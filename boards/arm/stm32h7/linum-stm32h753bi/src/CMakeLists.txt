@@ -24,10 +24,8 @@ set(SRCS stm32_boot.c stm32_bringup.c stm32_spi.c)
 
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS stm32_autoleds.c)
-endif()
-
-if(CONFIG_USERLED)
-  list(APPEND SRCS stm32_userled.c)
+elseif(CONFIG_USERLED)
+  list(APPEND SRCS stm32_userleds.c)
 endif()
 
 if(CONFIG_STM32_OTGFS)

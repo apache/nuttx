@@ -110,7 +110,6 @@ config ARCH_BOARD_AVRDX_BREADXAVR
 config ARCH_BOARD_AXOLOTI
 	bool "Axoloti board"
 	depends on ARCH_CHIP_STM32F427I
-	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
@@ -3463,8 +3462,6 @@ config ARCH_BOARD_B_L072Z_LRWAN1
 	bool "B-L072Z-LRWAN1"
 	depends on ARCH_CHIP_STM32L072CZ
 	select ARCH_HAVE_LEDS
-	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		STMicro STM32L0 Discovery kit with LoRa/SigFox based on STM32L072CZ MCU.
 

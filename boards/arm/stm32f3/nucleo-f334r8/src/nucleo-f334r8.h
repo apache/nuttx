@@ -134,18 +134,6 @@ int stm32_timer_driver_setup(const char *devpath, int timer);
 #endif
 
 /****************************************************************************
- * Name: stm32_dac_setup
- *
- * Description:
- *   Configure DAC peripheral for the board.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DAC
-int stm32_dac_setup(void);
-#endif
-
-/****************************************************************************
  * Name: stm32_pwm_setup
  *
  * Description:

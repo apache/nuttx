@@ -32,14 +32,6 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS stm32_buttons.c)
 endif()
 
-if(CONFIG_ARCH_IDLE_CUSTOM)
-  list(APPEND SRCS stm32_idle.c)
-endif()
-
-if(CONFIG_STM32_FSMC)
-  list(APPEND SRCS stm32_extmem.c)
-endif()
-
 if(CONFIG_STM32_OTGFS)
   list(APPEND SRCS stm32_usb.c)
 endif()

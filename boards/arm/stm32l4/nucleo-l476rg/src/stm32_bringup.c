@@ -382,14 +382,6 @@ int stm32_bringup(void)
 #endif
 #endif /* CONFIG_SENSORS_QENCODER */
 
-#ifdef CONFIG_SENSORS_HTS221
-  ret = stm32_hts221_initialize("/dev/hts221");
-  if (ret < 0)
-    {
-      serr("ERROR: Failed to initialize HTC221 driver: %d\n", ret);
-    }
-#endif
-
 #ifdef CONFIG_SENSORS_LSM6DSL
   ret = stm32_lsm6dsl_initialize("/dev/lsm6dsl0");
   if (ret < 0)

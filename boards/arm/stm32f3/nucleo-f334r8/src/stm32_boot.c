@@ -137,16 +137,6 @@ void board_late_initialize(void)
     }
 #endif
 
-#ifdef CONFIG_DAC
-  /* Initialize DAC and register the DAC driver. */
-
-  ret = stm32_dac_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_dac_setup failed: %d\n", ret);
-    }
-#endif
-
 #ifdef CONFIG_COMP
   /* Initialize COMP and register the COMP driver. */
 

@@ -78,10 +78,6 @@ if(CONFIG_LCD_MAX7219)
   list(APPEND SRCS stm32_max7219.c)
 endif()
 
-if(CONFIG_INPUT_NUNCHUCK)
-  list(APPEND SRCS stm32_nunchuck.c)
-endif()
-
 if(CONFIG_LCD_SSD1306_I2C)
   list(APPEND SRCS stm32_lcd_ssd1306.c)
 endif()

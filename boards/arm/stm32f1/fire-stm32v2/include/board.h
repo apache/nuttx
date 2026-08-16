@@ -370,22 +370,6 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Name:  fire_lcdclear
- *
- * Description:
- *   This is a non-standard LCD interface just for the M3 Wildfire board.
- *   Because of the various rotations, clearing the display in the normal
- *   way by writing a sequences of runs that covers the entire display can be
- *   very slow.  Here the display is cleared by simply setting all GRAM
- *   memory to the specified color.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32_FSMC
-void fire_lcdclear(uint16_t color);
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
