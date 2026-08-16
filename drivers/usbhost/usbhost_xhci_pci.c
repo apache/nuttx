@@ -1938,7 +1938,15 @@ static int xhci_command(FAR struct usbhost_xhci_s *priv,
   trb->d1 = priv->cmdres.d1;
   trb->d2 = priv->cmdres.d2;
 
-  if (XHCI_TRB_D1_CC_GET(trb->d1) != XHCI_TRB_CC_SUCCESS)
+  if (XHCI_TRB_D1_CC_GET(trb->d1) == XHCI_TRB_CC_SUCCESS)
+    {
+      /* The completion event decides the result, whether it arrived by
+       * interrupt or was found by the poll above.
+       */
+
+      ret = OK;
+    }
+  else
     {
       pcierr("event CC = %d\n", XHCI_TRB_D1_CC_GET(trb->d1));
       ret = -EIO;
