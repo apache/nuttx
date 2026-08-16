@@ -76,7 +76,7 @@
 #include "stm32_dma.h"
 #endif
 
-#if defined(CONFIG_STM32H5_STM32H50XXX)
+#if defined(CONFIG_STM32_STM32H50XXX)
 #  define SPI_MAX_KER_CK 250000000
 #else
 #  define SPI_MAX_KER_CK 125000000

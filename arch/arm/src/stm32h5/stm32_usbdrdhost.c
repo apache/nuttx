@@ -78,8 +78,8 @@
 #  define CONFIG_STM32_USBDRD_DESCSIZE 128
 #endif
 
-#ifndef CONFIG_STM32H5_USBDRD_TRANSFER_TIMEOUT
-#  define CONFIG_STM32H5_USBDRD_TRANSFER_TIMEOUT 5000
+#ifndef CONFIG_STM32_USBDRD_TRANSFER_TIMEOUT
+#  define CONFIG_STM32_USBDRD_TRANSFER_TIMEOUT 5000
 #endif
 
 /* Hardware definitions */
@@ -1225,7 +1225,7 @@ static int stm32_ctrl_sendsetup(struct stm32_usbhost_s *priv,
     }
 
   stm32_transfer_start(priv, ep0->outndx);
-  return stm32_chan_wait(priv, chan, CONFIG_STM32H5_USBDRD_TRANSFER_TIMEOUT);
+  return stm32_chan_wait(priv, chan, CONFIG_STM32_USBDRD_TRANSFER_TIMEOUT);
 }
 
 /****************************************************************************
@@ -1257,7 +1257,7 @@ static int stm32_ctrl_senddata(struct stm32_usbhost_s *priv,
     }
 
   stm32_transfer_start(priv, ep0->outndx);
-  return stm32_chan_wait(priv, chan, CONFIG_STM32H5_USBDRD_TRANSFER_TIMEOUT);
+  return stm32_chan_wait(priv, chan, CONFIG_STM32_USBDRD_TRANSFER_TIMEOUT);
 }
 
 /****************************************************************************
@@ -1289,7 +1289,7 @@ static int stm32_ctrl_recvdata(struct stm32_usbhost_s *priv,
     }
 
   stm32_transfer_start(priv, ep0->inndx);
-  return stm32_chan_wait(priv, chan, CONFIG_STM32H5_USBDRD_TRANSFER_TIMEOUT);
+  return stm32_chan_wait(priv, chan, CONFIG_STM32_USBDRD_TRANSFER_TIMEOUT);
 }
 
 /****************************************************************************
@@ -1321,7 +1321,7 @@ static ssize_t stm32_in_transfer(struct stm32_usbhost_s *priv,
 
   stm32_transfer_start(priv, chidx);
 
-  ret = stm32_chan_wait(priv, chan, CONFIG_STM32H5_USBDRD_TRANSFER_TIMEOUT);
+  ret = stm32_chan_wait(priv, chan, CONFIG_STM32_USBDRD_TRANSFER_TIMEOUT);
   if (ret < 0)
     {
       return ret;
@@ -1359,7 +1359,7 @@ static ssize_t stm32_out_transfer(struct stm32_usbhost_s *priv,
 
   stm32_transfer_start(priv, chidx);
 
-  ret = stm32_chan_wait(priv, chan, CONFIG_STM32H5_USBDRD_TRANSFER_TIMEOUT);
+  ret = stm32_chan_wait(priv, chan, CONFIG_STM32_USBDRD_TRANSFER_TIMEOUT);
   if (ret < 0)
     {
       return ret;
