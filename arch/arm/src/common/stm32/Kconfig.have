@@ -310,7 +310,7 @@ config STM32_HAVE_MDMA
 config STM32_HAVE_BDMA
 	bool
 
-config STM32_HAVE_GPADMA1
+config STM32_HAVE_GPDMA1
 	bool
 
 config STM32_HAVE_LPDMA1
