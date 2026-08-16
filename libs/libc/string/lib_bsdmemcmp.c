@@ -44,8 +44,6 @@ int memcmp(FAR const void *s1, FAR const void *s2, size_t n)
 {
   FAR unsigned char *p1 = (FAR unsigned char *)s1;
   FAR unsigned char *p2 = (FAR unsigned char *)s2;
-  FAR libc_data_t *a1;
-  FAR libc_data_t *a2;
 
   /* If the size is too small, or either pointer is unaligned,
    * then we punt to the byte compare loop.  Hopefully this will
@@ -54,12 +52,9 @@ int memcmp(FAR const void *s1, FAR const void *s2, size_t n)
 
   if (!TOO_SMALL(n) && !UNALIGNED(p1, p2))
     {
-      /* Otherwise, load and compare the blocks of memory one
-       * word at a time.
-       */
+      FAR libc_data_t *a1 = (FAR libc_data_t *)p1;
+      FAR libc_data_t *a2 = (FAR libc_data_t *)p2;
 
-      a1 = (FAR libc_data_t *)p1;
-      a2 = (FAR libc_data_t *)p2;
       while (n >= LITTLEBLOCKSIZE)
         {
           if (*a1 != *a2)
@@ -72,7 +67,25 @@ int memcmp(FAR const void *s1, FAR const void *s2, size_t n)
           n -= LITTLEBLOCKSIZE;
         }
 
-      /* check s mod LBLOCKSIZE remaining characters */
+      p1 = (FAR unsigned char *)a1;
+      p2 = (FAR unsigned char *)a2;
+    }
+  else if (!TOO_SMALL4(n) && !UNALIGNED4(p1, p2))
+    {
+      FAR uint32_t *a1 = (FAR uint32_t *)p1;
+      FAR uint32_t *a2 = (FAR uint32_t *)p2;
+
+      while (n >= LITTLEBLOCKSIZE4)
+        {
+          if (*a1 != *a2)
+            {
+              break;
+            }
+
+          a1++;
+          a2++;
+          n -= LITTLEBLOCKSIZE4;
+        }
 
       p1 = (FAR unsigned char *)a1;
       p2 = (FAR unsigned char *)a2;

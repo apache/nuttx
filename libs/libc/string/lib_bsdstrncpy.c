@@ -66,23 +66,31 @@ FAR char *strncpy(FAR char *dest, FAR const char *src, size_t n)
 {
   FAR char *dst0 = dest;
   FAR const char *src0 = src;
-  FAR libc_data_t *aligned_dst;
-  FAR const libc_data_t *aligned_src;
 
   /* If src and dest is aligned and n large enough, then copy words. */
 
   if (!UNALIGNED(src0, dst0) && !TOO_SMALL(n))
     {
-      aligned_dst = (FAR libc_data_t *)dst0;
-      aligned_src = (FAR libc_data_t *)src0;
-
-      /* src and dest are both "libc_data_t" aligned, try to do "libc_data_t"
-       * sized copies.
-       */
+      FAR libc_data_t *aligned_dst = (FAR libc_data_t *)dst0;
+      FAR const libc_data_t *aligned_src = (FAR libc_data_t *)src0;
 
       while (n >= LITTLEBLOCKSIZE && !DETECTNULL(*aligned_src))
         {
           n -= LITTLEBLOCKSIZE;
+          *aligned_dst++ = *aligned_src++;
+        }
+
+      dst0 = (FAR char *)aligned_dst;
+      src0 = (FAR char *)aligned_src;
+    }
+  else if (!UNALIGNED4(src0, dst0) && !TOO_SMALL4(n))
+    {
+      FAR uint32_t *aligned_dst = (FAR uint32_t *)dst0;
+      FAR const uint32_t *aligned_src = (FAR uint32_t *)src0;
+
+      while (n >= LITTLEBLOCKSIZE4 && !DETECTNULL32(*aligned_src))
+        {
+          n -= LITTLEBLOCKSIZE4;
           *aligned_dst++ = *aligned_src++;
         }
 

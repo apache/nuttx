@@ -57,21 +57,28 @@ FAR char *strcpy(FAR char *dest, FAR const char *src)
 {
   FAR char *dst0 = dest;
   FAR const char *src0 = src;
-  FAR libc_data_t *aligned_dst;
-  FAR const libc_data_t *aligned_src;
 
   /* If SRC or DEST is unaligned, then copy bytes. */
 
   if (!UNALIGNED(src0, dst0))
     {
-      aligned_dst = (FAR libc_data_t *)dst0;
-      aligned_src = (FAR libc_data_t *)src0;
-
-      /* SRC and DEST are both "libc_data_t" aligned, try to do "libc_data_t"
-       * sized copies.
-       */
+      FAR libc_data_t *aligned_dst = (FAR libc_data_t *)dst0;
+      FAR const libc_data_t *aligned_src = (FAR libc_data_t *)src0;
 
       while (!DETECTNULL(*aligned_src))
+        {
+          *aligned_dst++ = *aligned_src++;
+        }
+
+      dst0 = (FAR char *)aligned_dst;
+      src0 = (FAR char *)aligned_src;
+    }
+  else if (!UNALIGNED4(src0, dst0))
+    {
+      FAR uint32_t *aligned_dst = (FAR uint32_t *)dst0;
+      FAR const uint32_t *aligned_src = (FAR uint32_t *)src0;
+
+      while (!DETECTNULL32(*aligned_src))
         {
           *aligned_dst++ = *aligned_src++;
         }

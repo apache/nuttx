@@ -56,21 +56,27 @@ no_builtin("stpcpy")
 nosanitize_address
 FAR char *stpcpy(FAR char *dest, FAR const char *src)
 {
-  FAR libc_data_t *aligned_dst;
-  FAR const libc_data_t *aligned_src;
-
   /* If src or dest is unaligned, then copy bytes. */
 
   if (!UNALIGNED(src, dest))
     {
-      aligned_dst = (FAR libc_data_t *)dest;
-      aligned_src = (FAR libc_data_t *)src;
-
-      /* src and dest are both "libc_data_t" aligned, try to do "libc_data_t"
-       * sized copies.
-       */
+      FAR libc_data_t *aligned_dst = (FAR libc_data_t *)dest;
+      FAR const libc_data_t *aligned_src = (FAR libc_data_t *)src;
 
       while (!DETECTNULL(*aligned_src))
+        {
+          *aligned_dst++ = *aligned_src++;
+        }
+
+      dest = (FAR char *)aligned_dst;
+      src = (FAR char *)aligned_src;
+    }
+  else if (!UNALIGNED4(src, dest))
+    {
+      FAR uint32_t *aligned_dst = (FAR uint32_t *)dest;
+      FAR const uint32_t *aligned_src = (FAR uint32_t *)src;
+
+      while (!DETECTNULL32(*aligned_src))
         {
           *aligned_dst++ = *aligned_src++;
         }
