@@ -1915,7 +1915,8 @@ static void xhci_context_ctrl(FAR struct usbhost_xhci_s *priv,
 static int xhci_command(FAR struct usbhost_xhci_s *priv,
                         FAR struct xhci_trb_s *trb, uint16_t timeout_ms)
 {
-  int ret;
+  uint32_t cmdtype;
+  int      ret;
 
   /* Lock bus */
 
@@ -1924,6 +1925,10 @@ static int xhci_command(FAR struct usbhost_xhci_s *priv,
     {
       return ret;
     }
+
+  /* Remember what this was before the result overwrites it */
+
+  cmdtype = XHCI_TRB_D2_TYPE_GET(trb->d2);
 
   /* Add command to ring */
 
@@ -1960,7 +1965,8 @@ static int xhci_command(FAR struct usbhost_xhci_s *priv,
     }
   else
     {
-      uerr("event CC = %d\n", XHCI_TRB_D1_CC_GET(trb->d1));
+      uerr("command type %d failed, CC = %d\n", cmdtype,
+           XHCI_TRB_D1_CC_GET(trb->d1));
       ret = -EIO;
     }
 
