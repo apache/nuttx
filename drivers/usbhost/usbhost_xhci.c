@@ -3802,6 +3802,68 @@ static int xhci_ep0configure(FAR struct usbhost_driver_s *drvr,
 }
 
 /****************************************************************************
+ * Name: xhci_interval
+ *
+ * Description:
+ *   Work out the Interval an endpoint context wants.
+ *
+ *   The field is an exponent: the controller services the endpoint every
+ *   2^Interval microframes.  An endpoint descriptor does not say it that
+ *   way, and what it does say depends on how fast the device is, so the
+ *   number cannot simply be copied across.
+ *
+ *   A low or full speed interrupt endpoint counts in frames, so its period
+ *   is bInterval milliseconds, or bInterval * 8 microframes, and the
+ *   exponent is the position of the highest bit of that.  Everything else
+ *   that is periodic already states an exponent, one greater than the one
+ *   wanted here.  Control and bulk endpoints are not periodic and the field
+ *   means nothing to them.
+ *
+ ****************************************************************************/
+
+static uint8_t xhci_interval(uint8_t speed, uint8_t xfrtype,
+                             uint8_t interval)
+{
+  unsigned int exp;
+
+  if (xfrtype != USB_EP_ATTR_XFER_INT && xfrtype != USB_EP_ATTR_XFER_ISOC)
+    {
+      return 0;
+    }
+
+  if ((speed == USB_SPEED_LOW || speed == USB_SPEED_FULL) &&
+      xfrtype == USB_EP_ATTR_XFER_INT)
+    {
+      /* Frames.  Round down to a power of two, and keep it inside what the
+       * specification allows for this kind of endpoint: 2^3 microframes is
+       * one frame, 2^10 is 128 of them.
+       */
+
+      if (interval == 0)
+        {
+          interval = 1;
+        }
+
+      for (exp = 0; (1u << (exp + 1)) <= interval * 8u; exp++);
+
+      if (exp < 3)
+        {
+          exp = 3;
+        }
+      else if (exp > 10)
+        {
+          exp = 10;
+        }
+
+      return exp;
+    }
+
+  /* Already an exponent, counted from one */
+
+  return interval > 0 ? interval - 1 : 0;
+}
+
+/****************************************************************************
  * Name: xhci_epalloc
  *
  * Description:
@@ -3879,7 +3941,8 @@ static int xhci_epalloc(FAR struct usbhost_driver_s *drvr,
   epinfo->epno  = epdesc->addr;
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
-  epinfo->interval  = epdesc->interval;
+  epinfo->interval  = xhci_interval(hport->speed, epdesc->xfrtype,
+                                    epdesc->interval);
 #endif
   epinfo->xfrtype   = epdesc->xfrtype;
   nxsem_init(&epinfo->iocsem, 0, 0);
