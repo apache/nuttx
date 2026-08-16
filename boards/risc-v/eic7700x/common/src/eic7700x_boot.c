@@ -41,6 +41,7 @@
 #ifdef CONFIG_EIC7700X_CPUCLK
 #  include "eic7700x_cpuclk.h"
 #endif
+#include "eic7700x_pinctrl.h"
 
 #include "board_config.h"
 
@@ -57,6 +58,25 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifdef CONFIG_EIC7700X_PINCTRL
+/****************************************************************************
+ * Name: report_pads
+ *
+ * Description:
+ *   Report the pad census.  Its own function so that nothing it needs
+ *   stays on the stack for the bring up that follows.
+ *
+ ****************************************************************************/
+
+static void report_pads(void)
+{
+  unsigned int nchanged;
+  unsigned int npads = eic7700x_pinctrl_count(&nchanged);
+
+  syslog(LOG_INFO, "pinctrl: %u pads, %u configured\n", npads, nchanged);
+}
+#endif /* CONFIG_EIC7700X_PINCTRL */
 
 /****************************************************************************
  * Name: mount_ramdisk
@@ -156,6 +176,9 @@ void board_late_initialize(void)
   mount(NULL, "/proc", "procfs", 0, NULL);
 
   report_clocks();
+#ifdef CONFIG_EIC7700X_PINCTRL
+  report_pads();
+#endif /* CONFIG_EIC7700X_PINCTRL */
 
   /* Devices whose presence or order is this board's business */
 
