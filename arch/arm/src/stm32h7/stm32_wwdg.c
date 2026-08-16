@@ -66,12 +66,12 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_STM32H7_WWDG_DEFTIMOUT
-#  define CONFIG_STM32H7_WWDG_DEFTIMOUT WWDG_MAXTIMEOUT
+#ifndef CONFIG_STM32_WWDG_DEFTIMOUT
+#  define CONFIG_STM32_WWDG_DEFTIMOUT WWDG_MAXTIMEOUT
 #endif
 
 #ifndef CONFIG_DEBUG_WATCHDOG_INFO
-#  undef CONFIG_STM32H7_WWDG_REGDEBUG
+#  undef CONFIG_STM32_WWDG_REGDEBUG
 #endif
 
 /****************************************************************************
@@ -100,7 +100,7 @@ struct stm32_lowerhalf_s
 
 /* Register operations ******************************************************/
 
-#ifdef CONFIG_STM32H7_WWDG_REGDEBUG
+#ifdef CONFIG_STM32_WWDG_REGDEBUG
 static uint16_t stm32_getreg(uint32_t addr);
 static void     stm32_putreg(uint16_t val, uint32_t addr);
 #else
@@ -161,7 +161,7 @@ static struct stm32_lowerhalf_s g_wdgdev;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_WWDG_REGDEBUG
+#ifdef CONFIG_STM32_WWDG_REGDEBUG
 static uint16_t stm32_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -224,7 +224,7 @@ static uint16_t stm32_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_WWDG_REGDEBUG
+#ifdef CONFIG_STM32_WWDG_REGDEBUG
 static void stm32_putreg(uint16_t val, uint32_t addr)
 {
   /* Show the register value being written */
@@ -772,7 +772,7 @@ void stm32_wwdginitialize(const char *devpath)
    */
 
   stm32_settimeout((struct watchdog_lowerhalf_s *)priv,
-                   CONFIG_STM32H7_WWDG_DEFTIMOUT);
+                   CONFIG_STM32_WWDG_DEFTIMOUT);
 
   /* Register the watchdog driver as /dev/watchdog0 */
 
