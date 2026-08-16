@@ -52,4 +52,21 @@
 #define EIC7700X_PLIC_CLAIM0     (EIC7700X_PLIC_BASE + 0x201004)
 #define EIC7700X_PLIC_CLAIM_HART 0x2000
 
+/* The context every external interrupt is delivered to.
+ *
+ * The PLIC gives each Hart two contexts, M mode followed by S mode, which is
+ * why the strides above are twice a context: ENABLE0, THRESHOLD0 and CLAIM0
+ * are Hart 0's S mode context, and one stride steps over the next Hart's M
+ * mode context to reach its S mode one.
+ *
+ * NuttX enables a source in one context only, CPU0's, so CPU0 is the only
+ * Hart that can be interrupted by it and the dispatcher claims from the same
+ * context that enabled it.  That is a decision, not a limit of the hardware:
+ * steering a source at another Hart means choosing which, and NuttX has no
+ * way for a driver to say.  CPU0 is Hart 0, so these are the base addresses.
+ */
+
+#define EIC7700X_PLIC_ENABLE_CPU0 (EIC7700X_PLIC_ENABLE0)
+#define EIC7700X_PLIC_CLAIM_CPU0  (EIC7700X_PLIC_CLAIM0)
+
 #endif /* __ARCH_RISCV_SRC_EIC7700X_HARDWARE_EIC7700X_PLIC_H */

@@ -155,8 +155,7 @@ void up_disable_irq(int irq)
 
       if (0 <= extirq && extirq <= EIC7700X_PLIC_IRQS)
         {
-          addr = EIC7700X_PLIC_ENABLE0 +
-                 (g_eic7700x_boot_hart * EIC7700X_PLIC_ENABLE_HART);
+          addr = EIC7700X_PLIC_ENABLE_CPU0;
           modifyreg32(addr + (4 * (extirq / 32)),
                       1 << (extirq % 32), 0);
         }
@@ -200,8 +199,7 @@ void up_enable_irq(int irq)
 
       if (0 <= extirq && extirq <= EIC7700X_PLIC_IRQS)
         {
-          addr = EIC7700X_PLIC_ENABLE0 +
-                 (g_eic7700x_boot_hart * EIC7700X_PLIC_ENABLE_HART);
+          addr = EIC7700X_PLIC_ENABLE_CPU0;
           modifyreg32(addr + (4 * (extirq / 32)),
                       0, 1 << (extirq % 32));
         }
