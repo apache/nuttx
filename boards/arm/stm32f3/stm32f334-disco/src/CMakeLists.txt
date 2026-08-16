@@ -26,22 +26,6 @@ if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS stm32_autoleds.c)
 endif()
 
-if(CONFIG_STM32_CAN_CHARDRIVER)
-  list(APPEND SRCS stm32_can.c)
-endif()
-
-if(CONFIG_PWM)
-  list(APPEND SRCS stm32_pwm.c)
-endif()
-
-if(CONFIG_SPI)
-  list(APPEND SRCS stm32_spi.c)
-endif()
-
-if(CONFIG_TIMER)
-  list(APPEND SRCS stm32_timer.c)
-endif()
-
 if(CONFIG_DRIVERS_POWERLED)
   list(APPEND SRCS stm32_powerled.c)
 endif()
