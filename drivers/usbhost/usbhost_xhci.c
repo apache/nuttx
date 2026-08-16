@@ -4545,14 +4545,6 @@ static int xhci_hw_initialize(FAR struct usbhost_xhci_s *priv)
       goto errout;
     }
 
-  /* Configure interrupts */
-
-  ret = xhci_irq_initialize(priv);
-  if (ret < 0)
-    {
-      goto errout;
-    }
-
   /* Halt controller */
 
   ret = xhci_ctrl_halt(priv);
@@ -4697,6 +4689,7 @@ xhci_initialize(FAR const char *name, uintptr_t base,
 {
   FAR struct usbhost_conn_xhci_s *conn = NULL;
   FAR struct usbhost_xhci_s      *priv = NULL;
+  uint32_t                        regval;
   int                             ret;
 
   DEBUGASSERT(name != NULL && base != 0 && ops != NULL &&
@@ -4755,6 +4748,34 @@ xhci_initialize(FAR const char *name, uintptr_t base,
       usbhost_trace1(XHCI_TRACE1_START_FAILED, 0);
       goto errout;
     }
+
+  /* Take the interrupt only now.
+   *
+   * The handler defers to a worker that walks the event ring, and the ring
+   * does not exist until the controller has been started.  A controller
+   * left running by a boot loader can have an interrupt pending the moment
+   * the line is enabled, so attaching any earlier is a race with nothing
+   * to answer it.
+   */
+
+  ret = xhci_irq_initialize(priv);
+  if (ret < 0)
+    {
+      uerr("failed to attach interrupt: %d\n", ret);
+      goto errout;
+    }
+
+  /* Acknowledge anything the controller raised before the handler was
+   * attached.  A message is sent once, on the transition, so a bit set in
+   * that window would never produce another.  Clear them, so the next
+   * event is a fresh assertion.
+   */
+
+  regval = xhci_oper_getreg(priv, XHCI_USBSTS);
+  xhci_oper_putreg(priv, XHCI_USBSTS, regval);
+
+  regval = xhci_runt_getreg(priv, XHCI_IMAN(0));
+  xhci_runt_putreg(priv, XHCI_IMAN(0), regval | XHCI_IMAN_IP);
 
 #ifdef CONFIG_DEBUG_USB_INFO
   xhci_dump_mem(priv, "after init");
