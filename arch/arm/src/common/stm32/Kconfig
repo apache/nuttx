@@ -125,7 +125,7 @@ source "arch/arm/src/common/stm32/Kconfig.uart"
 endmenu # U[S]ART Configuration
 
 menu "SPI/I2S Configuration"
-	depends on STM32_SPI || STM32_I2S
+	depends on STM32_SPI || STM32_I2S || STM32_SPI_SLAVE
 source "arch/arm/src/common/stm32/Kconfig.spi"
 endmenu # SPI/I2S Configuration
 
