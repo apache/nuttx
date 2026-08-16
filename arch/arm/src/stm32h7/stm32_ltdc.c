@@ -216,36 +216,36 @@
 #endif
 
 #ifdef CONFIG_STM32_LTDC_L2
-#  ifndef CONFIG_STM32H7_LTDC_L2_WIDTH
-#    define CONFIG_STM32H7_LTDC_L2_WIDTH STM32_LTDC_WIDTH
+#  ifndef CONFIG_STM32_LTDC_L2_WIDTH
+#    define CONFIG_STM32_LTDC_L2_WIDTH STM32_LTDC_WIDTH
 #  endif
 
-#  if CONFIG_STM32H7_LTDC_L2_WIDTH > STM32_LTDC_WIDTH
+#  if CONFIG_STM32_LTDC_L2_WIDTH > STM32_LTDC_WIDTH
 #    error Width of Layer 2 exceeds the width of the display
 #  endif
 
-#  ifndef CONFIG_STM32H7_LTDC_L2_HEIGHT
-#    define CONFIG_STM32H7_LTDC_L2_HEIGHT STM32_LTDC_HEIGHT
+#  ifndef CONFIG_STM32_LTDC_L2_HEIGHT
+#    define CONFIG_STM32_LTDC_L2_HEIGHT STM32_LTDC_HEIGHT
 #  endif
 
-#  if CONFIG_STM32H7_LTDC_L2_HEIGHT > STM32_LTDC_HEIGHT
+#  if CONFIG_STM32_LTDC_L2_HEIGHT > STM32_LTDC_HEIGHT
 #    error Height of Layer 2 exceeds the height of the display
 #  endif
 
 #  if STM32_LTDC_L2_BPP == 8
-#    define STM32_LTDC_L2_STRIDE    (CONFIG_STM32H7_LTDC_L2_WIDTH)
+#    define STM32_LTDC_L2_STRIDE    (CONFIG_STM32_LTDC_L2_WIDTH)
 #  elif STM32_LTDC_L2_BPP == 16
-#    define STM32_LTDC_L2_STRIDE    ((CONFIG_STM32H7_LTDC_L2_WIDTH * 16 + 7) / 8)
+#    define STM32_LTDC_L2_STRIDE    ((CONFIG_STM32_LTDC_L2_WIDTH * 16 + 7) / 8)
 #  elif STM32_LTDC_L2_BPP == 24
-#    define STM32_LTDC_L2_STRIDE    ((CONFIG_STM32H7_LTDC_L2_WIDTH * 24 + 7) / 8)
+#    define STM32_LTDC_L2_STRIDE    ((CONFIG_STM32_LTDC_L2_WIDTH * 24 + 7) / 8)
 #  elif STM32_LTDC_L2_BPP == 32
-#    define STM32_LTDC_L2_STRIDE    ((CONFIG_STM32H7_LTDC_L2_WIDTH * 32 + 7) / 8)
+#    define STM32_LTDC_L2_STRIDE    ((CONFIG_STM32_LTDC_L2_WIDTH * 32 + 7) / 8)
 #  else
 #    error Undefined or unrecognized base resolution
 #  endif
 
 #  define STM32_LTDC_L2_FBSIZE      (STM32_LTDC_L2_STRIDE * \
-                                     CONFIG_STM32H7_LTDC_L2_HEIGHT)
+                                     CONFIG_STM32_LTDC_L2_HEIGHT)
 
 #else
 #  define STM32_LTDC_L2_FBSIZE (0)
@@ -3097,7 +3097,7 @@ int stm32_ltdcinitialize(void)
 #endif
   /* Enable the backlight */
 
-#ifdef CONFIG_STM32H7_LCD_BACKLIGHT
+#ifdef CONFIG_STM32_LTDC_BACKLIGHT
   stm32_backlight(true);
 #endif
 
@@ -3183,7 +3183,7 @@ void stm32_ltdcuninitialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_LCD_BACKLIGHT
+#ifdef CONFIG_STM32_LTDC_BACKLIGHT
 void stm32_backlight(bool blon)
 {
   /* Set default backlight level CONFIG_STM32_LTDC_DEFBACKLIGHT */

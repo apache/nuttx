@@ -25,7 +25,7 @@
 
 /****************************************************************************
  * The purpose of this driver is to add battery backup file to the file
- * system. There can be CONFIG_STM32H7_BBRSRAM_COUNT files defined.
+ * system. There can be CONFIG_STM32_BBRSRAM_COUNT files defined.
  * These files are of fixed size up to the maximum of the backing 4K SRAM.
  *
  * If CONFIG_SAVE_CRASHDUMP is defined The driver also supports a feature
