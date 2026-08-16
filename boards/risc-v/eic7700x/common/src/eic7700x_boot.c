@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/eic7700x/starpro64/src/eic7700x_boardinit.c
+ * boards/risc-v/eic7700x/common/src/eic7700x_boot.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -36,6 +36,8 @@
 #include <sys/mount.h>
 #include <sys/boardctl.h>
 #include <arch/board/board_memorymap.h>
+
+#include "board_config.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -118,8 +120,10 @@ void board_late_initialize(void)
 
   mount_ramdisk();
 
-  /* Perform board-specific initialization */
-
   mount(NULL, "/proc", "procfs", 0, NULL);
+
+  /* Devices whose presence or order is this board's business */
+
+  eic7700x_bringup();
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */

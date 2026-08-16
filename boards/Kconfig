@@ -2414,6 +2414,20 @@ config ARCH_BOARD_EIC7700X_STARPRO64
 		This options selects support for NuttX on PINE64 StarPro64 based
 		on ESWIN EIC7700X SoC.
 
+		UART0 is the console.  There is no USB serial bridge on the
+		board, so it comes out level shifted to 3.3V on the 40 pin GPIO
+		header, transmit on pin 8 and receive on pin 10, which is where
+		a Raspberry Pi puts them too.
+
+		UART1 carries the Bluetooth HCI of the on board AIC8800D80 WiFi
+		and Bluetooth combo, CTS and RTS included.
+
+		Nothing else here is a UART, in spite of the UART map on sheet 3
+		of the schematic.  That table came from ESWIN's reference design
+		and does not describe this board: GPIO62, which is the UART2_TX
+		pad, drives the system state LED, GPIO63 is unconnected, the
+		UART3 pads carry I2C8, and the UART4 pads go nowhere.
+
 config ARCH_BOARD_S32K118EVB
 	bool "NXP S32K118EVB"
 	depends on ARCH_CHIP_S32K118

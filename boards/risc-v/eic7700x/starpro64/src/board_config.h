@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/eic7700x/starpro64/include/board.h
+ * boards/risc-v/eic7700x/starpro64/src/board_config.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_EIC7700X_STARPRO64_INCLUDE_BOARD_H
-#define __BOARDS_RISCV_EIC7700X_STARPRO64_INCLUDE_BOARD_H
+#ifndef __BOARDS_RISCV_EIC7700X_STARPRO64_SRC_BOARD_CONFIG_H
+#define __BOARDS_RISCV_EIC7700X_STARPRO64_SRC_BOARD_CONFIG_H
 
 /****************************************************************************
  * Included Files
@@ -30,41 +30,18 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: eic7700x_boardinitialize
+ * Name: eic7700x_bringup
+ *
+ * Description:
+ *   Bring up this board's devices, in this board's order.  Called from the
+ *   common layer's board_late_initialize().
+ *
  ****************************************************************************/
 
-void eic7700x_boardinitialize(void);
+int eic7700x_bringup(void);
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_EIC7700X_STARPRO64_INCLUDE_BOARD_H */
+#endif /* __BOARDS_RISCV_EIC7700X_STARPRO64_SRC_BOARD_CONFIG_H */

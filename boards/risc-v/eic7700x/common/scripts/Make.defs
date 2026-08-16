@@ -1,5 +1,5 @@
 ############################################################################
-# boards/risc-v/eic7700x/starpro64/scripts/Make.defs
+# boards/risc-v/eic7700x/common/scripts/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -25,7 +25,7 @@ include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/risc-v/src/common/Toolchain.defs
 
 LDSCRIPT = ld.script
-ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+ARCHSCRIPT += $(call FINDSCRIPT,$(LDSCRIPT))
 
 CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)

@@ -41,11 +41,6 @@
 #define KSRAM_SIZE      (uintptr_t)__ksram_size
 #define KSRAM_END       (uintptr_t)__ksram_end
 
-/* Kernel RAM (RW) */
-
-#define PGPOOL_START    (uintptr_t)__pgheap_start
-#define PGPOOL_SIZE     (uintptr_t)__pgheap_size
-
 /* Page pool (RWX) */
 
 #define PGPOOL_START    (uintptr_t)__pgheap_start
