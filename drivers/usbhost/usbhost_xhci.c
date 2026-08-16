@@ -729,8 +729,17 @@ static void xhci_dump_mem(FAR struct usbhost_xhci_s *priv,
   uinfo("Dump xHCI registers: %s\n", msg);
 
   uinfo("=== Host Controller Capability Registers ===\n");
-  xhci_dump_capa_reg(priv, "CAPLENGTH   ", XHCI_CAPLENGTH);
-  xhci_dump_capa_reg(priv, "HCIVERSION  ", XHCI_HCIVERSION);
+
+  /* CAPLENGTH and HCIVERSION share one word, and a register block reached
+   * over a bus that only answers aligned accesses cannot be read at the
+   * odd offset the second one has.  Read the word once and take both from
+   * it.
+   */
+
+  uinfo("\tCAPLENGTH   :\t\t0x%" PRIx32 "\n",
+        xhci_capa_getreg(priv, XHCI_CAPLENGTH) & 0xff);
+  uinfo("\tHCIVERSION  :\t\t0x%" PRIx32 "\n",
+        xhci_capa_getreg(priv, XHCI_CAPLENGTH) >> 16);
   xhci_dump_capa_reg(priv, "HCSPARAMS1  ", XHCI_HCSPARAMS1);
   xhci_dump_capa_reg(priv, "HCSPARAMS2  ", XHCI_HCSPARAMS2);
   xhci_dump_capa_reg(priv, "HCSPARAMS3  ", XHCI_HCSPARAMS3);
