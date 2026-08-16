@@ -52,7 +52,7 @@
 
 /* Timer devices may be used for different purposes.  One special purpose is
  * to generate modulated outputs for such things as motor control.
- * If CONFIG_STM32F7_TIMn is defined then the CONFIG_STM32F7_TIMn_PWM must
+ * If CONFIG_STM32_TIMn is defined then the CONFIG_STM32_TIMn_PWM must
  * also be defined to indicate that timer "n" is intended to be used for
  * pulsed output signal generation.
  */
@@ -98,8 +98,8 @@
  * pulses
  */
 
-#undef CONFIG_STM32F7_TIM6_PWM
-#undef CONFIG_STM32F7_TIM7_PWM
+#undef CONFIG_STM32_TIM6_PWM
+#undef CONFIG_STM32_TIM7_PWM
 
 /* Check if PWM support for any channel is enabled. */
 
@@ -326,7 +326,7 @@
 /* For each timer that is enabled for PWM usage, we need the following
  * additional configuration settings:
  *
- * CONFIG_STM32F7_TIMx_CHANNEL - Specifies the timer output channel {1,..,4}
+ * CONFIG_STM32_TIMx_CHANNEL - Specifies the timer output channel {1,..,4}
  * PWM_TIMx_CHn - One of the values defined in chip/stm32*_pinmap.h.  In the
  * case where there are multiple pin selections, the correct setting must be
  * provided in the arch/board/board.h file.

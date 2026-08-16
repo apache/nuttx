@@ -35,13 +35,13 @@
  *
  * Options:
  *
- *  CONFIG_STM32F7_OTG_RXFIFO_SIZE - Size of the RX FIFO in 32-bit words.
+ *  CONFIG_STM32_OTG_RXFIFO_SIZE - Size of the RX FIFO in 32-bit words.
  *    Default 128 (512 bytes)
- *  CONFIG_STM32F7_OTG_NPTXFIFO_SIZE - Size of the non-periodic Tx FIFO
+ *  CONFIG_STM32_OTG_NPTXFIFO_SIZE - Size of the non-periodic Tx FIFO
  *    in 32-bit words.  Default 96 (384 bytes)
- *  CONFIG_STM32F7_OTG_PTXFIFO_SIZE - Size of the periodic Tx FIFO in 32-bit
+ *  CONFIG_STM32_OTG_PTXFIFO_SIZE - Size of the periodic Tx FIFO in 32-bit
  *    words.  Default 96 (384 bytes)
- *  CONFIG_STM32F7_OTG_SOFINTR - Enable SOF interrupts.  Why would you ever
+ *  CONFIG_STM32_OTG_SOFINTR - Enable SOF interrupts.  Why would you ever
  *    want to do that?
  *
  *  CONFIG_STM32_USBHOST_REGDEBUG - Enable very low-level register access

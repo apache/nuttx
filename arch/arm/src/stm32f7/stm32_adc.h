@@ -58,8 +58,8 @@
 /* Configuration ************************************************************/
 
 /* Timer devices may be used for different purposes.  One special purpose is
- * to control periodic ADC sampling.  If CONFIG_STM32F7_TIMn is defined then
- * CONFIG_STM32F7_TIMn_ADC must also be defined to indicate that timer "n"
+ * to control periodic ADC sampling.  If CONFIG_STM32_TIMn is defined then
+ * CONFIG_STM32_TIMn_ADC must also be defined to indicate that timer "n"
  * is intended to be used for that purpose. Timers 1-6 and 8 may be used.
  */
 
@@ -408,9 +408,9 @@
 /* EXTSEL configuration *****************************************************/
 
 /* NOTE:
- * this configuration if used only if CONFIG_STM32F7_TIMx_ADCy is selected.
+ * this configuration if used only if CONFIG_STM32_TIMx_ADCy is selected.
  * You can still connect the ADC with a timer trigger using the
- * CONFIG_STM32F7_ADCx_EXTSEL option.
+ * CONFIG_STM32_ADCx_EXTSEL option.
  */
 
 #if defined(CONFIG_STM32_TIM1_ADC1)

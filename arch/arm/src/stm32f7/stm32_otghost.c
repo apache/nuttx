@@ -78,14 +78,14 @@
  *
  * Options:
  *
- *  CONFIG_STM32F7_OTG_RXFIFO_SIZE - Size of the RX FIFO in 32-bit words.
+ *  CONFIG_STM32_OTG_RXFIFO_SIZE - Size of the RX FIFO in 32-bit words.
  *    Default 128 (512 bytes)
- *  CONFIG_STM32F7_OTG_NPTXFIFO_SIZE - Size of the non-periodic Tx FIFO
+ *  CONFIG_STM32_OTG_NPTXFIFO_SIZE - Size of the non-periodic Tx FIFO
  *    in 32-bit words.  Default 96 (384 bytes)
- *  CONFIG_STM32F7_OTG_PTXFIFO_SIZE - Size of the periodic Tx FIFO in 32-bit
+ *  CONFIG_STM32_OTG_PTXFIFO_SIZE - Size of the periodic Tx FIFO in 32-bit
  *    words.  Default 96 (384 bytes)
- *  CONFIG_STM32F7_OTG_DESCSIZE - Maximum size of a descriptor.  Default: 128
- *  CONFIG_STM32F7_OTG_SOFINTR - Enable SOF interrupts.  Why would you ever
+ *  CONFIG_STM32_OTG_DESCSIZE - Maximum size of a descriptor.  Default: 128
+ *  CONFIG_STM32_OTG_SOFINTR - Enable SOF interrupts.  Why would you ever
  *    want to do that?
  *  CONFIG_STM32_USBHOST_REGDEBUG - Enable very low-level register access
  *    debug.  Depends on CONFIG_DEBUG_FEATURES.
@@ -101,26 +101,26 @@
 
 /* Default RxFIFO size */
 
-#ifndef CONFIG_STM32F7_OTG_RXFIFO_SIZE
-#  define CONFIG_STM32F7_OTG_RXFIFO_SIZE 128
+#ifndef CONFIG_STM32_OTG_RXFIFO_SIZE
+#  define CONFIG_STM32_OTG_RXFIFO_SIZE 128
 #endif
 
 /* Default host non-periodic Tx FIFO size */
 
-#ifndef CONFIG_STM32F7_OTG_NPTXFIFO_SIZE
-#  define CONFIG_STM32F7_OTG_NPTXFIFO_SIZE 96
+#ifndef CONFIG_STM32_OTG_NPTXFIFO_SIZE
+#  define CONFIG_STM32_OTG_NPTXFIFO_SIZE 96
 #endif
 
 /* Default host periodic Tx fifo size register */
 
-#ifndef CONFIG_STM32F7_OTG_PTXFIFO_SIZE
-#  define CONFIG_STM32F7_OTG_PTXFIFO_SIZE 96
+#ifndef CONFIG_STM32_OTG_PTXFIFO_SIZE
+#  define CONFIG_STM32_OTG_PTXFIFO_SIZE 96
 #endif
 
 /* Maximum size of a descriptor */
 
-#ifndef CONFIG_STM32F7_OTG_DESCSIZE
-#  define CONFIG_STM32F7_OTG_DESCSIZE 128
+#ifndef CONFIG_STM32_OTG_DESCSIZE
+#  define CONFIG_STM32_OTG_DESCSIZE 128
 #endif
 
 /* Register/packet debug depends on CONFIG_DEBUG_FEATURES */
@@ -380,7 +380,7 @@ static void stm32_gint_disconnected(struct stm32_usbhost_s *priv);
 
 /* Second level interrupt handlers */
 
-#ifdef CONFIG_STM32F7_OTG_SOFINTR
+#ifdef CONFIG_STM32_OTG_SOFINTR
 static inline void stm32_gint_sofisr(struct stm32_usbhost_s *priv);
 #endif
 static inline void stm32_gint_rxflvlisr(struct stm32_usbhost_s *priv);
@@ -2987,7 +2987,7 @@ static void stm32_gint_disconnected(struct stm32_usbhost_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_OTG_SOFINTR
+#ifdef CONFIG_STM32_OTG_SOFINTR
 static inline void stm32_gint_sofisr(struct stm32_usbhost_s *priv)
 {
   /* Handle SOF interrupt */
@@ -3555,7 +3555,7 @@ static int stm32_gint_isr(int irq, void *context, void *arg)
 
       /* Handle the start of frame interrupt */
 
-#ifdef CONFIG_STM32F7_OTG_SOFINTR
+#ifdef CONFIG_STM32_OTG_SOFINTR
       if ((pending & OTG_GINT_SOF) != 0)
         {
           usbhost_vtrace1(OTG_VTRACE1_GINT_SOF, 0);
@@ -3721,7 +3721,7 @@ static inline void stm32_hostinit_enable(void)
    *   OTG_GINT_DISC     : Disconnect detected interrupt
    */
 
-#ifdef CONFIG_STM32F7_OTG_SOFINTR
+#ifdef CONFIG_STM32_OTG_SOFINTR
   regval |= (OTG_GINT_SOF    | OTG_GINT_RXFLVL   | OTG_GINT_IISOOXFR |
              OTG_GINT_HPRT   | OTG_GINT_HC       | OTG_GINT_DISC);
 #else
@@ -4245,7 +4245,7 @@ static int stm32_alloc(struct usbhost_driver_s *drvr,
 
   /* There is no special memory requirement for the STM32. */
 
-  alloc = kmm_malloc(CONFIG_STM32F7_OTG_DESCSIZE);
+  alloc = kmm_malloc(CONFIG_STM32_OTG_DESCSIZE);
   if (!alloc)
     {
       return -ENOMEM;
@@ -4254,7 +4254,7 @@ static int stm32_alloc(struct usbhost_driver_s *drvr,
   /* Return the allocated address and size of the descriptor buffer */
 
   *buffer = alloc;
-  *maxlen = CONFIG_STM32F7_OTG_DESCSIZE;
+  *maxlen = CONFIG_STM32_OTG_DESCSIZE;
   return OK;
 }
 
@@ -5121,21 +5121,21 @@ static void stm32_host_initialize(struct stm32_usbhost_s *priv)
 
   /* Configure Rx FIFO size (GRXFSIZ) */
 
-  stm32_putreg(STM32_OTG_GRXFSIZ, CONFIG_STM32F7_OTG_RXFIFO_SIZE);
-  offset = CONFIG_STM32F7_OTG_RXFIFO_SIZE;
+  stm32_putreg(STM32_OTG_GRXFSIZ, CONFIG_STM32_OTG_RXFIFO_SIZE);
+  offset = CONFIG_STM32_OTG_RXFIFO_SIZE;
 
   /* Setup the host non-periodic Tx FIFO size (HNPTXFSIZ) */
 
   regval = (offset |
-            (CONFIG_STM32F7_OTG_NPTXFIFO_SIZE <<
+            (CONFIG_STM32_OTG_NPTXFIFO_SIZE <<
             OTG_HNPTXFSIZ_NPTXFD_SHIFT));
   stm32_putreg(STM32_OTG_HNPTXFSIZ, regval);
-  offset += CONFIG_STM32F7_OTG_NPTXFIFO_SIZE;
+  offset += CONFIG_STM32_OTG_NPTXFIFO_SIZE;
 
   /* Set up the host periodic Tx fifo size register (HPTXFSIZ) */
 
   regval = (offset |
-            (CONFIG_STM32F7_OTG_PTXFIFO_SIZE <<
+            (CONFIG_STM32_OTG_PTXFIFO_SIZE <<
             OTG_HPTXFSIZ_PTXFD_SHIFT));
   stm32_putreg(STM32_OTG_HPTXFSIZ, regval);
 
