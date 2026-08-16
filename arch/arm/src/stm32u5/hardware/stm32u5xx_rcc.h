@@ -29,10 +29,10 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32U5_STM32U535XX) || defined(CONFIG_STM32U5_STM32U545XX) || \
-    defined(CONFIG_STM32U5_STM32U575XX) || defined(CONFIG_STM32_STM32U585XX) || \
-    defined(CONFIG_STM32U5_STM32U59XX) || defined(CONFIG_STM32U5_STM32U59AXX)  || \
-    defined(CONFIG_STM32_STM32U5A5XX) || defined(CONFIG_STM32U5_STM32U5A9XX)
+#if defined(CONFIG_STM32_STM32U535XX) || defined(CONFIG_STM32_STM32U545XX) || \
+    defined(CONFIG_STM32_STM32U575XX) || defined(CONFIG_STM32_STM32U585XX) || \
+    defined(CONFIG_STM32_STM32U59XX) || defined(CONFIG_STM32_STM32U59AXX)  || \
+    defined(CONFIG_STM32_STM32U5A5XX) || defined(CONFIG_STM32_STM32U5A9XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1254,5 +1254,5 @@
 #  define RCC_CCIPR2_OSPISEL_MSI         (1 << RCC_CCIPR2_OSPISEL_SHIFT)
 #  define RCC_CCIPR2_OSPISEL_PLL48M1CLK  (2 << RCC_CCIPR2_OSPISEL_SHIFT)
 
-#endif /* CONFIG_STM32U5_STM32U5XX */
+#endif /* CONFIG_STM32_STM32U5XX */
 #endif /* __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U5XX_RCC_H */

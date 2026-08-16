@@ -130,11 +130,11 @@
 #define STM32_IRQ_TIM16         (STM32_IRQ_FIRST + 70)  /* 70:  TIM16 global interrupt */
 #define STM32_IRQ_TIM17         (STM32_IRQ_FIRST + 71)  /* 71:  TIM17 global interrupt */
 #define STM32_IRQ_COMP          (STM32_IRQ_FIRST + 72)  /* 72:  COMP1/COMP2 interrupts */
-#if defined(CONFIG_STM32U5_STM32U535XX) || defined(CONFIG_STM32U5_STM32U545XX) || \
-    defined(CONFIG_STM32U5_STM32U575XX) || defined(CONFIG_STM32_STM32U585XX)
+#if defined(CONFIG_STM32_STM32U535XX) || defined(CONFIG_STM32_STM32U545XX) || \
+    defined(CONFIG_STM32_STM32U575XX) || defined(CONFIG_STM32_STM32U585XX)
 #  define STM32_IRQ_OTG_FS      (STM32_IRQ_FIRST + 73)  /* 73:  USB OTG FS global interrupt */
-#elif defined(CONFIG_STM32U5_STM32U59XX) || defined(CONFIG_STM32U5_STM32U59AXX)  || \
-    defined(CONFIG_STM32_STM32U5A5XX) || defined(CONFIG_STM32U5_STM32U5A9XX)
+#elif defined(CONFIG_STM32_STM32U59XX) || defined(CONFIG_STM32_STM32U59AXX)  || \
+    defined(CONFIG_STM32_STM32U5A5XX) || defined(CONFIG_STM32_STM32U5A9XX)
 #  define STM32_IRQ_OTG_HS      (STM32_IRQ_FIRST + 73)  /* 73:  USB OTG HS global interrupt */
 #else
 #  error "Unsupported STM32U5 chip"
@@ -191,10 +191,10 @@
 #define STM32_IRQ_CORDIC        (STM32_IRQ_FIRST + 123) /* 123: CORDIC interrupt */
 #define STM32_IRQ_FMAC          (STM32_IRQ_FIRST + 124) /* 124: FMAC interrupt */
 
-#if defined(CONFIG_STM32U5_STM32U535XX) || defined(CONFIG_STM32U5_STM32U545XX) || \
-    defined(CONFIG_STM32U5_STM32U575XX) || defined(CONFIG_STM32_STM32U585XX) || \
-    defined(CONFIG_STM32U5_STM32U59XX) || defined(CONFIG_STM32U5_STM32U59AXX)  || \
-    defined(CONFIG_STM32_STM32U5A5XX) || defined(CONFIG_STM32U5_STM32U5A9XX)
+#if defined(CONFIG_STM32_STM32U535XX) || defined(CONFIG_STM32_STM32U545XX) || \
+    defined(CONFIG_STM32_STM32U575XX) || defined(CONFIG_STM32_STM32U585XX) || \
+    defined(CONFIG_STM32_STM32U59XX) || defined(CONFIG_STM32_STM32U59AXX)  || \
+    defined(CONFIG_STM32_STM32U5A5XX) || defined(CONFIG_STM32_STM32U5A9XX)
 #  define STM32_IRQ_NEXTINTS    125
 #else
 #  error "Unsupported STM32U5 chip"
