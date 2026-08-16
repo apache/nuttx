@@ -27,6 +27,7 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 #include <errno.h>
+#include <string.h>
 
 #include <sys/endian.h>
 
@@ -34,6 +35,7 @@
 #include <nuttx/kthread.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/addrenv.h>
+#include <nuttx/cache.h>
 #include <nuttx/spinlock.h>
 
 #include <nuttx/usb/usb.h>
@@ -142,6 +144,9 @@ struct xhci_epinfo_s
   int                result;       /* The result of the transfer */
   size_t             xfrd;         /* On completion, will hold the number of bytes transferred */
   size_t             buflen;       /* Buffer length used for transfer */
+  FAR uint8_t       *buffer;       /* The caller's buffer, for cache maintenance */
+  FAR uint8_t       *bounce;       /* Aligned stand-in for it, or NULL */
+  bool               dmain;        /* Direction this buffer was prepared for */
   sem_t              iocsem;       /* Semaphore used to wait for transfer completion */
 #ifdef CONFIG_USBHOST_ASYNCH
   usbhost_asynch_t   callback;     /* Transfer complete callback */
@@ -411,6 +416,12 @@ static int xhci_isoc_setup(FAR struct xhci_rhport_s *rhport,
 #endif
 static ssize_t xhci_transfer_wait(FAR struct usbhost_xhci_s *priv,
                                   FAR struct xhci_epinfo_s *epinfo);
+static bool xhci_dmacapable(FAR struct usbhost_xhci_s *priv,
+                            FAR uint8_t *buffer, size_t buflen);
+static FAR uint8_t *xhci_dma_prepare(FAR struct xhci_epinfo_s *epinfo,
+                                     FAR uint8_t *buffer, size_t buflen,
+                                     bool dirin);
+static void xhci_dma_finish(FAR struct xhci_epinfo_s *epinfo);
 
 /* Interrupt handling *******************************************************/
 
@@ -2298,6 +2309,13 @@ static int xhci_control_setup(FAR struct xhci_rhport_s *rhport,
 
   if (buffer)
     {
+      buffer = xhci_dma_prepare(epinfo, buffer, buflen,
+                                (req->type & USB_REQ_DIR_IN) != 0);
+      if (buffer == NULL)
+        {
+          return -ENOMEM;
+        }
+
       trb[i].d0 = up_addrenv_va_to_pa(buffer);
       trb[i].d1 = XHCI_TRB_D1_TXLEN_SET(buflen);
       trb[i].d2 = XHCI_TRB_D2_TYPE_SET(XHCI_TRB_TYPE_DATA_STAGE);
@@ -2369,6 +2387,14 @@ static int xhci_normal_setup(FAR struct xhci_rhport_s *rhport,
   size_t                     chunk;
   uintptr_t                  pa;
   int                        n = 0;
+
+  /* Make the buffer safe for the controller to reach */
+
+  buffer = xhci_dma_prepare(epinfo, buffer, buflen, epinfo->dirin != 0);
+  if (buffer == NULL)
+    {
+      return -ENOMEM;
+    }
 
   /* One TRB describes one run of memory, and that run may not cross a 64K
    * boundary.  A longer transfer, or one starting near the wrong side of a
@@ -2445,6 +2471,14 @@ static int xhci_isoc_setup(FAR struct xhci_rhport_s *rhport,
 {
   FAR struct usbhost_xhci_s *priv = XHCI_PRIV_FROM_RHPORT(rhport);
   struct xhci_trb_s          trb;
+
+  /* Make the buffer safe for the controller to reach */
+
+  buffer = xhci_dma_prepare(epinfo, buffer, buflen, epinfo->dirin != 0);
+  if (buffer == NULL)
+    {
+      return -ENOMEM;
+    }
 
   /* Prepare TRB */
 
@@ -2740,6 +2774,152 @@ static void xhci_portsc_work(FAR void *arg)
 }
 
 /****************************************************************************
+ * Name: xhci_dmacapable
+ *
+ * Description:
+ *   Whether the controller may be pointed at this buffer.
+ *
+ *   The driver has no way to know this on its own.  Whether an address can
+ *   be turned into one the device will reach, and whether what lies behind
+ *   it is contiguous, is a property of the system the controller was fitted
+ *   into, so the answer comes from there.  A platform that says nothing is
+ *   taken to mean every address works, which is what a flat address space
+ *   gives.
+ *
+ ****************************************************************************/
+
+static bool xhci_dmacapable(FAR struct usbhost_xhci_s *priv,
+                            FAR uint8_t *buffer, size_t buflen)
+{
+  if (priv->ops->dmacapable == NULL)
+    {
+      return true;
+    }
+
+  return priv->ops->dmacapable(priv->arg, buffer, buflen);
+}
+
+/****************************************************************************
+ * Name: xhci_dma_prepare
+ *
+ * Description:
+ *   Make a caller's buffer safe for the controller to reach, and say which
+ *   address to hand it.
+ *
+ *   The controller writes memory behind the processor's back, so on a
+ *   machine whose caches are not coherent every buffer it touches must be
+ *   flushed before the controller reads and invalidated before the
+ *   processor does.
+ *
+ *   Both act a whole cache line at a time, which is unsafe for a buffer
+ *   that does not own its lines: invalidating drops whatever shares the
+ *   line, and a writeback lands on top of what the controller just put
+ *   there.  Class drivers pass their own structure members, a 31 byte
+ *   command block or a 13 byte status, which share lines.
+ *
+ *   Such a buffer gets an aligned stand-in and is copied at the ends.
+ *   Anything large enough to matter comes from a filesystem or from
+ *   xhci_ioalloc() and is already aligned.
+ *
+ * Returned Value:
+ *   The address to give the controller, or NULL if a stand-in was needed
+ *   and could not be allocated.
+ *
+ ****************************************************************************/
+
+static FAR uint8_t *xhci_dma_prepare(FAR struct xhci_epinfo_s *epinfo,
+                                     FAR uint8_t *buffer, size_t buflen,
+                                     bool dirin)
+{
+  size_t line = up_get_dcache_linesize();
+
+  epinfo->buffer = buffer;
+  epinfo->bounce = NULL;
+  epinfo->dmain  = dirin;
+
+  /* No cache to maintain, so nothing to arrange */
+
+  if (line == 0)
+    {
+      return buffer;
+    }
+
+  if (((uintptr_t)buffer & (line - 1)) != 0 || (buflen & (line - 1)) != 0)
+    {
+      /* The buffer shares a line with something else.  Work in a stand-in
+       * that does not.
+       */
+
+      epinfo->bounce = kmm_memalign(line, (buflen + line - 1) & ~(line - 1));
+      if (epinfo->bounce == NULL)
+        {
+          return NULL;
+        }
+
+      if (!dirin)
+        {
+          memcpy(epinfo->bounce, buffer, buflen);
+        }
+
+      buffer = epinfo->bounce;
+    }
+
+  /* Push what we are sending; drop what we are about to be sent, so that
+   * nothing the processor is still holding can be written back over it
+   * while the transfer is in flight.
+   */
+
+  if (dirin)
+    {
+      up_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+    }
+  else
+    {
+      up_clean_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+    }
+
+  return buffer;
+}
+
+/****************************************************************************
+ * Name: xhci_dma_finish
+ *
+ * Description:
+ *   Read back what the controller wrote, and give up any stand-in buffer.
+ *   Called on completion, before whoever is waiting is woken.
+ *
+ ****************************************************************************/
+
+static void xhci_dma_finish(FAR struct xhci_epinfo_s *epinfo)
+{
+  FAR uint8_t *dma  = epinfo->bounce ? epinfo->bounce : epinfo->buffer;
+  bool         dirin = epinfo->dmain;
+
+  if (dma == NULL)
+    {
+      return;
+    }
+
+  if (dirin)
+    {
+      up_invalidate_dcache((uintptr_t)dma, (uintptr_t)dma + epinfo->buflen);
+
+      if (epinfo->bounce != NULL && epinfo->buffer != NULL)
+        {
+          memcpy(epinfo->buffer, epinfo->bounce, epinfo->buflen);
+        }
+    }
+
+  if (epinfo->bounce != NULL)
+    {
+      kmm_free(epinfo->bounce);
+      epinfo->bounce = NULL;
+    }
+
+  epinfo->buffer = NULL;
+}
+
+/****************************************************************************
  * Name: xhci_transfer_complete
  *
  * Description:
@@ -2761,6 +2941,10 @@ static void xhci_transfer_complete(FAR struct usbhost_xhci_s *priv,
 
   epinfo = priv->devs[slot - 1].epinfo[ep - 1];
   DEBUGASSERT(epinfo != NULL);
+
+  /* Read back what the controller wrote before anyone looks at it */
+
+  xhci_dma_finish(epinfo);
 
   flags = spin_lock_irqsave(&priv->spinlock);
 
@@ -3737,7 +3921,8 @@ static int xhci_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
 static int xhci_ioalloc(FAR struct usbhost_driver_s *drvr,
                         FAR uint8_t **buffer, size_t buflen)
 {
-  int ret = -ENOMEM;
+  size_t line;
+  int    ret = -ENOMEM;
 
   DEBUGASSERT(drvr && buffer && buflen > 0);
 
@@ -3748,7 +3933,18 @@ static int xhci_ioalloc(FAR struct usbhost_driver_s *drvr,
       return -ENOMEM;
     }
 
-  /* Allocated buffer must not cross page boundaries */
+  /* Allocated buffer must not cross page boundaries.
+   *
+   * Round to whole cache lines as well as aligning the start, so that the
+   * buffer owns every line it touches and can be invalidated without
+   * disturbing whatever would otherwise share the last one.
+   */
+
+  line = up_get_dcache_linesize();
+  if (line > 1)
+    {
+      buflen = (buflen + line - 1) & ~(line - 1);
+    }
 
   *buffer = (FAR uint8_t *)kmm_memalign((XHCI_PAGE_SIZE / 2) , buflen);
   if (*buffer)
@@ -3847,6 +4043,13 @@ static int xhci_ctrl_xfer(FAR struct usbhost_driver_s *drvr,
 
   len = xhci_getle16(req->len);
 
+  /* Refuse a buffer the controller cannot reach, as for bulk transfers */
+
+  if (buffer != NULL && len > 0 && !xhci_dmacapable(priv, buffer, len))
+    {
+      return -EFAULT;
+    }
+
   /* Terse output only if we are tracing */
 
 #ifdef CONFIG_USBHOST_TRACE
@@ -3870,6 +4073,15 @@ static int xhci_ctrl_xfer(FAR struct usbhost_driver_s *drvr,
       ret = xhci_address_set(priv, rhport, true);
       if (ret == OK)
         {
+          /* The controller chose this address and wrote it into the
+           * output context.  Invalidate before reading, or the stale
+           * copy is used.
+           */
+
+          up_invalidate_dcache((uintptr_t)rhport->dev->ctx,
+                               (uintptr_t)rhport->dev->ctx +
+                               sizeof(struct xhci_dev_ctx_s));
+
           /* Store USB Device Address assigned by xHCI */
 
           ep0info->devaddr =
@@ -4009,6 +4221,16 @@ static ssize_t xhci_transfer(FAR struct usbhost_driver_s *drvr,
   int                        ret;
 
   DEBUGASSERT(priv && rhport && epinfo && buffer && buflen > 0);
+
+  /* Refuse a buffer the controller cannot reach rather than pointing it at
+   * the wrong memory.  A caller that has somewhere better to put the data
+   * will try again with it; the FAT filesystem does exactly that.
+   */
+
+  if (!xhci_dmacapable(priv, buffer, buflen))
+    {
+      return -EFAULT;
+    }
 
   /* We must have exclusive access to the xHCI hardware and data
    * structures.
