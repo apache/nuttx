@@ -5689,7 +5689,7 @@ void arm_usbinitialize(void)
 
   /* SOF output pin configuration is configurable. */
 
-#ifdef CONFIG_STM32_OTGFS_SOFOUTPUT
+#ifdef CONFIG_STM32_OTG_SOFOUTPUT
   stm32_configgpio(GPIO_OTGFS_SOF);
 #endif
 
@@ -5927,4 +5927,4 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   return OK;
 }
 
-#endif /* CONFIG_USBDEV && CONFIG_STM32_OTGFSDEV */
+#endif /* CONFIG_USBDEV && CONFIG_STM32_OTGFS */
