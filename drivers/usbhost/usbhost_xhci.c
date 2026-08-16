@@ -808,9 +808,16 @@ static int xhci_ring_init(FAR struct xhci_ring_s *ring, size_t len)
       ring->len = len;
     }
 
-  /* Reset data in ring */
+  /* Reset data in ring.
+   *
+   * Clearing dirties every line, and the controller writes into this
+   * memory itself.  Flush now, or a later writeback lands on top of an
+   * event somebody is waiting for.
+   */
 
   memset(ring->ring, 0, ring->len * sizeof(struct xhci_trb_s));
+  up_flush_dcache((uintptr_t)ring->ring,
+                  (uintptr_t)(ring->ring + ring->len));
 
   /* Fill Link TRB */
 
@@ -1112,9 +1119,22 @@ static int xhci_ctrl_start(FAR struct usbhost_xhci_s *priv)
   evnt->size = XHCI_EVENT_MAX;
   evnt->res  = 0;
 
-  /* Flush all memory before write to ERDP so xhci sees correct data */
+  /* Push the structures the controller is about to be pointed at.
+   *
+   * Flush by address: up_flush_dcache_all() is a no-op on architectures
+   * whose cache can only be maintained by address.
+   */
 
-  up_flush_dcache_all();
+  up_flush_dcache((uintptr_t)priv->pg_erst,
+                  (uintptr_t)priv->pg_erst +
+                  sizeof(struct xhci_event_ring_s) * priv->no_erst);
+  up_flush_dcache((uintptr_t)priv->pg_ctx,
+                  (uintptr_t)(priv->pg_ctx + priv->no_slots + 1));
+  if (priv->pg_sb != NULL)
+    {
+      up_flush_dcache((uintptr_t)priv->pg_sb,
+                      (uintptr_t)(priv->pg_sb + priv->no_scratch));
+    }
 
   xhci_runt_putreg_8b(priv, XHCI_ERDP(0),
                       up_addrenv_va_to_pa(priv->evnt.ring));
@@ -1151,9 +1171,12 @@ static int xhci_ctrl_start(FAR struct usbhost_xhci_s *priv)
   regval |= XHCI_IMAN_IE;
   xhci_runt_putreg(priv, XHCI_IMAN(0), regval);
 
-  /* Flush all memory once again */
+  /* And the command ring, whose last entry was just made to point back at
+   * its own beginning.
+   */
 
-  up_flush_dcache_all();
+  up_flush_dcache((uintptr_t)priv->cmd.ring,
+                  (uintptr_t)(priv->cmd.ring + XHCI_CMD_MAX));
 
   /* Turn the host controller ON, enable interrupts and system errors */
 
