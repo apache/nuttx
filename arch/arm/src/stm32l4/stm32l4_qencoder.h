@@ -38,8 +38,8 @@
  ****************************************************************************/
 
 /* Timer devices may be used for different purposes.  One special purpose is
- * as a quadrature encoder input device.  If CONFIG_STM32L4_TIMn is defined
- * then the CONFIG_STM32L4_TIMn_QE must also be defined to indicate that
+ * as a quadrature encoder input device.  If CONFIG_STM32_TIMn is defined
+ * then the CONFIG_STM32_TIMn_QE must also be defined to indicate that
  * timer "n" is intended to be used for as a quadrature encoder.
  */
 
@@ -65,14 +65,14 @@
 /* Only timers 2-5, and 1 & 8 can be used as a quadrature encoder
  */
 
-#undef CONFIG_STM32L4_TIM6_QE
-#undef CONFIG_STM32L4_TIM7_QE
-#undef CONFIG_STM32L4_TIM9_QE
-#undef CONFIG_STM32L4_TIM10_QE
-#undef CONFIG_STM32L4_TIM11_QE
-#undef CONFIG_STM32L4_TIM12_QE
-#undef CONFIG_STM32L4_TIM13_QE
-#undef CONFIG_STM32L4_TIM14_QE
+#undef CONFIG_STM32_TIM6_QE
+#undef CONFIG_STM32_TIM7_QE
+#undef CONFIG_STM32_TIM9_QE
+#undef CONFIG_STM32_TIM10_QE
+#undef CONFIG_STM32_TIM11_QE
+#undef CONFIG_STM32_TIM12_QE
+#undef CONFIG_STM32_TIM13_QE
+#undef CONFIG_STM32_TIM14_QE
 
 /****************************************************************************
  * Included Files

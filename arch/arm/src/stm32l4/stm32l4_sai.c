@@ -89,29 +89,29 @@
 #  error "Interrupt driven SAI not yet supported"
 #endif
 
-#ifndef CONFIG_STM32L4_SAI_DEFAULT_SAMPLERATE
-#  define CONFIG_STM32L4_SAI_DEFAULT_SAMPLERATE  (48000)
+#ifndef CONFIG_STM32_SAI_DEFAULT_SAMPLERATE
+#  define CONFIG_STM32_SAI_DEFAULT_SAMPLERATE  (48000)
 #endif
 
-#ifndef CONFIG_STM32L4_SAI_DEFAULT_DATALEN
-#  define CONFIG_STM32L4_SAI_DEFAULT_DATALEN     (16)
+#ifndef CONFIG_STM32_SAI_DEFAULT_DATALEN
+#  define CONFIG_STM32_SAI_DEFAULT_DATALEN     (16)
 #endif
 
-#ifndef CONFIG_STM32L4_SAI_MAXINFLIGHT
-#  define CONFIG_STM32L4_SAI_MAXINFLIGHT         (16)
+#ifndef CONFIG_STM32_SAI_MAXINFLIGHT
+#  define CONFIG_STM32_SAI_MAXINFLIGHT         (16)
 #endif
 
 #ifdef CONFIG_STM32_SAI_DMA
 /* SAI DMA priority */
 
-#  if defined(CONFIG_STM32L4_SAI_DMAPRIO)
-#    define SAI_DMA_PRIO       CONFIG_STM32L4_SAI_DMAPRIO
+#  if defined(CONFIG_STM32_SAI_DMAPRIO)
+#    define SAI_DMA_PRIO       CONFIG_STM32_SAI_DMAPRIO
 #  else
 #    define SAI_DMA_PRIO       DMA_CCR_PRIMED
 #  endif
 
 #  if (SAI_DMA_PRIO & ~DMA_CCR_PL_MASK) != 0
-#    error "Illegal value for CONFIG_STM32L4_SAI_DMAPRIO"
+#    error "Illegal value for CONFIG_STM32_SAI_DMAPRIO"
 #  endif
 
 /* DMA channel configuration */
@@ -168,7 +168,7 @@ struct stm32_sai_s
 
   sem_t bufsem;                   /* Buffer wait semaphore */
   struct sai_buffer_s *freelist;  /* A list a free buffer containers */
-  struct sai_buffer_s containers[CONFIG_STM32L4_SAI_MAXINFLIGHT];
+  struct sai_buffer_s containers[CONFIG_STM32_SAI_MAXINFLIGHT];
 };
 
 /****************************************************************************
@@ -244,9 +244,9 @@ static struct stm32_sai_s g_sai1a_priv =
 #ifdef CONFIG_STM32_SAI_DMA
   .dma_ch      = DMACHAN_SAI1_A,
 #endif
-  .datalen     = CONFIG_STM32L4_SAI_DEFAULT_DATALEN,
-  .samplerate  = CONFIG_STM32L4_SAI_DEFAULT_SAMPLERATE,
-  .bufsem      = SEM_INITIALIZER(CONFIG_STM32L4_SAI_MAXINFLIGHT),
+  .datalen     = CONFIG_STM32_SAI_DEFAULT_DATALEN,
+  .samplerate  = CONFIG_STM32_SAI_DEFAULT_SAMPLERATE,
+  .bufsem      = SEM_INITIALIZER(CONFIG_STM32_SAI_MAXINFLIGHT),
 };
 #endif
 
@@ -265,9 +265,9 @@ static struct stm32_sai_s g_sai1b_priv =
 #ifdef CONFIG_STM32_SAI_DMA
   .dma_ch      = DMACHAN_SAI1_B,
 #endif
-  .datalen     = CONFIG_STM32L4_SAI_DEFAULT_DATALEN,
-  .samplerate  = CONFIG_STM32L4_SAI_DEFAULT_SAMPLERATE,
-  .bufsem      = SEM_INITIALIZER(CONFIG_STM32L4_SAI_MAXINFLIGHT),
+  .datalen     = CONFIG_STM32_SAI_DEFAULT_DATALEN,
+  .samplerate  = CONFIG_STM32_SAI_DEFAULT_SAMPLERATE,
+  .bufsem      = SEM_INITIALIZER(CONFIG_STM32_SAI_MAXINFLIGHT),
 };
 #endif
 
@@ -288,9 +288,9 @@ static struct stm32_sai_s g_sai2a_priv =
 #ifdef CONFIG_STM32_SAI_DMA
   .dma_ch      = DMACHAN_SAI2_A,
 #endif
-  .datalen     = CONFIG_STM32L4_SAI_DEFAULT_DATALEN,
-  .samplerate  = CONFIG_STM32L4_SAI_DEFAULT_SAMPLERATE,
-  .bufsem      = SEM_INITIALIZER(CONFIG_STM32L4_SAI_MAXINFLIGHT),
+  .datalen     = CONFIG_STM32_SAI_DEFAULT_DATALEN,
+  .samplerate  = CONFIG_STM32_SAI_DEFAULT_SAMPLERATE,
+  .bufsem      = SEM_INITIALIZER(CONFIG_STM32_SAI_MAXINFLIGHT),
 };
 #endif
 
@@ -309,9 +309,9 @@ static struct stm32_sai_s g_sai2b_priv =
 #ifdef CONFIG_STM32_SAI_DMA
   .dma_ch      = DMACHAN_SAI2_B,
 #endif
-  .datalen     = CONFIG_STM32L4_SAI_DEFAULT_DATALEN,
-  .samplerate  = CONFIG_STM32L4_SAI_DEFAULT_SAMPLERATE,
-  .bufsem      = SEM_INITIALIZER(CONFIG_STM32L4_SAI_MAXINFLIGHT),
+  .datalen     = CONFIG_STM32_SAI_DEFAULT_DATALEN,
+  .samplerate  = CONFIG_STM32_SAI_DEFAULT_SAMPLERATE,
+  .bufsem      = SEM_INITIALIZER(CONFIG_STM32_SAI_MAXINFLIGHT),
 };
 #endif
 
@@ -1232,7 +1232,7 @@ static void sai_buf_initialize(struct stm32_sai_s *priv)
   int i;
 
   priv->freelist = NULL;
-  for (i = 0; i < CONFIG_STM32L4_SAI_MAXINFLIGHT; i++)
+  for (i = 0; i < CONFIG_STM32_SAI_MAXINFLIGHT; i++)
     {
       sai_buf_free(priv, &priv->containers[i]);
     }
@@ -1267,7 +1267,7 @@ static void sai_portinitialize(struct stm32_sai_s *priv)
   /* Configure the data width */
 
   sai_datawidth((struct i2s_dev_s *)priv,
-                CONFIG_STM32L4_SAI_DEFAULT_DATALEN);
+                CONFIG_STM32_SAI_DEFAULT_DATALEN);
 
 #ifdef CONFIG_STM32_SAI_DMA
   /* Get DMA channel */

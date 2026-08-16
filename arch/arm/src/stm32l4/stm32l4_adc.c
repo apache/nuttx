@@ -2686,7 +2686,7 @@ static void adc_llops_dumpregs(struct stm32_adc_dev_s *dev)
  *   The logic allow initialize ADC regular and injected channels.
  *
  *   The number of injected channels for given ADC is selected from Kconfig
- *   with CONFIG_STM32L4_ADCx_INJECTED_CHAN definitions
+ *   with CONFIG_STM32_ADCx_INJECTED_CHAN definitions
  *
  *   The number of regular channels is obtained from the equation:
  *
@@ -2710,9 +2710,9 @@ static void adc_llops_dumpregs(struct stm32_adc_dev_s *dev)
  *     chanlist[channels]           -> ADC_JSQR_ISQy
  *
  *   where:
- *      y = CONFIG_STM32L4_ADCx_INJECTED_CHAN, and y > 0
+ *      y = CONFIG_STM32_ADCx_INJECTED_CHAN, and y > 0
  *
- *   If CONFIG_STM32L4_ADCx_INJECTED_CHAN = 0, then all channels from
+ *   If CONFIG_STM32_ADCx_INJECTED_CHAN = 0, then all channels from
  *   chanlist are regular channels.
  *
  * Input Parameters:
