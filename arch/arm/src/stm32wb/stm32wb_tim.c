@@ -52,16 +52,16 @@
  * Such special purposes include:
  *
  * - To generate modulated outputs for such things as motor control.  If
- *   CONFIG_STM32WB_TIMn is defined then the CONFIG_STM32WB_TIMn_PWM may also
+ *   CONFIG_STM32_TIMn is defined then the CONFIG_STM32_TIMn_PWM may also
  *   be defined to indicate that the timer is intended to be used for pulsed
  *   output modulation.
  *
- * - To control periodic ADC input sampling.  If CONFIG_STM32WB_TIMn is
- *   defined then CONFIG_STM32WB_TIMn_ADC may also be defined to indicate
+ * - To control periodic ADC input sampling.  If CONFIG_STM32_TIMn is
+ *   defined then CONFIG_STM32_TIMn_ADC may also be defined to indicate
  *   that timer "n" is intended to be used for that purpose.
  *
- * - To use a Quadrature Encoder.  If CONFIG_STM32WB_TIMn is defined then
- *   CONFIG_STM32WB_TIMn_QE may also be defined to indicate that timer "n"
+ * - To use a Quadrature Encoder.  If CONFIG_STM32_TIMn is defined then
+ *   CONFIG_STM32_TIMn_QE may also be defined to indicate that timer "n"
  *   is intended to be used for that purpose.
  *
  * In any of these cases, the timer will not be used by this timer module.
@@ -77,13 +77,13 @@
 #  undef CONFIG_STM32_TIM2
 #endif
 
-#if defined(CONFIG_STM32_TIM16_PWM) || defined (CONFIG_STM32WB_TIM16_ADC) || \
-    defined(CONFIG_STM32WB_TIM16_QE)
+#if defined(CONFIG_STM32_TIM16_PWM) || defined (CONFIG_STM32_TIM16_ADC) || \
+    defined(CONFIG_STM32_TIM16_QE)
 #  undef CONFIG_STM32_TIM16
 #endif
 
-#if defined(CONFIG_STM32_TIM17_PWM) || defined (CONFIG_STM32WB_TIM17_ADC) || \
-    defined(CONFIG_STM32WB_TIM17_QE)
+#if defined(CONFIG_STM32_TIM17_PWM) || defined (CONFIG_STM32_TIM17_ADC) || \
+    defined(CONFIG_STM32_TIM17_QE)
 #  undef CONFIG_STM32_TIM17
 #endif
 
