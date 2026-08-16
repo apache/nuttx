@@ -49,10 +49,13 @@
 #define STM32_FLASH_BANK1    0x08000000     /* 0x08000000-0x080fffff: Bank 1 (562/563/573xx devices) */
 #define STM32_FLASH_BANK2    0x08100000     /* 0x08100000-0x081fffff: Bank 2 (562/563/573xx devices) */
 #define STM32_FLASH_BASE     STM32_FLASH_BANK1
-#define STM32_SRAM1_BASE     0x20000000     /* 0x20000000-0x2002ffff: 192k SRAM1 */
-#define STM32_SRAM2_BASE     0x20040000     /* 0x20040000-0x2004ffff:  64k SRAM2 */
-#define STM32_SRAM3_BASE     0x20050000     /* 0x20050000-0x2008ffff: 320k SRAM3 */
-                                            /* 0x20090000-0x2009ffff: Reserved for ECC */
+/* SRAM1, SRAM2 and SRAM3 are contiguous on all STM32H5 parts, but their
+ * sizes are family-dependent (STM32_SRAMx_SIZE comes from chip.h).
+ */
+
+#define STM32_SRAM1_BASE     0x20000000
+#define STM32_SRAM2_BASE     (STM32_SRAM1_BASE + STM32_SRAM1_SIZE)
+#define STM32_SRAM3_BASE     (STM32_SRAM2_BASE + STM32_SRAM2_SIZE)
 
 /* System Memory Addresses **************************************************/
 

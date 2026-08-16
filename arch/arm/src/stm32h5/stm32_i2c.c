@@ -158,7 +158,7 @@
  *
  *  One of:
  *
- *    CONFIG_STM32H5_STM32H5XXXXX
+ *    CONFIG_STM32_STM32H5XXXXX
  *
  *  and one or more interfaces:
  *

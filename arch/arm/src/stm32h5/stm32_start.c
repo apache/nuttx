@@ -190,7 +190,7 @@ void __start(void)
     }
 #endif
 
-#ifdef CONFIG_STM32H5_SRAM3_INIT
+#ifdef CONFIG_STM32_SRAM3_INIT
   for (dest = (uint32_t *)SRAM3_START; dest < (uint32_t *)SRAM3_END; )
     {
       *dest++ = 0;

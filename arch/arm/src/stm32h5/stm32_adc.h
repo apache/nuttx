@@ -41,8 +41,8 @@
 /* Configuration ************************************************************/
 
 /* Timer devices may be used for different purposes.  One special purpose is
- * to control periodic ADC sampling.  If CONFIG_STM32H5_TIMn is defined then
- * CONFIG_STM32H5_TIMn_ADC must also be defined to indicate that timer "n"
+ * to control periodic ADC sampling.  If CONFIG_STM32_TIMn is defined then
+ * CONFIG_STM32_TIMn_ADC must also be defined to indicate that timer "n"
  * is intended to be used for that purpose.
  */
 
@@ -119,12 +119,12 @@
 #endif
 
 #undef ADC_HAVE_WDG2
-#if defined(CONFIG_STM32H5_ADC1_WDG2) || defined(CONFIG_STM32H5_ADC2_WDG2)
+#if defined(CONFIG_STM32_ADC1_WDG2) || defined(CONFIG_STM32_ADC2_WDG2)
 #  define ADC_HAVE_WDG2 1
 #endif
 
 #undef ADC_HAVE_WDG3
-#if defined(CONFIG_STM32H5_ADC1_WDG3) || defined(CONFIG_STM32H5_ADC2_WDG3)
+#if defined(CONFIG_STM32_ADC1_WDG3) || defined(CONFIG_STM32_ADC2_WDG3)
 #  define ADC_HAVE_WDG3 1
 #endif
 

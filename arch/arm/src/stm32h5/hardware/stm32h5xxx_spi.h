@@ -489,5 +489,5 @@
 #define SPI_I2SCFGR_ODD            (1 << 24) /* Bit 24: Odd Factor for the Prescaler */
 #define SPI_I2SCFGR_MCKOE          (1 << 25) /* Bit 24: Master Clock Output Enable */
 
-#endif /* CONFIG_STM32H5_STM32H5XXX */
+#endif /* CONFIG_STM32_STM32H5XXX */
 #endif /* __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32H5XXX_SPI_H */

@@ -1242,5 +1242,5 @@
 #define RCC_PRIVCFGR_SPRIV               (1 << 0) /* Secure functions privilege configuration */
 #define RCC_PRIVCFGR_NSPRIV              (1 << 1) /* Non-secure functions privilege configuration */
 
-#endif /* CONFIG_STM32H5_STM32H562XX */
+#endif /* CONFIG_STM32_STM32H5XXXX */
 #endif /* __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32H5XXX_RCC_H */
