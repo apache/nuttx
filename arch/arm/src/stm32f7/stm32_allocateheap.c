@@ -63,7 +63,7 @@
  * to be present in the NuttX configuration file:
  *
  * CONFIG_STM32_FMC=y         : Enables the FMC
- * CONFIG_STM32F7_FMC_S[D]RAM=y : SRAM and/or SDRAM is available via the FMC.
+ * CONFIG_STM32_FMC_S[D]RAM=y : SRAM and/or SDRAM is available via the FMC.
  *                                Either of these autoselects
  *                                CONFIG_ARCH_HAVE_HEAP2
  *                                which is what we are interested in here.

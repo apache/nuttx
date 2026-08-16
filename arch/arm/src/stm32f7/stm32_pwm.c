@@ -163,8 +163,8 @@
 
 /* Break support */
 
-#if defined(CONFIG_STM32F7_TIM1_BREAK1) || defined(CONFIG_STM32F7_TIM1_BREAK2) || \
-    defined(CONFIG_STM32F7_TIM8_BREAK1) || defined(CONFIG_STM32F7_TIM8_BREAK2)
+#if defined(CONFIG_STM32_TIM1_BREAK1) || defined(CONFIG_STM32_TIM1_BREAK2) || \
+    defined(CONFIG_STM32_TIM8_BREAK1) || defined(CONFIG_STM32_TIM8_BREAK2)
 #  defined HAVE_BREAK
 #endif
 
@@ -385,14 +385,14 @@ static struct stm32_pwmchan_s g_pwm1channels[] =
 #ifdef HAVE_BREAK
     .brk =
     {
-#ifdef CONFIG_STM32F7_TIM1_BREAK1
+#ifdef CONFIG_STM32_TIM1_BREAK1
       .en1 = 1,
-      .pol1 = CONFIG_STM32F7_TIM1_BRK1POL,
+      .pol1 = CONFIG_STM32_TIM1_BRK1POL,
 #endif
-#ifdef CONFIG_STM32F7_TIM1_BREAK2
+#ifdef CONFIG_STM32_TIM1_BREAK2
       .en2 = 1,
-      .pol2 = CONFIG_STM32F7_TIM1_BRK2POL,
-      .flt2 = CONFIG_STM32F7_TIM1_BRK2FLT,
+      .pol2 = CONFIG_STM32_TIM1_BRK2POL,
+      .flt2 = CONFIG_STM32_TIM1_BRK2FLT,
 #endif
     },
 #endif
@@ -930,14 +930,14 @@ static struct stm32_pwmchan_s g_pwm8channels[] =
 #ifdef HAVE_BREAK
     .brk =
     {
-#ifdef CONFIG_STM32F7_TIM8_BREAK1
+#ifdef CONFIG_STM32_TIM8_BREAK1
       .en1 = 1,
-      .pol1 = CONFIG_STM32F7_TIM8_BRK1POL,
+      .pol1 = CONFIG_STM32_TIM8_BRK1POL,
 #endif
-#ifdef CONFIG_STM32F7_TIM8_BREAK2
+#ifdef CONFIG_STM32_TIM8_BREAK2
       .en2 = 1,
-      .pol2 = CONFIG_STM32F7_TIM8_BRK2POL,
-      .flt2 = CONFIG_STM32F7_TIM8_BRK2FLT,
+      .pol2 = CONFIG_STM32_TIM8_BRK2POL,
+      .flt2 = CONFIG_STM32_TIM8_BRK2FLT,
 #endif
     },
 #endif
