@@ -4611,6 +4611,7 @@ static void xhci_disconnect(FAR struct usbhost_driver_s *drvr,
 static int xhci_hw_getparams(FAR struct usbhost_xhci_s *priv)
 {
   uint32_t regval;
+  uint32_t erst;
 
   /* Get data form Host Controller Capability 1 Parameters */
 
@@ -4651,16 +4652,21 @@ static int xhci_hw_getparams(FAR struct usbhost_xhci_s *priv)
 
   uinfo("no scratch = %d\n", priv->no_scratch);
 
-  priv->no_erst = 1 << XHCI_HCSPARAMS2_ERST(regval);
+  /* How many event ring segments the controller will allow, which is a
+   * power of two and can reach 32768, so it is worked out at full width
+   * and only then narrowed to what this driver actually uses.  Computed
+   * into the field directly it would wrap to zero on any controller
+   * offering more than 128 segments, and a table declared to hold no
+   * entries gives a controller with nowhere to report anything.
+   */
 
-  uinfo("no_erst = %d\n", priv->no_erst);
+  erst = 1ul << XHCI_HCSPARAMS2_ERST(regval);
+
+  uinfo("erst max = %" PRIu32 "\n", erst);
 
   /* Limit event ring segment table to 1 */
 
-  if (priv->no_erst > XHCI_MAX_ERST)
-    {
-      priv->no_erst = XHCI_MAX_ERST;
-    }
+  priv->no_erst = (erst > XHCI_MAX_ERST) ? XHCI_MAX_ERST : erst;
 
   uinfo("no erst = %d\n", priv->no_erst);
 
