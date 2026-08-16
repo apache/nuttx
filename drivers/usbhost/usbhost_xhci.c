@@ -1141,6 +1141,10 @@ static int xhci_ctrl_start(FAR struct usbhost_xhci_s *priv)
   xhci_oper_putreg_8b(priv, XHCI_CRCR,
                       up_addrenv_va_to_pa(priv->cmd.ring) | XHCI_CRCR_RCS);
 
+  /* Do not sit on completions; see XHCI_IMOD_INTERVAL */
+
+  xhci_runt_putreg(priv, XHCI_IMOD(0), XHCI_IMOD_DEFAULT);
+
   /* Enable interrupts */
 
   regval = xhci_runt_getreg(priv, XHCI_IMAN(0));

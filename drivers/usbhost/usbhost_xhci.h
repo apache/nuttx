@@ -315,6 +315,17 @@
 #define XHCI_IMOD_IMODI_SHIFT        (0)                   /* Bits 0-15: Interrupt Moderation Interval */
 #define XHCI_IMOD_IMODC_SHIFT        (16)                  /* Bits 16-31: Interrupt Moderation Counter */
 
+/* What to set the moderation interval to, in 250ns units.
+ *
+ * The reset default is 4000, a millisecond, which is far too long to wait
+ * to be told a transfer finished.  Zero is too short: it puts no bound on
+ * how often a controller may interrupt, and a polled device such as a
+ * keyboard on an interrupt endpoint will then occupy a processor.  160 is
+ * 40us, which is what Linux uses.
+ */
+
+#define XHCI_IMOD_DEFAULT            (160)
+
 /* Event Ring Segment Table Size */
 
 #define XHCI_ERSTS_MASK              (0xffff)              /* Bit 0-15: Event Ring Segment Table Size */
