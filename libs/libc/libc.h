@@ -184,6 +184,7 @@
 /* How many bytes are copied each iteration of the word copy loop. */
 
 #define LITTLEBLOCKSIZE (sizeof(libc_data_t))
+#define BIGBLOCKSIZE    (sizeof(libc_data_t) << 2)
 
 /* Threshold for punting to the byte copier. */
 
@@ -191,7 +192,30 @@
 
 /* Macros for detecting endchar */
 
-#define DETECTNULL(x) (((x) - 0x0101010101010101LL) & ~(x) & 0x8080808080808080LL)
+#define DETECTNULL(x) \
+     (((x) - 0x0101010101010101LL) & ~(x) & 0x8080808080808080LL)
+
+#define DETECTCHAR(x, mask) (DETECTNULL((x) ^ (mask)))
+
+/* 32-bit helpers for the 4-byte middle path on 64-bit platforms.
+ * When libc_data_t is 8 bytes, pointers that are 4-byte aligned
+ * but not 8-byte aligned would otherwise fall back to byte-at-a-time.
+ */
+
+#define DETECTNULL32(x) \
+     (((x) - (uint32_t)0x01010101) & ~(x) & (uint32_t)0x80808080)
+
+#define DETECTCHAR32(x, mask) (DETECTNULL32((x) ^ (mask)))
+
+#define UNALIGNED4(x, y) \
+     ((((uintptr_t)(x)) | ((uintptr_t)(y))) & 3)
+
+#define UNALIGNED4_X(x) (((uintptr_t)(x)) & 3)
+
+#define LITTLEBLOCKSIZE4 (sizeof(uint32_t))
+#define BIGBLOCKSIZE4    (sizeof(uint32_t) << 2)
+
+#define TOO_SMALL4(len) ((len) < LITTLEBLOCKSIZE4)
 
 #ifndef __ASSEMBLY__
 

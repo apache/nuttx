@@ -43,23 +43,15 @@ no_builtin("strcmp")
 nosanitize_address
 int strcmp(FAR const char *cs, FAR const char *ct)
 {
-  FAR libc_data_t *a1;
-  FAR libc_data_t *a2;
-
   /* If cs or ct are unaligned, then compare bytes. */
 
   if (!UNALIGNED(cs, ct))
     {
-      /* If cs and ct are word-aligned, compare them a word at a time. */
+      FAR libc_data_t *a1 = (FAR libc_data_t *)cs;
+      FAR libc_data_t *a2 = (FAR libc_data_t *)ct;
 
-      a1 = (FAR libc_data_t *)cs;
-      a2 = (FAR libc_data_t *)ct;
       while (*a1 == *a2)
         {
-          /* To get here, *a1 == *a2, thus if we find a null in *a1,
-           * then the strings must be equal, so return zero.
-           */
-
           if (DETECTNULL(*a1))
             {
               return 0;
@@ -69,9 +61,24 @@ int strcmp(FAR const char *cs, FAR const char *ct)
           a2++;
         }
 
-      /* A difference was detected in last few bytes of cs,
-       * so search bytewise.
-       */
+      cs = (FAR char *)a1;
+      ct = (FAR char *)a2;
+    }
+  else if (!UNALIGNED4(cs, ct))
+    {
+      FAR uint32_t *a1 = (FAR uint32_t *)cs;
+      FAR uint32_t *a2 = (FAR uint32_t *)ct;
+
+      while (*a1 == *a2)
+        {
+          if (DETECTNULL32(*a1))
+            {
+              return 0;
+            }
+
+          a1++;
+          a2++;
+        }
 
       cs = (FAR char *)a1;
       ct = (FAR char *)a2;
