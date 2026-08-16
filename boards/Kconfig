@@ -625,6 +625,16 @@ config ARCH_BOARD_ESP32S3_LCKFB_SZPI
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
 
+config ARCH_BOARD_ESP32S3_TOUCH_LCD_7
+	bool "Waveshare ESP32-S3-Touch-LCD-7"
+	depends on ARCH_CHIP_ESP32S3WROOM1N16R8
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	---help---
+		The Waveshare ESP32-S3-Touch-LCD-7 board features the ESP32-S3
+		CPU with dual Xtensa LX7 cores, 7" LCD with Touchscreen, CAN,
+		RS485, USB, etc.
+
 config ARCH_BOARD_ESP32S3_WS_LCD128
 	bool "WaveShare ESP32-S3-(Touch)-LCD-1.28"
 	depends on ARCH_CHIP_ESP32S3CUSTOM
@@ -3795,6 +3805,7 @@ config ARCH_BOARD
 	default "esp32s3-box"                  if ARCH_BOARD_ESP32S3_BOX
 	default "esp32s3-korvo-2"              if ARCH_BOARD_ESP32S3_KORVO_2
 	default "lckfb-szpi-esp32s3"           if ARCH_BOARD_ESP32S3_LCKFB_SZPI
+	default "esp32s3-touch-lcd7"           if ARCH_BOARD_ESP32S3_TOUCH_LCD_7
 	default "esp32s3-ws-lcd128"            if ARCH_BOARD_ESP32S3_WS_LCD128
 	default "esp32c6-devkitc"              if ARCH_BOARD_ESP32C6_DEVKITC
 	default "esp32c6-devkitm"              if ARCH_BOARD_ESP32C6_DEVKITM
@@ -5133,6 +5144,9 @@ source "boards/xtensa/esp32s3/esp32s3-lcd-ev/Kconfig"
 endif
 if ARCH_BOARD_ESP32S3_LHCBIT
 source "boards/xtensa/esp32s3/esp32s3-lhcbit/Kconfig"
+endif
+if ARCH_BOARD_ESP32S3_TOUCH_LCD_7
+source "boards/xtensa/esp32s3/esp32s3-touch-lcd7/Kconfig"
 endif
 if ARCH_BOARD_ESP32S3_WS_LCD128
 source "boards/xtensa/esp32s3/esp32s3-ws-lcd128/Kconfig"
