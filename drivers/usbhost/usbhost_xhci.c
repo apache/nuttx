@@ -2804,6 +2804,7 @@ static int xhci_events_poll(FAR struct usbhost_xhci_s *priv)
   uintptr_t              addr;
   uint8_t                type;
   uint32_t               d2;
+  int                    count = 0;
 
   /* Invalidate event ring */
 
@@ -2875,6 +2876,7 @@ static int xhci_events_poll(FAR struct usbhost_xhci_s *priv)
 
       /* Next event */
 
+      count++;
       priv->evnt.i++;
 
       /* Handle ring wrap */
@@ -2891,7 +2893,7 @@ static int xhci_events_poll(FAR struct usbhost_xhci_s *priv)
   addr |= XHCI_ERDP_EHB;
   xhci_runt_putreg_8b(priv, XHCI_ERDP(0), addr);
 
-  return OK;
+  return count;
 }
 
 /****************************************************************************
@@ -2956,6 +2958,29 @@ static void xhci_interrupt_work(FAR void *arg)
   /* Clear pending bits */
 
   priv->pending = 0;
+
+  /* Let interrupts back in, which the handler masked on its way out, and
+   * clear the pending flag in the same write.
+   *
+   * A message signalled interrupt is sent on the flag's clear to set
+   * transition; a wire stays asserted while it is set.  Events that
+   * arrived while this interrupter was masked have already set the flag,
+   * so enabling without clearing leaves a message with nothing to
+   * transition on, and transfers have no timeout.
+   *
+   * Clearing opens its own window: an event delivered between the ring
+   * going empty and this write is discarded.  So drain again, and repeat
+   * if that drain found anything.  A drain that finds nothing is the only
+   * state in which no event can have been lost.
+   */
+
+  do
+    {
+      iman = xhci_runt_getreg(priv, XHCI_IMAN(0));
+      xhci_runt_putreg(priv, XHCI_IMAN(0),
+                       iman | XHCI_IMAN_IE | XHCI_IMAN_IP);
+    }
+  while (xhci_events_poll(priv) > 0);
 }
 
 /****************************************************************************
@@ -2969,10 +2994,22 @@ static void xhci_interrupt_work(FAR void *arg)
 static int xhci_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct usbhost_xhci_s *priv = arg;
+  uint32_t                   iman;
 
   /* Get pending interrupts */
 
   priv->pending = xhci_oper_getreg(priv, XHCI_USBSTS);
+
+  /* Silence the interrupter before returning.
+   *
+   * Nothing here clears the condition that raised the interrupt; the work
+   * runs later on a work queue.  On a level triggered line the source is
+   * still asserted on return, so the interrupt re-raises immediately and
+   * the worker never runs.  The worker clears the status and unmasks.
+   */
+
+  iman = xhci_runt_getreg(priv, XHCI_IMAN(0));
+  xhci_runt_putreg(priv, XHCI_IMAN(0), iman & ~XHCI_IMAN_IE);
 
   /* Handle interrupts in worker */
 
