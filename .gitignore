@@ -61,6 +61,7 @@ etctmp/
 /cscope.*
 /defconfig
 /defconfig.tmp.bak
+/Image-*
 /Make.defs
 /nuttx
 /nuttx32

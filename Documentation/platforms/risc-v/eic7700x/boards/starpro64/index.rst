@@ -2,6 +2,8 @@
 PINE64 StarPro64
 ================
 
+.. tags:: chip:eic7700x, arch:risc-v, vendor:pine64, experimental
+
 `PINE64 StarPro64 <https://lupyuen.github.io/articles/starpro64>`_
 is a RISC-V Single-Board Computer based on the ESWIN EIC7700X RISC-V SoC
 with Quad-Core 64-bit RISC-V CPU, 32 GB LPDDR5 RAM and 100 Mbps Ethernet.
@@ -89,16 +91,21 @@ This produces the NuttX Kernel ``nuttx.bin``.  Next, build the NuttX Apps Filesy
    $ tools/mkimport.sh -z -x ../nuttx/nuttx-export-*.tar.gz
    $ make import
    $ popd
-   $ genromfs -f initrd -d ../apps/bin -V "NuttXBootVol"
 
-This generates the Initial RAM Disk ``initrd``.
-
-Package the NuttX Kernel and Initial RAM Disk into a NuttX Image:
+Package the NuttX Kernel and the applications into a NuttX Image:
 
 .. code:: console
 
-   $ head -c 65536 /dev/zero >/tmp/nuttx.pad
-   $ cat nuttx.bin /tmp/nuttx.pad initrd >Image-starpro64
+   $ boards/risc-v/eic7700x/common/tools/mkimage.sh
+
+The image is the kernel, then padding, then a RAM disk holding the
+applications.  Use the script rather than padding by hand.  The RAM disk is
+found at run time by searching memory for its header, and that search runs
+after BSS has been cleared, so the disk has to start above ``_ebss`` or it
+is zeroed before anything looks for it.  The script reads ``_ebss`` from the
+kernel and pads to suit; a fixed pad works only until BSS grows past it, and
+when it does the board hangs during start up with nothing on the console at
+all, because the failure happens before there is a console to report it.
 
 The NuttX Image ``Image-starpro64`` will be copied to the TFTP Server in the next step.
 

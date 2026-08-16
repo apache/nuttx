@@ -1,5 +1,5 @@
 ############################################################################
-# boards/risc-v/eic7700x/starpro64/src/Makefile
+# boards/risc-v/eic7700x/common/src/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,10 +20,14 @@
 #
 ############################################################################
 
-include $(TOPDIR)/Make.defs
+ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
+
+CSRCS += eic7700x_boot.c
 
 RCSRCS = etc/init.d/rc.sysinit etc/init.d/rcS
 
-CSRCS = eic7700x_boardinit.c
+DEPPATH += --dep-path src
+VPATH += :src
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
 
-include $(TOPDIR)/boards/Board.mk
+endif

@@ -20,12 +20,26 @@
  *
  ****************************************************************************/
 
+/* The SoC has 16 GiB of LPDDR5 and this describes 960 MiB of it, which is as
+ * much as the design can currently use.  Three things decide that:
+ *
+ *   - The kernel's RAM mapping hangs off a single 512 entry L2 page table at
+ *     L1 index 2, so it reaches 0x80000000 to 0xc0000000 and no further.
+ *   - The page pool cannot exceed 65535 pages, because the granule allocator
+ *     behind mm_pgalloc() counts them in a uint16_t.  At 4 KiB that is just
+ *     under 256 MiB.
+ *   - Nothing yet allocates enough for the rest to be worth mapping.
+ *
+ * Every boundary is 2 MiB aligned because everything except kflash is mapped
+ * with 2 MiB pages.  480 of the 512 L2 entries are used.
+ */
+
 MEMORY
 {
     kflash (rx) : ORIGIN = 0x80200000, LENGTH = 2048K   /* w/ cache */
-    ksram (rwx) : ORIGIN = 0x80400000, LENGTH = 2048K   /* w/ cache */
-    pgram (rwx) : ORIGIN = 0x80600000, LENGTH = 4096K   /* w/ cache */
-    ramdisk (rwx) : ORIGIN = 0x80A00000, LENGTH = 16M   /* w/ cache */
+    ksram (rwx) : ORIGIN = 0x80400000, LENGTH = 640M    /* w/ cache */
+    pgram (rwx) : ORIGIN = 0xA8400000, LENGTH = 254M    /* w/ cache */
+    ramdisk (rwx) : ORIGIN = 0xB8200000, LENGTH = 64M   /* w/ cache */
 }
 
 OUTPUT_ARCH("riscv")
@@ -38,10 +52,17 @@ __ksram_start = ORIGIN(ksram);
 __ksram_size = LENGTH(ksram);
 __ksram_end = ORIGIN(ksram) + LENGTH(ksram);
 
-/* Page heap */
+/* Page heap.
+ *
+ * This is pgram and nothing else.  The RAM disk must not be part of it: the
+ * page allocator hands its pages out to user address environments, and there
+ * is nothing anywhere in NuttX that holds a region back from it, so a pool
+ * that covers the RAM disk is a pool that eventually returns pages of the
+ * mounted file system.
+ */
 
 __pgheap_start = ORIGIN(pgram);
-__pgheap_size = LENGTH(pgram) + LENGTH(ramdisk);
+__pgheap_size = LENGTH(pgram);
 
 /* Application ramdisk */
 
