@@ -51,8 +51,8 @@
  *
  * Parts STM32H7xxxI have 2048Kb of FLASH
  *
- * The correct FLASH size will be set CONFIG_STM32H7_FLASH_CONFIG_x or
- * overridden with CONFIG_STM32H7_FLASH_OVERRIDE_x
+ * The correct FLASH size will be set CONFIG_STM32_FLASH_CONFIG_x or
+ * overridden with CONFIG_STM32_FLASH_OVERRIDE_x
  */
 
 #if defined (CONFIG_ARCH_CHIP_STM32H723VG) || \
@@ -135,7 +135,7 @@
 #  elif defined(CONFIG_STM32H7_IO_CONFIG_Z)
 #      define STM32_NGPIO               (8)         /* GPIOA-GPIOH */
 #  else
-#      error CONFIG_STM32H7_IO_CONFIG_x Not Set
+#      error CONFIG_STM32_IO_CONFIG_x Not Set
 #  endif
 
 #  define STM32_NDMA                    (4)         /* (4) DMA1, DMA2, BDMA and MDMA */
@@ -189,7 +189,7 @@
 #  elif defined(CONFIG_STM32H7_IO_CONFIG_Z)
 #      define STM32_NGPIO               (8)         /* GPIOA-GPIOH */
 #  else
-#      error CONFIG_STM32H7_IO_CONFIG_x Not Set
+#      error CONFIG_STM32_IO_CONFIG_x Not Set
 #  endif
 
 #  define STM32_NDMA                    (4)         /* (4) DMA1, DMA2, BDMA and MDMA */
