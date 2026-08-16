@@ -39,6 +39,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Whether anything wants a pad's name in text.  The names cost about nine
+ * kilobytes, so they are only compiled when something will print them.
+ * GPIO_PROCFS is a consumer to come: the GPIO driver's procfs entry names
+ * the pad behind each line.
+ */
+
+#if defined(CONFIG_PINCTRL_PROCFS) || defined(CONFIG_GPIO_PROCFS)
+#  define HAVE_PINCTRL_TEXT 1
+#endif
+
 /* How many distinct reset values the 166 pads have between them.  The
  * manual gives a reset value per field; reassembled into words they
  * collapse to this many, so the table stores an index instead of a word.
@@ -152,6 +162,41 @@ int eic7700x_pinctrl_initialize(void);
  ****************************************************************************/
 
 unsigned int eic7700x_pinctrl_count(FAR unsigned int *changed);
+
+/****************************************************************************
+ * Name: eic7700x_pad_name
+ *
+ * Description:
+ *   The manual's name for a pad.
+ *
+ * Input Parameters:
+ *   pad - The pad id, an enum eic7700x_pad_e value
+ *
+ * Returned Value:
+ *   The name, or NULL if the pad id is out of range or the name tables
+ *   are not built.
+ *
+ ****************************************************************************/
+
+FAR const char *eic7700x_pad_name(unsigned int pad);
+
+/****************************************************************************
+ * Name: eic7700x_pad_funcname
+ *
+ * Description:
+ *   The name of one of a pad's function selects.
+ *
+ * Input Parameters:
+ *   pad  - The pad id, an enum eic7700x_pad_e value
+ *   func - The function select
+ *
+ * Returned Value:
+ *   The name, or NULL if the manual does not document that select or the
+ *   name tables are not built.
+ *
+ ****************************************************************************/
+
+FAR const char *eic7700x_pad_funcname(unsigned int pad, unsigned int func);
 
 /****************************************************************************
  * Name: eic7700x_pad_lookup
