@@ -116,6 +116,10 @@ if(CONFIG_STM32_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()
 
+if(CONFIG_STM32_IWDG)
+  list(APPEND SRCS stm32_iwdg.c)
+endif()
+
 # Required chip type specific files
 
 if(CONFIG_STM32_STM32H5XXXX)
