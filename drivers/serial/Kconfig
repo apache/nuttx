@@ -1061,10 +1061,6 @@ config CONSOLE_NETDEV_TXBUFSIZE
 	int "CONSOLE netdev transmit buffer size"
 	default 256
 
-config CONSOLE_NETDEV_DELAY_USEC
-	int "CONSOLE netdev polling interval in microseconds"
-	default 1000
-
 endif
 
 endif # SERIAL
