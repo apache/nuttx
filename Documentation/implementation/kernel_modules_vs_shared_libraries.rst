@@ -57,6 +57,31 @@ as the application that uses the shared library.
 So, they are shared in the sense that the ``.text`` is shared.
 
 
+Building a Shared Library
+=========================
+
+Applications can declare a loadable shared library with the Android.mk-style
+helper in ``nuttx-apps``. Include ``Make.defs``, set the module name and its C
+or C++ sources, then include ``BUILD_SHARED_LIBRARY``::
+
+  include $(APPDIR)/Make.defs
+
+  LOCAL_PATH := $(CURDIR)
+  LOCAL_MODULE := my-new-lib
+  LOCAL_SRC_FILES := my-source-file.cpp another-file.cpp
+
+  include $(BUILD_SHARED_LIBRARY)
+
+The build writes the relocatable ELF library to
+``$(BINDIR)/$(LOCAL_MODULE)``. Set ``LOCAL_MODULE_FILENAME`` when the runtime
+interface requires another name, such as ``libmy-new-lib.so``.
+
+``LOCAL_CFLAGS``, ``LOCAL_CXXFLAGS``, ``LOCAL_LDFLAGS``, and ``LOCAL_LDLIBS``
+add module-specific options. The selected architecture must provide the NuttX
+module compiler and linker flags. Exported symbols must have default
+visibility for ``dlsym()`` or use by another library.
+
+
 FLAT Build
 ==========
 
