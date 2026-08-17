@@ -167,6 +167,15 @@ ifeq ($(CONFIG_AMEBA_SPI),y)
 AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_spi.c
 endif
 
+# PWM timer register layer.  The time-base entry points (RTIM_TimeBaseInit/
+# StructInit/Cmd) are in ROM, but the compare/period helpers the PWM driver
+# (arch/.../common/ameba/ameba_pwm.c) calls -- RTIM_CCStructInit/CCxInit/
+# CCRxSet/CCxCmd/ChangePeriod/PrescalerConfig -- are compiled from this RAM
+# source and linked in (--gc-sections drops the unused input-capture paths).
+ifeq ($(CONFIG_AMEBA_PWM),y)
+AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_tim.c
+endif
+
 # -Wno-int-conversion: the vendored SDK passes NULL to irq_register()'s u32
 # "Data" (interrupt context) argument in many places -- an intentional
 # NULL-as-context idiom.  Silence -Wint-conversion for the SDK fwlib sources
