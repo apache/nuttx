@@ -42,6 +42,8 @@ Supported in this NuttX port:
   on the SDK fwlib register layer
 * PWM output exposed as a ``/dev/pwm0`` character device, driven directly on
   the SDK fwlib timer register layer
+* ADC channels exposed as an ``/dev/adc0`` character device, driven directly
+  on the SDK fwlib register layer
 
 Buttons and LEDs
 ================
@@ -146,6 +148,21 @@ GPIO table and are muxed to the PWM function through the crossbar. Set
 example::
 
     nsh> pwm -d 25 -f 1000     # 1 kHz, 25% duty on /dev/pwm0
+
+adc
+---
+
+Minimal NSH with the ADC driver and the ``adc`` example enabled (no Wi-Fi).
+The board registers its channels from a table (see
+``boards/arm/rtl8721f/rtl8721f_evb/src/rtl8721f_adc.c``): ``/dev/adc0`` samples
+CH0 on PA20 and CH1 on PA19. Edit that table -- channel numbers and the analog
+pad each is wired to -- to match a board's wiring; the external channels
+CH0..CH7 map to pads PA20,PA19,PA18,PA17,PA15,PA14,PA13,PA12 and are muxed to
+the ADC function through the SDK ROM, while internal channels carry
+``AMEBA_ADC_PIN_NC``. Every listed channel is sampled, in order, on each
+trigger. Read the channels with the example::
+
+    nsh> adc -n 1                        # one sweep of /dev/adc0
 
 nsh
 ---
