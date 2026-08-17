@@ -1805,9 +1805,6 @@ ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
           ring_buf_init(buf, r, cons_idx, discard, elem_size);
           ring_mc_finish(r, buf);
           all_discard += discard;
-
-          old_prod = atomic_read(&blob->prod_head);
-          prod_idx = RTS_IDX(old_prod);
         }
 
       new_prod = RTS_PACK(RTS_CNT(old_prod) + 1,
