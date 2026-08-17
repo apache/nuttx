@@ -160,6 +160,16 @@ int rtl8720f_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_AMEBA_PWM
+  /* Register the board's PWM timer at /dev/pwm0. */
+
+  ret = rtl8720f_pwm_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: rtl8720f_pwm_initialize failed: %d\n", ret);
+    }
+#endif
+
   /* Install the inter-core HW IPC-semaphore RTOS hooks LAST -- after all the
    * flash / WHC bring-up above, and just before this (board_late_initialize)
    * path returns and nx_start() hands off to the init task.

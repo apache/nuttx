@@ -39,6 +39,8 @@ Supported in this NuttX port:
   on the SDK fwlib register layer
 * SPI master buses exposed as ``/dev/spiN`` character devices, driven directly
   on the SDK fwlib register layer
+* PWM output exposed as a ``/dev/pwm0`` character device, driven directly on
+  the SDK fwlib timer register layer
 
 Buttons and LEDs
 ================
@@ -124,6 +126,23 @@ that not every pad can carry every SPI signal -- pick pads the SDK pin mux
 actually routes to the controller. Exercise a bus with the tool::
 
     nsh> spi exch -b 0 -x 4 deadbeef     # full-duplex transfer on /dev/spi0
+
+pwm
+---
+
+Minimal NSH with the PWM driver and the ``pwm`` example
+(``examples/pwm``) enabled (no Wi-Fi). The board registers one timer at
+``/dev/pwm0`` (see ``boards/arm/rtl8720f/rtl8720f_evb/src/rtl8720f_pwm.c``):
+TIM4 drives up to four compare channels off one shared time base, so every
+channel shares one frequency and each carries its own duty cycle. The example
+table routes channel 1 to PA23 and channel 2 to PA24; edit it -- one pad per
+channel, ``AMEBA_PWM_PIN_NC`` for the unused ones -- to match a board's
+wiring. The pads use the same ``AMEBA_PA()`` / ``AMEBA_PB()`` encoding as the
+GPIO table and are muxed to the PWM function through the crossbar. Set
+``CONFIG_PWM_NCHANNELS`` to the number of channels used. Exercise it with the
+example::
+
+    nsh> pwm -d 25 -f 1000     # 1 kHz, 25% duty on /dev/pwm0
 
 nsh
 ---
