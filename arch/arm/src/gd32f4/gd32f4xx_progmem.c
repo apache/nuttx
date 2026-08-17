@@ -59,6 +59,7 @@
 #    define FMC_PROGMEM_SECTOR_NUM       (2)
 #    define FMC_PROGMEM_SECTOR_SADDR     (0x08040000)
 #    define FMC_PROGMEM_SECTOR_EADDR     (0x0807FFFF)
+#    define FMC_PROGMEM_PAGESIZE         4096
 
 #  elif defined(CONFIG_GD32F4_FLASH_CONFIG_G)
 

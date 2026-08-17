@@ -559,9 +559,9 @@ config ARCH_BOARD_ESP32S3_BOX
 	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
 	---help---
 		The ESP-BOX is an advanced AIoT, Edge AI, and IIoT applications development platform
-		released by Espressif Systems. The board is built on Espressif¡¯s powerful ESP32-S3
+		released by Espressif Systems. The board is built on Espressifï¿½ï¿½s powerful ESP32-S3
 		Wi-Fi + Bluetooth 5 (LE) SoC and feature compact and beautiful enclosures.
-		Leveraging the multi-functional accessories and reliable examples from the repo¡¯s,
+		Leveraging the multi-functional accessories and reliable examples from the repoï¿½ï¿½s,
 		these development boards cater to both prototyping new projects and building complex
 		IoT systems, providing a perfect balance of form and function.
 
@@ -853,6 +853,14 @@ config ARCH_BOARD_GD32F470VIT6_EVAL
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		GD32 MCU GD32F470VIT6-EVAL board based on the GD32F4 GD32F470VIT6 MCU.
+
+
+config ARCH_BOARD_GD32F470ZET6_EVAL
+	bool "GD32 MCU GD32F470ZET6"
+	depends on ARCH_CHIP_GD32F470ZK
+	select ARCH_HAVE_LEDS
+	---help---
+		GD32 MCU GD32F470ZET6 board (mcu_plat out-of-tree BSP).
 
 config ARCH_BOARD_HIFIVE1_REVB
 	bool "HiFive1 Rev B board"
@@ -3736,6 +3744,7 @@ config ARCH_BOARD
 	default "gd32f470zk-aiotbox"           if ARCH_BOARD_GD32F470ZK_AIOTBOX
 	default "gd32f470ik-eval"              if ARCH_BOARD_GD32F470IK_EVAL
 	default "gd32f470vit6-eval"            if ARCH_BOARD_GD32F470VIT6_EVAL
+	default "gd32f470zet6-eval"            if ARCH_BOARD_GD32F470ZET6_EVAL
 	default "hifive1-revb"                 if ARCH_BOARD_HIFIVE1_REVB
 	default "hymini-stm32v"                if ARCH_BOARD_HYMINI_STM32V
 	default "imxrt1020-evk"                if ARCH_BOARD_IMXRT1020_EVK
@@ -4258,6 +4267,9 @@ source "boards/arm/gd32f4/gd32f470ik-eval/Kconfig"
 endif
 if ARCH_BOARD_GD32F470VIT6_EVAL
 source "boards/arm/gd32f4/gd32f470vit6-eval/Kconfig"
+endif
+if ARCH_BOARD_GD32F470ZET6_EVAL
+source "boards/arm/gd32f4/gd32f470zet6-eval/Kconfig"
 endif
 if ARCH_BOARD_TEENSY_LC
 source "boards/arm/kl/teensy-lc/Kconfig"
