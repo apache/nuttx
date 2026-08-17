@@ -49,6 +49,22 @@ FAR void *memcpy(FAR void *dest, FAR const void *src, size_t n)
   FAR char *pout = dest;
   FAR const char *pin = src;
 
+  /* Walk a pair that agrees about where a boundary falls up to it, so that
+   * the word path below is reached even when the caller aligned neither
+   * pointer.  Fewer than LITTLEBLOCKSIZE bytes are copied and the size was
+   * tested against that first, so this cannot run past the end.
+   */
+
+  if (!TOO_SMALL(n) && !MISALIGNED(pin, pout) && UNALIGNED_X(pin))
+    {
+      do
+        {
+          *pout++ = *pin++;
+          n--;
+        }
+      while (UNALIGNED_X(pin));
+    }
+
   /* If the size is small, or either pin or pout is unaligned,
    * then punt into the byte copy loop.  This should be rare.
    */

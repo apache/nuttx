@@ -67,6 +67,26 @@ FAR char *stpncpy(FAR char *dest, FAR const char *src, size_t n)
 {
   FAR char *ret = NULL;
 
+  /* Walk a pair that agrees about where a boundary falls up to it, so that
+   * the word path below is reached even when the caller aligned neither
+   * pointer.  The terminator is left for the byte loop, which also pads.
+   * Fewer than LITTLEBLOCKSIZE bytes are copied and n was tested against
+   * that first, so n cannot run out here.
+   */
+
+  if (!MISALIGNED(src, dest) && !TOO_SMALL(n) && UNALIGNED_X(src))
+    {
+      while (*src != '\0')
+        {
+          *dest++ = *src++;
+          n--;
+          if (!UNALIGNED_X(src))
+            {
+              break;
+            }
+        }
+    }
+
   /* If src and dest is aligned and n large enough, then copy words. */
 
   if (!UNALIGNED(src, dest) && !TOO_SMALL(n))

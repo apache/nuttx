@@ -43,6 +43,25 @@ no_builtin("strcmp")
 nosanitize_address
 int strcmp(FAR const char *cs, FAR const char *ct)
 {
+  /* Walk a pair that agrees about where a boundary falls up to it, so that
+   * the word path below is reached even when the caller aligned neither
+   * pointer.  A difference or a terminator found on the way stops the walk
+   * and is reported by the byte loop.
+   */
+
+  if (!MISALIGNED(cs, ct) && UNALIGNED_X(cs))
+    {
+      while (*cs != '\0' && *cs == *ct)
+        {
+          cs++;
+          ct++;
+          if (!UNALIGNED_X(cs))
+            {
+              break;
+            }
+        }
+    }
+
   /* If cs or ct are unaligned, then compare bytes. */
 
   if (!UNALIGNED(cs, ct))
