@@ -43,8 +43,6 @@
 #include "hardware/stm32_dbgmcu.h"
 #include "stm32_wdg.h"
 
-#if defined(CONFIG_WATCHDOG) && defined(CONFIG_STM32_IWDG)
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -53,7 +51,7 @@
 
 /* The minimum frequency of the IWDG clock is:
  *
- *  Fmin = Flsi / 256
+ *  Fmin = Flsi / 1024
  *
  * So the maximum delay (in milliseconds) is then:
  *
@@ -62,11 +60,11 @@
  * For example, if Flsi = 30Khz (the nominal, uncalibrated value), then the
  * maximum delay is:
  *
- *   Fmin = 117.1875
- *   1000 * 4095 / Fmin = 34,944 MSec
+ *   Fmin = 29.296875
+ *   1000 * 4095 / Fmin = 139,776 MSec
  */
 
-#define IWDG_FMIN       (STM32_LSI_FREQUENCY / 256)
+#define IWDG_FMIN       (STM32_LSI_FREQUENCY / 1024)
 #define IWDG_MAXTIMEOUT (1000 * IWDG_RLR_MAX / IWDG_FMIN)
 
 /* Configuration ************************************************************/
@@ -527,14 +525,16 @@ static int stm32_settimeout(struct watchdog_lowerhalf_s *lower,
 
   for (prescaler = 0; ; prescaler++)
     {
-      /* PR = 0 -> Divider = 4   = 1 << 2
-       * PR = 1 -> Divider = 8   = 1 << 3
-       * PR = 2 -> Divider = 16  = 1 << 4
-       * PR = 3 -> Divider = 32  = 1 << 5
-       * PR = 4 -> Divider = 64  = 1 << 6
-       * PR = 5 -> Divider = 128 = 1 << 7
-       * PR = 6 -> Divider = 256 = 1 << 8
-       * PR = n -> Divider       = 1 << (n+2)
+      /* PR = 0 -> Divider = 4    = 1 << 2
+       * PR = 1 -> Divider = 8    = 1 << 3
+       * PR = 2 -> Divider = 16   = 1 << 4
+       * PR = 3 -> Divider = 32   = 1 << 5
+       * PR = 4 -> Divider = 64   = 1 << 6
+       * PR = 5 -> Divider = 128  = 1 << 7
+       * PR = 6 -> Divider = 256  = 1 << 8
+       * PR = 7 -> Divider = 512  = 1 << 9
+       * PR = 8 -> Divider = 1024 = 1 << 10
+       * PR = n -> Divider        = 1 << (n+2)
        */
 
       shift = prescaler + 2;
@@ -558,7 +558,7 @@ static int stm32_settimeout(struct watchdog_lowerhalf_s *lower,
        * settings.
        */
 
-      if (reload <= IWDG_RLR_MAX || prescaler == 6)
+      if (reload <= IWDG_RLR_MAX || prescaler == 8)
         {
           /* Note that we explicitly break out of the loop rather than using
            * the 'for' loop termination logic because we do not want the
@@ -686,18 +686,9 @@ void stm32_iwdginitialize(const char *devpath, uint32_t lsifreq)
     defined(CONFIG_STM32_JTAG_NOJNTRST_ENABLE) || \
     defined(CONFIG_STM32_JTAG_SW_ENABLE)
     {
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F4XXX) || defined(CONFIG_STM32_STM32L15XX)
       uint32_t cr = getreg32(STM32_DBGMCU_APB1_FZ);
       cr |= DBGMCU_APB1_IWDGSTOP;
       putreg32(cr, STM32_DBGMCU_APB1_FZ);
-#else /* if defined(CONFIG_STM32_STM32F10XX) */
-      uint32_t cr = getreg32(STM32_DBGMCU_CR);
-      cr |= DBGMCU_CR_IWDGSTOP;
-      putreg32(cr, STM32_DBGMCU_CR);
-#endif
     }
 #endif
 }
-
-#endif /* CONFIG_WATCHDOG && CONFIG_STM32_IWDG */
