@@ -38,6 +38,10 @@
 
 #include <arch/board/board.h>
 
+#ifdef CONFIG_STM32_IWDG
+#  include "stm32_wdg.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -60,6 +64,12 @@
 int stm32_bringup(void)
 {
   int ret;
+
+#ifdef CONFIG_STM32_IWDG
+  /* Initialize the watchdog timer */
+
+  stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);
+#endif
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
