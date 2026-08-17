@@ -536,6 +536,7 @@ FLASH         to be done    arch/arm/src/stm32h5/stm32_flash.c
 GPIO          to be done    arch/arm/src/stm32h5/stm32_gpio.c      
 GPDMA         to be done    arch/arm/src/stm32h5/stm32_dma.c       
 I2C           to be done    arch/arm/src/stm32h5/stm32_i2c.c       
+IWDG          v1            arch/arm/src/stm32h5/stm32_iwdg.c      
 ICACHE        to be done    arch/arm/src/stm32h5/stm32_icache.c    
 OCTOSPI       to be done    arch/arm/src/stm32h5/stm32_qspi.c      
 PWR           to be done    arch/arm/src/stm32h5/stm32_pwr.c       
