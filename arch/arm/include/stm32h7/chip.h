@@ -51,8 +51,8 @@
  *
  * Parts STM32H7xxxI have 2048Kb of FLASH
  *
- * The correct FLASH size will be set CONFIG_STM32H7_FLASH_CONFIG_x or
- * overridden with CONFIG_STM32H7_FLASH_OVERRIDE_x
+ * The correct FLASH size will be set CONFIG_STM32_FLASH_CONFIG_x or
+ * overridden with CONFIG_STM32_FLASH_OVERRIDE_x
  */
 
 #if defined (CONFIG_ARCH_CHIP_STM32H723VG) || \
@@ -135,7 +135,7 @@
 #  elif defined(CONFIG_STM32H7_IO_CONFIG_Z)
 #      define STM32_NGPIO               (8)         /* GPIOA-GPIOH */
 #  else
-#      error CONFIG_STM32H7_IO_CONFIG_x Not Set
+#      error CONFIG_STM32_IO_CONFIG_x Not Set
 #  endif
 
 #  define STM32_NDMA                    (4)         /* (4) DMA1, DMA2, BDMA and MDMA */
@@ -189,7 +189,7 @@
 #  elif defined(CONFIG_STM32H7_IO_CONFIG_Z)
 #      define STM32_NGPIO               (8)         /* GPIOA-GPIOH */
 #  else
-#      error CONFIG_STM32H7_IO_CONFIG_x Not Set
+#      error CONFIG_STM32_IO_CONFIG_x Not Set
 #  endif
 
 #  define STM32_NDMA                    (4)         /* (4) DMA1, DMA2, BDMA and MDMA */
@@ -247,6 +247,9 @@
 #  error STM32 H7 chip Family not identified
 #endif
 
+#define STM32_NATIM                      2   /* Advanced timers TIM1 and TIM8 */
+#define STM32_NBTIM                      2   /* Basic timers TIM6 and TIM7 */
+
 /* TBD FPU Configuration */
 
 #if defined(CONFIG_ARCH_HAVE_FPU)
@@ -259,7 +262,7 @@
 
 /* Diversification based on Family and package */
 
-#if defined(CONFIG_STM32_HAVE_ETHERNET)
+#if defined(CONFIG_STM32_HAVE_ETHMAC)
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
 #else
 #  define STM32_NETHERNET                0   /* No 100/100 Ethernet MAC */

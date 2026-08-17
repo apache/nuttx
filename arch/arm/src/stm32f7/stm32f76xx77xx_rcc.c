@@ -872,7 +872,7 @@ static void stm32_stdclockconfig(void)
         {
         }
 
-#if defined(CONFIG_STM32_LTDC) || defined(CONFIG_STM32F7_PLLSAI)
+#if defined(CONFIG_STM32_LTDC) || defined(CONFIG_STM32_PLLSAI)
 
       /* Configure PLLSAI */
 
@@ -921,7 +921,7 @@ static void stm32_stdclockconfig(void)
         }
 #endif
 
-#if defined(CONFIG_STM32F7_PLLI2S) || \
+#if defined(CONFIG_STM32_PLLI2S) || \
     (STM32_RCC_DCKCFGR1_SAI1SRC == RCC_DCKCFGR1_SAI1SEL(1)) || \
     (STM32_RCC_DCKCFGR1_SAI2SRC == RCC_DCKCFGR1_SAI2SEL(1))
 

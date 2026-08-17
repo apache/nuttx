@@ -32,7 +32,7 @@
 #include "arm_internal.h"
 #include "chip.h"
 
-#include "hardware/stm32wl5_rcc.h"
+#include "hardware/stm32_rcc.h"
 
 /****************************************************************************
  * Pre-processor Definitions

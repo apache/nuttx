@@ -62,9 +62,7 @@ config STM32_FLASH_CONFIG_Z
 
 config STM32_FLASH_OVERRIDE
 	bool "Override Flash Designator" if ARCH_CHIP_STM32G0 || ARCH_CHIP_STM32C0
-	default y if ARCH_CHIP_STM32F7 || STM32_COMMON_F7_H7_H5
-	default y if STM32_COMMON_L4_H5_L5_U5 || ARCH_CHIP_STM32WB
-	default y if ARCH_CHIP_STM32WL5
+	default y if STM32_HAVE_FLASH_OVERRIDE
 	default n
 
 choice
@@ -122,7 +120,7 @@ config STM32_FLASH_ART_ACCELERATOR
 
 config STM32_FLASH_PREFETCH
 	bool "Enable FLASH Pre-fetch"
-	depends on STM32_STM32F20XX || STM32_STM32F4XXX || STM32_COMMON_L4_H5_L5_U5 || ARCH_CHIP_STM32WB
+	depends on STM32_HAVE_FLASH_PREFETCH
 	default STM32_STM32F427 || STM32_STM32F429 || STM32_STM32F446
 	default y
 	---help---
@@ -140,9 +138,9 @@ config STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW
 
 config STM32_PROGMEM
 	bool "Flash PROGMEM support"
-	depends on STM32_COMMON_F0_L0_G0_C0 && ARCH_HAVE_PROGMEM || STM32_COMMON_F7_H7_H5
-	select MTD if STM32_COMMON_F0_L0_G0_C0 && ARCH_HAVE_PROGMEM
-	select MTD_PROGMEM if STM32_COMMON_F0_L0_G0_C0 && ARCH_HAVE_PROGMEM
+	depends on (STM32_HAVE_FLASH_PROGMEM_MTD && ARCH_HAVE_PROGMEM) || STM32_HAVE_FLASH_PROGMEM
+	select MTD if STM32_HAVE_FLASH_PROGMEM_MTD
+	select MTD_PROGMEM if STM32_HAVE_FLASH_PROGMEM_MTD
 	---help---
 		Add progmem support, start block and end block options are provided to
 		obtain a uniform flash memory mapping.

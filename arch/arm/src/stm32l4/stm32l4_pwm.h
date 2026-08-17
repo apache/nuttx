@@ -93,8 +93,8 @@
  *  pulses.
  */
 
-#undef CONFIG_STM32L4_TIM6_PWM
-#undef CONFIG_STM32L4_TIM7_PWM
+#undef CONFIG_STM32_TIM6_PWM
+#undef CONFIG_STM32_TIM7_PWM
 
 /* Check if PWM support for any channel is enabled. */
 

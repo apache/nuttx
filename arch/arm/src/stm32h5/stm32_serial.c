@@ -403,7 +403,7 @@ static char g_uart8rxfifo[RXDMA_BUFFER_SIZE];
 #  endif
 #endif
 
-#ifdef CONFIG_STM32H5_USART10_SERIALDRIVER
+#ifdef CONFIG_STM32_USART10_SERIALDRIVER
 static char g_usart10rxbuffer[CONFIG_USART10_RXBUFSIZE];
 static char g_usart10txbuffer[CONFIG_USART10_TXBUFSIZE];
 #  ifdef CONFIG_USART10_RXDMA
@@ -411,7 +411,7 @@ static char g_usart10rxfifo[RXDMA_BUFFER_SIZE];
 #  endif
 #endif
 
-#ifdef CONFIG_STM32H5_USART11_SERIALDRIVER
+#ifdef CONFIG_STM32_USART11_SERIALDRIVER
 static char g_usart11rxbuffer[CONFIG_USART11_RXBUFSIZE];
 static char g_usart11txbuffer[CONFIG_USART11_TXBUFSIZE];
 #  ifdef CONFIG_USART11_RXDMA
@@ -1120,7 +1120,7 @@ static struct stm32_serial_s g_uart8priv =
 
 /* This describes the state of the STM32 UART9 port. */
 
-#ifdef CONFIG_STM32H5_UART9_SERIALDRIVER
+#ifdef CONFIG_STM32_UART9_SERIALDRIVER
 static struct stm32_serial_s g_uart9priv =
 {
   .dev =
@@ -1197,7 +1197,7 @@ static struct stm32_serial_s g_uart9priv =
 
 /* This describes the state of the STM32 USART10 port. */
 
-#ifdef CONFIG_STM32H5_USART10_SERIALDRIVER
+#ifdef CONFIG_STM32_USART10_SERIALDRIVER
 static struct stm32_serial_s g_usart10priv =
 {
   .dev =
@@ -1274,7 +1274,7 @@ static struct stm32_serial_s g_usart10priv =
 
 /* This describes the state of the STM32 USART11 port. */
 
-#ifdef CONFIG_STM32H5_USART11_SERIALDRIVER
+#ifdef CONFIG_STM32_USART11_SERIALDRIVER
 static struct stm32_serial_s g_usart11priv =
 {
   .dev =
@@ -1351,7 +1351,7 @@ static struct stm32_serial_s g_usart11priv =
 
 /* This describes the state of the STM32 UART12 port. */
 
-#ifdef CONFIG_STM32H5_UART12_SERIALDRIVER
+#ifdef CONFIG_STM32_UART12_SERIALDRIVER
 static struct stm32_serial_s g_uart12priv =
 {
   .dev =
@@ -1458,16 +1458,16 @@ static struct stm32_serial_s * const
 #ifdef CONFIG_STM32_UART8_SERIALDRIVER
   [8] = &g_uart8priv,
 #endif
-#ifdef CONFIG_STM32H5_UART9_SERIALDRIVER
+#ifdef CONFIG_STM32_UART9_SERIALDRIVER
   [9] = &g_uart9priv,
 #endif
-#ifdef CONFIG_STM32H5_USART10_SERIALDRIVER
+#ifdef CONFIG_STM32_USART10_SERIALDRIVER
   [10] = &g_usart10priv,
 #endif
-#ifdef CONFIG_STM32H5_USART11_SERIALDRIVER
+#ifdef CONFIG_STM32_USART11_SERIALDRIVER
   [11] = &g_usart11priv,
 #endif
-#ifdef CONFIG_STM32H5_UART12_SERIALDRIVER
+#ifdef CONFIG_STM32_UART12_SERIALDRIVER
   [12] = &g_uart12priv,
 #endif
 };
@@ -2105,26 +2105,26 @@ static void stm32serial_setapbclock(struct uart_dev_s *dev, bool on)
       regaddr = STM32_RCC_APB1LENR;
       break;
 #endif
-#ifdef CONFIG_STM32H5_UART9_SERIALDRIVER
+#ifdef CONFIG_STM32_UART9_SERIALDRIVER
     case STM32_UART9_BASE:
       rcc_en = RCC_APB1HENR_UART9EN;
       regaddr = STM32_RCC_APB1HENR;
       break;
 #endif
 
-#ifdef CONFIG_STM32H5_USART10_SERIALDRIVER
+#ifdef CONFIG_STM32_USART10_SERIALDRIVER
     case STM32_USART10_BASE:
       rcc_en = RCC_APB1LENR_USART10EN;
       regaddr = STM32_RCC_APB1LENR;
       break;
 #endif
-#ifdef CONFIG_STM32H5_USART11_SERIALDRIVER
+#ifdef CONFIG_STM32_USART11_SERIALDRIVER
     case STM32_USART11_BASE:
       rcc_en = RCC_APB1LENR_USART11EN;
       regaddr = STM32_RCC_APB1LENR;
       break;
 #endif
-#ifdef CONFIG_STM32H5_UART12_SERIALDRIVER
+#ifdef CONFIG_STM32_UART12_SERIALDRIVER
     case STM32_UART12_BASE:
       rcc_en = RCC_APB1HENR_UART12EN;
       regaddr = STM32_RCC_APB1HENR;

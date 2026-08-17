@@ -211,8 +211,8 @@
 #ifndef CONFIG_DEBUG_I2S_INFO
 #  undef CONFIG_STM32_I2S_DMADEBUG
 #  undef CONFIG_STM32_I2S_REGDEBUG
-#  undef CONFIG_STM32F7_I2S_QDEBUG
-#  undef CONFIG_STM32F7_I2S_DUMPBUFFERS
+#  undef CONFIG_STM32_I2S_QDEBUG
+#  undef CONFIG_STM32_I2S_DUMPBUFFERS
 #endif
 
 /* The I2S can handle most any bit width from 8 to 32.  However, the DMA
@@ -379,7 +379,7 @@ static void     i2s_dump_regs(struct stm32_i2s_s *priv, const char *msg);
 #  define       i2s_dump_regs(s,m)
 #endif
 
-#ifdef CONFIG_STM32F7_I2S_DUMPBUFFERS
+#ifdef CONFIG_STM32_I2S_DUMPBUFFERS
 #  define       i2s_init_buffer(b,s)   memset(b, 0x55, s);
 #  define       i2s_dump_buffer(m,b,s) lib_dumpbuffer(m,b,s)
 #else

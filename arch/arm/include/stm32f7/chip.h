@@ -181,8 +181,8 @@
  * Parts STM32F74xxG have 1024Kb of FLASH
  * Parts STM32F74xxI have 2048Kb of FLASH
  *
- * The correct FLASH size will be set CONFIG_STM32F7_FLASH_CONFIG_x
- * or overridden with CONFIG_STM32F7_FLASH_OVERRIDE_x
+ * The correct FLASH size will be set CONFIG_STM32_FLASH_CONFIG_x
+ * or overridden with CONFIG_STM32_FLASH_OVERRIDE_x
  *
  */
 #if defined(CONFIG_ARCH_CHIP_STM32F722RC) || \
@@ -355,7 +355,7 @@
 #else
 #  define STM32_NFMC                     0   /* No FMC memory controller */
 #endif
-#if defined(CONFIG_STM32_HAVE_ETHRNET)
+#if defined(CONFIG_STM32_HAVE_ETHMAC)
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
 #else
 #  define STM32_NETHERNET                0   /* No 100/100 Ethernet MAC */
@@ -423,7 +423,7 @@
 #else
 #define STM32_NHASH                      0   /* No HASH engine */
 #endif
-#if defined(CONFIG_STM32F7_HAVE_DFSDM)
+#if defined(CONFIG_STM32_HAVE_DFSDM)
 #define STM32_NDFSDM                     4   /* One set of 4 Digital filters */
 #else
 #define STM32_NDFSDM                     0   /* No Digital filters */

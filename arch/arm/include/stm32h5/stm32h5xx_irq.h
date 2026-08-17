@@ -88,10 +88,10 @@
 #  define STM32_IRQ_DAC1          (STM32_IRQ_FIRST + 38)  /* 38:  DAC global interrupt */
 #  define STM32_IRQ_FDCAN1_IT0    (STM32_IRQ_FIRST + 39)  /* 39:  FDCAN1_IT0: FDCAN1 Interrupt 0 */
 #  define STM32_IRQ_FDCAN1_IT1    (STM32_IRQ_FIRST + 40)  /* 40:  FDCAN1_IT0: FDCAN1 Interrupt 1 */
-#  define STM32_IRQ_TIM1_BRK      (STM32_IRQ_FIRST + 41)  /* 41:  TIM1 break */
-#  define STM32_IRQ_TIM1_UP       (STM32_IRQ_FIRST + 42)  /* 42:  TIM1 update */
-#  define STM32_IRQ_TIM1_TRG_COM  (STM32_IRQ_FIRST + 43)  /* 43:  TIM1 trigger and communication */
-#  define STM32_IRQ_TIM1_CC       (STM32_IRQ_FIRST + 44)  /* 44:  TIM1 capture compare interrupt */
+#  define STM32_IRQ_TIM1BRK       (STM32_IRQ_FIRST + 41)  /* 41:  TIM1 break */
+#  define STM32_IRQ_TIM1UP        (STM32_IRQ_FIRST + 42)  /* 42:  TIM1 update */
+#  define STM32_IRQ_TIM1TRGCOM    (STM32_IRQ_FIRST + 43)  /* 43:  TIM1 trigger and communication */
+#  define STM32_IRQ_TIM1CC        (STM32_IRQ_FIRST + 44)  /* 44:  TIM1 capture compare interrupt */
 #  define STM32_IRQ_TIM2          (STM32_IRQ_FIRST + 45)  /* 45:  TIM2 global interrupt */
 #  define STM32_IRQ_TIM3          (STM32_IRQ_FIRST + 46)  /* 46:  TIM3 global interrupt */
 #  define STM32_IRQ_TIM4          (STM32_IRQ_FIRST + 47)  /* 47:  TIM4 global interrupt */
@@ -112,14 +112,14 @@
 #  define STM32_IRQ_UART5         (STM32_IRQ_FIRST + 62)  /* 62:  UART5 global interrupt */
 #  define STM32_IRQ_LPUART1       (STM32_IRQ_FIRST + 63)  /* 63:  LPUART1 global interrupt */
 #  define STM32_IRQ_LPTIM1        (STM32_IRQ_FIRST + 64)  /* 64:  LPTIM1 global interrupt */
-#  define STM32_IRQ_TIM8_BRK      (STM32_IRQ_FIRST + 65)  /* 65:  TIM8_BRK global interrupt */
-#  define STM32_IRQ_TIM8_UP       (STM32_IRQ_FIRST + 66)  /* 66:  TIM8_UP global interrupt */
-#  define STM32_IRQ_TIM8_TRG_COM  (STM32_IRQ_FIRST + 67)  /* 67:  TIM8_TRG_COM global interrupt */
-#  define STM32_IRQ_TIM8_CC       (STM32_IRQ_FIRST + 68)  /* 68:  TIM8_CC global interrupt */
+#  define STM32_IRQ_TIM8BRK       (STM32_IRQ_FIRST + 65)  /* 65:  TIM8_BRK global interrupt */
+#  define STM32_IRQ_TIM8UP        (STM32_IRQ_FIRST + 66)  /* 66:  TIM8_UP global interrupt */
+#  define STM32_IRQ_TIM8TRGCOM    (STM32_IRQ_FIRST + 67)  /* 67:  TIM8_TRG_COM global interrupt */
+#  define STM32_IRQ_TIM8CC        (STM32_IRQ_FIRST + 68)  /* 68:  TIM8_CC global interrupt */
 #  define STM32_IRQ_ADC2          (STM32_IRQ_FIRST + 69)  /* 69:  ADC2 global interrupt */
 #  define STM32_IRQ_LPTIM2        (STM32_IRQ_FIRST + 70)  /* 70:  LPTIM2 global interrupt */
 #  define STM32_IRQ_TIM15         (STM32_IRQ_FIRST + 71)  /* 71:  TIM15 global interrupt */
-#if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32H5_STM32H57XXX)
+#if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32_STM32H57XXX)
 #  define STM32_IRQ_TIM16         (STM32_IRQ_FIRST + 72)  /* 72:  TIM16 global interrupt */
 #  define STM32_IRQ_TIM17         (STM32_IRQ_FIRST + 73)  /* 73:  TIM17 global interrupt */
 #endif
@@ -132,12 +132,12 @@
 #  define STM32_IRQ_I2C3_EV       (STM32_IRQ_FIRST + 80)  /* 80:  I2C3_EV global interrupt */
 #  define STM32_IRQ_I2C3_ER       (STM32_IRQ_FIRST + 81)  /* 81:  I2C3_ER global interrupt */
 #  define STM32_IRQ_SPI4          (STM32_IRQ_FIRST + 82)  /* 82:  SPI4 global interrupt */
-#if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32H5_STM32H57XXX)
+#if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32_STM32H57XXX)
 #  define STM32_IRQ_SPI5          (STM32_IRQ_FIRST + 83)  /* 83:  SPI5 global interrupt */
 #  define STM32_IRQ_SPI6          (STM32_IRQ_FIRST + 84)  /* 84:  SPI6 global interrupt */
 #endif
 #  define STM32_IRQ_USART6        (STM32_IRQ_FIRST + 85)  /* 85:  USART6 global interrupt */
-#if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32H5_STM32H57XXX)
+#if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32_STM32H57XXX)
 #  define STM32_IRQ_USART10       (STM32_IRQ_FIRST + 86)  /* 86:  USART10 global interrupt */
 #  define STM32_IRQ_USART11       (STM32_IRQ_FIRST + 87)  /* 87:  USART11 global interrupt */
 #  define STM32_IRQ_SAI1          (STM32_IRQ_FIRST + 88)  /* 88:  SAI1 global interrupt */
@@ -151,7 +151,7 @@
 #  define STM32_IRQ_GPDMA2_CH5    (STM32_IRQ_FIRST + 95)  /* 95:  GPDMA2_CH5 global interrupt */
 #  define STM32_IRQ_GPDMA2_CH6    (STM32_IRQ_FIRST + 96)  /* 96:  GPDMA2_CH6 global interrupt */
 #  define STM32_IRQ_GPDMA2_CH7    (STM32_IRQ_FIRST + 97)  /* 97:  GPDMA2_CH7 global interrupt */
-#if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32H5_STM32H57XXX)
+#if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32_STM32H57XXX)
 #  define STM32_IRQ_UART7         (STM32_IRQ_FIRST + 98)  /* 98:  UART7 global interrupt */
 #  define STM32_IRQ_UART8         (STM32_IRQ_FIRST + 99)  /* 99:  UART8 global interrupt */
 #  define STM32_IRQ_UART9         (STM32_IRQ_FIRST + 100) /* 100: UART9 global interrupt */
@@ -161,14 +161,14 @@
 #  define STM32_IRQ_FPU           (STM32_IRQ_FIRST + 103) /* 103: FPU global interrupt */
 #  define STM32_IRQ_ICACHE        (STM32_IRQ_FIRST + 104) /* 104: ICACHE global interrupt */
 #  define STM32_IRQ_DCACHE        (STM32_IRQ_FIRST + 105) /* 105: DCACHE global interrupt */
-#if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32H5_STM32H57XXX)
+#if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32_STM32H57XXX)
 #  define STM32_IRQ_ETH           (STM32_IRQ_FIRST + 106) /* 106: ETH global interrupt */
 #  define STM32_IRQ_ETH_WKUP      (STM32_IRQ_FIRST + 107) /* 107: ETH_WKUP global interrupt */
 #endif
 #  define STM32_IRQ_DCMI_PSSI     (STM32_IRQ_FIRST + 108) /* 108: DCMI PSSI global interrupt */
 #  define STM32_IRQ_FDCAN2_IT0    (STM32_IRQ_FIRST + 109) /* 109: FDCAN2_IT0 global interrupt */
 #  define STM32_IRQ_FDCAN2_IT1    (STM32_IRQ_FIRST + 110) /* 110: FDCAN2_IT1 global interrupt */
-#if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32H5_STM32H57XXX)
+#if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32_STM32H57XXX)
 #  define STM32_IRQ_CORDIC        (STM32_IRQ_FIRST + 111) /* 111: CORDIC global interrupt */
 #  define STM32_IRQ_FMAC          (STM32_IRQ_FIRST + 112) /* 112: FMAC global interrupt */
 #endif
@@ -180,13 +180,13 @@
 #  define STM32_IRQ_PKA           (STM32_IRQ_FIRST + 118) /* 118: PKA global interrupt */
 #  define STM32_IRQ_CEC           (STM32_IRQ_FIRST + 119) /* 119: CEC global interrupt */
 #  define STM32_IRQ_TIM12         (STM32_IRQ_FIRST + 120) /* 120: TIM12 global interrupt */
-#if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32H5_STM32H57XXX)
+#if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32_STM32H57XXX)
 #  define STM32_IRQ_TIM13         (STM32_IRQ_FIRST + 121) /* 121: TIM13 global interrupt */
 #  define STM32_IRQ_TIM14         (STM32_IRQ_FIRST + 122) /* 122: TIM14 global interrupt */
 #endif
 #  define STM32_IRQ_I3C1_EV       (STM32_IRQ_FIRST + 123) /* 123: I3C1_EV global interrupt */
 #  define STM32_IRQ_I3C1_ER       (STM32_IRQ_FIRST + 124) /* 124: I3C1_ER global interrupt */
-#if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32H5_STM32H57XXX)
+#if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32_STM32H57XXX)
 #  define STM32_IRQ_I2C4_EV       (STM32_IRQ_FIRST + 125) /* 125: I2C4_EV global interrupt */
 #  define STM32_IRQ_I2C4_ER       (STM32_IRQ_FIRST + 126) /* 126: I2C4_ER global interrupt */
 #  define STM32_IRQ_LPTIM3        (STM32_IRQ_FIRST + 127) /* 127: LPTIM3 global interrupt */
@@ -194,14 +194,14 @@
 #  define STM32_IRQ_LPTIM5        (STM32_IRQ_FIRST + 129) /* 129: LPTIM5 global interrupt */
 #  define STM32_IRQ_LPTIM6        (STM32_IRQ_FIRST + 130) /* 130: LPTIM6 global interrupt */
 #endif
-#if defined(CONFIG_STM32H5_STM32H52XXX) || defined(CONFIG_STM32H5_STM32H53XXX)
+#if defined(CONFIG_STM32_STM32H52XXX) || defined(CONFIG_STM32_STM32H53XXX)
 #  define STM32_IRQ_I3C2_EV       (STM32_IRQ_FIRST + 131) /* 131: I3C2_EV global interrupt */
 #  define STM32_IRQ_I3C2_ER       (STM32_IRQ_FIRST + 132) /* 132: I3C2_ER global interrupt */
 #endif
 
-#if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32H5_STM32H57XXX)
+#if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32_STM32H57XXX)
 #  define STM32_IRQ_NEXTINTS      131
-#elif defined(CONFIG_STM32H5_STM32H52XXX) || defined(CONFIG_STM32H5_STM32H53XXX)
+#elif defined(CONFIG_STM32_STM32H52XXX) || defined(CONFIG_STM32_STM32H53XXX)
 #  define STM32_IRQ_NEXTINTS      133
 #endif
 

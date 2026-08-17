@@ -92,7 +92,7 @@ static inline void rcc_enableahb1(void)
 
   regval = getreg32(STM32_RCC_AHB1ENR);
 
-#ifdef CONFIG_STM32U5_GPDMA1
+#ifdef CONFIG_STM32_GPDMA1
   regval |= RCC_AHB1ENR_GPDMA1EN;
 #endif
 
@@ -242,11 +242,11 @@ static inline void rcc_enableahb2(void)
   regval |= RCC_AHB2ENR1_OTFDEC2;
 #endif
 
-#ifdef CONFIG_STM32U5_SDMMC1EN
+#ifdef CONFIG_STM32_SDMMC1
   regval |= RCC_AHB2ENR1_SDMMC1EN;
 #endif
 
-#ifdef CONFIG_STM32U5_SDMMC2EN
+#ifdef CONFIG_STM32_SDMMC2
   regval |= RCC_AHB2ENR1_SDMMC2EN;
 #endif
 
@@ -327,7 +327,7 @@ static inline void rcc_enableahb3(void)
   regval |= RCC_AHB3ENR_GTZC2EN;
 #endif
 
-#ifdef CONFIG_STM32U5_SRAM4
+#ifdef CONFIG_STM32_SRAM4
   regval |= RCC_AHB3ENR_SRAM4EN;
 #endif
 
@@ -524,7 +524,7 @@ static inline void rcc_enableapb3(void)
   regval |= RCC_APB3ENR_LPUART1EN;
 #endif
 
-#ifdef CONFIG_STM32U5_I2C3EN
+#ifdef CONFIG_STM32_I2C3
   regval |= RCC_APB3ENR_I2C3EN;
 #endif
 

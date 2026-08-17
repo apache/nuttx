@@ -44,6 +44,7 @@
 #include "stm32l4_dac.h"
 #include "stm32l4_rcc.h"
 #include "stm32l4_dma.h"
+#include "hardware/stm32l4_tim.h"
 
 #ifdef CONFIG_DAC
 
@@ -277,7 +278,7 @@
 #endif
 
 /* Calculate timer divider values based upon DACn_TIMER_PCLK_FREQUENCY and
- * CONFIG_STM32L4_DACn_TIMER_FREQUENCY.
+ * CONFIG_STM32_DACn_TIMER_FREQUENCY.
  */
 
 #warning "Missing Logic"

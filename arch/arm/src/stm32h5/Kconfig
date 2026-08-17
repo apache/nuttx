@@ -10,6 +10,7 @@ comment "STM32H5 Configuration Options"
 config STM32_H5_PERIPHERALS
 	bool
 	default y
+	select STM32_HAVE_IP_RNG_V1 if STM32_HAVE_RNG
 	select STM32_HAVE_DMA1
 	select STM32_HAVE_DMA2
 	select STM32_HAVE_I2C1
@@ -25,7 +26,7 @@ config STM32_H5_PERIPHERALS
 	select STM32_HAVE_QSPI1
 	select STM32_HAVE_USBFS_MODE
 	select STM32_HAVE_USBDRD_HOST
-	select STM32_HAVE_ADC_H5
+	select STM32_HAVE_IP_ADC_M33_V1
 	select STM32_HAVE_USART_H5
 	select STM32_HAVE_I2C_H5
 
@@ -40,11 +41,10 @@ config ARCH_CHIP_STM32H563ZI
 	select STM32_STM32H5XXXX
 	select STM32_STM32H56XXX
 	select STM32_STM32H563XX
-	select STM32_STM32H5X3XX
 	select STM32_FLASH_CONFIG_I
 	select STM32H5_IO_CONFIG_Z
 	---help---
-		STM32 H5 Cortex M33, 512 Kb FLASH, 256 Kb SRAM
+		STM32 H5 Cortex M33, 2 Mb FLASH, 640 Kb SRAM
 
 endchoice # STM32 H5 Chip Selection
 
@@ -65,9 +65,11 @@ config STM32_STM32H56XXX
 	select STM32_HAVE_IP_CORDIC_M3M4_V1
 	select STM32_HAVE_TIM1
 	select STM32_HAVE_TIM2
+	select STM32_HAVE_TIM2_32BITS
 	select STM32_HAVE_TIM3
 	select STM32_HAVE_TIM4
 	select STM32_HAVE_TIM5
+	select STM32_HAVE_TIM5_32BITS
 	select STM32_HAVE_TIM6
 	select STM32_HAVE_TIM7
 	select STM32_HAVE_TIM8
@@ -102,7 +104,7 @@ config STM32_STM32H563XX
 	# STM32H552 and STM32H562 devices documented in RM0439
 	bool
 	default n
-	select STM32_HAVE_ETHERNET
+	select STM32_HAVE_ETHMAC
 
 # Pin/package configurations
 

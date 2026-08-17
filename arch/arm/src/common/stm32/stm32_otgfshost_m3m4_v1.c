@@ -5335,7 +5335,7 @@ static inline int stm32_hw_initialize(struct stm32_usbhost_s *priv)
 #if !defined(CONFIG_USBDEV_VBUSSENSING) && !defined(CONFIG_STM32_OTGFS_VBUS_CONTROL)
   regval |= OTGFS_GCCFG_NOVBUSSENS;
 #endif
-#ifdef CONFIG_STM32_OTGFS_SOFOUTPUT
+#ifdef CONFIG_STM32_OTG_SOFOUTPUT
   regval |= OTGFS_GCCFG_SOFOUTEN;
 #endif
   stm32_putreg(STM32_OTGFS_GCCFG, regval);
@@ -5442,7 +5442,7 @@ struct usbhost_connection_s *stm32_otgfshost_initialize(int controller)
 
   /* SOF output pin configuration is configurable */
 
-#ifdef CONFIG_STM32_OTGFS_SOFOUTPUT
+#ifdef CONFIG_STM32_OTG_SOFOUTPUT
   stm32_configgpio(GPIO_OTGFS_SOF);
 #endif
 

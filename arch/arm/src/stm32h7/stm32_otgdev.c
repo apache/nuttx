@@ -5938,4 +5938,4 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   return OK;
 }
 
-#endif /* CONFIG_USBDEV && CONFIG_STM32H7_OTGDEV */
+#endif /* CONFIG_USBDEV && CONFIG_STM32_OTGDEV */

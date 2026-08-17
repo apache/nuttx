@@ -26,9 +26,7 @@ if(CONFIG_STM32_FMC)
   list(APPEND SRCS stm32_extmem.c)
 endif()
 
-if(CONFIG_ARCH_LEDS)
-  list(APPEND SRCS stm32_autoleds.c)
-else()
+if(NOT CONFIG_ARCH_LEDS)
   list(APPEND SRCS stm32_userleds.c)
 endif()
 

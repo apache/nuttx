@@ -70,9 +70,9 @@
 /* Flash size is known from the chip selection:
  *
  *   When CONFIG_STM32_FLASH_OVERRIDE_DEFAULT is set the
- *   CONFIG_STM32H7_FLASH_CONFIG_x selects the default FLASH size based on
+ *   CONFIG_STM32_FLASH_CONFIG_x selects the default FLASH size based on
  *   the chip part number. This value can be overridden with
- *   CONFIG_STM32H7_FLASH_OVERRIDE_x
+ *   CONFIG_STM32_FLASH_OVERRIDE_x
  *
  *   Parts STM32H74xxE have 512Kb of FLASH
  *   Parts STM32H74xxG have 1024Kb of FLASH

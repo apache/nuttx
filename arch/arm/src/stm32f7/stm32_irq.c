@@ -40,7 +40,7 @@
 #include "ram_vectors.h"
 #include "arm_internal.h"
 
-#ifdef CONFIG_STM32F7_GPIO_IRQ
+#ifdef CONFIG_STM32_GPIO_IRQ
 #  include "stm32_gpio.h"
 #endif
 
@@ -402,7 +402,7 @@ void up_irqinitialize(void)
    * GPIO pins.
    */
 
-#ifdef CONFIG_STM32F7_GPIO_IRQ
+#ifdef CONFIG_STM32_GPIO_IRQ
   stm32_gpioirqinitialize();
 #endif
 
@@ -446,7 +446,7 @@ void up_disable_irq(int irq)
           putreg32(regval, regaddr);
         }
     }
-#ifdef CONFIG_STM32F7_GPIO_IRQ
+#ifdef CONFIG_STM32_GPIO_IRQ
   else
     {
       /* Maybe it is a (derived) GPIO IRQ */
@@ -493,7 +493,7 @@ void up_enable_irq(int irq)
           putreg32(regval, regaddr);
         }
     }
-#ifdef CONFIG_STM32F7_GPIO_IRQ
+#ifdef CONFIG_STM32_GPIO_IRQ
   else
     {
       /* Maybe it is a (derived) GPIO IRQ */

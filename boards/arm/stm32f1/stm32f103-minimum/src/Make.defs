@@ -80,10 +80,6 @@ ifeq ($(CONFIG_LCD_MAX7219),y)
   CSRCS += stm32_max7219.c
 endif
 
-ifeq ($(CONFIG_INPUT_NUNCHUCK),y)
-  CSRCS += stm32_nunchuck.c
-endif
-
 ifeq ($(CONFIG_LCD_SSD1306_I2C),y)
 CSRCS += stm32_lcd_ssd1306.c
 endif

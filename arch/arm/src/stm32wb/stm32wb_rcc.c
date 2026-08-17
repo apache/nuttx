@@ -218,7 +218,7 @@ static inline void rcc_enableahb2(void)
   regval |= RCC_AHB2ENR_ADCEN;
 #endif
 
-#ifdef CONFIG_STM32WB_AES1
+#ifdef CONFIG_STM32_AES1
   /* AES1 cryptographic accelerator clock enable */
 
   regval |= RCC_AHB2ENR_AES1EN;
@@ -257,7 +257,7 @@ static inline void rcc_enableahb3(void)
   regval |= RCC_AHB3ENR_PKAEN;
 #endif
 
-#ifdef CONFIG_STM32WB_AES2
+#ifdef CONFIG_STM32_AES2
   /* AES2 cryptographic accelerator clock enable */
 
   regval |= RCC_AHB3ENR_AES2EN;
@@ -789,7 +789,7 @@ static void stm32_stdclockconfig(void)
 #if defined(CONFIG_STM32_IWDG) || defined(CONFIG_STM32_RTC_LSICLOCK)
       /* Low speed internal clock source LSI */
 
-      stm32_rcc_enable_lsi();
+      stm32_rcc_enablelsi();
 #endif
 
 #if defined(STM32_USE_LSE)

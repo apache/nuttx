@@ -184,8 +184,8 @@ Options:
 CAN
 ---
 
-- CONFIG_CAN - Enables CAN support (one or both of CONFIG_STM32F7F7_CAN1 or
-  CONFIG_STM32F7F7_CAN2 must also be defined)
+- CONFIG_CAN - Enables CAN support (one or both of CONFIG_STM32_CAN1 or
+  CONFIG_STM32_CAN2 must also be defined)
 
 - CONFIG_CAN_EXTID - Enables support for the 29-bit extended ID.  Default Standard 11-bit IDs.
 
@@ -202,9 +202,9 @@ CAN
 - CONFIG_CAN_LOOPBACK - A CAN driver may or may not support a loopback
   mode for testing. The STM32F7 CAN driver does support loopback mode.
 
-- CONFIG_STM32F7F7_CAN1_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32F7F7_CAN1 is defined.
+- CONFIG_STM32_CAN1_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32_CAN1 is defined.
 
-- CONFIG_STM32F7F7_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32F7F7_CAN2 is defined.
+- CONFIG_STM32_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32_CAN2 is defined.
 
 - CONFIG_STM32_CAN_TSEG1 - The number of CAN time quanta in segment 1.  Default: 6
 

@@ -61,7 +61,7 @@
  * be present in the NuttX configuration file:
  *
  * CONFIG_STM32_FSMC=y      : Enables the FSMC
- * CONFIG_STM32L4_FSMC_SRAM=y : Indicates that SRAM is available via the
+ * CONFIG_STM32_FSMC_SRAM=y : Indicates that SRAM is available via the
  *                              FSMC (as opposed to an LCD or FLASH).
  * CONFIG_HEAP2_BASE          : The base address of the SRAM in the FSMC
  *                              address space
@@ -72,7 +72,7 @@
  */
 
 #ifndef CONFIG_STM32_FSMC
-#  undef CONFIG_STM32L4_FSMC_SRAM
+#  undef CONFIG_STM32_FSMC_SRAM
 #endif
 
 /* STM32L4[7,8]6xx have 128 Kib in two banks, both accessible to DMA:
@@ -118,13 +118,13 @@
 
 #if CONFIG_MM_REGIONS < defined(CONFIG_STM32_SRAM2_HEAP) + \
                         defined(CONFIG_STM32_SRAM3_HEAP) + \
-                        defined(CONFIG_STM32L4_FSMC_SRAM_HEAP) + 1
+                        defined(CONFIG_STM32_FSMC_SRAM_HEAP) + 1
 #  error "You need more memory manager regions to support selected heap components"
 #endif
 
 #if CONFIG_MM_REGIONS > defined(CONFIG_STM32_SRAM2_HEAP) + \
                         defined(CONFIG_STM32_SRAM3_HEAP) + \
-                        defined(CONFIG_STM32L4_FSMC_SRAM_HEAP) + 1
+                        defined(CONFIG_STM32_FSMC_SRAM_HEAP) + 1
 #  warning "CONFIG_MM_REGIONS large enough but I do not know what some of the region(s) are"
 #endif
 
@@ -133,10 +133,10 @@
  * configuration (as CONFIG_HEAP2_BASE and CONFIG_HEAP2_SIZE).
  */
 
-#ifdef CONFIG_STM32L4_FSMC_SRAM
+#ifdef CONFIG_STM32_FSMC_SRAM
 #  if !defined(CONFIG_HEAP2_BASE) || !defined(CONFIG_HEAP2_SIZE)
 #    error "CONFIG_HEAP2_BASE and CONFIG_HEAP2_SIZE must be provided"
-#    undef CONFIG_STM32L4_FSMC_SRAM
+#    undef CONFIG_STM32_FSMC_SRAM
 #  endif
 #endif
 
@@ -352,7 +352,7 @@ void arm_addregion(void)
 
 #endif /* SRAM3 */
 
-#ifdef CONFIG_STM32L4_FSMC_SRAM_HEAP
+#ifdef CONFIG_STM32_FSMC_SRAM_HEAP
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 
   /* Allow user-mode access to the FSMC SRAM user heap memory */
