@@ -67,6 +67,18 @@ int rtl8720f_bringup(void);
 int rtl8720f_spi_initialize(void);
 #endif
 
+#ifdef CONFIG_AMEBA_PWM
+/****************************************************************************
+ * Name: rtl8720f_pwm_initialize
+ *
+ * Description:
+ *   Register the board's PWM timer at /dev/pwm0.
+ *
+ ****************************************************************************/
+
+int rtl8720f_pwm_initialize(void);
+#endif
+
 #ifdef CONFIG_RTL8720F_WIFI
 /****************************************************************************
  * Name: rtl8720f_wifi_initialize
