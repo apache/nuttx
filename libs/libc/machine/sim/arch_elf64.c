@@ -170,6 +170,12 @@ int up_relocateadd(const Elf64_Rela *rel, const Elf64_Sym *sym,
 
   switch (relotype)
     {
+      case R_X86_64_NONE:
+
+        /* No relocation is needed for this entry. */
+
+        break;
+
       case R_X86_64_64: /* S + A */
         *(uint64_t *)addr = sym->st_value + rel->r_addend;
         break;

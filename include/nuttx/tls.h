@@ -123,6 +123,10 @@ struct pthread_atfork_s
 };
 #endif
 
+#if defined(CONFIG_BINFMT_LOADABLE) && defined(CONFIG_LIBC_ELF)
+struct binary_s;
+#endif
+
 struct task_info_s
 {
   mutex_t         ta_lock;
@@ -144,6 +148,10 @@ struct task_info_s
 #endif
 #ifdef CONFIG_FILE_STREAM
   struct streamlist ta_streamlist; /* Holds C buffered I/O info */
+#endif
+
+#if defined(CONFIG_BINFMT_LOADABLE) && defined(CONFIG_LIBC_ELF)
+  FAR struct binary_s *ta_bininfo; /* Loadable binary information */
 #endif
 
 #ifdef CONFIG_PTHREAD_ATFORK

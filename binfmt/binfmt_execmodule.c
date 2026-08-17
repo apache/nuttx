@@ -361,6 +361,12 @@ int exec_module(FAR struct binary_s *binp,
 
 #ifdef CONFIG_BINFMT_LOADABLE
   tcb->group->tg_bininfo = binp;
+#  ifdef CONFIG_LIBC_ELF
+  if (tcb->group->tg_info != NULL)
+    {
+      tcb->group->tg_info->ta_bininfo = binp;
+    }
+#  endif
 #endif
 
   /* Then activate the task at the provided priority */

@@ -41,6 +41,14 @@
 #include "elf/elf.h"
 
 /****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_LIBC_ELF_EH_FRAME
+extern void __register_frame(FAR void *begin);
+#endif
+
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
@@ -55,6 +63,35 @@
 #else
 #  define ARCH_ELFDATA_DEF
 #  define ARCH_ELFDATA_PARM NULL
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_LIBC_ELF_EH_FRAME
+static void libelf_register_eh_frame(FAR struct module_s *modp,
+                                     FAR struct mod_loadinfo_s *loadinfo)
+{
+  int ret;
+
+  ret = libelf_findsection(loadinfo, ".eh_frame");
+  if (ret < 0)
+    {
+      return;
+    }
+
+  if (loadinfo->shdr[ret].sh_addr == 0 || loadinfo->shdr[ret].sh_size == 0)
+    {
+      return;
+    }
+
+  loadinfo->ehframe = loadinfo->shdr[ret].sh_addr;
+  modp->ehframe = loadinfo->ehframe;
+  __register_frame((FAR void *)modp->ehframe);
+}
+#else
+#  define libelf_register_eh_frame(m,l)
 #endif
 
 /****************************************************************************
@@ -1065,6 +1102,8 @@ int libelf_bind(FAR struct module_s *modp,
     {
       up_coherent_dcache(loadinfo->datastart, loadinfo->datasize);
     }
+
+  libelf_register_eh_frame(modp, loadinfo);
 
 #ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
   for (i = 0; loadinfo->ehdr.e_type == ET_REL && i < loadinfo->ehdr.e_shnum;

@@ -66,6 +66,21 @@ SECTIONS
       _erodata = . ;
     }
 
+  .eh_frame :
+    {
+      KEEP(*(.eh_frame))
+      KEEP(*(.eh_frame.*))
+      LONG(0)
+      . = ALIGN(SECTIONS_ALIGN);
+    }
+
+  .gcc_except_table :
+    {
+      *(.gcc_except_table)
+      *(.gcc_except_table.*)
+      . = ALIGN(SECTIONS_ALIGN);
+    }
+
   .data DATA :
     {
       _sdata = . ;

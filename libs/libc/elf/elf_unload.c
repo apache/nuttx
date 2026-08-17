@@ -36,6 +36,14 @@
 #include "elf/elf.h"
 
 /****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_LIBC_ELF_EH_FRAME
+extern void __deregister_frame(FAR void *begin);
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -55,6 +63,14 @@
 
 int libelf_unload(FAR struct mod_loadinfo_s *loadinfo)
 {
+#ifdef CONFIG_LIBC_ELF_EH_FRAME
+  if (loadinfo->ehframe != 0)
+    {
+      __deregister_frame((FAR void *)loadinfo->ehframe);
+      loadinfo->ehframe = 0;
+    }
+#endif
+
   /* Free all working buffers */
 
   libelf_freebuffers(loadinfo);

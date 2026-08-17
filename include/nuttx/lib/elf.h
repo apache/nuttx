@@ -198,6 +198,9 @@ struct module_s
   uint16_t  ninit;                       /* Number of entries in .init_array */
   uintptr_t finiarr;                     /* .fini_array */
   uint16_t  nfini;                       /* Number of entries in .fini_array */
+#ifdef CONFIG_LIBC_ELF_EH_FRAME
+  uintptr_t ehframe;                     /* .eh_frame */
+#endif
 };
 
 /* This struct provides a description of the currently loaded instantiation
@@ -237,6 +240,9 @@ struct mod_loadinfo_s
   uintptr_t     initarr;     /* .init_array */
   uintptr_t     finiarr;     /* .fini_array */
   uintptr_t     preiarr;     /* .preinit_array */
+#ifdef CONFIG_LIBC_ELF_EH_FRAME
+  uintptr_t     ehframe;     /* .eh_frame */
+#endif
   uint16_t      ninit;       /* Number of .init_array entries */
   uint16_t      nfini;       /* Number of .fini_array entries */
   uint16_t      nprei;       /* Number of .preinit_array entries */

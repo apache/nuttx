@@ -116,4 +116,13 @@ config LIBC_ELF_EXIDX_SECTNAME
 
 		This is needed to support exception handling on loadable ELF modules.
 
+config LIBC_ELF_EH_FRAME
+	bool "Register DWARF EH frames for ELF modules"
+	default n
+	depends on CXX_EXCEPTION && ARCH_SIM && HOST_X86_64
+	---help---
+		Register loadable ELF module .eh_frame sections with the host
+		DWARF unwinder.  This is needed by C++ exceptions on the x86_64
+		SIM target.
+
 endmenu # Module library configuration

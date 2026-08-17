@@ -32,6 +32,14 @@
 #include <nuttx/lib/elf.h>
 
 /****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_LIBC_ELF_EH_FRAME
+extern void __deregister_frame(FAR void *begin);
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -62,7 +70,7 @@ int libelf_uninit(FAR struct module_s *modp)
   /* Is there an uninitializer? */
 
   array = (FAR void (**)(void))modp->finiarr;
-  for (i = 0; i < modp->nfini; i++)
+  for (i = modp->nfini - 1; i >= 0; i--)
     {
       array[i]();
     }
@@ -92,6 +100,14 @@ int libelf_uninit(FAR struct module_s *modp)
       modp->modinfo.nexports      = 0;
 #endif
     }
+
+#ifdef CONFIG_LIBC_ELF_EH_FRAME
+  if (modp->ehframe != 0)
+    {
+      __deregister_frame((FAR void *)modp->ehframe);
+      modp->ehframe = 0;
+    }
+#endif
 
   /* Release resources held by the module */
 
