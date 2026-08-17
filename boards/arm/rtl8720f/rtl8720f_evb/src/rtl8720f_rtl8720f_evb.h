@@ -79,6 +79,18 @@ int rtl8720f_spi_initialize(void);
 int rtl8720f_pwm_initialize(void);
 #endif
 
+#ifdef CONFIG_AMEBA_ADC
+/****************************************************************************
+ * Name: rtl8720f_adc_initialize
+ *
+ * Description:
+ *   Register the board's ADC channels at /dev/adc0.
+ *
+ ****************************************************************************/
+
+int rtl8720f_adc_initialize(void);
+#endif
+
 #ifdef CONFIG_RTL8720F_WIFI
 /****************************************************************************
  * Name: rtl8720f_wifi_initialize
