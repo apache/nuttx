@@ -67,7 +67,7 @@ FSMC        No
 GTZC        No
 HASH        No
 I3C         No
-IWDG        No
+IWDG        Yes
 LPTIM       No
 OTFDEC      No
 PKA         No
