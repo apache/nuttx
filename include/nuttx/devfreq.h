@@ -37,7 +37,11 @@
 #define DEVFREQ_PRECHANGE     0
 #define DEVFREQ_POSTCHANGE    1
 
-/* Special Values of .frequency field */
+/* Special values in a frequency table.  A table ascends, ends with
+ * DEVFREQ_ENTRY_END, and may carry DEVFREQ_ENTRY_INVALID in place of a
+ * frequency the device cannot use, which every consumer of the table skips.
+ * devfreq_register() rejects a table whose usable entries do not ascend.
+ */
 
 #define DEVFREQ_ENTRY_INVALID ~0u
 #define DEVFREQ_ENTRY_END     ~1u
@@ -96,6 +100,12 @@ struct devfreq_governor_s
 struct devfreq_driver_s
 {
   int conflict_policy;              /* DEVFREQ_CONFLICT_PREFER_HIGH or LOW */
+
+  /* The frequency table in kHz, ascending and DEVFREQ_ENTRY_END terminated.
+   * Called once, by devfreq_register(), which keeps the returned table for
+   * the life of the device, so it must not be on the caller's stack.
+   */
+
   CODE FAR const uint32_t *
            (*get_table)(FAR struct devfreq_s *devfreq);
   CODE int (*target_index)(FAR struct devfreq_s *devfreq,
