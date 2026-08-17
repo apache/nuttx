@@ -40,7 +40,6 @@
 #include "clock/clock.h"
 #include "arm_internal.h"
 #include "chip.h"
-#include "hardware/imxrt_ccm.h"
 
 /****************************************************************************
  * Pre-processor Definitions

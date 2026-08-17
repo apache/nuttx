@@ -207,7 +207,6 @@ config ARCH_CHIP_IMX9_CORTEX_M
 
 config ARCH_CHIP_IMXRT
 	bool "NXP/Freescale iMX.RT"
-	select ARCH_CORTEXM7
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_RAMFUNCS
@@ -215,9 +214,8 @@ config ARCH_CHIP_IMXRT
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_SPI_CS_CONTROL
 	select ARM_HAVE_MPU_UNIFIED
-	select ARMV7M_HAVE_STACKCHECK
 	---help---
-		NXP i.MX RT (ARM Cortex-M7) architectures
+		NXP i.MX RT (ARM Cortex-M7 and Cortex-M33) architectures
 
 config ARCH_CHIP_KINETIS
 	bool "NXP/Freescale Kinetis"

@@ -2786,11 +2786,11 @@ static int imxrt_pullup(struct usbdev_s *dev, bool enable)
     {
       imxrt_setbits(USBDEV_USBCMD_RS, IMXRT_USBDEV_USBCMD(0));
 
-#ifdef CONFIG_IMXRT_USB0DEV_NOVBUS
+#ifdef CONFIG_IMXRT_USBDEV_NOVBUS
       /* Create a 'false' power event on the USB port so the MAC connects */
 
-      imxrt_clrbits(USBOTG_OTGSC_VD, IMXRT_USBOTG_OTGSC);
-      imxrt_setbits(USBOTG_OTGSC_VC, IMXRT_USBOTG_OTGSC);
+      imxrt_clrbits(USBOTG_OTGSC_VD, IMXRT_USBOTG_OTGSC(0));
+      imxrt_setbits(USBOTG_OTGSC_VC, IMXRT_USBOTG_OTGSC(0));
 #endif
     }
   else
@@ -2888,7 +2888,7 @@ void arm_usbinitialize(void)
 
   imxrt_clockall_usboh3();
 
-#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#if defined(CONFIG_ARCH_FAMILY_IMXRT117x) || defined(CONFIG_ARCH_FAMILY_IMXRT118x)
   up_mdelay(1);
 
   putreg32(USBPHY_PLL_SIC_PLL_POWER |

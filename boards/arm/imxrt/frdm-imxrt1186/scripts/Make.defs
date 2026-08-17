@@ -1,0 +1,24 @@
+############################################################################
+# boards/arm/imxrt/frdm-imxrt1186/scripts/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+############################################################################
+
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
+include $(TOPDIR)/arch/arm/src/armv8-m/Toolchain.defs
+
+ifeq ($(CONFIG_FRDM_IMXRT1186_XIP),y)
+  LDSCRIPT = xip.ld
+else ifeq ($(CONFIG_IMXRT_NETC),y)
+  LDSCRIPT = netc.ld
+else
+  LDSCRIPT = dtcm.ld
+endif
+
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+
+CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+AFLAGS := $(CFLAGS) -D__ASSEMBLY__

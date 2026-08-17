@@ -35,7 +35,11 @@
 #include <nuttx/arch.h>
 
 #include <arch/irq.h>
-#include <arch/armv7-m/nvicpri.h>
+#ifdef CONFIG_ARCH_ARMV8M
+#  include <arch/armv8-m/nvicpri.h>
+#else
+#  include <arch/armv7-m/nvicpri.h>
+#endif
 
 #include "nvic.h"
 #include "ram_vectors.h"
@@ -339,15 +343,20 @@ static int imxrt_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
       else
 #endif
 #if IMXRT_IRQ_NEXTINT > 192
-      if (extint < 219)
+      if (extint < 224)
         {
            *regaddr = (NVIC_IRQ192_223_ENABLE + offset);
            *bit     = 1 << (extint - 192);
         }
       else
 #endif
-#if IMXRT_IRQ_NEXTINT > 218
-#  error Missing logic
+#if IMXRT_IRQ_NEXTINT > 224
+      if (extint < 240)
+        {
+          *regaddr = (NVIC_IRQ224_239_ENABLE + offset);
+          *bit     = 1 << (extint - 224);
+        }
+      else
 #endif
         {
           return ERROR; /* Invalid interrupt */

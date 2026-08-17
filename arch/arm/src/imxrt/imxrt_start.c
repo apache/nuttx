@@ -81,11 +81,12 @@
  * Private Types
  ****************************************************************************/
 
-#ifdef CONFIG_ARMV7M_STACKCHECK
-/* we need to get r10 set before we can allow instrumentation calls */
+/* __start_c() carries the C boot path.  The naked __start() dispatcher
+ * prevents a compiler-generated prologue before the initial CPU state has
+ * been normalized.
+ */
 
-void __start(void) noinstrument_function;
-#endif
+osentry_function void __start_c(void) noinstrument_function;
 
 extern const void * const _vectors[];
 
@@ -100,6 +101,7 @@ extern const void * const _vectors[];
 
 static inline void imxrt_tcmenable(void)
 {
+#ifdef CONFIG_ARCH_ARMV7M
   uint32_t regval;
 
   UP_MB();
@@ -131,6 +133,7 @@ static inline void imxrt_tcmenable(void)
 
 #warning Missing logic
 #endif
+#endif
 }
 
 /****************************************************************************
@@ -145,8 +148,23 @@ static inline void imxrt_tcmenable(void)
  *
  ****************************************************************************/
 
-osentry_function
-void __start(void)
+void __attribute__((naked)) noinstrument_function __start(void)
+{
+#ifdef CONFIG_ARCH_ARMV8M
+  /* ROM may leave the ARMv8-M stack limits enabled.  Clear them before the
+   * first C prologue to avoid a stacking UsageFault.  Older Cortex-M cores
+   * lack these registers, so this remains architecture-gated, not
+   * RT118x-specific.
+   */
+
+  __asm__ volatile ("mov r0, #0\n\t"
+                    "msr msplim, r0\n\t"
+                    "msr psplim, r0\n\t");
+#endif
+  __asm__ volatile ("b __start_c\n\t");
+}
+
+osentry_function void __start_c(void)
 {
   const register uint32_t *src;
   register uint32_t *dest;

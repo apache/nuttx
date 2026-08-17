@@ -1,0 +1,885 @@
+
+ser2net → FRDM-RT1186 Zephyr /dev/ttyACM1 (115200) [port tcp,2325]
+
+�lJ��&���@�lJ��^@^R
+nsh: @�lJ��^@^R: command not found
+nsh> 
+nsh> ^@�l
+nsh: ^@�l: command not found
+nsh> ostest
+stdio_test: write fd=1
+stdio_test: Standard I/O Check: printf
+stdio_test: write fd=2
+stdio_test: Standard I/O Check: fprintf to stderr
+ostest_main: putenv(Variable1=BadValue3)
+ostest_main: setenv(Variable1, GoodValue1, TRUE)
+ostest_main: setenv(Variable2, BadValue1, FALSE)
+ostest_main: setenv(Variable2, GoodValue2, TRUE)
+ostest_main: setenv(Variable3, GoodValue3, FALSE)
+ostest_main: setenv(Variable3, BadValue2, FALSE)
+show_variable: Variable=Variable1 has value=GoodValue1
+show_variable: Variable=Variable2 has value=GoodValue2
+show_variable: Variable=Variable3 has value=GoodValue3
+ostest_main: Started user_main at PID=4
+
+user_main: vfork() test
+vfork_test: Started
+vfork_test: Child 5 ran and exited before the parent resumed
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        2
+mxordblk 100b9100 100b9100
+uordblks     424c     424c
+fordblks 100b9150 100b9150
+
+user_main: Begin argument test
+user_main: Started with argc=5
+user_main: argv[0]="ostest"
+user_main: argv[1]="Arg1"
+user_main: argv[2]="Arg2"
+user_main: argv[3]="Arg3"
+user_main: argv[4]="Arg4"
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        2
+mxordblk 100b9100 100b9100
+uordblks     424c     424c
+fordblks 100b9150 100b9150
+
+user_main: getopt() test
+getopt():  Simple test
+getopt():  Invalid argument
+getopt():  Missing optional argument
+getopt_long():  Simple test
+getopt_long():  No short options
+getopt_long():  Argument for --option=argument
+getopt_long():  Invalid long option
+getopt_long():  Mixed long and short options
+getopt_long():  Invalid short option
+getopt_long():  Missing optional arguments
+getopt_long_only():  Mixed long and short options
+getopt_long_only():  Single hyphen long options
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        2
+mxordblk 100b9100 100b9100
+uordblks     424c     424c
+fordblks 100b9150 100b9150
+
+user_main: libc tests
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        2
+mxordblk 100b9100 100b9100
+uordblks     424c     424c
+fordblks 100b9150 100b9150
+show_variable: Variable=Variable1 has value=GoodValue1
+show_variable: Variable=Variable2 has value=GoodValue2
+show_variable: Variable=Variable3 has value=GoodValue3
+show_variable: Variable=Variable1 has no value
+show_variable: Variable=Variable2 has value=GoodValue2
+show_variable: Variable=Variable3 has value=GoodValue3
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        3
+mxordblk 100b9100 100b9100
+uordblks     424c     422c
+fordblks 100b9150 100b9170
+show_variable: Variable=Variable1 has no value
+show_variable: Variable=Variable2 has no value
+show_variable: Variable=Variable3 has no value
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         3        2
+mxordblk 100b9100 100b9100
+uordblks     422c     41b4
+fordblks 100b9170 100b91e8
+
+user_main: setvbuf test
+setvbuf_test: Test NO buffering
+setvbuf_test: Using NO buffering
+setvbuf_test: Test default FULL buffering
+setvbuf_test: Using default FULL buffering
+setvbuf_test: Test FULL buffering, buffer size 64
+setvbuf_test: Using FULL buffering, buffer size 64
+setvbuf_test: Test FULL buffering, pre-allocated buffer
+setvbuf_test: Using FULL buffering, pre-allocated buffer
+setvbuf_test: Test LINE buffering, buffer size 64
+setvbuf_test: Using LINE buffering, buffer size 64
+setvbuf_test: Test FULL buffering, pre-allocated buffer
+setvbuf_test: Using FULL buffering, pre-allocated buffer
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        2
+mxordblk 100b9100 100b9100
+uordblks     41b4     41b4
+fordblks 100b91e8 100b91e8
+
+user_main: /dev/null test
+dev_null: Read 0 bytes from /dev/null
+dev_null: Wrote 1024 bytes to /dev/null
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        2
+mxordblk 100b9100 100b9100
+uordblks     41b4     41b4
+fordblks 100b91e8 100b91e8
+
+user_main: task_restart test
+
+Test task_restart()
+restart_main: setenv(VarName, VarValue, TRUE)
+restart_main: Started restart_main at PID=6
+restart_main: Started with argc=4
+restart_main: argv[0]="ostest"
+restart_main: argv[1]="This is argument 1"
+restart_main: argv[2]="Argument 2 here"
+restart_main: argv[3]="Lastly, the 3rd argument"
+restart_main: Variable=VarName has value=VarValue
+restart_main: I am still here
+restart_main: I am still here
+restart_main: Started restart_main at PID=6
+restart_main: Started with argc=4
+restart_main: argv[0]="ostest"
+restart_main: argv[1]="This is argument 1"
+restart_main: argv[2]="Argument 2 here"
+restart_main: argv[3]="Lastly, the 3rd argument"
+restart_main: Variable=VarName has value=VarValue
+restart_main: Started with argc=4
+restart_main: argv[0]="ostest"
+restart_main: argv[1]="This is argument 1"
+restart_main: argv[2]="Argument 2 here"
+restart_main: argv[3]="Lastly, the 3rd argument"
+restart_main: Variable=VarName has value=VarValue
+restart_main: Exiting
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        2
+mxordblk 100b9100 100b9100
+uordblks     41b4     41ec
+fordblks 100b91e8 100b91b0
+
+user_main: waitpid test
+
+Test waitpid()
+waitpid_start_child: Started waitpid_main at PID=7
+waitpid_start_child: Started waitpid_main at PID=8
+waitpid_start_child: Started waitpid_main at PID=9
+waitpid_test: Waiting for PID=7 with waitpid()
+waitpid_main: PID 7 Started
+waitpid_main: PID 8 Started
+waitpid_main: PID 9 Started
+waitpid_main: PID 7 exitting with result=14
+waitpid_test: PID 7 waitpid succeeded with stat_loc=0e00
+waitpid_last: Waiting for PID=9 with waitpid()
+waitpid_main: PID 8 exitting with result=14
+waitpid_main: PID 9 exitting with result=14
+waitpid_last: PASS: PID 9 waitpid succeeded with stat_loc=0e00
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        2
+mxordblk 100b9100 100b9100
+uordblks     41ec     41ec
+fordblks 100b91b0 100b91b0
+
+user_main: mutex test
+Initializing mutex
+Starting thread 1
+Starting thread 2
+		Thread1	Thread2
+	Loops	32	32
+	Errors	0	0
+
+Testing moved mutex
+Starting moved mutex thread 1
+Starting moved mutex thread 2
+		Thread1	Thread2
+	Moved Loops	32	32
+	Moved Errors	0	0
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        2
+mxordblk 100b9100 100b9100
+uordblks     41ec     41ec
+fordblks 100b91b0 100b91b0
+
+user_main: timed mutex test
+mutex_test: Initializing mutex
+mutex_test: Starting thread
+pthread:  Started
+pthread:  Waiting for lock or timeout
+mutex_test: Unlocking
+pthread:  Got the lock
+pthread:  Waiting for lock or timeout
+pthread:  Got the timeout.  Terminating
+mutex_test: PASSED
+timedmutex regression test: PASSED
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        2
+mxordblk 100b9100 100b9100
+uordblks     41ec     41ec
+fordblks 100b91b0 100b91b0
+
+user_main: cancel test
+cancel_test: Test 1a: Normal Cancellation
+cancel_test: Starting thread
+start_thread: Initializing mutex
+start_thread: Initializing cond
+start_thread: Starting thread
+start_thread: Yielding
+sem_waiter: Taking mutex
+sem_waiter: Starting wait for condition
+cancel_test: Canceling thread
+cancel_test: Joining
+cancel_test: waiter exited with result=0xffffffff
+cancel_test: PASS thread terminated with PTHREAD_CANCELED
+cancel_test: Test 2: Asynchronous Cancellation
+... Skipped
+cancel_test: Test 3: Cancellation of detached thread
+cancel_test: Re-starting thread
+restart_thread: Destroying cond
+restart_thread: Destroying mutex
+restart_thread: Re-starting thread
+start_thread: Initializing mutex
+start_thread: Initializing cond
+start_thread: Starting thread
+start_thread: Yielding
+sem_waiter: Taking mutex
+sem_waiter: Starting wait for condition
+cancel_test: Canceling thread
+cancel_test: Joining
+cancel_test: PASS pthread_join failed with status=ESRCH
+cancel_test: Test 5: Non-cancelable threads
+cancel_test: Re-starting thread (non-cancelable)
+restart_thread: Destroying cond
+restart_thread: Destroying mutex
+restart_thread: Re-starting thread
+start_thread: Initializing mutex
+start_thread: Initializing cond
+start_thread: Starting thread
+start_thread: Yielding
+sem_waiter: Taking mutex
+sem_waiter: Starting wait for condition
+sem_waiter: Setting non-cancelable
+cancel_test: Canceling thread
+cancel_test: Joining
+sem_waiter: Releasing mutex
+sem_waiter: Setting cancelable
+cancel_test: waiter exited with result=0xffffffff
+cancel_test: PASS thread terminated with PTHREAD_CANCELED
+cancel_test: Test 6: Cancel message queue wait
+cancel_test: Starting thread (cancelable)
+Skipped
+cancel_test: Test 7: Cancel signal wait
+cancel_test: Starting thread (cancelable)
+Skipped
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        2
+mxordblk 100b9100 100b9100
+uordblks     41ec     41ec
+fordblks 100b91b0 100b91b0
+
+user_main: robust test
+robust_test: Initializing mutex
+robust_test: Starting thread
+robust_waiter: Taking mutex
+robust_waiter: Exiting with mutex
+robust_test: Take the lock again
+robust_test: Make the mutex consistent again.
+robust_test: Take the lock again
+robust_test: Joining
+robust_test: waiter exited with result=0
+robust_test: Test complete with nerrors=0
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        2
+mxordblk 100b9100 100b9100
+uordblks     41ec     41ec
+fordblks 100b91b0 100b91b0
+
+user_main: semaphore test
+sem_test: Initializing semaphore to 0
+sem_test: Starting waiter thread 1
+sem_test: Set thread 1 priority to 191
+waiter_func: Thread 1 Started
+waiter_func: Thread 1 initial semaphore value = 0
+waiter_func: Thread 1 waiting on semaphore
+sem_test: Starting waiter thread 2
+sem_test: Set thread 2 priority to 128
+waiter_func: Thread 2 Started
+waiter_func: Thread 2 initial semaphore value = -1
+waiter_func: Thread 2 waiting on semaphore
+sem_test: Starting poster thread 3
+sem_test: Set thread 3 priority to 64
+poster_func: Thread 3 started
+poster_func: Thread 3 semaphore value = -2
+poster_func: Thread 3 posting semaphore
+waiter_func: Thread 1 awakened
+waiter_func: Thread 1 new semaphore value = -1
+waiter_func: Thread 1 done
+poster_func: Thread 3 new semaphore value = -1
+poster_func: Thread 3 semaphore value = -1
+poster_func: Thread 3 posting semaphore
+waiter_func: Thread 2 awakened
+waiter_func: Thread 2 new semaphore value = 0
+waiter_func: Thread 2 done
+poster_func: Thread 3 new semaphore value = 0
+poster_func: Thread 3 done
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        2
+mxordblk 100b9100 100b9100
+uordblks     41ec     41ec
+fordblks 100b91b0 100b91b0
+
+user_main: timed semaphore test
+semtimed_test: Initializing semaphore to 0
+semtimed_test: Waiting for two second timeout
+semtimed_test: PASS: first test returned timeout
+BEFORE: (1534377658 sec, 60000000 nsec)
+AFTER:  (1534377660 sec, 60000000 nsec)
+semtimed_test: Starting poster thread
+semtimed_test: Set thread 1 priority to 191
+semtimed_test: Starting poster thread 3
+semtimed_test: Set thread 3 priority to 64
+semtimed_test: Waiting for two second timeout
+poster_func: Waiting for 1 second
+poster_func: Posting
+semtimed_test: PASS: sem_timedwait succeeded
+BEFORE: (1534377660 sec, 110000000 nsec)
+AFTER:  (1534377661 sec, 130000000 nsec)
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        2
+mxordblk 100b9100 100b9100
+uordblks     41ec     41ec
+fordblks 100b91b0 100b91b0
+
+user_main: condition variable test
+cond_test: Initializing mutex
+cond_test: Initializing cond
+cond_test: Starting waiter
+cond_test: Set thread 1 priority to 128
+waiter_thread: Started
+cond_test: Starting signaler
+cond_test: Set thread 2 priority to 64
+thread_signaler: Started
+thread_signaler: Terminating
+cond_test: signaler terminated, now cancel the waiter
+cond_test: 	Waiter	Signaler
+cond_test: Loops	32	32
+cond_test: Errors	0	0
+cond_test:
+cond_test: 0 times, waiter did not have to wait for data
+cond_test: 0 times, data was already available when the signaler run
+cond_test: 0 times, the waiter was in an unexpected state when the signaler ran
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        2
+mxordblk 100b9100 100b9100
+uordblks     41ec     41ec
+fordblks 100b91b0 100b91b0
+
+user_main: pthread_exit() test
+pthread_exit_test: Started pthread_exit_main at PID=33
+pthread_exit_main 33: Starting pthread_exit_thread
+pthread_exit_main 33: Sleeping for 5 seconds
+pthread_exit_thread 37: Sleeping for 10 second
+pthread_exit_main 33: Calling pthread_exit()
+pthread_exit_thread 37: Still running...
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        3
+mxordblk 100b9100 100b6730
+uordblks     41ec     4ad4
+fordblks 100b91b0 100b88c8
+
+user_main: pthread_rwlock test
+pthread_rwlock: Initializing rwlock
+pthread_exit_thread 37: Exiting
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         3        2
+mxordblk 100b6730 100b9100
+uordblks     4ad4     41fc
+fordblks 100b88c8 100b91a0
+
+user_main: pthread_rwlock_cancel test
+pthread_rwlock_cancel: Starting test
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        2
+mxordblk 100b9100 100b9100
+uordblks     41fc     41fc
+fordblks 100b91a0 100b91a0
+
+user_main: timed wait test
+thread_waiter: Initializing mutex
+timedwait_test: Initializing cond
+timedwait_test: Starting waiter
+timedwait_test: Set thread 2 priority to 177
+thread_waiter: Taking mutex
+thread_waiter: Starting 5 second wait for condition
+timedwait_test: Joining
+thread_waiter: pthread_cond_timedwait timed out
+thread_waiter: Releasing mutex
+thread_waiter: Exit with status 0x12345678
+timedwait_test: waiter exited with result=0x12345678
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        2
+mxordblk 100b9100 100b9100
+uordblks     41fc     41fc
+fordblks 100b91a0 100b91a0
+
+user_main: timed message queue test
+timedmqueue_test: Starting sender
+timedmqueue_test: Waiting for sender to complete
+sender_thread: Starting
+sender_thread: mq_timedsend succeeded on msg 0
+sender_thread: mq_timedsend succeeded on msg 1
+sender_thread: mq_timedsend succeeded on msg 2
+sender_thread: mq_timedsend succeeded on msg 3
+sender_thread: mq_timedsend succeeded on msg 4
+sender_thread: mq_timedsend succeeded on msg 5
+sender_thread: mq_timedsend succeeded on msg 6
+sender_thread: mq_timedsend succeeded on msg 7
+sender_thread: mq_timedsend succeeded on msg 8
+sender_thread: mq_timedsend 9 timed out as expected
+sender_thread: returning nerrors=0
+timedmqueue_test: Starting receiver
+timedmqueue_test: Waiting for receiver to complete
+receiver_thread: Starting
+receiver_thread: mq_timedreceive succeed on msg 0
+receiver_thread: mq_timedreceive succeed on msg 1
+receiver_thread: mq_timedreceive succeed on msg 2
+receiver_thread: mq_timedreceive succeed on msg 3
+receiver_thread: mq_timedreceive succeed on msg 4
+receiver_thread: mq_timedreceive succeed on msg 5
+receiver_thread: mq_timedreceive succeed on msg 6
+receiver_thread: mq_timedreceive succeed on msg 7
+receiver_thread: mq_timedreceive succeed on msg 8
+receiver_thread: Receive 9 timed out as expected
+receiver_thread: returning nerrors=0
+timedmqueue_test: Test complete
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        3
+mxordblk 100b9100 100b9100
+uordblks     41fc     4264
+fordblks 100b91a0 100b9138
+
+user_main: sigprocmask test
+sigprocmask_test: SUCCESS
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         3        3
+mxordblk 100b9100 100b9100
+uordblks     4264     4264
+fordblks 100b9138 100b9138
+
+user_main: message queue test
+mqueue_test: Starting receiver
+mqueue_test: Set receiver priority to 128
+receiver_thread: Starting
+mqueue_test: Starting sender
+mqueue_test: Set sender thread priority to 64
+mqueue_test: Waiting for sender to complete
+sender_thread: Starting
+receiver_thread: mq_receive succeeded on msg 0
+sender_thread: mq_send succeeded on msg 0
+receiver_thread: mq_receive succeeded on msg 1
+sender_thread: mq_send succeeded on msg 1
+receiver_thread: mq_receive succeeded on msg 2
+sender_thread: mq_send succeeded on msg 2
+receiver_thread: mq_receive succeeded on msg 3
+sender_thread: mq_send succeeded on msg 3
+receiver_thread: mq_receive succeeded on msg 4
+sender_thread: mq_send succeeded on msg 4
+receiver_thread: mq_receive succeeded on msg 5
+sender_thread: mq_send succeeded on msg 5
+receiver_thread: mq_receive succeeded on msg 6
+sender_thread: mq_send succeeded on msg 6
+receiver_thread: mq_receive succeeded on msg 7
+sender_thread: mq_send succeeded on msg 7
+receiver_thread: mq_receive succeeded on msg 8
+sender_thread: mq_send succeeded on msg 8
+receiver_thread: mq_receive succeeded on msg 9
+sender_thread: mq_send succeeded on msg 9
+sender_thread: returning nerrors=0
+mqueue_test: Killing receiver
+receiver_thread: mq_receive interrupted!
+receiver_thread: returning nerrors=0
+mqueue_test: Canceling receiver
+mqueue_test: receiver has already terminated
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         3        3
+mxordblk 100b9100 100b9100
+uordblks     4264     4264
+fordblks 100b9138 100b9138
+
+user_main: signal handler test
+sighand_test: Initializing semaphore to 0
+sighand_test: Starting waiter task
+sighand_test: Started waiter_main pid=53
+waiter_main: Waiter started
+waiter_main: Unmasking signal 32
+waiter_main: Registering signal handler
+waiter_main: oact.sigaction=0 oact.sa_flags=0 oact.sa_mask=0000000000000000
+waiter_main: Waiting on semaphore
+sighand_test: Signaling pid=53 with signo=32 sigvalue=42
+waiter_main: sem_wait() successfully interrupted by signal
+waiter_main: done
+sighand_test: done
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         3        2
+mxordblk 100b9100 100b9100
+uordblks     4264     427c
+fordblks 100b9138 100b9120
+
+user_main: nested signal handler test
+signest_test: Starting signal waiter task at priority 101
+waiter_main: Waiter started
+waiter_main: Setting signal mask
+waiter_main: Registering signal handler
+waiter_main: Waiting on semaphore
+signest_test: Started waiter_main pid=54
+signest_test: Starting interfering task at priority 102
+interfere_main: Waiting on semaphore
+signest_test: Started interfere_main pid=55
+signest_test: Simple case:
+  Total signalled 1240  Odd=620 Even=620
+  Total handled   1240  Odd=620 Even=620
+  Total nested    0    Odd=0   Even=0  
+signest_test: With task locking
+  Total signalled 2480  Odd=1240 Even=1240
+  Total handled   2480  Odd=1240 Even=1240
+  Total nested    0    Odd=0   Even=0  
+signest_test: With interfering thread
+  Total signalled 3720  Odd=1860 Even=1860
+  Total handled   3720  Odd=1860 Even=1860
+  Total nested    0    Odd=0   Even=0  
+signest_test: done
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        5
+mxordblk 100b9100 100b47e0
+uordblks     427c     42dc
+fordblks 100b9120 100b90c0
+
+user_main: POSIX timer test
+timer_test: Masking signal 32
+timer_test: Creating timer
+timer_test: Starting timer
+timer_test: Waiting on sigwaitinfo
+timer_test: sigwaitinfo() returned signo=32
+timer_expiration: sival_int=42
+timer_expiration: si_code=2 (SI_TIMER)
+timer_expiration: g_nsigreceived=1
+timer_test: Waiting on sigwaitinfo
+timer_test: sigwaitinfo() returned signo=32
+timer_expiration: sival_int=42
+timer_expiration: si_code=2 (SI_TIMER)
+timer_expiration: g_nsigreceived=2
+timer_test: Waiting on sigwaitinfo
+timer_test: sigwaitinfo() returned signo=32
+timer_expiration: sival_int=42
+timer_expiration: si_code=2 (SI_TIMER)
+timer_expiration: g_nsigreceived=3
+timer_test: Waiting on sigwaitinfo
+timer_test: sigwaitinfo() returned signo=32
+timer_expiration: sival_int=42
+timer_expiration: si_code=2 (SI_TIMER)
+timer_expiration: g_nsigreceived=4
+timer_test: Waiting on sigwaitinfo
+timer_test: sigwaitinfo() returned signo=32
+timer_expiration: sival_int=42
+timer_expiration: si_code=2 (SI_TIMER)
+timer_expiration: g_nsigreceived=5
+timer_test: Deleting timer
+timer_test: done
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         5        5
+mxordblk 100b47e0 100b47e0
+uordblks     42dc     42dc
+fordblks 100b90c0 100b90c0
+
+user_main: spinlock test
+Start Lock test:
+Thread num: 1, Loop times: 10000000
+
+Test type: spinlock
+spinlock: Test Results:
+spinlock: Final counter: 10000000
+spinlock: Average throughput : 3184713 op/s
+spinlock: Total execution time: 3140000000 ns
+ 
+Test type: rspinlock
+rspinlock: Test Results:
+rspinlock: Final counter: 10000000
+rspinlock: Average throughput : 3184713 op/s
+rspinlock: Total execution time: 3140000000 ns
+ 
+Test type: seqcount
+seqcount: Test Results:
+seqcount: Final counter: 10000000
+seqcount: Average throughput : 1769911 op/s
+seqcount: Total execution time: 5650000000 ns
+ 
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         5        5
+mxordblk 100b47e0 100b47e0
+uordblks     42dc     42dc
+fordblks 100b90c0 100b90c0
+
+user_main: wdog test
+wdog_test start...
+wdtest_once 0 ns
+wdtest_once 0 ns
+wdtest_once 0 ns
+wdtest_once 0 ns
+wdtest_once 1 ns
+wdtest_once 1 ns
+wdtest_once 1 ns
+wdtest_once 1 ns
+wdtest_once 10 ns
+wdtest_once 10 ns
+wdtest_once 10 ns
+wdtest_once 10 ns
+wdtest_once 100 ns
+wdtest_once 100 ns
+wdtest_once 100 ns
+wdtest_once 100 ns
+wdtest_once 1000 ns
+wdtest_once 1000 ns
+wdtest_once 1000 ns
+wdtest_once 1000 ns
+wdtest_once 10000 ns
+wdtest_once 10000 ns
+wdtest_once 10000 ns
+wdtest_once 10000 ns
+wdtest_once 100000 ns
+wdtest_once 100000 ns
+wdtest_once 100000 ns
+wdtest_once 100000 ns
+wdtest_once 1000000 ns
+wdtest_once 1000000 ns
+wdtest_once 1000000 ns
+wdtest_once 1000000 ns
+wd_start with maximum delay, cancel OK, rest 2305843009213693949
+wdtest_recursive 1000000ns
+wd_start with maximum delay, cancel OK, rest 2305843009213693949
+wdtest_recursive 1000000ns
+wd_start with maximum delay, cancel OK, rest 2305843009213693947
+wdtest_recursive 1000000ns
+wd_start with maximum delay, cancel OK, rest 2305843009213693946
+wdtest_recursive 1000000ns
+recursive wdog triggered 6 times, elapsed tick 12
+wdtest_recursive 10000000ns
+recursive wdog triggered 6 times, elapsed tick 12
+wdtest_recursive 10000000ns
+recursive wdog triggered 6 times, elapsed tick 12
+wdtest_recursive 10000000ns
+recursive wdog triggered 6 times, elapsed tick 12
+wdtest_recursive 10000000ns
+recursive wdog triggered 6 times, elapsed tick 12
+recursive wdog triggered 6 times, elapsed tick 12
+recursive wdog triggered 6 times, elapsed tick 12
+recursive wdog triggered 6 times, elapsed tick 12
+wdog_test end...
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         5        5
+mxordblk 100b47e0 100b47e0
+uordblks     42dc     42dc
+fordblks 100b90c0 100b90c0
+
+user_main: barrier test
+barrier_test: Initializing barrier
+barrier_test: Thread 0 created
+barrier_test: Thread 1 created
+barrier_test: Thread 2 created
+barrier_test: Thread 3 created
+barrier_test: Thread 4 created
+barrier_test: Thread 5 created
+barrier_test: Thread 6 created
+barrier_test: Thread 7 created
+barrier_func: Thread 0 started
+barrier_func: Thread 1 started
+barrier_func: Thread 2 started
+barrier_func: Thread 3 started
+barrier_func: Thread 4 started
+barrier_func: Thread 5 started
+barrier_func: Thread 6 started
+barrier_func: Thread 7 started
+barrier_func: Thread 0 calling pthread_barrier_wait()
+barrier_func: Thread 1 calling pthread_barrier_wait()
+barrier_func: Thread 2 calling pthread_barrier_wait()
+barrier_func: Thread 3 calling pthread_barrier_wait()
+barrier_func: Thread 4 calling pthread_barrier_wait()
+barrier_func: Thread 5 calling pthread_barrier_wait()
+barrier_func: Thread 6 calling pthread_barrier_wait()
+barrier_func: Thread 7 calling pthread_barrier_wait()
+barrier_func: Thread 7, back with status=PTHREAD_BARRIER_SERIAL_THREAD (I AM SPECIAL)
+barrier_func: Thread 0, back with status=0 (I am not special)
+barrier_func: Thread 1, back with status=0 (I am not special)
+barrier_func: Thread 2, back with status=0 (I am not special)
+barrier_func: Thread 3, back with status=0 (I am not special)
+barrier_func: Thread 4, back with status=0 (I am not special)
+barrier_func: Thread 5, back with status=0 (I am not special)
+barrier_func: Thread 6, back with status=0 (I am not special)
+barrier_func: Thread 7 done
+barrier_func: Thread 0 done
+barrier_test: Thread 0 completed with result=0
+barrier_func: Thread 1 done
+barrier_func: Thread 2 done
+barrier_test: Thread 1 completed with result=0
+barrier_test: Thread 2 completed with result=0
+barrier_func: Thread 3 done
+barrier_func: Thread 4 done
+barrier_test: Thread 3 completed with result=0
+barrier_test: Thread 4 completed with result=0
+barrier_func: Thread 5 done
+barrier_func: Thread 6 done
+barrier_test: Thread 5 completed with result=0
+barrier_test: Thread 6 completed with result=0
+barrier_test: Thread 7 completed with result=0
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         5        5
+mxordblk 100b47e0 100b47e0
+uordblks     42dc     42dc
+fordblks 100b90c0 100b90c0
+
+user_main: scheduler lock test
+sched_lock: Starting lowpri_thread at 97
+sched_lock: Set lowpri_thread priority to 97
+sched_lock: Starting highpri_thread at 98
+sched_lock: Set highpri_thread priority to 98
+sched_lock: Waiting...
+sched_lock: PASSED No pre-emption occurred while scheduler was locked.
+sched_lock: Starting lowpri_thread at 97
+sched_lock: Set lowpri_thread priority to 97
+sched_lock: Starting highpri_thread at 98
+sched_lock: Set highpri_thread priority to 98
+sched_lock: Waiting...
+sched_lock: PASSED No pre-emption occurred while scheduler was locked.
+sched_lock: Finished
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         5        5
+mxordblk 100b47e0 100b47e0
+uordblks     42dc     42dc
+fordblks 100b90c0 100b90c0
+
+Final memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena    100bd39c 100bd39c
+ordblks         2        5
+mxordblk 100b9100 100b47e0
+uordblks     424c     42dc
+fordblks 100b9150 100b90c0
+user_main: Exiting
+ostest_main: Exiting with status 0
+nsh> 
+XIP_OSTEST_HARNESS_DONE

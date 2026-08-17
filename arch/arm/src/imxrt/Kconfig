@@ -14,38 +14,45 @@ choice
 
 config ARCH_CHIP_MIMXRT1021CAG4A
 	bool "MIMXRT1021CAG4A"
+	select ARCH_CORTEXM7
 	select ARCH_FAMILY_MIMXRT1021C
 	select IMXRT_HAVE_USBOTG1
 
 config ARCH_CHIP_MIMXRT1021CAF4A
 	bool "MIMXRT1021CAF4A"
+	select ARCH_CORTEXM7
 	select ARCH_FAMILY_MIMXRT1021C
 	select IMXRT_HAVE_USBOTG1
 
 config ARCH_CHIP_MIMXRT1021DAF5A
 	bool "MIMXRT1021DAF5A"
+	select ARCH_CORTEXM7
 	select ARCH_FAMILY_MIMXRT1021D
 	select IMXRT_HAVE_USBOTG1
 
 config ARCH_CHIP_MIMXRT1021DAG5A
 	bool "MIMXRT1021DAG5A"
+	select ARCH_CORTEXM7
 	select ARCH_FAMILY_MIMXRT1021D
 	select IMXRT_HAVE_USBOTG1
 
 config ARCH_CHIP_MIMXRT1051DVL6A
 	bool "MIMXRT1051DVL6A"
+	select ARCH_CORTEXM7
 	select ARCH_FAMILY_MIMXRT105xDVL6A
 	select IMXRT_HAVE_USBOTG1
 	select IMXRT_HAVE_USBOTG2
 
 config ARCH_CHIP_MIMXRT1051CVL5A
 	bool "MIMXRT1051CVL5A"
+	select ARCH_CORTEXM7
 	select ARCH_FAMILY_MIMXRT105xCVL5A
 	select IMXRT_HAVE_USBOTG1
 	select IMXRT_HAVE_USBOTG2
 
 config ARCH_CHIP_MIMXRT1052DVL6A
 	bool "MIMXRT1052DVL6A"
+	select ARCH_CORTEXM7
 	select ARCH_FAMILY_MIMXRT105xDVL6A
 	select IMXRT_HAVE_LCD
 	select IMXRT_HAVE_USBOTG1
@@ -53,6 +60,7 @@ config ARCH_CHIP_MIMXRT1052DVL6A
 
 config ARCH_CHIP_MIMXRT1052CVL5A
 	bool "MIMXRT1052CVL5A"
+	select ARCH_CORTEXM7
 	select ARCH_FAMILY_MIMXRT105xCVL5A
 	select IMXRT_HAVE_LCD
 	select IMXRT_HAVE_USBOTG1
@@ -60,18 +68,21 @@ config ARCH_CHIP_MIMXRT1052CVL5A
 
 config ARCH_CHIP_MIMXRT1061DVL6A
 	bool "MIMXRT1061DVL6A"
+	select ARCH_CORTEXM7
 	select ARCH_FAMILY_MXRT106xDVL6A
 	select IMXRT_HAVE_USBOTG1
 	select IMXRT_HAVE_USBOTG2
 
 config ARCH_CHIP_MIMXRT1061CVL5A
 	bool "MIMXRT1061CVL5A"
+	select ARCH_CORTEXM7
 	select ARCH_FAMILY_MIMXRT106xCVL5A
 	select IMXRT_HAVE_USBOTG1
 	select IMXRT_HAVE_USBOTG2
 
 config ARCH_CHIP_MIMXRT1062DVL6A
 	bool "MIMXRT1062DVL6A"
+	select ARCH_CORTEXM7
 	select ARCH_FAMILY_MXRT106xDVL6A
 	select IMXRT_HAVE_LCD
 	select IMXRT_HAVE_USBOTG1
@@ -79,6 +90,7 @@ config ARCH_CHIP_MIMXRT1062DVL6A
 
 config ARCH_CHIP_MIMXRT1062CVL5A
 	bool "MIMXRT1062DVL6A"
+	select ARCH_CORTEXM7
 	select ARCH_FAMILY_MIMXRT106xCVL5A
 	select IMXRT_HAVE_LCD
 	select IMXRT_HAVE_USBOTG1
@@ -86,6 +98,7 @@ config ARCH_CHIP_MIMXRT1062CVL5A
 
 config ARCH_CHIP_MIMXRT1064DVL6A
 	bool "MIMXRT1064DVL6A"
+	select ARCH_CORTEXM7
 	select ARCH_FAMILY_MXRT106xDVL6A
 	select IMXRT_HAVE_LCD
 	select IMXRT_HAVE_USBOTG1
@@ -93,6 +106,7 @@ config ARCH_CHIP_MIMXRT1064DVL6A
 
 config ARCH_CHIP_MIMXRT1064CVL5A
 	bool "MIMXRT1064DVL6A"
+	select ARCH_CORTEXM7
 	select ARCH_FAMILY_MIMXRT106xCVL5A
 	select IMXRT_HAVE_LCD
 	select IMXRT_HAVE_USBOTG1
@@ -100,10 +114,17 @@ config ARCH_CHIP_MIMXRT1064CVL5A
 
 config ARCH_CHIP_MIMXRT1176DVMAA
 	bool "MIMXRT1176DVMAA"
+	select ARCH_CORTEXM7
 	select ARCH_FAMILY_IMXRT117x
 	select IMXRT_HAVE_LCD
 	select IMXRT_HAVE_USBOTG1
 	select IMXRT_HAVE_USBOTG2
+
+config ARCH_CHIP_MIMXRT1186
+	bool "MIMXRT1186 (Cortex-M33)"
+	select ARCH_CORTEXM33
+	select ARCH_FAMILY_IMXRT118x
+	select IMXRT_HAVE_USBOTG1
 
 endchoice # i.MX RT Chip Selection
 
@@ -132,6 +153,7 @@ config ARCH_FAMILY_IMXRT102x
 	select ARMV7M_HAVE_DCACHE
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
+	select ARMV7M_HAVE_STACKCHECK
 
 config ARCH_FAMILY_MIMXRT105xDVL6A
 	bool
@@ -156,6 +178,7 @@ config ARCH_FAMILY_IMXRT105x
 	select ARMV7M_HAVE_DCACHE
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
+	select ARMV7M_HAVE_STACKCHECK
 
 config ARCH_FAMILY_MXRT106xDVL6A
 	bool
@@ -180,6 +203,7 @@ config ARCH_FAMILY_IMXRT117x
 	select ARMV7M_HAVE_DCACHE
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
+	select ARMV7M_HAVE_STACKCHECK
 	select IMXRT_HIGHSPEED_GPIO
 	select IMXRT_HAVE_FLEXSPI2
 	select IMXRT_ADC_VER2
@@ -193,6 +217,10 @@ config ARCH_FAMILY_IMXRT117x
 	select IMXRT_FLEXCAN1_FD
 	select IMXRT_FLEXCAN2_FD
 
+config ARCH_FAMILY_IMXRT118x
+	bool
+	default n
+
 config ARCH_FAMILY_IMXRT106x
 	bool
 	default n
@@ -202,6 +230,7 @@ config ARCH_FAMILY_IMXRT106x
 	select ARMV7M_HAVE_DCACHE
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
+	select ARMV7M_HAVE_STACKCHECK
 	select IMXRT_HIGHSPEED_GPIO
 	select IMXRT_HAVE_FLEXSPI2
 	select IMXRT_HAVE_FLEXIO3
@@ -391,12 +420,80 @@ config IMXRT_USBOTG2
 config IMXRT_USBDEV
 	bool "USB Device"
 	default n
+	depends on IMXRT_HAVE_USBOTG1 || IMXRT_HAVE_USBOTG2
+	select USBDEV
+
+config IMXRT_BOOT_FLEXSPI
+	bool "Running from FlexSPI flash"
+	depends on BOOT_RUNFROMFLASH && ARCH_FAMILY_IMXRT118x
 
 config IMXRT_ENET
 	bool "Ethernet"
 	default n
+	depends on !ARCH_FAMILY_IMXRT118x
 	select ARCH_HAVE_PHY
 	select ARCH_HAVE_NETDEV_STATISTICS
+
+config IMXRT_NETC
+	bool "RT118x NETC Ethernet (experimental)"
+	default n
+	depends on ARCH_FAMILY_IMXRT118x && NET
+	select ARCH_HAVE_PHY
+	select ARCH_HAVE_NETDEV_STATISTICS
+	---help---
+		Enable the RT118x NETC switch Ethernet path.  The FRDM-IMXRT1186
+		implementation supports the YT8531 RGMII PHYs on switch ports 0
+		and 2 and uses internal port 4 with ENETC1 SI0 for packet DMA.
+
+if IMXRT_NETC
+
+config IMXRT_NETC_CLOCK_FREQUENCY
+	int "NETC root clock frequency"
+	default 240000000
+	---help---
+		Frequency in Hz of the programmed NETC root used to derive MDC.
+		Matches Zephyr FRDM: SYS_PLL3_PFD3 (frac 18) / 2 = 240 MHz.
+
+config IMXRT_NETC_PORT0_PHY_ADDRESS
+	int "FRDM switch port 0 PHY address"
+	range 0 31
+	default 5
+
+config IMXRT_NETC_PORT2_PHY_ADDRESS
+	int "FRDM switch port 2 PHY address"
+	range 0 31
+	default 4
+
+config IMXRT_NETC_YT8531_RX_DELAY
+	int "YT8531 RGMII RX delay select (0-15)"
+	range 0 15
+	default 13
+	---help---
+		Matches Zephyr FRDM motorcomm,rx-delay-sel.
+
+config IMXRT_NETC_YT8531_TX_DELAY
+	int "YT8531 RGMII TX delay select (0-15)"
+	range 0 15
+	default 13
+	---help---
+		Matches Zephyr FRDM motorcomm,tx-delay-sel.
+
+config IMXRT_NETC_MDIO_TIMEOUT_US
+	int "MDIO/reset polling timeout (microseconds)"
+	range 100 1000000
+	default 100000
+
+config IMXRT_NETC_LINK_TIMEOUT_MS
+	int "PHY link negotiation timeout (milliseconds)"
+	range 0 60000
+	default 10000
+	---help---
+		Maximum time for interface bring-up to wait for either external
+		switch PHY to complete autonegotiation.  This keeps one-shot
+		network initialization from starting DHCP before speed and duplex
+		are valid.  Zero disables the wait.
+
+endif # IMXRT_NETC
 
 config IMXRT_LCD
 	bool "LCD controller"

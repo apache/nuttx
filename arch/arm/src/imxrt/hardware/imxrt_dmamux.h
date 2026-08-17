@@ -39,6 +39,8 @@
 #elif defined(CONFIG_ARCH_FAMILY_IMXRT117x)
 #  include "hardware/rt117x/imxrt117x_dmamux.h"
 #define IMXRT_DMAMUX_BASE IMXRT_DMAMUX0_BASE
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT118x)
+/* DMA is not enabled by the initial RT1180 configuration. */
 #else
 #  error Unrecognized i.MX RT architecture
 #endif

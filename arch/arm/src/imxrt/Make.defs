@@ -20,29 +20,46 @@
 #
 ############################################################################
 
-# Common ARM and Cortex-M7 files
+# Common ARM Cortex-M files
 
-include armv7-m/Make.defs
+ifeq ($(CONFIG_ARCH_ARMV8M),y)
+  include armv8-m/Make.defs
+else
+  include armv7-m/Make.defs
+endif
 
 # Required i.MX RT files
 
-CHIP_CSRCS  = imxrt_allocateheap.c imxrt_start.c imxrt_periphclks.c
+CHIP_CSRCS  = imxrt_allocateheap.c imxrt_start.c
+ifneq ($(CONFIG_ARCH_FAMILY_IMXRT118x),y)
+CHIP_CSRCS += imxrt_periphclks.c
+endif
 ifeq ($(CONFIG_IMXRT_PROGMEM),y)
 CHIP_CSRCS += imxrt_flash.c
 endif
-CHIP_CSRCS += imxrt_irq.c imxrt_clrpend.c imxrt_gpio.c
-CHIP_CSRCS += imxrt_daisy.c imxrt_wdog.c imxrt_serial.c
-CHIP_CSRCS += imxrt_xbar.c imxrt_ocotp.c imxrt_lowputc.c
+CHIP_CSRCS += imxrt_irq.c imxrt_clrpend.c
+ifeq ($(CONFIG_ARCH_FAMILY_IMXRT118x),y)
+CHIP_CSRCS += imxrt118x_gpio.c
+else
+CHIP_CSRCS += imxrt_gpio.c imxrt_daisy.c
+endif
+CHIP_CSRCS += imxrt_serial.c imxrt_lowputc.c
+ifneq ($(CONFIG_ARCH_FAMILY_IMXRT118x),y)
+CHIP_CSRCS += imxrt_wdog.c imxrt_xbar.c imxrt_ocotp.c
+endif
 
 # Configuration-dependent i.MX RT files
 
-ifeq ($(CONFIG_IMXRT_CLOCKCONFIG_VER2),y)
+ifeq ($(CONFIG_ARCH_FAMILY_IMXRT118x),y)
+CHIP_CSRCS += imxrt118x_clockconfig.c
+else ifeq ($(CONFIG_IMXRT_CLOCKCONFIG_VER2),y)
 CHIP_CSRCS += imxrt_clockconfig_ver2.c imxrt_pmu.c
 else
 CHIP_CSRCS += imxrt_clockconfig_ver1.c
 endif
 
-ifeq ($(CONFIG_IMXRT_IOMUX_VER2),y)
+ifeq ($(CONFIG_ARCH_FAMILY_IMXRT118x),y)
+else ifeq ($(CONFIG_IMXRT_IOMUX_VER2),y)
 CHIP_CSRCS += imxrt_iomuxc_ver2.c
 else
 CHIP_CSRCS += imxrt_iomuxc_ver1.c
@@ -107,6 +124,10 @@ endif
 
 ifeq ($(CONFIG_IMXRT_ENET),y)
 CHIP_CSRCS += imxrt_enet.c
+endif
+
+ifeq ($(CONFIG_IMXRT_NETC),y)
+CHIP_CSRCS += imxrt_netc.c
 endif
 
 ifeq ($(CONFIG_IMXRT_LPI2C),y)
