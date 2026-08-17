@@ -108,6 +108,19 @@ static const char *_get_rname(int type)
 }
 
 /****************************************************************************
+ * Name: _extract_bits
+ *
+ * Description:
+ *   Copied from ELF_riscv.cpp (LLVM)
+ *
+ ****************************************************************************/
+
+static uint32_t _extract_bits(uint32_t num, int low, int size)
+{
+  return (num & (((1 << size) - 1) << low)) >> low;
+}
+
+/****************************************************************************
  * Name: _get_val, set_val, _add_val
  *
  * Description:
@@ -565,11 +578,21 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
 
           /* NOTE: we assume that a compiler adds an immediate value */
 
-          ASSERT(offset && val);
+          if (offset != 0 && val == 0)
+            {
+              uint32_t imm12 = _extract_bits(offset, 12, 1) << 31;
+              uint32_t imm10_5 = _extract_bits(offset, 5, 6) << 25;
+              uint32_t imm4_1 = _extract_bits(offset, 1, 4) << 8;
+              uint32_t imm11 = _extract_bits(offset, 11, 1) << 7;
 
-          binfo("offset for Bx=%ld (0x%lx) (val=0x%08" PRIx32 ") "
-                "already set!\n",
-                offset, offset, val);
+              _add_val((uint16_t *)addr, imm12 | imm10_5 | imm4_1 | imm11);
+            }
+          else
+            {
+              binfo("offset for Bx=%ld (0x%lx) (val=0x%08" PRIx32 ") "
+                    "already set!\n",
+                    offset, offset, val);
+            }
         }
         break;
 
@@ -586,13 +609,23 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
           offset = (long)sym->st_value + (long)rel->r_addend - (long)addr;
           uint32_t val = _get_val((uint16_t *)addr) & 0xfffff000;
 
-          ASSERT(offset && val);
-
           /* NOTE: we assume that a compiler adds an immediate value */
 
-          binfo("offset for JAL=%ld (0x%lx) (val=0x%08" PRIx32 ") "
-                "already set!\n",
-                offset, offset, val);
+          if (offset != 0 && val == 0)
+            {
+              uint32_t imm20 = _extract_bits(offset, 20, 1) << 31;
+              uint32_t imm10_1 = _extract_bits(offset, 1, 10) << 21;
+              uint32_t imm11 = _extract_bits(offset, 11, 1) << 20;
+              uint32_t imm19_12 = _extract_bits(offset, 12, 8) << 12;
+
+              _add_val((uint16_t *)addr, imm20 | imm10_1 | imm11 | imm19_12);
+            }
+          else
+            {
+              binfo("offset for JAL=%ld (0x%lx) (val=0x%08" PRIx32 ") "
+                    "already set!\n",
+                    offset, offset, val);
+            }
         }
         break;
 
@@ -695,8 +728,29 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
 
           uint16_t val = (*(uint16_t *)addr) & 0x1ffc;
 
-          binfo("offset for C.J=%ld (0x%lx) (val=0x%04x) already set!\n",
-                offset, offset, val);
+          /* NOTE: we assume that a compiler adds an immediate value */
+
+          if (offset != 0 && val == 0)
+            {
+              uint16_t imm11 = _extract_bits(offset, 11, 1) << 12;
+              uint16_t imm4 = _extract_bits(offset, 4, 1) << 11;
+              uint16_t imm9_8 = _extract_bits(offset, 8, 2) << 9;
+              uint16_t imm10 = _extract_bits(offset, 10, 1) << 8;
+              uint16_t imm6 = _extract_bits(offset, 6, 1) << 7;
+              uint16_t imm7 = _extract_bits(offset, 7, 1) << 6;
+              uint16_t imm3_1 = _extract_bits(offset, 1, 3) << 3;
+              uint16_t imm5 = _extract_bits(offset, 5, 1) << 2;
+
+              _add_val((uint16_t *)addr,
+                       imm11 | imm4 | imm9_8 | imm10 |
+                       imm6 | imm7 | imm3_1 | imm5);
+            }
+          else
+            {
+              binfo("offset for C.J=%ld (0x%lx) (val=0x%04x) "
+                    "already set!\n",
+                    offset, offset, val);
+            }
         }
         break;
 
@@ -717,10 +771,23 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
 
           /* NOTE: we assume that a compiler adds an immediate value */
 
-          ASSERT(offset && val);
+          if (offset != 0 && val == 0)
+            {
+              uint16_t imm8 = _extract_bits(offset, 8, 1) << 12;
+              uint16_t imm4_3 = _extract_bits(offset, 3, 2) << 10;
+              uint16_t imm7_6 = _extract_bits(offset, 6, 2) << 5;
+              uint16_t imm2_1 = _extract_bits(offset, 1, 2) << 3;
+              uint16_t imm5 = _extract_bits(offset, 5, 1) << 2;
 
-          binfo("offset for C.Bx=%ld (0x%lx) (val=0x%04x) already set!\n",
-                offset, offset, val);
+              _add_val((uint16_t *)addr,
+                       imm8 | imm4_3 | imm7_6 | imm2_1 | imm5);
+            }
+          else
+            {
+              binfo("offset for C.Bx=%ld (0x%lx) (val=0x%04x) "
+                    "already set!\n",
+                    offset, offset, val);
+            }
         }
         break;
       case R_RISCV_32_PCREL:
