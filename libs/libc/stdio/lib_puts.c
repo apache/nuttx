@@ -44,7 +44,9 @@
 
 int puts(FAR const IPTR char *s)
 {
-#ifdef CONFIG_FILE_STREAM
+#ifdef CONFIG_SYSLOG_STDOUT
+  return printf("%s\n", s);
+#elif defined(CONFIG_FILE_STREAM)
   FILE *stream = stdout;
   int nwritten;
   int nput = EOF;

@@ -33,7 +33,9 @@
 
 int putchar(int c)
 {
-#ifdef CONFIG_FILE_STREAM
+#ifdef CONFIG_SYSLOG_STDOUT
+  return printf("%c", c);
+#elif defined(CONFIG_FILE_STREAM)
   return fputc(c, stdout);
 #else
   unsigned char tmp = c;
@@ -43,7 +45,9 @@ int putchar(int c)
 
 int putchar_unlocked(int c)
 {
-#ifdef CONFIG_FILE_STREAM
+#ifdef CONFIG_SYSLOG_STDOUT
+  return printf("%c", c);
+#elif defined(CONFIG_FILE_STREAM)
   return fputc_unlocked(c, stdout);
 #else
   unsigned char tmp = c;
