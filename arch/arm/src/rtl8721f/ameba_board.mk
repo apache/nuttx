@@ -176,6 +176,14 @@ ifeq ($(CONFIG_AMEBA_PWM),y)
 AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_tim.c
 endif
 
+# ADC (SAR) register layer.  The ADC driver
+# (arch/.../common/ameba/ameba_adc.c) calls the fwlib ADC API; the data tables
+# and helpers it indexes live in this RAM source and must be compiled in
+# (--gc-sections drops the unused interrupt/timer-trigger helpers).
+ifeq ($(CONFIG_AMEBA_ADC),y)
+AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_adc.c
+endif
+
 # -Wno-int-conversion: the vendored SDK passes NULL to irq_register()'s u32
 # "Data" (interrupt context) argument in many places -- an intentional
 # NULL-as-context idiom.  Silence -Wint-conversion for the SDK fwlib sources
