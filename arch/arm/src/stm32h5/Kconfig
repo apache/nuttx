@@ -28,6 +28,7 @@ config STM32_H5_PERIPHERALS
 	select STM32_HAVE_ADC_H5
 	select STM32_HAVE_USART_H5
 	select STM32_HAVE_I2C_H5
+	select STM32_HAVE_IP_WDG_M3M4_V1
 
 choice
 	prompt "STM32 H5 Chip Selection"

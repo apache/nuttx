@@ -112,6 +112,10 @@ ifeq ($(CONFIG_STM32_PWM),y)
 CHIP_CSRCS += stm32_pwm.c
 endif
 
+ifeq ($(CONFIG_STM32_IWDG),y)
+CHIP_CSRCS += stm32_iwdg.c
+endif
+
 # Required chip type specific files
 
 ifeq ($(CONFIG_STM32_STM32H5XXXX),y)
