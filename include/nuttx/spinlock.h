@@ -276,8 +276,18 @@ static inline_function bool
 spin_trylock_notrace(FAR volatile spinlock_t *lock)
 {
 #ifdef CONFIG_TICKET_SPINLOCK
-  if (!atomic_cmpxchg(&lock->next, &lock->owner,
-                      atomic_read(&lock->next) + 1))
+  /* The expected value must live in a local.  A failed compare-exchange
+   * writes the current value of the target object back through the
+   * expected pointer, so passing &lock->owner here would clobber the
+   * owner counter and make a lock held by another CPU appear unlocked.
+   *
+   * The exchange succeeds only when next == owner, which is the unlocked
+   * state of a ticket lock.
+   */
+
+  uint32_t expected = atomic_read(&lock->owner);
+
+  if (!atomic_cmpxchg(&lock->next, &expected, expected + 1))
 #else /* CONFIG_TICKET_SPINLOCK */
   if (up_testset(lock) == SP_LOCKED)
 #endif /* CONFIG_TICKET_SPINLOCK */
@@ -394,7 +404,6 @@ spin_unlock_notrace(FAR volatile spinlock_t *lock)
  ****************************************************************************/
 
 #ifdef CONFIG_SPINLOCK
-#  ifdef __SP_UNLOCK_FUNCTION
 static inline_function void spin_unlock(FAR volatile spinlock_t *lock)
 {
   /* Unlock without trace note */
@@ -405,9 +414,6 @@ static inline_function void spin_unlock(FAR volatile spinlock_t *lock)
 
   sched_note_spinlock_unlock(lock);
 }
-#  else
-#    define spin_unlock(l)  do { *(l) = SP_UNLOCKED; } while (0)
-#  endif
 #else
 #  define spin_unlock(lock)
 #endif /* CONFIG_SPINLOCK */
