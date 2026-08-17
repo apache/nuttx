@@ -62,6 +62,10 @@ if(CONFIG_AMEBA_SPI)
   list(APPEND SRCS ${AMEBA_COMMON}/ameba_spi.c)
 endif()
 
+if(CONFIG_AMEBA_PWM)
+  list(APPEND SRCS ${AMEBA_COMMON}/ameba_pwm.c)
+endif()
+
 target_include_directories(arch PRIVATE ${AMEBA_COMMON})
 target_sources(arch PRIVATE ${SRCS})
 
@@ -130,6 +134,15 @@ endif()
 # (--gc-sections drops the unused DMA/interrupt helpers).
 if(CONFIG_AMEBA_SPI)
   list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_spi.c)
+endif()
+
+# PWM timer register layer.  The time-base entry points (RTIM_TimeBaseInit/
+# StructInit/Cmd) are in ROM, but the compare/period helpers the PWM driver
+# (arch/.../common/ameba/ameba_pwm.c) calls -- RTIM_CCStructInit/CCxInit/
+# CCRxSet/CCxCmd/ChangePeriod/PrescalerConfig -- are compiled from this RAM
+# source and linked in (--gc-sections drops the unused input-capture paths).
+if(CONFIG_AMEBA_PWM)
+  list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_tim.c)
 endif()
 
 # Silence a couple of warnings the vendored SDK sources trip under NuttX's
