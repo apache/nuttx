@@ -67,9 +67,14 @@ triggers (also known as property triggers, e.g., property:a=b). Actions can
 include multiple action triggers but only one event trigger. Triggers can be
 combined with && to represent "AND" conditions.
 
-.. note:: Currently, only event triggers are supported.
+The value of a property trigger is matched with ``fnmatch``, so glob
+patterns are accepted. Use ``!=`` to trigger when the value does not match,
+e.g. ``property:a!=b``. An ``on <event>`` action fires only on the edge when
+its condition becomes satisfied, not on every subsequent property update.
 
-.. todo:: Implement action triggers.
+Property (action) trigger support requires the ``init_property_*()`` backend
+to be provided; ``property_simple.c`` offers a minimal implementation that
+forwards ``setprop`` to the action manager.
 
 1. Event Trigger Execution Order
 --------------------------------
@@ -111,10 +116,10 @@ defconfig:
 .. code-block:: diff
 
     +CONFIG_INIT_ENTRYPOINT="init_main"
-    +CONFIG_SYSTEM_INIT=y
-    +CONFIG_SYSTEM_INIT_DEBUG=y
-    +CONFIG_SYSTEM_INIT_INFO=y
-    +CONFIG_SYSTEM_INIT_WARN=y
+    +CONFIG_SYSTEM_NXINIT=y
+    +CONFIG_SYSTEM_NXINIT_DEBUG=y
+    +CONFIG_SYSTEM_NXINIT_INFO=y
+    +CONFIG_SYSTEM_NXINIT_WARN=y
 
 init.rc:
 
@@ -124,6 +129,9 @@ init.rc:
         start console        /* Start the service named "console" */
         sleep 1              /* Block for 1 second */
         exec_start mkdir_tmp /* Start the "mkdir_tmp" service and wait for exit */
+
+    on boot && property:sys.boot.reason=bootloader
+        echo "On boot, the reason is BL."
         start fastboot
 
     service console sh
