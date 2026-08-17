@@ -41,9 +41,7 @@
 #define STM32_IWDG_PR_OFFSET     0x0004  /* Prescaler register (32-bit) */
 #define STM32_IWDG_RLR_OFFSET    0x0008  /* Reload register (32-bit) */
 #define STM32_IWDG_SR_OFFSET     0x000c  /* Status register (32-bit) */
-#if defined(CONFIG_STM32_STM32F30XX)
-#  define STM32_IWDG_WINR_OFFSET 0x000c  /* Window register (32-bit) */
-#endif
+#define STM32_IWDG_WINR_OFFSET   0x0010  /* Window register (32-bit) */
 
 #define STM32_WWDG_CR_OFFSET     0x0000  /* Control Register (32-bit) */
 #define STM32_WWDG_CFR_OFFSET    0x0004  /* Configuration register (32-bit) */
@@ -55,9 +53,7 @@
 #define STM32_IWDG_PR            (STM32_IWDG_BASE+STM32_IWDG_PR_OFFSET)
 #define STM32_IWDG_RLR           (STM32_IWDG_BASE+STM32_IWDG_RLR_OFFSET)
 #define STM32_IWDG_SR            (STM32_IWDG_BASE+STM32_IWDG_SR_OFFSET)
-#if defined(CONFIG_STM32_STM32F30XX)
-#  define STM32_IWDG_WINR        (STM32_IWDG_BASE+STM32_IWDG_WINR_OFFSET)
-#endif
+#define STM32_IWDG_WINR          (STM32_IWDG_BASE+STM32_IWDG_WINR_OFFSET)
 
 #define STM32_WWDG_CR            (STM32_WWDG_BASE+STM32_WWDG_CR_OFFSET)
 #define STM32_WWDG_CFR           (STM32_WWDG_BASE+STM32_WWDG_CFR_OFFSET)
@@ -77,15 +73,17 @@
 
 /* Prescaler register (32-bit) */
 
-#define IWDG_PR_SHIFT            (0)       /* Bits 2-0: Prescaler divider */
-#define IWDG_PR_MASK             (7 << IWDG_PR_SHIFT)
-#  define IWDG_PR_DIV4           (0 << IWDG_PR_SHIFT) /* 000: divider /4 */
-#  define IWDG_PR_DIV8           (1 << IWDG_PR_SHIFT) /* 001: divider /8 */
-#  define IWDG_PR_DIV16          (2 << IWDG_PR_SHIFT) /* 010: divider /16 */
-#  define IWDG_PR_DIV32          (3 << IWDG_PR_SHIFT) /* 011: divider /32 */
-#  define IWDG_PR_DIV64          (4 << IWDG_PR_SHIFT) /* 100: divider /64 */
-#  define IWDG_PR_DIV128         (5 << IWDG_PR_SHIFT) /* 101: divider /128 */
-#  define IWDG_PR_DIV256         (6 << IWDG_PR_SHIFT) /* 11x: divider /256 */
+#define IWDG_PR_SHIFT            (0)       /* Bits 3-0: Prescaler divider */
+#define IWDG_PR_MASK             (15 << IWDG_PR_SHIFT)
+#  define IWDG_PR_DIV4           ( 0 << IWDG_PR_SHIFT) /* 0000: divider /4 */
+#  define IWDG_PR_DIV8           ( 1 << IWDG_PR_SHIFT) /* 0001: divider /8 */
+#  define IWDG_PR_DIV16          ( 2 << IWDG_PR_SHIFT) /* 0010: divider /16 */
+#  define IWDG_PR_DIV32          ( 3 << IWDG_PR_SHIFT) /* 0011: divider /32 */
+#  define IWDG_PR_DIV64          ( 4 << IWDG_PR_SHIFT) /* 0100: divider /64 */
+#  define IWDG_PR_DIV128         ( 5 << IWDG_PR_SHIFT) /* 0101: divider /128 */
+#  define IWDG_PR_DIV256         ( 6 << IWDG_PR_SHIFT) /* 0110: divider /256 */
+#  define IWDG_PR_DIV512         ( 7 << IWDG_PR_SHIFT) /* 0111: divider /512 */
+#  define IWDG_PR_DIV1024        ( 8 << IWDG_PR_SHIFT) /* 1xxx: divider /1024 */
 
 /* Reload register (32-bit) */
 
@@ -98,17 +96,12 @@
 
 #define IWDG_SR_PVU              (1 << 0)  /* Bit 0: Watchdog prescaler value update */
 #define IWDG_SR_RVU              (1 << 1)  /* Bit 1: Watchdog counter reload value update */
-
-#if defined(CONFIG_STM32_STM32F30XX)
-#  define IWDG_SR_WVU            (1 << 2)  /* Bit 2:  */
-#endif
+#define IWDG_SR_WVU              (1 << 2)  /* Bit 2: Watchdog counter window value update */
 
 /* Window register (32-bit) */
 
-#if defined(CONFIG_STM32_STM32F30XX)
-#  define IWDG_WINR_SHIFT        (0)
-#  define IWDG_WINR_MASK         (0x0fff << IWDG_WINR_SHIFT)
-#endif
+#define IWDG_WINR_SHIFT          (0)
+#define IWDG_WINR_MASK           (0x0fff << IWDG_WINR_SHIFT)
 
 /* Control Register (32-bit) */
 
@@ -122,12 +115,16 @@
 
 #define WWDG_CFR_W_SHIFT         (0)       /* Bits 6:0 W[6:0] 7-bit window value */
 #define WWDG_CFR_W_MASK          (0x7f << WWDG_CFR_W_SHIFT)
-#define WWDG_CFR_WDGTB_SHIFT     (7)       /* Bits 8:7 [1:0]: Timer Base */
-#define WWDG_CFR_WDGTB_MASK      (3 << WWDG_CFR_WDGTB_SHIFT)
-#  define WWDG_CFR_PCLK1         (0 << WWDG_CFR_WDGTB_SHIFT) /* 00: CK Counter Clock (PCLK1 div 4096) div 1 */
-#  define WWDG_CFR_PCLK1d2       (1 << WWDG_CFR_WDGTB_SHIFT) /* 01: CK Counter Clock (PCLK1 div 4096) div 2 */
-#  define WWDG_CFR_PCLK1d4       (2 << WWDG_CFR_WDGTB_SHIFT) /* 10: CK Counter Clock (PCLK1 div 4096) div 4 */
-#  define WWDG_CFR_PCLK1d8       (3 << WWDG_CFR_WDGTB_SHIFT) /* 11: CK Counter Clock (PCLK1 div 4096) div 8 */
+#define WWDG_CFR_WDGTB_SHIFT     (11)      /* Bits 13:11 [2:0]: Timer Base */
+#define WWDG_CFR_WDGTB_MASK      (7 << WWDG_CFR_WDGTB_SHIFT)
+#  define WWDG_CFR_PCLK1         (0 << WWDG_CFR_WDGTB_SHIFT) /* 000: CK Counter Clock (PCLK1 div 4096) div 1 */
+#  define WWDG_CFR_PCLK1d2       (1 << WWDG_CFR_WDGTB_SHIFT) /* 001: CK Counter Clock (PCLK1 div 4096) div 2 */
+#  define WWDG_CFR_PCLK1d4       (2 << WWDG_CFR_WDGTB_SHIFT) /* 010: CK Counter Clock (PCLK1 div 4096) div 4 */
+#  define WWDG_CFR_PCLK1d8       (3 << WWDG_CFR_WDGTB_SHIFT) /* 011: CK Counter Clock (PCLK1 div 4096) div 8 */
+#  define WWDG_CFR_PCLK1d16      (4 << WWDG_CFR_WDGTB_SHIFT) /* 100: CK Counter Clock (PCLK1 div 4096) div 16 */
+#  define WWDG_CFR_PCLK1d32      (5 << WWDG_CFR_WDGTB_SHIFT) /* 101: CK Counter Clock (PCLK1 div 4096) div 32 */
+#  define WWDG_CFR_PCLK1d64      (6 << WWDG_CFR_WDGTB_SHIFT) /* 110: CK Counter Clock (PCLK1 div 4096) div 64 */
+#  define WWDG_CFR_PCLK1d128     (7 << WWDG_CFR_WDGTB_SHIFT) /* 111: CK Counter Clock (PCLK1 div 4096) div 128 */
 
 #define WWDG_CFR_EWI             (1 << 9)  /* Bit 9: Early Wakeup Interrupt */
 
