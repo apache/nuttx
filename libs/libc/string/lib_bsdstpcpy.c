@@ -56,6 +56,23 @@ no_builtin("stpcpy")
 nosanitize_address
 FAR char *stpcpy(FAR char *dest, FAR const char *src)
 {
+  /* Walk a pair that agrees about where a boundary falls up to it, so that
+   * the word path below is reached even when the caller aligned neither
+   * pointer.  The terminator is left for the byte loop to copy.
+   */
+
+  if (!MISALIGNED(src, dest) && UNALIGNED_X(src))
+    {
+      while (*src != '\0')
+        {
+          *dest++ = *src++;
+          if (!UNALIGNED_X(src))
+            {
+              break;
+            }
+        }
+    }
+
   /* If src or dest is unaligned, then copy bytes. */
 
   if (!UNALIGNED(src, dest))

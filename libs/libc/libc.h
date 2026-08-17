@@ -178,6 +178,16 @@
 
 #define UNALIGNED(x, y) ((UNALIGNED_X(x)) | (UNALIGNED_X(y)))
 
+/* Nonzero if x and y disagree about where a "libc_data_t" boundary falls.
+ * A pair that agrees can be walked up to the boundary a byte at a time and
+ * handled a word at a time from there, since aligning one aligns the
+ * other.  A pair that disagrees cannot, because no single boundary serves
+ * both.
+ */
+
+#define MISALIGNED(x, y) \
+  ((((uintptr_t)(x)) ^ ((uintptr_t)(y))) & (sizeof(libc_data_t) - 1))
+
 #define ALIGNED(x) \
   (((libc_data_t)(uintptr_t)(x) & (sizeof(libc_data_t) - 1)) == 0)
 

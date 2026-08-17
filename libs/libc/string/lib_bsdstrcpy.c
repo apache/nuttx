@@ -58,6 +58,23 @@ FAR char *strcpy(FAR char *dest, FAR const char *src)
   FAR char *dst0 = dest;
   FAR const char *src0 = src;
 
+  /* Walk a pair that agrees about where a boundary falls up to it, so that
+   * the word path below is reached even when the caller aligned neither
+   * pointer.  The terminator is left for the byte loop to copy.
+   */
+
+  if (!MISALIGNED(src0, dst0) && UNALIGNED_X(src0))
+    {
+      while (*src0 != '\0')
+        {
+          *dst0++ = *src0++;
+          if (!UNALIGNED_X(src0))
+            {
+              break;
+            }
+        }
+    }
+
   /* If SRC or DEST is unaligned, then copy bytes. */
 
   if (!UNALIGNED(src0, dst0))

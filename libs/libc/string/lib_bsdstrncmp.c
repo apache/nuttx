@@ -48,6 +48,31 @@ int strncmp(FAR const char *cs, FAR const char *ct, size_t nb)
       return 0;
     }
 
+  /* Walk a pair that agrees about where a boundary falls up to it, so that
+   * the word path below is reached even when the caller aligned neither
+   * pointer.  A difference found on the way stops the walk and is reported
+   * by the byte loop; the count running out or a terminator means the
+   * strings are equal over the whole comparison.
+   */
+
+  if (!MISALIGNED(cs, ct) && UNALIGNED_X(cs))
+    {
+      while (*cs == *ct)
+        {
+          if (--nb == 0 || *cs == '\0')
+            {
+              return 0;
+            }
+
+          cs++;
+          ct++;
+          if (!UNALIGNED_X(cs))
+            {
+              break;
+            }
+        }
+    }
+
   /* If cs or ct are unaligned, then compare bytes. */
 
   if (!UNALIGNED(cs, ct))
