@@ -317,6 +317,8 @@ int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
 #endif
   int i;
 
+  DEBUGASSERT(dev != NULL);
+
   /* Walk through the ARP mapping table and try to find an entry to
    * update. If none is found, the IP -> MAC address mapping is
    * inserted in the ARP table.
