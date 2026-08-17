@@ -77,6 +77,7 @@ static void task_init_stream(FAR struct streamlist *list)
       stream[i].fs_flags   |= __FS_FLAG_LBF; /* Line buffering */
 
 #  endif /* CONFIG_STDIO_LINEBUFFER */
+#endif /* !CONFIG_STDIO_DISABLE_BUFFERING && CONFIG_STDIO_BUFFER_SIZE > 0 */
 
       /* Save the file description and open flags.  Setting the
        * file descriptor locks this stream.
@@ -84,14 +85,6 @@ static void task_init_stream(FAR struct streamlist *list)
 
       stream[i].fs_cookie   = (FAR void *)(intptr_t)i;
       stream[i].fs_oflags   = i ? O_WRONLY : O_RDONLY;
-
-      /* Assign custom callbacks to NULL. */
-
-      stream[i].fs_iofunc.read  = NULL;
-      stream[i].fs_iofunc.write = NULL;
-      stream[i].fs_iofunc.seek  = NULL;
-      stream[i].fs_iofunc.close = NULL;
-#endif /* !CONFIG_STDIO_DISABLE_BUFFERING && CONFIG_STDIO_BUFFER_SIZE > 0 */
     }
 }
 #endif
