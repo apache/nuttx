@@ -116,6 +116,13 @@ ifeq ($(CONFIG_STM32_PWM),y)
 CHIP_CSRCS += stm32_pwm.c
 endif
 
+ifeq ($(CONFIG_PM),y)
+CHIP_CSRCS += stm32_pmstandby.c stm32_pmstop.c
+ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
+CHIP_CSRCS += stm32_pminitialize.c
+endif
+endif
+
 ifeq ($(CONFIG_STM32_IWDG),y)
 CHIP_CSRCS += stm32_iwdg.c
 endif
