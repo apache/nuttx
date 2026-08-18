@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 
 #ifndef __ASSEMBLY__
+#  include <stdbool.h>
 #  include <stdint.h>
 #endif
 
@@ -102,6 +103,9 @@
 #define STM32_CFGR_PLLSRC        RCC_CFGR_PLLSRC_HSId2       /* Source is HSI/2 */
 #define STM32_PLLSRC_FREQUENCY   (STM32_HSI_FREQUENCY/2)     /* 8MHz / 2 = 4MHz */
 #ifdef CONFIG_STM32_USB
+#  define STM32_USE_CLK48
+#  define STM32_CLK48_SEL         RCC_CFGR3_CLK48_HSI48
+#  define STM32_HSI48_SYNCSRC     SYNCSRC_USB
 #  undef  STM32_CFGR2_PREDIV                                 /* Not used with source HSI/2 */
 #  define STM32_CFGR_PLLMUL      RCC_CFGR_PLLMUL_CLKx12      /* PLLMUL = 12 */
 #  define STM32_PLL_FREQUENCY    (12*STM32_PLLSRC_FREQUENCY) /* PLL VCO Frequency is 48MHz */

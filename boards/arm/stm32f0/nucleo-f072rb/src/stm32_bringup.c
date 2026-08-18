@@ -31,6 +31,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/usb/cdcacm.h>
 
 #include "stm32_i2c.h"
 #include "nucleo-f072rb.h"
@@ -42,6 +43,10 @@
 #undef HAVE_I2C_DRIVER
 #if defined(CONFIG_STM32_I2C1) && defined(CONFIG_I2C_DRIVER)
 #  define HAVE_I2C_DRIVER 1
+#endif
+
+#if defined(CONFIG_CDCACM) && !defined(CONFIG_CDCACM_COMPOSITE)
+#  define HAVE_CDCACM 1
 #endif
 
 /****************************************************************************
@@ -93,6 +98,14 @@ int stm32_bringup(void)
         {
           i2cerr("ERROR: Failed to register I2C1 device: %d\n", ret);
         }
+    }
+#endif
+
+#ifdef HAVE_CDCACM
+  ret = cdcacm_initialize(0, NULL);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to register CDC ACM: %d\n", ret);
     }
 #endif
 
