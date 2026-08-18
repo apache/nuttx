@@ -221,18 +221,18 @@
 #  endif
 #endif /* SPI3 */
 
-#if defined(CONFIG_STM32_SPI1)
-#  ifndef STM32_SPI1_FREQUENCY
-#    error Must define STM32_SPI1_FREQUENCY in board.h
+#if defined(CONFIG_STM32_SPI4)
+#  ifndef STM32_SPI4_FREQUENCY
+#    error Must define STM32_SPI4_FREQUENCY in board.h
 #  else
-#    if STM32_SPI1_FREQUENCY > SPI_MAX_KER_CK
-#      error Not supported SPI1 frequency
+#    if STM32_SPI4_FREQUENCY > SPI_MAX_KER_CK
+#      error Not supported SPI4 frequency
 #    endif
 #  endif
-#  ifndef STM32_RCC_CCIPR3_SPI1SEL
-#    error Must define STM32_RCC_CCIPR3_SPI1SEL in board.h
+#  ifndef STM32_RCC_CCIPR3_SPI4SEL
+#    error Must define STM32_RCC_CCIPR3_SPI4SEL in board.h
 #  endif
-#endif /* SPI1 */
+#endif /* SPI4 */
 
 #if defined(CONFIG_STM32_SPI5)
 #  ifndef STM32_SPI5_FREQUENCY
