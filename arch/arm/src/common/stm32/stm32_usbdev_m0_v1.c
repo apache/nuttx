@@ -3684,20 +3684,19 @@ void arm_usbinitialize(void)
    */
 
   struct stm32_usbdev_s *priv = &g_usbdev;
-  uint32_t regval;
 
   usbtrace(TRACE_DEVINIT, 0);
 
   /* Configure USB GPIO alternate function pins */
-
+#ifndef CONFIG_STM32_STM32L0
   stm32_configgpio(GPIO_USB_DM);
   stm32_configgpio(GPIO_USB_DP);
+#endif
 
-  /* Enable clocking to the USB peripheral */
+  /* Reset the USB peripheral */
 
-  regval  = getreg32(STM32_RCC_APB1RSTR);
-  regval &= ~RCC_APB1ENR_USBEN;
-  putreg32(regval, STM32_RCC_APB1RSTR);
+  modifyreg32(STM32_RCC_APB1RSTR, 0, RCC_APB1RSTR_USBRST);
+  modifyreg32(STM32_RCC_APB1RSTR, RCC_APB1RSTR_USBRST, 0);
 
   /* Power up the USB controller, but leave it in the reset state */
 
