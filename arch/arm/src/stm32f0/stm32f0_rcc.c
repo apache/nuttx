@@ -248,7 +248,7 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR_CAN1EN;
 #endif
 
-#ifdef CONFIG_STM32_CRS
+#if defined(CONFIG_STM32_CRS) || defined(STM32_USE_HSI48)
   /* Clock recovery system clock enable */
 
   regval |= RCC_APB1ENR_CRSEN;
