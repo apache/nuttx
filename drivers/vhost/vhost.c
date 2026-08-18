@@ -419,6 +419,47 @@ int vhost_get_vq_buffers_pa(FAR struct virtqueue *vq,
 }
 
 /****************************************************************************
+ * Name: vhost_foreach_device
+ ****************************************************************************/
+
+int vhost_foreach_device(uint32_t id, vhost_foreach_t handler,
+                         FAR void *arg)
+{
+  FAR struct vhost_device_item_s *item;
+  int ret;
+
+  DEBUGASSERT(handler != NULL);
+
+  ret = nxmutex_lock(&g_vhost_bus.lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Only the probed list is walked: a deferred device has no driver yet, so
+   * hdev->priv does not hold a driver context.
+   */
+
+  dq_for_every_entry(&g_vhost_bus.device, item,
+                     struct vhost_device_item_s, node)
+    {
+      if (item->driver == NULL || item->device->id.device != id)
+        {
+          continue;
+        }
+
+      ret = handler(item->device, arg);
+      if (ret < 0)
+        {
+          break;
+        }
+    }
+
+  nxmutex_unlock(&g_vhost_bus.lock);
+  return ret;
+}
+
+/****************************************************************************
  * Name: vhost_register_driver
  ****************************************************************************/
 
