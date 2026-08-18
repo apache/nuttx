@@ -42,6 +42,30 @@
 
 #define VIRTIOIOC_DUMP        _VIRTIOIOC(1)
 
+/* Run a ping measurement.  arg is a struct virtio_ping_s, which names the
+ * target device, since /dev/virtio is a single global node.
+ */
+
+#define VIRTIOIOC_PING        _VIRTIOIOC(2)
+
+/* Instance name length, NUL included.  The name selects one ping device
+ * out of several and is shown by "virtio dump" / "vhost dump".
+ */
+
+#define VIRTIO_PING_NAMELEN   32
+
+/* Argument to VIRTIOIOC_PING and VHOSTIOC_PING.  Kept beside the commands
+ * it serves, so including this header is enough to issue one.
+ */
+
+struct virtio_ping_s
+{
+  char name[VIRTIO_PING_NAMELEN];  /* Instance name, or "all" */
+  int  times;                      /* Number of ping operations */
+  int  len;                        /* Request length, header included */
+  int  sleep;                      /* Interval between operations, ms */
+};
+
 #ifdef CONFIG_OPENAMP
 
 /****************************************************************************

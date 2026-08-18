@@ -58,6 +58,10 @@ ifeq ($(CONFIG_DRIVERS_VIRTIO_NET),y)
   CSRCS += virtio-net.c
 endif
 
+ifeq ($(CONFIG_DRIVERS_VIRTIO_PING),y)
+  CSRCS += virtio-ping.c
+endif
+
 ifeq ($(CONFIG_DRIVERS_VIRTIO_RNG),y)
   CSRCS += virtio-rng.c
 endif
