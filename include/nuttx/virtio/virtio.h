@@ -49,6 +49,13 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DRIVERS_VIRTIO
+/* Called for each device visited by virtio_foreach_device().  Returning a
+ * negative errno stops the walk and is handed back to the caller.
+ */
+
+typedef CODE int (*virtio_foreach_t)(FAR struct virtio_device *vdev,
+                                     FAR void *arg);
+
 struct virtio_driver
 {
   uint32_t           device;   /* device id */
@@ -236,6 +243,28 @@ int virtio_unregister_device(FAR struct virtio_device *device);
 /* VirtIO driver initailied function, called in NuttX driver_intialize() */
 
 void virtio_register_drivers(void);
+
+/****************************************************************************
+ * Name: virtio_foreach_device
+ *
+ * Description:
+ *   Walk every device on the virtio bus whose device id is 'id' and which a
+ *   driver has claimed, so vdev->priv is that driver's context.  The bus
+ *   lock is held across the walk, which keeps a device from being removed
+ *   underneath the handler.
+ *
+ * Input Parameters:
+ *   id      - Device id to match
+ *   handler - Called once per matching device
+ *   arg     - Opaque argument passed to handler
+ *
+ * Returned Value:
+ *   Zero on success, or the first negative errno a handler returned.
+ *
+ ****************************************************************************/
+
+int virtio_foreach_device(uint32_t id, virtio_foreach_t handler,
+                          FAR void *arg);
 
 /* Buffer map ops for MMIO/PCI with per-process address environments */
 
