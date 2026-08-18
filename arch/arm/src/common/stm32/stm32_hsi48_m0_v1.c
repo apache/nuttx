@@ -145,13 +145,13 @@ void stm32_enable_hsi48(enum syncsrc_e syncsrc)
 
   putreg32(regval, STM32_CRS_CFGR);
 
-  /* Set the AUTOTRIMEN bit the CRS_CR register to enables the automatic
-   * hardware adjustment of TRIM bits according to the measured frequency
-   * error between the selected SYNC event.
+  /* Enable the frequency error counter and automatic trimming.  The counter
+   * measures the error against the selected SYNC event; automatic trimming
+   * adjusts the HSI48 TRIM bits from that measurement.
    */
 
   regval  = getreg32(STM32_CRS_CR);
-  regval |= CRS_CR_AUTOTRIMEN;
+  regval |= CRS_CR_CEN | CRS_CR_AUTOTRIMEN;
   putreg32(regval, STM32_CRS_CR);
 }
 
