@@ -122,6 +122,7 @@ SECTIONS
         _sdata = ABSOLUTE(.);
         *(.data .data.*)
         *(.ldata .ldata.*)
+        *(.PyRuntime)
         *(.gnu.linkonce.d.*)
         CONSTRUCTORS
         . = ALIGN(4);

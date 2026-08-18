@@ -169,6 +169,23 @@ ostest
 The "standard" NuttX examples/ostest configuration with
 the default console on legacy UART0 port (base=0x3f8)
 
+python
+------
+
+This configuration runs the CPython interpreter (``apps/interpreters/python``)
+with SMP and networking (e1000) enabled.  It works only with the Make-based
+build system.
+
+Command to run the image with user-mode networking::
+
+  qemu-system-x86_64 -m 2G -smp 4 -cpu host -enable-kvm \
+  -kernel nuttx -nographic -serial mon:stdio \
+  -device e1000,netdev=u0 -netdev user,id=u0
+
+Then start the interpreter from NSH::
+
+  nsh> python
+
 jumbo
 -----
 
