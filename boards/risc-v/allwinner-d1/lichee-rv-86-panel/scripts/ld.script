@@ -1,0 +1,95 @@
+/****************************************************************************
+ * boards/risc-v/allwinner-d1/lichee-rv-86-panel/scripts/ld.script
+ * SPDX-License-Identifier: Apache-2.0
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+OUTPUT_ARCH("riscv")
+ENTRY(__start)
+
+SECTIONS
+{
+  . = CONFIG_RAM_START;
+
+  .text :
+    {
+      _stext = .;
+      *(.text)
+      *(.text.*)
+      *(.gnu.warning)
+      *(.stub)
+      *(.gnu.linkonce.t.*)
+      *(.init)
+      *(.fini)
+      _etext = .;
+    }
+
+  .init_section :
+    {
+      _sinit = ABSOLUTE(.);
+      KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*)
+             SORT_BY_INIT_PRIORITY(.ctors.*)))
+      KEEP(*(.init_array .ctors))
+      _einit = ABSOLUTE(.);
+    }
+
+  .rodata :
+    {
+      _srodata = .;
+      *(.rodata)
+      *(.rodata1)
+      *(.rodata.*)
+      *(.gnu.linkonce.r*)
+      _erodata = .;
+    }
+
+  .tdata :
+    {
+      _stdata = ABSOLUTE(.);
+      *(.tdata .tdata.* .gnu.linkonce.td.*)
+      _etdata = ABSOLUTE(.);
+    }
+
+  .tbss :
+    {
+      _stbss = ABSOLUTE(.);
+      *(.tbss .tbss.* .gnu.linkonce.tb.* .tcommon)
+      _etbss = ABSOLUTE(.);
+    }
+
+  _eronly = ABSOLUTE(.);
+
+  .data :
+    {
+      _sdata = .;
+      *(.data)
+      *(.data1)
+      *(.data.*)
+      *(.gnu.linkonce.d*)
+      . = ALIGN(8);
+      _edata = .;
+    }
+
+  .bss :
+    {
+      _sbss = .;
+      *(.bss)
+      *(.bss.*)
+      *(.sbss)
+      *(.sbss.*)
+      *(.gnu.linkonce.b*)
+      *(COMMON)
+      . = ALIGN(32);
+      _ebss = .;
+    }
+
+  .stab 0 : { *(.stab) }
+  .stabstr 0 : { *(.stabstr) }
+  .comment 0 : { *(.comment) }
+  .debug_abbrev 0 : { *(.debug_abbrev) }
+  .debug_info 0 : { *(.debug_info) }
+  .debug_line 0 : { *(.debug_line) }
+  .debug_pubnames 0 : { *(.debug_pubnames) }
+  .debug_aranges 0 : { *(.debug_aranges) }
+}

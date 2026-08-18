@@ -1,0 +1,11 @@
+############################################################################
+# arch/risc-v/src/allwinner-d1/Make.defs
+# SPDX-License-Identifier: Apache-2.0
+############################################################################
+
+include common/Make.defs
+
+HEAD_ASRC = allwinner_d1_head.S
+
+CHIP_CSRCS  = allwinner_d1_start.c allwinner_d1_irq_dispatch.c
+CHIP_CSRCS += allwinner_d1_irq.c allwinner_d1_timerisr.c

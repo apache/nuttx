@@ -2416,6 +2416,13 @@ config ARCH_BOARD_SG2000_MILKV_DUOS
 		This options selects support for NuttX on Milk-V Duo S based
 		on SOPHGO SG2000 SoC.
 
+config ARCH_BOARD_LICHEE_RV_86_PANEL
+	bool "Sipeed Lichee RV 86 Panel"
+	depends on ARCH_CHIP_ALLWINNER_D1
+	---help---
+		This selects the Sipeed Lichee RV 86 Panel / Lichee RV D1
+		platform based on the Allwinner D1 SoC.
+
 config ARCH_BOARD_EIC7700X_STARPRO64
 	bool "PINE64 StarPro64"
 	depends on ARCH_CHIP_EIC7700X
@@ -4066,6 +4073,7 @@ config ARCH_BOARD
 	default "canmv230"                     if ARCH_BOARD_K230_CANMV
 	default "ox64"                         if ARCH_BOARD_BL808_OX64
 	default "milkv_duos"                   if ARCH_BOARD_SG2000_MILKV_DUOS
+	default "lichee-rv-86-panel"           if ARCH_BOARD_LICHEE_RV_86_PANEL
 	default "starpro64"                    if ARCH_BOARD_EIC7700X_STARPRO64
 	default "eic7700-evb"                  if ARCH_BOARD_EIC7700X_EVB
 	default "sabre-6quad"                  if ARCH_BOARD_SABRE_6QUAD
@@ -5166,6 +5174,9 @@ source "boards/risc-v/bl808/ox64/Kconfig"
 endif
 if ARCH_BOARD_SG2000_MILKV_DUOS
 source "boards/risc-v/sg2000/milkv_duos/Kconfig"
+endif
+if ARCH_BOARD_LICHEE_RV_86_PANEL
+source "boards/risc-v/allwinner-d1/lichee-rv-86-panel/Kconfig"
 endif
 if ARCH_BOARD_EIC7700X_STARPRO64
 source "boards/risc-v/eic7700x/starpro64/Kconfig"
