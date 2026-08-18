@@ -97,18 +97,11 @@ int nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp)
       return -EINVAL;
     }
 
-  if (clock_id == CLOCK_MONOTONIC)
+  if (clock_id == CLOCK_MONOTONIC || clock_id == CLOCK_BOOTTIME)
     {
-      /* The the time elapsed since the timer was initialized at power on
-       * reset, excluding the time that the system is suspended.
-       */
-
-      clock_ticks2time(tp, clock_get_sched_ticks());
-    }
-  else if (clock_id == CLOCK_BOOTTIME)
-    {
-      /* The the time elapsed since the timer was initialized at power on
-       * reset, including the time that the system is suspended..
+      /* The time elapsed since the timer was initialized at power on
+       * reset.  Must be a live read: the sched tick counter is frozen
+       * while no timeout is armed on SCHED_TICKLESS.
        */
 
       clock_systime_timespec(tp);
