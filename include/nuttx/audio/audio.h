@@ -543,6 +543,10 @@
 #define AUDIO_STATE_DRAINING       4
 #define AUDIO_STATE_RUNNING        5
 
+/* Cross-Core Codec Parameters **********************************************/
+
+#define AUDIO_CODEC_EXTRADATA_MAX   64
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -700,6 +704,10 @@ struct audio_codec_s
   uint32_t format;
   uint32_t align;
   union audio_codec_options_u options;
+
+  uint32_t frame_samples;
+  uint32_t extradata_size;
+  uint8_t  extradata[AUDIO_CODEC_EXTRADATA_MAX];
 };
 
 struct audio_caps_s
