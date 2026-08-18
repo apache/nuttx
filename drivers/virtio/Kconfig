@@ -126,6 +126,18 @@ config DRIVERS_VIRTIO_NET_BUFNUM
 		If this value equals to 0, use CONFIG_IOB_NBUFFERS / 4 for each.
 		Normally we get just a little improvement for >8 buffers, and very little for >32.
 
+config DRIVERS_VIRTIO_PING
+	bool "Virtio ping support"
+	default n
+	select DRIVERS_VIRTIO
+	---help---
+		Enable the virtio (driver-side) ping backend, a diagnostic-only
+		device used to measure VirtIO layer connectivity, round trip latency
+		and throughput.  Unlike RPMSG ping, this measures the bare virtqueue
+		path, so the two can be compared to attribute cross core cost
+		between the vring/notification layer and the RPMSG framework.
+		Requires the peer core to enable DRIVERS_VHOST_PING.
+
 config DRIVERS_VIRTIO_RNG
 	bool "Virtio rng support"
 	default n

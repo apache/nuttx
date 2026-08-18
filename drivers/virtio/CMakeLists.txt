@@ -57,6 +57,10 @@ if(CONFIG_DRIVERS_VIRTIO_NET)
   list(APPEND SRCS virtio-net.c)
 endif()
 
+if(CONFIG_DRIVERS_VIRTIO_PING)
+  list(APPEND SRCS virtio-ping.c)
+endif()
+
 if(CONFIG_DRIVERS_VIRTIO_RNG)
   list(APPEND SRCS virtio-rng.c)
 endif()

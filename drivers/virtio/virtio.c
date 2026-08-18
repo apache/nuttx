@@ -36,6 +36,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/virtio/virtio.h>
+#include <nuttx/virtio/virtio-ping.h>
 
 #include "virtio-blk.h"
 #include "virtio-crypto.h"
@@ -44,6 +45,7 @@
 #include "virtio-i2c.h"
 #include "virtio-input.h"
 #include "virtio-net.h"
+#include "virtio-ping.h"
 #include "virtio-rng.h"
 #include "virtio-rpmb.h"
 #include "virtio-rpmsg.h"
@@ -193,6 +195,13 @@ static int virtio_dev_ioctl(FAR struct file *filep, int cmd,
         ret = OK;
         break;
 
+#ifdef CONFIG_DRIVERS_VIRTIO_PING
+      case VIRTIOIOC_PING:
+        ret = virtio_ping((FAR const struct virtio_ping_s *)
+                          (uintptr_t)arg);
+        break;
+#endif
+
       default:
         break;
     }
@@ -332,6 +341,14 @@ void virtio_register_drivers(void)
   if (ret < 0)
     {
       vrterr("virtio_register_net_driver failed, ret=%d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DRIVERS_VIRTIO_PING
+  ret = virtio_register_ping_driver();
+  if (ret < 0)
+    {
+      vrterr("virtio_register_ping_driver failed, ret=%d\n", ret);
     }
 #endif
 
