@@ -146,9 +146,9 @@ static bool rpmsgfs_ns_match(FAR struct rpmsg_device *rdev,
 static void rpmsgfs_ns_bind(FAR struct rpmsg_device *rdev,
                             FAR void *priv_, FAR const char *name,
                             uint32_t dest);
-static int  rpmsgfs_ept_cb(FAR struct rpmsg_endpoint *ept,
-                           FAR void *data, size_t len, uint32_t src,
-                           FAR void *priv);
+static int  rpmsgfs_server_ept_cb(FAR struct rpmsg_endpoint *ept,
+                                  FAR void *data, size_t len, uint32_t src,
+                                  FAR void *priv);
 
 /****************************************************************************
  * Private Data
@@ -1078,7 +1078,7 @@ static void rpmsgfs_ns_bind(FAR struct rpmsg_device *rdev,
 
   ret = rpmsg_create_ept(&priv->ept, rdev, name,
                          RPMSG_ADDR_ANY, dest,
-                         rpmsgfs_ept_cb, rpmsg_destroy_ept);
+                         rpmsgfs_server_ept_cb, rpmsg_destroy_ept);
   if (ret)
     {
       nxmutex_destroy(&priv->lock);
@@ -1086,9 +1086,9 @@ static void rpmsgfs_ns_bind(FAR struct rpmsg_device *rdev,
     }
 }
 
-static int rpmsgfs_ept_cb(FAR struct rpmsg_endpoint *ept,
-                          FAR void *data, size_t len, uint32_t src,
-                          FAR void *priv)
+static int rpmsgfs_server_ept_cb(FAR struct rpmsg_endpoint *ept,
+                                 FAR void *data, size_t len, uint32_t src,
+                                 FAR void *priv)
 {
   struct rpmsgfs_header_s *header = data;
   uint32_t command = header->command;
