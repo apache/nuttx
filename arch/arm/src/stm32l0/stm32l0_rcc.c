@@ -319,7 +319,9 @@ static inline void rcc_enableapb2(void)
 
   regval = getreg32(STM32_RCC_APB2ENR);
 
-#ifdef CONFIG_STM32_SYSCFG
+  /* VREFINT is configured through SYSCFG_CFGR3, so its clock is required */
+
+#if defined(CONFIG_STM32_SYSCFG) || defined(CONFIG_STM32_VREFINT)
   /* SYSCFG clock */
 
   regval |= RCC_APB2ENR_SYSCFGEN;
