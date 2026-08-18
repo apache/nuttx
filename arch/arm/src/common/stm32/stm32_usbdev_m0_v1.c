@@ -2390,7 +2390,14 @@ static int stm32_usb_interrupt(int irq, void *context, void *arg)
 
       /* And handle the completion event */
 
-      stm32_epdone(priv, epno);
+      if (epno == EP0)
+        {
+          stm32_ep0done(priv, istr);
+        }
+      else
+        {
+          stm32_epdone(priv, epno);
+        }
 
       /* Fetch the status again for the next time through the loop */
 
