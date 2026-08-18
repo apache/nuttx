@@ -270,6 +270,12 @@ static const struct netdev_ops_s g_igc_ops =
  * Private Functions
  *****************************************************************************/
 
+/* The device requires 32-bit register accesses, but volatile does not pin
+ * the access width: GCC 16 narrows a 32-bit load feeding a single bit test
+ * into a byte load.  Launder the value through a register with an empty
+ * asm, on loads and stores both, to force the full-width access.
+ */
+
 /*****************************************************************************
  * Name: igc_getreg_mem
  *****************************************************************************/
@@ -277,8 +283,11 @@ static const struct netdev_ops_s g_igc_ops =
 static uint32_t igc_getreg_mem(FAR struct igc_driver_s *priv,
                                unsigned int offset)
 {
-  uintptr_t addr = priv->base + offset;
-  return *((FAR volatile uint32_t *)addr);
+  uintptr_t addr   = priv->base + offset;
+  uint32_t  regval = *((FAR volatile uint32_t *)addr);
+
+  __asm__ __volatile__("" : "+r"(regval));
+  return regval;
 }
 
 /*****************************************************************************
@@ -290,6 +299,8 @@ static void igc_putreg_mem(FAR struct igc_driver_s *priv,
                            uint32_t value)
 {
   uintptr_t addr = priv->base + offset;
+
+  __asm__ __volatile__("" : "+r"(value));
   *((FAR volatile uint32_t *)addr) = value;
 }
 
