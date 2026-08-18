@@ -37,6 +37,7 @@
 #include <nuttx/queue.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/vhost/vhost.h>
+#include <nuttx/virtio/virtio-ping.h>
 
 #ifdef CONFIG_DRIVERS_VHOST_NET
 #  include "vhost-net.h"
@@ -47,6 +48,7 @@
 #include "vhost-crypto.h"
 #include "vhost-gpio.h"
 #include "vhost-i2c.h"
+#include "vhost-ping.h"
 #include "vhost-spi.h"
 #include "vhost-serial.h"
 #include "vhost-rng.h"
@@ -207,6 +209,13 @@ static int vhost_dev_ioctl(FAR struct file *filep, int cmd,
         vhost_dump((FAR const char *)(uintptr_t)arg);
         ret = OK;
         break;
+
+#ifdef CONFIG_DRIVERS_VHOST_PING
+      case VHOSTIOC_PING:
+        ret = vhost_ping((FAR const struct vhost_ping_s *)
+                         (uintptr_t)arg);
+        break;
+#endif
 
       default:
         break;
@@ -746,6 +755,14 @@ void vhost_register_drivers(void)
   if (ret < 0)
     {
       vhosterr("vhost_register_rpmb_driver failed, ret=%d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DRIVERS_VHOST_PING
+  ret = vhost_register_ping_driver();
+  if (ret < 0)
+    {
+      vhosterr("vhost_register_ping_driver failed, ret=%d\n", ret);
     }
 #endif
 

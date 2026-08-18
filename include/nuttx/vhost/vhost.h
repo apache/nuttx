@@ -43,10 +43,12 @@
 
 /* VHost ioctl command definitions.  They carry the same values as the
  * VirtIO ones, so one command number drives both /dev/virtio and
- * /dev/vhost.
+ * /dev/vhost.  The PING argument is a struct virtio_ping_s, which names
+ * the target device since both nodes are single and global.
  */
 
 #define VHOSTIOC_DUMP         VIRTIOIOC_DUMP
+#define VHOSTIOC_PING         VIRTIOIOC_PING
 
 /****************************************************************************
  * Public Type Definitions

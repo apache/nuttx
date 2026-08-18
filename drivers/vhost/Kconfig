@@ -97,6 +97,17 @@ config DRIVERS_VHOST_BLK_STACKSIZE
 
 endif # DRIVERS_VHOST_BLK
 
+config DRIVERS_VHOST_PING
+	bool "Virtual Host Ping Device Support"
+	default n
+	select DRIVERS_VHOST
+	---help---
+		Enable the vhost (device-side) ping backend for the VirtIO ping
+		device (vendor-local device ID 63).  It answers each request from
+		the driver side with a response on the other virtqueue, and can
+		start a ping itself through VHOSTIOC_PING on /dev/vhost.  It is the
+		peer of DRIVERS_VIRTIO_PING and is diagnostic-only.
+
 config DRIVERS_VHOST_RNG
 	bool "Virtual Host Rng Device Support"
 	default n
