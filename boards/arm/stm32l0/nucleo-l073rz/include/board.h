@@ -94,6 +94,11 @@
 #  define STM32_HSI48_SYNCSRC   SYNCSRC_USB
 #endif
 
+#if defined(CONFIG_STM32_USB) && defined(CONFIG_USBDEV)
+int stm32_usb_setpullup(bool enable);
+bool stm32_usb_pullup_enabled(void);
+#endif
+
 /* TODO: timers */
 
 /* LED definitions **********************************************************/

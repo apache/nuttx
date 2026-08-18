@@ -31,6 +31,7 @@
 
 #include <nuttx/board.h>
 #include <nuttx/leds/userled.h>
+#include <nuttx/usb/cdcacm.h>
 
 #include "nucleo-l073rz.h"
 
@@ -48,6 +49,10 @@
 #if defined(CONFIG_DAC)
 #  define HAVE_DAC1 1
 #  define HAVE_DAC2 1
+#endif
+
+#if defined(CONFIG_CDCACM) && !defined(CONFIG_CDCACM_COMPOSITE)
+#  define HAVE_CDCACM 1
 #endif
 
 /****************************************************************************
@@ -77,6 +82,14 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
       return ret;
+    }
+#endif
+
+#ifdef HAVE_CDCACM
+  ret = cdcacm_initialize(0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register CDC ACM: %d\n", ret);
     }
 #endif
 
