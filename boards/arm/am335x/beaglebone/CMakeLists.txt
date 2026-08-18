@@ -1,5 +1,5 @@
 # ##############################################################################
-# arch/arm/src/am335x/CMakeLists.txt
+# boards/arm/am335x/beaglebone/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,35 +20,4 @@
 #
 # ##############################################################################
 
-# AM335x-specific C source files
-
-set(SRCS
-    am335x_boot.c
-    am335x_clockconfig.c
-    am335x_pinmux.c
-    am335x_irq.c
-    am335x_gpio.c
-    am335x_lowputc.c
-    am335x_serial.c
-    am335x_wdog.c
-    am335x_sysclk.c
-    am335x_i2c.c
-    am335x_can.c)
-
-if(NOT CONFIG_SCHED_TICKLESS)
-  list(APPEND SRCS am335x_timerisr.c)
-endif()
-
-if(CONFIG_AM335X_GPIO_IRQ)
-  list(APPEND SRCS am335x_gpioirq.c)
-endif()
-
-if(CONFIG_AM335X_LCDC)
-  list(APPEND SRCS am335x_lcdc.c am335x_edid.c)
-endif()
-
-if(CONFIG_MM_PGALLOC)
-  list(APPEND SRCS am335x_pgalloc.c)
-endif()
-
-target_sources(arch PRIVATE ${SRCS})
+add_subdirectory(src)
