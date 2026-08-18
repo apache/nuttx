@@ -1,5 +1,5 @@
 ############################################################################
-# arch/arm/src/am335x/Make.defs
+# boards/arm/am335x/beaglebone/src/Makefile
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,26 +20,8 @@
 #
 ############################################################################
 
-include armv7-a/Make.defs
+include $(TOPDIR)/Make.defs
 
-# AM335x-specific C source files
+CSRCS = am335x_boot.c am335x_bringup.c am335x_leds.c
 
-CHIP_CSRCS  = am335x_boot.c am335x_clockconfig.c am335x_pinmux.c am335x_irq.c
-CHIP_CSRCS += am335x_gpio.c am335x_lowputc.c am335x_serial.c am335x_wdog.c
-CHIP_CSRCS += am335x_sysclk.c am335x_i2c.c am335x_can.c
-
-ifneq ($(CONFIG_SCHED_TICKLESS),y)
-CHIP_CSRCS += am335x_timerisr.c
-endif
-
-ifeq ($(CONFIG_AM335X_GPIO_IRQ),y)
-CHIP_CSRCS += am335x_gpioirq.c
-endif
-
-ifeq ($(CONFIG_AM335X_LCDC),y)
-CHIP_CSRCS += am335x_lcdc.c am335x_edid.c
-endif
-
-ifeq ($(CONFIG_MM_PGALLOC),y)
-CHIP_CSRCS += am335x_pgalloc.c
-endif
+include $(TOPDIR)/boards/Board.mk

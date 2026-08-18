@@ -1702,6 +1702,15 @@ config ARCH_BOARD_PCDUINO_A10
 		the differences are cosmetic.  This port was developed on the v1 board,
 		but the others may be compatible.
 
+config ARCH_BOARD_BEAGLEBONE
+	bool "beaglebone"
+	depends on ARCH_CHIP_AM335X
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This is the port of NuttX to the original TI Beaglebone board.
+
 config ARCH_BOARD_BEAGLEBONE_BLACK
 	bool "beaglebone black"
 	depends on ARCH_CHIP_AM335X
@@ -4009,6 +4018,7 @@ config ARCH_BOARD
 	default "or1k"                         if ARCH_BOARD_OR1K
 	default "p112"                         if ARCH_BOARD_P112
 	default "pcduino-a10"                  if ARCH_BOARD_PCDUINO_A10
+	default "beaglebone"                   if ARCH_BOARD_BEAGLEBONE
 	default "beaglebone-black"             if ARCH_BOARD_BEAGLEBONE_BLACK
 	default "pic32mx-starterkit"           if ARCH_BOARD_PIC32MX_STARTERKIT
 	default "pic32mx7mmb"                  if ARCH_BOARD_PIC32MX7MMB
@@ -4235,6 +4245,9 @@ comment "Board-Specific Options"
 
 if ARCH_BOARD_PCDUINO_A10
 source "boards/arm/a1x/pcduino-a10/Kconfig"
+endif
+if ARCH_BOARD_BEAGLEBONE
+source "boards/arm/am335x/beaglebone/Kconfig"
 endif
 if ARCH_BOARD_BEAGLEBONE_BLACK
 source "boards/arm/am335x/beaglebone-black/Kconfig"
