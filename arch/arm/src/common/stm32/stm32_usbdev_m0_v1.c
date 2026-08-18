@@ -81,7 +81,8 @@
 
 /* Initial interrupt mask: Reset + Suspend + Correct Transfer */
 
-#define STM32_CNTR_SETUP     (USB_CNTR_RESETM|USB_CNTR_SUSPM|USB_CNTR_CTRM)
+#define STM32_CNTR_SETUP     (USB_CNTR_RESETM|USB_CNTR_SUSPM|USB_CNTR_ERRM|\
+                              USB_CNTR_PMAOVRN|USB_CNTR_CTRM)
 
 /* Endpoint identifiers. The STM32 supports up to 16 mono-directional or 8
  * bidirectional endpoints.  However, when you take into account PMA buffer
@@ -2422,6 +2423,13 @@ static int stm32_usb_interrupt(int irq, void *context, void *arg)
 
       stm32_reset(priv);
       goto exit_interrupt;
+    }
+
+  if ((istr & (USB_ISTR_ERR | USB_ISTR_PMAOVRN)) != 0)
+    {
+      uint16_t errors = istr & (USB_ISTR_ERR | USB_ISTR_PMAOVRN);
+
+      stm32_putreg((uint16_t)~errors, STM32_USB_ISTR);
     }
 
   /* Handle Wakeup interrupts.
