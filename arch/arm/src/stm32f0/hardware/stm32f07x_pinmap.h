@@ -35,6 +35,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* USB */
+
+#define GPIO_USB_DM                (GPIO_ALT | GPIO_AF0 | GPIO_PORTA | GPIO_PIN11)
+#define GPIO_USB_DP                (GPIO_ALT | GPIO_AF0 | GPIO_PORTA | GPIO_PIN12)
+
 /* Alternate Pin Functions.
  *
  * Alternative pin selections are provided with a numeric suffix like _1, _2,
