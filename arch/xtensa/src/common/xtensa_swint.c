@@ -32,12 +32,26 @@
 
 #include <arch/xtensa/xtensa_specregs.h>
 #include <nuttx/arch.h>
+#include <nuttx/addrenv.h>
 #include <sys/syscall.h>
 
 #include "sched/sched.h"
 #include "chip.h"
 #include "signal/signal.h"
 #include "xtensa.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+/* A stack pointer is 16-byte aligned, and the windowed ABI reserves the
+ * 16 bytes below one as the base save area of the frame that owns it.
+ */
+
+#  define SIGTRAMP_STACK_ALIGN  16
+#  define SIGTRAMP_SAVE_AREA    16
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -102,6 +116,24 @@ int xtensa_swint(int irq, void *context, void *arg)
       case SYS_restore_context:
       case SYS_switch_context:
         {
+#ifdef CONFIG_ARCH_ADDRENV
+          /* Close down the outgoing task's address environment and
+           * instantiate the incoming one.  up_switch_context() is a
+           * SYS_switch_context call on this architecture, so this is the
+           * path every *voluntary* context switch takes -- without it a task
+           * resumed here keeps running against whatever address environment
+           * happened to be resident, which on the ESP32-S3 means the
+           * cache-MMU windows still point at another process's pages.
+           *
+           * addrenv_switch() may change this_task(), because dropping an
+           * address environment can post to the high-priority work queue, so
+           * re-read the TCB afterwards -- as arm_syscall.c does.
+           */
+
+          addrenv_switch(tcb);
+          tcb = this_task();
+#endif
+
           restore_critical_section(tcb, this_cpu());
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
           svcinfo("SYSCALL Return: Context switch!\n");
@@ -150,6 +182,19 @@ int xtensa_swint(int irq, void *context, void *arg)
           /* Save the new syscall nesting level */
 
           rtcb->xcp.nsyscalls = index;
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+          /* Leaving the outermost system call: hand the thread back its own
+           * stack, which it has not touched while the kernel borrowed its
+           * context.
+           */
+
+          if (index == 0 && rtcb->xcp.ustkptr != NULL)
+            {
+              regs[REG_A1]      = (uintptr_t)rtcb->xcp.ustkptr;
+              rtcb->xcp.ustkptr = NULL;
+            }
+#endif
 
           /* Handle any signal actions that were deferred while processing
            * the system call.
@@ -275,7 +320,11 @@ int xtensa_swint(int irq, void *context, void *arg)
            * unprivileged mode.
            */
 
+#if defined(CONFIG_BUILD_PROTECTED)
           regs[REG_PC]        = (uintptr_t)USERSPACE->signal_handler;
+#else
+          regs[REG_PC]        = (uintptr_t)ARCH_DATA_RESERVE->ar_sigtramp;
+#endif
 
           xtensa_lowerprivilege(regs);        /* User mode */
 
@@ -287,6 +336,55 @@ int xtensa_swint(int irq, void *context, void *arg)
           regs[REG_A3]        = regs[REG_A4]; /* signal */
           regs[REG_A4]        = regs[REG_A5]; /* info */
           regs[REG_A5]        = regs[REG_A6]; /* ucontext */
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+          /* The handler runs in user mode, so it has to run on the user
+           * stack.  Signal dispatch always reaches here on the thread's
+           * kernel stack -- up_schedule_sigaction() builds the dispatch
+           * context below the interrupted one -- so put that stack pointer
+           * aside and hand the thread its own stack back for the duration.
+           *
+           * Having a kernel stack at all is what says this is a user
+           * process.  Testing xcp.ustkptr instead would be wrong: that
+           * holds the user stack pointer only while a system call is in
+           * progress, so a signal caught in user code would leave the
+           * handler running on the kernel stack.
+           */
+
+          if (rtcb->xcp.kstack != NULL)
+            {
+              uintptr_t usp;
+
+              rtcb->xcp.kstkptr = (uint32_t *)regs[REG_A1];
+
+              /* The thread's own stack pointer is the one the system call
+               * saved if it was in one, and otherwise the one it was
+               * interrupted with, which up_schedule_sigaction() kept.
+               */
+
+              usp = rtcb->xcp.ustkptr != NULL ?
+                    (uintptr_t)rtcb->xcp.ustkptr :
+                    (uintptr_t)rtcb->xcp.saved_regs[REG_A1];
+
+              /* The siginfo passed in lives on the kernel stack, which the
+               * handler must not reach -- and cannot, once the permission
+               * control is programmed.  Copy it onto the user stack and
+               * hand the handler that copy.
+               *
+               * Skip the base save area the windowed ABI keeps in the
+               * 16 bytes below a stack pointer: it belongs to the frame
+               * that was interrupted.
+               */
+
+              usp = (usp - SIGTRAMP_SAVE_AREA - sizeof(siginfo_t)) &
+                    ~(SIGTRAMP_STACK_ALIGN - 1);
+
+              memcpy((void *)usp, (void *)regs[REG_A4], sizeof(siginfo_t));
+
+              regs[REG_A4]      = usp;            /* info */
+              regs[REG_A1]      = usp;
+            }
+#endif
         }
         break;
 #endif
@@ -313,6 +411,20 @@ int xtensa_swint(int irq, void *context, void *arg)
           xtensa_raiseprivilege(regs);        /* Privileged mode */
 
           rtcb->xcp.sigreturn = 0;
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+          /* The handler is done: return to the kernel stack the signal
+           * dispatch was running on.
+           */
+
+          if (rtcb->xcp.kstack != NULL)
+            {
+              DEBUGASSERT(rtcb->xcp.kstkptr != NULL);
+
+              regs[REG_A1]      = (uintptr_t)rtcb->xcp.kstkptr;
+              rtcb->xcp.kstkptr = NULL;
+            }
+#endif
         }
         break;
 #endif
@@ -351,6 +463,39 @@ int xtensa_swint(int irq, void *context, void *arg)
 
 #ifndef CONFIG_BUILD_FLAT
           xtensa_raiseprivilege(regs);        /* Privileged mode */
+#endif
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+          /* The system call itself runs in this task's own context, so
+           * without help it would run the kernel on the *user* stack.  That
+           * cannot be allowed in a kernel build: the user stack lives in a
+           * cache-MMU window, and any system call that selects a different
+           * address environment -- exec() loading a program, for one --
+           * reprograms that window and the kernel's stack disappears from
+           * under it, taking the frames it is standing on.
+           *
+           * So the outermost system call moves to the thread's kernel
+           * stack, which lives in kernel memory and is unaffected by
+           * address environment changes.  Nested calls are already on it.
+           */
+
+          if (index == 0 && rtcb->xcp.ktopstk != NULL)
+            {
+              rtcb->xcp.ustkptr = (uint32_t *)regs[REG_A1];
+
+              /* Start at the top of the kernel stack -- unless a signal
+               * handler is running, in which case the kernel stack is in
+               * use down to the point the dispatch left it at, and this
+               * call has to continue below that.  Restarting at the top
+               * would overwrite both the suspended signal dispatch and the
+               * context it saved to resume the thread with, which sits in
+               * the topmost frame.
+               */
+
+              regs[REG_A1]      = rtcb->xcp.kstkptr != NULL ?
+                                  (uintptr_t)rtcb->xcp.kstkptr :
+                                  (uintptr_t)rtcb->xcp.ktopstk;
+            }
 #endif
 
           /* Offset A2 to account for the reserved values */
