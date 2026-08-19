@@ -63,6 +63,11 @@ static void local_freectl(FAR struct local_conn_s *conn, int count)
 {
   FAR struct local_conn_s *peer = conn->lc_peer;
 
+  if (peer == NULL)
+    {
+      peer = conn;
+    }
+
   while (count-- > 0)
     {
       file_put(peer->lc_cfps[--peer->lc_cfpcount]);
