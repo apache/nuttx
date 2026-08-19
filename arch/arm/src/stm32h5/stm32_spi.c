@@ -303,6 +303,7 @@ struct stm32_spidev_s
   uint32_t         actual;       /* Actual clock frequency */
   int8_t           nbits;        /* Width of word in bits */
   uint8_t          mode;         /* Mode 0,1,2,3 */
+  uint8_t          depth;        /* Depth of RX/TX fifo in bytes */
 #ifdef CONFIG_PM
   struct pm_callback_s pm_cb;    /* PM callbacks */
 #endif
@@ -455,6 +456,7 @@ static struct stm32_spidev_s g_spi1dev =
   .txsem    = SEM_INITIALIZER(0),
 #endif
   .lock     = NXMUTEX_INITIALIZER,
+  .depth    = 16,
 #ifdef CONFIG_PM
   .pm_cb.prepare = spi_pm_prepare,
 #endif
@@ -527,6 +529,7 @@ static struct stm32_spidev_s g_spi2dev =
   .txsem    = SEM_INITIALIZER(0),
 #endif
   .lock     = NXMUTEX_INITIALIZER,
+  .depth    = 16,
 #ifdef CONFIG_PM
   .pm_cb.prepare = spi_pm_prepare,
 #endif
@@ -599,6 +602,7 @@ static struct stm32_spidev_s g_spi3dev =
   .txsem    = SEM_INITIALIZER(0),
 #endif
   .lock     = NXMUTEX_INITIALIZER,
+  .depth    = 16,
 #ifdef CONFIG_PM
   .pm_cb.prepare = spi_pm_prepare,
 #endif
@@ -671,6 +675,7 @@ static struct stm32_spidev_s g_spi4dev =
   .txsem    = SEM_INITIALIZER(0),
 #endif
   .lock     = NXMUTEX_INITIALIZER,
+  .depth    = 8,
 #ifdef CONFIG_PM
   .pm_cb.prepare = spi_pm_prepare,
 #endif
@@ -743,6 +748,7 @@ static struct stm32_spidev_s g_spi5dev =
   .txsem    = SEM_INITIALIZER(0),
 #endif
   .lock     = NXMUTEX_INITIALIZER,
+  .depth    = 8,
 #ifdef CONFIG_PM
   .pm_cb.prepare = spi_pm_prepare,
 #endif
@@ -816,6 +822,7 @@ static struct stm32_spidev_s g_spi6dev =
   .txsem    = SEM_INITIALIZER(0),
 #endif
   .lock     = NXMUTEX_INITIALIZER,
+  .depth    = 8,
 #ifdef CONFIG_PM
   .pm_cb.prepare = spi_pm_prepare,
 #endif
@@ -2012,6 +2019,17 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
   spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, SPI_CFG1_RXDMAEN |
                                              SPI_CFG1_TXDMAEN, 0);
 
+  /* Clear suspend flag */
+
+  spi_modifyreg(priv, STM32_SPI_IFCR_OFFSET, 0, SPI_IFCR_SUSPC);
+
+  /* Master transfer start */
+
+  if (priv->config != SIMPLEX_RX)
+    {
+      spi_modifyreg(priv, STM32_SPI_CR1_OFFSET, 0, SPI_CR1_CSTART);
+    }
+
   /* 8- or 16-bit mode? */
 
   if (priv->nbits > 8)
@@ -2021,8 +2039,9 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
       const uint16_t *src  = (const uint16_t *)txbuffer;
             uint16_t *dest = (uint16_t *)rxbuffer;
             uint16_t  word;
-
-      while (nwords-- > 0)
+            size_t n_tx_words = 0;
+            size_t n_rx_words = 0;
+      while (n_tx_words < nwords)
         {
           /* Get the next word to write.  Is there a source buffer? */
 
@@ -2037,7 +2056,33 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
 
           /* Exchange one word */
 
-          word = (uint16_t)spi_send(dev, (uint32_t)word);
+          spi_writeword(priv, (uint32_t)word);
+          n_tx_words++;
+
+          /* Only read after we have preloaded the TX Fifo so we can TX/RX
+           * at the same time. This is important at high SPI baud rates
+           */
+
+          if (n_tx_words - n_rx_words == (priv->depth / 2))
+            {
+              word = (uint16_t)spi_readword(priv);
+              n_rx_words++;
+
+              /* Is there a buffer to receive the return value? */
+
+              if (dest)
+                {
+                  *dest++ = word;
+                }
+            }
+        }
+
+      /* Read the last of the data */
+
+      while (n_rx_words < nwords)
+        {
+          word = (uint16_t)spi_readword(priv);
+          n_rx_words++;
 
           /* Is there a buffer to receive the return value? */
 
@@ -2049,13 +2094,13 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
     }
   else
     {
-      /* 8-bit mode */
-
       const uint8_t *src  = (const uint8_t *)txbuffer;
-            uint8_t *dest = (uint8_t *)rxbuffer;
-            uint8_t  word;
+      uint8_t *dest = (uint8_t *)rxbuffer;
+      uint8_t  word;
+      size_t n_tx_words = 0;
+      size_t n_rx_words = 0;
 
-      while (nwords-- > 0)
+      while (n_tx_words < nwords)
         {
           /* Get the next word to write.  Is there a source buffer? */
 
@@ -2070,7 +2115,33 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
 
           /* Exchange one word */
 
-          word = (uint8_t)spi_send(dev, (uint32_t)word);
+          spi_writebyte(priv, word);
+          n_tx_words++;
+
+          /* Only read after we have preloaded the TX Fifo so we can TX/RX
+           * at the same time. This is important at high SPI baud rates
+           */
+
+          if (n_tx_words - n_rx_words == priv->depth)
+            {
+              word = spi_readbyte(priv);
+              n_rx_words++;
+
+              /* Is there a buffer to receive the return value? */
+
+              if (dest)
+                {
+                  *dest++ = word;
+                }
+            }
+        }
+
+      /* Read the last of the data */
+
+      while (n_rx_words < nwords)
+        {
+          word = spi_readbyte(priv);
+          n_rx_words++;
 
           /* Is there a buffer to receive the return value? */
 
@@ -2080,6 +2151,11 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
             }
         }
     }
+
+  /* Suspend */
+
+  spi_modifyreg(priv, STM32_SPI_CR1_OFFSET, 0, SPI_CR1_CSUSP);
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_SUSP) == 0);
 }
 
 #endif /* !CONFIG_STM32_SPI_DMA || CONFIG_STM32_DMACAPABLE ||
