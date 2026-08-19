@@ -9,6 +9,7 @@ Implementation Details
    bottomhalf_interrupt.rst
    cancellation_points.rst
    chip_h.rst
+   chroot.rst
    context_switches.rst
    crc.rst
    critical_sections.rst
