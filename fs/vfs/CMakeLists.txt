@@ -54,6 +54,10 @@ set(SRCS
     fs_truncate.c
     fs_link.c)
 
+if(CONFIG_FS_CHROOT)
+  list(APPEND SRCS fs_chroot.c)
+endif()
+
 # File notify support
 
 if(CONFIG_FS_NOTIFY)
