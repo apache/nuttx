@@ -183,6 +183,10 @@
 
 #endif /* CONFIG_STM32_USE_HSE*/
 
+/* Select the SPI1 clock and tell driver the frequency */
+#define STM32_RCC_CCIPR3_SPI1SEL  RCC_CCIPR3_SPI1SEL_PLL1QCK
+#define STM32_SPI1_FREQUENCY      STM32_PLL1Q_FREQUENCY
+
 /* Enable CLK48; get it from HSI48 */
 
 #if defined(CONFIG_STM32_USBFS) || defined(CONFIG_STM32_RNG)
@@ -331,6 +335,15 @@
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
 /* Alternate function pin selections ****************************************/
+
+/* SPI1: Arduino Connector CN7 */
+
+#define GPIO_SPI1_NSS   (GPIO_OUTPUT|GPIO_SPEED_2MHZ| \
+                         GPIO_PUSHPULL|GPIO_OUTPUT_SET| \
+                         GPIO_PORTD|GPIO_PIN14)             /* PD14 */
+#define GPIO_SPI1_SCK   (GPIO_SPI1_SCK_1|GPIO_SPEED_50MHZ)  /* PA5  */
+#define GPIO_SPI1_MISO  (GPIO_SPI1_MISO_3)                  /* PG9  */
+#define GPIO_SPI1_MOSI  (GPIO_SPI1_MOSI_2|GPIO_SPEED_50MHZ) /* PB5  */
 
 /* ADC GPIOs ****************************************************************/
 

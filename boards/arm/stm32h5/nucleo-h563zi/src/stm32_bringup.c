@@ -146,6 +146,18 @@ int stm32_bringup(void)
 # endif
 #endif
 
+#ifdef CONFIG_STM32_SPI
+  /* Cannot call at board init because irq_attach would be called before
+   * before irq_initialize is called.
+   */
+
+  stm32_spiinitialize();
+
+#ifdef CONFIG_SPI_DRIVER
+  stm32_spiregister();
+#endif
+#endif /* CONFIG_STM32_SPI */
+
 #ifdef CONFIG_PWM
   /* Initialize PWM and register the PWM device. */
 

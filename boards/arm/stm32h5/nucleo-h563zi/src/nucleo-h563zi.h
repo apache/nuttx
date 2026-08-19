@@ -115,6 +115,31 @@
 
 int stm32_bringup(void);
 
+#ifdef CONFIG_STM32_SPI
+/****************************************************************************
+ * Name: stm32_spiregister
+ *
+ * Description:
+ *   Called to register spi character driver of initialized
+ *   spi device for the Nucleo-L432KC board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_DRIVER
+void stm32_spiregister(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_spiinitialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins.
+ *
+ ****************************************************************************/
+
+void stm32_spiinitialize(void);
+#endif /* CONFIG_STM32_SPI */
+
 /****************************************************************************
  * Name: stm32_adc_setup
  *
