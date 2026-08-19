@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/arch_atomic_irq.c
+ * libs/libc/machine/arch_atomic.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -30,6 +30,9 @@
 #include <stdint.h>
 #include <nuttx/irq.h>
 #include <nuttx/macro.h>
+#if defined(CONFIG_LIBC_ATOMIC_HWSPINLOCK)
+#  include <nuttx/hwspinlock/hwspinlock.h>
+#endif
 
 #include "arch_atomic.h"
 
@@ -37,6 +40,19 @@
  * Private Functions
  ****************************************************************************/
 
+#if defined(CONFIG_LIBC_ATOMIC_HWSPINLOCK)
+extern struct hwspinlock_dev_s g_atomic_hwspinlock;
+
+static inline irqstate_t atomic_lock(void)
+{
+  return hwspin_lock_irqsave(&g_atomic_hwspinlock);
+}
+
+static inline void atomic_unlock(irqstate_t flags)
+{
+  hwspin_unlock_restore(&g_atomic_hwspinlock, flags);
+}
+#elif defined(CONFIG_LIBC_ATOMIC_IRQ)
 static inline irqstate_t atomic_lock(void)
 {
   return up_irq_save();
@@ -46,6 +62,7 @@ static inline void atomic_unlock(irqstate_t flags)
 {
   up_irq_restore(flags);
 }
+#endif
 
 /****************************************************************************
  * Public Functions
