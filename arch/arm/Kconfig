@@ -1076,7 +1076,7 @@ config ARCH_ARMV6M
 	bool
 	default n
 	select ARCH_HAVE_CPUINFO
-	select LIBC_ATOMIC_IRQ
+	select LIBC_ATOMIC_IRQ if !LIBC_ATOMIC_HWSPINLOCK
 
 config ARCH_CORTEXM0
 	bool
