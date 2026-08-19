@@ -174,15 +174,13 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
 
   if (!mq || !mq_name || *mq_name == '\0')
     {
-      ret = -EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 
   if (sizeof(CONFIG_FS_MQUEUE_VFS_PATH) + 1 + strlen(mq_name)
       >= MAX_MQUEUE_PATH)
     {
-      ret = -ENAMETOOLONG;
-      goto errout;
+      return -ENAMETOOLONG;
     }
 
   /* Were we asked to create it? */
@@ -199,8 +197,7 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
         {
           if (attr->mq_maxmsg <= 0 || attr->mq_msgsize <= 0)
             {
-              ret = -EINVAL;
-              goto errout;
+              return -EINVAL;
             }
         }
     }
@@ -235,14 +232,16 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
    * have incremented the reference count on the inode.
    */
 
-  SETUP_SEARCH(&desc, fullpath, false);
+  ret = inode_search_setup(&desc, fullpath, false);
+  if (ret < 0)
+    {
+      goto errout_with_lock;
+    }
 
-  ret = inode_find(&desc);
+  ret = inode_find(&desc, &inode);
   if (ret >= 0)
     {
       /* Something exists at this path.  Get the search results */
-
-      inode = desc.node;
 
       /* Verify that the inode is a message queue */
 
@@ -301,7 +300,7 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
           /* The mqueue does not exist and O_CREAT is not set */
 
           ret = -ENOENT;
-          goto errout_with_lock;
+          goto errout_with_search;
         }
 
       /* Create an inode in the pseudo-filesystem at this path */
@@ -312,7 +311,7 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
 
       if (ret < 0)
         {
-          goto errout_with_lock;
+          goto errout_with_search;
         }
 
       /* Allocate memory for the new message queue.  The new inode will
@@ -345,7 +344,7 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
         }
     }
 
-  RELEASE_SEARCH(&desc);
+  inode_search_release(&desc);
   leave_critical_section(flags);
 #ifdef CONFIG_FS_NOTIFY
   notify_open(fullpath, oflags);
@@ -355,11 +354,11 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
 errout_with_inode:
   inode_release(inode);
 
-errout_with_lock:
-  RELEASE_SEARCH(&desc);
-  leave_critical_section(flags);
+errout_with_search:
+  inode_search_release(&desc);
 
-errout:
+errout_with_lock:
+  leave_critical_section(flags);
   return ret;
 }
 
