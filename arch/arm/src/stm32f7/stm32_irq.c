@@ -40,10 +40,6 @@
 #include "ram_vectors.h"
 #include "arm_internal.h"
 
-#ifdef CONFIG_STM32_GPIO_IRQ
-#  include "stm32_gpio.h"
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -398,14 +394,6 @@ void up_irqinitialize(void)
   stm32_dumpnvic("initial", NR_IRQS);
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  /* Initialize logic to support a second level of interrupt decoding for
-   * GPIO pins.
-   */
-
-#ifdef CONFIG_STM32_GPIO_IRQ
-  stm32_gpioirqinitialize();
-#endif
-
   /* And finally, enable interrupts */
 
   arm_color_intstack();
@@ -446,14 +434,6 @@ void up_disable_irq(int irq)
           putreg32(regval, regaddr);
         }
     }
-#ifdef CONFIG_STM32_GPIO_IRQ
-  else
-    {
-      /* Maybe it is a (derived) GPIO IRQ */
-
-      stm32_gpioirqdisable(irq);
-    }
-#endif
 
 #if 0 /* Might be useful in early bring-up */
   stm32_dumpnvic("disable", irq);
@@ -493,14 +473,6 @@ void up_enable_irq(int irq)
           putreg32(regval, regaddr);
         }
     }
-#ifdef CONFIG_STM32_GPIO_IRQ
-  else
-    {
-      /* Maybe it is a (derived) GPIO IRQ */
-
-      stm32_gpioirqenable(irq);
-    }
-#endif
 
 #if 0 /* Might be useful in early bring-up */
   stm32_dumpnvic("enable", irq);
