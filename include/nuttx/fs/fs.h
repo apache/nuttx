@@ -636,6 +636,27 @@ extern "C"
 void fs_initialize(void);
 
 /****************************************************************************
+ * Name: inode_addref
+ *
+ * Description:
+ *   Increment the reference count on an inode.
+ *
+ ****************************************************************************/
+
+void inode_addref(FAR struct inode *inode);
+
+/****************************************************************************
+ * Name: inode_release
+ *
+ * Description:
+ *   Decrement the reference count on an inode and free it when it reaches
+ *   zero.
+ *
+ ****************************************************************************/
+
+void inode_release(FAR struct inode *inode);
+
+/****************************************************************************
  * Name: register_driver
  *
  * Description:
