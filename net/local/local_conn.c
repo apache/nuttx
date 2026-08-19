@@ -338,8 +338,7 @@ void local_free(FAR struct local_conn_s *conn)
     {
       if (conn->lc_cfps[i])
         {
-          file_close(conn->lc_cfps[i]);
-          kmm_free(conn->lc_cfps[i]);
+          file_put(conn->lc_cfps[i]);
           conn->lc_cfps[i] = NULL;
         }
     }

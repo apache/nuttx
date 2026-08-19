@@ -191,7 +191,7 @@ static void local_recvctl(FAR struct local_conn_s *conn,
     {
       if (peer->lc_cfpcount)
         {
-          memmove(peer->lc_cfps[0], peer->lc_cfps[i],
+          memmove(&peer->lc_cfps[0], &peer->lc_cfps[i],
                   sizeof(FAR void *) * peer->lc_cfpcount);
         }
     }
