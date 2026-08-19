@@ -20,8 +20,8 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_LIBC_ATOMIC_IRQ),y)
-  CSRCS += arch_atomic_irq.c
+ifneq ($(filter y,$(CONFIG_LIBC_ATOMIC_IRQ)$(CONFIG_LIBC_ATOMIC_HWSPINLOCK)),)
+  CSRCS += arch_atomic.c
 endif
 
 CSRCS += arch_atomic64.c
