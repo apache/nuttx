@@ -89,7 +89,7 @@
                                                                         \
     do                                                                  \
       {                                                                 \
-        old_val = nx_atomic_load_4(ptr, memorder);                      \
+        old_val = atomic_load_4(ptr, memorder);                         \
       }                                                                 \
     while (__cmpAndSwap(ptr, old_val + value, old_val) != old_val);     \
                                                                         \
@@ -104,7 +104,7 @@
                                                                         \
     do                                                                  \
       {                                                                 \
-        old_val = nx_atomic_load_4(ptr, memorder);                      \
+        old_val = atomic_load_4(ptr, memorder);                         \
       }                                                                 \
     while (__cmpAndSwap(ptr, old_val - value, old_val) != old_val);     \
                                                                         \
@@ -119,7 +119,7 @@
                                                                         \
     do                                                                  \
       {                                                                 \
-        old_val = nx_atomic_load_4(ptr, memorder);                      \
+        old_val = atomic_load_4(ptr, memorder);                         \
       }                                                                 \
     while (__cmpAndSwap(ptr, old_val & value, old_val) != old_val);     \
                                                                         \
@@ -134,7 +134,7 @@
                                                                         \
     do                                                                  \
       {                                                                 \
-        old_val = nx_atomic_load_4(ptr, memorder);                      \
+        old_val = atomic_load_4(ptr, memorder);                         \
       }                                                                 \
     while (__cmpAndSwap(ptr, old_val | value, old_val) != old_val);     \
                                                                         \
@@ -149,7 +149,7 @@
                                                                         \
     do                                                                  \
       {                                                                 \
-        old_val = nx_atomic_load_4(ptr, memorder);                      \
+        old_val = atomic_load_4(ptr, memorder);                         \
       }                                                                 \
     while (__cmpAndSwap(ptr, old_val ^ value, old_val) != old_val);     \
                                                                         \
@@ -165,67 +165,67 @@
  ****************************************************************************/
 
 ARCH_ATOMIC_STORE_4(__atomic_store_4)
-ARCH_ATOMIC_STORE_4(nx_atomic_store_4)
+ARCH_ATOMIC_STORE_4(atomic_store_4)
 
 /****************************************************************************
  * Name: atomic_load_4
  ****************************************************************************/
 
 ARCH_ATOMIC_LOAD_4(__atomic_load_4)
-ARCH_ATOMIC_LOAD_4(nx_atomic_load_4)
+ARCH_ATOMIC_LOAD_4(atomic_load_4)
 
 /****************************************************************************
  * Name: atomic_exchange_4
  ****************************************************************************/
 
 ARCH_ATOMIC_EXCHANGE_4(__atomic_exchange_4)
-ARCH_ATOMIC_EXCHANGE_4(nx_atomic_exchange_4)
+ARCH_ATOMIC_EXCHANGE_4(atomic_exchange_4)
 
 /****************************************************************************
  * Name: atomic_compare_exchange_4
  ****************************************************************************/
 
 ARCH_ATOMIC_COMPARE_EXCHANGE_4(__atomic_compare_exchange_4)
-ARCH_ATOMIC_COMPARE_EXCHANGE_4(nx_atomic_compare_exchange_4)
+ARCH_ATOMIC_COMPARE_EXCHANGE_4(atomic_compare_exchange_4)
 
 /****************************************************************************
  * Name: atomic_flag_test_and_set_4
  ****************************************************************************/
 
 ARCH_ATOMIC_FLAGS_TEST_AND_SET_4(__atomic_flags_test_and_set_4)
-ARCH_ATOMIC_FLAGS_TEST_AND_SET_4(nx_atomic_flags_test_and_set_4)
+ARCH_ATOMIC_FLAGS_TEST_AND_SET_4(atomic_flags_test_and_set_4)
 
 /****************************************************************************
  * Name: atomic_fetch_add_4
  ****************************************************************************/
 
 ARCH_ATOMIC_FETCH_ADD_4(__atomic_fetch_add_4)
-ARCH_ATOMIC_FETCH_ADD_4(nx_atomic_fetch_add_4)
+ARCH_ATOMIC_FETCH_ADD_4(atomic_fetch_add_4)
 
 /****************************************************************************
  * Name: atomic_fetch_sub_4
  ****************************************************************************/
 
 ARCH_ATOMIC_FETCH_SUB_4(__atomic_fetch_sub_4)
-ARCH_ATOMIC_FETCH_SUB_4(nx_atomic_fetch_sub_4)
+ARCH_ATOMIC_FETCH_SUB_4(atomic_fetch_sub_4)
 
 /****************************************************************************
  * Name: atomic_fetch_and_4
  ****************************************************************************/
 
 ARCH_ATOMIC_FETCH_AND_4(__atomic_fetch_and_4)
-ARCH_ATOMIC_FETCH_AND_4(nx_atomic_fetch_and_4)
+ARCH_ATOMIC_FETCH_AND_4(atomic_fetch_and_4)
 
 /****************************************************************************
  * Name: atomic_fetch_or_4
  ****************************************************************************/
 
 ARCH_ATOMIC_FETCH_OR_4(__atomic_fetch_or_4)
-ARCH_ATOMIC_FETCH_OR_4(nx_atomic_fetch_or_4)
+ARCH_ATOMIC_FETCH_OR_4(atomic_fetch_or_4)
 
 /****************************************************************************
  * Name: atomic_fetch_xor_4
  ****************************************************************************/
 
 ARCH_ATOMIC_FETCH_XOR_4(__atomic_fetch_xor_4)
-ARCH_ATOMIC_FETCH_XOR_4(nx_atomic_fetch_xor_4)
+ARCH_ATOMIC_FETCH_XOR_4(atomic_fetch_xor_4)

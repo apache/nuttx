@@ -68,7 +68,7 @@ STORE(__atomic_store_, 2, uint16_t)
  ****************************************************************************/
 
 STORE(__atomic_store_, 4, uint32_t)
-STORE(nx_atomic_store_, 4, int32_t)
+STORE(atomic_store_, 4, int32_t)
 
 /****************************************************************************
  * Name: __atomic_load_1
@@ -87,7 +87,7 @@ LOAD(__atomic_load_, 2, uint16_t)
  ****************************************************************************/
 
 LOAD(__atomic_load_, 4, uint32_t)
-LOAD(nx_atomic_load_, 4, int32_t)
+LOAD(atomic_load_, 4, int32_t)
 
 /****************************************************************************
  * Name: __atomic_exchange_1
@@ -106,7 +106,7 @@ EXCHANGE(__atomic_exchange_, 2, uint16_t)
  ****************************************************************************/
 
 EXCHANGE(__atomic_exchange_, 4, uint32_t)
-EXCHANGE(nx_atomic_exchange_, 4, int32_t)
+EXCHANGE(atomic_exchange_, 4, int32_t)
 
 /****************************************************************************
  * Name: __atomic_compare_exchange_1
@@ -125,7 +125,7 @@ CMP_EXCHANGE(__atomic_compare_exchange_, 2, uint16_t)
  ****************************************************************************/
 
 CMP_EXCHANGE(__atomic_compare_exchange_, 4, uint32_t)
-CMP_EXCHANGE(nx_atomic_compare_exchange_, 4, int32_t)
+CMP_EXCHANGE(atomic_compare_exchange_, 4, int32_t)
 
 /****************************************************************************
  * Name: __atomic_flag_test_and_set_1
@@ -144,7 +144,7 @@ FLAG_TEST_AND_SET(__atomic_flags_test_and_set_, 2, uint16_t)
  ****************************************************************************/
 
 FLAG_TEST_AND_SET(__atomic_flags_test_and_set_, 4, uint32_t)
-FLAG_TEST_AND_SET(nx_atomic_flags_test_and_set_, 4, int32_t)
+FLAG_TEST_AND_SET(atomic_flags_test_and_set_, 4, int32_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_add_1
@@ -163,7 +163,7 @@ FETCH_ADD(__atomic_fetch_add_, 2, uint16_t)
  ****************************************************************************/
 
 FETCH_ADD(__atomic_fetch_add_, 4, uint32_t)
-FETCH_ADD(nx_atomic_fetch_add_, 4, int32_t)
+FETCH_ADD(atomic_fetch_add_, 4, int32_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_sub_1
@@ -182,7 +182,7 @@ FETCH_SUB(__atomic_fetch_sub_, 2, uint16_t)
  ****************************************************************************/
 
 FETCH_SUB(__atomic_fetch_sub_, 4, uint32_t)
-FETCH_SUB(nx_atomic_fetch_sub_, 4, int32_t)
+FETCH_SUB(atomic_fetch_sub_, 4, int32_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_and_1
@@ -201,7 +201,7 @@ FETCH_AND(__atomic_fetch_and_, 2, uint16_t)
  ****************************************************************************/
 
 FETCH_AND(__atomic_fetch_and_, 4, uint32_t)
-FETCH_AND(nx_atomic_fetch_and_, 4, int32_t)
+FETCH_AND(atomic_fetch_and_, 4, int32_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_or_1
@@ -220,7 +220,7 @@ FETCH_OR(__atomic_fetch_or_, 2, uint16_t)
  ****************************************************************************/
 
 FETCH_OR(__atomic_fetch_or_, 4, uint32_t)
-FETCH_OR(nx_atomic_fetch_or_, 4, int32_t)
+FETCH_OR(atomic_fetch_or_, 4, int32_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_xor_1
@@ -239,7 +239,7 @@ FETCH_XOR(__atomic_fetch_xor_, 2, uint16_t)
  ****************************************************************************/
 
 FETCH_XOR(__atomic_fetch_xor_, 4, uint32_t)
-FETCH_XOR(nx_atomic_fetch_xor_, 4, int32_t)
+FETCH_XOR(atomic_fetch_xor_, 4, int32_t)
 
 /* Clang define the __sync builtins, add #ifndef to avoid
  * redefined/redeclared problem.
