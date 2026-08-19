@@ -380,16 +380,20 @@ int nx_mount(FAR const char *source, FAR const char *target,
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   /* Check if the inode already exists */
 
-  SETUP_SEARCH(&desc, target, false);
+  ret = inode_search_setup(&desc, target, false);
+  if (ret < 0)
+    {
+      inode_unlock();
+      return ret;
+    }
 
-  ret = inode_find(&desc);
+  ret = inode_find(&desc, &mountpt_inode);
   if (ret >= 0)
     {
       /* Successfully found.  The reference count on the inode has been
        * incremented.
        */
 
-      mountpt_inode = desc.node;
       DEBUGASSERT(mountpt_inode != NULL);
 
       /* But is it a directory node (i.e., not a driver or other special
@@ -521,7 +525,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
 #endif
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  RELEASE_SEARCH(&desc);
+  inode_search_release(&desc);
 #endif
 #ifdef CONFIG_FS_NOTIFY
   notify_create(target);
@@ -539,7 +543,7 @@ errout_with_bind:
 errout_with_lock:
   inode_unlock();
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  RELEASE_SEARCH(&desc);
+  inode_search_release(&desc);
 #endif
 
 errout_with_inode:

@@ -34,6 +34,8 @@
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/sched.h>
+#include <nuttx/lib/lib.h>
 
 #include "inode/inode.h"
 
@@ -43,12 +45,11 @@
 
 static int _inode_compare(FAR const char *fname, FAR struct inode *inode);
 #ifdef CONFIG_FS_LINKS
-static int _inode_linktarget(FAR struct inode *inode,
+static int _inode_linktarget(FAR struct inode **inode,
                              FAR struct inode_search_s *desc);
 #endif
-static int _inode_search(FAR struct inode_search_s *desc);
 static FAR const char *_inode_getcwd(void);
-static int _inode_canonicalize(FAR char *path);
+static int _inode_canonicalize(FAR char *path, FAR char *dst_min);
 
 /****************************************************************************
  * Public Data
@@ -154,30 +155,34 @@ static int _inode_compare(FAR const char *fname, FAR struct inode *inode)
  ****************************************************************************/
 
 #ifdef CONFIG_FS_LINKS
-static int _inode_linktarget(FAR struct inode *inode,
+static int _inode_linktarget(FAR struct inode **inode,
                              FAR struct inode_search_s *desc)
 {
   unsigned int count = 0;
   bool save;
   int ret = -ENOENT;
 
-  DEBUGASSERT(desc != NULL && inode != NULL);
+  DEBUGASSERT(desc != NULL && inode != NULL && *inode != NULL);
 
   /* An infinite loop is avoided only by the loop count. */
 
   save = desc->nofollow;
-  while (INODE_IS_SOFTLINK(inode))
+  while (INODE_IS_SOFTLINK(*inode))
     {
-      FAR const char *link = (FAR const char *)inode->u.i_link;
+      FAR const char *link = (FAR const char *)(*inode)->u.i_link;
 
       /* Reset and reinitialize the search descriptor.  */
 
-      RELEASE_SEARCH(desc);
-      SETUP_SEARCH(desc, link, true);
+      inode_search_release(desc);
+      ret = inode_search_setup(desc, link, true);
+      if (ret < 0)
+        {
+          break;
+        }
 
       /* Look up inode associated with the target of the symbolic link */
 
-      ret = inode_search(desc);
+      ret = inode_search(desc, inode);
       if (ret < 0)
         {
           break;
@@ -193,8 +198,7 @@ static int _inode_linktarget(FAR struct inode *inode,
 
       /* Set up for the next time through the loop */
 
-      inode = desc->node;
-      DEBUGASSERT(inode != NULL);
+      DEBUGASSERT(*inode != NULL);
     }
 
   desc->nofollow = save;
@@ -229,13 +233,15 @@ static int _compute_path_depth(FAR const char *path)
  *
  * Description:
  *   Remove "." and ".." segments from an absolute path in-place.
- *   The path MUST start with '/'.  Returns -EINVAL if ".." attempts
- *   to ascend beyond the root directory, or -ENAMETOOLONG if the
- *   canonicalized result is >= PATH_MAX bytes.
+ *   The path MUST start with '/'.  'dst_min' is the lowest write
+ *   position ".." may pop to (path + 1 for the host root, or just
+ *   past the chroot prefix).  ".." that would ascend beyond that
+ *   floor is dropped.  Returns -ENAMETOOLONG if the canonicalized
+ *   result is >= PATH_MAX bytes.
  *
  ****************************************************************************/
 
-static int _inode_canonicalize(FAR char *path)
+static int _inode_canonicalize(FAR char *path, FAR char *dst_min)
 {
   /* Skip the initial '/' -- caller guarantees absolute path */
 
@@ -265,22 +271,18 @@ static int _inode_canonicalize(FAR char *path)
       if (src[0] == '.' && src[1] == '.' &&
           (src[2] == '/' || src[2] == '\0'))
         {
-          /* Cannot go above root */
-
-          if (dst <= path + 1)
+          if (dst > dst_min)
             {
-              return -EINVAL;
-            }
+              /* Remove trailing slash first */
 
-          /* Remove trailing slash first */
-
-          dst--;
-
-          /* Scan backward to find the previous '/' */
-
-          while (dst > path + 1 && *(dst - 1) != '/')
-            {
               dst--;
+
+              /* Scan backward to find the previous '/' */
+
+              while (dst > dst_min && *(dst - 1) != '/')
+                {
+                  dst--;
+                }
             }
 
           src += (src[2] == '/') ? 3 : 2;
@@ -358,108 +360,240 @@ static int _inode_checkpath(const char *path)
   return pathlen >= PATH_MAX ? -ENAMETOOLONG : OK;
 }
 
+#ifdef CONFIG_FS_CHROOT
 /****************************************************************************
- * Name: _inode_search
+ * Name: _inode_root_path
+ *
+ * Description:
+ *   Return the calling group's jail prefix, or NULL if none is installed.
+ *
+ ****************************************************************************/
+
+static FAR const char *_inode_root_path(void)
+{
+  FAR struct tcb_s *tcb = nxsched_self();
+
+  if (tcb != NULL && tcb->group != NULL)
+    {
+      return tcb->group->tg_root;
+    }
+
+  return NULL;
+}
+#endif
+
+/****************************************************************************
+ * Name: _inode_getcwd
+ *
+ * Description:
+ *   Return the current working directory
+ *
+ ****************************************************************************/
+
+static FAR const char *_inode_getcwd(void)
+{
+  FAR const char *pwd = "";
+
+#ifndef CONFIG_DISABLE_ENVIRON
+  pwd = getenv("PWD");
+  if (pwd == NULL)
+    {
+      pwd = CONFIG_LIBC_HOMEDIR;
+    }
+#endif
+
+  return pwd;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: inode_search_release
+ *
+ * Description:
+ *   Release any buffer allocated by inode_search_setup().
+ *
+ ****************************************************************************/
+
+void inode_search_release(FAR struct inode_search_s *desc)
+{
+  if (desc->buffer != NULL)
+    {
+      lib_put_tempbuffer(desc->buffer);
+      desc->buffer = NULL;
+    }
+}
+
+/****************************************************************************
+ * Name: inode_search_setup
+ *
+ * Description:
+ *   Initialize a search descriptor and make 'path' host-absolute: join
+ *   $PWD if it is relative, prepend the chroot jail if one is installed,
+ *   and canonicalize "." / "..".  On success desc->path points at
+ *   desc->buffer.
+ *
+ ****************************************************************************/
+
+int inode_search_setup(FAR struct inode_search_s *desc,
+                       FAR const char *path, bool nofollow)
+{
+  FAR const char *cwd = NULL;
+  FAR const char *root = NULL;
+  FAR char *dst_min;
+  size_t rootlen = 0;
+  size_t buflen;
+  int ret;
+
+  desc->path     = path;
+  desc->peer     = NULL;
+  desc->parent   = NULL;
+  desc->relpath  = NULL;
+  desc->buffer   = NULL;
+  desc->nofollow = nofollow;
+
+  if (path == NULL)
+    {
+      return -EINVAL;
+    }
+
+  ret = _inode_checkpath(path);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+#ifdef CONFIG_FS_CHROOT
+  root = _inode_root_path();
+  if (root != NULL)
+    {
+      rootlen = strlen(root);
+    }
+#endif
+
+  /* For a relative path the absolute form is "<cwd>/<path>".  That
+   * concatenation can exceed PATH_MAX even when the relative path
+   * itself is within PATH_MAX: a relative path of PATH_MAX-1 bytes
+   * is legal per pathconf(_PC_PATH_MAX), but the prefix added by the
+   * cwd pushes the uncanonicalized form past the limit.  Size the
+   * buffer to hold the full absolute form so that ".." segments are
+   * collapsed against the correct suffix; truncating first could
+   * drop the trailing component and let ".." collapse the path onto
+   * a directory (yielding the wrong errno, e.g. EISDIR, instead of
+   * resolving the file).  _inode_canonicalize() still rejects any
+   * result whose canonicalized length reaches PATH_MAX.
+   */
+
+  if (*path != '/')
+    {
+      cwd = _inode_getcwd();
+      buflen = strlen(cwd) + 1 + strlen(path) + 1;
+    }
+  else
+    {
+      buflen = strlen(path) + 1;
+    }
+
+  buflen += rootlen;
+  if (buflen < PATH_MAX)
+    {
+      buflen = PATH_MAX;
+    }
+
+  desc->buffer = lib_get_tempbuffer(buflen);
+  if (desc->buffer == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  if (root != NULL)
+    {
+      if (cwd != NULL)
+        {
+          snprintf(desc->buffer, buflen, "%s%s/%s", root, cwd, path);
+        }
+      else
+        {
+          snprintf(desc->buffer, buflen, "%s%s", root, path);
+        }
+    }
+  else if (cwd != NULL)
+    {
+      snprintf(desc->buffer, buflen, "%s/%s", cwd, path);
+    }
+  else
+    {
+      strlcpy(desc->buffer, path, buflen);
+    }
+
+  desc->path = desc->buffer;
+
+  /* Canonicalize the path to remove "." and ".." segments.  This ensures
+   * that mountpoint relpath never contains ".." which most filesystems
+   * (tmpfs, romfs, etc.) cannot resolve.  When a jail is installed,
+   * dst_min keeps ".." from popping above tg_root.
+   */
+
+  dst_min = desc->buffer + 1;
+#ifdef CONFIG_FS_CHROOT
+  if (root != NULL)
+    {
+      dst_min = desc->buffer + rootlen;
+      if (rootlen > 0 && root[rootlen - 1] != '/')
+        {
+          dst_min++;
+        }
+    }
+#endif
+
+  ret = _inode_canonicalize(desc->buffer, dst_min);
+  if (ret < 0)
+    {
+      inode_search_release(desc);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: inode_search
  *
  * Description:
  *   Find the inode associated with 'path' returning the inode references
- *   and references to its companion nodes.  This is the internal, common
- *   implementation of inode_search().
+ *   and references to its companion nodes.
  *
  *   If a mountpoint is encountered in the search prior to encountering the
  *   terminal node, the search will terminate at the mountpoint inode.  That
  *   inode and the relative path from the mountpoint, 'relpath' will be
  *   returned.
  *
+ *   inode_search will follow soft links in path leading up to the terminal
+ *   node.  Whether or no inode_search() will deference that terminal node
+ *   depends on the 'nofollow' input.
+ *
  *   If a soft link is encountered that is not the terminal node in the path,
  *   that link WILL be deferenced unconditionally.
  *
  * Assumptions:
  *   The caller holds the g_inode_sem semaphore
+ *   The descriptor was initialized with inode_search_setup()
  *
  ****************************************************************************/
 
-static int _inode_search(FAR struct inode_search_s *desc)
+int inode_search(FAR struct inode_search_s *desc, FAR struct inode **inodep)
 {
   FAR const char   *name;
   FAR struct inode *inode   = g_root_inode;
   FAR struct inode *left    = NULL;
   FAR struct inode *above   = NULL;
   FAR const char   *relpath = NULL;
-  int ret;
+  int ret = -ENOENT;
 
-  ret = _inode_checkpath(desc->path);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Ensure we have a writable buffer for path manipulation */
-
-  if (desc->buffer == NULL)
-    {
-      FAR const char *cwd = NULL;
-      size_t buflen;
-
-      /* For a relative path the absolute form is "<cwd>/<path>".  That
-       * concatenation can exceed PATH_MAX even when the relative path
-       * itself is within PATH_MAX: a relative path of PATH_MAX-1 bytes
-       * is legal per pathconf(_PC_PATH_MAX), but the prefix added by the
-       * cwd pushes the uncanonicalized form past the limit.  Size the
-       * buffer to hold the full absolute form so that ".." segments are
-       * collapsed against the correct suffix; truncating first could
-       * drop the trailing component and let ".." collapse the path onto
-       * a directory (yielding the wrong errno, e.g. EISDIR, instead of
-       * resolving the file).  _inode_canonicalize() still rejects any
-       * result whose canonicalized length reaches PATH_MAX.
-       */
-
-      if (*desc->path != '/')
-        {
-          cwd = _inode_getcwd();
-          buflen = strlen(cwd) + 1 + strlen(desc->path) + 1;
-        }
-      else
-        {
-          buflen = strlen(desc->path) + 1;
-        }
-
-      if (buflen < PATH_MAX)
-        {
-          buflen = PATH_MAX;
-        }
-
-      desc->buffer = lib_get_tempbuffer(buflen);
-      if (desc->buffer == NULL)
-        {
-          return -ENOMEM;
-        }
-
-      if (cwd != NULL)
-        {
-          snprintf(desc->buffer, buflen, "%s/%s", cwd, desc->path);
-        }
-      else
-        {
-          strlcpy(desc->buffer, desc->path, buflen);
-        }
-
-      desc->path = desc->buffer;
-    }
-
-  /* Canonicalize the path to remove "." and ".." segments.  This ensures
-   * that mountpoint relpath never contains ".." which most filesystems
-   * (tmpfs, romfs, etc.) cannot resolve.
-   */
-
-  ret = _inode_canonicalize(desc->buffer);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  DEBUGASSERT(desc != NULL && desc->path != NULL);
 
   name = desc->path;
-  ret = -ENOENT;
 
   /* Traverse the pseudo file system node tree until either (1) all nodes
    * have been examined without finding the matching node, or (2) the
@@ -531,6 +665,7 @@ static int _inode_search(FAR struct inode_search_s *desc)
 
               if (INODE_IS_SOFTLINK(inode))
                 {
+                  FAR struct inode *newnode = inode;
                   int status;
 
                   /* If this intermediate inode in the is a soft link, then
@@ -539,7 +674,7 @@ static int _inode_search(FAR struct inode_search_s *desc)
                    * instead.
                    */
 
-                  status = _inode_linktarget(inode, desc);
+                  status = _inode_linktarget(&newnode, desc);
                   if (status < 0)
                     {
                       /* Probably means that the target of the symbolic link
@@ -551,8 +686,6 @@ static int _inode_search(FAR struct inode_search_s *desc)
                     }
                   else
                     {
-                      FAR struct inode *newnode = desc->node;
-
                       if (newnode != inode)
                         {
                           /* The node was a valid symbolic link and we have
@@ -642,85 +775,13 @@ static int _inode_search(FAR struct inode_search_s *desc)
    */
 
   desc->path    = name;
-  desc->node    = inode;
   desc->peer    = left;
   desc->parent  = above;
   desc->relpath = relpath;
-  return ret;
-}
-
-/****************************************************************************
- * Name: _inode_getcwd
- *
- * Description:
- *   Return the current working directory
- *
- ****************************************************************************/
-
-static FAR const char *_inode_getcwd(void)
-{
-  FAR const char *pwd = "";
-
-#ifndef CONFIG_DISABLE_ENVIRON
-  pwd = getenv("PWD");
-  if (pwd == NULL)
-    {
-      pwd = CONFIG_LIBC_HOMEDIR;
-    }
-#endif
-
-  return pwd;
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: inode_search
- *
- * Description:
- *   Find the inode associated with 'path' returning the inode references
- *   and references to its companion nodes.
- *
- *   If a mountpoint is encountered in the search prior to encountering the
- *   terminal node, the search will terminate at the mountpoint inode.  That
- *   inode and the relative path from the mountpoint, 'relpath' will be
- *   returned.
- *
- *   inode_search will follow soft links in path leading up to the terminal
- *   node.  Whether or no inode_search() will deference that terminal node
- *   depends on the 'nofollow' input.
- *
- *   If a soft link is encountered that is not the terminal node in the path,
- *   that link WILL be deferenced unconditionally.
- *
- * Assumptions:
- *   The caller holds the g_inode_sem semaphore
- *
- ****************************************************************************/
-
-int inode_search(FAR struct inode_search_s *desc)
-{
-  int ret;
-
-  /* Perform the common _inode_search() logic.  This does everything except
-   * operations special operations that must be performed on the terminal
-   * node if node is a symbolic link.
-   */
-
-  DEBUGASSERT(desc != NULL && desc->path != NULL);
-
-  ret = _inode_search(desc);
 
 #ifdef CONFIG_FS_LINKS
   if (ret >= 0)
     {
-      FAR struct inode *inode;
-
-      /* Search completed successfully */
-
-      inode = desc->node;
       DEBUGASSERT(inode != NULL);
 
       /* Is the terminal node a softlink? Should we follow it? */
@@ -733,7 +794,7 @@ int inode_search(FAR struct inode_search_s *desc)
            * link target of the final symbolic link in the series.
            */
 
-          ret = _inode_linktarget(inode, desc);
+          ret = _inode_linktarget(&inode, desc);
           if (ret < 0)
             {
               /* The most likely cause for failure is that the target of the
@@ -749,11 +810,14 @@ int inode_search(FAR struct inode_search_s *desc)
 
           inode = inode->i_private;
           DEBUGASSERT(inode != NULL);
-
-          desc->node = inode;
         }
     }
 #endif
+
+  if (inodep != NULL)
+    {
+      *inodep = inode;
+    }
 
   return ret;
 }

@@ -93,9 +93,13 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
 
   /* Get an inode for this file */
 
-  SETUP_SEARCH(&desc, path, false);
+  ret = inode_search_setup(&desc, path, false);
+  if (ret < 0)
+    {
+      goto errout;
+    }
 
-  ret = inode_find(&desc);
+  ret = inode_find(&desc, &inode);
   if (ret < 0)
     {
       /* This name does not refer to a psudeo-inode and there is no
@@ -107,7 +111,6 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
 
   /* Get the search results */
 
-  inode = desc.node;
   DEBUGASSERT(inode != NULL);
 
   ret = inode_checkpathperm(inode, 0, 0);
@@ -154,7 +157,7 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
   /* Successfully statfs'ed the file */
 
   inode_release(inode);
-  RELEASE_SEARCH(&desc);
+  inode_search_release(&desc);
   return OK;
 
   /* Failure conditions always set the errno appropriately */
@@ -163,7 +166,7 @@ errout_with_inode:
   inode_release(inode);
 
 errout_with_search:
-  RELEASE_SEARCH(&desc);
+  inode_search_release(&desc);
 
 errout:
   set_errno(-ret);

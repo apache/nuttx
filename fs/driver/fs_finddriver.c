@@ -50,29 +50,33 @@
 FAR void *find_driver(FAR const char *pathname)
 {
   struct inode_search_s desc;
+  FAR struct inode *inode;
   FAR void *drvr = NULL;
 
   DEBUGASSERT(pathname != NULL);
 
   /* Find the inode registered with this pathname */
 
-  SETUP_SEARCH(&desc, pathname, false);
+  if (inode_search_setup(&desc, pathname, false) < 0)
+    {
+      return NULL;
+    }
 
   /* Get the search results */
 
   inode_lock();
-  if (inode_find(&desc) < 0)
+  if (inode_find(&desc, &inode) < 0)
     {
       ferr("ERROR: Failed to find %s\n", pathname);
     }
   else
     {
-      drvr = desc.node->i_private;
-      inode_release(desc.node);
+      drvr = inode->i_private;
+      inode_release(inode);
     }
 
   inode_unlock();
-  RELEASE_SEARCH(&desc);
+  inode_search_release(&desc);
 
   return drvr;
 }
