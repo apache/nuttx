@@ -71,12 +71,14 @@ static FAR struct inode *inode_unlink(FAR const char *path)
 
   /* Find the node to unlink */
 
-  SETUP_SEARCH(&desc, path, true);
+  if (inode_search_setup(&desc, path, true) < 0)
+    {
+      return NULL;
+    }
 
-  ret = inode_search(&desc);
+  ret = inode_search(&desc, &inode);
   if (ret >= 0)
     {
-      inode = desc.node;
       DEBUGASSERT(inode != NULL);
 
       if (desc.parent != NULL)
@@ -137,7 +139,7 @@ static FAR struct inode *inode_unlink(FAR const char *path)
     }
 
 errout:
-  RELEASE_SEARCH(&desc);
+  inode_search_release(&desc);
   return inode;
 }
 

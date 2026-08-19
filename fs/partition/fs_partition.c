@@ -29,6 +29,8 @@
 #include <assert.h>
 #include <stdio.h>
 
+#include <nuttx/lib/lib.h>
+
 #include "driver/driver.h"
 #include "partition.h"
 

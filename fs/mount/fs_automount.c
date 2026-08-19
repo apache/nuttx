@@ -397,6 +397,7 @@ static int automount_ioctl(FAR struct file *filep, int cmd,
 static int automount_findinode(FAR const char *path)
 {
   struct inode_search_s desc;
+  FAR struct inode *inode;
   int ret;
 
   /* Make sure that we were given a path */
@@ -409,9 +410,14 @@ static int automount_findinode(FAR const char *path)
 
   /* Find the inode */
 
-  SETUP_SEARCH(&desc, path, false);
+  ret = inode_search_setup(&desc, path, false);
+  if (ret < 0)
+    {
+      inode_runlock();
+      return ret;
+    }
 
-  ret = inode_search(&desc);
+  ret = inode_search(&desc, &inode);
 
   /* Did we find it? */
 
@@ -424,7 +430,7 @@ static int automount_findinode(FAR const char *path)
 
   /* Yes.. is it a mount point? */
 
-  else if (INODE_IS_MOUNTPT(desc.node))
+  else if (INODE_IS_MOUNTPT(inode))
     {
       /* Yes.. we found a mountpoint at this path */
 
@@ -440,7 +446,7 @@ static int automount_findinode(FAR const char *path)
   /* Relinquish our exclusive access to the inode try and return the result */
 
   inode_runlock();
-  RELEASE_SEARCH(&desc);
+  inode_search_release(&desc);
   return ret;
 }
 
@@ -807,6 +813,7 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
   int ret;
 #ifdef CONFIG_FS_AUTOMOUNTER_DRIVER
   FAR char *devpath = lib_get_pathbuffer();
+
   if (devpath == NULL)
     {
       return NULL;
@@ -917,6 +924,7 @@ void automount_uninitialize(FAR void *handle)
   if (priv->registered)
     {
       FAR char *devpath = lib_get_pathbuffer();
+
       if (devpath == NULL)
         {
           return;

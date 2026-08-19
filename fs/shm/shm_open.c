@@ -82,15 +82,17 @@ static int file_shm_open(FAR struct file *shm, FAR const char *name,
 
   /* Get the inode for this shm object */
 
-  SETUP_SEARCH(&desc, fullpath, false);
+  ret = inode_search_setup(&desc, fullpath, false);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   inode_lock();
-  ret = inode_find(&desc);
+  ret = inode_find(&desc, &inode);
   if (ret >= 0)
     {
       /* Something exists at this path.  Get the search results */
-
-      inode = desc.node;
 
       /* Verify that the inode is an shm object */
 
@@ -98,7 +100,7 @@ static int file_shm_open(FAR struct file *shm, FAR const char *name,
         {
           ret = -EINVAL;
           inode_release(inode);
-          goto errout_with_sem;
+          goto errout_with_lock;
         }
 
       /* It exists and is an shm object.  Check if the caller wanted to
@@ -109,7 +111,7 @@ static int file_shm_open(FAR struct file *shm, FAR const char *name,
         {
           ret = -EEXIST;
           inode_release(inode);
-          goto errout_with_sem;
+          goto errout_with_lock;
         }
 
 #ifdef CONFIG_FS_PERMISSION
@@ -117,7 +119,7 @@ static int file_shm_open(FAR struct file *shm, FAR const char *name,
       if (ret < 0)
         {
           inode_release(inode);
-          goto errout_with_sem;
+          goto errout_with_lock;
         }
 #endif
 
@@ -141,7 +143,7 @@ static int file_shm_open(FAR struct file *shm, FAR const char *name,
           /* The shm does not exist and O_CREAT is not set */
 
           ret = -ENOENT;
-          goto errout_with_sem;
+          goto errout_with_lock;
         }
 
       /* Create an inode in the pseudo-filesystem at this path */
@@ -149,7 +151,7 @@ static int file_shm_open(FAR struct file *shm, FAR const char *name,
       ret = inode_reserve(fullpath, mode, &inode);
       if (ret < 0)
         {
-          goto errout_with_sem;
+          goto errout_with_lock;
         }
 
       INODE_SET_SHM(inode);
@@ -163,9 +165,9 @@ static int file_shm_open(FAR struct file *shm, FAR const char *name,
   shm->f_oflags = oflags | O_NOFOLLOW;
   shm->f_inode = inode;
 
-errout_with_sem:
+errout_with_lock:
   inode_unlock();
-  RELEASE_SEARCH(&desc);
+  inode_search_release(&desc);
 #ifdef CONFIG_FS_NOTIFY
   if (ret >= 0)
     {
