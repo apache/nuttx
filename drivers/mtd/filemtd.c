@@ -208,6 +208,16 @@ static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset,
 
           file_seek(&priv->mtdfile, seekpos, SEEK_SET);
           buflen = file_read(&priv->mtdfile, buf, MIN(len, sizeof(buf)));
+
+          /* A negative errno or EOF must not reach the guards below,
+           * which would let pout run past buf[] and corrupt the stack.
+           */
+
+          if (buflen <= 0)
+            {
+              return buflen < 0 ? buflen : -EIO;
+            }
+
           pout   = (FAR uint8_t *)buf;
           remain = buflen;
         }
