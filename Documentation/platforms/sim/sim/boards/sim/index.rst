@@ -819,6 +819,15 @@ Keyboard input goes to the window that has focus; touch events are generated
 by mouse clicks within the window.  See
 :doc:`/applications/graphics/microwindows/index` for Microwindows details.
 
+nanox
+-----
+
+Nano-X configuration that boots directly into the ``nxterm`` terminal
+emulator, using virtual keyboard (event mode), touchscreen, and
+framebuffer.  Typing ``nanoxcalc`` inside the terminal starts the
+calculator demo.  See :doc:`/applications/graphics/microwindows/index`
+for details.
+
 nettest
 -------
 

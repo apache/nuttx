@@ -286,3 +286,11 @@ bootable ISO with GRUB2:
 The pre-built config sets ``CONFIG_INIT_ENTRYPOINT="mwdemo_main"`` so the
 demo starts immediately.  See
 :doc:`/applications/graphics/microwindows/index` for Microwindows details.
+
+nanox
+-----
+
+Nano-X configuration that boots directly into the ``nxterm`` terminal
+emulator, using framebuffer, USB HID keyboard in event mode (``/dev/kbda``),
+and USB HID mouse.  See :doc:`/applications/graphics/microwindows/index` for
+details.

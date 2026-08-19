@@ -11,12 +11,14 @@ embedded systems.  It provides:
 - **mwin** -- a widget toolkit built on the Win32 API, supporting windows,
   menus, buttons, edit boxes, list boxes, scroll bars, progress bars, and
   timers.
-- **Nano-X / X11 API** -- an X11-compatible client/server window system (not
-  yet enabled for NuttX; work in progress).
+- **Nano-X / X11 API** -- an X11-compatible client/server window system,
+  enabled with ``CONFIG_MICROWINDOWS_NANOX``.
 
-Currently the NuttX integration only enables the GDI / Win32 API and the
-mwin widget toolkit.  The Nano-X server and X11 client libraries are part of
-the upstream project but are not yet wired into the NuttX build.
+The NuttX integration includes the Microwindows core and GDI API.  The
+optional mwin widget toolkit provides a Win32-style API and is enabled with
+``CONFIG_MICROWINDOWS_MWIN=y``.  The Nano-X client library and server can
+also be built, giving access to the X11-style ``GrXXX`` API from multiple
+client applications.
 
 Quick Start
 ===========
@@ -26,8 +28,30 @@ Microwindows requires a framebuffer device (``CONFIG_VIDEO_FB=y``).
 The build and run instructions for the supported configurations are documented
 on their board pages:
 
-* :doc:`/platforms/sim/sim/boards/sim/index` (``sim:mw``)
-* :doc:`/platforms/x86_64/intel64/boards/qemu-intel64/index` (``qemu-intel64:mw``)
+* :doc:`/platforms/sim/sim/boards/sim/index` (``sim:mw`` and ``sim:nanox``)
+* :doc:`/platforms/x86_64/intel64/boards/qemu-intel64/index` (``qemu-intel64:mw`` and ``qemu-intel64:nanox``)
+
+Nano-X (X11 API)
+----------------
+
+For the Nano-X client/server window system, the ``sim:nanox`` configuration
+boots directly into the ``nxterm`` terminal emulator::
+
+   cd nuttx
+   tools/configure.sh sim:nanox
+   make -j$(nproc)
+
+This opens an X11-style terminal window running an NSH shell; typing
+``nanoxcalc`` inside it starts the calculator demo.
+
+For QEMU, use the ``qemu-intel64:nanox`` configuration instead::
+
+   cd nuttx
+   tools/configure.sh qemu-intel64:nanox
+   make -j$(nproc)
+
+See :doc:`/platforms/x86_64/intel64/boards/qemu-intel64/index` for the QEMU
+ISO creation and run instructions.
 
 Available Configurations
 ========================
@@ -40,7 +64,8 @@ Dependencies
 
 All configurations require ``CONFIG_VIDEO_FB=y``.
 
-For **qemu-intel64:mw**, the following input-related options are required:
+For **qemu-intel64:mw** and **qemu-intel64:nanox**, the following
+input-related options are required:
 
   ``CONFIG_USBHOST=y``, ``CONFIG_USBHOST_HIDKBD=y``, ``CONFIG_USBHOST_HIDMOUSE=y``,
   ``CONFIG_USBHOST_XHCI_PCI=y``, ``CONFIG_USBHOST_WAITER=y``,
@@ -50,7 +75,7 @@ For **qemu-intel64:mw**, the following input-related options are required:
 The USB HID keyboard exposes ``keyboard_event_s`` records at ``/dev/kbda``;
 it is not the raw byte-stream keyboard driver.
 
-For **sim:mw** the following input options are required:
+For **sim:mw** and **sim:nanox** the following input options are required:
 
   ``CONFIG_INPUT=y``, ``CONFIG_SIM_KEYBOARD=y``, ``CONFIG_SIM_TOUCHSCREEN=y``
 
@@ -113,6 +138,34 @@ Framebuffer
 ``MICROWINDOWS_FB_PATH``
     Path to the NuttX framebuffer device.  Default ``/dev/fb0``.
 
+Nano-X Client/Server Support
+----------------------------
+
+Enable the Nano-X (X11 API) client/server window system with
+``CONFIG_MICROWINDOWS_NANOX=y``.  It builds the Nano-X server core and the
+Nano-X client library from the bundled Microwindows tree.
+
+``MICROWINDOWS_NANOX``
+    Build the Nano-X server core and client library.  Applications can start
+    the server as a separate task; client applications connect to it through
+    a local stream socket and use the X11-like API (``GrXXX`` calls).  In
+    this network mode, it requires ``CONFIG_NET=y``, ``CONFIG_NET_LOCAL=y``
+    and ``CONFIG_NET_LOCAL_STREAM=y``.  The NuttX build enables
+    ``NX_PER_CLIENT_DATA`` and stores each client's state in POSIX thread-local
+    storage, so several client tasks can run at the same time in a flat build.
+
+``MICROWINDOWS_NANOX_NONETWORK``
+    Build the Nano-X client library and server in the linked-in
+    (``NONETWORK``) mode: client applications are linked directly with the
+    server and run in the same task, so no network stack or socket is
+    required and the memory footprint is minimal.  Only a single client
+    application can be active at a time.
+
+``MICROWINDOWS_NANOX_NANOWM``
+    Link the built-in window manager (``wm*.c``, ``nxdraw.c``) into the
+    Nano-X server, providing window decorations (title bar, 3D frame),
+    cascaded placement, move/resize and focus handling.
+
 Microwindows Demo Application
 =============================
 
@@ -149,6 +202,58 @@ message loop with ``GetMessage()`` / ``DispatchMessage()``.
 
 ``EXAMPLES_MICROWINDOWS_STACKSIZE``
     Stack size in bytes (default ``32768``).
+
+Nano-X Terminal Emulator Example
+================================
+
+Enable with ``CONFIG_EXAMPLES_NANOXTERM=y``.  The example is located at
+``apps/examples/nanoxterm``.
+
+It is a port of the ``nxterm`` demo from upstream Microwindows.  It starts
+the Nano-X server as a separate task, connects to it and creates a terminal
+window backed by a pseudo terminal.  The configured NSH program is started
+with ``posix_spawn()``.  Requires ``CONFIG_PSEUDOTERM=y``,
+``CONFIG_LIBC_EXECFUNCS=y`` and ``CONFIG_SYSTEM_NSH=y``.
+
+It can be used as the init entry point: setting
+``CONFIG_INIT_ENTRYPOINT="nanoxterm_main"`` boots directly into the
+terminal window, e.g. the ``sim:nanox`` configuration.
+
+.. figure:: nanoxterm-sim.png
+   :align: center
+   :alt: The Nano-X nxterm terminal emulator running on the NuttX simulator.
+
+   The nxterm terminal emulator running on the NuttX simulator (``sim:nanox``),
+   with an NSH shell.
+
+In the ``NONETWORK`` mode (``MICROWINDOWS_NANOX_NONETWORK``) the server task
+is not started, since the application runs the server inside ``main()``.
+
+``EXAMPLES_NANOXTERM_PROGNAME``
+    Program name for the NSH ELF install (default ``"nanoxterm"``).
+``EXAMPLES_NANOXTERM_PRIORITY``
+    Task priority (default ``100``).
+``EXAMPLES_NANOXTERM_STACKSIZE``
+    Stack size in bytes (default ``16384``).
+
+Nano-X Calculator Example
+=========================
+
+Enable with ``CONFIG_EXAMPLES_NANOXCALC=y``.  The example is located at
+``apps/examples/nanoxcalc``.
+
+It is a port of the ``nxcalc`` demo from upstream Microwindows.  It connects
+to the running Nano-X server and shows a calculator keypad operated by the
+mouse or keyboard.  Requires ``CONFIG_LIBC_FLOATINGPOINT=y``.  To invoke it
+as an NSH command, also enable ``CONFIG_NSH_BUILTIN_APPS=y``; both Nano-X
+defconfigs enable this option.
+
+``EXAMPLES_NANOXCALC_PROGNAME``
+    Program name for the NSH ELF install (default ``"nanoxcalc"``).
+``EXAMPLES_NANOXCALC_PRIORITY``
+    Task priority (default ``100``).
+``EXAMPLES_NANOXCALC_STACKSIZE``
+    Stack size in bytes (default ``16384``).
 
 Porting to New Hardware
 =======================
