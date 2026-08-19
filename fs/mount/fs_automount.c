@@ -476,56 +476,56 @@ static void automount_mount(FAR struct automounter_state_s *priv)
   ret = automount_findinode(lower->mountpoint);
   switch (ret)
     {
-    case OK_EXIST:
+      case OK_EXIST:
 
-      /* REVISIT: What should we do in this case?  I think that this would
-       * happen only if a previous unmount failed?  I suppose that we should
-       * try to unmount again because the mount might be stale.
-       */
+        /* REVISIT: What should we do in this case?  I think that this would
+         * happen only if a previous unmount failed?  I suppose that we
+         * should try to unmount again because the mount might be stale.
+         */
 
-      fwarn("WARNING: Mountpoint %s already exists\n", lower->mountpoint);
-      ret = automount_unmount(priv);
-      if (ret < 0)
-        {
-          /* We failed to unmount (again?).  Complain and abort. */
+        fwarn("WARNING: Mountpoint %s already exists\n", lower->mountpoint);
+        ret = automount_unmount(priv);
+        if (ret < 0)
+          {
+            /* We failed to unmount (again?).  Complain and abort. */
 
-          ferr("ERROR: automount_unmount failed: %d\n", ret);
-          return;
-        }
+            ferr("ERROR: automount_unmount failed: %d\n", ret);
+            return;
+          }
 
-      /* We successfully unmounted the file system.  Fall through to
-       * mount it again.
-       */
+        /* We successfully unmounted the file system.  Fall through to
+         * mount it again.
+         */
 
-    case OK_NOENT:
+      case OK_NOENT:
 
-      /* If we get here, then the volume must not be mounted */
+        /* If we get here, then the volume must not be mounted */
 
-      DEBUGASSERT(!priv->mounted);
+        DEBUGASSERT(!priv->mounted);
 
-       /* Mount the file system */
+        /* Mount the file system */
 
-      ret = nx_mount(lower->blockdev, lower->mountpoint, lower->fstype,
-                     0, NULL);
-      if (ret < 0)
-        {
-          ferr("ERROR: Mount failed: %d\n", ret);
-          return;
-        }
+        ret = nx_mount(lower->blockdev, lower->mountpoint, lower->fstype,
+                       0, NULL);
+        if (ret < 0)
+          {
+            ferr("ERROR: Mount failed: %d\n", ret);
+            return;
+          }
 
-      /* Indicate that the volume is mounted */
+        /* Indicate that the volume is mounted */
 
-      priv->mounted = true;
+        priv->mounted = true;
 
 #ifdef CONFIG_FS_AUTOMOUNTER_DRIVER
-      automount_notify(priv);
+        automount_notify(priv);
 #endif /* CONFIG_FS_AUTOMOUNTER_DRIVER */
 
-      break;
+        break;
 
-    default:
-      ferr("ERROR: automount_findinode failed: %d\n", ret);
-      break;
+      default:
+        ferr("ERROR: automount_findinode failed: %d\n", ret);
+        break;
     }
 }
 
@@ -556,69 +556,69 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
   ret = automount_findinode(lower->mountpoint);
   switch (ret)
     {
-    case OK_EXIST:
+      case OK_EXIST:
 
-      /* If we get here, then the volume must be mounted */
+        /* If we get here, then the volume must be mounted */
 
-      DEBUGASSERT(priv->mounted);
+        DEBUGASSERT(priv->mounted);
 
-      /* Un-mount the volume */
+        /* Un-mount the volume */
 
-      ret = nx_umount2(lower->mountpoint, MNT_FORCE);
-      if (ret < 0)
-        {
-          /* We expect the error to be EBUSY meaning that the volume could
-           * not be unmounted because there are currently reference via open
-           * files or directories.
-           */
+        ret = nx_umount2(lower->mountpoint, MNT_FORCE);
+        if (ret < 0)
+          {
+            /* We expect the error to be EBUSY meaning that the volume could
+             * not be unmounted because there are currently reference via
+             * open files or directories.
+             */
 
-          if (ret == -EBUSY)
-            {
-              finfo("WARNING: Volume is busy, try again later\n");
+            if (ret == -EBUSY)
+              {
+                finfo("WARNING: Volume is busy, try again later\n");
 
-              /* Start a timer to retry the umount2 after a delay */
+                /* Start a timer to retry the umount2 after a delay */
 
-              ret = wd_start(&priv->wdog, lower->udelay,
-                             automount_timeout, (wdparm_t)priv);
-              if (ret < 0)
-                {
-                  ferr("ERROR: wd_start failed: %d\n", ret);
-                  return ret;
-                }
-            }
+                ret = wd_start(&priv->wdog, lower->udelay,
+                               automount_timeout, (wdparm_t)priv);
+                if (ret < 0)
+                  {
+                    ferr("ERROR: wd_start failed: %d\n", ret);
+                    return ret;
+                  }
+              }
 
-          /* Other errors are fatal */
+            /* Other errors are fatal */
 
-          else
-            {
-              ferr("ERROR: umount2 failed: %d\n", ret);
-              return ret;
-            }
-        }
+            else
+              {
+                ferr("ERROR: umount2 failed: %d\n", ret);
+                return ret;
+              }
+          }
 
-      /* Fall through */
+        /* Fall through */
 
-    case OK_NOENT:
+      case OK_NOENT:
 
-      /* The mountpoint is not present.  This is normal behavior in the
-       * case where the user manually un-mounted the volume before removing
-       * media.  Nice job, Mr. user.
-       */
+        /* The mountpoint is not present.  This is normal behavior in the
+         * case where the user manually un-mounted the volume before removing
+         * media.  Nice job, Mr. user.
+         */
 
-      if (priv->mounted)
-        {
-          priv->mounted = false;
+        if (priv->mounted)
+          {
+            priv->mounted = false;
 
 #ifdef CONFIG_FS_AUTOMOUNTER_DRIVER
-          automount_notify(priv);
+            automount_notify(priv);
 #endif /* CONFIG_FS_AUTOMOUNTER_DRIVER */
-        }
+          }
 
-      return OK;
+        return OK;
 
-    default:
-      ferr("ERROR: automount_findinode failed: %d\n", ret);
-      return ret;
+      default:
+        ferr("ERROR: automount_findinode failed: %d\n", ret);
+        return ret;
     }
 }
 
