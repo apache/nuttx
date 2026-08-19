@@ -36,32 +36,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* GPIO IRQs ****************************************************************/
-
-#ifndef CONFIG_STM32_GPIO_IRQ
-#  undef CONFIG_STM32_GPIOA_IRQ
-#  undef CONFIG_STM32_GPIOB_IRQ
-#  undef CONFIG_STM32_GPIOC_IRQ
-#  undef CONFIG_STM32_GPIOD_IRQ
-#  undef CONFIG_STM32_GPIOE_IRQ
-#endif
-
-#if STM32_NPORTS < 1
-#  undef CONFIG_STM32_GPIOA_IRQ
-#endif
-#if STM32_NPORTS < 2
-#  undef CONFIG_STM32_GPIOB_IRQ
-#endif
-#if STM32_NPORTS < 3
-#  undef CONFIG_STM32_GPIOC_IRQ
-#endif
-#if STM32_NPORTS < 4
-#  undef CONFIG_STM32_GPIOD_IRQ
-#endif
-#if STM32_NPORTS < 5
-#  undef CONFIG_STM32_GPIOE_IRQ
-#endif
-
 /* UARTs ********************************************************************/
 
 /* Don't enable UARTs not supported by the chip. */
