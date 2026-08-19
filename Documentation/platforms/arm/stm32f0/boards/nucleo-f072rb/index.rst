@@ -223,3 +223,10 @@ nsh:
 ----
 Configures the NuttShell (nsh) located at examples/nsh.  This
 configuration is focused on low level, command-line driver testing.
+
+usb-cdc-uart:
+--------------
+Configures NSH on USART2 through the ST-LINK virtual COM port and exposes a
+separate USB CDC/ACM serial device on the STM32 USB FS connector.  The USB
+device uses the internal HSI48 oscillator synchronized from USB start of frame
+packets through the clock recovery system.
