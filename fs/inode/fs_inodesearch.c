@@ -34,6 +34,7 @@
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/sched.h>
 
 #include "inode/inode.h"
 #include "fs_heap.h"
@@ -49,6 +50,11 @@ static int _inode_linktarget(FAR struct inode *inode,
 #endif
 static int _inode_search(FAR struct inode_search_s *desc);
 static FAR const char *_inode_getcwd(void);
+#ifdef CONFIG_FS_CHROOT
+static FAR struct inode *inode_get_chroot(FAR const char **relpath);
+static int inode_normalize_abs(FAR const char *in, FAR char *out,
+                               size_t outlen);
+#endif
 
 /****************************************************************************
  * Public Data
@@ -193,6 +199,120 @@ static int _inode_linktarget(FAR struct inode *inode,
 }
 #endif
 
+#ifdef CONFIG_FS_CHROOT
+/****************************************************************************
+ * Name: inode_get_chroot
+ ****************************************************************************/
+
+static FAR struct inode *inode_get_chroot(FAR const char **relpath)
+{
+  FAR struct tcb_s *tcb = nxsched_self();
+
+  if (relpath != NULL)
+    {
+      *relpath = NULL;
+    }
+
+  if (tcb != NULL && tcb->group != NULL && tcb->group->tg_root != NULL)
+    {
+      if (relpath != NULL)
+        {
+          *relpath = tcb->group->tg_rootrel;
+        }
+
+      return tcb->group->tg_root;
+    }
+
+  return g_root_inode;
+}
+
+/****************************************************************************
+ * Name: inode_normalize_abs
+ *
+ * Description:
+ *   Normalize an absolute path: drop empty and "." segments, and clamp
+ *   ".." at the search root.  Needed even before a jail is installed:
+ *   chroot(".") becomes "$PWD/.", and if PWD sits under a mountpoint
+ *   (tmpfs /tmp) the leftover "." is passed to the filesystem as
+ *   relpath and fails with ENOENT.
+ *
+ ****************************************************************************/
+
+static int inode_normalize_abs(FAR const char *in, FAR char *out,
+                               size_t outlen)
+{
+  FAR char *dst;
+  FAR const char *src = in;
+
+  if (outlen < 2)
+    {
+      return -ENAMETOOLONG;
+    }
+
+  out[0] = '/';
+  dst = out + 1;
+
+  while (*src == '/')
+    {
+      src++;
+    }
+
+  while (*src != '\0')
+    {
+      FAR const char *end = src;
+      size_t seglen;
+
+      while (*end != '\0' && *end != '/')
+        {
+          end++;
+        }
+
+      seglen = (size_t)(end - src);
+      if (seglen == 0 || (seglen == 1 && src[0] == '.'))
+        {
+          /* Skip empty or "." segments */
+        }
+      else if (seglen == 2 && src[0] == '.' && src[1] == '.')
+        {
+          if (dst > out + 1)
+            {
+              dst--;
+              while (dst > out && *(dst - 1) != '/')
+                {
+                  dst--;
+                }
+            }
+        }
+      else
+        {
+          size_t used = (size_t)(dst - out);
+
+          if (used + ((dst > out + 1) ? 1 : 0) + seglen + 1 > outlen)
+            {
+              return -ENAMETOOLONG;
+            }
+
+          if (dst > out + 1)
+            {
+              *dst++ = '/';
+            }
+
+          memcpy(dst, src, seglen);
+          dst += seglen;
+        }
+
+      src = end;
+      while (*src == '/')
+        {
+          src++;
+        }
+    }
+
+  *dst = '\0';
+  return OK;
+}
+#endif
+
 /****************************************************************************
  * Name: _inode_search
  *
@@ -221,6 +341,11 @@ static int _inode_search(FAR struct inode_search_s *desc)
   FAR struct inode *left    = NULL;
   FAR struct inode *above   = NULL;
   FAR const char   *relpath = NULL;
+#ifdef CONFIG_FS_CHROOT
+  FAR struct inode *search_root = g_root_inode;
+  FAR const char   *rootrel = NULL;
+  char              norm[PATH_MAX];
+#endif
   int ret = -ENOENT;
 
   /* Get the search path, skipping over the leading '/'.  The leading '/' is
@@ -234,6 +359,99 @@ static int _inode_search(FAR struct inode_search_s *desc)
     {
       return -EINVAL;
     }
+
+#ifdef CONFIG_FS_CHROOT
+  search_root = inode_get_chroot(&rootrel);
+
+  ret = inode_normalize_abs(name, norm, sizeof(norm));
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Restore the search miss code.  OK from normalize must not leak
+   * through when the walk finds no node (inode_reserve of a new path).
+   */
+
+  ret = -ENOENT;
+
+  if (strcmp(name, norm) != 0)
+    {
+      if (desc->buffer != NULL)
+        {
+          fs_heap_free(desc->buffer);
+          desc->buffer = NULL;
+        }
+
+      desc->buffer = fs_heap_strdup(norm);
+      if (desc->buffer == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      name = desc->buffer;
+      desc->path = desc->buffer;
+    }
+
+  if (search_root != g_root_inode)
+    {
+      while (*name == '/')
+        {
+          name++;
+        }
+
+      if (INODE_IS_MOUNTPT(search_root))
+        {
+          if (rootrel != NULL && rootrel[0] != '\0')
+            {
+              FAR char *joined = NULL;
+
+              if (*name != '\0')
+                {
+                  ret = fs_heap_asprintf(&joined, "%s/%s", rootrel, name);
+                }
+              else
+                {
+                  ret = fs_heap_asprintf(&joined, "%s", rootrel);
+                }
+
+              if (ret < 0)
+                {
+                  return -ENOMEM;
+                }
+
+              fs_heap_free(desc->buffer);
+              desc->buffer = joined;
+              relpath = joined;
+            }
+          else
+            {
+              relpath = name;
+            }
+
+          desc->path    = relpath;
+          desc->node    = search_root;
+          desc->peer    = NULL;
+          desc->parent  = search_root->i_parent;
+          desc->relpath = relpath;
+          return OK;
+        }
+
+      if (*name == '\0')
+        {
+          desc->path    = name;
+          desc->node    = search_root;
+          desc->peer    = NULL;
+          desc->parent  = search_root->i_parent;
+          desc->relpath = NULL;
+          return OK;
+        }
+
+      inode = search_root->i_child;
+      above = search_root;
+      ret   = -ENOENT;
+    }
+#endif
 
   /* Traverse the pseudo file system node tree until either (1) all nodes
    * have been examined without finding the matching node, or (2) the
@@ -281,6 +499,27 @@ static int _inode_search(FAR struct inode_search_s *desc)
            */
 
           name = inode_nextname(name);
+
+#ifdef CONFIG_FS_CHROOT
+          /* Clamp ".." so it cannot walk above the search root. */
+
+          while (name[0] == '.' && name[1] == '.' &&
+                 (name[2] == '/' || name[2] == '\0'))
+            {
+              if (inode != search_root && above != NULL)
+                {
+                  inode = above;
+                  above = inode->i_parent;
+                }
+
+              name += 2;
+              while (*name == '/')
+                {
+                  name++;
+                }
+            }
+#endif
+
           if (*name == '\0' || INODE_IS_MOUNTPT(inode))
             {
               /* Either (1) we are at the end of the path, so this must be
