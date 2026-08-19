@@ -60,7 +60,7 @@ static inline void atomic_unlock(irqstate_t flags)
 
 STORE(__atomic_store_, 8, uint64_t)
 #ifndef CONFIG_LIBC_ATOMIC_TOOLCHAIN
-STORE(nx_atomic_store_, 8, int64_t)
+STORE(atomic_store_, 8, int64_t)
 #endif
 
 /****************************************************************************
@@ -69,7 +69,7 @@ STORE(nx_atomic_store_, 8, int64_t)
 
 LOAD(__atomic_load_, 8, uint64_t)
 #ifndef CONFIG_LIBC_ATOMIC_TOOLCHAIN
-LOAD(nx_atomic_load_, 8, int64_t)
+LOAD(atomic_load_, 8, int64_t)
 #endif
 
 /****************************************************************************
@@ -78,7 +78,7 @@ LOAD(nx_atomic_load_, 8, int64_t)
 
 EXCHANGE(__atomic_exchange_, 8, uint64_t)
 #ifndef CONFIG_LIBC_ATOMIC_TOOLCHAIN
-EXCHANGE(nx_atomic_exchange_, 8, int64_t)
+EXCHANGE(atomic_exchange_, 8, int64_t)
 #endif
 
 /****************************************************************************
@@ -87,7 +87,7 @@ EXCHANGE(nx_atomic_exchange_, 8, int64_t)
 
 CMP_EXCHANGE(__atomic_compare_exchange_, 8, uint64_t)
 #ifndef CONFIG_LIBC_ATOMIC_TOOLCHAIN
-CMP_EXCHANGE(nx_atomic_compare_exchange_, 8, int64_t)
+CMP_EXCHANGE(atomic_compare_exchange_, 8, int64_t)
 #endif
 
 /****************************************************************************
@@ -96,7 +96,7 @@ CMP_EXCHANGE(nx_atomic_compare_exchange_, 8, int64_t)
 
 FLAG_TEST_AND_SET(__atomic_flags_test_and_set_, 8, uint64_t)
 #ifndef CONFIG_LIBC_ATOMIC_TOOLCHAIN
-FLAG_TEST_AND_SET(nx_atomic_flags_test_and_set_, 8, int64_t)
+FLAG_TEST_AND_SET(atomic_flags_test_and_set_, 8, int64_t)
 #endif
 
 /****************************************************************************
@@ -105,7 +105,7 @@ FLAG_TEST_AND_SET(nx_atomic_flags_test_and_set_, 8, int64_t)
 
 FETCH_ADD(__atomic_fetch_add_, 8, uint64_t)
 #ifndef CONFIG_LIBC_ATOMIC_TOOLCHAIN
-FETCH_ADD(nx_atomic_fetch_add_, 8, int64_t)
+FETCH_ADD(atomic_fetch_add_, 8, int64_t)
 #endif
 
 /****************************************************************************
@@ -114,7 +114,7 @@ FETCH_ADD(nx_atomic_fetch_add_, 8, int64_t)
 
 FETCH_SUB(__atomic_fetch_sub_, 8, uint64_t)
 #ifndef CONFIG_LIBC_ATOMIC_TOOLCHAIN
-FETCH_SUB(nx_atomic_fetch_sub_, 8, int64_t)
+FETCH_SUB(atomic_fetch_sub_, 8, int64_t)
 #endif
 
 /****************************************************************************
@@ -123,7 +123,7 @@ FETCH_SUB(nx_atomic_fetch_sub_, 8, int64_t)
 
 FETCH_AND(__atomic_fetch_and_, 8, uint64_t)
 #ifndef CONFIG_LIBC_ATOMIC_TOOLCHAIN
-FETCH_AND(nx_atomic_fetch_and_, 8, int64_t)
+FETCH_AND(atomic_fetch_and_, 8, int64_t)
 #endif
 
 /****************************************************************************
@@ -132,7 +132,7 @@ FETCH_AND(nx_atomic_fetch_and_, 8, int64_t)
 
 FETCH_OR(__atomic_fetch_or_, 8, uint64_t)
 #ifndef CONFIG_LIBC_ATOMIC_TOOLCHAIN
-FETCH_OR(nx_atomic_fetch_or_, 8, int64_t)
+FETCH_OR(atomic_fetch_or_, 8, int64_t)
 #endif
 
 /****************************************************************************
@@ -141,7 +141,7 @@ FETCH_OR(nx_atomic_fetch_or_, 8, int64_t)
 
 FETCH_XOR(__atomic_fetch_xor_, 8, uint64_t)
 #ifndef CONFIG_LIBC_ATOMIC_TOOLCHAIN
-FETCH_XOR(nx_atomic_fetch_xor_, 8, int64_t)
+FETCH_XOR(atomic_fetch_xor_, 8, int64_t)
 #endif
 
 /* Clang define the __sync builtins, add #ifndef to avoid
