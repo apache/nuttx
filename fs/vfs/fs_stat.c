@@ -88,9 +88,13 @@ static int stat_recursive(FAR const char *path,
 
   /* Get an inode for this path */
 
-  SETUP_SEARCH(&desc, path, true);
+  ret = inode_search_setup(&desc, path, true);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
-  ret = inode_find(&desc);
+  ret = inode_find(&desc, &inode);
   if (ret < 0)
     {
       /* This name does not refer to an inode in the pseudo file system and
@@ -102,7 +106,6 @@ static int stat_recursive(FAR const char *path,
 
   /* Get the search results */
 
-  inode = desc.node;
   DEBUGASSERT(inode != NULL);
 
   ret = inode_checkpathperm(inode, 0, 0);
@@ -153,7 +156,7 @@ static int stat_recursive(FAR const char *path,
 
   inode_release(inode);
 errout_with_search:
-  RELEASE_SEARCH(&desc);
+  inode_search_release(&desc);
   return ret;
 }
 

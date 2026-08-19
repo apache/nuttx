@@ -29,14 +29,13 @@
 #include <sys/stat.h>
 #include <assert.h>
 #include <errno.h>
-#include <limits.h>
 #include <string.h>
 
 #include <nuttx/fs/fs.h>
-#include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>
 
 #include "inode/inode.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Public Functions
@@ -62,7 +61,7 @@ int chroot(FAR const char *path)
   FAR struct tcb_s *rtcb;
   FAR struct task_group_s *group;
   FAR char *newroot;
-  char abspath[PATH_MAX];
+  struct inode_search_s desc;
   struct stat buf;
   int ret;
 
@@ -98,11 +97,11 @@ int chroot(FAR const char *path)
     }
 
   /* Resolve to a host absolute path the same way lookups do: make
-   * absolute, prepend the current jail, and normalize.  No second
+   * absolute, prepend the current jail, and canonicalize.  No second
    * inode walk.
    */
 
-  ret = inode_chroot_hostpath(path, abspath, sizeof(abspath));
+  ret = inode_search_setup(&desc, path, true);
   if (ret < 0)
     {
       set_errno(-ret);
@@ -111,21 +110,23 @@ int chroot(FAR const char *path)
 
   /* Host "/" means no jail.  Clear any previous root. */
 
-  if (strcmp(abspath, "/") == 0)
+  if (strcmp(desc.path, "/") == 0)
     {
-      kmm_free(group->tg_root);
+      fs_heap_free(group->tg_root);
       group->tg_root = NULL;
+      inode_search_release(&desc);
       return OK;
     }
 
-  newroot = strdup(abspath);
+  newroot = fs_heap_strdup(desc.path);
+  inode_search_release(&desc);
   if (newroot == NULL)
     {
       set_errno(ENOMEM);
       return ERROR;
     }
 
-  kmm_free(group->tg_root);
+  fs_heap_free(group->tg_root);
   group->tg_root = newroot;
   return OK;
 }

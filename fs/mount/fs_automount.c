@@ -397,6 +397,7 @@ static int automount_ioctl(FAR struct file *filep, int cmd,
 static int automount_findinode(FAR const char *path)
 {
   struct inode_search_s desc;
+  FAR struct inode *inode;
   int ret;
 
   /* Make sure that we were given a path */
@@ -409,9 +410,14 @@ static int automount_findinode(FAR const char *path)
 
   /* Find the inode */
 
-  SETUP_SEARCH(&desc, path, false);
+  ret = inode_search_setup(&desc, path, false);
+  if (ret < 0)
+    {
+      inode_runlock();
+      return ret;
+    }
 
-  ret = inode_search(&desc);
+  ret = inode_search(&desc, &inode);
 
   /* Did we find it? */
 
@@ -420,27 +426,33 @@ static int automount_findinode(FAR const char *path)
       /* No.. Not found */
 
       ret = OK_NOENT;
-    }
-
-  /* Yes.. is it a mount point? */
-
-  else if (INODE_IS_MOUNTPT(desc.node))
-    {
-      /* Yes.. we found a mountpoint at this path */
-
-      ret = OK_EXIST;
+      inode = NULL;
     }
   else
     {
-      /* No.. then something is in the way */
+      inode_addref(inode);
 
-      ret = -ENOTDIR;
+      /* Yes.. is it a mount point? */
+
+      if (INODE_IS_MOUNTPT(inode))
+        {
+          /* Yes.. we found a mountpoint at this path */
+
+          ret = OK_EXIST;
+        }
+      else
+        {
+          /* No.. then something is in the way */
+
+          ret = -ENOTDIR;
+        }
     }
 
   /* Relinquish our exclusive access to the inode try and return the result */
 
   inode_runlock();
-  RELEASE_SEARCH(&desc);
+  inode_release(inode);
+  inode_search_release(&desc);
   return ret;
 }
 
@@ -470,56 +482,56 @@ static void automount_mount(FAR struct automounter_state_s *priv)
   ret = automount_findinode(lower->mountpoint);
   switch (ret)
     {
-    case OK_EXIST:
+      case OK_EXIST:
 
-      /* REVISIT: What should we do in this case?  I think that this would
-       * happen only if a previous unmount failed?  I suppose that we should
-       * try to unmount again because the mount might be stale.
-       */
+        /* REVISIT: What should we do in this case?  I think that this would
+         * happen only if a previous unmount failed?  I suppose that we
+         * should try to unmount again because the mount might be stale.
+         */
 
-      fwarn("WARNING: Mountpoint %s already exists\n", lower->mountpoint);
-      ret = automount_unmount(priv);
-      if (ret < 0)
-        {
-          /* We failed to unmount (again?).  Complain and abort. */
+        fwarn("WARNING: Mountpoint %s already exists\n", lower->mountpoint);
+        ret = automount_unmount(priv);
+        if (ret < 0)
+          {
+            /* We failed to unmount (again?).  Complain and abort. */
 
-          ferr("ERROR: automount_unmount failed: %d\n", ret);
-          return;
-        }
+            ferr("ERROR: automount_unmount failed: %d\n", ret);
+            return;
+          }
 
-      /* We successfully unmounted the file system.  Fall through to
-       * mount it again.
-       */
+        /* We successfully unmounted the file system.  Fall through to
+         * mount it again.
+         */
 
-    case OK_NOENT:
+      case OK_NOENT:
 
-      /* If we get here, then the volume must not be mounted */
+        /* If we get here, then the volume must not be mounted */
 
-      DEBUGASSERT(!priv->mounted);
+        DEBUGASSERT(!priv->mounted);
 
-       /* Mount the file system */
+        /* Mount the file system */
 
-      ret = nx_mount(lower->blockdev, lower->mountpoint, lower->fstype,
-                     0, NULL);
-      if (ret < 0)
-        {
-          ferr("ERROR: Mount failed: %d\n", ret);
-          return;
-        }
+        ret = nx_mount(lower->blockdev, lower->mountpoint, lower->fstype,
+                       0, NULL);
+        if (ret < 0)
+          {
+            ferr("ERROR: Mount failed: %d\n", ret);
+            return;
+          }
 
-      /* Indicate that the volume is mounted */
+        /* Indicate that the volume is mounted */
 
-      priv->mounted = true;
+        priv->mounted = true;
 
 #ifdef CONFIG_FS_AUTOMOUNTER_DRIVER
-      automount_notify(priv);
+        automount_notify(priv);
 #endif /* CONFIG_FS_AUTOMOUNTER_DRIVER */
 
-      break;
+        break;
 
-    default:
-      ferr("ERROR: automount_findinode failed: %d\n", ret);
-      break;
+      default:
+        ferr("ERROR: automount_findinode failed: %d\n", ret);
+        break;
     }
 }
 
@@ -550,69 +562,69 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
   ret = automount_findinode(lower->mountpoint);
   switch (ret)
     {
-    case OK_EXIST:
+      case OK_EXIST:
 
-      /* If we get here, then the volume must be mounted */
+        /* If we get here, then the volume must be mounted */
 
-      DEBUGASSERT(priv->mounted);
+        DEBUGASSERT(priv->mounted);
 
-      /* Un-mount the volume */
+        /* Un-mount the volume */
 
-      ret = nx_umount2(lower->mountpoint, MNT_FORCE);
-      if (ret < 0)
-        {
-          /* We expect the error to be EBUSY meaning that the volume could
-           * not be unmounted because there are currently reference via open
-           * files or directories.
-           */
+        ret = nx_umount2(lower->mountpoint, MNT_FORCE);
+        if (ret < 0)
+          {
+            /* We expect the error to be EBUSY meaning that the volume could
+             * not be unmounted because there are currently reference via
+             * open files or directories.
+             */
 
-          if (ret == -EBUSY)
-            {
-              finfo("WARNING: Volume is busy, try again later\n");
+            if (ret == -EBUSY)
+              {
+                finfo("WARNING: Volume is busy, try again later\n");
 
-              /* Start a timer to retry the umount2 after a delay */
+                /* Start a timer to retry the umount2 after a delay */
 
-              ret = wd_start(&priv->wdog, lower->udelay,
-                             automount_timeout, (wdparm_t)priv);
-              if (ret < 0)
-                {
-                  ferr("ERROR: wd_start failed: %d\n", ret);
-                  return ret;
-                }
-            }
+                ret = wd_start(&priv->wdog, lower->udelay,
+                               automount_timeout, (wdparm_t)priv);
+                if (ret < 0)
+                  {
+                    ferr("ERROR: wd_start failed: %d\n", ret);
+                    return ret;
+                  }
+              }
 
-          /* Other errors are fatal */
+            /* Other errors are fatal */
 
-          else
-            {
-              ferr("ERROR: umount2 failed: %d\n", ret);
-              return ret;
-            }
-        }
+            else
+              {
+                ferr("ERROR: umount2 failed: %d\n", ret);
+                return ret;
+              }
+          }
 
-      /* Fall through */
+        /* Fall through */
 
-    case OK_NOENT:
+      case OK_NOENT:
 
-      /* The mountpoint is not present.  This is normal behavior in the
-       * case where the user manually un-mounted the volume before removing
-       * media.  Nice job, Mr. user.
-       */
+        /* The mountpoint is not present.  This is normal behavior in the
+         * case where the user manually un-mounted the volume before removing
+         * media.  Nice job, Mr. user.
+         */
 
-      if (priv->mounted)
-        {
-          priv->mounted = false;
+        if (priv->mounted)
+          {
+            priv->mounted = false;
 
 #ifdef CONFIG_FS_AUTOMOUNTER_DRIVER
-          automount_notify(priv);
+            automount_notify(priv);
 #endif /* CONFIG_FS_AUTOMOUNTER_DRIVER */
-        }
+          }
 
-      return OK;
+        return OK;
 
-    default:
-      ferr("ERROR: automount_findinode failed: %d\n", ret);
-      return ret;
+      default:
+        ferr("ERROR: automount_findinode failed: %d\n", ret);
+        return ret;
     }
 }
 
@@ -807,6 +819,7 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
   int ret;
 #ifdef CONFIG_FS_AUTOMOUNTER_DRIVER
   FAR char *devpath = lib_get_pathbuffer();
+
   if (devpath == NULL)
     {
       return NULL;
@@ -917,6 +930,7 @@ void automount_uninitialize(FAR void *handle)
   if (priv->registered)
     {
       FAR char *devpath = lib_get_pathbuffer();
+
       if (devpath == NULL)
         {
           return;
