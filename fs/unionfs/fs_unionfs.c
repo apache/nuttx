@@ -2538,9 +2538,13 @@ static int unionfs_getmount(FAR const char *path, FAR struct inode **inode)
 
   /* Find the mountpt */
 
-  SETUP_SEARCH(&desc, path, false);
+  ret = inode_search_setup(&desc, path, false);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
-  ret = inode_find(&desc);
+  ret = inode_find(&desc, &minode);
   if (ret < 0)
     {
       /* Mountpoint inode not found */
@@ -2550,7 +2554,6 @@ static int unionfs_getmount(FAR const char *path, FAR struct inode **inode)
 
   /* Get the search results */
 
-  minode = desc.node;
   DEBUGASSERT(minode != NULL);
 
   /* Verify that the inode is a mountpoint.
@@ -2571,14 +2574,14 @@ static int unionfs_getmount(FAR const char *path, FAR struct inode **inode)
   /* Success! */
 
   *inode = minode;
-  RELEASE_SEARCH(&desc);
+  inode_search_release(&desc);
   return OK;
 
 errout_with_inode:
   inode_release(minode);
 
 errout_with_search:
-  RELEASE_SEARCH(&desc);
+  inode_search_release(&desc);
   return ret;
 }
 
