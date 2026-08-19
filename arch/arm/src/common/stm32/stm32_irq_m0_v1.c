@@ -213,14 +213,6 @@ void up_irqinitialize(void)
 
   stm32_dumpnvic("initial", NR_IRQS);
 
-  /* Initialize logic to support a second level of interrupt decoding for
-   * configured pin interrupts.
-   */
-
-#ifdef CONFIG_STM32_GPIOIRQ
-  stm32_gpioirqinitialize();
-#endif
-
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
   /* And finally, enable interrupts */
