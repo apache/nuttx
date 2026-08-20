@@ -716,12 +716,17 @@ static int pci_u16550_probe(FAR struct pci_device_s *dev)
           udev = g_pci_u16550_dev[i];
           priv = (FAR struct pci_u16550_priv_s *)udev->priv;
 
-          if (priv->vendor == dev->vendor &&
-              priv->device == dev->device &&
+          if ((priv->vendor == PCI_ANY_ID ||
+               priv->vendor == dev->vendor) &&
+              (priv->device == PCI_ANY_ID ||
+               priv->device == dev->device) &&
               priv->port == port)
             {
               break;
             }
+
+          udev = NULL;
+          priv = NULL;
         }
 
       /* Not found */
