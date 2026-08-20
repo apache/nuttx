@@ -3013,17 +3013,17 @@ static bool cdcuart_txempty(FAR struct uart_dev_s *dev)
       return true;
     }
 
+  priv->ispolling = true;
   spin_unlock_irqrestore(&priv->lock, flags);
 
-  priv->ispolling = true;
   EP_POLL(ep);
+
+  flags = spin_lock_irqsave(&priv->lock);
   priv->ispolling = false;
 
   /* When all of the allocated write requests have been returned to the
    * txfree, then there is no longer any TX data in flight.
    */
-
-  flags = spin_lock_irqsave(&priv->lock);
 
 #ifdef CONFIG_CDCACM_DISABLE_TXBUF
   /* dev->xmit.buffer always take one req, so just compare
@@ -3330,6 +3330,12 @@ int cdcacm_classobject(int minor, FAR struct usbdev_devinfo_s *devinfo,
   char devname[CDCACM_DEVNAME_SIZE];
   int ret;
 
+  ret = nxmutex_lock(&g_init_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Allocate the structures needed */
 
   alloc = (FAR struct cdcacm_alloc_s *)
@@ -3338,6 +3344,7 @@ int cdcacm_classobject(int minor, FAR struct usbdev_devinfo_s *devinfo,
   if (!alloc)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_ALLOCDEVSTRUCT), 0);
+      nxmutex_unlock(&g_init_lock);
       return -ENOMEM;
     }
 
@@ -3442,10 +3449,12 @@ int cdcacm_classobject(int minor, FAR struct usbdev_devinfo_s *devinfo,
     }
 #endif
 
+  nxmutex_unlock(&g_init_lock);
   return OK;
 
 errout_with_class:
   kmm_free(alloc);
+  nxmutex_unlock(&g_init_lock);
   return ret;
 }
 
@@ -3501,12 +3510,6 @@ int cdcacm_initialize(int minor, FAR void **handle)
   devinfo.epno[CDCACM_EP_BULKIN_IDX]  = CONFIG_CDCACM_EPBULKIN;
   devinfo.epno[CDCACM_EP_BULKOUT_IDX] = CONFIG_CDCACM_EPBULKOUT;
 
-  ret = nxmutex_lock(&g_init_lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
   /* Get an instance of the serial driver class object */
 
   ret = cdcacm_classobject(minor, &devinfo, &drvr);
@@ -3522,8 +3525,6 @@ int cdcacm_initialize(int minor, FAR void **handle)
                    (uint16_t)-ret);
         }
     }
-
-  nxmutex_unlock(&g_init_lock);
 
   /* Return the driver instance (if any) if the caller has requested it
    * by provided a pointer to the location to return it.
