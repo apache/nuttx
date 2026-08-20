@@ -117,12 +117,6 @@ static int rpmsgdev_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
 
 /* Functions for sending data to the remote cpu */
 
-static int
-rpmsgdev_send_recv_with_cookie(FAR struct rpmsgdev_s *priv,
-                               FAR struct rpmsgdev_cookie_s *cookie,
-                               uint32_t command, bool copy,
-                               FAR struct rpmsgdev_header_s *msg,
-                               int len, FAR void *data);
 static int     rpmsgdev_send_recv(FAR struct rpmsgdev_s *priv,
                                   uint32_t command, bool copy,
                                   FAR struct rpmsgdev_header_s *msg,
@@ -213,7 +207,7 @@ static int rpmsgdev_open(FAR struct file *filep)
 {
   FAR struct rpmsgdev_s *dev;
   FAR struct rpmsgdev_priv_s *priv;
-  FAR struct rpmsgdev_open_s *msg;
+  struct rpmsgdev_open_s msg;
   int ret;
 
   /* Get the mountpoint inode reference from the file structure and the
@@ -234,22 +228,19 @@ static int rpmsgdev_open(FAR struct file *filep)
    * operations.
    */
 
-  msg = rpmsg_pool_alloc(sizeof(*msg));
-  msg->flags = filep->f_oflags | O_NONBLOCK;
-  ret = rpmsgdev_send_recv(dev, RPMSGDEV_OPEN, true, &msg->header,
-                           sizeof(*msg), NULL);
+  msg.flags = filep->f_oflags | O_NONBLOCK;
+  ret = rpmsgdev_send_recv(dev, RPMSGDEV_OPEN, true, &msg.header,
+                           sizeof(msg), NULL);
   if (ret < 0)
     {
       rpmsgdeverr("open failed, ret=%d\n", ret);
-      rpmsg_pool_free(msg);
       kmm_free(priv);
       return ret;
     }
 
-  priv->filep    = msg->filep;
+  priv->filep    = msg.filep;
   priv->nonblock = !!(filep->f_oflags & O_NONBLOCK);
   nxmutex_init(&priv->lock);
-  rpmsg_pool_free(msg);
 
   /* Attach the private data to the struct file instance */
 
@@ -275,7 +266,7 @@ static int rpmsgdev_close(FAR struct file *filep)
 {
   FAR struct rpmsgdev_s *dev;
   FAR struct rpmsgdev_priv_s *priv;
-  FAR struct rpmsgdev_close_s *msg;
+  struct rpmsgdev_close_s msg;
   int ret;
 
   /* Recover our private data from the struct file instance */
@@ -286,18 +277,15 @@ static int rpmsgdev_close(FAR struct file *filep)
 
   /* Try to close the device in the remote cpu */
 
-  msg = rpmsg_pool_alloc(sizeof(*msg));
-  msg->filep = priv->filep;
-  ret = rpmsgdev_send_recv(dev, RPMSGDEV_CLOSE, true, &msg->header,
-                           sizeof(*msg), NULL);
+  msg.filep = priv->filep;
+  ret = rpmsgdev_send_recv(dev, RPMSGDEV_CLOSE, true, &msg.header,
+                           sizeof(msg), NULL);
   if (ret < 0)
     {
-      rpmsg_pool_free(msg);
       rpmsgdeverr("close failed, ret=%d\n", ret);
       return ret;
     }
 
-  rpmsg_pool_free(msg);
   filep->f_priv = NULL;
   nxmutex_destroy(&priv->lock);
   kmm_free(priv);
@@ -409,7 +397,6 @@ static int rpmsgdev_wait(FAR struct file *filep, pollevent_t events)
 static ssize_t rpmsgdev_read(FAR struct file *filep, FAR char *buffer,
                              size_t buflen)
 {
-  FAR struct rpmsgdev_cookie_s *cookie;
   FAR struct rpmsgdev_s *dev;
   FAR struct rpmsgdev_priv_s *priv;
   FAR struct rpmsgdev_read_s *msg;
@@ -429,53 +416,27 @@ static ssize_t rpmsgdev_read(FAR struct file *filep, FAR char *buffer,
   DEBUGASSERT(dev != NULL && priv != NULL);
 
   command = priv->nonblock ? RPMSGDEV_READ_NONBLOCK : RPMSGDEV_READ;
-  cookie = rpmsg_pool_alloc(sizeof(*cookie));
-  if (cookie == NULL)
-    {
-      return -ENOMEM;
-    }
 
   ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
-      goto out;
+      return ret;
     }
 
   msg = rpmsgdev_get_tx_payload_buffer(dev, &space);
   if (msg == NULL)
     {
-      ret = -ENOMEM;
       nxmutex_unlock(&priv->lock);
-      goto out;
+      return -ENOMEM;
     }
 
-  space -= sizeof(*msg) - 1;
   msg->filep = priv->filep;
-
-#if CONFIG_RPMSG_POOL_COUNT > 0
-  /* MPU mode: limit count to buffer space to ensure single response */
-
-  msg->count = MIN(space, buflen);
-#else
   msg->count = buflen;
-#endif
 
-  ret = rpmsgdev_send_recv_with_cookie(dev, cookie, command, false,
-                                       &msg->header, sizeof(*msg) - 1,
-                                       buffer);
-#if CONFIG_RPMSG_POOL_COUNT > 0
-  if (ret >= 0 && cookie->result > 0)
-    {
-      FAR struct rpmsgdev_read_s *rsp = cookie->data;
-
-      memcpy(buffer, rsp->buf, cookie->result);
-      rpmsg_release_rx_buffer(&dev->ept, cookie->data);
-    }
-#endif
+  ret = rpmsgdev_send_recv(dev, command, false, &msg->header,
+                           sizeof(*msg) - 1, buffer);
 
   nxmutex_unlock(&priv->lock);
-out:
-  rpmsg_pool_free(cookie);
   return ret;
 }
 
@@ -588,7 +549,7 @@ static off_t rpmsgdev_seek(FAR struct file *filep, off_t offset, int whence)
 {
   FAR struct rpmsgdev_s *dev;
   FAR struct rpmsgdev_priv_s *priv;
-  FAR struct rpmsgdev_lseek_s *msg;
+  struct rpmsgdev_lseek_s msg;
   int ret;
 
   /* Recover our private data from the struct file instance */
@@ -599,19 +560,17 @@ static off_t rpmsgdev_seek(FAR struct file *filep, off_t offset, int whence)
 
   /* Call our internal routine to perform the seek */
 
-  msg = rpmsg_pool_alloc(sizeof(*msg));
-  msg->filep  = priv->filep;
-  msg->offset = offset;
-  msg->whence = whence;
+  msg.filep  = priv->filep;
+  msg.offset = offset;
+  msg.whence = whence;
 
-  ret = rpmsgdev_send_recv(dev, RPMSGDEV_LSEEK, true, &msg->header,
-                           sizeof(*msg), NULL);
+  ret = rpmsgdev_send_recv(dev, RPMSGDEV_LSEEK, true, &msg.header,
+                           sizeof(msg), NULL);
   if (ret >= 0)
     {
-      filep->f_pos = msg->offset;
+      filep->f_pos = msg.offset;
     }
 
-  rpmsg_pool_free(msg);
   return ret;
 }
 
@@ -687,7 +646,6 @@ static ssize_t rpmsgdev_ioctl_arglen(int cmd, unsigned long arg)
 
 static int rpmsgdev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct rpmsgdev_cookie_s *cookie;
   FAR struct rpmsgdev_s *dev;
   FAR struct rpmsgdev_priv_s *priv;
   FAR struct rpmsgdev_ioctl_s *msg;
@@ -695,7 +653,6 @@ static int rpmsgdev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   uint32_t space;
   ssize_t arglen;
   size_t msglen;
-  int ret;
 
   /* Recover our private data from the struct file instance */
 
@@ -747,22 +704,8 @@ static int rpmsgdev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       memcpy(msg->buf, argp, arglen);
     }
 
-  cookie = rpmsg_pool_alloc(sizeof(*cookie));
-  ret = rpmsgdev_send_recv_with_cookie(dev, cookie, RPMSGDEV_IOCTL, false,
-                                       &msg->header, msglen,
-                                       arglen > 0 ? argp : NULL);
-#if CONFIG_RPMSG_POOL_COUNT > 0
-  if (ret >= 0 && cookie->result >= 0)
-    {
-      FAR struct rpmsgdev_ioctl_s *rsp = cookie->data;
-
-      memcpy(argp, rsp->buf, cookie->result);
-      rpmsg_release_rx_buffer(&dev->ept, cookie->data);
-    }
-#endif
-
-  rpmsg_pool_free(cookie);
-  return ret;
+  return rpmsgdev_send_recv(dev, RPMSGDEV_IOCTL, false, &msg->header,
+                            msglen, arglen > 0 ? argp : NULL);
 }
 
 /****************************************************************************
@@ -786,7 +729,7 @@ static int rpmsgdev_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
 {
   FAR struct rpmsgdev_s *dev;
   FAR struct rpmsgdev_priv_s *priv;
-  FAR struct rpmsgdev_poll_s *msg;
+  struct rpmsgdev_poll_s msg;
   int ret;
 
   /* Recover our private data from the struct file instance */
@@ -797,15 +740,13 @@ static int rpmsgdev_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
 
   /* Setup or teardown the poll */
 
-  msg = rpmsg_pool_alloc(sizeof(*msg));
-  msg->filep  = priv->filep;
-  msg->events = fds->events;
-  msg->setup  = setup;
-  msg->fds    = (uint64_t)(uintptr_t)fds;
+  msg.filep  = priv->filep;
+  msg.events = fds->events;
+  msg.setup  = setup;
+  msg.fds    = (uint64_t)(uintptr_t)fds;
 
-  ret = rpmsgdev_send_recv(dev, RPMSGDEV_POLL, true, &msg->header,
-                           sizeof(*msg), NULL);
-  rpmsg_pool_free(msg);
+  ret = rpmsgdev_send_recv(dev, RPMSGDEV_POLL, true, &msg.header,
+                           sizeof(msg), NULL);
   return ret;
 }
 
@@ -842,99 +783,6 @@ static FAR void *rpmsgdev_get_tx_payload_buffer(FAR struct rpmsgdev_s *priv,
 }
 
 /****************************************************************************
- * Name: rpmsgdev_send_recv_with_cookie
- *
- * Description:
- *   Send and receive the rpmsg data.
- *
- * Parameters:
- *   priv    - rpmsg device handle
- *   cookie  - the cookie
- *   command - the command, RPMSGDEV_OPEN, RPMSGDEV_CLOSE, RPMSGDEV_READ,
- *                          RPMSGDEV_WRITE, RPMSGDEV_IOCTL
- *   copy    - true, send a message across to the remote processor, and the
- *                   tx buffer will be alloced inside function rpmsg_send()
- *             false, send a message in tx buffer reserved by
- *                    rpmsg_get_tx_payload_buffer() across to the remote
- *                    processor.
- *   msg     - the message header
- *   len     - length of the payload
- *   data    - the data
- *
- * Returned Values:
- *   OK on success; A negated errno value is returned on any failure.
- *
- ****************************************************************************/
-
-static int
-rpmsgdev_send_recv_with_cookie(FAR struct rpmsgdev_s *priv,
-                               FAR struct rpmsgdev_cookie_s *cookie,
-                               uint32_t command, bool copy,
-                               FAR struct rpmsgdev_header_s *msg,
-                               int len, FAR void *data)
-{
-  irqstate_t flags;
-  int ret;
-
-  memset(cookie, 0, sizeof(*cookie));
-  nxsem_init(&cookie->sem, 0, 0);
-
-  if (data != NULL)
-    {
-      cookie->data = data;
-    }
-  else if (copy)
-    {
-      cookie->data = msg;
-    }
-
-  msg->command = command;
-  msg->result  = -ENXIO;
-  msg->cookie  = (uintptr_t)cookie;
-
-  flags = spin_lock_irqsave(&priv->lock);
-  list_add_tail(&priv->cookies, &cookie->node);
-  spin_unlock_irqrestore(&priv->lock, flags);
-
-  if (copy)
-    {
-      uint32_t buflen;
-      FAR void *buf;
-
-      buf = rpmsgdev_get_tx_payload_buffer(priv, &buflen);
-      if (buf == NULL)
-        {
-          ret = -ENOMEM;
-          goto fail;
-        }
-
-      DEBUGASSERT(len <= buflen);
-      memcpy(buf, msg, len);
-      msg = buf;
-    }
-
-  ret = rpmsg_send_nocopy(&priv->ept, msg, len);
-  if (ret < 0)
-    {
-      rpmsg_release_tx_buffer(&priv->ept, msg);
-      goto fail;
-    }
-
-  ret = rpmsg_wait(&priv->ept, &cookie->sem);
-  if (ret >= 0)
-    {
-      ret = cookie->result;
-    }
-
-fail:
-  flags = spin_lock_irqsave(&priv->lock);
-  list_delete(&cookie->node);
-  spin_unlock_irqrestore(&priv->lock, flags);
-  nxsem_destroy(&cookie->sem);
-  return ret;
-}
-
-/****************************************************************************
  * Name: rpmsgdev_send_recv
  *
  * Description:
@@ -963,13 +811,65 @@ static int rpmsgdev_send_recv(FAR struct rpmsgdev_s *priv,
                               FAR struct rpmsgdev_header_s *msg,
                               int len, FAR void *data)
 {
-  FAR struct rpmsgdev_cookie_s *cookie = rpmsg_pool_alloc(sizeof(*cookie));
+  struct rpmsgdev_cookie_s cookie;
+  irqstate_t flags;
   int ret;
 
-  ret = rpmsgdev_send_recv_with_cookie(priv, cookie, command, copy, msg,
-                                       len, data);
+  memset(&cookie, 0, sizeof(cookie));
+  nxsem_init(&cookie.sem, 0, 0);
 
-  rpmsg_pool_free(cookie);
+  if (data != NULL)
+    {
+      cookie.data = data;
+    }
+  else if (copy)
+    {
+      cookie.data = msg;
+    }
+
+  msg->command = command;
+  msg->result  = -ENXIO;
+  msg->cookie  = (uintptr_t)&cookie;
+
+  flags = spin_lock_irqsave(&priv->lock);
+  list_add_tail(&priv->cookies, &cookie.node);
+  spin_unlock_irqrestore(&priv->lock, flags);
+
+  if (copy)
+    {
+      uint32_t buflen;
+      FAR void *buf;
+
+      buf = rpmsgdev_get_tx_payload_buffer(priv, &buflen);
+      if (buf == NULL)
+        {
+          ret = -ENOMEM;
+          goto fail;
+        }
+
+      DEBUGASSERT(len <= buflen);
+      memcpy(buf, msg, len);
+      msg = buf;
+    }
+
+  ret = rpmsg_send_nocopy(&priv->ept, msg, len);
+  if (ret < 0)
+    {
+      rpmsg_release_tx_buffer(&priv->ept, msg);
+      goto fail;
+    }
+
+  ret = rpmsg_wait(&priv->ept, &cookie.sem);
+  if (ret >= 0)
+    {
+      ret = cookie.result;
+    }
+
+fail:
+  flags = spin_lock_irqsave(&priv->lock);
+  list_delete(&cookie.node);
+  spin_unlock_irqrestore(&priv->lock, flags);
+  nxsem_destroy(&cookie.sem);
   return ret;
 }
 
@@ -1041,15 +941,9 @@ static int rpmsgdev_read_handler(FAR struct rpmsg_endpoint *ept,
 
   if (header->result > 0)
     {
-#if CONFIG_RPMSG_POOL_COUNT > 0
-      cookie->result = header->result;
-      rpmsg_hold_rx_buffer(ept, data);
-      cookie->data = data;
-#else
       memcpy(cookie->data, rsp->buf, header->result);
       cookie->data += header->result;
       cookie->result += header->result;
-#endif
     }
   else if (cookie->result == 0)
     {
@@ -1095,12 +989,7 @@ static int rpmsgdev_ioctl_handler(FAR struct rpmsg_endpoint *ept,
   cookie->result = header->result;
   if (cookie->result >= 0 && rsp->arglen > 0)
     {
-#if CONFIG_RPMSG_POOL_COUNT > 0
-      cookie->data = data;
-      rpmsg_hold_rx_buffer(ept, data);
-#else
       memcpy(cookie->data, rsp->buf, rsp->arglen);
-#endif
     }
 
   rpmsg_post(ept, &cookie->sem);
