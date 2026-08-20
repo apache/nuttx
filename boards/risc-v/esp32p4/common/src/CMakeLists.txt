@@ -86,6 +86,4 @@ if(CONFIG_ESPRESSIF_ULP_USE_TEST_BIN)
   include(${NUTTX_DIR}/arch/risc-v/src/common/espressif/ulp.cmake)
 endif()
 
-endif()
-
 target_sources(board PRIVATE ${SRCS})
