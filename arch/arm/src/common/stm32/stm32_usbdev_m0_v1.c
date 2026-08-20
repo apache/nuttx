@@ -53,6 +53,7 @@
 #include "hardware/stm32_rcc.h"
 #include "hardware/stm32_usbdev.h"
 #include "stm32_gpio.h"
+#include "stm32_pwr.h"
 #include "stm32_usbdev.h"
 
 #if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
@@ -352,12 +353,17 @@ struct stm32_usbdev_s
 /* Register operations ******************************************************/
 
 #ifdef CONFIG_STM32_USBDEV_REGDEBUG
-static uint16_t stm32_getreg(uint32_t addr);
-static void stm32_putreg(uint16_t val, uint32_t addr);
+static uint32_t stm32_getreg(uint32_t addr);
+static void stm32_putreg(uint32_t val, uint32_t addr);
 static void stm32_dumpep(int epno);
 #else
-#  define stm32_getreg(addr)     getreg16(addr)
-#  define stm32_putreg(val,addr) putreg16(val,addr)
+#  ifdef CONFIG_STM32_STM32G0
+#    define stm32_getreg(addr)     getreg32(addr)
+#    define stm32_putreg(val,addr) putreg32(val,addr)
+#  else
+#    define stm32_getreg(addr)     getreg16(addr)
+#    define stm32_putreg(val,addr) putreg16(val,addr)
+#  endif
 #  define stm32_dumpep(epno)
 #endif
 
@@ -600,15 +606,19 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_USBDEV_REGDEBUG
-static uint16_t stm32_getreg(uint32_t addr)
+static uint32_t stm32_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
-  static uint16_t preval = 0;
+  static uint32_t preval = 0;
   static uint32_t count = 0;
 
   /* Read the value from the register */
 
-  uint16_t val = getreg16(addr);
+#ifdef CONFIG_STM32_STM32G0
+  uint32_t val = getreg32(addr);
+#else
+  uint32_t val = getreg16(addr);
+#endif
 
   /* Is this the same value that we read from the same register last time?
    * Are we polling the register?  If so, suppress some of the output.
@@ -658,7 +668,7 @@ static uint16_t stm32_getreg(uint32_t addr)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_USBDEV_REGDEBUG
-static void stm32_putreg(uint16_t val, uint32_t addr)
+static void stm32_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
@@ -666,7 +676,11 @@ static void stm32_putreg(uint16_t val, uint32_t addr)
 
   /* Write the value */
 
+#ifdef CONFIG_STM32_STM32G0
+  putreg32(val, addr);
+#else
   putreg16(val, addr);
+#endif
 }
 #endif
 
@@ -679,6 +693,27 @@ static void stm32_dumpep(int epno)
 {
   uint32_t addr;
 
+#ifdef CONFIG_STM32_STM32G0
+  uinfo("CNTR:   %04" PRIx32 "\n", getreg32(STM32_USB_CNTR));
+  uinfo("ISTR:   %04" PRIx32 "\n", getreg32(STM32_USB_ISTR));
+  uinfo("FNR:    %04" PRIx32 "\n", getreg32(STM32_USB_FNR));
+  uinfo("DADDR:  %04" PRIx32 "\n", getreg32(STM32_USB_DADDR));
+
+  addr = STM32_USB_EPR(epno);
+  uinfo("EPR%d:   [%08" PRIx32 "] %04" PRIx32 "\n",
+        epno, addr, getreg32(addr));
+
+  addr = STM32_USB_BTABLE_ADDR(epno, 0);
+  uinfo("DESC:   %08" PRIx32 "\n", addr);
+
+  addr = STM32_USB_TX(epno);
+  uinfo("  TX BUF:  [%08" PRIx32 "] %08" PRIx32 "\n",
+        addr, getreg32(addr));
+
+  addr = STM32_USB_RX(epno);
+  uinfo("  RX BUF:  [%08" PRIx32 "] %08" PRIx32 "\n",
+        addr, getreg32(addr));
+#else
   /* Common registers */
 
   uinfo("CNTR:   %04x\n", getreg16(STM32_USB_CNTR));
@@ -710,6 +745,7 @@ static void stm32_dumpep(int epno)
 
   addr = STM32_USB_COUNT_RX(epno);
   uinfo("     COUNT: [%08" PRIx32 "] %04x\n",  addr, getreg16(addr));
+#endif
 }
 #endif
 
@@ -723,8 +759,13 @@ static void stm32_dumpep(int epno)
 
 static inline void stm32_seteptxcount(uint8_t epno, uint16_t count)
 {
+#ifdef CONFIG_STM32_STM32G0
+  volatile uint32_t *epaddr = (uint32_t *)STM32_USB_TX(epno);
+  *epaddr = (*epaddr & 0x0000ffff) | ((uint32_t)count << 16);
+#else
   volatile uint16_t *epaddr = (uint16_t *)STM32_USB_COUNT_TX(epno);
   *epaddr = count;
+#endif
 }
 
 /****************************************************************************
@@ -733,8 +774,13 @@ static inline void stm32_seteptxcount(uint8_t epno, uint16_t count)
 
 static inline void stm32_seteptxaddr(uint8_t epno, uint16_t addr)
 {
+#ifdef CONFIG_STM32_STM32G0
+  volatile uint32_t *txaddr = (uint32_t *)STM32_USB_TX(epno);
+  *txaddr = (*txaddr & 0xffff0000) | addr;
+#else
   volatile uint16_t *txaddr = (uint16_t *)STM32_USB_ADDR_TX(epno);
   *txaddr = addr;
+#endif
 }
 
 /****************************************************************************
@@ -743,7 +789,11 @@ static inline void stm32_seteptxaddr(uint8_t epno, uint16_t addr)
 
 static inline uint16_t stm32_geteptxaddr(uint8_t epno)
 {
+#ifdef CONFIG_STM32_STM32G0
+  volatile uint32_t *txaddr = (uint32_t *)STM32_USB_TX(epno);
+#else
   volatile uint16_t *txaddr = (uint16_t *)STM32_USB_ADDR_TX(epno);
+#endif
   return (uint16_t)*txaddr;
 }
 
@@ -753,7 +803,11 @@ static inline uint16_t stm32_geteptxaddr(uint8_t epno)
 
 static void stm32_seteprxcount(uint8_t epno, uint16_t count)
 {
+#ifdef CONFIG_STM32_STM32G0
+  volatile uint32_t *epaddr = (uint32_t *)STM32_USB_RX(epno);
+#else
   volatile uint16_t *epaddr = (uint16_t *)STM32_USB_COUNT_RX(epno);
+#endif
   uint32_t rxcount = 0;
   uint16_t nblocks;
 
@@ -793,7 +847,11 @@ static void stm32_seteprxcount(uint8_t epno, uint16_t count)
       DEBUGASSERT(nblocks > 0 && nblocks < 0x1f);
       rxcount = (uint32_t)(nblocks << USB_COUNT_RX_NUM_BLOCK_SHIFT);
     }
+#ifdef CONFIG_STM32_STM32G0
+  *epaddr = (*epaddr & 0x0000ffff) | rxcount;
+#else
   *epaddr = rxcount;
+#endif
 }
 
 /****************************************************************************
@@ -802,8 +860,13 @@ static void stm32_seteprxcount(uint8_t epno, uint16_t count)
 
 static inline uint16_t stm32_geteprxcount(uint8_t epno)
 {
+#ifdef CONFIG_STM32_STM32G0
+  volatile uint32_t *epaddr = (uint32_t *)STM32_USB_RX(epno);
+  return (uint16_t)((*epaddr & USB_COUNT_RX_MASK) >> 16);
+#else
   volatile uint16_t *epaddr = (uint16_t *)STM32_USB_COUNT_RX(epno);
   return (*epaddr) & USB_COUNT_RX_MASK;
+#endif
 }
 
 /****************************************************************************
@@ -812,8 +875,13 @@ static inline uint16_t stm32_geteprxcount(uint8_t epno)
 
 static inline void stm32_seteprxaddr(uint8_t epno, uint16_t addr)
 {
+#ifdef CONFIG_STM32_STM32G0
+  volatile uint32_t *rxaddr = (uint32_t *)STM32_USB_RX(epno);
+  *rxaddr = (*rxaddr & 0xffff0000) | addr;
+#else
   volatile uint16_t *rxaddr = (uint16_t *)STM32_USB_ADDR_RX(epno);
   *rxaddr = addr;
+#endif
 }
 
 /****************************************************************************
@@ -822,7 +890,11 @@ static inline void stm32_seteprxaddr(uint8_t epno, uint16_t addr)
 
 static inline uint16_t stm32_geteprxaddr(uint8_t epno)
 {
+#ifdef CONFIG_STM32_STM32G0
+  volatile uint32_t *rxaddr = (uint32_t *)STM32_USB_RX(epno);
+#else
   volatile uint16_t *rxaddr = (uint16_t *)STM32_USB_ADDR_RX(epno);
+#endif
   return (uint16_t)*rxaddr;
 }
 
@@ -1042,6 +1114,36 @@ static inline bool stm32_eprxstalled(uint8_t epno)
 static void stm32_copytopma(const uint8_t *buffer,
                             uint16_t pma, uint16_t nbytes)
 {
+#ifdef CONFIG_STM32_STM32G0
+  volatile uint32_t *dest;
+
+  dest = (uint32_t *)(STM32_USBRAM_BASE + (uint32_t)pma);
+  while (nbytes >= 4)
+    {
+      *dest++ = (uint32_t)buffer[0] | ((uint32_t)buffer[1] << 8) |
+                ((uint32_t)buffer[2] << 16) |
+                ((uint32_t)buffer[3] << 24);
+      buffer += 4;
+      nbytes -= 4;
+    }
+
+  if (nbytes > 0)
+    {
+      uint32_t value = buffer[0];
+
+      if (nbytes > 1)
+        {
+          value |= (uint32_t)buffer[1] << 8;
+        }
+
+      if (nbytes > 2)
+        {
+          value |= (uint32_t)buffer[2] << 16;
+        }
+
+      *dest = value;
+    }
+#else
   uint16_t *dest;
   uint16_t  ms;
   uint16_t  ls;
@@ -1061,6 +1163,7 @@ static void stm32_copytopma(const uint8_t *buffer,
 
       dest++;
     }
+#endif
 }
 
 /****************************************************************************
@@ -1070,6 +1173,25 @@ static void stm32_copytopma(const uint8_t *buffer,
 static inline void
 stm32_copyfrompma(uint8_t *buffer, uint16_t pma, uint16_t nbytes)
 {
+#ifdef CONFIG_STM32_STM32G0
+  volatile uint32_t *src;
+
+  src = (uint32_t *)(STM32_USBRAM_BASE + (uint32_t)pma);
+  while (nbytes > 0)
+    {
+      uint32_t value = *src++;
+      uint16_t count = nbytes > 4 ? 4 : nbytes;
+      uint16_t i;
+
+      for (i = 0; i < count; i++)
+        {
+          *buffer++ = (uint8_t)value;
+          value >>= 8;
+        }
+
+      nbytes -= count;
+    }
+#else
   uint16_t *src;
   int     nwords = (nbytes + 1) >> 1;
   int     i;
@@ -1089,6 +1211,7 @@ stm32_copyfrompma(uint8_t *buffer, uint16_t pma, uint16_t nbytes)
 
       buffer += 2;
     }
+#endif
 }
 
 /****************************************************************************
@@ -3531,7 +3654,9 @@ static void stm32_hwreset(struct stm32_usbdev_s *priv)
 
   /* Set the STM32 BTABLE address */
 
+#ifndef CONFIG_STM32_STM32G0
   stm32_putreg(STM32_BTABLE_ADDRESS & 0xfff8, STM32_USB_BTABLE);
+#endif
 
   /* Initialize EP0 */
 
@@ -3565,6 +3690,12 @@ static void stm32_hwreset(struct stm32_usbdev_s *priv)
 static void stm32_hwsetup(struct stm32_usbdev_s *priv)
 {
   int epno;
+
+#ifdef CONFIG_STM32_STM32G0
+  /* Enable the STM32G0 USB transceiver supply. */
+
+  stm32_pwr_enableusv(true);
+#endif
 
   /* Power the USB controller, put the USB controller into reset, disable
    * all USB interrupts
@@ -3662,6 +3793,12 @@ static void stm32_hwshutdown(struct stm32_usbdev_s *priv)
   /* Power down the USB controller */
 
   stm32_putreg(USB_CNTR_FRES | USB_CNTR_PDWN, STM32_USB_CNTR);
+
+#ifdef CONFIG_STM32_STM32G0
+  /* Disable the STM32G0 USB transceiver supply. */
+
+  stm32_pwr_enableusv(false);
+#endif
 }
 
 /****************************************************************************

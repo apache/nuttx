@@ -220,7 +220,8 @@
                                               /* Bits 2-3: Reserved */
 #define RCC_APB1RSTR_TIM6RST        (1 << 4)  /* Bit 4:  Timer 6 reset */
 #define RCC_APB1RSTR_TIM7RST        (1 << 5)  /* Bit 5:  Timer 7 reset */
-                                              /* Bits 6-13: Reserved */
+                                              /* Bits 6-12: Reserved */
+#define RCC_APB1RSTR_USBRST         (1 << 13) /* Bit 13: USB reset */
 #define RCC_APB1RSTR_SPI2RST        (1 << 14) /* Bit 14: SPI 2 reset */
                                               /* Bits 15-16: Reserved */
 #define RCC_APB1RSTR_USART2RST      (1 << 17) /* Bit 17: USART 2 reset */
@@ -284,9 +285,11 @@
                                               /* Bits 2-3: Reserved */
 #define RCC_APB1ENR_TIM6EN          (1 << 4)  /* Bit 4:  Timer 6 enable */
 #define RCC_APB1ENR_TIM7EN          (1 << 5)  /* Bit 5:  Timer 7 enable */
-                                              /* Bits 6-13: Reserved */
+                                              /* Bits 6-12: Reserved */
+#define RCC_APB1ENR_USBEN           (1 << 13) /* Bit 13: USB enable */
 #define RCC_APB1ENR_SPI2EN          (1 << 14) /* Bit 14: SPI 2 enable */
-                                              /* Bits 15-16: Reserved */
+                                              /* Bit 15: Reserved */
+#define RCC_APB1ENR_CRSEN           (1 << 16) /* Bit 16: CRS enable */
 #define RCC_APB1ENR_USART2EN        (1 << 17) /* Bit 17: USART 2 enable */
 #define RCC_APB1ENR_USART3EN        (1 << 18) /* Bit 18: USART 3 enable */
 #define RCC_APB1ENR_USART4EN        (1 << 19) /* Bit 19: USART 4 enable */

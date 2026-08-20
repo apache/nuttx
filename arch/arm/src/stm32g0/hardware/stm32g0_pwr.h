@@ -120,6 +120,7 @@
 #define PWR_CR2_PVDFT_MASK       (7 << PWR_CR2_PLS_SHIFT)
 #define PWR_CR2_PVDRT_SHIFT      (4)      /* Bits 4-6: Power voltage detector rising threshold selection */
 #define PWR_CR2_PVDRT_MASK       (7 << PWR_CR2_PLS_SHIFT)
+#define PWR_CR2_USV              (1 << 10) /* Bit 10: USB supply valid */
 
 /* Power control register 3 */
 

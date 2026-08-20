@@ -54,6 +54,12 @@
 #  endif
 #endif
 
+/* HSI48 is the only 48MHz clock source on STM32G0 */
+
+#if defined(CONFIG_STM32_HAVE_HSI48) && defined(STM32_USE_CLK48)
+#  define STM32_USE_HSI48
+#endif
+
 static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
               "Configure BOARD_LOOPSPERMSEC to non-default value.");
 
