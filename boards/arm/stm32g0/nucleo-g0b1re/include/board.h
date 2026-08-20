@@ -53,6 +53,15 @@
 #define STM32_HSE_FREQUENCY     STM32_BOARD_XTAL
 #define STM32_LSE_FREQUENCY     32768            /* X2 on board */
 
+/* 48MHz clock configuration.  HSI48 is the only 48MHz source on STM32G0 and
+ * is trimmed by the CRS from the USB start of frame packet.
+ */
+
+#if defined(CONFIG_STM32_USB) || defined(CONFIG_STM32_RNG)
+#  define STM32_USE_CLK48       1
+#  define STM32_HSI48_SYNCSRC   SYNCSRC_USB
+#endif
+
 /* Main PLL Configuration.
  *
  * PLL source is HSI = 16,000,000
