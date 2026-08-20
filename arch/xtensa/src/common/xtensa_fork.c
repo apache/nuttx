@@ -343,7 +343,7 @@ static pid_t xtensa_fork_syscall(bool vfork)
    */
 
   DEBUGASSERT(parent->xcp.sregs != NULL);
-  index = (int)parent->xcp.nsyscalls - 1;
+  index = parent->xcp.nsyscalls - 1;
   DEBUGASSERT(index >= 0);
 
   snap.regs = parent->xcp.sregs;
