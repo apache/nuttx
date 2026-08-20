@@ -54,7 +54,8 @@
 #define STM32_IRQ_MEMFAULT       (4) /* Vector  4: Memory management (MPU) */
 #define STM32_IRQ_BUSFAULT       (5) /* Vector  5: Bus fault */
 #define STM32_IRQ_USAGEFAULT     (6) /* Vector  6: Usage fault */
-                                     /* Vectors 7-10: Reserved */
+#define STM32_IRQ_SECUREFAULT    (7) /* Vector  7: Secure fault */
+                                     /* Vectors 8-10: Reserved */
 #define STM32_IRQ_SVCALL        (11) /* Vector 11: SVC call */
 #define STM32_IRQ_DBGMONITOR    (12) /* Vector 12: Debug Monitor */
                                      /* Vector 13: Reserved */
