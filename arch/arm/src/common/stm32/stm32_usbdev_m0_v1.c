@@ -1685,20 +1685,13 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
       stm32_copyfrompma((uint8_t *)&priv->ctrl, stm32_geteprxaddr(EP0),
                         USB_SIZEOF_CTRLREQ);
 
-      /* And extract the little-endian 16-bit values to host order */
+      /* Is this an OUT setup request with a data phase? */
 
-      value.w = GETUINT16(priv->ctrl.value);
-      index.w = GETUINT16(priv->ctrl.index);
-      len.w   = GETUINT16(priv->ctrl.len);
-
-      uinfo("SETUP: type=%02x req=%02x value=%04x index=%04x len=%04x\n",
-            priv->ctrl.type, priv->ctrl.req, value.w, index.w, len.w);
-
-      /* Is this an setup with OUT and data of length > 0 */
-
-      if (USB_REQ_ISOUT(priv->ctrl.type) && len.w > 0)
+      if (USB_REQ_ISOUT(priv->ctrl.type) &&
+          GETUINT16(priv->ctrl.len) > 0)
         {
-          usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EP0SETUPOUT), len.w);
+          usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EP0SETUPOUT),
+                   GETUINT16(priv->ctrl.len));
 
           /* At this point priv->ctrl is the setup packet. */
 
@@ -1710,6 +1703,17 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
           priv->ep0state = EP0STATE_SETUP_READY;
         }
     }
+
+  /* Extract the little-endian 16-bit values from the saved SETUP request.
+   * This function may be called again after receiving an OUT data phase.
+   */
+
+  value.w = GETUINT16(priv->ctrl.value);
+  index.w = GETUINT16(priv->ctrl.index);
+  len.w   = GETUINT16(priv->ctrl.len);
+
+  uinfo("SETUP: type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+        priv->ctrl.type, priv->ctrl.req, value.w, index.w, len.w);
 
   /* Dispatch any non-standard requests */
 
