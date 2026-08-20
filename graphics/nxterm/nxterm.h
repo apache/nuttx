@@ -61,7 +61,7 @@
 
 /* VT100 escape sequence processing */
 
-#define VT100_MAX_SEQUENCE 3
+#define VT100_MAX_SEQUENCE 32
 
 /****************************************************************************
  * Public Types
