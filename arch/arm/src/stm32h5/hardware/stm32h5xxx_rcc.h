@@ -218,15 +218,11 @@
 #define RCC_CFGR1_TIMPRE                 (1 << 15) /* timers clocks prescaler selection */
 
 #define RCC_CFGR1_MCO1PRE_SHIFT             (18) /* Bits 21-18: MCO1 Prescaler */
-#define RCC_CFGR1_MCO1PRE_MASK              (0xf << RCC_CFGR1_MCO1PRE_SHIFT)
-#  define RCC_CFGR1_MCO1PRE_MCO1            (0 << RCC_CFGR1_MCO1PRE_SHIFT)  /* 0xx: MCO1 not divided */
-#  define RCC_CFGR1_MCO1PRE_MCO1d2          (2 << RCC_CFGR1_MCO1PRE_SHIFT)  /* 10: MCO1 divided by 2 */
-#  define RCC_CFGR1_MCO1PRE_MCO1d4          (4 << RCC_CFGR1_MCO1PRE_SHIFT)  /* 100: MCO1 divided by 4 */
-#  define RCC_CFGR1_MCO1PRE_MCO1d8          (8 << RCC_CFGR1_MCO1PRE_SHIFT)  /* 1000: MCO1 divided by 8 */
-#  define RCC_CFGR1_MCO1PRE_MCO1d15         (15 << RCC_CFGR1_MCO1PRE_SHIFT) /* 1111: MCO1 divided by 15 */
+#define RCC_CFGR1_MCO1PRE_MASK              (0xfU << RCC_CFGR1_MCO1PRE_SHIFT)
+#define RCC_CFGR1_MCO1PRE(x)                (((x) << RCC_CFGR1_MCO1PRE_SHIFT) & RCC_CFGR1_MCO1PRE_MASK)
 
 #define RCC_CFGR1_MCO1SEL_SHIFT            (22) /* Bits 24-22: Microcontroller Clock Output1 */
-#define RCC_CFGR1_MCO1SEL_MASK             (0x7 << RCC_CFGR1_MCO1SEL_SHIFT)
+#define RCC_CFGR1_MCO1SEL_MASK             (0x7U << RCC_CFGR1_MCO1SEL_SHIFT)
 #  define RCC_CFGR1_MCO1SEL_HSI            (0 << RCC_CFGR1_MCO1SEL_SHIFT) /* 0000: HSI clock selected */
 #  define RCC_CFGR1_MCO1SEL_LSE            (1 << RCC_CFGR1_MCO1SEL_SHIFT) /* 0001: LSE clock selected */
 #  define RCC_CFGR1_MCO1SEL_HSE            (2 << RCC_CFGR1_MCO1SEL_SHIFT) /* 0010: HSE clock selected */
@@ -234,15 +230,11 @@
 #  define RCC_CFGR1_MCO1SEL_HSI48          (4 << RCC_CFGR1_MCO1SEL_SHIFT) /* 0100: HSI48 clock selected */
 
 #define RCC_CFGR1_MCO2PRE_SHIFT             (25) /* Bits 28-25: MCO2 Prescaler */
-#define RCC_CFGR1_MCO2PRE_MASK              (0xf << RCC_CFGR1_MCO2PRE_SHIFT)
-#  define RCC_CFGR1_MCO2PRE_MCO2            (0 << RCC_CFGR1_MCO2PRE_SHIFT)  /* 0xx: MCO2 not divided */
-#  define RCC_CFGR1_MCO2PRE_MCO2d2          (2 << RCC_CFGR1_MCO2PRE_SHIFT)  /* 10: MCO2 divided by 2 */
-#  define RCC_CFGR1_MCO2PRE_MCO2d4          (4 << RCC_CFGR1_MCO2PRE_SHIFT)  /* 100: MCO2 divided by 4 */
-#  define RCC_CFGR1_MCO2PRE_MCO2d8          (8 << RCC_CFGR1_MCO2PRE_SHIFT)  /* 1000: MCO2 divided by 8 */
-#  define RCC_CFGR1_MCO2PRE_MCO2d15         (15 << RCC_CFGR1_MCO2PRE_SHIFT) /* 1111: MCO2 divided by 15 */
+#define RCC_CFGR1_MCO2PRE_MASK              (0xfU << RCC_CFGR1_MCO2PRE_SHIFT)
+#define RCC_CFGR1_MCO2PRE(x)                (((x) << RCC_CFGR1_MCO2PRE_SHIFT) & RCC_CFGR1_MCO2PRE_MASK)
 
 #define RCC_CFGR1_MCO2SEL_SHIFT            (29) /* Bits 31-29: Microcontroller Clock Output1 */
-#define RCC_CFGR1_MCO2SEL_MASK             (0x7 << RCC_CFGR1_MCO2SEL_SHIFT)
+#define RCC_CFGR1_MCO2SEL_MASK             (0x7U << RCC_CFGR1_MCO2SEL_SHIFT)
 #  define RCC_CFGR1_MCO2SEL_SYSCLLK        (0 << RCC_CFGR1_MCO2SEL_SHIFT) /* 0000: Main SYSCLLK selected  */
 #  define RCC_CFGR1_MCO2SEL_PLL2           (1 << RCC_CFGR1_MCO2SEL_SHIFT) /* 0001: Main PLL2 selected  */
 #  define RCC_CFGR1_MCO2SEL_HSE            (2 << RCC_CFGR1_MCO2SEL_SHIFT) /* 0010: HSE clock selected */
