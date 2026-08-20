@@ -11,13 +11,31 @@ MIPS Creator CI20
 
    The MIPS Creator CI20 V2.0
 
-Supported Features
-==================
+The following list indicates the state of peripheral support in NuttX:
 
-* Single 1.2GHz MIPS32 processor
-* 256MiB DRAM
-* UART0 on Raspberry PI connector
-* Fast Ethernet (DM9000)
+=========== ======= =============================
+Peripheral  Support NOTES
+=========== ======= =============================
+CPU0         Yes    1.2GHz MIPS32 processor
+CPU1         No     1.2GHz MIPS32 processor
+RAM          Yes    256MiB
+ADC          No
+Audio        No
+Display      Yes    HDMI (EDID not yet supported)
+DMA          No
+Ethernet     Yes    Fast Ethernet (DM9000)
+GPIO         Yes
+I2C          No
+LED          No
+TRNG         Yes
+SDcard       No
+SPI          No
+Timers       Yes
+UART0        Yes    Initialized by U-Boot
+USB OTG      No     DWC2
+USB Host     Yes    EHCI + OHCI
+Watchdog     Yes
+=========== ======= =============================
 
 Configurations
 ==============
