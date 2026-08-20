@@ -859,6 +859,11 @@ void up_extraheaps_init(void);
  * Description:
  *   Allocate memory for text with the specified alignment and sectname.
  *
+ *   If the architecture does not provide a separate text heap
+ *   (CONFIG_ARCH_USE_TEXT_HEAP is not set), the text heap API falls back
+ *   to the normal kernel heap: on flat-memory architectures the kernel
+ *   heap is executable, so no separate allocator is needed.
+ *
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_USE_TEXT_HEAP)
@@ -867,6 +872,12 @@ FAR void *up_textheap_memalign(FAR const char *sectname,
                                size_t align, size_t size);
 #  else
 FAR void *up_textheap_memalign(size_t align, size_t size);
+#  endif
+#else
+#  if defined(CONFIG_ARCH_USE_SEPARATED_SECTION)
+#    define up_textheap_memalign(s,a,z) kmm_memalign(a,z)
+#  else
+#    define up_textheap_memalign(a,z) kmm_memalign(a,z)
 #  endif
 #endif
 
@@ -880,6 +891,8 @@ FAR void *up_textheap_memalign(size_t align, size_t size);
 
 #if defined(CONFIG_ARCH_USE_TEXT_HEAP)
 void up_textheap_free(FAR void *p);
+#else
+#  define up_textheap_free(p) kmm_free(p)
 #endif
 
 /****************************************************************************
@@ -892,6 +905,8 @@ void up_textheap_free(FAR void *p);
 
 #if defined(CONFIG_ARCH_USE_TEXT_HEAP)
 bool up_textheap_heapmember(FAR void *p);
+#else
+#  define up_textheap_heapmember(p) kmm_heapmember(p)
 #endif
 
 /****************************************************************************
@@ -912,12 +927,11 @@ bool up_textheap_heapmember(FAR void *p);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
-#if defined(CONFIG_ARCH_HAVE_TEXT_HEAP_SEPARATE_DATA_ADDRESS)
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP) && \
+    defined(CONFIG_ARCH_HAVE_TEXT_HEAP_SEPARATE_DATA_ADDRESS)
 FAR void *up_textheap_data_address(FAR void *p);
 #else
 #define up_textheap_data_address(p) ((FAR void *)p)
-#endif
 #endif
 
 /****************************************************************************
@@ -930,12 +944,11 @@ FAR void *up_textheap_data_address(FAR void *p);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
-#if defined(CONFIG_ARCH_HAVE_TEXT_HEAP_SEPARATE_DATA_ADDRESS)
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP) && \
+    defined(CONFIG_ARCH_HAVE_TEXT_HEAP_SEPARATE_DATA_ADDRESS)
 void up_textheap_data_sync(void);
 #else
 #define up_textheap_data_sync() do {} while (0)
-#endif
 #endif
 
 /****************************************************************************
