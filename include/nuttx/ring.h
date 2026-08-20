@@ -623,7 +623,7 @@ ring_spsc_init(FAR struct ring_s *r, FAR void *buf, uint32_t buflen,
 
   r->blob = blob;
 
-  first = (blob->magic != RING_BLOB_MAGIC_READY);
+  first = blob->magic != RING_BLOB_MAGIC_READY || blob->capacity != cap;
   if (first)
     {
       blob->magic = RING_BLOB_MAGIC_INIT;
@@ -710,6 +710,7 @@ ring_mpmc_init(FAR struct ring_s *r, FAR void *buf, uint32_t buflen,
   uint32_t cap = buflen - sizeof(*blob);
   int32_t old_magic;
   irqstate_t flags;
+  bool first;
 
   DEBUGASSERT(buf != NULL && cap <= RING_SIZE_MAX &&
               buflen > sizeof(*blob) &&
@@ -744,26 +745,28 @@ ring_mpmc_init(FAR struct ring_s *r, FAR void *buf, uint32_t buflen,
     }
   while (!atomic_cmpxchg(&blob->magic, &old_magic, RING_BLOB_MAGIC_INIT));
 
-  /* The blob is ours until READY is published below, so the geometry can be
-   * stamped before anything that depends on it (ring_reset, ring_count).
+  /* Stamp the geometry before anything that depends on it (ring_dist,
+   * ring_reset).  A persisted blob is only reusable for a warm restart
+   * when it was left READY by a build with identical geometry; stale
+   * residue from another firmware or a resized buffer is discarded.
    */
 
   r->blob = blob;
 
-  if (old_magic == RING_BLOB_MAGIC_READY)
+  first = old_magic != RING_BLOB_MAGIC_READY || blob->capacity != cap;
+  if (first)
     {
-      /* Warm restart: validate indices.
-       *
-       * Invariant: count = (prod_idx - cons_idx) must be in
-       * [0, capacity].  If violated, the indices are corrupt
-       * and we fall back to a fresh reset.
-       */
-
+      blob->capacity = cap;
+      blob->wrappoint = ALIGN_DOWN(RING_SIZE_MAX, cap);
+      ring_reset(r);
+    }
+  else
+    {
       uint32_t prod_index = RTS_IDX(atomic_read(&blob->prod_tail));
       uint32_t cons_index = RTS_IDX(atomic_read(&blob->cons_tail));
       uint32_t count = ring_dist(r, prod_index, cons_index);
 
-      if (count > blob->capacity)
+      if (count > cap)
         {
           ring_reset(r);
         }
@@ -772,13 +775,9 @@ ring_mpmc_init(FAR struct ring_s *r, FAR void *buf, uint32_t buflen,
           uint32_t prod_tail;
           uint32_t cons_tail;
 
-          /* Replay already-consumed elements still physically present.  The
-           * free space is the whole recoverable window, so clamp to it.
-           */
-
-          if (rewind > blob->capacity - count)
+          if (rewind > cap - count)
             {
-              rewind = blob->capacity - count;
+              rewind = cap - count;
             }
 
           cons_index = ring_dist(r, cons_index, rewind);
@@ -792,20 +791,12 @@ ring_mpmc_init(FAR struct ring_s *r, FAR void *buf, uint32_t buflen,
           atomic_set(&blob->cons_head, cons_tail);
         }
     }
-  else
-    {
-      /* First-time init: zero everything */
-
-      blob->capacity = cap;
-      blob->wrappoint = ALIGN_DOWN(RING_SIZE_MAX, cap);
-      ring_reset(r);
-    }
 
   atomic_set_release(&blob->magic, RING_BLOB_MAGIC_READY);
   atomic_set(&r->magic, RING_MAGIC_READY);
   UP_SEV();
   irq_restore(flags);
-  return old_magic != RING_BLOB_MAGIC_READY;
+  return first;
 }
 
 /****************************************************************************
