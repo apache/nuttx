@@ -2088,8 +2088,10 @@ config ESPRESSIF_EMAC
 		Enable Ethernet MAC support.
 
 config ESPRESSIF_LDO
-	bool
+	bool "Low-Dropout Regulator (LDO)"
 	default n
+	---help---
+		Enable Low-Dropout Regulator (LDO) support.
 
 menuconfig ESPRESSIF_MIPI_DSI
 	bool "MIPI DSI Host"
