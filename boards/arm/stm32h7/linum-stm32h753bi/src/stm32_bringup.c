@@ -63,8 +63,12 @@
 #include <nuttx/usb/rndis.h>
 #endif
 
-#ifdef CONFIG_VIDEO_FB
+#if defined(CONFIG_VIDEO_FB) && defined(CONFIG_STM32_LTDC)
 #  include <nuttx/video/fb.h>
+#endif
+
+#ifdef CONFIG_VIDEO_VFB
+#  include <nuttx/video/vfb.h>
 #endif
 
 #include <arch/board/board.h>
@@ -198,13 +202,33 @@ int stm32_bringup(void)
 
   convert_lcd_rgb565();
 
-#ifdef CONFIG_VIDEO_FB
+/* Register the framebuffer:  the LTDC's when the panel is built in, a
+ * virtual one when it is not, either way /dev/fb0 appears and the
+ * graphics stack above does not care which it got.  Build both and the
+ * panel keeps /dev/fb0 while the virtual screen, which is free to be a
+ * different size, answers on /dev/fb1.
+ */
+
+#if defined(CONFIG_VIDEO_FB) && defined(CONFIG_STM32_LTDC)
   /* Initialize and register the framebuffer driver */
 
   ret = fb_register(0, 0);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_VIDEO_VFB
+#  ifdef CONFIG_STM32_LTDC
+  ret = vfb_register(1);
+#  else
+  ret = vfb_register(0);
+#  endif
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: vfb_register() failed: %d\n", ret);
     }
 #endif
 
