@@ -39,6 +39,12 @@
 
 #define CCTRL_COUNT_ENABLE (1 << 1)
 
+#ifdef CONFIG_ARCH_PERF_COUNT_BITWIDTH
+#  define CCNT_VALUE_MASK ((1UL << CONFIG_ARCH_PERF_COUNT_BITWIDTH) - 1UL)
+#else
+#  define CCNT_VALUE_MASK 0x7ffffffful
+#endif
+
 #ifdef CONFIG_ARCH_PERF_EVENTS
 
 /****************************************************************************
@@ -90,7 +96,7 @@ unsigned long up_perf_getfreq(void)
 
 clock_t up_perf_gettime(void)
 {
-  return (clock_t)tricore_mfcr(CPU_CCNT);
+  return (clock_t)(tricore_mfcr(CPU_CCNT) & CCNT_VALUE_MASK);
 }
 
 void up_perf_convert(clock_t elapsed, struct timespec *ts)
