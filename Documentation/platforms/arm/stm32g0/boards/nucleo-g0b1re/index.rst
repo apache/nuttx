@@ -55,3 +55,19 @@ nsh:
 
 This configuration provides a basic NuttShell configuration (NSH) on the
 Nucleo virtual console (VCOM on UART2).
+
+usb-clocks:
+-----------
+
+This configuration enables the STM32G0 USB device controller and its HSI48
+clock source.  It provides NSH on the Nucleo virtual console but does not
+register a USB device class.
+
+usb-cdc:
+--------
+
+This configuration extends ``usb-clocks`` with the CDC/ACM serial device
+class and the ``sercon`` and ``serdis`` commands.  Connect an external USB
+device connector to PA11 (USB DM) and PA12 (USB DP).  The CDC/ACM device is
+registered during board bring-up and enumerates when connected to the host.
+Run ``serdis`` to disconnect it and ``sercon`` to connect it again.

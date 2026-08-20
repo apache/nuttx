@@ -34,6 +34,7 @@
 #include <nuttx/board.h>
 #include <nuttx/input/buttons.h>
 #include <nuttx/leds/userled.h>
+#include <nuttx/usb/cdcacm.h>
 #include <arch/board/board.h>
 
 #include "nucleo-g0b1re.h"
@@ -72,6 +73,16 @@
 int stm32_bringup(void)
 {
   int ret;
+
+#if defined(CONFIG_CDCACM) && !defined(CONFIG_CDCACM_CONSOLE)
+  /* Register the CDC/ACM device at boot. */
+
+  ret = cdcacm_initialize(0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: cdcacm_initialize failed: %d\n", ret);
+    }
+#endif
 
 #ifdef HAVE_LEDS
   /* Register the LED driver */
