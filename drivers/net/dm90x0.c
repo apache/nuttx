@@ -45,6 +45,7 @@
 #include <time.h>
 #include <string.h>
 #include <nuttx/debug.h>
+#include <nuttx/compiler.h>
 #include <errno.h>
 
 #include <arpa/inet.h>
@@ -250,15 +251,23 @@
  * according to user supplied base address and bus width.
  */
 
+/* DATA port offset: default +2 (CMD on A0/A1). WarShip V3 CMD on FSMC_A7
+ * with 16-bit bus → CONFIG_DM9X_DATA_OFFSET=0x100.
+ */
+
+#ifndef CONFIG_DM9X_DATA_OFFSET
+#  define CONFIG_DM9X_DATA_OFFSET 2
+#endif
+
 #if defined(CONFIG_DM9X_BUSWIDTH8)
 #  define DM9X_INDEX *(volatile uint8_t*)(CONFIG_DM9X_BASE)
-#  define DM9X_DATA  *(volatile uint8_t*)(CONFIG_DM9X_BASE + 2)
+#  define DM9X_DATA  *(volatile uint8_t*)(CONFIG_DM9X_BASE + CONFIG_DM9X_DATA_OFFSET)
 #elif defined(CONFIG_DM9X_BUSWIDTH16)
 #  define DM9X_INDEX *(volatile uint16_t*)(CONFIG_DM9X_BASE)
-#  define DM9X_DATA  *(volatile uint16_t*)(CONFIG_DM9X_BASE + 2)
+#  define DM9X_DATA  *(volatile uint16_t*)(CONFIG_DM9X_BASE + CONFIG_DM9X_DATA_OFFSET)
 #elif defined(CONFIG_DM9X_BUSWIDTH32)
 #  define DM9X_INDEX *(volatile uint32_t*)(CONFIG_DM9X_BASE)
-#  define DM9X_DATA  *(volatile uint32_t*)(CONFIG_DM9X_BASE + 2)
+#  define DM9X_DATA  *(volatile uint32_t*)(CONFIG_DM9X_BASE + CONFIG_DM9X_DATA_OFFSET)
 #endif
 
 /* Phy operating mode.  Default is AUTO, but this setting can be overridden
@@ -717,7 +726,7 @@ static int dm9x_transmit(FAR struct dm9x_driver_s *priv)
       /* Increment count of packets transmitted */
 
       priv->dm_ntxpending++;
-      NETDEV_TXPACKETS(&dm9x0->dm_dev);
+      NETDEV_TXPACKETS(&priv->dm_dev);
 
       /* Disable all DM90x0 interrupts */
 
@@ -743,9 +752,9 @@ static int dm9x_transmit(FAR struct dm9x_driver_s *priv)
 
       priv->ncrxpackets = 0;
 
-      /* Re-enable DM90x0 interrupts */
-
-      putreg(DM9X_IMR, DM9X_IMRENABLE);
+      /* Leave IMR masked — caller (interrupt_work / txavail_work) re-enables
+       * after draining.  Re-enabling here races with TX-done while work runs.
+       */
 
       /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
@@ -853,9 +862,13 @@ static void dm9x_receive(FAR struct dm9x_driver_s *priv)
 
       priv->dm_read((FAR uint8_t *)&rx, 4);
 
-      /* Check if any errors were reported by the hardware */
+      /* Check if any errors were reported by the hardware.
+       * RSR bit6 (MF) = multicast/broadcast — not an error.  Using 0xbf
+       * drops ARP (dst FF:FF:FF:FF:FF:FF) and breaks IPv4 bring-up.
+       * Match Linux: FOE|CE|AE|PLE|RWTO|LCS|RF = 0x9f.
+       */
 
-      if (rx.desc.rx_status & 0xbf)
+      if (rx.desc.rx_status & 0x9f)
         {
           /* Bad RX packet... update statistics */
 
@@ -1061,7 +1074,7 @@ static void dm9x_interrupt_work(FAR void *arg)
   FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)arg;
   uint8_t isr;
   uint8_t save;
-  int i;
+  int pass;
 
   /* Process pending Ethernet interrupts */
 
@@ -1071,66 +1084,63 @@ static void dm9x_interrupt_work(FAR void *arg)
 
   save = (uint8_t)DM9X_INDEX;
 
-  /* Disable all DM90x0 interrupts */
+  /* Drain chip ISR while INT may still be asserted (TX done during RX). */
 
-  putreg(DM9X_IMR, DM9X_IMRDISABLE);
-
-  /* Get and clear the DM90x0 interrupt status bits */
-
-  isr = getreg(DM9X_ISR);
-  putreg(DM9X_ISR, isr);
-  ninfo("Interrupt status: %02x\n", isr);
-
-  /* Check for link status change */
-
-  if (isr & DM9X_INT_LNKCHG)
+  for (pass = 0; pass < 8; pass++)
     {
-      /* Wait up to 0.5s for link OK */
+      putreg(DM9X_IMR, DM9X_IMRDISABLE);
 
-      for (i = 0; i < 500; i++)
+      isr = getreg(DM9X_ISR);
+      putreg(DM9X_ISR, isr);
+      ninfo("Interrupt status: %02x\n", isr);
+
+      if ((isr & (DM9X_INT_PR | DM9X_INT_PT | DM9X_INT_LNKCHG)) == 0 &&
+          priv->dm_ntxpending == 0)
         {
-          dm9x_phyread(priv, 0x1);
-          if (dm9x_phyread(priv, 0x1) & 0x4) /* Link OK */
-            {
-              /* Wait to get detected speed */
-
-              for (i = 0; i < 200; i++)
-                {
-                  up_mdelay(1);
-                }
-
-              /* Set the new network speed */
-
-              if (dm9x_phyread(priv, 0) & 0x2000)
-                {
-                  priv->dm_b100m = true;
-                }
-              else
-                {
-                  priv->dm_b100m = false;
-                }
-              break;
-            }
-
-          up_mdelay(1);
+          break;
         }
 
-      nerr("ERROR: delay: %dmS speed: %s\n",
-           i, priv->dm_b100m ? "100M" : "10M");
-    }
+      /* Check for link status change */
 
-  /* Check if we received an incoming packet */
+      if (isr & DM9X_INT_LNKCHG)
+        {
+          if (dm9x_phyread(priv, 0x1) & 0x4)
+            {
+              priv->dm_b100m = (dm9x_phyread(priv, 0) & 0x2000) != 0;
+            }
+          else
+            {
+              priv->dm_b100m = false;
+            }
 
-  if (isr & DM9X_INT_PR)
-    {
-      dm9x_receive(priv);
-    }
+          ninfo("Link change: %s\n", priv->dm_b100m ? "100M" : "down/10M");
+        }
 
-  /* Check if we are able to transmit a packet */
+      /* Check if we received an incoming packet */
 
-  if (isr & DM9X_INT_PT)
-    {
-      dm9x_txdone(priv);
+      if (isr & DM9X_INT_PR)
+        {
+          dm9x_receive(priv);
+        }
+
+      /* Check if we are able to transmit a packet */
+
+      if (isr & DM9X_INT_PT)
+        {
+          dm9x_txdone(priv);
+        }
+
+      /* TX may have completed during RX-driven transmit — poll NSR. */
+
+      if (priv->dm_ntxpending > 0)
+        {
+          uint8_t nsr = getreg(DM9X_NETS);
+
+          if (nsr & (DM9X_NETS_TX1END | DM9X_NETS_TX2END))
+            {
+              dm9x_txdone(priv);
+            }
+        }
     }
 
   /* If the number of consecutive receive packets exceeds a threshold,
@@ -1154,10 +1164,6 @@ static void dm9x_interrupt_work(FAR void *arg)
 
   DM9X_INDEX = save;
   net_unlock();
-
-  /* Re-enable Ethernet interrupts */
-
-  up_enable_irq(CONFIG_DM9X_IRQ);
 }
 
 /****************************************************************************
@@ -1177,6 +1183,12 @@ static void dm9x_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
+/* Boards may clear platform EXTI pending bits here (e.g. STM32 EXTI_PR). */
+
+void weak_function board_dm9x_irq_ack(void)
+{
+}
+
 static int dm9x_interrupt(int irq, FAR void *context, FAR void *arg)
 {
 #if CONFIG_DM9X_NINTERFACES == 1
@@ -1186,12 +1198,14 @@ static int dm9x_interrupt(int irq, FAR void *context, FAR void *arg)
 #endif
   uint8_t isr;
 
-  /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
-   * also disabled if the TX timeout event occurs, there can be no race
-   * condition here.
+  board_dm9x_irq_ack();
+
+  /* Mask chip IRQs so INT deasserts (level) without leaving NVIC disabled
+   * across deferred work — disabling NVIC here permanently broke RX when
+   * LPWORK lagged or LNKCHG work ran long delays under net_lock.
    */
 
-  up_disable_irq(CONFIG_DM9X_IRQ);
+  putreg(DM9X_IMR, DM9X_IMRDISABLE);
 
   /* Determine if a TX transfer just completed */
 
@@ -1206,7 +1220,11 @@ static int dm9x_interrupt(int irq, FAR void *context, FAR void *arg)
        wd_cancel(&priv->dm_txtimeout);
     }
 
-  /* Schedule to perform the interrupt processing on the worker thread. */
+  /* Schedule to perform the interrupt processing on the worker thread.
+   * If work is already queued, leave IMR masked — the running work must
+   * drain ISR before re-enabling (re-enabling here loses EXTI edges while
+   * INT stays low).
+   */
 
   work_queue(ETHWORK, &priv->dm_irqwork, dm9x_interrupt_work, priv, 0);
   return OK;
@@ -1238,7 +1256,7 @@ static void dm9x_txtimeout_work(FAR void *arg)
   /* Increment statistics and dump debug info */
 
   net_lock();
-  NETDEV_TXTIMEOUTS(priv->dm_dev);
+  NETDEV_TXTIMEOUTS(&priv->dm_dev);
 
   ninfo("  TX packet count:           %d\n", priv->dm_ntxpending);
   ninfo("  TX read pointer address:   0x%02x:%02x\n",
@@ -1491,6 +1509,8 @@ static void dm9x_txavail_work(FAR void *arg)
 
           devif_poll(&priv->dm_dev, dm9x_txpoll);
         }
+
+      putreg(DM9X_IMR, DM9X_IMRENABLE);
     }
 
   net_unlock();
@@ -1637,6 +1657,19 @@ static void dm9x_bringup(FAR struct dm9x_driver_s *priv)
 
   /* Configure I/O mode */
 
+#if defined(CONFIG_DM9X_BUSWIDTH16)
+  priv->dm_read    = read16;
+  priv->dm_write   = write16;
+  priv->dm_discard = discard16;
+#elif defined(CONFIG_DM9X_BUSWIDTH8)
+  priv->dm_read    = read8;
+  priv->dm_write   = write8;
+  priv->dm_discard = discard8;
+#elif defined(CONFIG_DM9X_BUSWIDTH32)
+  priv->dm_read    = read32;
+  priv->dm_write   = write32;
+  priv->dm_discard = discard32;
+#else
   switch (getreg(DM9X_ISR) & DM9X_ISR_IOMODEM)
     {
       case DM9X_ISR_IOMODE8:
@@ -1660,6 +1693,7 @@ static void dm9x_bringup(FAR struct dm9x_driver_s *priv)
       default:
         break;
     }
+#endif
 
   /* Program PHY operating mode */
 
@@ -1683,6 +1717,26 @@ static void dm9x_bringup(FAR struct dm9x_driver_s *priv)
 #if defined(CONFIG_DM9X_ETRANS)
   putreg(DM9X_ETXCSR, 0x83);
 #endif
+
+  /* Program unicast MAC into PAB0-5 (netinit may have set d_mac already). */
+
+  {
+    FAR uint8_t *mptr = priv->dm_dev.d_mac.ether.ether_addr_octet;
+    int mi;
+    int mj;
+
+    for (mi = 0, mj = DM9X_PAB0; mi < ETHER_ADDR_LEN; mi++, mj++)
+      {
+        putreg(mj, mptr[mi]);
+      }
+
+    /* Accept all multicast/broadcast via hash table (U-Boot style). */
+
+    for (mj = DM9X_MAB0; mj <= DM9X_MAB7; mj++)
+      {
+        putreg(mj, 0xff);
+      }
+  }
 
   /* Initialize statistics */
 

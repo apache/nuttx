@@ -2220,6 +2220,8 @@ struct spi_dev_s *gd32_spibus_initialize(int port)
   if (port == 2)
     {
       /* Select SPI2 */
+
+      priv = &g_spi2dev;
     }
   else
 #endif

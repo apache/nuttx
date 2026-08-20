@@ -862,6 +862,13 @@ config ARCH_BOARD_GD32F470ZET6_EVAL
 	---help---
 		GD32 MCU GD32F470ZET6 board (mcu_plat out-of-tree BSP).
 
+
+config ARCH_BOARD_STM32F103ZET6_WARSHIP
+	bool "MCU platform STM32F103ZET6 WarShip V3"
+	depends on ARCH_CHIP_STM32F103ZE
+	---help---
+		STM32F103ZET6 WarShip V3 board (mcu_plat out-of-tree BSP).
+
 config ARCH_BOARD_HIFIVE1_REVB
 	bool "HiFive1 Rev B board"
 	depends on ARCH_CHIP_FE310
@@ -3745,6 +3752,7 @@ config ARCH_BOARD
 	default "gd32f470ik-eval"              if ARCH_BOARD_GD32F470IK_EVAL
 	default "gd32f470vit6-eval"            if ARCH_BOARD_GD32F470VIT6_EVAL
 	default "gd32f470zet6-eval"            if ARCH_BOARD_GD32F470ZET6_EVAL
+	default "stm32f103zet6-warship"            if ARCH_BOARD_STM32F103ZET6_WARSHIP
 	default "hifive1-revb"                 if ARCH_BOARD_HIFIVE1_REVB
 	default "hymini-stm32v"                if ARCH_BOARD_HYMINI_STM32V
 	default "imxrt1020-evk"                if ARCH_BOARD_IMXRT1020_EVK
@@ -4270,6 +4278,9 @@ source "boards/arm/gd32f4/gd32f470vit6-eval/Kconfig"
 endif
 if ARCH_BOARD_GD32F470ZET6_EVAL
 source "boards/arm/gd32f4/gd32f470zet6-eval/Kconfig"
+endif
+if ARCH_BOARD_STM32F103ZET6_WARSHIP
+source "boards/arm/stm32/stm32f103zet6-warship/Kconfig"
 endif
 if ARCH_BOARD_TEENSY_LC
 source "boards/arm/kl/teensy-lc/Kconfig"

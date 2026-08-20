@@ -36,7 +36,9 @@
 #include <time.h>
 #include <string.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <assert.h>
+#include <syslog.h>
 #include <nuttx/debug.h>
 
 #include <arpa/inet.h>
@@ -961,6 +963,15 @@ static int w5500_unfence(FAR struct w5500_driver_s *self)
 
   w5500_reset(self, false);  /* Reset sequence and keep reset de-asserted */
 
+  value = w5500_read8(self, W5500_BSB_COMMON_REGS, W5500_VERSIONR);
+  syslog(LOG_INFO, "w5500: VERSIONR=0x%02" PRIx8 " (expect 0x04)\n", value);
+  if (value != 0x04)
+    {
+      syslog(LOG_ERR,
+             "w5500: SPI/chip not responding (VERSIONR). Check WD_PWR/SPI.\n");
+      goto error;
+    }
+
   /* Set the Ethernet interface's MAC address */
 
   w5500_write(self,
@@ -1034,6 +1045,7 @@ static int w5500_unfence(FAR struct w5500_driver_s *self)
 
   if (value != SN_SR_SOCK_MACRAW)
     {
+      syslog(LOG_ERR, "w5500: SN_SR=0x%02" PRIx8 " (not MACRAW)\n", value);
       nerr("Unexpected status: %02" PRIx8 "\n", value);
       goto error;
     }
@@ -1059,12 +1071,19 @@ static int w5500_unfence(FAR struct w5500_driver_s *self)
 
   if (value & PHYCFGR_LNK)
     {
+      syslog(LOG_INFO, "w5500: link UP %dMbps %s PHYCFGR=0x%02" PRIx8 "\n",
+             (value & PHYCFGR_SPD) ? 100 : 10,
+             (value & PHYCFGR_DPX) ? "full" : "half",
+             value);
       ninfo("Link up (%d Mbps / %s duplex)\n",
             (value & PHYCFGR_SPD) ? 100 : 10,
             (value & PHYCFGR_DPX) ? "full" : "half");
     }
   else
     {
+      syslog(LOG_ERR, "w5500: link DOWN PHYCFGR=0x%02" PRIx8
+             " (cable/PHY). ifup aborted; ping will fail.\n",
+             value);
       nwarn("Link still down.  Cable plugged?\n");
       goto error;
     }
@@ -1348,7 +1367,7 @@ static void w5500_receive(FAR struct w5500_driver_s *self)
         {
           nerr("Bad packet size dropped (%"PRIu16")\n", self->w_dev.d_len);
           self->w_dev.d_len = 0;
-          NETDEV_RXERRORS(&priv->dev);
+          NETDEV_RXERRORS(&self->w_dev);
           continue;
         }
 

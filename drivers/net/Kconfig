@@ -154,6 +154,15 @@ config DM9X_BASE
 	hex "DM90x0 base address"
 	default 0x0
 
+config DM9X_DATA_OFFSET
+	hex "DM90x0 data register offset from base"
+	default 0x2
+	---help---
+		Offset of the data port from CONFIG_DM9X_BASE.  Default 2 matches
+		boards where CMD is wired to address bit A0 (byte) / A1 (16-bit).
+		ALIENTEK WarShip V3 wires CMD to FSMC_A7; with a 16-bit bus that
+		is CPU address bit 8 → use 0x100.
+
 config DM9X_IRQ
 	int "DM90x0 IRQ number"
 	default 0

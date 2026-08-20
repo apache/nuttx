@@ -114,6 +114,15 @@ static const struct uart_ops_s g_serial_rtt_ops =
 static char g_rtt0_xmit_buffer[CONFIG_SEGGER_RTT_BUFFER_SIZE_UP];
 static char g_rtt0_recv_buffer[CONFIG_SEGGER_RTT_BUFFER_SIZE_DOWN];
 
+/* Dedicated SEGGER ring buffers (do not pass NULL — host "Sent 0 of N"
+ * happens when down SizeOfBuffer stays 0 / default CB not usable).
+ */
+
+static char SERIAL_RTT_BUFFER_SECTION
+g_rtt0_up_buffer[CONFIG_SEGGER_RTT_BUFFER_SIZE_UP];
+static char SERIAL_RTT_BUFFER_SECTION
+g_rtt0_down_buffer[CONFIG_SEGGER_RTT_BUFFER_SIZE_DOWN];
+
 static struct serial_rtt_s g_serial_rtt0 =
 {
   .uart =
@@ -135,8 +144,8 @@ static struct serial_rtt_s g_serial_rtt0 =
     .priv = &g_serial_rtt0,
   },
   .channel = 0,
-  .up_buffer = NULL,
-  .down_buffer = NULL,
+  .up_buffer = g_rtt0_up_buffer,
+  .down_buffer = g_rtt0_down_buffer,
 };
 #endif
 
