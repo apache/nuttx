@@ -32,6 +32,10 @@ ifeq ($(CONFIG_ESP32P4_TAB5_HMI_POWER),y)
   CSRCS += esp32p4_hmi_power.c
 endif
 
+ifeq ($(CONFIG_MMCSD_SPI),y)
+  CSRCS += esp32p4_sd_power.c
+endif
+
 ifeq ($(CONFIG_ESP32P4_TAB5_LCD),y)
   CSRCS += esp32p4_display.c esp32p4_mipi_dpi.c
   ifeq ($(CONFIG_ESP32P4_TAB5_LCD_ST7121),y)
