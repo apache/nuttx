@@ -110,6 +110,45 @@ graphical front-end to GDB:
    need to start the Cygwin-X server before running ``ddd``. On macOS, it's
    probably easier to use ``lldb`` instead of ``gdb``.
 
+S2OPC
+=====
+
+The ``sim:s2opc`` configuration provides the S2OPC OPC UA server example.
+Build it from the NuttX source directory::
+
+  $ ./tools/configure.sh -l sim:s2opc
+  $ make -j
+
+An out-of-tree CMake build is also supported::
+
+  $ cmake -B build -DBOARD_CONFIG=sim:s2opc -GNinja
+  $ cmake --build build
+
+The simulator attaches its TAP device to a host bridge named ``s2opc0``.
+Create the bridge and assign the host address::
+
+  $ sudo ip link add s2opc0 type bridge
+  $ sudo ip address add 10.0.0.1/24 dev s2opc0
+  $ sudo ip link set s2opc0 up
+
+Start NuttX with permission to create the TAP device, then start the server::
+
+  $ ./nuttx
+  nsh> ping 10.0.0.1
+  nsh> s2opc
+
+From another host terminal, read the standard server time node::
+
+  $ uaread -u opc.tcp://10.0.0.2:4841 -n i=2258
+
+Press Ctrl-C at the NSH terminal to stop the server.  After testing, stop
+NuttX and remove the bridge::
+
+  $ sudo ip link delete s2opc0
+
+See :doc:`/applications/examples/s2opc/index` for command-line overrides and
+:doc:`/applications/netutils/s2opc/index` for toolkit configuration.
+
 Issues
 ======
 
