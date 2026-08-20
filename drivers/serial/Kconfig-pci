@@ -41,12 +41,14 @@ if 16550_PCI_UART0
 config 16550_PCI_UART0_VENDOR
 	hex "16550 UART0 PCI vendor"
 	---help---
-		PCI vendor number that will be associated with UART0
+		PCI vendor number that will be associated with UART0.  Set this
+		to 0xffff to match any device supported by the PCI 16550 driver.
 
 config 16550_PCI_UART0_DEVICE
 	hex "16550 UART0 PCI device"
 	---help---
-		PCI device number that will be associated with UART0
+		PCI device number that will be associated with UART0.  Set this
+		to 0xffff to match any device supported by the PCI 16550 driver.
 
 config 16550_PCI_UART0_PORT
 	int "16550 UART0 PCI port"
@@ -101,13 +103,15 @@ config 16550_PCI_UART1_VENDOR
 	hex "16550 UART1 PCI vendor"
 	default 16550_PCI_UART0_VENDOR
 	---help---
-		PCI vendor number that will be associated with UART1
+		PCI vendor number that will be associated with UART1.  Set this
+		to 0xffff to match any device supported by the PCI 16550 driver.
 
 config 16550_PCI_UART1_DEVICE
 	hex "16550 UART1 PCI device"
 	default 16550_PCI_UART0_DEVICE
 	---help---
-		PCI device number that will be associated with UART1
+		PCI device number that will be associated with UART1.  Set this
+		to 0xffff to match any device supported by the PCI 16550 driver.
 
 config 16550_PCI_UART1_PORT
 	int "16550 UART1 PCI port"
@@ -163,13 +167,15 @@ config 16550_PCI_UART2_VENDOR
 	hex "16550 UART2 PCI vendor"
 	default 16550_PCI_UART1_VENDOR
 	---help---
-		PCI vendor number that will be associated with UART2
+		PCI vendor number that will be associated with UART2.  Set this
+		to 0xffff to match any device supported by the PCI 16550 driver.
 
 config 16550_PCI_UART2_DEVICE
 	hex "16550 UART2 PCI device"
 	default 16550_PCI_UART1_DEVICE
 	---help---
-		PCI device number that will be associated with UART2
+		PCI device number that will be associated with UART2.  Set this
+		to 0xffff to match any device supported by the PCI 16550 driver.
 
 config 16550_PCI_UART2_PORT
 	int "16550 UART2 PCI port"
@@ -225,13 +231,15 @@ config 16550_PCI_UART3_VENDOR
 	hex "16550 UART3 PCI vendor"
 	default 16550_PCI_UART2_VENDOR
 	---help---
-		PCI vendor number that will be associated with UART3
+		PCI vendor number that will be associated with UART3.  Set this
+		to 0xffff to match any device supported by the PCI 16550 driver.
 
 config 16550_PCI_UART3_DEVICE
 	hex "16550 UART3 PCI device"
 	default 16550_PCI_UART2_DEVICE
 	---help---
-		PCI device number that will be associated with UART3
+		PCI device number that will be associated with UART3.  Set this
+		to 0xffff to match any device supported by the PCI 16550 driver.
 
 config 16550_PCI_UART3_PORT
 	int "16550 UART3 PCI port"
