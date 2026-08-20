@@ -67,21 +67,23 @@ extern "C"
  *     chip/stm32h5_rcc.h {RCC_CFGR_SYSCLK, RCC_CFGR_INTCLK,
  *     RCC_CFGR_EXTCLK, RCC_CFGR_PLLCLKd2, RCC_CFGR_PLL2CLK,
  *     RCC_CFGR_PLL3CLKd2, RCC_CFGR_XT1, RCC_CFGR_PLL3CLK}
+ *   div - Clock divider passed through the RCC_CFGR_MCO1PRE macro from
+ *     chip/stm32h5_rcc.h {RCC_CFGR_MCO1PRE(x) where x is 0..15})}
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static inline void stm32_mco1config(uint32_t source)
+static inline void stm32_mco1config(uint32_t source, uint32_t div)
 {
   uint32_t regval;
 
   /* Set MCO source */
 
   regval = getreg32(STM32_RCC_CFGR1);
-  regval &= ~(RCC_CFGR1_MCO1SEL_MASK);
-  regval |= (source & RCC_CFGR1_MCO1SEL_MASK);
+  regval &= ~(RCC_CFGR1_MCO1SEL_MASK | RCC_CFGR1_MCO1PRE_MASK);
+  regval |= (source | div);
   putreg32(regval, STM32_RCC_CFGR1);
 }
 
@@ -95,21 +97,23 @@ static inline void stm32_mco1config(uint32_t source)
  *     chip/stm32h5_rcc.h {RCC_CFGR_SYSCLK, RCC_CFGR_INTCLK,
  *     RCC_CFGR_EXTCLK, RCC_CFGR_PLLCLKd2, RCC_CFGR_PLL2CLK,
  *     RCC_CFGR_PLL3CLKd2, RCC_CFGR_XT1, RCC_CFGR_PLL3CLK}
+ *   div - Clock divider passed through the RCC_CFGR_MCO2PRE macro from
+ *     chip/stm32h5_rcc.h {RCC_CFGR_MCO2PRE(x) where x is 0..15})}
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static inline void stm32_mco2config(uint32_t source)
+static inline void stm32_mco2config(uint32_t source, uint32_t div)
 {
   uint32_t regval;
 
   /* Set MCO source */
 
   regval = getreg32(STM32_RCC_CFGR1);
-  regval &= ~(RCC_CFGR1_MCO2SEL_MASK);
-  regval |= (source & RCC_CFGR1_MCO2SEL_MASK);
+  regval &= ~(RCC_CFGR1_MCO2SEL_MASK | RCC_CFGR1_MCO2PRE_MASK);
+  regval |= (source | div);
   putreg32(regval, STM32_RCC_CFGR1);
 }
 
