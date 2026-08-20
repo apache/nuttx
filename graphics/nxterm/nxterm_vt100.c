@@ -53,6 +53,8 @@ struct vt100_sequence_s
 static int nxterm_erasetoeol(FAR struct nxterm_state_s *priv);
 static int nxterm_cursorleft(FAR struct nxterm_state_s *priv);
 static int nxterm_cursorright(FAR struct nxterm_state_s *priv);
+static enum nxterm_vt100state_e
+  nxterm_sgr(FAR struct nxterm_state_s *priv, int seqsize);
 
 /****************************************************************************
  * Private Data
@@ -194,6 +196,45 @@ static int nxterm_cursorright(FAR struct nxterm_state_s *priv)
 }
 
 /****************************************************************************
+ * Name: nxterm_sgr
+ *
+ * Description:
+ *   Consume an ANSI Select Graphic Rendition sequence.  NxTerm does not
+ *   currently support changing text attributes, but consuming the sequence
+ *   prevents unsupported color controls from being rendered as text.
+ *
+ ****************************************************************************/
+
+static enum nxterm_vt100state_e
+nxterm_sgr(FAR struct nxterm_state_s *priv, int seqsize)
+{
+  int i;
+
+  if (seqsize < 2 || priv->seq[0] != ASCII_ESC || priv->seq[1] != '[')
+    {
+      return VT100_ABORT;
+    }
+
+  for (i = 2; i < seqsize; i++)
+    {
+      char ch = priv->seq[i];
+
+      if (ch == 'm')
+        {
+          priv->nseq = 0;
+          return VT100_PROCESSED;
+        }
+
+      if ((ch < '0' || ch > '9') && ch != ';' && ch != ':')
+        {
+          return VT100_ABORT;
+        }
+    }
+
+  return seqsize < VT100_MAX_SEQUENCE ? VT100_CONSUMED : VT100_ABORT;
+}
+
+/****************************************************************************
  * Name: nxterm_vt100part
  *
  * Description:
@@ -287,6 +328,16 @@ static enum nxterm_vt100state_e nxterm_vt100seq(
        */
 
       return VT100_CONSUMED;
+    }
+
+  /* SGR parameters are variable-length.  Consume these sequences even
+   * though NxTerm does not yet implement their visual attributes.
+   */
+
+  ret = nxterm_sgr(priv, seqsize);
+  if (ret != VT100_ABORT)
+    {
+      return ret;
     }
 
   /* We get here on a failure.  The buffer sequence is not part of any
