@@ -255,5 +255,25 @@ int tab5_touchscreen_power_init(void);
 int tab5_touchscreen_init(void);
 #endif /* CONFIG_ESP32P4_TAB5_TOUCHSCREEN */
 
+#ifdef CONFIG_MMCSD_SPI
+
+/****************************************************************************
+ * Name: tab5_sd_card_power
+ *
+ * Description:
+ *   Enable or disable SD card power.
+ *
+ * Input Parameters:
+ *   on - True to enable the SD card power, false to disable it.
+ *
+ * Returned Value:
+ *   Zero on success, -1 on failure.
+ *
+ ****************************************************************************/
+
+int tab5_sd_card_power(bool on);
+
+#endif /* CONFIG_MMCSD_SPI */
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_RISCV_ESP32P4_ESP32P4_TAB5_SRC_ESP32P4_TAB5_H */

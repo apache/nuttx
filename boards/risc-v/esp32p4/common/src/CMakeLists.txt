@@ -76,9 +76,15 @@ if(CONFIG_ARCH_BOARD_COMMON)
     list(APPEND SRCS esp_board_pcnt.c)
   endif()
 
-  if(CONFIG_ESPRESSIF_ULP_USE_TEST_BIN)
-    include(${NUTTX_DIR}/arch/risc-v/src/common/espressif/ulp.cmake)
+  if(CONFIG_MMCSD_SPI)
+    list(APPEND SRCS esp_board_mmcsd.c)
   endif()
+
+endif()
+
+if(CONFIG_ESPRESSIF_ULP_USE_TEST_BIN)
+  include(${NUTTX_DIR}/arch/risc-v/src/common/espressif/ulp.cmake)
+endif()
 
 endif()
 

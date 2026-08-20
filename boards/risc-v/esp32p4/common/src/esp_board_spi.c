@@ -103,9 +103,12 @@ int esp_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 
 uint8_t esp_spi3_status(struct spi_dev_s *dev, uint32_t devid)
 {
-  uint8_t status = 0;
+  if (devid == SPIDEV_MMCSD(0))
+    {
+      return SPI_STATUS_PRESENT;
+    }
 
-  return status;
+  return 0;
 }
 
 #endif

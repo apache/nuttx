@@ -50,6 +50,10 @@
 #  include <nuttx/video/fb.h>
 #endif
 
+#ifdef CONFIG_MMCSD_SPI
+#  include "esp_board_mmcsd.h"
+#endif
+
 #include <arch/board/board.h>
 
 #include "esp32p4-tab5.h"
@@ -190,6 +194,38 @@ int esp_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: failed to initialize touchscreen: %d\n", ret);
     }
+#endif
+
+#if defined(CONFIG_ESPRESSIF_SPI) && defined(CONFIG_MMCSD_SPI)
+  ret = tab5_sd_card_power(true);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: failed to init SD card power\n");
+    }
+  else
+    {
+      syslog(LOG_INFO, "INFO: SD card power initialized\n");
+    }
+
+  ret = esp_mmcsd_spi_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: failed to init MMCSD SPI\n");
+    }
+
+#if defined(CONFIG_FS_FAT)
+  /* Mount the VFAT volume /mnt (2 attempts) */
+
+  ret = nx_mount("/dev/mmcsd0", "/mnt", "vfat", 0, NULL);
+  if (ret < 0)
+    {
+      ret = nx_mount("/dev/mmcsd0", "/mnt", "vfat", 0, NULL);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to mount the FS volume: %d\n", ret);
+        }
+    }
+#endif /* CONFIG_FS_FAT */
 #endif
 
 #ifdef CONFIG_FS_TMPFS
