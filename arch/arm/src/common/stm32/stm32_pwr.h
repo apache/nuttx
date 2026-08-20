@@ -217,6 +217,25 @@ void stm32_pwr_setvos(uint16_t vos);
 #endif
 
 /****************************************************************************
+ * Name: stm32_pwr_enableusv
+ *
+ * Description:
+ *   Declare the USB supply valid or not valid.  The USB transceiver cannot
+ *   be used on STM32G0 until the supply has been declared valid.
+ *
+ * Input Parameters:
+ *   enable - True:  USB supply is valid; False: USB supply is not valid.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_STM32G0
+void stm32_pwr_enableusv(bool enable);
+#endif
+
+/****************************************************************************
  * Name: stm32_pwr_setpvd
  *
  * Description:

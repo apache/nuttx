@@ -34,6 +34,7 @@
 #include <nuttx/irq.h>
 
 #include "arm_internal.h"
+#include "hardware/stm32_rcc.h"
 #include "stm32_pwr.h"
 
 #if defined(CONFIG_STM32_PWR)
@@ -90,6 +91,51 @@ void stm32_pwr_setvos(uint16_t vos)
     {
     }
 }
+
+/****************************************************************************
+ * Name: stm32_pwr_enableusv
+ *
+ * Description:
+ *   Declare the USB supply valid or not valid.  The USB transceiver cannot
+ *   be used on STM32G0 until the supply has been declared valid.
+ *
+ * Input Parameters:
+ *   enable - True:  USB supply is valid; False: USB supply is not valid.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_STM32G0
+void stm32_pwr_enableusv(bool enable)
+{
+  uint32_t regval;
+  bool wasenabled;
+
+  regval = getreg32(STM32_RCC_APB1ENR);
+  wasenabled = (regval & RCC_APB1ENR_PWREN) != 0;
+
+  if (!wasenabled)
+    {
+      modifyreg32(STM32_RCC_APB1ENR, 0, RCC_APB1ENR_PWREN);
+    }
+
+  if (enable)
+    {
+      modifyreg32(STM32_PWR_CR2, 0, PWR_CR2_USV);
+    }
+  else
+    {
+      modifyreg32(STM32_PWR_CR2, PWR_CR2_USV, 0);
+    }
+
+  if (!wasenabled)
+    {
+      modifyreg32(STM32_RCC_APB1ENR, RCC_APB1ENR_PWREN, 0);
+    }
+}
+#endif
 
 /* TODO Other stm32_pwr_* functions need to be implemented */
 
