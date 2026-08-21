@@ -2619,6 +2619,14 @@ config ARCH_BOARD_QEMU_ARMV7A
 		This options selects support for NuttX on the QEMU ARMv7a + virt
 		board featuring the qemu ARMv7a CPUs.
 
+config ARCH_BOARD_LUCKFOX_LYRA_AMP
+	bool "Luckfox Lyra RK3506 AMP subsystem board"
+	depends on ARCH_CHIP_RK3506
+	---help---
+		This option selects support for NuttX running as an AMP subsystem
+		on the Cortex-A7 CPU2 of the Rockchip RK3506 (Luckfox Lyra), brought
+		up by U-Boot via PSCI, alongside Linux on the other cores.
+
 config ARCH_BOARD_QEMU_ARMV8A
 	bool "Qemu ARMv8a CPUs board"
 	depends on ARCH_CHIP_QEMU
@@ -4098,6 +4106,7 @@ config ARCH_BOARD
 	default "a2g-tc397-5v-tft"             if ARCH_BOARD_A2G_TC397_5V_TFT
 	default "triboard_tc4x9_com"           if ARCH_BOARD_TRIBOARD_TC4X9_COM
 	default "qemu-armv7a"                  if ARCH_BOARD_QEMU_ARMV7A
+	default "luckfox-lyra-amp"             if ARCH_BOARD_LUCKFOX_LYRA_AMP
 	default "qemu-armv7r"                  if ARCH_BOARD_QEMU_ARMV7R
 	default "qemu-armv8a"                  if ARCH_BOARD_QEMU_ARMV8A
 	default "pinephone"                    if ARCH_BOARD_PINEPHONE
@@ -4354,6 +4363,9 @@ source "boards/arm/rtl8721f/rtl8721f_evb/Kconfig"
 endif
 if ARCH_BOARD_QEMU_ARMV7A
 source "boards/arm/qemu/qemu-armv7a/Kconfig"
+endif
+if ARCH_BOARD_LUCKFOX_LYRA_AMP
+source "boards/arm/rk3506/luckfox-lyra-amp/Kconfig"
 endif
 if ARCH_BOARD_QEMU_ARMV8A
 source "boards/arm64/qemu/qemu-armv8a/Kconfig"
