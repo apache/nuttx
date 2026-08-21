@@ -119,6 +119,10 @@ ifeq ($(CONFIG_STM32_QSPI),y)
 CHIP_CSRCS += stm32_qspi.c
 endif
 
+ifeq ($(CONFIG_STM32_XSPI),y)
+CHIP_CSRCS += stm32_xspi.c
+endif
+
 ifeq ($(CONFIG_STM32_RTC),y)
 CHIP_CSRCS += stm32_rtc.c
 ifeq ($(CONFIG_RTC_ALARM),y)

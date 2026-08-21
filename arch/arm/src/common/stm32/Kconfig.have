@@ -639,6 +639,9 @@ config STM32_HAVE_OCTOSPI2
 config STM32_HAVE_QSPI
 	bool
 
+config STM32_HAVE_XSPI
+	bool
+
 # CRC capabilities
 
 config STM32_HAVE_CRC
