@@ -54,7 +54,7 @@ USB_FS      Yes      USB Device and Host Support.
 AES         No
 CEC         No
 CORDIC      No
-CRC         No
+CRC         Yes
 CRS         No
 DAC         No
 DBG         No
