@@ -804,6 +804,13 @@ config STM32_BYPASS_CLOCKCONFIG
 		Bypass clock configuration. For dual core chips only one core
 		should configure clocks
 
+config STM32_XSPI
+	bool "XSPI support"
+	depends on STM32_HAVE_XSPI
+	default n
+	---help---
+		Enable support for the STM32H7R/S XSPI controller.
+
 config STM32_SRAM4EXCLUDE
 	bool "Exclude SRAM4 from the heap"
 	default y if RPTUN

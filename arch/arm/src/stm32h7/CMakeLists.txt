@@ -116,6 +116,10 @@ if(CONFIG_STM32_QSPI)
   list(APPEND SRCS stm32_qspi.c)
 endif()
 
+if(CONFIG_STM32_XSPI)
+  list(APPEND SRCS stm32_xspi.c)
+endif()
+
 if(CONFIG_STM32_RTC)
   list(APPEND SRCS stm32_rtc.c)
   if(CONFIG_RTC_ALARM)
