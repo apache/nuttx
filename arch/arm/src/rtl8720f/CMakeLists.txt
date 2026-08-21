@@ -66,6 +66,10 @@ if(CONFIG_AMEBA_PWM)
   list(APPEND SRCS ${AMEBA_COMMON}/ameba_pwm.c)
 endif()
 
+if(CONFIG_AMEBA_ADC)
+  list(APPEND SRCS ${AMEBA_COMMON}/ameba_adc.c)
+endif()
+
 target_include_directories(arch PRIVATE ${AMEBA_COMMON})
 target_sources(arch PRIVATE ${SRCS})
 
@@ -142,6 +146,14 @@ endif()
 # source and linked in (--gc-sections drops the unused input-capture paths).
 if(CONFIG_AMEBA_PWM)
   list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_tim.c)
+endif()
+
+# ADC (SAR) register layer.  The ADC driver (arch/.../common/ameba/ameba_adc.c)
+# calls the fwlib ADC API; the data tables and helpers it indexes live in this
+# RAM source and must be compiled in (--gc-sections drops the unused
+# interrupt/timer-trigger helpers).
+if(CONFIG_AMEBA_ADC)
+  list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_adc.c)
 endif()
 
 # Silence a couple of warnings the vendored SDK sources trip under NuttX's
