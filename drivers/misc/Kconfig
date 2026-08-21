@@ -62,7 +62,7 @@ config DEV_RPMSG_SERVER
 
 config DEV_RPMSG_OPEN_MAX
 	int "Rpmsg Device max concurrent opens per device"
-	default 4
+	default 2
 	depends on DEV_RPMSG || DEV_RPMSG_SERVER
 	---help---
 		Maximum number of concurrent open() instances supported per rpmsg
