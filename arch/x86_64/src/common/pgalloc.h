@@ -104,6 +104,7 @@ static inline uintptr_t x86_64_pgpaddr(uintptr_t vaddr)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_ADDRENV
 static inline bool x86_64_uservaddr(uintptr_t vaddr)
 {
   /* Check if this address is within the range of the virtualized .bss/.data,
@@ -116,6 +117,7 @@ static inline bool x86_64_uservaddr(uintptr_t vaddr)
 #endif
     );
 }
+#endif
 
 /****************************************************************************
  * Name: x86_64_pgwipe
