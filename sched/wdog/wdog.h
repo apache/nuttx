@@ -104,18 +104,14 @@ uint64_t wd_timer(const hrtimer_t *timer, uint64_t expired);
 #define wd_set_nested(f)          (g_wdtimernested = (f))
 #define wd_update_expire(expired) (g_wdexpired = (expired))
 
-static inline_function void wd_timer_start(clock_t tick, bool in_expiration)
+static inline_function void wd_timer_start(clock_t tick)
 {
-  if (!in_expiration)
-    {
-      uint64_t delay = clock_compare(g_wdexpired, tick) ?
-                       tick - g_wdexpired : 0u;
-      uint64_t nsec  = delay <= HRTIMER_MAX_DELAY / NSEC_PER_TICK ?
-                       TICK2NSEC(g_wdexpired + delay) :
-                       TICK2NSEC((uint64_t)g_wdexpired) + HRTIMER_MAX_DELAY;
-      DEBUGVERIFY(hrtimer_start(&g_wdtimer, wd_timer, nsec,
-                                HRTIMER_MODE_ABS));
-    }
+  uint64_t delay = clock_compare(g_wdexpired, tick) ?
+                   tick - g_wdexpired : 0u;
+  uint64_t nsec  = delay <= HRTIMER_MAX_DELAY / NSEC_PER_TICK ?
+                   TICK2NSEC(g_wdexpired + delay) :
+                   TICK2NSEC((uint64_t)g_wdexpired) + HRTIMER_MAX_DELAY;
+  hrtimer_start(&g_wdtimer, wd_timer, nsec, HRTIMER_MODE_ABS);
 }
 
 static inline_function void wd_timer_cancel(void)
