@@ -50,6 +50,6 @@ void fs_profile_stop(FAR clock_t *start, FAR atomic64_t *total,
   clock_t stop = perf_gettime();
   clock_t delta = stop - *start;
 
-  atomic64_fetch_add(total, delta);
-  atomic_fetch_add(count, 1);
+  atomic64_add(total, delta);
+  atomic_add(count, 1);
 }

@@ -982,7 +982,7 @@ void nxsem_release_all(FAR struct tcb_s *htcb)
            * that was taken by sem_wait() or sem_post().
            */
 
-          atomic_fetch_add(NXSEM_COUNT(sem), 1);
+          atomic_add(NXSEM_COUNT(sem), 1);
         }
     }
 }

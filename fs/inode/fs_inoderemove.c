@@ -119,7 +119,7 @@ static FAR struct inode *inode_unlink(FAR const char *path)
 
       inode->i_peer   = NULL;
       inode->i_parent = NULL;
-      atomic_fetch_sub(&inode->i_crefs, 1);
+      atomic_sub(&inode->i_crefs, 1);
     }
 
 errout:

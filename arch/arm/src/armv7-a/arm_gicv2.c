@@ -72,7 +72,7 @@ static atomic_t g_gic_init_done;
 #if defined(CONFIG_SMP) && CONFIG_SMP_NCPUS > 1
 static void arm_gic_init_done(void)
 {
-  atomic_fetch_or(&g_gic_init_done, 1 << this_cpu());
+  atomic_or(&g_gic_init_done, 1 << this_cpu());
 }
 
 static void arm_gic_wait_done(cpu_set_t cpuset)

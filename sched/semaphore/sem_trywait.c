@@ -117,7 +117,7 @@ int nxsem_trywait_slow(FAR sem_t *sem)
             }
           else
             {
-              atomic_fetch_add(NXSEM_COUNT(sem), 1);
+              atomic_add(NXSEM_COUNT(sem), 1);
             }
         }
       else

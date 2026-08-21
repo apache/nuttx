@@ -20,7 +20,11 @@
 #
 ############################################################################
 
-CSRCS += arch_atomic.c
+ifneq ($(filter y,$(CONFIG_LIBC_ATOMIC_IRQ)$(CONFIG_LIBC_ATOMIC_HWSPINLOCK)),)
+  CSRCS += arch_atomic.c
+endif
+
+CSRCS += arch_atomic64.c
 
 ifeq ($(CONFIG_MM_KASAN),y)
   CSRCS += arch_libc.c

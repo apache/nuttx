@@ -1,7 +1,5 @@
 /****************************************************************************
- * fs/inode/fs_inodeaddref.c
- *
- * SPDX-License-Identifier: Apache-2.0
+ * arch/arm/src/rp2040/rp2040_hwspinlock.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,29 +22,38 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <nuttx/hwspinlock/hwspinlock.h>
 
-#include <errno.h>
-#include <nuttx/fs/fs.h>
-#include "inode/inode.h"
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+#include "arm_internal.h"
+#include "hardware/rp2040_sio.h"
 
 /****************************************************************************
- * Name: inode_addref
- *
- * Description:
- *   Increment the reference count on an inode (as when a file descriptor
- *   is dup'ed).
- *
+ * Private Function Prototypes
  ****************************************************************************/
 
-void inode_addref(FAR struct inode *inode)
+static bool rp2040_hwspinlock_trylock(struct hwspinlock_dev_s *dev);
+static void rp2040_hwspinlock_unlock(struct hwspinlock_dev_s *dev);
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+const struct hwspinlock_ops_s g_rp2040_hwspinlock_ops =
 {
-  if (inode)
-    {
-      atomic_add(&inode->i_crefs, 1);
-    }
+  .trylock = rp2040_hwspinlock_trylock,
+  .unlock  = rp2040_hwspinlock_unlock
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static bool rp2040_hwspinlock_trylock(struct hwspinlock_dev_s *dev)
+{
+  return getreg32(RP2040_SIO_SPINLOCK(dev->id));
+}
+
+static void rp2040_hwspinlock_unlock(struct hwspinlock_dev_s *dev)
+{
+  putreg32(0, RP2040_SIO_SPINLOCK(dev->id));
 }

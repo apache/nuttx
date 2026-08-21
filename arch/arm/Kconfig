@@ -843,7 +843,6 @@ config ARCH_CHIP_CXD56XX
 	select ARCH_HAVE_MATH_H
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_CUSTOM_TESTSET
-	select LIBC_ARCH_ATOMIC if SMP
 	---help---
 		Sony CXD56XX (ARM Cortex-M4) architectures
 
@@ -935,7 +934,7 @@ config ARCH_CHIP_CXD32XX
 	bool "Sony CXD32xx"
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_FPU
-	select LIBC_ARCH_ATOMIC
+	select LIBC_ATOMIC_IRQ
 	---help---
 		Sony CXD32XX (ARM Cortex-M4) architectures
 
@@ -943,7 +942,6 @@ config ARCH_CHIP_HT32F491X3
 	bool "Holtek HT32F491x3"
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_FPU
-	select LIBC_ARCH_ATOMIC
 	---help---
 		Holtek HT32F491x3 (ARM Cortex-M4) architectures
 
@@ -967,6 +965,7 @@ config ARCH_ARM7TDMI
 	default n
 	select ARCH_DCACHE
 	select ARCH_ICACHE
+	select LIBC_ATOMIC_IRQ
 	---help---
 		The Arm7TDMI-S is an excellent workhorse processor capable of a wide
 		array of applications. Traditionally used in mobile handsets, the
@@ -996,6 +995,7 @@ config ARCH_ARM926EJS
 	select ARCH_ICACHE
 	select ARCH_HAVE_MMU
 	select ARCH_USE_MMU
+	select LIBC_ATOMIC_IRQ
 	---help---
 		Arm926EJ-S is the entry point processor capable of supporting full
 		Operating Systems including Linux, WindowsCE, and Symbian.
@@ -1051,6 +1051,7 @@ config ARCH_ARMV6M
 	bool
 	default n
 	select ARCH_HAVE_CPUINFO
+	select LIBC_ATOMIC_IRQ
 
 config ARCH_CORTEXM0
 	bool

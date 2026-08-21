@@ -280,7 +280,7 @@ reset_control_get_internal(FAR struct reset_controller_dev *rcdev,
               return NULL;
             }
 
-          atomic_fetch_add(&rstc->refcnt, 1);
+          atomic_add(&rstc->refcnt, 1);
           return rstc;
         }
     }
@@ -332,7 +332,7 @@ static void reset_control_put_internal(FAR struct reset_control *rstc)
 {
   DEBUGASSERT(nxmutex_is_locked(&g_reset_list_mutex));
 
-  if (atomic_fetch_sub(&rstc->refcnt, 1) == 1)
+  if (atomic_sub(&rstc->refcnt, 1) == 1)
     {
       DEBUGASSERT(nxmutex_is_locked(&g_reset_list_mutex));
       list_delete(&rstc->list);
@@ -533,7 +533,7 @@ int reset_control_reset(FAR struct reset_control *rstc)
           return -EINVAL;
         }
 
-      if (atomic_fetch_add(&rstc->triggered_count, 1) != 0)
+      if (atomic_add(&rstc->triggered_count, 1) != 0)
         {
           return 0;
         }
@@ -552,7 +552,7 @@ int reset_control_reset(FAR struct reset_control *rstc)
 
   if (rstc->shared && ret < 0)
     {
-      atomic_fetch_sub(&rstc->triggered_count, 1);
+      atomic_sub(&rstc->triggered_count, 1);
     }
 
   return ret;
@@ -609,7 +609,7 @@ int reset_control_assert(FAR struct reset_control *rstc)
           return -EINVAL;
         }
 
-      if (atomic_fetch_sub(&rstc->deassert_count, 1) != 1)
+      if (atomic_sub(&rstc->deassert_count, 1) != 1)
         {
           return 0;
         }
@@ -688,7 +688,7 @@ int reset_control_deassert(FAR struct reset_control *rstc)
           return -EINVAL;
         }
 
-      if (atomic_fetch_add(&rstc->deassert_count, 1) != 0)
+      if (atomic_add(&rstc->deassert_count, 1) != 0)
         {
           return 0;
         }

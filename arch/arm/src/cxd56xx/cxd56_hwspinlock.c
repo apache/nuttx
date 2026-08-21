@@ -1,7 +1,5 @@
 /****************************************************************************
- * fs/inode/fs_inodeaddref.c
- *
- * SPDX-License-Identifier: Apache-2.0
+ * arch/arm/src/cxd56xx/cxd56_hwspinlock.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,29 +22,42 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <nuttx/hwspinlock/hwspinlock.h>
 
-#include <errno.h>
-#include <nuttx/fs/fs.h>
-#include "inode/inode.h"
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+#include "arm_internal.h"
+#include "hardware/cxd56_sph.h"
 
 /****************************************************************************
- * Name: inode_addref
- *
- * Description:
- *   Increment the reference count on an inode (as when a file descriptor
- *   is dup'ed).
- *
+ * Private Function Prototypes
  ****************************************************************************/
 
-void inode_addref(FAR struct inode *inode)
+static bool cxd56_hwspinlock_trylock(struct hwspinlock_dev_s *dev);
+static void cxd56_hwspinlock_unlock(struct hwspinlock_dev_s *dev);
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+const struct hwspinlock_ops_s g_cxd56_hwspinlock_ops =
 {
-  if (inode)
-    {
-      atomic_add(&inode->i_crefs, 1);
-    }
+  .trylock = cxd56_hwspinlock_trylock,
+  .unlock  = cxd56_hwspinlock_unlock
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static bool cxd56_hwspinlock_trylock(struct hwspinlock_dev_s *dev)
+{
+  uint32_t sphlocked = ((up_cpu_index() + 2) << 16) | 0x1;
+
+  putreg32(REQ_LOCK, CXD56_SPH_REQ(dev->id));
+
+  return getreg32(CXD56_SPH_STS(dev->id)) == sphlocked;
+}
+
+static void cxd56_hwspinlock_unlock(struct hwspinlock_dev_s *dev)
+{
+  putreg32(REQ_UNLOCK, CXD56_SPH_REQ(dev->id));
 }

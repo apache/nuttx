@@ -162,7 +162,7 @@ static void rpmsg_port_spi_pm_callback(wdparm_t arg)
 
   flags = spin_lock_irqsave(&rpspi->pmlock);
   count = pm_wakelock_staycount(&rpspi->wakelock);
-  if (count > 0 && atomic_load(&rpspi->transferring) == 0 &&
+  if (count > 0 && atomic_read(&rpspi->transferring) == 0 &&
       rpmsg_port_queue_nused(&rpspi->port.txq) == 0 &&
       rpmsg_port_queue_nused(&rpspi->port.rxq) == 0)
     {
@@ -268,7 +268,7 @@ static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
   int pending;
 
   IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 0);
-  pending = atomic_fetch_add(&rpspi->transferring, 1);
+  pending = atomic_add(&rpspi->transferring, 1);
   if (pending > 0)
     {
       if (pending > 1)

@@ -25,6 +25,7 @@ include armv7-m/Make.defs
 CHIP_CSRCS  = lc823450_allocateheap2.c lc823450_start.c lc823450_irq.c lc823450_timer.c
 CHIP_CSRCS += lc823450_lowputc.c lc823450_serial.c lc823450_clockconfig.c
 CHIP_CSRCS += lc823450_syscontrol.c lc823450_gpio.c
+CHIP_CSRCS += lc823450_hwspinlock.c
 
 # Configuration-dependent LC823450 files
 
@@ -123,3 +124,4 @@ endif
 ifeq ($(CONFIG_ARM_MPU),y)
 CHIP_CSRCS += lc823450_mpuinit2.c
 endif
+CHIP_CSRCS += lc823450_atomic.c

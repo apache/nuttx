@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/inode/fs_inodeaddref.c
+ * arch/arm/src/lc823450/lc823450_atomic.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,29 +24,27 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <nuttx/hwspinlock/hwspinlock.h>
 
-#include <errno.h>
-#include <nuttx/fs/fs.h>
-#include "inode/inode.h"
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define LC823450_MUTEX_REG  0
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+extern const struct hwspinlock_ops_s g_lc823450_hwspinlock_ops;
+
+struct hwspinlock_dev_s g_atomic_hwspinlock =
+{
+  .id       = LC823450_MUTEX_REG,
+  .priority = 0,
+  .ops      = &g_lc823450_hwspinlock_ops
+};
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: inode_addref
- *
- * Description:
- *   Increment the reference count on an inode (as when a file descriptor
- *   is dup'ed).
- *
- ****************************************************************************/
-
-void inode_addref(FAR struct inode *inode)
-{
-  if (inode)
-    {
-      atomic_add(&inode->i_crefs, 1);
-    }
-}

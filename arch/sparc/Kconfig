@@ -18,6 +18,7 @@ config ARCH_CHIP_BM3803
 	select ARCH_HAVE_RAMFUNCS
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_SERIAL_TERMIOS
+	select LIBC_ATOMIC_IRQ
 	---help---
 		Microchip BM3803 (ARCH_SPARC_V8)
 
@@ -29,6 +30,7 @@ config ARCH_CHIP_BM3823
 	select ARCH_VECNOTIRQ
 	select ARCH_HAVE_RAMFUNCS
 	select ARCH_HAVE_SERIAL_TERMIOS
+	select LIBC_ATOMIC_IRQ
 	---help---
 		Microchip BM3823 (ARCH_SPARC_V8)
 

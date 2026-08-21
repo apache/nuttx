@@ -1,7 +1,5 @@
 /****************************************************************************
- * fs/inode/fs_inodeaddref.c
- *
- * SPDX-License-Identifier: Apache-2.0
+ * arch/arm/src/lc823450/lc823450_hwspinlock.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,29 +22,55 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <nuttx/hwspinlock/hwspinlock.h>
 
-#include <errno.h>
-#include <nuttx/fs/fs.h>
-#include "inode/inode.h"
+#include "arm_internal.h"
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
+
+#define LC823450_MUTEX_REG_BASE  0x40005000
+
+#define LC823450_MUTEX_REG_LEN  4
+#define LC823450_MUTEX_REG_ADDR(id) \
+  (LC823450_MUTEX_REG_BASE + (id) * LC823450_MUTEX_REG_LEN)
 
 /****************************************************************************
- * Name: inode_addref
- *
- * Description:
- *   Increment the reference count on an inode (as when a file descriptor
- *   is dup'ed).
- *
+ * Private Function Prototypes
  ****************************************************************************/
 
-void inode_addref(FAR struct inode *inode)
+static bool lc823450_hwspinlock_trylock(struct hwspinlock_dev_s *dev);
+static void lc823450_hwspinlock_unlock(struct hwspinlock_dev_s *dev);
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+const struct hwspinlock_ops_s g_lc823450_hwspinlock_ops =
 {
-  if (inode)
-    {
-      atomic_add(&inode->i_crefs, 1);
-    }
+  .trylock = lc823450_hwspinlock_trylock,
+  .unlock  = lc823450_hwspinlock_unlock
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static bool lc823450_hwspinlock_trylock(struct hwspinlock_dev_s *dev)
+{
+  uint32_t val;
+
+  val = (up_cpu_index() << 16) | 0x1;
+  putreg32(val, LC823450_MUTEX_REG_ADDR(dev->id));
+
+  return getreg32(LC823450_MUTEX_REG_ADDR(dev->id)) == val;
+}
+
+static void lc823450_hwspinlock_unlock(struct hwspinlock_dev_s *dev)
+{
+  uint32_t val;
+
+  val = (up_cpu_index() << 16) | 0x0;
+  putreg32(val, LC823450_MUTEX_REG_ADDR(dev->id));
 }

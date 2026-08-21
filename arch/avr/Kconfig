@@ -13,12 +13,14 @@ config ARCH_CHIP_ATMEGA
 	bool "ATMega family"
 	select ARCH_FAMILY_AVR
 	select MM_SMALL
+	select LIBC_ATOMIC_IRQ
 	---help---
 		Atmel ATMega family of 8-bit AVRs.
 
 config ARCH_CHIP_AT90USB
 	bool "AT90USB family"
 	select ARCH_FAMILY_AVR
+	select LIBC_ATOMIC_IRQ
 	select MM_SMALL
 	---help---
 		Atmel AT90USB family of 8-bit AVRs.
@@ -35,12 +37,14 @@ config ARCH_CHIP_AVRDX
 config ARCH_CHIP_AT32UC3
 	bool "AVR32 AT32UC3* family"
 	select ARCH_FAMILY_AVR32
+	select LIBC_ATOMIC_IRQ
 	---help---
 		Atmel AT32UC3A/B/C family of 32-bit AVR32s.
 
 config ARCH_CHIP_AVR_CUSTOM
 	bool "Custom AVR chip"
 	select ARCH_CHIP_CUSTOM
+	select LIBC_ATOMIC_IRQ
 	---help---
 		Select this option if there is no directory for the chip under arch/avr/src/.
 
