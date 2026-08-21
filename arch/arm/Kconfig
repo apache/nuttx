@@ -793,6 +793,15 @@ config ARCH_CHIP_TMS570
 	---help---
 		TI TMS570 family
 
+config ARCH_CHIP_RM57
+	bool "TI Hercules RM57"
+	select ARCH_HAVE_LOWVECTORS
+	select ARCH_HAVE_FETCHADD
+	select ARMV7R_MEMINIT
+	select ARMV7R_HAVE_DECODEFIQ
+	---help--- 
+		TI Hercules RM57 family (ARM Cortex-R5F)
+
 config ARCH_CHIP_TIVA
 	bool "TI Tiva"
 	select ARCH_HAVE_MPU
@@ -1383,6 +1392,7 @@ config ARCH_CHIP
 	default "stm32wl5"	if ARCH_CHIP_STM32WL5
 	default "str71x"	if ARCH_CHIP_STR71X
 	default "tms570"	if ARCH_CHIP_TMS570
+	default "rm57"		if ARCH_CHIP_RM57
 	default "xmc4"		if ARCH_CHIP_XMC4
 	default "mx8mp"		if ARCH_CHIP_MX8MP
 	default "cxd56xx"	if ARCH_CHIP_CXD56XX
@@ -1943,6 +1953,9 @@ source "arch/arm/src/str71x/Kconfig"
 endif
 if ARCH_CHIP_TMS570
 source "arch/arm/src/tms570/Kconfig"
+endif
+if ARCH_CHIP_RM57
+source "arch/arm/src/rm57/Kconfig"
 endif
 if ARCH_CHIP_XMC4
 source "arch/arm/src/xmc4/Kconfig"

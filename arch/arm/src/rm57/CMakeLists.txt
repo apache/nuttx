@@ -1,0 +1,38 @@
+# ##############################################################################
+# arch/arm/src/rm57/CMakeLists.txt
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more contributor
+# license agreements.  See the NOTICE file distributed with this work for
+# additional information regarding copyright ownership.  The ASF licenses this
+# file to you under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License.  You may obtain a copy of
+# the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations under
+# the License.
+#
+# ##############################################################################
+
+set(SRCS
+    rm57_boot.c
+    rm57_clockconfig.c
+    rm57_mpuinit.c
+    rm57_gio.c
+    rm57_irq.c
+    rm57_lowputc.c
+    rm57_serial.c
+    rm57_esm.c
+    rm57_coreinit.S)
+
+if(NOT CONFIG_SCHED_TICKLESS)
+  list(APPEND SRCS rm57_timerisr.c)
+endif()
+
+target_sources(arch PRIVATE ${SRCS})
