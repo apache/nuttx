@@ -861,3 +861,16 @@ LOWERMAP = A a B b C c D d E e F f G g H h I i J j K k L l M m N n O o P p Q q R
 
 UPPER_CASE = $(call ULMAP,$(UPPERMAP),$(1))
 LOWER_CASE = $(call ULMAP,$(LOWERMAP),$(1))
+
+# ZBus iterable sections "zero-touch" mode: supplement the board linker
+# script with the zbus sections via INSERT (see include/nuttx/linker/zbus.ld)
+# instead of requiring the board script to include common-rom.ld.
+#
+# The fragment is added through ARCHSCRIPT (not EXTRALINKCMDS) because GNU
+# ld requires the INSERT script to come BEFORE the script that defines the
+# target section on the command line; this file is included by the board
+# Make.defs before it appends its own script, so the fragment lands first.
+
+ifeq ($(CONFIG_ZBUS_LINKER_INSERT),y)
+  ARCHSCRIPT += $(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)linker$(DELIM)zbus.ld
+endif
