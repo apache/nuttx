@@ -84,6 +84,10 @@ ifeq ($(CONFIG_STM32_TIM),y)
 CHIP_CSRCS += stm32_tim.c
 endif
 
+ifeq ($(CONFIG_STM32_LPTIM),y)
+CHIP_CSRCS += stm32_lptim.c
+endif
+
 ifeq ($(CONFIG_STM32_HAVE_HSI48),y)
 CHIP_CSRCS += stm32_hsi48.c
 endif
