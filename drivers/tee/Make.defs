@@ -20,7 +20,9 @@
 #
 ############################################################################
 
-ifneq ($(CONFIG_DEV_OPTEE_NONE),y)
+ifeq ($(CONFIG_DEV_OPTEE_DUMMY),y)
+  CSRCS += optee_dummy.c
+else ifneq ($(CONFIG_DEV_OPTEE_NONE),y)
   CSRCS += optee.c
   ifeq ($(CONFIG_DEV_OPTEE_SMC),y)
     CSRCS += optee_smc.c

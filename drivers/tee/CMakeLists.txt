@@ -21,7 +21,9 @@
 # ##############################################################################
 set(SRCS)
 
-if(NOT CONFIG_DEV_OPTEE_NONE)
+if(CONFIG_DEV_OPTEE_DUMMY)
+  list(APPEND SRCS optee_dummy.c)
+elseif(NOT CONFIG_DEV_OPTEE_NONE)
   list(APPEND SRCS optee.c)
   if(CONFIG_DEV_OPTEE_SMC)
     list(APPEND SRCS optee_smc.c)

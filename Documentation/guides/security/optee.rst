@@ -63,6 +63,12 @@ Successful registration of the driver can be verified by looking into
 incompatibility with the TEE OS running in the system, will prevent the
 ``/dev/tee0`` character device from being registered.
 
+.. note::
+   The same choice also offers ``CONFIG_DEV_OPTEE_DUMMY``, which registers
+   no character device at all. It is meant for the side that runs the OP-TEE
+   server itself, and only announces the RPMsg channel that a REE binds its
+   own TEE driver to.
+
 IOCTLs supported
 ================
 
