@@ -13,6 +13,7 @@ case, you can head to the :doc:`reference <../reference/index>`.
    
    binfmt.rst
    concurrency/index.rst
+   iterable_sections.rst
    drivers/index.rst
    nxflat.rst
    nxgraphics/index.rst
