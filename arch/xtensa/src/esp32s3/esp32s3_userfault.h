@@ -1,5 +1,7 @@
 /****************************************************************************
- * arch/xtensa/src/esp32s3/esp32s3_userspace.h
+ * arch/xtensa/src/esp32s3/esp32s3_userfault.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USERSPACE_H
-#define __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USERSPACE_H
+#ifndef __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USERFAULT_H
+#define __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USERFAULT_H
 
 /****************************************************************************
  * Included Files
@@ -27,23 +29,31 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+
+#ifdef CONFIG_ESP32S3_USERFAULT_ABORT
+
 /****************************************************************************
- * Public Functions Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32s3_userspace
+ * Name: esp32s3_userfault_abort
  *
  * Description:
- *   For the case of the separate user-/kernel-space build, perform whatever
- *   platform specific initialization of the user memory is required.
- *   Normally this just means initializing the user space .data and .bss
- *   segments.
+ *   Terminate the faulting unprivileged task with SIGSEGV rather than
+ *   panicking the system.  Cause-agnostic; the caller decides eligibility.
+ *
+ * Input Parameters:
+ *   exccause - The EXCCAUSE of the user exception, for reporting
+ *   regs     - The register save area at the time of the exception
+ *
+ * Returned Value:
+ *   The register frame to resume.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_PROTECTED
-void esp32s3_userspace(void);
-#endif
+uint32_t *esp32s3_userfault_abort(int exccause, uint32_t *regs);
 
-#endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USERSPACE_H */
+#endif /* CONFIG_ESP32S3_USERFAULT_ABORT */
+#endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USERFAULT_H */

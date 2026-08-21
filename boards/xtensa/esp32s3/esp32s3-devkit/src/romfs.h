@@ -1,5 +1,7 @@
 /****************************************************************************
- * arch/xtensa/src/esp32s3/esp32s3_userspace.h
+ * boards/xtensa/esp32s3/esp32s3-devkit/src/romfs.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,32 +20,20 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USERSPACE_H
-#define __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USERSPACE_H
+#ifndef __BOARDS_XTENSA_ESP32S3_ESP32S3_DEVKIT_SRC_ROMFS_H
+#define __BOARDS_XTENSA_ESP32S3_ESP32S3_DEVKIT_SRC_ROMFS_H
 
 /****************************************************************************
- * Included Files
+ * Public Data
  ****************************************************************************/
 
-#include <nuttx/config.h>
+/* The boot ROMFS image holding the user-space programs of a kernel build.
+ * The real image is generated from apps/bin by apps/tools/mkromfsimg.sh into
+ * romfs_boot.c; romfs_stub.c provides a weak, empty placeholder so that the
+ * kernel still links before that step has been run.
+ */
 
-/****************************************************************************
- * Public Functions Prototypes
- ****************************************************************************/
+extern const unsigned char romfs_img[];
+extern const unsigned int romfs_img_len;
 
-/****************************************************************************
- * Name: esp32s3_userspace
- *
- * Description:
- *   For the case of the separate user-/kernel-space build, perform whatever
- *   platform specific initialization of the user memory is required.
- *   Normally this just means initializing the user space .data and .bss
- *   segments.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BUILD_PROTECTED
-void esp32s3_userspace(void);
-#endif
-
-#endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USERSPACE_H */
+#endif /* __BOARDS_XTENSA_ESP32S3_ESP32S3_DEVKIT_SRC_ROMFS_H */

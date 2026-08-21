@@ -343,6 +343,26 @@ config ESP32S3_RUN_IRAM
 		This loads all of NuttX inside IRAM. Used to test somewhat small
 		images that can fit entirely in IRAM.
 
+config ESP32S3_PGPOOL_SCRATCH
+	bool
+	default y
+	depends on BUILD_KERNEL && ARCH_ADDRENV && MM_PGALLOC
+	select ARCH_KVMA_MAPPING
+	---help---
+		The page pool is deliberately not kept mapped into the kernel
+		address space: it is carved out of the PSRAM the user processes
+		themselves run from, and the external memory permissions are indexed
+		by physical address, so a kernel window onto the pool is a window
+		onto every process's memory that no permission setting can close.
+
+		The kernel reaches a pool page through a small scratch region
+		instead, mapped for the duration of one operation and invalidated
+		afterwards.  ARCH_KMAP_VBASE and ARCH_KMAP_NPAGES describe it.
+
+		The pool itself is described by ARCH_PGPOOL_PBASE and
+		ARCH_PGPOOL_SIZE as usual.  Only ARCH_PGPOOL_VBASE does not apply,
+		because there is no permanent virtual mapping to name.
+
 menu "ESP32-S3 Peripheral Selection"
 
 source "arch/xtensa/src/common/espressif/Kconfig"
@@ -923,7 +943,56 @@ config ESP32S3_WCL
 	bool "World Controller"
 	default n
 	select ARCH_USE_MPU
-	select XTENSA_HAVE_GENERAL_EXCEPTION_HOOKS if BUILD_PROTECTED
+	select XTENSA_HAVE_GENERAL_EXCEPTION_HOOKS if !BUILD_FLAT
+
+config ESP32S3_PAGEFAULT
+	bool "Recoverable PMS permission faults"
+	default n
+	depends on !BUILD_FLAT
+	---help---
+		Route the precise Load/Store/InstrFetch Prohibited exceptions raised
+		by PMS (memory-protection) permission violations through a
+		recoverable-fault dispatcher instead of panicking unconditionally.
+		This is the foundation for guard pages, lazy stack/heap growth and,
+		ultimately, demand paging / copy-on-write on the ESP32-S3.
+
+config ESP32S3_USERFAULT_ABORT
+	bool "Abort a faulting user task instead of panicking"
+	default y
+	depends on !BUILD_FLAT
+	select SIG_DEFAULT
+	select SIG_SIGKILL_ACTION
+	---help---
+		When an unprivileged task takes a fault that cannot be serviced,
+		deliver SIGSEGV to it so its default action terminates only that task
+		and the rest of the system keeps running, instead of a whole-system
+		panic.  Kernel-mode faults still panic:  a kernel thread, a fault
+		inside a system call, and a fault while handling an interrupt all run
+		with PS.UM clear and there is no safe task to kill.
+
+		This is deliberately independent of ESP32S3_PAGEFAULT.  Servicing a
+		fault so the instruction can be re-executed and refusing to let a
+		rogue task halt the machine are separate capabilities, and the second
+		is one you always want:  a user task can raise an unaligned load, a
+		divide by zero, a privileged instruction or a corrupt opcode, none of
+		which any dispatcher can service.
+
+if ESP32S3_PAGEFAULT
+
+config ESP32S3_PAGEFAULT_SELFTEST
+	bool "Recoverable-fault self-test"
+	default n
+	---help---
+		Prove the recoverable-fault primitive on silicon.  A load from
+		0x80000000 raises a precise LoadProhibited (EXCCAUSE 28, "cache
+		attribute does not allow load"); the fault dispatcher lets the RFE
+		re-execute the identical faulting instruction several times (proving
+		a faulted precise access restarts cleanly) before stepping past it,
+		reporting the result over the console.  Trigger it from a user task,
+		e.g. with examples/pffault:  nsh> pffault r 0x80000000
+		For bring-up and evaluation only.
+
+endif # ESP32S3_PAGEFAULT
 
 config ESP32S3_LCD
 	bool "LCD"
