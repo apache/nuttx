@@ -341,6 +341,33 @@ static inline bool vaddr_is_shm(uintptr_t vaddr)
 #endif
 }
 
+#ifdef CONFIG_ARCH_HAVE_FORK
+/****************************************************************************
+ * Name: vaddr_is_text
+ *
+ * Description:
+ *   Check if a vaddr is part of the .text area, which is mapped read/execute
+ *   while everything else is mapped read/write.  The two arms mirror exactly
+ *   the two layouts up_addrenv_create() builds.
+ *
+ ****************************************************************************/
+
+static inline bool vaddr_is_text(const arch_addrenv_t *addrenv,
+                                 uintptr_t vaddr)
+{
+#if (CONFIG_ARCH_TEXT_VBASE != 0x0) && (CONFIG_ARCH_HEAP_VBASE != 0x0)
+  UNUSED(addrenv);
+  return vaddr >= CONFIG_ARCH_TEXT_VBASE && vaddr < ARCH_TEXT_VEND;
+#else
+  /* Contiguous layout:  the reserve sits below .text, and .data begins where
+   * .text ends.
+   */
+
+  return vaddr >= addrenv->textvbase && vaddr < addrenv->datavbase;
+#endif
+}
+#endif /* CONFIG_ARCH_HAVE_FORK */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -495,6 +522,172 @@ errout:
   up_addrenv_destroy(addrenv);
   return ret;
 }
+
+#ifdef CONFIG_ARCH_HAVE_FORK
+/****************************************************************************
+ * Name: up_addrenv_fork
+ *
+ * Description:
+ *   Duplicate an address environment for POSIX fork().  The destination gets
+ *   its own page tables and its own physical pages, holding a copy of the
+ *   source's contents and mapped at the same virtual addresses.
+ *
+ *   The walk mirrors up_addrenv_destroy():  every final level page table the
+ *   source has under its static tables is visited, and every page it maps is
+ *   duplicated.  So the cost is the size of the process, not the size of its
+ *   address space -- but it is an eager copy, with no copy-on-write, so
+ *   forking needs as much free page memory as the parent occupies.
+ *
+ * Input Parameters:
+ *   src  - The address environment to be duplicated.
+ *   dest - The location to receive the duplicate.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int up_addrenv_fork(const arch_addrenv_t *src, arch_addrenv_t *dest)
+{
+  uintptr_t *sptprev;
+  uintptr_t *sptlast;
+  uintptr_t *dptprev;
+  uintptr_t *dptlast;
+  uintptr_t  paddr;
+  uintptr_t  vaddr;
+  uintptr_t  pgvaddr;
+  size_t     pgsize;
+  int        i;
+  int        j;
+  int        ret;
+
+  DEBUGASSERT(src && dest);
+
+  memset(dest, 0, sizeof(arch_addrenv_t));
+
+  /* Give the child its own static page tables and kernel mappings */
+
+  ret = create_spgtables(dest);
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to create static page tables\n");
+      goto errout;
+    }
+
+  ret = copy_kernel_mappings(dest);
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to copy kernel mappings to new environment\n");
+      goto errout;
+    }
+
+  /* The duplicate lives at the same virtual addresses as the original --
+   * that is what makes it a copy rather than merely a similar process -- so
+   * the bases are carried over unchanged.
+   */
+
+  dest->textvbase = src->textvbase;
+  dest->datavbase = src->datavbase;
+  dest->heapvbase = src->heapvbase;
+  dest->heapsize  = src->heapsize;
+  dest->satp      = mmu_satp_reg(dest->spgtables[0], 0);
+
+  /* Make sure the source's page tables are visible before walking them */
+
+  UP_ISB();
+  UP_DMB();
+
+  vaddr   = ARCH_ADDRENV_VBASE;
+  pgsize  = mmu_get_region_size(ARCH_SPGTS);
+  sptprev = (uintptr_t *)riscv_pgvaddr(src->spgtables[ARCH_SPGTS - 1]);
+  dptprev = (uintptr_t *)riscv_pgvaddr(dest->spgtables[ARCH_SPGTS - 1]);
+
+  if (sptprev == NULL || dptprev == NULL)
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
+
+  i = (ARCH_SPGTS < 2) ? vaddr / pgsize : 0;
+  for (; i < ENTRIES_PER_PGT; i++, vaddr += pgsize)
+    {
+      sptlast = (uintptr_t *)riscv_pgvaddr(mmu_pte_to_paddr(sptprev[i]));
+      if (sptlast == NULL)
+        {
+          continue;
+        }
+
+      /* Hook the static tables up for this address, then give the child its
+       * own final level page table here.
+       */
+
+      map_spgtables(dest, vaddr);
+
+      paddr = mm_pgalloc(1);
+      if (!paddr)
+        {
+          ret = -ENOMEM;
+          goto errout;
+        }
+
+      riscv_pgwipe(paddr);
+      mmu_ln_setentry(ARCH_SPGTS, (uintptr_t)dptprev, paddr, vaddr,
+                      MMU_UPGT_FLAGS);
+      dptlast = (uintptr_t *)riscv_pgvaddr(paddr);
+
+      for (j = 0; j < ENTRIES_PER_PGT; j++)
+        {
+          uintptr_t pgvaddr_src;
+          uintptr_t srcpage;
+          uintptr_t destpage;
+
+          srcpage = mmu_pte_to_paddr(sptlast[j]);
+          if (!srcpage)
+            {
+              continue;
+            }
+
+          pgvaddr = vaddr + ((uintptr_t)j << MM_PGSHIFT);
+
+          if (vaddr_is_shm(pgvaddr))
+            {
+              /* Shared memory stays shared across fork().  Map the very same
+               * page; up_addrenv_destroy() knows not to free SHM pages, so
+               * this does not hand one page to the allocator twice.
+               */
+
+              dptlast[j] = sptlast[j];
+              continue;
+            }
+
+          destpage = mm_pgalloc(1);
+          if (!destpage)
+            {
+              ret = -ENOMEM;
+              goto errout;
+            }
+
+          pgvaddr_src = riscv_pgvaddr(srcpage);
+          memcpy((void *)riscv_pgvaddr(destpage), (const void *)pgvaddr_src,
+                 MM_PGSIZE);
+
+          mmu_ln_setentry(ARCH_SPGTS + 1, (uintptr_t)dptlast, destpage,
+                          pgvaddr,
+                          vaddr_is_text(src, pgvaddr) ? MMU_UTEXT_FLAGS
+                                                      : MMU_UDATA_FLAGS);
+        }
+    }
+
+  UP_ISB();
+  UP_DMB();
+
+  return OK;
+
+errout:
+  up_addrenv_destroy(dest);
+  return ret;
+}
+#endif /* CONFIG_ARCH_HAVE_FORK */
 
 /****************************************************************************
  * Name: up_addrenv_destroy
