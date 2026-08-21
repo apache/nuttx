@@ -36,6 +36,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdbool.h>
 
 #include <arch/csr.h>
 #include <arch/chip/irq.h>
