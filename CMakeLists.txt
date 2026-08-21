@@ -674,6 +674,13 @@ process_all_directory_romfs()
 # Get linker script to use
 get_property(ldscript GLOBAL PROPERTY LD_SCRIPT)
 
+# Iterable sections "zero-touch" mode: the central INSERT fragment must come
+# BEFORE the board script on the linker command line (GNU ld requirement for
+# INSERT AFTER), see include/nuttx/linker/common-insert.ld.
+if(CONFIG_ITERABLE_SECTIONS_LINKER_INSERT)
+  list(PREPEND ldscript ${NUTTX_DIR}/include/nuttx/linker/common-insert.ld)
+endif()
+
 # Pre-compile linker script(s)
 if(NOT CONFIG_ARCH_SIM)
   set(ldscript_tmp_list)

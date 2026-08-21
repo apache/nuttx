@@ -2957,6 +2957,30 @@ config DEBUG_LINK_MAP
 		and debugging magic section games, and for seeing which
 		pieces of code get eliminated with DEBUG_OPT_UNUSED_SECTIONS.
 
+config ITERABLE_SECTIONS_LINKER_INSERT
+	bool "Collect iterable sections through a supplementary INSERT linker script"
+	default n
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Zero-touch mode for link-time iterable sections
+		(include/nuttx/iterable_sections.h): instead of the board linker
+		script including <nuttx/linker/common-rom.ld>, the supplementary
+		script <nuttx/linker/common-insert.ld> is added before the board
+		script (Make and CMake builds) and supplements it with GNU ld
+		"INSERT AFTER .text"; subsystems add their ITERABLE_SECTION blocks
+		to that central file.
+
+		Leave disabled for boards whose linker script already includes
+		the common fragments.
+
+		Constraints: requires GNU ld, a board script with an output
+		section named ".text", and a MEMORY layout where the ROM/flash
+		region is the first region compatible with read-only sections
+		(GNU ld assigns INSERTed sections to a region by attribute
+		matching, in declaration order).  Boards declaring a generic
+		rwx region at a lower address first (e.g. ITCM at 0x0) must use
+		the common-rom.ld include instead.
+
 config CCACHE
 	bool "Use ccache"
 	default n
