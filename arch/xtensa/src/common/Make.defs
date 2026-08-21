@@ -39,6 +39,11 @@ CMN_CSRCS += xtensa_modifyreg8.c xtensa_modifyreg16.c xtensa_modifyreg32.c
 CMN_CSRCS += xtensa_mpu.c xtensa_nputs.c xtensa_oneshot.c xtensa_perf.c
 CMN_CSRCS += xtensa_releasestack.c xtensa_registerdump.c
 CMN_CSRCS += xtensa_swint.c xtensa_stackframe.c
+
+ifneq ($(CONFIG_ARCH_HAVE_FORK)$(CONFIG_ARCH_HAVE_VFORK),)
+CMN_CSRCS += xtensa_fork.c
+endif
+
 CMN_CSRCS += xtensa_saveusercontext.c
 CMN_CSRCS += xtensa_usestack.c xtensa_tcbinfo.c
 

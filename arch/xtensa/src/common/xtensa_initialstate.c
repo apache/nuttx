@@ -78,7 +78,7 @@ void up_initial_state(struct tcb_s *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
 #ifdef CONFIG_SCHED_THREAD_LOCAL
-  const uint32_t base = ALIGN_UP((uint32_t)&_rodata_reserved_align,
+  const uintptr_t base = ALIGN_UP((uintptr_t)&_rodata_reserved_align,
                                  TCB_SIZE);
 #endif
 
@@ -107,9 +107,24 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Initialize the context registers to stack top */
 
-  xcp->regs = (void *)((uint32_t)tcb->stack_base_ptr +
-                                 tcb->adj_stack_size -
-                                 XCPTCONTEXT_SIZE);
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  if (xcp->kstack != NULL)
+    {
+      /* Put the frame on the thread's kernel stack rather than its user
+       * stack.  It is restored in kernel context, and leaving it in user
+       * memory means the thread can scribble on the register set it is
+       * about to be started with.
+       */
+
+      xcp->regs = (void *)((uintptr_t)xcp->ktopstk - XCPTCONTEXT_SIZE);
+    }
+  else
+#endif
+    {
+      xcp->regs = (void *)((uintptr_t)tcb->stack_base_ptr +
+                                     tcb->adj_stack_size -
+                                     XCPTCONTEXT_SIZE);
+    }
 
   /* Initialize the xcp registers */
 
@@ -117,9 +132,9 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Set initial values of registers */
 
-  xcp->regs[REG_PC] = (uint32_t)tcb->start;           /* Task entrypoint                */
-  xcp->regs[REG_A0] = 0;                              /* To terminate GDB backtrace     */
-  xcp->regs[REG_A1] = (uint32_t)tcb->stack_base_ptr + /* Physical top of stack frame    */
+  xcp->regs[REG_PC] = (uintptr_t)tcb->start;           /* Task entrypoint             */
+  xcp->regs[REG_A0] = 0;                               /* To terminate GDB backtrace  */
+  xcp->regs[REG_A1] = (uintptr_t)tcb->stack_base_ptr + /* Physical top of stack frame */
                                 tcb->adj_stack_size;
 
   /* Each task access the TLS variables using the THREADPTR register plus an
@@ -228,8 +243,8 @@ void up_initial_state(struct tcb_s *tcb)
 #ifdef CONFIG_SCHED_THREAD_LOCAL
   xcp->regs[REG_THREADPTR] = (uintptr_t)tcb->stack_alloc_ptr +
                               sizeof(struct tls_info_s) -
-                             ((uint32_t)&_thread_local_start -
-                              (uint32_t)&_rodata_reserved_start) - base;
+                             ((uintptr_t)&_thread_local_start -
+                              (uintptr_t)&_rodata_reserved_start) - base;
 #endif
 
   /* Set initial PS to int level 0, user mode. */
