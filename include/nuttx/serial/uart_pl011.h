@@ -29,28 +29,48 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_UART_PL011
+#include <nuttx/serial/serial.h>>
+
+#include <stdint.h>
+#include <stdbool.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+struct pl011_regs;        /* Forward opaque type declaration */
+
+/* Configuration settings for a PL011 UART port */
+
+struct pl011_config
+{
+  FAR volatile struct pl011_regs *baseaddr;
+  uint32_t sys_clk_freq;
+  unsigned int irq_num;
+  uint32_t baud_rate;
+  bool sbsa;
+};
+
+/* PL011 UART device */
+
+struct pl011_uart_port_s
+{
+  struct uart_dev_s uart;     /* Underlying UART device */
+  struct pl011_config config; /* Configuration settings */
+  spinlock_t lock;            /* Lock */
+  bool inited;                /* Initialization tracker */
+};
+
+/****************************************************************************
  * Public Functions Prototypes
  ****************************************************************************/
 
-void pl011_earlyserialinit(void);
+void pl011_dev_init(FAR struct pl011_uart_port_s *priv);
 
-void pl011_serialinit(void);
+void pl011_putc(struct uart_dev_s *dev, int ch);
 
-#ifdef CONFIG_UART_PL011_PLATFORMIF
-/* If needed, implement platform specific process such as enabling pl011
- * to reduce power consumption.
- */
-
-int pl011_platform_setup(uint32_t base);
-int pl011_platform_shutdown(uint32_t base);
-#endif  /* CONFIG_UART_PL011_PLATFORMIF */
-
-#endif  /* CONFIG_UART_PL011 */
 #endif /* __INCLUDE_NUTTX_SERIAL_UART_PL011_H */
