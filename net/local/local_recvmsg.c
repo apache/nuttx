@@ -255,6 +255,7 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   if (flags & MSG_DONTWAIT)
     {
       int data_len = 0;
+
       ret = file_ioctl(&conn->lc_infile, FIONREAD, &data_len);
       if (ret < 0)
         {

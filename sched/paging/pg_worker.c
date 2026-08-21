@@ -148,6 +148,7 @@ static void pg_callback(FAR struct tcb_s *tcb, int result)
        */
 
       int priority = g_pftcb->sched_priority;
+
       if (htcb && priority < htcb->sched_priority)
         {
           priority = htcb->sched_priority;
@@ -266,6 +267,7 @@ static inline bool pg_dequeue(void)
                    */
 
                   int priority = g_pftcb->sched_priority;
+
                   if (priority < CONFIG_PAGING_DEFPRIO)
                     {
                       priority = CONFIG_PAGING_DEFPRIO;
@@ -447,6 +449,7 @@ static inline bool pg_startfill(void)
 static inline void pg_alldone(void)
 {
   FAR struct tcb_s *wtcb = this_task();
+
   g_pftcb = NULL;
   pginfo("New worker priority. %d->%d\n",
          wtcb->sched_priority, CONFIG_PAGING_DEFPRIO);

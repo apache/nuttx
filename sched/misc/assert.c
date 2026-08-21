@@ -210,6 +210,7 @@ static void dump_stackinfo(FAR const char *tag, uintptr_t sp,
   if (sp != 0)
     {
       uintptr_t top = base + size;
+
       _alert("    sp: %p\n", (FAR void *)sp);
 
       /* Get more information */
@@ -252,6 +253,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
   int cpu = rtcb->cpu;
 #else
   int cpu = this_cpu();
+
   UNUSED(cpu);
 #endif
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
@@ -477,6 +479,7 @@ static void dump_backtrace(FAR struct tcb_s *tcb, FAR void *arg)
 static void dump_fdlist(FAR struct tcb_s *tcb, FAR void *arg)
 {
   FAR struct fdlist *list = &tcb->group->tg_fdlist;
+
   fdlist_dump(list);
 }
 #endif

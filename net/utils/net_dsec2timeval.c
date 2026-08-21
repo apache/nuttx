@@ -57,6 +57,7 @@
 void net_dsec2timeval(uint16_t dsec, FAR struct timeval *tv)
 {
   uint16_t remainder;
+
   tv->tv_sec  = dsec / DSEC_PER_SEC;
   remainder   = dsec - tv->tv_sec * DSEC_PER_SEC;
   tv->tv_usec = remainder * USEC_PER_DSEC;

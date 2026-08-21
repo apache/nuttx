@@ -430,9 +430,9 @@ static uint16_t ipv6_fragout_getunfraginfo(FAR struct iob_s *iob,
 
           case NEXT_ROUTING_EH:
           case NEXT_HOPBYBOT_EH:
-              unfraglen = delta + extlen;
-              *hdroff = delta;
-              *hdrtype = exthdr->nxthdr;
+            unfraglen = delta + extlen;
+            *hdroff = delta;
+            *hdrtype = exthdr->nxthdr;
         }
 
       payload += extlen;

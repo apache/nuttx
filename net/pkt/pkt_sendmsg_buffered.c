@@ -329,6 +329,7 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
     {
       FAR struct eth_hdr_s *ethhdr =
           (FAR struct eth_hdr_s *)(IOB_DATA(iob) - NET_LL_HDRLEN(dev));
+
       memcpy(ethhdr->dest, addr->sll_addr, ETHER_ADDR_LEN);
       memcpy(ethhdr->src, &dev->d_mac.ether, ETHER_ADDR_LEN);
       ethhdr->type = addr->sll_protocol;

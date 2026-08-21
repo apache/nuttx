@@ -113,6 +113,7 @@ volatile clock_t g_cpuload_total;
 static void cpuload_callback(wdparm_t arg)
 {
   FAR struct wdog_s *wdog = (FAR struct wdog_s *)arg;
+
   nxsched_process_cpuload_ticks(CPULOAD_SAMPLING_PERIOD);
   wd_start_next(wdog, CPULOAD_SAMPLING_PERIOD, cpuload_callback, arg);
 }
@@ -196,6 +197,7 @@ void nxsched_process_cpuload_ticks(clock_t ticks)
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
       FAR struct tcb_s *rtcb = current_task(i);
+
       nxsched_process_taskload_ticks(rtcb, ticks);
     }
 }

@@ -923,7 +923,7 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
   retries = 5;
   do
     {
-       nxsched_usleep(5 * 5000);
+      nxsched_usleep(5 * 5000);
     }
   while ((wm8904_readreg(priv, WM8904_INT_STATUS) &
          WM8904_FLL_LOCK_INT) != 0 ||
@@ -1139,154 +1139,160 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
 
   switch (caps->ac_type)
     {
-    case AUDIO_TYPE_FEATURE:
-      audinfo("  AUDIO_TYPE_FEATURE\n");
+      case AUDIO_TYPE_FEATURE:
+        audinfo("  AUDIO_TYPE_FEATURE\n");
 
-      /* Process based on Feature Unit */
+        /* Process based on Feature Unit */
 
-      switch (caps->ac_format.hw)
-        {
-#ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
-        case AUDIO_FU_VOLUME:
+        switch (caps->ac_format.hw)
           {
-            /* Set the volume */
-
-            uint16_t volume = caps->ac_controls.hw[0];
-            audinfo("    Volume: %d\n", volume);
-
-            if (volume >= 0 && volume <= 1000)
+#ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
+            case AUDIO_FU_VOLUME:
               {
-                /* Scale the volume setting to the range {0.. 63} */
+                /* Set the volume */
 
-                wm8904_setvolume(priv, (63 * volume / 1000), priv->mute);
+                uint16_t volume = caps->ac_controls.hw[0];
+
+                audinfo("    Volume: %d\n", volume);
+
+                if (volume >= 0 && volume <= 1000)
+                  {
+                    /* Scale the volume setting to the range {0.. 63} */
+
+                    wm8904_setvolume(priv, (63 * volume / 1000), priv->mute);
+                  }
+                else
+                  {
+                    ret = -EDOM;
+                  }
               }
-            else
-              {
-                ret = -EDOM;
-              }
-           }
-          break;
+              break;
 #endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
 
 #ifndef CONFIG_AUDIO_EXCLUDE_BALANCE
-        case AUDIO_FU_BALANCE:
-          {
-            /* Set the balance.  The percentage level * 10 (0-1000) is in the
-             * ac_controls.b[0] parameter.
-             */
-
-            uint16_t balance = caps->ac_controls.hw[0];
-            audinfo("    Balance: %d\n", balance);
-
-            if (balance >= 0 && balance <= 1000)
+            case AUDIO_FU_BALANCE:
               {
-                /* Scale the balance setting to the range {0..(b16ONE - 1)} */
+                /* Set the balance.  The percentage level * 10 (0-1000)
+                 * is in the ac_controls.b[0] parameter.
+                 */
 
-                priv->balance = (balance * (b16ONE - 1)) / 1000;
-                wm8904_setvolume(priv, priv->volume, priv->mute);
+                uint16_t balance = caps->ac_controls.hw[0];
+
+                audinfo("    Balance: %d\n", balance);
+
+                if (balance >= 0 && balance <= 1000)
+                  {
+                    /* Scale the balance setting to the range
+                     * {0..(b16ONE - 1)}
+                     */
+
+                    priv->balance = (balance * (b16ONE - 1)) / 1000;
+                    wm8904_setvolume(priv, priv->volume, priv->mute);
+                  }
+                else
+                  {
+                    ret = -EDOM;
+                  }
               }
-            else
-              {
-                ret = -EDOM;
-              }
-           }
-          break;
+              break;
 #endif /* CONFIG_AUDIO_EXCLUDE_BALANCE */
 
 #ifndef CONFIG_AUDIO_EXCLUDE_TONE
-        case AUDIO_FU_BASS:
-          {
-            /* Set the bass.  The percentage level (0-100) is in the
-             * ac_controls.b[0] parameter.
-             */
-
-            uint8_t bass = caps->ac_controls.b[0];
-            audinfo("    Bass: %d\n", bass);
-
-            if (bass <= 100)
+            case AUDIO_FU_BASS:
               {
-                wm8904_setbass(priv, bass);
-              }
-            else
-              {
-                ret = -EDOM;
-              }
-          }
-          break;
+                /* Set the bass.  The percentage level (0-100) is in the
+                 * ac_controls.b[0] parameter.
+                 */
 
-        case AUDIO_FU_TREBLE:
-          {
-            /* Set the treble.  The percentage level (0-100) is in the
-             * ac_controls.b[0] parameter.
-             */
+                uint8_t bass = caps->ac_controls.b[0];
 
-            uint8_t treble = caps->ac_controls.b[0];
-            audinfo("    Treble: %d\n", treble);
+                audinfo("    Bass: %d\n", bass);
 
-            if (treble <= 100)
-              {
-                wm8904_settreble(priv, treble);
+                if (bass <= 100)
+                  {
+                    wm8904_setbass(priv, bass);
+                  }
+                else
+                  {
+                    ret = -EDOM;
+                  }
               }
-            else
+              break;
+
+            case AUDIO_FU_TREBLE:
               {
-                ret = -EDOM;
+                /* Set the treble.  The percentage level (0-100) is in the
+                 * ac_controls.b[0] parameter.
+                 */
+
+                uint8_t treble = caps->ac_controls.b[0];
+
+                audinfo("    Treble: %d\n", treble);
+
+                if (treble <= 100)
+                  {
+                    wm8904_settreble(priv, treble);
+                  }
+                else
+                  {
+                    ret = -EDOM;
+                  }
               }
-          }
-          break;
+              break;
 #endif /* CONFIG_AUDIO_EXCLUDE_TONE */
 
-        default:
-          auderr("    ERROR: Unrecognized feature unit\n");
-          ret = -ENOTTY;
-          break;
+            default:
+              auderr("    ERROR: Unrecognized feature unit\n");
+              ret = -ENOTTY;
+              break;
+          }
+        break;
+
+      case AUDIO_TYPE_OUTPUT:
+        {
+          audinfo("  AUDIO_TYPE_OUTPUT:\n");
+          audinfo("    Number of channels: %u\n", caps->ac_channels);
+          audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
+          audinfo("    Sample width:       %u\n", caps->ac_controls.b[2]);
+
+          /* Verify that all of the requested values are supported */
+
+          ret = -ERANGE;
+          if (caps->ac_channels != 1 && caps->ac_channels != 2)
+            {
+              auderr("ERROR: Unsupported number of channels: %d\n",
+                     caps->ac_channels);
+              break;
+            }
+
+          if (caps->ac_controls.b[2] != 8 && caps->ac_controls.b[2] != 16)
+            {
+              auderr("ERROR: Unsupported bits per sample: %d\n",
+                     caps->ac_controls.b[2]);
+              break;
+            }
+
+          /* Save the current stream configuration */
+
+          priv->samprate  = caps->ac_controls.hw[0];
+          priv->nchannels = caps->ac_channels;
+          priv->bpsamp    = caps->ac_controls.b[2];
+
+          /* Reconfigure the FLL to support the resulting number or channels,
+           * bits per sample, and bitrate.
+           */
+
+          wm8904_setdatawidth(priv);
+          wm8904_setbitrate(priv);
+          wm8904_writereg(priv, WM8904_DUMMY, 0x55aa);
+
+          wm8904_clock_analysis(&priv->dev, "AUDIO_TYPE_OUTPUT");
+          ret = OK;
         }
         break;
 
-    case AUDIO_TYPE_OUTPUT:
-      {
-        audinfo("  AUDIO_TYPE_OUTPUT:\n");
-        audinfo("    Number of channels: %u\n", caps->ac_channels);
-        audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
-        audinfo("    Sample width:       %u\n", caps->ac_controls.b[2]);
-
-        /* Verify that all of the requested values are supported */
-
-        ret = -ERANGE;
-        if (caps->ac_channels != 1 && caps->ac_channels != 2)
-          {
-            auderr("ERROR: Unsupported number of channels: %d\n",
-                   caps->ac_channels);
-            break;
-          }
-
-        if (caps->ac_controls.b[2] != 8 && caps->ac_controls.b[2] != 16)
-          {
-            auderr("ERROR: Unsupported bits per sample: %d\n",
-                   caps->ac_controls.b[2]);
-            break;
-          }
-
-        /* Save the current stream configuration */
-
-        priv->samprate  = caps->ac_controls.hw[0];
-        priv->nchannels = caps->ac_channels;
-        priv->bpsamp    = caps->ac_controls.b[2];
-
-        /* Reconfigure the FLL to support the resulting number or channels,
-         * bits per sample, and bitrate.
-         */
-
-        wm8904_setdatawidth(priv);
-        wm8904_setbitrate(priv);
-        wm8904_writereg(priv, WM8904_DUMMY, 0x55aa);
-
-        wm8904_clock_analysis(&priv->dev, "AUDIO_TYPE_OUTPUT");
-        ret = OK;
-      }
-      break;
-
-    case AUDIO_TYPE_PROCESSING:
-      break;
+      case AUDIO_TYPE_PROCESSING:
+        break;
     }
 
   return ret;
@@ -1824,7 +1830,7 @@ static int wm8904_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
         }
         break;
 
-       /* Report our preferred buffer size and quantity */
+        /* Report our preferred buffer size and quantity */
 
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
       case AUDIOIOC_GETBUFFERINFO:
@@ -1880,7 +1886,7 @@ static int wm8904_reserve(FAR struct audio_lowerhalf_s *dev)
       /* Initialize the session context */
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-     *session           = NULL;
+      *session           = NULL;
 #endif
       priv->inflight    = 0;
       priv->running     = false;

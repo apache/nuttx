@@ -163,6 +163,7 @@ FAR struct pkt_conn_s *pkt_active(FAR struct net_driver_s *dev)
   if (dev->d_lltype == NET_LL_ETHERNET || dev->d_lltype == NET_LL_IEEE80211)
     {
       FAR struct eth_hdr_s *ethhdr = NETLLBUF;
+
       ethertype = ethhdr->type;
     }
 

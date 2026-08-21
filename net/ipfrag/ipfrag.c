@@ -1124,6 +1124,7 @@ void ip_frag_stop(FAR struct net_driver_s *dev)
   while (entry != NULL)
     {
       FAR struct ip_fragsnode_s *node = (FAR struct ip_fragsnode_s *)entry;
+
       entrynext = sq_next(entry);
 
       if (dev == node->dev)
@@ -1179,6 +1180,7 @@ void ip_frag_remallfrags(void)
   while (entry != NULL)
     {
       FAR struct ip_fragsnode_s *node = (FAR struct ip_fragsnode_s *)entry;
+
       entrynext = sq_next(entry);
 
       if (node->frags != NULL)

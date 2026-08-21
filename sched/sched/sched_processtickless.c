@@ -106,6 +106,7 @@ int up_timer_gettick(FAR clock_t *ticks)
 {
   struct timespec ts;
   int ret;
+
   ret = up_timer_gettime(&ts);
   *ticks = clock_time2ticks_floor(&ts);
   return ret;
@@ -116,6 +117,7 @@ int up_timer_gettick(FAR clock_t *ticks)
 int up_alarm_tick_start(clock_t ticks)
 {
   struct timespec ts;
+
   clock_ticks2time(&ts, ticks);
   return up_alarm_start(&ts);
 }
@@ -125,6 +127,7 @@ int up_alarm_tick_start(clock_t ticks)
 int up_timer_tick_start(clock_t ticks)
 {
   struct timespec ts;
+
   clock_ticks2time(&ts, ticks);
   return up_timer_start(&ts);
 }
@@ -213,6 +216,7 @@ static clock_t nxsched_cpu_scheduler(int cpu, clock_t ticks,
   if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
     {
       FAR struct sporadic_s *sporadic = rtcb->sporadic;
+
       DEBUGASSERT(sporadic);
 
       /* Save the last time that the scheduler ran.  This time was saved
@@ -385,6 +389,7 @@ void nxsched_process_timer(void)
   /* Workaround for SCHED_RR, see the note. */
 
   irqstate_t flags = enter_critical_section();
+
   nxsched_process_event(ticks, true);
   leave_critical_section(flags);
 #  endif

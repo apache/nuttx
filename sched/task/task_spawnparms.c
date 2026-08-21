@@ -161,6 +161,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
   if ((attr->flags & POSIX_SPAWN_SETSIGMASK) != 0u)
     {
       FAR struct tcb_s *tcb = nxsched_get_tcb(pid);
+
       if (tcb)
         {
           tcb->sigprocmask = attr->sigmask;

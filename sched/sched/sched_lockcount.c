@@ -55,5 +55,6 @@
 int sched_lockcount(void)
 {
   FAR struct tcb_s *rtcb = this_task();
+
   return (int)rtcb->lockcount;
 }

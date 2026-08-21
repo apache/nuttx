@@ -154,6 +154,7 @@ static void nxsched_critmon_cpuload(FAR struct tcb_s *tcb, clock_t current,
                                     clock_t tick)
 {
   int i;
+
   UNUSED(i);
 
   /* Update the cpuload of the thread ready to be suspended */
@@ -374,6 +375,7 @@ void nxsched_switch_critmon(FAR struct tcb_s *from, FAR struct tcb_s *to)
 
 #ifdef CONFIG_SCHED_CPULOAD_CRITMONITOR
   clock_t tick = elapsed * CLOCKS_PER_SEC / perf_getfreq();
+
   nxsched_critmon_cpuload(from, current, tick);
   to->run_start = current;
 #endif
@@ -465,6 +467,7 @@ void nxsched_update_critmon(FAR struct tcb_s *tcb)
     {
 #ifdef CONFIG_SCHED_CPULOAD_CRITMONITOR
       clock_t tick = elapsed * CLOCKS_PER_SEC / perf_getfreq();
+
       nxsched_process_taskload_ticks(tcb, tick);
 #endif
 

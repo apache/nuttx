@@ -114,6 +114,7 @@ static int bluetooth_sockif_alloc(FAR struct socket *psock)
    */
 
   FAR struct bluetooth_conn_s *conn = bluetooth_conn_alloc();
+
   if (conn == NULL)
     {
       /* Failed to reserve a connection structure */
@@ -321,6 +322,7 @@ static int bluetooth_bind(FAR struct socket *psock,
       case BTPROTO_L2CAP:
         {
           FAR const struct sockaddr_l2 *iaddr;
+
           if (addrlen < sizeof(struct sockaddr_l2))
             {
               nerr("ERROR: Invalid address length: %zu < %zu\n",
@@ -335,6 +337,7 @@ static int bluetooth_bind(FAR struct socket *psock,
       case BTPROTO_HCI:
         {
           FAR const struct sockaddr_hci *hciaddr;
+
           if (addrlen < sizeof(struct sockaddr_hci))
             {
               nerr("ERROR: Invalid address length: %zu < %zu\n",

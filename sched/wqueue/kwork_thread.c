@@ -211,7 +211,7 @@ static int work_thread(int argc, FAR char *argv[])
        * so ourselves, and (2) there will be no changes to the work queue
        */
 
-       flags = spin_lock_irqsave_nopreempt(&wqueue->lock);
+      flags = spin_lock_irqsave_nopreempt(&wqueue->lock);
 
       /* If the wqueue timer is expired and non-active, it indicates that
        * there might be expired work in the pending queue.
@@ -373,6 +373,7 @@ void work_timer_expired(wdparm_t arg)
    */
 
   FAR struct kwork_wqueue_s *wq = (FAR struct kwork_wqueue_s *)arg;
+
   nxsem_post(&wq->sem);
 }
 

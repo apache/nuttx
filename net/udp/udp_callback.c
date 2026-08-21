@@ -275,7 +275,7 @@ net_dataevent(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn,
        * read-ahead buffers to retain the data -- drop the packet.
        */
 
-     ninfo("Dropped %d bytes\n", dev->d_len);
+      ninfo("Dropped %d bytes\n", dev->d_len);
 
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.udp.drop++;

@@ -101,7 +101,7 @@ int local_fifo_read(FAR struct file *filep, FAR uint8_t *buf,
            * has closed the FIFO.
            */
 
-            break;
+          break;
         }
       else
         {

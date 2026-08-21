@@ -824,12 +824,12 @@ static int es8311_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
         if (caps->ac_subtype == AUDIO_TYPE_QUERY)
           {
-              /* The types of audio units we implement */
+            /* The types of audio units we implement */
 
-              caps->ac_controls.b[0] = AUDIO_TYPE_INPUT |
-                                       AUDIO_TYPE_OUTPUT |
-                                       AUDIO_TYPE_FEATURE;
-              break;
+            caps->ac_controls.b[0] = AUDIO_TYPE_INPUT |
+                                     AUDIO_TYPE_OUTPUT |
+                                     AUDIO_TYPE_FEATURE;
+            break;
           }
 
         caps->ac_controls.b[0] = AUDIO_SUBFMT_END;
@@ -844,16 +844,16 @@ static int es8311_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
         if (caps->ac_subtype == AUDIO_TYPE_QUERY)
           {
-              /* Report the Sample rates we support */
+            /* Report the Sample rates we support */
 
-              /* 8kHz is hardware dependent */
+            /* 8kHz is hardware dependent */
 
-              caps->ac_controls.hw[0] =
-                AUDIO_SAMP_RATE_11K | AUDIO_SAMP_RATE_16K |
-                AUDIO_SAMP_RATE_22K | AUDIO_SAMP_RATE_32K |
-                AUDIO_SAMP_RATE_44K | AUDIO_SAMP_RATE_48K;
-              break;
-         }
+            caps->ac_controls.hw[0] =
+              AUDIO_SAMP_RATE_11K | AUDIO_SAMP_RATE_16K |
+              AUDIO_SAMP_RATE_22K | AUDIO_SAMP_RATE_32K |
+              AUDIO_SAMP_RATE_44K | AUDIO_SAMP_RATE_48K;
+            break;
+          }
 
         break;
 
@@ -863,14 +863,14 @@ static int es8311_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
         if (caps->ac_subtype == AUDIO_TYPE_QUERY)
           {
-              /* Report supported input sample rates */
+            /* Report supported input sample rates */
 
-              caps->ac_controls.hw[0] =
-                AUDIO_SAMP_RATE_11K | AUDIO_SAMP_RATE_16K |
-                AUDIO_SAMP_RATE_22K | AUDIO_SAMP_RATE_32K |
-                AUDIO_SAMP_RATE_44K | AUDIO_SAMP_RATE_48K;
-              break;
-         }
+            caps->ac_controls.hw[0] =
+              AUDIO_SAMP_RATE_11K | AUDIO_SAMP_RATE_16K |
+              AUDIO_SAMP_RATE_22K | AUDIO_SAMP_RATE_32K |
+              AUDIO_SAMP_RATE_44K | AUDIO_SAMP_RATE_48K;
+            break;
+          }
 
         break;
 
@@ -948,159 +948,162 @@ static int es8311_configure(FAR struct audio_lowerhalf_s *dev,
 
   switch (caps->ac_type)
     {
-    case AUDIO_TYPE_FEATURE:
-      audinfo("  AUDIO_TYPE_FEATURE\n");
+      case AUDIO_TYPE_FEATURE:
+        audinfo("  AUDIO_TYPE_FEATURE\n");
 
-      /* Process based on Feature Unit */
+        /* Process based on Feature Unit */
 
-      switch (caps->ac_format.hw)
-        {
-#ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
-        case AUDIO_FU_VOLUME:
+        switch (caps->ac_format.hw)
           {
-            /* Set the volume */
-
-            uint16_t volume = caps->ac_controls.hw[0];
-            audinfo("    Volume: %d\n", volume);
-
-            if (volume >= 0 && volume <= 1000)
+#ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
+            case AUDIO_FU_VOLUME:
               {
-                es8311_setvolume(priv, priv->audio_mode, volume);
-                break;
-              }
+                /* Set the volume */
 
-            ret = -EDOM;
-          }
-          break;
+                uint16_t volume = caps->ac_controls.hw[0];
+
+                audinfo("    Volume: %d\n", volume);
+
+                if (volume >= 0 && volume <= 1000)
+                  {
+                    es8311_setvolume(priv, priv->audio_mode, volume);
+                    break;
+                  }
+
+                ret = -EDOM;
+              }
+              break;
 #endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
 
 #ifndef CONFIG_AUDIO_EXCLUDE_MUTE
-        case AUDIO_FU_MUTE:
-          {
-            /* Mute/Unmute */
+            case AUDIO_FU_MUTE:
+              {
+                /* Mute/Unmute */
 
-            bool mute = (bool)caps->ac_controls.hw[0];
-            audinfo("    Mute: %d\n", mute);
+                bool mute = (bool)caps->ac_controls.hw[0];
 
-            es8311_setmute(priv, ES_MODULE_DAC, mute);
-          }
-          break;
+                audinfo("    Mute: %d\n", mute);
+
+                es8311_setmute(priv, ES_MODULE_DAC, mute);
+              }
+              break;
 #endif /* CONFIG_AUDIO_EXCLUDE_MUTE */
 
-        case AUDIO_FU_INP_GAIN:
-          {
-            /* Set the mic gain */
+            case AUDIO_FU_INP_GAIN:
+              {
+                /* Set the mic gain */
 
-            uint32_t mic_gain = caps->ac_controls.hw[0];
-            audinfo("    Mic gain: %" PRIu32 "\n", mic_gain);
+                uint32_t mic_gain = caps->ac_controls.hw[0];
 
-            es8311_setmicgain(priv, mic_gain);
+                audinfo("    Mic gain: %" PRIu32 "\n", mic_gain);
+
+                es8311_setmicgain(priv, mic_gain);
+              }
+              break;
+
+            default:
+              auderr("    Unrecognized feature unit\n");
+              ret = -ENOTTY;
+              break;
           }
-          break;
+        break;
 
-        default:
-          auderr("    Unrecognized feature unit\n");
-          ret = -ENOTTY;
-          break;
+      case AUDIO_TYPE_OUTPUT:
+        {
+          audinfo("  AUDIO_TYPE_OUTPUT:\n");
+          audinfo("    Number of channels: %u\n", caps->ac_channels);
+          audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
+          audinfo("    Sample width:       %u\n", caps->ac_controls.b[2]);
+
+          /* Verify that all of the requested values are supported */
+
+          ret = -ERANGE;
+
+          /* The codec can take stereo audio and play only one channel */
+
+          if (caps->ac_channels != 1 && caps->ac_channels != 2)
+            {
+              auderr("Unsupported number of channels: %d\n",
+                     caps->ac_channels);
+              break;
+            }
+
+          if (caps->ac_controls.b[2] != 16 &&
+              caps->ac_controls.b[2] != 24 &&
+              caps->ac_controls.b[2] != 32)
+            {
+              auderr("Unsupported bits per sample: %d\n",
+                     caps->ac_controls.b[2]);
+              break;
+            }
+
+          es8311_audio_output(priv);
+          es8311_reset(priv);
+
+          /* Save the current stream configuration */
+
+          priv->samprate  = caps->ac_controls.hw[0];
+          priv->bpsamp    = caps->ac_controls.b[2];
+
+          ret = es8311_setsamplerate(priv) == -ENOTTY ? OK : ret;
+          if (ret < 0)
+            {
+              break;
+            }
+
+          ret = es8311_setbitspersample(priv) == -ENOTTY ? OK : ret;
         }
         break;
 
-    case AUDIO_TYPE_OUTPUT:
-      {
-        audinfo("  AUDIO_TYPE_OUTPUT:\n");
-        audinfo("    Number of channels: %u\n", caps->ac_channels);
-        audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
-        audinfo("    Sample width:       %u\n", caps->ac_controls.b[2]);
+      case AUDIO_TYPE_INPUT:
+        {
+          audinfo("  AUDIO_TYPE_INPUT:\n");
+          audinfo("    Number of channels: %u\n", caps->ac_channels);
+          audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
+          audinfo("    Sample width:       %u\n", caps->ac_controls.b[2]);
 
-        /* Verify that all of the requested values are supported */
+          /* Verify that all of the requested values are supported */
 
-        ret = -ERANGE;
+          ret = -ERANGE;
 
-        /* The codec can take stereo audio and play only one channel */
+          /* The codec can take stereo audio and play only one channel */
 
-        if (caps->ac_channels != 1 && caps->ac_channels != 2)
-          {
-            auderr("Unsupported number of channels: %d\n",
-                   caps->ac_channels);
-            break;
-          }
+          if (caps->ac_channels != 1 && caps->ac_channels != 2)
+            {
+              auderr("Unsupported number of channels: %d\n",
+                     caps->ac_channels);
+              break;
+            }
 
-        if (caps->ac_controls.b[2] != 16 &&
-            caps->ac_controls.b[2] != 24 &&
-            caps->ac_controls.b[2] != 32)
-          {
-            auderr("Unsupported bits per sample: %d\n",
-                   caps->ac_controls.b[2]);
-            break;
-          }
+          if (caps->ac_controls.b[2] != 16 &&
+              caps->ac_controls.b[2] != 24 &&
+              caps->ac_controls.b[2] != 32)
+            {
+              auderr("Unsupported bits per sample: %d\n",
+                     caps->ac_controls.b[2]);
+              break;
+            }
 
-        es8311_audio_output(priv);
-        es8311_reset(priv);
+          es8311_audio_input(priv);
+          es8311_reset(priv);
 
-        /* Save the current stream configuration */
+          /* Save the current stream configuration */
 
-        priv->samprate  = caps->ac_controls.hw[0];
-        priv->bpsamp    = caps->ac_controls.b[2];
+          priv->samprate  = caps->ac_controls.hw[0];
+          priv->bpsamp    = caps->ac_controls.b[2];
 
-        ret = es8311_setsamplerate(priv) == -ENOTTY ? OK : ret;
-        if (ret < 0)
-          {
-            break;
-          }
+          ret = es8311_setsamplerate(priv) == -ENOTTY ? OK : ret;
+          if (ret != OK)
+            {
+              break;
+            }
 
-        ret = es8311_setbitspersample(priv) == -ENOTTY ? OK : ret;
-      }
-      break;
+          ret = es8311_setbitspersample(priv) == -ENOTTY ? OK : ret;
+        }
+        break;
 
-    case AUDIO_TYPE_INPUT:
-      {
-        audinfo("  AUDIO_TYPE_INPUT:\n");
-        audinfo("    Number of channels: %u\n", caps->ac_channels);
-        audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
-        audinfo("    Sample width:       %u\n", caps->ac_controls.b[2]);
-
-        /* Verify that all of the requested values are supported */
-
-        ret = -ERANGE;
-
-        /* The codec can take stereo audio and play only one channel */
-
-        if (caps->ac_channels != 1 && caps->ac_channels != 2)
-          {
-            auderr("Unsupported number of channels: %d\n",
-                   caps->ac_channels);
-            break;
-          }
-
-        if (caps->ac_controls.b[2] != 16 &&
-            caps->ac_controls.b[2] != 24 &&
-            caps->ac_controls.b[2] != 32)
-          {
-            auderr("Unsupported bits per sample: %d\n",
-                   caps->ac_controls.b[2]);
-            break;
-          }
-
-        es8311_audio_input(priv);
-        es8311_reset(priv);
-
-        /* Save the current stream configuration */
-
-        priv->samprate  = caps->ac_controls.hw[0];
-        priv->bpsamp    = caps->ac_controls.b[2];
-
-        ret = es8311_setsamplerate(priv) == -ENOTTY ? OK : ret;
-        if (ret != OK)
-          {
-            break;
-          }
-
-        ret = es8311_setbitspersample(priv) == -ENOTTY ? OK : ret;
-      }
-      break;
-
-    case AUDIO_TYPE_PROCESSING:
-      break;
+      case AUDIO_TYPE_PROCESSING:
+        break;
     }
 
   return ret;
@@ -1865,7 +1868,7 @@ static int es8311_reserve(FAR struct audio_lowerhalf_s *dev)
       /* Initialize the session context */
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-     *session           = NULL;
+      *session           = NULL;
 #endif /* CONFIG_AUDIO_MULTI_SESSION */
       priv->inflight    = 0;
       priv->running     = false;

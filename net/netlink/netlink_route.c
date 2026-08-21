@@ -1381,7 +1381,7 @@ ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
 
         if (req->gen.rtgen_family == AF_INET6)
           {
-             ret = netlink_get_neighborlist(handle, AF_INET6, req);
+            ret = netlink_get_neighborlist(handle, AF_INET6, req);
           }
         else
 #endif
@@ -1612,7 +1612,7 @@ void netlink_route_notify(FAR const void *route, int type, int domain)
                                     type, NULL);
       group = RTNLGRP_IPV6_ROUTE;
     }
-    else
+  else
 #endif
     {
       nwarn("netlink_route_notify unknown type %d domain %d\n",

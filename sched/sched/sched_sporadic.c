@@ -731,6 +731,7 @@ FAR struct replenishment_s *
       for (i = 0; i < sporadic->max_repl; i++)
         {
           FAR struct replenishment_s *tmp = &sporadic->replenishments[i];
+
           if ((tmp->flags & SPORADIC_FLAG_ALLOCED) == 0)
             {
               repl        = tmp;

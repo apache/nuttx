@@ -1003,6 +1003,7 @@ int udp_connect(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
           if (net_ipv6addr_cmp(addr, g_ipv6_unspecaddr))
             {
               struct in6_addr loopback_sin6_addr = IN6ADDR_LOOPBACK_INIT;
+
               net_ipv6addr_copy(conn->u.ipv6.raddr,
                                 loopback_sin6_addr.s6_addr16);
             }

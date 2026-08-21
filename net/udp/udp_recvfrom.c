@@ -225,6 +225,7 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
       if (conn->timestamp)
         {
           struct timespec timestamp;
+
           recvlen = iob_copyout((FAR uint8_t *)&timestamp, iob,
                                 sizeof(struct timespec), offset);
           DEBUGASSERT(recvlen == sizeof(struct timespec));

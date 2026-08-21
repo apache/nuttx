@@ -144,6 +144,7 @@ ipv6_nat_inbound_tcp(FAR struct ipv6_hdr_s *ipv6, FAR struct tcp_hdr_s *tcp,
                  ipv6_nat_inbound_entry_find(IP_PROTO_TCP,
                                              external_ip, *external_port,
                                              peer_ip, *peer_port, true);
+
   if (!entry)
     {
       return NULL;
@@ -679,6 +680,7 @@ int ipv6_nat_outbound(FAR struct net_driver_s *dev,
     {
       FAR ipv6_nat_entry_t *entry =
           ipv6_nat_outbound_internal(dev, ipv6, manip_type);
+
       if (manip_type == NAT_MANIP_SRC && !entry)
         {
           /* Outbound entry creation failed, should have entry. */

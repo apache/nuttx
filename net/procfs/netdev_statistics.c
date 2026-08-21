@@ -215,6 +215,7 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
       case NET_LL_IEEE80211:
         {
           char hwaddr[20];
+
           len += snprintf(&netfile->line[len], NET_LINELEN - len,
                           "%s\tLink encap:Ethernet HWaddr %s",
                           dev->d_ifname,

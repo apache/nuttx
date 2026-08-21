@@ -425,7 +425,7 @@ int local_set_pollthreshold(FAR struct local_conn_s *conn,
   ret = local_set_pollinthreshold(&conn->lc_infile, threshold);
   if (ret > 0)
     {
-       ret = local_set_polloutthreshold(&conn->lc_outfile, threshold);
+      ret = local_set_polloutthreshold(&conn->lc_outfile, threshold);
     }
 
   return ret;

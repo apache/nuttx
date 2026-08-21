@@ -50,6 +50,7 @@
 FAR void *group_zalloc(FAR struct task_group_s *group, size_t nbytes)
 {
   FAR void *mem = group_malloc(group, nbytes);
+
   if (mem)
     {
       memset(mem, 0, nbytes);
