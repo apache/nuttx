@@ -43,6 +43,7 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
+#include <nuttx/spinlock.h>
 
 #include "fs_heap.h"
 
@@ -110,6 +111,11 @@ const struct procfs_operations g_iobinfo_operations =
   NULL,           /* rewinddir */
   iobinfo_stat    /* stat */
 };
+
+#ifdef CONFIG_IOB_OWNER_TRACKING
+extern volatile spinlock_t g_iob_lock;
+extern FAR struct iob_s *g_iob_committed;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -222,6 +228,44 @@ static ssize_t iobinfo_read(FAR struct file *filep, FAR char *buffer,
   copysize   = procfs_memcpy(iobfile->line, linesize, buffer, buflen,
                              &offset);
   totalsize += copysize;
+
+#ifdef CONFIG_IOB_OWNER_TRACKING
+  buffer   += copysize;
+  buflen   -= copysize;
+
+  irqstate_t flags = spin_lock_irqsave(&g_iob_lock);
+
+  for (unsigned int i = 0; i < CONFIG_IOB_NBUFFERS; i++)
+    {
+      FAR struct iob_s *iob = iob_get_iob_by_index(i);
+
+      /* Print: PID (or -1 for ISR) and flags in hex */
+
+      if (iob->io_owner_flags != 0)
+        {
+          linesize = procfs_snprintf(iobfile->line, IOBINFO_LINELEN,
+                                    "%02d %p -> %p pid=%d flags=0x%02x\n", i,
+                                    iob, iob->io_flink,
+                                    (int)iob->io_owner_pid,
+                                    (unsigned)iob->io_owner_flags);
+        }
+      else
+        {
+          linesize = procfs_snprintf(iobfile->line, IOBINFO_LINELEN,
+                                    "%02d %p -> %p Free\n", i,
+                                    iob, iob->io_flink);
+        }
+
+      copysize = procfs_memcpy(iobfile->line, linesize,
+                               buffer, buflen, &offset);
+      totalsize += copysize;
+
+      buffer   += copysize;
+      buflen   -= copysize;
+    }
+
+  spin_unlock_irqrestore(&g_iob_lock, flags);
+#endif
 
   /* Update the file offset */
 
