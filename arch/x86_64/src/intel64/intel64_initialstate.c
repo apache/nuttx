@@ -80,7 +80,7 @@ void up_initial_state(struct tcb_s *tcb)
 
   if (tcb->pid == IDLE_PROCESS_ID)
     {
-      char *stack_ptr = (char *)(g_idle_topstack[0] -
+      char *stack_ptr = (char *)(x86_64_idle_topstack(0) -
                                  CONFIG_IDLETHREAD_STACKSIZE);
       tcb->stack_alloc_ptr = stack_ptr;
       tcb->stack_base_ptr  = stack_ptr;

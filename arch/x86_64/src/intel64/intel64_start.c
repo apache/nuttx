@@ -163,10 +163,10 @@ void __nxstart(void)
 #ifdef CONFIG_SCHED_THREAD_LOCAL
   /* Make sure that FS_BASE is not null */
 
-  write_fsbase((uintptr_t)(g_idle_topstack[0] -
-                           CONFIG_IDLETHREAD_STACKSIZE +
-                           sizeof(struct tls_info_s) +
-                           (_END_TBSS - _START_TDATA)));
+  write_fsbase(x86_64_idle_topstack(0) -
+               CONFIG_IDLETHREAD_STACKSIZE +
+               sizeof(struct tls_info_s) +
+               (_END_TBSS - _START_TDATA));
 #endif
 
   /* Low-level, pre-OS initialization */

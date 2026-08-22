@@ -61,12 +61,10 @@
 #define X86_XSAVE_XCOMPBC_OFFSET   520
 #define X86_XSAVE_RESERVED0_OFFSET 528
 
-/* Memory Map: _sbss is the start of the BSS region (see ld.script) _ebss is
- * the end of the BSS region (see ld.script). The idle task stack starts at
- * the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.  The IDLE thread
- * is the thread that the system boots on and, eventually, becomes the idle,
- * do nothing task that runs only when there is nothing else to run.  The
- * heap continues from there until the end of memory.  See g_idle_topstack below.
+/* Memory Map: _sbss is the start of the BSS region, _ebss is the end of the
+ * BSS region.  One idle task stack is reserved for each configured CPU.  The
+ * heap follows the reserved idle stack area and continues until the end of
+ * memory.  See g_idle_topstack below.
  */
 
 /****************************************************************************
@@ -87,7 +85,7 @@
 	.global    __nxstart                       /* __nxstart is defined elsewhere */
 	.global    nx_start                        /* nx_start is defined elsewhere */
 	.global    x86_64_ap_boot                  /* x86_64_ap_boot is defined elsewhere */
-	.global    g_idle_topstack                 /* The end of the idle stack, the start of the heap */
+	.global    g_idle_topstack                 /* Top of the CPU0 idle stack */
 	.global    g_mb_info_struct
 	.global    g_mb_magic
 	.global    g_cpu_count
@@ -413,10 +411,10 @@ ap_start:
 
 	/* Setup AP stack */
 	movabs  $g_idle_topstack,    %rbx
-	movl    %edi, %eax
-	imul    $8, %eax, %eax
-	add     %rax, %rbx
 	mov     (%rbx),   %rsp
+	movl    %edi, %eax
+	imulq   $CONFIG_IDLETHREAD_STACKSIZE, %rax, %rax
+	add     %rax, %rsp
 
 	/* Move initial RSP below IDLE TCB regs */
 	sub     $XCPTCONTEXT_SIZE, %rsp
