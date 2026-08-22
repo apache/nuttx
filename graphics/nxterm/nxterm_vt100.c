@@ -51,6 +51,10 @@ struct vt100_sequence_s
  ****************************************************************************/
 
 static int nxterm_erasetoeol(FAR struct nxterm_state_s *priv);
+static int nxterm_cursorleft(FAR struct nxterm_state_s *priv);
+static int nxterm_cursorright(FAR struct nxterm_state_s *priv);
+static enum nxterm_vt100state_e
+  nxterm_sgr(FAR struct nxterm_state_s *priv, int seqsize);
 
 /****************************************************************************
  * Private Data
@@ -63,12 +67,23 @@ static int nxterm_erasetoeol(FAR struct nxterm_state_s *priv);
 /* <esc>[K is the VT100 command erases to the end of the line. */
 
 static const char g_erasetoeol[] = VT100_CLEAREOL;
+static const char g_cursorleft[] =
+{
+  ASCII_ESC, '[', 'D'
+};
+
+static const char g_cursorright[] =
+{
+  ASCII_ESC, '[', 'C'
+};
 
 /* The list of all VT100 sequences supported by the emulation */
 
 static const struct vt100_sequence_s g_vt100sequences[] =
 {
   {g_erasetoeol, nxterm_erasetoeol, sizeof(g_erasetoeol)},
+  {g_cursorleft, nxterm_cursorleft, sizeof(g_cursorleft)},
+  {g_cursorright, nxterm_cursorright, sizeof(g_cursorright)},
   {NULL, NULL, 0}
 };
 
@@ -92,9 +107,131 @@ static const struct vt100_sequence_s g_vt100sequences[] =
 
 static int nxterm_erasetoeol(FAR struct nxterm_state_s *priv)
 {
-  /* Does nothing yet (other than consume the sequence) */
+  struct nxgl_rect_s bounds;
+  uint16_t dst;
+  uint16_t src;
+
+  bounds.pt1.x = priv->fpos.x;
+  bounds.pt1.y = priv->fpos.y;
+  bounds.pt2.x = priv->wndo.wsize.w - 1;
+  bounds.pt2.y = priv->fpos.y + priv->fheight - 1;
+
+  priv->ops->fill(priv, &bounds, priv->wndo.wcolor);
+
+  /* Discard every saved glyph covered by the erased portion of this line.
+   * Keeping the bitmap list in sync is necessary for later redraw events.
+   */
+
+  for (src = 0, dst = 0; src < priv->nchars; src++)
+    {
+      if (priv->bm[src].pos.y == priv->fpos.y &&
+          priv->bm[src].pos.x >= priv->fpos.x)
+        {
+          continue;
+        }
+
+      if (dst != src)
+        {
+          priv->bm[dst] = priv->bm[src];
+        }
+
+      dst++;
+    }
+
+  priv->nchars = dst;
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: nxterm_cursorleft
+ ****************************************************************************/
+
+static int nxterm_cursorleft(FAR struct nxterm_state_s *priv)
+{
+  nxgl_coord_t x = priv->spwidth;
+  uint16_t i;
+
+  /* Find the closest saved glyph to the left on the current line. */
+
+  for (i = 0; i < priv->nchars; i++)
+    {
+      if (priv->bm[i].pos.y == priv->fpos.y &&
+          priv->bm[i].pos.x < priv->fpos.x &&
+          priv->bm[i].pos.x > x)
+        {
+          x = priv->bm[i].pos.x;
+        }
+    }
+
+  priv->fpos.x = x;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: nxterm_cursorright
+ ****************************************************************************/
+
+static int nxterm_cursorright(FAR struct nxterm_state_s *priv)
+{
+  FAR const struct nxfonts_glyph_s *glyph;
+  int i;
+
+  /* Prefer the most recently rendered glyph when editing has overdrawn a
+   * character at the same location.
+   */
+
+  for (i = priv->nchars - 1; i >= 0; i--)
+    {
+      if (priv->bm[i].pos.y == priv->fpos.y &&
+          priv->bm[i].pos.x == priv->fpos.x)
+        {
+          glyph = nxf_cache_getglyph(priv->fcache, priv->bm[i].code);
+          priv->fpos.x += glyph == NULL ? priv->spwidth : glyph->width;
+          break;
+        }
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: nxterm_sgr
+ *
+ * Description:
+ *   Consume an ANSI Select Graphic Rendition sequence.  NxTerm does not
+ *   currently support changing text attributes, but consuming the sequence
+ *   prevents unsupported color controls from being rendered as text.
+ *
+ ****************************************************************************/
+
+static enum nxterm_vt100state_e
+nxterm_sgr(FAR struct nxterm_state_s *priv, int seqsize)
+{
+  int i;
+
+  if (seqsize < 2 || priv->seq[0] != ASCII_ESC || priv->seq[1] != '[')
+    {
+      return VT100_ABORT;
+    }
+
+  for (i = 2; i < seqsize; i++)
+    {
+      char ch = priv->seq[i];
+
+      if (ch == 'm')
+        {
+          priv->nseq = 0;
+          return VT100_PROCESSED;
+        }
+
+      if ((ch < '0' || ch > '9') && ch != ';' && ch != ':')
+        {
+          return VT100_ABORT;
+        }
+    }
+
+  return seqsize < VT100_MAX_SEQUENCE ? VT100_CONSUMED : VT100_ABORT;
 }
 
 /****************************************************************************
@@ -191,6 +328,16 @@ static enum nxterm_vt100state_e nxterm_vt100seq(
        */
 
       return VT100_CONSUMED;
+    }
+
+  /* SGR parameters are variable-length.  Consume these sequences even
+   * though NxTerm does not yet implement their visual attributes.
+   */
+
+  ret = nxterm_sgr(priv, seqsize);
+  if (ret != VT100_ABORT)
+    {
+      return ret;
     }
 
   /* We get here on a failure.  The buffer sequence is not part of any

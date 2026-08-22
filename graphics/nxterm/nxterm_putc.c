@@ -51,10 +51,11 @@ void nxterm_putc(FAR struct nxterm_state_s *priv, uint8_t ch)
   FAR const struct nxterm_bitmap_s *bm;
   int lineheight;
 
-  /* Ignore carriage returns */
+  /* Handle carriage returns */
 
   if (ch == '\r')
     {
+      priv->fpos.x = priv->spwidth;
       return;
     }
 
@@ -170,5 +171,22 @@ void nxterm_showcursor(FAR struct nxterm_state_s *priv)
 
 void nxterm_hidecursor(FAR struct nxterm_state_s *priv)
 {
+  int i;
+
   nxterm_hidechar(priv, &priv->cursor);
+
+  /* A cursor moved into an existing line is drawn on top of a saved glyph.
+   * Restore that glyph after erasing the cursor so command-line editing does
+   * not leave a hole in the displayed text.
+   */
+
+  for (i = priv->nchars - 1; i >= 0; i--)
+    {
+      if (priv->bm[i].pos.x == priv->cursor.pos.x &&
+          priv->bm[i].pos.y == priv->cursor.pos.y)
+        {
+          nxterm_fillchar(priv, NULL, &priv->bm[i]);
+          break;
+        }
+    }
 }
