@@ -152,6 +152,19 @@ Configuration
   See :ref:`file-permission` for the VFS helpers, mount-crossing
   traverse rules, and testing notes.
 
+Flat Build Trust Boundary
+=========================
+
+This credential model is a DAC layer for cooperating tasks, not a
+process-isolation boundary.  On ``CONFIG_BUILD_FLAT``, kernel and
+application share one address space, so other code can write
+``tg_euid`` / ``tg_egid`` (and other fields in ``task_group_s``)
+directly and bypass the syscall checks.  Protected and kernel builds
+enforce the boundary via the syscall interface.
+
+The same caveat applies to ``chroot()``'s ``euid == 0`` gate and
+``tg_root``; see :ref:`chroot`.
+
 Pseudo-Filesystem Ownership
 ===========================
 

@@ -98,6 +98,49 @@ static inline void group_inherit_identity(FAR struct task_group_s *group)
 #  define group_inherit_identity(group)
 #endif
 
+#ifdef CONFIG_FS_CHROOT
+/****************************************************************************
+ * Name: group_inherit_chroot
+ *
+ * Description:
+ *   Inherit the chroot jail from the parent task group.
+ *
+ ****************************************************************************/
+
+static int group_inherit_chroot(FAR struct task_group_s *group)
+{
+  FAR struct tcb_s *rtcb          = this_task();
+  FAR struct task_group_s *rgroup = rtcb->group;
+
+  DEBUGASSERT(group != NULL && rgroup != NULL);
+
+  if (rgroup->tg_root == NULL)
+    {
+      return OK;
+    }
+
+  group->tg_root = rgroup->tg_root;
+  inode_addref(group->tg_root);
+
+  if (rgroup->tg_rootrel != NULL)
+    {
+      size_t len = strlen(rgroup->tg_rootrel) + 1;
+
+      group->tg_rootrel = kmm_malloc(len);
+      if (group->tg_rootrel == NULL)
+        {
+          inode_release(group->tg_root);
+          group->tg_root = NULL;
+          return -ENOMEM;
+        }
+
+      memcpy(group->tg_rootrel, rgroup->tg_rootrel, len);
+    }
+
+  return OK;
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -190,6 +233,19 @@ int group_allocate(FAR struct tcb_s *tcb, uint8_t ttype)
 
   group_inherit_identity(group);
 
+#ifdef CONFIG_FS_CHROOT
+  /* Kernel threads share g_kthread_group and must not inherit a user jail */
+
+  if (ttype != TCB_FLAG_TTYPE_KERNEL)
+    {
+      ret = group_inherit_chroot(group);
+      if (ret < 0)
+        {
+          goto errout_with_group;
+        }
+    }
+#endif
+
   /* Initialize file descriptors for the TCB */
 
   fdlist_init(&group->tg_fdlist);
@@ -219,6 +275,20 @@ int group_allocate(FAR struct tcb_s *tcb, uint8_t ttype)
   return OK;
 
 errout_with_group:
+#ifdef CONFIG_FS_CHROOT
+  if (group->tg_root != NULL)
+    {
+      inode_release(group->tg_root);
+      group->tg_root = NULL;
+    }
+
+  if (group->tg_rootrel != NULL)
+    {
+      kmm_free(group->tg_rootrel);
+      group->tg_rootrel = NULL;
+    }
+#endif
+
   kmm_free(group);
   return ret;
 }

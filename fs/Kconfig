@@ -94,6 +94,18 @@ config PSEUDOFS_ATTRIBUTES
 		Enable support for attributes(e.g. mode, uid, gid and time)
 		in the pseudo file system.
 
+config FS_CHROOT
+	bool "chroot() filesystem jail"
+	default n
+	---help---
+		Enable POSIX chroot().  Each task group may pin a directory as its
+		root; absolute path lookup starts there so the group cannot see
+		files outside that tree.  This is a filesystem jail, not a
+		container (open file descriptors that already point outside the
+		tree remain usable).  Nested chroot() is relative to the current
+		root.  When SCHED_USER_IDENTITY is enabled, chroot() requires
+		effective UID 0.
+
 config FS_PERMISSION
 	bool "Enable UNIX Filesystem Permission Support"
 	default n
