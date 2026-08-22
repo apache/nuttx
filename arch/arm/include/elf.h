@@ -206,6 +206,24 @@
 #define R_ARM_THM_TLS_DESCSEQ16  129           /* Thumb16 */
 #define R_ARM_THM_TLS_DESCSEQ32  130           /* Thumb32 */
 
+/* FDPIC relocations.
+ *
+ * Under the FDPIC ABI each PT_LOAD segment is placed independently, so a
+ * function pointer cannot be a bare code address: it has to carry the data
+ * base its callee will need.  A "function descriptor" is that pair, and
+ * these relocations are how the loader is asked to build and reference
+ * them.  Values are from the ARM FDPIC ABI as implemented by binutils
+ * (include/elf/arm.h).
+ */
+
+#define R_ARM_GOTFUNCDESC        161           /* Data      GOT entry holding a descriptor */
+#define R_ARM_GOTOFFFUNCDESC     162           /* Data      GOT-relative descriptor */
+#define R_ARM_FUNCDESC           163           /* Data      Address of a descriptor */
+#define R_ARM_FUNCDESC_VALUE     164           /* Data      The descriptor itself: {code, GOT} */
+#define R_ARM_TLS_GD32_FDPIC     165           /* Data */
+#define R_ARM_TLS_LDM32_FDPIC    166           /* Data */
+#define R_ARM_TLS_IE32_FDPIC     167           /* Data */
+
 /* Processor specific values for the Phdr p_type field.  */
 
 #define PT_ARM_EXIDX             (PT_LOPROC + 1) /* ARM unwind segment.  */
@@ -247,9 +265,71 @@
 #define DT_ARM_PREEMPTMAP        0x70000002
 #define DT_ARM_RESERVED2         0x70000003
 
+/* Loader state the FDPIC relocations need but a relocation cannot carry:
+ * the object's data base, and a descriptor pool cursor that has to survive
+ * from one relocation to the next.
+ */
+
+/* The relocations that only an FDPIC object may use.  Seeing one in an
+ * object whose OS/ABI byte does not say FDPIC means the marker was lost.
+ */
+
+#define ARCH_ELF_RELOC_ISFDPIC(t)                    \
+  ((t) == R_ARM_FUNCDESC || (t) == R_ARM_FUNCDESC_VALUE)
+
+#define ARCH_ELFDATA             1
+
+#define ARCH_ELFDATA_INIT(d, l)          \
+  do                                     \
+    {                                    \
+      (d)->fdpic    = (l)->fdpic;        \
+      (d)->gotaddr  = (l)->gotaddr;      \
+      (d)->descpool = (l)->descpool;     \
+      (d)->ndesc    = (l)->ndesc;        \
+      (d)->usedesc  = (l)->usedesc;      \
+    }                                    \
+  while (0)
+
+#define ARCH_ELFDATA_FINI(d, l)          \
+  do                                     \
+    {                                    \
+      (l)->usedesc = (d)->usedesc;       \
+    }                                    \
+  while (0)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/* An FDPIC function pointer: the code, plus the data base to enter it
+ * with.
+ */
+
+struct arm_fdpic_desc_s
+{
+  uintptr_t entry;         /* Address of the code */
+  uintptr_t got;           /* Data base to install before branching */
+};
+
+struct arch_elfdata_s
+{
+  uint8_t   fdpic;         /* The object is an FDPIC one */
+  uintptr_t gotaddr;       /* DT_PLTGOT: this object's data base */
+  uintptr_t descpool;      /* Base of the descriptor pool */
+  uint16_t  ndesc;         /* Capacity, in descriptors */
+  uint16_t  usedesc;       /* Next free slot */
+  uint8_t   symisdesc;     /* Symbol value is a descriptor, not code */
+  uint8_t   pltrel;        /* Relocation comes from DT_JMPREL, so the word
+                            * it overwrites is a lazy binding stub and not
+                            * an addend
+                            */
+};
+
+typedef struct arch_elfdata_s arch_elfdata_t;
+
+#endif /* __ASSEMBLY__ */
 
 typedef struct __EIT_entry
 {

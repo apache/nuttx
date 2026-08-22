@@ -35,6 +35,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/binfmt/binfmt.h>
+#include <nuttx/fdpic.h>
 #include <nuttx/kmalloc.h>
 
 #include "binfmt.h"
@@ -98,6 +99,10 @@ static int elf_loadbinary(FAR struct binary_s *binp,
                           int nexports)
 {
   struct mod_loadinfo_s loadinfo;
+#ifdef CONFIG_BINFMT_CONSTRUCTORS
+  FAR void (**array)(void);
+  int i;
+#endif
   Elf_Sym sym;
   int ret;
 
@@ -252,6 +257,8 @@ static int elf_loadbinary(FAR struct binary_s *binp,
 
   binp->mod.textalloc = (FAR void *)loadinfo.textalloc;
   binp->mod.dataalloc = (FAR void *)loadinfo.datastart;
+  binp->mod.fdpic     = loadinfo.fdpic;
+  binp->mod.gotaddr   = loadinfo.gotaddr;
 #  ifdef CONFIG_BINFMT_CONSTRUCTORS
   binp->mod.initarr = loadinfo.initarr;
   binp->mod.finiarr = loadinfo.finiarr;
@@ -270,7 +277,7 @@ static int elf_loadbinary(FAR struct binary_s *binp,
 
   libelf_dumpentrypt(&loadinfo);
 #ifdef CONFIG_PIC
-  if (loadinfo.gotindex >= 0)
+  if (loadinfo.gotindex >= 0 || loadinfo.fdpic)
     {
       FAR struct dspace_s *dspaces = kmm_zalloc(sizeof(struct dspace_s));
 
@@ -280,10 +287,73 @@ static int elf_loadbinary(FAR struct binary_s *binp,
           goto errout_with_load;
         }
 
-      dspaces->region = (FAR void *)loadinfo.shdr[loadinfo.gotindex].sh_addr;
+      /* An FDPIC object names its data base in DT_PLTGOT, which the
+       * loader has already translated; everything else has it as the
+       * address of the .got section.  The two are the same idea reached
+       * by different routes, and both are what up_initial_state() puts
+       * in the PIC base register when the task starts.
+       */
+
+      if (loadinfo.fdpic)
+        {
+          dspaces->region = (FAR void *)loadinfo.gotaddr;
+        }
+      else
+        {
+          dspaces->region =
+            (FAR void *)loadinfo.shdr[loadinfo.gotindex].sh_addr;
+        }
+
       dspaces->crefs = 1;
       binp->picbase = (FAR void *)dspaces;
     }
+#endif
+
+#ifdef CONFIG_BINFMT_CONSTRUCTORS
+  /* Run the constructors.  This is the last thing the load does, so a
+   * global is initialized by the time the module's main() can see it, and
+   * nothing that could still fail runs after a constructor has.
+   *
+   * They run here rather than on the spawned task because there is no hook
+   * to enter it with, and because it is where libelf_insert() runs them for
+   * a module that arrives through dlopen().  An FDPIC object's reach its
+   * globals through its own data base, which this task does not carry.
+   */
+
+  array = (FAR void (**)(void))loadinfo.preiarr;
+  for (i = 0; i < loadinfo.nprei; i++)
+    {
+      if (loadinfo.fdpic)
+        {
+          fdpic_invoke((uintptr_t)array[i], 0, loadinfo.gotaddr);
+        }
+      else
+        {
+          array[i]();
+        }
+    }
+
+  array = (FAR void (**)(void))loadinfo.initarr;
+  for (i = 0; i < loadinfo.ninit; i++)
+    {
+      if (loadinfo.fdpic)
+        {
+          fdpic_invoke((uintptr_t)array[i], 0, loadinfo.gotaddr);
+        }
+      else
+        {
+          array[i]();
+        }
+    }
+#endif
+
+#ifdef HAVE_LIBC_ELF_PIN
+  /* Past the last thing that can fail, so the module owns the pin now: it
+   * is given back when the task that runs the module exits.
+   */
+
+  binp->mod.pinfile = loadinfo.pinfile;
+  loadinfo.pinfile  = NULL;
 #endif
 
   libelf_uninitialize(&loadinfo);

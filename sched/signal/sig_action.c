@@ -38,6 +38,10 @@
 #include <nuttx/signal.h>
 #include <nuttx/spinlock.h>
 
+#ifdef CONFIG_FDPIC
+#  include <nuttx/fdpic.h>
+#endif
+
 #include "sched/sched.h"
 #include "group/group.h"
 #include "signal/signal.h"
@@ -325,6 +329,27 @@ int nxsig_action(int signo, FAR const struct sigaction *act,
 #endif
 
   handler = act->sa_handler;
+
+#ifdef CONFIG_FDPIC
+  /* An FDPIC module passes the address of a function descriptor, not a code
+   * address.  Resolve it here, in the innermost common code, so a module
+   * that calls sigaction() directly is covered as well as one that goes
+   * through signal(), and each exactly once -- signal() passes its argument
+   * through unresolved for that reason.
+   *
+   * The dispositions have to be excluded by hand.  SIG_ERR, SIG_IGN,
+   * SIG_DFL and SIG_HOLD are the small integers -1, 0, 1 and 2 rather than
+   * addresses, and fdpic_callback() only declines to dereference NULL.
+   * sa_handler and sa_sigaction are a union, so this one resolution serves
+   * both handler forms.
+   */
+
+  if (handler != SIG_ERR && handler != SIG_IGN && handler != SIG_DFL &&
+      handler != SIG_HOLD)
+    {
+      handler = (_sa_handler_t)fdpic_callback((FAR void *)handler);
+    }
+#endif
 
 #ifdef CONFIG_SIG_DEFAULT
   /* If the caller is setting the handler to SIG_DFL, then we need to

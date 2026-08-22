@@ -34,6 +34,7 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/symtab.h>
+#include <nuttx/fdpic.h>
 #include <nuttx/lib/elf.h>
 
 #include "libc.h"
@@ -92,8 +93,8 @@ extern int nglobals;
  *
  ****************************************************************************/
 
-static int libelf_symname(FAR struct mod_loadinfo_s *loadinfo,
-                          FAR const Elf_Sym *sym, Elf_Off sh_offset)
+int libelf_symname(FAR struct mod_loadinfo_s *loadinfo,
+                   FAR const Elf_Sym *sym, Elf_Off sh_offset)
 {
   FAR uint8_t *buffer;
   off_t  offset;
@@ -107,7 +108,14 @@ static int libelf_symname(FAR struct mod_loadinfo_s *loadinfo,
 
   if (sym->st_name == 0)
     {
-      berr("ERROR: Symbol has no name\n");
+      /* Not a failure.  A section symbol has no name, and
+       * libelf_findsymbol() walks the whole table looking for optional
+       * symbols such as nx_stacksize, so it meets these routinely and
+       * checks for -ESRCH itself.  Reporting it as an error buries the
+       * real diagnostics on every module load.
+       */
+
+      binfo("Symbol has no name\n");
       return -ESRCH;
     }
 
@@ -538,6 +546,27 @@ int libelf_insertsymtab(FAR struct module_s *modp,
                       strdup((FAR char *)loadinfo->iobuffer);
                   symbol[j].sym_value =
                       (FAR const void *)(uintptr_t)sym[i].st_value;
+
+                  /* Publish a function as a descriptor, not a code
+                   * address, so dlsym() returns something an FDPIC caller
+                   * can branch through.  Only here does st_info still say
+                   * which symbols are functions.
+                   */
+
+                  if (loadinfo->fdpic &&
+                      ELF_ST_TYPE(sym[i].st_info) == STT_FUNC &&
+                      loadinfo->usedesc < loadinfo->ndesc)
+                    {
+                      FAR struct fdpic_desc_s *desc =
+                        (FAR struct fdpic_desc_s *)loadinfo->descpool +
+                        loadinfo->usedesc++;
+
+                      desc->entry = sym[i].st_value;
+                      desc->got   = loadinfo->gotaddr;
+
+                      symbol[j].sym_value = (FAR const void *)desc;
+                    }
+
                   j++;
                 }
             }
