@@ -5666,8 +5666,9 @@ static void stm32_hwinitialize(struct stm32_usbdev_s *priv)
 
   /* Enable the interrupts in the INTMSK */
 
-  regval = (OTG_GINT_RXFLVL | OTG_GINT_USBSUSP | OTG_GINT_ENUMDNE |
-            OTG_GINT_IEP | OTG_GINT_OEP | OTG_GINT_USBRST);
+  regval = (OTG_GINT_RXFLVL | OTG_GINT_USBSUSP | OTG_GINT_WKUP |
+            OTG_GINT_ENUMDNE | OTG_GINT_IEP | OTG_GINT_OEP |
+            OTG_GINT_USBRST);
 
 #  ifdef CONFIG_USBDEV_ISOCHRONOUS
   regval |= (OTG_GINT_IISOIXFR | OTG_GINT_IISOOXFR);
