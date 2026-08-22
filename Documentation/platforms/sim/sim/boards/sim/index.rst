@@ -802,6 +802,32 @@ mtdrwb
 This is the ``apps/examples/mtdrwb`` test using a MTD RAM driver to simulate the
 FLASH part.
 
+mw
+--
+
+Microwindows demo configuration using virtual keyboard (event mode),
+touchscreen, and X11-based framebuffer.
+
+Build the demo with::
+
+   cd nuttx
+   tools/configure.sh sim:mw
+   make -j$(nproc)
+
+This builds a host-native ``./nuttx`` binary that opens an X11 window.
+Keyboard input goes to the window that has focus; touch events are generated
+by mouse clicks within the window.  See
+:doc:`/applications/graphics/microwindows/index` for Microwindows details.
+
+nanox
+-----
+
+Nano-X configuration that boots directly into the ``nxterm`` terminal
+emulator, using virtual keyboard (event mode), touchscreen, and
+framebuffer.  Typing ``nanoxcalc`` inside the terminal starts the
+calculator demo.  See :doc:`/applications/graphics/microwindows/index`
+for details.
+
 nettest
 -------
 
