@@ -610,6 +610,7 @@ struct rfb_servercuttext_s
 #define RFB_ENCODING_COPYRECT  1  /* CopyRect */
 #define RFB_ENCODING_RRE       2  /* RRE */
 #define RFB_ENCODING_HEXTILE   5  /* Hextile */
+#define RFB_ENCODING_TRLE     15  /* TRLE */
 #define RFB_ENCODING_ZRLE     16  /* ZRLE */
 #define RFB_ENCODING_CURSOR  -239 /* Cursor pseudo-encoding */
 #define RFB_ENCODING_DESKTOP -223 /* DesktopSize pseudo-encoding */
