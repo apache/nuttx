@@ -240,6 +240,8 @@ static const char *g_white_prefix[] =
   "nav_msgs",            /* nav_msgs__msg__Odometry, ... */
   "builtin_interfaces",  /* builtin_interfaces__msg__Time, ... */
   "rcl_interfaces",      /* rcl_interfaces__msg__Log, ... */
+  "lifecycle_msgs",      /* lifecycle_msgs__srv__GetState, ... */
+  "rosidl_runtime_c",    /* rosidl_runtime_c__String__assign, ... */
   "Int8",                /* ROSIDL_GET_MSG_TYPE_SUPPORT(_, _, Int8) */
   "Int16",
   "Int32",
