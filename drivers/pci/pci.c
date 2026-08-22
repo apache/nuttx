@@ -426,6 +426,60 @@ static void pci_change_master(FAR struct pci_device_s *dev, bool enable)
 }
 
 /****************************************************************************
+ * Name: pci_enable_parent_bridges
+ *
+ * Description:
+ *   Enable memory forwarding and bus mastering on all bridges between a PCI
+ *   device and the root bus.
+ *
+ ****************************************************************************/
+
+static int pci_enable_parent_bridges(FAR struct pci_device_s *dev)
+{
+  FAR struct pci_device_s *bridge;
+  FAR struct pci_device_s *candidate;
+  FAR struct pci_bus_s *bus = dev->bus;
+  uint16_t command;
+  int ret;
+
+  while (bus != NULL && bus->parent_bus != NULL)
+    {
+      bridge = NULL;
+      list_for_every_entry(&bus->parent_bus->devices, candidate,
+                           struct pci_device_s, bus_list)
+        {
+          if (candidate->subordinate == bus)
+            {
+              bridge = candidate;
+              break;
+            }
+        }
+
+      if (bridge == NULL)
+        {
+          return -ENODEV;
+        }
+
+      ret = pci_read_config_word(bridge, PCI_COMMAND, &command);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      command |= PCI_COMMAND_MEMORY | PCI_COMMAND_MASTER;
+      ret = pci_write_config_word(bridge, PCI_COMMAND, command);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      bus = bus->parent_bus;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: pci_bus_find_start_cap
  *
  * Description:
@@ -1649,6 +1703,13 @@ void pci_clear_master(FAR struct pci_device_s *dev)
 int pci_enable_device(FAR struct pci_device_s *dev)
 {
   uint32_t cmd;
+  int ret;
+
+  ret = pci_enable_parent_bridges(dev);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   pci_read_config_dword(dev, PCI_COMMAND, &cmd);
   return pci_write_config_dword(dev, PCI_COMMAND,
