@@ -55,7 +55,8 @@
  * overridden with CONFIG_STM32_FLASH_OVERRIDE_x
  */
 
-#if defined (CONFIG_ARCH_CHIP_STM32H723VG) || \
+#if defined(CONFIG_STM32_STM32H7RSXX) || \
+    defined (CONFIG_ARCH_CHIP_STM32H723VG) || \
     defined (CONFIG_ARCH_CHIP_STM32H723ZG) || \
     defined (CONFIG_ARCH_CHIP_STM32H743AG) || \
     defined (CONFIG_ARCH_CHIP_STM32H743AI) || \
@@ -91,7 +92,36 @@
 
 /* Size SRAM */
 
-#if defined(CONFIG_STM32_STM32H7X0XX) || defined(CONFIG_STM32_STM32H7X3XX) || defined(CONFIG_STM32_STM32H7X5XX)
+#if defined(CONFIG_STM32_STM32H7RSXX)
+#  define STM32_SRAM_SIZE             (456*1024)
+#  define STM32_SRAM1_SIZE            (16*1024)
+#  define STM32_SRAM2_SIZE            (16*1024)
+#  define STM32_SRAM3_SIZE            (0)
+#  define STM32_SRAM123_SIZE          (32*1024)
+#  define STM32_SRAM4_SIZE            (0)
+#  define STM32_DTCM_SRAM_SIZE        (64*1024)
+#  define STM32_ITCM_SRAM_SIZE        (64*1024)
+
+/* Peripherals.  STM32_NGPIO is the size of the GPIO port lookup table;
+ * ports I-L are not implemented, while ports M-P occupy indices 12-15.
+ */
+
+#  define STM32_NGPIO                 (16) /* GPIOA-H and GPIOM-P */
+#  define STM32_NDMA                  (2)  /* GPDMA1 and HPDMA1 */
+#  define STM32_NADC                  (2)  /* ADC1-2 */
+#  define STM32_NDAC                  (0)  /* No DAC peripheral */
+#  define STM32_NCMP                  (0)  /* No analog comparator */
+#  define STM32_NPGA                  (0)  /* No operational amplifier */
+#  define STM32_NDFSDM                (0)  /* ADF1, not legacy DFSDM */
+#  define STM32_NUSART                (3)  /* USART1-3 */
+#  define STM32_NSPI                  (6)  /* SPI1-6 */
+#  define STM32_NI2S                  (4)  /* I2S1-3 and I2S6 */
+#  define STM32_NUART                 (4)  /* UART4-5 and UART7-8 */
+#  define STM32_NI2C                  (3)  /* I2C1-3; I2C1 shares I3C1 */
+#  define STM32_NSAI                  (2)  /* SAI1-2 */
+#  define STM32_NCAN                  (2)  /* FDCAN1-2 */
+#  define STM32_NSDIO                 (2)  /* SDMMC1-2 */
+#elif defined(CONFIG_STM32_STM32H7X0XX) || defined(CONFIG_STM32_STM32H7X3XX) || defined(CONFIG_STM32_STM32H7X5XX)
 /* Memory */
 
 #  ifdef CONFIG_STM32_STM32H72XXX_OR_STM32H73XXX

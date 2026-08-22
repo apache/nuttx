@@ -1,0 +1,33 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_NUCLEO_H7S3L8
+
+config NUCLEO_H7S3L8_USE_HSE
+	bool "Use the HSE clock source"
+	default n
+	help
+		Use the 24 MHz external clock supplied to the HSE input.
+
+config NUCLEO_H7S3L8_XIP
+	bool "Run from external XSPI2 flash"
+	default n
+	select STM32_BYPASS_CLOCKCONFIG
+	help
+		Link NuttX for execution from the board's MX25UW25645G flash at
+		0x70000000.  The internal flash must contain a loader which
+		initializes XSPI2 before transferring control to NuttX.
+
+config NUCLEO_H7S3L8_XIP_BOOTLOADER
+	bool "Boot an external XIP image"
+	default n
+	depends on STM32_XSPI && MTD_MX25UW25645G
+	help
+		Build a NuttX bootloader in internal flash.  It initializes the
+		MX25UW25645G flash in memory-mapped mode and starts a raw Arm image
+		linked at 0x70000000.  Image selection, update and integrity checking
+		are not provided.
+
+endif # ARCH_BOARD_NUCLEO_H7S3L8

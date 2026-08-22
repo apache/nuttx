@@ -639,6 +639,22 @@ config STM32_HAVE_OCTOSPI2
 config STM32_HAVE_QSPI
 	bool
 
+config STM32_HAVE_XSPI
+	bool
+
+# SBS capabilities
+
+config STM32_HAVE_SBS
+	bool
+
+# EXTI capabilities
+
+config STM32_HAVE_EXTI_SHARED_IRQ
+	bool
+	---help---
+		EXTI lines 9:5 and 15:10 each share a single interrupt vector,
+		rather than every line having its own.
+
 # CRC capabilities
 
 config STM32_HAVE_CRC

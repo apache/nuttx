@@ -33,7 +33,8 @@
  * families
  */
 
-#if defined(CONFIG_STM32_STM32H7X0XX) || \
+#if defined(CONFIG_STM32_STM32H7RSXX) || \
+    defined(CONFIG_STM32_STM32H7X0XX) || \
     defined(CONFIG_STM32_STM32H7X3XX) || \
     defined(CONFIG_STM32_STM32H7B3XX) || \
     defined(CONFIG_STM32_STM32H7X5XX) || \

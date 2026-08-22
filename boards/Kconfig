@@ -2098,6 +2098,15 @@ config ARCH_BOARD_NUCLEO_H753ZI
 	---help---
 		STMicro Nucleo H753ZI board based on the STMicro STM32H753ZI MCU.
 
+config ARCH_BOARD_NUCLEO_H7S3L8
+	bool "STM32H7S3 Nucleo H7S3L8"
+	depends on ARCH_CHIP_STM32H7S3L8
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo H7S3L8 board based on the STM32H7S3L8 MCU.
+
 config ARCH_BOARD_OPENH743I
 	bool "Waveshare OpenH743I board"
 	depends on ARCH_CHIP_STM32H743II
@@ -4011,6 +4020,7 @@ config ARCH_BOARD
 	default "stm32h750b-dk"                if ARCH_BOARD_STM32H750B_DK
 	default "linum-stm32h753bi"            if ARCH_BOARD_LINUM_STM32H753BI
 	default "nucleo-h753zi"                if ARCH_BOARD_NUCLEO_H753ZI
+	default "nucleo-h7s3l8"                if ARCH_BOARD_NUCLEO_H7S3L8
 	default "openh743i"                    if ARCH_BOARD_OPENH743I
 	default "portenta-h7"                  if ARCH_BOARD_PORTENTA_H7
 	default "nucleo-l073rz"                if ARCH_BOARD_NUCLEO_L073RZ
@@ -4819,6 +4829,9 @@ source "boards/arm/stm32h7/linum-stm32h753bi/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_H753ZI
 source "boards/arm/stm32h7/nucleo-h753zi/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_H7S3L8
+source "boards/arm/stm32h7/nucleo-h7s3l8/Kconfig"
 endif
 if ARCH_BOARD_OPENH743I
 source "boards/arm/stm32h7/openh743i/Kconfig"

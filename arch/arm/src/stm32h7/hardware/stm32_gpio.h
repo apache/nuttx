@@ -30,7 +30,9 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32_STM32H7X0XX)
+#if defined(CONFIG_STM32_STM32H7RSXX)
+#  include "hardware/stm32h7x3xx_gpio.h"
+#elif defined(CONFIG_STM32_STM32H7X0XX)
 #  include "hardware/stm32h7x3xx_gpio.h"
 #elif defined(CONFIG_STM32_STM32H7X3XX)
 #  include "hardware/stm32h7x3xx_gpio.h"
