@@ -84,26 +84,27 @@ void videomode_dump(FAR const char *prefix,
 {
   if (videomode != NULL)
     {
-      if (prefix != NULL)
+      if (terse)
         {
-          syslog(LOG_INFO, "%s", prefix);
+          syslog(LOG_INFO, "%s%ux%u @ %luHz",
+                 prefix ? prefix : "",
+                 videomode->hdisplay, videomode->vdisplay,
+                 (unsigned long)videomode_refresh(videomode));
         }
-
-      syslog(LOG_INFO, "%ux%u @ %luHz",
-             videomode->hdisplay, videomode->vdisplay,
-            (unsigned long)videomode_refresh(videomode));
-
-      if (!terse)
+      else
         {
-          syslog(LOG_INFO, " (%lu %u %u %u %u %u %u",
+          syslog(LOG_INFO,
+                 "%s%ux%u @ %luHz (%lu %u %u %u %u %u %u %s%sH %s%sV)\n",
+                 prefix ? prefix : "",
+                 videomode->hdisplay, videomode->vdisplay,
+                 (unsigned long)videomode_refresh(videomode),
                  (unsigned long)videomode->dotclock,
                  videomode->hsync_start,
                  videomode->hsync_end,
                  videomode->htotal,
                  videomode->vsync_start,
                  videomode->vsync_end,
-                 videomode->vtotal);
-          syslog(LOG_INFO, " %s%sH %s%sV)\n",
+                 videomode->vtotal,
                  videomode->flags & VID_PHSYNC ? "+" : "",
                  videomode->flags & VID_NHSYNC ? "-" : "",
                  videomode->flags & VID_PVSYNC ? "+" : "",
