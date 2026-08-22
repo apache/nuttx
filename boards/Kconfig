@@ -3311,6 +3311,14 @@ config ARCH_BOARD_NUCLEO_U5A5ZJ_Q
 		MCU. The STM32U5A5 is a Cortex-M33 optimised for low-power operation
 		at up to 160MHz operation with 4MB Flash memory and 2.5MB SRAM.
 
+config ARCH_BOARD_NUCLEO_U3C5ZI_Q
+	bool "STMicro NUCLEO-U3C5ZI-Q board"
+	depends on ARCH_CHIP_STM32U3C5ZI
+	---help---
+		STMicro NUCLEO-U3C5ZI-Q development board featuring the STM32U3C5ZI,
+		a Cortex-M33 MCU running at up to 96 MHz with 2 MiB Flash and
+		640 KiB SRAM.
+
 config ARCH_BOARD_STM32L476VG_DISCO
 	bool "STMicro STM32L476VG -Discovery board"
 	depends on ARCH_CHIP_STM32L476RG
@@ -4176,6 +4184,7 @@ config ARCH_BOARD
 	default "nucleo-h563zi"                if ARCH_BOARD_NUCLEO_H563ZI
 	default "nucleo-n657x0-q"              if ARCH_BOARD_NUCLEO_N657X0_Q
 	default "nucleo-u5a5zj-q"              if ARCH_BOARD_NUCLEO_U5A5ZJ_Q
+	default "nucleo-u3c5zi-q"              if ARCH_BOARD_NUCLEO_U3C5ZI_Q
 	default "stm32l476vg-disco"            if ARCH_BOARD_STM32L476VG_DISCO
 	default "stm32l476-mdk"                if ARCH_BOARD_STM32L476_MDK
 	default "stm32l4r9ai-disco"            if ARCH_BOARD_STM32L4R9AI_DISCO
@@ -4835,6 +4844,9 @@ endif
 if ARCH_BOARD_NUCLEO_U5A5ZJ_Q
 source "boards/arm/stm32u5/nucleo-u5a5zj-q/Kconfig"
 endif
+if ARCH_BOARD_NUCLEO_U3C5ZI_Q
+source "boards/arm/stm32u3/nucleo-u3c5zi-q/Kconfig"
+endif
 if ARCH_BOARD_NUCLEO_L432KC
 source "boards/arm/stm32l4/nucleo-l432kc/Kconfig"
 endif
@@ -5460,7 +5472,7 @@ endif
 if ARCH_CHIP_SAMV7
 source "boards/arm/samv7/common/Kconfig"
 endif
-if ARCH_CHIP_STM32C0 || ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32F1 || ARCH_CHIP_STM32F2 || ARCH_CHIP_STM32F3 || ARCH_CHIP_STM32F4 || ARCH_CHIP_STM32F7 || ARCH_CHIP_STM32G0 || ARCH_CHIP_STM32G4 || ARCH_CHIP_STM32L0 || ARCH_CHIP_STM32L1 || ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5 || ARCH_CHIP_STM32L5 || ARCH_CHIP_STM32U0 || ARCH_CHIP_STM32U5 || ARCH_CHIP_STM32WB || ARCH_CHIP_STM32WL5 || ARCH_CHIP_STM32N6
+if ARCH_CHIP_STM32C0 || ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32F1 || ARCH_CHIP_STM32F2 || ARCH_CHIP_STM32F3 || ARCH_CHIP_STM32F4 || ARCH_CHIP_STM32F7 || ARCH_CHIP_STM32G0 || ARCH_CHIP_STM32G4 || ARCH_CHIP_STM32L0 || ARCH_CHIP_STM32L1 || ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5 || ARCH_CHIP_STM32L5 || ARCH_CHIP_STM32U0 || ARCH_CHIP_STM32U3 || ARCH_CHIP_STM32U5 || ARCH_CHIP_STM32WB || ARCH_CHIP_STM32WL5 || ARCH_CHIP_STM32N6
 source "boards/arm/common/stm32/Kconfig"
 endif
 if ARCH_CHIP_RP2040

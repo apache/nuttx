@@ -27,7 +27,10 @@
  * Included Files
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_ARMV6M)
+#if defined(CONFIG_ARCH_CHIP_STM32U3) || \
+    defined(CONFIG_ARCH_CHIP_STM32U5)
+#  include "stm32_uart_m33_u3u5.h"
+#elif defined(CONFIG_ARCH_ARMV6M)
 #  if defined(CONFIG_STM32_HAVE_IP_USART_V3) || \
       defined(CONFIG_STM32_HAVE_IP_USART_V4)
 #    include "stm32_uart_m0_v1.h"

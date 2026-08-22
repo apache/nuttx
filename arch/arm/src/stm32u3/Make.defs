@@ -1,5 +1,5 @@
-##############################################################################
-# arch/arm/src/stm32u5/Make.defs
+############################################################################
+# arch/arm/src/stm32u3/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -18,39 +18,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
-##############################################################################
-
-# The start-up, "head", file.  Only common vectors are support so there
-# isn't one.
+############################################################################
 
 HEAD_ASRC =
-
-# Common ARM and Cortex-M4 files (copied from stm32/Make.defs)
 
 include armv8-m/Make.defs
 include common/stm32/Make.defs
 
-# Required STM32U5 files
-
 CHIP_ASRCS  =
-CHIP_CSRCS += stm32_rcc.c stm32_i2c.c
-CHIP_CSRCS += stm32_spi.c stm32_lse.c stm32_lsi.c stm32u5xx_rcc.c
-CHIP_CSRCS += stm32_pwr.c stm32_tim.c stm32_flash.c
-
-ifeq ($(CONFIG_TIMER),y)
-CHIP_CSRCS += stm32_tim_lowerhalf.c
-endif
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CHIP_CSRCS += stm32_userspace.c stm32_mpuinit.c
-endif
-
-ifeq ($(CONFIG_DEBUG_FEATURES),y)
-CHIP_CSRCS += stm32_dumpgpio.c
-endif
-
-# Required chip type specific files
-
-ifeq ($(CONFIG_USBDEV),y)
-CHIP_CSRCS += stm32_otgdev.c
-endif
+CHIP_CSRCS += stm32_rcc.c stm32u3xx_rcc.c

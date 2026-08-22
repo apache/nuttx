@@ -1,5 +1,5 @@
 # ##############################################################################
-# arch/arm/src/stm32u5/CMakeLists.txt
+# boards/arm/stm32u3/common/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,33 +20,6 @@
 #
 # ##############################################################################
 
-set(SRCS
-    stm32_rcc.c
-    stm32_i2c.c
-    stm32_spi.c
-    stm32_lse.c
-    stm32_lsi.c
-    stm32u5xx_rcc.c
-    stm32_pwr.c
-    stm32_tim.c
-    stm32_flash.c)
-
-if(CONFIG_TIMER)
-  list(APPEND SRCS stm32_tim_lowerhalf.c)
+if(CONFIG_ARCH_BOARD_COMMON)
+  add_subdirectory(${NUTTX_DIR}/boards/arm/common/stm32 stm32_common)
 endif()
-
-if(CONFIG_BUILD_PROTECTED)
-  list(APPEND SRCS stm32_userspace.c stm32_mpuinit.c)
-endif()
-
-if(CONFIG_DEBUG_FEATURES)
-  list(APPEND SRCS stm32_dumpgpio.c)
-endif()
-
-if(CONFIG_USBDEV)
-  list(APPEND SRCS stm32_otgdev.c)
-endif()
-
-target_sources(arch PRIVATE ${SRCS})
-
-add_subdirectory(${NUTTX_DIR}/arch/arm/src/common/stm32 stm32_common)

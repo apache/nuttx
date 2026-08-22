@@ -29,7 +29,10 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32_HAVE_IP_GPIO_M0_V1)
+#if defined(CONFIG_ARCH_CHIP_STM32U3) || \
+    defined(CONFIG_ARCH_CHIP_STM32U5)
+#  include "stm32_gpio_m33_u3u5.h"
+#elif defined(CONFIG_STM32_HAVE_IP_GPIO_M0_V1)
 #  include "stm32_gpio_m0_v1.h"
 #elif defined(CONFIG_STM32_HAVE_IP_GPIO_M3M4_V1)
 #  include "stm32_gpio_m3m4_v1v2.h"

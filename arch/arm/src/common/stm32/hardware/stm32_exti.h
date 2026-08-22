@@ -33,12 +33,16 @@
  * version is core-agnostic.
  */
 
-#if (defined(CONFIG_STM32_HAVE_IP_EXTI_V1) + \
+#if defined(CONFIG_ARCH_CHIP_STM32U3) || \
+    defined(CONFIG_ARCH_CHIP_STM32U5)
+
+#  include "hardware/stm32_exti_m33_u3u5.h"
+
+#elif (defined(CONFIG_STM32_HAVE_IP_EXTI_V1) + \
      defined(CONFIG_STM32_HAVE_IP_EXTI_V2)) > 1
 #  error Only one STM32 EXTI IP version must be selected
-#endif
-
-#if !(defined(CONFIG_STM32_HAVE_IP_EXTI_V1) || defined(CONFIG_STM32_HAVE_IP_EXTI_V2))
+#elif !(defined(CONFIG_STM32_HAVE_IP_EXTI_V1) || \
+        defined(CONFIG_STM32_HAVE_IP_EXTI_V2))
 #  error "Unsupported STM32 EXTI"
 #elif defined(CONFIG_ARCH_CORTEXM0)
 #  include "hardware/stm32_exti_v1v2_m0.h"

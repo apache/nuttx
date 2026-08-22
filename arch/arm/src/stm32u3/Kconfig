@@ -1,0 +1,41 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_STM32U3
+
+comment "STM32U3 Configuration Options"
+
+config STM32_U3_PERIPHERALS
+	bool
+	default y
+	select STM32_HAVE_SYSCFG
+	select STM32_HAVE_USART1
+	select STM32_HAVE_USART2
+	select STM32_HAVE_USART3
+	select STM32_HAVE_UART4
+	select STM32_HAVE_UART5
+	select STM32_HAVE_LPUART1
+
+choice
+	prompt "STM32U3 Chip Selection"
+	default ARCH_CHIP_STM32U3C5ZI
+
+config ARCH_CHIP_STM32U3C5ZI
+	bool "STM32U3C5ZI"
+	select STM32_STM32U3C5XX
+	select STM32U3_IO_CONFIG_Z
+	---help---
+		STM32U3 Cortex-M33, 2048 KiB flash, 640 KiB SRAM, LQFP144.
+
+endchoice
+
+config STM32_STM32U3C5XX
+	bool
+	select ARCH_HAVE_FPU
+
+config STM32U3_IO_CONFIG_Z
+	bool
+
+endif # ARCH_CHIP_STM32U3

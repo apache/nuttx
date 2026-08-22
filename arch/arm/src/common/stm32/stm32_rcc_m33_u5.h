@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_rcc.h
+ * arch/arm/src/common/stm32/stm32_rcc_m33_u5.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,33 +20,33 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_RCC_H
-#define __ARCH_ARM_SRC_COMMON_STM32_STM32_RCC_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_RCC_M33_U5_H
+#define __ARCH_ARM_SRC_COMMON_STM32_STM32_RCC_M33_U5_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-
-#if defined(CONFIG_ARCH_CHIP_STM32U3)
-
-#  include "stm32_rcc_m33_u3.h"
-
-#elif defined(CONFIG_ARCH_CHIP_STM32U5)
-
-#  include "stm32_rcc_m33_u5.h"
-
-#else
 
 #include <nuttx/config.h>
 
 #include "arm_internal.h"
 #include "chip.h"
 
-#include "hardware/stm32_rcc.h"
+#if defined(CONFIG_STM32_STM32U585XX) || defined(CONFIG_STM32_STM32U5A5XX)
+#  include "hardware/stm32u5xx_rcc.h"
+#else
+#  error "Unsupported STM32U5 chip"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* LPUART1 is clocked from PCLK3 by default and is gated through APB3. */
+
+#define STM32_LPUART1_FREQUENCY  STM32_PCLK3_FREQUENCY
+#define STM32_LPUART1_RCC_REG    STM32_RCC_APB3ENR
+#define STM32_LPUART1_RCC_EN     RCC_APB3ENR_LPUART1EN
 
 #ifndef __ASSEMBLY__
 
@@ -64,90 +64,31 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_mco1config
- *
- * Description:
- *   Selects the clock source to output on MCO1 pin (PA8). PA8 should be
- *   configured in alternate function mode.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
-static inline void stm32_mco1config(uint32_t source, uint32_t div)
-{
-  uint32_t regval;
-
-  regval = getreg32(STM32_RCC_CFGR);
-  regval &= ~(RCC_CFGR_MCO1_MASK | RCC_CFGR_MCO1PRE_MASK);
-  regval |= (source | div);
-  putreg32(regval, STM32_RCC_CFGR);
-}
-#endif
-
-/****************************************************************************
  * Name: stm32_mcoconfig
  *
  * Description:
- *   Selects the clock source to output on MC pin (PA8) for stm32f10xxx.
+ *   Selects the clock source to output on MCO pin (PA8) for stm32u585xx.
  *   PA8 should be configured in alternate function mode.
+ *
+ * Input Parameters:
+ *   source - One of the RCC_CFGR_MCO definitions from chip/stm32u585xx_rcc.h
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_CONNECTIVITYLINE)
 static inline void stm32_mcoconfig(uint32_t source)
 {
   uint32_t regval;
 
-  regval = getreg32(STM32_RCC_CFGR);
-  regval &= ~(RCC_CFGR_MCO_MASK);
-  regval |= (source & RCC_CFGR_MCO_MASK);
-  putreg32(regval, STM32_RCC_CFGR);
+  /* Set MCO source */
+
+  regval = getreg32(STM32_RCC_CFGR1);
+  regval &= ~(RCC_CFGR1_MCOSEL_MASK);
+  regval |= (source & RCC_CFGR1_MCOSEL_MASK);
+  putreg32(regval, STM32_RCC_CFGR1);
 }
-#endif
-
-/****************************************************************************
- * Name: stm32_mcodivconfig
- *
- * Description:
- *   Selects the clock source to output and clock divider on MC pin (PA4) for
- *   stm32l1xxx. PA4 should be configured in alternate function mode.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_STM32_STM32L15XX)
-static inline void stm32_mcodivconfig(uint32_t source, uint32_t divider)
-{
-  uint32_t regval;
-
-  regval = getreg32(STM32_RCC_CFGR);
-  regval &= ~(RCC_CFGR_MCOSEL_MASK);
-  regval |= (source & RCC_CFGR_MCOSEL_MASK);
-  regval &= ~(RCC_CFGR_MCOPRE_MASK);
-  regval |= (divider & RCC_CFGR_MCOPRE_MASK);
-  putreg32(regval, STM32_RCC_CFGR);
-}
-#endif
-
-/****************************************************************************
- * Name: stm32_mco2config
- *
- * Description:
- *   Selects the clock source to output on MCO2 pin (PC9). PC9 should be
- *   configured in alternate function mode.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
-static inline void stm32_mco2config(uint32_t source, uint32_t div)
-{
-  uint32_t regval;
-
-  regval = getreg32(STM32_RCC_CFGR);
-  regval &= ~(RCC_CFGR_MCO2_MASK | RCC_CFGR_MCO2PRE_MASK);
-  regval |= (source | div);
-  putreg32(regval, STM32_RCC_CFGR);
-}
-#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -157,10 +98,20 @@ static inline void stm32_mco2config(uint32_t source, uint32_t div)
  * Name: stm32_clockconfig
  *
  * Description:
- *   Called to initialize the STM32F0XX.
- *   This does whatever setup is needed to put the MCU in a usable state.
- *   This includes the initialization of clocking using the settings
- *   in board.h.
+ *   Called to establish the clock settings based on the values in board.h.
+ *   This function (by default) will reset most everything, enable the PLL,
+ *   and enable peripheral clocking for all periperipherals enabled in the
+ *   NuttX configuration file.
+ *
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then
+ *   clocking will be enabled by an externally provided, board-specific
+ *   function called stm32_board_clockconfig().
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
@@ -170,8 +121,8 @@ void stm32_clockconfig(void);
  * Name: stm32_board_clockconfig
  *
  * Description:
- *   Any STM32 board may replace the standard board clock configuration logic
- *   with its own custom clock configuration logic.
+ *   Any STM32U5 board may replace the "standard" board clock configuration
+ *   logic with its own, custom clock configuration logic.
  *
  ****************************************************************************/
 
@@ -180,11 +131,42 @@ void stm32_board_clockconfig(void);
 #endif
 
 /****************************************************************************
+ * Name: stm32_stdclockconfig
+ *
+ * Description:
+ *   The standard logic to configure the clocks based on settings in board.h.
+ *   Applicable if no custom clock config is provided.  This function is
+ *   chip type specific and implemented in corresponding modules such as e.g.
+ *   stm3262xx_rcc.c
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
+void stm32_stdclockconfig(void);
+#endif
+
+/****************************************************************************
  * Name: stm32_clockenable
  *
  * Description:
- *   Re-enable the clock and restore the clock settings after low-power
- *   modes.
+ *   Re-enable the clock and restore the clock settings based on settings in
+ *   board.h.  This function is only available to support low-power modes of
+ *   operation:  When re-awakening from deep-sleep modes, it is necessary to
+ *   re-enable/re-start the PLL
+ *
+ *   This function performs a subset of the operations performed by
+ *   stm32_clockconfig():  It does not reset any devices, and it does not
+ *   reset the currently enabled peripheral clocks.
+ *
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then
+ *   clocking will be enabled by an externally provided, board-specific
+ *   function called stm32_board_clockconfig().
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
@@ -228,11 +210,21 @@ void stm32_rcc_enablelsi(void);
 
 void stm32_rcc_disablelsi(void);
 
+/****************************************************************************
+ * Name: stm32_rcc_enableperipherals
+ *
+ * Description:
+ *   Enable all the chip peripherals according to configuration.  This is
+ *   chip type specific and thus implemented in corresponding modules such as
+ *   e.g. stm3262xx_rcc.c
+ *
+ ****************************************************************************/
+
+void stm32_rcc_enableperipherals(void);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
 #endif /* __ASSEMBLY__ */
-
-#endif /* CONFIG_ARCH_CHIP_STM32U5 */
-#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_RCC_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_RCC_M33_U5_H */
