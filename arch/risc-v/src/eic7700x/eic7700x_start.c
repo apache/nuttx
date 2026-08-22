@@ -39,6 +39,9 @@
 #include "chip.h"
 #include "eic7700x_mm_init.h"
 #include "eic7700x_memorymap.h"
+#ifdef CONFIG_EIC7700X_CLK
+#  include "eic7700x_clk.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -450,4 +453,26 @@ void riscv_earlyserialinit(void)
 void riscv_serialinit(void)
 {
   u16550_serialinit();
+}
+
+/****************************************************************************
+ * Name: riscv_soc_initialize
+ *
+ * Description:
+ *   SoC specific initialization, called from up_initialize() once the heap
+ *   and the serial driver are available.
+ *
+ *   This has to live in a file the linker is already pulling out of the
+ *   arch library.  up_initialize() reaches it through a weak undefined
+ *   reference, and the link uses neither --whole-archive nor a strong
+ *   reference elsewhere, so a member whose only symbol is this function
+ *   would never be extracted and the body would silently never run.
+ *
+ ****************************************************************************/
+
+void weak_function riscv_soc_initialize(void)
+{
+#ifdef CONFIG_EIC7700X_CLK
+  eic7700x_clk_initialize();
+#endif
 }
