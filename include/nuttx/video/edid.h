@@ -387,8 +387,8 @@
 
 #define _HACT_LO(p)                       ((p)[EDID_DESC_HPIXELS_LSBITS_OFFSET])
 #define _HBLK_LO(p)                       ((p)[EDID_DESC_HBLANK_LSBITS_OFFSET])
-#define _HACT_HI(p)                       (((p)[EDID_DESC_HMSBITS_OFFSET] & EDID_DESC_HPIXELS_MSBITS_SHIFT) << 4)
-#define _HBLK_HI(p)                       (((p)[EDID_DESC_HMSBITS_OFFSET] & EDID_DESC_HBLANK_MSBITS_SHIFT) << 8)
+#define _HACT_HI(p)                       (((p)[EDID_DESC_HMSBITS_OFFSET] & 0xf0) << 4)
+#define _HBLK_HI(p)                       (((p)[EDID_DESC_HMSBITS_OFFSET] & 0x0f) << 8)
 #define EDID_DESC_HACTIVE(p)              (_HACT_LO(p) | _HACT_HI(p))
 #define EDID_DESC_HBLANK(p)               (_HBLK_LO(p) | _HBLK_HI(p))
 

@@ -138,22 +138,22 @@ static bool edid_std_timing(FAR const uint8_t *stdtim,
   info = stdtim[EDID_STDTIMING_INFO_OFFSET];
   switch (info & EDID_STDTIMING_ASPECT_MASK)
     {
-    case EDID_STDTIMING_ASPECT_16_10:
-      y = x * 10 / 16;
-      break;
+      case EDID_STDTIMING_ASPECT_16_10:
+        y = x * 10 / 16;
+        break;
 
-    case EDID_STDTIMING_ASPECT_4_3:
-      y = x * 3 / 4;
-      break;
+      case EDID_STDTIMING_ASPECT_4_3:
+        y = x * 3 / 4;
+        break;
 
-    case EDID_STDTIMING_ASPECT_5_4:
-      y = x * 4 / 5;
-      break;
+      case EDID_STDTIMING_ASPECT_5_4:
+        y = x * 4 / 5;
+        break;
 
-    case EDID_STDTIMING_ASPECT_16_9:
-    default:
-      y = x * 9 / 16;
-      break;
+      case EDID_STDTIMING_ASPECT_16_9:
+      default:
+        y = x * 9 / 16;
+        break;
     }
 
   f = (info & ~EDID_STDTIMING_ASPECT_MASK) + 60;
@@ -241,8 +241,8 @@ static bool edid_desc_timing(FAR const uint8_t *desc,
       return false;
     }
 
-  mode->dotclock    =  (uint16_t)desc[EDID_DESC_PIXCLOCK_OFFSET] |
-                      ((uint16_t)desc[EDID_DESC_PIXCLOCK_OFFSET + 1] << 8);
+  mode->dotclock    = 10 *((uint16_t)desc[EDID_DESC_PIXCLOCK_OFFSET] |
+                      ((uint16_t)desc[EDID_DESC_PIXCLOCK_OFFSET + 1] << 8));
 
   hactive           = EDID_DESC_HACTIVE(desc);
   hblank            = EDID_DESC_HBLANK(desc);
@@ -353,77 +353,77 @@ static void edid_block(FAR struct edid_info_s *edid, FAR const uint8_t *desc)
 
   switch (desc[EDID_DESC_DESCTYPE])
     {
-    case EDID_DESCTYPE_SERIALNO:
+      case EDID_DESCTYPE_SERIALNO:
 #if 0 /* Not implemented */
-      memcpy(edid->edid_serstr, desc + EDID_DESC_ASCII_DATA_OFFSET,
-             EDID_DESC_ASCII_DATA_LEN);
-      edid->edid_serstr[sizeof(edid->edid_serial) - 1] = 0;
+        memcpy(edid->edid_serstr, desc + EDID_DESC_ASCII_DATA_OFFSET,
+               EDID_DESC_ASCII_DATA_LEN);
+        edid->edid_serstr[sizeof(edid->edid_serial) - 1] = 0;
 #endif
-      break;
+        break;
 
-    case EDID_DESCTYPE_TEXT:
+      case EDID_DESCTYPE_TEXT:
 #if 0 /* Not implemented */
-      memcpy(edid->edid_comment, desc + EDID_DESC_ASCII_DATA_OFFSET,
-             EDID_DESC_ASCII_DATA_LEN);
-      edid->edid_comment[sizeof(edid->edid_comment) - 1] = 0;
+        memcpy(edid->edid_comment, desc + EDID_DESC_ASCII_DATA_OFFSET,
+               EDID_DESC_ASCII_DATA_LEN);
+        edid->edid_comment[sizeof(edid->edid_comment) - 1] = 0;
 #endif
-      break;
+        break;
 
-    case EDID_DESCTYPE_LIMITS:
-      edid->edid_have_range = true;
-      edid->edid_range.er_min_vfreq = EDID_DESC_RANGE_MIN_VFREQ(desc);
-      edid->edid_range.er_max_vfreq = EDID_DESC_RANGE_MAX_VFREQ(desc);
-      edid->edid_range.er_min_hfreq = EDID_DESC_RANGE_MIN_HFREQ(desc);
-      edid->edid_range.er_max_hfreq = EDID_DESC_RANGE_MAX_HFREQ(desc);
-      edid->edid_range.er_max_clock = EDID_DESC_RANGE_MAX_CLOCK(desc);
+      case EDID_DESCTYPE_LIMITS:
+        edid->edid_have_range = true;
+        edid->edid_range.er_min_vfreq = EDID_DESC_RANGE_MIN_VFREQ(desc);
+        edid->edid_range.er_max_vfreq = EDID_DESC_RANGE_MAX_VFREQ(desc);
+        edid->edid_range.er_min_hfreq = EDID_DESC_RANGE_MIN_HFREQ(desc);
+        edid->edid_range.er_max_hfreq = EDID_DESC_RANGE_MAX_HFREQ(desc);
+        edid->edid_range.er_max_clock = EDID_DESC_RANGE_MAX_CLOCK(desc);
 
-      if (!EDID_DESC_RANGE_HAVE_GTF2(desc))
-        {
-          break;
-        }
+        if (!EDID_DESC_RANGE_HAVE_GTF2(desc))
+          {
+            break;
+          }
 
-      edid->edid_range.er_have_gtf2 = true;
-      edid->edid_range.er_gtf2_hfreq = EDID_DESC_RANGE_GTF2_HFREQ(desc);
-      edid->edid_range.er_gtf2_c = EDID_DESC_RANGE_GTF2_C(desc);
-      edid->edid_range.er_gtf2_m = EDID_DESC_RANGE_GTF2_M(desc);
-      edid->edid_range.er_gtf2_j = EDID_DESC_RANGE_GTF2_J(desc);
-      edid->edid_range.er_gtf2_k = EDID_DESC_RANGE_GTF2_K(desc);
-      break;
+        edid->edid_range.er_have_gtf2 = true;
+        edid->edid_range.er_gtf2_hfreq = EDID_DESC_RANGE_GTF2_HFREQ(desc);
+        edid->edid_range.er_gtf2_c = EDID_DESC_RANGE_GTF2_C(desc);
+        edid->edid_range.er_gtf2_m = EDID_DESC_RANGE_GTF2_M(desc);
+        edid->edid_range.er_gtf2_j = EDID_DESC_RANGE_GTF2_J(desc);
+        edid->edid_range.er_gtf2_k = EDID_DESC_RANGE_GTF2_K(desc);
+        break;
 
-    case EDID_DESCTYPE_NAME:
+      case EDID_DESCTYPE_NAME:
 #if 0 /* Not implemented */
-      /* Copy the product name into place */
+        /* Copy the product name into place */
 
-      memcpy(edid->edid_productname,
-             desc + EDID_DESC_ASCII_DATA_OFFSET, EDID_DESC_ASCII_DATA_LEN);
+        memcpy(edid->edid_productname,
+               desc + EDID_DESC_ASCII_DATA_OFFSET, EDID_DESC_ASCII_DATA_LEN);
 #endif
-      break;
+        break;
 
-    case EDID_DESCTYPE_STDTIMING_ID:
-      desc += EDID_DESC_STD_TIMING_START_OFFSET;
-      for (i = 0; i < EDID_DESC_STD_TIMING_COUNT_OFFSET; i++)
-        {
-          if (edid_std_timing(desc, &mode))
-            {
-              /* Does this mode already exist? */
+      case EDID_DESCTYPE_STDTIMING_ID:
+        desc += EDID_DESC_STD_TIMING_START_OFFSET;
+        for (i = 0; i < EDID_DESC_STD_TIMING_COUNT_OFFSET; i++)
+          {
+            if (edid_std_timing(desc, &mode))
+              {
+                /* Does this mode already exist? */
 
-              exist_mode = edid_search_mode(edid, &mode);
-              if (exist_mode == NULL)
-                {
-                  edid->edid_modes[edid->edid_nmodes] = mode;
-                  edid->edid_nmodes++;
-                }
-            }
+                exist_mode = edid_search_mode(edid, &mode);
+                if (exist_mode == NULL)
+                  {
+                    edid->edid_modes[edid->edid_nmodes] = mode;
+                    edid->edid_nmodes++;
+                  }
+              }
 
-          desc += 2;
-        }
-      break;
+            desc += 2;
+          }
+        break;
 
-    case EDID_DESCTYPE_WHITEPOINT:
+      case EDID_DESCTYPE_WHITEPOINT:
 
-      /* Not implemented yet */
+        /* Not implemented yet */
 
-      break;
+        break;
     }
 }
 
