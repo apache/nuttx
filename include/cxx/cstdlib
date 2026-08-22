@@ -29,6 +29,7 @@
 
 #include <nuttx/config.h>
 #include <stdlib.h>
+#include <nuttx/std_abs.h>
 
 //***************************************************************************
 // Namespace
