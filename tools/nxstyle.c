@@ -218,6 +218,8 @@ static const char *g_white_prefix[] =
   "ub32",    /* Ref:  include/fixedmath.h */
   "lua_",    /* Ref:  apps/interpreters/lua/lua-5.x.x/src/lua.h */
   "luaL_",   /* Ref:  apps/interpreters/lua/lua-5.x.x/src/lauxlib.h */
+  "PyMem_",  /* Ref:  apps/interpreters/python */
+  "PyOS_",   /* Ref:  apps/interpreters/python */
   "Ba",      /* Ref:  apps/netutils/xedge/BAS/examples/xedge/src/xedge.h */
   "Thread",  /* Ref:  apps/netutils/xedge/BAS/examples/xedge/src/xedge.h */
   "LThread", /* Ref:  apps/netutils/xedge/BAS/examples/xedge/src/xedge.h */
