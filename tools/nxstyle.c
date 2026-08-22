@@ -48,6 +48,7 @@
 #define LINE_SIZE      512
 #define RANGE_NUMBER   4096
 #define DEFAULT_WIDTH  78
+#define MAX_BRACE      64
 
 #define FIRST_SECTION  INCLUDED_FILES
 #define LAST_SECTION   PUBLIC_FUNCTION_PROTOTYPES
@@ -927,7 +928,7 @@ static void backslash_to_slash(char *str)
     {
       if (*p == '\\')
         {
-           *p = '/';
+          *p = '/';
         }
     }
 }
@@ -1010,8 +1011,8 @@ static void check_spaces_left(char *line, int lineno, int ndx)
 
   if (ndx-- > 0 && line[ndx] != ' ' && line[ndx] != '(' && line[ndx] != ')')
     {
-       ERROR("Operator/assignment must be preceded with whitespace",
-             lineno, ndx);
+      ERROR("Operator/assignment must be preceded with whitespace",
+            lineno, ndx);
     }
 }
 
@@ -1026,14 +1027,14 @@ static void check_spaces_leftright(char *line, int lineno, int ndx1, int ndx2)
 {
   if (ndx1 > 0 && line[ndx1 - 1] != ' ')
     {
-       ERROR("Operator/assignment must be preceded with whitespace",
-             lineno, ndx1);
+      ERROR("Operator/assignment must be preceded with whitespace",
+            lineno, ndx1);
     }
 
   if (line[ndx2 + 1] != '\0' && line[ndx2 + 1] != '\n' && line[ndx2 + 1] != ' ')
     {
-       ERROR("Operator/assignment must be followed with whitespace",
-             lineno, ndx2);
+      ERROR("Operator/assignment must be followed with whitespace",
+            lineno, ndx2);
     }
 }
 
@@ -1403,6 +1404,15 @@ int main(int argc, char **argv, char **envp)
   const char *ctrl_kw;  /* Control keyword whose header is being parsed */
   const char *brace_kw; /* Control keyword still waiting for its left brace */
   int ctrl_hdrend;      /* Index of the last character of that header */
+  int ctrl_indent;      /* Indentation of that control keyword */
+  int brace_indent;     /* Indentation of the keyword awaiting a brace */
+  int ctrl_brace;       /* Alignment required of a brace on this line, or -1 */
+  int rbrace_match;     /* Alignment of the left brace closed on this line */
+
+  /* Indentation of each open left brace */
+
+  int lbrace_indent[MAX_BRACE];
+
   enum pptype_e ppline; /* > 0: The next line the continuation of a
                          * pre-processor command */
   int rhcomment;        /* Indentation of Comment to the right of code
@@ -1436,48 +1446,48 @@ int main(int argc, char **argv, char **envp)
   while ((c = getopt(argc, argv, ":hv:gm:r:")) != -1)
     {
       switch (c)
-      {
-      case 'm':
-        excess = atoi(optarg);
-        if (excess < 1)
-          {
-            show_usage(argv[0], 1, "Bad value for <excess>.");
-            excess = 0;
-          }
+        {
+          case 'm':
+            excess = atoi(optarg);
+            if (excess < 1)
+              {
+                show_usage(argv[0], 1, "Bad value for <excess>.");
+                excess = 0;
+              }
 
-        break;
+            break;
 
-      case 'v':
-        g_verbose = atoi(optarg);
-        if (g_verbose < 0 || g_verbose > 2)
-          {
-            show_usage(argv[0], 1, "Bad value for <level>.");
-          }
+          case 'v':
+            g_verbose = atoi(optarg);
+            if (g_verbose < 0 || g_verbose > 2)
+              {
+                show_usage(argv[0], 1, "Bad value for <level>.");
+              }
 
-        break;
+            break;
 
-      case 'r':
-        g_rangestart[g_rangenumber] = atoi(strtok(optarg, ","));
-        g_rangecount[g_rangenumber++] = atoi(strtok(NULL, ","));
-        break;
+          case 'r':
+            g_rangestart[g_rangenumber] = atoi(strtok(optarg, ","));
+            g_rangecount[g_rangenumber++] = atoi(strtok(NULL, ","));
+            break;
 
-      case 'h':
-        show_usage(argv[0], 0, NULL);
-        break;
+          case 'h':
+            show_usage(argv[0], 0, NULL);
+            break;
 
-      case ':':
-        show_usage(argv[0], 1, "Missing argument.");
-        break;
+          case ':':
+            show_usage(argv[0], 1, "Missing argument.");
+            break;
 
-      case '?':
-        show_usage(argv[0], 1, "Unrecognized option.");
-        break;
+          case '?':
+            show_usage(argv[0], 1, "Unrecognized option.");
+            break;
 
-      default:
-        show_usage(argv[0], 0, NULL);
-        break;
-      }
-  }
+          default:
+            show_usage(argv[0], 0, NULL);
+            break;
+        }
+    }
 
   if (optind < argc - 1 || argv[optind] == NULL)
     {
@@ -1546,6 +1556,8 @@ int main(int argc, char **argv, char **envp)
   ctrl_kw        = NULL;        /* Control keyword being parsed */
   brace_kw       = NULL;        /* Control keyword waiting for a brace */
   ctrl_hdrend    = -1;          /* Index of the end of that header */
+  ctrl_indent    = 0;           /* Indentation of that control keyword */
+  brace_indent   = 0;           /* Indentation of the awaiting keyword */
   bif            = false;       /* True: This line is beginning of a 'if' statement */
   ppline         = PPLINE_NONE; /* > 0: The next line the continuation of a
                                  * pre-processor command */
@@ -1583,6 +1595,8 @@ int main(int argc, char **argv, char **envp)
       bppline      = false;    /* True: This line is a pre-processor line */
       bctrlline    = false;    /* No control statement starts on this line */
       ctrl_hdrend  = -1;       /* The header has not ended on this line yet */
+      ctrl_brace   = -1;       /* No brace is required on this line */
+      rbrace_match = -1;       /* No left brace is closed on this line */
 
       /* If we are not in a comment, then this certainly is not a right-hand
        * comment.
@@ -1647,8 +1661,8 @@ int main(int argc, char **argv, char **envp)
 
               if (line[n] != '}' && line[n] != '#' && prevrhcmt == 0)
                 {
-                   ERROR("Missing blank line after comment", comment_lineno,
-                         1);
+                  ERROR("Missing blank line after comment", comment_lineno,
+                        1);
                 }
             }
 
@@ -1659,7 +1673,7 @@ int main(int argc, char **argv, char **envp)
 
           if (lineno == 1 && (line[n] != '/' || line[n + 1] != '*'))
             {
-               ERROR("Missing file header comment block", lineno, 1);
+              ERROR("Missing file header comment block", lineno, 1);
             }
 
           if (lineno == 2)
@@ -1689,6 +1703,7 @@ int main(int argc, char **argv, char **envp)
                    */
 
                   char *basedir = strstr(g_file_name, TOPDIR);
+
                   if (basedir != NULL)
                     {
                       /* Add 1 to the offset for the slash character */
@@ -1779,8 +1794,8 @@ int main(int argc, char **argv, char **envp)
                   strncmp(&line[n], "while", 5) != 0 &&
                   strncmp(&line[n], "break", 5) != 0)
                 {
-                   ERROR("Right brace must be followed by a blank line",
-                         rbrace_lineno, n + 1);
+                  ERROR("Right brace must be followed by a blank line",
+                        rbrace_lineno, n + 1);
                 }
 
               /* If the right brace is followed by a pre-processor command
@@ -1814,43 +1829,43 @@ int main(int argc, char **argv, char **envp)
         {
           switch (line[n])
             {
-            case ' ':
-              {
-                indent++;
-              }
-              break;
+              case ' ':
+                {
+                  indent++;
+                }
+                break;
 
-            case '\t':
-              {
-                if (!btabs)
-                  {
-                    ERROR("TABs found.  First detected", lineno, n);
-                    btabs = true;
-                  }
+              case '\t':
+                {
+                  if (!btabs)
+                    {
+                      ERROR("TABs found.  First detected", lineno, n);
+                      btabs = true;
+                    }
 
-                indent = (indent + 4) & ~3;
-              }
-              break;
+                  indent = (indent + 4) & ~3;
+                }
+                break;
 
-            case '\r':
-              {
-                if (!bcrs)
-                  {
-                    ERROR("Carriage returns found.  "
-                            "First detected", lineno, n);
-                    bcrs = true;
-                  }
-              }
-              break;
+              case '\r':
+                {
+                  if (!bcrs)
+                    {
+                      ERROR("Carriage returns found.  "
+                              "First detected", lineno, n);
+                      bcrs = true;
+                    }
+                }
+                break;
 
-            default:
-              {
-                 snprintf(buffer, sizeof(buffer),
-                          "Unexpected white space character %02x found",
-                          line[n]);
-                 ERROR(buffer, lineno, n);
-              }
-              break;
+              default:
+                {
+                  snprintf(buffer, sizeof(buffer),
+                           "Unexpected white space character %02x found",
+                           line[n]);
+                  ERROR(buffer, lineno, n);
+                }
+                break;
             }
         }
 
@@ -1889,8 +1904,8 @@ int main(int argc, char **argv, char **envp)
               if (line[ii] != '\0')
                 {
                   /* Make sure that pre-processor definitions are all in
-                  * the pre-processor definitions section.
-                  */
+                   * the pre-processor definitions section.
+                   */
 
                   ppline = PPLINE_OTHER;
 
@@ -1981,7 +1996,7 @@ int main(int argc, char **argv, char **envp)
 
                       ppline = PPLINE_ENDIF;
                     }
-               }
+                }
             }
 
           if (ppline == PPLINE_IF || ppline == PPLINE_ELIF)
@@ -2051,7 +2066,7 @@ int main(int argc, char **argv, char **envp)
                 }
               else if (!isspace((int)line[n + 2]) && line[n + 2] != '*')
                 {
-                   ERROR("Missing space after opening C comment", lineno, n);
+                  ERROR("Missing space after opening C comment", lineno, n);
                 }
 
               if (strstr(lptr, "*/") == NULL)
@@ -2130,7 +2145,7 @@ int main(int argc, char **argv, char **envp)
                    * by a label.
                    */
 
-                   ERROR("Missing blank line before comment found", lineno, 1);
+                  ERROR("Missing blank line before comment found", lineno, 1);
                 }
 
               /* 'comment_lineno 'holds the line number of the last closing
@@ -2243,7 +2258,7 @@ int main(int argc, char **argv, char **envp)
                     {
                       if (tmppnest == 0 && !tmpbstring && line[i] == ',')
                         {
-                           ERROR("Multiple data definitions", lineno, i + 1);
+                          ERROR("Multiple data definitions", lineno, i + 1);
                           break;
                         }
                       else if (line[i] == '(')
@@ -2362,7 +2377,8 @@ int main(int argc, char **argv, char **envp)
 
           if (bnest > 0 && dnest == 0 && ctrl_kw == NULL)
             {
-              bctrlline = true;
+              bctrlline   = true;
+              ctrl_indent = indent;
 
               if (check_keyword(line, indent, "else"))
                 {
@@ -2475,78 +2491,78 @@ int main(int argc, char **argv, char **envp)
                    *   Hz          for frequencies (including KHz, MHz, etc.)
                    */
 
-                   if (!have_lower && islower(line[n]))
-                     {
-                       switch (line[n])
-                       {
-                         /* A sequence containing 'v' may occur at the
-                          * beginning of the identifier.
-                          */
+                  if (!have_lower && islower(line[n]))
+                    {
+                      switch (line[n])
+                        {
+                          /* A sequence containing 'v' may occur at the
+                           * beginning of the identifier.
+                           */
 
-                         case 'v':
-                           if (n > 1 &&
-                               line[n - 2] == 'I' &&
-                               line[n - 1] == 'P' &&
-                               (line[n + 1] == '4' ||
-                                line[n + 1] == '6'))
-                             {
-                             }
-                           else if (n > 3 &&
-                                    line[n - 4] == 'I' &&
-                                    line[n - 3] == 'C' &&
-                                    line[n - 2] == 'M' &&
-                                    line[n - 1] == 'P' &&
-                                    line[n + 1] == '6')
-                             {
-                             }
-                           else if (n > 3 &&
-                                    line[n - 4] == 'I' &&
-                                    line[n - 3] == 'G' &&
-                                    line[n - 2] == 'M' &&
-                                    line[n - 1] == 'P' &&
-                                    line[n + 1] == '2')
-                             {
-                             }
-                           else
-                             {
-                               have_lower = true;
-                             }
-                           break;
+                          case 'v':
+                            if (n > 1 &&
+                                line[n - 2] == 'I' &&
+                                line[n - 1] == 'P' &&
+                                (line[n + 1] == '4' ||
+                                 line[n + 1] == '6'))
+                              {
+                              }
+                            else if (n > 3 &&
+                                     line[n - 4] == 'I' &&
+                                     line[n - 3] == 'C' &&
+                                     line[n - 2] == 'M' &&
+                                     line[n - 1] == 'P' &&
+                                     line[n + 1] == '6')
+                              {
+                              }
+                            else if (n > 3 &&
+                                     line[n - 4] == 'I' &&
+                                     line[n - 3] == 'G' &&
+                                     line[n - 2] == 'M' &&
+                                     line[n - 1] == 'P' &&
+                                     line[n + 1] == '2')
+                              {
+                              }
+                            else
+                              {
+                                have_lower = true;
+                              }
+                            break;
 
-                         /* Sequences containing 'p', 'd', or 'z' must have
-                          * been preceded by upper case characters.
-                          */
+                          /* Sequences containing 'p', 'd', or 'z' must have
+                           * been preceded by upper case characters.
+                           */
 
-                         case 'p':
-                           if (!have_upper || n < 1 ||
-                               !isdigit(line[n - 1]) ||
-                               !isdigit(line[n + 1]))
-                             {
-                               have_lower = true;
-                             }
-                             break;
+                          case 'p':
+                            if (!have_upper || n < 1 ||
+                                !isdigit(line[n - 1]) ||
+                                !isdigit(line[n + 1]))
+                              {
+                                have_lower = true;
+                              }
+                            break;
 
-                         case 'd':
-                           if (!have_upper || !isdigit(line[n + 1]))
-                             {
-                               have_lower = true;
-                             }
-                             break;
+                          case 'd':
+                            if (!have_upper || !isdigit(line[n + 1]))
+                              {
+                                have_lower = true;
+                              }
+                            break;
 
-                         case 'z':
-                           if (!have_upper || n < 1 ||
-                               line[n - 1] != 'H')
-                             {
-                               have_lower = true;
-                             }
-                             break;
-                           break;
+                          case 'z':
+                            if (!have_upper || n < 1 ||
+                                line[n - 1] != 'H')
+                              {
+                                have_lower = true;
+                              }
+                            break;
+                            break;
 
-                         default:
-                           have_lower = true;
-                           break;
-                       }
-                     }
+                          default:
+                            have_lower = true;
+                            break;
+                        }
+                    }
 
                   n++;
                 }
@@ -2574,13 +2590,13 @@ int main(int argc, char **argv, char **envp)
                             line[ident_index] != 'X') ||
                            line[ident_index - 1] != '0')
                     {
-                       ERROR("Mixed case identifier found",
-                             lineno, ident_index);
+                      ERROR("Mixed case identifier found",
+                            lineno, ident_index);
                     }
                   else if (have_upper)
                     {
-                       ERROR("Upper case hex constant found",
-                             lineno, ident_index);
+                      ERROR("Upper case hex constant found",
+                            lineno, ident_index);
                     }
                 }
 
@@ -2606,7 +2622,7 @@ int main(int argc, char **argv, char **envp)
                     }
                   else if (!isspace((int)line[n + 2]) && line[n + 2] != '*')
                     {
-                       ERROR("Missing space after opening C comment", lineno, n);
+                      ERROR("Missing space after opening C comment", lineno, n);
                     }
 
                   /* Increment the count of nested comments */
@@ -2668,8 +2684,8 @@ int main(int argc, char **argv, char **envp)
                     }
                   else if (!isspace((int)line[n - 2]) && line[n - 2] != '*')
                     {
-                       ERROR("Missing space before closing C comment", lineno,
-                             n);
+                      ERROR("Missing space before closing C comment", lineno,
+                            n);
                     }
 
                   /* Check for block comments that are not on a separate line.
@@ -2680,8 +2696,8 @@ int main(int argc, char **argv, char **envp)
 
                   if (prevncomment > 0 && !bblank && rhcomment == 0)
                     {
-                       ERROR("Block comment terminator must be on a "
-                              "separate line", lineno, n);
+                      ERROR("Block comment terminator must be on a "
+                             "separate line", lineno, n);
                     }
 
 #if 0
@@ -2691,7 +2707,7 @@ int main(int argc, char **argv, char **envp)
 
                   if (line[n + 1] != '\n')
                     {
-                       ERROR("Garbage on line after C comment", lineno, n);
+                      ERROR("Garbage on line after C comment", lineno, n);
                     }
 #endif
 
@@ -2795,710 +2811,734 @@ int main(int argc, char **argv, char **envp)
             {
               switch (line[n])
                 {
-                /* Handle logic nested with curly braces */
+                  /* Handle logic nested with curly braces */
 
-                case '{':
-                  {
-                    if (n > indent)
+                  case '{':
+                    {
+                      if (n > indent)
+                        {
+                          /* REVISIT: dnest is always > 0 here if bfunctions ==
+                           * false.
+                           */
+
+                          if (dnest == 0 || !bfunctions ||
+                              lineno == rbrace_lineno)
+                            {
+                              ERROR("Left bracket not on separate line", lineno,
+                                    n);
+                            }
+                        }
+                      else if (line[n + 1] != '\n')
+                        {
+                          if (dnest == 0)
+                            {
+                              ERROR("Garbage follows left bracket", lineno, n);
+                            }
+                        }
+
+                      bnest++;
+
+                      /* Remember where a brace beginning a line sits, so the
+                       * brace closing it can be checked.  -1 for any other.
+                       */
+
+                      if (bnest >= 1 && bnest <= MAX_BRACE)
+                        {
+                          lbrace_indent[bnest - 1] = n == indent ? indent : -1;
+                        }
+
+                      if (dnest > 0)
+                        {
+                          dnest++;
+                        }
+
+                      /* Check if we are within 'extern "C"', we don't
+                       * normally indent in that case because the 'extern "C"'
+                       * is conditioned on __cplusplus.
+                       */
+
+                      if (lineno == externc_lineno ||
+                          lineno - 1 == externc_lineno)
+                        {
+                          bexternc = true;
+                        }
+
+                      /* Suppress error for comment following a left brace */
+
+                      noblank_lineno = lineno;
+                      lbrace_lineno  = lineno;
+                    }
+                    break;
+
+                  case '}':
+                    {
+                      /* Decrement the brace nesting level */
+
+                      if (bnest < 1)
+                        {
+                          ERROR("Unmatched right brace", lineno, n);
+                        }
+                      else
+                        {
+                          bnest--;
+                          if (bnest < 1)
+                            {
+                              bnest   = 0;
+                              bswitch = false;
+                            }
+
+                          /* Recover the alignment of the matching left brace */
+
+                          if (n == indent && bnest < MAX_BRACE)
+                            {
+                              rbrace_match = lbrace_indent[bnest];
+                            }
+                        }
+
+                      /* Decrement the declaration nesting level */
+
+                      if (dnest < 3)
+                        {
+                          dnest = 0;
+                          bexternc = false;
+                        }
+                      else
+                        {
+                          dnest--;
+                        }
+
+                      /* The right brace should be on a separate line */
+
+                      if (n > indent)
+                        {
+                          if (dnest == 0)
+                            {
+                              ERROR("Right bracket not on separate line",
+                                    lineno, n);
+                            }
+                        }
+
+                      /* Check for garbage following the left brace */
+
+                      if (line[n + 1] != '\n' &&
+                          line[n + 1] != ',' &&
+                          line[n + 1] != ';')
+                        {
+                          int sndx = n + 1;
+                          bool whitespace = false;
+
+                          /* Skip over spaces */
+
+                          while (line[sndx] == ' ')
+                            {
+                              sndx++;
+                            }
+
+                          /* One possibility is that the right bracket is
+                           * followed by an identifier then a semi-colon.
+                           * Comma is possible to but would be a case of
+                           * multiple declaration of multiple instances.
+                           */
+
+                          if (line[sndx] == '_' || isalpha(line[sndx]))
+                            {
+                              int endx = sndx;
+
+                              /* Skip to the end of the identifier.  Checking
+                               * for mixed case identifiers will be done
+                               * elsewhere.
+                               */
+
+                              while (line[endx] == '_' ||
+                                     isalnum(line[endx]))
+                                {
+                                  endx++;
+                                }
+
+                              /* Skip over spaces */
+
+                              while (line[endx] == ' ')
+                                {
+                                  whitespace = true;
+                                  endx++;
+                                }
+
+                              /* Handle according to what comes after the
+                               * identifier.
+                               */
+
+                              if (strncmp(&line[sndx], "while", 5) == 0)
+                                {
+                                  ERROR("'while' must be on a separate line",
+                                         lineno, sndx);
+                                }
+                              else if (line[endx] == ',')
+                                {
+                                  ERROR("Multiple data definitions on line",
+                                         lineno, endx);
+                                }
+                              else if (line[endx] == ';')
+                                {
+                                  if (whitespace)
+                                    {
+                                      ERROR("Space precedes semi-colon",
+                                            lineno, endx);
+                                    }
+                                }
+                              else if (line[endx] == '=')
+                                {
+                                  /* There's a struct initialization following */
+
+                                  check_spaces_leftright(line, lineno,
+                                                         endx, endx);
+                                  dnest = 1;
+                                }
+                              else
+                                {
+                                  ERROR("Garbage follows right bracket",
+                                        lineno, n);
+                                }
+                            }
+                          else
+                            {
+                              ERROR("Garbage follows right bracket", lineno, n);
+                            }
+                        }
+
+                      /* The right brace should not be preceded with a a blank
+                       * line.
+                       */
+
+                      if (lineno == blank_lineno + 1)
+                        {
+                          ERROR("Blank line precedes right brace at line",
+                                 lineno, 1);
+                        }
+
+                      rbrace_lineno  = lineno;
+                    }
+                    break;
+
+                  /* Handle logic with parentheses */
+
+                  case '(':
+                    {
+                      /* Increase the parenthetical nesting level */
+
+                      pnest++;
+
+                      /* Check for inappropriate space around parentheses */
+
+                      if (line[n + 1] == ' ')
+                        {
+                          ERROR("Space follows left parenthesis", lineno, n);
+                        }
+                    }
+                    break;
+
+                  case ')':
+                    {
+                      /* Decrease the parenthetical nesting level */
+
+                      if (pnest < 1)
+                        {
+                          ERROR("Unmatched right parentheses", lineno, n);
+                          pnest = 0;
+                        }
+                      else
+                        {
+                          pnest--;
+                        }
+
+                      /* Allow ')' as first thing on the line (n == indent)
+                       * Allow "for (xx; xx; )" (bfor == true)
+                       */
+
+                      if (n > 0 && n != indent && line[n - 1] == ' ' && !bfor)
+                        {
+                          ERROR("Space precedes right parenthesis", lineno, n);
+                        }
+
+                      /* Unset bif if last parenthesis is closed */
+
+                      if (bif == true && pnest == 0)
+                        {
+                          bif = false;
+                        }
+
+                      /* Remember where the header ends, to see what follows */
+
+                      if (ctrl_kw != NULL && pnest == 0 && ctrl_hdrend < 0)
+                        {
+                          ctrl_hdrend = n;
+                        }
+                    }
+                    break;
+
+                  /* Check for inappropriate space around square brackets */
+
+                  case '[':
+                    {
+                      if (line[n + 1] == ' ')
+                        {
+                          ERROR("Space follows left bracket", lineno, n);
+                        }
+                    }
+                    break;
+
+                  case ']':
+                    {
+                      if (n > 0 && line[n - 1] == ' ')
+                        {
+                          ERROR("Space precedes right bracket", lineno, n);
+                        }
+                    }
+                    break;
+
+                  /* Semi-colon may terminate a declaration */
+
+                  case ';':
+                    {
+                      if (!isspace((int)line[n + 1]))
+                        {
+                          ERROR("Missing whitespace after semicolon", lineno, n);
+                        }
+
+                      /* Semicolon terminates a declaration/definition if there
+                       * was no left curly brace (i.e., dnest is only 1).
+                       */
+
+                      if (dnest == 1)
+                        {
+                          dnest = 0;
+                        }
+                    }
+                    break;
+                  case ':':
+                    {
+                      if (bcase == true)
+                        {
+                          char *ndx = &line[n + 1];
+
+                          while ((int)isspace(*ndx))
+                            {
+                              ndx++;
+                            }
+
+                          if (*ndx != '\0' && *ndx != '/')
+                            {
+                              ERROR("Case statement should be on a new line",
+                                    lineno, n);
+                            }
+
+                          bcase = false;
+                        }
+                    }
+                    break;
+                  case ',':
+                    {
+                      if (!isspace((int)line[n + 1]))
+                        {
+                          ERROR("Missing whitespace after comma", lineno, n);
+                        }
+                    }
+                    break;
+
+                  /* Skip over character constants */
+
+                  case '\'':
+                    {
+                      int endndx = n + 2;
+
+                      if (line[n + 1] != '\n' && line[n + 1] != '\0')
+                        {
+                          if (line[n + 1] == '\\')
+                            {
+                              for (;
+                                   line[endndx] != '\n' &&
+                                   line[endndx] != '\0' &&
+                                   line[endndx] != '\'';
+                                   endndx++);
+                            }
+
+                          n = endndx;
+                        }
+                    }
+                    break;
+
+                  /* Check for space around various operators */
+
+                  case '-':
+
+                    /* -> */
+
+                    if (line[n + 1] == '>')
                       {
-                        /* REVISIT: dnest is always > 0 here if bfunctions ==
-                         * false.
+                        /* -> must have no whitespaces on its left or right */
+
+                        check_nospaces_leftright(line, lineno, n, n + 1);
+                        n++;
+                      }
+
+                    /* -- */
+
+                    else if (line[n + 1] == '-')
+                      {
+                        /* "--" should be next to its operand. If there are
+                         * whitespaces or non-operand characters on both left
+                         * and right (e.g. "a -- ", "a[i --]", "(-- i)"),
+                         * there's an error.
                          */
 
-                        if (dnest == 0 || !bfunctions || lineno == rbrace_lineno)
-                          {
-                             ERROR("Left bracket not on separate line", lineno,
-                                   n);
-                          }
-                      }
-                    else if (line[n + 1] != '\n')
-                      {
-                        if (dnest == 0)
-                          {
-                             ERROR("Garbage follows left bracket", lineno, n);
-                          }
+                        check_operand_leftright(line, lineno, n, n + 1);
+                        n++;
                       }
 
-                    bnest++;
-                    if (dnest > 0)
+                    /* -= */
+
+                    else if (line[n + 1] == '=')
                       {
-                        dnest++;
+                        check_spaces_leftright(line, lineno, n, n + 1);
+                        n++;
                       }
 
-                    /* Check if we are within 'extern "C"', we don't
-                     * normally indent in that case because the 'extern "C"'
-                     * is conditioned on __cplusplus.
+                    /* Scientific notation with a negative exponent (eg. 10e-10)
+                     * REVISIT: This fails for cases where the variable name
+                     *          ends with 'e' preceded by a digit:
+                     *          a = abc1e-10;
+                     *          a = ABC1E-10;
                      */
 
-                    if (lineno == externc_lineno ||
-                        lineno - 1 == externc_lineno)
+                    else if ((line[n - 1] == 'e' || line[n - 1] == 'E') &&
+                             isdigit(line[n + 1]) && isdigit(line[n - 2]))
                       {
-                        bexternc = true;
-                      }
-
-                    /* Suppress error for comment following a left brace */
-
-                    noblank_lineno = lineno;
-                    lbrace_lineno  = lineno;
-                  }
-                  break;
-
-                case '}':
-                  {
-                   /* Decrement the brace nesting level */
-
-                   if (bnest < 1)
-                     {
-                       ERROR("Unmatched right brace", lineno, n);
-                     }
-                   else
-                     {
-                       bnest--;
-                       if (bnest < 1)
-                         {
-                           bnest = 0;
-                           bswitch = false;
-                         }
-                     }
-
-                    /* Decrement the declaration nesting level */
-
-                    if (dnest < 3)
-                      {
-                        dnest = 0;
-                        bexternc = false;
+                        n++;
                       }
                     else
                       {
-                        dnest--;
-                      }
-
-                    /* The right brace should be on a separate line */
-
-                    if (n > indent)
-                      {
-                        if (dnest == 0)
-                          {
-                             ERROR("Right bracket not on separate line",
-                                   lineno, n);
-                          }
-                      }
-
-                    /* Check for garbage following the left brace */
-
-                    if (line[n + 1] != '\n' &&
-                        line[n + 1] != ',' &&
-                        line[n + 1] != ';')
-                      {
-                        int sndx = n + 1;
-                        bool whitespace = false;
-
-                        /* Skip over spaces */
-
-                        while (line[sndx] == ' ')
-                          {
-                            sndx++;
-                          }
-
-                        /* One possibility is that the right bracket is
-                         * followed by an identifier then a semi-colon.
-                         * Comma is possible to but would be a case of
-                         * multiple declaration of multiple instances.
+                        /* '-' may function as a unary operator and snuggle
+                         * on the left.
                          */
 
-                        if (line[sndx] == '_' || isalpha(line[sndx]))
-                          {
-                            int endx = sndx;
-
-                            /* Skip to the end of the identifier.  Checking
-                             * for mixed case identifiers will be done
-                             * elsewhere.
-                             */
-
-                            while (line[endx] == '_' ||
-                                   isalnum(line[endx]))
-                              {
-                                endx++;
-                              }
-
-                            /* Skip over spaces */
-
-                            while (line[endx] == ' ')
-                              {
-                                whitespace = true;
-                                endx++;
-                              }
-
-                            /* Handle according to what comes after the
-                             * identifier.
-                             */
-
-                            if (strncmp(&line[sndx], "while", 5) == 0)
-                              {
-                                 ERROR("'while' must be on a separate line",
-                                        lineno, sndx);
-                              }
-                            else if (line[endx] == ',')
-                              {
-                                 ERROR("Multiple data definitions on line",
-                                        lineno, endx);
-                              }
-                            else if (line[endx] == ';')
-                              {
-                                if (whitespace)
-                                  {
-                                     ERROR("Space precedes semi-colon",
-                                           lineno, endx);
-                                  }
-                              }
-                            else if (line[endx] == '=')
-                              {
-                                /* There's a struct initialization following */
-
-                                check_spaces_leftright(line, lineno, endx, endx);
-                                dnest = 1;
-                              }
-                            else
-                              {
-                                 ERROR("Garbage follows right bracket",
-                                       lineno, n);
-                              }
-                          }
-                        else
-                          {
-                             ERROR("Garbage follows right bracket", lineno, n);
-                          }
+                        check_spaces_left(line, lineno, n);
                       }
 
-                    /* The right brace should not be preceded with a a blank
-                     * line.
-                     */
+                    break;
 
-                    if (lineno == blank_lineno + 1)
+                  case '+':
+
+                    /* ++ */
+
+                    if (line[n + 1] == '+')
                       {
-                         ERROR("Blank line precedes right brace at line",
-                                lineno, 1);
+                        /* "++" should be next to its operand. If there are
+                         * whitespaces or non-operand characters on both left
+                         * and right (e.g. "a ++ ", "a[i ++]", "(++ i)"),
+                         * there's an error.
+                         */
+
+                        check_operand_leftright(line, lineno, n, n + 1);
+                        n++;
                       }
 
-                    rbrace_lineno  = lineno;
-                  }
-                  break;
+                    /* += */
 
-                /* Handle logic with parentheses */
-
-                case '(':
-                  {
-                    /* Increase the parenthetical nesting level */
-
-                    pnest++;
-
-                   /* Check for inappropriate space around parentheses */
-
-                    if (line[n + 1] == ' ')
+                    else if (line[n + 1] == '=')
                       {
-                         ERROR("Space follows left parenthesis", lineno, n);
-                      }
-                  }
-                  break;
-
-                case ')':
-                  {
-                    /* Decrease the parenthetical nesting level */
-
-                    if (pnest < 1)
-                      {
-                        ERROR("Unmatched right parentheses", lineno, n);
-                        pnest = 0;
+                        check_spaces_leftright(line, lineno, n, n + 1);
+                        n++;
                       }
                     else
-                     {
-                       pnest--;
-                     }
-
-                    /* Allow ')' as first thing on the line (n == indent)
-                     * Allow "for (xx; xx; )" (bfor == true)
-                     */
-
-                    if (n > 0 && n != indent && line[n - 1] == ' ' && !bfor)
                       {
-                        ERROR("Space precedes right parenthesis", lineno, n);
+                        /* '+' may function as a unary operator and snuggle
+                         * on the left.
+                         */
+
+                        check_spaces_left(line, lineno, n);
                       }
 
-                    /* Unset bif if last parenthesis is closed */
+                    break;
 
-                    if (bif == true && pnest == 0)
+                  case '&':
+
+                    /* &<variable> OR &(<expression>) */
+
+                    if (isalpha((int)line[n + 1]) || line[n + 1] == '_' ||
+                        line[n + 1] == '(')
                       {
-                        bif = false;
                       }
 
-                    /* Remember where the header ends, to see what follows */
+                    /* &&, &= */
 
-                    if (ctrl_kw != NULL && pnest == 0 && ctrl_hdrend < 0)
+                    else if (line[n + 1] == '=' || line[n + 1] == '&')
                       {
-                        ctrl_hdrend = n;
+                        check_spaces_leftright(line, lineno, n, n + 1);
+                        n++;
                       }
-                  }
-                  break;
-
-                /* Check for inappropriate space around square brackets */
-
-                case '[':
-                  {
-                    if (line[n + 1] == ' ')
+                    else
                       {
-                         ERROR("Space follows left bracket", lineno, n);
-                      }
-                  }
-                  break;
-
-                case ']':
-                  {
-                    if (n > 0 && line[n - 1] == ' ')
-                      {
-                         ERROR("Space precedes right bracket", lineno, n);
-                      }
-                  }
-                  break;
-
-                /* Semi-colon may terminate a declaration */
-
-                case ';':
-                  {
-                    if (!isspace((int)line[n + 1]))
-                      {
-                        ERROR("Missing whitespace after semicolon", lineno, n);
+                        check_spaces_leftright(line, lineno, n, n);
                       }
 
-                    /* Semicolon terminates a declaration/definition if there
-                     * was no left curly brace (i.e., dnest is only 1).
-                     */
+                    break;
 
-                    if (dnest == 1)
+                  case '/':
+
+                    /* C comment terminator */
+
+                    if (line[n - 1] == '*')
                       {
-                        dnest = 0;
+                        n++;
                       }
-                  }
-                  break;
-                case ':':
-                  {
-                    if (bcase == true)
-                      {
-                        char *ndx = &line[n + 1];
-                        while ((int)isspace(*ndx))
-                          {
-                            ndx++;
-                          }
-
-                        if (*ndx != '\0' && *ndx != '/')
-                          {
-                            ERROR("Case statement should be on a new line",
-                                  lineno, n);
-                          }
-
-                        bcase = false;
-                      }
-                  }
-                  break;
-                case ',':
-                  {
-                    if (!isspace((int)line[n + 1]))
-                      {
-                        ERROR("Missing whitespace after comma", lineno, n);
-                      }
-                  }
-                  break;
-
-                /* Skip over character constants */
-
-                case '\'':
-                  {
-                    int endndx = n + 2;
-
-                    if (line[n + 1] != '\n' && line[n + 1] != '\0')
-                      {
-                        if (line[n + 1] == '\\')
-                          {
-                            for (;
-                                 line[endndx] != '\n' &&
-                                 line[endndx] != '\0' &&
-                                 line[endndx] != '\'';
-                                 endndx++);
-                          }
-
-                        n = endndx;
-                      }
-                  }
-                  break;
-
-                /* Check for space around various operators */
-
-                case '-':
-
-                  /* -> */
-
-                  if (line[n + 1] == '>')
-                    {
-                      /* -> must have no whitespaces on its left or right */
-
-                      check_nospaces_leftright(line, lineno, n, n + 1);
-                      n++;
-                    }
-
-                  /* -- */
-
-                  else if (line[n + 1] == '-')
-                    {
-                      /* "--" should be next to its operand. If there are
-                       * whitespaces or non-operand characters on both left
-                       * and right (e.g. "a -- ", "a[i --]", "(-- i)"),
-                       * there's an error.
-                       */
-
-                      check_operand_leftright(line, lineno, n, n + 1);
-                      n++;
-                    }
-
-                  /* -= */
-
-                  else if (line[n + 1] == '=')
-                    {
-                      check_spaces_leftright(line, lineno, n, n + 1);
-                      n++;
-                    }
-
-                  /* Scientific notation with a negative exponent (eg. 10e-10)
-                   * REVISIT: This fails for cases where the variable name
-                   *          ends with 'e' preceded by a digit:
-                   *          a = abc1e-10;
-                   *          a = ABC1E-10;
-                   */
-
-                  else if ((line[n - 1] == 'e' || line[n - 1] == 'E') &&
-                           isdigit(line[n + 1]) && isdigit(line[n - 2]))
-                    {
-                      n++;
-                    }
-                  else
-                    {
-                      /* '-' may function as a unary operator and snuggle
-                       * on the left.
-                       */
-
-                      check_spaces_left(line, lineno, n);
-                    }
-
-                  break;
-
-                case '+':
-
-                  /* ++ */
-
-                  if (line[n + 1] == '+')
-                    {
-                      /* "++" should be next to its operand. If there are
-                       * whitespaces or non-operand characters on both left
-                       * and right (e.g. "a ++ ", "a[i ++]", "(++ i)"),
-                       * there's an error.
-                       */
-
-                      check_operand_leftright(line, lineno, n, n + 1);
-                      n++;
-                    }
-
-                  /* += */
-
-                  else if (line[n + 1] == '=')
-                    {
-                      check_spaces_leftright(line, lineno, n, n + 1);
-                      n++;
-                    }
-                  else
-                    {
-                      /* '+' may function as a unary operator and snuggle
-                       * on the left.
-                       */
-
-                      check_spaces_left(line, lineno, n);
-                    }
-
-                  break;
-
-                case '&':
-
-                  /* &<variable> OR &(<expression>) */
-
-                  if (isalpha((int)line[n + 1]) || line[n + 1] == '_' ||
-                      line[n + 1] == '(')
-                    {
-                    }
-
-                  /* &&, &= */
-
-                  else if (line[n + 1] == '=' || line[n + 1] == '&')
-                    {
-                      check_spaces_leftright(line, lineno, n, n + 1);
-                      n++;
-                    }
-                  else
-                    {
-                      check_spaces_leftright(line, lineno, n, n);
-                    }
-
-                  break;
-
-                case '/':
-
-                  /* C comment terminator */
-
-                  if (line[n - 1] == '*')
-                    {
-                      n++;
-                    }
 
                     /* C++-style comment */
 
-                  else if (line[n + 1] == '/')
-                    {
-                      /* Check for "http://" or "https://" */
+                    else if (line[n + 1] == '/')
+                      {
+                        /* Check for "http://" or "https://" */
 
-                      if ((n < 5 || strncmp(&line[n - 5], "http://", 7) != 0) &&
-                          (n < 6 || strncmp(&line[n - 6], "https://", 8) != 0))
-                        {
-                          ERROR("C++ style comment on at %d:%d\n",
-                                lineno, n);
-                        }
+                        if ((n < 5 ||
+                             strncmp(&line[n - 5], "http://", 7) != 0) &&
+                            (n < 6 ||
+                             strncmp(&line[n - 6], "https://", 8) != 0))
+                          {
+                            ERROR("C++ style comment on at %d:%d\n",
+                                  lineno, n);
+                          }
 
-                      n++;
-                    }
+                        n++;
+                      }
 
-                  /* /= */
+                    /* /= */
 
-                  else if (line[n + 1] == '=')
-                    {
-                      check_spaces_leftright(line, lineno, n, n + 1);
-                      n++;
-                    }
+                    else if (line[n + 1] == '=')
+                      {
+                        check_spaces_leftright(line, lineno, n, n + 1);
+                        n++;
+                      }
 
-                  /* Division operator */
+                    /* Division operator */
 
-                  else
-                    {
-                      check_spaces_leftright(line, lineno, n, n);
-                    }
+                    else
+                      {
+                        check_spaces_leftright(line, lineno, n, n);
+                      }
 
-                  break;
+                    break;
 
-                case '*':
+                  case '*':
 
-                  /* *\/, ** */
+                    /* *\/, ** */
 
-                  if (line[n] == '*' &&
-                      (line[n + 1] == '/' ||
-                       line[n + 1] == '*'))
-                    {
-                     n++;
-                     break;
-                    }
+                    if (line[n] == '*' &&
+                        (line[n + 1] == '/' ||
+                         line[n + 1] == '*'))
+                      {
+                        n++;
+                        break;
+                      }
 
-                  /* *<variable>, *(<expression>) */
+                    /* *<variable>, *(<expression>) */
 
-                  else if (isalpha((int)line[n + 1]) ||
-                           line[n + 1] == '_' ||
-                           line[n + 1] == '(')
-                    {
-                      break;
-                    }
+                    else if (isalpha((int)line[n + 1]) ||
+                             line[n + 1] == '_' ||
+                             line[n + 1] == '(')
+                      {
+                        break;
+                      }
 
-                  /* (<type> *) */
+                    /* (<type> *) */
 
-                  else if (line[n + 1] == ')')
-                    {
-                      /* REVISIT: This gives false alarms on syntax like *--ptr */
+                    else if (line[n + 1] == ')')
+                      {
+                        /* REVISIT: This gives false alarms on syntax
+                         * like *--ptr
+                         */
 
-                      if (line[n - 1] != ' ' && line[n - 1] != '(')
-                        {
-                           ERROR("Operator/assignment must be preceded "
-                                  "with whitespace", lineno, n);
-                        }
+                        if (line[n - 1] != ' ' && line[n - 1] != '(')
+                          {
+                            ERROR("Operator/assignment must be preceded "
+                                   "with whitespace", lineno, n);
+                          }
 
-                      break;
-                    }
+                        break;
+                      }
 
-                  /* *= */
+                    /* *= */
 
-                  else if (line[n + 1] == '=')
-                    {
-                      check_spaces_leftright(line, lineno, n, n + 1);
-                      n++;
-                    }
-                  else
-                    {
-                      /* A single '*' may be an binary operator, but
-                       * it could also be a unary operator when used to deference
-                       * a pointer.
-                       */
+                    else if (line[n + 1] == '=')
+                      {
+                        check_spaces_leftright(line, lineno, n, n + 1);
+                        n++;
+                      }
+                    else
+                      {
+                        /* A single '*' may be an binary operator, but
+                         * it could also be a unary operator when used to
+                         * deference a pointer.
+                         */
 
-                      check_spaces_left(line, lineno, n);
-                    }
+                        check_spaces_left(line, lineno, n);
+                      }
 
-                  break;
+                    break;
 
-                case '%':
+                  case '%':
 
-                  /* %= */
+                    /* %= */
 
-                  if (line[n + 1] == '=')
-                    {
-                      check_spaces_leftright(line, lineno, n, n + 1);
-                      n++;
-                    }
-                  else
-                    {
-                      check_spaces_leftright(line, lineno, n, n);
-                    }
+                    if (line[n + 1] == '=')
+                      {
+                        check_spaces_leftright(line, lineno, n, n + 1);
+                        n++;
+                      }
+                    else
+                      {
+                        check_spaces_leftright(line, lineno, n, n);
+                      }
 
-                  break;
+                    break;
 
-                case '<':
+                  case '<':
 
-                  /* <=, <<, <<= */
+                    /* <=, <<, <<= */
 
-                  if (line[n + 1] == '=')
-                    {
-                      check_spaces_leftright(line, lineno, n, n + 1);
-                      n++;
-                    }
-                  else if (line[n + 1] == '<')
-                    {
-                      if (line[n + 2] == '=')
-                        {
-                          check_spaces_leftright(line, lineno, n, n + 2);
-                          n += 2;
-                        }
-                      else
-                        {
-                          check_spaces_leftright(line, lineno, n, n + 1);
-                          n++;
-                        }
-                    }
-                  else
-                    {
-                      check_spaces_leftright(line, lineno, n, n);
-                    }
+                    if (line[n + 1] == '=')
+                      {
+                        check_spaces_leftright(line, lineno, n, n + 1);
+                        n++;
+                      }
+                    else if (line[n + 1] == '<')
+                      {
+                        if (line[n + 2] == '=')
+                          {
+                            check_spaces_leftright(line, lineno, n, n + 2);
+                            n += 2;
+                          }
+                        else
+                          {
+                            check_spaces_leftright(line, lineno, n, n + 1);
+                            n++;
+                          }
+                      }
+                    else
+                      {
+                        check_spaces_leftright(line, lineno, n, n);
+                      }
 
-                  break;
+                    break;
 
-                case '>':
+                  case '>':
 
-                  /* >=, >>, >>= */
+                    /* >=, >>, >>= */
 
-                  if (line[n + 1] == '=')
-                    {
-                      check_spaces_leftright(line, lineno, n, n + 1);
-                      n++;
-                    }
-                  else if (line[n + 1] == '>')
-                    {
-                      if (line[n + 2] == '=')
-                        {
-                          check_spaces_leftright(line, lineno, n, n + 2);
-                          n += 2;
-                        }
-                      else
-                        {
-                          check_spaces_leftright(line, lineno, n, n + 1);
-                          n++;
-                        }
-                    }
-                  else
-                    {
-                      check_spaces_leftright(line, lineno, n, n);
-                    }
+                    if (line[n + 1] == '=')
+                      {
+                        check_spaces_leftright(line, lineno, n, n + 1);
+                        n++;
+                      }
+                    else if (line[n + 1] == '>')
+                      {
+                        if (line[n + 2] == '=')
+                          {
+                            check_spaces_leftright(line, lineno, n, n + 2);
+                            n += 2;
+                          }
+                        else
+                          {
+                            check_spaces_leftright(line, lineno, n, n + 1);
+                            n++;
+                          }
+                      }
+                    else
+                      {
+                        check_spaces_leftright(line, lineno, n, n);
+                      }
 
-                  break;
+                    break;
 
-                case '|':
+                  case '|':
 
-                  /* |=, || */
+                    /* |=, || */
 
-                  if (line[n + 1] == '=')
-                    {
-                      check_spaces_leftright(line, lineno, n, n + 1);
-                      n++;
-                    }
-                  else if (line[n + 1] == '|')
-                    {
-                      check_spaces_leftright(line, lineno, n, n + 1);
-                      n++;
-                    }
-                  else
-                    {
-                      check_spaces_leftright(line, lineno, n, n);
-                    }
+                    if (line[n + 1] == '=')
+                      {
+                        check_spaces_leftright(line, lineno, n, n + 1);
+                        n++;
+                      }
+                    else if (line[n + 1] == '|')
+                      {
+                        check_spaces_leftright(line, lineno, n, n + 1);
+                        n++;
+                      }
+                    else
+                      {
+                        check_spaces_leftright(line, lineno, n, n);
+                      }
 
-                  break;
-                case '^':
+                    break;
+                  case '^':
 
-                  /* ^= */
+                    /* ^= */
 
-                  if (line[n + 1] == '=')
-                    {
-                      check_spaces_leftright(line, lineno, n, n + 1);
-                      n++;
-                    }
-                  else
-                    {
-                      check_spaces_leftright(line, lineno, n, n);
-                    }
+                    if (line[n + 1] == '=')
+                      {
+                        check_spaces_leftright(line, lineno, n, n + 1);
+                        n++;
+                      }
+                    else
+                      {
+                        check_spaces_leftright(line, lineno, n, n);
+                      }
 
-                  break;
+                    break;
 
-                case '=':
+                  case '=':
 
-                  /* == */
+                    /* == */
 
-                  if (line[n + 1] == '=')
-                    {
-                      check_spaces_leftright(line, lineno, n, n + 1);
-                      n++;
-                    }
-                  else
-                    {
-                      check_spaces_leftright(line, lineno, n, n);
-                    }
+                    if (line[n + 1] == '=')
+                      {
+                        check_spaces_leftright(line, lineno, n, n + 1);
+                        n++;
+                      }
+                    else
+                      {
+                        check_spaces_leftright(line, lineno, n, n);
+                      }
 
-                  break;
+                    break;
 
-                case '~':
-                  check_spaces_left(line, lineno, n);
-                  break;
+                  case '~':
+                    check_spaces_left(line, lineno, n);
+                    break;
 
-                case '!':
+                  case '!':
 
-                  /* != */
+                    /* != */
 
-                  if (line[n + 1] == '=')
-                    {
-                      check_spaces_leftright(line, lineno, n, n + 1);
-                      n++;
-                    }
+                    if (line[n + 1] == '=')
+                      {
+                        check_spaces_leftright(line, lineno, n, n + 1);
+                        n++;
+                      }
 
-                  /* !! */
+                    /* !! */
 
-                  else if (line[n + 1] == '!')
-                    {
-                      check_spaces_left(line, lineno, n);
-                      n++;
-                    }
-                  else
-                    {
-                      check_spaces_left(line, lineno, n);
-                    }
+                    else if (line[n + 1] == '!')
+                      {
+                        check_spaces_left(line, lineno, n);
+                        n++;
+                      }
+                    else
+                      {
+                        check_spaces_left(line, lineno, n);
+                      }
 
-                  break;
+                    break;
 
-                default:
-                  break;
+                  default:
+                    break;
                 }
             }
         }
@@ -3512,6 +3552,7 @@ int main(int argc, char **argv, char **envp)
            */
 
           int m = n;
+
           if (line[m] == '\0' && m > 0)
             {
               m--;
@@ -3606,7 +3647,13 @@ int main(int argc, char **argv, char **envp)
                * an 'else if', or alternatives sharing the braces that follow.
                */
 
-              if (line[indent] != '{' && !bctrlline)
+              if (line[indent] == '{')
+                {
+                  /* The brace sits one level in from the keyword */
+
+                  ctrl_brace = brace_indent + 2;
+                }
+              else if (!bctrlline)
                 {
                   snprintf(buffer, sizeof(buffer),
                            "Missing braces after '%s'", brace_kw);
@@ -3633,7 +3680,8 @@ int main(int argc, char **argv, char **envp)
                 {
                   /* The brace must appear on a following line */
 
-                  brace_kw = ctrl_kw;
+                  brace_kw     = ctrl_kw;
+                  brace_indent = ctrl_indent;
                 }
               else if (line[ndx] == ';' &&
                        (strcmp(ctrl_kw, "while") == 0 ||
@@ -3706,7 +3754,7 @@ int main(int argc, char **argv, char **envp)
 
                   if ((indent & 3) != 2 && rhcomment == 0)
                     {
-                       ERROR("Bad comment alignment", lineno, indent);
+                      ERROR("Bad comment alignment", lineno, indent);
                     }
 
                   /* REVISIT:  This screws up in cases where there is C code,
@@ -3715,7 +3763,7 @@ int main(int argc, char **argv, char **envp)
 
                   else if (line[indent + 1] != '*')
                     {
-                       ERROR("Missing asterisk in comment", lineno, indent);
+                      ERROR("Missing asterisk in comment", lineno, indent);
                     }
                 }
               else if (line[indent] == '*')
@@ -3733,7 +3781,7 @@ int main(int argc, char **argv, char **envp)
                   if ((indent & 3) != 3 && bfunctions && dnest == 0 &&
                       rhcomment == 0)
                     {
-                       ERROR("Bad comment block alignment", lineno, indent);
+                      ERROR("Bad comment block alignment", lineno, indent);
                     }
 
                   if (line[indent + 1] != ' ' &&
@@ -3741,8 +3789,8 @@ int main(int argc, char **argv, char **envp)
                       line[indent + 1] != '\n' &&
                       line[indent + 1] != '/')
                     {
-                       ERROR("Invalid character after asterisk "
-                             "in comment block", lineno, indent);
+                      ERROR("Invalid character after asterisk "
+                            "in comment block", lineno, indent);
                     }
                 }
 
@@ -3763,9 +3811,9 @@ int main(int argc, char **argv, char **envp)
         {
           if (indent == 0 && strchr("\n#{}", line[0]) == NULL)
             {
-               /* Ignore if we are at global scope */
+              /* Ignore if we are at global scope */
 
-               if (prevbnest > 0)
+              if (prevbnest > 0)
                 {
                   bool blabel = false;
 
@@ -3811,6 +3859,26 @@ int main(int argc, char **argv, char **envp)
                * the coding standard.
                */
 
+              /* A brace opening the body of a control statement must be
+               * indented exactly one level from its keyword.
+               */
+
+              else if (ctrl_brace >= 0)
+                {
+                  if (indent != ctrl_brace)
+                    {
+                      ERROR("Bad left brace alignment", lineno, indent);
+                    }
+
+                  /* Record what the brace should have been so that the brace
+                   * closing it is held to the same alignment.
+                   */
+
+                  if (bnest >= 1 && bnest <= MAX_BRACE)
+                    {
+                      lbrace_indent[bnest - 1] = ctrl_brace;
+                    }
+                }
               else if (!bfunctions && (indent & 1) != 0)
                 {
                   ERROR("Bad left brace alignment", lineno, indent);
@@ -3827,7 +3895,16 @@ int main(int argc, char **argv, char **envp)
                * the coding standard.
                */
 
-              if (!bfunctions && (indent & 1) != 0)
+              /* A right brace must line up with the left brace it closes */
+
+              if (rbrace_match >= 0)
+                {
+                  if (indent != rbrace_match)
+                    {
+                      ERROR("Bad right brace alignment", lineno, indent);
+                    }
+                }
+              else if (!bfunctions && (indent & 1) != 0)
                 {
                   ERROR("Bad left brace alignment", lineno, indent);
                 }
