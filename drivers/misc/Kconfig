@@ -159,6 +159,20 @@ bool "Lightweight Link Console Support"
 
 menu "Buffering"
 
+config BLOCK_CACHE
+	bool "Enable block cache wrapper"
+	default n
+	---help---
+		A block driver which can encapsulate another block device to
+		provide read-ahead and write buffering on multiple block ranges.
+
+if BLOCK_CACHE
+	config BLOCK_CACHE_DEBUG
+		bool "Debug block cache buffers"
+		default n
+endif
+
+
 config DRVR_WRITEBUFFER
 	bool "Enable write buffer support"
 	default n
