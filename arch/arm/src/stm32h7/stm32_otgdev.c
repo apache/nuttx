@@ -3362,7 +3362,7 @@ static inline void stm32_rxinterrupt(struct stm32_usbdev_s *priv)
                 regval  = stm32_getreg(STM32_OTG_DOEPCTL(0));
                 regval |= OTG_DOEPCTL0_CNAK;
                 stm32_putreg(regval, STM32_OTG_DOEPCTL(0));
-            }
+              }
           }
           break;
 
@@ -5565,8 +5565,9 @@ static void stm32_hwinitialize(struct stm32_usbdev_s *priv)
 
   /* Enable the interrupts in the INTMSK */
 
-  regval = (OTG_GINT_RXFLVL | OTG_GINT_USBSUSP | OTG_GINT_ENUMDNE |
-            OTG_GINT_IEP | OTG_GINT_OEP | OTG_GINT_USBRST);
+  regval = (OTG_GINT_RXFLVL | OTG_GINT_USBSUSP | OTG_GINT_WKUP |
+            OTG_GINT_ENUMDNE | OTG_GINT_IEP | OTG_GINT_OEP |
+            OTG_GINT_USBRST);
 
 #ifdef CONFIG_USBDEV_ISOCHRONOUS
   regval |= (OTG_GINT_IISOIXFR | OTG_GINT_IISOOXFR);
