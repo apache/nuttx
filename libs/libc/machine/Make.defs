@@ -20,7 +20,11 @@
 #
 ############################################################################
 
-CSRCS += arch_atomic.c
+ifeq ($(CONFIG_LIBC_ATOMIC_IRQ),y)
+  CSRCS += arch_atomic_irq.c
+endif
+
+CSRCS += arch_atomic64.c
 
 ifeq ($(CONFIG_MM_KASAN),y)
   CSRCS += arch_libc.c

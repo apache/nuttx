@@ -96,7 +96,7 @@ int nxsem_post_slow(FAR sem_t *sem)
 
       /* Lock the mutex for us by setting the blocking bit */
 
-      mholder = atomic_fetch_or(NXSEM_MHOLDER(sem), NXSEM_MBLOCKING_BIT);
+      mholder = atomic_or(NXSEM_MHOLDER(sem), NXSEM_MBLOCKING_BIT);
 
       /* Mutex post from another thread is not allowed, unless
        * called from nxsem_reset.  The comparison uses the same encoding

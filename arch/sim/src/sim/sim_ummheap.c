@@ -174,8 +174,8 @@ static void update_stats(struct mm_heap_s *heap, void *mem, size_t size,
       list_add_tail(&heap->alloclist, &node->node);
       spin_unlock_irqrestore(&heap->lock, flags);
 
-      atomic_fetch_add(&heap->aordblks, 1);
-      atomic_fetch_add(&heap->uordblks, size);
+      atomic_add(&heap->aordblks, 1);
+      atomic_add(&heap->uordblks, size);
       usmblks = atomic_read(&heap->usmblks);
       do
         {
@@ -189,8 +189,8 @@ static void update_stats(struct mm_heap_s *heap, void *mem, size_t size,
       list_delete(&node->node);
       spin_unlock_irqrestore(&heap->lock, flags);
 
-      atomic_fetch_sub(&heap->aordblks, 1);
-      atomic_fetch_sub(&heap->uordblks, size);
+      atomic_sub(&heap->aordblks, 1);
+      atomic_sub(&heap->uordblks, size);
     }
 }
 

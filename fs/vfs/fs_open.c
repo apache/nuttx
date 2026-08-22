@@ -358,7 +358,7 @@ int file_open(FAR struct file *filep, FAR const char *path, int oflags, ...)
 
   if (ret >= OK)
     {
-      atomic_fetch_add(&filep->f_refs, 1);
+      atomic_add(&filep->f_refs, 1);
     }
 
   return ret;

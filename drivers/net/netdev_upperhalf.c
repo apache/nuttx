@@ -169,7 +169,7 @@ static FAR netpkt_t *netpkt_get(FAR struct net_driver_s *dev,
    * cases will be limited by netdev_upper_can_tx and seldom reaches here.
    */
 
-  if (atomic_fetch_sub(&upper->lower->quota_ptr[type], 1) <= 0)
+  if (atomic_sub(&upper->lower->quota_ptr[type], 1) <= 0)
     {
       nwarn("WARNING: Allowing temporarily exceeding quota of %s.\n",
             dev->d_ifname);
@@ -196,7 +196,7 @@ static void netpkt_put(FAR struct net_driver_s *dev, FAR netpkt_t *pkt,
 
   DEBUGASSERT(dev && pkt);
 
-  atomic_fetch_add(&upper->lower->quota_ptr[type], 1);
+  atomic_add(&upper->lower->quota_ptr[type], 1);
   netdev_iob_replace_l2(dev, pkt);
 }
 
@@ -1723,9 +1723,9 @@ FAR netpkt_t *netpkt_alloc(FAR struct netdev_lowerhalf_s *dev,
 {
   FAR netpkt_t *pkt;
 
-  if (atomic_fetch_sub(&dev->quota_ptr[type], 1) <= 0)
+  if (atomic_sub(&dev->quota_ptr[type], 1) <= 0)
     {
-      atomic_fetch_add(&dev->quota_ptr[type], 1);
+      atomic_add(&dev->quota_ptr[type], 1);
       return NULL;
     }
 
@@ -1742,7 +1742,7 @@ FAR netpkt_t *netpkt_alloc(FAR struct netdev_lowerhalf_s *dev,
 
   if (pkt == NULL)
     {
-      atomic_fetch_add(&dev->quota_ptr[type], 1);
+      atomic_add(&dev->quota_ptr[type], 1);
       return NULL;
     }
 
@@ -1766,7 +1766,7 @@ FAR netpkt_t *netpkt_alloc(FAR struct netdev_lowerhalf_s *dev,
 void netpkt_free(FAR struct netdev_lowerhalf_s *dev, FAR netpkt_t *pkt,
                  enum netpkt_type_e type)
 {
-  atomic_fetch_add(&dev->quota_ptr[type], 1);
+  atomic_add(&dev->quota_ptr[type], 1);
   iob_free_chain(pkt);
 }
 

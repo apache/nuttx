@@ -82,6 +82,7 @@ config ARCH_CHIP_BL602
 	select ONESHOT_COUNT
 	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
+	select LIBC_ATOMIC_IRQ
 	---help---
 		BouffaloLab BL602(rv32imfc)
 
@@ -112,6 +113,7 @@ config ARCH_CHIP_ESP32C3_LEGACY
 	select ARCH_HAVE_RAMFUNCS
 	select ONESHOT_COUNT if ONESHOT
 	select ONESHOT_FAST_DIVISION if ONESHOT
+	select LIBC_ATOMIC_IRQ
 	---help---
 		Espressif ESP32-C3 (RV32IMC). Legacy implementation.
 
@@ -145,6 +147,7 @@ config ARCH_CHIP_ESP32C3
 	select ONESHOT_COUNT if ONESHOT
 	select ONESHOT_FAST_DIVISION if ONESHOT
 	select ARCH_MINIMAL_VECTORTABLE
+	select LIBC_ATOMIC_IRQ
 	---help---
 		ESP32-C3 chip with a single RISC-V IMC core, no embedded Flash memory
 
@@ -210,6 +213,7 @@ config ARCH_CHIP_ESP32H2
 	select ONESHOT_COUNT if ONESHOT
 	select ONESHOT_FAST_DIVISION if ONESHOT
 	select ARCH_MINIMAL_VECTORTABLE
+	select LIBC_ATOMIC_IRQ
 	---help---
 		Espressif ESP32-H2 (RV32IMC).
 
@@ -296,6 +300,7 @@ config ARCH_CHIP_RV32M1
 	select ONESHOT_COUNT
 	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
+	select LIBC_ATOMIC_IRQ
 	---help---
 		NXP RV32M1 processor (RISC-V Core with PULP extensions).
 

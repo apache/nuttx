@@ -420,12 +420,12 @@ static int bt_bridge_open(FAR struct bt_driver_s *drv)
   FAR struct bt_bridge_s *bridge = device->bridge;
   FAR struct bt_driver_s *driver = bridge->driver;
 
-  if (atomic_fetch_add(&bridge->refs, 1) == 0)
+  if (atomic_add(&bridge->refs, 1) == 0)
     {
       int ret = driver->open(driver);
       if (ret < 0)
         {
-          atomic_fetch_sub(&bridge->refs, 1);
+          atomic_sub(&bridge->refs, 1);
         }
 
       return ret;
@@ -514,7 +514,7 @@ static void bt_bridge_close(FAR struct bt_driver_s *drv)
   FAR struct bt_bridge_s *bridge = device->bridge;
   FAR struct bt_driver_s *driver = bridge->driver;
 
-  if (atomic_fetch_sub(&bridge->refs, 1) == 1)
+  if (atomic_sub(&bridge->refs, 1) == 1)
     {
       driver->close(driver);
     };

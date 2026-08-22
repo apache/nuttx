@@ -112,14 +112,14 @@ void nxsem_recover(FAR struct tcb_s *tcb)
           if (dq_empty(SEM_WAITLIST(sem)))
             {
               uint32_t mholder =
-                atomic_fetch_and(NXSEM_MHOLDER(sem), ~NXSEM_MBLOCKING_BIT);
+                atomic_and(NXSEM_MHOLDER(sem), ~NXSEM_MBLOCKING_BIT);
               DEBUGASSERT(NXSEM_MBLOCKING(mholder));
             }
         }
       else
         {
           DEBUGASSERT(atomic_read(NXSEM_COUNT(sem)) < 0);
-          atomic_fetch_add(NXSEM_COUNT(sem), 1);
+          atomic_add(NXSEM_COUNT(sem), 1);
         }
 
 #ifdef CONFIG_MM_KMAP
