@@ -21,7 +21,7 @@ CPU1         No     1.2GHz MIPS32 processor
 RAM          Yes    256MiB
 ADC          No
 Audio        No
-Display      Yes    HDMI (EDID not yet supported)
+Display      Yes    HDMI
 DMA          No
 Ethernet     Yes    Fast Ethernet (DM9000)
 GPIO         Yes

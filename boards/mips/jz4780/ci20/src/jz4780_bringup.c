@@ -41,10 +41,17 @@
 #endif
 
 #include "ci20.h"
+#include "jz4780_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define HDMI_CEC      (GPIO_MODE_DEVICE0 | GPIO_PORTF | GPIO_PIN23)
+#define HDMI_SCL      (GPIO_MODE_DEVICE0 | GPIO_PORTF | GPIO_PIN24)
+#define HDMI_SDA      (GPIO_MODE_DEVICE0 | GPIO_PORTF | GPIO_PIN25)
+
+#define HDMI_POWER_EN (GPIO_MODE_OUTPUT1 | GPIO_PORTA | GPIO_PIN25)
 
 /****************************************************************************
  * Private Data
@@ -92,6 +99,14 @@ int jz4780_bringup(void)
 #endif
 
 #ifdef CONFIG_VIDEO_FB
+
+  /* Configure the DDC pins */
+
+  jz4780_configgpio(HDMI_POWER_EN);
+  jz4780_configgpio(HDMI_CEC);
+  jz4780_configgpio(HDMI_SDA);
+  jz4780_configgpio(HDMI_SCL);
+
   /* Initialize and register the framebuffer driver */
 
   ret = fb_register(0, 0);

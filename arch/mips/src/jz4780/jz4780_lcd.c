@@ -42,6 +42,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/video/edid.h>
 #include <nuttx/video/fb.h>
 
 #include "mips_internal.h"
@@ -55,25 +56,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define JZ4780_COLOR_FMT    FB_FMT_RGB16_565
+#define JZ4780_BPP          16
+
+#define FB_MAX_BW           (1920 * 1080 * 60)
+#define FB_MAX_W            2048
+#define FB_MAX_H            2048
+#define FB_DIVIDE(x, y)     (((x) + ((y) / 2)) / (y))
+#define FB_MAX_SIZE         (FB_MAX_W * FB_MAX_H * (JZ4780_BPP / 2))
+
+#define DOT_CLOCK_TO_HZ(c)  ((c) * 1000)
+
 #define JZ4780_LCD_VRAMBASE                               0xAF800000
-#define JZ4780_LCD_HWIDTH                                 1360
-#define JZ4780_LCD_VHEIGHT                                768
 
 #define PCFG_MAGIC                                        0xc7ff2100
 
 #define FOREGROUND_OFFSET                                 0x400000
 
-#define VID_PHSYNC                                        0x0001
-#define VID_PVSYNC                                        0x0004
-#define VID_INTERLACE                                     0x0010
-
 #define JZ_REG_SHIFT                                      2
-
-#define JZ4780_COLOR_FMT                                  FB_FMT_RGB16_565
-#define JZ4780_BPP                                        16
-
-#define JZ4780_STRIDE ((JZ4780_LCD_HWIDTH * JZ4780_BPP + 7) / 8)
-#define JZ4780_FBSIZE (JZ4780_STRIDE * JZ4780_LCD_VHEIGHT)
 
 /* HDMI controller registers */
 
@@ -85,6 +85,11 @@
 /* Interrupt Registers */
 #define HDMI_IH_PHY_STAT0                                 0x0104
 #  define HDMI_IH_PHY_STAT0_HPD                           (1 << 0)
+
+#define HDMI_IH_I2CM_STAT0                                0x0105
+#  define HDMI_IH_I2CM_STAT0_DONE                         (1 << 1)
+#  define HDMI_IH_I2CM_STAT0_ERROR                        (1 << 0)
+
 #define HDMI_IH_I2CMPHY_STAT0                             0x0108
 #  define HDMI_IH_I2CMPHY_STAT0_DONE                      (1 << 1)
 #  define HDMI_IH_I2CMPHY_STAT0_ERROR                     (1 << 0)
@@ -238,7 +243,7 @@
 
 /* I2C Master Registers (E-DDC) */
 #define HDMI_I2CM_SLAVE                                   0x7E00
-#define HDMI_I2CMESS                                      0x7E01
+#define HDMI_I2CM_ADDRESS                                 0x7E01
 #define HDMI_I2CM_DATAO                                   0x7E02
 #define HDMI_I2CM_DATAI                                   0x7E03
 #define HDMI_I2CM_OPERATION                               0x7E04
@@ -247,6 +252,7 @@
 #define HDMI_I2CM_INT                                     0x7E05
 #define HDMI_I2CM_CTLINT                                  0x7E06
 #define HDMI_I2CM_DIV                                     0x7E07
+#define  HDMI_I2CM_DIV_MODE_MASK                          0xF7
 #define HDMI_I2CM_SEGADDR                                 0x7E08
 #define HDMI_I2CM_SOFTRSTZ                                0x7E09
 #define HDMI_I2CM_SEGPTR                                  0x7E0A
@@ -341,6 +347,35 @@
 #define LCDDESSIZE_WIDTH_SHIFT                            0
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct lcd_frame_descriptor
+{
+  uint32_t next;
+  uint32_t physaddr;
+  uint32_t id;
+  uint32_t cmd;
+  uint32_t offs;
+  uint32_t pw;
+  uint32_t cnum_pos;
+  uint32_t dessize;
+} __packed;
+
+struct display_s
+{
+  uint32_t fbsize;
+  uint32_t paddr;
+  uint32_t vaddr;
+
+  uint32_t fdesc_paddr;
+  struct lcd_frame_descriptor *fdesc;
+
+  struct videomode_s sc_mode;
+  struct edid_info_s ei;
+};
+
+/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
@@ -375,6 +410,12 @@ static int jz_setcursor(struct fb_vtable_s *vtable,
              struct fb_setcursor_s *settings);
 #endif
 
+static int dwc_hdmi_wait_i2cm_done(int msec);
+static int get_edid(uint8_t *buf, uint8_t block);
+static int jzlcd_get_bandwidth(const struct videomode_s *mode);
+static int jzlcd_mode_supported(const struct videomode_s *mode);
+static int jzlcd_find_mode(struct display_s *sc);
+
 static uint8_t hdmi_rd1(uint32_t off);
 static void hdmi_wr1(uint32_t off, uint8_t val);
 static void dwc_hdmi_init(void);
@@ -385,21 +426,21 @@ static void dwc_hdmi_init(void);
 
 /* This structure describes the video controller */
 
-static const struct fb_videoinfo_s g_videoinfo =
+static struct fb_videoinfo_s g_videoinfo =
 {
   .fmt      = JZ4780_COLOR_FMT,
-  .xres     = JZ4780_LCD_HWIDTH,
-  .yres     = JZ4780_LCD_VHEIGHT,
+  .xres     = 0,
+  .yres     = 0,
   .nplanes  = 1,
 };
 
 /* This structure describes the single color plane */
 
-static const struct fb_planeinfo_s g_planeinfo =
+static struct fb_planeinfo_s g_planeinfo =
 {
   .fbmem    = (void *)JZ4780_LCD_VRAMBASE,
-  .fblen    = JZ4780_FBSIZE,
-  .stride   = JZ4780_STRIDE,
+  .fblen    = 0,
+  .stride   = 0,
   .display  = 0,
   .bpp      = JZ4780_BPP,
 };
@@ -434,44 +475,6 @@ struct fb_vtable_s g_fbobject =
 #endif
 };
 
-struct lcd_frame_descriptor
-{
-  uint32_t next;
-  uint32_t physaddr;
-  uint32_t id;
-  uint32_t cmd;
-  uint32_t offs;
-  uint32_t pw;
-  uint32_t cnum_pos;
-  uint32_t dessize;
-} __packed;
-
-struct videomode_s
-{
-  int dot_clock;    /* Dot clock frequency in kHz. */
-  int hdisplay;
-  int hsync_start;
-  int hsync_end;
-  int htotal;
-  int vdisplay;
-  int vsync_start;
-  int vsync_end;
-  int vtotal;
-  int flags;         /* Video mode flags; see below. */
-};
-
-struct display_s
-{
-  uint32_t fbsize;
-  uint32_t paddr;
-  uint32_t vaddr;
-
-  uint32_t fdesc_paddr;
-  struct lcd_frame_descriptor *fdesc;
-
-  struct videomode_s sc_mode;
-};
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -496,6 +499,29 @@ static void lcd_write(struct display_s *sc, uint32_t reg, uint32_t val)
   putreg32(val, 0xb3050000 + reg);
 }
 
+static int dwc_hdmi_wait_i2cm_done(int msec)
+{
+  uint8_t val;
+
+  val = hdmi_rd1(HDMI_IH_I2CM_STAT0) &
+      (HDMI_IH_I2CM_STAT0_DONE | HDMI_IH_I2CM_STAT0_ERROR);
+
+  while ((val & HDMI_IH_I2CM_STAT0_DONE) == 0)
+    {
+      up_mdelay(10);
+      msec -= 10;
+      if (msec <= 0)
+        {
+          return -ETIMEDOUT;
+        }
+
+      val = hdmi_rd1(HDMI_IH_I2CM_STAT0) &
+          (HDMI_IH_I2CM_STAT0_DONE | HDMI_IH_I2CM_STAT0_ERROR);
+    }
+
+  return 0;
+}
+
 static void
 dwc_hdmi_phy_wait_i2c_done(int msec)
 {
@@ -508,7 +534,10 @@ dwc_hdmi_phy_wait_i2c_done(int msec)
       up_mdelay(10);
       msec -= 10;
       if (msec <= 0)
-        return;
+        {
+          return;
+        }
+
       val = hdmi_rd1(HDMI_IH_I2CMPHY_STAT0) &
           (HDMI_IH_I2CMPHY_STAT0_DONE | HDMI_IH_I2CMPHY_STAT0_ERROR);
     }
@@ -706,7 +735,9 @@ static void dwc_hdmi_clear_overflow(void)
   val = hdmi_rd1(HDMI_FC_INVIDCONF);
 
   for (count = 0 ; count < 4 ; count++)
-    hdmi_wr1(HDMI_FC_INVIDCONF, val);
+    {
+      hdmi_wr1(HDMI_FC_INVIDCONF, val);
+    }
 }
 
 static int
@@ -768,17 +799,29 @@ dwc_hdmi_phy_configure(int dot_clock)
    */
 
   if (dot_clock * 1000 <= 54000000)
-    dwc_hdmi_phy_i2c_write(0x091c, HDMI_PHY_I2C_CURRCTRL);
+    {
+      dwc_hdmi_phy_i2c_write(0x091c, HDMI_PHY_I2C_CURRCTRL);
+    }
   else if (dot_clock * 1000 <= 58400000)
-    dwc_hdmi_phy_i2c_write(0x091c, HDMI_PHY_I2C_CURRCTRL);
+    {
+      dwc_hdmi_phy_i2c_write(0x091c, HDMI_PHY_I2C_CURRCTRL);
+    }
   else if (dot_clock * 1000 <= 72000000)
-    dwc_hdmi_phy_i2c_write(0x06dc, HDMI_PHY_I2C_CURRCTRL);
+    {
+      dwc_hdmi_phy_i2c_write(0x06dc, HDMI_PHY_I2C_CURRCTRL);
+    }
   else if (dot_clock * 1000 <= 74250000)
-    dwc_hdmi_phy_i2c_write(0x06dc, HDMI_PHY_I2C_CURRCTRL);
+    {
+      dwc_hdmi_phy_i2c_write(0x06dc, HDMI_PHY_I2C_CURRCTRL);
+    }
   else if (dot_clock * 1000 <= 118800000)
-    dwc_hdmi_phy_i2c_write(0x091c, HDMI_PHY_I2C_CURRCTRL);
+    {
+      dwc_hdmi_phy_i2c_write(0x091c, HDMI_PHY_I2C_CURRCTRL);
+    }
   else if (dot_clock * 1000 <= 216000000)
-    dwc_hdmi_phy_i2c_write(0x06dc, HDMI_PHY_I2C_CURRCTRL);
+    {
+      dwc_hdmi_phy_i2c_write(0x06dc, HDMI_PHY_I2C_CURRCTRL);
+    }
   else
     {
       /* Unsupported mode */
@@ -835,7 +878,7 @@ dwc_hdmi_phy_configure(int dot_clock)
       up_mdelay(1);
       if (msec-- == 0)
         {
-          lcderr("PHY PLL not locked\n");
+          gerr("PHY PLL not locked\n");
           return -1;
         }
 
@@ -1050,7 +1093,7 @@ dwc_hdmi_set_mode(struct display_s *sc)
 
   dwc_hdmi_disable_overflow_interrupts();
   dwc_hdmi_av_composer(sc);
-  ret = dwc_hdmi_phy_init(sc->sc_mode.dot_clock);
+  ret = dwc_hdmi_phy_init(sc->sc_mode.dotclock);
   if (ret != OK)
     {
       return ret;
@@ -1066,15 +1109,176 @@ dwc_hdmi_set_mode(struct display_s *sc)
   return 0;
 }
 
+/****************************************************************************
+ * Name: get_edid
+ *
+ * Description:
+ *   Read the EDID block from the attached monitor.
+ *
+ * Input Parameters:
+ *   buf   - The buffer into which the data is copied.
+ *   block - Identifies the block being read.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is return on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+static int get_edid(uint8_t *buf, uint8_t block)
+{
+  uint8_t val = hdmi_rd1(HDMI_I2CM_DIV);
+  uint8_t segment = block / 2;
+  uint8_t offset = (block % 2) * 128;
+  int i;
+  int ret;
+
+  if (segment > 0)
+    {
+      return -EINVAL;
+    }
+
+  hdmi_wr1(HDMI_I2CM_DIV, val & HDMI_I2CM_DIV_MODE_MASK);
+  hdmi_wr1(HDMI_I2CM_SLAVE, 0x50);
+
+  hdmi_wr1(HDMI_I2CM_SEGADDR, 0x00);
+  hdmi_wr1(HDMI_I2CM_SEGPTR, segment);
+
+  for (i = 0; i < EDID_LENGTH; i++)
+    {
+      hdmi_wr1(HDMI_IH_I2CM_STAT0, HDMI_IH_I2CM_STAT0_DONE);
+      hdmi_wr1(HDMI_IH_I2CM_STAT0, HDMI_IH_I2CM_STAT0_ERROR);
+
+      hdmi_wr1(HDMI_I2CM_ADDRESS, offset + i);
+
+      hdmi_wr1(HDMI_I2CM_OPERATION, 0x01);
+
+      ret = dwc_hdmi_wait_i2cm_done(1000);
+      if (ret)
+        {
+          return ret;
+        }
+
+      buf[i] = hdmi_rd1(HDMI_I2CM_DATAI);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: jzlcd_get_bandwidth
+ ****************************************************************************/
+
+static int jzlcd_get_bandwidth(const struct videomode_s *mode)
+{
+  int refresh;
+
+  refresh = FB_DIVIDE(FB_DIVIDE(DOT_CLOCK_TO_HZ(mode->dotclock),
+      mode->htotal), mode->vtotal);
+
+  return mode->hdisplay * mode->vdisplay * refresh;
+}
+
+/****************************************************************************
+ * Name: jzlcd_mode_supported
+ ****************************************************************************/
+
+static int jzlcd_mode_supported(const struct videomode_s *mode)
+{
+  if (mode->hdisplay > FB_MAX_W || mode->vdisplay > FB_MAX_H)
+    {
+      return -EINVAL;
+    }
+
+  /* Bandwidth check */
+
+  if (jzlcd_get_bandwidth(mode) > FB_MAX_BW)
+    {
+      return -EINVAL;
+    }
+
+  /* Interlace modes not yet supported by the driver */
+
+  if ((mode->flags & VID_INTERLACE) != 0)
+    {
+      return -EINVAL;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: jzlcd_find_mode
+ ****************************************************************************/
+
+static int jzlcd_find_mode(struct display_s *sc)
+{
+  const struct videomode_s *best;
+  int n;
+  int bw;
+  int best_bw;
+
+  /* If the preferred mode is OK, just use it */
+
+  if (jzlcd_mode_supported(sc->ei.edid_preferred_mode) == OK)
+    {
+      sc->sc_mode = *sc->ei.edid_preferred_mode;
+      return OK;
+    }
+
+  /* Pick the mode with the highest bandwidth requirements */
+
+  best = NULL;
+  best_bw = 0;
+  for (n = 0; n < sc->ei.edid_nmodes; n++)
+    {
+      if (jzlcd_mode_supported(&sc->ei.edid_modes[n]) != OK)
+        {
+          continue;
+        }
+
+      bw = jzlcd_get_bandwidth(&sc->ei.edid_modes[n]);
+      if (bw > FB_MAX_BW)
+        {
+          continue;
+        }
+
+      if (best == NULL || bw > best_bw)
+        {
+          best = &sc->ei.edid_modes[n];
+          best_bw = bw;
+        }
+    }
+
+  if (best)
+    {
+      sc->sc_mode = *best;
+      return OK;
+    }
+  else
+    {
+      return -EINVAL;
+    }
+}
+
 void
 dwc_hdmi_init(void)
 {
-  lcdinfo("HDMI controller %02x:%02x:%02x:%02x\n",
+  ginfo("HDMI controller %02x:%02x:%02x:%02x\n",
       hdmi_rd1(HDMI_DESIGN_ID), hdmi_rd1(HDMI_REVISION_ID),
       hdmi_rd1(HDMI_PRODUCT_ID0), hdmi_rd1(HDMI_PRODUCT_ID1));
 
   hdmi_wr1(HDMI_PHY_POL0, HDMI_PHY_POL0_HPD);
   hdmi_wr1(HDMI_IH_PHY_STAT0, HDMI_IH_PHY_STAT0_HPD);
+}
+
+static uint32_t get_sclk_khz(uint32_t v)
+{
+  uint32_t pllm = PCR_PLLM(v) + 1;
+  uint32_t plln = PCR_PLLN(v) + 1;
+  uint32_t pllod = PCR_PLLOD(v) + 1;
+
+  return ((JZ_EXTCLK / 1000) * pllm / plln) / pllod;
 }
 
 static void
@@ -1130,16 +1334,18 @@ jzlcd_setup_descriptor(struct display_s *sc, const struct videomode_s *mode,
   uint32_t f0height = mode->vdisplay;
   uint32_t f1width  = mode->hdisplay;
   uint32_t f1height = mode->vdisplay;
-
   uint32_t bpp;
+
   bpp = JZ4780_BPP == 16 ? LCDPOS_BPP01_15_16 : LCDPOS_BPP01_24_COMP;
 
   /* Frame size is specified in # words */
 
   int line_sz = ((desno ? f1width : f0width) * JZ4780_BPP) >> 3;
+
   line_sz = ((line_sz + 3) & ~3) / 4;
 
   struct lcd_frame_descriptor *fdesc = sc->fdesc + desno;
+
   fdesc->id = desno;
   fdesc->offs = 0;
   fdesc->pw = 0;
@@ -1229,9 +1435,12 @@ jzlcd_set_videomode(struct display_s *sc, const struct videomode_s *mode)
       + sizeof(struct lcd_frame_descriptor));
   lcd_write(sc, LCDDA1, sc->fdesc_paddr);
 
+  uint32_t sclk = get_sclk_khz(getreg32(CPVPCR_REG));
+  uint32_t lcdiv = sclk / mode->dotclock;
+
   /* Set display clock */
 
-  putreg32(LPCS_VPLL | CE_LCD | LPCDR_VAL, LP1CDR_REG);
+  putreg32(LPCS_VPLL | CE_LCD | (lcdiv - 1), LP1CDR_REG);
   while (getreg32(LP1CDR_REG) & LCD_BUSY)
     {
     }
@@ -1242,9 +1451,10 @@ jzlcd_set_videomode(struct display_s *sc, const struct videomode_s *mode)
 static int
 jzlcd_configure(struct display_s *sc, const struct videomode_s *mode)
 {
+  int ret;
   uint32_t vaddr0 = (uint32_t)JZ4780_LCD_VRAMBASE;
 
-  sc->fbsize = 0x00300000;
+  sc->fbsize = FB_MAX_SIZE - 2*sizeof(struct lcd_frame_descriptor);
   sc->vaddr  = vaddr0;
   sc->paddr  = jz_physramaddr(vaddr0);
   sc->fdesc  = (struct lcd_frame_descriptor *)(sc->vaddr + sc->fbsize);
@@ -1252,10 +1462,10 @@ jzlcd_configure(struct display_s *sc, const struct videomode_s *mode)
 
   /* Setup video mode */
 
-  int error = jzlcd_set_videomode(sc, mode);
-  if (error != 0)
+  ret = jzlcd_set_videomode(sc, mode);
+  if (ret != 0)
     {
-      return error;
+      return ret;
     }
 
   return 0;
@@ -1264,23 +1474,25 @@ jzlcd_configure(struct display_s *sc, const struct videomode_s *mode)
 static void
 jzlcd_hdmi_event(struct display_s *sc)
 {
+  int ret;
+
   /* Stop the controller */
 
   jzlcd_stop(sc);
 
   /* Configure LCD controller */
 
-  int error = jzlcd_configure(sc, &sc->sc_mode);
-  if (error != 0)
+  ret = jzlcd_configure(sc, &sc->sc_mode);
+  if (ret != 0)
     {
-      lcderr("failed to configure FB: %d\n", error);
+      gerr("failed to configure FB: %d\n", ret);
       return;
     }
 
-  error = dwc_hdmi_set_mode(sc);
-  if (error != 0)
+  ret = dwc_hdmi_set_mode(sc);
+  if (ret != 0)
     {
-      lcderr("hdmi error: %d\n", error);
+      gerr("hdmi error: %d\n", ret);
       return;
     }
 
@@ -1302,7 +1514,13 @@ void jzlcd_clocks(void)
 
 int jzlcd_attach(void)
 {
+  int ret;
   uint32_t val;
+  uint8_t edid[EDID_LENGTH] =
+  {
+    0
+  };
+
   static struct display_s sc_obj = {
     .fbsize = 0,
     .paddr = 0,
@@ -1311,7 +1529,7 @@ int jzlcd_attach(void)
     .fdesc = NULL,
 
     .sc_mode = {
-      .dot_clock = 85500,
+      .dotclock = 85500,
       .hdisplay = 1360,
       .hsync_start = 1424,
       .hsync_end = 1536,
@@ -1329,8 +1547,36 @@ int jzlcd_attach(void)
   val &= ~CLKGR0_TVE;
   putreg32(val, CLKGR0_REG);
 
+  ret = get_edid(edid, 0);
+  if (ret == OK)
+    {
+      ret = edid_parse(edid, &sc_obj.ei);
+      if (ret != OK)
+        {
+          gerr("ERROR: Failed to parse EDID\n");
+        }
+      else
+        {
+#ifdef CONFIG_DEBUG_INFO
+          edid_dump(&sc_obj.ei);
+#endif
+          ret = jzlcd_find_mode(&sc_obj);
+        }
+    }
+
+  if (ret != OK)
+    {
+      gerr("EDID error. Falling back to %s.\n", sc_obj.sc_mode.name);
+    }
+
+  g_planeinfo.stride = ((sc_obj.sc_mode.hdisplay * JZ4780_BPP + 7) / 8);
+  g_planeinfo.fblen  = g_planeinfo.stride * sc_obj.sc_mode.vdisplay;
+
+  g_videoinfo.xres   = sc_obj.sc_mode.hdisplay;
+  g_videoinfo.yres   = sc_obj.sc_mode.vdisplay;
+
   jzlcd_hdmi_event(&sc_obj);
-  return 1;
+  return OK;
 }
 
 /****************************************************************************
@@ -1340,14 +1586,14 @@ int jzlcd_attach(void)
 static int jz_getvideoinfo(struct fb_vtable_s *vtable,
                               struct fb_videoinfo_s *vinfo)
 {
-  lcdinfo("vtable=%p vinfo=%p\n", vtable, vinfo);
+  ginfo("vtable=%p vinfo=%p\n", vtable, vinfo);
   if (vtable && vinfo)
     {
       memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
       return OK;
     }
 
-  lcderr("ERROR: Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -1358,14 +1604,14 @@ static int jz_getvideoinfo(struct fb_vtable_s *vtable,
 static int jz_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
                               struct fb_planeinfo_s *pinfo)
 {
-  lcdinfo("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
+  ginfo("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
   if (vtable && planeno == 0 && pinfo)
     {
       memcpy(pinfo, &g_planeinfo, sizeof(struct fb_planeinfo_s));
       return OK;
     }
 
-  lcderr("ERROR: Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -1413,7 +1659,7 @@ static int jz_getcursor(struct fb_vtable_s *vtable,
 static int jz_setcursor(struct fb_vtable_s *vtable,
                            struct fb_setcursor_s *settings)
 {
-  lcderr("ERROR: Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
@@ -1470,7 +1716,7 @@ int up_fbinitialize(int display)
 
 struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
 {
-  lcdinfo("vplane: %d\n", vplane);
+  ginfo("vplane: %d\n", vplane);
   if (vplane == 0)
     {
       return &g_fbobject;
