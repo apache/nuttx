@@ -26,6 +26,7 @@
 
 #include <inttypes.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
@@ -40,6 +41,7 @@
 #include "esp_clk.h"
 #include "esp_gpio.h"
 #include "esp32s3_dma.h"
+#include "hal/gdma_ll.h"
 #include "esp_irq.h"
 
 #include "xtensa.h"
@@ -150,6 +152,28 @@
 #define ESP32S3_LCD_DMADESC_NUM   (ESP32S3_LCD_FB_SIZE / \
                                    ESP32S3_DMA_BUFLEN_MAX + 1)
 
+#if CONFIG_ESP32S3_LCD_BOUNCE_LINES > 0
+
+/* Scan out of two buffers in internal RAM, refilled from the framebuffer as
+ * they are consumed, so that nothing on the panel's critical path depends on
+ * PSRAM.
+ */
+
+#  define ESP32S3_LCD_HAVE_BOUNCE 1
+
+#  define ESP32S3_LCD_BB_SIZE     (CONFIG_ESP32S3_LCD_HRES * \
+                                   CONFIG_ESP32S3_LCD_BOUNCE_LINES * \
+                                   ESP32S3_LCD_DATA_WIDTH)
+
+#  define ESP32S3_LCD_BB_DESCS    ((ESP32S3_LCD_BB_SIZE + \
+                                    ESP32S3_DMA_BUFLEN_MAX - 1) / \
+                                   ESP32S3_DMA_BUFLEN_MAX)
+
+#  if (ESP32S3_LCD_FB_SIZE % ESP32S3_LCD_BB_SIZE) != 0
+#    error "CONFIG_ESP32S3_LCD_BOUNCE_LINES must divide the vertical resolution"
+#  endif
+#endif
+
 #define ESP32S3_LCD_LAYERS        CONFIG_ESP32S3_LCD_BUFFER_LAYERS
 
 /* Get current layer pointer */
@@ -201,6 +225,18 @@ struct esp32s3_lcd_s
   uint8_t cur_layer;              /* Current layer number */
 
   uint32_t yoffset;               /* The current pan offset */
+
+#ifdef ESP32S3_LCD_HAVE_BOUNCE
+  /* Descriptors for the two bounce buffers, linked into a ring so that the
+   * transfer never ends and the controller never has to be restarted.
+   */
+
+  struct esp32s3_dmadesc_s bbdesc[2][ESP32S3_LCD_BB_DESCS];
+
+  uint32_t bouncepos;             /* Offset of the next chunk to copy */
+  uint32_t bbeof;                 /* Buffers consumed so far */
+  int bbcpuint;                   /* CPU interrupt for the DMA channel */
+#endif
 
   int cpuint;                     /* CPU interrupt assigned to this LCD */
   uint8_t cpu;                    /* CPU ID */
@@ -330,6 +366,16 @@ static struct fb_vtable_s g_base_vtable =
   .pandisplay    = esp32s3_lcd_base_pandisplay,
 #endif
 };
+
+#ifdef ESP32S3_LCD_HAVE_BOUNCE
+/* The bounce buffers.  Ordinary static data, so they are in internal RAM,
+ * which is the whole point of them.
+ */
+
+static uint8_t g_bounce[2][ESP32S3_LCD_BB_SIZE]
+  aligned_data(64);
+
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -731,6 +777,16 @@ static int IRAM_ATTR lcd_interrupt(int irq, void *context, void *arg)
                            ESP32S3_LCD_FB_SIZE);
 #endif
 
+#ifdef ESP32S3_LCD_HAVE_BOUNCE
+      /* Anchor the ring at the first bounce buffer again.  The read
+       * position needs no correction: the framebuffer is a whole number of
+       * bounce buffers, so by the time a frame has been sent the buffers
+       * already hold the first two pieces of the next one.
+       */
+
+      esp32s3_dma_load(priv->bbdesc[0], priv->dma_channel, true);
+#endif
+
       /* Enable DMA TX */
 
       esp32s3_dma_enable(priv->dma_channel, true);
@@ -748,6 +804,74 @@ static int IRAM_ATTR lcd_interrupt(int irq, void *context, void *arg)
 
   return 0;
 }
+
+#ifdef ESP32S3_LCD_HAVE_BOUNCE
+/****************************************************************************
+ * Name: esp32s3_lcd_bounce_fill
+ *
+ * Description:
+ *   Copy the next piece of the framebuffer into a bounce buffer that has
+ *   just been sent, and step the read position on.  The position wraps at
+ *   the end of the framebuffer, which is also the end of a frame because
+ *   the framebuffer is a whole number of bounce buffers, so the two stay in
+ *   step without anything having to resynchronise them.
+ *
+ * Input Parameters:
+ *   priv - The LCD driver state.
+ *   bb   - Which of the two buffers to refill.
+ *
+ ****************************************************************************/
+
+static void IRAM_ATTR esp32s3_lcd_bounce_fill(struct esp32s3_lcd_s *priv,
+                                              int bb)
+{
+  struct esp32s3_layer_s *layer = CURRENT_LAYER(priv);
+
+  memcpy(g_bounce[bb],
+         &layer->framebuffer[priv->yoffset * ESP32S3_LCD_STRIDE +
+                             priv->bouncepos],
+         ESP32S3_LCD_BB_SIZE);
+
+  priv->bouncepos += ESP32S3_LCD_BB_SIZE;
+  if (priv->bouncepos >= ESP32S3_LCD_FB_SIZE)
+    {
+      priv->bouncepos = 0;
+    }
+}
+
+/****************************************************************************
+ * Name: esp32s3_lcd_dma_interrupt
+ *
+ * Description:
+ *   One bounce buffer has been sent to the panel.  Refill it while the
+ *   other one is being sent.
+ *
+ ****************************************************************************/
+
+static int IRAM_ATTR esp32s3_lcd_dma_interrupt(int irq, void *context,
+                                               void *arg)
+{
+  struct esp32s3_lcd_s *priv = &g_lcd_priv;
+  int status = esp32s3_dma_get_interrupt(priv->dma_channel, true);
+
+  if (status <= 0)
+    {
+      return 0;
+    }
+
+  esp32s3_dma_clear_interrupt(priv->dma_channel, true, status);
+
+  if ((status & GDMA_LL_EVENT_TX_EOF) != 0)
+    {
+      /* The buffer that finished is the one this transfer started from */
+
+      esp32s3_lcd_bounce_fill(priv, priv->bbeof & 1);
+      priv->bbeof++;
+    }
+
+  return 0;
+}
+#endif
 
 /****************************************************************************
  * Name: esp32s3_lcd_dmasetup
@@ -783,8 +907,20 @@ static int esp32s3_lcd_dmasetup(void)
     {
       struct esp32s3_layer_s *layer = &priv->layer[i];
 
+      /* A framebuffer is large: at 800x480 in 16bpp one is 768000 bytes,
+       * twice that when double buffered, so it does not come from internal
+       * RAM and the allocation is one that can realistically fail.  Say so
+       * rather than faulting on the memset that follows.
+       */
+
       layer->framebuffer = memalign(64, ESP32S3_LCD_FB_MEM_SIZE);
-      DEBUGASSERT(layer->framebuffer != NULL);
+      if (layer->framebuffer == NULL)
+        {
+          lcderr("Failed to allocate %d bytes for framebuffer %d\n",
+                 ESP32S3_LCD_FB_MEM_SIZE, i);
+          goto errout;
+        }
+
       memset(layer->framebuffer, 0, ESP32S3_LCD_FB_MEM_SIZE);
 
       esp32s3_dma_setup(layer->dmadesc,
@@ -794,7 +930,63 @@ static int esp32s3_lcd_dmasetup(void)
                         true, priv->dma_channel);
     }
 
+#ifdef ESP32S3_LCD_HAVE_BOUNCE
+    {
+      struct esp32s3_dmadesc_s *tail;
+      int i;
+
+      /* One chain per bounce buffer, each ending in the end of frame mark
+       * that raises the interrupt this driver refills on, and the two of
+       * them joined into a ring.  The transfer then never finishes, so the
+       * controller runs continuously and the panel sees an unbroken stream.
+       */
+
+      for (i = 0; i < 2; i++)
+        {
+          esp32s3_dma_setup(priv->bbdesc[i],
+                            ESP32S3_LCD_BB_DESCS,
+                            g_bounce[i],
+                            ESP32S3_LCD_BB_SIZE,
+                            true, priv->dma_channel);
+        }
+
+      for (i = 0; i < 2; i++)
+        {
+          for (tail = priv->bbdesc[i]; tail->next != NULL; tail = tail->next)
+            {
+            }
+
+          tail->next = priv->bbdesc[i ^ 1];
+        }
+
+      /* Prime both buffers with the start of the first frame */
+
+      priv->bouncepos = 0;
+      priv->bbeof     = 0;
+
+      esp32s3_lcd_bounce_fill(priv, 0);
+      esp32s3_lcd_bounce_fill(priv, 1);
+    }
+#endif
+
   return OK;
+
+errout:
+  for (int i = 0; i < ESP32S3_LCD_LAYERS; i++)
+    {
+      struct esp32s3_layer_s *layer = &priv->layer[i];
+
+      if (layer->framebuffer != NULL)
+        {
+          free(layer->framebuffer);
+          layer->framebuffer = NULL;
+        }
+    }
+
+  esp32s3_dma_release(priv->dma_channel);
+  priv->dma_channel = -1;
+
+  return -ENOMEM;
 }
 
 /****************************************************************************
@@ -871,6 +1063,16 @@ static void esp32s3_lcd_enableclk(void)
            (ESP32S3_LCD_CLK_N << LCD_CAM_LCD_CLKM_DIV_NUM_S) |
            (clk_a << LCD_CAM_LCD_CLKM_DIV_A_S) |
            (clk_b << LCD_CAM_LCD_CLKM_DIV_B_S);
+
+#ifdef CONFIG_ESP32S3_LCD_PCLK_ACTIVE_NEG
+  /* Drive the pixel clock high for the first half of the cycle, so that the
+   * data lines, and DE and the sync signals with them, are stable across the
+   * falling edge the panel latches on.
+   */
+
+  regval |= LCD_CAM_LCD_CK_OUT_EDGE_M;
+#endif
+
   esp32s3_lcd_putreg(LCD_CAM_LCD_CLOCK_REG, regval);
 }
 
@@ -1006,7 +1208,25 @@ static void esp32s3_lcd_enable(void)
   struct esp32s3_lcd_s *priv = &g_lcd_priv;
   struct esp32s3_layer_s *layer = CURRENT_LAYER(priv);
 
+#ifdef ESP32S3_LCD_HAVE_BOUNCE
+  priv->bbcpuint = esp_setup_irq(ESP32S3_PERIPH_DMA_OUT_CH0 +
+                                 priv->dma_channel,
+                                 1, ESP_IRQ_TRIGGER_LEVEL,
+                                 esp32s3_lcd_dma_interrupt, NULL);
+  if (priv->bbcpuint < 0)
+    {
+      lcderr("Failed to attach the DMA interrupt: %d\n", priv->bbcpuint);
+      return;
+    }
+
+  esp32s3_dma_enable_interrupt(priv->dma_channel, true,
+                               GDMA_LL_EVENT_TX_EOF, true);
+  up_enable_irq(ESP32S3_IRQ_DMA_OUT_CH0 + priv->dma_channel);
+
+  esp32s3_dma_load(priv->bbdesc[0], priv->dma_channel, true);
+#else
   esp32s3_dma_load(layer->dmadesc, priv->dma_channel, true);
+#endif
   esp32s3_dma_enable(priv->dma_channel, true);
 
   /* Delay 1 microsecond to wait the DMA start */
