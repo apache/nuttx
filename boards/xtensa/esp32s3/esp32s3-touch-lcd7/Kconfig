@@ -5,4 +5,16 @@
 
 if ARCH_BOARD_ESP32S3_TOUCH_LCD_7
 
+config ESP32S3_BOARD_LCD
+	bool "Enable Board LCD"
+	default n
+	depends on ESP32S3_LCD
+	select ESP32S3_I2C0
+	select IOEXPANDER
+	select IOEXPANDER_CH422G
+	---help---
+		Enable the onboard 7 inch 800x480 RGB panel.  The panel reset and
+		the display enable are driven through the CH422G I/O expander on
+		I2C0, so both are selected here.
+
 endif # ARCH_BOARD_ESP32S3_TOUCH_LCD_7
