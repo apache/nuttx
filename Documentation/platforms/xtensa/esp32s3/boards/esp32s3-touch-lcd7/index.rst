@@ -78,6 +78,42 @@ The board has a 7-inch LCD:
   EXIO2     DISP     Backlight enable pin
   ========= ======== =========================
 
+The panel is an EK9716 driven over a 16-bit parallel RGB565 bus by the
+LCD_CAM peripheral.  Its timing is:
+
+  ==================== =======
+  Parameter            Value
+  ==================== =======
+  Resolution           800x480
+  Pixel clock          16 MHz
+  HSYNC pulse width    4
+  HSYNC back porch     8
+  HSYNC front porch    8
+  VSYNC pulse width    4
+  VSYNC back porch     8
+  VSYNC front porch    8
+  ==================== =======
+
+The RGB bus takes most of the usable pins, so the panel reset and the
+display enable are not wired to GPIOs.  They hang off a CH422G I/O
+expander, reached over the I2C bus shared with the touch controller:
+
+  ========= ============ ==================================
+  Signal    Connection   Description
+  ========= ============ ==================================
+  SDA       GPIO8        I2C data, expander and touch
+  SCL       GPIO9        I2C clock, expander and touch
+  TP_RST    CH422G EXIO1 GT911 touch controller reset
+  DISP      CH422G EXIO2 Display and backlight enable
+  LCD_RST   CH422G EXIO3 Panel reset
+  SD_CS     CH422G EXIO4 TF card chip select
+  USB_SEL   CH422G EXIO5 USB / CAN transceiver select
+  ========= ============ ==================================
+
+A 800x480 RGB565 framebuffer is 768000 bytes and does not fit in internal
+RAM, so any configuration that drives the panel must also enable the
+onboard 8MB octal PSRAM and leave it in the common heap.
+
 Configurations
 ==============
 
@@ -91,6 +127,50 @@ All of the configurations presented below can be tested by running the following
 
 Configuration Directories
 -------------------------
+
+lcd
+---
+
+Brings up the onboard 7 inch 800x480 panel as a framebuffer character
+driver at ``/dev/fb0``, on top of the ``usbnsh`` console.  The CH422G I/O
+expander is used to take the panel out of reset and to switch the display
+on once the framebuffer exists, and the PSRAM the framebuffer is allocated
+from is enabled.
+
+Note that the console is on UART0, GPIO43 and GPIO44, reached through the
+USB-to-UART bridge on the UART USB-C connector.  It is deliberately not on
+the native USB peripheral, because that is the connector a USB host
+configuration drives.
+
+``apps/examples/fb`` is included to prove the panel out.  It reports the
+geometry of the framebuffer it found and then draws a series of nested
+rectangles over the whole display::
+
+    nsh> fb
+    VideoInfo:
+          fmt: 11
+         xres: 800
+         yres: 480
+      nplanes: 1
+    PlaneInfo (plane 0):
+        fbmem: 0x3c050040
+        fblen: 1536000
+       stride: 1600
+      display: 0
+          bpp: 16
+    Mapped FB: 0x3c050040
+    Use consecutive fbmem2 = 0x3c10b840, yoffset = 480
+     0: (  0,  0) (800,480)
+     1: ( 72, 43) (656,394)
+     2: (144, 86) (512,308)
+     3: (216,129) (368,222)
+     4: (288,172) (224,136)
+     5: (360,215) ( 80, 50)
+    Test finished
+
+The framebuffer is in PSRAM, which is why ``fbmem`` is in the 0x3c000000
+range, and ``fblen`` is 1536000 rather than 768000 because the driver is
+double buffered by default.
 
 usbnsh
 ------
