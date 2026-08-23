@@ -2650,6 +2650,48 @@ config ESP32S3_LCD_CLOCK_MHZ
 	int "LCD Pixel Clock Frequency in MHz"
 	default 2
 
+config ESP32S3_LCD_BOUNCE_LINES
+	int "Bounce buffer height in lines (0 to disable)"
+	default 0
+	---help---
+		Scan the panel out of two small buffers in internal RAM, each this
+		many lines tall, refilled from the framebuffer as they are consumed,
+		rather than having the DMA read the framebuffer directly.
+
+		This matters when the framebuffer is in PSRAM.  The DMA then has to
+		fetch every pixel from PSRAM in real time, and it is competing with
+		whatever else uses that memory; a CPU writing to the framebuffer, or
+		flushing it out of the cache, can stall those fetches for long
+		enough to empty the LCD FIFO.  The panel sees the data stream
+		falter, and what shows up is an image that shakes and then rolls.
+
+		With a bounce buffer the only thing on the critical path is internal
+		RAM, which nothing else can stall.  The copy from PSRAM happens in
+		the interrupt that follows each buffer being consumed and has a
+		whole buffer's worth of time to complete.  This is the arrangement
+		the ESP-IDF RGB panel driver calls a bounce buffer.
+
+		The framebuffer must be a whole number of these buffers, so the
+		value has to divide the vertical resolution.  Two buffers of this
+		size are taken out of internal RAM.  Ten lines of an 800 pixel wide
+		panel at 16bpp costs 32000 bytes.
+
+config ESP32S3_LCD_PCLK_ACTIVE_NEG
+	bool "Latch data on the falling edge of the pixel clock"
+	default n
+	---help---
+		By default the pixel clock is low during the first half of a cycle,
+		so the panel latches the data lines, and DE and the sync signals
+		with them, on the rising edge.  Enable this for a panel that
+		expects the falling edge instead.
+
+		A panel driven on the wrong edge samples the sync signals at the
+		moment they change, which usually shows up as an image that is
+		recognisable but will not hold vertical lock.
+
+		This is the equivalent of pclk_active_neg in the ESP-IDF RGB panel
+		driver.
+
 config ESP32S3_LCD_VFRONTPORCH
 	int "LCD Vertical Front Porch"
 	default 40
