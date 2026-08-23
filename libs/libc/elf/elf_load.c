@@ -239,6 +239,20 @@ static void libelf_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
         }
     }
 
+  /* An ET_DYN object is sized from its program headers, which give no
+   * section alignment.  A word is enough.
+   */
+
+  if (loadinfo->textalign == 0)
+    {
+      loadinfo->textalign = sizeof(uintptr_t);
+    }
+
+  if (loadinfo->dataalign == 0)
+    {
+      loadinfo->dataalign = sizeof(uintptr_t);
+    }
+
   /* Save the allocation size */
 
   loadinfo->textsize = textsize;
