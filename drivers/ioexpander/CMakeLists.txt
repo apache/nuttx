@@ -59,6 +59,10 @@ if(CONFIG_IOEXPANDER)
     list(APPEND SRCS pi4ioe5v6408.c)
   endif()
 
+  if(CONFIG_IOEXPANDER_CH422G)
+    list(APPEND SRCS ch422g.c)
+  endif()
+
   if(CONFIG_IOEXPANDER_PCA9557)
     list(APPEND SRCS pca9557.c)
   endif()

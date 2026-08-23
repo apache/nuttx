@@ -56,6 +56,18 @@ config IOEXPANDER_DUMMY_INT_POLLDELAY
 
 endif # IOEXPANDER_DUMMY
 
+config IOEXPANDER_CH422G
+	bool "CH422G I2C IO expander"
+	default n
+	depends on I2C
+	---help---
+		Enable support for the WCH CH422G IO Expander, which offers eight
+		bi-directional pins, IO0-IO7, and four open-drain outputs, OC0-OC3.
+
+		IO0-IO7 share a single direction control in the hardware.  The
+		driver puts the group in output mode when at least one of them has
+		been configured as an output.
+
 config IOEXPANDER_ICJX
 	bool "iC-JX SPI IO expander"
 	default n

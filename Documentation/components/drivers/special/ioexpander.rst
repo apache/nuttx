@@ -62,64 +62,78 @@ routine in the header of the same name under
    * - Awinic AW9523B
      - I2C
      - 16
-     - ``IOEXPANDER_AW9523B``
+     - ``CONFIG_IOEXPANDER_AW9523B``
+   * - WCH CH422G
+     - I2C
+     - 12
+     - ``CONFIG_IOEXPANDER_CH422G``
    * - iC-Haus iC-JX
      - SPI
      - 16
-     - ``IOEXPANDER_ICJX``
+     - ``CONFIG_IOEXPANDER_ICJX``
    * - ISO1H812G
      - SPI
      - 8
-     - ``IOEXPANDER_ISO1H812G``
+     - ``CONFIG_IOEXPANDER_ISO1H812G``
    * - ISO1I813T
      - SPI
      - 8
-     - ``IOEXPANDER_ISO1I813T``
+     - ``CONFIG_IOEXPANDER_ISO1I813T``
    * - Microchip MCP23008 / MCP23S08
      - I2C
      - 8
-     - ``IOEXPANDER_MCP23X08``
+     - ``CONFIG_IOEXPANDER_MCP23X08``
    * - Microchip MCP23017 / MCP23S17
      - I2C
      - 16
-     - ``IOEXPANDER_MCP23X17``
+     - ``CONFIG_IOEXPANDER_MCP23X17``
    * - NXP PCA9538
      - I2C
      - 8
-     - ``IOEXPANDER_PCA9538``
+     - ``CONFIG_IOEXPANDER_PCA9538``
    * - NXP PCA9555
      - I2C
      - 16
-     - ``IOEXPANDER_PCA9555``
+     - ``CONFIG_IOEXPANDER_PCA9555``
    * - NXP PCA9557
      - I2C
      - 8
-     - ``IOEXPANDER_PCA9557``
+     - ``CONFIG_IOEXPANDER_PCA9557``
    * - PCF8574
      - I2C
      - 8
-     - ``IOEXPANDER_PCF8574``
+     - ``CONFIG_IOEXPANDER_PCF8574``
    * - PCF8575
      - I2C
      - 16
-     - ``IOEXPANDER_PCF8575``
+     - ``CONFIG_IOEXPANDER_PCF8575``
    * - Diodes PI4IOE5V6408
      - I2C
      - 8
-     - ``IOEXPANDER_PI4IOE5V6408``
+     - ``CONFIG_IOEXPANDER_PI4IOE5V6408``
    * - Semtech SX1509
      - I2C
      - 16
-     - ``IOEXPANDER_SX1509``
+     - ``CONFIG_IOEXPANDER_SX1509``
    * - TCA6408 / TCA6416 / TCA6424 / PCAL6416A
      - I2C
      - 8 / 16 / 24 / 16
-     - ``IOEXPANDER_TCA64XX``
+     - ``CONFIG_IOEXPANDER_TCA64XX``
 
 Notes on individual drivers:
 
-- ``IOEXPANDER_TCA64XX`` and ``IOEXPANDER_PCF8574`` additionally depend on
+- ``CONFIG_IOEXPANDER_TCA64XX`` and ``CONFIG_IOEXPANDER_PCF8574`` additionally depend on
   ``CONFIG_EXPERIMENTAL``.
+- ``CONFIG_IOEXPANDER_CH422G`` presents the eight bi-directional pins, IO0-IO7, as
+  pins 0-7 and the four open-drain outputs, OC0-OC3, as pins 8-11, so
+  ``CONFIG_IOEXPANDER_NPINS`` must be at least 12.  The device selects a
+  register by the I2C address a transfer is addressed to rather than by a
+  register address written ahead of the data, and none of its write-only
+  registers can be read back, so the driver shadows them.  IO0-IO7 share a
+  single direction control in the hardware: the driver records the direction
+  asked of each pin and puts the group in output mode once at least one of
+  them is an output.  Reading a pin of a group held in output mode reports
+  the value last written, because the device cannot report the pin level.
 - Drivers with a ``<device>_MULTIPLE`` option support more than one
   instance of the same chip on a board.
 - Drivers with a ``<device>_SHADOW_MODE`` option keep the output and

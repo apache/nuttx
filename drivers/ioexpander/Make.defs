@@ -58,6 +58,10 @@ ifeq ($(CONFIG_IOEXPANDER_PI4IOE5V6408),y)
   CSRCS += pi4ioe5v6408.c
 endif
 
+ifeq ($(CONFIG_IOEXPANDER_CH422G),y)
+  CSRCS += ch422g.c
+endif
+
 ifeq ($(CONFIG_IOEXPANDER_PCA9557),y)
   CSRCS += pca9557.c
 endif
