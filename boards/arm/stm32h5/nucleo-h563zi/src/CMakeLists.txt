@@ -28,6 +28,10 @@ else()
   list(APPEND SRCS stm32_userleds.c)
 endif()
 
+if(CONFIG_STM32_SPI)
+  list(APPEND SRCS stm32_spi.c)
+endif()
+
 if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS stm32_buttons.c)
 endif()
