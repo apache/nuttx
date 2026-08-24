@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_allocateheap_m33_u3u5.c
+ * arch/arm/src/common/stm32/stm32_allocateheap_m33_v1.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -47,14 +47,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Internal SRAM is available in all members of the STM32U3 and STM32U5
- * families.  The following definitions specify its family-specific size
- * and location:
+/* Each family using this implementation provides the following SRAM
+ * description:
  *
  * SRAM1_START   STM32_SRAM1_BASE
- * SRAM1_END
+ * SRAM1_END     STM32_SRAM1_BASE + STM32_PRIMARY_SRAM_SIZE
  * SRAM2_START   STM32_SRAM2_BASE
- * SRAM2_END
+ * SRAM2_END     STM32_SRAM2_BASE + STM32_SRAM2_SIZE
+ *
+ * STM32_PRIMARY_SRAM_SIZE may span multiple contiguous SRAM banks.  SRAM3
+ * and SRAM5 may be added as separate regions when their corresponding heap
+ * options are selected.
  *
  * In addition to internal SRAM, memory may also be available through the
  * FSMC.  In order to use FSMC SRAM, the following additional things need to
@@ -75,33 +78,10 @@
 #  undef CONFIG_STM32_FSMC_SRAM
 #endif
 
-/* STM32U5[7,8]6xx have 128 KiB in two banks, both accessible to DMA:
- *
- *   1) 96 KiB of System SRAM beginning at address 0x2000:0000 - 0x2001:8000
- *   2) 32 KiB of System SRAM beginning at address 0x1000:0000 - 0x1000:8000
- *
- * STM32U596xx have 320 KiB in two banks, both accessible to DMA:
- *
- *   1) 256 KiB of System SRAM beginning at address 0x2000:0000 - 0x2004:0000
- *   2) 64 KiB of System SRAM beginning at address 0x1000:0000 - 0x1001:0000
- *
- * STM32U5Rxxx have 640 KiB in three banks:
- *
- *   1) 192 KiB of System SRAM beginning at address 0x2000:0000 - 0x2003:0000
- *   2) 64 KiB of System SRAM beginning at address 0x1000:0000 - 0x1001:0000
- *   3) 384 KiB of System SRAM beginning at address 0x2004:0000 - 0x200A:0000
- *
- * In addition, external FSMC SRAM may be available.
- */
-
 /* Set the range of system SRAM */
 
 #define SRAM1_START  STM32_SRAM1_BASE
-#ifdef STM32_PRIMARY_SRAM_SIZE
-#  define SRAM1_END  (SRAM1_START + STM32_PRIMARY_SRAM_SIZE)
-#else
-#  define SRAM1_END  (SRAM1_START + STM32_SRAM1_SIZE)
-#endif
+#define SRAM1_END    (SRAM1_START + STM32_PRIMARY_SRAM_SIZE)
 
 /* Set the range of SRAM2 as well, requires a second memory region */
 
