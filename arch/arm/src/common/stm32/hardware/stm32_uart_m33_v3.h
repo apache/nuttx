@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/hardware/stm32_uart_m33_u3u5.h
+ * arch/arm/src/common/stm32/hardware/stm32_uart_m33_v3.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_UART_M33_U3U5_H
-#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_UART_M33_U3U5_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_UART_M33_V3_H
+#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_UART_M33_V3_H
 
 /****************************************************************************
  * Included Files
@@ -415,4 +415,4 @@
 #define USART_AUTOCR_TRIGSEL_MASK                  (0xf << USART_AUTOCR_TRIGSEL_SHIFT)
 #define USART_AUTOCR_TRIGSEL(n)                    ((n) << USART_AUTOCR_TRIGSEL_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_UART_M33_U3U5_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_UART_M33_V3_H */

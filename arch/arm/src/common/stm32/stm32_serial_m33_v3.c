@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_serial_m33_u3u5.c
+ * arch/arm/src/common/stm32/stm32_serial_m33_v3.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -261,6 +261,8 @@ struct stm32_serial_s
 
   const uint8_t     irq;       /* IRQ associated with this USART */
   const uint32_t    apbclock;  /* PCLK 1 or 2 frequency */
+  const uint32_t    rccreg;    /* RCC enable register */
+  const uint32_t    rccen;     /* RCC enable bit */
   const uint32_t    usartbase; /* Base address of USART registers */
   const uint32_t    tx_gpio;   /* U[S]ART TX GPIO pin configuration */
   const uint32_t    rx_gpio;   /* U[S]ART RX GPIO pin configuration */
@@ -478,6 +480,8 @@ static struct stm32_serial_s g_lpuart1priv =
   .stopbits2     = CONFIG_LPUART1_2STOP,
   .baud          = CONFIG_LPUART1_BAUD,
   .apbclock      = STM32_LPUART1_FREQUENCY,
+  .rccreg        = STM32_LPUART1_RCC_REG,
+  .rccen         = STM32_LPUART1_RCC_EN,
   .usartbase     = STM32_LPUART1_BASE,
   .tx_gpio       = GPIO_LPUART1_TX,
   .rx_gpio       = GPIO_LPUART1_RX,
@@ -490,7 +494,7 @@ static struct stm32_serial_s g_lpuart1priv =
   .rts_gpio      = GPIO_LPUART1_RTS,
 #  endif
 #  ifdef CONFIG_LPUART1_RXDMA
-  .rxdma_channel = DMAMAP_LPUSART_RX,
+  .rxdma_channel = DMAMAP_LPUART1_RX,
   .rxfifo        = g_lpuart1rxfifo,
 #  endif
 
@@ -537,7 +541,9 @@ static struct stm32_serial_s g_usart1priv =
   .bits          = CONFIG_USART1_BITS,
   .stopbits2     = CONFIG_USART1_2STOP,
   .baud          = CONFIG_USART1_BAUD,
-  .apbclock      = STM32_PCLK2_FREQUENCY,
+  .apbclock      = STM32_USART1_FREQUENCY,
+  .rccreg        = STM32_USART1_RCC_REG,
+  .rccen         = STM32_USART1_RCC_EN,
   .usartbase     = STM32_USART1_BASE,
   .tx_gpio       = GPIO_USART1_TX,
   .rx_gpio       = GPIO_USART1_RX,
@@ -599,7 +605,9 @@ static struct stm32_serial_s g_usart2priv =
   .bits          = CONFIG_USART2_BITS,
   .stopbits2     = CONFIG_USART2_2STOP,
   .baud          = CONFIG_USART2_BAUD,
-  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .apbclock      = STM32_USART2_FREQUENCY,
+  .rccreg        = STM32_USART2_RCC_REG,
+  .rccen         = STM32_USART2_RCC_EN,
   .usartbase     = STM32_USART2_BASE,
   .tx_gpio       = GPIO_USART2_TX,
   .rx_gpio       = GPIO_USART2_RX,
@@ -661,7 +669,9 @@ static struct stm32_serial_s g_usart3priv =
   .bits          = CONFIG_USART3_BITS,
   .stopbits2     = CONFIG_USART3_2STOP,
   .baud          = CONFIG_USART3_BAUD,
-  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .apbclock      = STM32_USART3_FREQUENCY,
+  .rccreg        = STM32_USART3_RCC_REG,
+  .rccen         = STM32_USART3_RCC_EN,
   .usartbase     = STM32_USART3_BASE,
   .tx_gpio       = GPIO_USART3_TX,
   .rx_gpio       = GPIO_USART3_RX,
@@ -731,7 +741,9 @@ static struct stm32_serial_s g_uart4priv =
   .rts_gpio      = GPIO_UART4_RTS,
 #  endif
   .baud          = CONFIG_UART4_BAUD,
-  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .apbclock      = STM32_UART4_FREQUENCY,
+  .rccreg        = STM32_UART4_RCC_REG,
+  .rccen         = STM32_UART4_RCC_EN,
   .usartbase     = STM32_UART4_BASE,
   .tx_gpio       = GPIO_UART4_TX,
   .rx_gpio       = GPIO_UART4_RX,
@@ -793,7 +805,9 @@ static struct stm32_serial_s g_uart5priv =
   .rts_gpio      = GPIO_UART5_RTS,
 #  endif
   .baud           = CONFIG_UART5_BAUD,
-  .apbclock       = STM32_PCLK1_FREQUENCY,
+  .apbclock       = STM32_UART5_FREQUENCY,
+  .rccreg         = STM32_UART5_RCC_REG,
+  .rccen          = STM32_UART5_RCC_EN,
   .usartbase      = STM32_UART5_BASE,
   .tx_gpio        = GPIO_UART5_TX,
   .rx_gpio        = GPIO_UART5_RX,
@@ -1323,62 +1337,16 @@ static void stm32serial_setapbclock(struct uart_dev_s *dev, bool on)
 {
   struct stm32_serial_s *priv =
     (struct stm32_serial_s *)dev->priv;
-  uint32_t rcc_en;
-  uint32_t regaddr;
-
-  /* Determine which USART to configure */
-
-  switch (priv->usartbase)
-    {
-      default:
-        return;
-#ifdef CONFIG_STM32_LPUART1_SERIALDRIVER
-      case STM32_LPUART1_BASE:
-        rcc_en  = STM32_LPUART1_RCC_EN;
-        regaddr = STM32_LPUART1_RCC_REG;
-        break;
-#endif
-#ifdef CONFIG_STM32_USART1_SERIALDRIVER
-      case STM32_USART1_BASE:
-        rcc_en = RCC_APB2ENR_USART1EN;
-        regaddr = STM32_RCC_APB2ENR;
-        break;
-#endif
-#ifdef CONFIG_STM32_USART2_SERIALDRIVER
-      case STM32_USART2_BASE:
-        rcc_en = RCC_APB1ENR1_USART2EN;
-        regaddr = STM32_RCC_APB1ENR1;
-        break;
-#endif
-#ifdef CONFIG_STM32_USART3_SERIALDRIVER
-      case STM32_USART3_BASE:
-        rcc_en = RCC_APB1ENR1_USART3EN;
-        regaddr = STM32_RCC_APB1ENR1;
-        break;
-#endif
-#ifdef CONFIG_STM32_UART4_SERIALDRIVER
-      case STM32_UART4_BASE:
-        rcc_en = RCC_APB1ENR1_UART4EN;
-        regaddr = STM32_RCC_APB1ENR1;
-        break;
-#endif
-#ifdef CONFIG_STM32_UART5_SERIALDRIVER
-      case STM32_UART5_BASE:
-        rcc_en = RCC_APB1ENR1_UART5EN;
-        regaddr = STM32_RCC_APB1ENR1;
-        break;
-#endif
-    }
 
   /* Enable/disable APB 1/2 clock for USART */
 
   if (on)
     {
-      modifyreg32(regaddr, 0, rcc_en);
+      modifyreg32(priv->rccreg, 0, priv->rccen);
     }
   else
     {
-      modifyreg32(regaddr, rcc_en, 0);
+      modifyreg32(priv->rccreg, priv->rccen, 0);
     }
 }
 
