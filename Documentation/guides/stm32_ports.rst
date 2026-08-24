@@ -778,23 +778,49 @@ STM32U3
 Peripheral    Core version  Driver
 ============  ============  =============================================================
 ADC           to be done    not supported
+ADF           to be done    not supported
+AES           to be done    not supported
+CCB           to be done    not supported
+COMP          to be done    not supported
+CRC           to be done    not supported
+CRS           to be done    not supported
 DAC           to be done    not supported
-EXTI          U3/U5         arch/arm/src/common/stm32/stm32_exti_gpio_m33_u3u5.c
+DBGMCU        to be done    not supported
+DLYB          to be done    not supported
+EXTI          M33 v1        arch/arm/src/common/stm32/stm32_exti_gpio_m33_v1.c
+FDCAN         to be done    not supported
 FLASH         to be done    not supported
-GPIO          U3/U5         arch/arm/src/common/stm32/stm32_gpio_m33_u3u5.c
 GPDMA         to be done    not supported
-I2C/I3C       to be done    not supported
+GPIO          M33 v1        arch/arm/src/common/stm32/stm32_gpio_m33_v1.c
+GTZC          to be done    not supported
+HASH          to be done    not supported
+HSP           to be done    not supported
+I2C           to be done    not supported
+I3C           to be done    not supported
 ICACHE        to be done    not supported
+IWDG          to be done    not supported
+LPTIM         to be done    not supported
+LPUART        M33 v3        arch/arm/src/common/stm32/stm32_serial_m33_v3.c
 OCTOSPI       to be done    not supported
+OPAMP         to be done    not supported
+PKA           to be done    not supported
 PWR           to be done    not supported
+RAMCFG        to be done    not supported
 RCC           U3            arch/arm/src/stm32u3/stm32u3xx_rcc.c
 RNG           to be done    not supported
 RTC           to be done    not supported
-SAES/AES      to be done    not supported
+SAES          to be done    not supported
+SAI           to be done    not supported
+SDMMC         to be done    not supported
 SPI/I2S       to be done    not supported
-TIM/LPTIM     to be done    not supported
-USART/LPUART  v3            arch/arm/src/common/stm32/stm32_serial_m33_u3u5.c
-USB           device        not supported
+SYSCFG        to be done    not supported
+TAMP          to be done    not supported
+TIM           to be done    not supported
+TSC           to be done    not supported
+USART/UART    M33 v3        arch/arm/src/common/stm32/stm32_serial_m33_v3.c
+USB_DRD_FS    to be done    not supported
+VREFBUF       to be done    not supported
+WWDG          to be done    not supported
 ============  ============  =============================================================
 
 STM32U5

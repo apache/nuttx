@@ -20,18 +20,55 @@ Peripheral Support
 
 The following list indicates peripherals supported in NuttX:
 
-==========  =======  =============================================
-Peripheral  Support  Notes
-==========  =======  =============================================
-RCC         Yes      Family-specific clock initialization.
-GPIO        Yes      Common STM32U3/STM32U5 Cortex-M33 driver.
-SYSCFG      Yes      GPIO EXTI routing.
-EXTI        Yes      Common STM32U3/STM32U5 Cortex-M33 driver.
-USART       Yes      USART1-3 and UART4-5.
-LPUART      Yes      LPUART1.
-==========  =======  =============================================
+==========  =======
+Peripheral  Support
+==========  =======
+RCC         Yes
+GPIO        Yes
+EXTI        Yes
+USART/UART  Yes
+LPUART      Yes
 
-Other STM32U3 peripherals are not yet supported.
+ADC         No
+ADF         No
+AES         No
+CCB         No
+COMP        No
+CRC         No
+CRS         No
+DAC         No
+DBGMCU      No
+DLYB        No
+FDCAN       No
+FLASH       No
+GPDMA       No
+GTZC        No
+HASH        No
+HSP         No
+I2C         No
+I3C         No
+ICACHE      No
+IWDG        No
+LPTIM       No
+OCTOSPI     No
+OPAMP       No
+PKA         No
+PWR         No
+RAMCFG      No
+RNG         No
+RTC         No
+SAES        No
+SAI         No
+SDMMC       No
+SPI/I2S     No
+SYSCFG      No
+TAMP        No
+TIM         No
+TSC         No
+USB_DRD_FS  No
+VREFBUF     No
+WWDG        No
+==========  =======
 
 References
 ==========
