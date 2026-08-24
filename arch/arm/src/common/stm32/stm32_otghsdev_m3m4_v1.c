@@ -2075,31 +2075,31 @@ static inline void stm32_ep0out_testmode(struct stm32_usbdev_s *priv,
   testmode = index >> 8;
   switch (testmode)
     {
-    case 1:
-      priv->testmode = OTGHS_TESTMODE_J;
-      break;
+      case 1:
+        priv->testmode = OTGHS_TESTMODE_J;
+        break;
 
-    case 2:
-      priv->testmode = OTGHS_TESTMODE_K;
-      break;
+      case 2:
+        priv->testmode = OTGHS_TESTMODE_K;
+        break;
 
-    case 3:
-      priv->testmode = OTGHS_TESTMODE_SE0_NAK;
-      break;
+      case 3:
+        priv->testmode = OTGHS_TESTMODE_SE0_NAK;
+        break;
 
-    case 4:
-      priv->testmode = OTGHS_TESTMODE_PACKET;
-      break;
+      case 4:
+        priv->testmode = OTGHS_TESTMODE_PACKET;
+        break;
 
-    case 5:
-      priv->testmode = OTGHS_TESTMODE_FORCE;
-      break;
+      case 5:
+        priv->testmode = OTGHS_TESTMODE_FORCE;
+        break;
 
-    default:
-      usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BADTESTMODE), testmode);
-      priv->dotest   = false;
-      priv->testmode = OTGHS_TESTMODE_DISABLED;
-      priv->stalled  = true;
+      default:
+        usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BADTESTMODE), testmode);
+        priv->dotest   = false;
+        priv->testmode = OTGHS_TESTMODE_DISABLED;
+        priv->stalled  = true;
     }
 
   priv->dotest = true;
@@ -2124,365 +2124,374 @@ static inline void stm32_ep0out_stdrequest(struct stm32_usbdev_s *priv,
 
   switch (ctrlreq->req)
     {
-    case USB_REQ_GETSTATUS:
-      {
-        /* type:  device-to-host; recipient = device, interface, endpoint
-         * value: 0
-         * index: zero interface endpoint
-         * len:   2; data = status
-         */
+      case USB_REQ_GETSTATUS:
+        {
+          /* type:  device-to-host; recipient = device, interface, endpoint
+           * value: 0
+           * index: zero interface endpoint
+           * len:   2; data = status
+           */
 
-        usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_GETSTATUS), 0);
-        if (!priv->addressed ||
-             ctrlreq->len != 2 ||
-            USB_REQ_ISOUT(ctrlreq->type) ||
-            ctrlreq->value != 0)
-          {
-            priv->stalled = true;
-          }
-        else
-          {
-            switch (ctrlreq->type & USB_REQ_RECIPIENT_MASK)
-              {
-              case USB_REQ_RECIPIENT_ENDPOINT:
+          usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_GETSTATUS), 0);
+          if (!priv->addressed ||
+               ctrlreq->len != 2 ||
+              USB_REQ_ISOUT(ctrlreq->type) ||
+              ctrlreq->value != 0)
+            {
+              priv->stalled = true;
+            }
+          else
+            {
+              switch (ctrlreq->type & USB_REQ_RECIPIENT_MASK)
                 {
-                  usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EPGETSTATUS), 0);
-                  privep = stm32_ep_findbyaddr(priv, ctrlreq->index);
-                  if (!privep)
+                  case USB_REQ_RECIPIENT_ENDPOINT:
                     {
-                      usbtrace(
-                        TRACE_DEVERROR(STM32_TRACEERR_BADEPGETSTATUS), 0);
-                      priv->stalled = true;
-                    }
-                  else
-                    {
-                      if (privep->stalled)
+                      usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EPGETSTATUS),
+                               0);
+                      privep = stm32_ep_findbyaddr(priv, ctrlreq->index);
+                      if (!privep)
                         {
-                          priv->ep0data[0] = (1 << USB_FEATURE_ENDPOINTHALT);
+                          usbtrace(
+                            TRACE_DEVERROR(STM32_TRACEERR_BADEPGETSTATUS),
+                            0);
+                          priv->stalled = true;
                         }
                       else
                         {
-                          priv->ep0data[0] = 0; /* Not stalled */
-                        }
+                          if (privep->stalled)
+                            {
+                              priv->ep0data[0] =
+                                (1 << USB_FEATURE_ENDPOINTHALT);
+                            }
+                          else
+                            {
+                              priv->ep0data[0] = 0; /* Not stalled */
+                            }
 
+                          priv->ep0data[1] = 0;
+                          stm32_ep0in_setupresponse(priv, priv->ep0data, 2);
+                        }
+                    }
+                    break;
+
+                  case USB_REQ_RECIPIENT_DEVICE:
+                    {
+                      if (ctrlreq->index == 0)
+                        {
+                          usbtrace(
+                            TRACE_INTDECODE(STM32_TRACEINTID_DEVGETSTATUS),
+                            0);
+
+                          /* Features:  Remote Wakeup and self-powered */
+
+                          priv->ep0data[0]  = (priv->selfpowered <<
+                                               USB_FEATURE_SELFPOWERED);
+                          priv->ep0data[0] |= (priv->wakeup      <<
+                                               USB_FEATURE_REMOTEWAKEUP);
+                          priv->ep0data[1]  = 0;
+
+                          stm32_ep0in_setupresponse(priv, priv->ep0data, 2);
+                        }
+                      else
+                        {
+                          usbtrace(
+                            TRACE_DEVERROR(STM32_TRACEERR_BADDEVGETSTATUS),
+                            0);
+                          priv->stalled = true;
+                        }
+                    }
+                    break;
+
+                  case USB_REQ_RECIPIENT_INTERFACE:
+                    {
+                      usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_IFGETSTATUS),
+                               0);
+                      priv->ep0data[0] = 0;
                       priv->ep0data[1] = 0;
+
                       stm32_ep0in_setupresponse(priv, priv->ep0data, 2);
                     }
-                }
-                break;
+                    break;
 
-              case USB_REQ_RECIPIENT_DEVICE:
-                {
-                  if (ctrlreq->index == 0)
+                  default:
                     {
-                      usbtrace(
-                        TRACE_INTDECODE(STM32_TRACEINTID_DEVGETSTATUS), 0);
+                      usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BADGETSTATUS),
+                               0);
+                      priv->stalled = true;
+                    }
+                    break;
+                }
+            }
+        }
+        break;
 
-                      /* Features:  Remote Wakeup and self-powered */
+      case USB_REQ_CLEARFEATURE:
+        {
+          /* type:  host-to-device; recipient = device, interface or endpoint
+           * value: feature selector
+           * index: zero interface endpoint;
+           * len:   zero, data = none
+           */
 
-                      priv->ep0data[0]  = (priv->selfpowered <<
-                                           USB_FEATURE_SELFPOWERED);
-                      priv->ep0data[0] |= (priv->wakeup      <<
-                                           USB_FEATURE_REMOTEWAKEUP);
-                      priv->ep0data[1]  = 0;
+          usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_CLEARFEATURE), 0);
+          if (priv->addressed != 0 && ctrlreq->len == 0)
+            {
+              uint8_t recipient = ctrlreq->type & USB_REQ_RECIPIENT_MASK;
+              if (recipient == USB_REQ_RECIPIENT_ENDPOINT &&
+                  ctrlreq->value == USB_FEATURE_ENDPOINTHALT &&
+                  (privep = stm32_ep_findbyaddr(priv,
+                                                ctrlreq->index)) != NULL)
+                {
+                  stm32_ep_clrstall(privep);
+                  stm32_ep0in_transmitzlp(priv);
+                }
+              else if (recipient == USB_REQ_RECIPIENT_DEVICE &&
+                       ctrlreq->value == USB_FEATURE_REMOTEWAKEUP)
+                {
+                  priv->wakeup = 0;
+                  stm32_ep0in_transmitzlp(priv);
+                }
+              else
+                {
+                  /* Actually, I think we could just stall here. */
 
-                      stm32_ep0in_setupresponse(priv, priv->ep0data, 2);
+                  stm32_req_dispatch(priv, &priv->ctrlreq);
+                }
+            }
+          else
+            {
+              usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BADCLEARFEATURE), 0);
+              priv->stalled = true;
+            }
+        }
+        break;
+
+      case USB_REQ_SETFEATURE:
+        {
+          /* type:  host-to-device; recipient = device, interface, endpoint
+           * value: feature selector
+           * index: zero interface endpoint;
+           * len:   0; data = none
+           */
+
+          usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SETFEATURE), 0);
+          if (priv->addressed != 0 && ctrlreq->len == 0)
+            {
+              uint8_t recipient = ctrlreq->type & USB_REQ_RECIPIENT_MASK;
+              if (recipient == USB_REQ_RECIPIENT_ENDPOINT &&
+                  ctrlreq->value == USB_FEATURE_ENDPOINTHALT &&
+                  (privep = stm32_ep_findbyaddr(priv,
+                                                ctrlreq->index)) != NULL)
+                {
+                  stm32_ep_setstall(privep);
+                  stm32_ep0in_transmitzlp(priv);
+                }
+              else if (recipient == USB_REQ_RECIPIENT_DEVICE &&
+                       ctrlreq->value == USB_FEATURE_REMOTEWAKEUP)
+                {
+                  priv->wakeup = 1;
+                  stm32_ep0in_transmitzlp(priv);
+                }
+              else if (recipient == USB_REQ_RECIPIENT_DEVICE &&
+                       ctrlreq->value == USB_FEATURE_TESTMODE &&
+                       ((ctrlreq->index & 0xff) == 0))
+                {
+                  stm32_ep0out_testmode(priv, ctrlreq->index);
+                }
+              else if (priv->configured)
+                {
+                  /* Actually, I think we could just stall here. */
+
+                  stm32_req_dispatch(priv, &priv->ctrlreq);
+                }
+              else
+                {
+                  usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BADSETFEATURE), 0);
+                  priv->stalled = true;
+                }
+            }
+          else
+            {
+              usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BADSETFEATURE), 0);
+              priv->stalled = true;
+            }
+        }
+        break;
+
+      case USB_REQ_SETADDRESS:
+        {
+          /* type:  host-to-device; recipient = device
+           * value: device address
+           * index: 0
+           * len:   0; data = none
+           */
+
+          usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SETADDRESS),
+                   ctrlreq->value);
+          if ((ctrlreq->type & USB_REQ_RECIPIENT_MASK) ==
+              USB_REQ_RECIPIENT_DEVICE &&
+              ctrlreq->index  == 0 &&
+              ctrlreq->len == 0 &&
+              ctrlreq->value < 128 &&
+              priv->devstate != DEVSTATE_CONFIGURED)
+            {
+              /* Save the address.  We cannot actually change to the next
+               * address until the completion of the status phase.
+               */
+
+              stm32_setaddress(priv, (uint16_t)priv->ctrlreq.value[0]);
+              stm32_ep0in_transmitzlp(priv);
+            }
+          else
+            {
+              usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BADSETADDRESS), 0);
+              priv->stalled = true;
+            }
+        }
+        break;
+
+      case USB_REQ_GETDESCRIPTOR:
+        /* type:  device-to-host; recipient = device
+         * value: descriptor type and index
+         * index: 0 or language ID;
+         * len:   descriptor len; data = descriptor
+         */
+
+      case USB_REQ_SETDESCRIPTOR:
+        /* type:  host-to-device; recipient = device
+         * value: descriptor type and index
+         * index: 0 or language ID;
+         * len:   descriptor len; data = descriptor
+         */
+
+        {
+          usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_GETSETDESC), 0);
+          if ((ctrlreq->type & USB_REQ_RECIPIENT_MASK) ==
+              USB_REQ_RECIPIENT_DEVICE ||
+              (ctrlreq->type & USB_REQ_RECIPIENT_MASK) ==
+              USB_REQ_RECIPIENT_INTERFACE)
+            {
+              stm32_req_dispatch(priv, &priv->ctrlreq);
+            }
+          else
+            {
+              usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BADGETSETDESC), 0);
+              priv->stalled = true;
+            }
+        }
+        break;
+
+      case USB_REQ_GETCONFIGURATION:
+        /* type:  device-to-host; recipient = device
+         * value: 0;
+         * index: 0;
+         * len:   1; data = configuration value
+         */
+
+        {
+          usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_GETCONFIG), 0);
+          if (priv->addressed &&
+             (ctrlreq->type & USB_REQ_RECIPIENT_MASK) ==
+              USB_REQ_RECIPIENT_DEVICE &&
+              ctrlreq->value == 0 &&
+              ctrlreq->index == 0 &&
+              ctrlreq->len == 1)
+            {
+              stm32_req_dispatch(priv, &priv->ctrlreq);
+            }
+          else
+            {
+              usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BADGETCONFIG), 0);
+              priv->stalled = true;
+            }
+        }
+        break;
+
+      case USB_REQ_SETCONFIGURATION:
+        /* type:  host-to-device; recipient = device
+         * value: configuration value
+         * index: 0;
+         * len:   0; data = none
+         */
+
+        {
+          usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SETCONFIG), 0);
+          if (priv->addressed &&
+              (ctrlreq->type & USB_REQ_RECIPIENT_MASK) ==
+              USB_REQ_RECIPIENT_DEVICE &&
+              ctrlreq->index == 0 &&
+              ctrlreq->len == 0)
+            {
+              /* Give the configuration to the class driver */
+
+              int ret = stm32_req_dispatch(priv, &priv->ctrlreq);
+
+              /* If the class driver accepted the configuration, then mark
+               * the device state as configured (or not, depending on the
+               * configuration).
+               */
+
+              if (ret == OK)
+                {
+                  uint8_t cfg = (uint8_t)ctrlreq->value;
+                  if (cfg != 0)
+                    {
+                      priv->devstate   = DEVSTATE_CONFIGURED;
+                      priv->configured = true;
                     }
                   else
                     {
-                      usbtrace(
-                        TRACE_DEVERROR(STM32_TRACEERR_BADDEVGETSTATUS), 0);
-                      priv->stalled = true;
+                      priv->devstate   = DEVSTATE_ADDRESSED;
+                      priv->configured = false;
                     }
                 }
-                break;
+            }
+          else
+            {
+              usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BADSETCONFIG), 0);
+              priv->stalled = true;
+            }
+        }
+        break;
 
-              case USB_REQ_RECIPIENT_INTERFACE:
-                {
-                  usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_IFGETSTATUS), 0);
-                  priv->ep0data[0] = 0;
-                  priv->ep0data[1] = 0;
-
-                  stm32_ep0in_setupresponse(priv, priv->ep0data, 2);
-                }
-                break;
-
-              default:
-                {
-                  usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BADGETSTATUS), 0);
-                  priv->stalled = true;
-                }
-                break;
-              }
-          }
-      }
-      break;
-
-    case USB_REQ_CLEARFEATURE:
-      {
-        /* type:  host-to-device; recipient = device, interface or endpoint
-         * value: feature selector
-         * index: zero interface endpoint;
-         * len:   zero, data = none
+      case USB_REQ_GETINTERFACE:
+        /* type:  device-to-host; recipient = interface
+         * value: 0
+         * index: interface;
+         * len:   1; data = alt interface
          */
 
-        usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_CLEARFEATURE), 0);
-        if (priv->addressed != 0 && ctrlreq->len == 0)
-          {
-            uint8_t recipient = ctrlreq->type & USB_REQ_RECIPIENT_MASK;
-            if (recipient == USB_REQ_RECIPIENT_ENDPOINT &&
-                ctrlreq->value == USB_FEATURE_ENDPOINTHALT &&
-                (privep = stm32_ep_findbyaddr(priv, ctrlreq->index)) != NULL)
-              {
-                stm32_ep_clrstall(privep);
-                stm32_ep0in_transmitzlp(priv);
-              }
-            else if (recipient == USB_REQ_RECIPIENT_DEVICE &&
-                     ctrlreq->value == USB_FEATURE_REMOTEWAKEUP)
-              {
-                priv->wakeup = 0;
-                stm32_ep0in_transmitzlp(priv);
-              }
-            else
-              {
-                /* Actually, I think we could just stall here. */
-
-                stm32_req_dispatch(priv, &priv->ctrlreq);
-              }
-          }
-        else
-          {
-            usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BADCLEARFEATURE), 0);
-            priv->stalled = true;
-          }
-      }
-      break;
-
-    case USB_REQ_SETFEATURE:
-      {
-        /* type:  host-to-device; recipient = device, interface, endpoint
-         * value: feature selector
-         * index: zero interface endpoint;
+      case USB_REQ_SETINTERFACE:
+        /* type:  host-to-device; recipient = interface
+         * value: alternate setting
+         * index: interface;
          * len:   0; data = none
          */
 
-        usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SETFEATURE), 0);
-        if (priv->addressed != 0 && ctrlreq->len == 0)
-          {
-            uint8_t recipient = ctrlreq->type & USB_REQ_RECIPIENT_MASK;
-            if (recipient == USB_REQ_RECIPIENT_ENDPOINT &&
-                ctrlreq->value == USB_FEATURE_ENDPOINTHALT &&
-                (privep = stm32_ep_findbyaddr(priv, ctrlreq->index)) != NULL)
-              {
-                stm32_ep_setstall(privep);
-                stm32_ep0in_transmitzlp(priv);
-              }
-            else if (recipient == USB_REQ_RECIPIENT_DEVICE &&
-                     ctrlreq->value == USB_FEATURE_REMOTEWAKEUP)
-              {
-                priv->wakeup = 1;
-                stm32_ep0in_transmitzlp(priv);
-              }
-            else if (recipient == USB_REQ_RECIPIENT_DEVICE &&
-                     ctrlreq->value == USB_FEATURE_TESTMODE &&
-                     ((ctrlreq->index & 0xff) == 0))
-              {
-                 stm32_ep0out_testmode(priv, ctrlreq->index);
-              }
-            else if (priv->configured)
-              {
-                /* Actually, I think we could just stall here. */
+        {
+          usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_GETSETIF), 0);
+          stm32_req_dispatch(priv, &priv->ctrlreq);
+        }
+        break;
 
-                stm32_req_dispatch(priv, &priv->ctrlreq);
-              }
-            else
-              {
-                usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BADSETFEATURE), 0);
-                priv->stalled = true;
-              }
-          }
-        else
-          {
-            usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BADSETFEATURE), 0);
-            priv->stalled = true;
-          }
-      }
-      break;
-
-    case USB_REQ_SETADDRESS:
-      {
-        /* type:  host-to-device; recipient = device
-         * value: device address
-         * index: 0
-         * len:   0; data = none
+      case USB_REQ_SYNCHFRAME:
+        /* type:  device-to-host; recipient = endpoint
+         * value: 0
+         * index: endpoint;
+         * len:   2; data = frame number
          */
 
-        usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SETADDRESS),
-                 ctrlreq->value);
-        if ((ctrlreq->type & USB_REQ_RECIPIENT_MASK) ==
-            USB_REQ_RECIPIENT_DEVICE &&
-            ctrlreq->index  == 0 &&
-            ctrlreq->len == 0 &&
-            ctrlreq->value < 128 &&
-            priv->devstate != DEVSTATE_CONFIGURED)
-          {
-            /* Save the address.  We cannot actually change to the next
-             * address until the completion of the status phase.
-             */
+        {
+          usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SYNCHFRAME), 0);
+        }
+        break;
 
-            stm32_setaddress(priv, (uint16_t)priv->ctrlreq.value[0]);
-            stm32_ep0in_transmitzlp(priv);
-          }
-        else
-          {
-            usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BADSETADDRESS), 0);
-            priv->stalled = true;
-          }
-      }
-      break;
-
-    case USB_REQ_GETDESCRIPTOR:
-      /* type:  device-to-host; recipient = device
-       * value: descriptor type and index
-       * index: 0 or language ID;
-       * len:   descriptor len; data = descriptor
-       */
-
-    case USB_REQ_SETDESCRIPTOR:
-      /* type:  host-to-device; recipient = device
-       * value: descriptor type and index
-       * index: 0 or language ID;
-       * len:   descriptor len; data = descriptor
-       */
-
-      {
-        usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_GETSETDESC), 0);
-        if ((ctrlreq->type & USB_REQ_RECIPIENT_MASK) ==
-            USB_REQ_RECIPIENT_DEVICE ||
-            (ctrlreq->type & USB_REQ_RECIPIENT_MASK) ==
-            USB_REQ_RECIPIENT_INTERFACE)
-          {
-            stm32_req_dispatch(priv, &priv->ctrlreq);
-          }
-        else
-          {
-            usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BADGETSETDESC), 0);
-            priv->stalled = true;
-          }
-      }
-      break;
-
-    case USB_REQ_GETCONFIGURATION:
-      /* type:  device-to-host; recipient = device
-       * value: 0;
-       * index: 0;
-       * len:   1; data = configuration value
-       */
-
-      {
-        usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_GETCONFIG), 0);
-        if (priv->addressed &&
-           (ctrlreq->type & USB_REQ_RECIPIENT_MASK) ==
-            USB_REQ_RECIPIENT_DEVICE &&
-            ctrlreq->value == 0 &&
-            ctrlreq->index == 0 &&
-            ctrlreq->len == 1)
-          {
-            stm32_req_dispatch(priv, &priv->ctrlreq);
-          }
-        else
-          {
-            usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BADGETCONFIG), 0);
-            priv->stalled = true;
-          }
-      }
-      break;
-
-    case USB_REQ_SETCONFIGURATION:
-      /* type:  host-to-device; recipient = device
-       * value: configuration value
-       * index: 0;
-       * len:   0; data = none
-       */
-
-      {
-        usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SETCONFIG), 0);
-        if (priv->addressed &&
-            (ctrlreq->type & USB_REQ_RECIPIENT_MASK) ==
-            USB_REQ_RECIPIENT_DEVICE &&
-            ctrlreq->index == 0 &&
-            ctrlreq->len == 0)
-          {
-            /* Give the configuration to the class driver */
-
-            int ret = stm32_req_dispatch(priv, &priv->ctrlreq);
-
-            /* If the class driver accepted the configuration, then mark the
-             * device state as configured (or not, depending on the
-             * configuration).
-             */
-
-            if (ret == OK)
-              {
-                uint8_t cfg = (uint8_t)ctrlreq->value;
-                if (cfg != 0)
-                  {
-                    priv->devstate   = DEVSTATE_CONFIGURED;
-                    priv->configured = true;
-                  }
-                else
-                  {
-                    priv->devstate   = DEVSTATE_ADDRESSED;
-                    priv->configured = false;
-                  }
-              }
-          }
-        else
-          {
-            usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BADSETCONFIG), 0);
-            priv->stalled = true;
-          }
-      }
-      break;
-
-    case USB_REQ_GETINTERFACE:
-      /* type:  device-to-host; recipient = interface
-       * value: 0
-       * index: interface;
-       * len:   1; data = alt interface
-       */
-
-    case USB_REQ_SETINTERFACE:
-      /* type:  host-to-device; recipient = interface
-       * value: alternate setting
-       * index: interface;
-       * len:   0; data = none
-       */
-
-      {
-        usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_GETSETIF), 0);
-        stm32_req_dispatch(priv, &priv->ctrlreq);
-      }
-      break;
-
-    case USB_REQ_SYNCHFRAME:
-      /* type:  device-to-host; recipient = endpoint
-       * value: 0
-       * index: endpoint;
-       * len:   2; data = frame number
-       */
-
-      {
-        usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SYNCHFRAME), 0);
-      }
-      break;
-
-    default:
-      {
-        usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDCTRLREQ), 0);
-        priv->stalled = true;
-      }
-      break;
+      default:
+        {
+          usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDCTRLREQ), 0);
+          priv->stalled = true;
+        }
+        break;
     }
 }
 
@@ -3193,131 +3202,132 @@ static inline void stm32_rxinterrupt(struct stm32_usbdev_s *priv)
 
       switch (regval & OTGHS_GRXSTSD_PKTSTS_MASK)
         {
-        /* Global OUT NAK.  This indicate that the global OUT NAK bit has
-         * taken effect.
-         *
-         * PKTSTS = Global OUT NAK, BCNT = 0,
-         * EPNUM = Don't Care, DPID = Don't Care.
-         */
+          /* Global OUT NAK.  This indicate that the global OUT NAK bit has
+           * taken effect.
+           *
+           * PKTSTS = Global OUT NAK, BCNT = 0,
+           * EPNUM = Don't Care, DPID = Don't Care.
+           */
 
-        case OTGHS_GRXSTSD_PKTSTS_OUTNAK:
-          {
-            usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_OUTNAK), 0);
-          }
-          break;
+          case OTGHS_GRXSTSD_PKTSTS_OUTNAK:
+            {
+              usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_OUTNAK), 0);
+            }
+            break;
 
-        /* OUT data packet received.
-         *
-         * PKTSTS = DataOUT, BCNT = size of the received data OUT packet,
-         * EPNUM = EPNUM on which the packet was received,
-         * DPID = Actual Data PID.
-         */
+          /* OUT data packet received.
+           *
+           * PKTSTS = DataOUT, BCNT = size of the received data OUT packet,
+           * EPNUM = EPNUM on which the packet was received,
+           * DPID = Actual Data PID.
+           */
 
-        case OTGHS_GRXSTSD_PKTSTS_OUTRECVD:
-          {
-            usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_OUTRECVD), epphy);
-            bcnt = (regval & OTGHS_GRXSTSD_BCNT_MASK) >>
-                   OTGHS_GRXSTSD_BCNT_SHIFT;
-            if (bcnt > 0)
-              {
-                stm32_epout_receive(privep, bcnt);
-              }
-          }
-          break;
+          case OTGHS_GRXSTSD_PKTSTS_OUTRECVD:
+            {
+              usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_OUTRECVD), epphy);
+              bcnt = (regval & OTGHS_GRXSTSD_BCNT_MASK) >>
+                     OTGHS_GRXSTSD_BCNT_SHIFT;
+              if (bcnt > 0)
+                {
+                  stm32_epout_receive(privep, bcnt);
+                }
+            }
+            break;
 
-        /* OUT transfer completed.  This indicates that an OUT data transfer
-         * for the specified OUT endpoint has completed. After this entry is
-         * popped from the receive FIFO, the core asserts a Transfer
-         * Completed interrupt on the specified OUT endpoint.
-         *
-         * PKTSTS = Data OUT Transfer Done, BCNT = 0, EPNUM = OUT EP Num on
-         * which the data transfer is complete, DPID = Don't Care.
-         */
+          /* OUT transfer completed.  This indicates that an OUT data
+           * transfer for the specified OUT endpoint has completed.  After
+           * this entry is popped from the receive FIFO, the core asserts a
+           * Transfer Completed interrupt on the specified OUT endpoint.
+           *
+           * PKTSTS = Data OUT Transfer Done, BCNT = 0, EPNUM = OUT EP Num on
+           * which the data transfer is complete, DPID = Don't Care.
+           */
 
-        case OTGHS_GRXSTSD_PKTSTS_OUTDONE:
-          {
-            usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_OUTDONE), epphy);
-          }
-          break;
+          case OTGHS_GRXSTSD_PKTSTS_OUTDONE:
+            {
+              usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_OUTDONE), epphy);
+            }
+            break;
 
-        /* SETUP transaction completed. This indicates that the Setup stage
-         * for the specified endpoint has completed and the Data stage has
-         * started. After this entry is popped from the receive FIFO, the
-         * core asserts a Setup interrupt on the specified control OUT
-         * endpoint (triggers an interrupt).
-         *
-         * PKTSTS = Setup Stage Done, BCNT = 0, EPNUM = Control EP Num,
-         * DPID = Don't Care.
-        */
+          /* SETUP transaction completed. This indicates that the Setup stage
+           * for the specified endpoint has completed and the Data stage has
+           * started. After this entry is popped from the receive FIFO, the
+           * core asserts a Setup interrupt on the specified control OUT
+           * endpoint (triggers an interrupt).
+           *
+           * PKTSTS = Setup Stage Done, BCNT = 0, EPNUM = Control EP Num,
+           * DPID = Don't Care.
+           */
 
-        case OTGHS_GRXSTSD_PKTSTS_SETUPDONE:
-          {
-            usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SETUPDONE), epphy);
-          }
-          break;
+          case OTGHS_GRXSTSD_PKTSTS_SETUPDONE:
+            {
+              usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SETUPDONE), epphy);
+            }
+            break;
 
-        /* SETUP data packet received.  This indicates that a SETUP packet
-         * for the specified endpoint is now available for reading from the
-         * receive FIFO.
-         *
-         * PKTSTS = SETUP, BCNT = 8, EPNUM = Control EP Num, DPID = D0.
-         */
+          /* SETUP data packet received.  This indicates that a SETUP packet
+           * for the specified endpoint is now available for reading from the
+           * receive FIFO.
+           *
+           * PKTSTS = SETUP, BCNT = 8, EPNUM = Control EP Num, DPID = D0.
+           */
 
-        case OTGHS_GRXSTSD_PKTSTS_SETUPRECVD:
-          {
-            uint16_t datlen;
+          case OTGHS_GRXSTSD_PKTSTS_SETUPRECVD:
+            {
+              uint16_t datlen;
 
-            usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SETUPRECVD), epphy);
+              usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SETUPRECVD), epphy);
 
-            /* Read EP0 setup data.  NOTE:  If multiple SETUP packets are
-             * received, the last one overwrites the previous setup packets
-             * and only that last SETUP packet will be processed.
-             */
+              /* Read EP0 setup data.  NOTE:  If multiple SETUP packets are
+               * received, the last one overwrites the previous setup packets
+               * and only that last SETUP packet will be processed.
+               */
 
-           stm32_rxfifo_read(&priv->epout[EP0],
-                             (uint8_t *)&priv->ctrlreq,
-                             USB_SIZEOF_CTRLREQ);
+              stm32_rxfifo_read(&priv->epout[EP0],
+                                (uint8_t *)&priv->ctrlreq,
+                                USB_SIZEOF_CTRLREQ);
 
-            /* Was this an IN or an OUT SETUP packet.  If it is an OUT SETUP,
-             * then we need to wait for the completion of the data phase to
-             * process the setup command.  If it is an IN SETUP packet, then
-             * we must processing the command BEFORE we enter the DATA phase.
-             *
-             * If the data associated with the OUT SETUP packet is zero
-             * length, then, of course, we don't need to wait.
-             */
+              /* Was this an IN or an OUT SETUP packet.  If it is an OUT
+               * SETUP, then we need to wait for the completion of the data
+               * phase to process the setup command.  If it is an IN SETUP
+               * packet, then we must processing the command BEFORE we enter
+               * the DATA phase.
+               *
+               * If the data associated with the OUT SETUP packet is zero
+               * length, then, of course, we don't need to wait.
+               */
 
-            datlen = GETUINT16(priv->ctrlreq.len);
-            if (USB_REQ_ISOUT(priv->ctrlreq.type) && datlen > 0)
-              {
-                /* Clear NAKSTS so that we can receive the data */
+              datlen = GETUINT16(priv->ctrlreq.len);
+              if (USB_REQ_ISOUT(priv->ctrlreq.type) && datlen > 0)
+                {
+                  /* Clear NAKSTS so that we can receive the data */
 
-                regval  = stm32_getreg(STM32_OTGHS_DOEPCTL0);
-                regval |= OTGHS_DOEPCTL0_CNAK;
-                stm32_putreg(regval, STM32_OTGHS_DOEPCTL0);
+                  regval  = stm32_getreg(STM32_OTGHS_DOEPCTL0);
+                  regval |= OTGHS_DOEPCTL0_CNAK;
+                  stm32_putreg(regval, STM32_OTGHS_DOEPCTL0);
 
-                /* Wait for the data phase. */
+                  /* Wait for the data phase. */
 
-                priv->ep0state = EP0STATE_SETUP_OUT;
-              }
-            else
-              {
-                /* We can process the setup data as soon as SETUP done word
-                 * is popped of the RxFIFO.
-                 */
+                  priv->ep0state = EP0STATE_SETUP_OUT;
+                }
+              else
+                {
+                  /* We can process the setup data as soon as SETUP done word
+                   * is popped of the RxFIFO.
+                   */
 
-                priv->ep0state = EP0STATE_SETUP_READY;
-              }
-          }
-          break;
+                  priv->ep0state = EP0STATE_SETUP_READY;
+                }
+            }
+            break;
 
-        default:
-          {
-            usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS),
-                     (regval & OTGHS_GRXSTSD_PKTSTS_MASK)
-                     >> OTGHS_GRXSTSD_PKTSTS_SHIFT);
-          }
-          break;
+          default:
+            {
+              usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS),
+                       (regval & OTGHS_GRXSTSD_PKTSTS_MASK)
+                       >> OTGHS_GRXSTSD_PKTSTS_SHIFT);
+            }
+            break;
         }
     }
 
