@@ -686,6 +686,26 @@ int userfs_run(FAR const char *mountpt,
                FAR const struct userfs_operations_s *userops,
                FAR void *volinfo, size_t mxwrite);
 
+/****************************************************************************
+ * Name: userfs_notify_event
+ *
+ * Description:
+ *   Inject a file change notification through an inotify descriptor
+ *   (CONFIG_FS_NOTIFY_INJECT).
+ *
+ * Input Parameters:
+ *   abspath - Absolute path of the affected object
+ *   mask    - inotify event mask
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_NOTIFY_INJECT
+int userfs_notify_event(FAR const char *abspath, uint32_t mask);
+#endif
+
 #ifdef __cplusplus
 }
 #endif
