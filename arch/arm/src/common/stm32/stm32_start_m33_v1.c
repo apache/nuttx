@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_start_m33_u3u5.c
+ * arch/arm/src/common/stm32/stm32_start_m33_v1.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -38,8 +38,11 @@
 
 #include "stm32.h"
 #include "stm32_gpio.h"
-#include "stm32_userspace.h"
 #include "stm32_start.h"
+
+#ifdef CONFIG_BUILD_PROTECTED
+#  include "stm32_userspace.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -48,13 +51,14 @@
 /* Memory map ***************************************************************/
 
 /* Internal flash begins at STM32_FLASH_BASE and contains the vector table.
- * SRAM1 begins at STM32_SRAM1_BASE and contains .data, .bss, the idle stack,
- * and the primary heap.  SRAM2 locations and sizes vary between the STM32U3
- * and STM32U5 families and are provided by the chip header.
+ * The primary SRAM contains .data, .bss, the idle stack and the primary
+ * heap.  A family may also request parity initialization of SRAM2.
  */
 
-#define SRAM2_START  STM32_SRAM2_BASE
-#define SRAM2_END    (SRAM2_START + STM32_SRAM2_SIZE)
+#ifdef CONFIG_STM32_SRAM2_INIT
+#  define SRAM2_START  STM32_SRAM2_BASE
+#  define SRAM2_END    (SRAM2_START + STM32_SRAM2_SIZE)
+#endif
 
 #define HEAP_BASE  ((uintptr_t)_ebss + CONFIG_IDLETHREAD_STACKSIZE)
 
