@@ -517,6 +517,50 @@ static void imxrt_reset(struct imxrt_driver_s *priv);
  ****************************************************************************/
 
 /****************************************************************************
+ * Function: imxrt_txmb_next
+ *
+ * Description:
+ *   Pick the mailbox to load the next frame into.
+ *
+ *   Every frame of a multi-frame transport transfer carries the same CAN
+ *   ID, and FlexCAN breaks an arbitration tie between mailboxes holding
+ *   equal IDs by taking the lowest mailbox number.  Handing out the
+ *   lowest *free* mailbox therefore lets a frame loaded into a
+ *   just-drained low mailbox win arbitration against older frames still
+ *   pending in higher ones, and the receiver sees the transfer out of
+ *   order.
+ *
+ *   Only ever hand out a mailbox above every pending one, and wrap back to
+ *   the bottom once the ring has drained.
+ *
+ * Input Parameters:
+ *   priv  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   The mailbox index to use, or TOTALMBCOUNT if none is available.
+ *
+ ****************************************************************************/
+
+static uint32_t imxrt_txmb_next(struct imxrt_driver_s *priv)
+{
+  uint32_t mbi  = RXMBCOUNT + 1;
+  uint32_t next = RXMBCOUNT + 1;
+
+  while (mbi < TOTALMBCOUNT)
+    {
+      struct mb_s *mb = flexcan_get_mb(priv, mbi);
+      if (mb->cs.code == CAN_TXMB_DATAORREMOTE)
+        {
+          next = mbi + 1;
+        }
+
+      mbi++;
+    }
+
+  return next;
+}
+
+/****************************************************************************
  * Function: imxrt_txringfull
  *
  * Description:
@@ -533,21 +577,7 @@ static void imxrt_reset(struct imxrt_driver_s *priv);
 
 static bool imxrt_txringfull(struct imxrt_driver_s *priv)
 {
-  uint32_t mbi = RXMBCOUNT + 1;
-  struct mb_s *mb;
-
-  while (mbi < TOTALMBCOUNT)
-    {
-      mb = flexcan_get_mb(priv, mbi);
-      if (mb->cs.code != CAN_TXMB_DATAORREMOTE)
-        {
-          return 0;
-        }
-
-      mbi++;
-    }
-
-  return 1;
+  return imxrt_txmb_next(priv) >= TOTALMBCOUNT;
 }
 
 /****************************************************************************
@@ -586,33 +616,20 @@ static int imxrt_transmit(struct imxrt_driver_s *priv)
   uint32_t txmb = 0;
 #endif
 
-  mbi = RXMBCOUNT + 1;
-  mb_bit = 1 << mbi;
+  mbi = imxrt_txmb_next(priv);
 
-  while (mbi < TOTALMBCOUNT)
-    {
-      /* Check whether message buffer is not currently transmitting */
-
-      struct mb_s *mb = flexcan_get_mb(priv, mbi);
-      if (mb->cs.code != CAN_TXMB_DATAORREMOTE)
-        {
-          putreg32(mb_bit, priv->base + IMXRT_CAN_IFLAG1_OFFSET);
-          break;
-        }
-
-      mb_bit <<= 1;
-      mbi++;
-#ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
-      txmb++;
-#endif
-    }
-
-  if (mbi == TOTALMBCOUNT)
+  if (mbi >= TOTALMBCOUNT)
     {
       nwarn("No TX MB available mbi %" PRIi32 "\n", mbi);
       NETDEV_TXERRORS(&priv->dev);
       return 0;       /* No transmission for you! */
     }
+
+  mb_bit = 1 << mbi;
+  putreg32(mb_bit, priv->base + IMXRT_CAN_IFLAG1_OFFSET);
+#ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
+  txmb = mbi - (RXMBCOUNT + 1);
+#endif
 
 #ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
   struct timespec ts;
