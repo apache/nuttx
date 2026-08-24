@@ -70,6 +70,10 @@ if(CONFIG_AMEBA_ADC)
   list(APPEND SRCS ${AMEBA_COMMON}/ameba_adc.c)
 endif()
 
+if(CONFIG_AMEBA_RTC)
+  list(APPEND SRCS ${AMEBA_COMMON}/ameba_rtc.c)
+endif()
+
 target_include_directories(arch PRIVATE ${AMEBA_COMMON})
 target_sources(arch PRIVATE ${SRCS})
 
@@ -155,6 +159,13 @@ endif()
 # interrupt/timer-trigger helpers).
 if(CONFIG_AMEBA_ADC)
   list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_adc.c)
+endif()
+
+# RTC register layer.  The RTC driver (arch/.../common/ameba/ameba_rtc.c) calls
+# the fwlib RTC API; the data tables and helpers it indexes live in this RAM
+# source and must be compiled in (mirrors the make build's ameba_board.mk).
+if(CONFIG_AMEBA_RTC)
+  list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_rtc.c)
 endif()
 
 # Silence a couple of warnings the vendored SDK sources trip under NuttX's

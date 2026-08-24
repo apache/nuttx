@@ -194,6 +194,16 @@ int rtl8721f_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_AMEBA_RTC
+  /* Register the board's RTC at /dev/rtc0. */
+
+  ret = rtl8721f_rtc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: rtl8721f_rtc_initialize failed: %d\n", ret);
+    }
+#endif
+
   IPC_patch_function(rtos_critical_enter, rtos_critical_exit,
                      AMEBA_RTOS_CRITICAL_SEMA);
   IPC_SEMDelayStub(rtos_time_delay_ms);

@@ -160,6 +160,19 @@ int rtl8721f_pwm_initialize(void);
 int rtl8721f_adc_initialize(void);
 #endif
 
+#ifdef CONFIG_AMEBA_RTC
+/****************************************************************************
+ * Name: rtl8721f_rtc_initialize
+ *
+ * Description:
+ *   Register the board's RTC at /dev/rtc0
+ *   (boards/arm/rtl8721f/rtl8721f_evb/src/rtl8721f_rtc.c).
+ *
+ ****************************************************************************/
+
+int rtl8721f_rtc_initialize(void);
+#endif
+
 #ifdef CONFIG_RTL8721F_FLASH_FS
 /****************************************************************************
  * Name: ameba_flash_fs_initialize
