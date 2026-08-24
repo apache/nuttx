@@ -55,6 +55,7 @@ config STM32_COMMON_L4_H5_L5_U5
 
 config STM32_COMMON_M33
 	bool
+	default y if ARCH_CHIP_STM32C5
 	default y if ARCH_CHIP_STM32U3
 	default y if ARCH_CHIP_STM32U5
 

@@ -42,8 +42,10 @@
 #  define STM32_EXTI_NLINES  24
 #elif defined(CONFIG_STM32_STM32U5A5XX)
 #  define STM32_EXTI_NLINES  26
+#elif defined(CONFIG_ARCH_CHIP_STM32C5)
+#  define STM32_EXTI_NLINES  36
 #else
-#  error "Unsupported STM32U3/U5 EXTI line inventory"
+#  error "Unsupported STM32 M33 EXTI line inventory"
 #endif
 
 /* Register Offsets *********************************************************/

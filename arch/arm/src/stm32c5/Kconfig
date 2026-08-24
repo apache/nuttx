@@ -1,0 +1,93 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_STM32C5
+
+comment "STM32C5 Configuration Options"
+
+config STM32_C5_PERIPHERALS
+	bool
+	default y
+	select ARCH_HAVE_FPU
+	select STM32_HAVE_IP_EXTI_M33_V1
+	select STM32_HAVE_IP_GPIO_M33_V1
+	select STM32_HAVE_IP_USART_M33_V3
+	select STM32_HAVE_LPUART1
+	select STM32_HAVE_UART4
+	select STM32_HAVE_UART5
+	select STM32_HAVE_USART1
+	select STM32_HAVE_USART2
+	select STM32_HAVE_USART3
+
+choice
+	prompt "STM32 C5 Chip Selection"
+	default ARCH_CHIP_STM32C562RE
+	depends on ARCH_CHIP_STM32C5
+
+config ARCH_CHIP_STM32C562CE
+	bool "STM32C562CE"
+	select STM32_FLASH_CONFIG_E
+	select STM32C5_IO_CONFIG_C
+	---help---
+		STM32C5 Cortex-M33, 512 KiB flash, 128 KiB SRAM, 48 pins.
+
+config ARCH_CHIP_STM32C562KE
+	bool "STM32C562KE"
+	select STM32_FLASH_CONFIG_E
+	select STM32C5_IO_CONFIG_K
+	---help---
+		STM32C5 Cortex-M33, 512 KiB flash, 128 KiB SRAM, 32 pins.
+
+config ARCH_CHIP_STM32C562ME
+	bool "STM32C562ME"
+	select STM32_FLASH_CONFIG_E
+	select STM32C5_IO_CONFIG_M
+	---help---
+		STM32C5 Cortex-M33, 512 KiB flash, 128 KiB SRAM, 80 pins.
+
+config ARCH_CHIP_STM32C562RE
+	bool "STM32C562RE"
+	select STM32_FLASH_CONFIG_E
+	select STM32C5_IO_CONFIG_R
+	---help---
+		STM32C5 Cortex-M33, 512 KiB flash, 128 KiB SRAM, 64 pins.
+
+config ARCH_CHIP_STM32C562VE
+	bool "STM32C562VE"
+	select STM32_FLASH_CONFIG_E
+	select STM32C5_IO_CONFIG_V
+	---help---
+		STM32C5 Cortex-M33, 512 KiB flash, 128 KiB SRAM, 100 pins.
+
+endchoice # STM32 C5 Chip Selection
+
+# Pin/package configurations
+
+config STM32C5_IO_CONFIG_K
+	# Package designator K
+	bool
+	default n
+
+config STM32C5_IO_CONFIG_C
+	# Package designator C
+	bool
+	default n
+
+config STM32C5_IO_CONFIG_R
+	# Package designator R
+	bool
+	default n
+
+config STM32C5_IO_CONFIG_M
+	# Package designator M
+	bool
+	default n
+
+config STM32C5_IO_CONFIG_V
+	# Package designator V
+	bool
+	default n
+
+endif # ARCH_CHIP_STM32C5
