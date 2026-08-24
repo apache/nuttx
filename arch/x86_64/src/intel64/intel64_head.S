@@ -420,7 +420,7 @@ ap_start:
 
 	/* Move initial RSP below IDLE TCB regs */
 	sub     $XCPTCONTEXT_SIZE, %rsp
-	and     $(~XCPTCONTEXT_SIZE), %rsp
+	and     $(~(XCPTCONTEXT_ALIGN - 1)), %rsp
 
 	/* Jump to ap_start routine */
 	movabs  $x86_64_ap_boot,   %rbx
