@@ -127,6 +127,10 @@ static int     inotify_open(FAR struct file *filep);
 static int     inotify_close(FAR struct file *filep);
 static ssize_t inotify_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen);
+#ifdef CONFIG_FS_NOTIFY_INJECT
+static ssize_t inotify_write(FAR struct file *filep,
+                             FAR const char *buffer, size_t buflen);
+#endif
 static int     inotify_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                             bool setup);
 static int     inotify_ioctl(FAR struct file *filep, int cmd,
@@ -145,7 +149,11 @@ static const struct file_operations g_inotify_fops =
   inotify_open,     /* open */
   inotify_close,    /* close */
   inotify_read,     /* read */
+#ifdef CONFIG_FS_NOTIFY_INJECT
+  inotify_write,    /* write */
+#else
   NULL,             /* write */
+#endif
   NULL,             /* seek */
   inotify_ioctl,    /* ioctl */
   NULL,             /* mmap */
@@ -579,6 +587,42 @@ static int inotify_open(FAR struct file *filep)
   nxmutex_unlock(&dev->lock);
   return OK;
 }
+
+/****************************************************************************
+ * Name: inotify_write
+ *
+ * Description:
+ *   Inject one event per write of a struct notify_inject_s payload
+ *   (event mask + NUL terminated absolute path).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_NOTIFY_INJECT
+static ssize_t inotify_write(FAR struct file *filep,
+                             FAR const char *buffer, size_t buflen)
+{
+  FAR const struct notify_inject_s *event;
+  size_t hdrlen = offsetof(struct notify_inject_s, path);
+  size_t pathlen;
+
+  event = (FAR const struct notify_inject_s *)buffer;
+  if (event == NULL || buflen <= hdrlen || buflen > hdrlen + PATH_MAX)
+    {
+      return -EINVAL;
+    }
+
+  pathlen = strnlen(event->path, buflen - hdrlen);
+  if (pathlen == buflen - hdrlen || event->path[0] != '/')
+    {
+      /* Not NUL terminated within the write, or not an absolute path */
+
+      return -EINVAL;
+    }
+
+  notify_event(NULL, event->path, event->mask);
+  return buflen;
+}
+#endif
 
 /****************************************************************************
  * Name: inotify_poll
@@ -1493,8 +1537,13 @@ int inotify_init1(int flags)
       goto exit_set_errno;
     }
 
+#ifdef CONFIG_FS_NOTIFY_INJECT
+  ret = file_allocate_from_inode(&g_inotify_inode, O_RDWR | flags,
+                                 0, dev, 0);
+#else
   ret = file_allocate_from_inode(&g_inotify_inode, O_RDONLY | flags,
                                  0, dev, 0);
+#endif
   if (ret < 0)
     {
       ferr("Failed to allocate inotify fd\n");
