@@ -289,7 +289,7 @@ static int pci_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = pci_bus_read_config(ctrl->bus, devfn, io->pi_reg,
                                     io->pi_width, &io->pi_data);
           break;
-         }
+        }
 
       case PCIOCWRITE:
         {
@@ -510,17 +510,17 @@ static uint8_t pci_bus_find_start_cap(FAR struct pci_bus_s *bus,
   /* Ignore MF bit */
 
   switch (hdr_type & 0x7f)
-  {
-    case PCI_HEADER_TYPE_NORMAL:
-    case PCI_HEADER_TYPE_BRIDGE:
-      return PCI_CAPABILITY_LIST;
+    {
+      case PCI_HEADER_TYPE_NORMAL:
+      case PCI_HEADER_TYPE_BRIDGE:
+        return PCI_CAPABILITY_LIST;
 
-    case PCI_HEADER_TYPE_CARDBUS:
-      return PCI_CB_CAPABILITY_LIST;
+      case PCI_HEADER_TYPE_CARDBUS:
+        return PCI_CB_CAPABILITY_LIST;
 
-    default:
-      return 0;
-  }
+      default:
+        return 0;
+    }
 }
 
 /****************************************************************************
@@ -1139,53 +1139,53 @@ static void pci_scan_bus(FAR struct pci_bus_s *bus)
               dev->vendor, dev->device);
 
       switch (hdr_type & 0x7f)
-      {
-        case PCI_HEADER_TYPE_NORMAL:
-          if (class == PCI_CLASS_BRIDGE_PCI)
-            {
-              goto bad;
-            }
+        {
+          case PCI_HEADER_TYPE_NORMAL:
+            if (class == PCI_CLASS_BRIDGE_PCI)
+              {
+                goto bad;
+              }
 
-          pci_setup_device(dev, 6, PCI_ROM_ADDRESS, &io, &mem, &mem_pref);
+            pci_setup_device(dev, 6, PCI_ROM_ADDRESS, &io, &mem, &mem_pref);
 
-          pci_read_config_word(dev, PCI_SUBSYSTEM_ID,
-                               &dev->subsystem_device);
-          pci_read_config_word(dev, PCI_SUBSYSTEM_VENDOR_ID,
-                               &dev->subsystem_vendor);
-          break;
+            pci_read_config_word(dev, PCI_SUBSYSTEM_ID,
+                                 &dev->subsystem_device);
+            pci_read_config_word(dev, PCI_SUBSYSTEM_VENDOR_ID,
+                                 &dev->subsystem_vendor);
+            break;
 
-        case PCI_HEADER_TYPE_BRIDGE:
-          child_bus = pci_alloc_bus();
+          case PCI_HEADER_TYPE_BRIDGE:
+            child_bus = pci_alloc_bus();
 
-          /* Inherit parent properties */
+            /* Inherit parent properties */
 
-          child_bus->ctrl = bus->ctrl;
-          child_bus->parent_bus = bus;
+            child_bus->ctrl       = bus->ctrl;
+            child_bus->parent_bus = bus;
 
 #ifdef CONFIG_PCI_ASSIGN_ALL_BUSES
-          child_bus->number = bus->ctrl->busno++;
+            child_bus->number = bus->ctrl->busno++;
 #endif
 
-          list_add_tail(&bus->children, &child_bus->node);
-          dev->subordinate = child_bus;
+            list_add_tail(&bus->children, &child_bus->node);
+            dev->subordinate = child_bus;
 
-          /* Scan pci hierarchy behind bridge */
+            /* Scan pci hierarchy behind bridge */
 
-          pci_presetup_bridge(dev);
-          pci_scan_bus(child_bus);
-          pci_postsetup_bridge(dev);
+            pci_presetup_bridge(dev);
+            pci_scan_bus(child_bus);
+            pci_postsetup_bridge(dev);
 
-          pci_setup_device(dev, 2, PCI_ROM_ADDRESS1, &io, &mem, &mem_pref);
-          break;
+            pci_setup_device(dev, 2, PCI_ROM_ADDRESS1, &io, &mem, &mem_pref);
+            break;
 
-        default:
-        bad:
-          pcierr("PCI: %02x:%02" PRIx32 " [%04x/%04x/%06" PRIx32
-                 "] has unknown header type %02x, ignoring.\n",
-                 bus->number, dev->devfn, dev->vendor,
-                 dev->device, class, hdr_type);
-          continue;
-      }
+          default:
+          bad:
+            pcierr("PCI: %02x:%02" PRIx32 " [%04x/%04x/%06" PRIx32
+                   "] has unknown header type %02x, ignoring.\n",
+                   bus->number, dev->devfn, dev->vendor, dev->device, class,
+                   hdr_type);
+            continue;
+        }
     }
 }
 
