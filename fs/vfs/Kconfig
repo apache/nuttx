@@ -107,6 +107,15 @@ config FS_NOTIFY_FD_POLLWAITERS
 	int "Max pollwaiters in one notify device"
 	default 2
 
+config FS_NOTIFY_INJECT
+	bool
+	default n
+	---help---
+		Allow injecting file change notifications by writing a
+		struct notify_inject_s to an inotify file descriptor.  Selected
+		by file systems whose user space server reports spontaneous
+		changes (for example userfs).  Any writer can forge events.
+
 endif # FS_NOTIFY
 
 config FS_BACKTRACE

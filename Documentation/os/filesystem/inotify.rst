@@ -153,3 +153,11 @@ backing store with:
 While a path has a file system watch handle, locally generated events
 on it are suppressed: all events for that path come from the file
 system, so each operation is reported once.
+
+Event injection
+---------------
+
+With ``CONFIG_FS_NOTIFY_INJECT``, one ``write()`` of a
+``struct notify_inject_s`` (event mask + NUL terminated absolute path)
+to an inotify file descriptor injects one notification.  Off by
+default since any writer can forge events for any path.
