@@ -34,14 +34,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
+#include <limits.h>
+#include <unistd.h>
 #include <assert.h>
 #include <errno.h>
 #include <nuttx/debug.h>
 
 #include <arpa/inet.h>
+#include <sys/inotify.h>
 #include <netinet/in.h>
 
 #include <nuttx/fs/userfs.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/mutex.h>
 
 #include "libc.h"
@@ -1332,3 +1336,63 @@ errout_with_info:
   lib_free(info);
   return ret;
 }
+
+/****************************************************************************
+ * Name: userfs_notify_event
+ *
+ * Description:
+ *   Inject a file change notification through an inotify descriptor
+ *   (CONFIG_FS_NOTIFY_INJECT).
+ *
+ * Input Parameters:
+ *   abspath - Absolute path of the affected object
+ *   mask    - inotify event mask
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_NOTIFY_INJECT
+int userfs_notify_event(FAR const char *abspath, uint32_t mask)
+{
+  FAR struct notify_inject_s *event;
+  size_t pathlen;
+  size_t len;
+  ssize_t nwritten;
+  int fd;
+
+  if (abspath == NULL || abspath[0] != '/')
+    {
+      return -EINVAL;
+    }
+
+  pathlen = strlen(abspath) + 1;
+  len     = sizeof(uint32_t) + pathlen;
+  if (len > PATH_MAX)
+    {
+      return -ENAMETOOLONG;
+    }
+
+  event = lib_get_tempbuffer(PATH_MAX);
+  if (event == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  event->mask = mask;
+  memcpy(event->path, abspath, pathlen);
+
+  fd = inotify_init1(0);
+  if (fd < 0)
+    {
+      lib_put_tempbuffer(event);
+      return -get_errno();
+    }
+
+  nwritten = write(fd, event, len);
+  close(fd);
+  lib_put_tempbuffer(event);
+  return nwritten < 0 ? -get_errno() : OK;
+}
+#endif /* CONFIG_FS_NOTIFY_INJECT */
