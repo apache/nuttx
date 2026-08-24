@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_gpio_m33_u3u5.h
+ * arch/arm/src/common/stm32/stm32_gpio_m33_v1.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_GPIO_M33_U3U5_H
-#define __ARCH_ARM_SRC_COMMON_STM32_STM32_GPIO_M33_U3U5_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_GPIO_M33_V1_H
+#define __ARCH_ARM_SRC_COMMON_STM32_STM32_GPIO_M33_V1_H
 
 /****************************************************************************
  * Included Files
@@ -38,14 +38,7 @@
 #include <arch/chip/chip.h>
 
 #include "chip.h"
-
-#if defined(CONFIG_STM32_STM32U3C5XX) || \
-    defined(CONFIG_STM32_STM32U585XX) || \
-    defined(CONFIG_STM32_STM32U5A5XX)
-#  include "hardware/stm32_gpio_m33_u3u5.h"
-#else
-#  error "Unsupported STM32U3/U5 chip"
-#endif
+#include "hardware/stm32_gpio_m33_v1.h"
 
 /****************************************************************************
  * Pre-Processor Declarations
@@ -364,4 +357,4 @@ void stm32_gpioinit(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_GPIO_M33_U3U5_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_GPIO_M33_V1_H */

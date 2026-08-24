@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_exti_gpio_m33_u3u5.c
+ * arch/arm/src/common/stm32/stm32_exti_gpio_m33_v1.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -38,8 +38,8 @@
 
 #include "arm_internal.h"
 #include "chip.h"
+#include "hardware/stm32_exti_m33_v1.h"
 #include "stm32_gpio.h"
-#include "stm32_exti.h"
 
 /****************************************************************************
  * Private Types
