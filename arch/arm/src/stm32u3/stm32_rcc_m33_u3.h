@@ -35,11 +35,31 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* LPUART1 is clocked from PCLK3 by default and is gated through APB3. */
+/* Common Cortex-M33 USART driver contract */
 
 #define STM32_LPUART1_FREQUENCY  STM32_PCLK3_FREQUENCY
 #define STM32_LPUART1_RCC_REG    STM32_RCC_APB3ENR
 #define STM32_LPUART1_RCC_EN     RCC_APB3ENR_LPUART1EN
+
+#define STM32_USART1_FREQUENCY   STM32_PCLK2_FREQUENCY
+#define STM32_USART1_RCC_REG     STM32_RCC_APB2ENR
+#define STM32_USART1_RCC_EN      RCC_APB2ENR_USART1EN
+
+#define STM32_USART2_FREQUENCY   STM32_PCLK1_FREQUENCY
+#define STM32_USART2_RCC_REG     STM32_RCC_APB1ENR1
+#define STM32_USART2_RCC_EN      RCC_APB1ENR1_USART2EN
+
+#define STM32_USART3_FREQUENCY   STM32_PCLK1_FREQUENCY
+#define STM32_USART3_RCC_REG     STM32_RCC_APB1ENR1
+#define STM32_USART3_RCC_EN      RCC_APB1ENR1_USART3EN
+
+#define STM32_UART4_FREQUENCY    STM32_PCLK1_FREQUENCY
+#define STM32_UART4_RCC_REG      STM32_RCC_APB1ENR1
+#define STM32_UART4_RCC_EN       RCC_APB1ENR1_UART4EN
+
+#define STM32_UART5_FREQUENCY    STM32_PCLK1_FREQUENCY
+#define STM32_UART5_RCC_REG      STM32_RCC_APB1ENR1
+#define STM32_UART5_RCC_EN       RCC_APB1ENR1_UART5EN
 
 /****************************************************************************
  * Public Function Prototypes

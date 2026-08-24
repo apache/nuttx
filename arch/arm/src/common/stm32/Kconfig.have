@@ -1098,6 +1098,10 @@ config STM32_HAVE_UART8
 config STM32_HAVE_IP_USART
 	bool
 
+config STM32_HAVE_IP_USART_M33_V3
+	bool
+	select STM32_HAVE_IP_USART
+
 config STM32_HAVE_IP_USART_V1
 	bool
 	select STM32_HAVE_IP_USART
