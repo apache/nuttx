@@ -14,7 +14,7 @@ Family status
 Family        CPU core          Status       NuttX source directory
 ============  ================  ===========  ===========================
 STM32C0       Cortex-M0+        supported    ``arch/arm/src/stm32c0``
-STM32C5       Cortex-M33        unsupported  none
+STM32C5       Cortex-M33        supported    ``arch/arm/src/stm32c5``
 STM32F0       Cortex-M0         supported    ``arch/arm/src/stm32f0``
 STM32F1       Cortex-M3         supported    ``arch/arm/src/stm32f1``
 STM32F2       Cortex-M3         supported    ``arch/arm/src/stm32f2``
@@ -231,6 +231,46 @@ USART/LPUART  v4            arch/arm/src/common/stm32/stm32_serial_m0_v4.c
 USB           device        not supported                                    
 WWDG          v1            arch/arm/src/common/stm32/stm32_wwdg_m0_v1.c     
 ============  ============  =================================================
+
+STM32C5
+-------
+
+============  ============  ==============================================================
+Peripheral    Core version  Driver
+============  ============  ==============================================================
+ADC           to be done    not supported
+AES           to be done    not supported
+COMP          to be done    not supported
+CORDIC        to be done    not supported
+CRC           to be done    not supported
+CRS           to be done    not supported
+DAC           to be done    not supported
+DBGMCU        to be done    not supported
+EXTI          M33 v1        arch/arm/src/common/stm32/stm32_exti_gpio_m33_v1.c
+FDCAN         FDCAN         not supported
+FLASH         to be done    not supported
+GPIO          M33 v1        arch/arm/src/common/stm32/stm32_gpio_m33_v1.c
+HASH          to be done    not supported
+I2C           to be done    not supported
+I3C           to be done    not supported
+ICACHE        to be done    not supported
+IWDG          to be done    not supported
+LPDMA         to be done    not supported
+LPTIM         to be done    not supported
+LPUART        M33 v3        arch/arm/src/common/stm32/stm32_serial_m33_v3.c
+PWR           to be done    not supported
+RAMCFG        to be done    not supported
+RCC           C5            arch/arm/src/stm32c5/stm32c5xx_rcc.c
+RNG           to be done    not supported
+RTC           to be done    not supported
+SBS           to be done    not supported
+SPI/I2S       to be done    not supported
+TAMP          to be done    not supported
+TIM           to be done    not supported
+USART/UART    M33 v3        arch/arm/src/common/stm32/stm32_serial_m33_v3.c
+USB_FS        FS            not supported
+WWDG          to be done    not supported
+============  ============  ==============================================================
 
 STM32F0
 -------
