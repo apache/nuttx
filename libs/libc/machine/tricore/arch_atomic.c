@@ -27,8 +27,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/atomic.h>
-
-#include <IfxCpu_Intrinsics.h>
+#include <nuttx/compiler.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -38,31 +37,31 @@
                                                                         \
   void func(volatile void *ptr, int32_t value, int memorder)            \
   {                                                                     \
-    __swap((void *)ptr, value);                                         \
+    tricore_atomic_swap(ptr, value);                                    \
   }
 
 #define ARCH_ATOMIC_LOAD_4(func)                                        \
                                                                         \
   int32_t func(const volatile void *ptr, int memorder)                  \
   {                                                                     \
-    return __ld32((void *)ptr);                                         \
+    return *(volatile uint32_t *)ptr;                                   \
   }
 
 #define ARCH_ATOMIC_EXCHANGE_4(func)                                    \
                                                                         \
   int32_t func(volatile void *ptr, int32_t value, int memorder)         \
   {                                                                     \
-    return __swap((void *)ptr, value);                                  \
+    return tricore_atomic_swap(ptr, value);                             \
   }
 
 #define ARCH_ATOMIC_COMPARE_EXCHANGE_4(func)                            \
                                                                         \
-  bool func(volatile void *ptr, void *expect, int32_t desired,          \
-            bool weak, int success, int failure)                        \
+  bool func(volatile void *ptr, volatile void *expect,                  \
+            int32_t desired, bool weak, int success, int failure)       \
   {                                                                     \
     int32_t old;                                                        \
                                                                         \
-    old = __cmpAndSwap(ptr, desired, *(int32_t *)expect);               \
+    old = tricore_atomic_cmpswap(ptr, desired, *(int32_t *)expect);     \
     if (old == *(int32_t *)expect)                                      \
       {                                                                 \
         return true;                                                    \
@@ -77,13 +76,12 @@
                                                                         \
   int32_t func(volatile void *ptr, int memorder)                        \
   {                                                                     \
-    return __swap((void *)ptr, 1);                                      \
+    return tricore_atomic_swap(ptr, 1);                                 \
   }
 
 #define ARCH_ATOMIC_FETCH_ADD_4(func)                                   \
                                                                         \
   int32_t func(volatile void *ptr, int32_t value, int memorder)         \
-                                                                        \
   {                                                                     \
     int32_t old_val;                                                    \
                                                                         \
@@ -91,7 +89,8 @@
       {                                                                 \
         old_val = atomic_load_4(ptr, memorder);                         \
       }                                                                 \
-    while (__cmpAndSwap(ptr, old_val + value, old_val) != old_val);     \
+    while (tricore_atomic_cmpswap(ptr, old_val + value, old_val)        \
+           != old_val);                                                 \
                                                                         \
     return old_val;                                                     \
   }
@@ -106,7 +105,8 @@
       {                                                                 \
         old_val = atomic_load_4(ptr, memorder);                         \
       }                                                                 \
-    while (__cmpAndSwap(ptr, old_val - value, old_val) != old_val);     \
+    while (tricore_atomic_cmpswap(ptr, old_val - value, old_val)        \
+           != old_val);                                                 \
                                                                         \
     return old_val;                                                     \
   }
@@ -121,7 +121,8 @@
       {                                                                 \
         old_val = atomic_load_4(ptr, memorder);                         \
       }                                                                 \
-    while (__cmpAndSwap(ptr, old_val & value, old_val) != old_val);     \
+    while (tricore_atomic_cmpswap(ptr, old_val & value, old_val)        \
+           != old_val);                                                 \
                                                                         \
     return old_val;                                                     \
   }
@@ -136,7 +137,8 @@
       {                                                                 \
         old_val = atomic_load_4(ptr, memorder);                         \
       }                                                                 \
-    while (__cmpAndSwap(ptr, old_val | value, old_val) != old_val);     \
+    while (tricore_atomic_cmpswap(ptr, old_val | value, old_val)        \
+           != old_val);                                                 \
                                                                         \
     return old_val;                                                     \
   }
@@ -151,10 +153,38 @@
       {                                                                 \
         old_val = atomic_load_4(ptr, memorder);                         \
       }                                                                 \
-    while (__cmpAndSwap(ptr, old_val ^ value, old_val) != old_val);     \
+    while (tricore_atomic_cmpswap(ptr, old_val ^ value, old_val)        \
+           != old_val);                                                 \
                                                                         \
     return old_val;                                                     \
   }
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+always_inline_function
+static uint32_t tricore_atomic_swap(volatile void *addr, uint32_t value)
+{
+  uint32_t res;
+
+  __asm__ volatile ("swap.w [%1]0, %2"
+                    : "=d"(res) : "a"(addr), "0"(value));
+  return res;
+}
+
+always_inline_function
+static uint32_t tricore_atomic_cmpswap(volatile void *addr, uint32_t value,
+                                       uint32_t condition)
+{
+  uint64_t reg64 = value | ((uint64_t)condition << 32);
+
+  __asm__ __volatile__ ("cmpswap.w [%1]0, %A0"
+                        : "+d" (reg64)
+                        : "a" (addr)
+                        : "memory");
+  return (uint32_t)reg64;
+}
 
 /****************************************************************************
  * Public Functions
