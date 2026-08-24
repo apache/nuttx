@@ -98,6 +98,10 @@ static int elf_loadbinary(FAR struct binary_s *binp,
                           int nexports)
 {
   struct mod_loadinfo_s loadinfo;
+#if defined(CONFIG_BINFMT_CONSTRUCTORS) && !defined(CONFIG_ARCH_ADDRENV)
+  FAR void (**array)(void);
+  int i;
+#endif
   Elf_Sym sym;
   int ret;
 
@@ -283,6 +287,28 @@ static int elf_loadbinary(FAR struct binary_s *binp,
       dspaces->region = (FAR void *)loadinfo.shdr[loadinfo.gotindex].sh_addr;
       dspaces->crefs = 1;
       binp->picbase = (FAR void *)dspaces;
+    }
+#endif
+
+#if defined(CONFIG_BINFMT_CONSTRUCTORS) && !defined(CONFIG_ARCH_ADDRENV)
+  /* Run the constructors, as libelf_insert() does for dlopen().  An
+   * executable runs its own in crt0.  A module with a PIC base is skipped:
+   * this task holds its own base, not the module's.
+   */
+
+  if (loadinfo.ehdr.e_type != ET_EXEC && binp->picbase == NULL)
+    {
+      array = (FAR void (**)(void))loadinfo.preiarr;
+      for (i = 0; i < loadinfo.nprei; i++)
+        {
+          array[i]();
+        }
+
+      array = (FAR void (**)(void))loadinfo.initarr;
+      for (i = 0; i < loadinfo.ninit; i++)
+        {
+          array[i]();
+        }
     }
 #endif
 
