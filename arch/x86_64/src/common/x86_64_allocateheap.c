@@ -56,7 +56,7 @@
  ****************************************************************************/
 
 const uintptr_t g_idle_topstack = (uintptr_t)_ebss +
-  (uintptr_t)CONFIG_IDLETHREAD_STACKSIZE * (CONFIG_SMP_NCPUS + 1) - 16;
+                                  CONFIG_IDLETHREAD_STACKSIZE - 16;
 
 /****************************************************************************
  * Name: up_allocate_heap
