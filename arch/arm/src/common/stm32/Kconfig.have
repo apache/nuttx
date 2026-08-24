@@ -33,6 +33,14 @@
 
 # ADC capabilities
 
+# Cortex-M33 GPIO and EXTI capabilities
+
+config STM32_HAVE_IP_GPIO_M33_V1
+	bool
+
+config STM32_HAVE_IP_EXTI_M33_V1
+	bool
+
 config STM32_HAVE_ADC_TIMTRIG_TRGO2
 	bool
 	default y if (STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || STM32_HAVE_IP_ADC_M0_V1 || ARCH_CHIP_STM32F7 || ARCH_CHIP_STM32H5

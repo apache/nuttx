@@ -33,10 +33,9 @@
  * version is core-agnostic.
  */
 
-#if defined(CONFIG_ARCH_CHIP_STM32U3) || \
-    defined(CONFIG_ARCH_CHIP_STM32U5)
+#if defined(CONFIG_STM32_HAVE_IP_EXTI_M33_V1)
 
-#  include "hardware/stm32_exti_m33_u3u5.h"
+#  include "hardware/stm32_exti_m33_v1.h"
 
 #elif (defined(CONFIG_STM32_HAVE_IP_EXTI_V1) + \
      defined(CONFIG_STM32_HAVE_IP_EXTI_V2)) > 1

@@ -27,9 +27,8 @@
  * Included Files
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_CHIP_STM32U3) || \
-    defined(CONFIG_ARCH_CHIP_STM32U5)
-#  include "hardware/stm32_gpio_m33_u3u5.h"
+#if defined(CONFIG_STM32_HAVE_IP_GPIO_M33_V1)
+#  include "hardware/stm32_gpio_m33_v1.h"
 #elif defined(CONFIG_STM32_HAVE_IP_GPIO_M0_V1)
 #  include "hardware/stm32_gpio_v2_m0.h"
 #elif defined(CONFIG_STM32_STM32L15XX)

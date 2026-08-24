@@ -10,6 +10,8 @@ comment "STM32U5 Configuration Options"
 config STM32_U5_PERIPHERALS
 	bool
 	default y
+	select STM32_HAVE_IP_EXTI_M33_V1
+	select STM32_HAVE_IP_GPIO_M33_V1
 	select STM32_HAVE_COMP
 	select STM32_HAVE_CRS
 	select STM32_HAVE_DAC1
