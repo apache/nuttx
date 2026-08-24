@@ -161,6 +161,15 @@ ifeq ($(CONFIG_AMEBA_ADC),y)
 AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_adc.c
 endif
 
+# RTC register layer.  The whole fwlib RTC API the RTC driver
+# (arch/.../common/ameba/ameba_rtc.c) calls -- RTC_Init/StructInit,
+# RTC_SetTime/GetTime and RTC_SetAlarm/GetAlarm/AlarmStructInit/AlarmCmd/
+# AlarmClear -- is compiled from this RAM source (the _LONG_CALL_ prototypes
+# resolve here, not to ROM) and must be linked in.
+ifeq ($(CONFIG_AMEBA_RTC),y)
+AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_rtc.c
+endif
+
 # -Wno-int-conversion: the vendored SDK passes NULL to irq_register()'s u32
 # "Data" (interrupt context) argument in many places -- an intentional
 # NULL-as-context idiom.  Silence -Wint-conversion for the SDK fwlib sources
