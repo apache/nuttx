@@ -66,6 +66,8 @@
 #define RPMSGFS_READLINK        24
 #define RPMSGFS_LINK            25
 #define RPMSGFS_LSTAT           26
+#define RPMSGFS_WATCH           27
+#define RPMSGFS_NOTIFY          28
 
 /****************************************************************************
  * Public Types
@@ -227,6 +229,35 @@ begin_packed_struct struct rpmsgfs_fchstat_s
 
 #define rpmsgfs_chstat_s rpmsgfs_fchstat_s
 
+/* Client to server: start/stop watching a path.  ADD is answered with
+ * the server watch descriptor in header.result; RM carries it back in
+ * wd and is not answered.
+ */
+
+begin_packed_struct struct rpmsgfs_watch_s
+{
+  struct rpmsgfs_header_s header;
+  int32_t                 action;      /* NOTIFY_WATCH_ADD or _RM */
+  int32_t                 wd;          /* RM: server watch descriptor */
+  uint32_t                mask;        /* inotify event mask */
+  char                    pathname[0]; /* ADD: server absolute path */
+} end_packed_struct;
+
+/* Server to client, unsolicited: a watched path changed */
+
+begin_packed_struct struct rpmsgfs_notify_s
+{
+  struct rpmsgfs_header_s header;
+  int32_t                 wd;          /* Server watch descriptor */
+  uint32_t                mask;        /* inotify event mask */
+  char                    name[0];     /* Directory entry, may be empty */
+} end_packed_struct;
+
+/* Remote event callback; runs on the rpmsg rx thread, must not block */
+
+typedef CODE void (*rpmsgfs_notify_t)(FAR void *arg, int wd,
+                                      FAR const char *name, uint32_t mask);
+
 /****************************************************************************
  * Internal function prototypes
  ****************************************************************************/
@@ -277,6 +308,14 @@ int       rpmsgfs_client_link(FAR void *handle, FAR const char *path1,
                               FAR const char *path2);
 int       rpmsgfs_client_lstat(FAR void *handle, FAR const char *path,
                                FAR struct stat *buf);
+#endif
+#ifdef CONFIG_FS_NOTIFY
+int       rpmsgfs_client_watch_add(FAR void *handle, FAR const char *path,
+                                   uint32_t mask);
+int       rpmsgfs_client_watch_rm(FAR void *handle, int wd);
+void      rpmsgfs_client_set_notify(FAR void *handle,
+                                    rpmsgfs_notify_t callback,
+                                    FAR void *arg);
 #endif
 
 /****************************************************************************

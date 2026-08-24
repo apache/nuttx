@@ -27,16 +27,16 @@
 #include <nuttx/config.h>
 
 #include <dirent.h>
-#include <stdio.h>
 #include <string.h>
-#include <fcntl.h>
 #include <assert.h>
 #include <nuttx/debug.h>
 #include <errno.h>
+#include <sys/inotify.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/list.h>
 #include <nuttx/mutex.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/rpmsg/rpmsg.h>
@@ -44,6 +44,10 @@
 #include "rpmsgfs.h"
 #include "fs_heap.h"
 #include "vfs/vfs.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Types
@@ -61,6 +65,10 @@ struct rpmsgfs_server_s
   struct list_node      lock_waiters; /* Deferred FIOC_SETLKW requests */
   sem_t                 lock_drained; /* Posted when lock_waiters drains */
   bool                  lock_closing; /* ept_release waits on lock_drained */
+#endif
+#ifdef CONFIG_FS_RPMSGFS_SERVER_NOTIFY
+  struct file           notify_file;  /* In-kernel inotify instance */
+  bool                  notify_open;  /* notify_file is initialized */
 #endif
 };
 
@@ -163,6 +171,9 @@ static int rpmsgfs_lstat_handler(FAR struct rpmsg_endpoint *ept,
                                  FAR void *data, size_t len,
                                  uint32_t src, FAR void *priv);
 #endif
+static int rpmsgfs_watch_handler(FAR struct rpmsg_endpoint *ept,
+                                 FAR void *data, size_t len,
+                                 uint32_t src, FAR void *priv);
 static bool rpmsgfs_ns_match(FAR struct rpmsg_device *rdev,
                              FAR void *priv_, FAR const char *name,
                              uint32_t dest);
@@ -210,6 +221,7 @@ static const rpmsg_ept_cb g_rpmsgfs_handler[] =
   [RPMSGFS_LINK]      = rpmsgfs_link_handler,
   [RPMSGFS_LSTAT]     = rpmsgfs_lstat_handler,
 #endif
+  [RPMSGFS_WATCH]     = rpmsgfs_watch_handler,
 };
 
 /****************************************************************************
@@ -1125,6 +1137,123 @@ static int rpmsgfs_lstat_handler(FAR struct rpmsg_endpoint *ept,
 }
 #endif
 
+#ifdef CONFIG_FS_RPMSGFS_SERVER_NOTIFY
+
+/****************************************************************************
+ * Name: rpmsgfs_notify_cb
+ *
+ * Description: Forward one inotify event to the client (unsolicited).
+ *   Invoked by the in-kernel inotify instance in the context that
+ *   generated the event, so it must not block: a tx buffer is taken
+ *   without waiting and the notification is dropped if none is free.
+ *
+ ****************************************************************************/
+
+static void rpmsgfs_notify_cb(FAR void *arg, int wd, uint32_t mask,
+                              FAR const char *name)
+{
+  FAR struct rpmsgfs_server_s *priv = arg;
+  FAR struct rpmsgfs_notify_s *msg;
+  uint32_t space;
+  size_t len;
+
+  len = sizeof(*msg) + (name != NULL ? strlen(name) : 0) + 1;
+
+  msg = rpmsg_get_tx_payload_buffer(&priv->ept, &space, false);
+  if (msg == NULL || len > space)
+    {
+      return;
+    }
+
+  msg->header.command = RPMSGFS_NOTIFY;
+  msg->header.result  = 0;
+  msg->header.cookie  = 0;
+  msg->wd             = wd;
+  msg->mask           = mask;
+  strlcpy(msg->name, name != NULL ? name : "", space - sizeof(*msg));
+
+  if (rpmsg_send_nocopy(&priv->ept, msg, len) < 0)
+    {
+      rpmsg_release_tx_buffer(&priv->ept, msg);
+    }
+}
+
+/****************************************************************************
+ * Name: rpmsgfs_watch_handler
+ *
+ * Description: Add or remove a watch on the in-kernel inotify instance.
+ *   ADD is answered with the watch descriptor; RM is fire and forget.
+ *
+ ****************************************************************************/
+
+static int rpmsgfs_watch_handler(FAR struct rpmsg_endpoint *ept,
+                                 FAR void *data, size_t len,
+                                 uint32_t src, FAR void *priv_)
+{
+  FAR struct rpmsgfs_server_s *priv = priv_;
+  FAR struct rpmsgfs_watch_s *msg = data;
+  int ret;
+
+  if (msg->action != NOTIFY_WATCH_ADD)
+    {
+      nxmutex_lock(&priv->lock);
+      if (priv->notify_open)
+        {
+          file_notify_rm_watch(&priv->notify_file, msg->wd);
+        }
+
+      nxmutex_unlock(&priv->lock);
+      return 0;
+    }
+
+  nxmutex_lock(&priv->lock);
+  if (!priv->notify_open)
+    {
+      ret = file_notify_open(&priv->notify_file, rpmsgfs_notify_cb, priv);
+      if (ret < 0)
+        {
+          nxmutex_unlock(&priv->lock);
+          msg->header.result = ret;
+          return rpmsg_send(ept, msg, len);
+        }
+
+      priv->notify_open = true;
+    }
+
+  ret = file_notify_add_watch(&priv->notify_file, msg->pathname,
+                              msg->mask & IN_ALL_EVENTS);
+  nxmutex_unlock(&priv->lock);
+
+  msg->header.result = ret;
+  return rpmsg_send(ept, msg, len);
+}
+
+#else
+
+/****************************************************************************
+ * Name: rpmsgfs_watch_handler
+ *
+ * Description: Without inotify forwarding, answer ADD with -ENOSYS so that
+ *   the client keeps a local-only watch.  RM expects no reply.
+ *
+ ****************************************************************************/
+
+static int rpmsgfs_watch_handler(FAR struct rpmsg_endpoint *ept,
+                                 FAR void *data, size_t len,
+                                 uint32_t src, FAR void *priv)
+{
+  FAR struct rpmsgfs_watch_s *msg = data;
+
+  if (msg->action != NOTIFY_WATCH_ADD)
+    {
+      return 0;
+    }
+
+  msg->header.result = -ENOSYS;
+  return rpmsg_send(ept, msg, len);
+}
+#endif /* CONFIG_FS_RPMSGFS_SERVER_NOTIFY */
+
 static bool rpmsgfs_ns_match(FAR struct rpmsg_device *rdev,
                              FAR void *priv_, FAR const char *name,
                              uint32_t dest)
@@ -1171,6 +1300,13 @@ static void rpmsgfs_ept_release(FAR struct rpmsg_endpoint *ept)
     }
 
   nxsem_destroy(&priv->lock_drained);
+#endif
+
+#ifdef CONFIG_FS_RPMSGFS_SERVER_NOTIFY
+  if (priv->notify_open)
+    {
+      file_notify_close(&priv->notify_file);
+    }
 #endif
 
   for (i = 0; i < priv->file_rows; i++)
@@ -1243,7 +1379,8 @@ static int rpmsgfs_server_ept_cb(FAR struct rpmsg_endpoint *ept,
   uint32_t command = header->command;
   int ret;
 
-  if (command >= nitems(g_rpmsgfs_handler))
+  if (command >= nitems(g_rpmsgfs_handler) ||
+      g_rpmsgfs_handler[command] == NULL)
     {
       return -EINVAL;
     }

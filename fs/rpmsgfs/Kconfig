@@ -38,3 +38,11 @@ config FS_RPMSGFS_SERVER
 	depends on RPMSG
 	---help---
 		Initialize RPMSG file system server automatically.
+
+config FS_RPMSGFS_SERVER_NOTIFY
+	bool "RPMSG File Server inotify forwarding"
+	default y
+	depends on FS_RPMSGFS_SERVER && FS_NOTIFY
+	---help---
+		Watch the paths requested by the rpmsgfs client and forward
+		the inotify events back to the client core.

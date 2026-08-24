@@ -34,7 +34,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/rpmsg/rpmsg.h>
@@ -52,6 +54,10 @@ struct rpmsgfs_s
   struct rpmsg_endpoint ept;
   char                  cpuname[RPMSG_NAME_SIZE];
   sem_t                 wait;
+#ifdef CONFIG_FS_NOTIFY
+  rpmsgfs_notify_t      notify_cb;
+  FAR void             *notify_arg;
+#endif
 };
 
 struct rpmsgfs_cookie_s
@@ -90,6 +96,11 @@ static int rpmsgfs_init_handler(FAR struct rpmsg_endpoint *ept,
 static int rpmsgfs_readlink_handler(FAR struct rpmsg_endpoint *ept,
                                     FAR void *data, size_t len,
                                     uint32_t src, FAR void *priv);
+#endif
+#ifdef CONFIG_FS_NOTIFY
+static int rpmsgfs_notify_handler(FAR struct rpmsg_endpoint *ept,
+                                  FAR void *data, size_t len,
+                                  uint32_t src, FAR void *priv);
 #endif
 static void rpmsgfs_device_created(struct rpmsg_device *rdev,
                                    FAR void *priv_);
@@ -138,6 +149,10 @@ static const rpmsg_ept_cb g_rpmsgfs_handler[] =
   [RPMSGFS_READLINK]  = rpmsgfs_readlink_handler,
   [RPMSGFS_LINK]      = rpmsgfs_default_handler,
   [RPMSGFS_LSTAT]     = rpmsgfs_stat_handler,
+#endif
+#ifdef CONFIG_FS_NOTIFY
+  [RPMSGFS_WATCH]     = rpmsgfs_default_handler,
+  [RPMSGFS_NOTIFY]    = rpmsgfs_notify_handler,
 #endif
 };
 
@@ -328,6 +343,26 @@ static int rpmsgfs_readlink_handler(FAR struct rpmsg_endpoint *ept,
 }
 #endif
 
+#ifdef CONFIG_FS_NOTIFY
+static int rpmsgfs_notify_handler(FAR struct rpmsg_endpoint *ept,
+                                  FAR void *data, size_t len,
+                                  uint32_t src, FAR void *priv_)
+{
+  FAR struct rpmsgfs_s *priv =
+      container_of(ept, struct rpmsgfs_s, ept);
+  FAR struct rpmsgfs_notify_s *msg = data;
+
+  /* Unsolicited message; the callback must not block */
+
+  if (priv->notify_cb != NULL)
+    {
+      priv->notify_cb(priv->notify_arg, msg->wd, msg->name, msg->mask);
+    }
+
+  return 0;
+}
+#endif
+
 static FAR void *rpmsgfs_get_tx_payload_buffer(FAR struct rpmsgfs_s *priv,
                                                FAR uint32_t *len)
 {
@@ -395,7 +430,8 @@ static int rpmsgfs_ept_cb(FAR struct rpmsg_endpoint *ept,
   FAR struct rpmsgfs_header_s *header = data;
   uint32_t command = header->command;
 
-  if (command < nitems(g_rpmsgfs_handler))
+  if (command < nitems(g_rpmsgfs_handler) &&
+      g_rpmsgfs_handler[command] != NULL)
     {
       return g_rpmsgfs_handler[command](ept, data, len, src, priv);
     }
@@ -1189,3 +1225,76 @@ int rpmsgfs_client_lstat(FAR void *handle, FAR const char *path,
   return rpmsgfs_send_recv(priv, RPMSGFS_LSTAT, false,
           (struct rpmsgfs_header_s *)msg, len, buf);
 }
+
+#ifdef CONFIG_FS_NOTIFY
+int rpmsgfs_client_watch_add(FAR void *handle, FAR const char *path,
+                             uint32_t mask)
+{
+  FAR struct rpmsgfs_s *priv = handle;
+  FAR struct rpmsgfs_watch_s *msg;
+  uint32_t space;
+  size_t len;
+
+  len = sizeof(*msg) + strlen(path) + 1;
+
+  msg = rpmsgfs_get_tx_payload_buffer(priv, &space);
+  if (!msg)
+    {
+      return -ENOMEM;
+    }
+
+  DEBUGASSERT(len <= space);
+
+  msg->action = NOTIFY_WATCH_ADD;
+  msg->wd     = -1;
+  msg->mask   = mask;
+  strlcpy(msg->pathname, path, space - sizeof(*msg));
+
+  /* The response carries the server watch descriptor in result */
+
+  return rpmsgfs_send_recv(priv, RPMSGFS_WATCH, false,
+          (FAR struct rpmsgfs_header_s *)msg, len, NULL);
+}
+
+int rpmsgfs_client_watch_rm(FAR void *handle, int wd)
+{
+  FAR struct rpmsgfs_s *priv = handle;
+  FAR struct rpmsgfs_watch_s *msg;
+  uint32_t space;
+  int ret;
+
+  msg = rpmsgfs_get_tx_payload_buffer(priv, &space);
+  if (!msg)
+    {
+      return -ENOMEM;
+    }
+
+  /* Fire and forget: no response is expected */
+
+  msg->header.command = RPMSGFS_WATCH;
+  msg->header.result  = -ENXIO;
+  msg->header.cookie  = 0;
+  msg->action         = NOTIFY_WATCH_RM;
+  msg->wd             = wd;
+  msg->mask           = 0;
+
+  ret = rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg));
+  if (ret < 0)
+    {
+      rpmsg_release_tx_buffer(&priv->ept, msg);
+      return ret;
+    }
+
+  return OK;
+}
+
+void rpmsgfs_client_set_notify(FAR void *handle,
+                               rpmsgfs_notify_t callback,
+                               FAR void *arg)
+{
+  FAR struct rpmsgfs_s *priv = handle;
+
+  priv->notify_cb  = callback;
+  priv->notify_arg = arg;
+}
+#endif

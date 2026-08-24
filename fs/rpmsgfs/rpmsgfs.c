@@ -39,10 +39,13 @@
 #include <limits.h>
 
 #include <nuttx/lib/lib.h>
+#include <nuttx/list.h>
 #include <nuttx/mutex.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/signal.h>
+#include <nuttx/spinlock.h>
 
 #include "rpmsgfs.h"
 #include "fs_heap.h"
@@ -87,7 +90,23 @@ struct rpmsgfs_mountpt_s
   char                       fs_root[PATH_MAX];
   void                       *handle;
   int                        timeout;  /* Connect timeout */
+#ifdef CONFIG_FS_NOTIFY
+  FAR struct inode           *mountpt;     /* For notify_event() */
+  struct list_node           watch_list;   /* wd to path translations */
+  spinlock_t                 watch_lock;   /* Protects watch_list */
+#endif
 };
+
+#ifdef CONFIG_FS_NOTIFY
+/* One watched path: translates the server watch descriptor back */
+
+struct rpmsgfs_watchmap_s
+{
+  struct list_node node;
+  int              wd;
+  char             relpath[1];
+};
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -104,7 +123,6 @@ static off_t   rpmsgfs_seek(FAR struct file *filep, off_t offset,
                             int whence);
 static int     rpmsgfs_ioctl(FAR struct file *filep, int cmd,
                              unsigned long arg);
-
 static int     rpmsgfs_sync(FAR struct file *filep);
 static int     rpmsgfs_dup(FAR const struct file *oldp,
                            FAR struct file *newp);
@@ -162,6 +180,12 @@ static int     rpmsgfs_lstat(FAR struct inode *mountpt,
                              FAR struct stat *buf);
 #endif
 
+#ifdef CONFIG_FS_NOTIFY
+static int     rpmsgfs_notify(FAR struct inode *mountpt, int wd,
+                              FAR const char *relpath, int action,
+                              uint32_t mask);
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -214,6 +238,10 @@ const struct mountpt_operations g_rpmsgfs_operations =
   rpmsgfs_symlink,       /* symlink */
   rpmsgfs_readlink,      /* readlink */
   rpmsgfs_lstat,         /* lstat */
+#endif
+
+#ifdef CONFIG_FS_NOTIFY
+  rpmsgfs_notify,        /* notify */
 #endif
 };
 
@@ -645,6 +673,176 @@ static int rpmsgfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   nxmutex_unlock(&fs->fs_lock);
   return ret;
 }
+
+#ifdef CONFIG_FS_NOTIFY
+
+/****************************************************************************
+ * Name: rpmsgfs_notify_findmap
+ *
+ * Description: Translate a server watch descriptor back to its path.
+ *
+ ****************************************************************************/
+
+static FAR struct rpmsgfs_watchmap_s *
+rpmsgfs_notify_findmap(FAR struct rpmsgfs_mountpt_s *fs, int wd)
+{
+  FAR struct rpmsgfs_watchmap_s *map;
+
+  list_for_every_entry(&fs->watch_list, map, struct rpmsgfs_watchmap_s,
+                       node)
+    {
+      if (map->wd == wd)
+        {
+          return map;
+        }
+    }
+
+  return NULL;
+}
+
+static void rpmsgfs_notify_cb(FAR void *arg, int wd,
+                              FAR const char *name, uint32_t mask)
+{
+  FAR struct rpmsgfs_mountpt_s *fs = arg;
+  FAR struct rpmsgfs_watchmap_s *map;
+  FAR char *relpath;
+  irqstate_t flags;
+
+  /* Runs on the rpmsg rx thread.  The inotify lock is only ever held
+   * briefly and never across an rpmsgfs request, so injecting the
+   * event directly here cannot block the rx thread against a pending
+   * reply.
+   */
+
+  relpath = lib_get_pathbuffer();
+  if (relpath == NULL)
+    {
+      return;
+    }
+
+  flags = spin_lock_irqsave(&fs->watch_lock);
+  map = rpmsgfs_notify_findmap(fs, wd);
+  if (map != NULL)
+    {
+      if (name[0] != '\0')
+        {
+          snprintf(relpath, PATH_MAX, "%s/%s", map->relpath, name);
+        }
+      else
+        {
+          strlcpy(relpath, map->relpath, PATH_MAX);
+        }
+    }
+
+  spin_unlock_irqrestore(&fs->watch_lock, flags);
+
+  if (map != NULL && fs->mountpt != NULL)
+    {
+      notify_event(fs->mountpt, relpath, mask);
+    }
+
+  lib_put_pathbuffer(relpath);
+}
+
+/****************************************************************************
+ * Name: rpmsgfs_notify
+ *
+ * Description: Forward the inotify watch life cycle to the server.
+ *
+ ****************************************************************************/
+
+static int rpmsgfs_notify(FAR struct inode *mountpt, int wd,
+                          FAR const char *relpath, int action,
+                          uint32_t mask)
+{
+  FAR struct rpmsgfs_mountpt_s *fs;
+  FAR struct rpmsgfs_watchmap_s *map;
+  irqstate_t flags;
+  FAR char *path;
+  size_t len;
+  int ret;
+
+  fs = mountpt->i_private;
+  DEBUGASSERT(fs != NULL);
+
+  if (action == NOTIFY_WATCH_RM)
+    {
+      flags = spin_lock_irqsave(&fs->watch_lock);
+      map = rpmsgfs_notify_findmap(fs, wd);
+      if (map != NULL)
+        {
+          list_delete(&map->node);
+        }
+
+      spin_unlock_irqrestore(&fs->watch_lock, flags);
+      if (map != NULL)
+        {
+          fs_heap_free(map);
+        }
+
+      return rpmsgfs_client_watch_rm(fs->handle, wd);
+    }
+
+  len = strlen(relpath);
+  map = fs_heap_malloc(sizeof(*map) + len);
+  if (map == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  memcpy(map->relpath, relpath, len + 1);
+
+  path = lib_get_pathbuffer();
+  if (path == NULL)
+    {
+      fs_heap_free(map);
+      return -ENOMEM;
+    }
+
+  ret = nxmutex_lock(&fs->fs_lock);
+  if (ret < 0)
+    {
+      lib_put_pathbuffer(path);
+      fs_heap_free(map);
+      return ret;
+    }
+
+  /* Cache the mountpoint inode for notify_event() */
+
+  fs->mountpt = mountpt;
+
+  rpmsgfs_mkpath(fs, relpath, path, PATH_MAX);
+  ret = rpmsgfs_client_watch_add(fs->handle, path, mask);
+  nxmutex_unlock(&fs->fs_lock);
+  lib_put_pathbuffer(path);
+
+  if (ret < 0)
+    {
+      fs_heap_free(map);
+      return ret;
+    }
+
+  /* The server returns the same wd when the path is already watched
+   * (a wider mask reuses the handle); keep a single map per wd.
+   */
+
+  map->wd = ret;
+  flags = spin_lock_irqsave(&fs->watch_lock);
+  if (rpmsgfs_notify_findmap(fs, ret) == NULL)
+    {
+      list_add_tail(&fs->watch_list, &map->node);
+      map = NULL;
+    }
+
+  spin_unlock_irqrestore(&fs->watch_lock, flags);
+  if (map != NULL)
+    {
+      fs_heap_free(map);
+    }
+
+  return ret;
+}
+#endif /* CONFIG_FS_NOTIFY */
 
 /****************************************************************************
  * Name: rpmsgfs_sync
@@ -1130,6 +1328,12 @@ static int rpmsgfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   nxmutex_init(&fs->fs_lock);
 
+#ifdef CONFIG_FS_NOTIFY
+  list_initialize(&fs->watch_list);
+  spin_lock_init(&fs->watch_lock);
+  rpmsgfs_client_set_notify(fs->handle, rpmsgfs_notify_cb, fs);
+#endif
+
   /* Initialize the allocated mountpt state structure.  The filesystem is
    * responsible for one reference ont the blkdriver inode and does not
    * have to addref() here (but does have to release in ubind().
@@ -1197,6 +1401,24 @@ static int rpmsgfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
       return (flags != 0) ? -ENOSYS : -EBUSY;
     }
+
+#ifdef CONFIG_FS_NOTIFY
+  /* Stop remote event delivery and drop the watch translations */
+
+  rpmsgfs_client_set_notify(fs->handle, NULL, NULL);
+
+  for (; ; )
+    {
+      FAR struct list_node *node = list_remove_head(&fs->watch_list);
+
+      if (node == NULL)
+        {
+          break;
+        }
+
+      fs_heap_free(container_of(node, struct rpmsgfs_watchmap_s, node));
+    }
+#endif
 
   ret = rpmsgfs_client_unbind(fs->handle);
   nxmutex_unlock(&fs->fs_lock);
@@ -1680,7 +1902,7 @@ static ssize_t rpmsgfs_readlink(FAR struct inode *mountpt,
 
   fs = mountpt->i_private;
 
-  path = lib_get_tempbuffer(PATH_MAX);
+  path = lib_get_pathbuffer();
   if (path == NULL)
     {
       return -ENOMEM;
@@ -1703,7 +1925,7 @@ static ssize_t rpmsgfs_readlink(FAR struct inode *mountpt,
   nxmutex_unlock(&fs->fs_lock);
 
 errout_with_path:
-  lib_put_tempbuffer(path);
+  lib_put_pathbuffer(path);
   return ret;
 }
 
@@ -1730,7 +1952,7 @@ static int rpmsgfs_lstat(FAR struct inode *mountpt, FAR const char *relpath,
 
   fs = mountpt->i_private;
 
-  path = lib_get_tempbuffer(PATH_MAX);
+  path = lib_get_pathbuffer();
   if (path == NULL)
     {
       return -ENOMEM;
@@ -1753,7 +1975,7 @@ static int rpmsgfs_lstat(FAR struct inode *mountpt, FAR const char *relpath,
   nxmutex_unlock(&fs->fs_lock);
 
 errout_with_path:
-  lib_put_tempbuffer(path);
+  lib_put_pathbuffer(path);
   return ret;
 }
 #endif
