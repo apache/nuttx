@@ -68,7 +68,7 @@ GTZC        No
 HASH        No
 I3C         No
 IWDG        Yes
-LPTIM       No
+LPTIM       Yes
 OTFDEC      No
 PKA         No
 PSSI        No
