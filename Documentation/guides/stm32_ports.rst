@@ -47,7 +47,6 @@ STM32WL5      Cortex-M0+        unsupported  none
 STM32WLE      Cortex-M4         unsupported  none
 ============  ================  ===========  ===========================
 
-
 Migration to NuttX 13.0
 =======================
 
@@ -918,12 +917,15 @@ of a peripheral on a given core is ``V1``.
 - Facade headers: ``stm32_<periph>.h`` — dispatch on Kconfig IP symbols
 - M0-core variants: ``stm32_<periph>_m0_v1.h``
 - M3/M4-core variants: ``stm32_<periph>_m3m4_v1.h``, ``stm32_<periph>_m3m4_v2.h``
+- M33-core variants: ``stm32_<periph>_m33_v1.h``, ``stm32_<periph>_m33_v3.h``
 - Combined variants: ``stm32_<periph>_m3m4_v1v2.h``, ``stm32_<periph>_m3m4_v1v2v3.h``
 
 **Source file naming** (``.c`` files):
 
 - Follow the same convention as headers: ``stm32_gpio_m3m4_v1v2.c``,
-  ``stm32_adc_m0_v1.c``, ``stm32_tim_m0_v1.c``, ``stm32_pwm_m3m4_v1v2v3.c``
+  ``stm32_adc_m0_v1.c``, ``stm32_gpio_m33_v1.c``,
+  ``stm32_serial_m33_v3.c``, ``stm32_tim_m0_v1.c``, and
+  ``stm32_pwm_m3m4_v1v2v3.c``
 
 **Kconfig symbol naming** (``CONFIG_STM32_HAVE_IP_<PERIPH>_<CORE>_<VERSION>``):
 
@@ -932,6 +934,9 @@ of a peripheral on a given core is ``V1``.
   ``CONFIG_STM32_HAVE_IP_ADC_M3M4_V1``, ``CONFIG_STM32_HAVE_IP_ADC_M3M4_V2``,
   ``CONFIG_STM32_HAVE_IP_TIMERS_M3M4_V1``, ``CONFIG_STM32_HAVE_IP_TIMERS_M3M4_V2``,
   ``CONFIG_STM32_HAVE_IP_TIMERS_M3M4_V3``
+- M33: ``CONFIG_STM32_HAVE_IP_GPIO_M33_V1``,
+  ``CONFIG_STM32_HAVE_IP_EXTI_M33_V1``, and
+  ``CONFIG_STM32_HAVE_IP_USART_M33_V3``
 
 Note that in the future the core prefix may be dropped and a single
 version number space used across all cores.  For now the core prefix is

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32u3/stm32_rcc_m33_u3.h
+ * arch/arm/src/stm32u3/stm32_rcc_m33.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32U3_STM32_RCC_M33_U3_H
-#define __ARCH_ARM_SRC_STM32U3_STM32_RCC_M33_U3_H
+#ifndef __ARCH_ARM_SRC_STM32U3_STM32_RCC_M33_H
+#define __ARCH_ARM_SRC_STM32U3_STM32_RCC_M33_H
 
 /****************************************************************************
  * Included Files
@@ -35,7 +35,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Common Cortex-M33 USART driver contract */
+/* USART clock and RCC definitions */
 
 #define STM32_LPUART1_FREQUENCY  STM32_PCLK3_FREQUENCY
 #define STM32_LPUART1_RCC_REG    STM32_RCC_APB3ENR
@@ -96,4 +96,4 @@ void stm32_rcc_enableperipherals(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32U3_STM32_RCC_M33_U3_H */
+#endif /* __ARCH_ARM_SRC_STM32U3_STM32_RCC_M33_H */
