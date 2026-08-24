@@ -71,6 +71,14 @@ _sa_handler_t signal(int signo, _sa_handler_t func)
 
   DEBUGASSERT(func != SIG_ERR && func != SIG_HOLD);
 
+  /* An FDPIC module passes the address of a function descriptor rather than
+   * a code address, but it is not resolved here: sigaction() then
+   * nxsig_action() resolves the handler in the innermost common code, which
+   * covers both this path and a module that calls sigaction() directly.
+   * Resolving here as well would resolve it twice and branch through a code
+   * address as if it were a descriptor.
+   */
+
   /* Initialize the sigaction structure */
 
   act.sa_handler = func;

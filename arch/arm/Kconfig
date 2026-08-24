@@ -1081,6 +1081,7 @@ config ARCH_ARMV7M
 	default n
 	select ARCH_HAVE_CPUINFO
 	select ARCH_HAVE_DEBUG
+	select ARCH_HAVE_ELF_FDPIC
 	select ARCH_HAVE_PERF_EVENTS
 
 config ARCH_CORTEXM3
@@ -1230,6 +1231,7 @@ config ARCH_ARMV8M
 	default n
 	select ARCH_HAVE_CPUINFO
 	select ARCH_HAVE_DEBUG
+	select ARCH_HAVE_ELF_FDPIC
 	select ARCH_HAVE_PERF_EVENTS
 
 config ARCH_CORTEXM23

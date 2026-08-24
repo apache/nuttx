@@ -79,6 +79,56 @@ do { \
   ); \
 } while (0)
 
+#ifdef CONFIG_FDPIC
+
+/****************************************************************************
+ * Name: up_fdpic_invoke
+ *
+ * Description:
+ *   Call a module entry point with the module data base in the PIC base
+ *   register.  Put the caller data base back after the call.
+ *
+ *   up_setpicbase() cannot do this.  The register must hold the module base
+ *   for one call only, and C cannot tell the compiler that the register is
+ *   live across that call.  Thus the save, the install, the branch and the
+ *   restore must be one sequence.
+ *
+ *   The sequence is safe against a context switch or an interrupt.  The
+ *   register is REG_PIC in the saved context, and the base firmware keeps
+ *   the register reserved.
+ *
+ * Input Parameters:
+ *   entry - The code address to enter.
+ *   arg   - The one word argument, passed in r0.
+ *   got   - The module data base to install.
+ *
+ ****************************************************************************/
+
+static inline void up_fdpic_invoke(uintptr_t entry, uintptr_t arg,
+                                   uintptr_t got)
+{
+  register uintptr_t r0v __asm__ ("r0") = arg;
+
+  /* arg stays in r0, which is the first argument and the scratch of the
+   * call.  Thus the asm needs registers for entry and got only.  The PIC
+   * register goes on the stack, and r4 goes with it to keep the push
+   * aligned to 8 bytes.
+   */
+
+  __asm__ __volatile__
+  (
+    "push {r4, " PIC_REG_STRING "}\n"   /* Save the caller's base       */
+    "mov " PIC_REG_STRING ", %[got]\n"  /* Install the module's base    */
+    "blx %[entry]\n"                    /* Enter the module             */
+    "pop {r4, " PIC_REG_STRING "}\n"    /* Restore the caller's base    */
+    : "+r" (r0v)
+    : [entry] "r" (entry), [got] "r" (got)
+    : "r1", "r2", "r3", "r12", "lr", "cc", "memory"
+  );
+}
+
+#endif /* CONFIG_FDPIC */
+
 #endif /* CONFIG_PIC */
 
 #ifdef CONFIG_ARCH_ADDRENV

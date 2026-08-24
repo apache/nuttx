@@ -14,6 +14,7 @@ case, you can head to the :doc:`reference <../reference/index>`.
    binfmt.rst
    concurrency/index.rst
    drivers/index.rst
+   fdpic.rst
    nxflat.rst
    nxgraphics/index.rst
    paging.rst
