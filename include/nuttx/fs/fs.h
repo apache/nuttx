@@ -182,6 +182,11 @@
 #define CH_STAT_SIZE       (1 << 7)
 #define CH_STAT_NOFOLLOW   (1 << 8)  /* Do not follow a final symbolic link */
 
+/* Actions passed to the notify method of struct mountpt_operations */
+
+#define NOTIFY_WATCH_ADD   0  /* First watch created on a path */
+#define NOTIFY_WATCH_RM    1  /* Last watch on a path removed  */
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -423,6 +428,22 @@ struct mountpt_operations
   CODE int     (*lstat)(FAR struct inode *mountpt,
                         FAR const char *relpath,
                         FAR struct stat *buf);
+#endif
+
+#ifdef CONFIG_FS_NOTIFY
+  /* Optional method, appended at the end so that the leading block
+   * stays union-compatible with struct file_operations.
+   * NOTIFY_WATCH_ADD returns a file system watch handle (or a negated
+   * errno) for the path; NOTIFY_WATCH_RM receives that handle back in
+   * wd.  Called whenever a watch on the path is added or removed, so
+   * the implementation must ignore a repeated add for a path it is
+   * already watching.  May block; called from inotify contexts, so it
+   * must not call back into the inotify engine synchronously.
+   */
+
+  CODE int     (*notify)(FAR struct inode *mountpt, int wd,
+                         FAR const char *relpath,
+                         int action, uint32_t mask);
 #endif
 };
 #endif /* CONFIG_DISABLE_MOUNTPOINT */
@@ -890,6 +911,25 @@ int nx_mount(FAR const char *source, FAR const char *target,
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 int nx_umount2(FAR const char *target, unsigned int flags);
+#endif
+
+/****************************************************************************
+ * Name: notify_event
+ *
+ * Description:
+ *   Inject a file change notification that originated outside the local
+ *   VFS.  Must be called from thread context.
+ *
+ * Input Parameters:
+ *   mountpt - Mountpoint inode, or NULL if relpath is absolute
+ *   relpath - Path of the affected object relative to the mountpoint
+ *   mask    - inotify event mask
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_NOTIFY
+void notify_event(FAR struct inode *mountpt, FAR const char *relpath,
+                  uint32_t mask);
 #endif
 
 /****************************************************************************
