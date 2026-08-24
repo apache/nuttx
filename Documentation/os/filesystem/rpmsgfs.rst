@@ -30,3 +30,11 @@ Using the following command to mount the master's ``/proc`` file system to ``/pr
 
 Note the ``-o cpu=master,fs=/proc`` specifies the ``master`` node's ``/proc`` path as the source, the ``/proc.master`` is the mount point at remote side. All files under that mount point is actually hosted at the master side. The ``-t rpmsgfs`` selects the RPMsg file system driver to serve the operation.
 
+
+inotify
+=======
+
+With ``CONFIG_FS_NOTIFY`` on the client and
+``CONFIG_FS_RPMSGFS_SERVER_NOTIFY`` on the server, inotify watches are
+forwarded to the server and server-side changes to watched files are
+reported back to local watchers.
