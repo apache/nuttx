@@ -91,6 +91,19 @@ int rtl8720f_pwm_initialize(void);
 int rtl8720f_adc_initialize(void);
 #endif
 
+#ifdef CONFIG_AMEBA_RTC
+/****************************************************************************
+ * Name: rtl8720f_rtc_initialize
+ *
+ * Description:
+ *   Register the board's RTC at /dev/rtc0
+ *   (boards/arm/rtl8720f/rtl8720f_evb/src/rtl8720f_rtc.c).
+ *
+ ****************************************************************************/
+
+int rtl8720f_rtc_initialize(void);
+#endif
+
 #ifdef CONFIG_RTL8720F_WIFI
 /****************************************************************************
  * Name: rtl8720f_wifi_initialize
