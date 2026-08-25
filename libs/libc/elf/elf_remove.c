@@ -28,8 +28,11 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/fdpic.h>
 #include <nuttx/lib/lib.h>
 #include <nuttx/lib/elf.h>
+
+#include "elf/elf.h"
 
 /****************************************************************************
  * Public Functions
@@ -59,12 +62,15 @@ int libelf_uninit(FAR struct module_s *modp)
     }
 #endif
 
-  /* Is there an uninitializer? */
+  /* Is there an uninitializer?  Like the constructors, an FDPIC object's
+   * destructors reach its globals through its own data base, which the
+   * unloading thread does not carry.
+   */
 
   array = (FAR void (**)(void))modp->finiarr;
   for (i = 0; i < modp->nfini; i++)
     {
-      array[i]();
+      fdpic_call(0, array[i], modp->gotbase);
     }
 
   if (modp->modinfo.uninitializer != NULL)
@@ -94,6 +100,14 @@ int libelf_uninit(FAR struct module_s *modp)
   libelf_freesymtab(modp);
   modp->modinfo.exports  = NULL;
   modp->modinfo.nexports = 0;
+
+#ifdef HAVE_LIBC_ELF_PIN
+  /* Give the pin back before the text goes out of use.  This does nothing if
+   * the loader took no pin.
+   */
+
+  libelf_pinrelease(&modp->pinfile);
+#endif
 
   /* Release resources held by the module */
 
@@ -149,6 +163,24 @@ int libelf_uninit(FAR struct module_s *modp)
           lib_free((FAR void *)modp->dataalloc);
 #  endif
 #endif
+        }
+      else if (modp->gotbase != 0)
+        {
+          /* An FDPIC object, which placed its two segments separately.  Free
+           * each one.  If the text stayed on the media, it was never
+           * allocated, thus leave it.
+           */
+
+          if (modp->xipbase == 0)
+            {
+#ifdef CONFIG_ARCH_USE_TEXT_HEAP
+              up_textheap_free((FAR void *)modp->textalloc);
+#else
+              lib_free((FAR void *)modp->textalloc);
+#endif
+            }
+
+          lib_free((FAR void *)modp->dataalloc);
         }
       else
         {

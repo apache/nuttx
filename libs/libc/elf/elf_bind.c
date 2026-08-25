@@ -30,6 +30,7 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
+#include <inttypes.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
@@ -796,6 +797,19 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
               }
             break;
         }
+    }
+
+  /* An object with no imports has no PLT and so no DT_PLTGOT, but it still
+   * has a GOT and still has to be entered with it: the linker puts it
+   * immediately after the dynamic section.
+   */
+
+  if (loadinfo->fdpic && loadinfo->gotbase == 0)
+    {
+      loadinfo->gotbase = libelf_addr(loadinfo,
+                                      shdr->sh_addr + shdr->sh_size);
+      binfo("No DT_PLTGOT; taking the GOT at %08" PRIxPTR "\n",
+            loadinfo->gotbase);
     }
 
   /* After the loop, because DT_PLTGOT is read there.  Both relocation

@@ -159,6 +159,36 @@ static inline void fdpic_invoke(uintptr_t arg,
     }
 }
 
+/****************************************************************************
+ * Name: fdpic_call
+ *
+ * Description:
+ *   Call a function of a module the caller is not running in, such as a
+ *   constructor of a module being loaded or a destructor of one being
+ *   unloaded, with the data base that function needs.
+ *
+ *   A zero base means the function is not a module's, or the caller already
+ *   carries the right one, and it is called directly.  A non-FDPIC object
+ *   has a GOT too, so the caller decides which base to pass, not this.
+ *
+ * Input Parameters:
+ *   arg - The one word argument.
+ *   fn  - The function to call.
+ *   got - The data base to enter it with, or zero.
+ *
+ ****************************************************************************/
+
+static inline void fdpic_call(uintptr_t arg, CODE void (*fn)(void),
+                              uintptr_t got)
+{
+  struct fdpic_desc_s desc;
+
+  desc.entry = (uintptr_t)fn;
+  desc.got   = got;
+
+  fdpic_invoke(arg, &desc);
+}
+
 #else
 
 #  define fdpic_base()       (0)
@@ -167,6 +197,8 @@ static inline void fdpic_invoke(uintptr_t arg,
           ((desc)->entry = (uintptr_t)(fn), (desc)->got = 0)
 #  define fdpic_invoke(arg, desc) \
           (((CODE void (*)(uintptr_t))(desc)->entry)(arg))
+#  define fdpic_call(arg, fn, got) \
+          ((void)(got), ((CODE void (*)(uintptr_t))(fn))(arg))
 
 #endif /* CONFIG_FDPIC */
 
