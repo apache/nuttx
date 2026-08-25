@@ -45,14 +45,14 @@
 #ifdef CONFIG_SCHED_SPORADIC
 static inline_function
 int set_sporadic_param(FAR const struct sched_param *param,
-                       FAR struct tcb_s *rtcb, FAR struct tcb_s *tcb)
+                       FAR struct tcb_s *tcb)
 {
   irqstate_t flags;
   int ret = OK;
 
   /* Update parameters associated with SCHED_SPORADIC */
 
-  if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+  if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
     {
       FAR struct sporadic_s *sporadic;
       clock_t repl_ticks;
@@ -104,7 +104,7 @@ int set_sporadic_param(FAR const struct sched_param *param,
 
                   tcb->timeslice         = budget_ticks;
 
-                  sporadic = rtcb->sporadic;
+                  sporadic = tcb->sporadic;
                   DEBUGASSERT(sporadic != NULL);
 
                   sporadic->hi_priority  = param->sched_priority;
@@ -136,7 +136,7 @@ int set_sporadic_param(FAR const struct sched_param *param,
   return ret;
 }
 #else
-#  define set_sporadic_param(p, r, t) OK
+#  define set_sporadic_param(p, t) OK
 #endif
 
 /****************************************************************************
@@ -216,7 +216,7 @@ int nxsched_set_param(pid_t pid, FAR const struct sched_param *param)
 
       if (ret >= 0)
         {
-          ret = set_sporadic_param(param, rtcb, tcb);
+          ret = set_sporadic_param(param, tcb);
         }
 
       /* Then perform the reprioritization */
@@ -271,6 +271,7 @@ int nxsched_set_param(pid_t pid, FAR const struct sched_param *param)
 int sched_setparam(pid_t pid, FAR const struct sched_param *param)
 {
   int ret = nxsched_set_param(pid, param);
+
   if (ret < 0)
     {
       set_errno(-ret);
