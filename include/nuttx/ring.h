@@ -1781,8 +1781,22 @@ ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
           discard = count - free_space;
           if (discard > committed)
             {
-              old_prod = atomic_read(&blob->prod_head);
-              continue;
+              /* Not enough committed data to evict: the room we would need
+               * is still held by producers that reserved it but have not
+               * called ring_mp_finish() yet, and evicting it would hand out
+               * slots another producer is writing into.
+               *
+               * Spinning here would wait for those producers to finish, but
+               * this path is reentrant - a producer preempted between its
+               * prod_head CAS and ring_mp_finish() cannot make progress
+               * while an interrupt handler on the same CPU spins for it.
+               * Drop the request instead: the whole count is reported as
+               * discarded and an empty buf makes ring_mp_finish() return
+               * early, so no prod_head reservation is left unmatched.
+               */
+
+              ring_buf_init(buf, r, 0, 0, elem_size);
+              return all_discard + count;
             }
 
           new_cons = RTS_PACK(RTS_CNT(old_cons) + 1,
