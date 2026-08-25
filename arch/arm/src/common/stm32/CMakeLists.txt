@@ -46,14 +46,16 @@ if(CONFIG_ARCH_CHIP_STM32U3 OR CONFIG_ARCH_CHIP_STM32U5)
     stm32_allocateheap_m33_u3u5.c
     stm32_exti_gpio_m33_u3u5.c
     stm32_gpio_m33_u3u5.c
-    stm32_irq_m33_u3u5.c
     stm32_lowputc_m33_u3u5.c
     stm32_serial_m33_u3u5.c
-    stm32_start_m33_u3u5.c
-    stm32_timerisr_m33_u3u5.c)
+    stm32_start_m33_u3u5.c)
+endif()
+
+if(CONFIG_ARCH_CHIP_STM32U3 OR CONFIG_ARCH_CHIP_STM32U5)
+  list(APPEND SRCS stm32_irq_m33_v1.c stm32_timerisr_m33_v1.c)
 
   if(NOT CONFIG_ARCH_IDLE_CUSTOM)
-    list(APPEND SRCS stm32_idle_m33_u3u5.c)
+    list(APPEND SRCS stm32_idle_m33_v1.c)
   endif()
 endif()
 
