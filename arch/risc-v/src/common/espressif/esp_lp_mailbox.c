@@ -24,6 +24,9 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
+#include <fcntl.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 
@@ -162,7 +165,7 @@ static int esp_lp_mailbox_read(struct file *filep,
 {
   struct inode *inode = filep->f_inode;
   struct esp_lp_mailbox_priv_s *priv = inode->i_private;
-  lp_message_t msg;
+  uint32_t timeout =  (filep->f_oflags & O_NONBLOCK) ? 0 : UINT32_MAX;
   int i = 0;
   int ret = OK;
   lp_message_t recv;
@@ -171,10 +174,19 @@ static int esp_lp_mailbox_read(struct file *filep,
 
   while (i < buflen)
     {
-      ret = lp_core_mailbox_receive(priv->mailbox, &recv, UINT32_MAX);
+      ret = lp_core_mailbox_receive(priv->mailbox, &recv, timeout);
       if (ret != OK)
         {
-          ferr("Failed to receive %dth byte\n", i + 1);
+          if (i == 0 && (filep->f_oflags & O_NONBLOCK) != 0)
+            {
+              return -EAGAIN;
+            }
+
+          if ((filep->f_oflags & O_NONBLOCK) == 0)
+            {
+              ferr("Failed to receive %dth byte\n", i + 1);
+            }
+
           return i;
         }
 
@@ -296,15 +308,15 @@ static int esp_lp_mailbox_ioctl(struct file *filep,
               priv->async_op = true;
             }
 
-            if (ret != OK)
-              {
-                priv->async_op = false;
-                ferr("Could not register callback-%lx to lp-mailbox!\n",
-                      (uint32_t)handler);
-                return ERROR;
-              }
+          if (ret != OK)
+            {
+              priv->async_op = false;
+              ferr("Could not register callback-%lx to lp-mailbox!\n",
+                    (uint32_t)handler);
+              return ERROR;
+            }
 
-            priv->handler = handler;
+          priv->handler = handler;
           break;
         }
 
