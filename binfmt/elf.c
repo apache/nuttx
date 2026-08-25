@@ -252,6 +252,7 @@ static int elf_loadbinary(FAR struct binary_s *binp,
 
   binp->mod.textalloc = (FAR void *)loadinfo.textalloc;
   binp->mod.dataalloc = (FAR void *)loadinfo.datastart;
+  binp->mod.gotbase   = loadinfo.fdpic ? loadinfo.gotbase : 0;
 #  ifdef CONFIG_BINFMT_CONSTRUCTORS
   binp->mod.initarr = loadinfo.initarr;
   binp->mod.finiarr = loadinfo.finiarr;
@@ -284,6 +285,15 @@ static int elf_loadbinary(FAR struct binary_s *binp,
       dspaces->crefs = 1;
       binp->picbase = (FAR void *)dspaces;
     }
+#endif
+
+#ifdef HAVE_LIBC_ELF_PIN
+  /* Past the last thing that can fail, so the module owns the pin: it is
+   * given back when the task that runs the module exits.
+   */
+
+  binp->mod.pinfile = loadinfo.pinfile;
+  loadinfo.pinfile  = NULL;
 #endif
 
   libelf_uninitialize(&loadinfo);
