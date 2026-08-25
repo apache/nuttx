@@ -38,6 +38,10 @@
 #include <nuttx/signal.h>
 #include <nuttx/spinlock.h>
 
+#ifdef CONFIG_FDPIC
+#  include <nuttx/fdpic.h>
+#endif
+
 #include "sched/sched.h"
 #include "group/group.h"
 #include "signal/signal.h"
@@ -325,6 +329,19 @@ int nxsig_action(int signo, FAR const struct sigaction *act,
 #endif
 
   handler = act->sa_handler;
+
+#ifdef CONFIG_FDPIC
+  /* Resolve the handler here, the innermost common code, so it happens
+   * exactly once.  SIG_ERR, SIG_IGN, SIG_DFL and SIG_HOLD are small
+   * integers rather than addresses, so exclude them by hand.
+   */
+
+  if (handler != SIG_ERR && handler != SIG_IGN && handler != SIG_DFL &&
+      handler != SIG_HOLD)
+    {
+      handler = (_sa_handler_t)fdpic_callback((FAR void *)handler);
+    }
+#endif
 
 #ifdef CONFIG_SIG_DEFAULT
   /* If the caller is setting the handler to SIG_DFL, then we need to

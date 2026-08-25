@@ -37,6 +37,10 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/spinlock.h>
 
+#if defined(CONFIG_FDPIC) && defined(CONFIG_SIG_EVTHREAD)
+#  include <nuttx/fdpic.h>
+#endif
+
 #include "sched/sched.h"
 #include "timer/timer.h"
 
@@ -196,6 +200,26 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp,
               /* Yes, copy the entire struct sigevent content */
 
               memcpy(&ret->pt_event, evp, sizeof(struct sigevent));
+
+#if defined(CONFIG_FDPIC) && defined(CONFIG_SIG_EVTHREAD)
+              /* Record the callback here, where this still runs in the
+               * module's context.  It fires later on a worker that carries
+               * no data base, so the base travels with it.  The function
+               * shares a union with the thread ID, so only a SIGEV_THREAD
+               * event has one to record.
+               */
+
+              ret->pt_work.func.got = 0;
+
+              if ((evp->sigev_notify & SIGEV_THREAD) != 0)
+                {
+                  fdpic_desc_init(&ret->pt_work.func,
+                                  (FAR void *)evp->sigev_notify_function);
+
+                  ret->pt_event.sigev_notify_function =
+                    (sigev_notify_function_t)ret->pt_work.func.entry;
+                }
+#endif
             }
           else
             {
