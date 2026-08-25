@@ -63,6 +63,24 @@
 
 int esp_bringup(void);
 
+/****************************************************************************
+ * Name: esp_gpio_init
+ *
+ * Description:
+ *   Configure the GPIO driver.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero (OK).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_GPIO
+int esp_gpio_init(void);
+#endif
+
 #ifdef CONFIG_ESP32P4_TAB5_LCD_POWER
 
 /****************************************************************************
