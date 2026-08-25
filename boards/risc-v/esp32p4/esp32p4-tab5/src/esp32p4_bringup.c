@@ -109,6 +109,16 @@ int esp_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_DEV_GPIO
+  /* Configure the GPIO driver */
+
+  ret = esp_gpio_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize GPIO driver: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_ESP32P4_TAB5_IOEXPANDER
   /* Initialize the IO expanders */
 

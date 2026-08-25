@@ -90,6 +90,19 @@
 #  define TAB5_MIPI_DSI_LANE_BITRATE_MBPS  965
 #endif
 
+/* GPIOs available on the M5-Bus connector */
+
+#define TAB5_GPIO_MBUS_3  3
+#define TAB5_GPIO_MBUS_2  2
+#define TAB5_GPIO_MBUS_47 47
+
+#define TAB5_GPIO_MBUS_16 16
+#define TAB5_GPIO_MBUS_45 45
+#define TAB5_GPIO_MBUS_4  4
+#define TAB5_GPIO_MBUS_48 48
+#define TAB5_GPIO_MBUS_35 35
+#define TAB5_GPIO_MBUS_51 51
+
 /* Touch - ST7121/ST7123 TDDI @0x55 (NOT implemented; INT GPIO23).  Older
  * ILI9881 units used GT911 @0x14 on the same INT pin.
  */
