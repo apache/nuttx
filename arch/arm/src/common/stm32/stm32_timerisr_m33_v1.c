@@ -48,23 +48,10 @@
  * system clock ticks per second.  That value is a user configurable setting
  * that defaults to 100 (100 ticks per second = 10 MS interval).
  *
- * The RCC feeds the Cortex System Timer (SysTick) with the AHB clock (HCLK)
- * divided by 8.  The SysTick can work either with this clock or with the
- * Cortex clock (HCLK), configurable in the SysTick Control and Status
- * register.
+ * The Cortex System Timer (SysTick) uses the Cortex clock (HCLK).
  */
 
-/* Power up default is HCLK, not HCLK/8.
- * And I don't know now to re-configure it yet
- */
-
-#undef CONFIG_STM32_SYSTICK_HCLKd8
-
-#ifdef CONFIG_STM32_SYSTICK_HCLKd8
-#  define SYSTICK_RELOAD ((STM32_HCLK_FREQUENCY / 8 / CLK_TCK) - 1)
-#else
-#  define SYSTICK_RELOAD ((STM32_HCLK_FREQUENCY / CLK_TCK) - 1)
-#endif
+#define SYSTICK_RELOAD ((STM32_HCLK_FREQUENCY / CLK_TCK) - 1)
 
 /* The size of the reload field is 24 bits.  Verify that the reload value
  * will fit in the reload register.
@@ -118,18 +105,6 @@ void up_timer_initialize(void)
   regval &= ~NVIC_SYSH_PRIORITY_PR15_MASK;
   regval |= (NVIC_SYSH_PRIORITY_DEFAULT << NVIC_SYSH_PRIORITY_PR15_SHIFT);
   putreg32(regval, NVIC_SYSH12_15_PRIORITY);
-
-  /* Make sure that the SYSTICK clock source is set correctly */
-
-#if 0 /* Does not work.  Comes up with HCLK source and I can't change it */
-  regval = getreg32(NVIC_SYSTICK_CTRL);
-#ifdef CONFIG_STM32_SYSTICK_HCLKd8
-  regval &= ~NVIC_SYSTICK_CTRL_CLKSOURCE;
-#else
-  regval |= NVIC_SYSTICK_CTRL_CLKSOURCE;
-#endif
-  putreg32(regval, NVIC_SYSTICK_CTRL);
-#endif
 
   /* Configure SysTick to interrupt at the requested rate */
 
