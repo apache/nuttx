@@ -530,7 +530,9 @@ static const struct rptun_ivshmem_rsc_s g_rsc_table =
       .da   = ALIGN_UP(offsetof(struct rptun_ivshmem_rsc_s, rpmb_shm) +
                        offsetof(struct rptun_ivshmem_mem_s, rsc_table), 8),
       .pa   = (uint32_t)METAL_BAD_PHYS,
-      .len  = sizeof(g_rsc_table.rpmb_shm),
+      .len  = sizeof(g_rsc_table.rpmb_shm) -
+              (ALIGN_UP(offsetof(struct rptun_ivshmem_rsc_s, rpmb_shm), 8) -
+               offsetof(struct rptun_ivshmem_rsc_s, rpmb_shm)),
     },
 #endif
 };
