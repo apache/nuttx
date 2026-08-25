@@ -82,7 +82,7 @@ SAI         No
 TAMP        No
 UCPD        No
 VREFBUF     No
-WWDG        No
+WWDG        Yes
 
 ==========  =======  =====
 
