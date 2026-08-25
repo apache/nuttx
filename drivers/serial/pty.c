@@ -594,12 +594,11 @@ static ssize_t pty_write(FAR struct file *filep,
 {
   FAR struct inode *inode;
   FAR struct pty_dev_s *dev;
-  ssize_t ntotal;
+  ssize_t ntotal = 0;
   ssize_t nwritten;
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
   pid_t pid;
 #endif
-  size_t i;
   char ch;
 
   inode = filep->f_inode;
@@ -618,19 +617,94 @@ static ssize_t pty_write(FAR struct file *filep,
 
   if ((dev->pd_oflag & OPOST) != 0)
     {
-      /* We will transfer one byte at a time, making the appropriae
-       * translations.  Specifically not handled:
+      /* Output post-processing is enabled.  Locate the next byte that needs
+       * translation (CR under OCRNL, NL under ONLCR/ONLRET) or that is a tty
+       * control character (SIGINT/SIGTSTP), write the run of ordinary bytes
+       * before it to the sink in a single call, then handle that byte.
        *
+       * Specifically not handled:
        *   OXTABS - primarily a full-screen terminal optimisation
        *   ONOEOT - Unix interoperability hack
        *   OLCUC  - Not specified by POSIX
        *   ONOCR  - low-speed interactive optimisation
        */
 
-      ntotal = 0;
-      for (i = 0; i < len; i++)
+      FAR const char *special;
+      size_t nbulk;
+
+      while (ntotal < len)
         {
-          ch = *buffer++;
+          special = NULL;
+
+          if ((dev->pd_oflag & OCRNL) != 0)
+            {
+              special = memchr(&buffer[ntotal], '\r', len - ntotal);
+            }
+
+          if ((dev->pd_oflag & (ONLCR | ONLRET)) != 0)
+            {
+              FAR const char *nl;
+
+              nl = memchr(&buffer[ntotal], '\n', len - ntotal);
+              if (nl != NULL && (special == NULL || nl < special))
+                {
+                  special = nl;
+                }
+            }
+
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
+          if (pid > 0 && (dev->pd_lflag & ISIG) != 0)
+            {
+              FAR const char *si;
+
+#ifdef CONFIG_TTY_SIGINT
+              si = memchr(&buffer[ntotal], CONFIG_TTY_SIGINT_CHAR,
+                          len - ntotal);
+              if (si != NULL && (special == NULL || si < special))
+                {
+                  special = si;
+                }
+#endif
+
+#ifdef CONFIG_TTY_SIGTSTP
+              si = memchr(&buffer[ntotal], CONFIG_TTY_SIGTSTP_CHAR,
+                          len - ntotal);
+              if (si != NULL && (special == NULL || si < special))
+                {
+                  special = si;
+                }
+#endif
+            }
+#endif
+
+          /* Write the run of ordinary bytes before the special byte (or the
+           * rest of the buffer when there is none).  The sink pipe write
+           * blocks until all bytes have been written.
+           */
+
+          nbulk = special != NULL ? special - &buffer[ntotal] : len - ntotal;
+          if (nbulk > 0)
+            {
+              nwritten = file_write(&dev->pd_sink, &buffer[ntotal], nbulk);
+              if (nwritten < 0)
+                {
+                  ntotal = ntotal ? ntotal : nwritten;
+                  break;
+                }
+
+              ntotal += nwritten;
+              if (nwritten < nbulk)
+                {
+                  continue;
+                }
+            }
+
+          if (special == NULL)
+            {
+              break;
+            }
+
+          ch = buffer[ntotal];
 
           /* Mapping CR to NL? */
 
@@ -661,24 +735,29 @@ static ssize_t pty_write(FAR struct file *filep,
               nwritten = file_write(&dev->pd_sink, &cr, 1);
               if (nwritten < 0)
                 {
-                  ntotal = nwritten;
+                  ntotal = ntotal ? ntotal : nwritten;
                   break;
                 }
             }
 
-#ifdef CONFIG_TTY_SIGINT
-          if (pid > 0 && ch == CONFIG_TTY_SIGINT_CHAR)
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
+          if (pid > 0 && (dev->pd_lflag & ISIG) != 0)
             {
-              nxsig_kill(pid, SIGINT);
-              return 1;
-            }
+#ifdef CONFIG_TTY_SIGINT
+              if (ch == CONFIG_TTY_SIGINT_CHAR)
+                {
+                  nxsig_kill(pid, SIGINT);
+                  return ntotal + 1;
+                }
 #endif
 
 #ifdef CONFIG_TTY_SIGTSTP
-          if (pid > 0 && ch == CONFIG_TTY_SIGTSTP_CHAR)
-            {
-              nxsig_kill(pid, SIGTSTP);
-              return 1;
+              if (ch == CONFIG_TTY_SIGTSTP_CHAR)
+                {
+                  nxsig_kill(pid, SIGTSTP);
+                  return ntotal + 1;
+                }
+#endif
             }
 #endif
 
@@ -694,7 +773,7 @@ static ssize_t pty_write(FAR struct file *filep,
           nwritten = file_write(&dev->pd_sink, &ch, 1);
           if (nwritten < 0)
             {
-              ntotal = nwritten;
+              ntotal = ntotal ? ntotal : nwritten;
               break;
             }
 
@@ -1174,9 +1253,10 @@ int pty_register2(int minor, bool susv1)
   devpair->pp_master.pd_devpair = devpair;
   devpair->pp_master.pd_master  = true;
   devpair->pp_master.pd_oflag   = OPOST | OCRNL;
+  devpair->pp_master.pd_lflag   = ISIG;
   devpair->pp_slave.pd_devpair  = devpair;
   devpair->pp_slave.pd_oflag    = OPOST | ONLCR;
-  devpair->pp_slave.pd_lflag    = ECHO | ICANON;
+  devpair->pp_slave.pd_lflag    = ECHO | ICANON | ISIG;
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
   /* Initialize  of the task that will receive SIGINT signals. */
 
