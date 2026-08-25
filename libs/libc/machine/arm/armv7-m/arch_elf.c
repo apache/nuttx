@@ -210,28 +210,36 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr,
                 "at addr=%08" PRIxPTR " to sym=%p st_value=%08" PRIx32 "\n",
                 addr, sym, sym->st_value);
 
-          if (data->pltrel)
+          if (data->symisdesc)
+            {
+              /* Resolved to a function in another object, which published a
+               * descriptor of its own.  Take both words: the callee has to
+               * run with its own data base, not ours.
+               */
+
+              *desc = *(FAR struct fdpic_desc_s *)sym->st_value;
+            }
+          else if (data->pltrel)
             {
               /* A lazy descriptor holds its PLT stub address, not an
                * addend.  Overwrite it, do not add to it.
                */
 
               desc->entry = sym->st_value;
+              desc->got   = data->gotbase;
             }
           else
             {
               desc->entry = sym->st_value + desc->entry;
+              desc->got   = data->gotbase;
             }
-
-          desc->got = data->gotbase;
         }
         break;
 
       case R_ARM_FUNCDESC:
         {
-          /* A pointer to a descriptor, which the loader has to supply.
-           * Carve one out of the pool reserved behind the writable segment
-           * and store its address.
+          /* A pointer to a descriptor the loader must supply.  Carve one
+           * from the pool and store its address.
            */
 
           struct fdpic_desc_s *desc;

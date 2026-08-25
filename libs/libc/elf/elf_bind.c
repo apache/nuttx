@@ -30,6 +30,7 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
+#include <dlfcn.h>
 #include <inttypes.h>
 #include <nuttx/debug.h>
 
@@ -67,7 +68,13 @@
 #if defined(ARCH_ELFDATA) && defined(ARCH_ELFDATA_SET_PLTREL)
 #  define ARCH_ELFDATA_PLTREL(v) ARCH_ELFDATA_SET_PLTREL(&arch_data, v)
 #else
-#  define ARCH_ELFDATA_PLTREL(v)
+#  define ARCH_ELFDATA_PLTREL(v) ((void)(v))
+#endif
+
+#if defined(ARCH_ELFDATA) && defined(ARCH_ELFDATA_SET_SYMISDESC)
+#  define ARCH_ELFDATA_SYMISDESC(v) ARCH_ELFDATA_SET_SYMISDESC(&arch_data, v)
+#else
+#  define ARCH_ELFDATA_SYMISDESC(v) ((void)(v))
 #endif
 
 #if defined(ARCH_ELFDATA) && defined(ARCH_ELFDATA_INIT)
@@ -93,7 +100,12 @@ typedef struct
   int        idx;
 } Elf_SymCache;
 
-struct
+/* Where a dynamic object's relocation tables live.  Per load, not per file:
+ * dlopen() of a DT_NEEDED library re-enters this function, and a shared
+ * instance would be overwritten by the nested load.
+ */
+
+struct reldata_s
 {
   int stroff;           /* offset to string table */
   int symoff;           /* offset to symbol table */
@@ -102,7 +114,7 @@ struct
   int reloff[2];        /* offset to the relocation section */
   int relsz[2];         /* size of relocation table */
   int relrela[2];       /* type of relocation type - 0: DT_REL / 1: DT_RELA */
-} reldata;
+};
 
 /****************************************************************************
  * Private Functions
@@ -674,6 +686,13 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
   int           i;
   int           idx_rel;
   int           idx_sym;
+#ifdef CONFIG_LIBC_DLFCN
+  int           j;
+  uintptr_t     libs[CONFIG_LIBC_ELF_MAXNEEDED];
+#endif
+  int           nlibs = 0;
+  struct reldata_s reldata;
+  bool          symfromlib;
 
   /* Define potential architecture specific elf data container */
 
@@ -734,6 +753,28 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
           case DT_PLTRELSZ:
             reldata.relsz[I_PLT] = dyn[i].d_un.d_val;
             break;
+          case DT_NEEDED:
+
+            /* Remember it; the name lives in the string table, which is
+             * not located until the loop has seen DT_STRTAB.
+             */
+
+            if (nlibs >= CONFIG_LIBC_ELF_MAXNEEDED)
+              {
+                berr("ERROR: More than %d DT_NEEDED entries\n",
+                     CONFIG_LIBC_ELF_MAXNEEDED);
+                lib_free(sym);
+                lib_free(rels);
+                lib_free(dyn);
+                return -ENOEXEC;
+              }
+
+#ifdef CONFIG_LIBC_DLFCN
+            libs[nlibs] = dyn[i].d_un.d_val;
+#endif
+            nlibs++;
+            break;
+
           case DT_PLTGOT:
 
             /* The object's data base.  Every function descriptor built
@@ -812,9 +853,68 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
             loadinfo->gotbase);
     }
 
-  /* After the loop, because DT_PLTGOT is read there.  Both relocation
-   * tables are walked under this one arch_data, so the pool cursor
-   * survives from one to the next.
+  /* Open whatever the object names in DT_NEEDED.  dlopen() is the loader
+   * for a shared library, so hand the work to it.
+   */
+
+#ifdef CONFIG_LIBC_DLFCN
+
+  symhdr = &loadinfo->shdr[loadinfo->dsymtabidx];
+
+  for (i = 0; i < nlibs; i++)
+    {
+      Elf_Sym namesym;
+      FAR void *handle;
+
+      /* The name is a string table offset, which is what st_name is, so
+       * the existing reader can fetch it.
+       */
+
+      memset(&namesym, 0, sizeof(namesym));
+      namesym.st_name = libs[i];
+
+      ret = libelf_symname(loadinfo, &namesym,
+                           loadinfo->shdr[symhdr->sh_link].sh_offset);
+      if (ret < 0)
+        {
+          berr("ERROR: DT_NEEDED %d has no name\n", i);
+          lib_free(sym);
+          lib_free(rels);
+          lib_free(dyn);
+          return ret;
+        }
+
+      handle = dlopen((FAR const char *)loadinfo->iobuffer, RTLD_NOW);
+      if (handle == NULL)
+        {
+          berr("ERROR: Cannot open needed library %s\n",
+               (FAR char *)loadinfo->iobuffer);
+          lib_free(sym);
+          lib_free(rels);
+          lib_free(dyn);
+          return -ELIBACC;
+        }
+
+      binfo("Opened needed library %s\n", (FAR char *)loadinfo->iobuffer);
+
+      modp->libs[modp->nlibs++] = handle;
+    }
+
+#else
+  if (nlibs > 0)
+    {
+      berr("ERROR: DT_NEEDED needs CONFIG_LIBC_DLFCN to load %d "
+           "librar%s\n", nlibs, nlibs == 1 ? "y" : "ies");
+      lib_free(sym);
+      lib_free(rels);
+      lib_free(dyn);
+      return -ENOSYS;
+    }
+#endif
+
+  /* Must follow the tag loop, which is where DT_PLTGOT is read.  Both
+   * relocation tables are walked under this one arch_data, so a cursor in
+   * it spans the object.
    */
 
   ARCH_ELFDATA_SETUP(loadinfo);
@@ -913,13 +1013,33 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
                 {
                   FAR void *ep;
 
+                  symfromlib = false;
                   ep = libelf_findglobal(modp, loadinfo, symhdr,
                                          &sym[idx_sym]);
 
-                  /* libelf_findglobal() searches only the registered
-                   * symbols.  A module from exec() has its own export
-                   * table, and an FDPIC module imports its libc there.
+                  /* libelf_findglobal() searches only the globally
+                   * registered symbols, and has left the name in the
+                   * I/O buffer.  Try the DT_NEEDED libraries next, then
+                   * the table exec() supplied.
                    */
+
+#ifdef CONFIG_LIBC_DLFCN
+                  for (j = 0; ep == NULL && j < modp->nlibs; j++)
+                    {
+                      ep = (FAR void *)
+                        libelf_getsymbol(modp->libs[j],
+                                         (FAR char *)loadinfo->iobuffer);
+                      if (ep != NULL)
+                        {
+                          /* Coming from a library is what tells the
+                           * relocation this is a descriptor.
+                           */
+
+                          symfromlib = true;
+                          break;
+                        }
+                    }
+#endif
 
                   if (ep == NULL && exports != NULL)
                     {
@@ -968,6 +1088,12 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
 
                   extsym.st_value = (uintptr_t)ep;
 
+                  /* Whether the resolved value is itself a descriptor,
+                   * which it is when the symbol came from a library.
+                   */
+
+                  ARCH_ELFDATA_SYMISDESC(symfromlib);
+
                   ret = up_relocate(rel, &extsym, addr, ARCH_ELFDATA_PARM);
                   if (ret < 0)
                     {
@@ -981,10 +1107,9 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
                 }
               else if (loadinfo->fdpic)
                 {
-                  /* A relocation naming a symbol inside this object.  A
-                   * pointer to a static function is emitted against the
-                   * section symbol, so the offset, Thumb bit included, is
-                   * the addend and must not come from the patched word.
+                  /* A symbol defined inside this object.  Its value is
+                   * the symbol's own, translated; the addend stays where
+                   * the relocation type expects it.
                    */
 
                   Elf_Sym defsym = sym[idx_sym];
@@ -1043,9 +1168,7 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
         }
     }
 
-  /* Hand back what the relocations consumed.  The error paths above do
-   * not bother: the load is being abandoned, so the cursor has no reader.
-   */
+  /* Hand back what the relocations consumed. */
 
   ARCH_ELFDATA_TEARDOWN(loadinfo);
 

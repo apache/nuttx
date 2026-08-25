@@ -12,6 +12,13 @@ config LIBC_ELF
 menu "Module library configuration"
 	depends on LIBC_ELF
 
+config LIBC_ELF_MAXNEEDED
+	int "Maximum DT_NEEDED libraries per module"
+	default 4
+	---help---
+		How many shared libraries one module may name in DT_NEEDED.  Each
+		is opened with dlopen() while the module loads.
+
 config LIBC_ELF_MAXDEPEND
 	int "Max dependencies"
 	default 2
