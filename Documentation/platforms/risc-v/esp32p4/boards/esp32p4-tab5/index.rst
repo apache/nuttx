@@ -143,6 +143,24 @@ is printed because the upstream default targets rev >= 3.0.
 Configurations
 ==============
 
+gpio
+----
+
+This is a test for the GPIO driver. It uses GPIO2 as output and
+GPIO3 as an interrupt pin.
+
+At the nsh, we can turn the outputs on and off with the following::
+
+    nsh> gpio -o 1 /dev/gpio0
+    nsh> gpio -o 0 /dev/gpio0
+
+We can use the interrupt pin to send a signal when the interrupt fires::
+
+    nsh> gpio -w 1 /dev/gpio1
+
+The pin is configured as a rising edge interrupt, so after issuing the
+above command, connect it to 3.3V.
+
 lvgl_demo
 ---------
 
