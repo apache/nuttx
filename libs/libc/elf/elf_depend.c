@@ -174,6 +174,15 @@ int libelf_undepend(FAR struct module_s *importer)
             }
 
           importer->dependencies[i] = NULL;
+
+          /* A library loaded for a DT_NEEDED entry is held only by the
+           * modules that depend on it, so the last of them unloads it.
+           */
+
+          if (exporter->dependents == 0 && exporter->nopen == 0)
+            {
+              libelf_remove(exporter);
+            }
         }
     }
 

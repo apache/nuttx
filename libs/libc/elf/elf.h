@@ -239,6 +239,17 @@ int libelf_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo,
 int libelf_freebuffers(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
+ * Name: libelf_symname
+ *
+ * Description:
+ *   Read a name out of a string table into the I/O buffer.
+ *
+ ****************************************************************************/
+
+int libelf_symname(FAR struct mod_loadinfo_s *loadinfo,
+                   FAR const Elf_Sym *sym, Elf_Off sh_offset);
+
+/****************************************************************************
  * Name: libelf_addr
  *
  * Description:
