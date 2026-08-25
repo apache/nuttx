@@ -365,4 +365,5 @@ binary format.
    :maxdepth: 1
 
    nxflat.rst
+   fdpic.rst
    kernel_modules_vs_shared_libraries.rst
