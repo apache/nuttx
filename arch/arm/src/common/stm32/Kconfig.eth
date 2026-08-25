@@ -309,3 +309,11 @@ config STM32_ETH_NTXDESC
 	default 4
 	---help---
 		Number of TX DMA descriptors to use.
+
+config STM32_ETH_TXTIMEOUT
+	int "TX watchdog timeout (seconds)"
+	depends on STM32_ETHMAC
+	default 60
+	---help---
+		Seconds before the TX watchdog resets the MAC when a transmission
+		does not complete.
