@@ -97,32 +97,76 @@ static inline FAR void *fdpic_callback(FAR void *fn)
 }
 
 /****************************************************************************
- * Name: fdpic_invoke
+ * Name: fdpic_init
  *
  * Description:
- *   Call a resolved module entry point with the module data base in the PIC
- *   base register.  For a callback that runs on a shared thread, which
- *   carries no module base.  Elsewhere fdpic_callback() is enough.
+ *   Record a callback for a later call from a thread that carries no module
+ *   base.  Runs in the caller's own context, which is the only place the
+ *   answer can be had.
+ *
+ *   A module's function pointer is the address of a descriptor, and the base
+ *   comes from there: a module can hand over a callback that belongs to
+ *   another one.  A firmware pointer is a code address and has no base.
  *
  * Input Parameters:
- *   arg   - The one word argument.
- *   entry - The code address to enter, already resolved from the descriptor.
- *   got   - The module data base to install.
+ *   desc - The descriptor to fill.
+ *   fn   - The callback, as the caller received it.
  *
  ****************************************************************************/
 
-static inline void fdpic_invoke(uintptr_t arg, uintptr_t entry,
-                                uintptr_t got)
+static inline void fdpic_init(FAR struct fdpic_desc_s *desc,
+                              FAR void *fn)
 {
-  up_fdpic_invoke(arg, entry, got);
+  if (fn != NULL && fdpic_base() != 0)
+    {
+      *desc = *(FAR struct fdpic_desc_s *)fn;
+    }
+  else
+    {
+      desc->entry = (uintptr_t)fn;
+      desc->got   = 0;
+    }
+}
+
+/****************************************************************************
+ * Name: fdpic_invoke
+ *
+ * Description:
+ *   Enter a callback recorded by fdpic_init(), with the data base it
+ *   carries in the PIC base register.  For a callback that runs on a shared
+ *   thread, which has no base of its own.  Elsewhere fdpic_callback() is
+ *   enough.
+ *
+ *   A zero base means the callback is not a module's, and it is branched to
+ *   directly.
+ *
+ * Input Parameters:
+ *   arg  - The one word argument.
+ *   desc - The recorded callback.
+ *
+ ****************************************************************************/
+
+static inline void fdpic_invoke(uintptr_t arg,
+                                FAR const struct fdpic_desc_s *desc)
+{
+  if (desc->got != 0)
+    {
+      up_fdpic_invoke(arg, desc->entry, desc->got);
+    }
+  else
+    {
+      ((CODE void (*)(uintptr_t))desc->entry)(arg);
+    }
 }
 
 #else
 
 #  define fdpic_base()       (0)
 #  define fdpic_callback(fn) (fn)
-#  define fdpic_invoke(arg, entry, got) \
-          ((void)(got), (((CODE void (*)(uintptr_t))(uintptr_t)(entry))(arg)))
+#  define fdpic_init(desc, fn) \
+          ((desc)->entry = (uintptr_t)(fn), (desc)->got = 0)
+#  define fdpic_invoke(arg, desc) \
+          (((CODE void (*)(uintptr_t))(desc)->entry)(arg))
 
 #endif /* CONFIG_FDPIC */
 
