@@ -292,7 +292,7 @@ I2C           to be done    not supported
 I3C           to be done    not supported
 ICACHE        to be done    not supported
 IWDG          to be done    not supported
-LPDMA         to be done    not supported
+LPDMA         GPDMA         arch/arm/src/common/stm32/stm32_dma_gpdma.c
 LPTIM         to be done    not supported
 LPUART        M33 v3        arch/arm/src/common/stm32/stm32_serial_m33_v3.c
 PWR           to be done    not supported
@@ -610,7 +610,7 @@ ETH           to be done    arch/arm/src/stm32h5/stm32_ethernet.c
 EXTI          to be done    arch/arm/src/stm32h5/stm32_exti_gpio.c 
 FLASH         to be done    arch/arm/src/stm32h5/stm32_flash.c     
 GPIO          to be done    arch/arm/src/stm32h5/stm32_gpio.c      
-GPDMA         to be done    arch/arm/src/stm32h5/stm32_dma.c       
+GPDMA         GPDMA         arch/arm/src/common/stm32/stm32_dma_gpdma.c
 I2C           to be done    arch/arm/src/stm32h5/stm32_i2c.c       
 IWDG          v1            arch/arm/src/stm32h5/stm32_iwdg.c      
 ICACHE        to be done    arch/arm/src/stm32h5/stm32_icache.c    
@@ -828,7 +828,7 @@ DLYB          to be done    not supported
 EXTI          M33 v1        arch/arm/src/common/stm32/stm32_exti_gpio_m33_v1.c
 FDCAN         to be done    not supported
 FLASH         to be done    not supported
-GPDMA         to be done    not supported
+GPDMA         GPDMA         arch/arm/src/common/stm32/stm32_dma_gpdma.c
 GPIO          M33 v1        arch/arm/src/common/stm32/stm32_gpio_m33_v1.c
 GTZC          to be done    not supported
 HASH          to be done    not supported
@@ -864,16 +864,16 @@ WWDG          to be done    not supported
 STM32U5
 -------
 
-============  ============  ======================================
+============  ============  ===========================================
 Peripheral    Core version  Driver                                
-============  ============  ======================================
+============  ============  ===========================================
 ADC           to be done    not supported                         
 DAC           to be done    not supported                         
 DCACHE        to be done    not supported                         
 EXTI          to be done    arch/arm/src/stm32u5/stm32_exti_gpio.c
 FLASH         to be done    arch/arm/src/stm32u5/stm32_flash.c    
 GPIO          to be done    arch/arm/src/stm32u5/stm32_gpio.c     
-GPDMA         to be done    not supported                         
+GPDMA         GPDMA         arch/arm/src/common/stm32/stm32_dma_gpdma.c
 HASH          to be done    not supported                         
 I2C           to be done    arch/arm/src/stm32u5/stm32_i2c.c      
 ICACHE        to be done    not supported                         
@@ -889,7 +889,7 @@ TAMP          to be done    not supported
 TIM/LPTIM     v3            arch/arm/src/common/stm32/stm32_tim.c 
 USART/LPUART  v3            arch/arm/src/stm32u5/stm32_serial.c   
 USB           device        not supported                         
-============  ============  ======================================
+============  ============  ===========================================
 
 STM32WB
 -------
@@ -1037,8 +1037,9 @@ of a peripheral on a given core is ``V1``.
 - M3/M4: ``CONFIG_STM32_HAVE_IP_GPIO_M3M4_V1``,
   ``CONFIG_STM32_HAVE_IP_ADC_M3M4_V1``, ``CONFIG_STM32_HAVE_IP_ADC_M3M4_V2``
 - M33: ``CONFIG_STM32_HAVE_IP_GPIO_M33_V1``,
-  ``CONFIG_STM32_HAVE_IP_EXTI_M33_V1``, and
-  ``CONFIG_STM32_HAVE_IP_USART_M33_V3``
+  ``CONFIG_STM32_HAVE_IP_EXTI_M33_V1``,
+  ``CONFIG_STM32_HAVE_IP_USART_M33_V3``, and
+  ``CONFIG_STM32_HAVE_IP_DMA_GPDMA``
 - No core prefix (used by several core classes):
   ``CONFIG_STM32_HAVE_IP_TIMERS_V1``, ``CONFIG_STM32_HAVE_IP_TIMERS_V2``,
   ``CONFIG_STM32_HAVE_IP_TIMERS_V3``
