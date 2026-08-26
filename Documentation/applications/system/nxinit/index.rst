@@ -89,6 +89,49 @@ forwards ``setprop`` to the action manager.
 - Property triggers are checked when the property is created or its value
   is updated (e.g., property:a=b is checked when a's value changes).
 
+Built-in Properties
+====================
+
+NXInit sets one built-in property on its own, before the ``boot`` event
+fires:
+
+- ``sys.boot.reason``: the cause of the last board reset. It is queried
+  once at startup via ``boardctl(BOARDIOC_RESET_CAUSE, ...)``; applications
+  do not need to set it themselves. This requires
+  ``CONFIG_BOARDCTL_RESET_CAUSE`` and a board-provided
+  ``board_reset_cause()`` implementation.
+
+  - If ``CONFIG_BOARDCTL_RESET_CAUSE`` is not enabled, ``sys.boot.reason``
+    is never set, so any trigger referencing it (e.g.
+    ``property:sys.boot.reason=...``) simply never matches; there is no
+    dedicated "unset" value to trigger on.
+  - If ``CONFIG_BOARDCTL_RESET_CAUSE`` is enabled but the ``boardctl()``
+    call itself fails (the board reports an error), NXInit aborts startup.
+
+  The value has one of two forms:
+
+  1. ``<cause>,<subreason>`` for hardware reset causes, where
+     ``<subreason>`` is a numeric flag (e.g. the watchdog timer index):
+     ``cold``, ``watchdog``, ``undervoltage``, ``warm``, ``powerkey``,
+     ``lowpower``, ``unknown``. For example, a watchdog reset from timer 4
+     sets the property to ``watchdog,4``.
+  2. A single soft-reset reason string, for software-triggered resets
+     (``BOARDIOC_RESETCAUSE_CPU_SOFT``): ``reboot``, ``assert``,
+     ``kernel_panic``, ``bootloader``, ``recovery``, ``factory_reset``,
+     ``factory_reset_inquiry``, ``thermal``.
+
+  Since the property is matched with ``fnmatch`` and alternatives can be
+  separated with ``|``, a trigger can match on the cause, the subreason, or
+  a set of soft-reset reasons:
+
+  .. code-block::
+
+      on init && property:sys.boot.reason=watchdog,4
+          ...
+
+      on init && property:sys.boot.reason=bootloader|recovery|thermal
+          ...
+
 Commands
 ========
 The commands supported by an action fall into three types: the built-in
@@ -104,6 +147,24 @@ The following is an explanation of some of NXInit's built-in commands.
 - File Operations: mkdir (create directories with configurable permissions,
   owner, and encryption settings), copy/write (copy files/write file content).
 - Others: trigger (trigger events).
+
+Compound Commands
+------------------
+
+A single line inside an action body may chain multiple commands with
+``&&`` and ``||``, using the familiar shell short-circuit semantics: the
+next command in an ``&&`` chain only runs if the previous one exited with
+status 0 (success), and the next command in an ``||`` chain only runs if
+the previous one exited non-zero (failure). A quoted argument
+(``"..."``) may contain ``&&``/``||`` without being treated as an
+operator.
+
+.. code-block::
+
+    on boot
+        echo "start" && hello && echo "done"
+        ls /missing || echo "not found"
+        echo "A" && echo "B" || echo "fallback"
 
 Examples
 ========
