@@ -32,6 +32,10 @@
  * Public Data
  ****************************************************************************/
 
+#ifdef CONFIG_SCHED_TICKLESS
+uint64_t g_hrtimer_expected;
+#endif
+
 #ifdef CONFIG_SMP
 /* Array of pointers to currently running high-resolution timers
  * for each CPU in SMP configurations. Index corresponds to CPU ID.

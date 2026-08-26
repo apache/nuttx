@@ -84,7 +84,7 @@ int hrtimer_start_absolute(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
 
   reprogram |= hrtimer_insert(hrtimer);
 
-  /* If the inserted timer is now the earliest, start hardware timer */
+  /* If the inserted timer is now the earliest, start hardware timer. */
 
   if (reprogram)
     {

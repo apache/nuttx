@@ -104,6 +104,10 @@ extern struct FAR hrtimer_s *g_hrtimer_head;
 extern struct list_node g_hrtimer_list;
 #endif
 
+#ifdef CONFIG_SCHED_TICKLESS
+extern uint64_t g_hrtimer_expected;
+#endif
+
 #ifdef CONFIG_SMP
 /* Array of pointers to currently running high-resolution timers
  * for each CPU in SMP configurations. Index corresponds to CPU ID.
@@ -219,42 +223,46 @@ static inline_function void hrtimer_reprogram(uint64_t next_expired)
   uint64_t        delay;
   uint64_t        expired = hrtimer_last_expired();
 
-#if CONFIG_HRTIMER_PRECISION_SHIFT > 0
-  /* Ceiling-align the target expiration time to the precision boundary.
-   * This coarsens the timer resolution to (1 << SHIFT) nanoseconds,
-   * reducing the frequency of hardware timer reprogramming.
-   */
+  if (g_hrtimer_expected != next_expired)
+    {
+      g_hrtimer_expected = next_expired;
+#  if CONFIG_HRTIMER_PRECISION_SHIFT > 0
+      /* Ceiling-align the target expiration time to the precision boundary.
+       * This coarsens the timer resolution to (1 << SHIFT) nanoseconds,
+       * reducing the frequency of hardware timer reprogramming.
+       */
 
-  next_expired = (next_expired + HRTIMER_PRECISION_MASK) &
-                 ~HRTIMER_PRECISION_MASK;
-#endif
+      next_expired = (next_expired + HRTIMER_PRECISION_MASK) &
+                     ~HRTIMER_PRECISION_MASK;
+#  endif
 
-  delay = HRTIMER_TIME_BEFORE_EQ(expired, next_expired) ?
-          next_expired - expired : 0u;
+      delay = HRTIMER_TIME_BEFORE_EQ(expired, next_expired) ?
+              next_expired - expired : 0u;
 
 #  ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
-  delay = delay < TICK2NSEC((uint64_t)g_oneshot_maxticks) ?
-          delay : TICK2NSEC((uint64_t)g_oneshot_maxticks);
+      delay = delay < TICK2NSEC((uint64_t)g_oneshot_maxticks) ?
+              delay : TICK2NSEC((uint64_t)g_oneshot_maxticks);
 #  endif
 
-  /* Even if overflow occurs here, the functional correctness
-   * should still be fine.
-   */
+      /* Even if overflow occurs here, the functional correctness
+       * should still be fine.
+       */
 
-  delay -= CONFIG_TIMER_ADJUST_NSEC;
+      delay -= CONFIG_TIMER_ADJUST_NSEC;
 
-  clock_nsec2time(&ts, expired + delay);
+      clock_nsec2time(&ts, expired + delay);
 
 #  ifdef CONFIG_SCHED_TICKLESS_ALARM
-  ret = up_alarm_start(&ts);
+      ret = up_alarm_start(&ts);
 #  else
-  struct timespec current;
-  up_timer_gettime(&current);
-  clock_timespec_subtract(&ts, &current, &ts);
-  ret = up_timer_start(&ts);
+      struct timespec current;
+      up_timer_gettime(&current);
+      clock_timespec_subtract(&ts, &current, &ts);
+      ret = up_timer_start(&ts);
 #  endif
 
-  DEBUGASSERT(ret == 0);
+      DEBUGASSERT(ret == 0);
+    }
 #endif
 }
 
@@ -600,9 +608,9 @@ int hrtimer_cancel_running(FAR hrtimer_t *timer)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
 static inline_function void hrtimer_wait(FAR hrtimer_t *timer)
 {
+#ifdef CONFIG_SMP
   int cpu;
 
   DEBUGASSERT(timer && timer->func == NULL);
@@ -634,10 +642,8 @@ static inline_function void hrtimer_wait(FAR hrtimer_t *timer)
     }
 
   /* Finally, we acquire the ownership of this hrtimer. */
-}
-#else
-#  define hrtimer_wait(timer) /* Nothing to wait in non-SMP. */
 #endif
+}
 
 /****************************************************************************
  * Name: hrtimer_process
@@ -666,6 +672,12 @@ static inline_function void hrtimer_process(uint64_t now)
   uint64_t          delay;
   int                 cpu = this_cpu();
   irqstate_t        flags = hrtimer_lock();
+
+#ifdef CONFIG_SCHED_TICKLESS
+  /* Invalidate the g_hrtimer_expected */
+
+  g_hrtimer_expected = now;
+#endif
 
   /* Acquire the lock and seize the ownership of the hrtimer queue. */
 
