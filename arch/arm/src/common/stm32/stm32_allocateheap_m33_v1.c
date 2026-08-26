@@ -57,7 +57,8 @@
  *
  * STM32_PRIMARY_SRAM_SIZE may span multiple contiguous SRAM banks.  SRAM3
  * and SRAM5 may be added as separate regions when their corresponding heap
- * options are selected.
+ * options are selected.  Do not add SRAM2 again if it is already covered
+ * by the primary heap.
  *
  * In addition to internal SRAM, memory may also be available through the
  * FSMC.  In order to use FSMC SRAM, the following additional things need to
@@ -303,7 +304,7 @@ void up_allocate_kheap(void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void arm_addregion(void)
 {
-#ifdef CONFIG_STM32_SRAM2_HEAP
+#if defined(CONFIG_STM32_SRAM2_HEAP) && SRAM2_START >= SRAM1_END
 
 #  if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 

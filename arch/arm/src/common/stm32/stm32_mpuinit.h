@@ -42,7 +42,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_PROTECTED
+#if defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_ARM_MPU)
 void stm32_mpuinitialize(void);
 #else
 #  define stm32_mpuinitialize()

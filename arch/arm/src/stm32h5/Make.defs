@@ -40,13 +40,9 @@ endif
 
 # Required STM32H5 files
 
-CHIP_CSRCS += stm32_gpio.c stm32_irq.c stm32_lowputc.c stm32_rcc.c
-CHIP_CSRCS += stm32_start.c stm32_pwr.c stm32_timerisr.c
+CHIP_CSRCS += stm32_gpio.c stm32_lowputc.c stm32_rcc.c
+CHIP_CSRCS += stm32_pwr.c
 CHIP_CSRCS += stm32_lse.c stm32_lsi.c stm32_exti_gpio.c stm32_sdmmc.c
-
-ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
-CHIP_CSRCS += stm32_idle.c
-endif
 
 ifeq ($(CONFIG_STM32_USART),y)
 CHIP_CSRCS += stm32_serial.c
@@ -137,10 +133,6 @@ endif
 
 ifeq ($(CONFIG_STM32_IWDG),y)
 CHIP_CSRCS += stm32_iwdg.c
-endif
-
-ifeq ($(CONFIG_ARM_MPU),y)
-CHIP_CSRCS += stm32_mpuinit.c
 endif
 
 ifeq ($(CONFIG_STM32_WWDG),y)

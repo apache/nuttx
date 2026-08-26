@@ -70,6 +70,11 @@ CHIP_CSRCS += stm32_timerisr_m33_v1.c
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += stm32_idle_m33_v1.c
 endif
+ifeq ($(CONFIG_ARM_MPU),y)
+ifneq ($(CONFIG_BUILD_PROTECTED),y)
+CHIP_CSRCS += stm32_mpuinit_m33_v1.c
+endif
+endif
 endif
 
 ifeq ($(CONFIG_STM32_PULSECOUNT),y)

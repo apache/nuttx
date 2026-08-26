@@ -58,6 +58,10 @@ if(CONFIG_STM32_COMMON_M33)
   if(NOT CONFIG_ARCH_IDLE_CUSTOM)
     list(APPEND SRCS stm32_idle_m33_v1.c)
   endif()
+
+  if(CONFIG_ARM_MPU AND NOT CONFIG_BUILD_PROTECTED)
+    list(APPEND SRCS stm32_mpuinit_m33_v1.c)
+  endif()
 endif()
 
 if(CONFIG_STM32_PULSECOUNT)

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/stm32_start.h
+ * arch/arm/src/common/stm32/stm32_mpuinit_m33_v1.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,28 +20,44 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H5_STM32_START_H
-#define __ARCH_ARM_SRC_STM32H5_STM32_START_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#include <assert.h>
+#include <sys/param.h>
+
+#include "mpu.h"
+#include "stm32_mpuinit.h"
+
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_board_initialize
+ * Name: stm32_mpuinitialize
  *
  * Description:
- *   All STM32H5 architectures must provide the following entry point.  This
- *   entry point is called early in the initialization -- after all memory
- *   has been configured and mapped but before any devices have been
- *   initialized.
+ *   Configure the MPU.
+ *
+ *   For FLAT build:
+ *     - just reset and enable the MPU with the default background region.
  *
  ****************************************************************************/
 
-void stm32_board_initialize(void);
+void stm32_mpuinitialize(void)
+{
+  /* Show MPU information */
 
-#endif /* __ARCH_ARM_SRC_STM32H5_STM32_START_H */
+  mpu_showtype();
+
+  /* Reset the MPU in case a bootloader left it configured */
+
+  mpu_reset();
+
+  /* Then enable the MPU */
+
+  mpu_control(true, false, true);
+}

@@ -56,6 +56,17 @@ extern "C"
 
 void stm32_boardinitialize(void);
 
+/****************************************************************************
+ * Name: stm32_board_initialize
+ *
+ * Description:
+ *   Board-specific initialization called by the common Cortex-M33 start
+ *   logic after the chip and early serial have been set up.
+ *
+ ****************************************************************************/
+
+void stm32_board_initialize(void);
+
 #ifdef __cplusplus
 }
 #endif
