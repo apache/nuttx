@@ -37,13 +37,11 @@ endif()
 list(
   APPEND
   SRCS
-  stm32_gpio.c
   stm32_lowputc.c
   stm32_rcc.c
   stm32_pwr.c
   stm32_lse.c
   stm32_lsi.c
-  stm32_exti_gpio.c
   stm32_sdmmc.c)
 
 if(CONFIG_STM32_USART)
