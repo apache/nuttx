@@ -666,12 +666,12 @@ static inline_function void hrtimer_wait(FAR hrtimer_t *timer)
 
 static inline_function void hrtimer_process(uint64_t now)
 {
-  FAR hrtimer_t  *hrtimer;
-  hrtimer_entry_t    func;
-  uint64_t        expired;
   uint64_t          delay;
   int                 cpu = this_cpu();
   irqstate_t        flags = hrtimer_lock();
+  FAR hrtimer_t  *hrtimer = hrtimer_get_first();
+  uint64_t        expired = hrtimer->expired;
+  hrtimer_entry_t    func = hrtimer->func;
 
 #ifdef CONFIG_SCHED_TICKLESS
   /* Invalidate the g_hrtimer_expected */
@@ -679,25 +679,14 @@ static inline_function void hrtimer_process(uint64_t now)
   g_hrtimer_expected = now;
 #endif
 
-  /* Acquire the lock and seize the ownership of the hrtimer queue. */
+  /* Acquire the lock and seize the ownership of the hrtimer queue.
+   * Then check if the timer has expired.
+   */
 
-  for (; ; )
+  while (HRTIMER_TIME_BEFORE_EQ(expired, now))
     {
-      /* Fetch the earliest active timer */
-
-      hrtimer = hrtimer_get_first();
-      expired = hrtimer->expired;
-
-      /* Check if the timer has expired */
-
-      if (!HRTIMER_TIME_BEFORE_EQ(expired, now))
-        {
-          break;
-        }
-
       /* Remove the expired timer from the timer queue */
 
-      func = hrtimer->func;
       hrtimer_remove(hrtimer);
 
       hrtimer_mark_running(hrtimer, cpu);
@@ -730,6 +719,12 @@ static inline_function void hrtimer_process(uint64_t now)
           hrtimer->func    = func;
           hrtimer_insert(hrtimer);
         }
+
+      /* Fetch the earliest active timer */
+
+      hrtimer = hrtimer_get_first();
+      expired = hrtimer->expired;
+      func    = hrtimer->func;
     }
 
   hrtimer_unmark_running(cpu);
