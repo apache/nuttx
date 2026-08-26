@@ -29,7 +29,9 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32_HAVE_IP_DMA_V1) || \
+#if defined(CONFIG_STM32_HAVE_IP_DMA_GPDMA)
+#  include "stm32_dma_gpdma.h"
+#elif defined(CONFIG_STM32_HAVE_IP_DMA_V1) || \
     defined(CONFIG_STM32_HAVE_IP_DMA_V2)
 #  include "stm32_dma_channel_stream.h"
 #else
