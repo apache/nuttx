@@ -315,7 +315,7 @@ static inline void rcc_enableahb3(void)
   regval |= RCC_AHB3ENR_DAC1EN;
 #endif
 
-#ifdef CONFIG_STM32_LPDMA1
+#ifdef CONFIG_STM32_DMA2
   regval |= RCC_AHB3ENR_LPDMA1EN;
 #endif
 
