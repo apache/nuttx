@@ -40,9 +40,9 @@ endif
 
 # Required STM32H5 files
 
-CHIP_CSRCS += stm32_gpio.c stm32_lowputc.c stm32_rcc.c
+CHIP_CSRCS += stm32_lowputc.c stm32_rcc.c
 CHIP_CSRCS += stm32_pwr.c
-CHIP_CSRCS += stm32_lse.c stm32_lsi.c stm32_exti_gpio.c stm32_sdmmc.c
+CHIP_CSRCS += stm32_lse.c stm32_lsi.c stm32_sdmmc.c
 
 ifeq ($(CONFIG_STM32_USART),y)
 CHIP_CSRCS += stm32_serial.c

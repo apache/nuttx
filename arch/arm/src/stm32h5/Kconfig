@@ -10,6 +10,8 @@ comment "STM32H5 Configuration Options"
 config STM32_H5_PERIPHERALS
 	bool
 	default y
+	select STM32_HAVE_IP_EXTI_M33_V1
+	select STM32_HAVE_IP_GPIO_M33_V1
 	select STM32_HAVE_DMA1
 	select STM32_HAVE_DMA2
 	select STM32_HAVE_I2C1
