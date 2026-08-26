@@ -1047,6 +1047,10 @@ The core prefix is dropped once an IP is used by more than one core
 class.  Until then it is kept to make migration of families into common
 code simpler.
 
+All instances of the GPDMA/LPDMA IP family are named ``STM32_DMAx`` in the
+memory maps, regardless of the GPDMA or LPDMA marketing name.  Register bit
+and interrupt vector names keep the reference manual names.
+
 Common STM32 files should follow these rules:
 
 * Files shared by more than one family are placed under
