@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/stm32_rcc.h
+ * arch/arm/src/stm32h5/stm32_rcc_m33.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H5_STM32_RCC_H
-#define __ARCH_ARM_SRC_STM32H5_STM32_RCC_H
+#ifndef __ARCH_ARM_SRC_STM32H5_STM32_RCC_M33_H
+#define __ARCH_ARM_SRC_STM32H5_STM32_RCC_M33_H
 
 /****************************************************************************
  * Included Files
@@ -254,4 +254,4 @@ void stm32_rcc_enableperipherals(void);
 }
 #endif
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32H5_STM32_RCC_H */
+#endif /* __ARCH_ARM_SRC_STM32H5_STM32_RCC_M33_H */

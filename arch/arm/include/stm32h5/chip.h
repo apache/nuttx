@@ -142,6 +142,10 @@
 #define STM32_NCOMP                    (0)   /* Comparators */
 #define STM32_NOPAMP                   (0)   /* Operational Amplifiers */
 
+/* Keep the primary heap within the configured SRAM range. */
+
+#define STM32_PRIMARY_SRAM_SIZE        (CONFIG_RAM_END - STM32_SRAM1_BASE)
+
 /* NVIC priority levels *****************************************************/
 
 /* 16 Programmable interrupt levels */
