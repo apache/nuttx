@@ -46,6 +46,10 @@
 #include "chip.h"
 #include "stm32_uid.h"
 
+#ifdef CONFIG_STM32_ICACHE
+#  include "stm32_icache.h"
+#endif
+
 #ifdef STM32_SYSMEM_UID /* Not defined for some STM32 parts */
 
 /****************************************************************************
@@ -56,6 +60,19 @@ void stm32_get_uniqueid(uint8_t uniqueid[12])
 {
   uint32_t uid[3];
   int i;
+#ifdef CONFIG_STM32_ICACHE
+  bool icache_enabled;
+
+  /* The UID on STM32 Cortex-M33 parts cannot be read while the instruction
+   * cache is enabled.  Preserve the cache state across the UID access.
+   */
+
+  icache_enabled = stm32_icache_enabled();
+  if (icache_enabled)
+    {
+      stm32_disable_icache();
+    }
+#endif
 
   /* Read the UID with 32-bit accesses. Some parts (STM32H5) store the UID
    * in flash memory that does not support 8-bit reads.
@@ -65,6 +82,13 @@ void stm32_get_uniqueid(uint8_t uniqueid[12])
     {
       uid[i] = getreg32(STM32_SYSMEM_UID + 4 * i);
     }
+
+#ifdef CONFIG_STM32_ICACHE
+  if (icache_enabled)
+    {
+      stm32_enable_icache();
+    }
+#endif
 
   memcpy(uniqueid, uid, 12);
 }

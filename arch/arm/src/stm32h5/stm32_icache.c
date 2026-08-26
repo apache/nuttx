@@ -180,6 +180,7 @@ static inline void stm32_icache_set_ier(uint32_t ier)
 static inline void stm32_icache_reset_hmon(void)
 {
   uint32_t regval;
+
   regval = getreg32(STM32_ICACHE_CR);
   regval |= ICACHE_CR_HITMRST;
   putreg32(regval, STM32_ICACHE_CR);
@@ -190,6 +191,7 @@ static inline void stm32_icache_reset_hmon(void)
 static inline void stm32_icache_reset_mmon(void)
 {
   uint32_t regval;
+
   regval = getreg32(STM32_ICACHE_CR);
   regval |= ICACHE_CR_MISSMRST;
   putreg32(regval, STM32_ICACHE_CR);
@@ -200,6 +202,7 @@ static inline void stm32_icache_reset_mmon(void)
 static inline void stm32_icache_enable_monitors(void)
 {
   uint32_t regval;
+
   regval = getreg32(STM32_ICACHE_CR);
   regval |= (ICACHE_CR_MISSMEN | ICACHE_CR_HITMEN);
   putreg32(regval, STM32_ICACHE_CR);
@@ -208,6 +211,7 @@ static inline void stm32_icache_enable_monitors(void)
 static inline void stm32_icache_disable_monitors(void)
 {
   uint32_t regval;
+
   regval = getreg32(STM32_ICACHE_CR);
   regval &= ~(ICACHE_CR_MISSMEN | ICACHE_CR_HITMEN);
   putreg32(regval, STM32_ICACHE_CR);
@@ -298,6 +302,7 @@ void stm32_icache_initialize(void)
 void stm32_icache_reset_monitors(void)
 {
   uint32_t regval;
+
   regval = getreg32(STM32_ICACHE_CR);
   regval |= (ICACHE_CR_MISSMRST | ICACHE_CR_HITMRST);
   putreg32(regval, STM32_ICACHE_CR);
@@ -318,9 +323,15 @@ size_t stm32_get_icache_size(void)
 void stm32_disable_icache(void)
 {
   uint32_t regval;
+
   regval = getreg32(STM32_ICACHE_CR);
   regval &= ~(ICACHE_CR_EN);
   putreg32(regval, STM32_ICACHE_CR);
+}
+
+bool stm32_icache_enabled(void)
+{
+  return (getreg32(STM32_ICACHE_CR) & ICACHE_CR_EN) != 0;
 }
 
 void stm32_enable_icache(void)
