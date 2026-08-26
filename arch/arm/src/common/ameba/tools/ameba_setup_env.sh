@@ -71,13 +71,30 @@ resolve_bindir() {
 
   # 2. system python3 -- expose it via a non-venv shim dir so a bare `python`
   #    exists and the system site-packages (with the deps) stay visible.
-  if command -v python3 >/dev/null 2>&1 && py_has_deps python3; then
-    sp=$(command -v python3)
-    mkdir -p "$SHIMBIN"
-    ln -sf "$sp" "$SHIMBIN/python"
-    ln -sf "$sp" "$SHIMBIN/python3"
-    printf '%s\n' "$SHIMBIN"
-    return 0
+  #
+  #    Resolve the REAL system interpreter, never our own shim: a previous run
+  #    put $SHIMBIN on PATH ahead of the system python3, so `command -v python3`
+  #    would return $SHIMBIN/python3 and `ln -sf shim shim` would create a
+  #    self-referential symlink loop ("Too many levels of symbolic links").
+  #    Scan PATH for the first python3 that is not inside $SHIMBIN, then
+  #    canonicalise it so the shim always points at a real interpreter.
+  sp=""
+  _oldifs=$IFS
+  IFS=:
+  for _d in $PATH; do
+    case "$_d" in "$SHIMBIN" | "$SHIMBIN"/) continue ;; esac
+    if [ -x "$_d/python3" ]; then sp="$_d/python3"; break; fi
+  done
+  IFS=$_oldifs
+  if [ -n "$sp" ]; then
+    sp=$(readlink -f "$sp" 2>/dev/null || printf '%s' "$sp")
+    if py_has_deps "$sp"; then
+      mkdir -p "$SHIMBIN"
+      ln -sf "$sp" "$SHIMBIN/python"
+      ln -sf "$sp" "$SHIMBIN/python3"
+      printf '%s\n' "$SHIMBIN"
+      return 0
+    fi
   fi
 
   return 1
