@@ -646,13 +646,18 @@ static int imxrt_transmit(struct imxrt_driver_s *priv)
     {
       struct timeval *tv =
              (struct timeval *)(priv->dev.d_buf + priv->dev.d_len);
-      priv->txmb[txmb].deadline = *tv;
       timeout  = (tv->tv_sec - ts.tv_sec)*CLK_TCK
                  + ((tv->tv_usec - ts.tv_nsec / 1000)*CLK_TCK) / 1000000;
       if (timeout < 0)
         {
           return 0;       /* No transmission for you! */
         }
+
+      /* Only now that the frame is going out, so a deadline is never left
+       * behind on a mailbox holding nothing.
+       */
+
+      priv->txmb[txmb].deadline = *tv;
     }
   else
     {
