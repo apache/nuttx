@@ -55,7 +55,7 @@
 #ifdef SERIAL_HAVE_DMA
 #  include "stm32l5_dma.h"
 #endif
-#include "stm32l5_rcc.h"
+#include "stm32_rcc.h"
 #include "arm_internal.h"
 
 /****************************************************************************
