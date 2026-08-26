@@ -50,4 +50,9 @@
 
 #define ARMV8M_PERIPHERAL_INTERRUPTS STM32_IRQ_NEXTINTS
 
+/* GPDMA instance parameters.  DMA1 is the GPDMA1 instance. */
+
+#define STM32_DMA1_NCHAN      12
+#define STM32_DMA1_IRQ_FIRST  STM32_IRQ_GPDMA1_CH0
+
 #endif /* __ARCH_ARM_SRC_STM32U3_CHIP_H */
