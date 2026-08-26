@@ -731,6 +731,7 @@ FAR struct replenishment_s *
       for (i = 0; i < sporadic->max_repl; i++)
         {
           FAR struct replenishment_s *tmp = &sporadic->replenishments[i];
+
           if ((tmp->flags & SPORADIC_FLAG_ALLOCED) == 0)
             {
               repl        = tmp;
@@ -889,6 +890,12 @@ int nxsched_stop_sporadic(FAR struct tcb_s *tcb)
 
   kmm_free(tcb->sporadic);
   tcb->sporadic = NULL;
+
+  /* The policy flag must not outlive the freed sporadic state: the final
+   * context switch on thread exit would dereference it.
+   */
+
+  tcb->flags &= ~TCB_FLAG_POLICY_MASK;
   return OK;
 }
 
