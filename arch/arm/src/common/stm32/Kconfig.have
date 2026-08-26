@@ -287,9 +287,6 @@ config STM32_HAVE_MDMA
 config STM32_HAVE_BDMA
 	bool
 
-config STM32_HAVE_LPDMA1
-	bool
-
 config STM32_HAVE_DMA1
 	bool
 

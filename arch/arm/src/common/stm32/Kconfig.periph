@@ -101,11 +101,6 @@ config STM32_BDMA
 	select STM32_DMA
 	select ARCH_DMA
 
-config STM32_LPDMA1
-	depends on STM32_HAVE_LPDMA1
-	bool "LPDMA1"
-	default n
-
 config STM32_DMA1
 	bool "DMA1"
 	depends on STM32_HAVE_DMA1
