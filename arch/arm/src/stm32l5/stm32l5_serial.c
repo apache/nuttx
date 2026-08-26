@@ -50,7 +50,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "stm32l5_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l5_uart.h"
 #ifdef SERIAL_HAVE_DMA
 #  include "stm32l5_dma.h"

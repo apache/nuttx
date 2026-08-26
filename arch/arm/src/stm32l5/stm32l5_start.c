@@ -37,7 +37,7 @@
 #include "nvic.h"
 
 #include "stm32.h"
-#include "stm32l5_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l5_userspace.h"
 #include "stm32l5_start.h"
 

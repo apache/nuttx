@@ -33,7 +33,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 
-#include "stm32l5_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l562e-dk.h"
 
 #include <arch/board/board.h>
