@@ -25,9 +25,7 @@
 list(
   APPEND
   SRCS
-  stm32l5_lowputc.c
   stm32l5_rcc.c
-  stm32l5_serial.c
   stm32l5_spi.c
   stm32l5_lse.c
   stm32l5_lsi.c
