@@ -556,6 +556,7 @@ static uint32_t imxrt_txmb_next(struct imxrt_driver_s *priv)
   while (mbi < TOTALMBCOUNT)
     {
       struct mb_s *mb = flexcan_get_mb(priv, mbi);
+
       if (mb->cs.code == CAN_TXMB_DATAORREMOTE)
         {
           next = mbi + 1;
@@ -640,12 +641,14 @@ static int imxrt_transmit(struct imxrt_driver_s *priv)
 
 #ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
   struct timespec ts;
+
   clock_systime_timespec(&ts);
 
   if (priv->dev.d_sndlen > priv->dev.d_len)
     {
       struct timeval *tv =
              (struct timeval *)(priv->dev.d_buf + priv->dev.d_len);
+
       timeout  = (tv->tv_sec - ts.tv_sec)*CLK_TCK
                  + ((tv->tv_usec - ts.tv_nsec / 1000)*CLK_TCK) / 1000000;
       if (timeout < 0)
@@ -685,9 +688,11 @@ static int imxrt_transmit(struct imxrt_driver_s *priv)
     (peak_tx_mailbox_index_ > mbi ? peak_tx_mailbox_index_ : mbi);
 
   union cs_e cs;
+
   cs.cs = 0;
   cs.code = CAN_TXMB_DATAORREMOTE;
   struct mb_s *mb = flexcan_get_mb(priv, mbi);
+
   mb->cs.code = CAN_TXMB_INACTIVE;
 
   if (priv->dev.d_len == sizeof(struct can_frame))
@@ -750,6 +755,7 @@ static int imxrt_transmit(struct imxrt_driver_s *priv)
    */
 
   struct mb_s *buffer = flexcan_get_mb(priv, RXMBCOUNT);
+
   buffer->cs.code = 0x3;
   buffer->cs.code = 0x3;
 
@@ -873,11 +879,13 @@ static void imxrt_receive(struct imxrt_driver_s *priv,
       mbj = mbi = arm_lsb(f);
       rf = flexcan_get_mb(priv, mbi);
       uint32_t t = rf->cs.time_stamp;
+
       while ((f &= ~(1 << mbj)) != 0)
         {
           mbj = arm_lsb(f);
           struct mb_s *rf_next = flexcan_get_mb(priv, mbj);
           uint16_t t_next = rf_next->cs.time_stamp;
+
           if ((int16_t)(t - t_next) > 0)
             {
               t = t_next;
@@ -1067,6 +1075,7 @@ static void imxrt_txdone(struct imxrt_driver_s *priv)
           priv->txmb[txmb].deadline.tv_usec = 0;
 
           struct mb_s *mb = flexcan_get_mb(priv, mbi);
+
           mb->cs.code = CAN_TXMB_INACTIVE;
 #endif
         }
@@ -1137,6 +1146,7 @@ static void imxrt_flexcan_interrupt_work(void *arg)
   struct imxrt_driver_s *priv = (struct imxrt_driver_s *)arg;
 
   uint32_t flags;
+
   flags  = getreg32(priv->base + IMXRT_CAN_IFLAG1_OFFSET);
   flags &= IFLAG1_RX;
 
@@ -1177,6 +1187,7 @@ static int imxrt_flexcan_interrupt(int irq, void *context,
   if (irq == priv->config->irq)
     {
       uint32_t flags;
+
       flags  = getreg32(priv->base + IMXRT_CAN_IFLAG1_OFFSET);
       flags &= IFLAG1_RX;
 
@@ -1334,6 +1345,7 @@ static void imxrt_setenable(uint32_t base, uint32_t enable)
 static void imxrt_setfreeze(uint32_t base, uint32_t freeze)
 {
   uint32_t regval;
+
   if (freeze)
     {
       /* Enter freeze mode */
@@ -1362,6 +1374,7 @@ static uint32_t imxrt_waitmcr_change(uint32_t base, uint32_t mask,
     {
       const bool state = (getreg32(base + IMXRT_CAN_MCR_OFFSET) & mask)
           != 0;
+
       if (state == target_state)
         {
           return true;
@@ -1583,6 +1596,7 @@ static int imxrt_ioctl(struct net_driver_s *dev, int cmd,
         {
           struct can_ioctl_data_s *req =
               (struct can_ioctl_data_s *)((uintptr_t)arg);
+
           req->arbi_bitrate = priv->arbi_timing.bitrate;
           req->arbi_samplep = priv->arbi_timing.samplep;
           if (priv->canfd_capable)
@@ -1606,6 +1620,7 @@ static int imxrt_ioctl(struct net_driver_s *dev, int cmd,
               (struct can_ioctl_data_s *)((uintptr_t)arg);
 
           struct flexcan_timeseg arbi_timing;
+
           arbi_timing.bitrate = req->arbi_bitrate;
           arbi_timing.samplep = req->arbi_samplep;
 
@@ -1822,11 +1837,13 @@ static int imxrt_initialize(struct imxrt_driver_s *priv)
    */
 
   struct mb_s *buffer = flexcan_get_mb(priv, RXMBCOUNT);
+
   buffer->cs.code = 0x3;
 
   for (i = RXMBCOUNT + 1; i < TOTALMBCOUNT; i++)
     {
       struct mb_s *rx = flexcan_get_mb(priv, i);
+
       rx->id.w = 0x0;
 
       /* FIXME sometimes we get a hard fault here */
@@ -1842,6 +1859,7 @@ static int imxrt_initialize(struct imxrt_driver_s *priv)
   for (i = 0; i < RXMBCOUNT; i++)
     {
       struct mb_s *rx = flexcan_get_mb(priv, i);
+
       ninfo("Set MB%" PRIi32 " to receive %p\n", i, rx);
       rx->cs.edl = 0x1;
       rx->cs.brs = 0x1;
@@ -1907,6 +1925,7 @@ static void imxrt_reset(struct imxrt_driver_s *priv)
   for (i = 0; i < TOTALMBCOUNT; i++)
     {
       struct mb_s *rx = flexcan_get_mb(priv, i);
+
       ninfo("MB %" PRIi32 " %p\n", i, rx);
       ninfo("MB %" PRIi32 " %p\n", i, &rx->id.w);
       rx->cs.cs = 0x0;
