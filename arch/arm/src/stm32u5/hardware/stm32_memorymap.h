@@ -127,7 +127,11 @@
 
 /* AHB1 Base Addresses ******************************************************/
 
-#define STM32_GPDMA1_BASE       0x40020000
+/* DMA1 is the GPDMA1 instance and DMA2 is the LPDMA1 instance.  All
+ * STM32 DMA instances of the GPDMA/LPDMA IP family are named DMAx.
+ */
+
+#define STM32_DMA1_BASE         0x40020000
 #define STM32_CORDIC_BASE       0x40021000
 #define STM32_FMAC_BASE         0x40021400
 #define STM32_FLASHIF_BASE      0x40022000
@@ -206,6 +210,6 @@
 #define STM32_GTZC2_TZIC_BASE   0x46023400
 #define STM32_GTZC2_MPCBB4_BASE 0x46023800
 #define STM32_ADF1_BASE         0x46024000
-#define STM32_LPDMA1_BASE       0x46025000
+#define STM32_DMA2_BASE         0x46025000
 
 #endif /* __ARCH_ARM_SRC_STM32U5_STM32_MEMORYMAP_H */
