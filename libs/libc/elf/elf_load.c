@@ -408,6 +408,7 @@ static inline int libelf_loadfile(FAR struct mod_loadinfo_s *loadinfo)
               else
                 {
                   size_t bsssize = phdr->p_memsz - phdr->p_filesz;
+
                   ret = libelf_read(loadinfo, data, phdr->p_filesz,
                                     phdr->p_offset);
                   memset(data + phdr->p_filesz, 0, bsssize);

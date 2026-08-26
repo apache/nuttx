@@ -85,6 +85,7 @@ void libelf_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
       for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
         {
           FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
+
           binfo("Sections %d:\n", i);
 #  ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
           if (loadinfo->ehdr.e_type == ET_REL)
@@ -420,27 +421,27 @@ FAR void *libelf_insert(FAR const char *filename, FAR const char *modname)
       case ET_REL :
       case ET_DYN :
 
-          /* Process any preinit_array entries */
+        /* Process any preinit_array entries */
 
-          array = (FAR void (**)(void))loadinfo.preiarr;
-          for (i = 0; i < loadinfo.nprei; i++)
-            {
-              array[i]();
-            }
+        array = (FAR void (**)(void))loadinfo.preiarr;
+        for (i = 0; i < loadinfo.nprei; i++)
+          {
+            array[i]();
+          }
 
-          /* Process any init_array entries */
+        /* Process any init_array entries */
 
-          array = (FAR void (**)(void))loadinfo.initarr;
-          for (i = 0; i < loadinfo.ninit; i++)
-            {
-              array[i]();
-            }
+        array = (FAR void (**)(void))loadinfo.initarr;
+        for (i = 0; i < loadinfo.ninit; i++)
+          {
+            array[i]();
+          }
 
-          modp->initarr = loadinfo.initarr;
-          modp->ninit = loadinfo.ninit;
-          modp->finiarr = loadinfo.finiarr;
-          modp->nfini = loadinfo.nfini;
-          break;
+        modp->initarr = loadinfo.initarr;
+        modp->ninit = loadinfo.ninit;
+        modp->finiarr = loadinfo.finiarr;
+        modp->nfini = loadinfo.nfini;
+        break;
     }
 
   /* Add the new module entry to the registry */
