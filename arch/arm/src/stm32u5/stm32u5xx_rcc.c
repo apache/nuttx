@@ -92,7 +92,7 @@ static inline void rcc_enableahb1(void)
 
   regval = getreg32(STM32_RCC_AHB1ENR);
 
-#ifdef CONFIG_STM32_GPDMA1
+#ifdef CONFIG_STM32_DMA1
   regval |= RCC_AHB1ENR_GPDMA1EN;
 #endif
 
