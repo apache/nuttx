@@ -50,4 +50,13 @@
 
 #define ARMV8M_PERIPHERAL_INTERRUPTS STM32_IRQ_NEXTINTS
 
+/* DMA instance parameters.  DMA1 and DMA2 are the LPDMA1 and LPDMA2
+ * instances.
+ */
+
+#define STM32_DMA1_NCHAN      8
+#define STM32_DMA1_IRQ_FIRST  STM32_IRQ_LPDMA1_CH0
+#define STM32_DMA2_NCHAN      4
+#define STM32_DMA2_IRQ_FIRST  STM32_IRQ_LPDMA2_CH0
+
 #endif /* __ARCH_ARM_SRC_STM32C5_CHIP_H */
