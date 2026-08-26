@@ -1916,6 +1916,9 @@ static void imxrt_reset(struct imxrt_driver_s *priv)
     }
 
   regval  = getreg32(priv->base + IMXRT_CAN_MCR_OFFSET);
+  regval &= ~CAN_MCR_MAXMB_MASK; /* Zero MAXMB to ensure "bitwise or"
+                                  * below sets the correct value.
+                                  */
   regval |= CAN_MCR_SLFWAK | CAN_MCR_WRNEN | CAN_MCR_SRXDIS |
             CAN_MCR_IRMQ | CAN_MCR_AEN |
             (((TOTALMBCOUNT - 1) << CAN_MCR_MAXMB_SHIFT) &
