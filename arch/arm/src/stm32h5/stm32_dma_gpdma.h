@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/stm32_dma.h
+ * arch/arm/src/stm32h5/stm32_dma_gpdma.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H5_STM32_DMA_H
-#define __ARCH_ARM_SRC_STM32H5_STM32_DMA_H
+#ifndef __ARCH_ARM_SRC_STM32H5_STM32_DMA_GPDMA_H
+#define __ARCH_ARM_SRC_STM32H5_STM32_DMA_GPDMA_H
 
 /****************************************************************************
  * Included Files
@@ -368,4 +368,4 @@ void stm32_dmadump(DMA_HANDLE handle, const char *msg);
 #endif
 
 #endif /* !__ASSEMBLY__*/
-#endif /* __ARCH_ARM_SRC_STM32H5_STM32_DMA_H*/
+#endif /* __ARCH_ARM_SRC_STM32H5_STM32_DMA_GPDMA_H*/
