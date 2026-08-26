@@ -815,38 +815,38 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
 
               if (sym[idx_sym].st_shndx == SHN_UNDEF)
                 {
-                    FAR void *ep;
+                  FAR void *ep;
 
-                    ep = libelf_findglobal(modp, loadinfo, symhdr,
-                                           &sym[idx_sym]);
-                    if ((ep == NULL) && (ELF_ST_BIND(sym[idx_sym].st_info)
-                        != STB_WEAK))
-                      {
-                        berr("ERROR: Unable to resolve addr of ext ref %s\n",
-                             loadinfo->iobuffer);
-                        ret = -EINVAL;
-                        lib_free(sym);
-                        lib_free(rels);
-                        lib_free(dyn);
-                        return ret;
-                      }
+                  ep = libelf_findglobal(modp, loadinfo, symhdr,
+                                         &sym[idx_sym]);
+                  if ((ep == NULL) && (ELF_ST_BIND(sym[idx_sym].st_info)
+                      != STB_WEAK))
+                    {
+                      berr("ERROR: Unable to resolve addr of ext ref %s\n",
+                           loadinfo->iobuffer);
+                      ret = -EINVAL;
+                      lib_free(sym);
+                      lib_free(rels);
+                      lib_free(dyn);
+                      return ret;
+                    }
 
-                    addr = libelf_addr(loadinfo, rel->r_offset);
+                  addr = libelf_addr(loadinfo, rel->r_offset);
 
-                    if (reldata.relrela[idx_rel] == 1)
-                      {
-                        addr += rela->r_addend;
-                      }
+                  if (reldata.relrela[idx_rel] == 1)
+                    {
+                      addr += rela->r_addend;
+                    }
 
-                    *(FAR uintptr_t *)addr = (uintptr_t)ep;
+                  *(FAR uintptr_t *)addr = (uintptr_t)ep;
                 }
             }
           else
             {
               Elf_Sym dynsym =
-                {
-                  0
-                };
+              {
+                0
+              };
 
               addr = libelf_addr(loadinfo, rel->r_offset);
 
@@ -943,6 +943,7 @@ int libelf_bind(FAR struct module_s *modp,
       /* Get the index to the relocation section */
 
       int infosec = loadinfo->shdr[i].sh_info;
+
       if (infosec >= loadinfo->ehdr.e_shnum)
         {
           continue;
@@ -1074,6 +1075,7 @@ errout_with_addrenv:
   if (loadinfo->addrenv != NULL)
     {
       int status = libelf_addrenv_restore(loadinfo);
+
       if (status < 0)
         {
           berr("ERROR: libelf_addrenv_restore() failed: %d\n", status);
