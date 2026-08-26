@@ -405,6 +405,7 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" TZ=Etc/UTC apt-get in
   npm \
   qemu-system-arm \
   qemu-system-misc \
+  qemu-system-x86 \
   python3 \
   python3-pip \
   python-is-python3 \
