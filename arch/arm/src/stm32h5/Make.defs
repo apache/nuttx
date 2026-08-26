@@ -100,10 +100,6 @@ ifeq ($(CONFIG_MDIO_BUS),y)
 CHIP_CSRCS += stm32_mdio.c
 endif
 
-ifeq ($(CONFIG_STM32_DMA),y)
-CHIP_CSRCS += stm32_dma.c
-endif
-
 ifeq ($(CONFIG_STM32_DTS),y)
 CHIP_CSRCS += stm32_dts.c
 endif
