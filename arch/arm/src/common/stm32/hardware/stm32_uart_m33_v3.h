@@ -184,10 +184,25 @@
 #define USART_CR1_TXFEIE                           (1 << 30)
 #define USART_CR1_RXFFIE                           (1 << 31)
 #define USART_CR1_RXNEIE_RXFNEIE                   USART_CR1_RXNEIE
-#define USART_CR1_ALLINTS                          (USART_CR1_IDLEIE | USART_CR1_RXNEIE | USART_CR1_TCIE | \
-   USART_CR1_TXEIE | USART_CR1_PEIE | USART_CR1_CMIE | \
-   USART_CR1_RTOIE | USART_CR1_EOBIE | USART_CR1_TXFEIE | \
-   USART_CR1_RXFFIE)
+#define USART_CR1_ALLINTS                          (USART_CR1_IDLEIE | \
+                                                    USART_CR1_RXNEIE | \
+                                                    USART_CR1_TCIE | \
+                                                    USART_CR1_TXEIE | \
+                                                    USART_CR1_PEIE | \
+                                                    USART_CR1_CMIE | \
+                                                    USART_CR1_RTOIE | \
+                                                    USART_CR1_EOBIE | \
+                                                    USART_CR1_TXFEIE | \
+                                                    USART_CR1_RXFFIE)
+
+#define LPUART_CR1_ALLINTS                         (USART_CR1_IDLEIE | \
+                                                    USART_CR1_RXNEIE | \
+                                                    USART_CR1_TCIE | \
+                                                    USART_CR1_TXEIE | \
+                                                    USART_CR1_PEIE | \
+                                                    USART_CR1_CMIE | \
+                                                    USART_CR1_TXFEIE | \
+                                                    USART_CR1_RXFFIE)
 
 /* USART control register 2 */
 
@@ -265,6 +280,12 @@
 #define USART_CR3_TXFTCFG(n)                       ((n) << USART_CR3_TXFTCFG_SHIFT)
 #define USART_CR3_SCARCNT2_SHIFT                   USART_CR3_SCARCNT_SHIFT
 #define USART_CR3_SCARCNT2_MASK                    USART_CR3_SCARCNT_MASK
+#define USART_CR3_WUS_SHIFT                        (20)
+#define USART_CR3_WUS_MASK                         (3 << USART_CR3_WUS_SHIFT)
+#define USART_CR3_WUS_ADDRESS                      (0 << USART_CR3_WUS_SHIFT)
+#define USART_CR3_WUS_START                        (2 << USART_CR3_WUS_SHIFT)
+#define USART_CR3_WUS_RXNE                         (3 << USART_CR3_WUS_SHIFT)
+#define USART_CR3_WUFIE                            (1 << 22)
 #define USART_CR3_RXFTCFG_1_8                      USART_CR3_RXFTCFG(0)
 #define USART_CR3_RXFTCFG_1_4                      USART_CR3_RXFTCFG(1)
 #define USART_CR3_RXFTCFG_1_2                      USART_CR3_RXFTCFG(2)
@@ -339,6 +360,7 @@
 #define USART_ISR_CMF                              (1 << 17)
 #define USART_ISR_SBKF                             (1 << 18)
 #define USART_ISR_RWU                              (1 << 19)
+#define USART_ISR_WUF                              (1 << 20)
 #define USART_ISR_TEACK                            (1 << 21)
 #define USART_ISR_REACK                            (1 << 22)
 #define USART_ISR_TXFE                             (1 << 23)
@@ -367,6 +389,7 @@
 #define USART_ICR_EOBCF                            (1 << 12)
 #define USART_ICR_UDRCF                            (1 << 13)
 #define USART_ICR_CMCF                             (1 << 17)
+#define USART_ICR_WUCF                             (1 << 20)
 #define USART_ICR_NCF                              USART_ICR_NECF
 
 /* USART receive-data register */
