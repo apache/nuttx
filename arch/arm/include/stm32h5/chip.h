@@ -79,7 +79,7 @@
 
 #if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32_STM32H57XXX)
 #  define STM32_NUART                  (6)   /* UART 4-5, 7-8, 9, 12 */
-#  define STM32_NUSART                 (5)   /* USART 1-3, 6, 10-11 */
+#  define STM32_NUSART                 (6)   /* USART 1-3, 6, 10-11 */
 #elif defined(CONFIG_STM32_STM32H52XXX) || defined(CONFIG_STM32_STM32H53XXX)
 #  define STM32_NUART                  (2)   /* UART 4-5 */
 #  define STM32_NUSART                 (4)   /* USART 1-3, 6*/
