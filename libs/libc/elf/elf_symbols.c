@@ -220,6 +220,7 @@ static int libelf_symcallback(FAR struct module_s *modp, FAR void *arg)
 
 #if CONFIG_LIBC_ELF_MAXDEPEND > 0
       int ret = libelf_depend(exportinfo->modp, modp);
+
       if (ret < 0)
         {
           berr("ERROR: libelf_depend failed: %d\n", ret);
@@ -354,108 +355,108 @@ int libelf_symvalue(FAR struct module_s *modp,
 
   switch (sym->st_shndx)
     {
-    case SHN_COMMON:
-      {
-        /* NuttX ELF modules should be compiled with -fno-common. */
+      case SHN_COMMON:
+        {
+          /* NuttX ELF modules should be compiled with -fno-common. */
 
-        berr("ERROR: SHN_COMMON: Re-compile with -fno-common\n");
-        return -ENOSYS;
-      }
+          berr("ERROR: SHN_COMMON: Re-compile with -fno-common\n");
+          return -ENOSYS;
+        }
 
-    case SHN_ABS:
-      {
-        /* st_value already holds the correct value */
+      case SHN_ABS:
+        {
+          /* st_value already holds the correct value */
 
-        binfo("SHN_ABS: st_value=%08lx\n", (long)sym->st_value);
-        return OK;
-      }
+          binfo("SHN_ABS: st_value=%08lx\n", (long)sym->st_value);
+          return OK;
+        }
 
-    case SHN_UNDEF:
-      {
-        /* Get the name of the undefined symbol */
+      case SHN_UNDEF:
+        {
+          /* Get the name of the undefined symbol */
 
-        ret = libelf_symname(loadinfo, sym, sh_offset);
-        if (ret < 0)
-          {
-            /* There are a few relocations for a few architectures that do
-             * no depend upon a named symbol.  We don't know if that is the
-             * case here, but return and special error to the caller to
-             * indicate the nameless symbol.
-             */
+          ret = libelf_symname(loadinfo, sym, sh_offset);
+          if (ret < 0)
+            {
+              /* There are a few relocations for a few architectures that do
+               * no depend upon a named symbol.  We don't know if that is the
+               * case here, but return and special error to the caller to
+               * indicate the nameless symbol.
+               */
 
-            berr("ERROR: SHN_UNDEF: Failed to get symbol name: %d\n", ret);
-            return ret;
-          }
+              berr("ERROR: SHN_UNDEF: Failed to get symbol name: %d\n", ret);
+              return ret;
+            }
 
-        /* First check if the symbol is exported by an installed module.
-         * Newest modules are installed at the head of the list.  Therefore,
-         * if the symbol is exported by numerous modules, then the most
-         * recently installed will take precedence.
-         */
+          /* First check if the symbol is exported by an installed module.
+           * Newest modules are installed at the head of the list.  So if
+           * the symbol is exported by numerous modules, then the most
+           * recently installed will take precedence.
+           */
 
-        exportinfo.name   = (FAR const char *)loadinfo->iobuffer;
-        exportinfo.modp   = modp;
-        exportinfo.symbol = NULL;
+          exportinfo.name   = (FAR const char *)loadinfo->iobuffer;
+          exportinfo.modp   = modp;
+          exportinfo.symbol = NULL;
 
-        ret = libelf_registry_foreach(libelf_symcallback,
-                                      (FAR void *)&exportinfo);
-        if (ret < 0)
-          {
-            berr("ERROR: libelf_symcallback failed: %d\n", ret);
-            return ret;
-          }
+          ret = libelf_registry_foreach(libelf_symcallback,
+                                        (FAR void *)&exportinfo);
+          if (ret < 0)
+            {
+              berr("ERROR: libelf_symcallback failed: %d\n", ret);
+              return ret;
+            }
 
-        symbol = exportinfo.symbol;
+          symbol = exportinfo.symbol;
 
-        /* If the symbol is not exported by any module, then check if the
-         * base code exports a symbol of this name.
-         */
+          /* If the symbol is not exported by any module, then check if the
+           * base code exports a symbol of this name.
+           */
 
-        if (symbol == NULL)
-          {
-            symbol = symtab_findbyname(exports, exportinfo.name,
-                                       nexports);
-          }
+          if (symbol == NULL)
+            {
+              symbol = symtab_findbyname(exports, exportinfo.name,
+                                         nexports);
+            }
 
-        /* Was the symbol found from any exporter? */
+          /* Was the symbol found from any exporter? */
 
-        if (symbol == NULL)
-          {
-            berr("ERROR: SHN_UNDEF: Exported symbol \"%s\" not found\n",
-                 loadinfo->iobuffer);
-            return -ENOENT;
-          }
+          if (symbol == NULL)
+            {
+              berr("ERROR: SHN_UNDEF: Exported symbol \"%s\" not found\n",
+                   loadinfo->iobuffer);
+              return -ENOENT;
+            }
 
-        /* Yes... add the exported symbol value to the ELF symbol tablei
-         * entry
-         */
+          /* Yes... add the exported symbol value to the ELF symbol tablei
+           * entry
+           */
 
-        binfo("SHN_UNDEF: name=%s "
-              "%08" PRIxPTR "+%08" PRIxPTR "=%08" PRIxPTR "\n",
-              loadinfo->iobuffer,
-              (uintptr_t)sym->st_value, (uintptr_t)symbol->sym_value,
-              (uintptr_t)(sym->st_value + (uintptr_t)symbol->sym_value));
+          binfo("SHN_UNDEF: name=%s "
+                "%08" PRIxPTR "+%08" PRIxPTR "=%08" PRIxPTR "\n",
+                loadinfo->iobuffer,
+                (uintptr_t)sym->st_value, (uintptr_t)symbol->sym_value,
+                (uintptr_t)(sym->st_value + (uintptr_t)symbol->sym_value));
 
-        sym->st_value += ((uintptr_t)symbol->sym_value);
-      }
-      break;
+          sym->st_value += ((uintptr_t)symbol->sym_value);
+        }
+        break;
 
-    default:
-      {
-        secbase = loadinfo->shdr[sym->st_shndx].sh_addr;
+      default:
+        {
+          secbase = loadinfo->shdr[sym->st_shndx].sh_addr;
 
-        binfo("Other[%d]: %08" PRIxPTR "+%08" PRIxPTR "=%08" PRIxPTR "\n",
-              sym->st_shndx,
-              (uintptr_t)sym->st_value, secbase,
-              (uintptr_t)(sym->st_value + secbase));
+          binfo("Other[%d]: %08" PRIxPTR "+%08" PRIxPTR "=%08" PRIxPTR "\n",
+                sym->st_shndx,
+                (uintptr_t)sym->st_value, secbase,
+                (uintptr_t)(sym->st_value + secbase));
 
-        sym->st_value += secbase;
-        if (loadinfo->gotindex >= 0)
-          {
-            sym->st_value -= loadinfo->shdr[sym->st_shndx].sh_offset;
-          }
-      }
-      break;
+          sym->st_value += secbase;
+          if (loadinfo->gotindex >= 0)
+            {
+              sym->st_value -= loadinfo->shdr[sym->st_shndx].sh_offset;
+            }
+        }
+        break;
     }
 
   return OK;
@@ -596,6 +597,7 @@ static int findep(FAR const void *c1, FAR const void *c2)
 {
   FAR const struct eptable_s *m1 = (FAR const struct eptable_s *)c1;
   FAR const struct eptable_s *m2 = (FAR const struct eptable_s *)c2;
+
   return strcmp((FAR const char *)m1->epname, (FAR const char *)m2->epname);
 }
 
