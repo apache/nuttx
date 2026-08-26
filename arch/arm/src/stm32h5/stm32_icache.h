@@ -118,6 +118,22 @@ void stm32_enable_icache(void);
 void stm32_disable_icache(void);
 
 /****************************************************************************
+ * Name: stm32_icache_enabled
+ *
+ * Description:
+ *   Returns whether the STM32H5 ICACHE is enabled.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   true if the ICACHE is enabled; false otherwise.
+ *
+ ****************************************************************************/
+
+bool stm32_icache_enabled(void);
+
+/****************************************************************************
  * Name: stm32_reset_monitors
  *
  * Description:
