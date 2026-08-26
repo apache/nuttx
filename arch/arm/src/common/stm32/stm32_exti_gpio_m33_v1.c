@@ -77,8 +77,8 @@ static int stm32_exti0_15_isr(int irq, void *context, void *arg)
 
   /* Clear the pending interrupt for both rising and falling edges. */
 
-  putreg32(0x0001 << exti, STM32_EXTI_RPR1);
-  putreg32(0x0001 << exti, STM32_EXTI_FPR1);
+  putreg32(STM32_EXTI_BIT(exti), STM32_EXTI_RPR1);
+  putreg32(STM32_EXTI_BIT(exti), STM32_EXTI_FPR1);
 
   /* And dispatch the interrupt to the handler */
 
@@ -123,10 +123,8 @@ static int stm32_exti0_15_isr(int irq, void *context, void *arg)
 int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
                        bool event, xcpt_t func, void *arg)
 {
-  uint32_t exticr;
   uint32_t exti;
   uint32_t port;
-  uint32_t shift;
   uint32_t pin;
   int irq;
   int ret;
@@ -139,7 +137,7 @@ int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
       return -EINVAL;
     }
 
-  exti = 1u << pin;
+  exti = STM32_EXTI_BIT(pin);
   irq  = STM32_IRQ_EXTI0 + pin;
 
   g_gpio_handlers[pin].callback = func;
@@ -147,10 +145,8 @@ int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
 
   /* Route the EXTI line to the selected GPIO port. */
 
-  exticr = STM32_EXTI_EXTICR1 + ((pin >> 2) << 2);
-  shift  = (pin & 3) << 3;
-  modifyreg32(exticr, STM32_EXTI_EXTICR_PORT_MASK << shift,
-              (event || func) ? port << shift : 0);
+  modifyreg32(STM32_EXTI_EXTICR(pin), EXTI_EXTICR_MASK(pin),
+              (event || func) ? EXTI_EXTICR_PORT(pin, port) : 0);
 
   /* Install external interrupt handlers */
 

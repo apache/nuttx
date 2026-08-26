@@ -10,6 +10,8 @@ comment "STM32L5 Configuration Options"
 config STM32_L5_PERIPHERALS
 	bool
 	default y
+	select STM32_HAVE_IP_EXTI_M33_V1
+	select STM32_HAVE_IP_GPIO_M33_V1
 	select STM32_HAVE_RTC_SUBSECONDS
 	select STM32_HAVE_RTC_MAGIC
 	select STM32_HAVE_RTC

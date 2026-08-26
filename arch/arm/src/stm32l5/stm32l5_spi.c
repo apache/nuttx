@@ -75,7 +75,7 @@
 #include "arm_internal.h"
 #include "chip.h"
 #include "stm32.h"
-#include "stm32l5_gpio.h"
+#include "stm32_gpio.h"
 #ifdef CONFIG_STM32_SPI_DMA
 #  include "stm32l5_dma.h"
 #endif

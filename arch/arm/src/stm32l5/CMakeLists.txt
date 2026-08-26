@@ -26,8 +26,6 @@ list(
   APPEND
   SRCS
   stm32l5_allocateheap.c
-  stm32l5_exti_gpio.c
-  stm32l5_gpio.c
   stm32l5_irq.c
   stm32l5_lowputc.c
   stm32l5_rcc.c
