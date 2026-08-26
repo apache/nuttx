@@ -55,8 +55,10 @@
  * Public Functions
  ****************************************************************************/
 
+/* The CPU0 idle stack starts at _ebss */
+
 const uintptr_t g_idle_topstack = (uintptr_t)_ebss +
-                                  CONFIG_IDLETHREAD_STACKSIZE - 16;
+                                  CONFIG_IDLETHREAD_STACKSIZE;
 
 /****************************************************************************
  * Name: up_allocate_heap
