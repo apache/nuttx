@@ -260,6 +260,7 @@ struct stm32_serial_s
 #endif
 
   const uint8_t     irq;       /* IRQ associated with this USART */
+  const bool        islpuart;  /* True: This device is an LPUART */
   const uint32_t    apbclock;  /* PCLK 1 or 2 frequency */
   const uint32_t    rccreg;    /* RCC enable register */
   const uint32_t    rccen;     /* RCC enable bit */
@@ -475,6 +476,7 @@ static struct stm32_serial_s g_lpuart1priv =
     },
 
   .irq           = STM32_IRQ_LPUART1,
+  .islpuart      = true,
   .parity        = CONFIG_LPUART1_PARITY,
   .bits          = CONFIG_LPUART1_BITS,
   .stopbits2     = CONFIG_LPUART1_2STOP,
@@ -537,6 +539,7 @@ static struct stm32_serial_s g_usart1priv =
     },
 
   .irq           = STM32_IRQ_USART1,
+  .islpuart      = false,
   .parity        = CONFIG_USART1_PARITY,
   .bits          = CONFIG_USART1_BITS,
   .stopbits2     = CONFIG_USART1_2STOP,
@@ -601,6 +604,7 @@ static struct stm32_serial_s g_usart2priv =
     },
 
   .irq           = STM32_IRQ_USART2,
+  .islpuart      = false,
   .parity        = CONFIG_USART2_PARITY,
   .bits          = CONFIG_USART2_BITS,
   .stopbits2     = CONFIG_USART2_2STOP,
@@ -665,6 +669,7 @@ static struct stm32_serial_s g_usart3priv =
     },
 
   .irq           = STM32_IRQ_USART3,
+  .islpuart      = false,
   .parity        = CONFIG_USART3_PARITY,
   .bits          = CONFIG_USART3_BITS,
   .stopbits2     = CONFIG_USART3_2STOP,
@@ -729,6 +734,7 @@ static struct stm32_serial_s g_uart4priv =
     },
 
   .irq           = STM32_IRQ_UART4,
+  .islpuart      = false,
   .parity        = CONFIG_UART4_PARITY,
   .bits          = CONFIG_UART4_BITS,
   .stopbits2     = CONFIG_UART4_2STOP,
@@ -793,6 +799,7 @@ static struct stm32_serial_s g_uart5priv =
     },
 
   .irq            = STM32_IRQ_UART5,
+  .islpuart       = false,
   .parity         = CONFIG_UART5_PARITY,
   .bits           = CONFIG_UART5_BITS,
   .stopbits2      = CONFIG_UART5_2STOP,
@@ -1036,49 +1043,60 @@ static void stm32serial_setformat(struct uart_dev_s *dev)
   uint32_t cr1;
   uint32_t brr;
 
-  /* In case of oversampling by 8, the equation is:
-   *
-   *   baud      = 2 * fCK / usartdiv8
-   *   usartdiv8 = 2 * fCK / baud
-   */
-
-  usartdiv8 = ((priv->apbclock << 1) + (priv->baud >> 1)) / priv->baud;
-
-  /* Baud rate for standard USART (SPI mode included):
-   *
-   * In case of oversampling by 16, the equation is:
-   *   baud       = fCK / usartdiv16
-   *   usartdiv16 = fCK / baud
-   *              = 2 * usartdiv8
-   */
-
-  /* Use oversamply by 8 only if the divisor is small.  But what is small? */
-
-  cr1 = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
-  if (usartdiv8 > 2000)
+  if (priv->islpuart)
     {
-      /* Use usartdiv16 */
+      /* LPUART BRR = 256 * fCK / baud */
 
-      brr  = (usartdiv8 + 1) >> 1;
-
-      /* Clear oversampling by 8 to enable oversampling by 16 */
-
-      cr1 &= ~USART_CR1_OVER8;
+      brr = (((uint64_t)priv->apbclock << 8) +
+             (priv->baud >> 1)) / priv->baud;
     }
   else
     {
-      DEBUGASSERT(usartdiv8 >= 8);
+      /* In case of oversampling by 8, the equation is:
+       *
+       *   baud      = 2 * fCK / usartdiv8
+       *   usartdiv8 = 2 * fCK / baud
+       */
 
-      /* Perform mysterious operations on bits 0-3 */
+      usartdiv8 = ((priv->apbclock << 1) + (priv->baud >> 1)) / priv->baud;
 
-      brr  = ((usartdiv8 & 0xfff0) | ((usartdiv8 & 0x000f) >> 1));
+      /* Baud rate for standard USART (SPI mode included):
+       *
+       * In case of oversampling by 16, the equation is:
+       *   baud       = fCK / usartdiv16
+       *   usartdiv16 = fCK / baud
+       *              = usartdiv8 / 2
+       */
 
-      /* Set oversampling by 8 */
+      /* Use oversampling by 8 only if the divisor is small */
 
-      cr1 |= USART_CR1_OVER8;
+      cr1 = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
+      if (usartdiv8 > 2000)
+        {
+          /* Use usartdiv16 */
+
+          brr  = (usartdiv8 + 1) >> 1;
+
+          /* Clear oversampling by 8 to enable oversampling by 16 */
+
+          cr1 &= ~USART_CR1_OVER8;
+        }
+      else
+        {
+          DEBUGASSERT(usartdiv8 >= 8);
+
+          /* Perform mysterious operations on bits 0-3 */
+
+          brr  = ((usartdiv8 & 0xfff0) | ((usartdiv8 & 0x000f) >> 1));
+
+          /* Set oversampling by 8 */
+
+          cr1 |= USART_CR1_OVER8;
+        }
+
+      stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1);
     }
 
-  stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1);
   stm32serial_putreg(priv, STM32_USART_BRR_OFFSET, brr);
 
   /* Configure parity mode */

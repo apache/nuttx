@@ -44,7 +44,7 @@
 #include "stm32_rcc.h"
 #include "stm32l5_spi.h"
 #include "stm32l5_tim.h"
-#include "stm32l5_uart.h"
-#include "stm32l5_lowputc.h"
+#include "stm32_uart.h"
+#include "stm32_lowputc.h"
 
 #endif /* __ARCH_ARM_SRC_STM32L5_STM32L5_H */
