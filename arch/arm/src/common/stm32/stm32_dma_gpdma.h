@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/stm32_dma_gpdma.h
+ * arch/arm/src/common/stm32/stm32_dma_gpdma.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H5_STM32_DMA_GPDMA_H
-#define __ARCH_ARM_SRC_STM32H5_STM32_DMA_GPDMA_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_DMA_GPDMA_H
+#define __ARCH_ARM_SRC_COMMON_STM32_STM32_DMA_GPDMA_H
 
 /****************************************************************************
  * Included Files
@@ -132,7 +132,7 @@ struct stm32_gpdma_cfg_s
 
   /* request: Accepts GPDMA_CXTR2_SWREQ, GPDMA_CXTR2_DREQ, and
    * GPDMA_CXTR2_REQSEL(r) for r given by GPDMA_REQ_x
-   * macros defined in hardware/stm32h56x_dmasigmap.h
+   * macros defined in the family hardware/stm32_dmasigmap.h
    */
 
   uint16_t request;
@@ -368,4 +368,4 @@ void stm32_dmadump(DMA_HANDLE handle, const char *msg);
 #endif
 
 #endif /* !__ASSEMBLY__*/
-#endif /* __ARCH_ARM_SRC_STM32H5_STM32_DMA_GPDMA_H*/
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_DMA_GPDMA_H*/

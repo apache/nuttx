@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/hardware/stm32_gpdma.h
+ * arch/arm/src/common/stm32/hardware/stm32_gpdma.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32_GPDMA_H
-#define __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32_GPDMA_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_GPDMA_H
+#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_GPDMA_H
 
 /****************************************************************************
  * Included Files
@@ -30,12 +30,9 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32_STM32H50XXX) || defined(CONFIG_STM32_STM32H53XXX) || \
-    defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32_STM32H57XXX)
-#  include "stm32h56x_dmasigmap.h"
-#else
-# error "Unsupported STM32 H5 DMA map"
-#endif
+/* Each family provides its DMA request signal map */
+
+#include "hardware/stm32_dmasigmap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -559,4 +556,4 @@
 #define GPDMA_CXLLR_UT2               (1 << 30) /* Update CxTR2 register from memory */
 #define GPDMA_CXLLR_UT1               (1 << 31) /* Update CxTR1 register from memory */
 
-#endif /* __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32_GPDMA_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_GPDMA_H */

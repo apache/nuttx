@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/stm32_dma.c
+ * arch/arm/src/common/stm32/stm32_dma_gpdma.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -118,13 +118,15 @@ static int gpdma_dmainterrupt(int irq, void *context, void *arg);
  * Private Data
  ****************************************************************************/
 
-/* One entry per implemented GPDMA channel */
+/* One entry per implemented GPDMA channel.  Each family provides
+ * STM32_DMAx_NCHAN and STM32_DMAx_IRQ_FIRST for its instances.
+ */
 
-#define GPDMA_CHAN(inst, ch, irqno) \
+#define GPDMA_CHAN(inst, ch) \
   { \
     .dma_instance = (inst), \
     .channel      = (ch), \
-    .irq          = (irqno), \
+    .irq          = STM32_DMA##inst##_IRQ_FIRST + (ch), \
     .free         = true, \
     .base         = STM32_DMA##inst##_BASE + CH_BASE_OFFSET(ch) \
   }
@@ -132,24 +134,104 @@ static int gpdma_dmainterrupt(int irq, void *context, void *arg);
 static struct gpdma_ch_s g_chan[] =
 {
 #ifdef CONFIG_STM32_DMA1
-  GPDMA_CHAN(1, 0, STM32_IRQ_GPDMA1_CH0),
-  GPDMA_CHAN(1, 1, STM32_IRQ_GPDMA1_CH1),
-  GPDMA_CHAN(1, 2, STM32_IRQ_GPDMA1_CH2),
-  GPDMA_CHAN(1, 3, STM32_IRQ_GPDMA1_CH3),
-  GPDMA_CHAN(1, 4, STM32_IRQ_GPDMA1_CH4),
-  GPDMA_CHAN(1, 5, STM32_IRQ_GPDMA1_CH5),
-  GPDMA_CHAN(1, 6, STM32_IRQ_GPDMA1_CH6),
-  GPDMA_CHAN(1, 7, STM32_IRQ_GPDMA1_CH7),
+#  if STM32_DMA1_NCHAN > 0
+  GPDMA_CHAN(1, 0),
+#  endif
+#  if STM32_DMA1_NCHAN > 1
+  GPDMA_CHAN(1, 1),
+#  endif
+#  if STM32_DMA1_NCHAN > 2
+  GPDMA_CHAN(1, 2),
+#  endif
+#  if STM32_DMA1_NCHAN > 3
+  GPDMA_CHAN(1, 3),
+#  endif
+#  if STM32_DMA1_NCHAN > 4
+  GPDMA_CHAN(1, 4),
+#  endif
+#  if STM32_DMA1_NCHAN > 5
+  GPDMA_CHAN(1, 5),
+#  endif
+#  if STM32_DMA1_NCHAN > 6
+  GPDMA_CHAN(1, 6),
+#  endif
+#  if STM32_DMA1_NCHAN > 7
+  GPDMA_CHAN(1, 7),
+#  endif
+#  if STM32_DMA1_NCHAN > 8
+  GPDMA_CHAN(1, 8),
+#  endif
+#  if STM32_DMA1_NCHAN > 9
+  GPDMA_CHAN(1, 9),
+#  endif
+#  if STM32_DMA1_NCHAN > 10
+  GPDMA_CHAN(1, 10),
+#  endif
+#  if STM32_DMA1_NCHAN > 11
+  GPDMA_CHAN(1, 11),
+#  endif
+#  if STM32_DMA1_NCHAN > 12
+  GPDMA_CHAN(1, 12),
+#  endif
+#  if STM32_DMA1_NCHAN > 13
+  GPDMA_CHAN(1, 13),
+#  endif
+#  if STM32_DMA1_NCHAN > 14
+  GPDMA_CHAN(1, 14),
+#  endif
+#  if STM32_DMA1_NCHAN > 15
+  GPDMA_CHAN(1, 15),
+#  endif
 #endif
 #ifdef CONFIG_STM32_DMA2
-  GPDMA_CHAN(2, 0, STM32_IRQ_GPDMA2_CH0),
-  GPDMA_CHAN(2, 1, STM32_IRQ_GPDMA2_CH1),
-  GPDMA_CHAN(2, 2, STM32_IRQ_GPDMA2_CH2),
-  GPDMA_CHAN(2, 3, STM32_IRQ_GPDMA2_CH3),
-  GPDMA_CHAN(2, 4, STM32_IRQ_GPDMA2_CH4),
-  GPDMA_CHAN(2, 5, STM32_IRQ_GPDMA2_CH5),
-  GPDMA_CHAN(2, 6, STM32_IRQ_GPDMA2_CH6),
-  GPDMA_CHAN(2, 7, STM32_IRQ_GPDMA2_CH7),
+#  if STM32_DMA2_NCHAN > 0
+  GPDMA_CHAN(2, 0),
+#  endif
+#  if STM32_DMA2_NCHAN > 1
+  GPDMA_CHAN(2, 1),
+#  endif
+#  if STM32_DMA2_NCHAN > 2
+  GPDMA_CHAN(2, 2),
+#  endif
+#  if STM32_DMA2_NCHAN > 3
+  GPDMA_CHAN(2, 3),
+#  endif
+#  if STM32_DMA2_NCHAN > 4
+  GPDMA_CHAN(2, 4),
+#  endif
+#  if STM32_DMA2_NCHAN > 5
+  GPDMA_CHAN(2, 5),
+#  endif
+#  if STM32_DMA2_NCHAN > 6
+  GPDMA_CHAN(2, 6),
+#  endif
+#  if STM32_DMA2_NCHAN > 7
+  GPDMA_CHAN(2, 7),
+#  endif
+#  if STM32_DMA2_NCHAN > 8
+  GPDMA_CHAN(2, 8),
+#  endif
+#  if STM32_DMA2_NCHAN > 9
+  GPDMA_CHAN(2, 9),
+#  endif
+#  if STM32_DMA2_NCHAN > 10
+  GPDMA_CHAN(2, 10),
+#  endif
+#  if STM32_DMA2_NCHAN > 11
+  GPDMA_CHAN(2, 11),
+#  endif
+#  if STM32_DMA2_NCHAN > 12
+  GPDMA_CHAN(2, 12),
+#  endif
+#  if STM32_DMA2_NCHAN > 13
+  GPDMA_CHAN(2, 13),
+#  endif
+#  if STM32_DMA2_NCHAN > 14
+  GPDMA_CHAN(2, 14),
+#  endif
+#  if STM32_DMA2_NCHAN > 15
+  GPDMA_CHAN(2, 15),
+#  endif
 #endif
 };
 
@@ -429,8 +511,7 @@ void weak_function arm_dma_initialize(void)
 
 DMA_HANDLE stm32_dmachannel(enum gpdma_ttype_e type)
 {
-  /* On the H5, peripherals can kind of be mapped to any number of different
-   * channels.
+  /* Peripherals can be mapped to any number of different channels.
    *
    * P2M and M2P should be on channels with 8 byte FIFOs. GPDMA1/2 CH[0-3]
    *
@@ -658,13 +739,13 @@ void stm32_dmastop(DMA_HANDLE handle)
  *
  * Description:
  *   Returns the number of data beats remaining to transfer in the current
- *   STM32H5 GPDMA block.  This reads the BNDT[15:0] field from the
+ *   GPDMA block.  This reads the BNDT[15:0] field from the
  *   GPDMA_CxBR1 register, which indicates how many beats are left in the
  *   programmed transfer.
  *
  * Assumptions:
  *   - DMA handle was allocated by stm32_dmachannel().
- *   - The handle refers to a valid STM32H5 GPDMA channel.
+ *   - The handle refers to a valid GPDMA channel.
  *
  ****************************************************************************/
 

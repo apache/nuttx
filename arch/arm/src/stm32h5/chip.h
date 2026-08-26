@@ -50,6 +50,13 @@
 
 #define ARMV8M_PERIPHERAL_INTERRUPTS STM32_IRQ_NEXTINTS
 
+/* GPDMA instance parameters */
+
+#define STM32_DMA1_NCHAN      8
+#define STM32_DMA1_IRQ_FIRST  STM32_IRQ_GPDMA1_CH0
+#define STM32_DMA2_NCHAN      8
+#define STM32_DMA2_IRQ_FIRST  STM32_IRQ_GPDMA2_CH0
+
 /* Cache line sizes set in line with ST document RM0481 Rev 2.
  * DCACHE implementation, pg 284, Table 93
  * ICACHE implementation, pg 367, Table 85.

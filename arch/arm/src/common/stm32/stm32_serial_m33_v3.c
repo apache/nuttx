@@ -57,6 +57,10 @@
 #include "stm32_rcc.h"
 #include "arm_internal.h"
 
+#ifdef SERIAL_HAVE_DMA
+#  include "stm32_dma.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/

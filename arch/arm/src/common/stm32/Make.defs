@@ -59,6 +59,10 @@ ifeq ($(CONFIG_STM32_HAVE_IP_GPIO_M33_V1),y)
 CHIP_CSRCS += stm32_gpio_m33_v1.c
 endif
 
+ifeq ($(CONFIG_STM32_HAVE_IP_DMA_GPDMA)$(CONFIG_STM32_DMA),yy)
+CHIP_CSRCS += stm32_dma_gpdma.c
+endif
+
 ifeq ($(CONFIG_STM32_HAVE_IP_EXTI_M33_V1),y)
 CHIP_CSRCS += stm32_exti_gpio_m33_v1.c
 endif
