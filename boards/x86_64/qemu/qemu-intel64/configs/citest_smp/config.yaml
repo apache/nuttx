@@ -1,0 +1,14 @@
+config:
+  cwd: './'
+
+product:
+  name: "qemu-intel64"
+  cores:
+    core0:
+      name: 'main'
+      device: 'qemu'
+      exec_path: 'qemu-system-x86_64'
+      exec_args: '-m 2G -smp 4 -cpu max -nographic -serial mon:stdio'
+      uptime: 60
+      conf_path: './.config'
+      elf_path: './nuttx'
