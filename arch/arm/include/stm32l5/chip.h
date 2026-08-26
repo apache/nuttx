@@ -40,6 +40,8 @@
 #  error "Unsupported STM32L5 chip"
 #endif
 
+#define STM32_PRIMARY_SRAM_SIZE STM32_SRAM1_SIZE
+
 #if defined(CONFIG_STM32_STM32L562XX)
 #  define STM32_NFSMC                    1   /* Have FSMC memory controller */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
