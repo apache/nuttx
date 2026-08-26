@@ -29,6 +29,7 @@
 #include <nuttx/nuttx.h>
 
 #include <stdint.h>
+#include <string.h>
 #include <assert.h>
 #include <nuttx/debug.h>
 
@@ -173,6 +174,7 @@ static void slab_init(uintptr_t start)
 static uintptr_t slab_alloc(void)
 {
   pgalloc_slab_t *slab = (pgalloc_slab_t *)sq_remfirst(&g_free_slabs);
+
   return slab ? (uintptr_t)slab->memory : 0;
 }
 
@@ -245,6 +247,14 @@ static void map_region(uintptr_t paddr, uintptr_t vaddr, size_t size,
 
 void qemu_rv_kernel_mappings(void)
 {
+  /* Clear page tables */
+
+  memset(m_l1_pgtable, 0, sizeof(m_l1_pgtable));
+  memset(m_l2_pgtable, 0, sizeof(m_l2_pgtable));
+#ifdef CONFIG_ARCH_MMU_TYPE_SV39
+  memset(m_l3_pgtable, 0, sizeof(m_l3_pgtable));
+#endif
+
   /* Initialize slab allocator for the L2/L3 page tables */
 
   slab_init(KMM_PBASE);
