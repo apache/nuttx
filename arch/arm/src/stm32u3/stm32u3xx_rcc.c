@@ -197,6 +197,10 @@ void stm32_rcc_enableperipherals(void)
 {
   uint32_t regval;
 
+#ifdef CONFIG_STM32_DMA1
+  modifyreg32(STM32_RCC_AHB1ENR1, 0, RCC_AHB1ENR1_GPDMA1EN);
+#endif
+
   /* Enable all GPIO ports implemented by STM32U3C5. */
 
   regval = RCC_AHB2ENR1_GPIOAEN | RCC_AHB2ENR1_GPIOBEN |
