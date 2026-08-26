@@ -83,6 +83,13 @@
 #define TXMBCOUNT                   (CONFIG_IMXRT_FLEXCAN_TXMB + 1)
 #define TOTALMBCOUNT                RXMBCOUNT + TXMBCOUNT
 
+/* TXMBCOUNT spans the mailbox reserved for the ERR005829 workaround as well,
+ * so the transmit ring is one shorter than the mailboxes it covers: the
+ * usable ones are RXMBCOUNT + 1 .. TOTALMBCOUNT - 1.
+ */
+
+#define TXMBRINGSIZE                (TXMBCOUNT - 1)
+
 #define IFLAG1_RX                   ((1 << RXMBCOUNT)-1)
 #define IFLAG1_TX                   (((1 << TXMBCOUNT)-2) << RXMBCOUNT)
 
@@ -269,7 +276,7 @@ struct imxrt_driver_s
   int mb_address_offset;
   spinlock_t lock;
 #ifdef TX_TIMEOUT_WQ
-  struct wdog_s txtimeout[TXMBCOUNT]; /* TX timeout timer */
+  struct wdog_s txtimeout[TXMBRINGSIZE]; /* TX timeout timer */
 #endif
   struct work_s rcvwork;            /* For deferring interrupt work to the wq */
   struct work_s irqwork;            /* For deferring interrupt work to the wq */
@@ -289,7 +296,7 @@ struct imxrt_driver_s
   const struct flexcan_config_s *config;
 
 #ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
-  struct txmbstats txmb[TXMBCOUNT];
+  struct txmbstats txmb[TXMBRINGSIZE];
 #endif
 };
 
@@ -1044,6 +1051,16 @@ static void imxrt_txdone(struct imxrt_driver_s *priv)
            */
 
           wd_cancel(&priv->txtimeout[txmb]);
+
+          /* Retire the deadline with the frame. Left behind it sits in the
+           * past forever, and the next expiry of any other mailbox's
+           * watchdog makes imxrt_txtimeout_work() abort whatever frame has
+           * since been loaded here.
+           */
+
+          priv->txmb[txmb].deadline.tv_sec  = 0;
+          priv->txmb[txmb].deadline.tv_usec = 0;
+
           struct mb_s *mb = flexcan_get_mb(priv, mbi);
           mb->cs.code = CAN_TXMB_INACTIVE;
 #endif
@@ -1207,9 +1224,11 @@ static void imxrt_txtimeout_work(void *arg)
   uint32_t mb_bit;
 
   struct timespec ts;
-  struct timeval *now = (struct timeval *)&ts;
+  struct timeval now;
+
   clock_systime_timespec(&ts);
-  now->tv_usec = ts.tv_nsec / 1000; /* timespec to timeval conversion */
+  now.tv_sec  = ts.tv_sec;
+  now.tv_usec = ts.tv_nsec / 1000;
 
   /* The watchdog timed out, yet we still check mailboxes in case the
    * transmit function transmitted a new frame
@@ -1217,25 +1236,43 @@ static void imxrt_txtimeout_work(void *arg)
 
   flags  = getreg32(priv->base + IMXRT_CAN_IFLAG1_OFFSET);
 
-  for (mbi = 0; mbi < TXMBCOUNT; mbi++)
+  for (mbi = 0; mbi < TXMBRINGSIZE; mbi++)
     {
-      if (priv->txmb[mbi].deadline.tv_sec != 0
-          && (now->tv_sec > priv->txmb[mbi].deadline.tv_sec
-          || now->tv_usec > priv->txmb[mbi].deadline.tv_usec))
+      struct timeval *deadline = &priv->txmb[mbi].deadline;
+      struct mb_s *mb;
+
+      /* imxrt_txdone() zeroes the deadline of a mailbox it has retired, so a
+       * non-zero deadline here means the mailbox still holds a frame.
+       */
+
+      if (deadline->tv_sec == 0 && deadline->tv_usec == 0)
         {
-          NETDEV_TXTIMEOUTS(&priv->dev);
-
-          mb_bit = 1 << (RXMBCOUNT +  mbi);
-
-          if (flags & mb_bit)
-            {
-              putreg32(mb_bit, priv->base + IMXRT_CAN_IFLAG1_OFFSET);
-            }
-
-          struct mb_s *mb = flexcan_get_mb(priv, mbi + RXMBCOUNT);
-          mb->cs.code = CAN_TXMB_ABORT;
-          priv->txmb[mbi].pending = TX_ABORT;
+          continue;
         }
+
+      if (now.tv_sec < deadline->tv_sec
+          || (now.tv_sec == deadline->tv_sec
+              && now.tv_usec <= deadline->tv_usec))
+        {
+          continue;
+        }
+
+      NETDEV_TXTIMEOUTS(&priv->dev);
+
+      /* imxrt_transmit() stores the deadline of mailbox RXMBCOUNT + 1 + mbi
+       * in txmb[mbi]; the mailbox this loop aborts has to match.
+       */
+
+      mb_bit = 1 << (RXMBCOUNT + 1 + mbi);
+
+      if (flags & mb_bit)
+        {
+          putreg32(mb_bit, priv->base + IMXRT_CAN_IFLAG1_OFFSET);
+        }
+
+      mb = flexcan_get_mb(priv, RXMBCOUNT + 1 + mbi);
+      mb->cs.code = CAN_TXMB_ABORT;
+      priv->txmb[mbi].pending = TX_ABORT;
     }
 }
 
