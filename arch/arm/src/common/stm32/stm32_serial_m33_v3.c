@@ -1454,6 +1454,9 @@ void stm32serial_setusartint(struct stm32_serial_s *priv,
   cr = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
   cr &= ~(USART_CR1_USED_INTS);
   cr |= (ie & (USART_CR1_USED_INTS));
+#ifdef SERIAL_HAVE_DMA
+  cr |= USART_CR1_IDLEIE;
+#endif
   stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, cr);
 
   cr = stm32serial_getreg(priv, STM32_USART_CR3_OFFSET);
@@ -2119,6 +2122,9 @@ static int stm32serial_setup(struct uart_dev_s *dev)
   regval      = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
   regval     |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE |
                  USART_CR1_FIFOEN);
+#ifdef SERIAL_HAVE_DMA
+  regval     |= USART_CR1_IDLEIE;
+#endif
   stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, regval);
 
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
@@ -2453,7 +2459,7 @@ static int stm32serial_interrupt(int irq, void *context, void *arg)
        *
        * Enable           Status         Meaning                Usage
        * ---------------- -------------- ---------------------- -------------
-       * USART_CR1_IDLEIE USART_ISR_IDLE Idle Line Detected     (not used)
+       * USART_CR1_IDLEIE USART_ISR_IDLE Idle Line Detected     (RX DMA)
        * USART_CR1_RXNEIE USART_ISR_RXNE Received Data Ready to
        *                                 be Read
        * "              " USART_ISR_ORE  Overrun Error Detected
@@ -2497,6 +2503,20 @@ static int stm32serial_interrupt(int irq, void *context, void *arg)
       if ((priv->sr & USART_ISR_WUF) != 0)
         {
           stm32serial_putreg(priv, STM32_USART_ICR_OFFSET, USART_ICR_WUCF);
+        }
+#endif
+
+#ifdef SERIAL_HAVE_DMA
+      /* The line going to idle, deliver any fraction of RX data */
+
+      if ((priv->sr & USART_ISR_IDLE) != 0)
+        {
+          stm32serial_putreg(priv, STM32_USART_ICR_OFFSET,
+                             USART_ICR_IDLECF);
+          if (priv->rxdma != NULL)
+            {
+              stm32serial_dmarxcallback(priv->rxdma, 0, priv);
+            }
         }
 #endif
 
