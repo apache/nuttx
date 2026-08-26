@@ -78,8 +78,9 @@ struct kwork_wqueue_s
   sem_t            sem;       /* The counting semaphore of the wqueue */
   sem_t            exsem;     /* Sync waiting for thread exit */
   spinlock_t       lock;      /* Spinlock */
-  uint8_t          nthreads;  /* Number of worker threads */
+  int              nthreads;  /* Number of worker threads */
   bool             exit;      /* A flag to request the thread to exit */
+  bool             dynamic;   /* Dynamically allocated queue */
   struct wdog_s    timer;     /* Timer to pending. */
 };
 
@@ -214,11 +215,12 @@ bool work_insert_pending(FAR struct kwork_wqueue_s *wqueue,
  *
  * Description:
  *   Internal public function to remove the work from the workqueue.
+ *   The caller must hold wqueue->lock, and work must be queued on wqueue.
  *   Require wqueue != NULL and work != NULL.
  *
  * Input Parameters:
  *   wqueue - The work queue.
- *   work   - The work to be inserted.
+ *   work   - The work to be removed.
  *
  * Returned Value:
  *   Return whether the head of the pending queue has changed.
