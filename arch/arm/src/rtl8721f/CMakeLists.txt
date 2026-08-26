@@ -97,6 +97,13 @@ set(AMEBA_CFG_FLASHFS ${CONFIG_RTL8721F_FLASH_FS})
 set(AMEBA_ROM_LDS ameba_rom_symbol_bcut_s.ld ameba_rom_symbol_bcut_wifi.ld
                   ameba_rom_symbol_bcut_os.ld ameba_rom_symbol_bcut.ld)
 
+# The SDK ships no bare RTL8721F.rdev flash profile (unlike RTL8721Dx /
+# RTL8720F); it splits by flash type into RTL8721F_NOR.rdev /
+# RTL8721F_NAND.rdev.  The EVB is NOR, so override the default (AMEBA_PY_SOC =
+# RTL8721F) accordingly -- matching
+# boards/arm/rtl8721f/rtl8721f_evb/scripts/Make.defs.
+set(AMEBA_FLASH_PROFILE RTL8721F_NOR)
+
 # Resolve AMEBA_SDK / asdk toolchain (provisioned by `. tools/ameba/env.sh`)
 # before the SDK-relative source lists below reference it.
 include(${AMEBA_COMMON}/cmake/ameba_sdk.cmake)
