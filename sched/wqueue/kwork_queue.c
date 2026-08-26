@@ -72,20 +72,32 @@ int work_queue_next_wq(FAR struct kwork_wqueue_s *wqueue,
                        FAR void *arg, clock_t delay)
 {
   irqstate_t flags;
+  bool retimer;
+  int ret = OK;
 
   if (wqueue == NULL || work == NULL || worker == NULL ||
-      delay > WDOG_MAX_DELAY)
+      delay < 0 || delay > WDOG_MAX_DELAY)
     {
       return -EINVAL;
     }
+
+  flags = spin_lock_irqsave(&wqueue->lock);
+
+  if (wqueue->exit)
+    {
+      ret = -ESHUTDOWN;
+      goto out;
+    }
+
+  /* Remove a previous pending instance before requeueing it. */
+
+  retimer = work_available(work) ? false : work_remove(wqueue, work);
 
   /* Initialize the work structure. */
 
   work->worker = worker; /* Work callback. non-NULL means queued */
   work->arg    = arg;    /* Callback argument */
   work->qtime += delay;  /* Expected time based on last expiration time */
-
-  flags = spin_lock_irqsave(&wqueue->lock);
 
   if (delay)
     {
@@ -95,6 +107,7 @@ int work_queue_next_wq(FAR struct kwork_wqueue_s *wqueue,
         {
           /* Start the timer if the work is the earliest expired work. */
 
+          retimer = false;
           wd_start_abstick(&wqueue->timer, work->qtime,
                            work_timer_expired, (wdparm_t)wqueue);
         }
@@ -106,16 +119,22 @@ int work_queue_next_wq(FAR struct kwork_wqueue_s *wqueue,
       list_add_tail(&wqueue->expired, &work->node);
     }
 
+  if (retimer)
+    {
+      work_timer_reset(wqueue);
+    }
+
+out:
   spin_unlock_irqrestore(&wqueue->lock, flags);
 
-  if (!delay)
+  if (ret == OK && !delay)
     {
       /* Immediately wake up the worker thread. */
 
       nxsem_post(&wqueue->sem);
     }
 
-  return 0;
+  return ret;
 }
 
 int work_queue_next(int qid, FAR struct work_s *work, worker_t worker,
@@ -163,7 +182,7 @@ int work_queue_wq(FAR struct kwork_wqueue_s *wqueue,
   bool retimer;
 
   if (wqueue == NULL || work == NULL || worker == NULL ||
-      delay > WDOG_MAX_DELAY)
+      delay < 0 || delay > WDOG_MAX_DELAY)
     {
       return -EINVAL;
     }
@@ -175,6 +194,12 @@ int work_queue_wq(FAR struct kwork_wqueue_s *wqueue,
    */
 
   flags = spin_lock_irqsave(&wqueue->lock);
+
+  if (wqueue->exit)
+    {
+      spin_unlock_irqrestore(&wqueue->lock, flags);
+      return -ESHUTDOWN;
+    }
 
   /* Ensure the work has been removed. */
 

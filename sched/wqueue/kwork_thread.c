@@ -28,6 +28,7 @@
 
 #include <unistd.h>
 #include <sched.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -199,19 +200,20 @@ static int work_thread(int argc, FAR char *argv[])
   kworker = (FAR struct kworker_s *)
             ((uintptr_t)strtoul(argv[2], NULL, 16));
 
-  /* Loop until wqueue->exit != 0.
-   * Since the only way to set wqueue->exit is to call work_queue_free(),
-   * there is no need for entering the critical section.
-   */
-
-  while (!wqueue->exit)
+  for (; ; )
     {
       /* And check first entry in the work queue. Since we have disabled
        * interrupts we know:  (1) we will not be suspended unless we do
        * so ourselves, and (2) there will be no changes to the work queue
        */
 
-       flags = spin_lock_irqsave_nopreempt(&wqueue->lock);
+      flags = spin_lock_irqsave_nopreempt(&wqueue->lock);
+
+      if (wqueue->exit)
+        {
+          spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
+          break;
+        }
 
       /* If the wqueue timer is expired and non-active, it indicates that
        * there might be expired work in the pending queue.
@@ -266,6 +268,12 @@ static int work_thread(int argc, FAR char *argv[])
               kworker->wait_count--;
               nxsem_post(&kworker->wait);
             }
+
+          if (wqueue->exit)
+            {
+              spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
+              break;
+            }
         }
 
       spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
@@ -306,6 +314,9 @@ static int work_thread_create(FAR const char *name, int priority,
   FAR char *argv[3];
   char arg0[32];
   char arg1[32];
+  irqstate_t flags;
+  int created = 0;
+  int initialized = 0;
   int wndx;
   int pid;
   FAR void *stack = NULL;
@@ -319,6 +330,7 @@ static int work_thread_create(FAR const char *name, int priority,
   for (wndx = 0; wndx < wqueue->nthreads; wndx++)
     {
       nxsem_init(&worker[wndx].wait, 0, 0);
+      initialized++;
 
       snprintf(arg0, sizeof(arg0), "%p", wqueue);
       snprintf(arg1, sizeof(arg1), "%p", &worker[wndx]);
@@ -336,19 +348,51 @@ static int work_thread_create(FAR const char *name, int priority,
       pid = kthread_create_with_stack(name, priority, stack,
                                       stack_size, work_thread, argv);
 
-      DEBUGASSERT(pid > 0);
-      if (pid < 0)
+      if (pid <= 0)
         {
+          if (pid == 0)
+            {
+              pid = -EIO;
+            }
+
           serr("ERROR: work_thread_create %d failed: %d\n", wndx, pid);
-          sched_unlock();
-          return pid;
+          goto errout_with_threads;
         }
 
       worker[wndx].pid = pid;
+      created++;
     }
 
   sched_unlock();
   return OK;
+
+errout_with_threads:
+  flags = spin_lock_irqsave_nopreempt(&wqueue->lock);
+  wqueue->exit = true;
+  spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
+
+  sched_unlock();
+
+  for (wndx = 0; wndx < created; wndx++)
+    {
+      nxsem_post(&wqueue->sem);
+    }
+
+  for (wndx = 0; wndx < created; wndx++)
+    {
+      nxsem_wait_uninterruptible(&wqueue->exsem);
+    }
+
+  for (wndx = 0; wndx < initialized; wndx++)
+    {
+      worker[wndx].pid = INVALID_PROCESS_ID;
+      nxsem_destroy(&worker[wndx].wait);
+    }
+
+  nxsem_reset(&wqueue->sem, 0);
+  nxsem_reset(&wqueue->exsem, 0);
+
+  return pid;
 }
 
 /****************************************************************************
@@ -373,6 +417,7 @@ void work_timer_expired(wdparm_t arg)
    */
 
   FAR struct kwork_wqueue_s *wq = (FAR struct kwork_wqueue_s *)arg;
+
   nxsem_post(&wq->sem);
 }
 
@@ -380,18 +425,15 @@ void work_timer_expired(wdparm_t arg)
  * Name: work_queue_create
  *
  * Description:
- *   Create a new work queue. The work queue is identified by its work
- *   queue ID, which is used to queue works to the work queue and to
- *   perform other operations on the work queue.
- *   This function will create a work thread pool with nthreads threads.
- *   The work queue ID is returned on success.
+ *   Create a custom work queue and return its handle.  This function creates
+ *   a pool containing nthreads workers.
  *
  * Input Parameters:
  *   name       - Name of the new task
  *   priority   - Priority of the new task
  *   stack_addr - Stack buffer of the new task
  *   stack_size - size (in bytes) of the stack needed
- *   nthreads   - Number of work thread should be created
+ *   nthreads   - Number of worker threads to create
  *
  * Returned Value:
  *   The work queue handle returned on success.  Otherwise, NULL
@@ -406,7 +448,8 @@ FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
   FAR struct kwork_wqueue_s *wqueue;
   int ret;
 
-  if (nthreads < 1)
+  if (name == NULL || stack_size <= 0 || nthreads < 1 ||
+      nthreads > (SIZE_MAX - sizeof(*wqueue)) / sizeof(struct kworker_s))
     {
       return NULL;
     }
@@ -428,6 +471,7 @@ FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
   nxsem_init(&wqueue->sem, 0, 0);
   nxsem_init(&wqueue->exsem, 0, 0);
   wqueue->nthreads = nthreads;
+  wqueue->dynamic = true;
   spin_lock_init(&wqueue->lock);
 
   /* Create the work queue thread pool */
@@ -435,6 +479,8 @@ FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
   ret = work_thread_create(name, priority, stack_addr, stack_size, wqueue);
   if (ret < 0)
     {
+      nxsem_destroy(&wqueue->sem);
+      nxsem_destroy(&wqueue->exsem);
       kmm_free(wqueue);
       return NULL;
     }
@@ -446,12 +492,11 @@ FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
  * Name: work_queue_free
  *
  * Description:
- *   Destroy a work queue. The work queue is identified by its work queue ID.
- *   All worker threads will be destroyed and the work queue will be freed.
- *   The work queue ID is invalid after this function returns.
+ *   Destroy a custom work queue.  All worker threads are stopped and the
+ *   queue is freed.  The handle is invalid after this function returns.
  *
  * Input Parameters:
- *  qid - The work queue ID
+ *  wqueue - The custom work queue handle
  *
  * Returned Value:
  *   Zero on success, a negated errno value on failure.
@@ -460,18 +505,56 @@ FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
 
 int work_queue_free(FAR struct kwork_wqueue_s *wqueue)
 {
+  FAR struct work_s *work;
+  FAR struct work_s *next;
+  FAR struct kworker_s *worker;
+  irqstate_t flags;
+  pid_t self;
   int wndx;
 
-  if (wqueue == NULL)
+  if (wqueue == NULL || !wqueue->dynamic)
     {
       return -EINVAL;
     }
 
-  wd_cancel(&wqueue->timer);
+  worker = wq_get_worker(wqueue);
+  self = nxsched_gettid();
 
-  /* Mark the work queue as exiting */
+  for (wndx = 0; wndx < wqueue->nthreads; wndx++)
+    {
+      if (worker[wndx].pid == self)
+        {
+          return -EDEADLK;
+        }
+    }
+
+  /* Mark the work queue as exiting and return all queued work structures
+   * to their owners before the queue storage is released.
+   */
+
+  flags = spin_lock_irqsave_nopreempt(&wqueue->lock);
 
   wqueue->exit = true;
+
+  list_for_every_entry_safe(&wqueue->expired, work, next,
+                            struct work_s, node)
+    {
+      list_delete(&work->node);
+      work->worker = NULL;
+    }
+
+  list_for_every_entry_safe(&wqueue->pending, work, next,
+                            struct work_s, node)
+    {
+      list_delete(&work->node);
+      work->worker = NULL;
+    }
+
+  spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
+
+  /* Stop delayed dispatch after new submissions have been disabled. */
+
+  wd_cancel(&wqueue->timer);
 
   /* Queue a exit work for all threads */
 
@@ -483,6 +566,11 @@ int work_queue_free(FAR struct kwork_wqueue_s *wqueue)
   for (wndx = 0; wndx < wqueue->nthreads; wndx++)
     {
       nxsem_wait_uninterruptible(&wqueue->exsem);
+    }
+
+  for (wndx = 0; wndx < wqueue->nthreads; wndx++)
+    {
+      nxsem_destroy(&worker[wndx].wait);
     }
 
   nxsem_destroy(&wqueue->sem);
