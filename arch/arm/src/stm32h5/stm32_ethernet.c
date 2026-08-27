@@ -1711,6 +1711,7 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
           else
             {
               bool err = ((rxdesc->des3 & ETH_RDES3_WB_ES) != 0);
+
               priv->segments++;
 
               /* Check if there is only one segment in the frame */
@@ -1895,7 +1896,7 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
        * tap
        */
 
-     pkt_input(&priv->dev);
+      pkt_input(&priv->dev);
 #endif
 
       /* Check if the packet is a valid size for the network buffer
@@ -2995,6 +2996,7 @@ static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_ioctl_data_s *req =
             (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
           req->phy_id = CONFIG_STM32_PHYADDR;
           ret = OK;
         }
@@ -3004,6 +3006,7 @@ static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_ioctl_data_s *req =
             (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
           ret = stm32_phyread(req->phy_id, req->reg_num, &req->val_out);
         }
         break;
@@ -3012,6 +3015,7 @@ static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_ioctl_data_s *req =
             (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
           ret = stm32_phywrite(req->phy_id, req->reg_num, req->val_in,
                                0xffff);
         }

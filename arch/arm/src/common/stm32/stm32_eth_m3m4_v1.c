@@ -1717,7 +1717,7 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
 #ifdef CONFIG_NET_PKT
       /* When packet sockets are enabled, feed the frame into the tap */
 
-     pkt_input(&priv->dev);
+      pkt_input(&priv->dev);
 #endif
 
       /* Check if the packet is a valid size for the network buffer
@@ -2138,7 +2138,7 @@ static int stm32_interrupt(int irq, void *context, void *arg)
            * expiration and the deferred interrupt processing.
            */
 
-           wd_cancel(&priv->txtimeout);
+          wd_cancel(&priv->txtimeout);
         }
 
       /* Schedule to perform the interrupt processing on the worker thread. */
@@ -2277,6 +2277,7 @@ static int stm32_ifup(struct net_driver_s *dev)
       /* Transfer time from system low-resolution timer to PTP basetime */
 
       struct timespec ts;
+
       clock_gettime(CLOCK_REALTIME, &ts);
       up_rtc_settime(&ts);
       g_rtc_enabled = true;
@@ -2336,6 +2337,7 @@ static int stm32_ifdown(struct net_driver_s *dev)
       /* Transfer back to system low-resolution timer */
 
       struct timespec ts;
+
       up_rtc_gettime(&ts);
       g_rtc_enabled = false;
       clock_settime(CLOCK_REALTIME, &ts);
@@ -2832,6 +2834,7 @@ static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_ioctl_data_s *req =
         (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
           req->phy_id = CONFIG_STM32_PHYADDR;
           ret = OK;
         }
@@ -2841,6 +2844,7 @@ static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_ioctl_data_s *req =
         (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
           ret = stm32_phyread(req->phy_id, req->reg_num, &req->val_out);
         }
         break;
@@ -2849,6 +2853,7 @@ static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_ioctl_data_s *req =
         (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
           ret = stm32_phywrite(req->phy_id, req->reg_num, req->val_in);
         }
         break;
@@ -3310,7 +3315,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
   ret = stm32_phywrite(CONFIG_STM32_PHYADDR, MII_MCR, phyval);
   if (ret < 0)
     {
-     nerr("ERROR: Failed to write the PHY MCR: %d\n", ret);
+      nerr("ERROR: Failed to write the PHY MCR: %d\n", ret);
       return ret;
     }
 
@@ -3776,26 +3781,26 @@ static void stm32_eth_ptp_convert_rxtime(struct stm32_ethmac_s *priv)
                      &priv->dev.d_rxtime);
 
 #else
-    {
-      struct timespec realtime;
-      uint64_t ptptime;
-      irqstate_t flags;
+  {
+    struct timespec realtime;
+    uint64_t ptptime;
+    irqstate_t flags;
 
-      /* Sample PTP and CLOCK_REALTIME close to each other */
+    /* Sample PTP and CLOCK_REALTIME close to each other */
 
-      clock_gettime(CLOCK_REALTIME, &realtime);
-      flags = spin_lock_irqsave(&g_rtc_lock);
-      ptptime = stm32_eth_ptp_gettime();
-      spin_unlock_irqrestore(&g_rtc_lock, flags);
+    clock_gettime(CLOCK_REALTIME, &realtime);
+    flags = spin_lock_irqsave(&g_rtc_lock);
+    ptptime = stm32_eth_ptp_gettime();
+    spin_unlock_irqrestore(&g_rtc_lock, flags);
 
-      /* Compute how much time has elapsed since packet reception
-       * and add that to current time.
-       */
+    /* Compute how much time has elapsed since packet reception
+     * and add that to current time.
+     */
 
-      timestamp = ptptime - timestamp;
-      ptp_to_timespec(timestamp, &rxtime);
-      clock_timespec_add(&rxtime, &realtime, &priv->dev.d_rxtime);
-    }
+    timestamp = ptptime - timestamp;
+    ptp_to_timespec(timestamp, &rxtime);
+    clock_timespec_add(&rxtime, &realtime, &priv->dev.d_rxtime);
+  }
 #endif /* CONFIG_STM32_ETH_PTP_RTC_HIRES */
 }
 #endif /* CONFIG_STM32_ETH_TIMESTAMP_RX */
