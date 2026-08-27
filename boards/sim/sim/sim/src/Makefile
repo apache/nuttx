@@ -51,7 +51,9 @@ endif
 endif
 
 ifeq ($(CONFIG_ETC_ROMFS),y)
-  RCSRCS = etc/init.d/rc.sysinit etc/init.d/rcS
+ifeq ($(CONFIG_SYSTEM_NXINIT),y)
+  RCSRCS = etc/init.d/init.rc
+endif
   RCRAWS = etc/group
 endif
 
