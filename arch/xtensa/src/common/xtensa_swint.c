@@ -345,6 +345,18 @@ int xtensa_swint(int irq, void *context, void *arg)
           xtensa_saveprivilege(regs, rtcb->xcp.syscall[index].int_ctx);
 #endif
 
+          /* Remember where the caller's registers are.  The cloning
+           * primitives need them:  a system call body runs as C code after
+           * this exception has returned, and xcp.regs is NULL by then.  Only
+           * the outermost call is of interest, since that is the one the
+           * caller made.  See up_fork().
+           */
+
+          if (index == 0)
+            {
+              rtcb->xcp.sregs = regs;
+            }
+
           rtcb->xcp.nsyscalls = index + 1;
 
           regs[REG_PC]        = (uintptr_t)xtensa_dispatch_syscall;
