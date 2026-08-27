@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sim/sim/sim/src/etc/init.d/rc.sysinit
+ * boards/sim/sim/sim/src/etc/init.d/init.rc
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,24 +21,24 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/macro.h>
 
-#define CONCAT_(x, y) x##y
-#define CONCAT(x, y)  CONCAT_(x, y)
+#ifdef CONFIG_SYSTEM_NSH
+service console sh
+   restart_period 1000
+#endif
 
-#ifdef CONFIG_ETC_ROMFS
+on init
+#ifdef CONFIG_SYSTEM_NSH
 #ifdef CONFIG_FS_TMPFS
-
-/* Mount /tmp on TMPFS */
-
-mount -t tmpfs /tmp
-
+   mount -t tmpfs /tmp
 #elif defined(CONFIG_FS_FAT)
-
-/* Create a FAT RAMDISK and mount it at /tmp */
-
-mkrd -m CONFIG_ETC_FATDEVNO -s CONFIG_ETC_FATSECTSIZE CONFIG_ETC_FATNSECTORS
-mkfatfs CONCAT(/dev/ram, CONFIG_ETC_FATDEVNO)
-mount -t vfat CONCAT(/dev/ram, CONFIG_ETC_FATDEVNO) CONFIG_ETC_FATMOUNTPT
-
-#endif /* CONFIG_FS_TMPFS || CONFIG_FS_FAT */
-#endif /* CONFIG_ETC_ROMFS */
+   mkrd -m CONFIG_ETC_FATDEVNO -s CONFIG_ETC_FATSECTSIZE CONFIG_ETC_FATNSECTORS
+   mkfatfs CONCATENATE(/dev/ram, CONFIG_ETC_FATDEVNO)
+   mount -t vfat CONCATENATE(/dev/ram, CONFIG_ETC_FATDEVNO) CONFIG_ETC_FATMOUNTPT
+#endif
+#ifdef CONFIG_FS_HOSTFS
+   mount -t hostfs -o fs=. /data
+#endif
+   start console
+#endif
