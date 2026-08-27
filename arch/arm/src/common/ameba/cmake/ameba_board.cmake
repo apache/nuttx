@@ -208,16 +208,28 @@ list(APPEND AMEBA_EXTRA_LIBS ${_crtbegin} ${_crtend} -lm -lstdc++)
 
 set(AMEBA_KM4_LD ${AMEBA_KM4_PROJ}/ld)
 set(AMEBA_IMG2_LD ${AMEBA_KM4_LD}/ameba_img2_all.ld)
-set(AMEBA_ROM_LD ${AMEBA_KM4_LD}/ameba_rom_symbol_acut_s.ld)
 set(GENLDSCRIPT ${AMEBA_PREBUILT}/ld.script.gen)
+
+# ROM symbol linker script(s), appended after the preprocessed image2 script.
+# Most ICs (rtl8721dx / rtl8720f) use a single script; rtl8721f overrides
+# AMEBA_ROM_LDS in its arch CMakeLists with four scripts (secure + wifi + os +
+# NS) so the ROM BSS (__rom_bss_*_ns__) and WiFi ROM (rtw_*) symbols resolve --
+# mirroring that IC's ameba_board.mk cat order.
+if(NOT DEFINED AMEBA_ROM_LDS)
+  set(AMEBA_ROM_LDS ameba_rom_symbol_acut_s.ld)
+endif()
+set(AMEBA_ROM_LD_PATHS "")
+foreach(_ld ${AMEBA_ROM_LDS})
+  list(APPEND AMEBA_ROM_LD_PATHS ${AMEBA_KM4_LD}/${_ld})
+endforeach()
 
 message(
   STATUS "ameba: generating ld.script.gen (AP ${AMEBA_AP_PROJECT} image2)")
 execute_process(
   COMMAND
     sh ${AMEBA_TOOLS_DIR}/ameba_gen_ldscript.sh ${CMAKE_C_COMPILER}
-    ${AMEBA_IMG2_LD} ${AMEBA_ROM_LD} ${AMEBA_AUTOCONF} ${AMEBA_PREBUILT}
-    ${AMEBA_AP_PROJECT} ${GENLDSCRIPT}
+    ${AMEBA_IMG2_LD} ${AMEBA_AUTOCONF} ${AMEBA_PREBUILT} ${AMEBA_AP_PROJECT}
+    ${GENLDSCRIPT} ${AMEBA_ROM_LD_PATHS}
   RESULT_VARIABLE _rc)
 if(NOT _rc EQUAL 0)
   message(FATAL_ERROR "ameba_gen_ldscript.sh failed (rc=${_rc})")

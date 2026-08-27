@@ -90,6 +90,13 @@ set(AMEBA_NP_TARGET km4ns)
 set(AMEBA_CFG_WIFI ${CONFIG_RTL8721F_WIFI})
 set(AMEBA_CFG_FLASHFS ${CONFIG_RTL8721F_FLASH_FS})
 
+# rtl8721f's combined image2 linker script must append four ROM symbol scripts
+# (secure + wifi + os + NS), in this order, to match
+# arch/arm/src/rtl8721f/ameba_board.mk.  ameba_board.cmake consumes this; the
+# other ICs leave it unset and default to the single script.
+set(AMEBA_ROM_LDS ameba_rom_symbol_bcut_s.ld ameba_rom_symbol_bcut_wifi.ld
+                  ameba_rom_symbol_bcut_os.ld ameba_rom_symbol_bcut.ld)
+
 # Resolve AMEBA_SDK / asdk toolchain (provisioned by `. tools/ameba/env.sh`)
 # before the SDK-relative source lists below reference it.
 include(${AMEBA_COMMON}/cmake/ameba_sdk.cmake)

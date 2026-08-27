@@ -10,15 +10,17 @@
 #   1. C-preprocess ameba_img2_all.ld (it #includes ameba_layout.ld and the
 #      config-derived platform_autoconf.h, staged as
 #      project_<proj>/platform_autoconf.h on the include path).
-#   2. Append ameba_rom_symbol_acut_s.ld (ROM symbol addresses).
+#   2. Append the ROM symbol linker script(s) (ROM symbol addresses).  Most
+#      ICs pass a single script; rtl8721f passes four scripts (secure + wifi +
+#      os + NS), matching the make build's cat.
 #   3. Fold NuttX's .vectors orphan section into the loadable SRAM data region
 #      so the large power-of-two aligned vector table does not land in and
 #      overflow the tiny fixed KM4_IMG2_ENTRY region.
 #
 # This reproduces the SDK-generated rlx8721d.ld; the SDK tree stays read-only.
 #
-# Usage: ameba_gen_ldscript.sh <cc> <img2_ld> <rom_ld> <autoconf> \
-#                              <prebuilt_dir> <ap_project> <out>
+# Usage: ameba_gen_ldscript.sh <cc> <img2_ld> <autoconf> <prebuilt_dir> \
+#                              <ap_project> <out> <rom_ld>...
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -43,16 +45,17 @@ set -e
 
 CC="$1"
 IMG2_LD="$2"
-ROM_LD="$3"
-AUTOCONF="$4"
-PREBUILT="$5"
-AP_PROJECT="$6"
-OUT="$7"
+AUTOCONF="$3"
+PREBUILT="$4"
+AP_PROJECT="$5"
+OUT="$6"
+shift 6
+ROM_LDS="$@"
 
-if [ -z "$CC" ] || [ -z "$IMG2_LD" ] || [ -z "$ROM_LD" ] || [ -z "$AUTOCONF" ] \
-   || [ -z "$PREBUILT" ] || [ -z "$AP_PROJECT" ] || [ -z "$OUT" ]; then
-  echo "usage: ameba_gen_ldscript.sh <cc> <img2_ld> <rom_ld> <autoconf>" \
-       "<prebuilt_dir> <ap_project> <out>" >&2
+if [ -z "$CC" ] || [ -z "$IMG2_LD" ] || [ -z "$AUTOCONF" ] || [ -z "$PREBUILT" ] \
+   || [ -z "$AP_PROJECT" ] || [ -z "$OUT" ] || [ -z "$ROM_LDS" ]; then
+  echo "usage: ameba_gen_ldscript.sh <cc> <img2_ld> <autoconf> <prebuilt_dir>" \
+       "<ap_project> <out> <rom_ld>..." >&2
   exit 1
 fi
 
@@ -61,9 +64,9 @@ fi
 mkdir -p "$PREBUILT/project_$AP_PROJECT"
 cp "$AUTOCONF" "$PREBUILT/project_$AP_PROJECT/platform_autoconf.h"
 
-# 1) preprocess, 2) append ROM symbols
+# 1) preprocess, 2) append ROM symbol script(s), in the given order
 "$CC" -E -P -xc -c "$IMG2_LD" -o "$OUT" -I "$PREBUILT"
-cat "$ROM_LD" >> "$OUT"
+cat $ROM_LDS >> "$OUT"
 
 # 3) fold NuttX .vectors into the loadable SRAM data region
 sed -i 's|^\([[:space:]]*\)\*(\.data\*)|\1*(.vectors*)\n\1*(.data*)|' "$OUT"
