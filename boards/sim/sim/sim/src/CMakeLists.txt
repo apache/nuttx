@@ -63,14 +63,17 @@ target_sources(board PRIVATE ${SRCS})
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/gnu-elf.ld")
 
 if(CONFIG_ETC_ROMFS)
+  if(CONFIG_SYSTEM_NXINIT)
+    set(ETC_RCSRCS etc/init.d/init.rc)
+  endif()
+
   nuttx_add_romfs(
     NAME
     etc
     MOUNTPOINT
     etc
     RCSRCS
-    etc/init.d/rcS
-    etc/init.d/rc.sysinit
+    ${ETC_RCSRCS}
     RCRAWS
     etc/group
     PATH
