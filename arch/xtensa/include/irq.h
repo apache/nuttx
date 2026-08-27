@@ -217,6 +217,16 @@ struct xcptcontext
   uint32_t *regs;
 
 #ifdef CONFIG_LIB_SYSCALL
+  /* The exception frame of the system call currently in progress, i.e. the
+   * caller's register context as the vector saved it.  A system call body
+   * runs as ordinary C code long after the exception has been dispatched, so
+   * this is the only way for one to reach the registers of the thread that
+   * made the call -- vfork() needs the caller's stack pointer and return
+   * address to give the child a copy.
+   */
+
+  uint32_t *sregs;
+
   /* The following array holds the return address and the exc_return value
    * needed to return from each nested system call.
    */
