@@ -173,6 +173,19 @@ int rtl8721f_adc_initialize(void);
 int rtl8721f_rtc_initialize(void);
 #endif
 
+#ifdef CONFIG_AMEBA_WDG
+/****************************************************************************
+ * Name: rtl8721f_wdg_initialize
+ *
+ * Description:
+ *   Register the board's watchdog at /dev/watchdog0
+ *   (boards/arm/rtl8721f/rtl8721f_evb/src/rtl8721f_wdg.c).
+ *
+ ****************************************************************************/
+
+int rtl8721f_wdg_initialize(void);
+#endif
+
 #ifdef CONFIG_RTL8721F_FLASH_FS
 /****************************************************************************
  * Name: ameba_flash_fs_initialize

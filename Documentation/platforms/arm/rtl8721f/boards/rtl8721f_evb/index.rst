@@ -46,6 +46,8 @@ Supported in this NuttX port:
   on the SDK fwlib register layer
 * On-chip RTC exposed as a ``/dev/rtc0`` date/time character device with
   alarm support, driven directly on the SDK fwlib register layer
+* On-chip watchdog exposed as a ``/dev/watchdog0`` character device, driven
+  directly on the SDK fwlib register layer
 
 Buttons and LEDs
 ================
@@ -179,6 +181,17 @@ NSH ``date`` command, and arm a one-shot wakeup with the example::
     nsh> date                            # read /dev/rtc0
     nsh> date -s "Jun 16 12:00:00 2026"  # set the RTC
     nsh> alarm 10                        # fire an alarm in 10 seconds
+
+wdg
+---
+
+Minimal NSH with the on-chip watchdog driver and the ``wdog`` example
+enabled (no Wi-Fi). The watchdog is registered at ``/dev/watchdog0`` from the
+board bring-up (``boards/arm/rtl8721f/rtl8721f_evb/src/rtl8721f_wdg.c``); it
+has no board wiring (it is an internal timer). Exercise it with the example,
+which opens the device, sets a timeout, and pings it::
+
+    nsh> wdog                            # run the watchdog example
 
 nsh
 ---
