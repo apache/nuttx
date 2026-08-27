@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <unistd.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -51,59 +52,85 @@
  *
  * Input Parameters:
  *   wqueue - The work queue
- *   work   - The previously queue work structure to cancel
+ *   work   - The previously queued work structure to cancel
  *
  * Returned Value:
  *   Zero (OK) on success, a negated errno on failure.  This error may be
  *   reported:
  *
- *   -ENOENT - There is no such work queued.
  *   -EINVAL - An invalid work queue was specified
  *
  ****************************************************************************/
 
-static int work_qcancel(FAR struct usr_wqueue_s *wqueue,
+static int work_qcancel(FAR struct usr_wqueue_s *wqueue, bool sync,
                         FAR struct work_s *work)
 {
-  int ret = -ENOENT;
-  int semcount;
+  pid_t self = sync ? gettid() : 0;
+  int ret;
 
-  DEBUGASSERT(work != NULL);
+  if (wqueue == NULL || work == NULL)
+    {
+      return -EINVAL;
+    }
 
-  /* Get exclusive access to the work queue */
-
-  while (nxmutex_lock(&wqueue->lock) < 0);
-
-  /* Cancelling the work is simply a matter of removing the work structure
-   * from the work queue.  This must be done with interrupts disabled because
-   * new work is typically added to the work queue from interrupt handlers.
+  /* A work structure becomes available for requeue after it is dequeued,
+   * before its callback returns.  Multiple workers can therefore execute
+   * callbacks using the same work structure.  Find one such worker and
+   * repeat after it finishes until no callback remains.  Exclude the
+   * calling worker to avoid self-deadlock.
    */
 
-  if (work->worker != NULL)
+  for (; ; )
     {
-      bool is_head = list_is_head(&wqueue->q, &work->node);
+      FAR sem_t *sync_wait = NULL;
+      int wndx;
 
-      /* Now, remove the work from the work queue */
+      /* Get exclusive access to the work queue */
 
-      list_delete(&work->node);
-
-      if (is_head)
+      do
         {
-          /* Remove the work at the head of the queue */
+          ret = nxmutex_lock(&wqueue->lock);
+        }
+      while (ret < 0);
 
-          nxsem_get_value(&wqueue->wake, &semcount);
-          if (semcount < 1)
+      /* Remove a pending instance from the queue. */
+
+      if (work->worker != NULL)
+        {
+          if (work_remove(wqueue, work))
             {
-              nxsem_post(&wqueue->wake);
+              work_wake(wqueue);
             }
         }
 
-      work->worker = NULL;
-      ret = OK;
-    }
+      if (sync)
+        {
+          for (wndx = 0; wndx < wqueue->nthreads; wndx++)
+            {
+              FAR struct usr_worker_s *worker = &wqueue->worker[wndx];
 
-  nxmutex_unlock(&wqueue->lock);
-  return ret;
+              if (worker->work == work && self != worker->tid)
+                {
+                  worker->wait_count++;
+                  sync_wait = &worker->wait;
+                  break;
+                }
+            }
+        }
+
+      nxmutex_unlock(&wqueue->lock);
+
+      if (sync_wait == NULL)
+        {
+          return OK;
+        }
+
+      do
+        {
+          ret = nxsem_wait(sync_wait);
+        }
+      while (ret == -EINTR);
+    }
 }
 
 /****************************************************************************
@@ -126,7 +153,7 @@ static int work_qcancel(FAR struct usr_wqueue_s *wqueue,
  *   Zero (OK) on success, a negated errno on failure.  This error may be
  *   reported:
  *
- *   -ENOENT - There is no such work queued.
+ *   -EINVAL - An invalid work queue was specified
  *
  ****************************************************************************/
 
@@ -134,12 +161,38 @@ int work_cancel(int qid, FAR struct work_s *work)
 {
   if (qid == USRWORK)
     {
-      return work_qcancel(&g_usrwork, work);
+      return work_qcancel(&g_usrwork, false, work);
     }
   else
     {
       return -EINVAL;
     }
 }
+
+#ifndef CONFIG_DISABLE_PTHREAD
+int work_cancel_wq(FAR struct kwork_wqueue_s *handle,
+                   FAR struct work_s *work)
+{
+  return work_qcancel((FAR struct usr_wqueue_s *)handle, false, work);
+}
+#endif
+
+int work_cancel_sync(int qid, FAR struct work_s *work)
+{
+  if (qid == USRWORK)
+    {
+      return work_qcancel(&g_usrwork, true, work);
+    }
+
+  return -EINVAL;
+}
+
+#ifndef CONFIG_DISABLE_PTHREAD
+int work_cancel_sync_wq(FAR struct kwork_wqueue_s *handle,
+                        FAR struct work_s *work)
+{
+  return work_qcancel((FAR struct usr_wqueue_s *)handle, true, work);
+}
+#endif
 
 #endif /* CONFIG_LIBC_USRWORK && !__KERNEL__ */

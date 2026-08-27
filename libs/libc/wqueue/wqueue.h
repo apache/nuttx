@@ -29,7 +29,9 @@
 
 #include <nuttx/config.h>
 
-#include <pthread.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <sys/types.h>
 
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
@@ -46,13 +48,32 @@
  * Public Type Definitions
  ****************************************************************************/
 
-/* This structure defines the state of one user-modework queue. */
+/* Forward reference */
+
+struct usr_wqueue_s;
+
+/* This structure describes one user-mode worker thread. */
+
+struct usr_worker_s
+{
+  pid_t                    tid;        /* Worker thread ID */
+  FAR struct work_s       *work;       /* Work currently being processed */
+  FAR struct usr_wqueue_s *wqueue;     /* Parent work queue */
+  sem_t                    wait;       /* Wait for the current work */
+  uint16_t                 wait_count; /* Number of synchronous waiters */
+};
+
+/* This structure defines the state of one user-mode work queue. */
 
 struct usr_wqueue_s
 {
-  struct list_node q;    /* The queue of pending work */
-  mutex_t          lock; /* exclusive access to user-mode work queue */
-  sem_t            wake; /* The wake-up semaphore of the  usrthread */
+  struct list_node        q;        /* The queue of pending work */
+  mutex_t                 lock;     /* Exclusive access to the queue */
+  sem_t                   wake;     /* Wake-up semaphore */
+  FAR struct usr_worker_s *worker;  /* Worker thread state array */
+  int                     nthreads; /* Number of worker threads */
+  bool                    exit;     /* Request worker thread exit */
+  bool                    dynamic;  /* Dynamically allocated queue */
 };
 
 /****************************************************************************
@@ -64,8 +85,49 @@ struct usr_wqueue_s
 extern struct usr_wqueue_s g_usrwork;
 
 /****************************************************************************
- * Public Function Prototypes
+ * Inline Functions
  ****************************************************************************/
 
-#endif /* CONFIG_LIBC_USRWORK && !__KERNEL__*/
+/****************************************************************************
+ * Name: work_remove
+ *
+ * Description:
+ *   Remove work from a user-mode work queue.  The caller must hold
+ *   wqueue->lock, and work must be queued on wqueue.
+ *
+ * Returned Value:
+ *   true if removing work changed the head of the queue; otherwise false.
+ *
+ ****************************************************************************/
+
+static inline_function bool
+work_remove(FAR struct usr_wqueue_s *wqueue,
+            FAR struct work_s *work)
+{
+  FAR struct work_s *head;
+
+  head = list_first_entry(&wqueue->q, struct work_s, node);
+
+  work->worker = NULL;
+  list_delete(&work->node);
+
+  return head == work;
+}
+
+static inline_function void work_wake(FAR struct usr_wqueue_s *wqueue)
+{
+  int semcount;
+
+  /* Keep enough wake tokens for the worker pool while bounding stale
+   * tokens when workers are already running.
+   */
+
+  nxsem_get_value(&wqueue->wake, &semcount);
+  if (semcount < wqueue->nthreads)
+    {
+      nxsem_post(&wqueue->wake);
+    }
+}
+
+#endif /* CONFIG_LIBC_USRWORK && !__KERNEL__ */
 #endif /* __LIBS_LIBC_WQUEUE_WQUEUE_H */

@@ -74,11 +74,15 @@
  *   priority worker thread.  Default: 2048.
  *
  * The user-mode work queue is only available in the protected or kernel
- * builds.  This those configurations, the user-mode work queue provides the
- * same (non-standard) facility for use by applications.
+ * builds.  In those configurations, the user-mode work queue provides the
+ * same (non-standard) facility for use by applications.  User-mode work
+ * queue APIs use blocking synchronization and must only be called from task
+ * context.  They must not be called from an interrupt handler.
  *
  * CONFIG_LIBC_USRWORK. If CONFIG_LIBC_USRWORK is also defined then the
- *   user-mode work queue will be created.
+ *   user-mode work queue will be created.  Dynamically allocated user-mode
+ *   work queues require pthread support.  The predefined protected-build
+ *   USRWORK queue does not require pthread support.
  * CONFIG_LIBC_USRWORKPRIORITY - The minimum execution priority of the lower
  *   priority worker thread.  Default: 100
  * CONFIG_LIBC_USRWORKSTACKSIZE - The stack size allocated for the lower
@@ -332,18 +336,18 @@ int work_usrstart(void);
  * Name: work_queue_create
  *
  * Description:
- *   Create a new work queue. The work queue is identified by its work
- *   queue ID, which is used to queue works to the work queue and to
- *   perform other operations on the work queue.
- *   This function will create a work thread pool with nthreads threads.
- *   The work queue ID is returned on success.
+ *   Create a custom work queue and return its handle.  The handle is used
+ *   to queue and cancel work, query the worker priority, and destroy the
+ *   queue.  This function creates a pool containing nthreads workers.
+ *   This function must only be called from task context.
+ *   User-mode custom queues require pthread support.
  *
  * Input Parameters:
  *   name       - Name of the new task
  *   priority   - Priority of the new task
  *   stack_addr - Stack buffer of the new task
  *   stack_size - size (in bytes) of the stack needed
- *   nthreads   - Number of work thread should be created
+ *   nthreads   - Number of worker threads to create
  *
  * Returned Value:
  *   The work queue handle returned on success.  Otherwise, NULL
@@ -359,15 +363,21 @@ FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
  * Name: work_queue_free
  *
  * Description:
- *   Destroy a work queue. The work queue is identified by its work queue ID.
- *   All worker threads will be destroyed and the work queue will be freed.
- *   The work queue ID is invalid after this function returns.
+ *   Destroy a custom work queue.  All worker threads are stopped and the
+ *   queue is freed.  The handle is invalid after this function returns.
+ *   Only a custom queue returned by work_queue_create() may be destroyed;
+ *   the predefined HPWORK, LPWORK, and USRWORK queues cannot be destroyed.
+ *   This function must only be called from task context and must not be
+ *   called by one of the queue's own worker threads.
  *
  * Input Parameters:
  *  wqueue - The work queue handle
  *
  * Returned Value:
  *   Zero on success, a negated errno value on failure.
+ *
+ *   -EDEADLK - Called by one of the queue's own worker threads.
+ *   -EINVAL  - The handle is NULL or does not identify a custom queue.
  *
  ****************************************************************************/
 
@@ -384,8 +394,14 @@ int work_queue_free(FAR struct kwork_wqueue_s *wqueue);
  *   the caller.  Otherwise, the work structure is completely managed by the
  *   work queue logic.  The caller should never modify the contents of the
  *   work queue structure directly.  If work_queue() is called before the
- *   previous work has been performed and removed from the queue, then any
- *   pending work will be canceled and lost.
+ *   previous work has been performed and removed from the same queue, then
+ *   any pending work will be canceled and replaced.  A queued work structure
+ *   must be cancelled before it is moved to a different work queue.
+ *
+ *   work_queue_wq() may be called from interrupt context for a kernel-mode
+ *   or flat-build queue.  A user-mode custom queue uses blocking
+ *   synchronization, so work_queue_wq() must only be called from task
+ *   context in user space.
  *
  * Input Parameters:
  *   qid    - The work queue ID (must be HPWORK or LPWORK)
@@ -399,7 +415,10 @@ int work_queue_free(FAR struct kwork_wqueue_s *wqueue);
  *            is invoked. Zero means to perform the work immediately.
  *
  * Returned Value:
- *   Zero on success, a negated errno on failure
+ *   Zero on success, a negated errno on failure.
+ *
+ *   -EINVAL    - An argument or delay is invalid.
+ *   -ESHUTDOWN - The custom work queue is being destroyed.
  *
  ****************************************************************************/
 
@@ -420,6 +439,10 @@ int work_queue_wq(FAR struct kwork_wqueue_s *wqueue,
  *   Note that calling this function outside the work callback requires
  *   the work->qtime being set.
  *
+ *   A user-mode custom queue uses blocking synchronization, so
+ *   work_queue_next_wq() must only be called from task context in user
+ *   space.
+ *
  * Input Parameters:
  *   qid    - The work queue ID (must be HPWORK or LPWORK)
  *   wqueue - The work queue handle
@@ -432,7 +455,10 @@ int work_queue_wq(FAR struct kwork_wqueue_s *wqueue,
  *            is invoked. Zero means to perform the work immediately.
  *
  * Returned Value:
- *   Zero on success, a negated errno on failure
+ *   Zero on success, a negated errno on failure.
+ *
+ *   -EINVAL    - An argument or delay is invalid.
+ *   -ESHUTDOWN - The custom work queue is being destroyed.
  *
  ****************************************************************************/
 
@@ -443,7 +469,7 @@ int work_queue_next_wq(FAR struct kwork_wqueue_s *wqueue,
                        FAR void *arg, clock_t delay);
 
 /****************************************************************************
- * Name: work_queue_pri
+ * Name: work_queue_priority/work_queue_priority_wq
  *
  * Description: Get priority of the wqueue. We believe that all worker
  *   threads have the same priority.
@@ -466,7 +492,12 @@ int work_queue_priority_wq(FAR struct kwork_wqueue_s *wqueue);
  * Description:
  *   Cancel previously queued work.  This removes work from the work queue.
  *   After work has been cancelled, it may be requeued by calling
- *   work_queue() again.
+ *   work_queue() again.  Cancelling work that is not queued is a successful
+ *   no-op.
+ *
+ *   work_cancel_wq() may be called from interrupt context for a kernel-mode
+ *   or flat-build queue.  It must only be called from task context for a
+ *   user-mode custom queue.
  *
  * Input Parameters:
  *   qid    - The work queue ID (must be HPWORK or LPWORK)
@@ -476,8 +507,7 @@ int work_queue_priority_wq(FAR struct kwork_wqueue_s *wqueue);
  * Returned Value:
  *   Zero on success, a negated errno on failure
  *
- *   -ENOENT - There is no such work queued.
- *   -EINVAL - An invalid work queue was specified
+ *   -EINVAL - An invalid work queue was specified.
  *
  ****************************************************************************/
 
@@ -489,9 +519,11 @@ int work_cancel_wq(FAR struct kwork_wqueue_s *wqueue,
  * Name: work_cancel_sync/work_cancel_sync_wq
  *
  * Description:
- *   Blocked cancel previously queued user-mode work.  This removes work
- *   from the user mode work queue.  After work has been cancelled, it may
- *   be requeued by calling work_queue() again.
+ *   Synchronously cancel previously queued work.  This removes work from
+ *   the queue and waits for callbacks that are already running.  After work
+ *   has been cancelled, it may be requeued by calling work_queue() again.
+ *   Cancelling work that is not queued is a successful no-op.
+ *   This function must only be called from task context.
  *
  * Input Parameters:
  *   qid    - The work queue ID (must be HPWORK or LPWORK)
@@ -499,13 +531,12 @@ int work_cancel_wq(FAR struct kwork_wqueue_s *wqueue,
  *   work   - The previously queued work structure to cancel
  *
  * Returned Value:
- *   Zero means the work was successfully cancelled.
- *   One means the work was not cancelled because it is currently being
- *   processed by work thread, but wait for it to finish.
- *   A negated errno value is returned on any failure:
+ *   Zero means that queued work was cancelled and all callbacks using the
+ *   work structure have finished, except for a callback running in the
+ *   caller's own worker thread.  A negated errno value is returned on any
+ *   failure:
  *
- *   -ENOENT - There is no such work queued.
- *   -EINVAL - An invalid work queue was specified
+ *   -EINVAL - An invalid work queue was specified.
  *
  ****************************************************************************/
 

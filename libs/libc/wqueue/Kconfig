@@ -9,9 +9,12 @@ menu "User Work Queue Support"
 config LIBC_USRWORK
 	bool "User mode worker thread"
 	default n
+	depends on BUILD_PROTECTED || !DISABLE_PTHREAD
 	---help---
-		User space work queues can also be made available for deferred
-		processing in the NuttX kernel build.
+		User-space work queues provide deferred processing in protected and
+		kernel builds.  Dynamically allocated user-mode work queues require
+		pthread support.  The predefined protected-build USRWORK queue does
+		not require pthread support.
 
 if LIBC_USRWORK
 
