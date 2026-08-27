@@ -28,6 +28,12 @@ ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += qemu_power.c
 endif
 
+ifeq ($(CONFIG_ETC_ROMFS),y)
+ifeq ($(CONFIG_SYSTEM_NXINIT),y)
+  RCSRCS += etc/init.d/init.rc
+endif
+endif
+
 ifeq ($(CONFIG_LIBC_FDT),y)
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)fdt$(DELIM)dtc$(DELIM)libfdt
 endif
