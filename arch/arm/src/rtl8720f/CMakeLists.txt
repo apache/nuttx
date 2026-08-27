@@ -74,6 +74,10 @@ if(CONFIG_AMEBA_RTC)
   list(APPEND SRCS ${AMEBA_COMMON}/ameba_rtc.c)
 endif()
 
+if(CONFIG_AMEBA_WDG)
+  list(APPEND SRCS ${AMEBA_COMMON}/ameba_wdg.c)
+endif()
+
 target_include_directories(arch PRIVATE ${AMEBA_COMMON})
 target_sources(arch PRIVATE ${SRCS})
 
