@@ -313,7 +313,12 @@ static void virtio_net_rxfill(FAR struct netdev_lowerhalf_s *dev)
 
       /* Add buffer to RX virtqueue */
 
-      virtio_net_addbuffer(dev, vq, pkt, VIRTIO_NET_RX);
+      if (virtio_net_addbuffer(dev, vq, pkt, VIRTIO_NET_RX) < 0)
+        {
+          vrterr("Failed to add buffer to RX virtqueue, i=%d\n", i);
+          netpkt_free(dev, pkt, NETPKT_RX);
+          break;
+        }
     }
 
   if (i > 0)
@@ -392,6 +397,8 @@ static int virtio_net_ifup(FAR struct netdev_lowerhalf_s *dev)
 static int virtio_net_ifdown(FAR struct netdev_lowerhalf_s *dev)
 {
   FAR struct virtio_net_priv_s *priv = (FAR struct virtio_net_priv_s *)dev;
+  FAR struct virtqueue *vq = priv->vdev->vrings_info[VIRTIO_NET_RX].vq;
+  FAR struct virtio_net_llhdr_s *hdr;
   int i;
 
   /* Disable the Ethernet interrupt */
@@ -401,6 +408,26 @@ static int virtio_net_ifdown(FAR struct netdev_lowerhalf_s *dev)
       virtqueue_disable_cb_lock(priv->vdev->vrings_info[i].vq,
                                 &priv->lock[i]);
     }
+
+  /* Drain RX virtqueue to free netpkt buffers that are still queued
+   * but not yet consumed.
+   */
+
+  while (1)
+    {
+      hdr = virtqueue_get_buffer_lock(vq, NULL, NULL,
+                                      &priv->lock[VIRTIO_NET_RX]);
+      if (hdr == NULL)
+        {
+          break;
+        }
+
+      netpkt_free(dev, hdr->pkt, NETPKT_RX);
+    }
+
+  /* Drain TX virtqueue as well */
+
+  virtio_net_txfree(dev);
 
 #ifdef CONFIG_DRIVERS_WIFI_SIM
   if (priv->lower.wifi)
