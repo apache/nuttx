@@ -84,6 +84,10 @@ ifeq ($(CONFIG_AMEBA_RTC),y)
 CHIP_CSRCS += ameba_rtc.c
 endif
 
+ifeq ($(CONFIG_AMEBA_WDG),y)
+CHIP_CSRCS += ameba_wdg.c
+endif
+
 ############################################################################
 # Realtek RTL8721F SDK integration
 #

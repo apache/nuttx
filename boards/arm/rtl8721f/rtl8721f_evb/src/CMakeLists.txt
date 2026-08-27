@@ -50,6 +50,10 @@ if(CONFIG_AMEBA_RTC)
   list(APPEND SRCS rtl8721f_rtc.c)
 endif()
 
+if(CONFIG_AMEBA_WDG)
+  list(APPEND SRCS rtl8721f_wdg.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_AMEBA_GPIO
@@ -58,7 +62,8 @@ if(CONFIG_AMEBA_GPIO
    OR CONFIG_AMEBA_SPI
    OR CONFIG_AMEBA_PWM
    OR CONFIG_AMEBA_ADC
-   OR CONFIG_AMEBA_RTC)
+   OR CONFIG_AMEBA_RTC
+   OR CONFIG_AMEBA_WDG)
   # The board pin tables pull in the shared drivers' public headers from
   # arch/arm/src/common/ameba/, not on the default board include path.
   target_include_directories(board
