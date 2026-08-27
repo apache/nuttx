@@ -149,10 +149,28 @@ and the user-mode work queue is functionally equivalent to the high
 priority work queue. It differs in that its implementation does not
 depend on internal, kernel-space facilities.
 
+**Custom User Work Queues**. Applications can use
+``work_queue_create()`` to create additional user-mode queues with a
+configurable priority and worker pool. The returned handle is passed to
+the ``*_wq()`` interfaces and to ``work_queue_free()``. The predefined
+``USRWORK`` queue remains available through the queue-ID interfaces. Custom
+user-mode queues require pthread support; the predefined ``USRWORK`` queue
+does not require pthread support in a protected build.
+
+**Execution Context**. The user-mode implementation uses mutexes and
+semaphores for synchronization. Its queue, cancel, create, priority, and
+destroy interfaces must therefore only be called from task context and
+must not be called from an interrupt handler. Kernel-mode and flat-build
+``work_queue()``, ``work_queue_wq()``, ``work_cancel()``, and
+``work_cancel_wq()`` remain safe for interrupt handlers. Creation,
+destruction, and synchronous cancellation are task-context operations in
+all build modes.
+
 **Configuration Options**.
 
 -  ``CONFIG_LIBC_USRWORK``. If CONFIG_LIBC_USRWORK is also defined
-   then the user-mode work queue will be enabled.
+   then the user-mode work queue will be enabled. Dynamically allocated
+   user-mode work queues require pthread support.
 -  ``CONFIG_LIBC_USRWORKPRIORITY``. The execution priority of the
    user-mode priority worker thread. Default: 100
 -  ``CONFIG_LIBC_USRWORKSTACKSIZE``. The stack size allocated for
@@ -202,7 +220,7 @@ Work Queue Interfaces
 ---------------------
 
 .. c:function:: int work_queue(int qid, FAR struct work_s *work, worker_t worker, \
-               FAR void *arg, uint32_t delay)
+               FAR void *arg, clock_t delay)
 
   Queue work to be performed at a later time. All
   queued work will be performed on the worker thread of execution
@@ -230,6 +248,56 @@ Work Queue Interfaces
 
   :return: Zero is returned on success; a negated errno is returned on failure.
 
+.. c:function:: FAR struct kwork_wqueue_s *work_queue_create( \
+               FAR const char *name, int priority, FAR void *stack_addr, \
+               int stack_size, int nthreads)
+
+  Create a custom work queue containing ``nthreads`` workers. All
+  workers use the requested name, priority, and stack size. If
+  ``stack_addr`` is ``NULL``, each worker stack is allocated by the
+  thread creation logic. Otherwise, ``stack_addr`` must identify storage
+  for ``nthreads * stack_size`` bytes.
+
+  This interface must only be called from task context.
+
+  :return: A work queue handle on success; ``NULL`` on failure.
+
+.. c:function:: int work_queue_free(FAR struct kwork_wqueue_s *wqueue)
+
+  Destroy a custom queue, discard pending work, and wait for all running
+  callbacks and worker threads to finish. Pending work structures become
+  available for reuse before the function returns. The predefined
+  ``HPWORK``, ``LPWORK``, and ``USRWORK`` queues cannot be destroyed.
+
+  This interface must only be called from task context and cannot be
+  called from one of the queue's own callbacks.
+
+  :return: Zero on success, ``-EINVAL`` for an invalid or predefined
+    queue, or ``-EDEADLK`` when called by one of the queue's workers.
+
+.. c:function:: int work_queue_wq(FAR struct kwork_wqueue_s *wqueue, \
+               FAR struct work_s *work, worker_t worker, FAR void *arg, \
+               clock_t delay)
+
+  Queue work on a custom queue. If the work structure is already pending
+  on the same queue, the pending instance is replaced. A work structure
+  must be cancelled before it is moved to another queue.
+
+  :return: Zero on success, ``-EINVAL`` for invalid arguments, or
+    ``-ESHUTDOWN`` after queue destruction starts.
+
+.. c:function:: int work_queue_next_wq( \
+               FAR struct kwork_wqueue_s *wqueue, \
+               FAR struct work_s *work, worker_t worker, FAR void *arg, \
+               clock_t delay)
+
+  Queue the next invocation relative to the work structure's previous
+  expiration time. This avoids accumulating callback execution time in a
+  periodic schedule. It is normally called from the work callback.
+
+  :return: Zero on success, ``-EINVAL`` for invalid arguments, or
+    ``-ESHUTDOWN`` after queue destruction starts.
+
 .. c:function:: int work_cancel(int qid, FAR struct work_s *work)
 
   Cancel previously queued work. This removes work
@@ -240,10 +308,36 @@ Work Queue Interfaces
   :param work: The previously queued work structure to cancel.
 
   :return: Zero is returned on success; a negated ``errno`` is returned on
-    failure.
+    failure. Cancelling work that is not queued is a successful no-op.
 
-    -  ``ENOENT``: There is no such work queued.
     -  ``EINVAL``: An invalid work queue was specified.
+
+.. c:function:: int work_cancel_wq(FAR struct kwork_wqueue_s *wqueue, \
+               FAR struct work_s *work)
+
+  Cancel pending work on a custom queue. Cancelling work that is not
+  queued is a successful no-op.
+
+  :return: Zero on success or ``-EINVAL`` for an invalid argument.
+
+.. c:function:: int work_cancel_sync_wq( \
+               FAR struct kwork_wqueue_s *wqueue, \
+               FAR struct work_s *work)
+
+  Cancel pending work and wait for callbacks already using the same work
+  structure to finish. If called from that work's own callback, the caller
+  is excluded from the wait to avoid self-deadlock.
+
+  This interface must only be called from task context.
+
+  :return: Zero on success or ``-EINVAL`` for an invalid argument.
+
+.. c:function:: int work_queue_priority_wq( \
+               FAR struct kwork_wqueue_s *wqueue)
+
+  Return the common scheduling priority of a custom queue's worker pool.
+
+  :return: The worker priority on success or a negated errno on failure.
 
 .. c:function:: int work_signal(int qid)
 
@@ -295,4 +389,3 @@ Work Queue Interfaces
 
   :param reqprio: Previously requested minimum worker thread
     priority to be "unboosted".
-
