@@ -27,3 +27,17 @@ if(CONFIG_LIBC_FDT)
 endif()
 
 target_sources(board PRIVATE ${SRCS})
+
+if(CONFIG_ETC_ROMFS AND CONFIG_SYSTEM_NXINIT)
+  nuttx_add_romfs(
+    NAME
+    etc
+    MOUNTPOINT
+    etc
+    RCSRCS
+    etc/init.d/init.rc
+    PATH
+    ${CMAKE_CURRENT_BINARY_DIR}/etc)
+
+  target_link_libraries(board PRIVATE romfs_etc)
+endif()
