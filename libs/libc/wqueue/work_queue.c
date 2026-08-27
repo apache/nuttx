@@ -52,10 +52,8 @@
  *
  *   The work structure is allocated by caller, but completely managed by
  *   the work queue logic.  The caller should never modify the contents of
- *   the work queue structure; the caller should not call work_qqueue()
- *   again until either (1) the previous work has been performed and removed
- *   from the queue, or (2) work_cancel() has been called to cancel the work
- *   and remove it from the work queue.
+ *   the work queue structure.  Calling work_qqueue() while the work is
+ *   pending on the same queue cancels and replaces the pending instance.
  *
  * Input Parameters:
  *   wqueue - The work queue
@@ -63,7 +61,7 @@
  *   worker - The worker callback to be invoked.  The callback will be
  *            invoked on the worker thread of execution.
  *   arg    - The argument that will be passed to the worker callback when
- *            int is invoked.
+ *            it is invoked.
  *   delay  - Delay (in clock ticks) from the time queue until the worker
  *            is invoked. Zero means to perform the work immediately.
  *
@@ -74,21 +72,57 @@
 
 static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
                        FAR struct work_s *work, worker_t worker,
-                       FAR void *arg, clock_t delay)
+                       FAR void *arg, clock_t delay, bool period)
 {
   FAR struct work_s *curr;
   FAR struct work_s *head;
-  int semcount;
+  bool wake = false;
+  int ret;
+
+  if (wqueue == NULL || work == NULL || worker == NULL ||
+      delay < 0 || delay > WDOG_MAX_DELAY)
+    {
+      return -EINVAL;
+    }
 
   /* Get exclusive access to the work queue */
 
-  while (nxmutex_lock(&wqueue->lock) < 0);
+  do
+    {
+      ret = nxmutex_lock(&wqueue->lock);
+    }
+  while (ret < 0);
+
+  if (wqueue->exit)
+    {
+      nxmutex_unlock(&wqueue->lock);
+      return -ESHUTDOWN;
+    }
+
+  /* Remove a previous pending instance before requeueing it. */
+
+  if (work->worker != NULL)
+    {
+      wake = work_remove(wqueue, work);
+    }
 
   /* Initialize the work structure */
 
-  work->worker = worker;          /* Work callback. non-NULL means queued */
-  work->arg    = arg;             /* Callback argument */
-  work->qtime  = clock() + delay; /* Delay until work performed */
+  work->worker = worker; /* Work callback. non-NULL means queued */
+  work->arg    = arg;    /* Callback argument */
+
+  if (period)
+    {
+      work->qtime += delay;
+    }
+  else if (delay > 0)
+    {
+      work->qtime = clock() + delay + 1;
+    }
+  else
+    {
+      work->qtime = clock();
+    }
 
   /* Insert the work into the wait queue sorted by the expired time. */
 
@@ -111,17 +145,13 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
 
   list_add_before(&curr->node, &work->node);
 
-  /* If the current work is the head of the wait queue.
-   * We should wake up the worker thread.
+  /* Wake if this work becomes the new head.  Immediate work may be queued
+   * behind other ready work, so wake another worker in the pool as well.
    */
 
-  if (curr == head)
+  if (wake || delay == 0 || curr == head)
     {
-      nxsem_get_value(&wqueue->wake, &semcount);
-      if (semcount < 1)
-        {
-          nxsem_post(&wqueue->wake);
-        }
+      work_wake(wqueue);
     }
 
   nxmutex_unlock(&wqueue->lock);
@@ -152,7 +182,7 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
  *   worker - The worker callback to be invoked.  The callback will be
  *            invoked on the worker thread of execution.
  *   arg    - The argument that will be passed to the worker callback when
- *            int is invoked.
+ *            it is invoked.
  *   delay  - Delay (in clock ticks) from the time queue until the worker
  *            is invoked. Zero means to perform the work immediately.
  *
@@ -166,16 +196,56 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
 {
   if (qid == USRWORK)
     {
-      /* Is there already pending work? */
-
-      work_cancel(qid, work);
-
-      return work_qqueue(&g_usrwork, work, worker, arg, delay);
+      return work_qqueue(&g_usrwork, work, worker, arg, delay, false);
     }
   else
     {
       return -EINVAL;
     }
 }
+
+/****************************************************************************
+ * Name: work_queue_wq
+ *
+ * Description:
+ *   Queue work on a user-mode custom work queue.  This function must only
+ *   be called from task context.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_PTHREAD
+int work_queue_wq(FAR struct kwork_wqueue_s *handle,
+                  FAR struct work_s *work, worker_t worker,
+                  FAR void *arg, clock_t delay)
+{
+  return work_qqueue((FAR struct usr_wqueue_s *)handle, work,
+                     worker, arg, delay, false);
+}
+#endif
+
+/****************************************************************************
+ * Name: work_queue_next/work_queue_next_wq
+ ****************************************************************************/
+
+int work_queue_next(int qid, FAR struct work_s *work, worker_t worker,
+                    FAR void *arg, clock_t delay)
+{
+  if (qid == USRWORK)
+    {
+      return work_qqueue(&g_usrwork, work, worker, arg, delay, true);
+    }
+
+  return -EINVAL;
+}
+
+#ifndef CONFIG_DISABLE_PTHREAD
+int work_queue_next_wq(FAR struct kwork_wqueue_s *handle,
+                       FAR struct work_s *work, worker_t worker,
+                       FAR void *arg, clock_t delay)
+{
+  return work_qqueue((FAR struct usr_wqueue_s *)handle, work,
+                     worker, arg, delay, true);
+}
+#endif
 
 #endif /* CONFIG_LIBC_USRWORK && !__KERNEL__ */
