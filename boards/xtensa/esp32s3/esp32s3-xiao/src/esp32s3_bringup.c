@@ -47,6 +47,10 @@
 #  include "espressif/esp_hr_timer.h"
 #endif
 
+#ifdef CONFIG_ESP32S3_I2C
+#  include "esp32s3_i2c.h"
+#endif
+
 #include "esp32s3-xiao.h"
 
 #ifdef CONFIG_USERLED
@@ -116,6 +120,28 @@ int esp32s3_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_I2C_DRIVER
+  /* Configure I2C peripheral interfaces */
+
+  ret = board_i2c_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize I2C driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_LSM6DS3TRC
+  /* Try to register the LSM6DS3TR-C device on I2C0 (D4/D5 = SDA/SCL) */
+
+  ret = board_lsm6ds3trc_initialize(0, ESP32S3_I2C0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "Failed to initialize LSM6DS3TR-C driver for I2C0: %d\n",
+             ret);
     }
 #endif
 
