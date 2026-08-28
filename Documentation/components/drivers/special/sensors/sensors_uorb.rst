@@ -559,4 +559,5 @@ Implemented Drivers
 - :doc:`sht4x`
 - :doc:`tmp112`
 - :doc:`lsm6dso32`
+- :doc:`lsm6ds3trc`
 - wtgahrs2

@@ -39,6 +39,7 @@ tool for monitoring sensor activity at runtime.
     sensors/sht4x.rst
     sensors/tmp112.rst
     sensors/lsm6dso32.rst
+    sensors/lsm6ds3trc.rst
     sensors/lis2mdl.rst
     sensors/l86xxx.rst
     sensors/gnss_lowerhalf.rst
