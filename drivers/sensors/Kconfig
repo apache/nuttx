@@ -1074,6 +1074,49 @@ config SENSORS_LSM6DSO32_GYRO_ORB_BUFSIZE
 
 endif # SENSORS_LSM6DSO32
 
+config SENSORS_LSM6DS3TRC
+	bool "STM LSM6DS3TR-C support"
+	default n
+	select I2C
+	select SCHED_HPWORK
+	---help---
+		Enable uORB driver support for the STM LSM6DS3TR-C 6-axis IMU
+		over I2C. Needs the high-priority work queue even in kthread
+		polling mode: the driver's interrupt handlers reference it
+		unconditionally (they're only dead code until a future phase wires
+		up INT1/INT2).
+
+if SENSORS_LSM6DS3TRC
+
+config SENSORS_LSM6DS3TRC_I2C_FREQUENCY
+	int "LSM6DS3TR-C I2C frequency"
+	default 400000
+	range 1 400000
+	---help---
+		The I2C frequency used to communicate with the LSM6DS3TR-C.
+
+config SENSORS_LSM6DS3TRC_THREAD_STACKSIZE
+	int "LSM6DS3TR-C worker thread stack size"
+	default 1024
+	---help---
+		The stack size for the worker threads that perform measurements.
+
+config SENSORS_LSM6DS3TRC_ACCEL_ORB_BUFSIZE
+	int "LSM6DS3TR-C accelerometer uORB buffer size"
+	default 10
+	range 0 500
+	---help---
+		The circular buffer size for the accelerometer uORB measurements
+
+config SENSORS_LSM6DS3TRC_GYRO_ORB_BUFSIZE
+	int "LSM6DS3TR-C gyroscope uORB buffer size"
+	default 10
+	range 0 500
+	---help---
+		The circular buffer size for the gyroscope uORB measurements
+
+endif # SENSORS_LSM6DS3TRC
+
 config SENSORS_LSM9DS1
 	bool "STMicro LSM9DS1 support"
 	default n
