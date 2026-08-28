@@ -157,6 +157,43 @@ RUN mkdir -p gcc-arm-none-eabi && \
   | tar -C gcc-arm-none-eabi --strip-components 1 -xJ
 
 ###############################################################################
+# Build image for tool required by FDPIC module builds
+###############################################################################
+FROM nuttx-toolchain-base AS nuttx-toolchain-fdpic
+# Build the arm-uclinuxfdpiceabi binutils.  The stock arm-none-eabi compiler
+# emits correct FDPIC objects, but its assembler and linker cannot handle
+# them: ld is configured with the armelf emulation alone and links an FDPIC
+# object into an ordinary shared object, turning every import into an
+# R_ARM_JUMP_SLOT where the ABI wants an R_ARM_FUNCDESC_VALUE.  No
+# distribution packages this target, so it is built here.
+RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq \
+  bison \
+  flex \
+  g++ \
+  gcc \
+  make \
+  texinfo \
+  zlib1g-dev
+
+RUN mkdir -p /tools/fdpic-tools/source && \
+  curl -s -L --fail "https://sourceware.org/pub/binutils/releases/binutils-2.43.tar.xz" \
+  | tar -C /tools/fdpic-tools/source --strip-components=1 -xJ
+
+# MAKEINFO=true because the info pages are of no use here and building them
+# is the slowest part of a binutils build.
+
+RUN mkdir -p /tools/fdpic-tools/build && cd /tools/fdpic-tools/build && \
+  /tools/fdpic-tools/source/configure \
+  --target=arm-uclinuxfdpiceabi \
+  --prefix=/tools/binutils-arm-uclinuxfdpiceabi \
+  --disable-nls \
+  --disable-werror \
+  --with-system-zlib && \
+  make -j$(nproc) MAKEINFO=true && make install-strip MAKEINFO=true && \
+  rm -rf /tools/binutils-arm-uclinuxfdpiceabi/share && \
+  cd /tools && rm -rf fdpic-tools
+
+###############################################################################
 # Build image for tool required by ARM64 builds
 ###############################################################################
 FROM nuttx-toolchain-base AS nuttx-toolchain-arm64
@@ -469,6 +506,10 @@ ENV PATH="/tools/gcc-arm-none-eabi/bin:$PATH"
 # ARM64 toolchain
 COPY --from=nuttx-toolchain-arm64 /tools/gcc-aarch64-none-elf/ gcc-aarch64-none-elf/
 ENV PATH="/tools/gcc-aarch64-none-elf/bin:$PATH"
+
+# FDPIC module toolchain
+COPY --from=nuttx-toolchain-fdpic /tools/binutils-arm-uclinuxfdpiceabi/ binutils-arm-uclinuxfdpiceabi/
+ENV PATH="/tools/binutils-arm-uclinuxfdpiceabi/bin:$PATH"
 
 # AVR32 toolchain
 COPY --from=nuttx-toolchain-avr32 /tools/gcc-avr32-gnu/ gcc-avr32-gnu/
