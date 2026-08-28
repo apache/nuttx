@@ -6,8 +6,18 @@ Prepare
 
 - Check fastboot tool(Host): :code:`fastboot --version`
 - Download fastboot tool and install(Host): `platform-tools <https://developer.android.com/tools/releases/platform-tools>`__
-- Enable the fastbootd application(Device): :code:`CONFIG_USBFASTBOOT=y` and :code:`CONFIG_SYSTEM_FASTBOOTD=y`
+- Enable the fastbootd application(Device): :code:`CONFIG_SYSTEM_FASTBOOTD=y`
+- Enable at least one transport: USB (:code:`CONFIG_SYSTEM_FASTBOOTD_USB=y`), TCP (:code:`CONFIG_SYSTEM_FASTBOOTD_TCP=y`), or Serial (:code:`CONFIG_SYSTEM_FASTBOOTD_SERIAL=y`)
 - Start fastbootd(Device): :code:`fastbootd &`
+
+Transports
+==========================
+
+The fastboot daemon supports multiple transport backends concurrently. Each transport can be individually enabled via Kconfig.
+
+- **USB**: Native USB fastboot protocol. Requires :code:`CONFIG_USBFASTBOOT=y`. Host: :code:`fastboot -s <SN> <command>` or just :code:`fastboot <command>`
+- **TCP**: Fastboot TCP v1 protocol on port 5554. Requires :code:`CONFIG_NET_TCP=y`. Host: :code:`fastboot -s tcp:<device-ip>[:port] <command>`
+- **Serial**: UART transport using TCP v1 wire framing. Use ``socat`` on the host to bridge the serial port to a TCP socket. Host: :code:`fastboot -s tcp:<host>:<socat-port> <command>`
 
 Commands
 ==========================
@@ -31,6 +41,7 @@ Examples
 - Exit fastboot mode: :code:`fastboot reboot`
 - Flash app.bin to partition /dev/app: :code:`fastboot flash app ./app.bin`
 - Erase partition /dev/userdata: :code:`fastboot erase userdata`
-- Dump partition /dev/app: :code:`fastboot filedump /dev/app` and then :code:`fastboot get_staged ./dump_app.bin`
+- Dump partition /dev/app: :code:`fastboot oem filedump /dev/app` and then :code:`fastboot get_staged ./dump_app.bin`
 - Dump memory from 0x44000000 to 0x440b6c00: :code:`fastboot oem memdump 0x44000000 0xb6c00` and then :code:`fastboot get_staged ./mem_44000000_440b6c00.bin`
 - Create RAM disk "/dev/ram10" of size 320KB: :code:`fastboot oem shell "mkrd -m 10 -s 512 640"`
+- Serial transport via socat: :code:`sudo socat -t 0 PTY,link=/dev/ttyFB,raw,echo=0 TCP-LISTEN:5556,reuseaddr,fork,nodelay &` then :code:`fastboot -s tcp:127.0.0.1:5556 getvar version`
