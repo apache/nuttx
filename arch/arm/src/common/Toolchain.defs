@@ -638,11 +638,29 @@ ifeq ($(CONFIG_PIC),y)
   # after including this file, which would discard the flag.
 
   ARCHCFLAGS += --fixed-r9
+
+ifeq ($(CONFIG_FDPIC),y)
+  # An FDPIC module is a shared object whose two segments the loader places
+  # independently.  The stock compiler emits correct FDPIC objects for both C
+  # and C++, so only the link needs the arm-uclinuxfdpiceabi linker: the
+  # stock one carries the armelf emulation alone and would turn every import
+  # into a jump slot where the ABI wants a function descriptor.
+
+  FDPIC_CROSSDEV ?= arm-uclinuxfdpiceabi-
+  MODULELD = $(FDPIC_CROSSDEV)ld
+
+  CELFFLAGS += -mfdpic -fPIC -Wa,--noexecstack
+  CXXELFFLAGS += -mfdpic -fPIC -Wa,--noexecstack
+
+  LDELFFLAGS += -m armelf_linux_fdpiceabi -shared -z now
+else
   CELFFLAGS += $(PICFLAGS) -mpic-register=r9
   CXXELFFLAGS += $(PICFLAGS) -mpic-register=r9
 
   # Generate an executable elf, need to ignore undefined symbols
   LDELFFLAGS += --unresolved-symbols=ignore-in-object-files --emit-relocs
+endif
+
 else
   ifneq ($(CONFIG_BINFMT_ELF_EXECUTABLE),y)
     LDELFFLAGS += -r
