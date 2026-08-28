@@ -640,6 +640,7 @@ static int hostfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           case FIOC_FILEPATH:
             {
               FAR char *path = (FAR char *)(uintptr_t)arg;
+
               ret = inode_getpath(filep->f_inode, path, PATH_MAX);
               if (ret >= 0)
                 {

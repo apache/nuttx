@@ -158,6 +158,7 @@ int host_close(int fd)
   /* Just call the close routine */
 
   int ret = _close(fd);
+
   if (ret == -1)
     {
       ret = -errno;
@@ -175,6 +176,7 @@ nuttx_ssize_t host_read(int fd, void *buf, nuttx_size_t count)
   /* Just call the read routine */
 
   nuttx_ssize_t ret = _read(fd, buf, count);
+
   if (ret == -1)
     {
       ret = -errno;
@@ -192,6 +194,7 @@ nuttx_ssize_t host_write(int fd, const void *buf, nuttx_size_t count)
   /* Just call the write routine */
 
   nuttx_ssize_t ret = _write(fd, buf, count);
+
   if (ret == -1)
     {
       ret = -errno;
@@ -210,6 +213,7 @@ nuttx_off_t host_lseek(int fd, nuttx_off_t pos, nuttx_off_t offset,
   /* Just call the lseek routine */
 
   nuttx_off_t ret = _lseek(fd, offset, whence);
+
   if (ret == (nuttx_off_t)-1)
     {
       ret = -errno;
@@ -244,6 +248,7 @@ void host_sync(int fd)
 int host_dup(int fd)
 {
   int ret = _dup(fd);
+
   if (ret < 0)
     {
       ret = -errno;
@@ -376,6 +381,7 @@ int host_statfs(const char *path, struct nuttx_statfs_s *buf)
 int host_unlink(const char *pathname)
 {
   int ret = _unlink(pathname);
+
   if (ret < 0)
     {
       ret = -errno;
@@ -393,6 +399,7 @@ int host_mkdir(const char *pathname, int mode)
   /* Just call the host's mkdir routine */
 
   int ret = _mkdir(pathname, mode);
+
   if (ret < 0)
     {
       ret = -errno;
@@ -408,6 +415,7 @@ int host_mkdir(const char *pathname, int mode)
 int host_rmdir(const char *pathname)
 {
   int ret = _rmdir(pathname);
+
   if (ret < 0)
     {
       ret = -errno;
