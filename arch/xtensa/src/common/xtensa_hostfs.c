@@ -166,6 +166,7 @@ int host_fstat(int fd, struct stat *buf)
 
   off_t saved_off = host_lseek(fd, 0, 0, SEEK_CUR);
   off_t size = host_lseek(fd, 0, 0, SEEK_END);
+
   host_lseek(fd, 0, saved_off, SEEK_SET);
 
   memset(buf, 0, sizeof(*buf));
@@ -231,9 +232,11 @@ int host_rename(const char *oldpath, const char *newpath)
 int host_stat(const char *path, struct stat *buf)
 {
   int ret = host_open(path, O_RDONLY, 0);
+
   if (ret >= 0)
     {
       int fd = ret;
+
       ret = host_fstat(fd, buf);
       host_close(fd);
     }

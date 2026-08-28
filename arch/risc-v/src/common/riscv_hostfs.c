@@ -60,9 +60,11 @@ static long host_call(unsigned int nbr, void *parm, size_t size)
 #endif
 
   long ret = smh_call(nbr, parm);
+
   if (ret < 0)
     {
       long err = smh_call(HOST_ERROR, NULL);
+
       if (err > 0)
         {
           ret = -err;
@@ -98,6 +100,7 @@ static int host_flags_to_mode(int flags)
   };
 
   int i;
+
   for (i = 0; i < nitems(modeflags); i++)
     {
       if ((modemasks & flags) == modeflags[i])
@@ -137,6 +140,7 @@ int host_open(const char *pathname, int flags, int mode)
 int host_close(int fd_)
 {
   long fd = fd_;
+
   return host_call(HOST_CLOSE, &fd, sizeof(long));
 }
 
@@ -223,7 +227,7 @@ off_t host_lseek(int fd, off_t pos, off_t offset, int whence)
       ret = host_call(HOST_SEEK, &seek, sizeof(seek));
       if (ret >= 0)
         {
-            ret = offset;
+          ret = offset;
         }
     }
 
@@ -345,9 +349,11 @@ int host_rename(const char *oldpath, const char *newpath)
 int host_stat(const char *path, struct stat *buf)
 {
   int ret = host_open(path, O_RDONLY, 0);
+
   if (ret >= 0)
     {
       int fd = ret;
+
       ret = host_fstat(fd, buf);
       host_close(fd);
     }

@@ -297,9 +297,11 @@ static int rpmsgfs_init_handler(FAR struct rpmsg_endpoint *ept,
                                    uint32_t src, FAR void *priv)
 {
   FAR struct rpmsgfs_s *ept_priv = ept->priv;
+
   rpmsg_post(&ept_priv->ept, &ept_priv->wait);
   return 0;
 }
+
 #ifdef CONFIG_FS_LINKS
 static int rpmsgfs_readlink_handler(FAR struct rpmsg_endpoint *ept,
                                     FAR void *data, size_t len,
@@ -340,6 +342,7 @@ static FAR void *rpmsgfs_get_tx_payload_buffer(FAR struct rpmsgfs_s *priv,
 static void rpmsgfs_ns_bound(struct rpmsg_endpoint *ept)
 {
   FAR struct rpmsgfs_s *priv = ept->priv;
+
   rpmsg_post(&priv->ept, &priv->wait);
 }
 

@@ -314,6 +314,7 @@ int host_open(const char *pathname, int flags, int mode)
   int mapflags = host_oflags_convert(flags);
 
   int ret = open(pathname, mapflags, mode);
+
   if (ret == -1)
     {
       ret = host_errno_convert(-errno);
@@ -331,6 +332,7 @@ int host_close(int fd)
   /* Just call the close routine */
 
   int ret = close(fd);
+
   if (ret == -1)
     {
       ret = host_errno_convert(-errno);
@@ -348,6 +350,7 @@ nuttx_ssize_t host_read(int fd, void *buf, nuttx_size_t count)
   /* Just call the read routine */
 
   nuttx_ssize_t ret = read(fd, buf, count);
+
   if (ret == -1)
     {
       ret = host_errno_convert(-errno);
@@ -365,6 +368,7 @@ nuttx_ssize_t host_write(int fd, const void *buf, nuttx_size_t count)
   /* Just call the write routine */
 
   nuttx_ssize_t ret = write(fd, buf, count);
+
   if (ret == -1)
     {
       ret = host_errno_convert(-errno);
@@ -383,6 +387,7 @@ nuttx_off_t host_lseek(int fd, nuttx_off_t pos, nuttx_off_t offset,
   /* Just call the lseek routine */
 
   nuttx_off_t ret = lseek(fd, offset, whence);
+
   if (ret == (nuttx_off_t)-1)
     {
       ret =  host_errno_convert(-errno);
@@ -439,6 +444,7 @@ void host_sync(int fd)
 int host_dup(int fd)
 {
   int ret = dup(fd);
+
   if (ret < 0)
     {
       ret = host_errno_convert(-errno);
@@ -538,6 +544,7 @@ int host_fchstat(int fd, const struct nuttx_stat_s *buf, int flags)
 int host_ftruncate(int fd, nuttx_off_t length)
 {
   int ret = ftruncate(fd, length);
+
   if (ret < 0)
     {
       ret = host_errno_convert(-errno);
@@ -636,6 +643,7 @@ void host_rewinddir(void *dirp)
 int host_closedir(void *dirp)
 {
   int ret = closedir(dirp);
+
   if (ret < 0)
     {
       ret = host_errno_convert(-errno);
@@ -682,6 +690,7 @@ int host_statfs(const char *path, struct nuttx_statfs_s *buf)
 int host_unlink(const char *pathname)
 {
   int ret = unlink(pathname);
+
   if (ret < 0)
     {
       ret = host_errno_convert(-errno);
@@ -699,6 +708,7 @@ int host_mkdir(const char *pathname, int mode)
   /* Just call the host's mkdir routine */
 
   int ret = mkdir(pathname, mode);
+
   if (ret < 0)
     {
       ret = host_errno_convert(-errno);
@@ -714,6 +724,7 @@ int host_mkdir(const char *pathname, int mode)
 int host_rmdir(const char *pathname)
 {
   int ret = rmdir(pathname);
+
   if (ret < 0)
     {
       ret = host_errno_convert(-errno);
@@ -729,6 +740,7 @@ int host_rmdir(const char *pathname)
 int host_rename(const char *oldpath, const char *newpath)
 {
   int ret = rename(oldpath, newpath);
+
   if (ret < 0)
     {
       ret = host_errno_convert(-errno);
@@ -829,6 +841,7 @@ int host_chstat(const char *path, const struct nuttx_stat_s *buf, int flags)
 int host_link(const char *path1, const char *path2)
 {
   int ret = link(path1, path2);
+
   if (ret < 0)
     {
       ret = -errno;
@@ -844,6 +857,7 @@ int host_link(const char *path1, const char *path2)
 int host_symlink(const char *target, const char *linkpath)
 {
   int ret = symlink(target, linkpath);
+
   if (ret < 0)
     {
       ret = -errno;
@@ -860,6 +874,7 @@ nuttx_ssize_t host_readlink(const char *path, char *buf,
                             nuttx_size_t bufsize)
 {
   ssize_t ret = readlink(path, buf, bufsize);
+
   if (ret < 0)
     {
       ret = -errno;
