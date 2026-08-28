@@ -149,7 +149,15 @@ function(nuttx_add_application)
         if(TARGET STARTUP_OBJS)
           add_dependencies(${TARGET} STARTUP_OBJS)
         endif()
-        if(NOT "${CMAKE_LD}" MATCHES "gcc$")
+        # A module may need a different linker from the one that links the
+        # firmware: an FDPIC module does, because the stock linker cannot
+        # produce one.  CMAKE_ELF_LD is that linker, and it is the ordinary one
+        # unless the architecture says otherwise.
+
+        if(NOT CMAKE_ELF_LD)
+          set(CMAKE_ELF_LD ${CMAKE_LD})
+        endif()
+        if(NOT "${CMAKE_ELF_LD}" MATCHES "gcc$")
           set(USE_LINKER True)
         endif()
         if(STACKSIZE)
@@ -179,7 +187,7 @@ function(nuttx_add_application)
           POST_BUILD
           COMMAND
             # add default link option
-            ${CMAKE_LD} -T ${NUTTX_BINARY_DIR}/gnu-elf.ld
+            ${CMAKE_ELF_LD} -T ${NUTTX_BINARY_DIR}/gnu-elf.ld
             # add global MOD link option if dynlib link
             $<$<BOOL:${DYNLIB_ELF_MODE}>:$<TARGET_PROPERTY:nuttx_global,NUTTX_MOD_APP_LINK_OPTIONS>>
             # add global ELF link option if m&kernel link
