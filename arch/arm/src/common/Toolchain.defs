@@ -649,6 +649,22 @@ ifeq ($(CONFIG_FDPIC),y)
   FDPIC_CROSSDEV ?= arm-uclinuxfdpiceabi-
   MODULELD = $(FDPIC_CROSSDEV)ld
 
+  # Say which linker is missing rather than letting make report a command it
+  # cannot run.  The report is deferred to the link itself rather than made
+  # here, so that a tree configured for FDPIC on a host without the linker can
+  # still be cleaned and reconfigured.
+
+  FDPIC_LD_FOUND := $(shell command -v $(MODULELD) 2> /dev/null)
+
+  ifeq ($(FDPIC_LD_FOUND),)
+    FDPIC_NO_LD_MSG = CONFIG_FDPIC needs $(FDPIC_CROSSDEV)ld, which is not \
+      on PATH.  It is in the NuttX CI image, and \
+      tools/ci/docker/linux/Dockerfile shows how it is built.  Set \
+      FDPIC_CROSSDEV to use a different prefix.
+
+    MODULELD = $(SHELL) -c 'echo "ERROR: $(FDPIC_NO_LD_MSG)" 1>&2; exit 1' --
+  endif
+
   CELFFLAGS += -mfdpic -fPIC -Wa,--noexecstack
   CXXELFFLAGS += -mfdpic -fPIC -Wa,--noexecstack
 
