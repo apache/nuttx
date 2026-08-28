@@ -389,6 +389,7 @@ int esp32s3_bringup(void)
 
 #ifdef CONFIG_ESPRESSIF_TEMP
   struct esp_temp_sensor_config_t cfg = TEMPERATURE_SENSOR_CONFIG(10, 50);
+
   ret = esp_temperature_sensor_initialize(cfg);
   if (ret < 0)
     {
@@ -645,6 +646,7 @@ int esp32s3_bringup(void)
   };
 
   struct dac_dev_s *dev = esp_sdminitialize(config);
+
   ret = dac_register("/dev/dac0", dev);
   if (ret < 0)
     {

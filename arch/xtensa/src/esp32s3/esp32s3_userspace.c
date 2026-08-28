@@ -349,8 +349,9 @@ static void pms_enable_interrupts(void)
   esp32s3_wcl_set_vecbase(PMS_WORLD_1, UIRAM_START);
 
   extern void _user_exception_vector(void);
-  esp32s3_wcl_set_world0_entry(1, (uintptr_t)_user_exception_vector);
   extern void _xtensa_level3_vector(void);
+
+  esp32s3_wcl_set_world0_entry(1, (uintptr_t)_user_exception_vector);
   esp32s3_wcl_set_world0_entry(2, (uintptr_t)_xtensa_level3_vector);
 
   /* Enable IRAM0 permission violation interrupt */
@@ -552,6 +553,7 @@ static IRAM_ATTR void pms_configure_flash_cache_access(void)
   /* Invalidate Cache */
 
   uint32_t cache_state = esp32s3_dcache_suspend(true);
+
   esp32s3_icache_invalidate_all();
 
   size_t partition_offset = USER_IMAGE_OFFSET;
