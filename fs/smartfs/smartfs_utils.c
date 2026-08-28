@@ -331,7 +331,9 @@ int smartfs_unmount(FAR struct smartfs_mountpt_s *fs)
       /* Test if this FS's blkdriver matches ours (it could be us) */
 
       if (nextfs->fs_blkdriver == fs->fs_blkdriver)
-        count++;
+        {
+          count++;
+        }
 
       /* Test if this entry is our's */
 
@@ -411,7 +413,7 @@ int smartfs_unmount(FAR struct smartfs_mountpt_s *fs)
 #else
   if (fs->fs_blkdriver)
     {
-     inode = fs->fs_blkdriver;
+      inode = fs->fs_blkdriver;
       if (inode)
         {
           if (inode->u.i_bops && inode->u.i_bops->close)
@@ -1528,20 +1530,20 @@ off_t smartfs_seek_internal(FAR struct smartfs_mountpt_s *fs,
   /* Calculate the file position to seek to based on current position */
 
   switch (whence)
-  {
-    case SEEK_SET:
-    default:
-      newpos = offset;
-      break;
+    {
+      case SEEK_SET:
+      default:
+        newpos = offset;
+        break;
 
-    case SEEK_CUR:
-      newpos = sf->filepos + offset;
-      break;
+      case SEEK_CUR:
+        newpos = sf->filepos + offset;
+        break;
 
-    case SEEK_END:
-      newpos = sf->entry.datlen + offset;
-      break;
-  }
+      case SEEK_END:
+        newpos = sf->entry.datlen + offset;
+        break;
+    }
 
   /* Ensure newpos is in range */
 
