@@ -42,151 +42,89 @@ static unsigned int g_mpu_set;
  * Private Functions
  ****************************************************************************/
 
-static Ifx_CPU_DPRE get_dpre_value(unsigned int set)
+static uint32_t get_dpre_value(unsigned int set)
 {
-  Ifx_CPU_DPRE dpre_value;
-
   switch (set)
     {
+#if CONFIG_ARCH_MPU_NSETS > 0
       case 0:
-        dpre_value.U = __mfcr(CPU_DPRE_0);
-        break;
+        return tricore_mfcr(CPU_DPRE_0);
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 1
       case 1:
-        dpre_value.U = __mfcr(CPU_DPRE_1);
-        break;
+        return tricore_mfcr(CPU_DPRE_1);
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 2
       case 2:
-        dpre_value.U = __mfcr(CPU_DPRE_2);
-        break;
+        return tricore_mfcr(CPU_DPRE_2);
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 3
       case 3:
-        dpre_value.U = __mfcr(CPU_DPRE_3);
-        break;
+        return tricore_mfcr(CPU_DPRE_3);
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 4
       case 4:
-        dpre_value.U = __mfcr(CPU_DPRE_4);
-        break;
+        return tricore_mfcr(CPU_DPRE_4);
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 5
       case 5:
-        dpre_value.U = __mfcr(CPU_DPRE_5);
-        break;
-#ifndef CONFIG_ARCH_CHIP_TC3XX
+        return tricore_mfcr(CPU_DPRE_5);
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 6
       case 6:
-        dpre_value.U = __mfcr(CPU_DPRE_6);
-        break;
+        return tricore_mfcr(CPU_DPRE_6);
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 7
       case 7:
-        dpre_value.U = __mfcr(CPU_DPRE_7);
-        break;
+        return tricore_mfcr(CPU_DPRE_7);
 #endif
       default:
-        dpre_value.U = 0;
-        break;
+        return 0;
     }
-
-  return dpre_value;
 }
 
-static void set_dpre_value(unsigned int set, Ifx_CPU_DPRE dpre_value)
+static void set_dpre_value(unsigned int set, uint32_t dpre_value)
 {
   switch (set)
     {
+#if CONFIG_ARCH_MPU_NSETS > 0
       case 0:
-        __mtcr(CPU_DPRE_0, dpre_value.U);
-        break;
-      case 1:
-        __mtcr(CPU_DPRE_1, dpre_value.U);
-        break;
-      case 2:
-        __mtcr(CPU_DPRE_2, dpre_value.U);
-        break;
-      case 3:
-        __mtcr(CPU_DPRE_3, dpre_value.U);
-        break;
-      case 4:
-        __mtcr(CPU_DPRE_4, dpre_value.U);
-        break;
-      case 5:
-        __mtcr(CPU_DPRE_5, dpre_value.U);
-        break;
-#ifndef CONFIG_ARCH_CHIP_TC3XX
-      case 6:
-        __mtcr(CPU_DPRE_6, dpre_value.U);
-        break;
-      case 7:
-        __mtcr(CPU_DPRE_7, dpre_value.U);
+        tricore_mtcr(CPU_DPRE_0, dpre_value);
         break;
 #endif
-      default:
-        break;
-    }
-
-  UP_ISB();
-}
-
-static Ifx_CPU_DPWE get_dpwe_value(unsigned int set)
-{
-  Ifx_CPU_DPWE dpwe_value;
-
-  switch (set)
-    {
-      case 0:
-        dpwe_value.U = __mfcr(CPU_DPWE_0);
-        break;
+#if CONFIG_ARCH_MPU_NSETS > 1
       case 1:
-        dpwe_value.U = __mfcr(CPU_DPWE_1);
-        break;
-      case 2:
-        dpwe_value.U = __mfcr(CPU_DPWE_2);
-        break;
-      case 3:
-        dpwe_value.U = __mfcr(CPU_DPWE_3);
-        break;
-      case 4:
-        dpwe_value.U = __mfcr(CPU_DPWE_4);
-        break;
-      case 5:
-        dpwe_value.U = __mfcr(CPU_DPWE_5);
-        break;
-#ifndef CONFIG_ARCH_CHIP_TC3XX
-      case 6:
-        dpwe_value.U = __mfcr(CPU_DPWE_6);
-        break;
-      case 7:
-        dpwe_value.U = __mfcr(CPU_DPWE_7);
+        tricore_mtcr(CPU_DPRE_1, dpre_value);
         break;
 #endif
-      default:
-        dpwe_value.U = 0;
-        break;
-    }
-
-  return dpwe_value;
-}
-
-static void set_dpwe_value(unsigned int set, Ifx_CPU_DPWE dpwe_value)
-{
-  switch (set)
-    {
-      case 0:
-        __mtcr(CPU_DPWE_0, dpwe_value.U);
-        break;
-      case 1:
-        __mtcr(CPU_DPWE_1, dpwe_value.U);
-        break;
+#if CONFIG_ARCH_MPU_NSETS > 2
       case 2:
-        __mtcr(CPU_DPWE_2, dpwe_value.U);
+        tricore_mtcr(CPU_DPRE_2, dpre_value);
         break;
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 3
       case 3:
-        __mtcr(CPU_DPWE_3, dpwe_value.U);
+        tricore_mtcr(CPU_DPRE_3, dpre_value);
         break;
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 4
       case 4:
-        __mtcr(CPU_DPWE_4, dpwe_value.U);
+        tricore_mtcr(CPU_DPRE_4, dpre_value);
         break;
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 5
       case 5:
-        __mtcr(CPU_DPWE_5, dpwe_value.U);
+        tricore_mtcr(CPU_DPRE_5, dpre_value);
         break;
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 6
       case 6:
-#ifndef CONFIG_ARCH_CHIP_TC3XX
-        __mtcr(CPU_DPWE_6, dpwe_value.U);
+        tricore_mtcr(CPU_DPRE_6, dpre_value);
         break;
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 7
       case 7:
-        __mtcr(CPU_DPWE_7, dpwe_value.U);
+        tricore_mtcr(CPU_DPRE_7, dpre_value);
         break;
 #endif
       default:
@@ -196,74 +134,181 @@ static void set_dpwe_value(unsigned int set, Ifx_CPU_DPWE dpwe_value)
   UP_ISB();
 }
 
-static Ifx_CPU_CPXE get_cpxe_value(unsigned int set)
-{
-  Ifx_CPU_CPXE cpxe_value;
-
-    switch (set)
-    {
-      case 0:
-        cpxe_value.U = __mfcr(CPU_CPXE_0);
-        break;
-      case 1:
-        cpxe_value.U = __mfcr(CPU_CPXE_1);
-        break;
-      case 2:
-        cpxe_value.U = __mfcr(CPU_CPXE_2);
-        break;
-      case 3:
-        cpxe_value.U = __mfcr(CPU_CPXE_3);
-        break;
-      case 4:
-        cpxe_value.U = __mfcr(CPU_CPXE_4);
-        break;
-      case 5:
-        cpxe_value.U = __mfcr(CPU_CPXE_5);
-        break;
-#ifndef CONFIG_ARCH_CHIP_TC3XX
-      case 6:
-        cpxe_value.U = __mfcr(CPU_CPXE_6);
-        break;
-      case 7:
-        cpxe_value.U = __mfcr(CPU_CPXE_7);
-        break;
-#endif
-      default:
-        cpxe_value.U = 0;
-        break;
-    }
-
-  return cpxe_value;
-}
-
-static void set_cpxe_value(unsigned int set, Ifx_CPU_CPXE cpxe_value)
+static uint32_t get_dpwe_value(unsigned int set)
 {
   switch (set)
     {
+#if CONFIG_ARCH_MPU_NSETS > 0
       case 0:
-        __mtcr(CPU_CPXE_0, cpxe_value.U);
-        break;
+        return tricore_mfcr(CPU_DPWE_0);
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 1
       case 1:
-        __mtcr(CPU_CPXE_1, cpxe_value.U);
-        break;
+        return tricore_mfcr(CPU_DPWE_1);
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 2
       case 2:
-        __mtcr(CPU_CPXE_2, cpxe_value.U);
-        break;
+        return tricore_mfcr(CPU_DPWE_2);
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 3
       case 3:
-        __mtcr(CPU_CPXE_3, cpxe_value.U);
-        break;
+        return tricore_mfcr(CPU_DPWE_3);
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 4
       case 4:
-        __mtcr(CPU_CPXE_4, cpxe_value.U);
-        break;
+        return tricore_mfcr(CPU_DPWE_4);
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 5
       case 5:
-        __mtcr(CPU_CPXE_5, cpxe_value.U);
-        break;
-#ifndef CONFIG_ARCH_CHIP_TC3XX
+        return tricore_mfcr(CPU_DPWE_5);
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 6
       case 6:
-        __mtcr(CPU_CPXE_6, cpxe_value.U);
-        break;
+        return tricore_mfcr(CPU_DPWE_6);
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 7
       case 7:
-        __mtcr(CPU_CPXE_7, cpxe_value.U);
+        return tricore_mfcr(CPU_DPWE_7);
+#endif
+      default:
+        return 0;
+    }
+}
+
+static void set_dpwe_value(unsigned int set, uint32_t dpwe_value)
+{
+  switch (set)
+    {
+#if CONFIG_ARCH_MPU_NSETS > 0
+      case 0:
+        tricore_mtcr(CPU_DPWE_0, dpwe_value);
+        break;
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 1
+      case 1:
+        tricore_mtcr(CPU_DPWE_1, dpwe_value);
+        break;
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 2
+      case 2:
+        tricore_mtcr(CPU_DPWE_2, dpwe_value);
+        break;
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 3
+      case 3:
+        tricore_mtcr(CPU_DPWE_3, dpwe_value);
+        break;
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 4
+      case 4:
+        tricore_mtcr(CPU_DPWE_4, dpwe_value);
+        break;
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 5
+      case 5:
+        tricore_mtcr(CPU_DPWE_5, dpwe_value);
+        break;
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 6
+      case 6:
+        tricore_mtcr(CPU_DPWE_6, dpwe_value);
+        break;
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 7
+      case 7:
+        tricore_mtcr(CPU_DPWE_7, dpwe_value);
+        break;
+#endif
+      default:
+        break;
+    }
+
+  UP_ISB();
+}
+
+static uint32_t get_cpxe_value(unsigned int set)
+{
+  switch (set)
+    {
+#if CONFIG_ARCH_MPU_NSETS > 0
+      case 0:
+        return tricore_mfcr(CPU_CPXE_0);
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 1
+      case 1:
+        return tricore_mfcr(CPU_CPXE_1);
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 2
+      case 2:
+        return tricore_mfcr(CPU_CPXE_2);
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 3
+      case 3:
+        return tricore_mfcr(CPU_CPXE_3);
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 4
+      case 4:
+        return tricore_mfcr(CPU_CPXE_4);
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 5
+      case 5:
+        return tricore_mfcr(CPU_CPXE_5);
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 6
+      case 6:
+        return tricore_mfcr(CPU_CPXE_6);
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 7
+      case 7:
+        return tricore_mfcr(CPU_CPXE_7);
+#endif
+      default:
+        return 0;
+    }
+}
+
+static void set_cpxe_value(unsigned int set, uint32_t cpxe_value)
+{
+  switch (set)
+    {
+#if CONFIG_ARCH_MPU_NSETS > 0
+      case 0:
+        tricore_mtcr(CPU_CPXE_0, cpxe_value);
+        break;
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 1
+      case 1:
+        tricore_mtcr(CPU_CPXE_1, cpxe_value);
+        break;
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 2
+      case 2:
+        tricore_mtcr(CPU_CPXE_2, cpxe_value);
+        break;
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 3
+      case 3:
+        tricore_mtcr(CPU_CPXE_3, cpxe_value);
+        break;
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 4
+      case 4:
+        tricore_mtcr(CPU_CPXE_4, cpxe_value);
+        break;
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 5
+      case 5:
+        tricore_mtcr(CPU_CPXE_5, cpxe_value);
+        break;
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 6
+      case 6:
+        tricore_mtcr(CPU_CPXE_6, cpxe_value);
+        break;
+#endif
+#if CONFIG_ARCH_MPU_NSETS > 7
+      case 7:
+        tricore_mtcr(CPU_CPXE_7, cpxe_value);
         break;
 #endif
       default:
@@ -274,107 +319,153 @@ static void set_cpxe_value(unsigned int set, Ifx_CPU_CPXE cpxe_value)
 }
 
 static int get_dpr_addrass_value(unsigned int region,
-                                 Ifx_CPU_DPR_L *dpr_l,
-                                 Ifx_CPU_DPR_U *dpr_u)
+                                 uint32_t *dpr_l,
+                                 uint32_t *dpr_u)
 {
   switch (region)
     {
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 0
       case 0:
-        dpr_l->U = __mfcr(CPU_DPR0_L);
-        dpr_u->U = __mfcr(CPU_DPR0_U);
+        *dpr_l = tricore_mfcr(CPU_DPR0_L);
+        *dpr_u = tricore_mfcr(CPU_DPR0_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 1
       case 1:
-        dpr_l->U = __mfcr(CPU_DPR1_L);
-        dpr_u->U = __mfcr(CPU_DPR1_U);
+        *dpr_l = tricore_mfcr(CPU_DPR1_L);
+        *dpr_u = tricore_mfcr(CPU_DPR1_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 2
       case 2:
-        dpr_l->U = __mfcr(CPU_DPR2_L);
-        dpr_u->U = __mfcr(CPU_DPR2_U);
+        *dpr_l = tricore_mfcr(CPU_DPR2_L);
+        *dpr_u = tricore_mfcr(CPU_DPR2_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 3
       case 3:
-        dpr_l->U = __mfcr(CPU_DPR3_L);
-        dpr_u->U = __mfcr(CPU_DPR3_U);
+        *dpr_l = tricore_mfcr(CPU_DPR3_L);
+        *dpr_u = tricore_mfcr(CPU_DPR3_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 4
       case 4:
-        dpr_l->U = __mfcr(CPU_DPR4_L);
-        dpr_u->U = __mfcr(CPU_DPR4_U);
+        *dpr_l = tricore_mfcr(CPU_DPR4_L);
+        *dpr_u = tricore_mfcr(CPU_DPR4_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 5
       case 5:
-        dpr_l->U = __mfcr(CPU_DPR5_L);
-        dpr_u->U = __mfcr(CPU_DPR5_U);
+        *dpr_l = tricore_mfcr(CPU_DPR5_L);
+        *dpr_u = tricore_mfcr(CPU_DPR5_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 6
       case 6:
-        dpr_l->U = __mfcr(CPU_DPR6_L);
-        dpr_u->U = __mfcr(CPU_DPR6_U);
+        *dpr_l = tricore_mfcr(CPU_DPR6_L);
+        *dpr_u = tricore_mfcr(CPU_DPR6_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 7
       case 7:
-        dpr_l->U = __mfcr(CPU_DPR7_L);
-        dpr_u->U = __mfcr(CPU_DPR7_U);
+        *dpr_l = tricore_mfcr(CPU_DPR7_L);
+        *dpr_u = tricore_mfcr(CPU_DPR7_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 8
       case 8:
-        dpr_l->U = __mfcr(CPU_DPR8_L);
-        dpr_u->U = __mfcr(CPU_DPR8_U);
+        *dpr_l = tricore_mfcr(CPU_DPR8_L);
+        *dpr_u = tricore_mfcr(CPU_DPR8_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 9
       case 9:
-        dpr_l->U = __mfcr(CPU_DPR9_L);
-        dpr_u->U = __mfcr(CPU_DPR9_U);
+        *dpr_l = tricore_mfcr(CPU_DPR9_L);
+        *dpr_u = tricore_mfcr(CPU_DPR9_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 10
       case 10:
-        dpr_l->U = __mfcr(CPU_DPR10_L);
-        dpr_u->U = __mfcr(CPU_DPR10_U);
+        *dpr_l = tricore_mfcr(CPU_DPR10_L);
+        *dpr_u = tricore_mfcr(CPU_DPR10_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 11
       case 11:
-        dpr_l->U = __mfcr(CPU_DPR11_L);
-        dpr_u->U = __mfcr(CPU_DPR11_U);
+        *dpr_l = tricore_mfcr(CPU_DPR11_L);
+        *dpr_u = tricore_mfcr(CPU_DPR11_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 12
       case 12:
-        dpr_l->U = __mfcr(CPU_DPR12_L);
-        dpr_u->U = __mfcr(CPU_DPR12_U);
+        *dpr_l = tricore_mfcr(CPU_DPR12_L);
+        *dpr_u = tricore_mfcr(CPU_DPR12_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 13
       case 13:
-        dpr_l->U = __mfcr(CPU_DPR13_L);
-        dpr_u->U = __mfcr(CPU_DPR13_U);
+        *dpr_l = tricore_mfcr(CPU_DPR13_L);
+        *dpr_u = tricore_mfcr(CPU_DPR13_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 14
       case 14:
-        dpr_l->U = __mfcr(CPU_DPR14_L);
-        dpr_u->U = __mfcr(CPU_DPR14_U);
+        *dpr_l = tricore_mfcr(CPU_DPR14_L);
+        *dpr_u = tricore_mfcr(CPU_DPR14_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 15
       case 15:
-        dpr_l->U = __mfcr(CPU_DPR15_L);
-        dpr_u->U = __mfcr(CPU_DPR15_U);
+        *dpr_l = tricore_mfcr(CPU_DPR15_L);
+        *dpr_u = tricore_mfcr(CPU_DPR15_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 16
       case 16:
-        dpr_l->U = __mfcr(CPU_DPR16_L);
-        dpr_u->U = __mfcr(CPU_DPR16_U);
+        *dpr_l = tricore_mfcr(CPU_DPR16_L);
+        *dpr_u = tricore_mfcr(CPU_DPR16_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 17
       case 17:
-        dpr_l->U = __mfcr(CPU_DPR17_L);
-        dpr_u->U = __mfcr(CPU_DPR17_U);
+        *dpr_l = tricore_mfcr(CPU_DPR17_L);
+        *dpr_u = tricore_mfcr(CPU_DPR17_U);
         break;
-#ifndef CONFIG_ARCH_CHIP_TC3XX
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 18
       case 18:
-        dpr_l->U = __mfcr(CPU_DPR18_L);
-        dpr_u->U = __mfcr(CPU_DPR18_U);
+        *dpr_l = tricore_mfcr(CPU_DPR18_L);
+        *dpr_u = tricore_mfcr(CPU_DPR18_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 19
       case 19:
-        dpr_l->U = __mfcr(CPU_DPR19_L);
-        dpr_u->U = __mfcr(CPU_DPR19_U);
+        *dpr_l = tricore_mfcr(CPU_DPR19_L);
+        *dpr_u = tricore_mfcr(CPU_DPR19_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 20
       case 20:
-        dpr_l->U = __mfcr(CPU_DPR20_L);
-        dpr_u->U = __mfcr(CPU_DPR20_U);
+        *dpr_l = tricore_mfcr(CPU_DPR20_L);
+        *dpr_u = tricore_mfcr(CPU_DPR20_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 21
       case 21:
-        dpr_l->U = __mfcr(CPU_DPR21_L);
-        dpr_u->U = __mfcr(CPU_DPR21_U);
+        *dpr_l = tricore_mfcr(CPU_DPR21_L);
+        *dpr_u = tricore_mfcr(CPU_DPR21_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 22
       case 22:
-        dpr_l->U = __mfcr(CPU_DPR22_L);
-        dpr_u->U = __mfcr(CPU_DPR22_U);
+        *dpr_l = tricore_mfcr(CPU_DPR22_L);
+        *dpr_u = tricore_mfcr(CPU_DPR22_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 23
       case 23:
-        dpr_l->U = __mfcr(CPU_DPR23_L);
-        dpr_u->U = __mfcr(CPU_DPR23_U);
+        *dpr_l = tricore_mfcr(CPU_DPR23_L);
+        *dpr_u = tricore_mfcr(CPU_DPR23_U);
         break;
 #endif
       default:
@@ -385,107 +476,153 @@ static int get_dpr_addrass_value(unsigned int region,
 }
 
 static void set_dpr_address_value(unsigned int region,
-                                  Ifx_CPU_DPR_L dpr_l,
-                                  Ifx_CPU_DPR_U dpr_u)
+                                  uint32_t dpr_l,
+                                  uint32_t dpr_u)
 {
   switch (region)
     {
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 0
       case 0:
-        __mtcr(CPU_DPR0_L, dpr_l.U);
-        __mtcr(CPU_DPR0_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR0_L, dpr_l);
+        tricore_mtcr(CPU_DPR0_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 1
       case 1:
-        __mtcr(CPU_DPR1_L, dpr_l.U);
-        __mtcr(CPU_DPR1_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR1_L, dpr_l);
+        tricore_mtcr(CPU_DPR1_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 2
       case 2:
-        __mtcr(CPU_DPR2_L, dpr_l.U);
-        __mtcr(CPU_DPR2_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR2_L, dpr_l);
+        tricore_mtcr(CPU_DPR2_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 3
       case 3:
-        __mtcr(CPU_DPR3_L, dpr_l.U);
-        __mtcr(CPU_DPR3_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR3_L, dpr_l);
+        tricore_mtcr(CPU_DPR3_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 4
       case 4:
-        __mtcr(CPU_DPR4_L, dpr_l.U);
-        __mtcr(CPU_DPR4_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR4_L, dpr_l);
+        tricore_mtcr(CPU_DPR4_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 5
       case 5:
-        __mtcr(CPU_DPR5_L, dpr_l.U);
-        __mtcr(CPU_DPR5_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR5_L, dpr_l);
+        tricore_mtcr(CPU_DPR5_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 6
       case 6:
-        __mtcr(CPU_DPR6_L, dpr_l.U);
-        __mtcr(CPU_DPR6_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR6_L, dpr_l);
+        tricore_mtcr(CPU_DPR6_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 7
       case 7:
-        __mtcr(CPU_DPR7_L, dpr_l.U);
-        __mtcr(CPU_DPR7_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR7_L, dpr_l);
+        tricore_mtcr(CPU_DPR7_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 8
       case 8:
-        __mtcr(CPU_DPR8_L, dpr_l.U);
-        __mtcr(CPU_DPR8_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR8_L, dpr_l);
+        tricore_mtcr(CPU_DPR8_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 9
       case 9:
-        __mtcr(CPU_DPR9_L, dpr_l.U);
-        __mtcr(CPU_DPR9_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR9_L, dpr_l);
+        tricore_mtcr(CPU_DPR9_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 10
       case 10:
-        __mtcr(CPU_DPR10_L, dpr_l.U);
-        __mtcr(CPU_DPR10_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR10_L, dpr_l);
+        tricore_mtcr(CPU_DPR10_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 11
       case 11:
-        __mtcr(CPU_DPR11_L, dpr_l.U);
-        __mtcr(CPU_DPR11_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR11_L, dpr_l);
+        tricore_mtcr(CPU_DPR11_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 12
       case 12:
-        __mtcr(CPU_DPR12_L, dpr_l.U);
-        __mtcr(CPU_DPR12_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR12_L, dpr_l);
+        tricore_mtcr(CPU_DPR12_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 13
       case 13:
-        __mtcr(CPU_DPR13_L, dpr_l.U);
-        __mtcr(CPU_DPR13_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR13_L, dpr_l);
+        tricore_mtcr(CPU_DPR13_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 14
       case 14:
-        __mtcr(CPU_DPR14_L, dpr_l.U);
-        __mtcr(CPU_DPR14_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR14_L, dpr_l);
+        tricore_mtcr(CPU_DPR14_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 15
       case 15:
-        __mtcr(CPU_DPR15_L, dpr_l.U);
-        __mtcr(CPU_DPR15_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR15_L, dpr_l);
+        tricore_mtcr(CPU_DPR15_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 16
       case 16:
-        __mtcr(CPU_DPR16_L, dpr_l.U);
-        __mtcr(CPU_DPR16_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR16_L, dpr_l);
+        tricore_mtcr(CPU_DPR16_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 17
       case 17:
-        __mtcr(CPU_DPR17_L, dpr_l.U);
-        __mtcr(CPU_DPR17_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR17_L, dpr_l);
+        tricore_mtcr(CPU_DPR17_U, dpr_u);
         break;
-#ifndef CONFIG_ARCH_CHIP_TC3XX
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 18
       case 18:
-        __mtcr(CPU_DPR18_L, dpr_l.U);
-        __mtcr(CPU_DPR18_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR18_L, dpr_l);
+        tricore_mtcr(CPU_DPR18_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 19
       case 19:
-        __mtcr(CPU_DPR19_L, dpr_l.U);
-        __mtcr(CPU_DPR19_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR19_L, dpr_l);
+        tricore_mtcr(CPU_DPR19_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 20
       case 20:
-        __mtcr(CPU_DPR20_L, dpr_l.U);
-        __mtcr(CPU_DPR20_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR20_L, dpr_l);
+        tricore_mtcr(CPU_DPR20_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 21
       case 21:
-        __mtcr(CPU_DPR21_L, dpr_l.U);
-        __mtcr(CPU_DPR21_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR21_L, dpr_l);
+        tricore_mtcr(CPU_DPR21_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 22
       case 22:
-        __mtcr(CPU_DPR22_L, dpr_l.U);
-        __mtcr(CPU_DPR22_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR22_L, dpr_l);
+        tricore_mtcr(CPU_DPR22_U, dpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_DATA_NREGIONS > 23
       case 23:
-        __mtcr(CPU_DPR23_L, dpr_l.U);
-        __mtcr(CPU_DPR23_U, dpr_u.U);
+        tricore_mtcr(CPU_DPR23_L, dpr_l);
+        tricore_mtcr(CPU_DPR23_U, dpr_u);
         break;
 #endif
       default:
@@ -496,75 +633,105 @@ static void set_dpr_address_value(unsigned int region,
 }
 
 static int get_cpr_address_region(unsigned int region,
-                                  Ifx_CPU_CPR_L *cpr_l,
-                                  Ifx_CPU_CPR_U *cpr_u)
+                                  uint32_t *cpr_l,
+                                  uint32_t *cpr_u)
 {
   switch (region)
     {
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 0
       case 0:
-        cpr_l->U = __mfcr(CPU_CPR0_L);
-        cpr_u->U = __mfcr(CPU_CPR0_U);
+        *cpr_l = tricore_mfcr(CPU_CPR0_L);
+        *cpr_u = tricore_mfcr(CPU_CPR0_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 1
       case 1:
-        cpr_l->U = __mfcr(CPU_CPR1_L);
-        cpr_u->U = __mfcr(CPU_CPR1_U);
+        *cpr_l = tricore_mfcr(CPU_CPR1_L);
+        *cpr_u = tricore_mfcr(CPU_CPR1_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 2
       case 2:
-        cpr_l->U = __mfcr(CPU_CPR2_L);
-        cpr_u->U = __mfcr(CPU_CPR2_U);
+        *cpr_l = tricore_mfcr(CPU_CPR2_L);
+        *cpr_u = tricore_mfcr(CPU_CPR2_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 3
       case 3:
-        cpr_l->U = __mfcr(CPU_CPR3_L);
-        cpr_u->U = __mfcr(CPU_CPR3_U);
+        *cpr_l = tricore_mfcr(CPU_CPR3_L);
+        *cpr_u = tricore_mfcr(CPU_CPR3_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 4
       case 4:
-        cpr_l->U = __mfcr(CPU_CPR4_L);
-        cpr_u->U = __mfcr(CPU_CPR4_U);
+        *cpr_l = tricore_mfcr(CPU_CPR4_L);
+        *cpr_u = tricore_mfcr(CPU_CPR4_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 5
       case 5:
-        cpr_l->U = __mfcr(CPU_CPR5_L);
-        cpr_u->U = __mfcr(CPU_CPR5_U);
+        *cpr_l = tricore_mfcr(CPU_CPR5_L);
+        *cpr_u = tricore_mfcr(CPU_CPR5_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 6
       case 6:
-        cpr_l->U = __mfcr(CPU_CPR6_L);
-        cpr_u->U = __mfcr(CPU_CPR6_U);
+        *cpr_l = tricore_mfcr(CPU_CPR6_L);
+        *cpr_u = tricore_mfcr(CPU_CPR6_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 7
       case 7:
-        cpr_l->U = __mfcr(CPU_CPR7_L);
-        cpr_u->U = __mfcr(CPU_CPR7_U);
+        *cpr_l = tricore_mfcr(CPU_CPR7_L);
+        *cpr_u = tricore_mfcr(CPU_CPR7_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 8
       case 8:
-        cpr_l->U = __mfcr(CPU_CPR8_L);
-        cpr_u->U = __mfcr(CPU_CPR8_U);
+        *cpr_l = tricore_mfcr(CPU_CPR8_L);
+        *cpr_u = tricore_mfcr(CPU_CPR8_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 9
       case 9:
-        cpr_l->U = __mfcr(CPU_CPR9_L);
-        cpr_u->U = __mfcr(CPU_CPR9_U);
+        *cpr_l = tricore_mfcr(CPU_CPR9_L);
+        *cpr_u = tricore_mfcr(CPU_CPR9_U);
         break;
-#ifndef CONFIG_ARCH_CHIP_TC3XX
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 10
       case 10:
-        cpr_l->U = __mfcr(CPU_CPR10_L);
-        cpr_u->U = __mfcr(CPU_CPR10_U);
+        *cpr_l = tricore_mfcr(CPU_CPR10_L);
+        *cpr_u = tricore_mfcr(CPU_CPR10_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 11
       case 11:
-        cpr_l->U = __mfcr(CPU_CPR11_L);
-        cpr_u->U = __mfcr(CPU_CPR11_U);
+        *cpr_l = tricore_mfcr(CPU_CPR11_L);
+        *cpr_u = tricore_mfcr(CPU_CPR11_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 12
       case 12:
-        cpr_l->U = __mfcr(CPU_CPR12_L);
-        cpr_u->U = __mfcr(CPU_CPR12_U);
+        *cpr_l = tricore_mfcr(CPU_CPR12_L);
+        *cpr_u = tricore_mfcr(CPU_CPR12_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 13
       case 13:
-        cpr_l->U = __mfcr(CPU_CPR13_L);
-        cpr_u->U = __mfcr(CPU_CPR13_U);
+        *cpr_l = tricore_mfcr(CPU_CPR13_L);
+        *cpr_u = tricore_mfcr(CPU_CPR13_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 14
       case 14:
-        cpr_l->U = __mfcr(CPU_CPR14_L);
-        cpr_u->U = __mfcr(CPU_CPR14_U);
+        *cpr_l = tricore_mfcr(CPU_CPR14_L);
+        *cpr_u = tricore_mfcr(CPU_CPR14_U);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 15
       case 15:
-        cpr_l->U = __mfcr(CPU_CPR15_L);
-        cpr_u->U = __mfcr(CPU_CPR15_U);
+        *cpr_l = tricore_mfcr(CPU_CPR15_L);
+        *cpr_u = tricore_mfcr(CPU_CPR15_U);
         break;
 #endif
       default:
@@ -575,75 +742,105 @@ static int get_cpr_address_region(unsigned int region,
 }
 
 static void set_cpr_address_value(unsigned int region,
-                                  Ifx_CPU_CPR_L cpr_l,
-                                  Ifx_CPU_CPR_U cpr_u)
+                                  uint32_t cpr_l,
+                                  uint32_t cpr_u)
 {
   switch (region)
     {
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 0
       case 0:
-        __mtcr(CPU_CPR0_L, cpr_l.U);
-        __mtcr(CPU_CPR0_U, cpr_u.U);
+        tricore_mtcr(CPU_CPR0_L, cpr_l);
+        tricore_mtcr(CPU_CPR0_U, cpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 1
       case 1:
-        __mtcr(CPU_CPR1_L, cpr_l.U);
-        __mtcr(CPU_CPR1_U, cpr_u.U);
+        tricore_mtcr(CPU_CPR1_L, cpr_l);
+        tricore_mtcr(CPU_CPR1_U, cpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 2
       case 2:
-        __mtcr(CPU_CPR2_L, cpr_l.U);
-        __mtcr(CPU_CPR2_U, cpr_u.U);
+        tricore_mtcr(CPU_CPR2_L, cpr_l);
+        tricore_mtcr(CPU_CPR2_U, cpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 3
       case 3:
-        __mtcr(CPU_CPR3_L, cpr_l.U);
-        __mtcr(CPU_CPR3_U, cpr_u.U);
+        tricore_mtcr(CPU_CPR3_L, cpr_l);
+        tricore_mtcr(CPU_CPR3_U, cpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 4
       case 4:
-        __mtcr(CPU_CPR4_L, cpr_l.U);
-        __mtcr(CPU_CPR4_U, cpr_u.U);
+        tricore_mtcr(CPU_CPR4_L, cpr_l);
+        tricore_mtcr(CPU_CPR4_U, cpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 5
       case 5:
-        __mtcr(CPU_CPR5_L, cpr_l.U);
-        __mtcr(CPU_CPR5_U, cpr_u.U);
+        tricore_mtcr(CPU_CPR5_L, cpr_l);
+        tricore_mtcr(CPU_CPR5_U, cpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 6
       case 6:
-        __mtcr(CPU_CPR6_L, cpr_l.U);
-        __mtcr(CPU_CPR6_U, cpr_u.U);
+        tricore_mtcr(CPU_CPR6_L, cpr_l);
+        tricore_mtcr(CPU_CPR6_U, cpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 7
       case 7:
-        __mtcr(CPU_CPR7_L, cpr_l.U);
-        __mtcr(CPU_CPR7_U, cpr_u.U);
+        tricore_mtcr(CPU_CPR7_L, cpr_l);
+        tricore_mtcr(CPU_CPR7_U, cpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 8
       case 8:
-        __mtcr(CPU_CPR8_L, cpr_l.U);
-        __mtcr(CPU_CPR8_U, cpr_u.U);
+        tricore_mtcr(CPU_CPR8_L, cpr_l);
+        tricore_mtcr(CPU_CPR8_U, cpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 9
       case 9:
-        __mtcr(CPU_CPR9_L, cpr_l.U);
-        __mtcr(CPU_CPR9_U, cpr_u.U);
+        tricore_mtcr(CPU_CPR9_L, cpr_l);
+        tricore_mtcr(CPU_CPR9_U, cpr_u);
         break;
-#ifndef CONFIG_ARCH_CHIP_TC3XX
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 10
       case 10:
-        __mtcr(CPU_CPR10_L, cpr_l.U);
-        __mtcr(CPU_CPR10_U, cpr_u.U);
+        tricore_mtcr(CPU_CPR10_L, cpr_l);
+        tricore_mtcr(CPU_CPR10_U, cpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 11
       case 11:
-        __mtcr(CPU_CPR11_L, cpr_l.U);
-        __mtcr(CPU_CPR11_U, cpr_u.U);
+        tricore_mtcr(CPU_CPR11_L, cpr_l);
+        tricore_mtcr(CPU_CPR11_U, cpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 12
       case 12:
-        __mtcr(CPU_CPR12_L, cpr_l.U);
-        __mtcr(CPU_CPR12_U, cpr_u.U);
+        tricore_mtcr(CPU_CPR12_L, cpr_l);
+        tricore_mtcr(CPU_CPR12_U, cpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 13
       case 13:
-        __mtcr(CPU_CPR13_L, cpr_l.U);
-        __mtcr(CPU_CPR13_U, cpr_u.U);
+        tricore_mtcr(CPU_CPR13_L, cpr_l);
+        tricore_mtcr(CPU_CPR13_U, cpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 14
       case 14:
-        __mtcr(CPU_CPR14_L, cpr_l.U);
-        __mtcr(CPU_CPR14_U, cpr_u.U);
+        tricore_mtcr(CPU_CPR14_L, cpr_l);
+        tricore_mtcr(CPU_CPR14_U, cpr_u);
         break;
+#endif
+#if CONFIG_ARCH_MPU_CODE_NREGIONS > 15
       case 15:
-        __mtcr(CPU_CPR15_L, cpr_l.U);
-        __mtcr(CPU_CPR15_U, cpr_u.U);
+        tricore_mtcr(CPU_CPR15_L, cpr_l);
+        tricore_mtcr(CPU_CPR15_U, cpr_u);
         break;
 #endif
     }
@@ -658,14 +855,9 @@ static void mpu_modify_data_region(unsigned int region, uintptr_t base,
 
   DEBUGASSERT(region < CONFIG_ARCH_MPU_DATA_NREGIONS);
 
-  Ifx_CPU_DPR_L dpr_l_value;
-  Ifx_CPU_DPR_U dpr_u_value;
-  dpr_l_value.U = base;
-  dpr_u_value.U = base + size;
-
   /* Set the lower bound and upper bound of CPU Data Protection Region */
 
-  set_dpr_address_value(region, dpr_l_value, dpr_u_value);
+  set_dpr_address_value(region, base, base + size);
 }
 
 static void mpu_modify_code_region(unsigned int region, uintptr_t base,
@@ -675,14 +867,9 @@ static void mpu_modify_code_region(unsigned int region, uintptr_t base,
 
   DEBUGASSERT(region < CONFIG_ARCH_MPU_CODE_NREGIONS);
 
-  Ifx_CPU_CPR_L cpr_l_value;
-  Ifx_CPU_CPR_U cpr_u_value;
-  cpr_l_value.U = base;
-  cpr_u_value.U = base + size;
-
   /* Set the lower bound and upper bound of CPU Code Protection Region */
 
-  set_cpr_address_value(region, cpr_l_value, cpr_u_value);
+  set_cpr_address_value(region, base, base + size);
 }
 
 static void mpu_modify_data_set(unsigned int set, unsigned int region,
@@ -693,17 +880,17 @@ static void mpu_modify_data_set(unsigned int set, unsigned int region,
   DEBUGASSERT(set < CONFIG_ARCH_MPU_NSETS);
   DEBUGASSERT(region < CONFIG_ARCH_MPU_DATA_NREGIONS);
 
-  Ifx_CPU_DPRE dpre_value = get_dpre_value(set);
-  Ifx_CPU_DPWE dpwe_value = get_dpwe_value(set);
+  uint32_t dpre_value = get_dpre_value(set);
+  uint32_t dpwe_value = get_dpwe_value(set);
 
   /* Set the bit corresponding to the given Data Protection Region */
 
-  dpre_value.U = flags & REGION_ATTR_RE ?
-                 dpre_value.U | (0x01 << region) :
-                 dpre_value.U & ~(0x01 << region);
-  dpwe_value.U = flags & REGION_ATTR_WE ?
-                 dpwe_value.U | (0x01 << region) :
-                 dpwe_value.U & ~(0x01 << region);
+  dpre_value = flags & REGION_ATTR_RE ?
+               dpre_value | (0x01 << region) :
+               dpre_value & ~(0x01 << region);
+  dpwe_value = flags & REGION_ATTR_WE ?
+               dpwe_value | (0x01 << region) :
+               dpwe_value & ~(0x01 << region);
 
   set_dpre_value(set, dpre_value);
   set_dpwe_value(set, dpwe_value);
@@ -719,13 +906,13 @@ static void mpu_modify_code_set(unsigned int set, unsigned int region,
 
   /* Get the CPU CPXE register value of the input protection set */
 
-  Ifx_CPU_CPXE cpxe_value = get_cpxe_value(set);
+  uint32_t cpxe_value = get_cpxe_value(set);
 
   /* Set the bit corresponding to the given code protection region */
 
-  cpxe_value.U = flags & REGION_ATTR_XE ?
-                 cpxe_value.U | (0x1 << region) :
-                 cpxe_value.U & ~(0x1 << region);
+  cpxe_value = flags & REGION_ATTR_XE ?
+               cpxe_value | (0x1 << region) :
+               cpxe_value & ~(0x1 << region);
 
   /* Set the CPU CPXE value to enable code execution */
 
@@ -951,11 +1138,12 @@ void mpu_free_set(unsigned int set)
 
 void mpu_control(bool enable)
 {
-  Ifx_CPU_CORECON corecon_value;
+  uint32_t corecon_value = tricore_mfcr(CPU_CORECON);
 
-  corecon_value.U = __mfcr(CPU_CORECON);
-  corecon_value.B.PROTEN = enable;
-  __mtcr(CPU_CORECON, corecon_value.U);
+  corecon_value = enable ?
+                  corecon_value | (1 << 1) :
+                  corecon_value & ~(1 << 1);
+  tricore_mtcr(CPU_CORECON, corecon_value);
 
   UP_ISB();
 }
@@ -980,13 +1168,13 @@ void mpu_dump_set(unsigned int set)
 
   DEBUGASSERT(set < CONFIG_ARCH_MPU_NSETS);
 
-  Ifx_CPU_DPRE dpre_value = get_dpre_value(set);
-  Ifx_CPU_DPWE dpwe_value = get_dpwe_value(set);
-  Ifx_CPU_CPXE cpxe_value = get_cpxe_value(set);
-  Ifx_CPU_DPR_L dprl_value;
-  Ifx_CPU_DPR_U dpru_value;
-  Ifx_CPU_CPR_L cprl_value;
-  Ifx_CPU_CPR_U cpru_value;
+  uint32_t dpre_value = get_dpre_value(set);
+  uint32_t dpwe_value = get_dpwe_value(set);
+  uint32_t cpxe_value = get_cpxe_value(set);
+  uint32_t dprl_value;
+  uint32_t dpru_value;
+  uint32_t cprl_value;
+  uint32_t cpru_value;
   unsigned int i;
   int ret;
 
@@ -999,9 +1187,9 @@ void mpu_dump_set(unsigned int set)
           _info("region: %02d, lower address: 0x%08X, \
                 upper address: 0x%08X, \
                 read enable:%s, write enable:%s\n",
-                i, dprl_value.U, dpru_value.U,
-                dpre_value.U & (0x01 << i) ? "yes" : "no",
-                dpwe_value.U & (0x01 << i) ? "yes" : "no");
+                i, dprl_value, dpru_value,
+                dpre_value & (0x01 << i) ? "yes" : "no",
+                dpwe_value & (0x01 << i) ? "yes" : "no");
         }
       else
         {
@@ -1018,8 +1206,8 @@ void mpu_dump_set(unsigned int set)
           _info("region: %02d, lower address: 0x%08X, \
                 upper address: 0x%08X, \
                 exec enable:%s\n",
-                i, cprl_value.U, cpru_value.U,
-                cpxe_value.U & (0x01 << i) ? "yes" : "no");
+                i, cprl_value, cpru_value,
+                cpxe_value & (0x01 << i) ? "yes" : "no");
         }
       else
         {
@@ -1154,10 +1342,10 @@ unsigned int mpu_configure_region(unsigned int set, uintptr_t base,
 
 unsigned int mpu_get_active_set(void)
 {
-  Ifx_CPU_PSW psw_value;
+  uint32_t psw_value = tricore_mfcr(CPU_PSW);
 
-  psw_value.U = __mfcr(CPU_PSW);
-  return (psw_value.B.PRS2 << 2) | psw_value.B.PRS;
+  return ((psw_value & (0x1 << 15)) >> 15) << 2 |
+         ((psw_value & (0x3 << 12)) >> 12);
 }
 
 /****************************************************************************
@@ -1180,11 +1368,12 @@ void mpu_set_active_set(unsigned int set)
 
   DEBUGASSERT(set < CONFIG_ARCH_MPU_NSETS);
 
-  Ifx_CPU_PSW psw_value;
-  psw_value.U = __mfcr(CPU_PSW);
-  psw_value.B.PRS2 = set >> 2;  /* bit[2] */
-  psw_value.B.PRS = set & 0x03; /* bit[1:0] */
-  __mtcr(CPU_PSW, psw_value.U);
+  uint32_t psw_value = tricore_mfcr(CPU_PSW);
+
+  psw_value &= ~((0x3 << 12) | (0x1 << 15));
+  psw_value |= (set >> 2) << 15;
+  psw_value |= (set & 0x03) << 12;
+  tricore_mtcr(CPU_PSW, psw_value);
 
   UP_ISB();
 }
