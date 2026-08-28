@@ -39,8 +39,21 @@ if(CONFIG_FDPIC)
     set(FDPIC_CROSSDEV arm-uclinuxfdpiceabi-)
   endif()
 
+  # Say which linker is missing rather than failing later with a command that
+  # cannot be run.
+
+  find_program(FDPIC_LD "${FDPIC_CROSSDEV}ld")
+
+  if(NOT FDPIC_LD)
+    message(
+      FATAL_ERROR
+        "CONFIG_FDPIC needs ${FDPIC_CROSSDEV}ld, which is not on PATH. "
+        "It is in the NuttX CI image, and tools/ci/docker/linux/Dockerfile "
+        "shows how it is built.  Set FDPIC_CROSSDEV to use a different prefix")
+  endif()
+
   set(CMAKE_ELF_LD
-      "${FDPIC_CROSSDEV}ld"
+      "${FDPIC_LD}"
       CACHE INTERNAL "Linker for FDPIC modules")
 
   nuttx_elf_compile_options(-mfdpic -fPIC -Wa,--noexecstack)
