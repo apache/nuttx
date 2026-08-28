@@ -217,47 +217,47 @@ void up_allocate_pgheap(void **heap_start, size_t *heap_size)
    * every region of every new process.
    */
 
-    {
-      uintptr_t ramstart = (uintptr_t)esp_spiram_allocable_vaddr_start();
-      uintptr_t ramend   = (uintptr_t)esp_spiram_allocable_vaddr_end();
-      uintptr_t poolvbase;
-      uint32_t  rampbase;
+  {
+    uintptr_t ramstart = (uintptr_t)esp_spiram_allocable_vaddr_start();
+    uintptr_t ramend   = (uintptr_t)esp_spiram_allocable_vaddr_end();
+    uintptr_t poolvbase;
+    uint32_t  rampbase;
 
-      if (!esp32s3_mmu_paddr(ramstart, &rampbase))
-        {
-          _err("ERROR: PSRAM window base %08" PRIxPTR " maps nothing\n",
-               ramstart);
-          PANIC();
-        }
+    if (!esp32s3_mmu_paddr(ramstart, &rampbase))
+      {
+        _err("ERROR: PSRAM window base %08" PRIxPTR " maps nothing\n",
+             ramstart);
+        PANIC();
+      }
 
-      if (ESP32S3_PGPOOL_PBASE < rampbase ||
-          ESP32S3_PGPOOL_PEND > rampbase + (ramend - ramstart))
-        {
-          _err("ERROR: page pool %08x-%08x is outside the mapped PSRAM "
-               "%08" PRIx32 "-%08" PRIxPTR "\n",
-               ESP32S3_PGPOOL_PBASE, ESP32S3_PGPOOL_PEND,
-               rampbase, rampbase + (ramend - ramstart));
-          PANIC();
-        }
+    if (ESP32S3_PGPOOL_PBASE < rampbase ||
+        ESP32S3_PGPOOL_PEND > rampbase + (ramend - ramstart))
+      {
+        _err("ERROR: page pool %08x-%08x is outside the mapped PSRAM "
+             "%08" PRIx32 "-%08" PRIxPTR "\n",
+             ESP32S3_PGPOOL_PBASE, ESP32S3_PGPOOL_PEND,
+             rampbase, rampbase + (ramend - ramstart));
+        PANIC();
+      }
 
-      poolvbase = ramstart + (ESP32S3_PGPOOL_PBASE - rampbase);
+    poolvbase = ramstart + (ESP32S3_PGPOOL_PBASE - rampbase);
 
-      _info("PSRAM window %08" PRIxPTR "-%08" PRIxPTR " (phys %08" PRIx32
-            "), page pool phys %08x-%08x at %08" PRIxPTR "\n",
-            ramstart, ramend, rampbase,
-            ESP32S3_PGPOOL_PBASE, ESP32S3_PGPOOL_PEND, poolvbase);
+    _info("PSRAM window %08" PRIxPTR "-%08" PRIxPTR " (phys %08" PRIx32
+          "), page pool phys %08x-%08x at %08" PRIxPTR "\n",
+          ramstart, ramend, rampbase,
+          ESP32S3_PGPOOL_PBASE, ESP32S3_PGPOOL_PEND, poolvbase);
 
-      check_windows_clear(MMU_ENTRY_OF(ramstart), MMU_ENTRY_OF(ramend - 1));
+    check_windows_clear(MMU_ENTRY_OF(ramstart), MMU_ENTRY_OF(ramend - 1));
 
-      /* Everything above has been established while the pool was still
-       * mapped, which is the only time it can be.  Now take that mapping
-       * away: from here the kernel reaches a pool page only through
-       * esp32s3_pgmap(), and an unprivileged task reaches one only if it is
-       * its own.
-       */
+    /* Everything above has been established while the pool was still
+     * mapped, which is the only time it can be.  Now take that mapping
+     * away: from here the kernel reaches a pool page only through
+     * esp32s3_pgmap(), and an unprivileged task reaches one only if it is
+     * its own.
+     */
 
-      esp32s3_pgpool_unmap(poolvbase, ESP32S3_PGPOOL_SIZE);
-    }
+    esp32s3_pgpool_unmap(poolvbase, ESP32S3_PGPOOL_SIZE);
+  }
 #endif
 
   *heap_start = (void *)ESP32S3_PGPOOL_PBASE;

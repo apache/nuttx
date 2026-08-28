@@ -102,6 +102,7 @@ static int alloc_region(uintptr_t *pages, unsigned int maxpages, size_t size,
   for (i = 0; i < npages; i++)
     {
       uintptr_t paddr = mm_pgalloc(1);
+
       if (paddr == 0)
         {
           berr("ERROR: page pool exhausted at page %u of %u\n", i, npages);
