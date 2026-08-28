@@ -39,6 +39,34 @@
 #  define SECTIONS_ALIGN 4
 #endif
 
+/* An FDPIC module is a shared object whose read-only and writable segments
+ * the loader places independently: the read-only one runs where the
+ * filesystem already holds it and only the writable one is copied to RAM,
+ * once per running instance.  So the two go into segments of their own, and
+ * .dynamic is named, because a shared object is bound through it.
+ *
+ * Everything else is common, the symbols crt0.c walks included, so a module
+ * is built and entered the same way whichever this is.
+ */
+
+#ifdef CONFIG_FDPIC
+#  define PHDR_TEXT :text
+#  define PHDR_DATA :data
+#  define DATA_ALIGN . = ALIGN(0x1000);
+
+PHDRS
+{
+  text    PT_LOAD FLAGS(5);    /* Read and execute */
+  data    PT_LOAD FLAGS(6);    /* Read and write   */
+  dynamic PT_DYNAMIC FLAGS(6);
+}
+
+#else
+#  define PHDR_TEXT
+#  define PHDR_DATA
+#  define DATA_ALIGN
+#endif
+
 SECTIONS
 {
   .text TEXT :
@@ -53,7 +81,7 @@ SECTIONS
       *(.jcr)
       . = ALIGN(SECTIONS_ALIGN);
       _etext = . ;
-    }
+    } PHDR_TEXT
 
   .rodata :
     {
@@ -64,7 +92,9 @@ SECTIONS
       *(.gnu.linkonce.r*)
       . = ALIGN(SECTIONS_ALIGN);
       _erodata = . ;
-    }
+    } PHDR_TEXT
+
+  DATA_ALIGN
 
   .data DATA :
     {
@@ -75,7 +105,7 @@ SECTIONS
       *(.gnu.linkonce.d*)
       . = ALIGN(SECTIONS_ALIGN);
       _edata = . ;
-    }
+    } PHDR_DATA
 
   .init_array :
     {
@@ -86,7 +116,7 @@ SECTIONS
       . = ALIGN(SECTIONS_ALIGN);
       _einit = .;
       _ectors = .;
-    }
+    } PHDR_DATA
 
   .fini_array :
     {
@@ -98,7 +128,24 @@ SECTIONS
       . = ALIGN(SECTIONS_ALIGN);
       _efini = .;
       _edtors = .;
-    }
+    } PHDR_DATA
+
+#ifdef CONFIG_FDPIC
+  .dynamic :
+    {
+      *(.dynamic)
+    } :data :dynamic
+#endif
+
+  .got :
+    {
+      *(.got*)
+    } PHDR_DATA
+
+  /* .bss holds no file content, so it comes last.  Everything ahead of it
+   * has content, thus the writable segment's p_filesz stops where .bss
+   * starts and the file does not carry it.
+   */
 
   .bss :
     {
@@ -111,12 +158,7 @@ SECTIONS
       *(COMMON)
       . = ALIGN(SECTIONS_ALIGN);
       _ebss = . ;
-    }
-
-  .got :
-    {
-      *(.got*)
-    }
+    } PHDR_DATA
 
     /* Stabs debugging sections.    */
 
