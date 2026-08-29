@@ -215,7 +215,7 @@
 #  define STM32_NSDIO                    1   /* One SDIO interface */
 #  define STM32_NLCD                     0   /* No LCD */
 #  define STM32_NUSBOTG                  1   /* USB OTG FS (only) */
-#  define STM32_NGPIO                    81  /* GPIOA-H */
+#  define STM32_NGPIO                    113 /* GPIOA-H. (N+15)>>4 is the port count; 81 yields A-F and drops H. */
 #  define STM32_NADC                     1   /* One 12-bit ADC1, 16 channels */
 #  define STM32_NDAC                     0   /* No DAC */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
