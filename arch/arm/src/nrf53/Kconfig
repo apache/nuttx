@@ -445,6 +445,23 @@ endif # NRF53_SYSTIMER_RTC
 
 endmenu # System Timer
 
+config NRF53_CACHE
+	bool "Application core flash cache"
+	depends on NRF53_APPCORE
+	default n
+	---help---
+		Enable the application core CACHE peripheral, which caches both
+		instruction and data accesses towards flash and XIP code regions.
+		The application core runs uncached without this, so enabling it is
+		a substantial speedup on any flash-resident code path.
+
+		The cache does not observe writes to the memory it caches. The
+		in-tree progmem driver handles this, but code outside the kernel
+		that programs flash, or a board that maps QSPI into the XIP
+		window and writes it, must invalidate the cache itself. Left off
+		by default for that reason, matching ARMV7M_ICACHE and
+		ARMV8M_ICACHE/DCACHE.
+
 config NRF53_FLASH_PREFETCH
 	bool "Enable FLASH Pre-fetch"
 	depends on NRF53_NETCORE
