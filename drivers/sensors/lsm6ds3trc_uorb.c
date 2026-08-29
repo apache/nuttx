@@ -109,14 +109,15 @@
 #define BIT_INT_FTH (1 << 3) /* INTn_CTRL: FIFO threshold reached enable */
 
 #define BIT_FIFO_STATUS2_OVER_RUN (1 << 6) /* FIFO_STATUS2: overrun */
-#define MASK_FIFO_DIFF_HI 0x0f             /* FIFO_STATUS2: DIFF_FIFO[10:8] */
+#define MASK_FIFO_DIFF_HI 0x07             /* FIFO_STATUS2: DIFF_FIFO[10:8] */
 
-#define MASK_DEC_FIFO_XL 0x03   /* FIFO_CTRL3[1:0]: accel decimation */
-#define SHIFT_DEC_FIFO_GY 3     /* FIFO_CTRL3[4:3]: gyro decimation */
+#define MASK_DEC_FIFO_XL 0x07   /* FIFO_CTRL3[2:0]: accel decimation */
+#define SHIFT_DEC_FIFO_GY 3     /* FIFO_CTRL3[5:3]: gyro decimation */
 #define DEC_FIFO_NONE 0x0       /* Sub-sensor excluded from the FIFO */
 #define DEC_FIFO_NO_DECIMATION 0x1
 
 #define SHIFT_FIFO_ODR 3        /* FIFO_CTRL5[6:3]: FIFO-only ODR */
+#define FIFO_MODE_BYPASS 0x0
 #define FIFO_MODE_CONTINUOUS 0x6
 #endif
 
@@ -535,18 +536,51 @@ static int lsm6ds3trc_fifo_configure(FAR struct lsm6ds3trc_dev_s *dev)
   dev->fifo_pattern_words = words;
   dev->fifo_odr = odr;
 
-  err = lsm6ds3trc_set_bits(dev, FIFO_CTRL3, dec,
-                            MASK_DEC_FIFO_XL |
-                            (MASK_DEC_FIFO_XL << SHIFT_DEC_FIFO_GY));
+  /* The FIFO's data-ready write trigger only fires while BOTH the
+   * accelerometer and the gyroscope are physically running, regardless
+   * of which one(s) are actually decimated into the pattern above --
+   * force whichever sub-sensor isn't subscribed to run at the shared
+   * rate anyway (still excluded from the pattern, so it costs no extra
+   * I2C bandwidth on drain, just its own unavoidable power draw), and
+   * bring it back down once neither is subscribed. See the driver's
+   * FIFO documentation.
+   */
+
+  if (!dev->gyro.enabled)
+    {
+      err = gyro_set_odr(dev, words != 0 ? odr : ODR_OFF);
+      if (err < 0)
+        {
+          return err;
+        }
+    }
+
+  if (!dev->accel.enabled)
+    {
+      err = accel_set_odr(dev, words != 0 ? odr : ODR_OFF);
+      if (err < 0)
+        {
+          return err;
+        }
+    }
+
+  /* Reconfiguring decimation/watermark/ODR while the pattern generator
+   * is still running in Continuous mode leaves FIFO_STATUS1/2 stuck
+   * reporting a stale diff count -- reset through Bypass mode first
+   * (which also empties the FIFO), same as the datasheet's documented
+   * procedure for changing FIFO settings, and only re-enter Continuous
+   * mode once every other register below is already in its new state.
+   */
+
+  err = lsm6ds3trc_set_bits(dev, FIFO_CTRL5, FIFO_MODE_BYPASS, 0x07);
   if (err < 0)
     {
       return err;
     }
 
-  err = lsm6ds3trc_set_bits(dev, FIFO_CTRL5,
-                            ((odr & 0xf) << SHIFT_FIFO_ODR) |
-                            FIFO_MODE_CONTINUOUS,
-                            0x7f);
+  err = lsm6ds3trc_set_bits(dev, FIFO_CTRL3, dec,
+                            MASK_DEC_FIFO_XL |
+                            (MASK_DEC_FIFO_XL << SHIFT_DEC_FIFO_GY));
   if (err < 0 || words == 0)
     {
       return err;
@@ -562,8 +596,17 @@ static int lsm6ds3trc_fifo_configure(FAR struct lsm6ds3trc_dev_s *dev)
       return err;
     }
 
-  return lsm6ds3trc_set_bits(dev, FIFO_CTRL2, (watermark_words >> 8) & 0x07,
+  err = lsm6ds3trc_set_bits(dev, FIFO_CTRL2, (watermark_words >> 8) & 0x07,
                             0x07);
+  if (err < 0)
+    {
+      return err;
+    }
+
+  return lsm6ds3trc_set_bits(dev, FIFO_CTRL5,
+                            ((odr & 0xf) << SHIFT_FIFO_ODR) |
+                            FIFO_MODE_CONTINUOUS,
+                            0x7f);
 }
 #endif
 
