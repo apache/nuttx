@@ -174,7 +174,14 @@ struct lsm6ds3trc_sens_s
   FAR struct lsm6ds3trc_dev_s *dev;    /* Reference to parent device */
   bool enabled;                        /* If this sensor is enabled */
   enum lsm6ds3trc_odr_e odr;           /* Measurement interval of this
-                                        * sensor */
+                                        * sensor, ODR_OFF while disabled */
+  enum lsm6ds3trc_odr_e last_odr;      /* Last ODR explicitly requested
+                                        * via set_interval(), ODR_OFF if
+                                        * never -- unlike odr, this
+                                        * survives being disabled, so
+                                        * activate() can restore it on
+                                        * the next enable instead of
+                                        * resetting to a fixed default */
   int fsr;                             /* Full scale range of this sensor.
                                         * Can be from either gyro or accel
                                         * FSR enum. */
@@ -1043,15 +1050,24 @@ static int lsm6ds3trc_activate(FAR struct sensor_lowerhalf_s *lower,
 
       start_thread = true;
 
-#ifdef CONFIG_SENSORS_LSM6DS3TRC_FIFO
-      /* Both sub-sensors share one FIFO write rate: join whatever the
-       * other one is already running at, if it's enabled, instead of
-       * disrupting an existing subscriber's rate.
+      /* Restore whatever ODR was last explicitly requested for this
+       * sub-sensor (via set_interval()), if any -- ODR_52HZ only
+       * applies the first time this sub-sensor is ever activated.
        */
 
-      odr = other->enabled ? other->odr : ODR_52HZ;
-#else
-      odr = ODR_52HZ;
+      odr = sens->last_odr != ODR_OFF ? sens->last_odr : ODR_52HZ;
+
+#ifdef CONFIG_SENSORS_LSM6DS3TRC_FIFO
+      /* ...but both sub-sensors share one FIFO write rate: joining
+       * whatever the other one is already running at takes priority
+       * over this sub-sensor's own remembered rate, since FIFO mode
+       * doesn't allow them to differ.
+       */
+
+      if (other->enabled)
+        {
+          odr = other->odr;
+        }
 #endif
 
       err = is_gyro ? gyro_set_odr(dev, odr) : accel_set_odr(dev, odr);
@@ -1204,6 +1220,13 @@ static int lsm6ds3trc_set_interval(FAR struct sensor_lowerhalf_s *lower,
     {
       goto early_ret;
     }
+
+  /* Remember this explicit request so activate() can restore it on the
+   * next enable, instead of resetting to a fixed default -- unlike
+   * sens->odr, this isn't touched by disabling the sensor.
+   */
+
+  sens->last_odr = odr;
 
 #ifdef CONFIG_SENSORS_LSM6DS3TRC_FIFO
   /* Both sub-sensors share one FIFO write rate -- re-pace whichever one
@@ -1468,6 +1491,7 @@ int lsm6ds3trc_register(FAR struct i2c_master_s *i2c, uint8_t addr,
   priv->gyro.lower.nbuffer = CONFIG_SENSORS_LSM6DS3TRC_GYRO_ORB_BUFSIZE;
   priv->gyro.enabled = false;
   priv->gyro.odr = ODR_OFF;
+  priv->gyro.last_odr = ODR_OFF;
   priv->gyro.fsr = LSM6DS3TRC_FSR_GY_245DPS;
   priv->gyro.dev = priv;
 
@@ -1486,6 +1510,7 @@ int lsm6ds3trc_register(FAR struct i2c_master_s *i2c, uint8_t addr,
   priv->accel.lower.nbuffer = CONFIG_SENSORS_LSM6DS3TRC_ACCEL_ORB_BUFSIZE;
   priv->accel.enabled = false;
   priv->accel.odr = ODR_OFF;
+  priv->accel.last_odr = ODR_OFF;
   priv->accel.fsr = LSM6DS3TRC_FSR_XL_4G; /* Default 4g, per project notes */
   priv->accel.dev = priv;
 
