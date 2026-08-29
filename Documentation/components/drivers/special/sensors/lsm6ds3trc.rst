@@ -132,6 +132,42 @@ sensor, read in the same burst transaction as whichever sub-sensor's
 sample triggered it -- it does not have an independent output data rate
 of its own in this driver.
 
+FIFO mode
+=========
+
+Setting ``CONFIG_SENSORS_LSM6DS3TRC_FIFO=y`` switches interrupt-driven
+delivery from one uORB event per data-ready interrupt to draining the
+chip's hardware FIFO on a watermark interrupt instead -- one interrupt and
+one I2C burst read per
+``CONFIG_SENSORS_LSM6DS3TRC_FIFO_WATERMARK`` samples, rather than per
+sample. This cuts interrupt and I2C-wakeup frequency roughly by the
+watermark size, at the cost of three limitations while it's on:
+
+- Both the accelerometer and gyroscope are forced to the same output
+  data rate. Whichever sub-sensor activates first sets it; a second
+  subscriber joins that rate instead of using its own.
+- Per-sample temperature isn't available -- the FIFO pattern doesn't
+  include it. One direct temperature read happens per drain and is
+  applied to every sample in that batch instead.
+- The chip's FIFO write trigger only fires while both the accelerometer
+  and the gyroscope are physically running, even if only one of them is
+  actually subscribed. This driver forces the unsubscribed sub-sensor
+  on at the shared rate to make the FIFO work at all -- it's still left
+  out of the FIFO pattern itself, so this doesn't cost extra I2C
+  bandwidth on drain, but it does mean FIFO mode cannot power down the
+  unused sub-sensor the way non-FIFO interrupt-driven mode can.
+
+.. warning::
+   ``CONFIG_SENSORS_LSM6DS3TRC_FIFO_WATERMARK`` is in samples, not raw
+   FIFO words, but it must not exceed
+   ``CONFIG_SENSORS_LSM6DS3TRC_ACCEL_ORB_BUFSIZE`` or
+   ``CONFIG_SENSORS_LSM6DS3TRC_GYRO_ORB_BUFSIZE`` -- a single drain can
+   push that many events into each topic's uORB ring buffer at once, and
+   a smaller buffer drops the oldest ones.
+
+FIFO mode only takes effect in interrupt-driven mode (a real ``attach()``
+in ``lsm6ds3trc_config_s``); it's silently unused in kthread polling mode.
+
 This sensor also has an additional command for gaining access to extra
 functionality.
 

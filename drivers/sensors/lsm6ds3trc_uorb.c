@@ -874,6 +874,24 @@ static void lsm6ds3trc_fifo_worker(FAR void *arg)
   if (status[1] & BIT_FIFO_STATUS2_OVER_RUN)
     {
       snerr("WARNING: LSM6DS3TR-C FIFO overrun, some samples were lost\n");
+
+      /* diff_words reads 0 here, not the FIFO's actual (still full)
+       * content -- confirmed on hardware (a forced read past this point
+       * recovers real, valid samples) and independently confirmed by
+       * ST's own engineers for this chip family: once Continuous mode
+       * genuinely overruns, DIFF_FIFO resets to 0 while OVER_RUN/WaterM/
+       * FIFO_FULL_SMART stay set (see ST's community forum, thread
+       * "LSM6DS3 FIFO status clarification", td-p/184022).
+       * Recovering the still-present data would mean assuming the
+       * FIFO is at capacity rather than trusting diff_words -- skipped
+       * here on purpose: with the small watermark this driver uses,
+       * reaching a real overrun at all means the drain has already
+       * fallen many seconds behind, and ST's own guidance for this
+       * condition is to avoid it via watermark sizing rather than
+       * recover from it. The mainline Linux st_lsm6dsx driver, for the
+       * same chip family, doesn't attempt recovery here either -- it
+       * only special-cases an empty FIFO, not an overrun one.
+       */
     }
 
   /* Round down to a whole number of pattern chunks -- never split one
