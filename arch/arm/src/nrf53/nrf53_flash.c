@@ -36,6 +36,9 @@
 
 #include "hardware/nrf53_ficr.h"
 #include "hardware/nrf53_nvmc.h"
+#ifdef CONFIG_NRF53_CACHE
+#  include "hardware/nrf53_cache.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -62,6 +65,35 @@ static inline uint32_t nrf53_get_page_size(void)
 static inline uint32_t nrf53_get_pages_num(void)
 {
   return getreg32(NRF53_FICR_INFO_CODESIZE);
+}
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/* The CACHE peripheral caches both instruction and data accesses towards
+ * flash, and does not observe NVMC programming.  A line held from before an
+ * erase or a write would otherwise satisfy the read-back that both paths use
+ * to verify what they just programmed -- up_progmem_ispageerased() reads a
+ * whole page, so the lines are commonly resident.
+ *
+ * Bypass the cache for the duration of the operation so the verify sees the
+ * array, then invalidate before re-enabling so later readers do too.
+ */
+
+static void nrf53_flash_cache_bypass(void)
+{
+#ifdef CONFIG_NRF53_CACHE
+  putreg32(0, NRF53_CACHE_ENABLE);
+#endif
+}
+
+static void nrf53_flash_cache_restore(void)
+{
+#ifdef CONFIG_NRF53_CACHE
+  putreg32(CACHE_INVALIDATE_INVALIDATE, NRF53_CACHE_INVALIDATE);
+  putreg32(CACHE_ENABLE_ENABLE, NRF53_CACHE_ENABLE);
+#endif
 }
 
 /****************************************************************************
@@ -212,6 +244,8 @@ ssize_t up_progmem_eraseblock(size_t block)
 
   page_address = up_progmem_getaddress(block);
 
+  nrf53_flash_cache_bypass();
+
   /* Enable erase mode */
 
   putreg32(NVMC_CONFIG_EEN, NRF53_NVMC_CONFIG);
@@ -244,10 +278,12 @@ ssize_t up_progmem_eraseblock(size_t block)
 
   if (up_progmem_ispageerased(block) == 0)
     {
+      nrf53_flash_cache_restore();
       return up_progmem_erasesize(block);
     }
   else
     {
+      nrf53_flash_cache_restore();
       return -EIO;
     }
 }
@@ -344,6 +380,8 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 
   addr += NRF53_FLASH_BASE;
 
+  nrf53_flash_cache_bypass();
+
   /* Begin flashing */
 
   for (; count; count -= 4, pword++, addr += 4)
@@ -378,9 +416,12 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 
       if (getreg32(addr) != *pword)
         {
+          nrf53_flash_cache_restore();
           return -EIO;
         }
     }
+
+  nrf53_flash_cache_restore();
 
   return written;
 }

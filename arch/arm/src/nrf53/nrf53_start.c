@@ -38,6 +38,7 @@
 #include "nvic.h"
 
 #include "nrf53_clockconfig.h"
+#include "hardware/nrf53_cache.h"
 #include "hardware/nrf53_nvmc.h"
 #include "hardware/nrf53_utils.h"
 #include "hardware/nrf53_uicr.h"
@@ -251,6 +252,16 @@ void __start(void)
 #ifdef CONFIG_NRF53_FLASH_PREFETCH
   nrf53_enable_icache(true);
   nrf53_enable_profile(true);
+#endif
+
+#ifdef CONFIG_NRF53_CACHE
+  /* Enable the application core CACHE peripheral.  The nrf53_enable_icache()
+   * path above drives NVMC ICACHECNF and is gated on NRF53_FLASH_PREFETCH,
+   * which depends on NRF53_NETCORE, so nothing else enables a cache on the
+   * application core.
+   */
+
+  putreg32(CACHE_ENABLE_ENABLE, NRF53_CACHE_ENABLE);
 #endif
 
 #ifdef CONFIG_ARCH_PERF_EVENTS
