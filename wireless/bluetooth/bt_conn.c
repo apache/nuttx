@@ -442,7 +442,7 @@ void bt_conn_send(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
       buf = bt_l2cap_create_pdu(conn);
 
       len = remaining;
-      if (len < g_btdev.le_mtu)
+      if (len > g_btdev.le_mtu)
         {
           len = g_btdev.le_mtu;
         }
