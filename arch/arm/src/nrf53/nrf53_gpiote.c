@@ -405,7 +405,7 @@ void nrf53_gpiote_set_ch_event(uint32_t pinset, int channel,
   inst = 0;
 #endif
 
-  rchan = (inst == 1) ? channel : (channel - GPIOTE_PER_CHANNEL);
+  rchan = (inst == 1) ? (channel - GPIOTE_PER_CHANNEL) : channel;
 
   /* NOTE: GPIOTE module has priority over GPIO module
    *       so GPIO configuration will be ignored
@@ -567,7 +567,7 @@ void nrf53_gpiote_set_task(uint32_t pinset, int channel,
   inst = 0;
 #endif
 
-  rchan = (inst == 1) ? channel : (channel - GPIOTE_PER_CHANNEL);
+  rchan = (inst == 1) ? (channel - GPIOTE_PER_CHANNEL) : channel;
 
   /* Select GPIOTE pin */
 
