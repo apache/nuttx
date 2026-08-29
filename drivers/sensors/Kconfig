@@ -1083,8 +1083,8 @@ config SENSORS_LSM6DS3TRC
 		Enable uORB driver support for the STM LSM6DS3TR-C 6-axis IMU
 		over I2C. Needs the high-priority work queue even in kthread
 		polling mode: the driver's interrupt handlers reference it
-		unconditionally (they're only dead code until a future phase wires
-		up INT1/INT2).
+		unconditionally, whether or not a board actually wires up INT1
+		to use them.
 
 if SENSORS_LSM6DS3TRC
 
@@ -1114,6 +1114,35 @@ config SENSORS_LSM6DS3TRC_GYRO_ORB_BUFSIZE
 	range 0 500
 	---help---
 		The circular buffer size for the gyroscope uORB measurements
+
+config SENSORS_LSM6DS3TRC_FIFO
+	bool "LSM6DS3TR-C FIFO drain (interrupt mode only)"
+	default n
+	---help---
+		Drain the chip's hardware FIFO on a watermark interrupt instead of
+		pushing one uORB event per physical sample on every data-ready
+		interrupt. Cuts the number of I2C transactions and interrupt
+		wakeups by roughly the watermark size, at the cost of both
+		sub-sensors being forced to the same output data rate while this
+		is on (whichever one is activated first sets it; the other joins
+		it) and per-sample temperature (the FIFO pattern doesn't include
+		it; one direct temperature read per drain is applied to the whole
+		batch instead). Only takes effect when the board registers this
+		driver with a real interrupt attach() -- it's silently unused in
+		kthread polling mode.
+
+config SENSORS_LSM6DS3TRC_FIFO_WATERMARK
+	int "LSM6DS3TR-C FIFO watermark (samples)"
+	default 8
+	range 1 300
+	depends on SENSORS_LSM6DS3TRC_FIFO
+	---help---
+		How many samples (not raw FIFO words) accumulate before the FIFO
+		threshold interrupt fires and a drain happens. Keep this at or
+		below CONFIG_SENSORS_LSM6DS3TRC_ACCEL_ORB_BUFSIZE and
+		CONFIG_SENSORS_LSM6DS3TRC_GYRO_ORB_BUFSIZE -- one drain can push
+		up to this many events into each topic's uORB ring buffer in a
+		single burst, and a smaller ring buffer will drop the oldest ones.
 
 endif # SENSORS_LSM6DS3TRC
 
