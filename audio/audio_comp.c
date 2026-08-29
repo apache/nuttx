@@ -193,6 +193,7 @@ static int audio_comp_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
           FAR struct audio_caps_s dup = *caps;
 
           int tmp = lower[i]->ops->getcaps(lower[i], type, &dup);
+
           if (tmp == -ENOTTY)
             {
               continue;
@@ -294,6 +295,7 @@ static int audio_comp_shutdown(FAR struct audio_lowerhalf_s *dev)
       if (lower[i]->ops->shutdown)
         {
           int tmp = lower[i]->ops->shutdown(lower[i]);
+
           if (tmp == -ENOTTY)
             {
               continue;
@@ -680,6 +682,7 @@ static int audio_comp_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
       if (lower[i]->ops->ioctl)
         {
           int tmp = lower[i]->ops->ioctl(lower[i], cmd, arg);
+
           if (tmp == -ENOTTY)
             {
               continue;

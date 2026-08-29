@@ -208,43 +208,43 @@ static int sixlowpan_uncompress_ipv6proto(FAR struct iob_s *iob,
   switch (ipv6->proto)
     {
 #ifdef CONFIG_NET_TCP
-    case IP_PROTO_TCP:
-      {
-        FAR struct tcp_hdr_s *tcp =
-          (FAR struct tcp_hdr_s *)(fptr + g_frame_hdrlen);
+      case IP_PROTO_TCP:
+        {
+          FAR struct tcp_hdr_s *tcp =
+            (FAR struct tcp_hdr_s *)(fptr + g_frame_hdrlen);
 
-        /* Check if the frame is too short */
+          /* Check if the frame is too short */
 
-        if (fptr + g_frame_hdrlen + sizeof(struct tcp_hdr_s) > endofframe)
-          {
-            nerr("ERROR: Frame too short for TCP header\n");
-            return -EINVAL;
-          }
+          if (fptr + g_frame_hdrlen + sizeof(struct tcp_hdr_s) > endofframe)
+            {
+              nerr("ERROR: Frame too short for TCP header\n");
+              return -EINVAL;
+            }
 
-        /* The TCP header length is encoded in the top 4 bits of the
-         * tcpoffset field (in units of 32-bit words).
-         */
+          /* The TCP header length is encoded in the top 4 bits of the
+           * tcpoffset field (in units of 32-bit words).
+           */
 
-        protosize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
-      }
-      break;
+          protosize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
+        }
+        break;
 #endif
 
 #ifdef CONFIG_NET_UDP
-    case IP_PROTO_UDP:
-      protosize = sizeof(struct udp_hdr_s);
-      break;
+      case IP_PROTO_UDP:
+        protosize = sizeof(struct udp_hdr_s);
+        break;
 #endif
 
 #ifdef CONFIG_NET_ICMPv6
-    case IP_PROTO_ICMP6:
-      protosize = sizeof(struct icmpv6_hdr_s);
-      break;
+      case IP_PROTO_ICMP6:
+        protosize = sizeof(struct icmpv6_hdr_s);
+        break;
 #endif
 
-    default:
-      nwarn("WARNING: Unrecognized proto: %u\n", ipv6->proto);
-      return 0;
+      default:
+        nwarn("WARNING: Unrecognized proto: %u\n", ipv6->proto);
+        return 0;
     }
 
   /* Check if the TCP header exceeds the frame size */
@@ -349,133 +349,136 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
   fragptr = fptr + hdrsize;
   switch ((GETUINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0xf800) >> 8)
     {
-    /* First fragment of new reassembly */
+      /* First fragment of new reassembly */
 
-    case SIXLOWPAN_DISPATCH_FRAG1:
-      {
-        /* Set up for the reassembly */
+      case SIXLOWPAN_DISPATCH_FRAG1:
+        {
+          /* Set up for the reassembly */
 
-        fragsize = GETUINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0x07ff;
-        fragtag  = GETUINT16(fragptr, SIXLOWPAN_FRAG_TAG);
-        g_frame_hdrlen += SIXLOWPAN_FRAG1_HDR_LEN;
+          fragsize = GETUINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) &
+                     0x07ff;
+          fragtag  = GETUINT16(fragptr, SIXLOWPAN_FRAG_TAG);
+          g_frame_hdrlen += SIXLOWPAN_FRAG1_HDR_LEN;
 
-        ninfo("FRAG1: fragsize=%d fragtag=%d fragoffset=%d\n",
-              fragsize, fragtag, fragoffset);
+          ninfo("FRAG1: fragsize=%d fragtag=%d fragoffset=%d\n",
+                fragsize, fragtag, fragoffset);
 
-        /* Drop any zero length fragments */
+          /* Drop any zero length fragments */
 
-        if (fragsize == 0)
-          {
-            nwarn("WARNING: Dropping zero-length 6LoWPAN fragment\n");
-            return INPUT_PARTIAL;
-          }
+          if (fragsize == 0)
+            {
+              nwarn("WARNING: Dropping zero-length 6LoWPAN fragment\n");
+              return INPUT_PARTIAL;
+            }
 
-        /* Drop the packet if it cannot fit into the d_buf */
+          /* Drop the packet if it cannot fit into the d_buf */
 
-        if (fragsize > CONFIG_NET_6LOWPAN_PKTSIZE)
-          {
-            nwarn("WARNING:  Reassembled packet size exceeds "
-                  "CONFIG_NET_6LOWPAN_PKTSIZE\n");
-            return -ENOSPC;
-          }
+          if (fragsize > CONFIG_NET_6LOWPAN_PKTSIZE)
+            {
+              nwarn("WARNING:  Reassembled packet size exceeds "
+                    "CONFIG_NET_6LOWPAN_PKTSIZE\n");
+              return -ENOSPC;
+            }
 
-        /* Extract the source address from the 'metadata'. */
+          /* Extract the source address from the 'metadata'. */
 
-        ret = sixlowpan_extract_srcaddr(radio, metadata, &fragsrc);
-        if (ret < 0)
-          {
-            nerr("ERROR: sixlowpan_extract_srcaddr failed: %d\n", ret);
-            return ret;
-          }
+          ret = sixlowpan_extract_srcaddr(radio, metadata, &fragsrc);
+          if (ret < 0)
+            {
+              nerr("ERROR: sixlowpan_extract_srcaddr failed: %d\n", ret);
+              return ret;
+            }
 
-        /* Allocate a new reassembly buffer */
+          /* Allocate a new reassembly buffer */
 
-        reass = sixlowpan_reass_allocate(fragtag, &fragsrc);
-        if (reass == NULL)
-          {
-            nerr("ERROR: Failed to allocate a reassembly buffer\n");
-            return -ENOMEM;
-          }
+          reass = sixlowpan_reass_allocate(fragtag, &fragsrc);
+          if (reass == NULL)
+            {
+              nerr("ERROR: Failed to allocate a reassembly buffer\n");
+              return -ENOMEM;
+            }
 
-        radio->r_dev.d_buf = reass->rb_buf;
-        radio->r_dev.d_len = 0;
-        reass->rb_pktlen   = fragsize;
+          radio->r_dev.d_buf = reass->rb_buf;
+          radio->r_dev.d_len = 0;
+          reass->rb_pktlen   = fragsize;
 
-        /* Indicate the first fragment of the reassembly */
+          /* Indicate the first fragment of the reassembly */
 
-        bptr               = reass->rb_buf;
-        isfrag1            = true;
-        isfrag             = true;
-      }
-      break;
+          bptr               = reass->rb_buf;
+          isfrag1            = true;
+          isfrag             = true;
+        }
+        break;
 
-    case SIXLOWPAN_DISPATCH_FRAGN:
-      {
-        /* Get offset, tag, size.  Offset is in units of 8 bytes. */
+      case SIXLOWPAN_DISPATCH_FRAGN:
+        {
+          /* Get offset, tag, size.  Offset is in units of 8 bytes. */
 
-        fragoffset = fragptr[SIXLOWPAN_FRAG_OFFSET];
-        fragtag  = GETUINT16(fragptr, SIXLOWPAN_FRAG_TAG);
-        fragsize = GETUINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0x07ff;
-        g_frame_hdrlen += SIXLOWPAN_FRAGN_HDR_LEN;
+          fragoffset = fragptr[SIXLOWPAN_FRAG_OFFSET];
+          fragtag  = GETUINT16(fragptr, SIXLOWPAN_FRAG_TAG);
+          fragsize = GETUINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) &
+                     0x07ff;
+          g_frame_hdrlen += SIXLOWPAN_FRAGN_HDR_LEN;
 
-        /* Extract the source address from the 'metadata'. */
+          /* Extract the source address from the 'metadata'. */
 
-        ret = sixlowpan_extract_srcaddr(radio, metadata, &fragsrc);
-        if (ret < 0)
-          {
-            nerr("ERROR: sixlowpan_extract_srcaddr failed: %d\n", ret);
-            return ret;
-          }
+          ret = sixlowpan_extract_srcaddr(radio, metadata, &fragsrc);
+          if (ret < 0)
+            {
+              nerr("ERROR: sixlowpan_extract_srcaddr failed: %d\n", ret);
+              return ret;
+            }
 
-        /* Find the existing reassembly buffer
-         * with the same tag and source address
+          /* Find the existing reassembly buffer
+           * with the same tag and source address
+           */
+
+          reass = sixlowpan_reass_find(fragtag, &fragsrc);
+          if (reass == NULL)
+            {
+              nerr("ERROR: Failed to find a reassembly buffer for "
+                   "tag=%04x\n", fragtag);
+              return -ENOENT;
+            }
+
+          if (fragsize != reass->rb_pktlen)
+            {
+              /* The packet is a fragment but its size does not match. */
+
+              nwarn("WARNING: Dropping 6LoWPAN packet. "
+                    "Bad fragsize: %u vs %u\n",
+                    fragsize, reass->rb_pktlen);
+              ret = -EPERM;
+              goto errout_with_reass;
+            }
+
+          radio->r_dev.d_buf  = reass->rb_buf;
+          radio->r_dev.d_len  = 0;
+
+          ninfo("FRAGN: fragsize=%d fragtag=%d fragoffset=%d\n",
+                fragsize, fragtag, fragoffset);
+          ninfo("FRAGN: rb_accumlen=%d paysize=%u fragsize=%u\n",
+                reass->rb_accumlen, iob->io_len - g_frame_hdrlen, fragsize);
+
+          /* Indicate that this frame is a another fragment for reassembly */
+
+          bptr   = g_bitbucket;
+          isfrag = true;
+        }
+        break;
+
+      /* Not a fragment */
+
+      default:
+        /* We still need a packet buffer.  But in this case, the driver
+         * should have provided one.
          */
 
-        reass = sixlowpan_reass_find(fragtag, &fragsrc);
-        if (reass == NULL)
-          {
-            nerr("ERROR: Failed to find a reassembly buffer for tag=%04x\n",
-                 fragtag);
-            return -ENOENT;
-          }
-
-       if (fragsize != reass->rb_pktlen)
-        {
-          /* The packet is a fragment but its size does not match. */
-
-          nwarn("WARNING: Dropping 6LoWPAN packet. Bad fragsize: %u vs %u\n",
-                fragsize, reass->rb_pktlen);
-          ret = -EPERM;
-          goto errout_with_reass;
-        }
-
-        radio->r_dev.d_buf  = reass->rb_buf;
-        radio->r_dev.d_len  = 0;
-
-        ninfo("FRAGN: fragsize=%d fragtag=%d fragoffset=%d\n",
-              fragsize, fragtag, fragoffset);
-        ninfo("FRAGN: rb_accumlen=%d paysize=%u fragsize=%u\n",
-              reass->rb_accumlen, iob->io_len - g_frame_hdrlen, fragsize);
-
-        /* Indicate that this frame is a another fragment for reassembly */
-
-        bptr   = g_bitbucket;
-        isfrag = true;
-      }
-      break;
-
-    /* Not a fragment */
-
-    default:
-      /* We still need a packet buffer.  But in this case, the driver should
-       * have provided one.
-       */
-
-      DEBUGASSERT(radio->r_dev.d_buf != NULL);
-      reass = (FAR struct sixlowpan_reassbuf_s *)radio->r_dev.d_buf;
-      reass->rb_pool = REASS_POOL_RADIO;
-      bptr  = reass->rb_buf;
-      break;
+        DEBUGASSERT(radio->r_dev.d_buf != NULL);
+        reass = (FAR struct sixlowpan_reassbuf_s *)radio->r_dev.d_buf;
+        reass->rb_pool = REASS_POOL_RADIO;
+        bptr  = reass->rb_buf;
+        break;
     }
 
   /* Process next dispatch and headers */

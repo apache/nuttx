@@ -561,6 +561,7 @@ static int netlink_list_conntrack(NETLINK_HANDLE handle,
 {
   struct nfnl_info_s info;
   uint8_t type = NFNL_MSG_TYPE(req->hdr.nlmsg_type);
+
   if (type != IPCTNL_MSG_CT_GET)
     {
       return -ENOSYS;

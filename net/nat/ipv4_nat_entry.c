@@ -125,6 +125,7 @@ ipv4_nat_entry_create(uint8_t protocol,
                       in_addr_t peer_ip, uint16_t peer_port)
 {
   FAR ipv4_nat_entry_t *entry = kmm_malloc(sizeof(ipv4_nat_entry_t));
+
   if (entry == NULL)
     {
       nwarn("WARNING: Failed to allocate IPv4 NAT entry\n");

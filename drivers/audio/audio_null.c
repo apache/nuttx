@@ -395,6 +395,7 @@ static int null_configure(FAR struct audio_lowerhalf_s *dev,
 #endif
 {
   FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
+
   audinfo("ac_type: %d\n", caps->ac_type);
 
   if (priv->mqname[0] == '\0')
@@ -427,48 +428,48 @@ static int null_configure(FAR struct audio_lowerhalf_s *dev,
 
   switch (caps->ac_type)
     {
-    case AUDIO_TYPE_FEATURE:
-      audinfo("  AUDIO_TYPE_FEATURE\n");
+      case AUDIO_TYPE_FEATURE:
+        audinfo("  AUDIO_TYPE_FEATURE\n");
 
-      /* Process based on Feature Unit */
+        /* Process based on Feature Unit */
 
-      switch (caps->ac_format.hw)
-        {
+        switch (caps->ac_format.hw)
+          {
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
-        case AUDIO_FU_VOLUME:
-          audinfo("    Volume: %d\n", caps->ac_controls.hw[0]);
-          break;
+            case AUDIO_FU_VOLUME:
+              audinfo("    Volume: %d\n", caps->ac_controls.hw[0]);
+              break;
 #endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
 
 #ifndef CONFIG_AUDIO_EXCLUDE_TONE
-        case AUDIO_FU_BASS:
-          audinfo("    Bass: %d\n", caps->ac_controls.b[0]);
-          break;
+            case AUDIO_FU_BASS:
+              audinfo("    Bass: %d\n", caps->ac_controls.b[0]);
+              break;
 
-        case AUDIO_FU_TREBLE:
-          audinfo("    Treble: %d\n", caps->ac_controls.b[0]);
-          break;
+            case AUDIO_FU_TREBLE:
+              audinfo("    Treble: %d\n", caps->ac_controls.b[0]);
+              break;
 #endif /* CONFIG_AUDIO_EXCLUDE_TONE */
 
-        default:
-          auderr("    ERROR: Unrecognized feature unit\n");
-          break;
-        }
-      break;
+            default:
+              auderr("    ERROR: Unrecognized feature unit\n");
+              break;
+          }
+        break;
 
-    case AUDIO_TYPE_OUTPUT:
-    case AUDIO_TYPE_INPUT:
-      priv->scaler = caps->ac_channels
-                   * caps->ac_controls.hw[0]
-                   * caps->ac_controls.b[2] / 8;
-      audinfo("    Number of channels: %u\n", caps->ac_channels);
-      audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
-      audinfo("    Sample width:       %u\n", caps->ac_controls.b[2]);
-      break;
+      case AUDIO_TYPE_OUTPUT:
+      case AUDIO_TYPE_INPUT:
+        priv->scaler = caps->ac_channels
+                     * caps->ac_controls.hw[0]
+                     * caps->ac_controls.b[2] / 8;
+        audinfo("    Number of channels: %u\n", caps->ac_channels);
+        audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
+        audinfo("    Sample width:       %u\n", caps->ac_controls.b[2]);
+        break;
 
-    case AUDIO_TYPE_PROCESSING:
-      audinfo("  AUDIO_TYPE_PROCESSING:\n");
-      break;
+      case AUDIO_TYPE_PROCESSING:
+        audinfo("  AUDIO_TYPE_PROCESSING:\n");
+        break;
     }
 
   audinfo("Return OK\n");
@@ -789,7 +790,7 @@ static int null_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
         }
         break;
 
-       /* Report our preferred buffer size and quantity */
+        /* Report our preferred buffer size and quantity */
 
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
       case AUDIOIOC_GETBUFFERINFO:

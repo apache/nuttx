@@ -200,55 +200,57 @@ static ssize_t usrsock_handle_event(FAR const void *buffer, size_t len)
 
   switch (common->msgid)
     {
-    case USRSOCK_MESSAGE_SOCKET_EVENT:
-      {
-        FAR const struct usrsock_message_socket_event_s *hdr = buffer;
-        FAR struct usrsock_conn_s *conn;
-        int ret;
+      case USRSOCK_MESSAGE_SOCKET_EVENT:
+        {
+          FAR const struct usrsock_message_socket_event_s *hdr = buffer;
+          FAR struct usrsock_conn_s *conn;
+          int ret;
 
-        if (len < sizeof(*hdr))
-          {
-            nerr("message too short, %zu < %zu.\n", len, sizeof(*hdr));
-            return -EINVAL;
-          }
+          if (len < sizeof(*hdr))
+            {
+              nerr("message too short, %zu < %zu.\n", len, sizeof(*hdr));
+              return -EINVAL;
+            }
 
-        len = sizeof(*hdr);
+          len = sizeof(*hdr);
 
-        /* Get corresponding usrsock connection. */
+          /* Get corresponding usrsock connection. */
 
-        conn = usrsock_active(hdr->usockid);
-        if (!conn)
-          {
-            nerr("no active connection for usockid=%d, events=%x.\n",
-                 hdr->usockid, hdr->head.events);
+          conn = usrsock_active(hdr->usockid);
+          if (!conn)
+            {
+              nerr("no active connection for usockid=%d, events=%x.\n",
+                   hdr->usockid, hdr->head.events);
 
-            /* We may receive event after socket close if message from lower
-             * layer is out of order, but it's OK to ignore such error.
-             */
+              /* We may receive event after socket close if message from
+               * lower layer is out of order, but it's OK to ignore such
+               * error.
+               */
 
-            return len;
-          }
+              return len;
+            }
 
 #ifdef CONFIG_DEV_RANDOM
-        /* Add randomness. */
+          /* Add randomness. */
 
-        add_sw_randomness((hdr->head.events << 16) - hdr->usockid);
+          add_sw_randomness((hdr->head.events << 16) - hdr->usockid);
 #endif
 
-        /* Handle event. */
+          /* Handle event. */
 
-        conn->resp.events = hdr->head.events & ~USRSOCK_EVENT_INTERNAL_MASK;
-        ret = usrsock_event(conn);
-        if (ret < 0)
-          {
-            return ret;
-          }
-      }
-      break;
+          conn->resp.events = hdr->head.events &
+                              ~USRSOCK_EVENT_INTERNAL_MASK;
+          ret = usrsock_event(conn);
+          if (ret < 0)
+            {
+              return ret;
+            }
+        }
+        break;
 
-    default:
-      nerr("Unknown event type: %d\n", common->msgid);
-      return -EINVAL;
+      default:
+        nerr("Unknown event type: %d\n", common->msgid);
+        return -EINVAL;
     }
 
   return len;
@@ -444,21 +446,21 @@ static ssize_t usrsock_handle_req_response(FAR const void *buffer,
 
   switch (hdr->head.msgid)
     {
-    case USRSOCK_MESSAGE_RESPONSE_ACK:
-      hdrlen = sizeof(struct usrsock_message_req_ack_s);
-      handle_response = &usrsock_handle_response;
-      break;
+      case USRSOCK_MESSAGE_RESPONSE_ACK:
+        hdrlen = sizeof(struct usrsock_message_req_ack_s);
+        handle_response = &usrsock_handle_response;
+        break;
 
-    case USRSOCK_MESSAGE_RESPONSE_DATA_ACK:
-      hdrlen = sizeof(struct usrsock_message_datareq_ack_s);
-      handle_response = &usrsock_handle_datareq_response;
-      break;
+      case USRSOCK_MESSAGE_RESPONSE_DATA_ACK:
+        hdrlen = sizeof(struct usrsock_message_datareq_ack_s);
+        handle_response = &usrsock_handle_datareq_response;
+        break;
 
-    default:
-      nerr("unknown message type: %d, flags: %d, xid: %" PRIu32 ", "
-           "result: %" PRId32 "\n",
-           hdr->head.msgid, hdr->head.flags, hdr->xid, hdr->result);
-      return -EINVAL;
+      default:
+        nerr("unknown message type: %d, flags: %d, xid: %" PRIu32 ", "
+             "result: %" PRId32 "\n",
+             hdr->head.msgid, hdr->head.flags, hdr->xid, hdr->result);
+        return -EINVAL;
     }
 
   if (len < hdrlen)

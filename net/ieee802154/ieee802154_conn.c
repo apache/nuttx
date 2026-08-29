@@ -232,9 +232,9 @@ FAR struct ieee802154_conn_s *
               }
             break;
 
-           default:
-             nerr("ERROR: Invalid address mode: %u\n", conn->raddr.s_mode);
-             return NULL;
+          default:
+            nerr("ERROR: Invalid address mode: %u\n", conn->raddr.s_mode);
+            return NULL;
         }
     }
 

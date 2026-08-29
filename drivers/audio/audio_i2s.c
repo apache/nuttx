@@ -155,27 +155,27 @@ static int audio_i2s_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
         if (caps->ac_subtype == AUDIO_TYPE_QUERY)
           {
-              /* We don't decode any formats!  Only something above us in
-               * the audio stream can perform decoding on our behalf.
-               */
+            /* We don't decode any formats!  Only something above us in
+             * the audio stream can perform decoding on our behalf.
+             */
 
-              /* The types of audio units we implement */
+            /* The types of audio units we implement */
 
-              if (audio_i2s->playback)
-                {
-                  caps->ac_controls.b[0] = AUDIO_TYPE_OUTPUT;
-                }
-              else
-                {
-                  caps->ac_controls.b[0] = AUDIO_TYPE_INPUT;
-                }
+            if (audio_i2s->playback)
+              {
+                caps->ac_controls.b[0] = AUDIO_TYPE_OUTPUT;
+              }
+            else
+              {
+                caps->ac_controls.b[0] = AUDIO_TYPE_INPUT;
+              }
 
-              caps->ac_format.hw = 1 << (AUDIO_FMT_PCM - 1);
-              break;
+            caps->ac_format.hw = 1 << (AUDIO_FMT_PCM - 1);
+            break;
           }
 
-         caps->ac_controls.b[0] = AUDIO_SUBFMT_END;
-         break;
+        caps->ac_controls.b[0] = AUDIO_SUBFMT_END;
+        break;
 
         /* Provide capabilities of our OUTPUT unit */
 
@@ -186,11 +186,11 @@ static int audio_i2s_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
           {
             /* Report the Sample rates we support */
 
-              caps->ac_controls.hw[0] = AUDIO_SAMP_RATE_DEF_ALL;
+            caps->ac_controls.hw[0] = AUDIO_SAMP_RATE_DEF_ALL;
 
-              caps->ac_channels = 2;
+            caps->ac_channels = 2;
 
-              break;
+            break;
           }
 
       default:

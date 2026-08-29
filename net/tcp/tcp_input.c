@@ -763,6 +763,7 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
       if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_SENT)
         {
           uint32_t ackseq;
+
           if ((tcp->flags & TCP_ACK) != 0)
             {
               ackseq = tcp_getsequence(tcp->ackno);
@@ -1221,6 +1222,7 @@ found:
            */
 
           uint32_t sndseq = tcp_getsequence(conn->sndseq);
+
           if (TCP_SEQ_LTE(sndseq, ackseq))
             {
               ninfo("sndseq: %08" PRIx32 "->%08" PRIx32
@@ -1239,6 +1241,7 @@ found:
       if (conn->nrtx == 0)
         {
           signed char m;
+
           m = conn->rto - conn->timer;
 
           /* This is taken directly from VJs original code in his paper */
@@ -1578,15 +1581,15 @@ skip_rtt:
                 dev->d_urglen = dev->d_len;
               }
 
-             /* The d_len field contains the length of the incoming data.
-              * d_urgdata points to the "urgent" data at the beginning of
-              * the payload; d_appdata field points to the any "normal" data
-              * that may follow the urgent data.
-              *
-              * NOTE: If the urgent data continues in the next packet, then
-              * d_len will be zero and d_appdata will point past the end of
-              * the payload (which is OK).
-              */
+            /* The d_len field contains the length of the incoming data.
+             * d_urgdata points to the "urgent" data at the beginning of
+             * the payload; d_appdata field points to the any "normal" data
+             * that may follow the urgent data.
+             *
+             * NOTE: If the urgent data continues in the next packet, then
+             * d_len will be zero and d_appdata will point past the end of
+             * the payload (which is OK).
+             */
 
             net_incr32(conn->rcvseq, dev->d_urglen);
             dev->d_len     -= dev->d_urglen;
@@ -1762,9 +1765,9 @@ skip_rtt:
       case TCP_CLOSE_WAIT:
 #ifdef CONFIG_NET_TCP_KEEPALIVE
         /* If the established socket receives an ACK or any kind of data
-        * from the remote peer (whether we accept it or not), then reset
-        * the keep alive timer.
-        */
+         * from the remote peer (whether we accept it or not), then reset
+         * the keep alive timer.
+         */
 
         if (conn->keepalive && (tcp->flags & TCP_ACK) != 0)
           {

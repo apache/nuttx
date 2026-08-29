@@ -132,6 +132,7 @@ static int local_sockif_alloc(FAR struct socket *psock)
   /* Allocate the local connection structure */
 
   FAR struct local_conn_s *conn;
+
   local_lock();
   conn = local_alloc();
   local_unlock();
@@ -494,7 +495,7 @@ static int local_getpeername(FAR struct socket *psock,
             }
           else
             {
-               strlcpy(unaddr->sun_path, peer->lc_path, namelen);
+              strlcpy(unaddr->sun_path, peer->lc_path, namelen);
             }
 
           *addrlen = sizeof(sa_family_t) + namelen;
@@ -1031,7 +1032,7 @@ static int local_socketpair(FAR struct socket *psocks[2])
 #ifdef CONFIG_NET_LOCAL_STREAM
                            = local_generate_instance_id();
 #else
-                           = -1;
+  = -1;
 #endif
 
   /* Create the FIFOs needed for the connection */
@@ -1132,6 +1133,7 @@ static int local_shutdown(FAR struct socket *psock, int how)
       case SOCK_STREAM:
         {
           FAR struct local_conn_s *conn = psock->s_conn;
+
           if (how & SHUT_RD)
             {
               if (conn->lc_infile.f_inode != NULL)

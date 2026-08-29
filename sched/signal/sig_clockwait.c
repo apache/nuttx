@@ -261,8 +261,8 @@ int nxsig_clockwait(int clockid, int flags,
           expect = clock_time2ticks(rqtp);
         }
 
-        wd_start_abstick(&rtcb->waitdog, expect,
-                         nxsig_timeout, (uintptr_t)rtcb);
+      wd_start_abstick(&rtcb->waitdog, expect,
+                       nxsig_timeout, (uintptr_t)rtcb);
     }
 
   /* Remove the tcb task from the ready-to-run list. */

@@ -224,21 +224,21 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
         {
 #endif
 
-      /* If d_sndlen > 0, the application has data to be sent. */
+          /* If d_sndlen > 0, the application has data to be sent. */
 
-      if (dev->d_sndlen > 0)
-        {
-          /* Remember how much data we send out now so that we know
-           * when everything has been acknowledged.  Just increment the
-           * amount of data sent.  This will be needed in sequence number
-           * calculations and we know that this is not a re-transmission.
-           * Retransmissions do not go through this path.
-           */
+          if (dev->d_sndlen > 0)
+            {
+              /* Remember how much data we send out now so that we know
+               * when everything has been acknowledged.  Just increment the
+               * amount of data sent.  This will be needed in sequence number
+               * calculations and we know that this is not a re-transmission.
+               * Retransmissions do not go through this path.
+               */
 
-          conn->tx_unacked += dev->d_sndlen;
-        }
+              conn->tx_unacked += dev->d_sndlen;
+            }
 
-      conn->nrtx = 0;
+          conn->nrtx = 0;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
         }

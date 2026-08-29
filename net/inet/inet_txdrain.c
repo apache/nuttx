@@ -85,7 +85,7 @@ int inet_txdrain(FAR struct socket *psock, unsigned int timeout)
         break;
 #endif
 
-     /* Other protocols do no support write buffering */
+        /* Other protocols do no support write buffering */
 
       default:
         break;

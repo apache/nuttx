@@ -227,6 +227,7 @@ retry:
 static inline void nxtask_inherit_affinity(FAR struct tcb_s *tcb)
 {
   FAR struct tcb_s *rtcb = this_task();
+
   tcb->affinity = rtcb->affinity;
 }
 #else
@@ -359,6 +360,7 @@ static inline void nxtask_save_parent(FAR struct tcb_s *tcb, uint8_t ttype)
 static inline void nxtask_dup_dspace(FAR struct tcb_s *tcb)
 {
   FAR struct tcb_s *rtcb = this_task();
+
   if (rtcb->dspace != NULL)
     {
       /* Copy the D-Space structure reference and increment the reference

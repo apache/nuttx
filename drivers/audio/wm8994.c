@@ -215,7 +215,9 @@ static const struct audio_ops_s g_audioops =
   wm8994_release        /* release        */
 };
 
-/* Private Functions */
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /* Name: wm8994_readreg
  *
@@ -269,16 +271,17 @@ uint16_t wm8994_readreg(FAR struct wm8994_dev_s *priv, uint16_t regaddr)
            */
 
           if (retries < MAX_RETRIES)
-          {
-            audwarn("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
+            {
+              audwarn("WARNING: I2C_TRANSFER failed: %d ... Resetting\n",
+                      ret);
 
-            ret = I2C_RESET(priv->i2c);
+              ret = I2C_RESET(priv->i2c);
               if (ret < 0)
-              {
-                auderr("ERROR: I2C_RESET failed: %d\n", ret);
-                break;
-              }
-          }
+                {
+                  auderr("ERROR: I2C_RESET failed: %d\n", ret);
+                  break;
+                }
+            }
 #else
           auderr("ERROR: I2C_TRANSFER failed: %d\n", ret);
 #endif
@@ -394,48 +397,48 @@ static void wm8994_setsamplefreq(FAR struct wm8994_dev_s *priv)
 
   switch (priv->samprate)
     {
-    case 8000:
-      regval = WM8994_AIF1_SR_8K;
-      break;
-    case 11025:
-      regval = WM8994_AIF1_SR_11K;
-      break;
-    case 12000:
-      regval = WM8994_AIF1_SR_12K;
-      break;
-    case 16000:
-      regval = WM8994_AIF1_SR_16K;
-      break;
-    case 22050:
-      regval = WM8994_AIF1_SR_22K;
-      break;
-    case 24000:
-      regval = WM8994_AIF1_SR_24K;
-      break;
-    case 32000:
-      regval = WM8994_AIF1_SR_32K;
-      break;
-    case 44100:
-      regval = WM8994_AIF1_SR_44K;
-      break;
-    case 48000:
-      regval = WM8994_AIF1_SR_48K;
-      break;
+      case 8000:
+        regval = WM8994_AIF1_SR_8K;
+        break;
+      case 11025:
+        regval = WM8994_AIF1_SR_11K;
+        break;
+      case 12000:
+        regval = WM8994_AIF1_SR_12K;
+        break;
+      case 16000:
+        regval = WM8994_AIF1_SR_16K;
+        break;
+      case 22050:
+        regval = WM8994_AIF1_SR_22K;
+        break;
+      case 24000:
+        regval = WM8994_AIF1_SR_24K;
+        break;
+      case 32000:
+        regval = WM8994_AIF1_SR_32K;
+        break;
+      case 44100:
+        regval = WM8994_AIF1_SR_44K;
+        break;
+      case 48000:
+        regval = WM8994_AIF1_SR_48K;
+        break;
 
-      /* If these frequencies should be added, the sample rate
-       * would need to be changed to 32 bit throughout the code
-       */
+        /* If these frequencies should be added, the sample rate
+         * would need to be changed to 32 bit throughout the code
+         */
 
 #if 0
-    case 88200:
-      regval = WM8994_AIF1_SR_88K;
-      break;
-    case 96000:
-      regval = WM8994_AIF1_SR_96K;
-      break;
+      case 88200:
+        regval = WM8994_AIF1_SR_88K;
+        break;
+      case 96000:
+        regval = WM8994_AIF1_SR_96K;
+        break;
 #endif
-    default:
-      regval = WM8994_AIF1_SR_11K; /* 11025 as default */
+      default:
+        regval = WM8994_AIF1_SR_11K; /* 11025 as default */
     }
 
   /* AIF1CLK / fs ratio = 256 */
@@ -530,6 +533,7 @@ static void wm8994_setvolume(FAR struct wm8994_dev_s *priv, uint16_t volume,
     {
       regval |= WM8994_HPOUT1L_MUTE_N_NO;
     }
+
   wm8994_writereg(priv, WM8994_LEFT_OUTPUT_VOL, regval);
   wm8994_writereg(priv, WM8994_SPEAKER_VOL_LEFT, regval);
 
@@ -538,6 +542,7 @@ static void wm8994_setvolume(FAR struct wm8994_dev_s *priv, uint16_t volume,
     {
       regval |= WM8994_HPOUT1R_MUTE_N_NO;
     }
+
   wm8994_writereg(priv, WM8994_RIGHT_OUTPUT_VOL, regval);
   wm8994_writereg(priv, WM8994_SPEAKER_VOL_RIGHT, regval);
 
@@ -837,153 +842,157 @@ static int wm8994_configure(FAR struct audio_lowerhalf_s *dev,
 
   switch (caps->ac_type)
     {
-    case AUDIO_TYPE_FEATURE:
-      audinfo("  AUDIO_TYPE_FEATURE\n");
+      case AUDIO_TYPE_FEATURE:
+        audinfo("  AUDIO_TYPE_FEATURE\n");
 
-      /* Process based on Feature Unit */
+        /* Process based on Feature Unit */
 
-      switch (caps->ac_format.hw)
-        {
-#ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
-        case AUDIO_FU_VOLUME:
+        switch (caps->ac_format.hw)
           {
-            /* Set the volume */
-
-            uint16_t volume = caps->ac_controls.hw[0];
-            audinfo("    Volume: %d\n", volume);
-
-            if (volume >= 0 && volume <= 1000)
+#ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
+            case AUDIO_FU_VOLUME:
               {
-                /* Scale the volume setting to the range {0.. 63} */
+                /* Set the volume */
 
-                wm8994_setvolume(priv, (63 * volume / 1000), priv->mute);
+                uint16_t volume = caps->ac_controls.hw[0];
+
+                audinfo("    Volume: %d\n", volume);
+
+                if (volume >= 0 && volume <= 1000)
+                  {
+                    /* Scale the volume setting to the range {0.. 63} */
+
+                    wm8994_setvolume(priv, (63 * volume / 1000), priv->mute);
+                  }
+                else
+                  {
+                    ret = -EDOM;
+                  }
               }
-            else
-              {
-                ret = -EDOM;
-              }
-          }
-          break;
+              break;
 #endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
 
 #ifndef CONFIG_AUDIO_EXCLUDE_BALANCE
-        case AUDIO_FU_BALANCE:
-          {
-            /* Set the balance.  The percentage level (0-100) is in the
-             * ac_controls.b[0] parameter.
-             */
-
-            uint16_t balance = caps->ac_controls.hw[0];
-            audinfo("    Balance: %d\n", balance);
-
-            if (balance >= 0 && balance <= 1000)
+            case AUDIO_FU_BALANCE:
               {
-                /* Scale the volume setting to the range {0.. 63} */
+                /* Set the balance.  The percentage level (0-100) is in the
+                 * ac_controls.b[0] parameter.
+                 */
 
-                priv->balance = (balance * (b16ONE - 1)) / 1000;
-                wm8994_setvolume(priv, priv->volume, priv->mute);
+                uint16_t balance = caps->ac_controls.hw[0];
+
+                audinfo("    Balance: %d\n", balance);
+
+                if (balance >= 0 && balance <= 1000)
+                  {
+                    /* Scale the volume setting to the range {0.. 63} */
+
+                    priv->balance = (balance * (b16ONE - 1)) / 1000;
+                    wm8994_setvolume(priv, priv->volume, priv->mute);
+                  }
+                else
+                  {
+                    ret = -EDOM;
+                  }
               }
-            else
-              {
-                ret = -EDOM;
-              }
-          }
-          break;
+              break;
 #endif /* CONFIG_AUDIO_EXCLUDE_BALANCE */
 
 #ifndef CONFIG_AUDIO_EXCLUDE_TONE
-        case AUDIO_FU_BASS:
-          {
-            /* Set the bass.  The percentage level (0-100) is in the
-             * ac_controls.b[0] parameter.
-             */
-
-            uint8_t bass = caps->ac_controls.b[0];
-            audinfo("    Bass: %d\n", bass);
-
-            if (bass <= 100)
+            case AUDIO_FU_BASS:
               {
-                wm8994_setbass(priv, bass);
-              }
-            else
-              {
-                ret = -EDOM;
-              }
-          }
-          break;
+                /* Set the bass.  The percentage level (0-100) is in the
+                 * ac_controls.b[0] parameter.
+                 */
 
-        case AUDIO_FU_TREBLE:
-          {
-            /* Set the treble.  The percentage level (0-100) is in the
-             * ac_controls.b[0] parameter.
-             */
+                uint8_t bass = caps->ac_controls.b[0];
 
-            uint8_t treble = caps->ac_controls.b[0];
-            audinfo("    Treble: %d\n", treble);
+                audinfo("    Bass: %d\n", bass);
 
-            if (treble <= 100)
-              {
-                wm8994_settreble(priv, treble);
+                if (bass <= 100)
+                  {
+                    wm8994_setbass(priv, bass);
+                  }
+                else
+                  {
+                    ret = -EDOM;
+                  }
               }
-            else
+              break;
+
+            case AUDIO_FU_TREBLE:
               {
-                ret = -EDOM;
+                /* Set the treble.  The percentage level (0-100) is in the
+                 * ac_controls.b[0] parameter.
+                 */
+
+                uint8_t treble = caps->ac_controls.b[0];
+
+                audinfo("    Treble: %d\n", treble);
+
+                if (treble <= 100)
+                  {
+                    wm8994_settreble(priv, treble);
+                  }
+                else
+                  {
+                    ret = -EDOM;
+                  }
               }
-          }
-          break;
+              break;
 #endif /* CONFIG_AUDIO_EXCLUDE_TONE */
 
-        default:
-          auderr("    ERROR: Unrecognized feature unit\n");
-          ret = -ENOTTY;
-          break;
+            default:
+              auderr("    ERROR: Unrecognized feature unit\n");
+              ret = -ENOTTY;
+              break;
+          }
+        break;
+
+      case AUDIO_TYPE_OUTPUT:
+        {
+          audinfo("  AUDIO_TYPE_OUTPUT:\n");
+          audinfo("    Number of channels: %u\n", caps->ac_channels);
+          audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
+          audinfo("    Sample width:       %u\n", caps->ac_controls.b[2]);
+
+          /* Verify that all of the requested values are supported */
+
+          ret = -ERANGE;
+          if (caps->ac_channels != 1 && caps->ac_channels != 2)
+            {
+              auderr("ERROR: Unsupported number of channels: %d\n",
+                     caps->ac_channels);
+              break;
+            }
+
+          if (caps->ac_controls.b[2] != 8 && caps->ac_controls.b[2] != 16)
+            {
+              auderr("ERROR: Unsupported bits per sample: %d\n",
+                     caps->ac_controls.b[2]);
+              break;
+            }
+
+          /* Save the current stream configuration */
+
+          priv->samprate  = caps->ac_controls.hw[0];
+          priv->nchannels = caps->ac_channels;
+          priv->bpsamp    = caps->ac_controls.b[2];
+
+          /* Reconfigure the FLL to support the resulting number or channels,
+           * bits per sample, and bitrate.
+           */
+
+          wm8994_setdatawidth(priv);
+          wm8994_setbitrate(priv);
+
+          wm8994_clock_analysis(&priv->dev, "AUDIO_TYPE_OUTPUT");
+          ret = OK;
         }
         break;
 
-    case AUDIO_TYPE_OUTPUT:
-      {
-        audinfo("  AUDIO_TYPE_OUTPUT:\n");
-        audinfo("    Number of channels: %u\n", caps->ac_channels);
-        audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
-        audinfo("    Sample width:       %u\n", caps->ac_controls.b[2]);
-
-        /* Verify that all of the requested values are supported */
-
-        ret = -ERANGE;
-        if (caps->ac_channels != 1 && caps->ac_channels != 2)
-          {
-            auderr("ERROR: Unsupported number of channels: %d\n",
-                   caps->ac_channels);
-            break;
-          }
-
-        if (caps->ac_controls.b[2] != 8 && caps->ac_controls.b[2] != 16)
-          {
-            auderr("ERROR: Unsupported bits per sample: %d\n",
-                   caps->ac_controls.b[2]);
-            break;
-          }
-
-        /* Save the current stream configuration */
-
-        priv->samprate  = caps->ac_controls.hw[0];
-        priv->nchannels = caps->ac_channels;
-        priv->bpsamp    = caps->ac_controls.b[2];
-
-        /* Reconfigure the FLL to support the resulting number or channels,
-         * bits per sample, and bitrate.
-         */
-
-        wm8994_setdatawidth(priv);
-        wm8994_setbitrate(priv);
-
-        wm8994_clock_analysis(&priv->dev, "AUDIO_TYPE_OUTPUT");
-        ret = OK;
-      }
-      break;
-
-    case AUDIO_TYPE_PROCESSING:
-      break;
+      case AUDIO_TYPE_PROCESSING:
+        break;
     }
 
   return ret;
@@ -1507,7 +1516,7 @@ static int wm8994_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
         }
         break;
 
-       /* Report our preferred buffer size and quantity */
+        /* Report our preferred buffer size and quantity */
 
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
       case AUDIOIOC_GETBUFFERINFO:
@@ -1557,7 +1566,7 @@ static int wm8994_reserve(FAR struct audio_lowerhalf_s *dev)
       /* Initialize the session context */
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-     *session           = NULL;
+      *session           = NULL;
 #endif
       priv->inflight    = 0;
       priv->running     = false;
@@ -1902,7 +1911,7 @@ static void wm8994_audio_output(FAR struct wm8994_dev_s *priv)
    *
    * Currently the DAC1 is used and configured for AIF1 Timeslot 0
    * DAC2 and AIF1 Timeslot 1 remain unused
-  */
+   */
 
   /* Enable DAC1 (Left), Enable DAC1 (Right)
    * Enable AIF1DAC1L (Left) input path (AIF1, TS0)
@@ -2138,6 +2147,7 @@ static void wm8994_audio_output(FAR struct wm8994_dev_s *priv)
       regval |= WM8994_SPKLVOL_ENA |
                 WM8994_SPKRVOL_ENA;
     }
+
   wm8994_writereg(priv, WM8994_PM3, regval);
 
   /* Enable DC Servo and trigger start-up mode on left and right channels */
@@ -2334,9 +2344,13 @@ static void wm8994_hw_reset(FAR struct wm8994_dev_s *priv)
   wm8994_writereg(priv, WM8994_ANTI_POP2, regval);
 
   if (WM8994_DEFAULT_INPUT_DEVICE > 0)
-    regval = 0x0013;
+    {
+      regval = 0x0013;
+    }
   else
-    regval = 0x0003;
+    {
+      regval = 0x0003;
+    }
 
   /* 0x01 = 0x0013 */
 
@@ -2348,7 +2362,7 @@ static void wm8994_hw_reset(FAR struct wm8994_dev_s *priv)
   wm8994_audio_output(priv);
   {
     switch (WM8994_DEFAULT_OUTPUT_DEVICE)
-    {
+      {
         case WM8994_OUTPUT_DEVICE_SPEAKER:
 
           /* regval = 0x0c0c */
@@ -2412,21 +2426,21 @@ static void wm8994_hw_reset(FAR struct wm8994_dev_s *priv)
         case WM8994_OUTPUT_DEVICE_BOTH:
           if (WM8994_DEFAULT_INPUT_DEVICE ==
               WM8994_INPUT_DEVICE_DIGITAL_MIC1_MIC2)
-          {
-            wm8994_writereg(priv, 0x005, 0x0303 | 0x0c0c);
-            wm8994_writereg(priv, 0x601, 0x0003);
-            wm8994_writereg(priv, 0x602, 0x0003);
-            wm8994_writereg(priv, 0x604, 0x0003);
-            wm8994_writereg(priv, 0x605, 0x0003);
-          }
+            {
+              wm8994_writereg(priv, 0x005, 0x0303 | 0x0c0c);
+              wm8994_writereg(priv, 0x601, 0x0003);
+              wm8994_writereg(priv, 0x602, 0x0003);
+              wm8994_writereg(priv, 0x604, 0x0003);
+              wm8994_writereg(priv, 0x605, 0x0003);
+            }
           else
-          {
-            wm8994_writereg(priv, 0x005, 0x0303 | 0x0c0c);
-            wm8994_writereg(priv, 0x601, 0x0001);
-            wm8994_writereg(priv, 0x602, 0x0001);
-            wm8994_writereg(priv, 0x604, 0x0002);
-            wm8994_writereg(priv, 0x605, 0x0002);
-          }
+            {
+              wm8994_writereg(priv, 0x005, 0x0303 | 0x0c0c);
+              wm8994_writereg(priv, 0x601, 0x0001);
+              wm8994_writereg(priv, 0x602, 0x0001);
+              wm8994_writereg(priv, 0x604, 0x0002);
+              wm8994_writereg(priv, 0x605, 0x0002);
+            }
 
           break;
         case WM8994_OUTPUT_DEVICE_AUTO:
@@ -2438,132 +2452,136 @@ static void wm8994_hw_reset(FAR struct wm8994_dev_s *priv)
           break;
         default:
           break;
-    }
+      }
   }
 
   /* Configure the WM8994 hardware as an audio input device */
 
   wm8994_audio_input(priv);
   switch (WM8994_DEFAULT_INPUT_DEVICE)
-  {
-    case WM8994_INPUT_DEVICE_DIGITAL_MICROPHONE_2:
-      wm8994_writereg(priv, 0x004, 0x0c30);
-      wm8994_writereg(priv, 0x450, 0x00db);
-      wm8994_writereg(priv, 0x002, 0x6000);
-      wm8994_writereg(priv, 0x608, 0x0002);
-      wm8994_writereg(priv, 0x700, 0x000b);
-      break;
-  case WM8994_INPUT_DEVICE_INPUT_LINE_1:
-      wm8994_writereg(priv, 0x028, 0x0011);
-      wm8994_writereg(priv, 0x029, 0x0035);
-      wm8994_writereg(priv, 0x02a, 0x0035);
-      wm8994_writereg(priv, 0x004, 0x0303);
-      wm8994_writereg(priv, 0x440, 0x00db);
-      wm8994_writereg(priv, 0x002, 0x6350);
-      wm8994_writereg(priv, 0x606, 0x0002);
-      wm8994_writereg(priv, 0x607, 0x0002);
-      wm8994_writereg(priv, 0x700, 0x000d);
-      break;
-  case WM8994_INPUT_DEVICE_DIGITAL_MICROPHONE_1:
-      wm8994_writereg(priv, 0x004, 0x030c);
-      wm8994_writereg(priv, 0x440, 0x00db);
-      wm8994_writereg(priv, 0x002, 0x6350);
-      wm8994_writereg(priv, 0x606, 0x0002);
-      wm8994_writereg(priv, 0x607, 0x0002);
-      wm8994_writereg(priv, 0x700, 0x000d);
-      break;
-  case WM8994_INPUT_DEVICE_DIGITAL_MIC1_MIC2:
-      wm8994_writereg(priv, 0x004, 0x0f3c);
-      wm8994_writereg(priv, 0x450, 0x00db);
-      wm8994_writereg(priv, 0x440, 0x00db);
-      wm8994_writereg(priv, 0x002, 0x63a0);
-      wm8994_writereg(priv, 0x606, 0x0002);
-      wm8994_writereg(priv, 0x607, 0x0002);
-      wm8994_writereg(priv, 0x608, 0x0002);
-      wm8994_writereg(priv, 0x609, 0x0002);
-      wm8994_writereg(priv, 0x700, 0x000d);
-      break;
-  case WM8994_INPUT_DEVICE_INPUT_LINE_2:
-  default:
-      break;
-  }
-
-  {
-    switch (WM8994_DEFAULT_SAMPRATE)
     {
-      case WM8994_AUDIO_FREQUENCY_8K:
-        regval = WM8994_AIF1CLK_RATE_2 | WM8994_AIF1_SR_8K;
-
-        /* 0x210 = 0x0003 */
-
-        wm8994_writereg(priv, WM8994_AIF1_RATE, regval);
+      case WM8994_INPUT_DEVICE_DIGITAL_MICROPHONE_2:
+        wm8994_writereg(priv, 0x004, 0x0c30);
+        wm8994_writereg(priv, 0x450, 0x00db);
+        wm8994_writereg(priv, 0x002, 0x6000);
+        wm8994_writereg(priv, 0x608, 0x0002);
+        wm8994_writereg(priv, 0x700, 0x000b);
         break;
-      case WM8994_AUDIO_FREQUENCY_16K:
-        regval = WM8994_AIF1CLK_RATE_2 | WM8994_AIF1_SR_16K;
-
-        /* 0x210 = 0x0033 */
-
-        wm8994_writereg(priv, WM8994_AIF1_RATE, regval);
+      case WM8994_INPUT_DEVICE_INPUT_LINE_1:
+        wm8994_writereg(priv, 0x028, 0x0011);
+        wm8994_writereg(priv, 0x029, 0x0035);
+        wm8994_writereg(priv, 0x02a, 0x0035);
+        wm8994_writereg(priv, 0x004, 0x0303);
+        wm8994_writereg(priv, 0x440, 0x00db);
+        wm8994_writereg(priv, 0x002, 0x6350);
+        wm8994_writereg(priv, 0x606, 0x0002);
+        wm8994_writereg(priv, 0x607, 0x0002);
+        wm8994_writereg(priv, 0x700, 0x000d);
         break;
-      case WM8994_AUDIO_FREQUENCY_22_050K:
-        regval = WM8994_AIF1CLK_RATE_2 | WM8994_AIF1_SR_22K;
-
-        /* 0x210 = 0x0063 */
-
-        wm8994_writereg(priv, WM8994_AIF1_RATE, regval);
+      case WM8994_INPUT_DEVICE_DIGITAL_MICROPHONE_1:
+        wm8994_writereg(priv, 0x004, 0x030c);
+        wm8994_writereg(priv, 0x440, 0x00db);
+        wm8994_writereg(priv, 0x002, 0x6350);
+        wm8994_writereg(priv, 0x606, 0x0002);
+        wm8994_writereg(priv, 0x607, 0x0002);
+        wm8994_writereg(priv, 0x700, 0x000d);
         break;
-        #if 0
-      case WM8994_AUDIO_FREQUENCY_48K:
-        regval = WM8994_AIF1CLK_RATE_2 | WM8994_AIF1_SR_24K;
-        wm8994_writereg(priv, WM8994_AIF1_RATE, regval); /* 0x210 = 0x0083 */
+      case WM8994_INPUT_DEVICE_DIGITAL_MIC1_MIC2:
+        wm8994_writereg(priv, 0x004, 0x0f3c);
+        wm8994_writereg(priv, 0x450, 0x00db);
+        wm8994_writereg(priv, 0x440, 0x00db);
+        wm8994_writereg(priv, 0x002, 0x63a0);
+        wm8994_writereg(priv, 0x606, 0x0002);
+        wm8994_writereg(priv, 0x607, 0x0002);
+        wm8994_writereg(priv, 0x608, 0x0002);
+        wm8994_writereg(priv, 0x609, 0x0002);
+        wm8994_writereg(priv, 0x700, 0x000d);
         break;
-        #endif
-      case WM8994_AUDIO_FREQUENCY_32K:
-        regval = WM8994_AIF1CLK_RATE_2 | WM8994_AIF1_SR_32K;
-        wm8994_writereg(priv, WM8994_AIF1_RATE, regval); /* 0x210 = 0x00a3 */
-        break;
-      case WM8994_AUDIO_FREQUENCY_44_100K:
-        regval = WM8994_AIF1CLK_RATE_2 | WM8994_AIF1_SR_44K;
-        wm8994_writereg(priv, WM8994_AIF1_RATE, regval); /* 0x210 = 0x0013 */
-        break;
-      case WM8994_AUDIO_FREQUENCY_48K:
-        regval = WM8994_AIF1CLK_RATE_2 | WM8994_AIF1_SR_48K;
-        wm8994_writereg(priv, WM8994_AIF1_RATE, regval); /* 0x210 = 0x0043 */
-        break;
-    #if 0
-      case WM8994_AUDIO_FREQUENCY_44_100K:
-        regval = WM8994_AIF1CLK_RATE_2 | WM8994_AIF1_SR_88K;
-        wm8994_writereg(priv, WM8994_AIF1_RATE, regval); /* 0x210 = 0x0073 */
-        break;
-    #endif
-      case WM8994_AUDIO_FREQUENCY_96K:
-        regval = WM8994_AIF1CLK_RATE_2 | WM8994_AIF1_SR_96K;
-
-        /* 0x210 = 0x00a3 */
-
-        wm8994_writereg(priv, WM8994_AIF1_RATE, regval);
-        break;
+      case WM8994_INPUT_DEVICE_INPUT_LINE_2:
       default:
-        regval = WM8994_AIF1CLK_RATE_2 | WM8994_AIF1_SR_48K;
-
-        /* 0x210 = 0x0083 */
-
-        wm8994_writereg(priv, WM8994_AIF1_RATE, regval);
         break;
     }
 
+  {
+    switch (WM8994_DEFAULT_SAMPRATE)
+      {
+        case WM8994_AUDIO_FREQUENCY_8K:
+          regval = WM8994_AIF1CLK_RATE_2 | WM8994_AIF1_SR_8K;
+
+          /* 0x210 = 0x0003 */
+
+          wm8994_writereg(priv, WM8994_AIF1_RATE, regval);
+          break;
+        case WM8994_AUDIO_FREQUENCY_16K:
+          regval = WM8994_AIF1CLK_RATE_2 | WM8994_AIF1_SR_16K;
+
+          /* 0x210 = 0x0033 */
+
+          wm8994_writereg(priv, WM8994_AIF1_RATE, regval);
+          break;
+        case WM8994_AUDIO_FREQUENCY_22_050K:
+          regval = WM8994_AIF1CLK_RATE_2 | WM8994_AIF1_SR_22K;
+
+          /* 0x210 = 0x0063 */
+
+          wm8994_writereg(priv, WM8994_AIF1_RATE, regval);
+          break;
+        #if 0
+        case WM8994_AUDIO_FREQUENCY_48K:
+          regval = WM8994_AIF1CLK_RATE_2 | WM8994_AIF1_SR_24K;
+          wm8994_writereg(priv, WM8994_AIF1_RATE, regval); /* 0x210 = 0x0083 */
+          break;
+        #endif
+        case WM8994_AUDIO_FREQUENCY_32K:
+          regval = WM8994_AIF1CLK_RATE_2 | WM8994_AIF1_SR_32K;
+          wm8994_writereg(priv, WM8994_AIF1_RATE, regval); /* 0x210 = 0x00a3 */
+          break;
+        case WM8994_AUDIO_FREQUENCY_44_100K:
+          regval = WM8994_AIF1CLK_RATE_2 | WM8994_AIF1_SR_44K;
+          wm8994_writereg(priv, WM8994_AIF1_RATE, regval); /* 0x210 = 0x0013 */
+          break;
+        case WM8994_AUDIO_FREQUENCY_48K:
+          regval = WM8994_AIF1CLK_RATE_2 | WM8994_AIF1_SR_48K;
+          wm8994_writereg(priv, WM8994_AIF1_RATE, regval); /* 0x210 = 0x0043 */
+          break;
+    #if 0
+        case WM8994_AUDIO_FREQUENCY_44_100K:
+          regval = WM8994_AIF1CLK_RATE_2 | WM8994_AIF1_SR_88K;
+          wm8994_writereg(priv, WM8994_AIF1_RATE, regval); /* 0x210 = 0x0073 */
+          break;
+    #endif
+        case WM8994_AUDIO_FREQUENCY_96K:
+          regval = WM8994_AIF1CLK_RATE_2 | WM8994_AIF1_SR_96K;
+
+          /* 0x210 = 0x00a3 */
+
+          wm8994_writereg(priv, WM8994_AIF1_RATE, regval);
+          break;
+        default:
+          regval = WM8994_AIF1CLK_RATE_2 | WM8994_AIF1_SR_48K;
+
+          /* 0x210 = 0x0083 */
+
+          wm8994_writereg(priv, WM8994_AIF1_RATE, regval);
+          break;
+      }
+
     if (WM8994_DEFAULT_INPUT_DEVICE == WM8994_INPUT_DEVICE_DIGITAL_MIC1_MIC2)
 
-        /* regval = 0x4018 */
+    /* regval = 0x4018 */
 
+      {
         regval = WM8994_AIF1ADCR_RIGHT_ADC | WM8994_AIF1_WL_16BITS
                                            | WM8994_AIF1_FMT_I2S;
+      }
     else
 
-        /* regval = 0x4010 */
+    /* regval = 0x4010 */
 
+      {
         regval = WM8994_AIF1ADCR_RIGHT_ADC | WM8994_AIF1_WL_16BITS
                                            | WM8994_AIF1_FMT_DSP;
+      }
 
     /* 0x300 = */
 
@@ -2590,35 +2608,35 @@ static void wm8994_hw_reset(FAR struct wm8994_dev_s *priv)
     wm8994_writereg(priv, WM8994_AIF1_CLK1, regval);
 
     if (WM8994_DEFAULT_OUTPUT_DEVICE == WM8994_OUTPUT_DEVICE_HEADPHONE)
-    {
-      regval = WM8994_DAC1L_TO_HPOUT1L_DAC1L;
-
-      /* 0x2d = 0x0100 */
-
-      wm8994_writereg(priv, WM8994_OUTPUT_MIXER1, regval);
-
-      regval = 0;
-      wm8994_writereg(priv, WM8994_OUTPUT_MIXER2, regval); /* 0x2e = 0x0100 */
-
-      if (WM8994_STARTUP_MODE_COLD)
       {
-        regval = 0x8100;
-        wm8994_writereg(priv, WM8994_WR_CTL_SEQ1, regval);
+        regval = WM8994_DAC1L_TO_HPOUT1L_DAC1L;
 
-        /* 0x110 = regval */
+        /* 0x2d = 0x0100 */
 
-        up_mdelay(300);
+        wm8994_writereg(priv, WM8994_OUTPUT_MIXER1, regval);
+
+        regval = 0;
+        wm8994_writereg(priv, WM8994_OUTPUT_MIXER2, regval); /* 0x2e = 0x0100 */
+
+        if (WM8994_STARTUP_MODE_COLD)
+          {
+            regval = 0x8100;
+            wm8994_writereg(priv, WM8994_WR_CTL_SEQ1, regval);
+
+            /* 0x110 = regval */
+
+            up_mdelay(300);
+          }
+        else
+          {
+            regval = 0x8108;
+            wm8994_writereg(priv, WM8994_WR_CTL_SEQ1, regval); /* 0x110 = regval */
+            up_mdelay(50);
+          }
+
+        regval = 0;
+        wm8994_writereg(priv, WM8994_AIF1_DAC1_FILTERS1, regval); /* 0x420 = 0x0000 */
       }
-      else
-      {
-        regval = 0x8108;
-        wm8994_writereg(priv, WM8994_WR_CTL_SEQ1, regval); /* 0x110 = regval */
-        up_mdelay(50);
-      }
-
-      regval = 0;
-      wm8994_writereg(priv, WM8994_AIF1_DAC1_FILTERS1, regval); /* 0x420 = 0x0000 */
-    }
 
     regval = 0;
     wm8994_writereg(priv, WM8994_PM3, regval); /* 0x03 = 0x0300 */
@@ -2636,9 +2654,14 @@ static void wm8994_hw_reset(FAR struct wm8994_dev_s *priv)
     wm8994_writereg(priv, WM8994_PM1, regval);  /* 0x01 = 0x3003 */
 
     if (WM8994_DEFAULT_INPUT_DEVICE == WM8994_INPUT_DEVICE_DIGITAL_MIC1_MIC2)
-      regval = 0x0205;
+      {
+        regval = 0x0205;
+      }
     else
-      regval = 0x0005;
+      {
+        regval = 0x0005;
+      }
+
     wm8994_writereg(priv, WM8994_CLASS_W_1, regval); /* 0x51 = regval */
 
     priv->power_mgnt_reg_1 |= 0x0303 | 0x3003;
@@ -2692,7 +2715,7 @@ static void wm8994_hw_reset(FAR struct wm8994_dev_s *priv)
                 WM8994_INPUT_DEVICE_DIGITAL_MICROPHONE_1)
         || (WM8994_DEFAULT_INPUT_DEVICE ==
             WM8994_INPUT_DEVICE_DIGITAL_MICROPHONE_2))
-    {
+      {
         priv->power_mgnt_reg_1 |= 0x0013;
         wm8994_writereg(priv, 0x01, priv->power_mgnt_reg_1); /* 0x01 = power_mgnt_reg_1 */
 
@@ -2701,10 +2724,10 @@ static void wm8994_hw_reset(FAR struct wm8994_dev_s *priv)
 
         regval = 0x3800;
         wm8994_writereg(priv, 0x411, 0x3800); /* 0x411 = 0x3800 */
-    }
+      }
     else if (WM8994_DEFAULT_INPUT_DEVICE ==
             WM8994_INPUT_DEVICE_DIGITAL_MIC1_MIC2)
-    {
+      {
         priv->power_mgnt_reg_1 |= 0x0013;
         wm8994_writereg(priv, 0x01, priv->power_mgnt_reg_1); /* 0x01 = power_mgnt_reg_1 */
 
@@ -2716,13 +2739,13 @@ static void wm8994_hw_reset(FAR struct wm8994_dev_s *priv)
 
         regval = 0x1800;
         wm8994_writereg(priv, 0x411, regval); /* 0x411 = 0x1800 */
-    }
+      }
     else if ((WM8994_DEFAULT_INPUT_DEVICE ==
                 WM8994_INPUT_DEVICE_INPUT_LINE_1)
         || (WM8994_DEFAULT_INPUT_DEVICE ==
             WM8994_INPUT_DEVICE_INPUT_LINE_2))
 
-    {
+      {
         regval = 0x000b;
         wm8994_writereg(priv, 0x18, regval); /* 0x18 = 0x000b */
 
@@ -2731,8 +2754,9 @@ static void wm8994_hw_reset(FAR struct wm8994_dev_s *priv)
 
         regval = 0x1800;
         wm8994_writereg(priv, 0x410, regval); /* 0x410 = 0x1800 */
-    }
+      }
   }
+
 #endif
   /* Configure the WM8994 hardware as an audio output device */
 

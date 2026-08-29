@@ -147,6 +147,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
   if (ret >= 0 && addr->sa_family != AF_UNSPEC)
     {
       FAR struct socket_conn_s *conn = psock->s_conn;
+
       conn->s_flags |= _SF_CONNECTED;
     }
 

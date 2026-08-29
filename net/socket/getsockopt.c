@@ -104,8 +104,8 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
             }
 
           /* Get the timeout value.  This is a atomic operation and should
-         * require no special operation.
-         */
+           * require no special operation.
+           */
 
           if (option == SO_RCVTIMEO)
             {
@@ -161,7 +161,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
           if (*value_len < sizeof(int))
             {
               return -EINVAL;
-           }
+            }
 
           /* Sample the current options.  This is atomic operation and so
            * should not require any special steps for thread safety. We

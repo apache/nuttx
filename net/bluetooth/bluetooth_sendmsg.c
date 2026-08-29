@@ -324,6 +324,7 @@ static ssize_t bluetooth_sendto(FAR struct socket *psock,
   else if (psock->s_proto == BTPROTO_HCI)
     {
       struct bluetooth_findbyidx_s match;
+
       match.bf_tgt   = conn->bc_ldev;
       match.bf_cur   = 0;
       match.bf_radio = NULL;
@@ -362,12 +363,14 @@ static ssize_t bluetooth_sendto(FAR struct socket *psock,
   if (psock->s_proto == BTPROTO_L2CAP)
     {
       FAR struct sockaddr_l2 *destaddr = (FAR struct sockaddr_l2 *)to;
+
       memcpy(&state.is_destaddr, &destaddr->l2_bdaddr,
              sizeof(bt_addr_t));
     }
   else if (psock->s_proto == BTPROTO_HCI)
     {
       FAR struct sockaddr_hci *destaddr = (FAR struct sockaddr_hci *)to;
+
       state.is_channel = destaddr->hci_channel;
     }
   else

@@ -82,6 +82,7 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb)
        */
 
       FAR struct tcb_s *nxttcb = (FAR struct tcb_s *)rtcb->flink;
+
       DEBUGASSERT(nxttcb != NULL);
 
       nxttcb->task_state = TSTATE_TASK_RUNNING;

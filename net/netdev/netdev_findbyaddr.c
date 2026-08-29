@@ -275,6 +275,7 @@ netdev_prefixlen_findby_lipv6addr(const net_ipv6addr_t lipaddr,
 FAR struct net_driver_s *netdev_findby_lipv4addr(in_addr_t lipaddr)
 {
   int8_t prefixlen;
+
   return netdev_prefixlen_findby_lipv4addr(lipaddr, &prefixlen);
 }
 #endif /* CONFIG_NET_IPv4 */
@@ -301,6 +302,7 @@ FAR struct net_driver_s *netdev_findby_lipv6addr(
                                       const net_ipv6addr_t lipaddr)
 {
   int16_t prefixlen;
+
   return netdev_prefixlen_findby_lipv6addr(lipaddr, &prefixlen);
 }
 #endif /* CONFIG_NET_IPv6 */

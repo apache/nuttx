@@ -176,6 +176,7 @@ int irq_attach_wqueue(int irq, xcpt_t isr, xcpt_t isrwork,
   int ret = OK;
 #if NR_IRQS > 0
   int ndx = IRQ_TO_NDX(irq);
+
   if (ndx < 0)
     {
       ret = ndx;
