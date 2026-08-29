@@ -813,7 +813,7 @@ FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, off_t offset,
 
   /* Set the file open mode. */
 
-  mode = O_RDONLY | O_WRONLY | O_CLOEXEC;
+  mode = O_RDWR | O_CLOEXEC;
 
   /* Try to open the file.  NOTE that block devices will use a character
    * driver proxy.
