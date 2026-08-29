@@ -105,6 +105,7 @@ static void eic7700x_copy_overlap(uint8_t *dest, const uint8_t *src,
   while (count--)
     {
       volatile uint8_t c = *s;  /* Prevent compiler optimization */
+
       *d = c;
       d--;
       s--;
@@ -157,6 +158,7 @@ static void eic7700x_copy_ramdisk(void)
   if (ramdisk_addr <= (uint8_t *)g_idle_topstack)
     {
       const size_t pad = (size_t)g_idle_topstack - (size_t)ramdisk_addr;
+
       _err("RAM Disk must be after Idle Stack. Increase initrd padding "
             "by %ul bytes.", pad);
       PANIC();
