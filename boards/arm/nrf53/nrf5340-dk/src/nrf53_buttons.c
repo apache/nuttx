@@ -101,7 +101,7 @@ uint32_t board_buttons(void)
     {
       /* A LOW value means that the key is pressed. */
 
-      bool released = nrf53_gpio_read(g_buttons[BUTTON_BTN1]);
+      bool released = nrf53_gpio_read(g_buttons[i]);
 
       /* Accumulate the set of depressed (not released) keys */
 
