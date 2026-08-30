@@ -180,12 +180,14 @@ int stm32_bringup(void)
         }
 
 #ifdef CONFIG_STM32F429I_DISCO_FLASH_PART
+      do
         {
           int partno;
           int partsize;
           int partoffset;
           int partszbytes;
           int erasesize;
+          int blkpererase;
           const char *partstring = CONFIG_STM32F429I_DISCO_FLASH_PART_LIST;
           const char *ptr;
           struct mtd_dev_s *mtd_part;
@@ -225,8 +227,18 @@ int stm32_bringup(void)
                   return -1;
                 }
 
-              mtd_part    = mtd_partition(mtd, partoffset,
-                                          partszbytes / erasesize);
+              /* mtd_partition() expects the offset and size in units of
+               * the underlying device "blocks" (geo.blocksize, 256B for
+               * the SST25), not erase blocks.  partoffset is tracked in
+               * erase blocks, so convert.  Without this, partitions are
+               * erasesize/blocksize (16x for the SST25) too small and
+               * misaligned.
+               */
+
+              blkpererase = geo.blocksize > 0 ?
+                            erasesize / geo.blocksize : 1;
+              mtd_part    = mtd_partition(mtd, partoffset * blkpererase,
+                                          partszbytes / geo.blocksize);
               partoffset += partszbytes / erasesize;
 
 #ifdef CONFIG_STM32F429I_DISCO_FLASH_CONFIG_PART
@@ -299,6 +311,7 @@ int stm32_bringup(void)
               partno++;
             }
         }
+      while (0);
 #else /* CONFIG_STM32F429I_DISCO_FLASH_PART */
 
       /* Configure the device with no partition support */
@@ -324,9 +337,11 @@ int stm32_bringup(void)
 #if defined(CONFIG_RAMMTD) && defined(CONFIG_STM32F429I_DISCO_RAMMTD)
   /* Create a RAM MTD device if configured */
 
+  do
     {
       uint8_t *start =
           kmm_malloc(CONFIG_STM32F429I_DISCO_RAMMTD_SIZE * 1024);
+
       mtd = rammtd_initialize(start,
                               CONFIG_STM32F429I_DISCO_RAMMTD_SIZE * 1024);
       mtd->ioctl(mtd, MTDIOC_BULKERASE, 0);
@@ -339,7 +354,7 @@ int stm32_bringup(void)
       smart_initialize(CONFIG_STM32F429I_DISCO_RAMMTD_MINOR, mtd, NULL);
 #endif
     }
-
+  while (0);
 #endif /* CONFIG_RAMMTD && CONFIG_STM32F429I_DISCO_RAMMTD */
 
 #ifdef HAVE_USBHOST
