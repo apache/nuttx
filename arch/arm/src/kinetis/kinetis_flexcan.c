@@ -643,12 +643,14 @@ static int kinetis_transmit(struct kinetis_driver_s *priv)
 
 #ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
   struct timespec ts;
+
   clock_systime_timespec(&ts);
 
   if (priv->dev.d_sndlen > priv->dev.d_len)
     {
       struct timeval *tv =
              (struct timeval *)(priv->dev.d_buf + priv->dev.d_len);
+
       priv->txmb[mbi].deadline = *tv;
       timeout  = (tv->tv_sec - ts.tv_sec)*CLK_TCK
                  + ((tv->tv_usec - ts.tv_nsec / 1000)*CLK_TCK) / 1000000;
@@ -683,9 +685,11 @@ static int kinetis_transmit(struct kinetis_driver_s *priv)
     (peak_tx_mailbox_index_ > mbi ? peak_tx_mailbox_index_ : mbi);
 
   union cs_e cs;
+
   cs.cs = 0;
   cs.code = CAN_TXMB_DATAORREMOTE;
   struct mb_s *mb = &priv->tx[mbi];
+
   mb->cs.code = CAN_TXMB_INACTIVE;
 
   if (priv->dev.d_len == sizeof(struct can_frame))
@@ -1015,6 +1019,7 @@ static void kinetis_txdone(struct kinetis_driver_s *priv)
 
           wd_cancel(&priv->txtimeout[mbi]);
           struct mb_s *mb = &priv->tx[mbi];
+
           mb->cs.code = CAN_TXMB_INACTIVE;
 #endif
         }
@@ -1084,6 +1089,7 @@ static int kinetis_flexcan_interrupt(int irq, void *context,
   if (irq == priv->config->mb_irq)
     {
       uint32_t flags;
+
       flags  = getreg32(priv->base + KINETIS_CAN_IFLAG1_OFFSET);
       flags &= IFLAG1_RX;
 
@@ -1141,6 +1147,7 @@ static void kinetis_txtimeout_work(void *arg)
 
   struct timespec ts;
   struct timeval *now = (struct timeval *)&ts;
+
   clock_systime_timespec(&ts);
   now->tv_usec = ts.tv_nsec / 1000; /* timespec to timeval conversion */
 
@@ -1166,6 +1173,7 @@ static void kinetis_txtimeout_work(void *arg)
             }
 
           struct mb_s *mb = &priv->tx[mbi];
+
           mb->cs.code = CAN_TXMB_ABORT;
           priv->txmb[mbi].pending = TX_ABORT;
         }
@@ -1230,6 +1238,7 @@ static uint32_t kinetis_waitesr2_change(uint32_t base, uint32_t mask,
   for (wait_ack = 0; wait_ack < timeout; wait_ack++)
     {
       uint32_t state = (getreg32(base + KINETIS_CAN_ESR2_OFFSET) & mask);
+
       if (state == target_state)
         {
           return true;
@@ -1244,6 +1253,7 @@ static uint32_t kinetis_waitesr2_change(uint32_t base, uint32_t mask,
 static void kinetis_setfreeze(uint32_t base, uint32_t freeze)
 {
   uint32_t regval;
+
   if (freeze)
     {
       /* Enter freeze mode */
@@ -1272,6 +1282,7 @@ static uint32_t kinetis_waitmcr_change(uint32_t base, uint32_t mask,
     {
       const bool state = (getreg32(base + KINETIS_CAN_MCR_OFFSET) & mask)
           != 0;
+
       if (state == target_state)
         {
           return true;
@@ -1492,6 +1503,7 @@ static int kinetis_ioctl(struct net_driver_s *dev, int cmd,
         {
           struct can_ioctl_data_s *req =
               (struct can_ioctl_data_s *)((uintptr_t)arg);
+
           req->arbi_bitrate = priv->arbi_timing.bitrate;
           req->arbi_samplep = priv->arbi_timing.samplep;
 #ifdef CONFIG_NET_CAN_CANFD
@@ -1511,6 +1523,7 @@ static int kinetis_ioctl(struct net_driver_s *dev, int cmd,
               (struct can_ioctl_data_s *)((uintptr_t)arg);
 
           struct flexcan_timeseg arbi_timing;
+
           arbi_timing.bitrate = req->arbi_bitrate;
           arbi_timing.samplep = req->arbi_samplep;
 
@@ -1525,6 +1538,7 @@ static int kinetis_ioctl(struct net_driver_s *dev, int cmd,
 
 #ifdef CONFIG_NET_CAN_CANFD
           struct flexcan_timeseg data_timing;
+
           data_timing.bitrate = req->data_bitrate;
           data_timing.samplep = req->data_samplep;
 
@@ -1803,76 +1817,76 @@ int kinetis_caninitialize(int intf)
   switch (intf)
     {
 #ifdef CONFIG_KINETIS_FLEXCAN0
-    case 0:
-      priv               = &g_flexcan0;
-      memset(priv, 0, sizeof(struct kinetis_driver_s));
-      priv->base         = KINETIS_CAN0_BASE;
-      priv->config       = &kinetis_flexcan0_config;
+      case 0:
+        priv               = &g_flexcan0;
+        memset(priv, 0, sizeof(struct kinetis_driver_s));
+        priv->base         = KINETIS_CAN0_BASE;
+        priv->config       = &kinetis_flexcan0_config;
 
-      /* Default bitrate configuration */
+        /* Default bitrate configuration */
 
 #  ifdef CONFIG_NET_CAN_CANFD
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN0_ARBI_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN0_ARBI_SAMPLEP;
-      priv->data_timing.bitrate = CONFIG_FLEXCAN0_DATA_BITRATE;
-      priv->data_timing.samplep = CONFIG_FLEXCAN0_DATA_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN0_ARBI_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN0_ARBI_SAMPLEP;
+        priv->data_timing.bitrate = CONFIG_FLEXCAN0_DATA_BITRATE;
+        priv->data_timing.samplep = CONFIG_FLEXCAN0_DATA_SAMPLEP;
 #  else
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN0_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN0_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN0_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN0_SAMPLEP;
 #  endif
-      regval = getreg32(KINETIS_SIM_SCGC6);
-      regval |= SIM_SCGC6_FLEXCAN0;
-      putreg32(regval, KINETIS_SIM_SCGC6);
-      break;
+        regval = getreg32(KINETIS_SIM_SCGC6);
+        regval |= SIM_SCGC6_FLEXCAN0;
+        putreg32(regval, KINETIS_SIM_SCGC6);
+        break;
 #endif
 
 #ifdef CONFIG_KINETIS_FLEXCAN1
-    case 1:
-      priv         = &g_flexcan1;
-      memset(priv, 0, sizeof(struct kinetis_driver_s));
-      priv->base   = KINETIS_CAN1_BASE;
-      priv->config = &kinetis_flexcan1_config;
+      case 1:
+        priv         = &g_flexcan1;
+        memset(priv, 0, sizeof(struct kinetis_driver_s));
+        priv->base   = KINETIS_CAN1_BASE;
+        priv->config = &kinetis_flexcan1_config;
 
-      /* Default bitrate configuration */
+        /* Default bitrate configuration */
 
 #  ifdef CONFIG_NET_CAN_CANFD
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN1_ARBI_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN1_ARBI_SAMPLEP;
-      priv->data_timing.bitrate = CONFIG_FLEXCAN1_DATA_BITRATE;
-      priv->data_timing.samplep = CONFIG_FLEXCAN1_DATA_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN1_ARBI_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN1_ARBI_SAMPLEP;
+        priv->data_timing.bitrate = CONFIG_FLEXCAN1_DATA_BITRATE;
+        priv->data_timing.samplep = CONFIG_FLEXCAN1_DATA_SAMPLEP;
 #  else
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN1_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN1_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN1_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN1_SAMPLEP;
 #  endif
-      regval = getreg32(KINETIS_SIM_SCGC3);
-      regval |= SIM_SCGC3_FLEXCAN1;
-      putreg32(regval, KINETIS_SIM_SCGC3);
-      break;
+        regval = getreg32(KINETIS_SIM_SCGC3);
+        regval |= SIM_SCGC3_FLEXCAN1;
+        putreg32(regval, KINETIS_SIM_SCGC3);
+        break;
 #endif
 
 #ifdef CONFIG_KINETIS_FLEXCAN2
-    case 2:
-      priv         = &g_flexcan2;
-      memset(priv, 0, sizeof(struct kinetis_driver_s));
-      priv->base   = KINETIS_CAN2_BASE;
-      priv->config = &kinetis_flexcan2_config;
+      case 2:
+        priv         = &g_flexcan2;
+        memset(priv, 0, sizeof(struct kinetis_driver_s));
+        priv->base   = KINETIS_CAN2_BASE;
+        priv->config = &kinetis_flexcan2_config;
 
-      /* Default bitrate configuration */
+        /* Default bitrate configuration */
 
 #  ifdef CONFIG_NET_CAN_CANFD
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN2_ARBI_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN2_ARBI_SAMPLEP;
-      priv->data_timing.bitrate = CONFIG_FLEXCAN2_DATA_BITRATE;
-      priv->data_timing.samplep = CONFIG_FLEXCAN2_DATA_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN2_ARBI_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN2_ARBI_SAMPLEP;
+        priv->data_timing.bitrate = CONFIG_FLEXCAN2_DATA_BITRATE;
+        priv->data_timing.samplep = CONFIG_FLEXCAN2_DATA_SAMPLEP;
 #  else
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN2_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN2_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN2_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN2_SAMPLEP;
 #  endif
-      break;
+        break;
 #endif
 
-    default:
-      return -ENODEV;
+      default:
+        return -ENODEV;
     }
 
   if (!kinetis_bitratetotimeseg(&priv->arbi_timing, 1, 0))

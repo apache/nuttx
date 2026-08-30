@@ -628,6 +628,7 @@ static int imx9_transmit(struct imx9_driver_s *priv)
       /* Check whether message buffer is not currently transmitting */
 
       struct mb_s *mb = flexcan_get_mb(priv, mbi);
+
       if (mb->cs.code != CAN_TXMB_DATAORREMOTE)
         {
           putreg32(mb_bit, priv->base + IMX9_CAN_IFLAG1_OFFSET);
@@ -650,12 +651,14 @@ static int imx9_transmit(struct imx9_driver_s *priv)
 
 #ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
   struct timespec ts;
+
   clock_systime_timespec(&ts);
 
   if (priv->dev.d_sndlen > priv->dev.d_len)
     {
       struct timeval *tv =
              (struct timeval *)(priv->dev.d_buf + priv->dev.d_len);
+
       priv->txmb[txmb].deadline = *tv;
       timeout  = (tv->tv_sec - ts.tv_sec)*CLK_TCK
                  + ((tv->tv_usec - ts.tv_nsec / 1000)*CLK_TCK) / 1000000;
@@ -690,9 +693,11 @@ static int imx9_transmit(struct imx9_driver_s *priv)
     (peak_tx_mailbox_index_ > mbi ? peak_tx_mailbox_index_ : mbi);
 
   union cs_e cs;
+
   cs.cs = 0;
   cs.code = CAN_TXMB_DATAORREMOTE;
   struct mb_s *mb = flexcan_get_mb(priv, mbi);
+
   mb->cs.code = CAN_TXMB_INACTIVE;
 
   if (priv->dev.d_len == sizeof(struct can_frame))
@@ -755,6 +760,7 @@ static int imx9_transmit(struct imx9_driver_s *priv)
    */
 
   struct mb_s *buffer = flexcan_get_mb(priv, RXMBCOUNT);
+
   buffer->cs.code = 0x3;
   buffer->cs.code = 0x3;
 
@@ -878,11 +884,13 @@ static void imx9_receive(struct imx9_driver_s *priv,
       mbj = mbi = arm_lsb(f);
       rf = flexcan_get_mb(priv, mbi);
       uint32_t t = rf->cs.time_stamp;
+
       while ((f &= ~(1 << mbj)) != 0)
         {
           mbj = arm_lsb(f);
           struct mb_s *rf_next = flexcan_get_mb(priv, mbj);
           uint16_t t_next = rf_next->cs.time_stamp;
+
           if ((int16_t)(t - t_next) > 0)
             {
               t = t_next;
@@ -897,7 +905,7 @@ static void imx9_receive(struct imx9_driver_s *priv,
 #ifdef CONFIG_NET_CAN_CANFD
       if (rf->cs.edl) /* CAN FD frame */
         {
-        struct canfd_frame *frame = (struct canfd_frame *)priv->rxdesc_fd;
+          struct canfd_frame *frame = (struct canfd_frame *)priv->rxdesc_fd;
 
           if (rf->cs.ide)
             {
@@ -938,7 +946,7 @@ static void imx9_receive(struct imx9_driver_s *priv,
       else /* CAN 2.0 Frame */
 #endif
         {
-        struct can_frame *frame = (struct can_frame *)priv->rxdesc;
+          struct can_frame *frame = (struct can_frame *)priv->rxdesc;
 
           if (rf->cs.ide)
             {
@@ -1058,6 +1066,7 @@ static void imx9_txdone(struct imx9_driver_s *priv)
 
           wd_cancel(&priv->txtimeout[txmb]);
           struct mb_s *mb = flexcan_get_mb(priv, mbi);
+
           mb->cs.code = CAN_TXMB_INACTIVE;
 #endif
         }
@@ -1128,6 +1137,7 @@ static void imx9_flexcan_interrupt_work(void *arg)
   struct imx9_driver_s *priv = (struct imx9_driver_s *)arg;
 
   uint32_t flags;
+
   flags  = getreg32(priv->base + IMX9_CAN_IFLAG1_OFFSET);
   flags &= IFLAG1_RX;
 
@@ -1168,6 +1178,7 @@ static int imx9_flexcan_interrupt(int irq, void *context,
   if (irq == priv->config->irq)
     {
       uint32_t flags;
+
       flags  = getreg32(priv->base + IMX9_CAN_IFLAG1_OFFSET);
       flags &= IFLAG1_RX;
 
@@ -1221,6 +1232,7 @@ static void imx9_txtimeout_work(void *arg)
 
   struct timespec ts;
   struct timeval *now = (struct timeval *)&ts;
+
   clock_systime_timespec(&ts);
   now->tv_usec = ts.tv_nsec / 1000; /* timespec to timeval conversion */
 
@@ -1246,6 +1258,7 @@ static void imx9_txtimeout_work(void *arg)
             }
 
           struct mb_s *mb = flexcan_get_mb(priv, mbi + RXMBCOUNT);
+
           mb->cs.code = CAN_TXMB_ABORT;
           priv->txmb[mbi].pending = TX_ABORT;
         }
@@ -1305,6 +1318,7 @@ static void imx9_setenable(uint32_t base, uint32_t enable)
 static void imx9_setfreeze(uint32_t base, uint32_t freeze)
 {
   uint32_t regval;
+
   if (freeze)
     {
       /* Enter freeze mode */
@@ -1333,6 +1347,7 @@ static uint32_t imx9_waitmcr_change(uint32_t base, uint32_t mask,
     {
       const bool state = (getreg32(base + IMX9_CAN_MCR_OFFSET) & mask)
           != 0;
+
       if (state == target_state)
         {
           return true;
@@ -1549,6 +1564,7 @@ static int imx9_ioctl(struct net_driver_s *dev, int cmd,
         {
           struct can_ioctl_data_s *req =
               (struct can_ioctl_data_s *)((uintptr_t)arg);
+
           req->arbi_bitrate = priv->arbi_timing.bitrate;
           req->arbi_samplep = priv->arbi_timing.samplep;
           if (priv->canfd_capable)
@@ -1572,6 +1588,7 @@ static int imx9_ioctl(struct net_driver_s *dev, int cmd,
               (struct can_ioctl_data_s *)((uintptr_t)arg);
 
           struct flexcan_timeseg arbi_timing;
+
           arbi_timing.bitrate = req->arbi_bitrate;
           arbi_timing.samplep = req->arbi_samplep;
 
@@ -1585,19 +1602,19 @@ static int imx9_ioctl(struct net_driver_s *dev, int cmd,
             }
 
           if (priv->canfd_capable)
-          {
-            data_timing.bitrate = req->data_bitrate;
-            data_timing.samplep = req->data_samplep;
+            {
+              data_timing.bitrate = req->data_bitrate;
+              data_timing.samplep = req->data_samplep;
 
-            if (ret == OK && imx9_bitratetotimeseg(&data_timing, 10, 1))
-              {
-                ret = OK;
-              }
-            else
-              {
-                ret = -EINVAL;
-              }
-          }
+              if (ret == OK && imx9_bitratetotimeseg(&data_timing, 10, 1))
+                {
+                  ret = OK;
+                }
+              else
+                {
+                  ret = -EINVAL;
+                }
+            }
 
           if (ret == OK)
             {
@@ -1605,9 +1622,9 @@ static int imx9_ioctl(struct net_driver_s *dev, int cmd,
 
               priv->arbi_timing = arbi_timing;
               if (priv->canfd_capable)
-              {
-                priv->data_timing = data_timing;
-              }
+                {
+                  priv->data_timing = data_timing;
+                }
             }
         }
         break;
@@ -1782,12 +1799,14 @@ static int imx9_initialize(struct imx9_driver_s *priv)
    *  transmitting the package, hence we write 0x3.
    */
 
-      struct mb_s *buffer = flexcan_get_mb(priv, RXMBCOUNT);
-      buffer->cs.code = 0x3;
+  struct mb_s *buffer = flexcan_get_mb(priv, RXMBCOUNT);
+
+  buffer->cs.code = 0x3;
 
   for (i = RXMBCOUNT + 1; i < TOTALMBCOUNT; i++)
     {
       struct mb_s *rx = flexcan_get_mb(priv, i);
+
       rx->id.w = 0x0;
 
       /* FIXME sometimes we get a hard fault here */
@@ -1803,6 +1822,7 @@ static int imx9_initialize(struct imx9_driver_s *priv)
   for (i = 0; i < RXMBCOUNT; i++)
     {
       struct mb_s *rx = flexcan_get_mb(priv, i);
+
       ninfo("Set MB%" PRIi32 " to receive %p\n", i, rx);
       rx->cs.edl = 0x1;
       rx->cs.brs = 0x1;
@@ -1868,6 +1888,7 @@ static void imx9_reset(struct imx9_driver_s *priv)
   for (i = 0; i < TOTALMBCOUNT; i++)
     {
       struct mb_s *rx = flexcan_get_mb(priv, i);
+
       ninfo("MB %" PRIi32 " %p\n", i, rx);
       ninfo("MB %" PRIi32 " %p\n", i, &rx->id.w);
       rx->cs.cs = 0x0;
@@ -1928,143 +1949,143 @@ int imx9_caninitialize(int intf)
   switch (intf)
     {
 #ifdef CONFIG_IMX9_FLEXCAN1
-    case 1:
-      priv               = &g_flexcan1;
-      memset(priv, 0, sizeof(struct imx9_driver_s));
-      priv->base         = IMX9_CAN1_BASE;
-      priv->config       = &imx9_flexcan1_config;
+      case 1:
+        priv               = &g_flexcan1;
+        memset(priv, 0, sizeof(struct imx9_driver_s));
+        priv->base         = IMX9_CAN1_BASE;
+        priv->config       = &imx9_flexcan1_config;
 #  if defined(CONFIG_NET_CAN_CANFD)
-      priv->canfd_capable = true;
-      priv->mb_address_offset = 14;
+        priv->canfd_capable = true;
+        priv->mb_address_offset = 14;
 #endif
 
-      /* Default bitrate configuration */
+        /* Default bitrate configuration */
 
 #  if defined(CONFIG_NET_CAN_CANFD)
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN1_ARBI_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN1_ARBI_SAMPLEP;
-      priv->data_timing.bitrate = CONFIG_FLEXCAN1_DATA_BITRATE;
-      priv->data_timing.samplep = CONFIG_FLEXCAN1_DATA_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN1_ARBI_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN1_ARBI_SAMPLEP;
+        priv->data_timing.bitrate = CONFIG_FLEXCAN1_DATA_BITRATE;
+        priv->data_timing.samplep = CONFIG_FLEXCAN1_DATA_SAMPLEP;
 #  else
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN1_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN1_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN1_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN1_SAMPLEP;
 #  endif
-      break;
+        break;
 #endif
 
 #ifdef CONFIG_IMX9_FLEXCAN2
-    case 2:
-      priv         = &g_flexcan2;
-      memset(priv, 0, sizeof(struct imx9_driver_s));
-      priv->base   = IMX9_CAN2_BASE;
-      priv->config = &imx9_flexcan2_config;
+      case 2:
+        priv         = &g_flexcan2;
+        memset(priv, 0, sizeof(struct imx9_driver_s));
+        priv->base   = IMX9_CAN2_BASE;
+        priv->config = &imx9_flexcan2_config;
 #  if defined(CONFIG_NET_CAN_CANFD)
-      priv->canfd_capable = true;
-      priv->mb_address_offset = 14;
+        priv->canfd_capable = true;
+        priv->mb_address_offset = 14;
 #  else
-      priv->canfd_capable = false;
-      priv->mb_address_offset = 0;
+        priv->canfd_capable = false;
+        priv->mb_address_offset = 0;
 #  endif
 
-      /* Default bitrate configuration */
+        /* Default bitrate configuration */
 
 #  if defined(CONFIG_NET_CAN_CANFD)
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN2_ARBI_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN2_ARBI_SAMPLEP;
-      priv->data_timing.bitrate = CONFIG_FLEXCAN2_DATA_BITRATE;
-      priv->data_timing.samplep = CONFIG_FLEXCAN2_DATA_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN2_ARBI_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN2_ARBI_SAMPLEP;
+        priv->data_timing.bitrate = CONFIG_FLEXCAN2_DATA_BITRATE;
+        priv->data_timing.samplep = CONFIG_FLEXCAN2_DATA_SAMPLEP;
 #  else
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN2_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN2_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN2_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN2_SAMPLEP;
 #  endif
-      break;
+        break;
 #endif
 
 #ifdef CONFIG_IMX9_FLEXCAN3
-    case 3:
-      priv         = &g_flexcan3;
-      memset(priv, 0, sizeof(struct imx9_driver_s));
-      priv->base   = IMX9_CAN3_BASE;
-      priv->config = &imx9_flexcan3_config;
+      case 3:
+        priv         = &g_flexcan3;
+        memset(priv, 0, sizeof(struct imx9_driver_s));
+        priv->base   = IMX9_CAN3_BASE;
+        priv->config = &imx9_flexcan3_config;
 #  ifdef CONFIG_NET_CAN_CANFD
-      priv->canfd_capable = true;
-      priv->mb_address_offset = 14;
+        priv->canfd_capable = true;
+        priv->mb_address_offset = 14;
 #  else
-      priv->canfd_capable = false;
-      priv->mb_address_offset = 0;
+        priv->canfd_capable = false;
+        priv->mb_address_offset = 0;
 #  endif
 
-      /* Default bitrate configuration */
+        /* Default bitrate configuration */
 
 #  ifdef CONFIG_NET_CAN_CANFD
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN3_ARBI_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN3_ARBI_SAMPLEP;
-      priv->data_timing.bitrate = CONFIG_FLEXCAN3_DATA_BITRATE;
-      priv->data_timing.samplep = CONFIG_FLEXCAN3_DATA_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN3_ARBI_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN3_ARBI_SAMPLEP;
+        priv->data_timing.bitrate = CONFIG_FLEXCAN3_DATA_BITRATE;
+        priv->data_timing.samplep = CONFIG_FLEXCAN3_DATA_SAMPLEP;
 #  else
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN3_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN3_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN3_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN3_SAMPLEP;
 #  endif
-      break;
+        break;
 #endif
 
 #ifdef CONFIG_IMX9_FLEXCAN4
-    case 4:
-      priv         = &g_flexcan4;
-      memset(priv, 0, sizeof(struct imx9_driver_s));
-      priv->base   = IMX9_CAN4_BASE;
-      priv->config = &imx9_flexcan4_config;
+      case 4:
+        priv         = &g_flexcan4;
+        memset(priv, 0, sizeof(struct imx9_driver_s));
+        priv->base   = IMX9_CAN4_BASE;
+        priv->config = &imx9_flexcan4_config;
 #  ifdef CONFIG_NET_CAN_CANFD
-      priv->canfd_capable = true;
-      priv->mb_address_offset = 14;
+        priv->canfd_capable = true;
+        priv->mb_address_offset = 14;
 #  else
-      priv->canfd_capable = false;
-      priv->mb_address_offset = 0;
+        priv->canfd_capable = false;
+        priv->mb_address_offset = 0;
 #  endif
 
-      /* Default bitrate configuration */
+        /* Default bitrate configuration */
 
 #  ifdef CONFIG_NET_CAN_CANFD
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN4_ARBI_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN4_ARBI_SAMPLEP;
-      priv->data_timing.bitrate = CONFIG_FLEXCAN4_DATA_BITRATE;
-      priv->data_timing.samplep = CONFIG_FLEXCAN4_DATA_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN4_ARBI_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN4_ARBI_SAMPLEP;
+        priv->data_timing.bitrate = CONFIG_FLEXCAN4_DATA_BITRATE;
+        priv->data_timing.samplep = CONFIG_FLEXCAN4_DATA_SAMPLEP;
 #  else
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN4_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN4_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN4_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN4_SAMPLEP;
 #  endif
-      break;
+        break;
 #endif
 
 #ifdef CONFIG_IMX9_FLEXCAN5
-    case 5:
-      priv         = &g_flexcan5;
-      memset(priv, 0, sizeof(struct imx9_driver_s));
-      priv->base   = IMX9_CAN5_BASE;
-      priv->config = &imx9_flexcan5_config;
+      case 5:
+        priv         = &g_flexcan5;
+        memset(priv, 0, sizeof(struct imx9_driver_s));
+        priv->base   = IMX9_CAN5_BASE;
+        priv->config = &imx9_flexcan5_config;
 #  ifdef CONFIG_NET_CAN_CANFD
-      priv->canfd_capable = true;
-      priv->mb_address_offset = 14;
+        priv->canfd_capable = true;
+        priv->mb_address_offset = 14;
 #  else
-      priv->canfd_capable = false;
-      priv->mb_address_offset = 0;
+        priv->canfd_capable = false;
+        priv->mb_address_offset = 0;
 #  endif
 
-      /* Default bitrate configuration */
+        /* Default bitrate configuration */
 
 #  ifdef CONFIG_NET_CAN_CANFD
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN5_ARBI_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN5_ARBI_SAMPLEP;
-      priv->data_timing.bitrate = CONFIG_FLEXCAN5_DATA_BITRATE;
-      priv->data_timing.samplep = CONFIG_FLEXCAN5_DATA_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN5_ARBI_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN5_ARBI_SAMPLEP;
+        priv->data_timing.bitrate = CONFIG_FLEXCAN5_DATA_BITRATE;
+        priv->data_timing.samplep = CONFIG_FLEXCAN5_DATA_SAMPLEP;
 #  else
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN5_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN5_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN5_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN5_SAMPLEP;
 #  endif
-      break;
+        break;
 #endif
-    default:
-      return -ENODEV;
+      default:
+        return -ENODEV;
     }
 
   imx9_configure_clock(priv->config->clk_root, true);
