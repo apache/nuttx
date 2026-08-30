@@ -224,7 +224,8 @@
 #  define STM32_NRNG                     0   /* No Random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
-#elif defined(CONFIG_ARCH_CHIP_STM32F412CE)  /* UFQFPN48 package, 512Kb FLASH, 256KiB SRAM */
+#elif defined(CONFIG_ARCH_CHIP_STM32F412CE) || \
+      defined(CONFIG_ARCH_CHIP_STM32F412CG)  /* UFQFPN48, 512Kb/1MB FLASH, 256KiB SRAM */
 #  define STM32_NFSMC                    0   /* No FSMC on the 48-pin package */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and TIM8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
