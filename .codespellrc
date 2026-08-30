@@ -9,7 +9,6 @@ exclude-file = .codespell-ignore-lines
 skip =
   LICENSE,
   */CODEOWNERS,
-  */system/zbus/images/*,
 
 # Ignore seemingly misspelled words.
 #   lowercase: case insensitive
