@@ -1244,7 +1244,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
         break;
 #endif
 
-#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_CAN_BITRATE_IOCTL)
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_CAN_IOCTL)
       case SIOCSCANBITRATE:  /* Set bitrate of a CAN controller */
         if (dev->d_flags & IFF_UP)
           {
@@ -1254,52 +1254,24 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
             break;
           }
 
-        /* If down, fall-through to common code in SIOCGCANBITRATE. */
+        /* If down, fall-through to the common CAN ioctl code. */
 
-      case SIOCGCANBITRATE:  /* Get bitrate from a CAN controller */
-        if (dev->d_ioctl)
-          {
-            FAR struct can_ioctl_data_s *can_bitrate_data =
-              &req->ifr_ifru.ifru_can_data;
-            ret = dev->d_ioctl(dev, cmd,
-                          (unsigned long)(uintptr_t)can_bitrate_data);
-          }
-        else
-          {
-            ret = -ENOSYS;
-          }
-        break;
-#endif
-
-#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_CAN_FILTER_IOCTL)
+      case SIOCGCANBITRATE:    /* Get bitrate from a CAN controller */
       case SIOCACANEXTFILTER:  /* Add an extended-ID filter */
       case SIOCDCANEXTFILTER:  /* Delete an extended-ID filter */
       case SIOCACANSTDFILTER:  /* Add a standard-ID filter */
       case SIOCDCANSTDFILTER:  /* Delete a standard-ID filter */
       case SIOCCANRECOVERY:    /* Recovery can controller when bus-off */
+      case SIOCGCANSTATE:      /* Get state from a CAN/LIN controller */
+      case SIOCSCANSTATE:      /* Set the LIN/CAN controller state */
         if (dev->d_ioctl)
           {
-            FAR struct can_ioctl_filter_s *can_filter =
-              &req->ifr_ifru.ifru_can_filter;
-            ret = dev->d_ioctl(dev, cmd,
-                          (unsigned long)(uintptr_t)can_filter);
-          }
-        else
-          {
-            ret = -ENOSYS;
-          }
-        break;
-#endif
+            /* Every CAN ioctl argument struct is a member of the
+             * ifr_ifru union, so cmd's struct is at its address.
+             */
 
-#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_CAN_STATE_IOCTL)
-      case SIOCGCANSTATE:  /* Get state from a CAN/LIN controller */
-      case SIOCSCANSTATE:  /* Set the LIN/CAN controller state */
-        if (dev->d_ioctl)
-          {
-            FAR struct can_ioctl_state_s *can_state =
-              &req->ifr_ifru.ifru_can_state;
             ret = dev->d_ioctl(dev, cmd,
-                          (unsigned long)(uintptr_t)can_state);
+                          (unsigned long)(uintptr_t)&req->ifr_ifru);
           }
         else
           {

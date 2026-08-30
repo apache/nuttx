@@ -474,12 +474,12 @@ static int mpfs_interrupt(int irq, void *context, void *arg);
 
 /* RX SW/HW filter related functions */
 
-#ifdef CONFIG_NETDEV_CAN_FILTER_IOCTL
+#ifdef CONFIG_NETDEV_CAN_IOCTL
 static uint8_t mpfs_can_add_filter(mpfs_can_instance_t *priv,
                                    uint8_t filter_type,
                                    uint32_t filter_id1,
                                    uint32_t filter_id2);
-#endif /* CONFIG_NETDEV_CAN_FILTER_IOCTL */
+#endif /* CONFIG_NETDEV_CAN_IOCTL */
 
 static uint8_t mpfs_can_reset_filter(mpfs_can_instance_t *priv);
 
@@ -523,7 +523,7 @@ static uint32_t mpfs_can_canid_to_msgid(uint32_t canid);
 static uint32_t mpfs_can_msgid_to_canid(uint32_t id, bool ide, bool rtr);
 static uint8_t mpfs_can_set_bitrate(mpfs_can_instance_t *priv,
                                     uint32_t bitrate);
-#if defined(CONFIG_DEBUG_NET_INFO) || defined(CONFIG_NETDEV_CAN_BITRATE_IOCTL)
+#if defined(CONFIG_DEBUG_NET_INFO) || defined(CONFIG_NETDEV_CAN_IOCTL)
 static uint32_t mpfs_can_get_sample_point(mpfs_can_instance_t *priv);
 #endif
 
@@ -1081,7 +1081,7 @@ static int mpfs_interrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_CAN_FILTER_IOCTL
+#ifdef CONFIG_NETDEV_CAN_IOCTL
 static uint8_t mpfs_can_add_filter(mpfs_can_instance_t *priv,
                                       uint8_t filter_type,
                                       uint32_t filter_id1,
@@ -1137,7 +1137,7 @@ static uint8_t mpfs_can_add_filter(mpfs_can_instance_t *priv,
 
   return CAN_OK;
 }
-#endif /* CONFIG_NETDEV_CAN_FILTER_IOCTL */
+#endif /* CONFIG_NETDEV_CAN_IOCTL */
 
 /****************************************************************************
  * Name: mpfs_can_reset_filter
@@ -1734,7 +1734,7 @@ static uint8_t mpfs_can_set_bitrate(mpfs_can_instance_t *priv,
   return CAN_OK;
 }
 
-#if defined(CONFIG_DEBUG_NET_INFO) || defined(CONFIG_NETDEV_CAN_BITRATE_IOCTL)
+#if defined(CONFIG_DEBUG_NET_INFO) || defined(CONFIG_NETDEV_CAN_IOCTL)
 /****************************************************************************
  * Name: mpfs_can_get_sample_point
  *
@@ -2299,8 +2299,7 @@ static int mpfs_ioctl(struct netdev_lowerhalf_s *dev, int cmd,
 {
   ninfo("IOCTL received | cmd: %d arg: %ld\n", cmd, arg);
 
-#if defined(CONFIG_NETDEV_CAN_BITRATE_IOCTL) || \
-defined(CONFIG_NETDEV_CAN_FILTER_IOCTL)
+#ifdef CONFIG_NETDEV_CAN_IOCTL
   mpfs_can_instance_t *priv =
     (mpfs_can_instance_t *)dev;
 #endif
@@ -2308,7 +2307,7 @@ defined(CONFIG_NETDEV_CAN_FILTER_IOCTL)
 
   switch (cmd)
     {
-#ifdef CONFIG_NETDEV_CAN_BITRATE_IOCTL
+#ifdef CONFIG_NETDEV_CAN_IOCTL
     case SIOCGCANBITRATE:
 
       /* Get bitrate from the CAN controller */
@@ -2340,9 +2339,7 @@ defined(CONFIG_NETDEV_CAN_FILTER_IOCTL)
         ret = CAN_OK;
       }
       break;
-#endif /* CONFIG_NETDEV_CAN_BITRATE_IOCTL */
 
-#ifdef CONFIG_NETDEV_CAN_FILTER_IOCTL
     case SIOCACANSTDFILTER:
     case SIOCACANEXTFILTER:
 
@@ -2370,7 +2367,7 @@ defined(CONFIG_NETDEV_CAN_FILTER_IOCTL)
         ret = CAN_OK;
       }
       break;
-#endif /* CONFIG_NETDEV_CAN_FILTER_IOCTL */
+#endif /* CONFIG_NETDEV_CAN_IOCTL */
 
     default:
       ret = -ENOTTY;
