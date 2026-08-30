@@ -129,6 +129,7 @@ int at32_w25initialize(int minor)
   /* Register the MTD driver */
 
   char path[32];
+
   snprintf(path, sizeof(path), "/dev/mtdblock%d", minor);
   ret = register_mtddriver(path, mtd, 0755, NULL);
   if (ret < 0)
@@ -141,136 +142,149 @@ int at32_w25initialize(int minor)
   /* Initialize to provide SMARTFS on the MTD interface */
 
 #ifdef FLASH_PART
-{
-  int partno;
-  int partsize;
-  int partoffset;
-  int partszbytes;
-  int erasesize;
-  const char *partstring = FLASH_PART_LIST;
-  const char *ptr;
-  struct mtd_dev_s *mtd_part;
-  char partref[16];
-  struct mtd_geometry_s geo;
-
-  /* Now create a partition on the FLASH device */
-
-  partno = 0;
-  ptr = partstring;
-  partoffset = 0;
-
-  /* Get the geometry of the FLASH device */
-
-  ret = mtd->ioctl(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&geo));
-  if (ret < 0)
+  do
     {
-      syslog(LOG_ERR, "ERROR: mtd->ioctl failed: %d\n", ret);
-      return ret;
-    }
+      int partno;
+      int partsize;
+      int partoffset;
+      int partszbytes;
+      int erasesize;
+      int blkpererase;
+      const char *partstring = FLASH_PART_LIST;
+      const char *ptr;
+      struct mtd_dev_s *mtd_part;
+      char partref[16];
+      struct mtd_geometry_s geo;
 
-  /* Get the Flash erase size */
+      /* Now create a partition on the FLASH device */
 
-  erasesize = geo.erasesize;
+      partno = 0;
+      ptr = partstring;
+      partoffset = 0;
 
-  while (*ptr != '\0')
-    {
-      /* Get the partition size */
+      /* Get the geometry of the FLASH device */
 
-      partsize = atoi(ptr);
-      partszbytes = (partsize << 10); /* partsize is defined in KB */
-
-      /* Check if partition size is bigger then erase block */
-
-      if (partszbytes < erasesize)
+      ret = mtd->ioctl(mtd, MTDIOC_GEOMETRY,
+                       (unsigned long)((uintptr_t)&geo));
+      if (ret < 0)
         {
-          syslog(LOG_ERR,
-                "ERROR: Partition size is lesser than erasesize!\n");
-          return -1;
+          syslog(LOG_ERR, "ERROR: mtd->ioctl failed: %d\n", ret);
+          return ret;
         }
 
-      /* Check if partition size is multiple of erase block */
+      /* Get the Flash erase size */
 
-      if ((partszbytes % erasesize) != 0)
+      erasesize = geo.erasesize;
+
+      while (*ptr != '\0')
         {
-          syslog(LOG_ERR,
-                "ERROR: Partition size isn't multiple of erasesize!\n");
-          return -1;
-        }
+          /* Get the partition size */
 
-      mtd_part = mtd_partition(mtd, partoffset, partszbytes / erasesize);
-      partoffset += partszbytes / erasesize;
+          partsize = atoi(ptr);
+          partszbytes = (partsize << 10); /* partsize is defined in KB */
 
-#ifdef FLASH_CONFIG_PART
-      /* Test if this is the config partition */
+          /* Check if partition size is bigger then erase block */
 
-      if (FLASH_CONFIG_PART_NUMBER == partno)
-        {
-          /* Register the partition as the config device */
+          if (partszbytes < erasesize)
+            {
+              syslog(LOG_ERR,
+                    "ERROR: Partition size is lesser than erasesize!\n");
+              return -1;
+            }
 
-          mtdconfig_register(mtd_part);
-        }
-      else
-#endif
-        {
-          /* Now initialize a SMART Flash block device and bind it
-           * to the MTD device.
+          /* Check if partition size is multiple of erase block */
+
+          if ((partszbytes % erasesize) != 0)
+            {
+              syslog(LOG_ERR,
+                    "ERROR: Partition size isn't multiple of erasesize!\n");
+              return -1;
+            }
+
+          /* mtd_partition() expects the offset and size in units of the
+           * underlying device "blocks" (geo.blocksize, 256B for the W25),
+           * not erase blocks.  partoffset is tracked in erase blocks, so
+           * convert.  Without this, partitions are erasesize/blocksize
+           * (16x for the W25) too small and misaligned.
            */
 
-  #if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
-          snprintf(partref, sizeof(partref), "p%d", partno);
-          smart_initialize(W25QXX_FLASH_MINOR,
-                          mtd_part, partref);
-  #endif
-        }
+          blkpererase = geo.blocksize > 0 ? erasesize / geo.blocksize : 1;
+          mtd_part = mtd_partition(mtd, partoffset * blkpererase,
+                                   partszbytes / geo.blocksize);
+          partoffset += partszbytes / erasesize;
 
-      /* Set the partition name */
+#ifdef FLASH_CONFIG_PART
+          /* Test if this is the config partition */
+
+          if (FLASH_CONFIG_PART_NUMBER == partno)
+            {
+              /* Register the partition as the config device */
+
+              mtdconfig_register(mtd_part);
+            }
+          else
+#endif
+            {
+              /* Now initialize a SMART Flash block device and bind it
+               * to the MTD device.
+               */
+
+  #if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
+              snprintf(partref, sizeof(partref), "p%d", partno);
+              smart_initialize(W25QXX_FLASH_MINOR,
+                              mtd_part, partref);
+  #endif
+            }
+
+          /* Set the partition name */
 
 #if defined(CONFIG_MTD_PARTITION_NAMES)
-      if (!mtd_part)
-        {
-          syslog(LOG_ERR, "Error: failed to create partition %s\n",
-                partname);
-          return -1;
-        }
+          if (!mtd_part)
+            {
+              syslog(LOG_ERR, "Error: failed to create partition %s\n",
+                    partname);
+              return -1;
+            }
 
-      mtd_setpartitionname(mtd_part, partname);
+          mtd_setpartitionname(mtd_part, partname);
 
-      /* Now skip to next name.  We don't need to split the string here
-       * because the MTD partition logic will only display names up to
-       * the comma, thus allowing us to use a single static name
-       * in the code.
-       */
+          /* Now skip to next name.  We don't need to split the string here
+           * because the MTD partition logic will only display names up to
+           * the comma, thus allowing us to use a single static name
+           * in the code.
+           */
 
-      while (*partname != ',' && *partname != '\0')
-        {
-          /* Skip to next ',' */
+          while (*partname != ',' && *partname != '\0')
+            {
+              /* Skip to next ',' */
 
-          partname++;
-        }
+              partname++;
+            }
 
-      if (*partname == ',')
-        {
-          partname++;
-        }
+          if (*partname == ',')
+            {
+              partname++;
+            }
 #endif
 
-      /* Update the pointer to point to the next size in the list */
+          /* Update the pointer to point to the next size in the list */
 
-      while ((*ptr >= '0') && (*ptr <= '9'))
-        {
-          ptr++;
+          while ((*ptr >= '0') && (*ptr <= '9'))
+            {
+              ptr++;
+            }
+
+          if (*ptr == ',')
+            {
+              ptr++;
+            }
+
+          /* Increment the part number */
+
+          partno++;
         }
-
-      if (*ptr == ',')
-        {
-          ptr++;
-        }
-
-      /* Increment the part number */
-
-      partno++;
     }
-}
+  while (0);
 
 #else /* CONFIG_FLASH_PART */
 
