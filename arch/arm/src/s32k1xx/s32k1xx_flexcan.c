@@ -1460,7 +1460,7 @@ static int s32k1xx_txavail(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_CAN_BITRATE_IOCTL
+#ifdef CONFIG_NETDEV_CAN_IOCTL
 static int s32k1xx_ioctl(struct net_driver_s *dev, int cmd,
                          unsigned long arg)
 {
