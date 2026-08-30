@@ -435,6 +435,13 @@
 #define CAN_FDCRC_FD_MBCRC(x)      (((uint32_t)(((uint32_t)(x)) << CAN_FDCRC_FD_MBCRC_SHIFT)) & CAN_FDCRC_FD_MBCRC_MASK)
                                             /* Bit 31: Reserved */
 
+/* CAN MB RX codes */
+
+#define CAN_RXMB_INACTIVE          0x0        /* MB is not active. */
+#define CAN_RXMB_FULL              0x2        /* MB is full. */
+#define CAN_RXMB_EMPTY             0x4        /* MB is empty. */
+#define CAN_RXMB_OVERRUN           0x6        /* MB is overwritten into a full buffer. */
+
 /* CAN MB TX codes */
 #define CAN_TXMB_INACTIVE          0x8        /* MB is not active. */
 #define CAN_TXMB_ABORT             0x9        /* MB is aborted. */

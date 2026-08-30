@@ -23,7 +23,8 @@ config NETDEV_CAN_IOCTL
 	depends on NET_CAN
 	---help---
 		Enable support for the CAN network device ioctl() commands:
-		bitrate, hardware-level filters and CAN/LIN controller state
+		bitrate, hardware-level filters, CAN/LIN controller state and
+		error counters
 		(NOTE: Not every command is supported by every driver)
 
 config NETDEV_WIRELESS_IOCTL
