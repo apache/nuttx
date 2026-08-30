@@ -518,6 +518,7 @@ static void fdcan_dumpregs(struct fdcan_driver_s *priv)
   printf("CAN%d Base: 0x%lx\n", priv->iface_idx, priv->base);
 
   uint32_t regval;
+
   regval = getreg32(priv->base + STM32_FDCAN_CCCR_OFFSET);
   printf("CCCR = 0x%lx\n", regval);
   regval = getreg32(priv->base + STM32_FDCAN_ECR_OFFSET);
@@ -721,6 +722,7 @@ static bool fdcan_txringfull(struct fdcan_driver_s *priv)
    */
 
   uint32_t regval = getreg32(priv->base + STM32_FDCAN_TXBC_OFFSET);
+
   if ((regval & FDCAN_TXBC_TFQS) == 0)
     {
       nerr("No Tx FIFO buffers assigned?  Check your message RAM config\n");
@@ -765,6 +767,7 @@ static int fdcan_transmit(struct fdcan_driver_s *priv)
   /* First, check if there are any slots available in the queue */
 
   uint32_t regval = getreg32(priv->base + STM32_FDCAN_TXFQS_OFFSET);
+
   if ((regval & FDCAN_TXFQS_TFQF) == FDCAN_TXFQS_TFQF)
     {
       /* Tx FIFO / Queue is full */
@@ -795,6 +798,7 @@ static int fdcan_transmit(struct fdcan_driver_s *priv)
 #ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
   int32_t timeout = 0;
   struct timespec ts;
+
   clock_systime_timespec(&ts);
 
   if (priv->dev.d_sndlen > priv->dev.d_len)
@@ -803,6 +807,7 @@ static int fdcan_transmit(struct fdcan_driver_s *priv)
 
       struct timeval *tv =
              (struct timeval *)(priv->dev.d_buf + priv->dev.d_len);
+
       priv->txmb[mbi].deadline = *tv;
       timeout  = (tv->tv_sec - ts.tv_sec)*CLK_TCK
                  + ((tv->tv_usec - ts.tv_nsec / 1000)*CLK_TCK) / 1000000;
@@ -1251,13 +1256,13 @@ static void fdcan_receive_work(void *arg)
   fdcan_check_errors(priv);
 
 #ifdef CONFIG_NET_CAN_ERRORS
-          uint32_t regval;
+  uint32_t regval;
 
-          /* Turning back on all configured RX error interrupts */
+  /* Turning back on all configured RX error interrupts */
 
-          regval = getreg32(priv->base + STM32_FDCAN_IE_OFFSET);
-          regval |= FDCAN_RXERR_INTS;
-          putreg32(regval, priv->base + STM32_FDCAN_IE_OFFSET);
+  regval = getreg32(priv->base + STM32_FDCAN_IE_OFFSET);
+  regval |= FDCAN_RXERR_INTS;
+  putreg32(regval, priv->base + STM32_FDCAN_IE_OFFSET);
 #endif
 
   leave_critical_section(flags);
@@ -1285,6 +1290,7 @@ static void fdcan_txdone(struct fdcan_driver_s *priv)
   /* Read and reset the interrupt flag */
 
   uint32_t ir = getreg32(priv->base + STM32_FDCAN_IR_OFFSET);
+
   if (ir & FDCAN_IR_TC)
     {
       putreg32(FDCAN_IR_TC, priv->base + STM32_FDCAN_IR_OFFSET);
@@ -1524,6 +1530,7 @@ static void fdcan_txtimeout_work(void *arg)
 
   struct timespec ts;
   struct timeval *now = (struct timeval *)&ts;
+
   clock_systime_timespec(&ts);
   now->tv_usec = ts.tv_nsec / 1000; /* timespec to timeval conversion */
 
@@ -1697,9 +1704,11 @@ static bool fdcan_waitccr_change(uint32_t base, uint32_t mask,
                                      uint32_t target_state)
 {
   const unsigned timeout = 1000;
+
   for (unsigned wait_ack = 0; wait_ack < timeout; wait_ack++)
     {
       const bool state = (getreg32(base + STM32_FDCAN_CCCR_OFFSET) & mask);
+
       if (state == target_state)
         {
           return true;
@@ -1730,6 +1739,7 @@ static void fdcan_enable_interrupts(struct fdcan_driver_s *priv)
   /* Enable both interrupt lines at the device level */
 
   const uint32_t ile = FDCAN_ILE_EINT0 | FDCAN_ILE_EINT1;
+
   modifyreg32(priv->base + STM32_FDCAN_ILE_OFFSET, 0, ile);
 
   /* Enable both lines at the NVIC level */
@@ -1762,6 +1772,7 @@ static void fdcan_disable_interrupts(struct fdcan_driver_s *priv)
   /* Disable both interrupt lines at the device level */
 
   const uint32_t ile = FDCAN_ILE_EINT0 | FDCAN_ILE_EINT1;
+
   modifyreg32(priv->base + STM32_FDCAN_ILE_OFFSET, ile, 0);
 }
 
@@ -1961,6 +1972,7 @@ static int fdcan_netdev_ioctl(struct net_driver_s *dev, int cmd,
         {
           struct can_ioctl_data_s *req =
               (struct can_ioctl_data_s *)((uintptr_t)arg);
+
           req->arbi_bitrate = priv->arbi_timing.bitrate;
 #ifdef CONFIG_NET_CAN_CANFD
           req->data_bitrate = priv->data_timing.bitrate;
@@ -2060,6 +2072,7 @@ int fdcan_initialize(struct fdcan_driver_s *priv)
 
 #ifdef CONFIG_STM32_FDCAN_REGDEBUG
   const struct fdcan_bitseg *tim = &priv->arbi_timing;
+
   ninfo("[fdcan][arbi] Timings: presc=%u sjw=%u bs1=%u bs2=%u\r\n",
         tim->prescaler, tim->sjw, tim->bs1, tim->bs2);
 #endif
@@ -2210,6 +2223,7 @@ int fdcan_initialize(struct fdcan_driver_s *priv)
   /* Standard ID Filters: Allow space for 128 filters (128 words) */
 
   const uint8_t n_stdid = 128;
+
   priv->message_ram.filt_stdid_addr = gl_ram_base + ram_offset * WORD_LENGTH;
 
   regval  = (n_stdid << FDCAN_SIDFC_LSS_SHIFT) & FDCAN_SIDFC_LSS_MASK;
@@ -2237,6 +2251,7 @@ int fdcan_initialize(struct fdcan_driver_s *priv)
    */
 
   const uint8_t n_extid = 128;
+
   priv->message_ram.filt_extid_addr = gl_ram_base + ram_offset * WORD_LENGTH;
 
   regval = (n_extid << FDCAN_XIDFC_LSE_SHIFT) & FDCAN_XIDFC_LSE_MASK;
@@ -2425,64 +2440,64 @@ int stm32_fdcansockinitialize(int intf)
   switch (intf)
     {
 #ifdef CONFIG_STM32_FDCAN1
-    case 0:
-      priv             = &g_fdcan0;
-      memset(priv, 0, sizeof(struct fdcan_driver_s));
-      priv->base       = STM32_FDCAN1_BASE;
-      priv->iface_idx  = 0;
-      priv->config     = &stm32_fdcan0_config;
+      case 0:
+        priv             = &g_fdcan0;
+        memset(priv, 0, sizeof(struct fdcan_driver_s));
+        priv->base       = STM32_FDCAN1_BASE;
+        priv->iface_idx  = 0;
+        priv->config     = &stm32_fdcan0_config;
 
-      /* Default bitrate configuration */
+        /* Default bitrate configuration */
 
 #  ifdef CONFIG_NET_CAN_CANFD
-      priv->arbi_timing.bitrate = CONFIG_FDCAN1_ARBI_BITRATE;
-      priv->data_timing.bitrate = CONFIG_FDCAN1_DATA_BITRATE;
+        priv->arbi_timing.bitrate = CONFIG_FDCAN1_ARBI_BITRATE;
+        priv->data_timing.bitrate = CONFIG_FDCAN1_DATA_BITRATE;
 #  else
-      priv->arbi_timing.bitrate = CONFIG_FDCAN1_BITRATE;
+        priv->arbi_timing.bitrate = CONFIG_FDCAN1_BITRATE;
 #  endif
-      break;
+        break;
 #endif
 
 #ifdef CONFIG_STM32_FDCAN2
-    case 1:
-      priv             = &g_fdcan1;
-      memset(priv, 0, sizeof(struct fdcan_driver_s));
-      priv->base       = STM32_FDCAN2_BASE;
-      priv->iface_idx  = 1;
-      priv->config     = &stm32_fdcan1_config;
+      case 1:
+        priv             = &g_fdcan1;
+        memset(priv, 0, sizeof(struct fdcan_driver_s));
+        priv->base       = STM32_FDCAN2_BASE;
+        priv->iface_idx  = 1;
+        priv->config     = &stm32_fdcan1_config;
 
-      /* Default bitrate configuration */
+        /* Default bitrate configuration */
 
 #  ifdef CONFIG_NET_CAN_CANFD
-      priv->arbi_timing.bitrate = CONFIG_FDCAN2_ARBI_BITRATE;
-      priv->data_timing.bitrate = CONFIG_FDCAN2_DATA_BITRATE;
+        priv->arbi_timing.bitrate = CONFIG_FDCAN2_ARBI_BITRATE;
+        priv->data_timing.bitrate = CONFIG_FDCAN2_DATA_BITRATE;
 #  else
-      priv->arbi_timing.bitrate = CONFIG_FDCAN2_BITRATE;
+        priv->arbi_timing.bitrate = CONFIG_FDCAN2_BITRATE;
 #  endif
-      break;
+        break;
 #endif
 
 #ifdef CONFIG_STM32_FDCAN3
-    case 2:
-      priv             = &g_fdcan2;
-      memset(priv, 0, sizeof(struct fdcan_driver_s));
-      priv->base       = STM32_FDCAN3_BASE;
-      priv->iface_idx  = 2;
-      priv->config     = &stm32_fdcan2_config;
+      case 2:
+        priv             = &g_fdcan2;
+        memset(priv, 0, sizeof(struct fdcan_driver_s));
+        priv->base       = STM32_FDCAN3_BASE;
+        priv->iface_idx  = 2;
+        priv->config     = &stm32_fdcan2_config;
 
-      /* Default bitrate configuration */
+        /* Default bitrate configuration */
 
 #  ifdef CONFIG_NET_CAN_CANFD
-      priv->arbi_timing.bitrate = CONFIG_FDCAN3_ARBI_BITRATE;
-      priv->data_timing.bitrate = CONFIG_FDCAN3_DATA_BITRATE;
+        priv->arbi_timing.bitrate = CONFIG_FDCAN3_ARBI_BITRATE;
+        priv->data_timing.bitrate = CONFIG_FDCAN3_DATA_BITRATE;
 #  else
-      priv->arbi_timing.bitrate = CONFIG_FDCAN3_BITRATE;
+        priv->arbi_timing.bitrate = CONFIG_FDCAN3_BITRATE;
 #  endif
-      break;
+        break;
 #endif
 
-    default:
-      return -ENODEV;
+      default:
+        return -ENODEV;
     }
 
   if (fdcan_bittiming(&priv->arbi_timing) != OK)

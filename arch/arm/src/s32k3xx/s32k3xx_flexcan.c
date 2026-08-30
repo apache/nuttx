@@ -805,12 +805,14 @@ static int s32k3xx_transmit(struct s32k3xx_driver_s *priv)
 
 #ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
   struct timespec ts;
+
   clock_systime_timespec(&ts);
 
   if (priv->dev.d_sndlen > priv->dev.d_len)
     {
       struct timeval *tv =
              (struct timeval *)(priv->dev.d_buf + priv->dev.d_len);
+
       priv->txmb[mbi].deadline = *tv;
       timeout  = (tv->tv_sec - ts.tv_sec)*CLK_TCK
                  + ((tv->tv_usec - ts.tv_nsec / 1000)*CLK_TCK) / 1000000;
@@ -845,9 +847,11 @@ static int s32k3xx_transmit(struct s32k3xx_driver_s *priv)
     (peak_tx_mailbox_index_ > mbi ? peak_tx_mailbox_index_ : mbi);
 
   union cs_e cs;
+
   cs.cs = 0;
   cs.code = CAN_TXMB_DATAORREMOTE;
   struct mb_s *mb = &priv->tx[mbi];
+
   mb->cs.code = CAN_TXMB_INACTIVE;
 
   if (priv->dev.d_len <= sizeof(struct can_frame))
@@ -1067,7 +1071,7 @@ static void s32k3xx_receive(struct s32k3xx_driver_s *priv, uint32_t flags)
       else /* CAN 2.0 Frame */
 #endif
         {
-        struct can_frame *frame = (struct can_frame *)priv->rxdesc;
+          struct can_frame *frame = (struct can_frame *)priv->rxdesc;
 
           if (rf->cs.ide)
             {
@@ -1175,6 +1179,7 @@ static void s32k3xx_txdone(struct s32k3xx_driver_s *priv)
 
           wd_cancel(&priv->txtimeout[mbi]);
           struct mb_s *mb = &priv->tx[mbi];
+
           mb->cs.code = CAN_TXMB_INACTIVE;
 #endif
         }
@@ -1243,6 +1248,7 @@ static int s32k3xx_flexcan_interrupt(int irq, void *context, void *arg)
   if (irq == priv->config->mb_irq)
     {
       uint32_t flags;
+
       flags  = getreg32(priv->base + S32K3XX_CAN_IFLAG1_OFFSET);
       flags &= IFLAG1_RX;
 
@@ -1300,6 +1306,7 @@ static void s32k3xx_txtimeout_work(void *arg)
 
   struct timespec ts;
   struct timeval *now = (struct timeval *)&ts;
+
   clock_systime_timespec(&ts);
   now->tv_usec = ts.tv_nsec / 1000; /* timespec to timeval conversion */
 
@@ -1325,6 +1332,7 @@ static void s32k3xx_txtimeout_work(void *arg)
             }
 
           struct mb_s *mb = &priv->tx[mbi];
+
           mb->cs.code = CAN_TXMB_ABORT;
           priv->txmb[mbi].pending = TX_ABORT;
         }
@@ -1384,6 +1392,7 @@ static void s32k3xx_setenable(uint32_t base, uint32_t enable)
 static void s32k3xx_setfreeze(uint32_t base, uint32_t freeze)
 {
   uint32_t regval;
+
   if (freeze)
     {
       /* Enter freeze mode */
@@ -1412,6 +1421,7 @@ static uint32_t s32k3xx_waitmcr_change(uint32_t base, uint32_t mask,
     {
       const bool state = (getreg32(base + S32K3XX_CAN_MCR_OFFSET) & mask)
           != 0;
+
       if (state == target_state)
         {
           return true;
@@ -1663,6 +1673,7 @@ static int s32k3xx_ioctl(struct net_driver_s *dev, int cmd,
         {
           struct can_ioctl_data_s *req =
               (struct can_ioctl_data_s *)((uintptr_t)arg);
+
           req->arbi_bitrate = priv->arbi_timing.bitrate;
           req->arbi_samplep = priv->arbi_timing.samplep;
 #ifdef CONFIG_NET_CAN_CANFD
@@ -1682,6 +1693,7 @@ static int s32k3xx_ioctl(struct net_driver_s *dev, int cmd,
               (struct can_ioctl_data_s *)((uintptr_t)arg);
 
           struct flexcan_timeseg arbi_timing;
+
           arbi_timing.bitrate = req->arbi_bitrate;
           arbi_timing.samplep = req->arbi_samplep;
 
@@ -1697,6 +1709,7 @@ static int s32k3xx_ioctl(struct net_driver_s *dev, int cmd,
 
 #ifdef CONFIG_NET_CAN_CANFD
           struct flexcan_timeseg data_timing;
+
           data_timing.bitrate = req->data_bitrate;
           data_timing.samplep = req->data_samplep;
 
@@ -2019,139 +2032,139 @@ int s32k3xx_caninitialize(int intf)
   switch (intf)
     {
 #ifdef CONFIG_S32K3XX_FLEXCAN0
-    case 0:
-      priv               = &g_flexcan0;
-      memset(priv, 0, sizeof(struct s32k3xx_driver_s));
-      priv->base         = S32K3XX_FLEXCAN0_BASE;
-      priv->config       = &s32k3xx_flexcan0_config;
-      priv->clk_freq     = s32k3xx_get_freq(FLEXCAN0_CLK);
+      case 0:
+        priv               = &g_flexcan0;
+        memset(priv, 0, sizeof(struct s32k3xx_driver_s));
+        priv->base         = S32K3XX_FLEXCAN0_BASE;
+        priv->config       = &s32k3xx_flexcan0_config;
+        priv->clk_freq     = s32k3xx_get_freq(FLEXCAN0_CLK);
 
-      /* Default bitrate configuration */
+        /* Default bitrate configuration */
 
 #  ifdef CONFIG_NET_CAN_CANFD
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN0_ARBI_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN0_ARBI_SAMPLEP;
-      priv->data_timing.bitrate = CONFIG_FLEXCAN0_DATA_BITRATE;
-      priv->data_timing.samplep = CONFIG_FLEXCAN0_DATA_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN0_ARBI_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN0_ARBI_SAMPLEP;
+        priv->data_timing.bitrate = CONFIG_FLEXCAN0_DATA_BITRATE;
+        priv->data_timing.samplep = CONFIG_FLEXCAN0_DATA_SAMPLEP;
 #  else
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN0_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN0_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN0_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN0_SAMPLEP;
 #  endif
-      break;
+        break;
 #endif
 
 #ifdef CONFIG_S32K3XX_FLEXCAN1
-    case 1:
-      priv               = &g_flexcan1;
-      memset(priv, 0, sizeof(struct s32k3xx_driver_s));
-      priv->base         = S32K3XX_FLEXCAN1_BASE;
-      priv->config       = &s32k3xx_flexcan1_config;
-      priv->clk_freq     = s32k3xx_get_freq(FLEXCAN1_CLK);
+      case 1:
+        priv               = &g_flexcan1;
+        memset(priv, 0, sizeof(struct s32k3xx_driver_s));
+        priv->base         = S32K3XX_FLEXCAN1_BASE;
+        priv->config       = &s32k3xx_flexcan1_config;
+        priv->clk_freq     = s32k3xx_get_freq(FLEXCAN1_CLK);
 
-      /* Default bitrate configuration */
+        /* Default bitrate configuration */
 
 #  ifdef CONFIG_NET_CAN_CANFD
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN1_ARBI_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN1_ARBI_SAMPLEP;
-      priv->data_timing.bitrate = CONFIG_FLEXCAN1_DATA_BITRATE;
-      priv->data_timing.samplep = CONFIG_FLEXCAN1_DATA_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN1_ARBI_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN1_ARBI_SAMPLEP;
+        priv->data_timing.bitrate = CONFIG_FLEXCAN1_DATA_BITRATE;
+        priv->data_timing.samplep = CONFIG_FLEXCAN1_DATA_SAMPLEP;
 #  else
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN1_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN1_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN1_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN1_SAMPLEP;
 #  endif
-      break;
+        break;
 #endif
 
 #ifdef CONFIG_S32K3XX_FLEXCAN2
-    case 2:
-      priv               = &g_flexcan2;
-      memset(priv, 0, sizeof(struct s32k3xx_driver_s));
-      priv->base         = S32K3XX_FLEXCAN2_BASE;
-      priv->config       = &s32k3xx_flexcan2_config;
-      priv->clk_freq     = s32k3xx_get_freq(FLEXCAN2_CLK);
+      case 2:
+        priv               = &g_flexcan2;
+        memset(priv, 0, sizeof(struct s32k3xx_driver_s));
+        priv->base         = S32K3XX_FLEXCAN2_BASE;
+        priv->config       = &s32k3xx_flexcan2_config;
+        priv->clk_freq     = s32k3xx_get_freq(FLEXCAN2_CLK);
 
-      /* Default bitrate configuration */
+        /* Default bitrate configuration */
 
 #  ifdef CONFIG_NET_CAN_CANFD
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN2_ARBI_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN2_ARBI_SAMPLEP;
-      priv->data_timing.bitrate = CONFIG_FLEXCAN2_DATA_BITRATE;
-      priv->data_timing.samplep = CONFIG_FLEXCAN2_DATA_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN2_ARBI_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN2_ARBI_SAMPLEP;
+        priv->data_timing.bitrate = CONFIG_FLEXCAN2_DATA_BITRATE;
+        priv->data_timing.samplep = CONFIG_FLEXCAN2_DATA_SAMPLEP;
 #  else
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN2_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN2_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN2_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN2_SAMPLEP;
 #  endif
-      break;
+        break;
 #endif
 
 #ifdef CONFIG_S32K3XX_FLEXCAN3
-    case 3:
-      priv               = &g_flexcan3;
-      memset(priv, 0, sizeof(struct s32k3xx_driver_s));
-      priv->base         = S32K3XX_FLEXCAN3_BASE;
-      priv->config       = &s32k3xx_flexcan3_config;
-      priv->clk_freq     = s32k3xx_get_freq(FLEXCAN3_CLK);
+      case 3:
+        priv               = &g_flexcan3;
+        memset(priv, 0, sizeof(struct s32k3xx_driver_s));
+        priv->base         = S32K3XX_FLEXCAN3_BASE;
+        priv->config       = &s32k3xx_flexcan3_config;
+        priv->clk_freq     = s32k3xx_get_freq(FLEXCAN3_CLK);
 
-      /* Default bitrate configuration */
+        /* Default bitrate configuration */
 
 #  ifdef CONFIG_NET_CAN_CANFD
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN3_ARBI_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN3_ARBI_SAMPLEP;
-      priv->data_timing.bitrate = CONFIG_FLEXCAN3_DATA_BITRATE;
-      priv->data_timing.samplep = CONFIG_FLEXCAN3_DATA_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN3_ARBI_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN3_ARBI_SAMPLEP;
+        priv->data_timing.bitrate = CONFIG_FLEXCAN3_DATA_BITRATE;
+        priv->data_timing.samplep = CONFIG_FLEXCAN3_DATA_SAMPLEP;
 #  else
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN3_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN3_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN3_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN3_SAMPLEP;
 #  endif
-      break;
+        break;
 #endif
 
 #ifdef CONFIG_S32K3XX_FLEXCAN4
-    case 4:
-      priv               = &g_flexcan4;
-      memset(priv, 0, sizeof(struct s32k3xx_driver_s));
-      priv->base         = S32K3XX_FLEXCAN4_BASE;
-      priv->config       = &s32k3xx_flexcan4_config;
-      priv->clk_freq     = s32k3xx_get_freq(FLEXCAN4_CLK);
+      case 4:
+        priv               = &g_flexcan4;
+        memset(priv, 0, sizeof(struct s32k3xx_driver_s));
+        priv->base         = S32K3XX_FLEXCAN4_BASE;
+        priv->config       = &s32k3xx_flexcan4_config;
+        priv->clk_freq     = s32k3xx_get_freq(FLEXCAN4_CLK);
 
-      /* Default bitrate configuration */
+        /* Default bitrate configuration */
 
 #  ifdef CONFIG_NET_CAN_CANFD
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN4_ARBI_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN4_ARBI_SAMPLEP;
-      priv->data_timing.bitrate = CONFIG_FLEXCAN4_DATA_BITRATE;
-      priv->data_timing.samplep = CONFIG_FLEXCAN4_DATA_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN4_ARBI_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN4_ARBI_SAMPLEP;
+        priv->data_timing.bitrate = CONFIG_FLEXCAN4_DATA_BITRATE;
+        priv->data_timing.samplep = CONFIG_FLEXCAN4_DATA_SAMPLEP;
 #  else
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN4_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN4_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN4_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN4_SAMPLEP;
 #  endif
-      break;
+        break;
 #endif
 
 #ifdef CONFIG_S32K3XX_FLEXCAN5
-    case 5:
-      priv               = &g_flexcan5;
-      memset(priv, 0, sizeof(struct s32k3xx_driver_s));
-      priv->base         = S32K3XX_FLEXCAN5_BASE;
-      priv->config       = &s32k3xx_flexcan5_config;
-      priv->clk_freq     = s32k3xx_get_freq(FLEXCAN5_CLK);
+      case 5:
+        priv               = &g_flexcan5;
+        memset(priv, 0, sizeof(struct s32k3xx_driver_s));
+        priv->base         = S32K3XX_FLEXCAN5_BASE;
+        priv->config       = &s32k3xx_flexcan5_config;
+        priv->clk_freq     = s32k3xx_get_freq(FLEXCAN5_CLK);
 
-      /* Default bitrate configuration */
+        /* Default bitrate configuration */
 
 #  ifdef CONFIG_NET_CAN_CANFD
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN5_ARBI_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN5_ARBI_SAMPLEP;
-      priv->data_timing.bitrate = CONFIG_FLEXCAN5_DATA_BITRATE;
-      priv->data_timing.samplep = CONFIG_FLEXCAN5_DATA_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN5_ARBI_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN5_ARBI_SAMPLEP;
+        priv->data_timing.bitrate = CONFIG_FLEXCAN5_DATA_BITRATE;
+        priv->data_timing.samplep = CONFIG_FLEXCAN5_DATA_SAMPLEP;
 #  else
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN5_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN5_SAMPLEP;
+        priv->arbi_timing.bitrate = CONFIG_FLEXCAN5_BITRATE;
+        priv->arbi_timing.samplep = CONFIG_FLEXCAN5_SAMPLEP;
 #  endif
-      break;
+        break;
 #endif
 
-    default:
-      return -ENODEV;
+      default:
+        return -ENODEV;
     }
 
   if (!s32k3xx_bitratetotimeseg(&priv->arbi_timing, 1, 0, priv->clk_freq))
@@ -2187,7 +2200,7 @@ int s32k3xx_caninitialize(int intf)
   /* Attach the flexcan interrupt handler */
 
   if (priv->config->bus_irq > 0)
-      {
+    {
       if (irq_attach(priv->config->bus_irq, s32k3xx_flexcan_interrupt, priv))
         {
           /* We could not attach the ISR to the interrupt */
@@ -2195,10 +2208,10 @@ int s32k3xx_caninitialize(int intf)
           nerr("ERROR: Failed to attach CAN bus IRQ\n");
           return -EAGAIN;
         }
-      }
+    }
 
   if (priv->config->error_irq > 0)
-      {
+    {
       if (irq_attach(priv->config->error_irq,
                      s32k3xx_flexcan_interrupt, priv))
         {
@@ -2207,7 +2220,7 @@ int s32k3xx_caninitialize(int intf)
           nerr("ERROR: Failed to attach CAN error IRQ\n");
           return -EAGAIN;
         }
-      }
+    }
 
   if (priv->config->lprx_irq > 0)
     {
