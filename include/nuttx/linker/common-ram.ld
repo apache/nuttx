@@ -40,8 +40,4 @@
  * sections; blocks are added below, each guarded by its Kconfig option.
  */
 
-/* zbus needs no RAM iterable sections: notification masks live in .bss
- * and are initialized at runtime from ROM-preserved values.
- */
-
 #endif /* !CONFIG_ITERABLE_SECTIONS_LINKER_INSERT */
