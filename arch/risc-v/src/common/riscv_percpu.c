@@ -26,7 +26,6 @@
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
-#include <nuttx/queue.h>
 #include <nuttx/spinlock.h>
 
 #include <arch/barriers.h>
@@ -60,7 +59,6 @@ static_assert(RISCV_PERCPU_KSP == offsetof(riscv_percpu_t, ksp),
  ****************************************************************************/
 
 static riscv_percpu_t   g_percpu[HART_CNT];
-static sq_queue_t       g_freelist;
 static uintptr_t        g_initialized;
 static spinlock_t       g_percpu_spin;
 
@@ -96,8 +94,6 @@ static void riscv_percpu_init(void)
       goto out_with_lock;
     }
 
-  sq_init(&g_freelist);
-
   for (i = 0; i < HART_CNT; i++)
     {
       /* Set interrupt stack (if any) */
@@ -105,8 +101,6 @@ static void riscv_percpu_init(void)
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
       g_percpu[i].irq_stack = (uintptr_t)g_intstacktop - i * INT_STACK_SIZE;
 #endif
-
-      sq_addlast((struct sq_entry_s *) &g_percpu[i], &g_freelist);
     }
 
 out_with_lock:
@@ -131,18 +125,22 @@ out_with_lock:
 void riscv_percpu_add_hart(uintptr_t hartid)
 {
   riscv_percpu_t *percpu;
-  irqstate_t      flags;
+  int             cpu;
 
   /* Make sure we are initialized */
 
   riscv_percpu_init();
 
-  /* Get free entry for this hart, this must not fail */
+  /* Get the per CPU entry corresponding to this hart. */
 
-  flags = spin_lock_irqsave(&g_percpu_spin);
-  percpu = (riscv_percpu_t *)sq_remfirst(&g_freelist);
-  spin_unlock_irqrestore(&g_percpu_spin, flags);
-  DEBUGASSERT(percpu);
+  cpu = riscv_hartid_to_cpuid(hartid);
+
+  if (cpu < 0 || cpu >= HART_CNT)
+    {
+      PANIC();
+    }
+
+  percpu = &g_percpu[cpu];
 
   /* Assign hartid, stack has already been assigned */
 
