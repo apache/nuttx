@@ -51,6 +51,10 @@
 #  include "esp32s3_i2c.h"
 #endif
 
+#if defined(CONFIG_ESP32S3_SDMMC) || defined(CONFIG_MMCSD_SPI)
+#  include "esp32s3_board_sdmmc.h"
+#endif
+
 #include "esp32s3-xiao.h"
 
 #ifdef CONFIG_USERLED
@@ -120,6 +124,14 @@ int esp32s3_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_MMCSD_SPI
+  ret = board_sdmmc_spi_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SDMMC: %d\n", ret);
     }
 #endif
 
