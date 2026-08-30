@@ -160,8 +160,8 @@ Imported Intefaces
 The interfaces that must be provided by the platform specified code
 are defined in ``include/nuttx/arch.h`` and summarized below.
 
-``up_timer_intialize()``
-^^^^^^^^^^^^^^^^^^^^^^^^
+``up_timer_initialize()``
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: c
 
@@ -169,7 +169,7 @@ are defined in ``include/nuttx/arch.h`` and summarized below.
 
 * **Description:** Initializes all platform-specific timer facilities.
   This function is called early in the initialization sequence by
-  ``up_intialize()``. On return, the current up-time should be available
+  ``up_initialize()``. On return, the current up-time should be available
   from ``up_timer_gettime()`` and the interval timer is ready for use
   (but not actively timing).
 * **Input Parameters:** None.
