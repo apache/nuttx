@@ -775,6 +775,7 @@ static ssize_t net_ioctl_ifreq_arglen(uint8_t domain, int cmd)
       case SIOCCANRECOVERY:
       case SIOCGCANSTATE:
       case SIOCSCANSTATE:
+      case SIOCGCANERRORS:
       case SIOCSIFNAME:
       case SIOCGIFNAME:
       case SIOCGIFINDEX:
@@ -1264,6 +1265,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
       case SIOCCANRECOVERY:    /* Recovery can controller when bus-off */
       case SIOCGCANSTATE:      /* Get state from a CAN/LIN controller */
       case SIOCSCANSTATE:      /* Set the LIN/CAN controller state */
+      case SIOCGCANERRORS:     /* Get CAN error counters and state */
         if (dev->d_ioctl)
           {
             /* Every CAN ioctl argument struct is a member of the

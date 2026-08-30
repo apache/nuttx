@@ -237,6 +237,25 @@ struct can_ioctl_state_s
   enum can_ioctl_state_e state;
 };
 
+/* Fault confinement and error counters, SIOCGCANERRORS ioctl command.
+ * WARNING is error-active with either error counter at or above 96;
+ * PASSIVE and BUSOFF follow the controller's own state.
+ */
+
+#define CAN_ERRSTATE_ACTIVE   0
+#define CAN_ERRSTATE_WARNING  1
+#define CAN_ERRSTATE_PASSIVE  2
+#define CAN_ERRSTATE_BUSOFF   3
+
+struct can_ioctl_errors_s
+{
+  uint8_t  state;       /* CAN_ERRSTATE_* */
+  uint8_t  txerr;       /* Transmit error counter (TEC) */
+  uint8_t  rxerr;       /* Receive error counter (REC) */
+  uint32_t errors;      /* Bus errors observed since ifup, monotonic */
+  uint32_t rx_overruns; /* RX frames the controller overwrote unread */
+};
+
 /* There are two forms of the I/F request structure.
  * One for IPv6 and one for IPv4.
  * Notice that they are (and must be) cast compatible and really different
@@ -264,6 +283,7 @@ struct lifreq
     struct can_ioctl_data_s    lifru_can_data;       /* CAN bitrate request data */
     struct can_ioctl_filter_s  lifru_can_filter;     /* CAN filter request data */
     struct can_ioctl_state_s   lifru_can_state;      /* CAN/LIN controller state */
+    struct can_ioctl_errors_s  lifru_can_errors;     /* CAN error counters */
   } lifr_ifru;
 };
 
@@ -322,6 +342,7 @@ struct ifreq
     struct can_ioctl_data_s    ifru_can_data;       /* CAN bitrate request data */
     struct can_ioctl_filter_s  ifru_can_filter;     /* CAN filter request data */
     struct can_ioctl_state_s   ifru_can_state;      /* CAN/LIN controller state */
+    struct can_ioctl_errors_s  ifru_can_errors;     /* CAN error counters */
     FAR void                  *ifru_data;           /* For use by interface */
   } ifr_ifru;
 };
