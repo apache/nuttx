@@ -1987,40 +1987,6 @@ static int fdcan_netdev_ioctl(struct net_driver_s *dev, int cmd,
         break;
 #endif /* CONFIG_NETDEV_CAN_BITRATE_IOCTL */
 
-#ifdef CONFIG_NETDEV_CAN_FILTER_IOCTL
-      case SIOCACANEXTFILTER:
-        {
-          /* TODO: Add hardware-level filter... */
-
-          stm32_addextfilter(priv, (struct canioc_extfilter_s *)arg);
-        }
-        break;
-
-      case SIOCDCANEXTFILTER:
-        {
-          /* TODO: Delete hardware-level filter... */
-
-          stm32_delextfilter(priv, (struct canioc_extfilter_s *)arg);
-        }
-        break;
-
-      case SIOCACANSTDFILTER:
-        {
-          /* TODO: Add hardware-level filter... */
-
-          stm32_addstdfilter(priv, (struct canioc_stdfilter_s *)arg);
-        }
-        break;
-
-      case SIOCDCANSTDFILTER:
-        {
-          /* TODO: Delete hardware-level filter... */
-
-          stm32_delstdfilter(priv, (struct canioc_stdfilter_s *)arg);
-        }
-        break;
-#endif
-
       default:
         ret = -ENOTSUP;
         break;
