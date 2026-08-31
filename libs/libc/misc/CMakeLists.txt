@@ -43,6 +43,7 @@ list(
   lib_mutex.c
   lib_fchmodat.c
   lib_fstatat.c
+  lib_statx.c
   lib_getfullpath.c
   lib_openat.c
   lib_mkdirat.c

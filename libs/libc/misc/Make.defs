@@ -25,7 +25,7 @@
 CSRCS += lib_bitmap.c lib_circbuf.c lib_creat.c lib_mknod.c lib_umask.c
 CSRCS += lib_utsname.c lib_getrandom.c lib_xorshift128.c lib_tea_encrypt.c
 CSRCS += lib_tea_decrypt.c lib_cxx_initialize.c lib_impure.c lib_memfd.c
-CSRCS += lib_mutex.c lib_fchmodat.c lib_fstatat.c lib_getfullpath.c
+CSRCS += lib_mutex.c lib_fchmodat.c lib_fstatat.c lib_statx.c lib_getfullpath.c
 CSRCS += lib_openat.c lib_mkdirat.c lib_utimensat.c lib_mallopt.c
 CSRCS += lib_idr.c lib_getnprocs.c
 

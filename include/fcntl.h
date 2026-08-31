@@ -143,6 +143,11 @@
 #define AT_SYMLINK_FOLLOW     0x0400 /* Follow symbolic links. */
 #define AT_NO_AUTOMOUNT       0x0800 /* Suppress terminal automount traversal */
 #define AT_EMPTY_PATH         0x1000 /* Allow empty relative pathname */
+#define AT_STATX_SYNC_AS_STAT 0x0000 /* Do whatever stat() does (default) */
+#define AT_STATX_FORCE_SYNC   0x2000 /* Force attributes to be sync'd */
+#define AT_STATX_DONT_SYNC    0x4000 /* Do not sync, accept stale values */
+#define AT_STATX_SYNC_TYPE    0x6000 /* Mask for the sync type values */
+#define AT_RECURSIVE          0x8000 /* Apply to the entire subtree */
 
 /* These are the notifications that can be received from F_NOTIFY (linux) */
 

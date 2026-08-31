@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdint.h>
 #include <time.h>
 
 /****************************************************************************
@@ -116,6 +117,33 @@
 #  define UTIME_OMIT  ((1l << 30) - 2l)
 #endif
 
+#define STATX_TYPE            0x000001u /* Want/got stx_mode & S_IFMT */
+#define STATX_MODE            0x000002u /* Want/got stx_mode & ~S_IFMT */
+#define STATX_NLINK           0x000004u /* Want/got stx_nlink */
+#define STATX_UID             0x000008u /* Want/got stx_uid */
+#define STATX_GID             0x000010u /* Want/got stx_gid */
+#define STATX_ATIME           0x000020u /* Want/got stx_atime */
+#define STATX_MTIME           0x000040u /* Want/got stx_mtime */
+#define STATX_CTIME           0x000080u /* Want/got stx_ctime */
+#define STATX_INO             0x000100u /* Want/got stx_ino */
+#define STATX_SIZE            0x000200u /* Want/got stx_size */
+#define STATX_BLOCKS          0x000400u /* Want/got stx_blocks */
+#define STATX_BASIC_STATS     0x0007ffu /* All fields common with struct stat */
+#define STATX_BTIME           0x000800u /* Want/got stx_btime */
+#define STATX_ALL             0x000fffu /* All currently supported fields */
+#define STATX_MNT_ID          0x001000u /* Want/got stx_mnt_id */
+#define STATX_DIOALIGN        0x002000u /* Want/got direct I/O alignment info */
+
+#define STATX_ATTR_COMPRESSED 0x000004u /* File is compressed by the fs */
+#define STATX_ATTR_IMMUTABLE  0x000010u /* File is marked immutable */
+#define STATX_ATTR_APPEND     0x000020u /* File is append-only */
+#define STATX_ATTR_NODUMP     0x000040u /* File is not to be dumped */
+#define STATX_ATTR_ENCRYPTED  0x000800u /* File requires key to decrypt */
+#define STATX_ATTR_AUTOMOUNT  0x001000u /* Dir: automount trigger */
+#define STATX_ATTR_MOUNT_ROOT 0x002000u /* Root of a mount point */
+#define STATX_ATTR_VERITY     0x100000u /* fs-verity protected */
+#define STATX_ATTR_DAX        0x200000u /* DAX file */
+
 /* The following macros are required by POSIX to achieve backward
  * compatibility with earlier versions of struct stat.
  */
@@ -159,6 +187,52 @@ struct stat
   blkcnt_t         st_blocks;  /* Number of blocks allocated */
 };
 
+/* Extended file status, Linux struct statx layout.  Fixed-width fields
+ * keep the ABI stable across toolchains and permit a future kernel-space
+ * statx() implementation without a user-space ABI break.
+ */
+
+struct statx_timestamp
+{
+  int64_t  tv_sec;    /* Seconds since the Epoch */
+  uint32_t tv_nsec;   /* Nanoseconds since tv_sec */
+  int32_t  reserved;
+};
+
+struct statx
+{
+  uint32_t stx_mask;                /* What results were actually filled in */
+  uint32_t stx_blksize;             /* Preferred I/O block size */
+  uint64_t stx_attributes;          /* STATX_ATTR_* flags supported+set */
+  uint32_t stx_nlink;               /* Number of hard links */
+  uint32_t stx_uid;                 /* User ID of owner */
+  uint32_t stx_gid;                 /* Group ID of owner */
+  uint16_t stx_mode;                /* File mode, S_IFMT | permissions */
+  uint16_t spare0[1];
+  uint64_t stx_ino;                 /* Inode number */
+  uint64_t stx_size;                /* File size in bytes */
+  uint64_t stx_blocks;              /* Number of 512B blocks allocated */
+  uint64_t stx_attributes_mask;     /* STATX_ATTR_* flags supported */
+
+  struct statx_timestamp stx_atime; /* Last access time */
+  struct statx_timestamp stx_btime; /* File creation time */
+  struct statx_timestamp stx_ctime; /* Last status change time */
+  struct statx_timestamp stx_mtime; /* Last data modification time */
+
+  uint32_t stx_rdev_major;          /* Device ID of special file */
+  uint32_t stx_rdev_minor;
+  uint32_t stx_dev_major;           /* ID of device containing file */
+  uint32_t stx_dev_minor;
+  uint64_t stx_mnt_id;              /* Mount ID */
+
+  /* Memory/file offset alignment for direct I/O */
+
+  uint32_t stx_dio_mem_align;
+  uint32_t stx_dio_offset_align;
+
+  uint64_t spare3[12];              /* Spare space for future expansion */
+};
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -183,6 +257,8 @@ int lstat(FAR const char *path, FAR struct stat *buf);
 int fstat(int fd, FAR struct stat *buf);
 int fstatat(int dirfd, FAR const char *path, FAR struct stat *buf,
             int flags);
+int statx(int dirfd, FAR const char *path, int flags, unsigned int mask,
+          FAR struct statx *buf);
 int chmod(FAR const char *path, mode_t mode);
 int lchmod(FAR const char *path, mode_t mode);
 int fchmod(int fd, mode_t mode);
