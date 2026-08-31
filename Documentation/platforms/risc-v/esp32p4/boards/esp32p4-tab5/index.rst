@@ -140,6 +140,45 @@ The Tab5 ships with ESP32-P4 **revision v1.0**.  The ``nsh`` defconfig sets
 ``CONFIG_ESP32P4_SELECTS_REV_LESS_V3=y`` accordingly.  A harmless boot warning
 is printed because the upstream default targets rev >= 3.0.
 
+Display panel and touch controller
+==================================
+
+The Tab5 ships in two hardware variants, and they always come as a pair:
+
+======================= ============================ ==========================
+Variant                 Panel                        Touch controller
+======================= ============================ ==========================
+Earlier units           ILI9881C                     GT911 (I2C ``0x14``)
+Later units             ST7121 / ST7123              ST7123 (I2C ``0x55``)
+======================= ============================ ==========================
+
+The panels need different initialization tables and different display
+timings, so the wrong selection leaves the panel lit but black, and the wrong
+touch selection fails the bring-up with::
+
+    ERROR: failed to register ST7123: -5
+
+Identify the board by scanning I2C0 with the ``nsh`` configuration. The
+address that answers tells which variant is fitted, and therefore which
+panel to select as well::
+
+    nsh> i2c dev -b 0 0x03 0x77
+
+Select the panel with ``ESP32P4_TAB5_LCD_ST7121`` (the default),
+``ESP32P4_TAB5_LCD_ST7123`` or ``ESP32P4_TAB5_LCD_ILI9881C``, and the touch
+controller with ``ESP32P4_TAB5_TOUCH_ST7123`` (the default) or
+``ESP32P4_TAB5_TOUCH_GT911``, both under the board menu.
+
+Both panels report their identification at boot, which confirms the
+selection. The ILI9881C answers ``98 81`` in the first two ID registers::
+
+    ili9881c: panel ID 98 81 5c
+    gt911: product "911" (39 31 31 00) fw 1060
+
+On the GT911 units the touch interrupt line has a pull-up to 3V3 that keeps
+the controller from scanning, so the board drives it low instead of using it
+as an interrupt. Contacts are picked up when the device is read.
+
 Configurations
 ==============
 
@@ -165,7 +204,6 @@ lvgl_demo
 ---------
 
 LVGL demo configuration with touch support.
-Requires the ST7123 touch controller version.
 
 .. note::
    This configuration redirects the console to UART0 instead of the USB Serial/JTAG port
@@ -181,11 +219,12 @@ lvgl_term
 ---------
 
 LVGL terminal configuration with touch support.
-Requires the ST7123 touch controller version.
 
 .. note::
-   This configuration redirects the console to UART0 instead of the USB Serial/JTAG port
-   and sets a custom entry point to open LVGL terminal on screen.
+   This configuration starts the LVGL terminal on the panel as its entry
+   point, and it runs its own NSH on a pseudo-terminal. The console is kept
+   on the USB Serial/JTAG port (exposed as ``ttyACM`` on the host), which
+   carries the system log.
 
 .. code-block:: console
 
