@@ -362,7 +362,7 @@ jobs:
             # get NTFC test cases
             cd external
             for i in 1 2 3 4 5; do
-              git clone -b release-0.0.1 https://github.com/apache/nuttx-ntfc-testing && break
+              git clone -b release-0.0.2 https://github.com/apache/nuttx-ntfc-testing && break
               if [ "$i" -eq 5 ]; then
                 echo "Failed to clone nuttx-ntfc-testing after $i attempts"
                 exit 1
