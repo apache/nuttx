@@ -55,9 +55,9 @@
 struct mpu_region_s
 {
   uintptr_t base;
-  size_t size;
-  int kflags;
-  int uflags;
+  size_t    size;
+  uint32_t  cpuset;
+  int       flags[CONFIG_ARCH_MPU_NSETS];
 };
 
 /****************************************************************************
