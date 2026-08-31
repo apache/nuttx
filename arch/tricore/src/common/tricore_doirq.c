@@ -109,7 +109,7 @@ void tricore_irq_direct(void)
       up_trigger_irq(TRICORE_SCHEDIRQ, cpuset);
     }
 
-  __jumpBackToLink();
+  tricore_jump_backto_link();
 }
 
 #endif /* CONFIG_ARCH_IRQPRIO */
@@ -194,5 +194,5 @@ void tricore_irq_sched(void)
   (*running_task)->xcp.regs = NULL;
   board_autoled_off(LED_INIRQ);
 
-  __jumpBackToLink();
+  tricore_jump_backto_link();
 }

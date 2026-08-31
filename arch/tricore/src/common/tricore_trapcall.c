@@ -44,11 +44,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define TRICORE_TRAP_RETURN() \
-  do                          \
-    {                         \
-      __jumpBackToLink();     \
-    }                         \
+#define TRICORE_TRAP_RETURN()     \
+  do                              \
+    {                             \
+      tricore_jump_backto_link(); \
+    }                             \
   while (0)
 
 /****************************************************************************

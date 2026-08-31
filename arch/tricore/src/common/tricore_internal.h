@@ -35,11 +35,6 @@
 #  include <sys/types.h>
 #  include <stdint.h>
 #  include <syscall.h>
-
-#  include <IfxCpu_reg.h>
-#  include <Ifx_Ssw_Compilers.h>
-#  include <Compilers/Compilers.h>
-#  include <IfxCpu_Intrinsics.h>
 #endif
 
 /****************************************************************************

@@ -35,6 +35,22 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
+/* Service Request Control (SRC) */
+
+#define TRICORE_SRC_BASEADDR     0xf0038000
+#define TRICORE_SRC_GPSR0_SR0    0xf0038990
+#define TRICORE_INT_SRB0_ADDR    0xf0037010
+
+/* Type of Service (TOS) */
+
+#define TRICORE_TOS_CPU0         0   /* CPU0 */
+#define TRICORE_TOS_DMA          1   /* DMA */
+#define TRICORE_TOS_CPU1         2   /* CPU1 */
+#define TRICORE_TOS_CPU2         3   /* CPU2 */
+#define TRICORE_TOS_CPU3         4   /* CPU3 */
+#define TRICORE_TOS_CPU4         5   /* CPU4 */
+#define TRICORE_TOS_CPU5         6   /* CPU5 */
+
 #define TRICORE_UART_RX_IRQ      21
 
 /****************************************************************************

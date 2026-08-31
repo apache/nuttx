@@ -33,6 +33,15 @@
 #include <stdint.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define CPU_PSTR  0x9200  /* Program Synchronous Trap Reg */
+#define CPU_DSTR  0x9010  /* Data Synchronous Trap Reg */
+#define CPU_DATR  0x9018  /* Data Asynchronous Trap Reg */
+#define CPU_DEADD 0x901C  /* Data Error Address Register */
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
