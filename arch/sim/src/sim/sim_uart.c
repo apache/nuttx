@@ -622,7 +622,12 @@ static void tty_dmareceive(struct uart_dev_s *dev)
     {
       xfer->nbytes = ret;
 
-      if (ret == xfer->length && xfer->nlength > 0)
+      /* The console fd is blocking, so only continue into the wrapped
+       * part of the circular buffer if there is really more data.
+       */
+
+      if (ret == xfer->length && xfer->nlength > 0 &&
+          host_uart_checkin(priv->fd))
         {
           ret = host_uart_gets(priv->fd, xfer->nbuffer, xfer->nlength);
           if (ret > 0)
