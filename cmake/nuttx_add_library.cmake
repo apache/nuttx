@@ -55,8 +55,8 @@ function(nuttx_add_library_internal target)
   # add extra flags into command line
 
   if(DEFINED EXTRAFLAGS)
-    string(REPLACE " " ";" eflags "${EXTRAFLAGS}")
-    target_compile_options(${target} PRIVATE ${eflags})
+    separate_arguments(EXTRAFLAGS_LIST UNIX_COMMAND "${EXTRAFLAGS}")
+    target_compile_options(${target} PRIVATE ${EXTRAFLAGS_LIST})
   endif()
 
   # Set install config for all library
