@@ -147,14 +147,14 @@
 /* FPU registers */
 
 #ifdef CONFIG_ARCH_TC1V6
-#  define FPU_SYNC_TRAP_REG  CPU_FPU_TRAP_CON
-#  define FPU_ASYNC_TRAP_REG CPU_FPU_TRAP_CON
+#  define FPU_SYNC_TRAP_REG   0xA000
+#  define FPU_ASYNC_TRAP_REG  0xA000
 #else
-#  define FPU_SYNC_TRAP_REG  CPU_FPU_SYNC_TRAP_CON
-#  define FPU_ASYNC_TRAP_REG CPU_FPU_TRAP_CON
+#  define FPU_SYNC_TRAP_REG   0xA030
+#  define FPU_ASYNC_TRAP_REG  0xA000
 #endif
-#define FPU_TRAP_FZE_SHIFT   20
-#define FPU_TRAP_TCL_SHIFT   1
+#define FPU_TRAP_FZE_SHIFT    20
+#define FPU_TRAP_TCL_SHIFT    1
 
 #ifndef __ASSEMBLY__
 
