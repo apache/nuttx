@@ -7,8 +7,10 @@ on:
       - master
       - "releases/*"
 
+# pull-requests read: needed to re-read edited Depends-On declarations on re-runs.
 permissions:
   contents: read
+  pull-requests: read
 
 # Per-PR group so superseded PR pushes cancel; per-SHA on push so master
 # commits never share a group. A shared refs/heads/master group lets a burst
@@ -186,6 +188,152 @@ jobs:
 
       - name: After CLEAN-UP Disk Space
         run: df -h
+
+      # Apply declared nuttx/apps dependencies before measuring, matching
+      # build.yml's checkout mapping and cherry-pick order. API or parser
+      # failures and parsed dependencies that cannot be applied are fatal, so a
+      # report is never taken from the wrong source set. Keep this after the
+      # disk cleanup: applying a dependency deepens a checkout.
+      - name: Apply depends-on PRs
+        if: ${{ github.event_name == 'pull_request' && github.base_ref == 'master' }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -uo pipefail
+
+          # Re-read the current body so a re-run picks up an edited Depends-On
+          # line. Do not fall back to the event payload: unlike build.yml, which
+          # resolves this once for every target, each matrix leg resolves
+          # independently and could otherwise use a different declaration.
+          if ! PR_BODY="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.body // ""')"; then
+            echo "::error::Could not read the PR description."
+            exit 1
+          fi
+
+          # A missing parser, a crash, or an unknown status all leave the
+          # declaration unevaluated.
+          PARSER=sources/nuttx/.github/scripts/depends_on.py
+          if [ ! -f "$PARSER" ]; then
+            echo "::error::${PARSER} not found."
+            exit 1
+          fi
+
+          STATE="${RUNNER_TEMP:-/tmp}/depends-on-state.txt"
+          if ! python3 "$PARSER" --print-state > "$STATE"; then
+            echo "::error::Could not parse the depends-on declarations."
+            exit 1
+          fi
+
+          # --print-state omits warnings. Run --github-output again with its
+          # outputs and report discarded so dropped entries remain visible as
+          # workflow annotations.
+          if ! WARNINGS="$(GITHUB_OUTPUT=/dev/null REPORT_PATH= python3 "$PARSER" --github-output)"; then
+            echo "::error::Could not re-read the depends-on warnings."
+            exit 1
+          fi
+          printf '%s\n' "$WARNINGS" | grep '^::warning::' || true
+
+          STATUS=$(head -n 1 "$STATE")
+          case "$STATUS" in
+            ok) ;;
+            none)
+              echo "No Depends-On declaration; building against the default sources."
+              exit 0 ;;
+            invalid)
+              # The parser warning forwarded above already explains this.
+              echo "No valid dependency parsed; building against the default sources."
+              exit 0 ;;
+            *)
+              echo "::error::Unexpected depends-on parser status: ${STATUS}"
+              exit 1 ;;
+          esac
+
+          git config --global user.email "actions@github.com"
+          git config --global user.name "github-actions"
+
+          # ok must carry at least one reference; an unreadable or empty list
+          # would skip the loop and report the default sources as though the
+          # declaration had been applied. Keep the loop in this shell, not a
+          # pipeline, so a dependency failure exits the step.
+          if ! tail -n +2 "$STATE" > "${STATE}.refs" || [ ! -s "${STATE}.refs" ]; then
+            echo "::error::Could not read the parsed dependency list."
+            exit 1
+          fi
+          # The report is keyed by the pull request head SHA, which names
+          # neither checkout: nuttx is the pull request merged into its base,
+          # and apps is an unpinned default branch the event never mentions.
+          # Record both in the summary, before anything is applied, so the
+          # source set is visible where the report is read.
+          NUTTX_CHECKOUT_SHA=$(git -C sources/nuttx rev-parse HEAD)
+          APPS_CHECKOUT_SHA=$(git -C sources/apps rev-parse HEAD)
+          {
+            echo "### Depends-On source set"
+            echo
+            echo "Measured under this pull request's head SHA, together with:"
+            echo "- \`apache/nuttx\` checkout @ \`${NUTTX_CHECKOUT_SHA}\`"
+            echo "- \`apache/nuttx-apps\` checkout @ \`${APPS_CHECKOUT_SHA}\`"
+          } >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+
+          while read -r DEP; do
+            [ -n "$DEP" ] || continue
+            DEP_REPO=${DEP%/pull/*}
+            DEP_NUM=${DEP##*/}
+
+            # Keep the repository mapping aligned with build.yml.
+            case "$DEP_REPO" in
+              "apache/nuttx")       REPO_PATH=sources/nuttx ;;
+              "apache/nuttx-apps")  REPO_PATH=sources/apps ;;
+              *)
+                echo "::error::Unsupported dependency repository: ${DEP_REPO}"
+                exit 1 ;;
+            esac
+
+            echo "Applying dependency ${DEP}"
+            # Deepening is best effort; the common-base and rev-list checks
+            # below still fail closed. Say it happened, so a missing common
+            # base is not mistaken for an unrelated dependency.
+            if [ -f "${REPO_PATH}/.git/shallow" ] \
+               && ! git -C "$REPO_PATH" fetch --unshallow origin; then
+              echo "::warning::Could not deepen ${REPO_PATH}; a missing common base below may follow from that rather than from ${DEP}."
+            fi
+            if ! git -C "$REPO_PATH" fetch origin "pull/${DEP_NUM}/head:dep-${DEP_NUM}"; then
+              echo "::error::Could not fetch ${DEP} (the PR may not exist)."
+              exit 1
+            fi
+
+            # Reject unrelated histories before computing HEAD..dep, which
+            # would otherwise list every dependency commit.
+            if [ -z "$(git -C "$REPO_PATH" merge-base "dep-${DEP_NUM}" HEAD || true)" ]; then
+              echo "::error::Could not find a common base with ${DEP}."
+              exit 1
+            fi
+            if ! COMMITS=$(git -C "$REPO_PATH" rev-list --reverse "HEAD..dep-${DEP_NUM}"); then
+              echo "::error::Could not list the commits of ${DEP}."
+              exit 1
+            fi
+
+            DEP_SHA=$(git -C "$REPO_PATH" rev-parse "dep-${DEP_NUM}")
+            if [ -z "$COMMITS" ]; then
+              echo "Dependency ${DEP} is already included."
+              echo "- \`${DEP}\` @ \`${DEP_SHA}\` (already in the checkout)" \
+                >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+              continue
+            fi
+
+            # shellcheck disable=SC2086
+            if ! git -C "$REPO_PATH" cherry-pick $COMMITS; then
+              echo "::error::Could not cherry-pick ${DEP}."
+              echo "::error::If your pull request contains merge commits, rebase instead of merging."
+              git -C "$REPO_PATH" cherry-pick --abort || true
+              exit 1
+            fi
+            echo "Applied ${DEP} @ ${DEP_SHA}"
+            echo "- \`${DEP}\` @ \`${DEP_SHA}\`" \
+              >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+          done < "${STATE}.refs"
 
       - name: Docker Login
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f  # v4.6.0
