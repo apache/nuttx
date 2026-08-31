@@ -185,6 +185,15 @@
 #define F_SEAL_WRITE        0x0008 /* Prevent writes */
 #define F_SEAL_FUTURE_WRITE 0x0010 /* Prevent future writes while mapped */
 
+/* fallocate() mode flag */
+
+#define FALLOC_FL_KEEP_SIZE      0x01 /* Allocate without changing st_size */
+#define FALLOC_FL_PUNCH_HOLE     0x02 /* De-allocate a range (unsupported) */
+#define FALLOC_FL_COLLAPSE_RANGE 0x08 /* Remove a range (unsupported) */
+#define FALLOC_FL_ZERO_RANGE     0x10 /* Zero a range (unsupported) */
+#define FALLOC_FL_INSERT_RANGE   0x20 /* Insert a hole (unsupported) */
+#define FALLOC_FL_UNSHARE_RANGE  0x40 /* Unshare blocks (unsupported) */
+
 #if defined(CONFIG_FS_LARGEFILE)
 #  define F_GETLK64         F_GETLK
 #  define F_SETLK64         F_SETLK
@@ -234,6 +243,7 @@ int open(FAR const char *path, int oflag, ...);
 int openat(int dirfd, FAR const char *path, int oflag, ...);
 int fcntl(int fd, int cmd, ...);
 
+int fallocate(int fd, int mode, off_t offset, off_t len);
 int posix_fallocate(int fd, off_t offset, off_t len);
 
 #if defined(__cplusplus)
