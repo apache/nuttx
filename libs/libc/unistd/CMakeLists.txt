@@ -120,7 +120,7 @@ if(CONFIG_LIBC_EXECFUNCS)
   list(APPEND SRCS lib_execl.c lib_execle.c lib_execv.c lib_execvp.c)
 endif()
 
-list(APPEND SRCS lib_truncate.c lib_posix_fallocate.c)
+list(APPEND SRCS lib_truncate.c lib_fallocate.c)
 
 if(CONFIG_ARCH_HAVE_VFORK OR CONFIG_ARCH_HAVE_FORK)
   list(APPEND SRCS lib_fork.c)
