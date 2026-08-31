@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32p4/esp32p4-tab5/src/esp32p4_touch.c
+ * boards/risc-v/esp32p4/esp32p4-tab5/src/esp32p4_touch_st7123.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -134,5 +134,6 @@ int tab5_touchscreen_init(void)
     }
 
   syslog(LOG_INFO, "ST7123 touchscreen controller initialized!\n");
+
   return OK;
 }

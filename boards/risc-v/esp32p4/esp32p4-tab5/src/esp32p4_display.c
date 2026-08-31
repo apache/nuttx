@@ -54,7 +54,10 @@
 
 #include "esp32p4-tab5.h"
 
-#ifdef CONFIG_ESP32P4_TAB5_LCD_ST7123
+#if defined(CONFIG_ESP32P4_TAB5_LCD_ILI9881C)
+#  include "esp32p4_lcd_ili9881c.h"
+#  define tab5_panel_initialize tab5_ili9881c_initialize
+#elif defined(CONFIG_ESP32P4_TAB5_LCD_ST7123)
 #  include "esp32p4_lcd_st7123.h"
 #  define tab5_panel_initialize tab5_st7123_initialize
 #else

@@ -42,11 +42,17 @@ ifeq ($(CONFIG_ESP32P4_TAB5_LCD),y)
     CSRCS += esp32p4_lcd_st7121.c
   else ifeq ($(CONFIG_ESP32P4_TAB5_LCD_ST7123),y)
     CSRCS += esp32p4_lcd_st7123.c
+  else ifeq ($(CONFIG_ESP32P4_TAB5_LCD_ILI9881C),y)
+    CSRCS += esp32p4_lcd_ili9881c.c
   endif
 endif
 
 ifeq ($(CONFIG_ESP32P4_TAB5_TOUCHSCREEN),y)
-  CSRCS += esp32p4_touch.c
+  ifeq ($(CONFIG_ESP32P4_TAB5_TOUCH_ST7123),y)
+    CSRCS += esp32p4_touch_st7123.c
+  else ifeq ($(CONFIG_ESP32P4_TAB5_TOUCH_GT911),y)
+    CSRCS += esp32p4_touch_gt911.c
+  endif
 endif
 
 ifeq ($(CONFIG_BOARDCTL),y)

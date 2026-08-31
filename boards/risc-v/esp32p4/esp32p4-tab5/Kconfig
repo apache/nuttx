@@ -96,15 +96,53 @@ config ESP32P4_TAB5_LCD_ST7123
 	---help---
 		Use the ST7123 initialization table and display timings.
 
+config ESP32P4_TAB5_LCD_ILI9881C
+	bool "ILI9881C"
+	---help---
+		Use the ILI9881C initialization table and display timings.  This is
+		the panel fitted to the earlier Tab5 units, the ones that also carry
+		the GT911 touch controller.
+
 endchoice
 
 config ESP32P4_TAB5_TOUCHSCREEN
 	bool "Touch Screen Controller"
 	default n
 	select INPUT
-	select INPUT_ST7123
 	select ESP32P4_TAB5_HMI_POWER
 	---help---
-		Initialize the ST7123 touch screen controller.
+		Initialize the touch screen controller.
+
+if ESP32P4_TAB5_TOUCHSCREEN
+
+choice
+	prompt "Touch screen controller"
+	default ESP32P4_TAB5_TOUCH_ST7123
+
+config ESP32P4_TAB5_TOUCH_ST7123
+	bool "ST7123"
+	select INPUT_ST7123
+	---help---
+		Sitronix ST7123, fitted to the Tab5 units that ship with the
+		ST7121/ST7123 panel.  Answers on I2C address 0x55.
+
+config ESP32P4_TAB5_TOUCH_GT911
+	bool "GT911"
+	select INPUT_GT9XX
+	---help---
+		Goodix GT911, fitted to the earlier Tab5 units.
+
+endchoice
+
+config ESP32P4_TAB5_TOUCH_GT911_ADDR
+	hex "GT911 I2C address"
+	depends on ESP32P4_TAB5_TOUCH_GT911
+	default 0x14
+	---help---
+		The GT911 latches its I2C address from the INT pin while it is
+		held in reset: either 0x14 or 0x5d.  Scan the bus with
+		"i2c dev -b 0 0x03 0x77" if unsure.
+
+endif # ESP32P4_TAB5_TOUCHSCREEN
 
 endif # ARCH_BOARD_ESP32P4_TAB5
