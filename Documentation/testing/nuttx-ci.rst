@@ -154,6 +154,9 @@ commit list cannot be determined, or it causes a cherry-pick conflict,
 ``Fetch-Source`` fails instead of silently testing without the requested
 dependency.
 
+The memory footprint workflow applies the same declarations independently,
+using the same parser and apply sequence (see `Memory Footprint Tracking`_).
+
 When a valid dependency report is available, the follow-up comment reports one
 of three outcomes:
 
@@ -249,3 +252,9 @@ The integration consists of:
 
 * the set of tracked targets, configured in ``.github/membrowse-targets.json``
 * the ``membrowse-*.yml`` workflows under ``.github/workflows/`` that drive it
+
+The memory report applies the same ``Depends-On:`` declarations as the Build
+workflow (see `Pull Request Dependencies`_), so a pull request that only builds
+on top of another one is measured against a tree that compiles. The declaration
+rules and the ``master``-only gate are the same. A dependency that cannot be
+fetched or applied fails the job in both workflows.
