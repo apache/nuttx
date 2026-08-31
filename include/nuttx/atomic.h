@@ -27,9 +27,15 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <sys/types.h>
+
+#ifdef CONFIG_LIBC_ATOMIC_ARCH
+#  include <arch/atomic.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -279,7 +285,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifndef CONFIG_LIBC_ATOMIC_TOOLCHAIN
+#if !defined(CONFIG_LIBC_ATOMIC_TOOLCHAIN) && !defined(CONFIG_LIBC_ATOMIC_ARCH)
 void atomic_store_4(FAR volatile void *ptr, int32_t value, int memorder);
 void atomic_store_8(FAR volatile void *ptr, int64_t value, int memorder);
 int32_t atomic_load_4(FAR const volatile void *ptr, int memorder);
