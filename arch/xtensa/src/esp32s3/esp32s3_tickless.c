@@ -76,9 +76,9 @@
 #define CTICK_PER_SEC         (ESP32S3_SYSTIMER_TICKS_PER_SEC)
 #define CTICK_PER_USEC        (CTICK_PER_SEC / USEC_PER_SEC)
 
-#define SEC_2_CTICK(s)        ((s) * CTICK_PER_SEC)
-#define USEC_2_CTICK(us)      ((us) * CTICK_PER_USEC)
-#define NSEC_2_CTICK(nsec)    (((nsec) * CTICK_PER_USEC) / NSEC_PER_USEC)
+#define SEC_2_CTICK(s)        ((uint64_t)(s) * CTICK_PER_SEC)
+#define USEC_2_CTICK(us)      ((uint64_t)(us) * CTICK_PER_USEC)
+#define NSEC_2_CTICK(nsec)    (((uint64_t)(nsec) * CTICK_PER_USEC) / NSEC_PER_USEC)
 
 #define CTICK_2_SEC(tick)     ((tick) / CTICK_PER_SEC)
 #define CTICK_2_USEC(tick)    ((tick) / CTICK_PER_USEC)
@@ -246,6 +246,7 @@ static int IRAM_ATTR tickless_isr(int irq, void *context, void *arg)
 
   uint64_t unit_ticks = tickless_getcounter();
   uint64_t alarm_ticks = tickless_getalarmvalue();
+
   if (unit_ticks < alarm_ticks)
     {
       modifyreg32(SYSTIMER_CONF_REG, 0, SYSTIMER_TARGET0_WORK_EN);
