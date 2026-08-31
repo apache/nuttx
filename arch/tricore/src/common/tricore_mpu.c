@@ -1207,38 +1207,43 @@ void mpu_set_active_set(unsigned int set)
 void mpu_initialize(const struct mpu_region_s *table, size_t count)
 {
   const struct mpu_region_s *conf;
-  unsigned int kset = mpu_alloc_set();
-#ifdef CONFIG_BUILD_PROTECTED
-  unsigned int uset = mpu_alloc_set();
-#endif
+  unsigned int cpu = this_cpu();
   unsigned int region;
-  size_t index;
+  int set;
+  int index;
 
   mpu_control(false);
   for (index = 0; index < count; index++)
     {
       conf = &table[index];
 
-      if ((conf->kflags & REGION_TYPE_MASK) == REGION_TYPE_CODE)
+      if (conf->cpuset & (1 << cpu))
         {
-          region = mpu_alloccoderegion();
-          mpu_modify_code_region(region, conf->base, conf->size);
-          mpu_modify_code_set(kset, region, conf->kflags);
-#ifdef CONFIG_BUILD_PROTECTED
-          mpu_modify_code_set(uset, region, conf->uflags);
-#endif
-        }
-      else
-        {
-          region = mpu_allocdataregion();
-          mpu_modify_data_region(region, conf->base, conf->size);
-          mpu_modify_data_set(kset, region, conf->kflags);
-    #ifdef CONFIG_BUILD_PROTECTED
-          mpu_modify_data_set(uset, region, conf->uflags);
-    #endif
+          /* Allocate new region based on type */
+
+          if ((conf->flags[0] & REGION_TYPE_MASK) == REGION_TYPE_CODE)
+            {
+              region = mpu_alloccoderegion();
+              mpu_modify_code_region(region, conf->base, conf->size);
+            }
+          else if ((conf->flags[0] & REGION_TYPE_MASK) == REGION_TYPE_DATA)
+            {
+              region = mpu_allocdataregion();
+              mpu_modify_data_region(region, conf->base, conf->size);
+            }
+          else
+            {
+              continue;
+            }
+
+          /* Set permissions for each protection set */
+
+          for (set = 0; set < CONFIG_ARCH_MPU_NSETS; set++)
+            {
+              mpu_modify_region(set, region, 0, 0, conf->flags[set]);
+            }
         }
     }
 
-  mpu_set_active_set(kset);
   mpu_control(true);
 }
