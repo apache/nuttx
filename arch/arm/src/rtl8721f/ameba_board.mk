@@ -167,12 +167,13 @@ ifeq ($(CONFIG_AMEBA_SPI),y)
 AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_spi.c
 endif
 
-# PWM timer register layer.  The time-base entry points (RTIM_TimeBaseInit/
-# StructInit/Cmd) are in ROM, but the compare/period helpers the PWM driver
-# (arch/.../common/ameba/ameba_pwm.c) calls -- RTIM_CCStructInit/CCxInit/
-# CCRxSet/CCxCmd/ChangePeriod/PrescalerConfig -- are compiled from this RAM
+# PWM/timer register layer.  The time-base entry points (RTIM_TimeBaseInit/
+# StructInit/Cmd/INTConfig/GetCount) are in ROM, but the compare/period and
+# interrupt-clear helpers the PWM driver (ameba_pwm.c: RTIM_CCStructInit/
+# CCxInit/CCRxSet/CCxCmd/ChangePeriod/PrescalerConfig) and the timer driver
+# (ameba_timer.c: RTIM_INTClear/ChangePeriod) call are compiled from this RAM
 # source and linked in (--gc-sections drops the unused input-capture paths).
-ifeq ($(CONFIG_AMEBA_PWM),y)
+ifneq (,$(filter y,$(CONFIG_AMEBA_PWM) $(CONFIG_AMEBA_TIMER)))
 AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_tim.c
 endif
 

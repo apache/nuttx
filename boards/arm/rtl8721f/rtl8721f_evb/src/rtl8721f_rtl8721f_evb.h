@@ -186,6 +186,19 @@ int rtl8721f_rtc_initialize(void);
 int rtl8721f_wdg_initialize(void);
 #endif
 
+#ifdef CONFIG_AMEBA_TIMER
+/****************************************************************************
+ * Name: rtl8721f_timer_initialize
+ *
+ * Description:
+ *   Register the board's timers at /dev/timer0 (TIM1) and /dev/timer1
+ *   (TIM2) (boards/arm/rtl8721f/rtl8721f_evb/src/rtl8721f_timer.c).
+ *
+ ****************************************************************************/
+
+int rtl8721f_timer_initialize(void);
+#endif
+
 #ifdef CONFIG_RTL8721F_FLASH_FS
 /****************************************************************************
  * Name: ameba_flash_fs_initialize
