@@ -30,6 +30,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -37,6 +38,7 @@
 #include <poll.h>
 #include <assert.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
@@ -237,40 +239,27 @@ static int gt9xx_i2c_write(FAR struct gt9xx_dev_s *dev,
 {
   int ret;
 
-  /* Send the Register Address, MSB first */
+  /* Send the Register Address MSB first, followed by the value, as a
+   * single message.  Splitting it into two messages joined by
+   * I2C_M_NOSTART puts the same bytes on the wire, but not every I2C
+   * controller can resume a transfer that way.
+   */
 
-  uint8_t regbuf[2] =
+  uint8_t buf[3] =
   {
-    reg >> 8,   /* First Byte: MSB */
-    reg & 0xff  /* Second Byte: LSB */
+    reg >> 8,   /* First Byte: Register Address MSB */
+    reg & 0xff, /* Second Byte: Register Address LSB */
+    val         /* Third Byte: Value to be written */
   };
 
-  /* Send the Register Value */
+  /* Compose the I2C Message */
 
-  uint8_t buf[1] =
-  {
-    val  /* Value to be written */
-  };
-
-  /* Compose the I2C Messages */
-
-  struct i2c_msg_s msgv[2] =
+  struct i2c_msg_s msgv[1] =
   {
     {
-      /* Send the I2C Register Address */
-
       .frequency = CONFIG_INPUT_GT9XX_I2C_FREQUENCY,
       .addr      = dev->addr,
       .flags     = 0,
-      .buffer    = regbuf,
-      .length    = sizeof(regbuf)
-    },
-    {
-      /* Send the I2C Register Value */
-
-      .frequency = CONFIG_INPUT_GT9XX_I2C_FREQUENCY,
-      .addr      = dev->addr,
-      .flags     = I2C_M_NOSTART,
       .buffer    = buf,
       .length    = sizeof(buf)
     }
@@ -551,9 +540,20 @@ static ssize_t gt9xx_read(FAR struct file *filep, FAR char *buffer,
           iinfo("skip duplicate x=%d, y=%d\n", priv->x, priv->y);
         }
 
-      /* Return the Touch Point */
+      /* Return the Touch Point, if there is one.  With no contact and a
+       * non-blocking read there is nothing to hand over: a sample carrying
+       * zero points would look like valid data to callers that judge the
+       * read by its return value.
+       */
 
-      memcpy(buffer, &sample, sizeof(sample));
+      if (sample.npoints == 0 && (filep->f_oflags & O_NONBLOCK) != 0)
+        {
+          ret = -EAGAIN;
+        }
+      else
+        {
+          memcpy(buffer, &sample, sizeof(sample));
+        }
 
       /* Begin Critical Section */
 
@@ -826,6 +826,7 @@ static int gt9xx_poll(FAR struct file *filep, FAR struct pollfd *fds,
       /* If Poll Teardown: Remove the poll setup */
 
       FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+
       DEBUGASSERT(slot != NULL);
 
       *slot = NULL;
