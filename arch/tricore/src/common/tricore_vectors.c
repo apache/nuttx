@@ -182,7 +182,7 @@ static void tricore_trap_trapcall(uint8_t tin, uint8_t tclass)
 {
   struct tricore_trap_s trap;
 
-  tricore_trap_class(&trap, (uintptr_t)__getA11(), tclass, tin);
+  tricore_trap_class(&trap, tricore_get_a11(), tclass, tin);
   TRICORE_TRAP_TSRHOOK(&trap, tricore_trapcall);
 }
 
@@ -191,7 +191,7 @@ static void tricore_trap_svcall(uint8_t tin, uint8_t tclass)
 {
   struct tricore_trap_s trap;
 
-  tricore_trap_class(&trap, (uintptr_t)__getA11(), tclass, tin);
+  tricore_trap_class(&trap, tricore_get_a11(), tclass, tin);
   TRICORE_TRAP_TSRHOOK(&trap, tricore_svcall);
 }
 

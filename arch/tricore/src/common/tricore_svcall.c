@@ -99,5 +99,5 @@ void tricore_svcall(volatile void *trap)
         break;
     }
 
-  __jumpBackToLink();
+  tricore_jump_backto_link();
 }
