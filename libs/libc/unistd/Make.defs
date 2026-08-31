@@ -73,9 +73,7 @@ ifeq ($(CONFIG_LIBC_EXECFUNCS),y)
 CSRCS += lib_execl.c lib_execle.c lib_execv.c lib_execvp.c
 endif
 
-ifneq ($(CONFIG_DISABLE_MOUNTPOINTS),y)
 CSRCS += lib_truncate.c lib_posix_fallocate.c
-endif
 
 ifneq ($(CONFIG_ARCH_HAVE_VFORK)$(CONFIG_ARCH_HAVE_FORK),)
 CSRCS += lib_fork.c

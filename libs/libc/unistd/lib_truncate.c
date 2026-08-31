@@ -31,8 +31,6 @@
 #include <errno.h>
 #include <assert.h>
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -117,5 +115,3 @@ int truncate(FAR const char *path, off_t length)
   close(fd);
   return ret;
 }
-
-#endif /* !CONFIG_DISABLE_MOUNTPOINT */

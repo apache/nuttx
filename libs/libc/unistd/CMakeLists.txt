@@ -120,9 +120,7 @@ if(CONFIG_LIBC_EXECFUNCS)
   list(APPEND SRCS lib_execl.c lib_execle.c lib_execv.c lib_execvp.c)
 endif()
 
-if(NOT CONFIG_DISABLE_MOUNTPOINTS)
-  list(APPEND SRCS lib_truncate.c lib_posix_fallocate.c)
-endif()
+list(APPEND SRCS lib_truncate.c lib_posix_fallocate.c)
 
 if(CONFIG_ARCH_HAVE_VFORK OR CONFIG_ARCH_HAVE_FORK)
   list(APPEND SRCS lib_fork.c)
