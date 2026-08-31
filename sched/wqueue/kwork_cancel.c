@@ -48,7 +48,6 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
 {
   irqstate_t flags;
   pid_t self = sync ? nxsched_gettid() : INVALID_PROCESS_ID;
-  int ret;
 
   if (wqueue == NULL || work == NULL)
     {
@@ -106,11 +105,7 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
           return OK;
         }
 
-      do
-        {
-          ret = nxsem_wait(sync_wait);
-        }
-      while (ret == -EINTR);
+      nxsem_wait_uninterruptible(sync_wait);
     }
 }
 
