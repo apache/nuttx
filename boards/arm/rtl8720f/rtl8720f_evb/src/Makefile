@@ -56,10 +56,14 @@ ifeq ($(CONFIG_AMEBA_WDG),y)
 CSRCS += rtl8720f_wdg.c
 endif
 
+ifeq ($(CONFIG_AMEBA_TIMER),y)
+CSRCS += rtl8720f_timer.c
+endif
+
 # The board pin tables pull in the shared drivers' public headers from
 # arch/arm/src/common/ameba/, which is not on the default board include path.
 
-ifneq ($(CONFIG_AMEBA_GPIO)$(CONFIG_AMEBA_UART)$(CONFIG_AMEBA_I2C)$(CONFIG_AMEBA_SPI)$(CONFIG_AMEBA_PWM)$(CONFIG_AMEBA_ADC)$(CONFIG_AMEBA_RTC)$(CONFIG_AMEBA_WDG),)
+ifneq ($(CONFIG_AMEBA_GPIO)$(CONFIG_AMEBA_UART)$(CONFIG_AMEBA_I2C)$(CONFIG_AMEBA_SPI)$(CONFIG_AMEBA_PWM)$(CONFIG_AMEBA_ADC)$(CONFIG_AMEBA_RTC)$(CONFIG_AMEBA_WDG)$(CONFIG_AMEBA_TIMER),)
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)arm$(DELIM)src$(DELIM)common$(DELIM)ameba
 endif
 
