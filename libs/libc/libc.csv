@@ -73,6 +73,7 @@
 "execvp","unistd.h","defined(CONFIG_LIBC_EXECFUNCS)","int","FAR const char *","FAR char *const[]|FAR char *const *"
 "execvpe","unistd.h","defined(CONFIG_LIBC_EXECFUNCS)","int","FAR const char *","FAR char *const[]|FAR char *const *","FAR char *const[]|FAR char *const *"
 "exit","stdlib.h","!defined(__KERNEL__)","noreturn","int"
+"fallocate","fcntl.h","","int","int","int","off_t","off_t"
 "fchdir","unistd.h","!defined(CONFIG_DISABLE_ENVIRON)","int","int"
 "fclose","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR FILE *"
 "fdatasync","unistd.h","","int","int"
