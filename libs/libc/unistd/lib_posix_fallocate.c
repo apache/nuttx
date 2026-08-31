@@ -30,8 +30,6 @@
 
 #include <sys/stat.h>
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -94,5 +92,3 @@ int posix_fallocate(int fd, off_t offset, off_t len)
 
   return 0;
 }
-
-#endif /* !CONFIG_DISABLE_MOUNTPOINT */
