@@ -4,10 +4,17 @@ set(NUTTX 1)
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-set(NUTTX_PATH ${CMAKE_CURRENT_LIST_DIR}/..)
+set(NUTTX_PATH "${CMAKE_CURRENT_LIST_DIR}/..")
+get_filename_component(NUTTX_PATH "${NUTTX_PATH}" ABSOLUTE)
 include(${NUTTX_PATH}/scripts/target.cmake)
 
-set(LINKER_SCRIPT ${NUTTX_PATH}/scripts/${LDNAME})
+# LDNAME may list several space-separated linker scripts. Prefix each one.
+separate_arguments(_ldname_list UNIX_COMMAND "${LDNAME}")
+set(_ldscripts)
+foreach(_ld IN LISTS _ldname_list)
+  list(APPEND _ldscripts "-T${NUTTX_PATH}/scripts/${_ld}")
+endforeach()
+string(REPLACE ";" " " LINKER_SCRIPT "${_ldscripts}")
 
 set(CMAKE_C_FLAGS "${ARCHCPUFLAGS} ${ARCHCFLAGS} -D__NuttX__")
 set(CMAKE_CXX_FLAGS "${ARCHCPUFLAGS} ${ARCHCXXFLAGS} -D__NuttX__")
@@ -27,10 +34,10 @@ add_compile_options(-ffunction-sections -fdata-sections)
 set(ENTRY_NAME "_start")
 
 set(CMAKE_C_LINK_EXECUTABLE
-    "<CMAKE_LINKER> ${LDFLAGS} --entry=${ENTRY_NAME} -T${LINKER_SCRIPT} <OBJECTS> -o <TARGET> <LINK_LIBRARIES> -L${NUTTX_PATH}/libs --start-group ${LDLIBS} ${EXTRA_LIBS} --end-group"
+    "<CMAKE_LINKER> ${LDFLAGS} --entry=${ENTRY_NAME} ${LINKER_SCRIPT} <OBJECTS> -o <TARGET> <LINK_LIBRARIES> -L${NUTTX_PATH}/libs --start-group ${LDLIBS} ${EXTRA_LIBS} --end-group"
 )
 set(CMAKE_CXX_LINK_EXECUTABLE
-    "<CMAKE_LINKER> ${LDFLAGS} --entry=${ENTRY_NAME} -T${LINKER_SCRIPT} <OBJECTS> -o <TARGET> <LINK_LIBRARIES> -L${NUTTX_PATH}/libs --start-group ${LDLIBS} ${EXTRA_LIBS} --end-group"
+    "<CMAKE_LINKER> ${LDFLAGS} --entry=${ENTRY_NAME} ${LINKER_SCRIPT} <OBJECTS> -o <TARGET> <LINK_LIBRARIES> -L${NUTTX_PATH}/libs --start-group ${LDLIBS} ${EXTRA_LIBS} --end-group"
 )
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
