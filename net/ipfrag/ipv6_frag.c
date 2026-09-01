@@ -469,6 +469,8 @@ int32_t ipv6_fragin(FAR struct net_driver_s *dev)
   FAR struct ip_fragsnode_s *node = NULL;
   FAR struct ip_fraglink_s *fraginfo = NULL;
   bool restartwdog;
+  uint8_t reassembled;
+  int32_t ret;
 
   if (dev->d_len != dev->d_iob->io_pktlen)
     {
@@ -521,7 +523,12 @@ int32_t ipv6_fragin(FAR struct net_driver_s *dev)
 
       kmm_free(node);
 
-      return ipv6_input(dev);
+      reassembled = dev->d_ipfrag_reassembled;
+      dev->d_ipfrag_reassembled = true;
+      ret = ipv6_input(dev);
+      dev->d_ipfrag_reassembled = reassembled;
+
+      return ret;
     }
 
   nxmutex_unlock(&g_ipfrag_lock);
