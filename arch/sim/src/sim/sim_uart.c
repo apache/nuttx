@@ -293,6 +293,7 @@ static void uart_nputs(int fd, const char *buf, size_t size)
   while (size > 0)
     {
       int ret = host_uart_puts(fd, buf, size);
+
       if (ret < 0)
         {
           continue;
@@ -805,6 +806,7 @@ void up_putc(int ch)
 {
 #ifdef USE_DEVCONSOLE
   char c = ch;
+
   up_nputs(&c, 1);
 #endif
 }
