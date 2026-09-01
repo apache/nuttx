@@ -110,10 +110,6 @@ menuconfig UART_PL011
 	bool "PL011 Chip support"
 	default n
 
-if UART_PL011
-source "drivers/serial/Kconfig-pl011"
-endif
-
 menuconfig UART_XLNXPS
 	bool "Xilinx UART Peripheral System (XUARTPS) Chip support"
 	default n
