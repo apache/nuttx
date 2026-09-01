@@ -39,10 +39,18 @@
  * Name: __atomic_*_{1,2,4,8}
  ****************************************************************************/
 
+#ifdef ARCH_HAVE_ATOMIC_1
 ARCH_ATOMIC_DEFINE(__atomic, uint8_t, 1)
+#endif
+#ifdef ARCH_HAVE_ATOMIC_2
 ARCH_ATOMIC_DEFINE(__atomic, uint16_t, 2)
+#endif
+#ifdef ARCH_HAVE_ATOMIC_4
 ARCH_ATOMIC_DEFINE(__atomic, uint32_t, 4)
+#endif
+#ifdef ARCH_HAVE_ATOMIC_8
 ARCH_ATOMIC_DEFINE(__atomic, uint64_t, 8)
+#endif
 
 /* Clang define the __sync builtins, add #ifndef to avoid
  * redefined/redeclared problem.
@@ -55,10 +63,18 @@ ARCH_ATOMIC_DEFINE(__atomic, uint64_t, 8)
  ****************************************************************************/
 
 #ifdef ARCH_SYNC_DEFINE
+#  ifdef ARCH_HAVE_ATOMIC_1
 ARCH_SYNC_DEFINE(__sync, uint8_t, 1)
+#  endif
+#  ifdef ARCH_HAVE_ATOMIC_2
 ARCH_SYNC_DEFINE(__sync, uint16_t, 2)
+#  endif
+#  ifdef ARCH_HAVE_ATOMIC_4
 ARCH_SYNC_DEFINE(__sync, uint32_t, 4)
+#  endif
+#  ifdef ARCH_HAVE_ATOMIC_8
 ARCH_SYNC_DEFINE(__sync, uint64_t, 8)
+#  endif
 #endif
 
 /****************************************************************************

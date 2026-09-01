@@ -252,6 +252,11 @@ static inline void atomic_unlock(irqstate_t flags)
   ARCH_SYNC_BOOL_CMP_SWAP(prefix ## _bool_compare_and_swap_ ## n, t)     \
   ARCH_SYNC_VAL_CMP_SWAP(prefix ## _val_compare_and_swap_ ## n, t)
 
+#define ARCH_HAVE_ATOMIC_1
+#define ARCH_HAVE_ATOMIC_2
+#define ARCH_HAVE_ATOMIC_4
+#define ARCH_HAVE_ATOMIC_8
+
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
