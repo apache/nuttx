@@ -80,7 +80,7 @@ int rexec_af(FAR char **ahost, int inport, FAR const char *user,
   hints.ai_flags = AI_CANONNAME;
 
   ret = getaddrinfo(*ahost, port_str, &hints, &res);
-  if (ret < 0)
+  if (ret != 0)
     {
       return -1;
     }
