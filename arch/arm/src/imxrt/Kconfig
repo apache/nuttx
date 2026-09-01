@@ -237,6 +237,7 @@ config ARCH_FAMILY_IMXRT118x
 	select IMXRT_CLOCKCONFIG_VER3
 	select IMXRT_IOMUX_VER3
 	select IMXRT_RGPIO
+	select IMXRT_EDMA_VER2
 	---help---
 		i.MX RT1180 dual-core Crossover Processors (Cortex-M33 + Cortex-M7).
 
@@ -431,6 +432,13 @@ config IMXRT_RGPIO
 	---help---
 		Selects the RGPIO driver (arch/arm/src/imxrt/imxrt_rgpio.c) that
 		targets the RGPIO IP block used on RT118x.
+
+config IMXRT_EDMA_VER2
+	bool
+	default n
+	---help---
+		Selects the RT118x eDMA driver variant
+		(arch/arm/src/imxrt/imxrt_edma_ver2.c) used by RT118x.
 
 config IMXRT_TRDC
 	bool
