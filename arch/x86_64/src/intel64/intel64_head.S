@@ -388,8 +388,11 @@ start64:
 	movabs  $g_idle_topstack,    %rbx
 	mov     (%rbx),   %rsp
 
-	/* Allocate space XCPTCONTEXT */
+	/* Start RSP below the IDLE register save area which up_initial_state()
+	 * places at ALIGN_DOWN(topstack - XCPTCONTEXT_SIZE).
+	 */
 	leaq    -XCPTCONTEXT_SIZE(%rsp), %rsp
+	and     $(~(XCPTCONTEXT_ALIGN - 1)), %rsp
 
 	/* Set bsp_done flag */
 	movl     $1, bsp_done
@@ -416,8 +419,11 @@ ap_start:
 	imulq   $CONFIG_IDLETHREAD_STACKSIZE, %rax, %rax
 	add     %rax, %rsp
 
-	/* Move initial RSP below IDLE TCB regs */
-	sub     $XCPTCONTEXT_SIZE, %rsp
+	/* Start RSP below the IDLE register save area which up_initial_state()
+	 * places at ALIGN_DOWN(topstack - 8 - XCPTCONTEXT_SIZE) for AP CPUs
+	 * (up_cpu_idlestack() adjusts the stack size by 8).
+	 */
+	sub     $(XCPTCONTEXT_SIZE + 8), %rsp
 	and     $(~(XCPTCONTEXT_ALIGN - 1)), %rsp
 
 	/* Jump to ap_start routine */
