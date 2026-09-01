@@ -87,23 +87,19 @@ void up_exit(int status)
 
   x86_64_restore_auxstate(tcb);
 
-  /* Restore the cpu lock */
-
-  restore_critical_section(tcb, this_cpu());
-
 #ifdef CONFIG_ARCH_KERNEL_STACK
   /* Update kernel stack top pointer */
 
   x86_64_set_ktopstk(tcb->xcp.ktopstk);
 #endif
 
-  /* Then switch contexts */
-
-  x86_64_fullcontextrestore(tcb->xcp.regs);
-
-  /* x86_64_fullcontextrestore() should not return but could if the software
-   * interrupts are disabled.
+  /* Restore the cpu lock.  This must come last and the final jump must
+   * not touch the stack (see up_switch_context()).
    */
 
-  PANIC();
+  restore_critical_section(tcb, this_cpu());
+
+  __asm__ volatile ("jmp x86_64_fullcontextrestore"
+                    :: "D" (tcb->xcp.regs) : "memory");
+  __builtin_unreachable();
 }
