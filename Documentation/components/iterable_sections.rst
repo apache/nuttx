@@ -58,8 +58,10 @@ Available macros:
 * ``STRUCT_SECTION_ITERABLE(type, varname)`` -- define an instance inside
   the iterable section ``._<type>.static.<varname>``.  The variable name
   is part of the input section name, so the linker's ``SORT_BY_NAME()``
-  defines the iteration order (instances may encode ordering in their
-  names).
+  defines the iteration order.  A subsystem that needs a specific order
+  encodes it in the name, usually with a fixed width index:
+  ``FOREACH_ARG()`` from ``nuttx/macro.h`` hands the position of each item
+  to the definition macro as a literal that can be pasted into the name.
 * ``STRUCT_SECTION_DECLARE(type)`` -- declare the boundary symbols (file
   scope), required before iterating.
 * ``STRUCT_SECTION_FOREACH(type, iterator)`` -- for-loop over all
