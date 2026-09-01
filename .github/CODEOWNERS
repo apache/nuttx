@@ -190,7 +190,6 @@ Documentation/guides/automounter.rst raiden00@railab.me
 Documentation/guides/building_nuttx_with_app_out_of_src_tree.rst ludovicvanasse@gmail.com
 Documentation/guides/building_uclibcpp.rst ludovicvanasse@gmail.com
 Documentation/guides/changing_systemclockconfig.rst ludovicvanasse@gmail.com devel@sumpfralle.de
-Documentation/guides/citests.rst michallenc@seznam.cz devel@sumpfralle.de ludovicvanasse@gmail.com 59230071+hartmannathan@users.noreply.github.com
 Documentation/guides/cpp_cmake.rst flavio.alves@phiinnovations.com xiaoxiang@xiaomi.com longdh.2017.vn@gmail.com raiden00@railab.me 59230071+hartmannathan@users.noreply.github.com
 Documentation/guides/custom_app_directories.rst ludovicvanasse@gmail.com
 Documentation/guides/customapps.rst 56726697+TimJTi@users.noreply.github.com acassis@gmail.com raiden00@railab.me 31182898+dlstjq7685@users.noreply.github.com

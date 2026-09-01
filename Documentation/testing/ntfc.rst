@@ -14,7 +14,7 @@ The framework and official test cases are available at:
 
 Detailed documentation is available in the framework repository.
 
-CI migration to NTFC is in progress. Configurations currently using NTFC:
+CI runtime test cases use NTFC. Configurations with an NTFC runner include:
 
 - :doc:`risc-v/qemu-rv </platforms/risc-v/qemu-rv/index>`: ``rv-virt/citest64``
 - :doc:`risc-v/qemu-rv </platforms/risc-v/qemu-rv/index>`: ``rv-virt/citest``
