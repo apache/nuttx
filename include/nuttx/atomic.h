@@ -138,6 +138,8 @@
   atomic_compare_exchange_4(obj, (FAR int32_t *)expected, desired, false, __ATOMIC_ACQUIRE, __ATOMIC_RELAXED)
 #define atomic_cmpxchg_release(obj, expected, desired) \
   atomic_compare_exchange_4(obj, (FAR int32_t *)expected, desired, false, __ATOMIC_RELEASE, __ATOMIC_RELAXED)
+#define atomic_cmpxchg_release_acquire(obj, expected, desired) \
+  atomic_compare_exchange_4(obj, (FAR int32_t *)expected, desired, false, __ATOMIC_RELEASE, __ATOMIC_ACQUIRE)
 #define atomic_cmpxchg_relaxed(obj, expected, desired) \
   atomic_compare_exchange_4(obj, (FAR int32_t *)expected, desired, false, __ATOMIC_RELAXED, __ATOMIC_RELAXED)
 #define atomic64_cmpxchg(obj, expected, desired) \
@@ -146,6 +148,8 @@
   atomic_compare_exchange_8(obj, (FAR int64_t *)expected, desired, false, __ATOMIC_ACQUIRE, __ATOMIC_RELAXED)
 #define atomic64_cmpxchg_release(obj, expected, desired) \
   atomic_compare_exchange_8(obj, (FAR int64_t *)expected, desired, false, __ATOMIC_RELEASE, __ATOMIC_RELAXED)
+#define atomic64_cmpxchg_release_acquire(obj, expected, desired) \
+  atomic_compare_exchange_8(obj, (FAR int64_t *)expected, desired, false, __ATOMIC_RELEASE, __ATOMIC_ACQUIRE)
 #define atomic64_cmpxchg_relaxed(obj, expected, desired) \
   atomic_compare_exchange_8(obj, (FAR int64_t *)expected, desired, false, __ATOMIC_RELAXED, __ATOMIC_RELAXED)
 
@@ -155,6 +159,8 @@
   atomic_compare_exchange_4(obj, (FAR int32_t *)expected, desired, true, __ATOMIC_ACQUIRE, __ATOMIC_RELAXED)
 #define atomic_try_cmpxchg_release(obj, expected, desired) \
   atomic_compare_exchange_4(obj, (FAR int32_t *)expected, desired, true, __ATOMIC_RELEASE, __ATOMIC_RELAXED)
+#define atomic_try_cmpxchg_release_acquire(obj, expected, desired) \
+  atomic_compare_exchange_4(obj, (FAR int32_t *)expected, desired, true, __ATOMIC_RELEASE, __ATOMIC_ACQUIRE)
 #define atomic_try_cmpxchg_relaxed(obj, expected, desired) \
   atomic_compare_exchange_4(obj, (FAR int32_t *)expected, desired, true, __ATOMIC_RELAXED, __ATOMIC_RELAXED)
 #define atomic64_try_cmpxchg(obj, expected, desired) \
@@ -163,6 +169,8 @@
   atomic_compare_exchange_8(obj, (FAR int64_t *)expected, desired, true, __ATOMIC_ACQUIRE, __ATOMIC_RELAXED)
 #define atomic64_try_cmpxchg_release(obj, expected, desired) \
   atomic_compare_exchange_8(obj, (FAR int64_t *)expected, desired, true, __ATOMIC_RELEASE, __ATOMIC_RELAXED)
+#define atomic64_try_cmpxchg_release_acquire(obj, expected, desired) \
+  atomic_compare_exchange_8(obj, (FAR int64_t *)expected, desired, true, __ATOMIC_RELEASE, __ATOMIC_ACQUIRE)
 #define atomic64_try_cmpxchg_relaxed(obj, expected, desired) \
   atomic_compare_exchange_8(obj, (FAR int64_t *)expected, desired, true, __ATOMIC_RELAXED, __ATOMIC_RELAXED)
 
@@ -202,6 +210,8 @@
   atomic64_cmpxchg_acquire(obj, expected, desired)
 #define atomic_ptr_cmpxchg_release(obj, expected, desired) \
   atomic64_cmpxchg_release(obj, expected, desired)
+#define atomic_ptr_cmpxchg_release_acquire(obj, expected, desired) \
+  atomic64_cmpxchg_release_acquire(obj, expected, desired)
 #define atomic_ptr_cmpxchg_relaxed(obj, expected, desired) \
   atomic64_cmpxchg_relaxed(obj, expected, desired)
 #define atomic_ptr_try_cmpxchg(obj, expected, desired) \
@@ -210,6 +220,8 @@
   atomic64_try_cmpxchg_acquire(obj, expected, desired)
 #define atomic_ptr_try_cmpxchg_release(obj, expected, desired) \
   atomic64_try_cmpxchg_release(obj, expected, desired)
+#define atomic_ptr_try_cmpxchg_release_acquire(obj, expected, desired) \
+  atomic64_try_cmpxchg_release_acquire(obj, expected, desired)
 #define atomic_ptr_try_cmpxchg_relaxed(obj, expected, desired) \
   atomic64_try_cmpxchg_relaxed(obj, expected, desired)
 
@@ -249,6 +261,8 @@
   atomic_cmpxchg_acquire(obj, expected, desired)
 #define atomic_ptr_cmpxchg_release(obj, expected, desired) \
   atomic_cmpxchg_release(obj, expected, desired)
+#define atomic_ptr_cmpxchg_release_acquire(obj, expected, desired) \
+  atomic_cmpxchg_release_acquire(obj, expected, desired)
 #define atomic_ptr_cmpxchg_relaxed(obj, expected, desired) \
   atomic_cmpxchg_relaxed(obj, expected, desired)
 #define atomic_ptr_try_cmpxchg(obj, expected, desired) \
@@ -257,6 +271,8 @@
   atomic_try_cmpxchg_acquire(obj, expected, desired)
 #define atomic_ptr_try_cmpxchg_release(obj, expected, desired) \
   atomic_try_cmpxchg_release(obj, expected, desired)
+#define atomic_ptr_try_cmpxchg_release_acquire(obj, expected, desired) \
+  atomic_try_cmpxchg_release_acquire(obj, expected, desired)
 #define atomic_ptr_try_cmpxchg_relaxed(obj, expected, desired) \
   atomic_try_cmpxchg_relaxed(obj, expected, desired)
 
