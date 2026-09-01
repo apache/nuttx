@@ -1061,7 +1061,8 @@ config SCHED_CRITMONITOR_MAXTIME_BUSYWAIT
 		Busy waiting time to enter critical section or
 		get spinlock should be smaller than
 		SCHED_CRITMONITOR_MAXTIME_BUSYWAIT, or system will give a warning.
-		For debugging system latency, -1 means disabled.
+		For debugging system latency, 0 means disabled, -1 means not
+		configured (feature off, no statistics collected).
 
 config SCHED_CRITMONITOR_MAXTIME_IRQ
 	int "IRQ max execution time"
