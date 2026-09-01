@@ -71,6 +71,18 @@
 #ifdef CONFIG_IMXRT_LPUART8
 #  define HAVE_LPUART8 1
 #endif
+#ifdef CONFIG_IMXRT_LPUART9
+#  define HAVE_LPUART9 1
+#endif
+#ifdef CONFIG_IMXRT_LPUART10
+#  define HAVE_LPUART10 1
+#endif
+#ifdef CONFIG_IMXRT_LPUART11
+#  define HAVE_LPUART11 1
+#endif
+#ifdef CONFIG_IMXRT_LPUART12
+#  define HAVE_LPUART12 1
+#endif
 
 /* Check if we have a LPUART device */
 
@@ -79,7 +91,8 @@
 
 #if defined(HAVE_LPUART1) || defined(HAVE_LPUART2) || defined(HAVE_LPUART3) || \
     defined(HAVE_LPUART4) || defined(HAVE_LPUART5) || defined(HAVE_LPUART6) || \
-    defined(HAVE_LPUART7) || defined(HAVE_LPUART8)
+    defined(HAVE_LPUART7) || defined(HAVE_LPUART8) || defined(HAVE_LPUART9) || \
+    defined(HAVE_LPUART10) || defined(HAVE_LPUART11) || defined(HAVE_LPUART12)
 #  define HAVE_LPUART_DEVICE 1
 #endif
 
