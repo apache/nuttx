@@ -483,7 +483,8 @@ void imxrt_lowsetup(void)
 int imxrt_lpuart_configure(uint32_t base,
                            const struct uart_config_s *config)
 {
-#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#if !defined(CONFIG_ARCH_FAMILY_IMXRT117x) && \
+    !defined(CONFIG_ARCH_FAMILY_IMXRT118x)
   uint32_t src_freq = 0;
   uint32_t pll3_div = 0;
   uint32_t uart_div = 0;
@@ -499,7 +500,8 @@ int imxrt_lpuart_configure(uint32_t base,
   uint32_t regval;
   uint32_t regval2;
 
-#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#if defined(CONFIG_ARCH_FAMILY_IMXRT117x) || \
+    defined(CONFIG_ARCH_FAMILY_IMXRT118x)
   if (base == IMXRT_LPUART1_BASE)
     {
       if (imxrt_get_rootclock(CCM_CR_LPUART1, &lpuart_freq) != OK)
