@@ -125,6 +125,7 @@ config ARCH_CHIP_MIMXRT1189CVM8C_CM33
 	select ARCH_FAMILY_IMXRT118x
 	select ARCH_CORTEXM33
 	select ARMV8M_HAVE_STACKCHECK
+	select IMXRT_TRDC
 	---help---
 		Target the Cortex-M33 core on the RT1189 SoC.  Used to build a
 		NuttX bootloader / minimal application that runs on the M33 out
@@ -414,6 +415,14 @@ config IMXRT_CLOCKCONFIG_VER3
 config IMXRT_IOMUX_VER2
 	bool
 	default n
+
+config IMXRT_TRDC
+	bool
+	default n
+	---help---
+		Enable the Trusted Resource Domain Controller driver
+		(arch/arm/src/imxrt/imxrt118x_trdc.c).  Present on RT118x-class
+		SoCs.
 
 menu "i.MX RT Peripheral Selection"
 
