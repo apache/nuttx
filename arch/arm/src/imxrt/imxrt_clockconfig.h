@@ -33,7 +33,9 @@
  * hence we use a VER2 driver for clockconfig
  */
 
-#ifdef CONFIG_IMXRT_CLOCKCONFIG_VER2
+#ifdef CONFIG_IMXRT_CLOCKCONFIG_VER3
+#include "imxrt_clockconfig_ver3.h"
+#elif defined(CONFIG_IMXRT_CLOCKCONFIG_VER2)
 #include "imxrt_clockconfig_ver2.h"
 #else
 #include "imxrt_clockconfig_ver1.h"

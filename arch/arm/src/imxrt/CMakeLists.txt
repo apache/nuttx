@@ -45,7 +45,9 @@ list(
 
 # Configuration-dependent i.MX RT files
 
-if(CONFIG_IMXRT_CLOCKCONFIG_VER2)
+if(CONFIG_IMXRT_CLOCKCONFIG_VER3)
+  list(APPEND SRCS imxrt_clockconfig_ver3.c)
+elseif(CONFIG_IMXRT_CLOCKCONFIG_VER2)
   list(APPEND SRCS imxrt_clockconfig_ver2.c imxrt_pmu.c)
 else()
   list(APPEND SRCS imxrt_clockconfig_ver1.c)
