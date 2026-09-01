@@ -150,3 +150,7 @@ endif
 ifeq ($(CONFIG_IMXRT_TRDC),y)
 CHIP_CSRCS += imxrt118x_trdc.c
 endif
+
+ifeq ($(CONFIG_IMXRT_ELE),y)
+CHIP_CSRCS += imxrt118x_ele.c
+endif
