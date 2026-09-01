@@ -40,7 +40,9 @@ CHIP_CSRCS += imxrt_xbar.c imxrt_ocotp.c imxrt_lowputc.c
 
 # Configuration-dependent i.MX RT files
 
-ifeq ($(CONFIG_IMXRT_CLOCKCONFIG_VER2),y)
+ifeq ($(CONFIG_IMXRT_CLOCKCONFIG_VER3),y)
+CHIP_CSRCS += imxrt_clockconfig_ver3.c
+else ifeq ($(CONFIG_IMXRT_CLOCKCONFIG_VER2),y)
 CHIP_CSRCS += imxrt_clockconfig_ver2.c imxrt_pmu.c
 else
 CHIP_CSRCS += imxrt_clockconfig_ver1.c
