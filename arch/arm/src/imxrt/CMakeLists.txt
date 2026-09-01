@@ -96,7 +96,11 @@ if(CONFIG_BUILD_PROTECTED)
 endif()
 
 if(CONFIG_IMXRT_EDMA)
-  list(APPEND SRCS imxrt_edma.c)
+  if(CONFIG_IMXRT_EDMA_VER2)
+    list(APPEND SRCS imxrt_edma_ver2.c)
+  else()
+    list(APPEND SRCS imxrt_edma.c)
+  endif()
 endif()
 
 if(CONFIG_IMXRT_USDHC)

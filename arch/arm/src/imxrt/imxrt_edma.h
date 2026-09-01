@@ -99,7 +99,12 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include "hardware/imxrt_edma.h"
+
+#ifdef CONFIG_IMXRT_EDMA_VER2
+#  include "hardware/rt118x/imxrt118x_edma.h"
+#else
+#  include "hardware/imxrt_edma.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -138,13 +143,26 @@ typedef void *DMACH_HANDLE;
 typedef void (*edma_callback_t)(DMACH_HANDLE handle,
                                 void *arg, bool done, int result);
 
-/* eDMA transfer sizes */
+/* eDMA transfer type */
 
-enum kinetis_edma_sizes_e
+enum imxrt_edma_xfrtype_e
+{
+  EDMA_MEM2MEM = 0,      /* Transfer from memory to memory */
+  EDMA_PERIPH2MEM,       /* Transfer from peripheral to memory */
+  EDMA_MEM2PERIPH,       /* Transfer from memory to peripheral */
+};
+
+/* eDMA transfer sises */
+
+enum imxrt_edma_sizes_e
 {
   EDMA_8BIT    = 0,      /* Transfer data size 8 */
   EDMA_16BIT   = 1,      /* Transfer data size 16 */
   EDMA_32BIT   = 2,      /* Transfer data size 32 */
+  EDMA_64BIT   = 3,      /* Transfer data size 64 */
+  EDMA_16BYTE  = 4,      /* Transfer data size 16-byte */
+  EDMA_32BYTE  = 5,      /* Transfer data size 32-byte */
+  EDMA_64BYTE  = 6,      /* Transfer data size 64-byte */
 };
 
 /* This structure holds the source/destination transfer attribute
@@ -165,6 +183,11 @@ struct imxrt_edma_xfrconfig_s
   uint16_t nbytes;     /* Bytes to transfer in a minor loop */
 #else
   uint32_t nbytes;     /* Bytes to transfer in a minor loop */
+#endif
+#ifdef CONFIG_IMXRT_EDMA_VER2
+  uint8_t smod;
+  uint8_t dmod;
+  uint8_t bwc;
 #endif
 #ifdef CONFIG_IMXRT_EDMA_ELINK
   DMACH_HANDLE linkch; /* Link channel (With EDMA_CONFIG_LINKTYPE_* flags) */
