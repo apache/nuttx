@@ -22,7 +22,7 @@
 
 add_subdirectory(${CONFIG_ARCH})
 
-if(CONFIG_LIBC_ATOMIC_IRQ OR CONFIG_LIBC_ATOMIC_HWSPINLOCK)
+if(NOT CONFIG_LIBC_ATOMIC_TOOLCHAIN)
   target_sources(c PRIVATE arch_atomic.c)
 endif()
 

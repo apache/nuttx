@@ -22,10 +22,6 @@
 
 set(SRCS)
 
-if(CONFIG_LIBC_ATOMIC_ARCH)
-  list(APPEND SRCS arch_atomic.c)
-endif()
-
 if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
   set(TRICORE_SUBDIR tasking)
 else()
