@@ -235,6 +235,8 @@ config ARCH_FAMILY_IMXRT118x
 	select IMXRT_HAVE_LPUART11
 	select IMXRT_HAVE_LPUART12
 	select IMXRT_CLOCKCONFIG_VER3
+	select IMXRT_IOMUX_VER3
+	select IMXRT_RGPIO
 	---help---
 		i.MX RT1180 dual-core Crossover Processors (Cortex-M33 + Cortex-M7).
 
@@ -416,6 +418,19 @@ config IMXRT_CLOCKCONFIG_VER3
 config IMXRT_IOMUX_VER2
 	bool
 	default n
+
+config IMXRT_IOMUX_VER3
+	bool
+	default n
+	---help---
+		Selects the "generation 3" IOMUXC driver used by RT118x.
+
+config IMXRT_RGPIO
+	bool
+	default n
+	---help---
+		Selects the RGPIO driver (arch/arm/src/imxrt/imxrt_rgpio.c) that
+		targets the RGPIO IP block used on RT118x.
 
 config IMXRT_TRDC
 	bool
@@ -2465,6 +2480,7 @@ endmenu # i.MX RT Peripheral Selection
 menuconfig IMXRT_GPIO_IRQ
 	bool "GPIO Interrupt Support"
 	default n
+	depends on !IMXRT_RGPIO
 
 if IMXRT_GPIO_IRQ
 
