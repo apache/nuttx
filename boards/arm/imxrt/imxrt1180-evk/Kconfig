@@ -1,0 +1,21 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_IMXRT1180_EVK
+
+config IMXRT1180_EVK_BOOTLOADER
+	bool "Cortex-M33 bootloader application"
+	default n
+	depends on ARCH_CORTEXM33
+	---help---
+		Build the minimal Cortex-M33 bootloader application
+		(src/imxrt_bootloader.c) instead of a normal NuttX application.
+		Its bootloader_main() entry point only releases the Cortex-M7,
+		which then runs the M7 NuttX image XIP'd at 0x28080000.
+
+		Set CONFIG_INIT_ENTRYPOINT="bootloader_main" when this is
+		enabled (see the imxrt1180-evk:bl configuration).
+
+endif
