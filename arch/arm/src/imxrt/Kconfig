@@ -232,6 +232,7 @@ config ARCH_FAMILY_IMXRT118x
 	select IMXRT_HAVE_LPUART10
 	select IMXRT_HAVE_LPUART11
 	select IMXRT_HAVE_LPUART12
+	select IMXRT_CLOCKCONFIG_VER3
 	---help---
 		i.MX RT1180 dual-core Crossover Processors (Cortex-M33 + Cortex-M7).
 
@@ -402,6 +403,13 @@ config IMXRT_ADC_VER2
 config IMXRT_CLOCKCONFIG_VER2
 	bool
 	default n
+
+config IMXRT_CLOCKCONFIG_VER3
+	bool
+	default n
+	---help---
+		Selects the RT118x-family clock configuration
+		(arch/arm/src/imxrt/imxrt_clockconfig_ver3.c).
 
 config IMXRT_IOMUX_VER2
 	bool
