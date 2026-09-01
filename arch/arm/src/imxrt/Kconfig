@@ -235,6 +235,8 @@ config ARCH_FAMILY_IMXRT118x
 	select IMXRT_HAVE_LPUART11
 	select IMXRT_HAVE_LPUART12
 	select IMXRT_CLOCKCONFIG_VER3
+	select IMXRT_IOMUX_VER3
+	select IMXRT_RGPIO
 	---help---
 		i.MX RT1180 dual-core Crossover Processors (Cortex-M33 + Cortex-M7).
 
@@ -416,6 +418,19 @@ config IMXRT_CLOCKCONFIG_VER3
 config IMXRT_IOMUX_VER2
 	bool
 	default n
+
+config IMXRT_IOMUX_VER3
+	bool
+	default n
+	---help---
+		Selects the "generation 3" IOMUXC driver used by RT118x.
+
+config IMXRT_RGPIO
+	bool
+	default n
+	---help---
+		Selects the RGPIO driver (arch/arm/src/imxrt/imxrt_rgpio.c) that
+		targets the RGPIO IP block used on RT118x.
 
 config IMXRT_TRDC
 	bool
@@ -2451,42 +2466,52 @@ if IMXRT_GPIO_IRQ
 config IMXRT_GPIO1_0_15_IRQ
 	bool "GPIO1 Pins 0-15 interrupts"
 	default n
+	depends on !IMXRT_RGPIO
 
 config IMXRT_GPIO1_16_31_IRQ
 	bool "GPIO1 Pins 16-31 interrupts"
 	default n
+	depends on !IMXRT_RGPIO
 
 config IMXRT_GPIO2_0_15_IRQ
 	bool "GPIO2 Pins 0-15 interrupts"
 	default n
+	depends on !IMXRT_RGPIO
 
 config IMXRT_GPIO2_16_31_IRQ
 	bool "GPIO2 Pins 16-31 interrupts"
 	default n
+	depends on !IMXRT_RGPIO
 
 config IMXRT_GPIO3_0_15_IRQ
 	bool "GPIO3 Pins 0-15 interrupts"
 	default n
+	depends on !IMXRT_RGPIO
 
 config IMXRT_GPIO3_16_31_IRQ
 	bool "GPIO3 Pins 16-31 interrupts"
 	default n
+	depends on !IMXRT_RGPIO
 
 config IMXRT_GPIO4_0_15_IRQ
 	bool "GPIO4 Pins 0-15 interrupts"
 	default n
+	depends on !IMXRT_RGPIO
 
 config IMXRT_GPIO4_16_31_IRQ
 	bool "GPIO4 Pins 16-31 interrupts"
 	default n
+	depends on !IMXRT_RGPIO
 
 config IMXRT_GPIO5_0_15_IRQ
 	bool "GPIO5 Pins 0-15 interrupts"
 	default n
+	depends on !IMXRT_RGPIO
 
 config IMXRT_GPIO5_16_31_IRQ
 	bool "GPIO5 Pins 16-31 interrupts"
 	default n
+	depends on !IMXRT_RGPIO
 
 config IMXRT_GPIO6_0_15_IRQ
 	bool "GPIO6 Pins 0-15 interrupts"
