@@ -211,6 +211,7 @@ struct lib_rawoutstream_s
   int                    fd;
 };
 
+#ifndef CONFIG_DISABLE_MOUNTPOINT
 struct lib_fileinstream_s
 {
   struct lib_instream_s  common;
@@ -222,6 +223,7 @@ struct lib_fileoutstream_s
   struct lib_outstream_s common;
   struct file            file;
 };
+#endif
 
 struct lib_rawsistream_s
 {
@@ -428,12 +430,14 @@ void lib_stdsostream(FAR struct lib_stdsostream_s *stream,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_MOUNTPOINT
 int lib_fileinstream_open(FAR struct lib_fileinstream_s *stream,
                           FAR const char *path, int oflag, mode_t mode);
 void lib_fileinstream_close(FAR struct lib_fileinstream_s *stream);
 int lib_fileoutstream_open(FAR struct lib_fileoutstream_s *stream,
                            FAR const char *path, int oflag, mode_t mode);
 void lib_fileoutstream_close(FAR struct lib_fileoutstream_s *stream);
+#endif
 
 /****************************************************************************
  * Name: lib_rawinstream, lib_rawoutstream, lib_rawsistream, and

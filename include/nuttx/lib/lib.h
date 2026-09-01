@@ -28,9 +28,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/fs.h>
-#include <nuttx/kmalloc.h>
-
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
+#  include <nuttx/kmalloc.h>
+#else
+#  include <stdlib.h>
+#endif
+#ifdef CONFIG_FILE_STREAM
+#  include <nuttx/fs/fs.h>
+#endif
+#include <stdbool.h>
 #include <limits.h>
 #include <alloca.h>
 
