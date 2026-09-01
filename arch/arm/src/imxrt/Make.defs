@@ -92,7 +92,11 @@ CHIP_CSRCS += imxrt_userspace.c
 endif
 
 ifeq ($(CONFIG_IMXRT_EDMA),y)
+ifeq ($(CONFIG_IMXRT_EDMA_VER2),y)
+CHIP_CSRCS += imxrt_edma_ver2.c
+else
 CHIP_CSRCS += imxrt_edma.c
+endif
 endif
 
 ifdef CONFIG_IMXRT_USDHC
