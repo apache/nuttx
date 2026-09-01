@@ -105,6 +105,33 @@ config ARCH_CHIP_MIMXRT1176DVMAA
 	select IMXRT_HAVE_USBOTG1
 	select IMXRT_HAVE_USBOTG2
 
+config ARCH_CHIP_MIMXRT1189CVM8C
+	bool "MIMXRT1189CVM8C (Cortex-M7 core)"
+	select ARCH_FAMILY_IMXRT118x
+	select ARCH_CORTEXM7
+	select ARCH_HAVE_DPFPU
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select ARMV7M_HAVE_STACKCHECK
+	select ARMV7M_ITCM
+	select ARMV7M_DTCM
+	---help---
+		Target the Cortex-M7 core on the RT1189 SoC.
+
+config ARCH_CHIP_MIMXRT1189CVM8C_CM33
+	bool "MIMXRT1189CVM8C (Cortex-M33 core)"
+	select ARCH_FAMILY_IMXRT118x
+	select ARCH_CORTEXM33
+	select ARMV8M_HAVE_STACKCHECK
+	select IMXRT_ELE
+	select IMXRT_TRDC
+	---help---
+		Target the Cortex-M33 core on the RT1189 SoC.  Used to build a
+		NuttX bootloader / minimal application that runs on the M33 out
+		of reset.
+
 endchoice # i.MX RT Chip Selection
 
 # i.MX RT Families
@@ -126,12 +153,14 @@ config ARCH_FAMILY_MIMXRT1021C
 config ARCH_FAMILY_IMXRT102x
 	bool
 	default n
+	select ARCH_CORTEXM7
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU # REVISIT
 	select ARMV7M_HAVE_ICACHE
 	select ARMV7M_HAVE_DCACHE
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
+	select ARMV7M_HAVE_STACKCHECK
 
 config ARCH_FAMILY_MIMXRT105xDVL6A
 	bool
@@ -150,12 +179,14 @@ config ARCH_FAMILY_MIMXRT105xCVL5A
 config ARCH_FAMILY_IMXRT105x
 	bool
 	default n
+	select ARCH_CORTEXM7
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU # REVISIT
 	select ARMV7M_HAVE_ICACHE
 	select ARMV7M_HAVE_DCACHE
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
+	select ARMV7M_HAVE_STACKCHECK
 
 config ARCH_FAMILY_MXRT106xDVL6A
 	bool
@@ -174,12 +205,14 @@ config ARCH_FAMILY_MIMXRT106xCVL5A
 config ARCH_FAMILY_IMXRT117x
 	bool
 	default n
+	select ARCH_CORTEXM7
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU # REVISIT
 	select ARMV7M_HAVE_ICACHE
 	select ARMV7M_HAVE_DCACHE
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
+	select ARMV7M_HAVE_STACKCHECK
 	select IMXRT_HIGHSPEED_GPIO
 	select IMXRT_HAVE_FLEXSPI2
 	select IMXRT_ADC_VER2
@@ -193,15 +226,32 @@ config ARCH_FAMILY_IMXRT117x
 	select IMXRT_FLEXCAN1_FD
 	select IMXRT_FLEXCAN2_FD
 
+config ARCH_FAMILY_IMXRT118x
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select IMXRT_HAVE_LPUART9
+	select IMXRT_HAVE_LPUART10
+	select IMXRT_HAVE_LPUART11
+	select IMXRT_HAVE_LPUART12
+	select IMXRT_IOMUX_VER3
+	select IMXRT_RGPIO
+	select IMXRT_CLOCKCONFIG_VER3
+	select IMXRT_EDMA_VER3
+	---help---
+		i.MX RT1180 dual-core Crossover Processors (Cortex-M33 + Cortex-M7).
+
 config ARCH_FAMILY_IMXRT106x
 	bool
 	default n
+	select ARCH_CORTEXM7
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU # REVISIT
 	select ARMV7M_HAVE_ICACHE
 	select ARMV7M_HAVE_DCACHE
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
+	select ARMV7M_HAVE_STACKCHECK
 	select IMXRT_HIGHSPEED_GPIO
 	select IMXRT_HAVE_FLEXSPI2
 	select IMXRT_HAVE_FLEXIO3
@@ -359,9 +409,72 @@ config IMXRT_CLOCKCONFIG_VER2
 	bool
 	default n
 
+config IMXRT_CLOCKCONFIG_VER3
+	bool
+	default n
+	---help---
+		Selects the RT118x-family clock configuration
+		(arch/arm/src/imxrt/imxrt_clockconfig_ver3.c).
+
 config IMXRT_IOMUX_VER2
 	bool
 	default n
+
+config IMXRT_IOMUX_VER3
+	bool
+	default n
+	---help---
+		Selects the "generation 3" IOMUXC driver used by RT118x.
+
+config IMXRT_RGPIO
+	bool
+	default n
+	---help---
+		Selects the RGPIO driver (arch/arm/src/imxrt/imxrt_rgpio.c) that
+		targets the RGPIO IP block used on RT118x.
+
+config IMXRT_ELE
+	bool
+	default n
+	---help---
+		Enable the NXP EdgeLock Enclave (ELE) messaging driver
+		(arch/arm/src/imxrt/imxrt118x_ele.c).  Present on RT118x-class
+		SoCs.
+
+config IMXRT_ELE_LOAD_FW
+	bool "Load ELE firmware from NuttX at boot"
+	depends on IMXRT_ELE
+	default n
+	---help---
+		Embed the ELE firmware AHAB container (CONFIG_IMXRT_ELE_FW_PATH)
+		in the NuttX image and hand it to the EdgeLock Enclave with a
+		LOAD_FW command early in imxrt118x_ele_init().
+
+		When disabled, the ELE firmware is instead packed as its own
+		AHAB container in the boot image, loaded by ROM code.
+
+config IMXRT_ELE_FW_PATH
+	string "ELE firmware AHAB container path"
+	depends on IMXRT_ELE
+	default "tools/imxrt1180/.cache/ele-fw/mxrt1180b0-ahab-container.img"
+	---help---
+		Path (relative to the NuttX top-level directory, or absolute) to
+		the NXP EdgeLock Enclave firmware AHAB container.
+
+config IMXRT_TRDC
+	bool
+	default n
+	---help---
+		Enable the Trusted Resource Domain Controller driver
+		(arch/arm/src/imxrt/imxrt118x_trdc.c).  Present on RT118x-class
+		SoCs.
+
+config IMXRT_EDMA_VER3
+	bool
+	default n
+	---help---
+		Selects the "generation 3" eDMA driver
+		(arch/arm/src/imxrt/imxrt_edma_ver3.c) used by RT118x.
 
 menu "i.MX RT Peripheral Selection"
 
@@ -2350,6 +2463,7 @@ endmenu # i.MX RT Peripheral Selection
 menuconfig IMXRT_GPIO_IRQ
 	bool "GPIO Interrupt Support"
 	default n
+	depends on !IMXRT_RGPIO
 
 if IMXRT_GPIO_IRQ
 
