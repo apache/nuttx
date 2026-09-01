@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/gd32vw55x/gd32vw553k-start/include/board.h
+ * boards/risc-v/gd32vw55x/gd32vw553-hmq/include/board.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_GD32VW55X_GD32VW553K_START_INCLUDE_BOARD_H
-#define __BOARDS_RISCV_GD32VW55X_GD32VW553K_START_INCLUDE_BOARD_H
+#ifndef __BOARDS_RISCV_GD32VW55X_GD32VW553_HMQ_INCLUDE_BOARD_H
+#define __BOARDS_RISCV_GD32VW55X_GD32VW553_HMQ_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -35,8 +35,8 @@
 #define BOARD_IRC32K_FREQUENCY  32000     /* Internal 32 kHz RC (FWDGT, RTC) */
 #define BOARD_SYSCLK_FREQUENCY  160000000
 
-/* UART pin muxing.  The GD32VW553K-START wires UART2 (PA6/PA7) to the
- * on-board GD-Link virtual COM port.  Pin/AF assignments follow the
+/* UART pin muxing.  The GD32VW553-HMQ wires UART0 (PA8/PB15) to the
+ * on-board UBS/Serial port.  Pin/AF assignments follow the
  * vendor SDK (plf/src/uart/uart.h, ASIC boards).
  */
 
@@ -53,6 +53,8 @@
 #define BOARD_UART1_RX_GPIO     GD32VW55X_GPIOA_BASE
 #define BOARD_UART1_RX_PIN      8
 #define BOARD_UART1_RX_AF       3
+
+/* This is the console: PA8 as RX and PB15 ad TX */
 
 #define BOARD_USART0_TX_GPIO    GD32VW55X_GPIOB_BASE
 #define BOARD_USART0_TX_PIN     15
@@ -129,38 +131,26 @@
 
 /* LEDs *********************************************************************/
 
-/* The GD32VW553K-START has three LEDs on GPIOC, driven push-pull and
+/* The GD32VW553-HMQ has one LED on GPIO PC13, driven push-pull and
  * active HIGH (the vendor demo turns them on with gpio_bit_set(); see
  * MSDK/plf/src/gd32vw55x_platform.h, where they are named LED_RUN,
  * LED_SLEEP and LED_RX).
  *
- *   LED1  PC0
- *   LED2  PC1
- *   LED3  PC2
+ *   LED1  PC13
  */
 
 #define GPIO_LED1 (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PUPD_NONE | GPIO_CFG_PP | \
                    GPIO_CFG_SPEED_MAX | GPIO_CFG_OUTPUT_RESET | \
                    GPIO_CFG_PORT_C | GPIO_CFG_PIN_0)
-#define GPIO_LED2 (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PUPD_NONE | GPIO_CFG_PP | \
-                   GPIO_CFG_SPEED_MAX | GPIO_CFG_OUTPUT_RESET | \
-                   GPIO_CFG_PORT_C | GPIO_CFG_PIN_1)
-#define GPIO_LED3 (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PUPD_NONE | GPIO_CFG_PP | \
-                   GPIO_CFG_SPEED_MAX | GPIO_CFG_OUTPUT_RESET | \
-                   GPIO_CFG_PORT_C | GPIO_CFG_PIN_2)
 
 /* LED index values for use with board_userled() */
 
 #define BOARD_LED1        0
-#define BOARD_LED2        1
-#define BOARD_LED3        2
-#define BOARD_NLEDS       3
+#define BOARD_NLEDS       1
 
 /* LED bits for use with board_userled_all() */
 
 #define BOARD_LED1_BIT    (1 << BOARD_LED1)
-#define BOARD_LED2_BIT    (1 << BOARD_LED2)
-#define BOARD_LED3_BIT    (1 << BOARD_LED3)
 
 /* If CONFIG_ARCH_LEDS is defined, the LEDs are used by the OS to signal
  * its state, and are not available to the application.  Otherwise they are
@@ -170,13 +160,13 @@
  *   ------------------  ------------------------  ----  ----  ----
  */
 
-#define LED_STARTED       0  /* NuttX has been started  ON   OFF   OFF */
-#define LED_HEAPALLOCATE  1  /* Heap has been allocated ON   OFF   OFF */
-#define LED_IRQSENABLED   2  /* Interrupts enabled      ON   OFF   OFF */
-#define LED_STACKCREATED  3  /* Idle stack created      ON   ON    OFF */
-#define LED_INIRQ         4  /* In an interrupt         N/C  N/C   N/C */
-#define LED_SIGNAL        5  /* In a signal handler     N/C  N/C   N/C */
-#define LED_ASSERTION     6  /* An assertion failed     N/C  N/C   ON  */
-#define LED_PANIC         7  /* The system has crashed  N/C  N/C   BLINK */
+#define LED_STARTED       0  /* NuttX has been started  ON    */
+#define LED_HEAPALLOCATE  1  /* Heap has been allocated OFF   */
+#define LED_IRQSENABLED   2  /* Interrupts enabled      OFF   */
+#define LED_STACKCREATED  3  /* Idle stack created      OFF   */
+#define LED_INIRQ         4  /* In an interrupt         OFF   */
+#define LED_SIGNAL        5  /* In a signal handler     OFF   */
+#define LED_ASSERTION     6  /* An assertion failed     OFF   */
+#define LED_PANIC         7  /* The system has crashed  BLINK */
 
-#endif /* __BOARDS_RISCV_GD32VW55X_GD32VW553K_START_INCLUDE_BOARD_H */
+#endif /* __BOARDS_RISCV_GD32VW55X_GD32VW553_HMQ_INCLUDE_BOARD_H */
