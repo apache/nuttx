@@ -20,9 +20,13 @@
 #
 ############################################################################
 
-# Common ARM and Cortex-M7 files
+# Common ARM and Cortex-M7/M33 files
 
+ifeq ($(CONFIG_ARCH_CORTEXM33),y)
+include armv8-m/Make.defs
+else
 include armv7-m/Make.defs
+endif
 
 # Required i.MX RT files
 
