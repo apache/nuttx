@@ -146,3 +146,7 @@ else
 CHIP_CSRCS += imxrt_adc_ver1.c
 endif
 endif
+
+ifeq ($(CONFIG_IMXRT_TRDC),y)
+CHIP_CSRCS += imxrt118x_trdc.c
+endif
