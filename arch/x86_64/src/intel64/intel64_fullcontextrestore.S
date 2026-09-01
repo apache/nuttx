@@ -64,38 +64,11 @@ x86_64_fullcontextrestore:
 	xrstor   (%rdi)
 #endif
 
-	/* Create an interrupt stack frame for the final iret.
-	*
-	*
-	*                  IRET STACK
-	*               ---------------
-	* RSP Before ->
-	*                  SS
-	*                  RSP
-	*                  RFLAGS
-	*                  CS
-	* RSP After  ->    RIP
-	*
-	*/
+	/* Restore the remaining registers.  The current stack may belong to
+	 * the outgoing task, which can already be running on another CPU, so
+	 * it must not be written from here on.
+	 */
 
-	movq    (8*REG_SS)(%rdi), %rbx
-	push    %rbx
-	movq    (8*REG_RSP)(%rdi), %rbx
-	push    %rbx
-
-	movq    (8*REG_RFLAGS)(%rdi), %rbx
-	push    %rbx
-	movq    (8*REG_CS)(%rdi), %rbx
-	push    %rbx
-	movq    (8*REG_RIP)(%rdi), %rbx
-	push    %rbx
-
-	/* Save the value of RDI on the stack too */
-
-	movq    (8*REG_RDI)(%rdi), %rbx
-	push    %rbx
-
-	/* Now restore the remaining registers */
 	movq    (8*REG_RSI)(%rdi), %rsi
 	movq    (8*REG_RDX)(%rdi), %rdx
 	movq    (8*REG_RCX)(%rdi), %rcx
@@ -132,11 +105,17 @@ x86_64_fullcontextrestore:
 
 	movq    (8*REG_RAX)(%rdi), %rax
 
+	/* REG_RIP..REG_SS are contiguous and match the iretq frame layout,
+	 * so iretq can pop them straight from the register save area.
+	 */
+
+	leaq    (8*REG_RIP)(%rdi), %rsp
+
 	/* Restore the correct value of RDI */
 
-	popq    %rdi
+	movq    (8*REG_RDI)(%rdi), %rdi
 
-	/* Pops 5 things at once: RIP, CS, RFLAGS RSP and SS */
+	/* Pops 5 things at once: RIP, CS, RFLAGS, RSP and SS */
 
 	iretq
 	.size x86_64_fullcontextrestore, . - x86_64_fullcontextrestore
