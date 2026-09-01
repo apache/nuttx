@@ -329,10 +329,15 @@
  *
  *   5) 64Kib of System SRAM beginning at address 0x2002:0000
  *
+ * The STM32F412 family has 256KiB of System SRAM in one bank and no CCM:
+ *
+ *   6) 256KiB of System SRAM beginning at address 0x2000:0000
+ *
  * As determined by the linker script, g_heapbase lies in the 112KiB memory
  * region and that extends to 0x2001:0000.  But the  first and second memory
  * regions are contiguous and treated as one in this logic that extends to
- * 0x2002:0000 (or 0x2003:0000 for the F427/F437/F429/F439).
+ * 0x2002:0000 (or 0x2003:0000 for the F427/F437/F429/F439, or 0x2004:0000
+ * for the F412).
  *
  * As a complication, CCM SRAM cannot be used for DMA.  So, if STM32 DMA is
  * enabled, CCM SRAM should probably be excluded from the heap or the
@@ -363,6 +368,8 @@
 #    define SRAM1_END 0x20008000
 #  elif defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
 #    define SRAM1_END 0x20030000
+#  elif defined(CONFIG_STM32_STM32F412)
+#    define SRAM1_END 0x20040000
 #  elif defined(CONFIG_STM32_STM32F446)
 #    define SRAM1_END 0x20020000
 #  elif defined(CONFIG_STM32_STM32F469)
