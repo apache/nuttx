@@ -30,13 +30,22 @@ endif
 
 # Required i.MX RT files
 
-CHIP_CSRCS  = imxrt_allocateheap.c imxrt_start.c imxrt_periphclks.c
+CHIP_CSRCS  = imxrt_allocateheap.c imxrt_start.c
+ifneq ($(CONFIG_IMXRT_RGPIO),y)
+CHIP_CSRCS += imxrt_periphclks.c
+endif
 ifeq ($(CONFIG_IMXRT_PROGMEM),y)
 CHIP_CSRCS += imxrt_flash.c
 endif
-CHIP_CSRCS += imxrt_irq.c imxrt_clrpend.c imxrt_gpio.c
-CHIP_CSRCS += imxrt_daisy.c imxrt_wdog.c imxrt_serial.c
-CHIP_CSRCS += imxrt_xbar.c imxrt_ocotp.c imxrt_lowputc.c
+CHIP_CSRCS += imxrt_irq.c imxrt_clrpend.c
+ifeq ($(CONFIG_IMXRT_RGPIO),y)
+CHIP_CSRCS += imxrt_rgpio.c
+else
+CHIP_CSRCS += imxrt_gpio.c
+CHIP_CSRCS += imxrt_daisy.c
+endif
+CHIP_CSRCS += imxrt_wdog.c imxrt_serial.c imxrt_xbar.c imxrt_ocotp.c
+CHIP_CSRCS += imxrt_lowputc.c
 
 # Configuration-dependent i.MX RT files
 
@@ -48,7 +57,9 @@ else
 CHIP_CSRCS += imxrt_clockconfig_ver1.c
 endif
 
-ifeq ($(CONFIG_IMXRT_IOMUX_VER2),y)
+ifeq ($(CONFIG_IMXRT_IOMUX_VER3),y)
+CHIP_CSRCS += imxrt_iomuxc_ver3.c
+else ifeq ($(CONFIG_IMXRT_IOMUX_VER2),y)
 CHIP_CSRCS += imxrt_iomuxc_ver2.c
 else
 CHIP_CSRCS += imxrt_iomuxc_ver1.c
@@ -65,7 +76,11 @@ CHIP_CSRCS += imxrt_tickless.c
 endif
 
 ifeq ($(CONFIG_IMXRT_GPIO_IRQ),y)
+ifeq ($(CONFIG_IMXRT_RGPIO),y)
+CHIP_CSRCS += imxrt_rgpioirq.c
+else
 CHIP_CSRCS += imxrt_gpioirq.c
+endif
 endif
 
 ifeq ($(CONFIG_ARM_MPU),y)
