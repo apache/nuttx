@@ -151,4 +151,8 @@ if(CONFIG_IMXRT_ADC)
   endif()
 endif()
 
+if(CONFIG_IMXRT_TRDC)
+  list(APPEND SRCS imxrt118x_trdc.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})
