@@ -316,5 +316,20 @@ config RPMSG_VIRTIO_PM_AUTORELAX
 		it prevents unnecessary power consumption by reducing the times that system
 		enter and leave low-power states.
 
+config RPMSG_VIRTIO_START_SYNC
+	bool "rpmsg virtio start devices synchronously"
+	default n
+	---help---
+		By default probe defers the rpmsg device bring-up to the rpmsg work
+		queue.  Enable this to run it inline instead, so the device is ready
+		when probe returns, at the cost of blocking the probe caller.
+
+		The bring-up then announces the local services from outside the
+		rpmsg work queue, while the work queues of both cores answer each
+		other's announcements and wait for tx buffers recursively.  If
+		RPMSG_RECURSIVE_LIMIT is too small on either core, both cores wait
+		for tx buffers forever: sim, with 17 services and 8 buffers, needs
+		at least 4 on both cores.
+
 endif # RPMSG_VIRTIO
 
