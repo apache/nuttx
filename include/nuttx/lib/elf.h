@@ -262,7 +262,6 @@ struct mod_loadinfo_s
   uint16_t      buflen;      /* size of iobuffer[] */
   int           filfd;       /* Descriptor for the file being loaded */
   int           nexports;    /* ET_DYN - Number of symbols exported */
-  int           gotindex;    /* Index to the GOT section */
   uintptr_t     xipbase;     /* if elf is position independent, and use
                               * romfs/tmps, we can try get xipbase,
                               * skip the copy.
@@ -278,11 +277,14 @@ struct mod_loadinfo_s
   FAR struct file *pinfile;
 #endif
 
-  /* The object's data base, from DT_PLTGOT.  An FDPIC module runs with this
-   * in the PIC base register.
+  /* The object's GOT.  gotbase is where it ended up: the placed address of
+   * .got, or DT_PLTGOT for an FDPIC object, which runs with it in the PIC
+   * base register.  gotsize is the extent of .got, and is also what says
+   * the object has one at all.
    */
 
   uintptr_t     gotbase;
+  size_t        gotsize;
 
   /* Pool of function descriptors behind the writable segment.  Reserved
    * when the segment is sized, and bounded by the relocation count.

@@ -337,7 +337,7 @@ static int libelf_relocate(FAR struct module_s *modp,
 
       /* Calculate the relocation address. */
 
-      if (loadinfo->gotindex >= 0)
+      if (loadinfo->gotsize != 0)
         {
           if (sym->st_shndx == SHN_UNDEF)
             {
@@ -345,8 +345,7 @@ static int libelf_relocate(FAR struct module_s *modp,
                * to the value of the symbol.
                */
 
-              FAR Elf_Shdr *gotsec = &loadinfo->shdr[loadinfo->gotindex];
-              FAR uintptr_t *gotaddr = (FAR uintptr_t *)(gotsec->sh_addr +
+              FAR uintptr_t *gotaddr = (FAR uintptr_t *)(loadinfo->gotbase +
                 *((FAR uintptr_t *)(dstsec->sh_addr + rel->r_offset)));
 
               *gotaddr = sym->st_value;

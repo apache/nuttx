@@ -546,13 +546,30 @@ skipload:
         }
     }
 
-  /* Update GOT table */
+  /* Note the GOT.  The sections are placed by now, thus .got carries the
+   * address it will be read at.  An FDPIC object's sections are never
+   * placed, and libelf_bind() takes its base from DT_PLTGOT instead.
+   */
 
-  if (loadinfo->gotindex >= 0)
+  ret = libelf_findsection(loadinfo, ".got");
+  if (ret >= 0)
     {
-      FAR Elf_Shdr *gotshdr = &loadinfo->shdr[loadinfo->gotindex];
-      FAR uintptr_t *got = (FAR uintptr_t *)gotshdr->sh_addr;
-      FAR uintptr_t *end = got + gotshdr->sh_size / sizeof(uintptr_t);
+      loadinfo->gotsize = loadinfo->shdr[ret].sh_size;
+
+      if (!loadinfo->fdpic)
+        {
+          loadinfo->gotbase = loadinfo->shdr[ret].sh_addr;
+        }
+    }
+
+  /* Update GOT table.  An FDPIC object's entries are relocated through its
+   * own relocations, so there is nothing to do for one here.
+   */
+
+  if (loadinfo->gotbase != 0)
+    {
+      FAR uintptr_t *got = (FAR uintptr_t *)loadinfo->gotbase;
+      FAR uintptr_t *end = got + loadinfo->gotsize / sizeof(uintptr_t);
 
       for (; got < end; got++)
         {
@@ -714,10 +731,14 @@ int libelf_load(FAR struct mod_loadinfo_s *loadinfo)
       goto errout_with_buffers;
     }
 
-  loadinfo->gotindex = libelf_findsection(loadinfo, ".got");
-  if (loadinfo->gotindex >= 0)
+  /* An object with a GOT is position independent, thus its read-only part
+   * may be able to stay where the filesystem holds it.  The section is not
+   * placed yet, so ask for it by name.
+   */
+
+  if (libelf_findsection(loadinfo, ".got") >= 0)
     {
-      binfo("GOT section found! index %d\n", loadinfo->gotindex);
+      binfo("GOT section found!\n");
       libelf_xipacquire(loadinfo);
     }
 
@@ -949,10 +970,14 @@ int libelf_load_with_addrenv(FAR struct mod_loadinfo_s *loadinfo)
       goto errout_with_buffers;
     }
 
-  loadinfo->gotindex = libelf_findsection(loadinfo, ".got");
-  if (loadinfo->gotindex >= 0)
+  /* An object with a GOT is position independent, thus its read-only part
+   * may be able to stay where the filesystem holds it.  The section is not
+   * placed yet, so ask for it by name.
+   */
+
+  if (libelf_findsection(loadinfo, ".got") >= 0)
     {
-      binfo("GOT section found! index %d\n", loadinfo->gotindex);
+      binfo("GOT section found!\n");
       libelf_xipacquire(loadinfo);
     }
 
