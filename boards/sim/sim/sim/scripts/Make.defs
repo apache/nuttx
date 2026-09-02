@@ -287,6 +287,11 @@ endif
 
 CELFFLAGS = $(CFLAGS) -fvisibility=hidden
 CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
+
+# __dso_handle comes from crtbegin, which a module does not link
+
+CXXELFFLAGS += -fno-use-cxa-atexit
+
 # -fno-pic to avoid GOT relocations
 CELFFLAGS += -fno-pic
 CXXELFFLAGS += -fno-pic
