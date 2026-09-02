@@ -301,10 +301,21 @@ int intel64_oneshot_start(struct intel64_oneshot_s *oneshot,
   flags = spin_lock_irqsave(&g_oneshot_spin);
   if (oneshot->running)
     {
-      /* Yes.. then cancel it */
+      /* Yes.. then stop it.  Do NOT call intel64_oneshot_cancel() here:
+       * it takes g_oneshot_spin, which we already hold, and spinlocks are
+       * not recursive, so that deadlocks the CPU.  Everything else that
+       * cancel would do (ISR, comparator, interrupt enable) is
+       * reprogrammed below anyway.
+       */
 
       tmrinfo("Already running... cancelling\n");
-      intel64_oneshot_cancel(oneshot, NULL);
+
+#ifndef CONFIG_INTEL64_HPET_FSB
+      INTEL64_TIM_DISABLEINT(oneshot->tch, oneshot->chan);
+      INTEL64_TIM_SETISR(oneshot->tch, oneshot->chan, NULL, NULL, false);
+#endif
+
+      oneshot->running = false;
     }
 
   /* Save the new handler and its argument */
