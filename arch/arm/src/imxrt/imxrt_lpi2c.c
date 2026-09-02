@@ -1072,7 +1072,8 @@ static void imxrt_lpi2c_tracedump(struct imxrt_lpi2c_priv_s *priv)
 static void imxrt_lpi2c_setclock(struct imxrt_lpi2c_priv_s *priv,
                                  uint32_t frequency)
 {
-#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#if !defined(CONFIG_ARCH_FAMILY_IMXRT117x) && \
+    !defined(CONFIG_ARCH_FAMILY_IMXRT118x)
   uint32_t pll3_div = 0;
   uint32_t lpi2c_clk_div;
 #endif
@@ -1108,7 +1109,8 @@ static void imxrt_lpi2c_setclock(struct imxrt_lpi2c_priv_s *priv,
 
           /* Get the LPI2C clock source frequency */
 
-#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#if defined(CONFIG_ARCH_FAMILY_IMXRT117x) || \
+    defined(CONFIG_ARCH_FAMILY_IMXRT118x)
           if (priv->config->base == IMXRT_LPI2C1_BASE)
             {
               imxrt_get_rootclock(CCM_CR_LPI2C1, &src_freq);
@@ -1681,7 +1683,8 @@ void imxrt_lpi2c_clock_enable (uint32_t base)
     }
   else if (base == IMXRT_LPI2C4_BASE)
     {
-#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#if !defined(CONFIG_ARCH_FAMILY_IMXRT117x) && \
+    !defined(CONFIG_ARCH_FAMILY_IMXRT118x)
       imxrt_clockall_lpi2c4_serial();
 #else
       imxrt_clockall_lpi2c4();
@@ -1721,7 +1724,8 @@ void imxrt_lpi2c_clock_disable (uint32_t base)
     }
   else if (base == IMXRT_LPI2C4_BASE)
     {
-#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#if !defined(CONFIG_ARCH_FAMILY_IMXRT117x) && \
+    !defined(CONFIG_ARCH_FAMILY_IMXRT118x)
       imxrt_clockoff_lpi2c4_serial();
 #else
       imxrt_clockoff_lpi2c4();
