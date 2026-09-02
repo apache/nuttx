@@ -86,7 +86,9 @@ struct rpmsg_virtio_priv_s
   uint16_t                        headtx;
   int                             sleepertx;
   int                             timeouttx;  /* Consecutive tx wait slices */
+#ifndef CONFIG_RPMSG_VIRTIO_START_SYNC
   struct work_s                   startwork;
+#endif
 #ifdef CONFIG_RPMSG_VIRTIO_PM
   spinlock_t                      lock;
   struct pm_wakelock_s            wakelock;
@@ -799,6 +801,12 @@ static int rpmsg_virtio_notify_wait(FAR struct rpmsg_device *rdev,
 
 /****************************************************************************
  * Name: rpmsg_virtio_start_worker
+ *
+ * Description:
+ *   Register the rpmsg device and bring up the rpmsg virtio device.  Runs
+ *   either inline in the probe context (CONFIG_RPMSG_VIRTIO_START_SYNC) or
+ *   on the rpmsg work queue.
+ *
  ****************************************************************************/
 
 static void rpmsg_virtio_start_worker(FAR void *arg)
@@ -1013,9 +1021,13 @@ int rpmsg_virtio_probe_cpuname(FAR struct virtio_device *vdev,
           pm_wakelock_init(&priv->wakelock, name, PM_IDLE_DOMAIN, PM_IDLE);
 #endif
 
+#ifdef CONFIG_RPMSG_VIRTIO_START_SYNC
+          rpmsg_virtio_start_worker(&priv->rpmsg);
+#else
           rpmsg_queue_work(&priv->rpmsg, RPMSG_PRIO_DEFAULT,
                            &priv->startwork, rpmsg_virtio_start_worker,
                            &priv->rpmsg);
+#endif
         }
       else
         {
