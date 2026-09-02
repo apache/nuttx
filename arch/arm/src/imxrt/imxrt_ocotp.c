@@ -49,6 +49,15 @@
  * Private Function
  ****************************************************************************/
 
+#ifndef CONFIG_ARCH_FAMILY_IMXRT118x
+
+/* The private helpers below drive the classic OCOTP MMIO register
+ * controller present on RT10xx / RT117x.  On chips that ship an EdgeLock
+ * Enclave (RT1180 / CONFIG_ARCH_FAMILY_IMXRT118x=y) the fuse controller is owned
+ * by the ELE and the SoC only exposes a shadow-read window; those chips
+ * do not need or have these helpers.
+ */
+
 static inline void imxrt_ocotp_reset_errors(void)
 {
   putreg32(OCOTP_CTRL_ERROR, IMXRT_OCOTP_CTRL_CLR);
@@ -187,6 +196,8 @@ static int imxrt_ocotp_wait_for_completion(uint32_t timeout_ms)
   return OK;
 }
 
+#endif /* !CONFIG_ARCH_FAMILY_IMXRT118x */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -199,8 +210,16 @@ static int imxrt_ocotp_wait_for_completion(uint32_t timeout_ms)
  *
  ****************************************************************************/
 
-int imxrt_ocotp_reload()
+int imxrt_ocotp_reload(void)
 {
+#ifdef CONFIG_ARCH_FAMILY_IMXRT118x
+  /* Shadow reload on ELE-equipped chips (e.g. RT1180) is owned by the
+   * EdgeLock Enclave and would need to go through its messaging protocol.
+   * Not implemented in this port.
+   */
+
+  return -ENOSYS;
+#else
   int ret;
 
   ret = imxrt_ocotp_wait_for_completion(OCOTP_OPT_TIMEOUT_MS);
@@ -214,6 +233,7 @@ int imxrt_ocotp_reload()
     }
 
   return ret;
+#endif
 }
 
 /****************************************************************************
@@ -234,6 +254,20 @@ int imxrt_ocotp_reload()
 
 int imxrt_ocotp_read(uint32_t otp_index, uint32_t *data)
 {
+#ifdef CONFIG_ARCH_FAMILY_IMXRT118x
+  /* On ELE-equipped chips (e.g. RT1180) the SoC only exposes a read-only
+   * window of the non-security-related OCOTP shadow registers.  Access it
+   * directly via IMXRT_OCOTP_SHADOW_BASE.
+   */
+
+  if (data == NULL)
+    {
+      return -EINVAL;
+    }
+
+  *data = getreg32(IMXRT_OCOTP_SHADOW_BASE + (otp_index * 4));
+  return OK;
+#else
   int ret;
 
   ret = imxrt_ocotp_wait_for_completion(OCOTP_OPT_TIMEOUT_MS);
@@ -262,6 +296,7 @@ int imxrt_ocotp_read(uint32_t otp_index, uint32_t *data)
     }
 
   return ret;
+#endif
 }
 
 /****************************************************************************
@@ -283,6 +318,15 @@ int imxrt_ocotp_read(uint32_t otp_index, uint32_t *data)
 
 int imxrt_ocotp_write(uint32_t otp_index, uint32_t data)
 {
+#ifdef CONFIG_ARCH_FAMILY_IMXRT118x
+  /* Fuse writes on ELE-equipped chips must go through the EdgeLock
+   * Enclave messaging protocol.  Not implemented in this port.
+   */
+
+  UNUSED(otp_index);
+  UNUSED(data);
+  return -ENOSYS;
+#else
   int ret;
   ret = imxrt_ocotp_wait_for_completion(OCOTP_OPT_TIMEOUT_MS);
   if (ret == OK)
@@ -311,4 +355,5 @@ int imxrt_ocotp_write(uint32_t otp_index, uint32_t data)
     }
 
   return ret;
+#endif
 }
