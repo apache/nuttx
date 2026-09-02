@@ -7,6 +7,7 @@ product:
     core0:
       name: 'main'
       device: 'qemu'
+      line_buffered: true
       exec_path: 'qemu-system-arm'
       exec_args: '-semihosting -M sabrelite -m 1024 -smp 4 -nographic'
       conf_path: './.config'
