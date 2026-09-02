@@ -852,7 +852,8 @@ void up_trigger_irq(int irq, cpu_set_t cpuset)
           struct arm_smccc_res res;
 
           arm_smccc_smc(ARM_SMCCC_NUTTX_SEND_SECURE_SGI,
-                          irq, 0, 0, 0, 0, 0, 0, &res);
+                        irq, cpuset,
+                        0, 0, 0, 0, 0, &res);
         }
       else
 #endif

@@ -141,7 +141,18 @@ static int rptun_bmp_notify(FAR struct rptun_dev_s *dev, uint32_t vqid)
 {
   FAR struct rptun_bmp_dev_s *priv = (FAR struct rptun_bmp_dev_s *)dev;
 
-  up_trigger_irq(priv->irq_trigger, priv->cpuset);
+  /* An empty remote_cpu means the peer OS lives in the other security state
+   * of the SAME physical cores (REE <-> TEE), so the doorbell belongs to the
+   * core we are running on: that is the core whose peer-world context waits
+   * for it.  A fixed mask would always poke one core no matter where the
+   * sender runs, serialising every notification through that core.
+   *
+   * Otherwise the peer is a distinct processor with its own core numbering
+   * and the mask the board passed is the only valid target.
+   */
+
+  up_trigger_irq(priv->irq_trigger,
+                 priv->cpuset != 0 ? priv->cpuset : 1 << this_cpu());
   return 0;
 }
 
@@ -166,19 +177,21 @@ static int rptun_bmp_register_callback(FAR struct rptun_dev_s *dev,
                                        FAR void *arg)
 {
   FAR struct rptun_bmp_dev_s *priv = (FAR struct rptun_bmp_dev_s *)dev;
+#ifdef CONFIG_SMP
+  cpu_set_t cpuset = (1 << CPU_SETSIZE) - 1;
+#endif
 
   priv->callback = callback;
   priv->arg      = arg;
 
 #ifdef CONFIG_SMP
-  /* The doorbell IRQ (SGI/PPI) is routed to CPU0. On ARM GIC,
-   * up_enable_irq/up_disable_irq for per-CPU interrupts only
-   * affects the local core's enable bit. We must ensure the
-   * operation executes on CPU0; use nxsched_cpu_call_single()
-   * to dispatch it if we are running on another core.
+  /* The doorbell SGI is enabled per core: up_enable_irq() writes the
+   * calling core's GICR_ISENABLER0 and affects that core only.  Enable it
+   * on every core so delivery does not depend on which core the sender
+   * targets, nor on which core happens to run this registration.
    */
 
-  nxsched_cpu_call_single(0, rptun_bmp_set_irq, priv);
+  nxsched_cpu_call(cpuset, rptun_bmp_set_irq, priv);
 #else
   rptun_bmp_set_irq(priv);
 #endif
