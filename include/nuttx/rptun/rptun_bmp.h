@@ -52,7 +52,9 @@ extern "C"
  *   rsc - The resource for shared memory
  *   irq_event - Interrupt ID to attach
  *   irq_trigger - Interrupt ID to trigger
- *   remote_cpu - Remote CPU ID
+ *   remote_cpu - Set of cores the doorbell is raised on.  Pass an empty set
+ *     when the peer shares these physical cores (REE <-> TEE); the doorbell
+ *     is then raised on whichever core sends it.
  *
  * Returned Value:
  *   OK on success, negated errno on failure
