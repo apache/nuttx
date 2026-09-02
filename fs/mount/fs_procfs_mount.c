@@ -182,6 +182,11 @@ static void mount_sprintf(FAR struct mount_info_s *info,
   linesize = vsnprintf(info->line, info->linelen, fmt, ap);
   va_end(ap);
 
+  if (linesize >= info->linelen)
+    {
+      linesize = info->linelen - 1;
+    }
+
   /* Copy the line buffer to the user buffer */
 
   copysize = procfs_memcpy(info->line, linesize,
