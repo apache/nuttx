@@ -286,6 +286,10 @@ endif
 CELFFLAGS = $(CFLAGS) -fvisibility=hidden
 CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
 
+# __dso_handle comes from crtbegin, which a module does not link
+
+CXXELFFLAGS += -fno-use-cxa-atexit
+
 LDELFFLAGS = -r -e _start
 ifneq ($(CONFIG_BUILD_KERNEL),y)
   # Flat build and protected elf entry point use crt0,

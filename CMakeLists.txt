@@ -516,6 +516,20 @@ if(EXISTS ${NUTTX_DIR}/arch/${CONFIG_ARCH}/src/cmake/elf.cmake)
   include(${NUTTX_DIR}/arch/${CONFIG_ARCH}/src/cmake/elf.cmake)
 endif()
 
+# The default registers each static object's destructor with __cxa_atexit(dtor,
+# obj, &__dso_handle), and __dso_handle comes from crtbegin, which a module does
+# not link.  Turning it off also puts the destructors in .fini_array, which is
+# where the loader looks for them when the module is unloaded.
+#
+# GCC and Clang alone take the option, which is why the architectures built by
+# another compiler do not carry it in their Toolchain.defs either.  ARMClang
+# reports ARMClang, so it keeps it.  The generator expression keeps the option
+# off the C compiles, which it is not valid for.
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  nuttx_elf_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-use-cxa-atexit>)
+endif()
+
 include(platform)
 
 if(CONFIG_ARCH_TOOLCHAIN_TASKING)

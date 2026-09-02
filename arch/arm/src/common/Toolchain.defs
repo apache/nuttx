@@ -633,6 +633,10 @@ CELFFLAGS = $(filter-out --fixed-r9,$(CFLAGS)) -fvisibility=hidden \
 CXXELFFLAGS = $(filter-out --fixed-r9,$(CXXFLAGS)) -fvisibility=hidden \
               -mlong-calls
 
+# __dso_handle comes from crtbegin, which a module does not link
+
+CXXELFFLAGS += -fno-use-cxa-atexit
+
 ifeq ($(CONFIG_PIC),y)
   # ARCHCFLAGS, not CFLAGS: board Make.defs reassign CFLAGS with ':='
   # after including this file, which would discard the flag.
