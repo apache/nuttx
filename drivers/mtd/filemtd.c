@@ -507,6 +507,7 @@ static int filemtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
         {
           FAR struct partition_info_s *info =
             (FAR struct partition_info_s *)arg;
+
           if (info != NULL)
             {
               info->numsectors  = priv->nblocks *
@@ -530,6 +531,7 @@ static int filemtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
       case MTDIOC_ERASESTATE:
         {
           FAR uint8_t *result = (FAR uint8_t *)arg;
+
           *result = CONFIG_FILEMTD_ERASESTATE;
 
           ret = OK;
@@ -580,6 +582,7 @@ static int mtd_loop_setup(FAR const char *devname, FAR const char *filename,
           /* Try to erase the entire device, before register */
 
           FAR struct file_dev_s *fdev = (FAR struct file_dev_s *)mtd;
+
           mtd->erase(mtd, offset / erasesize, fdev->nblocks);
         }
 
@@ -698,61 +701,61 @@ static int mtd_loop_ioctl(FAR struct file *filep, int cmd,
 
   switch (cmd)
     {
-    /* Command:      LOOPIOC_SETUP
-     * Description:  Setup the loop device
-     * Argument:     A pointer to a read-only instance of struct losetup_s.
-     * Dependencies: The loop device must be enabled (CONFIG_MTD_LOOP=y)
-     */
+      /* Command:      LOOPIOC_SETUP
+       * Description:  Setup the loop device
+       * Argument:     A pointer to a read-only instance of struct losetup_s.
+       * Dependencies: The loop device must be enabled (CONFIG_MTD_LOOP=y)
+       */
 
-    case MTD_LOOPIOC_SETUP:
-      {
-        FAR struct mtd_losetup_s *setup =
-          (FAR struct mtd_losetup_s *)((uintptr_t)arg);
+      case MTD_LOOPIOC_SETUP:
+        {
+          FAR struct mtd_losetup_s *setup =
+            (FAR struct mtd_losetup_s *)((uintptr_t)arg);
 
-        if (setup == NULL)
-          {
-            ret = -EINVAL;
-          }
-        else
-          {
+          if (setup == NULL)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
 #  ifndef CONFIG_MTD_CONFIG_NONE
-            ret = mtd_loop_setup(setup->devname, setup->filename,
-                                 setup->sectsize, setup->erasesize,
-                                 setup->offset, setup->configdata);
+              ret = mtd_loop_setup(setup->devname, setup->filename,
+                                   setup->sectsize, setup->erasesize,
+                                   setup->offset, setup->configdata);
 #  else
-            ret = mtd_loop_setup(setup->devname, setup->filename,
-                                 setup->sectsize, setup->erasesize,
-                                 setup->offset);
+              ret = mtd_loop_setup(setup->devname, setup->filename,
+                                   setup->sectsize, setup->erasesize,
+                                   setup->offset);
 #  endif
-          }
-      }
-      break;
+            }
+        }
+        break;
 
-    /* Command:      LOOPIOC_TEARDOWN
-     * Description:  Teardown a loop device previously setup via
-     *               LOOPIOC_SETUP
-     * Argument:     A read-able pointer to the path of the device to be
-     *               torn down
-     * Dependencies: The loop device must be enabled (CONFIG_MTD_LOOP=y)
-     */
+      /* Command:      LOOPIOC_TEARDOWN
+       * Description:  Teardown a loop device previously setup via
+       *               LOOPIOC_SETUP
+       * Argument:     A read-able pointer to the path of the device to be
+       *               torn down
+       * Dependencies: The loop device must be enabled (CONFIG_MTD_LOOP=y)
+       */
 
-    case MTD_LOOPIOC_TEARDOWN:
-      {
-        FAR const char *devname = (FAR const char *)((uintptr_t)arg);
+      case MTD_LOOPIOC_TEARDOWN:
+        {
+          FAR const char *devname = (FAR const char *)((uintptr_t)arg);
 
-        if (devname == NULL)
-          {
-            ret = -EINVAL;
-          }
-        else
-          {
-            ret = mtd_loop_teardown(devname);
-          }
-       }
-       break;
+          if (devname == NULL)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              ret = mtd_loop_teardown(devname);
+            }
+        }
+        break;
 
-     default:
-       ret = -ENOTTY;
+      default:
+        ret = -ENOTTY;
     }
 
   return ret;
