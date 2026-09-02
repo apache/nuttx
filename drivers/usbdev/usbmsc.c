@@ -368,25 +368,32 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
       reqcontainer->req->callback = usbmsc_rdcomplete;
     }
 
+  /* Compute the bulk IN request buffer size once (SS vs non-SS) and use it
+   * both to allocate the requests below and (via priv->bulkinreqlen) to let
+   * usbmsc_cmdreadstate fill a full request per bulk-IN transfer instead of
+   * one maxpacket.  Single source of truth for the buffer size.
+   */
+
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  if (dev->speed == USB_SPEED_SUPER ||
+      dev->speed == USB_SPEED_SUPER_PLUS)
+    {
+      priv->bulkinreqlen = USBMSC_SSBULKMAXPACKET *
+                           (USBMSC_SSBULKMAXBURST + 1);
+    }
+  else
+#endif
+    {
+      priv->bulkinreqlen = CONFIG_USBMSC_BULKINREQLEN;
+    }
+
   /* Pre-allocate write request containers and put in a free list */
 
   for (i = 0; i < CONFIG_USBMSC_NWRREQS; i++)
     {
       reqcontainer = &priv->wrreqs[i];
-#ifdef CONFIG_USBDEV_SUPERSPEED
-      if (dev->speed == USB_SPEED_SUPER ||
-          dev->speed == USB_SPEED_SUPER_PLUS)
-        {
-          reqcontainer->req = usbdev_allocreq(priv->epbulkin,
-                                              USBMSC_SSBULKMAXPACKET *
-                                              (USBMSC_SSBULKMAXBURST + 1));
-        }
-      else
-#endif
-        {
-          reqcontainer->req = usbdev_allocreq(priv->epbulkin,
-                                              CONFIG_USBMSC_BULKINREQLEN);
-        }
+      reqcontainer->req = usbdev_allocreq(priv->epbulkin,
+                                          priv->bulkinreqlen);
 
       if (reqcontainer->req == NULL)
         {
@@ -1053,6 +1060,16 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
     }
 
   priv->epbulkout->priv = priv;
+
+  /* The per-request buffers were allocated at bind time from
+   * priv->bulkinreqlen.  The bulk-IN fill length
+   * (MAX(bulkinreqlen, maxpacket) in usbmsc_cmdreadstate) and
+   * assume each buffer holds at least one maxpacket;
+   * a configured REQLEN smaller than maxpacket would overflow req->buf.
+   * Catch such a misconfiguration early.
+   */
+
+  DEBUGASSERT(priv->bulkinreqlen >= priv->epbulkin->maxpacket);
 
   /* Queue read requests in the bulk OUT endpoint */
 

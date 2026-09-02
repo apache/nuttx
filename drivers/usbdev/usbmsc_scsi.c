@@ -2304,8 +2304,7 @@ static int usbmsc_cmdreadstate(FAR struct usbmsc_dev_s *priv)
       src    = &priv->iobuffer[lun->sectorsize - priv->nsectbytes];
       dest   = &req->buf[priv->nreqbytes];
 
-      nbytes = MIN(priv->epbulkin->maxpacket - priv->nreqbytes,
-                   priv->nsectbytes);
+      nbytes = MIN(priv->bulkinreqlen - priv->nreqbytes, priv->nsectbytes);
 
       /* Copy the data from the sector buffer to the USB request and update
        * counts
@@ -2320,7 +2319,7 @@ static int usbmsc_cmdreadstate(FAR struct usbmsc_dev_s *priv)
        * then submit the request
        */
 
-      if (priv->nreqbytes >= priv->epbulkin->maxpacket ||
+      if (priv->nreqbytes >= priv->bulkinreqlen ||
           (priv->u.xfrlen <= 0 && priv->nsectbytes <= 0))
         {
           /* Submit the request to the bulk IN endpoint */
