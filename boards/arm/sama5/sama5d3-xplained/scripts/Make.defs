@@ -50,5 +50,9 @@ LDNXFLATFLAGS = -e main -s 2048
 CELFFLAGS = $(CFLAGS) -mlong-calls # --target1-abs
 CXXELFFLAGS = $(CXXFLAGS) -mlong-calls # --target1-abs
 
+# __dso_handle comes from crtbegin, which a module does not link
+
+CXXELFFLAGS += -fno-use-cxa-atexit
+
 LDELFFLAGS = -r -e main
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
