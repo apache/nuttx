@@ -366,13 +366,19 @@ static void libelf_set_emptysect_vma(FAR struct mod_loadinfo_s *loadinfo,
  *   Read the section data into memory. Section addresses in the shdr[] are
  *   updated to point to the corresponding position in the memory.
  *
+ * Input Parameters:
+ *   loadinfo - The load state.
+ *   gotidx   - Section index of .got, which the caller has already looked
+ *              up, or a negative value if the object has none.
+ *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
  *   failure.
  *
  ****************************************************************************/
 
-static inline int libelf_loadfile(FAR struct mod_loadinfo_s *loadinfo)
+static inline int libelf_loadfile(FAR struct mod_loadinfo_s *loadinfo,
+                                  int gotidx)
 {
   FAR uint8_t *text = (FAR uint8_t *)loadinfo->textalloc;
   FAR uint8_t *data = (FAR uint8_t *)loadinfo->datastart;
@@ -546,13 +552,29 @@ skipload:
         }
     }
 
-  /* Update GOT table */
+  /* Note the GOT.  The sections are placed by now, thus .got carries the
+   * address it will be read at.  An FDPIC object's sections are never
+   * placed, and libelf_bind() takes its base from DT_PLTGOT instead.
+   */
 
-  if (loadinfo->gotindex >= 0)
+  if (gotidx >= 0)
     {
-      FAR Elf_Shdr *gotshdr = &loadinfo->shdr[loadinfo->gotindex];
-      FAR uintptr_t *got = (FAR uintptr_t *)gotshdr->sh_addr;
-      FAR uintptr_t *end = got + gotshdr->sh_size / sizeof(uintptr_t);
+      loadinfo->gotsize = loadinfo->shdr[gotidx].sh_size;
+
+      if (!loadinfo->fdpic)
+        {
+          loadinfo->gotbase = loadinfo->shdr[gotidx].sh_addr;
+        }
+    }
+
+  /* Update GOT table.  An FDPIC object's entries are relocated through its
+   * own relocations, so there is nothing to do for one here.
+   */
+
+  if (loadinfo->gotbase != 0)
+    {
+      FAR uintptr_t *got = (FAR uintptr_t *)loadinfo->gotbase;
+      FAR uintptr_t *end = got + loadinfo->gotsize / sizeof(uintptr_t);
 
       for (; got < end; got++)
         {
@@ -699,6 +721,7 @@ void libelf_pinrelease(FAR struct file **pinfile)
 
 int libelf_load(FAR struct mod_loadinfo_s *loadinfo)
 {
+  int gotidx;
   int ret;
   int i;
 
@@ -714,10 +737,15 @@ int libelf_load(FAR struct mod_loadinfo_s *loadinfo)
       goto errout_with_buffers;
     }
 
-  loadinfo->gotindex = libelf_findsection(loadinfo, ".got");
-  if (loadinfo->gotindex >= 0)
+  /* An object with a GOT is position independent, thus its read-only part
+   * may be able to stay where the filesystem holds it.  Keep the index:
+   * libelf_loadfile() notes the section once it has placed it.
+   */
+
+  gotidx = libelf_findsection(loadinfo, ".got");
+  if (gotidx >= 0)
     {
-      binfo("GOT section found! index %d\n", loadinfo->gotindex);
+      binfo("GOT section found! index %d\n", gotidx);
       libelf_xipacquire(loadinfo);
     }
 
@@ -889,7 +917,7 @@ int libelf_load(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Load ELF section data into memory */
 
-  ret = libelf_loadfile(loadinfo);
+  ret = libelf_loadfile(loadinfo, gotidx);
   if (ret < 0)
     {
       berr("ERROR: libelf_loadfile failed: %d\n", ret);
@@ -935,6 +963,7 @@ errout_with_buffers:
 #ifdef CONFIG_ARCH_ADDRENV
 int libelf_load_with_addrenv(FAR struct mod_loadinfo_s *loadinfo)
 {
+  int gotidx;
   int ret;
 
   binfo("loadinfo: %p\n", loadinfo);
@@ -949,10 +978,15 @@ int libelf_load_with_addrenv(FAR struct mod_loadinfo_s *loadinfo)
       goto errout_with_buffers;
     }
 
-  loadinfo->gotindex = libelf_findsection(loadinfo, ".got");
-  if (loadinfo->gotindex >= 0)
+  /* An object with a GOT is position independent, thus its read-only part
+   * may be able to stay where the filesystem holds it.  Keep the index:
+   * libelf_loadfile() notes the section once it has placed it.
+   */
+
+  gotidx = libelf_findsection(loadinfo, ".got");
+  if (gotidx >= 0)
     {
-      binfo("GOT section found! index %d\n", loadinfo->gotindex);
+      binfo("GOT section found! index %d\n", gotidx);
       libelf_xipacquire(loadinfo);
     }
 
@@ -980,7 +1014,7 @@ int libelf_load_with_addrenv(FAR struct mod_loadinfo_s *loadinfo)
       goto errout_with_buffers;
     }
 
-  ret = libelf_loadfile(loadinfo);
+  ret = libelf_loadfile(loadinfo, gotidx);
   if (ret < 0)
     {
       berr("ERROR: libelf_loadfile failed: %d\n", ret);
