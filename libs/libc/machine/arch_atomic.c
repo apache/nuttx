@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#define ARCH_ATOMIC_SPECIFIER
+#define ARCH_ATOMIC_SPECIFIER weak_function
 
 #include <nuttx/atomic.h>
 #include <nuttx/arch.h>
@@ -36,7 +36,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: __atomic_*_{1,2,4,8}
+ * Name: __atomic_*_{1,2,4}
  ****************************************************************************/
 
 #ifdef ARCH_HAVE_ATOMIC_1
@@ -48,9 +48,6 @@ ARCH_ATOMIC_DEFINE(__atomic, uint16_t, 2)
 #ifdef ARCH_HAVE_ATOMIC_4
 ARCH_ATOMIC_DEFINE(__atomic, uint32_t, 4)
 #endif
-#ifdef ARCH_HAVE_ATOMIC_8
-ARCH_ATOMIC_DEFINE(__atomic, uint64_t, 8)
-#endif
 
 /* Clang define the __sync builtins, add #ifndef to avoid
  * redefined/redeclared problem.
@@ -59,7 +56,7 @@ ARCH_ATOMIC_DEFINE(__atomic, uint64_t, 8)
 #ifndef __clang__
 
 /****************************************************************************
- * Name: __sync_*_{1,2,4,8}
+ * Name: __sync_*_{1,2,4}
  ****************************************************************************/
 
 #ifdef ARCH_SYNC_DEFINE
@@ -71,9 +68,6 @@ ARCH_SYNC_DEFINE(__sync, uint16_t, 2)
 #  endif
 #  ifdef ARCH_HAVE_ATOMIC_4
 ARCH_SYNC_DEFINE(__sync, uint32_t, 4)
-#  endif
-#  ifdef ARCH_HAVE_ATOMIC_8
-ARCH_SYNC_DEFINE(__sync, uint64_t, 8)
 #  endif
 #endif
 

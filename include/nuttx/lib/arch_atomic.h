@@ -255,20 +255,19 @@ static inline void atomic_unlock(irqstate_t flags)
 #define ARCH_HAVE_ATOMIC_1
 #define ARCH_HAVE_ATOMIC_2
 #define ARCH_HAVE_ATOMIC_4
-#define ARCH_HAVE_ATOMIC_8
 
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
 
+#ifndef CONFIG_LIBC_ATOMIC_TOOLCHAIN
 ARCH_ATOMIC_DEFINE(atomic, uint8_t, 1)
 ARCH_ATOMIC_DEFINE(atomic, uint16_t, 2)
 ARCH_ATOMIC_DEFINE(atomic, int32_t, 4)
-ARCH_ATOMIC_DEFINE(atomic, int64_t, 8)
 
 ARCH_SYNC_DEFINE(sync, uint8_t, 1)
 ARCH_SYNC_DEFINE(sync, uint16_t, 2)
 ARCH_SYNC_DEFINE(sync, uint32_t, 4)
-ARCH_SYNC_DEFINE(sync, uint64_t, 8)
+#endif
 
 #endif /* __INCLUDE_NUTTX_LIB_ARCH_ATOMIC_H */
