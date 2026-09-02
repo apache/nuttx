@@ -1104,6 +1104,8 @@ config USBMSC_BULKINREQLEN
 	int "Bulk IN request size"
 	default 512 if USBDEV_DUALSPEED
 	default 64  if !USBDEV_DUALSPEED
+	range 512 65536 if USBDEV_DUALSPEED
+	range 64 65536 if !USBDEV_DUALSPEED
 	---help---
 		The size of the buffer in each WRITE request.  This value should to be
 		at least as large as the endpoint maxpacket size .  Most DCDs can divide

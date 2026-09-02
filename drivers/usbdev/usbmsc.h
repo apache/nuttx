@@ -399,6 +399,9 @@ struct usbmsc_dev_s
   FAR struct usbdev_ep_s  *epbulkin;  /* Bulk IN endpoint structure */
   FAR struct usbdev_ep_s  *epbulkout; /* Bulk OUT endpoint structure */
   FAR struct usbdev_req_s *ctrlreq;   /* Control request (for ep0 setup responses) */
+  uint32_t          bulkinreqlen;     /* Allocated size of each bulk IN request
+                                       * buffer (== alloc expr; used to fill a
+                                       * full request per bulk-IN transfer) */
 
   /* SCSI command processing */
 
