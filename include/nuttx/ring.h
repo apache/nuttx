@@ -60,6 +60,29 @@
  *     ring_spsc_enqueue(&g_ring, &val, 1);
  *     ring_spsc_dequeue(&g_ring, &out, 1);
  *
+ *   Enqueue takes as much as fits and reports how much that was.  When the
+ *   payload is indivisible - a framed record whose reader splits on a length
+ *   field, say - use the bulk form instead: it takes all of it or none, and
+ *   returns count or 0, so the ring never holds a fragment:
+ *     ring_spsc_enqueue_bulk(&g_ring, buf, n, &space);   // n or 0
+ *     ring_mpsc_enqueue_bulk(&g_ring, buf, n, &space);
+ *     ring_spmc_enqueue_bulk(&g_ring, buf, n, &space);
+ *     ring_mpmc_enqueue_bulk(&g_ring, buf, n, NULL);
+ *
+ *   Dequeue mirrors this.  The bulk form returns count or 0 and leaves an
+ *   incomplete record in the ring for a later pass, rather than handing back
+ *   part of one.  On the MC forms it also closes a race a hand-rolled
+ *   ring_count() test cannot: the check sits inside the CAS:
+ *     ring_spsc_dequeue_bulk(&g_ring, buf, n, &avail);   // n or 0
+ *     ring_mpsc_dequeue_bulk(&g_ring, buf, n, &avail);
+ *     ring_spmc_dequeue_bulk(&g_ring, buf, n, &avail);
+ *     ring_mpmc_dequeue_bulk(&g_ring, buf, n, NULL);
+ *
+ *   The bulk forms take one extra argument, NULL to decline it: the space
+ *   (enqueue) or readable count (dequeue) left after the call, saving a
+ *   follow-up ring_space() / ring_count().  Only a hint on the MP/MC forms,
+ *   where a rival may claim more right after the reservation lands.
+ *
  *   MPSC - Multiple Producers, Single Consumer:
  *     ring_mpsc_enqueue(&g_ring, &val, 1);
  *     ring_mpsc_dequeue(&g_ring, &out, 1);
@@ -104,10 +127,18 @@
  *              buf.len2 * elem_size);
  *     ring_spsc_enqueue_finish(&g_ring, &buf);
  *
+ *     ring_spsc_enqueue_start_bulk(&g_ring, count, elem_size, NULL, &buf);
+ *     if (buf.cnt != 0)
+ *       { ... fill and finish as above ... }
+ *
  *     // Dequeue (all modes):
  *     ring_spsc_dequeue_start(&g_ring, count, elem_size, &buf);
  *     // Read from buf.ptr1 (len1) and buf.ptr2 (len2)
  *     ring_spsc_dequeue_finish(&g_ring, &buf);
+ *
+ *     ring_spsc_dequeue_start_bulk(&g_ring, count, elem_size, NULL, &buf);
+ *     if (buf.cnt != 0)
+ *       { ... read and finish as above ... }
  *
  * 6. Zero-copy overwrite (start/finish pattern):
  *
@@ -229,9 +260,17 @@
   (ring_is_ready(r) ? \
    ring_sp_enqueue(r, items, count, sizeof(*(items))) : 0)
 
+#define ring_spsc_enqueue_bulk(r, items, count, space) \
+  (ring_is_ready(r) ? \
+   ring_sp_enqueue_bulk(r, items, count, sizeof(*(items)), space) : 0)
+
 #define ring_spsc_dequeue(r, items, count) \
   (ring_is_ready(r) ? \
    ring_sc_dequeue(r, items, count, sizeof(*(items))) : 0)
+
+#define ring_spsc_dequeue_bulk(r, items, count, avail) \
+  (ring_is_ready(r) ? \
+   ring_sc_dequeue_bulk(r, items, count, sizeof(*(items)), avail) : 0)
 
 #define ring_spsc_skip(r, count) \
   (ring_is_ready(r) ? ring_sc_skip(r, count) : 0)
@@ -239,20 +278,38 @@
 #define ring_mpmc_enqueue(r, items, count) \
   ring_mp_enqueue(r, items, count, sizeof(*(items)))
 
+#define ring_mpmc_enqueue_bulk(r, items, count, space) \
+  ring_mp_enqueue_bulk(r, items, count, sizeof(*(items)), space)
+
 #define ring_mpmc_dequeue(r, items, count) \
   ring_mc_dequeue(r, items, count, sizeof(*(items)))
+
+#define ring_mpmc_dequeue_bulk(r, items, count, avail) \
+  ring_mc_dequeue_bulk(r, items, count, sizeof(*(items)), avail)
 
 #define ring_spmc_enqueue(r, items, count) \
   ring_sp_enqueue(r, items, count, sizeof(*(items)))
 
+#define ring_spmc_enqueue_bulk(r, items, count, space) \
+  ring_sp_enqueue_bulk(r, items, count, sizeof(*(items)), space)
+
 #define ring_spmc_dequeue(r, items, count) \
   ring_mc_dequeue(r, items, count, sizeof(*(items)))
+
+#define ring_spmc_dequeue_bulk(r, items, count, avail) \
+  ring_mc_dequeue_bulk(r, items, count, sizeof(*(items)), avail)
 
 #define ring_mpsc_enqueue(r, items, count) \
   ring_mp_enqueue(r, items, count, sizeof(*(items)))
 
+#define ring_mpsc_enqueue_bulk(r, items, count, space) \
+  ring_mp_enqueue_bulk(r, items, count, sizeof(*(items)), space)
+
 #define ring_mpsc_dequeue(r, items, count) \
   ring_sc_dequeue(r, items, count, sizeof(*(items)))
+
+#define ring_mpsc_dequeue_bulk(r, items, count, avail) \
+  ring_sc_dequeue_bulk(r, items, count, sizeof(*(items)), avail)
 
 #define ring_mpmc_skip(r, count) ring_mc_skip(r, count)
 #define ring_spmc_skip(r, count) ring_mc_skip(r, count)
@@ -290,42 +347,66 @@
 #define ring_mpmc_overwrite_finish(r, b) ring_mp_finish(r, b)
 
 #define ring_spsc_enqueue_start(r, count, elem_size, b) \
-  ring_sp_start(r, count, elem_size, b)
+  ring_sp_start(r, count, elem_size, false, NULL, b)
+
+#define ring_spsc_enqueue_start_bulk(r, count, elem_size, space, b) \
+  ring_sp_start(r, count, elem_size, true, space, b)
 
 #define ring_spsc_enqueue_finish(r, b) ring_sp_finish(r, b)
 
 #define ring_spsc_dequeue_start(r, count, elem_size, b) \
-  ring_sc_start(r, count, elem_size, b)
+  ring_sc_start(r, count, elem_size, false, NULL, b)
+
+#define ring_spsc_dequeue_start_bulk(r, count, elem_size, avail, b) \
+  ring_sc_start(r, count, elem_size, true, avail, b)
 
 #define ring_spsc_dequeue_finish(r, b) ring_sc_finish(r, b)
 
 #define ring_mpmc_enqueue_start(r, count, elem_size, b) \
-  ring_mp_start(r, count, elem_size, b)
+  ring_mp_start(r, count, elem_size, false, NULL, b)
+
+#define ring_mpmc_enqueue_start_bulk(r, count, elem_size, space, b) \
+  ring_mp_start(r, count, elem_size, true, space, b)
 
 #define ring_mpmc_enqueue_finish(r, b) ring_mp_finish(r, b)
 
 #define ring_mpmc_dequeue_start(r, count, elem_size, b) \
-  ring_mc_start(r, count, elem_size, b)
+  ring_mc_start(r, count, elem_size, false, NULL, b)
+
+#define ring_mpmc_dequeue_start_bulk(r, count, elem_size, avail, b) \
+  ring_mc_start(r, count, elem_size, true, avail, b)
 
 #define ring_mpmc_dequeue_finish(r, b) ring_mc_finish(r, b)
 
 #define ring_spmc_enqueue_start(r, count, elem_size, b) \
-  ring_sp_start(r, count, elem_size, b)
+  ring_sp_start(r, count, elem_size, false, NULL, b)
+
+#define ring_spmc_enqueue_start_bulk(r, count, elem_size, space, b) \
+  ring_sp_start(r, count, elem_size, true, space, b)
 
 #define ring_spmc_enqueue_finish(r, b) ring_sp_finish(r, b)
 
 #define ring_spmc_dequeue_start(r, count, elem_size, b) \
-  ring_mc_start(r, count, elem_size, b)
+  ring_mc_start(r, count, elem_size, false, NULL, b)
+
+#define ring_spmc_dequeue_start_bulk(r, count, elem_size, avail, b) \
+  ring_mc_start(r, count, elem_size, true, avail, b)
 
 #define ring_spmc_dequeue_finish(r, b) ring_mc_finish(r, b)
 
 #define ring_mpsc_enqueue_start(r, count, elem_size, b) \
-  ring_mp_start(r, count, elem_size, b)
+  ring_mp_start(r, count, elem_size, false, NULL, b)
+
+#define ring_mpsc_enqueue_start_bulk(r, count, elem_size, space, b) \
+  ring_mp_start(r, count, elem_size, true, space, b)
 
 #define ring_mpsc_enqueue_finish(r, b) ring_mp_finish(r, b)
 
 #define ring_mpsc_dequeue_start(r, count, elem_size, b) \
-  ring_sc_start(r, count, elem_size, b)
+  ring_sc_start(r, count, elem_size, false, NULL, b)
+
+#define ring_mpsc_dequeue_start_bulk(r, count, elem_size, avail, b) \
+  ring_sc_start(r, count, elem_size, true, avail, b)
 
 #define ring_mpsc_dequeue_finish(r, b) ring_sc_finish(r, b)
 
@@ -998,19 +1079,30 @@ ring_copy_to(FAR struct ring_buf_s *buf, FAR void *items, size_t elem_size)
  ****************************************************************************/
 
 static inline_function void
-ring_sp_start(FAR struct ring_s *r, uint32_t count,
-              size_t elem_size, FAR struct ring_buf_s *buf)
+ring_sp_start(FAR struct ring_s *r, uint32_t count, size_t elem_size,
+              bool bulk, FAR uint32_t *space, FAR struct ring_buf_s *buf)
 {
   FAR struct ring_blob_s *blob = r->blob;
   uint32_t prod_index = RTS_IDX(blob->prod_tail);
   uint32_t cons_index;
-  uint32_t free_space;
-  uint32_t n;
+  uint32_t used;
+  uint32_t free_space = 0;
+  uint32_t n = 0;
 
   UP_RMB();
   cons_index = RTS_IDX(blob->cons_tail);
-  free_space = blob->capacity - ring_dist(r, prod_index, cons_index);
-  n = count < free_space ? count : free_space;
+  used = ring_dist(r, prod_index, cons_index);
+
+  if (used <= blob->capacity)
+    {
+      free_space = blob->capacity - used;
+      n = count <= free_space ? count : (bulk ? 0 : free_space);
+    }
+
+  if (space != NULL)
+    {
+      *space = free_space - n;
+    }
 
   ring_buf_init(buf, r, prod_index, n, elem_size);
 }
@@ -1025,22 +1117,31 @@ ring_sp_start(FAR struct ring_s *r, uint32_t count,
  ****************************************************************************/
 
 static inline_function void
-ring_mp_start(FAR struct ring_s *r, uint32_t count,
-              size_t elem_size, FAR struct ring_buf_s *buf)
+ring_mp_start(FAR struct ring_s *r, uint32_t count, size_t elem_size,
+              bool bulk, FAR uint32_t *space, FAR struct ring_buf_s *buf)
 {
   FAR struct ring_blob_s *blob = r->blob;
   uint32_t old_head;
   uint32_t new_head;
+  uint32_t free_space;
   uint32_t n;
 
   old_head = atomic_read(&blob->prod_head);
   do
     {
       uint32_t cons_index = RTS_IDX(atomic_read_acquire(&blob->cons_tail));
-      uint32_t free_space = blob->capacity -
-        ring_dist(r, RTS_IDX(old_head), cons_index);
+      uint32_t used = ring_dist(r, RTS_IDX(old_head), cons_index);
 
-      n = count < free_space ? count : free_space;
+      if (used > blob->capacity)
+        {
+          free_space = 0;
+          n = 0;
+          break;
+        }
+
+      free_space = blob->capacity - used;
+
+      n = count <= free_space ? count : (bulk ? 0 : free_space);
       if (n == 0)
         {
           break;
@@ -1050,6 +1151,11 @@ ring_mp_start(FAR struct ring_s *r, uint32_t count,
                           ring_advance(r, RTS_IDX(old_head), n));
     }
   while (!atomic_cmpxchg_relaxed(&blob->prod_head, &old_head, new_head));
+
+  if (space != NULL)
+    {
+      *space = free_space - n;
+    }
 
   ring_buf_init(buf, r, RTS_IDX(old_head), n, elem_size);
 }
@@ -1064,8 +1170,8 @@ ring_mp_start(FAR struct ring_s *r, uint32_t count,
  ****************************************************************************/
 
 static inline_function void
-ring_sc_start(FAR struct ring_s *r, uint32_t count,
-              size_t elem_size, FAR struct ring_buf_s *buf)
+ring_sc_start(FAR struct ring_s *r, uint32_t count, size_t elem_size,
+              bool bulk, FAR uint32_t *avail, FAR struct ring_buf_s *buf)
 {
   FAR struct ring_blob_s *blob = r->blob;
   uint32_t cons_index = RTS_IDX(blob->cons_tail);
@@ -1086,7 +1192,16 @@ ring_sc_start(FAR struct ring_s *r, uint32_t count,
 
   if (available <= blob->capacity)
     {
-      n = count < available ? count : available;
+      n = count <= available ? count : (bulk ? 0 : available);
+    }
+  else
+    {
+      available = 0;
+    }
+
+  if (avail != NULL)
+    {
+      *avail = available - n;
     }
 
   ring_buf_init(buf, r, cons_index, n, elem_size);
@@ -1102,19 +1217,21 @@ ring_sc_start(FAR struct ring_s *r, uint32_t count,
  ****************************************************************************/
 
 static inline_function void
-ring_mc_start(FAR struct ring_s *r, uint32_t count,
-              size_t elem_size, FAR struct ring_buf_s *buf)
+ring_mc_start(FAR struct ring_s *r, uint32_t count, size_t elem_size,
+              bool bulk, FAR uint32_t *avail, FAR struct ring_buf_s *buf)
 {
   FAR struct ring_blob_s *blob = r->blob;
   uint32_t old_head;
   uint32_t new_head;
+  uint32_t available;
   uint32_t n;
 
   old_head = atomic_read(&blob->cons_head);
   do
     {
       uint32_t prod_index = RTS_IDX(atomic_read_acquire(&blob->prod_tail));
-      uint32_t available = ring_dist(r, prod_index, RTS_IDX(old_head));
+
+      available = ring_dist(r, prod_index, RTS_IDX(old_head));
 
       /* available > capacity is physically impossible for a consistent
        * ring; it can only result from a torn snapshot where prod_tail is
@@ -1125,11 +1242,12 @@ ring_mc_start(FAR struct ring_s *r, uint32_t count,
 
       if (available > blob->capacity)
         {
+          available = 0;
           n = 0;
           break;
         }
 
-      n = count < available ? count : available;
+      n = count <= available ? count : (bulk ? 0 : available);
       if (n == 0)
         {
           break;
@@ -1139,6 +1257,11 @@ ring_mc_start(FAR struct ring_s *r, uint32_t count,
                           ring_advance(r, RTS_IDX(old_head), n));
     }
   while (!atomic_cmpxchg_relaxed(&blob->cons_head, &old_head, new_head));
+
+  if (avail != NULL)
+    {
+      *avail = available - n;
+    }
 
   ring_buf_init(buf, r, RTS_IDX(old_head), n, elem_size);
 }
@@ -1455,7 +1578,33 @@ ring_sp_enqueue(FAR struct ring_s *r, FAR const void *items,
 {
   struct ring_buf_s buf;
 
-  ring_sp_start(r, count, elem_size, &buf);
+  ring_sp_start(r, count, elem_size, false, NULL, &buf);
+  ring_copy_from(&buf, items, elem_size);
+  ring_sp_finish(r, &buf);
+
+  return buf.cnt;
+}
+
+/****************************************************************************
+ * Name: ring_sp_enqueue_bulk
+ *
+ * Description:
+ *   Single-producer all-or-nothing enqueue.  Either every element goes in or
+ *   none does, so the ring never holds a fragment of an indivisible payload.
+ *
+ * Returned Value:
+ *   count on success, 0 if the ring could not take the whole payload.
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t
+ring_sp_enqueue_bulk(FAR struct ring_s *r, FAR const void *items,
+                     uint32_t count, size_t elem_size,
+                     FAR uint32_t *space)
+{
+  struct ring_buf_s buf;
+
+  ring_sp_start(r, count, elem_size, true, space, &buf);
   ring_copy_from(&buf, items, elem_size);
   ring_sp_finish(r, &buf);
 
@@ -1482,7 +1631,33 @@ ring_mp_enqueue(FAR struct ring_s *r, FAR const void *items,
 {
   struct ring_buf_s buf;
 
-  ring_mp_start(r, count, elem_size, &buf);
+  ring_mp_start(r, count, elem_size, false, NULL, &buf);
+  ring_copy_from(&buf, items, elem_size);
+  ring_mp_finish(r, &buf);
+
+  return buf.cnt;
+}
+
+/****************************************************************************
+ * Name: ring_mp_enqueue_bulk
+ *
+ * Description:
+ *   Multi-producer all-or-nothing enqueue.  As ring_sp_enqueue_bulk, over
+ *   the RTS CAS protocol.
+ *
+ * Returned Value:
+ *   count on success, 0 if the ring could not take the whole payload.
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t
+ring_mp_enqueue_bulk(FAR struct ring_s *r, FAR const void *items,
+                     uint32_t count, size_t elem_size,
+                     FAR uint32_t *space)
+{
+  struct ring_buf_s buf;
+
+  ring_mp_start(r, count, elem_size, true, space, &buf);
   ring_copy_from(&buf, items, elem_size);
   ring_mp_finish(r, &buf);
 
@@ -1503,7 +1678,34 @@ ring_sc_dequeue(FAR struct ring_s *r, FAR void *items,
 {
   struct ring_buf_s buf;
 
-  ring_sc_start(r, count, elem_size, &buf);
+  ring_sc_start(r, count, elem_size, false, NULL, &buf);
+  ring_copy_to(&buf, items, elem_size);
+  ring_sc_finish(r, &buf);
+
+  return buf.cnt;
+}
+
+/****************************************************************************
+ * Name: ring_sc_dequeue_bulk
+ *
+ * Description:
+ *   Single-consumer all-or-nothing dequeue.  Either every element comes out
+ *   or none does, leaving an incomplete record in the ring for a later pass
+ *   rather than handing the caller a fragment of it.
+ *
+ * Returned Value:
+ *   count on success, 0 if the ring did not hold that many elements.
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t
+ring_sc_dequeue_bulk(FAR struct ring_s *r, FAR void *items,
+                     uint32_t count, size_t elem_size,
+                     FAR uint32_t *avail)
+{
+  struct ring_buf_s buf;
+
+  ring_sc_start(r, count, elem_size, true, avail, &buf);
   ring_copy_to(&buf, items, elem_size);
   ring_sc_finish(r, &buf);
 
@@ -1527,7 +1729,35 @@ ring_mc_dequeue(FAR struct ring_s *r, FAR void *items,
 {
   struct ring_buf_s buf;
 
-  ring_mc_start(r, count, elem_size, &buf);
+  ring_mc_start(r, count, elem_size, false, NULL, &buf);
+  ring_copy_to(&buf, items, elem_size);
+  ring_mc_finish(r, &buf);
+
+  return buf.cnt;
+}
+
+/****************************************************************************
+ * Name: ring_mc_dequeue_bulk
+ *
+ * Description:
+ *   Multi-consumer all-or-nothing dequeue.  As ring_sc_dequeue_bulk, over
+ *   the RTS CAS protocol - and unlike a ring_count() test the caller could
+ *   write itself, the check happens inside the CAS loop, so a rival consumer
+ *   cannot take the data in between.
+ *
+ * Returned Value:
+ *   count on success, 0 if the ring did not hold that many elements.
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t
+ring_mc_dequeue_bulk(FAR struct ring_s *r, FAR void *items,
+                     uint32_t count, size_t elem_size,
+                     FAR uint32_t *avail)
+{
+  struct ring_buf_s buf;
+
+  ring_mc_start(r, count, elem_size, true, avail, &buf);
   ring_copy_to(&buf, items, elem_size);
   ring_mc_finish(r, &buf);
 
@@ -1548,7 +1778,7 @@ ring_sc_skip(FAR struct ring_s *r, uint32_t count)
 {
   struct ring_buf_s buf;
 
-  ring_sc_start(r, count, 0, &buf);
+  ring_sc_start(r, count, 0, false, NULL, &buf);
   ring_sc_finish(r, &buf);
 
   return buf.cnt;
@@ -1593,7 +1823,7 @@ ring_mc_skip(FAR struct ring_s *r, uint32_t count)
 {
   struct ring_buf_s buf;
 
-  ring_mc_start(r, count, 0, &buf);
+  ring_mc_start(r, count, 0, false, NULL, &buf);
   ring_mc_finish(r, &buf);
 
   return buf.cnt;
