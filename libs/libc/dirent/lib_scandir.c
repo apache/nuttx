@@ -204,6 +204,7 @@ int scandir(FAR const char *path, FAR struct dirent ***namelist,
       if (compar)
         {
           typedef int (*compar_fn_t)(FAR const void *, FAR const void *);
+
           qsort(list, cnt, sizeof(*list), (compar_fn_t)compar);
         }
 
