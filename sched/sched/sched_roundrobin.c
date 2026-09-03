@@ -229,4 +229,63 @@ clock_t nxsched_process_roundrobin(FAR struct tcb_s *tcb, clock_t ticks,
   return ret;
 }
 
+#ifdef CONFIG_SCHED_TICKLESS
+
+/****************************************************************************
+ * Name:  nxsched_suspend_roundrobin
+ *
+ * Description:
+ *   Called when a task using round-robin scheduling is being switched out.
+ *   Accounts for the time consumed since the timeslice was last assessed
+ *   so that only actual CPU execution time is charged against the task.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread that is being suspended.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumption:
+ *   This function is called from the critical section.
+ *
+ ****************************************************************************/
+
+void nxsched_suspend_roundrobin(FAR struct tcb_s *tcb)
+{
+  clock_t now     = clock_systime_ticks();
+  clock_t elapsed = now - tcb->rr_starttime;
+
+  nxsched_process_roundrobin(tcb, elapsed, true);
+}
+
+/****************************************************************************
+ * Name:  nxsched_resume_roundrobin
+ *
+ * Description:
+ *   Called when a task using round-robin scheduling is being switched in.
+ *   Restarts the scheduler timer for the task's remaining timeslice so
+ *   that the timer is always armed while an RR task is running.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread that is being resumed.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumption:
+ *   This function is called from the critical section.
+ *
+ ****************************************************************************/
+
+void nxsched_resume_roundrobin(FAR struct tcb_s *tcb)
+{
+  clock_t now = clock_systime_ticks();
+
+  DEBUGASSERT(tcb->timeslice >= 0);
+  tcb->rr_starttime = now;
+  nxsched_timer_start(now, tcb->timeslice);
+}
+
+#endif /* CONFIG_SCHED_TICKLESS */
+
 #endif /* CONFIG_RR_INTERVAL > 0 */

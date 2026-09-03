@@ -51,6 +51,17 @@ void nxsched_switch_context(FAR struct tcb_s *from, FAR struct tcb_s *to)
 {
   nxsched_checkstackoverflow(from);
 
+#if CONFIG_RR_INTERVAL > 0 && defined(CONFIG_SCHED_TICKLESS)
+  /* If the task being switched out uses round-robin scheduling, account
+   * for the time it has consumed from its timeslice.
+   */
+
+  if ((from->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
+    {
+      nxsched_suspend_roundrobin(from);
+    }
+#endif
+
 #ifdef CONFIG_SCHED_SPORADIC
   /* Perform sporadic schedule operations */
 
@@ -65,12 +76,14 @@ void nxsched_switch_context(FAR struct tcb_s *from, FAR struct tcb_s *to)
     }
 #endif
 
-#if defined(CONFIG_SCHED_TICKLESS) && CONFIG_RR_INTERVAL > 0
-  /* Before the context switch, we should set the timer for RR. */
+#if CONFIG_RR_INTERVAL > 0 && defined(CONFIG_SCHED_TICKLESS)
+  /* If the task being switched in uses round-robin scheduling, restart
+   * the timer for its remaining timeslice.
+   */
 
-  if (from != to && (to->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
+  if ((to->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
     {
-      nxsched_reassess_timer();
+      nxsched_resume_roundrobin(to);
     }
 #endif
 
