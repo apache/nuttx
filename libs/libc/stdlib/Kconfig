@@ -80,4 +80,13 @@ config LIBC_DISABLE_HEXSTR_TO_FLOAT
 		and is rarely needed in embedded systems. Decimal float parsing remains
 		available.
 
+config LIBC_QSORT_SMALL
+	bool "Use compact small qsort implementation"
+	default DEFAULT_SMALL
+	---help---
+		Select a small, non-recursive heapsort-based qsort() implementation
+		instead of the full Bentley-McIlroy quicksort.  Reduces static code
+		size at the cost of average-case performance (still O(n log n)
+		worst-case).  Intended for size-constrained systems.
+
 endmenu # stdlib Options
