@@ -562,7 +562,7 @@ config 16550_WAIT_LCR
 
 config 16550_SET_MCR_OUT2
 	bool "Set MCR OUT2 bit high"
-	default n
+	default y
 	---help---
 		Some platforms require OUT2 of MCR being set for interrupt to be triggered
 
