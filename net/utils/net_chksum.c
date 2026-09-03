@@ -61,6 +61,11 @@ uint16_t checksum(uint16_t sum, FAR const uint8_t *data,
   FAR const uint8_t *last_byte;
   uint16_t t;
 
+  if (len == 0)
+    {
+      return sum;
+    }
+
   dataptr = data;
   last_byte = data + len - 1;
 
