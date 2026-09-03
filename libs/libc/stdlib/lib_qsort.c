@@ -47,6 +47,115 @@
 #  include <nuttx/fdpic.h>
 #endif
 
+#ifdef CONFIG_LIBC_QSORT_SMALL
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static void qsort_swap(FAR char *a, FAR char *b, size_t width)
+{
+  char t;
+
+  while (width-- > 0)
+    {
+      t = *a;
+      *a++ = *b;
+      *b++ = t;
+    }
+}
+
+static void qsort_siftdown(FAR char *base, size_t root, size_t n,
+                           size_t width,
+                           CODE int (*compar)(FAR const void *,
+                                              FAR const void *))
+{
+  FAR char *rp = base + root * width;
+  FAR char *cp;
+  size_t child;
+
+  while ((child = 2 * root + 1) < n)
+    {
+      cp = base + child * width;
+
+      /* Pick the larger child to maintain a max-heap */
+
+      if (child + 1 < n && compar(cp, cp + width) < 0)
+        {
+          child++;
+          cp += width;
+        }
+
+      /* Stop when the heap property is already satisfied */
+
+      if (compar(rp, cp) >= 0)
+        {
+          break;
+        }
+
+      qsort_swap(rp, cp, width);
+      root = child;
+      rp = cp;
+    }
+}
+
+/****************************************************************************
+ * Public Function
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: qsort
+ *
+ * Description:
+ *   Sort an array of 'nel' objects of 'width' bytes in ascending order
+ *   using the comparison function pointed to by 'compar'.  This is the
+ *   compact small variant: a non-recursive heapsort with O(n log n)
+ *   worst-case and O(1) extra stack, selected by CONFIG_LIBC_QSORT_SMALL.
+ *   The API and observable behavior match the standard qsort() (unstable,
+ *   in-place).
+ *
+ * Input Parameters:
+ *   base   - start of the array
+ *   nel    - number of elements
+ *   width  - size of each element in bytes
+ *   compar - comparison function returning <0, 0, or >0
+ *
+ * Returned Value:
+ *   None (the array is sorted in place).
+ *
+ ****************************************************************************/
+
+void qsort(FAR void *base, size_t nel, size_t width,
+           CODE int(*compar)(FAR const void *, FAR const void *))
+{
+  FAR char *p = base;
+  size_t i;
+
+  if (nel < 2 || width == 0)
+    {
+      return;
+    }
+
+  /* Build a max-heap in place */
+
+  i = nel / 2;
+  while (i > 0)
+    {
+      qsort_siftdown(p, --i, nel, width, compar);
+    }
+
+  /* Repeatedly move the current maximum to the end and restore the heap */
+
+  while (nel > 1)
+    {
+      qsort_swap(p, p + (nel - 1) * width, width);
+      nel--;
+      qsort_siftdown(p, 0, nel, width, compar);
+    }
+}
+
+#else
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -316,3 +425,5 @@ void qsort(FAR void *base, size_t nel, size_t width,
 
   qsort_internal(base, nel, width, compar);
 }
+
+#endif /* CONFIG_LIBC_QSORT_SMALL */
