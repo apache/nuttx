@@ -160,6 +160,7 @@ config ARCH_XTENSA
 	bool "Xtensa"
 	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_VFORK
+	select ARCH_HAVE_FORK if BUILD_KERNEL && ARCH_ADDRENV
 	select ARCH_HAVE_CPUINFO
 	select ARCH_HAVE_INTERRUPTSTACK
 	select ARCH_HAVE_STACKCHECK
@@ -1037,8 +1038,6 @@ config ARCH_PGPOOL_MAPPING
 		Otherwise, a temporary mapping will have to be established each time
 		it is necessary to modify the contents of a page.
 
-if ARCH_PGPOOL_MAPPING
-
 config ARCH_PGPOOL_PBASE
 	hex "Page pool physical address"
 	default 0x0
@@ -1048,14 +1047,9 @@ config ARCH_PGPOOL_PBASE
 		but is required again in order to modularize the common address
 		environment logic.
 
-config ARCH_PGPOOL_VBASE
-	hex "Page pool virtual address"
-	default 0x0
-	---help---
-		The virtual address of the start of the page pool memory.  This
-		setting is probably equivalent to other platform specific definitions
-		but is required again in order to modularize the common address
-		environment logic.
+		This applies whether or not the pool is statically mapped:  the page
+		allocator hands out physical addresses either way.  Only
+		ARCH_PGPOOL_VBASE depends on ARCH_PGPOOL_MAPPING.
 
 config ARCH_PGPOOL_SIZE
 	int "Page pool size (bytes)"
@@ -1064,6 +1058,17 @@ config ARCH_PGPOOL_SIZE
 		The size of the page pool memory in bytes.  This setting is probably
 		equivalent  to other platform specific definitions but is required again
 		in order to modularize the common address environment logic.
+
+if ARCH_PGPOOL_MAPPING
+
+config ARCH_PGPOOL_VBASE
+	hex "Page pool virtual address"
+	default 0x0
+	---help---
+		The virtual address of the start of the page pool memory.  This
+		setting is probably equivalent to other platform specific definitions
+		but is required again in order to modularize the common address
+		environment logic.
 
 endif # ARCH_PGPOOL_MAPPING
 endif # ARCH_ADDRENV && ARCH_NEED_ADDRENV_MAPPING
