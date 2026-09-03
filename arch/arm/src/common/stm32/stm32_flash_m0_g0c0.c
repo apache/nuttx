@@ -373,6 +373,7 @@ static void flash_lock_cr(void)
 static bool flash_unlock_opt(void)
 {
   bool was_locked = false;
+
   flash_unlock_cr();
 
   if (getreg32(STM32_FLASH_CR) & FLASH_CR_OPTLOCK)
@@ -688,6 +689,9 @@ ssize_t up_progmem_eraseblock(size_t block)
 {
   int ret;
   size_t block_address;
+#ifdef FLASH_DUAL_BANK
+  bool bank2;
+#endif
 
   ret = flash_verify_blocknum(block);
   if (ret < 0)
@@ -729,7 +733,17 @@ ssize_t up_progmem_eraseblock(size_t block)
    * match the correct bank.
    */
 
-  if (block >= flash_bank2_priv.stblock)
+  /* BKER selects a physical bank, while block numbers follow the memory map.
+   * Reverse the bank selection when the banks are swapped in the memory map.
+   */
+
+  bank2 = block >= flash_bank2_priv.stblock;
+  if ((getreg32(STM32_FLASH_OPTR) & FLASH_OPTR_NSWAP_BANK) == 0)
+    {
+      bank2 = !bank2;
+    }
+
+  if (bank2)
     {
       modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_BKER);
     }
