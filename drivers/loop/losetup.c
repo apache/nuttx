@@ -41,6 +41,7 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 #include <errno.h>
+#include <inttypes.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
@@ -200,11 +201,26 @@ static ssize_t loop_read(FAR struct inode *inode, FAR unsigned char *buffer,
   /* Calculate the offset to read the sectors and seek to the position */
 
   offset = start_sector * dev->sectsize + dev->offset;
+
+  /* dev->devfile's file position is shared by all users of this loop device,
+   * so the seek and read below must be atomic; a concurrent reader could
+   * otherwise make this call return data from the wrong offset. dev->lock
+   * is a plain mutex, so a loop device must not nest on its backing file.
+   */
+
+  ret = nxmutex_lock(&dev->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = file_seek(&dev->devfile, offset, SEEK_SET);
   if (ret < 0)
     {
-      ferr("ERROR: Seek failed for offset=%d: %d\n", (int)offset, (int)ret);
-      return -EIO;
+      ferr("ERROR: Seek failed for offset=%" PRIdOFF ": %" PRIdOFF "\n",
+           offset, ret);
+      nxmutex_unlock(&dev->lock);
+      return ret;
     }
 
   /* Then read the requested number of sectors from that position */
@@ -216,10 +232,13 @@ static ssize_t loop_read(FAR struct inode *inode, FAR unsigned char *buffer,
       if (nbytesread < 0 && nbytesread != -EINTR)
         {
           ferr("ERROR: Read failed: %zd\n", nbytesread);
-          return (int)nbytesread;
+          nxmutex_unlock(&dev->lock);
+          return nbytesread;
         }
     }
   while (nbytesread < 0);
+
+  nxmutex_unlock(&dev->lock);
 
   /* Return the number of sectors read */
 
@@ -248,10 +267,20 @@ static ssize_t loop_write(FAR struct inode *inode,
   /* Calculate the offset to write the sectors and seek to the position */
 
   offset = start_sector * dev->sectsize + dev->offset;
+
+  ret = nxmutex_lock(&dev->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = file_seek(&dev->devfile, offset, SEEK_SET);
   if (ret < 0)
     {
-      ferr("ERROR: Seek failed for offset=%d: %d\n", (int)offset, (int)ret);
+      ferr("ERROR: Seek failed for offset=%" PRIdOFF ": %" PRIdOFF "\n",
+           offset, ret);
+      nxmutex_unlock(&dev->lock);
+      return ret;
     }
 
   /* Then write the requested number of sectors to that position */
@@ -263,10 +292,13 @@ static ssize_t loop_write(FAR struct inode *inode,
       if (nbyteswritten < 0 && nbyteswritten != -EINTR)
         {
           ferr("ERROR: file_write failed: %zd\n", nbyteswritten);
+          nxmutex_unlock(&dev->lock);
           return nbyteswritten;
         }
     }
   while (nbyteswritten < 0);
+
+  nxmutex_unlock(&dev->lock);
 
   /* Return the number of sectors written */
 
