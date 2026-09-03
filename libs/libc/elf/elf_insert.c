@@ -85,6 +85,7 @@ void libelf_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
       for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
         {
           FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
+
           binfo("Sections %d:\n", i);
 #  ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
           if (loadinfo->ehdr.e_type == ET_REL)
@@ -247,9 +248,21 @@ static int libelf_loadsymtab(FAR struct module_s *modp,
       if (sym[i].st_shndx != SHN_UNDEF &&
           sym[i].st_shndx < loadinfo->ehdr.e_shnum)
         {
-          FAR Elf_Shdr *s = &loadinfo->shdr[sym[i].st_shndx];
+          if (loadinfo->ehdr.e_type == ET_DYN)
+            {
+              /* A shared object's symbol value is already the full
+               * link-time address.  It only needs translating onto where
+               * the object was placed.
+               */
 
-          sym[i].st_value = sym[i].st_value + s->sh_addr;
+              sym[i].st_value = libelf_addr(loadinfo, sym[i].st_value);
+            }
+          else
+            {
+              FAR Elf_Shdr *s = &loadinfo->shdr[sym[i].st_shndx];
+
+              sym[i].st_value = sym[i].st_value + s->sh_addr;
+            }
         }
     }
 
@@ -408,27 +421,27 @@ FAR void *libelf_insert(FAR const char *filename, FAR const char *modname)
       case ET_REL :
       case ET_DYN :
 
-          /* Process any preinit_array entries */
+        /* Process any preinit_array entries */
 
-          array = (FAR void (**)(void))loadinfo.preiarr;
-          for (i = 0; i < loadinfo.nprei; i++)
-            {
-              array[i]();
-            }
+        array = (FAR void (**)(void))loadinfo.preiarr;
+        for (i = 0; i < loadinfo.nprei; i++)
+          {
+            array[i]();
+          }
 
-          /* Process any init_array entries */
+        /* Process any init_array entries */
 
-          array = (FAR void (**)(void))loadinfo.initarr;
-          for (i = 0; i < loadinfo.ninit; i++)
-            {
-              array[i]();
-            }
+        array = (FAR void (**)(void))loadinfo.initarr;
+        for (i = 0; i < loadinfo.ninit; i++)
+          {
+            array[i]();
+          }
 
-          modp->initarr = loadinfo.initarr;
-          modp->ninit = loadinfo.ninit;
-          modp->finiarr = loadinfo.finiarr;
-          modp->nfini = loadinfo.nfini;
-          break;
+        modp->initarr = loadinfo.initarr;
+        modp->ninit = loadinfo.ninit;
+        modp->finiarr = loadinfo.finiarr;
+        modp->nfini = loadinfo.nfini;
+        break;
     }
 
   /* Add the new module entry to the registry */

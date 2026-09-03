@@ -147,7 +147,7 @@ int board_boot_image(const char *path, uint32_t hdr_size)
     }
 
   bss = libelf_findsection(&loadinfo, ".bss");
-  got = loadinfo.shdr[loadinfo.gotindex].sh_addr;
+  got = loadinfo.gotbase;
   msp = loadinfo.shdr[bss].sh_addr + loadinfo.shdr[bss].sh_size +
         CONFIG_IDLETHREAD_STACKSIZE;
 
