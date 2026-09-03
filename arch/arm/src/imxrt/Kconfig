@@ -2601,6 +2601,7 @@ endchoice # i.MX RT Boot Configuration
 
 choice
 	prompt "i.MX RT Primary RAM"
+	default IMXRT_TCM_PRIMARY if ARCH_CORTEXM33
 	default IMXRT_OCRAM_PRIMARY
 	---help---
 		The primary RAM is the RAM that contains the system BLOB's .data and
@@ -2617,6 +2618,13 @@ config IMXRT_SDRAM_PRIMARY
 config IMXRT_SRAM_PRIMARY
 	bool "External SRAM primary"
 	depends on IMXRT_SEMC_SRAM
+
+config IMXRT_TCM_PRIMARY
+	bool "TCM primary"
+	---help---
+		Place the primary RAM in the core-local TCM (M7 DTCM or M33
+		System TCM, both aliased at IMXRT_DTCM_BASE).  The size is taken
+		from the linker script's _ram_size symbol.
 
 endchoice # i.MX RT Primary RAM
 
