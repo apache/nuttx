@@ -1,12 +1,14 @@
 /****************************************************************************
- * arch/arm/src/imxrt/imxrt_edma.h
+ * arch/arm/src/imxrt/imxrt_edma_ver3.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2018 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2019, 2021, 2023 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2022 NXP
  * SPDX-FileCopyrightText: 2016-2017 NXP
  * SPDX-FileCopyrightText: 2015, Freescale Semiconductor, Inc.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
- * All rights reserved
+ * SPDX-FileContributor: David Sidrane <david.sidrane@nscdg.com>
+ * SPDX-FileContributor: Peter van der Perk <peter.vanderperk@nxp.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,21 +39,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMXRT_IMXRT_EDMAC_H
-#define __ARCH_ARM_SRC_IMXRT_IMXRT_EDMAC_H
-
-#include <nuttx/config.h>
-
-#ifdef CONFIG_IMXRT_EDMA_VER3
-
-/* On RT118x the eDMA IP is different enough (eDMA3 + eDMA4 with per-channel
- * CH_MUX and no DMAMUX) that a separate driver is used.  Its public API
- * is a superset of the legacy driver's API declared below.
- */
-
-#  include "imxrt_edma_ver3.h"
-
-#else
+#ifndef __ARCH_ARM_SRC_IMXRT_IMXRT_EDMA_VER3_H
+#define __ARCH_ARM_SRC_IMXRT_IMXRT_EDMA_VER3_H
 
 /* General Usage:
  *
@@ -76,8 +65,8 @@
  *      ret = imxrt_dmach_xfrsetup(handle, &config);
  *
  * 4. If you are setting up a scatter gather DMA
- *    (with CONFIG_IMXRT_EDMA_NTCD > 0),
- *    then repeat steps 2 and 3 for each segment of the transfer.
+ *    (with CONFIG_IMXRT_EDMA_NTCD > 0), then repeat steps 2 and 3 for
+ *     each segment of the transfer.
  *
  * 5. Start the DMA:
  *
@@ -99,10 +88,10 @@
  *      imxrt_dmach_free(handle);
  *
  * Almost non-invasive debug instrumentation is available.  You may call
- * imxrt_dmasample() to save the current state of the eDMA registers at any
- * given point in time.  At some later, postmortem analysis, you can dump the
- * content of the buffered registers with imxrt_dmadump().  imxrt_dmasample()
- * is also available for monitoring DMA progress.
+ * imxrt_dmasample() to save the current state of the eDMA registers at
+ * any given point in time.  At some later, postmortem analysis, you can
+ * dump the content of the buffered registers with imxrt_dmadump().
+ * imxrt_dmasample() is also available for monitoring DMA progress.
  */
 
 /****************************************************************************
@@ -112,7 +101,6 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include "hardware/imxrt_edma.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -131,7 +119,7 @@
 #  define EDMA_CONFIG_LINKTYPE_MINORLINK (1 << EDMA_CONFIG_LINKTYPE_SHIFT) /* Channel link after each minor loop */
 #  define EDMA_CONFIG_LINKTYPE_MAJORLINK (2 << EDMA_CONFIG_LINKTYPE_SHIFT) /* Channel link when major loop count exhausted */
 
-#define EDMA_CONFIG_LOOP_SHIFT           (2) /* Bits 2-3: Loop type */
+#define EDMA_CONFIG_LOOP_SHIFT           (2) /* Bits 2: Loop type */
 #define EDMA_CONFIG_LOOP_MASK            (3 << EDMA_CONFIG_LOOP_SHIFT)
 #  define EDMA_CONFIG_LOOPNONE           (0 << EDMA_CONFIG_LOOP_SHIFT) /* No looping */
 #  define EDMA_CONFIG_LOOPSRC            (1 << EDMA_CONFIG_LOOP_SHIFT) /* Source looping */
@@ -142,6 +130,7 @@
                                                    * Default is only on last completion
                                                    * if using scatter gather
                                                    */
+#define EDMA_CONFIG_SWSTART              (1 << 6) /* Start by software trigger */
 
 /****************************************************************************
  * Public Types
@@ -151,13 +140,26 @@ typedef void *DMACH_HANDLE;
 typedef void (*edma_callback_t)(DMACH_HANDLE handle,
                                 void *arg, bool done, int result);
 
-/* eDMA transfer sizes */
+/* eDMA transfer type */
 
-enum kinetis_edma_sizes_e
+enum imxrt_edma_xfrtype_e
+{
+  EDMA_MEM2MEM = 0,      /* Transfer from memory to memory */
+  EDMA_PERIPH2MEM,       /* Transfer from peripheral to memory */
+  EDMA_MEM2PERIPH,       /* Transfer from memory to peripheral */
+};
+
+/* eDMA transfer sises */
+
+enum imxrt_edma_sizes_e
 {
   EDMA_8BIT    = 0,      /* Transfer data size 8 */
   EDMA_16BIT   = 1,      /* Transfer data size 16 */
   EDMA_32BIT   = 2,      /* Transfer data size 32 */
+  EDMA_64BIT   = 3,      /* Transfer data size 64 */
+  EDMA_16BYTE  = 4,      /* Transfer data size 16-byte */
+  EDMA_32BYTE  = 5,      /* Transfer data size 32-byte */
+  EDMA_64BYTE  = 6,      /* Transfer data size 64-byte */
 };
 
 /* This structure holds the source/destination transfer attribute
@@ -166,26 +168,33 @@ enum kinetis_edma_sizes_e
 
 struct imxrt_edma_xfrconfig_s
 {
-  uint32_t saddr;      /* Source data address. */
-  uint32_t daddr;      /* Destination data address. */
-  int16_t  soff;       /* Sign-extended offset for current source address. */
-  int16_t  doff;       /* Sign-extended offset for current destination address. */
-  uint16_t iter;       /* Major loop iteration count. */
-  uint8_t  flags;      /* See EDMA_CONFIG_* definitions */
-  uint8_t  ssize;      /* Source data transfer size (see TCD_ATTR_SIZE_* definitions in hardware/. */
-  uint8_t  dsize;      /* Destination data transfer size. */
+    uintptr_t saddr;      /* Source data address. */
+    uintptr_t daddr;      /* Destination data address. */
+    int16_t   soff;       /* Sign-extended offset for current source address. */
+    int16_t   doff;       /* Sign-extended offset for current destination address. */
+    uint16_t  iter;       /* Major loop iteration count. */
+    uint8_t   flags;      /* See EDMA_CONFIG_* definitions */
+    uint8_t   ssize;      /* Source data transfer size (see TCD_ATTR_SIZE_* definitions in rdware/. */
+    uint8_t   dsize;      /* Destination data transfer size. */
 #ifdef CONFIG_IMXRT_EDMA_EMLIM
-  uint16_t nbytes;     /* Bytes to transfer in a minor loop */
+    uint16_t  nbytes;     /* Bytes to transfer in a minor loop */
 #else
-  uint32_t nbytes;     /* Bytes to transfer in a minor loop */
+    uint32_t  nbytes;     /* Bytes to transfer in a minor loop */
+#endif
+#ifdef CONFIG_IMXRT_EDMA_MOD
+    uint8_t smod;
+    uint8_t dmod;
+#endif
+#ifdef CONFIG_IMXRT_EDMA_BWC
+    uint8_t bwc;
 #endif
 #ifdef CONFIG_IMXRT_EDMA_ELINK
-  DMACH_HANDLE linkch; /* Link channel (With EDMA_CONFIG_LINKTYPE_* flags) */
+    DMACH_HANDLE linkch; /* Link channel (With EDMA_CONFIG_LINKTYPE_* flags) */
 #endif
 };
 
-/* The following is used for sampling DMA registers
- * when CONFIG DEBUG_DMA is selected
+/* The following is used for sampling DMA registers when CONFIG DEBUG_DMA
+ * is selected
  */
 
 #ifdef CONFIG_DEBUG_DMA
@@ -197,11 +206,8 @@ struct imxrt_dmaregs_s
 
   uint32_t cr;           /* Control */
   uint32_t es;           /* Error Status */
-  uint32_t erq;          /* Enable Request */
   uint32_t req;          /* Interrupt Request */
-  uint32_t err;          /* Error */
   uint32_t hrs;          /* Hardware Request Status */
-  uint32_t ears;         /* Enable Asynchronous Request in Stop */
 
   /* eDMA Channel registers */
 
@@ -263,7 +269,6 @@ extern "C"
  *            Settings include:
  *
  *            DMAMUX_CHCFG_SOURCE     Chip-specific DMA source (required)
- *            DMAMUX_CHCFG_AON        DMA Channel Always Enable (optional)
  *            DMAMUX_CHCFG_TRIG       DMA Channel Trigger Enable (optional)
  *            DMAMUX_CHCFG_ENBL       DMA Mux Channel Enable (required)
  *
@@ -284,15 +289,15 @@ extern "C"
  *
  ****************************************************************************/
 
-DMACH_HANDLE imxrt_dmach_alloc(uint32_t dmamux, uint8_t dchpri);
+DMACH_HANDLE imxrt_dmach_alloc(uint16_t dmamux, uint8_t dchpri);
 
 /****************************************************************************
  * Name: imxrt_dmach_free
  *
  * Description:
  *   Release a DMA channel.
- *   NOTE:  The 'handle' used in this argument must NEVER be used again until
- *   imxrt_dmach_alloc() is called again to re-gain a valid handle.
+ *   NOTE:  The 'handle' used in this argument must NEVER be used again
+ *   until imxrt_dmach_alloc() is called again to re-gain a valid handle.
  *
  * Returned Value:
  *   None
@@ -307,7 +312,8 @@ void imxrt_dmach_free(DMACH_HANDLE handle);
  * Description:
  *   This function adds the eDMA transfer to the DMA sequence.  The request
  *   is setup according to the content of the transfer configuration
- *   structure.  For "normal" DMA, imxrt_dmach_xfrsetup is called only once.
+ *   structure.  For "normal" DMA, imxrt_dmach_xfrsetup is called only
+ *   once.
  *   Scatter/gather DMA is accomplished by calling this function repeatedly,
  *   once for each transfer in the sequence.  Scatter/gather DMA processing
  *   is enabled automatically when the second transfer configuration is
@@ -328,15 +334,15 @@ void imxrt_dmach_free(DMACH_HANDLE handle);
  ****************************************************************************/
 
 int imxrt_dmach_xfrsetup(DMACH_HANDLE handle,
-                         const struct imxrt_edma_xfrconfig_s *config);
+                        const struct imxrt_edma_xfrconfig_s *config);
 
 /****************************************************************************
  * Name: imxrt_dmach_start
  *
  * Description:
- *   Start the DMA transfer by enabling the channel DMA request.  This
- *   function should be called after the final call to imxrt_dmasetup() in
- *   order to avoid race conditions.
+ *   Start the DMA transfer by enabling the channel DMA request.
+ *   This function should be called after the final call to
+ *   imxrt_dmasetup() in order to avoid race conditions.
  *
  *   At the conclusion of each major DMA loop, a callback to the
  *   user-provided function is made:  |For "normal" DMAs, this will
@@ -344,13 +350,14 @@ int imxrt_dmach_xfrsetup(DMACH_HANDLE handle,
  *   interrupts will be generated with the final being the DONE interrupt.
  *
  *   At the conclusion of the DMA, the DMA channel is reset, all TCDs are
- *   freed, and the callback function is called with the success/fail
+ *   freed, and the callback function is called with the the success/fail
  *   result of the DMA.
  *
- *   NOTE: On Rx DMAs (peripheral-to-memory or memory-to-memory), it is
- *   necessary to invalidate the destination memory.  That is not done
- *   automatically by the DMA module.  Invalidation of the destination memory
- *   regions is the responsibility of the caller.
+ *   NOTE:
+ *   On Rx DMAs (peripheral-to-memory or memory-to-memory), it is necessary
+ *   to invalidate the destination memory.  That is not done automatically
+ *   by the DMA module.  Invalidation of the destination memory regions is
+ *   the responsibility of the caller.
  *
  * Input Parameters:
  *   handle   - DMA channel handle created by imxrt_dmach_alloc()
@@ -364,15 +371,15 @@ int imxrt_dmach_xfrsetup(DMACH_HANDLE handle,
  *
  ****************************************************************************/
 
-int imxrt_dmach_start(DMACH_HANDLE handle,
-                      edma_callback_t callback, void *arg);
+int imxrt_dmach_start(DMACH_HANDLE handle, edma_callback_t callback,
+                     void *arg);
 
 /****************************************************************************
  * Name: imxrt_dmach_stop
  *
  * Description:
- *   Cancel the DMA.  After imxrt_dmach_stop() is called, the DMA channel is
- *   reset, all TCDs are freed, and imxrt_dmarx/txsetup() must be called
+ *   Cancel the DMA.  After imxrt_dmach_stop() is called, the DMA channel
+ *   is reset, all TCDs are freed, and imxrt_dmarx/txsetup() must be called
  *   before imxrt_dmach_start() can be called again
  *
  * Input Parameters:
@@ -391,7 +398,7 @@ void imxrt_dmach_dump(DMACH_HANDLE handle);
  *
  * Description:
  *   This function checks the TCD (Task Control Descriptor) status for a
- *   specified eDMA channel and returns the number of major loop counts
+ *   specified eDMA channel and returns the the number of major loop counts
  *   that have not finished.
  *
  *   NOTES:
@@ -409,8 +416,7 @@ void imxrt_dmach_dump(DMACH_HANDLE handle);
  *   initial value of NBYTES (for example copied before enabling the channel)
  *   is needed. The formula to calculate it is shown below:
  *
- *     RemainingBytes = RemainingMajorLoopCount * NBYTES
- *                                               (initially configured)
+ *    RemainingBytes = RemainingMajorLoopCount * NBYTES(initially configured)
  *
  * Input Parameters:
  *   handle  - DMA channel handle created by imxrt_dmach_alloc()
@@ -470,7 +476,4 @@ void imxrt_dmadump(const struct imxrt_dmaregs_s *regs, const char *msg);
 #endif
 
 #endif /* __ASSEMBLY__ */
-
-#endif /* CONFIG_IMXRT_EDMA_VER3 */
-
-#endif /* __ARCH_ARM_SRC_IMXRT_IMXRT_EDMAC_H */
+#endif /* __ARCH_ARM_SRC_IMXRT_IMXRT_EDMA_VER3_H */
