@@ -1446,6 +1446,31 @@ To use IPv4, modify these settings in the defconfig file:
    -CONFIG_NET_IPv6=y
    -CONFIG_NET_IPv6_NCONF_ENTRIES=4
 
+tflm
+----
+
+Builds TensorFlow Lite for Microcontrollers from
+``apps/mlearning/tflite-micro``, including the ``tflm`` command-line tool.
+A CMake build of this configuration also includes the ``tflm_hello``
+example.
+
+.. code-block:: console
+
+   $ ./tools/configure.sh sim:tflm
+   $ make -j$(nproc)
+   $ ./nuttx
+
+With CMake::
+
+   $ cmake -B build -DBOARD_CONFIG=sim:tflm -GNinja
+   $ cmake --build build
+   $ ./build/nuttx
+
+From NSH, ``tflm -h`` prints the tool usage. ``tflm_hello`` (CMake image)
+runs the upstream sine-model test.
+
+See :doc:`/applications/mlearning/tflite-micro/index`.
+
 touchscreen
 -----------
 
