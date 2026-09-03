@@ -26,7 +26,7 @@ These can be found in the `apps <https://github.com/apache/nuttx-apps>`_ reposit
    logging/index.rst
    lte/index.rst
    math/index.rst
-   mlearing/index.rst
+   mlearning/index.rst
    netutils/index.rst
    nsh/index.rst
    sdr/index.rst
