@@ -5569,6 +5569,9 @@ endif
 if ARCH_CHIP_ESP32C3_LEGACY
 source "boards/risc-v/esp32c3-legacy/common/Kconfig"
 endif
+if ARCH_CHIP_ESP32C2
+source "boards/risc-v/esp32c2/common/Kconfig"
+endif
 if ARCH_CHIP_ESP32C3
 source "boards/risc-v/esp32c3/common/Kconfig"
 endif
