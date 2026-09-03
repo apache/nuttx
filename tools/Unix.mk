@@ -602,7 +602,7 @@ endif
 ifeq ($(CONFIG_RAW_DISASSEMBLY),y)
 	@echo "CP: nuttx.asm"
 	$(Q) $(OBJDUMP) -d $(BIN) > nuttx.asm
-	$(Q) echo nuttx.bin >> nuttx.asm
+	$(Q) echo nuttx.asm >> nuttx.manifest
 endif
 	$(call POSTBUILD, $(TOPDIR))
 
