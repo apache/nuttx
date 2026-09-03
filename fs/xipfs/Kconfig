@@ -7,6 +7,7 @@ config FS_XIPFS
 	bool "XIPFS contiguous execute-in-place file system"
 	default n
 	depends on !DISABLE_MOUNTPOINT && MTD
+	select FS_PIN
 	---help---
 		Enable support for XIPFS, a file system that stores each file as a
 		single physically contiguous, erase-block aligned extent on memory

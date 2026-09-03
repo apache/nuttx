@@ -79,6 +79,45 @@ do { \
   ); \
 } while (0)
 
+#ifdef CONFIG_FDPIC
+
+/****************************************************************************
+ * Name: up_fdpic_invoke
+ *
+ * Description:
+ *   Call a module entry point with the module data base in the PIC base
+ *   register.  Put the caller data base back after the call.
+ *
+ * Input Parameters:
+ *   arg   - The one word argument, passed in r0.
+ *   entry - The code address to enter.
+ *   got   - The module data base to install.
+ *
+ ****************************************************************************/
+
+static inline void up_fdpic_invoke(uintptr_t arg, uintptr_t entry,
+                                   uintptr_t got)
+{
+  register uintptr_t r0v __asm__ ("r0") = arg;
+
+  /* arg is already in r0.  r4 goes on the stack with the PIC register to
+   * keep the push aligned to 8 bytes.
+   */
+
+  __asm__ __volatile__
+  (
+    "push {r4, " PIC_REG_STRING "}\n"   /* Save the caller's base       */
+    "mov " PIC_REG_STRING ", %[got]\n"  /* Install the module's base    */
+    "blx %[entry]\n"                    /* Enter the module             */
+    "pop {r4, " PIC_REG_STRING "}\n"    /* Restore the caller's base    */
+    : "+r" (r0v)
+    : [entry] "r" (entry), [got] "r" (got)
+    : "r1", "r2", "r3", "r12", "lr", "cc", "memory"
+  );
+}
+
+#endif /* CONFIG_FDPIC */
+
 #endif /* CONFIG_PIC */
 
 #ifdef CONFIG_ARCH_ADDRENV
