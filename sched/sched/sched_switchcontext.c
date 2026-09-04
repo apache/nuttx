@@ -65,6 +65,15 @@ void nxsched_switch_context(FAR struct tcb_s *from, FAR struct tcb_s *to)
     }
 #endif
 
+#if defined(CONFIG_SCHED_TICKLESS) && CONFIG_RR_INTERVAL > 0
+  /* Before the context switch, we should set the timer for RR. */
+
+  if (from != to && (to->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
+    {
+      nxsched_reassess_timer();
+    }
+#endif
+
   /* Indicate that the task has been suspended */
 
 #ifdef CONFIG_SCHED_CRITMONITOR
