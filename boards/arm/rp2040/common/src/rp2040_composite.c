@@ -32,6 +32,7 @@
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/cdcacm.h>
 #include <nuttx/usb/usbmsc.h>
+#include <nuttx/usb/adb.h>
 #include <nuttx/usb/composite.h>
 
 #if defined(CONFIG_BOARDCTL_USBDEVCTRL) && defined(CONFIG_USBDEV_COMPOSITE)
@@ -192,7 +193,7 @@ void *board_composite_connect(int port, int configid)
 
   if (configid == 0)
     {
-      struct composite_devdesc_s dev[2];
+      struct composite_devdesc_s dev[3];
       int ifnobase = 0;
       int strbase  = COMPOSITE_NSTRIDS;
       int n = 0;
@@ -264,6 +265,48 @@ void *board_composite_connect(int port, int configid)
       dev[n].devinfo.epno[CDCACM_EP_INTIN_IDX]   = 3;
       dev[n].devinfo.epno[CDCACM_EP_BULKIN_IDX]  = 4;
       dev[n].devinfo.epno[CDCACM_EP_BULKOUT_IDX] = 5;
+
+      /* Count up the base numbers.  This used to be omitted here because
+       * CDC/ACM was always the last device in the composite; now that
+       * USB ADB/fastboot may follow it, the offsets must be propagated.
+       */
+
+      ifnobase += dev[n].devinfo.ninterfaces;
+      strbase  += dev[n].devinfo.nstrings;
+      n++;
+#endif
+
+#ifdef CONFIG_USBADB
+      /* Configure the USB ADB/fastboot device.  With CONFIG_USBFASTBOOT
+       * selected this same driver exposes /dev/fastboot instead of
+       * /dev/adb0, so a single "fastboot" personality composite with
+       * CDC/ACM (console) is supported without any additional glue.
+       */
+
+      /* Ask the adb/fastboot driver to fill in the constants we didn't
+       * know here.
+       */
+
+      usbdev_adb_get_composite_devdesc(&dev[n]);
+
+      /* Interfaces */
+
+      dev[n].devinfo.ifnobase = ifnobase;             /* Offset to Interface-IDs */
+      dev[n].minor = 0;                               /* The minor interface number */
+
+      /* Strings */
+
+      dev[n].devinfo.strbase = strbase;               /* Offset to String Numbers */
+
+      /* Endpoints */
+
+      dev[n].devinfo.epno[USBADB_EP_BULKIN_IDX]  = 6;
+      dev[n].devinfo.epno[USBADB_EP_BULKOUT_IDX] = 7;
+
+      /* Count up the base numbers */
+
+      ifnobase += dev[n].devinfo.ninterfaces;
+      strbase  += dev[n].devinfo.nstrings;
       n++;
 #endif
 
