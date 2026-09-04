@@ -46,6 +46,10 @@ if(CONFIG_DEVICE_TREE)
     list(APPEND SRCS fdt_qemu_fwcfg.c)
   endif()
 
+  if(CONFIG_PWM_SIFIVE)
+    list(APPEND SRCS fdt_sifive_pwm.c)
+  endif()
+
   target_include_directories(drivers
                              PRIVATE ${NUTTX_DIR}/libs/libc/fdt/dtc/libfdt)
   target_sources(drivers PRIVATE ${SRCS})

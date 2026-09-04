@@ -50,6 +50,10 @@ ifeq ($(CONFIG_QEMU_FWCFG),y)
   CSRCS += fdt_qemu_fwcfg.c
 endif
 
+ifeq ($(CONFIG_PWM_SIFIVE),y)
+  CSRCS += fdt_sifive_pwm.c
+endif
+
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)fdt$(DELIM)dtc$(DELIM)libfdt
 
 DEPPATH += --dep-path devicetree
