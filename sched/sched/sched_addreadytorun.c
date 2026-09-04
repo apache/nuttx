@@ -103,6 +103,17 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
       btcb->flink->task_state = TSTATE_TASK_READYTORUN;
       up_update_task(btcb);
       ret = true;
+
+#if defined(CONFIG_SCHED_TICKLESS) && CONFIG_RR_INTERVAL > 0
+      /* Tickless has no periodic tick to keep RR accounting alive, so
+       * arm the new task's timeslice timer explicitly on switch-in.
+       */
+
+      if ((btcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
+        {
+          nxsched_reassess_timer();
+        }
+#endif
     }
   else
     {

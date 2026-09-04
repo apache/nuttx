@@ -176,7 +176,14 @@ static inline_function void wd_timer_start(clock_t tick, bool in_expiration)
 #ifdef CONFIG_SCHED_TICKLESS_ALARM
   up_alarm_tick_start(next_tick);
 #else
-  up_timer_tick_start(next_tick - clock_systime_ticks());
+  clock_t delta = next_tick - clock_systime_ticks();
+
+  /* Clamp to >= 1 tick: an already-expired 'delta' can go negative
+   * (overflows unsigned in arch code), and even zero can miss a
+   * oneshot timer's rising-edge match if the target is already due.
+   */
+
+  up_timer_tick_start(delta > 0 ? delta : 1);
 #endif
 }
 
