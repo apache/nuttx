@@ -20,8 +20,10 @@
 #
 ############################################################################
 
-ifneq ($(CONFIG_LIBC_ATOMIC_TOOLCHAIN),y)
-  CSRCS += arch_atomic.c
+CSRCS += arch_atomic.c
+
+ifeq ($(CONFIG_LIBC_ATOMIC_IRQ)$(CONFIG_LIBC_ATOMIC_HWSPINLOCK),)
+  CSRCS += arch_atomic_spinlock.c
 endif
 
 ifeq ($(CONFIG_MM_KASAN),y)

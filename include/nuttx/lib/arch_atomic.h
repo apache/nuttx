@@ -49,38 +49,32 @@
 #endif
 
 #if !defined(CONFIG_BUILD_FLAT) && !defined(__KERNEL__)
-static inline irqstate_t atomic_lock(void)
-{
-  sched_lock();
-  return 0;
-}
-
-static inline void atomic_unlock(irqstate_t flags)
-{
-  sched_unlock();
-}
+#  define atomic_lock() (sched_lock(), (irqstate_t)0)
+#  define atomic_unlock(flags) ((void)(flags), sched_unlock())
 #elif defined(CONFIG_LIBC_ATOMIC_HWSPINLOCK)
 extern struct hwspinlock_dev_s g_atomic_hwspinlock;
-static inline irqstate_t atomic_lock(void)
-{
-  return hwspin_lock_irqsave(&g_atomic_hwspinlock);
-}
-
-static inline void atomic_unlock(irqstate_t flags)
-{
-  hwspin_unlock_restore(&g_atomic_hwspinlock, flags);
-}
+#  define atomic_lock() \
+     hwspin_lock_irqsave(&g_atomic_hwspinlock)
+#  define atomic_unlock(flags) \
+     hwspin_unlock_restore(&g_atomic_hwspinlock, flags)
 #else
-static inline irqstate_t atomic_lock(void)
-{
-  return up_irq_save();
-}
-
-static inline void atomic_unlock(irqstate_t flags)
-{
-  up_irq_restore(flags);
-}
+#  define atomic_lock() up_irq_save()
+#  define atomic_unlock(flags) up_irq_restore(flags)
 #endif
+
+#undef ARCH_ATOMIC_STORE
+#undef ARCH_ATOMIC_LOAD
+#undef ARCH_ATOMIC_EXCHANGE
+#undef ARCH_ATOMIC_COMPARE_EXCHANGE
+#undef ARCH_ATOMIC_FLAGS_TEST_AND_SET
+#undef ARCH_ATOMIC_FETCH_OP
+#undef ARCH_ATOMIC_DEFINE
+#undef ARCH_SYNC_OP_FETCH
+#undef ARCH_SYNC_NAND_FETCH
+#undef ARCH_SYNC_BOOL_CMP_SWAP
+#undef ARCH_SYNC_VAL_CMP_SWAP
+#undef ARCH_SYNC_SYNCHRONIZE
+#undef ARCH_SYNC_DEFINE
 
 #define ARCH_ATOMIC_STORE(func, t)                                       \
   ARCH_ATOMIC_SPECIFIER                                                  \
@@ -271,10 +265,12 @@ static inline void atomic_unlock(irqstate_t flags)
   ARCH_SYNC_BOOL_CMP_SWAP(prefix ## _bool_compare_and_swap_ ## n, t)     \
   ARCH_SYNC_VAL_CMP_SWAP(prefix ## _val_compare_and_swap_ ## n, t)
 
-#define ARCH_HAVE_ATOMIC_1
-#define ARCH_HAVE_ATOMIC_2
-#define ARCH_HAVE_ATOMIC_4
-#define ARCH_HAVE_ATOMIC_8
+#if defined(CONFIG_LIBC_ATOMIC_HWSPINLOCK) || \
+    defined(CONFIG_LIBC_ATOMIC_IRQ)
+#  define ARCH_HAVE_ATOMIC_1
+#  define ARCH_HAVE_ATOMIC_2
+#  define ARCH_HAVE_ATOMIC_4
+#  define ARCH_HAVE_ATOMIC_8
 
 /****************************************************************************
  * Inline Functions
@@ -289,5 +285,6 @@ ARCH_SYNC_DEFINE(sync, uint8_t, 1)
 ARCH_SYNC_DEFINE(sync, uint16_t, 2)
 ARCH_SYNC_DEFINE(sync, uint32_t, 4)
 ARCH_SYNC_DEFINE(sync, uint64_t, 8)
+#endif
 
 #endif /* __INCLUDE_NUTTX_LIB_ARCH_ATOMIC_H */

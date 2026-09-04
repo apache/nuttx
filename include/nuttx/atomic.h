@@ -278,6 +278,40 @@
 
 #endif /* UINTPTR_MAX > UINT32_MAX */
 
+#define ARCH_ATOMIC_DECLARE(prefix, t, n)                              \
+  void prefix ## _store_ ## n(FAR volatile void *ptr, t value,         \
+                              int memorder);                           \
+  t prefix ## _load_ ## n(FAR const volatile void *ptr, int memorder); \
+  t prefix ## _exchange_ ## n(FAR volatile void *ptr, t value,         \
+                              int memorder);                           \
+  bool prefix ## _compare_exchange_ ## n(                              \
+      FAR volatile void *ptr, FAR volatile void *expect, t desired,    \
+      bool weak, int success, int failure);                            \
+  t prefix ## _flags_test_and_set_ ## n(FAR volatile void *ptr,        \
+                                        int memorder);                 \
+  t prefix ## _fetch_add_ ## n(FAR volatile void *ptr, t value,        \
+                               int memorder);                          \
+  t prefix ## _fetch_sub_ ## n(FAR volatile void *ptr, t value,        \
+                               int memorder);                          \
+  t prefix ## _fetch_and_ ## n(FAR volatile void *ptr, t value,        \
+                               int memorder);                          \
+  t prefix ## _fetch_or_ ## n(FAR volatile void *ptr, t value,         \
+                              int memorder);                           \
+  t prefix ## _fetch_xor_ ## n(FAR volatile void *ptr, t value,        \
+                               int memorder);
+
+#define ARCH_SYNC_DECLARE(prefix, t, n)                                \
+  t prefix ## _add_and_fetch_ ## n(FAR volatile void *ptr, t value);   \
+  t prefix ## _sub_and_fetch_ ## n(FAR volatile void *ptr, t value);   \
+  t prefix ## _or_and_fetch_ ## n(FAR volatile void *ptr, t value);    \
+  t prefix ## _and_and_fetch_ ## n(FAR volatile void *ptr, t value);   \
+  t prefix ## _xor_and_fetch_ ## n(FAR volatile void *ptr, t value);   \
+  t prefix ## _nand_and_fetch_ ## n(FAR volatile void *ptr, t value);  \
+  bool prefix ## _bool_compare_and_swap_ ## n(                         \
+      FAR volatile void *ptr, t oldvalue, t newvalue);                 \
+  t prefix ## _val_compare_and_swap_ ## n(                             \
+      FAR volatile void *ptr, t oldvalue, t newvalue);
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -289,6 +323,36 @@ typedef __Atomic(int64_t) atomic64_t;
 typedef atomic64_t atomic_ptr_t;
 #else
 typedef atomic_t atomic_ptr_t;
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
+
+#ifdef CONFIG_LIBC_ATOMIC_ARCH
+#  ifndef ARCH_HAVE_ATOMIC_1
+ARCH_ATOMIC_DECLARE(atomic, uint8_t, 1)
+ARCH_SYNC_DECLARE(sync, uint8_t, 1)
+#  endif
+
+#  ifndef ARCH_HAVE_ATOMIC_2
+ARCH_ATOMIC_DECLARE(atomic, uint16_t, 2)
+ARCH_SYNC_DECLARE(sync, uint16_t, 2)
+#  endif
+
+#  ifndef ARCH_HAVE_ATOMIC_8
+ARCH_ATOMIC_DECLARE(atomic, int64_t, 8)
+ARCH_SYNC_DECLARE(sync, uint64_t, 8)
+#  endif
+#endif
+
+#if defined(__cplusplus)
+}
 #endif
 
 #endif /* __INCLUDE_NUTTX_ATOMIC_H */

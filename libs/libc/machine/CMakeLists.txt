@@ -22,8 +22,10 @@
 
 add_subdirectory(${CONFIG_ARCH})
 
-if(NOT CONFIG_LIBC_ATOMIC_TOOLCHAIN)
-  target_sources(c PRIVATE arch_atomic.c)
+target_sources(c PRIVATE arch_atomic.c)
+
+if(NOT CONFIG_LIBC_ATOMIC_IRQ AND NOT CONFIG_LIBC_ATOMIC_HWSPINLOCK)
+  target_sources(c PRIVATE arch_atomic_spinlock.c)
 endif()
 
 if(CONFIG_MM_KASAN)
