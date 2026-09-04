@@ -104,6 +104,10 @@ if(CONFIG_PWM)
   list(APPEND SRCS pwm.c)
 endif()
 
+if(CONFIG_PWM_SIFIVE)
+  list(APPEND SRCS sifive_pwm.c)
+endif()
+
 if(CONFIG_PULSECOUNT)
   list(APPEND SRCS pulsecount.c)
 endif()

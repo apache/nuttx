@@ -142,6 +142,12 @@ ifeq ($(CONFIG_PWM),y)
   TMRVPATH = :timers
 endif
 
+ifeq ($(CONFIG_PWM_SIFIVE),y)
+  CSRCS += sifive_pwm.c
+  TMRDEPPATH = --dep-path timers
+  TMRVPATH = :timers
+endif
+
 ifeq ($(CONFIG_PULSECOUNT),y)
   CSRCS += pulsecount.c
   TMRDEPPATH = --dep-path timers
