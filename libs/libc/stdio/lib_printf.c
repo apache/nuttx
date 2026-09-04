@@ -25,6 +25,10 @@
  ****************************************************************************/
 
 #include <stdio.h>
+#include <syslog.h>
+
+#include <nuttx/streams.h>
+#include <nuttx/syslog/syslog.h>
 
 /****************************************************************************
  * Public Functions
@@ -40,7 +44,25 @@ int printf(FAR const IPTR char *fmt, ...)
   int     ret;
 
   va_start(ap, fmt);
-#ifdef CONFIG_FILE_STREAM
+
+#ifdef CONFIG_SYSLOG_STDOUT_PREFIX
+  ret = nx_vsyslog(LOG_NOTICE, fmt, &ap);
+#elif defined(CONFIG_SYSLOG_STDOUT)
+  struct lib_syslograwstream_s stream;
+
+  /* Wrap the low-level output in a stream object and let lib_vsprintf
+   * do the work.
+   */
+
+  lib_syslograwstream_open(&stream);
+
+  ret = lib_vsprintf_internal(&stream.common, fmt, ap);
+
+  /* Flush and destroy the syslog stream buffer */
+
+  lib_syslograwstream_close(&stream);
+
+#elif defined(CONFIG_FILE_STREAM)
   ret = vfprintf(stdout, fmt, ap);
 #else
   ret = vdprintf(STDOUT_FILENO, fmt, ap);
