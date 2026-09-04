@@ -506,6 +506,7 @@ static int epoll_teardown(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
 {
   FAR epoll_node_t *tepn;
   FAR epoll_node_t *epn;
+  bool pending = false;
   int i = 0;
   int ret;
 
@@ -532,7 +533,16 @@ static int epoll_teardown(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
 
       if ((epn->pfd.events & EPOLLET) != 0)
         {
-          if (epn->pfd.revents != 0 && i < maxevents)
+          if (epn->pfd.revents == 0)
+            {
+              /* A POLLALWAYS notification with nothing to report.  The
+               * registration is still valid; leaving the flag set would
+               * strand this node, never reported nor registered again.
+               */
+
+              epn->notified = false;
+            }
+          else if (i < maxevents)
             {
               evs[i].data      = epn->data;
               evs[i++].events  = epn->pfd.revents;
@@ -544,6 +554,15 @@ static int epoll_teardown(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
                   list_delete(&epn->node);
                   list_add_tail(&eph->oneshot, &epn->node);
                 }
+            }
+          else
+            {
+              /* Array full.  An ET node stays registered, so the driver
+               * will not notify again; post the semaphore below or the
+               * next epoll_wait() blocks with this event pending.
+               */
+
+              pending = true;
             }
         }
       else
@@ -576,6 +595,18 @@ static int epoll_teardown(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
     }
 
   nxrmutex_unlock(&eph->lock);
+
+  if (pending)
+    {
+      int semcount = 0;
+
+      nxsem_get_value(&eph->sem, &semcount);
+      if (semcount < 1)
+        {
+          nxsem_post(&eph->sem);
+        }
+    }
+
   return i;
 }
 
