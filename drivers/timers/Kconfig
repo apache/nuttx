@@ -132,6 +132,38 @@ config OCU
 		actions (pin toggle, notification callback) on match.
 		See include/nuttx/timers/ocu.h for further OCU driver information.
 
+config TIMER_IMX_GPT
+	bool "i.MX GPT Driver"
+	default n
+	---help---
+		Enable the i.MX GPT (General Purpose Timer) lower-half driver
+		core: one free-running counter and one shared interrupt.  A single
+		GPT block can expose an Output Compare Unit (/dev/ocuN) and/or an
+		Input Capture Unit (/dev/capN); enable either or both below.
+		Instances are created from the device tree ("fsl,imx-gpt") by the
+		board bring-up code via imx_gpt_initialize().
+
+if TIMER_IMX_GPT
+
+config TIMER_IMX_GPT_OCU
+	bool "Output Compare Unit (OCU) support"
+	default y
+	select OCU
+	---help---
+		Register the GPT output-compare channels as /dev/ocuN and plug
+		them into the generic ocu upper-half driver.
+
+config TIMER_IMX_GPT_NUM_OCU
+	int "Number of OCU (output compare) channels"
+	depends on TIMER_IMX_GPT_OCU
+	default 1
+	range 1 3
+	---help---
+		Number of Output Compare Unit channels to register as /dev/ocuN.
+		The i.MX GPT hardware provides up to 3 output compare channels.
+
+endif # TIMER_IMX_GPT
+
 config TIMER
 	bool "Timer Support"
 	default n
