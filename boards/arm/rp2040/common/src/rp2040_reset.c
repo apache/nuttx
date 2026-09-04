@@ -28,6 +28,10 @@
 #include <nuttx/board.h>
 #include <nuttx/arch.h>
 
+#include <sys/boardctl.h>
+
+#include "rp2040_rom.h"
+
 #ifdef CONFIG_BOARDCTL_RESET
 
 /****************************************************************************
@@ -56,7 +60,18 @@
 
 int board_reset(int status)
 {
-  up_systemreset();
+  if (status == BOARDIOC_SOFTRESETCAUSE_ENTER_BOOTLOADER)
+    {
+      rom_reset_usb_boot_fn reset_usb_boot;
+
+      reset_usb_boot = (rom_reset_usb_boot_fn)ROM_LOOKUP(ROM_RESET_USB_BOOT);
+      reset_usb_boot(0, 0);
+    }
+  else
+    {
+      up_systemreset();
+    }
+
   return 0;
 }
 

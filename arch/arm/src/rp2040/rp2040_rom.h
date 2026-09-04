@@ -63,3 +63,5 @@
  ****************************************************************************/
 
 typedef void *(*rom_table_lookup_fn)(uint16_t *table, uint32_t code);
+typedef void (*rom_reset_usb_boot_fn)(uint32_t usb_activity_gpio_pin_mask,
+                                      uint32_t disable_interface_mask);
