@@ -287,7 +287,8 @@ void poll_notify(FAR struct pollfd_s **afds, int nfds, pollevent_t eventset)
         {
           /* The error event must be set in fds->revents */
 
-          fds->revents |= eventset & (fds->events | POLLERR | POLLHUP);
+          fds->revents |= eventset & (fds->events | POLLERR | POLLHUP) &
+                          ~POLLALWAYS;
           if ((fds->revents & (POLLERR | POLLHUP)) != 0)
             {
               /* Error or Hung up, clear POLLOUT event */
@@ -295,7 +296,8 @@ void poll_notify(FAR struct pollfd_s **afds, int nfds, pollevent_t eventset)
               fds->revents &= ~POLLOUT;
             }
 
-          if ((fds->revents != 0 || (fds->events & POLLALWAYS) != 0) &&
+          if ((fds->revents != 0 ||
+               (fds->events & eventset & POLLALWAYS) != 0) &&
               fds->cb != NULL)
             {
               finfo("Report events: %08" PRIx32 "\n", fds->revents);
