@@ -38,6 +38,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/timers/capture.h>
 #include <nuttx/timers/ocu.h>
 
 #include <stdint.h>
@@ -51,6 +52,9 @@
 
 #ifdef CONFIG_TIMER_IMX_GPT_OCU
 #define IMX_GPT_NUM_OCU  CONFIG_TIMER_IMX_GPT_NUM_OCU
+#endif
+#ifdef CONFIG_TIMER_IMX_GPT_ICU
+#define IMX_GPT_NUM_ICU  CONFIG_TIMER_IMX_GPT_NUM_ICU
 #endif
 
 /* Register offsets (32-bit, little-endian, 4-byte access). */
@@ -69,6 +73,7 @@
 /* Per-channel register helpers. */
 
 #define IMX_GPT_OCR(ch)  (IMX_GPT_OCR1 + ((ch) * 4)) /* ch = 0..2 */
+#define IMX_GPT_ICR(ch)  (IMX_GPT_ICR1 + ((ch) * 4)) /* ch = 0..1 */
 
 /* GPT_CR bit definitions. */
 
@@ -78,6 +83,15 @@
 #define GPT_CR_CLKSRC_MASK  (0x7 << GPT_CR_CLKSRC_SHIFT)
 #define GPT_CR_FRR          (1 << 9)   /* Free-run (1) / restart (0) */
 #define GPT_CR_SWR          (1 << 15)  /* Software reset */
+
+/* Input capture mode (2 bits/channel): 0=off 1=rising 2=falling 3=both. */
+
+#define GPT_CR_IM_SHIFT(ch) (16 + ((ch) * 2))
+#define GPT_CR_IM_MASK(ch)  (0x3 << GPT_CR_IM_SHIFT(ch))
+#define GPT_IM_DISABLE      0
+#define GPT_IM_RISING       1
+#define GPT_IM_FALLING      2
+#define GPT_IM_BOTH         3
 
 /* Output compare mode (3 bits/channel):
  * 0=disconnect 1=toggle 2=clear(low) 3=set(high) 4=low-pulse.
@@ -97,9 +111,11 @@
 /* GPT_SR / GPT_IR share the same bit layout. */
 
 #define GPT_SR_OF(ch)       (1 << (ch))        /* OCU compare match, ch 0..2 */
+#define GPT_SR_IF(ch)       (1 << (3 + (ch)))  /* ICU edge capture, ch 0..1 */
 #define GPT_SR_ROV          (1 << 5)           /* Counter roll-over */
 
 #define GPT_IR_OF(ch)       GPT_SR_OF(ch)
+#define GPT_IR_IF(ch)       GPT_SR_IF(ch)
 #define GPT_IR_ROV          GPT_SR_ROV
 
 #define GPT_TIMER_MAX       0xffffffffu
@@ -129,6 +145,29 @@ struct imx_gpt_ocu_s
 };
 #endif
 
+/* ICU (input capture) per-channel lower-half. */
+
+#ifdef CONFIG_TIMER_IMX_GPT_ICU
+struct imx_gpt_icu_s
+{
+  struct cap_lowerhalf_s     lower;          /* Must be first (cast-compat) */
+  FAR struct imx_gpt_dev_s  *dev;            /* Back-pointer to shared core */
+  uint8_t                    ch;             /* ICU channel index 0..1 */
+  bool                       running;        /* Capture enabled */
+  bool                       have_rise;      /* last_rise is valid */
+  uint8_t                    level;          /* Current inferred input level */
+#ifdef CONFIG_CAPTURE_NOTIFY
+  enum cap_type_e            type;           /* Notify edge filter */
+  capture_notify_t           cb;             /* Upper-half notify callback */
+  FAR void                  *priv;           /* Callback private pointer */
+#endif
+  uint32_t                   last_rise;      /* Timestamp of last rising edge */
+  uint32_t                   period;         /* Ticks between rising edges */
+  uint32_t                   high_time;      /* High-level ticks in a period */
+  uint32_t                   edges;          /* Accumulated edge count */
+};
+#endif
+
 /* Shared "core" device: one MMIO block, one IRQ, one counter. */
 
 struct imx_gpt_dev_s
@@ -140,6 +179,9 @@ struct imx_gpt_dev_s
   volatile uint32_t          rollover;       /* ROV accounting */
 #ifdef CONFIG_TIMER_IMX_GPT_OCU
   FAR struct imx_gpt_ocu_s  *ocu[IMX_GPT_NUM_OCU];
+#endif
+#ifdef CONFIG_TIMER_IMX_GPT_ICU
+  FAR struct imx_gpt_icu_s  *icu[IMX_GPT_NUM_ICU];
 #endif
 };
 
@@ -221,6 +263,12 @@ imx_gpt_ocu_register(FAR struct imx_gpt_dev_s *dev, int ch,
                      FAR const char *devpath);
 #endif
 
+#ifdef CONFIG_TIMER_IMX_GPT_ICU
+FAR struct imx_gpt_icu_s *
+imx_gpt_icu_register(FAR struct imx_gpt_dev_s *dev, int ch,
+                     FAR const char *devpath);
+#endif
+
 /****************************************************************************
  * Name: imx_gpt_ocu_on_match
  *
@@ -233,6 +281,9 @@ imx_gpt_ocu_register(FAR struct imx_gpt_dev_s *dev, int ch,
 
 #ifdef CONFIG_TIMER_IMX_GPT_OCU
 void imx_gpt_ocu_on_match(FAR struct imx_gpt_ocu_s *ocu);
+#endif
+#ifdef CONFIG_TIMER_IMX_GPT_ICU
+void imx_gpt_icu_on_edge(FAR struct imx_gpt_icu_s *icu);
 #endif
 
 #undef EXTERN

@@ -162,6 +162,24 @@ config TIMER_IMX_GPT_NUM_OCU
 		Number of Output Compare Unit channels to register as /dev/ocuN.
 		The i.MX GPT hardware provides up to 3 output compare channels.
 
+config TIMER_IMX_GPT_ICU
+	bool "Input Capture Unit (ICU) support"
+	default y
+	select CAPTURE
+	select CAPTURE_NOTIFY
+	---help---
+		Register the GPT input-capture channels as /dev/capN and plug
+		them into the generic capture upper-half driver.
+
+config TIMER_IMX_GPT_NUM_ICU
+	int "Number of ICU (input capture) channels"
+	depends on TIMER_IMX_GPT_ICU
+	default 1
+	range 1 2
+	---help---
+		Number of Input Capture Unit channels to register as /dev/capN.
+		The i.MX GPT hardware provides up to 2 input capture channels.
+
 endif # TIMER_IMX_GPT
 
 config TIMER
