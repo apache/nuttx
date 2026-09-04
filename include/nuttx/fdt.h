@@ -531,6 +531,27 @@ int fdt_sp804_devices_register(FAR const void *fdt, int irqbase);
 #endif
 
 /****************************************************************************
+ * Name: fdt_imx_gpt_devices_register
+ *
+ * Description:
+ *   This function scans the device tree for nodes with compatible
+ *   "fsl,imx-gpt" and registers each one's OCU channels as /dev/ocuN and
+ *   ICU channels as /dev/capN via imx_gpt_initialize().
+ *
+ * Input Parameters:
+ *   fdt      - Device tree handle
+ *   irqbase  - Interrupt base number
+ *
+ * Returned Value:
+ *   Return 0 if success, negative if failed
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIMER_IMX_GPT
+int fdt_imx_gpt_devices_register(FAR const void *fdt, int irqbase);
+#endif
+
+/****************************************************************************
  * Name: fdt_cmsdk_wdt_devices_register
  *
  * Description:

@@ -41,6 +41,9 @@ ifeq ($(CONFIG_TIMER),y)
   CSRCS += fdt_sp804.c
 endif
 endif
+ifeq ($(CONFIG_TIMER_IMX_GPT),y)
+  CSRCS += fdt_imx_gpt.c
+endif
 
 ifeq ($(CONFIG_WATCHDOG_CMSDK),y)
   CSRCS += fdt_cmsdk_wdt.c
