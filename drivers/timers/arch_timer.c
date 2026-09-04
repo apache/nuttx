@@ -128,6 +128,7 @@ static uint64_t current_usec(void)
 static void udelay_accurate(useconds_t microseconds)
 {
   uint64_t start = current_usec();
+
   while (current_usec() - start < microseconds)
     {
       ; /* Wait until the timeout reach */
