@@ -137,7 +137,15 @@ static int nxmq_file_poll(FAR struct file *filep,
           eventset |= POLLIN;
         }
 
-      poll_notify(&fds, 1, eventset);
+      /* The eventset is never empty and an epoll node sets POLLALWAYS,
+       * so notifying unconditionally would make epoll_wait() tear down
+       * and set up this fd on every call while reporting nothing.
+       */
+
+      if ((eventset & (fds->events | POLLERR | POLLHUP)) != 0)
+        {
+          poll_notify(&fds, 1, eventset);
+        }
     }
   else if (fds->priv != NULL)
     {
