@@ -131,8 +131,29 @@ ACKing behavior and you have MSS sizes that are larger that
 the average size of the user buffers, then your throughput 
 can probably be greatly improved by enabling ``CONFIG_NET_TCP_SPLIT=y``
 
-NOTE: NuttX is `not` an RFC 1122 recipient; NuttX will ACK 
+NOTE: NuttX is `not` an RFC 1122 recipient; NuttX will ACK
 every TCP/IP packet that it receives.
+
+The Delayed ACK Threshold Configuration
+=======================================
+
+The delayed ACK logic is enabled with ``CONFIG_NET_TCP_DELAYED_ACK``.
+When enabled, the number of received data segments that trigger one
+ACK can be configured with ``CONFIG_NET_TCP_ACK_FREQUENCY``:
+
+* Value 1 degenerates to an immediate ACK per received segment
+  (delayed ACK effectively disabled).
+* Value 2 (default) is the RFC 1122 compliant behavior: an ACK for
+  at least every second segment in a stream of full-sized segments.
+* Values above 2 reduce ACK traffic and can improve throughput when
+  bulk data is received, at the cost of a coarser ACK clock and
+  slower peer congestion window growth.
+
+NOTE: RFC 1122 Section 4.2.3.2 states that in a stream of full-sized
+segments there SHOULD be an ACK for at least every second segment.
+Setting ``CONFIG_NET_TCP_ACK_FREQUENCY`` above 2 no longer meets
+that requirement. The delayed ACK timer still forces an ACK after
+at most 0.5 seconds as required by RFC 1122.
 
 Write Buffering
 ===============
