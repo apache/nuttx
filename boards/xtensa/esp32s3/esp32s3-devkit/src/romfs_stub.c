@@ -1,5 +1,7 @@
 /****************************************************************************
- * arch/xtensa/src/esp32s3/esp32s3_userspace.h
+ * boards/xtensa/esp32s3/esp32s3-devkit/src/romfs_stub.c
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,32 +20,37 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USERSPACE_H
-#define __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USERSPACE_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <nuttx/compiler.h>
+
+#ifndef HAVE_ROMFS_BOOT
 
 /****************************************************************************
- * Public Functions Prototypes
+ * Public Data
  ****************************************************************************/
+
+/* Placeholder for the boot ROMFS image of a kernel build.  It lets the
+ * kernel link before apps/tools/mkromfsimg.sh has generated the real
+ * romfs_boot.c.  A kernel built against this placeholder has no user-space
+ * programs and so cannot start its init process; esp32s3_bringup() says so
+ * on the console.
+ *
+ * HAVE_ROMFS_BOOT is defined by src/Make.defs once the generated image is in
+ * place, and this file then contributes nothing.
+ */
+
+const unsigned char aligned_data(4) romfs_img[] =
+{
+  0x00
+};
+
+const unsigned int romfs_img_len = 1;
+
+#endif /* !HAVE_ROMFS_BOOT */
 
 /****************************************************************************
- * Name: esp32s3_userspace
- *
- * Description:
- *   For the case of the separate user-/kernel-space build, perform whatever
- *   platform specific initialization of the user memory is required.
- *   Normally this just means initializing the user space .data and .bss
- *   segments.
- *
+ * Public Functions
  ****************************************************************************/
-
-#ifdef CONFIG_BUILD_PROTECTED
-void esp32s3_userspace(void);
-#endif
-
-#endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USERSPACE_H */

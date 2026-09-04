@@ -43,6 +43,44 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += esp32s3_userspace.c
 endif
 
+# The privileged/unprivileged world split itself, shared by the protected
+# user split and the kernel-build address environments.
+
+ifneq ($(CONFIG_BUILD_FLAT),y)
+CHIP_CSRCS += esp32s3_isolation.c
+endif
+
+# Terminating a faulting user task rather than panicking is independent of
+# the recoverable-fault dispatcher, so it is built whenever there is an
+# unprivileged world at all.
+
+ifeq ($(CONFIG_ESP32S3_USERFAULT_ABORT),y)
+CHIP_CSRCS += esp32s3_userfault.c
+endif
+
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+CHIP_ASRCS += esp32s3_world1_vectors.S
+endif
+
+# The MMU/PMS/WCL primitives back both the protected user split and the
+# BUILD_KERNEL address-environment remap.
+
+ifneq ($(filter y,$(CONFIG_BUILD_PROTECTED) $(CONFIG_ARCH_ADDRENV)),)
+CHIP_CSRCS += esp32s3_mmu.c esp32s3_pms.c esp32s3_wcl.c
+endif
+
+ifeq ($(CONFIG_ESP32S3_PAGEFAULT),y)
+CHIP_CSRCS += esp32s3_pagefault.c
+endif
+
+ifeq ($(CONFIG_ARCH_ADDRENV),y)
+CHIP_CSRCS += esp32s3_addrenv.c esp32s3_addrenv_utils.c
+endif
+
+ifeq ($(CONFIG_MM_PGALLOC),y)
+CHIP_CSRCS += esp32s3_pgalloc.c
+endif
+
 ifeq ($(CONFIG_SMP),y)
 CHIP_CSRCS += esp32s3_cpuidlestack.c esp32s3_cpustart.c esp32s3_intercpu_interrupt.c
 endif
