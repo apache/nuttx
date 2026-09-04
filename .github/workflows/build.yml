@@ -348,10 +348,18 @@ jobs:
             export ARTIFACTDIR=`pwd`/buildartifacts
 
             for i in 1 2 3; do
-              python -m pip install \
+              if python -m pip install \
                 --default-timeout=100 \
                 --retries 10 \
-                ntfc==0.0.1 && break
+                git+https://github.com/apache/nuttx-ntfc.git@main; then
+                break
+              fi
+
+              if [ "$i" -eq 3 ]; then
+                echo "Failed to install NTFC after $i attempts"
+                exit 1
+              fi
+
               echo "Retry $i failed..."
               sleep 5
             done
