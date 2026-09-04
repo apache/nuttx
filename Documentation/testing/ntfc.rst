@@ -22,6 +22,7 @@ CI runtime test cases use NTFC. Configurations with an NTFC runner include:
 - :doc:`arm/imx6 </platforms/arm/imx6/index>`: ``sabre-6quad/citest``
 - :doc:`arm64/qemu </platforms/arm64/qemu/boards/qemu-armv8a/index>`: ``qemu-armv8a/citest``
 - :doc:`arm64/qemu </platforms/arm64/qemu/boards/qemu-armv8a/index>`: ``qemu-armv8a/citest_smp``
+- :doc:`x86_64/qemu </platforms/x86_64/intel64/boards/qemu-intel64/index>`: ``qemu-intel64/citest_smp``
 
 Running a CI Test Target Locally
 ================================
