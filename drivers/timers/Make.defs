@@ -177,6 +177,15 @@ ifeq ($(CONFIG_CAPTURE),y)
   TMRVPATH = :timers
 endif
 
+ifeq ($(CONFIG_TIMER_IMX_GPT),y)
+  CSRCS += imx_gpt.c
+ifeq ($(CONFIG_TIMER_IMX_GPT_OCU),y)
+  CSRCS += ocu_imx_gpt.c
+endif
+  TMRDEPPATH = --dep-path timers
+  TMRVPATH = :timers
+endif
+
 ifeq ($(CONFIG_GOLDFISH_TIMER),y)
   CSRCS += goldfish_timer.c
   TMRDEPPATH = --dep-path timers
