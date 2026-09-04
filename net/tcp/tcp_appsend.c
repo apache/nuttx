@@ -118,19 +118,22 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
        * NOTES:
        * 1. If there is a data payload or other flags to be sent with the
        *    outgoing packet, then we may as well include the ACK too.
-       * 2. The RFC refers to full-size segments.  It is not clear what
+       * 2. The ACK threshold is CONFIG_NET_TCP_ACK_FREQUENCY segments.
+       *    The default value of 2 preserves the RFC 1122 behavior (an
+       *    ACK for at least every second segment).
+       * 3. The RFC refers to full-size segments.  It is not clear what
        *    "full-size" means.  Does that mean that the payload is the size
        *    of the MSS?  Payload size is not considered other there being
        *    a payload or or not.  Should there be some special action for
        *    small payloads of size < MSS?
-       * 3. Experimentation shows that Windows and Linux behave somewhat
+       * 4. Experimentation shows that Windows and Linux behave somewhat
        *    differently; they delay the ACKs for many more segments (6 or
        *    more).  Delaying for more segments would provide less network
        *    traffic and better performance but seems non-compliant.
        */
 
-      if (conn->rx_unackseg > 0 || dev->d_sndlen > 0 ||
-          result != TCP_SNDACK)
+      if (conn->rx_unackseg >= CONFIG_NET_TCP_ACK_FREQUENCY - 1 ||
+          dev->d_sndlen > 0 || result != TCP_SNDACK)
         {
           /* Reset the delayed ACK state and send the ACK with this packet. */
 
@@ -138,12 +141,11 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
         }
       else
         {
-          /* This is only an ACK and there is no pending delayed ACK and
-           * no TX data is being sent.  Indicate that there is one un-ACKed
-           * segment and don't send anything now.
+          /* This is only an ACK and there is no TX data being sent.
+           * Count one more un-ACKed segment and don't send anything now.
            */
 
-          conn->rx_unackseg = 1;
+          conn->rx_unackseg++;
           return;
         }
     }
@@ -224,21 +226,21 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
         {
 #endif
 
-      /* If d_sndlen > 0, the application has data to be sent. */
+          /* If d_sndlen > 0, the application has data to be sent. */
 
-      if (dev->d_sndlen > 0)
-        {
-          /* Remember how much data we send out now so that we know
-           * when everything has been acknowledged.  Just increment the
-           * amount of data sent.  This will be needed in sequence number
-           * calculations and we know that this is not a re-transmission.
-           * Retransmissions do not go through this path.
-           */
+          if (dev->d_sndlen > 0)
+            {
+              /* Remember how much data we send out now so that we know
+               * when everything has been acknowledged.  Just increment the
+               * amount of data sent.  This will be needed in sequence number
+               * calculations and we know that this is not a re-transmission.
+               * Retransmissions do not go through this path.
+               */
 
-          conn->tx_unacked += dev->d_sndlen;
-        }
+              conn->tx_unacked += dev->d_sndlen;
+            }
 
-      conn->nrtx = 0;
+          conn->nrtx = 0;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
         }
