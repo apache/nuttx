@@ -182,6 +182,9 @@ ifeq ($(CONFIG_TIMER_IMX_GPT),y)
 ifeq ($(CONFIG_TIMER_IMX_GPT_OCU),y)
   CSRCS += ocu_imx_gpt.c
 endif
+ifeq ($(CONFIG_TIMER_IMX_GPT_ICU),y)
+  CSRCS += capture_imx_gpt.c
+endif
   TMRDEPPATH = --dep-path timers
   TMRVPATH = :timers
 endif

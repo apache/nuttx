@@ -57,7 +57,7 @@ static int imx_gpt_interrupt(int irq, FAR void *context, FAR void *arg)
   irqstate_t flags;
   uint32_t status;
   uint32_t handled = 0;
-#ifdef CONFIG_TIMER_IMX_GPT_OCU
+#if defined(CONFIG_TIMER_IMX_GPT_OCU) || defined(CONFIG_TIMER_IMX_GPT_ICU)
   int ch;
 #endif
 
@@ -78,6 +78,22 @@ static int imx_gpt_interrupt(int irq, FAR void *context, FAR void *arg)
           if (dev->ocu[ch] != NULL)
             {
               imx_gpt_ocu_on_match(dev->ocu[ch]);
+            }
+        }
+    }
+#endif
+
+#ifdef CONFIG_TIMER_IMX_GPT_ICU
+  /* ICU edge-capture channels. */
+
+  for (ch = 0; ch < IMX_GPT_NUM_ICU; ch++)
+    {
+      if ((status & GPT_SR_IF(ch)) != 0)
+        {
+          handled |= GPT_SR_IF(ch);
+          if (dev->icu[ch] != NULL)
+            {
+              imx_gpt_icu_on_edge(dev->icu[ch]);
             }
         }
     }
@@ -151,16 +167,18 @@ int imx_gpt_initialize(uintptr_t base, int irq, uint32_t freq,
                        int ocu_bus, int cap_bus)
 {
   FAR struct imx_gpt_dev_s *dev;
-#ifdef CONFIG_TIMER_IMX_GPT_OCU
+#if defined(CONFIG_TIMER_IMX_GPT_OCU) || defined(CONFIG_TIMER_IMX_GPT_ICU)
   char devpath[20];
   int ch;
 #endif
   int ret;
 
   DEBUGASSERT(base != 0);
-  UNUSED(cap_bus);
 #ifndef CONFIG_TIMER_IMX_GPT_OCU
   UNUSED(ocu_bus);
+#endif
+#ifndef CONFIG_TIMER_IMX_GPT_ICU
+  UNUSED(cap_bus);
 #endif
 
   dev = kmm_zalloc(sizeof(*dev));
@@ -186,6 +204,22 @@ int imx_gpt_initialize(uintptr_t base, int irq, uint32_t freq,
       snprintf(devpath, sizeof(devpath), "/dev/ocu%d", ocu_bus + ch);
       dev->ocu[ch] = imx_gpt_ocu_register(dev, ch, devpath);
       if (dev->ocu[ch] == NULL)
+        {
+          tmrerr("ERROR: failed to register %s\n", devpath);
+          ret = -ENODEV;
+          goto err;
+        }
+    }
+#endif
+
+#ifdef CONFIG_TIMER_IMX_GPT_ICU
+  /* Register the ICU channels as /dev/cap<cap_bus + ch>. */
+
+  for (ch = 0; ch < IMX_GPT_NUM_ICU; ch++)
+    {
+      snprintf(devpath, sizeof(devpath), "/dev/cap%d", cap_bus + ch);
+      dev->icu[ch] = imx_gpt_icu_register(dev, ch, devpath);
+      if (dev->icu[ch] == NULL)
         {
           tmrerr("ERROR: failed to register %s\n", devpath);
           ret = -ENODEV;
