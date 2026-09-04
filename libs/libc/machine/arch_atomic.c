@@ -26,9 +26,10 @@
 
 #include <nuttx/config.h>
 
-#define ARCH_ATOMIC_SPECIFIER
-
 #include <nuttx/atomic.h>
+
+#undef ARCH_ATOMIC_SPECIFIER
+#define ARCH_ATOMIC_SPECIFIER weak_function
 
 /****************************************************************************
  * Public Functions
