@@ -30,6 +30,10 @@ if(CONFIG_DRIVERS_VIDEO)
     list(APPEND SRCS fb.c)
   endif()
 
+  if(CONFIG_VIDEO_VFB)
+    list(APPEND SRCS vfb.c)
+  endif()
+
   if(CONFIG_VIDEO_STREAM)
     list(APPEND SRCS v4l2_core.c video_framebuff.c v4l2_cap.c v4l2_m2m.c)
   endif()

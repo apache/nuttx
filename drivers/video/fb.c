@@ -41,6 +41,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
+#include <sys/param.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/clock.h>
 #include <nuttx/wdog.h>
@@ -92,6 +93,17 @@ struct fb_priv_s
 
   FAR struct pollfd *fds[CONFIG_VIDEO_FB_NPOLLWAITERS];
 
+  /* Dirty-area reporting (FBIOC_WATCHAREA/FBIOC_GETDIRTY).  A small ring
+   * of the areas applications reported through FBIO_UPDATE;  when it
+   * overflows, the newest areas are merged into the last entry's
+   * bounding box, so nothing is lost, only precision.
+   */
+
+  bool watch;                     /* Reporting enabled for this file */
+  uint8_t dirtyhead;              /* Ring indices */
+  uint8_t dirtytail;
+  struct fb_area_s dirty[16];
+
 #ifdef CONFIG_FB_SYNC
   sem_t wait;
 #endif
@@ -113,6 +125,7 @@ struct fb_paninfo_s
 struct fb_chardev_s
 {
   FAR struct fb_vtable_s  *vtable;         /* Framebuffer interface          */
+  uint8_t                  display;        /* Display number                 */
   uint8_t                  plane;          /* Video plan number              */
   clock_t                  vsyncoffset;    /* VSync offset ticks             */
   FAR struct fb_priv_s    *head;
@@ -871,14 +884,104 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #endif
 
 #ifdef CONFIG_FB_UPDATE
+      case FBIOC_WATCHAREA:  /* Enable/disable dirty-area reporting */
+        {
+          FAR struct fb_priv_s *priv = filep->f_priv;
+
+          DEBUGASSERT(priv != NULL);
+          nxmutex_lock(&fb->lock);
+          priv->watch     = (arg != 0);
+          priv->dirtyhead = 0;
+          priv->dirtytail = 0;
+          nxmutex_unlock(&fb->lock);
+          ret = OK;
+        }
+        break;
+
+      case FBIOC_GETDIRTY:  /* Pop the next queued dirty area */
+        {
+          FAR struct fb_priv_s *priv = filep->f_priv;
+          FAR struct fb_area_s *out =
+            (FAR struct fb_area_s *)((uintptr_t)arg);
+
+          DEBUGASSERT(priv != NULL && out != NULL);
+          nxmutex_lock(&fb->lock);
+          if (priv->dirtytail == priv->dirtyhead)
+            {
+              ret = -EAGAIN;
+            }
+          else
+            {
+              *out = priv->dirty[priv->dirtytail];
+              priv->dirtytail = (priv->dirtytail + 1) % 16;
+              ret = OK;
+            }
+
+          nxmutex_unlock(&fb->lock);
+        }
+        break;
+
       case FBIO_UPDATE:  /* Update the modified framebuffer data  */
         {
           struct fb_area_s *area = (FAR struct fb_area_s *)((uintptr_t)arg);
+          FAR struct fb_priv_s *priv;
 
           DEBUGASSERT(fb->vtable != NULL);
+
+          /* Queue the area for every open file that asked to watch, and
+           * wake its pollers.  Files that never asked cost nothing.
+           */
+
+          nxmutex_lock(&fb->lock);
+          for (priv = fb->head; priv != NULL; priv = priv->flink)
+            {
+              uint8_t next;
+
+              if (!priv->watch)
+                {
+                  continue;
+                }
+
+              next = (priv->dirtyhead + 1) % 16;
+              if (next == priv->dirtytail)
+                {
+                  /* Full: widen the newest entry to cover this area too */
+
+                  FAR struct fb_area_s *last =
+                    &priv->dirty[(priv->dirtyhead + 16 - 1) % 16];
+                  fb_coord_t x2 = MAX(last->x + last->w,
+                                      area->x + area->w);
+                  fb_coord_t y2 = MAX(last->y + last->h,
+                                      area->y + area->h);
+
+                  last->x = MIN(last->x, area->x);
+                  last->y = MIN(last->y, area->y);
+                  last->w = x2 - last->x;
+                  last->h = y2 - last->y;
+                }
+              else
+                {
+                  priv->dirty[priv->dirtyhead] = *area;
+                  priv->dirtyhead = next;
+                }
+
+              poll_notify(priv->fds, CONFIG_VIDEO_FB_NPOLLWAITERS,
+                          POLLPRI);
+            }
+
+          nxmutex_unlock(&fb->lock);
+
           if (fb->vtable->updatearea == NULL)
             {
-              ret = -ENOTTY;
+              /* A display driver with no updatearea, memory-scanned
+               * hardware such as an LTDC, has nothing to do here, but
+               * the notification still reached the watchers above, which
+               * is a service in itself.  Reporting ENOTTY would tell the
+               * application its update failed and, worse, that this
+               * framebuffer cannot report changes.
+               */
+
+              ret = OK;
               break;
             }
 
@@ -1479,6 +1582,11 @@ static int fb_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
       if (!circbuf_is_full(panbuf))
         {
           poll_notify(&fds, 1, POLLOUT);
+        }
+
+      if (priv->watch && priv->dirtytail != priv->dirtyhead)
+        {
+          poll_notify(&fds, 1, POLLPRI);
         }
     }
   else if (fds->priv != NULL)

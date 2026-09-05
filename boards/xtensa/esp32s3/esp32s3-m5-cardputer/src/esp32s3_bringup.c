@@ -59,6 +59,10 @@
 #  include <nuttx/video/fb.h>
 #endif
 
+#ifdef CONFIG_VIDEO_VFB
+#  include <nuttx/video/vfb.h>
+#endif
+
 #ifdef CONFIG_LCD_DEV
 #  include <nuttx/lcd/lcd_dev.h>
 #endif
@@ -176,15 +180,34 @@ int esp32s3_bringup(void)
 
 #endif /* CONFIG_ESPRESSIF_WIRELESS */
 
-#if defined(CONFIG_VIDEO_FB)
-  /* Initialize and register the framebuffer (backed by the ST7789 LCD) */
+#if defined(CONFIG_VIDEO_FB) && defined(CONFIG_LCD_FRAMEBUFFER)
+  /* Register the ST7789 panel as /dev/fb0 */
 
   ret = fb_register(0, 0);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize Frame Buffer Driver.\n");
     }
-#elif defined(CONFIG_LCD)
+#endif
+
+#ifdef CONFIG_VIDEO_VFB
+  /* Memory alone, for a board driven over the network.  It takes /dev/fb0
+   * when the panel is not built in and /dev/fb1 when it is.
+   */
+
+#  ifdef CONFIG_LCD_FRAMEBUFFER
+  ret = vfb_register(1);
+#  else
+  ret = vfb_register(0);
+#  endif
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: vfb_register() failed: %d\n", ret);
+    }
+#endif
+
+#if !defined(CONFIG_VIDEO_FB) && defined(CONFIG_LCD)
   ret = board_lcd_initialize();
   if (ret < 0)
     {

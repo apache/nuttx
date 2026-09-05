@@ -148,3 +148,43 @@ lvglterm
     ``.`` scroll the output::
 
         nsh> lvglterm
+
+lvglvnc
+    The panel, mirrored over Wi-Fi.  The ST7789 keeps showing the on-screen
+    terminal and a VNC client sees the same pixels, with its keyboard
+    arriving as a uinput keyboard, so what is typed on a viewer reaches the
+    shell on the panel::
+
+        nsh> wapi mode wlan0 2
+        nsh> wapi essid wlan0 <SSID> 1
+        nsh> wapi psk wlan0 <password> 3
+        nsh> wapi essid wlan0 <SSID> 1
+        nsh> renew wlan0
+        nsh> fbvnc start /dev/fb0
+        nsh> lvglterm /dev/ukeyboard &
+
+.. figure:: fbvnc_lvglterm.png
+   :align: center
+
+   ``lvglvnc``:  the on-screen terminal of the Cardputer, seen from a VNC
+   client over Wi-Fi.  ``uname -a`` and ``free`` were typed on the viewer's
+   keyboard and ran in the shell on the panel.
+
+vncfb
+    A display the board does not have.  The ST7789 is left out of the build
+    entirely and a virtual framebuffer takes its place, so the graphics
+    stack runs unchanged and the only screen is the one on the network.
+    Same commands as ``lvglvnc``.
+
+    The virtual screen is 160x120 because it is paid for twice:  LVGL
+    allocates an off-screen buffer of its own when the framebuffer driver
+    offers a single buffer, and this module has no PSRAM.  A larger one
+    leaves the 260 KB heap with nothing to spare, at 240x160 the board
+    could no longer start ``wapi`` to bring up its own Wi-Fi, which NuttShell
+    reports as ``wapi: command not found``.
+
+.. note::
+   Bring Wi-Fi up before starting the applications.  Both configurations
+   are close to the memory this module has, and a task that cannot be
+   spawned is reported as a missing command rather than as a memory
+   failure.

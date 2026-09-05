@@ -33,6 +33,11 @@
 
 #include "linum-stm32h753bi.h"
 
+#if defined(CONFIG_ARM_MPU) && defined(BOARD_SDRAM1_SIZE)
+#  include "mpu.h"
+#  include "hardware/stm32_memorymap.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -48,8 +53,49 @@
  *
  ****************************************************************************/
 
+#if defined(CONFIG_ARM_MPU) && defined(BOARD_SDRAM1_SIZE)
+
+/****************************************************************************
+ * Name: linum_sdram_cacheable
+ *
+ * Description:
+ *   Let the caches work on the external SDRAM.
+ *
+ *   It sits at 0xc0000000, and the Cortex-M7 default memory map calls
+ *   that range External Device:  uncached, and every write strongly
+ *   ordered.  Anything held there is then read and written at the speed
+ *   of the SDRAM bus with no cache in front of it, a comparison of a
+ *   128 KiB buffer measured 97 ms there against 6 ms in internal SRAM,
+ *   and a graphics stack drawing into a framebuffer in SDRAM pays that
+ *   on every pixel.
+ *
+ *   Nothing else is reading the memory behind the CPU's back:  the
+ *   framebuffer this board can put there is drawn and read by software
+ *   on the same core, and the data cache is write-through, so what the
+ *   LTDC would see if it were enabled is what was written.
+ *
+ ****************************************************************************/
+
+static void linum_sdram_cacheable(void)
+{
+  mpu_configure_region(STM32_FMC_BANK5, BOARD_SDRAM1_SIZE,
+                       MPU_RASR_TEX_NOR |    /* Normal memory        */
+                       MPU_RASR_C       |    /* Cacheable            */
+                       MPU_RASR_B       |    /* Bufferable           */
+                       MPU_RASR_AP_RWRW);    /* Read and write       */
+
+  /* Everything outside the region keeps the default map */
+
+  mpu_control(true, false, true);
+}
+#endif
+
 void stm32_boardinitialize(void)
 {
+#if defined(CONFIG_ARM_MPU) && defined(BOARD_SDRAM1_SIZE)
+  linum_sdram_cacheable();
+#endif
+
 #ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
 
