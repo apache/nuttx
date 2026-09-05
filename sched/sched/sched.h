@@ -349,8 +349,10 @@ int  nxsched_reprioritize(FAR struct tcb_s *tcb, int sched_priority);
 
 #ifdef CONFIG_SCHED_TICKLESS
 void nxsched_reassess_timer(void);
+void nxsched_timer_start(clock_t now, clock_t delay);
 #else
 #  define nxsched_reassess_timer()
+#  define nxsched_timer_start(now, delay)
 #endif
 
 /* Scheduler policy support */
@@ -358,6 +360,10 @@ void nxsched_reassess_timer(void);
 #if CONFIG_RR_INTERVAL > 0
 clock_t nxsched_process_roundrobin(FAR struct tcb_s *tcb, clock_t ticks,
                                    bool noswitches);
+#  ifdef CONFIG_SCHED_TICKLESS
+void nxsched_suspend_roundrobin(FAR struct tcb_s *tcb);
+void nxsched_resume_roundrobin(FAR struct tcb_s *tcb);
+#  endif
 #endif
 
 #ifdef CONFIG_SCHED_SPORADIC

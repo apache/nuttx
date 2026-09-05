@@ -178,7 +178,9 @@ clkcnt_t clkcnt_delta_time2cnt(uint64_t time, uint32_t freq, uint32_t scale)
 
   DEBUGASSERT(time <= CLKCNT_MAX / freq);
 
-  return div_const(time * freq, scale);
+  /* Round-up to the scale. */
+
+  return div_const(time * freq + (scale - 1u), scale);
 }
 
 /****************************************************************************

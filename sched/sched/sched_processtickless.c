@@ -79,7 +79,6 @@ static clock_t nxsched_cpu_scheduler(int cpu, clock_t ticks,
 #endif
 static clock_t nxsched_process_scheduler(clock_t ticks, clock_t elapsed,
                                          bool noswitches);
-static void nxsched_timer_start(clock_t ticks, clock_t interval);
 
 /****************************************************************************
  * Private Data
@@ -106,6 +105,7 @@ int up_timer_gettick(FAR clock_t *ticks)
 {
   struct timespec ts;
   int ret;
+
   ret = up_timer_gettime(&ts);
   *ticks = clock_time2ticks_floor(&ts);
   return ret;
@@ -116,6 +116,7 @@ int up_timer_gettick(FAR clock_t *ticks)
 int up_alarm_tick_start(clock_t ticks)
 {
   struct timespec ts;
+
   clock_ticks2time(&ts, ticks);
   return up_alarm_start(&ts);
 }
@@ -125,6 +126,7 @@ int up_alarm_tick_start(clock_t ticks)
 int up_timer_tick_start(clock_t ticks)
 {
   struct timespec ts;
+
   clock_ticks2time(&ts, ticks);
   return up_timer_start(&ts);
 }
@@ -203,6 +205,7 @@ static clock_t nxsched_cpu_scheduler(int cpu, clock_t ticks,
        * timeslice.
        */
 
+      rtcb->rr_starttime = ticks;
       ret = nxsched_process_roundrobin(rtcb, elapsed, noswitches);
     }
 #endif
@@ -213,6 +216,7 @@ static clock_t nxsched_cpu_scheduler(int cpu, clock_t ticks,
   if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
     {
       FAR struct sporadic_s *sporadic = rtcb->sporadic;
+
       DEBUGASSERT(sporadic);
 
       /* Save the last time that the scheduler ran.  This time was saved
@@ -315,35 +319,6 @@ clock_t nxsched_process_scheduler(clock_t ticks, clock_t elapsed,
 }
 
 /****************************************************************************
- * Name:  nxsched_timer_start
- *
- * Description:
- *   Start the interval timer.
- *
- * Input Parameters:
- *   ticks - The number of ticks defining the timer interval to setup.
- *   interval - The number of ticks to use when setting up the next timer.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void nxsched_timer_start(clock_t ticks, clock_t interval)
-{
-  if (interval != CLOCK_MAX)
-    {
-      DEBUGASSERT(interval <= UINT32_MAX);
-      wd_start_abstick(&g_sched_event, ticks + interval,
-                       nxsched_wdog_expiration, 0u);
-    }
-  else
-    {
-      wd_cancel(&g_sched_event);
-    }
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -362,13 +337,6 @@ static void nxsched_timer_start(clock_t ticks, clock_t interval)
  *   Base code implementation assumes that this function is called from
  *   interrupt handling logic with interrupts disabled.
  *
- * Note:
- *   The current SCHED_RR implementation has an issue: if a round-robin task
- *   is preempted, its timeslice counter does not decrement properly.
- *   Therefore, we must trigger the scheduler on each timer expiration to
- *   minimize the occurrence of this problem.
- *   This workaround can be removed once the SCHED_RR behavior is fixed.
- *
  ****************************************************************************/
 
 void nxsched_process_timer(void)
@@ -380,15 +348,6 @@ void nxsched_process_timer(void)
   clock_update_sched_ticks(ticks);
 
   hrtimer_process(nsec);
-
-#  if CONFIG_RR_INTERVAL > 0
-  /* Workaround for SCHED_RR, see the note. */
-
-  irqstate_t flags = enter_critical_section();
-  nxsched_process_event(ticks, true);
-  leave_critical_section(flags);
-#  endif
-
 #else
   irqstate_t flags;
   clock_t ticks;
@@ -404,12 +363,6 @@ void nxsched_process_timer(void)
   /* Update sched ticks */
 
   clock_update_sched_ticks(ticks);
-
-#if CONFIG_RR_INTERVAL > 0
-  /* Workaround for SCHED_RR, see the note. */
-
-  nxsched_process_event(ticks, true);
-#endif
 
   wd_timer(ticks);
 
@@ -464,6 +417,40 @@ void nxsched_reassess_timer(void)
     }
 
   nxsched_process_event(g_wdexpired, true);
+}
+
+/****************************************************************************
+ * Name:  nxsched_timer_start
+ *
+ * Description:
+ *   Start the interval timer for the scheduler event.  Called during
+ *   context switches to set up the timer for the newly running RR task's
+ *   remaining timeslice.
+ *
+ * Input Parameters:
+ *   now   - The current time in ticks.
+ *   delay - The number of ticks to wait until the timer expires.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumption:
+ *   This function is called from the critical section.
+ *
+ ****************************************************************************/
+
+void nxsched_timer_start(clock_t now, clock_t delay)
+{
+  if (delay != CLOCK_MAX)
+    {
+      DEBUGASSERT(delay <= UINT32_MAX);
+      wd_start_abstick(&g_sched_event, now + delay,
+                       nxsched_wdog_expiration, 0u);
+    }
+  else
+    {
+      wd_cancel(&g_sched_event);
+    }
 }
 
 /****************************************************************************

@@ -88,7 +88,7 @@ int hrtimer_start_absolute(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
 
   if (reprogram)
     {
-      hrtimer_reprogram(hrtimer->expired);
+      hrtimer_reprogram(hrtimer_get_first()->expired);
     }
 
   /* Release the lock and give up the ownership of the hrtimer queue. */

@@ -639,6 +639,10 @@ struct tcb_s
   int32_t  timeslice;                    /* RR timeslice OR Sporadic budget */
                                          /* interval remaining              */
 #endif
+#if CONFIG_RR_INTERVAL > 0 && defined(CONFIG_SCHED_TICKLESS)
+  clock_t  rr_starttime;                 /* Time when RR task was last      */
+                                         /* accounted                       */
+#endif
 #ifdef CONFIG_SCHED_SPORADIC
   FAR struct sporadic_s *sporadic;       /* Sporadic scheduling parameters  */
 #endif
