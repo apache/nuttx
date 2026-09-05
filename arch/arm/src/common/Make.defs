@@ -74,6 +74,3 @@ endif
 
 CMN_ASRCS += fork.S
 
-ifeq ($(CONFIG_ARCH_HAVE_FETCHADD),y)
-  CMN_ASRCS += arm_fetchadd.S
-endif

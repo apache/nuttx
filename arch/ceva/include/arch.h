@@ -34,6 +34,7 @@
 #include <nuttx/config.h>
 
 #include <arch/chip/chip.h>
+#include <arch/barriers.h>
 
 /****************************************************************************
  * Pre-processor Definitions

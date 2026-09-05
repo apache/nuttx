@@ -46,10 +46,6 @@ ifeq ($(CONFIG_SMP),y)
 CHIP_CSRCS += cxd56_cpuidlestack.c
 CHIP_CSRCS += cxd56_smpcall.c
 CHIP_CSRCS += cxd56_cpustart.c
-ifeq ($(CONFIG_CXD56_TESTSET),y)
-CHIP_CSRCS += cxd56_testset.c
-CMN_ASRCS  := $(filter-out arm_testset.S,$(CMN_ASRCS))
-endif
 endif
 
 ifeq ($(CONFIG_ARCH_HAVE_MULTICPU),y)

@@ -167,10 +167,6 @@ ifeq ($(CONFIG_STACK_COLORATION),y)
   CSRCS += sim_checkstack.c
 endif
 
-ifeq ($(CONFIG_SPINLOCK),y)
-  HOSTSRCS += sim_testset.c
-endif
-
 ifeq ($(CONFIG_SMP),y)
   CSRCS += sim_smpsignal.c sim_cpuidlestack.c
 endif

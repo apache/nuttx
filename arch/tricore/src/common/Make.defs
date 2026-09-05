@@ -54,10 +54,6 @@ ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
 CMN_CSRCS += tricore_schedulesigaction.c tricore_sigdeliver.c
 endif
 
-ifeq ($(CONFIG_SPINLOCK),y)
-  CMN_CSRCS += tricore_testset.c
-endif
-
 ifeq ($(CONFIG_ARCH_USE_MPU),y)
   CMN_CSRCS += tricore_mpu.c
 endif
