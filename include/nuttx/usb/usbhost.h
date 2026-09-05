@@ -721,6 +721,21 @@ struct usbhost_hubport_s
   uint8_t port;                         /* Hub port index */
   uint8_t funcaddr;                     /* Device function address */
   uint8_t speed;                        /* Device speed */
+#ifdef CONFIG_USBHOST_HUB
+  /* Set by the hub class driver when the device attached here is itself a
+   * hub, describing that hub rather than this port.  Both are zero
+   * otherwise, and zero ports is not a hub.
+   *
+   * A host controller that has to be told about the hubs in a topology,
+   * rather than only about the device at the end of it, reads these from
+   * the parent of the port it is working on.  They are set before the hub
+   * activates any downstream port, so they are in place before anything
+   * behind that hub can be enumerated.
+   */
+
+  uint8_t nports;                       /* Downstream ports on the attached hub */
+  uint8_t ttt;                          /* Its transaction translator think time */
+#endif
 };
 
 /* The root hub port differs in that it includes a data set that is used to

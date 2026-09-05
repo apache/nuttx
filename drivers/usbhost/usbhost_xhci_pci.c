@@ -213,7 +213,7 @@ static int pci_xhci_probe(FAR struct pci_device_s *dev)
       goto errout;
     }
 
-  pcix->conn = xhci_initialize("usb", base, &g_pci_xhci_ops, pcix);
+  pcix->conn = xhci_initialize("usb", 0, base, &g_pci_xhci_ops, pcix);
   if (pcix->conn == NULL)
     {
       pcierr("xhci_initialize failed\n");
