@@ -121,6 +121,7 @@ void board_late_initialize(void)
   if (NSECTORS(romfs_img_len) > 1)
     {
       int ret = OK;
+
       ret = romdisk_register(0, romfs_img, NSECTORS(romfs_img_len),
         SECTORSIZE);
       if (ret < 0)
@@ -138,6 +139,10 @@ void board_late_initialize(void)
   mount(NULL, CONFIG_LIBC_TMPDIR, "tmpfs", 0, NULL);
 #endif
 
+#ifdef CONFIG_FS_BINFS
+  mount(NULL, CONFIG_PATH_INITIAL, "binfs", 0, NULL);
+#endif
+
 #ifdef CONFIG_DRIVERS_VIRTIO_MMIO
 #ifndef CONFIG_BOARD_EARLY_INITIALIZE
   qemu_virtio_register_mmio_devices();
@@ -152,6 +157,7 @@ void board_late_initialize(void)
   /* Register the LED driver */
 
   int ret = userled_lower_initialize("/dev/userleds");
+
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
