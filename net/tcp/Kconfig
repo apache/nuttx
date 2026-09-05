@@ -35,6 +35,28 @@ config NET_TCP_DELAYED_ACK
 		0.5 seconds, and in a stream of full-sized segments there should
 		be an ACK for at least every second segments.
 
+config NET_TCP_ACK_FREQUENCY
+	int "Segments received per ACK (delayed ACK threshold)"
+	depends on NET_TCP_DELAYED_ACK
+	range 1 255
+	default 2
+	---help---
+		Number of received data segments that trigger one ACK (the
+		delayed ACK threshold).  The delayed ACK timer still forces
+		an ACK after at most 0.5 seconds per RFC 1122.
+
+		Value 1 degenerates to an immediate ACK per received segment
+		(delayed ACK effectively disabled).  Value 2 (default) is the
+		RFC 1122 compliant behavior (an ACK for at least every second
+		segment).  Values above 2 reduce the ACK traffic at the cost of
+		a coarser ACK clock and slower peer congestion window growth.
+
+		NOTE: RFC 1122 Section 4.2.3.2 states that in a stream of
+		full-sized segments there SHOULD be an ACK for at least every
+		second segment.  Setting this value above 2 no longer meets
+		that requirement, but the delayed ACK timer still limits the
+		ACK delay to 0.5 seconds as required by RFC 1122.
+
 config NET_TCP_KEEPALIVE
 	bool "TCP/IP Keep-alive support"
 	default n
