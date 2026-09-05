@@ -64,28 +64,30 @@ int mkdir(const char *pathname, mode_t mode)
 {
   struct inode_search_s desc;
   FAR struct inode *inode;
-  int errcode;
   int ret;
 
   mode &= ~getumask();
 
   /* Find the inode that includes this path */
 
-  SETUP_SEARCH(&desc, pathname, false);
+  ret = inode_search_setup(&desc, pathname, false);
+  if (ret < 0)
+    {
+      goto errout;
+    }
 
-  ret = inode_find(&desc);
+  ret = inode_find(&desc, &inode);
   if (ret >= 0)
     {
       /* An inode was found that includes this path and possibly refers to a
        * mountpoint.
        */
 
-      inode = desc.node;
       DEBUGASSERT(inode != NULL);
 
       if (desc.relpath[0] == '\0')
         {
-          errcode = EEXIST;
+          ret = -EEXIST;
           goto errout_with_inode;
         }
 
@@ -96,14 +98,13 @@ int mkdir(const char *pathname, mode_t mode)
         {
           /* The inode is not a mountpoint */
 
-          errcode = ENXIO;
+          ret = -ENXIO;
           goto errout_with_inode;
         }
 
       ret = inode_checkpathperm(inode, 0, 0);
       if (ret < 0)
         {
-          errcode = -ret;
           goto errout_with_inode;
         }
 
@@ -116,13 +117,12 @@ int mkdir(const char *pathname, mode_t mode)
           ret = inode->u.i_mops->mkdir(inode, desc.relpath, mode);
           if (ret < 0)
             {
-              errcode = -ret;
               goto errout_with_inode;
             }
         }
       else
         {
-          errcode = ENOSYS;
+          ret = -ENOSYS;
           goto errout_with_inode;
         }
 
@@ -132,7 +132,7 @@ int mkdir(const char *pathname, mode_t mode)
 #else
       /* But mountpoints are not supported in this configuration */
 
-      errcode = EEXIST;
+      ret = -EEXIST;
       goto errout_with_inode;
 #endif
     }
@@ -159,21 +159,20 @@ int mkdir(const char *pathname, mode_t mode)
 
       if (ret < 0)
         {
-          errcode = -ret;
           goto errout_with_search;
         }
     }
 #else
   else
     {
-      errcode = ENXIO;
+      ret = -ENXIO;
       goto errout_with_search;
     }
 #endif
 
   /* Directory successfully created */
 
-  RELEASE_SEARCH(&desc);
+  inode_search_release(&desc);
 #ifdef CONFIG_FS_NOTIFY
   notify_mkdir(pathname);
 #endif
@@ -183,8 +182,10 @@ errout_with_inode:
   inode_release(inode);
 
 errout_with_search:
-  RELEASE_SEARCH(&desc);
-  set_errno(errcode);
+  inode_search_release(&desc);
+
+errout:
+  set_errno(-ret);
   return ERROR;
 }
 

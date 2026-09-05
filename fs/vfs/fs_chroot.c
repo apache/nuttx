@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/driver/fs_findmtddriver.c
+ * fs/vfs/fs_chroot.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,93 +26,107 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdbool.h>
+#include <sys/stat.h>
 #include <assert.h>
 #include <errno.h>
-#include <nuttx/debug.h>
+#include <string.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/sched.h>
 
 #include "inode/inode.h"
-
-#ifdef CONFIG_MTD
+#include "fs_heap.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: find_mtddriver
+ * Name: chroot
  *
  * Description:
- *   Return the inode of the named MTD driver specified by 'pathname'
+ *   Cause the named directory to become the root directory, that is, the
+ *   starting point for path names beginning with '/'.
  *
  * Input Parameters:
- *   pathname   - the full path to the named MTD driver to be located
- *   ppinode    - address of the location to return the inode reference
+ *   path - Directory to use as the new root
  *
  * Returned Value:
- *   Returns zero on success or a negated errno on failure:
- *
- *   ENOENT  - No MTD driver of this name is registered
- *   ENOTBLK - The inode associated with the pathname is not an MTD driver
+ *   0(OK) on success; -1(ERROR) on failure with errno set appropriately.
  *
  ****************************************************************************/
 
-int find_mtddriver(FAR const char *pathname, FAR struct inode **ppinode)
+int chroot(FAR const char *path)
 {
+  FAR struct tcb_s *rtcb;
+  FAR struct task_group_s *group;
+  FAR char *newroot;
   struct inode_search_s desc;
-  FAR struct inode *inode;
-  int ret = 0; /* Assume success */
+  struct stat buf;
+  int ret;
 
-  DEBUGASSERT(pathname != NULL || ppinode != NULL);
+  if (path == NULL || path[0] == '\0')
+    {
+      set_errno(ENOENT);
+      return ERROR;
+    }
 
-  /* Find the inode registered with this pathname */
+  rtcb = nxsched_self();
+  DEBUGASSERT(rtcb != NULL && rtcb->group != NULL);
+  group = rtcb->group;
 
-  ret = inode_search_setup(&desc, pathname, false);
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  if (group->tg_euid != 0)
+    {
+      set_errno(EPERM);
+      return ERROR;
+    }
+#endif
+
+  ret = nx_stat(path, &buf, 1);
   if (ret < 0)
     {
-      return ret;
+      set_errno(-ret);
+      return ERROR;
     }
 
-  ret = inode_find(&desc, &inode);
+  if (!S_ISDIR(buf.st_mode))
+    {
+      set_errno(ENOTDIR);
+      return ERROR;
+    }
+
+  /* Resolve to a host absolute path the same way lookups do: make
+   * absolute, prepend the current jail, and canonicalize.  No second
+   * inode walk.
+   */
+
+  ret = inode_search_setup(&desc, path, true);
   if (ret < 0)
     {
-      ferr("ERROR: Failed to find %s\n", pathname);
-      goto errout_with_search;
+      set_errno(-ret);
+      return ERROR;
     }
 
-  /* Verify that the inode is a block driver. */
+  /* Host "/" means no jail.  Clear any previous root. */
 
-  if (!INODE_IS_MTD(inode))
+  if (strcmp(desc.path, "/") == 0)
     {
-      ferr("ERROR: %s is not a named MTD driver\n", pathname);
-      ret = -ENOTBLK;
-      goto errout_with_inode;
+      fs_heap_free(group->tg_root);
+      group->tg_root = NULL;
+      inode_search_release(&desc);
+      return OK;
     }
 
-  /* Return the MTD inode reference */
-
-  DEBUGASSERT(inode->u.i_mtd != NULL);
-
-  *ppinode = inode;
+  newroot = fs_heap_strdup(desc.path);
   inode_search_release(&desc);
+  if (newroot == NULL)
+    {
+      set_errno(ENOMEM);
+      return ERROR;
+    }
+
+  fs_heap_free(group->tg_root);
+  group->tg_root = newroot;
   return OK;
-
-errout_with_inode:
-  inode_release(inode);
-
-errout_with_search:
-  inode_search_release(&desc);
-  return ret;
 }
-
-#else
-
-int find_mtddriver(FAR const char *pathname, FAR struct inode **ppinode)
-{
-  return -ENODEV;
-}
-
-#endif /* CONFIG_MTD */
