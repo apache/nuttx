@@ -32,9 +32,13 @@
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
-#include <nuttx/debug.h>
 #include <errno.h>
+#include <nuttx/debug.h>
 #include <nuttx/board.h>
+
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
+#endif
 
 #include "esp32_start.h"
 
@@ -106,6 +110,14 @@ int esp32_bringup(void)
    * at least enough succeeded to bring-up NSH with perhaps reduced
    * capabilities.
    */
+
+#ifdef CONFIG_USERLED
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
 
   UNUSED(ret);
   return OK;

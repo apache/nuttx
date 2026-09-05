@@ -46,13 +46,6 @@
 
 #define BUTTON_BOOT  0
 
-/* LED
- *
- * This is an externally connected LED used for testing.
- */
-
-#define GPIO_LED1             2
-
 /* PCNT Quadrature Encoder IDs */
 
 #define PCNT_QE0_ID           0
