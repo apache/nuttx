@@ -87,7 +87,7 @@ int set_sporadic_param(FAR const struct sched_param *param,
            * half the duty.
            */
 
-          if (repl_ticks < (2 * budget_ticks))
+          if (repl_ticks >= (2 * budget_ticks))
 #else
           if (repl_ticks < budget_ticks)
 #endif
