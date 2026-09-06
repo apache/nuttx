@@ -101,10 +101,10 @@ class Tcb(Value):
     run_start: Value
     run_max: Value
     run_time: Value
-    premp_start: Value
-    premp_max: Value
-    premp_caller: Value
-    premp_max_caller: Value
+    preemp_start: Value
+    preemp_max: Value
+    preemp_caller: Value
+    preemp_max_caller: Value
     crit_start: Value
     crit_max: Value
     crit_caller: Value
