@@ -187,6 +187,12 @@ int nxsched_set_param(pid_t pid, FAR const struct sched_param *param)
 
   if (param != NULL)
     {
+      if (param->sched_priority < SCHED_PRIORITY_MIN ||
+          param->sched_priority > SCHED_PRIORITY_MAX)
+        {
+          return -EINVAL;
+        }
+
       /* Prohibit modifications to the head of the ready-to-run task
        * list while adjusting the priority
        */
