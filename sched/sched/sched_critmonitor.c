@@ -377,12 +377,11 @@ void nxsched_switch_critmon(FAR struct tcb_s *from, FAR struct tcb_s *to)
   clock_t tick = elapsed * CLOCKS_PER_SEC / perf_getfreq();
 
   nxsched_critmon_cpuload(from, current, tick);
-  to->run_start = current;
 #endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
   from->run_time += elapsed;
-  to->run_time = current;
+  to->run_start = current;
   if (elapsed > from->run_max)
     {
       from->run_max = elapsed;
