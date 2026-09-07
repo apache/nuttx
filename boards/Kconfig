@@ -860,14 +860,14 @@ config ARCH_BOARD_GD32F470ZET6_EVAL
 	depends on ARCH_CHIP_GD32F470ZK
 	select ARCH_HAVE_LEDS
 	---help---
-		GD32 MCU GD32F470ZET6 board (mcu_plat out-of-tree BSP).
+		GD32 MCU GD32F470ZET6 board (energyos_mcu out-of-tree BSP).
 
 
 config ARCH_BOARD_STM32F103ZET6_WARSHIP
 	bool "MCU platform STM32F103ZET6 WarShip V3"
 	depends on ARCH_CHIP_STM32F103ZE
 	---help---
-		STM32F103ZET6 WarShip V3 board (mcu_plat out-of-tree BSP).
+		STM32F103ZET6 WarShip V3 board (energyos_mcu out-of-tree BSP).
 
 config ARCH_BOARD_HIFIVE1_REVB
 	bool "HiFive1 Rev B board"
