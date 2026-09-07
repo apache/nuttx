@@ -157,7 +157,18 @@ static void lio_sighandler(int signo, siginfo_t *info, void *ucontext)
   /* Recover our private data from the AIO control block */
 
   sighand = (FAR struct lio_sighand_s *)aiocbp->aio_priv;
-  DEBUGASSERT(sighand && sighand->list);
+  if (sighand == NULL)
+    {
+      /* This I/O completed before lio_sigsetup() attached our private data
+       * to it (the completion raced with lio_listio() on another CPU).
+       * Nothing to do: an entry that still carries the private data will
+       * finish the job, or lio_sigsetup() already notified the caller.
+       */
+
+      return;
+    }
+
+  DEBUGASSERT(sighand->list);
   aiocbp->aio_priv = NULL;
 
   /* Check if all of the pending I/O has completed */
@@ -165,6 +176,26 @@ static void lio_sighandler(int signo, siginfo_t *info, void *ucontext)
   ret = lio_checkio(sighand->list, sighand->nent);
   if (ret != -EINPROGRESS)
     {
+      FAR struct aiocb *other;
+      int i;
+
+      /* Detach the private data of every other entry.  A SIGPOLL that was
+       * dispatched for one of them before we got here still carries this
+       * handler and will be delivered later, possibly after the caller has
+       * been notified and its list is gone; with aio_priv cleared such a
+       * late invocation finds nothing to do.
+       */
+
+      for (i = 0; i < sighand->nent; i++)
+        {
+          other = sighand->list[i];
+          if (other != NULL && other->aio_priv != NULL)
+            {
+              lib_free(other->aio_priv);
+              other->aio_priv = NULL;
+            }
+        }
+
       /* All pending I/O has completed */
 
       /* Restore the signal handler */
@@ -211,10 +242,12 @@ static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
                         FAR struct sigevent *sig)
 {
   FAR struct aiocb *aiocbp;
+  FAR struct aiocb *first = NULL;
   struct lio_sighand_s sighand;
   sigset_t set;
   struct sigaction act;
   int status;
+  int nprivs = 0;
   int i;
 
   /* Initialize the allocated structure */
@@ -225,11 +258,15 @@ static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
   sighand.nent = nent;
   sighand.pid  = _SCHED_GETPID();
 
-  /* Make sure that SIGPOLL is not blocked */
+  /* Block SIGPOLL until every entry carries its private data.  The I/O is
+   * already in flight and may complete on another CPU at any time; a
+   * completion signal delivered before the loop below has attached the
+   * private data would be lost to lio_sighandler().
+   */
 
   sigemptyset(&set);
   sigaddset(&set, SIGPOLL);
-  status = sigprocmask(SIG_UNBLOCK, &set, &sighand.oprocmask);
+  status = sigprocmask(SIG_BLOCK, &set, &sighand.oprocmask);
   if (status != OK)
     {
       int errcode = get_errno();
@@ -271,6 +308,11 @@ static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
         {
           FAR void *priv = NULL;
 
+          if (first == NULL)
+            {
+              first = aiocbp;
+            }
+
           /* Check if I/O is pending for  this entry */
 
           if (aiocbp->aio_result == -EINPROGRESS)
@@ -284,10 +326,38 @@ static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
 
               memcpy(priv, (FAR void *)&sighand,
                       sizeof(struct lio_sighand_s));
+              nprivs++;
             }
 
           aiocbp->aio_priv = priv;
         }
+    }
+
+  if (nprivs == 0 && first != NULL)
+    {
+      /* Every I/O completed while the signal handler was being set up, so
+       * no lio_sighandler() invocation will see our private data.  Finish
+       * the job here: restore the signal state and notify the caller.
+       */
+
+      sigaction(SIGPOLL, &sighand.oact, NULL);
+      sigprocmask(SIG_SETMASK, &sighand.oprocmask, NULL);
+      return nxsig_notification(sighand.pid, &sighand.sig, SI_ASYNCIO,
+                                &first->aio_sigwork);
+    }
+
+  /* Let the completion signals through.  Any that arrived meanwhile are
+   * delivered right here.
+   */
+
+  status = sigprocmask(SIG_UNBLOCK, &set, NULL);
+  if (status != OK)
+    {
+      int errcode = get_errno();
+
+      ferr("ERROR sigprocmask failed: %d\n", errcode);
+      DEBUGASSERT(errcode > 0);
+      return -errcode;
     }
 
   return OK;
