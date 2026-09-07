@@ -289,7 +289,8 @@ void weak_function up_timer_getmask(FAR clock_t *mask)
 
       ONESHOT_TICK_MAX_DELAY(g_oneshot_lower, &maxticks);
 
-      *mask = CLOCK_MAX >> (sizeof(clock_t) * 8u - flsx(maxticks));
+      *mask = maxticks == 0 ? 0 :
+              UINT64_MAX >> (sizeof(clock_t) * 8u - flsx(maxticks));
     }
 }
 

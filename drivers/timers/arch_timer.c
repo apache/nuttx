@@ -277,11 +277,12 @@ void up_timer_set_lowerhalf(FAR struct timer_lowerhalf_s *lower)
 
 void weak_function up_timer_getmask(FAR clock_t *mask)
 {
-  uint32_t maxticks;
+  uint32_t maxticks = 0u;
 
   TIMER_TICK_MAXTIMEOUT(g_timer.lower, &maxticks);
 
-  *mask = CLOCK_MAX >> (sizeof(clock_t) * 8u - flsx(maxticks));
+  *mask = maxticks == 0u ? 0 :
+          UINT64_MAX >> (sizeof(clock_t) * 8u - flsx(maxticks));
 }
 
 int weak_function up_timer_gettick(FAR clock_t *ticks)
