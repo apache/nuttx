@@ -48,6 +48,7 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
 {
   irqstate_t flags;
   pid_t self = sync ? nxsched_gettid() : INVALID_PROCESS_ID;
+  int ret = -ENOENT;
 
   if (wqueue == NULL || work == NULL)
     {
@@ -83,7 +84,17 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
             {
               work_timer_reset(wqueue);
             }
+
+          ret = OK;
         }
+
+      /* Otherwise the work is not queued: either it was never queued or a
+       * worker has already dequeued it and may be executing its callback
+       * right now.  Only the scan below can tell.  Report -ENOENT if the
+       * work is neither queued nor running, so that callers (e.g.
+       * aio_cancel()) do not free resources that the callback is still
+       * using.
+       */
 
       if (sync)
         {
@@ -93,6 +104,7 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
                 {
                   worker[wndx].wait_count++;
                   sync_wait = &worker[wndx].wait;
+                  ret = OK;
                   break;
                 }
             }
@@ -102,7 +114,7 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
 
       if (sync_wait == NULL)
         {
-          return OK;
+          return ret;
         }
 
       nxsem_wait_uninterruptible(sync_wait);
@@ -130,6 +142,8 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
  *   Zero on success, a negated errno on failure
  *
  *   -EINVAL - An invalid work queue was specified
+ *   -ENOENT - The work is not queued (and, for the sync variant, not
+ *             running either)
  *
  ****************************************************************************/
 
