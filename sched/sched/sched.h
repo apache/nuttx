@@ -367,6 +367,9 @@ void nxsched_resume_roundrobin(FAR struct tcb_s *tcb);
 #endif
 
 #ifdef CONFIG_SCHED_SPORADIC
+int  nxsched_validate_sporadic(FAR const struct sched_param *param,
+                                FAR clock_t *repl_ticks,
+                                FAR clock_t *budget_ticks);
 int  nxsched_initialize_sporadic(FAR struct tcb_s *tcb);
 int  nxsched_start_sporadic(FAR struct tcb_s *tcb);
 int  nxsched_stop_sporadic(FAR struct tcb_s *tcb);
