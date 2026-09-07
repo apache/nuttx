@@ -179,7 +179,7 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
                                                  rsc.rng0_shm);
       rsc->rng0_carveout.pa           = FW_RSC_U32_ADDR_ANY;
       rsc->rng0_carveout.len          = sizeof(priv->shmem->rsc.rng0_shm);
-      memcpy(rsc->rng0_carveout.name, "rng0_shm", 9);
+      memcpy(rsc->rng0_carveout.name, "vdev0buffer", 12);
 
       /* Virtio Driver 1, VIRTIO_ID_ENTROPY */
 
@@ -207,7 +207,7 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
                                                  rsc.rng1_shm);
       rsc->rng1_carveout.pa           = FW_RSC_U32_ADDR_ANY;
       rsc->rng1_carveout.len          = sizeof(priv->shmem->rsc.rng1_shm);
-      memcpy(rsc->rng1_carveout.name, "rng1_shm", 9);
+      memcpy(rsc->rng1_carveout.name, "vdev1buffer", 12);
 
       /* Virtio Driver 2, VIRTIO_ID_RPMSG */
 
@@ -248,7 +248,7 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
                                                  rsc.rpmsg0_shm);
       rsc->rpmsg0_carveout.pa         = FW_RSC_U32_ADDR_ANY;
       rsc->rpmsg0_carveout.len        = sizeof(priv->shmem->rsc.rpmsg0_shm);
-      memcpy(rsc->rpmsg0_carveout.name, "rpmsg0_shm", 10);
+      memcpy(rsc->rpmsg0_carveout.name, "vdev2buffer", 12);
 
       /* Virtio Driver 3, VIRTIO_ID_SERIAL */
 
@@ -281,7 +281,7 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
                                              rsc.serial0_shm);
       rsc->serial0_carveout.pa    = FW_RSC_U32_ADDR_ANY;
       rsc->serial0_carveout.len   = sizeof(priv->shmem->rsc.serial0_shm);
-      memcpy(rsc->serial0_carveout.name, "serial0_shm", 11);
+      memcpy(rsc->serial0_carveout.name, "vdev3buffer", 12);
 
       priv->shmem->base           = (uintptr_t)priv->shmem;
 
