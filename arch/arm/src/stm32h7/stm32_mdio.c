@@ -63,7 +63,7 @@ struct stm32_mdio_lowerhalf_s
 {
   struct mdio_lowerhalf_s base;
 
-  /* MDIO bus timeout in milliseconds */
+  /* MDIO bus timeout in microseconds */
 
   int timeout;
 };
@@ -95,7 +95,7 @@ struct stm32_mdio_lowerhalf_s g_stm32_mdio_lowerhalf =
     {
       .ops = &g_stm32_mdio_ops
     },
-  .timeout = 10
+  .timeout = 10000
 };
 
 /****************************************************************************
@@ -131,9 +131,14 @@ static int stm32_c22_read(struct mdio_lowerhalf_s *dev, uint8_t phydev,
 
   stm32_putreg(regval, STM32_ETH_MACMDIOAR);
 
-  /* Wait for the transfer to complete */
+  /* Wait for the transfer to complete.  A Clause 22 frame is 64 MDC
+   * cycles, about 30 us at a 2.5 MHz MDC, so poll at a fraction of that.
+   * A millisecond delay here turns every PHY register access into a
+   * busy-wait far longer than the transfer, and the autonegotiation link
+   * wait in stm32_phyinit() issues thousands of them.
+   */
 
-  for (to = priv->timeout; to >= 0; to--)
+  for (to = priv->timeout; to > 0; to -= 10)
     {
       if ((stm32_getreg(STM32_ETH_MACMDIOAR) & ETH_MACMDIOAR_MB) == 0)
         {
@@ -142,10 +147,10 @@ static int stm32_c22_read(struct mdio_lowerhalf_s *dev, uint8_t phydev,
           break;
         }
 
-      up_mdelay(5);
+      up_udelay(10);
     }
 
-  if (to <= 0)
+  if (retval < 0)
     {
       ninfo("MII transfer timed out: phydev: %04x regaddr: %04x\n",
             phydev, regaddr);
@@ -192,7 +197,7 @@ static int stm32_c22_write(struct mdio_lowerhalf_s *dev, uint8_t phydev,
 
   /* Wait for the transfer to complete */
 
-  for (to = priv->timeout; to >= 0; to--)
+  for (to = priv->timeout; to > 0; to -= 10)
     {
       if ((stm32_getreg(STM32_ETH_MACMDIOAR) & ETH_MACMDIOAR_MB) == 0)
         {
@@ -200,10 +205,10 @@ static int stm32_c22_write(struct mdio_lowerhalf_s *dev, uint8_t phydev,
           break;
         }
 
-      up_mdelay(5);
+      up_udelay(10);
     }
 
-  if (to <= 0)
+  if (retval < 0)
     {
       ninfo("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x"
             "value: %04x\n", phydev, regaddr, value);
