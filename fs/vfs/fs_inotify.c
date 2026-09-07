@@ -80,6 +80,13 @@ struct inotify_device_s
   uint32_t           event_size;  /* Size of the queue (bytes) */
   uint32_t           event_count; /* Number of pending events */
   FAR struct pollfd_s *fds[CONFIG_FS_NOTIFY_FD_POLLWAITERS];
+
+  /* An in-kernel instance delivers events through this callback instead
+   * of the event queue (see file_notify_open).
+   */
+
+  inotify_callback_t callback;
+  FAR void          *arg;
 };
 
 struct inotify_event_s
@@ -314,6 +321,14 @@ static void inotify_queue_event(FAR struct inotify_device_s *dev, int wd,
   FAR struct inotify_event_s *event;
   FAR struct inotify_event_s *last;
   int semcnt;
+
+  /* In-kernel instance: hand the event to the callback and return */
+
+  if (dev->callback != NULL)
+    {
+      dev->callback(dev->arg, wd, mask, name);
+      return;
+    }
 
   if (!list_is_empty(&dev->events))
     {
@@ -824,31 +839,6 @@ static int inotify_close(FAR struct file *filep)
 }
 
 /****************************************************************************
- * Name: inotify_get_device_from_fd
- *
- * Description:
- *   Get the inotify device from the file descriptor.
- *
- ****************************************************************************/
-
-static FAR struct inotify_device_s *
-inotify_get_device_from_fd(int fd, FAR struct file **filep)
-{
-  if (file_get(fd, filep) < 0)
-    {
-      return NULL;
-    }
-
-  if ((*filep)->f_inode != &g_inotify_inode)
-    {
-      file_put(*filep);
-      return NULL;
-    }
-
-  return (*filep)->f_priv;
-}
-
-/****************************************************************************
  * Name: inotify_get_watch_from_list
  *
  * Description:
@@ -1317,27 +1307,237 @@ static void notify_free_entry(FAR ENTRY *entry)
 
 int inotify_add_watch(int fd, FAR const char *pathname, uint32_t mask)
 {
+  FAR struct file *filep;
+  int ret;
+
+  ret = file_get(fd, &filep);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
+    }
+
+  if (filep->f_inode != &g_inotify_inode)
+    {
+      file_put(filep);
+      set_errno(EBADF);
+      return ERROR;
+    }
+
+  ret = file_notify_add_watch(filep, pathname, mask);
+  file_put(filep);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: inotify_rm_watch
+ *
+ * Description:
+ *  Removes the watch associated with the watch descriptor wd from the
+ *  inotify instance associated with the file descriptor fd.
+ *
+ * Input Parameters:
+ *  fd - The file descriptor associated with an instance of inotify.
+ *  wd - The watch descriptor to be removed.
+ *
+ * Returned Value:
+ *  On success, inotify_rm_watch() returns zero.  On error, -1 is returned
+ *  and errno is set appropriately.
+ *
+ ****************************************************************************/
+
+int inotify_rm_watch(int fd, int wd)
+{
+  FAR struct file *filep;
+  int ret;
+
+  ret = file_get(fd, &filep);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
+    }
+
+  if (filep->f_inode != &g_inotify_inode)
+    {
+      file_put(filep);
+      set_errno(EBADF);
+      return ERROR;
+    }
+
+  ret = file_notify_rm_watch(filep, wd);
+  file_put(filep);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: inotify_init1
+ *
+ * Description:
+ *  Initializes a new inotify instance and returns a file descriptor
+ *  associated with a new inotify event queue.
+ *
+ * Input Parameters:
+ *  flags - The following values are recognized in flags:
+ *    IN_NONBLOCK - Set the O_NONBLOCK file status flag on the new open file
+ *      description. Using this flag saves extra calls to fcntl(2) to achieve
+ *      the same result.
+ *    IN_CLOEXEC - Set the close-on-exec (FD_CLOEXEC) flag on the new file
+ *      descriptor. See the description of the O_CLOEXEC flag in open(2) for
+ *      reasons why this may be useful.
+ *
+ * Returned Value:
+ *  On success, these system calls return a new file descriptor.
+ *  On error, -1 is returned and errno is set appropriately.
+ *
+ ****************************************************************************/
+
+int inotify_init1(int flags)
+{
+  FAR struct inotify_device_s *dev;
+  int ret;
+
+  if ((flags & ~(IN_NONBLOCK | IN_CLOEXEC)) != 0)
+    {
+      ret = -EINVAL;
+      goto exit_set_errno;
+    }
+
+  dev = inotify_alloc_device();
+  if (dev == NULL)
+    {
+      ferr("Failed to allocate inotify device\n");
+      ret = -ENOMEM;
+      goto exit_set_errno;
+    }
+
+#ifdef CONFIG_FS_NOTIFY_INJECT
+  ret = file_allocate_from_inode(&g_inotify_inode, O_RDWR | flags,
+                                 0, dev, 0);
+#else
+  ret = file_allocate_from_inode(&g_inotify_inode, O_RDONLY | flags,
+                                 0, dev, 0);
+#endif
+  if (ret < 0)
+    {
+      ferr("Failed to allocate inotify fd\n");
+      goto exit_with_dev;
+    }
+
+  return ret;
+
+exit_with_dev:
+  nxmutex_destroy(&dev->lock);
+  nxsem_destroy(&dev->sem);
+  fs_heap_free(dev);
+exit_set_errno:
+  set_errno(-ret);
+  return ERROR;
+}
+
+/****************************************************************************
+ * Name: inotify_init
+ *
+ * Description:
+ *  Initializes a new inotify instance and returns a file descriptor
+ *  associated with a new inotify event queue.
+ *
+ * Returned Value:
+ *  On success, these system calls return a new file descriptor.
+ *  On error, -1 is returned and errno is set appropriately.
+ *
+ ****************************************************************************/
+
+int inotify_init(void)
+{
+  return inotify_init1(0);
+}
+
+/****************************************************************************
+ * Name: file_notify_open
+ *
+ * Description:
+ *   Open an in-kernel inotify instance.  Instead of queueing events for
+ *   a reader, the instance delivers each event to callback in the
+ *   context that generated it (so the callback must not block).  The
+ *   instance is closed with file_notify_close().
+ *
+ * Input Parameters:
+ *   filep    - Caller provided file structure to initialize
+ *   callback - Invoked for every event on a watched path
+ *   arg      - Opaque argument passed to callback
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int file_notify_open(FAR struct file *filep, inotify_callback_t callback,
+                     FAR void *arg)
+{
+  FAR struct inotify_device_s *dev;
+
+  DEBUGASSERT(filep != NULL && callback != NULL);
+
+  dev = inotify_alloc_device();
+  if (dev == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  dev->callback = callback;
+  dev->arg      = arg;
+
+  memset(filep, 0, sizeof(*filep));
+  inode_addref(&g_inotify_inode);
+  filep->f_inode  = &g_inotify_inode;
+  filep->f_oflags = O_RDONLY;
+  filep->f_priv   = dev;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: file_notify_add_watch
+ *
+ * Description:
+ *   Add a watch to an in-kernel inotify instance (see file_notify_open).
+ *
+ * Returned Value:
+ *   A nonnegative watch descriptor on success; a negated errno value on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int file_notify_add_watch(FAR struct file *filep, FAR const char *pathname,
+                          uint32_t mask)
+{
+  FAR struct inotify_device_s *dev;
   FAR struct inotify_watch_list_s *list;
   FAR struct inotify_watch_s *watch;
   FAR struct inotify_watch_s *old;
-  FAR struct inotify_device_s *dev;
-  FAR struct file *filep;
   FAR char *tmpbuffer;
   FAR char *abspath;
   struct stat buf;
   int ret;
 
+  DEBUGASSERT(filep != NULL && filep->f_priv != NULL);
+  dev = filep->f_priv;
+
   if ((mask & IN_ALL_EVENTS) == 0)
     {
-      set_errno(EINVAL);
-      return ERROR;
-    }
-
-  dev = inotify_get_device_from_fd(fd, &filep);
-  if (dev == NULL)
-    {
-      set_errno(EBADF);
-      return ERROR;
+      return -EINVAL;
     }
 
   /* Allocate temporary buffer for realpath */
@@ -1345,9 +1545,7 @@ int inotify_add_watch(int fd, FAR const char *pathname, uint32_t mask)
   tmpbuffer = lib_get_tempbuffer(PATH_MAX);
   if (tmpbuffer == NULL)
     {
-      file_put(filep);
-      set_errno(ENOMEM);
-      return ERROR;
+      return -ENOMEM;
     }
 
   abspath = lib_realpath(pathname, tmpbuffer, mask & IN_DONT_FOLLOW);
@@ -1436,46 +1634,28 @@ out:
     }
 
 out_free:
-  file_put(filep);
   lib_put_tempbuffer(tmpbuffer);
-  if (ret < 0)
-    {
-      set_errno(-ret);
-      ret = ERROR;
-    }
-
   return ret;
 }
 
 /****************************************************************************
- * Name: inotify_rm_watch
+ * Name: file_notify_rm_watch
  *
  * Description:
- *  Removes the watch associated with the watch descriptor wd from the
- *  inotify instance associated with the file descriptor fd.
- *
- * Input Parameters:
- *  fd - The file descriptor associated with an instance of inotify.
- *  wd - The watch descriptor to be removed.
+ *   Remove a watch from an in-kernel inotify instance.
  *
  * Returned Value:
- *  On success, inotify_rm_watch() returns zero.  On error, -1 is returned
- *  and errno is set appropriately.
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int inotify_rm_watch(int fd, int wd)
+int file_notify_rm_watch(FAR struct file *filep, int wd)
 {
   FAR struct inotify_device_s *dev;
   FAR struct inotify_watch_s *watch;
-  FAR struct file *filep;
 
-  dev = inotify_get_device_from_fd(fd, &filep);
-  if (dev == NULL)
-    {
-      set_errno(EBADF);
-      return ERROR;
-    }
+  DEBUGASSERT(filep != NULL && filep->f_priv != NULL);
+  dev = filep->f_priv;
 
   nxmutex_lock(&g_inotify.lock);
   nxmutex_lock(&dev->lock);
@@ -1484,99 +1664,29 @@ int inotify_rm_watch(int fd, int wd)
     {
       nxmutex_unlock(&dev->lock);
       nxmutex_unlock(&g_inotify.lock);
-      file_put(filep);
-      set_errno(EINVAL);
-      return ERROR;
+      return -EINVAL;
     }
 
   inotify_remove_watch(dev, watch);
   nxmutex_unlock(&dev->lock);
   nxmutex_unlock(&g_inotify.lock);
-  file_put(filep);
   return OK;
 }
 
 /****************************************************************************
- * Name: inotify_init1
+ * Name: file_notify_close
  *
  * Description:
- *  Initializes a new inotify instance and returns a file descriptor
- *  associated with a new inotify event queue.
- *
- * Input Parameters:
- *  flags - The following values are recognized in flags:
- *    IN_NONBLOCK - Set the O_NONBLOCK file status flag on the new open file
- *      description. Using this flag saves extra calls to fcntl(2) to achieve
- *      the same result.
- *    IN_CLOEXEC - Set the close-on-exec (FD_CLOEXEC) flag on the new file
- *      descriptor. See the description of the O_CLOEXEC flag in open(2) for
- *      reasons why this may be useful.
- *
- * Returned Value:
- *  On success, these system calls return a new file descriptor.
- *  On error, -1 is returned and errno is set appropriately.
+ *   Close an in-kernel inotify instance and remove all its watches.
  *
  ****************************************************************************/
 
-int inotify_init1(int flags)
+void file_notify_close(FAR struct file *filep)
 {
-  FAR struct inotify_device_s *dev;
-  int ret;
-
-  if ((flags & ~(IN_NONBLOCK | IN_CLOEXEC)) != 0)
-    {
-      ret = -EINVAL;
-      goto exit_set_errno;
-    }
-
-  dev = inotify_alloc_device();
-  if (dev == NULL)
-    {
-      ferr("Failed to allocate inotify device\n");
-      ret = -ENOMEM;
-      goto exit_set_errno;
-    }
-
-#ifdef CONFIG_FS_NOTIFY_INJECT
-  ret = file_allocate_from_inode(&g_inotify_inode, O_RDWR | flags,
-                                 0, dev, 0);
-#else
-  ret = file_allocate_from_inode(&g_inotify_inode, O_RDONLY | flags,
-                                 0, dev, 0);
-#endif
-  if (ret < 0)
-    {
-      ferr("Failed to allocate inotify fd\n");
-      goto exit_with_dev;
-    }
-
-  return ret;
-
-exit_with_dev:
-  nxmutex_destroy(&dev->lock);
-  nxsem_destroy(&dev->sem);
-  fs_heap_free(dev);
-exit_set_errno:
-  set_errno(-ret);
-  return ERROR;
-}
-
-/****************************************************************************
- * Name: inotify_init
- *
- * Description:
- *  Initializes a new inotify instance and returns a file descriptor
- *  associated with a new inotify event queue.
- *
- * Returned Value:
- *  On success, these system calls return a new file descriptor.
- *  On error, -1 is returned and errno is set appropriately.
- *
- ****************************************************************************/
-
-int inotify_init(void)
-{
-  return inotify_init1(0);
+  DEBUGASSERT(filep != NULL);
+  inotify_close(filep);
+  inode_release(filep->f_inode);
+  filep->f_inode = NULL;
 }
 
 /****************************************************************************

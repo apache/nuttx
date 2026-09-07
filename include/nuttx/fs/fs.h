@@ -938,6 +938,34 @@ int nx_umount2(FAR const char *target, unsigned int flags);
 #ifdef CONFIG_FS_NOTIFY
 void notify_event(FAR struct inode *mountpt, FAR const char *relpath,
                   uint32_t mask);
+
+/* Callback invoked for each event on an in-kernel inotify instance.
+ * Runs in the context that generated the event and must not block.
+ */
+
+typedef CODE void (*inotify_callback_t)(FAR void *arg, int wd,
+                                        uint32_t mask,
+                                        FAR const char *name);
+
+/****************************************************************************
+ * Name: file_notify_open / file_notify_add_watch / file_notify_rm_watch /
+ *       file_notify_close
+ *
+ * Description:
+ *   In-kernel inotify: watch paths and receive events through a callback
+ *   instead of a file descriptor and event queue.  file_notify_open()
+ *   initializes a caller provided struct file; watches are added and
+ *   removed with the returned watch descriptors; file_notify_close()
+ *   removes all watches and releases the instance.
+ *
+ ****************************************************************************/
+
+int file_notify_open(FAR struct file *filep, inotify_callback_t callback,
+                     FAR void *arg);
+int file_notify_add_watch(FAR struct file *filep, FAR const char *pathname,
+                          uint32_t mask);
+int file_notify_rm_watch(FAR struct file *filep, int wd);
+void file_notify_close(FAR struct file *filep);
 #endif
 
 /****************************************************************************
