@@ -390,9 +390,12 @@ static int intel64_hpet_setisr(struct intel64_tim_dev_s *dev, uint8_t timer,
 
   if (handler == NULL)
     {
-      /* Disable interrupt */
+      /* Disable the interrupt but keep the ISR attached.  Detaching it here
+       * installs irq_unexpected_isr(), and an HPET interrupt that is already
+       * in flight to another CPU then panics the system.  A stray interrupt
+       * is handled as spurious by the oneshot ISR instead.
+       */
 
-      irq_attach(irq, handler, arg);
       up_disable_irq(irq);
     }
   else
