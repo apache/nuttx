@@ -139,6 +139,12 @@ ifeq ($(CONFIG_DSHOT),y)
   TMRVPATH = :timers
 endif
 
+ifeq ($(CONFIG_OCU),y)
+  CSRCS += ocu.c
+  TMRDEPPATH = --dep-path timers
+  TMRVPATH = :timers
+endif
+
 ifeq ($(CONFIG_CAPTURE),y)
   CSRCS += capture.c
 
