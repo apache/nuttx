@@ -1642,6 +1642,18 @@
 #  define __has_include(x) 0
 #endif
 
+#ifndef __has_feature
+#  define __has_feature(x) 0
+#endif
+
+#ifndef __has_extension
+#  define __has_extension(x) 0
+#endif
+
+#ifndef __has_keyword
+#  define __has_keyword(x) 0
+#endif
+
 /* A program can define NUTTX_NO_EXTENSIONS before the first #include to
  * keep some non-standard names free for its own use.  Then the headers do
  * not define ERROR and OK (sys/types.h), set_errno() and get_errno()
