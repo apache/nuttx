@@ -31,11 +31,13 @@
 #include <poll.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/param.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/i2c/i2c_slave.h>
 
