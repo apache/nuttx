@@ -1247,11 +1247,11 @@ static void rp2040_ep0setup(struct rp2040_usbdev_s *priv)
             break;
 
           case USB_REQ_SYNCHFRAME:
-              /* type:  device-to-host; recipient = endpoint
-               * value: 0
-               * index: endpoint;
-               * len:   2; data = frame number
-               */
+            /* type:  device-to-host; recipient = endpoint
+             * value: 0
+             * index: endpoint;
+             * len:   2; data = frame number
+             */
 
             {
               usbtrace(TRACE_INTDECODE(RP2040_TRACEINTID_SYNCHFRAME), 0);
@@ -1497,7 +1497,8 @@ static int rp2040_usbinterrupt(int irq, void *context, void *arg)
   if (stat & RP2040_USBCTRL_REGS_INTR_BUFF_STATUS)
     {
       while (rp2040_usbintr_buffstat(priv))
-        ;
+        {
+        }
     }
 
   if (stat & RP2040_USBCTRL_REGS_INTR_SETUP_REQ)
@@ -1971,6 +1972,13 @@ static struct usbdev_ep_s *rp2040_allocep(struct usbdev_s *dev,
   int dpindex;
 
   usbtrace(TRACE_DEVALLOCEP, (uint16_t)eplog);
+
+  /* Some callers (e.g. usbdev_fs.c) pass a bare endpoint number in eplog
+   * and rely solely on 'in' for direction, so make eplog agree with 'in'
+   * before it is used by RP2040_EPINDEX()/RP2040_DPINDEX() below.
+   */
+
+  eplog = in ? (USB_EPNO(eplog) | USB_DIR_IN) : USB_EPNO(eplog);
 
   /* Ignore any direction bits in the logical address */
 
