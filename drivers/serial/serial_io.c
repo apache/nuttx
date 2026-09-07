@@ -57,14 +57,22 @@
 void uart_xmitchars(FAR uart_dev_t *dev)
 {
   uint16_t nbytes = 0;
+  sbuf_size_t head;
 
 #ifdef CONFIG_SMP
   irqstate_t flags = enter_critical_section();
 #endif
 
-  /* Send while we still have data in the TX buffer & room in the fifo */
+  /* Send while we still have data in the TX buffer & room in the fifo.
+   *
+   * uart_putxmitchar() advances xmit.head from thread context without
+   * holding the critical section, so on SMP it can move (and wrap) while
+   * we are in here.  Sample it once per iteration: a stale value only
+   * makes us send less now, whereas reading it twice can turn the batch
+   * length negative and send from far beyond the buffer.
+   */
 
-  while (dev->xmit.head != dev->xmit.tail && uart_txready(dev))
+  while ((head = dev->xmit.head) != dev->xmit.tail && uart_txready(dev))
     {
       /* Send the next byte */
 
@@ -72,9 +80,9 @@ void uart_xmitchars(FAR uart_dev_t *dev)
         {
           ssize_t sent;
 
-          if (dev->xmit.tail < dev->xmit.head)
+          if (dev->xmit.tail < head)
             {
-              sent = dev->xmit.head - dev->xmit.tail;
+              sent = head - dev->xmit.tail;
             }
           else
             {
