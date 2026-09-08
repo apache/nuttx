@@ -100,18 +100,21 @@ static int intel64_oneshot_handler(int irg_num, void * context, void *arg)
       INTEL64_TIM_ACKINT(oneshot->tch, oneshot->chan);
 #endif
 
-      /* The timer is no longer running */
+      /* The timer is no longer running.  Only pick up the handler here;
+       * it is owned by intel64_oneshot_start()/cancel(), which may be
+       * re-arming the timer on another CPU right now.  Clearing it from
+       * the ISR could leave a re-armed timer without a handler, and the
+       * next expiry would then jump through a NULL pointer.
+       */
 
       oneshot->running = false;
-
-      /* Forward the event, clearing out any vestiges */
-
       oneshot_handler  = (oneshot_handler_t)oneshot->handler;
-      oneshot->handler = NULL;
       oneshot_arg      = (void *)oneshot->arg;
-      oneshot->arg     = NULL;
 
-      oneshot_handler(oneshot_arg);
+      if (oneshot_handler != NULL)
+        {
+          oneshot_handler(oneshot_arg);
+        }
     }
   else
     {
