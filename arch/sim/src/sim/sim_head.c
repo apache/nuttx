@@ -41,6 +41,9 @@
 #include <nuttx/syslog/syslog_rpmsg.h>
 
 #include "sim_internal.h"
+#ifdef CONFIG_SIM_HCISOCKET
+#  include "sim_hosthcisocket.h"
+#endif
 
 /****************************************************************************
  * Public Data
@@ -189,6 +192,16 @@ int main(int argc, char **argv, char **envp)
         {
           host_set_timeratio(atoi(argv[i] + 15));
         }
+#ifdef CONFIG_SIM_HCISOCKET
+      else if (strncmp(argv[i], "--bt-dev=", 9) == 0)
+        {
+          if (host_bthcisock_configure(argv[i] + 9) < 0)
+            {
+              host_printf("invalid --bt-dev target: %s\n", argv[i] + 9);
+              return EXIT_FAILURE;
+            }
+        }
+#endif
 #ifdef CONFIG_SIM_BSIM_TIME
       else if (strncmp(argv[i], "--sim-bsim-sid=", 15) == 0)
         {

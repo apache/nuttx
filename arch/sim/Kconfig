@@ -672,6 +672,9 @@ config SIM_HCISOCKET
 		target via HCI_CHANNEL_USER. This gives NuttX full
 		control of the device, but is abstracted from the
 		physical interface which is still handled by Linux.
+		The default BlueZ device can be overridden at runtime
+		with --bt-dev=hciN, or replaced by a Unix-domain HCI
+		socket with --bt-dev=/path/to/socket.
 
 config SIM_HCISOCKET_DEVID
 	int "Bluetooth Device ID"
@@ -679,7 +682,7 @@ config SIM_HCISOCKET_DEVID
 	depends on SIM_HCISOCKET
 	---help---
 		Attached the local bluetooth device use specific
-		Bluetooth HCI number id.
+		Bluetooth HCI number id when --bt-dev is not passed.
 
 config SIM_I2CBUS
 	bool "Simulated I2C Bus"

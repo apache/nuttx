@@ -28,9 +28,12 @@
 #include <sys/uio.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
+#include <sys/un.h>
 
+#include <stddef.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
@@ -60,9 +63,125 @@ struct sockaddr_hci
   unsigned short  hci_channel;
 };
 
+enum bthcisock_target_e
+{
+  BTHCISOCK_TARGET_DEFAULT = 0,
+  BTHCISOCK_TARGET_BLUEZ,
+  BTHCISOCK_TARGET_UNIX
+};
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static enum bthcisock_target_e g_bthcisock_target;
+static int g_bthcisock_devid;
+static char g_bthcisock_path[sizeof(((struct sockaddr_un *)0)->sun_path)];
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static int host_bthcisock_parse_devid(const char *target, int *devid)
+{
+  if (strncmp(target, "hci", 3) != 0 || target[3] == '\0')
+    {
+      return -EINVAL;
+    }
+
+  target += 3;
+  *devid = atoi(target);
+  return 0;
+}
+
+static int host_bthcisock_open_unix(const char *path)
+{
+  struct sockaddr_un addr;
+  size_t len;
+  int ret;
+  int fd;
+
+  len = strlen(path);
+  if (len == 0)
+    {
+      return -EINVAL;
+    }
+
+  if (len >= sizeof(addr.sun_path))
+    {
+      return -ENAMETOOLONG;
+    }
+
+  fd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC | SOCK_NONBLOCK, 0);
+  if (fd < 0)
+    {
+      return -errno;
+    }
+
+  memset(&addr, 0, sizeof(addr));
+  addr.sun_family = AF_UNIX;
+  memcpy(addr.sun_path, path, len + 1);
+
+  ret = connect(fd, (struct sockaddr *)&addr,
+                offsetof(struct sockaddr_un, sun_path) + len + 1);
+  if (ret < 0)
+    {
+      ret = -errno;
+      close(fd);
+      return ret;
+    }
+
+  return fd;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: host_bthcisock_configure
+ *
+ * Description:
+ *   Override the default HCI target. Accepted values:
+ *   - "hci<n>" for BlueZ HCI user channel
+ *   - "/path/to.sock" for Unix-domain HCI socket
+ *
+ ****************************************************************************/
+
+int host_bthcisock_configure(const char *target)
+{
+  size_t len;
+  int ret;
+  int devid;
+
+  if (target == NULL || target[0] == '\0')
+    {
+      return -EINVAL;
+    }
+
+  if (target[0] == '/')
+    {
+      len = strlen(target);
+      if (len >= sizeof(g_bthcisock_path))
+        {
+          return -ENAMETOOLONG;
+        }
+
+      memcpy(g_bthcisock_path, target, len + 1);
+      g_bthcisock_target = BTHCISOCK_TARGET_UNIX;
+      return 0;
+    }
+
+  ret = host_bthcisock_parse_devid(target, &devid);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  g_bthcisock_devid = devid;
+  g_bthcisock_target = BTHCISOCK_TARGET_BLUEZ;
+  return 0;
+}
 
 /****************************************************************************
  * Name: host_bthcisock_avail
@@ -127,7 +246,7 @@ int host_bthcisock_send(int fd, const void *data, size_t len)
           continue;
         }
 
-      return -1;
+      return -errno;
     }
 
   return 0;
@@ -160,7 +279,7 @@ int host_bthcisock_receive(int fd, void *data, size_t len)
     {
       /* Both an empty read and an error are "error" conditions */
 
-      return -1;
+      return err < 0 ? -errno : -ECONNRESET;
     }
 
   /* Return the number of bytes written to data */
@@ -189,11 +308,23 @@ int host_bthcisock_open(int dev_idx)
 {
   int err;
   struct sockaddr_hci addr;
-  int fd = socket(PF_BLUETOOTH, SOCK_RAW | SOCK_CLOEXEC | SOCK_NONBLOCK,
-                  BTPROTO_HCI);
+  int fd;
+
+  if (g_bthcisock_target == BTHCISOCK_TARGET_UNIX)
+    {
+      return host_bthcisock_open_unix(g_bthcisock_path);
+    }
+
+  if (g_bthcisock_target == BTHCISOCK_TARGET_BLUEZ)
+    {
+      dev_idx = g_bthcisock_devid;
+    }
+
+  fd = socket(PF_BLUETOOTH, SOCK_RAW | SOCK_CLOEXEC | SOCK_NONBLOCK,
+              BTPROTO_HCI);
   if (fd < 0)
     {
-      return fd;
+      return -errno;
     }
 
   /* We must bring the device down before binding to user channel */
@@ -201,6 +332,8 @@ int host_bthcisock_open(int dev_idx)
   err = ioctl(fd, HCIDEVDOWN, dev_idx);
   if (err < 0)
     {
+      err = -errno;
+      close(fd);
       return err;
     }
 
@@ -212,6 +345,7 @@ int host_bthcisock_open(int dev_idx)
   err = bind(fd, (struct sockaddr *) &addr, sizeof(addr));
   if (err < 0)
     {
+      err = -errno;
       close(fd);
       return err;
     }
@@ -236,5 +370,5 @@ int host_bthcisock_open(int dev_idx)
 
 int host_bthcisock_close(int fd)
 {
-  return close(fd);
+  return close(fd) < 0 ? -errno : 0;
 }
