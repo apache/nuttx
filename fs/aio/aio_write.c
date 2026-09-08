@@ -82,7 +82,12 @@ static void aio_write_worker(FAR void *arg)
 #ifdef CONFIG_PRIORITY_INHERITANCE
   prio   = aioc->aioc_prio;
 #endif
-  aiocbp = aioc_decant(aioc);
+  aiocbp = aioc->aioc_aiocbp;
+
+  /* Perform the I/O while the container and its file reference are
+   * still valid.  aioc_decant() drops the reference and frees the
+   * container, so it must be the last use of 'aioc'.
+   */
 
   /* Call fcntl(F_GETFL) to get the file open mode. */
 
@@ -133,6 +138,7 @@ errout:
 
   /* Signal the client */
 
+  aioc_decant(aioc);
   aio_signal(pid, aiocbp);
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
