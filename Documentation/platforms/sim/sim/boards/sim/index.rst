@@ -651,17 +651,48 @@ the NULL Bluetooth device at ``drivers/wireless/bluetooth/bt_null.c``.
 There is also support on a Linux Host for attaching the bluetooth hardware from
 the host to the NuttX bluetooth stack via the HCI Socket interface over the User
 Channel. This is enabled in the bthcisock configuration. In order to use this
-you must give the ``nuttx`` ELF additional capabilities:
+with the configured default HCI device, you must give the ``nuttx`` ELF
+additional capabilities:
 
 .. code:: console
 
    $ sudo setcap 'cap_net_raw,cap_net_admin=eip' ./nuttx
 
-You can then monitor the HCI traffic on the host with WireShark or ``btmon``:
+The default HCI device is selected by ``CONFIG_SIM_HCISOCKET_DEVID``. It may be
+overridden at runtime with ``--bt-dev=hciN``:
+
+.. code:: console
+
+   $ ./nuttx --bt-dev=hci1
+
+You can then monitor the BlueZ HCI traffic on the host with WireShark or
+``btmon``:
 
 .. code:: console
 
    $ sudo btmon
+
+The sim target can also connect to an HCI H:4 stream exposed through a Unix
+domain socket by passing an absolute socket path:
+
+.. code:: console
+
+   $ ./nuttx --bt-dev=/tmp/hci0.sock
+
+This Unix socket mode does not require a BlueZ HCI device. Since ``nuttx`` only
+connects to a normal Unix domain socket, the ``nuttx`` process does not need to
+run as root and does not need the ``setcap`` command above. This is useful when
+the controller is provided by another host process, or when a UART controller is
+bridged into a Unix socket with a tool such as ``socat``:
+
+.. code:: console
+
+   $ socat UNIX-LISTEN:/tmp/hci0.sock,fork,reuseaddr \
+       /dev/ttyACM0,b1000000,raw,echo=0,crtscts=1
+
+The process listening on the socket must be started before NuttX. If that
+process opens a real UART device, it still needs permission to access that UART
+device.
 
 configdata
 ----------
