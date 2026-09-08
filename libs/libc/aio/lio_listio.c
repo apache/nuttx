@@ -233,6 +233,7 @@ static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
   if (status != OK)
     {
       int errcode = get_errno();
+
       ferr("ERROR sigprocmask failed: %d\n", errcode);
       DEBUGASSERT(errcode > 0);
       return -errcode;
@@ -547,59 +548,61 @@ int lio_listio(int mode, FAR struct aiocb * const list[], int nent,
           status = OK;
           switch (aiocbp->aio_lio_opcode)
             {
-            case LIO_NOP:
-              {
-                /* Mark the do-nothing operation complete */
+              case LIO_NOP:
+                {
+                  /* Mark the do-nothing operation complete */
 
-                aiocbp->aio_result = OK;
-              }
-              break;
+                  aiocbp->aio_result = OK;
+                }
+                break;
 
-            case LIO_READ:
-            case LIO_WRITE:
-              {
-                if (aiocbp->aio_lio_opcode == LIO_READ)
-                  {
-                    /* Submit the asynchronous read operation */
+              case LIO_READ:
+              case LIO_WRITE:
+                {
+                  if (aiocbp->aio_lio_opcode == LIO_READ)
+                    {
+                      /* Submit the asynchronous read operation */
 
-                    status = aio_read(aiocbp);
-                  }
-                else
-                  {
-                    /* Submit the asynchronous write operation */
+                      status = aio_read(aiocbp);
+                    }
+                  else
+                    {
+                      /* Submit the asynchronous write operation */
 
-                    status = aio_write(aiocbp);
-                  }
+                      status = aio_write(aiocbp);
+                    }
 
-                if (status < 0)
-                  {
-                    /* Failed to queue the I/O.  Set up the error return. */
+                  if (status < 0)
+                    {
+                      /* Failed to queue the I/O.  Set up the error return. */
 
-                    errcode = get_errno();
-                    ferr("ERROR: aio_read/write failed: %d\n", errcode);
-                    DEBUGASSERT(errcode > 0);
-                    aiocbp->aio_result = -errcode;
-                    ret = ERROR;
-                  }
-                else
-                  {
-                    /* Increment the count of successfully queue operations */
+                      errcode = get_errno();
+                      ferr("ERROR: aio_read/write failed: %d\n", errcode);
+                      DEBUGASSERT(errcode > 0);
+                      aiocbp->aio_result = -errcode;
+                      ret = ERROR;
+                    }
+                  else
+                    {
+                      /* Increment the count of successfully queued
+                       * operations
+                       */
 
-                    nqueued++;
-                  }
-              }
-              break;
+                      nqueued++;
+                    }
+                }
+                break;
 
-            default:
-              {
-                /* Make the invalid operation complete with an error */
+              default:
+                {
+                  /* Make the invalid operation complete with an error */
 
-                ferr("ERROR: Unrecognized opcode: %d\n",
-                     aiocbp->aio_lio_opcode);
-                aiocbp->aio_result = -EINVAL;
-                ret = ERROR;
-              }
-              break;
+                  ferr("ERROR: Unrecognized opcode: %d\n",
+                       aiocbp->aio_lio_opcode);
+                  aiocbp->aio_result = -EINVAL;
+                  ret = ERROR;
+                }
+                break;
             }
         }
     }
@@ -674,8 +677,8 @@ int lio_listio(int mode, FAR struct aiocb * const list[], int nent,
                * and this is the first error to be reported.
                */
 
-               retcode = -status;
-               ret     = ERROR;
+              retcode = -status;
+              ret     = ERROR;
             }
         }
     }
