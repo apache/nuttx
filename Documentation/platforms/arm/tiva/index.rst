@@ -30,7 +30,7 @@ with a GNU arm-nuttx-elf toolchain\* under either Linux or Cygwin.
 2) Cygwin/MSYS with Cygwin GNU toolchain, 3) Cygwin/MSYS with Windows
 native toolchain (CodeSourcery or devkitARM), or 4) Native Windows. A
 DIY toolchain for Linux or Cygwin is provided by the NuttX
-`buildroot <https://bitbucket.org/nuttx/buildroot/downloads/>`__
+`buildroot <https://github.com/patacongo/buildroot>`__
 package.
 
 TI/Stellaris LM3S6965

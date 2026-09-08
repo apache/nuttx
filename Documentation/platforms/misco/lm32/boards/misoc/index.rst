@@ -15,8 +15,8 @@ A GNU GCC-based toolchain is assumed. The ``PATH`` environment variable should
 be modified to point to the correct path to the LM32 GCC toolchain (if different
 from the default in your ``PATH`` variable).
 
-If you have no LM32 toolchain, one can be cloned from the NuttX Bitbucket GIT
-repository (https://bitbucket.org/nuttx/buildroot). This GNU toolchain builds
+If you have no LM32 toolchain, one can be cloned from the NuttX buildroot GIT
+repository (https://github.com/patacongo/buildroot). This GNU toolchain builds
 and executes in the Linux or Cygwin environment.
 
 1. You must have already configured NuttX in ``<some-dir>/nuttx``.
@@ -30,13 +30,13 @@ and executes in the Linux or Cygwin environment.
 
 .. code:: console
 
-   $ git clone git@bitbucket.org:nuttx/buildroot.git <some-dir>/buildroot
+   $ git clone git@github.com:patacongo/buildroot.git <some-dir>/buildroot
 
 or
 
 .. code:: console
 
-   $ git clone https://patacongo@bitbucket.org/nuttx/buildroot.git <some-dir>/buildroot
+   $ git clone https://github.com/patacongo/buildroot.git <some-dir>/buildroot
 
 3. 
 
