@@ -169,7 +169,7 @@ NuttX buildroot Toolchain
   different from the default).
 
   If you have no ARM toolchain, one can be downloaded from the NuttX
-  Bitbucket download site (https://bitbucket.org/nuttx/buildroot/downloads/).
+  buildroot repository (https://github.com/patacongo/buildroot).
 
   1. You must have already configured NuttX in <some-dir>nuttx.
 

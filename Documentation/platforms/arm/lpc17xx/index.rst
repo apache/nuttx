@@ -156,7 +156,7 @@ boards.
 2) Cygwin/MSYS with Cygwin GNU toolchain, 3) Cygwin/MSYS with Windows
 native toolchain (CodeSourcery devkitARM or Code Red), or 4) Native
 Windows. A DIY toolchain for Linux or Cygwin is provided by the NuttX
-`buildroot <https://bitbucket.org/nuttx/buildroot/downloads/>`__
+`buildroot <https://github.com/patacongo/buildroot>`__
 package.
 
 NXP LPC178x

@@ -42,7 +42,7 @@ done:
 native toolchain, or 4) Native Windows. All testing, however, has been
 performed using the NuttX DIY toolchain for Linux or Cygwin is provided
 by the NuttX
-`buildroot <https://bitbucket.org/nuttx/buildroot/downloads/>`__
+`buildroot <https://github.com/patacongo/buildroot>`__
 package. As a result, that toolchain is recommended.
 
 Toolchains
@@ -64,7 +64,7 @@ Buildroot
 ---------
 
 There is a DIY buildroot version for the AVR boards here:
-http://bitbucket.org/nuttx/buildroot/downloads/. See the following section for
+https://github.com/patacongo/buildroot. See the following section for
 details on building this toolchain.
 
 Before building, make sure that the path to the new toolchain is included in
