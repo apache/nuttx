@@ -24,6 +24,7 @@
 
 #ifdef CONFIG_SYSTEM_NSH
 service console sh
+   console
    restart_period 1000
 #endif
 
@@ -36,6 +37,9 @@ service fastbootd fastbootd
 #endif
 
 on init
+#ifdef CONFIG_SYSTEM_CDCACM
+   exec -- sercon
+#endif
 #ifdef CONFIG_SYSTEM_NSH
    start console
 #endif
