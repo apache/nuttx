@@ -48,12 +48,12 @@ Output Format
 
 The output shows a table with the following columns:
 
-- **PRE-EMPTION CALLER**: The function that most recently enabled
-  pre-emption for this task.
-- **CSECTION CALLER**: The function that most recently entered a
-  critical section.
-- **RUN**: Maximum time spent in a critical section.
-- **TIME**: Total accumulated critical section time.
+- **PRE-EMPTION CALLER**: Maximum pre-emption-disabled time and its
+  associated caller.
+- **CSECTION CALLER**: Maximum critical-section time and its associated
+  caller.
+- **RUN**: Maximum uninterrupted execution time for the thread.
+- **TIME**: Total accumulated execution time for the thread.
 - **PID**: Process/thread ID.
 - **DESCRIPTION**: Task name (if ``CONFIG_TASK_NAME_SIZE > 0``).
 
@@ -87,5 +87,6 @@ Stop the monitoring daemon:
 See Also
 ========
 
+- :doc:`/implementation/critical_sections`
 - :doc:`../stackmonitor/index`
 - :doc:`../gprof/index`
