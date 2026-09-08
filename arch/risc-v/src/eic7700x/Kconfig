@@ -47,4 +47,4 @@ config EIC7700X_CPU_FREQ_MHZ
 		cores at 1400, so the default changes nothing and merely says
 		so in the log.
 
-endif 
+endif
