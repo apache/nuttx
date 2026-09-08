@@ -54,6 +54,9 @@ static FAR const char * const g_priority_color[] =
     "",           /* LOG_INFO, Normal */
     "\e[2m",      /* LOG_DEBUG, Dim */
   };
+
+#  define SYSLOG_COLOR_RESET     "\e[0m"
+#  define SYSLOG_COLOR_RESET_LEN (sizeof(SYSLOG_COLOR_RESET) - 1)
 #endif
 
 #if defined(CONFIG_SYSLOG_PRIORITY)
@@ -163,7 +166,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #if defined(CONFIG_SYSLOG_COLOR_OUTPUT)
   /* Reset the terminal style. */
 
-                             "\e[0m"
+                             SYSLOG_COLOR_RESET
 #endif
 
 #ifdef CONFIG_SYSLOG_TIMESTAMP
@@ -288,7 +291,8 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #if defined(CONFIG_SYSLOG_COLOR_OUTPUT)
   /* Reset the terminal style back to normal. */
 
-  ret += lib_stream_puts(&stream.common, "\e[0m", sizeof("\e[0m"));
+  ret += lib_stream_puts(&stream.common, SYSLOG_COLOR_RESET,
+                         SYSLOG_COLOR_RESET_LEN);
 #endif
 
   /* Flush and destroy the syslog stream buffer */
