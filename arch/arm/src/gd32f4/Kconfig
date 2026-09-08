@@ -231,6 +231,14 @@ menuconfig GD32F4_PROGMEM_OTA_PARTITION
 
 if GD32F4_PROGMEM_OTA_PARTITION
 
+# EnergyOS 2 MiB map (see docs/eos_mcu_flash/eos_mcu_flash.png):
+#   loader 128K | primary 768K | secondary 768K | scratch 128K |
+#   factory 32K | security 64K | sysconfig 64K | userconfig 64K | ota-state 32K
+
+config GD32F4_OTA_BOOT_DEVPATH
+	string "Bootloader (loader) device path"
+	default "/dev/otaboot"
+
 config GD32F4_OTA_PRIMARY_SLOT_DEVPATH
 	string "Primary slot device path"
 	default "/dev/ota0"
@@ -243,25 +251,93 @@ config GD32F4_OTA_SCRATCH_DEVPATH
 	string "Scratch partition device path"
 	default "/dev/otascratch"
 
+config GD32F4_OTA_FACTORY_DEVPATH
+	string "Factory data device path"
+	default "/dev/factory"
+
+config GD32F4_OTA_SECURITY_DEVPATH
+	string "Security data device path"
+	default "/dev/security"
+
+config GD32F4_OTA_SYSCONFIG_DEVPATH
+	string "System config device path"
+	default "/dev/sysconfig"
+
+config GD32F4_OTA_USERCONFIG_DEVPATH
+	string "User config device path"
+	default "/dev/userconfig"
+
+config GD32F4_OTA_STATE_DEVPATH
+	string "OTA / boot state device path"
+	default "/dev/ota-state"
+
+config GD32F4_OTA_BOOT_OFFSET
+	hex "Bootloader (loader) offset"
+	default 0x0
+
 config GD32F4_OTA_PRIMARY_SLOT_OFFSET
 	hex "Primary slot offset"
 	default 0x20000
 
 config GD32F4_OTA_SECONDARY_SLOT_OFFSET
 	hex "Secondary slot offset"
-	default 0x100000
+	default 0xe0000
 
 config GD32F4_OTA_SCRATCH_OFFSET
 	hex "Scratch partition offset"
-	default 0x1e0000
+	default 0x1a0000
+
+config GD32F4_OTA_FACTORY_OFFSET
+	hex "Factory data offset"
+	default 0x1c0000
+
+config GD32F4_OTA_SECURITY_OFFSET
+	hex "Security data offset"
+	default 0x1c8000
+
+config GD32F4_OTA_SYSCONFIG_OFFSET
+	hex "System config offset"
+	default 0x1d8000
+
+config GD32F4_OTA_USERCONFIG_OFFSET
+	hex "User config offset"
+	default 0x1e8000
+
+config GD32F4_OTA_STATE_OFFSET
+	hex "OTA / boot state offset"
+	default 0x1f8000
+
+config GD32F4_OTA_BOOT_SIZE
+	hex "Bootloader (loader) size (in bytes)"
+	default 0x20000
 
 config GD32F4_OTA_SLOT_SIZE
 	hex "Application image slot size (in bytes)"
-	default 0xe0000
+	default 0xc0000
 
 config GD32F4_OTA_SCRATCH_SIZE
 	hex "Scratch partition size (in bytes)"
 	default 0x20000
+
+config GD32F4_OTA_FACTORY_SIZE
+	hex "Factory data size (in bytes)"
+	default 0x8000
+
+config GD32F4_OTA_SECURITY_SIZE
+	hex "Security data size (in bytes)"
+	default 0x10000
+
+config GD32F4_OTA_SYSCONFIG_SIZE
+	hex "System config size (in bytes)"
+	default 0x10000
+
+config GD32F4_OTA_USERCONFIG_SIZE
+	hex "User config size (in bytes)"
+	default 0x10000
+
+config GD32F4_OTA_STATE_SIZE
+	hex "OTA / boot state size (in bytes)"
+	default 0x8000
 
 endif # GD32F4_PROGMEM_OTA_PARTITION
 endif # GD32F4_HAVE_OTA_PARTITION
