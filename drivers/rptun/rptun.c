@@ -80,8 +80,7 @@
 struct rptun_carveout_s
 {
   FAR struct mm_heap_s       *heap;
-  FAR void                   *base;
-  size_t                      size;
+  FAR void                   *start;
   char                        name[RPROC_MAX_NAME_LEN];
 };
 
@@ -99,6 +98,8 @@ struct rptun_priv_s
   pid_t                       pid;
   FAR const void             *trace_va;
   struct work_s               work;
+  FAR struct mm_heap_s       *heap;
+  char                        poolname[RPROC_MAX_NAME_LEN];
 };
 
 struct rptun_store_s
@@ -526,115 +527,350 @@ static void rptun_unmap_buf(FAR struct virtio_device *vdev,
 }
 
 /****************************************************************************
- * Name: rptun_init_carveout
+ * Name: rptun_find_carveout
+ *
+ * Description:
+ *   Find the carveout with the given name. Returns NULL when the table has
+ *   none, which is legal because a carveout is optional.
+ *
  ****************************************************************************/
 
-static int rptun_init_carveout(FAR struct rptun_priv_s *priv,
-                               FAR struct virtio_device *vdev,
-                               FAR const char *shmname,
-                               FAR void *shmbase, size_t shmlen)
+static FAR struct fw_rsc_carveout *
+rptun_find_carveout(FAR struct resource_table *rsc, FAR const char *name)
 {
-  FAR struct rptun_carveout_s *carveout;
-  struct mm_heap_config_s config;
-  int ret = -ENOMEM;
+  FAR struct fw_rsc_carveout *carv = NULL;
+  uint32_t i;
 
-  carveout = kmm_zalloc(sizeof(*carveout));
-  if (carveout != NULL)
+  for (i = 0; i < rsc->num; i++)
     {
-      strlcpy(carveout->name, shmname, sizeof(carveout->name));
+      FAR struct fw_rsc_hdr *hdr =
+        (FAR struct fw_rsc_hdr *)((FAR char *)rsc + rsc->offset[i]);
+      FAR struct fw_rsc_carveout *tmp;
 
+      if (hdr->type != RSC_CARVEOUT)
+        {
+          continue;
+        }
+
+      /* The name in the table need not be terminated, so bound the
+       * comparison by the size of the field.
+       */
+
+      tmp = (FAR struct fw_rsc_carveout *)hdr;
+      if (strncmp((FAR const char *)tmp->name, name,
+                  RPROC_MAX_NAME_LEN) == 0)
+        {
+          carv = tmp;
+          break;
+        }
+    }
+
+  return carv;
+}
+
+/****************************************************************************
+ * Name: rptun_create_heap
+ *
+ * Description:
+ *   Build a heap named after a carveout.  Without a va the carveout is one
+ *   the table placed, so map what its device address points at and take the
+ *   heap context from the kernel heap.  With a va the caller cut the region
+ *   out of the pool, and the context sits at the head of the region itself,
+ *   so the heap pointer is the region base and one free returns all of it.
+ *
+ *   The heap keeps a pointer to its name, so the name is copied into the
+ *   caller's buffer rather than pointing into the table the peer can
+ *   rewrite.
+ *
+ ****************************************************************************/
+
+static FAR struct mm_heap_s *
+rptun_create_heap(FAR struct rptun_priv_s *priv, FAR char *name,
+                  FAR const uint8_t *rscname, metal_phys_addr_t da,
+                  FAR void *va, size_t len)
+{
+  FAR struct mm_heap_s *heap = NULL;
+  struct mm_heap_config_s config;
+
+  strlcpy(name, (FAR const char *)rscname, RPROC_MAX_NAME_LEN);
+  if (va == NULL)
+    {
+      /* Create heap from carveout resource, need map the da to va */
+
+      va = remoteproc_mmap(&priv->rproc, NULL, &da, len, 0, NULL);
+      if (va == NULL)
+        {
+          rptunerr("ERROR: %s mmap failed, da=0x%lx len=%zu\n",
+                    name, da, len);
+        }
+    }
+
+  if (va != NULL)
+    {
       memset(&config, 0, sizeof(config));
-      config.name      = carveout->name;
-      config.start     = shmbase;
-      config.size      = shmlen;
+      config.name      = name;
+      config.start     = va;
+      config.size      = len;
       config.nokasan   = true;
       config.allocheap = true;
 
-      carveout->base = shmbase;
-      carveout->size = shmlen;
-      carveout->heap = mm_initialize_heap(&config);
-      if (carveout->heap != NULL)
+      heap = mm_initialize_heap(&config);
+      if (heap != NULL)
         {
-          ret = OK;
-          vdev->mmops = &g_rptun_mmops;
-          vdev->mm_priv = carveout;
-
-          rptuninfo("caveouts=%p heap=%p name=%s base=%p size=%zu\n",
-                    carveout, carveout->heap, shmname, shmbase, shmlen);
+          rptuninfo("INFO: heap=%p name=%s va=%p size=%zu\n",
+                    heap, name, va, len);
         }
       else
         {
-          rptunerr("ERROR: Failed to initialize heap\n");
-          kmm_free(carveout);
+          rptunerr("ERROR: failed to initialize heap %s\n", name);
         }
+    }
+
+  return heap;
+}
+
+/****************************************************************************
+ * Name: rptun_create_carveout
+ *
+ * Description:
+ *   Hand a virtio device the heap it allocates from.  A carveout named after
+ *   the device index is private to it, and is either placed by the table or
+ *   cut out of the pool here; a device the table names no carveout for gets
+ *   the pool itself.
+ *
+ *   Only a driver side device gets this far, so the memory is this side's to
+ *   manage.  Where the table leaves every device on the vhost side, none of
+ *   this runs and the memory stays the peer's.
+ *
+ *   The pool is published once, by the master: both sides read the same
+ *   table, so a slave building its own heap over it would alias the
+ *   master's allocations.  A slave device needs a carveout of its own.
+ *
+ ****************************************************************************/
+
+static FAR struct rptun_carveout_s *
+rptun_create_carveout(FAR struct rptun_priv_s *priv, unsigned int index)
+{
+  FAR struct rptun_carveout_s *carv;
+  FAR struct fw_rsc_carveout *rsc;
+  char name[RPROC_MAX_NAME_LEN];
+
+  if (priv->heap == NULL && RPTUN_IS_MASTER(priv->dev))
+    {
+      rsc = rptun_find_carveout(priv->rproc.rsc_table, "vdevbuffer");
+      if (rsc != NULL)
+        {
+          priv->heap = rptun_create_heap(priv, priv->poolname, rsc->name,
+                                         rsc->da, NULL, rsc->len);
+        }
+    }
+
+  carv = kmm_zalloc(sizeof(struct rptun_carveout_s));
+  if (carv != NULL)
+    {
+      /* Try create the virtio driver private heap */
+
+      snprintf(name, sizeof(name), "vdev%ubuffer", index);
+      rsc = rptun_find_carveout(priv->rproc.rsc_table, name);
+      if (rsc == NULL)
+        {
+          carv->heap = priv->heap;
+        }
+      else if (rsc->da != 0u && rsc->da != FW_RSC_U32_ADDR_ANY)
+        {
+          carv->heap = rptun_create_heap(priv, carv->name, rsc->name,
+                                         rsc->da, NULL, rsc->len);
+        }
+      else if (priv->heap != NULL)
+        {
+          /* Resource not specific the memory address, so try cut a piece
+           * from the shared heap.
+           */
+
+          FAR void *va = mm_memalign(priv->heap, MM_ALIGN, rsc->len);
+
+          if (va != NULL)
+            {
+              carv->start = va;
+              carv->heap = rptun_create_heap(priv, carv->name, rsc->name,
+                                             rsc->da, va, rsc->len);
+              if (carv->heap == NULL)
+                {
+                  mm_free(priv->heap, va);
+                }
+            }
+          else
+            {
+              rptunerr("ERROR: no room in the pool for %"PRIu32" bytes\n",
+                       rsc->len);
+            }
+        }
+
+      if (carv->heap == NULL)
+        {
+          rptunerr("ERROR: failed to create heap for %s\n", name);
+          kmm_free(carv);
+          carv = NULL;
+        }
+    }
+
+  return carv;
+}
+
+/****************************************************************************
+ * Name: rptun_free_carveout
+ *
+ * Description:
+ *   Drop a heap a device is done with.  One cut from the pool goes back to
+ *   it, so a later start cuts the region afresh.  The pool itself outlives
+ *   the devices that shared it.
+ *
+ ****************************************************************************/
+
+static void rptun_free_carveout(FAR struct rptun_priv_s *priv,
+                                FAR struct rptun_carveout_s *carv)
+{
+  if (carv->heap != priv->heap)
+    {
+      mm_uninitialize(carv->heap);
+
+      if (priv->heap != NULL && mm_heapmember(priv->heap, carv->start))
+        {
+          mm_free(priv->heap, carv->start);
+        }
+    }
+
+  kmm_free(carv);
+}
+
+/****************************************************************************
+ * Name: rptun_free_vrings
+ *
+ * Description:
+ *   Release the vrings taken from the heap and hand their da fields back to
+ *   FW_RSC_U32_ADDR_ANY, so a later start places them again instead of
+ *   reusing an address from a destroyed heap. A vring the table placed
+ *   statically lies outside the heap and is left untouched.
+ *
+ ****************************************************************************/
+
+static void rptun_free_vrings(FAR struct rptun_priv_s *priv,
+                              FAR struct fw_rsc_vdev *vdev_rsc,
+                              FAR struct mm_heap_s *heap)
+{
+  uint8_t i;
+
+  for (i = 0; i < vdev_rsc->num_of_vrings; i++)
+    {
+      FAR struct fw_rsc_vdev_vring *vring_rsc = &vdev_rsc->vring[i];
+      metal_phys_addr_t pa;
+      FAR void *va;
+
+      if (vring_rsc->da == 0u || vring_rsc->da == FW_RSC_U32_ADDR_ANY)
+        {
+          continue;
+        }
+
+      pa = rptun_da_to_pa(priv->dev, vring_rsc->da);
+      va = metal_io_phys_to_virt(metal_io_get_region(), pa);
+      if (va != NULL && mm_heapmember(heap, va))
+        {
+          mm_free(heap, va);
+          vring_rsc->da = FW_RSC_U32_ADDR_ANY;
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: rptun_alloc_vrings
+ *
+ * Description:
+ *   Place the vrings of a driver side vdev in its heap. They are plain
+ *   allocations, so a heap shared by several devices needs no cross device
+ *   reservation pass.
+ *
+ ****************************************************************************/
+
+static int rptun_alloc_vrings(FAR struct rptun_priv_s *priv,
+                              FAR struct fw_rsc_vdev *vdev_rsc,
+                              FAR struct mm_heap_s *heap)
+{
+  int ret = OK;
+  uint8_t i;
+
+  for (i = 0; i < vdev_rsc->num_of_vrings; i++)
+    {
+      FAR struct fw_rsc_vdev_vring *vring_rsc = &vdev_rsc->vring[i];
+      metal_phys_addr_t pa;
+      FAR void *va;
+      size_t sz;
+
+      /* A static da was placed by the table author on purpose. */
+
+      if (vring_rsc->da != 0u && vring_rsc->da != FW_RSC_U32_ADDR_ANY)
+        {
+          continue;
+        }
+
+      sz = ALIGN_UP(vring_size(vring_rsc->num, vring_rsc->align),
+                    vring_rsc->align);
+      va = mm_memalign(heap, vring_rsc->align, sz);
+      if (va == NULL)
+        {
+          rptunerr("ERROR: vr[%u] alloc failed, sz=%zu\n", i, sz);
+          ret = -ENOMEM;
+          break;
+        }
+
+      pa = metal_io_virt_to_phys(metal_io_get_region(), va);
+      vring_rsc->da = rptun_pa_to_da(priv->dev, pa);
+
+      rptuninfo("INFO: vr[%u] va=%p da=0x%" PRIx32 " sz=%zu\n", i, va,
+                vring_rsc->da, sz);
     }
 
   return ret;
 }
 
 /****************************************************************************
- * Name: rptun_uninit_carveout
+ * Name: rptun_check_vdev
+ *
+ * Description:
+ *   Tell whether the virtio device can be created now: -EEXIST when this
+ *   rproc already has it, -EAGAIN when the vhost side would come up before
+ *   the peer driver is ready.
+ *
  ****************************************************************************/
 
-static void rptun_uninit_carveout(FAR struct virtio_device *vdev)
+static int rptun_check_vdev(FAR struct rptun_priv_s *priv,
+                            FAR struct fw_rsc_vdev *vdev_rsc,
+                            unsigned int role)
 {
-  FAR struct rptun_carveout_s *carveout = vdev->mm_priv;
+  FAR struct remoteproc *rproc = &priv->rproc;
+  FAR struct remoteproc_virtio *rvdev;
+  FAR struct metal_list *node;
+  int ret = OK;
 
-  if (carveout != NULL && vdev->role != VIRTIO_DEV_DEVICE)
+  metal_mutex_acquire(&rproc->lock);
+  metal_list_for_each(&rproc->vdevs, node)
     {
-      mm_uninitialize(carveout->heap);
-      kmm_free(carveout);
-    }
-}
-
-/****************************************************************************
- * Name: rptun_get_carveout_memory
- ****************************************************************************/
-
-static FAR void *
-rptun_get_carveout_memory(FAR struct rptun_priv_s *priv,
-                          FAR struct fw_rsc_carveout *carveout,
-                          FAR size_t *size)
-{
-  metal_phys_addr_t da = carveout->da;
-
-  *size = carveout->len;
-  return remoteproc_mmap(&priv->rproc, NULL, &da, carveout->len, 0, NULL);
-}
-
-static void rptun_update_vring_da(FAR struct remoteproc *rproc,
-                                  FAR struct fw_rsc_vdev *vdev_rsc,
-                                  FAR char **shmbase, size_t *shmlen)
-{
-  uint8_t i;
-
-  /* Calculate the da of all vrings and assign back to the resource table */
-
-  for (i = 0; i < vdev_rsc->num_of_vrings; i++)
-    {
-      FAR struct fw_rsc_vdev_vring *vring = &vdev_rsc->vring[i];
-      metal_phys_addr_t vring_da = METAL_BAD_PHYS;
-      metal_phys_addr_t vring_pa;
-      size_t vring_sz;
-
-      vring_sz = ALIGN_UP(vring_size(vring->num, vring->align),
-                          vring->align);
-      vring_pa = metal_io_virt_to_phys(metal_io_get_region(), *shmbase);
-
-      if (!remoteproc_mmap(rproc, &vring_pa, &vring_da, vring_sz, 0, NULL))
+      rvdev = container_of(node, struct remoteproc_virtio, node);
+      if (rvdev->vdev_rsc == vdev_rsc)
         {
-          rptunerr("vr[%u] da=0x%lx pa=0x%lx sz=%zu\n",
-                   i, vring_da, vring_pa, vring_sz);
-        }
-      else if (vring->da == 0u || vring->da == FW_RSC_U32_ADDR_ANY)
-        {
-          rptuninfo("vr[%u] shm=%p len=%zu da=0x%lx pa=0x%lx sz=%zu\n",
-                    i, *shmbase, *shmlen, vring_da, vring_pa, vring_sz);
-          vring->da = vring_da;
-          *shmbase  += vring_sz;
-          *shmlen   -= vring_sz;
+          ret = -EEXIST;
+          break;
         }
     }
+
+  metal_mutex_release(&rproc->lock);
+
+  if (ret >= 0 && role == VIRTIO_DEV_DEVICE &&
+      !(vdev_rsc->status & VIRTIO_CONFIG_STATUS_DRIVER_OK))
+    {
+      ret = -EAGAIN;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -646,17 +882,13 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
                                unsigned int index)
 {
   FAR struct remoteproc *rproc = &priv->rproc;
-  FAR struct fw_rsc_carveout *carveout_rsc = NULL;
-  FAR struct fw_rsc_vdev *vdev_rsc;
-  FAR struct remoteproc_virtio *rvdev;
-  FAR struct virtio_device *vdev;
-  FAR struct metal_list *node;
+  FAR struct rptun_carveout_s *carv = NULL;
   FAR char *rsc = rproc->rsc_table;
-  FAR char *shmbase = NULL;
+  FAR struct fw_rsc_vdev *vdev_rsc;
+  FAR struct virtio_device *vdev;
   unsigned int role;
-  size_t shmlen = 0;
   size_t off;
-  int ret = OK;
+  int ret;
 
   off = find_rsc(rsc, RSC_VDEV, index);
   if (off == 0u)
@@ -666,84 +898,62 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
   else
     {
       vdev_rsc = (FAR struct fw_rsc_vdev *)(rsc + off);
-
-      /* Check that this virtio device/driver is not created before */
-
-      metal_mutex_acquire(&rproc->lock);
-      metal_list_for_each(&rproc->vdevs, node)
-        {
-          rvdev = container_of(node, struct remoteproc_virtio, node);
-          if (rvdev->vdev_rsc == vdev_rsc)
-            {
-              ret = -EEXIST;
-              break;
-            }
-        }
-
-      metal_mutex_release(&rproc->lock);
-
-      /* Get virtio device role from virtio device resource table */
-
       role = RPTUN_IS_MASTER(priv->dev) ^
              (vdev_rsc->reserved[0] == VIRTIO_DEV_DRIVER);
-      if (ret >= 0 && role == VIRTIO_DEV_DEVICE &&
-          !(vdev_rsc->status & VIRTIO_CONFIG_STATUS_DRIVER_OK))
-        {
-          ret = -EAGAIN;
-        }
-    }
 
-  if (ret >= 0)
-    {
-      /* If provided the carveout, init the vring->da (driver side)
-       * and init a share memory heap based on the carveout defined
-       * memory region.
-       * Note: do not return error because the carveout is optional
-       * for the virtio device side.
+      ret = rptun_check_vdev(priv, vdev_rsc, role);
+
+      /* Only the driver side manages the share memory as a heap. Without
+       * one there is nowhere to put the vrings, so fail rather than bring
+       * the device up unable to allocate.
        */
 
-      off = find_rsc(rsc, RSC_CARVEOUT, index);
-      if (off != 0u)
+      if (ret >= 0 && role == VIRTIO_DEV_DRIVER)
         {
-          carveout_rsc = (FAR struct fw_rsc_carveout *)(rsc + off);
-
-          /* Get share memory from carveout resource table */
-
-          shmbase = rptun_get_carveout_memory(priv, carveout_rsc, &shmlen);
-          DEBUGASSERT(shmbase != NULL);
-
-          /* Update the vring->da address for driver if needed  */
-
-          if (role == VIRTIO_DEV_DRIVER)
+          carv = rptun_create_carveout(priv, index);
+          if (carv != NULL)
             {
-              rptun_update_vring_da(rproc, vdev_rsc, &shmbase, &shmlen);
-            }
-        }
-
-      vdev = remoteproc_create_virtio(rproc, index, role, 0);
-      if (vdev != NULL)
-        {
-          ret = rproc_virtio_set_shm_io(vdev, metal_io_get_region());
-          if (ret >= 0 && carveout_rsc != NULL &&
-              vdev->role != VIRTIO_DEV_DEVICE)
-            {
-              ret = rptun_init_carveout(priv, vdev,
-                                        (FAR const char *)carveout_rsc->name,
-                                        shmbase, shmlen);
-            }
-
-          if (ret < 0)
-            {
-              remoteproc_remove_virtio(rproc, vdev);
+              ret = rptun_alloc_vrings(priv, vdev_rsc, carv->heap);
             }
           else
             {
-              *vdev_ = vdev;
+              ret = -ENOMEM;
             }
         }
-      else
+
+      if (ret >= 0)
         {
-          ret = -ENOMEM;
+          vdev = remoteproc_create_virtio(rproc, index, role, 0);
+          if (vdev != NULL)
+            {
+              ret = rproc_virtio_set_shm_io(vdev, metal_io_get_region());
+              if (ret < 0)
+                {
+                  remoteproc_remove_virtio(rproc, vdev);
+                }
+              else
+                {
+                  /* Bind the heap to virtio device */
+
+                  if (carv != NULL)
+                    {
+                      vdev->mmops   = &g_rptun_mmops;
+                      vdev->mm_priv = carv;
+                    }
+
+                  *vdev_ = vdev;
+                }
+            }
+          else
+            {
+              ret = -ENOMEM;
+            }
+        }
+
+      if (ret < 0 && carv != NULL)
+        {
+          rptun_free_vrings(priv, vdev_rsc, carv->heap);
+          rptun_free_carveout(priv, carv);
         }
     }
 
@@ -757,7 +967,18 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
 static void rptun_remove_device(FAR struct rptun_priv_s *priv,
                                 FAR struct virtio_device *vdev)
 {
-  rptun_uninit_carveout(vdev);
+  FAR struct remoteproc_virtio *rvdev =
+    container_of(vdev, struct remoteproc_virtio, vdev);
+  FAR struct rptun_carveout_s *carveout = vdev->mm_priv;
+
+  if (carveout != NULL)
+    {
+      rptun_free_vrings(priv, rvdev->vdev_rsc, carveout->heap);
+      rptun_free_carveout(priv, carveout);
+      vdev->mm_priv = NULL;
+      vdev->mmops   = NULL;
+    }
+
   remoteproc_remove_virtio(&priv->rproc, vdev);
 }
 
@@ -860,6 +1081,12 @@ static void rptun_remove_devices(FAR struct rptun_priv_s *priv)
     }
 
   metal_mutex_release(&rproc->lock);
+
+  if (priv->heap != NULL)
+    {
+      mm_uninitialize(priv->heap);
+      priv->heap = NULL;
+    }
 }
 
 /****************************************************************************
