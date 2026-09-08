@@ -172,8 +172,16 @@ void uart_recvchars(FAR uart_dev_t *dev)
 
   while (uart_rxavailable(dev))
     {
+      /* uart_read() advances recv.tail from thread context without holding
+       * the critical section, so on SMP it can move (and wrap) while we are
+       * in here.  Sample it once per iteration and derive the free space
+       * from that snapshot: a stale value only makes us store less now,
+       * whereas reading it twice can turn the batch length negative.
+       */
+
       int nexthead = rxbuf->head + 1 < rxbuf->size ? rxbuf->head + 1 : 0;
-      bool is_full = (nexthead == rxbuf->tail);
+      sbuf_size_t tail = rxbuf->tail;
+      bool is_full = (nexthead == tail);
       FAR char *pbuf = NULL;
       char ch;
 
@@ -182,13 +190,13 @@ void uart_recvchars(FAR uart_dev_t *dev)
 
       /* How many bytes are buffered */
 
-      if (rxbuf->head >= rxbuf->tail)
+      if (rxbuf->head >= tail)
         {
-          nbuffered = rxbuf->head - rxbuf->tail;
+          nbuffered = rxbuf->head - tail;
         }
       else
         {
-          nbuffered = rxbuf->size - rxbuf->tail + rxbuf->head;
+          nbuffered = rxbuf->size - tail + rxbuf->head;
         }
 
       /* Is the level now above the watermark level that we need to report? */
@@ -231,11 +239,11 @@ void uart_recvchars(FAR uart_dev_t *dev)
 
           if (!is_full)
             {
-              if (rxbuf->tail > rxbuf->head)
+              if (tail > rxbuf->head)
                 {
-                  nbytes = rxbuf->tail - rxbuf->head - 1;
+                  nbytes = tail - rxbuf->head - 1;
                 }
-              else if (rxbuf->tail)
+              else if (tail)
                 {
                   nbytes = rxbuf->size - rxbuf->head;
                 }
