@@ -60,9 +60,13 @@
 int clearenv(void)
 {
   FAR struct tcb_s *tcb = this_task();
-  DEBUGASSERT(tcb->group);
+  FAR struct task_group_s *group = tcb->group;
 
-  env_release(tcb->group);
+  DEBUGASSERT(group);
+
+  nxrmutex_lock(&group->tg_mutex);
+  env_release(group);
+  nxrmutex_unlock(&group->tg_mutex);
   return OK;
 }
 
