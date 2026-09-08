@@ -88,6 +88,17 @@ NuttShell configuration (console enabled in UART0, at 115200 bps) with support f
 CDC/ACM with MSC USB composite driver. ``conn`` command enables the composite
 device.
 
+fastboot_usb
+------------
+
+Runs the USB fastboot daemon (``fastbootd``) on boot instead of NSH, exposed
+as a USB composite device together with CDC/ACM (console enabled in USB
+Port, at 115200 bps). On the host, ``fastboot devices``, ``fastboot getvar
+<var>``, and ``fastboot reboot``/``fastboot reboot bootloader`` are
+available. More details about the fastboot daemon are available at
+`fastbootd — NuttX latest documentation
+<https://nuttx.apache.org/docs/latest/applications/system/fastboot/index.html>`_.
+
 nsh
 ---
 
