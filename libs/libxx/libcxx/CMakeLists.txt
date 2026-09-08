@@ -55,6 +55,8 @@ if(CONFIG_LIBCXX)
         ${CMAKE_CURRENT_LIST_DIR}/0001-Fix-build-error-about-__GLIBC__.patch &&
         patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
         ${CMAKE_CURRENT_LIST_DIR}/0001-libc-Fix-failures-with-GCC-14-92663.patch
+        && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-fix-string-constexpr-dtor-build-error.patch
       DOWNLOAD_NO_PROGRESS true
       TIMEOUT 30)
 

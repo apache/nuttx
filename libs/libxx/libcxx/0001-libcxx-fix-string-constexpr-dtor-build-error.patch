@@ -1,0 +1,14 @@
+--- libcxx/include/string
++++ libcxx/include/string
+@@ -1091,7 +1091,11 @@
+   }
+ #endif // _LIBCPP_CXX03_LANG
+
++#if defined(__arm__) && !defined(__clang__)
++  inline ~basic_string() {
++#else
+   inline _LIBCPP_CONSTEXPR_SINCE_CXX20 ~basic_string() {
++#endif
+     if (__is_long())
+       __alloc_traits::deallocate(__alloc(), __get_long_pointer(), __get_long_cap());
+   }
