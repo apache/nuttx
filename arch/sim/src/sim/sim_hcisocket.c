@@ -88,6 +88,7 @@ static int  bthcisock_send(struct bt_driver_s *drv,
 static int  bthcisock_open(struct bt_driver_s *drv);
 static void bthcisock_close(struct bt_driver_s *drv);
 static int  bthcisock_receive(struct bt_driver_s *drv);
+static void sim_bthcisock_interrupt(wdparm_t arg);
 
 /****************************************************************************
  * Private Functions
@@ -127,6 +128,7 @@ static void bthcisock_close(struct bt_driver_s *drv)
 {
   struct bthcisock_s *dev = (struct bthcisock_s *)drv;
 
+  wd_cancel(&dev->wdog);
   host_bthcisock_close(dev->fd);
   dev->fd = -1;
 }
@@ -153,10 +155,9 @@ static int bthcisock_receive(struct bt_driver_s *drv)
       hdr = (union bt_hdr_u *)&dev->rxbuf[H4_HEADER_SIZE];
       switch (dev->rxbuf[0])
         {
-        case H4_EVT:
-          {
+          case H4_EVT:
             if (dev->rxlen < H4_HEADER_SIZE
-                + sizeof (struct bt_hci_evt_hdr_s))
+                + sizeof(struct bt_hci_evt_hdr_s))
               {
                 return ret;
               }
@@ -164,10 +165,8 @@ static int bthcisock_receive(struct bt_driver_s *drv)
             type = BT_EVT;
             pktlen = H4_HEADER_SIZE + sizeof(struct bt_hci_evt_hdr_s)
                      + hdr->evt.len;
-          }
-          break;
-        case H4_ACL:
-          {
+            break;
+          case H4_ACL:
             if (dev->rxlen < H4_HEADER_SIZE
                 + sizeof(struct bt_hci_acl_hdr_s))
               {
@@ -177,10 +176,8 @@ static int bthcisock_receive(struct bt_driver_s *drv)
             type = BT_ACL_IN;
             pktlen = H4_HEADER_SIZE + sizeof(struct bt_hci_acl_hdr_s)
                      + hdr->acl.len;
-          }
-          break;
-        case H4_ISO:
-          {
+            break;
+          case H4_ISO:
             if (dev->rxlen < H4_HEADER_SIZE
                 + sizeof(struct bt_hci_iso_hdr_s))
               {
@@ -190,10 +187,9 @@ static int bthcisock_receive(struct bt_driver_s *drv)
             type = BT_ISO_IN;
             pktlen = H4_HEADER_SIZE + sizeof(struct bt_hci_iso_hdr_s)
                      + hdr->iso.len;
-          }
-          break;
-        default:
-          return -EINVAL;
+            break;
+          default:
+            return -EINVAL;
         }
 
       if (dev->rxlen < pktlen)
@@ -223,6 +219,7 @@ static int bthcisock_open(struct bt_driver_s *drv)
     }
 
   dev->fd = fd;
+  wd_start(&dev->wdog, 0, sim_bthcisock_interrupt, (wdparm_t)dev);
 
   return OK;
 }
@@ -253,6 +250,12 @@ static struct bthcisock_s *bthcisock_alloc(int dev_id)
 
 static void bthcisock_free(struct bthcisock_s *dev)
 {
+  wd_cancel(&dev->wdog);
+  if (dev->fd >= 0)
+    {
+      host_bthcisock_close(dev->fd);
+    }
+
   kmm_free(dev);
 }
 
@@ -314,8 +317,6 @@ int sim_bthcisock_register(int dev_id)
       bthcisock_free(dev);
       return ret;
     }
-
-  wd_start(&dev->wdog, 0, sim_bthcisock_interrupt, (wdparm_t)dev);
 
   return 0;
 }
