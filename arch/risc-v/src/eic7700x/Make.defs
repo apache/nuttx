@@ -39,3 +39,7 @@ endif
 ifeq ($(CONFIG_EIC7700X_CPUCLK),y)
 CHIP_CSRCS += eic7700x_cpuclk.c
 endif
+
+ifeq ($(CONFIG_EIC7700X_PINCTRL),y)
+CHIP_CSRCS += eic7700x_pinctrl.c eic7700x_pinctrl_ops.c
+endif
