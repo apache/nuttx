@@ -30,7 +30,7 @@
 #include <nuttx/config.h>
 #include <stdbool.h>
 
-#include <nuttx/list.h>
+#include <nuttx/queue.h>
 #include <nuttx/compiler.h>
 
 /****************************************************************************
@@ -105,7 +105,7 @@ struct reset_control_ops
  *                               provide multiple reset controls
  * name a reset controller device name
  * ops: a pointer to device specific struct reset_control_ops
- * list: internal list of reset controller devices
+ * list: node in the per-CPU list of reset controller devices
  * reset_control_head: head of internal list of requested reset controls
  * nlines: the id space, so get_line() is asked about 0 to nlines - 1.
  *         Controllers commonly leave gaps, which get_line() reports, so
@@ -117,8 +117,8 @@ struct reset_controller_dev
 {
   FAR const char *name;
   FAR const struct reset_control_ops *ops;
-  struct list_node list;
-  struct list_node reset_control_head;
+  dq_entry_t list;
+  dq_queue_t reset_control_head;
   unsigned int nlines;
 };
 

@@ -31,7 +31,7 @@
 #include <stdbool.h>
 
 #include <nuttx/atomic.h>
-#include <nuttx/list.h>
+#include <nuttx/queue.h>
 
 /****************************************************************************
  * Public Types
@@ -58,7 +58,7 @@ struct reset_controller_dev;
 struct reset_control
 {
   FAR struct reset_controller_dev *rcdev;
-  struct list_node list;
+  dq_entry_t list;
   unsigned int id;
   atomic_t refcnt;
   bool acquired;

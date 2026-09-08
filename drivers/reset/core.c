@@ -30,6 +30,9 @@
 
 #include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
+#include <nuttx/percpu.h>
+#include <nuttx/queue.h>
 #include <nuttx/reset/reset.h>
 #include <nuttx/reset/reset-controller.h>
 
@@ -46,9 +49,20 @@
  * Private Data
  ****************************************************************************/
 
-static struct list_node
-g_reset_controller_list = LIST_INITIAL_VALUE(g_reset_controller_list);
-static mutex_t g_reset_list_mutex = NXMUTEX_INITIALIZER;
+/* The controller list and its lock are per-CPU: under BMP each core runs its
+ * own scheduler off a shared image, so a controller belongs to the core that
+ * registered it and the lock must not be shared across cores either.
+ *
+ * The list is a dq queue rather than a list_node: a circular head cannot be
+ * initialised statically in per-CPU storage, where the initialiser would
+ * point every core's copy at the first core's head, while a zeroed dq head
+ * is already a valid empty queue.
+ */
+
+static DEFINE_PER_CPU_BSS_BMP(dq_queue_t, g_reset_controller_list);
+#define g_reset_controller_list this_cpu_var_bmp(g_reset_controller_list)
+static DEFINE_PER_CPU_BMP(mutex_t, g_reset_list_mutex) = NXMUTEX_INITIALIZER;
+#define g_reset_list_mutex this_cpu_var_bmp(g_reset_list_mutex)
 
 /****************************************************************************
  * Private Types
@@ -272,8 +286,8 @@ reset_control_get_internal(FAR struct reset_controller_dev *rcdev,
 
   DEBUGASSERT(nxmutex_is_locked(&g_reset_list_mutex));
 
-  list_for_every_entry(&rcdev->reset_control_head, rstc,
-                       struct reset_control, list)
+  dq_for_every_entry(&rcdev->reset_control_head, rstc,
+                     struct reset_control, list)
     {
       if (rstc->id == index)
         {
@@ -323,7 +337,7 @@ reset_control_get_internal(FAR struct reset_controller_dev *rcdev,
 #endif
 
   rstc->rcdev = rcdev;
-  list_add_after(&rcdev->reset_control_head, &rstc->list);
+  dq_addlast(&rstc->list, &rcdev->reset_control_head);
   rstc->id = index;
   atomic_set(&rstc->refcnt, 1);
   rstc->acquired = acquired;
@@ -350,7 +364,7 @@ static void reset_control_put_internal(FAR struct reset_control *rstc)
   if (atomic_sub(&rstc->refcnt, 1) == 1)
     {
       DEBUGASSERT(nxmutex_is_locked(&g_reset_list_mutex));
-      list_delete(&rstc->list);
+      dq_rem(&rstc->list, &rstc->rcdev->reset_control_head);
 
 #if defined(CONFIG_RESET_RPMSG)
 
@@ -412,8 +426,8 @@ reset_controller_get_by_name(FAR const char *name)
   FAR struct reset_controller_dev *rcdev;
 
   nxmutex_lock(&g_reset_list_mutex);
-  list_for_every_entry(&g_reset_controller_list, rcdev,
-                       struct reset_controller_dev, list)
+  dq_for_every_entry(&g_reset_controller_list, rcdev,
+                     struct reset_controller_dev, list)
   {
     if (!strcmp(name, rcdev->name))
       {
@@ -625,8 +639,8 @@ static ssize_t reset_procfs_read(FAR struct file *filep,
       return ret;
     }
 
-  list_for_every_entry(&g_reset_controller_list, rcdev,
-                       struct reset_controller_dev, list)
+  dq_for_every_entry(&g_reset_controller_list, rcdev,
+                     struct reset_controller_dev, list)
     {
       if (remaining == 0)
         {
@@ -1151,8 +1165,8 @@ int reset_control_acquire(FAR struct reset_control *rstc)
       return 0;
     }
 
-  list_for_every_entry(&rstc->rcdev->reset_control_head, rc,
-                        struct reset_control, list)
+  dq_for_every_entry(&rstc->rcdev->reset_control_head, rc,
+                     struct reset_control, list)
     {
       if (rstc != rc && rstc->id == rc->id)
         {
@@ -1348,7 +1362,7 @@ int reset_controller_register(FAR struct reset_controller_dev *rcdev)
       return -EINVAL;
     }
 
-  list_initialize(&rcdev->reset_control_head);
+  dq_init(&rcdev->reset_control_head);
 
   nxmutex_lock(&g_reset_list_mutex);
 
@@ -1366,7 +1380,7 @@ int reset_controller_register(FAR struct reset_controller_dev *rcdev)
     }
 #endif
 
-  list_add_after(&g_reset_controller_list, &rcdev->list);
+  dq_addlast(&rcdev->list, &g_reset_controller_list);
   nxmutex_unlock(&g_reset_list_mutex);
 
   return 0;
@@ -1385,7 +1399,7 @@ int reset_controller_register(FAR struct reset_controller_dev *rcdev)
 void reset_controller_unregister(FAR struct reset_controller_dev *rcdev)
 {
   nxmutex_lock(&g_reset_list_mutex);
-  list_delete(&rcdev->list);
+  dq_rem(&rcdev->list, &g_reset_controller_list);
   nxmutex_unlock(&g_reset_list_mutex);
 }
 
