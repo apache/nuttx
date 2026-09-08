@@ -147,18 +147,22 @@ which links the module into the NXFLAT binary format.
 ``tools/mknxflat`` whenever ``CONFIG_NXFLAT`` is selected, so there is
 nothing to install.
 
-``ldnxflat`` is not part of NuttX and has to be built from the buildroot
-package, which can be downloaded from
-`Bitbucket.org <https://bitbucket.org/nuttx/buildroot/downloads>`__.  You
-will need version 0.1.7 or later:
+``ldnxflat`` is not part of NuttX and cannot be: it is GPL and derives from
+elf2flt.  It lives in the NuttX buildroot toolchain, at
+`patacongo/buildroot <https://github.com/patacongo/buildroot>`__, under
+``toolchain/nxflat``.
 
--  Unpack the package and ``cd`` into the resulting directory.
--  Copy a configuration file into the top buildroot directory:
-   ``cp boards/abc-defconfig-x.y.z .config``.
--  Run ``make menuconfig`` and select the NXFLAT toolchain.  Building GCC
-   can be omitted if you already have a toolchain of your own.
--  Run ``make``.  The tool binaries are left under
-   ``build_abc/staging_dir/bin``; put that directory on your ``PATH``.
+Only that one tool is needed.  The rest of the buildroot toolchain is not:
+an ordinary ``arm-none-eabi`` GCC compiles and links NXFLAT modules, so a
+board does not have to select ``CONFIG_ARM_TOOLCHAIN_BUILDROOT`` to use
+them.
+
+``ldnxflat`` reads its input through libbfd, so it is built against a
+binutils source tree and a binutils build of the same version.
+``toolchain/nxflat/Makefile`` takes those as ``BINUTILS_DIR`` and
+``BINUTILS_DIR1``, and expects an ``arch`` symbolic link naming the target,
+``thumb2`` or ``arm``.  Where the binutils build leaves ``libbfd.a`` varies,
+so the library path may need adjusting.  Put the result on your ``PATH``.
 
 On ARM, ``arch/arm/src/common/Toolchain.defs`` provides both ``MKNXFLAT``
 (with the ``-a`` option following ``CONFIG_ARM_THUMB``) and ``LDNXFLAT``, so
