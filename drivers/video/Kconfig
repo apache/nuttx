@@ -82,6 +82,44 @@ config VIDEO_FB_NPOLLWAITERS
 	depends on VIDEO_FB
 	default 2
 
+config VIDEO_VFB
+	bool "Virtual framebuffer (no display hardware)"
+	depends on VIDEO_FB
+	default n
+	select FB_UPDATE
+	---help---
+		A framebuffer that is memory and nothing else, registered as
+		/dev/fbN like any other.  Applications draw into it as they
+		would into a panel;  whatever wants the pixels reads the same
+		memory and learns what changed through the framebuffer's
+		dirty-area reporting.
+
+		A board with no display runs the same graphics stack as one
+		with a panel;  a board whose panel is the wrong size for what
+		is being developed can serve a different one over the network.
+
+		Registered by the board with vfb_register(), so a board that has
+		a panel of its own can serve both:  the panel on one /dev/fbN and
+		a virtual screen of a different size on another.
+
+config VIDEO_VFB_WIDTH
+	int "Virtual framebuffer width (pixels)"
+	depends on VIDEO_VFB
+	default 480
+
+config VIDEO_VFB_HEIGHT
+	int "Virtual framebuffer height (rows)"
+	depends on VIDEO_VFB
+	default 320
+
+config VIDEO_VFB_FMT_RGB32
+	bool "Virtual framebuffer is RGB32 rather than RGB16 5:6:5"
+	depends on VIDEO_VFB
+	default n
+	---help---
+		Other formats are a few lines away in vfb.c should a consumer
+		need one.
+
 config VIDEO_FB_SPLASHSCREEN
 	bool "Enable Splashscreen when Framebuffer Driver is registered"
 	depends on VIDEO_FB

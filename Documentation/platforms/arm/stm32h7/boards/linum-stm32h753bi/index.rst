@@ -1298,3 +1298,44 @@ This example demonstrates how to use the CAN-FD peripherals can0 and can1 with t
     can0  051   [8]  00 11 22 33 44 55 66 77
     can0  051  [16]  00 11 22 33 44 55 66 77 88 99 AA BB CC DD EE FF
 
+
+vnc
+---
+
+Mirrors the board's own display over the network.  The panel keeps working;
+a viewer sees the same pixels, and its mouse and keyboard reach the
+application as a second touchscreen and a keyboard::
+
+  nsh> fbvnc start /dev/fb0
+  nsh> lvgldemo &
+
+.. figure:: fbvnc_lvgl.png
+   :align: center
+
+   ``vnc``:  the panel keeps showing the demo and a viewer on the network
+   sees the same pixels, with its mouse and keyboard reaching the
+   application.
+
+vncfb
+-----
+
+Serves a display the board does not have.  The LTDC is left out of the
+build entirely and a virtual framebuffer takes its place, so the graphics
+stack runs unchanged and the only screen is the one on the network::
+
+  nsh> fbvnc start /dev/fb0
+  nsh> lvglterm /dev/ukeyboard &   # a terminal, driven from the viewer
+
+The Ethernet runs at 100 Mbps here, unlike the ``vnc`` configuration:  the
+link is pinned to 10BASE-T there to work around the panel's interference
+with the magnetics, and there is no panel in this one.
+
+.. note::
+   Known limitation with LVGL applications.  A key of LVGL's on-screen
+   keyboard, clicked once from a viewer, is typed twice, and typing into
+   LVGL widgets from the viewer's keyboard does not work at all, LVGL's
+   NuttX port has a touchscreen driver but no keyboard one, so nothing
+   reads ``/dev/ukeyboard`` into an input device.  Pointer input otherwise
+   works:  tabs, buttons and fields all respond.  An application that reads
+   the keyboard itself, as ``lvglterm`` does, is unaffected.  See the TODO
+   in ``apps/system/fbvnc/fbvnc_main.c``.
