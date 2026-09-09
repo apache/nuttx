@@ -52,12 +52,36 @@ if(CONFIG_ARCH_BOARD_COMMON)
     list(APPEND SRCS esp_board_spiflash.c)
   endif()
 
+  if(CONFIG_SENSORS_BMP180)
+    list(APPEND SRCS esp_board_bmp180.c)
+  endif()
+
+  if(CONFIG_SENSORS_BMP280)
+    list(APPEND SRCS esp_board_bmp280.c)
+  endif()
+
   if(CONFIG_DEV_RNG90)
     list(APPEND SRCS esp_board_rng90.c)
   endif()
 
   if(CONFIG_MMCSD_SPI)
     list(APPEND SRCS esp_board_mmcsd.c)
+  endif()
+
+  # Handle ROMFS init scripts
+  if(CONFIG_ETC_ROMFS)
+    nuttx_add_romfs(
+      NAME
+      etc
+      MOUNTPOINT
+      etc
+      RCSRCS
+      etc/init.d/rcS
+      etc/init.d/rc.sysinit
+      PATH
+      ${CMAKE_CURRENT_BINARY_DIR}/etc)
+
+    target_link_libraries(board PRIVATE romfs_etc)
   endif()
 
 endif()
