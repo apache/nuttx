@@ -38,6 +38,7 @@
 #include <errno.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/himem/himem.h>
+#include <nuttx/power/pm.h>
 #include <arch/board/board.h>
 
 #include "espressif/esp_gpio.h"
@@ -45,6 +46,10 @@
 
 #ifdef CONFIG_ESPRESSIF_HR_TIMER
 #  include "espressif/esp_hr_timer.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_WIFI
+#  include "esp32s3_board_wlan.h"
 #endif
 
 #ifdef CONFIG_ESP32S3_I2C
@@ -155,6 +160,25 @@ int esp32s3_bringup(void)
              "Failed to initialize LSM6DS3TR-C driver for I2C0: %d\n",
              ret);
     }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_WIFI
+#  ifdef CONFIG_PM
+  /* Wi-Fi radio calibration can't tolerate PM_STANDBY light sleep. */
+
+  pm_stay(PM_IDLE_DOMAIN, PM_IDLE);
+#  endif
+
+  ret = board_wlan_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize wlan subsystem=%d\n",
+             ret);
+    }
+
+#  ifdef CONFIG_PM
+  pm_relax(PM_IDLE_DOMAIN, PM_IDLE);
+#  endif
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but
