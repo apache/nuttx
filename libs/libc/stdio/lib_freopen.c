@@ -32,6 +32,7 @@
 #include <unistd.h>
 
 #ifdef CONFIG_FDSAN
+#  include <stdint.h>
 #  include <android/fdsan.h>
 #endif
 
@@ -118,9 +119,18 @@ FAR FILE *freopen(FAR const char *path, FAR const char *mode,
       /* close the old fd */
 
 #ifdef CONFIG_FDSAN
-      android_fdsan_close_with_tag(fileno(stream),
+      /* Standard streams are fdsan-unowned; bypass fdsan as fclose() does. */
+
+      if (stream == stdin || stream == stdout || stream == stderr)
+        {
+          close(fileno(stream));
+        }
+      else
+        {
+          android_fdsan_close_with_tag(fileno(stream),
               android_fdsan_create_owner_tag(ANDROID_FDSAN_OWNER_TYPE_FILE,
                                              (uintptr_t)stream));
+        }
 #else
       close(fileno(stream));
 #endif
@@ -129,9 +139,13 @@ FAR FILE *freopen(FAR const char *path, FAR const char *mode,
 
       fd = open(path, oflags, 0666);
 #ifdef CONFIG_FDSAN
-      android_fdsan_exchange_owner_tag(fd, 0,
-          android_fdsan_create_owner_tag(ANDROID_FDSAN_OWNER_TYPE_FILE,
-                                        (uintptr_t)stream));
+      if (stream != stdin && stream != stdout && stream != stderr)
+        {
+          android_fdsan_exchange_owner_tag(fd, 0,
+              android_fdsan_create_owner_tag(ANDROID_FDSAN_OWNER_TYPE_FILE,
+                                             (uintptr_t)stream));
+        }
+
 #endif
       flockfile(stream);
       stream->fs_cookie = (FAR void *)(intptr_t)fd;
