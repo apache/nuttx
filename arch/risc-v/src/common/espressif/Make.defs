@@ -293,7 +293,7 @@ endif
 ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
 ifneq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: initializing submodules..."
-	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/esp_phy/lib components/esp_wifi/lib components/bt/controller/lib_esp32c3_family components/bt/controller/lib_esp32c6/esp32c6-bt-lib components/bt/controller/lib_esp32h2/esp32h2-bt-lib components/esp_coex/lib
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/esp_phy/lib components/esp_wifi/lib components/bt/controller/lib_esp32c2/esp32c2-bt-lib components/bt/controller/lib_esp32c3_family components/bt/controller/lib_esp32c6/esp32c6-bt-lib components/bt/controller/lib_esp32h2/esp32h2-bt-lib components/esp_coex/lib
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls reset --quiet --hard
 endif
 	$(Q) echo "Applying patches..."
