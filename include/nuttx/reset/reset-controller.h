@@ -61,8 +61,11 @@ struct reset_lineinfo_s
 
 /* struct reset_control_ops - reset controller driver operations
  * reset: for self-deasserting resets, does all necessary
- *         things to reset the device
- * assert: manually assert the reset line, if supported
+ *         things to reset the device.  reason is passed through from the
+ *         caller for controllers that act on a cause rather than on a piece
+ *         of hardware; a controller driving real hardware only needs id.
+ * assert: manually assert the reset line, if supported.  reason is passed
+ *         through the same way as for reset.
  * deassert: manually deassert the reset line, if supported
  * status: return the status of the reset line, if supported
  */
@@ -74,9 +77,9 @@ struct reset_control_ops
   CODE int (*release)(FAR struct reset_controller_dev *rcdev,
                       unsigned int id);
   CODE int (*reset)(FAR struct reset_controller_dev *rcdev,
-                    unsigned int id);
+                    unsigned int id, unsigned int reason);
   CODE int (*assert)(FAR struct reset_controller_dev *rcdev,
-                     unsigned int id);
+                     unsigned int id, unsigned int reason);
   CODE int (*deassert)(FAR struct reset_controller_dev *rcdev,
                        unsigned int id);
   CODE int (*status)(FAR struct reset_controller_dev *rcdev,

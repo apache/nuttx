@@ -78,7 +78,7 @@ rstc_to_array(FAR struct reset_control *rstc)
 }
 
 /****************************************************************************
- * Name: reset_control_array_reset
+ * Name: reset_control_array_reset_reason
  *
  * Description:
  *   This function is used to perform reset operation of a reset control
@@ -86,19 +86,22 @@ rstc_to_array(FAR struct reset_control *rstc)
  *
  * Input Parameters:
  *   resets - An instance of a reset_control_array.
+ *   reason - Reason to hand each element's controller.
  *
  * Returned Value:
  *   A 0 in case of success, otherwise error.
  ****************************************************************************/
 
-static int reset_control_array_reset(FAR struct reset_control_array *resets)
+static int
+reset_control_array_reset_reason(FAR struct reset_control_array *resets,
+                                 unsigned int reason)
 {
   int ret = 0;
   unsigned int i;
 
   for (i = 0; i < resets->num_rstcs; i++)
     {
-      ret = reset_control_reset(resets->rstc[i]);
+      ret = reset_control_reset_reason(resets->rstc[i], reason);
       if (ret < 0)
         {
           return ret;
@@ -109,7 +112,7 @@ static int reset_control_array_reset(FAR struct reset_control_array *resets)
 }
 
 /****************************************************************************
- * Name: reset_control_array_assert
+ * Name: reset_control_array_assert_reason
  *
  * Description:
  *   This function is used to perform assert operation of a reset control
@@ -117,19 +120,22 @@ static int reset_control_array_reset(FAR struct reset_control_array *resets)
  *
  * Input Parameters:
  *    resets - An instance of a reset_control_array.
+ *    reason - Reason to hand each element's controller.
  *
  * Returned Value:
  *   A 0 in case of success, otherwise error.
  ****************************************************************************/
 
-static int reset_control_array_assert(FAR struct reset_control_array *resets)
+static int
+reset_control_array_assert_reason(FAR struct reset_control_array *resets,
+                                  unsigned int reason)
 {
   int ret = 0;
   unsigned int i;
 
   for (i = 0; i < resets->num_rstcs; i++)
     {
-      ret = reset_control_assert(resets->rstc[i]);
+      ret = reset_control_assert_reason(resets->rstc[i], reason);
       if (ret < 0)
         {
           while (i--)
@@ -817,9 +823,14 @@ reset_control_get(FAR const char *name, int index, bool shared,
 }
 
 /****************************************************************************
- * Name: reset_control_reset
+ * Name: reset_control_reset_reason
  *
  * Description:
+ *   Reset the target with an explicit reason, for controllers whose lines
+ *   encode a cause rather than a piece of hardware.  The reason reaches the
+ *   controller unchanged, alongside the reset control's own line id, and
+ *   every element of a reset control array gets the same one.
+ *
  *   On a shared reset line the actual reset pulse is only triggered once for
  *   the lifetime of the reset_control instance: for all but the first caller
  *   this is a no-op.
@@ -827,18 +838,20 @@ reset_control_get(FAR const char *name, int index, bool shared,
  *   when reset_control_reset has been used.
  *
  * Input Parameters:
- *   rstc - Reset controller
+ *   rstc   - Reset controller
+ *   reason - Reason to hand the controller, see reset-controller.h
  *
  * Returned Value:
  *   Returns a negative errno if not supported, a positive value if the
  *   reset line is asserted.
  ****************************************************************************/
 
-int reset_control_reset(FAR struct reset_control *rstc)
+int reset_control_reset_reason(FAR struct reset_control *rstc,
+                               unsigned int reason)
 {
   int ret;
 
-  rstinfo("Enter: reset_control_reset\n");
+  rstinfo("Enter: reset_control_reset_reason\n");
 
   if (rstc == NULL)
     {
@@ -848,7 +861,7 @@ int reset_control_reset(FAR struct reset_control *rstc)
 
   if (rstc->array)
     {
-      return reset_control_array_reset(rstc_to_array(rstc));
+      return reset_control_array_reset_reason(rstc_to_array(rstc), reason);
     }
 
   if (!rstc->rcdev->ops->reset)
@@ -877,7 +890,7 @@ int reset_control_reset(FAR struct reset_control *rstc)
         }
     }
 
-  ret = rstc->rcdev->ops->reset(rstc->rcdev, rstc->id);
+  ret = rstc->rcdev->ops->reset(rstc->rcdev, rstc->id, reason);
 
   /* shared:1 and reset failed, triggered_count subtract 1 */
 
@@ -890,7 +903,7 @@ int reset_control_reset(FAR struct reset_control *rstc)
 }
 
 /****************************************************************************
- * Name: reset_control_assert
+ * Name: reset_control_assert_reason
  *
  * Description:
  *   Asserts the reset line.
@@ -906,16 +919,18 @@ int reset_control_reset(FAR struct reset_control *rstc)
  *   return -EBUSY.
  *
  * Input Parameters:
- *   rstc - Reset controller
+ *   rstc   - Reset controller
+ *   reason - Reason to hand the controller, see reset-controller.h
  *
  * Returned Value:
  *   Returns a negative errno if not supported, a positive value if the
  *   reset line is asserted.
  ****************************************************************************/
 
-int reset_control_assert(FAR struct reset_control *rstc)
+int reset_control_assert_reason(FAR struct reset_control *rstc,
+                                unsigned int reason)
 {
-  rstinfo("Enter: reset_control_assert\n");
+  rstinfo("Enter: reset_control_assert_reason\n");
   if (rstc == NULL)
     {
       rsterr("rstc is null\n");
@@ -924,7 +939,7 @@ int reset_control_assert(FAR struct reset_control *rstc)
 
   if (rstc->array)
     {
-      return reset_control_array_assert(rstc_to_array(rstc));
+      return reset_control_array_assert_reason(rstc_to_array(rstc), reason);
     }
 
   if (rstc->shared)
@@ -975,7 +990,7 @@ int reset_control_assert(FAR struct reset_control *rstc)
     }
 
 #undef assert
-  return rstc->rcdev->ops->assert(rstc->rcdev, rstc->id);
+  return rstc->rcdev->ops->assert(rstc->rcdev, rstc->id, reason);
 }
 
 /****************************************************************************
