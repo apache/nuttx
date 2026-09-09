@@ -108,6 +108,10 @@
 #  include "esp_board_mmcsd.h"
 #endif
 
+#ifdef CONFIG_ESPRESSIF_BLE
+#  include "esp_ble.h"
+#endif
+
 #include "esp8684-devkitm.h"
 
 /****************************************************************************
@@ -326,6 +330,15 @@ int esp_bringup(void)
       syslog(LOG_ERR, "ERROR: board_ledc_setup() failed: %d\n", ret);
     }
 #endif /* CONFIG_ESPRESSIF_LEDC */
+
+#ifdef CONFIG_ESPRESSIF_BLE
+  ret = esp_ble_initialize();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize BLE\n");
+      return ret;
+    }
+#endif
 
 #ifdef CONFIG_PM
   /* Configure PM */
