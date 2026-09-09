@@ -108,6 +108,18 @@
 #  include "esp_board_mmcsd.h"
 #endif
 
+#ifdef CONFIG_ESPRESSIF_BLE
+#  include "esp_ble.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
+#  include "private/esp_coexist_internal.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_WIFI
+#  include "esp_board_wlan.h"
+#endif
+
 #include "esp8684-devkitm.h"
 
 /****************************************************************************
@@ -327,6 +339,29 @@ int esp_bringup(void)
       syslog(LOG_ERR, "ERROR: board_ledc_setup() failed: %d\n", ret);
     }
 #endif /* CONFIG_ESPRESSIF_LEDC */
+
+#ifdef CONFIG_ESPRESSIF_BLE
+  ret = esp_ble_initialize();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize BLE\n");
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
+  esp_coex_adapter_register(&g_coex_adapter_funcs);
+  coex_pre_init();
+#endif
+
+#ifdef CONFIG_ESPRESSIF_WIFI
+  ret = board_wlan_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize wireless subsystem=%d\n",
+             ret);
+    }
+#endif
 
 #ifdef CONFIG_PM
   /* Configure PM */
