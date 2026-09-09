@@ -27,9 +27,11 @@ ifeq ($(CONFIG_RESET),y)
 CSRCS += core.c
 
 ifeq ($(CONFIG_RESET_RPMSG),y)
-
 CSRCS += reset_rpmsg.c
+endif
 
+ifeq ($(CONFIG_RESET_IPC),y)
+CSRCS += reset_ipc.c
 endif
 
 DEPPATH += --dep-path reset

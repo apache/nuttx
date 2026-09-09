@@ -24,15 +24,17 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-menuconfig RESET
-	bool "reset driver Support"
+config RESET
+	bool
 	default n
 	---help---
 		This selection enables building of the "upper-half" reset driver.
+		Selected by the drivers that need it, not chosen directly.
 
 config RESET_RPMSG
 	bool "Reset rpmsg driver support"
-	depends on RESET && RPTUN
+	depends on RPTUN
+	select RESET
 	default n
 	---help---
 		This selection enables rpmsg support for reset.
@@ -50,3 +52,34 @@ config RESET_PROCFS
 		interface says how many lines a controller has or what any of them
 		is called, so without this the only way to see which peripherals
 		are held is a program that knows the numbering already.
+
+config RESET_IPC
+	bool "Inter-Processor panic/reset notify support"
+	select RESET
+	default n
+	---help---
+		RESET_IPC provides the multicore panic/reset coordination
+		mechanism (pause/panic/poweroff/stop handshake over a pair of
+		shared status words plus an IPI) shared by transports such as
+		RPTUN and RPMSG_BMP.  Each registered channel also exposes the
+		peer core to the reset framework, with one reset line per reset
+		reason (line id == BOARDIOC_SOFTRESETCAUSE_xxx).  It is selected
+		automatically by the transports that use it.
+
+if RESET_IPC
+
+config RESET_IPC_REMOTE_PANIC_SILENT
+	bool "Silence syslog on remote-triggered panic"
+	default n
+	---help---
+		When a remote core triggers a panic on this core, silence
+		all syslog output by setting logmask to LOG_NONE.  The log
+		mask is restored at PANIC_KERNEL_FINAL before coredump and
+		RAMLOG dump, so only the originating core's crash log is
+		printed during the panic sequence.
+
+config RESET_IPC_STATUS_TIMEOUT_MS
+	int "reset_ipc status timeout ms"
+	default 5000
+
+endif # RESET_IPC
