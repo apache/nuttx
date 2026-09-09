@@ -36,11 +36,14 @@
 
 #define IMXRT_USBPHY_BASE_OFFSET            0x1000  /* USB1 PHY Base */
 
-/* Simple hack to get iMXRT117x working with same macro */
+/* Simple hack to get iMXRT117x/iMXRT118x working with same macro */
 
 #ifdef CONFIG_ARCH_FAMILY_IMXRT117x
 #  define IMXRT_ANATOP_BASE                 0x40433000 /* ANATOP doesn't exist on rt117x, it is used this way here only to make the code compatible */
 #  define IMXRT_USBPHY_SHIFT                0x4000
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT118x)
+#  define IMXRT_ANATOP_BASE                 (IMXRT_USBPHY1_BASE - IMXRT_USBPHY_BASE_OFFSET) /* ANATOP doesn't exist on rt118x */
+#  define IMXRT_USBPHY_SHIFT                0x10000
 #else
 #  define IMXRT_USBPHY_SHIFT                0x1000
 #endif
