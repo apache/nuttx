@@ -39,6 +39,7 @@
 #include "esp_board_ledc.h"
 #include "esp_board_spiflash.h"
 #include "esp_board_i2c.h"
+#include "esp_board_bmp180.h"
 
 #include "espressif/esp_start.h"
 
@@ -91,8 +92,16 @@
 #  include "esp_board_adc.h"
 #endif
 
+#ifdef CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL
+#  include "espressif/esp_nxdiag.h"
+#endif
+
 #ifdef CONFIG_ESPRESSIF_SHA_ACCELERATOR
 #  include "espressif/esp_sha.h"
+#endif
+
+#ifdef CONFIG_PM
+#  include "espressif/esp_pm.h"
 #endif
 
 #ifdef CONFIG_MMCSD_SPI
@@ -261,6 +270,18 @@ int esp_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SENSORS_BMP180
+  /* Try to register BMP180 device in I2C0 */
+
+  ret = board_bmp180_initialize(0);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize BMP180 "
+             "Driver for I2C0: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_ESPRESSIF_TEMP
   struct esp_temp_sensor_config_t cfg = TEMPERATURE_SENSOR_CONFIG(10, 50);
 
@@ -306,6 +327,24 @@ int esp_bringup(void)
       syslog(LOG_ERR, "ERROR: board_ledc_setup() failed: %d\n", ret);
     }
 #endif /* CONFIG_ESPRESSIF_LEDC */
+
+#ifdef CONFIG_PM
+  /* Configure PM */
+
+  ret = esp_pmconfigure();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_pmconfigure failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL
+  ret = esp_nxdiag_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_nxdiag_initialize failed: %d\n", ret);
+    }
+#endif
 
 #ifdef CONFIG_ESPRESSIF_ADC
   ret = board_adc_init();
