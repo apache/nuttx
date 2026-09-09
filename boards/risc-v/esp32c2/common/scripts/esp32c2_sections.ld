@@ -118,6 +118,22 @@ SECTIONS
     *(.iram1)
     *(.iram1.*)
 
+#ifdef CONFIG_ESPRESSIF_BLE
+    /* BLE controller (libble_app.a) uses custom section names for the code
+     * that must run from IRAM.  Collect them here so elf2image does not see
+     * one ESP segment per input section.
+     */
+
+    *(.isr_iram1)
+    *(.isr_iram1.*)
+    *(.conn_iram1)
+    *(.conn_iram1.*)
+    *(.sleep_iram1)
+    *(.sleep_iram1.*)
+    *(.ble_log_iram1)
+    *(.ble_log_iram1.*)
+#endif
+
     *libcoexist.a:(.coexiram .coexiram.*)
 
     *libpp.a:wifi_iram.*(.literal .text .literal.* .text.*)

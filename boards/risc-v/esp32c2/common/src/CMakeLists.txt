@@ -52,6 +52,10 @@ if(CONFIG_ARCH_BOARD_COMMON)
     list(APPEND SRCS esp_board_spiflash.c)
   endif()
 
+  if(CONFIG_ESPRESSIF_WIFI)
+    list(APPEND SRCS esp_board_wlan.c)
+  endif()
+
   if(CONFIG_SENSORS_BMP180)
     list(APPEND SRCS esp_board_bmp180.c)
   endif()
