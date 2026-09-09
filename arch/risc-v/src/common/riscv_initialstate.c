@@ -60,7 +60,7 @@ void up_initial_state(struct tcb_s *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
 #if defined(CONFIG_ARCH_RV_ISA_V) && (CONFIG_ARCH_RV_VECTOR_BYTE_LENGTH == 0)
-  uintptr_t *vregs = tcb->vregs;
+  uintreg_t *vregs = xcp->vregs;
 #endif
   uintptr_t regval;
   uintptr_t topstack;
