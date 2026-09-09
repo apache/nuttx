@@ -27,5 +27,9 @@ if(CONFIG_RESET)
     list(APPEND SRCS reset_rpmsg.c)
   endif()
 
+  if(CONFIG_RESET_IPC)
+    list(APPEND SRCS reset_ipc.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 endif()
