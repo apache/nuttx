@@ -52,9 +52,45 @@ File path configured by ``CONFIG_SYSTEM_NXINIT_RC_FILE_PATH``.
   via the override option).
 - Options are modifiers for services, affecting their running mode and timing.
   Examples include class (specify service category for batch start/stop),
+  console (redirect the service's stdio to a console device; see below),
   override (override previously defined services), restart_period (interval
   for restarting exited services), and reboot_on_failure (critical services
   trigger device reboot on startup failure or abnormal exit).
+
+The ``console`` Option
+-----------------------
+
+.. code-block::
+
+    service <name> <pathname> [ <argument> ]*
+       console [ <device> ]
+
+A service does not open a console device on its own - it simply inherits
+whatever stdin/stdout/stderr NXInit itself has, which for many boards is
+never set up at all (there is no ``/dev/console`` unless
+``CONFIG_DEV_CONSOLE`` is enabled). ``console`` fixes this by opening
+``<device>`` (``CONFIG_SYSTEM_NXINIT_CONSOLE_DEV``, ``/dev/console`` by
+default, if omitted) and duplicating it onto the service's stdin, stdout
+and stderr before it is spawned.
+
+This is required for a plain shell service (e.g. ``service console sh``)
+to actually be usable as an interactive console. It is not needed for
+``nsh`` (the full NSH application, as opposed to plain ``sh``), which
+already does the equivalent internally via ``nsh_consolemain()``.
+
+For a USB gadget console (``CONFIG_CDCACM_CONSOLE``/``CONFIG_PL2303_CONSOLE``),
+the device does not exist until the gadget is actually registered with the
+USB stack - unlike a plain UART, this does not happen implicitly during
+early boot. The gadget must be brought up once, before any service using
+``console`` is started, e.g. via ``apps/system/cdcacm``'s ``sercon``:
+
+.. code-block::
+
+    on init
+        exec -- sercon
+
+    service console sh
+        console
 
 Triggers
 ========
