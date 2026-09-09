@@ -25,4 +25,14 @@ include common/espressif/Make.defs
 
 CHIP_CSRCS += esp_chip_rev.c
 
+ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
+CHIP_CSRCS += esp_coex_adapter.c esp_wifi_adapter.c
+EXTRA_LIBS += -lcore -lnet80211 -lpp
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_BLE),y)
+CHIP_CSRCS += esp_ble.c
+EXTRA_LIBS += -lbtbb -lble_app
+endif
+
 CFLAGS += ${DEFINE_PREFIX}_RETARGETABLE_LOCKING
