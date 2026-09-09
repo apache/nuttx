@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_UDP)
 
+#include <poll.h>
 #include <stdint.h>
 #include <string.h>
 #include <nuttx/debug.h>
@@ -44,6 +45,37 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: udp_readahead_signal_poll
+ *
+ * Description:
+ *   Notify UDP poll/select waiters only after read-ahead data is available.
+ *
+ ****************************************************************************/
+
+static void udp_readahead_signal_poll(FAR struct udp_conn_s *conn)
+{
+  FAR struct udp_poll_s *info;
+  int i;
+
+  for (i = 0; i < CONFIG_NET_UDP_NPOLLWAITERS; i++)
+    {
+      info = &conn->pollinfo[i];
+
+      if (info->conn != conn || info->fds == NULL)
+        {
+          continue;
+        }
+
+      if ((info->fds->events & POLLIN) == 0)
+        {
+          continue;
+        }
+
+      poll_notify(&info->fds, 1, POLLIN);
+    }
+}
 
 /****************************************************************************
  * Name: udp_datahandler
@@ -269,6 +301,11 @@ net_dataevent(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn,
    */
 
   recvlen = udp_datahandler(dev, conn, buffer, buflen);
+  if (recvlen > 0)
+    {
+      udp_readahead_signal_poll(conn);
+    }
+
   if (recvlen < buflen)
     {
       /* There is no handler to receive new data and there are no free
