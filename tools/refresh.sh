@@ -22,7 +22,7 @@
 WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 CWD=`pwd`
 
-USAGE="USAGE: $0 [options] <board>:<config>+"
+USAGE="USAGE: $0 [options] (<board>:<config>|<path/to/config/folder>)+"
 ADVICE="Try '$0 --help' for more information"
 
 unset CONFIGS
@@ -53,7 +53,7 @@ while [ ! -z "$1" ]; do
   --help )
     echo "$0 is a tool for refreshing board configurations"
     echo ""
-    echo $USAGE
+    echo "$USAGE"
     echo ""
     echo "Where [options] include:"
     echo "  --debug"
@@ -78,7 +78,9 @@ while [ ! -z "$1" ]; do
     echo "     The architecture directory under nuttx/boards/"
     echo "  <chipname>"
     echo "     The chip family directory under nuttx/boards/<arch>/"
-    echo " "
+    echo "  <path/to/config/folder>"
+    echo "     Relative or absolute path to the configuration subdirectory"
+    echo ""
     echo "  Note1: all configurations are refreshed if <board>:<config> is replaced with \"all\" keyword" 
     echo "  Note2: all configurations of arch XYZ are refreshed if \"arch:<namearch>\" is passed"
     echo "  Note3: all configurations of chip XYZ are refreshed if \"chip:<chipname>\" is passed"
@@ -86,7 +88,7 @@ while [ ! -z "$1" ]; do
     exit 0
     ;;
   * )
-    CONFIGS=$*
+    CONFIGS=( $@ )
     break
     ;;
   esac
@@ -278,7 +280,7 @@ for i in ${!CONFIGS[@]}; do
 
     if [ "X${prompt}" == "Xy" ]; then
 
-      read -p "Save the new configuration (y/n)?" -n 1 -r
+      read -p "Save the new configuration (y/N)?" -n 1 -r
       echo
       if [[ $REPLY =~ ^[Yy]$ ]]; then
         echo "Saving the new configuration file"

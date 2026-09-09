@@ -4,19 +4,21 @@
 
 .. note::
 
-   This script with ``--silent`` is really obsolete. The silent option really
-   adds default values. However, as of 217-07-09, defconfig files are retained
-   in a compressed format, i.e., with default values removed.  So the
-   ``--silent`` option will accomplish nothing. Without ``--silent``, you will
-   have the opportunity over override the default value from the command line
-   and, in that case, the script may still have some minimal value.
+   This script with ``--silent`` is obsolete.
 
-This is a bash script that automates refreshing of board default configuration
+   The silent option adds default values, however, as of 2017-07-09,
+   defconfig files are retained in a compressed format, i.e. with default values
+   removed.  So the ``--silent`` option will accomplish nothing. Without
+   ``--silent``, you will have the opportunity to override the default values
+   from the command line and, in that case, the script may still have some
+   minimal value.
+
+This is a bash script that automates refreshing board default configuration
 (defconfig) files. It does not do anything special that you cannot do manually,
 but is useful for updating dozens of configuration files. It is also used in the
 NuttX CI process.
 
-Configuration files have to be updated because over time, the configuration
+Configuration files have to be updated because, over time, the configuration
 settings change; new configurations are added and new dependencies are added.
 So an old configuration file may not be usable anymore until it is refreshed.
 
@@ -27,7 +29,7 @@ Help is also available:
    $ tools/refresh.sh --help
    tools/refresh.sh is a tool for refreshing board configurations
 
-   USAGE: tools/refresh.sh [options] <board>:<config>+
+   USAGE: tools/refresh.sh [options] (<board>:<config>|<path/to/config/folder>)+
 
    Where [options] include:
      --debug
@@ -52,71 +54,85 @@ Help is also available:
         The architecture directory under nuttx/boards/
      <chipname>
         The chip family directory under nuttx/boards/<arch>/
+     <path/to/config/folder>
+        Relative or absolute path the configuration subdirectory
 
      Note1: all configurations are refreshed if <board>:<config> is replaced with "all" keyword
      Note2: all configurations of arch XYZ are refreshed if "arch:<namearch>" is passed
      Note3: all configurations of chip XYZ are refreshed if "chip:<chipname>" is passed
      Note4: all configurations of board XYZ are refreshed if "board:<boardname>" is passed
 
-The steps to refresh the file taken by ``refresh.sh`` are:
+The steps to refresh the configurations and/or files given to ``refresh.sh`` are:
 
-1. Make ``tools/cmpconfig`` if it is not already built.
+1. Copy the defconfig file to the top-level NuttX directory as ``.config`` and its
+   corresponding ``Make.defs`` file (being careful to save any previous identically
+   named files that you might want to keep).
 
-2. Copy the defconfig file to the top-level NuttX directory as ``.config``
-   (being careful to save any previous ``.config`` file that you might want to
-   keep!).
-
-3. Execute ``make` oldconfig` to update the configuration. ``make oldconfig``
+2. Execute ``make oldconfig`` to update the configuration. ``make oldconfig``
    will prompt you for each change in the configuration that requires that you
-   make some decision. With the ``--silent`` option, the script will use ``make
-   oldefconfig`` instead and you won't have to answer any questions; the refresh
-   will simply accept the default value for any new configuration settings.
+   make some decision. With the ``--defaults`` option, the script will use ``make
+   oldefconfig`` instead and you won't have to answer any question; the refresh
+   will simply accept the default value for any new configuration setting.
 
-4. Then it runs ``tools/cmpconfig`` to show the real differences between the
-   configuration files.  Configuration files are complex and things can move
-   around so a simple 'diff' between two configuration files is often not
-   useful.  But tools/cmpconfig will show only the meaningful differences
-   between the two configuration files.
+3. Execute ``make savedefconfig`` to create the new defconfig file. Any setting set
+   to its default value is stripped down from this file.
 
-5. It will edit the .config file to comment out the setting of the
-   ``CONFIG_APPS_DIR=`` setting. This setting should not be in checked-in
-   defconfig files because the actually must be determined at the next time that
-   the configuration is installed.
+   This will also strip down the ``CONFIG_APPS_DIR`` and ``CONFIG_BASE_DEFCONFIG``
+   settings. They should not be in checked-in defconfig files because they must be
+   determined each time the configuration is installed.
 
-6. Finally, the refreshed defconfig file is copied back in place where it can be
-   committed with the next set of difference to the command line. If you select
-   the ``--silent`` option, this file copy will occur automatically. Otherwise,
-   refresh.sh will prompt you first to avoid overwriting the defconfig file with
-   changes that you may not want.
+4. Check for any difference between the generated defconfig and the original
+   configuration file using the ``diff`` utility.
 
-Usage examples:
+   If there are differences, it save the new configuration (with or without prompt
+   depending on the ``--silent`` and ``--prompt`` options).
+
+5. Restore the ``.config`` and ``Make.defs`` files from step 1.
+
+
+Usage examples
+--------------
 
 Update all boards without verbose output:
 
 .. code:: console
 
-   $ ./tools/refresh.sh --silent --defaults all
+   $ ./tools/refresh.sh --defaults all
 
 Update all boards and configs from `arm` architecture:
 
 .. code:: console
 
-   $ ./tools/refresh.sh --silent arch:arm
+   $ ./tools/refresh.sh --defaults arch:arm
 
 Update all boards from ``stm32f7`` chip family:
 
 .. code:: console
 
-   $ ./tools/refresh.sh --silent chip:stm32f7
+   $ ./tools/refresh.sh --defaults chip:stm32f7
 
 Update all configs from ``stm32f103-minimum`` board:
 
 .. code:: console
 
-   $ ./tools/refresh.sh --silent board:stm32f103-minimum
+   $ ./tools/refresh.sh --defaults board:stm32f103-minimum
 
-Update only the `.nsh.` config from stm32f103-minimum board:
+Update only the `nsh` config from ``stm32f103-minimum`` board:
 
 .. code:: console
 
-   $ ./tools/refresh.sh --silent stm32f103-minimum:nsh
+   $ ./tools/refresh.sh --defaults stm32f103-minimum:nsh
+
+Update the `hello` config from the ``arduino-mega2560`` board and the `ostest` config
+from the ``sim`` pseudo-board:
+
+.. code:: console
+
+  $ ./tools/refresh.sh --defaults arduino-mega2560:hello sim:ostest
+
+Update the `nsh` config from ``stm32f103-minimum`` board, using the path to the
+configuration subdirectory:
+
+.. code:: console
+
+  $ ./tools/refresh.sh --defaults boards/arm/stm32f1/stm32f103-minimum/configs/nsh
