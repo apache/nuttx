@@ -227,6 +227,10 @@ static const struct sensor_meta_s g_sensor_meta[] =
   {sizeof(struct sensor_voltage),             "voltage"},
   {sizeof(struct sensor_current),             "current"},
   {sizeof(struct sensor_power),               "power"},
+  {sizeof(struct sensor_resistance),          "resistance"},
+  {sizeof(struct sensor_conductivity),        "conductivity"},
+  {sizeof(struct sensor_energy),              "energy"},
+  {sizeof(struct sensor_charge),              "charge"},
 };
 
 static const struct file_operations g_sensor_fops =
