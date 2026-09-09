@@ -51,6 +51,7 @@
 #define IXANY     (1 << 11) /* Bit 11: Enable any character to restart output */
 #define IXOFF     (1 << 12) /* Bit 12: Enable start/stop input control */
 #define IMAXBEL   (1 << 13) /* Bit 13: Ring bell when input queue is full */
+#define IUTF8     (1 << 14) /* Bit 14: Input is UTF8 (for canonical erase) */
 
 /* Terminal output modes (c_oflag in the termios structure) */
 
