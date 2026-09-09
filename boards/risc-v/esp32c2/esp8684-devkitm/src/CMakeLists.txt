@@ -28,6 +28,14 @@ if(CONFIG_BOARDCTL)
   endif()
 endif()
 
+if(CONFIG_DEV_GPIO)
+  list(APPEND SRCS esp32c2_gpio.c)
+endif()
+
+if(CONFIG_ARCH_BUTTONS)
+  list(APPEND SRCS esp32c2_buttons.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 # ##############################################################################

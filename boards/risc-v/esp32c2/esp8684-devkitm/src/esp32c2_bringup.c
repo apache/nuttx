@@ -27,12 +27,83 @@
 #include <nuttx/config.h>
 
 #include <nuttx/debug.h>
+#include <fcntl.h>
 #include <syslog.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #include <nuttx/fs/fs.h>
 
+#include "esp_board_ledc.h"
+#include "esp_board_spiflash.h"
+#include "esp_board_i2c.h"
+
+#include "espressif/esp_start.h"
+
+#ifdef CONFIG_WATCHDOG
+#  include "espressif/esp_wdt.h"
+#endif
+
+#ifdef CONFIG_TIMER
+#  include "espressif/esp_gptimer.h"
+#endif
+
+#ifdef CONFIG_ONESHOT
+#  include "espressif/esp_oneshot.h"
+#endif
+
+#ifdef CONFIG_RTC_DRIVER
+#  include "espressif/esp_rtc.h"
+#endif
+
+#ifdef CONFIG_DEV_GPIO
+#  include "espressif/esp_gpio.h"
+#endif
+
+#ifdef CONFIG_INPUT_BUTTONS
+#  include <nuttx/input/buttons.h>
+#endif
+
+#ifdef CONFIG_ESPRESSIF_EFUSE
+#  include "espressif/esp_efuse.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_SPI
+#  include "espressif/esp_spi.h"
+#  include "esp_board_spidev.h"
+#  ifdef CONFIG_ESPRESSIF_SPI_BITBANG
+#    include "espressif/esp_spi_bitbang.h"
+#  endif
+#endif
+
+#ifdef CONFIG_SPI_SLAVE
+#  include "espressif/esp_spi.h"
+#  include "esp_board_spislavedev.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_TEMP
+#  include "espressif/esp_temperature_sensor.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_ADC
+#  include "esp_board_adc.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_SHA_ACCELERATOR
+#  include "espressif/esp_sha.h"
+#endif
+
+#ifdef CONFIG_MMCSD_SPI
+#  include "esp_board_mmcsd.h"
+#endif
+
 #include "esp8684-devkitm.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -77,6 +148,170 @@ int esp_bringup(void)
   if (ret < 0)
     {
       _err("Failed to mount tmpfs at %s: %d\n", CONFIG_LIBC_TMPDIR, ret);
+    }
+#endif
+
+#if defined(CONFIG_ESPRESSIF_EFUSE)
+  ret = esp_efuse_initialize("/dev/efuse");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init EFUSE: %d\n", ret);
+    }
+#endif
+
+#if !defined(CONFIG_CRYPTO_CRYPTODEV_HARDWARE)
+#  if defined(CONFIG_ESPRESSIF_SHA_ACCELERATOR)
+  ret = esp_sha_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize SHA: %d\n", ret);
+    }
+#  endif
+#endif
+
+#ifdef CONFIG_ESPRESSIF_MWDT0
+  ret = esp_wdt_initialize("/dev/watchdog0", ESP_WDT_MWDT0);
+  if (ret < 0)
+    {
+      _err("Failed to initialize WDT: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_RWDT
+  ret = esp_wdt_initialize("/dev/watchdog2", ESP_WDT_RWDT);
+  if (ret < 0)
+    {
+      _err("Failed to initialize WDT: %d\n", ret);
+    }
+#endif
+
+/* The single timer group is claimed by the oneshot lower-half when it is
+ * enabled.
+ */
+
+#if defined(CONFIG_TIMER) && !defined(CONFIG_ONESHOT)
+  ret = esp_timer_initialize(0);
+  if (ret < 0)
+    {
+      _err("Failed to initialize Timer 0: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ONESHOT
+  ret = esp_oneshot_initialize();
+  if (ret < 0)
+    {
+      _err("Failed to initialize Oneshot Timer: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_RTC_DRIVER
+  /* Initialize the RTC driver */
+
+  ret = esp_rtc_driverinit();
+  if (ret < 0)
+    {
+      _err("Failed to initialize the RTC driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_SPI
+#  ifdef CONFIG_ESPRESSIF_SPI2
+  ret = board_spidev_initialize(ESPRESSIF_SPI2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init spidev 2: %d\n", ret);
+    }
+#  endif /* CONFIG_ESPRESSIF_SPI2 */
+
+#  ifdef CONFIG_ESPRESSIF_SPI_BITBANG
+  ret = board_spidev_initialize(ESPRESSIF_SPI_BITBANG);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init spidev 3: %d\n", ret);
+    }
+#  endif /* CONFIG_ESPRESSIF_SPI_BITBANG */
+#endif /* CONFIG_ESPRESSIF_SPI */
+
+#if defined(CONFIG_ESPRESSIF_SPI) && defined(CONFIG_MMCSD_SPI)
+  ret = esp_mmcsd_spi_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: failed to init MMCSD SPI\n");
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
+  ret = board_spiflash_init();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI Flash\n");
+    }
+#endif
+
+#if defined(CONFIG_I2C)
+  /* Configure I2C peripheral interfaces */
+
+  ret = board_i2c_init();
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize I2C driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_TEMP
+  struct esp_temp_sensor_config_t cfg = TEMPERATURE_SENSOR_CONFIG(10, 50);
+
+  ret = esp_temperature_sensor_initialize(cfg);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize temperature sensor driver: %d\n",
+             ret);
+    }
+#endif
+
+#if defined(CONFIG_SPI_SLAVE) && defined(CONFIG_ESPRESSIF_SPI2)
+  ret = board_spislavedev_initialize(ESPRESSIF_SPI2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SPI%d Slave driver: %d\n",
+             ESPRESSIF_SPI2, ret);
+    }
+#endif
+
+#ifdef CONFIG_DEV_GPIO
+  ret = esp_gpio_init();
+  if (ret < 0)
+    {
+      ierr("Failed to initialize GPIO Driver: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_INPUT_BUTTONS) && defined(CONFIG_INPUT_BUTTONS_LOWER)
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      ierr("ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_LEDC
+  ret = board_ledc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_ledc_setup() failed: %d\n", ret);
+    }
+#endif /* CONFIG_ESPRESSIF_LEDC */
+
+#ifdef CONFIG_ESPRESSIF_ADC
+  ret = board_adc_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_adc_init failed: %d\n", ret);
     }
 #endif
 
