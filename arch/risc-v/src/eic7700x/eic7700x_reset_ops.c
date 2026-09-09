@@ -185,8 +185,9 @@ static int eic7700x_reset_deassert(FAR struct reset_controller_dev *rcdev,
  *   the table in eic7700x_reset.c for what counts as that.
  *
  * Input Parameters:
- *   rcdev - The reset controller
- *   id    - The reset line id
+ *   rcdev  - The reset controller
+ *   id     - The reset line id
+ *   reason - Ignored, the lines of this controller carry no cause
  *
  * Returned Value:
  *   OK, -EINVAL if the id names no line, -EROFS if the hardware will not
@@ -195,7 +196,7 @@ static int eic7700x_reset_deassert(FAR struct reset_controller_dev *rcdev,
  ****************************************************************************/
 
 static int eic7700x_reset_assert(FAR struct reset_controller_dev *rcdev,
-                                 unsigned int id)
+                                 unsigned int id, unsigned int reason)
 {
   FAR const struct eic7700x_reset_reg_s *desc;
   uintptr_t reg;
@@ -240,8 +241,9 @@ static int eic7700x_reset_assert(FAR struct reset_controller_dev *rcdev,
  *   not expect.
  *
  * Input Parameters:
- *   rcdev - The reset controller
- *   id    - The reset line id
+ *   rcdev  - The reset controller
+ *   id     - The reset line id
+ *   reason - Ignored, the lines of this controller carry no cause
  *
  * Returned Value:
  *   OK, or the error eic7700x_reset_assert() refused the line with; a
@@ -250,11 +252,11 @@ static int eic7700x_reset_assert(FAR struct reset_controller_dev *rcdev,
  ****************************************************************************/
 
 static int eic7700x_reset_reset(FAR struct reset_controller_dev *rcdev,
-                                unsigned int id)
+                                unsigned int id, unsigned int reason)
 {
   int ret;
 
-  ret = eic7700x_reset_assert(rcdev, id);
+  ret = eic7700x_reset_assert(rcdev, id, reason);
   if (ret < 0)
     {
       return ret;

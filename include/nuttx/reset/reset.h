@@ -75,30 +75,74 @@ struct reset_control
 struct reset_control;
 
 /****************************************************************************
+ * Name: reset_control_reset_reason()
+ *
+ * Description:
+ *   Same as reset_control_reset(), but also hands the controller an explicit
+ *   reason.  For controllers whose lines encode a cause rather than a piece
+ *   of hardware (e.g. reset_ipc), this lets one reset control trigger any
+ *   cause without acquiring one control per line.
+ *
+ * Input Parameters:
+ *   rstc   - a instance of reset control.
+ *   reason - the reason to hand the controller, see reset-controller.h.
+ *
+ ****************************************************************************/
+
+int reset_control_reset_reason(FAR struct reset_control *rstc,
+                               unsigned int reason);
+
+/****************************************************************************
  * Name: reset_control_reset()
  *
  * Description:
- *   this function is used to execute reset ops.
+ *   this function is used to execute reset ops, with no reason to give.  A
+ *   controller that acts on a cause gets zero and decides what that means
+ *   to it.
  *
  * Input Parameters:
  *   rstc - a instance of reset control.
  *
  ****************************************************************************/
 
-int reset_control_reset(FAR struct reset_control *rstc);
+static inline int reset_control_reset(FAR struct reset_control *rstc)
+{
+  return reset_control_reset_reason(rstc, 0);
+}
+
+/****************************************************************************
+ * Name: reset_control_assert_reason()
+ *
+ * Description:
+ *   Same as reset_control_assert(), but also hands the controller an
+ *   explicit reason, the same way reset_control_reset_reason() does for the
+ *   reset op.
+ *
+ * Input Parameters:
+ *   rstc   - an instance of reset control.
+ *   reason - the reason to hand the controller, see reset-controller.h.
+ *
+ ****************************************************************************/
+
+int reset_control_assert_reason(FAR struct reset_control *rstc,
+                                unsigned int reason);
 
 /****************************************************************************
  * Name: reset_control_assert()
  *
  * Description:
- *   This function is used to execute assert ops.
+ *   This function is used to execute assert ops, with no reason to give, as
+ *   for reset_control_reset().
  *
  * Input Parameters:
  *   rstc - An instance of reset control.
  *
  ****************************************************************************/
 
-int reset_control_assert(FAR struct reset_control *rstc);
+static inline int reset_control_assert(FAR struct reset_control *rstc)
+{
+  return reset_control_assert_reason(rstc, 0);
+}
 
 /****************************************************************************
  * Name: reset_control_deassert()
