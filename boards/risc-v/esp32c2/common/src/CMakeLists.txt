@@ -22,4 +22,44 @@
 
 set(SRCS)
 
+if(CONFIG_ARCH_BOARD_COMMON)
+
+  if(CONFIG_ESPRESSIF_ADC)
+    list(APPEND SRCS esp_board_adc.c)
+  endif()
+
+  if(CONFIG_ESPRESSIF_LEDC)
+    list(APPEND SRCS esp_board_ledc.c)
+  endif()
+
+  if(CONFIG_ESPRESSIF_SPI)
+    list(APPEND SRCS esp_board_spi.c)
+  endif()
+
+  if(CONFIG_SPI)
+    list(APPEND SRCS esp_board_spidev.c)
+  endif()
+
+  if(CONFIG_SPI_SLAVE)
+    list(APPEND SRCS esp_board_spislavedev.c)
+  endif()
+
+  if(CONFIG_I2C)
+    list(APPEND SRCS esp_board_i2c.c)
+  endif()
+
+  if(CONFIG_ESPRESSIF_SPIFLASH)
+    list(APPEND SRCS esp_board_spiflash.c)
+  endif()
+
+  if(CONFIG_DEV_RNG90)
+    list(APPEND SRCS esp_board_rng90.c)
+  endif()
+
+  if(CONFIG_MMCSD_SPI)
+    list(APPEND SRCS esp_board_mmcsd.c)
+  endif()
+
+endif()
+
 target_sources(board PRIVATE ${SRCS})
