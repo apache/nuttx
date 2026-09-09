@@ -22,6 +22,42 @@
 
 ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
 
+ifeq ($(CONFIG_ESPRESSIF_ADC),y)
+  CSRCS += esp_board_adc.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_LEDC),y)
+  CSRCS += esp_board_ledc.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_SPI),y)
+  CSRCS += esp_board_spi.c
+endif
+
+ifeq ($(CONFIG_SPI),y)
+  CSRCS += esp_board_spidev.c
+endif
+
+ifeq ($(CONFIG_SPI_SLAVE),y)
+  CSRCS += esp_board_spislavedev.c
+endif
+
+ifeq ($(CONFIG_I2C),y)
+  CSRCS += esp_board_i2c.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_SPIFLASH),y)
+  CSRCS += esp_board_spiflash.c
+endif
+
+ifeq ($(CONFIG_DEV_RNG90),y)
+  CSRCS += esp_board_rng90.c
+endif
+
+ifeq ($(CONFIG_MMCSD_SPI),y)
+  CSRCS += esp_board_mmcsd.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
