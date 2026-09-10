@@ -104,6 +104,35 @@ static struct pinmux_conf_s g_am67_epwm1_pinmux_conf[] =
   {PINMUX_END, PINMUX_END}
 };
 
+/* eCAP0 pad unassigned: C20 stays with EPWM0_B (keeps the console free). */
+
+static struct pinmux_conf_s g_am67_ecap0_pinmux_conf[] =
+{
+  {PINMUX_END, PINMUX_END}
+};
+
+static struct pinmux_conf_s g_am67_ecap1_pinmux_conf[] =
+{
+  /* eCAP1 APWM out: MCASP0_AXR3 mode 5 */
+
+  {
+    PIN_MCASP0_AXR3,
+    (PIN_MODE(5) | PIN_PULL_DISABLE)
+  },
+  {PINMUX_END, PINMUX_END}
+};
+
+static struct pinmux_conf_s g_am67_ecap2_pinmux_conf[] =
+{
+  /* eCAP2 APWM out: MCASP0_ACLKX mode 2 */
+
+  {
+    PIN_MCASP0_ACLKX,
+    (PIN_MODE(2) | PIN_PULL_DISABLE)
+  },
+  {PINMUX_END, PINMUX_END}
+};
+
 static struct pinmux_conf_s g_am67_mcu_spi_pinmux_conf[] =
 {
   /* MCU_SPI0_CLK */
@@ -360,3 +389,33 @@ void am67_epwm_pinmux_init(int epwm)
     }
 }
 
+/****************************************************************************
+ * Name: am67_ecap_pinmux_init
+ *
+ * Description:
+ *   Configure the APWM output pad for the given eCAP module.  eCAP0 uses
+ *   ball A23 (mode 8); eCAP1/eCAP2 pad tables are empty pending a board
+ *   decision (see the table definitions above).
+ *
+ ****************************************************************************/
+
+void am67_ecap_pinmux_init(int ecap)
+{
+  switch (ecap)
+    {
+      case 0:
+        am67_pinmux_config(g_am67_ecap0_pinmux_conf);
+        break;
+
+      case 1:
+        am67_pinmux_config(g_am67_ecap1_pinmux_conf);
+        break;
+
+      case 2:
+        am67_pinmux_config(g_am67_ecap2_pinmux_conf);
+        break;
+
+      default:
+        break;
+    }
+}
