@@ -368,9 +368,8 @@ static void am67_ecap_park(struct am67_ecap_s *priv)
  * Name: am67_ecap_setup
  *
  * Description:
- *   First-open configuration: PID check, pad mux, frozen APWM mode, and a
- *   counter reset.  All eCAP register access is here (on open) rather than
- *   Configure the output pad.  No output until start().
+ *   First-open configuration: configure the output pad.  No output until
+ *   start().
  *
  * Returned Value:
  *   Zero (OK).
@@ -431,8 +430,10 @@ static int am67_ecap_start(struct pwm_lowerhalf_s *dev,
   int8_t ch;
   int i;
 
-  am67_ecap_config_apwm(priv->base);
-  am67_ecap_reset_counter(priv->base);
+  /* config_apwm() clears TSCNTSTP (stops the counter) and reset_counter()
+   * zeroes it, so both run only on a frequency change below - a duty-only
+   * start() must not disturb the running counter.
+   */
 
   /* Validate the channel array (only channel 1 exists) and read its duty. */
 
@@ -504,6 +505,7 @@ static int am67_ecap_start(struct pwm_lowerhalf_s *dev,
 
   if (freq_changed)
     {
+      am67_ecap_config_apwm(priv->base);
       am67_ecap_counter_freeze(priv->base);
       am67_ecap_write_immediate(priv->base, period - 1u, compare);
       am67_ecap_reset_counter(priv->base);
