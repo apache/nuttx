@@ -66,7 +66,8 @@
  *
  ****************************************************************************/
 
-static int lio_checkio(FAR struct aiocb * const *list, int nent)
+static int lio_checkio(FAR struct aiocb *restrict const *restrict list,
+                       int nent)
 {
   FAR struct aiocb *aiocbp;
   int ret;
@@ -131,7 +132,8 @@ static int lio_checkio(FAR struct aiocb * const *list, int nent)
  *
  ****************************************************************************/
 
-static int lio_waitall(FAR struct aiocb * const *list, int nent)
+static int lio_waitall(FAR struct aiocb *restrict const *restrict list,
+                       int nent)
 {
   sigset_t set;
   int ret;
@@ -320,8 +322,8 @@ static int lio_waitall(FAR struct aiocb * const *list, int nent)
  *
  ****************************************************************************/
 
-int lio_listio(int mode, FAR struct aiocb * const list[], int nent,
-               FAR struct sigevent *sig)
+int lio_listio(int mode, FAR struct aiocb *restrict const list[restrict],
+               int nent, FAR struct sigevent *restrict sig)
 {
   FAR struct aiocb *aiocbp = NULL;
   struct list_node head;
