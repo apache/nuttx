@@ -46,5 +46,9 @@ uint8_t am67_spi0status(FAR struct spi_dev_s *dev, uint32_t devid);
 void am67_spidev_initialize(void);
 #endif
 
+#if defined(CONFIG_AM67_I2C0) || defined(CONFIG_AM67_WKUP_I2C0)
+void am67_i2cdev_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_T3_GEM_O1_SRC_T3_GEM_O1_H */
