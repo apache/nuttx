@@ -1,0 +1,19 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "default",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {}
+    },
+    {
+      "name": "Default",
+      "inherits": "default",
+      "cacheVariables": {
+        "BOARD_CONFIG": "n32h762iil7:nsh"
+      }
+    }
+  ]
+}
