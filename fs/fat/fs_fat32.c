@@ -81,6 +81,18 @@ static int     fat_fstat(FAR const struct file *filep,
                  FAR struct stat *buf);
 static int     fat_truncate(FAR struct file *filep, off_t length);
 
+static FAR struct fat_shared_s *
+               fat_shared_find(FAR struct fat_mountpt_s *fs,
+                 off_t dirsector, uint16_t dirindex);
+static int     fat_shared_invalidate(FAR struct fat_mountpt_s *fs,
+                 FAR struct fat_shared_s *shared);
+static void    fat_shared_reset_cursors(FAR struct fat_mountpt_s *fs,
+                 FAR struct fat_shared_s *shared);
+static int     fat_shared_release(FAR struct fat_mountpt_s *fs,
+                 FAR struct fat_shared_s *shared);
+static int     fat_shrinkshared(FAR struct fat_mountpt_s *fs,
+                 FAR struct fat_file_s *ff, off_t length);
+
 static int     fat_opendir(FAR struct inode *mountpt,
                  FAR const char *relpath, FAR struct fs_dirent_s **dir);
 static int     fat_closedir(FAR struct inode *mountpt,
@@ -164,6 +176,262 @@ const struct mountpt_operations g_fat_operations =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: fat_shared_find
+ *
+ * Description:
+ *   Find the canonical open-file object for the directory entry at
+ *   (dirsector, dirindex).  Objects marked pending (unlinked) are detached
+ *   from the directory namespace and never match, so a directory-entry
+ *   slot reused by a new file always yields a new object.
+ *
+ * Input Parameters:
+ *   fs        - The mountpoint private data (caller holds fs_lock)
+ *   dirsector - Sector containing the directory entry
+ *   dirindex  - Index of the directory entry
+ *
+ * Returned Value:
+ *   The matching shared object, or NULL if the file is not open.
+ *
+ ****************************************************************************/
+
+static FAR struct fat_shared_s *
+fat_shared_find(FAR struct fat_mountpt_s *fs,
+                off_t dirsector, uint16_t dirindex)
+{
+  FAR struct fat_shared_s *shared;
+
+  for (shared = fs->fs_shared; shared != NULL; shared = shared->s_next)
+    {
+      if (!shared->s_pending &&
+          shared->s_dirsector == dirsector &&
+          shared->s_dirindex == dirindex)
+        {
+          return shared;
+        }
+    }
+
+  return NULL;
+}
+
+/****************************************************************************
+ * Name: fat_shared_invalidate
+ *
+ * Description:
+ *   Flush (and invalidate) the private sector caches of every open handle
+ *   attached to a shared object.  Used before the underlying cluster chain
+ *   is cut down so that dirty data is written back while the chain is
+ *   still intact.
+ *
+ ****************************************************************************/
+
+static int fat_shared_invalidate(FAR struct fat_mountpt_s *fs,
+                                 FAR struct fat_shared_s *shared)
+{
+  FAR struct fat_file_s *ff;
+  int ret = OK;
+  int tmp;
+
+  for (ff = fs->fs_head; ff != NULL; ff = ff->ff_next)
+    {
+      if (ff->ff_shared == shared)
+        {
+          tmp = fat_ffcacheinvalidate(fs, ff);
+          if (tmp < 0 && ret == OK)
+            {
+              ret = tmp;
+            }
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: fat_shared_reset_cursors
+ *
+ * Description:
+ *   Reset the traversal state of every open handle attached to a shared
+ *   object back to the start of the file.  Used after the chain is cut
+ *   down (truncate) so that no handle keeps a cursor into freed clusters.
+ *
+ ****************************************************************************/
+
+static void fat_shared_reset_cursors(FAR struct fat_mountpt_s *fs,
+                                     FAR struct fat_shared_s *shared)
+{
+  FAR struct fat_file_s *ff;
+
+  for (ff = fs->fs_head; ff != NULL; ff = ff->ff_next)
+    {
+      if (ff->ff_shared == shared)
+        {
+          ff->ff_currentcluster   = shared->s_startcluster;
+          ff->ff_sectorsincluster = fs->fs_fatsecperclus;
+          ff->ff_pos              = 0;
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: fat_shared_release
+ *
+ * Description:
+ *   Drop one reference to a canonical open-file object.  When the last
+ *   reference disappears, unlink the object and, if the file was
+ *   unlinked while open, finally free its cluster chain.
+ *
+ *   The caller must hold fs_lock.
+ *
+ ****************************************************************************/
+
+static int fat_shared_release(FAR struct fat_mountpt_s *fs,
+                              FAR struct fat_shared_s *shared)
+{
+  FAR struct fat_shared_s *curr;
+  FAR struct fat_shared_s *prev;
+  uint32_t startcluster;
+  bool pending;
+  int ret = OK;
+
+  DEBUGASSERT(shared->s_refs > 0);
+
+  if (--shared->s_refs > 0)
+    {
+      return OK;
+    }
+
+  for (prev = NULL, curr = fs->fs_shared;
+       curr != NULL && curr != shared;
+       prev = curr, curr = curr->s_next);
+
+  if (curr != NULL)
+    {
+      if (prev != NULL)
+        {
+          prev->s_next = shared->s_next;
+        }
+      else
+        {
+          fs->fs_shared = shared->s_next;
+        }
+    }
+
+  /* Keep a deleted file's chain until the last open handle closes.  An
+   * empty file has no chain (start cluster 0); chains allocated by
+   * writes after the unlink are part of the shared chain and are freed
+   * here as well.
+   */
+
+  startcluster = shared->s_startcluster;
+  pending      = shared->s_pending;
+
+  fs_heap_free(shared);
+
+  if (pending && startcluster >= 2)
+    {
+      ret = fat_removechain(fs, startcluster);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      ret = fat_updatefsinfo(fs);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: fat_shrinkshared
+ *
+ * Description:
+ *   Shrink a file described only by its shared (in-memory) state to a
+ *   smaller, non-zero length.  Used when the directory entry is gone
+ *   (unlinked file) and fat_dirshrink() has no entry to work with.
+ *
+ *   The caller holds fs_lock and has already invalidated attached caches.
+ *
+ ****************************************************************************/
+
+static int fat_shrinkshared(FAR struct fat_mountpt_s *fs,
+                            FAR struct fat_file_s *ff, off_t length)
+{
+  FAR struct fat_shared_s *shared = ff->ff_shared;
+  off_t clustersize;
+  off_t remaining;
+  int32_t lastcluster;
+  int32_t cluster;
+  int ret;
+
+  DEBUGASSERT(shared->s_pending && length > 0 &&
+              length < shared->s_size);
+
+  lastcluster = shared->s_startcluster;
+
+  /* Find the cluster chain to be removed, mirroring fat_dirshrink().
+   * Start with the cluster after the current one (which we know
+   * contains data).
+   */
+
+  cluster = fat_getcluster(fs, lastcluster);
+  if (cluster < 0)
+    {
+      return cluster;
+    }
+
+  clustersize = fs->fs_fatsecperclus * fs->fs_hwsectorsize;
+  remaining   = length;
+
+  while (cluster >= 2 && cluster < (int32_t)(fs->fs_nclusters + 2))
+    {
+      /* Will there be data in the next cluster after the shrinkage? */
+
+      if (remaining <= clustersize)
+        {
+          /* No.. then nullify next cluster -- removing it from the
+           * chain.
+           */
+
+          ret = fat_putcluster(fs, lastcluster, 0);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          /* Then free the remainder of the chain */
+
+          ret = fat_removechain(fs, cluster);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          /* Setup FSINFO to reuse the removed cluster next */
+
+          fs->fs_fsinextfree = cluster - 1;
+          break;
+        }
+
+      /* Then set up to remove the next cluster */
+
+      lastcluster = cluster;
+      cluster     = fat_getcluster(fs, cluster);
+
+      if (cluster < 0)
+        {
+          return cluster;
+        }
+
+      remaining  -= clustersize;
+    }
+
+  shared->s_size = length;
+  fat_shared_reset_cursors(fs, shared);
+
+  return fat_updatefsinfo(fs);
+}
+
+/****************************************************************************
  * Name: fat_open
  ****************************************************************************/
 
@@ -174,6 +442,7 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
   FAR struct inode *inode;
   FAR struct fat_mountpt_s *fs;
   FAR struct fat_file_s *ff;
+  FAR struct fat_shared_s *shared = NULL;
   uint8_t *direntry;
   int ret;
 
@@ -267,12 +536,35 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
 
       if ((oflags & (O_TRUNC | O_WRONLY)) == (O_TRUNC | O_WRONLY))
         {
-          /* Truncate the file to zero length */
+          /* Truncate the file to zero length.  If the file is already
+           * open elsewhere, the shared state is updated as well so that
+           * all handles observe the truncation.
+           */
+
+          FAR struct fat_shared_s *truncshared;
+
+          truncshared = fat_shared_find(fs, fs->fs_currentsector,
+                                        dirinfo.dir.fd_index);
+          if (truncshared != NULL)
+            {
+              ret = fat_shared_invalidate(fs, truncshared);
+              if (ret < 0)
+                {
+                  goto errout_with_lock;
+                }
+            }
 
           ret = fat_dirtruncate(fs, direntry);
           if (ret < 0)
             {
               goto errout_with_lock;
+            }
+
+          if (truncshared != NULL)
+            {
+              truncshared->s_startcluster = 0;
+              truncshared->s_size         = 0;
+              fat_shared_reset_cursors(fs, truncshared);
             }
         }
 
@@ -339,26 +631,49 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
       goto errout_with_struct;
     }
 
+  /* Attach to the canonical open-file object for this directory entry,
+   * creating it when this is the first open.  All opens of the same file
+   * share the directory-entry location, start cluster and size, so every
+   * handle keeps observing the file across writes, truncates and renames.
+   */
+
+  shared = fat_shared_find(fs, fs->fs_currentsector,
+                           dirinfo.dir.fd_index);
+  if (shared == NULL)
+    {
+      shared = fs_heap_zalloc(sizeof(struct fat_shared_s));
+      if (!shared)
+        {
+          ret = -ENOMEM;
+          goto errout_with_buffer;
+        }
+
+      shared->s_refs         = 1;
+      shared->s_pending      = false;
+      shared->s_attr         = DIR_GETATTRIBUTES(direntry);
+      shared->s_dirindex     = dirinfo.dir.fd_index;
+      shared->s_dirsector    = fs->fs_currentsector;
+      shared->s_size         = DIR_GETFILESIZE(direntry);
+      shared->s_startcluster =
+        ((uint32_t)DIR_GETFSTCLUSTHI(direntry) << 16) |
+          DIR_GETFSTCLUSTLO(direntry);
+
+      shared->s_next = fs->fs_shared;
+      fs->fs_shared  = shared;
+    }
+  else
+    {
+      shared->s_refs++;
+    }
+
   /* Initialize the file private data (only need to initialize non-zero
    * elements).
    */
 
   ff->ff_oflags           = oflags;
-
-  /* Save information that can be used later to recover the directory entry */
-
-  ff->ff_dirsector        = fs->fs_currentsector;
-  ff->ff_dirindex         = dirinfo.dir.fd_index;
-
-  /* File cluster/size info */
-
-  ff->ff_startcluster     =
-    ((uint32_t)DIR_GETFSTCLUSTHI(direntry) << 16) |
-      DIR_GETFSTCLUSTLO(direntry);
-
-  ff->ff_currentcluster   = ff->ff_startcluster;
+  ff->ff_shared           = shared;
+  ff->ff_currentcluster   = shared->s_startcluster;
   ff->ff_sectorsincluster = fs->fs_fatsecperclus;
-  ff->ff_size             = DIR_GETFILESIZE(direntry);
 
   /* Attach the private date to the struct file instance */
 
@@ -381,10 +696,45 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
 
   if ((oflags & O_APPEND) && (oflags & O_ACCMODE) != O_RDONLY)
     {
-      off_t offset = fat_seek(filep, ff->ff_size, SEEK_SET);
+      FAR struct fat_file_s *prevff;
+      FAR struct fat_file_s *currff;
+      off_t offset;
+
+      offset = fat_seek(filep, shared->s_size, SEEK_SET);
       if (offset < 0)
         {
+          /* Detach again.  The handle is already on fs_head, so
+           * remove it first, then drop the shared reference.  The
+           * object cannot be pending since it was just looked up or
+           * created from a live directory entry.
+           */
+
+          ret = nxmutex_lock(&fs->fs_lock);
+          if (ret >= 0)
+            {
+              for (prevff = NULL, currff = fs->fs_head;
+                   currff != NULL && currff != ff;
+                   prevff = currff, currff = currff->ff_next);
+
+              if (currff != NULL)
+                {
+                  if (prevff != NULL)
+                    {
+                      prevff->ff_next = ff->ff_next;
+                    }
+                  else
+                    {
+                      fs->fs_head = ff->ff_next;
+                    }
+                }
+
+              fat_shared_release(fs, shared);
+              nxmutex_unlock(&fs->fs_lock);
+            }
+
+          fat_io_free(ff->ff_buffer, fs->fs_hwsectorsize);
           fs_heap_free(ff);
+          filep->f_priv = NULL;
           return (int)offset;
         }
     }
@@ -394,6 +744,14 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
   /* Error exits -- goto's are nasty things, but they sure can make error
    * handling a lot simpler.
    */
+
+errout_with_buffer:
+  if (shared != NULL)
+    {
+      fat_shared_release(fs, shared);
+    }
+
+  fat_io_free(ff->ff_buffer, fs->fs_hwsectorsize);
 
 errout_with_struct:
   fs_heap_free(ff);
@@ -413,6 +771,7 @@ static int fat_close(FAR struct file *filep)
   FAR struct fat_file_s *ff;
   FAR struct fat_file_s *currff;
   FAR struct fat_file_s *prevff;
+  FAR struct fat_shared_s *shared;
   FAR struct fat_mountpt_s *fs;
   int ret = OK;
 
@@ -422,11 +781,12 @@ static int fat_close(FAR struct file *filep)
 
   /* Recover our private data from the struct file instance */
 
-  ff    = filep->f_priv;
-  inode = filep->f_inode;
-  fs    = inode->i_private;
+  ff     = filep->f_priv;
+  shared = ff->ff_shared;
+  inode  = filep->f_inode;
+  fs     = inode->i_private;
 
-  DEBUGASSERT(fs != NULL);
+  DEBUGASSERT(fs != NULL && shared != NULL);
 
   /* Check for the forced mount condition */
 
@@ -440,24 +800,49 @@ static int fat_close(FAR struct file *filep)
 
       ret = fat_sync(filep);
 
-      /* Remove the file structure from the list of open files in the
-       * mountpoint structure.
+      if (nxmutex_lock(&fs->fs_lock) == OK)
+        {
+          /* Remove the file structure from the list of open files in the
+           * mountpoint structure.
+           */
+
+          for (prevff = NULL, currff = fs->fs_head;
+               currff && currff != ff;
+               prevff = currff, currff = currff->ff_next);
+
+          if (currff)
+            {
+              if (prevff)
+                {
+                  prevff->ff_next = ff->ff_next;
+                }
+              else
+                {
+                  fs->fs_head = ff->ff_next;
+                }
+            }
+
+          /* Drop the shared reference.  When the last handle of an
+           * unlinked file goes away, this frees the deferred cluster
+           * chain.
+           */
+
+          ret = fat_shared_release(fs, shared);
+
+          nxmutex_unlock(&fs->fs_lock);
+        }
+    }
+  else
+    {
+      /* Forced unmount: the mountpoint (and its shared list) is already
+       * gone, so only drop the reference without touching fs lists or
+       * the media.  The chain of an unlinked file cannot be reclaimed
+       * here; its clusters stay allocated.
        */
 
-      for (prevff = NULL, currff = fs->fs_head;
-           currff && currff != ff;
-           prevff = currff, currff = currff->ff_next);
-
-      if (currff)
+      if (--shared->s_refs == 0)
         {
-          if (prevff)
-            {
-              prevff->ff_next = ff->ff_next;
-            }
-          else
-            {
-              fs->fs_head = ff->ff_next;
-            }
+          fs_heap_free(shared);
         }
     }
 
@@ -569,8 +954,7 @@ out:
  *   ->ff_currentsector    - the sector index where ->f_pos is located
  *   ->ff_currentcluster   - the cluster index where ->f_pos is located
  *   ->ff_sectorsincluster - sectors remaining in cluster
- *   ->ff_startcluster     - the first cluster of the file when writing an
- *                           empty file
+ *   ->s_startcluster      - (shared) first cluster for empty files
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned on
@@ -583,6 +967,7 @@ static int fat_get_sectors(FAR struct file *filep, bool read)
   FAR struct inode *inode = filep->f_inode;
   FAR struct fat_mountpt_s *fs = inode->i_private;
   FAR struct fat_file_s *ff = filep->f_priv;
+  FAR struct fat_shared_s *shared = ff->ff_shared;
   int i;
   int num_clu;
   int new_num_clu;
@@ -593,10 +978,10 @@ static int fat_get_sectors(FAR struct file *filep, bool read)
   int zero_end;
   int clu_size = fs->fs_fatsecperclus * fs->fs_hwsectorsize;
 
-  num_clu = DIV_ROUND_UP(ff->ff_size, clu_size);
+  num_clu = DIV_ROUND_UP(ff->ff_shared->s_size, clu_size);
   new_num_clu = DIV_ROUND_UP(filep->f_pos + 1, clu_size);
 
-  if (ff->ff_startcluster == 0)
+  if (ff->ff_shared->s_startcluster == 0)
     {
       /* empty file */
 
@@ -616,7 +1001,7 @@ static int fat_get_sectors(FAR struct file *filep, bool read)
     {
       /* Traverse the FATchain from the first cluster of the file */
 
-      cluster = ff->ff_startcluster;
+      cluster = ff->ff_shared->s_startcluster;
       num_traversed = 1;
     }
 
@@ -646,14 +1031,15 @@ static int fat_get_sectors(FAR struct file *filep, bool read)
    * |        |    (1)   |      (2)         | (3) |        |      |
    * +-------------------+------------------+---------------------+
    *          ^                                   ^
-   *          ff_size                             f_pos
+   *          s_size                              f_pos
    */
 
   /* zero area (1) */
 
-  if (i == num_clu && filep->f_pos > ff->ff_size && ff->ff_size)
+  if (i == num_clu && filep->f_pos > shared->s_size &&
+      shared->s_size != 0)
     {
-      zero_start = ff->ff_size & (clu_size - 1);
+      zero_start = ff->ff_shared->s_size & (clu_size - 1);
 
       if (num_clu == new_num_clu)
         {
@@ -692,9 +1078,9 @@ static int fat_get_sectors(FAR struct file *filep, bool read)
           return ret;
         }
 
-      if (ff->ff_startcluster == 0)
+      if (ff->ff_shared->s_startcluster == 0)
         {
-          ff->ff_startcluster = cluster;
+          ff->ff_shared->s_startcluster = cluster;
         }
     }
 
@@ -719,15 +1105,15 @@ static int fat_get_sectors(FAR struct file *filep, bool read)
             }
         }
 
-      if (ff->ff_startcluster == 0)
+      if (ff->ff_shared->s_startcluster == 0)
         {
-          ff->ff_startcluster = cluster;
+          ff->ff_shared->s_startcluster = cluster;
         }
     }
 
-  if (filep->f_pos > ff->ff_size)
+  if (filep->f_pos > ff->ff_shared->s_size)
     {
-      ff->ff_size = filep->f_pos;
+      ff->ff_shared->s_size = filep->f_pos;
     }
 
 out:
@@ -810,7 +1196,7 @@ static ssize_t fat_read(FAR struct file *filep, FAR char *buffer,
 
   /* Check that the file position is not past the end of the file */
 
-  if (filep->f_pos > ff->ff_size)
+  if (filep->f_pos > ff->ff_shared->s_size)
     {
       /* Return EOF */
 
@@ -821,7 +1207,7 @@ static ssize_t fat_read(FAR struct file *filep, FAR char *buffer,
     {
       /* Get the number of bytes left in the file */
 
-      bytesleft = ff->ff_size - filep->f_pos;
+      bytesleft = ff->ff_shared->s_size - filep->f_pos;
 
       /* Truncate read count so that it does not exceed the number of bytes
        * left in the file.
@@ -1028,7 +1414,7 @@ static ssize_t fat_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Check if the file size would exceed the range of off_t */
 
-  if (buflen > OFF_MAX || ff->ff_size > OFF_MAX - (off_t)buflen)
+  if (buflen > OFF_MAX || ff->ff_shared->s_size > OFF_MAX - (off_t)buflen)
     {
       ret = -EFBIG;
       goto errout_with_lock;
@@ -1132,7 +1518,7 @@ fat_write_restart:
            */
 
           if ((sectorindex == 0) && ((buflen >= fs->fs_hwsectorsize) ||
-              ((filep->f_pos + buflen) >= ff->ff_size)))
+              ((filep->f_pos + buflen) >= ff->ff_shared->s_size)))
             {
               /* Flush unwritten data in the sector cache. */
 
@@ -1199,9 +1585,9 @@ fat_write_restart:
 
       /* Update the file size */
 
-      if (filep->f_pos > ff->ff_size)
+      if (filep->f_pos > ff->ff_shared->s_size)
         {
-          ff->ff_size = filep->f_pos;
+          ff->ff_shared->s_size = filep->f_pos;
         }
     }
 
@@ -1262,7 +1648,7 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
       case SEEK_END: /* The offset is set to the size of the file plus
                       * offset bytes. */
 
-          position = offset + ff->ff_size;
+          position = offset + ff->ff_shared->s_size;
           break;
 
       default:
@@ -1443,8 +1829,15 @@ static int fat_getfilepath(FAR struct fat_mountpt_s *fs,
   int ret;
 
   names[0] = '\0';
-  dirsector = ff->ff_dirsector;
-  dirindex = ff->ff_dirindex;
+  dirsector = ff->ff_shared->s_dirsector;
+  dirindex = ff->ff_shared->s_dirindex;
+
+  /* An unlinked file has no path anymore */
+
+  if (ff->ff_shared->s_pending)
+    {
+      return -ENOENT;
+    }
 
   /* Remove trailing slash from path if present */
 
@@ -1841,6 +2234,7 @@ static int fat_sync(FAR struct file *filep)
 
   if ((ff->ff_bflags & FFBUFF_MODIFIED) != 0)
     {
+      FAR struct fat_shared_s *shared = ff->ff_shared;
       uint8_t dircopy[DIR_SIZE];
 
       /* Flush any unwritten data in the file buffer */
@@ -1851,11 +2245,29 @@ static int fat_sync(FAR struct file *filep)
           goto errout_with_lock;
         }
 
+      /* An unlinked file has no directory entry anymore.  Its size and
+       * cluster chain live only in the shared object until the last
+       * close, so there is nothing to write back here.
+       */
+
+      if (shared->s_pending)
+        {
+          ret = fat_updatefsinfo(fs);
+          if (ret >= 0)
+            {
+              /* Clear the modified bit in the flags */
+
+              ff->ff_bflags &= ~FFBUFF_MODIFIED;
+            }
+
+          goto errout_with_lock;
+        }
+
       /* Update the directory entry.  First read the directory
        * entry into the fs_buffer (preserving the ff_buffer)
        */
 
-      ret = fat_fscacheread(fs, ff->ff_dirsector);
+      ret = fat_fscacheread(fs, shared->s_dirsector);
       if (ret < 0)
         {
           goto errout_with_lock;
@@ -1865,7 +2277,7 @@ static int fat_sync(FAR struct file *filep)
        * in the sector using the saved directory index.
        */
 
-      direntry = &fs->fs_buffer[(ff->ff_dirindex & DIRSEC_NDXMASK(fs)) *
+      direntry = &fs->fs_buffer[(shared->s_dirindex & DIRSEC_NDXMASK(fs)) *
                                  DIR_SIZE];
 
       /* Copy directory entry */
@@ -1879,9 +2291,9 @@ static int fat_sync(FAR struct file *filep)
 
       direntry[DIR_ATTRIBUTES] |= FATATTR_ARCHIVE;
 
-      DIR_PUTFILESIZE(direntry, ff->ff_size);
-      DIR_PUTFSTCLUSTLO(direntry, ff->ff_startcluster);
-      DIR_PUTFSTCLUSTHI(direntry, ff->ff_startcluster >> 16);
+      DIR_PUTFILESIZE(direntry, shared->s_size);
+      DIR_PUTFSTCLUSTLO(direntry, shared->s_startcluster);
+      DIR_PUTFSTCLUSTHI(direntry, shared->s_startcluster >> 16);
 
       wrttime = fat_systime2fattime();
       DIR_PUTWRTTIME(direntry, wrttime & 0xffff);
@@ -1983,35 +2395,24 @@ static int fat_dup(FAR const struct file *oldp, FAR struct file *newp)
       goto errout_with_struct;
     }
 
-  /* Copy the rest of the open open file state from the old file structure.
-   * There are some assumptions and potential issues here:
-   *
-   * 1) We assume that the higher level logic has copied the elements of
-   *    the file structure, in particular, the file position.
-   * 2) There is a problem with ff_size if there are multiple opened
-   *    file structures, each believing they know the size of the file.
-   *    If one instance modifies the file length, then the new size of
-   *    the opened file will be unknown to the other.  That is a lurking
-   *    bug!
-   *
-   *    One good solution to this might be to add a reference count to the
-   *    file structure.  Then, instead of dup'ing the whole structure
-   *    as is done here, just increment the reference count on the
-   *    structure.  The would have to be integrated with open logic as
-   *    well, however, so that the same file structure is reused if the
-   *    file is re-opened.
+  /* Copy the open file state from the old file structure.  The dup'ed
+   * handle refers to the same underlying file, so it attaches to the
+   * same canonical shared object (reference counted) instead of copying
+   * the size, start cluster and directory-entry location.  The file
+   * position itself is copied by higher level logic; only the traversal
+   * cache is duplicated here.
    */
 
   newff->ff_bflags           = 0;                          /* File buffer flags */
   newff->ff_oflags           = oldff->ff_oflags;           /* File open flags */
+  newff->ff_shared           = oldff->ff_shared;           /* Shared file state */
   newff->ff_sectorsincluster = oldff->ff_sectorsincluster; /* Sectors remaining in cluster */
-  newff->ff_dirindex         = oldff->ff_dirindex;         /* Index to directory entry */
   newff->ff_currentcluster   = oldff->ff_currentcluster;   /* Current cluster */
-  newff->ff_dirsector        = oldff->ff_dirsector;        /* Sector containing directory entry */
-  newff->ff_size             = oldff->ff_size;             /* Size of the file */
-  newff->ff_startcluster     = oldff->ff_startcluster;     /* Start cluster of file on media */
   newff->ff_currentsector    = oldff->ff_currentsector;    /* Current sector */
   newff->ff_cachesector      = 0;                          /* Sector in file buffer */
+  newff->ff_pos              = oldff->ff_pos;              /* Traversal position */
+
+  oldff->ff_shared->s_refs++;
 
   /* Attach the private date to the struct file instance */
 
@@ -2210,28 +2611,59 @@ static int fat_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   ff = filep->f_priv;
 
-  /* Update the directory entry.  First read the directory
-   * entry into the fs_buffer (preserving the ff_buffer)
+  /* An unlinked file has no directory entry anymore.  Report the
+   * in-memory shared state instead of reading a dead (and possibly
+   * reused) directory slot.
    */
 
-  ret = fat_fscacheread(fs, ff->ff_dirsector);
-  if (ret < 0)
+  if (ff->ff_shared->s_pending)
     {
+      FAR struct fat_shared_s *fstatshared = ff->ff_shared;
+
+      memset(buf, 0, sizeof(struct stat));
+
+      buf->st_mode = S_IROTH | S_IRGRP | S_IRUSR | S_IFREG;
+      if ((fstatshared->s_attr & FATATTR_READONLY) == 0)
+        {
+          buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
+        }
+
+      buf->st_size    = fstatshared->s_size;
+      buf->st_blksize = fs->fs_fatsecperclus * fs->fs_hwsectorsize;
+      buf->st_blocks  = (buf->st_size + buf->st_blksize - 1) /
+                        buf->st_blksize;
+
+      ret = OK;
       goto errout_with_lock;
     }
+  else
+    {
+      FAR struct fat_shared_s *shared = ff->ff_shared;
 
-  /* Recover a pointer to the specific directory entry in the sector using
-   * the saved directory index.
-   */
+      /* Read the directory entry into the fs_buffer
+       * (preserving the ff_buffer).  The entry is located using the
+       * shared directory-entry location.
+       */
 
-  direntry = &fs->fs_buffer[(ff->ff_dirindex & DIRSEC_NDXMASK(fs)) *
-                             DIR_SIZE];
+      ret = fat_fscacheread(fs, shared->s_dirsector);
+      if (ret < 0)
+        {
+          goto errout_with_lock;
+        }
 
-  /* Call fat_stat_file() to create the buf and to save information to
-   * it.
-   */
+      /* Recover a pointer to the specific directory entry in the sector
+       * using the saved directory index.
+       */
 
-  ret = fat_stat_file(fs, direntry, buf);
+      direntry = &fs->fs_buffer[(shared->s_dirindex &
+                                 DIRSEC_NDXMASK(fs)) * DIR_SIZE];
+
+      /* Call fat_stat_file() to create the buf and to save information
+       * to it.
+       */
+
+      ret = fat_stat_file(fs, direntry, buf);
+    }
 
 errout_with_lock:
   nxmutex_unlock(&fs->fs_lock);
@@ -2297,7 +2729,7 @@ static int fat_truncate(FAR struct file *filep, off_t length)
 
   /* Are we shrinking the file?  Or extending it? */
 
-  oldsize = ff->ff_size;
+  oldsize = ff->ff_shared->s_size;
   if (oldsize == length)
     {
       /* Do nothing but say that we did */
@@ -2306,52 +2738,101 @@ static int fat_truncate(FAR struct file *filep, off_t length)
     }
   else if (oldsize > length)
     {
-      FAR uint8_t *direntry;
-      int ndx;
+      FAR struct fat_shared_s *shared = ff->ff_shared;
 
-      /* We are shrinking the file.
-       *
-       * Read the directory entry into the fs_buffer.
+      /* We are shrinking the file.  An unlinked file has no directory
+       * entry, so cut the shared chain directly instead of going
+       * through fat_dirtruncate()/fat_dirshrink().
        */
 
-      ret = fat_fscacheread(fs, ff->ff_dirsector);
-      if (ret < 0)
+      if (shared->s_pending)
         {
+          ret = fat_shared_invalidate(fs, shared);
+          if (ret < 0)
+            {
+              goto errout_with_lock;
+            }
+
+          if (length == 0)
+            {
+              ret = fat_removechain(fs, shared->s_startcluster);
+              if (ret < 0)
+                {
+                  goto errout_with_lock;
+                }
+
+              shared->s_startcluster = 0;
+              shared->s_size         = 0;
+              fat_shared_reset_cursors(fs, shared);
+
+              ret = fat_updatefsinfo(fs);
+            }
+          else
+            {
+              ret = fat_shrinkshared(fs, ff, length);
+            }
+
           goto errout_with_lock;
-        }
-
-      /* Recover a pointer to the specific directory entry in the sector
-       * using the saved directory index.
-       */
-
-      ndx      = (ff->ff_dirindex & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
-      direntry = &fs->fs_buffer[ndx];
-
-      /* Handle the simple case where we are shrinking the file to zero
-       * length.
-       */
-
-      if (length == 0)
-        {
-          /* Shrink to length == 0 */
-
-          ret = fat_dirtruncate(fs, direntry);
         }
       else
         {
-          /* Shrink to 0 < length < oldsize */
+          FAR uint8_t *direntry;
+          int ndx;
 
-          ret = fat_dirshrink(fs, direntry, length);
-        }
-
-      if (ret >= 0)
-        {
-          /* The truncation has completed without error.  Update the file
-           * size.
+          /* Flush attached caches while the chain is still intact,
+           * then read the directory entry into the fs_buffer.
            */
 
-          ff->ff_size = length;
-          ret = OK;
+          ret = fat_shared_invalidate(fs, shared);
+          if (ret < 0)
+            {
+              goto errout_with_lock;
+            }
+
+          ret = fat_fscacheread(fs, shared->s_dirsector);
+          if (ret < 0)
+            {
+              goto errout_with_lock;
+            }
+
+          /* Recover a pointer to the specific directory entry in the
+           * sector using the saved directory index.
+           */
+
+          ndx      = (shared->s_dirindex & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
+          direntry = &fs->fs_buffer[ndx];
+
+          /* Handle the simple case where we are shrinking the file to
+           * zero length.
+           */
+
+          if (length == 0)
+            {
+              /* Shrink to length == 0 */
+
+              ret = fat_dirtruncate(fs, direntry);
+            }
+          else
+            {
+              /* Shrink to 0 < length < oldsize */
+
+              ret = fat_dirshrink(fs, direntry, length);
+            }
+
+          if (ret >= 0)
+            {
+              /* The truncation has completed without error.  Update the
+               * shared file state and reset attached cursors, since the
+               * chain was cut down from under them.
+               */
+
+              shared->s_startcluster =
+                ((uint32_t)DIR_GETFSTCLUSTHI(direntry) << 16) |
+                  DIR_GETFSTCLUSTLO(direntry);
+              shared->s_size = length;
+              fat_shared_reset_cursors(fs, shared);
+              ret = OK;
+            }
         }
     }
   else
@@ -2368,7 +2849,7 @@ static int fat_truncate(FAR struct file *filep, off_t length)
            * size.
            */
 
-          ff->ff_size = length;
+          ff->ff_shared->s_size = length;
           ret = OK;
         }
     }
@@ -2872,14 +3353,9 @@ static int fat_unlink(FAR struct inode *mountpt, FAR const char *relpath)
   ret = fat_checkmount(fs);
   if (ret == OK)
     {
-      /* If the file is open, the correct behavior is to remove the file
-       * name, but to keep the file cluster chain in place until the last
-       * open reference to the file is closed.
-       */
-
-      /* Remove the file
-       *
-       * TODO: Need to defer deleting cluster chain if the file is open.
+      /* If the file is open, fat_remove() removes the file name but
+       * keeps the file cluster chain in place until the last open
+       * reference to the file is closed.
        */
 
       ret = fat_remove(fs, relpath, false);
@@ -3148,12 +3624,9 @@ static int fat_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
     {
       /* If the directory is open, the correct behavior is to remove the
        * directory name, but to keep the directory cluster chain in place
-       * until the last open reference to the directory is closed.
-       */
-
-      /* Remove the directory.
-       *
-       * TODO: Need to defer deleting cluster chain if the file is open.
+       * until the last open reference to the directory is closed.  NOTE:
+       * directories opened with opendir() are not tracked, so this
+       * currently only defers regular open files; see fat_remove().
        */
 
       ret = fat_remove(fs, relpath, true);
@@ -3176,6 +3649,11 @@ static int fat_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
   FAR struct fat_mountpt_s *fs;
   FAR struct fat_dirinfo_s dirinfo;
   FAR struct fat_dirseq_s dirseq;
+  FAR struct fat_shared_s *shared;
+  off_t oldsector;
+  off_t newsector;
+  uint16_t oldindex;
+  uint16_t newindex;
   uint8_t *direntry;
   uint8_t dirstate[DIR_SIZE - DIR_ATTRIBUTES];
   int ret;
@@ -3231,6 +3709,13 @@ static int fat_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
    */
 
   memcpy(&dirseq, &dirinfo.fd_seq, sizeof(struct fat_dirseq_s));
+
+  /* Save the location of the old directory entry.  Open handles are
+   * keyed by this location and are moved to the new entry below.
+   */
+
+  oldsector = fs->fs_currentsector;
+  oldindex  = dirinfo.dir.fd_index;
 
   /* Save the non-name-related portion of the directory entry intact */
 
@@ -3290,6 +3775,14 @@ static int fat_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
   memcpy(&direntry[DIR_ATTRIBUTES], dirstate, DIR_SIZE - DIR_ATTRIBUTES);
   fs->fs_dirty = true;
 
+  /* The new short file name entry is still in the sector cache here.
+   * Remember its location before freeing the old entry below changes
+   * the cache.
+   */
+
+  newsector = fs->fs_currentsector;
+  newindex  = dirinfo.dir.fd_index;
+
   /* Remove the old entry, flushing the new directory entry to disk.  If
    * the old file name was a long file name, then multiple directory
    * entries may be freed.
@@ -3299,6 +3792,22 @@ static int fat_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
   if (ret < 0)
     {
       goto errout_with_lock;
+    }
+
+  /* Move open handles to the new directory entry so that later syncs
+   * update the new location (instead of corrupting the freed old slot)
+   * and a later unlink of the new name finds them.
+   */
+
+  for (shared = fs->fs_shared; shared != NULL; shared = shared->s_next)
+    {
+      if (!shared->s_pending &&
+          shared->s_dirsector == oldsector &&
+          shared->s_dirindex == oldindex)
+        {
+          shared->s_dirsector = newsector;
+          shared->s_dirindex  = newindex;
+        }
     }
 
   /* Write the old entry to disk and update FSINFO if necessary */

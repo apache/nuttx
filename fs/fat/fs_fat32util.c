@@ -1609,7 +1609,7 @@ int fat_dirextend(FAR struct fat_mountpt_s *fs, FAR struct fat_file_s *ff,
    * position.
    */
 
-  pos = ff->ff_size;
+  pos = ff->ff_shared->s_size;
 
   /* Get the first sector to write to. */
 
@@ -1617,12 +1617,12 @@ int fat_dirextend(FAR struct fat_mountpt_s *fs, FAR struct fat_file_s *ff,
     {
       /* Has the starting cluster been defined? */
 
-      if (ff->ff_startcluster == 0)
+      if (ff->ff_shared->s_startcluster == 0)
         {
           /* No.. we have to create a new cluster chain */
 
-          ff->ff_startcluster     = fat_createchain(fs);
-          ff->ff_currentcluster   = ff->ff_startcluster;
+          ff->ff_shared->s_startcluster     = fat_createchain(fs);
+          ff->ff_currentcluster   = ff->ff_shared->s_startcluster;
           ff->ff_sectorsincluster = fs->fs_fatsecperclus;
         }
 
@@ -1692,7 +1692,7 @@ int fat_dirextend(FAR struct fat_mountpt_s *fs, FAR struct fat_file_s *ff,
        */
 
       if (sectndx == 0 && (remaining >= fs->fs_hwsectorsize ||
-          (pos + remaining) >= ff->ff_size))
+          (pos + remaining) >= ff->ff_shared->s_size))
         {
           /* Flush unwritten data in the sector cache. */
 
@@ -1754,7 +1754,7 @@ int fat_dirextend(FAR struct fat_mountpt_s *fs, FAR struct fat_file_s *ff,
 
   /* The truncation has completed without error.  Update the file size */
 
-  ff->ff_size = length;
+  ff->ff_shared->s_size = length;
   return OK;
 }
 
@@ -2169,7 +2169,7 @@ int fat_currentsector(struct fat_mountpt_s *fs, struct fat_file_s *ff,
   int sectoroffset;
   off_t cluster_start_sector;
 
-  if (position <= ff->ff_size)
+  if (position <= ff->ff_shared->s_size)
     {
       /* sectoroffset is the sector number offset into the current cluster */
 
