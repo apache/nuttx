@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/am67/t3-gem-o1/src/am67_bringup.c
+ * boards/arm/am67/t3-gem-o1/src/am67_i2c.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,61 +25,58 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/fs.h>
+
 #include <debug.h>
 
-#include "t3-gem-o1.h"
-
-#ifdef CONFIG_AM67_MCSPI0
-#include "am67_mcspi.h"
-#include "am67_gpio.h"
-#endif
+#include <nuttx/i2c/i2c_master.h>
+#include "am67_i2c.h"
 
 #if defined(CONFIG_AM67_I2C0) || defined(CONFIG_AM67_WKUP_I2C0)
-#include "am67_i2c.h"
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: am67_bringup
- *
- * Description:
- *   Perform architecture-specific initialization.
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
- *     Called from the NSH library.
- *
+ * Name: am67_i2cdev_initialize
  ****************************************************************************/
 
-int am67_bringup(void)
+void am67_i2cdev_initialize(void)
 {
-  int ret = OK;
+  FAR struct i2c_master_s *i2c;
+  int ret;
 
-#ifdef CONFIG_AM67_MCSPI0
-  am67_sensors_power_enable(true);
-  am67_spiinitialize();
-  am67_spidev_initialize();
-#endif
-
-#if defined(CONFIG_AM67_I2C0) || defined(CONFIG_AM67_WKUP_I2C0)
-  am67_i2cdev_initialize();
-#endif
-
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
+#ifdef CONFIG_AM67_I2C0
+  i2c = am67_i2cbus_initialize(0);
+  if (i2c == NULL)
     {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+      i2cerr("ERROR: Failed to initialize I2C0\n");
+    }
+  else
+    {
+      ret = i2c_register(i2c, 0);
+      if (ret < 0)
+        {
+          i2cerr("ERROR: Failed to register /dev/i2c0: %d\n", ret);
+        }
     }
 #endif
 
-  return ret;
+#ifdef CONFIG_AM67_WKUP_I2C0
+  i2c = am67_i2cbus_initialize(2);
+  if (i2c == NULL)
+    {
+      i2cerr("ERROR: Failed to initialize WKUP_I2C0\n");
+    }
+  else
+    {
+      ret = i2c_register(i2c, 2);
+      if (ret < 0)
+        {
+          i2cerr("ERROR: Failed to register /dev/i2c2: %d\n", ret);
+        }
+    }
+#endif
 }
+
+#endif /* CONFIG_AM67_I2C0 || CONFIG_AM67_WKUP_I2C0 */

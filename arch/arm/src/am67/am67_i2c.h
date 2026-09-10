@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/am67/t3-gem-o1/src/am67_bringup.c
+ * arch/arm/src/am67/am67_i2c.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,66 +20,54 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_AM67_AM67_I2C_H
+#define __ARCH_ARM_SRC_AM67_AM67_I2C_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/fs.h>
-#include <debug.h>
-
-#include "t3-gem-o1.h"
-
-#ifdef CONFIG_AM67_MCSPI0
-#include "am67_mcspi.h"
-#include "am67_gpio.h"
-#endif
-
-#if defined(CONFIG_AM67_I2C0) || defined(CONFIG_AM67_WKUP_I2C0)
-#include "am67_i2c.h"
-#endif
+#include <nuttx/i2c/i2c_master.h>
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: am67_bringup
+ * Name: am67_i2cbus_initialize
  *
  * Description:
- *   Perform architecture-specific initialization.
+ *   Initialize the selected I2C port. And return a unique instance of struct
+ *   struct i2c_master_s.  This function may be called to obtain multiple
+ *   instances of the interface, each of which may be set up with a
+ *   different frequency and slave address.
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
+ * Input Parameters:
+ *   Port number (for hardware that has multiple I2C interfaces)
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
- *     Called from the NSH library.
+ * Returned Value:
+ *   Valid I2C device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
-int am67_bringup(void)
-{
-  int ret = OK;
+struct i2c_master_s *am67_i2cbus_initialize(int port);
 
-#ifdef CONFIG_AM67_MCSPI0
-  am67_sensors_power_enable(true);
-  am67_spiinitialize();
-  am67_spidev_initialize();
-#endif
+/****************************************************************************
+ * Name: am67_i2cbus_uninitialize
+ *
+ * Description:
+ *   De-initialize the selected I2C port, and power down the device.
+ *
+ * Input Parameters:
+ *   Device structure as returned by the am67_i2cbus_initialize()
+ *
+ * Returned Value:
+ *   OK on success, ERROR when internal reference count mismatch or dev
+ *   points to invalid hardware device.
+ *
+ ****************************************************************************/
 
-#if defined(CONFIG_AM67_I2C0) || defined(CONFIG_AM67_WKUP_I2C0)
-  am67_i2cdev_initialize();
-#endif
+int am67_i2cbus_uninitialize(struct i2c_master_s *dev);
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
-    }
-#endif
-
-  return ret;
-}
+#endif /* __ARCH_ARM_SRC_AM67_AM67_I2C_H */
