@@ -56,7 +56,7 @@
 #ifdef CONFIG_SCHED_CHILD_STATUS
 static void exited_child(FAR struct tcb_s *rtcb,
                          FAR struct child_status_s *child,
-                         FAR siginfo_t *info)
+                         FAR siginfo_t *info, int options)
 {
   /* The child has exited. Return the saved exit status (and some fudged
    * information).
@@ -72,10 +72,15 @@ static void exited_child(FAR struct tcb_s *rtcb,
       info->si_status          = child->ch_status;
     }
 
-  /* Discard the child entry */
+  /* Discard the child entry unless WNOWAIT is set (the caller wants the
+   * child to remain in a waitable state).
+   */
 
-  group_remove_child(rtcb->group, child->ch_pid);
-  group_free_child(child);
+  if ((options & WNOWAIT) == 0)
+    {
+      group_remove_child(rtcb->group, child->ch_pid);
+      group_free_child(child);
+    }
 }
 #endif
 
@@ -117,7 +122,7 @@ int waittcb(FAR struct tcb_s *rtcb, idtype_t idtype, int options,
                * Return the exit status and break out of the loop.
                */
 
-              exited_child(rtcb, child, info);
+              exited_child(rtcb, child, info, options);
               break;
             }
         }
@@ -141,7 +146,7 @@ int waittcb(FAR struct tcb_s *rtcb, idtype_t idtype, int options,
                * of the loop.
                */
 
-              exited_child(rtcb, child, info);
+              exited_child(rtcb, child, info, options);
               break;
             }
         }
@@ -232,7 +237,7 @@ int waittcb(FAR struct tcb_s *rtcb, idtype_t idtype, int options,
 
                       if ((child->ch_flags & CHILD_FLAG_EXITED) != 0)
                         {
-                          exited_child(rtcb, child, NULL);
+                          exited_child(rtcb, child, NULL, options);
                         }
                     }
 #endif
@@ -255,7 +260,7 @@ int waittcb(FAR struct tcb_s *rtcb, idtype_t idtype, int options,
                   if (child &&
                       (child->ch_flags & CHILD_FLAG_EXITED) != 0)
                     {
-                      exited_child(rtcb, child, NULL);
+                      exited_child(rtcb, child, NULL, options);
                     }
                 }
 #endif
@@ -369,7 +374,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
 
   if ((idtype == P_PID || idtype == P_ALL) &&
       (options & WEXITED) != 0 &&
-      (options & ~(WEXITED | WNOHANG)) == 0)
+      (options & ~(WEXITED | WNOHANG | WNOWAIT)) == 0)
 #endif
     {
       errcode = OK;
