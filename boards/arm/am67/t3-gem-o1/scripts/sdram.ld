@@ -101,7 +101,6 @@ SECTIONS
     } > ddr
 
     _etext = ABSOLUTE(.); /* End of code/read-only sections */
-    _sidata = _etext;    /* Start of initial values for .data (LMA) */
 
     .init_section :
     {
@@ -111,7 +110,7 @@ SECTIONS
         _einit = ABSOLUTE(.);
     } > ddr
 
-    .data : AT ( _sidata )
+    .data :
     {
         _sdata = ABSOLUTE(.);
         *(.data .data.*)
