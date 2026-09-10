@@ -180,6 +180,13 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
 
           if (aioc)
             {
+              /* Advance to the next container now: work_cancel() may report
+               * that this one is already executing (-ENOENT), and we must
+               * not examine the same container again in that case.
+               */
+
+              next = (FAR struct aio_container_s *)aioc->aioc_link.flink;
+
               /* Yes... attempt to cancel the I/O.  There are two
                * possibilities:* (1) the work has already been started and
                * is no longer queued, or (2) the work has not been started
@@ -195,8 +202,6 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
                    * transfers
                    */
 
-                  next   =
-                    (FAR struct aio_container_s *)aioc->aioc_link.flink;
                   pid    = aioc->aioc_pid;
                   aiocbp = aioc_decant(aioc);
                   DEBUGASSERT(aiocbp);

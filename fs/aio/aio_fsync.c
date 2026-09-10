@@ -79,7 +79,12 @@ static void aio_fsync_worker(FAR void *arg)
 #ifdef CONFIG_PRIORITY_INHERITANCE
   prio   = aioc->aioc_prio;
 #endif
-  aiocbp = aioc_decant(aioc);
+  aiocbp = aioc->aioc_aiocbp;
+
+  /* Perform the I/O while the container and its file reference are
+   * still valid.  aioc_decant() drops the reference and frees the
+   * container, so it must be the last use of 'aioc'.
+   */
 
   /* Perform the fsync using aioc_filep */
 
@@ -96,6 +101,7 @@ static void aio_fsync_worker(FAR void *arg)
 
   /* Signal the client */
 
+  aioc_decant(aioc);
   aio_signal(pid, aiocbp);
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
