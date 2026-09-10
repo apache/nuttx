@@ -400,7 +400,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
             {
               /* Make sure that the thread it is our child. */
 
-              if (ctcb->group->tg_ppid != rtcb->pid)
+              if (ctcb->group->tg_ppid != rtcb->group->tg_pid)
                 {
                   errcode = ECHILD;
                 }
@@ -437,7 +437,8 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
 
           ctcb = nxsched_get_tcb((pid_t)id);
 
-          if (!ctcb || !ctcb->group || ctcb->group->tg_ppid != rtcb->pid)
+          if (!ctcb || !ctcb->group ||
+              ctcb->group->tg_ppid != rtcb->group->tg_pid)
             {
               errcode = ECHILD;
             }
