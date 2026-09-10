@@ -311,7 +311,11 @@ int aio_write(FAR struct aiocb *aiocbp)
       return ERROR;
     }
 
-  list_initialize(&aiocbp->lio_link);
+  /* Clear lio_link so aio_signal() skips the lio_listio path (see
+   * aio_fsync.c); list_initialize() would wrongly leave prev non-NULL.
+   */
+
+  list_clear_node(&aiocbp->lio_link);
   return aio_write_internal(aiocbp);
 }
 
