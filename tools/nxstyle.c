@@ -261,6 +261,17 @@ static const char *g_white_prefix[] =
 
   "uxrCustom",           /* uxrCustomTransport */
 
+  /* Ref:  apps/examples/xrcedds
+   * Public type names from the eProsima Micro XRCE-DDS Client and
+   * Micro-CDR APIs.
+   */
+
+  "uxrUDPTransport",     /* uxrUDPTransport */
+  "uxrSession",          /* uxrSession */
+  "uxrStreamId",         /* uxrStreamId */
+  "uxrObjectId",         /* uxrObjectId */
+  "ucdrBuffer",          /* ucdrBuffer */
+
   /* Ref:  arch/arm/src/common/ameba, arch/arm/src/rtl8721dx,
    * arch/arm/src/rtl8720f, arch/arm/src/rtl8721f and the matching boards.
    * Realtek Ameba SDK ROM/HAL symbols and ARM CMSE intrinsics referenced
