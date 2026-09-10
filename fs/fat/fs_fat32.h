@@ -863,10 +863,12 @@
  */
 
 struct fat_file_s;
+struct fat_shared_s;
 struct fat_mountpt_s
 {
   FAR struct inode      *fs_blkdriver; /* The block driver inode that hosts the FAT32 fs */
   FAR struct fat_file_s *fs_head;      /* A list to all files opened on this mountpoint */
+  FAR struct fat_shared_s *fs_shared;  /* Canonical open-file objects, see below */
 
   mutex_t  fs_lock;                /* Used to assume thread-safe access */
   off_t    fs_hwsectorsize;        /* HW: Sector size reported by block driver */
@@ -893,6 +895,39 @@ struct fat_mountpt_s
                                     * sector from the device */
 };
 
+/* This structure is the canonical, FAT-local representation of an open
+ * file.  There is one instance per underlying file, shared by every
+ * open file description and dup'ed handle referring to it (similar in
+ * spirit to a Linux in-core inode or a FreeBSD denode, but scoped to
+ * the FAT mountpoint instead of the generic VFS layer).
+ *
+ * Sharing the directory-entry location, start cluster and size through
+ * this object solves three problems that per-handle copies cannot:
+ *
+ * 1. An unlinked-but-open file keeps its cluster chain alive until the
+ *    last reference disappears (POSIX unlink semantics).  The chain is
+ *    identified by the shared start cluster, so empty files (cluster 0
+ *    at unlink time, cluster allocated later by write) work as well.
+ * 2. A rename updates the directory-entry location once, so all open
+ *    handles keep following the file instead of going stale.
+ * 3. A directory-entry slot reused by a new file after unlink can never
+ *    alias the unlinked file: the shared object is marked pending and
+ *    detached from the directory namespace, so new opens always create
+ *    a new object.
+ */
+
+struct fat_shared_s
+{
+  FAR struct fat_shared_s *s_next;    /* Retained in a singly linked list */
+  uint16_t s_refs;                    /* Open handles referencing this file */
+  bool     s_pending;                 /* True after unlink, dir entry is gone */
+  uint8_t  s_attr;                    /* Directory entry attributes snapshot */
+  uint16_t s_dirindex;                /* Index into s_dirsector to dir entry */
+  off_t    s_dirsector;               /* Sector containing the directory entry */
+  off_t    s_size;                    /* Size of the file in bytes */
+  off_t    s_startcluster;            /* Start cluster of file on media */
+};
+
 /* This structure represents on open file under the mountpoint.  An instance
  * of this structure is retained as struct file specific information on each
  * opened file.
@@ -900,15 +935,14 @@ struct fat_mountpt_s
 
 struct fat_file_s
 {
+  /* Canonical open-file state, shared by all handles of the file. */
+
+  FAR struct fat_shared_s *ff_shared;
   FAR struct fat_file_s *ff_next;  /* Retained in a singly linked list */
   uint8_t  ff_bflags;              /* The file buffer/mount flags */
   uint8_t  ff_oflags;              /* Flags provided when file was opened */
   uint8_t  ff_sectorsincluster;    /* Sectors remaining in cluster */
-  uint16_t ff_dirindex;            /* Index into ff_dirsector to directory entry */
   uint32_t ff_currentcluster;      /* Current cluster being accessed */
-  off_t    ff_dirsector;           /* Sector containing the directory entry */
-  off_t    ff_size;                /* Size of the file in bytes */
-  off_t    ff_startcluster;        /* Start cluster of file on media */
   off_t    ff_currentsector;       /* Current sector being operated on */
   off_t    ff_cachesector;         /* Current sector in the file buffer */
   off_t    ff_pos;                 /* Current position in the file */
