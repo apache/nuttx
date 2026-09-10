@@ -172,6 +172,11 @@ int nxsched_set_scheduler(pid_t pid, int policy,
   irqstate_t flags;
   int ret = -EINVAL;
 
+  if (param == NULL)
+    {
+      return -EINVAL;
+    }
+
   /* Check if the task to modify the calling task */
 
   if (pid == 0)
