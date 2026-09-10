@@ -1636,23 +1636,23 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
   switch (whence)
     {
       case SEEK_SET: /* The offset is set to offset bytes. */
-          position = offset;
-          break;
+        position = offset;
+        break;
 
       case SEEK_CUR: /* The offset is set to its current location plus
                       * offset bytes. */
 
-          position = offset + filep->f_pos;
-          break;
+        position = offset + filep->f_pos;
+        break;
 
       case SEEK_END: /* The offset is set to the size of the file plus
                       * offset bytes. */
 
-          position = offset + ff->ff_shared->s_size;
-          break;
+        position = offset + ff->ff_shared->s_size;
+        break;
 
       default:
-          return -EINVAL;
+        return -EINVAL;
     }
 
   /* Invalid arguments are entered, returns an error. */
@@ -2159,7 +2159,9 @@ static int fat_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       case FIOC_FILEPATH:
         {
-          FAR char *path = (FAR char *)(uintptr_t)arg;
+          FAR char *path;
+
+          path = (FAR char *)(uintptr_t)arg;
           ret = inode_getpath(filep->f_inode, path, PATH_MAX);
           if (ret >= 0)
             {
@@ -3224,7 +3226,9 @@ static int fat_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
   if (fs->fs_blkdriver)
     {
-      FAR struct inode *inode = fs->fs_blkdriver;
+      FAR struct inode *inode;
+
+      inode = fs->fs_blkdriver;
       if (inode)
         {
           if (inode->u.i_bops && inode->u.i_bops->close)
