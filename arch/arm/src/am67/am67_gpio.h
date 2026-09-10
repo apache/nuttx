@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/am67/t3-gem-o1/src/am67_bringup.c
+ * arch/arm/src/am67/am67_gpio.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,58 +20,58 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_AM67_AM67_GPIO_H
+#define __ARCH_ARM_SRC_AM67_AM67_GPIO_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/fs.h>
-#include <debug.h>
-
-#include "t3-gem-o1.h"
-
-#ifdef CONFIG_AM67_MCSPI0
-#include "am67_mcspi.h"
-#include "am67_gpio.h"
-#endif
+#include <stdbool.h>
+#include <stdint.h>
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: am67_bringup
- *
- * Description:
- *   Perform architecture-specific initialization.
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
- *     Called from the NSH library.
- *
- ****************************************************************************/
+/* PX4 board_config.h compatibility */
 
-int am67_bringup(void)
+#define GPIO_OUTPUT           0
+#define GPIO_INPUT            1
+
+typedef uint32_t am67_gpio_t;
+
+enum am67_gpio_id_e
 {
-  int ret = OK;
+  AM67_GPIO_ID_LED_GREEN = 0,
+  AM67_GPIO_ID_LED_RED,
+  AM67_GPIO_ID_SPI_CS1,
+  AM67_GPIO_ID_SPI_CS3,
+  AM67_GPIO_ID_IMU_EN,
+  AM67_GPIO_ID_SPI_CS2,
+  AM67_GPIO_ID_COUNT
+};
 
-#ifdef CONFIG_AM67_MCSPI0
-  am67_sensors_power_enable(true);
-  am67_spiinitialize();
-  am67_spidev_initialize();
-#endif
+#define AM67_GPIO_OLDI0_A0P  ((am67_gpio_t)AM67_GPIO_ID_LED_GREEN)
+#define AM67_GPIO_OLDI0_A0N  ((am67_gpio_t)AM67_GPIO_ID_LED_RED)
+#define AM67_GPIO_HAT_CS1    ((am67_gpio_t)AM67_GPIO_ID_SPI_CS1)
+#define AM67_GPIO_HAT_CS3    ((am67_gpio_t)AM67_GPIO_ID_SPI_CS3)
+#define AM67_GPIO_MCU0_PIN12 ((am67_gpio_t)AM67_GPIO_ID_IMU_EN)
+#define AM67_GPIO_HAT_CS2    ((am67_gpio_t)AM67_GPIO_ID_SPI_CS2)
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
+/* HAT header GPIO mapping — filled in during F4 PWM bring-up */
 
-  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
-    }
-#endif
+#define AM67_GPIO_HAT(n)     am67_gpio_hat(n)
 
-  return ret;
-}
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+am67_gpio_t am67_gpio_hat(unsigned int hat_pin);
+void am67_configgpio(am67_gpio_t gpio, int pintype);
+void am67_gpiowrite(am67_gpio_t gpio, bool value);
+bool am67_gpioread(am67_gpio_t gpio);
+void am67_sensors_power_enable(bool enable);
+
+#endif /* __ARCH_ARM_SRC_AM67_AM67_GPIO_H */
