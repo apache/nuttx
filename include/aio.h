@@ -155,16 +155,16 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-int aio_cancel(int fildes, FAR struct aiocb *aiocbp);
-int aio_error(FAR const struct aiocb *aiocbp);
-int aio_fsync(int op, FAR struct aiocb *aiocbp);
-int aio_read(FAR struct aiocb *aiocbp);
-ssize_t aio_return(FAR struct aiocb *aiocbp);
-int aio_suspend(FAR const struct aiocb * const list[], int nent,
-                FAR const struct timespec *timeout);
-int aio_write(FAR struct aiocb *aiocbp);
-int lio_listio(int mode, FAR struct aiocb * const list[], int nent,
-               FAR struct sigevent *sig);
+int aio_cancel(int, FAR struct aiocb *);
+int aio_error(FAR const struct aiocb *);
+int aio_fsync(int, FAR struct aiocb *);
+int aio_read(FAR struct aiocb *);
+ssize_t aio_return(FAR struct aiocb *);
+int aio_suspend(FAR const struct aiocb * const[], int,
+                FAR const struct timespec *);
+int aio_write(FAR struct aiocb *);
+int lio_listio(int, FAR struct aiocb *restrict const[restrict], int,
+               FAR struct sigevent *restrict);
 
 #undef EXTERN
 #ifdef __cplusplus
