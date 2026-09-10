@@ -13,6 +13,27 @@ config AM67_GPIO
 		example applications (LED, IMU_EN, SPI CS padconfig).
 
 
+config AM67_EPWM0
+	bool "AM67 EPWM0 driver"
+	default n
+	depends on PWM
+	select ARCH_HAVE_PWM_MULTICHAN
+	---help---
+		Enable EPWM driver on EPWM0 (outputs A and B; requires
+		PWM_MULTICHAN with PWM_NCHANNELS >= 2)
+
+config AM67_EPWM1
+	bool "AM67 EPWM1 driver"
+	default n
+	depends on PWM
+	select ARCH_HAVE_PWM_MULTICHAN
+	---help---
+		Enable EPWM driver on EPWM1 (outputs A and B on HAT GPIO-6
+		and GPIO-13; requires PWM_MULTICHAN with PWM_NCHANNELS >= 2).
+		EPWM2 is the board cooling fan and is deliberately not
+		supported.
+
+
 config AM67_MCSPI0
 	bool "AM67 MCU_MCSPI0 master driver"
 	default n

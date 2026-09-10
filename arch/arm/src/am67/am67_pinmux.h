@@ -100,7 +100,7 @@ enum pinmux_main_offsets_e
   PIN_GPMC0_AD14     = 0x0074,
   PIN_GPMC0_AD15     = 0x0078,
   PIN_GPMC0_WAIT1    = 0x009c,
-  PIN_SPI0_CS1       = 0x01bb,
+  PIN_SPI0_CS1       = 0x01b8,
   PIN_UART0_TXD      = 0x01cc,
   PIN_UART0_RXD      = 0x01c8,
   PIN_SPI0_CS0       = 0x01b4,
@@ -315,5 +315,6 @@ void am67_mcu_pinmux_config(const struct pinmux_conf_s *pinmux_conf);
 void am67_pinmux_init(void);
 void am67_spi_pinmux_init(void);
 void am67_i2c_pinmux_init(void);
+void am67_epwm_pinmux_init(int epwm);
 
 #endif /* __ARCH_ARM_SRC_AM67_AM67_PINMUX_H */
