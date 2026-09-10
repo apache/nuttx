@@ -28,6 +28,7 @@ config ARCH_CHIP_AT90USB
 config ARCH_CHIP_AVRDX
 	bool "AVR 32/64/128 DA/DB core"
 	select ARCH_FAMILY_AVR
+	select LIBC_ATOMIC_IRQ
 	select MM_SMALL
 	select ARCH_HAVE_TICKLESS
 	select AVR_HAVE_FLMAP
