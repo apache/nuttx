@@ -25,7 +25,7 @@ ifeq ($(CONFIG_FS_AIO),y)
 # Add the asynchronous I/O C files to the build
 
 CSRCS += aio_cancel.c aioc_contain.c aio_fsync.c aio_initialize.c
-CSRCS += aio_queue.c aio_read.c aio_signal.c aio_write.c
+CSRCS += aio_queue.c aio_read.c aio_signal.c aio_write.c lio_listio.c
 
 # Add the asynchronous I/O directory to the build
 

@@ -21,5 +21,5 @@
 # ##############################################################################
 
 if(CONFIG_FS_AIO)
-  target_sources(c PRIVATE aio_error.c aio_return.c aio_suspend.c lio_listio.c)
+  target_sources(c PRIVATE aio_error.c aio_return.c aio_suspend.c)
 endif()
