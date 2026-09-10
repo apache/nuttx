@@ -10,7 +10,7 @@
  * "License"); you may not use this file except in compliance with the
  * License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -68,6 +68,42 @@ static struct pinmux_conf_s g_am67_pinmux_conf[] =
   {PINMUX_END, PINMUX_END}
 };
 
+static struct pinmux_conf_s g_am67_epwm0_pinmux_conf[] =
+{
+  /* EPWM0 A output pin (B20, mode 2 = EHRPWM0_A) */
+
+  {
+    PIN_SPI0_CS0,
+    (PIN_MODE(2) | PIN_PULL_DISABLE)
+  },
+
+  /* EPWM0 B output pin (C20, mode 2 = EHRPWM0_B) */
+
+  {
+    PIN_SPI0_CS1,
+    (PIN_MODE(2) | PIN_PULL_DISABLE)
+  },
+  {PINMUX_END, PINMUX_END}
+};
+
+static struct pinmux_conf_s g_am67_epwm1_pinmux_conf[] =
+{
+  /* EPWM1 A output pin (D20, mode 2 = EHRPWM1_A) */
+
+  {
+    PIN_SPI0_CLK,
+    (PIN_MODE(2) | PIN_PULL_DISABLE)
+  },
+
+  /* EPWM1 B output pin (E19, mode 2 = EHRPWM1_B) */
+
+  {
+    PIN_SPI0_D0,
+    (PIN_MODE(2) | PIN_PULL_DISABLE)
+  },
+  {PINMUX_END, PINMUX_END}
+};
+
 static struct pinmux_conf_s g_am67_mcu_spi_pinmux_conf[] =
 {
   /* MCU_SPI0_CLK */
@@ -107,13 +143,6 @@ static struct pinmux_conf_s g_am67_mcu_spi_pinmux_conf[] =
     (PIN_MODE(0) | PIN_PULL_DISABLE)
   },
 
-  /* MCU_SPI0_CS2 (HAT spidev, channel 2) - WKUP_UART0_RXD pad, mode 2 */
-
-  {
-    PIN_WKUP_UART0_RXD,
-    (PIN_MODE(2) | PIN_PULL_DISABLE)
-  },
-
   /* MCU_SPI0_CS3 (ICM20948, channel 3) - MCU_MCAN0_TX pad, mode 2 */
 
   {
@@ -127,6 +156,42 @@ static struct pinmux_conf_s g_am67_mcu_spi_pinmux_conf[] =
     PIN_WKUP_UART0_RTSN,
     (PIN_MODE(7) | PIN_PULL_DISABLE)
   },
+  {PINMUX_END, PINMUX_END}
+};
+
+static struct pinmux_conf_s g_am67_mcu_i2c_pinmux_conf[] =
+{
+#ifdef CONFIG_AM67_I2C0
+  /* MCU_I2C0_SCL */
+
+  {
+    PIN_MCU_I2C0_SCL,
+    (PIN_MODE(0) | PIN_INPUT_ENABLE | PIN_PULL_DISABLE)
+  },
+
+  /* MCU_I2C0_SDA */
+
+  {
+    PIN_MCU_I2C0_SDA,
+    (PIN_MODE(0) | PIN_INPUT_ENABLE | PIN_PULL_DISABLE)
+  },
+#endif
+
+#ifdef CONFIG_AM67_WKUP_I2C0
+  /* WKUP_I2C0_SCL */
+
+  {
+    PIN_WKUP_I2C0_SCL,
+    (PIN_MODE(0) | PIN_INPUT_ENABLE | PIN_PULL_DISABLE)
+  },
+
+  /* WKUP_I2C0_SDA */
+
+  {
+    PIN_WKUP_I2C0_SDA,
+    (PIN_MODE(0) | PIN_INPUT_ENABLE | PIN_PULL_DISABLE)
+  },
+#endif
   {PINMUX_END, PINMUX_END}
 };
 
@@ -260,3 +325,38 @@ void am67_spi_pinmux_init(void)
 {
   am67_mcu_pinmux_config(g_am67_mcu_spi_pinmux_conf);
 }
+
+/****************************************************************************
+ * Name: am67_i2c_pinmux_init
+ *
+ * Description:
+ *   Configure MCU_I2C0 pin multiplexing for onboard sensors.
+ *
+ ****************************************************************************/
+
+void am67_i2c_pinmux_init(void)
+{
+  am67_mcu_pinmux_config(g_am67_mcu_i2c_pinmux_conf);
+}
+
+/****************************************************************************
+ * Name: am67_epwm_pinmux_init
+ *
+ * Description:
+ *   Configure the output pin multiplexing (A and B pads) for the given
+ *   EPWM instance.
+ *
+ ****************************************************************************/
+
+void am67_epwm_pinmux_init(int epwm)
+{
+  if (epwm == 0)
+    {
+      am67_pinmux_config(g_am67_epwm0_pinmux_conf);
+    }
+  else
+    {
+      am67_pinmux_config(g_am67_epwm1_pinmux_conf);
+    }
+}
+
