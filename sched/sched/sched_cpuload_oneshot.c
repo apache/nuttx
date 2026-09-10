@@ -194,7 +194,7 @@ static void nxsched_oneshot_start(void)
   /* Then re-start the oneshot timer */
 
   secs       = USEC2SEC(usecs);
-  usecs     -= 100000 * secs;
+  usecs     -= USEC_PER_SEC * secs;
 
   ts.tv_sec  = secs;
   ts.tv_nsec = 1000 * usecs;
