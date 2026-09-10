@@ -549,13 +549,16 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
        */
 
       int i;
+
       for (i = 0; i < 4; i++)
         {
           /* Check if the partition exists and, if so, get the bootsector for
            * that partition and see if we can find the boot record there.
            */
 
-          uint8_t part = PART_GETTYPE(i, fs->fs_buffer);
+          uint8_t part;
+
+          part = PART_GETTYPE(i, fs->fs_buffer);
           finfo("Partition %d, offset %d, type %d\n",
                  i, PART_ENTRY(i), part);
 
@@ -690,11 +693,15 @@ int fat_checkmount(struct fat_mountpt_s *fs)
 
       if (fs->fs_blkdriver)
         {
-          struct inode *inode = fs->fs_blkdriver;
+          struct inode *inode;
+
+          inode = fs->fs_blkdriver;
           if (inode && inode->u.i_bops && inode->u.i_bops->geometry)
             {
               struct geometry geo;
-              int errcode = inode->u.i_bops->geometry(inode, &geo);
+              int errcode;
+
+              errcode = inode->u.i_bops->geometry(inode, &geo);
               if (errcode == OK && geo.geo_available &&
                   !geo.geo_mediachanged)
                 {
@@ -722,14 +729,20 @@ int fat_checkmount(struct fat_mountpt_s *fs)
 int fat_hwread(struct fat_mountpt_s *fs, uint8_t *buffer,  off_t sector,
                unsigned int nsectors)
 {
-  int ret = -ENODEV;
+  int ret;
+
+  ret = -ENODEV;
   if (fs && fs->fs_blkdriver)
     {
-      struct inode *inode = fs->fs_blkdriver;
+      struct inode *inode;
+
+      inode = fs->fs_blkdriver;
       if (inode && inode->u.i_bops && inode->u.i_bops->read)
         {
-          ssize_t nsectorsread = inode->u.i_bops->read(inode, buffer,
-                                                       sector, nsectors);
+          ssize_t nsectorsread;
+
+          nsectorsread = inode->u.i_bops->read(inode, buffer,
+                                               sector, nsectors);
           if (nsectorsread == nsectors)
             {
               ret = OK;
@@ -755,13 +768,19 @@ int fat_hwread(struct fat_mountpt_s *fs, uint8_t *buffer,  off_t sector,
 int fat_hwwrite(struct fat_mountpt_s *fs, uint8_t *buffer, off_t sector,
                 unsigned int nsectors)
 {
-  int ret = -ENODEV;
+  int ret;
+
+  ret = -ENODEV;
   if (fs && fs->fs_blkdriver)
     {
-      struct inode *inode = fs->fs_blkdriver;
+      struct inode *inode;
+
+      inode = fs->fs_blkdriver;
       if (inode && inode->u.i_bops && inode->u.i_bops->write)
         {
-          ssize_t nsectorswritten =
+          ssize_t nsectorswritten;
+
+          nsectorswritten =
               inode->u.i_bops->write(inode, buffer, sector, nsectors);
 
           if (nsectorswritten == nsectors)
@@ -932,7 +951,7 @@ off_t fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno)
             }
 
           default:
-              break;
+            break;
         }
     }
 
@@ -1053,7 +1072,7 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno,
 
               fs->fs_buffer[fatindex] = value;
             }
-          break;
+            break;
 
           case FSTYPE_FAT16 :
             {
@@ -1071,7 +1090,7 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno,
 
               FAT_PUTFAT16(fs->fs_buffer, fatindex, nextcluster & 0xffff);
             }
-          break;
+            break;
 
           case FSTYPE_FAT32 :
             {
@@ -1094,7 +1113,7 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno,
               FAT_PUTFAT32(fs->fs_buffer, fatindex,
                            val | (nextcluster & 0x0fffffff));
             }
-          break;
+            break;
 
           default:
             return -EINVAL;
@@ -2037,7 +2056,9 @@ int fat_computefreeclusters(struct fat_mountpt_s *fs)
 {
   /* We have to count the number of free clusters */
 
-  uint32_t nfreeclusters = 0;
+  uint32_t nfreeclusters;
+
+  nfreeclusters = 0;
   if (fs->fs_type == FSTYPE_FAT12)
     {
       off_t sector;
@@ -2146,7 +2167,9 @@ int fat_nfreeclusters(struct fat_mountpt_s *fs, fsblkcnt_t *pfreeclusters)
 
   /* Otherwise, we will have to compute the number of free clusters */
 
-  int ret = fat_computefreeclusters(fs);
+  int ret;
+
+  ret = fat_computefreeclusters(fs);
   if (ret == OK)
     {
       *pfreeclusters = fs->fs_fsifreecount;
