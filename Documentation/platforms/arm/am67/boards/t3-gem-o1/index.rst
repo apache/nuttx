@@ -105,6 +105,8 @@ main-domain R5F core:
   and /dev/pwm1.
 - **eCAP:** eCAP1 and eCAP2 in APWM mode, registered as /dev/ecap1 and
   /dev/ecap2.
+- **IPC:** rptun over the NAVSS mailbox, giving OpenAMP rpmsg channels to
+  Linux running on the A53 cores.
 
 Installation
 ============
