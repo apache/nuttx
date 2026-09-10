@@ -32,6 +32,7 @@
 #  include <nuttx/input/buttons.h>
 #endif
 
+#include <assert.h>
 #include <avr/io.h>
 
 #include "avrdx_gpio.h"
@@ -77,13 +78,15 @@
 #ifdef CONFIG_BOARD_EARLY_INITIALIZE
 void board_early_initialize(void)
 {
+#  ifdef CONFIG_BREADXAVR_BUTTONS_DRIVER
   int ret = OK;
+#  endif
 
 #  ifdef CONFIG_BREADXAVR_BUTTONS_DRIVER
   ret = btn_lower_initialize("/dev/buttons");
   if (ret != OK)
     {
-      return;
+      PANIC();
     }
 #  endif
 }
