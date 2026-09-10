@@ -511,7 +511,7 @@ static bool netdev_console_txempty(FAR struct uart_dev_s *dev)
  *
  * Description:
  *   Socket poll callback.  Invoked by the network stack when the console
- *   socket becomes readable, so that received data is pulled on demand
+ *   socket becomes readable, so that the blocked reader is woken on demand
  *   rather than by periodically polling from a work queue.
  *
  ****************************************************************************/
@@ -525,7 +525,17 @@ static void netdev_console_poll(FAR struct pollfd_s *fds)
       fds->revents &= ~POLLIN;
       if (priv->rxint)
         {
-          uart_dmarxfree(&priv->dev);
+          /* Do not pull here.  This callback runs inside the network RX
+           * path before the datagram is buffered to the socket read-ahead
+           * (the UDP layer dispatches poll notifications in the step that
+           * precedes read-ahead buffering), so a synchronous psock_recv()
+           * would read nothing and the datagram would stay stranded until
+           * the next one arrives.  Wake the reader instead; the serial
+           * read path pulls on demand in the reader thread, after the RX
+           * path has committed the data to the read-ahead buffer.
+           */
+
+          uart_datareceived(&priv->dev);
         }
     }
 }
