@@ -316,5 +316,6 @@ void am67_pinmux_init(void);
 void am67_spi_pinmux_init(void);
 void am67_i2c_pinmux_init(void);
 void am67_epwm_pinmux_init(int epwm);
+void am67_ecap_pinmux_init(int ecap);
 
 #endif /* __ARCH_ARM_SRC_AM67_AM67_PINMUX_H */

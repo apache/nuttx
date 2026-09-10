@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/am67/t3-gem-o1/src/am67_bringup.c
+ * arch/arm/src/am67/am67_ecap.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,84 +20,65 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_AM67_AM67_ECAP_H
+#define __ARCH_ARM_SRC_AM67_AM67_ECAP_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/fs.h>
-#include <debug.h>
 
-#include "t3-gem-o1.h"
+/* The eCAP module is driven as an Auxiliary PWM (APWM) generator, so it
+ * binds to the PWM upper half (pwm_register), not the capture upper half.
+ */
 
-#ifdef CONFIG_AM67_MCSPI0
-#include "am67_mcspi.h"
-#include "am67_gpio.h"
-#endif
-
-#if defined(CONFIG_AM67_I2C0) || defined(CONFIG_AM67_WKUP_I2C0)
-#include "am67_i2c.h"
-#endif
-
-#if defined(CONFIG_AM67_EPWM0) || defined(CONFIG_AM67_EPWM1)
-#include "am67_pwm.h"
-#endif
-
-#if defined(CONFIG_AM67_ECAP0) || defined(CONFIG_AM67_ECAP1) || \
-    defined(CONFIG_AM67_ECAP2)
-#include "am67_ecap.h"
-#endif
+#include <nuttx/timers/pwm.h>
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: am67_bringup
+ * Name: am67_ecap_init
  *
  * Description:
- *   Perform architecture-specific initialization.
+ *   Boot-time preparation: unlock MAIN_CTRL_MMR partition 1, mirroring
+ *   am67_epwm_init.  Must run before pwm_register().
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
- *     Called from the NSH library.
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure.
  *
  ****************************************************************************/
 
-int am67_bringup(void)
-{
-  int ret = OK;
+int am67_ecap_init(void);
 
-#ifdef CONFIG_AM67_MCSPI0
-  am67_sensors_power_enable(true);
-  am67_spiinitialize();
-  am67_spidev_initialize();
-#endif
+/****************************************************************************
+ * Name: am67_ecapinitialize
+ *
+ * Description:
+ *   Return the lower-half instance for the given module so the board bringup
+ *   can bind it with pwm_register().  No hardware is touched here.
+ *
+ * Input Parameters:
+ *   ecap - eCAP module number: 0, 1 or 2.
+ *
+ * Returned Value:
+ *   Lower-half pointer on success; NULL on an unsupported or unconfigured
+ *   module number.
+ *
+ ****************************************************************************/
 
-#if defined(CONFIG_AM67_I2C0) || defined(CONFIG_AM67_WKUP_I2C0)
-  am67_i2cdev_initialize();
-#endif
+struct pwm_lowerhalf_s *am67_ecapinitialize(int ecap);
 
-#if defined(CONFIG_AM67_EPWM0) || defined(CONFIG_AM67_EPWM1)
-  am67_pwmdev_initialize();
-#endif
+/****************************************************************************
+ * Name: am67_ecapdev_initialize
+ *
+ * Description:
+ *   Initialize the eCAP lower-half driver and register the PWM device.
+ *
+ ****************************************************************************/
 
-#if defined(CONFIG_AM67_ECAP0) || defined(CONFIG_AM67_ECAP1) || \
-    defined(CONFIG_AM67_ECAP2)
-  am67_ecapdev_initialize();
-#endif
+void am67_ecapdev_initialize(void);
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
-    }
-#endif
-
-  return ret;
-}
+#endif /* __ARCH_ARM_SRC_AM67_AM67_ECAP_H */
