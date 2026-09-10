@@ -222,32 +222,17 @@ int aio_read(FAR struct aiocb *aiocbp)
 
   DEBUGASSERT(aiocbp);
 
-  if (aiocbp->aio_reqprio < 0)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
-
-  if (aiocbp->aio_fildes < 0)
-    {
-      /* the EBADF should be collected by aio_error(), we need return OK at
-       * here
-       */
-
-      aiocbp->aio_result = -EBADF;
-      return OK;
-    }
-
   /* for aio_read, the aio_offset should be large or equal than 0 */
 
-  if (aiocbp->aio_offset < 0)
+  if (aiocbp->aio_offset < 0 || aiocbp->aio_reqprio < 0)
     {
-      /* the EINVAL should be collected by aio_error(), we need to return OK
-       * here
+      /* the EINVAL should be collected by aio_error(), we need to return
+       * ERROR here
        */
 
       aiocbp->aio_result = -EINVAL;
-      return OK;
+      set_errno(EINVAL);
+      return ERROR;
     }
 
   /* The result -EINPROGRESS means that the transfer has not yet completed */
@@ -265,7 +250,7 @@ int aio_read(FAR struct aiocb *aiocbp)
       /* The errno has already been set (probably EBADF) */
 
       aiocbp->aio_result = -get_errno();
-      return ERROR;
+      return OK;
     }
 
   /* Defer the work to the worker thread */
