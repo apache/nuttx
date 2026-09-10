@@ -4,3 +4,27 @@
 #
 
 comment "AM67 Configuration Options"
+
+config AM67_GPIO
+	bool "AM67 padconfig GPIO driver"
+	default y
+	---help---
+		Enable the AM67 GPIO driver used by PX4 board support and
+		example applications (LED, IMU_EN, SPI CS padconfig).
+
+
+config AM67_MCSPI0
+	bool "AM67 MCU_MCSPI0 master driver"
+	default n
+	depends on SPI
+	---help---
+		Enable polled SPI master on MCU_MCSPI0 @ 0x04b00000 (onboard
+		ICM-20948 CS3 and LPS22DF CS1).
+
+if AM67_MCSPI0
+
+config AM67_MCSPI0_FCLK
+	int "MCU_MCSPI0 functional clock (Hz)"
+	default 48000000
+
+endif
