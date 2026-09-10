@@ -108,6 +108,7 @@ endif()
 
 if(CONFIG_PROFILE_ALL)
   add_compile_options(-pg)
+  list(APPEND COMPILE_ONLY_FLAGS -pg)
 endif()
 
 if(CONFIG_MM_UBSAN_ALL)
