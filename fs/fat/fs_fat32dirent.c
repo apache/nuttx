@@ -775,7 +775,7 @@ static inline int fat_createalias(FAR struct fat_dirinfo_s *dirinfo)
     }
   else
     {
-       src       = (FAR lfnchar *)dirinfo->fd_lfname;
+      src       = (FAR lfnchar *)dirinfo->fd_lfname;
     }
 
   /* Then copy the name and extension, handling upper case conversions and
@@ -1163,8 +1163,10 @@ static int fat_path2dirname(FAR const char **path,
           /* Get short file name for given path */
 
           char name[DIR_MAXFNAME];
+          FAR const char *tmp;
+
           memcpy(name, dirinfo->fd_lfname, DIR_MAXFNAME);
-          FAR const char *tmp = (FAR const char *)name;
+          tmp = (FAR const char *)name;
           if (fat_parsesfname(&tmp, dirinfo, NULL) != OK)
             {
               /* The name fits the short form's length but cannot be
@@ -2666,7 +2668,9 @@ int fat_finddirentry(FAR struct fat_mountpt_s *fs,
            *  - file created on Windows is written as SFN if it fits 8.3
            */
 
-          struct fat_dirinfo_s d = *dirinfo;
+          struct fat_dirinfo_s d;
+
+          d = *dirinfo;
           ret = fat_findlfnentry(fs, dirinfo);
           if (ret < 0)
             {
