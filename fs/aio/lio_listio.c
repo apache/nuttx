@@ -381,78 +381,80 @@ int lio_listio(int mode, FAR struct aiocb *restrict const list[restrict],
       /* Skip over NULL entries */
 
       aiocbp = list[i];
-      if (aiocbp)
+      if (!aiocbp)
         {
-          /* Submit the operation according to its opcode */
+          continue;
+        }
 
-          status = OK;
-          switch (aiocbp->aio_lio_opcode)
+      /* Submit the operation according to its opcode */
+
+      status = OK;
+      switch (aiocbp->aio_lio_opcode)
+        {
+          case LIO_NOP:
             {
-            case LIO_NOP:
-              {
-                /* Mark the do-nothing operation complete */
+              /* Mark the do-nothing operation complete */
 
-                aiocbp->aio_result = OK;
-              }
-              break;
-
-            case LIO_READ:
-            case LIO_WRITE:
-              {
-                if (aiocbp->aio_lio_opcode == LIO_READ)
-                  {
-                    /* Submit the asynchronous read operation */
-
-                    status = aio_read_internal(aiocbp);
-                  }
-                else
-                  {
-                    /* Submit the asynchronous write operation */
-
-                    status = aio_write_internal(aiocbp);
-                  }
-
-                if (status < 0)
-                  {
-                    /* Failed to queue the I/O.  Set up the error return. */
-
-                    errcode = get_errno();
-                    ferr("ERROR: aio_read/write failed: %d\n", errcode);
-                    DEBUGASSERT(errcode > 0);
-                    aiocbp->aio_result = -errcode;
-                    ret = ERROR;
-                  }
-
-                if (status < 0 || aiocbp->aio_result == -EBADF ||
-                    aiocbp->aio_result == -EINVAL)
-                  {
-                    if (mode == LIO_NOWAIT && sig)
-                     {
-                       aio_lock();
-                       list_delete(&aiocbp->lio_link);
-                       aio_unlock();
-                     }
-                  }
-                else
-                  {
-                    /* Increment the count of successfully queue operations */
-
-                    nqueued++;
-                  }
-              }
-              break;
-
-            default:
-              {
-                /* Make the invalid operation complete with an error */
-
-                ferr("ERROR: Unrecognized opcode: %d\n",
-                     aiocbp->aio_lio_opcode);
-                aiocbp->aio_result = -EINVAL;
-                ret = ERROR;
-              }
-              break;
+              aiocbp->aio_result = OK;
             }
+            break;
+
+          case LIO_READ:
+          case LIO_WRITE:
+            {
+              if (aiocbp->aio_lio_opcode == LIO_READ)
+                {
+                  /* Submit the asynchronous read operation */
+
+                  status = aio_read_internal(aiocbp);
+                }
+              else
+                {
+                  /* Submit the asynchronous write operation */
+
+                  status = aio_write_internal(aiocbp);
+                }
+
+              if (status < 0)
+                {
+                  /* Failed to queue the I/O.  Set up the error return. */
+
+                  errcode = get_errno();
+                  ferr("ERROR: aio_read/write failed: %d\n", errcode);
+                  DEBUGASSERT(errcode > 0);
+                  aiocbp->aio_result = -errcode;
+                  ret = ERROR;
+                }
+
+              if (status < 0 || aiocbp->aio_result == -EBADF ||
+                  aiocbp->aio_result == -EINVAL)
+                {
+                  if (mode == LIO_NOWAIT && sig)
+                    {
+                      aio_lock();
+                      list_delete(&aiocbp->lio_link);
+                      aio_unlock();
+                    }
+                }
+              else
+                {
+                  /* Increment the count of successfully queue operations */
+
+                  nqueued++;
+                }
+            }
+            break;
+
+          default:
+            {
+              /* Make the invalid operation complete with an error */
+
+              ferr("ERROR: Unrecognized opcode: %d\n",
+                   aiocbp->aio_lio_opcode);
+              aiocbp->aio_result = -EINVAL;
+              ret = ERROR;
+            }
+            break;
         }
     }
 
