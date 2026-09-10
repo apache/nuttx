@@ -349,14 +349,21 @@ int lio_listio(int mode, FAR struct aiocb *restrict const list[restrict],
   if (mode == LIO_NOWAIT && sig)
     {
       list_initialize(&head);
+    }
 
-      for (i = 0; i < nent; i++)
+  for (i = 0; i < nent; i++)
+    {
+      aiocbp = list[i];
+      if (aiocbp && aiocbp->aio_lio_opcode != LIO_NOP)
         {
-          aiocbp = list[i];
-          if (aiocbp && aiocbp->aio_lio_opcode != LIO_NOP)
+          if (mode == LIO_NOWAIT && sig)
             {
               list_add_head(&head, &(aiocbp->lio_link));
               aiocbp->lio_sigevent = *sig;
+            }
+          else
+            {
+              list_initialize(&aiocbp->lio_link);
             }
         }
     }
@@ -392,13 +399,13 @@ int lio_listio(int mode, FAR struct aiocb *restrict const list[restrict],
                   {
                     /* Submit the asynchronous read operation */
 
-                    status = aio_read(aiocbp);
+                    status = aio_read_internal(aiocbp);
                   }
                 else
                   {
                     /* Submit the asynchronous write operation */
 
-                    status = aio_write(aiocbp);
+                    status = aio_write_internal(aiocbp);
                   }
 
                 if (status < 0)

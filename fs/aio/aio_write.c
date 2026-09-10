@@ -245,7 +245,7 @@ errout:
  *
  ****************************************************************************/
 
-int aio_write(FAR struct aiocb *aiocbp)
+int aio_write_internal(FAR struct aiocb *aiocbp)
 {
   FAR struct aio_container_s *aioc;
   int ret;
@@ -301,6 +301,18 @@ int aio_write(FAR struct aiocb *aiocbp)
     }
 
   return OK;
+}
+
+int aio_write(FAR struct aiocb *aiocbp)
+{
+  if (aiocbp == NULL)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
+  list_initialize(&aiocbp->lio_link);
+  return aio_write_internal(aiocbp);
 }
 
 #endif /* CONFIG_FS_AIO */
