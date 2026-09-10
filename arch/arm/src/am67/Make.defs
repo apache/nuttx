@@ -33,6 +33,9 @@ CHIP_CSRCS += am67_timer.c
 ifeq ($(CONFIG_AM67_GPIO),y)
 CHIP_CSRCS += am67_gpio.c
 endif
+ifeq ($(CONFIG_AM67_EPWM0),y)
+CHIP_CSRCS += am67_pwm.c
+endif
 ifeq ($(CONFIG_AM67_MCSPI0),y)
 CHIP_CSRCS += am67_mcspi.c
 endif

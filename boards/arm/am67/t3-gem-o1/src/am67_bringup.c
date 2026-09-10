@@ -39,6 +39,10 @@
 #include "am67_i2c.h"
 #endif
 
+#if defined(CONFIG_AM67_EPWM0) || defined(CONFIG_AM67_EPWM1)
+#include "am67_pwm.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -70,6 +74,60 @@ int am67_bringup(void)
 #if defined(CONFIG_AM67_I2C0) || defined(CONFIG_AM67_WKUP_I2C0)
   am67_i2cdev_initialize();
 #endif
+
+#if defined(CONFIG_AM67_EPWM0) || defined(CONFIG_AM67_EPWM1)
+  ret = am67_epwm_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize EPWM: %d\n", ret);
+    }
+  else
+    {
+      struct pwm_lowerhalf_s *lower;
+
+      syslog(LOG_INFO, "EPWM: CTRL_MMR unlocked\n");
+
+#ifdef CONFIG_AM67_EPWM0
+      lower = am67_epwminitialize(0);
+      if (lower == NULL)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to get EPWM0 lower half\n");
+        }
+      else
+        {
+          ret = pwm_register("/dev/pwm0", lower);
+          if (ret < 0)
+            {
+              syslog(LOG_ERR, "ERROR: pwm_register failed: %d\n", ret);
+            }
+          else
+            {
+              syslog(LOG_INFO, "EPWM0: registered /dev/pwm0\n");
+            }
+        }
+#endif
+
+#ifdef CONFIG_AM67_EPWM1
+      lower = am67_epwminitialize(1);
+      if (lower == NULL)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to get EPWM1 lower half\n");
+        }
+      else
+        {
+          ret = pwm_register("/dev/pwm1", lower);
+          if (ret < 0)
+            {
+              syslog(LOG_ERR, "ERROR: pwm_register failed: %d\n", ret);
+            }
+          else
+            {
+              syslog(LOG_INFO, "EPWM1: registered /dev/pwm1\n");
+            }
+        }
+#endif
+    }
+#endif /* CONFIG_AM67_EPWM0 || CONFIG_AM67_EPWM1 */
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
