@@ -79,7 +79,7 @@ static void aio_read_worker(FAR void *arg)
 #ifdef CONFIG_PRIORITY_INHERITANCE
   prio   = aioc->aioc_prio;
 #endif
-  aiocbp = aioc_decant(aioc);
+  aiocbp = aioc->aioc_aiocbp;
 
   /* Perform the file read using:
    *
@@ -106,6 +106,7 @@ static void aio_read_worker(FAR void *arg)
   /* Signal the client */
 
   aio_signal(pid, aiocbp);
+  aioc_decant(aioc);
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
   /* Restore the low priority worker thread default priority */
