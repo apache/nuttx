@@ -23,8 +23,12 @@ Markdown code blocks. Repositories are restricted to ``NUTTX_REPO`` and
 
 CLI:
     python3 depends_on.py                 # print result JSON
-    python3 depends_on.py --print-state   # print state used by the edit gate
+    python3 depends_on.py --print-state   # status line, then one ref per line
     python3 depends_on.py --github-output # write workflow outputs and report
+
+The --print-state output is a contract rather than a debugging aid: the first
+line is the status and every remaining line is a reference in declaration
+order. It is parsed by membrowse-report.yml and pinned by test_depends_on.py.
 """
 
 from __future__ import annotations
