@@ -413,6 +413,15 @@ if(NOT EXISTS ${NUTTX_BINARY_DIR}/.config OR NOT "${NUTTX_DEFCONFIG}" STREQUAL
   message(STATUS "  Appdir: ${NUTTX_APPS_DIR}")
 endif()
 
+# config.h and CONFIG_* are generated at configure time. Watch .config so an
+# out-of-band edit (kconfig-tweak) reruns CMake instead of leaving a stale
+# header. .config is only rewritten when missing or the defconfig path changes,
+# so this does not loop.
+set_property(
+  DIRECTORY
+  APPEND
+  PROPERTY CMAKE_CONFIGURE_DEPENDS ${NUTTX_BINARY_DIR}/.config)
+
 # declare global custom targets at very beginning `nuttx_global` is used to hold
 # global target properties to solve that cmake GLOBAL property can not use
 # generator expression this is needed to make sure added before project() create
