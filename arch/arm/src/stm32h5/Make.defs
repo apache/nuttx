@@ -127,6 +127,10 @@ ifeq ($(CONFIG_STM32_IWDG),y)
 CHIP_CSRCS += stm32_iwdg.c
 endif
 
+ifeq ($(CONFIG_ARM_MPU),y)
+CHIP_CSRCS += stm32_mpuinit.c
+endif
+
 ifeq ($(CONFIG_STM32_WWDG),y)
 CHIP_CSRCS += stm32_wwdg.c
 endif
