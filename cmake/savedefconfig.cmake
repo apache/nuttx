@@ -42,7 +42,7 @@ foreach(NameAndValue ${ConfigContents})
      OR "${NameAndValue}" MATCHES "CONFIG_ARCH_BOARD_COMMON="
      OR "${NameAndValue}" MATCHES "^CONFIG_ARCH_CUSTOM"
      OR "${NameAndValue}" MATCHES "^CONFIG_ARCH_BOARD_CUSTOM")
-    decode_semicolon(Value)
+    decode_semicolon(NameAndValue)
     file(APPEND ${TARGET_FILE} "${NameAndValue}\n")
   endif()
 endforeach()
