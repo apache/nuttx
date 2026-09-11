@@ -44,4 +44,10 @@
  *   #endif
  */
 
+#ifdef CONFIG_ZBUS
+ITERABLE_SECTION(zbus_channel)
+ITERABLE_SECTION(zbus_observer)
+ITERABLE_SECTION(zbus_channel_observation)
+#endif
+
 #endif /* !CONFIG_ITERABLE_SECTIONS_LINKER_INSERT */

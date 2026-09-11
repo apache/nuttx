@@ -54,6 +54,11 @@ SECTIONS
 {
     .iterable_sections : SUBALIGN(4)
     {
+#ifdef CONFIG_ZBUS
+        ITERABLE_SECTION(zbus_channel)
+        ITERABLE_SECTION(zbus_observer)
+        ITERABLE_SECTION(zbus_channel_observation)
+#endif
     }
 }
 INSERT AFTER .text;
