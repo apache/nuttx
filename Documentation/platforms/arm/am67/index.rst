@@ -25,9 +25,11 @@ The TI AM67 platform integrates a dual‑domain architecture comprising:
 
 .. warning::
 
-   This chip currently only supports a basic implementation of NuttX with
-   only UART console as a supported peripheral. Please see the contributing
-   documentation if you would like to help contribute to the support.
+   NuttX runs on the Cortex-R5F cores, loaded by U-Boot or Linux via
+   RemoteProc, and relies on the bootloader / Linux Device Manager to have
+   powered and clocked the peripherals it uses (NuttX does not yet run a TISCI
+   client of its own). Support is a work in progress -- please see the
+   contributing documentation if you would like to help.
 
 Supported Boards
 ================
