@@ -402,6 +402,9 @@ struct usbmsc_dev_s
   uint32_t          bulkinreqlen;     /* Allocated size of each bulk IN request
                                        * buffer (== alloc expr; used to fill a
                                        * full request per bulk-IN transfer) */
+  uint32_t          bulkoutreqlen;    /* Allocated size of each bulk OUT request
+                                       * buffer (== alloc expr; upper bound on
+                                       * an enlarged bulk-OUT request) */
 
   /* SCSI command processing */
 

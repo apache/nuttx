@@ -569,6 +569,38 @@ static inline int usbmsc_cmdread6(FAR struct usbmsc_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: usbmsc_wrreqinit
+ *
+ * Description:
+ *   Called once when a SCSI write command is accepted (transition into the
+ *   USBMSC_STATE_CMDWRITE state) to arm the enlarged bulk-OUT re-submit
+ *   sizing used by usbmsc_cmdwritestate.
+ *
+ *   CONFIG_USBMSC_NRDREQS bulk-OUT requests are already queued on the
+ *   endpoint, each sized at one maxpacket, so they will absorb the first
+ *   NRDREQS*maxpacket bytes of this data-out phase.  Only the remaining
+ *   bytes may be requested in larger (bulkoutreqlen) chunks.  Pre-accounting
+ *   the already-queued capacity here guarantees the total bytes ever
+ *   requested for this command never exceeds the host's data-out length, so
+ *   an enlarged request can never stall waiting for bytes the host will not
+ *   send.
+ *
+ *   The seed is stored in priv->residue, which during the CMDWRITE data
+ *   phase is reused as the "bytes still to request" counter.  When the data
+ *   phase ends, usbmsc_cmdwritestate rebuilds priv->residue from
+ *   xfrlen * sectorsize so the CSW reports the correct untransferred amount.
+ *
+ ****************************************************************************/
+
+static void usbmsc_wrreqinit(FAR struct usbmsc_dev_s *priv)
+{
+  uint32_t total    = priv->u.xfrlen * priv->lun->sectorsize;
+  uint32_t prealloc = CONFIG_USBMSC_NRDREQS * priv->epbulkout->maxpacket;
+
+  priv->residue = total > prealloc ? total - prealloc : 0;
+}
+
+/****************************************************************************
  * Name: usbmsc_cmdwrite6
  *
  * Description:
@@ -636,6 +668,7 @@ static inline int usbmsc_cmdwrite6(FAR struct usbmsc_dev_s *priv)
         {
           usbtrace(TRACE_CLASSSTATE(USBMSC_CLASSSTATE_CMDPARSECMDWRITE6),
                    priv->cdb[0]);
+          usbmsc_wrreqinit(priv);
           priv->thstate = USBMSC_STATE_CMDWRITE;
         }
     }
@@ -1198,6 +1231,7 @@ static inline int usbmsc_cmdwrite10(FAR struct usbmsc_dev_s *priv)
         {
           usbtrace(TRACE_CLASSSTATE(USBMSC_CLASSSTATE_CMDPARSECMDWRITE10),
                    priv->cdb[0]);
+          usbmsc_wrreqinit(priv);
           priv->thstate = USBMSC_STATE_CMDWRITE;
         }
     }
@@ -1548,6 +1582,7 @@ static inline int usbmsc_cmdwrite12(FAR struct usbmsc_dev_s *priv)
         {
           usbtrace(TRACE_CLASSSTATE(USBMSC_CLASSSTATE_CMDPARSECMDWRITE12),
                    priv->cdb[0]);
+          usbmsc_wrreqinit(priv);
           priv->thstate = USBMSC_STATE_CMDWRITE;
           return OK;
         }
@@ -2398,6 +2433,7 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
   irqstate_t flags;
   ssize_t nwritten;
   uint32_t xfrd;
+  uint32_t reqlen;
   FAR uint8_t *src;
   FAR uint8_t *dest;
   int nbytes;
@@ -2499,7 +2535,6 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
                 }
 
               priv->nsectbytes = 0;
-              priv->residue   -= lun->sectorsize * nrbufs;
               priv->u.xfrlen  -= nrbufs;
               priv->sector    += nrbufs;
             }
@@ -2520,7 +2555,6 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
                 }
 
               priv->nsectbytes = 0;
-              priv->residue   -= lun->sectorsize;
               priv->u.xfrlen--;
               priv->sector++;
             }
@@ -2530,9 +2564,31 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
       /* In either case, we are finished with this read request and can
        * return it to the endpoint.  Then we will go back to the top of the
        * top and attempt to get the next read request.
+       *
+       * While there are still data-out bytes not yet requested (beyond the
+       * initially queued maxpacket requests, pre-accounted in priv->residue),
+       * request them in full bulkoutreqlen chunks so the controller DMA
+       * coalesces many maxpacket USB packets into one completion, cutting
+       * the EP_SUBMIT / completion-IRQ / worker round-trips that dominate
+       * the OUT throughput.  Because priv->residue was seeded with
+       * (total - NRDREQS*maxpacket), the total bytes ever requested can
+       * never exceed the host's data-out length, so an
+       * enlarged request can never stall.  Once exhausted, fall back to one
+       * maxpacket so leftover queued requests stay maxpacket-sized for the
+       * next command.
        */
 
-      req->len      = priv->epbulkout->maxpacket;
+      if (priv->residue > 0)
+        {
+          reqlen = MIN(priv->bulkoutreqlen, priv->residue);
+          priv->residue -= reqlen;
+        }
+      else
+        {
+          reqlen = priv->epbulkout->maxpacket;
+        }
+
+      req->len      = reqlen;
       req->priv     = privreq;
       req->callback = usbmsc_rdcomplete;
 
@@ -2556,6 +2612,13 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
     }
 
 errout:
+  /* Rebuild the CSW residue (bytes not written to the block driver) from the
+   * still-untransferred sector count.  During the data phase priv->residue is
+   * reused to size the enlarged bulk-OUT re-submits; xfrlen * sectorsize is
+   * the exact untransferred byte count to report in the CSW.
+   */
+
+  priv->residue  = priv->u.xfrlen * lun->sectorsize;
   usbtrace(TRACE_CLASSSTATE(USBMSC_CLASSSTATE_CMDWRITECMDFINISH),
            priv->u.xfrlen);
   priv->thstate  = USBMSC_STATE_CMDFINISH;
