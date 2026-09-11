@@ -33,6 +33,21 @@
 #include <sys/types.h>
 
 #include "hardware/stm32_flash.h"
+#include "hardware/stm32_memorymap.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* STM32_OTP_BASE/STM32_OTP_SIZE (hardware/stm32h5xxx_memorymap.h) are the
+ * silicon facts from RM0481, "OTP area".  These are the same facts recast
+ * as a 16-bit word count, which is what stm32_otp_word_read16()/write16()
+ * and the efuse driver built on them index by.
+ */
+
+#define STM32_OTP_NWORDS     (STM32_OTP_SIZE / 2)
+#define STM32_OTP_WORD_BITS  16
+#define STM32_OTP_TOTAL_BITS (STM32_OTP_NWORDS * STM32_OTP_WORD_BITS)
 
 /****************************************************************************
  * Public Function Prototypes
@@ -65,6 +80,21 @@ int stm32_otp_write(const uint16_t *data, uint16_t len, uint32_t offset);
 int stm32_otp_read(uint16_t *data, uint16_t len, uint32_t offset);
 
 uint32_t stm32_otp_getlockstatus(void);
+
+#ifdef CONFIG_STM32H5_OTP_WORD
+
+int stm32_otp_word_read16(uint32_t word, FAR uint16_t *value);
+
+int stm32_otp_word_read32(uint32_t word, FAR uint32_t *value);
+
+#ifdef CONFIG_STM32H5_OTP_WRITE
+
+int stm32_otp_word_write16(uint32_t word, uint16_t value);
+
+int stm32_otp_word_write32(uint32_t word, uint32_t value);
+
+#endif /* CONFIG_STM32H5_OTP_WRITE */
+#endif /* CONFIG_STM32H5_OTP_WORD */
 
 /* Flash high-cycle data (EDATA) low-level access.
  *

@@ -229,6 +229,52 @@ config STM32H5_IO_CONFIG_A
 	bool
 	default n
 
+comment "STM32H5 OTP Options"
+
+config STM32H5_OTP_WORD
+	bool "OTP word read/write"
+	default n
+	---help---
+		Build stm32_otp_word_read16()/read32() (and, with
+		STM32H5_OTP_WRITE below, write16()/write32()) in
+		stm32h563xx_flash.c: direct 16- or 32-bit word access to the
+		STM32H5 OTP area (RM0481, "OTP area"), independent of the
+		existing block/locking API (stm32_otp_write()/
+		stm32_otp_read()/stm32_otp_getlockstatus()) in that same
+		file, which is always built.
+
+		The OTP area's base address and size are fixed by the
+		silicon, so they are plain constants in
+		arch/arm/src/stm32h5/hardware/stm32h5xxx_memorymap.h rather
+		than configuration here.
+
+if STM32H5_OTP_WORD
+
+config STM32H5_OTP_WRITE
+	bool "Allow OTP word programming"
+	default n
+	---help---
+		Build the code that programs OTP words.
+
+		Programming is IRREVERSIBLE: OTP bits can only be cleared, and
+		because ECC is computed over each 16-bit word, a word that
+		already holds a different value can never be reprogrammed to
+		match -- see stm32_otp_word_write16() in
+		arch/arm/src/stm32h5/stm32h563xx_flash.c.  Reads work normally
+		either way.
+
+endif # STM32H5_OTP_WORD
+
+config STM32H5_EFUSE
+	bool "eFuse character device for the OTP area"
+	default n
+	depends on EFUSE
+	select STM32H5_OTP_WORD
+	---help---
+		Expose the OTP area through the NuttX efuse interface as a
+		character device, by default /dev/efuse, built on
+		stm32_otp_word_read16()/write16() -- see stm32_efuse.c.
+
 comment "STM32H5 SRAM2 Options"
 
 config STM32_SBS
