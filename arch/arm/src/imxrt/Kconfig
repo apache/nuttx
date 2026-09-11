@@ -1942,6 +1942,31 @@ menuconfig IMXRT_FLEXSPI2_XIP
 		FlexSPI2 is used as XIP thus already
 		initialized by the bootloader
 
+config IMXRT_XIP_KEEP_BOOTROM_FLEXSPI_CLOCK
+	bool "Keep the boot ROM's XIP FlexSPI clock root"
+	default y
+	depends on IMXRT_CLOCKCONFIG_VER2
+	---help---
+		When executing in place from flash, the XIP FlexSPI clock must not be
+		reconfigured during the initial clock setup. The boot ROM configures
+		the	clock for its flash read sequence, and changing it before the board
+		installs a suitable high-speed read sequence can break instruction
+		fetch. The board's flash setup may reconfigure the clock afterward.
+
+choice
+	prompt "Boot ROM XIP FlexSPI instance"
+	depends on IMXRT_XIP_KEEP_BOOTROM_FLEXSPI_CLOCK
+	default IMXRT_XIP_BOOTROM_FLEXSPI1
+
+config IMXRT_XIP_BOOTROM_FLEXSPI1
+	bool "FLEXSPI1"
+
+config IMXRT_XIP_BOOTROM_FLEXSPI2
+	bool "FLEXSPI2"
+	depends on IMXRT_HAVE_FLEXSPI2
+
+endchoice
+
 endmenu # FLEXSPI Peripherals
 
 menu "ADC Peripherals"
