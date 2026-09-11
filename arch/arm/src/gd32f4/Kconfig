@@ -231,9 +231,9 @@ menuconfig GD32F4_PROGMEM_OTA_PARTITION
 
 if GD32F4_PROGMEM_OTA_PARTITION
 
-# EnergyOS 2 MiB map (see docs/eos_mcu_flash/eos_mcu_flash.png):
-#   loader 128K | primary 768K | secondary 768K | scratch 128K |
-#   factory 32K | security 64K | sysconfig 64K | userconfig 64K | ota-state 32K
+# EnergyOS 2 MiB Layout v2 (Code 512K + Data 1536K @ 0x08080000):
+#   loader 128K | code-reserve 384K (factory/security/sys/user/ota-state) |
+#   primary 768K @0x80000 | secondary 768K @0x140000 (no scratch; OVERWRITE)
 
 config GD32F4_OTA_BOOT_DEVPATH
 	string "Bootloader (loader) device path"
@@ -248,7 +248,7 @@ config GD32F4_OTA_SECONDARY_SLOT_DEVPATH
 	default "/dev/ota1"
 
 config GD32F4_OTA_SCRATCH_DEVPATH
-	string "Scratch partition device path"
+	string "Scratch partition device path (unused in OVERWRITE)"
 	default "/dev/otascratch"
 
 config GD32F4_OTA_FACTORY_DEVPATH
@@ -277,35 +277,35 @@ config GD32F4_OTA_BOOT_OFFSET
 
 config GD32F4_OTA_PRIMARY_SLOT_OFFSET
 	hex "Primary slot offset"
-	default 0x20000
+	default 0x80000
 
 config GD32F4_OTA_SECONDARY_SLOT_OFFSET
 	hex "Secondary slot offset"
-	default 0xe0000
+	default 0x140000
 
 config GD32F4_OTA_SCRATCH_OFFSET
-	hex "Scratch partition offset"
-	default 0x1a0000
+	hex "Scratch partition offset (unused when size 0)"
+	default 0x0
 
 config GD32F4_OTA_FACTORY_OFFSET
-	hex "Factory data offset"
-	default 0x1c0000
+	hex "Factory data offset (in code-reserve)"
+	default 0x20000
 
 config GD32F4_OTA_SECURITY_OFFSET
 	hex "Security data offset"
-	default 0x1c8000
+	default 0x28000
 
 config GD32F4_OTA_SYSCONFIG_OFFSET
 	hex "System config offset"
-	default 0x1d8000
+	default 0x38000
 
 config GD32F4_OTA_USERCONFIG_OFFSET
 	hex "User config offset"
-	default 0x1e8000
+	default 0x48000
 
 config GD32F4_OTA_STATE_OFFSET
 	hex "OTA / boot state offset"
-	default 0x1f8000
+	default 0x58000
 
 config GD32F4_OTA_BOOT_SIZE
 	hex "Bootloader (loader) size (in bytes)"
@@ -316,8 +316,8 @@ config GD32F4_OTA_SLOT_SIZE
 	default 0xc0000
 
 config GD32F4_OTA_SCRATCH_SIZE
-	hex "Scratch partition size (in bytes)"
-	default 0x20000
+	hex "Scratch partition size (in bytes; 0 = disabled)"
+	default 0x0
 
 config GD32F4_OTA_FACTORY_SIZE
 	hex "Factory data size (in bytes)"
@@ -495,6 +495,23 @@ config GD32F4_PROGMEM
 	---help---
 		Use a part of GD32F4xx's internal flash memory as a
 		Memory-Technology-Device (MTD).
+
+config GD32F4_FLASH_HAL_SELFTEST
+	bool "GD32 Flash HAL self-test before MCUboot boot_go"
+	default n
+	depends on GD32F4_PROGMEM && GD32F4_GD32F470
+	---help---
+		Run Secondary→SRAM→Primary Flash HAL matrix (R1/E1/W1/C1/C2/L1)
+		before boot_go. Intended for OVERWRITE bring-up only; disable for
+		production loader. Results are printed via syslog after FMC idle.
+
+config GD32F4_FLASH_HAL_SELFTEST_FULL
+	bool "Include full-slot Secondary→Primary copy (C3)"
+	default n
+	depends on GD32F4_FLASH_HAL_SELFTEST
+	---help---
+		Also copy the entire 768 KiB slot (C3). Destroys Primary contents;
+		Secondary must hold a valid image.
 
 config GD32F4_MTD
 	bool "MTD driver"

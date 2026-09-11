@@ -302,6 +302,10 @@
 #define FMC_OB_DRP_ALL                   (0x0FFF0FFF)        /* D-bus read protection protection of all sectors */
 
 /* FMC time out */
-#define FMC_TIMEOUT_COUNT                (0x4FFFFFFF)        /* count to judge of FMC timeout */
+/* ~few seconds of polling at typical core clocks; old 0x4FFFFFFF could
+ * spin ~10+ minutes per stuck page erase and miss EMS reboot windows.
+ */
+
+#define FMC_TIMEOUT_COUNT                (0x000FFFFF)
 
 #endif /* __ARCH_ARM_SRC_GD32F4_HARDWARE_GD32F4XX_FMC_H */

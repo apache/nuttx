@@ -85,6 +85,19 @@ int gd32_fmc_unlock(void);
 
 int gd32_fmc_lock(void);
 
+/****************************************************************************
+ * Name: gd32_fmc_unlock_ram / gd32_fmc_lock_ram / gd32_fmc_flag_clear_ram
+ *
+ * Description:
+ *   SRAM-resident FMC helpers for use around erase/program busy windows.
+ *   No mutex, no flash-resident putreg32 — safe when called from .ramfunc.
+ *
+ ****************************************************************************/
+
+void gd32_fmc_unlock_ram(void);
+void gd32_fmc_lock_ram(void);
+void gd32_fmc_flag_clear_ram(uint32_t fmc_flag);
+
 #if defined(CONFIG_GD32F4_GD32F470)
 
 /****************************************************************************
@@ -102,6 +115,18 @@ int gd32_fmc_lock(void);
  ****************************************************************************/
 
 gd32_fmc_state_enum gd32_fmc_page_erase(uint32_t fmc_page);
+
+/****************************************************************************
+ * Name: gd32_fmc_erase_range_and_reset
+ *
+ * Description:
+ *   RAM-resident: erase [start,end) with 4 KiB pages (skip already 0xFF),
+ *   then trigger a system reset. Does not return.
+ *
+ ****************************************************************************/
+
+void noreturn_function gd32_fmc_erase_range_and_reset(uint32_t start,
+                                                      uint32_t end);
 
 #endif
 /****************************************************************************
