@@ -1119,6 +1119,8 @@ config USBMSC_BULKOUTREQLEN
 	int "Bulk OUT request size"
 	default 512 if USBDEV_DUALSPEED
 	default 64  if !USBDEV_DUALSPEED
+	range 512 65536 if USBDEV_DUALSPEED
+	range 64 65536 if !USBDEV_DUALSPEED
 	---help---
 		The size of the buffer in each READ request.  This value should to be
 		at least as large as the endpoint maxpacket size.  Most DCDs will return

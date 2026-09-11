@@ -336,25 +336,32 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
 
   priv->epbulkout->priv = priv;
 
+  /* Compute the bulk OUT request buffer size once (SS vs non-SS) and use it
+   * both to allocate the requests below and (via priv->bulkoutreqlen) as the
+   * upper bound when usbmsc_cmdwritestate enlarges a bulk-OUT re-submit.
+   * Single source of truth for the buffer size.
+   */
+
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  if (dev->speed == USB_SPEED_SUPER ||
+      dev->speed == USB_SPEED_SUPER_PLUS)
+    {
+      priv->bulkoutreqlen = USBMSC_SSBULKMAXPACKET *
+                            (USBMSC_SSBULKMAXBURST + 1);
+    }
+  else
+#endif
+    {
+      priv->bulkoutreqlen = CONFIG_USBMSC_BULKOUTREQLEN;
+    }
+
   /* Pre-allocate read requests */
 
   for (i = 0; i < CONFIG_USBMSC_NRDREQS; i++)
     {
       reqcontainer = &priv->rdreqs[i];
-#ifdef CONFIG_USBDEV_SUPERSPEED
-      if (dev->speed == USB_SPEED_SUPER ||
-          dev->speed == USB_SPEED_SUPER_PLUS)
-        {
-          reqcontainer->req = usbdev_allocreq(priv->epbulkout,
-                                              USBMSC_SSBULKMAXPACKET *
-                                              (USBMSC_SSBULKMAXBURST + 1));
-        }
-      else
-#endif
-        {
-          reqcontainer->req = usbdev_allocreq(priv->epbulkout,
-                                              CONFIG_USBMSC_BULKOUTREQLEN);
-        }
+      reqcontainer->req = usbdev_allocreq(priv->epbulkout,
+                                          priv->bulkoutreqlen);
 
       if (reqcontainer->req == NULL)
         {
@@ -1062,14 +1069,15 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
   priv->epbulkout->priv = priv;
 
   /* The per-request buffers were allocated at bind time from
-   * priv->bulkinreqlen.  The bulk-IN fill length
-   * (MAX(bulkinreqlen, maxpacket) in usbmsc_cmdreadstate) and
-   * assume each buffer holds at least one maxpacket;
-   * a configured REQLEN smaller than maxpacket would overflow req->buf.
-   * Catch such a misconfiguration early.
+   * priv->bulkinreqlen / priv->bulkoutreqlen.  The bulk-IN fill length
+   * (MAX(bulkinreqlen, maxpacket) in usbmsc_cmdreadstate) and the bulk-OUT
+   * submit length (maxpacket, queued below) both assume each buffer holds at
+   * least one maxpacket; a configured REQLEN smaller than maxpacket would
+   * overflow req->buf.  Catch such a misconfiguration early.
    */
 
   DEBUGASSERT(priv->bulkinreqlen >= priv->epbulkin->maxpacket);
+  DEBUGASSERT(priv->bulkoutreqlen >= priv->epbulkout->maxpacket);
 
   /* Queue read requests in the bulk OUT endpoint */
 
