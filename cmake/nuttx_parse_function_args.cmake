@@ -73,14 +73,14 @@ function(nuttx_parse_function_args)
                         "${IN_MULTI_VALUE}" "${IN_ARGN}")
 
   if(OUT_UNPARSED_ARGUMENTS)
-    message(FATAL_ERROR "${IN_NAME}: unparsed ${OUT_UNPARSED_ARGUMENTS}")
+    message(FATAL_ERROR "${IN_FUNC}: unparsed ${OUT_UNPARSED_ARGUMENTS}")
   endif()
 
   foreach(arg ${IN_REQUIRED})
     if(NOT OUT_${arg})
       if(NOT "${OUT_${arg}}" STREQUAL "0")
         message(
-          FATAL_ERROR "${IN_NAME} requires argument ${arg}\nARGN: ${IN_ARGN}")
+          FATAL_ERROR "${IN_FUNC} requires argument ${arg}\nARGN: ${IN_ARGN}")
       endif()
     endif()
   endforeach()
