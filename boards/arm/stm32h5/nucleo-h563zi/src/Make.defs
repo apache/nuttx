@@ -58,6 +58,10 @@ ifeq ($(CONFIG_STM32_USBFS_HOST),y)
 CSRCS += stm32_usb.c
 endif
 
+ifeq ($(CONFIG_ARM_MPU),y)
+CSRCS += stm32_mpu.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board
