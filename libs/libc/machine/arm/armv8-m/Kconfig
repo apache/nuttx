@@ -7,7 +7,7 @@ if ARCH_ARMV8M
 
 config ARMV8M_STRING_FUNCTION
 	bool "Enable optimized ARMv8M specific string function"
-	default n
+	default y
 	depends on ARCH_TOOLCHAIN_GNU
 	select ARMV8M_MEMCHR
 	select ARMV8M_MEMCPY
