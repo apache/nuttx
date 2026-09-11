@@ -128,6 +128,10 @@ if(CONFIG_STM32_IWDG)
   list(APPEND SRCS stm32_iwdg.c)
 endif()
 
+if(CONFIG_ARM_MPU)
+  list(APPEND SRCS stm32_mpuinit.c)
+endif()
+
 # Required chip type specific files
 
 if(CONFIG_STM32_STM32H5XXXX)
