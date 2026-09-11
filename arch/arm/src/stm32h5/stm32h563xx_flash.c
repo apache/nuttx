@@ -128,6 +128,10 @@
 #define FLASH_OTP_WORDS_PER_BLOCK   32             /* 32 words per block */
 #define OTP_WORD_SIZE               2              /* 16-bit words as per manual */
 
+#define OTP_ERASEDVALUE16    0xffffu
+#define OTP_ERASEDVALUE32    0xffffffffu
+#define OTP_ECCD             (FLASH_ECCDETR_ECCD | FLASH_ECCDETR_OTP_ECC)
+
 #define FLASH_NSSR_ALL_ERRORS  (FLASH_NSSR_WRPERR | FLASH_NSSR_PGSERR |  \
                                 FLASH_NSSR_STRBERR | FLASH_NSSR_INCERR | \
                                 FLASH_NSSR_OBKERR | FLASH_NSSR_OBKWERR | \
@@ -364,6 +368,79 @@ static void flash_lock_opt(void)
   modifyreg32(STM32_FLASH_OPTCR, 0, FLASH_OPTCR_OPTLOCK);
 }
 
+#if defined(CONFIG_STM32_EDATA) || defined(CONFIG_STM32H5_OTP_WORD)
+
+/****************************************************************************
+ * Name: flash_read_eccsafe16
+ *
+ * Description:
+ *   Read one 16-bit half-word of EDATA or OTP.  Both only support 16 and
+ *   32-bit reads, so the ICACHE, which would fill whole lines, is disabled
+ *   for the read.  Reading a blank (erased, never programmed) half-word
+ *   raises the Flash ECC NMI, which is masked in the SBS first and handled
+ *   instead by checking ECCDETR afterwards.  Both are restored before
+ *   returning.
+ *
+ * Input Parameters:
+ *   addr    - Address of the half-word
+ *   eccd    - ECCDETR bits that flag an ECC error for this memory
+ *             (EDATA_ECCD or OTP_ECCD)
+ *   eccerr  - Set to true if ECCDETR flagged this read, whether because
+ *             the half-word was blank or genuinely corrupt.  The returned
+ *             value in that case comes from ECCDR, not from the bus, since
+ *             a flagged read's data is not to be trusted.
+ *
+ ****************************************************************************/
+
+static uint16_t flash_read_eccsafe16(uintptr_t addr, uint32_t eccd,
+                                     bool *eccerr)
+{
+  irqstate_t flags;
+  uint16_t   value;
+  uint32_t   eccnmir;
+#ifdef CONFIG_STM32_ICACHE
+  bool       icache;
+#endif
+
+  flags = up_irq_save();
+
+#ifdef CONFIG_STM32_ICACHE
+  icache = stm32_icache_enabled();
+  if (icache)
+    {
+      stm32_disable_icache();
+    }
+#endif
+
+  eccnmir = getreg32(STM32_SBS_ECCNMIR);
+  putreg32(eccnmir | SBS_ECCNMIR_ECCNMI_MASK_EN, STM32_SBS_ECCNMIR);
+
+  value = getreg16(addr);
+  UP_DSB();
+
+  *eccerr = (getreg32(STM32_FLASH_ECCDETR) & eccd) == eccd;
+  if (*eccerr)
+    {
+      value = getreg32(STM32_FLASH_ECCDR) & FLASH_ECCDR_DATA_ECC_MASK;
+      putreg32(FLASH_ECCDETR_ECCD, STM32_FLASH_ECCDETR);
+    }
+
+  putreg32(eccnmir, STM32_SBS_ECCNMIR);
+
+#ifdef CONFIG_STM32_ICACHE
+  if (icache)
+    {
+      stm32_enable_icache();
+    }
+#endif
+
+  up_irq_restore(flags);
+
+  return value;
+}
+
+#endif /* CONFIG_STM32_EDATA || CONFIG_STM32H5_OTP_WORD */
+
 #ifdef CONFIG_STM32_EDATA
 
 /****************************************************************************
@@ -394,56 +471,12 @@ static int edata_logical_bank(int bank)
  *   reads as 0xffff.  If the half-word is corrupt, for example because
  *   power was lost while it was being programmed, the raw data is returned.
  *
- *   EDATA only supports 16 and 32-bit reads, so the ICACHE, which would
- *   fill whole lines, is disabled for the read.  The ECC NMI that a blank
- *   half-word would raise is masked in the SBS and handled by checking
- *   ECCDETR instead.  Both are restored afterwards.
- *
  ****************************************************************************/
 
 static uint16_t edata_read_hword(uintptr_t addr)
 {
-  irqstate_t flags;
-  uint16_t   value;
-  uint32_t   eccnmir;
-  bool       eccerr = false;
-#ifdef CONFIG_STM32_ICACHE
-  bool       icache;
-#endif
-
-  flags = up_irq_save();
-
-#ifdef CONFIG_STM32_ICACHE
-  icache = stm32_icache_enabled();
-  if (icache)
-    {
-      stm32_disable_icache();
-    }
-#endif
-
-  eccnmir = getreg32(STM32_SBS_ECCNMIR);
-  putreg32(eccnmir | SBS_ECCNMIR_ECCNMI_MASK_EN, STM32_SBS_ECCNMIR);
-
-  value = getreg16(addr);
-  UP_DSB();
-
-  if ((getreg32(STM32_FLASH_ECCDETR) & EDATA_ECCD) == EDATA_ECCD)
-    {
-      value  = getreg32(STM32_FLASH_ECCDR) & FLASH_ECCDR_DATA_ECC_MASK;
-      eccerr = true;
-      putreg32(FLASH_ECCDETR_ECCD, STM32_FLASH_ECCDETR);
-    }
-
-  putreg32(eccnmir, STM32_SBS_ECCNMIR);
-
-#ifdef CONFIG_STM32_ICACHE
-  if (icache)
-    {
-      stm32_enable_icache();
-    }
-#endif
-
-  up_irq_restore(flags);
+  bool eccerr;
+  uint16_t value = flash_read_eccsafe16(addr, EDATA_ECCD, &eccerr);
 
   if (eccerr && value != EDATA_ERASEDVALUE)
     {
@@ -496,6 +529,47 @@ static int edata_erase(int bank, unsigned int sector)
 }
 
 #endif /* CONFIG_STM32_EDATA */
+
+#ifdef CONFIG_STM32H5_OTP_WORD
+
+/****************************************************************************
+ * Name: otp_read_eccsafe16
+ *
+ * Description:
+ *   Read one 16-bit OTP word; see flash_read_eccsafe16().
+ *
+ ****************************************************************************/
+
+static uint16_t otp_read_eccsafe16(uintptr_t addr, bool *eccerr)
+{
+  return flash_read_eccsafe16(addr, OTP_ECCD, eccerr);
+}
+
+/****************************************************************************
+ * Name: otp_read_eccsafe32
+ *
+ * Description:
+ *   32-bit counterpart of otp_read_eccsafe16().  ECC is computed per
+ *   16-bit word (FLASH_ECCDR only ever holds 16 bits of recovered data),
+ *   so a 32-bit read is done as its two halves, each independently
+ *   recovered: a single native 32-bit access could only ever recover
+ *   whichever half ECCDETR last reported and would have to discard the
+ *   other half's real contents.
+ *
+ ****************************************************************************/
+
+static uint32_t otp_read_eccsafe32(uintptr_t addr, FAR bool *eccerr)
+{
+  bool erclo;
+  bool erchi;
+  uint16_t lo = otp_read_eccsafe16(addr, &erclo);
+  uint16_t hi = otp_read_eccsafe16(addr + sizeof(uint16_t), &erchi);
+
+  *eccerr = erclo || erchi;
+  return (uint32_t)lo | ((uint32_t)hi << 16);
+}
+
+#endif /* CONFIG_STM32H5_OTP_WORD */
 
 /****************************************************************************
  * Name: stm32h5_otp_is_space_available
@@ -1505,6 +1579,282 @@ exit_with_lock:
 }
 
 #endif /* CONFIG_STM32_EDATA */
+
+#ifdef CONFIG_STM32H5_OTP_WORD
+
+/****************************************************************************
+ * Name: stm32_otp_word_read16
+ *
+ * Description:
+ *   Read one 16-bit OTP word.  This is independent of, and does not
+ *   interact with, the block-oriented stm32_otp_write()/stm32_otp_read()
+ *   API above: no locking is involved or required, since reading never
+ *   conflicts with anything.
+ *
+ *   A blank (never programmed) word reads back as 0xffff.  Since whether a
+ *   word has been written is known (that is exactly what trips its ECC),
+ *   that is reported through the return value as -ENODATA rather than as
+ *   OK, even though *value is filled in either way.  -EIO is reserved for
+ *   a word whose ECC genuinely does not check out: neither blank nor the
+ *   value its own program operation wrote.
+ *
+ * Input Parameters:
+ *   word  - 16-bit word index, 0 to (FLASH_OTP_SIZE / 2) - 1
+ *   value - Receives the word's contents
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value otherwise.  *value is set
+ *   in every case except -EINVAL:
+ *
+ *     -EINVAL:  value is NULL, or word is out of range
+ *     -ENODATA: The word has never been programmed; *value is 0xffff
+ *     -EIO:     The word's ECC does not check out
+ *
+ ****************************************************************************/
+
+int stm32_otp_word_read16(uint32_t word, FAR uint16_t *value)
+{
+  bool eccerr;
+  uint16_t raw;
+
+  if (value == NULL || word >= FLASH_OTP_SIZE / OTP_WORD_SIZE)
+    {
+      return -EINVAL;
+    }
+
+  raw = otp_read_eccsafe16(STM32_OTP_BASE + word * OTP_WORD_SIZE, &eccerr);
+  *value = raw;
+
+  if (eccerr)
+    {
+      if (raw != OTP_ERASEDVALUE16)
+        {
+          ferr("ERROR: OTP word %" PRIu32 " ECC error: %04x\n", word, raw);
+          return -EIO;
+        }
+
+      return -ENODATA;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: stm32_otp_word_read32
+ *
+ * Description:
+ *   32-bit counterpart of stm32_otp_word_read16().  Note that "word" here
+ *   is a 32-bit word index: it does not line up with the index used by
+ *   the 16-bit functions, the same as the attached reference driver this
+ *   was ported from.
+ *
+ ****************************************************************************/
+
+int stm32_otp_word_read32(uint32_t word, FAR uint32_t *value)
+{
+  bool eccerr;
+  uint32_t raw;
+
+  if (value == NULL || word >= FLASH_OTP_SIZE / sizeof(uint32_t))
+    {
+      return -EINVAL;
+    }
+
+  raw = otp_read_eccsafe32(STM32_OTP_BASE + word * sizeof(uint32_t),
+                           &eccerr);
+  *value = raw;
+
+  if (eccerr)
+    {
+      if (raw != OTP_ERASEDVALUE32)
+        {
+          ferr("ERROR: OTP word %" PRIu32 " ECC error: %08" PRIx32 "\n",
+               word, raw);
+          return -EIO;
+        }
+
+      return -ENODATA;
+    }
+
+  return OK;
+}
+
+#ifdef CONFIG_STM32H5_OTP_WRITE
+
+/****************************************************************************
+ * Name: stm32_otp_word_write16
+ *
+ * Description:
+ *   Program one 16-bit OTP word.  Programming is IRREVERSIBLE: a word
+ *   that already holds a value other than the one requested cannot be
+ *   reprogrammed, because bits can only move from 1 to 0 and ECC was
+ *   already computed over its current contents.  Writing a word that
+ *   already holds exactly the requested value is a harmless no-op that
+ *   returns success, so this is safe to call unconditionally for a value
+ *   that may or may not have been written before.
+ *
+ * Returned Value:
+ *   Zero (OK) on success (including the no-op case above); a negated
+ *   errno value on failure:
+ *
+ *     -EINVAL: word is out of range
+ *     -EEXIST: The word already holds a different value
+ *     -EIO:    Programming failed, or the post-write readback did not
+ *              match
+ *
+ ****************************************************************************/
+
+int stm32_otp_word_write16(uint32_t word, uint16_t value)
+{
+  uintptr_t addr;
+  uint16_t  current;
+  bool      eccerr;
+  int       ret;
+
+  if (word >= FLASH_OTP_SIZE / OTP_WORD_SIZE)
+    {
+      return -EINVAL;
+    }
+
+  addr = STM32_OTP_BASE + word * OTP_WORD_SIZE;
+
+  ret = nxmutex_lock(&g_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  current = otp_read_eccsafe16(addr, &eccerr);
+  if (!eccerr || current != OTP_ERASEDVALUE16)
+    {
+      /* Not blank: either already holds this exact value (success, the
+       * word is already in the requested state) or holds something else
+       * (this word can never be reprogrammed to the new value).
+       */
+
+      ret = current == value ? OK : -EEXIST;
+      goto exit_with_lock;
+    }
+
+  if (flash_wait_for_operation())
+    {
+      ret = -EIO;
+      goto exit_with_lock;
+    }
+
+  flash_unlock_nscr();
+  modifyreg32(STM32_FLASH_NSCCR, 0, ~0);
+
+  modifyreg32(STM32_FLASH_NSCR, 0, FLASH_NSCR_PG);
+  UP_MB();
+
+  putreg16(value, addr);
+  UP_MB();
+
+  ret = OK;
+  if (flash_wait_for_operation() ||
+      (getreg32(STM32_FLASH_NSSR) & FLASH_NSSR_ALL_ERRORS))
+    {
+      ret = -EIO;
+    }
+
+  modifyreg32(STM32_FLASH_NSCR, FLASH_NSCR_PG, 0);
+  modifyreg32(STM32_FLASH_NSCCR, 0, ~0);
+  flash_lock_nscr();
+
+  if (ret == OK)
+    {
+      current = otp_read_eccsafe16(addr, &eccerr);
+      if (eccerr || current != value)
+        {
+          ret = -EIO;
+        }
+    }
+
+exit_with_lock:
+  nxmutex_unlock(&g_lock);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: stm32_otp_word_write32
+ *
+ * Description:
+ *   32-bit counterpart of stm32_otp_word_write16(); see there for the
+ *   full explanation.  As with stm32_otp_word_read32(), "word" is a
+ *   32-bit word index here.
+ *
+ ****************************************************************************/
+
+int stm32_otp_word_write32(uint32_t word, uint32_t value)
+{
+  uintptr_t addr;
+  uint32_t  current;
+  bool      eccerr;
+  int       ret;
+
+  if (word >= FLASH_OTP_SIZE / sizeof(uint32_t))
+    {
+      return -EINVAL;
+    }
+
+  addr = STM32_OTP_BASE + word * sizeof(uint32_t);
+
+  ret = nxmutex_lock(&g_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  current = otp_read_eccsafe32(addr, &eccerr);
+  if (!eccerr || current != OTP_ERASEDVALUE32)
+    {
+      ret = current == value ? OK : -EEXIST;
+      goto exit_with_lock;
+    }
+
+  if (flash_wait_for_operation())
+    {
+      ret = -EIO;
+      goto exit_with_lock;
+    }
+
+  flash_unlock_nscr();
+  modifyreg32(STM32_FLASH_NSCCR, 0, ~0);
+
+  modifyreg32(STM32_FLASH_NSCR, 0, FLASH_NSCR_PG);
+  UP_MB();
+
+  putreg32(value, addr);
+  UP_MB();
+
+  ret = OK;
+  if (flash_wait_for_operation() ||
+      (getreg32(STM32_FLASH_NSSR) & FLASH_NSSR_ALL_ERRORS))
+    {
+      ret = -EIO;
+    }
+
+  modifyreg32(STM32_FLASH_NSCR, FLASH_NSCR_PG, 0);
+  modifyreg32(STM32_FLASH_NSCCR, 0, ~0);
+  flash_lock_nscr();
+
+  if (ret == OK)
+    {
+      current = otp_read_eccsafe32(addr, &eccerr);
+      if (eccerr || current != value)
+        {
+          ret = -EIO;
+        }
+    }
+
+exit_with_lock:
+  nxmutex_unlock(&g_lock);
+  return ret;
+}
+
+#endif /* CONFIG_STM32H5_OTP_WRITE */
+#endif /* CONFIG_STM32H5_OTP_WORD */
 
 #ifdef CONFIG_ARCH_HAVE_PROGMEM
 

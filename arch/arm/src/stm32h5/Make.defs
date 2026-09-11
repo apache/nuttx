@@ -76,6 +76,10 @@ ifeq ($(CONFIG_STM32_ICACHE),y)
 CHIP_CSRCS += stm32_icache.c
 endif
 
+ifeq ($(CONFIG_STM32H5_EFUSE),y)
+CHIP_CSRCS += stm32_efuse.c
+endif
+
 ifeq ($(CONFIG_STM32_SPI),y)
 CHIP_CSRCS += stm32_spi.c
 endif

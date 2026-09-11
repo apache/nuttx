@@ -114,6 +114,16 @@ STM32H5 parts have a 2 KiB one-time programmable (OTP) area. It's organized
 into 32 blocks of 32 16-bit words. Each word can be successfully programmed once.
 Each block may be permanently locked at any point. Written words may be read.
 
+There are two APIs for it: a block-oriented API with locking, and a lower-level
+word API. An optional eFuse character device is built on top of the word API.
+
+Block API
+~~~~~~~~~
+
+This API is organized into 32 blocks of 32 16-bit words. Each word can be
+successfully programmed once. Each block may be permanently locked at any
+point. Written words may be read.
+
 Writing the same word more than once is unsupported. Doing so may cause corruption.
 Reading an unwritten word raises an exception.
 To simplify the programming model, the OTP API
@@ -134,6 +144,53 @@ Any block affected by ``stm32_otp_write`` will be locked. The user should be awa
 of the block size and count when partitioning the OTP area for their needs.
 ``len`` is the number of bytes - not words. It has no alignment requirement. ``offset`` is
 the offset in bytes. It must be a multiple of 4.
+
+Word API
+~~~~~~~~
+
+``CONFIG_STM32H5_OTP_WORD`` builds direct 16- or 32-bit word access to the
+OTP area, independent of the block API above -- there is no locking, and
+no relation between a "word" index here and the block API's byte
+``offset``:
+
+.. code:: c
+
+   int stm32_otp_word_read16(uint32_t word, uint16_t *value);
+   int stm32_otp_word_read32(uint32_t word, uint32_t *value);
+
+Unlike the block API, reading a blank (never programmed) word does not
+raise an exception: it legitimately reads back as
+``0xffff``/``0xffffffff``, which is returned through ``*value`` either
+way. Since whether a word has been written is known, that is reported
+through the return value: ``-ENODATA`` for a blank word, ``OK`` for one
+that holds real data. ``-EIO`` is returned only when a word's ECC does
+not check out at all, i.e. it is neither blank nor the value its own
+program operation wrote.
+
+With ``CONFIG_STM32H5_OTP_WRITE`` also set:
+
+.. code:: c
+
+   int stm32_otp_word_write16(uint32_t word, uint16_t value);
+   int stm32_otp_word_write32(uint32_t word, uint32_t value);
+
+Each word may be programmed once. Writing a word that already holds
+exactly the value requested is a harmless no-op that returns ``OK``.
+Writing a word that already holds a different value returns ``-EEXIST``.
+A hardware programming failure, or a post-write readback mismatch,
+returns ``-EIO``.
+
+eFuse Character Device
+~~~~~~~~~~~~~~~~~~~~~~
+
+``CONFIG_STM32H5_EFUSE`` (which selects ``CONFIG_STM32H5_OTP_WORD``)
+registers the OTP area as a NuttX efuse character device, by default
+``/dev/efuse``, built on the word API above. See
+:doc:`/components/drivers/character/efuse` for the ``EFUSEIOC_READ_FIELD``/
+``EFUSEIOC_WRITE_FIELD`` ioctl interface. Field bit offsets index into the
+flat bit space of the OTP area at 16 bits per word, the same as the word
+API's ``word`` index. Writing a field requires ``CONFIG_STM32H5_OTP_WRITE``;
+without it, writes are refused with ``-EPERM``.
 
 Clocks
 ------
