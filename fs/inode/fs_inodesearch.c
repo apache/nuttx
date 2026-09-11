@@ -429,7 +429,7 @@ static int _inode_search(FAR struct inode_search_s *desc)
           buflen = PATH_MAX;
         }
 
-      desc->buffer = lib_get_tempbuffer(buflen);
+      desc->buffer = fs_heap_malloc(buflen);
       if (desc->buffer == NULL)
         {
           return -ENOMEM;
@@ -578,7 +578,7 @@ static int _inode_search(FAR struct inode_search_s *desc)
                                 {
                                   FAR char *buffer = NULL;
 
-                                  buffer = lib_get_tempbuffer(PATH_MAX);
+                                  buffer = fs_heap_malloc(PATH_MAX);
                                   if (buffer == NULL)
                                     {
                                       ret = -ENOMEM;
@@ -587,7 +587,7 @@ static int _inode_search(FAR struct inode_search_s *desc)
                                     {
                                       snprintf(buffer, PATH_MAX, "%s/%s",
                                                desc->relpath, name);
-                                      lib_put_tempbuffer(desc->buffer);
+                                      fs_heap_free(desc->buffer);
                                       desc->buffer = buffer;
                                       relpath = buffer;
                                       ret = OK;
