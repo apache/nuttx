@@ -51,6 +51,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_IMXRT_XIP_BOOTROM_FLEXSPI2
+#  define XIP_BOOTROM_FLEXSPI_CLOCK_ROOT CCM_CR_FLEXSPI2
+#else
+#  define XIP_BOOTROM_FLEXSPI_CLOCK_ROOT CCM_CR_FLEXSPI1
+#endif
+
 #define VIDEO_PLL_MIN_FREQ 650000000
 #define OSC24_FREQ         24000000
 
@@ -715,6 +721,19 @@ void imxrt_clockconfig()
 
   for (int i = 0; i < IMXRT_CCM_CR_COUNT; i++)
     {
+#ifdef CONFIG_IMXRT_XIP_KEEP_BOOTROM_FLEXSPI_CLOCK
+
+      /* Do not reconfigure the XIP flash clock during initial clock setup.
+       * The board may change it after installing a suitable high-speed read
+       * sequence.
+       */
+
+      if (i == XIP_BOOTROM_FLEXSPI_CLOCK_ROOT)
+        {
+          continue;
+        }
+#endif
+
       reg = getreg32(IMXRT_CCM_CR_CTRL(i));
 
       reg &= ~(CCM_CR_CTRL_MUX_MASK |
