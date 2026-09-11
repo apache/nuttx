@@ -499,12 +499,12 @@ static void imx9_dmaterminate(struct imx9_dmach_s *dmach, int result)
   dmach->arg      = NULL;
   dmach->state    = IMX9_DMA_IDLE;
 
+  spin_unlock_irqrestore_nopreempt(&g_edma.lock, flags);
+
   if (callback)
     {
       callback((DMACH_HANDLE)dmach, arg, true, result);
     }
-
-  spin_unlock_irqrestore_nopreempt(&g_edma.lock, flags);
 }
 
 /****************************************************************************
