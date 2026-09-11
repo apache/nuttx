@@ -34,7 +34,13 @@
 
 int syslog_rtt_putc(FAR syslog_channel_t *channel, int ch)
 {
-  SEGGER_RTT_BLOCK_IF_FIFO_FULL(CONFIG_SYSLOG_RTT_CHANNEL);
+  /* Never block: OTA/RS485 paths call syslog while the bus thread must
+   * still ACK. With no RTT host, BLOCK_IF_FIFO_FULL hangs forever once
+   * the up-buffer is full (seen as DATA ACK silence after a few KB).
+   * Buffer mode is CONFIG_SEGGER_RTT_MODE_NO_BLOCK_TRIM — drop/trim.
+   */
+
+  (void)channel;
   SEGGER_RTT_PutChar(CONFIG_SYSLOG_RTT_CHANNEL, ch);
   return ch;
 }
@@ -42,6 +48,6 @@ int syslog_rtt_putc(FAR syslog_channel_t *channel, int ch)
 ssize_t syslog_rtt_write(FAR syslog_channel_t *channel,
                          FAR const char *buffer, size_t buflen)
 {
-  SEGGER_RTT_BLOCK_IF_FIFO_FULL(CONFIG_SYSLOG_RTT_CHANNEL);
+  (void)channel;
   return SEGGER_RTT_Write(CONFIG_SYSLOG_RTT_CHANNEL, buffer, buflen);
 }

@@ -166,7 +166,13 @@ void up_idle(void)
 
   up_idlepm();
 
-#if !defined(CONFIG_DEBUG_SYMBOLS)
+  /* Skip WFI when debugging OR when board asks to keep peripherals awake.
+   * GD32 UART RX during WFI has dropped OTA/gs_raw frames on Board1 HIL
+   * unless a debugger session was attached.
+   */
+
+#if !defined(CONFIG_DEBUG_SYMBOLS) && \
+    !defined(CONFIG_GD32F4_DISABLE_IDLE_SLEEP_DURING_DEBUG)
   BEGIN_IDLE();
   asm("WFI");
   END_IDLE();

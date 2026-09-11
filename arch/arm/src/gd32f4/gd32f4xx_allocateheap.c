@@ -84,9 +84,18 @@
 
 #if defined(CONFIG_GD32F4_GD32F4XX)
 
-/* Set the end of system SRAM */
+/* Set the end of system SRAM.
+ *
+ * GD32F470 has up to 512KB contiguous System SRAM (0x20000000..).
+ * Older NuttX defaults only covered the smaller F4xx window
+ * (SRAM_END=0x20020000 → ~40KB heap after BSS), which OOMs when
+ * Board1 bringup starts webui + pylon_bms + sim_sdk + sim_pcs.
+ * Prefer CONFIG_RAM_END from the board defconfig.
+ */
 
-#  if defined(CONFIG_GD32F4_GD32F450)
+#  if defined(CONFIG_GD32F4_GD32F470)
+#    define SRAM_END CONFIG_RAM_END
+#  elif defined(CONFIG_GD32F4_GD32F450)
 #    if defined(CONFIG_GD32F4_GD32F450XI)
 #      define SRAM_END 0x20070000
 #    else

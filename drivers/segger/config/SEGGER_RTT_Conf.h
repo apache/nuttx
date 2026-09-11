@@ -115,20 +115,15 @@ extern ptrdiff_t g_segger_offset;
 #define SEGGER_RTT_IS_CONNECTED(ch)     (SEGGER_RTT_RDOFF_UP(ch) != 0)
 #define SEGGER_RTT_IS_FIFO_MODE(ch)     (SEGGER_RTT_FLAG_UP(ch) == SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL)
 
-/* Determine whether JLink is connected, and use FIFO mode
-  * after connection to ensure that data is not lost.
-  */
+/* Never promote RTT to BLOCK_IF_FIFO_FULL. A brief J-Link/RTT attach sets
+ * RdOff != 0 ("connected"); the old helper then switched the up-buffer to
+ * blocking mode, and after the probe detached the MCU hung forever in
+ * _WriteBlocking once the 4KB buffer filled (OTA DATA ACK silence).
+ * Keep the configured non-blocking mode (NO_BLOCK_TRIM/SKIP).
+ */
 
 #define SEGGER_RTT_BLOCK_IF_FIFO_FULL(ch) \
-  do \
-    { \
-      if (!SEGGER_RTT_IS_FIFO_MODE(ch) && SEGGER_RTT_IS_CONNECTED(ch)) \
-        { \
-          SEGGER_RTT_SetFlagsUpBuffer(ch, SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL); \
-          SEGGER_RTT_SetFlagsDownBuffer(ch, SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL); \
-        } \
-    } \
-  while (0)
+  do { (void)(ch); } while (0)
 
 #define SEGGER_SYSVIEW_PRINTF_IMPLICIT_FORMAT 1
 

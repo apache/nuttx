@@ -240,6 +240,17 @@ void __start(void)
       *dest++ = *src++;
     }
 
+#ifdef CONFIG_ARCH_RAMFUNCS
+  /* Copy .ramfunc (FMC erase/program waiters) from FLASH load address to SRAM */
+
+  for (src = (const uint32_t *)_framfuncs,
+       dest = (uint32_t *)_sramfuncs; dest < (uint32_t *)_eramfuncs;
+      )
+    {
+      *dest++ = *src++;
+    }
+#endif
+
 #ifdef CONFIG_ARMV7M_STACKCHECK
   arm_stack_check_init();
 #endif
