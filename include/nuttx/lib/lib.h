@@ -130,8 +130,8 @@ void lib_put_tempbuffer(FAR char *buffer);
 #  define lib_put_tempbuffer(b)
 #endif
 
-#define lib_get_pathbuffer() lib_get_tempbuffer(PATH_MAX)
-#define lib_put_pathbuffer(b) lib_put_tempbuffer(b)
+#define lib_get_pathbuffer() lib_malloc(PATH_MAX)
+#define lib_put_pathbuffer(b) lib_free(b)
 
 /* Functions defined in lib_realpath.c **************************************/
 
