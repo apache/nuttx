@@ -247,13 +247,22 @@ void clock_update_wall_time(void)
 
   if (g_clock_adjust != 0 && sec > 0)
     {
-      long adjust = NTP_MAX_ADJUST * (long)sec;
-      if (g_clock_adjust < adjust && g_clock_adjust > -adjust)
+      long limit = NTP_MAX_ADJUST * (long)sec;
+      long adjust = g_clock_adjust;
+
+      /* Limit the adjustment while preserving its direction. */
+
+      if (adjust > limit)
         {
-          adjust = g_clock_adjust;
+          adjust = limit;
+        }
+      else if (adjust < -limit)
+        {
+          adjust = -limit;
         }
 
       nsec += adjust * NSEC_PER_USEC;
+      g_clock_adjust -= adjust;
 
       while (nsec < 0)
         {
