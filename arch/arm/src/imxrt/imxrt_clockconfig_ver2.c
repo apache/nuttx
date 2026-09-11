@@ -780,42 +780,42 @@ int imxrt_get_pll(enum ccm_clock_name clkname, uint32_t *frequency)
   switch (clkname)
     {
       case PLL_ARM_CLK:
-          loop_div = ((getreg32(IMXRT_ANADIG_PLL_ARM_PLL_CTRL) &
-                      ANADIG_PLL_ARM_PLL_CTRL_DIV_SELECT_MASK)
-                      >> ANADIG_PLL_ARM_PLL_CTRL_DIV_SELECT_SHIFT);
-          post_div = ((getreg32(IMXRT_ANADIG_PLL_ARM_PLL_CTRL) &
-                      ANADIG_PLL_ARM_PLL_CTRL_POST_DIV_SEL_MASK)
-                      >> ANADIG_PLL_ARM_PLL_CTRL_POST_DIV_SEL_SHIFT);
-          post_div = (1 << (post_div + 1));
-          *frequency = ((BOARD_XTAL_FREQUENCY / (2 * post_div)) * loop_div);
-          break;
+        loop_div = ((getreg32(IMXRT_ANADIG_PLL_ARM_PLL_CTRL) &
+                    ANADIG_PLL_ARM_PLL_CTRL_DIV_SELECT_MASK)
+                    >> ANADIG_PLL_ARM_PLL_CTRL_DIV_SELECT_SHIFT);
+        post_div = ((getreg32(IMXRT_ANADIG_PLL_ARM_PLL_CTRL) &
+                    ANADIG_PLL_ARM_PLL_CTRL_POST_DIV_SEL_MASK)
+                    >> ANADIG_PLL_ARM_PLL_CTRL_POST_DIV_SEL_SHIFT);
+        post_div = (1 << (post_div + 1));
+        *frequency = ((BOARD_XTAL_FREQUENCY / (2 * post_div)) * loop_div);
+        break;
 
       case SYS_PLL1:
-          *frequency = SYS_PLL1_FREQ;
-          break;
+        *frequency = SYS_PLL1_FREQ;
+        break;
 
       case SYS_PLL2:
-          *frequency = SYS_PLL2_FREQ;
-          break;
+        *frequency = SYS_PLL2_FREQ;
+        break;
 
       case SYS_PLL3:
-          *frequency = SYS_PLL3_FREQ;
-          break;
+        *frequency = SYS_PLL3_FREQ;
+        break;
 
       case AUDIO_PLL_CLK:
       case VIDEO_PLL_CLK:
-          return -ENOSYS;
+        return -ENOSYS;
 
       default:
 
-          /* Wrong input parameter pll or not implemented */
+        /* Wrong input parameter pll or not implemented */
 
-          DEBUGASSERT(false);
-          return -ENODEV;
-          break;
+        DEBUGASSERT(false);
+        return -ENODEV;
+        break;
     }
 
-    return OK;
+  return OK;
 }
 
 int imxrt_get_pll_pfd(enum ccm_clock_name clkname, uint32_t pfd,
@@ -848,18 +848,18 @@ int imxrt_get_pll_pfd(enum ccm_clock_name clkname, uint32_t pfd,
             break;
         }
 
-       frac = frac >> (8 * pfd);
+      frac = frac >> (8 * pfd);
 
-       if (frac != 0)
-         {
-           *frequency = (pllfreq / frac * 18);
-         }
-       else
-         {
-           *frequency = 0;
-         }
+      if (frac != 0)
+        {
+          *frequency = (pllfreq / frac * 18);
+        }
+      else
+        {
+          *frequency = 0;
+        }
 
-       return OK;
+      return OK;
     }
   else
     {
@@ -888,107 +888,107 @@ int imxrt_get_pll_pfd(enum ccm_clock_name clkname, uint32_t pfd,
 
 int imxrt_get_clock(enum ccm_clock_name clkname, uint32_t *frequency)
 {
-    switch (clkname)
-      {
-        case OSC_RC_16M:
-            *frequency = 16000000U;
-            break;
+  switch (clkname)
+    {
+      case OSC_RC_16M:
+        *frequency = 16000000U;
+        break;
 
-        case OSC_RC_48M:
-            *frequency = 48000000U;
-            break;
+      case OSC_RC_48M:
+        *frequency = 48000000U;
+        break;
 
-        case OSC_RC_48M_DIV2:
-            *frequency = 24000000U;
-            break;
+      case OSC_RC_48M_DIV2:
+        *frequency = 24000000U;
+        break;
 
-        case OSC_RC_400M:
-            *frequency = 400000000U;
-            break;
+      case OSC_RC_400M:
+        *frequency = 400000000U;
+        break;
 
-        case OSC_24M:
-            *frequency = 24000000U;
-            break;
+      case OSC_24M:
+        *frequency = 24000000U;
+        break;
 
-        case PLL_ARM_CLK:
-            return imxrt_get_pll(PLL_ARM_CLK, frequency);
-            break;
+      case PLL_ARM_CLK:
+        return imxrt_get_pll(PLL_ARM_CLK, frequency);
+        break;
 
-        case SYS_PLL2:
-            return imxrt_get_pll(SYS_PLL2, frequency);
-            break;
+      case SYS_PLL2:
+        return imxrt_get_pll(SYS_PLL2, frequency);
+        break;
 
-        case SYS_PLL2_PFD0:
-            return imxrt_get_pll_pfd(SYS_PLL2, 0, frequency);
-            break;
+      case SYS_PLL2_PFD0:
+        return imxrt_get_pll_pfd(SYS_PLL2, 0, frequency);
+        break;
 
-        case SYS_PLL2_PFD1:
-            return imxrt_get_pll_pfd(SYS_PLL2, 1, frequency);
-            break;
+      case SYS_PLL2_PFD1:
+        return imxrt_get_pll_pfd(SYS_PLL2, 1, frequency);
+        break;
 
-        case SYS_PLL2_PFD2:
-            return imxrt_get_pll_pfd(SYS_PLL2, 2, frequency);
-            break;
+      case SYS_PLL2_PFD2:
+        return imxrt_get_pll_pfd(SYS_PLL2, 2, frequency);
+        break;
 
-        case SYS_PLL2_PFD3:
-            return imxrt_get_pll_pfd(SYS_PLL2, 3, frequency);
-            break;
+      case SYS_PLL2_PFD3:
+        return imxrt_get_pll_pfd(SYS_PLL2, 3, frequency);
+        break;
 
-        case SYS_PLL3:
-            return imxrt_get_pll(SYS_PLL3, frequency);
-            break;
+      case SYS_PLL3:
+        return imxrt_get_pll(SYS_PLL3, frequency);
+        break;
 
-        case SYS_PLL3_DIV2:
-            imxrt_get_pll(SYS_PLL3, frequency);
-            *frequency = *frequency / 2;
-            break;
+      case SYS_PLL3_DIV2:
+        imxrt_get_pll(SYS_PLL3, frequency);
+        *frequency = *frequency / 2;
+        break;
 
-        case SYS_PLL3_PFD0:
-            return imxrt_get_pll_pfd(SYS_PLL3, 0, frequency);
-            break;
+      case SYS_PLL3_PFD0:
+        return imxrt_get_pll_pfd(SYS_PLL3, 0, frequency);
+        break;
 
-        case SYS_PLL3_PFD1:
-            return imxrt_get_pll_pfd(SYS_PLL3, 1, frequency);
-            break;
+      case SYS_PLL3_PFD1:
+        return imxrt_get_pll_pfd(SYS_PLL3, 1, frequency);
+        break;
 
-        case SYS_PLL3_PFD2:
-            return imxrt_get_pll_pfd(SYS_PLL3, 2, frequency);
-            break;
+      case SYS_PLL3_PFD2:
+        return imxrt_get_pll_pfd(SYS_PLL3, 2, frequency);
+        break;
 
-        case SYS_PLL3_PFD3:
-            return imxrt_get_pll_pfd(SYS_PLL3, 3, frequency);
-            break;
+      case SYS_PLL3_PFD3:
+        return imxrt_get_pll_pfd(SYS_PLL3, 3, frequency);
+        break;
 
-        case SYS_PLL1:
-            return imxrt_get_pll(SYS_PLL1, frequency);
-            break;
+      case SYS_PLL1:
+        return imxrt_get_pll(SYS_PLL1, frequency);
+        break;
 
-        case SYS_PLL1_DIV2:
-            imxrt_get_pll(SYS_PLL1, frequency);
-            *frequency = *frequency / 2;
-            break;
+      case SYS_PLL1_DIV2:
+        imxrt_get_pll(SYS_PLL1, frequency);
+        *frequency = *frequency / 2;
+        break;
 
-        case SYS_PLL1_DIV5:
-            imxrt_get_pll(SYS_PLL1, frequency);
-            *frequency = *frequency / 5;
-            break;
+      case SYS_PLL1_DIV5:
+        imxrt_get_pll(SYS_PLL1, frequency);
+        *frequency = *frequency / 5;
+        break;
 
-        case AUDIO_PLL_CLK:
-            return imxrt_get_pll(AUDIO_PLL_CLK, frequency);
-            break;
-        case VIDEO_PLL_CLK:
-            return imxrt_get_pll(VIDEO_PLL_CLK, frequency);
-            break;
+      case AUDIO_PLL_CLK:
+        return imxrt_get_pll(AUDIO_PLL_CLK, frequency);
+        break;
+      case VIDEO_PLL_CLK:
+        return imxrt_get_pll(VIDEO_PLL_CLK, frequency);
+        break;
 
-        default:
+      default:
 
-            /* Wrong input parameter name. */
+        /* Wrong input parameter name. */
 
-            return -ENODEV;
-            break;
+        return -ENODEV;
+        break;
     }
 
-    return OK;
+  return OK;
 }
 
 /****************************************************************************
