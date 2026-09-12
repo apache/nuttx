@@ -163,7 +163,21 @@
 #  endif
 #endif
 
+#ifdef CONFIG_BUILD_KERNEL
+#  include <nuttx/drivers/ramdisk.h>
+#  include "romfs.h"
+#endif
+
 #include "esp32s3-devkit.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_KERNEL
+#  define SECTORSIZE   512
+#  define NSECTORS(b)  (((b) + SECTORSIZE - 1) / SECTORSIZE)
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -187,6 +201,31 @@ int esp32s3_bringup(void)
     defined(CONFIG_ESPRESSIF_I2S1)
   bool i2s_enable_tx;
   bool i2s_enable_rx;
+#endif
+
+#ifdef CONFIG_BUILD_KERNEL
+  /* A kernel build has no built-in applications: the init process and every
+   * other user program is a separate ELF living in the boot ROMFS image.
+   * Publish it as a RAM disk here so that nx_start_application() can mount
+   * it at CONFIG_INIT_MOUNT_TARGET and exec CONFIG_INIT_FILEPATH from it.
+   * An unpopulated image means romfs_boot.c was never generated -- see
+   * apps/tools/mkromfsimg.sh -- so there is nothing to register.
+   */
+
+  if (NSECTORS(romfs_img_len) > 1)
+    {
+      ret = romdisk_register(0, romfs_img, NSECTORS(romfs_img_len),
+                             SECTORSIZE);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to register boot ROMFS: %d\n", ret);
+        }
+    }
+  else
+    {
+      syslog(LOG_ERR, "ERROR: Boot ROMFS image is empty; the init process "
+                      "cannot be started\n");
+    }
 #endif
 
 #if defined(CONFIG_ESP32S3_SPIRAM) && \
@@ -350,6 +389,7 @@ int esp32s3_bringup(void)
 
 #ifdef CONFIG_ESPRESSIF_TEMP
   struct esp_temp_sensor_config_t cfg = TEMPERATURE_SENSOR_CONFIG(10, 50);
+
   ret = esp_temperature_sensor_initialize(cfg);
   if (ret < 0)
     {
@@ -606,6 +646,7 @@ int esp32s3_bringup(void)
   };
 
   struct dac_dev_s *dev = esp_sdminitialize(config);
+
   ret = dac_register("/dev/dac0", dev);
   if (ret < 0)
     {

@@ -190,6 +190,7 @@ SECTIONS
     *libkarch.a:*uart_hal.*(.text .text.* .literal .literal.*)
     *libkarch.a:*mpu_hal.*(.text .text.* .literal .literal.*)
     *libkarch.a:*mmu_hal.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*esp_mmu_map.*(.text .text.* .literal .literal.*)
     *libkarch.a:*efuse_hal.*(.text .text.* .literal .literal.*)
     *libkarch.a:*uart_periph.*(.text .text.* .literal .literal.*)
     *libkarch.a:*esp_rom_uart.*(.text .text.* .literal .literal.*)
@@ -217,6 +218,7 @@ SECTIONS
 
     *libkarch.a:*mspi_timing_tuning.*(.text .text.* .literal .literal.*)
     *libkarch.a:*mspi_timing_config.*(.text .text.* .literal .literal.*)
+    *libkarch.a:esp32s3_spi_timing.*(.text .text.* .literal .literal.*)
     *libkarch.a:*spi_flash_oct_flash_init.*(.text .text.* .literal .literal.*)
     *libkarch.a:*spi_flash_hpm_enable.*(.text .text.* .literal .literal.*)
 #endif
