@@ -200,6 +200,20 @@ We can use the interrupt pin to send a signal when the interrupt fires::
 The pin is configured as a rising edge interrupt, so after issuing the
 above command, connect it to 3.3V.
 
+knsh
+----
+
+This is identical to the ``nsh`` configuration below except that NuttX is
+built in protected mode (``CONFIG_BUILD_PROTECTED``): the kernel and the user
+applications are linked as two separate images, the kernel runs in machine
+mode and user code in user mode, and the PMP enforces the split.
+
+The console is UART0 rather than the USB Serial/JTAG port, so connect to the
+board's UART adapter rather than ``/dev/ttyACM0``.
+
+The build produces two images, ``nuttx.bin`` and ``nuttx_user.bin``; see
+`Building and flashing`_ for the offsets.
+
 lvgl_demo
 ---------
 
@@ -301,3 +315,19 @@ Then open the console:
 
    $ picocom -b 115200 /dev/ttyACM0
    nsh>
+
+Protected build
+---------------
+
+The ``knsh`` configuration produces a second image for user space, which is
+flashed at ``CONFIG_ESPRESSIF_USER_IMAGE_OFFSET`` (``0x110000`` by default):
+
+.. code-block:: console
+
+   $ ./tools/configure.sh esp32p4-tab5:knsh
+   $ make -j
+   $ esptool.py -c esp32p4 -p /dev/ttyACM0 -b 921600 write_flash \
+       0x2000 nuttx.bin 0x110000 nuttx_user.bin
+
+``make flash ESPTOOL_PORT=<port>`` does both in one step.  The console for this
+configuration is UART0 at 115200, not the USB Serial/JTAG port.

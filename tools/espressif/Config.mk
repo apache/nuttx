@@ -144,6 +144,16 @@ endif
 
 ESPTOOL_BINS += $(FLASH_APP) $(ENC_APP)
 
+# A protected build produces a second image.  nuttx_user.bin is a raw binary
+# whose first bytes are the metadata block that esp_userspace() reads to learn
+# where the user image expects its flash-mapped regions; it is not an
+# Espressif application image and is written at its own offset rather than
+# being merged into nuttx.bin.
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+	ESPTOOL_BINS += $(CONFIG_ESPRESSIF_USER_IMAGE_OFFSET) nuttx_user.bin
+endif
+
 # Commands for colored and formatted output
 
 RED    = \033[1;31m

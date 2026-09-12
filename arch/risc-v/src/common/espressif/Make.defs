@@ -39,6 +39,14 @@ CHIP_CSRCS += esp_irq.c esp_gpio.c esp_rtc_gpio.c esp_libc_stubs.c
 CHIP_CSRCS += esp_lowputc.c esp_serial.c
 CHIP_CSRCS += esp_systemreset.c
 
+ifeq ($(CONFIG_ESPRESSIF_KERNEL_OWNS_PMP),y)
+  CHIP_CSRCS += esp_region_protect.c
+endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+  CHIP_CSRCS += esp_userspace.c
+endif
+
 ifeq ($(CONFIG_ARCH_HAVE_EXTRA_HEAPS),y)
 	CHIP_CSRCS += esp_extraheaps.c
 	ifeq ($(CONFIG_ESPRESSIF_RETENTION_HEAP),y)

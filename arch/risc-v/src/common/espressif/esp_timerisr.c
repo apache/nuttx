@@ -34,6 +34,7 @@
 #include <arch/irq.h>
 
 #include "chip.h"
+#include "esp_p4dbg.h"
 #include "esp_irq.h"
 
 #include "hal/systimer_hal.h"
@@ -88,6 +89,52 @@ static systimer_hal_context_t systimer_hal;
 
 static int systimer_irq_handler(int irq, void *context, void *arg)
 {
+#ifdef P4DBG
+  {
+    uint32_t c;
+
+    g_p4dbg_tick_n++;
+
+    /* mcause.mpil here is the CLIC level of the context this tick
+     * interrupted.  Task context must be level 0; anything else means the
+     * level was left raised by an earlier return.
+     */
+
+    __asm__ __volatile__ ("csrr %0, mcause" : "=r"(c));
+
+    if ((c & 0x00ff0000) != 0)
+      {
+        g_p4dbg_mil_ticks++;
+
+        if (g_p4dbg_mil_first_tick == 0)
+          {
+            g_p4dbg_mil_first_tick   = g_p4dbg_tick_n;
+            g_p4dbg_mil_first_mcause = c;
+            g_p4dbg_mil_first_epc    =
+              (uint32_t)((uintreg_t *)context)[REG_EPC];
+          }
+      }
+    else
+      {
+        g_p4dbg_mil_last_zero_tick = g_p4dbg_tick_n;
+      }
+
+    /* Last healthy CLIC snapshot: this handler running IS the proof that
+     * delivery still works at this instant.
+     */
+
+    __asm__ __volatile__ ("csrr %0, 0x346" : "=r"(c));
+    g_p4dbg_tick_mint   = c;
+    g_p4dbg_tick_thresh = *(volatile uint32_t *)(P4DBG_CLIC_BASE + 8);
+
+    for (c = 0; c < P4DBG_CLIC_N; c++)
+      {
+        g_p4dbg_tick_clic[c] =
+          *(volatile uint32_t *)(P4DBG_CLIC_CTRL + c * 4);
+      }
+  }
+#endif
+
   systimer_ll_clear_alarm_int(systimer_hal.dev,
                               SYSTIMER_ALARM_OS_TICK_CORE0);
 

@@ -34,6 +34,19 @@ config ESPRESSIF_FLASH_32M
 
 endchoice # ESPRESSIF_FLASH
 
+config ESPRESSIF_P4DBG
+	bool "ESP32-P4 protected-build debug counters"
+	default n
+	depends on ARCH_CHIP_ESP32P4 && !BUILD_FLAT
+	---help---
+		Maintain counters and CLIC state snapshots in the interrupt, idle and
+		timer paths. Emit progress markers from board bring-up using the
+		ROM printf rather than syslog.
+
+		The counters should be read with a debugger.
+
+		Debug aid, do not activate in a production build.
+
 config ESPRESSIF_DONT_USE_ROM_LIBC
 	bool "Don't use ROM libc functions"
 	default n
@@ -237,6 +250,84 @@ config ESPRESSIF_REGION_PROTECTION
 	select ARCH_USE_MPU
 	---help---
 		Configure the MPU to disable access to invalid memory regions.
+
+		Must be disabled in a protected build; esp_start.c fails the build
+		if it is not.  It only adds a second, redundant call to
+		esp_cpu_configure_region_protection() late in esp_start() -- the
+		regions have already been programmed from bootloader_init() by then
+		-- and in a protected build the kernel owns the PMP and re-describes
+		it during userspace initialisation, so the extra call is pointless
+		at best and racy against that setup at worst.
+
+		This is enforced with a compile-time check rather than
+		"depends on !BUILD_PROTECTED".  This symbol selects ARCH_USE_MPU and
+		BUILD_PROTECTED depends on ARCH_USE_MPU, so a dependency on the
+		build type closes a loop that Kconfig resolves by making
+		BUILD_PROTECTED unsatisfiable -- which silently collapses the whole
+		"Memory organization" choice for every board in the tree.
+
+config ESPRESSIF_KERNEL_OWNS_PMP
+	bool "Kernel owns the PMP configuration"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	select ARCH_USE_MPU
+	---help---
+		Drop the HAL's esp_cpu_configure_region_protection() from the build
+		and supply a NuttX build of the same code with the PMP lock bit
+		cleared.  The region layout, and the PMA setup the SoC needs in
+		order to run at all, are unchanged; only the lock bit differs.
+
+		The HAL version sets the lock bit on every entry it writes, and runs
+		from bootloader_init() before NuttX can intervene.  PMP lock bits
+		are irreversible without the Smepmp extension, which the ESP32-P4
+		does not implement, so a protected build has to prevent the locking
+		rather than undo it.
+
+		A protected build requires this and must set it explicitly in its
+		defconfig; esp_start.c fails the build if the two disagree.  It is
+		deliberately not "default y if BUILD_PROTECTED": this symbol selects
+		ARCH_USE_MPU, BUILD_PROTECTED depends on ARCH_USE_MPU, and a default
+		conditioned on BUILD_PROTECTED closes that loop.  Kconfig resolves
+		the circularity by making BUILD_PROTECTED unsatisfiable, which
+		silently collapses the whole "Memory organization" choice for every
+		board in the tree.
+
+		Enabling it on its own is legitimate only for bring-up: unlocked
+		entries do not constrain machine mode, so a flat build ends up with
+		less protection than it would otherwise have.
+
+if BUILD_PROTECTED
+
+config ESPRESSIF_USER_IMAGE_OFFSET
+	hex "User image offset"
+	default 0x110000
+	---help---
+		Offset in SPI Flash for flashing the User application firmware
+		image (nuttx_user.bin).
+
+		Must be aligned to the flash MMU page size (64 KB on ESP32-P4) so
+		that the cache MMU constraint paddr % 64KB == vaddr % 64KB can be
+		met, and must be beyond the end of the kernel image.
+
+endif # BUILD_PROTECTED
+
+config ESPRESSIF_PMP_EARLY_SNAPSHOT
+	bool "Dump PMP state during early boot (diagnostic)"
+	default n
+	---help---
+		Bring-up diagnostic.  Prints the raw PMP configuration via the ROM
+		printf immediately before and after the bootloader_init() call in
+		esp_start(), long before the console driver exists.
+
+		Use it to determine whether PMP entries are already locked when
+		NuttX gains control, or whether the lock bits are set by
+		bootloader_init() -> bootloader_init_mem() ->
+		esp_cpu_configure_region_protection().  PMP lock bits cannot be
+		cleared without the Smepmp extension, so a protected-mode port has
+		to prevent the locking rather than undo it, and that requires
+		knowing which code sets it.
+
+		This is a debug aid only; leave it disabled in normal builds.
 
 config ESPRESSIF_RUN_IRAM
 	bool "Run from IRAM"

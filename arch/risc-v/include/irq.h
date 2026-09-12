@@ -242,7 +242,26 @@
 #  define REG_INT_CTX_NDX     32
 #endif
 
-#ifdef CONFIG_ARCH_RISCV_INTXCPT_EXTREGS
+/* On a CLIC part, mcause carries mpp / mpie / mpil / interrupt -- state that
+ * mret consults -- so it must be saved and restored with the frame, not just
+ * read for dispatch.  It is appended above REG_INT_CTX, so that slot and
+ * everything below it keep their offsets.
+ */
+
+#if defined(CONFIG_ARCH_CHIP_ESP32P4) && !defined(CONFIG_BUILD_FLAT)
+#  define REG_MCAUSE_NDX    (REG_INT_CTX_NDX + 1)
+#endif
+
+#ifdef REG_MCAUSE_NDX
+
+/* The frame carries mcause as well; keep it sized to match. */
+
+#  ifdef CONFIG_ARCH_RISCV_INTXCPT_EXTREGS
+#    define INT_XCPT_REGS   (REG_MCAUSE_NDX + 1 + CONFIG_ARCH_RISCV_INTXCPT_EXTREGS)
+#  else
+#    define INT_XCPT_REGS   (REG_MCAUSE_NDX + 1)
+#  endif
+#elif defined(CONFIG_ARCH_RISCV_INTXCPT_EXTREGS)
 #  define INT_XCPT_REGS     (REG_INT_CTX_NDX + 1 + CONFIG_ARCH_RISCV_INTXCPT_EXTREGS)
 #else
 #  define INT_XCPT_REGS     (REG_INT_CTX_NDX + 1)
@@ -391,6 +410,9 @@
 #    define REG_INT_THRESH  (INT_REG_SIZE*REG_INT_THRESH_NDX)
 #  endif
 #  define REG_INT_CTX       (INT_REG_SIZE*REG_INT_CTX_NDX)
+#  ifdef REG_MCAUSE_NDX
+#    define REG_MCAUSE      (INT_REG_SIZE*REG_MCAUSE_NDX)
+#  endif
 
 #ifdef CONFIG_ARCH_FPU
 #  define REG_F0            (INT_REG_SIZE*REG_F0_NDX)
@@ -473,6 +495,9 @@
 #    define REG_INT_THRESH  REG_INT_THRESH_NDX
 #  endif
 #  define REG_INT_CTX       REG_INT_CTX_NDX
+#  ifdef REG_MCAUSE_NDX
+#    define REG_MCAUSE      REG_MCAUSE_NDX
+#  endif
 
 #ifdef CONFIG_ARCH_FPU
 #  define REG_F0            REG_F0_NDX

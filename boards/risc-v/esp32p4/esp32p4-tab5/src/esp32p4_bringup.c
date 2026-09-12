@@ -34,6 +34,12 @@
 
 #include "espressif/esp_start.h"
 
+#ifdef CONFIG_ESPRESSIF_P4DBG
+#  include <nuttx/irq.h>
+#  include <arch/irq.h>
+#  include "riscv_internal.h"
+#endif
+
 #ifdef CONFIG_ESPRESSIF_SPIFLASH
 #  include "esp_board_spiflash.h"
 #endif
@@ -77,9 +83,46 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ESPRESSIF_P4DBG
+/* Declared locally: the HAL header that provides this is not on the include
+ * path for board sources.  esp_start.c declares ets_printf() the same way.
+ */
+
+extern int esp_rom_printf(const char *fmt, ...) printf_like(1, 2);
+
+/****************************************************************************
+ * Name: protected_fault_handler
+ *
+ * Description:
+ *   Bring-up scaffolding.  Reports a CPU exception using the ROM printf
+ *   rather than syslog(), which needs a working scheduler and console.
+ *
+ ****************************************************************************/
+
+static int protected_fault_handler(int irq, void *context, void *arg)
+{
+  uintreg_t *regs = (uintreg_t *)context;
+
+  esp_rom_printf("FAULT: irq=%d epc=0x%x sp=0x%x ra=0x%x mstatus=0x%x\n",
+                 irq, (unsigned int)regs[REG_EPC],
+                 (unsigned int)regs[REG_SP], (unsigned int)regs[REG_RA],
+                 (unsigned int)regs[REG_INT_CTX]);
+
+  for (; ; )
+    {
+    }
+
+  return OK;
+}
+#endif
+
 int esp_bringup(void)
 {
   int ret = OK;
+
+#ifdef CONFIG_ESPRESSIF_P4DBG
+  esp_rom_printf("bringup: enter\n");
+#endif
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
@@ -252,6 +295,23 @@ int esp_bringup(void)
    * at least enough succeeded to bring-up NSH with perhaps reduced
    * capabilities.
    */
+
+#ifdef CONFIG_ESPRESSIF_P4DBG
+  esp_rom_printf("bringup: done ret=%d\n", ret);
+  syslog(LOG_ERR, "bringup: syslog reaches the console\n");
+
+  /* Take over the fault vectors for the remainder of bring-up, so that a
+   * fault entering user mode announces itself.
+   */
+
+  irq_attach(RISCV_IRQ_IAFAULT, protected_fault_handler, NULL);
+  irq_attach(RISCV_IRQ_LAFAULT, protected_fault_handler, NULL);
+  irq_attach(RISCV_IRQ_SAFAULT, protected_fault_handler, NULL);
+  irq_attach(RISCV_IRQ_IINSTRUCTION, protected_fault_handler, NULL);
+  irq_attach(RISCV_IRQ_IAMISALIGNED, protected_fault_handler, NULL);
+  irq_attach(RISCV_IRQ_LAMISALIGNED, protected_fault_handler, NULL);
+  irq_attach(RISCV_IRQ_SAMISALIGNED, protected_fault_handler, NULL);
+#endif
 
   return ret;
 }
