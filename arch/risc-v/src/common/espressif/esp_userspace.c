@@ -48,6 +48,12 @@
 #include "spi_flash_mmap.h"
 #include "bootloader_flash_priv.h"
 
+#if defined(CONFIG_ESPRESSIF_SPIRAM) && \
+    defined(CONFIG_ESPRESSIF_SPIRAM_USER_HEAP)
+#  include "esp_psram.h"
+#  include "esp_private/esp_psram_extram.h"
+#endif
+
 #ifdef CONFIG_BUILD_PROTECTED
 
 /****************************************************************************
@@ -283,13 +289,22 @@ static void configure_mpu(void)
   riscv_config_pmp_region(15, PMPCFG_A_OFF, 0, 0);
 
   /* TOR entries take their lower bound from the preceding entry's address,
-   * so the regions must be programmed in ascending address order.  Each pair
-   * is an unmatched gap followed by the region proper:
+   * so each pair is an unmatched gap followed by the region proper.
    *
-   *   UIROM  0x40200000 - 0x40300000   user code, execute in place
-   *   UDROM  0x40300080 - 0x40380000   user rodata (0x80 metadata gap below)
-   *   ROM    SOC_IROM_MASK_*           ROM routines the user image calls
-   *   UDRAM  0x4ff40000 - 0x4ff80000   user data, bss and heap
+   *   0/1  UIROM  0x40200000 - 0x40300000  user code, execute in place
+   *   2/3  UDROM  0x40300080 - 0x40380000  user rodata (0x80 metadata gap)
+   *   4/5  PSRAM  runtime bounds           external RAM, in the user heap
+   *   6/7  ROM    SOC_IROM_MASK_*          ROM routines the user image calls
+   *   8/9  UDRAM  0x4ff40000 - 0x4ff80000  user data, bss and heap
+   *
+   * The whole table must be in ascending address order, not merely each pair
+   * internally.  PMP resolves an access to the LOWEST-numbered entry that
+   * matches it, so a low-numbered gap silently shadows any grant above it.
+   * Appending PSRAM after UDRAM does not work for exactly that reason: the
+   * gap at entry 4 spans UDROM_END up to SOC_IROM_MASK_LOW (0x40380000 to
+   * 0x4fc00000) and swallows 0x48000000, denying user access however the
+   * higher entries are programmed.  It presents as a load/store access fault
+   * on the first user-mode touch of PSRAM, with the heap none the wiser.
    */
 
   /* User code, executed in place from flash */
@@ -302,6 +317,39 @@ static void configure_mpu(void)
   riscv_config_pmp_region(2, PMPCFG_A_TOR, UDROM_START, 0);
   riscv_config_pmp_region(3, PMPCFG_A_TOR | r, UDROM_END, 0);
 
+#if defined(CONFIG_ESPRESSIF_SPIRAM) && \
+    defined(CONFIG_ESPRESSIF_SPIRAM_USER_HEAP)
+  /* External PSRAM.  riscv_addregion() adds this same span to the user heap;
+   * without the grant here it would be in the heap but would fault on the
+   * first touch from user code.  Read/write only: it is a data heap, and
+   * user code executes in place from flash.
+   *
+   * If PSRAM did not initialise, entries 4 and 5 are left off by the reset
+   * above and entry 6 simply takes its base from a zero pmpaddr5, which
+   * widens the following gap harmlessly.
+   */
+
+  if (esp_psram_is_initialized())
+    {
+      uintptr_t pstart = esp_psram_extram_vaddr_start();
+      uintptr_t pend   = esp_psram_extram_vaddr_end();
+
+      /* Both bounds come from the HAL's mapping of a 64 KB-aligned window,
+       * so they already satisfy the 128-byte PMP granularity.  Assert it
+       * rather than assume it: a misaligned bound silently rounds and would
+       * grant a different region than the heap is handed.
+       */
+
+      DEBUGASSERT((pstart & 0x7f) == 0 && (pend & 0x7f) == 0);
+
+      if (pend > pstart)
+        {
+          riscv_config_pmp_region(4, PMPCFG_A_TOR, pstart, 0);
+          riscv_config_pmp_region(5, PMPCFG_A_TOR | rw, pend, 0);
+        }
+    }
+#endif
+
   /* Internal ROM.  CONFIG_LIBC_ARCH_* is selected for this chip, so libc
    * omits its generic memcpy(), strcmp() and friends and the user image is
    * linked against the ROM implementations instead (see the ROM linker
@@ -309,13 +357,13 @@ static void configure_mpu(void)
    * call from user mode takes an instruction access fault.
    */
 
-  riscv_config_pmp_region(4, PMPCFG_A_TOR, SOC_IROM_MASK_LOW, 0);
-  riscv_config_pmp_region(5, PMPCFG_A_TOR | rx, SOC_IROM_MASK_HIGH, 0);
+  riscv_config_pmp_region(6, PMPCFG_A_TOR, SOC_IROM_MASK_LOW, 0);
+  riscv_config_pmp_region(7, PMPCFG_A_TOR | rx, SOC_IROM_MASK_HIGH, 0);
 
   /* User data, bss and heap in internal SRAM */
 
-  riscv_config_pmp_region(6, PMPCFG_A_TOR, UDRAM_START, 0);
-  riscv_config_pmp_region(7, PMPCFG_A_TOR | rw, UDRAM_END, 0);
+  riscv_config_pmp_region(8, PMPCFG_A_TOR, UDRAM_START, 0);
+  riscv_config_pmp_region(9, PMPCFG_A_TOR | rw, UDRAM_END, 0);
 }
 
 /****************************************************************************
