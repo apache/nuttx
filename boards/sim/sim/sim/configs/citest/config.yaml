@@ -8,5 +8,6 @@ product:
     core0:
       name: 'main'
       device: 'sim'
+      line_buffered: true
       conf_path: './.config'
       elf_path: './nuttx'
