@@ -31,6 +31,7 @@
 
 #include <arch/board/board.h>
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/userspace.h>
 #include <nuttx/board.h>
 #include <nuttx/mm/mm.h>
@@ -221,8 +222,21 @@ void riscv_addregion(void)
     }
 #endif
 
-#if !defined(CONFIG_MM_KERNEL_HEAP)
-#  if defined(CONFIG_ESPRESSIF_SPIRAM_USER_HEAP)
+  /* External PSRAM is user memory.  kumm_addregion() resolves to
+   * mm_addregion(USR_HEAP, ...), and USR_HEAP is the single heap in a flat
+   * build and (*USERSPACE->us_data->us_heap) in the kernel phase of a
+   * protected one, so the same call reaches user-accessible memory in both.
+   *
+   * configure_mpu() has already granted user mode read/write over this
+   * span.  The two must agree: a region added here without the grant is in
+   * the heap but faults on first touch from user code.
+   *
+   * A flat build that keeps a separate kernel heap is deliberately left as
+   * it was; changing where PSRAM lands there is not part of this change.
+   */
+
+#if defined(CONFIG_ESPRESSIF_SPIRAM_USER_HEAP) && \
+    (defined(CONFIG_BUILD_PROTECTED) || !defined(CONFIG_MM_KERNEL_HEAP))
   if (esp_psram_is_initialized())
     {
       uintptr_t start = esp_psram_extram_vaddr_start();
@@ -233,7 +247,6 @@ void riscv_addregion(void)
           kumm_addregion((void *)start, end - start);
         }
     }
-#  endif
 #endif
 }
 #endif
