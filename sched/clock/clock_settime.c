@@ -89,12 +89,16 @@ static void nxclock_set_realtime(FAR const struct timespec *tp)
 
   spin_unlock_irqrestore(&g_basetime_lock, flags);
 
+#else
+  clock_timekeeping_set_wall_time(tp);
+#endif
+
   /* Setup the RTC (lo- or high-res) */
 
-#  ifdef CONFIG_RTC
+#ifdef CONFIG_RTC
   if (g_rtc_enabled)
     {
-#    ifdef CONFIG_SCHED_LPWORK
+#  ifdef CONFIG_SCHED_LPWORK
       /* Setting the current time in RTC may be a blocking operation (driver
        * needs to wait for oscillator stabilization after reset and so on).
        * This may cause the unwanted effect of clock_settime blocking the
@@ -109,19 +113,16 @@ static void nxclock_set_realtime(FAR const struct timespec *tp)
       g_rtc_to_set = *tp;
       work_queue(LPWORK, &g_rtc_work, rtc_worker,
                  (FAR void *)&g_rtc_to_set, 0);
-#    else
+#  else
       up_rtc_settime(tp);
-#    endif
-    }
 #  endif
+    }
+#endif
 
-#  ifdef CONFIG_CLOCK_ADJTIME
+#if defined(CONFIG_CLOCK_ADJTIME) && !defined(CONFIG_CLOCK_TIMEKEEPING)
   /* Cancel any ongoing adjustment */
 
   adjtime(&zerodelta, NULL);
-#  endif
-#else
-  clock_timekeeping_set_wall_time(tp);
 #endif
 }
 
