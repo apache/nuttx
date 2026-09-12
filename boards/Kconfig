@@ -474,6 +474,17 @@ config ARCH_BOARD_ESP32C3_XIAO
 		The XIAO-ESP32C3 from Seeed Studio features the ESP32-C3 CPU with a RISC-V core,
 		supporting IEEE 802.11 b/g/n WiFi, and Bluetooth 5 (BLE) protocols.
 
+config ARCH_BOARD_ESP32C3_SUPERMINI
+	bool "ESP32-C3 SuperMini"
+	depends on ARCH_CHIP_ESP32C3
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		The ESP32-C3 SuperMini is a compact third-party development board based
+		on the ESP32-C3 RISC-V SoC. Typical boards in this form factor include
+		native USB-C, 4 MB flash, IEEE 802.11 b/g/n Wi-Fi, Bluetooth 5 (BLE),
+		an onboard LED on GPIO8, and a BOOT button on GPIO9.
+
 config ARCH_BOARD_ESP32_C3_ZERO
 	bool "Waveshare ESP32-C3-Zero"
 	depends on ARCH_CHIP_ESP32C3
@@ -3910,6 +3921,7 @@ config ARCH_BOARD
 	default "esp32c3-legacy-devkit-rust-1" if ARCH_BOARD_ESP32C3_LEGACY_DEVKIT_RUST1
 	default "esp32c3-legacy-devkit"        if ARCH_BOARD_ESP32C3_LEGACY_DEVKIT
 	default "esp32c3-xiao"                 if ARCH_BOARD_ESP32C3_XIAO
+	default "esp32c3-supermini"            if ARCH_BOARD_ESP32C3_SUPERMINI
 	default "esp32-c3-zero"                if ARCH_BOARD_ESP32_C3_ZERO
 	default "esp32s2-kaluga-1"             if ARCH_BOARD_ESP32S2_KALUGA_1
 	default "esp32s2-saola-1"              if ARCH_BOARD_ESP32S2_SAOLA_1
@@ -5269,6 +5281,9 @@ source "boards/risc-v/esp32c3/esp32c3-devkit/Kconfig"
 endif
 if ARCH_BOARD_ESP32C3_XIAO
 source "boards/risc-v/esp32c3/esp32c3-xiao/Kconfig"
+endif
+if ARCH_BOARD_ESP32C3_SUPERMINI
+source "boards/risc-v/esp32c3/esp32c3-supermini/Kconfig"
 endif
 if ARCH_BOARD_ESP32_C3_ZERO
 source "boards/risc-v/esp32c3/esp32-c3-zero/Kconfig"
