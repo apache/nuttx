@@ -41,6 +41,7 @@
 
 #include "esp_gpio.h"
 #include "esp_irq.h"
+#include "esp_p4dbg.h"
 #include "esp_rtc_gpio.h"
 
 #include "esp_attr.h"
@@ -250,6 +251,44 @@ IRAM_ATTR static int esp_isr_demultiplexing(int irq, void *context,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Temporary instrumentation.
+ *
+ * After the SCHED_RR pthreads exit, a usleep() never wakes: the
+ * nxsig_timeout watchdog sits on g_wdactivelist unserviced while the idle
+ * task runs.  These counters separate "the tick stopped" from "the tick
+ * runs but the watchdog arithmetic is wrong", and record mintstatus.mil,
+ * which can stick at a level that masks every interrupt.
+ *
+ * Read them with an observe-only halt, twice a few seconds apart: whichever
+ * counters advance is the answer.
+ ****************************************************************************/
+
+#ifdef P4DBG
+volatile uint32_t g_p4dbg_irq_n;         /* interrupts dispatched          */
+volatile uint32_t g_p4dbg_exc_n;         /* exceptions dispatched          */
+volatile uint32_t g_p4dbg_last_mcause;   /* mcause of the last interrupt   */
+volatile uint32_t g_p4dbg_tick_n;        /* systimer_irq_handler entries   */
+volatile uint32_t g_p4dbg_idle_n;        /* up_idle() passes               */
+volatile uint32_t g_p4dbg_idle_mint;     /* mintstatus sampled in up_idle  */
+volatile uint32_t g_p4dbg_idle_mstatus;  /* mstatus sampled in up_idle     */
+volatile uint32_t g_p4dbg_mil_first_tick;
+volatile uint32_t g_p4dbg_mil_first_mcause;
+volatile uint32_t g_p4dbg_mil_first_epc;
+volatile uint32_t g_p4dbg_mil_ticks;
+volatile uint32_t g_p4dbg_mil_last_zero_tick;
+volatile uint32_t g_p4dbg_tick_thresh;
+volatile uint32_t g_p4dbg_tick_mint;
+volatile uint32_t g_p4dbg_tick_clic[P4DBG_CLIC_N];
+volatile uint32_t g_p4dbg_idle_thresh;
+volatile uint32_t g_p4dbg_idle_clic[P4DBG_CLIC_N];
+volatile uint32_t g_p4dbg_mintlog[P4DBG_MINTLOG_N][2];
+volatile uint32_t g_p4dbg_mintlog_n;
+volatile uint32_t g_p4dbg_force_mil0;   /* 0: answered, see 36.21 */
+volatile uint32_t g_p4dbg_mil_before;
+volatile uint32_t g_p4dbg_mil_after;
+#endif
 
 /****************************************************************************
  * Name: up_irq_to_ndx
@@ -563,6 +602,18 @@ IRAM_ATTR void *riscv_dispatch_irq(uintreg_t mcause, uintreg_t *regs)
   bool is_irq = (RISCV_IRQ_BIT & mcause) != 0;
   bool is_edge = false;
   int cpu = this_cpu();
+
+#ifdef P4DBG
+  if (is_irq)
+    {
+      g_p4dbg_irq_n++;
+      g_p4dbg_last_mcause = (uint32_t)mcause;
+    }
+  else
+    {
+      g_p4dbg_exc_n++;
+    }
+#endif
 
   if (is_irq)
     {

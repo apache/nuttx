@@ -37,6 +37,7 @@
 #include <sys/param.h>
 
 #include "riscv_internal.h"
+#include "esp_p4dbg.h"
 #include "esp_pm.h"
 
 #ifdef CONFIG_ESPRESSIF_HR_TIMER
@@ -235,6 +236,66 @@ void up_idle(void)
   /* This would be an appropriate place to put some MCU-specific logic to
    * sleep in a reduced power mode until an interrupt occurs to save power
    */
+
+#ifdef P4DBG
+  /* If this counter advances while g_p4dbg_irq_n does not, the
+   * core is leaving WFI without taking an interrupt -- which on RISC-V means
+   * an interrupt is PENDING BUT MASKED, and mintstatus.mil below says why.
+   */
+
+  {
+    uint32_t v;
+
+    g_p4dbg_idle_n++;
+    __asm__ __volatile__ ("csrr %0, 0x346" : "=r"(v));
+
+    if (v != g_p4dbg_idle_mint && g_p4dbg_mintlog_n < P4DBG_MINTLOG_N)
+      {
+        g_p4dbg_mintlog[g_p4dbg_mintlog_n][0] = g_p4dbg_idle_n;
+        g_p4dbg_mintlog[g_p4dbg_mintlog_n][1] = v;
+        g_p4dbg_mintlog_n++;
+      }
+
+    g_p4dbg_idle_mint = v;
+
+    /* Is the stuck CLIC level the blocker?  Write it down to canonical
+     * level 0 (0x1f, NLBITS = 3) and record whether the CSR took the
+     * write.  If it did and interrupts start flowing again, the level is
+     * the blocker and any fix must make it unwind; if the write is
+     * ignored, mintstatus is read-only here and the level is a symptom of
+     * something else.
+     */
+
+    if (g_p4dbg_force_mil0 != 0 && (v >> 24) != 0x1f)
+      {
+        uint32_t after;
+
+        __asm__ __volatile__ ("csrw 0x346, %0" :: "r"(0x1f000000u));
+        __asm__ __volatile__ ("csrr %0, 0x346" : "=r"(after));
+
+        g_p4dbg_mil_before = v;
+        g_p4dbg_mil_after  = after;
+      }
+
+    __asm__ __volatile__ ("csrr %0, mstatus" : "=r"(v));
+    g_p4dbg_idle_mstatus = v;
+
+    /* Snapshot the CLIC occasionally rather than every pass: this loop spins
+     * at millions of iterations a second once delivery has stopped.
+     */
+
+    if ((g_p4dbg_idle_n & 0xffff) == 0)
+      {
+        g_p4dbg_idle_thresh = *(volatile uint32_t *)(P4DBG_CLIC_BASE + 8);
+
+        for (v = 0; v < P4DBG_CLIC_N; v++)
+          {
+            g_p4dbg_idle_clic[v] =
+              *(volatile uint32_t *)(P4DBG_CLIC_CTRL + v * 4);
+          }
+      }
+  }
+#endif
 
   esp_pm_impl_idle_hook();
   esp_pm_impl_waiti();

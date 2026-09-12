@@ -456,6 +456,16 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/heap_caps.c
   ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/platform/os.c)
 
+# The kernel takes ownership of the PMP: drop the HAL implementation, which
+# locks every entry it programs.  See esp_region_protect.c.
+
+if(CONFIG_ESPRESSIF_KERNEL_OWNS_PMP)
+  list(
+    REMOVE_ITEM HAL_SRCS
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/cpu_region_protect.c
+  )
+endif()
+
 if(CONFIG_ESPRESSIF_WIFI OR CONFIG_ESPRESSIF_EMAC)
   list(APPEND HAL_SRCS ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/esp_event.c)
 endif()
