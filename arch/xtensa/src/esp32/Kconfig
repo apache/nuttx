@@ -2759,6 +2759,10 @@ config ESP32_HAVE_OTA_PARTITION
 	bool
 	default n
 
+config BOARDCTL_BOOT_IMAGE
+	select ESP32_HAVE_OTA_PARTITION
+	select ESP32_SPIFLASH
+
 menu "Bootloader and Image Configuration"
 
 config ESPRESSIF_SIMPLE_BOOT
