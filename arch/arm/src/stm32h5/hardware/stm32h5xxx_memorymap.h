@@ -60,6 +60,7 @@
 /* System Memory Addresses **************************************************/
 
 #define STM32_SYSMEM_MEM     0x0bf80000
+#define STM32_OTP_BASE       0x08FFF000     /* One-Time Programmable (OTP) memory base address */
 #define STM32_SYSMEM_UID     0x08FFF800     /* The 96-bit unique device identifier */
 #define STM32_SYSMEM_FSIZE   0x08FFF80C     /* Size of Flash memory in Kbytes. */
 #define STM32_SYSMEM_PACKAGE 0x08FFF80E     /* Indicates the device's package type. */
