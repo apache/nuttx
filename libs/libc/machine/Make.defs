@@ -20,7 +20,7 @@
 #
 ############################################################################
 
-ifneq ($(filter y,$(CONFIG_LIBC_ATOMIC_IRQ)$(CONFIG_LIBC_ATOMIC_HWSPINLOCK)),)
+ifneq ($(CONFIG_LIBC_ATOMIC_TOOLCHAIN),y)
   CSRCS += arch_atomic.c
 endif
 
