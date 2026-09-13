@@ -202,6 +202,7 @@ void riscv_ack_irq(int irq);
 
 void riscv_sigdeliver(void);
 int riscv_swint(int irq, void *context, void *arg);
+
 uintptr_t riscv_get_newintctx(void);
 void riscv_set_idleintctx(void);
 void riscv_exception_attach(void);

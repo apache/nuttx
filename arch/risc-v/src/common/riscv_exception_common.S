@@ -159,6 +159,12 @@ exception_common:
   REGSTORE   s1, REG_EPC(sp)
   REGSTORE   s3, REG_SP(sp)
 
+#ifdef REG_MCAUSE
+  /* s2 still holds the RAW mcause here, before it is masked for dispatch. */
+
+  REGSTORE   s2, REG_MCAUSE(sp)
+#endif
+
 #ifdef CONFIG_LIB_SYSCALL
   csrr       tp, CSR_SCRATCH      /* Load kernel TP */
   REGLOAD    tp, RISCV_PERCPU_TCB(tp)
@@ -204,6 +210,7 @@ return_from_syscall:
   /* Clean up after system call */
 
   REGSTORE   a0, REG_A0(sp)       /* Syscall return value to user context */
+
   mv         a0, sp               /* Return to same context */
   tail       return_from_exception
 
@@ -278,6 +285,52 @@ return_from_exception:
 
   REGLOAD    s0, REG_EPC(sp)      /* restore sepc */
   csrw       CSR_EPC, s0
+
+#ifdef REG_MCAUSE
+  /* Restore mcause with the frame.  On a CLIC part mcause holds mpp, mpie and
+   * mpil; mret restores privilege from mpp and mintstatus.mil from mpil.
+   * Leaving it as whatever the last trap wrote makes mret restore the wrong
+   * privilege or the wrong interrupt level -- mil stuck at 63
+   * masks every interrupt and deadlocks the system.  The frame's
+   * value is by construction what the hardware latched for this trap, so it is
+   * correct at any nesting depth.
+   *
+   * Restored BEFORE mstatus, deliberately.  mstatus.MPP/MPIE are aliased into
+   * mcause[29:28]/[27], so whichever is written last wins for those fields.
+   * Synthesised frames -- up_initial_state(), riscv_jump_to_user() -- leave
+   * this slot zero, and writing that after mstatus dropped kernel threads to
+   * U-mode and faulted on the first instruction fetch of kernel text.  Writing
+   * mcause first lets mstatus stay authoritative for privilege while mcause
+   * still supplies mpil, which lives nowhere else.
+   */
+
+  REGLOAD    s1, REG_MCAUSE(sp)
+
+  /* On a return to U-MODE, clear mcause.interrupt (31) and mcause.minhv (30)
+   * while keeping mpp/mpie/mpil.  An mret to U-mode whose mcause has bit 31
+   * set breaks the next trap this core takes: the trap latches
+   * mepc/mcause/mstatus and raises privilege, but the pc never reaches
+   * mtvec.base.  The frame's mcause is the value the hardware latched for the
+   * trap that SAVED the frame, so after a context switch it is restored by a
+   * different trap -- SYS_restore_context, an ECALLM -- and interrupt = 1 then
+   * tells the CLIC it is returning from an interrupt that is not in flight.
+   *
+   * mpil (23:16) is deliberately NOT cleared: doing so was measured to change
+   * nothing, so the raised level does not come from this path.
+   *
+   * Kernel returns are left alone.  s0 is reloaded from the frame immediately
+   * below; s2 is reloaded by load_ctx further down.
+   */
+
+  REGLOAD    s0, REG_INT_CTX(sp)
+  li         s2, STATUS_PPP
+  and        s0, s0, s2
+  bnez       s0, 1f               /* kernel return: leave mcause alone */
+  li         s2, 0x3fffffff       /* clear interrupt (31) and minhv (30) */
+  and        s1, s1, s2
+1:
+  csrw       mcause, s1
+#endif
 
   REGLOAD    s0, REG_INT_CTX(sp)  /* restore status */
   csrw       CSR_STATUS, s0
@@ -354,6 +407,7 @@ riscv_jump_to_user:
   li       a1, ~STATUS_PPP
   and      a0, a0, a1
   REGSTORE a0, REG_INT_CTX(sp)
+
   mv       a0, sp
   tail return_from_exception
 
