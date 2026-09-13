@@ -105,6 +105,10 @@ struct pkt_conn_s
   struct iob_queue_s readahead;   /* Read-ahead buffering */
 
   FAR struct iob_s  *pendiob;     /* The iob currently being sent */
+  uint16_t           pendiob_len; /* Length of pendiob, to disambiguate
+                                    * a reused iob slot from a genuinely
+                                    * different received packet
+                                    */
 
   /* The following is a list of poll structures of threads waiting for
    * socket events.

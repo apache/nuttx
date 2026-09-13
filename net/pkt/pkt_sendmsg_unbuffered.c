@@ -127,13 +127,15 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
               goto end_wait;
             }
 
-          dev->d_len                = dev->d_sndlen;
-          pstate->snd_sent          = pstate->snd_buflen;
-          pstate->snd_conn->pendiob = dev->d_iob;
+          dev->d_len                    = dev->d_sndlen;
+          pstate->snd_sent              = pstate->snd_buflen;
+          pstate->snd_conn->pendiob     = dev->d_iob;
+          pstate->snd_conn->pendiob_len = dev->d_sndlen;
 
           if (pstate->snd_sock->s_type == SOCK_DGRAM)
             {
               FAR struct eth_hdr_s *ethhdr = NETLLBUF;
+
               memcpy(ethhdr->dest, pstate->addr->sll_addr, ETHER_ADDR_LEN);
               memcpy(ethhdr->src, &dev->d_mac.ether, ETHER_ADDR_LEN);
               ethhdr->type = pstate->addr->sll_protocol;
