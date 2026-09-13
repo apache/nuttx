@@ -37,7 +37,7 @@
 #define CSL_PADCFG_CTRL0_CFG0_BASE            (0xf0000ul)
 #define CSL_PADCFG_CTRL0_CFG0_SIZE            (0x8000ul)
 
-#define CSL_MCU_PADCFG_CTRL0_CFG0_BASE        (0x4080000ul)
+#define CSL_MCU_PADCFG_CTRL0_CFG0_BASE        (0x04080000ul)
 #define CSL_MCU_PADCFG_CTRL0_CFG0_SIZE        (0x8000ul)
 
 #define PADCFG_PMUX_OFFSET                    (0x4000u)
@@ -302,6 +302,7 @@ struct pinmux_conf_s
  ****************************************************************************/
 
 void am67_pinmux_config(const struct pinmux_conf_s *pinmux_conf);
+void am67_mcu_pinmux_config(const struct pinmux_conf_s *pinmux_conf);
 
 /****************************************************************************
  * Name: am67_pinmux_init
@@ -312,5 +313,6 @@ void am67_pinmux_config(const struct pinmux_conf_s *pinmux_conf);
  ****************************************************************************/
 
 void am67_pinmux_init(void);
+void am67_spi_pinmux_init(void);
 
 #endif /* __ARCH_ARM_SRC_AM67_AM67_PINMUX_H */

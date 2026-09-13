@@ -30,3 +30,10 @@ CHIP_CSRCS += am67_mpuinit.c
 CHIP_CSRCS += am67_pinmux.c
 CHIP_CSRCS += am67_serial.c
 CHIP_CSRCS += am67_timer.c
+ifeq ($(CONFIG_AM67_GPIO),y)
+CHIP_CSRCS += am67_gpio.c
+endif
+ifeq ($(CONFIG_AM67_MCSPI0),y)
+CHIP_CSRCS += am67_mcspi.c
+endif
+CHIP_CSRCS += arm_mpu.c
