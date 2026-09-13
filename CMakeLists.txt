@@ -97,6 +97,42 @@ if(EXISTS "${NUTTX_DIR}/.config")
     FATAL_ERROR "Please distclean previous make build with `make distclean`")
 endif()
 
+# Check if board presets already exist
+set(GENERATED_PRESET_FILE "${CMAKE_SOURCE_DIR}/CMakeUserPresets.json")
+
+if(NOT EXISTS "${GENERATED_PRESET_FILE}")
+  message(STATUS "CMake board presets not found. Generating them now...")
+  message(
+    STATUS
+      "  This will create 'CMakeUserPresets.json' with all available board configs."
+  )
+
+  execute_process(
+    COMMAND python3 "${CMAKE_SOURCE_DIR}/tools/generate_cmake_presets.py"
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    RESULT_VARIABLE GEN_RESULT
+    OUTPUT_VARIABLE GEN_OUTPUT
+    ERROR_VARIABLE GEN_ERROR)
+
+  if(GEN_RESULT EQUAL 0)
+    message(STATUS "   Board presets generated successfully.")
+    message(
+      STATUS
+        "   Please reload CMake configuration (e.g., re-run 'cmake -B build')")
+    message(STATUS "   to see the presets in your IDE.")
+  else()
+    message(
+      WARNING
+        "Failed to generate board presets (python3 not found or script error).")
+    message(WARNING "  To enable preset selection, run manually:")
+    message(
+      WARNING "    python3 ${CMAKE_SOURCE_DIR}/tools/generate_cmake_presets.py")
+    if(GEN_ERROR)
+      message(STATUS "  Error output: ${GEN_ERROR}")
+    endif()
+  endif()
+endif()
+
 if(NOT DEFINED BOARD_CONFIG)
   message(FATAL_ERROR "Please define configuration with BOARD_CONFIG")
 endif()

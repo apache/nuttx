@@ -1364,6 +1364,15 @@ config ARCH_BOARD_MOXA
 	---help---
 		Moxa
 
+config ARCH_BOARD_N32H762IIL7
+	bool "Nation Tech N32H762IIL7 DevKit"
+	depends on ARCH_CHIP_N32H762II
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This is the board configuration for the port of NuttX to the
+
 config ARCH_BOARD_NE64BADGE
 	bool "FEG NE64 /PoE Badge board"
 	depends on ARCH_CHIP_MCS92S12NEC64
@@ -4258,6 +4267,7 @@ config ARCH_BOARD
 	default "phy6222"                      if ARCH_BOARD_PHY6222
 	default "sim"                          if ARCH_BOARD_SIM
 	default "moxa"                         if ARCH_BOARD_MOXA
+	default "n32h762iil7"                  if ARCH_BOARD_N32H762IIL7
 	default "spresense"                    if ARCH_BOARD_SPRESENSE
 	default "xx3803"                       if ARCH_BOARD_XX3803
 	default "xx3823"                       if ARCH_BOARD_XX3823

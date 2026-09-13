@@ -1,0 +1,35 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_N32H762IIL7
+
+config N32_ROMFS
+	bool "Automount baked-in ROMFS image"
+	default n
+	depends on FS_ROMFS
+	---help---
+		Select N32_ROMFS_IMAGEFILE, N32_ROMFS_DEV_MINOR, N32_ROMFS_MOUNTPOINT
+
+config N32_ROMFS_DEV_MINOR
+	int "Minor for the block device backing the data"
+	depends on N32_ROMFS
+	default 64
+
+config N32_ROMFS_MOUNTPOINT
+	string "Mountpoint of the custom romfs image"
+	depends on N32_ROMFS
+	default "/rom"
+
+config N32_ROMFS_IMAGEFILE
+	string "ROMFS image file to include into build"
+	depends on N32_ROMFS
+	default "../../../rom.img"
+
+config N32_BOARDCTL_RESET
+	bool "Board control reset support"
+	select BOARDCTL_RESET
+	default n
+
+endif # ARCH_BOARD_N32H762IIL7

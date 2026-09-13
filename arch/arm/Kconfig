@@ -303,6 +303,22 @@ config ARCH_CHIP_MOXART
 	---help---
 		MoxART family
 
+config ARCH_CHIP_N32H7
+	bool "N32 H7"
+	select ARCH_CORTEXM7
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_PROGMEM
+#	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_SPI_BITORDER
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_HAVE_STACKCHECK
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_TIMEKEEPING
+	---help---
+		Nation Tech N32H7 architectures (ARM Cortex-M7 or
+		dual ARM Cortex-M7 Cortex-M4).
+
 config ARCH_CHIP_NRF52
 	bool "Nordic nRF52"
 	select ARCH_CORTEXM4
@@ -1317,6 +1333,7 @@ config ARCH_CHIP
 	default "lpc54xx"	if ARCH_CHIP_LPC54XX
 	default "max326xx"	if ARCH_CHIP_MAX326XX
 	default "moxart"	if ARCH_CHIP_MOXART
+	default "n32h7"		if ARCH_CHIP_N32H7
 	default "nrf52"		if ARCH_CHIP_NRF52
 	default "nrf53"		if ARCH_CHIP_NRF53
 	default "nrf91"		if ARCH_CHIP_NRF91
@@ -1810,6 +1827,9 @@ source "arch/arm/src/max326xx/Kconfig"
 endif
 if ARCH_CHIP_MOXART
 source "arch/arm/src/moxart/Kconfig"
+endif
+if ARCH_CHIP_N32H7
+source "arch/arm/src/n32h7/Kconfig"
 endif
 if ARCH_CHIP_NRF52
 source "arch/arm/src/nrf52/Kconfig"
