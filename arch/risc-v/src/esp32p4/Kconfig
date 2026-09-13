@@ -145,6 +145,26 @@ endmenu # Cache config
 
 endif # ARCH_CHIP_ESP32P4
 
+config ARCH_RV_CLIC_INTTHRESH_MMIO
+	hex
+	default 0x20800008 if ESP32P4_SELECTS_REV_LESS_V3
+	---help---
+		Pre-v3 ESP32-P4 silicon implements a non-standard CLIC: the interrupt
+		threshold lives in this memory-mapped register rather than in the
+		mintthresh CSR, and reading that CSR raises an illegal instruction.
+		Defining this switches the common RISC-V code over to the
+		memory-mapped register; it is left undefined on parts that implement
+		the CSR, which then keep using it.
+
+config ARCH_RV_CLIC_INTTHRESH_MMIO_MAX
+	hex
+	default 0xff000000 if ESP32P4_SELECTS_REV_LESS_V3
+	---help---
+		Value written to ARCH_RV_CLIC_INTTHRESH_MMIO to mask every interrupt.
+		The threshold occupies the top byte of the register, and with NLBITS
+		of 3 an absolute level L encodes as ((L << 5) | 0x1f), so level 7 --
+		mask everything -- is 0xff placed at bit 24.
+
 config P4_REV3_MSPI_CRASH_AFTER_POWER_UP_WORKAROUND
 	bool
 	default y if ESP32P4_REV_MIN_300

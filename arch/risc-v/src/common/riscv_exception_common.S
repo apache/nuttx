@@ -148,7 +148,12 @@ exception_common:
   csrr       s1, CSR_EPC          /* s1=exception PC */
   csrr       s2, CSR_CAUSE        /* s2=cause */
 #ifdef CONFIG_ARCH_RV_HAVE_CLIC
+#ifdef CONFIG_ARCH_RV_CLIC_INTTHRESH_MMIO
+  li         s4, CONFIG_ARCH_RV_CLIC_INTTHRESH_MMIO
+  lw         s4, 0(s4)            /* s4=interrupt threshold */
+#else
   csrr       s4, CSR_INTTHRESH    /* s4=interrupt threshold */
+#endif
 #endif
 
 
@@ -353,7 +358,13 @@ return_from_exception:
   csrw       CSR_STATUS, s0
 #ifdef CONFIG_ARCH_RV_HAVE_CLIC
   REGLOAD    s0, REG_INT_THRESH(sp) /* restore interrupt threshold */
+#ifdef CONFIG_ARCH_RV_CLIC_INTTHRESH_MMIO
+  li         s1, CONFIG_ARCH_RV_CLIC_INTTHRESH_MMIO
+  sw         s0, 0(s1)
+  lw         s1, 0(s1)            /* force the store; threshold takes effect */
+#else
   csrw       CSR_INTTHRESH, s0
+#endif
 #endif
 
 #ifdef CONFIG_RISCV_FRAME_TRACE
