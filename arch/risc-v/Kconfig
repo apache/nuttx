@@ -222,6 +222,7 @@ config ARCH_CHIP_ESP32P4
 	select ARCH_RV_ISA_M
 	select ARCH_RV_ISA_A
 	select ARCH_RV_ISA_C
+	select ARCH_RV_HAVE_CLIC
 	select ARCH_VECNOTIRQ
 	select ARCH_HAVE_BOOTLOADER if !ESPRESSIF_SIMPLE_BOOT
 	select ARCH_HAVE_I2CRESET
@@ -794,6 +795,15 @@ config ARCH_RV_HAVE_APLIC
 		Instead of PLIC, RISC-V also defines Advanced Platform-Level Interrupt
 		Controller (APLIC) to provide flexible interrupt control. This device
 		is not backward compatible with PLIC.
+
+config ARCH_RV_HAVE_CLIC
+	bool
+	default n
+	---help---
+		RISC-V defines Core-Level Interrupt Controller (CLIC) to provide
+		flexible interrupt control. When enabled, CLIC uses interrupt
+		threshold (MINTTHRESH/SINTTHRESH) CSRs for interrupt control
+		instead of the standard IE bit in STATUS register.
 
 config ARCH_RV_EXT_AIA
 	bool "Enable RISC-V SxAIA support"

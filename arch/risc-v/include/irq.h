@@ -205,9 +205,13 @@
  * mret consults -- so it must be saved and restored with the frame, not just
  * read for dispatch.  Uses the ARCH_RISCV_INTXCPT_EXTREGS extension slot,
  * so REG_INT_CTX and everything below it keep their existing offsets.
+ *
+ * Only a protected build needs this: a flat build never returns to a lower
+ * privilege level, so nothing consumes the saved mpp.  Keeping the frame at
+ * its original size there leaves every flat RISC-V target untouched.
  */
 
-#if defined(CONFIG_ARCH_CHIP_ESP32P4) && !defined(CONFIG_BUILD_FLAT)
+#if defined(CONFIG_ARCH_RV_HAVE_CLIC) && !defined(CONFIG_BUILD_FLAT)
 #  define REG_MCAUSE_NDX    33
 #endif
 
