@@ -3913,6 +3913,16 @@ static int stm32_macconfig(struct stm32_ethmac_s *priv)
   regval &= ~MACCR_CLEAR_BITS;
   regval |= MACCR_SET_BITS;
 
+  /* Disable reception of our own transmitted frames. In half-duplex
+   * mode the MAC otherwise reflects every frame it transmits back to
+   * its own receiver (this bit has no effect in full-duplex, so it is
+   * safe to set unconditionally). Without it, a busy transmitter can
+   * flood the receive path with its own traffic right as a genuine
+   * reply arrives.
+   */
+
+  regval |= ETH_MACCR_ROD;
+
   if (priv->fduplex)
     {
       /* Set the DM bit for full duplex support */
