@@ -53,7 +53,7 @@ static FAR char *file_get_path(FAR struct file *filep)
   FAR char *pathbuffer;
   int ret;
 
-  pathbuffer = lib_get_pathbuffer();
+  pathbuffer = lib_malloc(PATH_MAX);
   if (pathbuffer == NULL)
     {
       return NULL;
@@ -62,7 +62,7 @@ static FAR char *file_get_path(FAR struct file *filep)
   ret = file_fcntl(filep, F_GETPATH, pathbuffer);
   if (ret < 0)
     {
-      lib_put_pathbuffer(pathbuffer);
+      lib_free(pathbuffer);
       return NULL;
     }
 
@@ -139,7 +139,7 @@ int file_close(FAR struct file *filep)
           if (path != NULL)
             {
               notify_close(path, filep->f_oflags);
-              lib_put_pathbuffer(path);
+              lib_free(path);
             }
 #endif
 
@@ -148,7 +148,7 @@ int file_close(FAR struct file *filep)
 #ifdef CONFIG_FS_NOTIFY
       else if (path != NULL)
         {
-          lib_put_pathbuffer(path);
+          lib_free(path);
         }
 #endif
 
