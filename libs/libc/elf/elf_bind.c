@@ -58,6 +58,25 @@
 #  define ARCH_ELFDATA_PARM NULL
 #endif
 
+/* Move loader state in and out of the arch_data block, and say which
+ * relocation table is being walked.  Nothing for an architecture whose
+ * relocations do not need any of it.
+ */
+
+#if defined(ARCH_ELFDATA) && defined(ARCH_ELFDATA_SET_PLTREL)
+#  define ARCH_ELFDATA_PLTREL(v) ARCH_ELFDATA_SET_PLTREL(&arch_data, v)
+#else
+#  define ARCH_ELFDATA_PLTREL(v)
+#endif
+
+#if defined(ARCH_ELFDATA) && defined(ARCH_ELFDATA_INIT)
+#  define ARCH_ELFDATA_SETUP(l)    ARCH_ELFDATA_INIT(&arch_data, l)
+#  define ARCH_ELFDATA_TEARDOWN(l) ARCH_ELFDATA_FINI(&arch_data, l)
+#else
+#  define ARCH_ELFDATA_SETUP(l)
+#  define ARCH_ELFDATA_TEARDOWN(l)
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -720,7 +739,8 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
              * for it names this base.
              */
 
-            loadinfo->gotbase = dyn[i].d_un.d_ptr;
+            loadinfo->gotbase = libelf_addr(loadinfo,
+                                            dyn[i].d_un.d_ptr);
             break;
 
           /* The constructor and destructor tables.  Section headers are
@@ -778,6 +798,13 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
         }
     }
 
+  /* After the loop, because DT_PLTGOT is read there.  Both relocation
+   * tables are walked under this one arch_data, so the pool cursor
+   * survives from one to the next.
+   */
+
+  ARCH_ELFDATA_SETUP(loadinfo);
+
   symhdr = &loadinfo->shdr[loadinfo->dsymtabidx];
   sym = lib_malloc(symhdr->sh_size);
   if (!sym)
@@ -814,6 +841,10 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
 
       ret = OK;
       lrelent = reldata.relsz[idx_rel] / reldata.relentsz[idx_rel];
+
+      /* Say which table this is, for an architecture that cares. */
+
+      ARCH_ELFDATA_PLTREL(idx_rel == I_PLT);
 
       for (i = 0; i < lrelent; i++)
         {
@@ -909,7 +940,30 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
                       addr += rela->r_addend;
                     }
 
-                  *(FAR uintptr_t *)addr = (uintptr_t)ep;
+                  /* An import may be a descriptor under FDPIC, which is
+                   * built rather than assigned, so the relocation type
+                   * decides what to write.  Everything else stores the
+                   * resolved address, which R_ARM_JUMP_SLOT and
+                   * R_ARM_GLOB_DAT do, so one path serves both.
+                   */
+
+                  Elf_Sym extsym =
+                  {
+                    0
+                  };
+
+                  extsym.st_value = (uintptr_t)ep;
+
+                  ret = up_relocate(rel, &extsym, addr, ARCH_ELFDATA_PARM);
+                  if (ret < 0)
+                    {
+                      berr("ERROR: Section %d reloc %d: "
+                           "Relocation failed: %d\n", relidx, i, ret);
+                      lib_free(sym);
+                      lib_free(rels);
+                      lib_free(dyn);
+                      return ret;
+                    }
                 }
               else if (loadinfo->fdpic)
                 {
@@ -974,6 +1028,12 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
             }
         }
     }
+
+  /* Hand back what the relocations consumed.  The error paths above do
+   * not bother: the load is being abandoned, so the cursor has no reader.
+   */
+
+  ARCH_ELFDATA_TEARDOWN(loadinfo);
 
   lib_free(sym);
   lib_free(rels);
