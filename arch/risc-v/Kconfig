@@ -733,25 +733,6 @@ config RISCV_MISALIGNED_HANDLER
 	depends on ARCH_HAVE_MISALIGN_EXCEPTION
 	default y
 
-config RISCV_FRAME_TRACE
-	bool "Trap frame trace (debug)"
-	default n
-	depends on !BUILD_FLAT
-	---help---
-		Record a ring of trap frames at the points where the kernel chooses
-		which frame to resume: interrupt dispatch, context-switch
-		syscalls, syscall return and the signal paths.  Each entry holds the
-		frame pointer, EPC, the saved status word and, where the
-		architecture carries it, mcause.
-
-		Intended too help debugging a protected build, where a frame restored
-		may be with the wrong privilege or interrupt level
-		Nothing is printed inline; the ring is read out
-		of RAM with a debugger, or dumped from the panic path.
-
-		This adds a call on every trap dispatch and a static ring buffer
-		and is not intended fro production builds.
-
 config RISCV_PERCPU_SCRATCH
 	bool "Enable Scratch-based Per-CPU storage"
 	default y if LIB_SYSCALL

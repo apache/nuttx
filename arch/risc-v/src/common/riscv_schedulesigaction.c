@@ -121,13 +121,4 @@ void up_schedule_sigaction(struct tcb_s *tcb)
 #endif
 
   tcb->xcp.regs[REG_INT_CTX] = int_ctx;
-
-#ifdef CONFIG_RISCV_FRAME_TRACE
-  /* Record the frame this built.  It deliberately sets MPP=M so the
-   * trampoline runs privileged, and leaves REG_MCAUSE as the copied user
-   * value.
-   */
-
-  riscv_trace_frame(RISCV_TRACE_TAG_SIG_SCHED, tcb, tcb->xcp.regs);
-#endif
 }

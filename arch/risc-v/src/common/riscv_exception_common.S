@@ -148,7 +148,6 @@ exception_common:
   csrr       s1, CSR_EPC          /* s1=exception PC */
   csrr       s2, CSR_CAUSE        /* s2=cause */
 
-
 #ifdef CONFIG_ARCH_KERNEL_STACK
   csrr       s3, CSR_SCRATCH
   REGLOAD    s3, RISCV_PERCPU_USP(s3)
@@ -211,16 +210,6 @@ return_from_syscall:
   /* Clean up after system call */
 
   REGSTORE   a0, REG_A0(sp)       /* Syscall return value to user context */
-
-#ifdef CONFIG_RISCV_FRAME_TRACE
-  /* Frame trace.  Safe here: the return value is already stored to the frame
-   * and everything is restored from sp immediately below, so clobbering
-   * caller-saved registers costs nothing.
-   */
-
-  mv         a0, sp
-  call       x1, riscv_trace_syscall_ret
-#endif
 
   mv         a0, sp               /* Return to same context */
   tail       return_from_exception
@@ -345,26 +334,6 @@ return_from_exception:
 
   REGLOAD    s0, REG_INT_CTX(sp)  /* restore status */
   csrw       CSR_STATUS, s0
-
-#ifdef CONFIG_RISCV_FRAME_TRACE
-  /* Capture what this mret will actually
-   * consume, after every CSR write and before the register reloads.  t0/t1 are
-   * reloaded from the frame further down this epilogue, so clobbering them here
-   * is safe; no argument register is touched.  Read the globals with an
-   * observe-only halt.
-   */
-
-  la         t0, g_mret_epc
-  csrr       t1, CSR_EPC
-  REGSTORE   t1, 0(t0)
-  la         t0, g_mret_status
-  csrr       t1, CSR_STATUS
-  REGSTORE   t1, 0(t0)
-  la         t0, g_mret_cause
-  csrr       t1, mcause
-  REGSTORE   t1, 0(t0)
-#endif
-
 
 #ifdef CONFIG_LIB_SYSCALL
   /* Store tcb to scratch register */
