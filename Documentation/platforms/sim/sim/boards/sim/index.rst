@@ -41,6 +41,43 @@ Timing Fidelity
    Another option is to use ``CONFIG_SIM_WALLTIME_SLEEP`` which will enable the
    tick events to be delayed from the Idle task by using a host sleep call.
 
+BabbleSim Discrete Time
+-----------------------
+
+The Linux ``sim`` target can optionally use a BabbleSim PHY process as the
+monotonic time source.  This is useful for tests where a NuttX host-side stack
+and other BabbleSim devices need to advance in the same discrete-time domain.
+
+Enable ``CONFIG_SIM_BSIM_TIME`` together with ``CONFIG_SIM_WALLTIME_SLEEP``.
+This mode is available only on Linux hosts and is not supported with SMP or
+``CONFIG_SIM_WALLTIME_SIGNAL``.
+
+When ``CONFIG_SIM_BSIM_TIME`` is enabled, the build needs the BabbleSim
+component headers and libraries:
+
+.. code:: console
+
+   $ export BSIM_OUT_PATH=/path/to/bsim
+   $ export BSIM_COMPONENTS_PATH=${BSIM_OUT_PATH}/components
+
+``BSIM_LIBS_DIR`` may be used instead of ``BSIM_OUT_PATH`` when the BabbleSim
+shared libraries are installed in a non-default directory.
+
+When ``CONFIG_SIM_BSIM_TIME`` is enabled, the simulator connects to the
+BabbleSim PHY at startup:
+
+.. code:: console
+
+   $ ./nuttx --sim-bsim-sid=default \
+       --sim-bsim-pid=2G4 \
+       --sim-bsim-dev=0
+
+The BabbleSim PHY process must be started separately by the test runner before
+launching the NuttX simulator.
+
+The runtime options override ``CONFIG_SIM_BSIM_SIM_ID``,
+``CONFIG_SIM_BSIM_PHY_ID``, and ``CONFIG_SIM_BSIM_DEVICE_NBR``.
+
 Debugging
 =========
 
@@ -614,17 +651,48 @@ the NULL Bluetooth device at ``drivers/wireless/bluetooth/bt_null.c``.
 There is also support on a Linux Host for attaching the bluetooth hardware from
 the host to the NuttX bluetooth stack via the HCI Socket interface over the User
 Channel. This is enabled in the bthcisock configuration. In order to use this
-you must give the ``nuttx`` ELF additional capabilities:
+with the configured default HCI device, you must give the ``nuttx`` ELF
+additional capabilities:
 
 .. code:: console
 
    $ sudo setcap 'cap_net_raw,cap_net_admin=eip' ./nuttx
 
-You can then monitor the HCI traffic on the host with WireShark or ``btmon``:
+The default HCI device is selected by ``CONFIG_SIM_HCISOCKET_DEVID``. It may be
+overridden at runtime with ``--bt-dev=hciN``:
+
+.. code:: console
+
+   $ ./nuttx --bt-dev=hci1
+
+You can then monitor the BlueZ HCI traffic on the host with WireShark or
+``btmon``:
 
 .. code:: console
 
    $ sudo btmon
+
+The sim target can also connect to an HCI H:4 stream exposed through a Unix
+domain socket by passing an absolute socket path:
+
+.. code:: console
+
+   $ ./nuttx --bt-dev=/tmp/hci0.sock
+
+This Unix socket mode does not require a BlueZ HCI device. Since ``nuttx`` only
+connects to a normal Unix domain socket, the ``nuttx`` process does not need to
+run as root and does not need the ``setcap`` command above. This is useful when
+the controller is provided by another host process, or when a UART controller is
+bridged into a Unix socket with a tool such as ``socat``:
+
+.. code:: console
+
+   $ socat UNIX-LISTEN:/tmp/hci0.sock,fork,reuseaddr \
+       /dev/ttyACM0,b1000000,raw,echo=0,crtscts=1
+
+The process listening on the socket must be started before NuttX. If that
+process opens a real UART device, it still needs permission to access that UART
+device.
 
 configdata
 ----------
