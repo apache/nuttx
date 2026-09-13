@@ -164,11 +164,23 @@ static int pkt_in(FAR struct net_driver_s *dev)
 
       if (conn->pendiob == dev->d_iob)
         {
-          /* Do not read back the packet sent by oneself */
+          /* The iob pool is small and recycled quickly, so a genuinely
+           * different received packet can end up reusing the exact
+           * iob slot our own last transmission used. Matching on the
+           * iob pointer alone would then drop that unrelated packet
+           * as a false positive. Require the length to also match
+           * what we sent, since a real self-echo is byte-for-byte
+           * the same frame we just transmitted.
+           */
 
-          conn->pendiob = NULL;
-          pkt_conn_list_unlock();
-          return OK;
+          if (conn->pendiob_len == dev->d_len)
+            {
+              /* Do not read back the packet sent by oneself */
+
+              conn->pendiob = NULL;
+              pkt_conn_list_unlock();
+              return OK;
+            }
         }
 
 #if defined(CONFIG_NET_TIMESTAMP) && !defined(CONFIG_ARCH_HAVE_NETDEV_TIMESTAMP)
