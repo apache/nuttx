@@ -28,9 +28,6 @@
 
 #include <inttypes.h>
 #include <stdint.h>
-#ifdef CONFIG_RISCV_FRAME_TRACE
-#  include <stdbool.h>
-#endif
 #include <string.h>
 #include <assert.h>
 #include <nuttx/debug.h>
@@ -140,170 +137,6 @@ uintptr_t dispatch_syscall(unsigned int nbr, uintptr_t parm1,
 }
 #endif
 
-#ifdef CONFIG_RISCV_FRAME_TRACE
-
-/****************************************************************************
- * Trap frame trace, CONFIG_RISCV_FRAME_TRACE.
- *
- * The question: when a user task blocks inside a syscall and is later
- * resumed, which frame does the kernel restore on the way back out, and does
- * its REG_INT_CTX carry MPP=M?  riscv_doirq() ends with
- * "regs = tcb->xcp.regs", so that is the single point where every trap
- * decides what to restore -- RISCV_TRACE_TAG_DOIRQ records it.  The
- * RISCV_TRACE_TAG_RESTORE_CTX and RISCV_TRACE_TAG_SWITCH_CTX tags record the
- * two context-switch cases below.
- *
- * Nothing is printed inline: on the polled UART console each character costs
- * ~87 us, and printing from inside the switch path would perturb the timing
- * under test.  The ring buffer is dumped from the "default" case instead --
- * i.e. exactly when the flip has produced its panic.
- ****************************************************************************/
-
-#define TRACE_ENTRIES  64
-#define TRACE_USER_LO  0x40200000  /* user image text window */
-#define TRACE_USER_HI  0x40300000
-
-struct riscv_trace_s
-{
-  uintreg_t *regs;
-  uintreg_t  epc;
-  uintreg_t  int_ctx;
-  uintreg_t  mcause;
-  int16_t    irq;
-  uint8_t    tag;                  /* RISCV_TRACE_TAG_* */
-  pid_t      pid;
-};
-
-static struct riscv_trace_s g_trace[TRACE_ENTRIES];
-static unsigned int         g_trace_ndx;
-
-/* Written by the asm probe in return_from_exception
- * (riscv_exception_common.S) immediately after the mepc/mstatus restores:
- * what the mret will actually consume, as opposed to what the frame holds.
- */
-
-uintreg_t g_mret_epc;
-uintreg_t g_mret_status;
-uintreg_t g_mret_cause;
-
-void riscv_trace_frame(int tag, struct tcb_s *tcb, uintreg_t *regs)
-{
-  struct riscv_trace_s *e = &g_trace[g_trace_ndx % TRACE_ENTRIES];
-
-  e->tag  = (uint8_t)(tag & 0xff);
-  e->irq  = (int16_t)(tag >> 8);
-  e->pid  = tcb != NULL ? tcb->pid : -1;
-  e->regs = regs;
-
-  if (regs != NULL)
-    {
-      e->epc     = regs[REG_EPC];
-      e->int_ctx = regs[REG_INT_CTX];
-#ifdef REG_MCAUSE
-      /* The frame's mcause, so mpil (23:16) can be tracked: mil pinned at 63
-       * is what deadlocks the interrupt system.
-       */
-
-      e->mcause  = regs[REG_MCAUSE];
-#endif
-    }
-  else
-    {
-      e->epc     = 0;
-      e->int_ctx = 0;
-      e->mcause  = 0;
-    }
-
-  g_trace_ndx++;
-}
-
-/* Called from return_from_syscall (riscv_exception_common.S).  User
- * syscall returns bypass riscv_doirq() entirely -- they restore the frame
- * at sp -- so this is the only place they can be observed.
- */
-
-void riscv_trace_syscall_ret(uintreg_t *regs)
-{
-  riscv_trace_frame(RISCV_TRACE_TAG_SYSCALL_RET, this_task(), regs);
-}
-
-/* Called from exception_common (riscv_exception_common.S) on EVERY trap
- * entry, once the frame is fully formed.  This is the mirror of the
- * exit records: it shows the privilege the CPU was in when the trap was
- * taken, straight from the hardware, plus the raw mcause.
- */
-
-void riscv_trace_trap_entry(uintreg_t *regs, uintreg_t mcause)
-{
-  struct riscv_trace_s *e = &g_trace[g_trace_ndx % TRACE_ENTRIES];
-
-  riscv_trace_frame(RISCV_TRACE_TAG_TRAP_ENTRY, this_task(), regs);
-
-  /* riscv_trace_frame() may have skipped the entry; only stamp mcause if it
-   * actually recorded one.
-   */
-
-  if (e->tag == RISCV_TRACE_TAG_TRAP_ENTRY)
-    {
-      e->mcause = mcause;
-    }
-}
-
-void riscv_trace_dump(uintreg_t *regs)
-{
-  unsigned int total;
-
-  /* Record the panicking frame itself, so that its REG_INT_CTX can be
-   * read out of RAM with an observe-only halt.  The _alert() output below is
-   * unreliable on this board at panic time; the ring buffer is not.
-   */
-
-  /* Stamp what the last mret consumed, from the asm probe, so that it
-   * comes out of the same ring-buffer read.
-   */
-
-  {
-    struct riscv_trace_s *m = &g_trace[g_trace_ndx % TRACE_ENTRIES];
-
-    m->tag     = RISCV_TRACE_TAG_MRET;
-    m->pid     = -1;
-    m->irq     = 0;
-    m->regs    = NULL;
-    m->epc     = g_mret_epc;
-    m->int_ctx = g_mret_status;
-    m->mcause  = g_mret_cause;
-    g_trace_ndx++;
-  }
-
-  riscv_trace_frame(RISCV_TRACE_TAG_PANIC, this_task(), regs);
-
-  total = g_trace_ndx;
-  unsigned int n     = total < TRACE_ENTRIES ? total : TRACE_ENTRIES;
-  unsigned int i;
-
-  _alert("TRACE: panic cmd=%" PRIxREG " frame=%p epc=%" PRIxREG
-         " int_ctx=%" PRIxREG "\n",
-         regs[REG_A0], regs, regs[REG_EPC], regs[REG_INT_CTX]);
-  _alert("TRACE: %u events, last %u shown; tag %u=doirq %u=restore "
-         "%u=switch\n",
-         total, n, RISCV_TRACE_TAG_DOIRQ, RISCV_TRACE_TAG_RESTORE_CTX,
-         RISCV_TRACE_TAG_SWITCH_CTX);
-
-  for (i = total - n; i < total; i++)
-    {
-      struct riscv_trace_s *e = &g_trace[i % TRACE_ENTRIES];
-      bool user = e->epc >= TRACE_USER_LO && e->epc < TRACE_USER_HI;
-      bool mpp  = (e->int_ctx & STATUS_PPP) != 0;
-
-      _alert("  [%2u] tag=%u irq=%d pid=%d frame=%p epc=%" PRIxREG
-             " int_ctx=%" PRIxREG " %s%s\n",
-             i, e->tag, e->irq, e->pid, e->regs, e->epc, e->int_ctx,
-             user ? "[user]" : "[kern]",
-             (user && mpp) ? " <<< USER FRAME WITH MPP=M" : "");
-    }
-}
-#endif /* CONFIG_RISCV_FRAME_TRACE */
-
 /****************************************************************************
  * Name: riscv_swint
  *
@@ -335,10 +168,6 @@ int riscv_swint(int irq, void *context, void *arg)
     {
       case SYS_restore_context:
         {
-#ifdef CONFIG_RISCV_FRAME_TRACE
-          riscv_trace_frame(RISCV_TRACE_TAG_RESTORE_CTX, tcb,
-                            tcb->xcp.regs);
-#endif
           riscv_restorecontext(tcb);
           restore_critical_section(tcb, cpu);
         }
@@ -346,10 +175,6 @@ int riscv_swint(int irq, void *context, void *arg)
 
       case SYS_switch_context:
         {
-#ifdef CONFIG_RISCV_FRAME_TRACE
-          riscv_trace_frame(RISCV_TRACE_TAG_SWITCH_CTX, tcb,
-                            tcb->xcp.regs);
-#endif
           riscv_savecontext(g_running_tasks[cpu]);
           riscv_restorecontext(tcb);
           restore_critical_section(tcb, cpu);
@@ -373,10 +198,6 @@ int riscv_swint(int irq, void *context, void *arg)
 #if !defined(CONFIG_BUILD_FLAT) && defined(CONFIG_ENABLE_ALL_SIGNALS)
       case SYS_signal_handler:
         {
-#ifdef CONFIG_RISCV_FRAME_TRACE
-          riscv_trace_frame(RISCV_TRACE_TAG_SIG_HANDLER, this_task(),
-                            regs);
-#endif
           struct tcb_s *rtcb   = this_task();
 
           /* Remember the caller's return address */
@@ -454,10 +275,6 @@ int riscv_swint(int irq, void *context, void *arg)
 #if !defined(CONFIG_BUILD_FLAT) && defined(CONFIG_ENABLE_ALL_SIGNALS)
       case SYS_signal_handler_return:
         {
-#ifdef CONFIG_RISCV_FRAME_TRACE
-          riscv_trace_frame(RISCV_TRACE_TAG_SIG_RETURN, this_task(),
-                            regs);
-#endif
           struct tcb_s *rtcb   = this_task();
 
           /* Set up to return to the kernel-mode signal dispatching logic. */
@@ -486,17 +303,6 @@ int riscv_swint(int irq, void *context, void *arg)
 #endif
 
       default:
-#ifdef CONFIG_RISCV_FRAME_TRACE
-        /* Record the panicking frame but do NOT print the ring here.
-         * riscv_trace_dump() pushes 64 syslog lines through the polled
-         * console from inside a trap with interrupts disabled; under an
-         * ostest-scale failure that takes minutes and buries the assert
-         * output.  Read the ring out of RAM with an observe-only halt
-         * instead.
-         */
-
-        riscv_trace_frame(RISCV_TRACE_TAG_PANIC, this_task(), regs);
-#endif
         DEBUGPANIC();
         break;
     }

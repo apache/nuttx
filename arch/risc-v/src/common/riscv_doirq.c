@@ -148,14 +148,6 @@ uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
 
   regs = tcb->xcp.regs;
 
-#ifdef CONFIG_RISCV_FRAME_TRACE
-  /* This is the single point where every trap decides which frame to
-   * restore.
-   */
-
-  riscv_trace_frame(RISCV_TRACE_TAG_IRQ(irq), tcb, regs);
-#endif
-
   /* (*running_task)->xcp.regs is about to become invalid
    * and will be marked as NULL to avoid misusage.
    */

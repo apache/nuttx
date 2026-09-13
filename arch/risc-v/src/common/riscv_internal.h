@@ -102,32 +102,6 @@
 #define PMP_ACCESS_DENIED   (-1)    /* Access set and denied */
 #define PMP_ACCESS_FULL     (1)     /* Access set and allowed */
 
-#ifdef CONFIG_RISCV_FRAME_TRACE
-
-/* Trap frame trace tags, the "tag" argument of riscv_trace_frame().  Each
- * one names the place in the trap path that recorded the frame; they are
- * printed verbatim by riscv_trace_dump().  The tag occupies the low 8 bits
- * of the argument, bits 8 and up carry the IRQ number (see
- * RISCV_TRACE_TAG_IRQ).
- */
-
-#define RISCV_TRACE_TAG_DOIRQ        0  /* riscv_doirq() frame selection */
-#define RISCV_TRACE_TAG_RESTORE_CTX  1  /* SYS_restore_context */
-#define RISCV_TRACE_TAG_SWITCH_CTX   2  /* SYS_switch_context */
-#define RISCV_TRACE_TAG_SYSCALL_RET  3  /* return_from_syscall */
-#define RISCV_TRACE_TAG_TRAP_ENTRY   4  /* exception_common, every trap */
-#define RISCV_TRACE_TAG_SIG_SCHED    5  /* frame built for signal delivery */
-#define RISCV_TRACE_TAG_SIG_HANDLER  6  /* SYS_signal_handler */
-#define RISCV_TRACE_TAG_SIG_RETURN   7  /* SYS_signal_handler_return */
-#define RISCV_TRACE_TAG_MRET         8  /* what the last mret consumed */
-#define RISCV_TRACE_TAG_PANIC        9  /* the panicking frame */
-
-/* Tag for a frame recorded on behalf of a given IRQ */
-
-#define RISCV_TRACE_TAG_IRQ(irq)     (RISCV_TRACE_TAG_DOIRQ | ((irq) << 8))
-
-#endif /* CONFIG_RISCV_FRAME_TRACE */
-
 #ifndef __ASSEMBLY__
 
 /* Use ASM as rv64ilp32 compiler generated address is limited */
@@ -229,14 +203,6 @@ void riscv_ack_irq(int irq);
 void riscv_sigdeliver(void);
 int riscv_swint(int irq, void *context, void *arg);
 
-/* Trap frame trace, CONFIG_RISCV_FRAME_TRACE.  See the option's help text. */
-
-#ifdef CONFIG_RISCV_FRAME_TRACE
-void riscv_trace_frame(int tag, struct tcb_s *tcb, uintreg_t *regs);
-void riscv_trace_dump(uintreg_t *regs);
-void riscv_trace_syscall_ret(uintreg_t *regs);
-void riscv_trace_trap_entry(uintreg_t *regs, uintreg_t mcause);
-#endif
 uintptr_t riscv_get_newintctx(void);
 void riscv_set_idleintctx(void);
 void riscv_exception_attach(void);
