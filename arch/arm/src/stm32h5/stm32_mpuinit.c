@@ -32,8 +32,6 @@
 #include "mpu.h"
 #include "stm32_mpuinit.h"
 
-#ifdef CONFIG_ARM_MPU
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -63,5 +61,3 @@ void stm32_mpuinitialize(void)
 
   mpu_control(true, false, true);
 }
-
-#endif /* CONFIG_ARM_MPU */
