@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/aio/lio_listio.c
+ * fs/aio/lio_listio.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -36,24 +36,9 @@
 #include <nuttx/signal.h>
 #include <nuttx/sched.h>
 
-#include "libc.h"
 #include "aio/aio.h"
 
 #ifdef CONFIG_FS_AIO
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-struct lio_sighand_s
-{
-  FAR struct aiocb * const *list;  /* List of I/O operations */
-  FAR struct sigevent sig;         /* Describes how to signal the caller */
-  int nent;                        /* Number or elements in list[] */
-  pid_t pid;                       /* ID of client */
-  sigset_t oprocmask;              /* sigprocmask to restore */
-  struct sigaction oact;           /* Signal handler to restore */
-};
 
 /****************************************************************************
  * Private Functions
@@ -81,7 +66,8 @@ struct lio_sighand_s
  *
  ****************************************************************************/
 
-static int lio_checkio(FAR struct aiocb * const *list, int nent)
+static int lio_checkio(FAR struct aiocb *restrict const *restrict list,
+                       int nent)
 {
   FAR struct aiocb *aiocbp;
   int ret;
@@ -126,173 +112,6 @@ static int lio_checkio(FAR struct aiocb * const *list, int nent)
 }
 
 /****************************************************************************
- * Name: lio_sighandler
- *
- * Description:
- *   Handle the SIGPOLL signal.
- *
- * Input Parameters:
- *   signo   - The number of the signal that we caught (SIGPOLL)
- *   info    - Information accompanying the signal
- *   context - Not used in NuttX
- *
- * Returned Value:
- *  None
- *
- ****************************************************************************/
-
-static void lio_sighandler(int signo, siginfo_t *info, void *ucontext)
-{
-  FAR struct aiocb *aiocbp;
-  FAR struct lio_sighand_s *sighand;
-  int ret;
-
-  DEBUGASSERT(signo == SIGPOLL && info);
-
-  /* The info structure should contain a pointer to the AIO control block */
-
-  aiocbp = (FAR struct aiocb *)info->si_value.sival_ptr;
-  DEBUGASSERT(aiocbp && aiocbp->aio_result != -EINPROGRESS);
-
-  /* Recover our private data from the AIO control block */
-
-  sighand = (FAR struct lio_sighand_s *)aiocbp->aio_priv;
-  DEBUGASSERT(sighand && sighand->list);
-  aiocbp->aio_priv = NULL;
-
-  /* Check if all of the pending I/O has completed */
-
-  ret = lio_checkio(sighand->list, sighand->nent);
-  if (ret != -EINPROGRESS)
-    {
-      /* All pending I/O has completed */
-
-      /* Restore the signal handler */
-
-      sigaction(SIGPOLL, &sighand->oact, NULL);
-
-      /* Restore the sigprocmask */
-
-      sigprocmask(SIG_SETMASK, &sighand->oprocmask, NULL);
-
-      /* Signal the client */
-
-      DEBUGVERIFY(nxsig_notification(sighand->pid, &sighand->sig,
-                                     SI_ASYNCIO, &aiocbp->aio_sigwork));
-
-      /* And free the container */
-
-      lib_free(sighand);
-    }
-}
-
-/****************************************************************************
- * Name: lio_sigsetup
- *
- * Description:
- *   Setup a signal handler to detect when until all I/O completes.
- *
- * Input Parameters:
- *   list - The list of I/O operations to be performed
- *   nent - The number of elements in the list
- *
- * Returned Value:
- *  Zero (OK) is returned if all I/O completed successfully; Otherwise, a
- *  negated errno value is returned corresponding to the first error
- *  detected.
- *
- * Assumptions:
- *  The scheduler is locked and no I/O can complete asynchronously with
- *  the logic in this function.
- *
- ****************************************************************************/
-
-static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
-                        FAR struct sigevent *sig)
-{
-  FAR struct aiocb *aiocbp;
-  struct lio_sighand_s sighand;
-  sigset_t set;
-  struct sigaction act;
-  int status;
-  int i;
-
-  /* Initialize the allocated structure */
-
-  memset(&sighand, 0, sizeof(struct lio_sighand_s));
-  sighand.list = list;
-  sighand.sig  = *sig;
-  sighand.nent = nent;
-  sighand.pid  = _SCHED_GETPID();
-
-  /* Make sure that SIGPOLL is not blocked */
-
-  sigemptyset(&set);
-  sigaddset(&set, SIGPOLL);
-  status = sigprocmask(SIG_UNBLOCK, &set, &sighand.oprocmask);
-  if (status != OK)
-    {
-      int errcode = get_errno();
-      ferr("ERROR sigprocmask failed: %d\n", errcode);
-      DEBUGASSERT(errcode > 0);
-      return -errcode;
-    }
-
-  /* Attach our signal handler */
-
-  finfo("Registering signal handler\n");
-
-  act.sa_sigaction = lio_sighandler;
-  act.sa_flags = SA_SIGINFO;
-
-  sigfillset(&act.sa_mask);
-  sigdelset(&act.sa_mask, SIGPOLL);
-
-  status = sigaction(SIGPOLL, &act, &sighand.oact);
-  if (status != OK)
-    {
-      int errcode = get_errno();
-
-      ferr("ERROR sigaction failed: %d\n", errcode);
-
-      DEBUGASSERT(errcode > 0);
-      return -errcode;
-    }
-
-  /* Save this structure as the private data attached to each aiocb */
-
-  for (i = 0; i < nent; i++)
-    {
-      /* Skip over NULL entries in the list */
-
-      aiocbp = list[i];
-      if (aiocbp)
-        {
-          FAR void *priv = NULL;
-
-          /* Check if I/O is pending for  this entry */
-
-          if (aiocbp->aio_result == -EINPROGRESS)
-            {
-              priv = lib_zalloc(sizeof(struct lio_sighand_s));
-              if (!priv)
-                {
-                  ferr("ERROR: lib_zalloc failed\n");
-                  return -ENOMEM;
-                }
-
-              memcpy(priv, (FAR void *)&sighand,
-                      sizeof(struct lio_sighand_s));
-            }
-
-          aiocbp->aio_priv = priv;
-        }
-    }
-
-  return OK;
-}
-
-/****************************************************************************
  * Name: lio_waitall
  *
  * Description:
@@ -313,7 +132,8 @@ static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
  *
  ****************************************************************************/
 
-static int lio_waitall(FAR struct aiocb * const *list, int nent)
+static int lio_waitall(FAR struct aiocb *restrict const *restrict list,
+                       int nent)
 {
   sigset_t set;
   int ret;
@@ -502,10 +322,11 @@ static int lio_waitall(FAR struct aiocb * const *list, int nent)
  *
  ****************************************************************************/
 
-int lio_listio(int mode, FAR struct aiocb * const list[], int nent,
-               FAR struct sigevent *sig)
+int lio_listio(int mode, FAR struct aiocb *restrict const list[restrict],
+               int nent, FAR struct sigevent *restrict sig)
 {
   FAR struct aiocb *aiocbp = NULL;
+  struct list_node head;
   int nqueued;
   int errcode;
   int retcode;
@@ -513,7 +334,8 @@ int lio_listio(int mode, FAR struct aiocb * const list[], int nent,
   int ret;
   int i;
 
-  if (mode != LIO_WAIT && mode != LIO_NOWAIT)
+  if (nent < 0 || nent > AIO_LISTIO_MAX ||
+      (mode != LIO_WAIT && mode != LIO_NOWAIT))
     {
       set_errno(EINVAL);
       return ERROR;
@@ -524,12 +346,31 @@ int lio_listio(int mode, FAR struct aiocb * const list[], int nent,
   nqueued = 0;    /* No I/O operations yet queued */
   ret     = OK;   /* Assume success */
 
-  /* Lock the scheduler so that no I/O events can complete on the worker
-   * thread until we set our wait set up.  Pre-emption will, of course, be
-   * re-enabled while we are waiting for the signal.
-   */
+  if (mode == LIO_NOWAIT && sig)
+    {
+      list_initialize(&head);
+    }
 
-  sched_lock();
+  for (i = 0; i < nent; i++)
+    {
+      aiocbp = list[i];
+      if (aiocbp && aiocbp->aio_lio_opcode != LIO_NOP)
+        {
+          if (mode == LIO_NOWAIT && sig)
+            {
+              list_add_head(&head, &(aiocbp->lio_link));
+              aiocbp->lio_sigevent = *sig;
+            }
+          else
+            {
+              /* Not part of a lio_listio batch: clear lio_link so that
+               * aio_signal() skips the lio_listio completion path.
+               */
+
+              list_clear_node(&aiocbp->lio_link);
+            }
+        }
+    }
 
   /* Submit each asynchronous I/O operation in the list, skipping over NULL
    * entries.
@@ -540,67 +381,80 @@ int lio_listio(int mode, FAR struct aiocb * const list[], int nent,
       /* Skip over NULL entries */
 
       aiocbp = list[i];
-      if (aiocbp)
+      if (!aiocbp)
         {
-          /* Submit the operation according to its opcode */
+          continue;
+        }
 
-          status = OK;
-          switch (aiocbp->aio_lio_opcode)
+      /* Submit the operation according to its opcode */
+
+      status = OK;
+      switch (aiocbp->aio_lio_opcode)
+        {
+          case LIO_NOP:
             {
-            case LIO_NOP:
-              {
-                /* Mark the do-nothing operation complete */
+              /* Mark the do-nothing operation complete */
 
-                aiocbp->aio_result = OK;
-              }
-              break;
-
-            case LIO_READ:
-            case LIO_WRITE:
-              {
-                if (aiocbp->aio_lio_opcode == LIO_READ)
-                  {
-                    /* Submit the asynchronous read operation */
-
-                    status = aio_read(aiocbp);
-                  }
-                else
-                  {
-                    /* Submit the asynchronous write operation */
-
-                    status = aio_write(aiocbp);
-                  }
-
-                if (status < 0)
-                  {
-                    /* Failed to queue the I/O.  Set up the error return. */
-
-                    errcode = get_errno();
-                    ferr("ERROR: aio_read/write failed: %d\n", errcode);
-                    DEBUGASSERT(errcode > 0);
-                    aiocbp->aio_result = -errcode;
-                    ret = ERROR;
-                  }
-                else
-                  {
-                    /* Increment the count of successfully queue operations */
-
-                    nqueued++;
-                  }
-              }
-              break;
-
-            default:
-              {
-                /* Make the invalid operation complete with an error */
-
-                ferr("ERROR: Unrecognized opcode: %d\n",
-                     aiocbp->aio_lio_opcode);
-                aiocbp->aio_result = -EINVAL;
-                ret = ERROR;
-              }
-              break;
+              aiocbp->aio_result = OK;
             }
+            break;
+
+          case LIO_READ:
+          case LIO_WRITE:
+            {
+              if (aiocbp->aio_lio_opcode == LIO_READ)
+                {
+                  /* Submit the asynchronous read operation */
+
+                  status = aio_read_internal(aiocbp);
+                }
+              else
+                {
+                  /* Submit the asynchronous write operation */
+
+                  status = aio_write_internal(aiocbp);
+                }
+
+              if (status < 0)
+                {
+                  /* Failed to queue the I/O.  Set up the error return. */
+
+                  errcode = get_errno();
+                  ferr("ERROR: aio_read/write failed: %d\n", errcode);
+                  DEBUGASSERT(errcode > 0);
+                  aiocbp->aio_result = -errcode;
+                  ret = ERROR;
+                }
+
+              if (status < 0 || aiocbp->aio_result == -EBADF ||
+                  aiocbp->aio_result == -EINVAL)
+                {
+                  if (mode == LIO_NOWAIT && sig)
+                    {
+                      aio_lock();
+                      list_delete(&aiocbp->lio_link);
+                      aio_unlock();
+                    }
+                }
+              else
+                {
+                  /* Increment the count of successfully queue operations */
+
+                  nqueued++;
+                }
+            }
+            break;
+
+          default:
+            {
+              /* Make the invalid operation complete with an error */
+
+              ferr("ERROR: Unrecognized opcode: %d\n",
+                   aiocbp->aio_lio_opcode);
+              aiocbp->aio_result = -EINVAL;
+              ret = ERROR;
+            }
+            break;
         }
     }
 
@@ -649,33 +503,48 @@ int lio_listio(int mode, FAR struct aiocb * const list[], int nent,
 
   else if (sig != NULL)
     {
-      if (nqueued > 0)
-        {
-          /* Setup a signal handler to detect when until all I/O completes. */
+      aio_lock();
+      status = list_is_empty(&head);
+      list_delete(&head);
+      aio_unlock();
 
-          status = lio_sigsetup(list, nent, sig);
+      if (status)
+        {
+          /* head is empty meaning all I/O completed before head was
+           * removed, so manually signal the client
+           */
+
+          /* Find a non-NULL aiocbp */
+
+          if (aiocbp == NULL)
+            {
+              for (i = 0; i < nent; i++)
+                {
+                  if (list[i])
+                    {
+                      aiocbp = list[i];
+                      break;
+                    }
+                }
+
+              if (aiocbp == NULL)
+                {
+                  goto out;
+                }
+            }
+
+          status = nxsig_notification(nxsched_getpid(),
+                                      &aiocbp->lio_sigevent,
+                                      SI_ASYNCIO,
+                                      &aiocbp->lio_sigwork);
           if (status < 0 && ret == OK)
             {
-              /* Something bad happened while setting up the signal and this
-               * is the first error to be reported.
+              /* Something bad happened while signal the client and
+               * this is the first error to be reported.
                */
 
               retcode = -status;
               ret     = ERROR;
-            }
-        }
-      else
-        {
-          status = nxsig_notification(_SCHED_GETPID(), sig,
-                                      SI_ASYNCIO, &aiocbp->aio_sigwork);
-          if (status < 0 && ret == OK)
-            {
-              /* Something bad happened while performing the notification
-               * and this is the first error to be reported.
-               */
-
-               retcode = -status;
-               ret     = ERROR;
             }
         }
     }
@@ -685,7 +554,7 @@ int lio_listio(int mode, FAR struct aiocb * const list[], int nent,
    *   Just return now.
    */
 
-  sched_unlock();
+out:
   if (ret < 0)
     {
       set_errno(retcode);

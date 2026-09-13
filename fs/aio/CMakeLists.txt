@@ -31,6 +31,7 @@ if(CONFIG_FS_AIO)
             aio_queue.c
             aio_read.c
             aio_signal.c
-            aio_write.c)
+            aio_write.c
+            lio_listio.c)
 
 endif()

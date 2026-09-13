@@ -266,6 +266,9 @@ long sysconf(int name)
       case _SC_THREAD_THREADS_MAX:
         return UINT8_MAX;
 
+      case _SC_AIO_LISTIO_MAX:
+        return AIO_LISTIO_MAX;
+
       default:
 #if 0 /* Assume valid but not implemented for the time being */
         errcode = EINVAL;

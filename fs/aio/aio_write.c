@@ -82,7 +82,7 @@ static void aio_write_worker(FAR void *arg)
 #ifdef CONFIG_PRIORITY_INHERITANCE
   prio   = aioc->aioc_prio;
 #endif
-  aiocbp = aioc_decant(aioc);
+  aiocbp = aioc->aioc_aiocbp;
 
   /* Call fcntl(F_GETFL) to get the file open mode. */
 
@@ -134,6 +134,7 @@ errout:
   /* Signal the client */
 
   aio_signal(pid, aiocbp);
+  aioc_decant(aioc);
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
   /* Restore the low priority worker thread default priority */
@@ -244,7 +245,7 @@ errout:
  *
  ****************************************************************************/
 
-int aio_write(FAR struct aiocb *aiocbp)
+int aio_write_internal(FAR struct aiocb *aiocbp)
 {
   FAR struct aio_container_s *aioc;
   int ret;
@@ -252,35 +253,19 @@ int aio_write(FAR struct aiocb *aiocbp)
 
   DEBUGASSERT(aiocbp);
 
-  if (aiocbp->aio_reqprio < 0)
+  if (aiocbp->aio_offset < 0 || aiocbp->aio_reqprio < 0)
     {
+      aiocbp->aio_result = -EINVAL;
       set_errno(EINVAL);
       return ERROR;
     }
 
-  if (aiocbp->aio_offset < 0)
-    {
-      aiocbp->aio_result = -EINVAL;
-      return OK;
-    }
-
-  if (aiocbp->aio_fildes < 0)
-    {
-      /* for EBADF, the aio_write do not return error directly, but using
-       * aio_error to return this error code
-       */
-
-      aiocbp->aio_result = -EBADF;
-      return OK;
-    }
-
   /* the aio_fildes that transferred in may be opened with O_RDONLY, for this
-   * case, we need to return OK directly, and using the aio_error to collect
-   * the EBADF error code
+   * case, we need to return OK directly, and set the EBADF error code
    */
 
   flags = fcntl(aiocbp->aio_fildes, F_GETFL);
-  if ((flags & O_ACCMODE) == O_RDONLY)
+  if (flags == ERROR || (flags & O_ACCMODE) == O_RDONLY)
     {
       aiocbp->aio_result = -EBADF;
       return OK;
@@ -290,7 +275,6 @@ int aio_write(FAR struct aiocb *aiocbp)
 
   sigwork_init(&aiocbp->aio_sigwork);
   aiocbp->aio_result = -EINPROGRESS;
-  aiocbp->aio_priv   = NULL;
 
   /* Create a container for the AIO control block.  This may cause us to
    * block if there are insufficient resources to satisfy the request.
@@ -302,7 +286,7 @@ int aio_write(FAR struct aiocb *aiocbp)
       /* The errno has already been set (probably EBADF) */
 
       aiocbp->aio_result = -get_errno();
-      return ERROR;
+      return OK;
     }
 
   /* Defer the work to the worker thread */
@@ -317,6 +301,22 @@ int aio_write(FAR struct aiocb *aiocbp)
     }
 
   return OK;
+}
+
+int aio_write(FAR struct aiocb *aiocbp)
+{
+  if (aiocbp == NULL)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
+  /* Clear lio_link so aio_signal() skips the lio_listio path (see
+   * aio_fsync.c); list_initialize() would wrongly leave prev non-NULL.
+   */
+
+  list_clear_node(&aiocbp->lio_link);
+  return aio_write_internal(aiocbp);
 }
 
 #endif /* CONFIG_FS_AIO */
