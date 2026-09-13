@@ -110,6 +110,7 @@ int atexit_register(int type, CODE void (*func)(void), FAR void *arg,
 void atexit_call_exitfuncs(int status, bool quick)
 {
   FAR struct atexit_list_s *aehead;
+  FAR struct task_info_s   *info = task_get_info();
   CODE void               (*func)(void);
   FAR void                 *arg;
   int                       idx;
@@ -119,17 +120,32 @@ void atexit_call_exitfuncs(int status, bool quick)
 
   aehead = get_exitfuncs();
 
-  for (idx = aehead->nfuncs - 1; idx >= 0; idx--)
+  while (aehead->nfuncs > 0)
     {
-      /* Remove the function to prevent recursive call to it */
+      /* Claim the newest entry under the lock.  A handler may register
+       * further functions during exit processing; those land in the slot
+       * just freed here and are executed on the next iteration, i.e.
+       * before the older remaining ones, as documented in exit(3).
+       */
+
+      if (nxmutex_lock(&info->ta_lock) < 0)
+        {
+          break;
+        }
+
+      idx = aehead->nfuncs - 1;
 
       type = aehead->funcs[idx].type;
-
       func = aehead->funcs[idx].func;
       arg  = aehead->funcs[idx].arg;
 
+      /* Remove the function to prevent recursive call to it */
+
       aehead->funcs[idx].func = NULL;
       aehead->funcs[idx].arg  = NULL;
+      aehead->nfuncs--;
+
+      nxmutex_unlock(&info->ta_lock);
 
       if (!func)
         {
