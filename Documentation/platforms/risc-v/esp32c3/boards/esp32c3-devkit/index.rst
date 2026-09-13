@@ -10,6 +10,11 @@ Most of the I/O pins are broken out to the pin headers on both sides for easy
 interfacing. Developers can either connect peripherals with jumper wires or
 mount ESP32-C3 DevKit on a breadboard.
 
+.. note::
+   This page documents Espressif's ESP32-C3-DevKitC-02 and ESP32-C3-DevKitM-1.
+   For the compact third-party ESP32-C3 SuperMini, see
+   :doc:`../esp32c3-supermini/index`.
+
 .. list-table::
    :align: center
 
