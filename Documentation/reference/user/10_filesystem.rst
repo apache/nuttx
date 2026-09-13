@@ -219,6 +219,9 @@ UNIX Standard Operations (``unistd.h``)
   /* Working directory operations */
 
   int     chdir(FAR const char *path);
+  #ifdef CONFIG_FS_CHROOT
+  int     chroot(FAR const char *path);
+  #endif
   FAR char *getcwd(FAR char *buf, size_t size);
 
   /* File path operations */

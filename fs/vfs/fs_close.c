@@ -34,6 +34,7 @@
 
 #include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/lib/lib.h>
 
 #ifdef CONFIG_FDSAN
 #  include <android/fdsan.h>
