@@ -39,20 +39,25 @@
 #include <nuttx/clock_notifier.h>
 
 #include "clock/clock.h"
+#include "clock/clock_timekeeping.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NTP_MAX_ADJUST 500
+#ifdef CONFIG_CLOCK_ADJTIME_SLEWLIMIT_PPM
+#  define NTP_MAX_ADJUST CONFIG_CLOCK_ADJTIME_SLEWLIMIT_PPM
+#else
+#  define NTP_MAX_ADJUST 500
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static struct timespec g_clock_wall_time;
-static uint64_t        g_clock_last_counter;
-static uint64_t        g_clock_mask;
+static clock_t         g_clock_last_counter;
+static clock_t         g_clock_mask;
 static long            g_clock_adjust;
 static spinlock_t      g_clock_lock = SP_UNLOCKED;
 
@@ -68,8 +73,8 @@ static int clock_get_current_time(FAR struct timespec *ts,
                                   FAR struct timespec *base)
 {
   irqstate_t flags;
-  uint64_t counter;
-  uint64_t offset;
+  clock_t counter;
+  clock_t offset;
   uint64_t nsec;
   time_t sec;
   int ret;
@@ -112,6 +117,7 @@ errout_in_critical_section:
 
 int clock_timekeeping_get_wall_time(FAR struct timespec *ts)
 {
+  clock_update_wall_time();
   return clock_get_current_time(ts, &g_clock_wall_time);
 }
 
@@ -122,7 +128,7 @@ int clock_timekeeping_get_wall_time(FAR struct timespec *ts)
 int clock_timekeeping_set_wall_time(FAR const struct timespec *ts)
 {
   irqstate_t flags;
-  uint64_t counter;
+  clock_t counter;
   int ret;
 
   flags = spin_lock_irqsave(&g_clock_lock);
@@ -214,8 +220,8 @@ int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta)
 void clock_update_wall_time(void)
 {
   irqstate_t flags;
-  uint64_t counter;
-  uint64_t offset;
+  clock_t counter;
+  clock_t offset;
   int64_t nsec;
   time_t sec;
   int ret;
@@ -261,8 +267,8 @@ void clock_update_wall_time(void)
           adjust = -limit;
         }
 
-      nsec += adjust * NSEC_PER_USEC;
       g_clock_adjust -= adjust;
+      nsec += adjust * NSEC_PER_USEC;
 
       while (nsec < 0)
         {
