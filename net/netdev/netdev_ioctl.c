@@ -784,6 +784,7 @@ static ssize_t net_ioctl_ifreq_arglen(uint8_t domain, int cmd)
       case SIOCSIFNAME:
       case SIOCGIFNAME:
       case SIOCGIFINDEX:
+      case SIOCG_TX_HW_TIMESTAMP:
         return sizeof(struct ifreq);
 
       case SIOCSIFADDR:
@@ -1303,6 +1304,21 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 #ifdef CONFIG_NETDEV_IFINDEX
       case SIOCGIFINDEX:  /* Index to name mapping */
         req->ifr_ifindex = dev->d_ifindex;
+        break;
+#endif
+
+#ifdef CONFIG_NETDEV_IOCTL
+      case SIOCG_TX_HW_TIMESTAMP:
+        if (dev->d_ioctl)
+          {
+            ret = dev->d_ioctl(dev, cmd,
+                               (unsigned long)
+                               (uintptr_t)req->ifr_ifru.ifru_data);
+          }
+        else
+          {
+            ret = -ENOSYS;
+          }
         break;
 #endif
 
