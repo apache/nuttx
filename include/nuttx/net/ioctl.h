@@ -161,6 +161,10 @@
 #define SIOCGIFVLAN        _SIOC(0x0043)  /* Get VLAN interface */
 #define SIOCSIFVLAN        _SIOC(0x0044)  /* Set VLAN interface */
 
+/* PTP Timestamping *********************************************************/
+
+#define SIOCG_TX_HW_TIMESTAMP _SIOC(0x0046) /* Get hardware TX timestamp */
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
