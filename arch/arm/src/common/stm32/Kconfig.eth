@@ -194,6 +194,13 @@ config STM32_ETH_TIMESTAMP_RX
 		Timestamp all received Ethernet packets.
 		Timestamp is available to application through SO_TIMESTAMP socket option.
 
+config STM32_ETH_TIMESTAMP_TX
+	bool "Hardware timestamping of transmitted packets"
+	depends on STM32_COMMON_LEGACY && STM32_ETH_PTP && STM32_ETH_ENHANCEDDESC
+	default n
+	---help---
+		Enables hardware timestamp capture on transmitted Ethernet frames.
+
 config STM32_RMII
 	bool
 	default !STM32_MII
