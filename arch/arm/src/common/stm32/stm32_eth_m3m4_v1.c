@@ -1714,12 +1714,6 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
 
   while (stm32_recvframe(priv) == OK)
     {
-#ifdef CONFIG_NET_PKT
-      /* When packet sockets are enabled, feed the frame into the tap */
-
-      pkt_input(&priv->dev);
-#endif
-
       /* Check if the packet is a valid size for the network buffer
        * configuration (this should not happen)
        */
@@ -1741,7 +1735,22 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
         }
 
 #ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+      /* Convert this frame's hardware RX timestamp before handing the
+       * frame to pkt_input() below. pkt_input() copies dev->d_rxtime
+       * into the packet socket's queued metadata immediately, so if
+       * the conversion ran after it, every packet would be tagged
+       * with the *previous* frame's timestamp instead of its own,
+       * introducing effectively random error on the order of the
+       * inter-frame interval into every RX timestamp.
+       */
+
       stm32_eth_ptp_convert_rxtime(priv);
+#endif
+
+#ifdef CONFIG_NET_PKT
+      /* When packet sockets are enabled, feed the frame into the tap */
+
+      pkt_input(&priv->dev);
 #endif
 
       /* We only accept IP packets of the configured type and ARP packets */
