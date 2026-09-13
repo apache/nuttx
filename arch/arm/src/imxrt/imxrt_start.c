@@ -47,6 +47,14 @@
 #include "imxrt_start.h"
 #include "imxrt_gpio.h"
 
+#ifdef CONFIG_IMXRT_ELE
+#  include "imxrt118x_ele.h"
+#endif
+
+#ifdef CONFIG_IMXRT_TRDC
+#  include "imxrt118x_trdc.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -100,6 +108,7 @@ extern const void * const _vectors[];
 
 static inline void imxrt_tcmenable(void)
 {
+#ifdef CONFIG_ARCH_CORTEXM7
   uint32_t regval;
 
   UP_MB();
@@ -131,6 +140,7 @@ static inline void imxrt_tcmenable(void)
 
 #warning Missing logic
 #endif
+#endif /* CONFIG_ARCH_CORTEXM7 */
 }
 
 /****************************************************************************
@@ -239,6 +249,27 @@ void __start(void)
   /* Initialize onboard resources */
 
   imxrt_boardinitialize();
+
+#ifdef CONFIG_IMXRT_ELE
+  /* Bring the EdgeLock Enclave up.  With CONFIG_IMXRT_ELE_LOAD_FW, load
+   * the ELE firmware ourselves since the RT118x ROM only ships an ELE
+   * stub.  Otherwise, the ROM is expected to have already loaded the ELE
+   * firmware automatically from its own AHAB container.  Either way,
+   * this also checks that ELE firmware is active via GET_FW_VERSION.
+   */
+
+  imxrt118x_ele_init();
+#endif
+
+#ifdef CONFIG_IMXRT_TRDC
+  /* Take ownership of the TRDCs from ELE and program them.  Prerequisite
+   * for anything that later touches restricted peripherals or releases the
+   * M7.  Depends on the ELE being up.
+   */
+
+  imxrt118x_trdc_init();
+  imxrt118x_trdc_config();
+#endif
 
 #ifdef CONFIG_ARM_MPU
 #ifdef CONFIG_BUILD_PROTECTED

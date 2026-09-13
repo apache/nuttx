@@ -725,7 +725,8 @@ static inline void imxrt_lpspi_master_set_delays(
                              uint32_t delay_ns,
                              enum imxrt_delay_e type)
 {
-#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#if !defined(CONFIG_ARCH_FAMILY_IMXRT117x) && \
+    !defined(CONFIG_ARCH_FAMILY_IMXRT118x)
   uint32_t pll3_div;
   uint32_t pll_freq;
 #endif
@@ -739,7 +740,8 @@ static inline void imxrt_lpspi_master_set_delays(
   uint32_t clock_div_prescaler;
   uint32_t additional_scaler;
 
-#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#if defined(CONFIG_ARCH_FAMILY_IMXRT117x) || \
+    defined(CONFIG_ARCH_FAMILY_IMXRT118x)
   if (priv->spibase == IMXRT_LPSPI1_BASE)
     {
       imxrt_get_rootclock(CCM_CR_LPSPI1, &src_freq);
@@ -936,7 +938,8 @@ static uint32_t imxrt_lpspi_setfrequency(struct spi_dev_s *dev,
 {
   struct imxrt_lpspidev_s *priv = (struct imxrt_lpspidev_s *)dev;
 
-#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#if !defined(CONFIG_ARCH_FAMILY_IMXRT117x) && \
+    !defined(CONFIG_ARCH_FAMILY_IMXRT118x)
   uint32_t pll_freq;
   uint32_t pll3_div;
 #endif
@@ -964,7 +967,8 @@ static uint32_t imxrt_lpspi_setfrequency(struct spi_dev_s *dev,
                                         LPSPI_CR_MEN, 0);
         }
 
-#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#if defined(CONFIG_ARCH_FAMILY_IMXRT117x) || \
+    defined(CONFIG_ARCH_FAMILY_IMXRT118x)
       if (priv->spibase == IMXRT_LPSPI1_BASE)
         {
           imxrt_get_rootclock(CCM_CR_LPSPI1, &src_freq);

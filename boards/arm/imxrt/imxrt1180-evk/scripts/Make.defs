@@ -1,0 +1,106 @@
+############################################################################
+# boards/arm/imxrt/imxrt1180-evk/scripts/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
+
+# Select the right Toolchain.defs (ARMv7-M for the M7 build, ARMv8-M for the
+# M33 build) and the matching per-core linker script.
+
+ifeq ($(CONFIG_ARCH_CORTEXM33),y)
+include $(TOPDIR)/arch/arm/src/armv8-m/Toolchain.defs
+LDSCRIPT = flash-m33.ld
+else
+include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
+LDSCRIPT = flash.ld
+endif
+
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+
+ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
+
+CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
+CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
+CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+AFLAGS := $(CFLAGS) -D__ASSEMBLY__
+
+# Post-build: assemble the flashable image "flash.bin" for CM33 builds.
+#
+# CM33 builds
+#   flash.bin = FCB (0x400)
+#             + AHAB container (this NuttX image) at 0x1000
+#   Programmed at FlexSPI offset 0 (flash address 0x28000000).  The M33
+#   image is confined to the first 512 KB of NOR.
+#
+# The AHAB container is assembled by NXP SPSDK "nxpimage".  The build
+# script bootstraps a private SPSDK venv on first run (see
+# tools/imxrt1180/build_flash_image.sh for the license note and cache
+# location).
+#
+# CONFIG_IMXRT_ELE_LOAD_FW selects which of the two mutually exclusive
+# ELE firmware loading methods is built into the flash image:
+#
+#   - disabled (the default): the NXP EdgeLock Enclave firmware
+#     (CONFIG_IMXRT_ELE_FW_PATH) is packed as a second image inside the
+#     AHAB container, so the RT118x ROM loads it automatically
+#   - enabled: the firmware is embedded in the NuttX image and
+#     loaded into the ELE at runtime via a LOAD_FW command.
+
+FLASH_BUILDER = $(TOPDIR)$(DELIM)tools$(DELIM)imxrt1180$(DELIM)build_flash_image.sh
+
+ifeq ($(CONFIG_IMXRT_ELE_LOAD_FW),y)
+FLASH_BUILDER_ELE_FW_ARGS =
+else
+ifeq ($(CONFIG_IMXRT_ELE),y)
+# Resolve CONFIG_IMXRT_ELE_FW_PATH (relative to TOPDIR unless already
+# absolute) the same way arch/arm/src/imxrt/Make.defs does.
+IMXRT_ELE_FW_FILE := $(strip $(subst ",,$(CONFIG_IMXRT_ELE_FW_PATH)))
+ifeq ($(patsubst /%,/,$(IMXRT_ELE_FW_FILE)),/)
+IMXRT_ELE_FW_ABS := $(IMXRT_ELE_FW_FILE)
+else
+IMXRT_ELE_FW_ABS := $(TOPDIR)/$(IMXRT_ELE_FW_FILE)
+endif
+FLASH_BUILDER_ELE_FW_ARGS = --ele-fw $(IMXRT_ELE_FW_ABS)
+else
+FLASH_BUILDER_ELE_FW_ARGS =
+endif
+endif
+
+ifeq ($(CONFIG_ARCH_CORTEXM33),y)
+define POSTBUILD
+	$(Q) echo "Assembling MIMXRT1180-EVK FlexSPI NOR image (CM33 target)"
+	$(Q) $(OBJCOPY) -O binary -R .bss -R .initstack $(BIN) nuttx.bin
+	$(Q) $(TOPDIR)/tools/imxrt1180/fetch_ele_fw.sh >/dev/null
+	$(Q) $(FLASH_BUILDER) \
+	     --m33 nuttx.bin \
+	     --out flash.bin \
+	     $(FLASH_BUILDER_ELE_FW_ARGS)
+	$(Q) echo "flash.bin" >> nuttx.manifest
+endef
+else
+define POSTBUILD
+	$(Q) echo "Building MIMXRT1180-EVK Cortex-M7 payload (nuttx.bin)"
+	$(Q) $(OBJCOPY) -O binary -R .bss -R .initstack $(BIN) nuttx.bin
+endef
+endif

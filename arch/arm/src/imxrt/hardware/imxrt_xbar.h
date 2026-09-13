@@ -39,6 +39,8 @@
 #  include "hardware/rt106x/imxrt106x_xbar.h"
 #elif defined(CONFIG_ARCH_FAMILY_IMXRT117x)
 #  include "hardware/rt117x/imxrt117x_xbar.h"
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT118x)
+#  include "hardware/rt118x/imxrt118x_xbar.h"
 #else
 #  error Unrecognized i.MX RT architecture
 #endif

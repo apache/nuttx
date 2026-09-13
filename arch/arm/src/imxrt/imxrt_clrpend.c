@@ -90,6 +90,27 @@ void imxrt_clrpend(int irq)
                    NVIC_IRQ128_159_CLRPEND);
         }
 #endif
+#if IMXRT_IRQ_NEXTINT >= 192
+      else if (irq < (IMXRT_IRQ_EXTINT + 192))
+        {
+          putreg32(1 << (irq - IMXRT_IRQ_EXTINT - 160),
+                   NVIC_IRQ160_191_CLRPEND);
+        }
+#endif
+#if IMXRT_IRQ_NEXTINT >= 224
+      else if (irq < (IMXRT_IRQ_EXTINT + 224))
+        {
+          putreg32(1 << (irq - IMXRT_IRQ_EXTINT - 192),
+                   NVIC_IRQ192_223_CLRPEND);
+        }
+#endif
+#if IMXRT_IRQ_NEXTINT >= 240
+      else if (irq < (IMXRT_IRQ_EXTINT + 240))
+        {
+          putreg32(1 << (irq - IMXRT_IRQ_EXTINT - 224),
+                   NVIC_IRQ224_239_CLRPEND);
+        }
+#endif
       else
         {
           DEBUGPANIC();

@@ -60,6 +60,16 @@ void arm_fpuconfig(void)
 {
   uint32_t regval;
 
+  /* Enable full access to CP10 and CP11 before setting CONTROL.FPCA (see
+   * ARMv7-M Architecture Reference Manual, DDI 0403E.e).  Otherwise cores
+   * which have the coprocessor disabled at reset will raise a NOCP usage
+   * fault.
+   */
+
+  regval = getreg32(NVIC_CPACR);
+  regval |= NVIC_CPACR_CP_FULL(10) | NVIC_CPACR_CP_FULL(11);
+  putreg32(regval, NVIC_CPACR);
+
   /* Set CONTROL.FPCA so that we always get the extended context frame
    * with the volatile FP registers stacked above the basic context.
    */
@@ -76,10 +86,4 @@ void arm_fpuconfig(void)
   regval = getreg32(NVIC_FPCCR);
   regval &= ~(NVIC_FPCCR_ASPEN | NVIC_FPCCR_LSPEN);
   putreg32(regval, NVIC_FPCCR);
-
-  /* Enable full access to CP10 and CP11 */
-
-  regval = getreg32(NVIC_CPACR);
-  regval |= NVIC_CPACR_CP_FULL(10) | NVIC_CPACR_CP_FULL(11);
-  putreg32(regval, NVIC_CPACR);
 }

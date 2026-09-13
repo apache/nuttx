@@ -20,29 +20,46 @@
 #
 ############################################################################
 
-# Common ARM and Cortex-M7 files
+# Common ARM and Cortex-M7/M33 files
 
+ifeq ($(CONFIG_ARCH_CORTEXM33),y)
+include armv8-m/Make.defs
+else
 include armv7-m/Make.defs
+endif
 
 # Required i.MX RT files
 
-CHIP_CSRCS  = imxrt_allocateheap.c imxrt_start.c imxrt_periphclks.c
+CHIP_CSRCS  = imxrt_allocateheap.c imxrt_start.c
+ifneq ($(CONFIG_IMXRT_RGPIO),y)
+CHIP_CSRCS += imxrt_periphclks.c
+endif
 ifeq ($(CONFIG_IMXRT_PROGMEM),y)
 CHIP_CSRCS += imxrt_flash.c
 endif
-CHIP_CSRCS += imxrt_irq.c imxrt_clrpend.c imxrt_gpio.c
-CHIP_CSRCS += imxrt_daisy.c imxrt_wdog.c imxrt_serial.c
-CHIP_CSRCS += imxrt_xbar.c imxrt_ocotp.c imxrt_lowputc.c
+CHIP_CSRCS += imxrt_irq.c imxrt_clrpend.c
+ifeq ($(CONFIG_IMXRT_RGPIO),y)
+CHIP_CSRCS += imxrt_rgpio.c
+else
+CHIP_CSRCS += imxrt_gpio.c
+CHIP_CSRCS += imxrt_daisy.c
+endif
+CHIP_CSRCS += imxrt_wdog.c imxrt_serial.c imxrt_xbar.c imxrt_ocotp.c
+CHIP_CSRCS += imxrt_lowputc.c
 
 # Configuration-dependent i.MX RT files
 
-ifeq ($(CONFIG_IMXRT_CLOCKCONFIG_VER2),y)
+ifeq ($(CONFIG_IMXRT_CLOCKCONFIG_VER3),y)
+CHIP_CSRCS += imxrt_clockconfig_ver3.c
+else ifeq ($(CONFIG_IMXRT_CLOCKCONFIG_VER2),y)
 CHIP_CSRCS += imxrt_clockconfig_ver2.c imxrt_pmu.c
 else
 CHIP_CSRCS += imxrt_clockconfig_ver1.c
 endif
 
-ifeq ($(CONFIG_IMXRT_IOMUX_VER2),y)
+ifeq ($(CONFIG_IMXRT_IOMUX_VER3),y)
+CHIP_CSRCS += imxrt_iomuxc_ver3.c
+else ifeq ($(CONFIG_IMXRT_IOMUX_VER2),y)
 CHIP_CSRCS += imxrt_iomuxc_ver2.c
 else
 CHIP_CSRCS += imxrt_iomuxc_ver1.c
@@ -59,7 +76,11 @@ CHIP_CSRCS += imxrt_tickless.c
 endif
 
 ifeq ($(CONFIG_IMXRT_GPIO_IRQ),y)
+ifeq ($(CONFIG_IMXRT_RGPIO),y)
+CHIP_CSRCS += imxrt_rgpioirq.c
+else
 CHIP_CSRCS += imxrt_gpioirq.c
+endif
 endif
 
 ifeq ($(CONFIG_ARM_MPU),y)
@@ -71,7 +92,11 @@ CHIP_CSRCS += imxrt_userspace.c
 endif
 
 ifeq ($(CONFIG_IMXRT_EDMA),y)
+ifeq ($(CONFIG_IMXRT_EDMA_VER3),y)
+CHIP_CSRCS += imxrt_edma_ver3.c
+else
 CHIP_CSRCS += imxrt_edma.c
+endif
 endif
 
 ifdef CONFIG_IMXRT_USDHC
@@ -139,4 +164,33 @@ CHIP_CSRCS += imxrt_adc_ver2.c
 else
 CHIP_CSRCS += imxrt_adc_ver1.c
 endif
+endif
+
+ifeq ($(CONFIG_IMXRT_ELE),y)
+CHIP_CSRCS += imxrt118x_ele.c
+
+ifeq ($(CONFIG_IMXRT_ELE_LOAD_FW),y)
+# The ELE FW blob is fetched on demand by tools/imxrt1180/fetch_ele_fw.sh.
+# Resolve CONFIG_IMXRT_ELE_FW_PATH (relative to TOPDIR unless it is
+# already absolute) and pass it back to imxrt118x_ele.c via a
+# -D override so the .incbin directive can find the file no matter what
+# the compiler's CWD happens to be.
+IMXRT_ELE_FW_FILE := $(strip $(subst ",,$(CONFIG_IMXRT_ELE_FW_PATH)))
+ifeq ($(patsubst /%,/,$(IMXRT_ELE_FW_FILE)),/)
+IMXRT_ELE_FW_ABS := $(IMXRT_ELE_FW_FILE)
+else
+IMXRT_ELE_FW_ABS := $(TOPDIR)/$(IMXRT_ELE_FW_FILE)
+endif
+
+CFLAGS += -DIMXRT_ELE_FW_ABS_PATH=\"$(IMXRT_ELE_FW_ABS)\"
+
+imxrt118x_ele.o: $(IMXRT_ELE_FW_ABS)
+
+$(IMXRT_ELE_FW_ABS):
+	$(Q) $(TOPDIR)/tools/imxrt1180/fetch_ele_fw.sh >/dev/null
+endif
+endif
+
+ifeq ($(CONFIG_IMXRT_TRDC),y)
+CHIP_CSRCS += imxrt118x_trdc.c
 endif

@@ -40,6 +40,19 @@
 #ifndef __ARCH_ARM_SRC_IMXRT_IMXRT_EDMAC_H
 #define __ARCH_ARM_SRC_IMXRT_IMXRT_EDMAC_H
 
+#include <nuttx/config.h>
+
+#ifdef CONFIG_IMXRT_EDMA_VER3
+
+/* On RT118x the eDMA IP is different enough (eDMA3 + eDMA4 with per-channel
+ * CH_MUX and no DMAMUX) that a separate driver is used.  Its public API
+ * is a superset of the legacy driver's API declared below.
+ */
+
+#  include "imxrt_edma_ver3.h"
+
+#else
+
 /* General Usage:
  *
  * 1. Allocate a DMA channel
@@ -371,6 +384,7 @@ int imxrt_dmach_start(DMACH_HANDLE handle,
  ****************************************************************************/
 
 void imxrt_dmach_stop(DMACH_HANDLE handle);
+void imxrt_dmach_dump(DMACH_HANDLE handle);
 
 /****************************************************************************
  * Name: imxrt_dmach_getcount
@@ -456,4 +470,7 @@ void imxrt_dmadump(const struct imxrt_dmaregs_s *regs, const char *msg);
 #endif
 
 #endif /* __ASSEMBLY__ */
+
+#endif /* CONFIG_IMXRT_EDMA_VER3 */
+
 #endif /* __ARCH_ARM_SRC_IMXRT_IMXRT_EDMAC_H */

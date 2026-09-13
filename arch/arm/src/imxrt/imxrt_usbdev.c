@@ -207,11 +207,21 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
 #endif
 
 #if defined(CONFIG_ARMV7M_DCACHE)
-#  define cache_aligned_alloc(s) kmm_memalign(ARMV7M_DCACHE_LINESIZE,(s))
+#  define cache_aligned_alloc(s) \
+     kmm_memalign(ARMV7M_DCACHE_LINESIZE, \
+                  (((s) + ARMV7M_DCACHE_LINESIZE - 1) & \
+                   ~(ARMV7M_DCACHE_LINESIZE - 1)))
 #  define CACHE_ALIGNED_DATA     aligned_data(ARMV7M_DCACHE_LINESIZE)
+#  define DCACHE_LINEMASK        (ARMV7M_DCACHE_LINESIZE - 1)
+#  define DCACHE_ALIGN_UP(a)     (((a) + DCACHE_LINEMASK) & ~DCACHE_LINEMASK)
+#  define IS_CACHE_ALIGNED(x,y) \
+     (((uintptr_t)(x) & DCACHE_LINEMASK) == 0 && \
+      ((y) & DCACHE_LINEMASK) == 0)
 #else
 #  define cache_aligned_alloc kmm_malloc
 #  define CACHE_ALIGNED_DATA
+#  define DCACHE_ALIGN_UP(a)     (a)
+#  define IS_CACHE_ALIGNED(x,y)  (true)
 #endif
 
 /* Hardware interface *******************************************************/
@@ -369,7 +379,7 @@ struct imxrt_usbdev_s
 
   uint8_t                 ep0state;      /* State of certain EP0 operations */
                                          /* buffer for EP0 short transfers */
-  uint8_t                 ep0buf[64] CACHE_ALIGNED_DATA;
+  uint8_t                *ep0buf;
   uint8_t                 paddr;         /* Address assigned by SETADDRESS */
   uint8_t                 stalled:1;     /* 1: Protocol stalled */
   uint8_t                 selfpowered:1; /* 1: Device is self powered */
@@ -389,6 +399,8 @@ struct imxrt_usbdev_s
 
   struct imxrt_ep_s       eplist[IMXRT_NPHYSENDPOINTS];
 };
+
+#define IMXRT_EP0BUF_SIZE         64       /* Size of the EP0 short transfer buffer */
 
 #define EP0STATE_IDLE             0        /* Idle State, leave on receiving a setup packet or epsubmit */
 #define EP0STATE_SETUP_OUT        1        /* Setup Packet received - SET/CLEAR */
@@ -513,11 +525,33 @@ static int         imxrt_pullup(struct usbdev_s *dev, bool enable);
 
 static struct imxrt_usbdev_s g_usbdev;
 
+/* Normally g_qh, g_td and g_ep0buf are statically allocated in .bss.
+ * But they need to be DMA-capable for usb engine to access them. If we
+ * run with TCM memory as the primary, there has to be another memory
+ * segment elsewhere, in DMA capable memory (.dmamemory). Also we must have
+ * USBDEV_DMAMEMORY enabled to be able to dynamically allocate from there.
+ */
+
+#ifdef CONFIG_IMXRT_TCM_PRIMARY
+#  ifndef CONFIG_USBDEV_DMAMEMORY
+#    error "CONFIG_USBDEV_DMAMEMORY must be defined"
+#  endif
+#  define USBDEV_DMA_SECTION locate_data(".dmamemory")
+#else
+#  define USBDEV_DMA_SECTION
+#endif
+
 static struct imxrt_dqh_s g_qh[IMXRT_NPHYSENDPOINTS]
+                               USBDEV_DMA_SECTION
                                aligned_data(2048);
 
 static struct imxrt_dtd_s g_td[IMXRT_NPHYSENDPOINTS]
+                               USBDEV_DMA_SECTION
                                aligned_data(32);
+
+static uint8_t g_ep0buf[IMXRT_EP0BUF_SIZE]
+                        USBDEV_DMA_SECTION
+                        aligned_data(32);
 
 static const struct usbdev_epops_s g_epops =
 {
@@ -748,6 +782,11 @@ static inline void imxrt_writedtd(struct imxrt_dtd_s *dtd,
                                   const uint8_t *data,
                                   uint32_t nbytes)
 {
+#if defined(CONFIG_ARMV7M_DCACHE)
+  DEBUGASSERT(data == NULL ||
+              IS_CACHE_ALIGNED(data, DCACHE_ALIGN_UP(nbytes)));
+#endif
+
   dtd->nextdesc  = DTD_NEXTDESC_INVALID;
   dtd->config    = DTD_CONFIG_LENGTH(nbytes) | DTD_CONFIG_IOC |
       DTD_CONFIG_ACTIVE;
@@ -1718,7 +1757,7 @@ static void imxrt_ep0complete(struct imxrt_usbdev_s *priv, uint8_t epphy)
        */
 
       up_invalidate_dcache((uintptr_t)priv->ep0buf,
-                           (uintptr_t)priv->ep0buf + sizeof(priv->ep0buf));
+                           (uintptr_t)priv->ep0buf + IMXRT_EP0BUF_SIZE);
 
       imxrt_dispatchrequest(priv, &priv->ep0ctrl);
       imxrt_ep0state(priv, EP0STATE_WAIT_NAK_IN);
@@ -1847,8 +1886,6 @@ bool imxrt_epcomplete(struct imxrt_usbdev_s *priv, uint8_t epphy)
 
   up_invalidate_dcache((uintptr_t)dtd,
                        (uintptr_t)dtd + sizeof(struct imxrt_dtd_s));
-  up_invalidate_dcache((uintptr_t)dtd->buffer0,
-                       (uintptr_t)dtd->buffer0 + dtd->xfer_len);
 
   int xfrd = dtd->xfer_len - (dtd->config >> 16);
 
@@ -1862,6 +1899,14 @@ bool imxrt_epcomplete(struct imxrt_usbdev_s *priv, uint8_t epphy)
        */
 
       usbtrace(TRACE_INTDECODE(IMXRT_TRACEINTID_EPIN), complete);
+
+      /* Invalidate the RX buffer */
+
+      DEBUGASSERT(IS_CACHE_ALIGNED(privreq->req.buf,
+                                    DCACHE_ALIGN_UP(privreq->req.xfrd)));
+      up_invalidate_dcache((uintptr_t)privreq->req.buf,
+                           (uintptr_t)privreq->req.buf +
+                           DCACHE_ALIGN_UP(privreq->req.xfrd));
     }
   else
     {
@@ -2834,6 +2879,7 @@ void arm_usbinitialize(void)
   priv->usbdev.ops = &g_devops;
   priv->usbdev.ep0 = &priv->eplist[IMXRT_EP0_IN].ep;
   priv->epavail    = IMXRT_EPALLSET & ~IMXRT_EPCTRLSET;
+  priv->ep0buf     = g_ep0buf;
 
   /* Initialize the endpoint list */
 
@@ -2888,7 +2934,7 @@ void arm_usbinitialize(void)
 
   imxrt_clockall_usboh3();
 
-#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#if defined(CONFIG_ARCH_FAMILY_IMXRT117x) || defined(CONFIG_ARCH_FAMILY_IMXRT118x)
   up_mdelay(1);
 
   putreg32(USBPHY_PLL_SIC_PLL_POWER |
