@@ -93,6 +93,33 @@ extern void rtw_psk_sta_recv_eapol(u8 *evt_info);
 extern void rtw_sae_sta_start(u8 *evt_info);
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* NOTE: this file is compiled by the board PREBUILD step with the vendor
+ * SDK include set (platform_autoconf.h), NOT the NuttX config.h, so the
+ * per-IC guard must use CONFIG_AMEBASMART (defined in the AmebaSmart
+ * autoconf) rather than CONFIG_ARCH_CHIP_RTL8730E (a NuttX Kconfig symbol
+ * that is invisible here).
+ */
+
+#ifdef CONFIG_AMEBASMART
+/* Real efuse MAC pushed up by the NP.
+ *
+ * On RTL8730E the standard WHC_API_WIFI_GET_MAC_ADDR pull API times out (the
+ * KM4 firmware snapshot linked into this image does not register a handler
+ * for it), so ameba_wifi_get_mac() cannot query the MAC synchronously.  The
+ * NP does, however, PUSH its real efuse MAC to the host at wifi-on time via
+ * WHC_API_SET_NETIF_INFO, which lands in lwip_wlan_set_netif_info() below.
+ * Cache it there and hand it back from ameba_wifi_get_mac() so the netdev
+ * uses the genuine hardware MAC instead of a fabricated one.
+ */
+
+static unsigned char g_np_mac[6];
+static int           g_np_mac_valid;
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -172,10 +199,56 @@ int ameba_wifi_txframe(int idx, const void *buf, unsigned int len,
  * netdev can fill dev->d_mac without pulling SDK headers.  Referencing
  * wifi_get_mac_address here also keeps its real NP implementation (the NP
  * noused generator sees it in the NuttX image).  Returns 0 on success.
+ *
+ * RTL8730E only: lib_wifi_whc_ap.a's wifi_get_mac_address() uses EXT API
+ * 0x1002 (WHC_API_WIFI_GET_MAC_ADDR), which the KM4 firmware snapshot
+ * linked into this image does not register a handler for, so the synchronous
+ * pull never returns (12-second timeout per call).  The NP does, however,
+ * PUSH its real efuse MAC to the host at wifi-on time via
+ * WHC_API_SET_NETIF_INFO -> lwip_wlan_set_netif_info(), which we cache in
+ * g_np_mac.  Prefer that genuine MAC; only if it has not arrived yet do we
+ * fall back to a stable locally-administered random MAC (TRNG stub in
+ * rtl8730e_wifi_stubs.c) so the netdev always has a usable address.  The
+ * other Ameba parts (8721Dx/8720F/8721F) have a working GET_MAC and keep
+ * the real efuse MAC path below.
  */
 
 int ameba_wifi_get_mac(int idx, unsigned char *mac)
 {
+#ifdef CONFIG_AMEBASMART
+  static uint8_t cached[6];
+  static int     initialized;
+
+  /* Preferred: the real efuse MAC the NP pushed up via SET_NETIF_INFO. */
+
+  if (g_np_mac_valid)
+    {
+      mac[0] = g_np_mac[0];
+      mac[1] = g_np_mac[1];
+      mac[2] = g_np_mac[2];
+      mac[3] = g_np_mac[3];
+      mac[4] = g_np_mac[4];
+      mac[5] = g_np_mac[5] + (uint8_t)idx;  /* STA/AP differ in last octet */
+      return 0;
+    }
+
+  /* Fallback: NP MAC not pushed yet -- synthesise a stable LAA MAC. */
+
+  if (!initialized)
+    {
+      TRNG_get_random_bytes(cached, 6);
+      cached[0] = (cached[0] & 0xfe) | 0x02;  /* LAA, unicast */
+      initialized = 1;
+    }
+
+  mac[0] = cached[0];
+  mac[1] = cached[1];
+  mac[2] = cached[2];
+  mac[3] = cached[3];
+  mac[4] = cached[4];
+  mac[5] = cached[5] + (uint8_t)idx;  /* STA/AP differ in last octet */
+  return 0;
+#else
   struct rtw_mac m;
 
   if (wifi_get_mac_address(idx, &m, 0) != RTK_SUCCESS)
@@ -186,6 +259,7 @@ int ameba_wifi_get_mac(int idx, unsigned char *mac)
   mac[0] = m.octet[0]; mac[1] = m.octet[1]; mac[2] = m.octet[2];
   mac[3] = m.octet[3]; mac[4] = m.octet[4]; mac[5] = m.octet[5];
   return 0;
+#endif
 }
 
 /* Bring the WLAN netif administratively up.  In NuttX the netdev
@@ -310,7 +384,25 @@ void lwip_wlan_set_netif_info(int idx_wlan, void *dev,
 {
   (void)idx_wlan;
   (void)dev;
+
+#ifdef CONFIG_AMEBASMART
+  /* The NP pushes its real efuse MAC here at wifi-on time.  Cache the STA
+   * (idx 0) address so ameba_wifi_get_mac() can return the genuine MAC.
+   */
+
+  if (dev_addr != NULL && idx_wlan == 0)
+    {
+      g_np_mac[0] = dev_addr[0];
+      g_np_mac[1] = dev_addr[1];
+      g_np_mac[2] = dev_addr[2];
+      g_np_mac[3] = dev_addr[3];
+      g_np_mac[4] = dev_addr[4];
+      g_np_mac[5] = dev_addr[5];
+      g_np_mac_valid = 1;
+    }
+#else
   (void)dev_addr;
+#endif
 }
 
 /* AP-mode netif pointer; STA-only build leaves it NULL (AP path unused). */

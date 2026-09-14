@@ -57,6 +57,8 @@
 extern void wifi_set_rom2flash(void);
 extern void wifi_set_task_size(void);   /* rtw_task_size.c (compiled)        */
 extern void whc_ipc_host_init(void);    /* lib_wifi_whc_ap                   */
+extern int  wifi_set_mac_address(int idx, unsigned char *mac, u8 efuse);
+extern int  ameba_wifi_get_mac(int idx, unsigned char *mac); /* depend.c      */
 
 /****************************************************************************
  * Public Functions
@@ -256,6 +258,35 @@ int ameba_wifi_connect(const unsigned char *ssid, int ssid_len,
       info.security_type  = RTW_SECURITY_OPEN;
     }
 
+#ifdef CONFIG_AMEBASMART
+  /* Align the NP's WiFi MAC with the address NuttX uses on the netdev.
+   *
+   * On RTL8730E the NP firmware does not honour WHC_API_WIFI_GET_MAC_ADDR
+   * (SDK snapshot mismatch), so ameba_wifi_get_mac() returns a random
+   * locally-administered MAC on the AP side.  Left alone, the NP associates
+   * with its own efuse MAC while NuttX stamps its random MAC into the DHCP
+   * chaddr and Ethernet source: the router then unicasts the DHCP OFFER to
+   * the (random) MAC, which the NP's 802.11 RX hardware filter drops, so the
+   * OFFER never reaches ameba_wlan_rxframe and DHCP times out.
+   *
+   * WHC_API_WIFI_SET_MAC_ADDR *is* implemented on the NP, so push the netdev
+   * MAC down before association (efuse=0: runtime only, not burned).  Both
+   * sides then share one address and unicast frames pass the RX filter.
+   *
+   * The other Ameba parts read the real efuse MAC via a working GET_MAC and
+   * need no such override, so this is scoped to RTL8730E only.
+   */
+
+  {
+    unsigned char mac[6];
+
+    if (ameba_wifi_get_mac(0, mac) == 0)
+      {
+        wifi_set_mac_address(0, mac, 0);
+      }
+  }
+#endif
+
   DiagPrintf("[ameba-wifi] connecting to \"%s\" (security=0x%x) ...\n",
              info.ssid.val, (unsigned)info.security_type);
   ret = wifi_connect(&info, 1);
@@ -266,6 +297,7 @@ int ameba_wifi_connect(const unsigned char *ssid, int ssid_len,
     }
 
   DiagPrintf("[ameba-wifi] connected\n");
+
   return 0;
 }
 
