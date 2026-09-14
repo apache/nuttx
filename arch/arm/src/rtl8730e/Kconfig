@@ -1,0 +1,33 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_RTL8730E
+
+menu "Realtek AmebaSmart (RTL8730E) Chip Selection"
+
+# NOTE (P0 bring-up):
+#   The RTL8730E application core is a Cortex-A32.  NuttX does not yet
+#   provide an ARCH_CORTEXA32 option, so for the P0 compile skeleton we
+#   temporarily borrow ARCH_CORTEXA7 (both are ARMv7-A) to get the tree
+#   building.  TODO: add a proper ARCH_CORTEXA32 option and select it here.
+
+config ARCH_CHIP_RTL8730E_CA32
+	bool "RTL8730E application core (Cortex-A32, borrows Cortex-A7 for P0)"
+	default y
+	select ARCH_CORTEXA7
+	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_ELF_EXECUTABLE
+	select ARCH_HAVE_LOWVECTORS
+	select ARCH_HAVE_MULTICPU
+	select ARCH_NEED_ADDRENV_MAPPING
+	select ARM_HAVE_NEON
+	select ARM_HAVE_PSCI
+	select ARMV7A_HAVE_GICv2
+	select ARMV7A_HAVE_GTM
+	select ARMV7A_HAVE_PTM
+
+endmenu # "Realtek AmebaSmart (RTL8730E) Chip Selection"
+
+endif # ARCH_CHIP_RTL8730E
