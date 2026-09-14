@@ -9,7 +9,7 @@ Supported MCUs
 MCU        Support Note
 =========  ======= =======================
 STM32C051  Yes     
-STM32C071  Yes     USB not supported yet
+STM32C071  Yes
 STM32C091  Yes     
 STM32C092  Yes     FDCAN not supported yet
 =========  ======= =======================
@@ -41,7 +41,7 @@ I2C         Yes
 USART       Yes
 SPI         Yes
 FDCAN       Yes
-USB         No
+USB         Yes      Device only (STM32C071)
 ==========  =======  =====
 
 Supported Boards

@@ -347,9 +347,10 @@
 
 /* RCC peripherals independent clock configuration register 2 */
 
-#define RCC_CCIPR2_USBSEL_SHIFT       (12) /* Bit 12: SB clock source selection */
-#define RCC_CCIPR2_USBSEL_HSIUSB48    (0 << RCC_CCIPR2_USBSEL_SHIFT)
-#define RCC_CCIPR2_USBSEL_HSE         (1 << RCC_CCIPR2_USBSEL_SHIFT)
+#define RCC_CCIPR2_USBSEL_SHIFT       (12) /* Bit 12: USB clock source selection */
+#define RCC_CCIPR2_USBSEL_MASK        (1 << RCC_CCIPR2_USBSEL_SHIFT)
+#  define RCC_CCIPR2_USBSEL_HSIUSB48  (0 << RCC_CCIPR2_USBSEL_SHIFT)
+#  define RCC_CCIPR2_USBSEL_HSE       (1 << RCC_CCIPR2_USBSEL_SHIFT)
 
 /* Clock configuration register 1 */
 
