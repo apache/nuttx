@@ -456,6 +456,11 @@ config IMXRT_ELE
 		(arch/arm/src/imxrt/imxrt118x_ele.c).  Present on RT118x-class
 		SoCs.
 
+config IMXRT_CM7_BOOT
+	bool
+	default n
+	depends on ARCH_CHIP_MIMXRT1189CVM8C_CM33
+
 menu "i.MX RT Peripheral Selection"
 
 config IMXRT_EDMA

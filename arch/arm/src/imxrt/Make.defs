@@ -173,3 +173,7 @@ endif
 ifeq ($(CONFIG_IMXRT_ELE),y)
 CHIP_CSRCS += imxrt118x_ele.c
 endif
+
+ifeq ($(CONFIG_IMXRT_CM7_BOOT),y)
+CHIP_CSRCS += imxrt118x_start_cm7.c
+endif
