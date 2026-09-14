@@ -2311,6 +2311,7 @@ static inline void imxrt_serialout(struct imxrt_uart_s *priv,
 static int imxrt_dma_nextrx(struct imxrt_uart_s *priv)
 {
   int dmaresidual = imxrt_dmach_getcount(priv->rxdma);
+
   DEBUGASSERT(dmaresidual <= RXDMA_BUFFER_SIZE);
 
   return (RXDMA_BUFFER_SIZE - dmaresidual) % RXDMA_BUFFER_SIZE;
@@ -2818,300 +2819,304 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
-    case TIOCSERGSTRUCT:
-      {
-         struct imxrt_uart_s *user = (struct imxrt_uart_s *)arg;
-         if (!user)
-           {
-             ret = -EINVAL;
-           }
-         else
-           {
-             memcpy(user, dev, sizeof(struct imxrt_uart_s));
-           }
-       }
-       break;
+      case TIOCSERGSTRUCT:
+        {
+          struct imxrt_uart_s *user = (struct imxrt_uart_s *)arg;
+
+          if (!user)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              memcpy(user, dev, sizeof(struct imxrt_uart_s));
+            }
+        }
+        break;
 #endif
 
 #ifdef CONFIG_SERIAL_TERMIOS
-    case TCGETS:
-      {
-        struct termios *termiosp = (struct termios *)arg;
-        struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev;
+      case TCGETS:
+        {
+          struct termios *termiosp = (struct termios *)arg;
+          struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev;
 
-        if (!termiosp)
-          {
-            ret = -EINVAL;
-            break;
-          }
+          if (!termiosp)
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        /* Return parity */
+          /* Return parity */
 
-        termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
-                            ((priv->parity == 1) ? PARODD : 0);
+          termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
+                              ((priv->parity == 1) ? PARODD : 0);
 
-        /* Return stop bits */
+          /* Return stop bits */
 
-        termiosp->c_cflag |= (priv->stopbits2) ? CSTOPB : 0;
+          termiosp->c_cflag |= (priv->stopbits2) ? CSTOPB : 0;
 
-        /* Return flow control */
+          /* Return flow control */
 
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-        termiosp->c_cflag |= ((priv->oflow) ? CCTS_OFLOW : 0);
+          termiosp->c_cflag |= ((priv->oflow) ? CCTS_OFLOW : 0);
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-        termiosp->c_cflag |= ((priv->iflow) ? CRTS_IFLOW : 0);
+          termiosp->c_cflag |= ((priv->iflow) ? CRTS_IFLOW : 0);
 #endif
-        /* Return baud */
+          /* Return baud */
 
-        cfsetispeed(termiosp, priv->baud);
+          cfsetispeed(termiosp, priv->baud);
 
-        /* Return number of bits */
+          /* Return number of bits */
 
-        switch (priv->bits)
-          {
-          case 5:
-            termiosp->c_cflag |= CS5;
-            break;
+          switch (priv->bits)
+            {
+              case 5:
+                termiosp->c_cflag |= CS5;
+                break;
 
-          case 6:
-            termiosp->c_cflag |= CS6;
-            break;
+              case 6:
+                termiosp->c_cflag |= CS6;
+                break;
 
-          case 7:
-            termiosp->c_cflag |= CS7;
-            break;
+              case 7:
+                termiosp->c_cflag |= CS7;
+                break;
 
-          default:
-          case 8:
-            termiosp->c_cflag |= CS8;
-            break;
+              default:
+              case 8:
+                termiosp->c_cflag |= CS8;
+                break;
 
 #if defined(CS9)
-          case 9:
-            termiosp->c_cflag |= CS9;
-            break;
+              case 9:
+                termiosp->c_cflag |= CS9;
+                break;
 #endif
-          }
-      }
-      break;
+            }
+        }
+        break;
 
-    case TCSETS:
-      {
-        struct termios *termiosp = (struct termios *)arg;
-        struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev;
-        uint32_t baud;
-        uint32_t ie;
-        uint8_t parity;
-        uint8_t nbits;
-        bool stop2;
+      case TCSETS:
+        {
+          struct termios *termiosp = (struct termios *)arg;
+          struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev;
+          uint32_t baud;
+          uint32_t ie;
+          uint8_t parity;
+          uint8_t nbits;
+          bool stop2;
 
-        if ((!termiosp)
+          if ((!termiosp)
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-            || ((termiosp->c_cflag & CCTS_OFLOW) && (priv->cts_gpio == 0))
+              || ((termiosp->c_cflag & CCTS_OFLOW) && (priv->cts_gpio == 0))
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-            || ((termiosp->c_cflag & CRTS_IFLOW) && (priv->rts_gpio == 0))
+              || ((termiosp->c_cflag & CRTS_IFLOW) && (priv->rts_gpio == 0))
 #endif
-           )
-          {
-            ret = -EINVAL;
-            break;
-          }
+              )
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        /* Decode baud. */
+          /* Decode baud. */
 
-        ret = OK;
-        baud = cfgetispeed(termiosp);
+          ret = OK;
+          baud = cfgetispeed(termiosp);
 
-        /* Decode number of bits */
+          /* Decode number of bits */
 
-        switch (termiosp->c_cflag & CSIZE)
-          {
-          case CS5:
-            nbits = 5;
-            break;
+          switch (termiosp->c_cflag & CSIZE)
+            {
+              case CS5:
+                nbits = 5;
+                break;
 
-          case CS6:
-            nbits = 6;
-            break;
+              case CS6:
+                nbits = 6;
+                break;
 
-          case CS7:
-            nbits = 7;
-            break;
+              case CS7:
+                nbits = 7;
+                break;
 
-          case CS8:
-            nbits = 8;
-            break;
+              case CS8:
+                nbits = 8;
+                break;
 
 #if defined(CS9)
-          case CS9:
-            nbits = 9;
-            break;
+              case CS9:
+                nbits = 9;
+                break;
 #endif
-          default:
-            ret = -EINVAL;
-            break;
-          }
+              default:
+                ret = -EINVAL;
+                break;
+            }
 
-        /* Decode parity */
+          /* Decode parity */
 
-        if ((termiosp->c_cflag & PARENB) != 0)
-          {
-            parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
-          }
-        else
-          {
-            parity = 0;
-          }
+          if ((termiosp->c_cflag & PARENB) != 0)
+            {
+              parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
+            }
+          else
+            {
+              parity = 0;
+            }
 
-        /* Decode stop bits */
+          /* Decode stop bits */
 
-        stop2 = (termiosp->c_cflag & CSTOPB) != 0;
+          stop2 = (termiosp->c_cflag & CSTOPB) != 0;
 
-        /* Verify that all settings are valid before committing */
+          /* Verify that all settings are valid before committing */
 
-        if (ret == OK)
-          {
-            /* Commit */
+          if (ret == OK)
+            {
+              /* Commit */
 
-            priv->baud      = baud;
-            priv->parity    = parity;
-            priv->bits      = nbits;
-            priv->stopbits2 = stop2;
+              priv->baud      = baud;
+              priv->parity    = parity;
+              priv->bits      = nbits;
+              priv->stopbits2 = stop2;
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-            priv->oflow     = (termiosp->c_cflag & CCTS_OFLOW) != 0;
+              priv->oflow     = (termiosp->c_cflag & CCTS_OFLOW) != 0;
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-            priv->iflow     = (termiosp->c_cflag & CRTS_IFLOW) != 0;
+              priv->iflow     = (termiosp->c_cflag & CRTS_IFLOW) != 0;
 #endif
-            /* effect the changes immediately - note that we do not
-             * implement TCSADRAIN / TCSAFLUSH
-             */
+              /* effect the changes immediately - note that we do not
+               * implement TCSADRAIN / TCSAFLUSH
+               */
 
-            flags  = spin_lock_irqsave(&priv->lock);
-            imxrt_disableuartint(priv, &ie);
-            ret = dev->ops->setup(dev);
+              flags  = spin_lock_irqsave(&priv->lock);
+              imxrt_disableuartint(priv, &ie);
+              ret = dev->ops->setup(dev);
 
-            /* Restore the interrupt state */
+              /* Restore the interrupt state */
 
-            imxrt_restoreuartint(priv, ie);
-            priv->ie = ie;
-            spin_unlock_irqrestore(&priv->lock, flags);
-          }
-      }
-      break;
+              imxrt_restoreuartint(priv, ie);
+              priv->ie = ie;
+              spin_unlock_irqrestore(&priv->lock, flags);
+            }
+        }
+        break;
 #endif /* CONFIG_SERIAL_TERMIOS */
 
 #ifdef CONFIG_IMXRT_LPUART_SINGLEWIRE
-    case TIOCSSINGLEWIRE:
-      {
-        uint32_t regval;
-        struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev;
+      case TIOCSSINGLEWIRE:
+        {
+          uint32_t regval;
+          struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev;
 
-        flags  = spin_lock_irqsave(&priv->lock);
-        regval   = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
+          flags  = spin_lock_irqsave(&priv->lock);
+          regval = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
 
-        if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
-          {
-            uint32_t gpio_val = (arg & SER_SINGLEWIRE_PUSHPULL) ==
-                                 SER_SINGLEWIRE_PUSHPULL ?
-                                 IOMUX_CMOS_OUTPUT : IOMUX_OPENDRAIN;
-            gpio_val |= (arg & SER_SINGLEWIRE_PULL_MASK) ==
-                         SER_SINGLEWIRE_PULLUP ?
-                                        IOMUX_PULL_UP : IOMUX_PULL_NONE;
-            gpio_val |= (arg & SER_SINGLEWIRE_PULL_MASK) ==
-                         SER_SINGLEWIRE_PULLDOWN ?
-                                     IOMUX_PULL_DOWN : IOMUX_PULL_NONE;
-            imxrt_config_gpio((priv->tx_gpio &
-                          ~(IOMUX_PULL_MASK | IOMUX_OPENDRAIN)) | gpio_val);
-            regval |= LPUART_CTRL_LOOPS | LPUART_CTRL_RSRC;
-            priv->prev_ops = priv->dev.ops;
+          if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
+            {
+              uint32_t gpio_val;
+
+              gpio_val = (arg & SER_SINGLEWIRE_PUSHPULL) ==
+                         SER_SINGLEWIRE_PUSHPULL ?
+                         IOMUX_CMOS_OUTPUT : IOMUX_OPENDRAIN;
+              gpio_val |= (arg & SER_SINGLEWIRE_PULL_MASK) ==
+                          SER_SINGLEWIRE_PULLUP ?
+                          IOMUX_PULL_UP : IOMUX_PULL_NONE;
+              gpio_val |= (arg & SER_SINGLEWIRE_PULL_MASK) ==
+                          SER_SINGLEWIRE_PULLDOWN ?
+                          IOMUX_PULL_DOWN : IOMUX_PULL_NONE;
+              imxrt_config_gpio((priv->tx_gpio &
+                                 ~(IOMUX_PULL_MASK | IOMUX_OPENDRAIN)) |
+                                gpio_val);
+              regval |= LPUART_CTRL_LOOPS | LPUART_CTRL_RSRC;
+              priv->prev_ops = priv->dev.ops;
 #ifdef SERIAL_HAVE_RXDMA
-            if (priv->dev.ops->receive == imxrt_dma_receive)
-              {
-                priv->dev.ops = &g_lpuart_singlewire_rxdma_ops;
-              }
-            else
+              if (priv->dev.ops->receive == imxrt_dma_receive)
+                {
+                  priv->dev.ops = &g_lpuart_singlewire_rxdma_ops;
+                }
+              else
 #endif
-              {
-                priv->dev.ops = &g_lpuart_singlewire_ops;
-              }
-          }
-        else
-          {
-            imxrt_config_gpio((priv->tx_gpio & ~(IOMUX_PULL_MASK |
-                                                 IOMUX_OPENDRAIN)) |
-                                                 IOMUX_PULL_NONE);
-            regval &= ~(LPUART_CTRL_LOOPS | LPUART_CTRL_RSRC);
-            if (priv->prev_ops)
-              {
-                priv->dev.ops = priv->prev_ops;
-                priv->prev_ops = 0;
-              }
-          }
+                {
+                  priv->dev.ops = &g_lpuart_singlewire_ops;
+                }
+            }
+          else
+            {
+              imxrt_config_gpio((priv->tx_gpio &
+                                 ~(IOMUX_PULL_MASK | IOMUX_OPENDRAIN)) |
+                                IOMUX_PULL_NONE);
+              regval &= ~(LPUART_CTRL_LOOPS | LPUART_CTRL_RSRC);
+              if (priv->prev_ops)
+                {
+                  priv->dev.ops = priv->prev_ops;
+                  priv->prev_ops = 0;
+                }
+            }
 
-        imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
+          imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
 
-        spin_unlock_irqrestore(&priv->lock, flags);
-      }
-      break;
+          spin_unlock_irqrestore(&priv->lock, flags);
+        }
+        break;
 #endif
 
 #ifdef CONFIG_IMXRT_LPUART_INVERT
-    case TIOCSINVERT:
-      {
-        uint32_t ctrl;
-        uint32_t stat;
-        uint32_t regval;
-        struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev;
+      case TIOCSINVERT:
+        {
+          uint32_t ctrl;
+          uint32_t stat;
+          uint32_t regval;
+          struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev;
 
-        flags  = spin_lock_irqsave(&priv->lock);
-        ctrl   = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
-        stat   = imxrt_serialin(priv, IMXRT_LPUART_STAT_OFFSET);
-        regval = ctrl;
+          flags  = spin_lock_irqsave(&priv->lock);
+          ctrl   = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
+          stat   = imxrt_serialin(priv, IMXRT_LPUART_STAT_OFFSET);
+          regval = ctrl;
 
-        /* {R|T}XINV bit field can only be written when the receiver
-         * is disabled (RE=0).
-         */
+          /* {R|T}XINV bit field can only be written when the receiver
+           * is disabled (RE=0).
+           */
 
-        regval &= ~LPUART_CTRL_RE;
+          regval &= ~LPUART_CTRL_RE;
 
-        imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
+          imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
 
-        /* Enable/disable signal inversion. */
+          /* Enable/disable signal inversion. */
 
-        if (arg & SER_INVERT_ENABLED_RX)
-          {
-            stat |= LPUART_STAT_RXINV;
-          }
-        else
-          {
-            stat &= ~LPUART_STAT_RXINV;
-          }
+          if (arg & SER_INVERT_ENABLED_RX)
+            {
+              stat |= LPUART_STAT_RXINV;
+            }
+          else
+            {
+              stat &= ~LPUART_STAT_RXINV;
+            }
 
-        if (arg & SER_INVERT_ENABLED_TX)
-          {
-            ctrl |= LPUART_CTRL_TXINV;
-          }
-        else
-          {
-            ctrl &= ~LPUART_CTRL_TXINV;
-          }
+          if (arg & SER_INVERT_ENABLED_TX)
+            {
+              ctrl |= LPUART_CTRL_TXINV;
+            }
+          else
+            {
+              ctrl &= ~LPUART_CTRL_TXINV;
+            }
 
-        imxrt_serialout(priv, IMXRT_LPUART_STAT_OFFSET, stat);
-        imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, ctrl);
+          imxrt_serialout(priv, IMXRT_LPUART_STAT_OFFSET, stat);
+          imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, ctrl);
 
-        spin_unlock_irqrestore(&priv->lock, flags);
-      }
-      break;
+          spin_unlock_irqrestore(&priv->lock, flags);
+        }
+        break;
 #endif
 
-    case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
-    case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
-    default:
-      ret = -ENOTTY;
-      break;
+      case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
+      case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
+      default:
+        ret = -ENOTTY;
+        break;
     }
 
   return ret;
@@ -3647,6 +3652,7 @@ static void imxrt_singlewire_send(struct uart_dev_s *dev, int ch)
 static void imxrt_send(struct uart_dev_s *dev, int ch)
 {
   struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev;
+
   imxrt_serialout(priv, IMXRT_LPUART_DATA_OFFSET, (uint32_t)ch);
 }
 
