@@ -56,6 +56,12 @@ void stm32_flash_lock(void);
 
 void stm32_flash_unlock(void);
 
+int stm32_otp_write(const uint16_t *data, uint16_t len, uint32_t offset);
+
+int stm32_otp_read(uint16_t *data, uint16_t len, uint32_t offset);
+
+uint32_t stm32_otp_getlockstatus(void);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
