@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/am67/t3-gem-o1/src/t3-gem-o1.h
+ * boards/arm/am67/t3-gem-o1/src/am67_pwm.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,35 +20,26 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_T3_GEM_O1_SRC_T3_GEM_O1_H
-#define __BOARDS_ARM_T3_GEM_O1_SRC_T3_GEM_O1_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#ifndef __ASSEMBLY__
+#include <debug.h>
 
-struct spi_dev_s;
+#include <nuttx/timers/pwm.h>
+
+#include "am67_pwm.h"
+
+#ifdef CONFIG_AM67_EPWM0
 
 /****************************************************************************
- * Public Functions Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-int am67_bringup(void);
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-#ifdef CONFIG_AM67_MCSPI0
-void am67_spi0select(FAR struct spi_dev_s *dev, uint32_t devid,
-                     bool selected);
-uint8_t am67_spi0status(FAR struct spi_dev_s *dev, uint32_t devid);
-void am67_spidev_initialize(void);
-#endif
-
-#if defined(CONFIG_AM67_I2C0) || defined(CONFIG_AM67_WKUP_I2C0)
-void am67_i2cdev_initialize(void);
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_T3_GEM_O1_SRC_T3_GEM_O1_H */
+#endif /* CONFIG_AM67_EPWM0 */
