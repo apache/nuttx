@@ -3032,6 +3032,21 @@ static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         }
         break;
 #endif
+#ifdef CONFIG_STM32_ETH_PTP
+      case SIOCS_PTP_ADJFREQ:
+        {
+          FAR const long *ppb = (FAR const long *)((uintptr_t)arg);
+
+          if (ppb == NULL)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          ret = stm32_eth_ptp_adjust(*ppb);
+        }
+        break;
+#endif
 
       default:
         ret = -ENOTTY;
@@ -3751,7 +3766,7 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
 static int stm32_eth_ptp_adjust(long ppb)
 {
   uint32_t regval;
-  uint64_t addend;
+  int64_t addend;
   uint32_t increment;
 
   /* Compute addend value to achieve nominal timer rate.
@@ -3766,15 +3781,15 @@ static int stm32_eth_ptp_adjust(long ppb)
 
   if (ppb != 0)
     {
-      addend += addend * ppb / NSEC_PER_SEC;
+      addend += addend * (int64_t)ppb / NSEC_PER_SEC;
     }
 
   /* Check for overflows */
 
-  if (addend == 0 || (uint32_t)addend != addend)
+  if (addend <= 0 || (uint64_t)addend > UINT32_MAX)
     {
       nerr("PTP adjustment out of range: ppb=%ld, addend=%lld\n",
-           ppb, addend);
+           ppb, (long long)addend);
       return -EINVAL;
     }
 
