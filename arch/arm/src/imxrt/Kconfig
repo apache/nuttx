@@ -476,6 +476,11 @@ config IMXRT_ELE_FW_PATH
 		Path (relative to the NuttX top-level directory, or absolute) to
 		the NXP EdgeLock Enclave firmware AHAB container.
 
+config IMXRT_CM7_BOOT
+	bool
+	default n
+	depends on ARCH_CHIP_MIMXRT1189CVM8C_CM33
+
 menu "i.MX RT Peripheral Selection"
 
 config IMXRT_EDMA

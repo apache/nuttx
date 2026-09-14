@@ -194,3 +194,7 @@ $(IMXRT_ELE_FW_ABS):
 	$(Q) $(TOPDIR)/tools/imxrt1180/fetch_ele_fw.sh >/dev/null
 endif
 endif
+
+ifeq ($(CONFIG_IMXRT_CM7_BOOT),y)
+CHIP_CSRCS += imxrt118x_start_cm7.c
+endif
