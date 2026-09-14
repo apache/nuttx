@@ -156,6 +156,7 @@ int irq_attach_thread(int irq, xcpt_t isr, xcpt_t isrthread, FAR void *arg,
   char arg4[32];  /* arg */
   pid_t pid;
   int ndx = IRQ_TO_NDX(irq);
+
   if (ndx < 0)
     {
       ret = ndx;
@@ -191,8 +192,10 @@ int irq_attach_thread(int irq, xcpt_t isr, xcpt_t isrthread, FAR void *arg,
         {
           ret = pid;
         }
-
-      irq_thread_pid[ndx] = pid;
+      else
+        {
+          irq_thread_pid[ndx] = pid;
+        }
     }
 #endif /* NR_IRQS */
 
