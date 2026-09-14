@@ -13,7 +13,7 @@ config FS_AIO
 
 config FS_AIO_LISTIO_MAX
 	int "Maximum number of AIO operations in listio"
-	default 10
+	default 256
 	---help---
 		This option sets the maximum number of asynchronous I/O (AIO) operations
 		that can be submitted in a single call to lio_listio().
