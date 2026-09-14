@@ -76,9 +76,11 @@ Features
 
 .. warning::
 
-   This board currently only supports a basic implementation of NuttX with
-   only UART console as a supported peripheral. Please see the contributing
-   documentation if you would like to help contribute to the support.
+   NuttX runs on the main-domain R5F core, loaded by U-Boot or Linux via
+   RemoteProc. It relies on the bootloader / Linux Device Manager to have
+   powered and clocked the peripherals it uses (NuttX does not yet run a TISCI
+   client of its own). Support is a work in progress -- please see the
+   contributing documentation if you would like to help.
 
 Serial console
 ==============
@@ -88,6 +90,19 @@ HAT:
 
 - **UART-MAIN1 TX:** GPIO-14
 - **UART-MAIN1 RX:** GPIO-15
+
+Peripheral Support
+==================
+
+Beyond the serial console, the following peripherals have drivers for the
+main-domain R5F core:
+
+- **GPIO:** pad configuration and read/write over the AM67 GPIO controller.
+- **SPI:** MCU_MCSPI0 master, with the hardware chip-select driven per channel
+  (used for the on-board ICM-20948 IMU and LPS22DF barometer).
+- **I2C:** WKUP_I2C0 master, registered as /dev/i2c2.
+- **PWM:** EPWM0 and EPWM1, channels A and B each, registered as /dev/pwm0
+  and /dev/pwm1.
 
 Installation
 ============
