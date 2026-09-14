@@ -681,7 +681,7 @@ struct xcptcontext
 #  if CONFIG_ARCH_RV_VECTOR_BYTE_LENGTH > 0
   /* There are 32 vector registers(v0 - v31) with vlenb length. */
 
-  uintreg_t vregs[VPU_XCPTC_SIZE];
+  uintreg_t vregs[VPU_XCPTC_SIZE / INT_REG_SIZE];
 #  else
   uintreg_t *vregs;
 #  endif
