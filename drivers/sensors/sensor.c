@@ -865,6 +865,8 @@ static int sensor_close(FAR struct file *filep)
     }
 
   list_delete(&user->node);
+  user->fds = NULL;
+  wd_cancel(&user->wdog);
 
   /* The user is closed, notify to other users */
 
