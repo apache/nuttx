@@ -440,14 +440,20 @@ int zipfs_new(FAR const char *abspath, FAR const char *relpath,
 
   while (true)
     {
+      FAR const char *name;
+
       ret = archive_read_next_header2(newp->a, newp->entry);
       ret = zipfs_convert_result(ret);
-      if (ret < 0)
+
+      /* Stop at end of archive (entry cleared, name NULL) or on error */
+
+      if (ret == ARCHIVE_EOF || ret < 0)
         {
           break;
         }
 
-      if (strcmp(archive_entry_pathname(newp->entry), relpath) == 0)
+      name = archive_entry_pathname(newp->entry);
+      if (name != NULL && strcmp(name, relpath) == 0)
         {
           *priv = newp;
           return OK;
