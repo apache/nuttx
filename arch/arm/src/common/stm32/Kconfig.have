@@ -1178,6 +1178,9 @@ config STM32_HAVE_USBDEV
 config STM32_HAVE_IP_USBDEV_M0_V1
 	bool
 
+config STM32_HAVE_IP_USBDEV_M0_V2
+	bool
+
 config STM32_HAVE_IP_USBDEV_M3M4_V1
 	bool
 

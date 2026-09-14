@@ -357,7 +357,7 @@ static uint32_t stm32_getreg(uint32_t addr);
 static void stm32_putreg(uint32_t val, uint32_t addr);
 static void stm32_dumpep(int epno);
 #else
-#  ifdef CONFIG_STM32_STM32G0
+#  ifdef CONFIG_STM32_HAVE_IP_USBDEV_M0_V2
 #    define stm32_getreg(addr)     getreg32(addr)
 #    define stm32_putreg(val,addr) putreg32(val,addr)
 #  else
@@ -614,7 +614,7 @@ static uint32_t stm32_getreg(uint32_t addr)
 
   /* Read the value from the register */
 
-#ifdef CONFIG_STM32_STM32G0
+#ifdef CONFIG_STM32_HAVE_IP_USBDEV_M0_V2
   uint32_t val = getreg32(addr);
 #else
   uint32_t val = getreg16(addr);
@@ -676,7 +676,7 @@ static void stm32_putreg(uint32_t val, uint32_t addr)
 
   /* Write the value */
 
-#ifdef CONFIG_STM32_STM32G0
+#ifdef CONFIG_STM32_HAVE_IP_USBDEV_M0_V2
   putreg32(val, addr);
 #else
   putreg16(val, addr);
@@ -693,7 +693,7 @@ static void stm32_dumpep(int epno)
 {
   uint32_t addr;
 
-#ifdef CONFIG_STM32_STM32G0
+#ifdef CONFIG_STM32_HAVE_IP_USBDEV_M0_V2
   uinfo("CNTR:   %04" PRIx32 "\n", getreg32(STM32_USB_CNTR));
   uinfo("ISTR:   %04" PRIx32 "\n", getreg32(STM32_USB_ISTR));
   uinfo("FNR:    %04" PRIx32 "\n", getreg32(STM32_USB_FNR));
@@ -759,7 +759,7 @@ static void stm32_dumpep(int epno)
 
 static inline void stm32_seteptxcount(uint8_t epno, uint16_t count)
 {
-#ifdef CONFIG_STM32_STM32G0
+#ifdef CONFIG_STM32_HAVE_IP_USBDEV_M0_V2
   volatile uint32_t *epaddr = (uint32_t *)STM32_USB_TX(epno);
   *epaddr = (*epaddr & 0x0000ffff) | ((uint32_t)count << 16);
 #else
@@ -774,7 +774,7 @@ static inline void stm32_seteptxcount(uint8_t epno, uint16_t count)
 
 static inline void stm32_seteptxaddr(uint8_t epno, uint16_t addr)
 {
-#ifdef CONFIG_STM32_STM32G0
+#ifdef CONFIG_STM32_HAVE_IP_USBDEV_M0_V2
   volatile uint32_t *txaddr = (uint32_t *)STM32_USB_TX(epno);
   *txaddr = (*txaddr & 0xffff0000) | addr;
 #else
@@ -789,7 +789,7 @@ static inline void stm32_seteptxaddr(uint8_t epno, uint16_t addr)
 
 static inline uint16_t stm32_geteptxaddr(uint8_t epno)
 {
-#ifdef CONFIG_STM32_STM32G0
+#ifdef CONFIG_STM32_HAVE_IP_USBDEV_M0_V2
   volatile uint32_t *txaddr = (uint32_t *)STM32_USB_TX(epno);
 #else
   volatile uint16_t *txaddr = (uint16_t *)STM32_USB_ADDR_TX(epno);
@@ -803,7 +803,7 @@ static inline uint16_t stm32_geteptxaddr(uint8_t epno)
 
 static void stm32_seteprxcount(uint8_t epno, uint16_t count)
 {
-#ifdef CONFIG_STM32_STM32G0
+#ifdef CONFIG_STM32_HAVE_IP_USBDEV_M0_V2
   volatile uint32_t *epaddr = (uint32_t *)STM32_USB_RX(epno);
 #else
   volatile uint16_t *epaddr = (uint16_t *)STM32_USB_COUNT_RX(epno);
@@ -847,7 +847,7 @@ static void stm32_seteprxcount(uint8_t epno, uint16_t count)
       DEBUGASSERT(nblocks > 0 && nblocks < 0x1f);
       rxcount = (uint32_t)(nblocks << USB_COUNT_RX_NUM_BLOCK_SHIFT);
     }
-#ifdef CONFIG_STM32_STM32G0
+#ifdef CONFIG_STM32_HAVE_IP_USBDEV_M0_V2
   *epaddr = (*epaddr & 0x0000ffff) | rxcount;
 #else
   *epaddr = rxcount;
@@ -860,7 +860,7 @@ static void stm32_seteprxcount(uint8_t epno, uint16_t count)
 
 static inline uint16_t stm32_geteprxcount(uint8_t epno)
 {
-#ifdef CONFIG_STM32_STM32G0
+#ifdef CONFIG_STM32_HAVE_IP_USBDEV_M0_V2
   volatile uint32_t *epaddr = (uint32_t *)STM32_USB_RX(epno);
   return (uint16_t)((*epaddr & USB_COUNT_RX_MASK) >> 16);
 #else
@@ -875,7 +875,7 @@ static inline uint16_t stm32_geteprxcount(uint8_t epno)
 
 static inline void stm32_seteprxaddr(uint8_t epno, uint16_t addr)
 {
-#ifdef CONFIG_STM32_STM32G0
+#ifdef CONFIG_STM32_HAVE_IP_USBDEV_M0_V2
   volatile uint32_t *rxaddr = (uint32_t *)STM32_USB_RX(epno);
   *rxaddr = (*rxaddr & 0xffff0000) | addr;
 #else
@@ -890,7 +890,7 @@ static inline void stm32_seteprxaddr(uint8_t epno, uint16_t addr)
 
 static inline uint16_t stm32_geteprxaddr(uint8_t epno)
 {
-#ifdef CONFIG_STM32_STM32G0
+#ifdef CONFIG_STM32_HAVE_IP_USBDEV_M0_V2
   volatile uint32_t *rxaddr = (uint32_t *)STM32_USB_RX(epno);
 #else
   volatile uint16_t *rxaddr = (uint16_t *)STM32_USB_ADDR_RX(epno);
@@ -1114,7 +1114,7 @@ static inline bool stm32_eprxstalled(uint8_t epno)
 static void stm32_copytopma(const uint8_t *buffer,
                             uint16_t pma, uint16_t nbytes)
 {
-#ifdef CONFIG_STM32_STM32G0
+#ifdef CONFIG_STM32_HAVE_IP_USBDEV_M0_V2
   volatile uint32_t *dest;
 
   dest = (uint32_t *)(STM32_USBRAM_BASE + (uint32_t)pma);
@@ -1173,7 +1173,7 @@ static void stm32_copytopma(const uint8_t *buffer,
 static inline void
 stm32_copyfrompma(uint8_t *buffer, uint16_t pma, uint16_t nbytes)
 {
-#ifdef CONFIG_STM32_STM32G0
+#ifdef CONFIG_STM32_HAVE_IP_USBDEV_M0_V2
   volatile uint32_t *src;
 
   src = (uint32_t *)(STM32_USBRAM_BASE + (uint32_t)pma);
@@ -3654,7 +3654,7 @@ static void stm32_hwreset(struct stm32_usbdev_s *priv)
 
   /* Set the STM32 BTABLE address */
 
-#ifndef CONFIG_STM32_STM32G0
+#ifndef CONFIG_STM32_HAVE_IP_USBDEV_M0_V2
   stm32_putreg(STM32_BTABLE_ADDRESS & 0xfff8, STM32_USB_BTABLE);
 #endif
 
