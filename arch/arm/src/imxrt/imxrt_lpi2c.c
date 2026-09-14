@@ -1653,6 +1653,7 @@ static int imxrt_lpi2c_isr(int irq, void *context, void *arg)
 
   DEBUGASSERT(priv != NULL);
   int rv = imxrt_lpi2c_isr_process(priv);
+
   return rv;
 }
 #endif
@@ -1862,6 +1863,7 @@ static int imxrt_lpi2c_deinit(struct imxrt_lpi2c_priv_s *priv)
 static int imxrt_lpi2c_dma_configure_mder(struct imxrt_lpi2c_priv_s *priv)
 {
   struct imxrt_edma_xfrconfig_s config;
+
   memset(&config, 0, sizeof(config));
 
   config.saddr  = (uint32_t) &g_lpi2c_mder_rdde;
@@ -1894,6 +1896,7 @@ static int imxrt_lpi2c_dma_command_configure(struct imxrt_lpi2c_priv_s *priv,
                                              uint16_t *ccmd, uint32_t ncmd)
 {
   struct imxrt_edma_xfrconfig_s config;
+
   memset(&config, 0, sizeof(config));
 
   config.saddr  = (uint32_t) ccmd;
@@ -1926,6 +1929,7 @@ static int imxrt_lpi2c_dma_data_configure(struct imxrt_lpi2c_priv_s *priv,
                                           struct i2c_msg_s *msg)
 {
   struct imxrt_edma_xfrconfig_s config;
+
   memset(&config, 0, sizeof(config));
 
   config.iter   = msg->length;
@@ -2250,8 +2254,8 @@ static int imxrt_lpi2c_transfer(struct i2c_master_s *dev,
         {
           if (msgs[m].flags & I2C_M_READ)
             {
-            up_invalidate_dcache((uintptr_t)msgs[m].buffer,
-                                (uintptr_t)msgs[m].buffer + msgs[m].length);
+              up_invalidate_dcache((uintptr_t)msgs[m].buffer,
+                (uintptr_t)msgs[m].buffer + msgs[m].length);
             }
         }
     }
@@ -2419,37 +2423,57 @@ struct i2c_master_s *imxrt_i2cbus_initialize(int port)
   switch (port)
     {
 #ifdef CONFIG_IMXRT_LPI2C1
-    case 1:
-      priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c1_priv;
-      break;
+      case 1:
+        {
+          priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c1_priv;
+          break;
+        }
+
 #endif
 #ifdef CONFIG_IMXRT_LPI2C2
-    case 2:
-      priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c2_priv;
-      break;
+      case 2:
+        {
+          priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c2_priv;
+          break;
+        }
+
 #endif
 #ifdef CONFIG_IMXRT_LPI2C3
-    case 3:
-      priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c3_priv;
-      break;
+      case 3:
+        {
+          priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c3_priv;
+          break;
+        }
+
 #endif
 #ifdef CONFIG_IMXRT_LPI2C4
-    case 4:
-      priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c4_priv;
-      break;
+      case 4:
+        {
+          priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c4_priv;
+          break;
+        }
+
 #endif
 #ifdef CONFIG_IMXRT_LPI2C5
-    case 5:
-      priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c5_priv;
-      break;
+      case 5:
+        {
+          priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c5_priv;
+          break;
+        }
+
 #endif
 #ifdef CONFIG_IMXRT_LPI2C6
-    case 6:
-      priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c6_priv;
-      break;
+      case 6:
+        {
+          priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c6_priv;
+          break;
+        }
+
 #endif
-    default:
-      return NULL;
+      default:
+        {
+          return NULL;
+        }
     }
 
   /* Initialize private data for the first time, increment reference count,
