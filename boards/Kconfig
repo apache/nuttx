@@ -2665,6 +2665,15 @@ config ARCH_BOARD_QEMU_ARMV7A
 		This options selects support for NuttX on the QEMU ARMv7a + virt
 		board featuring the qemu ARMv7a CPUs.
 
+config ARCH_BOARD_CA32_EVB
+	bool "Realtek AmebaSmart (RTL8730E) CA32 EVB board"
+	depends on ARCH_CHIP_RTL8730E
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the Realtek AmebaSmart
+		(RTL8730E) evaluation board running on the CA32 (Cortex-A32)
+		application core.
+
 config ARCH_BOARD_QEMU_ARMV8A
 	bool "Qemu ARMv8a CPUs board"
 	depends on ARCH_CHIP_QEMU
@@ -4167,6 +4176,7 @@ config ARCH_BOARD
 	default "a2g-tc397-5v-tft"             if ARCH_BOARD_A2G_TC397_5V_TFT
 	default "triboard_tc4x9_com"           if ARCH_BOARD_TRIBOARD_TC4X9_COM
 	default "qemu-armv7a"                  if ARCH_BOARD_QEMU_ARMV7A
+	default "ca32-evb"                     if ARCH_BOARD_CA32_EVB
 	default "qemu-armv7r"                  if ARCH_BOARD_QEMU_ARMV7R
 	default "qemu-armv8a"                  if ARCH_BOARD_QEMU_ARMV8A
 	default "pinephone"                    if ARCH_BOARD_PINEPHONE
@@ -4426,6 +4436,9 @@ source "boards/arm/rtl8721f/rtl8721f_evb/Kconfig"
 endif
 if ARCH_BOARD_QEMU_ARMV7A
 source "boards/arm/qemu/qemu-armv7a/Kconfig"
+endif
+if ARCH_BOARD_CA32_EVB
+source "boards/arm/rtl8730e/ca32-evb/Kconfig"
 endif
 if ARCH_BOARD_QEMU_ARMV8A
 source "boards/arm64/qemu/qemu-armv8a/Kconfig"
