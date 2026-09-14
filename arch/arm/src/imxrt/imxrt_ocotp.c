@@ -284,6 +284,7 @@ int imxrt_ocotp_read(uint32_t otp_index, uint32_t *data)
 int imxrt_ocotp_write(uint32_t otp_index, uint32_t data)
 {
   int ret;
+
   ret = imxrt_ocotp_wait_for_completion(OCOTP_OPT_TIMEOUT_MS);
   if (ret == OK)
     {
