@@ -195,12 +195,6 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR_USBEN;
 #endif
 
-#ifdef CONFIG_STM32_CRC
-  /* CRC clock enable */
-
-  regval |= RCC_APB1ENR_CRCEN;
-#endif
-
 #ifdef CONFIG_STM32_USART2
   /* USART 2 clock enable */
 
