@@ -115,8 +115,12 @@ inline_function FAR struct kwork_wqueue_s *irq_get_wqueue(int priority)
 static void irq_work_handler(FAR void *arg)
 {
   FAR struct irq_work_info_s *info = arg;
+  xcpt_t isrwork = info->isrwork;
 
-  info->isrwork(info->irq, NULL, info->arg);
+  if (isrwork != NULL)
+    {
+      isrwork(info->irq, NULL, info->arg);
+    }
 }
 
 static int irq_default_handler(int irq, FAR void *context, FAR void *arg)
@@ -192,6 +196,11 @@ int irq_attach_wqueue(int irq, xcpt_t isr, xcpt_t isrwork,
       if (isrwork == NULL)
         {
           irq_detach(irq);
+          if (info->wqueue != NULL)
+            {
+              work_cancel_wq(info->wqueue, &info->work);
+            }
+
           info->isrwork = NULL;
           info->handler = NULL;
           info->arg     = NULL;
