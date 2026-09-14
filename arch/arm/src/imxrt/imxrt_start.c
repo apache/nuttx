@@ -176,7 +176,7 @@ void __start(void)
 #endif
 
 #if defined(CONFIG_BOOT_RUNFROMISRAM) || defined(CONFIG_IMXRT_INIT_FLEXRAM)
-    imxrt_ocram_initialize();
+  imxrt_ocram_initialize();
 #endif
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
