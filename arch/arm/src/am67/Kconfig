@@ -4,3 +4,101 @@
 #
 
 comment "AM67 Configuration Options"
+
+config AM67_GPIO
+	bool "AM67 padconfig GPIO driver"
+	default y
+	---help---
+		Enable the AM67 GPIO driver used by PX4 board support and
+		example applications (LED, IMU_EN, SPI CS padconfig).
+
+
+config AM67_EPWM0
+	bool "AM67 EPWM0 driver"
+	default n
+	depends on PWM
+	select ARCH_HAVE_PWM_MULTICHAN
+	---help---
+		Enable EPWM driver on EPWM0 (outputs A and B; requires
+		PWM_MULTICHAN with PWM_NCHANNELS >= 2)
+
+config AM67_EPWM1
+	bool "AM67 EPWM1 driver"
+	default n
+	depends on PWM
+	select ARCH_HAVE_PWM_MULTICHAN
+	---help---
+		Enable EPWM driver on EPWM1 (outputs A and B on HAT GPIO-6
+		and GPIO-13; requires PWM_MULTICHAN with PWM_NCHANNELS >= 2).
+		EPWM2 is the board cooling fan and is deliberately not
+		supported.
+
+
+config AM67_ECAP0
+	bool "AM67 eCAP0 APWM driver"
+	default n
+	depends on PWM
+	---help---
+		Enable the eCAP0 module as a single-channel Auxiliary PWM
+		(APWM) output.  Registered as /dev/ecap0 (kept out of the
+		/dev/pwmN namespace, which belongs to the EPWM instances).
+		The default output pad is ball A23 (mode 8 =
+		ECAP0_IN_APWM0_OUT), chosen to avoid the C20 collision with
+		EPWM0_B; confirm it reaches the HAT header before relying on
+		it.
+
+config AM67_ECAP1
+	bool "AM67 eCAP1 APWM driver"
+	default n
+	depends on PWM
+	---help---
+		Enable the eCAP1 module as a single-channel APWM output,
+		registered as /dev/ecap1.  Output pad selection is a board TODO
+		(candidates collide with I2C0); see am67_pinmux.c.
+
+config AM67_ECAP2
+	bool "AM67 eCAP2 APWM driver"
+	default n
+	depends on PWM
+	---help---
+		Enable the eCAP2 module as a single-channel APWM output,
+		registered as /dev/ecap2.  Output pad selection is a board TODO
+		(candidates collide with I2C0); see am67_pinmux.c.
+
+
+config AM67_MCSPI0
+	bool "AM67 MCU_MCSPI0 master driver"
+	default n
+	depends on SPI
+	---help---
+		Enable polled SPI master on MCU_MCSPI0 @ 0x04b00000 (onboard
+		ICM-20948 CS3 and LPS22DF CS1).
+
+if AM67_MCSPI0
+
+config AM67_MCSPI0_FCLK
+	int "MCU_MCSPI0 functional clock (Hz)"
+	default 48000000
+
+endif
+
+config AM67_I2C
+	bool "AM67 I2C support"
+	default n
+	depends on I2C
+
+if AM67_I2C
+
+config AM67_I2C0
+	bool "AM67 MCU_I2C0 driver (MCU domain, 0x04900000)"
+	default n
+	---help---
+		Enable the I2C master driver for MCU_I2C0.
+
+config AM67_WKUP_I2C0
+	bool "AM67 WKUP_I2C0 driver (WKUP domain, 0x2b200000)"
+	default n
+	---help---
+		Enable the I2C master driver for WKUP_I2C0.
+
+endif # AM67_I2C

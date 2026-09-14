@@ -37,7 +37,7 @@
 #define CSL_PADCFG_CTRL0_CFG0_BASE            (0xf0000ul)
 #define CSL_PADCFG_CTRL0_CFG0_SIZE            (0x8000ul)
 
-#define CSL_MCU_PADCFG_CTRL0_CFG0_BASE        (0x4080000ul)
+#define CSL_MCU_PADCFG_CTRL0_CFG0_BASE        (0x04080000ul)
 #define CSL_MCU_PADCFG_CTRL0_CFG0_SIZE        (0x8000ul)
 
 #define PADCFG_PMUX_OFFSET                    (0x4000u)
@@ -100,7 +100,7 @@ enum pinmux_main_offsets_e
   PIN_GPMC0_AD14     = 0x0074,
   PIN_GPMC0_AD15     = 0x0078,
   PIN_GPMC0_WAIT1    = 0x009c,
-  PIN_SPI0_CS1       = 0x01bb,
+  PIN_SPI0_CS1       = 0x01b8,
   PIN_UART0_TXD      = 0x01cc,
   PIN_UART0_RXD      = 0x01c8,
   PIN_SPI0_CS0       = 0x01b4,
@@ -302,6 +302,7 @@ struct pinmux_conf_s
  ****************************************************************************/
 
 void am67_pinmux_config(const struct pinmux_conf_s *pinmux_conf);
+void am67_mcu_pinmux_config(const struct pinmux_conf_s *pinmux_conf);
 
 /****************************************************************************
  * Name: am67_pinmux_init
@@ -312,5 +313,9 @@ void am67_pinmux_config(const struct pinmux_conf_s *pinmux_conf);
  ****************************************************************************/
 
 void am67_pinmux_init(void);
+void am67_spi_pinmux_init(void);
+void am67_i2c_pinmux_init(void);
+void am67_epwm_pinmux_init(int epwm);
+void am67_ecap_pinmux_init(int ecap);
 
 #endif /* __ARCH_ARM_SRC_AM67_AM67_PINMUX_H */
