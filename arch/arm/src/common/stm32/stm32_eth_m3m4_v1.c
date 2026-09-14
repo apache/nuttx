@@ -789,6 +789,7 @@ static int  stm32_ethconfig(struct stm32_ethmac_s *priv);
 
 #ifdef CONFIG_STM32_ETH_PTP
 static int stm32_eth_ptp_adjust(long ppb);
+static int stm32_eth_ptp_adjphase(int64_t delta_ns);
 static void stm32_eth_ptp_init(uint64_t timestamp);
 static uint64_t stm32_eth_ptp_gettime(void);
 #endif
@@ -3046,6 +3047,21 @@ static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
           ret = stm32_eth_ptp_adjust(*ppb);
         }
         break;
+
+      case SIOCS_PTP_ADJPHASE:
+        {
+          FAR const int64_t *delta_ns =
+            (FAR const int64_t *)((uintptr_t)arg);
+
+          if (delta_ns == NULL)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          ret = stm32_eth_ptp_adjphase(*delta_ns);
+        }
+        break;
 #endif
 
       default:
@@ -3804,6 +3820,64 @@ static int stm32_eth_ptp_adjust(long ppb)
       /* This can happen if Ethernet PHY clock is stopped */
 
       nerr("PTP addend update failed\n");
+      return -EBUSY;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Function: stm32_eth_ptp_adjphase
+ *
+ * Description:
+ *   Nudge the PTP hardware counter's phase by a signed delta, in
+ *   nanoseconds, via the System Time Update (TSSTU) mechanism. Unlike
+ *   stm32_eth_ptp_init(), this does not reset the rate (addend) that
+ *   stm32_eth_ptp_adjust() may already have applied.
+ *
+ * Input Parameters:
+ *   delta_ns - Amount to add to (positive) or subtract from (negative)
+ *              the current counter value.
+ *
+ * Returned Value:
+ *   OK on success, negated errno on failure.
+ *
+ ****************************************************************************/
+
+static int stm32_eth_ptp_adjphase(int64_t delta_ns)
+{
+  uint32_t regval;
+  uint32_t sec;
+  uint32_t subsec;
+  uint32_t abs_nsec;
+  uint64_t abs_ns;
+  bool negative;
+
+  negative = (delta_ns < 0);
+  abs_ns   = negative ? (uint64_t)(-delta_ns) : (uint64_t)delta_ns;
+
+  sec      = (uint32_t)(abs_ns / NSEC_PER_SEC);
+  abs_nsec = (uint32_t)(abs_ns % NSEC_PER_SEC);
+
+  /* Convert the nanosecond remainder to the same 32-bit binary fraction
+   * of a second used by ptp_to_timespec()/stm32_eth_ptp_init(), then
+   * halve it to fit the 31-bit TSUSS field (mirrors the >>1 done in
+   * stm32_eth_ptp_init()).
+   */
+
+  subsec = (uint32_t)(((uint64_t)abs_nsec << 32) / NSEC_PER_SEC) >> 1;
+  subsec &= ETH_PTPTSLR_MASK;
+
+  stm32_putreg(sec, STM32_ETH_PTPTSHUR);
+  stm32_putreg(subsec | (negative ? ETH_PTPTSLU_TSUPNS : 0),
+              STM32_ETH_PTPTSLUR);
+
+  regval = stm32_getreg(STM32_ETH_PTPTSCR);
+  stm32_putreg(regval | ETH_PTPTSCR_TSSTU, STM32_ETH_PTPTSCR);
+  up_udelay(1);
+  if (stm32_getreg(STM32_ETH_PTPTSCR) & ETH_PTPTSCR_TSSTU)
+    {
+      nerr("PTP phase update failed\n");
       return -EBUSY;
     }
 
