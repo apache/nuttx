@@ -1009,6 +1009,24 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      /* Resize (PIPEIOC_SETSIZE) or query the size of (PIPEIOC_GETSIZE) the
+       * sink pipe, following the same rule as FIONWRITE and FIONSPACE above.
+       * A file writing more than the pipe holds is split into that many
+       * partial writes, which a protocol carried over the PTY may not
+       * tolerate, so let it size the pipe it writes into rather than making
+       * every PTY in the system pay for the largest consumer through
+       * CONFIG_PSEUDOTERM_RXBUFSIZE and CONFIG_PSEUDOTERM_TXBUFSIZE.  Both
+       * ends of a pair have to ask for themselves, which is what keeps the
+       * two directions independent.
+       */
+
+      case PIPEIOC_SETSIZE:
+      case PIPEIOC_GETSIZE:
+        {
+          ret = file_ioctl(&dev->pd_sink, cmd, arg);
+        }
+        break;
+
       case FIONBIO:
         {
           ret = file_ioctl(&dev->pd_src, cmd, arg);
@@ -1090,10 +1108,10 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       /* Any unrecognized IOCTL commands will be passed to the contained
        * pipe driver.
        *
-       * REVISIT:  We know for a fact that the pipe driver only supports
-       * FIONREAD, FIONWRITE, FIONSPACE and PIPEIOC_POLICY.  The first two
-       * are handled above and PIPEIOC_POLICY should not be managed by
-       * applications -- it can break the PTY!
+       * REVISIT:  The pipe driver supports FIONREAD, FIONWRITE, FIONSPACE,
+       * PIPEIOC_PEEK, PIPEIOC_SETSIZE, PIPEIOC_GETSIZE and PIPEIOC_POLICY.
+       * All but the last are handled above; PIPEIOC_POLICY should not be
+       * managed by applications -- it can break the PTY!
        */
 
       default:
