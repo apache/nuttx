@@ -170,9 +170,16 @@ bool os_heap_add(uint8_t *start_addr, size_t heap_size)
  * the NP DMAs them, so an unaligned base would clobber neighbouring data on
  * cache maintenance.  whc_ipc_host_init_skb() outright rejects an unaligned
  * skb_data_buf ("skb_data_buf malloc fail!"), leaving the skb pool empty and
- * the TX path handing the NP a garbage buffer pointer.  This is guaranteed
- * by CONFIG_MM_DEFAULT_ALIGNMENT=32 (>= SKB_CACHE_SZ) -- every NuttX heap
- * block is then cache-line aligned, so plain kmm_* suffices here.
+ * the TX path handing the NP a garbage buffer pointer.  Worse, when the pool
+ * squeaks past that check but is not aligned to the full cache line, the
+ * driver's by-VA DCache_Clean/Invalidate spills onto the neighbouring skb
+ * struct and corrupts its (immutable) buf pointer, so a later TX memcpy
+ * faults on a garbage skb->data (seen as skb->buf = 0x05).
+ *
+ * This is guaranteed by CONFIG_MM_DEFAULT_ALIGNMENT >= SKB_CACHE_SZ -- every
+ * NuttX heap block is then cache-line aligned, so plain kmm_* suffices here.
+ * SKB_CACHE_SZ is 32 on the other Ameba WHC parts but 64 on AmebaSmart
+ * (RTL8730E), so that board's defconfig sets CONFIG_MM_DEFAULT_ALIGNMENT=64.
  */
 
 void *rtos_mem_malloc(uint32_t size)
