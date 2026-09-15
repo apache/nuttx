@@ -28,3 +28,24 @@ config AM67_MCSPI0_FCLK
 	default 48000000
 
 endif
+
+config AM67_I2C
+	bool "AM67 I2C support"
+	default n
+	depends on I2C
+
+if AM67_I2C
+
+config AM67_I2C0
+	bool "AM67 MCU_I2C0 driver (MCU domain, 0x04900000)"
+	default n
+	---help---
+		Enable the I2C master driver for MCU_I2C0.
+
+config AM67_WKUP_I2C0
+	bool "AM67 WKUP_I2C0 driver (WKUP domain, 0x2b200000)"
+	default n
+	---help---
+		Enable the I2C master driver for WKUP_I2C0.
+
+endif # AM67_I2C
