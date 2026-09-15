@@ -31,8 +31,6 @@
 #include <nuttx/i2c/i2c_master.h>
 #include "am67_i2c.h"
 
-#if defined(CONFIG_AM67_I2C0) || defined(CONFIG_AM67_WKUP_I2C0)
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -79,4 +77,3 @@ void am67_i2cdev_initialize(void)
 #endif
 }
 
-#endif /* CONFIG_AM67_I2C0 || CONFIG_AM67_WKUP_I2C0 */

@@ -100,6 +100,7 @@ main-domain R5F core:
 - **GPIO:** pad configuration and read/write over the AM67 GPIO controller.
 - **SPI:** MCU_MCSPI0 master, with the hardware chip-select driven per channel
   (used for the on-board ICM-20948 IMU and LPS22DF barometer).
+- **I2C:** WKUP_I2C0 master, registered as /dev/i2c2.
 
 Installation
 ============

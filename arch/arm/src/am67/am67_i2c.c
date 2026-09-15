@@ -52,9 +52,6 @@
 
 /* At least one I2C peripheral must be enabled */
 
-#if defined(CONFIG_AM67_I2C0) || defined(CONFIG_AM67_I2C1) || \
-    defined(CONFIG_AM67_WKUP_I2C0)
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -1479,4 +1476,3 @@ int am67_i2cbus_uninitialize(struct i2c_master_s *dev)
   return OK;
 }
 
-#endif /* CONFIG_AM67_I2C0 || CONFIG_AM67_I2C1 || CONFIG_AM67_WKUP_I2C0 */
