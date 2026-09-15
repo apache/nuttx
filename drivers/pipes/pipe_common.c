@@ -1117,6 +1117,8 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR void *newbuf;
           FAR void *oldbuf;
 
+          ret = OK;
+
           if (size == 0)
             {
               ret = -EINVAL;
@@ -1127,7 +1129,6 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           if (size == dev->d_bufsize)
             {
-              ret = OK;
               break;
             }
 
