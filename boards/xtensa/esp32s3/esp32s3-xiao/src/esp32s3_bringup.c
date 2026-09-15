@@ -114,6 +114,24 @@ int esp32s3_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESP32S3_SPIFLASH
+#  ifdef CONFIG_PM
+  /* Flash ops run with the cache disabled; same PM guard as Wi-Fi below. */
+
+  pm_stay(PM_IDLE_DOMAIN, PM_IDLE);
+#  endif
+
+  ret = board_spiflash_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI flash: %d\n", ret);
+    }
+
+#  ifdef CONFIG_PM
+  pm_relax(PM_IDLE_DOMAIN, PM_IDLE);
+#  endif
+#endif
+
 #ifdef CONFIG_DEV_GPIO
   ret = esp32s3_gpio_init();
   if (ret < 0)
