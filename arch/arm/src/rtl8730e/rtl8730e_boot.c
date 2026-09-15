@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/arch.h>
 
 #include "arm_internal.h"
 
@@ -132,6 +133,71 @@ void arm_boot(void)
 #endif
 }
 
+/* RTL8730E HSYS / CA32 register addresses for Core1 power sequencing.
+ * Core1 is powered off by default; ATF SP_MIN waits for Core1 to poll its
+ * mailbox but the core never wakes unless the HSYS power rails are enabled
+ * first.  These constants mirror the SDK smp.c / ameba_hsys.h definitions
+ * without requiring vendor headers.
+ */
+
+#define RTL8730E_HSYS_BASE      0x41000000u
+#define RTL8730E_HSYS_HP_PWC    0x000u
+#define RTL8730E_HSYS_HP_ISO    0x004u
+#define RTL8730E_CA32_RST_CTRL  0x41000204u
+
+#define HSYS_PSW_HP_AP_CORE(x)      (((x) & 0x3u) << 4)
+#define HSYS_PSW_HP_AP_CORE_2ND(x)  (((x) & 0x3u) << 6)
+#define HSYS_ISO_HP_AP_CORE(x)      (((x) & 0x3u) << 4)
+#define HSYS_GET_ISO_HP_AP_CORE(x)  (((x) >> 4) & 0x3u)
+#define CA32_NCOREPORESET(x)        (((x) & 0x3u) << 0)
+#define CA32_NCORERESET(x)          (((x) & 0x3u) << 4)
+
+static void rtl8730e_core1_power_on(void)
+{
+  volatile uint32_t *pwc = (volatile uint32_t *)(RTL8730E_HSYS_BASE +
+                                                 RTL8730E_HSYS_HP_PWC);
+  volatile uint32_t *iso = (volatile uint32_t *)(RTL8730E_HSYS_BASE +
+                                                 RTL8730E_HSYS_HP_ISO);
+  volatile uint32_t *rst = (volatile uint32_t *)RTL8730E_CA32_RST_CTRL;
+  uint32_t val;
+
+  /* Assert reset on core1 */
+
+  *rst &= ~(CA32_NCOREPORESET(0x2u) | CA32_NCORERESET(0x2u));
+
+  /* Assert isolation on core1 */
+
+  val  = *iso;
+  val |= HSYS_ISO_HP_AP_CORE(0x2u);
+  *iso = val;
+  up_udelay(50);
+
+  /* First-stage power-on (mask 0x3 keeps core0 rails stable) */
+
+  val  = *pwc;
+  val |= HSYS_PSW_HP_AP_CORE(0x3u);
+  *pwc = val;
+  up_udelay(50);
+
+  /* Second-stage power-on */
+
+  val  = *pwc;
+  val |= HSYS_PSW_HP_AP_CORE_2ND(0x3u);
+  *pwc = val;
+  up_udelay(500);
+
+  /* Release isolation */
+
+  val  = *iso;
+  val &= ~HSYS_ISO_HP_AP_CORE(0x3u);
+  *iso = val;
+  up_udelay(50);
+
+  /* Release reset */
+
+  *rst |= (CA32_NCOREPORESET(0x2u) | CA32_NCORERESET(0x2u));
+}
+
 #if defined(CONFIG_ARM_PSCI) && defined(CONFIG_SMP)
 int up_cpu_start(int cpu)
 {
@@ -148,6 +214,12 @@ int up_cpu_start(int cpu)
           (uint32_t *)PGTABLE_BASE_VADDR, PGTABLE_SIZE);
   UP_DSB();
 #endif
+
+  if (cpu == 1)
+    {
+      rtl8730e_core1_power_on();
+      up_udelay(40);
+    }
 
   return psci_cpu_on(cpu, (uintptr_t)__start);
 }
