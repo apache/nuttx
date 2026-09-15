@@ -48,6 +48,7 @@
 #include <nuttx/net/mii.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spinlock.h>
 
 #if defined(CONFIG_NET_PKT)
@@ -598,6 +599,15 @@
  * Private Types
  ****************************************************************************/
 
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+struct stm32_ptp_txmeta_s
+{
+  bool            track_ts;     /* True if descriptor requires TS capture */
+  FAR sem_t      *wait_sem;     /* Semaphore to notify waiting thread */
+  struct timespec ts;           /* Captured hardware timestamp */
+};
+#endif
+
 /* The stm32_ethmac_s encapsulates all state information for a single
  * hardware interface
  */
@@ -629,6 +639,12 @@ struct stm32_ethmac_s
 #ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
   uint32_t             rxtimelow;   /* Received packet timestamp subsecond */
   uint32_t             rxtimehigh;  /* Received packet timestamp seconds */
+#endif
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+  struct stm32_ptp_txmeta_s tx_meta[CONFIG_STM32_ETH_NTXDESC];
+  sem_t                tx_ptp_sem;    /* Synch semaphore for TX timestamp */
+  struct timespec      tx_last_ts;    /* Most recent TX hardware timestamp */
+  bool                 tx_last_valid; /* True if tx_last_ts is valid */
 #endif
 };
 
@@ -773,12 +789,24 @@ static int  stm32_ethconfig(struct stm32_ethmac_s *priv);
 
 #ifdef CONFIG_STM32_ETH_PTP
 static int stm32_eth_ptp_adjust(long ppb);
+static int stm32_eth_ptp_adjphase(int64_t delta_ns);
 static void stm32_eth_ptp_init(uint64_t timestamp);
+#ifdef CONFIG_STM32_ETH_PTP_RTC_HIRES
 static uint64_t stm32_eth_ptp_gettime(void);
+#endif
+#endif
+
+#if defined(CONFIG_STM32_ETH_TIMESTAMP_RX) || defined(CONFIG_STM32_ETH_TIMESTAMP_TX)
+static int  stm32_eth_ptp_convert_hwtime(uint32_t sec, uint32_t subsecond,
+                                         FAR struct timespec *ts);
 #endif
 
 #ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
 static void stm32_eth_ptp_convert_rxtime(struct stm32_ethmac_s *priv);
+#endif
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+static bool stm32_is_ptp_event_frame(FAR const uint8_t *buf, uint16_t len);
 #endif
 
 /****************************************************************************
@@ -1046,6 +1074,9 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
 {
   struct eth_txdesc_s *txdesc;
   struct eth_txdesc_s *txfirst;
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+  bool is_ptp_event = false;
+#endif
 
   /* The internal (optimal) network buffer size may be configured to be
    * larger than the Ethernet buffer size.
@@ -1074,6 +1105,16 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
   /* Is the size to be sent greater than the size of the Ethernet buffer? */
 
   DEBUGASSERT(priv->dev.d_len > 0 && priv->dev.d_buf != NULL);
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+  if (stm32_is_ptp_event_frame(priv->dev.d_buf, priv->dev.d_len))
+    {
+      is_ptp_event = true;
+      txfirst->tdes0 |= ETH_TDES0_TTSE;
+      priv->tx_last_valid = false;
+      nxsem_reset(&priv->tx_ptp_sem, 0);
+    }
+#endif
 
 #if OPTIMAL_ETH_BUFSIZE > CONFIG_STM32_ETH_BUFSIZE
   if (priv->dev.d_len > CONFIG_STM32_ETH_BUFSIZE)
@@ -1115,6 +1156,25 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
 
               txdesc->tdes0 |= (ETH_TDES0_LS | ETH_TDES0_IC);
 
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+              {
+                uint32_t last_idx = (uint32_t)(txdesc - g_txtable);
+
+                DEBUGASSERT(last_idx < CONFIG_STM32_ETH_NTXDESC);
+
+                if (is_ptp_event)
+                  {
+                    priv->tx_meta[last_idx].track_ts = true;
+                    priv->tx_meta[last_idx].wait_sem = &priv->tx_ptp_sem;
+                  }
+                else
+                  {
+                    priv->tx_meta[last_idx].track_ts = false;
+                    priv->tx_meta[last_idx].wait_sem = NULL;
+                  }
+              }
+#endif
+
               /* This segment is, most likely, of fractional buffersize */
 
               txdesc->tdes1  = lastsize;
@@ -1127,6 +1187,17 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
                */
 
               txdesc->tdes0 &= ~ETH_TDES0_IC;
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+              {
+                uint32_t seg_idx = (uint32_t)(txdesc - g_txtable);
+
+                DEBUGASSERT(seg_idx < CONFIG_STM32_ETH_NTXDESC);
+
+                priv->tx_meta[seg_idx].track_ts = false;
+                priv->tx_meta[seg_idx].wait_sem = NULL;
+              }
+#endif
 
               /* The size of the transfer is the whole buffer */
 
@@ -1148,6 +1219,25 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
        */
 
       txdesc->tdes0 |= (ETH_TDES0_FS | ETH_TDES0_LS | ETH_TDES0_IC);
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+      {
+        uint32_t txindex = (uint32_t)(txdesc - g_txtable);
+
+        DEBUGASSERT(txindex < CONFIG_STM32_ETH_NTXDESC);
+
+        if (is_ptp_event)
+          {
+            priv->tx_meta[txindex].track_ts = true;
+            priv->tx_meta[txindex].wait_sem = &priv->tx_ptp_sem;
+          }
+        else
+          {
+            priv->tx_meta[txindex].track_ts = false;
+            priv->tx_meta[txindex].wait_sem = NULL;
+          }
+      }
+#endif
 
       /* Set frame size */
 
@@ -1714,12 +1804,6 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
 
   while (stm32_recvframe(priv) == OK)
     {
-#ifdef CONFIG_NET_PKT
-      /* When packet sockets are enabled, feed the frame into the tap */
-
-      pkt_input(&priv->dev);
-#endif
-
       /* Check if the packet is a valid size for the network buffer
        * configuration (this should not happen)
        */
@@ -1741,7 +1825,22 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
         }
 
 #ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+      /* Convert this frame's hardware RX timestamp before handing the
+       * frame to pkt_input() below. pkt_input() copies dev->d_rxtime
+       * into the packet socket's queued metadata immediately, so if
+       * the conversion ran after it, every packet would be tagged
+       * with the *previous* frame's timestamp instead of its own,
+       * introducing effectively random error on the order of the
+       * inter-frame interval into every RX timestamp.
+       */
+
       stm32_eth_ptp_convert_rxtime(priv);
+#endif
+
+#ifdef CONFIG_NET_PKT
+      /* When packet sockets are enabled, feed the frame into the tap */
+
+      pkt_input(&priv->dev);
 #endif
 
       /* We only accept IP packets of the configured type and ARP packets */
@@ -1890,6 +1989,43 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
 
           if ((txdesc->tdes0 & ETH_TDES0_LS) != 0)
             {
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+              uint32_t tail_idx = (uint32_t)(txdesc - g_txtable);
+
+              DEBUGASSERT(tail_idx < CONFIG_STM32_ETH_NTXDESC);
+
+              if (priv->tx_meta[tail_idx].track_ts)
+                {
+                  ninfo("TX PTP frame: tail=%" PRIu32 " tdes0=%08" PRIx32
+                        " tdes6=%08" PRIx32 " tdes7=%08" PRIx32 "\n",
+                        tail_idx, txdesc->tdes0,
+                        txdesc->tdes6, txdesc->tdes7);
+
+                  if ((txdesc->tdes0 & ETH_TDES0_TTSS) != 0)
+                    {
+                      if (stm32_eth_ptp_convert_hwtime(
+                            txdesc->tdes7, txdesc->tdes6,
+                            &priv->tx_meta[tail_idx].ts) == OK)
+                        {
+                          priv->tx_last_ts = priv->tx_meta[tail_idx].ts;
+                          priv->tx_last_valid = true;
+                        }
+                    }
+                  else
+                    {
+                      nerr("PTP frame transmitted without TTSS flag\n");
+                    }
+
+                  priv->tx_meta[tail_idx].track_ts = false;
+
+                  if (priv->tx_meta[tail_idx].wait_sem != NULL)
+                    {
+                      nxsem_post(priv->tx_meta[tail_idx].wait_sem);
+                      priv->tx_meta[tail_idx].wait_sem = NULL;
+                    }
+                }
+#endif
+
               /* Yes.. Decrement the number of frames "in-flight". */
 
               priv->inflight--;
@@ -2804,7 +2940,8 @@ static void stm32_rxdescinit(struct stm32_ethmac_s *priv,
 #ifdef CONFIG_NETDEV_IOCTL
 static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
-#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+#if (defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)) || \
+    defined(CONFIG_STM32_ETH_TIMESTAMP_TX)
   struct stm32_ethmac_s *priv =
     (struct stm32_ethmac_s *)dev->d_private;
 #endif
@@ -2858,6 +2995,76 @@ static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         }
         break;
 #endif /* CONFIG_NETDEV_PHY_IOCTL */
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+      case SIOCG_TX_HW_TIMESTAMP:
+        {
+          FAR struct timespec *ts = (FAR struct timespec *)((uintptr_t)arg);
+
+          _alert("IOCTL SIOCG_TX_HW_TIMESTAMP: waiting for sem...\n");
+
+          if (ts == NULL)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          /* Wait for TX done interrupt to capture timestamp.
+           * Timeout after 50 ms.
+           */
+
+          ret = nxsem_tickwait_uninterruptible(&priv->tx_ptp_sem,
+                                               MSEC2TICK(50));
+          if (ret < 0)
+            {
+              nerr("Timed out waiting for TX hardware timestamp: %d\n", ret);
+              ret = -ETIMEDOUT;
+              break;
+            }
+
+          if (!priv->tx_last_valid)
+            {
+              nerr("TX hardware timestamp not available\n");
+              ret = -ENODATA;
+              break;
+            }
+
+          *ts = priv->tx_last_ts;
+          priv->tx_last_valid = false;
+          ret = OK;
+        }
+        break;
+#endif
+#ifdef CONFIG_STM32_ETH_PTP
+      case SIOCS_PTP_ADJFREQ:
+        {
+          FAR const long *ppb = (FAR const long *)((uintptr_t)arg);
+
+          if (ppb == NULL)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          ret = stm32_eth_ptp_adjust(*ppb);
+        }
+        break;
+
+      case SIOCS_PTP_ADJPHASE:
+        {
+          FAR const int64_t *delta_ns =
+            (FAR const int64_t *)((uintptr_t)arg);
+
+          if (delta_ns == NULL)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          ret = stm32_eth_ptp_adjphase(*delta_ns);
+        }
+        break;
+#endif
 
       default:
         ret = -ENOTTY;
@@ -3577,7 +3784,7 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
 static int stm32_eth_ptp_adjust(long ppb)
 {
   uint32_t regval;
-  uint64_t addend;
+  int64_t addend;
   uint32_t increment;
 
   /* Compute addend value to achieve nominal timer rate.
@@ -3592,15 +3799,15 @@ static int stm32_eth_ptp_adjust(long ppb)
 
   if (ppb != 0)
     {
-      addend += addend * ppb / NSEC_PER_SEC;
+      addend += addend * (int64_t)ppb / NSEC_PER_SEC;
     }
 
   /* Check for overflows */
 
-  if (addend == 0 || (uint32_t)addend != addend)
+  if (addend <= 0 || (uint64_t)addend > UINT32_MAX)
     {
       nerr("PTP adjustment out of range: ppb=%ld, addend=%lld\n",
-           ppb, addend);
+           ppb, (long long)addend);
       return -EINVAL;
     }
 
@@ -3615,6 +3822,64 @@ static int stm32_eth_ptp_adjust(long ppb)
       /* This can happen if Ethernet PHY clock is stopped */
 
       nerr("PTP addend update failed\n");
+      return -EBUSY;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Function: stm32_eth_ptp_adjphase
+ *
+ * Description:
+ *   Nudge the PTP hardware counter's phase by a signed delta, in
+ *   nanoseconds, via the System Time Update (TSSTU) mechanism. Unlike
+ *   stm32_eth_ptp_init(), this does not reset the rate (addend) that
+ *   stm32_eth_ptp_adjust() may already have applied.
+ *
+ * Input Parameters:
+ *   delta_ns - Amount to add to (positive) or subtract from (negative)
+ *              the current counter value.
+ *
+ * Returned Value:
+ *   OK on success, negated errno on failure.
+ *
+ ****************************************************************************/
+
+static int stm32_eth_ptp_adjphase(int64_t delta_ns)
+{
+  uint32_t regval;
+  uint32_t sec;
+  uint32_t subsec;
+  uint32_t abs_nsec;
+  uint64_t abs_ns;
+  bool negative;
+
+  negative = (delta_ns < 0);
+  abs_ns   = negative ? (uint64_t)(-delta_ns) : (uint64_t)delta_ns;
+
+  sec      = (uint32_t)(abs_ns / NSEC_PER_SEC);
+  abs_nsec = (uint32_t)(abs_ns % NSEC_PER_SEC);
+
+  /* Convert the nanosecond remainder to the same 32-bit binary fraction
+   * of a second used by ptp_to_timespec()/stm32_eth_ptp_init(), then
+   * halve it to fit the 31-bit TSUSS field (mirrors the >>1 done in
+   * stm32_eth_ptp_init()).
+   */
+
+  subsec = (uint32_t)(((uint64_t)abs_nsec << 32) / NSEC_PER_SEC) >> 1;
+  subsec &= ETH_PTPTSLR_MASK;
+
+  stm32_putreg(sec, STM32_ETH_PTPTSHUR);
+  stm32_putreg(subsec | (negative ? ETH_PTPTSLU_TSUPNS : 0),
+              STM32_ETH_PTPTSLUR);
+
+  regval = stm32_getreg(STM32_ETH_PTPTSCR);
+  stm32_putreg(regval | ETH_PTPTSCR_TSSTU, STM32_ETH_PTPTSCR);
+  up_udelay(1);
+  if (stm32_getreg(STM32_ETH_PTPTSCR) & ETH_PTPTSCR_TSSTU)
+    {
+      nerr("PTP phase update failed\n");
       return -EBUSY;
     }
 
@@ -3719,6 +3984,7 @@ static void stm32_eth_ptp_init(uint64_t timestamp)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_STM32_ETH_PTP_RTC_HIRES
 static uint64_t stm32_eth_ptp_gettime(void)
 {
   uint32_t high1;
@@ -3742,6 +4008,7 @@ static uint64_t stm32_eth_ptp_gettime(void)
       return ((uint64_t)high2 << 32);
     }
 }
+#endif
 
 static inline void ptp_to_timespec(uint64_t timestamp, struct timespec *ts)
 {
@@ -3749,61 +4016,146 @@ static inline void ptp_to_timespec(uint64_t timestamp, struct timespec *ts)
   ts->tv_nsec = ((uint32_t)timestamp * (uint64_t)NSEC_PER_SEC) >> 32;
 }
 
-/* Convert RX timestamp to CLOCK_REALTIME */
-#ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
-static void stm32_eth_ptp_convert_rxtime(struct stm32_ethmac_s *priv)
+#if defined(CONFIG_STM32_ETH_TIMESTAMP_RX) || defined(CONFIG_STM32_ETH_TIMESTAMP_TX)
+/****************************************************************************
+ * Name: stm32_eth_ptp_convert_hwtime
+ *
+ * Description:
+ *   Convert 64-bit hardware timestamp (seconds and subseconds) to
+ *   CLOCK_REALTIME.
+ *
+ ****************************************************************************/
+
+static int stm32_eth_ptp_convert_hwtime(uint32_t sec, uint32_t subsecond,
+                                        FAR struct timespec *ts)
 {
   uint64_t timestamp;
-  struct timespec rxtime;
 
-  timestamp = ((uint64_t)priv->rxtimehigh << 32)
-            | ((priv->rxtimelow & ETH_PTPTSLR_MASK) << 1);
+  timestamp = ((uint64_t)sec << 32)
+            | ((subsecond & ETH_PTPTSLR_MASK) << 1);
 
   /* Timestamp of 0 indicates that Ethernet peripheral didn't store the
    * timestamp. Timestamp of all ones indicates "corrupt timestamp"
-   * according to reference manual. In either case, we pass along
-   * a timestamp of all zeros to application.
+   * according to reference manual. In either case, return error.
    */
 
   if (timestamp == 0 || timestamp >= UINT64_MAX - 1)
     {
-      nerr("Packet RX timestamp is invalid\n");
-      priv->dev.d_rxtime.tv_sec = 0;
-      priv->dev.d_rxtime.tv_nsec = 0;
-      return;
+      ts->tv_sec = 0;
+      ts->tv_nsec = 0;
+      return -EINVAL;
     }
 
-#ifdef CONFIG_STM32_ETH_PTP_RTC_HIRES
-  /* PTP is the system time reference, just add the base time */
+  /* Convert 64-bit hardware timestamp directly into timespec.
+   * In a PTP system, the MAC hardware counter is the PTP clock reference.
+   * Delivering the hardware counter's timestamp directly allows the PTP
+   * daemon to close the feedback loop and phase-lock the MAC counter (and
+   * therefore the physical PPS output) to the master.
+   */
 
-  ptp_to_timespec(timestamp, &rxtime);
-  clock_timespec_add(&rxtime, &g_stm32_eth_ptp_basetime,
-                     &priv->dev.d_rxtime);
+  ptp_to_timespec(timestamp, ts);
+  return OK;
+}
+#endif /* CONFIG_STM32_ETH_TIMESTAMP_RX || CONFIG_STM32_ETH_TIMESTAMP_TX */
 
-#else
-  {
-    struct timespec realtime;
-    uint64_t ptptime;
-    irqstate_t flags;
+/* Convert RX timestamp to CLOCK_REALTIME */
 
-    /* Sample PTP and CLOCK_REALTIME close to each other */
-
-    clock_gettime(CLOCK_REALTIME, &realtime);
-    flags = spin_lock_irqsave(&g_rtc_lock);
-    ptptime = stm32_eth_ptp_gettime();
-    spin_unlock_irqrestore(&g_rtc_lock, flags);
-
-    /* Compute how much time has elapsed since packet reception
-     * and add that to current time.
-     */
-
-    timestamp = ptptime - timestamp;
-    ptp_to_timespec(timestamp, &rxtime);
-    clock_timespec_add(&rxtime, &realtime, &priv->dev.d_rxtime);
-  }
-#endif /* CONFIG_STM32_ETH_PTP_RTC_HIRES */
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+static void stm32_eth_ptp_convert_rxtime(struct stm32_ethmac_s *priv)
+{
+  if (stm32_eth_ptp_convert_hwtime(priv->rxtimehigh, priv->rxtimelow,
+                                   &priv->dev.d_rxtime) < 0)
+    {
+      nerr("Packet RX timestamp is invalid\n");
+    }
 }
 #endif /* CONFIG_STM32_ETH_TIMESTAMP_RX */
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+/****************************************************************************
+ * Name: stm32_is_ptp_event_frame
+ *
+ * Description:
+ *   Inspect Ethernet frame to determine if it is a PTP event message
+ *   (Sync, Delay_Req, Pdelay_Req, Pdelay_Resp) requiring TX timestamping.
+ *
+ ****************************************************************************/
+
+static bool stm32_is_ptp_event_frame(FAR const uint8_t *buf, uint16_t len)
+{
+  uint16_t ethertype;
+
+  if (buf == NULL || len < 14)
+    {
+      return false;
+    }
+
+  ethertype = (buf[12] << 8) | buf[13];
+
+  /* 802.1Q VLAN tag support */
+
+  if (ethertype == 0x8100 && len >= 18)
+    {
+      ethertype = (buf[16] << 8) | buf[17];
+      buf += 4;
+      len -= 4;
+    }
+
+  /* PTP over IEEE 802.3 / Ethernet (EtherType 0x88F7) */
+
+  if (ethertype == 0x88f7)
+    {
+      if (len >= 15)
+        {
+          uint8_t msgtype = buf[14] & 0x0f;
+
+          /* Event messages: Sync(0), Delay_Req(1), Pdelay_Req(2),
+           * Pdelay_Resp(3).
+           */
+
+          if (msgtype <= 3)
+            {
+              return true;
+            }
+        }
+
+      return false;
+    }
+
+  /* PTP over UDP/IPv4 (EtherType 0x0800) */
+
+  if (ethertype == 0x0800 && len >= 14 + 20 + 8)
+    {
+      FAR const uint8_t *ip = &buf[14];
+      uint8_t ip_hl = (ip[0] & 0x0f) * 4;
+      uint8_t ip_proto = ip[9];
+
+      if (ip_proto == 17 && len >= 14 + ip_hl + 8) /* UDP */
+        {
+          FAR const uint8_t *udp = &buf[14 + ip_hl];
+          uint16_t dst_port = (udp[2] << 8) | udp[3];
+
+          /* PTP event messages use UDP port 319 */
+
+          if (dst_port == 319)
+            {
+              if (len >= 14 + ip_hl + 8 + 1)
+                {
+                  FAR const uint8_t *ptp = &udp[8];
+                  uint8_t msgtype = ptp[0] & 0x0f;
+
+                  if (msgtype <= 3)
+                    {
+                      return true;
+                    }
+                }
+            }
+        }
+    }
+
+  return false;
+}
+#endif /* CONFIG_STM32_ETH_TIMESTAMP_TX */
 
 #endif /* CONFIG_STM32_ETH_PTP */
 
@@ -3903,6 +4255,16 @@ static int stm32_macconfig(struct stm32_ethmac_s *priv)
   regval  = stm32_getreg(STM32_ETH_MACCR);
   regval &= ~MACCR_CLEAR_BITS;
   regval |= MACCR_SET_BITS;
+
+  /* Disable reception of our own transmitted frames. In half-duplex
+   * mode the MAC otherwise reflects every frame it transmits back to
+   * its own receiver (this bit has no effect in full-duplex, so it is
+   * safe to set unconditionally). Without it, a busy transmitter can
+   * flood the receive path with its own traffic right as a genuine
+   * reply arrives.
+   */
+
+  regval |= ETH_MACCR_ROD;
 
   if (priv->fduplex)
     {
@@ -4200,6 +4562,9 @@ int stm32_ethinitialize(int intf)
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct stm32_ethmac_s));
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+  nxsem_init(&priv->tx_ptp_sem, 0, 0);
+#endif
   priv->dev.d_ifup    = stm32_ifup;     /* I/F up (new IP address) callback */
   priv->dev.d_ifdown  = stm32_ifdown;   /* I/F down callback */
   priv->dev.d_txavail = stm32_txavail;  /* New TX data callback */
