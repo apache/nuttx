@@ -766,13 +766,13 @@
 
 /* ADC analog watchdog 3 configuration register (AWD3CR) */
 
-#define ADC_AWD3CR_CH_SHIFT            (0)                            /* Bits 0-18: Analog watchdog 2 channel selection */
+#define ADC_AWD3CR_CH_SHIFT            (0)                            /* Bits 0-18: Analog watchdog 3 channel selection */
 #define ADC_AWD3CR_CH_MASK             (0x7ffff << ADC_AWD3CR_CH_SHIFT)
 #  define ADC_AWD3CR_CH(n)             (1 << (n))                     /* Channel n=0..18 */
 
 /* ADC differential mode selection register (DIFSEL) */
 
-#define ADC_DIFSEL_CH_SHIFT            (0)                            /* Bits 0-18: Analog watchdog 2 channel selection */
+#define ADC_DIFSEL_CH_SHIFT            (0)                            /* Bits 0-18: Differential mode selection */
 #define ADC_DIFSEL_CH_MASK             (0x7ffff << ADC_DIFSEL_CH_SHIFT)
 #  define ADC_DIFSEL_CH(n)             (1 << (n))                     /* Channel n=0..18 */
 
