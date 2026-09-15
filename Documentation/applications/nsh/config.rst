@@ -40,6 +40,7 @@ Command                Depends on Configuration                    Can Be Disabl
                        ! ``CONFIG_NSH_DISABLE_LOOPS``  
 :ref:`cmdcat`          ``CONFIG_NSH_DISABLE_CAT``                  .
 :ref:`cmdcd`           ! ``CONFIG_DISABLE_ENVIRON``                ``CONFIG_NSH_DISABLE_CD``
+:ref:`cmdchroot`       ``CONFIG_FS_CHROOT``                        ``CONFIG_NSH_DISABLE_CHROOT``
 :ref:`cmdcmp`          ``CONFIG_NSH_DISABLE_CMP``                  .
 :ref:`cmdcp`           ``CONFIG_NSH_DISABLE_CP``                   .
 :ref:`cmddate`         ``CONFIG_NSH_DISABLE_DATE``                 .

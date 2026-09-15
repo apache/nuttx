@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/driver/fs_finddriver.c
+ * fs/vfs/fs_chroot.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,7 +25,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/debug.h>
+
+#include <sys/stat.h>
+#include <assert.h>
+#include <errno.h>
+#include <string.h>
+
+#include <nuttx/fs/fs.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/sched.h>
 
 #include "inode/inode.h"
 
@@ -34,49 +42,91 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: find_driver
+ * Name: chroot
  *
  * Description:
- *   Returns the pointer of a registered driver specified by 'pathname'
+ *   Cause the named directory to become the root directory, that is, the
+ *   starting point for path names beginning with '/'.
  *
  * Input Parameters:
- *   pathname - the full path to the driver's device node in file system
+ *   path - Directory to use as the new root
  *
  * Returned Value:
- *   Pointer to driver's registered private pointer or NULL if not found.
+ *   0(OK) on success; -1(ERROR) on failure with errno set appropriately.
  *
  ****************************************************************************/
 
-FAR void *find_driver(FAR const char *pathname)
+int chroot(FAR const char *path)
 {
+  FAR struct tcb_s *rtcb;
+  FAR struct task_group_s *group;
+  FAR char *newroot;
   struct inode_search_s desc;
-  FAR struct inode *inode;
-  FAR void *drvr = NULL;
+  struct stat buf;
+  int ret;
 
-  DEBUGASSERT(pathname != NULL);
-
-  /* Find the inode registered with this pathname */
-
-  if (inode_search_setup(&desc, pathname, false) < 0)
+  if (path == NULL || path[0] == '\0')
     {
-      return NULL;
+      set_errno(ENOENT);
+      return ERROR;
     }
 
-  /* Get the search results */
+  rtcb = nxsched_self();
+  DEBUGASSERT(rtcb != NULL && rtcb->group != NULL);
+  group = rtcb->group;
 
-  inode_lock();
-  if (inode_find(&desc, &inode) < 0)
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  if (group->tg_euid != 0)
     {
-      ferr("ERROR: Failed to find %s\n", pathname);
+      set_errno(EPERM);
+      return ERROR;
     }
-  else
+#endif
+
+  ret = nx_stat(path, &buf, 1);
+  if (ret < 0)
     {
-      drvr = inode->i_private;
-      inode_release(inode);
+      set_errno(-ret);
+      return ERROR;
     }
 
-  inode_unlock();
+  if (!S_ISDIR(buf.st_mode))
+    {
+      set_errno(ENOTDIR);
+      return ERROR;
+    }
+
+  /* Resolve to a host absolute path the same way lookups do: make
+   * absolute, prepend the current jail, and canonicalize.  No second
+   * inode walk.
+   */
+
+  ret = inode_search_setup(&desc, path, true);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
+    }
+
+  /* Host "/" means no jail.  Clear any previous root. */
+
+  if (strcmp(desc.path, "/") == 0)
+    {
+      kmm_free(group->tg_root);
+      group->tg_root = NULL;
+      inode_search_release(&desc);
+      return OK;
+    }
+
+  newroot = strdup(desc.path);
   inode_search_release(&desc);
+  if (newroot == NULL)
+    {
+      set_errno(ENOMEM);
+      return ERROR;
+    }
 
-  return drvr;
+  kmm_free(group->tg_root);
+  group->tg_root = newroot;
+  return OK;
 }

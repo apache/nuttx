@@ -215,6 +215,52 @@ Also sets the previous working directory environment variable
 ``cd ..`` 	        sets the current working directory to the parent directory.
 ==================  =====================================
 
+.. _cmdchroot:
+
+``chroot`` Change Root Directory
+================================
+
+**Command Syntax**::
+
+  chroot <newroot> [<command> [args...]]
+
+**Synopsis**. Change the filesystem root of the current task group so
+absolute path lookups start at ``<newroot>``. Requires
+``CONFIG_FS_CHROOT``. This is a filesystem jail, not a container.
+
+The command performs ``chdir(newroot)``, ``chroot(".")``, then
+``chdir("/")``. With no extra arguments the current NSH session stays
+jailed (``pwd`` shows ``/``). An optional command is executed with
+``execvp()`` after the jail is in place.
+
+When ``CONFIG_SCHED_USER_IDENTITY`` is enabled, ``chroot()`` requires
+effective UID 0. Drop extra privilege after jailing so a later
+``chroot()`` cannot be used to escape.
+
+File descriptors opened before ``chroot()`` are not retroactively
+contained. The ``chroot <newroot> <command>`` form closes non-stdio
+descriptors that are not already ``O_CLOEXEC`` before ``execvp()``.
+The no-command form leaves the current session's existing descriptors
+usable, including any that point outside the jail.
+
+**Example**::
+
+  nsh> mkdir /tmp/jail
+  nsh> echo hello > /tmp/jail/marker
+  nsh> chroot /tmp/jail
+  nsh> pwd
+  /
+  nsh> ls /
+  /:
+   marker
+  nsh> cat /marker
+  hello
+
+Note that ``ls /`` only lists ``marker``: ``/dev`` and ``/proc`` are not
+visible inside the jail because they were never created under
+``/tmp/jail``. ``chroot()`` does not bind-mount or otherwise populate
+these pseudo-filesystems into the new root; see :ref:`chroot`.
+
 .. _cmdchmod:
 
 ``chmod`` Change File Permissions
