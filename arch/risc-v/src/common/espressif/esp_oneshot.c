@@ -55,9 +55,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Oneshot Timer is assigned to the Timer 0 of TimerGroup 1 */
+/* Oneshot Timer is assigned to the Timer 0 of the last TimerGroup */
 
-#define GROUP_ID  1
+#define GROUP_ID  (TIMG_LL_GET(INST_NUM) - 1)
 #define TIMER_ID  0
 
 /* Resolution of 1 microsecond */
