@@ -9,6 +9,7 @@ exclude-file = .codespell-ignore-lines
 skip =
   LICENSE,
   */CODEOWNERS,
+  Documentation/platforms/arm/imxrt/boards/frdm-imxrt1186/ostest-xip.log,
 
 # Ignore seemingly misspelled words.
 #   lowercase: case insensitive

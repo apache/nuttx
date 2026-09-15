@@ -187,7 +187,8 @@
 #define imxrt_clockoff_trace()            imxrt_periphclk_configure(CCM_CCGR_TRACE, CCM_CG_OFF)
 #define imxrt_clockoff_trng()             imxrt_periphclk_configure(CCM_CCGR_TRNG, CCM_CG_OFF)
 #define imxrt_clockoff_tsc_dig()          imxrt_periphclk_configure(CCM_CCGR_TSC_DIG, CCM_CG_OFF)
-#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#if defined(CONFIG_ARCH_FAMILY_IMXRT117x) || \
+    defined(CONFIG_ARCH_FAMILY_IMXRT118x)
 #  define imxrt_clockoff_usboh3()         imxrt_periphclk_configure(CCM_CCGR_USB, CCM_CG_OFF)
 #else
 #  define imxrt_clockoff_usboh3()         imxrt_periphclk_configure(CCM_CCGR_USBOH3, CCM_CG_OFF)
@@ -355,7 +356,8 @@
 #define imxrt_clockrun_trace()            imxrt_periphclk_configure(CCM_CCGR_TRACE, CCM_CG_RUN)
 #define imxrt_clockrun_trng()             imxrt_periphclk_configure(CCM_CCGR_TRNG, CCM_CG_RUN)
 #define imxrt_clockrun_tsc_dig()          imxrt_periphclk_configure(CCM_CCGR_TSC_DIG, CCM_CG_RUN)
-#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#if defined(CONFIG_ARCH_FAMILY_IMXRT117x) || \
+    defined(CONFIG_ARCH_FAMILY_IMXRT118x)
 #  define imxrt_clockrun_usboh3()         imxrt_periphclk_configure(CCM_CCGR_USB, CCM_CG_RUN)
 #else
 #  define imxrt_clockrun_usboh3()         imxrt_periphclk_configure(CCM_CCGR_USBOH3, CCM_CG_RUN)
@@ -521,7 +523,8 @@
 #define imxrt_clockall_trace()            imxrt_periphclk_configure(CCM_CCGR_TRACE, CCM_CG_ALL)
 #define imxrt_clockall_trng()             imxrt_periphclk_configure(CCM_CCGR_TRNG, CCM_CG_ALL)
 #define imxrt_clockall_tsc_dig()          imxrt_periphclk_configure(CCM_CCGR_TSC_DIG, CCM_CG_ALL)
-#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#if defined(CONFIG_ARCH_FAMILY_IMXRT117x) || \
+    defined(CONFIG_ARCH_FAMILY_IMXRT118x)
 #  define imxrt_clockall_usboh3()         imxrt_periphclk_configure(CCM_CCGR_USB, CCM_CG_ALL)
 #else
 #  define imxrt_clockall_usboh3()         imxrt_periphclk_configure(CCM_CCGR_USBOH3, CCM_CG_ALL)
@@ -546,7 +549,8 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#if defined(CONFIG_ARCH_FAMILY_IMXRT117x) || \
+    defined(CONFIG_ARCH_FAMILY_IMXRT118x)
 
 /****************************************************************************
  * Name: imxrt_periphclk_configure

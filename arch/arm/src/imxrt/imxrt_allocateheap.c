@@ -267,7 +267,14 @@ extern  const uint32_t  _ram_size[];  /* See linker script */
  * aligned).
  */
 
-const uintptr_t g_idle_topstack = (uintptr_t)&_ebss +
+#ifdef CONFIG_ARCH_FAMILY_IMXRT118x
+extern uint8_t _eclockstatus;
+#  define IMXRT_IDLE_STACK_BASE ((uintptr_t)&_eclockstatus)
+#else
+#  define IMXRT_IDLE_STACK_BASE ((uintptr_t)&_ebss)
+#endif
+
+const uintptr_t g_idle_topstack = IMXRT_IDLE_STACK_BASE +
                                   CONFIG_IDLETHREAD_STACKSIZE;
 
 /****************************************************************************
