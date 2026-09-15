@@ -62,6 +62,13 @@ struct xhci_bus_ops_s
   /* Undo it, and release anything the bus allocated to make it work */
 
   CODE void (*irq_detach)(FAR void *arg);
+
+  /* Whether the controller may be pointed at a given buffer, which is a
+   * property of the platform.  Leave NULL where every address a caller can
+   * produce is reachable, as a flat address space gives.
+   */
+
+  CODE bool (*dmacapable)(FAR void *arg, FAR uint8_t *buffer, size_t buflen);
 };
 
 /****************************************************************************
