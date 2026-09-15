@@ -115,5 +115,23 @@ int board_lsm6ds3trc_initialize(int devno, int busno);
 int esp_openeth_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: board_spiflash_init
+ *
+ * Description:
+ *   Initialize the SPI flash MTD partition and mount the file system
+ *   selected by CONFIG_ESP32S3_SPIFLASH_FS on it.  Implemented by the
+ *   shared ESP32-S3 board code in
+ *   boards/xtensa/esp32s3/common/src/esp32s3_board_spiflash.c.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_SPIFLASH
+int board_spiflash_init(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32S3_ESP32S3_XIAO_SRC_ESP32S3_XIAO_H */
