@@ -63,7 +63,6 @@ struct syslog_rpmsg_s
 
   struct rpmsg_endpoint                    ept;
   spinlock_t                               lock;
-  bool                                     suspend;
 };
 #endif
 
