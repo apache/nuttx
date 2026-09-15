@@ -30,10 +30,13 @@
 #include <nuttx/config.h>
 
 /* IMXRT117X IOMUX Differs too much from IMXRT10XX
- * hence we use a VER2 driver
+ * hence we use a VER2 driver.  IMXRT118x uses another (generation 3)
+ * IOMUXC IP; that is IMXRT_IOMUX_VER3.
  */
 
-#ifdef CONFIG_IMXRT_IOMUX_VER2
+#ifdef CONFIG_IMXRT_IOMUX_VER3
+#include "imxrt_iomuxc_ver3.h"
+#elif defined(CONFIG_IMXRT_IOMUX_VER2)
 #include "imxrt_iomuxc_ver2.h"
 #else
 #include "imxrt_iomuxc_ver1.h"

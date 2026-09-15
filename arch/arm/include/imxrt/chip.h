@@ -84,6 +84,11 @@
 /* MIMXRT1170DVMA TODO
  */
 #  define IMXRT_GPIO_NPORTS            13           /* Thirteen total ports */
+#elif defined(CONFIG_ARCH_CHIP_MIMXRT1189CVM8C) || \
+      defined(CONFIG_ARCH_CHIP_MIMXRT1189CVM8C_CM33)
+/* MIMXRT1189CVM8C - Dual-core Cortex-M33 + Cortex-M7 */
+
+#  define IMXRT_GPIO_NPORTS            6            /* Six general purpose GPIO ports */
 #else
 #  error "Unknown i.MX RT chip type"
 #endif
