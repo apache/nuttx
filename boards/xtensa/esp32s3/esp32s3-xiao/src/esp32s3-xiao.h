@@ -98,5 +98,22 @@ int board_i2c_init(void);
 int board_lsm6ds3trc_initialize(int devno, int busno);
 #endif
 
+/****************************************************************************
+ * Name: esp_openeth_initialize
+ *
+ * Description:
+ *   Register the openeth MAC driver, the NIC emulated by QEMU's esp32s3
+ *   machine.  Implemented by the shared Espressif code in
+ *   arch/xtensa/src/common/espressif/esp_openeth.c.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_OPENETH
+int esp_openeth_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32S3_ESP32S3_XIAO_SRC_ESP32S3_XIAO_H */

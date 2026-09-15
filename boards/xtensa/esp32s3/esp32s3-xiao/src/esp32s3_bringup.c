@@ -181,6 +181,18 @@ int esp32s3_bringup(void)
 #  endif
 #endif
 
+#ifdef CONFIG_ESP32S3_OPENETH
+  /* The NIC QEMU's esp32s3 machine provides; compiles away on real
+   * hardware, where CONFIG_ESP32S3_OPENETH is never set.
+   */
+
+  ret = esp_openeth_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize openeth: %d\n", ret);
+    }
+#endif
+
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced
    * capabilities.
