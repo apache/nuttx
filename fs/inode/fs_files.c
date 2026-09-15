@@ -81,27 +81,41 @@ static inline int fdlist_limit(FAR struct fdlist *list)
  * Name: fdlist_get_by_index
  ****************************************************************************/
 
-static void fdlist_get_by_index(FAR struct fdlist *list,
-                                int l1, int l2,
-                                FAR struct file **filep,
-                                FAR struct fd **fdp)
+static FAR struct file *fdlist_get_by_index(FAR struct fdlist *list,
+                                            int l1, int l2,
+                                            FAR struct fd **fdp)
 {
-  FAR struct fd *fdp1;
+  FAR struct file *filep = NULL;
+  FAR struct fd *fdp1 = NULL;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave_notrace(&list->fl_lock);
-  fdp1 = &list->fl_fds[l1][l2];
-  *filep = fdp1->f_file;
-  if (*filep != NULL)
+  if (list != NULL)
     {
-      atomic_add(&(*filep)->f_refs, 1);
+      /* Bound-check under the lock: fdlist_free() may detach the table
+       * at any time.
+       */
+
+      flags = spin_lock_irqsave_notrace(&list->fl_lock);
+      if (l1 >= 0 && l1 < list->fl_rows &&
+          l2 >= 0 && l2 < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK)
+        {
+          fdp1  = &list->fl_fds[l1][l2];
+          filep = fdp1->f_file;
+          if (filep != NULL)
+            {
+              atomic_add(&filep->f_refs, 1);
+            }
+        }
+
+      spin_unlock_irqrestore_notrace(&list->fl_lock, flags);
     }
 
-  spin_unlock_irqrestore_notrace(&list->fl_lock, flags);
   if (fdp != NULL)
     {
       *fdp = fdp1;
     }
+
+  return filep;
 }
 
 /****************************************************************************
@@ -200,17 +214,20 @@ retry:
 }
 
 /****************************************************************************
- * Name: fdlist_uninstall
+ * Name: fdlist_clear_slot
+ *
+ * Description:
+ *   Detach the file from a descriptor slot and return it for the caller to
+ *   release.  The caller owns any required locking: fdlist_uninstall()
+ *   holds fl_lock, fdlist_free() runs on a detached private table.
+ *
  ****************************************************************************/
 
-static void fdlist_uninstall(FAR struct fdlist *list, FAR struct fd *fdp)
+static FAR struct file *fdlist_clear_slot(FAR struct fd *fdp)
 {
-  FAR struct file *filep = NULL;
-  irqstate_t flags;
+  FAR struct file *filep = fdp->f_file;
 
-  flags = spin_lock_irqsave_notrace(&list->fl_lock);
-
-  if (fdp->f_file != NULL)
+  if (filep != NULL)
     {
 #ifdef CONFIG_FDSAN
       fdp->f_tag_fdsan   = 0;
@@ -218,10 +235,23 @@ static void fdlist_uninstall(FAR struct fdlist *list, FAR struct fd *fdp)
 #ifdef CONFIG_FDCHECK
       fdp->f_tag_fdcheck = 0;
 #endif
-      filep              = fdp->f_file;
       fdp->f_file        = NULL;
     }
 
+  return filep;
+}
+
+/****************************************************************************
+ * Name: fdlist_uninstall
+ ****************************************************************************/
+
+static void fdlist_uninstall(FAR struct fdlist *list, FAR struct fd *fdp)
+{
+  FAR struct file *filep;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave_notrace(&list->fl_lock);
+  filep = fdlist_clear_slot(fdp);
   spin_unlock_irqrestore_notrace(&list->fl_lock, flags);
   file_put(filep);
 }
@@ -292,7 +322,7 @@ static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
               return;
             }
 
-          fdlist_get_by_index(&ctcb->group->tg_fdlist, i, j, &filep, NULL);
+          filep = fdlist_get_by_index(&ctcb->group->tg_fdlist, i, j, NULL);
           if (filep != NULL)
             {
               file_fsync(filep);
@@ -480,30 +510,45 @@ void fdlist_dump(FAR struct fdlist *list)
 
 void fdlist_free(FAR struct fdlist *list)
 {
+  FAR struct fd **fds;
+  irqstate_t flags;
+  int rows;
   int i;
   int j;
 
-  /* Close each file descriptor .. Normally, you would need take the list
-   * mutex, but it is safe to ignore the mutex in this context
-   * because there should not be any references in this context.
+  /* The TCB stays reachable through the pid hash until
+   * nxsched_releasepid(), so detach the table first: a concurrent
+   * fdlist_get() then sees an empty list, never a freed row.  The
+   * detached table is private, so tear it down without the lock.
    */
 
-  for (i = list->fl_rows - 1; i >= 0; i--)
+  flags = spin_lock_irqsave_notrace(&list->fl_lock);
+  fds  = list->fl_fds;
+  rows = list->fl_rows;
+  list->fl_rows  = 0;
+  list->fl_fds   = &list->fl_prefd;
+  list->fl_prefd = list->fl_prefds;
+  spin_unlock_irqrestore_notrace(&list->fl_lock, flags);
+
+  for (i = rows - 1; i >= 0; i--)
     {
       for (j = CONFIG_NFILE_DESCRIPTORS_PER_BLOCK - 1; j >= 0; j--)
         {
-          fdlist_close(list, i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j);
+          FAR struct fd *fdp = &fds[i][j];
+          FAR struct file *filep = fdlist_clear_slot(fdp);
+
+          file_put(filep);
         }
 
-      if (i != 0)
+      if (fds[i] != list->fl_prefds)
         {
-          fs_heap_free(list->fl_fds[i]);
+          fs_heap_free(fds[i]);
         }
     }
 
-  if (list->fl_fds != &list->fl_prefd)
+  if (fds != &list->fl_prefd)
     {
-      fs_heap_free(list->fl_fds);
+      fs_heap_free(fds);
     }
 }
 
@@ -548,24 +593,14 @@ int fdlist_count(FAR struct fdlist *list)
 int fdlist_get2(FAR struct fdlist *list, int fd,
                 FAR struct file **filep, FAR struct fd **fdp)
 {
-  if (list == NULL)
-    {
-      return -EINVAL;
-    }
-
 #ifdef CONFIG_FDCHECK
   fd = fdcheck_restore(fd);
 #endif
 
-  if (fd < 0 || fd >= fdlist_count(list))
-    {
-      return -EBADF;
-    }
-
-  fdlist_get_by_index(list,
-                      fd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK,
-                      fd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK,
-                      filep, fdp);
+  *filep = fdlist_get_by_index(list,
+                               fd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK,
+                               fd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK,
+                               fdp);
   if (*filep == NULL)
     {
       return -EBADF;
@@ -767,7 +802,7 @@ int fdlist_copy(FAR struct fdlist *plist, FAR struct fdlist *clist,
             }
 #endif
 
-          fdlist_get_by_index(plist, i, j, &filep, &fdp);
+          filep = fdlist_get_by_index(plist, i, j, &fdp);
           if (filep == NULL)
             {
               continue;
