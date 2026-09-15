@@ -285,7 +285,7 @@ static void syslog_rpmsg_addbuf(FAR struct syslog_rpmsg_s *priv,
       header->tail = (header->head + 1) % header->size;
     }
 
-  if (!priv->suspend && is_rpmsg_ept_ready(&priv->ept))
+  if (is_rpmsg_ept_ready(&priv->ept))
     {
       clock_t delay = SYSLOG_RPMSG_WORK_DELAY;
       uint32_t space = SYSLOG_RPMSG_SPACE(header);
@@ -356,17 +356,7 @@ static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
   FAR struct syslog_rpmsg_s *priv = priv_;
   FAR struct syslog_rpmsg_header_s *header = data;
 
-  if (header->command == SYSLOG_RPMSG_SUSPEND)
-    {
-      work_cancel(HPWORK, &priv->work);
-      priv->suspend = true;
-    }
-  else if (header->command == SYSLOG_RPMSG_RESUME)
-    {
-      priv->suspend = false;
-      work_queue(HPWORK, &priv->work, syslog_rpmsg_work, priv, 0);
-    }
-  else if (header->command == SYSLOG_RPMSG_SYNC)
+  if (header->command == SYSLOG_RPMSG_SYNC)
     {
       syslog_rpmsg_transfer(priv, true);
       rpmsg_send(ept, data, len);
@@ -387,7 +377,7 @@ static ssize_t syslog_rpmsg_file_read(FAR struct file *filep,
   DEBUGASSERT(inode->i_private);
   priv = inode->i_private;
 
-  if (!priv->suspend && is_rpmsg_ept_ready(&priv->ept))
+  if (is_rpmsg_ept_ready(&priv->ept))
     {
       work_queue(HPWORK, &priv->work, syslog_rpmsg_work, priv, 0);
     }
