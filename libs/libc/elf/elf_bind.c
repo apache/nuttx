@@ -733,6 +733,24 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
           case DT_PLTRELSZ:
             reldata.relsz[I_PLT] = dyn[i].d_un.d_val;
             break;
+          case DT_NEEDED:
+
+            /* Nothing loads DT_NEEDED yet, so refuse the module rather
+             * than let it fault on its first call into the library.
+             */
+
+            if (loadinfo->fdpic)
+              {
+                berr("ERROR: FDPIC module has a DT_NEEDED entry.  Shared "
+                     "libraries are not supported; link it statically.\n");
+                lib_free(sym);
+                lib_free(rels);
+                lib_free(dyn);
+                return -ENOEXEC;
+              }
+
+            break;
+
           case DT_PLTGOT:
 
             /* The object's data base.  Every function descriptor built
