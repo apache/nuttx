@@ -211,7 +211,7 @@ Known gaps
 complete -- ``addrenv_fork()``, the ``up_addrenv_fork()`` hook, the syscall, the
 libc wrapper and the ``ostest`` case -- so an architecture provides ``fork()``
 by implementing ``up_addrenv_fork()`` and selecting ``CONFIG_ARCH_HAVE_FORK``,
-with no further generic work.
+with no further generic work.  arm64 selects it today.
 
 **A windowed ABI needs its stack rebased, not just copied.**  On Xtensa,
 giving a child a relocated copy of the parent's stack takes more than the copy:
