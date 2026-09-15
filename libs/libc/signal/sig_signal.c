@@ -71,6 +71,10 @@ _sa_handler_t signal(int signo, _sa_handler_t func)
 
   DEBUGASSERT(func != SIG_ERR && func != SIG_HOLD);
 
+  /* Not resolved here.  nxsig_action() resolves the handler, which covers
+   * a module calling sigaction() directly as well.
+   */
+
   /* Initialize the sigaction structure */
 
   act.sa_handler = func;

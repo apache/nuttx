@@ -105,24 +105,23 @@ static inline FAR void *fdpic_callback(FAR void *fn)
  *   carries no module base.  Elsewhere fdpic_callback() is enough.
  *
  * Input Parameters:
- *   arg   - The one word argument.
- *   entry - The code address to enter, already resolved from the descriptor.
- *   got   - The module data base to install.
+ *   arg  - The one word argument.
+ *   desc - The entry point to enter and the data base to install.
  *
  ****************************************************************************/
 
-static inline void fdpic_invoke(uintptr_t arg, uintptr_t entry,
-                                uintptr_t got)
+static inline void fdpic_invoke(uintptr_t arg,
+                                FAR const struct fdpic_desc_s *desc)
 {
-  up_fdpic_invoke(arg, entry, got);
+  up_fdpic_invoke(arg, desc->entry, desc->got);
 }
 
 #else
 
 #  define fdpic_base()       (0)
 #  define fdpic_callback(fn) (fn)
-#  define fdpic_invoke(arg, entry, got) \
-          ((void)(got), (((CODE void (*)(uintptr_t))(uintptr_t)(entry))(arg)))
+#  define fdpic_invoke(arg, desc) \
+          (((CODE void (*)(uintptr_t))(uintptr_t)(desc)->entry)(arg))
 
 #endif /* CONFIG_FDPIC */
 

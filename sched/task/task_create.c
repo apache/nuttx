@@ -37,6 +37,10 @@
 #include <nuttx/kthread.h>
 #include <nuttx/fs/fs.h>
 
+#ifdef CONFIG_FDPIC
+#  include <nuttx/fdpic.h>
+#endif
+
 #include "sched/sched.h"
 #include "group/group.h"
 #include "task/task.h"
@@ -202,8 +206,18 @@ int task_create_with_stack(FAR const char *name, int priority,
                            FAR void *stack_addr, int stack_size,
                            main_t entry, FAR char * const argv[])
 {
-  int ret = nxtask_create(name, priority, stack_addr,
-                          stack_size, entry, argv, NULL);
+  int ret;
+
+#ifdef CONFIG_FDPIC
+  /* Resolve here, once: this covers task_create() too, which is a plain
+   * forwarder.  The new task inherits the creator's D-Space.
+   */
+
+  entry = (main_t)fdpic_callback((FAR void *)entry);
+#endif
+
+  ret = nxtask_create(name, priority, stack_addr,
+                      stack_size, entry, argv, NULL);
   if (ret < 0)
     {
       set_errno(-ret);
