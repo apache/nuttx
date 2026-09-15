@@ -366,7 +366,7 @@ static int openeth_ifdown(struct netdev_lowerhalf_s *dev)
 
   /* Disable TX and RX */
 
-  openeth_enable();
+  openeth_disable();
 
   leave_critical_section(flags);
 
@@ -424,6 +424,7 @@ static int openeth_set_addr(uint8_t *addr)
 
   uint32_t mac0_u32;
   uint32_t mac1_u32;
+
   memcpy(&mac0_u32, &mac0, 4);
   memcpy(&mac1_u32, &mac1, 4);
   REG_WRITE(OPENETH_MAC_ADDR0_REG, mac0_u32);
@@ -523,6 +524,12 @@ int esp_openeth_initialize(void)
       ret = -ENOMEM;
       goto err;
     }
+
+  /* The interrupt is attached but still masked at the CPU; without this
+   * call it never fires, so received frames are only picked up on a TX.
+   */
+
+  up_enable_irq(OPENETH_IRQ_MAC);
 
   /* Initialize the MAC */
 
