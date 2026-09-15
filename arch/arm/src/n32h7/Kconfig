@@ -1,0 +1,5302 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_N32H7
+
+# "N32 H7 Configuration Options"
+
+choice
+	prompt "N32 H7 Chip Selection"
+	default ARCH_CHIP_N32H762II
+	depends on ARCH_CHIP_N32H7
+
+config ARCH_CHIP_N32H762II
+	bool "N32H762IIL7"
+	select N32H7_N32H76X
+	select N32H7_FLASH_CONFIG_I
+	select N32H7_IO_CONFIG_I
+	---help---
+		N32 H7 Cortex M7, 2048 Kb FLASH, 15K Kb SRAM,
+		with cryptographic accelerator, LQFP176
+endchoice # N32 H7 Chip Selection
+
+config N32H7_N32H76X
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select N32H7_HAVE_ETHERNET
+	select N32H7_HAVE_FMC
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config N32H7_HAVE_USART8
+	bool
+	default n
+
+config N32H7_HAVE_FMC
+	bool
+	default n
+
+config N32H7_HAVE_ETHERNET
+	bool
+	default n
+
+choice
+	prompt "N32 H7 Core selection"
+	default ARCH_CHIP_N32H7_CORTEXM7
+
+config ARCH_CHIP_N32H7_CORTEXM7
+	bool "N32H7 Cortex-M7 core"
+	select ARCH_CORTEXM7
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+
+config ARCH_CHIP_N32H7_CORTEXM4
+	bool "N32H7 Cortex-M4 core"
+	depends on ARCH_N32H7_DUALCORE
+	select ARCH_CORTEXM4
+
+endchoice # N32 H7 Core selection
+
+config N32H7_FLASH_CONFIG_I
+	bool
+	default n
+
+config N32H7_FLASH_CONFIG_K
+	bool
+	default n
+
+choice
+	prompt "Override Flash Size Designator"
+	depends on ARCH_CHIP_N32H7
+	default N32H7_FLASH_OVERRIDE_DEFAULT
+	---help---
+		N32H7 series parts numbering (sans the package type) ends with a
+		letter that designates the FLASH size.
+
+			Designator  Size in KiB
+				I	2048
+				K   4096
+
+		This configuration option defaults to using the configuration based
+		on that designator or the default smaller size if there is no last
+		character designator is present in the N32 Chip Selection.
+
+config N32H7_FLASH_OVERRIDE_DEFAULT
+	bool "Default"
+
+config N32H7_FLASH_OVERRIDE_I
+	bool "I 2048KiB"
+
+config N32H7_FLASH_OVERRIDE_K
+	bool "K 4096KiB"
+
+endchoice # "Override Flash Size Designator"
+
+config N32H7_BSRAMEXCLUDE
+	bool
+	default y
+
+config N32H7_IO_CONFIG_V
+    bool
+    default n
+
+config N32H7_IO_CONFIG_Z
+    bool
+    default n
+
+config N32H7_IO_CONFIG_I
+    bool
+    default n
+
+config N32H7_IO_CONFIG_X
+    bool
+    default n
+
+config N32H7_CORDIC
+	bool "CORDIC"
+	select MATH_CORDIC
+	default n
+
+config N32H7_PWR
+	bool "PWR"
+	default n
+
+config N32H7_DMA
+	bool "DMA"
+	select ARCH_DMA
+	default n
+
+config N32H7_MDMA
+	bool "MDMA"
+	default n
+
+config N32H7_DMA1
+	bool "DMA1"
+	default n
+
+config N32H7_DMA2
+	bool "DMA2"
+	default n
+
+config N32H7_DMA3
+	bool "DMA3"
+	default n
+
+config N32H7_TIM
+	bool "TIM"
+	default n
+
+config N32H7_PWM
+	bool "PWM"
+	default n
+
+config N32H7_SDMMC
+	bool "SDMMC"
+	select MMCSD
+	select ARCH_HAVE_SDIO
+	select SDIO_BLOCKSETUP
+	default n
+
+if N32H7_SDMMC
+config N32H7_SDMMC_ADMA
+	bool "SDMMC ADMA"
+	select SDIO_DMA
+	default n
+if N32H7_SDMMC_ADMA
+config N32H7_SDMMC_MAX_DESCS
+	int
+	default 4
+	---help---
+		Maximum number of SDMMC ADMA descriptors.
+endif
+endif # N32H7_SDMMC
+
+config N32H7_SDMMC1
+	bool "SDMMC1"
+	default n
+	select N32H7_SDMMC
+
+config N32H7_SDMMC2
+	bool "SDMMC2"
+	default n
+	select N32H7_SDMMC
+
+config N32H7_PROGMEM
+	bool "Progmem MTD configuration"
+	default n
+	select MTD
+	select MTD_PROGMEM
+
+config N32H7_USBHS
+	bool "USBHS"
+	default n
+
+config N32H7_USBHS_FS
+	bool "USBHS FS"
+	default n
+
+if N32H7_USBHS
+config N32H7_USBHS_ID_DISABLE
+	bool "Disable USBHS ID GPIO"
+	default y
+
+config N32H7_USBHS_SOFOUTPUT
+	bool "USBHS SOF Output"
+	default n
+endif # N32H7_USBHS
+
+config N32H7_USBHS1_DEV
+	bool "USBHS1 Device"
+	default n
+	select USBDEV
+	select N32H7_USBHS
+
+config N32H7_USBHS2_DEV
+	bool "USBHS2 Device"
+	default n
+	select USBDEV
+	select N32H7_USBHS
+
+config N32H7_USBHS1_HOST
+	bool "USBHS1 Host"
+	default n
+	select USBHOST
+	select USBHOST_INT_DISABLE
+	select N32H7_USBHS
+
+config N32H7_USBHS2_HOST
+	bool "USBHS2 Host"
+	default n
+	select USBHOST
+	select USBHOST_INT_DISABLE
+	select N32H7_USBHS
+
+menuconfig N32H7_SERIAL
+	bool "Serial Driver Support"
+	default n
+	---help---
+		Enable N32H7 serial driver.
+
+if N32H7_SERIAL
+config N32H7_USART1
+	bool "USART1"
+	default n
+	select USART1_SERIALDRIVER
+
+endif # N32H7_SERIAL
+if N32H7_SERIAL
+config N32H7_USART2
+	bool "USART2"
+	default n
+	select USART2_SERIALDRIVER
+
+endif # N32H7_SERIAL
+if N32H7_SERIAL
+config N32H7_USART3
+	bool "USART3"
+	default n
+	select USART3_SERIALDRIVER
+
+endif # N32H7_SERIAL
+if N32H7_SERIAL
+config N32H7_USART4
+	bool "USART4"
+	default n
+	select USART4_SERIALDRIVER
+
+endif # N32H7_SERIAL
+if N32H7_SERIAL
+config N32H7_USART5
+	bool "USART5"
+	default n
+	select USART5_SERIALDRIVER
+
+endif # N32H7_SERIAL
+if N32H7_SERIAL
+config N32H7_USART6
+	bool "USART6"
+	default n
+	select USART6_SERIALDRIVER
+
+endif # N32H7_SERIAL
+if N32H7_SERIAL
+config N32H7_USART7
+	bool "USART7"
+	default n
+	select USART7_SERIALDRIVER
+
+endif # N32H7_SERIAL
+if N32H7_SERIAL
+config N32H7_USART8
+	bool "USART8"
+	default n
+	select USART8_SERIALDRIVER
+
+endif # N32H7_SERIAL
+if N32H7_SERIAL
+config N32H7_UART9
+	bool "UART9"
+	default n
+	select UART9_SERIALDRIVER
+
+endif # N32H7_SERIAL
+if N32H7_SERIAL
+config N32H7_UART10
+	bool "UART10"
+	default n
+	select UART10_SERIALDRIVER
+
+endif # N32H7_SERIAL
+if N32H7_SERIAL
+config N32H7_UART11
+	bool "UART11"
+	default n
+	select UART11_SERIALDRIVER
+
+endif # N32H7_SERIAL
+if N32H7_SERIAL
+config N32H7_UART12
+	bool "UART12"
+	default n
+	select UART12_SERIALDRIVER
+
+endif # N32H7_SERIAL
+if N32H7_SERIAL
+config N32H7_UART13
+	bool "UART13"
+	default n
+	select UART13_SERIALDRIVER
+
+endif # N32H7_SERIAL
+if N32H7_SERIAL
+config N32H7_UART14
+	bool "UART14"
+	default n
+	select UART14_SERIALDRIVER
+
+endif # N32H7_SERIAL
+if N32H7_SERIAL
+config N32H7_UART15
+	bool "UART15"
+	default n
+	select UART15_SERIALDRIVER
+
+endif # N32H7_SERIAL
+
+#
+# Timer Configuration for N32H7 - AUTO GENERATED
+# Do not edit manually.
+#
+
+menu "Timer Configuration"
+
+if SCHED_TICKLESS
+
+config N32H7_TICKLESS_TIMER
+	int "Tickless hardware timer"
+	default 15
+	range 1 18
+	---help---
+		If the Tickless OS feature is enabled, then one timer must be
+		assigned to provide the timer needed by the OS.
+
+		N32H7 Timer Number Mapping:
+		  1  = ATIM1       10 = GTIMA6
+		  2  = ATIM2       11 = GTIMA7
+		  3  = GTIMA1      12 = GTIMB1
+		  4  = GTIMA2      13 = GTIMB2
+		  5  = GTIMA3      14 = GTIMB3
+		  6  = ATIM3       15 = BTIM1
+		  7  = ATIM4       16 = BTIM2
+		  8  = GTIMA4      17 = BTIM3
+		  9  = GTIMA5      18 = BTIM4
+
+config N32H7_TICKLESS_CHANNEL
+	int "Tickless timer channel"
+	default 1
+	range 1 4
+	---help---
+		If the Tickless OS feature is enabled, the timer needs one channel
+		on that timer to handle intervals.
+
+endif # SCHED_TICKLESS
+
+config N32H7_ONESHOT
+	bool "TIM one-shot wrapper"
+	default n
+	select ONESHOT
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+config N32H7_ONESHOT_MAXCHANNELS
+	int "Maximum number of oneshot channels"
+	default 1
+	range 1 8
+	depends on N32H7_ONESHOT
+	---help---
+		Determines the maximum number of oneshot timers that can be
+		supported. This setting pre-allocates some minimal support for each
+		of the timers and places an upper limit on the number of oneshot
+		timers that you can use.
+
+config N32H7_TIMER
+	bool "N32H7 timer driver support"
+	default n
+	select TIMER
+	---help---
+		Enable support for the N32H7 timer driver (n32_tim.c and
+		n32_tim_lowerhalf.c).
+
+config N32H7_TIMER_ADVANCED
+	bool "Advanced Timers (ATIM1-4)"
+	select N32H7_TIM
+	---help---
+		Enable support for Advanced Timers (ATIM1, ATIM2, ATIM3, ATIM4).
+		These timers support complementary outputs, dead-time, break,
+		repetition counter, and encoder modes.
+
+config N32H7_TIMER_GTIMA
+	bool "General-purpose Timers A (GTIMA1-7)"
+	select N32H7_TIM
+	---help---
+		Enable support for General-purpose Timers A (GTIMA1-7).
+		These timers support PWM, input capture, output compare,
+		and encoder modes. No complementary outputs.
+
+config N32H7_TIMER_GTIMB
+	bool "General-purpose Timers B (GTIMB1-3)"
+	select N32H7_TIM
+	---help---
+		Enable support for General-purpose Timers B (GTIMB1-3).
+		These timers support PWM, input capture, output compare,
+		complementary outputs (CH1 only), break, and encoder modes.
+
+config N32H7_TIMER_BASIC
+	bool "Basic Timers (BTIM1-4)"
+	select N32H7_TIM
+	---help---
+		Enable support for Basic Timers (BTIM1, BTIM2, BTIM3, BTIM4).
+		These timers have a 32-bit counter and only support update events.
+		No PWM, capture, or encoder modes.
+
+if N32H7_TIMER_ADVANCED
+
+config N32H7_ATIM1
+	bool "ATIM1"
+	default n
+	---help---
+		Enable Advanced Timer ATIM1.
+
+if N32H7_ATIM1
+
+config N32H7_ATIM1_PWM
+	bool "ATIM1 PWM"
+	default n
+	depends on N32H7_PWM
+	---help---
+		Reserve ATIM1 for use by PWM.
+
+if N32H7_ATIM1_PWM
+
+config N32H7_ATIM1_MODE
+	int "ATIM1 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the ATIM1 timer mode: 0=up, 1=down, 2=center1, 3=center2, 4=center3.
+
+config N32H7_ATIM1_LOCK
+	int "ATIM1 Lock Level"
+	default 0
+	range 0 3
+	---help---
+		ATIM1 BDTR lock level configuration.
+
+config N32H7_ATIM1_TDTS
+	int "ATIM1 t_DTS Division"
+	default 0
+	range 0 2
+	---help---
+		ATIM1 dead-time and sampling clock division: 0=tCK_INT, 1=2*tCK_INT, 2=4*tCK_INT.
+
+config N32H7_ATIM1_DEADTIME
+	int "ATIM1 Initial Dead-time"
+	default 0
+	range 0 255
+	---help---
+		ATIM1 initial dead-time value (0-255).
+
+config N32H7_ATIM1_BREAK1
+	bool "ATIM1 Break1 Enable"
+	default n
+	---help---
+		Enable Break1 input for ATIM1.
+
+config N32H7_ATIM1_BRK1POL
+	int "ATIM1 Break1 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_BREAK1
+	---help---
+		ATIM1 Break1 polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM1_BREAK2
+	bool "ATIM1 Break2 Enable"
+	default n
+	---help---
+		Enable Break2 input for ATIM1 (ATIM only).
+
+config N32H7_ATIM1_BRK2POL
+	int "ATIM1 Break2 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_BREAK2
+	---help---
+		ATIM1 Break2 polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM1_BRK2FLT
+	int "ATIM1 Break2 Filter"
+	default 0
+	range 0 15
+	depends on N32H7_ATIM1_BREAK2
+	---help---
+		ATIM1 Break2 filter value (0-15).
+
+if N32H7_PWM_MULTICHAN
+
+config N32H7_ATIM1_CHANNEL1
+	bool "ATIM1 Channel 1"
+	default n
+
+if N32H7_ATIM1_CHANNEL1
+
+config N32H7_ATIM1_CH1OUT
+	bool "ATIM1 Channel 1 Output Enable"
+	default N32H7_ATIM1_CHANNEL1
+	---help---
+		Enable output for ATIM1 Channel 1. If disabled, the channel will not be used.
+
+config N32H7_ATIM1_CH1MODE
+	int "ATIM1 Channel 1 Mode"
+	default 6
+	depends on N32H7_ATIM1_CH1OUT
+	range 0 11
+	---help---
+		ATIM1 Channel 1 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_ATIM1_CH1POL
+	int "ATIM1 Channel 1 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH1OUT
+	---help---
+		ATIM1 Channel 1 output polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM1_CH1IDLE
+	int "ATIM1 Channel 1 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH1OUT
+	---help---
+		ATIM1 Channel 1 idle state: 0=inactive, 1=active.
+
+config N32H7_ATIM1_CH1NOUT
+	bool "ATIM1 Channel 1 Complementary Output Enable"
+	default n
+	depends on N32H7_ATIM1_CH1OUT
+	---help---
+		Enable complementary output for ATIM1 Channel 1.
+
+config N32H7_ATIM1_CH1NPOL
+	int "ATIM1 Channel 1 Complementary Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH1NOUT
+	---help---
+		ATIM1 Channel 1 complementary polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM1_CH1NIDLE
+	int "ATIM1 Channel 1 Complementary Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH1NOUT
+	---help---
+		ATIM1 Channel 1 complementary idle state: 0=inactive, 1=active.
+
+endif # N32H7_ATIM1_CHANNEL1
+
+config N32H7_ATIM1_CHANNEL2
+	bool "ATIM1 Channel 2"
+	default n
+
+if N32H7_ATIM1_CHANNEL2
+
+config N32H7_ATIM1_CH2OUT
+	bool "ATIM1 Channel 2 Output Enable"
+	default N32H7_ATIM1_CHANNEL2
+	---help---
+		Enable output for ATIM1 Channel 2. If disabled, the channel will not be used.
+
+config N32H7_ATIM1_CH2MODE
+	int "ATIM1 Channel 2 Mode"
+	default 6
+	depends on N32H7_ATIM1_CH2OUT
+	range 0 11
+	---help---
+		ATIM1 Channel 2 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_ATIM1_CH2POL
+	int "ATIM1 Channel 2 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH2OUT
+	---help---
+		ATIM1 Channel 2 output polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM1_CH2IDLE
+	int "ATIM1 Channel 2 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH2OUT
+	---help---
+		ATIM1 Channel 2 idle state: 0=inactive, 1=active.
+
+config N32H7_ATIM1_CH2NOUT
+	bool "ATIM1 Channel 2 Complementary Output Enable"
+	default n
+	depends on N32H7_ATIM1_CH2OUT
+	---help---
+		Enable complementary output for ATIM1 Channel 2.
+
+config N32H7_ATIM1_CH2NPOL
+	int "ATIM1 Channel 2 Complementary Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH2NOUT
+	---help---
+		ATIM1 Channel 2 complementary polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM1_CH2NIDLE
+	int "ATIM1 Channel 2 Complementary Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH2NOUT
+	---help---
+		ATIM1 Channel 2 complementary idle state: 0=inactive, 1=active.
+
+endif # N32H7_ATIM1_CHANNEL2
+
+config N32H7_ATIM1_CHANNEL3
+	bool "ATIM1 Channel 3"
+	default n
+
+if N32H7_ATIM1_CHANNEL3
+
+config N32H7_ATIM1_CH3OUT
+	bool "ATIM1 Channel 3 Output Enable"
+	default N32H7_ATIM1_CHANNEL3
+	---help---
+		Enable output for ATIM1 Channel 3. If disabled, the channel will not be used.
+
+config N32H7_ATIM1_CH3MODE
+	int "ATIM1 Channel 3 Mode"
+	default 6
+	depends on N32H7_ATIM1_CH3OUT
+	range 0 11
+	---help---
+		ATIM1 Channel 3 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_ATIM1_CH3POL
+	int "ATIM1 Channel 3 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH3OUT
+	---help---
+		ATIM1 Channel 3 output polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM1_CH3IDLE
+	int "ATIM1 Channel 3 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH3OUT
+	---help---
+		ATIM1 Channel 3 idle state: 0=inactive, 1=active.
+
+config N32H7_ATIM1_CH3NOUT
+	bool "ATIM1 Channel 3 Complementary Output Enable"
+	default n
+	depends on N32H7_ATIM1_CH3OUT
+	---help---
+		Enable complementary output for ATIM1 Channel 3.
+
+config N32H7_ATIM1_CH3NPOL
+	int "ATIM1 Channel 3 Complementary Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH3NOUT
+	---help---
+		ATIM1 Channel 3 complementary polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM1_CH3NIDLE
+	int "ATIM1 Channel 3 Complementary Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH3NOUT
+	---help---
+		ATIM1 Channel 3 complementary idle state: 0=inactive, 1=active.
+
+endif # N32H7_ATIM1_CHANNEL3
+
+config N32H7_ATIM1_CHANNEL4
+	bool "ATIM1 Channel 4"
+	default n
+
+if N32H7_ATIM1_CHANNEL4
+
+config N32H7_ATIM1_CH4OUT
+	bool "ATIM1 Channel 4 Output Enable"
+	default N32H7_ATIM1_CHANNEL4
+	---help---
+		Enable output for ATIM1 Channel 4. If disabled, the channel will not be used.
+
+config N32H7_ATIM1_CH4MODE
+	int "ATIM1 Channel 4 Mode"
+	default 6
+	depends on N32H7_ATIM1_CH4OUT
+	range 0 11
+	---help---
+		ATIM1 Channel 4 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_ATIM1_CH4POL
+	int "ATIM1 Channel 4 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH4OUT
+	---help---
+		ATIM1 Channel 4 output polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM1_CH4IDLE
+	int "ATIM1 Channel 4 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH4OUT
+	---help---
+		ATIM1 Channel 4 idle state: 0=inactive, 1=active.
+
+config N32H7_ATIM1_CH4NOUT
+	bool "ATIM1 Channel 4 Complementary Output Enable"
+	default n
+	depends on N32H7_ATIM1_CH4OUT
+	---help---
+		Enable complementary output for ATIM1 Channel 4.
+
+config N32H7_ATIM1_CH4NPOL
+	int "ATIM1 Channel 4 Complementary Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH4NOUT
+	---help---
+		ATIM1 Channel 4 complementary polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM1_CH4NIDLE
+	int "ATIM1 Channel 4 Complementary Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH4NOUT
+	---help---
+		ATIM1 Channel 4 complementary idle state: 0=inactive, 1=active.
+
+endif # N32H7_ATIM1_CHANNEL4
+
+endif # N32H7_PWM_MULTICHAN
+
+if N32H7_PWM_MULTICHAN = n
+
+config N32H7_ATIM1_CHANNEL
+	int "ATIM1 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If ATIM1 is enabled for PWM, specifies the timer output channel {1..4}.
+
+config N32H7_ATIM1_CHMODE
+	int "ATIM1 Channel Mode"
+	default 6
+	range 0 11
+	---help---
+		ATIM1 channel mode. See enum n32_pwm_chanmode_e.
+
+endif # N32H7_PWM_MULTICHAN = n
+
+endif # N32H7_ATIM1_PWM
+
+config N32H7_ATIM1_QE
+	bool "ATIM1 Quadrature Encoder"
+	default n
+	depends on SENSORS_QENCODER
+	---help---
+		Reserve ATIM1 for use as a quadrature encoder interface.
+
+endif # N32H7_ATIM1
+
+config N32H7_ATIM2
+	bool "ATIM2"
+	default n
+	---help---
+		Enable Advanced Timer ATIM2.
+
+if N32H7_ATIM2
+
+config N32H7_ATIM2_PWM
+	bool "ATIM2 PWM"
+	default n
+	depends on N32H7_PWM
+	---help---
+		Reserve ATIM2 for use by PWM.
+
+if N32H7_ATIM2_PWM
+
+config N32H7_ATIM2_MODE
+	int "ATIM2 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the ATIM2 timer mode: 0=up, 1=down, 2=center1, 3=center2, 4=center3.
+
+config N32H7_ATIM2_LOCK
+	int "ATIM2 Lock Level"
+	default 0
+	range 0 3
+	---help---
+		ATIM2 BDTR lock level configuration.
+
+config N32H7_ATIM2_TDTS
+	int "ATIM2 t_DTS Division"
+	default 0
+	range 0 2
+	---help---
+		ATIM2 dead-time and sampling clock division: 0=tCK_INT, 1=2*tCK_INT, 2=4*tCK_INT.
+
+config N32H7_ATIM2_DEADTIME
+	int "ATIM2 Initial Dead-time"
+	default 0
+	range 0 255
+	---help---
+		ATIM2 initial dead-time value (0-255).
+
+config N32H7_ATIM2_BREAK1
+	bool "ATIM2 Break1 Enable"
+	default n
+	---help---
+		Enable Break1 input for ATIM2.
+
+config N32H7_ATIM2_BRK1POL
+	int "ATIM2 Break1 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_BREAK1
+	---help---
+		ATIM2 Break1 polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM2_BREAK2
+	bool "ATIM2 Break2 Enable"
+	default n
+	---help---
+		Enable Break2 input for ATIM2 (ATIM only).
+
+config N32H7_ATIM2_BRK2POL
+	int "ATIM2 Break2 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_BREAK2
+	---help---
+		ATIM2 Break2 polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM2_BRK2FLT
+	int "ATIM2 Break2 Filter"
+	default 0
+	range 0 15
+	depends on N32H7_ATIM2_BREAK2
+	---help---
+		ATIM2 Break2 filter value (0-15).
+
+if N32H7_PWM_MULTICHAN
+
+config N32H7_ATIM2_CHANNEL1
+	bool "ATIM2 Channel 1"
+	default n
+
+if N32H7_ATIM2_CHANNEL1
+
+config N32H7_ATIM2_CH1OUT
+	bool "ATIM2 Channel 1 Output Enable"
+	default N32H7_ATIM2_CHANNEL1
+	---help---
+		Enable output for ATIM2 Channel 1. If disabled, the channel will not be used.
+
+config N32H7_ATIM2_CH1MODE
+	int "ATIM2 Channel 1 Mode"
+	default 6
+	depends on N32H7_ATIM2_CH1OUT
+	range 0 11
+	---help---
+		ATIM2 Channel 1 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_ATIM2_CH1POL
+	int "ATIM2 Channel 1 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH1OUT
+	---help---
+		ATIM2 Channel 1 output polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM2_CH1IDLE
+	int "ATIM2 Channel 1 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH1OUT
+	---help---
+		ATIM2 Channel 1 idle state: 0=inactive, 1=active.
+
+config N32H7_ATIM2_CH1NOUT
+	bool "ATIM2 Channel 1 Complementary Output Enable"
+	default n
+	depends on N32H7_ATIM2_CH1OUT
+	---help---
+		Enable complementary output for ATIM2 Channel 1.
+
+config N32H7_ATIM2_CH1NPOL
+	int "ATIM2 Channel 1 Complementary Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH1NOUT
+	---help---
+		ATIM2 Channel 1 complementary polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM2_CH1NIDLE
+	int "ATIM2 Channel 1 Complementary Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH1NOUT
+	---help---
+		ATIM2 Channel 1 complementary idle state: 0=inactive, 1=active.
+
+endif # N32H7_ATIM2_CHANNEL1
+
+config N32H7_ATIM2_CHANNEL2
+	bool "ATIM2 Channel 2"
+	default n
+
+if N32H7_ATIM2_CHANNEL2
+
+config N32H7_ATIM2_CH2OUT
+	bool "ATIM2 Channel 2 Output Enable"
+	default N32H7_ATIM2_CHANNEL2
+	---help---
+		Enable output for ATIM2 Channel 2. If disabled, the channel will not be used.
+
+config N32H7_ATIM2_CH2MODE
+	int "ATIM2 Channel 2 Mode"
+	default 6
+	depends on N32H7_ATIM2_CH2OUT
+	range 0 11
+	---help---
+		ATIM2 Channel 2 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_ATIM2_CH2POL
+	int "ATIM2 Channel 2 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH2OUT
+	---help---
+		ATIM2 Channel 2 output polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM2_CH2IDLE
+	int "ATIM2 Channel 2 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH2OUT
+	---help---
+		ATIM2 Channel 2 idle state: 0=inactive, 1=active.
+
+config N32H7_ATIM2_CH2NOUT
+	bool "ATIM2 Channel 2 Complementary Output Enable"
+	default n
+	depends on N32H7_ATIM2_CH2OUT
+	---help---
+		Enable complementary output for ATIM2 Channel 2.
+
+config N32H7_ATIM2_CH2NPOL
+	int "ATIM2 Channel 2 Complementary Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH2NOUT
+	---help---
+		ATIM2 Channel 2 complementary polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM2_CH2NIDLE
+	int "ATIM2 Channel 2 Complementary Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH2NOUT
+	---help---
+		ATIM2 Channel 2 complementary idle state: 0=inactive, 1=active.
+
+endif # N32H7_ATIM2_CHANNEL2
+
+config N32H7_ATIM2_CHANNEL3
+	bool "ATIM2 Channel 3"
+	default n
+
+if N32H7_ATIM2_CHANNEL3
+
+config N32H7_ATIM2_CH3OUT
+	bool "ATIM2 Channel 3 Output Enable"
+	default N32H7_ATIM2_CHANNEL3
+	---help---
+		Enable output for ATIM2 Channel 3. If disabled, the channel will not be used.
+
+config N32H7_ATIM2_CH3MODE
+	int "ATIM2 Channel 3 Mode"
+	default 6
+	depends on N32H7_ATIM2_CH3OUT
+	range 0 11
+	---help---
+		ATIM2 Channel 3 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_ATIM2_CH3POL
+	int "ATIM2 Channel 3 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH3OUT
+	---help---
+		ATIM2 Channel 3 output polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM2_CH3IDLE
+	int "ATIM2 Channel 3 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH3OUT
+	---help---
+		ATIM2 Channel 3 idle state: 0=inactive, 1=active.
+
+config N32H7_ATIM2_CH3NOUT
+	bool "ATIM2 Channel 3 Complementary Output Enable"
+	default n
+	depends on N32H7_ATIM2_CH3OUT
+	---help---
+		Enable complementary output for ATIM2 Channel 3.
+
+config N32H7_ATIM2_CH3NPOL
+	int "ATIM2 Channel 3 Complementary Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH3NOUT
+	---help---
+		ATIM2 Channel 3 complementary polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM2_CH3NIDLE
+	int "ATIM2 Channel 3 Complementary Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH3NOUT
+	---help---
+		ATIM2 Channel 3 complementary idle state: 0=inactive, 1=active.
+
+endif # N32H7_ATIM2_CHANNEL3
+
+config N32H7_ATIM2_CHANNEL4
+	bool "ATIM2 Channel 4"
+	default n
+
+if N32H7_ATIM2_CHANNEL4
+
+config N32H7_ATIM2_CH4OUT
+	bool "ATIM2 Channel 4 Output Enable"
+	default N32H7_ATIM2_CHANNEL4
+	---help---
+		Enable output for ATIM2 Channel 4. If disabled, the channel will not be used.
+
+config N32H7_ATIM2_CH4MODE
+	int "ATIM2 Channel 4 Mode"
+	default 6
+	depends on N32H7_ATIM2_CH4OUT
+	range 0 11
+	---help---
+		ATIM2 Channel 4 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_ATIM2_CH4POL
+	int "ATIM2 Channel 4 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH4OUT
+	---help---
+		ATIM2 Channel 4 output polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM2_CH4IDLE
+	int "ATIM2 Channel 4 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH4OUT
+	---help---
+		ATIM2 Channel 4 idle state: 0=inactive, 1=active.
+
+config N32H7_ATIM2_CH4NOUT
+	bool "ATIM2 Channel 4 Complementary Output Enable"
+	default n
+	depends on N32H7_ATIM2_CH4OUT
+	---help---
+		Enable complementary output for ATIM2 Channel 4.
+
+config N32H7_ATIM2_CH4NPOL
+	int "ATIM2 Channel 4 Complementary Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH4NOUT
+	---help---
+		ATIM2 Channel 4 complementary polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM2_CH4NIDLE
+	int "ATIM2 Channel 4 Complementary Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH4NOUT
+	---help---
+		ATIM2 Channel 4 complementary idle state: 0=inactive, 1=active.
+
+endif # N32H7_ATIM2_CHANNEL4
+
+endif # N32H7_PWM_MULTICHAN
+
+if N32H7_PWM_MULTICHAN = n
+
+config N32H7_ATIM2_CHANNEL
+	int "ATIM2 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If ATIM2 is enabled for PWM, specifies the timer output channel {1..4}.
+
+config N32H7_ATIM2_CHMODE
+	int "ATIM2 Channel Mode"
+	default 6
+	range 0 11
+	---help---
+		ATIM2 channel mode. See enum n32_pwm_chanmode_e.
+
+endif # N32H7_PWM_MULTICHAN = n
+
+endif # N32H7_ATIM2_PWM
+
+config N32H7_ATIM2_QE
+	bool "ATIM2 Quadrature Encoder"
+	default n
+	depends on SENSORS_QENCODER
+	---help---
+		Reserve ATIM2 for use as a quadrature encoder interface.
+
+endif # N32H7_ATIM2
+
+config N32H7_ATIM3
+	bool "ATIM3"
+	default n
+	---help---
+		Enable Advanced Timer ATIM3.
+
+if N32H7_ATIM3
+
+config N32H7_ATIM3_PWM
+	bool "ATIM3 PWM"
+	default n
+	depends on N32H7_PWM
+	---help---
+		Reserve ATIM3 for use by PWM.
+
+if N32H7_ATIM3_PWM
+
+config N32H7_ATIM3_MODE
+	int "ATIM3 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the ATIM3 timer mode: 0=up, 1=down, 2=center1, 3=center2, 4=center3.
+
+config N32H7_ATIM3_LOCK
+	int "ATIM3 Lock Level"
+	default 0
+	range 0 3
+	---help---
+		ATIM3 BDTR lock level configuration.
+
+config N32H7_ATIM3_TDTS
+	int "ATIM3 t_DTS Division"
+	default 0
+	range 0 2
+	---help---
+		ATIM3 dead-time and sampling clock division: 0=tCK_INT, 1=2*tCK_INT, 2=4*tCK_INT.
+
+config N32H7_ATIM3_DEADTIME
+	int "ATIM3 Initial Dead-time"
+	default 0
+	range 0 255
+	---help---
+		ATIM3 initial dead-time value (0-255).
+
+config N32H7_ATIM3_BREAK1
+	bool "ATIM3 Break1 Enable"
+	default n
+	---help---
+		Enable Break1 input for ATIM3.
+
+config N32H7_ATIM3_BRK1POL
+	int "ATIM3 Break1 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_BREAK1
+	---help---
+		ATIM3 Break1 polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM3_BREAK2
+	bool "ATIM3 Break2 Enable"
+	default n
+	---help---
+		Enable Break2 input for ATIM3 (ATIM only).
+
+config N32H7_ATIM3_BRK2POL
+	int "ATIM3 Break2 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_BREAK2
+	---help---
+		ATIM3 Break2 polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM3_BRK2FLT
+	int "ATIM3 Break2 Filter"
+	default 0
+	range 0 15
+	depends on N32H7_ATIM3_BREAK2
+	---help---
+		ATIM3 Break2 filter value (0-15).
+
+if N32H7_PWM_MULTICHAN
+
+config N32H7_ATIM3_CHANNEL1
+	bool "ATIM3 Channel 1"
+	default n
+
+if N32H7_ATIM3_CHANNEL1
+
+config N32H7_ATIM3_CH1OUT
+	bool "ATIM3 Channel 1 Output Enable"
+	default N32H7_ATIM3_CHANNEL1
+	---help---
+		Enable output for ATIM3 Channel 1. If disabled, the channel will not be used.
+
+config N32H7_ATIM3_CH1MODE
+	int "ATIM3 Channel 1 Mode"
+	default 6
+	depends on N32H7_ATIM3_CH1OUT
+	range 0 11
+	---help---
+		ATIM3 Channel 1 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_ATIM3_CH1POL
+	int "ATIM3 Channel 1 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH1OUT
+	---help---
+		ATIM3 Channel 1 output polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM3_CH1IDLE
+	int "ATIM3 Channel 1 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH1OUT
+	---help---
+		ATIM3 Channel 1 idle state: 0=inactive, 1=active.
+
+config N32H7_ATIM3_CH1NOUT
+	bool "ATIM3 Channel 1 Complementary Output Enable"
+	default n
+	depends on N32H7_ATIM3_CH1OUT
+	---help---
+		Enable complementary output for ATIM3 Channel 1.
+
+config N32H7_ATIM3_CH1NPOL
+	int "ATIM3 Channel 1 Complementary Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH1NOUT
+	---help---
+		ATIM3 Channel 1 complementary polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM3_CH1NIDLE
+	int "ATIM3 Channel 1 Complementary Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH1NOUT
+	---help---
+		ATIM3 Channel 1 complementary idle state: 0=inactive, 1=active.
+
+endif # N32H7_ATIM3_CHANNEL1
+
+config N32H7_ATIM3_CHANNEL2
+	bool "ATIM3 Channel 2"
+	default n
+
+if N32H7_ATIM3_CHANNEL2
+
+config N32H7_ATIM3_CH2OUT
+	bool "ATIM3 Channel 2 Output Enable"
+	default N32H7_ATIM3_CHANNEL2
+	---help---
+		Enable output for ATIM3 Channel 2. If disabled, the channel will not be used.
+
+config N32H7_ATIM3_CH2MODE
+	int "ATIM3 Channel 2 Mode"
+	default 6
+	depends on N32H7_ATIM3_CH2OUT
+	range 0 11
+	---help---
+		ATIM3 Channel 2 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_ATIM3_CH2POL
+	int "ATIM3 Channel 2 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH2OUT
+	---help---
+		ATIM3 Channel 2 output polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM3_CH2IDLE
+	int "ATIM3 Channel 2 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH2OUT
+	---help---
+		ATIM3 Channel 2 idle state: 0=inactive, 1=active.
+
+config N32H7_ATIM3_CH2NOUT
+	bool "ATIM3 Channel 2 Complementary Output Enable"
+	default n
+	depends on N32H7_ATIM3_CH2OUT
+	---help---
+		Enable complementary output for ATIM3 Channel 2.
+
+config N32H7_ATIM3_CH2NPOL
+	int "ATIM3 Channel 2 Complementary Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH2NOUT
+	---help---
+		ATIM3 Channel 2 complementary polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM3_CH2NIDLE
+	int "ATIM3 Channel 2 Complementary Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH2NOUT
+	---help---
+		ATIM3 Channel 2 complementary idle state: 0=inactive, 1=active.
+
+endif # N32H7_ATIM3_CHANNEL2
+
+config N32H7_ATIM3_CHANNEL3
+	bool "ATIM3 Channel 3"
+	default n
+
+if N32H7_ATIM3_CHANNEL3
+
+config N32H7_ATIM3_CH3OUT
+	bool "ATIM3 Channel 3 Output Enable"
+	default N32H7_ATIM3_CHANNEL3
+	---help---
+		Enable output for ATIM3 Channel 3. If disabled, the channel will not be used.
+
+config N32H7_ATIM3_CH3MODE
+	int "ATIM3 Channel 3 Mode"
+	default 6
+	depends on N32H7_ATIM3_CH3OUT
+	range 0 11
+	---help---
+		ATIM3 Channel 3 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_ATIM3_CH3POL
+	int "ATIM3 Channel 3 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH3OUT
+	---help---
+		ATIM3 Channel 3 output polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM3_CH3IDLE
+	int "ATIM3 Channel 3 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH3OUT
+	---help---
+		ATIM3 Channel 3 idle state: 0=inactive, 1=active.
+
+config N32H7_ATIM3_CH3NOUT
+	bool "ATIM3 Channel 3 Complementary Output Enable"
+	default n
+	depends on N32H7_ATIM3_CH3OUT
+	---help---
+		Enable complementary output for ATIM3 Channel 3.
+
+config N32H7_ATIM3_CH3NPOL
+	int "ATIM3 Channel 3 Complementary Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH3NOUT
+	---help---
+		ATIM3 Channel 3 complementary polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM3_CH3NIDLE
+	int "ATIM3 Channel 3 Complementary Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH3NOUT
+	---help---
+		ATIM3 Channel 3 complementary idle state: 0=inactive, 1=active.
+
+endif # N32H7_ATIM3_CHANNEL3
+
+config N32H7_ATIM3_CHANNEL4
+	bool "ATIM3 Channel 4"
+	default n
+
+if N32H7_ATIM3_CHANNEL4
+
+config N32H7_ATIM3_CH4OUT
+	bool "ATIM3 Channel 4 Output Enable"
+	default N32H7_ATIM3_CHANNEL4
+	---help---
+		Enable output for ATIM3 Channel 4. If disabled, the channel will not be used.
+
+config N32H7_ATIM3_CH4MODE
+	int "ATIM3 Channel 4 Mode"
+	default 6
+	depends on N32H7_ATIM3_CH4OUT
+	range 0 11
+	---help---
+		ATIM3 Channel 4 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_ATIM3_CH4POL
+	int "ATIM3 Channel 4 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH4OUT
+	---help---
+		ATIM3 Channel 4 output polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM3_CH4IDLE
+	int "ATIM3 Channel 4 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH4OUT
+	---help---
+		ATIM3 Channel 4 idle state: 0=inactive, 1=active.
+
+config N32H7_ATIM3_CH4NOUT
+	bool "ATIM3 Channel 4 Complementary Output Enable"
+	default n
+	depends on N32H7_ATIM3_CH4OUT
+	---help---
+		Enable complementary output for ATIM3 Channel 4.
+
+config N32H7_ATIM3_CH4NPOL
+	int "ATIM3 Channel 4 Complementary Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH4NOUT
+	---help---
+		ATIM3 Channel 4 complementary polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM3_CH4NIDLE
+	int "ATIM3 Channel 4 Complementary Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH4NOUT
+	---help---
+		ATIM3 Channel 4 complementary idle state: 0=inactive, 1=active.
+
+endif # N32H7_ATIM3_CHANNEL4
+
+endif # N32H7_PWM_MULTICHAN
+
+if N32H7_PWM_MULTICHAN = n
+
+config N32H7_ATIM3_CHANNEL
+	int "ATIM3 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If ATIM3 is enabled for PWM, specifies the timer output channel {1..4}.
+
+config N32H7_ATIM3_CHMODE
+	int "ATIM3 Channel Mode"
+	default 6
+	range 0 11
+	---help---
+		ATIM3 channel mode. See enum n32_pwm_chanmode_e.
+
+endif # N32H7_PWM_MULTICHAN = n
+
+endif # N32H7_ATIM3_PWM
+
+config N32H7_ATIM3_QE
+	bool "ATIM3 Quadrature Encoder"
+	default n
+	depends on SENSORS_QENCODER
+	---help---
+		Reserve ATIM3 for use as a quadrature encoder interface.
+
+endif # N32H7_ATIM3
+
+config N32H7_ATIM4
+	bool "ATIM4"
+	default n
+	---help---
+		Enable Advanced Timer ATIM4.
+
+if N32H7_ATIM4
+
+config N32H7_ATIM4_PWM
+	bool "ATIM4 PWM"
+	default n
+	depends on N32H7_PWM
+	---help---
+		Reserve ATIM4 for use by PWM.
+
+if N32H7_ATIM4_PWM
+
+config N32H7_ATIM4_MODE
+	int "ATIM4 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the ATIM4 timer mode: 0=up, 1=down, 2=center1, 3=center2, 4=center3.
+
+config N32H7_ATIM4_LOCK
+	int "ATIM4 Lock Level"
+	default 0
+	range 0 3
+	---help---
+		ATIM4 BDTR lock level configuration.
+
+config N32H7_ATIM4_TDTS
+	int "ATIM4 t_DTS Division"
+	default 0
+	range 0 2
+	---help---
+		ATIM4 dead-time and sampling clock division: 0=tCK_INT, 1=2*tCK_INT, 2=4*tCK_INT.
+
+config N32H7_ATIM4_DEADTIME
+	int "ATIM4 Initial Dead-time"
+	default 0
+	range 0 255
+	---help---
+		ATIM4 initial dead-time value (0-255).
+
+config N32H7_ATIM4_BREAK1
+	bool "ATIM4 Break1 Enable"
+	default n
+	---help---
+		Enable Break1 input for ATIM4.
+
+config N32H7_ATIM4_BRK1POL
+	int "ATIM4 Break1 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_BREAK1
+	---help---
+		ATIM4 Break1 polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM4_BREAK2
+	bool "ATIM4 Break2 Enable"
+	default n
+	---help---
+		Enable Break2 input for ATIM4 (ATIM only).
+
+config N32H7_ATIM4_BRK2POL
+	int "ATIM4 Break2 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_BREAK2
+	---help---
+		ATIM4 Break2 polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM4_BRK2FLT
+	int "ATIM4 Break2 Filter"
+	default 0
+	range 0 15
+	depends on N32H7_ATIM4_BREAK2
+	---help---
+		ATIM4 Break2 filter value (0-15).
+
+if N32H7_PWM_MULTICHAN
+
+config N32H7_ATIM4_CHANNEL1
+	bool "ATIM4 Channel 1"
+	default n
+
+if N32H7_ATIM4_CHANNEL1
+
+config N32H7_ATIM4_CH1OUT
+	bool "ATIM4 Channel 1 Output Enable"
+	default N32H7_ATIM4_CHANNEL1
+	---help---
+		Enable output for ATIM4 Channel 1. If disabled, the channel will not be used.
+
+config N32H7_ATIM4_CH1MODE
+	int "ATIM4 Channel 1 Mode"
+	default 6
+	depends on N32H7_ATIM4_CH1OUT
+	range 0 11
+	---help---
+		ATIM4 Channel 1 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_ATIM4_CH1POL
+	int "ATIM4 Channel 1 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH1OUT
+	---help---
+		ATIM4 Channel 1 output polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM4_CH1IDLE
+	int "ATIM4 Channel 1 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH1OUT
+	---help---
+		ATIM4 Channel 1 idle state: 0=inactive, 1=active.
+
+config N32H7_ATIM4_CH1NOUT
+	bool "ATIM4 Channel 1 Complementary Output Enable"
+	default n
+	depends on N32H7_ATIM4_CH1OUT
+	---help---
+		Enable complementary output for ATIM4 Channel 1.
+
+config N32H7_ATIM4_CH1NPOL
+	int "ATIM4 Channel 1 Complementary Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH1NOUT
+	---help---
+		ATIM4 Channel 1 complementary polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM4_CH1NIDLE
+	int "ATIM4 Channel 1 Complementary Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH1NOUT
+	---help---
+		ATIM4 Channel 1 complementary idle state: 0=inactive, 1=active.
+
+endif # N32H7_ATIM4_CHANNEL1
+
+config N32H7_ATIM4_CHANNEL2
+	bool "ATIM4 Channel 2"
+	default n
+
+if N32H7_ATIM4_CHANNEL2
+
+config N32H7_ATIM4_CH2OUT
+	bool "ATIM4 Channel 2 Output Enable"
+	default N32H7_ATIM4_CHANNEL2
+	---help---
+		Enable output for ATIM4 Channel 2. If disabled, the channel will not be used.
+
+config N32H7_ATIM4_CH2MODE
+	int "ATIM4 Channel 2 Mode"
+	default 6
+	depends on N32H7_ATIM4_CH2OUT
+	range 0 11
+	---help---
+		ATIM4 Channel 2 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_ATIM4_CH2POL
+	int "ATIM4 Channel 2 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH2OUT
+	---help---
+		ATIM4 Channel 2 output polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM4_CH2IDLE
+	int "ATIM4 Channel 2 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH2OUT
+	---help---
+		ATIM4 Channel 2 idle state: 0=inactive, 1=active.
+
+config N32H7_ATIM4_CH2NOUT
+	bool "ATIM4 Channel 2 Complementary Output Enable"
+	default n
+	depends on N32H7_ATIM4_CH2OUT
+	---help---
+		Enable complementary output for ATIM4 Channel 2.
+
+config N32H7_ATIM4_CH2NPOL
+	int "ATIM4 Channel 2 Complementary Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH2NOUT
+	---help---
+		ATIM4 Channel 2 complementary polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM4_CH2NIDLE
+	int "ATIM4 Channel 2 Complementary Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH2NOUT
+	---help---
+		ATIM4 Channel 2 complementary idle state: 0=inactive, 1=active.
+
+endif # N32H7_ATIM4_CHANNEL2
+
+config N32H7_ATIM4_CHANNEL3
+	bool "ATIM4 Channel 3"
+	default n
+
+if N32H7_ATIM4_CHANNEL3
+
+config N32H7_ATIM4_CH3OUT
+	bool "ATIM4 Channel 3 Output Enable"
+	default N32H7_ATIM4_CHANNEL3
+	---help---
+		Enable output for ATIM4 Channel 3. If disabled, the channel will not be used.
+
+config N32H7_ATIM4_CH3MODE
+	int "ATIM4 Channel 3 Mode"
+	default 6
+	depends on N32H7_ATIM4_CH3OUT
+	range 0 11
+	---help---
+		ATIM4 Channel 3 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_ATIM4_CH3POL
+	int "ATIM4 Channel 3 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH3OUT
+	---help---
+		ATIM4 Channel 3 output polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM4_CH3IDLE
+	int "ATIM4 Channel 3 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH3OUT
+	---help---
+		ATIM4 Channel 3 idle state: 0=inactive, 1=active.
+
+config N32H7_ATIM4_CH3NOUT
+	bool "ATIM4 Channel 3 Complementary Output Enable"
+	default n
+	depends on N32H7_ATIM4_CH3OUT
+	---help---
+		Enable complementary output for ATIM4 Channel 3.
+
+config N32H7_ATIM4_CH3NPOL
+	int "ATIM4 Channel 3 Complementary Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH3NOUT
+	---help---
+		ATIM4 Channel 3 complementary polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM4_CH3NIDLE
+	int "ATIM4 Channel 3 Complementary Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH3NOUT
+	---help---
+		ATIM4 Channel 3 complementary idle state: 0=inactive, 1=active.
+
+endif # N32H7_ATIM4_CHANNEL3
+
+config N32H7_ATIM4_CHANNEL4
+	bool "ATIM4 Channel 4"
+	default n
+
+if N32H7_ATIM4_CHANNEL4
+
+config N32H7_ATIM4_CH4OUT
+	bool "ATIM4 Channel 4 Output Enable"
+	default N32H7_ATIM4_CHANNEL4
+	---help---
+		Enable output for ATIM4 Channel 4. If disabled, the channel will not be used.
+
+config N32H7_ATIM4_CH4MODE
+	int "ATIM4 Channel 4 Mode"
+	default 6
+	depends on N32H7_ATIM4_CH4OUT
+	range 0 11
+	---help---
+		ATIM4 Channel 4 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_ATIM4_CH4POL
+	int "ATIM4 Channel 4 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH4OUT
+	---help---
+		ATIM4 Channel 4 output polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM4_CH4IDLE
+	int "ATIM4 Channel 4 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH4OUT
+	---help---
+		ATIM4 Channel 4 idle state: 0=inactive, 1=active.
+
+config N32H7_ATIM4_CH4NOUT
+	bool "ATIM4 Channel 4 Complementary Output Enable"
+	default n
+	depends on N32H7_ATIM4_CH4OUT
+	---help---
+		Enable complementary output for ATIM4 Channel 4.
+
+config N32H7_ATIM4_CH4NPOL
+	int "ATIM4 Channel 4 Complementary Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH4NOUT
+	---help---
+		ATIM4 Channel 4 complementary polarity: 0=active high, 1=active low.
+
+config N32H7_ATIM4_CH4NIDLE
+	int "ATIM4 Channel 4 Complementary Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH4NOUT
+	---help---
+		ATIM4 Channel 4 complementary idle state: 0=inactive, 1=active.
+
+endif # N32H7_ATIM4_CHANNEL4
+
+endif # N32H7_PWM_MULTICHAN
+
+if N32H7_PWM_MULTICHAN = n
+
+config N32H7_ATIM4_CHANNEL
+	int "ATIM4 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If ATIM4 is enabled for PWM, specifies the timer output channel {1..4}.
+
+config N32H7_ATIM4_CHMODE
+	int "ATIM4 Channel Mode"
+	default 6
+	range 0 11
+	---help---
+		ATIM4 channel mode. See enum n32_pwm_chanmode_e.
+
+endif # N32H7_PWM_MULTICHAN = n
+
+endif # N32H7_ATIM4_PWM
+
+config N32H7_ATIM4_QE
+	bool "ATIM4 Quadrature Encoder"
+	default n
+	depends on SENSORS_QENCODER
+	---help---
+		Reserve ATIM4 for use as a quadrature encoder interface.
+
+endif # N32H7_ATIM4
+
+endif # N32H7_TIMER_ADVANCED
+
+if N32H7_TIMER_GTIMA
+
+config N32H7_GTIMA1
+	bool "GTIMA1"
+	default n
+	---help---
+		Enable General-purpose Timer A GTIMA1.
+
+if N32H7_GTIMA1
+
+config N32H7_GTIMA1_PWM
+	bool "GTIMA1 PWM"
+	default n
+	depends on N32H7_PWM
+	---help---
+		Reserve GTIMA1 for use by PWM.
+
+if N32H7_GTIMA1_PWM
+
+config N32H7_GTIMA1_MODE
+	int "GTIMA1 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the GTIMA1 timer mode: 0=up, 1=down, 2=center1, 3=center2, 4=center3.
+
+if N32H7_PWM_MULTICHAN
+
+config N32H7_GTIMA1_CHANNEL1
+	bool "GTIMA1 Channel 1"
+	default n
+
+if N32H7_GTIMA1_CHANNEL1
+
+config N32H7_GTIMA1_CH1OUT
+	bool "GTIMA1 Channel 1 Output Enable"
+	default N32H7_GTIMA1_CHANNEL1
+	---help---
+		Enable output for GTIMA1 Channel 1. If disabled, the channel will not be used.
+
+config N32H7_GTIMA1_CH1MODE
+	int "GTIMA1 Channel 1 Mode"
+	default 6
+	depends on N32H7_GTIMA1_CH1OUT
+	range 0 9
+	---help---
+		GTIMA1 Channel 1 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA1_CH1POL
+	int "GTIMA1 Channel 1 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA1_CH1OUT
+	---help---
+		GTIMA1 Channel 1 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA1_CH1IDLE
+	int "GTIMA1 Channel 1 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA1_CH1OUT
+	---help---
+		GTIMA1 Channel 1 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA1_CHANNEL1
+
+config N32H7_GTIMA1_CHANNEL2
+	bool "GTIMA1 Channel 2"
+	default n
+
+if N32H7_GTIMA1_CHANNEL2
+
+config N32H7_GTIMA1_CH2OUT
+	bool "GTIMA1 Channel 2 Output Enable"
+	default N32H7_GTIMA1_CHANNEL2
+	---help---
+		Enable output for GTIMA1 Channel 2. If disabled, the channel will not be used.
+
+config N32H7_GTIMA1_CH2MODE
+	int "GTIMA1 Channel 2 Mode"
+	default 6
+	depends on N32H7_GTIMA1_CH2OUT
+	range 0 9
+	---help---
+		GTIMA1 Channel 2 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA1_CH2POL
+	int "GTIMA1 Channel 2 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA1_CH2OUT
+	---help---
+		GTIMA1 Channel 2 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA1_CH2IDLE
+	int "GTIMA1 Channel 2 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA1_CH2OUT
+	---help---
+		GTIMA1 Channel 2 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA1_CHANNEL2
+
+config N32H7_GTIMA1_CHANNEL3
+	bool "GTIMA1 Channel 3"
+	default n
+
+if N32H7_GTIMA1_CHANNEL3
+
+config N32H7_GTIMA1_CH3OUT
+	bool "GTIMA1 Channel 3 Output Enable"
+	default N32H7_GTIMA1_CHANNEL3
+	---help---
+		Enable output for GTIMA1 Channel 3. If disabled, the channel will not be used.
+
+config N32H7_GTIMA1_CH3MODE
+	int "GTIMA1 Channel 3 Mode"
+	default 6
+	depends on N32H7_GTIMA1_CH3OUT
+	range 0 9
+	---help---
+		GTIMA1 Channel 3 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA1_CH3POL
+	int "GTIMA1 Channel 3 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA1_CH3OUT
+	---help---
+		GTIMA1 Channel 3 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA1_CH3IDLE
+	int "GTIMA1 Channel 3 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA1_CH3OUT
+	---help---
+		GTIMA1 Channel 3 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA1_CHANNEL3
+
+config N32H7_GTIMA1_CHANNEL4
+	bool "GTIMA1 Channel 4"
+	default n
+
+if N32H7_GTIMA1_CHANNEL4
+
+config N32H7_GTIMA1_CH4OUT
+	bool "GTIMA1 Channel 4 Output Enable"
+	default N32H7_GTIMA1_CHANNEL4
+	---help---
+		Enable output for GTIMA1 Channel 4. If disabled, the channel will not be used.
+
+config N32H7_GTIMA1_CH4MODE
+	int "GTIMA1 Channel 4 Mode"
+	default 6
+	depends on N32H7_GTIMA1_CH4OUT
+	range 0 9
+	---help---
+		GTIMA1 Channel 4 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA1_CH4POL
+	int "GTIMA1 Channel 4 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA1_CH4OUT
+	---help---
+		GTIMA1 Channel 4 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA1_CH4IDLE
+	int "GTIMA1 Channel 4 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA1_CH4OUT
+	---help---
+		GTIMA1 Channel 4 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA1_CHANNEL4
+
+endif # N32H7_PWM_MULTICHAN
+
+if N32H7_PWM_MULTICHAN = n
+
+config N32H7_GTIMA1_CHANNEL
+	int "GTIMA1 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If GTIMA1 is enabled for PWM, specifies the timer output channel {1..4}.
+
+config N32H7_GTIMA1_CHMODE
+	int "GTIMA1 Channel Mode"
+	default 6
+	range 0 9
+	---help---
+		GTIMA1 channel mode. See enum n32_pwm_chanmode_e.
+
+endif # N32H7_PWM_MULTICHAN = n
+
+endif # N32H7_GTIMA1_PWM
+
+config N32H7_GTIMA1_QE
+	bool "GTIMA1 Quadrature Encoder"
+	default n
+	depends on SENSORS_QENCODER
+	---help---
+		Reserve GTIMA1 for use as a quadrature encoder interface.
+
+endif # N32H7_GTIMA1
+
+config N32H7_GTIMA2
+	bool "GTIMA2"
+	default n
+	---help---
+		Enable General-purpose Timer A GTIMA2.
+
+if N32H7_GTIMA2
+
+config N32H7_GTIMA2_PWM
+	bool "GTIMA2 PWM"
+	default n
+	depends on N32H7_PWM
+	---help---
+		Reserve GTIMA2 for use by PWM.
+
+if N32H7_GTIMA2_PWM
+
+config N32H7_GTIMA2_MODE
+	int "GTIMA2 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the GTIMA2 timer mode: 0=up, 1=down, 2=center1, 3=center2, 4=center3.
+
+if N32H7_PWM_MULTICHAN
+
+config N32H7_GTIMA2_CHANNEL1
+	bool "GTIMA2 Channel 1"
+	default n
+
+if N32H7_GTIMA2_CHANNEL1
+
+config N32H7_GTIMA2_CH1OUT
+	bool "GTIMA2 Channel 1 Output Enable"
+	default N32H7_GTIMA2_CHANNEL1
+	---help---
+		Enable output for GTIMA2 Channel 1. If disabled, the channel will not be used.
+
+config N32H7_GTIMA2_CH1MODE
+	int "GTIMA2 Channel 1 Mode"
+	default 6
+	depends on N32H7_GTIMA2_CH1OUT
+	range 0 9
+	---help---
+		GTIMA2 Channel 1 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA2_CH1POL
+	int "GTIMA2 Channel 1 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA2_CH1OUT
+	---help---
+		GTIMA2 Channel 1 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA2_CH1IDLE
+	int "GTIMA2 Channel 1 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA2_CH1OUT
+	---help---
+		GTIMA2 Channel 1 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA2_CHANNEL1
+
+config N32H7_GTIMA2_CHANNEL2
+	bool "GTIMA2 Channel 2"
+	default n
+
+if N32H7_GTIMA2_CHANNEL2
+
+config N32H7_GTIMA2_CH2OUT
+	bool "GTIMA2 Channel 2 Output Enable"
+	default N32H7_GTIMA2_CHANNEL2
+	---help---
+		Enable output for GTIMA2 Channel 2. If disabled, the channel will not be used.
+
+config N32H7_GTIMA2_CH2MODE
+	int "GTIMA2 Channel 2 Mode"
+	default 6
+	depends on N32H7_GTIMA2_CH2OUT
+	range 0 9
+	---help---
+		GTIMA2 Channel 2 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA2_CH2POL
+	int "GTIMA2 Channel 2 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA2_CH2OUT
+	---help---
+		GTIMA2 Channel 2 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA2_CH2IDLE
+	int "GTIMA2 Channel 2 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA2_CH2OUT
+	---help---
+		GTIMA2 Channel 2 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA2_CHANNEL2
+
+config N32H7_GTIMA2_CHANNEL3
+	bool "GTIMA2 Channel 3"
+	default n
+
+if N32H7_GTIMA2_CHANNEL3
+
+config N32H7_GTIMA2_CH3OUT
+	bool "GTIMA2 Channel 3 Output Enable"
+	default N32H7_GTIMA2_CHANNEL3
+	---help---
+		Enable output for GTIMA2 Channel 3. If disabled, the channel will not be used.
+
+config N32H7_GTIMA2_CH3MODE
+	int "GTIMA2 Channel 3 Mode"
+	default 6
+	depends on N32H7_GTIMA2_CH3OUT
+	range 0 9
+	---help---
+		GTIMA2 Channel 3 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA2_CH3POL
+	int "GTIMA2 Channel 3 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA2_CH3OUT
+	---help---
+		GTIMA2 Channel 3 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA2_CH3IDLE
+	int "GTIMA2 Channel 3 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA2_CH3OUT
+	---help---
+		GTIMA2 Channel 3 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA2_CHANNEL3
+
+config N32H7_GTIMA2_CHANNEL4
+	bool "GTIMA2 Channel 4"
+	default n
+
+if N32H7_GTIMA2_CHANNEL4
+
+config N32H7_GTIMA2_CH4OUT
+	bool "GTIMA2 Channel 4 Output Enable"
+	default N32H7_GTIMA2_CHANNEL4
+	---help---
+		Enable output for GTIMA2 Channel 4. If disabled, the channel will not be used.
+
+config N32H7_GTIMA2_CH4MODE
+	int "GTIMA2 Channel 4 Mode"
+	default 6
+	depends on N32H7_GTIMA2_CH4OUT
+	range 0 9
+	---help---
+		GTIMA2 Channel 4 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA2_CH4POL
+	int "GTIMA2 Channel 4 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA2_CH4OUT
+	---help---
+		GTIMA2 Channel 4 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA2_CH4IDLE
+	int "GTIMA2 Channel 4 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA2_CH4OUT
+	---help---
+		GTIMA2 Channel 4 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA2_CHANNEL4
+
+endif # N32H7_PWM_MULTICHAN
+
+if N32H7_PWM_MULTICHAN = n
+
+config N32H7_GTIMA2_CHANNEL
+	int "GTIMA2 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If GTIMA2 is enabled for PWM, specifies the timer output channel {1..4}.
+
+config N32H7_GTIMA2_CHMODE
+	int "GTIMA2 Channel Mode"
+	default 6
+	range 0 9
+	---help---
+		GTIMA2 channel mode. See enum n32_pwm_chanmode_e.
+
+endif # N32H7_PWM_MULTICHAN = n
+
+endif # N32H7_GTIMA2_PWM
+
+config N32H7_GTIMA2_QE
+	bool "GTIMA2 Quadrature Encoder"
+	default n
+	depends on SENSORS_QENCODER
+	---help---
+		Reserve GTIMA2 for use as a quadrature encoder interface.
+
+endif # N32H7_GTIMA2
+
+config N32H7_GTIMA3
+	bool "GTIMA3"
+	default n
+	---help---
+		Enable General-purpose Timer A GTIMA3.
+
+if N32H7_GTIMA3
+
+config N32H7_GTIMA3_PWM
+	bool "GTIMA3 PWM"
+	default n
+	depends on N32H7_PWM
+	---help---
+		Reserve GTIMA3 for use by PWM.
+
+if N32H7_GTIMA3_PWM
+
+config N32H7_GTIMA3_MODE
+	int "GTIMA3 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the GTIMA3 timer mode: 0=up, 1=down, 2=center1, 3=center2, 4=center3.
+
+if N32H7_PWM_MULTICHAN
+
+config N32H7_GTIMA3_CHANNEL1
+	bool "GTIMA3 Channel 1"
+	default n
+
+if N32H7_GTIMA3_CHANNEL1
+
+config N32H7_GTIMA3_CH1OUT
+	bool "GTIMA3 Channel 1 Output Enable"
+	default N32H7_GTIMA3_CHANNEL1
+	---help---
+		Enable output for GTIMA3 Channel 1. If disabled, the channel will not be used.
+
+config N32H7_GTIMA3_CH1MODE
+	int "GTIMA3 Channel 1 Mode"
+	default 6
+	depends on N32H7_GTIMA3_CH1OUT
+	range 0 9
+	---help---
+		GTIMA3 Channel 1 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA3_CH1POL
+	int "GTIMA3 Channel 1 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA3_CH1OUT
+	---help---
+		GTIMA3 Channel 1 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA3_CH1IDLE
+	int "GTIMA3 Channel 1 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA3_CH1OUT
+	---help---
+		GTIMA3 Channel 1 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA3_CHANNEL1
+
+config N32H7_GTIMA3_CHANNEL2
+	bool "GTIMA3 Channel 2"
+	default n
+
+if N32H7_GTIMA3_CHANNEL2
+
+config N32H7_GTIMA3_CH2OUT
+	bool "GTIMA3 Channel 2 Output Enable"
+	default N32H7_GTIMA3_CHANNEL2
+	---help---
+		Enable output for GTIMA3 Channel 2. If disabled, the channel will not be used.
+
+config N32H7_GTIMA3_CH2MODE
+	int "GTIMA3 Channel 2 Mode"
+	default 6
+	depends on N32H7_GTIMA3_CH2OUT
+	range 0 9
+	---help---
+		GTIMA3 Channel 2 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA3_CH2POL
+	int "GTIMA3 Channel 2 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA3_CH2OUT
+	---help---
+		GTIMA3 Channel 2 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA3_CH2IDLE
+	int "GTIMA3 Channel 2 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA3_CH2OUT
+	---help---
+		GTIMA3 Channel 2 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA3_CHANNEL2
+
+config N32H7_GTIMA3_CHANNEL3
+	bool "GTIMA3 Channel 3"
+	default n
+
+if N32H7_GTIMA3_CHANNEL3
+
+config N32H7_GTIMA3_CH3OUT
+	bool "GTIMA3 Channel 3 Output Enable"
+	default N32H7_GTIMA3_CHANNEL3
+	---help---
+		Enable output for GTIMA3 Channel 3. If disabled, the channel will not be used.
+
+config N32H7_GTIMA3_CH3MODE
+	int "GTIMA3 Channel 3 Mode"
+	default 6
+	depends on N32H7_GTIMA3_CH3OUT
+	range 0 9
+	---help---
+		GTIMA3 Channel 3 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA3_CH3POL
+	int "GTIMA3 Channel 3 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA3_CH3OUT
+	---help---
+		GTIMA3 Channel 3 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA3_CH3IDLE
+	int "GTIMA3 Channel 3 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA3_CH3OUT
+	---help---
+		GTIMA3 Channel 3 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA3_CHANNEL3
+
+config N32H7_GTIMA3_CHANNEL4
+	bool "GTIMA3 Channel 4"
+	default n
+
+if N32H7_GTIMA3_CHANNEL4
+
+config N32H7_GTIMA3_CH4OUT
+	bool "GTIMA3 Channel 4 Output Enable"
+	default N32H7_GTIMA3_CHANNEL4
+	---help---
+		Enable output for GTIMA3 Channel 4. If disabled, the channel will not be used.
+
+config N32H7_GTIMA3_CH4MODE
+	int "GTIMA3 Channel 4 Mode"
+	default 6
+	depends on N32H7_GTIMA3_CH4OUT
+	range 0 9
+	---help---
+		GTIMA3 Channel 4 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA3_CH4POL
+	int "GTIMA3 Channel 4 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA3_CH4OUT
+	---help---
+		GTIMA3 Channel 4 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA3_CH4IDLE
+	int "GTIMA3 Channel 4 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA3_CH4OUT
+	---help---
+		GTIMA3 Channel 4 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA3_CHANNEL4
+
+endif # N32H7_PWM_MULTICHAN
+
+if N32H7_PWM_MULTICHAN = n
+
+config N32H7_GTIMA3_CHANNEL
+	int "GTIMA3 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If GTIMA3 is enabled for PWM, specifies the timer output channel {1..4}.
+
+config N32H7_GTIMA3_CHMODE
+	int "GTIMA3 Channel Mode"
+	default 6
+	range 0 9
+	---help---
+		GTIMA3 channel mode. See enum n32_pwm_chanmode_e.
+
+endif # N32H7_PWM_MULTICHAN = n
+
+endif # N32H7_GTIMA3_PWM
+
+config N32H7_GTIMA3_QE
+	bool "GTIMA3 Quadrature Encoder"
+	default n
+	depends on SENSORS_QENCODER
+	---help---
+		Reserve GTIMA3 for use as a quadrature encoder interface.
+
+endif # N32H7_GTIMA3
+
+config N32H7_GTIMA4
+	bool "GTIMA4"
+	default n
+	---help---
+		Enable General-purpose Timer A GTIMA4.
+
+if N32H7_GTIMA4
+
+config N32H7_GTIMA4_PWM
+	bool "GTIMA4 PWM"
+	default n
+	depends on N32H7_PWM
+	---help---
+		Reserve GTIMA4 for use by PWM.
+
+if N32H7_GTIMA4_PWM
+
+config N32H7_GTIMA4_MODE
+	int "GTIMA4 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the GTIMA4 timer mode: 0=up, 1=down, 2=center1, 3=center2, 4=center3.
+
+if N32H7_PWM_MULTICHAN
+
+config N32H7_GTIMA4_CHANNEL1
+	bool "GTIMA4 Channel 1"
+	default n
+
+if N32H7_GTIMA4_CHANNEL1
+
+config N32H7_GTIMA4_CH1OUT
+	bool "GTIMA4 Channel 1 Output Enable"
+	default N32H7_GTIMA4_CHANNEL1
+	---help---
+		Enable output for GTIMA4 Channel 1. If disabled, the channel will not be used.
+
+config N32H7_GTIMA4_CH1MODE
+	int "GTIMA4 Channel 1 Mode"
+	default 6
+	depends on N32H7_GTIMA4_CH1OUT
+	range 0 9
+	---help---
+		GTIMA4 Channel 1 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA4_CH1POL
+	int "GTIMA4 Channel 1 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA4_CH1OUT
+	---help---
+		GTIMA4 Channel 1 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA4_CH1IDLE
+	int "GTIMA4 Channel 1 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA4_CH1OUT
+	---help---
+		GTIMA4 Channel 1 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA4_CHANNEL1
+
+config N32H7_GTIMA4_CHANNEL2
+	bool "GTIMA4 Channel 2"
+	default n
+
+if N32H7_GTIMA4_CHANNEL2
+
+config N32H7_GTIMA4_CH2OUT
+	bool "GTIMA4 Channel 2 Output Enable"
+	default N32H7_GTIMA4_CHANNEL2
+	---help---
+		Enable output for GTIMA4 Channel 2. If disabled, the channel will not be used.
+
+config N32H7_GTIMA4_CH2MODE
+	int "GTIMA4 Channel 2 Mode"
+	default 6
+	depends on N32H7_GTIMA4_CH2OUT
+	range 0 9
+	---help---
+		GTIMA4 Channel 2 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA4_CH2POL
+	int "GTIMA4 Channel 2 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA4_CH2OUT
+	---help---
+		GTIMA4 Channel 2 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA4_CH2IDLE
+	int "GTIMA4 Channel 2 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA4_CH2OUT
+	---help---
+		GTIMA4 Channel 2 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA4_CHANNEL2
+
+config N32H7_GTIMA4_CHANNEL3
+	bool "GTIMA4 Channel 3"
+	default n
+
+if N32H7_GTIMA4_CHANNEL3
+
+config N32H7_GTIMA4_CH3OUT
+	bool "GTIMA4 Channel 3 Output Enable"
+	default N32H7_GTIMA4_CHANNEL3
+	---help---
+		Enable output for GTIMA4 Channel 3. If disabled, the channel will not be used.
+
+config N32H7_GTIMA4_CH3MODE
+	int "GTIMA4 Channel 3 Mode"
+	default 6
+	depends on N32H7_GTIMA4_CH3OUT
+	range 0 9
+	---help---
+		GTIMA4 Channel 3 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA4_CH3POL
+	int "GTIMA4 Channel 3 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA4_CH3OUT
+	---help---
+		GTIMA4 Channel 3 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA4_CH3IDLE
+	int "GTIMA4 Channel 3 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA4_CH3OUT
+	---help---
+		GTIMA4 Channel 3 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA4_CHANNEL3
+
+config N32H7_GTIMA4_CHANNEL4
+	bool "GTIMA4 Channel 4"
+	default n
+
+if N32H7_GTIMA4_CHANNEL4
+
+config N32H7_GTIMA4_CH4OUT
+	bool "GTIMA4 Channel 4 Output Enable"
+	default N32H7_GTIMA4_CHANNEL4
+	---help---
+		Enable output for GTIMA4 Channel 4. If disabled, the channel will not be used.
+
+config N32H7_GTIMA4_CH4MODE
+	int "GTIMA4 Channel 4 Mode"
+	default 6
+	depends on N32H7_GTIMA4_CH4OUT
+	range 0 9
+	---help---
+		GTIMA4 Channel 4 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA4_CH4POL
+	int "GTIMA4 Channel 4 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA4_CH4OUT
+	---help---
+		GTIMA4 Channel 4 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA4_CH4IDLE
+	int "GTIMA4 Channel 4 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA4_CH4OUT
+	---help---
+		GTIMA4 Channel 4 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA4_CHANNEL4
+
+endif # N32H7_PWM_MULTICHAN
+
+if N32H7_PWM_MULTICHAN = n
+
+config N32H7_GTIMA4_CHANNEL
+	int "GTIMA4 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If GTIMA4 is enabled for PWM, specifies the timer output channel {1..4}.
+
+config N32H7_GTIMA4_CHMODE
+	int "GTIMA4 Channel Mode"
+	default 6
+	range 0 9
+	---help---
+		GTIMA4 channel mode. See enum n32_pwm_chanmode_e.
+
+endif # N32H7_PWM_MULTICHAN = n
+
+endif # N32H7_GTIMA4_PWM
+
+config N32H7_GTIMA4_QE
+	bool "GTIMA4 Quadrature Encoder"
+	default n
+	depends on SENSORS_QENCODER
+	---help---
+		Reserve GTIMA4 for use as a quadrature encoder interface.
+
+endif # N32H7_GTIMA4
+
+config N32H7_GTIMA5
+	bool "GTIMA5"
+	default n
+	---help---
+		Enable General-purpose Timer A GTIMA5.
+
+if N32H7_GTIMA5
+
+config N32H7_GTIMA5_PWM
+	bool "GTIMA5 PWM"
+	default n
+	depends on N32H7_PWM
+	---help---
+		Reserve GTIMA5 for use by PWM.
+
+if N32H7_GTIMA5_PWM
+
+config N32H7_GTIMA5_MODE
+	int "GTIMA5 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the GTIMA5 timer mode: 0=up, 1=down, 2=center1, 3=center2, 4=center3.
+
+if N32H7_PWM_MULTICHAN
+
+config N32H7_GTIMA5_CHANNEL1
+	bool "GTIMA5 Channel 1"
+	default n
+
+if N32H7_GTIMA5_CHANNEL1
+
+config N32H7_GTIMA5_CH1OUT
+	bool "GTIMA5 Channel 1 Output Enable"
+	default N32H7_GTIMA5_CHANNEL1
+	---help---
+		Enable output for GTIMA5 Channel 1. If disabled, the channel will not be used.
+
+config N32H7_GTIMA5_CH1MODE
+	int "GTIMA5 Channel 1 Mode"
+	default 6
+	depends on N32H7_GTIMA5_CH1OUT
+	range 0 9
+	---help---
+		GTIMA5 Channel 1 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA5_CH1POL
+	int "GTIMA5 Channel 1 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA5_CH1OUT
+	---help---
+		GTIMA5 Channel 1 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA5_CH1IDLE
+	int "GTIMA5 Channel 1 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA5_CH1OUT
+	---help---
+		GTIMA5 Channel 1 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA5_CHANNEL1
+
+config N32H7_GTIMA5_CHANNEL2
+	bool "GTIMA5 Channel 2"
+	default n
+
+if N32H7_GTIMA5_CHANNEL2
+
+config N32H7_GTIMA5_CH2OUT
+	bool "GTIMA5 Channel 2 Output Enable"
+	default N32H7_GTIMA5_CHANNEL2
+	---help---
+		Enable output for GTIMA5 Channel 2. If disabled, the channel will not be used.
+
+config N32H7_GTIMA5_CH2MODE
+	int "GTIMA5 Channel 2 Mode"
+	default 6
+	depends on N32H7_GTIMA5_CH2OUT
+	range 0 9
+	---help---
+		GTIMA5 Channel 2 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA5_CH2POL
+	int "GTIMA5 Channel 2 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA5_CH2OUT
+	---help---
+		GTIMA5 Channel 2 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA5_CH2IDLE
+	int "GTIMA5 Channel 2 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA5_CH2OUT
+	---help---
+		GTIMA5 Channel 2 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA5_CHANNEL2
+
+config N32H7_GTIMA5_CHANNEL3
+	bool "GTIMA5 Channel 3"
+	default n
+
+if N32H7_GTIMA5_CHANNEL3
+
+config N32H7_GTIMA5_CH3OUT
+	bool "GTIMA5 Channel 3 Output Enable"
+	default N32H7_GTIMA5_CHANNEL3
+	---help---
+		Enable output for GTIMA5 Channel 3. If disabled, the channel will not be used.
+
+config N32H7_GTIMA5_CH3MODE
+	int "GTIMA5 Channel 3 Mode"
+	default 6
+	depends on N32H7_GTIMA5_CH3OUT
+	range 0 9
+	---help---
+		GTIMA5 Channel 3 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA5_CH3POL
+	int "GTIMA5 Channel 3 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA5_CH3OUT
+	---help---
+		GTIMA5 Channel 3 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA5_CH3IDLE
+	int "GTIMA5 Channel 3 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA5_CH3OUT
+	---help---
+		GTIMA5 Channel 3 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA5_CHANNEL3
+
+config N32H7_GTIMA5_CHANNEL4
+	bool "GTIMA5 Channel 4"
+	default n
+
+if N32H7_GTIMA5_CHANNEL4
+
+config N32H7_GTIMA5_CH4OUT
+	bool "GTIMA5 Channel 4 Output Enable"
+	default N32H7_GTIMA5_CHANNEL4
+	---help---
+		Enable output for GTIMA5 Channel 4. If disabled, the channel will not be used.
+
+config N32H7_GTIMA5_CH4MODE
+	int "GTIMA5 Channel 4 Mode"
+	default 6
+	depends on N32H7_GTIMA5_CH4OUT
+	range 0 9
+	---help---
+		GTIMA5 Channel 4 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA5_CH4POL
+	int "GTIMA5 Channel 4 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA5_CH4OUT
+	---help---
+		GTIMA5 Channel 4 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA5_CH4IDLE
+	int "GTIMA5 Channel 4 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA5_CH4OUT
+	---help---
+		GTIMA5 Channel 4 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA5_CHANNEL4
+
+endif # N32H7_PWM_MULTICHAN
+
+if N32H7_PWM_MULTICHAN = n
+
+config N32H7_GTIMA5_CHANNEL
+	int "GTIMA5 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If GTIMA5 is enabled for PWM, specifies the timer output channel {1..4}.
+
+config N32H7_GTIMA5_CHMODE
+	int "GTIMA5 Channel Mode"
+	default 6
+	range 0 9
+	---help---
+		GTIMA5 channel mode. See enum n32_pwm_chanmode_e.
+
+endif # N32H7_PWM_MULTICHAN = n
+
+endif # N32H7_GTIMA5_PWM
+
+config N32H7_GTIMA5_QE
+	bool "GTIMA5 Quadrature Encoder"
+	default n
+	depends on SENSORS_QENCODER
+	---help---
+		Reserve GTIMA5 for use as a quadrature encoder interface.
+
+endif # N32H7_GTIMA5
+
+config N32H7_GTIMA6
+	bool "GTIMA6"
+	default n
+	---help---
+		Enable General-purpose Timer A GTIMA6.
+
+if N32H7_GTIMA6
+
+config N32H7_GTIMA6_PWM
+	bool "GTIMA6 PWM"
+	default n
+	depends on N32H7_PWM
+	---help---
+		Reserve GTIMA6 for use by PWM.
+
+if N32H7_GTIMA6_PWM
+
+config N32H7_GTIMA6_MODE
+	int "GTIMA6 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the GTIMA6 timer mode: 0=up, 1=down, 2=center1, 3=center2, 4=center3.
+
+if N32H7_PWM_MULTICHAN
+
+config N32H7_GTIMA6_CHANNEL1
+	bool "GTIMA6 Channel 1"
+	default n
+
+if N32H7_GTIMA6_CHANNEL1
+
+config N32H7_GTIMA6_CH1OUT
+	bool "GTIMA6 Channel 1 Output Enable"
+	default N32H7_GTIMA6_CHANNEL1
+	---help---
+		Enable output for GTIMA6 Channel 1. If disabled, the channel will not be used.
+
+config N32H7_GTIMA6_CH1MODE
+	int "GTIMA6 Channel 1 Mode"
+	default 6
+	depends on N32H7_GTIMA6_CH1OUT
+	range 0 9
+	---help---
+		GTIMA6 Channel 1 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA6_CH1POL
+	int "GTIMA6 Channel 1 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA6_CH1OUT
+	---help---
+		GTIMA6 Channel 1 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA6_CH1IDLE
+	int "GTIMA6 Channel 1 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA6_CH1OUT
+	---help---
+		GTIMA6 Channel 1 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA6_CHANNEL1
+
+config N32H7_GTIMA6_CHANNEL2
+	bool "GTIMA6 Channel 2"
+	default n
+
+if N32H7_GTIMA6_CHANNEL2
+
+config N32H7_GTIMA6_CH2OUT
+	bool "GTIMA6 Channel 2 Output Enable"
+	default N32H7_GTIMA6_CHANNEL2
+	---help---
+		Enable output for GTIMA6 Channel 2. If disabled, the channel will not be used.
+
+config N32H7_GTIMA6_CH2MODE
+	int "GTIMA6 Channel 2 Mode"
+	default 6
+	depends on N32H7_GTIMA6_CH2OUT
+	range 0 9
+	---help---
+		GTIMA6 Channel 2 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA6_CH2POL
+	int "GTIMA6 Channel 2 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA6_CH2OUT
+	---help---
+		GTIMA6 Channel 2 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA6_CH2IDLE
+	int "GTIMA6 Channel 2 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA6_CH2OUT
+	---help---
+		GTIMA6 Channel 2 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA6_CHANNEL2
+
+config N32H7_GTIMA6_CHANNEL3
+	bool "GTIMA6 Channel 3"
+	default n
+
+if N32H7_GTIMA6_CHANNEL3
+
+config N32H7_GTIMA6_CH3OUT
+	bool "GTIMA6 Channel 3 Output Enable"
+	default N32H7_GTIMA6_CHANNEL3
+	---help---
+		Enable output for GTIMA6 Channel 3. If disabled, the channel will not be used.
+
+config N32H7_GTIMA6_CH3MODE
+	int "GTIMA6 Channel 3 Mode"
+	default 6
+	depends on N32H7_GTIMA6_CH3OUT
+	range 0 9
+	---help---
+		GTIMA6 Channel 3 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA6_CH3POL
+	int "GTIMA6 Channel 3 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA6_CH3OUT
+	---help---
+		GTIMA6 Channel 3 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA6_CH3IDLE
+	int "GTIMA6 Channel 3 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA6_CH3OUT
+	---help---
+		GTIMA6 Channel 3 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA6_CHANNEL3
+
+config N32H7_GTIMA6_CHANNEL4
+	bool "GTIMA6 Channel 4"
+	default n
+
+if N32H7_GTIMA6_CHANNEL4
+
+config N32H7_GTIMA6_CH4OUT
+	bool "GTIMA6 Channel 4 Output Enable"
+	default N32H7_GTIMA6_CHANNEL4
+	---help---
+		Enable output for GTIMA6 Channel 4. If disabled, the channel will not be used.
+
+config N32H7_GTIMA6_CH4MODE
+	int "GTIMA6 Channel 4 Mode"
+	default 6
+	depends on N32H7_GTIMA6_CH4OUT
+	range 0 9
+	---help---
+		GTIMA6 Channel 4 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA6_CH4POL
+	int "GTIMA6 Channel 4 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA6_CH4OUT
+	---help---
+		GTIMA6 Channel 4 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA6_CH4IDLE
+	int "GTIMA6 Channel 4 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA6_CH4OUT
+	---help---
+		GTIMA6 Channel 4 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA6_CHANNEL4
+
+endif # N32H7_PWM_MULTICHAN
+
+if N32H7_PWM_MULTICHAN = n
+
+config N32H7_GTIMA6_CHANNEL
+	int "GTIMA6 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If GTIMA6 is enabled for PWM, specifies the timer output channel {1..4}.
+
+config N32H7_GTIMA6_CHMODE
+	int "GTIMA6 Channel Mode"
+	default 6
+	range 0 9
+	---help---
+		GTIMA6 channel mode. See enum n32_pwm_chanmode_e.
+
+endif # N32H7_PWM_MULTICHAN = n
+
+endif # N32H7_GTIMA6_PWM
+
+config N32H7_GTIMA6_QE
+	bool "GTIMA6 Quadrature Encoder"
+	default n
+	depends on SENSORS_QENCODER
+	---help---
+		Reserve GTIMA6 for use as a quadrature encoder interface.
+
+endif # N32H7_GTIMA6
+
+config N32H7_GTIMA7
+	bool "GTIMA7"
+	default n
+	---help---
+		Enable General-purpose Timer A GTIMA7.
+
+if N32H7_GTIMA7
+
+config N32H7_GTIMA7_PWM
+	bool "GTIMA7 PWM"
+	default n
+	depends on N32H7_PWM
+	---help---
+		Reserve GTIMA7 for use by PWM.
+
+if N32H7_GTIMA7_PWM
+
+config N32H7_GTIMA7_MODE
+	int "GTIMA7 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the GTIMA7 timer mode: 0=up, 1=down, 2=center1, 3=center2, 4=center3.
+
+if N32H7_PWM_MULTICHAN
+
+config N32H7_GTIMA7_CHANNEL1
+	bool "GTIMA7 Channel 1"
+	default n
+
+if N32H7_GTIMA7_CHANNEL1
+
+config N32H7_GTIMA7_CH1OUT
+	bool "GTIMA7 Channel 1 Output Enable"
+	default N32H7_GTIMA7_CHANNEL1
+	---help---
+		Enable output for GTIMA7 Channel 1. If disabled, the channel will not be used.
+
+config N32H7_GTIMA7_CH1MODE
+	int "GTIMA7 Channel 1 Mode"
+	default 6
+	depends on N32H7_GTIMA7_CH1OUT
+	range 0 9
+	---help---
+		GTIMA7 Channel 1 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA7_CH1POL
+	int "GTIMA7 Channel 1 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA7_CH1OUT
+	---help---
+		GTIMA7 Channel 1 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA7_CH1IDLE
+	int "GTIMA7 Channel 1 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA7_CH1OUT
+	---help---
+		GTIMA7 Channel 1 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA7_CHANNEL1
+
+config N32H7_GTIMA7_CHANNEL2
+	bool "GTIMA7 Channel 2"
+	default n
+
+if N32H7_GTIMA7_CHANNEL2
+
+config N32H7_GTIMA7_CH2OUT
+	bool "GTIMA7 Channel 2 Output Enable"
+	default N32H7_GTIMA7_CHANNEL2
+	---help---
+		Enable output for GTIMA7 Channel 2. If disabled, the channel will not be used.
+
+config N32H7_GTIMA7_CH2MODE
+	int "GTIMA7 Channel 2 Mode"
+	default 6
+	depends on N32H7_GTIMA7_CH2OUT
+	range 0 9
+	---help---
+		GTIMA7 Channel 2 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA7_CH2POL
+	int "GTIMA7 Channel 2 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA7_CH2OUT
+	---help---
+		GTIMA7 Channel 2 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA7_CH2IDLE
+	int "GTIMA7 Channel 2 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA7_CH2OUT
+	---help---
+		GTIMA7 Channel 2 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA7_CHANNEL2
+
+config N32H7_GTIMA7_CHANNEL3
+	bool "GTIMA7 Channel 3"
+	default n
+
+if N32H7_GTIMA7_CHANNEL3
+
+config N32H7_GTIMA7_CH3OUT
+	bool "GTIMA7 Channel 3 Output Enable"
+	default N32H7_GTIMA7_CHANNEL3
+	---help---
+		Enable output for GTIMA7 Channel 3. If disabled, the channel will not be used.
+
+config N32H7_GTIMA7_CH3MODE
+	int "GTIMA7 Channel 3 Mode"
+	default 6
+	depends on N32H7_GTIMA7_CH3OUT
+	range 0 9
+	---help---
+		GTIMA7 Channel 3 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA7_CH3POL
+	int "GTIMA7 Channel 3 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA7_CH3OUT
+	---help---
+		GTIMA7 Channel 3 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA7_CH3IDLE
+	int "GTIMA7 Channel 3 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA7_CH3OUT
+	---help---
+		GTIMA7 Channel 3 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA7_CHANNEL3
+
+config N32H7_GTIMA7_CHANNEL4
+	bool "GTIMA7 Channel 4"
+	default n
+
+if N32H7_GTIMA7_CHANNEL4
+
+config N32H7_GTIMA7_CH4OUT
+	bool "GTIMA7 Channel 4 Output Enable"
+	default N32H7_GTIMA7_CHANNEL4
+	---help---
+		Enable output for GTIMA7 Channel 4. If disabled, the channel will not be used.
+
+config N32H7_GTIMA7_CH4MODE
+	int "GTIMA7 Channel 4 Mode"
+	default 6
+	depends on N32H7_GTIMA7_CH4OUT
+	range 0 9
+	---help---
+		GTIMA7 Channel 4 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMA7_CH4POL
+	int "GTIMA7 Channel 4 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA7_CH4OUT
+	---help---
+		GTIMA7 Channel 4 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMA7_CH4IDLE
+	int "GTIMA7 Channel 4 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA7_CH4OUT
+	---help---
+		GTIMA7 Channel 4 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMA7_CHANNEL4
+
+endif # N32H7_PWM_MULTICHAN
+
+if N32H7_PWM_MULTICHAN = n
+
+config N32H7_GTIMA7_CHANNEL
+	int "GTIMA7 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If GTIMA7 is enabled for PWM, specifies the timer output channel {1..4}.
+
+config N32H7_GTIMA7_CHMODE
+	int "GTIMA7 Channel Mode"
+	default 6
+	range 0 9
+	---help---
+		GTIMA7 channel mode. See enum n32_pwm_chanmode_e.
+
+endif # N32H7_PWM_MULTICHAN = n
+
+endif # N32H7_GTIMA7_PWM
+
+config N32H7_GTIMA7_QE
+	bool "GTIMA7 Quadrature Encoder"
+	default n
+	depends on SENSORS_QENCODER
+	---help---
+		Reserve GTIMA7 for use as a quadrature encoder interface.
+
+endif # N32H7_GTIMA7
+
+endif # N32H7_TIMER_GTIMA
+
+if N32H7_TIMER_GTIMB
+
+config N32H7_GTIMB1
+	bool "GTIMB1"
+	default n
+	---help---
+		Enable General-purpose Timer B GTIMB1.
+
+if N32H7_GTIMB1
+
+config N32H7_GTIMB1_PWM
+	bool "GTIMB1 PWM"
+	default n
+	depends on N32H7_PWM
+	---help---
+		Reserve GTIMB1 for use by PWM.
+
+if N32H7_GTIMB1_PWM
+
+config N32H7_GTIMB1_MODE
+	int "GTIMB1 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the GTIMB1 timer mode: 0=up, 1=down, 2=center1, 3=center2, 4=center3.
+
+config N32H7_GTIMB1_LOCK
+	int "GTIMB1 Lock Level"
+	default 0
+	range 0 3
+	---help---
+		GTIMB1 BDTR lock level configuration.
+
+config N32H7_GTIMB1_TDTS
+	int "GTIMB1 t_DTS Division"
+	default 0
+	range 0 2
+	---help---
+		GTIMB1 dead-time and sampling clock division: 0=tCK_INT, 1=2*tCK_INT, 2=4*tCK_INT.
+
+config N32H7_GTIMB1_DEADTIME
+	int "GTIMB1 Initial Dead-time"
+	default 0
+	range 0 255
+	---help---
+		GTIMB1 initial dead-time value (0-255).
+
+config N32H7_GTIMB1_BREAK1
+	bool "GTIMB1 Break1 Enable"
+	default n
+	---help---
+		Enable Break1 input for GTIMB1.
+
+config N32H7_GTIMB1_BRK1POL
+	int "GTIMB1 Break1 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB1_BREAK1
+	---help---
+		GTIMB1 Break1 polarity: 0=active high, 1=active low.
+
+if N32H7_PWM_MULTICHAN
+
+config N32H7_GTIMB1_CHANNEL1
+	bool "GTIMB1 Channel 1"
+	default n
+
+if N32H7_GTIMB1_CHANNEL1
+
+config N32H7_GTIMB1_CH1OUT
+	bool "GTIMB1 Channel 1 Output Enable"
+	default N32H7_GTIMB1_CHANNEL1
+	---help---
+		Enable output for GTIMB1 Channel 1. If disabled, the channel will not be used.
+
+config N32H7_GTIMB1_CH1MODE
+	int "GTIMB1 Channel 1 Mode"
+	default 6
+	depends on N32H7_GTIMB1_CH1OUT
+	range 0 9
+	---help---
+		GTIMB1 Channel 1 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMB1_CH1POL
+	int "GTIMB1 Channel 1 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB1_CH1OUT
+	---help---
+		GTIMB1 Channel 1 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMB1_CH1IDLE
+	int "GTIMB1 Channel 1 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB1_CH1OUT
+	---help---
+		GTIMB1 Channel 1 idle state: 0=inactive, 1=active.
+
+config N32H7_GTIMB1_CH1NOUT
+	bool "GTIMB1 Channel 1 Complementary Output Enable"
+	default n
+	depends on N32H7_GTIMB1_CH1OUT
+	---help---
+		Enable complementary output for GTIMB1 Channel 1.
+
+config N32H7_GTIMB1_CH1NPOL
+	int "GTIMB1 Channel 1 Complementary Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB1_CH1NOUT
+	---help---
+		GTIMB1 Channel 1 complementary polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMB1_CH1NIDLE
+	int "GTIMB1 Channel 1 Complementary Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB1_CH1NOUT
+	---help---
+		GTIMB1 Channel 1 complementary idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMB1_CHANNEL1
+
+config N32H7_GTIMB1_CHANNEL2
+	bool "GTIMB1 Channel 2"
+	default n
+
+if N32H7_GTIMB1_CHANNEL2
+
+config N32H7_GTIMB1_CH2OUT
+	bool "GTIMB1 Channel 2 Output Enable"
+	default N32H7_GTIMB1_CHANNEL2
+	---help---
+		Enable output for GTIMB1 Channel 2. If disabled, the channel will not be used.
+
+config N32H7_GTIMB1_CH2MODE
+	int "GTIMB1 Channel 2 Mode"
+	default 6
+	depends on N32H7_GTIMB1_CH2OUT
+	range 0 9
+	---help---
+		GTIMB1 Channel 2 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMB1_CH2POL
+	int "GTIMB1 Channel 2 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB1_CH2OUT
+	---help---
+		GTIMB1 Channel 2 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMB1_CH2IDLE
+	int "GTIMB1 Channel 2 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB1_CH2OUT
+	---help---
+		GTIMB1 Channel 2 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMB1_CHANNEL2
+
+config N32H7_GTIMB1_CHANNEL3
+	bool "GTIMB1 Channel 3"
+	default n
+
+if N32H7_GTIMB1_CHANNEL3
+
+config N32H7_GTIMB1_CH3OUT
+	bool "GTIMB1 Channel 3 Output Enable"
+	default N32H7_GTIMB1_CHANNEL3
+	---help---
+		Enable output for GTIMB1 Channel 3. If disabled, the channel will not be used.
+
+config N32H7_GTIMB1_CH3MODE
+	int "GTIMB1 Channel 3 Mode"
+	default 6
+	depends on N32H7_GTIMB1_CH3OUT
+	range 0 9
+	---help---
+		GTIMB1 Channel 3 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMB1_CH3POL
+	int "GTIMB1 Channel 3 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB1_CH3OUT
+	---help---
+		GTIMB1 Channel 3 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMB1_CH3IDLE
+	int "GTIMB1 Channel 3 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB1_CH3OUT
+	---help---
+		GTIMB1 Channel 3 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMB1_CHANNEL3
+
+config N32H7_GTIMB1_CHANNEL4
+	bool "GTIMB1 Channel 4"
+	default n
+
+if N32H7_GTIMB1_CHANNEL4
+
+config N32H7_GTIMB1_CH4OUT
+	bool "GTIMB1 Channel 4 Output Enable"
+	default N32H7_GTIMB1_CHANNEL4
+	---help---
+		Enable output for GTIMB1 Channel 4. If disabled, the channel will not be used.
+
+config N32H7_GTIMB1_CH4MODE
+	int "GTIMB1 Channel 4 Mode"
+	default 6
+	depends on N32H7_GTIMB1_CH4OUT
+	range 0 9
+	---help---
+		GTIMB1 Channel 4 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMB1_CH4POL
+	int "GTIMB1 Channel 4 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB1_CH4OUT
+	---help---
+		GTIMB1 Channel 4 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMB1_CH4IDLE
+	int "GTIMB1 Channel 4 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB1_CH4OUT
+	---help---
+		GTIMB1 Channel 4 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMB1_CHANNEL4
+
+endif # N32H7_PWM_MULTICHAN
+
+if N32H7_PWM_MULTICHAN = n
+
+config N32H7_GTIMB1_CHANNEL
+	int "GTIMB1 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If GTIMB1 is enabled for PWM, specifies the timer output channel {1..4}.
+
+config N32H7_GTIMB1_CHMODE
+	int "GTIMB1 Channel Mode"
+	default 6
+	range 0 9
+	---help---
+		GTIMB1 channel mode. See enum n32_pwm_chanmode_e.
+
+endif # N32H7_PWM_MULTICHAN = n
+
+endif # N32H7_GTIMB1_PWM
+
+config N32H7_GTIMB1_QE
+	bool "GTIMB1 Quadrature Encoder"
+	default n
+	depends on SENSORS_QENCODER
+	---help---
+		Reserve GTIMB1 for use as a quadrature encoder interface.
+
+endif # N32H7_GTIMB1
+
+config N32H7_GTIMB2
+	bool "GTIMB2"
+	default n
+	---help---
+		Enable General-purpose Timer B GTIMB2.
+
+if N32H7_GTIMB2
+
+config N32H7_GTIMB2_PWM
+	bool "GTIMB2 PWM"
+	default n
+	depends on N32H7_PWM
+	---help---
+		Reserve GTIMB2 for use by PWM.
+
+if N32H7_GTIMB2_PWM
+
+config N32H7_GTIMB2_MODE
+	int "GTIMB2 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the GTIMB2 timer mode: 0=up, 1=down, 2=center1, 3=center2, 4=center3.
+
+config N32H7_GTIMB2_LOCK
+	int "GTIMB2 Lock Level"
+	default 0
+	range 0 3
+	---help---
+		GTIMB2 BDTR lock level configuration.
+
+config N32H7_GTIMB2_TDTS
+	int "GTIMB2 t_DTS Division"
+	default 0
+	range 0 2
+	---help---
+		GTIMB2 dead-time and sampling clock division: 0=tCK_INT, 1=2*tCK_INT, 2=4*tCK_INT.
+
+config N32H7_GTIMB2_DEADTIME
+	int "GTIMB2 Initial Dead-time"
+	default 0
+	range 0 255
+	---help---
+		GTIMB2 initial dead-time value (0-255).
+
+config N32H7_GTIMB2_BREAK1
+	bool "GTIMB2 Break1 Enable"
+	default n
+	---help---
+		Enable Break1 input for GTIMB2.
+
+config N32H7_GTIMB2_BRK1POL
+	int "GTIMB2 Break1 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB2_BREAK1
+	---help---
+		GTIMB2 Break1 polarity: 0=active high, 1=active low.
+
+if N32H7_PWM_MULTICHAN
+
+config N32H7_GTIMB2_CHANNEL1
+	bool "GTIMB2 Channel 1"
+	default n
+
+if N32H7_GTIMB2_CHANNEL1
+
+config N32H7_GTIMB2_CH1OUT
+	bool "GTIMB2 Channel 1 Output Enable"
+	default N32H7_GTIMB2_CHANNEL1
+	---help---
+		Enable output for GTIMB2 Channel 1. If disabled, the channel will not be used.
+
+config N32H7_GTIMB2_CH1MODE
+	int "GTIMB2 Channel 1 Mode"
+	default 6
+	depends on N32H7_GTIMB2_CH1OUT
+	range 0 9
+	---help---
+		GTIMB2 Channel 1 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMB2_CH1POL
+	int "GTIMB2 Channel 1 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB2_CH1OUT
+	---help---
+		GTIMB2 Channel 1 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMB2_CH1IDLE
+	int "GTIMB2 Channel 1 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB2_CH1OUT
+	---help---
+		GTIMB2 Channel 1 idle state: 0=inactive, 1=active.
+
+config N32H7_GTIMB2_CH1NOUT
+	bool "GTIMB2 Channel 1 Complementary Output Enable"
+	default n
+	depends on N32H7_GTIMB2_CH1OUT
+	---help---
+		Enable complementary output for GTIMB2 Channel 1.
+
+config N32H7_GTIMB2_CH1NPOL
+	int "GTIMB2 Channel 1 Complementary Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB2_CH1NOUT
+	---help---
+		GTIMB2 Channel 1 complementary polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMB2_CH1NIDLE
+	int "GTIMB2 Channel 1 Complementary Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB2_CH1NOUT
+	---help---
+		GTIMB2 Channel 1 complementary idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMB2_CHANNEL1
+
+config N32H7_GTIMB2_CHANNEL2
+	bool "GTIMB2 Channel 2"
+	default n
+
+if N32H7_GTIMB2_CHANNEL2
+
+config N32H7_GTIMB2_CH2OUT
+	bool "GTIMB2 Channel 2 Output Enable"
+	default N32H7_GTIMB2_CHANNEL2
+	---help---
+		Enable output for GTIMB2 Channel 2. If disabled, the channel will not be used.
+
+config N32H7_GTIMB2_CH2MODE
+	int "GTIMB2 Channel 2 Mode"
+	default 6
+	depends on N32H7_GTIMB2_CH2OUT
+	range 0 9
+	---help---
+		GTIMB2 Channel 2 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMB2_CH2POL
+	int "GTIMB2 Channel 2 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB2_CH2OUT
+	---help---
+		GTIMB2 Channel 2 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMB2_CH2IDLE
+	int "GTIMB2 Channel 2 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB2_CH2OUT
+	---help---
+		GTIMB2 Channel 2 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMB2_CHANNEL2
+
+config N32H7_GTIMB2_CHANNEL3
+	bool "GTIMB2 Channel 3"
+	default n
+
+if N32H7_GTIMB2_CHANNEL3
+
+config N32H7_GTIMB2_CH3OUT
+	bool "GTIMB2 Channel 3 Output Enable"
+	default N32H7_GTIMB2_CHANNEL3
+	---help---
+		Enable output for GTIMB2 Channel 3. If disabled, the channel will not be used.
+
+config N32H7_GTIMB2_CH3MODE
+	int "GTIMB2 Channel 3 Mode"
+	default 6
+	depends on N32H7_GTIMB2_CH3OUT
+	range 0 9
+	---help---
+		GTIMB2 Channel 3 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMB2_CH3POL
+	int "GTIMB2 Channel 3 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB2_CH3OUT
+	---help---
+		GTIMB2 Channel 3 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMB2_CH3IDLE
+	int "GTIMB2 Channel 3 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB2_CH3OUT
+	---help---
+		GTIMB2 Channel 3 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMB2_CHANNEL3
+
+config N32H7_GTIMB2_CHANNEL4
+	bool "GTIMB2 Channel 4"
+	default n
+
+if N32H7_GTIMB2_CHANNEL4
+
+config N32H7_GTIMB2_CH4OUT
+	bool "GTIMB2 Channel 4 Output Enable"
+	default N32H7_GTIMB2_CHANNEL4
+	---help---
+		Enable output for GTIMB2 Channel 4. If disabled, the channel will not be used.
+
+config N32H7_GTIMB2_CH4MODE
+	int "GTIMB2 Channel 4 Mode"
+	default 6
+	depends on N32H7_GTIMB2_CH4OUT
+	range 0 9
+	---help---
+		GTIMB2 Channel 4 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMB2_CH4POL
+	int "GTIMB2 Channel 4 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB2_CH4OUT
+	---help---
+		GTIMB2 Channel 4 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMB2_CH4IDLE
+	int "GTIMB2 Channel 4 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB2_CH4OUT
+	---help---
+		GTIMB2 Channel 4 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMB2_CHANNEL4
+
+endif # N32H7_PWM_MULTICHAN
+
+if N32H7_PWM_MULTICHAN = n
+
+config N32H7_GTIMB2_CHANNEL
+	int "GTIMB2 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If GTIMB2 is enabled for PWM, specifies the timer output channel {1..4}.
+
+config N32H7_GTIMB2_CHMODE
+	int "GTIMB2 Channel Mode"
+	default 6
+	range 0 9
+	---help---
+		GTIMB2 channel mode. See enum n32_pwm_chanmode_e.
+
+endif # N32H7_PWM_MULTICHAN = n
+
+endif # N32H7_GTIMB2_PWM
+
+config N32H7_GTIMB2_QE
+	bool "GTIMB2 Quadrature Encoder"
+	default n
+	depends on SENSORS_QENCODER
+	---help---
+		Reserve GTIMB2 for use as a quadrature encoder interface.
+
+endif # N32H7_GTIMB2
+
+config N32H7_GTIMB3
+	bool "GTIMB3"
+	default n
+	---help---
+		Enable General-purpose Timer B GTIMB3.
+
+if N32H7_GTIMB3
+
+config N32H7_GTIMB3_PWM
+	bool "GTIMB3 PWM"
+	default n
+	depends on N32H7_PWM
+	---help---
+		Reserve GTIMB3 for use by PWM.
+
+if N32H7_GTIMB3_PWM
+
+config N32H7_GTIMB3_MODE
+	int "GTIMB3 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the GTIMB3 timer mode: 0=up, 1=down, 2=center1, 3=center2, 4=center3.
+
+config N32H7_GTIMB3_LOCK
+	int "GTIMB3 Lock Level"
+	default 0
+	range 0 3
+	---help---
+		GTIMB3 BDTR lock level configuration.
+
+config N32H7_GTIMB3_TDTS
+	int "GTIMB3 t_DTS Division"
+	default 0
+	range 0 2
+	---help---
+		GTIMB3 dead-time and sampling clock division: 0=tCK_INT, 1=2*tCK_INT, 2=4*tCK_INT.
+
+config N32H7_GTIMB3_DEADTIME
+	int "GTIMB3 Initial Dead-time"
+	default 0
+	range 0 255
+	---help---
+		GTIMB3 initial dead-time value (0-255).
+
+config N32H7_GTIMB3_BREAK1
+	bool "GTIMB3 Break1 Enable"
+	default n
+	---help---
+		Enable Break1 input for GTIMB3.
+
+config N32H7_GTIMB3_BRK1POL
+	int "GTIMB3 Break1 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB3_BREAK1
+	---help---
+		GTIMB3 Break1 polarity: 0=active high, 1=active low.
+
+if N32H7_PWM_MULTICHAN
+
+config N32H7_GTIMB3_CHANNEL1
+	bool "GTIMB3 Channel 1"
+	default n
+
+if N32H7_GTIMB3_CHANNEL1
+
+config N32H7_GTIMB3_CH1OUT
+	bool "GTIMB3 Channel 1 Output Enable"
+	default N32H7_GTIMB3_CHANNEL1
+	---help---
+		Enable output for GTIMB3 Channel 1. If disabled, the channel will not be used.
+
+config N32H7_GTIMB3_CH1MODE
+	int "GTIMB3 Channel 1 Mode"
+	default 6
+	depends on N32H7_GTIMB3_CH1OUT
+	range 0 9
+	---help---
+		GTIMB3 Channel 1 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMB3_CH1POL
+	int "GTIMB3 Channel 1 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB3_CH1OUT
+	---help---
+		GTIMB3 Channel 1 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMB3_CH1IDLE
+	int "GTIMB3 Channel 1 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB3_CH1OUT
+	---help---
+		GTIMB3 Channel 1 idle state: 0=inactive, 1=active.
+
+config N32H7_GTIMB3_CH1NOUT
+	bool "GTIMB3 Channel 1 Complementary Output Enable"
+	default n
+	depends on N32H7_GTIMB3_CH1OUT
+	---help---
+		Enable complementary output for GTIMB3 Channel 1.
+
+config N32H7_GTIMB3_CH1NPOL
+	int "GTIMB3 Channel 1 Complementary Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB3_CH1NOUT
+	---help---
+		GTIMB3 Channel 1 complementary polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMB3_CH1NIDLE
+	int "GTIMB3 Channel 1 Complementary Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB3_CH1NOUT
+	---help---
+		GTIMB3 Channel 1 complementary idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMB3_CHANNEL1
+
+config N32H7_GTIMB3_CHANNEL2
+	bool "GTIMB3 Channel 2"
+	default n
+
+if N32H7_GTIMB3_CHANNEL2
+
+config N32H7_GTIMB3_CH2OUT
+	bool "GTIMB3 Channel 2 Output Enable"
+	default N32H7_GTIMB3_CHANNEL2
+	---help---
+		Enable output for GTIMB3 Channel 2. If disabled, the channel will not be used.
+
+config N32H7_GTIMB3_CH2MODE
+	int "GTIMB3 Channel 2 Mode"
+	default 6
+	depends on N32H7_GTIMB3_CH2OUT
+	range 0 9
+	---help---
+		GTIMB3 Channel 2 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMB3_CH2POL
+	int "GTIMB3 Channel 2 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB3_CH2OUT
+	---help---
+		GTIMB3 Channel 2 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMB3_CH2IDLE
+	int "GTIMB3 Channel 2 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB3_CH2OUT
+	---help---
+		GTIMB3 Channel 2 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMB3_CHANNEL2
+
+config N32H7_GTIMB3_CHANNEL3
+	bool "GTIMB3 Channel 3"
+	default n
+
+if N32H7_GTIMB3_CHANNEL3
+
+config N32H7_GTIMB3_CH3OUT
+	bool "GTIMB3 Channel 3 Output Enable"
+	default N32H7_GTIMB3_CHANNEL3
+	---help---
+		Enable output for GTIMB3 Channel 3. If disabled, the channel will not be used.
+
+config N32H7_GTIMB3_CH3MODE
+	int "GTIMB3 Channel 3 Mode"
+	default 6
+	depends on N32H7_GTIMB3_CH3OUT
+	range 0 9
+	---help---
+		GTIMB3 Channel 3 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMB3_CH3POL
+	int "GTIMB3 Channel 3 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB3_CH3OUT
+	---help---
+		GTIMB3 Channel 3 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMB3_CH3IDLE
+	int "GTIMB3 Channel 3 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB3_CH3OUT
+	---help---
+		GTIMB3 Channel 3 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMB3_CHANNEL3
+
+config N32H7_GTIMB3_CHANNEL4
+	bool "GTIMB3 Channel 4"
+	default n
+
+if N32H7_GTIMB3_CHANNEL4
+
+config N32H7_GTIMB3_CH4OUT
+	bool "GTIMB3 Channel 4 Output Enable"
+	default N32H7_GTIMB3_CHANNEL4
+	---help---
+		Enable output for GTIMB3 Channel 4. If disabled, the channel will not be used.
+
+config N32H7_GTIMB3_CH4MODE
+	int "GTIMB3 Channel 4 Mode"
+	default 6
+	depends on N32H7_GTIMB3_CH4OUT
+	range 0 9
+	---help---
+		GTIMB3 Channel 4 mode. See enum n32_pwm_chanmode_e.
+
+config N32H7_GTIMB3_CH4POL
+	int "GTIMB3 Channel 4 Polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB3_CH4OUT
+	---help---
+		GTIMB3 Channel 4 output polarity: 0=active high, 1=active low.
+
+config N32H7_GTIMB3_CH4IDLE
+	int "GTIMB3 Channel 4 Idle State"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB3_CH4OUT
+	---help---
+		GTIMB3 Channel 4 idle state: 0=inactive, 1=active.
+
+endif # N32H7_GTIMB3_CHANNEL4
+
+endif # N32H7_PWM_MULTICHAN
+
+if N32H7_PWM_MULTICHAN = n
+
+config N32H7_GTIMB3_CHANNEL
+	int "GTIMB3 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If GTIMB3 is enabled for PWM, specifies the timer output channel {1..4}.
+
+config N32H7_GTIMB3_CHMODE
+	int "GTIMB3 Channel Mode"
+	default 6
+	range 0 9
+	---help---
+		GTIMB3 channel mode. See enum n32_pwm_chanmode_e.
+
+endif # N32H7_PWM_MULTICHAN = n
+
+endif # N32H7_GTIMB3_PWM
+
+config N32H7_GTIMB3_QE
+	bool "GTIMB3 Quadrature Encoder"
+	default n
+	depends on SENSORS_QENCODER
+	---help---
+		Reserve GTIMB3 for use as a quadrature encoder interface.
+
+endif # N32H7_GTIMB3
+
+endif # N32H7_TIMER_GTIMB
+
+if N32H7_TIMER_BASIC
+
+config N32H7_BTIM1
+	bool "BTIM1"
+	default n
+	---help---
+		Enable Basic Timer BTIM1. BTIM timers are 32-bit.
+
+config N32H7_BTIM2
+	bool "BTIM2"
+	default n
+	---help---
+		Enable Basic Timer BTIM2. BTIM timers are 32-bit.
+
+config N32H7_BTIM3
+	bool "BTIM3"
+	default n
+	---help---
+		Enable Basic Timer BTIM3. BTIM timers are 32-bit.
+
+config N32H7_BTIM4
+	bool "BTIM4"
+	default n
+	---help---
+		Enable Basic Timer BTIM4. BTIM timers are 32-bit.
+
+endif # N32H7_TIMER_BASIC
+
+config N32H7_PWM
+	bool "PWM support"
+	default n
+	select PWM
+	---help---
+		Enable PWM support for N32H7 timers.
+
+config N32H7_PWM_LL_OPS
+	bool "PWM low-level operations"
+	default n
+	depends on N32H7_PWM
+	---help---
+		Enable low-level PWM ops for direct register access.
+
+config N32H7_PWM_MULTICHAN
+	bool "PWM Multiple Output Channels"
+	default n
+	depends on N32H7_PWM
+	select ARCH_HAVE_PWM_MULTICHAN
+	---help---
+		Specifies that the PWM driver supports multiple output
+		channels per timer.
+
+menu "N32H7 TIMx Outputs Configuration"
+	depends on N32H7_PWM
+
+config N32H7_ATIM1_CH1POL
+	int "ATIM1 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH1OUT
+
+config N32H7_ATIM1_CH1IDLE
+	int "ATIM1 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH1OUT
+
+config N32H7_ATIM1_CH1NPOL
+	int "ATIM1 Channel 1 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH1NOUT
+
+config N32H7_ATIM1_CH1NIDLE
+	int "ATIM1 Channel 1 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH1NOUT
+
+config N32H7_ATIM1_CH2POL
+	int "ATIM1 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH2OUT
+
+config N32H7_ATIM1_CH2IDLE
+	int "ATIM1 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH2OUT
+
+config N32H7_ATIM1_CH3POL
+	int "ATIM1 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH3OUT
+
+config N32H7_ATIM1_CH3IDLE
+	int "ATIM1 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH3OUT
+
+config N32H7_ATIM1_CH4POL
+	int "ATIM1 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH4OUT
+
+config N32H7_ATIM1_CH4IDLE
+	int "ATIM1 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM1_CH4OUT
+
+config N32H7_ATIM2_CH1POL
+	int "ATIM2 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH1OUT
+
+config N32H7_ATIM2_CH1IDLE
+	int "ATIM2 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH1OUT
+
+config N32H7_ATIM2_CH1NPOL
+	int "ATIM2 Channel 1 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH1NOUT
+
+config N32H7_ATIM2_CH1NIDLE
+	int "ATIM2 Channel 1 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH1NOUT
+
+config N32H7_ATIM2_CH2POL
+	int "ATIM2 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH2OUT
+
+config N32H7_ATIM2_CH2IDLE
+	int "ATIM2 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH2OUT
+
+config N32H7_ATIM2_CH3POL
+	int "ATIM2 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH3OUT
+
+config N32H7_ATIM2_CH3IDLE
+	int "ATIM2 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH3OUT
+
+config N32H7_ATIM2_CH4POL
+	int "ATIM2 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH4OUT
+
+config N32H7_ATIM2_CH4IDLE
+	int "ATIM2 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM2_CH4OUT
+
+config N32H7_ATIM3_CH1POL
+	int "ATIM3 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH1OUT
+
+config N32H7_ATIM3_CH1IDLE
+	int "ATIM3 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH1OUT
+
+config N32H7_ATIM3_CH1NPOL
+	int "ATIM3 Channel 1 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH1NOUT
+
+config N32H7_ATIM3_CH1NIDLE
+	int "ATIM3 Channel 1 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH1NOUT
+
+config N32H7_ATIM3_CH2POL
+	int "ATIM3 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH2OUT
+
+config N32H7_ATIM3_CH2IDLE
+	int "ATIM3 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH2OUT
+
+config N32H7_ATIM3_CH3POL
+	int "ATIM3 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH3OUT
+
+config N32H7_ATIM3_CH3IDLE
+	int "ATIM3 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH3OUT
+
+config N32H7_ATIM3_CH4POL
+	int "ATIM3 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH4OUT
+
+config N32H7_ATIM3_CH4IDLE
+	int "ATIM3 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM3_CH4OUT
+
+config N32H7_ATIM4_CH1POL
+	int "ATIM4 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH1OUT
+
+config N32H7_ATIM4_CH1IDLE
+	int "ATIM4 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH1OUT
+
+config N32H7_ATIM4_CH1NPOL
+	int "ATIM4 Channel 1 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH1NOUT
+
+config N32H7_ATIM4_CH1NIDLE
+	int "ATIM4 Channel 1 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH1NOUT
+
+config N32H7_ATIM4_CH2POL
+	int "ATIM4 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH2OUT
+
+config N32H7_ATIM4_CH2IDLE
+	int "ATIM4 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH2OUT
+
+config N32H7_ATIM4_CH3POL
+	int "ATIM4 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH3OUT
+
+config N32H7_ATIM4_CH3IDLE
+	int "ATIM4 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH3OUT
+
+config N32H7_ATIM4_CH4POL
+	int "ATIM4 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH4OUT
+
+config N32H7_ATIM4_CH4IDLE
+	int "ATIM4 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_ATIM4_CH4OUT
+
+config N32H7_GTIMA1_CH1POL
+	int "GTIMA1 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA1_CH1OUT
+
+config N32H7_GTIMA1_CH1IDLE
+	int "GTIMA1 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA1_CH1OUT
+
+config N32H7_GTIMA1_CH2POL
+	int "GTIMA1 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA1_CH2OUT
+
+config N32H7_GTIMA1_CH2IDLE
+	int "GTIMA1 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA1_CH2OUT
+
+config N32H7_GTIMA1_CH3POL
+	int "GTIMA1 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA1_CH3OUT
+
+config N32H7_GTIMA1_CH3IDLE
+	int "GTIMA1 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA1_CH3OUT
+
+config N32H7_GTIMA1_CH4POL
+	int "GTIMA1 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA1_CH4OUT
+
+config N32H7_GTIMA1_CH4IDLE
+	int "GTIMA1 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA1_CH4OUT
+
+config N32H7_GTIMA2_CH1POL
+	int "GTIMA2 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA2_CH1OUT
+
+config N32H7_GTIMA2_CH1IDLE
+	int "GTIMA2 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA2_CH1OUT
+
+config N32H7_GTIMA2_CH2POL
+	int "GTIMA2 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA2_CH2OUT
+
+config N32H7_GTIMA2_CH2IDLE
+	int "GTIMA2 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA2_CH2OUT
+
+config N32H7_GTIMA2_CH3POL
+	int "GTIMA2 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA2_CH3OUT
+
+config N32H7_GTIMA2_CH3IDLE
+	int "GTIMA2 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA2_CH3OUT
+
+config N32H7_GTIMA2_CH4POL
+	int "GTIMA2 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA2_CH4OUT
+
+config N32H7_GTIMA2_CH4IDLE
+	int "GTIMA2 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA2_CH4OUT
+
+config N32H7_GTIMA3_CH1POL
+	int "GTIMA3 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA3_CH1OUT
+
+config N32H7_GTIMA3_CH1IDLE
+	int "GTIMA3 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA3_CH1OUT
+
+config N32H7_GTIMA3_CH2POL
+	int "GTIMA3 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA3_CH2OUT
+
+config N32H7_GTIMA3_CH2IDLE
+	int "GTIMA3 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA3_CH2OUT
+
+config N32H7_GTIMA3_CH3POL
+	int "GTIMA3 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA3_CH3OUT
+
+config N32H7_GTIMA3_CH3IDLE
+	int "GTIMA3 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA3_CH3OUT
+
+config N32H7_GTIMA3_CH4POL
+	int "GTIMA3 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA3_CH4OUT
+
+config N32H7_GTIMA3_CH4IDLE
+	int "GTIMA3 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA3_CH4OUT
+
+config N32H7_GTIMA4_CH1POL
+	int "GTIMA4 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA4_CH1OUT
+
+config N32H7_GTIMA4_CH1IDLE
+	int "GTIMA4 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA4_CH1OUT
+
+config N32H7_GTIMA4_CH2POL
+	int "GTIMA4 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA4_CH2OUT
+
+config N32H7_GTIMA4_CH2IDLE
+	int "GTIMA4 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA4_CH2OUT
+
+config N32H7_GTIMA4_CH3POL
+	int "GTIMA4 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA4_CH3OUT
+
+config N32H7_GTIMA4_CH3IDLE
+	int "GTIMA4 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA4_CH3OUT
+
+config N32H7_GTIMA4_CH4POL
+	int "GTIMA4 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA4_CH4OUT
+
+config N32H7_GTIMA4_CH4IDLE
+	int "GTIMA4 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA4_CH4OUT
+
+config N32H7_GTIMA5_CH1POL
+	int "GTIMA5 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA5_CH1OUT
+
+config N32H7_GTIMA5_CH1IDLE
+	int "GTIMA5 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA5_CH1OUT
+
+config N32H7_GTIMA5_CH2POL
+	int "GTIMA5 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA5_CH2OUT
+
+config N32H7_GTIMA5_CH2IDLE
+	int "GTIMA5 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA5_CH2OUT
+
+config N32H7_GTIMA5_CH3POL
+	int "GTIMA5 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA5_CH3OUT
+
+config N32H7_GTIMA5_CH3IDLE
+	int "GTIMA5 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA5_CH3OUT
+
+config N32H7_GTIMA5_CH4POL
+	int "GTIMA5 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA5_CH4OUT
+
+config N32H7_GTIMA5_CH4IDLE
+	int "GTIMA5 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA5_CH4OUT
+
+config N32H7_GTIMA6_CH1POL
+	int "GTIMA6 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA6_CH1OUT
+
+config N32H7_GTIMA6_CH1IDLE
+	int "GTIMA6 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA6_CH1OUT
+
+config N32H7_GTIMA6_CH2POL
+	int "GTIMA6 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA6_CH2OUT
+
+config N32H7_GTIMA6_CH2IDLE
+	int "GTIMA6 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA6_CH2OUT
+
+config N32H7_GTIMA6_CH3POL
+	int "GTIMA6 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA6_CH3OUT
+
+config N32H7_GTIMA6_CH3IDLE
+	int "GTIMA6 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA6_CH3OUT
+
+config N32H7_GTIMA6_CH4POL
+	int "GTIMA6 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA6_CH4OUT
+
+config N32H7_GTIMA6_CH4IDLE
+	int "GTIMA6 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA6_CH4OUT
+
+config N32H7_GTIMA7_CH1POL
+	int "GTIMA7 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA7_CH1OUT
+
+config N32H7_GTIMA7_CH1IDLE
+	int "GTIMA7 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA7_CH1OUT
+
+config N32H7_GTIMA7_CH2POL
+	int "GTIMA7 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA7_CH2OUT
+
+config N32H7_GTIMA7_CH2IDLE
+	int "GTIMA7 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA7_CH2OUT
+
+config N32H7_GTIMA7_CH3POL
+	int "GTIMA7 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA7_CH3OUT
+
+config N32H7_GTIMA7_CH3IDLE
+	int "GTIMA7 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA7_CH3OUT
+
+config N32H7_GTIMA7_CH4POL
+	int "GTIMA7 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA7_CH4OUT
+
+config N32H7_GTIMA7_CH4IDLE
+	int "GTIMA7 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMA7_CH4OUT
+
+config N32H7_GTIMB1_CH1POL
+	int "GTIMB1 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB1_CH1OUT
+
+config N32H7_GTIMB1_CH1IDLE
+	int "GTIMB1 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB1_CH1OUT
+
+config N32H7_GTIMB1_CH1NPOL
+	int "GTIMB1 Channel 1 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB1_CH1NOUT
+
+config N32H7_GTIMB1_CH1NIDLE
+	int "GTIMB1 Channel 1 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB1_CH1NOUT
+
+config N32H7_GTIMB1_CH2POL
+	int "GTIMB1 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB1_CH2OUT
+
+config N32H7_GTIMB1_CH2IDLE
+	int "GTIMB1 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB1_CH2OUT
+
+config N32H7_GTIMB1_CH3POL
+	int "GTIMB1 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB1_CH3OUT
+
+config N32H7_GTIMB1_CH3IDLE
+	int "GTIMB1 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB1_CH3OUT
+
+config N32H7_GTIMB1_CH4POL
+	int "GTIMB1 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB1_CH4OUT
+
+config N32H7_GTIMB1_CH4IDLE
+	int "GTIMB1 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB1_CH4OUT
+
+config N32H7_GTIMB2_CH1POL
+	int "GTIMB2 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB2_CH1OUT
+
+config N32H7_GTIMB2_CH1IDLE
+	int "GTIMB2 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB2_CH1OUT
+
+config N32H7_GTIMB2_CH1NPOL
+	int "GTIMB2 Channel 1 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB2_CH1NOUT
+
+config N32H7_GTIMB2_CH1NIDLE
+	int "GTIMB2 Channel 1 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB2_CH1NOUT
+
+config N32H7_GTIMB2_CH2POL
+	int "GTIMB2 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB2_CH2OUT
+
+config N32H7_GTIMB2_CH2IDLE
+	int "GTIMB2 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB2_CH2OUT
+
+config N32H7_GTIMB2_CH3POL
+	int "GTIMB2 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB2_CH3OUT
+
+config N32H7_GTIMB2_CH3IDLE
+	int "GTIMB2 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB2_CH3OUT
+
+config N32H7_GTIMB2_CH4POL
+	int "GTIMB2 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB2_CH4OUT
+
+config N32H7_GTIMB2_CH4IDLE
+	int "GTIMB2 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB2_CH4OUT
+
+config N32H7_GTIMB3_CH1POL
+	int "GTIMB3 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB3_CH1OUT
+
+config N32H7_GTIMB3_CH1IDLE
+	int "GTIMB3 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB3_CH1OUT
+
+config N32H7_GTIMB3_CH1NPOL
+	int "GTIMB3 Channel 1 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB3_CH1NOUT
+
+config N32H7_GTIMB3_CH1NIDLE
+	int "GTIMB3 Channel 1 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB3_CH1NOUT
+
+config N32H7_GTIMB3_CH2POL
+	int "GTIMB3 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB3_CH2OUT
+
+config N32H7_GTIMB3_CH2IDLE
+	int "GTIMB3 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB3_CH2OUT
+
+config N32H7_GTIMB3_CH3POL
+	int "GTIMB3 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB3_CH3OUT
+
+config N32H7_GTIMB3_CH3IDLE
+	int "GTIMB3 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB3_CH3OUT
+
+config N32H7_GTIMB3_CH4POL
+	int "GTIMB3 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB3_CH4OUT
+
+config N32H7_GTIMB3_CH4IDLE
+	int "GTIMB3 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on N32H7_GTIMB3_CH4OUT
+
+endmenu # N32H7 TIMx Outputs Configuration
+
+endmenu # Timer Configuration
+
+menuconfig N32H7_CAPTURE
+    bool "Timer Input Capture support"
+    select CAPTURE
+    default n
+    ---help---
+        Enable input capture support for N32H7 timers.
+
+if N32H7_CAPTURE
+
+config N32H7_ATIM1_CAP
+    bool "ATIM1 Capture"
+    default n
+    ---help---
+        Enable input capture on ATIM1.
+
+if N32H7_ATIM1_CAP
+config N32H7_ATIM1_CHANNEL
+    int "Capture channel (1 or 2)"
+    default 1
+    range 1 2
+    ---help---
+        Select the input capture channel (only 1 or 2 are supported for PWM input).
+
+config N32H7_ATIM1_CLOCK
+    int "Timer counting frequency (Hz)"
+    default 1000000
+    ---help---
+        Actual clock frequency after prescaler. This affects resolution and range.
+        Higher frequency gives better resolution but shorter maximum period.
+
+endif # N32H7_ATIM1_CAP
+
+config N32H7_ATIM2_CAP
+    bool "ATIM2 Capture"
+    default n
+    ---help---
+        Enable input capture on ATIM2.
+
+if N32H7_ATIM2_CAP
+config N32H7_ATIM2_CHANNEL
+    int "Capture channel (1 or 2)"
+    default 1
+    range 1 2
+    ---help---
+        Select the input capture channel (only 1 or 2 are supported for PWM input).
+
+config N32H7_ATIM2_CLOCK
+    int "Timer counting frequency (Hz)"
+    default 1000000
+    ---help---
+        Actual clock frequency after prescaler. This affects resolution and range.
+        Higher frequency gives better resolution but shorter maximum period.
+
+endif # N32H7_ATIM2_CAP
+
+config N32H7_ATIM3_CAP
+    bool "ATIM3 Capture"
+    default n
+    ---help---
+        Enable input capture on ATIM3.
+
+if N32H7_ATIM3_CAP
+config N32H7_ATIM3_CHANNEL
+    int "Capture channel (1 or 2)"
+    default 1
+    range 1 2
+    ---help---
+        Select the input capture channel (only 1 or 2 are supported for PWM input).
+
+config N32H7_ATIM3_CLOCK
+    int "Timer counting frequency (Hz)"
+    default 1000000
+    ---help---
+        Actual clock frequency after prescaler. This affects resolution and range.
+        Higher frequency gives better resolution but shorter maximum period.
+
+endif # N32H7_ATIM3_CAP
+
+config N32H7_ATIM4_CAP
+    bool "ATIM4 Capture"
+    default n
+    ---help---
+        Enable input capture on ATIM4.
+
+if N32H7_ATIM4_CAP
+config N32H7_ATIM4_CHANNEL
+    int "Capture channel (1 or 2)"
+    default 1
+    range 1 2
+    ---help---
+        Select the input capture channel (only 1 or 2 are supported for PWM input).
+
+config N32H7_ATIM4_CLOCK
+    int "Timer counting frequency (Hz)"
+    default 1000000
+    ---help---
+        Actual clock frequency after prescaler. This affects resolution and range.
+        Higher frequency gives better resolution but shorter maximum period.
+
+endif # N32H7_ATIM4_CAP
+
+config N32H7_GTIMA1_CAP
+    bool "GTIMA1 Capture"
+    default n
+    ---help---
+        Enable input capture on GTIMA1.
+
+if N32H7_GTIMA1_CAP
+config N32H7_GTIMA1_CHANNEL
+    int "Capture channel (1 or 2)"
+    default 1
+    range 1 2
+    ---help---
+        Select the input capture channel (only 1 or 2 are supported for PWM input).
+
+config N32H7_GTIMA1_CLOCK
+    int "Timer counting frequency (Hz)"
+    default 1000000
+    ---help---
+        Actual clock frequency after prescaler. This affects resolution and range.
+        Higher frequency gives better resolution but shorter maximum period.
+
+endif # N32H7_GTIMA1_CAP
+
+config N32H7_GTIMA2_CAP
+    bool "GTIMA2 Capture"
+    default n
+    ---help---
+        Enable input capture on GTIMA2.
+
+if N32H7_GTIMA2_CAP
+config N32H7_GTIMA2_CHANNEL
+    int "Capture channel (1 or 2)"
+    default 1
+    range 1 2
+    ---help---
+        Select the input capture channel (only 1 or 2 are supported for PWM input).
+
+config N32H7_GTIMA2_CLOCK
+    int "Timer counting frequency (Hz)"
+    default 1000000
+    ---help---
+        Actual clock frequency after prescaler. This affects resolution and range.
+        Higher frequency gives better resolution but shorter maximum period.
+
+endif # N32H7_GTIMA2_CAP
+
+config N32H7_GTIMA3_CAP
+    bool "GTIMA3 Capture"
+    default n
+    ---help---
+        Enable input capture on GTIMA3.
+
+if N32H7_GTIMA3_CAP
+config N32H7_GTIMA3_CHANNEL
+    int "Capture channel (1 or 2)"
+    default 1
+    range 1 2
+    ---help---
+        Select the input capture channel (only 1 or 2 are supported for PWM input).
+
+config N32H7_GTIMA3_CLOCK
+    int "Timer counting frequency (Hz)"
+    default 1000000
+    ---help---
+        Actual clock frequency after prescaler. This affects resolution and range.
+        Higher frequency gives better resolution but shorter maximum period.
+
+endif # N32H7_GTIMA3_CAP
+
+config N32H7_GTIMA4_CAP
+    bool "GTIMA4 Capture"
+    default n
+    ---help---
+        Enable input capture on GTIMA4.
+
+if N32H7_GTIMA4_CAP
+config N32H7_GTIMA4_CHANNEL
+    int "Capture channel (1 or 2)"
+    default 1
+    range 1 2
+    ---help---
+        Select the input capture channel (only 1 or 2 are supported for PWM input).
+
+config N32H7_GTIMA4_CLOCK
+    int "Timer counting frequency (Hz)"
+    default 1000000
+    ---help---
+        Actual clock frequency after prescaler. This affects resolution and range.
+        Higher frequency gives better resolution but shorter maximum period.
+
+endif # N32H7_GTIMA4_CAP
+
+config N32H7_GTIMA5_CAP
+    bool "GTIMA5 Capture"
+    default n
+    ---help---
+        Enable input capture on GTIMA5.
+
+if N32H7_GTIMA5_CAP
+config N32H7_GTIMA5_CHANNEL
+    int "Capture channel (1 or 2)"
+    default 1
+    range 1 2
+    ---help---
+        Select the input capture channel (only 1 or 2 are supported for PWM input).
+
+config N32H7_GTIMA5_CLOCK
+    int "Timer counting frequency (Hz)"
+    default 1000000
+    ---help---
+        Actual clock frequency after prescaler. This affects resolution and range.
+        Higher frequency gives better resolution but shorter maximum period.
+
+endif # N32H7_GTIMA5_CAP
+
+config N32H7_GTIMA6_CAP
+    bool "GTIMA6 Capture"
+    default n
+    ---help---
+        Enable input capture on GTIMA6.
+
+if N32H7_GTIMA6_CAP
+config N32H7_GTIMA6_CHANNEL
+    int "Capture channel (1 or 2)"
+    default 1
+    range 1 2
+    ---help---
+        Select the input capture channel (only 1 or 2 are supported for PWM input).
+
+config N32H7_GTIMA6_CLOCK
+    int "Timer counting frequency (Hz)"
+    default 1000000
+    ---help---
+        Actual clock frequency after prescaler. This affects resolution and range.
+        Higher frequency gives better resolution but shorter maximum period.
+
+endif # N32H7_GTIMA6_CAP
+
+config N32H7_GTIMA7_CAP
+    bool "GTIMA7 Capture"
+    default n
+    ---help---
+        Enable input capture on GTIMA7.
+
+if N32H7_GTIMA7_CAP
+config N32H7_GTIMA7_CHANNEL
+    int "Capture channel (1 or 2)"
+    default 1
+    range 1 2
+    ---help---
+        Select the input capture channel (only 1 or 2 are supported for PWM input).
+
+config N32H7_GTIMA7_CLOCK
+    int "Timer counting frequency (Hz)"
+    default 1000000
+    ---help---
+        Actual clock frequency after prescaler. This affects resolution and range.
+        Higher frequency gives better resolution but shorter maximum period.
+
+endif # N32H7_GTIMA7_CAP
+
+config N32H7_GTIMB1_CAP
+    bool "GTIMB1 Capture"
+    default n
+    ---help---
+        Enable input capture on GTIMB1.
+
+if N32H7_GTIMB1_CAP
+config N32H7_GTIMB1_CHANNEL
+    int "Capture channel (1 or 2)"
+    default 1
+    range 1 2
+    ---help---
+        Select the input capture channel (only 1 or 2 are supported for PWM input).
+
+config N32H7_GTIMB1_CLOCK
+    int "Timer counting frequency (Hz)"
+    default 1000000
+    ---help---
+        Actual clock frequency after prescaler. This affects resolution and range.
+        Higher frequency gives better resolution but shorter maximum period.
+
+endif # N32H7_GTIMB1_CAP
+
+config N32H7_GTIMB2_CAP
+    bool "GTIMB2 Capture"
+    default n
+    ---help---
+        Enable input capture on GTIMB2.
+
+if N32H7_GTIMB2_CAP
+config N32H7_GTIMB2_CHANNEL
+    int "Capture channel (1 or 2)"
+    default 1
+    range 1 2
+    ---help---
+        Select the input capture channel (only 1 or 2 are supported for PWM input).
+
+config N32H7_GTIMB2_CLOCK
+    int "Timer counting frequency (Hz)"
+    default 1000000
+    ---help---
+        Actual clock frequency after prescaler. This affects resolution and range.
+        Higher frequency gives better resolution but shorter maximum period.
+
+endif # N32H7_GTIMB2_CAP
+
+config N32H7_GTIMB3_CAP
+    bool "GTIMB3 Capture"
+    default n
+    ---help---
+        Enable input capture on GTIMB3.
+
+if N32H7_GTIMB3_CAP
+config N32H7_GTIMB3_CHANNEL
+    int "Capture channel (1 or 2)"
+    default 1
+    range 1 2
+    ---help---
+        Select the input capture channel (only 1 or 2 are supported for PWM input).
+
+config N32H7_GTIMB3_CLOCK
+    int "Timer counting frequency (Hz)"
+    default 1000000
+    ---help---
+        Actual clock frequency after prescaler. This affects resolution and range.
+        Higher frequency gives better resolution but shorter maximum period.
+
+endif # N32H7_GTIMB3_CAP
+endif # N32H7_CAPTURE
+
+endif # ARCH_CHIP_N32H7
