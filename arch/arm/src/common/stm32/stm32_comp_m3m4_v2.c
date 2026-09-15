@@ -764,6 +764,7 @@ static int comp_config(struct stm32_comp_s *priv)
 
   comp_putreg_csr(priv, regval);
 
+#ifndef CONFIG_STM32_COMP_INIT_DISABLED
   /* Enable Comparator */
 
   comp_enable(priv, true);
@@ -774,6 +775,7 @@ static int comp_config(struct stm32_comp_s *priv)
     {
       comp_lock_set(priv, true);
     }
+#endif
 
   return OK;
 }
@@ -918,8 +920,41 @@ static int comp_read(struct comp_dev_s *dev)
 #ifdef CONFIG_COMP
 static int comp_ioctl(struct comp_dev_s *dev, int cmd, unsigned long arg)
 {
-#warning "Missing logic"
-  return -ENOTTY;
+  FAR struct stm32_comp_s *priv = (FAR struct stm32_comp_s *)dev->ad_priv;
+  int ret = OK;
+
+  switch (cmd)
+    {
+      case ANIOC_COMP_ENABLE:
+        {
+          /* Enable comparator */
+
+          ret = comp_enable(priv, true);
+          if (ret == OK && priv->lock)
+            {
+              comp_lock_set(priv, true);
+            }
+
+          break;
+        }
+
+      case ANIOC_COMP_DISABLE:
+        {
+          /* Disable comparator */
+
+          ret = comp_enable(priv, false);
+          break;
+        }
+
+      default:
+        {
+          aerr("ERROR: Unknown cmd: %d\n", cmd);
+          ret = -ENOTTY;
+          break;
+        }
+    }
+
+  return ret;
 }
 #endif
 
@@ -954,57 +989,57 @@ struct comp_dev_s *stm32_compinitialize(int intf)
   switch (intf)
     {
 #ifdef CONFIG_STM32_COMP1
-    case 1:
-      ainfo("COMP1 selected\n");
-      dev = &g_comp1dev;
-      break;
+      case 1:
+        ainfo("COMP1 selected\n");
+        dev = &g_comp1dev;
+        break;
 #endif
 
 #ifdef CONFIG_STM32_COMP2
-    case 2:
-      ainfo("COMP2 selected\n");
-      dev = &g_comp2dev;
-      break;
+      case 2:
+        ainfo("COMP2 selected\n");
+        dev = &g_comp2dev;
+        break;
 #endif
 
 #ifdef CONFIG_STM32_COMP3
-    case 3:
-      ainfo("COMP3 selected\n");
-      dev = &g_comp3dev;
-      break;
+      case 3:
+        ainfo("COMP3 selected\n");
+        dev = &g_comp3dev;
+        break;
 #endif
 
 #ifdef CONFIG_STM32_COMP4
-    case 4:
-      ainfo("COMP4 selected\n");
-      dev = &g_comp4dev;
-      break;
+      case 4:
+        ainfo("COMP4 selected\n");
+        dev = &g_comp4dev;
+        break;
 #endif
 
 #ifdef CONFIG_STM32_COMP5
-    case 5:
-      ainfo("COMP5 selected\n");
-      dev = &g_comp5dev;
-      break;
+      case 5:
+        ainfo("COMP5 selected\n");
+        dev = &g_comp5dev;
+        break;
 #endif
 
 #ifdef CONFIG_STM32_COMP6
-    case 6:
-      ainfo("COMP6 selected\n");
-      dev = &g_comp6dev;
-      break;
+      case 6:
+        ainfo("COMP6 selected\n");
+        dev = &g_comp6dev;
+        break;
 #endif
 
 #ifdef CONFIG_STM32_COMP7
-    case 7:
-      ainfo("COMP7 selected\n");
-      dev = &g_comp7dev;
-      break;
+      case 7:
+        ainfo("COMP7 selected\n");
+        dev = &g_comp7dev;
+        break;
 #endif
 
-    default:
-      aerr("ERROR: No COMP interface defined\n");
-      return NULL;
+      default:
+        aerr("ERROR: No COMP interface defined\n");
+        return NULL;
     }
 
   /* Configure selected comparator */
