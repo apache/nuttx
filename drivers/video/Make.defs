@@ -28,6 +28,10 @@ ifeq ($(CONFIG_VIDEO_FB),y)
   CSRCS += fb.c
 endif
 
+ifeq ($(CONFIG_VIDEO_VFB),y)
+  CSRCS += vfb.c
+endif
+
 ifeq ($(CONFIG_VIDEO_STREAM),y)
   CSRCS += v4l2_core.c video_framebuff.c v4l2_cap.c v4l2_m2m.c
 endif
