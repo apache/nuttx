@@ -323,11 +323,37 @@ err:
 
 static int openeth_ifup(struct netdev_lowerhalf_s *dev)
 {
+  struct openeth_priv_s *priv = (struct openeth_priv_s *)dev;
+  int i;
   irqstate_t flags;
 
   /* Disable the Ethernet interrupt */
 
   flags = enter_critical_section();
+
+  /* Re-arm every descriptor and rewind the ring index to 0.  QEMU's
+   * OpenCores MAC model resets its DMA ring pointer to descriptor 0
+   * whenever RXEN toggles off and back on, but priv->cur_rx_desc is
+   * only ever initialized once, in esp_openeth_initialize().  After
+   * the first ifdown/ifup cycle the two disagree permanently and
+   * openeth_receive() silently drops every RX notification.
+   */
+
+  for (i = 0; i < RX_BUF_COUNT; i++)
+    {
+      openeth_init_rx_desc(openeth_rx_desc(i), priv->rx_buf[i]);
+    }
+
+  openeth_rx_desc(RX_BUF_COUNT - 1)->wr = 1;
+  priv->cur_rx_desc = 0;
+
+  for (i = 0; i < TX_BUF_COUNT; i++)
+    {
+      openeth_init_tx_desc(openeth_tx_desc(i), priv->tx_buf[i]);
+    }
+
+  openeth_tx_desc(TX_BUF_COUNT - 1)->wr = 1;
+  priv->cur_tx_desc = 0;
 
   /* Enable TX and RX */
 
