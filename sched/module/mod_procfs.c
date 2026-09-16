@@ -28,7 +28,6 @@
 
 #include <sys/stat.h>
 
-#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -136,15 +135,15 @@ static int modprocfs_callback(FAR struct module_s *modp, FAR void *arg)
   DEBUGASSERT(modp != NULL && arg != NULL);
   priv = (FAR struct modprocfs_file_s *)arg;
 
-  linesize = snprintf(priv->line, MOD_LINELEN,
-                      "%s,%p,%p,%u,%p,%lu,%p,%lu\n",
-                      modp->modname,
-                      modp->modinfo.uninitializer, modp->modinfo.arg,
-                      modp->modinfo.nexports,
-                      modp->textalloc,
-                      (unsigned long)modp->textsize,
-                      (FAR uint8_t *)modp->dataalloc,
-                      (unsigned long)modp->datasize);
+  linesize = procfs_snprintf(priv->line, MOD_LINELEN,
+                             "%s,%p,%p,%u,%p,%lu,%p,%lu\n",
+                             modp->modname,
+                             modp->modinfo.uninitializer, modp->modinfo.arg,
+                             modp->modinfo.nexports,
+                             modp->textalloc,
+                             (unsigned long)modp->textsize,
+                             (FAR uint8_t *)modp->dataalloc,
+                             (unsigned long)modp->datasize);
   copysize = procfs_memcpy(priv->line, linesize, priv->buffer,
                            priv->remaining, &priv->offset);
   priv->totalsize += copysize;
