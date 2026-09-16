@@ -164,9 +164,15 @@ static bool g_hr_timer_enabled = false;
 
 #endif /* CONFIG_RTC_DRIVER */
 
-/* Saved data for persistent RTC time */
+/* Saved data for persistent RTC time.  Chips without RTC retention memory
+ * keep it in DRAM, so the saved time does not survive deep sleep.
+ */
 
+#ifdef SOC_RTC_MEM_SUPPORTED
 static RTC_DATA_ATTR struct esp_rtc_backup_s g_rtc_saved_data;
+#else
+static struct esp_rtc_backup_s g_rtc_saved_data;
+#endif
 static struct esp_rtc_backup_s *g_rtc_save;
 
 /****************************************************************************
@@ -326,6 +332,7 @@ static int esp_rtc_rdtime(struct rtc_lowerhalf_s *lower,
   if (gmtime_r(&timer, (struct tm *)rtctime) == 0)
     {
       int errcode = get_errno();
+
       DEBUGASSERT(errcode > 0);
 
       rtcerr("gmtime_r failed: %d\n", errcode);
@@ -949,6 +956,7 @@ int esp_rtc_driverinit(void)
   struct rtc_lowerhalf_s *lower = (struct rtc_lowerhalf_s *)&g_rtc_lowerhalf;
 
   int ret = rtc_initialize(0, lower);
+
   if (ret < 0)
     {
       return ret;
