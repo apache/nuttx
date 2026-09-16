@@ -362,10 +362,15 @@ static int pty_close(FAR struct file *filep)
       return ret;
     }
 
-  /* Check if the decremented inode reference count would go to zero */
+  /* Check if the decremented inode reference count would go to zero.  A
+   * device still in the VFS namespace holds one reference for its
+   * registration, so its last open reference is the second one.  The master
+   * of a SUSv1 pair is the exception: ptmx_open() unlinks it as soon as it
+   * has opened it, leaving the open itself as the only reference.
+   */
 
-  if ((!dev->pd_master && atomic_read(&inode->i_crefs) == 2) ||
-       (dev->pd_master && atomic_read(&inode->i_crefs) == 1))
+  if (atomic_read(&inode->i_crefs) ==
+      ((dev->pd_master && devpair->pp_susv1) ? 1 : 2))
     {
       /* Did the (single) master just close its reference? */
 
