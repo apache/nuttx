@@ -313,8 +313,7 @@ static uint32_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
 
   if (pstate)
     {
-#if (defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)) \
-     || defined(CONFIG_NET_TIMESTAMP)
+#if defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)
       struct can_conn_s *conn = pstate->pr_conn;
 #endif
 

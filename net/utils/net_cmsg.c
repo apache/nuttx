@@ -110,6 +110,7 @@ void cmsg_store_timestamp(FAR struct msghdr *msg,
   if (_SO_GETOPT(opt, SO_TIMESTAMP))
     {
       struct timeval tv;
+
       TIMESPEC_TO_TIMEVAL(&tv, tstamp);
       cmsg_append(msg, SOL_SOCKET, SO_TIMESTAMP, &tv,
                   sizeof(struct timeval));
