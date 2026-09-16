@@ -1828,12 +1828,27 @@ int mtdconfig_unregister_by_path(FAR const char *path)
 
   inode = file.f_inode;
   dev = inode->i_private;
+
+  /* Close the file before freeing the private device structure. */
+
+  ret = file_close(&file);
+  if (ret < 0)
+    {
+      ferr("ERROR: close %s failed: %d\n", path, ret);
+      return ret;
+    }
+
+  /* Free the private device structure only after unregistering the driver. */
+
+  ret = unregister_driver(path);
+  if (ret < 0)
+    {
+      ferr("ERROR: unregister %s failed: %d\n", path, ret);
+      return ret;
+    }
+
   nxmutex_destroy(&dev->lock);
   kmm_free(dev);
-
-  file_close(&file);
-
-  unregister_driver(path);
 
   return OK;
 }
