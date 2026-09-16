@@ -240,6 +240,8 @@ int libelf_remove(FAR void *handle)
 
   /* And free the registry entry */
 
+  lib_free(modp);
+
   return ret;
 
 errout_with_lock:
