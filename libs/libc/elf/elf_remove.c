@@ -81,17 +81,19 @@ int libelf_uninit(FAR struct module_s *modp)
           return ret;
         }
 
-      libelf_freesymtab(modp);
-
       /* Nullify so that the uninitializer cannot be called again */
 
       modp->modinfo.uninitializer = NULL;
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
       modp->modinfo.arg           = NULL;
-      modp->modinfo.exports       = NULL;
-      modp->modinfo.nexports      = 0;
-#endif
     }
+
+  /* Free the symbol table that the module exports.  It is built for
+   * every loaded module, whether or not it has an uninitializer.
+   */
+
+  libelf_freesymtab(modp);
+  modp->modinfo.exports  = NULL;
+  modp->modinfo.nexports = 0;
 
   /* Release resources held by the module */
 
