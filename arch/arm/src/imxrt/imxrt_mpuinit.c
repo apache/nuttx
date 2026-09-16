@@ -269,6 +269,80 @@ void imxrt_mpu_initialize(void)
                                             * Not Shareable
                                             * No Subregion disable       */
                        );
+#  elif defined(CONFIG_ARCH_FAMILY_IMXRT118x)
+  uint32_t regval;
+  uint32_t region;
+
+  /* Deny access by default to prevent speculative accesses outside the
+   * explicitly mapped RT118x address ranges (Arm erratum 1013783-B).
+   */
+
+  mpu_reset();
+  region = mpu_allocregion();
+  DEBUGASSERT(region == 0);
+
+  putreg32(region, MPU_RNR);
+  putreg32(region | MPU_RBAR_VALID, MPU_RBAR);
+
+  regval = MPU_RASR_ENABLE        |
+           MPU_RASR_SIZE_LOG2(32) |
+           MPU_RASR_TEX_SO        |
+           MPU_RASR_AP_NONO       |
+           MPU_RASR_XN;
+  putreg32(regval, MPU_RASR);
+
+  /* Map the external and internal peripheral spaces as device memory. */
+
+  mpu_configure_region(IMXRT_SEMC0_BASE, IMXRT_SEMC0_SIZE,
+                       MPU_RASR_TEX_DEV |
+                       MPU_RASR_AP_RWRW |
+                       MPU_RASR_XN);
+
+  mpu_configure_region(IMXRT_M7_SYSTEM_BASE, IMXRT_M7_SYSTEM_SIZE,
+                       MPU_RASR_TEX_DEV |
+                       MPU_RASR_AP_RWRW |
+                       MPU_RASR_XN);
+
+  /* Higher-numbered regions override the device mapping for executable and
+   * cacheable memories.
+   */
+
+  mpu_configure_region(IMXRT_M7_ROM_BASE, IMXRT_M7_ROM_SIZE,
+                       MPU_RASR_TEX_NOR |
+                       MPU_RASR_C       |
+                       MPU_RASR_B       |
+                       MPU_RASR_AP_RORO);
+
+  mpu_configure_region(IMXRT_ITCM_BASE, 256 * 1024,
+                       MPU_RASR_TEX_NOR |
+                       RASR_C_VALUE     |
+                       RASR_B_VALUE     |
+                       MPU_RASR_AP_RWRW);
+
+  mpu_configure_region(IMXRT_DTCM_BASE, 256 * 1024,
+                       MPU_RASR_TEX_NOR |
+                       RASR_C_VALUE     |
+                       RASR_B_VALUE     |
+                       MPU_RASR_AP_RWRW);
+
+  mpu_configure_region(IMXRT_OCRAM1_BASE, 512 * 1024,
+                       MPU_RASR_TEX_NOR |
+                       RASR_C_VALUE     |
+                       RASR_B_VALUE     |
+                       MPU_RASR_AP_RWRW);
+
+  mpu_configure_region(IMXRT_OCRAM2_BASE, 256 * 1024,
+                       MPU_RASR_TEX_NOR |
+                       RASR_C_VALUE     |
+                       RASR_B_VALUE     |
+                       MPU_RASR_AP_RWRW);
+
+  mpu_configure_region(IMXRT_FLEXSPI1_XIP_BASE, 128 * 1024 * 1024,
+                       MPU_RASR_TEX_NOR |
+                       MPU_RASR_C       |
+                       MPU_RASR_B       |
+                       MPU_RASR_AP_RORO);
+
 #  else
 
   mpu_reset();

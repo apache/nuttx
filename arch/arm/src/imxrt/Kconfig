@@ -117,6 +117,7 @@ config ARCH_CHIP_MIMXRT1189CVM8C
 	select ARMV7M_HAVE_STACKCHECK
 	select ARMV7M_ITCM
 	select ARMV7M_DTCM
+	select ARM_MPU
 	---help---
 		Target the Cortex-M7 core on the RT1189 SoC.
 
