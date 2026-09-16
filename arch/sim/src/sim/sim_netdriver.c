@@ -317,12 +317,14 @@ static int netdriver_rmmac(struct netdev_lowerhalf_s *dev,
 static void netdriver_txdone_interrupt(void *priv)
 {
   struct netdev_lowerhalf_s *dev = (struct netdev_lowerhalf_s *)priv;
+
   netdev_lower_txdone(dev);
 }
 
 static void netdriver_rxready_interrupt(void *priv)
 {
   struct netdev_lowerhalf_s *dev = (struct netdev_lowerhalf_s *)priv;
+
   netdev_lower_rxready(dev);
 }
 
@@ -415,6 +417,7 @@ void sim_netdriver_setmtu(int devidx, int mtu)
 void sim_netdriver_loop(void)
 {
   int devidx;
+
   for (devidx = 0; devidx < CONFIG_SIM_NETDEV_NUMBER; devidx++)
     {
       if (sim_netdev_avail(devidx)

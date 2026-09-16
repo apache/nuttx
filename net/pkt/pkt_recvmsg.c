@@ -384,8 +384,6 @@ static inline int pkt_readdata(FAR struct pkt_recvfrom_s *pstate,
     {
       DEBUGASSERT(iob->io_pktlen > 0);
 
-
-
       /* Copy to user */
 
       if (pstate->pr_type == SOCK_DGRAM)
