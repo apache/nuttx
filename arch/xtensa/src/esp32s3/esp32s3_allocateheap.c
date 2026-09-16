@@ -96,6 +96,17 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 
   utop  = ALIGN_DOWN(ets_rom_layout_p->dram0_rtos_reserved_start, 256);
 
+#  elif defined(CONFIG_BUILD_KERNEL)
+  /* There is no single user heap in a kernel build:  each task group grows
+   * its own out of the page pool as it is created.  nx_start() knows this
+   * and never asks -- MM_KERNEL_USRHEAP_INIT is undefined for BUILD_KERNEL
+   * -- so report an empty heap and let the assertion below catch it if this
+   * ever is reached.
+   */
+
+  ubase = 0;
+  utop  = 0;
+
 #  elif defined(CONFIG_BUILD_FLAT)
 #    ifdef MM_USER_HEAP_EXTRAM
   ubase = (uintptr_t)esp_spiram_allocable_vaddr_start();
@@ -160,6 +171,16 @@ void up_allocate_kheap(void **heap_start, size_t *heap_size)
 
   kbase = (uintptr_t)_sheap;
   ktop  = KDRAM_END;
+#elif defined(CONFIG_BUILD_KERNEL)
+  /* A kernel build has a single kernel heap and one user heap per task
+   * group, the latter grown out of the page pool by pgalloc().  So the whole
+   * internal DRAM heap belongs to the kernel here, whether or not PSRAM is
+   * fitted:  PSRAM backs the page pool, not this heap.
+   */
+
+  kbase = (uintptr_t)_sheap + XTENSA_IMEM_REGION_SIZE;
+  ktop  = (uintptr_t)ets_rom_layout_p->dram0_rtos_reserved_start;
+
 #elif defined(CONFIG_BUILD_FLAT)
 #  ifdef MM_USER_HEAP_IRAM
   /* Skip internal heap region if CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP is

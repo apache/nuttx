@@ -45,6 +45,56 @@
  * Public Types
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_ADDRENV
+#ifndef __ASSEMBLY__
+
+/* The ESP32-S3 has no general paging MMU and no per-process page-table root.
+ * External memory (PSRAM) is reached through a single global cache-MMU remap
+ * table with separate instruction-bus (.text) and data-bus (.data/.bss/heap)
+ * address windows, at 64 KB page granularity.  An address environment is
+ * therefore described not by a page-table root (no satp/TTBR equivalent) but
+ * by the set of physical PSRAM pages that back the process plus the fixed
+ * virtual window bases.  up_addrenv_select() makes an environment active by
+ * reprogramming the cache-MMU window entries to point at these pages,
+ * invalidating the cache, and reprogramming the PMS split lines that gate
+ * WORLD1 (user) access -- with a fast path when the incoming environment is
+ * already the active one (thread<->thread, ISR, syscall).
+ */
+
+struct arch_addrenv_s
+{
+  /* Virtual bases and heap size.  Returned by up_addrenv_vtext/vdata/vheap
+   * and up_addrenv_heapsize.  .text maps through the instruction-bus window,
+   * .data/.bss and the heap through the data-bus window.
+   */
+
+  uintptr_t textvbase;
+  uintptr_t datavbase;
+  uintptr_t heapvbase;
+  size_t    heapsize;
+
+  /* Physical PSRAM page addresses backing each region -- one 64 KB page per
+   * entry, allocated from the PSRAM page pool by up_addrenv_create().
+   * Index i of a region backs virtual page i counted from that region's
+   * vbase.
+   */
+
+  uintptr_t textpages[CONFIG_ARCH_TEXT_NPAGES];
+  uintptr_t datapages[CONFIG_ARCH_DATA_NPAGES];
+  uintptr_t heappages[CONFIG_ARCH_HEAP_NPAGES];
+
+  /* Number of pages actually allocated in each region */
+
+  uint16_t  ntext;
+  uint16_t  ndata;
+  uint16_t  nheap;
+};
+
+typedef struct arch_addrenv_s arch_addrenv_t;
+
+#endif /* __ASSEMBLY__ */
+#endif /* CONFIG_ARCH_ADDRENV */
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
