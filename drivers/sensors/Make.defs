@@ -354,6 +354,10 @@ else
 endif
 endif
 
+ifeq ($(CONFIG_SENSORS_TC74),y)
+  CSRCS += tc74.c
+endif
+
 endif # CONFIG_I2C
 
 # These drivers depend on SPI support

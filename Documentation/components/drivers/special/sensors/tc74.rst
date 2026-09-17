@@ -1,0 +1,46 @@
+====
+TC74
+====
+
+The TC74 is a Microchip serial digital thermal sensor, specified from
+-40°C to +125°C, with an eight-bit reading of 1°C a count. Factory-programmed
+I2C addresses range from 0x48 through 0x4f (suffixes A0 through A7), allowing
+up to eight parts on the same bus.
+
+This driver uses the :doc:`uorb
+</components/drivers/special/sensors/sensors_uorb>` interface, so the reading
+appears as a topic the common sensor tools can read.
+
+Application Programming Interface
+=================================
+
+The header file for the TC74 driver interface can be included using:
+
+.. code-block:: c
+
+   #include <nuttx/sensors/tc74.h>
+
+Registering the driver creates one topic, ``sensor_temp<n>``, where ``n`` is
+the ``devno`` passed in:
+
+.. code-block:: c
+
+   int tc74_register(int devno, FAR struct i2c_master_s *i2c, uint8_t addr);
+
+For example, a part with address 0x4d (TC74A5) on I2C bus 0, published as
+``sensor_temp0``:
+
+.. code-block:: c
+
+   FAR struct i2c_master_s *i2c = board_i2cbus_initialize(0);
+
+   tc74_register(0, i2c, TC74_ADDR_A5);
+
+Reading
+=======
+
+The driver polls on the low priority work queue at whatever interval a
+consumer asks for. When activated (for example when an application subscribes
+to the sensor topic), the driver wakes the part up from standby mode. When
+deactivated (when all subscribers close the topic), it places the part back
+into low-power standby mode to save energy.
