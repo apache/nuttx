@@ -27,7 +27,6 @@
 #include <nuttx/config.h>
 
 #include <sys/mount.h>
-#include <sys/statfs.h>
 #include <stdbool.h>
 #include <errno.h>
 #include <assert.h>
@@ -63,13 +62,11 @@
  *
  ****************************************************************************/
 
-static int umount_all_handler(FAR const char *mountpoint,
-                              FAR struct statfs *statbuf, FAR void *arg)
+static int umount_all_handler(FAR const char *mountpoint, FAR void *arg)
 {
   int ret;
 
   UNUSED(arg);
-  UNUSED(statbuf);
 
   /* Force-unmount the mountpoint.  nx_umount2() re-resolves the path and
    * flushes (syncfs) before unbind under the inode write lock that

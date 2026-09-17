@@ -26,8 +26,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/statfs.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -67,23 +65,20 @@ static int mountpoint_filter(FAR struct inode *node,
                              FAR char dirpath[PATH_MAX], FAR void *arg)
 {
   FAR struct enum_mountpoint_s *info = (FAR struct enum_mountpoint_s *)arg;
-  struct statfs statbuf;
   int pathlen;
   int namlen;
   int ret = OK;
 
   DEBUGASSERT(node && info && info->handler);
 
-  /* Check if the inode is a mountpoint.  Mountpoints must support statfs.
-   * If this one does not for some reason, then it will be ignored.
-   *
-   * The root node is a special case: It has no operations (u.i_mops == NULL)
+  /* Forward the mountpoint path only; callers needing statfs query it
+   * themselves.
    */
 
-  if (INODE_IS_MOUNTPT(node) && node->u.i_mops && node->u.i_mops->statfs)
+  if (INODE_IS_MOUNTPT(node))
     {
-      /* Yes... get the full path to the inode by concatenating the inode
-       * name and the path to the directory containing the inode.
+      /* Get the full path to the inode by concatenating the inode name and
+       * the path to the directory containing the inode.
        */
 
       pathlen = strnlen(dirpath, PATH_MAX);
@@ -100,15 +95,9 @@ static int mountpoint_filter(FAR struct inode *node,
 
       snprintf(&dirpath[pathlen], PATH_MAX - pathlen, "/%s", node->i_name);
 
-      /* Get the status of the file system */
+      /* Pass the full path to the handler */
 
-      memset(&statbuf, 0, sizeof(struct statfs));
-      if (node->u.i_mops->statfs(node, &statbuf) == OK)
-        {
-          /* And pass the full path and file system status to the handler */
-
-          ret = info->handler(dirpath, &statbuf, info->arg);
-        }
+      ret = info->handler(dirpath, info->arg);
 
       /* Truncate the path name back to the correct length */
 

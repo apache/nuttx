@@ -106,16 +106,13 @@ struct mount_info_s
 static void    mount_sprintf(FAR struct mount_info_s *info,
                              FAR const char *fmt, ...) printf_like(2, 3);
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MOUNT
-static int     mount_entry(FAR const char *mountpoint,
-                           FAR struct statfs *statbuf, FAR void *arg);
+static int     mount_entry(FAR const char *mountpoint, FAR void *arg);
 #endif
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_BLOCKS
-static int     blocks_entry(FAR const char *mountpoint,
-                            FAR struct statfs *statbuf, FAR void *arg);
+static int     blocks_entry(FAR const char *mountpoint, FAR void *arg);
 #endif
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_USAGE
-static int     usage_entry(FAR const char *mountpoint,
-                           FAR struct statfs *statbuf, FAR void *arg);
+static int     usage_entry(FAR const char *mountpoint, FAR void *arg);
 #endif
 
 /* File system methods */
@@ -212,17 +209,26 @@ static void mount_sprintf(FAR struct mount_info_s *info,
  ****************************************************************************/
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MOUNT
-static int mount_entry(FAR const char *mountpoint,
-                       FAR struct statfs *statbuf, FAR void *arg)
+static int mount_entry(FAR const char *mountpoint, FAR void *arg)
 {
   FAR struct mount_info_s *info = (FAR struct mount_info_s *)arg;
   FAR const char *fstype;
+  struct statfs statbuf;
 
-  DEBUGASSERT(mountpoint != NULL && statbuf != NULL && info != NULL);
+  DEBUGASSERT(mountpoint != NULL && info != NULL);
+
+  /* Query the file system here (the traversal only hands us the path).
+   * Skip this entry if it cannot be stat'ed.
+   */
+
+  if (statfs(mountpoint, &statbuf) < 0)
+    {
+      return OK;
+    }
 
   /* Get the file system type */
 
-  fstype = fs_gettype(statbuf);
+  fstype = fs_gettype(&statbuf);
 
   /* Generate mount list one line at a time */
 
@@ -243,12 +249,21 @@ static int mount_entry(FAR const char *mountpoint,
  ****************************************************************************/
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_BLOCKS
-static int blocks_entry(FAR const char *mountpoint,
-                        FAR struct statfs *statbuf, FAR void *arg)
+static int blocks_entry(FAR const char *mountpoint, FAR void *arg)
 {
   FAR struct mount_info_s *info = (FAR struct mount_info_s *)arg;
+  struct statfs statbuf;
 
-  DEBUGASSERT(mountpoint != NULL && statbuf != NULL && info != NULL);
+  DEBUGASSERT(mountpoint != NULL && info != NULL);
+
+  /* Query the file system here (the traversal only hands us the path).
+   * Skip this entry if it cannot be stat'ed.
+   */
+
+  if (statfs(mountpoint, &statbuf) < 0)
+    {
+      return OK;
+    }
 
   /* Have we generated the header yet? */
 
@@ -265,8 +280,8 @@ static int blocks_entry(FAR const char *mountpoint,
 
   mount_sprintf(info, "%6zu %10" PRIuOFF " %10" PRIuOFF
                 "  %10" PRIuOFF " %s\n",
-                statbuf->f_bsize, statbuf->f_blocks,
-                statbuf->f_blocks - statbuf->f_bavail, statbuf->f_bavail,
+                statbuf.f_bsize, statbuf.f_blocks,
+                statbuf.f_blocks - statbuf.f_bavail, statbuf.f_bavail,
                 mountpoint);
 
   return (info->totalsize >= info->buflen) ? 1 : 0;
@@ -285,11 +300,11 @@ static int blocks_entry(FAR const char *mountpoint,
  ****************************************************************************/
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_USAGE
-static int usage_entry(FAR const char *mountpoint,
-                       FAR struct statfs *statbuf, FAR void *arg)
+static int usage_entry(FAR const char *mountpoint, FAR void *arg)
 {
   FAR struct mount_info_s *info = (FAR struct mount_info_s *)arg;
   FAR const char *fstype;
+  struct statfs statbuf;
   fsblkcnt_t size;
   fsblkcnt_t used;
   fsblkcnt_t free;
@@ -302,7 +317,16 @@ static int usage_entry(FAR const char *mountpoint,
     'B', 'K', 'M', 'G', 'T'
   };
 
-  DEBUGASSERT(mountpoint != NULL && statbuf != NULL && info != NULL);
+  DEBUGASSERT(mountpoint != NULL && info != NULL);
+
+  /* Query the file system here (the traversal only hands us the path).
+   * Skip this entry if it cannot be stat'ed.
+   */
+
+  if (statfs(mountpoint, &statbuf) < 0)
+    {
+      return OK;
+    }
 
   /* Have we generated the header yet? */
 
@@ -315,10 +339,10 @@ static int usage_entry(FAR const char *mountpoint,
 
   /* Get the file system type */
 
-  fstype = fs_gettype(statbuf);
+  fstype = fs_gettype(&statbuf);
 
-  size = statbuf->f_bsize * statbuf->f_blocks;
-  free = statbuf->f_bsize * statbuf->f_bavail;
+  size = statbuf.f_bsize * statbuf.f_blocks;
+  free = statbuf.f_bsize * statbuf.f_bavail;
   used = size - free;
 
   /* Find the label for size */
