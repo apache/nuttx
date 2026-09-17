@@ -792,18 +792,52 @@ done:
 
 static void le_adv_report(FAR struct bt_buf_s *buf)
 {
-  FAR struct bt_hci_ev_le_advertising_report_s *info;
-  uint8_t num_reports = buf->data[0];
+  uint8_t num_reports;
+
+  if (buf->len < sizeof(num_reports))
+    {
+      wlerr("ERROR: Truncated advertising report event\n");
+      return;
+    }
+
+  num_reports = buf->data[0];
 
   wlinfo("Adv number of reports %u\n", num_reports);
 
-  info = bt_buf_consume(buf, sizeof(num_reports));
+  bt_buf_consume(buf, sizeof(num_reports));
 
   while (num_reports--)
     {
-      int8_t rssi = info->data[info->length];
+      FAR struct bt_hci_ev_le_advertising_report_s *info;
       FAR struct bt_keys_s *keys;
       bt_addr_le_t addr;
+      size_t reportlen;
+      int8_t rssi;
+
+      /* A report is the fixed fields, the advertising data whose length
+       * they declare, and one octet of RSSI.  Both lengths come from the
+       * controller, so check them against what was actually received
+       * before using them: the data length indexes the RSSI octet, and
+       * the total is what locates the next report.
+       */
+
+      if (buf->len < sizeof(*info))
+        {
+          wlerr("ERROR: Truncated advertising report\n");
+          return;
+        }
+
+      info      = (FAR void *)buf->data;
+      reportlen = sizeof(*info) + info->length + sizeof(rssi);
+
+      if (buf->len < reportlen)
+        {
+          wlerr("ERROR: Advertising report data length %u exceeds event\n",
+                info->length);
+          return;
+        }
+
+      rssi = info->data[info->length];
 
       wlinfo("%s event %u, len %u, rssi %d dBm\n",
              bt_addr_le_str(&info->addr), info->evt_type, info->length,
@@ -829,16 +863,13 @@ static void le_adv_report(FAR struct bt_buf_s *buf)
 
       check_pending_conn(&info->addr, info->evt_type, keys);
 
-      /* Get next report iteration by moving pointer to right offset in buf
-       * according to spec 4.2, Vol 2, Part E, 7.7.65.2.
-       *
-       * TODO: multiple reports are stored as multiple arrays not one array
-       * of structs. If num_reports > 0 this will not WORK!
+      /* Advance to the next report.  The RSSI octet sits after the
+       * advertising data and belongs to the report, which the previous
+       * advance left out, so every report after the first started one
+       * octet early.
        */
 
-      /* Note that info already contains one byte which accounts for RSSI */
-
-      info = bt_buf_consume(buf, sizeof(*info) + info->length);
+      bt_buf_consume(buf, reportlen);
     }
 }
 
@@ -2191,6 +2222,7 @@ send_set_param:
 int bt_stop_advertising(void)
 {
   FAR struct bt_buf_s *buf;
+
   if (!g_btdev.adv_enable)
     {
       wlwarn("WARNING:  Already advertising\n");
