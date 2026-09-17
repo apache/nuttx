@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 #include <nuttx/nuttx.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/fs/fs.h>
@@ -202,6 +203,8 @@ struct lsm6ds3trc_dev_s
   bool interrupt_mode;            /* True if using the INT pin instead of
                                    * kthread polling */
   enum lsm6ds3trc_int_e int_pin;  /* Shared INT pin (interrupt mode only) */
+  int irq;                        /* IRQ number for int_pin, saved by the
+                                   * ISR so the worker can re-enable it */
   struct work_s work;             /* Shared interrupt work queue
                                    * structure -- one burst read serves
                                    * both sub-sensors */
@@ -834,9 +837,8 @@ static int accel_thread(int argc, char **argv)
  *
  ****************************************************************************/
 
-static void lsm6ds3trc_fifo_worker(FAR void *arg)
+static void lsm6ds3trc_fifo_worker_body(FAR struct lsm6ds3trc_dev_s *dev)
 {
-  FAR struct lsm6ds3trc_dev_s *dev = arg;
   uint8_t status[2];
   int16_t raw[FIFO_MAX_WORDS];
   int16_t raw_temp;
@@ -980,6 +982,24 @@ static void lsm6ds3trc_fifo_worker(FAR void *arg)
     }
 }
 
+/****************************************************************************
+ * Name: lsm6ds3trc_fifo_worker
+ *
+ * Description:
+ *   work_queue() entry point. Re-enables the IRQ lsm6ds3trc_interrupt()
+ *   disabled, after the FIFO has actually been drained -- see the comment
+ *   on lsm6ds3trc_interrupt() for why the order matters.
+ *
+ ****************************************************************************/
+
+static void lsm6ds3trc_fifo_worker(FAR void *arg)
+{
+  FAR struct lsm6ds3trc_dev_s *dev = arg;
+
+  lsm6ds3trc_fifo_worker_body(dev);
+  up_enable_irq(dev->irq);
+}
+
 #else
 /****************************************************************************
  * Name: lsm6ds3trc_worker
@@ -993,9 +1013,8 @@ static void lsm6ds3trc_fifo_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-static void lsm6ds3trc_worker(FAR void *arg)
+static void lsm6ds3trc_worker_body(FAR struct lsm6ds3trc_dev_s *dev)
 {
-  FAR struct lsm6ds3trc_dev_s *dev = arg;
   int16_t raw[7]; /* temp, gx, gy, gz, ax, ay, az */
   struct sensor_gyro gyro_data;
   struct sensor_accel accel_data;
@@ -1043,6 +1062,24 @@ static void lsm6ds3trc_worker(FAR void *arg)
                                   sizeof(accel_data));
     }
 }
+
+/****************************************************************************
+ * Name: lsm6ds3trc_worker
+ *
+ * Description:
+ *   work_queue() entry point. Re-enables the IRQ lsm6ds3trc_interrupt()
+ *   disabled, after the measurement has actually been drained -- see the
+ *   comment on lsm6ds3trc_interrupt() for why the order matters.
+ *
+ ****************************************************************************/
+
+static void lsm6ds3trc_worker(FAR void *arg)
+{
+  FAR struct lsm6ds3trc_dev_s *dev = arg;
+
+  lsm6ds3trc_worker_body(dev);
+  up_enable_irq(dev->irq);
+}
 #endif
 
 /****************************************************************************
@@ -1052,6 +1089,13 @@ static void lsm6ds3trc_worker(FAR void *arg)
  *   ISR for the shared INT pin. Timestamps here, where the burst really
  *   became ready -- the I2C read cannot run in interrupt context, so it's
  *   deferred to lsm6ds3trc_worker()/lsm6ds3trc_fifo_worker() on HPWORK.
+ *
+ *   The IRQ is disabled here and only re-enabled once the worker has
+ *   drained the condition that raised it: if a PM wake source ever leaves
+ *   this pin level-triggered instead of edge-triggered (or the line is
+ *   simply slow to fall), leaving the IRQ enabled would re-fire it
+ *   continuously and starve every task, including the worker that would
+ *   otherwise clear it.
  *
  ****************************************************************************/
 
@@ -1063,6 +1107,9 @@ static int lsm6ds3trc_interrupt(int irq, FAR void *context, FAR void *arg)
   (void)(context);
 
   DEBUGASSERT(arg != NULL);
+
+  dev->irq = irq;
+  up_disable_irq(irq);
 
   dev->timestamp = sensor_get_timestamp();
 

@@ -42,6 +42,7 @@
 
 #include "xtensa.h"
 
+#include "esp_gpio.h"
 #include "esp_irq.h"
 
 #include "esp_intr_alloc.h"
@@ -596,6 +597,21 @@ void up_enable_irq(int irq)
 
   if (intr_handle == IRQ_UNMAPPED)
     {
+      /* Not a real interrupt-matrix source -- esp_gpio_irq() registers
+       * per-pin GPIO IRQs through gpio_isr_handler_add() instead, so
+       * esp_get_handle() never finds them here. Try it as a GPIO pin.
+       */
+
+#ifdef CONFIG_ESPRESSIF_GPIO_IRQ
+      int pin = ESP_IRQ2PIN(irq);
+
+      if (pin >= 0 && pin < SOC_GPIO_PIN_COUNT && ESP_PIN2IRQ(pin) == irq)
+        {
+          esp_gpioirqenable(pin);
+          return;
+        }
+#endif
+
       irqwarn("IRQ %d not mapped to handle\n", irq);
       return;
     }
@@ -636,6 +652,17 @@ void up_disable_irq(int irq)
   intr_handle = esp_get_handle(this_cpu(), irq);
   if (intr_handle == IRQ_UNMAPPED)
     {
+      /* See the matching comment in up_enable_irq(). */
+
+#ifdef CONFIG_ESPRESSIF_GPIO_IRQ
+      int pin = ESP_IRQ2PIN(irq);
+
+      if (pin >= 0 && pin < SOC_GPIO_PIN_COUNT && ESP_PIN2IRQ(pin) == irq)
+        {
+          esp_gpioirqdisable(pin);
+        }
+#endif
+
       return;
     }
 
