@@ -120,8 +120,8 @@ static void devif_packet_conversion(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_IPv4
           if ((ipv6->vtc & IP_VERSION_MASK) != IPv6_VERSION)
             {
-               nerr("ERROR: IPv6 version error: %02x...  Packet dropped\n",
-                    ipv6->vtc);
+              nerr("ERROR: IPv6 version error: %02x...  Packet dropped\n",
+                   ipv6->vtc);
             }
           else
 #endif
@@ -259,6 +259,16 @@ devif_poll_pkt_connections(FAR struct net_driver_s *dev,
             {
               bstop = callback(dev);
             }
+
+          /* pkt_poll() records the outgoing IOB in pkt_conn->pendiob so that
+           * the TX tap run from the driver callback above can skip the
+           * sending connection.  Drop the reference now that the callback
+           * has returned: it must not outlive the buffer it points at, or a
+           * later frame reusing the same IOB address would be withheld from
+           * this connection.
+           */
+
+          pkt_conn->pendiob = NULL;
         }
     }
 
