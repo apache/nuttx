@@ -952,22 +952,36 @@ static void att_find_info_rsp(FAR struct bt_conn_s *conn, uint8_t err,
     {
       case BT_ATT_INFO_16:
         uuid.type = BT_UUID_16;
-        len = sizeof(info.i16);
+        len = sizeof(struct bt_att_info_16_s);
         break;
 
       case BT_ATT_INFO_128:
         uuid.type = BT_UUID_128;
-        len = sizeof(info.i128);
+        len = sizeof(struct bt_att_info_128_s);
         break;
 
       default:
-      wlerr("ERROR: Invalid format %u\n", rsp->format);
+        wlerr("ERROR: Invalid format %u\n", rsp->format);
+        goto done;
+    }
+
+  /* The response is the format octet followed by whole records of the
+   * size the format selects.  Anything else is malformed and must not be
+   * walked, since the loop below advances by one record at a time.
+   */
+
+  length--;
+
+  if (length < len || (length % len) != 0)
+    {
+      wlerr("ERROR: Invalid info length %u for format %u\n", length,
+            rsp->format);
       goto done;
     }
 
   /* Parse descriptors found */
 
-  for (length--, pdu = rsp->info; length >= len; length -= len, pdu += len)
+  for (pdu = rsp->info; length >= len; length -= len, pdu += len)
     {
       FAR const struct bt_gatt_attr_s *attr;
 
