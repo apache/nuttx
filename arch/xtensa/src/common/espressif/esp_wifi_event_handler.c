@@ -150,13 +150,20 @@ static void esp_wifi_event_handler(void *arg, esp_event_base_t event_base,
   UNUSED(event_base);
 
   net_lock();
-  esp_wifi_lock(true);
+
+  /* esp_wifi_lock() no longer spans the esp_wlan_*_hook() calls below:
+   * they take netdev_lock(), which ifdown already holds *around* its own
+   * esp_wifi_lock() call, so locking both here in the opposite order
+   * deadlocked ifdown against this handler.
+   */
 
   switch (event_id)
     {
 #ifdef ESP_WLAN_DEVS
       case WIFI_EVENT_SCAN_DONE:
+        esp_wifi_lock(true);
         esp_wifi_scan_event_parse();
+        esp_wifi_lock(false);
         break;
 #endif
       case WIFI_EVENT_HOME_CHANNEL_CHANGE:
@@ -168,7 +175,9 @@ static void esp_wifi_event_handler(void *arg, esp_event_base_t event_base,
         {
           wlinfo("Wi-Fi sta start\n");
 
+          esp_wifi_lock(true);
           ret = esp_wifi_set_ps(ps_type);
+          esp_wifi_lock(false);
           if (ret != 0)
             {
               wlerr("Failed to set power save type\n");
@@ -214,7 +223,9 @@ static void esp_wifi_event_handler(void *arg, esp_event_base_t event_base,
         {
           wlinfo("INFO: Wi-Fi softap start\n");
           esp_wlan_softap_connect_success_hook();
+          esp_wifi_lock(true);
           ret = esp_wifi_set_ps(ps_type);
+          esp_wifi_lock(false);
           if (ret != 0)
             {
               wlerr("Failed to set power save type\n");
@@ -260,7 +271,6 @@ static void esp_wifi_event_handler(void *arg, esp_event_base_t event_base,
         }
     }
 
-  esp_wifi_lock(false);
   net_unlock();
 }
 
