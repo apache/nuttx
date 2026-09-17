@@ -45,7 +45,6 @@ struct inode;  /* Forward reference */
  */
 
 typedef int (*foreach_mountpoint_t)(FAR const char *mountpoint,
-                                    FAR struct statfs *statbuf,
                                     FAR void *arg);
 
 /****************************************************************************
