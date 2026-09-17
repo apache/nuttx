@@ -102,4 +102,15 @@ int am67_epwm_init(void);
 
 struct pwm_lowerhalf_s *am67_epwminitialize(int pwm);
 
+/****************************************************************************
+ * Name: am67_pwmdev_initialize
+ *
+ * Description:
+ *   Initialize the EPWM lower-half driver and register the PWM device.
+ *   This function is called from board bringup.
+ *
+ ****************************************************************************/
+
+void am67_pwmdev_initialize(void);
+
 #endif /* __ARCH_ARM_SRC_AM67_AM67_PWM_H */
