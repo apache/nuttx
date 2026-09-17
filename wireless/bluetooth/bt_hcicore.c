@@ -2184,6 +2184,27 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
   else
     {
       wlerr("ERROR:  Failed get response\n");
+
+      /* The command timed out, and sync_sem is about to go out of scope.
+       * A completion arriving after this point would still find the
+       * pointer to it in the command buffer and post it, so detach it
+       * from the buffer, and from the pending command that still refers
+       * to the buffer, before destroying it.
+       *
+       * This closes the window rather than removing it: the completion
+       * runs in another context and there is no lock shared with it.  A
+       * race-free version needs the command queue with per-command state
+       * that is planned separately.
+       */
+
+      buf->u.hci.sync = NULL;
+
+      if (g_btdev.sent_cmd == buf)
+        {
+          g_btdev.sent_cmd = NULL;
+          bt_buf_release(buf);
+        }
+
       nxsem_destroy(&sync_sem);
       return -EIO;
     }
