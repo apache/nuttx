@@ -156,8 +156,8 @@
 #  define LP_I2C_BUS_CLK_ATOMIC()    PERIPH_RCC_ATOMIC()
 #endif
 
-#define SCL_PIN_ATTR (FUNCTION_2 || INPUT_PULLUP || OUTPUT_OPEN_DRAIN)
-#define SDA_PIN_ATTR (FUNCTION_2 || INPUT_PULLUP || OUTPUT_OPEN_DRAIN)
+#define SCL_PIN_ATTR (FUNCTION_2 | INPUT_PULLUP | OUTPUT_OPEN_DRAIN)
+#define SDA_PIN_ATTR (FUNCTION_2 | INPUT_PULLUP | OUTPUT_OPEN_DRAIN)
 
 /****************************************************************************
  * Private Types
