@@ -1545,23 +1545,23 @@ endchoice # PM_UART_WAKEUP_UART_NUM
 
 choice PM_UART_WAKEUP_MODE
 	prompt "PM UART Wakeup Mode"
-	default PM_UART_WAKEUP_START_BIT_MODE if !ARCH_CHIP_ESP32C3
-	default PM_UART_WAKEUP_ACTIVE_EDGE_THRESHOLD_MODE if ARCH_CHIP_ESP32C3
+	default PM_UART_WAKEUP_START_BIT_MODE if !ARCH_CHIP_ESP32C2 && !ARCH_CHIP_ESP32C3
+	default PM_UART_WAKEUP_ACTIVE_EDGE_THRESHOLD_MODE if ARCH_CHIP_ESP32C2 || ARCH_CHIP_ESP32C3
 
 config PM_UART_WAKEUP_ACTIVE_EDGE_THRESHOLD_MODE
 	bool "Wake-up triggered by active edge threshold"
 
 config PM_UART_WAKEUP_FIFO_THRESHOLD_MODE
 	bool "Wake-up triggered by the number of bytes received in the RX FIFO"
-	depends on !ARCH_CHIP_ESP32C3
+	depends on !ARCH_CHIP_ESP32C2 && !ARCH_CHIP_ESP32C3
 
 config PM_UART_WAKEUP_START_BIT_MODE
 	bool "Wake-up triggered by the detection of a start bit"
-	depends on !ARCH_CHIP_ESP32C3
+	depends on !ARCH_CHIP_ESP32C2 && !ARCH_CHIP_ESP32C3
 
 config PM_UART_WAKEUP_CHAR_SEQ_MODE
 	bool "Wake-up triggered by detecting a specific character sequence"
-	depends on !ARCH_CHIP_ESP32C3
+	depends on !ARCH_CHIP_ESP32C2 && !ARCH_CHIP_ESP32C3
 
 endchoice # PM_UART_WAKEUP_MODE
 

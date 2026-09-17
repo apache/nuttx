@@ -960,3 +960,18 @@ int esp_pmconfigure(void)
 
   return ret;
 }
+
+#ifdef CONFIG_ARCH_CHIP_ESP32C2
+
+/* The ESP32-C2 HAL has no port/esp32c2/sleep_cpu.c. pm_impl.c still
+ * calls sleep_cpu_configure() when CONFIG_PM_ESP_SLEEP_POWER_DOWN_CPU
+ * is set. Light sleep does not use CPU retention on this SoC.
+ */
+
+esp_err_t sleep_cpu_configure(bool light_sleep_enable)
+{
+  UNUSED(light_sleep_enable);
+  return ESP_OK;
+}
+
+#endif /* CONFIG_ARCH_CHIP_ESP32C2 */
