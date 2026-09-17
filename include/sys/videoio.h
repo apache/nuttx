@@ -472,6 +472,7 @@ struct v4l2_capability
   uint32_t version;      /* Version number of the driver */
   uint32_t capabilities; /* Available capabilities of the physical device */
   uint32_t device_caps;  /* Device capabilities of the opened device */
+  uint32_t reserved[3];  /* Reserved space for future use */
 };
 
 /* Values for 'capabilities' field */
@@ -545,10 +546,11 @@ struct v4l2_fract
 
 struct v4l2_selection
 {
-  uint32_t type;       /* Buffer type */
+  uint32_t type;         /* Buffer type */
   uint32_t target;
   uint32_t flags;
-  struct v4l2_rect r;  /* The selection rectangle. */
+  struct v4l2_rect r;    /* The selection rectangle. */
+  uint32_t reserved[9];  /* Reserved space for future use */
 };
 
 typedef uint64_t v4l2_std_id;
@@ -813,13 +815,16 @@ enum v4l2_buf_mode
 
 struct v4l2_requestbuffers
 {
-  uint32_t count;    /* The number of buffers requested.
-                      * Supported maximum is
-                      * is V4L2_REQBUFS_COUNT_MAX
-                      */
-  uint32_t type;     /* enum #v4l2_buf_type */
-  uint32_t memory;   /* enum #v4l2_memory */
-  uint32_t mode;     /* enum #v4l2_buf_mode */
+  uint32_t count;        /* The number of buffers requested.
+                          * Supported maximum is
+                          * is V4L2_REQBUFS_COUNT_MAX
+                          */
+  uint32_t type;         /* enum #v4l2_buf_type */
+  uint32_t memory;       /* enum #v4l2_memory */
+  uint32_t capabilities; /* Requested buffer capabilities */
+  uint8_t  flags;        /* Memory consistency flags */
+  uint8_t  mode;         /* NuttX private: enum #v4l2_buf_mode */
+  uint8_t  reserved[2];  /* Reserved space for future use */
 };
 
 typedef struct v4l2_requestbuffers v4l2_requestbuffers_t;
@@ -845,8 +850,8 @@ struct v4l2_plane
   {
     uint32_t      mem_offset;
     unsigned long userptr;
-    int           fd;
-    void          *vaddr;
+    int32_t       fd;
+    void          *vaddr;    /* NuttX private: kernel address of plane data */
   } m;
   uint32_t        data_offset;
   uint32_t        reserved[11];
@@ -876,10 +881,16 @@ struct v4l2_buffer
     uint32_t           offset;
     unsigned long      userptr;   /* Address of buffer */
     struct v4l2_plane  *planes;
-    int                fd;
+    int32_t            fd;
     void               *vaddr;    /* The real kernel address of image data */
   } m;
   uint32_t             length;    /* User set the buffer size */
+  uint32_t             reserved2; /* Reserved, drivers/apps must zero */
+  union
+  {
+    int32_t            request_fd; /* fd of the request this buffer uses */
+    uint32_t           reserved;
+  };
 };
 
 typedef struct v4l2_buffer v4l2_buffer_t;
@@ -906,12 +917,13 @@ typedef struct v4l2_buffer v4l2_buffer_t;
 
 struct v4l2_fmtdesc
 {
-  uint16_t index;                           /* Format number      */
-  uint16_t type;                            /* enum v4l2_buf_type */
+  uint32_t index;                           /* Format number      */
+  uint32_t type;                            /* enum v4l2_buf_type */
   uint32_t flags;
   char     description[V4L2_FMT_DSC_MAX];   /* Description string */
   uint32_t pixelformat;                     /* Format fourcc      */
   uint32_t mbus_code;                       /* Media bus code    */
+  uint32_t reserved[3];                     /* Reserved for future use */
 };
 
 enum v4l2_fmt_flag
@@ -929,24 +941,23 @@ enum v4l2_frmsizetypes
 
 struct v4l2_frmsize_discrete
 {
-  uint16_t width;          /* Frame width [pixel] */
-  uint16_t height;         /* Frame height [pixel] */
+  uint32_t width;          /* Frame width [pixel] */
+  uint32_t height;         /* Frame height [pixel] */
 };
 
 struct v4l2_frmsize_stepwise
 {
-  uint16_t min_width;      /* Minimum frame width [pixel] */
-  uint16_t max_width;      /* Maximum frame width [pixel] */
-  uint16_t step_width;     /* Frame width step size [pixel] */
-  uint16_t min_height;     /* Minimum frame height [pixel] */
-  uint16_t max_height;     /* Maximum frame height [pixel] */
-  uint16_t step_height;    /* Frame height step size [pixel] */
+  uint32_t min_width;      /* Minimum frame width [pixel] */
+  uint32_t max_width;      /* Maximum frame width [pixel] */
+  uint32_t step_width;     /* Frame width step size [pixel] */
+  uint32_t min_height;     /* Minimum frame height [pixel] */
+  uint32_t max_height;     /* Maximum frame height [pixel] */
+  uint32_t step_height;    /* Frame height step size [pixel] */
 };
 
 struct v4l2_frmsizeenum
 {
   uint32_t  index;              /* Frame size number */
-  uint32_t  buf_type;           /* enum #v4l2_buf_type */
   uint32_t  pixel_format;       /* Pixel format */
   uint32_t  type;               /* Frame size type the device supports. */
 
@@ -959,6 +970,8 @@ struct v4l2_frmsizeenum
     struct v4l2_frmsize_discrete discrete;
     struct v4l2_frmsize_stepwise stepwise;
   };
+
+  uint32_t  reserved[2];        /* Reserved space for future use */
 };
 
 /* Type of frame interval enumeration */
@@ -982,16 +995,17 @@ struct v4l2_frmival_stepwise
 struct v4l2_frmivalenum
 {
   uint32_t index;               /* Frame format index */
-  uint32_t buf_type;            /* enum #v4l2_buf_type */
   uint32_t pixel_format;        /* Pixel format */
-  uint16_t width;               /* Frame width */
-  uint16_t height;              /* Frame height */
+  uint32_t width;               /* Frame width */
+  uint32_t height;              /* Frame height */
   uint32_t type;                /* Frame interval type */
   union
   {                             /* Frame interval */
     struct v4l2_fract               discrete;
     struct v4l2_frmival_stepwise    stepwise;
   };
+
+  uint32_t reserved[2];         /* Reserved space for future use */
 };
 
 /* Single-planar format structure. */
@@ -1025,12 +1039,12 @@ typedef struct v4l2_pix_format v4l2_pix_format_t;
  * adjacent lines
  */
 
-struct v4l2_plane_pix_format
+begin_packed_struct struct v4l2_plane_pix_format
 {
   uint32_t  sizeimage;
   uint32_t  bytesperline;
   uint16_t  reserved[6];
-};
+} end_packed_struct;
 
 /* struct v4l2_pix_format_mplane - multiplanar format definition
  * width: image width in pixels
@@ -1046,7 +1060,7 @@ struct v4l2_plane_pix_format
  * xfer_func: enum v4l2_xfer_func, colorspace transfer function
  */
 
-struct v4l2_pix_format_mplane
+begin_packed_struct struct v4l2_pix_format_mplane
 {
   uint32_t      width;
   uint32_t      height;
@@ -1065,25 +1079,26 @@ struct v4l2_pix_format_mplane
   uint8_t                      quantization;
   uint8_t                      xfer_func;
   uint8_t                      reserved[7];
-};
+} end_packed_struct;
 
-struct v4l2_meta_format
+begin_packed_struct struct v4l2_meta_format
 {
     uint32_t                   dataformat;
     uint32_t                   buffersize;
     uint32_t                   width;
     uint32_t                   height;
     uint32_t                   bytesperline;
-};
+} end_packed_struct;
 
 struct v4l2_format
 {
   uint32_t  type;                         /* enum #v4l2_buf_type. */
-  union
+  union aligned_data(sizeof(void *))
   {
     struct v4l2_pix_format        pix;    /* Image format */
     struct v4l2_pix_format_mplane pix_mp; /* V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE */
     struct v4l2_meta_format       meta;   /* V4L2_BUF_TYPE_META_CAPTURE */
+    uint8_t                       raw_data[200];
   } fmt;
 };
 
@@ -1096,6 +1111,7 @@ struct v4l2_captureparm
   struct v4l2_fract  timeperframe;  /*  Time per frame in seconds */
   uint32_t           extendedmode;  /*  Driver-specific extensions */
   uint32_t           readbuffers;   /*  # of buffers for read */
+  uint32_t           reserved[4];
 };
 
 struct v4l2_outputparm
@@ -1135,8 +1151,8 @@ struct v4l2_streamparm
   {
     struct v4l2_captureparm capture;
     struct v4l2_outputparm  output;
+    uint8_t                 raw_data[200]; /* user-defined */
   } parm;
-  uint8_t  raw_data[200];            /* user-defined */
 };
 
 /* E V E N T S */
@@ -1264,21 +1280,21 @@ enum v4l2_ctrl_type
 
 struct v4l2_queryctrl
 {
-  uint16_t   ctrl_class;               /* Control class(not used) */
-  uint16_t   id;                       /* Control id */
-  uint16_t   type;                     /* enum #v4l2_ctrl_type */
+  uint32_t   id;                       /* Control id */
+  uint32_t   type;                     /* enum #v4l2_ctrl_type */
   char       name[32];                 /* Name of control */
   int32_t    minimum;                  /* Minimum value */
   int32_t    maximum;                  /* Maximum value */
-  uint32_t   step;                     /* Step */
+  int32_t    step;                     /* Step */
   int32_t    default_value;            /* Default value */
-  uint32_t   flags;                    /* Flag */};
+  uint32_t   flags;                    /* Flag */
+  uint32_t   reserved[2];              /* Reserved space for future use */
+};
 
 struct v4l2_query_ext_ctrl
 {
-  uint16_t   ctrl_class;               /* Control class(not used) */
-  uint16_t   id;                       /* Control id */
-  uint16_t   type;                     /* enum #v4l2_ctrl_type */
+  uint32_t   id;                       /* Control id */
+  uint32_t   type;                     /* enum #v4l2_ctrl_type */
   char       name[32];                 /* Name of control */
   int64_t    minimum;                  /* Minimum value */
   int64_t    maximum;                  /* Maximum value */
@@ -1289,19 +1305,20 @@ struct v4l2_query_ext_ctrl
   uint32_t   elems;                    /* Number of elements */
   uint32_t   nr_of_dims;               /* Number of dimensions */
   uint32_t   dims[V4L2_CTRL_MAX_DIMS]; /* Dimensions */
+  uint32_t   reserved[32];             /* Reserved space for future use */
 };
 
-struct v4l2_querymenu
+begin_packed_struct struct v4l2_querymenu
 {
-  uint16_t   ctrl_class;    /* Camera control class(not used) */
-  uint16_t   id;            /* Camera control id    */
+  uint32_t   id;            /* Camera control id    */
   uint32_t   index;         /* Index of menu.       */
   union
   {
     char    name[32];       /* Name of menu  */
     int64_t value;          /* Value of menu */
   };
-};
+  uint32_t   reserved;
+} end_packed_struct;
 
 /* Control flags */
 
@@ -1439,7 +1456,7 @@ enum v4l2_output_capabilites_compat
 
 struct v4l2_control
 {
-  uint16_t id;
+  uint32_t id;
   int32_t  value;
 };
 
@@ -1447,31 +1464,34 @@ struct v4l2_control
  *  ioctl(VIDIOC_G_EXT_CTRLS / VIDIOC_S_EXT_CTRLS)
  */
 
-struct v4l2_ext_control
+begin_packed_struct struct v4l2_ext_control
 {
-  uint16_t   id;       /* Camera control id */
-  uint16_t   size;     /* Size of value(not use) */
+  uint32_t   id;         /* Camera control id */
+  uint32_t   size;       /* Size of value(not use) */
+  uint32_t   reserved2[1];
   union
   {
-    int32_t  value;    /* QUERY_EXT_CTRL type = INTEGER, xxx */
-    int64_t  value64;  /* QUERY_EXT_CTRL type = INTEGER64, MENU */
+    int32_t  value;      /* QUERY_EXT_CTRL type = INTEGER, xxx */
+    int64_t  value64;    /* QUERY_EXT_CTRL type = INTEGER64, MENU */
     char     *string;
-    uint8_t  *p_u8;    /* QUERY_EXT_CTRL type = U8  */
-    uint16_t *p_u16;   /* QUERY_EXT_CTRL type = U16 */
-    uint32_t *p_u32;   /* QUERY_EXT_CTRL type = U32 */
+    uint8_t  *p_u8;      /* QUERY_EXT_CTRL type = U8  */
+    uint16_t *p_u16;     /* QUERY_EXT_CTRL type = U16 */
+    uint32_t *p_u32;     /* QUERY_EXT_CTRL type = U32 */
     void     *ptr;
   };
-};
+} end_packed_struct;
 
 struct v4l2_ext_controls
 {
   union
   {
-    uint16_t              ctrl_class;  /* Camera control class         */
-    uint16_t              which;
+    uint32_t              ctrl_class;  /* Camera control class         */
+    uint32_t              which;
   };
-  uint16_t                count;       /* Number of requests           */
-  uint16_t                error_idx;   /* Index in that error occurred */
+  uint32_t                count;       /* Number of requests           */
+  uint32_t                error_idx;   /* Index in that error occurred */
+  int32_t                 request_fd;  /* File descriptor of request   */
+  uint32_t                reserved[1];
   struct v4l2_ext_control *controls;   /* Each control information     */
 };
 
@@ -1507,7 +1527,7 @@ struct v4l2_exportbuffer
   uint32_t index;
   uint32_t plane;
   uint32_t flags;
-  uint32_t fd;
+  int32_t  fd;
   uint32_t reserved[11];
 };
 
