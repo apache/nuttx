@@ -360,6 +360,10 @@ if(CONFIG_SENSORS)
       endif()
     endif()
 
+    if(CONFIG_SENSORS_TC74)
+      list(APPEND SRCS tc74.c)
+    endif()
+
     # QMI8658 6-axis IMU
 
     if(CONFIG_SENSORS_QMI8658)
