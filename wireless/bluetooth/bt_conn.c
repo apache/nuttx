@@ -294,7 +294,18 @@ void bt_conn_receive(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
     {
       case BT_HCI_ACL_NEW:
 
-        /* First packet */
+        /* First packet.  The L2CAP header is read from the fragment, so
+         * the fragment has to be long enough to hold one.
+         */
+
+        if (buf->len < sizeof(*hdr))
+          {
+            wlerr("ERROR: First L2CAP frame too short for a header (%u)\n",
+                  buf->len);
+            bt_conn_reset_rx_state(conn);
+            bt_buf_release(buf);
+            return;
+          }
 
         hdr = (FAR void *)buf->data;
         len = BT_LE162HOST(hdr->len);
@@ -305,6 +316,21 @@ void bt_conn_receive(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
           {
             wlerr("ERROR: Unexpected first L2CAP frame\n");
             bt_conn_reset_rx_state(conn);
+          }
+
+        /* The fragment must not carry more than the PDU it declares.  If
+         * it does, the outstanding length below underflows and the
+         * connection is parked waiting for a remainder that cannot come,
+         * holding the partial PDU until some later error clears it.
+         */
+
+        if (buf->len > sizeof(*hdr) + len)
+          {
+            wlerr("ERROR: First L2CAP frame exceeds its PDU (%u > %zu)\n",
+                  buf->len, sizeof(*hdr) + len);
+            bt_conn_reset_rx_state(conn);
+            bt_buf_release(buf);
+            return;
           }
 
         conn->rx_len = (sizeof(*hdr) + len) - buf->len;
