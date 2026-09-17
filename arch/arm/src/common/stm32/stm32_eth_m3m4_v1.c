@@ -774,7 +774,9 @@ static int  stm32_ethconfig(struct stm32_ethmac_s *priv);
 #ifdef CONFIG_STM32_ETH_PTP
 static int stm32_eth_ptp_adjust(long ppb);
 static void stm32_eth_ptp_init(uint64_t timestamp);
+#ifdef CONFIG_STM32_ETH_PTP_RTC_HIRES
 static uint64_t stm32_eth_ptp_gettime(void);
+#endif
 #endif
 
 #ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
@@ -3707,6 +3709,7 @@ static void stm32_eth_ptp_init(uint64_t timestamp)
 #endif
 }
 
+#ifdef CONFIG_STM32_ETH_PTP_RTC_HIRES
 /****************************************************************************
  * Name: stm32_eth_ptp_gettime
  *
@@ -3751,6 +3754,7 @@ static uint64_t stm32_eth_ptp_gettime(void)
       return ((uint64_t)high2 << 32);
     }
 }
+#endif
 
 static inline void ptp_to_timespec(uint64_t timestamp, struct timespec *ts)
 {
@@ -3763,7 +3767,6 @@ static inline void ptp_to_timespec(uint64_t timestamp, struct timespec *ts)
 static void stm32_eth_ptp_convert_rxtime(struct stm32_ethmac_s *priv)
 {
   uint64_t timestamp;
-  struct timespec rxtime;
 
   timestamp = ((uint64_t)priv->rxtimehigh << 32)
             | ((priv->rxtimelow & ETH_PTPTSLR_MASK) << 1);
@@ -3782,35 +3785,14 @@ static void stm32_eth_ptp_convert_rxtime(struct stm32_ethmac_s *priv)
       return;
     }
 
-#ifdef CONFIG_STM32_ETH_PTP_RTC_HIRES
-  /* PTP is the system time reference, just add the base time */
+  /* Convert 64-bit hardware timestamp directly into timespec.
+   * In a PTP system, the MAC hardware counter is the PTP clock reference.
+   * Delivering the hardware counter's timestamp directly allows the PTP
+   * daemon to close the feedback loop and phase-lock the MAC counter (and
+   * therefore the physical PPS output) to the master.
+   */
 
-  ptp_to_timespec(timestamp, &rxtime);
-  clock_timespec_add(&rxtime, &g_stm32_eth_ptp_basetime,
-                     &priv->dev.d_rxtime);
-
-#else
-  {
-    struct timespec realtime;
-    uint64_t ptptime;
-    irqstate_t flags;
-
-    /* Sample PTP and CLOCK_REALTIME close to each other */
-
-    clock_gettime(CLOCK_REALTIME, &realtime);
-    flags = spin_lock_irqsave(&g_rtc_lock);
-    ptptime = stm32_eth_ptp_gettime();
-    spin_unlock_irqrestore(&g_rtc_lock, flags);
-
-    /* Compute how much time has elapsed since packet reception
-     * and add that to current time.
-     */
-
-    timestamp = ptptime - timestamp;
-    ptp_to_timespec(timestamp, &rxtime);
-    clock_timespec_add(&rxtime, &realtime, &priv->dev.d_rxtime);
-  }
-#endif /* CONFIG_STM32_ETH_PTP_RTC_HIRES */
+  ptp_to_timespec(timestamp, &priv->dev.d_rxtime);
 }
 #endif /* CONFIG_STM32_ETH_TIMESTAMP_RX */
 
