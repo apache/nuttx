@@ -143,6 +143,21 @@ To run it with QEMU, use the following command::
       -mon chardev=con,mode=readline \
       -bios none -kernel nuttx
 
+elf
+---
+
+This configuration uses ``apps/examples/elf`` in order to test the ELF loader
+on 32-bit RISC-V. It boots directly into the ELF example and does not provide
+the NuttShell (NSH).
+
+libcxx64
+--------
+
+This configuration provides the NuttShell (NSH) with the C++ standard library
+on 64-bit RISC-V. The C++ test at ``apps/testing/cxxtest`` can be run with::
+
+    nsh> cxxtest
+
 lvgl64_vector
 -------------
 
@@ -294,6 +309,10 @@ leds64
 ------
 
 Similar to the `nsh64`_ configuration, but with User LEDs support for 64-bit RISC-V.
+
+The LEDs are implemented as virtual LEDs and their state is reported through
+the system log. The current ``rv-virt`` implementation does not provide
+a NuttX GPIO controller for these LEDs.
 
 leds64_rust
 -----------
