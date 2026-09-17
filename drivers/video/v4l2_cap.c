@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <poll.h>
 
 #include <sys/param.h>
@@ -3374,7 +3375,6 @@ static int capture_queryctrl(FAR struct file *filep,
 
   /* Replace to VIDIOC_QUERY_EXT_CTRL format */
 
-  ext_ctrl.ctrl_class = ctrl->ctrl_class;
   ext_ctrl.id         = ctrl->id;
 
   ret = capture_query_ext_ctrl(filep, &ext_ctrl);
@@ -3681,10 +3681,12 @@ static int capture_g_ext_ctrls(FAR struct file *filep,
         }
       else
         {
+          imgsensor_value_t value;
+
           ret = IMGSENSOR_GET_VALUE(cmng->imgsensor,
                   control->id,
                   control->size,
-                  (imgsensor_value_t *)&control->value64);
+                  &value);
           if (ret < 0)
             {
               /* Set cnt in that error occurred */
@@ -3692,6 +3694,8 @@ static int capture_g_ext_ctrls(FAR struct file *filep,
               ctrls->error_idx = cnt;
               return ret;
             }
+
+          control->value64 = value.value64;
         }
     }
 
@@ -4017,7 +4021,7 @@ static int capture_expbuf(FAR struct file *filep,
 
   ebuf->fd = ret;
 
-  vinfo("dma_buf_export fd: %d\n", ebuf->fd);
+  vinfo("dma_buf_export fd: 0x%" PRIx32 "\n", ebuf->fd);
 
   return 0;
 }
