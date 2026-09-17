@@ -432,8 +432,32 @@ static void hci_cmd_status(FAR struct bt_buf_s *buf)
 static void hci_num_completed_packets(FAR struct bt_buf_s *buf)
 {
   FAR struct bt_hci_evt_num_completed_packets_s *evt = (FAR void *)buf->data;
-  uint16_t num_handles = BT_LE162HOST(evt->num_handles);
-  uint16_t i;
+  uint8_t num_handles;
+  uint8_t i;
+
+  if (buf->len < sizeof(*evt))
+    {
+      wlerr("ERROR: Truncated Number Of Completed Packets event\n");
+      return;
+    }
+
+  /* Number_of_Handles is one octet.  Reading it with BT_LE162HOST() took
+   * the first octet of the following handle as its high byte, so a count
+   * of up to 65535 could be produced from a one-octet field.
+   */
+
+  num_handles = evt->num_handles;
+
+  /* The handle and count pairs the event declares have to have been
+   * received before they can be read.
+   */
+
+  if (buf->len < sizeof(*evt) + num_handles * sizeof(evt->h[0]))
+    {
+      wlerr("ERROR: Event declares %u handles but carries %u octets\n",
+            num_handles, buf->len);
+      return;
+    }
 
   wlinfo("num_handles %u\n", num_handles);
 
