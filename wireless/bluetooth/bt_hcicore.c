@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -963,19 +964,72 @@ static int le_param_request(FAR struct bt_buf_s *buf)
           reply_buf, NULL);
 }
 
+/****************************************************************************
+ * Name: hci_evt_length_ok
+ *
+ * Description:
+ *   Verify that an event carries at least the parameters the handler for
+ *   it is going to read.  Everything reaching here comes from the
+ *   controller, which is a separate device on a serial line, a
+ *   co-processor or, in the simulator, another process, so the lengths it
+ *   declares are checked rather than trusted.
+ *
+ * Input Parameters:
+ *   buf    - The event buffer, positioned at the event parameters
+ *   minlen - Size of the structure the handler casts the parameters to
+ *   code   - Event or subevent code, for the diagnostic only
+ *
+ * Returned Value:
+ *   true if the handler may run.
+ *
+ ****************************************************************************/
+
+static bool hci_evt_length_ok(FAR struct bt_buf_s *buf, size_t minlen,
+                              uint8_t code)
+{
+  if (buf->len < minlen)
+    {
+      wlerr("ERROR: Event 0x%02x too short: %u, need %zu\n", code,
+            buf->len, minlen);
+      return false;
+    }
+
+  return true;
+}
+
 static void hci_le_meta_event(FAR struct bt_buf_s *buf)
 {
-  FAR struct bt_hci_evt_le_meta_event_s *evt = (FAR void *)buf->data;
+  FAR struct bt_hci_evt_le_meta_event_s *evt;
+  uint8_t subevent;
+
+  if (buf->len < sizeof(*evt))
+    {
+      wlerr("ERROR: Truncated LE meta event\n");
+      return;
+    }
+
+  evt      = (FAR void *)buf->data;
+  subevent = evt->subevent;
 
   bt_buf_consume(buf, sizeof(*evt));
 
-  switch (evt->subevent)
+  switch (subevent)
     {
       case BT_HCI_EVT_LE_CONN_COMPLETE:
-        le_conn_complete(buf);
+        if (hci_evt_length_ok(buf,
+                              sizeof(struct bt_hci_evt_le_conn_complete_s),
+                              subevent))
+          {
+            le_conn_complete(buf);
+          }
         break;
 
       case BT_HCI_EVT_LE_ADVERTISING_REPORT:
+
+        /* le_adv_report() checks the report count and every per-report
+         * length itself, since those vary within the event.
+         */
+
         le_adv_report(buf);
         break;
 
@@ -983,39 +1037,86 @@ static void hci_le_meta_event(FAR struct bt_buf_s *buf)
         break;
 
       case BT_HCI_EVT_LE_LTK_REQUEST:
-        le_ltk_request(buf);
+        if (hci_evt_length_ok(buf,
+                              sizeof(struct bt_hci_evt_le_ltk_request_s),
+                              subevent))
+          {
+            le_ltk_request(buf);
+          }
         break;
 
       case BT_HCI_EVT_LE_CONN_PARAM_REQ:
-        le_param_request(buf);
+        if (hci_evt_length_ok(
+              buf, sizeof(struct bt_hci_evt_le_rem_conn_param_req_s),
+              subevent))
+          {
+            le_param_request(buf);
+          }
         break;
 
       default:
-        wlinfo("Unhandled LE event %04x\n", evt->subevent);
+        wlinfo("Unhandled LE event %04x\n", subevent);
         break;
     }
 }
 
 static void hci_event(FAR struct bt_buf_s *buf)
 {
-  FAR struct bt_hci_evt_hdr_s *hdr = (FAR void *)buf->data;
+  FAR struct bt_hci_evt_hdr_s *hdr;
+  uint8_t evt;
 
-  wlinfo("event %u\n", hdr->evt);
+  if (buf->len < sizeof(*hdr))
+    {
+      wlerr("ERROR: Truncated event header\n");
+      return;
+    }
+
+  hdr = (FAR void *)buf->data;
+  evt = hdr->evt;
+
+  wlinfo("event %u\n", evt);
 
   bt_buf_consume(buf, sizeof(struct bt_hci_evt_hdr_s));
 
-  switch (hdr->evt)
+  /* The event declares its own parameter length.  If less than that was
+   * received the packet was truncated in transport and the parameters
+   * cannot be parsed.
+   */
+
+  if (buf->len < hdr->len)
+    {
+      wlerr("ERROR: Event 0x%02x declares %u parameters, got %u\n", evt,
+            hdr->len, buf->len);
+      return;
+    }
+
+  switch (evt)
     {
       case BT_HCI_EVT_DISCONN_COMPLETE:
-        hci_disconn_complete(buf);
+        if (hci_evt_length_ok(buf,
+                              sizeof(struct bt_hci_evt_disconn_complete_s),
+                              evt))
+          {
+            hci_disconn_complete(buf);
+          }
         break;
 
       case BT_HCI_EVT_ENCRYPT_CHANGE:
-        hci_encrypt_change(buf);
+        if (hci_evt_length_ok(buf,
+                              sizeof(struct bt_hci_evt_encrypt_change_s),
+                              evt))
+          {
+            hci_encrypt_change(buf);
+          }
         break;
 
       case BT_HCI_EVT_ENCRYPT_KEY_REFRESH_COMPLETE:
-        hci_encrypt_key_refresh_complete(buf);
+        if (hci_evt_length_ok(
+              buf, sizeof(struct bt_hci_evt_encrypt_key_refresh_complete_s),
+              evt))
+          {
+            hci_encrypt_key_refresh_complete(buf);
+          }
         break;
 
       case BT_HCI_EVT_LE_META_EVENT:
@@ -1023,7 +1124,7 @@ static void hci_event(FAR struct bt_buf_s *buf)
         break;
 
       default:
-        wlwarn("WARNING:  Unhandled event 0x%02x\n", hdr->evt);
+        wlwarn("WARNING:  Unhandled event 0x%02x\n", evt);
         break;
     }
 }
