@@ -42,17 +42,21 @@ nuttx_add_extra_library(
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_phy/lib/${CHIP_SERIES}/libphy.a
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_coex/lib/${CHIP_SERIES}/libcoexist.a)
 
-if(NOT CONFIG_ARCH_CHIP_ESP32H2)
+if(CONFIG_ESPRESSIF_WIFI AND NOT CONFIG_ARCH_CHIP_ESP32H2)
+  if(NOT CONFIG_ARCH_CHIP_ESP32C2)
+    nuttx_add_extra_library(
+      ${ESP_HAL_3RDPARTY_REPO}/components/esp_wifi/lib/${CHIP_SERIES}/libmesh.a)
+  endif()
+
   nuttx_add_extra_library(
-    ${ESP_HAL_3RDPARTY_REPO}/components/esp_wifi/lib/${CHIP_SERIES}/libmesh.a
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_wifi/lib/${CHIP_SERIES}/libespnow.a)
 endif()
 
 # ##############################################################################
-# ESP32-C6 / ESP32-H2 BLE host and controller sources
+# ESP32-C2 / ESP32-C6 / ESP32-H2 BLE host and controller sources
 # ##############################################################################
 
-if((CONFIG_ARCH_CHIP_ESP32C6 OR CONFIG_ARCH_CHIP_ESP32H2)
+if((CONFIG_ARCH_CHIP_ESP32C2 OR CONFIG_ARCH_CHIP_ESP32C6 OR CONFIG_ARCH_CHIP_ESP32H2)
    AND CONFIG_ESPRESSIF_BLE)
   target_include_directories(
     arch
@@ -91,6 +95,12 @@ if((CONFIG_ARCH_CHIP_ESP32C6 OR CONFIG_ARCH_CHIP_ESP32H2)
 
   target_compile_definitions(arch PRIVATE ESP_PLATFORM=1)
 
+  if(CONFIG_ARCH_CHIP_ESP32C2)
+    target_sources(
+      arch
+      PRIVATE ${ESP_HAL_3RDPARTY_REPO}/components/bt/controller/${CHIP_SERIES}/dummy.c)
+  endif()
+
   if(CONFIG_ARCH_CHIP_ESP32H2)
     target_sources(
       arch
@@ -109,7 +119,11 @@ if(CONFIG_ESPRESSIF_BLE)
   nuttx_add_extra_library(
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_phy/lib/${CHIP_SERIES}/libbtbb.a)
 
-  if(CONFIG_ARCH_CHIP_ESP32C3)
+  if(CONFIG_ARCH_CHIP_ESP32C2)
+    nuttx_add_extra_library(
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/controller/lib_esp32c2/esp32c2-bt-lib/libble_app.a
+    )
+  elseif(CONFIG_ARCH_CHIP_ESP32C3)
     nuttx_add_extra_library(
       ${ESP_HAL_3RDPARTY_REPO}/components/bt/controller/lib_esp32c3_family/${CHIP_SERIES}/libbtdm_app.a
     )
@@ -233,9 +247,18 @@ if(CONFIG_ESPRESSIF_WIFI)
       ${ESP_HAL_3RDPARTY_REPO}/components/mbedtls/port/esp_hardware.c
       ${ESP_HAL_3RDPARTY_REPO}/components/mbedtls/port/esp_mem.c
       ${ESP_HAL_3RDPARTY_REPO}/components/mbedtls/port/esp_timing.c
-      ${ESP_HAL_3RDPARTY_REPO}/components/mbedtls/port/psa_driver/esp_mac/psa_crypto_driver_esp_hmac_opaque.c
       ${ESP_HAL_3RDPARTY_REPO}/components/mbedtls/port/psa_driver/esp_md/psa_crypto_driver_esp_md5.c
   )
+
+  # The HMAC peripheral is not available on the ESP32-C2
+
+  if(NOT CONFIG_ARCH_CHIP_ESP32C2)
+    list(
+      APPEND
+      MBEDTLS_PORT_SRCS
+      ${ESP_HAL_3RDPARTY_REPO}/components/mbedtls/port/psa_driver/esp_mac/psa_crypto_driver_esp_hmac_opaque.c
+    )
+  endif()
 
   target_sources(arch PRIVATE ${MBEDTLS_SRCS} ${TF_PSA_CORE_SRCS}
                               ${MBEDTLS_PORT_SRCS})
