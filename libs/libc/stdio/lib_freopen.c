@@ -138,6 +138,19 @@ FAR FILE *freopen(FAR const char *path, FAR const char *mode,
       /* Open the new file and reused the fd */
 
       fd = open(path, oflags, 0666);
+      flockfile(stream);
+      stream->fs_cookie = (FAR void *)(intptr_t)fd;
+      funlockfile(stream);
+
+      /* Return on open failure before fdsan exchange: ioctl(-1) would
+       * set errno=EBADF and clobber the real failure cause.
+       */
+
+      if (fd < 0)
+        {
+          return NULL;
+        }
+
 #ifdef CONFIG_FDSAN
       if (stream != stdin && stream != stdout && stream != stderr)
         {
@@ -145,18 +158,7 @@ FAR FILE *freopen(FAR const char *path, FAR const char *mode,
               android_fdsan_create_owner_tag(ANDROID_FDSAN_OWNER_TYPE_FILE,
                                              (uintptr_t)stream));
         }
-
 #endif
-      flockfile(stream);
-      stream->fs_cookie = (FAR void *)(intptr_t)fd;
-      funlockfile(stream);
-
-      /* To clear the stale fd */
-
-      if (fd < 0)
-        {
-          return NULL;
-        }
 
       clearerr(stream);
       return stream;
