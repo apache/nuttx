@@ -15,6 +15,7 @@ case, you can head to the :doc:`reference <../reference/index>`.
    concurrency/index.rst
    iterable_sections.rst
    drivers/index.rst
+   fdpic.rst
    nxflat.rst
    nxgraphics/index.rst
    paging.rst
