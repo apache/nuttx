@@ -53,12 +53,10 @@ AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 #   Programmed at FlexSPI offset 0 (flash address 0x28000000).  The M33
 #   image is confined to the first 512 KB of NOR.
 #
-# The AHAB container is assembled by NXP SPSDK "nxpimage".  The build
-# script bootstraps a private SPSDK venv on first run (see
-# tools/imxrt1180/build_flash_image.sh for the license note and cache
-# location).
-
-FLASH_BUILDER = $(TOPDIR)$(DELIM)tools$(DELIM)imxrt1180$(DELIM)build_flash_image.sh
+# The AHAB container is a single, unsigned application container.
+# In the simples case, use a standalone tools/imxrt1180/mkahab host tool
+# to create the container. If ELE FW is needed, download and use the the
+# full SPSDK toolkit.
 
 ifeq ($(CONFIG_IMXRT_ELE_FW),y)
 include $(TOPDIR)/tools/imxrt1180/Config.mk
@@ -70,13 +68,17 @@ include $(TOPDIR)/tools/imxrt1180/Config.mk
 endif
 
 ifeq ($(CONFIG_IMXRT_ELE_FW),y)
-ifeq ($(CONFIG_IMXRT_ELE_LOAD_FW),y)
-FLASH_BUILDER_ELE_FW_ARGS =
-else
-FLASH_BUILDER_ELE_FW_ARGS = --ele-fw $(IMXRT_ELE_FW_ABS)
+ifneq ($(CONFIG_IMXRT_ELE_LOAD_FW),y)
+FLASH_BUILDER_NEEDS_SPSDK = 1
 endif
+endif
+
+ifeq ($(FLASH_BUILDER_NEEDS_SPSDK),1)
+FLASH_BUILDER = $(TOPDIR)$(DELIM)tools$(DELIM)imxrt1180$(DELIM)build_flash_image.sh
+FLASH_BUILDER_ARGS = --ele-fw $(IMXRT_ELE_FW_ABS)
 else
-FLASH_BUILDER_ELE_FW_ARGS =
+FLASH_BUILDER = $(TOPDIR)$(DELIM)tools$(DELIM)imxrt1180$(DELIM)mkahab$(HOSTEXEEXT)
+FLASH_BUILDER_ARGS =
 endif
 
 ifeq ($(CONFIG_ARCH_CORTEXM33),y)
@@ -84,10 +86,12 @@ define POSTBUILD
 	$(Q) echo "Assembling MIMXRT1180-EVK FlexSPI NOR image (CM33 target)"
 	$(Q) $(OBJCOPY) -O binary -R .bss -R .initstack $(BIN) nuttx.bin
 	$(if $(IMXRT_ELE_FW_ABS),$(Q) $(MAKE) $(IMXRT_ELE_FW_ABS))
+	$(if $(filter 1,$(FLASH_BUILDER_NEEDS_SPSDK)),,+$(Q) $(MAKE) -C $(TOPDIR)$(DELIM)tools$(DELIM)imxrt1180 -f Makefile.host)
 	$(Q) $(FLASH_BUILDER) \
 	     --m33 nuttx.bin \
 	     --out flash.bin \
-	     $(FLASH_BUILDER_ELE_FW_ARGS)
+	     $(FLASH_BUILDER_ARGS)
+	$(if $(filter 1,$(FLASH_BUILDER_NEEDS_SPSDK)),,+$(Q) $(MAKE) -C $(TOPDIR)$(DELIM)tools$(DELIM)imxrt1180 -f Makefile.host clean)
 	$(Q) echo "flash.bin" >> nuttx.manifest
 endef
 else
