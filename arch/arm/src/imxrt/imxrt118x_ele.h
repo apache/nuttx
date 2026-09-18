@@ -38,6 +38,18 @@
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_IMXRT_ELE_LOAD_FW
+/* Embedded ELE firmware container, incbin'd directly from
+ * CONFIG_IMXRT_ELE_FW_PATH (see imxrt118x_ele.c).  Only needed when the
+ * driver is responsible for handing the FW to the ELE at runtime; when
+ * the FW is instead packed into the boot AHAB container for the ROM to
+ * load automatically, this blob is not built into the image at all.
+ */
+
+extern const uint8_t imxrt118x_ele_fw[];
+extern const uint8_t imxrt118x_ele_fw_end[];
+#endif
+
 /****************************************************************************
  * Name: imxrt118x_ele_init
  *

@@ -42,6 +42,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_IMXRT_ELE_LOAD_FW
+#  ifndef IMXRT_ELE_FW_ABS_PATH
+#    error "IMXRT_ELE_FW_ABS_PATH must be set via CFLAGS"
+#  endif
+
+#  define STR2(m) #m
+#  define STR(m) STR2(m)
+#endif
+
 /* The M7 core is Armv7-M and the M33 core is Armv8-M; pick whichever
  * D-Cache line size macro chip.h provided for the core we're building
  * for.
@@ -77,6 +86,27 @@ struct ele_trng_state
  ****************************************************************************/
 
 static struct ele_msg g_msg;
+
+#ifdef CONFIG_IMXRT_ELE_LOAD_FW
+/* Embeds the NXP EdgeLock Enclave firmware AHAB container (path from
+ * CONFIG_IMXRT_ELE_FW_PATH) directly into the driver image.
+ *
+ * This is legacy/fallback support: the RT118x ROM can also load the ELE
+ * FW automatically from a properly packed AHAB container, in which case
+ * CONFIG_IMXRT_ELE_LOAD_FW should be disabled.
+ */
+
+__asm__ (
+    ".section .rodata.imxrt118x_ele_fw, \"a\"\n"
+    ".balign  8\n"
+    ".globl   imxrt118x_ele_fw\n"
+"imxrt118x_ele_fw:\n"
+    ".incbin " STR(IMXRT_ELE_FW_ABS_PATH) "\n"
+    ".balign  8\n"
+    ".globl   imxrt118x_ele_fw_end\n"
+"imxrt118x_ele_fw_end:\n"
+);
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -155,6 +185,12 @@ void imxrt118x_ele_init(void)
 {
   putreg32(0, ELE_MU_TCR);
   putreg32(0, ELE_MU_RCR);
+
+#ifdef CONFIG_IMXRT_ELE_LOAD_FW
+  /* Load the ELE firmware via mailbox */
+
+  imxrt118x_ele_load_fw((uint32_t)(uintptr_t)imxrt118x_ele_fw);
+#endif
 
   imxrt118x_ele_check_fw_version();
 }
