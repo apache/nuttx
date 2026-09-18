@@ -150,6 +150,198 @@
 #ifdef USE_SERIALDRIVER
 #ifdef HAVE_UART
 
+#if !defined STM32_RCC_CCIPR1_USART1SEL || STM32_RCC_CCIPR1_USART1SEL == RCC_CCIPR1_USART1SEL_RCCPCLK2
+#  define STM32_USART1_FREQUENCY STM32_PCLK2_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART1SEL == RCC_CCIPR1_USART1SEL_PLL2QCK
+#  define STM32_USART1_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART1SEL == RCC_CCIPR1_USART1SEL_PLL3QCK
+#  define STM32_USART1_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART1SEL == RCC_CCIPR1_USART1SEL_HSIKERCK
+#  define STM32_USART1_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART1SEL == RCC_CCIPR1_USART1SEL_CSIKERCK
+#  define STM32_USART1_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART1SEL == RCC_CCIPR1_USART1SEL_LSECK
+#  define STM32_USART1_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported USART1 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR1_USART2SEL || STM32_RCC_CCIPR1_USART2SEL == RCC_CCIPR1_USART2SEL_RCCPCLK1
+#  define STM32_USART2_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART2SEL == RCC_CCIPR1_USART2SEL_PLL2QCK
+#  define STM32_USART2_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART2SEL == RCC_CCIPR1_USART2SEL_PLL3QCK
+#  define STM32_USART2_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART2SEL == RCC_CCIPR1_USART2SEL_HSIKERCK
+#  define STM32_USART2_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART2SEL == RCC_CCIPR1_USART2SEL_CSIKERCK
+#  define STM32_USART2_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART2SEL == RCC_CCIPR1_USART2SEL_LSECK
+#  define STM32_USART2_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported USART2 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR1_USART3SEL || STM32_RCC_CCIPR1_USART3SEL == RCC_CCIPR1_USART3SEL_RCCPCLK1
+#  define STM32_USART3_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART3SEL == RCC_CCIPR1_USART3SEL_PLL2QCK
+#  define STM32_USART3_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART3SEL == RCC_CCIPR1_USART3SEL_PLL3QCK
+#  define STM32_USART3_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART3SEL == RCC_CCIPR1_USART3SEL_HSIKERCK
+#  define STM32_USART3_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART3SEL == RCC_CCIPR1_USART3SEL_CSIKERCK
+#  define STM32_USART3_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART3SEL == RCC_CCIPR1_USART3SEL_LSECK
+#  define STM32_USART3_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported USART3 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR1_UART4SEL || STM32_RCC_CCIPR1_UART4SEL == RCC_CCIPR1_UART4SEL_RCCPCLK1
+#  define STM32_UART4_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART4SEL == RCC_CCIPR1_UART4SEL_PLL2QCK
+#  define STM32_UART4_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART4SEL == RCC_CCIPR1_UART4SEL_PLL3QCK
+#  define STM32_UART4_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART4SEL == RCC_CCIPR1_UART4SEL_HSIKERCK
+#  define STM32_UART4_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART4SEL == RCC_CCIPR1_UART4SEL_CSIKERCK
+#  define STM32_UART4_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART4SEL == RCC_CCIPR1_UART4SEL_LSECK
+#  define STM32_UART4_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported UART4 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR1_UART5SEL || STM32_RCC_CCIPR1_UART5SEL == RCC_CCIPR1_UART5SEL_RCCPCLK1
+#  define STM32_UART5_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART5SEL == RCC_CCIPR1_UART5SEL_PLL2QCK
+#  define STM32_UART5_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART5SEL == RCC_CCIPR1_UART5SEL_PLL3QCK
+#  define STM32_UART5_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART5SEL == RCC_CCIPR1_UART5SEL_HSIKERCK
+#  define STM32_UART5_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART5SEL == RCC_CCIPR1_UART5SEL_CSIKERCK
+#  define STM32_UART5_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART5SEL == RCC_CCIPR1_UART5SEL_LSECK
+#  define STM32_UART5_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported UART5 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR1_USART6SEL || STM32_RCC_CCIPR1_USART6SEL == RCC_CCIPR1_USART6SEL_RCCPCLK1
+#  define STM32_USART6_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART6SEL == RCC_CCIPR1_USART6SEL_PLL2QCK
+#  define STM32_USART6_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART6SEL == RCC_CCIPR1_USART6SEL_PLL3QCK
+#  define STM32_USART6_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART6SEL == RCC_CCIPR1_USART6SEL_HSIKERCK
+#  define STM32_USART6_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART6SEL == RCC_CCIPR1_USART6SEL_CSIKERCK
+#  define STM32_USART6_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART6SEL == RCC_CCIPR1_USART6SEL_LSECK
+#  define STM32_USART6_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported USART6 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR1_UART7SEL || STM32_RCC_CCIPR1_UART7SEL == RCC_CCIPR1_UART7SEL_RCCPCLK1
+#  define STM32_UART7_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART7SEL == RCC_CCIPR1_UART7SEL_PLL2QCK
+#  define STM32_UART7_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART7SEL == RCC_CCIPR1_UART7SEL_PLL3QCK
+#  define STM32_UART7_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART7SEL == RCC_CCIPR1_UART7SEL_HSIKERCK
+#  define STM32_UART7_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART7SEL == RCC_CCIPR1_UART7SEL_CSIKERCK
+#  define STM32_UART7_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART7SEL == RCC_CCIPR1_UART7SEL_LSECK
+#  define STM32_UART7_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported UART7 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR1_UART8SEL || STM32_RCC_CCIPR1_UART8SEL == RCC_CCIPR1_UART8SEL_RCCPCLK1
+#  define STM32_UART8_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART8SEL == RCC_CCIPR1_UART8SEL_PLL2QCK
+#  define STM32_UART8_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART8SEL == RCC_CCIPR1_UART8SEL_PLL3QCK
+#  define STM32_UART8_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART8SEL == RCC_CCIPR1_UART8SEL_HSIKERCK
+#  define STM32_UART8_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART8SEL == RCC_CCIPR1_UART8SEL_CSIKERCK
+#  define STM32_UART8_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART8SEL == RCC_CCIPR1_UART8SEL_LSECK
+#  define STM32_UART8_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported UART8 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR1_UART9SEL || STM32_RCC_CCIPR1_UART9SEL == RCC_CCIPR1_UART9SEL_RCCPCLK1
+#  define STM32_UART9_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART9SEL == RCC_CCIPR1_UART9SEL_PLL2QCK
+#  define STM32_UART9_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART9SEL == RCC_CCIPR1_UART9SEL_PLL3QCK
+#  define STM32_UART9_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART9SEL == RCC_CCIPR1_UART9SEL_HSIKERCK
+#  define STM32_UART9_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART9SEL == RCC_CCIPR1_UART9SEL_CSIKERCK
+#  define STM32_UART9_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART9SEL == RCC_CCIPR1_UART9SEL_LSECK
+#  define STM32_UART9_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported UART9 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR1_USART10SEL || STM32_RCC_CCIPR1_USART10SEL == RCC_CCIPR1_USART10SEL_RCCPCLK1
+#  define STM32_USART10_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART10SEL == RCC_CCIPR1_USART10SEL_PLL2QCK
+#  define STM32_USART10_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART10SEL == RCC_CCIPR1_USART10SEL_PLL3QCK
+#  define STM32_USART10_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART10SEL == RCC_CCIPR1_USART10SEL_HSIKERCK
+#  define STM32_USART10_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART10SEL == RCC_CCIPR1_USART10SEL_CSIKERCK
+#  define STM32_USART10_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART10SEL == RCC_CCIPR1_USART10SEL_LSECK
+#  define STM32_USART10_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported USART10 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR2_USART11SEL || STM32_RCC_CCIPR2_USART11SEL == RCC_CCIPR2_USART11SEL_RCCPCLK1
+#  define STM32_USART11_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR2_USART11SEL == RCC_CCIPR2_USART11SEL_PLL2QCK
+#  define STM32_USART11_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR2_USART11SEL == RCC_CCIPR2_USART11SEL_PLL3QCK
+#  define STM32_USART11_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR2_USART11SEL == RCC_CCIPR2_USART11SEL_HSIKERCK
+#  define STM32_USART11_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR2_USART11SEL == RCC_CCIPR2_USART11SEL_CSIKERCK
+#  define STM32_USART11_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR2_USART11SEL == RCC_CCIPR2_USART11SEL_LSECK
+#  define STM32_USART11_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported USART11 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR2_UART12SEL || STM32_RCC_CCIPR2_UART12SEL == RCC_CCIPR2_UART12SEL_RCCPCLK1
+#  define STM32_UART12_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR2_UART12SEL == RCC_CCIPR2_UART12SEL_PLL2QCK
+#  define STM32_UART12_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR2_UART12SEL == RCC_CCIPR2_UART12SEL_PLL3QCK
+#  define STM32_UART12_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR2_UART12SEL == RCC_CCIPR2_UART12SEL_HSIKERCK
+#  define STM32_UART12_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR2_UART12SEL == RCC_CCIPR2_UART12SEL_CSIKERCK
+#  define STM32_UART12_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR2_UART12SEL == RCC_CCIPR2_UART12SEL_LSECK
+#  define STM32_UART12_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported UART12 Clock Selection"
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -157,8 +349,8 @@
 struct stm32_serial_s
 {
   struct uart_dev_s dev;       /* Generic UART device */
-  uint16_t          ie;        /* Saved interrupt mask bits value */
-  uint16_t          sr;        /* Saved status bits */
+  uint32_t          ie;        /* Saved interrupt mask bits value */
+  uint32_t          sr;        /* Saved status bits */
 
   /* Has been initialized and HW is setup. */
 
@@ -194,7 +386,7 @@ struct stm32_serial_s
   const uint32_t    baud;      /* Configured baud */
 #endif
   const uint8_t     irq;       /* IRQ associated with this USART */
-  const uint32_t    apbclock;  /* PCLK 1 or 2 frequency */
+  const uint32_t    apbclock;  /* Peripheral kernel clock frequency */
   const uint32_t    usartbase; /* Base address of USART registers */
   const uint32_t    tx_gpio;   /* U[S]ART TX GPIO pin configuration */
   const uint32_t    rx_gpio;   /* U[S]ART RX GPIO pin configuration */
@@ -228,6 +420,8 @@ struct stm32_serial_s
   const uint8_t     unconfigure; /* Unconfigure pins on close */
   const bool        islpuart;    /* Is this device a Low Power UART? */
   spinlock_t        lock;
+  const bool wakefromlowpower;      /* Enable interrupt to wake from low power mode */
+  const uint8_t wus;                /* Wake from low power configuration. USART_CR3_WUS_* */
 };
 
 /****************************************************************************
@@ -536,7 +730,7 @@ static struct stm32_serial_s g_usart1priv =
   .bits          = CONFIG_USART1_BITS,
   .stopbits2     = CONFIG_USART1_2STOP,
   .baud          = CONFIG_USART1_BAUD,
-  .apbclock      = STM32_PCLK2_FREQUENCY,
+  .apbclock      = STM32_USART1_FREQUENCY,
   .usartbase     = STM32_USART1_BASE,
   .tx_gpio       = GPIO_USART1_TX,
   .rx_gpio       = GPIO_USART1_RX,
@@ -576,6 +770,10 @@ static struct stm32_serial_s g_usart1priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_USART1_WAKE_FROM_LOW_POWER) && defined(CONFIG_USART1_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_USART1_WUS,
+#endif
 };
 #endif
 
@@ -613,7 +811,7 @@ static struct stm32_serial_s g_usart2priv =
   .bits          = CONFIG_USART2_BITS,
   .stopbits2     = CONFIG_USART2_2STOP,
   .baud          = CONFIG_USART2_BAUD,
-  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .apbclock      = STM32_USART2_FREQUENCY,
   .usartbase     = STM32_USART2_BASE,
   .tx_gpio       = GPIO_USART2_TX,
   .rx_gpio       = GPIO_USART2_RX,
@@ -653,6 +851,10 @@ static struct stm32_serial_s g_usart2priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_USART2_WAKE_FROM_LOW_POWER) && defined(CONFIG_USART2_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_USART2_WUS,
+#endif
 };
 #endif
 
@@ -690,7 +892,7 @@ static struct stm32_serial_s g_usart3priv =
   .bits          = CONFIG_USART3_BITS,
   .stopbits2     = CONFIG_USART3_2STOP,
   .baud          = CONFIG_USART3_BAUD,
-  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .apbclock      = STM32_USART3_FREQUENCY,
   .usartbase     = STM32_USART3_BASE,
   .tx_gpio       = GPIO_USART3_TX,
   .rx_gpio       = GPIO_USART3_RX,
@@ -730,6 +932,10 @@ static struct stm32_serial_s g_usart3priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_USART3_WAKE_FROM_LOW_POWER) && defined(CONFIG_USART3_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_USART3_WUS,
+#endif
 };
 #endif
 
@@ -775,7 +981,7 @@ static struct stm32_serial_s g_uart4priv =
   .rts_gpio      = GPIO_UART4_RTS,
 #  endif
   .baud          = CONFIG_UART4_BAUD,
-  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .apbclock      = STM32_UART4_FREQUENCY,
   .usartbase     = STM32_UART4_BASE,
   .tx_gpio       = GPIO_UART4_TX,
   .rx_gpio       = GPIO_UART4_RX,
@@ -807,6 +1013,10 @@ static struct stm32_serial_s g_uart4priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_UART4_WAKE_FROM_LOW_POWER) && defined(CONFIG_UART4_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_UART4_WUS,
+#endif
 };
 #endif
 
@@ -852,7 +1062,7 @@ static struct stm32_serial_s g_uart5priv =
   .rts_gpio      = GPIO_UART5_RTS,
 #  endif
   .baud           = CONFIG_UART5_BAUD,
-  .apbclock       = STM32_PCLK1_FREQUENCY,
+  .apbclock       = STM32_UART5_FREQUENCY,
   .usartbase      = STM32_UART5_BASE,
   .tx_gpio        = GPIO_UART5_TX,
   .rx_gpio        = GPIO_UART5_RX,
@@ -884,6 +1094,10 @@ static struct stm32_serial_s g_uart5priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_UART5_WAKE_FROM_LOW_POWER) && defined(CONFIG_UART5_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_UART5_WUS,
+#endif
 };
 #endif
 
@@ -921,7 +1135,7 @@ static struct stm32_serial_s g_usart6priv =
   .bits          = CONFIG_USART6_BITS,
   .stopbits2     = CONFIG_USART6_2STOP,
   .baud          = CONFIG_USART6_BAUD,
-  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .apbclock      = STM32_USART6_FREQUENCY,
   .usartbase     = STM32_USART6_BASE,
   .tx_gpio       = GPIO_USART6_TX,
   .rx_gpio       = GPIO_USART6_RX,
@@ -961,6 +1175,10 @@ static struct stm32_serial_s g_usart6priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_USART6_WAKE_FROM_LOW_POWER) && defined(CONFIG_USART6_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_USART6_WUS,
+#endif
 };
 #endif
 
@@ -1006,7 +1224,7 @@ static struct stm32_serial_s g_uart7priv =
   .rts_gpio      = GPIO_UART7_RTS,
 #  endif
   .baud           = CONFIG_UART7_BAUD,
-  .apbclock       = STM32_PCLK1_FREQUENCY,
+  .apbclock       = STM32_UART7_FREQUENCY,
   .usartbase      = STM32_UART7_BASE,
   .tx_gpio        = GPIO_UART7_TX,
   .rx_gpio        = GPIO_UART7_RX,
@@ -1038,6 +1256,10 @@ static struct stm32_serial_s g_uart7priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_UART7_WAKE_FROM_LOW_POWER) && defined(CONFIG_UART7_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_UART7_WUS,
+#endif
 };
 #endif
 
@@ -1083,7 +1305,7 @@ static struct stm32_serial_s g_uart8priv =
   .rts_gpio      = GPIO_UART8_RTS,
 #  endif
   .baud           = CONFIG_UART8_BAUD,
-  .apbclock       = STM32_PCLK1_FREQUENCY,
+  .apbclock       = STM32_UART8_FREQUENCY,
   .usartbase      = STM32_UART8_BASE,
   .tx_gpio        = GPIO_UART8_TX,
   .rx_gpio        = GPIO_UART8_RX,
@@ -1115,6 +1337,10 @@ static struct stm32_serial_s g_uart8priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_UART8_WAKE_FROM_LOW_POWER) && defined(CONFIG_UART8_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_UART8_WUS,
+#endif
 };
 #endif
 
@@ -1160,7 +1386,7 @@ static struct stm32_serial_s g_uart9priv =
   .rts_gpio      = GPIO_UART9_RTS,
 #  endif
   .baud           = CONFIG_UART9_BAUD,
-  .apbclock       = STM32_PCLK1_FREQUENCY,
+  .apbclock       = STM32_UART9_FREQUENCY,
   .usartbase      = STM32_UART9_BASE,
   .tx_gpio        = GPIO_UART9_TX,
   .rx_gpio        = GPIO_UART9_RX,
@@ -1192,6 +1418,10 @@ static struct stm32_serial_s g_uart9priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_UART9_WAKE_FROM_LOW_POWER) && defined(CONFIG_UART9_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_UART9_WUS,
+#endif
 };
 #endif
 
@@ -1229,7 +1459,7 @@ static struct stm32_serial_s g_usart10priv =
   .bits          = CONFIG_USART10_BITS,
   .stopbits2     = CONFIG_USART10_2STOP,
   .baud          = CONFIG_USART10_BAUD,
-  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .apbclock      = STM32_USART10_FREQUENCY,
   .usartbase     = STM32_USART10_BASE,
   .tx_gpio       = GPIO_USART10_TX,
   .rx_gpio       = GPIO_USART10_RX,
@@ -1269,6 +1499,10 @@ static struct stm32_serial_s g_usart10priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_USART10_WAKE_FROM_LOW_POWER) && defined(CONFIG_USART10_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_USART10_WUS,
+#endif
 };
 #endif
 
@@ -1306,7 +1540,7 @@ static struct stm32_serial_s g_usart11priv =
   .bits          = CONFIG_USART11_BITS,
   .stopbits2     = CONFIG_USART11_2STOP,
   .baud          = CONFIG_USART11_BAUD,
-  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .apbclock      = STM32_USART11_FREQUENCY,
   .usartbase     = STM32_USART11_BASE,
   .tx_gpio       = GPIO_USART11_TX,
   .rx_gpio       = GPIO_USART11_RX,
@@ -1346,6 +1580,10 @@ static struct stm32_serial_s g_usart11priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_USART11_WAKE_FROM_LOW_POWER) && defined(CONFIG_USART11_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_USART11_WUS,
+#endif
 };
 #endif
 
@@ -1391,7 +1629,7 @@ static struct stm32_serial_s g_uart12priv =
   .rts_gpio      = GPIO_UART12_RTS,
 #  endif
   .baud           = CONFIG_UART12_BAUD,
-  .apbclock       = STM32_PCLK1_FREQUENCY,
+  .apbclock       = STM32_UART12_FREQUENCY,
   .usartbase      = STM32_UART12_BASE,
   .tx_gpio        = GPIO_UART12_TX,
   .rx_gpio        = GPIO_UART12_RX,
@@ -1423,6 +1661,10 @@ static struct stm32_serial_s g_uart12priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_UART12_WAKE_FROM_LOW_POWER) && defined(CONFIG_UART12_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_UART12_WUS,
+#endif
 };
 #endif
 
@@ -2239,19 +2481,21 @@ static int stm32serial_setup(struct uart_dev_s *dev)
 
   /* Configure CR1 */
 
-  /* Clear TE, REm and all interrupt enable bits */
+  /* Clear UE, TE, RE, and all interrupt enable bits */
 
   regval  = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
 
 #ifdef CONFIG_STM32_LPUART1
   if (priv->islpuart == true)
     {
-      regval &= ~(USART_CR1_TE | USART_CR1_RE | LPUART_CR1_ALLINTS);
+      regval &= ~(USART_CR1_UE | USART_CR1_TE | USART_CR1_RE |
+                  LPUART_CR1_ALLINTS);
     }
   else
 #endif
     {
-      regval &= ~(USART_CR1_TE | USART_CR1_RE | USART_CR1_ALLINTS);
+      regval &= ~(USART_CR1_UE | USART_CR1_TE | USART_CR1_RE |
+                  USART_CR1_ALLINTS);
     }
 
   stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, regval);
@@ -2262,7 +2506,13 @@ static int stm32serial_setup(struct uart_dev_s *dev)
 
   regval  = stm32serial_getreg(priv, STM32_USART_CR3_OFFSET);
   regval &= ~(USART_CR3_CTSIE | USART_CR3_CTSE | USART_CR3_RTSE |
-              USART_CR3_EIE);
+              USART_CR3_EIE | USART_CR3_WUFIE);
+
+  if (priv->wakefromlowpower)
+    {
+      regval |= USART_CR3_WUFIE;
+      regval |= (priv->wus << USART_CR3_WUS_SHIFT);
+    }
 
   stm32serial_putreg(priv, STM32_USART_CR3_OFFSET, regval);
 
@@ -2273,7 +2523,8 @@ static int stm32serial_setup(struct uart_dev_s *dev)
   /* Enable Rx, Tx, and the USART */
 
   regval      = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
-  regval     |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
+  regval     |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE |
+                 USART_CR1_FIFOEN);
   stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, regval);
 
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
@@ -2622,6 +2873,7 @@ static int stm32serial_interrupt(int irq, void *context, void *arg)
        * "           "    USART_ISR_NE   Noise Error
        * "           "    USART_ISR_ORE  Overrun Error Detected
        * USART_CR3_CTSIE  USART_ISR_CTS  CTS flag               (not used)
+       * USART_CR3_WUFIE  USART_ISR_WUF  wake up from low power
        *
        * NOTE: Some of these status bits must be cleared by explicitly
        * writing one to the ICR register: USART_ICR_CTSCF, USART_ICR_LBDCF.
@@ -2645,6 +2897,13 @@ static int stm32serial_interrupt(int irq, void *context, void *arg)
           stm32serial_restoreusartint(priv, priv->ie & ~USART_CR1_TCIE);
         }
 #endif
+
+      /* Wake up from low power mode interrupt */
+
+      if ((priv->sr & USART_ISR_WUF) != 0)
+        {
+          stm32serial_putreg(priv, STM32_USART_ICR_OFFSET, USART_ICR_WUCF);
+        }
 
       /* Handle incoming, receive bytes. */
 
