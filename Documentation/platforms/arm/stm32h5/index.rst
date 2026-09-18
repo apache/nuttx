@@ -135,6 +135,26 @@ of the block size and count when partitioning the OTP area for their needs.
 ``len`` is the number of bytes - not words. It has no alignment requirement. ``offset`` is
 the offset in bytes. It must be a multiple of 4.
 
+Clocks
+------
+
+``STM32_BOARD_HSIKERON_ENABLE`` can be defined in board.h to keep HSI running in
+STOP mode. This can be used to keep a peripheral clocked by HSI running in
+STOP mode.
+
+``STM32_RCC_CCIPR1_U[S]ARTxSEL`` (e.g. ``STM32_RCC_CCIPR1_USART3SEL``) can be defined as one of
+
+- ``RCC_CCIPR1_U[S]ARTxSEL_RCCPCLK1``
+- ``RCC_CCIPR1_U[S]ARTxSEL_PLL2QCK``
+- ``RCC_CCIPR1_U[S]ARTxSEL_PLL3QCK``
+- ``RCC_CCIPR1_U[S]ARTxSEL_HSIKERCK``
+- ``RCC_CCIPR1_U[S]ARTxSEL_CSIKERCK``
+- ``RCC_CCIPR1_U[S]ARTxSEL_LSECK``
+
+E.g. ``RCC_CCIPR1_USART3SEL_HSIKERCK`` in board.h to select the clock source for that USART.
+The clock source is set in RCC initialization. Only stm32_serial.c is aware of this setting.
+TODO: Make stm32_lowputc.c aware of this clock source setting too.
+
 References
 =================
 [RM0481] Reference Manual: STM32H523/33xx, STM32H562/63xx, and STM32H573xx Arm® -based 32-bit MCUs
