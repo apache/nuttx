@@ -27,6 +27,9 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 #include <errno.h>
+#include <syslog.h>
+#include <inttypes.h>
+#include <string.h>
 
 #include <sys/endian.h>
 
@@ -34,6 +37,7 @@
 #include <nuttx/kthread.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/addrenv.h>
+#include <nuttx/cache.h>
 #include <nuttx/spinlock.h>
 
 #include <nuttx/usb/usb.h>
@@ -52,12 +56,6 @@
 
 #if CONFIG_USBHOST_XHCI_MAX_DEVS > XHCI_MAX_DEVS
 #  error Invalid value for CONFIG_USBHOST_XHCI_MAX_DEVS
-#endif
-
-/* USB HUB support is not yet implemented */
-
-#ifdef CONFIG_USBHOST_HUB
-#  error XHCI USB HUB support is not yet implemented
 #endif
 
 /* Some constants for this implementation */
@@ -79,6 +77,14 @@
  */
 
 #define XHCI_PORT_RESET_MS       (500)
+
+/* How much memory a context occupies, which depends on the stride the
+ * controller asked for.  One entry for the slot and one per endpoint, and
+ * the input context carries its control entry in front of both.
+ */
+
+#define XHCI_DEVCTX_SIZE(priv)   ((1 + XHCI_MAX_ENDPOINTS) * (priv)->ctxsize)
+#define XHCI_INCTX_SIZE(priv)    ((2 + XHCI_MAX_ENDPOINTS) * (priv)->ctxsize)
 #define XHCI_BUFSIZE             (512)
 
 /* Port numbers macros */
@@ -142,20 +148,28 @@ struct xhci_epinfo_s
   int                result;       /* The result of the transfer */
   size_t             xfrd;         /* On completion, will hold the number of bytes transferred */
   size_t             buflen;       /* Buffer length used for transfer */
+  FAR uint8_t       *buffer;       /* The caller's buffer, for cache maintenance */
+  FAR uint8_t       *bounce;       /* Aligned stand-in for it, or NULL */
+  size_t             dmalen;       /* Length the cache is maintained over */
+  size_t             dmacopy;      /* Length to copy back out of a stand-in */
+  bool               dmain;        /* Direction this buffer was prepared for */
   sem_t              iocsem;       /* Semaphore used to wait for transfer completion */
+
+  /* One transfer at a time on an endpoint.  The controller lock below is
+   * released while a transfer is in flight, so it cannot serve this: two
+   * threads would each set up a transfer on the same endpoint and the
+   * second would find iocwait already set.  A device's default control
+   * endpoint is the one that meets this, since every interface driver on
+   * a composite device speaks through it.
+   */
+
+  mutex_t            exclsem;      /* Serialises transfers on this endpoint */
 #ifdef CONFIG_USBHOST_ASYNCH
   usbhost_asynch_t   callback;     /* Transfer complete callback */
   FAR void          *arg;          /* Argument that accompanies the callback */
 #endif
   struct xhci_ring_s td;           /* TD ring for this endpoint */
   uint8_t            slot;         /* Slot where this EP resides */
-
-  /* These fields are used in the split-transaction protocol. */
-
-  uint8_t           hubaddr;      /* USB device address of the high-speed hub below
-                                   * which a full/low-speed device is attached.
-                                   */
-  uint8_t           hubport;      /* The port on the above high-speed hub. */
 };
 
 /* This structure retains the state of one root hub port */
@@ -172,6 +186,7 @@ struct xhci_rhport_s
   /* Root hub port status */
 
   bool                          connected;  /* Connected to device */
+  uint8_t                       enumfail;   /* Consecutive failed enumerations */
   int8_t                        slot;       /* Slot ID associated with this port */
   struct xhci_epinfo_s          ep0;        /* EP0 endpoint info */
   struct usbhost_roothubport_s  hport;      /* This is the hub port description understood
@@ -191,6 +206,20 @@ struct xhci_dev_s
   FAR struct xhci_input_dev_ctx_s *input;   /* Input Device Context. Input to xHC */
   FAR struct xhci_rhport_s        *rhport;  /* Root Hub Port associated with this device */
 
+  /* The port this device is attached to.  Several devices can share a root
+   * hub port once a hub is in between, so this, and not the port above, is
+   * what identifies a device to the class drivers.
+   */
+
+  FAR struct usbhost_hubport_s    *hport;
+
+  /* True once the controller has been told this device is a hub.  It is not
+   * known when the slot is created: the hub descriptor is read later, and
+   * only then does anything know how many ports it has.
+   */
+
+  bool                             ishub;
+
   /* Reference to allocated endpoints */
 
   FAR struct xhci_epinfo_s *epinfo[XHCI_MAX_ENDPOINTS];
@@ -201,7 +230,14 @@ struct xhci_dev_s
 struct usbhost_xhci_s
 {
 #ifdef CONFIG_USBHOST_HUB
-  FAR struct usbhost_hubport_s *hport;      /* Used to pass external hub port events */
+  /* Ports a hub has reported and the waiter has not collected.  A hub
+   * reports each changed port without waiting for the last, so several can
+   * be outstanding, but never more than there are slots.
+   */
+
+  FAR struct usbhost_hubport_s *hports[CONFIG_USBHOST_XHCI_MAX_DEVS];
+  uint8_t                       hhead;    /* Next free entry */
+  uint8_t                       htail;    /* Next entry to collect */
 #endif
   struct usbhost_devaddr_s      devgen;     /* Address generation data */
   bool                          pscwait;    /* TRUE: Thread is waiting for port status change event */
@@ -212,6 +248,7 @@ struct usbhost_xhci_s
   /* xHCI parameters */
 
   uint8_t                       no_ports;   /* Number of USB Ports */
+  uint8_t                       bus;        /* Which controller this is */
   uint8_t                       no_slots;   /* Maximum number of Device Slots (one per USB device) */
   uint8_t                       no_scratch; /* Number of scratch buffers */
   uint8_t                       no_erst;    /* Event Ring Segment Table size */
@@ -246,6 +283,7 @@ struct usbhost_xhci_s
   FAR const struct xhci_bus_ops_s *ops;     /* Bus operations */
   FAR void                     *arg;        /* Bus private data */
   FAR const char               *name;       /* What to call this controller */
+  uint8_t                       ctxsize;    /* Context stride, 32 or 64 bytes */
   uint32_t                      pending;    /* IRQ pending status */
   struct work_s                 work;       /* IRQ work */
   struct work_s                 pscwork;    /* Port status change work */
@@ -341,6 +379,7 @@ static int xhci_ctrl_reset(FAR struct usbhost_xhci_s *priv);
 /* Port management **********************************************************/
 
 static void xhci_probe_ports(FAR struct usbhost_xhci_s *priv);
+static FAR const char *xhci_speed_str(uint32_t portsc);
 static int xhci_port_enable(FAR struct usbhost_xhci_s *priv,
                             FAR struct usbhost_hubport_s *hport);
 
@@ -354,13 +393,20 @@ static void xhci_ep_configure(FAR struct usbhost_xhci_s *priv,
                               uint8_t maxburst, uint64_t tr_dp,
                               uint8_t mult, uint8_t interval);
 static int xhci_address_set(FAR struct usbhost_xhci_s *priv,
-                            FAR struct xhci_rhport_s *rhport, bool setaddr);
+                            FAR struct xhci_dev_s *dev, bool setaddr);
 static int xhci_slot_init(FAR struct usbhost_xhci_s *priv,
                           FAR struct xhci_dev_s *dev);
+#ifdef CONFIG_USBHOST_HUB
+static uint32_t xhci_route_string(FAR struct usbhost_hubport_s *hport);
+static uint32_t xhci_slot_tt(FAR struct usbhost_xhci_s *priv,
+                             FAR struct xhci_dev_s *dev);
+#endif
 static int xhci_device_init(FAR struct usbhost_xhci_s *priv,
-                            FAR struct xhci_rhport_s *rhport);
+                            FAR struct xhci_rhport_s *rhport,
+                            FAR struct usbhost_hubport_s *hport,
+                            FAR struct xhci_epinfo_s *ep0info);
 static int xhci_device_deinit(FAR struct usbhost_xhci_s *priv,
-                              FAR struct xhci_rhport_s *rhport);
+                              FAR struct xhci_dev_s *dev);
 static inline uint8_t xhci_epno_get(FAR struct xhci_epinfo_s *epinfo);
 static void xhci_context_ctrl(FAR struct usbhost_xhci_s *priv,
                               FAR struct xhci_dev_s *dev,
@@ -393,9 +439,11 @@ static int xhci_ioc_wait(FAR struct xhci_epinfo_s *epinfo);
 #ifdef CONFIG_USBHOST_ASYNCH
 static inline int xhci_ioc_async_setup(FAR struct xhci_rhport_s *rhport,
                                        FAR struct xhci_epinfo_s *epinfo,
+                                       size_t buflen,
                                        usbhost_asynch_t callback,
                                        FAR void *arg);
-static void xhci_asynch_completion(FAR struct xhci_epinfo_s *epinfo);
+static void xhci_asynch_completion(FAR struct usbhost_xhci_s *priv,
+                                   FAR struct xhci_epinfo_s *epinfo);
 #endif
 static int xhci_control_setup(FAR struct xhci_rhport_s *rhport,
                               FAR struct xhci_epinfo_s *epinfo,
@@ -411,6 +459,22 @@ static int xhci_isoc_setup(FAR struct xhci_rhport_s *rhport,
 #endif
 static ssize_t xhci_transfer_wait(FAR struct usbhost_xhci_s *priv,
                                   FAR struct xhci_epinfo_s *epinfo);
+static bool xhci_dmacapable(FAR struct usbhost_xhci_s *priv,
+                            FAR uint8_t *buffer, size_t buflen);
+static uint32_t xhci_speed_id(uint8_t speed);
+static inline FAR struct xhci_slot_ctx_s *
+xhci_in_slot(FAR struct usbhost_xhci_s *priv,
+             FAR struct xhci_input_dev_ctx_s *input);
+static inline FAR struct xhci_ep_ctx_s *
+xhci_in_ep(FAR struct usbhost_xhci_s *priv,
+           FAR struct xhci_input_dev_ctx_s *input, int epidx);
+static inline FAR struct xhci_slot_ctx_s *
+xhci_out_slot(FAR struct xhci_dev_ctx_s *ctx);
+static FAR uint8_t *xhci_dma_prepare(FAR struct usbhost_xhci_s *priv,
+                                     FAR struct xhci_epinfo_s *epinfo,
+                                     FAR uint8_t *buffer, size_t buflen,
+                                     bool dirin);
+static void xhci_dma_finish(FAR struct xhci_epinfo_s *epinfo);
 
 /* Interrupt handling *******************************************************/
 
@@ -718,8 +782,17 @@ static void xhci_dump_mem(FAR struct usbhost_xhci_s *priv,
   uinfo("Dump xHCI registers: %s\n", msg);
 
   uinfo("=== Host Controller Capability Registers ===\n");
-  xhci_dump_capa_reg(priv, "CAPLENGTH   ", XHCI_CAPLENGTH);
-  xhci_dump_capa_reg(priv, "HCIVERSION  ", XHCI_HCIVERSION);
+
+  /* CAPLENGTH and HCIVERSION share one word, and a register block reached
+   * over a bus that only answers aligned accesses cannot be read at the
+   * odd offset the second one has.  Read the word once and take both from
+   * it.
+   */
+
+  uinfo("\tCAPLENGTH   :\t\t0x%" PRIx32 "\n",
+        xhci_capa_getreg(priv, XHCI_CAPLENGTH) & 0xff);
+  uinfo("\tHCIVERSION  :\t\t0x%" PRIx32 "\n",
+        xhci_capa_getreg(priv, XHCI_CAPLENGTH) >> 16);
   xhci_dump_capa_reg(priv, "HCSPARAMS1  ", XHCI_HCSPARAMS1);
   xhci_dump_capa_reg(priv, "HCSPARAMS2  ", XHCI_HCSPARAMS2);
   xhci_dump_capa_reg(priv, "HCSPARAMS3  ", XHCI_HCSPARAMS3);
@@ -808,9 +881,16 @@ static int xhci_ring_init(FAR struct xhci_ring_s *ring, size_t len)
       ring->len = len;
     }
 
-  /* Reset data in ring */
+  /* Reset data in ring.
+   *
+   * Clearing dirties every line, and the controller writes into this
+   * memory itself.  Flush now, or a later writeback lands on top of an
+   * event somebody is waiting for.
+   */
 
   memset(ring->ring, 0, ring->len * sizeof(struct xhci_trb_s));
+  up_flush_dcache((uintptr_t)ring->ring,
+                  (uintptr_t)(ring->ring + ring->len));
 
   /* Fill Link TRB */
 
@@ -939,6 +1019,19 @@ static void xhci_add_trb(FAR struct usbhost_xhci_s *priv,
             {
               d2 = XHCI_TRB_D2_TC |
                    XHCI_TRB_D2_TYPE_SET(XHCI_TRB_TYPE_LINK);
+            }
+
+          /* Carry the chain forward across the join.
+           *
+           * A multi-TRB transfer can reach the end of the ring part way
+           * through, putting the link inside it.  A link without the
+           * chain bit ends the transfer where it stands, and the TRB that
+           * asked for the completion interrupt is never reached.
+           */
+
+          if ((trb[i].d2 & XHCI_TRB_D2_CH) != 0)
+            {
+              d2 |= XHCI_TRB_D2_CH;
             }
 
           /* Other parameters are already correct for this TRB */
@@ -1112,9 +1205,22 @@ static int xhci_ctrl_start(FAR struct usbhost_xhci_s *priv)
   evnt->size = XHCI_EVENT_MAX;
   evnt->res  = 0;
 
-  /* Flush all memory before write to ERDP so xhci sees correct data */
+  /* Push the structures the controller is about to be pointed at.
+   *
+   * Flush by address: up_flush_dcache_all() is a no-op on architectures
+   * whose cache can only be maintained by address.
+   */
 
-  up_flush_dcache_all();
+  up_flush_dcache((uintptr_t)priv->pg_erst,
+                  (uintptr_t)priv->pg_erst +
+                  sizeof(struct xhci_event_ring_s) * priv->no_erst);
+  up_flush_dcache((uintptr_t)priv->pg_ctx,
+                  (uintptr_t)(priv->pg_ctx + priv->no_slots + 1));
+  if (priv->pg_sb != NULL)
+    {
+      up_flush_dcache((uintptr_t)priv->pg_sb,
+                      (uintptr_t)(priv->pg_sb + priv->no_scratch));
+    }
 
   xhci_runt_putreg_8b(priv, XHCI_ERDP(0),
                       up_addrenv_va_to_pa(priv->evnt.ring));
@@ -1141,15 +1247,22 @@ static int xhci_ctrl_start(FAR struct usbhost_xhci_s *priv)
   xhci_oper_putreg_8b(priv, XHCI_CRCR,
                       up_addrenv_va_to_pa(priv->cmd.ring) | XHCI_CRCR_RCS);
 
+  /* Do not sit on completions; see XHCI_IMOD_INTERVAL */
+
+  xhci_runt_putreg(priv, XHCI_IMOD(0), XHCI_IMOD_DEFAULT);
+
   /* Enable interrupts */
 
   regval = xhci_runt_getreg(priv, XHCI_IMAN(0));
   regval |= XHCI_IMAN_IE;
   xhci_runt_putreg(priv, XHCI_IMAN(0), regval);
 
-  /* Flush all memory once again */
+  /* And the command ring, whose last entry was just made to point back at
+   * its own beginning.
+   */
 
-  up_flush_dcache_all();
+  up_flush_dcache((uintptr_t)priv->cmd.ring,
+                  (uintptr_t)(priv->cmd.ring + XHCI_CMD_MAX));
 
   /* Turn the host controller ON, enable interrupts and system errors */
 
@@ -1291,8 +1404,13 @@ static void xhci_probe_ports(FAR struct usbhost_xhci_s *priv)
       portsc = xhci_oper_getreg(priv, XHCI_PORTSC(i));
       priv->rhport[i].connected = ((portsc & XHCI_PORTSC_CCS) != 0);
 
-      /* Clear status change */
+      /* Clear status change, but not PED.  Port Enabled/Disabled is
+       * write-one-to-clear, so writing back what was read disables any
+       * port that came up enabled, which is what a device attached at
+       * power up does.
+       */
 
+      portsc &= ~XHCI_PORTSC_PED;
       xhci_oper_putreg(priv, XHCI_PORTSC(i), portsc);
     }
 }
@@ -1408,6 +1526,16 @@ static int xhci_port_enable(FAR struct usbhost_xhci_s *priv,
           return -EINVAL;
         }
     }
+
+  /* Say what turned up, now that the port can answer.
+   *
+   * The speed field only means anything once the port has been reset and
+   * enabled.  A USB2 port reports the reset default, full speed, until
+   * then.
+   */
+
+  syslog(LOG_INFO, "%s: port %d: device attached at %s\n",
+         priv->name, rhpndx + 1, xhci_speed_str(regval));
 
   return OK;
 }
@@ -1525,15 +1653,11 @@ static void xhci_ep_configure(FAR struct usbhost_xhci_s *priv,
  ****************************************************************************/
 
 static int xhci_address_set(FAR struct usbhost_xhci_s *priv,
-                            FAR struct xhci_rhport_s *rhport, bool setaddr)
+                            FAR struct xhci_dev_s *dev, bool setaddr)
 {
-  FAR struct xhci_dev_s *dev;
-  uint64_t ctx;
+  uint64_t ctx = up_addrenv_va_to_pa(dev->input);
 
-  dev = rhport->dev;
-  ctx = up_addrenv_va_to_pa(dev->input);
-
-  return xhci_cmd_setaddr(priv, rhport->slot, ctx, !setaddr);
+  return xhci_cmd_setaddr(priv, dev->slot, ctx, !setaddr);
 }
 
 /****************************************************************************
@@ -1562,7 +1686,7 @@ static int xhci_slot_init(FAR struct usbhost_xhci_s *priv,
    * Initialize all fields to 0.
    */
 
-  memset(dev->input, 0, sizeof(struct xhci_input_dev_ctx_s));
+  memset(dev->input, 0, XHCI_INCTX_SIZE(priv));
 
   /* Step 2. Initialize the Input Control Context by setting the A0 and
    * A1 flags to 1 (Slot flag and EP0 flag).
@@ -1572,21 +1696,21 @@ static int xhci_slot_init(FAR struct usbhost_xhci_s *priv,
            XHCI_IN_CTX1_A(XHCI_EP0_FLAG);
   xhci_context_ctrl(priv, dev, 0, regval);
 
-  /* Step 3. Initialize the Input Slot Context */
-
-  regval = XHCI_ST_CTX0_CTXENT_SET(1);
-
-#ifdef CONFIG_USBHOST_HUB
-  /* TODO:
-   *   1. Activate the transaction translator if required
-   *   2. Configure hub bit in slot context if hub
-   *   3. configure route string
+  /* Step 3. Initialize the Input Slot Context.
+   *
+   * The speed field has no valid zero.  This is the only place the
+   * controller learns the device's speed, and one that checks refuses
+   * Address Device with a parameter error without it.
    */
 
-#  warning missing logic
+  regval = XHCI_ST_CTX0_CTXENT_SET(1) |
+           XHCI_ST_CTX0_SPEED_SET(xhci_speed_id(dev->hport->speed));
+
+#ifdef CONFIG_USBHOST_HUB
+  regval |= XHCI_ST_CTX0_RTSTR_SET(xhci_route_string(dev->hport));
 #endif
 
-  dev->input->slot.ctx[0] = htole32(regval);
+  xhci_in_slot(priv, dev->input)->ctx[0] = htole32(regval);
 
   /* Configure Root Hub Port Number (starts from 1) */
 
@@ -1595,18 +1719,23 @@ static int xhci_slot_init(FAR struct usbhost_xhci_s *priv,
   /* TODO: configure number of ports */
 
   regval |= XHCI_ST_CTX1_PORTS_SET(0);
-  dev->input->slot.ctx[1] = htole32(regval);
+  xhci_in_slot(priv, dev->input)->ctx[1] = htole32(regval);
+
+#ifdef CONFIG_USBHOST_HUB
+  xhci_in_slot(priv, dev->input)->ctx[2] = htole32(xhci_slot_tt(priv, dev));
+#endif
 
   /* Step 4. the Transfer Ring for the Default Control Endpoint is already
    * allocated.
    */
 
-  drdp = up_addrenv_va_to_pa(dev->rhport->ep0.td.ring);
+  DEBUGASSERT(dev->epinfo[0] != NULL);
+  drdp = up_addrenv_va_to_pa(dev->epinfo[0]->td.ring);
 
   /* Step 5. Initialize the Input default control Endpoint 0 Context */
 
-  DEBUGASSERT(dev->rhport != NULL);
-  if (dev->rhport->hport.hport.speed == USB_SPEED_HIGH)
+  DEBUGASSERT(dev->hport != NULL);
+  if (dev->hport->speed == USB_SPEED_HIGH)
     {
       /* For high-speed, we must use 64 bytes */
 
@@ -1621,7 +1750,7 @@ static int xhci_slot_init(FAR struct usbhost_xhci_s *priv,
 
   DEBUGASSERT(drdp != 0);
   xhci_ep_configure(priv,
-                    &dev->input->ep[0],
+                    xhci_in_ep(priv, dev->input, 0),
                     XHCI_EPTYPE_CTRL, maxpkt,
                     0, drdp,
                     0, 0);
@@ -1630,13 +1759,22 @@ static int xhci_slot_init(FAR struct usbhost_xhci_s *priv,
    * Initialize all fields to 0.
    */
 
-  memset(dev->ctx, 0, sizeof(struct xhci_dev_ctx_s));
+  memset(dev->ctx, 0, XHCI_DEVCTX_SIZE(priv));
 
-  /* Flush Device input context */
+  /* Flush both contexts.
+   *
+   * The output context is the controller's to write, so clearing it must
+   * reach memory: the dirty zeros left in cache are written back later, on
+   * top of what the controller has put there.  The slot state lives in
+   * that context, and losing it fails the next command against the slot.
+   */
+
+  up_flush_dcache((uintptr_t)dev->ctx,
+                  (uintptr_t)dev->ctx + XHCI_DEVCTX_SIZE(priv));
 
   up_flush_dcache((uintptr_t)dev->input,
                   (uintptr_t)dev->input +
-                  sizeof(struct xhci_input_dev_ctx_s));
+                  XHCI_INCTX_SIZE(priv));
 
   /* Step 7. Load the appropriate (Device Slot ID) entry in the Device
    * Context Base Address Array with a pointer to the Output Device
@@ -1664,7 +1802,9 @@ static int xhci_slot_init(FAR struct usbhost_xhci_s *priv,
  ****************************************************************************/
 
 static int xhci_device_init(FAR struct usbhost_xhci_s *priv,
-                            FAR struct xhci_rhport_s *rhport)
+                            FAR struct xhci_rhport_s *rhport,
+                            FAR struct usbhost_hubport_s *hport,
+                            FAR struct xhci_epinfo_s *ep0info)
 {
   FAR struct xhci_dev_s *dev;
   uint8_t                slot;
@@ -1683,7 +1823,15 @@ static int xhci_device_init(FAR struct usbhost_xhci_s *priv,
   ret = xhci_cmd_sloten(priv, &slot);
   if (ret < 0 || slot > priv->no_slots)
     {
-      /* Something goes wrong ! */
+      /* A slot the controller cannot address is no more usable than no
+       * slot at all, and the command itself succeeds in that case, so the
+       * caller needs an error either way.
+       */
+
+      if (ret >= 0)
+        {
+          ret = -EINVAL;
+        }
 
       usbhost_vtrace1(XHCI_TRACE1_SLOTEN_FAILED, ret);
       return ret;
@@ -1691,9 +1839,17 @@ static int xhci_device_init(FAR struct usbhost_xhci_s *priv,
 
   /* Slot ID is an index to the identify Device data */
 
-  rhport->dev = &priv->devs[slot - 1];
-  rhport->slot = slot;
-  dev = rhport->dev;
+  dev = &priv->devs[slot - 1];
+
+  /* A root hub port names the device on it, which a hub port must not
+   * disturb: the device its root port names is the hub itself.
+   */
+
+  if (hport == &rhport->hport.hport)
+    {
+      rhport->dev  = dev;
+      rhport->slot = slot;
+    }
 
   /* Slot has been allocated to software and is now in Enabled state */
 
@@ -1703,22 +1859,23 @@ static int xhci_device_init(FAR struct usbhost_xhci_s *priv,
    * All data structured are already allocated.
    */
 
-  ret = xhci_ring_init(&rhport->ep0.td, XHCI_TD_MAX);
+  ret = xhci_ring_init(&ep0info->td, XHCI_TD_MAX);
   if (ret < 0)
     {
       uerr("ep0 ring init failed\n");
-      return ret;
+      goto errout_with_slot;
     }
 
-  rhport->ep0.slot = slot;
-  dev->rhport      = rhport;
-  dev->slot        = slot;
-  dev->epinfo[0]   = &rhport->ep0;
+  ep0info->slot  = slot;
+  dev->rhport    = rhport;
+  dev->hport     = hport;
+  dev->slot      = slot;
+  dev->epinfo[0] = ep0info;
 
   ret = xhci_slot_init(priv, dev);
   if (ret < 0)
     {
-      return ret;
+      goto errout_with_slot;
     }
 
   /* Step 6: Assign and address to the device and enable its Default
@@ -1729,16 +1886,25 @@ static int xhci_device_init(FAR struct usbhost_xhci_s *priv,
    *       stack.
    */
 
-  ret = xhci_address_set(priv, rhport, false);
+  ret = xhci_address_set(priv, dev, false);
   if (ret < 0)
     {
       uerr("failed to set address %d\n", ret);
-      return ret;
+      goto errout_with_slot;
     }
 
   /* Steps 7-12 don't belong here! */
 
   return OK;
+
+errout_with_slot:
+
+  /* Nothing else gives the slot back, and the controller has a fixed
+   * number of them.
+   */
+
+  xhci_device_deinit(priv, dev);
+  return ret;
 }
 
 /****************************************************************************
@@ -1753,9 +1919,9 @@ static int xhci_device_init(FAR struct usbhost_xhci_s *priv,
  ****************************************************************************/
 
 static int xhci_device_deinit(FAR struct usbhost_xhci_s *priv,
-                              FAR struct xhci_rhport_s *rhport)
+                              FAR struct xhci_dev_s *dev)
 {
-  uint8_t slot = rhport->slot;
+  uint8_t slot = dev->slot;
   int     ret;
 
   /* Disable Slot */
@@ -1772,14 +1938,30 @@ static int xhci_device_deinit(FAR struct usbhost_xhci_s *priv,
 
   /* Clean up device data, but don't touch allocated memory! */
 
-  rhport->dev->state = XHCI_SLOT_DISABLED;
+  dev->state = XHCI_SLOT_DISABLED;
 
-  memset(rhport->dev->ctx, 0, sizeof(struct xhci_dev_ctx_s));
-  memset(rhport->dev->input, 0, sizeof(struct xhci_input_dev_ctx_s));
+  memset(dev->ctx, 0, XHCI_DEVCTX_SIZE(priv));
+  memset(dev->input, 0, XHCI_INCTX_SIZE(priv));
 
-  /* Remove reference to a device slot */
+  /* And push both, so nothing is left to be written back later */
 
-  rhport->dev = NULL;
+  up_flush_dcache((uintptr_t)dev->ctx,
+                  (uintptr_t)dev->ctx + XHCI_DEVCTX_SIZE(priv));
+  up_flush_dcache((uintptr_t)dev->input,
+                  (uintptr_t)dev->input + XHCI_INCTX_SIZE(priv));
+
+  /* Remove reference to a device slot.  Only the device sitting directly
+   * on the root port is the one that port points at; a device behind a hub
+   * must leave that pointing at the hub.
+   */
+
+  if (dev->rhport != NULL && dev->rhport->dev == dev)
+    {
+      dev->rhport->dev = NULL;
+    }
+
+  dev->hport  = NULL;
+  dev->rhport = NULL;
 
   return OK;
 }
@@ -1844,8 +2026,8 @@ static void xhci_context_ctrl(FAR struct usbhost_xhci_s *priv,
         }
     }
 
-  dev->input->slot.ctx[0] &= ~XHCI_ST_CTX0_CTXENT_MASK;
-  dev->input->slot.ctx[0] |= XHCI_ST_CTX0_CTXENT_SET(i);
+  xhci_in_slot(priv, dev->input)->ctx[0] &= ~XHCI_ST_CTX0_CTXENT_MASK;
+  xhci_in_slot(priv, dev->input)->ctx[0] |= XHCI_ST_CTX0_CTXENT_SET(i);
 }
 
 /****************************************************************************
@@ -1863,7 +2045,8 @@ static void xhci_context_ctrl(FAR struct usbhost_xhci_s *priv,
 static int xhci_command(FAR struct usbhost_xhci_s *priv,
                         FAR struct xhci_trb_s *trb, uint16_t timeout_ms)
 {
-  int ret;
+  uint32_t cmdtype;
+  int      ret;
 
   /* Lock bus */
 
@@ -1872,6 +2055,10 @@ static int xhci_command(FAR struct usbhost_xhci_s *priv,
     {
       return ret;
     }
+
+  /* Remember what this was before the result overwrites it */
+
+  cmdtype = XHCI_TRB_D2_TYPE_GET(trb->d2);
 
   /* Add command to ring */
 
@@ -1908,7 +2095,8 @@ static int xhci_command(FAR struct usbhost_xhci_s *priv,
     }
   else
     {
-      uerr("event CC = %d\n", XHCI_TRB_D1_CC_GET(trb->d1));
+      uerr("command type %d failed, CC = %d\n", cmdtype,
+           XHCI_TRB_D1_CC_GET(trb->d1));
       ret = -EIO;
     }
 
@@ -2266,6 +2454,13 @@ static int xhci_control_setup(FAR struct xhci_rhport_s *rhport,
 
   if (buffer)
     {
+      buffer = xhci_dma_prepare(priv, epinfo, buffer, buflen,
+                                (req->type & USB_REQ_DIR_IN) != 0);
+      if (buffer == NULL)
+        {
+          return -ENOMEM;
+        }
+
       trb[i].d0 = up_addrenv_va_to_pa(buffer);
       trb[i].d1 = XHCI_TRB_D1_TXLEN_SET(buflen);
       trb[i].d2 = XHCI_TRB_D2_TYPE_SET(XHCI_TRB_TYPE_DATA_STAGE);
@@ -2333,15 +2528,65 @@ static int xhci_normal_setup(FAR struct xhci_rhport_s *rhport,
   FAR struct usbhost_xhci_s *priv = XHCI_PRIV_FROM_RHPORT(rhport);
   struct xhci_trb_s          trb;
 
-  /* Prepare TRB */
+  size_t                     left;
+  size_t                     chunk;
+  uintptr_t                  pa;
+  int                        n = 0;
 
-  trb.d0 = up_addrenv_va_to_pa(buffer);
-  trb.d1 = XHCI_TRB_D1_IRQ_SET(0) | XHCI_TRB_D1_TXLEN_SET(buflen);
-  trb.d2 = XHCI_TRB_D2_IOC | XHCI_TRB_D2_TYPE_SET(XHCI_TRB_TYPE_NORMAL);
+  /* Make the buffer safe for the controller to reach */
 
-  /* Add TRBs to ring */
+  buffer = xhci_dma_prepare(priv, epinfo, buffer, buflen,
+                            epinfo->dirin != 0);
+  if (buffer == NULL)
+    {
+      return -ENOMEM;
+    }
 
-  xhci_add_trb(priv, &epinfo->td, &trb, 1);
+  /* One TRB describes one run of memory, and that run may not cross a 64K
+   * boundary.  A longer transfer, or one starting near the wrong side of a
+   * boundary, becomes several TRBs chained into a single transfer, with
+   * the interrupt asked for only on the last so that one completion
+   * arrives for the whole of it.
+   */
+
+  pa   = up_addrenv_va_to_pa(buffer);
+  left = buflen;
+
+  while (left > 0)
+    {
+      chunk = XHCI_TD_LEN_MAX - (pa & (XHCI_TD_LEN_MAX - 1));
+      if (chunk > left)
+        {
+          chunk = left;
+        }
+
+      if (++n >= XHCI_TD_MAX)
+        {
+          uerr("transfer of %zu from pa %" PRIxPTR " needs more than %d "
+               "TRBs\n", buflen, pa, XHCI_TD_MAX);
+          return -EINVAL;
+        }
+
+      trb.d0 = pa;
+      trb.d1 = XHCI_TRB_D1_IRQ_SET(0) | XHCI_TRB_D1_TXLEN_SET(chunk);
+      trb.d2 = XHCI_TRB_D2_TYPE_SET(XHCI_TRB_TYPE_NORMAL);
+
+      left -= chunk;
+      pa   += chunk;
+
+      /* Chain everything but the last, and interrupt only on the last */
+
+      if (left > 0)
+        {
+          trb.d2 |= XHCI_TRB_D2_CH;
+        }
+      else
+        {
+          trb.d2 |= XHCI_TRB_D2_IOC;
+        }
+
+      xhci_add_trb(priv, &epinfo->td, &trb, 1);
+    }
 
   /* Trigger transfer */
 
@@ -2372,6 +2617,15 @@ static int xhci_isoc_setup(FAR struct xhci_rhport_s *rhport,
 {
   FAR struct usbhost_xhci_s *priv = XHCI_PRIV_FROM_RHPORT(rhport);
   struct xhci_trb_s          trb;
+
+  /* Make the buffer safe for the controller to reach */
+
+  buffer = xhci_dma_prepare(priv, epinfo, buffer, buflen,
+                            epinfo->dirin != 0);
+  if (buffer == NULL)
+    {
+      return -ENOMEM;
+    }
 
   /* Prepare TRB */
 
@@ -2451,6 +2705,8 @@ static ssize_t xhci_transfer_wait(FAR struct usbhost_xhci_s *priv,
  * Input Parameters:
  *   epinfo - The IN or OUT endpoint descriptor for the device endpoint on
  *      which the transfer will be performed.
+ *   buflen - The length of the transfer, from which the completion works
+ *      out how much was transferred.
  *   callback - The function to be called when the transfer completes
  *   arg - An arbitrary argument that will be provided with the callback.
  *
@@ -2464,6 +2720,7 @@ static ssize_t xhci_transfer_wait(FAR struct usbhost_xhci_s *priv,
 
 static inline int xhci_ioc_async_setup(FAR struct xhci_rhport_s *rhport,
                                        FAR struct xhci_epinfo_s *epinfo,
+                                       size_t buflen,
                                        usbhost_asynch_t callback,
                                        FAR void *arg)
 {
@@ -2486,6 +2743,7 @@ static inline int xhci_ioc_async_setup(FAR struct xhci_rhport_s *rhport,
       epinfo->iocwait  = false;    /* No synchronous wakeup */
       epinfo->status   = 0;        /* No status yet */
       epinfo->xfrd     = 0;        /* Nothing transferred yet */
+      epinfo->buflen   = buflen;   /* Buffer length */
       epinfo->result   = -EBUSY;   /* Transfer in progress */
       epinfo->callback = callback; /* Asynchronous callback */
       epinfo->arg      = arg;      /* Argument that accompanies the callback */
@@ -2500,10 +2758,11 @@ static inline int xhci_ioc_async_setup(FAR struct xhci_rhport_s *rhport,
  * Name: xhci_asynch_completion
  *
  * Description:
- *   This function is called at the interrupt level when an asynchronous
- *   transfer completes.  It performs the pending callback.
+ *   This function is called from the interrupt work queue when an
+ *   asynchronous transfer completes.  It performs the pending callback.
  *
  * Input Parameters:
+ *   priv - xHCI private state
  *   epinfo - The IN or OUT endpoint descriptor for the device endpoint on
  *      which the transfer was performed.
  *
@@ -2511,21 +2770,26 @@ static inline int xhci_ioc_async_setup(FAR struct xhci_rhport_s *rhport,
  *   None
  *
  * Assumptions:
- *   - Called from the interrupt level
+ *   - Called from the work queue, without the spinlock held
  *
  ****************************************************************************/
 
-static void xhci_asynch_completion(FAR struct xhci_epinfo_s *epinfo)
+static void xhci_asynch_completion(FAR struct usbhost_xhci_s *priv,
+                                   FAR struct xhci_epinfo_s *epinfo)
 {
   usbhost_asynch_t callback;
   ssize_t nbytes;
   FAR void *arg;
+  irqstate_t flags;
   int result;
 
-  DEBUGASSERT(epinfo != NULL && epinfo->iocwait == false &&
-              epinfo->callback != NULL);
+  DEBUGASSERT(epinfo != NULL && epinfo->iocwait == false);
 
-  /* Extract and reset the callback info */
+  /* Extract and reset the callback info, atomically against a concurrent
+   * cancellation.
+   */
+
+  flags = spin_lock_irqsave(&priv->spinlock);
 
   callback         = epinfo->callback;
   arg              = epinfo->arg;
@@ -2536,6 +2800,23 @@ static void xhci_asynch_completion(FAR struct xhci_epinfo_s *epinfo)
   epinfo->arg      = NULL;
   epinfo->result   = OK;
   epinfo->iocwait  = false;
+
+  spin_unlock_irqrestore(&priv->spinlock, flags);
+
+  /* A cancellation that got in first has already done the callback */
+
+  if (callback == NULL)
+    {
+      return;
+    }
+
+  /* Bring back what the controller wrote before anyone reads it.  The
+   * addresses are usable here: a transfer given to DRVR_ASYNCH must use
+   * memory from DRVR_ALLOC, and that is kernel memory, which this work
+   * queue thread can reach.
+   */
+
+  xhci_dma_finish(epinfo);
 
   /* Then perform the callback.  Provide the number of bytes successfully
    * transferred or the negated errno value in the event of a failure.
@@ -2549,6 +2830,36 @@ static void xhci_asynch_completion(FAR struct xhci_epinfo_s *epinfo)
   callback(arg, nbytes);
 }
 #endif
+
+/****************************************************************************
+ * Name: xhci_speed_str
+ *
+ * Description:
+ *   What a port negotiated, in words.  PORTSC reports a speed ID, not a
+ *   speed.
+ *
+ ****************************************************************************/
+
+static FAR const char *xhci_speed_str(uint32_t portsc)
+{
+  switch (XHCI_PORTSC_PS(portsc))
+    {
+      case XHCI_PORTSC_PS_FULL:
+        return "full speed, 12Mbps";
+      case XHCI_PORTSC_PS_LOW:
+        return "low speed, 1.5Mbps";
+      case XHCI_PORTSC_PS_HIGH:
+        return "high speed, 480Mbps";
+      case XHCI_PORTSC_PS_SUPPER11:
+        return "SuperSpeed, 5Gbps";
+      case XHCI_PORTSC_PS_SUPPER21:
+      case XHCI_PORTSC_PS_SUPPER12:
+      case XHCI_PORTSC_PS_SUPPER22:
+        return "SuperSpeed+, 10Gbps";
+      default:
+        return "an unknown speed";
+    }
+}
 
 /****************************************************************************
  * Name: xhci_portsc_work
@@ -2602,6 +2913,12 @@ static void xhci_portsc_work(FAR void *arg)
 
                   rhport->connected = true;
 
+                  /* A new device gets the full allowance of attempts,
+                   * whatever the last one that sat here managed.
+                   */
+
+                  rhport->enumfail = 0;
+
                   usbhost_vtrace2(XHCI_VTRACE2_PORTSC_CONNECTED,
                                   rhpndx + 1, priv->pscwait);
 
@@ -2628,6 +2945,9 @@ static void xhci_portsc_work(FAR void *arg)
 
                   usbhost_vtrace2(XHCI_VTRACE2_PORTSC_DISCONND,
                                   rhpndx + 1, priv->pscwait);
+
+                  syslog(LOG_INFO, "%s: port %d: device removed\n",
+                         priv->name, rhpndx + 1);
 
                   rhport->connected = false;
 
@@ -2667,6 +2987,429 @@ static void xhci_portsc_work(FAR void *arg)
 }
 
 /****************************************************************************
+ * Name: xhci_in_slot / xhci_in_ep / xhci_out_slot
+ *
+ * Description:
+ *   Reach into a device context.
+ *
+ *   A context is an array of equally sized entries, and how big they are is
+ *   a property of the controller rather than of the specification: it
+ *   reports either thirty-two or sixty-four bytes, and the wider form is
+ *   the same fields with reserved space after them.  So these are the same
+ *   structures at a different stride, and only the arithmetic to find the
+ *   n'th one has to know which.
+ *
+ *   Output context:  slot, then endpoints 1 upward.
+ *   Input context:   input control, then slot, then endpoints.
+ *
+ *   The first entry of either is at offset zero, so only the ones after it
+ *   need this.
+ *
+ ****************************************************************************/
+
+static inline FAR struct xhci_slot_ctx_s *
+xhci_in_slot(FAR struct usbhost_xhci_s *priv,
+             FAR struct xhci_input_dev_ctx_s *input)
+{
+  return (FAR struct xhci_slot_ctx_s *)((uintptr_t)input + priv->ctxsize);
+}
+
+static inline FAR struct xhci_ep_ctx_s *
+xhci_in_ep(FAR struct usbhost_xhci_s *priv,
+           FAR struct xhci_input_dev_ctx_s *input, int epidx)
+{
+  return (FAR struct xhci_ep_ctx_s *)((uintptr_t)input +
+                                      (epidx + 2) * priv->ctxsize);
+}
+
+static inline FAR struct xhci_slot_ctx_s *
+xhci_out_slot(FAR struct xhci_dev_ctx_s *ctx)
+{
+  return (FAR struct xhci_slot_ctx_s *)ctx;
+}
+
+/****************************************************************************
+ * Name: xhci_dev_from_ep
+ *
+ * Description:
+ *   The device an endpoint belongs to.
+ *
+ *   An endpoint records the slot it was opened on, and the slot indexes the
+ *   device table, so this holds wherever the device sits.  The root hub port
+ *   does not: a class driver reaches the controller through the port it
+ *   descends from, and a hub puts several devices behind one such port.
+ *
+ ****************************************************************************/
+
+static inline FAR struct xhci_dev_s *
+xhci_dev_from_ep(FAR struct usbhost_xhci_s *priv,
+                 FAR struct xhci_epinfo_s *epinfo)
+{
+  DEBUGASSERT(epinfo->slot > 0 && epinfo->slot <= priv->no_slots);
+  return &priv->devs[epinfo->slot - 1];
+}
+
+/****************************************************************************
+ * Name: xhci_dev_from_hport
+ *
+ * Description:
+ *   The device attached to a hub port, or NULL if there is none.
+ *
+ *   Used where there is no endpoint to ask yet, which is the case when the
+ *   first one is being allocated.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_USBHOST_HUB
+/****************************************************************************
+ * Name: xhci_route_string
+ *
+ * Description:
+ *   The route string for a device, which is how the controller finds it.
+ *
+ *   Each hub between the root and the device contributes one nibble holding
+ *   the number of the port the next thing down is plugged into, with the
+ *   tier nearest the root in the lowest nibble.  A device on a root hub port
+ *   routes to zero, which is what the field means for "no hubs in between".
+ *
+ *   Reference:
+ *     - 8.9: Route String Field
+ *
+ ****************************************************************************/
+
+static uint32_t xhci_route_string(FAR struct usbhost_hubport_s *hport)
+{
+  uint32_t route = 0;
+  int      tier  = 0;
+
+  /* Walking up reaches the deepest tier first, and shifting what is already
+   * there left by a nibble each time leaves the tier nearest the root in the
+   * lowest one.  USB allows five tiers of hubs and the field holds exactly
+   * that many, so a chain longer than the bus permits stops here rather than
+   * writing over the speed field above it.
+   */
+
+  while (hport->parent != NULL && tier < 5)
+    {
+      uint8_t portno = hport->port + 1;
+
+      /* The nibble cannot express a port above fifteen.  A hub that large
+       * is legal, so clamp rather than let the number wrap into the tier
+       * below it.
+       */
+
+      if (portno > 15)
+        {
+          portno = 15;
+        }
+
+      route = (route << 4) | portno;
+      hport = hport->parent;
+      tier++;
+    }
+
+  return route;
+}
+#endif
+
+static FAR struct xhci_dev_s *
+xhci_dev_from_hport(FAR struct usbhost_xhci_s *priv,
+                    FAR struct usbhost_hubport_s *hport)
+{
+  uint8_t i;
+
+  for (i = 0; i < priv->no_slots; i++)
+    {
+      if (priv->devs[i].state != XHCI_SLOT_DISABLED &&
+          priv->devs[i].hport == hport)
+        {
+          return &priv->devs[i];
+        }
+    }
+
+  return NULL;
+}
+
+#ifdef CONFIG_USBHOST_HUB
+/****************************************************************************
+ * Name: xhci_slot_tt
+ *
+ * Description:
+ *   Slot context dword 2, naming the transaction translator that carries a
+ *   low or full speed device behind a high speed hub.  Zero when no
+ *   translator is involved, which is what the field means.
+ *
+ *   Reference:
+ *     - 6.2.2: Slot Context
+ *
+ ****************************************************************************/
+
+static uint32_t xhci_slot_tt(FAR struct usbhost_xhci_s *priv,
+                             FAR struct xhci_dev_s *dev)
+{
+  FAR struct usbhost_hubport_s *hport = dev->hport;
+  FAR struct xhci_dev_s        *tthub;
+
+  /* Only a low or full speed device is translated for. */
+
+  if (hport->speed == USB_SPEED_HIGH)
+    {
+      return 0;
+    }
+
+  /* The translator lives in the nearest high speed ancestor, which need not
+   * be the hub the device is plugged into: a full speed hub below a high
+   * speed one is itself carried by the translator above it.
+   */
+
+  while (hport->parent != NULL && hport->parent->speed != USB_SPEED_HIGH)
+    {
+      hport = hport->parent;
+    }
+
+  if (hport->parent == NULL)
+    {
+      /* Nothing high speed above, so the device is on a root hub port or
+       * the whole chain runs at its speed.  Either way there is no
+       * translator to name.
+       */
+
+      return 0;
+    }
+
+  tthub = xhci_dev_from_hport(priv, hport->parent);
+  if (tthub == NULL)
+    {
+      uerr("no device for the hub carrying port %d\n", hport->port);
+      return 0;
+    }
+
+  /* Think time is the hub's, reported by the hub class driver from the hub
+   * descriptor.  Both fields count in the same units, so the value carries
+   * across unchanged.
+   */
+
+  return XHCI_ST_CTX2_TTHSID_SET(tthub->slot) |
+         XHCI_ST_CTX2_TTPORT_SET(hport->port + 1) |
+         XHCI_ST_CTX2_TTT_SET(hport->parent->ttt);
+}
+#endif
+
+/****************************************************************************
+ * Name: xhci_speed_id
+ *
+ * Description:
+ *   Turn the speed the USB host stack uses into the one a slot context
+ *   wants, which is a different numbering with no relation to it.
+ *
+ ****************************************************************************/
+
+static uint32_t xhci_speed_id(uint8_t speed)
+{
+  switch (speed)
+    {
+      case USB_SPEED_LOW:
+        return XHCI_SPEED_LOW;
+      case USB_SPEED_FULL:
+        return XHCI_SPEED_FULL;
+      case USB_SPEED_HIGH:
+        return XHCI_SPEED_HIGH;
+      case USB_SPEED_SUPER:
+        return XHCI_SPEED_SUPER;
+      case USB_SPEED_SUPER_PLUS:
+        return XHCI_SPEED_SUPER_PLUS;
+      default:
+
+        /* Nothing else can be described to a controller, and full speed
+         * is the safe answer.
+         */
+
+        uwarn("no speed ID for USB speed %d\n", speed);
+        return XHCI_SPEED_FULL;
+    }
+}
+
+/****************************************************************************
+ * Name: xhci_dmacapable
+ *
+ * Description:
+ *   Whether the controller may be pointed at this buffer.
+ *
+ *   The driver has no way to know this on its own.  Whether an address can
+ *   be turned into one the device will reach, and whether what lies behind
+ *   it is contiguous, is a property of the system the controller was fitted
+ *   into, so the answer comes from there.  A platform that says nothing is
+ *   taken to mean every address works, which is what a flat address space
+ *   gives.
+ *
+ ****************************************************************************/
+
+static bool xhci_dmacapable(FAR struct usbhost_xhci_s *priv,
+                            FAR uint8_t *buffer, size_t buflen)
+{
+  if (priv->ops->dmacapable == NULL)
+    {
+      return true;
+    }
+
+  return priv->ops->dmacapable(priv->arg, buffer, buflen);
+}
+
+/****************************************************************************
+ * Name: xhci_dma_prepare
+ *
+ * Description:
+ *   Make a caller's buffer safe for the controller to reach, and say which
+ *   address to hand it.
+ *
+ *   The controller writes memory behind the processor's back, so on a
+ *   machine whose caches are not coherent every buffer it touches must be
+ *   flushed before the controller reads and invalidated before the
+ *   processor does.
+ *
+ *   Both act a whole cache line at a time, which is unsafe for a buffer
+ *   that does not own its lines: invalidating drops whatever shares the
+ *   line, and a writeback lands on top of what the controller just put
+ *   there.  Class drivers pass their own structure members, a 31 byte
+ *   command block or a 13 byte status, which share lines.
+ *
+ *   Such a buffer gets an aligned stand-in and is copied at the ends.
+ *   Anything large enough to matter comes from a filesystem or from
+ *   xhci_ioalloc() and is already aligned.
+ *
+ * Returned Value:
+ *   The address to give the controller, or NULL if a stand-in was needed
+ *   and could not be allocated.
+ *
+ ****************************************************************************/
+
+static FAR uint8_t *xhci_dma_prepare(FAR struct usbhost_xhci_s *priv,
+                                     FAR struct xhci_epinfo_s *epinfo,
+                                     FAR uint8_t *buffer, size_t buflen,
+                                     bool dirin)
+{
+  size_t line      = up_get_dcache_linesize();
+  bool   reachable = xhci_dmacapable(priv, buffer, buflen);
+
+  epinfo->buffer  = buffer;
+  epinfo->bounce  = NULL;
+  epinfo->dmalen  = buflen;
+
+  /* How much to bring back afterwards.  This cannot be taken from buflen
+   * at completion time: that field means the length of a data transfer and
+   * control transfers deliberately leave it zero, so a descriptor read
+   * would copy nothing back and the caller would see whatever its buffer
+   * held before.
+   */
+
+  epinfo->dmacopy = buflen;
+  epinfo->dmain   = dirin;
+
+  /* Nothing to arrange: no cache to maintain, and an address the
+   * controller can be pointed at as it stands.
+   */
+
+  if (line == 0 && reachable)
+    {
+      return buffer;
+    }
+
+  if (!reachable ||
+      ((uintptr_t)buffer & (line - 1)) != 0 || (buflen & (line - 1)) != 0)
+    {
+      /* A stand-in is needed; see xhci_dma_direct() for the same test */
+
+      /* The buffer shares a line with something else.  Work in a stand-in
+       * that does not.
+       */
+
+      /* Maintain the whole stand-in, not just the part in use: cache
+       * operations work a line at a time and this chip rejects a partial
+       * range.
+       */
+
+      epinfo->dmalen = line ? ((buflen + line - 1) & ~(line - 1)) : buflen;
+
+      epinfo->bounce = kmm_memalign(line ? line : sizeof(uintptr_t),
+                                    epinfo->dmalen);
+      if (epinfo->bounce == NULL)
+        {
+          return NULL;
+        }
+
+      if (!dirin)
+        {
+          memcpy(epinfo->bounce, buffer, buflen);
+        }
+
+      buffer = epinfo->bounce;
+    }
+
+  /* Push what we are sending; drop what we are about to be sent, so that
+   * nothing the processor is still holding can be written back over it
+   * while the transfer is in flight.
+   */
+
+  if (dirin)
+    {
+      up_invalidate_dcache((uintptr_t)buffer,
+                           (uintptr_t)buffer + epinfo->dmalen);
+    }
+  else
+    {
+      up_clean_dcache((uintptr_t)buffer,
+                      (uintptr_t)buffer + epinfo->dmalen);
+    }
+
+  return buffer;
+}
+
+/****************************************************************************
+ * Name: xhci_dma_finish
+ *
+ * Description:
+ *   Read back what the controller wrote, and give up any stand-in buffer.
+ *
+ *   This must run in the context of whoever asked for the transfer, not in
+ *   the completion handler.  The buffer being copied back into may belong
+ *   to a user process, and its address means nothing in the work queue
+ *   thread that handles the completion event, where the write would fault
+ *   or corrupt another process.  The caller is blocked until the transfer
+ *   finishes anyway.
+ *
+ ****************************************************************************/
+
+static void xhci_dma_finish(FAR struct xhci_epinfo_s *epinfo)
+{
+  FAR uint8_t *dma  = epinfo->bounce ? epinfo->bounce : epinfo->buffer;
+  bool         dirin = epinfo->dmain;
+
+  if (dma == NULL)
+    {
+      return;
+    }
+
+  if (dirin)
+    {
+      up_invalidate_dcache((uintptr_t)dma,
+                           (uintptr_t)dma + epinfo->dmalen);
+
+      if (epinfo->bounce != NULL && epinfo->buffer != NULL)
+        {
+          memcpy(epinfo->buffer, epinfo->bounce, epinfo->dmacopy);
+        }
+    }
+
+  if (epinfo->bounce != NULL)
+    {
+      kmm_free(epinfo->bounce);
+      epinfo->bounce = NULL;
+    }
+
+  epinfo->buffer = NULL;
+}
+
+/****************************************************************************
  * Name: xhci_transfer_complete
  *
  * Description:
@@ -2683,6 +3426,9 @@ static void xhci_transfer_complete(FAR struct usbhost_xhci_s *priv,
   uint8_t                   ep   = XHCI_TRB_D2_EP_GET(evt->d2);
   uint8_t                   ret  = XHCI_TRB_D1_CC_GET(evt->d1);
   irqstate_t                flags;
+#ifdef CONFIG_USBHOST_ASYNCH
+  bool                      asynch = false;
+#endif
 
   /* Get EP associated with this transfer */
 
@@ -2744,17 +3490,32 @@ static void xhci_transfer_complete(FAR struct usbhost_xhci_s *priv,
     }
 
 #ifdef CONFIG_USBHOST_ASYNCH
-  /* No.. Is there a pending asynchronous transfer? */
+  /* No.. Is there a pending asynchronous transfer instead?  Decide while
+   * still holding the lock: the moment the waiter above is posted, the
+   * endpoint may be given a new transfer, and that one is not complete.
+   */
 
-  else if (epinfo->callback != NULL)
+  else
     {
-      /* Yes.. perform the callback */
-
-      xhci_asynch_completion(epinfo);
+      asynch = epinfo->callback != NULL;
     }
 #endif
 
   spin_unlock_irqrestore(&priv->spinlock, flags);
+
+#ifdef CONFIG_USBHOST_ASYNCH
+  /* The callback runs outside the spinlock: it is class driver code, and
+   * what it does (queue work, take its own locks) has no business running
+   * with interrupts masked.
+   */
+
+  if (asynch)
+    {
+      /* Perform the callback */
+
+      xhci_asynch_completion(priv, epinfo);
+    }
+#endif
 }
 
 /****************************************************************************
@@ -2799,6 +3560,7 @@ static int xhci_events_poll(FAR struct usbhost_xhci_s *priv)
   uintptr_t              addr;
   uint8_t                type;
   uint32_t               d2;
+  int                    count = 0;
 
   /* Invalidate event ring */
 
@@ -2870,6 +3632,7 @@ static int xhci_events_poll(FAR struct usbhost_xhci_s *priv)
 
       /* Next event */
 
+      count++;
       priv->evnt.i++;
 
       /* Handle ring wrap */
@@ -2886,7 +3649,7 @@ static int xhci_events_poll(FAR struct usbhost_xhci_s *priv)
   addr |= XHCI_ERDP_EHB;
   xhci_runt_putreg_8b(priv, XHCI_ERDP(0), addr);
 
-  return OK;
+  return count;
 }
 
 /****************************************************************************
@@ -2901,6 +3664,20 @@ static void xhci_interrupt_work(FAR void *arg)
 {
   FAR struct usbhost_xhci_s *priv = arg;
   uint32_t                   iman;
+
+  /* Acknowledge before walking the ring, not after.  An event arriving
+   * during the walk sets the pending bit again, and clearing after the
+   * walk discards it.  Transfers have no timeout, so the one it belonged
+   * to would wait forever.
+   */
+
+  xhci_oper_putreg(priv, XHCI_USBSTS, priv->pending);
+
+  iman = xhci_runt_getreg(priv, XHCI_IMAN(0));
+  if (iman & XHCI_IMAN_IP)
+    {
+      xhci_runt_putreg(priv, XHCI_IMAN(0), iman);
+    }
 
   xhci_events_poll(priv);
 
@@ -2934,21 +3711,32 @@ static void xhci_interrupt_work(FAR void *arg)
       uinfo("Host Controller Error\n");
     }
 
-  /* ACK interrupts */
-
-  xhci_oper_putreg(priv, XHCI_USBSTS, priv->pending);
-
-  /* Clear interrupter pending bit */
-
-  iman = xhci_runt_getreg(priv, XHCI_IMAN(0));
-  if (iman & XHCI_IMAN_IP)
-    {
-      xhci_runt_putreg(priv, XHCI_IMAN(0), iman);
-    }
-
   /* Clear pending bits */
 
   priv->pending = 0;
+
+  /* Let interrupts back in, which the handler masked on its way out, and
+   * clear the pending flag in the same write.
+   *
+   * A message signalled interrupt is sent on the flag's clear to set
+   * transition; a wire stays asserted while it is set.  Events that
+   * arrived while this interrupter was masked have already set the flag,
+   * so enabling without clearing leaves a message with nothing to
+   * transition on, and transfers have no timeout.
+   *
+   * Clearing opens its own window: an event delivered between the ring
+   * going empty and this write is discarded.  So drain again, and repeat
+   * if that drain found anything.  A drain that finds nothing is the only
+   * state in which no event can have been lost.
+   */
+
+  do
+    {
+      iman = xhci_runt_getreg(priv, XHCI_IMAN(0));
+      xhci_runt_putreg(priv, XHCI_IMAN(0),
+                       iman | XHCI_IMAN_IE | XHCI_IMAN_IP);
+    }
+  while (xhci_events_poll(priv) > 0);
 }
 
 /****************************************************************************
@@ -2962,10 +3750,22 @@ static void xhci_interrupt_work(FAR void *arg)
 static int xhci_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct usbhost_xhci_s *priv = arg;
+  uint32_t                   iman;
 
   /* Get pending interrupts */
 
   priv->pending = xhci_oper_getreg(priv, XHCI_USBSTS);
+
+  /* Silence the interrupter before returning.
+   *
+   * Nothing here clears the condition that raised the interrupt; the work
+   * runs later on a work queue.  On a level triggered line the source is
+   * still asserted on return, so the interrupt re-raises immediately and
+   * the worker never runs.  The worker clears the status and unmasks.
+   */
+
+  iman = xhci_runt_getreg(priv, XHCI_IMAN(0));
+  xhci_runt_putreg(priv, XHCI_IMAN(0), iman & ~XHCI_IMAN_IE);
 
   /* Handle interrupts in worker */
 
@@ -3047,12 +3847,12 @@ static int xhci_wait(FAR struct usbhost_connection_s *conn,
 #ifdef CONFIG_USBHOST_HUB
       /* Is a device connected to an external hub? */
 
-      if (priv->hport)
+      if (priv->hhead != priv->htail)
         {
           /* Yes.. return the external hub port */
 
-          connport = priv->hport;
-          priv->hport = NULL;
+          connport = priv->hports[priv->htail];
+          priv->htail = (priv->htail + 1) % CONFIG_USBHOST_XHCI_MAX_DEVS;
 
           *hport = (FAR struct usbhost_hubport_s *)connport;
           spin_unlock_irqrestore(&priv->spinlock, flags);
@@ -3144,7 +3944,8 @@ static int xhci_rh_enumerate(FAR struct usbhost_connection_s *conn,
 
   /* Initialize device data */
 
-  ret = xhci_device_init(priv, rhport);
+  ret = xhci_device_init(priv, rhport, &rhport->hport.hport,
+                         &rhport->ep0);
   if (ret < 0)
     {
       uerr("Failed to initialize device %d\n", ret);
@@ -3191,12 +3992,52 @@ static int xhci_enumerate(FAR struct usbhost_connection_s *conn,
     {
       /* Failed to enumerate */
 
+      /* The device is addressed by now, so it holds a slot, and the retry
+       * below asks for another.
+       */
+
+#ifdef CONFIG_USBHOST_HUB
+      if (ROOTHUB(hport))
+#endif
+        {
+          FAR struct usbhost_xhci_s *priv = XHCI_PRIV_FROM_CONN(conn);
+          FAR struct xhci_rhport_s  *rhport = &priv->rhport[hport->port];
+
+          if (rhport->dev != NULL)
+            {
+              xhci_device_deinit(priv, rhport->dev);
+            }
+
+          /* Clearing connected below is what makes xhci_wait() return,
+           * so it is also what repeats the attempt.  Leave the port alone
+           * past the limit; a new connection clears the count.
+           */
+
+          if (++rhport->enumfail >= CONFIG_USBHOST_XHCI_ENUM_RETRIES)
+            {
+              syslog(LOG_ERR, "%s: port %d: giving up after %d attempts\n",
+                     priv->name, hport->port + 1, rhport->enumfail);
+              return ret;
+            }
+        }
+
       /* If this is a root hub port, then marking the hub port not connected
        * will cause xhci_wait() to return and we will try the connection
        * again.
        */
 
       hport->connected = false;
+    }
+  else
+    {
+#ifdef CONFIG_USBHOST_HUB
+      if (ROOTHUB(hport))
+#endif
+        {
+          FAR struct usbhost_xhci_s *priv = XHCI_PRIV_FROM_CONN(conn);
+
+          priv->rhport[hport->port].enumfail = 0;
+        }
     }
 
   return ret;
@@ -3233,43 +4074,114 @@ static int xhci_ep0configure(FAR struct usbhost_driver_s *drvr,
                              usbhost_ep_t ep0, uint8_t funcaddr,
                              uint8_t speed, uint16_t maxpacketsize)
 {
-  FAR struct xhci_rhport_s  *rhport = (FAR struct xhci_rhport_s *)drvr;
   FAR struct xhci_epinfo_s  *epinfo = (FAR struct xhci_epinfo_s *)ep0;
   FAR struct usbhost_xhci_s *priv   = XHCI_PRIV_FROM_DRVR(drvr);
+  FAR struct xhci_dev_s     *dev;
   uint64_t                   ctx;
   int                        ret;
 
   DEBUGASSERT(drvr != NULL && epinfo != NULL && maxpacketsize < 2048);
+
+  dev = xhci_dev_from_ep(priv, epinfo);
 
   ret = nxmutex_lock(&priv->lock);
   if (ret >= 0)
     {
       /* Update max packet size */
 
-      rhport->dev->input->ep[0].ctx1 &= ~XHCI_EP_CTX1_MAXPKT_MASK;
-      rhport->dev->input->ep[0].ctx1 |= XHCI_EP_CTX1_MAXPKT(maxpacketsize);
+      FAR struct xhci_ep_ctx_s *ep0ctx =
+        xhci_in_ep(priv, dev->input, 0);
+
+      ep0ctx->ctx1 &= ~XHCI_EP_CTX1_MAXPKT_MASK;
+      ep0ctx->ctx1 |= XHCI_EP_CTX1_MAXPKT(maxpacketsize);
 
       /* Add Slot Context and EP0 Context */
 
-      xhci_context_ctrl(priv, rhport->dev, 0,
+      xhci_context_ctrl(priv, dev, 0,
                         XHCI_IN_CTX1_A(XHCI_SLOT_FLAG) |
                         XHCI_IN_CTX1_A(XHCI_EP0_FLAG));
 
       /* Flush Device input context */
 
-      up_flush_dcache((uintptr_t)rhport->dev->input,
-                      (uintptr_t)rhport->dev->input +
-                      sizeof(struct xhci_input_dev_ctx_s));
+      up_flush_dcache((uintptr_t)dev->input,
+                      (uintptr_t)dev->input +
+                      XHCI_INCTX_SIZE(priv));
 
       /* Free mutex before command execution */
 
       nxmutex_unlock(&priv->lock);
 
-      ctx = up_addrenv_va_to_pa(rhport->dev->input);
+      ctx = up_addrenv_va_to_pa(dev->input);
+
+      uinfo("slot %d funcaddr %d speed %d maxpacket %d\n",
+            epinfo->slot, funcaddr, speed, maxpacketsize);
+
       ret = xhci_cmd_evalctx(priv, epinfo->slot, ctx);
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: xhci_interval
+ *
+ * Description:
+ *   Work out the Interval an endpoint context wants.
+ *
+ *   The field is an exponent: the controller services the endpoint every
+ *   2^Interval microframes.  An endpoint descriptor does not say it that
+ *   way, and what it does say depends on how fast the device is, so the
+ *   number cannot simply be copied across.
+ *
+ *   A low or full speed interrupt endpoint counts in frames, so its period
+ *   is bInterval milliseconds, or bInterval * 8 microframes, and the
+ *   exponent is the position of the highest bit of that.  Everything else
+ *   that is periodic already states an exponent, one greater than the one
+ *   wanted here.  Control and bulk endpoints are not periodic and the field
+ *   means nothing to them.
+ *
+ ****************************************************************************/
+
+static uint8_t xhci_interval(uint8_t speed, uint8_t xfrtype,
+                             uint8_t interval)
+{
+  unsigned int exp;
+
+  if (xfrtype != USB_EP_ATTR_XFER_INT && xfrtype != USB_EP_ATTR_XFER_ISOC)
+    {
+      return 0;
+    }
+
+  if ((speed == USB_SPEED_LOW || speed == USB_SPEED_FULL) &&
+      xfrtype == USB_EP_ATTR_XFER_INT)
+    {
+      /* Frames.  Round down to a power of two, and keep it inside what the
+       * specification allows for this kind of endpoint: 2^3 microframes is
+       * one frame, 2^10 is 128 of them.
+       */
+
+      if (interval == 0)
+        {
+          interval = 1;
+        }
+
+      for (exp = 0; (1u << (exp + 1)) <= interval * 8u; exp++);
+
+      if (exp < 3)
+        {
+          exp = 3;
+        }
+      else if (exp > 10)
+        {
+          exp = 10;
+        }
+
+      return exp;
+    }
+
+  /* Already an exponent, counted from one */
+
+  return interval > 0 ? interval - 1 : 0;
 }
 
 /****************************************************************************
@@ -3299,7 +4211,6 @@ static int xhci_epalloc(FAR struct usbhost_driver_s *drvr,
                         FAR usbhost_ep_t *ep)
 {
   FAR struct usbhost_xhci_s    *priv   = XHCI_PRIV_FROM_DRVR(drvr);
-  FAR struct xhci_rhport_s     *rhport = (FAR struct xhci_rhport_s *)drvr;
   FAR struct usbhost_hubport_s *hport;
   FAR struct xhci_epinfo_s     *epinfo;
   FAR struct xhci_dev_s        *dev;
@@ -3344,16 +4255,58 @@ static int xhci_epalloc(FAR struct usbhost_driver_s *drvr,
   epinfo->epno  = epdesc->addr;
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
-  epinfo->interval  = epdesc->interval;
+  epinfo->interval  = xhci_interval(hport->speed, epdesc->xfrtype,
+                                    epdesc->interval);
 #endif
   epinfo->xfrtype   = epdesc->xfrtype;
   nxsem_init(&epinfo->iocsem, 0, 0);
+  nxmutex_init(&epinfo->exclsem);
 
   /* xhci_epno_get() returns Device Context Index (DCI) */
 
-  idx              = xhci_epno_get(epinfo);
-  mask             = XHCI_IN_CTX1_A(XHCI_EP_FLAG(idx));
-  dev              = rhport->dev;
+  idx  = xhci_epno_get(epinfo);
+  mask = XHCI_IN_CTX1_A(XHCI_EP_FLAG(idx));
+  dev  = xhci_dev_from_hport(priv, hport);
+
+#ifdef CONFIG_USBHOST_HUB
+  /* A hub asks for the control endpoint of a port before it reports the
+   * connection, so there is no device to attach it to yet.  Hand back an
+   * endpoint with no slot; xhci_connect() gives it one when it creates the
+   * device, which is the next thing the hub does.
+   */
+
+  if (dev == NULL && !ROOTHUB(hport) &&
+      epdesc->xfrtype == USB_EP_ATTR_XFER_CONTROL)
+    {
+      ret = xhci_ring_init(&epinfo->td, XHCI_TD_MAX);
+      if (ret < 0)
+        {
+          uerr("ep0 ring init failed\n");
+          nxmutex_destroy(&epinfo->exclsem);
+          nxsem_destroy(&epinfo->iocsem);
+          kmm_free(epinfo);
+          return ret;
+        }
+
+      *ep = (usbhost_ep_t)epinfo;
+      return OK;
+    }
+#endif
+
+  /* There has to be a device to hang the endpoint off.  A port whose
+   * enumeration failed is retried after its slot has been given back, so
+   * this can run for a port with nothing behind it.
+   */
+
+  if (dev == NULL)
+    {
+      uerr("no device on port %d\n", hport->port);
+      nxmutex_destroy(&epinfo->exclsem);
+      nxsem_destroy(&epinfo->iocsem);
+      kmm_free(epinfo);
+      return -ENODEV;
+    }
+
   dev->epinfo[idx - 1] = epinfo;
 
   /* TD rings already allocated but not connected yet. */
@@ -3367,33 +4320,7 @@ static int xhci_epalloc(FAR struct usbhost_driver_s *drvr,
 
   /* Store slot ID for later */
 
-  epinfo->slot = rhport->slot;
-
-#ifdef CONFIG_USBHOST_HUB
-  if (hport->speed != USB_SPEED_HIGH)
-    {
-      /* A high speed hub exists between this device and the root hub
-       * otherwise we would not get here.
-       */
-
-      FAR struct usbhost_hubport_s *parent = hport->parent;
-
-      for (; parent->speed != USB_SPEED_HIGH; parent = hport->parent)
-        {
-          hport = parent;
-        }
-
-      if (parent->speed == USB_SPEED_HIGH)
-        {
-          epinfo->hubport = HPORT(hport);
-          epinfo->hubaddr = hport->parent->funcaddr;
-        }
-      else
-        {
-          return -EINVAL;
-        }
-    }
-#endif
+  epinfo->slot = dev->slot;
 
   /* Get EP type */
 
@@ -3436,7 +4363,7 @@ static int xhci_epalloc(FAR struct usbhost_driver_s *drvr,
    * Max Burst Size set for 0 for now (USB3.0 specific)
    */
 
-  xhci_ep_configure(priv, &dev->input->ep[idx - 1],
+  xhci_ep_configure(priv, xhci_in_ep(priv, dev->input, idx - 1),
                     eptype, epdesc->mxpacketsize, 0,
                     up_addrenv_va_to_pa(epinfo->td.ring),
                     0, epinfo->interval);
@@ -3447,7 +4374,7 @@ static int xhci_epalloc(FAR struct usbhost_driver_s *drvr,
 
   up_flush_dcache((uintptr_t)dev->input,
                   (uintptr_t)dev->input +
-                  sizeof(struct xhci_input_dev_ctx_s));
+                  XHCI_INCTX_SIZE(priv));
 
   /* Configure EP */
 
@@ -3501,6 +4428,8 @@ static int xhci_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   /* Free the container */
 
+  nxmutex_destroy(&epinfo->exclsem);
+  nxsem_destroy(&epinfo->iocsem);
   kmm_free(epinfo);
   return OK;
 }
@@ -3625,7 +4554,8 @@ static int xhci_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
 static int xhci_ioalloc(FAR struct usbhost_driver_s *drvr,
                         FAR uint8_t **buffer, size_t buflen)
 {
-  int ret = -ENOMEM;
+  size_t line;
+  int    ret = -ENOMEM;
 
   DEBUGASSERT(drvr && buffer && buflen > 0);
 
@@ -3636,7 +4566,18 @@ static int xhci_ioalloc(FAR struct usbhost_driver_s *drvr,
       return -ENOMEM;
     }
 
-  /* Allocated buffer must not cross page boundaries */
+  /* Allocated buffer must not cross page boundaries.
+   *
+   * Round to whole cache lines as well as aligning the start, so that the
+   * buffer owns every line it touches and can be invalidated without
+   * disturbing whatever would otherwise share the last one.
+   */
+
+  line = up_get_dcache_linesize();
+  if (line > 1)
+    {
+      buflen = (buflen + line - 1) & ~(line - 1);
+    }
 
   *buffer = (FAR uint8_t *)kmm_memalign((XHCI_PAGE_SIZE / 2) , buflen);
   if (*buffer)
@@ -3733,6 +4674,17 @@ static int xhci_ctrl_xfer(FAR struct usbhost_driver_s *drvr,
 
   DEBUGASSERT(rhport != NULL && ep0info != NULL && req != NULL);
 
+  /* One request at a time on this endpoint.  Taken before the controller
+   * lock and held across the wait, so the ordering is always endpoint then
+   * controller and never the reverse.
+   */
+
+  ret = nxmutex_lock(&ep0info->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   len = xhci_getle16(req->len);
 
   /* Terse output only if we are tracing */
@@ -3751,20 +4703,34 @@ static int xhci_ctrl_xfer(FAR struct usbhost_driver_s *drvr,
        * on control EP.
        */
 
-      xhci_ring_init(&rhport->dev->rhport->ep0.td, 0);
+      xhci_ring_init(&ep0info->td, 0);
 
       /* Issue SET_ADDRESS request */
 
-      ret = xhci_address_set(priv, rhport, true);
+      ret = xhci_address_set(priv, xhci_dev_from_ep(priv, ep0info),
+                             true);
       if (ret == OK)
         {
+          FAR struct xhci_dev_s *dev = xhci_dev_from_ep(priv, ep0info);
+
+          /* The controller chose this address and wrote it into the
+           * output context.  Invalidate before reading, or the stale
+           * copy is used.
+           */
+
+          up_invalidate_dcache((uintptr_t)dev->ctx,
+                               (uintptr_t)dev->ctx +
+                               XHCI_DEVCTX_SIZE(priv));
+
           /* Store USB Device Address assigned by xHCI */
 
           ep0info->devaddr =
-            XHCI_ST_CTX3_ADDR_GET(rhport->dev->ctx->slot.ctx[3]);
-          rhport->dev->input->slot.ctx[3] = rhport->dev->ctx->slot.ctx[3];
+            XHCI_ST_CTX3_ADDR_GET(xhci_out_slot(dev->ctx)->ctx[3]);
+          xhci_in_slot(priv, dev->input)->ctx[3] =
+            xhci_out_slot(dev->ctx)->ctx[3];
         }
 
+      nxmutex_unlock(&ep0info->exclsem);
       return OK;
     }
 
@@ -3775,6 +4741,7 @@ static int xhci_ctrl_xfer(FAR struct usbhost_driver_s *drvr,
   ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
+      nxmutex_unlock(&ep0info->exclsem);
       return ret;
     }
 
@@ -3800,12 +4767,19 @@ static int xhci_ctrl_xfer(FAR struct usbhost_driver_s *drvr,
   /* And wait for the transfer to complete */
 
   nbytes = xhci_transfer_wait(priv, ep0info);
+
+  /* As for bulk: the copy back belongs in the caller's context */
+
+  xhci_dma_finish(ep0info);
+
+  nxmutex_unlock(&ep0info->exclsem);
   return nbytes >= 0 ? OK : (int)nbytes;
 
 errout_with_iocwait:
   ep0info->iocwait = false;
 errout_with_lock:
   nxmutex_unlock(&priv->lock);
+  nxmutex_unlock(&ep0info->exclsem);
   return ret;
 }
 
@@ -3898,6 +4872,16 @@ static ssize_t xhci_transfer(FAR struct usbhost_driver_s *drvr,
 
   DEBUGASSERT(priv && rhport && epinfo && buffer && buflen > 0);
 
+  /* One transfer at a time on this endpoint, taken before the controller
+   * lock and held across the wait.  See the note beside exclsem.
+   */
+
+  ret = nxmutex_lock(&epinfo->exclsem);
+  if (ret < 0)
+    {
+      return (ssize_t)ret;
+    }
+
   /* We must have exclusive access to the xHCI hardware and data
    * structures.
    */
@@ -3905,6 +4889,7 @@ static ssize_t xhci_transfer(FAR struct usbhost_driver_s *drvr,
   ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
+      nxmutex_unlock(&epinfo->exclsem);
       return (ssize_t)ret;
     }
 
@@ -3959,12 +4944,21 @@ static ssize_t xhci_transfer(FAR struct usbhost_driver_s *drvr,
   /* Then wait for the transfer to complete */
 
   nbytes = xhci_transfer_wait(priv, epinfo);
+
+  /* And bring back what it produced, here rather than in the completion,
+   * because this is the context the caller's buffer belongs to.
+   */
+
+  xhci_dma_finish(epinfo);
+
+  nxmutex_unlock(&epinfo->exclsem);
   return nbytes;
 
 errout_with_iocwait:
   epinfo->iocwait = false;
 errout_with_lock:
   nxmutex_unlock(&priv->lock);
+  nxmutex_unlock(&epinfo->exclsem);
   return (ssize_t)ret;
 }
 
@@ -4028,7 +5022,7 @@ static int xhci_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   /* Set the request for the callback well BEFORE initiating the transfer. */
 
-  ret = xhci_ioc_async_setup(rhport, epinfo, callback, arg);
+  ret = xhci_ioc_async_setup(rhport, epinfo, buflen, callback, arg);
   if (ret != OK)
     {
       goto errout_with_lock;
@@ -4168,9 +5162,13 @@ static int xhci_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   else
     {
-      /* Yes.. perform the callback */
+      /* Yes.. give back any stand-in buffer, then perform the callback.
+       * The endpoint has been stopped, so the controller is no longer
+       * writing into it.
+       */
 
       DEBUGASSERT(callback != NULL);
+      xhci_dma_finish(epinfo);
       callback(arg, -ESHUTDOWN);
     }
 #endif
@@ -4200,11 +5198,186 @@ static int xhci_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_HUB
+/****************************************************************************
+ * Name: xhci_rhport_from_hport
+ *
+ * Description:
+ *   The root hub port a device descends from, however many hubs are in the
+ *   way.  The slot context names it, because that is the port the traffic
+ *   physically leaves by.
+ *
+ ****************************************************************************/
+
+static FAR struct xhci_rhport_s *
+xhci_rhport_from_hport(FAR struct usbhost_xhci_s *priv,
+                       FAR struct usbhost_hubport_s *hport)
+{
+  while (hport->parent != NULL)
+    {
+      hport = hport->parent;
+    }
+
+  return &priv->rhport[hport->port];
+}
+
+/****************************************************************************
+ * Name: xhci_hub_update
+ *
+ * Description:
+ *   Tell the controller that a device is a hub, so that it will route to
+ *   what is behind it.
+ *
+ *   The slot was created before anyone knew: a hub is addressed and
+ *   configured like any other device, and only then does its class driver
+ *   read the descriptor saying how many ports it has.  So the slot context
+ *   is corrected here, the first time something appears behind it.
+ *
+ ****************************************************************************/
+
+static int xhci_hub_update(FAR struct usbhost_xhci_s *priv,
+                           FAR struct usbhost_hubport_s *hubport)
+{
+  FAR struct xhci_slot_ctx_s *in;
+  FAR struct xhci_dev_s      *dev;
+  uint64_t                    ctx;
+  int                         ret;
+
+  dev = xhci_dev_from_hport(priv, hubport);
+  if (dev == NULL || dev->ishub || hubport->nports == 0)
+    {
+      /* Nothing to correct: no slot for it, already done, or the hub class
+       * driver has not reported the descriptor.
+       */
+
+      return OK;
+    }
+
+  ret = nxmutex_lock(&priv->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Only the slot context changes, and it must go in carrying everything
+   * the controller already holds, so start from the output context it has
+   * been maintaining.
+   */
+
+  up_invalidate_dcache((uintptr_t)dev->ctx,
+                       (uintptr_t)dev->ctx + XHCI_DEVCTX_SIZE(priv));
+
+  xhci_context_ctrl(priv, dev, 0, XHCI_IN_CTX1_A(XHCI_SLOT_FLAG));
+
+  in = xhci_in_slot(priv, dev->input);
+  in->ctx[0] = xhci_out_slot(dev->ctx)->ctx[0] | htole32(XHCI_ST_CTX0_HUB);
+  in->ctx[1] = (xhci_out_slot(dev->ctx)->ctx[1] &
+                ~htole32(XHCI_ST_CTX1_PORTS_MASK)) |
+               htole32(XHCI_ST_CTX1_PORTS_SET(hubport->nports));
+  in->ctx[2] = (xhci_out_slot(dev->ctx)->ctx[2] &
+                ~htole32(XHCI_ST_CTX2_TTT_MASK)) |
+               htole32(XHCI_ST_CTX2_TTT_SET(hubport->ttt));
+  in->ctx[3] = xhci_out_slot(dev->ctx)->ctx[3];
+
+  up_flush_dcache((uintptr_t)dev->input,
+                  (uintptr_t)dev->input + XHCI_INCTX_SIZE(priv));
+
+  ctx = up_addrenv_va_to_pa(dev->input);
+
+  nxmutex_unlock(&priv->lock);
+
+  ret = xhci_cmd_cfgep(priv, dev->slot, ctx, false);
+  if (ret < 0)
+    {
+      uerr("failed to describe the hub on slot %d: %d\n", dev->slot, ret);
+      return ret;
+    }
+
+  dev->ishub = true;
+
+  uinfo("%s: port %d: hub with %d port%s\n",
+        priv->name, xhci_rhport_from_hport(priv, hubport)->hport.hport.port
+        + 1, hubport->nports, hubport->nports == 1 ? "" : "s");
+
+  return OK;
+}
+
 static int xhci_connect(FAR struct usbhost_driver_s *drvr,
                         FAR struct usbhost_hubport_s *hport,
                         bool connected)
 {
-#error missing logic
+  FAR struct usbhost_xhci_s *priv = XHCI_PRIV_FROM_DRVR(drvr);
+  FAR struct xhci_dev_s     *dev;
+  irqstate_t                 flags;
+  int                        ret;
+
+  DEBUGASSERT(priv != NULL && hport != NULL && !ROOTHUB(hport));
+
+  /* The hub owns this port, so there is no port register here to consult
+   * and no reset to drive: what the hub reports is the whole of what the
+   * controller can know about it.
+   */
+
+  hport->connected = connected;
+
+  if (connected)
+    {
+      /* The controller has to know the port belongs to a hub before it will
+       * carry anything to it.
+       */
+
+      ret = xhci_hub_update(priv, hport->parent);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* Give the device a slot.  The hub allocated its control endpoint
+       * before saying anything, so that endpoint is what the slot gets.
+       */
+
+      ret = xhci_device_init(priv, xhci_rhport_from_hport(priv, hport),
+                             hport, (FAR struct xhci_epinfo_s *)hport->ep0);
+      if (ret < 0)
+        {
+          uerr("port %d: no slot for the device: %d\n", hport->port, ret);
+          return ret;
+        }
+    }
+  else
+    {
+      dev = xhci_dev_from_hport(priv, hport);
+      if (dev != NULL)
+        {
+          xhci_device_deinit(priv, dev);
+        }
+    }
+
+  flags = spin_lock_irqsave(&priv->spinlock);
+
+  /* Queue it for the waiter.  Dropping one when the queue is full would
+   * lose a device silently, and the queue is as long as the controller has
+   * slots, so a full one means every slot is already spoken for.
+   */
+
+  if ((uint8_t)(priv->hhead + 1) % CONFIG_USBHOST_XHCI_MAX_DEVS !=
+      priv->htail)
+    {
+      priv->hports[priv->hhead] = hport;
+      priv->hhead = (priv->hhead + 1) % CONFIG_USBHOST_XHCI_MAX_DEVS;
+    }
+  else
+    {
+      uerr("no room to report port %d\n", hport->port + 1);
+    }
+
+  if (priv->pscwait)
+    {
+      priv->pscwait = false;
+      nxsem_post(&priv->pscsem);
+    }
+
+  spin_unlock_irqrestore(&priv->spinlock, flags);
+  return OK;
 }
 #endif
 
@@ -4237,17 +5410,21 @@ static int xhci_connect(FAR struct usbhost_driver_s *drvr,
 static void xhci_disconnect(FAR struct usbhost_driver_s *drvr,
                             FAR struct usbhost_hubport_s *hport)
 {
-  FAR struct usbhost_xhci_s *priv   = XHCI_PRIV_FROM_DRVR(drvr);
-  FAR struct xhci_rhport_s  *rhport = (FAR struct xhci_rhport_s *)drvr;
+  FAR struct usbhost_xhci_s *priv = XHCI_PRIV_FROM_DRVR(drvr);
+  FAR struct xhci_dev_s     *dev;
 
   DEBUGASSERT(hport != NULL);
   hport->devclass = NULL;
 
-  /* Deinit device slot */
+  /* Deinit the device that was on this port.  Taking it from the port and
+   * not from the root port matters once a hub is in the way, where the root
+   * port names the hub rather than the device going away.
+   */
 
-  if (rhport->dev)
+  dev = xhci_dev_from_hport(priv, hport);
+  if (dev != NULL)
     {
-      xhci_device_deinit(priv, rhport);
+      xhci_device_deinit(priv, dev);
     }
 }
 
@@ -4262,15 +5439,18 @@ static void xhci_disconnect(FAR struct usbhost_driver_s *drvr,
 static int xhci_hw_getparams(FAR struct usbhost_xhci_s *priv)
 {
   uint32_t regval;
+  uint32_t erst;
 
   /* Get data form Host Controller Capability 1 Parameters */
 
+  /* Context entry stride, 32 or 64 bytes as the controller reports.  The
+   * wider form is the same fields with padding.
+   */
+
   regval = xhci_capa_getreg(priv, XHCI_HCCPARAMS1);
-  if (regval & XHCI_HCCPARAMS1_CSZ)
-    {
-      uerr("Only 32 byte Context data structures supported!\n");
-      return -EIO;
-    }
+  priv->ctxsize = (regval & XHCI_HCCPARAMS1_CSZ) ? 64 : 32;
+
+  uinfo("context size = %d\n", priv->ctxsize);
 
   /* Get data from Structural Parameters 1 register */
 
@@ -4302,16 +5482,21 @@ static int xhci_hw_getparams(FAR struct usbhost_xhci_s *priv)
 
   uinfo("no scratch = %d\n", priv->no_scratch);
 
-  priv->no_erst = 1 << XHCI_HCSPARAMS2_ERST(regval);
+  /* How many event ring segments the controller will allow, which is a
+   * power of two and can reach 32768, so it is worked out at full width
+   * and only then narrowed to what this driver actually uses.  Computed
+   * into the field directly it would wrap to zero on any controller
+   * offering more than 128 segments, and a table declared to hold no
+   * entries gives a controller with nowhere to report anything.
+   */
 
-  uinfo("no_erst = %d\n", priv->no_erst);
+  erst = 1ul << XHCI_HCSPARAMS2_ERST(regval);
+
+  uinfo("erst max = %" PRIu32 "\n", erst);
 
   /* Limit event ring segment table to 1 */
 
-  if (priv->no_erst > XHCI_MAX_ERST)
-    {
-      priv->no_erst = XHCI_MAX_ERST;
-    }
+  priv->no_erst = (erst > XHCI_MAX_ERST) ? XHCI_MAX_ERST : erst;
 
   uinfo("no erst = %d\n", priv->no_erst);
 
@@ -4432,7 +5617,12 @@ static int xhci_mem_alloc(FAR struct usbhost_xhci_s *priv)
     {
       /* Allocate Device Context */
 
-      priv->devs[i].ctx = kmm_zalloc(sizeof(struct xhci_dev_ctx_s));
+      /* The base address array holds these, and every entry in it must be
+       * 64 byte aligned, so the allocation has to be too.
+       */
+
+      priv->devs[i].ctx = kmm_memalign(XHCI_CTX_ALIGN,
+                                       XHCI_DEVCTX_SIZE(priv));
       if (!priv->devs[i].ctx)
         {
           uerr("dev ctx zalloc failed!\n");
@@ -4444,7 +5634,7 @@ static int xhci_mem_alloc(FAR struct usbhost_xhci_s *priv)
        */
 
       priv->devs[i].input = kmm_memalign((XHCI_PAGE_SIZE / 2),
-                            sizeof(struct xhci_input_dev_ctx_s));
+                            XHCI_INCTX_SIZE(priv));
       if (!priv->devs[i].input)
         {
           uerr("dev input zalloc failed!\n");
@@ -4540,14 +5730,6 @@ static int xhci_hw_initialize(FAR struct usbhost_xhci_s *priv)
   /* Allocate all required memory */
 
   ret = xhci_mem_alloc(priv);
-  if (ret < 0)
-    {
-      goto errout;
-    }
-
-  /* Configure interrupts */
-
-  ret = xhci_irq_initialize(priv);
   if (ret < 0)
     {
       goto errout;
@@ -4649,6 +5831,8 @@ static inline int xhci_sw_initialize(FAR struct usbhost_xhci_s *priv)
       rhport->ep0.epno            = 0;
       rhport->ep0.devaddr         = 0;
       nxsem_init(&rhport->ep0.iocsem, 0, 0);
+      rhport->hport.bus           = priv->bus;
+      nxmutex_init(&rhport->ep0.exclsem);
 
       /* Initialize the public port representation */
 
@@ -4692,11 +5876,12 @@ static inline int xhci_sw_initialize(FAR struct usbhost_xhci_s *priv)
  ****************************************************************************/
 
 FAR struct usbhost_connection_s *
-xhci_initialize(FAR const char *name, uintptr_t base,
+xhci_initialize(FAR const char *name, uint8_t bus, uintptr_t base,
                 FAR const struct xhci_bus_ops_s *ops, FAR void *arg)
 {
   FAR struct usbhost_conn_xhci_s *conn = NULL;
   FAR struct usbhost_xhci_s      *priv = NULL;
+  uint32_t                        regval;
   int                             ret;
 
   DEBUGASSERT(name != NULL && base != 0 && ops != NULL &&
@@ -4720,6 +5905,13 @@ xhci_initialize(FAR const char *name, uintptr_t base,
   conn->priv           = priv;
 
   priv->name           = name;
+
+  /* The bus is what the controller calls itself, so that a port reported
+   * through the generic host stack and a message from this driver name the
+   * same thing.  Numbering them here instead would agree only by accident.
+   */
+
+  priv->bus            = bus;
   priv->ops            = ops;
   priv->arg            = arg;
   priv->base           = base;
@@ -4755,6 +5947,34 @@ xhci_initialize(FAR const char *name, uintptr_t base,
       usbhost_trace1(XHCI_TRACE1_START_FAILED, 0);
       goto errout;
     }
+
+  /* Take the interrupt only now.
+   *
+   * The handler defers to a worker that walks the event ring, and the ring
+   * does not exist until the controller has been started.  A controller
+   * left running by a boot loader can have an interrupt pending the moment
+   * the line is enabled, so attaching any earlier is a race with nothing
+   * to answer it.
+   */
+
+  ret = xhci_irq_initialize(priv);
+  if (ret < 0)
+    {
+      uerr("failed to attach interrupt: %d\n", ret);
+      goto errout;
+    }
+
+  /* Acknowledge anything the controller raised before the handler was
+   * attached.  A message is sent once, on the transition, so a bit set in
+   * that window would never produce another.  Clear them, so the next
+   * event is a fresh assertion.
+   */
+
+  regval = xhci_oper_getreg(priv, XHCI_USBSTS);
+  xhci_oper_putreg(priv, XHCI_USBSTS, regval);
+
+  regval = xhci_runt_getreg(priv, XHCI_IMAN(0));
+  xhci_runt_putreg(priv, XHCI_IMAN(0), regval | XHCI_IMAN_IP);
 
 #ifdef CONFIG_DEBUG_USB_INFO
   xhci_dump_mem(priv, "after init");
