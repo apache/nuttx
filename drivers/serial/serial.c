@@ -476,6 +476,7 @@ static inline void uart_putchars(FAR uart_dev_t *dev,
       if (dev->ops->sendbuf)
         {
           ssize_t ret = uart_sendbuf(dev, pbuf, len);
+
           if (ret > 0)
             {
               pbuf += ret;
@@ -550,12 +551,14 @@ static inline ssize_t uart_irqwritev(FAR uart_dev_t *dev,
   for (i = 0; i < iovcnt; i++)
     {
       const struct iovec *iov = &uio->uio_iov[i];
+
       if (iov->iov_len == 0)
         {
           continue;
         }
 
       ssize_t written = uart_irqwrite(dev, iov->iov_base, iov->iov_len);
+
       if (written < 0)
         {
           error = written;
@@ -1122,6 +1125,7 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
               if (recvd > 0)
                 {
                   static const char zero = '\0';
+
                   uio_copyfrom(uio, recvd, &zero, 1);
                   recvd--;
                   if (dev->tc_lflag & ECHO)
@@ -1139,7 +1143,7 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
                     }
                 }
 
-                continue;
+              continue;
             }
 
           /* Specifically not handled:
@@ -2139,7 +2143,7 @@ static int uart_poll(FAR struct file *filep,
 
       if (dev->disconnected)
         {
-           eventset |= (POLLERR | POLLHUP);
+          eventset |= (POLLERR | POLLHUP);
         }
 #endif
 
