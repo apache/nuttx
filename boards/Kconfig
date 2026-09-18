@@ -1567,6 +1567,13 @@ config ARCH_BOARD_THINGY53
 	---help---
 		This option selects the Thingy:53 multi-protocol IoT prototyping platform
 
+config ARCH_BOARD_NRF54LM20_DK
+	bool "Nordic nRF54LM20 Development Kit"
+	depends on ARCH_CHIP_NRF54LM20A || ARCH_CHIP_NRF54LM20B
+	select ARCH_HAVE_LEDS
+	---help---
+		This option selects the nRF54LM20 Development Kit
+
 config ARCH_BOARD_NRF9160_DK
 	bool "Nordic nRF9160 Development Kit (PCA10090)"
 	depends on ARCH_CHIP_NRF91
@@ -4134,6 +4141,7 @@ config ARCH_BOARD
 	default "nrf5340-dk"                   if ARCH_BOARD_NRF5340_DK
 	default "nrf5340-audio-dk"             if ARCH_BOARD_NRF5340_AUDIO_DK
 	default "thingy53"                     if ARCH_BOARD_THINGY53
+	default "nrf54lm20-dk"                 if ARCH_BOARD_NRF54LM20_DK
 	default "nrf9160-dk"                   if ARCH_BOARD_NRF9160_DK
 	default "thingy91"                     if ARCH_BOARD_THINGY91
 	default "thingy91-nrf52"               if ARCH_BOARD_THINGY91_NRF52
