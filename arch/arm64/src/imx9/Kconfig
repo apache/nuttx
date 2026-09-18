@@ -81,6 +81,7 @@ config IMX9_BOOTLOADER
 	bool "Bootloader"
 	select ARM64_DECODEFIQ if ARCH_ARM64_EXCEPTION_LEVEL = 3
 	select IMX9_DDR_TRAINING if ARCH_ARM64_EXCEPTION_LEVEL = 3
+	select IMX9_ELE
 	default n
 	---help---
 		Configure NuttX as the bootloader. NuttX will be compiled
@@ -125,7 +126,21 @@ config IMX_AHAB_CNTR_ADDR
 	---help---
 		Physical address where the AHAB container header is loaded into memory.
 
+config IMX9_ELE
+	bool
+	default n
+
 menu "i.MX9 Peripheral Selection"
+
+config IMX9_RNG
+	bool "ELE true random number generator"
+	default n
+	select IMX9_ELE
+	select ARCH_HAVE_RNG
+	---help---
+		Register /dev/random and /dev/urandom, both backed by the ELE
+		true random number generator. Without this the entropy pool is
+		never seeded from hardware.
 
 config IMX9_EDMA
 	bool "eDMA"

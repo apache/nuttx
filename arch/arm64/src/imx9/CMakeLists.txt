@@ -90,7 +90,15 @@ if(CONFIG_IMX9_FLEXSPI_NOR)
 endif()
 
 if(CONFIG_IMX9_BOOTLOADER)
-  list(APPEND SRCS imx9_system_ctl.c imx9_trdc.c imx9_ele.c)
+  list(APPEND SRCS imx9_system_ctl.c imx9_trdc.c)
+endif()
+
+if(CONFIG_IMX9_ELE)
+  list(APPEND SRCS imx9_ele.c)
+endif()
+
+if(CONFIG_IMX9_RNG)
+  list(APPEND SRCS imx9_rng.c)
 endif()
 
 if(CONFIG_IMX9_ROMAPI)
