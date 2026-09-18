@@ -30,14 +30,16 @@
 #include <fixedmath.h>
 #include <assert.h>
 
-#include "hardware/imxrt_iomuxc.h"
 #include "hardware/imxrt_pinmux.h"
-#include "hardware/imxrt_ccm.h"
 #include "hardware/imxrt_lpuart.h"
 #include "imxrt_config.h"
 #include "imxrt_clockconfig.h"
-#include "imxrt_periphclks.h"
-#include "imxrt_iomuxc.h"
+#ifndef CONFIG_ARCH_FAMILY_IMXRT118x
+#  include "hardware/imxrt_iomuxc.h"
+#  include "hardware/imxrt_ccm.h"
+#  include "imxrt_periphclks.h"
+#  include "imxrt_iomuxc.h"
+#endif
 
 #include "imxrt_gpio.h"
 #include "imxrt_lowputc.h"
@@ -180,6 +182,11 @@ static const struct uart_config_s g_console_config =
 
 void imxrt_lpuart_clock_enable (uint32_t base)
 {
+#ifdef CONFIG_ARCH_FAMILY_IMXRT118x
+  /* The minimal RT1180 clock setup leaves the LPUART1 root enabled. */
+
+  (void)base;
+#else
   if (base == IMXRT_LPUART1_BASE)
     {
       imxrt_clockall_lpuart1();
@@ -235,6 +242,7 @@ void imxrt_lpuart_clock_enable (uint32_t base)
     {
       imxrt_clockall_lpuart12();
     }
+#endif
 #endif
 }
 
@@ -483,7 +491,8 @@ void imxrt_lowsetup(void)
 int imxrt_lpuart_configure(uint32_t base,
                            const struct uart_config_s *config)
 {
-#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#if !defined(CONFIG_ARCH_FAMILY_IMXRT117x) && \
+    !defined(CONFIG_ARCH_FAMILY_IMXRT118x)
   uint32_t src_freq = 0;
   uint32_t pll3_div = 0;
   uint32_t uart_div = 0;
@@ -499,7 +508,9 @@ int imxrt_lpuart_configure(uint32_t base,
   uint32_t regval;
   uint32_t regval2;
 
-#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#ifdef CONFIG_ARCH_FAMILY_IMXRT118x
+  lpuart_freq = BOARD_LPUART_FREQUENCY;
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT117x)
   if (base == IMXRT_LPUART1_BASE)
     {
       if (imxrt_get_rootclock(CCM_CR_LPUART1, &lpuart_freq) != OK)

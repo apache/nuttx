@@ -1,0 +1,22 @@
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+if ARCH_BOARD_FRDM_IMXRT1186
+
+config FRDM_IMXRT1186_DTCM
+	bool
+	default y
+
+config FRDM_IMXRT1186_XIP
+	bool "Create a FlexSPI2 NOR execute-in-place image"
+	depends on BOOT_RUNFROMFLASH
+	---help---
+		Build an RT1180 Boot ROM container that executes the Cortex-M33
+		image directly from the on-board 16 MiB W25Q128 QSPI NOR connected
+		to FlexSPI2.  Writable data remains in internal OCRAM.
+
+		The raw binary starts at flash offset zero and includes the FlexSPI
+		configuration block and RT1180 container required for POR boot.
+
+endif

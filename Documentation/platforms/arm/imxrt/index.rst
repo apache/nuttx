@@ -25,7 +25,7 @@ RT1060  Yes             Cortex-M7        600 MHz
 RT1064  Yes             Cortex-M7        600 MHz
 RT1160  No              Cortex-M7 + M4   600 Mhz + 240 MHz
 RT1170  Yes (Only M7)   Cortex-M7 + M4   1 GHz + 400 MHz
-RT1180  No              Cortex-M7 + M33  800 Mhz + 300 MHz
+RT1180  Yes (Only M33)  Cortex-M7 + M33  800 Mhz + 300 MHz
 ======  ==============  ===============  =================
 
 Data and Instruction Cache
