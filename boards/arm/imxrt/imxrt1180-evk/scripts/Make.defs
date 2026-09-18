@@ -60,13 +60,34 @@ AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 
 FLASH_BUILDER = $(TOPDIR)$(DELIM)tools$(DELIM)imxrt1180$(DELIM)build_flash_image.sh
 
+ifeq ($(CONFIG_IMXRT_ELE_FW),y)
+include $(TOPDIR)/tools/imxrt1180/Config.mk
+
+# Restore "all" as the default goal: Config.mk's FW target would
+# otherwise become it, since this file is included before "all" is
+# defined.
+.DEFAULT_GOAL := all
+endif
+
+ifeq ($(CONFIG_IMXRT_ELE_FW),y)
+ifeq ($(CONFIG_IMXRT_ELE_LOAD_FW),y)
+FLASH_BUILDER_ELE_FW_ARGS =
+else
+FLASH_BUILDER_ELE_FW_ARGS = --ele-fw $(IMXRT_ELE_FW_ABS)
+endif
+else
+FLASH_BUILDER_ELE_FW_ARGS =
+endif
+
 ifeq ($(CONFIG_ARCH_CORTEXM33),y)
 define POSTBUILD
 	$(Q) echo "Assembling MIMXRT1180-EVK FlexSPI NOR image (CM33 target)"
 	$(Q) $(OBJCOPY) -O binary -R .bss -R .initstack $(BIN) nuttx.bin
+	$(if $(IMXRT_ELE_FW_ABS),$(Q) $(MAKE) $(IMXRT_ELE_FW_ABS))
 	$(Q) $(FLASH_BUILDER) \
 	     --m33 nuttx.bin \
-	     --out flash.bin
+	     --out flash.bin \
+	     $(FLASH_BUILDER_ELE_FW_ARGS)
 	$(Q) echo "flash.bin" >> nuttx.manifest
 endef
 else

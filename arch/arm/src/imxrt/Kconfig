@@ -457,6 +457,49 @@ config IMXRT_ELE
 		(arch/arm/src/imxrt/imxrt118x_ele.c).  Present on RT118x-class
 		SoCs.
 
+config IMXRT_ELE_FW
+	bool "Use a separate ELE firmware image"
+	depends on IMXRT_ELE
+	default n
+	---help---
+		Use a separate NXP EdgeLock Enclave firmware AHAB container
+		(CONFIG_IMXRT_ELE_FW_PATH) instead of relying solely on the
+		ELE code already built into the RT118x boot ROM.
+
+		When disabled (the default), no separate ELE firmware is used
+		at all.
+
+config IMXRT_ELE_FW_DOWNLOAD
+	bool "Download the ELE firmware image"
+	depends on IMXRT_ELE_FW
+	default y
+	---help---
+		Download the pinned NXP EdgeLock Enclave firmware AHAB
+		container into CONFIG_IMXRT_ELE_FW_PATH as part of the build.
+
+		The container is proprietary NXP object code; running the build
+		implies acceptance of NXP's LA_OPT NXP Software License.
+
+config IMXRT_ELE_LOAD_FW
+	bool "Load ELE firmware from NuttX at boot"
+	depends on IMXRT_ELE_FW
+	default y
+	---help---
+		Embed the ELE firmware AHAB container (CONFIG_IMXRT_ELE_FW_PATH)
+		in the NuttX image and hand it to the EdgeLock Enclave with a
+		LOAD_FW command early in imxrt118x_ele_init().
+
+		When disabled, the ELE firmware is instead packed as its own
+		AHAB container in the boot image, loaded by ROM code.
+
+config IMXRT_ELE_FW_PATH
+	string "ELE firmware AHAB container path"
+	depends on IMXRT_ELE_FW
+	default "tools/imxrt1180/.cache/ele-fw/mxrt1180b0-ahab-container.img"
+	---help---
+		Path (relative to the NuttX top-level directory, or absolute) to
+		the NXP EdgeLock Enclave firmware AHAB container.
+
 config IMXRT_CM7_BOOT
 	bool
 	default n
