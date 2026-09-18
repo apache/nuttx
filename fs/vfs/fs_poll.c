@@ -35,6 +35,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/signal.h>
 #include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
@@ -391,10 +392,10 @@ int file_poll(FAR struct file *filep, FAR struct pollfd_s *fds, bool setup)
 }
 
 /****************************************************************************
- * Name: poll
+ * Name: nx_poll
  *
  * Description:
- *   poll() waits for one of a set of file descriptors to become ready to
+ *   nx_poll() waits for one of a set of file descriptors to become ready to
  *   perform I/O.  If none of the events requested (and no error) has
  *   occurred for any of  the  file  descriptors,  then  poll() blocks until
  *   one of the events occurs.
@@ -405,11 +406,12 @@ int file_poll(FAR struct file *filep, FAR struct pollfd_s *fds, bool setup)
  *   timeout - Specifies an upper limit on the time for which poll() will
  *     block in milliseconds.  A negative value of timeout means an infinite
  *     timeout.
+ *   sigmask - Optional temporary signal mask, installed after poll setup.
  *
  * Returned Value:
  *   On success, the number of structures that have non-zero revents fields.
  *   A value of 0 indicates that the call timed out and no file descriptors
- *   were ready.  On error, -1 is returned, and errno is set appropriately:
+ *   were ready.  On error, a negated errno value is returned:
  *
  *   EBADF  - An invalid file descriptor was given in one of the sets.
  *   EFAULT - The fds address is invalid
@@ -421,12 +423,15 @@ int file_poll(FAR struct file *filep, FAR struct pollfd_s *fds, bool setup)
  *
  ****************************************************************************/
 
-int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
+int nx_poll(FAR struct pollfd *fds, nfds_t nfds, int timeout,
+            FAR const sigset_t *sigmask)
 {
   struct pollfd_s sfds[POLL_NSTACKFDS];
   struct pollinfo_s fdsinfo;
   FAR struct pollfd_s *kfds;
   sem_t sem;
+  sigset_t saved;
+  irqstate_t flags = 0;
   int count = 0;
   int ret = OK;
   nfds_t i;
@@ -491,7 +496,20 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
       fdsinfo.heap = kfds != sfds;
       tls_cleanup_push(tls_get_info(), poll_cleanup, &fdsinfo);
 
-      if (timeout > 0)
+      /* Driver setup can block.  Keep signals masked until setup is done
+       * so a signal cannot be consumed before the poll wait is armed.
+       */
+
+      if (sigmask != NULL)
+        {
+          flags = enter_critical_section();
+          if (nxsig_waitmask_set(sigmask, &saved))
+            {
+              ret = -EINTR;
+            }
+        }
+
+      if (ret == OK && timeout > 0)
         {
           /* "Implementations may place limitations on the granularity of
            * timeout intervals. If the requested timeout interval requires
@@ -523,11 +541,17 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
               /* EINTR is the only other error expected in normal operation */
             }
         }
-      else if (timeout < 0)
+      else if (ret == OK && timeout < 0)
         {
           /* Wait for the poll event or signal with no timeout */
 
           ret = nxsem_wait(&sem);
+        }
+
+      if (sigmask != NULL)
+        {
+          nxsig_waitmask_restore(&saved);
+          leave_critical_section(flags);
         }
 
       /* Teardown the poll operation and get the count of events.  Zero will
@@ -541,6 +565,19 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
       /* Pop the cancellation point */
 
       tls_cleanup_pop(tls_get_info(), 0);
+    }
+  else if (sigmask != NULL)
+    {
+      /* poll_setup already tore down the ready descriptors. */
+
+      flags = enter_critical_section();
+      if (nxsig_waitmask_set(sigmask, &saved))
+        {
+          ret = -EINTR;
+        }
+
+      nxsig_waitmask_restore(&saved);
+      leave_critical_section(flags);
     }
 
   nxsem_destroy(&sem);
@@ -560,6 +597,21 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 out_with_cancelpt:
   leave_cancellation_point();
 
+  return ret < 0 ? ret : count;
+}
+
+/****************************************************************************
+ * Name: poll
+ *
+ * Description:
+ *   Wait for file descriptor events, translating internal errors to errno.
+ *
+ ****************************************************************************/
+
+int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
+{
+  int ret = nx_poll(fds, nfds, timeout, NULL);
+
   if (ret < 0)
     {
       set_errno(-ret);
@@ -567,6 +619,6 @@ out_with_cancelpt:
     }
   else
     {
-      return count;
+      return ret;
     }
 }

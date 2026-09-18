@@ -1880,6 +1880,21 @@ int file_fcntl(FAR struct file *filep, int cmd, ...);
 int file_poll(FAR struct file *filep, FAR struct pollfd_s *fds, bool setup);
 
 /****************************************************************************
+ * Name: nx_poll
+ *
+ * Description:
+ *   Internal poll implementation.  Returns the number of ready descriptors
+ *   or a negated errno value.  It is a cancellation point, like poll().
+ *   A non-NULL sigmask is installed only after driver setup and is restored
+ *   after the wait, with signal dispatch deferred to syscall exit as needed.
+ *   NULL leaves signal-mask handling to the caller.
+ *
+ ****************************************************************************/
+
+int nx_poll(FAR struct pollfd *fds, nfds_t nfds, int timeout,
+            FAR const sigset_t *sigmask);
+
+/****************************************************************************
  * Name: file_fstat
  *
  * Description:

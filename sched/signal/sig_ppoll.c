@@ -28,8 +28,9 @@
 
 #include <poll.h>
 
+#include <nuttx/fs/fs.h>
+
 #include "sched/sched.h"
-#include "signal/signal.h"
 
 /****************************************************************************
  * Public Functions
@@ -70,59 +71,29 @@ int ppoll(FAR struct pollfd *fds, nfds_t nfds,
           FAR const struct timespec *timeout_ts,
           FAR const sigset_t *sigmask)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  sigset_t saved_sigprocmask;
-  irqstate_t flags;
-  int ret = ERROR;
+  sigset_t mask;
+  int timeout = -1;
+  int ret;
 
-  /* Several operations must be performed below:  We must determine if any
-   * signal is pending and, if not, wait for the signal.  Since signals can
-   * be posted from the interrupt level, there is a race condition that
-   * can only be eliminated by disabling interrupts!
-   */
-
-  flags = enter_critical_section();
-
-  /* Save a copy of the old sigprocmask and install the new (temporary)
-   * sigprocmask.  Check if there is a pending signal corresponding to one
-   * of the signals that will be unblocked by the new sigprocmask.
-   */
-
-  if (nxsig_waitmask_set(sigmask, &saved_sigprocmask))
+  if (timeout_ts != NULL)
     {
-      /* Dispatching one or more of the signals is sufficient to cause
-       * us to not wait. Restore the original sigprocmask.
-       */
-
-      nxsig_restoremask(rtcb, &saved_sigprocmask);
-      leave_critical_section(flags);
-      set_errno(EINTR);
+      timeout = (int)(timeout_ts->tv_sec * MSEC_PER_SEC +
+                      timeout_ts->tv_nsec / NSEC_PER_MSEC);
     }
-  else
+
+  /* A NULL mask keeps the caller's mask but still checks pending signals. */
+
+  if (sigmask == NULL)
     {
-      int timeout = -1;
+      mask = this_task()->sigprocmask;
+      sigmask = &mask;
+    }
 
-      /* And call poll to do the real work */
-
-      if (timeout_ts)
-        {
-          timeout = (int)(timeout_ts->tv_sec * MSEC_PER_SEC +
-                          timeout_ts->tv_nsec / NSEC_PER_MSEC);
-        }
-
-      ret = poll(fds, nfds, timeout);
-
-      /* We are running again, restore the original sigprocmask */
-
-      nxsig_restoremask(rtcb, &saved_sigprocmask);
-      leave_critical_section(flags);
-
-      /* Now, handle the (rare?) case where (a) a blocked signal was received
-       * while the task was suspended but (b) restoring the original
-       * sigprocmask will unblock the signal.
-       */
-
-      nxsig_unmask_pendingsignal();
+  ret = nx_poll(fds, nfds, timeout, sigmask);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
     }
 
   return ret;
