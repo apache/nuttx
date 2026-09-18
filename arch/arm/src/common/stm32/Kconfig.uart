@@ -1227,6 +1227,286 @@ config UART8_RXFIFO_THRES
 
 endif # STM32_UART8
 
+config USART1_WAKE_FROM_LOW_POWER
+	bool "USART1 Enable wake from low power mode"
+	default n
+	depends on STM32_HAVE_USART_WUS && STM32_USART && STM32_USART1_SERIALDRIVER
+	---help---
+		Enable the wake from low power mode interrupt.
+		NOTE: The UART must be clocked from a clock source which is not disabled during stop
+		for this to work
+
+config USART1_WUS
+	int "USART1 Wake from low power interrupt selection"
+	default 2
+	range 0 3
+	depends on USART1_WAKE_FROM_LOW_POWER
+	---help---
+		0 = WUF active on address match (as defined by ADD[7:0] and ADDM7)
+		1 = Reserved.
+		2 = WUF active on start bit detection
+		3 = WUF active on RXNE/RXFNE.
+
+config USART2_WAKE_FROM_LOW_POWER
+	bool "USART2 Enable wake from low power mode"
+	default n
+	depends on STM32_HAVE_USART_WUS && STM32_USART && STM32_USART2_SERIALDRIVER
+	---help---
+		Enable the wake from low power mode interrupt.
+		NOTE: The UART must be clocked from a clock source which is not disabled during stop
+		for this to work
+
+config USART2_WUS
+	int "USART2 Wake from low power interrupt selection"
+	default 2
+	range 0 3
+	depends on USART2_WAKE_FROM_LOW_POWER
+	---help---
+		0 = WUF active on address match (as defined by ADD[7:0] and ADDM7)
+		1 = Reserved.
+		2 = WUF active on start bit detection
+		3 = WUF active on RXNE/RXFNE.
+
+if STM32_USART3
+
+config USART3_WAKE_FROM_LOW_POWER
+	bool "USART3 Enable wake from low power mode"
+	default n
+	depends on STM32_HAVE_USART_WUS
+	---help---
+		Enable the wake from low power mode interrupt.
+		NOTE: The UART must be clocked from a clock source which is not disabled during stop
+		for this to work
+
+config USART3_WUS
+	int "USART3 Wake from low power interrupt selection"
+	default 2
+	range 0 3
+	depends on USART3_WAKE_FROM_LOW_POWER
+	---help---
+		0 = WUF active on address match (as defined by ADD[7:0] and ADDM7)
+		1 = Reserved.
+		2 = WUF active on start bit detection
+		3 = WUF active on RXNE/RXFNE.
+
+endif # STM32_USART3
+
+if STM32_UART4
+
+config UART4_WAKE_FROM_LOW_POWER
+	bool "UART4 Enable wake from low power mode"
+	default n
+	depends on STM32_HAVE_USART_WUS
+	---help---
+		Enable the wake from low power mode interrupt.
+		NOTE: The UART must be clocked from a clock source which is not disabled during stop
+		for this to work
+
+config UART4_WUS
+	int "UART4 Wake from low power interrupt selection"
+	default 2
+	range 0 3
+	depends on UART4_WAKE_FROM_LOW_POWER
+	---help---
+		0 = WUF active on address match (as defined by ADD[7:0] and ADDM7)
+		1 = Reserved.
+		2 = WUF active on start bit detection
+		3 = WUF active on RXNE/RXFNE.
+
+endif # STM32_UART4
+
+if STM32_UART5
+
+config UART5_WAKE_FROM_LOW_POWER
+	bool "UART5 Enable wake from low power mode"
+	default n
+	depends on STM32_HAVE_USART_WUS
+	---help---
+		Enable the wake from low power mode interrupt.
+		NOTE: The UART must be clocked from a clock source which is not disabled during stop
+		for this to work
+
+config UART5_WUS
+	int "UART5 Wake from low power interrupt selection"
+	default 2
+	range 0 3
+	depends on UART5_WAKE_FROM_LOW_POWER
+	---help---
+		0 = WUF active on address match (as defined by ADD[7:0] and ADDM7)
+		1 = Reserved.
+		2 = WUF active on start bit detection
+		3 = WUF active on RXNE/RXFNE.
+
+endif # STM32_UART5
+
+if STM32_USART6
+
+config USART6_WAKE_FROM_LOW_POWER
+	bool "USART6 Enable wake from low power mode"
+	default n
+	depends on STM32_HAVE_USART_WUS
+	---help---
+		Enable the wake from low power mode interrupt.
+		NOTE: The UART must be clocked from a clock source which is not disabled during stop
+		for this to work
+
+config USART6_WUS
+	int "USART6 Wake from low power interrupt selection"
+	default 2
+	range 0 3
+	depends on USART6_WAKE_FROM_LOW_POWER
+	---help---
+		0 = WUF active on address match (as defined by ADD[7:0] and ADDM7)
+		1 = Reserved.
+		2 = WUF active on start bit detection
+		3 = WUF active on RXNE/RXFNE.
+
+endif # STM32_USART6
+
+if STM32_UART7
+
+config UART7_WAKE_FROM_LOW_POWER
+	bool "UART7 Enable wake from low power mode"
+	default n
+	depends on STM32_HAVE_USART_WUS
+	---help---
+		Enable the wake from low power mode interrupt.
+		NOTE: The UART must be clocked from a clock source which is not disabled during stop
+		for this to work
+
+config UART7_WUS
+	int "UART7 Wake from low power interrupt selection"
+	default 2
+	range 0 3
+	depends on UART7_WAKE_FROM_LOW_POWER
+	---help---
+		0 = WUF active on address match (as defined by ADD[7:0] and ADDM7)
+		1 = Reserved.
+		2 = WUF active on start bit detection
+		3 = WUF active on RXNE/RXFNE.
+
+endif # STM32_UART7
+
+if STM32_UART8
+
+config UART8_WAKE_FROM_LOW_POWER
+	bool "UART8 Enable wake from low power mode"
+	default n
+	depends on STM32_HAVE_USART_WUS
+	---help---
+		Enable the wake from low power mode interrupt.
+		NOTE: The UART must be clocked from a clock source which is not disabled during stop
+		for this to work
+
+config UART8_WUS
+	int "UART8 Wake from low power interrupt selection"
+	default 2
+	range 0 3
+	depends on UART8_WAKE_FROM_LOW_POWER
+	---help---
+		0 = WUF active on address match (as defined by ADD[7:0] and ADDM7)
+		1 = Reserved.
+		2 = WUF active on start bit detection
+		3 = WUF active on RXNE/RXFNE.
+
+endif # STM32_UART8
+
+if STM32_UART9
+
+config UART9_WAKE_FROM_LOW_POWER
+	bool "UART9 Enable wake from low power mode"
+	default n
+	depends on STM32_HAVE_USART_WUS
+	---help---
+		Enable the wake from low power mode interrupt.
+		NOTE: The UART must be clocked from a clock source which is not disabled during stop
+		for this to work
+
+config UART9_WUS
+	int "UART9 Wake from low power interrupt selection"
+	default 2
+	range 0 3
+	depends on UART9_WAKE_FROM_LOW_POWER
+	---help---
+		0 = WUF active on address match (as defined by ADD[7:0] and ADDM7)
+		1 = Reserved.
+		2 = WUF active on start bit detection
+		3 = WUF active on RXNE/RXFNE.
+
+endif # STM32_UART9
+
+if STM32_USART10
+
+config USART10_WAKE_FROM_LOW_POWER
+	bool "USART10 Enable wake from low power mode"
+	default n
+	depends on STM32_HAVE_USART_WUS
+	---help---
+		Enable the wake from low power mode interrupt.
+		NOTE: The UART must be clocked from a clock source which is not disabled during stop
+		for this to work
+
+config USART10_WUS
+	int "USART10 Wake from low power interrupt selection"
+	default 2
+	range 0 3
+	depends on USART10_WAKE_FROM_LOW_POWER
+	---help---
+		0 = WUF active on address match (as defined by ADD[7:0] and ADDM7)
+		1 = Reserved.
+		2 = WUF active on start bit detection
+		3 = WUF active on RXNE/RXFNE.
+
+endif # STM32_USART10
+
+if STM32_USART11
+
+config USART11_WAKE_FROM_LOW_POWER
+	bool "USART11 Enable wake from low power mode"
+	default n
+	depends on STM32_HAVE_USART_WUS
+	---help---
+		Enable the wake from low power mode interrupt.
+		NOTE: The UART must be clocked from a clock source which is not disabled during stop
+		for this to work
+
+config USART11_WUS
+	int "USART11 Wake from low power interrupt selection"
+	default 2
+	range 0 3
+	depends on USART11_WAKE_FROM_LOW_POWER
+	---help---
+		0 = WUF active on address match (as defined by ADD[7:0] and ADDM7)
+		1 = Reserved.
+		2 = WUF active on start bit detection
+		3 = WUF active on RXNE/RXFNE.
+
+endif # STM32_USART11
+
+if STM32_UART12
+
+config UART12_WAKE_FROM_LOW_POWER
+	bool "UART12 Enable wake from low power mode"
+	default n
+	depends on STM32_HAVE_USART_WUS
+	---help---
+		Enable the wake from low power mode interrupt.
+		NOTE: The UART must be clocked from a clock source which is not disabled during stop
+		for this to work
+
+config UART12_WUS
+	int "UART12 Wake from low power interrupt selection"
+	default 2
+	range 0 3
+	depends on UART12_WAKE_FROM_LOW_POWER
+	---help---
+		0 = WUF active on address match (as defined by ADD[7:0] and ADDM7)
+		1 = Reserved.
+		2 = WUF active on start bit detection
+		3 = WUF active on RXNE/RXFNE.
+
+endif # STM32_UART12
+
 config STM32_USART_INVERT
 	bool "Signal Invert Support"
 	depends on STM32_USART
