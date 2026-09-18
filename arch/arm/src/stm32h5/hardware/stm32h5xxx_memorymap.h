@@ -65,10 +65,6 @@
 #define STM32_SYSMEM_FSIZE   0x08FFF80C     /* Size of Flash memory in Kbytes. */
 #define STM32_SYSMEM_PACKAGE 0x08FFF80E     /* Indicates the device's package type. */
 
-/* OTP Base Addresses *******************************************************/
-
-#define STM32_OTP_BASE       0x08fff000     /* Base address of OTP Area */
-
 /* Peripheral Base Addresses ************************************************/
 
 #define STM32_APB1_BASE      0x40000000     /* 0x40000000-0x4000fbff: APB1 */
