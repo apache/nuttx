@@ -168,3 +168,12 @@ The idle loop uses ``WFI`` when GRTC provides tickless scheduling. With
 SysTick selected, the CPU remains awake so its clock keeps running.
 ``CONFIG_PM`` initializes the NuttX power management framework. System OFF
 is not supported.
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*
