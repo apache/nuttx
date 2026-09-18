@@ -929,7 +929,12 @@ static int comp_ioctl(struct comp_dev_s *dev, int cmd, unsigned long arg)
         {
           /* Enable comparator */
 
-          comp_enable(priv, true);
+          ret = comp_enable(priv, true);
+          if (ret == OK && priv->lock)
+            {
+              comp_lock_set(priv, true);
+            }
+
           break;
         }
 
@@ -937,7 +942,7 @@ static int comp_ioctl(struct comp_dev_s *dev, int cmd, unsigned long arg)
         {
           /* Disable comparator */
 
-          comp_enable(priv, false);
+          ret = comp_enable(priv, false);
           break;
         }
 
