@@ -104,7 +104,12 @@ static void up_idlepm(void)
       /* Release the stay above: it only forces this one state change. */
 
       pm_relax(PM_IDLE_DOMAIN, PM_NORMAL);
-      newstate = PM_NORMAL;
+
+      /* Without this, oldstate goes stale after the first wakeup and the
+       * state machine wedges in PM_NORMAL forever -- see commit message.
+       */
+
+      oldstate = PM_NORMAL;
     }
 
   /* Decide, which power saving level can be obtained */
