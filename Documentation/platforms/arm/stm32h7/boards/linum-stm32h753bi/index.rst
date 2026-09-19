@@ -1298,3 +1298,28 @@ This example demonstrates how to use the CAN-FD peripherals can0 and can1 with t
     can0  051   [8]  00 11 22 33 44 55 66 77
     can0  051  [16]  00 11 22 33 44 55 66 77 88 99 AA BB CC DD EE FF
 
+
+zbus
+----
+
+Enables the zbus message bus library (``apps/system/zbus``, a port of the
+Zephyr zbus — see :doc:`its documentation
+</applications/system/zbus/index>`) with all observer types (listeners,
+subscribers, message subscribers, async listeners, ISR publisher and
+runtime observers), together with its example application::
+
+    nsh> zbus
+    zbus: publishing 5 messages to acc_chan
+    zbus:  listener: x=1 y=10 z=100
+    zbus:  subscriber: x=1 y=10 z=100
+    ...
+    zbus: done
+
+The cmocka test suite from ``apps/testing/zbus`` is also included and can
+be used to validate the whole zbus API on the board::
+
+    nsh> cmocka_zbus_test
+    [==========] tests: Running 16 test(s).
+    ...
+    [==========] tests: 16 test(s) run.
+    [  PASSED  ] 16 test(s).
