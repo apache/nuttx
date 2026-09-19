@@ -27,4 +27,14 @@ config ARCH_CHIP_STM32N657X0
 
 endchoice
 
+config STM32N6_DEBUG
+	bool "Enable debugger access after boot"
+	default n
+	---help---
+		Reopen secure and non-secure debugger access at the current hardware
+		protection level early in startup.  The boot ROM can close this access
+		when booting from external flash.  Enable this option for development
+		to attach without switching to DEV boot mode.  This changes runtime
+		BSEC registers only, not OTP fuses.
+
 endif # ARCH_CHIP_STM32N6
