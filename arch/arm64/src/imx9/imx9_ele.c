@@ -24,6 +24,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/arch.h>
 #include <nuttx/debug.h>
 #include <errno.h>
 
@@ -147,6 +148,30 @@ static void imx9_ele_receivemsg(struct ele_msg *msg_ptr)
 }
 
 /****************************************************************************
+ * Name: imx9_ele_buffer_pa
+ *
+ * Description:
+ *   Physical address of a buffer the ELE will read or write.  The enclave
+ *   addresses memory physically while cache maintenance takes the virtual
+ *   address, so a caller holding one of them cannot supply the other.
+ *
+ * Returned Value:
+ *   The physical address, or zero if the buffer is not mapped.
+ *
+ ****************************************************************************/
+
+static uintptr_t imx9_ele_buffer_pa(void *va)
+{
+#ifdef CONFIG_ARCH_USE_MMU
+  return up_addrenv_va_to_pa(va);
+#else
+  /* Without translation the virtual address is the physical one. */
+
+  return (uintptr_t)va;
+#endif
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -199,6 +224,9 @@ uint32_t imx9_ele_read_common_fuse(uint32_t fuse_id)
 int imx9_ele_get_key(uint8_t *key, size_t key_size,
                      uint8_t *ctx, size_t ctx_size)
 {
+  uintptr_t key_pa;
+  uintptr_t ctx_pa;
+
   if (!key)
     {
       _err("Invalid key parameter\n");
@@ -229,17 +257,27 @@ int imx9_ele_get_key(uint8_t *key, size_t key_size,
       return -EINVAL;
     }
 
+  key_pa = imx9_ele_buffer_pa(key);
+  ctx_pa = imx9_ele_buffer_pa(ctx);
+
+  if (key_pa == 0 || ctx_pa == 0)
+    {
+      _err("Buffer is not mapped\n");
+      return -EFAULT;
+    }
+
   msg.header.version = ELE_VERSION;
   msg.header.tag = ELE_CMD_TAG;
   msg.header.size = 7;
   msg.header.command = ELE_DERIVE_KEY_REQ;
-  msg.data[0] = upper_32_bits((ulong)key);
-  msg.data[1] = lower_32_bits((ulong)key);
-  msg.data[2] = upper_32_bits((ulong)ctx);
-  msg.data[3] = lower_32_bits((ulong)ctx);
+  msg.data[0] = upper_32_bits((ulong)key_pa);
+  msg.data[1] = lower_32_bits((ulong)key_pa);
+  msg.data[2] = upper_32_bits((ulong)ctx_pa);
+  msg.data[3] = lower_32_bits((ulong)ctx_pa);
   msg.data[4] = ((ctx_size << 16) | key_size);
 
   uint32_t crc = msg.header.data;
+
   for (uint32_t i = 0; i < msg.header.size - 2; i++)
     {
       crc ^= msg.data[i];
@@ -424,6 +462,7 @@ int imx9_ele_get_trng_state(void)
     {
       struct ele_trng_state *ele_trng =
         (struct ele_trng_state *)(msg.data + 1);
+
       if (ele_trng->trng_state != ELE_TRNG_STATUS_READY ||
           ele_trng->csal_state != ELE_CSAL_STATUS_READY)
         {
@@ -442,15 +481,37 @@ int imx9_ele_get_trng_state(void)
   return -EIO;
 }
 
-int imx9_ele_get_random(uint32_t paddr, size_t len)
+int imx9_ele_get_random(void *buf, size_t len)
 {
   uint16_t counter = 0;
   uint16_t max_tries = ELE_RNG_TIMEOUT_US / ELE_RNG_SLEEP_US;
+  uintptr_t paddr;
 
-  if (paddr == 0 || len == 0)
+  if (buf == NULL || len == 0)
     {
       _err("Wrong input parameters!\n");
       return -EINVAL;
+    }
+
+  /* The buffer is invalidated after the transfer, so anything sharing its
+   * first or last cache line would lose whatever was written meanwhile.
+   */
+
+  if (!IS_ALIGNED((uintptr_t)buf, ARMV8A_DCACHE_LINESIZE) ||
+      !IS_ALIGNED(len, ARMV8A_DCACHE_LINESIZE))
+    {
+      _err("Buffer is not a whole number of cache lines\n");
+      return -EINVAL;
+    }
+
+  paddr = imx9_ele_buffer_pa(buf);
+
+  /* The address travels in a single 32-bit message word. */
+
+  if (paddr == 0 || paddr > UINT32_MAX - len)
+    {
+      _err("Buffer is not mapped, or is beyond the ELE address range\n");
+      return -EFAULT;
     }
 
   while ((imx9_ele_get_trng_state() != 0))
@@ -465,16 +526,18 @@ int imx9_ele_get_random(uint32_t paddr, size_t len)
       counter++;
     }
 
-  /* Flush the cache before sending the request to ELE. */
+  /* Cache maintenance takes the virtual address; the ELE takes the
+   * physical one.
+   */
 
-  up_flush_dcache((uintptr_t)paddr, (uintptr_t)(paddr + len));
+  up_flush_dcache((uintptr_t)buf, (uintptr_t)buf + len);
 
   msg.header.version = ELE_VERSION_FW;
   msg.header.tag = ELE_CMD_TAG;
   msg.header.size = 4;
   msg.header.command = ELE_GET_RNG_REQ;
   msg.data[0] = 0;
-  msg.data[1] = paddr;
+  msg.data[1] = (uint32_t)paddr;
   msg.data[2] = len;
 
   imx9_ele_sendmsg(&msg);
@@ -484,8 +547,7 @@ int imx9_ele_get_random(uint32_t paddr, size_t len)
     {
       /* Invalidate the cache so we can read the result from RAM. */
 
-      up_invalidate_dcache((uintptr_t)paddr,
-                           (uintptr_t)(paddr + len));
+      up_invalidate_dcache((uintptr_t)buf, (uintptr_t)buf + len);
       return 0;
     }
 
