@@ -31,6 +31,7 @@
 
 #include "am67_mpuinit.h"
 #include "am67_pinmux.h"
+#include "am67_rptun.h"
 #include "arm.h"
 
 /****************************************************************************
@@ -38,98 +39,160 @@
  ****************************************************************************/
 
 #define NUM_VRINGS          (0x02)
-#define RL_BUFFER_COUNT     (0x200)
+#define RL_BUFFER_COUNT     (0x200)   /* RPMsg vring buffer count (512) */
+#define NET_BUFFER_COUNT    (0x100)   /* virtio-net vring buffer count (256) */
 #define VRING_ALIGN         (0x1000)
-#define VRING_SIZE          (0x8000)
-#define VDEV0_VRING_BASE    (0xa2200000)
 #define RESOURCE_TABLE_BASE (0xa2100000)
 
-#define NO_RESOURCE_ENTRIES (1)
+/* Vring device addresses are NOT fixed by the firmware.  Linux remoteproc
+ * allocates each vring as a carveout from the R5F DMA pool (DT reserved
+ * memory main-r5fss-dma-memory-region@a2000000, 1 MB) and cannot honor
+ * addresses outside that pool: a fixed da merely produces "Allocated
+ * carveout doesn't fit device address request" and the host uses its own
+ * allocation while the device stares at empty memory.  FW_RSC_ADDR_ANY
+ * asks the host to allocate and WRITE THE CHOSEN ADDRESS BACK into this
+ * table before the R5F boots; rptun then reads the live table and attaches
+ * to the real rings.  The DMA pool lies inside the non-cacheable MPU
+ * window (am67_mpuinit.h), so coherency is preserved.
+ */
+
+#define FW_RSC_ADDR_ANY     (0xffffffffu)
+
+/* Resource table has 2 entries: vdev[0]=RPMsg, vdev[1]=virtio-net */
+#define NO_RESOURCE_ENTRIES (2)
 #define RSC_VDEV_FEATURE_NS (1) /* Support name service announcement */
 #define RSC_TABLE_VERSION   (1)
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+/* virtio device IDs (from virtio spec) */
+#define VIRTIO_ID_NET_DEV   (1)  /* VIRTIO_ID_NETWORK */
+#define VIRTIO_ID_RPMSG_DEV (7)  /* VIRTIO_ID_RPMSG */
 
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+/* notifyid assignments (must be unique across all resources):
+ *   rpmsg_vring0: 0
+ *   rpmsg_vring1: 1
+ *   rpmsg_vdev:   2
+ *   net_vring0:   3
+ *   net_vring1:   4
+ *   net_vdev:     5
+ */
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-/* Place resource table in special ELF section */
+/* Place extended resource table in special ELF section.
+ * Linux remoteproc reads this section from the R5F firmware binary to
+ * discover virtio devices and set up shared-memory vrings.
+ *
+ * Layout (all offsets from the start of this struct):
+ *   [0] rpmsg_vdev  — RPMsg transport (VIRTIO_ID_RPMSG=7)
+ *   [1] net_vdev    — virtio-net      (VIRTIO_ID_NETWORK=1)
+ */
 
-__attribute__ ((section(".resource_table")))
-const struct rptun_rsc_s g_am67_rsc_table =
+__attribute__((section(".resource_table")))
+const struct am67_rsc_s g_am67_rsc_table =
 {
-  .rsc_tbl_hdr =
+  .base =
   {
-    RSC_TABLE_VERSION,
-    NO_RESOURCE_ENTRIES,
+    .rsc_tbl_hdr =
     {
-      0, 0
+      RSC_TABLE_VERSION,
+      NO_RESOURCE_ENTRIES,
+      {
+        0, 0
+      }
+    },
+
+    /* Offsets from the start of g_am67_rsc_table to each resource */
+
+    .offset =
+    {
+      offsetof(struct am67_rsc_s, base.rpmsg_vdev),
+      offsetof(struct am67_rsc_s, net_vdev),
+    },
+
+    .log_trace =
+    {
+      RSC_TRACE, 0, 0
+    },
+
+    .rpmsg_vdev = /* RPMsg virtio device entry */
+    {
+      RSC_VDEV,
+      VIRTIO_ID_RPMSG_DEV,
+      2,               /* notifyid */
+      RSC_VDEV_FEATURE_NS,
+      0,               /* gfeatures */
+      0,               /* config_len */
+      0,               /* status */
+      NUM_VRINGS,
+      {
+        0, 0
+      }
+    },
+
+    .rpmsg_vring0 =
+    {
+      FW_RSC_ADDR_ANY, /* da: host allocates and writes back */
+      VRING_ALIGN,
+      RL_BUFFER_COUNT,
+      0,               /* notifyid */
+      0                /* pa */
+    },
+
+    .rpmsg_vring1 =
+    {
+      FW_RSC_ADDR_ANY, /* da: host allocates and writes back */
+      VRING_ALIGN,
+      RL_BUFFER_COUNT,
+      1,               /* notifyid */
+      0                /* pa */
+    },
+
+    .config =
+    {
+      0
     }
   },
 
-  .offset =
-  {
-    offsetof(struct rptun_rsc_s, rpmsg_vdev)
-  },
+  /* virtio-net vdev entry — Linux creates a virtual Ethernet interface
+   * backed by standard virtio_net.ko.  NuttX's virtio-net driver
+   * (CONFIG_DRIVERS_VIRTIO_NET) handles the R5F side.
+   */
 
-  .log_trace =
-  {
-    RSC_TRACE, 0, 0
-  },
-
-  .rpmsg_vdev = /* SRTM virtio device entry */
+  .net_vdev =
   {
     RSC_VDEV,
-    7,
-    2,
-    RSC_VDEV_FEATURE_NS,
-    0,
-    0,
-    0,
+    VIRTIO_ID_NET_DEV,
+    5,               /* notifyid */
+    0,               /* dfeatures: Linux negotiates */
+    0,               /* gfeatures */
+    0,               /* config_len: no MAC address config for now */
+    0,               /* status */
     NUM_VRINGS,
     {
       0, 0
     }
   },
 
-  .rpmsg_vring0 =
+  .net_vring0 =
   {
-    VDEV0_VRING_BASE,
+    FW_RSC_ADDR_ANY, /* da: host allocates and writes back */
     VRING_ALIGN,
-    RL_BUFFER_COUNT,
-    0,
-    0
+    NET_BUFFER_COUNT,
+    3,               /* notifyid */
+    0                /* pa */
   },
 
-  .rpmsg_vring1 =
+  .net_vring1 =
   {
-    VDEV0_VRING_BASE + VRING_SIZE,
+    FW_RSC_ADDR_ANY, /* da: host allocates and writes back */
     VRING_ALIGN,
-    RL_BUFFER_COUNT,
-    1,
-    0
+    NET_BUFFER_COUNT,
+    4,               /* notifyid */
+    0                /* pa */
   },
-
-  .config =
-  {
-    0
-  }
 };
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -175,4 +238,21 @@ void arm_boot(void)
   /* Then start NuttX */
 
   nx_start();
+}
+
+/****************************************************************************
+ * Name: up_addrenv_pa_to_va / up_addrenv_va_to_pa
+ *
+ * The R5F has no MMU (only MPU), so physical == virtual.
+ * OpenAMP / libmetal call these unconditionally; provide trivial stubs.
+ ****************************************************************************/
+
+FAR void *up_addrenv_pa_to_va(uintptr_t pa)
+{
+  return (FAR void *)pa;
+}
+
+uintptr_t up_addrenv_va_to_pa(FAR void *va)
+{
+  return (uintptr_t)va;
 }
