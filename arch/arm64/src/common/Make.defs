@@ -80,6 +80,16 @@ endif
 
 ifeq ($(CONFIG_ARCH_HAVE_MMU),y)
 CMN_CSRCS += arm64_mmu.c
+
+ifeq ($(CONFIG_ARM64_CRYPTO_AES),y)
+CMN_CSRCS += arm64_aes.c
+endif
+
+ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
+ifeq ($(CONFIG_ARM64_CRYPTO_AES),y)
+CMN_CSRCS += arm64_crypto.c
+endif
+endif
 endif
 
 ifeq ($(CONFIG_ARM64_MTE),y)
