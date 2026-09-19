@@ -121,24 +121,25 @@ pid_t riscv_fork(bool vfork, const struct fork_s *context)
       return (pid_t)ERROR;
     }
 
-  /* Copy parent user stack to child */
-
-  stacktop = (uintptr_t)parent->stack_base_ptr + parent->adj_stack_size;
-  DEBUGASSERT(stacktop > parent->xcp.sregs[REG_SP]);
-  stackutil = stacktop - parent->xcp.sregs[REG_SP];
-
   if (child->stack_base_ptr == parent->stack_base_ptr)
     {
-      /* The child is running at the parent's stack addresses, inside its
-       * own duplicated address environment.  There is nothing to relocate:
-       * every stack address the child inherits is still the address it
-       * names.
+      /* A fork() child inherits the parent's stack address:  its copy of the
+       * parent's stack is already in place, with its contents, at the same
+       * virtual address, so there is nothing to copy and nothing to
+       * relocate.  The child simply resumes on the stack pointer the parent
+       * called with.
        */
 
       newsp = parent->xcp.sregs[REG_SP];
     }
   else
     {
+      /* Copy parent user stack to child */
+
+      stacktop = (uintptr_t)parent->stack_base_ptr + parent->adj_stack_size;
+      DEBUGASSERT(stacktop > parent->xcp.sregs[REG_SP]);
+      stackutil = stacktop - parent->xcp.sregs[REG_SP];
+
       /* Copy goes to child's user stack top */
 
       newtop = (uintptr_t)child->stack_base_ptr + child->adj_stack_size;
