@@ -417,7 +417,7 @@
  */
 
 #ifdef CONFIG_NET_PROMISCUOUS
-#  define MACFFR_SET_BITS (ETH_MACFFR_PCF_PAUSE | ETH_MACFFR_PM)
+#  define MACFFR_SET_BITS (ETH_MACFFR_PCF_ALL | ETH_MACFFR_PM)
 #else
 #  define MACFFR_SET_BITS (ETH_MACFFR_PCF_PAUSE)
 #endif
@@ -808,6 +808,14 @@ static void stm32_eth_ptp_convert_rxtime(struct stm32_ethmac_s *priv);
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_STM32_ETH_PTP
+static inline void ptp_to_timespec(uint64_t timestamp, struct timespec *ts)
+{
+  ts->tv_sec = (timestamp >> 32);
+  ts->tv_nsec = ((uint32_t)timestamp * (uint64_t)NSEC_PER_SEC) >> 32;
+}
+#endif
+
 /****************************************************************************
  * Name: stm32_getreg
  *
@@ -1186,6 +1194,10 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
                 clone->io_conn = priv->dev.d_iob->io_conn;
                 priv->txmeta[txindex] = clone;
                 txdesc->tdes0 |= ETH_TDES0_TTSE;
+              }
+            else
+              {
+                nerr("ERROR: Failed to clone IOB for TX timestamp\n");
               }
           }
       }
@@ -1756,16 +1768,15 @@ static void stm32_txtstamp_flush(struct stm32_ethmac_s *priv)
     {
       struct iob_s *iob = iob_remove_queue(&priv->txtstampq);
 
-      if (iob != NULL)
-        {
-          dev->d_iob = iob;
-          dev->d_len = iob->io_pktlen;
+      dev->d_iob = iob;
+      dev->d_len = iob->io_pktlen;
 #ifdef CONFIG_NET_PKT
-          pkt_input(dev);
+      pkt_input(dev);
 #endif
-          dev->d_iob = NULL;
-          dev->d_len = 0;
-        }
+      dev->d_iob = NULL;
+      dev->d_len = 0;
+      iob->io_conn = NULL;
+      iob_free_chain(iob);
     }
 }
 #endif
@@ -1909,7 +1920,18 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
       else
 #endif
         {
-          nerr("ERROR: Dropped, Unknown type: %04x\n", BUF->type);
+#ifdef CONFIG_NET_PKT
+          /* Frames that packet sockets consume directly (PTP, Ethertype
+           * 0x88f7, and IPv6) were already delivered via pkt_input()
+           * above, so they are not "unknown" and must not be logged as
+           * dropped.
+           */
+
+          if (BUF->type != HTONS(0x88f7) && BUF->type != HTONS(ETHTYPE_IP6))
+#endif
+            {
+              nerr("ERROR: Dropped, Unknown type: %04x\n", BUF->type);
+            }
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is
@@ -4102,12 +4124,6 @@ static uint64_t stm32_eth_ptp_gettime(void)
     }
 }
 #endif
-
-static inline void ptp_to_timespec(uint64_t timestamp, struct timespec *ts)
-{
-  ts->tv_sec = (timestamp >> 32);
-  ts->tv_nsec = ((uint32_t)timestamp * (uint64_t)NSEC_PER_SEC) >> 32;
-}
 
 /* Convert the RX timestamp of the MAC to a timespec. It is the value of the
  * PTP counter of the MAC, which is the time base of /dev/ptp0, and not a
