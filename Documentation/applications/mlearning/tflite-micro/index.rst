@@ -6,7 +6,8 @@ TensorFlow Lite for Microcontrollers (TFLM) is a C++ interpreter for
 running ``.tflite`` models on memory-constrained targets. NuttX integrates
 it from ``apps/mlearning/tflite-micro``.
 
-The build downloads a pinned TFLM snapshot from
+The build downloads a pinned TFLM snapshot
+(``cfa4c91d1b36c37c7c104b9c664615e59f1abfe3``, 24 February 2024) from
 https://github.com/tensorflow/tflite-micro and applies NuttX patches that
 add INT8-only operator registrations and an ``extern "C"`` entry point for
 the hello-world example.
@@ -16,10 +17,14 @@ Dependencies
 
 ``CONFIG_TFLITEMICRO`` depends on all of:
 
-- ``CONFIG_SYSTEM_FLATBUFFERS`` — FlatBuffers headers (``apps/system/flatbuffers``)
-- ``CONFIG_MATH_GEMMLOWP`` — gemmlowp (``apps/math/gemmlowp``)
-- ``CONFIG_MATH_KISSFFT`` — KissFFT (``apps/math/kissfft``)
-- ``CONFIG_MATH_RUY`` — Ruy (``apps/math/ruy``)
+- ``CONFIG_SYSTEM_FLATBUFFERS`` — FlatBuffers headers
+  (:doc:`../../system/flatbuffers/index`)
+- ``CONFIG_MATH_GEMMLOWP`` — gemmlowp
+  (:doc:`../../math/gemmlowp/index`)
+- ``CONFIG_MATH_KISSFFT`` — KissFFT
+  (:doc:`../../math/kissfft/index`)
+- ``CONFIG_MATH_RUY`` — Ruy
+  (:doc:`../../math/ruy/index`)
 
 TFLM is C++, so the configuration also needs C++ support (``CONFIG_HAVE_CXX``
 and a C++ standard library such as ``CONFIG_LIBCXX``).
@@ -95,10 +100,12 @@ unpacked tree under ``apps/mlearning/tflite-micro/tflite-micro``.
 Using the ``tflm`` tool
 =======================
 
-``tflm`` loads a ``.tflite`` file from the filesystem, constructs a
-``tflite::MicroInterpreter``, calls ``AllocateTensors()``, and can invoke
-the model once for profiling or emit compiled C++ (when TFLM was built
-with ``TFLITE_MODEL_COMPILER``).
+``tflm`` is a host-oriented NSH helper for ``sim:tflm``. It loads a
+``.tflite`` file from the filesystem with ``ifstream``, allocates the
+tensor arena with ``new``, constructs a ``tflite::MicroInterpreter``,
+and calls ``AllocateTensors()``. That heap-and-filesystem path is
+intentional on the simulator. On-target applications should embed the
+model as a C array; see *Embedding a model in an application* below.
 
 .. code-block:: console
 
@@ -116,10 +123,16 @@ with ``TFLITE_MODEL_COMPILER``).
 ``-i`` is required. ``-o`` is required only with ``-C``. Defaults are
 prefix ``NXAI`` and arena size 8192 bytes.
 
-The built-in operator resolver registers eight generic (float and
+``-C`` appears in the help text but is not functional in NuttX builds.
+Model compilation requires ``TFLITE_MODEL_COMPILER``, which neither the
+Makefile nor the CMake integration defines. ``tflm -C`` prints
+``Not supported compiling``.
+
+The built-in operator resolver registers nine generic (float and
 quantized) ops:
 
 - ``CONV_2D``
+- ``DEPTHWISE_CONV_2D``
 - ``MAX_POOL_2D``
 - ``QUANTIZE``
 - ``DEQUANTIZE``
@@ -184,7 +197,7 @@ and the NuttX apps tree next to ``nuttx`` (``../apps`` or
      nsh> tflm -E -i /path/to/model.tflite -a 8192
 
    The tool fails with ``AllocateTensors failed`` if the arena is too
-   small or the model uses operators outside the eight registered ops.
+   small or the model uses operators outside the nine registered ops.
 
 CMake is equivalent: ``cmake -B build -DBOARD_CONFIG=sim:tflm -GNinja``
 then ``cmake --build build`` and ``./build/nuttx``.
@@ -192,9 +205,11 @@ then ``cmake --build build`` and ``./build/nuttx``.
 Embedding a model in an application
 ===================================
 
-TFLM is designed for targets without a filesystem and without dynamic
-allocation for the model itself. Typical NuttX applications compile the
-``.tflite`` file into a C array and pass it to ``tflite::GetModel()``.
+The TFLM library is designed for targets without a filesystem and
+without dynamic allocation for the model itself. The ``tflm`` NSH tool
+is an exception used on ``sim:tflm``. Typical on-target applications
+compile the ``.tflite`` file into a C array and pass it to
+``tflite::GetModel()``.
 
 The CMake helper ``tflite_generate_data()`` in
 ``apps/mlearning/tflite-micro/CMakeLists.txt`` wraps ``xxd -i`` for that

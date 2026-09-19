@@ -41,6 +41,11 @@ Subdirectories of ``nuttx/drivers``
 
   1wire device drivers.
 
+* ``aie/`` :doc:`character/aie`
+
+  Upper-half character driver for hardware AI / NPU engines.
+  See ``include/nuttx/aie/ai_engine.h``.
+
 * ``analog/`` :doc:`character/analog/index`
 
   This directory holds implementations of analog device drivers.

@@ -7,4 +7,7 @@ config AI_ENGINE
 	bool "AI Engine Acceleration Support"
 	default n
 	---help---
-		Drivers for various AI engine devices.
+		Upper-half character driver for hardware AI / NPU engines.
+		A board or architecture lower-half must implement struct
+		aie_ops_s and call aie_register(). There is no in-tree
+		lower-half yet. See include/nuttx/aie/ai_engine.h.
