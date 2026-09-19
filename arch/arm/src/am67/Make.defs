@@ -45,4 +45,7 @@ endif
 ifeq ($(CONFIG_AM67_I2C),y)
 CHIP_CSRCS += am67_i2c.c
 endif
-CHIP_CSRCS += arm_mpu.c
+ifeq ($(CONFIG_RPTUN),y)
+CHIP_CSRCS += am67_rptun.c
+endif
+CHIP_CSRCS += am67_rat.c
