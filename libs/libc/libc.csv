@@ -241,6 +241,7 @@
 "pthread_self","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","pthread_t","void"
 "pthread_setname_np","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","pthread_t","const char *"
 "pthread_setspecific","pthread.h","!defined(CONFIG_DISABLE_PTHREAD) && CONFIG_TLS_NELEM > 0","int","pthread_key_t","FAR const void *"
+"pthread_sigqueue","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","pthread_t","int","const union sigval"
 "pthread_yield","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","void"
 "puts","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR const IPTR char *"
 "putwc","wchar.h","defined(CONFIG_FILE_STREAM)","wint_t","wchar_t","FAR FILE *"
