@@ -1,0 +1,37 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_RK3506
+
+menu "RK3506 Chip Selection"
+
+config RK3506_AMP_SECONDARY
+	bool "Run as AMP secondary core (do not init GIC distributor)"
+	default y
+	---help---
+		When NuttX runs as an AMP subsystem alongside Linux on the same
+		SoC, the GIC distributor is owned/initialized by the Linux side.
+		This option makes NuttX initialize only its own GIC CPU interface
+		(GICC) and skip the distributor (GICD) initialization, so it does
+		not corrupt the configuration set up by Linux.
+
+config RK3506_UART4
+	bool "UART4 (dw-apb-uart) console"
+	default y
+	---help---
+		RK3506 UART4 at 0xff0e0000, used as the NuttX console in the
+		default AMP configuration. Pins routed to CPU2 by the Linux
+		device tree.
+
+config RK3506_UART3
+	bool "UART3 (dw-apb-uart)"
+	default n
+	---help---
+		RK3506 UART3 at 0xff0d0000, the secondary UART also routed to
+		CPU2 by the Linux device tree.
+
+endmenu # "RK3506 Chip Selection"
+
+endif # ARCH_CHIP_RK3506
