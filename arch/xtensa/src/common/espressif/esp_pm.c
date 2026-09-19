@@ -44,6 +44,7 @@
 #endif
 #include "esp_sleep.h"
 #include "soc/rtc.h"
+#include "soc/soc_caps.h"
 #include "esp_sleep_internal.h"
 #include "esp_pmu.h"
 #include "esp_attr.h"
@@ -758,6 +759,7 @@ void esp_pmstandby(uint64_t time_in_us)
 #endif
 #ifdef CONFIG_PM_EXT1_WAKEUP
   int64_t ext1_mask;
+
   esp_pm_ext1_wakeup_prepare();
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP
@@ -775,8 +777,13 @@ void esp_pmstandby(uint64_t time_in_us)
 
   esp_pm_light_sleep_start(&rtc_diff_us);
 
-#ifdef CONFIG_SCHED_TICKLESS
-  up_step_idletime((uint32_t)time_in_us);
+  /* Only step the clock where the systimer actually stalls during sleep
+   * (SOC_SLEEP_SYSTIMER_STALL_WORKAROUND); elsewhere it keeps counting
+   * through light sleep, so stepping it here would double-count the time.
+   */
+
+#if defined(CONFIG_SCHED_TICKLESS) && defined(SOC_SLEEP_SYSTIMER_STALL_WORKAROUND)
+  up_step_idletime((uint32_t)rtc_diff_us);
 #endif
 
   cause = esp_sleep_get_wakeup_cause();
