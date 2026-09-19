@@ -1630,6 +1630,88 @@ int lsm6ds3trc_register(FAR struct i2c_master_s *i2c, uint8_t addr,
       goto unreg_gyro;
     }
 
+  /* Put the sensor into its power-on register state before anything else
+   * touches it, and in particular before the interrupt is attached.
+   *
+   * The LSM6DS3TR-C has its own supply and its own reset: an MCU reset
+   * (watchdog, RTS pin, esptool, `reboot`) does not reset the sensor, so
+   * it comes up still holding whatever the previous session configured.
+   * For this driver that means INT1_CTRL.INT1_FTH still set and a FIFO
+   * still over its watermark -- i.e. INT1 asserted high, immediately, at
+   * registration time.
+   *
+   * INT1 is level-triggered (ONHIGH; see the comment in
+   * boards/xtensa/esp32s3/common/src/esp32s3_board_lsm6ds3trc.c for why
+   * edge triggering is wrong here).  A level-triggered line that is
+   * already active when esp_gpioirqenable() runs re-fires forever, and
+   * the board then wedges during bring-up with no console output and no
+   * crash dump -- observed as a boot that stops right after Wi-Fi init
+   * and never reaches NSH, recoverable only by physically removing power
+   * from the sensor.
+   *
+   * SW_RESET (CTRL3_C bit 0) clears INT1_CTRL and FIFO_CTRL back to 0,
+   * which deasserts INT1.  It self-clears in ~50us; poll rather than
+   * assume, and carry on if the sensor does not answer -- a sensor that
+   * cannot be reset is a problem for the caller to report, not a reason
+   * to arm an interrupt line we know may be stuck high.
+   */
+
+  {
+    uint8_t ctrl3_c;
+    int attempt;
+    int tries;
+    bool reset_done = false;
+
+    /* The I2C bus is not always ready the instant we get here -- a write
+     * at this point has been seen to fail with -EIO on a cold boot.  Give
+     * it a few attempts with a short pause between them.
+     */
+
+    for (attempt = 0; attempt < 3 && !reset_done; attempt++)
+      {
+        ctrl3_c = 0x01;                 /* SW_RESET */
+
+        err = lsm6ds3trc_write_bytes(priv, CTRL3_C, &ctrl3_c, 1);
+        if (err < 0)
+          {
+            snwarn("Software reset write failed (attempt %d): %d\n",
+                   attempt + 1, err);
+            nxsig_usleep(10000);
+            continue;
+          }
+
+        for (tries = 0; tries < 20; tries++)
+          {
+            nxsig_usleep(1000);
+
+            if (lsm6ds3trc_read_bytes(priv, CTRL3_C, &ctrl3_c, 1) >= 0 &&
+                (ctrl3_c & 0x01) == 0)
+              {
+                reset_done = true;
+                break;
+              }
+          }
+      }
+
+    /* Carry on even if it never took.  Not resetting the sensor risks the
+     * interrupt storm this reset exists to prevent (see the comment
+     * above), but that is a far better failure than refusing to register
+     * the device at all: an unregistered sensor leaves the application
+     * with no /dev/uorb/sensor_accel0 to open, which is fatal to it.
+     * Losing the whole sensor to protect against a maybe-storm is the
+     * wrong trade -- and it is exactly what happened on 2026-09-19, when
+     * a single -EIO here took the collar down completely.
+     */
+
+    if (!reset_done)
+      {
+        snerr("Software reset did not complete; continuing unreset. "
+              "INT1 may already be asserted -- watch for an IRQ storm.\n");
+      }
+
+    err = OK;
+  }
+
   /* Write CTRL1_XL's FS_XL bits to match the software default above --
    * ODR is set later by activate(), but FSR needs to be right from the
    * first sample instead of only after an explicit SNIOC_SETFULLSCALE.
