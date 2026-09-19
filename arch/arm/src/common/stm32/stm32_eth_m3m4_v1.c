@@ -4604,6 +4604,9 @@ int stm32_ethinitialize(int intf)
 #ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
   priv->dev.d_features |= NETDEV_RX_STAMP;
 #endif
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+  priv->dev.d_features |= NETDEV_TX_STAMP;
+#endif
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
