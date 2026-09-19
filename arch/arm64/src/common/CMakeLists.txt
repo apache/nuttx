@@ -73,6 +73,12 @@ endif()
 
 if(CONFIG_ARCH_HAVE_MMU)
   list(APPEND SRCS arm64_mmu.c)
+
+  # drivers/misc/addrenv.c defines the same entry points from a table.
+
+  if(NOT CONFIG_DEV_SIMPLE_ADDRENV)
+    list(APPEND SRCS arm64_physpgaddr.c)
+  endif()
 endif()
 
 if(CONFIG_ARM64_MTE)
