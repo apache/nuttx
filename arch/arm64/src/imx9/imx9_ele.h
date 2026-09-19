@@ -266,7 +266,7 @@ int imx9_ele_get_trng_state(void);
  *
  ****************************************************************************/
 
-int imx9_ele_get_random(uint32_t paddr, size_t len);
+int imx9_ele_get_random(void *buf, size_t len);
 
 /****************************************************************************
  * Name: imx9_ele_commit
