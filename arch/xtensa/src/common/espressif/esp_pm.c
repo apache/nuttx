@@ -446,6 +446,8 @@ static uint64_t IRAM_ATTR esp_pm_get_gpio_mask(void)
  *
  ****************************************************************************/
 
+static gpio_pinattr_t g_gpio_wakeup_saved[CONFIG_SOC_GPIO_PIN_COUNT];
+
 static void IRAM_ATTR esp_pm_gpio_wakeup_prepare(void)
 {
   uint64_t mask_value = esp_pm_get_gpio_mask();
@@ -461,12 +463,45 @@ static void IRAM_ATTR esp_pm_gpio_wakeup_prepare(void)
       pin_mask = BIT(i);
       if ((mask_value & pin_mask) != 0)
         {
+          /* This pin may also be a normal edge-triggered peripheral IRQ
+           * (e.g. a sensor's data-ready line) -- gpio_wakeup_enable()
+           * below only supports level triggering, so remember whatever
+           * esp_configgpio() had last set here and put it back in
+           * esp_pm_gpio_wakeup_restore() once this sleep is over.
+           */
+
+          g_gpio_wakeup_saved[i] = esp_getconfiggpio(i);
           esp_configgpio(i, INPUT);
           gpio_wakeup_enable(i, level_mode);
         }
     }
 
   esp_sleep_enable_gpio_wakeup();
+}
+
+/****************************************************************************
+ * Name: esp_pm_gpio_wakeup_restore
+ *
+ * Description:
+ *   Undo esp_pm_gpio_wakeup_prepare(): restore each wake-source gpio to
+ *   whatever esp_configgpio() had it set to before this sleep.
+ *
+ ****************************************************************************/
+
+static void IRAM_ATTR esp_pm_gpio_wakeup_restore(void)
+{
+  uint64_t mask_value = esp_pm_get_gpio_mask();
+  int pin_mask = 0;
+
+  for (int i = 0; i < CONFIG_SOC_GPIO_PIN_COUNT; i++)
+    {
+      pin_mask = BIT(i);
+      if ((mask_value & pin_mask) != 0)
+        {
+          gpio_wakeup_disable(i);
+          esp_configgpio(i, g_gpio_wakeup_saved[i]);
+        }
+    }
 }
 #endif /* CONFIG_PM_GPIO_WAKEUP */
 
@@ -776,6 +811,10 @@ void esp_pmstandby(uint64_t time_in_us)
   esp_pm_sleep_enable_timer_wakeup(time_in_us);
 
   esp_pm_light_sleep_start(&rtc_diff_us);
+
+#ifdef CONFIG_PM_GPIO_WAKEUP
+  esp_pm_gpio_wakeup_restore();
+#endif
 
   /* Only step the clock where the systimer actually stalls during sleep
    * (SOC_SLEEP_SYSTIMER_STALL_WORKAROUND); elsewhere it keeps counting
