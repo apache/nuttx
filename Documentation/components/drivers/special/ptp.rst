@@ -28,29 +28,58 @@ The upper-half driver (``drivers/timers/ptp_clock.c``) provides:
 - Common ioctl command handling
 - Frequency and time adjustment logic
 - Cross-timestamp support
-- Interface to POSIX clock APIs via CLOCKFD mechanism
+- Interface to POSIX clock APIs through the ``CLOCK_FD`` clock type
 
 Lower-Half Driver
 -----------------
 
-Hardware-specific drivers implement the ``struct ptp_lowerhalf_s`` interface
-with the following operations:
+Hardware-specific drivers embed a ``struct ptp_lowerhalf_s`` and point its
+``ops`` field to a ``struct ptp_ops_s`` with the following operations:
 
 .. code-block:: c
 
-   struct ptp_clock_ops_s
+   struct ptp_lowerhalf_s
    {
-     CODE int (*adjfine)(FAR struct ptp_lowerhalf_s *lower, long scaled_ppm);
+     FAR const struct ptp_ops_s *ops;  /* Lower half driver operations */
+     FAR void *upper;                  /* The upper handle */
+   };
+
+   struct ptp_ops_s
+   {
+     CODE int (*adjfine)(FAR struct ptp_lowerhalf_s *lower, long ppb);
+     CODE int (*adjphase)(FAR struct ptp_lowerhalf_s *lower, int32_t phase);
      CODE int (*adjtime)(FAR struct ptp_lowerhalf_s *lower, int64_t delta);
      CODE int (*gettime)(FAR struct ptp_lowerhalf_s *lower,
-                         FAR struct timespec *ts);
+                         FAR struct timespec *ts,
+                         FAR struct ptp_system_timestamp *sts);
+     CODE int (*getcrosststamp)(FAR struct ptp_lowerhalf_s *lower,
+                                FAR struct system_device_crosststamp *cts);
      CODE int (*settime)(FAR struct ptp_lowerhalf_s *lower,
                          FAR const struct timespec *ts);
-     CODE int (*getcaps)(FAR struct ptp_lowerhalf_s *lower,
-                         FAR struct ptp_clock_caps *caps);
-     CODE int (*getcrosststamp)(FAR struct ptp_lowerhalf_s *lower,
-                               FAR struct system_device_crosststamp *xts);
+     CODE int (*getres)(FAR struct ptp_lowerhalf_s *lower,
+                        FAR struct timespec *res);
+     CODE int (*control)(FAR struct ptp_lowerhalf_s *lower,
+                         int cmd, unsigned long arg);
    };
+
+The units are:
+
+- ``adjfine``: the frequency offset from the nominal frequency, in parts per
+  billion. The upper half converts the ``freq`` field of ``struct timex``
+  (parts per million with 16 fractional bits) and rejects values beyond the
+  ``max_adj`` given at registration before calling it.
+- ``adjphase``: the change to apply to the phase, in nanoseconds.
+- ``adjtime``: the change to apply to the time, in nanoseconds.
+
+The upper half calls ``adjtime`` unconditionally, so every driver has to
+provide it. The other operations are optional: ``gettime``, ``settime`` and
+``getres`` make the matching ioctl return ``-ENOTSUP`` when they are missing,
+``adjfine`` and ``adjphase`` make the corresponding ``clock_adjtime()`` mode
+fail the same way, and ``getcrosststamp`` is reported through the
+``cross_timestamping`` capability. The capabilities are built by the upper
+half from which operations exist and from ``max_adj``, so there is no
+operation to report them. Ioctl commands that the upper half does not know
+are passed to ``control``.
 
 Configuration Options
 =====================
@@ -64,7 +93,7 @@ The PTP clock framework can be enabled with the following Kconfig options:
 ``CONFIG_PTP_CLOCK_DUMMY``
   Enable a software-based dummy PTP clock driver for testing and development.
   This driver provides a PTP clock implementation without hardware support,
-  using the system monotonic clock as the time base.
+  using ``CLOCK_REALTIME`` as the time base.
 
 ``CONFIG_CLOCK_ADJTIME``
   Enable the ``clock_adjtime()`` system call, required for frequency and
@@ -90,18 +119,18 @@ The following ioctl commands are supported:
 
   .. code-block:: c
 
-     struct ptp_clock_time time;
-     ioctl(fd, PTP_CLOCK_GETTIME, &time);
+     struct timespec ts;
+     ioctl(fd, PTP_CLOCK_GETTIME, &ts);
 
 ``PTP_CLOCK_SETTIME``
   Set the time of the PTP clock.
 
   .. code-block:: c
 
-     struct ptp_clock_time time;
-     time.sec = 1234567890;
-     time.nsec = 123456789;
-     ioctl(fd, PTP_CLOCK_SETTIME, &time);
+     struct timespec ts;
+     ts.tv_sec  = 1234567890;
+     ts.tv_nsec = 123456789;
+     ioctl(fd, PTP_CLOCK_SETTIME, &ts);
 
 ``PTP_CLOCK_GETRES``
   Get the resolution of the PTP clock.
@@ -119,7 +148,7 @@ The following ioctl commands are supported:
      struct timex tx;
      memset(&tx, 0, sizeof(tx));
      tx.modes = ADJ_FREQUENCY;
-     tx.freq = 10000000;  /* +10 PPM */
+     tx.freq = 655360;  /* +10 ppm, in ppm scaled by 65536 */
      ioctl(fd, PTP_CLOCK_ADJTIME, &tx);
 
 ``PTP_CLOCK_GETCAPS``
@@ -148,59 +177,87 @@ The following ioctl commands are supported:
      struct ptp_sys_offset_precise precise;
      ioctl(fd, PTP_SYS_OFFSET_PRECISE, &precise);
 
-POSIX Clock API (CLOCKFD)
+``PTP_SYS_OFFSET_EXTENDED``
+  Like ``PTP_SYS_OFFSET``, but returns for each sample the system time before
+  and after reading the device time (``struct ptp_sys_offset_extended``).
+
+``PTP_CLOCK_GETSTATS`` and ``PTP_CLOCK_SETSTATS``
+  Read or set the drift statistics kept by the upper half
+  (``struct ptp_statistics_s``).
+
+The ``PTP_CLOCK_GETCAPS``, ``PTP_SYS_OFFSET``, ``PTP_SYS_OFFSET_PRECISE`` and
+``PTP_SYS_OFFSET_EXTENDED`` commands also exist with a ``2`` suffix
+(``PTP_CLOCK_GETCAPS2``, ``PTP_SYS_OFFSET2`` and so on), which the upper half
+handles the same way. The time values of ``PTP_CLOCK_GETTIME``,
+``PTP_CLOCK_SETTIME`` and ``PTP_CLOCK_GETRES`` are ``struct timespec``, while
+``struct ptp_clock_time`` is used by the ``PTP_SYS_OFFSET`` family.
+
+POSIX Clock API (CLOCK_FD)
 ==========================
 
-NuttX implements the CLOCKFD mechanism, allowing PTP clocks to be accessed
-through standard POSIX clock APIs. This provides a more familiar interface
-for applications already using ``clock_gettime()``, ``clock_settime()``,
-``clock_getres()``, and ``clock_adjtime()``.
+NuttX allows PTP clocks to be accessed through the standard POSIX clock APIs.
+This provides a more familiar interface for applications already using
+``clock_gettime()``, ``clock_settime()``, ``clock_getres()`` and
+``clock_adjtime()``.
 
-The CLOCKFD mechanism works by encoding a file descriptor into a clockid_t
-value using the ``CLOCKFD()`` macro:
+The clock identifier is built from the file descriptor of the opened device
+with the ``CLOCK_SHIFT`` and ``CLOCK_FD`` definitions of
+``<nuttx/clock.h>``:
 
 .. code-block:: c
 
    #include <time.h>
    #include <fcntl.h>
+   #include <sys/timex.h>
    #include <nuttx/clock.h>
 
-   int fd = open("/dev/ptp0", O_RDONLY);
+   int fd = open("/dev/ptp0", O_RDWR);
+   clockid_t clockid = (fd << CLOCK_SHIFT) | CLOCK_FD;
    struct timespec ts;
-   
+
    /* Get PTP clock time using POSIX API */
-   clock_gettime(CLOCKFD(fd), &ts);
-   
+   clock_gettime(clockid, &ts);
+
    /* Set PTP clock time */
-   clock_settime(CLOCKFD(fd), &ts);
-   
+   clock_settime(clockid, &ts);
+
    /* Get PTP clock resolution */
    struct timespec res;
-   clock_getres(CLOCKFD(fd), &res);
-   
+   clock_getres(clockid, &res);
+
    /* Adjust PTP clock frequency */
    struct timex tx = {0};
    tx.modes = ADJ_FREQUENCY;
-   tx.freq = -5000000;  /* -5 PPM */
-   clock_adjtime(CLOCKFD(fd), &tx);
-   
+   tx.freq = -327680;  /* -5 ppm, in ppm scaled by 65536 */
+   clock_adjtime(clockid, &tx);
+
    close(fd);
+
+The clock identifier is only valid while the file descriptor is open.
 
 Supported Adjustment Modes
 ---------------------------
 
-The ``clock_adjtime()`` function supports the following adjustment modes
-via ``struct timex``:
+For a PTP clock, ``clock_adjtime()`` handles one of the following modes per
+call, checked in this order:
 
-- ``ADJ_OFFSET``: Apply time offset adjustment
-- ``ADJ_FREQUENCY``: Adjust clock frequency in scaled PPM
-- ``ADJ_MAXERROR``: Set maximum time error estimate
-- ``ADJ_ESTERROR``: Set estimated time error
-- ``ADJ_STATUS``: Modify clock status bits
-- ``ADJ_TIMECONST``: Set PLL time constant
-- ``ADJ_SETOFFSET``: Set absolute time offset (with ``ADJ_NANO`` flag)
-- ``ADJ_MICRO``: Interpret time values as microseconds
-- ``ADJ_NANO``: Interpret time values as nanoseconds
+- ``ADJ_SETOFFSET``: step the clock by the offset in ``tx.time``. The
+  ``tv_usec`` field holds microseconds, or nanoseconds if ``ADJ_NANO`` is also
+  set. A value of one second or more in that field is rejected with
+  ``-EINVAL``.
+- ``ADJ_FREQUENCY``: set the frequency offset from ``tx.freq``, in parts per
+  million with 16 fractional bits (ppm multiplied by 65536, so +10 ppm is
+  655360). A value beyond the maximum adjustment of the clock returns
+  ``-ERANGE``. This needs the ``adjfine`` operation of the driver.
+- ``ADJ_OFFSET``: adjust the **phase** by ``tx.offset``, in microseconds, or in
+  nanoseconds if ``ADJ_NANO`` is also set. This needs the ``adjphase``
+  operation of the driver.
+- No mode (``tx.modes`` equal to zero): read back the last frequency set in
+  ``tx.freq``.
+
+``ADJ_NANO`` only selects the unit of the two time based modes above.
+``ADJ_MAXERROR``, ``ADJ_ESTERROR``, ``ADJ_STATUS`` and ``ADJ_TIMECONST`` are not
+handled for a PTP clock and make the call return ``-ENOTSUP``.
 
 Dummy PTP Clock Driver
 =======================
@@ -240,9 +297,10 @@ Basic Time Operations
    int main(void)
    {
      int fd;
+     clockid_t clockid;
      struct timespec ts;
      struct timespec res;
-     
+
      /* Open PTP clock device */
      fd = open("/dev/ptp0", O_RDWR);
      if (fd < 0)
@@ -250,19 +308,21 @@ Basic Time Operations
          perror("Failed to open PTP clock");
          return -1;
        }
-     
+
+     clockid = (fd << CLOCK_SHIFT) | CLOCK_FD;
+
      /* Get current PTP clock time */
-     if (clock_gettime(CLOCKFD(fd), &ts) == 0)
+     if (clock_gettime(clockid, &ts) == 0)
        {
          printf("PTP time: %ld.%09ld\n", ts.tv_sec, ts.tv_nsec);
        }
-     
+
      /* Get PTP clock resolution */
-     if (clock_getres(CLOCKFD(fd), &res) == 0)
+     if (clock_getres(clockid, &res) == 0)
        {
          printf("PTP resolution: %ld.%09ld\n", res.tv_sec, res.tv_nsec);
        }
-     
+
      close(fd);
      return 0;
    }
@@ -281,21 +341,24 @@ Frequency Adjustment
    int main(void)
    {
      int fd;
+     clockid_t clockid;
      struct timex tx;
-     
+
      fd = open("/dev/ptp0", O_RDWR);
      if (fd < 0)
        {
          perror("Failed to open PTP clock");
          return -1;
        }
-     
-     /* Adjust frequency by +10 PPM */
+
+     clockid = (fd << CLOCK_SHIFT) | CLOCK_FD;
+
+     /* Adjust frequency by +10 ppm */
      memset(&tx, 0, sizeof(tx));
      tx.modes = ADJ_FREQUENCY;
-     tx.freq = 10000000;  /* 10 PPM in scaled PPM (65536 * PPM) */
-     
-     if (clock_adjtime(CLOCKFD(fd), &tx) == 0)
+     tx.freq = 655360;  /* 10 ppm in scaled ppm (65536 * ppm) */
+
+     if (clock_adjtime(clockid, &tx) == 0)
        {
          printf("Frequency adjusted successfully\n");
        }
@@ -303,7 +366,7 @@ Frequency Adjustment
        {
          perror("Failed to adjust frequency");
        }
-     
+
      close(fd);
      return 0;
    }
@@ -322,22 +385,25 @@ Time Offset Adjustment
    int main(void)
    {
      int fd;
+     clockid_t clockid;
      struct timex tx;
-     
+
      fd = open("/dev/ptp0", O_RDWR);
      if (fd < 0)
        {
          perror("Failed to open PTP clock");
          return -1;
        }
-     
+
+     clockid = (fd << CLOCK_SHIFT) | CLOCK_FD;
+
      /* Apply time offset: +1 second */
      memset(&tx, 0, sizeof(tx));
      tx.modes = ADJ_SETOFFSET | ADJ_NANO;
      tx.time.tv_sec = 1;
      tx.time.tv_usec = 0;  /* tv_usec holds nanoseconds when ADJ_NANO is set */
-     
-     if (clock_adjtime(CLOCKFD(fd), &tx) == 0)
+
+     if (clock_adjtime(clockid, &tx) == 0)
        {
          printf("Time offset applied successfully\n");
        }
@@ -345,7 +411,7 @@ Time Offset Adjustment
        {
          perror("Failed to apply time offset");
        }
-     
+
      close(fd);
      return 0;
    }
@@ -354,7 +420,8 @@ Implementing a Lower-Half Driver
 =================================
 
 To implement a hardware-specific PTP clock driver, create a lower-half driver
-that implements the ``struct ptp_lowerhalf_s`` interface:
+that embeds a ``struct ptp_lowerhalf_s`` and provides the operations of
+``struct ptp_ops_s`` described above:
 
 .. code-block:: c
 
@@ -369,73 +436,78 @@ that implements the ``struct ptp_lowerhalf_s`` interface:
      /* ... */
    };
 
-   /* Implement required operations */
-   static int my_ptp_adjfine(FAR struct ptp_lowerhalf_s *lower,
-                            long scaled_ppm)
+   /* Implement the operations */
+   static int my_ptp_adjfine(FAR struct ptp_lowerhalf_s *lower, long ppb)
    {
      FAR struct my_ptp_lowerhalf_s *priv =
        (FAR struct my_ptp_lowerhalf_s *)lower;
-     
-     /* Adjust hardware clock frequency */
+
+     /* Adjust hardware clock frequency by ppb parts per billion */
      /* ... hardware-specific code ... */
-     
+
      return OK;
    }
 
    static int my_ptp_gettime(FAR struct ptp_lowerhalf_s *lower,
-                            FAR struct timespec *ts)
+                             FAR struct timespec *ts,
+                             FAR struct ptp_system_timestamp *sts)
    {
      FAR struct my_ptp_lowerhalf_s *priv =
        (FAR struct my_ptp_lowerhalf_s *)lower;
-     
+
      /* Read time from hardware */
      /* ... hardware-specific code ... */
-     
+
      return OK;
    }
 
-   /* Define operations structure */
-   static const struct ptp_clock_ops_s g_my_ptp_ops =
+   /* Define operations structure. Operations that the hardware does not
+    * support are left out (NULL), except adjtime.
+    */
+   static const struct ptp_ops_s g_my_ptp_ops =
    {
-     .adjfine       = my_ptp_adjfine,
-     .adjtime       = my_ptp_adjtime,
-     .gettime       = my_ptp_gettime,
-     .settime       = my_ptp_settime,
-     .getcaps       = my_ptp_getcaps,
-     .getcrosststamp = my_ptp_getcrosststamp,
+     .adjfine = my_ptp_adjfine,
+     .adjtime = my_ptp_adjtime,
+     .gettime = my_ptp_gettime,
+     .settime = my_ptp_settime,
+     .getres  = my_ptp_getres,
    };
 
    /* Registration function */
    int my_ptp_register(void)
    {
      FAR struct my_ptp_lowerhalf_s *priv;
-     
+
      priv = kmm_zalloc(sizeof(struct my_ptp_lowerhalf_s));
      if (priv == NULL)
        {
          return -ENOMEM;
        }
-     
+
      priv->base.ops = &g_my_ptp_ops;
-     
+
      /* Initialize hardware */
      /* ... */
-     
-     return ptp_clock_register(&priv->base, 0);  /* Register as /dev/ptp0 */
+
+     /* Register as /dev/ptp0, with a maximum adjustment of 500 ppm
+      * (500000 ppb).
+      */
+
+     return ptp_clock_register(&priv->base, 500000, 0);
    }
 
 Integration with PTP Daemon
 ===========================
 
-The PTP clock framework is designed to work with standard PTP synchronization
-daemons such as:
+The PTP clock framework mirrors the PTP hardware clock interface of Linux
+(``/dev/ptpN`` and ``clock_adjtime()``), so software written for that
+interface is easier to port.
 
-- **ptp4l**: IEEE 1588 PTP daemon from the linuxptp project
-- **timemaster**: Synchronization manager combining PTP and NTP
-- **ptpd**: PTP daemon (IEEE 1588-2008 implementation)
-
-These daemons can use the PTP clock devices through the standard POSIX clock
-APIs via the CLOCKFD mechanism, making porting straightforward.
+The PTP daemon of NuttX is ``ptpd`` (``apps/netutils/ptpd``, see
+:doc:`/applications/system/ptpd/index`). It uses a PTP clock through the
+clock identifier described above, when it is started with the device path, for
+example ``ptpd -p /dev/ptp0``. The ``ptp4l`` and ``timemaster`` programs of
+the linuxptp project are Linux programs and are not part of NuttX.
 
 Performance Considerations
 ==========================
@@ -469,20 +541,12 @@ hardware supports adjustments in the range of:
 Debugging
 =========
 
-Debug output can be enabled using the ``CONFIG_DEBUG_PTPCLK_*`` configuration
-options:
+Debug output can be enabled with ``CONFIG_DEBUG_PTP`` and the following
+options, which send the messages to the SYSLOG:
 
-- ``CONFIG_DEBUG_PTPCLK_ERROR``: Error messages
-- ``CONFIG_DEBUG_PTPCLK_WARN``: Warning messages
-- ``CONFIG_DEBUG_PTPCLK_INFO``: Informational messages
-
-Example debug output:
-
-.. code-block:: text
-
-   ptpclk: PTP clock registered as /dev/ptp0
-   ptpclk: adjfine: scaled_ppm=656360 (10 PPM)
-   ptpclk: gettime: ts=1234567890.123456789
+- ``CONFIG_DEBUG_PTP_ERROR``: Error messages
+- ``CONFIG_DEBUG_PTP_WARN``: Warning messages
+- ``CONFIG_DEBUG_PTP_INFO``: Informational messages
 
 References
 ==========
@@ -493,5 +557,6 @@ References
 - `Linux PTP Project <https://linuxptp.sourceforge.net/>`_
 
 - ``include/nuttx/timers/ptp_clock.h`` - PTP clock header file
+- ``include/nuttx/clock.h`` - ``CLOCK_FD`` and ``CLOCK_SHIFT`` definitions
 - ``drivers/timers/ptp_clock.c`` - Upper-half driver implementation
 - ``drivers/timers/ptp_clock_dummy.c`` - Dummy driver implementation
