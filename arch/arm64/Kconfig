@@ -229,6 +229,19 @@ config ARCH_AS_HAS_ARMV8_5
 menu "ARMv8.5 architectural features"
 	depends on ARCH_AS_HAS_ARMV8_5
 
+config ARM64_CRYPTO_AES
+	bool "AES using the Armv8 Cryptography Extension"
+	select CRYPTO
+	select CRYPTO_AES
+	---help---
+		Provide aes_cypher() with AESE, AESD and the MixColumns pair. The
+		table-driven cipher indexes memory with key-dependent values, so
+		its timing follows the cache; these instructions do not.
+
+		The core must implement the extension. ID_AA64ISAR0_EL1 is read on
+		every call, which returns -ENOTSUP rather than trapping if it does
+		not.
+
 config ARM64_MTE
 	bool "Memory Tagging Extension support"
 	select ARCH_HAVE_MEMTAG
