@@ -350,7 +350,6 @@ static void append_timestamp(FAR struct pkt_recvfrom_s *pstate,
 static void append_timestamping(FAR struct pkt_recvfrom_s *pstate,
                                 FAR struct iob_s *iob)
 {
-  FAR struct pkt_conn_s *conn = pstate->pr_conn;
   struct timespec ts[3];
 
   memset(&ts, 0, sizeof(ts));
