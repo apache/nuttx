@@ -81,6 +81,14 @@ if(CONFIG_ARCH_HAVE_MMU)
   endif()
 endif()
 
+if(CONFIG_ARM64_CRYPTO_AES)
+  list(APPEND SRCS arm64_aes.c)
+endif()
+
+if(CONFIG_ARM64_CRYPTO_AES AND CONFIG_CRYPTO_CRYPTODEV_HARDWARE)
+  list(APPEND SRCS arm64_crypto.c)
+endif()
+
 if(CONFIG_ARM64_MTE)
   list(APPEND SRCS arm64_mte.c)
 endif()
