@@ -88,6 +88,7 @@ config ARCH_CHIP_AM67
 	select ARCH_CORTEXR5
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_TICKLESS
+	select SCHED_HPWORK if RPTUN
 	---help---
 		TI AM67 family
 

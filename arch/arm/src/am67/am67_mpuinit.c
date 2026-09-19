@@ -76,5 +76,14 @@ void am67_mpu_init(void)
   am67_mcu_msram_region(AM67_MCU_MSRAM_START_ADDR, AM67_MCU_MSRAM_SIZE);
   am67_ddr_region(AM67_DDR_START_ADDR, AM67_DDR_SIZE);
 
+  /* Non-cacheable overrides for the OpenAMP/rptun shared IPC memory.
+   * Configured last so they take priority over the (cacheable) DDR
+   * region for their ranges and make the R5F<->A53 shared structures
+   * coherent (see am67_mpuinit.h).
+   */
+
+  am67_ipc_shm_region(AM67_IPC_SHM0_START_ADDR, AM67_IPC_SHM0_SIZE);
+  am67_ipc_shm_region(AM67_IPC_SHM1_START_ADDR, AM67_IPC_SHM1_SIZE);
+
   mpu_control(true);
 }
