@@ -7,7 +7,10 @@
 networks produced by Neural Network Libraries.
 
 Enable ``CONFIG_NNABLA_RT``. ``CONFIG_NNABLA_RT_VER`` selects the upstream
-tag (default ``1.24.0``). The Makefile downloads that release and compiles
+tag (default ``1.24.0``). Sony's later ``nnabla-c-runtime`` tags go
+through ``v1.38.0``; NuttX has not moved the default. Sony has placed
+NNABLA in maintenance. There is no NuttX example application and no
+CMake build. The Makefile downloads the selected release and compiles
 the runtime plus a subset of operators, including:
 
 - Activations (ReLU, sigmoid, tanh, softmax, ELU, leaky ReLU, Swish, ...)
