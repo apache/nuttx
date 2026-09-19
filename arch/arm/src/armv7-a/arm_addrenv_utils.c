@@ -149,6 +149,132 @@ int arm_addrenv_create_region(uintptr_t *l1table, unsigned int listlen,
   return npages;
 }
 
+#ifdef CONFIG_ARCH_HAVE_FORK
+/****************************************************************************
+ * Name: arm_addrenv_fork_region
+ *
+ * Description:
+ *   Duplicate one memory region of an address environment for fork().
+ *
+ *   The destination gets its own L2 page tables and, unless `share' is
+ *   requested, its own physical pages holding a copy of the source's
+ *   contents.  Both are mapped at the same virtual addresses as the source,
+ *   which is what makes the duplicate an exact copy:  a pointer the parent
+ *   held into its own memory means the same thing in the child.
+ *
+ *   Only the sections the source actually has mapped are duplicated, so the
+ *   copy is the size of the parent, not the size of the region.
+ *
+ *   `share' maps the source's own pages into the destination rather than
+ *   copying them.  It is used for the shared memory region, which POSIX says
+ *   remains shared across fork().
+ *
+ * Input Parameters:
+ *   srcl1    - The L1 page table of the address environment to duplicate
+ *   destl1   - The L1 page table receiving the duplicate
+ *   listlen  - Number of sections in the region
+ *   vaddr    - Virtual base address of the region
+ *   mmuflags - L2 flags for the duplicated pages
+ *   share    - Map the source's pages rather than copying them
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.  On failure the
+ *   caller is expected to tear the destination down with
+ *   up_addrenv_destroy(), which copes with a partially built environment.
+ *
+ ****************************************************************************/
+
+int arm_addrenv_fork_region(uintptr_t *srcl1, uintptr_t *destl1,
+                            unsigned int listlen, uintptr_t vaddr,
+                            uint32_t mmuflags, bool share)
+{
+  uintptr_t l1entry;
+  uintptr_t *srcl2;
+  uintptr_t *destl2;
+  uintptr_t paddr;
+  unsigned int i;
+  unsigned int j;
+
+  binfo("listlen=%d vaddr=%08lx share=%d\n", listlen,
+        (unsigned long)vaddr, share);
+
+  for (i = 0; i < listlen; i++, vaddr += SECTION_SIZE)
+    {
+      /* Skip sections the source never populated */
+
+      l1entry = mmu_l1table_getentry(srcl1, vaddr);
+      if (l1entry == 0)
+        {
+          continue;
+        }
+
+      srcl2 = (uintptr_t *)arm_pgvaddr(l1entry & PTE_SMALL_PADDR_MASK);
+
+      /* Allocate one physical page for the destination L2 page table */
+
+      paddr = mm_pgalloc(1);
+      if (!paddr)
+        {
+          return -ENOMEM;
+        }
+
+      DEBUGASSERT(MM_ISALIGNED(paddr));
+
+      mmu_l1table_setentry(destl1, paddr, vaddr, MMU_L1_PGTABFLAGS);
+
+      destl2 = (uintptr_t *)arm_pgvaddr(paddr);
+      memset(destl2, 0, ENTRIES_PER_L2TABLE * sizeof(uintptr_t));
+
+      for (j = 0; j < ENTRIES_PER_L2TABLE; j++)
+        {
+          uintptr_t srcpage = srcl2[j];
+          uintptr_t destpage;
+
+          if (srcpage == 0)
+            {
+              continue;
+            }
+
+          if (share)
+            {
+              /* Map the very same page.  Note that up_addrenv_destroy()
+               * tears a shared region down with keep=true, so this does not
+               * hand the same page to the page allocator twice.
+               */
+
+              destl2[j] = srcpage;
+              continue;
+            }
+
+          srcpage &= PTE_SMALL_PADDR_MASK;
+
+          destpage = mm_pgalloc(1);
+          if (!destpage)
+            {
+              return -ENOMEM;
+            }
+
+          memcpy((void *)arm_pgvaddr(destpage),
+                 (const void *)arm_pgvaddr(srcpage), MM_PGSIZE);
+
+          up_flush_dcache(arm_pgvaddr(destpage),
+                          arm_pgvaddr(destpage) + MM_PGSIZE);
+
+          set_l2_entry(destl2, destpage, vaddr + (j << MM_PGSHIFT),
+                       mmuflags);
+        }
+
+      /* Make sure the initialized L2 table is visible to the MMU */
+
+      up_flush_dcache((uintptr_t)destl2,
+                      (uintptr_t)destl2 +
+                      ENTRIES_PER_L2TABLE * sizeof(uintptr_t));
+    }
+
+  return OK;
+}
+#endif /* CONFIG_ARCH_HAVE_FORK */
+
 /****************************************************************************
  * Name: arm_addrenv_destroy_region
  *
