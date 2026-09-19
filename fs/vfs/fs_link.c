@@ -80,36 +80,37 @@ int link(FAR const char *path1, FAR const char *path2)
   struct inode_search_s desc_path2;
   FAR struct inode *target = NULL;
   FAR struct inode *newinode = NULL;
-  int errcode;
   int ret;
 
   if (path1 == NULL || path2 == NULL)
     {
-      errcode = EINVAL;
+      ret = -EINVAL;
       goto errout;
     }
 
   if (*path1 == '\0' || *path2 == '\0')
     {
-      errcode = ENOENT;
+      ret = -ENOENT;
       goto errout;
     }
 
-  SETUP_SEARCH(&desc_path1, path1, false);
-  ret = inode_find(&desc_path1);
+  ret = inode_search_setup(&desc_path1, path1, false);
   if (ret < 0)
     {
-      errcode = -ret;
-      goto errout_with_search_path1;
+      goto errout;
     }
 
-  target = desc_path1.node;
+  ret = inode_find(&desc_path1, &target);
+  if (ret < 0)
+    {
+      goto errout_with_search_path1;
+    }
 
   if (INODE_GET_NLINK(target) >= _POSIX_LINK_MAX)
     {
       /* Too many links to the target inode */
 
-      errcode = EMLINK;
+      ret = -EMLINK;
       goto errout_with_target;
     }
 
@@ -117,13 +118,15 @@ int link(FAR const char *path1, FAR const char *path2)
    * 'path2' does not lie on a mounted volume.
    */
 
-  SETUP_SEARCH(&desc_path2, path2, true);
+  ret = inode_search_setup(&desc_path2, path2, true);
+  if (ret < 0)
+    {
+      goto errout_with_target;
+    }
 
-  ret = inode_find(&desc_path2);
+  ret = inode_find(&desc_path2, &newinode);
   if (ret >= 0)
     {
-      newinode = desc_path2.node;
-
       /* Something exists at the path2 where we are trying to create the
        * link.
        */
@@ -138,7 +141,7 @@ int link(FAR const char *path1, FAR const char *path2)
 
           if (newinode != target)
             {
-              errcode = EXDEV;
+              ret = -EXDEV;
               goto errout_with_newinode;
             }
 
@@ -152,7 +155,6 @@ int link(FAR const char *path1, FAR const char *path2)
                                            desc_path2.relpath);
               if (ret < 0)
                 {
-                  errcode = -ret;
                   goto errout_with_newinode;
                 }
             }
@@ -160,7 +162,7 @@ int link(FAR const char *path1, FAR const char *path2)
             {
               /* Hard links within this type of fs are not supported */
 
-              errcode = ENOSYS;
+              ret = -ENOSYS;
               goto errout_with_newinode;
             }
         }
@@ -169,7 +171,7 @@ int link(FAR const char *path1, FAR const char *path2)
         {
           /* A node already exists in the pseudofs at 'path2' */
 
-          errcode = EEXIST;
+          ret = -EEXIST;
           goto errout_with_newinode;
         }
     }
@@ -187,7 +189,6 @@ int link(FAR const char *path1, FAR const char *path2)
 
       if (ret != -ENOENT && ret != -ENOTDIR)
         {
-          errcode = -ret;
           goto errout_with_newinode;
         }
 
@@ -195,7 +196,7 @@ int link(FAR const char *path1, FAR const char *path2)
 
       if (INODE_IS_MOUNTPT(target))
         {
-          errcode = EXDEV;
+          ret = -EXDEV;
           goto errout_with_newinode;
         }
 
@@ -216,15 +217,14 @@ int link(FAR const char *path1, FAR const char *path2)
       inode_unlock();
       if (ret < 0)
         {
-          errcode = -ret;
           goto errout_with_newinode;
         }
     }
 
   /* Hard link successfully created */
 
-  RELEASE_SEARCH(&desc_path1);
-  RELEASE_SEARCH(&desc_path2);
+  inode_search_release(&desc_path1);
+  inode_search_release(&desc_path2);
   inode_release(target);
 
 #ifdef CONFIG_FS_NOTIFY
@@ -234,14 +234,14 @@ int link(FAR const char *path1, FAR const char *path2)
 
 errout_with_newinode:
   inode_release(newinode);
-  RELEASE_SEARCH(&desc_path2);
+  inode_search_release(&desc_path2);
 errout_with_target:
   inode_release(target);
 errout_with_search_path1:
-  RELEASE_SEARCH(&desc_path1);
+  inode_search_release(&desc_path1);
 
 errout:
-  set_errno(errcode);
+  set_errno(-ret);
   return ERROR;
 }
 

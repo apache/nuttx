@@ -102,14 +102,16 @@ int nxevent_open(FAR nxevent_t **event, FAR const char *name,
    * will have incremented the reference count on the inode.
    */
 
-  SETUP_SEARCH(&desc, fullpath, false);
+  ret = inode_search_setup(&desc, fullpath, false);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
-  ret = inode_find(&desc);
+  ret = inode_find(&desc, &inode);
   if (ret >= 0)
     {
       /* Something exists at this path.  Get the search results */
-
-      inode = desc.node;
 
       /* Verify that the inode is a event group */
 
@@ -206,7 +208,7 @@ int nxevent_open(FAR nxevent_t **event, FAR const char *name,
       *event = &nevent->ne_event;
     }
 
-  RELEASE_SEARCH(&desc);
+  inode_search_release(&desc);
 #ifdef CONFIG_FS_NOTIFY
   notify_open(fullpath, oflags);
 #endif
@@ -216,6 +218,6 @@ errout_with_inode:
   inode_release(inode);
 
 errout_with_search:
-  RELEASE_SEARCH(&desc);
+  inode_search_release(&desc);
   return ret;
 }
