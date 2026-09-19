@@ -39,7 +39,9 @@
 #include <arpa/inet.h>
 
 #include <nuttx/net/dns.h>
-#include <nuttx/net/loopback.h>
+#ifdef CONFIG_NET_LOOPBACK
+#  include <nuttx/net/loopback.h>
+#endif
 
 #include "netdb/lib_dns.h"
 #include "netdb/lib_netdb.h"
