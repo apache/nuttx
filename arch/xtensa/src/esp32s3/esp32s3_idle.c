@@ -160,6 +160,12 @@ static void up_idlepm(void)
 
               esp_pmstandby(CONFIG_PM_ALARM_SEC * 1000000 +
                             CONFIG_PM_ALARM_NSEC / 1000);
+
+              /* Without this, /proc/pm/state0 bills sleep time to wake[]
+               * -- pm_stats() needs PM_RESTORE to know time was asleep.
+               */
+
+              pm_changestate(PM_IDLE_DOMAIN, PM_RESTORE);
             }
             break;
 
