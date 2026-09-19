@@ -216,6 +216,21 @@ struct lsm6ds3trc_dev_s
                                    * (both), 0 if neither is */
   enum lsm6ds3trc_odr_e fifo_odr; /* Shared ODR currently driving
                                    * FIFO_CTRL5 */
+  FAR int16_t *fifo_raw;          /* Drain buffer, FIFO_MAX_WORDS entries.
+                                   *
+                                   * On the heap, not the stack.
+                                   * FIFO_MAX_WORDS scales with
+                                   * CONFIG_SENSORS_LSM6DS3TRC_FIFO_
+                                   * WATERMARK, so at the watermark this
+                                   * board uses the old on-stack array was
+                                   * 6000 bytes inside an 8192-byte HPWORK
+                                   * stack -- 73% of it, before the call
+                                   * frame and the whole I2C stack below
+                                   * it.  The Kconfig default watermark of
+                                   * 8 needs only 192 bytes, which is
+                                   * presumably why this was never hit.
+                                   * Allocated once at registration so the
+                                   * drain path stays allocation free. */
 #endif
 };
 
@@ -840,7 +855,7 @@ static int accel_thread(int argc, char **argv)
 static void lsm6ds3trc_fifo_worker_body(FAR struct lsm6ds3trc_dev_s *dev)
 {
   uint8_t status[2];
-  int16_t raw[FIFO_MAX_WORDS];
+  FAR int16_t *raw = dev->fifo_raw;
   int16_t raw_temp;
   float temp_c;
   uint16_t diff_words;
@@ -1567,6 +1582,18 @@ int lsm6ds3trc_register(FAR struct i2c_master_s *i2c, uint8_t addr,
     }
 
   priv->i2c = i2c;
+
+#ifdef CONFIG_SENSORS_LSM6DS3TRC_FIFO
+  priv->fifo_raw = kmm_malloc(FIFO_MAX_WORDS * sizeof(int16_t));
+  if (priv->fifo_raw == NULL)
+    {
+      snerr("ERROR: no memory for the %d-byte FIFO drain buffer\n",
+            (int)(FIFO_MAX_WORDS * sizeof(int16_t)));
+      kmm_free(priv);
+      return -ENOMEM;
+    }
+#endif
+
   priv->addr = addr;
   priv->interrupt_mode = config->attach != NULL;
   priv->int_pin = config->int_pin;
