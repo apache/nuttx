@@ -933,8 +933,23 @@ static void lsm6ds3trc_fifo_worker_body(FAR struct lsm6ds3trc_dev_s *dev)
                               nwords * sizeof(int16_t));
   if (err < 0)
     {
-      nxmutex_unlock(&dev->devlock);
+      uint8_t ctrl5;
+
       snerr("ERROR: Failed to read FIFO data: %d\n", err);
+
+      /* Recover instead of wedging: a FIFO left above watermark holds
+       * level-triggered INT1 asserted, re-entering this worker forever.
+       * Emptying it through Bypass costs one batch but deasserts the line;
+       * restore the previous mode bits to keep fifo_configure()'s ODR.
+       */
+
+      if (lsm6ds3trc_read_bytes(dev, FIFO_CTRL5, &ctrl5, 1) >= 0)
+        {
+          lsm6ds3trc_set_bits(dev, FIFO_CTRL5, FIFO_MODE_BYPASS, 0x07);
+          lsm6ds3trc_set_bits(dev, FIFO_CTRL5, ctrl5 & 0x07, 0x07);
+        }
+
+      nxmutex_unlock(&dev->devlock);
       return;
     }
 
@@ -1726,8 +1741,8 @@ int lsm6ds3trc_register(FAR struct i2c_master_s *i2c, uint8_t addr,
      * the device at all: an unregistered sensor leaves the application
      * with no /dev/uorb/sensor_accel0 to open, which is fatal to it.
      * Losing the whole sensor to protect against a maybe-storm is the
-     * wrong trade -- and it is exactly what happened on 2026-09-19, when
-     * a single -EIO here took the collar down completely.
+     * wrong trade -- a single -EIO here has taken a board down completely
+     * before.
      */
 
     if (!reset_done)
