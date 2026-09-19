@@ -1016,6 +1016,19 @@ extern "C"
 #define EXTERN extern
 #endif
 
+/* FBIOC_WATCHAREA - Enable (or, with zero, disable) per-open-file dirty
+ *                   area reporting:  every area an application reports
+ *                   through FBIO_UPDATE is queued for this file and
+ *                   signalled with POLLPRI.
+ *                   Argument: int (boolean)
+ * FBIOC_GETDIRTY  - Pop the next queued dirty area.
+ *                   Argument: writable struct fb_area_s*
+ *                   Returns -EAGAIN when nothing is pending.
+ */
+
+#define FBIOC_WATCHAREA       _FBIOC(0x0030)
+#define FBIOC_GETDIRTY        _FBIOC(0x0031)
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
