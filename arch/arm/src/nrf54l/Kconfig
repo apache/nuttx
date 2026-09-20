@@ -25,6 +25,12 @@ endchoice # nRF54L Chip Selection
 
 # Peripheral Selection
 
+config NRF54L_SPI_MASTER
+	bool
+	default n
+	select SPI
+	select ARCH_HAVE_SPI_BITORDER
+
 config NRF54L_UART
 	bool
 	default n
@@ -42,6 +48,48 @@ menu "nRF54L Peripheral Selection"
 config NRF54L_GPIOTE
 	bool "GPIOTE (GPIO interrupts)"
 	default n
+
+config NRF54L_SPI0_MASTER
+	bool "SPI0 Master (SPIM20)"
+	default n
+	depends on !NRF54L_UART0
+	select NRF54L_SPI_MASTER
+
+config NRF54L_SPI1_MASTER
+	bool "SPI1 Master (SPIM21)"
+	default n
+	depends on !NRF54L_UART1
+	select NRF54L_SPI_MASTER
+
+config NRF54L_SPI2_MASTER
+	bool "SPI2 Master (SPIM22)"
+	default n
+	depends on !NRF54L_UART2
+	select NRF54L_SPI_MASTER
+
+config NRF54L_SPI3_MASTER
+	bool "SPI3 Master (SPIM30)"
+	default n
+	depends on !NRF54L_UART3
+	select NRF54L_SPI_MASTER
+
+config NRF54L_SPI4_MASTER
+	bool "SPI4 Master (SPIM00)"
+	default n
+	depends on !NRF54L_UART4
+	select NRF54L_SPI_MASTER
+
+config NRF54L_SPI5_MASTER
+	bool "SPI5 Master (SPIM23)"
+	default n
+	depends on !ARCH_CHIP_NRF54L15 && !NRF54L_UART5
+	select NRF54L_SPI_MASTER
+
+config NRF54L_SPI6_MASTER
+	bool "SPI6 Master (SPIM24)"
+	default n
+	depends on !ARCH_CHIP_NRF54L15 && !NRF54L_UART6
+	select NRF54L_SPI_MASTER
 
 config NRF54L_UART0
 	bool "UART0"
@@ -435,6 +483,18 @@ config NRF54L_SAADC_LIMITS
 endif # NRF54L_SAADC
 
 endmenu # SAADC Configuration
+
+menu "SPI Configuration"
+
+if NRF54L_SPI_MASTER
+
+config NRF54L_SPI_MASTER_INTERRUPTS
+	bool "SPI Master interrupts support"
+	default n
+
+endif # NRF54L_SPI_MASTER
+
+endmenu # SPI Configuration
 
 menuconfig NRF54L_SOFTDEVICE_CONTROLLER
 	bool "SoftDevice Controller"
