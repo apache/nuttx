@@ -154,6 +154,64 @@ notification between cores.
 32kB of the SRAM3 is reserved for shared memory and this is the only available
 option at the moment.
 
+Ethernet
+========
+
+The Ethernet MAC of the STM32H7 has a time counter that can stamp the frames
+it sends or receives in hardware, at the moment the frame crosses the MAC. A
+protocol such as the Precision Time Protocol (IEEE 1588, PTP) uses these
+stamps to compare its clock with the clock of another node without the delay
+of the software (interrupts and task scheduling) getting into the
+measurement. The options below enable that part of the driver.
+
+Precision Time Protocol
+-----------------------
+
+The counter has a 32-bit seconds part and a nanoseconds part that counts up to
+10^9 (digital rollover), and it is clocked from ``HCLK``. Its rate can be
+trimmed by up to +/- 50 %, and its phase can be stepped, which is what a PTP
+daemon needs to steer it towards a master clock.
+
+  - ``CONFIG_STM32_ETH_PTP`` - Enables the PTP timer of the MAC. It starts
+    at zero when the interface goes up, whether or not the link is up, and it
+    is cleared by every reset of the MAC, for example when the interface goes
+    down.
+
+  - ``CONFIG_STM32_ETH_PTP_GPIO`` - Enables the pulse-per-second output of the
+    MAC on the pin ``GPIO_ETH_PPS_OUT``. The board has to define it in its
+    ``board.h`` with one of the pins of the chip (on the STM32H743
+    ``GPIO_ETH_PPS_OUT_1`` is PB5 and ``GPIO_ETH_PPS_OUT_2`` is PG8). It is a
+    pulse train with a period of one second and a width of half of it, that
+    starts at a whole second of the counter. It does not depend on the link
+    or on a PTP daemon. The train counts by itself and does not follow a step
+    of the time, so the driver starts it again at the next whole second when
+    the time is set or stepped.
+
+Clock device
+------------
+
+With ``CONFIG_PTP_CLOCK`` the driver registers the counter as a PTP hardware
+clock, ``/dev/ptp0`` for the first Ethernet interface (the number of the
+device is the number of the interface). It follows the generic framework
+described in :doc:`/components/drivers/special/ptp` and offers reading and
+setting the time, the resolution (the increment of the counter, 10 ns with
+``HCLK`` at 200 MHz), frequency adjustment (``ADJ_FREQUENCY``, up to +/- 50 %)
+and phase steps (``ADJ_OFFSET`` and ``ADJ_SETOFFSET``). It does not offer the
+cross timestamp of the system and the device clock. The seconds of the time
+that is set have to fit in 32 bits.
+``CONFIG_CLOCK_ADJTIME`` is needed for ``clock_adjtime()``.
+
+A configuration with the options above, for a board with the Ethernet MAC,
+looks like this:
+
+.. code-block:: kconfig
+
+   CONFIG_STM32_ETHMAC=y
+   CONFIG_STM32_ETH_PTP=y
+   CONFIG_STM32_ETH_PTP_GPIO=y
+   CONFIG_PTP_CLOCK=y
+   CONFIG_CLOCK_ADJTIME=y
+
 Supported Boards
 ================
 
