@@ -29,6 +29,10 @@ config NRF54L_UART
 	bool
 	default n
 
+config NRF54L_TIMER
+	bool
+	default n
+
 menu "nRF54L Peripheral Selection"
 
 config NRF54L_UART0
@@ -95,6 +99,41 @@ config NRF54L_UART6
 	---help---
 		Enable UART6 (UARTE24). The board must provide
 		BOARD_UART6_TX_PIN and BOARD_UART6_RX_PIN.
+
+config NRF54L_TIMER0
+	bool "TIMER0 (TIMER20)"
+	select NRF54L_TIMER
+	default n
+
+config NRF54L_TIMER1
+	bool "TIMER1 (TIMER21)"
+	select NRF54L_TIMER
+	default n
+
+config NRF54L_TIMER2
+	bool "TIMER2 (TIMER22)"
+	select NRF54L_TIMER
+	default n
+
+config NRF54L_TIMER3
+	bool "TIMER3 (TIMER23)"
+	select NRF54L_TIMER
+	default n
+
+config NRF54L_TIMER4
+	bool "TIMER4 (TIMER24)"
+	select NRF54L_TIMER
+	default n
+
+config NRF54L_TIMER5
+	bool "TIMER5 (TIMER00)"
+	select NRF54L_TIMER
+	default n
+
+config NRF54L_TIMER6
+	bool "TIMER6 (TIMER10)"
+	select NRF54L_TIMER
+	default n
 
 endmenu # nRF54L Peripheral Selection
 

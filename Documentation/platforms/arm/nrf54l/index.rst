@@ -23,7 +23,7 @@ RADIO       No
 RRAMC       No
 SAADC       No
 SPIM        No
-TIMER       No
+TIMER       Yes
 TWIM        No
 UARTE       Yes     No hardware flow control
 USBHS       No
@@ -34,6 +34,13 @@ GPIO
 ----
 
 Pins can be configured and operated using ``nrf54l_gpio_*`` functions.
+
+TIMER
+-----
+
+TIMER0 through TIMER6 correspond to TIMER20, TIMER21, TIMER22, TIMER23,
+TIMER24, TIMER00 and TIMER10. The timer lower-half driver uses a 1 MHz
+counter clock on each instance.
 
 UARTE
 -----
