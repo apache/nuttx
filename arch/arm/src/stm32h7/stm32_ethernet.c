@@ -276,6 +276,15 @@
 
 #  define STM32_PTP_UPDATE_USTIMEOUT  (1000)
 
+#  ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+
+/* Time to wait for the DMA to write the context descriptor that follows
+ * the last descriptor of a timestamped frame, in microseconds.
+ */
+
+#    define STM32_PTP_CTX_USTIMEOUT   (10)
+#  endif
+
 /* The addend can be trimmed by up to 50% each way from its nominal value,
  * in parts per billion.
  */
@@ -756,6 +765,8 @@ struct stm32_ethmac_s
 
   struct eth_desc_s *txchbase;      /* TX descriptor ring base address */
   struct eth_desc_s *rxchbase;      /* RX descriptor ring base address */
+
+  uint32_t rxbuf[CONFIG_STM32_ETH_NRXDESC]; /* Buffer of each RX descriptor */
 
   struct eth_desc_s *txtail;        /* First "in_flight" TX descriptor */
   struct eth_desc_s *rxcurr;        /* First RX descriptor of the segment */
@@ -1764,6 +1775,124 @@ static void stm32_freesegment(struct stm32_ethmac_s *priv,
 }
 
 /****************************************************************************
+ * Function: stm32_rxindex
+ *
+ * Description:
+ *   Get the position of an RX descriptor in the ring. The descriptors of
+ *   the ring are the size of the union that also holds a TX descriptor,
+ *   not of struct eth_desc_s.
+ *
+ ****************************************************************************/
+
+static inline int stm32_rxindex(struct stm32_ethmac_s *priv,
+                                struct eth_desc_s *rxdesc)
+{
+  return (union stm32_desc_u *)rxdesc - (union stm32_desc_u *)priv->rxchbase;
+}
+
+/****************************************************************************
+ * Function: stm32_freectxdesc
+ *
+ * Description:
+ *   Give a context descriptor back to the DMA. The DMA writes the
+ *   timestamp over the buffer address, so the address is restored from the
+ *   copy that the driver keeps.
+ *
+ * Parameters:
+ *   priv    - Reference to the driver state structure
+ *   ctxdesc - The context descriptor
+ *
+ * Assumptions:
+ *   Global interrupts are disabled by interrupt handling logic.
+ *
+ ****************************************************************************/
+
+static void stm32_freectxdesc(struct stm32_ethmac_s *priv,
+                              struct eth_desc_s *ctxdesc)
+{
+  ctxdesc->des0 = priv->rxbuf[stm32_rxindex(priv, ctxdesc)];
+  ctxdesc->des1 = 0;
+  ctxdesc->des2 = 0;
+  stm32_freesegment(priv, ctxdesc, 1);
+}
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+/****************************************************************************
+ * Function: stm32_rxtimestamp
+ *
+ * Description:
+ *   Get the hardware timestamp of a received frame, and put it in d_rxtime.
+ *   The timestamp is in the context descriptor that the DMA writes right
+ *   after the last descriptor of the frame. A frame without a timestamp
+ *   gets a time of zero.
+ *
+ * Parameters:
+ *   priv - Reference to the driver state structure
+ *   last - The last descriptor of the frame
+ *
+ * Returned Value:
+ *   The context descriptor, that the caller has to give back to the DMA
+ *   after the frame, or NULL if the frame has none. A context descriptor
+ *   that the DMA does not write in time is found later by the scan of the
+ *   descriptors, and dropped.
+ *
+ * Assumptions:
+ *   Global interrupts are disabled by interrupt handling logic.
+ *
+ ****************************************************************************/
+
+static struct eth_desc_s *stm32_rxtimestamp(struct stm32_ethmac_s *priv,
+                                            struct eth_desc_s *last)
+{
+  struct net_driver_s *dev = &priv->dev;
+  struct eth_desc_s *ctxdesc;
+  int i;
+
+  dev->d_rxtime.tv_sec  = 0;
+  dev->d_rxtime.tv_nsec = 0;
+
+  if ((last->des3 & ETH_RDES3_WB_RS1V) == 0 ||
+      (last->des1 & ETH_RDES1_WB_TSA) == 0)
+    {
+      return NULL;
+    }
+
+  ctxdesc = stm32_get_next_rxdesc(priv, last);
+
+  for (i = 0; i < STM32_PTP_CTX_USTIMEOUT; i++)
+    {
+      up_invalidate_dcache((uintptr_t)ctxdesc,
+                           (uintptr_t)ctxdesc + sizeof(struct eth_desc_s));
+
+      if ((ctxdesc->des3 & ETH_RDES3_WB_OWN) == 0)
+        {
+          break;
+        }
+
+      up_udelay(1);
+    }
+
+  if ((ctxdesc->des3 & ETH_RDES3_WB_OWN) != 0 ||
+      (ctxdesc->des3 & ETH_RDES3_WB_CTXT) == 0)
+    {
+      return NULL;
+    }
+
+  /* The nanoseconds are in the first word and the seconds in the second,
+   * and all ones is a timestamp that is not valid.
+   */
+
+  if (ctxdesc->des0 != UINT32_MAX || ctxdesc->des1 != UINT32_MAX)
+    {
+      dev->d_rxtime.tv_sec  = ctxdesc->des1;
+      dev->d_rxtime.tv_nsec = ctxdesc->des0;
+    }
+
+  return ctxdesc;
+}
+#endif /* CONFIG_STM32_ETH_TIMESTAMP_RX */
+
+/****************************************************************************
  * Function: stm32_recvframe
  *
  * Description:
@@ -1788,6 +1917,9 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
 {
   struct eth_desc_s *rxdesc;
   struct eth_desc_s *rxcurr = NULL;
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+  struct eth_desc_s *ctxdesc;
+#endif
   uint8_t *buffer;
   int i;
 
@@ -1911,6 +2043,8 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
                       DEBUGASSERT(dev->d_buf == NULL);
                       dev->d_buf    = (uint8_t *)rxcurr->des0;
                       rxcurr->des0 = (uint32_t)buffer;
+                      priv->rxbuf[stm32_rxindex(priv, rxcurr)] =
+                        (uint32_t)buffer;
 
                       /* Make sure that the modified RX descriptor is written
                        * to physical memory.
@@ -1925,7 +2059,21 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
                        */
 
                       priv->rxhead   = stm32_get_next_rxdesc(priv, rxdesc);
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+                      ctxdesc = stm32_rxtimestamp(priv, rxdesc);
+#endif
+
                       stm32_freesegment(priv, rxcurr, priv->segments);
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+                      if (ctxdesc != NULL)
+                        {
+                          priv->rxhead =
+                            stm32_get_next_rxdesc(priv, ctxdesc);
+                          stm32_freectxdesc(priv, ctxdesc);
+                        }
+#endif
 
                       /* Force the completed RX DMA buffer to be re-read from
                        * physical memory.
@@ -1961,8 +2109,7 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
         {
           /* Drop the context descriptors, we are not interested */
 
-          DEBUGASSERT(rxcurr != NULL);
-          stm32_freesegment(priv, rxcurr, 1);
+          stm32_freectxdesc(priv, rxdesc);
         }
 
       /* Try the next descriptor */
@@ -3065,6 +3212,7 @@ static void stm32_rxdescinit(struct stm32_ethmac_s *priv,
       /* Set Buffer1 address pointer */
 
       rxdesc->des0 = (uint32_t)&rxbuffer[i * ALIGNED_BUFSIZE];
+      priv->rxbuf[i] = rxdesc->des0;
 
       /* Set Buffer1 address high bytes */
 
@@ -4056,6 +4204,16 @@ static int stm32_eth_ptp_init(void)
    */
 
   tscr = ETH_MACTSCR_TSENA | ETH_MACTSCR_TSCFUPDT | ETH_MACTSCR_TSCTRLSSR;
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+  /* Timestamp the received PTP version 2 messages, over Ethernet and over
+   * UDP, except for the announce, management and signaling messages.
+   */
+
+  tscr |= ETH_MACTSCR_TSVER2ENA | ETH_MACTSCR_TSIPENA |
+          ETH_MACTSCR_TSIPV4ENA | ETH_MACTSCR_TSIPV6ENA |
+          ETH_MACTSCR_SNAPTYPSEL_1;
+#endif
   stm32_putreg(tscr, STM32_ETH_MACTSCR);
 
   /* Set the increment of the system time */
@@ -4842,6 +5000,10 @@ static inline int stm32_ethinitialize(int intf)
   /* Put the interface in the down state. */
 
   stm32_ifdown(&priv->dev);
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+  priv->dev.d_features |= NETDEV_RX_STAMP;
+#endif
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
