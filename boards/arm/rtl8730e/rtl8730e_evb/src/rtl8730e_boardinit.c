@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rtl8730e/ca32-evb/src/rtl8730e_boardinit.c
+ * boards/arm/rtl8730e/rtl8730e_evb/src/rtl8730e_boardinit.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -28,7 +28,7 @@
 #include <nuttx/config.h>
 #include <stdint.h>
 #include <nuttx/board.h>
-#include "ca32-evb.h"
+#include "rtl8730e_evb.h"
 
 /****************************************************************************
  * Pre-processor Definitions
