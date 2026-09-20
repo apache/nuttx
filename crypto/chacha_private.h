@@ -58,8 +58,8 @@ chacha_ctx;
     }                                            \
   while (0)
 
-static const char sigma[16] = "expand 32-byte k";
-static const char tau[16] = "expand 16-byte k";
+static const char sigma[] = "expand 32-byte k";
+static const char tau[] = "expand 16-byte k";
 
 static inline void hchacha20(FAR uint32_t *derived_key,
                              FAR const uint8_t *nonce,
