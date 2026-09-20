@@ -341,6 +341,16 @@ config ARCH_CHIP_NRF53
 	---help---
 		Nordic nRF53 architectures (ARM dual Cortex-M33).
 
+config ARCH_CHIP_NRF54L
+	bool "Nordic nRF54L"
+	select ARCH_CORTEXM33
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select ARM_HAVE_DSP
+	select ARCH_DMA_NO_FLASH_TRANSFER
+	---help---
+		Nordic nRF54L application Cortex-M33, standalone secure image.
+
 config ARCH_CHIP_NRF91
 	bool "Nordic nRF91"
 	select ARCH_CORTEXM33
@@ -1336,6 +1346,7 @@ config ARCH_CHIP
 	default "n32h7"		if ARCH_CHIP_N32H7
 	default "nrf52"		if ARCH_CHIP_NRF52
 	default "nrf53"		if ARCH_CHIP_NRF53
+	default "nrf54l"	if ARCH_CHIP_NRF54L
 	default "nrf91"		if ARCH_CHIP_NRF91
 	default "nuc1xx"	if ARCH_CHIP_NUC1XX
 	default "ra4"			if ARCH_CHIP_RA4
@@ -1836,6 +1847,9 @@ source "arch/arm/src/nrf52/Kconfig"
 endif
 if ARCH_CHIP_NRF53
 source "arch/arm/src/nrf53/Kconfig"
+endif
+if ARCH_CHIP_NRF54L
+source "arch/arm/src/nrf54l/Kconfig"
 endif
 if ARCH_CHIP_NRF91
 source "arch/arm/src/nrf91/Kconfig"
