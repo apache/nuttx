@@ -3749,7 +3749,10 @@ static inline void ptp_to_timespec(uint64_t timestamp, struct timespec *ts)
   ts->tv_nsec = ((uint32_t)timestamp * (uint64_t)NSEC_PER_SEC) >> 32;
 }
 
-/* Convert RX timestamp to CLOCK_REALTIME */
+/* Convert the RX timestamp of the MAC to a timespec. It is the value of the
+ * PTP counter of the MAC, which is the time base of /dev/ptp0, and not a
+ * value of CLOCK_REALTIME.
+ */
 #ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
 static void stm32_eth_ptp_convert_rxtime(struct stm32_ethmac_s *priv)
 {
