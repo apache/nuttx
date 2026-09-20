@@ -363,6 +363,7 @@
 #define ETH_MACTSCR_TSMSTRENA       (1 << 15) /* Bit 15: Enable snapshot for messages relevant to master */
 #define ETH_MACTSCR_SNAPTYPSEL_SHIFT (16)     /* Bits 16-17: Select PTP packets for taking snapshots */
 #define ETH_MACTSCR_SNAPTYPSEL_MASK (0x3 << ETH_MACTSCR_SNAPTYPSEL_SHIFT)
+#  define ETH_MACTSCR_SNAPTYPSEL_1 (1 << ETH_MACTSCR_SNAPTYPSEL_SHIFT)
 #define ETH_MACTSCR_TSENMACADDR     (1 << 18) /* Bit 18: Enable MAC address for PTP packet filtering */
 #define ETH_MACTSCR_CSC             (1 << 19) /* Bit 19: Checksum correction for PTP over UDP/IPv4 (one-step) */
 #define ETH_MACTSCR_TXTSSTSM        (1 << 24) /* Bit 24: Transmit timestamp status mode */
