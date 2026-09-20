@@ -1091,34 +1091,37 @@ struct sensor_eng           /* Type: ENG */
   uint32_t stat;            /* Status. bit3:0 - value 3:0 is valid or not */
 };
 
-struct sensor_voltage       /* Type: Voltage */
+struct sensor_voltage        /* Type: Voltage */
 {
-  uint64_t timestamp;       /* Unit is microseconds */
-  float voltage;            /* in SI units V */
+  uint64_t      timestamp;   /* Unit is microseconds */
+  sensor_data_t voltage;     /* in SI units V */
 };
 
-struct sensor_current       /* Type: Current */
+struct sensor_current        /* Type: Current */
 {
-  uint64_t timestamp;       /* Unit is microseconds */
-  float current;            /* in SI units A, signed */
+  uint64_t      timestamp;   /* Unit is microseconds */
+  sensor_data_t current;     /* in SI units A, signed */
 };
 
-struct sensor_power         /* Type: Power */
+struct sensor_power          /* Type: Power */
 {
-  uint64_t timestamp;       /* Unit is microseconds */
-  float power;              /* Instantaneous active power in SI units W */
+  uint64_t      timestamp;   /* Unit is microseconds */
+  sensor_data_t power;       /* Instantaneous active power, SI units W */
 };
 
-struct sensor_resistance    /* Type: Resistance */
+struct sensor_resistance     /* Type: Resistance */
 {
-  uint64_t timestamp;       /* Unit is microseconds */
-  float resistance;         /* in SI units Ohm(Ω) */
+  uint64_t      timestamp;   /* Unit is microseconds */
+  sensor_data_t resistance;  /* in SI units Ohm(Ω) */
 };
 
-struct sensor_conductivity  /* Type: Electrical conductivity */
+struct sensor_conductivity   /* Type: Electrical conductivity */
 {
-  uint64_t timestamp;       /* Unit is microseconds */
-  float conductivity;       /* in SI units S/m, 1 S/m = 1e4 uS/cm */
+  uint64_t      timestamp;   /* Unit is microseconds */
+
+  /* In SI units S/m, where 1 S/m is 1e4 uS/cm */
+
+  sensor_data_t conductivity;
 };
 
 struct sensor_energy        /* Type: Energy */
