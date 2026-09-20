@@ -135,7 +135,36 @@ config NRF54L_TIMER6
 	select NRF54L_TIMER
 	default n
 
+config NRF54L_GRTC
+	bool "GRTC"
+	default n
+
 endmenu # nRF54L Peripheral Selection
+
+config NRF54L_USE_LFCLK
+	bool "Enable LFCLK"
+	default n
+	---help---
+		Enable low-frequency clock.
+
+if NRF54L_USE_LFCLK
+
+choice
+	prompt "LFCLK source"
+	default NRF54L_LFCLK_XTAL
+
+config NRF54L_LFCLK_XTAL
+	bool "External 32.768Khz crystal"
+
+config NRF54L_LFCLK_RC
+	bool "Internal RC oscillator"
+
+config NRF54L_LFCLK_SYNTH
+	bool "Synthesized from HFCLK"
+
+endchoice # LFCLK source
+
+endif # NRF54L_USE_LFCLK
 
 menu "System Timer"
 
@@ -148,6 +177,16 @@ config NRF54L_SYSTIMER_SYSTICK
 	select TIMER
 	select TIMER_ARCH
 	select ARMV8M_SYSTICK
+
+config NRF54L_SYSTIMER_GRTC
+	bool "GRTC"
+	select NRF54L_GRTC
+	select ARCH_HAVE_TICKLESS
+	select SCHED_TICKLESS
+	select SCHED_TICKLESS_ALARM
+	select NRF54L_USE_LFCLK
+	---help---
+		Use GRTC timer in tickless mode.
 
 endchoice # System Timer Source
 

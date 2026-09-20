@@ -30,6 +30,14 @@ ifeq ($(CONFIG_NRF54L_SYSTIMER_SYSTICK),y)
 CHIP_CSRCS += nrf54l_systick.c
 endif
 
+ifeq ($(CONFIG_NRF54L_GRTC),y)
+CHIP_CSRCS += nrf54l_grtc.c
+endif
+
+ifeq ($(CONFIG_NRF54L_SYSTIMER_GRTC),y)
+CHIP_CSRCS += nrf54l_tickless_grtc.c
+endif
+
 ifeq ($(CONFIG_NRF54L_UART),y)
 CHIP_CSRCS += nrf54l_serial.c
 endif

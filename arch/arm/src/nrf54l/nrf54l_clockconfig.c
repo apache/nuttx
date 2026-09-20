@@ -156,6 +156,32 @@ void nrf54l_clockconfig(void)
       PANIC();
     }
 
+#ifdef CONFIG_NRF54L_USE_LFCLK
+  /* Initialize LFCLK */
+
+#if defined(CONFIG_NRF54L_LFCLK_XTAL)
+  putreg32(CLOCK_LFCLK_SRC_SRC_LFXO, NRF54L_CLOCK_LFCLK_SRC);
+#elif defined(CONFIG_NRF54L_LFCLK_SYNTH)
+  putreg32(CLOCK_LFCLK_SRC_SRC_LFSYNT, NRF54L_CLOCK_LFCLK_SRC);
+#else
+  putreg32(CLOCK_LFCLK_SRC_SRC_LFRC, NRF54L_CLOCK_LFCLK_SRC);
+#endif
+
+  /* Trigger LFCLK start */
+
+  putreg32(0x0, NRF54L_CLOCK_EVENTS_LFCLKSTARTED);
+  putreg32(0x1, NRF54L_CLOCK_TASKS_LFCLKSTART);
+
+  while (!getreg32(NRF54L_CLOCK_EVENTS_LFCLKSTARTED))
+    {
+      /* Wait for LFCLK to be running */
+    }
+
+#if defined(CONFIG_NRF54L_LFCLK_RC)
+  /* TODO: calibrate LFCLK RC oscillator */
+#endif
+#endif
+
 #ifndef CONFIG_ARCH_CHIP_NRF54L15
   for (i = 0; i < 10000000 && getreg32(NRF54L_KMU_STATUS) == 1; i++)
     {

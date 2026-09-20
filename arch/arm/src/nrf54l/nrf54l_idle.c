@@ -83,9 +83,16 @@ void up_idle(void)
   nxsched_process_timer();
 #else
 
-  /* The SysTick's clock will only tick when the CPU is
+  /* Sleep until an interrupt occurs to save power
+   *
+   * The SysTick's clock will only tick when the CPU is
    * running (not in WFE/WFI) or when the system is in debug interface mode.
    */
 
+#ifdef CONFIG_NRF54L_SYSTIMER_GRTC
+  BEGIN_IDLE();
+  asm("WFI");
+  END_IDLE();
+#endif
 #endif
 }
