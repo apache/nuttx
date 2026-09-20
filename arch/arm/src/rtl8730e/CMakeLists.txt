@@ -61,7 +61,8 @@ endif()
 if(CONFIG_AMEBA_GPIO)
   list(APPEND SRCS ${AMEBA_COMMON}/ameba_gpio.c)
   # rtl8730e_flash_stubs.c is also needed for GPIO (irq_enable / Pinmux_Config
-  # called by lib_rom.a GPIO functions).  Avoid duplicate if already added above.
+  # called by lib_rom.a GPIO functions).  Avoid duplicate if already added
+  # above.
   if(NOT CONFIG_RTL8730E_FLASH_FS)
     list(APPEND SRCS rtl8730e_flash_stubs.c)
   endif()
@@ -72,12 +73,12 @@ target_sources(arch PRIVATE ${SRCS})
 
 # ##############################################################################
 # Vendor-SDK build machinery (fwlib + WiFi glue archives, prebuilt libs, and
-# link flags).  RTL8730E (CA32) differs from the KM4-based ICs:
-#   - No SDK autoconf / image2 ldscript generation: the board uses its own
-#     dramboot.ld and a static prebuilt platform_autoconf.h.
-#   - No NP firmware build: KM0/KM4 are prebuilt blobs in boards/.../prebuilt/.
-#   - No -mcmse (CA32 is ARMv7-A, not Cortex-M33).
-#   - lib_rom.a provides ROM functions (GPIO_Init, Pinmux_Config, flash MTD).
+# link flags).  RTL8730E (CA32) differs from the KM4-based ICs: - No SDK
+# autoconf / image2 ldscript generation: the board uses its own dramboot.ld and
+# a static prebuilt platform_autoconf.h. - No NP firmware build: KM0/KM4 are
+# prebuilt blobs in boards/.../prebuilt/. - No -mcmse (CA32 is ARMv7-A, not
+# Cortex-M33). - lib_rom.a provides ROM functions (GPIO_Init, Pinmux_Config,
+# flash MTD).
 # ##############################################################################
 
 # Per-IC identifiers (parallel to the names in ameba_board.mk).
@@ -183,8 +184,8 @@ endif()
 
 set(AMEBA_EXTRA_LIBS)
 
-# lib_rom.a: prebuilt AP ROM stubs (GPIO_Init, RCC_PeriphClockCmd,
-# PAD_PullCtrl, Pinmux_Config, flash MTD primitives).
+# lib_rom.a: prebuilt AP ROM stubs (GPIO_Init, RCC_PeriphClockCmd, PAD_PullCtrl,
+# Pinmux_Config, flash MTD primitives).
 if(CONFIG_AMEBA_GPIO OR CONFIG_RTL8730E_FLASH_FS)
   list(APPEND AMEBA_EXTRA_LIBS
        ${AMEBA_SOC}/project/${AMEBA_KM_PROJ}/lib/soc/lib_rom.a)
@@ -204,16 +205,16 @@ if(CONFIG_RTL8730E_FLASH_FS AND EXISTS ${AMEBA_AUTOCONF})
     list(GET _l 0 _l0)
     string(REGEX REPLACE ".*CONFIG_FLASH_VFS1_OFFSET[ \t]+([0-9xXa-fA-F]+).*"
                          "\\1" _vfs1_off "${_l0}")
-    target_compile_definitions(arch PRIVATE
-                               AMEBA_FLASH_VFS1_OFFSET_XIP=${_vfs1_off})
+    target_compile_definitions(arch
+                               PRIVATE AMEBA_FLASH_VFS1_OFFSET_XIP=${_vfs1_off})
   endif()
   file(STRINGS ${AMEBA_AUTOCONF} _l REGEX "CONFIG_FLASH_VFS1_SIZE[ \t]")
   if(_l)
     list(GET _l 0 _l0)
     string(REGEX REPLACE ".*CONFIG_FLASH_VFS1_SIZE[ \t]+([0-9xXa-fA-F]+).*"
                          "\\1" _vfs1_size "${_l0}")
-    target_compile_definitions(arch PRIVATE
-                               AMEBA_FLASH_VFS1_SIZE_CFG=${_vfs1_size})
+    target_compile_definitions(arch
+                               PRIVATE AMEBA_FLASH_VFS1_SIZE_CFG=${_vfs1_size})
   endif()
 endif()
 
@@ -275,15 +276,19 @@ if(CONFIG_RTL8730E_WIFI)
   add_dependencies(nuttx ${_wifi_target})
 
   set(_ameba_ap_lib ${AMEBA_SOC}/project/${AMEBA_KM_PROJ}/lib/application)
-  list(APPEND AMEBA_EXTRA_LIBS ${_ameba_ap_lib}/lib_wifi_whc_ap.a
-       ${_ameba_ap_lib}/lib_wifi_rtk_app.a
-       ${_ameba_ap_lib}/lib_wifi_com_sec.a
-       ${_ameba_ap_lib}/lib_wpa_lite.a
-       ${AMEBA_WIFI_A})
+  list(
+    APPEND
+    AMEBA_EXTRA_LIBS
+    ${_ameba_ap_lib}/lib_wifi_whc_ap.a
+    ${_ameba_ap_lib}/lib_wifi_rtk_app.a
+    ${_ameba_ap_lib}/lib_wifi_com_sec.a
+    ${_ameba_ap_lib}/lib_wpa_lite.a
+    ${AMEBA_WIFI_A})
 endif()
 
 # Suppress the VFP-ABI mismatch warning between lib_rom.a / WiFi libs (compiled
-# without hard-float) and the rest of the NuttX build (compiled with hard-float).
+# without hard-float) and the rest of the NuttX build (compiled with
+# hard-float).
 if(AMEBA_EXTRA_LIBS)
   target_link_options(nuttx PRIVATE -Wl,--no-warn-mismatch)
 endif()
@@ -295,7 +300,7 @@ set_property(GLOBAL APPEND PROPERTY NUTTX_EXTRA_LIBRARIES ${AMEBA_EXTRA_LIBS})
 # ----------------------------------------------------------------------------
 # `flash` target -- download boot.bin + nuttx.bin via ameba_smart_flash.sh.
 # Usage: AMEBA_PORT=/dev/ttyUSB1 [AMEBA_BAUD=1500000] cmake --build <dir>
-#        --target flash
+# --target flash
 # ----------------------------------------------------------------------------
 
 set(AMEBA_TOOLS_DIR ${AMEBA_COMMON}/tools)
@@ -304,9 +309,8 @@ if(EXISTS ${AMEBA_TOOLS_DIR}/ameba_smart_flash.sh AND NOT TARGET flash)
   add_custom_target(
     flash
     DEPENDS nuttx
-    COMMAND
-      ${CMAKE_COMMAND} -E env sh ${AMEBA_TOOLS_DIR}/ameba_smart_flash.sh
-      ${AMEBA_SDK} ${AMEBA_PREBUILT} ${NUTTX_BINARY_DIR}/nuttx.bin
+    COMMAND ${CMAKE_COMMAND} -E env sh ${AMEBA_TOOLS_DIR}/ameba_smart_flash.sh
+            ${AMEBA_SDK} ${AMEBA_PREBUILT} ${NUTTX_BINARY_DIR}/nuttx.bin
     WORKING_DIRECTORY ${NUTTX_BINARY_DIR}
     USES_TERMINAL VERBATIM
     COMMENT "Flashing RTL8730E over ${AMEBA_PORT}")

@@ -222,6 +222,7 @@ int rtl8730e_bringup(void)
    */
 
   extern void rtl8730e_flash_init_para(void);
+
   rtl8730e_flash_init_para();
 
   ret = ameba_flash_fs_initialize();

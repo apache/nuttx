@@ -1,4 +1,4 @@
-/***************************************************************************
+/****************************************************************************
  * arch/arm/src/rtl8730e/rtl8730e_serial.c
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -18,11 +18,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ***************************************************************************/
+ ****************************************************************************/
 
-/***************************************************************************
+/****************************************************************************
  * Included Files
- ***************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -38,9 +38,9 @@
 #include "hardware/rtl8730e_loguart.h"
 #include "chip.h"
 
-/***************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ***************************************************************************/
+ ****************************************************************************/
 
 /* RTL8730E AmebaSmart LOGUART console driver.
  *
@@ -76,7 +76,9 @@
 #define IPCAP_ISR                  (RTL8730E_IPCAP_BASE + 0x008)
 #define IPCAP_IMR                  (RTL8730E_IPCAP_BASE + 0x00c)
 
-/* LP→AP LOGUART channel 0 = ISR/IMR bit 24 (IPC_BIT_ISR_RX0_FULL_STATUS0) */
+/* LP->AP LOGUART channel 0 = ISR/IMR bit 24
+ * (IPC_BIT_ISR_RX0_FULL_STATUS0)
+ */
 
 #define IPCAP_L2A_LOGUART_BIT      (1u << 24)
 
@@ -105,9 +107,9 @@
 #define LOGUART_RXBUFSIZE          256
 #define LOGUART_TXBUFSIZE          256
 
-/***************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ***************************************************************************/
+ ****************************************************************************/
 
 static int  loguart_setup(struct uart_dev_s *dev);
 static void loguart_shutdown(struct uart_dev_s *dev);
@@ -123,9 +125,9 @@ static void loguart_txint(struct uart_dev_s *dev, bool enable);
 static bool loguart_txready(struct uart_dev_s *dev);
 static bool loguart_txempty(struct uart_dev_s *dev);
 
-/***************************************************************************
+/****************************************************************************
  * Private Data
- ***************************************************************************/
+ ****************************************************************************/
 
 static const struct uart_ops_s g_loguart_ops =
 {
@@ -167,13 +169,13 @@ static struct uart_dev_s g_loguart_port =
  * it here so that loguart_receive() can serve it one byte at a time.
  */
 
-static char    g_ipc_rxbuf[UART_LOG_CMDLEN + 1]; /* +1 for appended '\n' */
+static char    g_ipc_rxbuf[UART_LOG_CMDLEN + 1];  /* +1 for appended '\n' */
 static uint8_t g_ipc_rxcount;                     /* total chars available */
 static uint8_t g_ipc_rxhead;                      /* next index to serve */
 
-/***************************************************************************
+/****************************************************************************
  * Private Functions
- ***************************************************************************/
+ ****************************************************************************/
 
 static int loguart_setup(struct uart_dev_s *dev)
 {
@@ -223,7 +225,8 @@ static void loguart_detach(struct uart_dev_s *dev)
  */
 
 /* Weak hook called at the end of every IPC_AP interrupt to give WiFi a
- * chance to process its NP→AP channels (bits 16/17).  rtl8730e_wifi_init.c
+ * chance to process its NP->AP channels (bits 16/17).
+ * rtl8730e_wifi_init.c
  * provides the strong definition when CONFIG_RTL8730E_WIFI is enabled.
  * The weak stub here is a no-op so non-WiFi builds compile without change.
  */
@@ -248,8 +251,8 @@ static int loguart_ipc_interrupt(int irq, void *context, void *arg)
 
   if ((getreg32(IPCAP_ISR) & IPCAP_L2A_LOGUART_BIT) != 0)
     {
-      /* Read IPC message slot: msg field holds UART_LOG_BUF physical address.
-       * KM0 SRAM is mapped device/IO (non-cacheable), no dcache flush needed.
+      /* Read IPC message slot: msg field holds UART_LOG_BUF
+       * physical address.  KM0 SRAM is device/IO (non-cacheable).
        */
 
       log_buf_addr = getreg32(IPC_L2A_LOGUART_SLOT + IPC_MSG_MSG_OFF);
@@ -376,9 +379,9 @@ static bool loguart_txempty(struct uart_dev_s *dev)
   return true;
 }
 
-/***************************************************************************
+/****************************************************************************
  * Public Functions
- ***************************************************************************/
+ ****************************************************************************/
 
 void up_putc(int ch)
 {
