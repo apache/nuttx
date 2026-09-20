@@ -4,7 +4,7 @@ Nordic nRF54L
 
 The nRF54L series from Nordic Semiconductor is based on an ARM Cortex-M33
 application core. NuttX supports nRF54L15 and nRF54LM20A/B as standalone
-secure images, with a 128 MHz CPU clock and SysTick scheduling.
+secure images, with a 128 MHz CPU clock and SysTick or GRTC scheduling.
 
 Peripheral Support
 ==================
@@ -16,7 +16,7 @@ Peripheral  Support Notes
 ==========  ======= =====================================
 GPIO        Yes
 GPIOTE      No
-GRTC        No
+GRTC        Yes     Counter and tickless scheduling
 PWM         No
 QDEC        No
 RADIO       No
@@ -34,6 +34,15 @@ GPIO
 ----
 
 Pins can be configured and operated using ``nrf54l_gpio_*`` functions.
+
+GRTC
+----
+
+``nrf54l_grtc_init(0)`` provides access to the 52-bit, 1 MHz system counter
+and twelve compare channels. ``CONFIG_NRF54L_SYSTIMER_GRTC`` reserves the
+instance and compare channel zero for tickless scheduling. The GRTC is timed
+by LFCLK, so the LFCLK source selected with ``CONFIG_NRF54L_USE_LFCLK``
+determines the long-term accuracy of the system time.
 
 TIMER
 -----
@@ -59,6 +68,7 @@ being transmitted or DMA error recovery is in progress.
 Power Management
 ================
 
-With SysTick selected, the CPU remains awake so its clock keeps running.
+The idle loop uses ``WFI`` when GRTC provides tickless scheduling. With
+SysTick selected, the CPU remains awake so its clock keeps running.
 ``CONFIG_PM`` initializes the NuttX power management framework. System OFF
 is not supported.
