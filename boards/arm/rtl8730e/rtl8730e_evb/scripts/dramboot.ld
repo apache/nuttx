@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rtl8730e/ca32-evb/scripts/dramboot.ld
+ * boards/arm/rtl8730e/rtl8730e_evb/scripts/dramboot.ld
  *
  * SPDX-License-Identifier: Apache-2.0
  *

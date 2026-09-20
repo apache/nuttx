@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rtl8730e/ca32-evb/include/board.h
+ * boards/arm/rtl8730e/rtl8730e_evb/src/rtl8730e_evb.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_RTL8730E_CA32_EVB_INCLUDE_BOARD_H
-#define __BOARDS_ARM_RTL8730E_CA32_EVB_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_RTL8730E_RTL8730E_EVB_SRC_RTL8730E_EVB_H
+#define __BOARDS_ARM_RTL8730E_RTL8730E_EVB_SRC_RTL8730E_EVB_H
 
 /****************************************************************************
  * Included Files
@@ -29,8 +29,10 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
@@ -39,23 +41,21 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions Definitions
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
+/****************************************************************************
+ * Name: rtl8730e_bringup
+ *
+ * Description:
+ *   Bring up board features
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
+int rtl8730e_bringup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_RTL8730E_CA32_EVB_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_RTL8730E_RTL8730E_EVB_SRC_RTL8730E_EVB_H */

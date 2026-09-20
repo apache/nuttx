@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rtl8730e/ca32-evb/src/rtl8730e_bringup.c
+ * boards/arm/rtl8730e/rtl8730e_evb/src/rtl8730e_bringup.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -46,7 +46,7 @@ extern int rtl8730e_wifi_initialize(void);
 #endif
 
 #include "chip.h"
-#include "ca32-evb.h"
+#include "rtl8730e_evb.h"
 
 /****************************************************************************
  * Pre-processor Definitions

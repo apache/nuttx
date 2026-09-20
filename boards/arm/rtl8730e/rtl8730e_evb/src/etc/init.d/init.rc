@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rtl8730e/ca32-evb/src/etc/init.d/init.rc
+ * boards/arm/rtl8730e/rtl8730e_evb/src/etc/init.d/init.rc
  *
  * SPDX-License-Identifier: Apache-2.0
  *

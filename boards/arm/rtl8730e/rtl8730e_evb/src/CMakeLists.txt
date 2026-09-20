@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/rtl8730e/ca32-evb/src/CMakeLists.txt
+# boards/arm/rtl8730e/rtl8730e_evb/src/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
