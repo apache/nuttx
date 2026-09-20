@@ -92,23 +92,23 @@ static const char *state2str(enum bt_conn_state_e state)
 {
   switch (state)
     {
-    case BT_CONN_DISCONNECTED:
-      return "disconnected";
+      case BT_CONN_DISCONNECTED:
+        return "disconnected";
 
-    case BT_CONN_CONNECT_SCAN:
-      return "connect-scan";
+      case BT_CONN_CONNECT_SCAN:
+        return "connect-scan";
 
-    case BT_CONN_CONNECT:
-      return "connect";
+      case BT_CONN_CONNECT:
+        return "connect";
 
-    case BT_CONN_CONNECTED:
-      return "connected";
+      case BT_CONN_CONNECTED:
+        return "connected";
 
-    case BT_CONN_DISCONNECT:
-      return "disconnect";
+      case BT_CONN_DISCONNECT:
+        return "disconnect";
 
-    default:
-      return "(unknown)";
+      default:
+        return "(unknown)";
     }
 }
 
@@ -615,7 +615,7 @@ void bt_conn_set_state(FAR struct bt_conn_s *conn,
 
               ret = nxsem_wait_uninterruptible(&g_conn_handoff.sync_sem);
               nxsem_post(&g_conn_handoff.sync_sem);
-          }
+            }
 
           UNUSED(ret);
         }
