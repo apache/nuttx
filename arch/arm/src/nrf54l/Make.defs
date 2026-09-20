@@ -26,6 +26,10 @@ CHIP_CSRCS += nrf54l_start.c nrf54l_clockconfig.c nrf54l_oscconfig.c nrf54l_irq.
 CHIP_CSRCS += nrf54l_allocateheap.c nrf54l_gpio.c nrf54l_lowputc.c
 CHIP_CSRCS += nrf54l_uid.c
 
+ifeq ($(CONFIG_NRF54L_PROGMEM),y)
+CHIP_CSRCS += nrf54l_flash.c
+endif
+
 ifeq ($(CONFIG_NRF54L_SYSTIMER_SYSTICK),y)
 CHIP_CSRCS += nrf54l_systick.c
 endif

@@ -30,6 +30,10 @@ set(SRCS
     nrf54l_lowputc.c
     nrf54l_uid.c)
 
+if(CONFIG_NRF54L_PROGMEM)
+  list(APPEND SRCS nrf54l_flash.c)
+endif()
+
 if(CONFIG_NRF54L_SYSTIMER_SYSTICK)
   list(APPEND SRCS nrf54l_systick.c)
 endif()
