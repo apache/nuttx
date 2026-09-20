@@ -48,6 +48,10 @@
 #include <string.h>
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * PMU stubs — power management owned by KM4 on amebasmart
  ****************************************************************************/
 
@@ -56,15 +60,15 @@ int pmu_yield_os_check(void)
   return 0;
 }
 
-int pmu_acquire_wakelock(uint32_t nDeviceId)
+int pmu_acquire_wakelock(uint32_t device_id)
 {
-  (void)nDeviceId;
+  (void)device_id;
   return 0;
 }
 
-int pmu_release_wakelock(uint32_t nDeviceId)
+int pmu_release_wakelock(uint32_t device_id)
 {
-  (void)nDeviceId;
+  (void)device_id;
   return 0;
 }
 
@@ -79,11 +83,11 @@ uint32_t pmu_get_wakelock_status(void)
   return 0;
 }
 
-int pmu_register_sleep_callback(uint32_t nDeviceId, void *presleep,
+int pmu_register_sleep_callback(uint32_t device_id, void *presleep,
                                 void *psleep_param, void *pwakeup,
                                 void *pwakeup_param)
 {
-  (void)nDeviceId;
+  (void)device_id;
   (void)presleep;
   (void)psleep_param;
   (void)pwakeup;

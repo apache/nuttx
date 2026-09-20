@@ -29,7 +29,8 @@
 
 /* AmebaSmart (RTL8730E) LOGUART is a Realtek-specific console UART shared by
  * all three cores (KM0/KM4/CA32).  It is NOT a PL011 nor a 16550.  Register
- * base and layout come from the vendor SDK (hal_platform.h / ameba_loguart.h).
+ * base and layout come from the vendor SDK (hal_platform.h /
+ * ameba_loguart.h).
  * The KM4 IMG1 bootloader has already configured the baud rate before it
  * hands control to the CA32, so NuttX only needs to poll the line-status
  * register and push characters into its own transmit path FIFO.

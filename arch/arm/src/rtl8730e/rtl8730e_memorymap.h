@@ -62,7 +62,7 @@
 #define VIRT_DDR_PSECTION        0x60000000  /* 0x60000000-0x64000000   */
 #define VIRT_GIC_PSECTION        0xa0000000  /* 0xa0000000-0xa0200000   */
 
-/* RTL8730E Virtual Memory Map *********************************************/
+/* RTL8730E Virtual Memory Map **********************************************/
 
 #define VIRT_FLASH_VSECTION      VIRT_FLASH_PSECTION
 #define VIRT_KM0_VSECTION        VIRT_KM0_PSECTION
@@ -75,8 +75,8 @@
 
 #define VIRT_FLASH_SECSIZE       (128*1024*1024)  /* 128 MiB XIP window */
 #define VIRT_KM4_SRAM_SECSIZE    (1*1024*1024)    /* 1 MiB covers 0x2001c01c */
-#define VIRT_KM0_SECSIZE         (128*1024)   /* 128 KB, rounds to 1 MMU section */
-#define VIRT_IO_SECSIZE          (80*1024*1024)  /* 0x40000000-0x44FFFFFF: APB + SPIC ctrl */
+#define VIRT_KM0_SECSIZE         (128*1024)       /* 128 KB, rounds to 1 MMU section */
+#define VIRT_IO_SECSIZE          (80*1024*1024)   /* 0x40000000-0x44FFFFFF: APB + SPIC ctrl */
 #define VIRT_SEC_IO_SECSIZE      (48*1024*1024)
 #define VIRT_DDR_SECSIZE         (64*1024*1024)
 #define VIRT_GIC_SECSIZE         (2*1024*1024)

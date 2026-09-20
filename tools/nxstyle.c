@@ -285,6 +285,8 @@ static const char *g_white_prefix[] =
   "Cache_",
   "DCache_",
   "ChipInfo_",
+  "CPU_",             /* CPU_InInterrupt — amebasmart SDK exception check */
+  "Diag",             /* DiagPrintf, DiagVprintf, DiagPrintfNano — SDK log */
   "EFUSE_",
   "FLASH_",
   "GPIO_",
@@ -309,8 +311,11 @@ static const char *g_white_prefix[] =
   "SYSCFG_",
   "SYSTIMER_",
   "SYS_PLL_",         /* SYS_PLL_ClkGet — RTL8720F SPI ip_clk query */
+  "System_",          /* System_Reset — amebasmart SDK power management */
+  "TRNG_",            /* TRNG_get_random_bytes — amebasmart SDK TRNG */
   "UART_",
   "WDG_",             /* WDG_Init, WDG_Refresh, WDG_INTConfig, etc. */
+  "vPort",            /* vPortGateOtherCore, vPortWakeOtherCore — FreeRTOS SMP */
   "SystemCoreClock",  /* SystemCoreClock, SystemCoreClockUpdate */
   "cmse_",            /* ARM CMSE TrustZone intrinsics (arm_cmse.h) */
   "MQTTErrors",       /* apps/tools/netutils/mqttc/MQTT-C/include/mqtt.h */

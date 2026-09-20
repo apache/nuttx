@@ -784,6 +784,7 @@ int rtos_sema_delete_static(rtos_sema_t p_handle)
 uint32_t rtos_mem_get_free_heap_size(void)
 {
   struct mallinfo info = mallinfo();
+
   return (uint32_t)info.fordblks;
 }
 
@@ -940,6 +941,7 @@ int rtos_timer_change_period(rtos_timer_t p_handle, uint32_t interval_ms,
 uint32_t rtos_timer_is_timer_active(rtos_timer_t p_handle)
 {
   struct ameba_timer_s *t = (struct ameba_timer_s *)p_handle;
+
   return (t != NULL && t->active) ? 1 : 0;
 }
 
@@ -968,6 +970,7 @@ int rtos_timer_delete_static(rtos_timer_t p_handle, uint32_t wait_ms)
 uint32_t rtos_timer_get_id(rtos_timer_t p_handle)
 {
   struct ameba_timer_s *t = (struct ameba_timer_s *)p_handle;
+
   return (t != NULL) ? t->id : 0;
 }
 

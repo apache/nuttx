@@ -60,7 +60,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Flash XIP window: 0x08000000–0x0FFFFFFF (128 MiB), 128 × 1 MiB sections.
+/* Flash XIP window: 0x08000000-0x0FFFFFFF (128 MiB), 128 x 1 MiB sections.
  * Matches the range the SDK maps as MT_CODE in setupMMUTable().
  */
 
@@ -101,7 +101,8 @@ void vPortWakeOtherCore(void)
  *     1. Clean+invalidate D-cache for the flash window (write back any dirty
  *        lines so the device view is coherent).
  *     2. Re-map all 128 L1 sections to MMU_IOFLAGS (Device, non-cacheable).
- *     3. Flush the TLB (via mmu_invalidate_region which also issues DSB/ISB).
+ *     3. Flush the TLB (via mmu_invalidate_region which also issues
+ *        DSB/ISB).
  ****************************************************************************/
 
 void xlat_flash_region_device(void)
@@ -202,6 +203,7 @@ int CPU_InInterrupt(void)
    */
 
   uint32_t cpsr;
+
   __asm__ volatile("mrs %0, cpsr" : "=r"(cpsr));
   return ((cpsr & 0x1f) != 0x10) && ((cpsr & 0x1f) != 0x1f);
 }
