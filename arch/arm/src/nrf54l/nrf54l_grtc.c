@@ -122,7 +122,11 @@ struct nrf54l_grtc_priv_s g_nrf54l_grtc_priv =
   .ops   = &nrf54l_grtc_ops,
   .base  = NRF54L_GRTC_BASE,
   .irq   = NRF54L_IRQ_GRTC_0,
+#ifdef CONFIG_NRF54L_SOFTDEVICE_CONTROLLER
+  .chan  = 7,
+#else
   .chan  = 12,
+#endif
   .inuse = false,
 };
 

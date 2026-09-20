@@ -19,7 +19,7 @@ GPIOTE      No
 GRTC        Yes     Counter and tickless scheduling
 PWM         No
 QDEC        No
-RADIO       No
+RADIO       Yes     Bluetooth LE through SDC
 RRAMC       Yes     Progmem erase/write interface
 SAADC       No
 SPIM        No
@@ -43,6 +43,27 @@ and twelve compare channels. ``CONFIG_NRF54L_SYSTIMER_GRTC`` reserves the
 instance and compare channel zero for tickless scheduling. The GRTC is timed
 by LFCLK, so the LFCLK source selected with ``CONFIG_NRF54L_USE_LFCLK``
 determines the long-term accuracy of the system time.
+With SDC enabled, channels 7 through 11 are reserved for MPSL.
+
+RADIO
+-----
+
+``CONFIG_NRF54L_SOFTDEVICE_CONTROLLER`` enables Nordic's SoftDevice Controller
+using nrfxlib 3.4.1. This SDK version no longer accepts raw HCI command
+packets, so ``nrf54l_sdc_hci.c`` translates each HCI command into the
+corresponding SDC command function and builds the Command Complete or
+Command Status event. Events and ACL data pass through unchanged. Supported
+commands cover legacy advertising, scanning, central and peripheral
+connections, Data Length Extension, and 1M, 2M and Coded PHYs. The driver
+provides the NuttX Bluetooth driver interface for the native host or HCI
+transport. The build downloads nrfxlib; ``CONFIG_ALLOW_BSDNORDIC_COMPONENTS``
+must be enabled.
+
+MPSL and SDC reserve TIMER10, TIMER20, GRTC channels 7 through 11, RADIO,
+ECB00, AAR00, CCM00, CLOCK, TEMP and RRAMC, together with their DPPI/PPIB
+resources. TIMER0, TIMER6 and progmem are unavailable while SDC is enabled.
+The remaining GRTC channels can be used by the tickless scheduler. HFXO
+remains running; the LFCLK source is selected with ``CONFIG_NRF54L_USE_LFCLK``.
 
 RRAMC
 -----
