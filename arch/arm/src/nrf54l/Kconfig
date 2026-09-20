@@ -260,6 +260,13 @@ config NRF54L_GRTC
 	bool "GRTC"
 	default n
 
+config NRF54L_USBDEV
+	bool "USB Device"
+	default n
+	depends on ARCH_CHIP_NRF54LM20A || ARCH_CHIP_NRF54LM20B
+	select USBDEV
+	select SCHED_LPWORK
+
 endmenu # nRF54L Peripheral Selection
 
 config NRF54L_USE_LFCLK
