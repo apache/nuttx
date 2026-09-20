@@ -52,6 +52,7 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/crc64.h>
+#include <nuttx/timers/ptp_clock.h>
 
 #if defined(CONFIG_NET_PKT)
 #  include <nuttx/net/pkt.h>
@@ -254,7 +255,47 @@
 #endif
 
 #ifdef CONFIG_STM32_ETH_PTP
-#  warning "CONFIG_STM32_ETH_PTP is not yet supported"
+/* The timestamp unit is clocked from HCLK. The system time advances by
+ * STM32_PTP_SSINC nanoseconds each time the 32-bit accumulator of the
+ * addend register overflows, so its rate is HCLK * addend / 2^32. Aim at
+ * an update rate of half of HCLK: the nominal addend is then close to 2^31
+ * and the frequency can be trimmed by +/- 50 %.
+ */
+
+#  define STM32_PTP_CLOCK      STM32_HCLK_FREQUENCY
+#  define STM32_PTP_SSINC      ((2 * NSEC_PER_SEC + STM32_PTP_CLOCK / 2) / \
+                                STM32_PTP_CLOCK)
+#  define STM32_PTP_ADDEND     ((uint32_t)((((uint64_t)1 << 32) * \
+                                            NSEC_PER_SEC) / \
+                                           ((uint64_t)STM32_PTP_SSINC * \
+                                            STM32_PTP_CLOCK)))
+
+/* Time to wait for the unit to take an update of the addend or of the
+ * system time, in microseconds.
+ */
+
+#  define STM32_PTP_UPDATE_USTIMEOUT  (1000)
+
+/* The addend can be trimmed by up to 50% each way from its nominal value,
+ * in parts per billion.
+ */
+
+#  define STM32_PTP_MAX_ADJ           (500000000)
+
+#  ifdef CONFIG_STM32_ETH_PTP_GPIO
+
+/* The pulse-per-second output is a pulse train with a period of one
+ * second and a width of half of it, that starts at a whole second of the
+ * system time. The first pulse is at least STM32_PTP_PPS_MARGIN_NS ahead,
+ * so the target time is loaded before it. The interval and the width are
+ * in increments of the system time, minus one.
+ */
+
+#    define STM32_PTP_PPS_MARGIN_NS   (100000000)
+#    define STM32_PTP_PPS_INTERVAL    (NSEC_PER_SEC / STM32_PTP_SSINC - 1)
+#    define STM32_PTP_PPS_WIDTH       ((NSEC_PER_SEC / 2) / \
+                                       STM32_PTP_SSINC - 1)
+#  endif
 #endif
 
 #undef CONFIG_STM32_ETH_HWCHECKSUM
@@ -723,6 +764,10 @@ struct stm32_ethmac_s
   sq_queue_t           freeb;       /* The free buffer list */
 
   struct mdio_bus_s *mdio;
+
+#if defined(CONFIG_STM32_ETH_PTP) && defined(CONFIG_PTP_CLOCK)
+  struct ptp_lowerhalf_s ptp_lower; /* PTP hardware clock lower half */
+#endif
 };
 
 /****************************************************************************
@@ -861,6 +906,9 @@ static inline void stm32_selectrmii(void);
 #endif
 static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv);
 static void stm32_ethreset(struct stm32_ethmac_s *priv);
+#ifdef CONFIG_STM32_ETH_PTP
+static int  stm32_eth_ptp_init(void);
+#endif
 static int  stm32_macconfig(struct stm32_ethmac_s *priv);
 static void stm32_macaddress(struct stm32_ethmac_s *priv);
 static int  stm32_macenable(struct stm32_ethmac_s *priv);
@@ -3814,6 +3862,460 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
 #endif
 }
 
+#ifdef CONFIG_STM32_ETH_PTP
+/****************************************************************************
+ * Name: stm32_eth_ptp_wait
+ *
+ * Description:
+ *   Wait for the timestamp unit to clear a bit that is set while it takes
+ *   an update of the addend, of the system time or of the PPS target time.
+ *
+ * Input Parameters:
+ *   reg - The register that holds the bit
+ *   bit - The bit to wait for
+ *
+ * Returned Value:
+ *   OK on success, -ETIMEDOUT if the bit was not cleared in time.
+ *
+ ****************************************************************************/
+
+static int stm32_eth_ptp_wait(uint32_t reg, uint32_t bit)
+{
+  int timeout;
+
+  for (timeout = 0; timeout < STM32_PTP_UPDATE_USTIMEOUT; timeout++)
+    {
+      if ((stm32_getreg(reg) & bit) == 0)
+        {
+          return OK;
+        }
+
+      up_udelay(1);
+    }
+
+  return -ETIMEDOUT;
+}
+
+#if defined(CONFIG_STM32_ETH_PTP_GPIO) || defined(CONFIG_PTP_CLOCK)
+/****************************************************************************
+ * Name: stm32_eth_ptp_read
+ *
+ * Description:
+ *   Read the system time. The seconds and the nanoseconds are in two
+ *   registers, so the seconds are read again to detect a rollover between
+ *   the reads.
+ *
+ * Input Parameters:
+ *   sec  - The location to store the seconds
+ *   nsec - The location to store the nanoseconds
+ *
+ ****************************************************************************/
+
+static void stm32_eth_ptp_read(uint32_t *sec, uint32_t *nsec)
+{
+  uint32_t sec1;
+  uint32_t sec2;
+  uint32_t ns;
+
+  sec1 = stm32_getreg(STM32_ETH_MACSTSR);
+  ns   = stm32_getreg(STM32_ETH_MACSTNR);
+  sec2 = stm32_getreg(STM32_ETH_MACSTSR);
+
+  if (sec1 != sec2)
+    {
+      ns = stm32_getreg(STM32_ETH_MACSTNR);
+    }
+
+  *sec  = sec2;
+  *nsec = ns & ETH_MACSTNR_TSSS_MASK;
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_eth_ptp_setaddend
+ *
+ * Description:
+ *   Load the addend, that sets the rate of the system time.
+ *
+ * Input Parameters:
+ *   addend - The value to load
+ *
+ * Returned Value:
+ *   OK on success, -ETIMEDOUT if the unit did not take it in time.
+ *
+ ****************************************************************************/
+
+static int stm32_eth_ptp_setaddend(uint32_t addend)
+{
+  stm32_putreg(addend, STM32_ETH_MACTSAR);
+  stm32_putreg(stm32_getreg(STM32_ETH_MACTSCR) | ETH_MACTSCR_TSADDREG,
+               STM32_ETH_MACTSCR);
+  return stm32_eth_ptp_wait(STM32_ETH_MACTSCR, ETH_MACTSCR_TSADDREG);
+}
+
+#ifdef CONFIG_STM32_ETH_PTP_GPIO
+/****************************************************************************
+ * Name: stm32_eth_ptp_pps_start
+ *
+ * Description:
+ *   Start the pulse-per-second output, a pulse train with a period of one
+ *   second and a duty cycle of 50%, aligned to the system time. The fixed
+ *   frequency mode of the MAC gives a pulse too short to be seen, so the
+ *   flexible mode is used.
+ *
+ * Returned Value:
+ *   OK on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int stm32_eth_ptp_pps_start(void)
+{
+  uint32_t sec;
+  uint32_t nsec;
+  int ret;
+
+  /* The first pulse is at the next whole second, or at the one after it
+   * if that is too close to be loaded in time.
+   */
+
+  stm32_eth_ptp_read(&sec, &nsec);
+  sec += (nsec < NSEC_PER_SEC - STM32_PTP_PPS_MARGIN_NS) ? 1 : 2;
+
+  stm32_putreg(sec, STM32_ETH_MACPPSTTSR);
+  stm32_putreg(0, STM32_ETH_MACPPSTTNR);
+
+  ret = stm32_eth_ptp_wait(STM32_ETH_MACPPSTTNR, ETH_MACPPSTTNR_TRGTBUSY0);
+  if (ret < 0)
+    {
+      nerr("ERROR: Timed out loading the PPS target time\n");
+      return ret;
+    }
+
+  stm32_putreg(STM32_PTP_PPS_INTERVAL, STM32_ETH_MACPPSIR);
+  stm32_putreg(STM32_PTP_PPS_WIDTH, STM32_ETH_MACPPSWR);
+  stm32_putreg(ETH_MACPPSCR_PPSEN0 | ETH_MACPPSCR_PPSCMD_START_TRAIN,
+               STM32_ETH_MACPPSCR);
+  return OK;
+}
+
+#ifdef CONFIG_PTP_CLOCK
+/****************************************************************************
+ * Name: stm32_eth_ptp_pps_restart
+ *
+ * Description:
+ *   Align the pulse-per-second output to the whole seconds of the system
+ *   time again. The pulse train counts by itself, and does not follow a
+ *   step of the system time, so after a step the pulses would be displaced
+ *   by the same amount.
+ *
+ * Returned Value:
+ *   OK on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int stm32_eth_ptp_pps_restart(void)
+{
+  int ret;
+
+  stm32_putreg(ETH_MACPPSCR_PPSEN0 | ETH_MACPPSCR_PPSCMD_STOP_NOW,
+               STM32_ETH_MACPPSCR);
+  ret = stm32_eth_ptp_wait(STM32_ETH_MACPPSCR, ETH_MACPPSCR_PPSCTRL_MASK);
+  if (ret < 0)
+    {
+      nerr("ERROR: Timed out stopping the PPS output\n");
+      return ret;
+    }
+
+  return stm32_eth_ptp_pps_start();
+}
+#endif /* CONFIG_PTP_CLOCK */
+#endif /* CONFIG_STM32_ETH_PTP_GPIO */
+
+/****************************************************************************
+ * Name: stm32_eth_ptp_init
+ *
+ * Description:
+ *   Start the system time of the timestamp unit of the MAC, at zero and at
+ *   its nominal rate. The unit needs to be enabled before the addend and
+ *   the system time can be loaded. It does not depend on the link, but it
+ *   needs the MAC to be out of reset, and a reset of the MAC clears it.
+ *
+ * Returned Value:
+ *   OK on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int stm32_eth_ptp_init(void)
+{
+  uint32_t tscr;
+  int ret;
+
+  /* Enable the unit, with the fine update method (the addend sets the
+   * rate) and a digital rollover (the nanoseconds count from 0 to
+   * 999999999).
+   */
+
+  tscr = ETH_MACTSCR_TSENA | ETH_MACTSCR_TSCFUPDT | ETH_MACTSCR_TSCTRLSSR;
+  stm32_putreg(tscr, STM32_ETH_MACTSCR);
+
+  /* Set the increment of the system time */
+
+  stm32_putreg(STM32_PTP_SSINC << ETH_MACSSIR_SSINC_SHIFT,
+               STM32_ETH_MACSSIR);
+
+  /* Load the addend for the nominal rate */
+
+  ret = stm32_eth_ptp_setaddend(STM32_PTP_ADDEND);
+  if (ret < 0)
+    {
+      nerr("ERROR: Timed out loading the PTP addend\n");
+      return ret;
+    }
+
+  /* Initialize the system time to zero */
+
+  stm32_putreg(0, STM32_ETH_MACSTSUR);
+  stm32_putreg(0, STM32_ETH_MACSTNUR);
+  stm32_putreg(tscr | ETH_MACTSCR_TSINIT, STM32_ETH_MACTSCR);
+  ret = stm32_eth_ptp_wait(STM32_ETH_MACTSCR, ETH_MACTSCR_TSINIT);
+  if (ret < 0)
+    {
+      nerr("ERROR: Timed out initializing the PTP system time\n");
+      return ret;
+    }
+
+#ifdef CONFIG_STM32_ETH_PTP_GPIO
+  ret = stm32_eth_ptp_pps_start();
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
+
+  ninfo("PTP: system time started, SSINC=%u addend=%" PRIu32 "\n",
+        (unsigned int)STM32_PTP_SSINC, (uint32_t)STM32_PTP_ADDEND);
+  return OK;
+}
+
+#ifdef CONFIG_PTP_CLOCK
+/****************************************************************************
+ * Name: stm32_ptp_adjfine
+ *
+ * Description:
+ *   Adjust the frequency of the system time.
+ *
+ * Input Parameters:
+ *   lower - The PTP clock lower half (unused)
+ *   ppb   - The offset from the nominal frequency, in parts per billion.
+ *           Positive makes the system time run faster.
+ *
+ * Returned Value:
+ *   OK on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int stm32_ptp_adjfine(struct ptp_lowerhalf_s *lower, long ppb)
+{
+  irqstate_t flags;
+  int64_t addend;
+  int ret;
+
+  addend = STM32_PTP_ADDEND;
+  addend += addend * ppb / NSEC_PER_SEC;
+
+  if (addend <= 0 || addend > UINT32_MAX)
+    {
+      nerr("ERROR: PTP adjustment out of range: %ld ppb\n", ppb);
+      return -EINVAL;
+    }
+
+  flags = enter_critical_section();
+  ret = stm32_eth_ptp_setaddend((uint32_t)addend);
+  leave_critical_section(flags);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: stm32_ptp_adjtime
+ *
+ * Description:
+ *   Step the system time by a signed amount, without changing its rate.
+ *
+ * Input Parameters:
+ *   lower - The PTP clock lower half (unused)
+ *   delta - The amount to add, in nanoseconds
+ *
+ * Returned Value:
+ *   OK on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int stm32_ptp_adjtime(struct ptp_lowerhalf_s *lower, int64_t delta)
+{
+  irqstate_t flags;
+  uint64_t abs_ns;
+  uint64_t sec;
+  uint32_t nsec;
+  uint32_t nsreg;
+  int ret;
+
+  abs_ns = delta < 0 ? (uint64_t)0 - (uint64_t)delta : (uint64_t)delta;
+  sec    = abs_ns / NSEC_PER_SEC;
+  nsec   = abs_ns % NSEC_PER_SEC;
+
+  if (sec > UINT32_MAX)
+    {
+      return -EINVAL;
+    }
+
+  if (delta < 0)
+    {
+      /* To subtract, the seconds register holds the negated seconds and
+       * the nanoseconds register 10^9 minus the nanoseconds.
+       */
+
+      sec   = (uint32_t)(0 - (uint32_t)sec);
+      nsreg = ETH_MACSTNUR_ADDSUB | (NSEC_PER_SEC - nsec);
+    }
+  else
+    {
+      nsreg = nsec;
+    }
+
+  flags = enter_critical_section();
+  stm32_putreg((uint32_t)sec, STM32_ETH_MACSTSUR);
+  stm32_putreg(nsreg, STM32_ETH_MACSTNUR);
+  stm32_putreg(stm32_getreg(STM32_ETH_MACTSCR) | ETH_MACTSCR_TSUPDT,
+               STM32_ETH_MACTSCR);
+  ret = stm32_eth_ptp_wait(STM32_ETH_MACTSCR, ETH_MACTSCR_TSUPDT);
+  if (ret < 0)
+    {
+      nerr("ERROR: Timed out stepping the PTP system time\n");
+    }
+#ifdef CONFIG_STM32_ETH_PTP_GPIO
+  else
+    {
+      ret = stm32_eth_ptp_pps_restart();
+    }
+#endif
+
+  leave_critical_section(flags);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: stm32_ptp_adjphase
+ *
+ * Description:
+ *   Step the system time by a signed amount, in nanoseconds.
+ *
+ ****************************************************************************/
+
+static int stm32_ptp_adjphase(struct ptp_lowerhalf_s *lower, int32_t phase)
+{
+  return stm32_ptp_adjtime(lower, phase);
+}
+
+/****************************************************************************
+ * Name: stm32_ptp_gettime
+ *
+ * Description:
+ *   Read the system time. The system clock timestamps are not supported.
+ *
+ ****************************************************************************/
+
+static int stm32_ptp_gettime(struct ptp_lowerhalf_s *lower,
+                             struct timespec *ts,
+                             struct ptp_system_timestamp *sts)
+{
+  uint32_t sec;
+  uint32_t nsec;
+
+  stm32_eth_ptp_read(&sec, &nsec);
+
+  ts->tv_sec  = sec;
+  ts->tv_nsec = nsec;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: stm32_ptp_settime
+ *
+ * Description:
+ *   Set the system time.
+ *
+ * Input Parameters:
+ *   lower - The PTP clock lower half (unused)
+ *   ts    - The time to set. The seconds must fit in 32 bits.
+ *
+ * Returned Value:
+ *   OK on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int stm32_ptp_settime(struct ptp_lowerhalf_s *lower,
+                             const struct timespec *ts)
+{
+  irqstate_t flags;
+  int ret;
+
+  if (ts->tv_sec < 0 || ts->tv_sec > UINT32_MAX ||
+      ts->tv_nsec < 0 || ts->tv_nsec >= NSEC_PER_SEC)
+    {
+      return -EINVAL;
+    }
+
+  flags = enter_critical_section();
+  stm32_putreg((uint32_t)ts->tv_sec, STM32_ETH_MACSTSUR);
+  stm32_putreg((uint32_t)ts->tv_nsec, STM32_ETH_MACSTNUR);
+  stm32_putreg(stm32_getreg(STM32_ETH_MACTSCR) | ETH_MACTSCR_TSINIT,
+               STM32_ETH_MACTSCR);
+  ret = stm32_eth_ptp_wait(STM32_ETH_MACTSCR, ETH_MACTSCR_TSINIT);
+  if (ret < 0)
+    {
+      nerr("ERROR: Timed out setting the PTP system time\n");
+    }
+#ifdef CONFIG_STM32_ETH_PTP_GPIO
+  else
+    {
+      ret = stm32_eth_ptp_pps_restart();
+    }
+#endif
+
+  leave_critical_section(flags);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: stm32_ptp_getres
+ *
+ * Description:
+ *   Get the resolution of the system time, that is its increment.
+ *
+ ****************************************************************************/
+
+static int stm32_ptp_getres(struct ptp_lowerhalf_s *lower,
+                            struct timespec *res)
+{
+  res->tv_sec  = 0;
+  res->tv_nsec = STM32_PTP_SSINC;
+  return OK;
+}
+
+static const struct ptp_ops_s g_stm32_ptp_ops =
+{
+  stm32_ptp_adjfine,  /* adjfine */
+  stm32_ptp_adjphase, /* adjphase */
+  stm32_ptp_adjtime,  /* adjtime */
+  stm32_ptp_gettime,  /* gettime */
+  NULL,               /* getcrosststamp */
+  stm32_ptp_settime,  /* settime */
+  stm32_ptp_getres,   /* getres */
+};
+#endif /* CONFIG_PTP_CLOCK */
+#endif /* CONFIG_STM32_ETH_PTP */
+
 /****************************************************************************
  * Function: stm32_ethreset
  *
@@ -4099,9 +4601,13 @@ static int stm32_macenable(struct stm32_ethmac_s *priv)
   regval |= ETH_DMACRXCR_SR;
   stm32_putreg(regval, STM32_ETH_DMACRXCR);
 
-  /* Enable Ethernet DMA interrupts */
+  /* Enable Ethernet MAC interrupts, except the one of the timestamp unit.
+   * It is set each time the target time of the PPS output is reached and
+   * is cleared by reading MACTSSR, which the interrupt handler does not,
+   * so it would stay pending and keep the handler running.
+   */
 
-  stm32_putreg(ETH_MACIER_ALLINTS, STM32_ETH_MACIER);
+  stm32_putreg(ETH_MACIER_ALLINTS & ~ETH_MACIER_TSIE, STM32_ETH_MACIER);
 
   /* Ethernet DMA supports two classes of interrupts: Normal interrupt
    * summary (NIS) and Abnormal interrupt summary (AIS) with a variety
@@ -4165,6 +4671,19 @@ static int stm32_ethconfig(struct stm32_ethmac_s *priv)
 
   ninfo("Reset the Ethernet block\n");
   stm32_ethreset(priv);
+
+#ifdef CONFIG_STM32_ETH_PTP
+  /* Start the system time of the timestamp unit. It does not depend on the
+   * link, so it is started before the PHY, which fails to initialize when
+   * there is no link.
+   */
+
+  ret = stm32_eth_ptp_init();
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
 
   /* Initialize TX Descriptors list */
 
@@ -4327,6 +4846,17 @@ static inline int stm32_ethinitialize(int intf)
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
   netdev_register(&priv->dev, NET_LL_ETHERNET);
+
+#if defined(CONFIG_STM32_ETH_PTP) && defined(CONFIG_PTP_CLOCK)
+  /* Register the PTP hardware clock, /dev/ptp0 */
+
+  priv->ptp_lower.ops = &g_stm32_ptp_ops;
+  if (ptp_clock_register(&priv->ptp_lower, STM32_PTP_MAX_ADJ, intf) < 0)
+    {
+      nerr("ERROR: Failed to register the PTP clock\n");
+    }
+#endif
+
   return ret;
 }
 
