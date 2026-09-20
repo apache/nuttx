@@ -24,7 +24,7 @@ RRAMC       Yes     Progmem erase/write interface
 SAADC       Yes
 SPIM        Yes
 TIMER       Yes
-TWIM        No
+TWIM        Yes
 UARTE       Yes     No hardware flow control
 USBHS       No
 WDT         No
@@ -110,7 +110,7 @@ and optional command/data callbacks declared in ``nrf54l_spi.h``.
 The driver supports 8-bit transfers, modes 0 through 3 and configurable
 bit order. SPI4 supports up to 32 MHz; other instances support up to 8 MHz.
 ``SPI_SETFREQUENCY()`` returns the clock selected using the hardware divider.
-SPI and UART cannot use the same SERIAL instance concurrently.
+SPI, I2C and UART cannot use the same SERIAL instance concurrently.
 
 TIMER
 -----
@@ -118,6 +118,22 @@ TIMER
 TIMER0 through TIMER6 correspond to TIMER20, TIMER21, TIMER22, TIMER23,
 TIMER24, TIMER00 and TIMER10. The timer lower-half driver uses a 1 MHz
 counter clock on each instance.
+
+TWIM
+----
+
+I2C0 through I2C3 correspond to TWIM20, TWIM21, TWIM22 and TWIM30.
+nRF54LM20 also provides I2C4 and I2C5 using TWIM23 and TWIM24. Each bus
+requires ``BOARD_I2Cn_SCL_PIN`` and ``BOARD_I2Cn_SDA_PIN`` definitions.
+UART and I2C cannot use the same SERIAL instance concurrently.
+
+The driver supports 7-bit addressing at 100, 250 and 400 kHz, including
+write/read transfers with a repeated START and two-part continued writes.
+Other message chains requiring an uninterrupted bus return ``-ENOTSUP``.
+Continued writes use a per-bus buffer sized by
+``CONFIG_NRF54L_I2C_MASTER_COPY_BUF_SIZE``. A combined write exceeding this
+size returns ``-E2BIG`` before starting the transaction.
+Bus reset is not supported.
 
 UARTE
 -----
