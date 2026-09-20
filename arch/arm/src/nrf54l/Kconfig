@@ -33,6 +33,10 @@ config NRF54L_TIMER
 	bool
 	default n
 
+config NRF54L_PWM
+	bool
+	default n
+
 menu "nRF54L Peripheral Selection"
 
 config NRF54L_GPIOTE
@@ -141,6 +145,24 @@ config NRF54L_TIMER6
 	depends on !NRF54L_SOFTDEVICE_CONTROLLER
 	default n
 
+config NRF54L_PWM0
+	bool "PWM0 (PWM20)"
+	select NRF54L_PWM
+	depends on PWM
+	default n
+
+config NRF54L_PWM1
+	bool "PWM1 (PWM21)"
+	select NRF54L_PWM
+	depends on PWM
+	default n
+
+config NRF54L_PWM2
+	bool "PWM2 (PWM22)"
+	select NRF54L_PWM
+	depends on PWM
+	default n
+
 config NRF54L_GRTC
 	bool "GRTC"
 	default n
@@ -224,6 +246,128 @@ config NRF54L_PER_PIN_INTERRUPTS
 		Dispatch PORT events to separate callbacks for each pin.
 
 endmenu # GPIO Interrupt Configuration
+
+menu "PWM configuration"
+
+if NRF54L_PWM
+
+config NRF54L_PWM_MULTICHAN
+	bool "PWM Multiple Output Channels"
+	default n
+
+if NRF54L_PWM_MULTICHAN
+
+if NRF54L_PWM0
+
+config NRF54L_PWM0_CH0
+	bool "PWM0 Channel 0 Output"
+	default n
+	---help---
+		Enables channel 0 output.
+
+config NRF54L_PWM0_CH1
+	bool "PWM0 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config NRF54L_PWM0_CH2
+	bool "PWM0 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config NRF54L_PWM0_CH3
+	bool "PWM0 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # NRF54L_PWM0
+
+if NRF54L_PWM1
+
+config NRF54L_PWM1_CH0
+	bool "PWM1 Channel 0 Output"
+	default n
+	---help---
+		Enables channel 0 output.
+
+config NRF54L_PWM1_CH1
+	bool "PWM1 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config NRF54L_PWM1_CH2
+	bool "PWM1 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config NRF54L_PWM1_CH3
+	bool "PWM1 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # NRF54L_PWM1
+
+if NRF54L_PWM2
+
+config NRF54L_PWM2_CH0
+	bool "PWM2 Channel 0 Output"
+	default n
+	---help---
+		Enables channel 0 output.
+
+config NRF54L_PWM2_CH1
+	bool "PWM2 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config NRF54L_PWM2_CH2
+	bool "PWM2 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config NRF54L_PWM2_CH3
+	bool "PWM2 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # NRF54L_PWM2
+
+endif # NRF54L_PWM_MULTICHAN
+
+if !NRF54L_PWM_MULTICHAN
+
+config NRF54L_PWM0_CHANNEL
+	int "PWM0 Output Channel"
+	depends on NRF54L_PWM0
+	default 0
+	range 0 3
+
+config NRF54L_PWM1_CHANNEL
+	int "PWM1 Output Channel"
+	depends on NRF54L_PWM1
+	default 0
+	range 0 3
+
+config NRF54L_PWM2_CHANNEL
+	int "PWM2 Output Channel"
+	depends on NRF54L_PWM2
+	default 0
+	range 0 3
+
+endif # !NRF54L_PWM_MULTICHAN
+
+endif # NRF54L_PWM
+
+endmenu # PWM configuration
 
 menuconfig NRF54L_SOFTDEVICE_CONTROLLER
 	bool "SoftDevice Controller"

@@ -17,7 +17,7 @@ Peripheral  Support Notes
 GPIO        Yes
 GPIOTE      Yes
 GRTC        Yes     Counter and tickless scheduling
-PWM         No
+PWM         Yes
 QDEC        No
 RADIO       Yes     Bluetooth LE through SDC
 RRAMC       Yes     Progmem erase/write interface
@@ -48,6 +48,13 @@ instance and compare channel zero for tickless scheduling. The GRTC is timed
 by LFCLK, so the LFCLK source selected with ``CONFIG_NRF54L_USE_LFCLK``
 determines the long-term accuracy of the system time.
 With SDC enabled, channels 7 through 11 are reserved for MPSL.
+
+PWM
+---
+
+PWM0 through PWM2 correspond to PWM20, PWM21 and PWM22. Each instance
+supports four output channels. The board must provide an
+``NRF54L_PWMn_CHm_PIN`` definition for each enabled channel.
 
 RADIO
 -----
