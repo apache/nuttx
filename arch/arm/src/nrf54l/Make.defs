@@ -50,6 +50,10 @@ ifeq ($(CONFIG_NRF54L_GPIOTE),y)
 CHIP_CSRCS += nrf54l_gpiote.c
 endif
 
+ifeq ($(CONFIG_NRF54L_PWM),y)
+CHIP_CSRCS += nrf54l_pwm.c
+endif
+
 ifeq ($(CONFIG_NRF54L_TIMER),y)
 CHIP_CSRCS += nrf54l_tim.c
 ifeq ($(CONFIG_TIMER),y)
