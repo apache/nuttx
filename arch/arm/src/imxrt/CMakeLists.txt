@@ -177,4 +177,12 @@ if(CONFIG_IMXRT_ELE)
   list(APPEND SRCS imxrt118x_ele.c)
 endif()
 
+if(CONFIG_IMXRT_CAAM)
+  list(APPEND SRCS imxrt_caam.c)
+endif()
+
+if(CONFIG_IMXRT_RNG)
+  list(APPEND SRCS imxrt_rng.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

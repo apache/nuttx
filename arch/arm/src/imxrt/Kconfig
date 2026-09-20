@@ -500,12 +500,31 @@ config IMXRT_ELE_FW_PATH
 		Path (relative to the NuttX top-level directory, or absolute) to
 		the NXP EdgeLock Enclave firmware AHAB container.
 
+config IMXRT_CAAM
+	bool
+	default n
+	---help---
+		Enable the CAAM job ring driver
+		(arch/arm/src/imxrt/imxrt_caam.c).  Present on RT117x-class
+		SoCs.
+
 config IMXRT_CM7_BOOT
 	bool
 	default n
 	depends on ARCH_CHIP_MIMXRT1189CVM8C_CM33
 
 menu "i.MX RT Peripheral Selection"
+
+config IMXRT_RNG
+	bool "CAAM true random number generator"
+	default n
+	depends on ARCH_FAMILY_IMXRT117x
+	select IMXRT_CAAM
+	select ARCH_HAVE_RNG
+	---help---
+		Register /dev/random and /dev/urandom, both backed by the CAAM
+		true random number generator. Without this the entropy pool is
+		never seeded from hardware.
 
 config IMXRT_EDMA
 	bool "eDMA"
