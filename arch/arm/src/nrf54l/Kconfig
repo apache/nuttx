@@ -103,6 +103,7 @@ config NRF54L_UART6
 config NRF54L_TIMER0
 	bool "TIMER0 (TIMER20)"
 	select NRF54L_TIMER
+	depends on !NRF54L_SOFTDEVICE_CONTROLLER
 	default n
 
 config NRF54L_TIMER1
@@ -133,6 +134,7 @@ config NRF54L_TIMER5
 config NRF54L_TIMER6
 	bool "TIMER6 (TIMER10)"
 	select NRF54L_TIMER
+	depends on !NRF54L_SOFTDEVICE_CONTROLLER
 	default n
 
 config NRF54L_GRTC
@@ -195,6 +197,7 @@ endmenu # System Timer
 config NRF54L_PROGMEM
 	bool "RRAM program memory"
 	default n
+	depends on !NRF54L_SOFTDEVICE_CONTROLLER
 	select ARCH_HAVE_PROGMEM
 	---help---
 		Enable the program memory interfaces in nuttx/progmem.h.
@@ -206,3 +209,92 @@ config NRF54L_DEBUG_ACCESS
 	---help---
 		Open unlocked TAMPC debug signals for SWD/RTT development.
 		Signals locked by an earlier boot stage are left unchanged.
+
+menuconfig NRF54L_SOFTDEVICE_CONTROLLER
+	bool "SoftDevice Controller"
+	depends on ALLOW_BSDNORDIC_COMPONENTS
+	depends on NET_BLUETOOTH || UART_BTH4
+	select ARCH_RAMVECTORS
+	select ARCH_IRQPRIO
+	select ARCH_HIPRI_INTERRUPT
+	select CRYPTO
+	select CRYPTO_RANDOM_POOL
+	select SCHED_LPWORK
+	select NRF54L_GRTC
+	select NRF54L_USE_LFCLK
+	---help---
+		Enable Nordic's Bluetooth LE SoftDevice Controller and MPSL.
+		MPSL reserves GRTC channels 7-11, TIMER10, TIMER20, ECB00,
+		RADIO, CLOCK and TEMP. SDC also reserves AAR00, CCM00 and
+		RRAMC. Their DPPI and PPIB channels must not be used by the
+		application. HFXO remains running at 32 MHz.
+		Use an interrupt stack and allow sufficient stack space for
+		controller initialization and the low-priority work queue.
+
+if NRF54L_SOFTDEVICE_CONTROLLER
+
+config NRF54L_SDC_CLOCK_ACCURACY
+	int "Clock Accuracy [PPM]"
+	default 50
+	range 20 500
+	---help---
+		Accuracy of the board's HFXO, which supplies synthesized LFCLK.
+
+config NRF54L_SDC_PERIPHERAL_COUNT
+	int "Number of peripheral connections"
+	default 1
+	range 0 20
+
+config NRF54L_SDC_MAX_COUNT
+	int "Maximum number of connections"
+	default 2
+	range 1 20
+	depends on !NET_BLUETOOTH
+	---help---
+		The remaining connections are central roles. With the native
+		Bluetooth host, BLUETOOTH_MAX_CONN provides this total instead.
+
+config NRF54L_SDC_ADVERTISING
+	bool "Support advertising"
+	default y
+
+config NRF54L_SDC_SCANNING
+	bool "Support scanning"
+	default y
+
+if NRF54L_SDC_SCANNING
+
+config NRF54L_SDC_SCAN_BUFFER_COUNT
+	int "Scanning buffer count"
+	default 3
+	range 2 255
+
+endif # NRF54L_SDC_SCANNING
+
+config NRF54L_SDC_LE_2M_PHY
+	bool "Support LE 2M PHY"
+	default y
+
+config NRF54L_SDC_LE_CODED_PHY
+	bool "Support LE Coded PHY"
+	default y
+
+config NRF54L_SDC_DLE
+	bool "Support Data Length Extension (DLE)"
+	default y
+
+config NRF54L_SDC_FICR_STATIC_ADDR
+	bool "Configure factory generated static random address"
+	default y
+
+config NRF54L_SDC_PUB_ADDR
+	hex "Configure Bluetooth public address"
+	default 0x000000000000
+	---help---
+		Public address, most significant byte first.
+		For example, 0x010203040506 configures 06:05:04:03:02:01.
+		Zero leaves the controller public address unset. The native
+		NuttX Bluetooth host requires a public address; hosts using a
+		static random address configure it through HCI instead.
+
+endif # NRF54L_SOFTDEVICE_CONTROLLER
