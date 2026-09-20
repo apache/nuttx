@@ -1,0 +1,122 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "nRF54L Configuration Options"
+
+# nRF54L Families
+
+choice
+	prompt "nRF54L Chip Selection"
+	default ARCH_CHIP_NRF54L15
+	depends on ARCH_CHIP_NRF54L
+
+config ARCH_CHIP_NRF54L15
+	bool "nRF54L15"
+
+config ARCH_CHIP_NRF54LM20A
+	bool "nRF54LM20A"
+
+config ARCH_CHIP_NRF54LM20B
+	bool "nRF54LM20B"
+
+endchoice # nRF54L Chip Selection
+
+# Peripheral Selection
+
+config NRF54L_UART
+	bool
+	default n
+
+menu "nRF54L Peripheral Selection"
+
+config NRF54L_UART0
+	bool "UART0"
+	default n
+	select UART0_SERIALDRIVER
+	select NRF54L_UART
+	---help---
+		Enable UART0 (UARTE20). The board must provide
+		BOARD_UART0_TX_PIN and BOARD_UART0_RX_PIN.
+
+config NRF54L_UART1
+	bool "UART1"
+	default n
+	select UART1_SERIALDRIVER
+	select NRF54L_UART
+	---help---
+		Enable UART1 (UARTE21). The board must provide
+		BOARD_UART1_TX_PIN and BOARD_UART1_RX_PIN.
+
+config NRF54L_UART2
+	bool "UART2"
+	default n
+	select UART2_SERIALDRIVER
+	select NRF54L_UART
+	---help---
+		Enable UART2 (UARTE22). The board must provide
+		BOARD_UART2_TX_PIN and BOARD_UART2_RX_PIN.
+
+config NRF54L_UART3
+	bool "UART3"
+	default n
+	select UART3_SERIALDRIVER
+	select NRF54L_UART
+	---help---
+		Enable UART3 (UARTE30). The board must provide
+		BOARD_UART3_TX_PIN and BOARD_UART3_RX_PIN.
+
+config NRF54L_UART4
+	bool "UART4"
+	default n
+	select UART4_SERIALDRIVER
+	select NRF54L_UART
+	---help---
+		Enable UART4 (UARTE00). The board must provide
+		BOARD_UART4_TX_PIN and BOARD_UART4_RX_PIN.
+
+config NRF54L_UART5
+	bool "UART5"
+	default n
+	depends on ARCH_CHIP_NRF54LM20A || ARCH_CHIP_NRF54LM20B
+	select UART5_SERIALDRIVER
+	select NRF54L_UART
+	---help---
+		Enable UART5 (UARTE23). The board must provide
+		BOARD_UART5_TX_PIN and BOARD_UART5_RX_PIN.
+
+config NRF54L_UART6
+	bool "UART6"
+	default n
+	depends on ARCH_CHIP_NRF54LM20A || ARCH_CHIP_NRF54LM20B
+	select UART6_SERIALDRIVER
+	select NRF54L_UART
+	---help---
+		Enable UART6 (UARTE24). The board must provide
+		BOARD_UART6_TX_PIN and BOARD_UART6_RX_PIN.
+
+endmenu # nRF54L Peripheral Selection
+
+menu "System Timer"
+
+choice
+	prompt "System Timer Source"
+	default NRF54L_SYSTIMER_SYSTICK
+
+config NRF54L_SYSTIMER_SYSTICK
+	bool "SysTick"
+	select TIMER
+	select TIMER_ARCH
+	select ARMV8M_SYSTICK
+
+endchoice # System Timer Source
+
+endmenu # System Timer
+
+config NRF54L_DEBUG_ACCESS
+	bool "Keep firmware-controlled debug access open"
+	default y
+	---help---
+		Open unlocked TAMPC debug signals for SWD/RTT development.
+		Signals locked by an earlier boot stage are left unchanged.
