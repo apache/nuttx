@@ -366,7 +366,15 @@
 
 #define PHY_READ_TIMEOUT  (0x0004ffff)
 #define PHY_WRITE_TIMEOUT (0x0004ffff)
-#define PHY_RETRY_TIMEOUT (0x0001998)
+/* The PHY is polled every PHY_POLL_MS milliseconds and given up to
+ * PHY_LINK_TIMEOUT_MS milliseconds to bring the link up or to complete
+ * auto-negotiation. The time is in milliseconds so that it does not depend
+ * on the period of the system tick.
+ */
+
+#define PHY_POLL_MS         (10)
+#define PHY_LINK_TIMEOUT_MS (5000)
+#define PHY_RETRY_TIMEOUT   (PHY_LINK_TIMEOUT_MS / PHY_POLL_MS)
 
 /* MAC reset ready delays in loop counts */
 
@@ -3413,7 +3421,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
           break;
         }
 
-      nxsched_usleep(100);
+      nxsched_msleep(PHY_POLL_MS);
     }
 
   if (timeout >= PHY_RETRY_TIMEOUT)
@@ -3464,7 +3472,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
           break;
         }
 
-      nxsched_usleep(100);
+      nxsched_msleep(PHY_POLL_MS);
     }
 
   if (timeout >= PHY_RETRY_TIMEOUT)
