@@ -195,6 +195,86 @@ SDIO
 - CONFIG_STM32_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
   4-bit transfer mode.
 
+Ethernet
+--------
+
+The Ethernet MAC of the STM32F4 has a time counter that can stamp every
+frame it sends or receives in hardware, at the moment the frame crosses the
+MAC. A protocol such as the Precision Time Protocol (IEEE 1588, PTP) uses
+these stamps to compare its clock with the clock of another node without the
+delay of the software (interrupts and task scheduling) getting into the
+measurement. The options below enable that part of the driver.
+
+Precision Time Protocol
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The counter has a 32-bit seconds part and a 31-bit sub-second part and is
+clocked from ``SYSCLK``. Its rate can be trimmed by up to +/- 50 %, and its
+phase can be stepped, which is what a PTP daemon needs to steer it towards a
+master clock.
+
+- CONFIG_STM32_ETH_PTP - Enables the PTP timer of the MAC.
+
+- CONFIG_STM32_ETH_ENHANCEDDESC - Uses the double-length DMA descriptors,
+  which have room for the timestamp. Needed for timestamping received
+  packets.
+
+- CONFIG_STM32_ETH_TIMESTAMP_RX - Timestamps every received packet with the
+  counter. Requires CONFIG_STM32_ETH_PTP, CONFIG_STM32_ETH_ENHANCEDDESC and
+  CONFIG_NET_TIMESTAMP. The timestamp is delivered to the application with
+  the packet through the socket options of the network stack, for example
+  ``SO_TIMESTAMPNS``. A packet for which the MAC did not store a timestamp
+  gets a timestamp of zero.
+
+- CONFIG_STM32_ETH_PTP_GPIO - Enables the pulse-per-second output of the MAC
+  on the pin ``GPIO_ETH_PPS_OUT``. The board has to define it in its
+  ``board.h`` with one of the pins of the chip (on the STM32F40xxx and
+  STM32F42xxx parts ``GPIO_ETH_PPS_OUT_1`` is PB5 and ``GPIO_ETH_PPS_OUT_2``
+  is PG8). The pulse is derived from the counter, so it shows how well the
+  counter follows the master clock.
+
+- CONFIG_STM32_ETH_PTP_RTC_HIRES - Uses the counter as the source of
+  ``CONFIG_RTC_HIRES``.
+
+Clock device
+^^^^^^^^^^^^
+
+With CONFIG_PTP_CLOCK the driver registers the counter as a PTP hardware
+clock, ``/dev/ptp0`` for the first Ethernet interface (the number of the
+device is the number of the interface). It follows the generic framework
+described in :doc:`/components/drivers/special/ptp` and offers reading and
+setting the time, the resolution, frequency adjustment (``ADJ_FREQUENCY``, up
+to +/- 50 %) and phase steps (``ADJ_OFFSET`` and ``ADJ_SETOFFSET``). It does
+not offer the cross timestamp of the system and the device clock.
+CONFIG_CLOCK_ADJTIME is needed for ``clock_adjtime()``.
+
+The timestamps of the received packets are values of this same counter, not of
+``CLOCK_REALTIME``. A program that uses them has to compare them with
+``/dev/ptp0``. The ``ptpd`` daemon does that when it is started with hardware
+timestamping and the device as its clock:
+
+.. code-block:: console
+
+   nsh> ptpd -H -p /dev/ptp0 -i eth0 &
+
+A configuration with everything above, for a board with the Ethernet MAC,
+looks like this:
+
+.. code-block:: kconfig
+
+   CONFIG_STM32_ETHMAC=y
+   CONFIG_STM32_ETH_PTP=y
+   CONFIG_STM32_ETH_ENHANCEDDESC=y
+   CONFIG_STM32_ETH_TIMESTAMP_RX=y
+   CONFIG_STM32_ETH_PTP_GPIO=y
+   CONFIG_NET_TIMESTAMP=y
+   CONFIG_PTP_CLOCK=y
+   CONFIG_CLOCK_ADJTIME=y
+   CONFIG_NETUTILS_PTPD=y
+
+This driver stamps received packets only. The packets it sends are not
+stamped by the hardware yet.
+
 USB
 ---
 
