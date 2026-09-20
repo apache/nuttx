@@ -21,7 +21,7 @@ PWM         Yes
 QDEC        No
 RADIO       Yes     Bluetooth LE through SDC
 RRAMC       Yes     Progmem erase/write interface
-SAADC       No
+SAADC       Yes
 SPIM        No
 TIMER       Yes
 TWIM        No
@@ -82,6 +82,21 @@ RRAMC
 ``CONFIG_NRF54L_PROGMEM`` enables the progmem interface. RRAM supports
 overwriting either bit value; erase operations fill emulated 4 KiB blocks
 with ``0xff``. Writes require word-aligned addresses and lengths.
+
+SAADC
+-----
+
+``nrf54l_adcinitialize()`` provides the ADC lower half, with up to eight
+single-ended or differential channels, 8/10/12/14-bit resolution and
+optional oversampling. Each ``ANIOC_TRIGGER`` collects one result per
+channel. The local timer supports a single channel; scanning with
+oversampling requires burst mode on every channel.
+
+The internal reference is 0.9 V. Available gains range from 1/4 to 2.
+External analog and reference pins must have their digital input buffers,
+outputs and pulls disconnected before opening the device. AIN0 through
+AIN7 map to P1.04/05/06/07/11/12/13/14 on L15 and
+P1.00/31/30/29/06/05/04/03 on LM20.
 
 TIMER
 -----
