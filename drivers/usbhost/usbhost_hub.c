@@ -578,6 +578,17 @@ static inline int usbhost_hubdesc(FAR struct usbhost_class_s *hubclass)
   priv->pwrondelay  = (2 * hubdesc->pwrondelay);
   priv->ctrlcurrent = hubdesc->ctrlcurrent;
 
+  /* Publish what describes this hub as a hub, rather than as a device, on
+   * the port it occupies.  A host controller that has to be told about the
+   * hubs in a topology reads it from there when it sets up a device behind
+   * this one.  This runs before any downstream port is activated, so it is
+   * in place before there is anything behind it to set up.
+   */
+
+  hport->nports     = hubdesc->nports;
+  hport->ttt        = (hubchar & USBHUB_CHAR_TTTT_MASK) >>
+                       USBHUB_CHAR_TTTT_SHIFT;
+
   uinfo("Hub Descriptor:\n");
   uinfo("  bDescLength:         %d\n", hubdesc->len);
   uinfo("  bDescriptorType:     0x%02x\n", hubdesc->type);
