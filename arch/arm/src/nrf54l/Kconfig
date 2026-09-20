@@ -192,6 +192,14 @@ endchoice # System Timer Source
 
 endmenu # System Timer
 
+config NRF54L_PROGMEM
+	bool "RRAM program memory"
+	default n
+	select ARCH_HAVE_PROGMEM
+	---help---
+		Enable the program memory interfaces in nuttx/progmem.h.
+		RRAM erase blocks are emulated as 4 KiB regions filled with 0xff.
+
 config NRF54L_DEBUG_ACCESS
 	bool "Keep firmware-controlled debug access open"
 	default y

@@ -20,7 +20,7 @@ GRTC        Yes     Counter and tickless scheduling
 PWM         No
 QDEC        No
 RADIO       No
-RRAMC       No
+RRAMC       Yes     Progmem erase/write interface
 SAADC       No
 SPIM        No
 TIMER       Yes
@@ -43,6 +43,13 @@ and twelve compare channels. ``CONFIG_NRF54L_SYSTIMER_GRTC`` reserves the
 instance and compare channel zero for tickless scheduling. The GRTC is timed
 by LFCLK, so the LFCLK source selected with ``CONFIG_NRF54L_USE_LFCLK``
 determines the long-term accuracy of the system time.
+
+RRAMC
+-----
+
+``CONFIG_NRF54L_PROGMEM`` enables the progmem interface. RRAM supports
+overwriting either bit value; erase operations fill emulated 4 KiB blocks
+with ``0xff``. Writes require word-aligned addresses and lengths.
 
 TIMER
 -----
