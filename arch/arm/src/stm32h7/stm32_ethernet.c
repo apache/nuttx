@@ -3795,7 +3795,7 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
 #  endif
 #endif
 
-#ifdef CONFIG_STM32_ETH_PTP
+#ifdef CONFIG_STM32_ETH_PTP_GPIO
   /* Enable pulse-per-second (PPS) output signal */
 
   stm32_configgpio(GPIO_ETH_PPS_OUT);
