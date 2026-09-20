@@ -74,6 +74,10 @@ if(CONFIG_PM)
   list(APPEND SRCS nrf54l_pminitialize.c)
 endif()
 
+if(CONFIG_USBDEV)
+  list(APPEND SRCS nrf54l_usbhs.c nrf54l_usbd.c)
+endif()
+
 if(CONFIG_NRF54L_SOFTDEVICE_CONTROLLER)
   set(NRFXLIB_VER "3.4.1")
   set(NRFXLIB_DIR "${NUTTX_CHIP_ABS_DIR}/sdk-nrfxlib")
