@@ -195,7 +195,7 @@ config STM32_ETH_TIMESTAMP_RX
 
 config STM32_ETH_TIMESTAMP_TX
 	bool "Hardware timestamping of transmitted packets"
-	depends on STM32_COMMON_LEGACY && STM32_ETH_PTP && NET_TIMESTAMP && STM32_ETH_ENHANCEDDESC
+	depends on STM32_ETH_PTP && NET_TIMESTAMP && (STM32_COMMON_H7_H5 || (STM32_COMMON_LEGACY && STM32_ETH_ENHANCEDDESC))
 	default n
 	---help---
 		Enables hardware timestamp capture on transmitted Ethernet frames.

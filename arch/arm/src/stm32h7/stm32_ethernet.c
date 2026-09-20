@@ -776,6 +776,18 @@ struct stm32_ethmac_s
 
   struct mdio_bus_s *mdio;
 
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+  struct iob_queue_s txtstampq;     /* Timestamped frames to loop back */
+
+  /* Per TX descriptor: the copy of the frame that is waiting for its
+   * timestamp, and its buffer, because the MAC writes the timestamp over
+   * the address of the buffer in the descriptor.
+   */
+
+  struct iob_s *txmeta[CONFIG_STM32_ETH_NTXDESC];
+  uint32_t txmetabuf[CONFIG_STM32_ETH_NTXDESC];
+#endif
+
 #if defined(CONFIG_STM32_ETH_PTP) && defined(CONFIG_PTP_CLOCK)
   struct ptp_lowerhalf_s ptp_lower; /* PTP hardware clock lower half */
 #endif
@@ -857,6 +869,9 @@ static int  stm32_recvframe(struct stm32_ethmac_s *priv);
 static void stm32_receive(struct stm32_ethmac_s *priv);
 static void stm32_freeframe(struct stm32_ethmac_s *priv);
 static void stm32_txdone(struct stm32_ethmac_s *priv);
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+static void stm32_txtstamp_flush(struct stm32_ethmac_s *priv);
+#endif
 
 static void stm32_interrupt_work(void *arg);
 static int  stm32_interrupt(int irq, void *context, void *arg);
@@ -1200,6 +1215,23 @@ static struct eth_desc_s *stm32_get_next_txdesc(struct stm32_ethmac_s *priv,
   return &next->desc;
 }
 
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+/****************************************************************************
+ * Function: stm32_txindex
+ *
+ * Description:
+ *   Get the position of a TX descriptor in the ring. The descriptors of the
+ *   ring are the size of the union that also holds an RX descriptor.
+ *
+ ****************************************************************************/
+
+static inline int stm32_txindex(struct stm32_ethmac_s *priv,
+                                struct eth_desc_s *txdesc)
+{
+  return (union stm32_desc_u *)txdesc - (union stm32_desc_u *)priv->txchbase;
+}
+#endif
+
 /****************************************************************************
  * Function: stm32_transmit
  *
@@ -1363,6 +1395,31 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
 
       DEBUGASSERT(priv->dev.d_len <= CONFIG_NET_ETH_PKTSIZE);
       txdesc->des2 = priv->dev.d_len | ETH_TDES2_RD_IOC;
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+      /* If a packet socket asked for the transmit timestamp, keep a copy of
+       * the frame to loop back with it, and ask the MAC to timestamp.
+       */
+
+      if (priv->dev.d_iob != NULL && priv->dev.d_iob->io_conn != NULL)
+        {
+          struct iob_s *clone = netdev_iob_clone(&priv->dev, false);
+
+          if (clone != NULL)
+            {
+              int txindex = stm32_txindex(priv, txdesc);
+
+              clone->io_conn = priv->dev.d_iob->io_conn;
+              priv->txmeta[txindex]    = clone;
+              priv->txmetabuf[txindex] = (uint32_t)priv->dev.d_buf;
+              txdesc->des2 |= ETH_TDES2_RD_TTSE;
+            }
+          else
+            {
+              nerr("ERROR: Failed to clone the IOB for the TX timestamp\n");
+            }
+        }
+#endif
 
       /* The single descriptor is both the first and last segment. */
 
@@ -2135,6 +2192,43 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
   return -EAGAIN;
 }
 
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+/****************************************************************************
+ * Function: stm32_txtstamp_flush
+ *
+ * Description:
+ *   Give the frames that have been transmitted, with their hardware
+ *   timestamp, back to the network stack, that delivers them to the error
+ *   queue of the packet socket that asked for it.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static void stm32_txtstamp_flush(struct stm32_ethmac_s *priv)
+{
+  struct net_driver_s *dev = &priv->dev;
+  struct iob_s *iob;
+
+  while ((iob = iob_remove_queue(&priv->txtstampq)) != NULL)
+    {
+      dev->d_iob = iob;
+      dev->d_len = iob->io_pktlen;
+
+#ifdef CONFIG_NET_PKT
+      pkt_input(dev);
+#endif
+
+      dev->d_iob = NULL;
+      dev->d_len = 0;
+
+      iob->io_conn = NULL;
+      iob_free_chain(iob);
+    }
+}
+#endif /* CONFIG_STM32_ETH_TIMESTAMP_TX */
+
 /****************************************************************************
  * Function: stm32_receive
  *
@@ -2155,6 +2249,12 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
 static void stm32_receive(struct stm32_ethmac_s *priv)
 {
   struct net_driver_s *dev = &priv->dev;
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+  /* Loop back the frames that have their transmit timestamp first */
+
+  stm32_txtstamp_flush(priv);
+#endif
 
   /* Loop while while stm32_recvframe() successfully retrieves valid
    * Ethernet frames.
@@ -2346,6 +2446,11 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
 {
   struct eth_desc_s *txdesc;
   uint32_t des3_tmp;
+  uint8_t *buffer;
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+  struct iob_s *clone;
+  int txindex;
+#endif
 
   ninfo("txhead: %p txtail: %p inflight: %d\n",
         priv->txhead, priv->txtail, priv->inflight);
@@ -2372,11 +2477,40 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
                 " des2: %08" PRIx32 " des3: %08" PRIx32 "\n",
                 txdesc, txdesc->des0, txdesc->des2, txdesc->des3);
 
-          DEBUGASSERT(txdesc->des0 != 0);
+          buffer = (uint8_t *)txdesc->des0;
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+          txindex = stm32_txindex(priv, txdesc);
+          clone   = priv->txmeta[txindex];
+          if (clone != NULL)
+            {
+              /* The MAC wrote the timestamp over the buffer address, and
+               * the seconds over the second word. All ones is not valid.
+               */
+
+              buffer = (uint8_t *)priv->txmetabuf[txindex];
+              priv->txmeta[txindex] = NULL;
+
+              if ((txdesc->des3 & ETH_TDES3_WB_TTSS) != 0 &&
+                  (txdesc->des0 != UINT32_MAX ||
+                   txdesc->des1 != UINT32_MAX))
+                {
+                  clone->io_time.tv_sec  = txdesc->des1;
+                  clone->io_time.tv_nsec = txdesc->des0;
+                  iob_add_queue(clone, &priv->txtstampq);
+                }
+              else
+                {
+                  iob_free_chain(clone);
+                }
+            }
+#endif
+
+          DEBUGASSERT(buffer != NULL);
 
           /* Yes.. Free the buffer */
 
-          stm32_freebuffer(priv, (uint8_t *)txdesc->des0);
+          stm32_freebuffer(priv, buffer);
 
           /* In any event, make sure that des0-3 are nullified. */
 
@@ -2464,6 +2598,12 @@ static void stm32_txdone(struct stm32_ethmac_s *priv)
   /* Scan the TX descriptor change, returning buffers to free list */
 
   stm32_freeframe(priv);
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+  /* Loop back the frames that have their transmit timestamp */
+
+  stm32_txtstamp_flush(priv);
+#endif
 
   /* If no further xmits are pending, then cancel the TX timeout */
 
@@ -2808,6 +2948,9 @@ static int stm32_ifdown(struct net_driver_s *dev)
 {
   struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)dev->d_private;
   irqstate_t flags;
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+  int i;
+#endif
 
   ninfo("Taking the network down\n");
 
@@ -2826,6 +2969,20 @@ static int stm32_ifdown(struct net_driver_s *dev)
    */
 
   stm32_ethreset(priv);
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+  /* Drop the frames that were waiting for their transmit timestamp */
+
+  iob_free_queue(&priv->txtstampq);
+  for (i = 0; i < CONFIG_STM32_ETH_NTXDESC; i++)
+    {
+      if (priv->txmeta[i] != NULL)
+        {
+          iob_free_chain(priv->txmeta[i]);
+          priv->txmeta[i] = NULL;
+        }
+    }
+#endif
 
   /* Mark the device "down" */
 
