@@ -41,6 +41,10 @@
 #include "arm_internal.h"
 #include "nrf54l_irq.h"
 
+#ifdef CONFIG_NRF54L_GPIOTE
+#  include "nrf54l_gpiote.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -348,6 +352,12 @@ void up_irqinitialize(void)
 #endif
 
   nrf54l_dumpnvic("initial", NRF54L_IRQ_NIRQS);
+
+#ifdef CONFIG_NRF54L_GPIOTE
+  /* Initialize GPIO interrupt support */
+
+  DEBUGVERIFY(nrf54l_gpiote_init());
+#endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* And finally, enable interrupts */
