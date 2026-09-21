@@ -446,7 +446,7 @@ RUN pip3 install cvt2utf
 # Install pytest
 RUN pip3 install cxxfilt
 RUN pip3 install construct
-RUN pip3 install esptool==5.2.0
+RUN pip3 install esptool==5.3.1
 RUN pip3 install imgtool
 RUN pip3 install kconfiglib
 RUN pip3 install pexpect==4.8.0

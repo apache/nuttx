@@ -254,7 +254,7 @@ python_tools() {
     construct \
     cvt2utf \
     cxxfilt \
-    esptool==5.2.0 \
+    esptool==5.3.1 \
     imgtool==1.9.0 \
     kconfiglib \
     pexpect==4.8.0 \
