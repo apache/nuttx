@@ -31,6 +31,7 @@
 #include <stdlib.h>
 
 #include <nuttx/compiler.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev_lowerhalf.h>
@@ -350,6 +351,70 @@ static void virtio_net_txfree(FAR struct netdev_lowerhalf_s *dev)
 
       netpkt_free(dev, hdr->pkt, NETPKT_TX);
       vrtinfo("Free, hdr: %p, pkt: %p\n", hdr, hdr->pkt);
+    }
+}
+
+/****************************************************************************
+ * Name: virtio_net_free_vq_buffers
+ *
+ * Description:
+ *   Reclaim and free all in-flight RX/TX netpkt buffers still queued in the
+ *   virtqueues. Called after virtio_reset_device() so the device no longer
+ *   accesses the buffers, and before virtio_delete_virtqueues() so the ring
+ *   and virtqueue structures are still valid.
+ *
+ * Input Parameters:
+ *   vdev - The virtio device
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void virtio_net_free_vq_buffers(FAR struct virtio_device *vdev)
+{
+  FAR struct virtio_net_priv_s *priv = vdev->priv;
+  FAR struct netdev_lowerhalf_s *dev = (FAR struct netdev_lowerhalf_s *)priv;
+  FAR struct virtio_net_llhdr_s *hdr;
+  FAR struct virtqueue *vq;
+  FAR void *buf;
+  enum netpkt_type_e type;
+  uint16_t idx;
+  int i;
+
+  for (i = 0; i < VIRTIO_NET_NUM; i++)
+    {
+      vq   = vdev->vrings_info[i].vq;
+      type = (i == VIRTIO_NET_RX) ? NETPKT_RX : NETPKT_TX;
+
+      while (1)
+        {
+          hdr = virtqueue_get_buffer_lock(vq, NULL, NULL,
+                                           &priv->lock[i]);
+          if (hdr == NULL)
+            {
+              break;
+            }
+
+          netpkt_free(dev, hdr->pkt, type);
+        }
+
+      /* virtio_reset_device does not return driver-submitted buffers, so
+       * reclaim those still queued in the avail ring.
+       */
+
+      while (1)
+        {
+          buf = virtqueue_get_available_buffer_lock(vq, &idx, NULL,
+                                                    &priv->lock[i]);
+          if (buf == NULL)
+            {
+              break;
+            }
+
+          hdr = container_of(buf, struct virtio_net_llhdr_s, vhdr);
+          netpkt_free(dev, hdr->pkt, type);
+        }
     }
 }
 
@@ -754,6 +819,7 @@ static void virtio_net_remove(FAR struct virtio_device *vdev)
 
   netdev_lower_unregister((FAR struct netdev_lowerhalf_s *)priv);
   virtio_reset_device(vdev);
+  virtio_net_free_vq_buffers(vdev);
   virtio_delete_virtqueues(vdev);
 #ifdef CONFIG_DRIVERS_WIFI_SIM
   g_netdev_num--;
