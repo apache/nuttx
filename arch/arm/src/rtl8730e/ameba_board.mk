@@ -169,7 +169,8 @@ define PREBUILD
 	     for src in $(AMEBA_FWLIB_SRCS); do \
 	       obj="$(AMEBA_PREBUILT_LIBS)/$$(basename $${src%.c}).o"; \
 	       echo "  CC  $$src"; \
-	       $(CC) $(ARCHCPUFLAGS) $(ARCHOPTIMIZATION) $(AMEBA_FWLIB_INC) \
+	       $(CC) $(ARCHCPUFLAGS) -Os -ffunction-sections -fdata-sections \
+	         $(AMEBA_FWLIB_INC) \
 	         -c $$src -o $$obj || exit 1; \
 	       objs="$$objs $$obj"; \
 	     done; \
@@ -181,7 +182,7 @@ define PREBUILD
 	       for src in $(AMEBA_WIFI_SRCS); do \
 	         obj=$(AMEBA_PREBUILT_LIBS)/wifi_obj/`basename $$src .c`.o; \
 	         if [ "$$src" -nt "$$obj" ] 2>/dev/null || [ ! -f "$$obj" ]; then \
-	           $(CC) $(ARCHCPUFLAGS) $(ARCHOPTIMIZATION) \
+	           $(CC) $(ARCHCPUFLAGS) -Os -ffunction-sections -fdata-sections \
 	             $(AMEBA_WIFI_INC) -c $$src -o $$obj || exit 1; \
 	           rebuild_wifi=1; \
 	         fi; \
