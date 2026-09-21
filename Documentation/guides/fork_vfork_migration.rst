@@ -58,8 +58,9 @@ Two things break, and they break loudly rather than quietly:
 environment no longer builds.**  ``fork()`` is not declared in ``unistd.h``
 there, so you get a compile error naming the function.  That is the intended
 outcome:  a build error is strictly better than the silent wrongness it
-replaces.  Today that is every in-tree architecture, so every caller of
-``fork()`` has to be looked at.
+replaces.  Today that is every configuration without a per-process address
+environment -- every flat and every protected build -- so most callers of
+``fork()`` have to be looked at.
 
 **Code calling** ``fork()`` **on a target that does have real** ``fork()``
 **changes behaviour** -- from sharing to copying.  Code that (perhaps
@@ -211,7 +212,7 @@ Known gaps
 complete -- ``addrenv_fork()``, the ``up_addrenv_fork()`` hook, the syscall, the
 libc wrapper and the ``ostest`` case -- so an architecture provides ``fork()``
 by implementing ``up_addrenv_fork()`` and selecting ``CONFIG_ARCH_HAVE_FORK``,
-with no further generic work.
+with no further generic work.  RISC-V selects it today.
 
 **A windowed ABI needs its stack rebased, not just copied.**  On Xtensa,
 giving a child a relocated copy of the parent's stack takes more than the copy:
