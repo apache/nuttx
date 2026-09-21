@@ -3230,7 +3230,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
   if (to <= 0)
     {
       nerr("ERROR: Phy reset timeout\n");
-      return ret;
+      return -ETIMEDOUT;
     }
   else
     {
