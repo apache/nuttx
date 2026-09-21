@@ -144,6 +144,10 @@ struct flexspi_nor_config_s
   uint8_t  ipcmd_serial_clk_freq;
   uint8_t  is_uniform_block_size;
   uint8_t  reserved0[2];
+  uint8_t  serial_nor_type;
+  uint8_t  need_exit_nocmdmode;
+  uint8_t  halfclk_for_nonreadcmd;
+  uint8_t  need_restore_nocmdmode;
   uint32_t block_size;
   uint32_t reserved1[11];
 };
