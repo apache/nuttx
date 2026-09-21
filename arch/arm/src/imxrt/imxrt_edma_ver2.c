@@ -87,7 +87,11 @@
  * invalidation.
  */
 
-#define EDMA_ALIGN        ARMV7M_DCACHE_LINESIZE
+#ifdef CONFIG_ARCH_CORTEXM33
+#  define EDMA_ALIGN      ARMV8M_DCACHE_LINESIZE
+#else
+#  define EDMA_ALIGN      ARMV7M_DCACHE_LINESIZE
+#endif
 #define EDMA_ALIGN_MASK   (EDMA_ALIGN - 1)
 #define EDMA_ALIGN_UP(n)  (((n) + EDMA_ALIGN_MASK) & ~EDMA_ALIGN_MASK)
 
