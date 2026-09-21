@@ -384,6 +384,10 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS adxl362_uorb.c)
     endif()
 
+    if(CONFIG_SENSORS_ADXL367)
+      list(APPEND SRCS adxl367.c)
+    endif()
+
     if(CONFIG_SENSORS_ADXL372)
       if(CONFIG_SENSORS_ADXL372_UORB)
         list(APPEND SRCS adxl372_uorb.c)

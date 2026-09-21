@@ -1507,6 +1507,15 @@ config SENSORS_ADXL362_THREAD_STACKSIZE
 
 endif # SENSORS_ADXL362
 
+config SENSORS_ADXL367
+	bool "Analog Devices ADXL367 accelerometer"
+	default n
+	select I2C
+	---help---
+		Enable the ADXL367 I2C accelerometer driver using the sensor
+		framework. Supports +/-2 g acceleration and die temperature,
+		with output data rates from 12.5 to 400 Hz.
+
 config SENSORS_ADXL372
 	bool "Analog Devices ADXL372 Sensor support"
 	default n
