@@ -40,6 +40,7 @@
 
 #include <arch/barriers.h>
 #include <arpa/inet.h>
+#include <netinet/if_ether.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
@@ -2392,7 +2393,18 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
       else
 #endif
         {
-          nwarn("WARNING: DROPPED Unknown type: %04x\n", BUF->type);
+#ifdef CONFIG_NET_PKT
+          /* Frames that packet sockets consume (PTP over Ethernet and
+           * IPv6) were already given to pkt_input() above, so they are not
+           * unknown and must not be logged as dropped.
+           */
+
+          if (BUF->type != HTONS(ETH_P_1588) &&
+              BUF->type != HTONS(ETHTYPE_IP6))
+#endif
+            {
+              nwarn("WARNING: DROPPED Unknown type: %04x\n", BUF->type);
+            }
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is
