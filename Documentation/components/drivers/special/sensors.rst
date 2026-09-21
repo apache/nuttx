@@ -27,6 +27,7 @@ tool for monitoring sensor activity at runtime.
     sensors/adt7320.rst
     sensors/adxl345.rst
     sensors/adxl362.rst
+    sensors/adxl367.rst
     sensors/adxl372.rst
     sensors/aht10.rst
     sensors/ak09912.rst

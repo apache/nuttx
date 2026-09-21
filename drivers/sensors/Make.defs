@@ -372,6 +372,10 @@ ifeq ($(CONFIG_SENSORS_ADXL362),y)
   CSRCS += adxl362_uorb.c
 endif
 
+ifeq ($(CONFIG_SENSORS_ADXL367),y)
+  CSRCS += adxl367.c
+endif
+
 ifeq ($(CONFIG_SENSORS_ADXL372),y)
 ifeq ($(CONFIG_SENSORS_ADXL372_UORB),y)
   CSRCS += adxl372_uorb.c

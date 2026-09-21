@@ -530,6 +530,7 @@ Implemented Drivers
 ===================
 
 - :doc:`adxl362`
+- :doc:`adxl367`
 - :doc:`adxl372`
 - bh1749nuc
 - bme680
