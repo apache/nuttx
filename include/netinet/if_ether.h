@@ -51,6 +51,7 @@
 #define ETH_P_IPV6  ETHERTYPE_IPV6
 #define ETH_P_ARP   ETHERTYPE_ARP
 #define ETH_P_TSN   0x22F0  /* TSN (IEEE 1722) packet */
+#define ETH_P_1588  0x88F7  /* PTP (IEEE 1588) over Ethernet packet */
 
 /****************************************************************************
  * Public Type Definitions
