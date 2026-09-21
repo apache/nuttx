@@ -1231,6 +1231,13 @@ config ARCH_BOARD_MAIX_BIT
 		This is the board configuration for the port of NuttX to the
 		Sipeed Maix Bit board. This board features the RISC-V K210
 
+config ARCH_BOARD_ERBIUM_MINION
+	bool "AIFoundry Erbium Minion"
+	depends on ARCH_CHIP_ERBIUM
+	---help---
+		This is the board configuration for the AIFoundry Erbium simulator
+		minion target. This board features an RV64IMFC Erbium hart.
+
 config ARCH_BOARD_SMARTL_C906
 	bool "smartl evaluation board for C906"
 	depends on ARCH_CHIP_C906
@@ -4023,6 +4030,7 @@ config ARCH_BOARD
 	default "lpcxpresso-lpc54628"          if ARCH_BOARD_LPCXPRESSO_LPC54628
 	default "lx_cpu"                       if ARCH_BOARD_LX_CPU
 	default "maix-bit"                     if ARCH_BOARD_MAIX_BIT
+	default "minion"                       if ARCH_BOARD_ERBIUM_MINION
 	default "smartl-c906"                  if ARCH_BOARD_SMARTL_C906
 	default "icicle"                       if ARCH_BOARD_ICICLE_MPFS
 	default "m100pfsevp"                   if ARCH_BOARD_M100PFSEVP_MPFS
@@ -5267,6 +5275,9 @@ source "boards/risc-v/fe310/hifive1-revb/Kconfig"
 endif
 if ARCH_BOARD_MAIX_BIT
 source "boards/risc-v/k210/maix-bit/Kconfig"
+endif
+if ARCH_BOARD_ERBIUM_MINION
+source "boards/risc-v/erbium/minion/Kconfig"
 endif
 if ARCH_BOARD_SMARTL_C906
 source "boards/risc-v/c906/smartl-c906/Kconfig"
