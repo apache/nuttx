@@ -1,0 +1,22 @@
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config ERBIUM_UART_CLOCK
+	int "UART input clock (Hz)"
+	default 6666667
+	range 1 2147483647
+	---help---
+		UART peripheral clock after the Erbium divide-by-30 prescaler,
+		with a 200 MHz system clock.
+
+config ERBIUM_MTIMER_FREQ
+	int "Machine timer frequency (Hz)"
+	default 2000000
+	range 1 2147483647
+	---help---
+		Machine timer frequency after the reference clock divider and
+		timer prescaler. The ET-platform emulator defaults to 2 MHz.
