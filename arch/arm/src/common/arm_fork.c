@@ -277,6 +277,11 @@ static pid_t arm_fork_direct(bool vfork, struct tcb_s *parent,
  *   in a system call at all, so it inherits none of the parent's nesting
  *   state.
  *
+ *   A process in a kernel build keeps its register save area on its kernel
+ *   stack, so building the child's context writes nothing to any user stack
+ *   -- see up_initial_state().  That is what lets a child which shares the
+ *   parent's stack addresses be left exactly as it is.
+ *
  * Input Parameters:
  *   vfork  - true for vfork(), false for fork()
  *   parent - The calling task's TCB
@@ -344,14 +349,6 @@ static pid_t arm_fork_syscall(bool vfork, struct tcb_s *parent)
       newtop = (uint32_t)child->stack_base_ptr +
                          child->adj_stack_size;
       newsp  = newtop - stackutil;
-
-      /* Put the child's register save area where the parent's is:  just
-       * below the stack the caller was using.  It cannot be left at the top
-       * of the child's stack, which is where up_initial_state() put it,
-       * because the copy of the parent's stack below is about to land there.
-       */
-
-      child->xcp.regs = (uint32_t *)(newsp - XCPTCONTEXT_SIZE);
 
       memcpy((void *)newsp, (const void *)oldsp, stackutil);
 
