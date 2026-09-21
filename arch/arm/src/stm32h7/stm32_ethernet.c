@@ -296,13 +296,12 @@
  * second and a width of half of it, that starts at a whole second of the
  * system time. The first pulse is at least STM32_PTP_PPS_MARGIN_NS ahead,
  * so the target time is loaded before it. The interval and the width are
- * in increments of the system time, minus one.
+ * in increments of the system time.
  */
 
 #    define STM32_PTP_PPS_MARGIN_NS   (100000000)
-#    define STM32_PTP_PPS_INTERVAL    (NSEC_PER_SEC / STM32_PTP_SSINC - 1)
-#    define STM32_PTP_PPS_WIDTH       ((NSEC_PER_SEC / 2) / \
-                                       STM32_PTP_SSINC - 1)
+#    define STM32_PTP_PPS_INTERVAL    (NSEC_PER_SEC / STM32_PTP_SSINC)
+#    define STM32_PTP_PPS_WIDTH       ((NSEC_PER_SEC / 2) / STM32_PTP_SSINC)
 #  endif
 #endif
 
