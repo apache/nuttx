@@ -38,7 +38,7 @@
 #elif defined(CONFIG_ARCH_FAMILY_IMXRT117x)
 #  include "hardware/rt117x/imxrt117x_gpio.h"
 #elif defined(CONFIG_ARCH_FAMILY_IMXRT118x)
-#  include "hardware/imxrt_memorymap.h"
+#  include "hardware/rt118x/imxrt118x_gpio.h"
 #else
 #  error Unrecognized i.MX RT architecture
 #endif
