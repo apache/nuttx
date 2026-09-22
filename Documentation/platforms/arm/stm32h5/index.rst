@@ -155,6 +155,22 @@ E.g. ``RCC_CCIPR1_USART3SEL_HSIKERCK`` in board.h to select the clock source for
 The clock source is set in RCC initialization. Only stm32_serial.c is aware of this setting.
 TODO: Make stm32_lowputc.c aware of this clock source setting too.
 
+CAN
+---
+
+Enabled by CONFIG_STM32_FDCAN_CHARDRIVER.
+
+CAN SocketCAN
+-------------
+
+Enabled by CONFIG_STM32_FDCAN_SOCKET.
+
+Requires STM32H5_FDCANx_PWR and STM32H5_FDCANx_PWR_STANDBY to be defined
+in board.h for each instance. TODO: Make it optional. STM32H5_FDCANx_PWR
+is the pin that shall be asserted/deasserted when the interface is
+active/inactive. STM32H5_FDCANx_PWR_STANDBY is a bool which is the
+IO level of the pin when the interface is disabled.
+
 References
 =================
 [RM0481] Reference Manual: STM32H523/33xx, STM32H562/63xx, and STM32H573xx Arm® -based 32-bit MCUs
