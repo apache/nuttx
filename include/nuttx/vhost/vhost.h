@@ -115,6 +115,14 @@ int vhost_get_vq_buffers_pa(FAR struct virtqueue *vq,
  * of contiguous bytes reachable from it.  The mapping may be invalidated
  * by the next call (e.g. a sliding hardware window), so callers must
  * serialize use.
+ *
+ * This exists because the libmetal path used by virtqueue_phys_to_virt()
+ * cannot express such an address: metal_phys_addr_t is an unsigned long
+ * and up_addrenv_pa_to_va() takes a uintptr_t, both 32-bit on the cores
+ * that need this hook, so the descriptor address would be truncated
+ * before any translation happens.  Arches whose peer memory does fit a
+ * pointer need neither this hook nor vhost_get_vq_buffers_pa(); they are
+ * served by up_addrenv_pa_to_va() like the rest of libmetal.
  */
 
 FAR void *up_vhost_iomap(uint64_t pa, FAR size_t *avail);
