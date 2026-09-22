@@ -38,6 +38,168 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define CCM_CLOCK_ROOT_DISABLE \
+  { .action = CCM_CLOCK_ROOT_ACTION_DISABLE }
+#define CCM_CLOCK_ROOT_IGNORE \
+  { .action = CCM_CLOCK_ROOT_ACTION_IGNORE }
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+enum ccm_clock_root_action_e
+{
+  CCM_CLOCK_ROOT_ACTION_DISABLE = 0,
+  CCM_CLOCK_ROOT_CONFIGURE,
+  CCM_CLOCK_ROOT_ACTION_IGNORE
+};
+
+struct ccm_clock_root
+{
+  uint8_t action;
+  uint8_t div;
+  uint8_t mux;
+};
+
+struct ccm_clock_root_config_s
+{
+  union
+  {
+    struct
+    {
+      struct ccm_clock_root m7_clk_root;
+      struct ccm_clock_root m33_clk_root;
+      struct ccm_clock_root edgelock_clk_root;
+      struct ccm_clock_root bus_aon_clk_root;
+      struct ccm_clock_root bus_wakeup_clk_root;
+      struct ccm_clock_root wakeup_axi_clk_root;
+      struct ccm_clock_root swo_trace_clk_root;
+      struct ccm_clock_root m33_systick_clk_root;
+      struct ccm_clock_root m7_systick_clk_root;
+      struct ccm_clock_root flexio1_clk_root;
+      struct ccm_clock_root flexio2_clk_root;
+      struct ccm_clock_root lpit3_clk_root;
+      struct ccm_clock_root lptimer1_clk_root;
+      struct ccm_clock_root lptimer2_clk_root;
+      struct ccm_clock_root lptimer3_clk_root;
+      struct ccm_clock_root tpm2_clk_root;
+      struct ccm_clock_root tpm4_clk_root;
+      struct ccm_clock_root tpm5_clk_root;
+      struct ccm_clock_root tpm6_clk_root;
+      struct ccm_clock_root gpt1_clk_root;
+      struct ccm_clock_root gpt2_clk_root;
+      struct ccm_clock_root flexspi1_clk_root;
+      struct ccm_clock_root flexspi2_clk_root;
+      struct ccm_clock_root flexspi_slv_clk_root;
+      struct ccm_clock_root can1_clk_root;
+      struct ccm_clock_root can2_clk_root;
+      struct ccm_clock_root can3_clk_root;
+      struct ccm_clock_root lpuart0102_clk_root;
+      struct ccm_clock_root lpuart0304_clk_root;
+      struct ccm_clock_root lpuart0506_clk_root;
+      struct ccm_clock_root lpuart0708_clk_root;
+      struct ccm_clock_root lpuart0910_clk_root;
+      struct ccm_clock_root lpuart1112_clk_root;
+      struct ccm_clock_root lpi2c0102_clk_root;
+      struct ccm_clock_root lpi2c0304_clk_root;
+      struct ccm_clock_root lpi2c0506_clk_root;
+      struct ccm_clock_root lpspi0102_clk_root;
+      struct ccm_clock_root lpspi0304_clk_root;
+      struct ccm_clock_root lpspi0506_clk_root;
+      struct ccm_clock_root i3c1_clk_root;
+      struct ccm_clock_root i3c2_clk_root;
+      struct ccm_clock_root usdhc1_clk_root;
+      struct ccm_clock_root usdhc2_clk_root;
+      struct ccm_clock_root semc_clk_root;
+      struct ccm_clock_root adc1_clk_root;
+      struct ccm_clock_root adc2_clk_root;
+      struct ccm_clock_root acmp_clk_root;
+      struct ccm_clock_root ecat_clk_root;
+      struct ccm_clock_root enet_clk_root;
+      struct ccm_clock_root tmr_1588_clk_root;
+      struct ccm_clock_root netc_clk_root;
+      struct ccm_clock_root mac0_clk_root;
+      struct ccm_clock_root mac1_clk_root;
+      struct ccm_clock_root mac2_clk_root;
+      struct ccm_clock_root mac3_clk_root;
+      struct ccm_clock_root mac4_clk_root;
+      struct ccm_clock_root serdes0_clk_root;
+      struct ccm_clock_root serdes1_clk_root;
+      struct ccm_clock_root serdes2_clk_root;
+      struct ccm_clock_root serdes0_1g_clk_root;
+      struct ccm_clock_root serdes1_1g_clk_root;
+      struct ccm_clock_root serdes2_1g_clk_root;
+      struct ccm_clock_root xcelbusx_clk_root;
+      struct ccm_clock_root xriocu4_clk_root;
+      struct ccm_clock_root mctrl_clk_root;
+      struct ccm_clock_root sai1_clk_root;
+      struct ccm_clock_root sai2_clk_root;
+      struct ccm_clock_root sai3_clk_root;
+      struct ccm_clock_root sai4_clk_root;
+      struct ccm_clock_root spdif_clk_root;
+      struct ccm_clock_root asrc_clk_root;
+      struct ccm_clock_root mic_clk_root;
+      struct ccm_clock_root cko1_clk_root;
+      struct ccm_clock_root cko2_clk_root;
+    };
+    struct ccm_clock_root clock_root[CCM_CR_COUNT];
+  };
+};
+
+struct ccm_arm_pll
+{
+  uint8_t post_div;
+  uint8_t loop_div;
+};
+
+struct ccm_sys_pll1
+{
+  uint32_t enable;
+  uint8_t div;
+  uint32_t num;
+  uint32_t denom;
+};
+
+struct ccm_sys_pll2
+{
+  uint32_t mfd;
+  uint32_t ss;
+  uint8_t ss_enable;
+  uint16_t ss_stop;
+  uint16_t ss_step;
+  uint32_t pfd0;
+  uint32_t pfd1;
+  uint32_t pfd2;
+  uint32_t pfd3;
+};
+
+struct ccm_sys_pll3
+{
+  uint32_t pfd0;
+  uint32_t pfd1;
+  uint32_t pfd2;
+  uint32_t pfd3;
+};
+
+struct clock_configuration_s
+{
+  struct ccm_clock_root_config_s ccm;
+  struct ccm_arm_pll             arm_pll;
+  struct ccm_sys_pll1            sys_pll1;
+  struct ccm_sys_pll2            sys_pll2;
+  struct ccm_sys_pll3            sys_pll3;
+};
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+extern const struct clock_configuration_s g_initial_clkconfig;
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
 /* LPCG helpers so the shared code can enable/disable peripheral clock gates
  * with the same names as on other i.MX RT families.
  */
