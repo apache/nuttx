@@ -4,9 +4,12 @@ RTL8730E_EVB
 
 .. tags:: chip:rtl8730e, arch:arm, vendor:realtek
 
-.. image:: img/rtl8730e_evb.png
+.. figure:: rtl8730e_evb.png
+   :scale: 50 %
    :align: center
-   :alt: PKE8730EAH-VD3-F32 evaluation board
+   :alt: Realtek RTL8730E EVB development board
+
+   The RTL8730E EVB development board.
 
 The RTL8730E_EVB is a Realtek RTL8730E evaluation board built around the
 RTL8730EH (DDR2 64 MB, 16 MB NOR flash).  NuttX runs on the dual-core Arm
@@ -30,6 +33,8 @@ Supported in this NuttX port:
 * NSH shell over the LOG-UART console
 * SMP on both Cortex-A32 cores; tasks are dispatched across CPU0 and CPU1
   by the NuttX SMP scheduler
+* GPIO pins exposed as ``/dev/gpioN`` character devices (input, output and
+  interrupt), driven through the SDK fwlib ROM layer
 * littlefs persistent storage mounted at ``/data`` (a dedicated SPI NOR flash
   partition), backing the Wi-Fi key-value store
 * Wi-Fi station and SoftAP through the ``wapi`` tool
@@ -51,6 +56,24 @@ nsh
 
 Networking-enabled NSH with SMP, littlefs at ``/data``, and the ``wapi``
 Wi-Fi tool.  The console is the LOG-UART at 1500000 8N1.
+
+gpio
+----
+
+Minimal NSH with the GPIO driver and the ``gpio`` example enabled (no Wi-Fi).
+The board registers three pins from its pin table (see
+``boards/arm/rtl8730e/rtl8730e_evb/src/rtl8730e_gpio.c``): an output at
+``/dev/gpio0``, an input at ``/dev/gpio1`` and an interrupt pin at
+``/dev/gpio2``.  Edit that table to match a board's wiring.  Exercise them
+with the example::
+
+    nsh> gpio -o 1 /dev/gpio0     # drive the output high
+    nsh> gpio /dev/gpio1          # read the input
+    nsh> gpio -w 1 /dev/gpio2     # wait for a falling-edge interrupt
+
+Pins are encoded with the ``AMEBA_PA()`` / ``AMEBA_PB()`` helpers from
+``arch/arm/src/common/ameba/ameba_gpio.h`` (port A/B, pin 0-31), matching the
+Ameba SDK ``PinName`` layout.
 
 Wi-Fi
 =====
