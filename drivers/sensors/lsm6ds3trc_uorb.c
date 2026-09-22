@@ -1675,21 +1675,17 @@ int lsm6ds3trc_register(FAR struct i2c_master_s *i2c, uint8_t addr,
   /* Put the sensor into its power-on register state before anything else
    * touches it, and in particular before the interrupt is attached.
    *
-   * The LSM6DS3TR-C has its own supply and its own reset: an MCU reset
-   * (watchdog, RTS pin, esptool, `reboot`) does not reset the sensor, so
-   * it comes up still holding whatever the previous session configured.
-   * For this driver that means INT1_CTRL.INT1_FTH still set and a FIFO
-   * still over its watermark -- i.e. INT1 asserted high, immediately, at
-   * registration time.
+   * The LSM6DS3TR-C has its own supply and its own reset: a plain MCU
+   * reset does not reset the sensor, so it comes up still holding
+   * whatever the previous session configured.  For this driver that
+   * means INT1_CTRL.INT1_FTH still set and a FIFO still over its
+   * watermark -- i.e. INT1 asserted, immediately, at registration time.
    *
-   * INT1 is level-triggered (ONHIGH; see the comment in
-   * boards/xtensa/esp32s3/common/src/esp32s3_board_lsm6ds3trc.c for why
-   * edge triggering is wrong here).  A level-triggered line that is
-   * already active when esp_gpioirqenable() runs re-fires forever, and
-   * the board then wedges during bring-up with no console output and no
-   * crash dump -- observed as a boot that stops right after Wi-Fi init
-   * and never reaches NSH, recoverable only by physically removing power
-   * from the sensor.
+   * The board is expected to configure INT1 as level-triggered (a FIFO
+   * watermark is a level condition, not a pulse).  Arming an interrupt
+   * on a line that is already active when config->attach() enables it
+   * can re-fire continuously and wedge the caller with no diagnostic
+   * output, depending on the arch's own interrupt-controller behavior.
    *
    * SW_RESET (CTRL3_C bit 0) clears INT1_CTRL and FIFO_CTRL back to 0,
    * which deasserts INT1.  It self-clears in ~50us; poll rather than
