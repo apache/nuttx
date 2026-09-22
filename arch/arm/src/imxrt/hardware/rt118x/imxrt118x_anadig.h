@@ -176,6 +176,14 @@
 #define IMXRT_ANADIG_OSC_24M_CTRL        (IMXRT_ANADIG_OSC_BASE + 0x3320)
 #define IMXRT_ANADIG_OSC_400M_CTRL1      (IMXRT_ANADIG_OSC_BASE + 0x3350)
 
+#define ANADIG_OSC_24M_CTRL_BYPASS_EN     (1u << 1)   /* Use external clock on XTALI instead of crystal */
+#define ANADIG_OSC_24M_CTRL_LP_EN         (1u << 2)   /* 0: High Gain mode, 1: Low-Power mode */
+#define ANADIG_OSC_24M_CTRL_COMP_MODE     (1u << 3)   /* 0: single-ended (default), 1: differential (test) */
+#define ANADIG_OSC_24M_CTRL_OSC_EN        (1u << 4)   /* Enable the 24MHz XTALOSC */
+#define ANADIG_OSC_24M_CTRL_GATE          (1u << 7)   /* 1: output gated (default), 0: output not gated */
+#define ANADIG_OSC_24M_CTRL_STABLE        (1u << 30)  /* RO: 1 once the OSC stable time has been reached */
+#define ANADIG_OSC_24M_CTRL_CONTROL_MODE  (1u << 31)  /* 0: software mode (default), 1: GPC mode */
+
 /* PHY_LDO registers (IMXRT1180RM Ch. 41.  Physical: 0x4448_4680).  Each
  * has RW/SET/CLR/TOG aliases.
  */
