@@ -1296,6 +1296,7 @@ static uint32_t mcan_getreg(struct sam_mcan_s *priv, int offset)
 static uint32_t mcan_getreg(struct sam_mcan_s *priv, int offset)
 {
   const struct sam_config_s *config = priv->config;
+
   return getreg32(config->base + offset);
 }
 
@@ -1891,12 +1892,12 @@ static int mcan_add_extfilter(struct sam_mcan_s *priv,
               regval |= (MCAN_CCCR_INIT | MCAN_CCCR_CCE);
               mcan_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
 
-             /* Update the Global Filter Configuration so that received
-              * messages are rejected if they do not match the acceptance
-              * filter.
-              *
-              *   ANFE=2: Discard all rejected frames
-              */
+              /* Update the Global Filter Configuration so that received
+               * messages are rejected if they do not match the acceptance
+               * filter.
+               *
+               *   ANFE=2: Discard all rejected frames
+               */
 
               regval  = mcan_getreg(priv, SAM_MCAN_GFC_OFFSET);
               regval &= ~MCAN_GFC_ANFE_MASK;
@@ -2158,12 +2159,12 @@ static int mcan_add_stdfilter(struct sam_mcan_s *priv,
               regval |= (MCAN_CCCR_INIT | MCAN_CCCR_CCE);
               mcan_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
 
-             /* Update the Global Filter Configuration so that received
-              * messages are rejected if they do not match the acceptance
-              * filter.
-              *
-              *   ANFS=2: Discard all rejected frames
-              */
+              /* Update the Global Filter Configuration so that received
+               * messages are rejected if they do not match the acceptance
+               * filter.
+               *
+               *   ANFS=2: Discard all rejected frames
+               */
 
               regval  = mcan_getreg(priv, SAM_MCAN_GFC_OFFSET);
               regval &= ~MCAN_GFC_ANFS_MASK;
@@ -3788,14 +3789,14 @@ static int mcan_interrupt(int irq, void *context, void *arg)
 
           if ((priv->rev == 0) && ((ie & MCAN_INT_ACKE) == 0))
             {
-                ie |= MCAN_INT_ACKE;
-                mcan_putreg(priv, SAM_MCAN_IE_OFFSET, ie);
+              ie |= MCAN_INT_ACKE;
+              mcan_putreg(priv, SAM_MCAN_IE_OFFSET, ie);
             }
           else if ((priv->rev == 1) &&
                    ((ie & (MCAN_INT_PEA | MCAN_INT_PED)) == 0))
             {
-                ie |= MCAN_INT_PEA | MCAN_INT_PED;
-                mcan_putreg(priv, SAM_MCAN_IE_OFFSET, ie);
+              ie |= MCAN_INT_PEA | MCAN_INT_PED;
+              mcan_putreg(priv, SAM_MCAN_IE_OFFSET, ie);
             }
 
           /* Clear the pending TX completion interrupt (and all
@@ -4246,10 +4247,10 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
 
   if (config->loopback)
     {
-     /* MCAN_CCCR_TEST  - Test mode enable
-      * MCAN_CCCR_MON   - Bus monitoring mode (for internal loopback)
-      * MCAN_TEST_LBCK  - Loopback mode
-      */
+      /* MCAN_CCCR_TEST  - Test mode enable
+       * MCAN_CCCR_MON   - Bus monitoring mode (for internal loopback)
+       * MCAN_TEST_LBCK  - Loopback mode
+       */
 
       regval = mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET);
       regval |= (MCAN_CCCR_TEST | MCAN_CCCR_MON);
