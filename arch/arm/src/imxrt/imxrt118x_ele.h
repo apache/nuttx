@@ -180,6 +180,23 @@ int imxrt118x_ele_close_device(void);
 uint32_t imxrt118x_ele_get_lifecycle(void);
 
 /****************************************************************************
+ * Name: imxrt118x_ele_get_soc_revision
+ *
+ * Description:
+ *   Return the SoC silicon revision reported by ELE GET_INFO. The revision
+ *   uses NXP's hexadecimal major/minor encoding, for example 0xb0 or 0xc0.
+ *
+ * Output Parameters:
+ *   revision - SoC silicon revision.
+ *
+ * Returned Value:
+ *   OK on success, a negated errno value otherwise.
+ *
+ ****************************************************************************/
+
+int imxrt118x_ele_get_soc_revision(uint8_t *revision);
+
+/****************************************************************************
  * Name: imxrt118x_ele_auth_oem_ctnr
  *
  * Description:

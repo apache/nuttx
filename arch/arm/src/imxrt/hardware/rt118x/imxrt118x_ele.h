@@ -76,9 +76,12 @@
 
 /* GET_INFO returned data. */
 
-#define ELE_GET_INFO_BYTES        160
-#define ELE_GET_INFO_LC_WORD      2
-#define ELE_GET_INFO_LC_MASK      0xffff
+#define ELE_GET_INFO_BYTES         160
+#define ELE_GET_INFO_SOC_WORD      1
+#define ELE_GET_INFO_SOC_REV_SHIFT 24
+#define ELE_GET_INFO_SOC_REV_MASK  0xff
+#define ELE_GET_INFO_LC_WORD       2
+#define ELE_GET_INFO_LC_MASK       0xffff
 
 /* System 3 Messaging Unit A (IMXRT1180RM Ch. 65).
  * The CM33 boots in Secure state and NXP's own SDK uses the Secure alias
