@@ -1030,6 +1030,13 @@ void stm32_stdclockconfig(void)
   /* Enable External High-Speed Clock (HSE) */
 
   regval  = getreg32(STM32_RCC_CR);
+  regval &= ~(RCC_CR_HSEBYP | RCC_CR_HSEEXT);
+#ifdef STM32_HSEBYP_ENABLE
+  regval |= RCC_CR_HSEBYP;          /* External oscillator */
+#  ifdef STM32_HSEEXT_ENABLE
+  regval |= RCC_CR_HSEEXT;          /* Digital bypass input */
+#  endif
+#endif
   regval |= RCC_CR_HSEON;           /* Enable HSE */
   putreg32(regval, STM32_RCC_CR);
 
