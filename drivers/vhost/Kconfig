@@ -8,7 +8,7 @@ config ARCH_HAVE_VHOST_IOMAP
 	default n
 
 config DRIVERS_VHOST
-	bool "Virtual Host (device-role virtio) support"
+	bool
 	select OPENAMP
 	select SCHED_WORKQUEUE
 	default n
@@ -28,6 +28,7 @@ config DRIVERS_VHOST_NET
 	bool "Virtual Host Network Device Support"
 	default n
 	depends on NETDEVICES
+	select ARCH_HAVE_NETDEV_STATISTICS
 	select DRIVERS_VHOST
 	---help---
 		Device-role virtio-net: expose this side as a network card to a
@@ -36,17 +37,16 @@ config DRIVERS_VHOST_NET
 
 config DRIVERS_VHOST_NET_MACADDR
 	hex "vhost-net MAC address"
-	default 0x025433000001
+	default 0x0
 	depends on DRIVERS_VHOST_NET
 	---help---
-		No virtio-net features are negotiated on this link, so there is
-		no MAC config space to read; this fixed, software-assigned,
-		locally administered address is presented to the network stack
-		instead.
+		Fixed, software-assigned, locally administered MAC address
+		presented to the network stack when the peer does not publish a
+		valid address in the configuration space.  Set to 0 to generate
+		a random locally administered unicast address instead.
 
 config DRIVERS_VHOST_RPMSG
 	bool "Virtual Host Rpmsg Device Support"
 	default n
 	select RPMSG_VIRTIO
 	select DRIVERS_VHOST
-

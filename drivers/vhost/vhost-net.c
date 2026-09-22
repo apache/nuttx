@@ -34,6 +34,18 @@
  * No virtio-net features are negotiated (the resource table advertises
  * none), so every packet is prefixed by the legacy 10-byte
  * struct virtio_net_hdr with all fields zero (gso_type NONE).
+ *
+ * Notification handling follows the NAPI pattern: vhost_net_getbufs()
+ * suppresses the peer's kicks as soon as a ring hands out work and only
+ * re-arms them once it ran dry, so a busy link costs no cross-core
+ * notifications.  Receive completions are batched and published with a
+ * single kick per poll burst.
+ *
+ * The virtqueues are touched from exactly one context, the netdev upper
+ * half's work thread (see the NETDEV_RX_WORK note in vhost_net_probe()),
+ * so no locking is needed.  The kick callbacks run in interrupt context
+ * and must therefore stay clear of the rings -- all they do is wake the
+ * upper half.
  */
 
 /****************************************************************************
@@ -43,32 +55,47 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <errno.h>
+#include <inttypes.h>
+#include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/param.h>
 
+#include <nuttx/arch.h>
+#include <nuttx/compiler.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/net/ethernet.h>
 #include <nuttx/net/netdev_lowerhalf.h>
 #include <nuttx/vhost/vhost.h>
 
 #include "vhost-net.h"
 
-/* Peer buffers are referenced by 64-bit guest physical addresses that may
- * exceed the CPU's direct reach; arches that provide a translation window
- * implement up_vhost_iomap() (ARCH_HAVE_VHOST_IOMAP), others use the
- * identity mapping.
+/* Peer buffers are referenced by the raw 64-bit addresses found in the
+ * descriptors.  Normally that is just a physical address, and the arch
+ * translation that libmetal (and therefore virtqueue_phys_to_virt()) also
+ * relies on is up_addrenv_pa_to_va().
+ *
+ * ARCH_HAVE_VHOST_IOMAP targets cannot go through libmetal at all: there
+ * metal_phys_addr_t (unsigned long) and up_addrenv_pa_to_va() (uintptr_t)
+ * are narrower than the descriptor address, so they would truncate it.
+ * Those arches expose a translation window through up_vhost_iomap()
+ * instead, which reports how many contiguous bytes the returned pointer
+ * covers so that callers can split accesses at the window boundary.
  */
 
 #ifdef CONFIG_ARCH_HAVE_VHOST_IOMAP
 #  define vhost_net_map(pa, avl) up_vhost_iomap((pa), (avl))
 #else
-static inline FAR void *vhost_net_map(uint64_t pa, FAR size_t *avail)
+static inline_function FAR void *vhost_net_map(uint64_t pa,
+                                               FAR size_t *avail)
 {
   if (avail != NULL)
     {
       *avail = SIZE_MAX;
     }
 
-  return (FAR void *)(uintptr_t)pa;
+  return up_addrenv_pa_to_va((uintptr_t)pa);
 }
 #endif
 
@@ -88,8 +115,12 @@ static inline FAR void *vhost_net_map(uint64_t pa, FAR size_t *avail)
 
 #define VHOST_NET_HDRSIZE    10
 
+/* virtio-net feature bits referenced here */
+
+#define VHOST_NET_F_MAC      5
+
 /* netpkt quota per direction and the longest peer descriptor chain we
- * accept on receive (Linux commonly splits header and payload).
+ * accept on either ring (Linux commonly splits header and payload).
  */
 
 #define VHOST_NET_NPKTS      8
@@ -99,12 +130,21 @@ static inline FAR void *vhost_net_map(uint64_t pa, FAR size_t *avail)
  * Private Types
  ****************************************************************************/
 
+/* Leading field of the virtio-net configuration space (virtio 1.2
+ * section 5.1.4); only the MAC is read here.
+ */
+
+struct vhost_net_config_s
+{
+  uint8_t mac[IFHWADDRLEN];             /* VIRTIO_NET_F_MAC */
+};
+
 struct vhost_net_priv_s
 {
   struct netdev_lowerhalf_s lower;      /* Must be first for casts */
-  FAR struct vhost_device  *hdev;
   FAR struct virtqueue     *txq;        /* peer RX ring (filled here) */
   FAR struct virtqueue     *rxq;        /* peer TX ring (drained here) */
+  bool                      rxpending;  /* Used entries not yet notified */
 };
 
 /****************************************************************************
@@ -152,12 +192,206 @@ static struct vhost_driver g_vhost_net_driver =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: vhost_net_getbufs
+ *
+ * Description:
+ *   Fetch the next descriptor chain the peer posted on a ring and leave
+ *   the ring's notifications in the right state: suppressed while it keeps
+ *   delivering work, armed once it is empty.
+ *
+ *   The kick that raced with the re-arm was already swallowed, so
+ *   virtqueue_enable_cb() reports whether a chain landed in that window
+ *   and it is picked up here instead of being stranded.
+ *
+ * Returned Value:
+ *   The head descriptor index, -ENOMEM if the ring is empty, or another
+ *   negated errno for a malformed chain (already recycled by the ring
+ *   layer, so it must not be completed again).
+ *
+ ****************************************************************************/
+
+static int vhost_net_getbufs(FAR struct virtqueue *vq,
+                             FAR struct vhost_buf_s *vb, size_t vbsize,
+                             FAR size_t *cnt)
+{
+  int head = vhost_get_vq_buffers_pa(vq, vb, vbsize, cnt);
+
+  if (head == -ENOMEM)
+    {
+      if (!virtqueue_enable_cb(vq))
+        {
+          return -ENOMEM;
+        }
+
+      head = vhost_get_vq_buffers_pa(vq, vb, vbsize, cnt);
+      if (head == -ENOMEM)
+        {
+          return -ENOMEM;
+        }
+    }
+
+  /* Work in hand: no need for the peer to keep knocking */
+
+  virtqueue_disable_cb(vq);
+  return head;
+}
+
+/****************************************************************************
+ * Name: vhost_net_rxcomplete / vhost_net_rxflush
+ *
+ * Description:
+ *   Hand a receive chain back to the peer.  The used ring is published
+ *   immediately but the notification is deferred to vhost_net_rxflush(),
+ *   so a burst costs one kick instead of one per frame.
+ *
+ ****************************************************************************/
+
+static void vhost_net_rxcomplete(FAR struct vhost_net_priv_s *priv,
+                                 int head, uint32_t len)
+{
+  virtqueue_add_consumed_buffer(priv->rxq, head, len);
+  priv->rxpending = true;
+}
+
+static void vhost_net_rxflush(FAR struct vhost_net_priv_s *priv)
+{
+  if (priv->rxpending)
+    {
+      priv->rxpending = false;
+      virtqueue_kick(priv->rxq);
+    }
+}
+
+/****************************************************************************
+ * Name: vhost_net_pkt2vb
+ *
+ * Description:
+ *   Serialize the zeroed virtio-net header followed by the frame into the
+ *   descriptor chain the peer posted, honoring both descriptor and
+ *   translation-window boundaries.
+ *
+ * Returned Value:
+ *   OK on success, -EMSGSIZE if the chain is too short for the frame, or
+ *   -EIO if the frame could not be read out of the netpkt.
+ *
+ ****************************************************************************/
+
+static int vhost_net_pkt2vb(FAR struct netdev_lowerhalf_s *dev,
+                            FAR netpkt_t *pkt,
+                            FAR const struct vhost_buf_s *vb, size_t cnt,
+                            unsigned int len)
+{
+  unsigned int total = len + VHOST_NET_HDRSIZE;
+  unsigned int pos = 0;
+  size_t i;
+
+  for (i = 0; i < cnt && pos < total; i++)
+    {
+      uint64_t pa = vb[i].addr;
+      unsigned int blen = MIN(vb[i].len, total - pos);
+
+      while (blen > 0)
+        {
+          FAR uint8_t *dst;
+          unsigned int hdrlen = 0;
+          unsigned int chunk;
+          size_t avail;
+
+          dst   = vhost_net_map(pa, &avail);
+          chunk = MIN(blen, avail);
+          if (chunk == 0)
+            {
+              return -EIO;
+            }
+
+          if (pos < VHOST_NET_HDRSIZE)
+            {
+              hdrlen = MIN(VHOST_NET_HDRSIZE - pos, chunk);
+              memset(dst, 0, hdrlen);
+            }
+
+          if (chunk > hdrlen &&
+              netpkt_copyout(dev, dst + hdrlen, pkt, chunk - hdrlen,
+                             pos + hdrlen - VHOST_NET_HDRSIZE) < 0)
+            {
+              return -EIO;
+            }
+
+          pos  += chunk;
+          pa   += chunk;
+          blen -= chunk;
+        }
+    }
+
+  return pos == total ? OK : -EMSGSIZE;
+}
+
+/****************************************************************************
+ * Name: vhost_net_vb2pkt
+ *
+ * Description:
+ *   Copy a received descriptor chain into a netpkt, skipping the leading
+ *   virtio-net header (which the peer may place in its own descriptor)
+ *   and honoring translation-window boundaries.
+ *
+ ****************************************************************************/
+
+static int vhost_net_vb2pkt(FAR struct netdev_lowerhalf_s *dev,
+                            FAR netpkt_t *pkt,
+                            FAR const struct vhost_buf_s *vb, size_t cnt,
+                            unsigned int len)
+{
+  unsigned int skip = VHOST_NET_HDRSIZE;
+  unsigned int pos = 0;
+  size_t i;
+
+  for (i = 0; i < cnt && pos < len; i++)
+    {
+      uint64_t pa = vb[i].addr;
+      unsigned int blen = vb[i].len;
+
+      if (skip > 0)
+        {
+          unsigned int drop = MIN(skip, blen);
+
+          pa   += drop;
+          blen -= drop;
+          skip -= drop;
+        }
+
+      blen = MIN(blen, len - pos);
+
+      while (blen > 0)
+        {
+          FAR const uint8_t *src;
+          unsigned int chunk;
+          size_t avail;
+
+          src   = vhost_net_map(pa, &avail);
+          chunk = MIN(blen, avail);
+          if (chunk == 0 ||
+              netpkt_copyin(dev, pkt, src, chunk, pos) < 0)
+            {
+              return -EIO;
+            }
+
+          pos  += chunk;
+          pa   += chunk;
+          blen -= chunk;
+        }
+    }
+
+  return pos == len ? OK : -EIO;
+}
+
+/****************************************************************************
  * Name: vhost_net_rxready / vhost_net_txdone
  *
  * Description:
- *   Virtqueue kick callbacks (transport notification context, thread
- *   level).  Notify the upper half that ring work is pending; the rings
- *   are processed in transmit()/receive().
+ *   Virtqueue kick callbacks.  These run in interrupt context (rptun
+ *   delivers notifications straight from its ISR), so they must not touch
+ *   the rings -- that is what keeps the ring state single-context and
+ *   lock-free.  Waking the upper half is all they do.
  *
  ****************************************************************************/
 
@@ -181,12 +415,32 @@ static void vhost_net_txdone(FAR struct virtqueue *vq)
 
 static int vhost_net_ifup(FAR struct netdev_lowerhalf_s *dev)
 {
+  FAR struct vhost_net_priv_s *priv = (FAR struct vhost_net_priv_s *)dev;
+
+  /* Arm both lanes; vhost_net_getbufs() suppresses them again as soon as
+   * a ring starts delivering work.
+   */
+
+  virtqueue_enable_cb(priv->rxq);
+  virtqueue_enable_cb(priv->txq);
+
   netdev_lower_carrier_on(dev);
   return OK;
 }
 
 static int vhost_net_ifdown(FAR struct netdev_lowerhalf_s *dev)
 {
+  FAR struct vhost_net_priv_s *priv = (FAR struct vhost_net_priv_s *)dev;
+
+  /* The upper half has already cancelled the poll work, so the rings are
+   * idle here.  Stop taking notifications, then let the peer know about
+   * the receive buffers completed but not yet notified.
+   */
+
+  virtqueue_disable_cb(priv->rxq);
+  virtqueue_disable_cb(priv->txq);
+  vhost_net_rxflush(priv);
+
   netdev_lower_carrier_off(dev);
   return OK;
 }
@@ -195,9 +449,11 @@ static int vhost_net_ifdown(FAR struct netdev_lowerhalf_s *dev)
  * Name: vhost_net_transmit
  *
  * Description:
- *   Fill one peer-posted RX buffer with the frame and complete it.
+ *   Fill one peer-posted RX chain with the frame and complete it.
  *   Completion is synchronous: the netpkt is consumed and freed before
- *   returning.
+ *   returning.  Note that txdone is deliberately not signalled from here,
+ *   the upper half continues its poll on a successful transmit and
+ *   netpkt_free() already returns the quota.
  *
  ****************************************************************************/
 
@@ -205,84 +461,56 @@ static int vhost_net_transmit(FAR struct netdev_lowerhalf_s *dev,
                               FAR netpkt_t *pkt)
 {
   FAR struct vhost_net_priv_s *priv = (FAR struct vhost_net_priv_s *)dev;
-  struct vhost_buf_s vb[1];
+  struct vhost_buf_s vb[VHOST_NET_MAXCHAIN];
   unsigned int len;
-  unsigned int pos;
   size_t cnt;
   int head;
+  int ret;
 
-  head = vhost_get_vq_buffers_pa(priv->txq, vb, nitems(vb), &cnt);
-  if (head < 0)
+  head = vhost_net_getbufs(priv->txq, vb, nitems(vb), &cnt);
+  if (head == -ENOMEM)
     {
-      /* Peer has not posted buffers (yet).  Re-enable its notifications;
-       * enable_cb reports buffers that arrived in the race window (their
-       * kick was suppressed), so grab them now if so.
+      /* The peer has no receive buffer posted.  Its notifications are
+       * armed again now, so stop the poll and let vhost_net_txdone()
+       * resume it; the upper half keeps the packet.
        */
 
-      if (!virtqueue_enable_cb(priv->txq))
-        {
-          return -ENOBUFS;
-        }
-
-      head = vhost_get_vq_buffers_pa(priv->txq, vb, nitems(vb), &cnt);
-      if (head < 0)
-        {
-          return -ENOBUFS;
-        }
+      return -ENOBUFS;
     }
 
   len = netpkt_getdatalen(dev, pkt);
-  if (len + VHOST_NET_HDRSIZE > vb[0].len)
+  if (head < 0)
     {
-      /* Frame cannot fit the peer's buffer: complete it empty (drop) */
+      /* Malformed chain; the ring layer already recycled it and only the
+       * notification below is still owed.
+       */
 
-      vhosterr("frame %u exceeds peer buffer %" PRIu32 ", dropped\n",
-               len, vb[0].len);
-      len = 0;
+      ret = head;
     }
   else
     {
-      /* Serialize the zero header + frame into the peer buffer through
-       * the translation window, honoring window-boundary splits.
+      /* A failed copy is completed with a zero length, which the peer
+       * driver discards, rather than leaking the descriptor.
        */
 
-      for (pos = 0; pos < len + VHOST_NET_HDRSIZE; )
-        {
-          size_t avail;
-          FAR uint8_t *dst = vhost_net_map(vb[0].addr + pos, &avail);
-          unsigned int chunk = MIN(len + VHOST_NET_HDRSIZE - pos, avail);
-          unsigned int hdrlen = 0;
-          int ret = OK;
-
-          if (pos < VHOST_NET_HDRSIZE)
-            {
-              hdrlen = MIN(VHOST_NET_HDRSIZE - pos, chunk);
-              memset(dst, 0, hdrlen);
-            }
-
-          if (chunk > hdrlen)
-            {
-              ret = netpkt_copyout(dev, dst + hdrlen, pkt, chunk - hdrlen,
-                                   pos + hdrlen - VHOST_NET_HDRSIZE);
-            }
-
-          if (ret < 0)
-            {
-              vhosterr("netpkt_copyout failed, ret=%d, dropped\n", ret);
-              len = 0;
-              break;
-            }
-
-          pos += chunk;
-        }
+      ret = vhost_net_pkt2vb(dev, pkt, vb, cnt, len);
+      virtqueue_add_consumed_buffer(priv->txq, head,
+                                    ret < 0 ? 0 : len + VHOST_NET_HDRSIZE);
     }
 
-  virtqueue_add_consumed_buffer(priv->txq, head,
-                                len ? len + VHOST_NET_HDRSIZE : 0);
   virtqueue_kick(priv->txq);
 
+  if (ret < 0)
+    {
+      vhosterr("tx dropped: %u bytes, ret=%d\n", len, ret);
+      NETDEV_TXERRORS(&dev->netdev);
+    }
+  else
+    {
+      NETDEV_TXDONE(&dev->netdev);
+    }
+
   netpkt_free(dev, pkt, NETPKT_TX);
-  netdev_lower_txdone(dev);
   return OK;
 }
 
@@ -290,9 +518,10 @@ static int vhost_net_transmit(FAR struct netdev_lowerhalf_s *dev,
  * Name: vhost_net_receive
  *
  * Description:
- *   Harvest one frame (possibly a descriptor chain) from the peer TX
- *   ring, copy it into a fresh netpkt (stripping the virtio-net header)
- *   and return the buffers to the peer.
+ *   Harvest the next frame from the peer TX ring, copy it into a fresh
+ *   netpkt (stripping the virtio-net header) and return the buffers to
+ *   the peer.  Frames rejected by the length checks are skipped inline so
+ *   a single malformed chain does not abort the poll.
  *
  ****************************************************************************/
 
@@ -300,102 +529,113 @@ static FAR netpkt_t *vhost_net_receive(FAR struct netdev_lowerhalf_s *dev)
 {
   FAR struct vhost_net_priv_s *priv = (FAR struct vhost_net_priv_s *)dev;
   struct vhost_buf_s vb[VHOST_NET_MAXCHAIN];
-  FAR netpkt_t *pkt = NULL;
-  unsigned int total = 0;
-  unsigned int skip = VHOST_NET_HDRSIZE;
-  int offset = 0;
+  FAR netpkt_t *pkt;
+  uint64_t total;
+  unsigned int len;
   size_t cnt;
   size_t i;
   int head;
+  int ret;
 
-  head = vhost_get_vq_buffers_pa(priv->rxq, vb, nitems(vb), &cnt);
-  if (head < 0)
+  for (; ; )
     {
-      /* See vhost_net_transmit() for the enable_cb recheck rationale */
-
-      if (!virtqueue_enable_cb(priv->rxq))
+      head = vhost_net_getbufs(priv->rxq, vb, nitems(vb), &cnt);
+      if (head == -ENOMEM)
         {
-          return NULL;
-        }
-
-      head = vhost_get_vq_buffers_pa(priv->rxq, vb, nitems(vb), &cnt);
-      if (head < 0)
-        {
-          return NULL;
-        }
-    }
-
-  for (i = 0; i < cnt; i++)
-    {
-      total += vb[i].len;
-    }
-
-  if (total > skip)
-    {
-      pkt = netpkt_alloc(dev, NETPKT_RX);
-    }
-
-  if (pkt != NULL &&
-      netpkt_setdatalen(dev, pkt, total - skip) < total - skip)
-    {
-      vhosterr("rx dropped: cannot size netpkt to %u\n", total - skip);
-      netpkt_free(dev, pkt, NETPKT_RX);
-      pkt = NULL;
-    }
-
-  if (pkt != NULL)
-    {
-      for (i = 0; i < cnt; i++)
-        {
-          uint64_t pa = vb[i].addr;
-          uint32_t blen = vb[i].len;
-
-          if (skip > 0)
-            {
-              uint32_t skiplen = MIN(skip, blen);
-
-              pa   += skiplen;
-              blen -= skiplen;
-              skip -= skiplen;
-            }
-
-          /* Copy through the translation window, honoring
-           * window-boundary splits.
+          /* Ring drained and the peer's notifications are armed again:
+           * publish the batched completions with a single kick and let
+           * the upper half stop polling.
            */
 
-          while (blen > 0)
+          vhost_net_rxflush(priv);
+          return NULL;
+        }
+
+      if (head < 0)
+        {
+          /* Malformed chain; the ring layer already recycled it, so only
+           * the deferred notification is still owed.  Keep draining, the
+           * ring advances on every iteration.
+           */
+
+          NETDEV_RXERRORS(&dev->netdev);
+          priv->rxpending = true;
+          continue;
+        }
+
+      /* Accumulate in 64 bits: the descriptor lengths are peer controlled
+       * 32-bit values and a full chain of them would wrap a narrower sum.
+       */
+
+      for (i = 0, total = 0; i < cnt; i++)
+        {
+          total += vb[i].len;
+        }
+
+      /* A valid frame carries the virtio-net header plus at least a
+       * complete Ethernet header, and must fit the MTU.  Note that
+       * VIRTIO_NET_F_MTU is not negotiated on this link, so the peer sends
+       * according to its own MTU: both ends have to be configured to the
+       * same frame size (CONFIG_NET_ETH_PKTSIZE here) or the peer's larger
+       * frames are dropped rather than handed up with d_len > d_pktsize.
+       */
+
+      if (total < VHOST_NET_HDRSIZE + ETH_HDRLEN ||
+          total > VHOST_NET_HDRSIZE + NETDEV_PKTSIZE(&dev->netdev))
+        {
+          vhosterr("rx dropped: bad frame length %" PRIu64 "\n", total);
+          NETDEV_RXERRORS(&dev->netdev);
+          vhost_net_rxcomplete(priv, head, 0);
+          continue;
+        }
+
+      len = (unsigned int)total - VHOST_NET_HDRSIZE;
+
+      pkt = netpkt_alloc(dev, NETPKT_RX);
+      if (pkt == NULL)
+        {
+          /* Out of receive quota: drop the frame, re-arm the peer's
+           * notifications and stop polling so the stack can release
+           * buffers.
+           */
+
+          vhosterr("rx dropped: no netpkt for %u bytes\n", len);
+          NETDEV_RXDROPPED(&dev->netdev);
+          vhost_net_rxcomplete(priv, head, (uint32_t)total);
+          vhost_net_rxflush(priv);
+          virtqueue_enable_cb(priv->rxq);
+          return NULL;
+        }
+
+      /* Size the netpkt up front so a short chain is caught before any
+       * byte is copied.
+       */
+
+      ret = netpkt_setdatalen(dev, pkt, len);
+      if (ret < 0 || (unsigned int)ret < len)
+        {
+          vhosterr("rx dropped: cannot size netpkt to %u\n", len);
+          NETDEV_RXDROPPED(&dev->netdev);
+          ret = -ENOSPC;
+        }
+      else
+        {
+          ret = vhost_net_vb2pkt(dev, pkt, vb, cnt, len);
+          if (ret < 0)
             {
-              size_t avail;
-              FAR const uint8_t *src = vhost_net_map(pa, &avail);
-              uint32_t chunk = MIN(blen, avail);
-
-              if (netpkt_copyin(dev, pkt, src, chunk, offset) < 0)
-                {
-                  vhosterr("netpkt_copyin failed, rx dropped\n");
-                  netpkt_free(dev, pkt, NETPKT_RX);
-                  pkt = NULL;
-                  goto out;
-                }
-
-              offset += chunk;
-              pa     += chunk;
-              blen   -= chunk;
+              vhosterr("rx dropped: copy failed, ret=%d\n", ret);
+              NETDEV_RXERRORS(&dev->netdev);
             }
         }
+
+      vhost_net_rxcomplete(priv, head, (uint32_t)total);
+      if (ret >= 0)
+        {
+          return pkt;
+        }
+
+      netpkt_free(dev, pkt, NETPKT_RX);
     }
-  else
-    {
-      vhosterr("rx dropped: total=%u (no netpkt)\n", total);
-    }
-
-out:
-
-  /* Hand the buffers back to the peer either way */
-
-  virtqueue_add_consumed_buffer(priv->rxq, head, total);
-  virtqueue_kick(priv->rxq);
-
-  return pkt;
 }
 
 /****************************************************************************
@@ -416,7 +656,6 @@ static int vhost_net_probe(FAR struct vhost_device *hdev)
       return -ENOMEM;
     }
 
-  priv->hdev = hdev;
   hdev->priv = priv;
 
   vqnames[VHOST_NET_PEER_RXQ]   = "vhost_net_peer_rx";
@@ -434,21 +673,53 @@ static int vhost_net_probe(FAR struct vhost_device *hdev)
   priv->txq = hdev->vrings_info[VHOST_NET_PEER_RXQ].vq;
   priv->rxq = hdev->vrings_info[VHOST_NET_PEER_TXQ].vq;
 
+  /* Start from a known state rather than whatever the peer left in the
+   * shared vring; vhost_net_ifup() arms the notifications.
+   */
+
+  virtqueue_disable_cb(priv->txq);
+  virtqueue_disable_cb(priv->rxq);
+
   priv->lower.quota[NETPKT_RX] = VHOST_NET_NPKTS;
   priv->lower.quota[NETPKT_TX] = VHOST_NET_NPKTS;
   priv->lower.ops = &g_vhost_net_ops;
 
-  /* Software-assigned MAC (no MAC config space without negotiated
-   * features); see CONFIG_DRIVERS_VHOST_NET_MACADDR.
+  /* transmit() and receive() must not run concurrently: both walk peer
+   * buffers through the arch translation window, a single shared resource
+   * (see up_vhost_iomap()).  NETDEV_RX_WORK keeps both on the upper
+   * half's work thread, which is also what makes the ring state above
+   * single-context.
+   */
+
+  priv->lower.rxtype = NETDEV_RX_WORK;
+
+  /* Take the address the peer published in the configuration space when
+   * VIRTIO_NET_F_MAC says it is valid.  Otherwise fall back to the fixed
+   * address from Kconfig, or generate a random locally administered
+   * unicast one when that is left at 0 so that two instances on the same
+   * link cannot collide.
    */
 
   mac = priv->lower.netdev.d_mac.ether.ether_addr_octet;
-  mac[0] = (CONFIG_DRIVERS_VHOST_NET_MACADDR >> (8 * 5)) & 0xff;
-  mac[1] = (CONFIG_DRIVERS_VHOST_NET_MACADDR >> (8 * 4)) & 0xff;
-  mac[2] = (CONFIG_DRIVERS_VHOST_NET_MACADDR >> (8 * 3)) & 0xff;
-  mac[3] = (CONFIG_DRIVERS_VHOST_NET_MACADDR >> (8 * 2)) & 0xff;
-  mac[4] = (CONFIG_DRIVERS_VHOST_NET_MACADDR >> (8 * 1)) & 0xff;
-  mac[5] = (CONFIG_DRIVERS_VHOST_NET_MACADDR >> (8 * 0)) & 0xff;
+  if (!vhost_has_feature(hdev, VHOST_NET_F_MAC) ||
+      vhost_read_config(hdev, offsetof(struct vhost_net_config_s, mac),
+                        mac, IFHWADDRLEN) < 0)
+    {
+#if CONFIG_DRIVERS_VHOST_NET_MACADDR != 0
+      uint64_t macaddr = CONFIG_DRIVERS_VHOST_NET_MACADDR;
+
+      mac[0] = (macaddr >> 40) & 0xff;
+      mac[1] = (macaddr >> 32) & 0xff;
+      mac[2] = (macaddr >> 24) & 0xff;
+      mac[3] = (macaddr >> 16) & 0xff;
+      mac[4] = (macaddr >> 8)  & 0xff;
+      mac[5] = (macaddr >> 0)  & 0xff;
+#else
+      arc4random_buf(mac, IFHWADDRLEN);
+      mac[0] &= 0xfe;    /* Unicast */
+      mac[0] |= 0x02;    /* Locally administered */
+#endif
+    }
 
   ret = netdev_lower_register(&priv->lower, NET_LL_ETHERNET);
   if (ret < 0)
@@ -474,6 +745,13 @@ err_with_priv:
 static void vhost_net_remove(FAR struct vhost_device *hdev)
 {
   FAR struct vhost_net_priv_s *priv = hdev->priv;
+
+  /* Silence the peer before tearing the netdev down, so a late kick
+   * cannot reach an unregistered upper half.
+   */
+
+  virtqueue_disable_cb(priv->rxq);
+  virtqueue_disable_cb(priv->txq);
 
   netdev_lower_unregister(&priv->lower);
   vhost_delete_virtqueues(hdev);
