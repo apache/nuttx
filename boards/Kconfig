@@ -996,6 +996,14 @@ config ARCH_BOARD_IMXRT1170_EVK
 		This is the board configuration for the port of NuttX to the NXP i.MXRT
 		evaluation kit, MIMXRT1170-EVK.  This board features the MIMXRT1176DVMAA MCU.
 
+config ARCH_BOARD_FMU_V6XRT
+	bool "NXP MR-VMU-RT1176 (PX4 FMUv6X-RT)"
+	depends on ARCH_CHIP_MIMXRT1176DVMAA
+	---help---
+		This is the board configuration for the port of NuttX to the NXP
+		MR-VMU-RT1176 flight controller, which PX4 calls FMUv6X-RT.  It
+		features the MIMXRT1176DVMAA MCU and an SE051 secure element.
+
 config ARCH_BOARD_IMX93_QSB
 	bool "NXP i.MX 93 QSB (Cortex M33)"
 	depends on ARCH_CHIP_IMX9_CORTEX_M
@@ -3999,6 +4007,7 @@ config ARCH_BOARD
 	default "imxrt1060-evk"                if ARCH_BOARD_IMXRT1060_EVK
 	default "imxrt1064-evk"                if ARCH_BOARD_IMXRT1064_EVK
 	default "imxrt1170-evk"                if ARCH_BOARD_IMXRT1170_EVK
+	default "fmu-v6xrt"                    if ARCH_BOARD_FMU_V6XRT
 	default "imxrt1180-evk"                if ARCH_BOARD_IMXRT1180_EVK
 	default "imx93-qsb"                    if ARCH_BOARD_IMX93_QSB
 	default "imx95-evk"                    if ARCH_BOARD_IMX95_EVK
@@ -4496,6 +4505,10 @@ source "boards/arm/imxrt/imxrt1064-evk/Kconfig"
 endif
 if ARCH_BOARD_IMXRT1170_EVK
 source "boards/arm/imxrt/imxrt1170-evk/Kconfig"
+endif
+
+if ARCH_BOARD_FMU_V6XRT
+source "boards/arm/imxrt/fmu-v6xrt/Kconfig"
 endif
 if ARCH_BOARD_IMXRT1180_EVK
 source "boards/arm/imxrt/imxrt1180-evk/Kconfig"
