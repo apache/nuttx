@@ -24,6 +24,12 @@ include $(TOPDIR)/Make.defs
 
 CSRCS  = imxrt_boot.c imxrt_bringup.c imxrt_appinit.c
 
+ifeq ($(CONFIG_ARCH_CORTEXM33),y)
+CSRCS += imxrt_clockconfig_m33.c
+else
+CSRCS += imxrt_clockconfig_m7.c
+endif
+
 # On the M33 target the ROM boots our image directly, so we must supply the
 # FlexSPI Configuration Block ourselves.  The M7 image is a raw XIP payload
 # and carries no flash headers.
