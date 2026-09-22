@@ -3222,12 +3222,21 @@ static bool mcan_txready(struct can_dev_s *dev)
 
 #ifdef CONFIG_DEBUG_FEATURES
   /* As a sanity check, the txfsem should also track the number of elements
-   * the TX FIFO/queue.  Make sure that they are consistent.
+   * the TX FIFO/queue. Check only if the value doesn't exceed number of
+   * FIFO queue members. Sanity check comparing semaphore value with notfull
+   * flag may not always work, because SAM_MCAN_TXFQS register may signalize
+   * not full queue before we process the interrupt and increment the
+   * semaphore. The sanity checks should not be necessary because
+   * mcan_buffer_reserve function will take care of fixing the semaphore
+   * value if it doesn't match with the FIFO.
+   *
+   * REVISIT: The entire semaphore logic is a bit weird and probably not
+   * necessary. All we need to do is to check SAM_MCAN_TXFQS register
+   * if there is at least one free slot in the queue.
    */
 
   nxsem_get_value(&priv->txfsem, &sval);
-  DEBUGASSERT(((notfull && sval > 0) || (!notfull && sval <= 0)) &&
-              (sval <= priv->config->ntxfifoq));
+  DEBUGASSERT((sval <= priv->config->ntxfifoq));
 #endif
 
   nxmutex_unlock(&priv->lock);
