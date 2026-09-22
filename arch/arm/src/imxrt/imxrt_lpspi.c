@@ -111,6 +111,7 @@ struct imxrt_lpspidev_s
 {
   struct spi_dev_s spidev;    /* Externally visible part of the SPI interface */
   uint32_t spibase;           /* SPIn base address */
+  bool initialized;           /* True: Bus hardware has been initialized */
 #ifdef CONFIG_IMXRT_LPSPI_INTERRUPTS
   uint8_t spiirq;             /* SPI IRQ number */
 #endif
@@ -1675,8 +1676,10 @@ static void imxrt_lpspi_recvblock(struct spi_dev_s *dev,
  *
  ****************************************************************************/
 
-void imxrt_lpspi_clock_enable(uint32_t base)
+void imxrt_lpspi_clock_enable(struct imxrt_lpspidev_s *priv)
 {
+  uint32_t base = priv->spibase;
+
   if (base == IMXRT_LPSPI1_BASE)
     {
       imxrt_clockall_lpspi1();
@@ -1705,6 +1708,8 @@ void imxrt_lpspi_clock_enable(uint32_t base)
       imxrt_clockall_lpspi6();
     }
 #endif
+
+  priv->initialized = true;
 }
 
 /****************************************************************************
@@ -1715,8 +1720,10 @@ void imxrt_lpspi_clock_enable(uint32_t base)
  *
  ****************************************************************************/
 
-void imxrt_lpspi_clock_disable(uint32_t base)
+void imxrt_lpspi_clock_disable(struct imxrt_lpspidev_s *priv)
 {
+  uint32_t base = priv->spibase;
+
   if (base == IMXRT_LPSPI1_BASE)
     {
       imxrt_clockoff_lpspi1();
@@ -1745,6 +1752,8 @@ void imxrt_lpspi_clock_disable(uint32_t base)
       imxrt_clockoff_lpspi6();
     }
 #endif
+
+  priv->initialized = false;
 }
 
 /****************************************************************************
@@ -1768,7 +1777,7 @@ static void imxrt_lpspi_bus_initialize(struct imxrt_lpspidev_s *priv)
 
   /* Enable power and reset the peripheral */
 
-  imxrt_lpspi_clock_enable(priv->spibase);
+  imxrt_lpspi_clock_enable(priv);
 
   /* Reset to known status */
 
@@ -2015,8 +2024,7 @@ struct spi_dev_s *imxrt_lpspibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((imxrt_lpspi_getreg32(priv, IMXRT_LPSPI_CR_OFFSET)
-           & LPSPI_CR_MEN) == 0)
+      if (!priv->initialized)
         {
           /* Configure SPI1 pins: SCK, MISO, and MOSI */
 
@@ -2046,8 +2054,7 @@ struct spi_dev_s *imxrt_lpspibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((imxrt_lpspi_getreg32(priv, IMXRT_LPSPI_CR_OFFSET)
-           & LPSPI_CR_MEN) == 0)
+      if (!priv->initialized)
         {
           /* Configure SPI2 pins: SCK, MISO, and MOSI */
 
@@ -2077,8 +2084,7 @@ struct spi_dev_s *imxrt_lpspibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((imxrt_lpspi_getreg32(priv, IMXRT_LPSPI_CR_OFFSET)
-           & LPSPI_CR_MEN) == 0)
+      if (!priv->initialized)
         {
           /* Configure SPI3 pins: SCK, MISO, and MOSI */
 
@@ -2108,8 +2114,7 @@ struct spi_dev_s *imxrt_lpspibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((imxrt_lpspi_getreg32(priv, IMXRT_LPSPI_CR_OFFSET)
-           & LPSPI_CR_MEN) == 0)
+      if (!priv->initialized)
         {
           /* Configure SPI4 pins: SCK, MISO, and MOSI */
 
@@ -2139,8 +2144,7 @@ struct spi_dev_s *imxrt_lpspibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((imxrt_lpspi_getreg32(priv, IMXRT_LPSPI_CR_OFFSET)
-           & LPSPI_CR_MEN) == 0)
+      if (!priv->initialized)
         {
           /* Configure SPI5 pins: SCK, MISO, and MOSI */
 
@@ -2170,8 +2174,7 @@ struct spi_dev_s *imxrt_lpspibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((imxrt_lpspi_getreg32(priv, IMXRT_LPSPI_CR_OFFSET)
-           & LPSPI_CR_MEN) == 0)
+      if (!priv->initialized)
         {
           /* Configure SPI6 pins: SCK, MISO, and MOSI */
 
