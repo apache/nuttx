@@ -2387,6 +2387,10 @@ static int imxrt_lpi2c_reset(struct i2c_master_s *dev)
   imxrt_config_gpio(sda_gpio);
   imxrt_config_gpio(scl_gpio);
 
+  ret = OK;
+
+out:
+
   /* Re-init the port */
 
   imxrt_lpi2c_init(priv);
@@ -2394,9 +2398,6 @@ static int imxrt_lpi2c_reset(struct i2c_master_s *dev)
   /* Restore the frequency */
 
   imxrt_lpi2c_setclock(priv, frequency);
-  ret = OK;
-
-out:
 
   /* Release the port for reuse by other clients */
 
