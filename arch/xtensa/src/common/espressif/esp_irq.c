@@ -788,7 +788,13 @@ int esp_setup_irq_with_flags_intrstatus(int source,
    * CPU information, so no additional mapping is needed.
    */
 
-  esp_set_handle(this_cpu(), irq, ret_handle);
+  ret = esp_set_handle(this_cpu(), irq, ret_handle);
+  if (ret < 0)
+    {
+      esp_intr_free(ret_handle);
+      kmm_free(isr_adapter_args);
+      return ret;
+    }
 
   return cpuint;
 }
@@ -886,6 +892,37 @@ int esp_set_handle(int cpu, int irq, intr_handle_t handle)
 intr_handle_t esp_get_handle(int cpu, int irq)
 {
   return g_handle_map[cpu][irq];
+}
+
+/****************************************************************************
+ * Name:  esp_get_irq
+ *
+ * Description:
+ *   This function gets the IRQ associated with a handle
+ *
+ * Input Parameters:
+ *   cpu - The CPU associated with the IRQ
+ *   handle - The handle associated with a CPU interrupt
+ *
+ * Returned Value:
+ *   The irq associated with the handle or negative value if no irq is
+ *   associated with the handle.
+ *
+ ****************************************************************************/
+
+int esp_get_irq(int cpu, intr_handle_t handle)
+{
+  int irq;
+
+  for (irq = 0; irq < NR_IRQS; irq++)
+    {
+      if (g_handle_map[cpu][irq] == handle)
+        {
+          return irq;
+        }
+    }
+
+  return -EINVAL;
 }
 
 /****************************************************************************
