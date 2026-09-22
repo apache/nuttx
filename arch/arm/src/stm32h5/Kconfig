@@ -70,6 +70,16 @@ config ARCH_CHIP_STM32H563ZI
 	---help---
 		STM32 H5 Cortex M33, 2 Mb FLASH, 640 Kb SRAM
 
+config ARCH_CHIP_STM32H573II
+	bool "STM32H573II"
+	select ARCH_CORTEXM33
+	select STM32_STM32H5XXXX
+	select STM32_STM32H57XXX
+	select STM32_FLASH_CONFIG_I
+	select STM32H5_IO_CONFIG_I
+	---help---
+		STM32 H5 Cortex M33, 2 Mb FLASH, 640 Kb SRAM
+
 endchoice # STM32 H5 Chip Selection
 
 # Chip families:
@@ -128,6 +138,15 @@ config STM32_STM32H53XXX
 config STM32_STM32H56XXX
 	bool
 	default n
+
+config STM32_STM32H57XXX
+	bool
+	default n
+	select STM32_HAVE_ETHERNET
+
+config STM32_H56_H57_PERIPHERALS
+	bool
+	default y if STM32_STM32H56XXX || STM32_STM32H57XXX
 	select STM32_HAVE_I2C3
 	select STM32_HAVE_QSPI1
 	select STM32_HAVE_CORDIC
@@ -194,6 +213,11 @@ config STM32H5_IO_CONFIG_C
 
 config STM32H5_IO_CONFIG_R
 	# Package designator R
+	bool
+	default n
+
+config STM32H5_IO_CONFIG_I
+	# Package designator I
 	bool
 	default n
 

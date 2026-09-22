@@ -31,13 +31,14 @@
 
 #if defined(CONFIG_STM32_STM32H53XXX) || \
     defined(CONFIG_STM32_STM32H563XX) || \
-    defined(CONFIG_STM32_STM32H562XX)
+    defined(CONFIG_STM32_STM32H562XX) || \
+    defined(CONFIG_STM32_STM32H57XXX)
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Alternate Pin Functions.  All members of the STM32H562xx and STM32H563xx
- * families share the same pin multiplexing (although they may differ in the
+/* Alternate Pin Functions.  STM32H562xx, STM32H563xx and STM32H573xx
+ * devices share the same pin multiplexing (although they may differ in the
  * pins physically available).  See DS14258, Table 15 "Alternate Function AF0
  * to AF7" and Table 16 "Alternate Function AF8 to AF15".
  *
@@ -796,5 +797,5 @@
 #define GPIO_ADC2_INN18_0  (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN5)
 #define GPIO_ADC2_INP19_0  (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN5)
 
-#endif /* CONFIG_STM32_STM32H563XX*/
+#endif /* STM32H53xxx, STM32H562xx, STM32H563xx or STM32H57xxx */
 #endif /* __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32H56XXX_PINMAP_H */
