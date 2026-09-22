@@ -61,12 +61,9 @@ AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_ipc_api.c \
                     $(AMEBA_SOC)/fwlib/ram_common/ameba_ipc_ram.c
 endif
 
+
 ifeq ($(CONFIG_RTL8730E_FLASH_FS),y)
 AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_flash_ram.c
-
-# lib_rom.a: prebuilt SDK AP library that provides FLASH_TxData/RxCmd/Erase/
-# SetStatus and RSIP_MMU_* called by ameba_flash_ram.c at link time.
-EXTRA_LIBS += $(AMEBA_SOC)/project/project_ap/lib/soc/lib_rom.a
 endif
 
 # Include paths scoped to the fwlib compile only (never leaked to NuttX core).

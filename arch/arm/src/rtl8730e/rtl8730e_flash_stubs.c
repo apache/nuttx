@@ -173,7 +173,7 @@ void *_memset(void *s, int c, size_t n)
   return memset(s, c, n);
 }
 
-int _strcmp(const char *s1, const char *s2)
+int __attribute__((weak)) _strcmp(const char *s1, const char *s2)
 {
   return strcmp(s1, s2);
 }
@@ -325,12 +325,16 @@ void System_Reset(void)
   __asm__ volatile("b .");
 }
 
-/* Pinmux_Config: flash/LOGUART pinmux is handled by KM4; stub for CA32. */
+/* Pinmux_Config: lib_rom.a declares this as an external reference and
+ * provides _Pinmux_Config as the actual register-writing implementation.
+ * Delegate to it so GPIO_Init can configure pad mux for user GPIO pins.
+ */
+
+extern void _Pinmux_Config(uint32_t pinname, uint32_t pinfunc);
 
 void Pinmux_Config(uint32_t pinname, uint32_t pinfunc)
 {
-  (void)pinname;
-  (void)pinfunc;
+  _Pinmux_Config(pinname, pinfunc);
 }
 
 /****************************************************************************

@@ -105,6 +105,13 @@ SECTIONS
   .data : {                    /* Data */
       _sdata = .;
       *(.data*)
+      /* lib_rom.a places GPIO port-base tables and other init data in
+       * .sramdram.only.data.  These must be copied from flash to RAM
+       * before any ROM GPIO (or other sramdram) functions are called.
+       * Including them here causes the normal _eronly..._edata copy in
+       * arm_data_initialize() to handle them automatically.
+       */
+      *(.sramdram.only.data)
       . = ALIGN(8);
       __start_impls = .;
       *(.impls)

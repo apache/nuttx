@@ -109,7 +109,16 @@
  * AMEBA_GPIO_PORT_IRQS vector table come from <ameba_gpio_chip.h>.  The
  * fwlib GPIO_Init() leaves the peripheral clock to the caller, so the driver
  * gates AMEBA_APBPERIPH_GPIO on before use (RCC touches the LSYS block).
+ *
+ * On most Ameba chips the peripheral-enable and clock-enable bits are the
+ * same value, so a single macro suffices for both RCC_PeriphClockCmd args.
+ * On chips where they differ (e.g. RTL8730E), <ameba_gpio_chip.h> may also
+ * define AMEBA_APBPERIPH_GPIO_CLK for the clock-enable argument.
  */
+
+#ifndef AMEBA_APBPERIPH_GPIO_CLK
+#  define AMEBA_APBPERIPH_GPIO_CLK AMEBA_APBPERIPH_GPIO
+#endif
 
 /****************************************************************************
  * Private Types
@@ -256,7 +265,7 @@ static void ameba_gpio_configure(struct ameba_gpio_dev_s *priv,
 
   /* Gate on the GPIO peripheral clock (idempotent). */
 
-  RCC_PeriphClockCmd(AMEBA_APBPERIPH_GPIO, AMEBA_APBPERIPH_GPIO,
+  RCC_PeriphClockCmd(AMEBA_APBPERIPH_GPIO, AMEBA_APBPERIPH_GPIO_CLK,
                      AMEBA_ENABLE);
 
   switch (pintype)

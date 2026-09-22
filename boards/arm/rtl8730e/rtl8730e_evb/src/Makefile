@@ -34,8 +34,12 @@ ifeq ($(CONFIG_LIBC_FDT),y)
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)fdt$(DELIM)dtc$(DELIM)libfdt
 endif
 
-ifeq ($(CONFIG_RTL8730E_FLASH_FS),y)
+ifneq ($(CONFIG_RTL8730E_FLASH_FS)$(CONFIG_AMEBA_GPIO),)
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)arm$(DELIM)src$(DELIM)common$(DELIM)ameba
+endif
+
+ifeq ($(CONFIG_AMEBA_GPIO),y)
+CSRCS += rtl8730e_gpio.c
 endif
 
 include $(TOPDIR)/boards/Board.mk

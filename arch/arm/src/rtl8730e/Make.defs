@@ -59,6 +59,21 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
   CHIP_CSRCS += rtl8730e_userspace.c rtl8730e_allocateheap.c
 endif
 
+AMEBA_AP_SOC_LIB = $(TOPDIR)/arch/arm/src/common/ameba/ameba-rtos/component/soc/amebasmart/project/project_ap/lib/soc
+
+# lib_rom.a provides ROM stubs (GPIO, UART, flash, Pinmux, etc.).
+# rtl8730e_flash_stubs.c supplies the RAM-side symbols that lib_rom.a objects
+# expect (DiagPrintfNano, irq_enable, Pinmux_Config, etc.).  Compile them once
+# whenever any driver needing ROM is enabled.
+ifneq ($(filter y,$(CONFIG_AMEBA_GPIO) $(CONFIG_RTL8730E_FLASH_FS)),)
+CHIP_CSRCS += rtl8730e_flash_stubs.c
+EXTRA_LIBS += $(AMEBA_AP_SOC_LIB)$(DELIM)lib_rom.a
+endif
+
+ifeq ($(CONFIG_AMEBA_GPIO),y)
+CHIP_CSRCS += ameba_gpio.c
+endif
+
 # WiFi (WHC host, CA32 side).
 ifeq ($(CONFIG_RTL8730E_WIFI),y)
 CHIP_CSRCS += rtl8730e_wifi_init.c
@@ -80,7 +95,6 @@ endif
 
 # On-chip SPI NOR flash MTD (littlefs data partition).
 ifeq ($(CONFIG_RTL8730E_FLASH_FS),y)
-CHIP_CSRCS += rtl8730e_flash_stubs.c
 
 # ameba_flash_mtd.c lives in the common Ameba driver directory (already on
 # VPATH + INCLUDES at the top of this file).

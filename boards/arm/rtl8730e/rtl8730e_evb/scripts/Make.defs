@@ -59,9 +59,10 @@ AMEBA_BAUD ?= 1500000
 include $(TOPDIR)$(DELIM)arch$(DELIM)arm$(DELIM)src$(DELIM)common$(DELIM)ameba$(DELIM)ameba_sdk.mk
 include $(TOPDIR)$(DELIM)arch$(DELIM)arm$(DELIM)src$(DELIM)rtl8730e$(DELIM)ameba_board.mk
 
-# lib_rom.a is compiled without VFP ABI flags; suppress the harmless mismatch
-# warning so the linker does not abort on it.
-ifeq ($(CONFIG_RTL8730E_FLASH_FS),y)
+# lib_rom.a and the RTK toolchain's libgcc.a are compiled without VFP ABI
+# flags; suppress the harmless mismatch so the linker does not abort on it
+# whenever libameba_fwlib.a is in the link (GPIO, WiFi, or flash-FS config).
+ifneq ($(filter y,$(CONFIG_AMEBA_GPIO) $(CONFIG_RTL8730E_WIFI) $(CONFIG_RTL8730E_FLASH_FS)),)
 LDFLAGS += --no-warn-mismatch
 endif
 
