@@ -36,15 +36,10 @@
 #include <nuttx/config.h>
 #include "hardware/imxrt_memorymap.h"
 
-#ifdef CONFIG_ARCH_FAMILY_IMXRT118x
-
-/* On chips fronted by the EdgeLock Enclave (e.g. RT1180) the OCOTP
- * register layout differs and only a shadow-read window is exposed to
- * the SoC; see hardware/rt118x/imxrt118x_ocotp.h for details.
- */
-
+#if defined(CONFIG_ARCH_FAMILY_IMXRT117x)
+#  include "hardware/rt117x/imxrt117x_ocotp.h"
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT118x)
 #  include "hardware/rt118x/imxrt118x_ocotp.h"
-
 #else
 
 /****************************************************************************
@@ -436,6 +431,6 @@
 #define OCOTP_LOCK_FIELD_RETURN_MASK          (15 << OCOTP_LOCK_FIELD_RETURN_SHIFT)
 #  define OCOTP_LOCK_FIELD_RETURN(n)          ((uint32_t)(n) << OCOTP_LOCK_FIELD_RETURN_SHIFT)
 
-#endif /* CONFIG_ARCH_FAMILY_IMXRT118x */
+#endif /* CONFIG_ARCH_FAMILY_IMXRT117x / CONFIG_ARCH_FAMILY_IMXRT118x */
 
 #endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_OCOTP_H */
