@@ -30,4 +30,6 @@ config ARCH_CHIP_RTL8730E_CA32
 
 endmenu # "Realtek AmebaSmart (RTL8730E) Chip Selection"
 
+source "arch/arm/src/common/ameba/Kconfig"
+
 endif # ARCH_CHIP_RTL8730E

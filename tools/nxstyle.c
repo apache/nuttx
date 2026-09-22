@@ -301,6 +301,7 @@ static const char *g_white_prefix[] =
   "PAD_",
   "PLL_",             /* PLL_ClkGet — amebadplus SPI ip_clk query */
   "Pinmux_",
+  "_Pinmux_",           /* _Pinmux_Config — ROM symbol for RTL8730E pad mux */
   "RCC_",
   "RTC_",             /* RTC_InitTypeDef, RTC_Enable, RTC_SetTime, etc. */
   "RTCIO_",

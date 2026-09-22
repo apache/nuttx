@@ -242,6 +242,15 @@ int rtl8730e_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_AMEBA_GPIO
+  ret = rtl8730e_gpio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize GPIO: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }
