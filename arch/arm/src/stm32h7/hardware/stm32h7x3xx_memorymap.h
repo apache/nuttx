@@ -195,9 +195,12 @@
 #define STM32_NANDC_BASE       0x52004000     /*                       NAND Flash controller */
 #define STM32_SDRAMC_BASE      0x52004000     /*                       SDRAM controller */
 #define STM32_QUADSPI_BASE     0x52005000     /* 0x52005000-0x52005fff QUADSPI control */
+#define STM32_OCTOSPI1_BASE    0x52005000     /*                       OCTOSPI1 control */
 #define STM32_DLYBQUADSPI_BASE 0x52006000     /* 0x52006000-0x52006fff QUADSPI Delay Block */
 #define STM32_SDMMC1_BASE      0x52007000     /* 0x52007000-0x52007fff SDMMC1 */
 #define STM32_DLYBSDMMC1_BASE  0x52008000     /* 0x52008000-0x52008fff Delay Block SDMMC1 */
+#define STM32_OCTOSPI2_BASE    0x5200a000     /* 0x5200a000-0x5200afff OCTOSPI2 control */
+#define STM32_OCTOSPIM_BASE    0x5200b400     /* 0x5200b400-0x5200b7ff OCTOSPI I/O manager */
 
 /* APB4 Base Addresses ******************************************************/
 

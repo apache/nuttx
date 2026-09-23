@@ -425,6 +425,9 @@ config STM32_HAVE_GPIOF
 config STM32_HAVE_GPIOG
 	bool
 
+config STM32_HAVE_GPIOI
+	bool
+
 # HRTIM capabilities
 
 config STM32_HAVE_HRTIM1

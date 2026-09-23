@@ -693,6 +693,7 @@
 #define RCC_AHB3RSTR_FMCRST             (1 << 12) /* RCC AHB3RSTR: FMCRST */
 #define RCC_AHB3RSTR_QSPIRST            (1 << 14) /* RCC AHB3RSTR: QSPIRST */
 #define RCC_AHB3RSTR_SDMMC1RST          (1 << 16) /* RCC AHB3RSTR: SDMMC1RST */
+#define RCC_AHB3RSTR_OSPI2RST           (1 << 19) /* RCC AHB3RSTR: OSPI2RST */
 #define RCC_AHB3RSTR_CPURST             (1 << 31) /* RCC AHB3RSTR: CPURST */
 
 /* AHB1 peripheral reset register */
@@ -865,6 +866,8 @@
 #define RCC_AHB3ENR_FMCEN               (1 << 12) /* RCC AHB3ENR: FMCEN */
 #define RCC_AHB3ENR_QSPIEN              (1 << 14) /* RCC AHB3ENR: QSPIEN */
 #define RCC_AHB3ENR_SDMMC1EN            (1 << 16) /* RCC AHB3ENR: SDMMC1EN */
+#define RCC_AHB3ENR_OSPI2EN             (1 << 19) /* RCC AHB3ENR: OSPI2EN */
+#define RCC_AHB3ENR_IOMNGREN            (1 << 21) /* RCC AHB3ENR: IOMNGREN */
 
 /* AHB1 Peripheral Clock enable register */
 
