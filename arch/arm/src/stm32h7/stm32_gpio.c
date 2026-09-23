@@ -99,7 +99,7 @@ static spinlock_t g_configgpio_lock = SP_UNLOCKED;
 #  define GPIOG_BASE  0
 #endif
 
-#ifdef STM32_GPIOI_BASE
+#ifdef CONFIG_STM32_HAVE_GPIOI
 #  define GPIOI_BASE  STM32_GPIOI_BASE
 #else
 #  define GPIOI_BASE  0
