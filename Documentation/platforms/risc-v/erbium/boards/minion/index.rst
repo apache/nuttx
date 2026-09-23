@@ -4,6 +4,19 @@ Erbium Minion
 
 .. tags:: chip:erbium, arch:risc-v, vendor:aifoundry
 
+.. figure:: erbium-minion-core.png
+   :align: center
+   :alt: ET-Minion core block diagram
+
+   ET-Minion core (source: `aifoundry-org/erbium
+   <https://github.com/aifoundry-org/erbium>`__, Apache-2.0).
+
+The Erbium CPU subsystem is one ET-Neighborhood of eight dual-threaded
+RV64IMFC ET-Minion cores (16 harts), derived from the Esperanto ET-SoC-1,
+together with a PLIC, a CLINT-style machine timer and a shared instruction
+cache. Erbium silicon is not yet available, so this board targets the
+``erbium_emu`` system emulator. NuttX runs on hart 0.
+
 Memory and interrupts
 =====================
 
@@ -15,7 +28,10 @@ stack. The linker checks that the image and idle stack fit in MRAM.
 The PLIC at ``0xa0000000`` provides sources 1 through 6; UART0 uses source
 3. Receive and transmit use interrupts, without periodic polling.
 The machine timer uses ``mtime`` at ``0x80f40200`` and ``mtimecmp`` at
-``0x80f40208``. Its default frequency is 2 MHz in the emulator.
+``0x80f40208``. ``CONFIG_ERBIUM_MTIMER_FREQ`` defaults to 2 MHz, the
+emulator's timer rate. The Erbium documentation specifies a 10 MHz
+``mtime`` (one tick every 100 ns) on silicon, so set this option to match
+the target.
 
 Toolchain
 =========
@@ -138,3 +154,13 @@ for low-level console debugging.
 The emulator reads host input into its finite RX FIFO immediately. Feeding
 a long command through a pipe can overrun that FIFO. Automated console
 tests should pace input, for example by waiting for each echoed character.
+
+References
+==========
+
+* `Erbium documentation <https://erbium.readthedocs.io/en/latest/>`_
+* `ET-Minion core <https://erbium.readthedocs.io/en/latest/minion/>`_
+* `Interrupts and PLIC source IDs <https://erbium.readthedocs.io/en/latest/interrupts/>`_
+* `CPU memory map <https://erbium.readthedocs.io/en/latest/cpu_mm/>`_
+* `UART <https://erbium.readthedocs.io/en/latest/uart/>`_
+* `ET-platform, including erbium_emu <https://github.com/aifoundry-org/et-platform>`_
