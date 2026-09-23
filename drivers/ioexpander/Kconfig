@@ -618,6 +618,14 @@ config IOEXPANDER_MULTIPIN
 		This settings enable the definition of routines for
 		optimized simultaneous access to multiple pins.
 
+config IOEXPANDER_PWM
+	bool "Support pin PWM control"
+	default n
+	---help---
+		This setting enables an operation to control the PWM duty cycle
+		of I/O expander pins, for expanders that can modulate their
+		outputs (e.g. through a LED driver engine).
+
 endif # IOEXPANDER
 
 config DEV_GPIO

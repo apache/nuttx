@@ -273,6 +273,18 @@ driver operations table (``struct ioexpander_ops_s``):
    - ``IOEXP_READBUF`` reads the buffered/register value cached by the
      expander.
 
+Pin PWM control
+---------------
+
+``CONFIG_IOEXPANDER_PWM`` enables the optional ``ioe_setpwm`` operation.
+
+.. c:macro:: IOEXP_SETPWM(dev, pin, duty)
+
+   Set a physical pin's duty cycle: ``duty`` is a ``uint16_t`` value from
+   ``0`` (off) to ``0xffff`` (fully on). Returns 0 on success or a negative
+   errno on failure. The caller must ensure ``dev->ops->ioe_setpwm`` is
+   non-NULL; the macro does not check it. Frequency control is not provided.
+
 Multi-pin operations
 --------------------
 
