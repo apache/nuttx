@@ -33,7 +33,9 @@
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_USE_TEXT_HEAP
 static struct mm_heap_s *g_textheap;
+#endif
 static struct mm_heap_s *g_dataheap;
 
 /****************************************************************************
@@ -48,6 +50,7 @@ static struct mm_heap_s *g_dataheap;
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_USE_TEXT_HEAP
 #ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
 void *up_textheap_memalign(const char *sectname, size_t align, size_t size)
 #else
@@ -92,6 +95,7 @@ bool up_textheap_heapmember(void *p)
 {
   return g_textheap != NULL && mm_heapmember(g_textheap, p);
 }
+#endif /* CONFIG_ARCH_USE_TEXT_HEAP */
 
 /****************************************************************************
  * Name: up_dataheap_memalign
