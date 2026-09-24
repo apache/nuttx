@@ -73,14 +73,14 @@
 #undef PMP_L
 #define PMP_L 0
 
-/* The HAL implementation itself, compiled with the lock bit cleared.  The
- * chip directory is spelled out rather than derived from
- * CONFIG_ESPRESSIF_CHIP_SERIES because an #include directive cannot
- * concatenate string literals; CONFIG_ESPRESSIF_KERNEL_OWNS_PMP depends on
- * ARCH_CHIP_ESP32P4, so this file is only ever built for that chip.
+/* The HAL implementation itself, compiled with the lock bit cleared.  This
+ * file lives under src/esp32p4 rather than src/common/espressif precisely
+ * because it names a chip directory: an #include cannot concatenate string
+ * literals, so the path cannot be derived from CONFIG_ESPRESSIF_CHIP_SERIES,
+ * and a common source has no business reaching into one chip's HAL port.
  */
 
-#include "../../chip/esp-hal-3rdparty/components/esp_hw_support/port/esp32p4/cpu_region_protect.c"
+#include "../chip/esp-hal-3rdparty/components/esp_hw_support/port/esp32p4/cpu_region_protect.c"
 
 /****************************************************************************
  * Pre-processor Definitions

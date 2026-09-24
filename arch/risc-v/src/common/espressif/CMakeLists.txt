@@ -23,10 +23,6 @@
 set(SRCS)
 
 # Head/startup file
-if(CONFIG_ESPRESSIF_KERNEL_OWNS_PMP)
-  list(APPEND SRCS esp_region_protect.c)
-endif()
-
 if(CONFIG_BUILD_PROTECTED)
   list(APPEND SRCS esp_userspace.c)
 endif()
