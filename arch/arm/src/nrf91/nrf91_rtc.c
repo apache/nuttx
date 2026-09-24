@@ -392,7 +392,7 @@ static int nrf91_rtc_setcc(struct nrf91_rtc_dev_s *dev, uint8_t i,
 
   /* Is the channel supported? */
 
-  if (i > rtc->chan)
+  if (i >= rtc->chan)
     {
       rtcerr("ERROR: unsupported RTCER channel %d\n", i);
       ret = -EINVAL;
@@ -422,7 +422,7 @@ static int nrf91_rtc_getcc(struct nrf91_rtc_dev_s *dev, uint8_t i,
 
   /* Is the channel supported? */
 
-  if (i > rtc->chan)
+  if (i >= rtc->chan)
     {
       rtcerr("ERROR: unsupported RTCER channel %d\n", i);
       ret = -EINVAL;
@@ -775,6 +775,10 @@ struct nrf91_rtc_dev_s *nrf91_rtc_init(int rtc)
       /* RTC already in use */
 
       priv = NULL;
+    }
+  else
+    {
+      priv->inuse = true;
     }
 
 errout:
