@@ -488,7 +488,7 @@ static int nrf52_tim_setcc(struct nrf52_tim_dev_s *dev, uint8_t i,
 
   /* Is the channel supported? */
 
-  if (i > tim->chan)
+  if (i >= tim->chan)
     {
       tmrerr("ERROR: unsupported TIMER channel %d\n", i);
       ret = -EINVAL;
@@ -518,7 +518,7 @@ static int nrf52_tim_getcc(struct nrf52_tim_dev_s *dev, uint8_t i,
 
   /* Is the channel supported? */
 
-  if (i > tim->chan)
+  if (i >= tim->chan)
     {
       tmrerr("ERROR: unsupported TIMER channel %d\n", i);
       ret = -EINVAL;
@@ -831,6 +831,10 @@ struct nrf52_tim_dev_s *nrf52_tim_init(int timer)
       /* Timer already in use */
 
       tim = NULL;
+    }
+  else
+    {
+      tim->inuse = true;
     }
 
 errout:
