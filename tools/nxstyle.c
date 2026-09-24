@@ -193,6 +193,7 @@ static const char *g_white_prefix[] =
   "ASCII_",  /* Ref:  include/nuttx/ascii.h */
   "Dl_info", /* Ref:  include/dlfcn.h */
   "Elf",     /* Ref:  include/elf.h, include/elf32.h, include/elf64.h */
+  "GL",      /* Ref:  apps/graphics/tinygl/tinygl/include/GL/gl.h */
   "Ifx",     /* Ref:  arch/tricore/src */
   "PRId",    /* Ref:  inttypes.h */
   "PRIi",    /* Ref:  inttypes.h */
@@ -213,6 +214,8 @@ static const char *g_white_prefix[] =
   "b16",     /* Ref:  include/fixedmath.h */
   "b32",     /* Ref:  include/fixedmath.h */
   "cJSON",   /* Ref:  apps/wireless/wapi/src */
+  "gl",      /* Ref:  apps/graphics/tinygl/tinygl/include/GL/gl.h */
+  "ZB",      /* Ref:  apps/graphics/tinygl/tinygl/include/zbuffer.h */
   "ub8",     /* Ref:  include/fixedmath.h */
   "ub16",    /* Ref:  include/fixedmath.h */
   "ub32",    /* Ref:  include/fixedmath.h */
