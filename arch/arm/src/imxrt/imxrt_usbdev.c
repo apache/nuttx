@@ -2997,10 +2997,15 @@ void arm_usbinitialize(void)
   imxrt_clockall_usboh3();
 
 #if defined(CONFIG_ARCH_FAMILY_IMXRT117x) || defined(CONFIG_ARCH_FAMILY_IMXRT118x)
-  up_mdelay(1);
+  putreg32(USBPHY_CTRL_SFTRST,
+           IMXRT_USBPHY_CTRL_CLR(0));
 
-  putreg32(USBPHY_PLL_SIC_PLL_POWER |
-           USBPHY_PLL_SIC_PLL_REG_ENABLE,
+  putreg32(USBPHY_PLL_SIC_PLL_REG_ENABLE,
+           IMXRT_USBPHY_PLL_SIC_SET(0));
+
+  up_udelay(15);
+
+  putreg32(USBPHY_PLL_SIC_PLL_POWER,
            IMXRT_USBPHY_PLL_SIC_SET(0));
 
   putreg32(USBPHY_PLL_SIC_PLL_DIV_SEL_MASK,

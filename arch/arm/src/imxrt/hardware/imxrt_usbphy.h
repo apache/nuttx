@@ -119,7 +119,7 @@
 #define USBPHY_CTRL_ENHOSTDISCONDET   (1 << 1)   /* Bit 1:  Enable HighSpeed disconnect detector */
 #define USBPHY_CTRL_ENOTG_ID_CHG_IRQ  (1 << 0)   /* Bit 0:  Enable OTG_ID_CHG_IRQ */
 
-/* USB PHY PLL Control/Status Register (PLL_SIC, only in IMXRT117X) */
+/* USB PHY PLL Control/Status Register (PLL_SIC, IMXRT117x and IMXRT118x) */
 #define USBPHY_PLL_SIC_PLL_POSTDIV_SHIFT   (2)        /* Bits 2-5: PLL_POSTDIV */
 #define USBPHY_PLL_SIC_PLL_POSTDIV_MASK    (0x7 << USBPHY_PLL_SIC_PLL_POSTDIV_SHIFT)
 #define USBPHY_PLL_SIC_PLL_POSTDIV(n)      (((n) << USBPHY_PLL_SIC_PLL_POSTDIV_SHIFT) & USBPHY_PLL_SIC_PLL_POSTDIV_MASK)
@@ -130,7 +130,7 @@
 #define USBPHY_PLL_SIC_REFBIAS_PWD_SEL     (1 << 19)  /* Bit 19: REFBIAS_PWD_SEL */
 #define USBPHY_PLL_SIC_REFBIAS_PWD         (1 << 20)  /* Bit 20: Power down the reference bias */
 #define USBPHY_PLL_SIC_PLL_REG_ENABLE      (1 << 21)  /* Bit 21: PLL_REG_ENABLE */
-#define USBPHY_PLL_SIC_PLL_DIV_SEL_SHIFT   (22)       /* Bits 22-25: PLL_DIV_SEL */
+#define USBPHY_PLL_SIC_PLL_DIV_SEL_SHIFT   (22)       /* Bits 22-24: PLL_DIV_SEL */
 #define USBPHY_PLL_SIC_PLL_DIV_SEL_MASK    (0x7 << USBPHY_PLL_SIC_PLL_DIV_SEL_SHIFT)
 #define USBPHY_PLL_SIC_PLL_DIV_SEL(n)      (((n) << USBPHY_PLL_SIC_PLL_DIV_SEL_SHIFT) & USBPHY_PLL_SIC_PLL_DIV_SEL_MASK)
 #define USBPHY_PLL_SIC_PLL_LOCK            (1 << 31)  /* Bit 31: PLL_LOCK */
