@@ -837,7 +837,6 @@ static ssize_t wdog_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct watchdog_upperhalf_s *upper;
   FAR struct watchdog_lowerhalf_s *lower;
   int err = 0;
-  int i;
 
   upper = inode->i_private;
   DEBUGASSERT(upper != NULL);
@@ -846,29 +845,23 @@ static ssize_t wdog_write(FAR struct file *filep, FAR const char *buffer,
 
   nxmutex_lock(&upper->lock);
 
-  for (i = 0; i < buflen; i++)
+  if (buflen > 0 && buffer[0] == 'V')
     {
-      if (buffer[i] == 'V')
-        {
 #ifdef CONFIG_WATCHDOG_AUTOMONITOR
-          watchdog_automonitor_stop(upper);
+      watchdog_automonitor_stop(upper);
 #else
-          err = WD_STOP(lower);
+      err = WD_STOP(lower);
 #endif
-          break;
-        }
-      else
-        {
-#ifdef CONFIG_WATCHDOG_AUTOMONITOR
-          watchdog_automonitor_start(upper);
-#else
-          err = lower->ops->start(lower);
-#endif
-          break;
-        }
     }
-
-  if (i == buflen)
+  else if (buflen > 0)
+    {
+#ifdef CONFIG_WATCHDOG_AUTOMONITOR
+      watchdog_automonitor_start(upper);
+#else
+      err = lower->ops->start(lower);
+#endif
+    }
+  else
     {
       err = WD_KEEPALIVE(lower);
     }
