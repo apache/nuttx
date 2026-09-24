@@ -369,6 +369,16 @@ int sim_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SIM_MOUSE
+  /* Initialize the mouse */
+
+  ret = sim_mouse_initialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sim_mouse_initialize failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_SIM_KEYBOARD
   /* Initialize the keyboard */
 
