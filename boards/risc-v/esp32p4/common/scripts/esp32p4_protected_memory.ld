@@ -67,6 +67,15 @@
 #  define MSPI_WORKAROUND_SIZE  0x0
 #endif
 
+/* Likewise from the HAL's sdkconfig.h: the cache MMU page size, 64 KB on
+ * ESP32-P4.  Without it IDROM_SEG_SIZE below underflows and the linker
+ * rejects the length of extern_ram_seg.
+ */
+
+#ifndef CONFIG_MMU_PAGE_SIZE
+#  define CONFIG_MMU_PAGE_SIZE  0x10000
+#endif
+
 /* Internal SRAM.  Bank boundaries come from the flat layout so that the two
  * stay in step; see esp32p4_flat_memory.ld.
  */
