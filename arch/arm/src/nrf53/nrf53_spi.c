@@ -265,7 +265,7 @@ static const struct spi_ops_s g_spi2ops =
 #  ifdef CONFIG_SPI_EXCHANGE
   .exchange          = nrf53_spi_exchange,
 #  else
-  .sndlock           = nrf53_spi_sndblock,
+  .sndblock          = nrf53_spi_sndblock,
   .recvblock         = nrf53_spi_recvblock,
 #  endif
 #ifdef CONFIG_SPI_TRIGGER
@@ -318,7 +318,7 @@ static const struct spi_ops_s g_spi3ops =
 #  ifdef CONFIG_SPI_EXCHANGE
   .exchange          = nrf53_spi_exchange,
 #  else
-  .sndlock           = nrf53_spi_sndblock,
+  .sndblock          = nrf53_spi_sndblock,
   .recvblock         = nrf53_spi_recvblock,
 #  endif
 #ifdef CONFIG_SPI_TRIGGER
@@ -371,7 +371,7 @@ static const struct spi_ops_s g_spi4ops =
 #  ifdef CONFIG_SPI_EXCHANGE
   .exchange          = nrf53_spi_exchange,
 #  else
-  .sndlock           = nrf53_spi_sndblock,
+  .sndblock          = nrf53_spi_sndblock,
   .recvblock         = nrf53_spi_recvblock,
 #  endif
 #ifdef CONFIG_SPI_TRIGGER
