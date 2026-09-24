@@ -126,7 +126,7 @@ int sim_mouse_initialize(int minor)
   snprintf(devname, sizeof(devname), DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
-  ret = mouse_register(&priv->lower, devname, 1);
+  ret = mouse_register(&priv->lower, devname, CONFIG_SIM_MOUSE_BUFFSIZE);
   if (ret < 0)
     {
       ierr("ERROR: mouse_register() failed: %d\n", ret);
