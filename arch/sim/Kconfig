@@ -652,6 +652,16 @@ config SIM_KEYBOARD
 	---help---
 		Support an X11 mouse-based keyboard emulation.  Also needs INPUT=y
 
+config SIM_MOUSE_BUFFSIZE
+	int "sim mouse buffer size"
+	default 16
+	depends on SIM_MOUSE
+	---help---
+		Number of mouse reports buffered by /dev/mouse0.  The X11 event
+		loop can deliver a button press and its release in the same
+		polling period; with a single report buffered the press would be
+		overwritten before the application reads it.
+
 config SIM_KEYBOARD_BUFFSIZE
 	int "sim keyboard buffer size"
 	default 64
