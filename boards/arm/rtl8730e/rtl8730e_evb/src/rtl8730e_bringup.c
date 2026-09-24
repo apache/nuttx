@@ -251,6 +251,15 @@ int rtl8730e_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_AMEBA_UART
+  ret = rtl8730e_uart_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize UART: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }
