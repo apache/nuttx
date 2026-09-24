@@ -30,8 +30,12 @@ HEAD_ASRC =
 include armv8-m/Make.defs
 include common/stm32/Make.defs
 
-ifeq ($(CONFIG_STM32_PROGMEM),y)
+ifneq ($(CONFIG_STM32_PROGMEM)$(CONFIG_STM32_EDATA),)
 CHIP_CSRCS += stm32_flash.c
+endif
+
+ifeq ($(CONFIG_STM32_EDATA),y)
+CHIP_CSRCS += stm32_edata.c
 endif
 
 # Required STM32H5 files

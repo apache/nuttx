@@ -24,8 +24,12 @@ set(SRCS)
 
 # Common ARM and Cortex-M33 files
 
-if(CONFIG_STM32_PROGMEM)
+if(CONFIG_STM32_PROGMEM OR CONFIG_STM32_EDATA)
   list(APPEND SRCS stm32_flash.c)
+endif()
+
+if(CONFIG_STM32_EDATA)
+  list(APPEND SRCS stm32_edata.c)
 endif()
 
 # Required STM32H5 files

@@ -49,6 +49,8 @@
 #define STM32_FLASH_BANK1    0x08000000     /* 0x08000000-0x080fffff: Bank 1 (562/563/573xx devices) */
 #define STM32_FLASH_BANK2    0x08100000     /* 0x08100000-0x081fffff: Bank 2 (562/563/573xx devices) */
 #define STM32_FLASH_BASE     STM32_FLASH_BANK1
+#define STM32_EDATA_BASE     0x09000000     /* 0x09000000-0x09017fff: Flash high-cycle data (562/563/573xx devices) */
+
 /* SRAM1, SRAM2 and SRAM3 are contiguous on all STM32H5 parts, but their
  * sizes are family-dependent (STM32_SRAMx_SIZE comes from chip.h).
  */

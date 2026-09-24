@@ -28,6 +28,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdint.h>
+#include <sys/types.h>
+
 #include "hardware/stm32_flash.h"
 
 /****************************************************************************
@@ -61,6 +65,29 @@ int stm32_otp_write(const uint16_t *data, uint16_t len, uint32_t offset);
 int stm32_otp_read(uint16_t *data, uint16_t len, uint32_t offset);
 
 uint32_t stm32_otp_getlockstatus(void);
+
+/* Flash high-cycle data (EDATA) low-level access.
+ *
+ * EDATA can be enabled on the last 1..8 sectors of each physical bank.
+ * Each 8 KiB user flash sector becomes a 6 KiB EDATA sector, read and
+ * programmed in 16-bit half-words and mapped at STM32_EDATA_BASE.
+ *
+ * Banks are always physical banks (1 or 2).  The EDATA window follows the
+ * SWAP_BANK option in the same way as the user flash, which these functions
+ * account for.  Sectors are numbered 0..7 within the EDATA area of a bank,
+ * where 0 is the first of the last eight sectors of the bank.
+ */
+
+#define STM32_EDATA_BANK_NSECTORS  8
+#define STM32_EDATA_SECTOR_SIZE    6144
+
+int stm32_flash_edata_getconfig(int bank);
+int stm32_flash_edata_configure(int bank, unsigned int nsectors);
+uintptr_t stm32_flash_edata_address(int bank, unsigned int sector);
+int stm32_flash_edata_erase(int bank, unsigned int sector);
+ssize_t stm32_flash_edata_read(uintptr_t addr, void *buf, size_t count);
+ssize_t stm32_flash_edata_write(uintptr_t addr, const void *buf,
+                                size_t count);
 
 #undef EXTERN
 #if defined(__cplusplus)
