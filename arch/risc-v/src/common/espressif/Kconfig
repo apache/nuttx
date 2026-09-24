@@ -34,19 +34,6 @@ config ESPRESSIF_FLASH_32M
 
 endchoice # ESPRESSIF_FLASH
 
-config ESPRESSIF_P4DBG
-	bool "ESP32-P4 protected-build debug counters"
-	default n
-	depends on ARCH_CHIP_ESP32P4 && !BUILD_FLAT
-	---help---
-		Maintain counters and CLIC state snapshots in the interrupt, idle and
-		timer paths. Emit progress markers from board bring-up using the
-		ROM printf rather than syslog.
-
-		The counters should be read with a debugger.
-
-		Debug aid, do not activate in a production build.
-
 config ESPRESSIF_DONT_USE_ROM_LIBC
 	bool "Don't use ROM libc functions"
 	default n
