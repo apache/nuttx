@@ -767,7 +767,7 @@ static int nrf52_adc_chancfg(struct nrf52_adc_s *priv, uint8_t chan,
 #ifdef CONFIG_NRF52_SAADC_LIMITS
   /* Configure limits */
 
-  regval = (cfg->limith < 16) | (cfg->limith << 0);
+  regval = ((uint32_t)cfg->limith << 16) | ((uint32_t)cfg->limitl << 0);
   nrf52_adc_putreg(priv, NRF52_SAADC_CHLIMIT_OFFSET(chan), regval);
 #endif
 
