@@ -73,6 +73,26 @@ struct trdc_mrc_config
   bool secure;
 };
 
+struct trdc_gpio_config
+{
+  uintptr_t address;
+  uint32_t value;
+};
+
+struct trdc_mda_config
+{
+  unsigned long trdc_base;
+  uint8_t mda_inst;
+  uint8_t mda_reg;
+  bool cpu;
+  bool did_bypass;
+  uint8_t did_sel;
+  uint8_t sa;
+  uint8_t pa;
+  uint8_t did;
+  bool lock;
+};
+
 /****************************************************************************
  * Name: imxrt118x_trdc_config
  *

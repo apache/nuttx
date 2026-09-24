@@ -39,6 +39,7 @@
 
 #include "chip.h"
 #include "arm_internal.h"
+#include "hardware/imxrt_gpio.h"
 #include "imxrt118x_ele.h"
 #include "imxrt118x_trdc.h"
 #include <arch/board/imxrt118x_trdc_config.h>
@@ -572,6 +573,20 @@ static void trdc_try_lockup(const struct trdc_config_info *cfg)
     }
 }
 
+static void trdc_mda_setup(const struct trdc_mda_config *cfg)
+{
+  if (cfg->cpu)
+    {
+      trdc_mda_set_cpu(cfg->trdc_base, cfg->mda_inst, cfg->mda_reg,
+        cfg->did_sel, cfg->sa, cfg->did, cfg->lock);
+    }
+  else
+    {
+      trdc_mda_set_noncpu(cfg->trdc_base, cfg->mda_inst, cfg->mda_reg,
+        cfg->did_bypass, cfg->sa, cfg->pa, cfg->did, cfg->lock);
+    }
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -580,61 +595,21 @@ void imxrt118x_trdc_config(void)
 {
   int i;
 
-  /* Assign GPIO2..GPIO6 to non-secure access. */
+  /* Apply board GPIO pin control and interrupt control settings.
+   * The board keeps GPIO2..GPIO6 secure-only to match the secure masters.
+   */
 
-  mmio_write_32(IMXRT_GPIO2_BASE + 0x10, 0xffffffff);
-  mmio_write_32(IMXRT_GPIO2_BASE + 0x14, 0x3);
-  mmio_write_32(IMXRT_GPIO2_BASE + 0x18, 0xffffffff);
-  mmio_write_32(IMXRT_GPIO2_BASE + 0x1c, 0x3);
+  for (i = 0; i < nitems(g_trdc_gpio); i++)
+    {
+      mmio_write_32(g_trdc_gpio[i].address, g_trdc_gpio[i].value);
+    }
 
-  mmio_write_32(IMXRT_GPIO3_BASE + 0x10, 0xffffffff);
-  mmio_write_32(IMXRT_GPIO3_BASE + 0x14, 0x3);
-  mmio_write_32(IMXRT_GPIO3_BASE + 0x18, 0xffffffff);
-  mmio_write_32(IMXRT_GPIO3_BASE + 0x1c, 0x3);
+  /* Apply board MDA settings. */
 
-  mmio_write_32(IMXRT_GPIO4_BASE + 0x10, 0xffffffff);
-  mmio_write_32(IMXRT_GPIO4_BASE + 0x14, 0x3);
-  mmio_write_32(IMXRT_GPIO4_BASE + 0x18, 0xffffffff);
-  mmio_write_32(IMXRT_GPIO4_BASE + 0x1c, 0x3);
-
-  mmio_write_32(IMXRT_GPIO5_BASE + 0x10, 0xffffffff);
-  mmio_write_32(IMXRT_GPIO5_BASE + 0x14, 0x3);
-  mmio_write_32(IMXRT_GPIO5_BASE + 0x18, 0xffffffff);
-  mmio_write_32(IMXRT_GPIO5_BASE + 0x1c, 0x3);
-
-  mmio_write_32(IMXRT_GPIO6_BASE + 0x10, 0xffffffff);
-  mmio_write_32(IMXRT_GPIO6_BASE + 0x14, 0x3);
-  mmio_write_32(IMXRT_GPIO6_BASE + 0x18, 0xffffffff);
-  mmio_write_32(IMXRT_GPIO6_BASE + 0x1c, 0x3);
-
-  /* Apply common DAC setup. */
-
-  trdc_mda_set_cpu(IMXRT_TRDC1_BASE, 1, 0, TRDC_MDA_DID_FROM_INPUT,
-    TRDC_MDA_FORCE_SECURE, DID_CM33, false);      /* MDAC_A1 CM33 */
-  trdc_mda_set_noncpu(IMXRT_TRDC1_BASE, 2, 0, true,
-    TRDC_MDA_FORCE_SECURE, TRDC_MDA_FORCE_PRIVILEGE, DID_EDMA3, false);
-
-  trdc_mda_set_cpu(IMXRT_TRDC2_BASE, 0, 0, TRDC_MDA_DID_FROM_INPUT,
-    TRDC_MDA_FORCE_SECURE, DID_CM7, false);       /* MDAC_W0 CM7 AHBP */
-  trdc_mda_set_cpu(IMXRT_TRDC2_BASE, 1, 0, TRDC_MDA_DID_FROM_INPUT,
-    TRDC_MDA_FORCE_SECURE, DID_CM7, false);       /* MDAC_W1 CM7 AXI */
-  trdc_mda_set_noncpu(IMXRT_TRDC2_BASE, 2, 0, true,
-    TRDC_MDA_FORCE_SECURE, TRDC_MDA_FORCE_PRIVILEGE, DID_DAP, false);
-  trdc_mda_set_noncpu(IMXRT_TRDC2_BASE, 3, 0, true,
-    TRDC_MDA_FORCE_SECURE, TRDC_MDA_FORCE_PRIVILEGE, DID_CORESIGHT, false);
-  trdc_mda_set_noncpu(IMXRT_TRDC2_BASE, 4, 0, true,
-    TRDC_MDA_FORCE_SECURE, TRDC_MDA_FORCE_PRIVILEGE, DID_EDMA4, false);
-  trdc_mda_set_cpu(IMXRT_TRDC2_BASE, 5, 0, TRDC_MDA_DID_FROM_INPUT,
-    TRDC_MDA_FORCE_SECURE, DID_NETC, false);      /* MDAC_W5 NETC */
-
-  trdc_mda_set_noncpu(IMXRT_TRDC3_BASE, 0, 0, true,
-    TRDC_MDA_FORCE_SECURE, TRDC_MDA_FORCE_PRIVILEGE, DID_USDHC1, false);
-  trdc_mda_set_noncpu(IMXRT_TRDC3_BASE, 1, 0, true,
-    TRDC_MDA_FORCE_SECURE, TRDC_MDA_FORCE_PRIVILEGE, DID_USDHC2, false);
-  trdc_mda_set_noncpu(IMXRT_TRDC3_BASE, 3, 0, true,
-    TRDC_MDA_FORCE_SECURE, TRDC_MDA_FORCE_PRIVILEGE, DID_USB, false);
-  trdc_mda_set_noncpu(IMXRT_TRDC3_BASE, 4, 0, true,
-    TRDC_MDA_FORCE_SECURE, TRDC_MDA_FORCE_PRIVILEGE, DID_FLEXSPI_FLR, false);
+  for (i = 0; i < nitems(g_trdc_mda); i++)
+    {
+      trdc_mda_setup(&g_trdc_mda[i]);
+    }
 
   /* Protect TRDC manager slots. */
 
