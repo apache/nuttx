@@ -352,7 +352,7 @@ void nrf53_gpiote_set_port_event(uint32_t pinset, xcpt_t func, void *arg)
 
       for (i = 0; i < NRF53_GPIO_NPORTS; i++)
         {
-          if (g_gpiote_port_callback[port].callback)
+          if (g_gpiote_port_callback[i].callback)
             {
               break;
             }
@@ -506,25 +506,41 @@ int nrf53_gpiote_set_event(uint32_t pinset,
 
   flags = enter_critical_section();
 
-  /* Get free channel or channel already used by pinset */
+  /* Get channel already used by pinset */
 
   for (i = 0; i < GPIOTE_CHANNELS; i++)
     {
-      if (g_gpiote_ch_callbacks[i].callback == NULL ||
+      if (g_gpiote_ch_callbacks[i].callback != NULL &&
           g_gpiote_ch_callbacks[i].pinset == pinset)
         {
-          g_gpiote_ch_callbacks[i].pinset = pinset;
-
-          nrf53_gpiote_set_ch_event(pinset, i,
-                                    risingedge, fallingedge,
-                                    func, arg);
-
-          /* Return the channel index */
-
-          ret = i;
-
           break;
         }
+    }
+
+  /* Otherwise get a free channel */
+
+  if (i == GPIOTE_CHANNELS && func != NULL)
+    {
+      for (i = 0; i < GPIOTE_CHANNELS; i++)
+        {
+          if (g_gpiote_ch_callbacks[i].callback == NULL)
+            {
+              break;
+            }
+        }
+    }
+
+  if (i < GPIOTE_CHANNELS)
+    {
+      g_gpiote_ch_callbacks[i].pinset = pinset;
+
+      nrf53_gpiote_set_ch_event(pinset, i,
+                                risingedge, fallingedge,
+                                func, arg);
+
+      /* Return the channel index */
+
+      ret = i;
     }
 
   leave_critical_section(flags);
@@ -533,7 +549,7 @@ int nrf53_gpiote_set_event(uint32_t pinset,
 }
 
 /****************************************************************************
- * Name: nrf53_gpio_set_task
+ * Name: nrf53_gpiote_set_task
  *
  * Description:
  *   Configure GPIO in TASK mode (to be controlled via tasks).
@@ -626,8 +642,8 @@ int nrf53_gpiote_init(void)
 {
   /* Clear LATCH register(s) */
 
-  putreg32(0, NRF53_GPIO_P0_BASE + NRF53_GPIO_LATCH_OFFSET);
-  putreg32(0, NRF53_GPIO_P1_BASE + NRF53_GPIO_LATCH_OFFSET);
+  putreg32(0xffffffff, NRF53_GPIO_P0_BASE + NRF53_GPIO_LATCH_OFFSET);
+  putreg32(0xffffffff, NRF53_GPIO_P1_BASE + NRF53_GPIO_LATCH_OFFSET);
 
   /* Reset GPIOTE data */
 

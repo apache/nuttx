@@ -144,7 +144,7 @@ void nrf91_gpiote_set_port_event(uint32_t pinset, xcpt_t func, void *arg);
 #endif
 
 /****************************************************************************
- * Name: nrf91_gpio_set_task
+ * Name: nrf91_gpiote_set_task
  *
  * Description:
  *   Configure GPIO in TASK mode (to be controlled via tasks).
@@ -162,7 +162,7 @@ void nrf91_gpiote_set_port_event(uint32_t pinset, xcpt_t func, void *arg);
  *
  ****************************************************************************/
 
-void nrf91_gpio_set_task(uint32_t pinset, int channel,
+void nrf91_gpiote_set_task(uint32_t pinset, int channel,
                         bool output_high, enum nrf91_gpiote_outcfg_e outcfg);
 
 /****************************************************************************
