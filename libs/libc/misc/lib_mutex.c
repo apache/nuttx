@@ -86,11 +86,6 @@ int nxmutex_init(FAR mutex_t *mutex)
 {
   int ret = nxsem_init(&mutex->sem, 0, NXSEM_NO_MHOLDER);
 
-  if (ret < 0)
-    {
-      return ret;
-    }
-
 #ifdef CONFIG_PRIORITY_INHERITANCE
   nxsem_set_protocol(&mutex->sem, SEM_TYPE_MUTEX | SEM_PRIO_INHERIT);
 #else
