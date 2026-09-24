@@ -33,9 +33,6 @@
 #include <nuttx/init.h>
 
 #include "riscv_internal.h"
-#ifdef CONFIG_ESPRESSIF_PMP_EARLY_SNAPSHOT
-#  include <arch/csr.h>
-#endif
 
 #include "esp_irq.h"
 #include "esp_libc_stubs.h"
@@ -523,89 +520,6 @@ void sys_startup_fn(void)
   SYS_STARTUP_FN();
 }
 
-#ifdef CONFIG_ESPRESSIF_PMP_EARLY_SNAPSHOT
-
-/****************************************************************************
- * Name: esp_pmp_early_snapshot
- *
- * Description:
- *   Bring-up diagnostic.  Dumps the raw PMP configuration at a given point
- *   in early startup, before the console is available, using the ROM printf.
- *
- *   Its purpose is to establish whether PMP entries are already locked when
- *   NuttX gains control, or whether the lock bits are set later by
- *   bootloader_init() -> bootloader_init_mem() ->
- *   esp_cpu_configure_region_protection().  Lock bits are irreversible
- *   without Smepmp, so this distinction decides whether a protected build is
- *   possible on a given part.
- *
- * Input Parameters:
- *   tag - Short label identifying the sample point.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-static void esp_pmp_early_snapshot(const char *tag)
-{
-  uintptr_t cfg[4];
-  uintptr_t addr[16];
-  int locked = 0;
-  int active = 0;
-  int i;
-
-  cfg[0]  = READ_CSR(pmpcfg0);
-  cfg[1]  = READ_CSR(pmpcfg1);
-  cfg[2]  = READ_CSR(pmpcfg2);
-  cfg[3]  = READ_CSR(pmpcfg3);
-
-  addr[0]  = READ_CSR(pmpaddr0);
-  addr[1]  = READ_CSR(pmpaddr1);
-  addr[2]  = READ_CSR(pmpaddr2);
-  addr[3]  = READ_CSR(pmpaddr3);
-  addr[4]  = READ_CSR(pmpaddr4);
-  addr[5]  = READ_CSR(pmpaddr5);
-  addr[6]  = READ_CSR(pmpaddr6);
-  addr[7]  = READ_CSR(pmpaddr7);
-  addr[8]  = READ_CSR(pmpaddr8);
-  addr[9]  = READ_CSR(pmpaddr9);
-  addr[10] = READ_CSR(pmpaddr10);
-  addr[11] = READ_CSR(pmpaddr11);
-  addr[12] = READ_CSR(pmpaddr12);
-  addr[13] = READ_CSR(pmpaddr13);
-  addr[14] = READ_CSR(pmpaddr14);
-  addr[15] = READ_CSR(pmpaddr15);
-
-  for (i = 0; i < 16; i++)
-    {
-      uint8_t b = (uint8_t)((cfg[i / 4] >> ((i % 4) * 8)) & 0xff);
-
-      if ((b & PMPCFG_L) != 0)
-        {
-          locked++;
-        }
-
-      if ((b & PMPCFG_A_MASK) != PMPCFG_A_OFF)
-        {
-          active++;
-        }
-    }
-
-  ets_printf("PMP[%s]: cfg %08x %08x %08x %08x active=%d locked=%d\n",
-             tag, (unsigned int)cfg[0], (unsigned int)cfg[1],
-             (unsigned int)cfg[2], (unsigned int)cfg[3], active, locked);
-
-  for (i = 0; i < 16; i += 4)
-    {
-      ets_printf("PMP[%s]: addr%-2d %08x %08x %08x %08x\n", tag, i,
-                 (unsigned int)addr[i], (unsigned int)addr[i + 1],
-                 (unsigned int)addr[i + 2], (unsigned int)addr[i + 3]);
-    }
-}
-
-#endif /* CONFIG_ESPRESSIF_PMP_EARLY_SNAPSHOT */
-
 /****************************************************************************
  * Name: __esp_start
  ****************************************************************************/
@@ -631,20 +545,12 @@ void __esp_start(void)
 
   bootloader_clear_bss_section();
 
-#ifdef CONFIG_ESPRESSIF_PMP_EARLY_SNAPSHOT
-  esp_pmp_early_snapshot("pre-bl");
-#endif
-
 #ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
   if (bootloader_init() != 0)
     {
       ets_printf("Hardware init failed, aborting\n");
       while (true);
     }
-#endif
-
-#ifdef CONFIG_ESPRESSIF_PMP_EARLY_SNAPSHOT
-  esp_pmp_early_snapshot("post-bl");
 #endif
 
   /* Initialize the per CPU areas */

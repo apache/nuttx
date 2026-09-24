@@ -298,24 +298,6 @@ config ESPRESSIF_USER_IMAGE_OFFSET
 
 endif # BUILD_PROTECTED
 
-config ESPRESSIF_PMP_EARLY_SNAPSHOT
-	bool "Dump PMP state during early boot (diagnostic)"
-	default n
-	---help---
-		Bring-up diagnostic.  Prints the raw PMP configuration via the ROM
-		printf immediately before and after the bootloader_init() call in
-		esp_start(), long before the console driver exists.
-
-		Use it to determine whether PMP entries are already locked when
-		NuttX gains control, or whether the lock bits are set by
-		bootloader_init() -> bootloader_init_mem() ->
-		esp_cpu_configure_region_protection().  PMP lock bits cannot be
-		cleared without the Smepmp extension, so a protected-mode port has
-		to prevent the locking rather than undo it, and that requires
-		knowing which code sets it.
-
-		This is a debug aid only; leave it disabled in normal builds.
-
 config ESPRESSIF_RUN_IRAM
 	bool "Run from IRAM"
 	default n
