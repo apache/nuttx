@@ -873,22 +873,11 @@ int mcp9600_register(FAR struct i2c_master_s *i2c, uint8_t addr,
 
   /* Initialize semaphore */
 
-  err = nxsem_init(&priv->run, 0, 0);
-  if (err < 0)
-    {
-      snerr("Failed to register MCP9600 driver: %d\n", err);
-      kmm_free(priv);
-      return err;
-    }
+  nxsem_init(&priv->run, 0, 0);
 
   /* Initialize mutex */
 
-  err = nxmutex_init(&priv->devlock);
-  if (err < 0)
-    {
-      snerr("ERROR: Failed to register MCP9600 driver: %d\n", err);
-      goto del_sem;
-    }
+  nxmutex_init(&priv->devlock);
 
   /* Cold junction lower half */
 
@@ -950,7 +939,6 @@ int mcp9600_register(FAR struct i2c_master_s *i2c, uint8_t addr,
       sensor_unregister(&priv->cold_junc.lower, c_devno);
     del_mutex:
       nxmutex_destroy(&priv->devlock);
-    del_sem:
       nxsem_destroy(&priv->run);
       kmm_free(priv);
       return err;

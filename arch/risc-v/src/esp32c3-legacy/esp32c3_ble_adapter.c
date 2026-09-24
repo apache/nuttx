@@ -775,7 +775,6 @@ static void task_yield_from_isr(void)
 
 static void *semphr_create_wrapper(uint32_t max, uint32_t init)
 {
-  int ret;
   struct bt_sem_s *bt_sem;
   int tmp;
 
@@ -783,8 +782,7 @@ static void *semphr_create_wrapper(uint32_t max, uint32_t init)
   bt_sem = kmm_malloc(tmp);
   DEBUGASSERT(bt_sem);
 
-  ret = nxsem_init(&bt_sem->sem, 0, init);
-  DEBUGASSERT(ret == OK);
+  nxsem_init(&bt_sem->sem, 0, init);
 
 #ifdef CONFIG_ESP32C3_SPIFLASH
   esp32c3_wl_init_semcache(&bt_sem->sc, &bt_sem->sem);

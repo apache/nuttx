@@ -265,13 +265,7 @@ int himem_chardev_init(void)
       return ret;
     }
 
-  ret = nxmutex_init(&lock);
-  if (ret != 0)
-    {
-      merr("Failed to init semaphore.\n");
-      esp_himem_free_map_range(g_range_handle);
-      return ret;
-    }
+  nxmutex_init(&lock);
 
   g_ram_offset = HIMEM_UNMAPPED;
   g_mapped_inode = NULL;
@@ -281,13 +275,7 @@ int himem_chardev_init(void)
 int himem_chardev_exit(void)
 {
   int ret = 0;
-  ret = nxmutex_destroy(&lock);
-  if (ret != 0)
-    {
-      merr("Failed to destroy semaphore.\n");
-      esp_himem_free_map_range(g_range_handle);
-      return ret;
-    }
+  nxmutex_destroy(&lock);
 
   ret = esp_himem_free_map_range(g_range_handle);
 

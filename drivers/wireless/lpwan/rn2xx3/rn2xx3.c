@@ -1874,12 +1874,7 @@ int rn2xx3_register(FAR const char *devpath, FAR const char *uartpath)
 
   /* Initialize mutex */
 
-  err = nxmutex_init(&priv->devlock);
-  if (err < 0)
-    {
-      wlerr("Failed to initialize mutex for RN2xx3 device: %d\n", err);
-      goto free_mem;
-    }
+  nxmutex_init(&priv->devlock);
 
   /* Open UART interface for use */
 
@@ -1928,7 +1923,6 @@ int rn2xx3_register(FAR const char *devpath, FAR const char *uartpath)
       file_close(&priv->uart);
     destroy_mutex:
       nxmutex_destroy(&priv->devlock);
-    free_mem:
       kmm_free(priv);
     }
 

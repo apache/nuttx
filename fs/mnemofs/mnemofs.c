@@ -868,12 +868,7 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
 
   finfo("sb allocated: %p\n", sb);
 
-  ret = nxmutex_init(&sb->lock);
-  if (ret < 0)
-    {
-      ferr("Could not initialize fs mutex\n");
-      goto errout_with_sb;
-    }
+  nxmutex_init(&sb->lock);
 
   ret = mnemofs_lock(sb);
   if (ret < 0)
@@ -1041,7 +1036,6 @@ errout_with_lock:
   kmm_free(sb->rwbuf);
 errout_with_mutex:
   nxmutex_destroy(&sb->lock);
-errout_with_sb:
   kmm_free(sb);
   return ret;
 }

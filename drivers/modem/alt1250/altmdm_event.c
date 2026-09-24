@@ -72,21 +72,17 @@ static int set_expiretime(int expire_time, FAR struct timespec *set_time)
 
 int altmdm_event_init(FAR struct altmdm_event_s *evt)
 {
-  int ret;
-
   evt->event = 0;
-  ret = nxsem_init(&evt->sem, 0, 0);
+  nxsem_init(&evt->sem, 0, 0);
 
-  return ret;
+  return OK;
 }
 
 int altmdm_event_destroy(FAR struct altmdm_event_s *evt)
 {
-  int ret;
+  nxsem_destroy(&evt->sem);
 
-  ret = nxsem_destroy(&evt->sem);
-
-  return ret;
+  return OK;
 }
 
 uint32_t altmdm_event_wait(FAR struct altmdm_event_s *evt,
