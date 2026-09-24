@@ -101,6 +101,7 @@ config ARCH_CHIP_MIMXRT1064CVL5A
 config ARCH_CHIP_MIMXRT1176DVMAA
 	bool "MIMXRT1176DVMAA"
 	select ARCH_FAMILY_IMXRT117x
+	select IMXRT_HAVE_CM4
 	select IMXRT_HAVE_LCD
 	select IMXRT_HAVE_USBOTG1
 	select IMXRT_HAVE_USBOTG2
@@ -390,6 +391,10 @@ config IMXRT_HAVE_LCD
 	bool
 	default n
 
+config IMXRT_HAVE_CM4
+	bool
+	default n
+
 config IMXRT_HAVE_USBOTG1
 	bool
 	default n
@@ -568,6 +573,18 @@ config IMXRT_WDOG
 	bool "Watchdog 1"
 	default n
 	depends on WATCHDOG
+
+config IMXRT_RPTUN
+	bool "RPTUN transport to the CM4 core"
+	default n
+	depends on IMXRT_HAVE_CM4 && RPTUN
+	select RPTUN_LOADER
+	select DEV_SIMPLE_ADDRENV
+	---help---
+		rpmsg/virtio transport to the Cortex-M4 of the dual-core i.MX RT1170.
+		The CM7 loads the CM4 ELF, releases the core and signals it over the
+		MU-A mailbox.  The board supplies the memory map and the ELF path
+		through imxrt_rptun_init().
 
 menu "FlexIO Peripherals"
 

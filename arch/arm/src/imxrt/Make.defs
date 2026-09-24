@@ -99,6 +99,10 @@ CHIP_CSRCS += imxrt_edma.c
 endif
 endif
 
+ifeq ($(CONFIG_IMXRT_RPTUN),y)
+CHIP_CSRCS += imxrt_rptun.c
+endif
+
 ifdef CONFIG_IMXRT_USDHC
 CHIP_CSRCS += imxrt_usdhc.c
 endif
