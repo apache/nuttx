@@ -35,6 +35,9 @@ Supported in this NuttX port:
   by the NuttX SMP scheduler
 * GPIO pins exposed as ``/dev/gpioN`` character devices (input, output and
   interrupt), driven through the SDK fwlib ROM layer
+* General-purpose UARTs exposed as ``/dev/ttySN`` serial devices, driven
+  through the SDK fwlib ROM layer (the LOG-UART owns the console and
+  ``/dev/ttyS0``)
 * littlefs persistent storage mounted at ``/data`` (a dedicated SPI NOR flash
   partition), backing the Wi-Fi key-value store
 * Wi-Fi station and SoftAP through the ``wapi`` tool
@@ -74,6 +77,26 @@ with the example::
 Pins are encoded with the ``AMEBA_PA()`` / ``AMEBA_PB()`` helpers from
 ``arch/arm/src/common/ameba/ameba_gpio.h`` (port A/B, pin 0-31), matching the
 Ameba SDK ``PinName`` layout.
+
+uart
+----
+
+Minimal NSH with the general-purpose UART driver and the ``serialrx`` /
+``serialblaster`` examples enabled (no Wi-Fi). The LOG-UART owns the console
+and ``/dev/ttyS0``, so the board registers UART0-2 from its table (see
+``boards/arm/rtl8730e/rtl8730e_evb/src/rtl8730e_uart.c``) as ``/dev/ttyS1-3``
+at 115200 8N1. Edit that table -- controller, TX/RX pads and baud -- to match a
+board's wiring. The TX/RX pads use the same ``AMEBA_PA()`` / ``AMEBA_PB()``
+encoding as the GPIO table; the driver muxes them to the UART function and
+pulls RX high through the SDK ROM. Exercise a port with the examples (loop TX
+back to RX, or wire it to a host serial adapter)::
+
+    nsh> serialblaster /dev/ttyS1 26   # stream a test pattern out /dev/ttyS1
+    nsh> serialrx      /dev/ttyS1 26   # receive and dump bytes from /dev/ttyS1
+
+The line format can be changed at runtime through ``tcsetattr()`` (the config
+enables ``CONFIG_SERIAL_TERMIOS``). UART3 is reserved for Bluetooth and is not
+exposed by the driver.
 
 Wi-Fi
 =====
