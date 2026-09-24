@@ -331,3 +331,5 @@ flashed at ``CONFIG_ESPRESSIF_USER_IMAGE_OFFSET`` (``0x110000`` by default):
 
 ``make flash ESPTOOL_PORT=<port>`` does both in one step.  The console for this
 configuration is UART0 at 115200, not the USB Serial/JTAG port.
+
+The protected build has not been tested in a multi-core configuration.
