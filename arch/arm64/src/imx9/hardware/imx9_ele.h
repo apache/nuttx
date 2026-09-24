@@ -57,6 +57,64 @@
 #define ELE_VERIFY_IMAGE_REQ      0x88
 #define ELE_COMMIT_REQ            0xa8
 
+/* Key store services. These answer to ELE_VERSION_FW, not ELE_VERSION, and
+ * every one of them is a session the caller has to close.
+ */
+
+#define ELE_SAB_INIT_REQ          0x17
+#define ELE_SESSION_OPEN_REQ      0x10
+#define ELE_SESSION_CLOSE_REQ     0x11
+#define ELE_KEY_STORE_OPEN_REQ    0x30
+#define ELE_KEY_STORE_CLOSE_REQ   0x31
+#define ELE_KEY_MGMT_OPEN_REQ     0x40
+#define ELE_KEY_MGMT_CLOSE_REQ    0x41
+#define ELE_GENERATE_KEY_REQ      0x42
+#define ELE_DELETE_KEY_REQ        0x4e
+#define ELE_SIG_GEN_OPEN_REQ      0x70
+#define ELE_STORAGE_OPEN_REQ      0xe0
+#define ELE_STORAGE_CLOSE_REQ     0xe1
+#define ELE_STORAGE_IMPORT_REQ    0xe2
+#define ELE_STORAGE_EXPORT_START  0xe3
+#define ELE_STORAGE_EXPORT_FINISH 0xe4
+#define ELE_STORAGE_CHUNK_EXPORT  0xe5
+#define ELE_STORAGE_CHUNK_GET     0xe6
+#define ELE_STORAGE_CHUNK_GET_DONE 0xe7
+#define ELE_SIG_GEN_CLOSE_REQ     0x71
+#define ELE_SIGNATURE_GEN_REQ     0x72
+
+#define ELE_KEY_STORE_FLAG_CREATE 0x01
+
+/* Key attributes, from NXP's key management API. SECP_R1 covers the NIST
+ * curves; the enclave offers no Edwards or Montgomery curve.
+ */
+
+#define ELE_KEY_TYPE_ECC_PAIR_SECP_R1 0x7112
+#define ELE_KEY_USAGE_SIGN_HASH       0x00001000
+#define ELE_KEY_USAGE_VERIFY_HASH     0x00002000
+#define ELE_KEY_LIFETIME_PERSISTENT   0x00000001
+#define ELE_KEY_LIFECYCLE_OPEN        0x01
+#define ELE_KEY_LIFECYCLE_CLOSED      0x02
+#define ELE_ALGO_ECDSA_SHA256         0x06000609
+#define ELE_KEY_GROUP_PERSISTENT      1
+
+/* Without the strict flag a generated key lives in the enclave's own memory
+ * and is never written to the key store, so it does not survive the store
+ * being closed, let alone a reboot.
+ */
+
+#define ELE_KEY_FLAG_STRICT           0x80
+
+/* The input to a signature is a message the enclave hashes itself, or a
+ * digest the caller hashed. A CSR is signed over a digest. Bit 0 selects the
+ * message, not the digest, which the part settles: setting it produced a
+ * signature over sha256 of the digest that was passed in.
+ */
+
+#define ELE_SIG_FLAG_INPUT_DIGEST     0x00
+#define ELE_SIG_FLAG_INPUT_MESSAGE    0x01
+#define ELE_KEY_STORE_FLAG_SYNC   0x80
+#define ELE_KEY_STORE_FLAG_MONINC 0x20
+
 /* Messaging Unit registers. */
 
 #define ELE_MU_TCR (IMX9_S3MUA_BASE + 0x120)
