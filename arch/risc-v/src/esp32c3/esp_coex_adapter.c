@@ -329,7 +329,6 @@ void IRAM_ATTR esp_coex_common_task_yield_from_isr_wrapper(void)
 
 void *esp_coex_common_semphr_create_wrapper(uint32_t max, uint32_t init)
 {
-  int ret;
   sem_t *sem;
   int tmp;
 
@@ -341,13 +340,7 @@ void *esp_coex_common_semphr_create_wrapper(uint32_t max, uint32_t init)
       return NULL;
     }
 
-  ret = nxsem_init(sem, 0, init);
-  if (ret)
-    {
-      wlerr("Failed to initialize sem error=%d\n", ret);
-      kmm_free(sem);
-      return NULL;
-    }
+  nxsem_init(sem, 0, init);
 
   return sem;
 }

@@ -217,7 +217,6 @@ void rtos_mem_free(void *pbuf)
 struct ameba_qobj_s *ameba_qobj_alloc(uint8_t tag)
 {
   struct ameba_qobj_s *obj = kmm_zalloc(sizeof(struct ameba_qobj_s));
-  int ret;
 
   if (obj == NULL)
     {
@@ -229,11 +228,11 @@ struct ameba_qobj_s *ameba_qobj_alloc(uint8_t tag)
   switch (tag)
     {
       case AMEBA_QOBJ_MUTEX:
-        ret = nxmutex_init(&obj->u.mutex);
+        nxmutex_init(&obj->u.mutex);
         break;
 
       case AMEBA_QOBJ_RMUTEX:
-        ret = nxrmutex_init(&obj->u.rmutex);
+        nxrmutex_init(&obj->u.rmutex);
         break;
 
       case AMEBA_QOBJ_SEM:
@@ -241,14 +240,7 @@ struct ameba_qobj_s *ameba_qobj_alloc(uint8_t tag)
 
         /* Caller initialises the semaphore counts via nxsem_init below. */
 
-        ret = OK;
         break;
-    }
-
-  if (ret < 0)
-    {
-      kmm_free(obj);
-      return NULL;
     }
 
   return obj;
@@ -386,11 +378,7 @@ int rtos_sema_create(rtos_sema_t *pp_handle, uint32_t init_count,
       return RTK_FAIL;
     }
 
-  if (nxsem_init(&obj->u.sem, 0, init_count) < 0)
-    {
-      kmm_free(obj);
-      return RTK_FAIL;
-    }
+  nxsem_init(&obj->u.sem, 0, init_count);
 
   *pp_handle = (rtos_sema_t)obj;
   return RTK_SUCCESS;

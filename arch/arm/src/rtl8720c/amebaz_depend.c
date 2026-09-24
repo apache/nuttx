@@ -172,11 +172,7 @@ void rtw_init_sema(void **sema, int init_val)
       return;
     }
 
-  if (nxsem_init(_sema, 0, init_val))
-    {
-      free(_sema);
-      return;
-    }
+  nxsem_init(_sema, 0, init_val);
 
   *sema = _sema;
 }
