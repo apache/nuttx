@@ -735,6 +735,7 @@ errout:
 static uint32_t nrf52_rtc_getbase(struct nrf52_rtc_dev_s *dev)
 {
   struct nrf52_rtc_priv_s *rtc = (struct nrf52_rtc_priv_s *)dev;
+
   DEBUGASSERT(dev);
 
   return rtc->base;
