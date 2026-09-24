@@ -1937,8 +1937,8 @@ static void wifi_apb80m_release(void)
 
 static void esp_phy_enable_wrapper(void)
 {
-    esp_phy_enable(PHY_MODEM_WIFI);
-    phy_wifi_enable_set(1);
+  esp_phy_enable(PHY_MODEM_WIFI);
+  phy_wifi_enable_set(1);
 }
 
 /****************************************************************************
@@ -1959,8 +1959,8 @@ static void esp_phy_enable_wrapper(void)
 
 static void esp_phy_disable_wrapper(void)
 {
-    phy_wifi_enable_set(0);
-    esp_phy_disable(PHY_MODEM_WIFI);
+  phy_wifi_enable_set(0);
+  esp_phy_disable(PHY_MODEM_WIFI);
 }
 
 /****************************************************************************
@@ -2630,10 +2630,11 @@ static uint32_t esp_clk_slowclk_cal_get_wrapper(void)
   if (REG_GET_FIELD(SYSTEM_BT_LPCK_DIV_FRAC_REG, SYSTEM_LPCLK_SEL_XTAL))
     {
       uint64_t time_per_us = 1000000ULL;
+
       return (((time_per_us << RTC_CLK_CAL_FRACT) / (MHZ)) >>
               (RTC_CLK_CAL_FRACT - SOC_WIFI_LIGHT_SLEEP_CLK_WIDTH));
     }
-    else
+  else
     {
       return (getreg32(RTC_SLOW_CLK_CAL_REG) >>
               (RTC_CLK_CAL_FRACT - SOC_WIFI_LIGHT_SLEEP_CLK_WIDTH));
@@ -2713,6 +2714,7 @@ static void esp_log_write_wrapper(unsigned int level,
   if (level <= max_level)
     {
       va_list list;
+
       va_start(list, format);
       esp_log_writev(level, tag, format, list);
       va_end(list);
@@ -2780,6 +2782,7 @@ static void *esp_realloc_internal(void *ptr, size_t size)
   void *old_ptr = ptr;
   void *new_ptr = NULL;
   size_t old_size = 0;
+
   if (size == 0)
     {
       kmm_free(ptr);
@@ -2829,6 +2832,7 @@ static void *esp_calloc_internal(size_t n, size_t size)
   return xtensa_imm_calloc(n, size);
 #else
   void *ptr = kmm_calloc(n, size);
+
   if (ptr != NULL)
     {
       if (esp32s3_ptr_extram(ptr))
@@ -2864,6 +2868,7 @@ static void *esp_zalloc_internal(size_t size)
   return xtensa_imm_zalloc(size);
 #else
   void *ptr = kmm_zalloc(size);
+
   if (ptr != NULL)
     {
       if (esp32s3_ptr_extram(ptr))

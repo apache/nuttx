@@ -386,7 +386,7 @@ static off_t zipfs_seek(FAR struct file *filep, off_t offset,
             goto err_with_lock;
           }
 
-          offset += file_info.uncompressed_size;
+        offset += file_info.uncompressed_size;
         break;
       default:
         ret = -EINVAL;
