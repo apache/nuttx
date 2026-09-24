@@ -140,7 +140,7 @@ void nrf53_gpiote_set_port_event(uint32_t pinset, xcpt_t func, void *arg);
 #endif
 
 /****************************************************************************
- * Name: nrf53_gpio_set_task
+ * Name: nrf53_gpiote_set_task
  *
  * Description:
  *   Configure GPIO in TASK mode (to be controlled via tasks).
@@ -158,7 +158,7 @@ void nrf53_gpiote_set_port_event(uint32_t pinset, xcpt_t func, void *arg);
  *
  ****************************************************************************/
 
-void nrf53_gpio_set_task(uint32_t pinset, int channel,
+void nrf53_gpiote_set_task(uint32_t pinset, int channel,
                         bool output_high, enum nrf53_gpiote_outcfg_e outcfg);
 
 /****************************************************************************
