@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/espressif/esp_region_protect.c
+ * arch/risc-v/src/esp32p4/esp_region_protect.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
