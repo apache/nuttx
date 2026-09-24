@@ -316,7 +316,7 @@
 
 /* Ethernet MTL registers */
 
-#define ETH_MTLOMR_DTXSTS             (1 << 1)   /* Bit 1: Drop Transmit Status */
+#define ETH_MTLOMR_DTXSTS             (1 << 0)   /* Bit 0: Drop Transmit Status */
 #define ETH_MTLOMR_CNTPRST            (1 << 8)   /* Bit 8: Counters Preset */
 #define ETH_MTLOMR_CNTCLR             (1 << 9)   /* Bit 9: Counters Reset */
 
