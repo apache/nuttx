@@ -129,6 +129,29 @@ SECTIONS
 
   .bss : {                     /* BSS */
        _sbss = .;
+
+       /* Cortex-A32 exclusive-monitor false-sharing workaround.
+        *
+        * The generic SMP critical-section spinlock g_cpu_irqlock and the
+        * plain (non-atomic) bitmap g_cpu_irqset are defined back-to-back in
+        * sched/irq/irq_csection.c and land in the same 64-byte cache line.
+        * The A32 exclusive monitor reserves a full cache line, so one core's
+        * ordinary store to g_cpu_irqset clears the other core's LDREX
+        * reservation on g_cpu_irqlock; under heavy dual-core critical-section
+        * traffic (e.g. several UART ISRs) the two cores live-lock trading
+        * failed STREX.  Place the lock on its own cache line and push
+        * g_cpu_irqset onto the next one so they occupy separate reservation
+        * granules.  Done here in the (chip-specific) link script so the
+        * generic scheduler source is left untouched; relies on the toolchain
+        * emitting per-object -fdata-sections.
+        */
+
+       . = ALIGN(64);
+       *(.bss.g_cpu_irqlock)
+       . = ALIGN(64);
+       *(.bss.g_cpu_irqset)
+       . = ALIGN(64);
+
        *(.bss*)
        . = ALIGN(4096);
        _ebss = .;
