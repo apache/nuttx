@@ -45,7 +45,7 @@
 #define NRF53_RTC_TRGOVRFLW(d)            ((d)->ops->trgovrflw(d))
 #define NRF53_RTC_GETCOUNTER(d, c)        ((d)->ops->getcounter(d, c))
 #define NRF53_RTC_SETCC(d, i, cc)         ((d)->ops->setcc(d, i, cc))
-#define NRF53_RTC_GETCC(d, i, cc)         ((d)->ops->setcc(d, i, cc))
+#define NRF53_RTC_GETCC(d, i, cc)         ((d)->ops->getcc(d, i, cc))
 #define NRF53_RTC_SETPRE(d, pre)          ((d)->ops->setpre(d, pre))
 #define NRF53_RTC_SETISR(d, hnd, arg)     ((d)->ops->setisr(d, hnd, arg))
 #define NRF53_RTC_ENABLEINT(d, s)         ((d)->ops->enableint(d, s))
