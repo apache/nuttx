@@ -556,6 +556,7 @@ static int nrf53_pwm_start(struct pwm_lowerhalf_s *dev,
 
   /* Start sequence 0 */
 
+  nrf53_pwm_putreg(priv, NRF53_PWM_EVENTS_SEQSTARTED0_OFFSET, 0);
   nrf53_pwm_putreg(priv, NRF53_PWM_TASKS_SEQSTART0_OFFSET, 1);
 
   /* Wait for sequence started */
@@ -581,6 +582,7 @@ static int nrf53_pwm_stop(struct pwm_lowerhalf_s *dev)
 
   /* Stop PWM */
 
+  nrf53_pwm_putreg(priv, NRF53_PWM_EVENTS_STOPPED_OFFSET, 0);
   nrf53_pwm_putreg(priv, NRF53_PWM_TASKS_STOP_OFFSET, 1);
 
   /* Wait for PWM stopped */
