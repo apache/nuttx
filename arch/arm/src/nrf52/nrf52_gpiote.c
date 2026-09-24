@@ -144,6 +144,7 @@ static int nrf52_gpiote_isr(int irq, void *context, void *arg)
 
               xcpt_t callback = g_gpiote_ch_callbacks[i].callback;
               void *cbarg = g_gpiote_ch_callbacks[i].arg;
+
               ret = callback(irq, context, cbarg);
 
               /* Clear event */
@@ -172,11 +173,11 @@ static int nrf52_gpiote_isr(int irq, void *context, void *arg)
             {
               case 0:
                 addr = NRF52_GPIO_P0_BASE + NRF52_GPIO_LATCH_OFFSET;
-              break;
+                break;
 #ifdef CONFIG_NRF52_HAVE_PORT1
               case 1:
                 addr = NRF52_GPIO_P1_BASE + NRF52_GPIO_LATCH_OFFSET;
-              break;
+                break;
 #endif
             }
 
@@ -220,7 +221,7 @@ static int nrf52_gpiote_isr(int irq, void *context, void *arg)
               ret = callback(irq, context, cbarg);
             }
 #endif
-       }
+        }
     }
 
   return ret;
