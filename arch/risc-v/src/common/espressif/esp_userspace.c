@@ -62,6 +62,22 @@
 
 #define USER_IMAGE_OFFSET   CONFIG_ESPRESSIF_USER_IMAGE_OFFSET
 
+/* Flash size, used to bound the load addresses the user image header
+ * claims.  The Kconfig choice is a set of booleans rather than a number.
+ */
+
+#if defined(CONFIG_ESPRESSIF_FLASH_32M)
+#  define USER_FLASH_SIZE   (32 * 1024 * 1024)
+#elif defined(CONFIG_ESPRESSIF_FLASH_16M)
+#  define USER_FLASH_SIZE   (16 * 1024 * 1024)
+#elif defined(CONFIG_ESPRESSIF_FLASH_8M)
+#  define USER_FLASH_SIZE   (8 * 1024 * 1024)
+#elif defined(CONFIG_ESPRESSIF_FLASH_4M)
+#  define USER_FLASH_SIZE   (4 * 1024 * 1024)
+#else
+#  define USER_FLASH_SIZE   (2 * 1024 * 1024)
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -90,6 +106,211 @@ static struct user_image_load_header_s g_header;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: reject
+ *
+ * Description:
+ *   Report a rejected user image and stop.
+ *
+ *   These are runtime checks rather than DEBUGASSERT deliberately.  The
+ *   values they guard are read out of flash and decide what gets mapped
+ *   into the user address space and what the PMP grants, so they sit on a
+ *   trust boundary.  DEBUGASSERT compiles to nothing once assertions are
+ *   off, which is exactly the build that ships.
+ *
+ *   Reporting goes through the ROM printf because this runs long before
+ *   the console driver exists.
+ *
+ * Input Parameters:
+ *   what  - what was wrong.
+ *   value - the offending value.
+ *
+ * Returned Value:
+ *   Does not return.
+ *
+ ****************************************************************************/
+
+static void noreturn_function reject(const char *what, uintptr_t value)
+{
+  esp_rom_printf("ERROR: user image rejected: %s (0x%x)\n",
+                 what, (unsigned int)value);
+  PANIC();
+}
+
+/****************************************************************************
+ * Name: validate_header
+ *
+ * Description:
+ *   Check the load header before configure_mmu() acts on it.
+ *
+ *   A bad header does not fail cleanly: mmu_hal_map_region() would map
+ *   some other part of flash into the user window, and the failure would
+ *   surface much later as an unexplained fault in user code.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.  Does not return if the header is rejected.
+ *
+ ****************************************************************************/
+
+static void validate_header(void)
+{
+  uintptr_t lma;
+
+  /* A zero-sized region would map nothing and leave user code with no text
+   * or no rodata; neither is recoverable.
+   */
+
+  if (g_header.drom_size == 0)
+    {
+      reject("drom_size is zero", g_header.drom_size);
+    }
+
+  if (g_header.irom_size == 0)
+    {
+      reject("irom_size is zero", g_header.irom_size);
+    }
+
+  /* The virtual addresses must land in the windows the linker script
+   * reserved for the user image, with the whole region inside.  Checking
+   * the end as well as the start is what catches a plausible-looking vma
+   * with a nonsense size.
+   */
+
+  if (g_header.drom_vma < UDROM_START ||
+      g_header.drom_vma >= UDROM_END ||
+      g_header.drom_size > (uintptr_t)(UDROM_END - g_header.drom_vma))
+    {
+      reject("drom does not lie within UDROM", g_header.drom_vma);
+    }
+
+  if (g_header.irom_vma < UIROM_START ||
+      g_header.irom_vma >= UIROM_END ||
+      g_header.irom_size > (uintptr_t)(UIROM_END - g_header.irom_vma))
+    {
+      reject("irom does not lie within UIROM", g_header.irom_vma);
+    }
+
+  /* Load addresses are offsets from the start of the user image, so they
+   * are added to USER_IMAGE_OFFSET.  Check the addition and the resulting
+   * extent separately: a large lma can wrap, and a wrapped value would
+   * otherwise pass a simple upper-bound test.
+   */
+
+  if (g_header.drom_lma > (uintptr_t)(USER_FLASH_SIZE - USER_IMAGE_OFFSET))
+    {
+      reject("drom_lma is beyond the end of flash", g_header.drom_lma);
+    }
+
+  lma = USER_IMAGE_OFFSET + g_header.drom_lma;
+  if (g_header.drom_size > (uintptr_t)(USER_FLASH_SIZE - lma))
+    {
+      reject("drom extends past the end of flash", lma);
+    }
+
+  if (g_header.irom_lma > (uintptr_t)(USER_FLASH_SIZE - USER_IMAGE_OFFSET))
+    {
+      reject("irom_lma is beyond the end of flash", g_header.irom_lma);
+    }
+
+  lma = USER_IMAGE_OFFSET + g_header.irom_lma;
+  if (g_header.irom_size > (uintptr_t)(USER_FLASH_SIZE - lma))
+    {
+      reject("irom extends past the end of flash", lma);
+    }
+
+  /* The cache MMU can only map a physical page onto a virtual page at the
+   * same offset within the page, so paddr % page must equal vaddr % page.
+   * configure_mmu() masks both with MMU_FLASH_MASK and would silently map
+   * the wrong bytes if they disagreed.
+   */
+
+  if (((USER_IMAGE_OFFSET + g_header.drom_lma) ^ g_header.drom_vma) &
+      ~MMU_FLASH_MASK)
+    {
+      reject("drom lma and vma differ within the MMU page",
+             g_header.drom_vma);
+    }
+
+  if (((USER_IMAGE_OFFSET + g_header.irom_lma) ^ g_header.irom_vma) &
+      ~MMU_FLASH_MASK)
+    {
+      reject("irom lma and vma differ within the MMU page",
+             g_header.irom_vma);
+    }
+}
+
+/****************************************************************************
+ * Name: validate_userspace
+ *
+ * Description:
+ *   Check the userspace structure before anything is written through it.
+ *
+ *   The structure lives in the user image and is reached through the
+ *   mapping configure_mmu() just installed, so it is only as trustworthy
+ *   as the image.  It is validated before the .bss clear and the .data
+ *   copy, both of which write through these pointers.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.  Does not return if the structure is rejected.
+ *
+ ****************************************************************************/
+
+static void validate_userspace(void)
+{
+  uintptr_t entry = (uintptr_t)USERSPACE->us_entrypoint;
+
+  /* User code executes in place from flash, so the entry point belongs in
+   * UIROM, not in RAM.
+   */
+
+  if (entry < UIROM_START || entry >= UIROM_END)
+    {
+      reject("entry point is outside UIROM", entry);
+    }
+
+  /* .data, .bss and the heap all live in UDRAM and must be ordered
+   * .data <= .bss <= heap end, with the whole span inside the region.
+   */
+
+  if (USERSPACE->us_datastart < UDRAM_START ||
+      USERSPACE->us_dataend > UDRAM_END ||
+      USERSPACE->us_datastart > USERSPACE->us_dataend)
+    {
+      reject("data segment is outside UDRAM", USERSPACE->us_datastart);
+    }
+
+  if (USERSPACE->us_bssstart < UDRAM_START ||
+      USERSPACE->us_bssend > UDRAM_END ||
+      USERSPACE->us_bssstart > USERSPACE->us_bssend)
+    {
+      reject("bss segment is outside UDRAM", USERSPACE->us_bssstart);
+    }
+
+  if (USERSPACE->us_heapend > UDRAM_END ||
+      USERSPACE->us_bssend > USERSPACE->us_heapend)
+    {
+      reject("heap does not follow bss within UDRAM",
+             USERSPACE->us_heapend);
+    }
+
+  /* .data is copied from flash at us_datasource, an offset within the
+   * user image in the same way as the header's load addresses.
+   */
+
+  if (USERSPACE->us_datasource == 0 ||
+      USERSPACE->us_datasource >
+        (uintptr_t)(USER_FLASH_SIZE - USER_IMAGE_OFFSET))
+    {
+      reject("data source is outside flash", USERSPACE->us_datasource);
+    }
+}
 
 /****************************************************************************
  * Name: load_header
@@ -122,6 +343,8 @@ static void load_header(void)
                      ret, (unsigned int)USER_IMAGE_OFFSET);
       PANIC();
     }
+
+  validate_header();
 }
 
 /****************************************************************************
@@ -409,10 +632,13 @@ void esp_userspace(void)
 
   configure_mmu();
 
-  /* Clear all of userspace .bss */
+  /* The userspace structure is only reachable now that the mapping is in
+   * place, and everything below writes through it, so check it here.
+   */
 
-  DEBUGASSERT(USERSPACE->us_bssstart != 0 && USERSPACE->us_bssend != 0 &&
-              USERSPACE->us_bssstart <= USERSPACE->us_bssend);
+  validate_userspace();
+
+  /* Clear all of userspace .bss */
 
   dest = (uint8_t *)USERSPACE->us_bssstart;
   end  = (uint8_t *)USERSPACE->us_bssend;
@@ -423,10 +649,6 @@ void esp_userspace(void)
     }
 
   /* Initialize all of userspace .data */
-
-  DEBUGASSERT(USERSPACE->us_datasource != 0 &&
-              USERSPACE->us_datastart != 0 && USERSPACE->us_dataend != 0 &&
-              USERSPACE->us_datastart <= USERSPACE->us_dataend);
 
   initialize_data();
 
