@@ -231,4 +231,21 @@ config STM32H5_IO_CONFIG_A
 
 comment "STM32H5 SRAM2 Options"
 
+config STM32_SBS
+	bool
+	default n
+
+config STM32_EDATA
+	bool "Flash high-cycle data (EDATA) MTD driver"
+	default n
+	depends on STM32_STM32H563XX
+	select MTD
+	select STM32_SBS
+	---help---
+		Provides stm32_edata_initialize(), which configures the last
+		sectors of a flash bank as high-cycle data (EDATA) and returns an
+		MTD device for them.  EDATA is rated for many more erase cycles
+		than user flash, which makes it suitable for configuration storage
+		such as NVS (MTD_CONFIG_NVS).
+
 endif # ARCH_CHIP_STM32H5

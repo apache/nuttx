@@ -44,11 +44,18 @@
 
 #include <stdbool.h>
 #include <assert.h>
+#include <debug.h>
 #include <errno.h>
+#include <inttypes.h>
+#include <string.h>
+#include <sys/param.h>
 
 #include "hardware/stm32_flash.h"
 #include "hardware/stm32_memorymap.h"
+#include "hardware/stm32_sbs.h"
 #include "arm_internal.h"
+#include "stm32_flash.h"
+#include "stm32_icache.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -121,12 +128,17 @@
 #define FLASH_OTP_WORDS_PER_BLOCK   32             /* 32 words per block */
 #define OTP_WORD_SIZE               2              /* 16-bit words as per manual */
 
-#define FLASH_NSSR_ALL_ERRORS  (FLASH_NSSR_BSY | FLASH_NSSR_WBNE |       \
-                                FLASH_NSSR_DBNE |FLASH_NSSR_EOP |        \
-                                FLASH_NSSR_WRPERR | FLASH_NSSR_PGSERR |  \
+#define FLASH_NSSR_ALL_ERRORS  (FLASH_NSSR_WRPERR | FLASH_NSSR_PGSERR |  \
                                 FLASH_NSSR_STRBERR | FLASH_NSSR_INCERR | \
                                 FLASH_NSSR_OBKERR | FLASH_NSSR_OBKWERR | \
                                 FLASH_NSSR_OPTCHANGERR )
+
+/* Flash high-cycle data (EDATA) */
+
+#define EDATA_BANK_SIZE       (STM32_EDATA_BANK_NSECTORS * \
+                               STM32_EDATA_SECTOR_SIZE)
+#define EDATA_ERASEDVALUE     0xffffu
+#define EDATA_ECCD            (FLASH_ECCDETR_ECCD | FLASH_ECCDETR_EDATA_ECC)
 
 /****************************************************************************
  * Private Types
@@ -351,6 +363,139 @@ static void flash_lock_opt(void)
 {
   modifyreg32(STM32_FLASH_OPTCR, 0, FLASH_OPTCR_OPTLOCK);
 }
+
+#ifdef CONFIG_STM32_EDATA
+
+/****************************************************************************
+ * Name: edata_logical_bank
+ *
+ * Description:
+ *   Returns the logical bank (1 or 2) a physical bank is currently mapped
+ *   to.  The swap only takes effect at reset, so this is only valid until
+ *   the SWAP_BANK option is next changed.
+ *
+ ****************************************************************************/
+
+static int edata_logical_bank(int bank)
+{
+  if (getreg32(STM32_FLASH_OPTSR_CUR) & FLASH_OPTSR_CUR_SWAP_BANK)
+    {
+      return 3 - bank;
+    }
+
+  return bank;
+}
+
+/****************************************************************************
+ * Name: edata_read_hword
+ *
+ * Description:
+ *   Read one EDATA half-word.  A blank (erased, never programmed) half-word
+ *   reads as 0xffff.  If the half-word is corrupt, for example because
+ *   power was lost while it was being programmed, the raw data is returned.
+ *
+ *   EDATA only supports 16 and 32-bit reads, so the ICACHE, which would
+ *   fill whole lines, is disabled for the read.  The ECC NMI that a blank
+ *   half-word would raise is masked in the SBS and handled by checking
+ *   ECCDETR instead.  Both are restored afterwards.
+ *
+ ****************************************************************************/
+
+static uint16_t edata_read_hword(uintptr_t addr)
+{
+  irqstate_t flags;
+  uint16_t   value;
+  uint32_t   eccnmir;
+  bool       eccerr = false;
+#ifdef CONFIG_STM32_ICACHE
+  bool       icache;
+#endif
+
+  flags = up_irq_save();
+
+#ifdef CONFIG_STM32_ICACHE
+  icache = stm32_icache_enabled();
+  if (icache)
+    {
+      stm32_disable_icache();
+    }
+#endif
+
+  eccnmir = getreg32(STM32_SBS_ECCNMIR);
+  putreg32(eccnmir | SBS_ECCNMIR_ECCNMI_MASK_EN, STM32_SBS_ECCNMIR);
+
+  value = getreg16(addr);
+  UP_DSB();
+
+  if ((getreg32(STM32_FLASH_ECCDETR) & EDATA_ECCD) == EDATA_ECCD)
+    {
+      value  = getreg32(STM32_FLASH_ECCDR) & FLASH_ECCDR_DATA_ECC_MASK;
+      eccerr = true;
+      putreg32(FLASH_ECCDETR_ECCD, STM32_FLASH_ECCDETR);
+    }
+
+  putreg32(eccnmir, STM32_SBS_ECCNMIR);
+
+#ifdef CONFIG_STM32_ICACHE
+  if (icache)
+    {
+      stm32_enable_icache();
+    }
+#endif
+
+  up_irq_restore(flags);
+
+  if (eccerr && value != EDATA_ERASEDVALUE)
+    {
+      ferr("ERROR: EDATA ECC error at %08" PRIxPTR ": %04x\n", addr, value);
+    }
+
+  return value;
+}
+
+/****************************************************************************
+ * Name: edata_erase
+ *
+ * Description:
+ *   Erase one EDATA sector.  Must be called with g_lock held.
+ *
+ ****************************************************************************/
+
+static int edata_erase(int bank, unsigned int sector)
+{
+  uint32_t snb = H5_FLASH_BANK_NBLOCKS - STM32_EDATA_BANK_NSECTORS + sector;
+  int ret = OK;
+
+  if (flash_wait_for_operation())
+    {
+      return -EIO;
+    }
+
+  flash_unlock_nscr();
+  modifyreg32(STM32_FLASH_NSCCR, 0, ~0);
+
+  /* BKSEL selects the physical bank */
+
+  modifyreg32(STM32_FLASH_NSCR, FLASH_NSCR_BKSEL | FLASH_NSCR_SNB_MASK,
+              FLASH_NSCR_SER | FLASH_NSCR_SNB(snb) |
+              (bank == 2 ? FLASH_NSCR_BKSEL : 0));
+  modifyreg32(STM32_FLASH_NSCR, 0, FLASH_NSCR_STRT);
+
+  if (flash_wait_for_operation() ||
+      (getreg32(STM32_FLASH_NSSR) & FLASH_NSSR_ALL_ERRORS))
+    {
+      ret = -EIO;
+    }
+
+  modifyreg32(STM32_FLASH_NSCR, FLASH_NSCR_SER | FLASH_NSCR_SNB_MASK |
+              FLASH_NSCR_BKSEL, 0);
+  modifyreg32(STM32_FLASH_NSCCR, 0, ~0);
+  flash_lock_nscr();
+
+  return ret;
+}
+
+#endif /* CONFIG_STM32_EDATA */
 
 /****************************************************************************
  * Name: stm32h5_otp_is_space_available
@@ -986,6 +1131,380 @@ uint32_t stm32_otp_getlockstatus(void)
 {
   return getreg32(STM32_FLASH_OTBPBLR_CUR);
 }
+
+#ifdef CONFIG_STM32_EDATA
+
+/****************************************************************************
+ * Name: stm32_flash_edata_getconfig
+ *
+ * Description:
+ *   Returns the number of sectors of a physical bank (1 or 2) that are
+ *   currently configured as EDATA, 0 if EDATA is disabled in that bank, or
+ *   a negated errno value.
+ *
+ ****************************************************************************/
+
+int stm32_flash_edata_getconfig(int bank)
+{
+  uint32_t regval;
+
+  if (bank == 1)
+    {
+      regval = getreg32(STM32_FLASH_EDATA1R_CUR);
+    }
+  else if (bank == 2)
+    {
+      regval = getreg32(STM32_FLASH_EDATA2R_CUR);
+    }
+  else
+    {
+      return -EINVAL;
+    }
+
+  /* The EDATA1R and EDATA2R fields are laid out identically */
+
+  if (!(regval & FLASH_EDATA1R_CUR_EDATA1_EN))
+    {
+      return 0;
+    }
+
+  return ((regval & FLASH_EDATA1R_CUR_EDATA1_STRT_MASK) >>
+          FLASH_EDATA1R_CUR_EDATA1_STRT_SHIFT) + 1;
+}
+
+/****************************************************************************
+ * Name: stm32_flash_edata_configure
+ *
+ * Description:
+ *   Program the option bytes so that the last nsectors (0..8) sectors of a
+ *   physical bank (1 or 2) are EDATA.  Sectors that change between user
+ *   flash and EDATA are erased.  Nothing is done if the bank is already
+ *   configured that way.
+ *
+ *   This refuses to convert sectors holding the running image, but the
+ *   other bank is not checked.
+ *
+ * Returned Value:
+ *   Zero or a negated errno value:
+ *
+ *     -EINVAL: Invalid bank or sector count
+ *     -EBUSY:  The sectors hold the running image
+ *     -EIO:    Programming the option bytes or erasing failed
+ *
+ ****************************************************************************/
+
+int stm32_flash_edata_configure(int bank, unsigned int nsectors)
+{
+  uintptr_t cur;
+  uintptr_t prg;
+  uintptr_t addr;
+  uint32_t  regval;
+  unsigned int oldsectors;
+  unsigned int sector;
+  bool was_locked;
+  int ret;
+
+  if ((bank != 1 && bank != 2) || nsectors > STM32_EDATA_BANK_NSECTORS)
+    {
+      return -EINVAL;
+    }
+
+  ret = stm32_flash_edata_getconfig(bank);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  oldsectors = ret;
+  if (oldsectors == nsectors)
+    {
+      return OK;
+    }
+
+  /* Make sure the running image is not in any sector that changes type */
+
+  addr = STM32_FLASH_BASE +
+         (edata_logical_bank(bank) - 1) * H5_FLASH_BANKSIZE +
+         (H5_FLASH_BANK_NBLOCKS - MAX(oldsectors, nsectors)) *
+         FLASH_BLOCK_SIZE;
+
+  if (addr < (uintptr_t)_eronly + (uintptr_t)(_edata - _sdata))
+    {
+      ferr("ERROR: EDATA sectors overlap the running image\n");
+      return -EBUSY;
+    }
+
+  if (bank == 1)
+    {
+      cur = STM32_FLASH_EDATA1R_CUR;
+      prg = STM32_FLASH_EDATA1R_PRG;
+    }
+  else
+    {
+      cur = STM32_FLASH_EDATA2R_CUR;
+      prg = STM32_FLASH_EDATA2R_PRG;
+    }
+
+  regval = 0;
+  if (nsectors > 0)
+    {
+      regval = FLASH_EDATA1R_PRG_EDATA1_EN |
+               FLASH_EDATA1R_PRG_EDATA1_STRT(nsectors);
+    }
+
+  ret = nxmutex_lock(&g_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (flash_wait_for_operation())
+    {
+      ret = -EIO;
+      goto exit_with_lock;
+    }
+
+  was_locked = flash_unlock_opt();
+
+  modifyreg32(prg, FLASH_EDATA1R_PRG_EDATA1_EN |
+              FLASH_EDATA1R_PRG_EDATA1_STRT_MASK, regval);
+  modifyreg32(STM32_FLASH_OPTCR, 0, FLASH_OPTCR_OPTSTRT);
+
+  if (flash_wait_for_operation())
+    {
+      ret = -EIO;
+    }
+
+  if (was_locked)
+    {
+      flash_lock_opt();
+    }
+
+  if (ret == OK &&
+      (getreg32(cur) & (FLASH_EDATA1R_CUR_EDATA1_EN |
+                        FLASH_EDATA1R_CUR_EDATA1_STRT_MASK)) != regval)
+    {
+      ferr("ERROR: EDATA%dR option bytes not updated\n", bank);
+      ret = -EIO;
+    }
+
+  /* Erase the sectors that changed type.  Their contents are unreadable
+   * with the other ECC layout.
+   */
+
+  for (sector = STM32_EDATA_BANK_NSECTORS - MAX(oldsectors, nsectors);
+       ret == OK &&
+       sector < STM32_EDATA_BANK_NSECTORS - MIN(oldsectors, nsectors);
+       sector++)
+    {
+      ret = edata_erase(bank, sector);
+    }
+
+exit_with_lock:
+  nxmutex_unlock(&g_lock);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: stm32_flash_edata_address
+ *
+ * Description:
+ *   Returns the address of an EDATA sector (0..7) of a physical bank (1 or
+ *   2), or 0 if the arguments are invalid.  The sector must be enabled with
+ *   stm32_flash_edata_configure() before it is accessed.
+ *
+ ****************************************************************************/
+
+uintptr_t stm32_flash_edata_address(int bank, unsigned int sector)
+{
+  if ((bank != 1 && bank != 2) || sector >= STM32_EDATA_BANK_NSECTORS)
+    {
+      return 0;
+    }
+
+  return STM32_EDATA_BASE +
+         (edata_logical_bank(bank) - 1) * EDATA_BANK_SIZE +
+         sector * STM32_EDATA_SECTOR_SIZE;
+}
+
+/****************************************************************************
+ * Name: stm32_flash_edata_erase
+ *
+ * Description:
+ *   Erase an EDATA sector (0..7) of a physical bank (1 or 2).
+ *
+ ****************************************************************************/
+
+int stm32_flash_edata_erase(int bank, unsigned int sector)
+{
+  int ret;
+
+  if ((bank != 1 && bank != 2) || sector >= STM32_EDATA_BANK_NSECTORS)
+    {
+      return -EINVAL;
+    }
+
+  ret = nxmutex_lock(&g_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = edata_erase(bank, sector);
+
+  nxmutex_unlock(&g_lock);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: stm32_flash_edata_read
+ *
+ * Description:
+ *   Read from EDATA.  The address and count must be half-word aligned.
+ *   Blank half-words read as 0xffff.
+ *
+ * Returned Value:
+ *   The number of bytes read or a negated errno value.
+ *
+ ****************************************************************************/
+
+ssize_t stm32_flash_edata_read(uintptr_t addr, void *buf, size_t count)
+{
+  uint8_t *dest = buf;
+  uint16_t value;
+  size_t   i;
+  int      ret;
+
+  if ((addr | count) & 1)
+    {
+      return -EINVAL;
+    }
+
+  if (addr < STM32_EDATA_BASE ||
+      addr + count > STM32_EDATA_BASE + 2 * EDATA_BANK_SIZE)
+    {
+      return -EFAULT;
+    }
+
+  ret = nxmutex_lock(&g_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  for (i = 0; i < count; i += sizeof(value))
+    {
+      value = edata_read_hword(addr + i);
+      memcpy(dest + i, &value, sizeof(value));
+    }
+
+  nxmutex_unlock(&g_lock);
+  return count;
+}
+
+/****************************************************************************
+ * Name: stm32_flash_edata_write
+ *
+ * Description:
+ *   Program EDATA.  The address and count must be half-word aligned.
+ *
+ *   Each half-word can only be programmed once after an erase.  Half-words
+ *   that already hold the requested value are skipped, so writing 0xffff
+ *   leaves a blank half-word blank.  Programming a half-word that holds a
+ *   different value fails with -EIO.
+ *
+ * Returned Value:
+ *   The number of bytes written or a negated errno value.
+ *
+ ****************************************************************************/
+
+ssize_t stm32_flash_edata_write(uintptr_t addr, const void *buf,
+                                size_t count)
+{
+  const uint8_t *src = buf;
+  uint16_t value;
+  uint16_t current;
+  size_t   i;
+  int      ret;
+
+  if ((addr | count) & 1)
+    {
+      return -EINVAL;
+    }
+
+  if (addr < STM32_EDATA_BASE ||
+      addr + count > STM32_EDATA_BASE + 2 * EDATA_BANK_SIZE)
+    {
+      return -EFAULT;
+    }
+
+  ret = nxmutex_lock(&g_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (flash_wait_for_operation())
+    {
+      ret = -EIO;
+      goto exit_with_lock;
+    }
+
+  flash_unlock_nscr();
+  modifyreg32(STM32_FLASH_NSCCR, 0, ~0);
+
+  for (i = 0; i < count; i += sizeof(value))
+    {
+      memcpy(&value, src + i, sizeof(value));
+
+      current = edata_read_hword(addr + i);
+      if (current == value)
+        {
+          continue;
+        }
+
+      if (current != EDATA_ERASEDVALUE)
+        {
+          ret = -EIO;
+          break;
+        }
+
+      /* EDATA is programmed one half-word at a time */
+
+      modifyreg32(STM32_FLASH_NSCR, 0, FLASH_NSCR_PG);
+      UP_MB();
+
+      putreg16(value, addr + i);
+      UP_MB();
+
+      if (flash_wait_for_operation() ||
+          (getreg32(STM32_FLASH_NSSR) & FLASH_NSSR_ALL_ERRORS))
+        {
+          ret = -EIO;
+        }
+
+      modifyreg32(STM32_FLASH_NSCR, FLASH_NSCR_PG, 0);
+
+      if (ret == OK && edata_read_hword(addr + i) != value)
+        {
+          ret = -EIO;
+        }
+
+      if (ret < 0)
+        {
+          break;
+        }
+    }
+
+  modifyreg32(STM32_FLASH_NSCCR, 0, ~0);
+  flash_lock_nscr();
+
+exit_with_lock:
+  nxmutex_unlock(&g_lock);
+  return ret < 0 ? ret : count;
+}
+
+#endif /* CONFIG_STM32_EDATA */
 
 #ifdef CONFIG_ARCH_HAVE_PROGMEM
 

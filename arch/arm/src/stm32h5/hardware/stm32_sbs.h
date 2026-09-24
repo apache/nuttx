@@ -86,6 +86,10 @@
 
 /* Register Bitfield Definitions ********************************************/
 
+/* ECC NMI mask register (ECCNMIR) */
+
+#define SBS_ECCNMIR_ECCNMI_MASK_EN  (1 << 0) /* Bit 0: Flash ECC NMI masked */
+
 /* Product mode and configuration register (PMCR) */
 
 #define SBS_PMCR_PB6_FMP  (1 << 16) /* Fast-mode Plus on PB6*/
