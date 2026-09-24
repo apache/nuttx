@@ -938,6 +938,7 @@ static void bl_os_timer_callback(wdparm_t arg)
 void *bl_os_timer_create(void *func, void *argv)
 {
   struct timer_adpt *timer = kmm_malloc(sizeof(struct timer_adpt));
+
   if (!timer)
     {
       ASSERT(0);
@@ -1065,6 +1066,7 @@ int bl_os_timer_start_periodic(void *timerid, long t_sec, long t_nsec)
 void *bl_os_workqueue_create(void)
 {
   struct work_s *work = kmm_calloc(1, sizeof(struct work_s));
+
   if (!work)
     {
       ASSERT(0);
@@ -1145,6 +1147,7 @@ int bl_os_workqueue_submit_lpwork(void *work,
 uint64_t bl_os_clock_gettime_ms(void)
 {
   struct timespec ts;
+
   clock_systime_timespec(&ts);
   return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
 }
@@ -1521,23 +1524,23 @@ static void bl_os_log_writev(uint32_t level,
 {
   switch (level)
     {
-    case LOG_LEVEL_ERROR:
-      {
-        vsyslog(LOG_ERR, format, args);
-        break;
-      }
+      case LOG_LEVEL_ERROR:
+        {
+          vsyslog(LOG_ERR, format, args);
+          break;
+        }
 
-    case LOG_LEVEL_WARN:
-      {
-        vsyslog(LOG_WARNING, format, args);
-        break;
-      }
+      case LOG_LEVEL_WARN:
+        {
+          vsyslog(LOG_WARNING, format, args);
+          break;
+        }
 
-    case LOG_LEVEL_INFO:
-      {
-        vsyslog(LOG_INFO, format, args);
-        break;
-      }
+      case LOG_LEVEL_INFO:
+        {
+          vsyslog(LOG_INFO, format, args);
+          break;
+        }
     }
 }
 
@@ -1569,6 +1572,7 @@ void bl_os_log_write(uint32_t level,
   if (&_wifi_log_flag)
     {
       va_list list;
+
       va_start(list, format);
       bl_os_log_writev(level, tag, NULL, 0, format, list);
       va_end(list);

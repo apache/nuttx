@@ -2282,7 +2282,7 @@ int esp32c3_bt_controller_enable(esp_bt_mode_t mode)
 
   if (g_lp_cntl.enable)
     {
-        btdm_controller_enable_sleep(true);
+      btdm_controller_enable_sleep(true);
     }
 
   if (btdm_controller_enable(mode) != 0)
@@ -2381,6 +2381,7 @@ void esp32c3_vhci_host_send_packet(uint8_t *data, uint16_t len)
 int esp32c3_vhci_register_callback(const esp_vhci_host_callback_t *callback)
 {
   int ret = -1;
+
   if (btdm_controller_status != ESP_BT_CONTROLLER_STATUS_ENABLED)
     {
       return ret;
