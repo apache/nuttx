@@ -173,6 +173,10 @@
 #  define imxrt_clockoff_lpuart12()       imxrt_periphclk_configure(CCM_CCGR_LPUART12, CCM_CG_OFF)
 #endif
 #define imxrt_clockoff_mqs()              imxrt_periphclk_configure(CCM_CCGR_MQS, CCM_CG_OFF)
+#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockoff_mu_a()           imxrt_periphclk_configure(CCM_CCGR_MU_A, CCM_CG_OFF)
+#  define imxrt_clockoff_mu_b()           imxrt_periphclk_configure(CCM_CCGR_MU_B, CCM_CG_OFF)
+#endif
 #define imxrt_clockoff_ocotp_ctrl()       imxrt_periphclk_configure(CCM_CCGR_OCOTP_CTRL, CCM_CG_OFF)
 #define imxrt_clockoff_ocram()            imxrt_periphclk_configure(CCM_CCGR_OCRAM, CCM_CG_OFF)
 #define imxrt_clockoff_pit()              imxrt_periphclk_configure(CCM_CCGR_PIT, CCM_CG_OFF)
@@ -513,6 +517,10 @@
 #  define imxrt_clockall_lpuart12()       imxrt_periphclk_configure(CCM_CCGR_LPUART12, CCM_CG_ALL)
 #endif
 #define imxrt_clockall_mqs()              imxrt_periphclk_configure(CCM_CCGR_MQS, CCM_CG_ALL)
+#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockall_mu_a()           imxrt_periphclk_configure(CCM_CCGR_MU_A, CCM_CG_ALL)
+#  define imxrt_clockall_mu_b()           imxrt_periphclk_configure(CCM_CCGR_MU_B, CCM_CG_ALL)
+#endif
 #define imxrt_clockall_ocotp_ctrl()       imxrt_periphclk_configure(CCM_CCGR_OCOTP_CTRL, CCM_CG_ALL)
 #define imxrt_clockall_ocram()            imxrt_periphclk_configure(CCM_CCGR_OCRAM, CCM_CG_ALL)
 #define imxrt_clockall_pit()              imxrt_periphclk_configure(CCM_CCGR_PIT, CCM_CG_ALL)

@@ -103,6 +103,10 @@ if(CONFIG_IMXRT_EDMA)
   endif()
 endif()
 
+if(CONFIG_IMXRT_RPTUN)
+  list(APPEND SRCS imxrt_rptun.c)
+endif()
+
 if(CONFIG_IMXRT_USDHC)
   list(APPEND SRCS imxrt_usdhc.c)
 endif()
