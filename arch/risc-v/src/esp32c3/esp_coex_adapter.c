@@ -574,6 +574,7 @@ uint32_t esp_coex_common_clk_slowclk_cal_get_wrapper(void)
   if (GET_PERI_REG_MASK(SYSTEM_BT_LPCK_DIV_FRAC_REG, SYSTEM_LPCLK_SEL_XTAL))
     {
       uint64_t time_per_us = 1000000ULL;
+
       return (((time_per_us << RTC_CLK_CAL_FRACT) / (MHZ)) >>
               (RTC_CLK_CAL_FRACT - SOC_WIFI_LIGHT_SLEEP_CLK_WIDTH));
     }

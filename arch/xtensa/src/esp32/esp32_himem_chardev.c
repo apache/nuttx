@@ -222,7 +222,7 @@ static off_t himem_chardev_seek(struct file *filep,
       merr("invalid parameter: whence:%d\n", whence);
       nxmutex_unlock(&lock);
       return -1;
-  }
+    }
   filep->f_pos = priv->offset;
   nxmutex_unlock(&lock);
   return priv->offset;
@@ -251,6 +251,7 @@ static const struct file_operations g_fops =
 int himem_chardev_init(void)
 {
   int ret = 0;
+
   ret = esp_himem_init();
   if (ret != 0)
     {
@@ -275,6 +276,7 @@ int himem_chardev_init(void)
 int himem_chardev_exit(void)
 {
   int ret = 0;
+
   nxmutex_destroy(&lock);
 
   ret = esp_himem_free_map_range(g_range_handle);
@@ -287,6 +289,7 @@ int himem_chardev_register(char *name, size_t size)
   int ret = 0;
   struct himem_chardev_s *dev =
     kmm_malloc(sizeof(struct himem_chardev_s));
+
   if (dev == NULL)
     {
       merr("Failed to malloc.\n");
@@ -296,6 +299,7 @@ int himem_chardev_register(char *name, size_t size)
   /* 32KB Alignment */
 
   size_t mod = size % ESP_HIMEM_BLKSZ;
+
   if (mod != 0)
     {
       size += (ESP_HIMEM_BLKSZ - mod);
@@ -352,6 +356,7 @@ int himem_chardev_unregister(char *name)
   int success = 0;
   struct himem_chardev_s *dev;
   struct himem_chardev_s *tmp;
+
   nxmutex_lock(&lock);
   list_for_every_entry_safe(&g_himem_chardev_list, dev,
                             tmp, struct himem_chardev_s, node)
