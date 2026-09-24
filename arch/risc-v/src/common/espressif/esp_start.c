@@ -106,6 +106,21 @@
 #  error "BUILD_PROTECTED needs ESPRESSIF_KERNEL_OWNS_PMP; the HAL locks every PMP entry"
 #endif
 
+/* configure_mpu() in esp_userspace.c resets PMP entries 0-15 before
+ * describing the user regions.  That covers every entry the HAL programs
+ * on revision 0.x and 1.x silicon, which uses 0-15 and no more.  Revision
+ * 3.0 and later take a different HAL layout that programs entries through
+ * 31, and those would survive the reset: unlocked entries do not restrain
+ * machine mode, but they do grant user mode whatever they describe, so
+ * leftovers would silently widen the user-accessible set.
+ */
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_ARCH_CHIP_ESP32P4) && \
+    !defined(CONFIG_ESP32P4_SELECTS_REV_LESS_V3)
+#  error "BUILD_PROTECTED tested with ESP32P4_SELECTS_REV_LESS_V3; the rev3 HAL \
+layout uses PMP entries 16-31, which configure_mpu() does not reset"
+#endif
+
 /* Region protection would re-run esp_cpu_configure_region_protection()
  * late in esp_start(), after bootloader_init() has already programmed the
  * regions, racing the userspace PMP setup.  Enforced here rather than with
