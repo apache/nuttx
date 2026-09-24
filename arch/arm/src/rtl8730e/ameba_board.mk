@@ -66,6 +66,14 @@ ifeq ($(CONFIG_RTL8730E_FLASH_FS),y)
 AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_flash_ram.c
 endif
 
+# UART_DEV_TABLE / APBPeriph_UARTx / APBPeriph_UARTx_CLOCK are defined in
+# ram_hp/ameba_uart.c (not in lib_rom.a).  The ROM UART_Init/SetBaud
+# functions look up the register base and clock via these tables, so the
+# file must be compiled into libameba_fwlib.a whenever UART is enabled.
+ifeq ($(CONFIG_AMEBA_UART),y)
+AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_hp/ameba_uart.c
+endif
+
 # Include paths scoped to the fwlib compile only (never leaked to NuttX core).
 # -DCONFIG_ARM_CORE_CA32 activates the CA32 code paths in ameba_flash_ram.c.
 # No -mcmse (that is Cortex-M33 TrustZone; CA32 is ARMv7-A non-secure EL1).
