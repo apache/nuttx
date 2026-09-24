@@ -437,7 +437,7 @@ int nrf_modem_os_sem_init(void **sem, unsigned int initial_count,
   UNUSED(limit);
 
   DEBUGASSERT(g_nrf91_modem_os.sem_cntr < NRF_MODEM_OS_NUM_SEM_REQUIRED);
-  ret = nxsem_init(modemsem, 0, initial_count);
+  nxsem_init(modemsem, 0, initial_count);
   g_nrf91_modem_os.sem_cntr++;
 
   *sem = (void *)modemsem;

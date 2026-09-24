@@ -2475,12 +2475,7 @@ int mtdconfig_register_by_path(FAR struct mtd_dev_s *mtd,
   /* Initialize the mtdnvs device structure */
 
   fs->mtd = mtd;
-  rc = nxmutex_init(&fs->nvs_lock);
-  if (rc < 0)
-    {
-      ferr("ERROR: nxmutex_init failed: %d\n", rc);
-      goto errout;
-    }
+  nxmutex_init(&fs->nvs_lock);
 
   rc = nvs_startup(fs);
   if (rc < 0)
@@ -2500,8 +2495,6 @@ int mtdconfig_register_by_path(FAR struct mtd_dev_s *mtd,
 
 mutex_err:
   nxmutex_destroy(&fs->nvs_lock);
-
-errout:
   kmm_free(fs);
   return rc;
 }

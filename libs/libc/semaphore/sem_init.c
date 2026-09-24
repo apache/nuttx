@@ -120,8 +120,6 @@ int nxsem_init(FAR sem_t *sem, int pshared, int32_t value)
 
 int sem_init(FAR sem_t *sem, int pshared, unsigned int value)
 {
-  int ret;
-
   /* Verify that a semaphore was provided and the count is within the valid
    * range.
    */
@@ -132,12 +130,6 @@ int sem_init(FAR sem_t *sem, int pshared, unsigned int value)
       return ERROR;
     }
 
-  ret = nxsem_init(sem, pshared, value);
-  if (ret < 0)
-    {
-      set_errno(-ret);
-      ret = ERROR;
-    }
-
-  return ret;
+  nxsem_init(sem, pshared, value);
+  return OK;
 }

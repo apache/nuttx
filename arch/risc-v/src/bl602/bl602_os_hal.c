@@ -1276,7 +1276,6 @@ void bl_os_irq_disable(int32_t n)
 
 void *bl_os_mutex_create(void)
 {
-  int ret;
   mutex_t *mutex;
   int tmp;
 
@@ -1288,13 +1287,7 @@ void *bl_os_mutex_create(void)
       return NULL;
     }
 
-  ret = nxmutex_init(mutex);
-  if (ret)
-    {
-      wlerr("ERROR: Failed to initialize mutex error=%d\n", ret);
-      kmm_free(mutex);
-      return NULL;
-    }
+  nxmutex_init(mutex);
 
   return mutex;
 }
@@ -1394,7 +1387,6 @@ int32_t bl_os_mutex_unlock(void *mutex_data)
 
 void *bl_os_sem_create(uint32_t init)
 {
-  int ret;
   sem_t *sem;
   int tmp;
 
@@ -1406,13 +1398,7 @@ void *bl_os_sem_create(uint32_t init)
       return NULL;
     }
 
-  ret = nxsem_init(sem, 0, init);
-  if (ret)
-    {
-      wlerr("ERROR: Failed to initialize sem error=%d\n", ret);
-      kmm_free(sem);
-      return NULL;
-    }
+  nxsem_init(sem, 0, init);
 
   return sem;
 }

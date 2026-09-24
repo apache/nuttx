@@ -849,22 +849,9 @@ int sht4x_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr)
 
   priv->last_heat.tv_sec -= 1;
 
-  err = nxmutex_init(&priv->devlock);
-  if (err < 0)
-    {
-      snerr("ERROR: Failed to register SHT4X driver: %d\n", err);
-      kmm_free(priv);
-      return err;
-    }
+  nxmutex_init(&priv->devlock);
 
-  err = nxsem_init(&priv->run, 0, 0);
-  if (err < 0)
-    {
-      snerr("Failed to register SHT4X driver: %d\n", err);
-      nxmutex_destroy(&priv->devlock);
-      kmm_free(priv);
-      return err;
-    }
+  nxsem_init(&priv->run, 0, 0);
 
   /* Register lower half for humidity */
 

@@ -766,11 +766,7 @@ static inline_function int nxrmutex_destroy(FAR rmutex_t *rmutex)
 {
   int ret = nxmutex_destroy(&rmutex->mutex);
 
-  if (ret >= 0)
-    {
-      rmutex->count = 0;
-    }
-
+  rmutex->count = 0;
   return ret;
 }
 

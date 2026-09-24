@@ -2595,13 +2595,7 @@ static int cdcncm_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* The single write request just allocated is available now. */
 
-  ret = nxsem_init(&self->wrreq_idle, 0, 1);
-
-  if (ret != OK)
-    {
-      uerr("nxsem_init failed. ret: %d\n", ret);
-      goto error;
-    }
+  nxsem_init(&self->wrreq_idle, 0, 1);
 
   self->txdone    = false;
 

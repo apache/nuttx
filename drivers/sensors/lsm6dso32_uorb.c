@@ -1882,30 +1882,15 @@ int lsm6dso32_register(FAR struct i2c_master_s *i2c, uint8_t addr,
 
   /* Create mutex */
 
-  err = nxmutex_init(&priv->devlock);
-  if (err < 0)
-    {
-      snerr("Failed to initialize mutex: %d\n", err);
-      goto free_mem;
-    }
+  nxmutex_init(&priv->devlock);
 
   /* Create gyro semaphore */
 
-  err = nxsem_init(&priv->gyro.run, 0, 0);
-  if (err < 0)
-    {
-      snerr("Failed to initialize gyro semaphore: %d\n", err);
-      goto del_mutex;
-    }
+  nxsem_init(&priv->gyro.run, 0, 0);
 
   /* Create accel semaphore */
 
-  err = nxsem_init(&priv->accel.run, 0, 0);
-  if (err < 0)
-    {
-      snerr("Failed to initialize accel semaphore: %d\n", err);
-      goto del_gyro_sem;
-    }
+  nxsem_init(&priv->accel.run, 0, 0);
 
   /* Create gyro lower half */
 
@@ -2047,11 +2032,8 @@ int lsm6dso32_register(FAR struct i2c_master_s *i2c, uint8_t addr,
       sensor_unregister(&priv->gyro.lower, devno);
     del_accel_sem:
       nxsem_destroy(&priv->accel.run);
-    del_gyro_sem:
       nxsem_destroy(&priv->gyro.run);
-    del_mutex:
       nxmutex_destroy(&priv->devlock);
-    free_mem:
       kmm_free(priv);
       snerr("ERROR: Failed to register LSM6DSO32 driver: %d\n", err);
     }

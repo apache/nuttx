@@ -1295,19 +1295,9 @@ int lis2mdl_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr,
   priv->i2c = i2c;
   priv->addr = addr;
 
-  err = nxmutex_init(&priv->devlock);
-  if (err < 0)
-    {
-      snerr("Failed to register LIS2MDL driver: %d\n", err);
-      goto del_mem;
-    }
+  nxmutex_init(&priv->devlock);
 
-  err = nxsem_init(&priv->run, 0, 0);
-  if (err < 0)
-    {
-      snerr("Failed to register LIS2MDL driver: %d\n", err);
-      goto del_mutex;
-    }
+  nxsem_init(&priv->run, 0, 0);
 
   /* Register UORB Sensor */
 
@@ -1380,9 +1370,7 @@ int lis2mdl_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr,
       sensor_unregister(&priv->lower, devno);
     del_sem:
       nxsem_destroy(&priv->run);
-    del_mutex:
       nxmutex_destroy(&priv->devlock);
-    del_mem:
       kmm_free(priv);
       return err;
     }

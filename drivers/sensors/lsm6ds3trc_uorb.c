@@ -1613,26 +1613,11 @@ int lsm6ds3trc_register(FAR struct i2c_master_s *i2c, uint8_t addr,
   priv->interrupt_mode = config->attach != NULL;
   priv->int_pin = config->int_pin;
 
-  err = nxmutex_init(&priv->devlock);
-  if (err < 0)
-    {
-      snerr("Failed to initialize mutex: %d\n", err);
-      goto free_mem;
-    }
+  nxmutex_init(&priv->devlock);
 
-  err = nxsem_init(&priv->gyro.run, 0, 0);
-  if (err < 0)
-    {
-      snerr("Failed to initialize gyro semaphore: %d\n", err);
-      goto del_mutex;
-    }
+  nxsem_init(&priv->gyro.run, 0, 0);
 
-  err = nxsem_init(&priv->accel.run, 0, 0);
-  if (err < 0)
-    {
-      snerr("Failed to initialize accel semaphore: %d\n", err);
-      goto del_gyro_sem;
-    }
+  nxsem_init(&priv->accel.run, 0, 0);
 
   /* Create gyro lower half */
 
@@ -1826,11 +1811,8 @@ unreg_gyro:
   sensor_unregister(&priv->gyro.lower, devno);
 del_accel_sem:
   nxsem_destroy(&priv->accel.run);
-del_gyro_sem:
   nxsem_destroy(&priv->gyro.run);
-del_mutex:
   nxmutex_destroy(&priv->devlock);
-free_mem:
   kmm_free(priv);
   snerr("ERROR: Failed to register LSM6DS3TR-C driver: %d\n", err);
   return err;

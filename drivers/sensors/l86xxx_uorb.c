@@ -640,21 +640,11 @@ int l86xxx_register(FAR const char *uartpath, int devno)
 
   /* Initialize mutex */
 
-  err = nxmutex_init(&priv->devlock);
-  if (err < 0)
-    {
-      snerr("Failed to initialize mutex for L86-XXX device: %d\n", err);
-      goto free_mem;
-    }
+  nxmutex_init(&priv->devlock);
 
   /* Initialize semaphore */
 
-  err = nxsem_init(&priv->run, 0, 0);
-  if (err < 0)
-    {
-      snerr("Failed to register L86-XXX driver: %d\n", err);
-      goto destroy_mutex;
-    }
+  nxsem_init(&priv->run, 0, 0);
 
   /* Open UART interface for use */
 
@@ -732,9 +722,7 @@ close_file:
   file_close(&priv->uart);
 destroy_sem:
   nxsem_destroy(&priv->run);
-destroy_mutex:
   nxmutex_destroy(&priv->devlock);
-free_mem:
   kmm_free(priv);
 
   return err;

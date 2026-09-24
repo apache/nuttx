@@ -2891,7 +2891,6 @@ static int32_t xqueue_send_adapter(void *queue,
 
 void *xsemaphore_create_counting_adapter(uint32_t max, uint32_t init)
 {
-  int ret;
   sem_t *sem;
   int tmp;
 
@@ -2903,13 +2902,7 @@ void *xsemaphore_create_counting_adapter(uint32_t max, uint32_t init)
       return NULL;
     }
 
-  ret = nxsem_init(sem, 0, init);
-  if (ret)
-    {
-      wlerr("Failed to initialize sem error=%d\n", ret);
-      kmm_free(sem);
-      return NULL;
-    }
+  nxsem_init(sem, 0, init);
 
   return sem;
 }
