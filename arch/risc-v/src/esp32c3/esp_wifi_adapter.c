@@ -1716,6 +1716,7 @@ static void esp_log_write_wrapper(unsigned int level,
   if (level <= max_level)
     {
       va_list list;
+
       va_start(list, format);
       esp_log_writev(level, tag, format, list);
       va_end(list);
