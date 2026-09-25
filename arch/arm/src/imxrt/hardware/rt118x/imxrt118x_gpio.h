@@ -72,8 +72,6 @@
 
 /* Most registers are laid out simply with one bit per pin */
 
-#define GPIO_PIN(n)                     (1u << (n))  /* Bit n: Pin n, n=0-31 */
-
 /* ICRN register (per-pin interrupt configuration) */
 
 #define IMXRT_GPIO_ICRN_ISF             (1u << 24)   /* Bit 24: Interrupt Status Flag */
