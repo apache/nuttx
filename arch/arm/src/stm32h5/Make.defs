@@ -64,6 +64,10 @@ ifeq ($(CONFIG_STM32_FDCAN_CHARDRIVER),y)
 CHIP_CSRCS += stm32_fdcan.c
 endif
 
+ifeq ($(CONFIG_STM32_FDCAN_SOCKET),y)
+CHIP_CSRCS += stm32_fdcan_socket.c
+endif
+
 ifeq ($(CONFIG_STM32_RNG),y)
 CHIP_CSRCS += stm32_rng.c
 endif

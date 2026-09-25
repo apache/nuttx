@@ -258,7 +258,7 @@ void arp_input(FAR struct net_driver_s *dev)
       return;
     }
 
-  netdev_input(dev, arp_in, true);
+  netdev_input(dev, arp_in, true, false);
 }
 
 #endif /* CONFIG_NET_ARP */

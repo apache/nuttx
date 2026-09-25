@@ -172,5 +172,15 @@ config NET_CAN_NPOLLWAITERS
 		Maximum number of threads than can be waiting for POLL events.
 		Default: 4
 
+config NET_CAN_IOB_CONFIRM
+	int "Extra IOBs reserved for confirmation frames"
+	default 0
+	---help---
+		Provides an extra number of IOBs on top of the receive limit set for 
+		each connection.
+		This is to prevent the confirm frames being dropped when the RX queue 
+		is full of broadcast frames.
+		Set 0 for no extra IOBs
+
 endif # NET_CAN
 endmenu # CAN Socket Support

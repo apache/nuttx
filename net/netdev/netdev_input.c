@@ -66,7 +66,7 @@
  ****************************************************************************/
 
 int netdev_input(FAR struct net_driver_s *dev,
-                 devif_poll_callback_t callback, bool reply)
+                 devif_poll_callback_t callback, bool reply, bool throttled)
 {
   uint16_t llhdrlen = NET_LL_HDRLEN(dev);
   FAR uint8_t *buf = dev->d_buf;
@@ -74,7 +74,7 @@ int netdev_input(FAR struct net_driver_s *dev,
 
   /* Prepare iob buffer */
 
-  ret = netdev_iob_prepare(dev, false, 0);
+  ret = netdev_iob_prepare(dev, throttled, 0);
   if (ret != OK)
     {
       return ret;
@@ -89,7 +89,7 @@ int netdev_input(FAR struct net_driver_s *dev,
 
   /* Copy data to iob entry */
 
-  ret = iob_trycopyin(dev->d_iob, buf, dev->d_len, -llhdrlen, false);
+  ret = iob_trycopyin(dev->d_iob, buf, dev->d_len, -llhdrlen, throttled);
   if (ret == dev->d_len)
     {
       /* Update device buffer to l2 start */

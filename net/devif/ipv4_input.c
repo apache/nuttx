@@ -600,7 +600,7 @@ int ipv4_input(FAR struct net_driver_s *dev)
       return ret;
     }
 
-  ret = netdev_input(dev, ipv4_in, true);
+  ret = netdev_input(dev, ipv4_in, true, false);
   netdev_unlock(dev);
   return ret;
 }

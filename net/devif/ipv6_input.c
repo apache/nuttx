@@ -732,7 +732,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
       return ret;
     }
 
-  ret = netdev_input(dev, ipv6_in, true);
+  ret = netdev_input(dev, ipv6_in, true, false);
   netdev_unlock(dev);
   return ret;
 }
