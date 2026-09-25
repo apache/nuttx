@@ -43,6 +43,7 @@
 #include <net/ethernet.h>
 #include <netinet/in.h>
 
+#include <nuttx/ethtool.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/radiodev.h>
 #include <nuttx/net/vlan.h>
@@ -767,6 +768,7 @@ static ssize_t net_ioctl_ifreq_arglen(uint8_t domain, int cmd)
       case SIOCGIFCOUNT:
       case SIOCSIFFLAGS:
       case SIOCGIFFLAGS:
+      case SIOCETHTOOL:
       case SIOCMIINOTIFY:
       case SIOCGMIIPHY:
       case SIOCGMIIREG:
@@ -807,6 +809,85 @@ static ssize_t net_ioctl_ifreq_arglen(uint8_t domain, int cmd)
     }
 
   return -ENOTTY;
+}
+
+/****************************************************************************
+ * Name: netdev_ethtool_ioctl
+ *
+ * Description:
+ *   Handle the SIOCETHTOOL command.  req->ifr_data points to an ethtool
+ *   command structure whose first field is the ETHTOOL_* command.
+ *   ETHTOOL_GET_TS_INFO is answered from the device features; any other
+ *   command is passed to the driver.
+ *
+ * Input Parameters:
+ *   dev      The network device
+ *   req      The argument of the ioctl cmd
+ *
+ * Returned Value:
+ *   >=0 on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+static int netdev_ethtool_ioctl(FAR struct net_driver_s *dev,
+                                FAR struct ifreq *req)
+{
+  FAR uint32_t *ethcmd = req->ifr_data;
+
+  if (ethcmd == NULL)
+    {
+      return -EINVAL;
+    }
+
+  switch (*ethcmd)
+    {
+      case ETHTOOL_GET_TS_INFO:  /* Get time stamping and PHC info */
+        {
+          FAR struct ethtool_ts_info *info = req->ifr_data;
+
+          memset(info, 0, sizeof(*info));
+          info->cmd       = ETHTOOL_GET_TS_INFO;
+          info->phc_index = -1;
+
+#ifdef CONFIG_NET_TIMESTAMP
+          /* Received packets carry the hardware timestamp when the driver
+           * provides one, and are stamped by the stack with CLOCK_REALTIME
+           * otherwise.
+           */
+
+          if ((dev->d_features & NETDEV_RX_STAMP) != 0)
+            {
+              info->so_timestamping |= SOF_TIMESTAMPING_RX_HARDWARE |
+                                       SOF_TIMESTAMPING_RAW_HARDWARE;
+            }
+          else
+            {
+              info->so_timestamping |= SOF_TIMESTAMPING_RX_SOFTWARE |
+                                       SOF_TIMESTAMPING_SOFTWARE;
+            }
+
+          if ((dev->d_features & NETDEV_TX_STAMP) != 0)
+            {
+              info->so_timestamping |= SOF_TIMESTAMPING_TX_HARDWARE |
+                                       SOF_TIMESTAMPING_RAW_HARDWARE;
+            }
+#endif
+
+          return OK;
+        }
+
+      default:
+#ifdef CONFIG_NETDEV_IOCTL
+        if (dev->d_ioctl != NULL)
+          {
+            return dev->d_ioctl(dev, SIOCETHTOOL,
+                                (unsigned long)(uintptr_t)req->ifr_data);
+          }
+#endif
+
+        return -ENOTTY;
+    }
 }
 
 /****************************************************************************
@@ -1086,6 +1167,10 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 
       case SIOCGIFFLAGS:  /* Gets the interface flags */
         req->ifr_flags = dev->d_flags;
+        break;
+
+      case SIOCETHTOOL:   /* Ethtool interface */
+        ret = netdev_ethtool_ioctl(dev, req);
         break;
 
       /* MAC address operations only make sense if Ethernet or 6LoWPAN are

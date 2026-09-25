@@ -24,6 +24,12 @@
 #define __INCLUDE_NUTTX_ETHTOOL_H
 
 /****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <stdint.h>
+
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
@@ -219,6 +225,31 @@ struct ethtool_cmd
   uint8_t eth_tp_mdix_ctrl;
   uint32_t lp_advertising;
   uint32_t reserved[2];
+};
+
+/* struct ethtool_ts_info - holds a device's timestamping and PHC
+ * association (ETHTOOL_GET_TS_INFO), same layout as Linux.
+ * @cmd: command number = %ETHTOOL_GET_TS_INFO
+ * @so_timestamping: bit mask of the sum of the supported SO_TIMESTAMPING
+ *  flags (SOF_TIMESTAMPING_*)
+ * @phc_index: device index of the associated PHC, or -1 if there is none
+ * @tx_types: bit mask of the supported hwtstamp_tx_types values; zero,
+ *  NuttX has no SIOCSHWTSTAMP to select them
+ * @tx_reserved: reserved for future use, zero
+ * @rx_filters: bit mask of the supported hwtstamp_rx_filters values; zero,
+ *  NuttX has no SIOCSHWTSTAMP to select them
+ * @rx_reserved: reserved for future use, zero
+ */
+
+struct ethtool_ts_info
+{
+  uint32_t cmd;
+  uint32_t so_timestamping;
+  int32_t  phc_index;
+  uint32_t tx_types;
+  uint32_t tx_reserved[3];
+  uint32_t rx_filters;
+  uint32_t rx_reserved[3];
 };
 
 #endif
