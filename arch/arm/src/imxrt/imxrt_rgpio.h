@@ -36,6 +36,8 @@
 #include "hardware/rt118x/imxrt118x_gpio.h"
 #include "imxrt_iomuxc_ver3.h"
 
+#define GPIO_PIN(n)            (1u << (n))
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
