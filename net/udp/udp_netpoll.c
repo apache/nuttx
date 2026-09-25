@@ -79,12 +79,10 @@ static uint32_t udp_poll_eventhandler(FAR struct net_driver_s *dev,
     {
       pollevent_t eventset = 0;
 
-      /* Check for data or connection availability events. */
-
-      if ((flags & UDP_NEWDATA) != 0)
-        {
-          eventset |= POLLIN;
-        }
+      /* UDP readability follows buffered read-ahead data.  Defer POLLIN
+       * notification until udp_datahandler() has queued the datagram into
+       * conn->readahead.
+       */
 
       /* Check for loss of connection events. */
 
