@@ -73,7 +73,7 @@ enum ip_fragverify_e
 struct ip_fraglink_s
 {
   /* This link is used to maintain a single-linked list of ip_fraglink_s,
-   * it links all framgents with the same IP ID
+   * it links all fragments with the same reassembly key.
    */
 
   FAR struct ip_fraglink_s  *flink;
@@ -84,6 +84,11 @@ struct ip_fraglink_s
   uint16_t                   fragoff;   /* Fragment offset */
   uint16_t                   fraglen;   /* Payload length */
   uint16_t                   morefrags; /* The more frag flag */
+
+#ifdef CONFIG_NET_IPv6
+  net_ipv6addr_t             srcipaddr;  /* IPv6 source address */
+  net_ipv6addr_t             destipaddr; /* IPv6 destination address */
+#endif
 
   /* The identification field is 16 bits in IPv4 header but 32 bits in IPv6
    * fragment header
@@ -109,12 +114,18 @@ struct ip_fragsnode_s
   /* Interface understood by the network */
 
   FAR struct net_driver_s   *dev;
+  uint8_t                    isipv4;     /* IPv4 or IPv6 */
 
   /* IP Identification (IP ID) field defined in ipv4 header or in ipv6
    * fragment header.
    */
 
   uint32_t                   ipid;
+
+#ifdef CONFIG_NET_IPv6
+  net_ipv6addr_t             srcipaddr;  /* IPv6 source address */
+  net_ipv6addr_t             destipaddr; /* IPv6 destination address */
+#endif
 
   /* Count ticks, used by ressembly timer */
 
@@ -128,7 +139,7 @@ struct ip_fragsnode_s
 
   uint32_t                   bufcnt;
 
-  /* Linked all fragments with the same IP ID. */
+  /* Linked all fragments with the same reassembly key. */
 
   FAR struct ip_fraglink_s  *frags;
 
