@@ -57,7 +57,7 @@
 
 #include "esp_private/vectors_const.h"
 
-#ifndef CONFIG_ARCH_CHIP_ESP32C3
+#if !defined(CONFIG_ARCH_CHIP_ESP32C3) && !defined(CONFIG_ARCH_CHIP_ESP32C2)
 #  include "soc/hp_system_reg.h"
 #endif
 
