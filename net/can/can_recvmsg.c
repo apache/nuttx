@@ -161,6 +161,11 @@ static size_t can_recvfrom_newdata(FAR struct net_driver_s *dev,
                        pstate->pr_conn->sconn.s_options);
 #endif
 
+  if (dev->d_iob->io_conn == &pstate->pr_conn->sconn)
+    {
+      pstate->pr_msg->msg_flags |= MSG_CONFIRM;
+    }
+
   recvlen = MIN(pstate->pr_msg->msg_iov->iov_len, dev->d_len);
 
   /* Copy the new packet data into the user buffer */
@@ -264,6 +269,11 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
       cmsg_store_timestamp(pstate->pr_msg, &iob->io_time,
                            conn->sconn.s_options);
 #endif
+
+      if (iob->io_conn == &conn->sconn)
+        {
+          pstate->pr_msg->msg_flags |= MSG_CONFIRM;
+        }
 
       /* Transfer that buffered data from the I/O buffer chain into
        * the user buffer.
