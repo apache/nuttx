@@ -1,0 +1,186 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "RA Configuration Options"
+
+choice
+	prompt "RA Chip Selection"
+	default ARCH_CHIP_R7FA8M1AHECFC
+	depends on ARCH_CHIP_RA8M1
+
+config ARCH_CHIP_R7FA8M1AFECAM
+	bool "R7FA8M1AFECAM"
+	select RA_HAVE_SCI_B0
+	select RA_HAVE_SCI_B1
+	select RA_HAVE_SCI_B2
+	select RA_HAVE_SCI_B3
+	select RA_HAVE_SCI_B4
+	select RA_HAVE_SCI_B9
+	select RA8M1_FAMILY
+
+config ARCH_CHIP_R7FA8M1AFECBD
+	bool "R7FA8M1AFECBD"
+	select RA_HAVE_SCI_B0
+	select RA_HAVE_SCI_B1
+	select RA_HAVE_SCI_B2
+	select RA_HAVE_SCI_B3
+	select RA_HAVE_SCI_B4
+	select RA_HAVE_SCI_B9
+	select RA8M1_FAMILY
+
+config ARCH_CHIP_R7FA8M1AFECFB
+	bool "R7FA8M1AFECFB"
+	select RA_HAVE_SCI_B0
+	select RA_HAVE_SCI_B1
+	select RA_HAVE_SCI_B2
+	select RA_HAVE_SCI_B3
+	select RA_HAVE_SCI_B4
+	select RA_HAVE_SCI_B9
+	select RA8M1_FAMILY
+
+config ARCH_CHIP_R7FA8M1AFECFC
+	bool "R7FA8M1AFECFC"
+	select RA_HAVE_SCI_B0
+	select RA_HAVE_SCI_B1
+	select RA_HAVE_SCI_B2
+	select RA_HAVE_SCI_B3
+	select RA_HAVE_SCI_B4
+	select RA_HAVE_SCI_B9
+	select RA8M1_FAMILY
+
+config ARCH_CHIP_R7FA8M1AFECFP
+	bool "R7FA8M1AFECFP"
+	select RA_HAVE_SCI_B0
+	select RA_HAVE_SCI_B1
+	select RA_HAVE_SCI_B2
+	select RA_HAVE_SCI_B3
+	select RA_HAVE_SCI_B4
+	select RA_HAVE_SCI_B9
+	select RA8M1_FAMILY
+
+config ARCH_CHIP_R7FA8M1AHECAM
+	bool "R7FA8M1AHECAM"
+	select RA_HAVE_SCI_B0
+	select RA_HAVE_SCI_B1
+	select RA_HAVE_SCI_B2
+	select RA_HAVE_SCI_B3
+	select RA_HAVE_SCI_B4
+	select RA_HAVE_SCI_B9
+	select RA8M1_FAMILY
+
+config ARCH_CHIP_R7FA8M1AHECBD
+	bool "R7FA8M1AHECBD"
+	select RA_HAVE_SCI_B0
+	select RA_HAVE_SCI_B1
+	select RA_HAVE_SCI_B2
+	select RA_HAVE_SCI_B3
+	select RA_HAVE_SCI_B4
+	select RA_HAVE_SCI_B9
+	select RA8M1_FAMILY
+
+config ARCH_CHIP_R7FA8M1AHECFB
+	bool "R7FA8M1AHECFB"
+	select RA_HAVE_SCI_B0
+	select RA_HAVE_SCI_B1
+	select RA_HAVE_SCI_B2
+	select RA_HAVE_SCI_B3
+	select RA_HAVE_SCI_B4
+	select RA_HAVE_SCI_B9
+	select RA8M1_FAMILY
+
+config ARCH_CHIP_R7FA8M1AHECFC
+	bool "R7FA8M1AHECFC"
+	select RA_HAVE_SCI_B0
+	select RA_HAVE_SCI_B1
+	select RA_HAVE_SCI_B2
+	select RA_HAVE_SCI_B3
+	select RA_HAVE_SCI_B4
+	select RA_HAVE_SCI_B9
+	select RA8M1_FAMILY
+
+config ARCH_CHIP_R7FA8M1AHECFP
+	bool "R7FA8M1AHECFP"
+	select RA_HAVE_SCI_B0
+	select RA_HAVE_SCI_B1
+	select RA_HAVE_SCI_B2
+	select RA_HAVE_SCI_B3
+	select RA_HAVE_SCI_B4
+	select RA_HAVE_SCI_B9
+	select RA8M1_FAMILY
+
+endchoice # RA Chip Selection
+
+config RA8M1_FAMILY
+	bool
+	default n
+	select ARCH_CORTEXM85
+
+menu "RA8M1 Peripheral Support"
+
+config RA_HAVE_SCI_B0
+	bool
+	default n
+
+config RA_HAVE_SCI_B1
+	bool
+	default n
+
+config RA_HAVE_SCI_B2
+	bool
+	default n
+
+config RA_HAVE_SCI_B3
+	bool
+	default n
+
+config RA_HAVE_SCI_B4
+	bool
+	default n
+
+config RA_HAVE_SCI_B9
+	bool
+	default n
+
+# TODO: user-facing enable options go here, one per
+# RA_HAVE_* above (prompt, depends on RA_HAVE_*, select
+# the driver it wires up -- see README "Kconfig draft").
+
+config RA_SCI0_UART
+	bool "UART 0"
+	default n
+	depends on RA_HAVE_SCI_B0
+	select SCI0_SERIALDRIVER
+
+config RA_SCI1_UART
+	bool "UART 1"
+	default n
+	depends on RA_HAVE_SCI_B1
+	select SCI1_SERIALDRIVER
+
+config RA_SCI2_UART
+	bool "UART 2"
+	default n
+	depends on RA_HAVE_SCI_B2
+	select SCI2_SERIALDRIVER
+
+config RA_SCI3_UART
+	bool "UART 3"
+	default n
+	depends on RA_HAVE_SCI_B3
+	select SCI3_SERIALDRIVER
+
+config RA_SCI4_UART
+	bool "UART 4"
+	default n
+	depends on RA_HAVE_SCI_B4
+	select SCI4_SERIALDRIVER
+
+config RA_SCI9_UART
+	bool "UART 9"
+	default n
+	depends on RA_HAVE_SCI_B9
+	select SCI9_SERIALDRIVER
+
+endmenu # RA8M1 Peripheral Support
