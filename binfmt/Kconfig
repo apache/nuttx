@@ -66,6 +66,7 @@ config FDPIC
 	default n
 	select PIC
 	depends on ARCH_HAVE_ELF_FDPIC
+	depends on BUILD_FLAT
 	---help---
 		Load ELF modules built for the FDPIC ABI.
 

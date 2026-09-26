@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 #include <assert.h>
+#include <dlfcn.h>
 #include <nuttx/debug.h>
 #include <errno.h>
 
@@ -42,7 +43,9 @@
  * Name: libelf_uninit
  *
  * Description:
- *   Uninitialize module resources.
+ *   Uninitialize module resources.  Gives up everything the module holds,
+ *   the DT_NEEDED libraries included, so the caller must hold the last
+ *   reference.
  *
  ****************************************************************************/
 
@@ -100,6 +103,17 @@ int libelf_uninit(FAR struct module_s *modp)
   libelf_freesymtab(modp);
   modp->modinfo.exports  = NULL;
   modp->modinfo.nexports = 0;
+
+#ifdef CONFIG_LIBC_DLFCN
+  /* Let go of anything opened for DT_NEEDED.  After the destructors, which
+   * may call into those libraries.
+   */
+
+  while (modp->nlibs > 0)
+    {
+      dlclose(modp->libs[--modp->nlibs]);
+    }
+#endif
 
 #ifdef HAVE_LIBC_ELF_PIN
   /* Give the pin back before the text goes out of use.  This does nothing if
