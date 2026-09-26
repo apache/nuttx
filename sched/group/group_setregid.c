@@ -82,7 +82,7 @@ int setregid(gid_t rgid, gid_t egid)
   if (old_egid != 0)
     {
       if (rgid != (gid_t)-1 &&
-          rgid != old_egid && rgid != old_sgid)
+          rgid != old_rgid && rgid != old_egid && rgid != old_sgid)
         {
           set_errno(EPERM);
           return ERROR;
@@ -111,8 +111,8 @@ int setregid(gid_t rgid, gid_t egid)
    * set-group-ID to the new effective group ID.
    */
 
-  if ((rgid != (gid_t)-1 && rgroup->tg_gid != old_rgid) ||
-      (egid != (gid_t)-1 && rgroup->tg_egid != old_rgid))
+  if (rgid != (gid_t)-1 ||
+      (egid != (gid_t)-1 && egid != old_rgid))
     {
       rgroup->tg_sgid = rgroup->tg_egid;
     }

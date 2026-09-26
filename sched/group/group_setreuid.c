@@ -83,7 +83,7 @@ int setreuid(uid_t ruid, uid_t euid)
   if (old_euid != 0)
     {
       if (ruid != (uid_t)-1 &&
-          ruid != old_euid && ruid != old_suid)
+          ruid != old_ruid && ruid != old_euid && ruid != old_suid)
         {
           set_errno(EPERM);
           return ERROR;
@@ -112,8 +112,8 @@ int setreuid(uid_t ruid, uid_t euid)
    * set-user-ID to the new effective user ID.
    */
 
-  if ((ruid != (uid_t)-1 && rgroup->tg_uid != old_ruid) ||
-      (euid != (uid_t)-1 && rgroup->tg_euid != old_ruid))
+  if (ruid != (uid_t)-1 ||
+      (euid != (uid_t)-1 && euid != old_ruid))
     {
       rgroup->tg_suid = rgroup->tg_euid;
     }
