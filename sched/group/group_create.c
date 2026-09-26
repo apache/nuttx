@@ -287,7 +287,12 @@ errout_with_group:
     }
 #endif
 
-  kmm_free(group);
+  if (group != &g_kthread_group)
+    {
+      kmm_free(group);
+    }
+
+  tcb->group = NULL;
   return ret;
 }
 
