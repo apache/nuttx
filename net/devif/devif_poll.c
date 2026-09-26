@@ -346,6 +346,17 @@ devif_poll_bluetooth_connections(FAR struct net_driver_s *dev,
   FAR struct bluetooth_conn_s *bluetooth_conn = NULL;
   int bstop = 0;
 
+  /* PF_BLUETOOTH sockets are polled through struct radio_driver_s, which
+   * only devices of Bluetooth link type are embedded in.  Polling any
+   * other device here would reinterpret its struct net_driver_s as a
+   * radio driver and write through fields the device does not have.
+   */
+
+  if (dev->d_lltype != NET_LL_BLUETOOTH)
+    {
+      return 0;
+    }
+
   /* Traverse all of the allocated packet connections and perform the poll
    * action.
    */
