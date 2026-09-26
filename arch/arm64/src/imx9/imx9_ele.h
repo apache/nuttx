@@ -29,6 +29,7 @@
 
 #include "hardware/imx9_ele.h"
 #include <sys/types.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 /****************************************************************************
@@ -287,4 +288,145 @@ int imx9_ele_get_random(void *buf, size_t len);
  ****************************************************************************/
 
 int imx9_ele_commit(uint32_t info, uint32_t *response);
+
+/****************************************************************************
+ * Name: imx9_ele_session_open / imx9_ele_session_close
+ *
+ * Description:
+ *   Open and close an ELE session. The key store services hang off one, and
+ *   the enclave holds the session until it is closed.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned for success. A negated errno value is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int imx9_ele_sab_init(uint32_t *rsp);
+int imx9_ele_session_open(uint32_t *session);
+int imx9_ele_session_open_rsp(uint32_t *session, uint32_t *rsp);
+int imx9_ele_session_close(uint32_t session);
+
+/****************************************************************************
+ * Name: imx9_ele_key_store_open / imx9_ele_key_store_close
+ *
+ * Description:
+ *   Open a key store on an ELE session, creating it if asked. A key
+ *   generated into a store has no command that returns its private half.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned for success. A negated errno value is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int imx9_ele_key_store_open(uint32_t session, uint32_t id, uint32_t nonce,
+                            uint8_t flags, uint32_t *store);
+int imx9_ele_key_store_open_rsp(uint32_t session, uint32_t id,
+                                uint32_t nonce, uint8_t flags,
+                                uint32_t *store, uint32_t *rsp);
+int imx9_ele_key_store_close(uint32_t store);
+
+/****************************************************************************
+ * Name: imx9_ele_key_mgmt_open / close, imx9_ele_generate_key
+ *
+ * Description:
+ *   Generate a key pair inside the enclave. The public half is returned; the
+ *   private half stays in the key store with no command that returns it.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned for success. A negated errno value is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int imx9_ele_key_mgmt_open(uint32_t store, uint32_t *mgmt, uint32_t *rsp);
+int imx9_ele_key_mgmt_close(uint32_t mgmt);
+int imx9_ele_generate_key(uint32_t mgmt, uint16_t key_type,
+                          uint16_t key_bits, uint32_t algo,
+                          uint32_t lifecycle,
+                          void *pubkey, size_t pubkey_len,
+                          uint32_t *key_id, uint32_t *rsp);
+
+/****************************************************************************
+ * Name: imx9_ele_sig_gen_open / close, imx9_ele_sign
+ *
+ * Description:
+ *   Sign with a key held in the key store. The key is named by identifier,
+ *   never handed over, so this is the only way to use it.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned for success. A negated errno value is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int imx9_ele_sig_gen_open(uint32_t store, uint32_t *svc, uint32_t *rsp);
+int imx9_ele_sig_gen_close(uint32_t svc);
+int imx9_ele_sign(uint32_t svc, uint32_t key_id, uint32_t algo, bool digest,
+                  void *in, size_t inlen, void *out, size_t outlen,
+                  uint32_t *rsp);
+
+/****************************************************************************
+ * Name: imx9_ele_poll_msg
+ *
+ * Description:
+ *   Receive a message the enclave sent on its own initiative.
+ *
+ * Returned Value:
+ *   Zero (OK) on success, -ETIMEDOUT if nothing arrived.
+ *
+ ****************************************************************************/
+
+int imx9_ele_poll_msg(struct ele_msg *msg_ptr, uint32_t timeout_us);
+
+/****************************************************************************
+ * Name: imx9_ele_storage_open / close
+ *
+ * Description:
+ *   Open a storage session, without which the enclave will not sync a key
+ *   store.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned for success. A negated errno value is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int imx9_ele_storage_open(uint32_t session, uint32_t *storage,
+                          uint32_t *rsp);
+int imx9_ele_storage_close(uint32_t storage);
+
+/****************************************************************************
+ * Name: imx9_ele_blob_get / imx9_ele_blob_put
+ *
+ * Description:
+ *   The key store the enclave asked to have persisted, a slot at a time.
+ *   Where it is kept is not this driver's business.
+ *
+ * Returned Value:
+ *   imx9_ele_blob_get() returns the size of that slot, zero if it holds
+ *   nothing. imx9_ele_blob_put() returns zero (OK), or a negated errno.
+ *
+ ****************************************************************************/
+
+uint32_t imx9_ele_blob_get(unsigned slot, uint32_t *id, uint32_t *id_ext,
+                           const void **blob);
+int imx9_ele_blob_put(uint32_t id, uint32_t id_ext, const void *blob,
+                      uint32_t len);
+
+/****************************************************************************
+ * Name: imx9_ele_storage_master_import
+ *
+ * Description:
+ *   Give the enclave back the master blob of a key store it exported.
+ *   Without it the open that follows answers UNKNOWN_ID.
+ *
+ * Returned Value:
+ *   Zero (OK), -ENOENT if no master blob is held, or a negated errno.
+ *
+ ****************************************************************************/
+
+int imx9_ele_storage_master_import(uint32_t storage, uint32_t *rsp);
+
 #endif /* __ARCH_ARM64_SRC_IMX9_IMX9_ELE_H */
