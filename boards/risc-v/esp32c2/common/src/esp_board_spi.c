@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c2/esp8684-devkitm/src/esp8684-devkitm.h
+ * boards/risc-v/esp32c2/common/src/esp_board_spi.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,63 +20,71 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_ESP32C2_ESP8684_DEVKITM_SRC_ESP8684_DEVKITM_H
-#define __BOARDS_RISCV_ESP32C2_ESP8684_DEVKITM_SRC_ESP8684_DEVKITM_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <stdbool.h>
+#include <nuttx/debug.h>
+
+#include <nuttx/spi/spi.h>
+
+#include "espressif/esp_gpio.h"
+
 /****************************************************************************
- * Public Types
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp_bringup
- *
- * Description:
- *   Perform architecture-specific initialization.
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failure.
- *
+ * Name: esp_spi2_status
  ****************************************************************************/
 
-int esp_bringup(void);
+#ifdef CONFIG_ESPRESSIF_SPI2
 
-/****************************************************************************
- * Name: esp_gpio_init
- *
- * Description:
- *   Configure the GPIO driver.
- *
- * Returned Value:
- *   Zero (OK).
- *
- ****************************************************************************/
+uint8_t esp_spi2_status(struct spi_dev_s *dev, uint32_t devid)
+{
+  uint8_t status = 0;
 
-#ifdef CONFIG_DEV_GPIO
-int esp_gpio_init(void);
+  if (devid == SPIDEV_MMCSD(0))
+    {
+      return SPI_STATUS_PRESENT;
+    }
+
+  return status;
+}
+
 #endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_ESP32C2_ESP8684_DEVKITM_SRC_ESP8684_DEVKITM_H */
+/****************************************************************************
+ * Name: esp_spi2_cmddata
+ ****************************************************************************/
+
+#if defined(CONFIG_ESPRESSIF_SPI2) && defined(CONFIG_SPI_CMDDATA)
+
+int esp_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
+{
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      /*  This is the Data/Command control pad which determines whether the
+       *  data bits are data or a command.
+       */
+
+      esp_gpiowrite(CONFIG_ESPRESSIF_SPI2_MISOPIN, !cmd);
+
+      return OK;
+    }
+
+  spiinfo("devid: %" PRIu32 " CMD: %s\n", devid, cmd ? "command" :
+          "data");
+
+  return -ENODEV;
+}
+
+#endif

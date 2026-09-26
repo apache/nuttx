@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c2/esp8684-devkitm/src/esp8684-devkitm.h
+ * boards/risc-v/esp32c2/common/src/esp_board_rng90.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,63 +20,76 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_ESP32C2_ESP8684_DEVKITM_SRC_ESP8684_DEVKITM_H
-#define __BOARDS_RISCV_ESP32C2_ESP8684_DEVKITM_SRC_ESP8684_DEVKITM_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#include <stdio.h>
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+#include <nuttx/arch.h>
+#include <nuttx/crypto/rng90.h>
+#include <nuttx/debug.h>
+#include <nuttx/i2c/i2c_master.h>
 
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: esp_bringup
- *
- * Description:
- *   Perform architecture-specific initialization.
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failure.
- *
- ****************************************************************************/
-
-int esp_bringup(void);
-
-/****************************************************************************
- * Name: esp_gpio_init
- *
- * Description:
- *   Configure the GPIO driver.
- *
- * Returned Value:
- *   Zero (OK).
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEV_GPIO
-int esp_gpio_init(void);
+#ifndef CONFIG_ESPRESSIF_I2C_BITBANG
+#  include "espressif/esp_i2c.h"
+#else
+#  include "espressif/esp_i2c_bitbang.h"
 #endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_ESP32C2_ESP8684_DEVKITM_SRC_ESP8684_DEVKITM_H */
+#include "esp_board_rng90.h"
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_rng90_initialize
+ *
+ * Description:
+ *   Initialize and register the RNG90 True Random Number Generator driver.
+ *
+ * Input Parameters:
+ *   devno - The device number, used to build the device path as /dev/rngN
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ ****************************************************************************/
+
+int board_rng90_initialize(int devno)
+{
+  struct i2c_master_s *i2c;
+  char devpath[16];
+  int ret;
+
+  sninfo("Initializing RNG90\n");
+
+  /* Initialize I2C */
+
+#ifndef CONFIG_ESPRESSIF_I2C_BITBANG
+  i2c = esp_i2cbus_initialize(ESPRESSIF_I2C0);
+#else
+  i2c = esp_i2cbus_bitbang_initialize();
+#endif
+
+  if (i2c == NULL)
+    {
+      snerr("ERROR: Failed to initialize I2C for RNG90\n");
+      return -ENODEV;
+    }
+
+  /* Register the RNG90 driver at "/dev/rngN" */
+
+  snprintf(devpath, sizeof(devpath), "/dev/rng%d", devno);
+  ret = rng90_register(devpath, i2c, RNG90_I2C_ADDR);
+  if (ret < 0)
+    {
+      snerr("ERROR: Failed to register RNG90 driver: %d\n", ret);
+      return ret;
+    }
+
+  return OK;
+}
+

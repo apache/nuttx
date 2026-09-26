@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c2/esp8684-devkitm/src/esp8684-devkitm.h
+ * boards/risc-v/esp32c2/common/src/esp_board_mmcsd.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,63 +20,78 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_ESP32C2_ESP8684_DEVKITM_SRC_ESP8684_DEVKITM_H
-#define __BOARDS_RISCV_ESP32C2_ESP8684_DEVKITM_SRC_ESP8684_DEVKITM_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/debug.h>
 #include <nuttx/config.h>
+#include <nuttx/mmcsd.h>
+#include <nuttx/spi/spi.h>
+
+#include "espressif/esp_spi.h"
 
 /****************************************************************************
- * Public Types
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Function Prototypes
+ * Private Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp_bringup
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp_mmcsd_spi_initialize
  *
  * Description:
- *   Perform architecture-specific initialization.
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
+ *   Initialize SPI-based SD card.
  *
  * Input Parameters:
- *   None.
+ *   minor - The MMC/SD minor device number. The MMC/SD device will be
+ *     registered as /dev/mmcsdN where N is the minor number
  *
  * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failure.
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
  *
  ****************************************************************************/
 
-int esp_bringup(void);
+int esp_mmcsd_spi_initialize(void)
+{
+  struct spi_dev_s *spi;
+  int ret;
 
-/****************************************************************************
- * Name: esp_gpio_init
- *
- * Description:
- *   Configure the GPIO driver.
- *
- * Returned Value:
- *   Zero (OK).
- *
- ****************************************************************************/
+  syslog(LOG_INFO, "INFO: init MMC/SD slot %d on SPI%d: /dev/mmcsd%d\n",
+         CONFIG_NSH_MMCSDSLOTNO, CONFIG_NSH_MMCSDSPIPORTNO,
+         CONFIG_NSH_MMCSDMINOR);
 
-#ifdef CONFIG_DEV_GPIO
-int esp_gpio_init(void);
-#endif
+  spi = esp_spibus_initialize(CONFIG_NSH_MMCSDSPIPORTNO);
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_ESP32C2_ESP8684_DEVKITM_SRC_ESP8684_DEVKITM_H */
+  if (spi == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: failed to initialize SPI%d.\n",
+             CONFIG_NSH_MMCSDSPIPORTNO);
+      return -ENODEV;
+    }
+
+  /* Mounts to /dev/mmcsdN where N in the minor number */
+
+  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR,
+                                CONFIG_NSH_MMCSDSLOTNO, spi);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: failed to bind SPI%d to SD slot %d\n",
+            CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
+      return ret;
+    }
+
+  syslog(LOG_INFO, "INFO: MMCSD initialized\n");
+  return OK;
+}

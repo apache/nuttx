@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c2/esp8684-devkitm/src/esp8684-devkitm.h
+ * boards/risc-v/esp32c2/common/include/esp_board_spidev.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_ESP32C2_ESP8684_DEVKITM_SRC_ESP8684_DEVKITM_H
-#define __BOARDS_RISCV_ESP32C2_ESP8684_DEVKITM_SRC_ESP8684_DEVKITM_H
+#ifndef __BOARDS_RISC_V_ESP32C2_COMMON_INCLUDE_ESP_BOARD_SPIDEV_H
+#define __BOARDS_RISC_V_ESP32C2_COMMON_INCLUDE_ESP_BOARD_SPIDEV_H
 
 /****************************************************************************
  * Included Files
@@ -30,53 +30,51 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
- * Public Types
+ * Pre-processor Definitions
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp_bringup
+ * Name: board_spidev_initialize
  *
  * Description:
- *   Perform architecture-specific initialization.
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
+ *   Initialize SPI driver and register the /dev/spi device.
  *
  * Input Parameters:
- *   None.
+ *   bus - The SPI bus number, used to build the device path as /dev/spiN
  *
  * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failure.
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
  *
  ****************************************************************************/
 
-int esp_bringup(void);
+#ifdef CONFIG_SPI
+int board_spidev_initialize(int bus);
+#endif
 
-/****************************************************************************
- * Name: esp_gpio_init
- *
- * Description:
- *   Configure the GPIO driver.
- *
- * Returned Value:
- *   Zero (OK).
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEV_GPIO
-int esp_gpio_init(void);
+#undef EXTERN
+#if defined(__cplusplus)
+}
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_ESP32C2_ESP8684_DEVKITM_SRC_ESP8684_DEVKITM_H */
+#endif /* __BOARDS_RISC_V_ESP32C2_COMMON_INCLUDE_ESP_BOARD_SPIDEV_H */

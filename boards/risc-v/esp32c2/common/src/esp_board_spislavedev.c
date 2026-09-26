@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c2/esp8684-devkitm/src/esp8684-devkitm.h
+ * boards/risc-v/esp32c2/common/src/esp_board_spislavedev.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,63 +20,66 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_ESP32C2_ESP8684_DEVKITM_SRC_ESP8684_DEVKITM_H
-#define __BOARDS_RISCV_ESP32C2_ESP8684_DEVKITM_SRC_ESP8684_DEVKITM_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
+
+#include <nuttx/spi/slave.h>
+
+#include "espressif/esp_spi.h"
+
+#include "esp_board_spislavedev.h"
+
 /****************************************************************************
- * Public Types
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: esp_bringup
+ * Name: board_spislavedev_initialize
  *
  * Description:
- *   Perform architecture-specific initialization.
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
+ *   Initialize SPI Slave driver and register the /dev/spislv device.
  *
  * Input Parameters:
- *   None.
+ *   bus - The SPI bus number, used to build the device path as /dev/spislvN
  *
  * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failure.
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
  *
  ****************************************************************************/
 
-int esp_bringup(void);
+int board_spislavedev_initialize(int bus)
+{
+  struct spi_slave_ctrlr_s *ctrlr;
+  int ret = OK;
 
-/****************************************************************************
- * Name: esp_gpio_init
- *
- * Description:
- *   Configure the GPIO driver.
- *
- * Returned Value:
- *   Zero (OK).
- *
- ****************************************************************************/
+  /* Initialize SPI Slave controller device */
 
-#ifdef CONFIG_DEV_GPIO
-int esp_gpio_init(void);
+  ctrlr = esp_spislave_ctrlr_initialize(bus);
+  if (ctrlr == NULL)
+    {
+      syslog(LOG_ERR, "Failed to initialize SPI%d as slave.\n", bus);
+      return -ENODEV;
+    }
+
+#ifdef CONFIG_SPI_SLAVE_DRIVER
+  syslog(LOG_INFO, "Initializing /dev/spislv%d...\n", bus);
+
+  ret = spi_slave_register(ctrlr, bus);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to register /dev/spislv%d: %d\n", bus, ret);
+
+      esp_spislave_ctrlr_uninitialize(ctrlr);
+    }
 #endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_ESP32C2_ESP8684_DEVKITM_SRC_ESP8684_DEVKITM_H */
+  return ret;
+}
