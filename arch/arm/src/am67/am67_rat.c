@@ -50,10 +50,10 @@
 #include <stddef.h>
 
 #include <arch/barriers.h>
+#include <nuttx/vhost/vhost.h>
 
 #include "arm_internal.h"
 #include "am67_rat.h"
-#include <nuttx/vhost/vhost.h>
 
 /****************************************************************************
  * Pre-processor Definitions
