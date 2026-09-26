@@ -682,9 +682,27 @@ choice
 
 config NRF52_SAADC_TASK
 	bool "SAADC Task trigger"
+	---help---
+		Every conversion is triggered explicitly by the CPU writing the
+		SAMPLE task.
 
 config NRF52_SAADC_TIMER
 	bool "SAADC Timer trigger"
+	---help---
+		Sampling is driven by the SAADC internal sample timer.  The
+		hardware supports this only with a single enabled channel, so
+		NRF52_SAADC_CHANNELS is forced to 1 in this mode.  The achievable
+		sample rate is 16MHz/CC, which limits it to roughly 7.8kHz-200kHz.
+
+config NRF52_SAADC_TIMER_PPI
+	bool "SAADC Timer trigger via PPI"
+	depends on NRF52_TIMER0 || NRF52_TIMER1 || NRF52_TIMER2 || NRF52_TIMER3 || NRF52_TIMER4
+	select NRF52_PPI
+	---help---
+		Sampling is driven by a general-purpose TIMER compare event routed
+		to the SAADC SAMPLE task over PPI.  Unlike the internal sample
+		timer this supports multi-channel scan and, thanks to the TIMER
+		prescaler, much lower sample rates.
 
 endchoice # SAADC trigger selection
 
@@ -695,8 +713,11 @@ config NRF52_SAADC_TIMER_CC
 	default 0
 	range 80 2047
 
+endif # NRF52_SAADC_TIMER
+
 config NRF52_SAADC_CONTINUOUS
 	bool "SAADC continuous mode"
+	depends on NRF52_SAADC_TIMER || NRF52_SAADC_TIMER_PPI
 	select NRF52_PPI
 	default n
 	---help---
@@ -705,22 +726,66 @@ config NRF52_SAADC_CONTINUOUS
 		channel and completed buffers are passed to the upper-half with
 		the batch interface.
 
+		Works with either timer source.  With NRF52_SAADC_TIMER_PPI the
+		buffers hold whole interleaved scans and the batch is delivered
+		together with a per-sample channel map.
+
 if NRF52_SAADC_CONTINUOUS
 
 config NRF52_SAADC_CONTINUOUS_BUFLEN
 	int "SAADC continuous mode DMA buffer length"
 	default 32
 	---help---
-		Number of samples in each of the two EasyDMA buffers.
+		Number of scans in each of the two EasyDMA buffers.  A scan is one
+		conversion of every enabled channel, so each buffer holds
+		NRF52_SAADC_CHANNELS * NRF52_SAADC_CONTINUOUS_BUFLEN samples.
+		That product must not exceed 32767 (the SAADC MAXCNT field).
 
 config NRF52_SAADC_CONTINUOUS_PPI_CH
 	int "SAADC continuous mode PPI channel"
-	range 0 19
+	range 0 15 if NRF52_SOFTDEVICE_CONTROLLER
+	range 0 19 if !NRF52_SOFTDEVICE_CONTROLLER
 	default 0
+	---help---
+		PPI channel used to restart the SAADC from its own END event.
+		Must differ from NRF52_SAADC_PPI_CHANNEL.
 
 endif # NRF52_SAADC_CONTINUOUS
 
-endif # NRF52_SAADC_TIMER
+if NRF52_SAADC_TIMER_PPI
+
+config NRF52_SAADC_PPI_TIMER
+	int "SAADC PPI trigger TIMER instance"
+	default 0
+	range 0 4
+	---help---
+		General-purpose TIMER instance used to generate periodic compare
+		events routed via PPI into SAADC TASKS_SAMPLE.
+
+config NRF52_SAADC_PPI_CHANNEL
+	int "SAADC PPI channel"
+	default 0
+	range 0 15 if NRF52_SOFTDEVICE_CONTROLLER
+	range 0 19 if !NRF52_SOFTDEVICE_CONTROLLER
+	---help---
+		PPI channel used to connect TIMER compare event to SAADC SAMPLE task.
+
+config NRF52_SAADC_PPI_PRE
+	int "SAADC PPI timer prescaler"
+	default 4
+	range 0 9
+	---help---
+		TIMER prescaler value. Timer clock is 16 MHz / (2^prescaler).
+
+config NRF52_SAADC_PPI_CC
+	int "SAADC PPI timer compare value"
+	default 1000
+	range 1 2147483647
+	---help---
+		Timer compare value used as sampling period tick.
+		Sample period = CC / (16 MHz / (2^prescaler)).
+
+endif # NRF52_SAADC_TIMER_PPI
 
 config NRF52_SAADC_OVERSAMPLE
 	int "SAADC oversample"
@@ -738,10 +803,21 @@ config NRF52_SAADC_RESOLUTION
 
 config NRF52_SAADC_CHANNELS
 	int "SAADC channels"
-	default 8
-	range 0 8
+	default 8 if NRF52_SAADC_TASK
+	default 1 if NRF52_SAADC_TIMER
+	default 8 if NRF52_SAADC_TIMER_PPI
+	range 1 8 if NRF52_SAADC_TASK
+	range 1 1 if NRF52_SAADC_TIMER
+	range 1 8 if NRF52_SAADC_TIMER_PPI
 	---help---
-		SAADC channels
+		SAADC channels.
+
+		The SAADC internal sample timer works with a single channel only,
+		so NRF52_SAADC_TIMER is restricted to 1.  The other trigger modes
+		scan all enabled channels on every SAMPLE task.
+
+		Batching several scans per interrupt is done with
+		NRF52_SAADC_CONTINUOUS_BUFLEN in continuous mode.
 
 config NRF52_SAADC_LIMITS
 	bool "SAADC limits enable"
