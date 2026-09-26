@@ -66,6 +66,7 @@ static inline void imxrt_ocotp_reset_errors(void)
 static void imxrt_ocotp_initialize(void)
 {
   static bool once = false;
+#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
   uint32_t read;
   uint32_t prog;
   uint32_t relax;
@@ -74,6 +75,7 @@ static void imxrt_ocotp_initialize(void)
   uint32_t wait;
 
   const uint32_t ipg_freq_hz = BOARD_CPU_FREQUENCY / IMXRT_IPG_PODF_DIVIDER;
+#endif
 
   if (!once)
     {
@@ -81,6 +83,7 @@ static void imxrt_ocotp_initialize(void)
 
       imxrt_clockall_ocotp_ctrl();
 
+#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
       /* WAIT specifies time interval between auto read and write
        *      access in one time program.
        *
@@ -169,6 +172,7 @@ static void imxrt_ocotp_initialize(void)
                   OCOTP_TIMING2_RELAX_PROG_MASK,
                   OCOTP_TIMING2_RELAX_READ(relax_read) |
                   OCOTP_TIMING2_RELAX_PROG(relax_prog));
+#endif
     }
 }
 
