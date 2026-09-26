@@ -76,13 +76,6 @@
 #define IMXRT_SYS_PLL3_PFD2_HZ   (392727272u)  /* frac = 22 */
 #define IMXRT_SYS_PLL3_PFD3_HZ   (392727272u)  /* frac = 22 */
 
-/* ARM_PLL loop divider for 798 MHz with post_div = 2:
- *
- *   Fout = 24 MHz * 133 / (2 * 2) = 798 MHz
- */
-
-#define ARM_PLL_DIV_SELECT       (133)
-
 /* Analog settling delays, expressed as NOP spins because no timer exists
  * this early.  The M33 still runs from OSC_RC_400M/2 (200 MHz), so one
  * iteration is roughly 5 ns; both values are generously rounded up.
@@ -231,14 +224,14 @@ static void imxrt_enable_pll_ldo(void)
  *
  ****************************************************************************/
 
-static void imxrt_init_arm_pll(void)
+static void imxrt_init_arm_pll(const struct ccm_arm_pll *config)
 {
   uint32_t regval;
 
   imxrt_enable_pll_ldo();
 
-  regval = ANADIG_PLL_ARM_DIV_SELECT(ARM_PLL_DIV_SELECT) |
-           ANADIG_PLL_ARM_POST_DIV_SEL(ANADIG_PLL_ARM_POST_DIV_2);
+  regval = ANADIG_PLL_ARM_DIV_SELECT(config->loop_div) |
+           ANADIG_PLL_ARM_POST_DIV_SEL(config->post_div);
 
   /* Power the PLL down before touching the dividers, keeping the output
    * gated so that nothing sees an intermediate frequency.
@@ -266,6 +259,49 @@ static void imxrt_init_arm_pll(void)
 }
 
 #endif /* CONFIG_ARCH_CHIP_MIMXRT1189CVM8C_CM33 */
+
+static void imxrt_enable_osc_24m(void)
+{
+  uint32_t reg;
+
+  /* Check if the 24 MHz crystal oscillator not enabled, is gated
+   * or is not stable
+   */
+
+  reg  = getreg32(IMXRT_ANADIG_OSC_24M_CTRL);
+
+  if ((reg & (ANADIG_OSC_24M_CTRL_OSC_EN |
+              ANADIG_OSC_24M_CTRL_GATE |
+              ANADIG_OSC_24M_CTRL_STABLE)) !=
+             (ANADIG_OSC_24M_CTRL_OSC_EN |
+              ANADIG_OSC_24M_CTRL_STABLE))
+    {
+      /* It needs to be enabled */
+
+      reg |= ANADIG_OSC_24M_CTRL_OSC_EN;
+      putreg32(reg, IMXRT_ANADIG_OSC_24M_CTRL);
+
+      while ((getreg32(IMXRT_ANADIG_OSC_24M_CTRL) &
+              ANADIG_OSC_24M_CTRL_STABLE) == 0);
+
+      reg  = getreg32(IMXRT_ANADIG_OSC_24M_CTRL);
+      reg &= ~ANADIG_OSC_24M_CTRL_GATE;
+      putreg32(reg, IMXRT_ANADIG_OSC_24M_CTRL);
+    }
+}
+
+static void imxrt_enable_clock_source(int source)
+{
+  switch (source)
+    {
+      case OSC_24M:
+        imxrt_enable_osc_24m();
+        break;
+
+      default:
+        break;
+    }
+}
 
 /****************************************************************************
  * Public Functions
@@ -310,7 +346,8 @@ int imxrt_ccm_configure_root_clock(int root, int src, uint32_t div)
     }
 
   regval = getreg32(IMXRT_CCM_CR_CTRL(root));
-  newval = regval & ~(CCM_CR_CTRL_MUX_MASK | CCM_CR_CTRL_DIV_MASK);
+  newval = regval & ~(CCM_CR_CTRL_MUX_MASK | CCM_CR_CTRL_DIV_MASK |
+                      CCM_CR_CTRL_OFF);
   newval |= CCM_CR_CTRL_MUX_SRCSEL(i) | CCM_CR_CTRL_DIV(div);
 
   /* Do not reconfigure a root that already has the requested settings. */
@@ -321,6 +358,41 @@ int imxrt_ccm_configure_root_clock(int root, int src, uint32_t div)
     }
 
   putreg32(newval, IMXRT_CCM_CR_CTRL(root));
+
+  while (getreg32(IMXRT_CCM_CR_STAT0(root)) & CCM_CR_STAT0_CHANGING);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: imxrt_ccm_disable_root_clock
+ ****************************************************************************/
+
+static int imxrt_ccm_disable_root_clock(int root)
+{
+  uint32_t auth;
+  uint32_t regval;
+
+  if (root >= CCM_CR_COUNT)
+    {
+      return -EINVAL;
+    }
+
+  auth = getreg32(IMXRT_CCM_CR_AUTH(root));
+
+  if ((auth & CCM_CR_AUTH_DOMAIN(BOARD_CCM_DOMAIN_ID)) == 0)
+    {
+      return -EINVAL;
+    }
+
+  regval = getreg32(IMXRT_CCM_CR_CTRL(root));
+
+  if ((regval & CCM_CR_CTRL_OFF) != 0)
+    {
+      return OK;
+    }
+
+  putreg32(regval | CCM_CR_CTRL_OFF, IMXRT_CCM_CR_CTRL(root));
 
   while (getreg32(IMXRT_CCM_CR_STAT0(root)) & CCM_CR_STAT0_CHANGING);
 
@@ -494,13 +566,14 @@ int imxrt_get_rootclock(uint32_t clkroot, uint32_t *frequency)
  *   Called to initialize the i.MX RT.  This does whatever setup is needed to
  *   put the SoC in a usable state.  The Cortex-M33 boot ROM has already
  *   started essential PLLs and set the FlexSPI1 clock, so only the roots
- *   required by NuttX are configured here.  CCM_CR_FLEXSPI1 and its LPCG
- *   MUST NOT be touched while executing XIP from FlexSPI1.
+ *   required by NuttX are configured here.
  *
  ****************************************************************************/
 
 void imxrt_clockconfig(void)
 {
+  unsigned int i;
+
 #ifdef CONFIG_ARCH_CHIP_MIMXRT1189CVM8C_CM33
   /* Raise VDD1P0 to the HSRUN (OverDrive) level.  Both cores share this
    * rail and the M33 is the boot core, so it does this on behalf of both.
@@ -518,25 +591,10 @@ void imxrt_clockconfig(void)
    * ARM_PLL or the M33 root when it later executes this function.
    */
 
-  imxrt_init_arm_pll();
+  imxrt_init_arm_pll(&g_initial_clkconfig.arm_pll);
 
-  /* M33 core clock: ARM_PLL (798 MHz) / 3 = 266 MHz. */
-
-  imxrt_ccm_configure_root_clock(CCM_CR_M33, ARM_PLL_OUT, 3);
-
-  /* Root1 belongs exclusively to the M33 domain.  LOCK_LIST makes this
-   * ownership immutable until the next system reset.
-   */
-
-  putreg32(CCM_CR_AUTH_DOMAIN(BOARD_CCM_DOMAIN_ID) |
-           CCM_CR_AUTH_LOCK_LIST,
-           IMXRT_CCM_CR_AUTH(CCM_CR_M33));
-
-#endif
-
-#ifdef CONFIG_ARCH_CHIP_MIMXRT1189CVM8C_CM33
-  /* Keep both CPU cores in RUN during WFI so core exceptions such as
-   * SysTick can wake them without requiring a GPC wakeup source.
+  /* Keep M33 core in RUN during WFI so core exceptions such as
+   * SysTick can wake it without requiring a GPC wakeup source.
    */
 
   modifyreg32(IMXRT_GPC_CM33_MODE_CTRL,
@@ -546,17 +604,35 @@ void imxrt_clockconfig(void)
               GPC_CM_MISC_SLEEP_HOLD_EN, 0);
 #endif
 
-  /* AON bus (LPUART1/2 pclk): SYS_PLL2 (528 MHz) / 4 = 132 MHz */
+  /* Configure the clock roots required by NuttX. */
 
-  imxrt_ccm_configure_root_clock(CCM_CR_BUS_AON, SYS_PLL2_OUT, 4);
+  for (i = 0; i < CCM_CR_COUNT; i++)
+    {
+      if (g_initial_clkconfig.ccm.clock_root[i].action ==
+          CCM_CLOCK_ROOT_CONFIGURE)
+        {
+          imxrt_enable_clock_source(
+              g_initial_clkconfig.ccm.clock_root[i].mux);
+          imxrt_ccm_configure_root_clock(i,
+              g_initial_clkconfig.ccm.clock_root[i].mux,
+              g_initial_clkconfig.ccm.clock_root[i].div);
+        }
+      else if (g_initial_clkconfig.ccm.clock_root[i].action ==
+               CCM_CLOCK_ROOT_ACTION_DISABLE)
+        {
+          imxrt_ccm_disable_root_clock(i);
+        }
+    }
 
-  /* M7 SysTick reference: 24 MHz / 240 = 100 kHz */
+#ifdef CONFIG_ARCH_CHIP_MIMXRT1189CVM8C_CM33
+  /* Root1 belongs exclusively to the M33 domain.  LOCK_LIST makes this
+   * ownership immutable until the next system reset.
+   */
 
-  imxrt_ccm_configure_root_clock(CCM_CR_M7_SYSTICK, OSC_24M, 240);
-
-  /* LPUART1/2 functional clock: SYS_PLL3_DIV2 (240 MHz) / 10 = 24 MHz */
-
-  imxrt_ccm_configure_root_clock(CCM_CR_LPUART0102, SYS_PLL3_DIV2, 10);
+  putreg32(CCM_CR_AUTH_DOMAIN(BOARD_CCM_DOMAIN_ID) |
+           CCM_CR_AUTH_LOCK_LIST,
+           IMXRT_CCM_CR_AUTH(CCM_CR_M33));
+#endif
 
   /* Turn on the LPCGs used by the minimal port */
 
