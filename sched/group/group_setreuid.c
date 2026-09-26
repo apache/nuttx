@@ -78,44 +78,23 @@ int setreuid(uid_t ruid, uid_t euid)
   old_euid = rgroup->tg_euid;
   old_suid = rgroup->tg_suid;
 
-  if (old_euid == 0)
+  /* Non-super-user processes may only select existing credentials. */
+
+  if (old_euid != 0)
     {
-      /* Super-user: may set any combination of real and effective IDs. */
-
-      if (ruid != (uid_t)-1)
+      if (ruid != (uid_t)-1 &&
+          ruid != old_euid && ruid != old_suid)
         {
-          rgroup->tg_uid = ruid;
-
-          if (euid == (uid_t)-1)
-            {
-              rgroup->tg_euid = ruid;
-              rgroup->tg_suid = ruid;
-            }
+          set_errno(EPERM);
+          return ERROR;
         }
 
-      if (euid != (uid_t)-1)
+      if (euid != (uid_t)-1 &&
+          euid != old_euid && euid != old_suid && euid != old_ruid)
         {
-          rgroup->tg_euid = euid;
-          rgroup->tg_suid = euid;
+          set_errno(EPERM);
+          return ERROR;
         }
-
-      return OK;
-    }
-
-  /* Non-super-user */
-
-  if (ruid != (uid_t)-1 &&
-      ruid != old_euid && ruid != old_suid)
-    {
-      set_errno(EPERM);
-      return ERROR;
-    }
-
-  if (euid != (uid_t)-1 &&
-      euid != old_euid && euid != old_suid && euid != old_ruid)
-    {
-      set_errno(EPERM);
-      return ERROR;
     }
 
   if (ruid != (uid_t)-1)

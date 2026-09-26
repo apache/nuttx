@@ -77,44 +77,23 @@ int setregid(gid_t rgid, gid_t egid)
   old_egid = rgroup->tg_egid;
   old_sgid = rgroup->tg_sgid;
 
-  if (old_egid == 0)
+  /* Non-super-user processes may only select existing credentials. */
+
+  if (old_egid != 0)
     {
-      /* Super-user: may set any combination of real and effective IDs. */
-
-      if (rgid != (gid_t)-1)
+      if (rgid != (gid_t)-1 &&
+          rgid != old_egid && rgid != old_sgid)
         {
-          rgroup->tg_gid = rgid;
-
-          if (egid == (gid_t)-1)
-            {
-              rgroup->tg_egid = rgid;
-              rgroup->tg_sgid = rgid;
-            }
+          set_errno(EPERM);
+          return ERROR;
         }
 
-      if (egid != (gid_t)-1)
+      if (egid != (gid_t)-1 &&
+          egid != old_egid && egid != old_sgid && egid != old_rgid)
         {
-          rgroup->tg_egid = egid;
-          rgroup->tg_sgid = egid;
+          set_errno(EPERM);
+          return ERROR;
         }
-
-      return OK;
-    }
-
-  /* Non-super-user */
-
-  if (rgid != (gid_t)-1 &&
-      rgid != old_egid && rgid != old_sgid)
-    {
-      set_errno(EPERM);
-      return ERROR;
-    }
-
-  if (egid != (gid_t)-1 &&
-      egid != old_egid && egid != old_sgid && egid != old_rgid)
-    {
-      set_errno(EPERM);
-      return ERROR;
     }
 
   if (rgid != (gid_t)-1)
