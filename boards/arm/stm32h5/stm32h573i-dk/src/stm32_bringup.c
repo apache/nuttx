@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/stm32_flash.c
+ * boards/arm/stm32h5/stm32h573i-dk/src/stm32_bringup.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,12 +26,54 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32_STM32H563XX) || defined(CONFIG_STM32_STM32H57XXX)
-#  include "stm32h563xx_flash.c"
-#else
-#  error "Unsupported STM32 H5 chip"
-#endif
+#include <sys/mount.h>
+#include <syslog.h>
+#include <nuttx/board.h>
+#include <nuttx/input/buttons.h>
+#include <nuttx/leds/userled.h>
+
+#include "stm32h573i-dk.h"
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Perform board initialization from board_late_initialize().
+ *
+ ****************************************************************************/
+
+int stm32_bringup(void)
+{
+  int ret = OK;
+
+#ifdef CONFIG_FS_PROCFS
+  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_USERLED_LOWER) && !defined(CONFIG_ARCH_LEDS)
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register LEDs: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_INPUT_BUTTONS_LOWER
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register buttons: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
+  return OK;
+}

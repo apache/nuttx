@@ -3468,6 +3468,15 @@ config ARCH_BOARD_NUCLEO_H563ZI
 	---help---
 		STMicro Nucleo-H563ZI board based on the STMicro STM32H563ZI MCU.
 
+config ARCH_BOARD_STM32H573I_DK
+	bool "STMicro STM32H573I-DK"
+	depends on ARCH_CHIP_STM32H573II
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro STM32H573I-DK Discovery kit based on the STM32H573II MCU.
+
 config ARCH_BOARD_NUCLEO_N657X0_Q
 	bool "NUCLEO_N657X0_Q"
 	depends on ARCH_CHIP_STM32N657X0
@@ -4279,6 +4288,7 @@ config ARCH_BOARD
 	default "nucleo-h503rb"                if ARCH_BOARD_NUCLEO_H503RB
 	default "nucleo-h533re"                if ARCH_BOARD_NUCLEO_H533RE
 	default "nucleo-h563zi"                if ARCH_BOARD_NUCLEO_H563ZI
+	default "stm32h573i-dk"                if ARCH_BOARD_STM32H573I_DK
 	default "nucleo-n657x0-q"              if ARCH_BOARD_NUCLEO_N657X0_Q
 	default "nucleo-u5a5zj-q"              if ARCH_BOARD_NUCLEO_U5A5ZJ_Q
 	default "nucleo-u3c5zi-q"              if ARCH_BOARD_NUCLEO_U3C5ZI_Q

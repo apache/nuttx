@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/stm32_flash.c
+ * boards/arm/stm32h5/stm32h573i-dk/src/stm32_autoleds.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,12 +26,56 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32_STM32H563XX) || defined(CONFIG_STM32_STM32H57XXX)
-#  include "stm32h563xx_flash.c"
-#else
-#  error "Unsupported STM32 H5 chip"
-#endif
+#include <stdbool.h>
+#include <nuttx/board.h>
+#include <arch/board/board.h>
+
+#include "stm32h573i-dk.h"
+
+#ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_autoled_initialize
+ ****************************************************************************/
+
+void board_autoled_initialize(void)
+{
+  stm32_configgpio(GPIO_LD1);
+  stm32_configgpio(GPIO_LD2);
+  stm32_configgpio(GPIO_LD3);
+  stm32_configgpio(GPIO_LD4);
+}
+
+/****************************************************************************
+ * Name: board_autoled_on
+ ****************************************************************************/
+
+void board_autoled_on(int led)
+{
+  if (led == LED_STACKCREATED)
+    {
+      stm32_gpiowrite(GPIO_LD1, false);
+    }
+  else if (led == LED_PANIC)
+    {
+      stm32_gpiowrite(GPIO_LD3, false);
+    }
+}
+
+/****************************************************************************
+ * Name: board_autoled_off
+ ****************************************************************************/
+
+void board_autoled_off(int led)
+{
+  if (led == LED_PANIC)
+    {
+      stm32_gpiowrite(GPIO_LD3, true);
+    }
+}
+
+#endif /* CONFIG_ARCH_LEDS */
