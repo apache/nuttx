@@ -28,9 +28,15 @@
 
 #include <sys/param.h>
 #include <sys/types.h>
+
+#include <assert.h>
+#include <errno.h>
+#include <limits.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
+#include <nuttx/streams.h>
 #include <nuttx/fs/procfs.h>
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
@@ -44,6 +50,116 @@
  */
 
 #define LINEBUF_SIZE 128
+
+/* Largest representable positive off_t, derived from the actual off_t width.
+ * The windowed stream uses it to keep the returned byte count and the
+ * advanced file position representable.
+ */
+
+#define PROCFS_OFF_MAX \
+  ((off_t)(((uintmax_t)1 << (sizeof(off_t) * CHAR_BIT - 1)) - 1))
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* Private windowed output stream state used by procfs_format_read(). */
+
+struct procfs_format_stream_s
+{
+  struct lib_outstream_s common; /* Common stream state; nput is the logical
+                                  * count of all bytes offered so far */
+  FAR char *buffer;              /* User receive buffer */
+  size_t buflen;                 /* Representable copy capacity of buffer */
+  size_t copied;                 /* Bytes copied to buffer so far */
+  off_t skip;                    /* Bytes still to skip before the window */
+  int err;                       /* First sticky negative errno, or zero */
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: procfs_format_puts
+ *
+ * Description:
+ *   Consume one renderer output block through the window: bytes before the
+ *   requested file position reduce the remaining skip, bytes intersecting
+ *   the user buffer are copied, and bytes beyond it are discarded.  A block
+ *   whose length cannot be represented in the logical count records a
+ *   sticky deferred -EOVERFLOW.
+ *
+ ****************************************************************************/
+
+static ssize_t procfs_format_puts(FAR struct lib_outstream_s *self,
+                                  FAR const void *buf, size_t len)
+{
+  FAR struct procfs_format_stream_s *stream =
+                        (FAR struct procfs_format_stream_s *)self;
+  FAR const char *src = buf;
+  size_t chunk;
+
+  if (stream->err < 0 || len == 0)
+    {
+      return (ssize_t)len;
+    }
+
+  /* Reject a block whose length cannot be represented in the logical count
+   * before it changes the count or the buffer.
+   */
+
+  if (len > (size_t)(PROCFS_OFF_MAX - stream->common.nput))
+    {
+      stream->err = -EOVERFLOW;
+      return (ssize_t)len;
+    }
+
+  stream->common.nput += (off_t)len;
+
+  /* Region 1: bytes before the requested file position */
+
+  if (stream->skip > 0)
+    {
+      if (len <= (size_t)stream->skip)
+        {
+          stream->skip -= (off_t)len;
+          return (ssize_t)len;
+        }
+
+      len -= (size_t)stream->skip;
+      src += (size_t)stream->skip;
+      stream->skip = 0;
+    }
+
+  /* Region 2: bytes intersecting the user buffer */
+
+  chunk = MIN(len, stream->buflen - stream->copied);
+
+  if (chunk > 0)
+    {
+      memcpy(stream->buffer + stream->copied, src, chunk);
+      stream->copied += chunk;
+    }
+
+  /* Region 3: bytes beyond the buffer are discarded.  The read entry point
+   * already clamped buflen so the copied count and advanced file position
+   * stay representable, so no per-byte overflow check is needed here.
+   */
+
+  return (ssize_t)len;
+}
+
+/****************************************************************************
+ * Name: procfs_format_putc
+ ****************************************************************************/
+
+static void procfs_format_putc(FAR struct lib_outstream_s *self, int ch)
+{
+  char value = (char)ch;
+
+  procfs_format_puts(self, &value, 1);
+}
 
 /****************************************************************************
  * Public Functions
@@ -144,6 +260,7 @@ int procfs_snprintf(FAR char *buf, size_t size,
 {
   va_list ap;
   int n;
+
   va_start(ap, format);
   n = vsnprintf(buf, size, format, ap);
   va_end(ap);
@@ -210,6 +327,121 @@ void procfs_sprintf(FAR char *buf, size_t size, FAR off_t *offset,
     }
 
   *offset -= copysize;
+}
+
+/****************************************************************************
+ * Name: procfs_format_read
+ *
+ * Description:
+ *   Read one window of the formatted text of a procfs file.  The renderer
+ *   is replayed from the beginning on a private, stack allocated stream:
+ *   bytes before the current file position are skipped, bytes intersecting
+ *   the caller's receive buffer are copied, bytes beyond it are discarded,
+ *   and the file position advances only by the bytes actually copied.
+ *   See the full contract in include/nuttx/fs/procfs.h.
+ *
+ * Input Parameters:
+ *   filep  - The file structure describing the open procfs file
+ *   buffer - The address of the user's receive buffer
+ *   buflen - The size (in bytes) of the user's receive buffer
+ *   format - The renderer callback that formats the complete conceptual
+ *            text of the node
+ *   arg    - The opaque context passed to the renderer
+ *
+ * Returned Value:
+ *   The number of bytes actually transferred into the user's receive
+ *   buffer, zero at end of file or for a zero length request, or a negated
+ *   errno value on failure.
+ *
+ ****************************************************************************/
+
+ssize_t procfs_format_read(FAR struct file *filep, FAR char *buffer,
+                           size_t buflen, procfs_format_t format,
+                           FAR void *arg)
+{
+  struct procfs_format_stream_s stream;
+  size_t limit;
+  int ret;
+
+  DEBUGASSERT(filep != NULL && format != NULL);
+
+  /* A zero length request returns zero without invoking the renderer */
+
+  if (buflen == 0)
+    {
+      return 0;
+    }
+
+  DEBUGASSERT(buffer != NULL);
+
+  /* A negative file position is invalid; the renderer is not invoked */
+
+  if (filep->f_pos < 0)
+    {
+      return -EINVAL;
+    }
+
+  /* Bound the copy capacity by the largest positive ssize_t return and by
+   * the room left before the file position would exceed the largest
+   * positive off_t.  A user buffer larger than this bound yields a short
+   * read plus a deferred overflow, replayed at the boundary on later reads.
+   */
+
+  limit = MIN(buflen, (size_t)SSIZE_MAX);
+  if (filep->f_pos > PROCFS_OFF_MAX - (off_t)limit)
+    {
+      limit = (size_t)(PROCFS_OFF_MAX - filep->f_pos);
+    }
+
+  /* Replay the renderer from the beginning of the conceptual text */
+
+  stream.common.nput  = 0;
+  stream.common.putc  = procfs_format_putc;
+  stream.common.puts  = procfs_format_puts;
+  stream.common.flush = lib_noflush;
+  stream.buffer       = buffer;
+  stream.buflen       = limit;
+  stream.copied       = 0;
+  stream.skip         = filep->f_pos;
+  stream.err          = 0;
+
+  ret = format(&stream.common, arg);
+
+  /* Copied data wins over a deferred error: advance the file position by
+   * the copied count and return it.  A renderer or stream error with no
+   * copied byte is reported now and replayed at the boundary later.
+   */
+
+  if (stream.copied > 0)
+    {
+      filep->f_pos += (off_t)stream.copied;
+      return (ssize_t)stream.copied;
+    }
+
+  return ret < 0 ? ret : stream.err;
+}
+
+/****************************************************************************
+ * Name: procfs_format_done
+ *
+ * Description:
+ *   Report whether a procfs_format_read() renderer can stop early.  See the
+ *   contract in include/nuttx/fs/procfs.h.
+ *
+ ****************************************************************************/
+
+bool procfs_format_done(FAR struct lib_outstream_s *stream)
+{
+  FAR struct procfs_format_stream_s *priv =
+                        (FAR struct procfs_format_stream_s *)stream;
+
+  DEBUGASSERT(priv != NULL);
+
+  /* Once a sticky error is set, or the skip prefix is consumed and the
+   * buffer is full, every further byte would be discarded.
+   */
+
+  return priv->err < 0 || (priv->skip == 0 && priv->copied >= priv->buflen);
 }
 
 #endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS */

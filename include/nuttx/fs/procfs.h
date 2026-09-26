@@ -152,6 +152,20 @@ struct procfs_meminfo_entry_s
 #endif
 };
 
+/* Forward reference for the generic output stream, fully defined in
+ * <nuttx/streams.h>.  A node that formats text includes that header itself.
+ */
+
+struct lib_outstream_s;
+
+/* Renderer callback for procfs_format_read().  The renderer writes the
+ * complete conceptual text of a procfs file to 'stream' with the normal
+ * NuttX stream formatting functions, such as lib_sprintf().
+ */
+
+typedef CODE int (*procfs_format_t)(FAR struct lib_outstream_s *stream,
+                                    FAR void *arg);
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -250,6 +264,92 @@ int procfs_snprintf(FAR char *buf, size_t size,
 
 void procfs_sprintf(FAR char *buf, size_t size, FAR off_t *offset,
                     FAR const IPTR char *format, ...) printf_like(4, 5);
+
+/****************************************************************************
+ * Name: procfs_format_read
+ *
+ * Description:
+ *   Read one window of the formatted text of a procfs file.
+ *
+ *   A procfs node provides a renderer callback that writes the complete
+ *   conceptual text of the node to a generic output stream with the normal
+ *   formatting functions (lib_sprintf() and friends).  This helper invokes
+ *   that renderer on a private, stack allocated stream for every read,
+ *   skips the bytes before the current file position, copies the bytes
+ *   intersecting the caller's receive buffer, discards the bytes beyond it,
+ *   and advances the file position only by the bytes actually copied.
+ *
+ *   The renderer is replayed from the beginning on every read.  It must be
+ *   finite, deterministic, and replayable: given the same context it must
+ *   produce the same byte sequence and fail, if at all, at the same logical
+ *   position with the same negative errno.  Use this helper only for
+ *   bounded, inexpensive text output; reading a text of length N with a
+ *   fixed small buffer can approach quadratic formatting work.
+ *
+ *   Read semantics:
+ *     buflen == 0          - Returns zero without invoking the renderer.
+ *     negative f_pos       - Returns -EINVAL without invoking the renderer.
+ *     bytes copied         - Advances f_pos by the copied count and returns
+ *                            that count.  A renderer or stream error after
+ *                            copied bytes is deferred: it is reported by a
+ *                            later read once no byte before the failure
+ *                            boundary remains.
+ *     no bytes, no error   - Returns zero (EOF) without changing f_pos.
+ *     no bytes, error      - Returns the negative error without changing
+ *                            f_pos.  Repeating the read at the same
+ *                            position reports the error again.
+ *
+ *   The stream records -EOVERFLOW when conceptual output reaches a
+ *   requested byte that cannot have a representable return count or next
+ *   file position.
+ *
+ * Input Parameters:
+ *   filep  - The file structure describing the open procfs file.  f_pos is
+ *            the authoritative read position.
+ *   buffer - The address of the user's receive buffer.
+ *   buflen - The size (in bytes) of the user's receive buffer.
+ *   format - The renderer callback that formats the complete conceptual
+ *            text of the node.
+ *   arg    - The opaque context passed to the renderer.  It must remain
+ *            valid and unchanged for the entire call.
+ *
+ * Returned Value:
+ *   The number of bytes actually transferred into the user's receive
+ *   buffer, zero at end of file or for a zero length request, or a negated
+ *   errno value on failure.
+ *
+ ****************************************************************************/
+
+ssize_t procfs_format_read(FAR struct file *filep, FAR char *buffer,
+                           size_t buflen, procfs_format_t format,
+                           FAR void *arg);
+
+/****************************************************************************
+ * Name: procfs_format_done
+ *
+ * Description:
+ *   Report whether a procfs_format_read() renderer can stop early.  It
+ *   returns true once the current read window is fully satisfied (the skip
+ *   prefix is consumed and the receive buffer is full) or a sticky error
+ *   has been recorded, meaning every subsequent byte the renderer produces
+ *   would be discarded.
+ *
+ *   A renderer that emits many independent blocks may query this between
+ *   blocks and return early to avoid formatting work whose output cannot be
+ *   returned.  This is an optimization only: it must not change the byte
+ *   sequence of any single read, so a renderer must still be replayable and
+ *   deterministic across reads.
+ *
+ * Input Parameters:
+ *   stream - The output stream passed to the renderer by
+ *            procfs_format_read().
+ *
+ * Returned Value:
+ *   True if the renderer may stop early; false if it must keep rendering.
+ *
+ ****************************************************************************/
+
+bool procfs_format_done(FAR struct lib_outstream_s *stream);
 
 /****************************************************************************
  * Name: procfs_register
