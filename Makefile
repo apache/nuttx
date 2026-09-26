@@ -41,3 +41,5 @@ else
 include tools/Unix.mk
 endif
 endif
+
+$(APPDIR)/libapps$(LIBEXT): $(filter-out %libapps$(LIBEXT), $(NUTTXLIBS) $(USERLIBS))
