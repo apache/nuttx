@@ -2091,6 +2091,15 @@ config COREDUMP
 		memory space of the program. The CPU state contains register values
 		when the core dump has been generated.
 
+config COREDUMP_MEMORY_REGION_MAX
+	int "Maximum runtime coredump memory regions"
+	default 8
+	depends on COREDUMP
+	---help---
+		Maximum number of extra memory regions tracked by coredump at runtime.
+		CONFIG_BOARD_MEMORY_RANGE provides the boot default; /proc/coredump
+		can replace or extend the runtime list.
+
 config CUSTOM_SEMAPHORE_MAXVALUE
 	bool "Custom max value for semaphores"
 	default n
