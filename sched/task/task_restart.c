@@ -106,6 +106,12 @@ static void nxtask_reset_task(FAR struct tcb_s *tcb, bool remove)
 
 #ifdef HAVE_GROUP_MEMBERS
   group_kill_children(tcb);
+
+  /* The task group is reused after a restart.  It is no longer exiting once
+   * all of the old child threads have been removed.
+   */
+
+  tcb->group->tg_flags &= ~GROUP_FLAG_EXITING;
 #endif
 
   /* Remove the TCB from whatever list it is in.  After this point, the TCB
