@@ -85,6 +85,7 @@
 #define NETDEV_TX_CSUM  (1 << 1) /* Netdev support hardware tx checksum */
 #define NETDEV_RX_CSUM  (1 << 2) /* Netdev support hardware rx checksum */
 #define NETDEV_RX_STAMP (1 << 3) /* Netdev support hardware timestamp */
+#define NETDEV_TX_STAMP (1 << 4) /* Netdev provides hardware TX timestamps */
 
 /* Determine the largest possible address */
 

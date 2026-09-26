@@ -230,15 +230,24 @@
 
 #define __SO_PROTOCOL   16
 
+/* SO_TIMESTAMPING flags, with the same values as Linux so that they can
+ * also describe the capabilities of an interface (ETHTOOL_GET_TS_INFO).
+ * setsockopt(SO_TIMESTAMPING) currently treats any non-zero value as
+ * "enabled" and does not honour the individual flags.
+ */
+
 /* Timestamp generation */
 
-#define SOF_TIMESTAMPING_TX_HARDWARE  (1 << SO_TIMESTAMPING)
-#define SOF_TIMESTAMPING_TX_SOFTWARE  SOF_TIMESTAMPING_TX_HARDWARE
+#define SOF_TIMESTAMPING_TX_HARDWARE  (1 << 0)
+#define SOF_TIMESTAMPING_TX_SOFTWARE  (1 << 1)
+#define SOF_TIMESTAMPING_RX_HARDWARE  (1 << 2)
+#define SOF_TIMESTAMPING_RX_SOFTWARE  (1 << 3)
 
 /* Timestamp reporting */
 
-#define SOF_TIMESTAMPING_SOFTWARE     SOF_TIMESTAMPING_TX_SOFTWARE
-#define SOF_TIMESTAMPING_RAW_HARDWARE SOF_TIMESTAMPING_TX_HARDWARE
+#define SOF_TIMESTAMPING_SOFTWARE     (1 << 4)
+#define SOF_TIMESTAMPING_SYS_HARDWARE (1 << 5)
+#define SOF_TIMESTAMPING_RAW_HARDWARE (1 << 6)
 
 /* The options are unsupported but included for compatibility
  * and portability
