@@ -34,11 +34,23 @@ CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
 
 ARCHSCRIPT += $(BOARD_COMMON_DIR)/scripts/$(CHIP_SERIES)_aliases.ld
 
-ARCHSCRIPT += $(call FINDSCRIPT,$(CHIP_SERIES)_flat_memory.ld)
-
 ifneq ($(CONFIG_ESP32P4_SELECTS_REV_LESS_V3),y)
   BOARD_REV = .rev3
 endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+
+# Protected build: the kernel image is linked against its own half of the
+# memory map.  kernel-space.ld exports the region boundaries and then pulls
+# in the flat sections script, so the two stay in step -- the sections script
+# must NOT also be added here, or .flash.text is defined twice.
+
+ARCHSCRIPT += $(call FINDSCRIPT,$(CHIP_SERIES)_protected_memory.ld)
+ARCHSCRIPT += $(call FINDSCRIPT,kernel-space.ld)
+
+else
+
+ARCHSCRIPT += $(call FINDSCRIPT,$(CHIP_SERIES)_flat_memory.ld)
 
 ifeq ($(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),y)
   ARCHSCRIPT += $(call FINDSCRIPT,$(CHIP_SERIES)_sections$(BOARD_REV).ld)
@@ -46,6 +58,9 @@ else ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),y)
   ARCHSCRIPT += $(call FINDSCRIPT,$(CHIP_SERIES)_sections$(BOARD_REV).ld)
 endif
 
+endif
+
+ARCHPICFLAGS = -fpic
 
 CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -Werror=return-type
 CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)

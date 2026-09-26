@@ -242,7 +242,30 @@
 #  define REG_INT_CTX_NDX     32
 #endif
 
-#ifdef CONFIG_ARCH_RISCV_INTXCPT_EXTREGS
+/* On a CLIC part, mcause carries mpp / mpie / mpil / interrupt -- state that
+ * mret consults -- so it must be saved and restored with the frame, not just
+ * read for dispatch.  It is appended above REG_INT_CTX, so that slot and
+ * everything below it keep their offsets.
+ *
+ * Only a protected build needs this: a flat build never returns to a lower
+ * privilege level, so nothing consumes the saved mpp.  Keeping the frame at
+ * its original size there leaves every flat RISC-V target untouched.
+ */
+
+#if defined(CONFIG_ARCH_RV_HAVE_CLIC) && !defined(CONFIG_BUILD_FLAT)
+#  define REG_MCAUSE_NDX    (REG_INT_CTX_NDX + 1)
+#endif
+
+#ifdef REG_MCAUSE_NDX
+
+/* The frame carries mcause as well; keep it sized to match. */
+
+#  ifdef CONFIG_ARCH_RISCV_INTXCPT_EXTREGS
+#    define INT_XCPT_REGS   (REG_MCAUSE_NDX + 1 + CONFIG_ARCH_RISCV_INTXCPT_EXTREGS)
+#  else
+#    define INT_XCPT_REGS   (REG_MCAUSE_NDX + 1)
+#  endif
+#elif defined(CONFIG_ARCH_RISCV_INTXCPT_EXTREGS)
 #  define INT_XCPT_REGS     (REG_INT_CTX_NDX + 1 + CONFIG_ARCH_RISCV_INTXCPT_EXTREGS)
 #else
 #  define INT_XCPT_REGS     (REG_INT_CTX_NDX + 1)
@@ -391,6 +414,9 @@
 #    define REG_INT_THRESH  (INT_REG_SIZE*REG_INT_THRESH_NDX)
 #  endif
 #  define REG_INT_CTX       (INT_REG_SIZE*REG_INT_CTX_NDX)
+#  ifdef REG_MCAUSE_NDX
+#    define REG_MCAUSE      (INT_REG_SIZE*REG_MCAUSE_NDX)
+#  endif
 
 #ifdef CONFIG_ARCH_FPU
 #  define REG_F0            (INT_REG_SIZE*REG_F0_NDX)
@@ -473,6 +499,9 @@
 #    define REG_INT_THRESH  REG_INT_THRESH_NDX
 #  endif
 #  define REG_INT_CTX       REG_INT_CTX_NDX
+#  ifdef REG_MCAUSE_NDX
+#    define REG_MCAUSE      REG_MCAUSE_NDX
+#  endif
 
 #ifdef CONFIG_ARCH_FPU
 #  define REG_F0            REG_F0_NDX
@@ -804,6 +833,75 @@ int up_this_cpu(void);
 
 #ifdef CONFIG_ARCH_RV_HAVE_CLIC
 
+#ifdef CONFIG_ARCH_RV_CLIC_INTTHRESH_MMIO
+
+/****************************************************************************
+ * Name: up_irq_save
+ *
+ * Description:
+ *   Disable interrupts by setting interrupt threshold to maximum and return
+ *   the previous threshold value.
+ *
+ *   Some CLIC implementations place the threshold in a memory-mapped
+ *   register rather than in the mintthresh CSR; a chip advertises that by
+ *   defining ARCH_RV_CLIC_INTTHRESH_MMIO.  There is no single-instruction
+ *   for such a register, so the read-modify-write runs with STATUS_IE
+ *   cleared to keep it atomic against an interrupt arriving part way
+ *   through, and the write is followed by a read because the core does not
+ *   act on the new threshold until the store has been forced out.
+ *
+ ****************************************************************************/
+
+noinstrument_function static inline_function irqstate_t up_irq_save(void)
+{
+  volatile uint32_t *thresh =
+    (volatile uint32_t *)CONFIG_ARCH_RV_CLIC_INTTHRESH_MMIO;
+  irqstate_t flags;
+  uintreg_t status;
+
+  __asm__ __volatile__
+    (
+      "csrrc %0, " __XSTR(CSR_STATUS) ", %1\n"
+      : "=r" (status)
+      : "r"(STATUS_IE)
+      : "memory"
+    );
+
+  flags   = *thresh;
+  *thresh = CONFIG_ARCH_RV_CLIC_INTTHRESH_MMIO_MAX;
+  (void)*thresh;
+
+  __asm__ __volatile__
+    (
+      "csrs " __XSTR(CSR_STATUS) ", %0\n"
+      : /* no output */
+      : "r" (status & STATUS_IE)
+      : "memory"
+    );
+
+  return flags;
+}
+
+/****************************************************************************
+ * Name: up_irq_restore
+ *
+ * Description:
+ *   Restore the value of the memory-mapped interrupt threshold register
+ *
+ ****************************************************************************/
+
+noinstrument_function static inline_function
+void up_irq_restore(irqstate_t flags)
+{
+  volatile uint32_t *thresh =
+    (volatile uint32_t *)CONFIG_ARCH_RV_CLIC_INTTHRESH_MMIO;
+
+  *thresh = flags;
+  (void)*thresh;
+}
+
+#else
+
 /****************************************************************************
  * Name: up_irq_save
  *
@@ -835,6 +933,8 @@ void up_irq_restore(irqstate_t flags)
 
   WRITE_CSR(CSR_INTTHRESH, flags);
 }
+
+#endif /* CONFIG_ARCH_RV_CLIC_INTTHRESH_MMIO */
 
 #else
 

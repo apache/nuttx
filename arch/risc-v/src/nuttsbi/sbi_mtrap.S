@@ -64,6 +64,12 @@ machine_trap:
   csrrw      s0, CSR_MSCRATCH, x0 /* read user stack */
   REGSTORE   s0, REG_X2(sp)       /* original SP      */
 
+#ifdef REG_MCAUSE
+  /* The frame carries mcause on a CLIC part; see riscv_syscall.S. */
+
+  REGSTORE   x0, REG_MCAUSE(sp)
+#endif
+
   /* Check if this is an exception */
 
   bgez       a0, .Lmexception
