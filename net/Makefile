@@ -57,6 +57,7 @@ include route/Make.defs
 include procfs/Make.defs
 include usrsock/Make.defs
 include utils/Make.defs
+include lwip/Make.defs
 endif
 
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)net
