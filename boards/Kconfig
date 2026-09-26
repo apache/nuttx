@@ -3478,6 +3478,14 @@ config ARCH_BOARD_NUCLEO_N657X0_Q
 		code directly into SRAM via the on-board ST-Link V3EC, with
 		the NSH console on USART1 (ST-Link Virtual COM Port).
 
+config ARCH_BOARD_STM32N6570_DK
+	bool "STM32N6570-DK"
+	depends on ARCH_CHIP_STM32N657X0
+	select ARCH_HAVE_LEDS
+	---help---
+		STMicro STM32N6570-DK Discovery kit based on the STM32N657X0
+		MCU (Cortex-M55).
+
 config ARCH_BOARD_STM32L562E_DK
 	bool "STM32L562E-DK"
 	depends on ARCH_CHIP_STM32L562QE
@@ -4280,6 +4288,7 @@ config ARCH_BOARD
 	default "nucleo-h533re"                if ARCH_BOARD_NUCLEO_H533RE
 	default "nucleo-h563zi"                if ARCH_BOARD_NUCLEO_H563ZI
 	default "nucleo-n657x0-q"              if ARCH_BOARD_NUCLEO_N657X0_Q
+	default "stm32n6570-dk"                if ARCH_BOARD_STM32N6570_DK
 	default "nucleo-u5a5zj-q"              if ARCH_BOARD_NUCLEO_U5A5ZJ_Q
 	default "nucleo-u3c5zi-q"              if ARCH_BOARD_NUCLEO_U3C5ZI_Q
 	default "nucleo-c562re"                if ARCH_BOARD_NUCLEO_C562RE
@@ -5000,6 +5009,9 @@ source "boards/arm/stm32h5/nucleo-h563zi/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_N657X0_Q
 source "boards/arm/stm32n6/nucleo-n657x0-q/Kconfig"
+endif
+if ARCH_BOARD_STM32N6570_DK
+source "boards/arm/stm32n6/stm32n6570-dk/Kconfig"
 endif
 if ARCH_BOARD_STM32L562E_DK
 source "boards/arm/stm32l5/stm32l562e-dk/Kconfig"

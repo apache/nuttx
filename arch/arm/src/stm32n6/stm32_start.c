@@ -41,6 +41,7 @@
 #include "stm32_gpio.h"
 #include "stm32_pwr.h"
 #include "stm32_start.h"
+#include "hardware/stm32n6xxx_bsec.h"
 #include "hardware/stm32n6xxx_syscfg.h"
 
 /****************************************************************************
@@ -145,6 +146,23 @@ void __start_c(void)
 
   putreg32(0, NVIC_SYSTICK_CTRL);
   putreg32(NVIC_INTCTRL_PENDSTCLR, NVIC_INTCTRL);
+
+#ifdef CONFIG_STM32N6_DEBUG
+  /* Enable BSEC before accessing its debug control registers. */
+
+  putreg32(RCC_APB4HENR_BSECEN, STM32_RCC_APB4HENSR);
+  (void)getreg32(STM32_RCC_APB4HENR);
+
+  /* The boot ROM can close debug access in flash boot mode.  Reopen it
+   * at the current protection level before clock and memory initialization
+   * so a debugger can attach without changing the boot pins.
+   */
+
+  putreg32(BSEC_AP_UNLOCK_UNLOCK, STM32_BSEC_AP_UNLOCK);
+  putreg32(BSEC_DBGCR_AUTH_SEC | BSEC_DBGCR_UNLOCK |
+           ((getreg32(STM32_BSEC_HDPLSR) & BSEC_HDPLSR_HDPL_MASK) <<
+            BSEC_DBGCR_AUTH_HDPL_SHIFT), STM32_BSEC_DBGCR);
+#endif
 
   /* Force plain SLEEP (not DEEPSLEEP) on WFI so the system clock keeps
    * running and SysTick continues to wake us.  Cleared once here so
