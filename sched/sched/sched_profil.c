@@ -96,6 +96,7 @@ static void profil_timer_handler(wdparm_t arg)
 
 #ifdef CONFIG_SMP
   cpu_set_t cpus = (1 << CONFIG_SMP_NCPUS) - 1;
+
   CPU_CLR(this_cpu(), &cpus);
   nxsched_smp_call_async(cpus, &g_call_data);
 #endif
@@ -149,7 +150,7 @@ int profil(FAR unsigned short *buf, size_t bufsiz,
       if (buf != NULL && scale != 0)
         {
           memset(buf, 0, bufsiz);
-          highpc = (uintmax_t)bufsiz * 65536 / scale;
+          highpc = (uintmax_t)(bufsiz & ~1) * 65536 / scale;
 
           flags = spin_lock_irqsave(&prof->lock);
           prof->counter = buf;
