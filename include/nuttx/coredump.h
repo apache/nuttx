@@ -42,9 +42,28 @@
 #define COREDUMP_MAGIC          0x434f5245
 #define COREDUMP_INFONAME_SIZE  ALIGN_UP(CONFIG_TASK_NAME_SIZE, 8)
 
+#ifndef CONFIG_COREDUMP_MEMORY_REGION_MAX
+#  define CONFIG_COREDUMP_MEMORY_REGION_MAX 8
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* Runtime coredump mode */
+
+enum coredump_mode_e
+{
+  COREDUMP_MODE_DISABLED = 0,
+  COREDUMP_MODE_CURRENT_TASK,
+  COREDUMP_MODE_ALL_TASKS,
+};
+
+struct coredump_config_s
+{
+  enum coredump_mode_e mode;
+  struct memory_region_s regions[CONFIG_COREDUMP_MEMORY_REGION_MAX + 1];
+};
 
 /* Coredump information for block header */
 
@@ -58,6 +77,47 @@ struct coredump_info_s
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: coredump_get_config
+ *
+ * Description:
+ *   Copy the runtime coredump configuration.
+ *
+ ****************************************************************************/
+
+void coredump_get_config(FAR struct coredump_config_s *config);
+
+/****************************************************************************
+ * Name: coredump_set_mode
+ *
+ * Description:
+ *   Set the runtime coredump mode.
+ *
+ ****************************************************************************/
+
+int coredump_set_mode(enum coredump_mode_e mode);
+
+/****************************************************************************
+ * Name: coredump_clear_memory_regions
+ *
+ * Description:
+ *   Clear all runtime coredump memory regions.
+ *
+ ****************************************************************************/
+
+void coredump_clear_memory_regions(void);
+
+/****************************************************************************
+ * Name: coredump_set_memory_regions
+ *
+ * Description:
+ *   Replace all runtime coredump memory regions.
+ *
+ ****************************************************************************/
+
+int coredump_set_memory_regions(
+  FAR const struct memory_region_s *regions, size_t count);
 
 /****************************************************************************
  * Name: coredump_add_memory_region

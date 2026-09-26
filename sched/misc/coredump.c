@@ -27,6 +27,8 @@
 #include <sys/stat.h>
 #include <sys/param.h>
 
+#include <errno.h>
+#include <string.h>
 #include <syslog.h>
 #include <nuttx/debug.h>
 
@@ -102,13 +104,20 @@ static struct lib_blkoutstream_s g_devstream;
 static struct lib_mtdoutstream_s g_devstream;
 #endif
 
-#ifdef CONFIG_BOARD_MEMORY_RANGE
-static struct memory_region_s g_memory_region[] =
-  {
-    CONFIG_BOARD_MEMORY_RANGE
-  };
+static struct coredump_config_s g_coredump_config =
+{
+#ifdef CONFIG_BOARD_COREDUMP_FULL
+  .mode = COREDUMP_MODE_ALL_TASKS,
+#else
+  .mode = COREDUMP_MODE_CURRENT_TASK,
 #endif
-static const struct memory_region_s *g_regions;
+#ifdef CONFIG_BOARD_MEMORY_RANGE
+  .regions =
+    {
+      CONFIG_BOARD_MEMORY_RANGE
+    },
+#endif
+};
 
 /****************************************************************************
  * Private Functions
@@ -117,6 +126,99 @@ static const struct memory_region_s *g_regions;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static int coredump_select_dump_scope(enum coredump_mode_e mode,
+                                      FAR pid_t *pid)
+{
+  switch (mode)
+    {
+      case COREDUMP_MODE_DISABLED:
+        _alert("Coredump skipped: runtime mode off\n");
+        return -ECANCELED;
+
+      case COREDUMP_MODE_ALL_TASKS:
+        *pid = INVALID_PROCESS_ID;
+        break;
+
+      case COREDUMP_MODE_CURRENT_TASK:
+        if (*pid == INVALID_PROCESS_ID)
+          {
+            *pid = running_task()->pid;
+          }
+
+        break;
+
+      default:
+        return -EINVAL;
+    }
+
+  return OK;
+}
+
+static int coredump_add_region(FAR struct memory_region_s *regions,
+                               uintptr_t start, uintptr_t end,
+                               uint32_t flags)
+{
+  size_t count = 0;
+  size_t dest = 0;
+  bool changed;
+  size_t i;
+
+  if (start >= end)
+    {
+      return -EINVAL;
+    }
+
+  while (count < CONFIG_COREDUMP_MEMORY_REGION_MAX &&
+         regions[count].start < regions[count].end)
+    {
+      count++;
+    }
+
+  do
+    {
+      changed = false;
+      for (i = 0; i < count; i++)
+        {
+          if (start < regions[i].end && end > regions[i].start)
+            {
+              if (flags != regions[i].flags)
+                {
+                  return -EINVAL;
+                }
+
+              if (start > regions[i].start || end < regions[i].end)
+                {
+                  start = MIN(start, regions[i].start);
+                  end = MAX(end, regions[i].end);
+                  changed = true;
+                }
+            }
+        }
+    }
+  while (changed);
+
+  for (i = 0; i < count; i++)
+    {
+      if (end <= regions[i].start || start >= regions[i].end)
+        {
+          regions[dest++] = regions[i];
+        }
+    }
+
+  if (dest >= CONFIG_COREDUMP_MEMORY_REGION_MAX)
+    {
+      return -E2BIG;
+    }
+
+  regions[dest].start = start;
+  regions[dest].end   = end;
+  regions[dest].flags = flags;
+
+  memset(&regions[dest + 1], 0,
+         (CONFIG_COREDUMP_MEMORY_REGION_MAX - dest) * sizeof(*regions));
+  return OK;
+}
 
 /****************************************************************************
  * Name: elf_flush
@@ -374,7 +476,7 @@ static void elf_emit_note(FAR struct elf_dumpinfo_s *cinfo)
 
   if (cinfo->pid == INVALID_PROCESS_ID)
     {
-     FAR struct tcb_s *rtcb = running_task();
+      FAR struct tcb_s *rtcb = running_task();
 
       /* Emit the current (typically crashing) task first so that GDB's
        * default thread selection shows the crashing backtrace on the initial
@@ -719,7 +821,8 @@ static void elf_emit_phdr(FAR struct elf_dumpinfo_s *cinfo,
  ****************************************************************************/
 
 #ifdef CONFIG_BOARD_COREDUMP_SYSLOG
-static void coredump_dump_syslog(pid_t pid)
+static void coredump_dump_syslog(
+  FAR const struct memory_region_s *regions, pid_t pid)
 {
   FAR void *stream;
   FAR const char *streamname;
@@ -753,7 +856,7 @@ static void coredump_dump_syslog(pid_t pid)
 
   /* Do core dump */
 
-  coredump(g_regions, stream, pid);
+  coredump(regions, stream, pid);
 
 #  ifdef CONFIG_BOARD_COREDUMP_COMPRESSION
   _alert("Finish coredump (Compression Enabled). %s formatted\n",
@@ -775,7 +878,8 @@ static void coredump_dump_syslog(pid_t pid)
  ****************************************************************************/
 
 #ifdef CONFIG_BOARD_COREDUMP_DEV
-static void coredump_dump_dev(pid_t pid)
+static void coredump_dump_dev(
+  FAR const struct memory_region_s *regions, pid_t pid)
 {
   FAR void *stream = &g_devstream;
   int ret;
@@ -791,7 +895,7 @@ static void coredump_dump_dev(pid_t pid)
   stream = &g_lzfstream;
 #endif
 
-  ret = coredump(g_regions, stream, pid);
+  ret = coredump(regions, stream, pid);
   if (ret < 0)
     {
       _alert("Coredump fail %d\n", ret);
@@ -804,22 +908,91 @@ static void coredump_dump_dev(pid_t pid)
 #endif
 
 /****************************************************************************
- * Name: coredump_initialize_memory_region
+ * Name: coredump_get_config
  *
  * Description:
- *   initialize the memory region with board memory range specified in config
+ *   Copy the current runtime coredump configuration into the caller buffer.
  *
  ****************************************************************************/
 
-static int coredump_initialize_memory_region(void)
+void coredump_get_config(FAR struct coredump_config_s *config)
 {
-#ifdef CONFIG_BOARD_MEMORY_RANGE
-  if (g_regions == NULL)
-    {
-      g_regions = g_memory_region;
-    }
-#endif
+  irqstate_t flags;
 
+  DEBUGASSERT(config != NULL);
+
+  flags = enter_critical_section();
+  *config = g_coredump_config;
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
+ * Name: coredump_set_mode
+ ****************************************************************************/
+
+int coredump_set_mode(enum coredump_mode_e mode)
+{
+  switch (mode)
+    {
+      case COREDUMP_MODE_DISABLED:
+      case COREDUMP_MODE_CURRENT_TASK:
+      case COREDUMP_MODE_ALL_TASKS:
+        {
+          irqstate_t flags = enter_critical_section();
+
+          g_coredump_config.mode = mode;
+          leave_critical_section(flags);
+          return OK;
+        }
+
+      default:
+        return -EINVAL;
+    }
+}
+
+/****************************************************************************
+ * Name: coredump_clear_memory_regions
+ ****************************************************************************/
+
+void coredump_clear_memory_regions(void)
+{
+  coredump_set_memory_regions(NULL, 0);
+}
+
+/****************************************************************************
+ * Name: coredump_set_memory_regions
+ ****************************************************************************/
+
+int coredump_set_memory_regions(FAR const struct memory_region_s *regions,
+                                size_t count)
+{
+  irqstate_t flags;
+  size_t i;
+
+  if (count > CONFIG_COREDUMP_MEMORY_REGION_MAX ||
+      (count > 0 && regions == NULL))
+    {
+      return -EINVAL;
+    }
+
+  for (i = 0; i < count; i++)
+    {
+      if (regions[i].start >= regions[i].end)
+        {
+          return -EINVAL;
+        }
+    }
+
+  flags = enter_critical_section();
+  memset(g_coredump_config.regions, 0, sizeof(g_coredump_config.regions));
+
+  if (count > 0)
+    {
+      memcpy(g_coredump_config.regions, regions,
+             count * sizeof(struct memory_region_s));
+    }
+
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -834,88 +1007,20 @@ static int coredump_initialize_memory_region(void)
 int coredump_add_memory_region(FAR const void *ptr, size_t size,
                                uint32_t flags)
 {
-  FAR struct memory_region_s *region;
-  size_t count = 1; /* 1 for end flag */
+  uintptr_t start = (uintptr_t)ptr;
+  uintptr_t end = start + size;
+  irqstate_t irqflags;
   int ret;
 
-  ret = coredump_initialize_memory_region();
-  if (ret < 0)
+  if (ptr == NULL || size == 0 || end <= start)
     {
-      return ret;
+      return -EINVAL;
     }
 
-  if (g_regions != NULL)
-    {
-      region = (FAR struct memory_region_s *)g_regions;
-
-      while (region->start < region->end)
-        {
-          if ((uintptr_t)ptr >= region->start &&
-              (uintptr_t)ptr + size < region->end)
-            {
-              /* Already watched */
-
-              return 0;
-            }
-          else if ((uintptr_t)ptr < region->start &&
-                   (uintptr_t)ptr + size >= region->end)
-            {
-              /* start out of region, end out of region */
-
-              region->start = (uintptr_t)ptr;
-              region->end = (uintptr_t)ptr + size;
-              return 0;
-            }
-          else if ((uintptr_t)ptr < region->start &&
-                   (uintptr_t)ptr + size >= region->start)
-            {
-              /* start out of region, end in region */
-
-              region->start = (uintptr_t)ptr;
-              return 0;
-            }
-          else if ((uintptr_t)ptr < region->end &&
-                   (uintptr_t)ptr + size >= region->end)
-            {
-              /* start in region, end out of region */
-
-              region->end = (uintptr_t)ptr + size;
-              return 0;
-            }
-
-          count++;
-          region++;
-        }
-
-      /* Need a new region */
-    }
-
-  region = lib_malloc(sizeof(struct memory_region_s) * (count + 1));
-  if (region == NULL)
-    {
-      return -ENOMEM;
-    }
-
-  memcpy(region, g_regions, sizeof(struct memory_region_s) * count);
-
-  if (g_regions != NULL
-#ifdef CONFIG_BOARD_MEMORY_RANGE
-    && g_regions != g_memory_region
-#endif
-    )
-    {
-      lib_free((FAR void *)g_regions);
-    }
-
-  region[count - 1].start = (uintptr_t)ptr;
-  region[count - 1].end = (uintptr_t)ptr + size;
-  region[count - 1].flags = flags;
-  region[count].start = 0;
-  region[count].end = 0;
-  region[count].flags = 0;
-
-  g_regions = region;
-  return 0;
+  irqflags = enter_critical_section();
+  ret = coredump_add_region(g_coredump_config.regions, start, end, flags);
+  leave_critical_section(irqflags);
+  return ret;
 }
 
 /****************************************************************************
@@ -930,12 +1035,6 @@ int coredump_add_memory_region(FAR const void *ptr, size_t size,
 int coredump_initialize(void)
 {
   int ret = 0;
-
-  ret = coredump_initialize_memory_region();
-  if (ret < 0)
-    {
-      return ret;
-    }
 
 #ifdef CONFIG_BOARD_COREDUMP_BLKDEV
   ret = lib_blkoutstream_open(&g_devstream,
@@ -969,12 +1068,23 @@ int coredump_initialize(void)
 
 void coredump_dump(pid_t pid)
 {
+  struct coredump_config_s config;
+  int ret;
+
+  coredump_get_config(&config);
+
+  ret = coredump_select_dump_scope(config.mode, &pid);
+  if (ret < 0)
+    {
+      return;
+    }
+
 #ifdef CONFIG_BOARD_COREDUMP_SYSLOG
-  coredump_dump_syslog(pid);
+  coredump_dump_syslog(config.regions, pid);
 #endif
 
 #ifdef CONFIG_BOARD_COREDUMP_DEV
-  coredump_dump_dev(pid);
+  coredump_dump_dev(config.regions, pid);
 #endif
 }
 
