@@ -28,15 +28,24 @@ The code is in ``drivers/misc/``.
        and for measuring how fast something can read.
    * - ``/dev/mem``
      - ``CONFIG_DEV_MEM``
-     - Physical memory as a file, so it can be read and written by offset.
+     - Physical memory as a file: the file position *is* the address, and a
+       read or write is a ``memcpy()`` to or from it.  It also supports
+       ``mmap()``, which is the usual way to reach a register block.
        Powerful and unguarded: it is a debugging tool, not a production
        interface.
    * - ``/dev/ascii``
      - ``CONFIG_DEV_ASCII``
-     - Reads return the printable ASCII characters, repeating.  A test
-       pattern with the useful property of being readable in a hex dump.
+     - Reads return the printable ASCII characters, ``!`` through ``~``,
+       cycling forever, with a newline in the place where the space would
+       fall.  That is what makes it a test pattern you can read as text
+       rather than one endless line.
 
-Each costs almost nothing to enable, which is why ``/dev/zero`` defaults to
-on unless ``CONFIG_DEFAULT_SMALL`` is set.  On a system that is genuinely
-tight, they are among the first things to turn off, because a program that
+``/dev/null`` and ``/dev/zero`` cost almost nothing to enable, and both
+default to on unless ``CONFIG_DEFAULT_SMALL`` is set.  ``/dev/mem`` and
+``/dev/ascii`` default to off.  On a system that is genuinely tight, the
+first two are among the first things to turn off, because a program that
 really needs them is rare.
+
+Each is registered by a call the board makes during bring-up --
+``devnull_register()``, ``devzero_register()``, ``devmem_register()`` and
+``devascii_register()`` -- declared in ``include/nuttx/drivers/drivers.h``.

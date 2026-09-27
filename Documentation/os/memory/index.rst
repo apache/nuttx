@@ -20,11 +20,18 @@ This page discusses the NuttX memory management logic.
       One heap, two heaps, or one per process.  See :doc:`/os/index` for what
       each build mode is.
 
-   The practical consequence is which allocator a piece of code may call.  In a
-   flat build ``malloc()`` and ``kmm_malloc()`` are the same allocator.  In a
-   protected or kernel build they are not, and kernel code that calls
-   ``malloc()`` is a bug -- it would hand out memory the application is not
-   allowed to touch, or that the kernel cannot reach.
+   The practical consequence is which allocator a piece of code may call.
+   Whether there are two is decided by ``CONFIG_MM_KERNEL_HEAP``, not by the
+   build mode directly -- the build mode only sets its default, on for
+   protected and kernel builds and off for flat.  With it off, ``KRN_HEAP``
+   *is* ``USR_HEAP``: ``malloc()`` and ``kmm_malloc()`` reach the same pool.
+   With it on they do not, and kernel code that calls ``malloc()`` is a bug
+   -- it would hand out memory the application is not allowed to touch, or
+   that the kernel cannot reach.
+
+   The distinction matters in a flat build too.  The Kconfig offers
+   ``CONFIG_MM_KERNEL_HEAP`` there on purpose, so that a microcontroller
+   with external RAM can place the two heaps in different memory.
 
 .. toctree::
    :maxdepth: 1
@@ -44,8 +51,9 @@ include the files:
 * Standard Interfaces: ``mm_malloc.c``, ``mm_calloc.c``, ``mm_realloc.c``,
   ``mm_memalign.c``, ``mm_free.c``
 * Less-Standard Interfaces: ``mm_zalloc.c``, ``mm_mallinfo.c``
-* Internal Implementation: ``mm_initialize.c`` ``mm_sem.c``
-  ``mm_addfreechunk.c`` ``mm_size2ndx.c`` ``mm_shrinkchunk.c``
+* Internal Implementation: ``mm_initialize.c`` ``mm_lock.c``
+  ``mm_shrinkchunk.c`` ``mm_foreach.c`` ``mm_heapmember.c``
+  ``mm_memdump.c``
 * Build and Configuration files: ``Kconfig``, ``Makefile``
 
 Memory Models
@@ -163,12 +171,15 @@ Allocations may be aligned to a user-provided address boundary.
 
 The granule allocator interfaces are defined in ``nuttx/include/nuttx/mm/gran.h``.
 The granule allocator consists of these files in this directory:
-``mm_gran.h``, ``mm_granalloc.c``, ``mm_grancritical.c``, ``mm_granfree.c``
-``mm_graninit.c``
+``mm_gran.h``, ``mm_granalloc.c``, ``mm_grancritical.c``, ``mm_granfree.c``,
+``mm_graninfo.c``, ``mm_graninit.c``, ``mm_granrelease.c``,
+``mm_granreserve.c`` and ``mm_grantable.c``.
 
-The granule allocator is not used anywhere within the base NuttX code
-as of this writing.  The intent of the granule allocator is to provide
-a tool to support platform-specific management of aligned DMA memory.
+The intent of the granule allocator is to provide a tool to support
+platform-specific management of aligned DMA memory, and that is what it is
+used for: ``imx9_dma_alloc.c`` and ``mpfs_dma_alloc.c`` both build on it.
+It also carries the page allocator described below, through
+``mm_pgalloc.c``, which in turn is used by ``mm/map/`` and ``mm/kmap/``.
 
 NOTE: Because each granule may be aligned and each allocation is in
 units of the granule size, selection of the granule size is important:
@@ -178,10 +189,11 @@ can occur from alignment;  Of course, heap alignment should no be
 used unless (a) you are using the granule allocator to manage DMA memory
 and (b) your hardware has specific memory alignment requirements.
 
-The current implementation also restricts the maximum allocation size
-to 32 granules.  That restriction could be eliminated with some
-additional coding effort, but currently requires larger granule
-sizes for larger allocations.
+An allocation may be as large as the heap: ``gran_alloc()`` refuses only a
+request bigger than ``ngranules``, the number of granules the heap was
+created with.  The allocation table is an array of 32-bit cells and a
+request spans as many of them as it needs, which is what the ``smask`` and
+``emask`` fields of the table entry are for.
 
 General Usage Example
 ~~~~~~~~~~~~~~~~~~~~~

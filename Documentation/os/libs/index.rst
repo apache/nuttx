@@ -24,10 +24,11 @@ Libraries in NuttX are very special creatures.  They have these properties:
    ``nxsem_wait()`` must be used.
 
 NOTE:  The libraries under ``libs/`` build differently from other NuttX
-components:  There are no build-related files in the ``libs/`` directory; it
-is simply a container for other well-known, individual library directories.
-The upper level Makefile logic is aware of the libraries within the ``libs/``
-container.
+components:  the only build-related file in the ``libs/`` directory is a
+one-line ``CMakeLists.txt`` that recurses into the subdirectories.  It is
+otherwise simply a container for other well-known, individual library
+directories, and the upper level Makefile logic is aware of the libraries
+within the ``libs/`` container.
 
 The only real function of the ``libs/`` directory is to prevent the top-level
 directory from becoming cluttered with individual libraries.
@@ -37,6 +38,7 @@ directory from becoming cluttered with individual libraries.
    :caption: Contents:
    
    libc/index.rst
+   libbuiltin.rst
    libdsp.rst
    libm.rst
    libxx.rst

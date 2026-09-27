@@ -20,7 +20,9 @@ provided:
 
 And then finally:
 
-- ``CONFIG_MM_SHM=y`` - Enables shared memory support
+- ``CONFIG_MM_SHM=y`` - Enables shared memory support.  Kconfig enforces two
+  of the prerequisites above for you: it carries ``depends on MM_PGALLOC &&
+  BUILD_KERNEL``, and it selects ``CONFIG_ARCH_VMA_MAPPING``.
 - ``CONFIG_ARCH_SHM_VBASE`` - The virtual address of the beginning of the
   shared memory region.
 - ``CONFIG_ARCH_SHM_MAXREGIONS`` - The maximum number of regions that can
@@ -29,6 +31,11 @@ And then finally:
   other purpose. Default is 1.
 - ``CONFIG_ARCH_SHM_NPAGES`` - The maximum number of pages that can allocated
   for the shared memory region.  Default is 1.
+
+The option has grown past SysV shared memory: its Kconfig help also covers
+device mapping interfaces such as ``vm_map_region()``, and
+``CONFIG_ARCH_SHM_NPAGES`` is described there as the maximum size of a
+userspace VM mapping, shared memory being only one use of it.
 
 The size of the virtual shared memory address space is then determined by
 the product of the maximum number of regions, the maximum number of pages
@@ -134,15 +141,15 @@ Shared memory interfaces are only available with the NuttX kernel
 build (``CONFIG_BUILD_KERNEL=y``). These interfaces support user
 memory regions that can be shared between multiple user processes.
 The user interfaces are provided in the standard header file
-``include/sys/shm.h>``. All logic to support shared memory is
+``include/sys/shm.h``. All logic to support shared memory is
 implemented within the NuttX kernel with the exception of two
-low-level functions that are require to configure the
+low-level functions that are required to configure the
 platform-specific MMU resources. Those interfaces are described
 below:
 
 .. c:function:: int up_shmat(FAR uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
 
-  Attach, i.e, map, on shared memory region to a user virtual address.
+  Attach, that is map, a shared memory region to a user virtual address.
 
   :param pages: A pointer to the first element in a array of
     physical address, each corresponding to one page of memory.
@@ -155,10 +162,10 @@ below:
 
 .. c:function:: int up_shmdt(uintptr_t vaddr, unsigned int npages)
 
-  Detach, i.e, unmap, on shared memory region from a user virtual address.
+  Detach, that is unmap, a shared memory region from a user virtual address.
 
   :param vaddr: The virtual address corresponding to the beginning
     of the (contiguous) virtual address region.
-  :param npages: T The number of pages to be unmapped.
+  :param npages: The number of pages to be unmapped.
 
   :return: Zero (OK) is returned on success; a negated errno value is returned on failure.

@@ -54,6 +54,24 @@ builds the tree out of them:
 Because the parent of each node is known, asking a leaf for its rate walks
 up the tree, and enabling a leaf enables everything above it that was off.
 
+Enabling is reference counted.  A clock only reaches its own hardware
+``enable`` when its count goes from zero, and only turns off when the count
+comes back to zero, so two drivers sharing a parent do not switch it off
+under each other.  The corollary is that every enable owes a disable.
+
+Seeing the tree
+===============
+
+With procfs mounted, ``/proc/clk`` prints one line per clock -- the name,
+the enable count, the rate and the phase.  That is the direct answer to "is
+my clock actually on", which is otherwise a peripheral that will not answer
+register reads.  ``CONFIG_FS_PROCFS_EXCLUDE_CLK`` leaves it out.
+
+A board can also call ``clk_disable_unused()`` after bring-up, declared in
+``include/nuttx/clk/clk.h``.  It walks the tree and turns off every clock
+whose enable count is zero.  Worth knowing about if a clock the bootloader
+left running disappears once NuttX starts: nothing claimed it.
+
 Across processors
 =================
 

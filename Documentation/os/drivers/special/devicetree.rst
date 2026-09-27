@@ -41,6 +41,21 @@ board with sockets -- and where compiling the answer in would be wrong.
 Getting one
 ===========
 
-The bootloader normally passes the address of the tree to the kernel; on
-QEMU and similar platforms it is generated for you from the command line
-options. :doc:`/guides/drivers/devicetree` covers using one in practice.
+Whatever produces the tree, a port hands its address to
+``fdt_register()`` during start-up, and code that needs it later calls
+``fdt_get()``.  How the address is arrived at differs by port, and in the
+tree today it is usually *not* the bootloader:
+
+* ``qemu-rv`` takes the pointer the RISC-V boot protocol hands it, which is
+  the case the word "bootloader" describes.
+* ``litex`` uses a pointer if one was passed and otherwise falls back to
+  ``CONFIG_LITEX_FDT_MEMORY_ADDRESS``, a compile-time constant.
+* the ARM and ARM64 ``qemu`` and ``goldfish`` ports register a hard-coded
+  ``0x40000000``, which is simply where the emulator puts the tree.
+
+On QEMU the tree itself is generated for you from the command line options.
+:doc:`/guides/drivers/devicetree` covers using one in practice.
+
+Nearly every configuration that turns this on is an emulator: of the 25
+defconfigs with ``CONFIG_DEVICE_TREE=y``, 24 are QEMU and one is the
+Allwinner A527.

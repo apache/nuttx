@@ -2,12 +2,15 @@
 Math library
 =================
 
-Which implementation of ``<math.h>`` gets linked in.  NuttX does not provide
-one by default, and the choice matters more than it looks: floating point
-code pulls in a surprising amount of object code, and these implementations
-trade size against accuracy and speed differently.
+Which implementation of ``<math.h>`` gets linked in.  The choice matters
+more than it looks: floating point code pulls in a surprising amount of
+object code, and these implementations trade size against accuracy and speed
+differently.
 
-The configuration lives in ``libs/libm/``.
+The configuration lives in ``libs/libm/``.  It is a Kconfig ``choice``, so
+exactly one applies, and the default is ``CONFIG_LIBM_TOOLCHAIN`` -- or
+``CONFIG_LIBM_NONE`` when ``CONFIG_DEFAULT_SMALL`` is set.  Either way NuttX
+does not build a math library of its own unless you ask it to.
 
 The choices
 ===========
@@ -19,12 +22,13 @@ The choices
    * - Option
      - What it selects
    * - ``CONFIG_LIBM``
-     - The implementation that ships with NuttX.  Available when the
-       architecture does not provide its own ``math.h``.
+     - The implementation that ships with NuttX, from the Rhombus OS.  It
+       also selects ``CONFIG_ARCH_FLOAT_H``.
    * - ``CONFIG_LIBM_NEWLIB``
      - Newlib's math library.
    * - ``CONFIG_LIBM_LIBMCS``
-     - LibmCS, written for safety-critical use.
+     - LibmCS.  Also needs ``CONFIG_ALLOW_BSD_COMPONENTS``, so a build that
+       must avoid BSD licensed code cannot use it.
    * - ``CONFIG_LIBM_OPENLIBM``
      - OpenLibm.
    * - ``CONFIG_LIBM_TOOLCHAIN``
@@ -34,6 +38,12 @@ The choices
      - No math library at all.  Code that calls ``sin()`` will fail to link,
        which is the point: on a system that should not be doing floating
        point, this makes it impossible rather than merely unwise.
+
+The first four are the ones NuttX compiles, and all four are available only
+when ``CONFIG_ARCH_MATH_H`` is *not* set -- that is, when the architecture
+does not supply a ``math.h`` of its own at
+``arch/<architecture>/include/math.h``.  Where it does, that one wins and
+the choice narrows to the toolchain's library or none.
 
 Choosing
 ========

@@ -2,11 +2,24 @@
 User-space sockets (usrsock)
 ============================
 
-Usually a call to ``socket()`` ends up in the NuttX network stack.  Usrsock
-redirects it instead to a daemon running as an ordinary task, which answers
-the call however it likes.
+A call to ``socket()`` can be answered by a daemon running as an ordinary
+task instead of by the NuttX network stack.  Turn on ``CONFIG_NET_USRSOCK``
+and the order reverses: ``psock_socket()`` offers **every** new socket to
+the daemon first, and only falls back to the kernel stack if the daemon
+declines it.
 
-The code is in ``drivers/usrsock/``.
+That fallback is the interesting part, and it is per socket.  The daemon
+answers ``-ENOSYS`` or ``-ENOTSUP`` for a socket it does not want, and that
+one is created against the kernel stack as usual.  If the daemon was never
+started, or has died, the setup fails with ``-ENETDOWN`` and the same
+fallback happens, so a build with usrsock compiled in still works with no
+daemon running.  The two stacks coexist rather than replace one another.
+
+The work is split in two: ``net/usrsock/`` holds the implementation, one
+file per socket call -- ``usrsock_connect.c``, ``usrsock_sendmsg.c`` and so
+on -- while ``drivers/usrsock/`` holds only the transports that carry the
+requests.  The wire protocol between the two is in
+``include/nuttx/net/usrsock.h``.
 
 What it is for
 ==============
@@ -26,7 +39,8 @@ How the request reaches the daemon
 ==================================
 
 The kernel side turns each socket call into a request, and the daemon
-answers it.  How the request travels is a configuration choice:
+answers it.  How the request travels is a single choice -- the three are
+mutually exclusive, and the first is the default:
 
 ``CONFIG_NET_USRSOCK_DEVICE``
    Exports ``/dev/usrsock``.  The daemon opens that device, reads requests
@@ -39,6 +53,12 @@ answers it.  How the request travels is a configuration choice:
 
 ``CONFIG_NET_USRSOCK_CUSTOM``
    Neither of the above: the board provides its own transport.
+
+``CONFIG_NET_USRSOCK_RPMSG_CPUNAME`` names the processor the RPMSG server
+runs on, and that server side is enabled separately with
+``CONFIG_NET_USRSOCK_RPMSG_SERVER``.  ``CONFIG_NET_USRSOCK_PREALLOC_CONNS``,
+six by default, sets how many usrsock connection structures are allocated up
+front.
 
 What it costs
 =============

@@ -36,9 +36,10 @@ LED-related definitions are provided in two header files:
    interfaces. This is because the implementation of LED support
    may be very different on different boards. Prototypes for these
    board-specific implementations are, however, provided in
-   architecture-common header files. That header file is usually
-   at ``<arch-name>/src/common/up_internal.h``, but could be at
-   other locations in particular architectures. These prototypes
+   architecture-common header files. That header file is
+   ``<arch-name>/src/common/<arch-name>_internal.h`` --
+   ``arm_internal.h``, ``riscv_internal.h`` and so on -- but could be
+   at other locations in particular architectures. These prototypes
    are discussed `below <#ledapis>`__.
 
 LED Definitions
@@ -52,7 +53,7 @@ rather, it refers to an event to be shown on the LEDS in whatever
 manner is appropriate for the board; the way that this event is
 presented depends upon the hardware available on the board.
 
-The model used by NuttX is that the board can show 8 events
+The model used by NuttX is that the board can show these events,
 defined as follows in ``<board-name>/include/board.h``:
 
 .. code-block:: c
@@ -65,6 +66,7 @@ defined as follows in ``<board-name>/include/board.h``:
   #define LED_SIGNAL        ??
   #define LED_ASSERTION     ??
   #define LED_PANIC         ??
+  #define LED_IDLE          ??   /* optional */
 
 The specific value assigned to each pre-processor variable can be
 whatever makes the implementation easiest for the board logic. The
@@ -93,8 +95,13 @@ whatever makes the implementation easiest for the board logic. The
    signal handler. Signal handlers are tricky so this is
    especially useful during bring-up or a new architecture.
 -  ``LED_ASSERTION`` is set if an assertion occurs.
--  ``LED_PANIC`` will blink at around 1Hz if the system panics and
-   hangs.
+-  ``LED_PANIC`` blinks at 2Hz -- 250ms on, 250ms off -- if the
+   system panics and hangs. It only blinks when
+   ``CONFIG_BOARD_RESET_ON_ASSERT`` is 0; above that the board is
+   reset instead of being left flashing.
+-  ``LED_IDLE`` is set when the MCU enters sleep mode and cleared
+   when it leaves. Unlike the others it is optional: the idle logic
+   uses it only if the board defines it.
 
 Common LED interfaces
 =====================
@@ -130,5 +137,5 @@ The ``include/nuttx/board.h`` includes the following declarations:
   Called to terminate the LED
   presentation of the event. The ``led`` argument is one of the
   definitions provided in ``<board-name>/include/board.h``. Note
-  that only ``LED_INIRQ``, ``LED_SIGNAL``, ``LED_ASSERTION``, and
-  ``LED_PANIC`` indications are terminated.
+  that only ``LED_INIRQ``, ``LED_SIGNAL``, ``LED_ASSERTION``,
+  ``LED_PANIC`` and ``LED_IDLE`` indications are terminated.

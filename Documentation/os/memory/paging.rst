@@ -473,12 +473,34 @@ Application Notes
 
 What on-demand paging means for the code running on top of it.
 
-The NuttX On-Demand Paging feature permits embedded MCUs with some
-limited RAM space to execute large programs from some non-random
-access media. If the platform meets certain requirements, then
-NuttX can provide on-demand paging: It can copy .text from the
-large program in non-volatile media into RAM as needed to execute
-a huge program from the small RAM. Design and porting issues for
-this feature are discussed in a separate document. Please see the
-:ref:`NuttX Demand Paging <ondemandpaging>` design document
-for further information.
+**The two implementations are alternatives, not layers.**
+``CONFIG_PAGING`` carries ``depends on BUILD_KERNEL && ARCH_USE_MMU &&
+!ARCH_ROMPGTABLE && !LEGACY_PAGING``, so a configuration has the kernel
+build implementation or the legacy one, never both.
+
+**What gets paged is not the same in the two.**  The legacy design above is
+about ``.text``: copying code from serial FLASH into a small SRAM as the
+program runs.  The kernel build implementation, on RISC-V at least, serves
+data.  ``riscv_exception.c`` attaches ``riscv_fillpage()`` to the load and
+store page faults; the instruction page fault keeps the ordinary exception
+handler.  The demonstration configuration the page mentions says the same
+thing in its numbers: ``knsh_paging`` gives each process
+``CONFIG_ARCH_HEAP_NPAGES=2048`` -- 8MiB of virtual heap -- against 128
+pages of text.
+
+**A filled page arrives zeroed.**  ``riscv_fillpage()`` wipes the physical
+page before mapping it, so memory that appears on demand is not whatever
+the previous owner left there.
+
+**A permission violation is not a fill.**  The same exception is raised
+when a page is present but the access is not allowed -- a store to a
+``.text`` page, say.  The handler checks for an already-valid entry and
+reports ``Page already mapped, permission violation`` rather than
+allocating over it.
+
+**The cost lands on ordinary instructions.**  Any load or store may now
+have to allocate a physical page before it can complete, and if there is
+none left the fill returns ``-ENOMEM``.  Code that must not stall for an
+unbounded time -- an interrupt handler, or anything the legacy design would
+have wanted "locked in memory" -- should not be reaching pages that may not
+be resident.

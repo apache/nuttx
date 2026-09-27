@@ -41,6 +41,10 @@ Subdirectories of ``nuttx/drivers``
 
   1wire device drivers.
 
+* ``aie/``
+
+  AI engine acceleration drivers, gated by ``CONFIG_AI_ENGINE``.
+
 * ``analog/`` :doc:`character/analog/index`
 
   This directory holds implementations of analog device drivers.
@@ -71,10 +75,19 @@ Subdirectories of ``nuttx/drivers``
   communication devices with other similar peers, but couplers/interfaces
   to contactless cards and tags.
 
+* ``coresight/``
+
+  CoreSight trace and debug components -- ETM, ETB, TMC, funnel,
+  replicator, STM and TPIU. Gated by ``CONFIG_CORESIGHT``.
+
 * ``crypto/`` :doc:`character/crypto/index`
 
   Contains crypto drivers and support logic, including the
   ``/dev/urandom`` device.
+
+* ``devfreq/`` :doc:`special/devfreq`
+
+  Dynamic frequency scaling for devices.
 
 * ``devicetree/`` :doc:`special/devicetree`
 
@@ -83,6 +96,10 @@ Subdirectories of ``nuttx/drivers``
 * ``dma/`` :doc:`special/dma`
 
   DMA drivers support.
+
+* ``dummy/``
+
+  A placeholder directory. It holds no drivers.
 
 * ``eeprom/`` :doc:`character/eeprom`
 
@@ -136,7 +153,7 @@ Subdirectories of ``nuttx/drivers``
   Supports the standard loop device that can be used to export a
   file (or character device) as a block device.
 
-  See ``losetup()`` and ``loteardown()`` in ``include/nuttx/fs/fs.h``.
+  See ``losetup()`` and ``loteardown()`` in ``include/nuttx/fs/loop.h``.
 
 * ``math/`` :doc:`character/math`
 
@@ -173,9 +190,13 @@ Subdirectories of ``nuttx/drivers``
 
   Network interface drivers.
 
-* ``notes/`` :doc:`character/note`
+* ``note/`` :doc:`character/note`
 
   Note Driver Support.
+
+* ``pci/`` :doc:`special/pci/index`
+
+  PCI and PCIe bus support.
 
 * ``pinctrl/`` :doc:`special/pinctrl`
 
@@ -205,6 +226,10 @@ Subdirectories of ``nuttx/drivers``
 * ``rf/`` :doc:`character/rf`
 
   RF Device Support.
+
+* ``rpmsg/`` :doc:`special/rpmsg/index`
+
+  RPMSG transport and the services built on it.
 
 * ``rptun/`` :doc:`special/rptun/index`
 
@@ -239,6 +264,10 @@ Subdirectories of ``nuttx/drivers``
 
   System logging devices.
 
+* ``thermal/`` :doc:`thermal/index`
+
+  The thermal framework: sensors, cooling devices and governors.
+
 * ``timers/`` :doc:`character/timers/index`
 
   Includes support for various timer devices.
@@ -262,6 +291,10 @@ Subdirectories of ``nuttx/drivers``
 * ``usrsock/`` :doc:`special/usrsock`
 
   Usrsock Driver Support.
+
+* ``vhost/`` :doc:`special/vhost/index`
+
+  Vhost device support.
 
 * ``video/`` :doc:`special/video`
 

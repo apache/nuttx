@@ -42,10 +42,14 @@ for instance :ref:`kernel-threads-vs-pthreads`, :ref:`tasks-vs-threads`,
         - 0
         - What runs when nothing else can.  It is not really created: the
           system boots into it, and its task control block is the statically
-          allocated ``g_idletcb``.  Under ``CONFIG_SMP`` there is one per CPU,
-          and CPU 0's idle thread is what starts the others.  Priority 0 is
-          below anything a task can be given, so it never competes with real
-          work.
+          allocated ``g_idletcb``, an array of ``CONFIG_SMP_NCPUS`` entries --
+          so under ``CONFIG_SMP`` there is one idle thread per CPU, and CPU 0's
+          is what starts the others.  The name differs there too: ``Idle_Task``
+          is used only in a non-SMP build, while an SMP build names each one
+          ``CPU0 IDLE``, ``CPU1 IDLE`` and so on.  Priority 0 is below anything
+          a task can be given -- ``SCHED_PRIORITY_MIN`` is 1 -- so it never
+          competes with real work, and the idle thread is the only one with
+          both ``pid`` and ``sched_priority`` of 0.
       * - ``hpwork``
         - 224
         - The high priority work queue, enabled by ``CONFIG_SCHED_HPWORK``.
@@ -106,37 +110,45 @@ or TCB. That data structure is defined in the header file
 Task Lists
 ----------
 
-These TCBs are retained in lists. The state of a task is indicated both
-by the ``task_state`` field of the TCB and by a series of task lists.
-Although it is not always necessary, most of these lists are prioritized
-so that common list handling logic can be used (only the ``g_readytorun``,
-the ``g_pendingtasks``, and the ``g_waitingforsemaphore`` lists
-need to be prioritized).
+These TCBs are retained in lists.  The state of a task is indicated both by
+the ``task_state`` field of the TCB and by a series of task lists, and the two
+are tied together by ``g_tasklisttable[]``, built once at start-up by
+``tasklist_initialize()`` in ``sched/init/nx_start.c``.  The table is indexed
+by ``task_state``; each entry carries the list for that state plus attribute
+bits saying whether it is prioritized, whether it is indexed by CPU, and
+whether it holds running tasks.
+
+Most of these lists are prioritized so that common list handling logic can be
+used.  ``g_inactivetasks`` is the only one that is not.
 
 All new tasks start in an initial, non-running state:
 
 .. code-block:: c
 
-  volatile dq_queue_t g_inactivetasks;
+  dq_queue_t g_inactivetasks;
 
 * This is the list of all tasks that have been initialized, but not yet
-  activated. NOTE: This is the only list that is not prioritized.
+  activated.
 
-* When the task is initialized, it is moved to a ready-to-run list.
-  There are two lists representing ready-to-run threads and several
-  lists representing blocked threads. Here are the ready-to-run threads:
-
-.. code-block:: c
-
-  volatile dq_queue_t g_readytorun;
-
-* This is the list of all tasks that are ready to run.
-  The head of this list is the currently active task;
-  the tail of this list is always the idle task.
+* When the task is initialized, it is moved to a ready-to-run list.  Here are
+  the ready-to-run threads:
 
 .. code-block:: c
 
-  volatile dq_queue_t g_pendingtasks;
+  dq_queue_t g_readytorun;
+
+* This is the list of all tasks that are ready to run.  Without
+  ``CONFIG_SMP``, the head of this list is the currently active task and the
+  tail is always the idle task.  Under ``CONFIG_SMP`` its meaning narrows: it
+  then holds only threads that are eligible to run but are **not** running and
+  have not been assigned to a CPU, and the TCB running on CPU *n* is kept in
+  ``g_assignedtasks[n]`` instead.
+
+.. code-block:: c
+
+  #ifndef CONFIG_SMP
+  dq_queue_t g_pendingtasks;
+  #endif
 
 * This is the list of all tasks that are ready-to-run, but cannot be placed
   in the ``g_readytorun`` list because:
@@ -144,54 +156,67 @@ All new tasks start in an initial, non-running state:
   1. They are higher priority than the currently active task at the head
      of the ``g_readytorun`` list, AND
   2. the currently active task has disabled pre-emption.
-  
-  These tasks will stay in this holding list until pre-emption is again
-  enabled (or until the currently active task voluntarily relinquishes
-  the CPU).
 
-* Tasks in the ``g_readytorun`` list may become blocked.
-  In this cased, their TCB will be moved to one of the blocked lists.
-  When the block task is ready-to-run, its TCB will be moved back to either
-  the ``g_readytorun`` to ``the g_pendingtasks`` lists, depending up
-  if pre-emption is disabled and upon the priority of the tasks.
+  These tasks stay in this holding list until pre-emption is again enabled, or
+  until the currently active task voluntarily relinquishes the CPU.  The guard
+  above is not decoration: there is no ``g_pendingtasks`` in an SMP build.
 
-Here are the blocked task lists:
+* Tasks in the ``g_readytorun`` list may become blocked.  Their TCB is then
+  moved to whichever list ``g_tasklisttable[]`` names for the new state, and
+  moved back to ``g_readytorun`` or ``g_pendingtasks`` once the thread is
+  runnable again, depending on the priorities involved and on whether
+  pre-emption is disabled.
 
-.. code-block:: c
+Blocked threads are kept two different ways
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  volatile dq_queue_t g_waitingforsemaphore;
-
-* This is the list of all tasks that are blocked waiting for a semaphore.
+This is where the table earns its keep, because blocked threads are not all
+held in the same shape of list.  Three states have a global list of their own:
 
 .. code-block:: c
 
-  volatile dq_queue_t g_waitingforsignal;
+  dq_queue_t g_waitingforsignal;   /* blocked waiting for a signal */
 
-* This is the list of all tasks that are blocked waiting for a signal
-  (only if signal support has not been disabled).
+  #ifdef CONFIG_LEGACY_PAGING
+  dq_queue_t g_waitingforfill;     /* blocked waiting for a page fill */
+  #endif
 
-.. code-block:: c
+  #ifdef CONFIG_SIG_SIGSTOP_ACTION
+  dq_queue_t g_stoppedtasks;       /* stopped by SIGSTOP or SIGTSTP */
+  #endif
 
-  volatile dq_queue_t g_waitingformqnotempty;
-
-* This is the list of all tasks that are blocked waiting for a message queue
-  to become non-empty (only if message queue support has not been disabled).
-
-.. code-block:: c
-
-  volatile dq_queue_t g_waitingformqnotfull;
-
-* This is the list of all tasks that are blocked waiting for a message queue
-  to become non-full (only if message queue support has not been disabled).
+The others have no global list at all.  Their queue lives *inside the object
+being waited on*, and the table entry holds an offset into that object rather
+than a pointer to a list:
 
 .. code-block:: c
 
-  volatile dq_queue_t g_waitingforfill;
+  tlist[TSTATE_WAIT_SEM].list = (FAR void *)offsetof(sem_t, waitlist);
+  tlist[TSTATE_WAIT_SEM].attr = TLIST_ATTR_PRIORITIZED | TLIST_ATTR_OFFSET;
 
-* This is the list of all tasks that are blocking waiting for a page fill
-  (only if on-demand paging is selected).
+``TLIST_ATTR_OFFSET`` is the flag that marks the difference, and
+``TLIST_HEAD()`` resolves it by adding the offset to the TCB's ``waitobj``
+pointer.  Four states work this way:
 
-Reference: ``nuttx/sched/sched/sched.h``.
+* ``TSTATE_WAIT_SEM`` -- ``offsetof(sem_t, waitlist)``
+* ``TSTATE_WAIT_EVENT`` -- ``offsetof(nxevent_t, waitlist)``, under
+  ``CONFIG_SCHED_EVENTS``
+* ``TSTATE_WAIT_MQNOTEMPTY`` and ``TSTATE_WAIT_MQNOTFULL`` --
+  ``cmn.waitfornotempty`` and ``cmn.waitfornotfull`` inside
+  ``struct mqueue_inode_s``, unless ``CONFIG_DISABLE_MQUEUE`` is set
+
+So a semaphore carries its own queue of waiters, and releasing it reaches the
+right thread by looking at the head of that queue rather than by scanning a
+system-wide list.
+
+One warning for anyone reading the source alongside this page:
+``g_waitingforsemaphore``, ``g_waitingformqnotempty`` and
+``g_waitingformqnotfull`` are **not** variables.  The first survives in three
+comments and the other two in one comment each; none is declared anywhere.
+Grepping for them finds the comments and no code.
+
+Reference: ``sched/sched/sched.h`` for the declarations and the ``TLIST_*``
+macros, and ``sched/init/nx_start.c`` for ``tasklist_initialize()``.
 
 
 State Transition Diagram
@@ -206,7 +231,9 @@ State Transition Diagram
             may block waiting for a resource and return to ready, and finally
             exits.
 
-      The task lists above, drawn as the states a thread moves through.
+      The values of ``task_state``, drawn as the states a thread moves
+      through.  The lists above are the other half of the pair: this is what
+      ``g_tasklisttable[]`` is indexed by.
 
 Scheduling Policies
 ===================

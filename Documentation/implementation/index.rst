@@ -2,9 +2,14 @@
 Porting and Conventions
 =========================
 
-Notes that are not about one subsystem: what a new chip or board has to
-provide, how the build works, and the naming rules the code follows.  How
-the OS itself is built is in :doc:`/os/index`.
+Notes that are not about one subsystem: what a chip has to provide, how the
+make build works, and the naming rules the code follows.  Two others sit here
+for historical rather than topical reasons: :doc:`hardfaults`, which
+:doc:`/debugging/cortexmhardfaults` covers at greater length, and
+:doc:`simulation`, alongside :doc:`/guides/simulation/simulator`.
+
+How the OS itself works is in :doc:`/os/index`.  The step-by-step guide to
+adding a new SoC or board is :doc:`/guides/porting/port`.
 
 .. toctree::
    :maxdepth: 1

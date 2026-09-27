@@ -54,8 +54,10 @@ This section provides the origin design specification for the implementation.
 As a result, you may find that the test uses future and conditional tenses
 when describing the implementation of SMP on NuttX.
 
-This design has been maintained and now reflects the current "as-built"
-state of SMP in NuttX.
+This design has been maintained, but parts of it have been overtaken by the
+code.  Where the text below describes a mechanism that no longer exists, the
+**Architecture Interface** section at the end of this page says what replaced
+it -- and that section, not this one, is the list a port has to implement.
 
 
 Design Requirements
@@ -873,64 +875,91 @@ Architecture Interface
 ======================
 
 A port that supports ``CONFIG_SMP`` has to provide the following.  They are
-called by the OS, never by an application.
+called by the OS, never by an application.  This list, and not the design
+specification above, is what ``include/nuttx/arch.h`` declares today.
+
+What the design above no longer describes
+-----------------------------------------
+
+Three things named repeatedly in the text above have left the tree:
+
+* ``up_cpu_pause()`` and ``up_cpu_resume()`` are gone, and so is the OS
+  wrapper ``sched_tcb_pause()``.  ``up_cpu_resume`` appears nowhere in the
+  tree at all; the only surviving mention of ``up_cpu_pause`` is a stale
+  comment in ``arch/sparc/src/sparc_v8/sparc_v8_sigdeliver.c``.  What a CPU
+  does now, when something has to happen on another CPU, is hand that CPU the
+  work instead of freezing it: ``up_send_smp_call()`` below, with the OS side
+  in ``nxsched_smp_call()`` and its variants in ``include/nuttx/sched.h``.
+
+* ``g_cpu_lockset`` and ``g_cpu_schedlock`` do not exist.  The global-bitset
+  design sketched under *Disabling Pre-emption* was not the one adopted:
+  ``sched_lock()`` still works through the per-thread ``rtcb->lockcount``,
+  and the comment beside it says that counter "allows nested lock operations
+  on this thread (on any CPU)".  ``sched_lock()`` also does nothing at all
+  when called from an interrupt handler.
+
+* ``g_cpu_irqlock`` and ``g_cpu_irqset`` *do* still exist, so the
+  *Disabling Interrupts* discussion above still matches the code in outline.
+
+The interface itself
+--------------------
 
 .. c:function:: int up_cpu_index(void)
 
-  Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1)
-  that corresponds to the currently executing CPU.
+  Return the **physical** core number of the currently executing CPU.  Note
+  that this one is not conditional on ``CONFIG_SMP``: its description in
+  ``arch.h`` is "return the real core number regardless CONFIG_SMP setting",
+  and the header defines it as ``0`` unless ``CONFIG_ARCH_HAVE_MULTICPU`` is
+  set.
 
-  :return: An integer index in the range of 0 through
-    (CONFIG_SMP_NCPUS-1) that corresponds to the
-    currently executing CPU.
+  :return: The physical core number of the current CPU.
+
+.. c:function:: int up_this_cpu(void)
+
+  Return the **logical** core number -- the one the OS uses to index arrays
+  such as ``g_assignedtasks[]``.  The default is a 1:1 mapping onto
+  ``up_cpu_index()``, which is what ``arch.h`` defines unless
+  ``CONFIG_ARCH_HAVE_CPUID_MAPPING`` is set.  A port whose physical core
+  numbering is not the numbering the OS should count from provides this
+  separately.
+
+  :return: The logical core number of the current CPU.
 
 .. c:function:: int up_cpu_start(int cpu)
 
-  In an SMP configuration, only one CPU is initially active (CPU 0).
-  System initialization occurs on that single thread. At the
-  completion of the initialization of the OS, just before
-  beginning normal multitasking, the additional CPUs would
-  be started by calling this function.
+  In an SMP configuration, only one CPU is initially active (CPU 0).  System
+  initialization occurs on that single thread.  At the completion of the
+  initialization of the OS, just before beginning normal multitasking, the
+  additional CPUs are started by calling this function.
 
-  Each CPU is provided the entry point to is IDLE task when started.
-  A TCB for each CPU's IDLE task has been initialized and
-  placed in the CPU's g_assignedtasks[cpu] list. A stack
-  has also been allocated and initialized.
+  Each CPU is provided the entry point to its IDLE task when started.  A TCB
+  for each CPU's IDLE task has been initialized and placed in the CPU's
+  ``g_assignedtasks[cpu]`` list.  **No stack has been allocated or
+  initialized** -- that is the port's work.
 
-  The OS initialization logic calls this function repeatedly until
-  each CPU has been started, 1 through (CONFIG_SMP_NCPUS-1).
+  The OS initialization logic calls this function repeatedly until each CPU
+  has been started, 1 through (CONFIG_SMP_NCPUS-1).
 
-  :param cpu: The index of the CPU being started. This will be a
-    numeric value in the range of from one to
-    ``(CONFIG_SMP_NCPUS-1)``). (CPU 0 is already active).
+  :param cpu: The index of the CPU being started, a value from one to
+    ``(CONFIG_SMP_NCPUS-1)``.  CPU 0 is already active.
 
   :return: Zero (OK) is returned on success; a negated errno value on failure.
 
-.. c:function:: int up_cpu_pause(int cpu)
+.. c:function:: int up_send_smp_sched(int cpu)
 
-  Save the state of the current task at the head of the
-  ``g_assignedtasks[cpu]`` task list and then pause task execution on the CPU.
+  Pause task execution on ``cpu``, check whether there are tasks that have
+  been delivered to it, and try to run them.  ``arch.h`` records the
+  precondition: it must be called from within a critical section.
 
-  This function is called by the OS when the logic executing on
-  one CPU needs to modify the state of the ``g_assignedtasks[cpu]``
-  list for another CPU.
-
-  :param cpu: The index of the CPU to be paused. This will not be
-    the index of the currently executing CPU.
+  :param cpu: The index of the CPU to be paused.
 
   :return: Zero (OK) is returned on success; a negated errno value on failure.
 
-.. c:function:: int up_cpu_resume(int cpu)
+.. c:function:: void up_send_smp_call(cpu_set_t cpuset)
 
-  Restart the cpu after it was paused via up_cpu_pause(),
-  restoring the state of the task at the head of the
-  ``g_assignedtasks[cpu]`` list, and resume normal tasking.
-
-  This function is called after ``up_cpu_pause()`` in order
-  resume operation of the CPU after modifying its
-  ``g_assignedtasks[cpu]`` list.
-
-  :param cpu: The index of the CPU being resumed. This will not be
-    the index of the currently executing CPU.
-
-  :return: Zero (OK) is returned on success; a negated errno value on failure.
+  Send an SMP call to every CPU in ``cpuset``.  This is what replaced the
+  pause/resume pair: instead of stopping another CPU so that this one can edit
+  its data structures, the work is handed to that CPU to run.  The receiving
+  side is ``nxsched_smp_call_handler()``; the OS-level entry points are
+  ``nxsched_smp_call()``, ``nxsched_smp_call_single()`` and their ``_async``
+  variants, all declared in ``include/nuttx/sched.h``.

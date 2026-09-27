@@ -2,7 +2,7 @@
 OS Design
 =========
 
-How NuttX is built, subsystem by subsystem.  The sections follow the source
+How NuttX is put together, subsystem by subsystem.  The sections follow the source
 tree: what lives under ``sched/`` is described in :doc:`scheduling/index`,
 what lives under ``fs/`` in :doc:`filesystem/index`, under ``drivers/`` in
 :doc:`drivers/index`, and so on.  Each subsystem is described once, going

@@ -16,11 +16,15 @@ Two kinds
 ``pipe()``
    An anonymous pipe.  It returns two file descriptors and has no name in
    the file system, so only the process that created it -- and anything that
-   inherits its descriptors -- can reach it.
+   inherits its descriptors -- can reach it.  It does briefly have one: the
+   driver is registered under ``CONFIG_DEV_PIPE_VFS_PATH``, ``/var/pipe`` by
+   default, both descriptors are opened from there, and the name is then
+   unregistered while the open descriptors keep the pipe alive.
 
 ``mkfifo()``
-   A named pipe.  It creates an entry under ``/dev/`` that any task can
-   open, which is how two unrelated programs use one.
+   A named pipe, created at whatever path you hand it -- there is no
+   ``/dev`` in the driver -- which any task can then open.  That is how two
+   unrelated programs use one.
 
 Both are POSIX interfaces and behave as POSIX describes them; see
 :doc:`/reference/user/10_filesystem` for the calls themselves.
@@ -28,17 +32,25 @@ Both are POSIX interfaces and behave as POSIX describes them; see
 Buffering and blocking
 ======================
 
-A pipe holds a fixed ring buffer.  ``CONFIG_DEV_PIPE_SIZE`` sets the default
-size in bytes, and ``CONFIG_DEV_PIPE_MAXSIZE`` caps what a program may ask
-for at runtime.  Setting ``CONFIG_DEV_PIPE_SIZE`` to zero removes pipe
-support altogether.
+The whole subsystem is enabled by ``CONFIG_PIPES``.  Within it, pipes and
+FIFOs are sized separately: ``CONFIG_DEV_PIPE_SIZE`` and
+``CONFIG_DEV_FIFO_SIZE`` each set a default ring buffer in bytes -- 1024, or
+256 under ``CONFIG_DEFAULT_SMALL`` -- and each disables its own half when
+set to zero, so a build can have FIFOs without pipes or the other way
+round.  ``CONFIG_DEV_PIPE_MAXSIZE``, 65535 by default, caps what a program
+may ask for at runtime.
 
 The size is worth choosing rather than accepting, because it decides when
 each side blocks:
 
 * a reader blocks while the buffer is empty, unless the pipe was opened with
-  ``O_NONBLOCK``;
+  ``O_NONBLOCK``, in which case it gets ``-EAGAIN``;
 * a writer blocks while the buffer is full, for the same reason.
+
+Both sides wait on a ``sem_t`` of their own -- ``d_rdsem`` and ``d_wrsem``
+in ``struct pipe_dev_s`` -- through ``nxsem_wait()``, which is what puts the
+thread in ``TSTATE_WAIT_SEM``.  ``poll()`` works too, with
+``CONFIG_DEV_PIPE_NPOLLWAITERS`` setting how many threads may wait at once.
 
 A buffer that is too small turns a producer and a consumer into a pair of
 threads that hand the CPU back and forth on every message.  A buffer that is

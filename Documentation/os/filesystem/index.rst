@@ -28,10 +28,11 @@ extended my mounting block devices that provide access to true
 file systems backed up via some mass storage device. NuttX
 supports the standard ``mount()`` command that allows a block
 driver to be bound to a mountpoint within the pseudo file system
-and to a file system. At present, NuttX supports the standard VFAT
-and ROMFS file systems, a special, wear-leveling NuttX FLASH File
-System (NXFFS), as well as a Network File System client (NFS
-version 3, UDP).
+and to a file system. The file systems NuttX can mount are the ones
+registered in ``fs/mount/fs_mount.c``, twenty of them at the time of
+writing: the standard VFAT and ROMFS, a wear-levelling NuttX FLASH
+File System (NXFFS), a Network File System client (NFS version 3,
+over UDP or TCP), and the rest listed under `File systems`_ below.
 
 **Comparison to Linux** From a programming perspective, the NuttX
 file system appears very similar to a Linux file system. However,
@@ -218,12 +219,15 @@ belonging to a unified interface:
     a. The filesystem implements the mmap file operation.  Any file
        system that maps files contiguously on the media should support
        this ioctl. (vs. file system that scatter files over the media
-       in non-contiguous sectors).  As of this writing, ROMFS is the
-       only file system that meets this requirement.
+       in non-contiguous sectors).  ROMFS, TMPFS and XIPFS fill in the
+       ``mmap`` method of ``struct mountpt_operations``; every other
+       file system leaves it ``NULL``.
 
     b. The underlying block driver supports the BIOC_XIPBASE ioctl
        command that maps the underlying media to a randomly accessible
-       address. At  present, only the RAM/ROM disk driver does this.
+       address. The RAM/ROM disk driver does this, and so do several
+       MTD drivers -- among them ``mtd_progmem``, ``mtd_cfi``,
+       ``rammtd``, ``sst39vf`` and ``mtd_partition``.
        
   2. If CONFIG_FS_RAMMAP is defined in the configuration, then mmap() will
      support simulation of memory mapped files by copying files whole
@@ -604,9 +608,9 @@ they require:
 
 1. They require a block device driver. They include vfat, romfs, smartfs, and
    littlefs.
-2. They require MTD drivers. They include romfs, spiffs, littlefs, xipfs.
-3. They require neither block nor MTD drivers. They include nxffs, tmpfs, nfs
-   binfs, procfs, userfs, hostfs, cromfs, unionfs, rpmsgfs, and zipfs.
+2. They require MTD drivers. They are spiffs, littlefs, mnemofs and xipfs.
+3. They require neither block nor MTD drivers. They are nxffs, tmpfs, nfs,
+   binfs, procfs, userfs, hostfs, cromfs, unionfs, rpmsgfs, zipfs and v9fs.
 
 The requirements are specified by declaring the filesystem in the proper
 array in ``fs/mount/fs_mount.c``.

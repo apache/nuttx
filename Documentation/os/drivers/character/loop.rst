@@ -4,7 +4,11 @@ Loop device
 
 Makes a **file** look like a **block device**, so that something which
 expects a disk can be given a file instead.  The usual reason is to mount a
-file system image without having a partition to put it on.
+file system image without having a partition to put it on.  The Kconfig help
+names character devices too, but whatever is wrapped has to report a size
+through ``stat()``: the driver divides that size by the sector size to get
+the number of sectors, and refuses the setup with ``-ERANGE`` if there is
+not room for even one.
 
 Enabled with ``CONFIG_DEV_LOOP``.  The code is in ``drivers/loop/``, and the
 control device is ``/dev/loop``.
@@ -15,14 +19,40 @@ How it is used
 Two ioctls on ``/dev/loop``, defined in ``include/nuttx/fs/loop.h``:
 
 ``LOOPIOC_SETUP``
-   Takes a ``struct losetup_s`` naming the file to wrap and the block device
-   node to create.  After this, that node can be mounted.
+   Takes a ``struct losetup_s``.  After this, the node it names can be
+   mounted.
 
 ``LOOPIOC_TEARDOWN``
    Takes the path of a node created by ``LOOPIOC_SETUP`` and removes it.
 
-In practice this is done from the shell rather than from C, with the
-``losetup`` command in NSH.
+The structure carries more than the two paths:
+
+.. code-block:: c
+
+   struct losetup_s
+   {
+     FAR const char *devname;   /* The loop block device to be created */
+     FAR const char *filename;  /* The file or character device to use */
+     uint16_t sectsize;         /* The sector size to use with the block device */
+     off_t offset;              /* An offset that may be applied to the device */
+     bool readonly;             /* True: Read access will be supported only */
+   };
+
+``offset`` is the one worth knowing about.  Because the device starts that
+many bytes into the file, a single image holding several partitions can be
+mounted one partition at a time, without cutting it up first.
+
+An application has to use the ioctls.  The driver does export ``losetup()``
+and ``loteardown()`` as C functions, but they sit behind ``#ifdef
+__KERNEL__`` in the header, under the note that they are internal OS
+interfaces and not available to applications.
+
+From the shell, NSH wraps the same two ioctls::
+
+   losetup [-d <dev-path>] | [[-o <offset>] [-r] [-b <sect-size>] <dev-path> <file-path>]
+
+``-d`` tears down, ``-o`` is the offset, ``-r`` makes it read-only and
+``-b`` sets the sector size, which defaults to 512.
 
 Why it is useful on an embedded system
 ======================================
