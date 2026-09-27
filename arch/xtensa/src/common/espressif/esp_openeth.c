@@ -323,11 +323,37 @@ err:
 
 static int openeth_ifup(struct netdev_lowerhalf_s *dev)
 {
+  struct openeth_priv_s *priv = (struct openeth_priv_s *)dev;
+  int i;
   irqstate_t flags;
 
   /* Disable the Ethernet interrupt */
 
   flags = enter_critical_section();
+
+  /* Re-arm every descriptor and rewind the ring index to 0.  QEMU's
+   * OpenCores MAC model resets its DMA ring pointer to descriptor 0
+   * whenever RXEN toggles off and back on, but priv->cur_rx_desc is
+   * only ever initialized once, in esp_openeth_initialize().  After
+   * the first ifdown/ifup cycle the two disagree permanently and
+   * openeth_receive() silently drops every RX notification.
+   */
+
+  for (i = 0; i < RX_BUF_COUNT; i++)
+    {
+      openeth_init_rx_desc(openeth_rx_desc(i), priv->rx_buf[i]);
+    }
+
+  openeth_rx_desc(RX_BUF_COUNT - 1)->wr = 1;
+  priv->cur_rx_desc = 0;
+
+  for (i = 0; i < TX_BUF_COUNT; i++)
+    {
+      openeth_init_tx_desc(openeth_tx_desc(i), priv->tx_buf[i]);
+    }
+
+  openeth_tx_desc(TX_BUF_COUNT - 1)->wr = 1;
+  priv->cur_tx_desc = 0;
 
   /* Enable TX and RX */
 
@@ -366,7 +392,7 @@ static int openeth_ifdown(struct netdev_lowerhalf_s *dev)
 
   /* Disable TX and RX */
 
-  openeth_enable();
+  openeth_disable();
 
   leave_critical_section(flags);
 
@@ -424,6 +450,7 @@ static int openeth_set_addr(uint8_t *addr)
 
   uint32_t mac0_u32;
   uint32_t mac1_u32;
+
   memcpy(&mac0_u32, &mac0, 4);
   memcpy(&mac1_u32, &mac1, 4);
   REG_WRITE(OPENETH_MAC_ADDR0_REG, mac0_u32);
@@ -523,6 +550,12 @@ int esp_openeth_initialize(void)
       ret = -ENOMEM;
       goto err;
     }
+
+  /* The interrupt is attached but still masked at the CPU; without this
+   * call it never fires, so received frames are only picked up on a TX.
+   */
+
+  up_enable_irq(OPENETH_IRQ_MAC);
 
   /* Initialize the MAC */
 

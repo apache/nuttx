@@ -140,8 +140,8 @@
 #  define PWM_DECODER_LOAD_INDIVIDUAL  (2 << PWM_DECODER_LOAD_SHIFT)
 #  define PWM_DECODER_LOAD_WAVEFORM    (3 << PWM_DECODER_LOAD_SHIFT)
 
-#define PWM_DECODER_MODE_REFRESH       (8 << 0) /* Bit 8: */
-#define PWM_DECODER_MODE_NEXTSTEP      (8 << 1) /* Bit 8: */
+#define PWM_DECODER_MODE_REFRESH       (0 << 8) /* Bit 8: Load using REFRESH */
+#define PWM_DECODER_MODE_NEXTSTEP      (1 << 8) /* Bit 8: Load using NEXTSTEP */
 
 /* LOOP Register */
 
@@ -162,10 +162,11 @@
 /* PSEL[x] Register */
 
 #define PWM_PSEL_PIN_SHIFT             (0)        /* Bits 0-4: OUT pin number */
-#define PWM_PSEL_PIN_MASK              (0x1f << PWM_PSELSDA_PIN_SHIFT)
+#define PWM_PSEL_PIN_MASK              (0x1f << PWM_PSEL_PIN_SHIFT)
 #define PWM_PSEL_PORT_SHIFT            (5)        /* Bit 5: PUT port number */
-#define PWM_PSEL_PORT_MASK             (0x1 << PWM_PSELSDA_PORT_SHIFT)
-#define PWM_PSEL_CONNECTED             (1 << 31)  /* Bit 31: Connection */
+#define PWM_PSEL_PORT_MASK             (0x1 << PWM_PSEL_PORT_SHIFT)
+#define PWM_PSEL_CONNECTED             (0 << 31)  /* Bit 31: Connected */
+#define PWM_PSEL_DISCONNECTED          (1 << 31)  /* Bit 31: Disconnected */
 #define PWM_PSEL_RESET                 (0xffffffff)
 
 /* Decoder data */

@@ -40,6 +40,7 @@
 
 #include <arch/barriers.h>
 #include <arpa/inet.h>
+#include <netinet/if_ether.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
@@ -51,6 +52,7 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/crc64.h>
+#include <nuttx/timers/ptp_clock.h>
 
 #if defined(CONFIG_NET_PKT)
 #  include <nuttx/net/pkt.h>
@@ -253,7 +255,55 @@
 #endif
 
 #ifdef CONFIG_STM32_ETH_PTP
-#  warning "CONFIG_STM32_ETH_PTP is not yet supported"
+/* The timestamp unit is clocked from HCLK. The system time advances by
+ * STM32_PTP_SSINC nanoseconds each time the 32-bit accumulator of the
+ * addend register overflows, so its rate is HCLK * addend / 2^32. Aim at
+ * an update rate of half of HCLK: the nominal addend is then close to 2^31
+ * and the frequency can be trimmed by +/- 50 %.
+ */
+
+#  define STM32_PTP_CLOCK      STM32_HCLK_FREQUENCY
+#  define STM32_PTP_SSINC      ((2 * NSEC_PER_SEC + STM32_PTP_CLOCK / 2) / \
+                                STM32_PTP_CLOCK)
+#  define STM32_PTP_ADDEND     ((uint32_t)((((uint64_t)1 << 32) * \
+                                            NSEC_PER_SEC) / \
+                                           ((uint64_t)STM32_PTP_SSINC * \
+                                            STM32_PTP_CLOCK)))
+
+/* Time to wait for the unit to take an update of the addend or of the
+ * system time, in microseconds.
+ */
+
+#  define STM32_PTP_UPDATE_USTIMEOUT  (1000)
+
+#  ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+
+/* Time to wait for the DMA to write the context descriptor that follows
+ * the last descriptor of a timestamped frame, in microseconds.
+ */
+
+#    define STM32_PTP_CTX_USTIMEOUT   (10)
+#  endif
+
+/* The addend can be trimmed by up to 50% each way from its nominal value,
+ * in parts per billion.
+ */
+
+#  define STM32_PTP_MAX_ADJ           (500000000)
+
+#  ifdef CONFIG_STM32_ETH_PTP_GPIO
+
+/* The pulse-per-second output is a pulse train with a period of one
+ * second and a width of half of it, that starts at a whole second of the
+ * system time. The first pulse is at least STM32_PTP_PPS_MARGIN_NS ahead,
+ * so the target time is loaded before it. The interval and the width are
+ * in increments of the system time.
+ */
+
+#    define STM32_PTP_PPS_MARGIN_NS   (100000000)
+#    define STM32_PTP_PPS_INTERVAL    (NSEC_PER_SEC / STM32_PTP_SSINC)
+#    define STM32_PTP_PPS_WIDTH       ((NSEC_PER_SEC / 2) / STM32_PTP_SSINC)
+#  endif
 #endif
 
 #undef CONFIG_STM32_ETH_HWCHECKSUM
@@ -366,7 +416,15 @@
 
 #define PHY_READ_TIMEOUT  (0x0004ffff)
 #define PHY_WRITE_TIMEOUT (0x0004ffff)
-#define PHY_RETRY_TIMEOUT (0x0001998)
+/* The PHY is polled every PHY_POLL_MS milliseconds and given up to
+ * PHY_LINK_TIMEOUT_MS milliseconds to bring the link up or to complete
+ * auto-negotiation. The time is in milliseconds so that it does not depend
+ * on the period of the system tick.
+ */
+
+#define PHY_POLL_MS         (10)
+#define PHY_LINK_TIMEOUT_MS (5000)
+#define PHY_RETRY_TIMEOUT   (PHY_LINK_TIMEOUT_MS / PHY_POLL_MS)
 
 /* MAC reset ready delays in loop counts */
 
@@ -707,6 +765,8 @@ struct stm32_ethmac_s
   struct eth_desc_s *txchbase;      /* TX descriptor ring base address */
   struct eth_desc_s *rxchbase;      /* RX descriptor ring base address */
 
+  uint32_t rxbuf[CONFIG_STM32_ETH_NRXDESC]; /* Buffer of each RX descriptor */
+
   struct eth_desc_s *txtail;        /* First "in_flight" TX descriptor */
   struct eth_desc_s *rxcurr;        /* First RX descriptor of the segment */
   uint16_t             segments;    /* RX segment count */
@@ -714,6 +774,22 @@ struct stm32_ethmac_s
   sq_queue_t           freeb;       /* The free buffer list */
 
   struct mdio_bus_s *mdio;
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+  struct iob_queue_s txtstampq;     /* Timestamped frames to loop back */
+
+  /* Per TX descriptor: the copy of the frame that is waiting for its
+   * timestamp, and its buffer, because the MAC writes the timestamp over
+   * the address of the buffer in the descriptor.
+   */
+
+  struct iob_s *txmeta[CONFIG_STM32_ETH_NTXDESC];
+  uint32_t txmetabuf[CONFIG_STM32_ETH_NTXDESC];
+#endif
+
+#if defined(CONFIG_STM32_ETH_PTP) && defined(CONFIG_PTP_CLOCK)
+  struct ptp_lowerhalf_s ptp_lower; /* PTP hardware clock lower half */
+#endif
 };
 
 /****************************************************************************
@@ -792,6 +868,9 @@ static int  stm32_recvframe(struct stm32_ethmac_s *priv);
 static void stm32_receive(struct stm32_ethmac_s *priv);
 static void stm32_freeframe(struct stm32_ethmac_s *priv);
 static void stm32_txdone(struct stm32_ethmac_s *priv);
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+static void stm32_txtstamp_flush(struct stm32_ethmac_s *priv);
+#endif
 
 static void stm32_interrupt_work(void *arg);
 static int  stm32_interrupt(int irq, void *context, void *arg);
@@ -852,6 +931,9 @@ static inline void stm32_selectrmii(void);
 #endif
 static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv);
 static void stm32_ethreset(struct stm32_ethmac_s *priv);
+#ifdef CONFIG_STM32_ETH_PTP
+static int  stm32_eth_ptp_init(void);
+#endif
 static int  stm32_macconfig(struct stm32_ethmac_s *priv);
 static void stm32_macaddress(struct stm32_ethmac_s *priv);
 static int  stm32_macenable(struct stm32_ethmac_s *priv);
@@ -1132,6 +1214,23 @@ static struct eth_desc_s *stm32_get_next_txdesc(struct stm32_ethmac_s *priv,
   return &next->desc;
 }
 
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+/****************************************************************************
+ * Function: stm32_txindex
+ *
+ * Description:
+ *   Get the position of a TX descriptor in the ring. The descriptors of the
+ *   ring are the size of the union that also holds an RX descriptor.
+ *
+ ****************************************************************************/
+
+static inline int stm32_txindex(struct stm32_ethmac_s *priv,
+                                struct eth_desc_s *txdesc)
+{
+  return (union stm32_desc_u *)txdesc - (union stm32_desc_u *)priv->txchbase;
+}
+#endif
+
 /****************************************************************************
  * Function: stm32_transmit
  *
@@ -1295,6 +1394,31 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
 
       DEBUGASSERT(priv->dev.d_len <= CONFIG_NET_ETH_PKTSIZE);
       txdesc->des2 = priv->dev.d_len | ETH_TDES2_RD_IOC;
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+      /* If a packet socket asked for the transmit timestamp, keep a copy of
+       * the frame to loop back with it, and ask the MAC to timestamp.
+       */
+
+      if (priv->dev.d_iob != NULL && priv->dev.d_iob->io_conn != NULL)
+        {
+          struct iob_s *clone = netdev_iob_clone(&priv->dev, false);
+
+          if (clone != NULL)
+            {
+              int txindex = stm32_txindex(priv, txdesc);
+
+              clone->io_conn = priv->dev.d_iob->io_conn;
+              priv->txmeta[txindex]    = clone;
+              priv->txmetabuf[txindex] = (uint32_t)priv->dev.d_buf;
+              txdesc->des2 |= ETH_TDES2_RD_TTSE;
+            }
+          else
+            {
+              nerr("ERROR: Failed to clone the IOB for the TX timestamp\n");
+            }
+        }
+#endif
 
       /* The single descriptor is both the first and last segment. */
 
@@ -1707,6 +1831,124 @@ static void stm32_freesegment(struct stm32_ethmac_s *priv,
 }
 
 /****************************************************************************
+ * Function: stm32_rxindex
+ *
+ * Description:
+ *   Get the position of an RX descriptor in the ring. The descriptors of
+ *   the ring are the size of the union that also holds a TX descriptor,
+ *   not of struct eth_desc_s.
+ *
+ ****************************************************************************/
+
+static inline int stm32_rxindex(struct stm32_ethmac_s *priv,
+                                struct eth_desc_s *rxdesc)
+{
+  return (union stm32_desc_u *)rxdesc - (union stm32_desc_u *)priv->rxchbase;
+}
+
+/****************************************************************************
+ * Function: stm32_freectxdesc
+ *
+ * Description:
+ *   Give a context descriptor back to the DMA. The DMA writes the
+ *   timestamp over the buffer address, so the address is restored from the
+ *   copy that the driver keeps.
+ *
+ * Parameters:
+ *   priv    - Reference to the driver state structure
+ *   ctxdesc - The context descriptor
+ *
+ * Assumptions:
+ *   Global interrupts are disabled by interrupt handling logic.
+ *
+ ****************************************************************************/
+
+static void stm32_freectxdesc(struct stm32_ethmac_s *priv,
+                              struct eth_desc_s *ctxdesc)
+{
+  ctxdesc->des0 = priv->rxbuf[stm32_rxindex(priv, ctxdesc)];
+  ctxdesc->des1 = 0;
+  ctxdesc->des2 = 0;
+  stm32_freesegment(priv, ctxdesc, 1);
+}
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+/****************************************************************************
+ * Function: stm32_rxtimestamp
+ *
+ * Description:
+ *   Get the hardware timestamp of a received frame, and put it in d_rxtime.
+ *   The timestamp is in the context descriptor that the DMA writes right
+ *   after the last descriptor of the frame. A frame without a timestamp
+ *   gets a time of zero.
+ *
+ * Parameters:
+ *   priv - Reference to the driver state structure
+ *   last - The last descriptor of the frame
+ *
+ * Returned Value:
+ *   The context descriptor, that the caller has to give back to the DMA
+ *   after the frame, or NULL if the frame has none. A context descriptor
+ *   that the DMA does not write in time is found later by the scan of the
+ *   descriptors, and dropped.
+ *
+ * Assumptions:
+ *   Global interrupts are disabled by interrupt handling logic.
+ *
+ ****************************************************************************/
+
+static struct eth_desc_s *stm32_rxtimestamp(struct stm32_ethmac_s *priv,
+                                            struct eth_desc_s *last)
+{
+  struct net_driver_s *dev = &priv->dev;
+  struct eth_desc_s *ctxdesc;
+  int i;
+
+  dev->d_rxtime.tv_sec  = 0;
+  dev->d_rxtime.tv_nsec = 0;
+
+  if ((last->des3 & ETH_RDES3_WB_RS1V) == 0 ||
+      (last->des1 & ETH_RDES1_WB_TSA) == 0)
+    {
+      return NULL;
+    }
+
+  ctxdesc = stm32_get_next_rxdesc(priv, last);
+
+  for (i = 0; i < STM32_PTP_CTX_USTIMEOUT; i++)
+    {
+      up_invalidate_dcache((uintptr_t)ctxdesc,
+                           (uintptr_t)ctxdesc + sizeof(struct eth_desc_s));
+
+      if ((ctxdesc->des3 & ETH_RDES3_WB_OWN) == 0)
+        {
+          break;
+        }
+
+      up_udelay(1);
+    }
+
+  if ((ctxdesc->des3 & ETH_RDES3_WB_OWN) != 0 ||
+      (ctxdesc->des3 & ETH_RDES3_WB_CTXT) == 0)
+    {
+      return NULL;
+    }
+
+  /* The nanoseconds are in the first word and the seconds in the second,
+   * and all ones is a timestamp that is not valid.
+   */
+
+  if (ctxdesc->des0 != UINT32_MAX || ctxdesc->des1 != UINT32_MAX)
+    {
+      dev->d_rxtime.tv_sec  = ctxdesc->des1;
+      dev->d_rxtime.tv_nsec = ctxdesc->des0;
+    }
+
+  return ctxdesc;
+}
+#endif /* CONFIG_STM32_ETH_TIMESTAMP_RX */
+
+/****************************************************************************
  * Function: stm32_recvframe
  *
  * Description:
@@ -1731,6 +1973,9 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
 {
   struct eth_desc_s *rxdesc;
   struct eth_desc_s *rxcurr = NULL;
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+  struct eth_desc_s *ctxdesc;
+#endif
   uint8_t *buffer;
   int i;
 
@@ -1854,6 +2099,8 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
                       DEBUGASSERT(dev->d_buf == NULL);
                       dev->d_buf    = (uint8_t *)rxcurr->des0;
                       rxcurr->des0 = (uint32_t)buffer;
+                      priv->rxbuf[stm32_rxindex(priv, rxcurr)] =
+                        (uint32_t)buffer;
 
                       /* Make sure that the modified RX descriptor is written
                        * to physical memory.
@@ -1868,7 +2115,21 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
                        */
 
                       priv->rxhead   = stm32_get_next_rxdesc(priv, rxdesc);
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+                      ctxdesc = stm32_rxtimestamp(priv, rxdesc);
+#endif
+
                       stm32_freesegment(priv, rxcurr, priv->segments);
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+                      if (ctxdesc != NULL)
+                        {
+                          priv->rxhead =
+                            stm32_get_next_rxdesc(priv, ctxdesc);
+                          stm32_freectxdesc(priv, ctxdesc);
+                        }
+#endif
 
                       /* Force the completed RX DMA buffer to be re-read from
                        * physical memory.
@@ -1904,8 +2165,7 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
         {
           /* Drop the context descriptors, we are not interested */
 
-          DEBUGASSERT(rxcurr != NULL);
-          stm32_freesegment(priv, rxcurr, 1);
+          stm32_freectxdesc(priv, rxdesc);
         }
 
       /* Try the next descriptor */
@@ -1931,6 +2191,43 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
   return -EAGAIN;
 }
 
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+/****************************************************************************
+ * Function: stm32_txtstamp_flush
+ *
+ * Description:
+ *   Give the frames that have been transmitted, with their hardware
+ *   timestamp, back to the network stack, that delivers them to the error
+ *   queue of the packet socket that asked for it.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static void stm32_txtstamp_flush(struct stm32_ethmac_s *priv)
+{
+  struct net_driver_s *dev = &priv->dev;
+  struct iob_s *iob;
+
+  while ((iob = iob_remove_queue(&priv->txtstampq)) != NULL)
+    {
+      dev->d_iob = iob;
+      dev->d_len = iob->io_pktlen;
+
+#ifdef CONFIG_NET_PKT
+      pkt_input(dev);
+#endif
+
+      dev->d_iob = NULL;
+      dev->d_len = 0;
+
+      iob->io_conn = NULL;
+      iob_free_chain(iob);
+    }
+}
+#endif /* CONFIG_STM32_ETH_TIMESTAMP_TX */
+
 /****************************************************************************
  * Function: stm32_receive
  *
@@ -1951,6 +2248,12 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
 static void stm32_receive(struct stm32_ethmac_s *priv)
 {
   struct net_driver_s *dev = &priv->dev;
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+  /* Loop back the frames that have their transmit timestamp first */
+
+  stm32_txtstamp_flush(priv);
+#endif
 
   /* Loop while while stm32_recvframe() successfully retrieves valid
    * Ethernet frames.
@@ -2090,7 +2393,18 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
       else
 #endif
         {
-          nwarn("WARNING: DROPPED Unknown type: %04x\n", BUF->type);
+#ifdef CONFIG_NET_PKT
+          /* Frames that packet sockets consume (PTP over Ethernet and
+           * IPv6) were already given to pkt_input() above, so they are not
+           * unknown and must not be logged as dropped.
+           */
+
+          if (BUF->type != HTONS(ETH_P_1588) &&
+              BUF->type != HTONS(ETHTYPE_IP6))
+#endif
+            {
+              nwarn("WARNING: DROPPED Unknown type: %04x\n", BUF->type);
+            }
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is
@@ -2131,6 +2445,11 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
 {
   struct eth_desc_s *txdesc;
   uint32_t des3_tmp;
+  uint8_t *buffer;
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+  struct iob_s *clone;
+  int txindex;
+#endif
 
   ninfo("txhead: %p txtail: %p inflight: %d\n",
         priv->txhead, priv->txtail, priv->inflight);
@@ -2157,11 +2476,40 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
                 " des2: %08" PRIx32 " des3: %08" PRIx32 "\n",
                 txdesc, txdesc->des0, txdesc->des2, txdesc->des3);
 
-          DEBUGASSERT(txdesc->des0 != 0);
+          buffer = (uint8_t *)txdesc->des0;
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+          txindex = stm32_txindex(priv, txdesc);
+          clone   = priv->txmeta[txindex];
+          if (clone != NULL)
+            {
+              /* The MAC wrote the timestamp over the buffer address, and
+               * the seconds over the second word. All ones is not valid.
+               */
+
+              buffer = (uint8_t *)priv->txmetabuf[txindex];
+              priv->txmeta[txindex] = NULL;
+
+              if ((txdesc->des3 & ETH_TDES3_WB_TTSS) != 0 &&
+                  (txdesc->des0 != UINT32_MAX ||
+                   txdesc->des1 != UINT32_MAX))
+                {
+                  clone->io_time.tv_sec  = txdesc->des1;
+                  clone->io_time.tv_nsec = txdesc->des0;
+                  iob_add_queue(clone, &priv->txtstampq);
+                }
+              else
+                {
+                  iob_free_chain(clone);
+                }
+            }
+#endif
+
+          DEBUGASSERT(buffer != NULL);
 
           /* Yes.. Free the buffer */
 
-          stm32_freebuffer(priv, (uint8_t *)txdesc->des0);
+          stm32_freebuffer(priv, buffer);
 
           /* In any event, make sure that des0-3 are nullified. */
 
@@ -2249,6 +2597,12 @@ static void stm32_txdone(struct stm32_ethmac_s *priv)
   /* Scan the TX descriptor change, returning buffers to free list */
 
   stm32_freeframe(priv);
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+  /* Loop back the frames that have their transmit timestamp */
+
+  stm32_txtstamp_flush(priv);
+#endif
 
   /* If no further xmits are pending, then cancel the TX timeout */
 
@@ -2593,6 +2947,9 @@ static int stm32_ifdown(struct net_driver_s *dev)
 {
   struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)dev->d_private;
   irqstate_t flags;
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+  int i;
+#endif
 
   ninfo("Taking the network down\n");
 
@@ -2611,6 +2968,20 @@ static int stm32_ifdown(struct net_driver_s *dev)
    */
 
   stm32_ethreset(priv);
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
+  /* Drop the frames that were waiting for their transmit timestamp */
+
+  iob_free_queue(&priv->txtstampq);
+  for (i = 0; i < CONFIG_STM32_ETH_NTXDESC; i++)
+    {
+      if (priv->txmeta[i] != NULL)
+        {
+          iob_free_chain(priv->txmeta[i]);
+          priv->txmeta[i] = NULL;
+        }
+    }
+#endif
 
   /* Mark the device "down" */
 
@@ -2997,6 +3368,7 @@ static void stm32_rxdescinit(struct stm32_ethmac_s *priv,
       /* Set Buffer1 address pointer */
 
       rxdesc->des0 = (uint32_t)&rxbuffer[i * ALIGNED_BUFSIZE];
+      priv->rxbuf[i] = rxdesc->des0;
 
       /* Set Buffer1 address high bytes */
 
@@ -3336,7 +3708,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
   if (to <= 0)
     {
       nerr("ERROR: Phy reset timeout\n");
-      return ret;
+      return -ETIMEDOUT;
     }
   else
     {
@@ -3413,7 +3785,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
           break;
         }
 
-      nxsched_usleep(100);
+      nxsched_msleep(PHY_POLL_MS);
     }
 
   if (timeout >= PHY_RETRY_TIMEOUT)
@@ -3464,7 +3836,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
           break;
         }
 
-      nxsched_usleep(100);
+      nxsched_msleep(PHY_POLL_MS);
     }
 
   if (timeout >= PHY_RETRY_TIMEOUT)
@@ -3787,12 +4159,476 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
 #  endif
 #endif
 
-#ifdef CONFIG_STM32_ETH_PTP
+#ifdef CONFIG_STM32_ETH_PTP_GPIO
   /* Enable pulse-per-second (PPS) output signal */
 
   stm32_configgpio(GPIO_ETH_PPS_OUT);
 #endif
 }
+
+#ifdef CONFIG_STM32_ETH_PTP
+/****************************************************************************
+ * Name: stm32_eth_ptp_wait
+ *
+ * Description:
+ *   Wait for the timestamp unit to clear a bit that is set while it takes
+ *   an update of the addend, of the system time or of the PPS target time.
+ *
+ * Input Parameters:
+ *   reg - The register that holds the bit
+ *   bit - The bit to wait for
+ *
+ * Returned Value:
+ *   OK on success, -ETIMEDOUT if the bit was not cleared in time.
+ *
+ ****************************************************************************/
+
+static int stm32_eth_ptp_wait(uint32_t reg, uint32_t bit)
+{
+  int timeout;
+
+  for (timeout = 0; timeout < STM32_PTP_UPDATE_USTIMEOUT; timeout++)
+    {
+      if ((stm32_getreg(reg) & bit) == 0)
+        {
+          return OK;
+        }
+
+      up_udelay(1);
+    }
+
+  return -ETIMEDOUT;
+}
+
+#if defined(CONFIG_STM32_ETH_PTP_GPIO) || defined(CONFIG_PTP_CLOCK)
+/****************************************************************************
+ * Name: stm32_eth_ptp_read
+ *
+ * Description:
+ *   Read the system time. The seconds and the nanoseconds are in two
+ *   registers, so the seconds are read again to detect a rollover between
+ *   the reads.
+ *
+ * Input Parameters:
+ *   sec  - The location to store the seconds
+ *   nsec - The location to store the nanoseconds
+ *
+ ****************************************************************************/
+
+static void stm32_eth_ptp_read(uint32_t *sec, uint32_t *nsec)
+{
+  uint32_t sec1;
+  uint32_t sec2;
+  uint32_t ns;
+
+  sec1 = stm32_getreg(STM32_ETH_MACSTSR);
+  ns   = stm32_getreg(STM32_ETH_MACSTNR);
+  sec2 = stm32_getreg(STM32_ETH_MACSTSR);
+
+  if (sec1 != sec2)
+    {
+      ns = stm32_getreg(STM32_ETH_MACSTNR);
+    }
+
+  *sec  = sec2;
+  *nsec = ns & ETH_MACSTNR_TSSS_MASK;
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_eth_ptp_setaddend
+ *
+ * Description:
+ *   Load the addend, that sets the rate of the system time.
+ *
+ * Input Parameters:
+ *   addend - The value to load
+ *
+ * Returned Value:
+ *   OK on success, -ETIMEDOUT if the unit did not take it in time.
+ *
+ ****************************************************************************/
+
+static int stm32_eth_ptp_setaddend(uint32_t addend)
+{
+  stm32_putreg(addend, STM32_ETH_MACTSAR);
+  stm32_putreg(stm32_getreg(STM32_ETH_MACTSCR) | ETH_MACTSCR_TSADDREG,
+               STM32_ETH_MACTSCR);
+  return stm32_eth_ptp_wait(STM32_ETH_MACTSCR, ETH_MACTSCR_TSADDREG);
+}
+
+#ifdef CONFIG_STM32_ETH_PTP_GPIO
+/****************************************************************************
+ * Name: stm32_eth_ptp_pps_start
+ *
+ * Description:
+ *   Start the pulse-per-second output, a pulse train with a period of one
+ *   second and a duty cycle of 50%, aligned to the system time. The fixed
+ *   frequency mode of the MAC gives a pulse too short to be seen, so the
+ *   flexible mode is used.
+ *
+ * Returned Value:
+ *   OK on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int stm32_eth_ptp_pps_start(void)
+{
+  uint32_t sec;
+  uint32_t nsec;
+  int ret;
+
+  /* The first pulse is at the next whole second, or at the one after it
+   * if that is too close to be loaded in time.
+   */
+
+  stm32_eth_ptp_read(&sec, &nsec);
+  sec += (nsec < NSEC_PER_SEC - STM32_PTP_PPS_MARGIN_NS) ? 1 : 2;
+
+  stm32_putreg(sec, STM32_ETH_MACPPSTTSR);
+  stm32_putreg(0, STM32_ETH_MACPPSTTNR);
+
+  ret = stm32_eth_ptp_wait(STM32_ETH_MACPPSTTNR, ETH_MACPPSTTNR_TRGTBUSY0);
+  if (ret < 0)
+    {
+      nerr("ERROR: Timed out loading the PPS target time\n");
+      return ret;
+    }
+
+  stm32_putreg(STM32_PTP_PPS_INTERVAL, STM32_ETH_MACPPSIR);
+  stm32_putreg(STM32_PTP_PPS_WIDTH, STM32_ETH_MACPPSWR);
+  stm32_putreg(ETH_MACPPSCR_PPSEN0 | ETH_MACPPSCR_PPSCMD_START_TRAIN,
+               STM32_ETH_MACPPSCR);
+  return OK;
+}
+
+#ifdef CONFIG_PTP_CLOCK
+/****************************************************************************
+ * Name: stm32_eth_ptp_pps_restart
+ *
+ * Description:
+ *   Align the pulse-per-second output to the whole seconds of the system
+ *   time again. The pulse train counts by itself, and does not follow a
+ *   step of the system time, so after a step the pulses would be displaced
+ *   by the same amount.
+ *
+ * Returned Value:
+ *   OK on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int stm32_eth_ptp_pps_restart(void)
+{
+  int ret;
+
+  stm32_putreg(ETH_MACPPSCR_PPSEN0 | ETH_MACPPSCR_PPSCMD_STOP_NOW,
+               STM32_ETH_MACPPSCR);
+  ret = stm32_eth_ptp_wait(STM32_ETH_MACPPSCR, ETH_MACPPSCR_PPSCTRL_MASK);
+  if (ret < 0)
+    {
+      nerr("ERROR: Timed out stopping the PPS output\n");
+      return ret;
+    }
+
+  return stm32_eth_ptp_pps_start();
+}
+#endif /* CONFIG_PTP_CLOCK */
+#endif /* CONFIG_STM32_ETH_PTP_GPIO */
+
+/****************************************************************************
+ * Name: stm32_eth_ptp_init
+ *
+ * Description:
+ *   Start the system time of the timestamp unit of the MAC, at zero and at
+ *   its nominal rate. The unit needs to be enabled before the addend and
+ *   the system time can be loaded. It does not depend on the link, but it
+ *   needs the MAC to be out of reset, and a reset of the MAC clears it.
+ *
+ * Returned Value:
+ *   OK on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int stm32_eth_ptp_init(void)
+{
+  uint32_t tscr;
+  int ret;
+
+  /* Enable the unit, with the fine update method (the addend sets the
+   * rate) and a digital rollover (the nanoseconds count from 0 to
+   * 999999999).
+   */
+
+  tscr = ETH_MACTSCR_TSENA | ETH_MACTSCR_TSCFUPDT | ETH_MACTSCR_TSCTRLSSR;
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+  /* Timestamp the received PTP version 2 messages, over Ethernet and over
+   * UDP, except for the announce, management and signaling messages.
+   */
+
+  tscr |= ETH_MACTSCR_TSVER2ENA | ETH_MACTSCR_TSIPENA |
+          ETH_MACTSCR_TSIPV4ENA | ETH_MACTSCR_TSIPV6ENA |
+          ETH_MACTSCR_SNAPTYPSEL_1;
+#endif
+  stm32_putreg(tscr, STM32_ETH_MACTSCR);
+
+  /* Set the increment of the system time */
+
+  stm32_putreg(STM32_PTP_SSINC << ETH_MACSSIR_SSINC_SHIFT,
+               STM32_ETH_MACSSIR);
+
+  /* Load the addend for the nominal rate */
+
+  ret = stm32_eth_ptp_setaddend(STM32_PTP_ADDEND);
+  if (ret < 0)
+    {
+      nerr("ERROR: Timed out loading the PTP addend\n");
+      return ret;
+    }
+
+  /* Initialize the system time to zero */
+
+  stm32_putreg(0, STM32_ETH_MACSTSUR);
+  stm32_putreg(0, STM32_ETH_MACSTNUR);
+  stm32_putreg(tscr | ETH_MACTSCR_TSINIT, STM32_ETH_MACTSCR);
+  ret = stm32_eth_ptp_wait(STM32_ETH_MACTSCR, ETH_MACTSCR_TSINIT);
+  if (ret < 0)
+    {
+      nerr("ERROR: Timed out initializing the PTP system time\n");
+      return ret;
+    }
+
+#ifdef CONFIG_STM32_ETH_PTP_GPIO
+  ret = stm32_eth_ptp_pps_start();
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
+
+  ninfo("PTP: system time started, SSINC=%u addend=%" PRIu32 "\n",
+        (unsigned int)STM32_PTP_SSINC, (uint32_t)STM32_PTP_ADDEND);
+  return OK;
+}
+
+#ifdef CONFIG_PTP_CLOCK
+/****************************************************************************
+ * Name: stm32_ptp_adjfine
+ *
+ * Description:
+ *   Adjust the frequency of the system time.
+ *
+ * Input Parameters:
+ *   lower - The PTP clock lower half (unused)
+ *   ppb   - The offset from the nominal frequency, in parts per billion.
+ *           Positive makes the system time run faster.
+ *
+ * Returned Value:
+ *   OK on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int stm32_ptp_adjfine(struct ptp_lowerhalf_s *lower, long ppb)
+{
+  irqstate_t flags;
+  int64_t addend;
+  int ret;
+
+  addend = STM32_PTP_ADDEND;
+  addend += addend * ppb / NSEC_PER_SEC;
+
+  if (addend <= 0 || addend > UINT32_MAX)
+    {
+      nerr("ERROR: PTP adjustment out of range: %ld ppb\n", ppb);
+      return -EINVAL;
+    }
+
+  flags = enter_critical_section();
+  ret = stm32_eth_ptp_setaddend((uint32_t)addend);
+  leave_critical_section(flags);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: stm32_ptp_adjtime
+ *
+ * Description:
+ *   Step the system time by a signed amount, without changing its rate.
+ *
+ * Input Parameters:
+ *   lower - The PTP clock lower half (unused)
+ *   delta - The amount to add, in nanoseconds
+ *
+ * Returned Value:
+ *   OK on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int stm32_ptp_adjtime(struct ptp_lowerhalf_s *lower, int64_t delta)
+{
+  irqstate_t flags;
+  uint64_t abs_ns;
+  uint64_t sec;
+  uint32_t nsec;
+  uint32_t nsreg;
+  int ret;
+
+  abs_ns = delta < 0 ? (uint64_t)0 - (uint64_t)delta : (uint64_t)delta;
+  sec    = abs_ns / NSEC_PER_SEC;
+  nsec   = abs_ns % NSEC_PER_SEC;
+
+  if (sec > UINT32_MAX)
+    {
+      return -EINVAL;
+    }
+
+  if (delta < 0)
+    {
+      /* To subtract, the seconds register holds the negated seconds and
+       * the nanoseconds register 10^9 minus the nanoseconds.
+       */
+
+      sec   = (uint32_t)(0 - (uint32_t)sec);
+      nsreg = ETH_MACSTNUR_ADDSUB | (NSEC_PER_SEC - nsec);
+    }
+  else
+    {
+      nsreg = nsec;
+    }
+
+  flags = enter_critical_section();
+  stm32_putreg((uint32_t)sec, STM32_ETH_MACSTSUR);
+  stm32_putreg(nsreg, STM32_ETH_MACSTNUR);
+  stm32_putreg(stm32_getreg(STM32_ETH_MACTSCR) | ETH_MACTSCR_TSUPDT,
+               STM32_ETH_MACTSCR);
+  ret = stm32_eth_ptp_wait(STM32_ETH_MACTSCR, ETH_MACTSCR_TSUPDT);
+  if (ret < 0)
+    {
+      nerr("ERROR: Timed out stepping the PTP system time\n");
+    }
+#ifdef CONFIG_STM32_ETH_PTP_GPIO
+  else
+    {
+      ret = stm32_eth_ptp_pps_restart();
+    }
+#endif
+
+  leave_critical_section(flags);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: stm32_ptp_adjphase
+ *
+ * Description:
+ *   Step the system time by a signed amount, in nanoseconds.
+ *
+ ****************************************************************************/
+
+static int stm32_ptp_adjphase(struct ptp_lowerhalf_s *lower, int32_t phase)
+{
+  return stm32_ptp_adjtime(lower, phase);
+}
+
+/****************************************************************************
+ * Name: stm32_ptp_gettime
+ *
+ * Description:
+ *   Read the system time. The system clock timestamps are not supported.
+ *
+ ****************************************************************************/
+
+static int stm32_ptp_gettime(struct ptp_lowerhalf_s *lower,
+                             struct timespec *ts,
+                             struct ptp_system_timestamp *sts)
+{
+  uint32_t sec;
+  uint32_t nsec;
+
+  stm32_eth_ptp_read(&sec, &nsec);
+
+  ts->tv_sec  = sec;
+  ts->tv_nsec = nsec;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: stm32_ptp_settime
+ *
+ * Description:
+ *   Set the system time.
+ *
+ * Input Parameters:
+ *   lower - The PTP clock lower half (unused)
+ *   ts    - The time to set. The seconds must fit in 32 bits.
+ *
+ * Returned Value:
+ *   OK on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int stm32_ptp_settime(struct ptp_lowerhalf_s *lower,
+                             const struct timespec *ts)
+{
+  irqstate_t flags;
+  int ret;
+
+  if (ts->tv_sec < 0 || ts->tv_sec > UINT32_MAX ||
+      ts->tv_nsec < 0 || ts->tv_nsec >= NSEC_PER_SEC)
+    {
+      return -EINVAL;
+    }
+
+  flags = enter_critical_section();
+  stm32_putreg((uint32_t)ts->tv_sec, STM32_ETH_MACSTSUR);
+  stm32_putreg((uint32_t)ts->tv_nsec, STM32_ETH_MACSTNUR);
+  stm32_putreg(stm32_getreg(STM32_ETH_MACTSCR) | ETH_MACTSCR_TSINIT,
+               STM32_ETH_MACTSCR);
+  ret = stm32_eth_ptp_wait(STM32_ETH_MACTSCR, ETH_MACTSCR_TSINIT);
+  if (ret < 0)
+    {
+      nerr("ERROR: Timed out setting the PTP system time\n");
+    }
+#ifdef CONFIG_STM32_ETH_PTP_GPIO
+  else
+    {
+      ret = stm32_eth_ptp_pps_restart();
+    }
+#endif
+
+  leave_critical_section(flags);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: stm32_ptp_getres
+ *
+ * Description:
+ *   Get the resolution of the system time, that is its increment.
+ *
+ ****************************************************************************/
+
+static int stm32_ptp_getres(struct ptp_lowerhalf_s *lower,
+                            struct timespec *res)
+{
+  res->tv_sec  = 0;
+  res->tv_nsec = STM32_PTP_SSINC;
+  return OK;
+}
+
+static const struct ptp_ops_s g_stm32_ptp_ops =
+{
+  stm32_ptp_adjfine,  /* adjfine */
+  stm32_ptp_adjphase, /* adjphase */
+  stm32_ptp_adjtime,  /* adjtime */
+  stm32_ptp_gettime,  /* gettime */
+  NULL,               /* getcrosststamp */
+  stm32_ptp_settime,  /* settime */
+  stm32_ptp_getres,   /* getres */
+};
+#endif /* CONFIG_PTP_CLOCK */
+#endif /* CONFIG_STM32_ETH_PTP */
 
 /****************************************************************************
  * Function: stm32_ethreset
@@ -4079,9 +4915,13 @@ static int stm32_macenable(struct stm32_ethmac_s *priv)
   regval |= ETH_DMACRXCR_SR;
   stm32_putreg(regval, STM32_ETH_DMACRXCR);
 
-  /* Enable Ethernet DMA interrupts */
+  /* Enable Ethernet MAC interrupts, except the one of the timestamp unit.
+   * It is set each time the target time of the PPS output is reached and
+   * is cleared by reading MACTSSR, which the interrupt handler does not,
+   * so it would stay pending and keep the handler running.
+   */
 
-  stm32_putreg(ETH_MACIER_ALLINTS, STM32_ETH_MACIER);
+  stm32_putreg(ETH_MACIER_ALLINTS & ~ETH_MACIER_TSIE, STM32_ETH_MACIER);
 
   /* Ethernet DMA supports two classes of interrupts: Normal interrupt
    * summary (NIS) and Abnormal interrupt summary (AIS) with a variety
@@ -4145,6 +4985,19 @@ static int stm32_ethconfig(struct stm32_ethmac_s *priv)
 
   ninfo("Reset the Ethernet block\n");
   stm32_ethreset(priv);
+
+#ifdef CONFIG_STM32_ETH_PTP
+  /* Start the system time of the timestamp unit. It does not depend on the
+   * link, so it is started before the PHY, which fails to initialize when
+   * there is no link.
+   */
+
+  ret = stm32_eth_ptp_init();
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
 
   /* Initialize TX Descriptors list */
 
@@ -4304,9 +5157,24 @@ static inline int stm32_ethinitialize(int intf)
 
   stm32_ifdown(&priv->dev);
 
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+  priv->dev.d_features |= NETDEV_RX_STAMP;
+#endif
+
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
   netdev_register(&priv->dev, NET_LL_ETHERNET);
+
+#if defined(CONFIG_STM32_ETH_PTP) && defined(CONFIG_PTP_CLOCK)
+  /* Register the PTP hardware clock, /dev/ptp0 */
+
+  priv->ptp_lower.ops = &g_stm32_ptp_ops;
+  if (ptp_clock_register(&priv->ptp_lower, STM32_PTP_MAX_ADJ, intf) < 0)
+    {
+      nerr("ERROR: Failed to register the PTP clock\n");
+    }
+#endif
+
   return ret;
 }
 

@@ -29,6 +29,17 @@
 
 #include <nuttx/config.h>
 #include <stdint.h>
+
+#ifdef CONFIG_IMXRT_CLOCKCONFIG_VER3
+
+/* CCM v2 with per-peripheral LPCG registers: LPUART clock helpers are
+ * declared in imxrt_clockconfig_ver3.h.
+ */
+
+#include "imxrt_clockconfig_ver3.h"
+
+#else
+
 #include "hardware/imxrt_ccm.h"
 
 /****************************************************************************
@@ -53,6 +64,9 @@
 #define imxrt_clockoff_aoi1()             imxrt_periphclk_configure(CCM_CCGR_AOI1, CCM_CG_OFF)
 #define imxrt_clockoff_aoi2()             imxrt_periphclk_configure(CCM_CCGR_AOI2, CCM_CG_OFF)
 #define imxrt_clockoff_bee()              imxrt_periphclk_configure(CCM_CCGR_BEE, CCM_CG_OFF)
+#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockoff_caam()           imxrt_periphclk_configure(CCM_CCGR_CAAM, CCM_CG_OFF)
+#endif
 #define imxrt_clockoff_can1()             imxrt_periphclk_configure(CCM_CCGR_CAN1, CCM_CG_OFF)
 #ifndef CONFIG_ARCH_FAMILY_IMXRT117x
 #  define imxrt_clockoff_can1_serial()    imxrt_periphclk_configure(CCM_CCGR_CAN1_SERIAL, CCM_CG_OFF)
@@ -219,6 +233,9 @@
 #define imxrt_clockrun_aoi1()             imxrt_periphclk_configure(CCM_CCGR_AOI1, CCM_CG_RUN)
 #define imxrt_clockrun_aoi2()             imxrt_periphclk_configure(CCM_CCGR_AOI2, CCM_CG_RUN)
 #define imxrt_clockrun_bee()              imxrt_periphclk_configure(CCM_CCGR_BEE, CCM_CG_RUN)
+#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockrun_caam()           imxrt_periphclk_configure(CCM_CCGR_CAAM, CCM_CG_RUN)
+#endif
 #define imxrt_clockrun_can1()             imxrt_periphclk_configure(CCM_CCGR_CAN1, CCM_CG_RUN)
 #ifndef CONFIG_ARCH_FAMILY_IMXRT117x
 #  define imxrt_clockrun_can1_serial()    imxrt_periphclk_configure(CCM_CCGR_CAN1_SERIAL, CCM_CG_RUN)
@@ -387,6 +404,9 @@
 #define imxrt_clockall_aoi1()             imxrt_periphclk_configure(CCM_CCGR_AOI1, CCM_CG_ALL)
 #define imxrt_clockall_aoi2()             imxrt_periphclk_configure(CCM_CCGR_AOI2, CCM_CG_ALL)
 #define imxrt_clockall_bee()              imxrt_periphclk_configure(CCM_CCGR_BEE, CCM_CG_ALL)
+#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockall_caam()           imxrt_periphclk_configure(CCM_CCGR_CAAM, CCM_CG_ALL)
+#endif
 #define imxrt_clockall_can1()             imxrt_periphclk_configure(CCM_CCGR_CAN1, CCM_CG_ALL)
 #ifndef CONFIG_ARCH_FAMILY_IMXRT117x
 #  define imxrt_clockall_can1_serial()    imxrt_periphclk_configure(CCM_CCGR_CAN1_SERIAL, CCM_CG_ALL)
@@ -589,6 +609,8 @@ void imxrt_periphclk_configure(uintptr_t regaddr, unsigned int index,
                                unsigned int value);
 
 #endif
+
+#endif /* !CONFIG_ARCH_FAMILY_IMXRT118x */
 
 #undef EXTERN
 #if defined(__cplusplus)

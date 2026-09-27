@@ -156,8 +156,8 @@
 #  define LP_I2C_BUS_CLK_ATOMIC()    PERIPH_RCC_ATOMIC()
 #endif
 
-#define SCL_PIN_ATTR (FUNCTION_2 || INPUT_PULLUP || OUTPUT_OPEN_DRAIN)
-#define SDA_PIN_ATTR (FUNCTION_2 || INPUT_PULLUP || OUTPUT_OPEN_DRAIN)
+#define SCL_PIN_ATTR (FUNCTION_2 | INPUT_PULLUP | OUTPUT_OPEN_DRAIN)
+#define SDA_PIN_ATTR (FUNCTION_2 | INPUT_PULLUP | OUTPUT_OPEN_DRAIN)
 
 /****************************************************************************
  * Private Types
@@ -1064,7 +1064,7 @@ static int esp_i2c_polling_waitdone(struct esp_i2c_priv_s *priv)
    * and an error didn't occur within the timeout
    */
 
-  while (current - timeout < 0 && priv->error == 0)
+  while ((int32_t)(current - timeout) < 0 && priv->error == 0)
     {
       /* Check if any interrupt triggered, clear them
        * process the operation.
@@ -1264,7 +1264,7 @@ static int esp_i2c_transfer(struct i2c_master_s *dev,
         }
 #endif
 
-        i2cinfo("Message %" PRIu8 " transfer complete.\n", priv->msgid);
+      i2cinfo("Message %" PRIu8 " transfer complete.\n", priv->msgid);
     }
 
   /* Dump the trace result */
@@ -1300,6 +1300,7 @@ static void esp_i2c_clear_bus(struct esp_i2c_priv_s *priv)
 
   clock_t start = clock_systime_ticks();
   clock_t timeout = start + MSEC2TICK(I2C_CLR_BUS_TIMEOUT_MS);
+
   while (i2c_ll_master_is_bus_clear_done(priv->ctx->dev))
     {
       if (clock_systime_ticks() >= timeout)
@@ -1589,6 +1590,7 @@ static inline void esp_i2c_process(struct esp_i2c_priv_s *priv,
   struct i2c_msg_s *msg = &priv->msgv[priv->msgid];
 #ifdef CONFIG_I2C_TRACE
   uint32_t status = 0;
+
   status = GET_STATUS(priv->ctx->dev);
 #endif
   /* Check for any errors */
@@ -1707,22 +1709,22 @@ struct i2c_master_s *esp_i2cbus_initialize(int port)
   switch (port)
     {
 #ifdef CONFIG_ESPRESSIF_I2C0_MASTER_MODE
-    case ESPRESSIF_I2C0:
-      priv = &esp_i2c0_priv;
-      break;
+      case ESPRESSIF_I2C0:
+        priv = &esp_i2c0_priv;
+        break;
 #endif
 #ifdef CONFIG_ESPRESSIF_I2C1_MASTER_MODE
-    case ESPRESSIF_I2C1:
-      priv = &esp_i2c1_priv;
-      break;
+      case ESPRESSIF_I2C1:
+        priv = &esp_i2c1_priv;
+        break;
 #endif
 #ifdef CONFIG_ESPRESSIF_LP_I2C0
-    case ESPRESSIF_LP_I2C0:
-      priv = &esp_lp_i2c0_priv;
-      break;
+      case ESPRESSIF_LP_I2C0:
+        priv = &esp_lp_i2c0_priv;
+        break;
 #endif
-    default:
-      return NULL;
+      default:
+        return NULL;
     }
 
   nxmutex_lock(&priv->lock);

@@ -870,15 +870,15 @@ static bool uuid_create(FAR struct bt_uuid_s *uuid,
 
   switch (data->len)
     {
-    case 2:
-      uuid->type  = BT_UUID_16;
-      uuid->u.u16 = bt_buf_get_le16(data);
-      return true;
+      case 2:
+        uuid->type  = BT_UUID_16;
+        uuid->u.u16 = bt_buf_get_le16(data);
+        return true;
 
-    case 16:
-      uuid->type = BT_UUID_128;
-      memcpy(uuid->u.u128, data->data, data->len);
-      return true;
+      case 16:
+        uuid->type = BT_UUID_128;
+        memcpy(uuid->u.u128, data->data, data->len);
+        return true;
     }
 
   return false;
@@ -1022,14 +1022,14 @@ static uint8_t err_to_att(int err)
 
   switch (err)
     {
-    case -EINVAL:
-      return BT_ATT_ERR_INVALID_OFFSET;
+      case -EINVAL:
+        return BT_ATT_ERR_INVALID_OFFSET;
 
-    case -EFBIG:
-      return BT_ATT_ERR_INVALID_ATTRIBUTE_LEN;
+      case -EFBIG:
+        return BT_ATT_ERR_INVALID_ATTRIBUTE_LEN;
 
-    default:
-      return BT_ATT_ERR_UNLIKELY;
+      default:
+        return BT_ATT_ERR_UNLIKELY;
     }
 }
 
@@ -1870,6 +1870,16 @@ FAR struct bt_buf_s *bt_att_create_pdu(FAR struct bt_conn_s *conn,
   FAR struct bt_att_hdr_s *hdr;
   FAR struct bt_buf_s *buf;
   FAR struct bt_att_s *att = conn->att;
+
+  /* There is no ATT context until the connection is established, and it
+   * is released again on disconnect.
+   */
+
+  if (att == NULL)
+    {
+      wlwarn("No ATT context for handle %u\n", conn->handle);
+      return NULL;
+    }
 
   if (len + sizeof(op) > att->mtu)
     {

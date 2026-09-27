@@ -707,7 +707,7 @@ These are standalone repositories:
     originates from <http://cxx.uclibc.org/> and has been adapted for NuttX by the
     RGMP team (<http://rgmp.sourceforge.net/wiki/index.php/Main_Page>).
 
-  * <https://bitbucket.org/nuttx/buildroot>
+  * <https://github.com/patacongo/buildroot>
 
     A environment that you can to use to build a custom, NuttX GNU toolchain.
 
@@ -1841,7 +1841,7 @@ then you may encounter these:
      for NXFLAT.  NXFLAT is a binary format described in
      Documentation/NuttXNxFlat.html.  It may be possible to build
      standalone versions of the NXFLAT tools; there are a few examples
-     of this in the buildroot repository at <https://bitbucket.org/nuttx/buildroot>
+     of this in the buildroot repository at <https://github.com/patacongo/buildroot>
      However, it is possible that there could be interoperability issues
      with your toolchain since they will be using different versions of
      binutils and possibly different ABIs.

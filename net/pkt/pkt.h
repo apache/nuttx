@@ -104,6 +104,10 @@ struct pkt_conn_s
 
   struct iob_queue_s readahead;   /* Read-ahead buffering */
 
+#ifdef CONFIG_NET_TIMESTAMP
+  struct iob_queue_s errahead;    /* Error-ahead buffering */
+#endif
+
   FAR struct iob_s  *pendiob;     /* The iob currently being sent */
 
   /* The following is a list of poll structures of threads waiting for

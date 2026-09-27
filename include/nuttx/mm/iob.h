@@ -37,6 +37,10 @@
 #  include <nuttx/wqueue.h>
 #endif
 
+#ifdef CONFIG_NET_TIMESTAMP
+#  include <sys/time.h>
+#endif
+
 #ifdef CONFIG_MM_IOB
 
 /****************************************************************************
@@ -126,6 +130,18 @@ struct iob_s
 #endif
   unsigned int io_pktlen; /* Total length of the packet */
 
+  FAR struct socket_conn_s *io_conn;
+
+#ifdef CONFIG_NET_TIMESTAMP
+  /* timestamp of the packet.
+   * d_features is the member of net_driver_s struct, if the NETDEV_RX_STAMP
+   * bit of d_features is set, the timestamp is provided by hardware driver.
+   * Otherwise it is filled in by kernel when the packet is passed into
+   * respective protocol layer. The timestamp is in CLOCK_REALTIME.
+   */
+
+  struct timespec io_time;
+#endif
 #ifdef CONFIG_IOB_ALLOC
   iob_free_cb_t io_free;  /* Custom free callback */
   FAR uint8_t  *io_data;

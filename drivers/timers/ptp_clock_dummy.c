@@ -144,7 +144,7 @@ ptp_clock_dummy_getcrosststamp(FAR struct ptp_lowerhalf_s *lower,
 
   clock_gettime(CLOCK_MONOTONIC, &ts);
   cts->monoraw.tv_sec = ts.tv_sec;
-  cts->monoraw.tv_nsec = ts.tv_sec;
+  cts->monoraw.tv_nsec = ts.tv_nsec;
 
   ptpinfo("ptp_clock_dummy_getcrosststamp sec:%jd, nsec:%ld\n",
           (intmax_t)ts.tv_sec, ts.tv_nsec);

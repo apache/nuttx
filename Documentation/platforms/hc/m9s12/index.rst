@@ -14,7 +14,7 @@ included:
 -  The Future Electronics Group NE64 /PoE Badge board.
 
 Both use a GNU arm-nuttx-elf toolchain\* under Linux or Cygwin. The
-NuttX `buildroot <https://bitbucket.org/nuttx/buildroot/downloads/>`__
+NuttX `buildroot <https://github.com/patacongo/buildroot>`__
 provides a properly patched GCC 3.4.4 toolchain that is highly optimized
 for the m9s12x family.
 

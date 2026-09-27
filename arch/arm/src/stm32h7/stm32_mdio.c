@@ -24,7 +24,17 @@
  * Included Files
  ****************************************************************************/
 
-#include <arm_internal.h>
+#include <nuttx/mutex.h>
+#include <nuttx/config.h>
+#include <nuttx/nuttx.h>
+
+#include <nuttx/debug.h>
+#include <errno.h>
+#include <inttypes.h>
+
+#include "arm_internal.h"
+#include "stm32_mdio.h"
+#include "hardware/stm32_ethernet.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -39,21 +49,6 @@ static void stm32_checksetup(void);
 #  define stm32_putreg(val,addr) putreg32(val,addr)
 #  define stm32_checksetup()
 #endif
-
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <nuttx/mutex.h>
-#include <nuttx/config.h>
-#include <nuttx/nuttx.h>
-
-#include <nuttx/debug.h>
-#include <errno.h>
-#include <inttypes.h>
-
-#include "stm32_mdio.h"
-#include "hardware/stm32_ethernet.h"
 
 /****************************************************************************
  * Private Types

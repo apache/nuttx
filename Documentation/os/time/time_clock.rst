@@ -551,7 +551,7 @@ or ``kill()`` to communicate with NuttX tasks.
    the wdog->expired being set.
 
   :param wdog: Watchdog ID
-  :param delay: Delay count in clock ticks
+  :param delay: Positive delay count in clock ticks
   :param wdentry: Function to call on timeout
   :param arg: The parameter to pass to wdentry.
 

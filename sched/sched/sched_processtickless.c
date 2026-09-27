@@ -354,6 +354,12 @@ void nxsched_process_timer(void)
 
   flags = enter_critical_section();
 
+#ifdef CONFIG_CLOCK_TIMEKEEPING
+  /* Process wall time */
+
+  clock_update_wall_time();
+#endif
+
   /* Do not move the up_timer_gettick out of the critical section,
    * it will violate the invariant that the g_timer_tick should be monotonic.
    */

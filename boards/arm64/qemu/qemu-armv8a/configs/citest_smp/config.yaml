@@ -7,6 +7,7 @@ product:
     core0:
       name: 'main'
       device: 'qemu'
+      line_buffered: true
       exec_path: 'qemu-system-aarch64'
       exec_args: '-cpu cortex-a53 -nographic -smp 4
                  -machine virt,virtualization=on,gic-version=3

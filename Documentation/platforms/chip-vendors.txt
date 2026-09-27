@@ -115,3 +115,5 @@ fvp-v8r-aarch32   arm
 bm3803            ?
 bm3823            ?
 s698pm            ?
+n32h7*            nations
+erbium            aifoundry

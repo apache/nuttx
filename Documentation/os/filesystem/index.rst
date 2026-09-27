@@ -572,6 +572,7 @@ NuttX provides support for a variety of file systems out of the box.
 
   aio.rst
   binfs.rst
+  chroot.rst
   cromfs.rst
   fat.rst
   hostfs.rst

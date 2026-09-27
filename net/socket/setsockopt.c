@@ -140,6 +140,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 #ifdef CONFIG_NET_TIMESTAMP
       case SO_TIMESTAMP:   /* Generates a timestamp in us for each incoming packet */
       case SO_TIMESTAMPNS: /* Generates a timestamp in ns for each incoming packet */
+      case SO_TIMESTAMPING:/*  Timestamp all packets */
 #endif
         {
           int setting;

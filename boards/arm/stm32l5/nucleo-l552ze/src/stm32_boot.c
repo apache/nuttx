@@ -33,7 +33,7 @@
 #include "arm_internal.h"
 #include "nucleo-l552ze.h"
 #include "stm32l5_pwr.h"
-#include "stm32l5_gpio.h"
+#include "stm32_gpio.h"
 
 #include <arch/board/board.h>
 

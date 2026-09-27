@@ -38,6 +38,10 @@ if(CONFIG_NRF91_MODEM)
   list(APPEND SRCS nrf91_modem.c)
 endif()
 
+if(CONFIG_RGBLED)
+  list(APPEND SRCS nrf91_rgbled.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_ARCH_BOARD_COMMON)

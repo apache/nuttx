@@ -490,6 +490,7 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
       case SIOCBTCONNECT:
         {
           FAR struct bt_conn_s *conn;
+
           conn = bt_conn_create_le(&btreq->btr_rmtpeer);
 
           if (!conn)
@@ -538,55 +539,55 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
         }
         break;
 
-       /* SIOCGBTINFO:  Get Bluetooth device Info.  Given the device name,
-        * fill in the btreq_s structure.
-        *
-        * REVISIT:  Little more than a stub at present.  It does return the
-        * device address associated with the device name which in itself is
-        * important.
-        */
+      /* SIOCGBTINFO:  Get Bluetooth device Info.  Given the device name,
+       * fill in the btreq_s structure.
+       *
+       * REVISIT:  Little more than a stub at present.  It does return the
+       * device address associated with the device name which in itself is
+       * important.
+       */
 
-       case SIOCGBTINFO:
-         {
-           memset(&btreq->btru.btri, 0, sizeof(btreq->btru.btri));
-           BLUETOOTH_ADDRCOPY(btreq->btr_bdaddr.val, g_btdev.bdaddr.val);
-           btreq->btr_num_cmd = CONFIG_BLUETOOTH_BUFFER_PREALLOC;
-           btreq->btr_num_acl = CONFIG_BLUETOOTH_BUFFER_PREALLOC;
-           btreq->btr_acl_mtu = BLUETOOTH_MAX_MTU;
-           btreq->btr_sco_mtu = BLUETOOTH_MAX_MTU;
-           btreq->btr_max_acl = CONFIG_IOB_NBUFFERS;
-           ret                = OK;
-         }
-         break;
+      case SIOCGBTINFO:
+        {
+          memset(&btreq->btru.btri, 0, sizeof(btreq->btru.btri));
+          BLUETOOTH_ADDRCOPY(btreq->btr_bdaddr.val, g_btdev.bdaddr.val);
+          btreq->btr_num_cmd = CONFIG_BLUETOOTH_BUFFER_PREALLOC;
+          btreq->btr_num_acl = CONFIG_BLUETOOTH_BUFFER_PREALLOC;
+          btreq->btr_acl_mtu = BLUETOOTH_MAX_MTU;
+          btreq->btr_sco_mtu = BLUETOOTH_MAX_MTU;
+          btreq->btr_max_acl = CONFIG_IOB_NBUFFERS;
+          ret                = OK;
+        }
+        break;
 
-       /* SIOCGBTFEAT
-        *   Get Bluetooth BR/BDR device Features.  This returns the cached
-        *   basic (page 0) and extended (page 1 & 2) features.  Only page 0
-        *   is valid.
-        * SIOCGBTLEFEAT
-        *   Get Bluetooth LE device Features.  This returns the cached page
-        *   0-2  features.  Only page 0 is value.
-        */
+      /* SIOCGBTFEAT
+       *   Get Bluetooth BR/BDR device Features.  This returns the cached
+       *   basic (page 0) and extended (page 1 & 2) features.  Only page 0
+       *   is valid.
+       * SIOCGBTLEFEAT
+       *   Get Bluetooth LE device Features.  This returns the cached page
+       *   0-2  features.  Only page 0 is value.
+       */
 
-       case SIOCGBTFEAT:
-       case SIOCGBTLEFEAT:
-         {
-           FAR const uint8_t *src;
+      case SIOCGBTFEAT:
+      case SIOCGBTLEFEAT:
+        {
+          FAR const uint8_t *src;
 
-           memset(&btreq->btru.btrf, 0, sizeof(btreq->btru.btrf));
-           if (cmd == SIOCGBTFEAT)
-             {
-               src = g_btdev.features;
-             }
-           else
-             {
-               src = g_btdev.le_features;
-             }
+          memset(&btreq->btru.btrf, 0, sizeof(btreq->btru.btrf));
+          if (cmd == SIOCGBTFEAT)
+            {
+              src = g_btdev.features;
+            }
+          else
+            {
+              src = g_btdev.le_features;
+            }
 
-           memcpy(btreq->btr_features0, src, 8);
-           ret = OK;
-         }
-         break;
+          memcpy(btreq->btr_features0, src, 8);
+          ret = OK;
+        }
+        break;
 
       /* SIOCBTADVSTART:  Set advertisement data, scan response data,
        * advertisement parameters and start advertising.
@@ -718,6 +719,12 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
               wlwarn("WARNING:  Peer not connected\n");
               ret = -ENOTCONN;
             }
+          else if (conn->state != BT_CONN_CONNECTED)
+            {
+              wlwarn("WARNING:  Peer connection not established\n");
+              bt_conn_release(conn);
+              ret = -ENOTCONN;
+            }
           else
             {
               struct btnet_wrstate_s wrstate;
@@ -762,10 +769,17 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
               wlwarn("WARNING:  Peer not connected\n");
               ret = -ENOTCONN;
             }
+          else if (conn->state != BT_CONN_CONNECTED)
+            {
+              wlwarn("WARNING:  Peer connection not established\n");
+              bt_conn_release(conn);
+              ret = -ENOTCONN;
+            }
           else
             {
               struct btnet_discoverstate_s dstate;
               FAR struct bt_gatt_discover_params_s *params;
+
               memset(&dstate, 0, sizeof(dstate));
 
               /* Set up the query */
@@ -848,6 +862,12 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
               wlwarn("WARNING: Peer not connected\n");
               ret = -ENOTCONN;
             }
+          else if (conn->state != BT_CONN_CONNECTED)
+            {
+              wlwarn("WARNING: Peer connection not established\n");
+              bt_conn_release(conn);
+              ret = -ENOTCONN;
+            }
           else
             {
               /* Set up for the read */
@@ -917,6 +937,12 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
           if (conn == NULL)
             {
               wlwarn("WARNING:  Peer not connected\n");
+              ret = -ENOTCONN;
+            }
+          else if (conn->state != BT_CONN_CONNECTED)
+            {
+              wlwarn("WARNING:  Peer connection not established\n");
+              bt_conn_release(conn);
               ret = -ENOTCONN;
             }
           else

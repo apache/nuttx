@@ -97,12 +97,7 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
 
   outmsg.sem_done = &sem_done;
 
-  ret = nxsem_init(&sem_done, 0, 0);
-  if (ret < 0)
-    {
-      gerr("ERROR: nxsem_init failed: %d\n", ret);
-      return ret;
-    }
+  nxsem_init(&sem_done, 0, 0);
 
   /* Forward the fill command to the server */
 

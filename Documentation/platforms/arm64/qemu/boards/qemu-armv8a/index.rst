@@ -78,6 +78,45 @@ Running with QEMU:
     -net none -chardev stdio,id=con,mux=on -serial chardev:con \
     -mon chardev=con,mode=readline -kernel ./nuttx
 
+S2OPC
+-----
+
+The ``qemu-armv8a:s2opc`` configuration provides the S2OPC OPC UA server
+example.  Build it from the NuttX source directory::
+
+  $ ./tools/configure.sh -l qemu-armv8a:s2opc
+  $ make -j
+
+Run QEMU with user networking and forward host TCP port 4841 to NuttX::
+
+  $ qemu-system-aarch64 -cpu cortex-a53 -nographic \
+      -machine virt,virtualization=on,gic-version=3 \
+      -global virtio-mmio.force-legacy=false \
+      -chardev stdio,id=con,mux=on -serial chardev:con \
+      -mon chardev=con,mode=readline \
+      -netdev user,id=u1,hostfwd=tcp:127.0.0.1:4841-:4841 \
+      -device virtio-net-device,netdev=u1,bus=virtio-mmio-bus.0 \
+      -kernel ./nuttx
+
+The configured NuttX address and endpoint are ``10.0.2.15`` and
+``opc.tcp://10.0.2.15:4841``.  At the NSH prompt, start the server::
+
+  nsh> ping 10.0.2.2
+  nsh> s2opc &
+  s2opc [4:100]
+
+From another host terminal, read the standard server time node through the
+forwarded port::
+
+  $ uaread -u opc.tcp://127.0.0.1:4841 -n i=2258
+
+Stop the server with the task ID printed by NSH::
+
+  nsh> kill -2 4
+
+See :doc:`/applications/examples/s2opc/index` for command-line overrides and
+:doc:`/applications/netutils/s2opc/index` for toolkit configuration.
+
 ------------------------------------------------------------------
 Single Core with virtio network, block, rng, serial driver (GICv3)
 ------------------------------------------------------------------
@@ -946,4 +985,3 @@ References
 6. Arm Generic Interrupt Controller v3 and v4 Overview
 7. Arm® Generic Interrupt Controller Architecture Specification GIC architecture version 3 and version 4
 8. (DEN0022D.b) Arm Power State Coordination Interface Platform Design Document
-

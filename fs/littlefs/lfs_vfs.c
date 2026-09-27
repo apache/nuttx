@@ -37,6 +37,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/mutex.h>
 
@@ -901,10 +902,12 @@ static int littlefs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case FIOC_FILEPATH:
         {
           FAR char *path = (FAR char *)(uintptr_t)arg;
+
           ret = inode_getpath(inode, path, PATH_MAX);
           if (ret >= 0)
             {
               size_t len = strlen(path);
+
               if (path[len - 1] != '/')
                 {
                   path[len++] = '/';

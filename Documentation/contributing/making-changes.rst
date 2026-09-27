@@ -137,6 +137,24 @@ maybe doing that several times. Then when everything works, the branch is ready 
        $ # run again
        $ ./tools/checkpatch.sh -f my-file.c
 
+   Python files are checked with ``black``, ``isort``, and ``flake8``. Install
+   these tools before checking a Python contribution:
+
+    .. code-block:: bash
+
+       $ pip install black isort flake8
+       $ ./tools/checkpatch.sh -f path/to/script.py
+
+   ``checkpatch.sh`` can also format Python files with the configured
+   ``isort`` settings and ``black``:
+
+    .. code-block:: bash
+
+       $ ./tools/checkpatch.sh -x path/to/script.py
+
+   You can also use :ref:`precommit` to run the repository's configured
+   checks automatically before committing changes.
+
    If you have made a lot of changes, you can also use this bash commandline to see the errors for all the changed C
    files in your branch (assumes you are currently on the branch that has the changed files):
 

@@ -150,6 +150,198 @@
 #ifdef USE_SERIALDRIVER
 #ifdef HAVE_UART
 
+#if !defined STM32_RCC_CCIPR1_USART1SEL || STM32_RCC_CCIPR1_USART1SEL == RCC_CCIPR1_USART1SEL_RCCPCLK2
+#  define STM32_USART1_FREQUENCY STM32_PCLK2_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART1SEL == RCC_CCIPR1_USART1SEL_PLL2QCK
+#  define STM32_USART1_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART1SEL == RCC_CCIPR1_USART1SEL_PLL3QCK
+#  define STM32_USART1_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART1SEL == RCC_CCIPR1_USART1SEL_HSIKERCK
+#  define STM32_USART1_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART1SEL == RCC_CCIPR1_USART1SEL_CSIKERCK
+#  define STM32_USART1_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART1SEL == RCC_CCIPR1_USART1SEL_LSECK
+#  define STM32_USART1_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported USART1 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR1_USART2SEL || STM32_RCC_CCIPR1_USART2SEL == RCC_CCIPR1_USART2SEL_RCCPCLK1
+#  define STM32_USART2_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART2SEL == RCC_CCIPR1_USART2SEL_PLL2QCK
+#  define STM32_USART2_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART2SEL == RCC_CCIPR1_USART2SEL_PLL3QCK
+#  define STM32_USART2_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART2SEL == RCC_CCIPR1_USART2SEL_HSIKERCK
+#  define STM32_USART2_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART2SEL == RCC_CCIPR1_USART2SEL_CSIKERCK
+#  define STM32_USART2_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART2SEL == RCC_CCIPR1_USART2SEL_LSECK
+#  define STM32_USART2_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported USART2 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR1_USART3SEL || STM32_RCC_CCIPR1_USART3SEL == RCC_CCIPR1_USART3SEL_RCCPCLK1
+#  define STM32_USART3_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART3SEL == RCC_CCIPR1_USART3SEL_PLL2QCK
+#  define STM32_USART3_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART3SEL == RCC_CCIPR1_USART3SEL_PLL3QCK
+#  define STM32_USART3_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART3SEL == RCC_CCIPR1_USART3SEL_HSIKERCK
+#  define STM32_USART3_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART3SEL == RCC_CCIPR1_USART3SEL_CSIKERCK
+#  define STM32_USART3_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART3SEL == RCC_CCIPR1_USART3SEL_LSECK
+#  define STM32_USART3_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported USART3 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR1_UART4SEL || STM32_RCC_CCIPR1_UART4SEL == RCC_CCIPR1_UART4SEL_RCCPCLK1
+#  define STM32_UART4_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART4SEL == RCC_CCIPR1_UART4SEL_PLL2QCK
+#  define STM32_UART4_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART4SEL == RCC_CCIPR1_UART4SEL_PLL3QCK
+#  define STM32_UART4_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART4SEL == RCC_CCIPR1_UART4SEL_HSIKERCK
+#  define STM32_UART4_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART4SEL == RCC_CCIPR1_UART4SEL_CSIKERCK
+#  define STM32_UART4_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART4SEL == RCC_CCIPR1_UART4SEL_LSECK
+#  define STM32_UART4_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported UART4 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR1_UART5SEL || STM32_RCC_CCIPR1_UART5SEL == RCC_CCIPR1_UART5SEL_RCCPCLK1
+#  define STM32_UART5_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART5SEL == RCC_CCIPR1_UART5SEL_PLL2QCK
+#  define STM32_UART5_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART5SEL == RCC_CCIPR1_UART5SEL_PLL3QCK
+#  define STM32_UART5_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART5SEL == RCC_CCIPR1_UART5SEL_HSIKERCK
+#  define STM32_UART5_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART5SEL == RCC_CCIPR1_UART5SEL_CSIKERCK
+#  define STM32_UART5_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART5SEL == RCC_CCIPR1_UART5SEL_LSECK
+#  define STM32_UART5_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported UART5 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR1_USART6SEL || STM32_RCC_CCIPR1_USART6SEL == RCC_CCIPR1_USART6SEL_RCCPCLK1
+#  define STM32_USART6_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART6SEL == RCC_CCIPR1_USART6SEL_PLL2QCK
+#  define STM32_USART6_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART6SEL == RCC_CCIPR1_USART6SEL_PLL3QCK
+#  define STM32_USART6_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART6SEL == RCC_CCIPR1_USART6SEL_HSIKERCK
+#  define STM32_USART6_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART6SEL == RCC_CCIPR1_USART6SEL_CSIKERCK
+#  define STM32_USART6_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART6SEL == RCC_CCIPR1_USART6SEL_LSECK
+#  define STM32_USART6_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported USART6 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR1_UART7SEL || STM32_RCC_CCIPR1_UART7SEL == RCC_CCIPR1_UART7SEL_RCCPCLK1
+#  define STM32_UART7_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART7SEL == RCC_CCIPR1_UART7SEL_PLL2QCK
+#  define STM32_UART7_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART7SEL == RCC_CCIPR1_UART7SEL_PLL3QCK
+#  define STM32_UART7_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART7SEL == RCC_CCIPR1_UART7SEL_HSIKERCK
+#  define STM32_UART7_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART7SEL == RCC_CCIPR1_UART7SEL_CSIKERCK
+#  define STM32_UART7_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART7SEL == RCC_CCIPR1_UART7SEL_LSECK
+#  define STM32_UART7_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported UART7 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR1_UART8SEL || STM32_RCC_CCIPR1_UART8SEL == RCC_CCIPR1_UART8SEL_RCCPCLK1
+#  define STM32_UART8_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART8SEL == RCC_CCIPR1_UART8SEL_PLL2QCK
+#  define STM32_UART8_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART8SEL == RCC_CCIPR1_UART8SEL_PLL3QCK
+#  define STM32_UART8_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART8SEL == RCC_CCIPR1_UART8SEL_HSIKERCK
+#  define STM32_UART8_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART8SEL == RCC_CCIPR1_UART8SEL_CSIKERCK
+#  define STM32_UART8_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART8SEL == RCC_CCIPR1_UART8SEL_LSECK
+#  define STM32_UART8_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported UART8 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR1_UART9SEL || STM32_RCC_CCIPR1_UART9SEL == RCC_CCIPR1_UART9SEL_RCCPCLK1
+#  define STM32_UART9_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART9SEL == RCC_CCIPR1_UART9SEL_PLL2QCK
+#  define STM32_UART9_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART9SEL == RCC_CCIPR1_UART9SEL_PLL3QCK
+#  define STM32_UART9_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART9SEL == RCC_CCIPR1_UART9SEL_HSIKERCK
+#  define STM32_UART9_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART9SEL == RCC_CCIPR1_UART9SEL_CSIKERCK
+#  define STM32_UART9_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_UART9SEL == RCC_CCIPR1_UART9SEL_LSECK
+#  define STM32_UART9_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported UART9 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR1_USART10SEL || STM32_RCC_CCIPR1_USART10SEL == RCC_CCIPR1_USART10SEL_RCCPCLK1
+#  define STM32_USART10_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART10SEL == RCC_CCIPR1_USART10SEL_PLL2QCK
+#  define STM32_USART10_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART10SEL == RCC_CCIPR1_USART10SEL_PLL3QCK
+#  define STM32_USART10_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART10SEL == RCC_CCIPR1_USART10SEL_HSIKERCK
+#  define STM32_USART10_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART10SEL == RCC_CCIPR1_USART10SEL_CSIKERCK
+#  define STM32_USART10_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR1_USART10SEL == RCC_CCIPR1_USART10SEL_LSECK
+#  define STM32_USART10_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported USART10 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR2_USART11SEL || STM32_RCC_CCIPR2_USART11SEL == RCC_CCIPR2_USART11SEL_RCCPCLK1
+#  define STM32_USART11_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR2_USART11SEL == RCC_CCIPR2_USART11SEL_PLL2QCK
+#  define STM32_USART11_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR2_USART11SEL == RCC_CCIPR2_USART11SEL_PLL3QCK
+#  define STM32_USART11_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR2_USART11SEL == RCC_CCIPR2_USART11SEL_HSIKERCK
+#  define STM32_USART11_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR2_USART11SEL == RCC_CCIPR2_USART11SEL_CSIKERCK
+#  define STM32_USART11_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR2_USART11SEL == RCC_CCIPR2_USART11SEL_LSECK
+#  define STM32_USART11_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported USART11 Clock Selection"
+#endif
+
+#if !defined STM32_RCC_CCIPR2_UART12SEL || STM32_RCC_CCIPR2_UART12SEL == RCC_CCIPR2_UART12SEL_RCCPCLK1
+#  define STM32_UART12_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif STM32_RCC_CCIPR2_UART12SEL == RCC_CCIPR2_UART12SEL_PLL2QCK
+#  define STM32_UART12_FREQUENCY STM32_PLL2Q_FREQUENCY
+#elif STM32_RCC_CCIPR2_UART12SEL == RCC_CCIPR2_UART12SEL_PLL3QCK
+#  define STM32_UART12_FREQUENCY STM32_PLL3Q_FREQUENCY
+#elif STM32_RCC_CCIPR2_UART12SEL == RCC_CCIPR2_UART12SEL_HSIKERCK
+#  define STM32_UART12_FREQUENCY STM32_HSI_FREQUENCY
+#elif STM32_RCC_CCIPR2_UART12SEL == RCC_CCIPR2_UART12SEL_CSIKERCK
+#  define STM32_UART12_FREQUENCY STM32_CSI_FREQUENCY
+#elif STM32_RCC_CCIPR2_UART12SEL == RCC_CCIPR2_UART12SEL_LSECK
+#  define STM32_UART12_FREQUENCY STM32_LSE_FREQUENCY
+#else
+#  error "Unsupported UART12 Clock Selection"
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -157,8 +349,8 @@
 struct stm32_serial_s
 {
   struct uart_dev_s dev;       /* Generic UART device */
-  uint16_t          ie;        /* Saved interrupt mask bits value */
-  uint16_t          sr;        /* Saved status bits */
+  uint32_t          ie;        /* Saved interrupt mask bits value */
+  uint32_t          sr;        /* Saved status bits */
 
   /* Has been initialized and HW is setup. */
 
@@ -194,7 +386,7 @@ struct stm32_serial_s
   const uint32_t    baud;      /* Configured baud */
 #endif
   const uint8_t     irq;       /* IRQ associated with this USART */
-  const uint32_t    apbclock;  /* PCLK 1 or 2 frequency */
+  const uint32_t    apbclock;  /* Peripheral kernel clock frequency */
   const uint32_t    usartbase; /* Base address of USART registers */
   const uint32_t    tx_gpio;   /* U[S]ART TX GPIO pin configuration */
   const uint32_t    rx_gpio;   /* U[S]ART RX GPIO pin configuration */
@@ -228,6 +420,8 @@ struct stm32_serial_s
   const uint8_t     unconfigure; /* Unconfigure pins on close */
   const bool        islpuart;    /* Is this device a Low Power UART? */
   spinlock_t        lock;
+  const bool wakefromlowpower;      /* Enable interrupt to wake from low power mode */
+  const uint8_t wus;                /* Wake from low power configuration. USART_CR3_WUS_* */
 };
 
 /****************************************************************************
@@ -536,7 +730,7 @@ static struct stm32_serial_s g_usart1priv =
   .bits          = CONFIG_USART1_BITS,
   .stopbits2     = CONFIG_USART1_2STOP,
   .baud          = CONFIG_USART1_BAUD,
-  .apbclock      = STM32_PCLK2_FREQUENCY,
+  .apbclock      = STM32_USART1_FREQUENCY,
   .usartbase     = STM32_USART1_BASE,
   .tx_gpio       = GPIO_USART1_TX,
   .rx_gpio       = GPIO_USART1_RX,
@@ -576,6 +770,10 @@ static struct stm32_serial_s g_usart1priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_USART1_WAKE_FROM_LOW_POWER) && defined(CONFIG_USART1_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_USART1_WUS,
+#endif
 };
 #endif
 
@@ -613,7 +811,7 @@ static struct stm32_serial_s g_usart2priv =
   .bits          = CONFIG_USART2_BITS,
   .stopbits2     = CONFIG_USART2_2STOP,
   .baud          = CONFIG_USART2_BAUD,
-  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .apbclock      = STM32_USART2_FREQUENCY,
   .usartbase     = STM32_USART2_BASE,
   .tx_gpio       = GPIO_USART2_TX,
   .rx_gpio       = GPIO_USART2_RX,
@@ -653,6 +851,10 @@ static struct stm32_serial_s g_usart2priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_USART2_WAKE_FROM_LOW_POWER) && defined(CONFIG_USART2_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_USART2_WUS,
+#endif
 };
 #endif
 
@@ -690,7 +892,7 @@ static struct stm32_serial_s g_usart3priv =
   .bits          = CONFIG_USART3_BITS,
   .stopbits2     = CONFIG_USART3_2STOP,
   .baud          = CONFIG_USART3_BAUD,
-  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .apbclock      = STM32_USART3_FREQUENCY,
   .usartbase     = STM32_USART3_BASE,
   .tx_gpio       = GPIO_USART3_TX,
   .rx_gpio       = GPIO_USART3_RX,
@@ -730,6 +932,10 @@ static struct stm32_serial_s g_usart3priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_USART3_WAKE_FROM_LOW_POWER) && defined(CONFIG_USART3_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_USART3_WUS,
+#endif
 };
 #endif
 
@@ -775,7 +981,7 @@ static struct stm32_serial_s g_uart4priv =
   .rts_gpio      = GPIO_UART4_RTS,
 #  endif
   .baud          = CONFIG_UART4_BAUD,
-  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .apbclock      = STM32_UART4_FREQUENCY,
   .usartbase     = STM32_UART4_BASE,
   .tx_gpio       = GPIO_UART4_TX,
   .rx_gpio       = GPIO_UART4_RX,
@@ -807,6 +1013,10 @@ static struct stm32_serial_s g_uart4priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_UART4_WAKE_FROM_LOW_POWER) && defined(CONFIG_UART4_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_UART4_WUS,
+#endif
 };
 #endif
 
@@ -852,7 +1062,7 @@ static struct stm32_serial_s g_uart5priv =
   .rts_gpio      = GPIO_UART5_RTS,
 #  endif
   .baud           = CONFIG_UART5_BAUD,
-  .apbclock       = STM32_PCLK1_FREQUENCY,
+  .apbclock       = STM32_UART5_FREQUENCY,
   .usartbase      = STM32_UART5_BASE,
   .tx_gpio        = GPIO_UART5_TX,
   .rx_gpio        = GPIO_UART5_RX,
@@ -884,6 +1094,10 @@ static struct stm32_serial_s g_uart5priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_UART5_WAKE_FROM_LOW_POWER) && defined(CONFIG_UART5_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_UART5_WUS,
+#endif
 };
 #endif
 
@@ -921,7 +1135,7 @@ static struct stm32_serial_s g_usart6priv =
   .bits          = CONFIG_USART6_BITS,
   .stopbits2     = CONFIG_USART6_2STOP,
   .baud          = CONFIG_USART6_BAUD,
-  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .apbclock      = STM32_USART6_FREQUENCY,
   .usartbase     = STM32_USART6_BASE,
   .tx_gpio       = GPIO_USART6_TX,
   .rx_gpio       = GPIO_USART6_RX,
@@ -961,6 +1175,10 @@ static struct stm32_serial_s g_usart6priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_USART6_WAKE_FROM_LOW_POWER) && defined(CONFIG_USART6_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_USART6_WUS,
+#endif
 };
 #endif
 
@@ -1006,7 +1224,7 @@ static struct stm32_serial_s g_uart7priv =
   .rts_gpio      = GPIO_UART7_RTS,
 #  endif
   .baud           = CONFIG_UART7_BAUD,
-  .apbclock       = STM32_PCLK1_FREQUENCY,
+  .apbclock       = STM32_UART7_FREQUENCY,
   .usartbase      = STM32_UART7_BASE,
   .tx_gpio        = GPIO_UART7_TX,
   .rx_gpio        = GPIO_UART7_RX,
@@ -1038,6 +1256,10 @@ static struct stm32_serial_s g_uart7priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_UART7_WAKE_FROM_LOW_POWER) && defined(CONFIG_UART7_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_UART7_WUS,
+#endif
 };
 #endif
 
@@ -1083,7 +1305,7 @@ static struct stm32_serial_s g_uart8priv =
   .rts_gpio      = GPIO_UART8_RTS,
 #  endif
   .baud           = CONFIG_UART8_BAUD,
-  .apbclock       = STM32_PCLK1_FREQUENCY,
+  .apbclock       = STM32_UART8_FREQUENCY,
   .usartbase      = STM32_UART8_BASE,
   .tx_gpio        = GPIO_UART8_TX,
   .rx_gpio        = GPIO_UART8_RX,
@@ -1115,6 +1337,10 @@ static struct stm32_serial_s g_uart8priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_UART8_WAKE_FROM_LOW_POWER) && defined(CONFIG_UART8_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_UART8_WUS,
+#endif
 };
 #endif
 
@@ -1160,7 +1386,7 @@ static struct stm32_serial_s g_uart9priv =
   .rts_gpio      = GPIO_UART9_RTS,
 #  endif
   .baud           = CONFIG_UART9_BAUD,
-  .apbclock       = STM32_PCLK1_FREQUENCY,
+  .apbclock       = STM32_UART9_FREQUENCY,
   .usartbase      = STM32_UART9_BASE,
   .tx_gpio        = GPIO_UART9_TX,
   .rx_gpio        = GPIO_UART9_RX,
@@ -1192,6 +1418,10 @@ static struct stm32_serial_s g_uart9priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_UART9_WAKE_FROM_LOW_POWER) && defined(CONFIG_UART9_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_UART9_WUS,
+#endif
 };
 #endif
 
@@ -1229,7 +1459,7 @@ static struct stm32_serial_s g_usart10priv =
   .bits          = CONFIG_USART10_BITS,
   .stopbits2     = CONFIG_USART10_2STOP,
   .baud          = CONFIG_USART10_BAUD,
-  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .apbclock      = STM32_USART10_FREQUENCY,
   .usartbase     = STM32_USART10_BASE,
   .tx_gpio       = GPIO_USART10_TX,
   .rx_gpio       = GPIO_USART10_RX,
@@ -1269,6 +1499,10 @@ static struct stm32_serial_s g_usart10priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_USART10_WAKE_FROM_LOW_POWER) && defined(CONFIG_USART10_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_USART10_WUS,
+#endif
 };
 #endif
 
@@ -1306,7 +1540,7 @@ static struct stm32_serial_s g_usart11priv =
   .bits          = CONFIG_USART11_BITS,
   .stopbits2     = CONFIG_USART11_2STOP,
   .baud          = CONFIG_USART11_BAUD,
-  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .apbclock      = STM32_USART11_FREQUENCY,
   .usartbase     = STM32_USART11_BASE,
   .tx_gpio       = GPIO_USART11_TX,
   .rx_gpio       = GPIO_USART11_RX,
@@ -1346,6 +1580,10 @@ static struct stm32_serial_s g_usart11priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_USART11_WAKE_FROM_LOW_POWER) && defined(CONFIG_USART11_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_USART11_WUS,
+#endif
 };
 #endif
 
@@ -1391,7 +1629,7 @@ static struct stm32_serial_s g_uart12priv =
   .rts_gpio      = GPIO_UART12_RTS,
 #  endif
   .baud           = CONFIG_UART12_BAUD,
-  .apbclock       = STM32_PCLK1_FREQUENCY,
+  .apbclock       = STM32_UART12_FREQUENCY,
   .usartbase      = STM32_UART12_BASE,
   .tx_gpio        = GPIO_UART12_TX,
   .rx_gpio        = GPIO_UART12_RX,
@@ -1423,6 +1661,10 @@ static struct stm32_serial_s g_uart12priv =
                       USART_UNCONFIGURE_DIR
 #endif
       ,
+#if defined(CONFIG_UART12_WAKE_FROM_LOW_POWER) && defined(CONFIG_UART12_WUS)
+  .wakefromlowpower = true,
+  .wus              = CONFIG_UART12_WUS,
+#endif
 };
 #endif
 
@@ -2008,7 +2250,9 @@ static void stm32serial_pm_setsuspend(bool suspend)
   /* Already in desired state? */
 
   if (suspend == g_serialpm.serial_suspended)
-    return;
+    {
+      return;
+    }
 
   g_serialpm.serial_suspended = suspend;
 
@@ -2049,86 +2293,86 @@ static void stm32serial_setapbclock(struct uart_dev_s *dev, bool on)
 
   switch (priv->usartbase)
     {
-    default:
-      return;
+      default:
+        return;
 #ifdef CONFIG_STM32_LPUART1_SERIALDRIVER
-    case STM32_LPUART1_BASE:
-      rcc_en = RCC_APB3ENR_LPUART1EN ;
-      regaddr = STM32_RCC_APB3ENR;
-      break;
+      case STM32_LPUART1_BASE:
+        rcc_en = RCC_APB3ENR_LPUART1EN ;
+        regaddr = STM32_RCC_APB3ENR;
+        break;
 #endif
 #ifdef CONFIG_STM32_USART1_SERIALDRIVER
-    case STM32_USART1_BASE:
-      rcc_en = RCC_APB2ENR_USART1EN ;
-      regaddr = STM32_RCC_APB2ENR;
-      break;
+      case STM32_USART1_BASE:
+        rcc_en = RCC_APB2ENR_USART1EN ;
+        regaddr = STM32_RCC_APB2ENR;
+        break;
 #endif
 #ifdef CONFIG_STM32_USART2_SERIALDRIVER
-    case STM32_USART2_BASE:
-      rcc_en = RCC_APB1LENR_USART2EN;
-      regaddr = STM32_RCC_APB1LENR;
-      break;
+      case STM32_USART2_BASE:
+        rcc_en = RCC_APB1LENR_USART2EN;
+        regaddr = STM32_RCC_APB1LENR;
+        break;
 #endif
 #ifdef CONFIG_STM32_USART3_SERIALDRIVER
-    case STM32_USART3_BASE:
-      rcc_en = RCC_APB1LENR_USART3EN;
-      regaddr = STM32_RCC_APB1LENR;
-      break;
+      case STM32_USART3_BASE:
+        rcc_en = RCC_APB1LENR_USART3EN;
+        regaddr = STM32_RCC_APB1LENR;
+        break;
 #endif
 #ifdef CONFIG_STM32_UART4_SERIALDRIVER
-    case STM32_UART4_BASE:
-      rcc_en = RCC_APB1LENR_UART4EN;
-      regaddr = STM32_RCC_APB1LENR;
-      break;
+      case STM32_UART4_BASE:
+        rcc_en = RCC_APB1LENR_UART4EN;
+        regaddr = STM32_RCC_APB1LENR;
+        break;
 #endif
 #ifdef CONFIG_STM32_UART5_SERIALDRIVER
-    case STM32_UART5_BASE:
-      rcc_en = RCC_APB1LENR_UART5EN;
-      regaddr = STM32_RCC_APB1LENR;
-      break;
+      case STM32_UART5_BASE:
+        rcc_en = RCC_APB1LENR_UART5EN;
+        regaddr = STM32_RCC_APB1LENR;
+        break;
 #endif
 #ifdef CONFIG_STM32_USART6_SERIALDRIVER
-    case STM32_USART6_BASE:
-      rcc_en = RCC_APB1LENR_USART6EN;
-      regaddr = STM32_RCC_APB1LENR;
-      break;
+      case STM32_USART6_BASE:
+        rcc_en = RCC_APB1LENR_USART6EN;
+        regaddr = STM32_RCC_APB1LENR;
+        break;
 #endif
 #ifdef CONFIG_STM32_UART7_SERIALDRIVER
-    case STM32_UART7_BASE:
-      rcc_en = RCC_APB1LENR_UART7EN;
-      regaddr = STM32_RCC_APB1LENR;
-      break;
+      case STM32_UART7_BASE:
+        rcc_en = RCC_APB1LENR_UART7EN;
+        regaddr = STM32_RCC_APB1LENR;
+        break;
 #endif
 #ifdef CONFIG_STM32_UART8_SERIALDRIVER
-    case STM32_UART8_BASE:
-      rcc_en = RCC_APB1LENR_UART8EN;
-      regaddr = STM32_RCC_APB1LENR;
-      break;
+      case STM32_UART8_BASE:
+        rcc_en = RCC_APB1LENR_UART8EN;
+        regaddr = STM32_RCC_APB1LENR;
+        break;
 #endif
 #ifdef CONFIG_STM32_UART9_SERIALDRIVER
-    case STM32_UART9_BASE:
-      rcc_en = RCC_APB1HENR_UART9EN;
-      regaddr = STM32_RCC_APB1HENR;
-      break;
+      case STM32_UART9_BASE:
+        rcc_en = RCC_APB1HENR_UART9EN;
+        regaddr = STM32_RCC_APB1HENR;
+        break;
 #endif
 
 #ifdef CONFIG_STM32_USART10_SERIALDRIVER
-    case STM32_USART10_BASE:
-      rcc_en = RCC_APB1LENR_USART10EN;
-      regaddr = STM32_RCC_APB1LENR;
-      break;
+      case STM32_USART10_BASE:
+        rcc_en = RCC_APB1LENR_USART10EN;
+        regaddr = STM32_RCC_APB1LENR;
+        break;
 #endif
 #ifdef CONFIG_STM32_USART11_SERIALDRIVER
-    case STM32_USART11_BASE:
-      rcc_en = RCC_APB1LENR_USART11EN;
-      regaddr = STM32_RCC_APB1LENR;
-      break;
+      case STM32_USART11_BASE:
+        rcc_en = RCC_APB1LENR_USART11EN;
+        regaddr = STM32_RCC_APB1LENR;
+        break;
 #endif
 #ifdef CONFIG_STM32_UART12_SERIALDRIVER
-    case STM32_UART12_BASE:
-      rcc_en = RCC_APB1HENR_UART12EN;
-      regaddr = STM32_RCC_APB1HENR;
-      break;
+      case STM32_UART12_BASE:
+        rcc_en = RCC_APB1HENR_UART12EN;
+        regaddr = STM32_RCC_APB1HENR;
+        break;
 #endif
     }
 
@@ -2237,19 +2481,21 @@ static int stm32serial_setup(struct uart_dev_s *dev)
 
   /* Configure CR1 */
 
-  /* Clear TE, REm and all interrupt enable bits */
+  /* Clear UE, TE, RE, and all interrupt enable bits */
 
   regval  = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
 
 #ifdef CONFIG_STM32_LPUART1
   if (priv->islpuart == true)
     {
-      regval &= ~(USART_CR1_TE | USART_CR1_RE | LPUART_CR1_ALLINTS);
+      regval &= ~(USART_CR1_UE | USART_CR1_TE | USART_CR1_RE |
+                  LPUART_CR1_ALLINTS);
     }
   else
 #endif
     {
-      regval &= ~(USART_CR1_TE | USART_CR1_RE | USART_CR1_ALLINTS);
+      regval &= ~(USART_CR1_UE | USART_CR1_TE | USART_CR1_RE |
+                  USART_CR1_ALLINTS);
     }
 
   stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, regval);
@@ -2260,7 +2506,13 @@ static int stm32serial_setup(struct uart_dev_s *dev)
 
   regval  = stm32serial_getreg(priv, STM32_USART_CR3_OFFSET);
   regval &= ~(USART_CR3_CTSIE | USART_CR3_CTSE | USART_CR3_RTSE |
-              USART_CR3_EIE);
+              USART_CR3_EIE | USART_CR3_WUFIE);
+
+  if (priv->wakefromlowpower)
+    {
+      regval |= USART_CR3_WUFIE;
+      regval |= (priv->wus << USART_CR3_WUS_SHIFT);
+    }
 
   stm32serial_putreg(priv, STM32_USART_CR3_OFFSET, regval);
 
@@ -2271,7 +2523,8 @@ static int stm32serial_setup(struct uart_dev_s *dev)
   /* Enable Rx, Tx, and the USART */
 
   regval      = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
-  regval     |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
+  regval     |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE |
+                 USART_CR1_FIFOEN);
   stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, regval);
 
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
@@ -2558,6 +2811,7 @@ static void stm32serial_detach(struct uart_dev_s *dev)
 {
   struct stm32_serial_s *priv =
     (struct stm32_serial_s *)dev->priv;
+
   up_disable_irq(priv->irq);
   irq_detach(priv->irq);
 }
@@ -2619,6 +2873,7 @@ static int stm32serial_interrupt(int irq, void *context, void *arg)
        * "           "    USART_ISR_NE   Noise Error
        * "           "    USART_ISR_ORE  Overrun Error Detected
        * USART_CR3_CTSIE  USART_ISR_CTS  CTS flag               (not used)
+       * USART_CR3_WUFIE  USART_ISR_WUF  wake up from low power
        *
        * NOTE: Some of these status bits must be cleared by explicitly
        * writing one to the ICR register: USART_ICR_CTSCF, USART_ICR_LBDCF.
@@ -2642,6 +2897,13 @@ static int stm32serial_interrupt(int irq, void *context, void *arg)
           stm32serial_restoreusartint(priv, priv->ie & ~USART_CR1_TCIE);
         }
 #endif
+
+      /* Wake up from low power mode interrupt */
+
+      if ((priv->sr & USART_ISR_WUF) != 0)
+        {
+          stm32serial_putreg(priv, STM32_USART_ICR_OFFSET, USART_ICR_WUCF);
+        }
 
       /* Handle incoming, receive bytes. */
 
@@ -2815,385 +3077,387 @@ static int stm32serial_ioctl(struct file *filep, int cmd,
   switch (cmd)
     {
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
-    case TIOCSERGSTRUCT:
-      {
-        struct stm32_serial_s *user;
+      case TIOCSERGSTRUCT:
+        {
+          struct stm32_serial_s *user;
 
-        user = (struct stm32_serial_s *)arg;
+          user = (struct stm32_serial_s *)arg;
 
-        if (!user)
-          {
-            ret = -EINVAL;
-          }
-        else
-          {
-            memcpy(user, dev, sizeof(struct stm32_serial_s));
-          }
-      }
-      break;
+          if (!user)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              memcpy(user, dev, sizeof(struct stm32_serial_s));
+            }
+        }
+        break;
 #endif
 
 #ifdef CONFIG_STM32_USART_SINGLEWIRE
-    case TIOCSSINGLEWIRE:
-      {
-        uint32_t cr1;
-        uint32_t cr1_ue;
-        irqstate_t flags;
+      case TIOCSSINGLEWIRE:
+        {
+          uint32_t cr1;
+          uint32_t cr1_ue;
+          irqstate_t flags;
 
-        flags = enter_critical_section();
+          flags = enter_critical_section();
 
-        /* Get the original state of UE */
+          /* Get the original state of UE */
 
-        cr1    = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
-        cr1_ue = cr1 & USART_CR1_UE;
-        cr1   &= ~USART_CR1_UE;
+          cr1    = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
+          cr1_ue = cr1 & USART_CR1_UE;
+          cr1   &= ~USART_CR1_UE;
 
-        /* Disable UE, HDSEL can only be written when UE=0 */
+          /* Disable UE, HDSEL can only be written when UE=0 */
 
-        stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1);
+          stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1);
 
-        /* Change the TX port to be open-drain/push-pull and enable/disable
-         * half-duplex mode.
-         */
+          /* Change the TX port to be open-drain/push-pull and enable/disable
+           * half-duplex mode.
+           */
 
-        uint32_t cr = stm32serial_getreg(priv, STM32_USART_CR3_OFFSET);
+          uint32_t cr = stm32serial_getreg(priv, STM32_USART_CR3_OFFSET);
 
-        if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
-          {
-            uint32_t gpio_val = GPIO_OPENDRAIN;
+          if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
+            {
+              uint32_t gpio_val = GPIO_OPENDRAIN;
 
-            if ((arg & SER_SINGLEWIRE_PULL_MASK) == SER_SINGLEWIRE_PULLUP)
-              {
-                gpio_val |= GPIO_PULLUP;
-              }
-            else
-              {
-                gpio_val |= GPIO_FLOAT;
-              }
+              if ((arg & SER_SINGLEWIRE_PULL_MASK) == SER_SINGLEWIRE_PULLUP)
+                {
+                  gpio_val |= GPIO_PULLUP;
+                }
+              else
+                {
+                  gpio_val |= GPIO_FLOAT;
+                }
 
-            if ((arg & SER_SINGLEWIRE_PULL_MASK) == SER_SINGLEWIRE_PULLDOWN)
-              {
-                gpio_val |= GPIO_PULLDOWN;
-              }
-            else
-              {
-                gpio_val |= GPIO_FLOAT;
-              }
+              if ((arg & SER_SINGLEWIRE_PULL_MASK) ==
+                  SER_SINGLEWIRE_PULLDOWN)
+                {
+                  gpio_val |= GPIO_PULLDOWN;
+                }
+              else
+                {
+                  gpio_val |= GPIO_FLOAT;
+                }
 
-            if (priv->tx_gpio != 0)
-              {
-                stm32_configgpio((priv->tx_gpio &
-                                  ~(GPIO_PUPD_MASK | GPIO_OPENDRAIN)) |
-                                  gpio_val);
-              }
+              if (priv->tx_gpio != 0)
+                {
+                  stm32_configgpio((priv->tx_gpio &
+                                    ~(GPIO_PUPD_MASK | GPIO_OPENDRAIN)) |
+                                    gpio_val);
+                }
 
-            cr |= USART_CR3_HDSEL;
-          }
-        else
-          {
-            if (priv->tx_gpio != 0)
-              {
-                stm32_configgpio((priv->tx_gpio &
-                                  ~(GPIO_PUPD_MASK | GPIO_OPENDRAIN)) |
-                                  GPIO_PUSHPULL);
-              }
+              cr |= USART_CR3_HDSEL;
+            }
+          else
+            {
+              if (priv->tx_gpio != 0)
+                {
+                  stm32_configgpio((priv->tx_gpio &
+                                    ~(GPIO_PUPD_MASK | GPIO_OPENDRAIN)) |
+                                    GPIO_PUSHPULL);
+                }
 
-            cr &= ~USART_CR3_HDSEL;
-          }
+              cr &= ~USART_CR3_HDSEL;
+            }
 
-        stm32serial_putreg(priv, STM32_USART_CR3_OFFSET, cr);
+          stm32serial_putreg(priv, STM32_USART_CR3_OFFSET, cr);
 
-        /* Re-enable UE if appropriate */
+          /* Re-enable UE if appropriate */
 
-        stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1 | cr1_ue);
-        leave_critical_section(flags);
-      }
-     break;
+          stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1 | cr1_ue);
+          leave_critical_section(flags);
+        }
+        break;
 #endif
 
 #ifdef CONFIG_STM32_USART_INVERT
-    case TIOCSINVERT:
-      {
-        uint32_t cr1;
-        uint32_t cr1_ue;
-        irqstate_t flags;
+      case TIOCSINVERT:
+        {
+          uint32_t cr1;
+          uint32_t cr1_ue;
+          irqstate_t flags;
 
-        flags = enter_critical_section();
+          flags = enter_critical_section();
 
-        /* Get the original state of UE */
+          /* Get the original state of UE */
 
-        cr1    = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
-        cr1_ue = cr1 & USART_CR1_UE;
-        cr1   &= ~USART_CR1_UE;
+          cr1    = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
+          cr1_ue = cr1 & USART_CR1_UE;
+          cr1   &= ~USART_CR1_UE;
 
-        /* Disable UE, {R,T}XINV can only be written when UE=0 */
+          /* Disable UE, {R,T}XINV can only be written when UE=0 */
 
-        stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1);
+          stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1);
 
-        /* Enable/disable signal inversion. */
+          /* Enable/disable signal inversion. */
 
-        uint32_t cr = stm32serial_getreg(priv, STM32_USART_CR2_OFFSET);
+          uint32_t cr = stm32serial_getreg(priv, STM32_USART_CR2_OFFSET);
 
-        if (arg & SER_INVERT_ENABLED_RX)
-          {
-            cr |= USART_CR2_RXINV;
-          }
-        else
-          {
-            cr &= ~USART_CR2_RXINV;
-          }
+          if (arg & SER_INVERT_ENABLED_RX)
+            {
+              cr |= USART_CR2_RXINV;
+            }
+          else
+            {
+              cr &= ~USART_CR2_RXINV;
+            }
 
-        if (arg & SER_INVERT_ENABLED_TX)
-          {
-            cr |= USART_CR2_TXINV;
-          }
-        else
-          {
-            cr &= ~USART_CR2_TXINV;
-          }
+          if (arg & SER_INVERT_ENABLED_TX)
+            {
+              cr |= USART_CR2_TXINV;
+            }
+          else
+            {
+              cr &= ~USART_CR2_TXINV;
+            }
 
-        stm32serial_putreg(priv, STM32_USART_CR2_OFFSET, cr);
+          stm32serial_putreg(priv, STM32_USART_CR2_OFFSET, cr);
 
-        /* Re-enable UE if appropriate */
+          /* Re-enable UE if appropriate */
 
-        stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1 | cr1_ue);
-        leave_critical_section(flags);
-      }
-     break;
+          stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1 | cr1_ue);
+          leave_critical_section(flags);
+        }
+        break;
 #endif
 
 #ifdef CONFIG_STM32_USART_SWAP
-    case TIOCSSWAP:
-      {
-        uint32_t cr1;
-        uint32_t cr1_ue;
-        irqstate_t flags;
+      case TIOCSSWAP:
+        {
+          uint32_t cr1;
+          uint32_t cr1_ue;
+          irqstate_t flags;
 
-        flags = enter_critical_section();
+          flags = enter_critical_section();
 
-        /* Get the original state of UE */
+          /* Get the original state of UE */
 
-        cr1    = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
-        cr1_ue = cr1 & USART_CR1_UE;
-        cr1   &= ~USART_CR1_UE;
+          cr1    = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
+          cr1_ue = cr1 & USART_CR1_UE;
+          cr1   &= ~USART_CR1_UE;
 
-        /* Disable UE, SWAP can only be written when UE=0 */
+          /* Disable UE, SWAP can only be written when UE=0 */
 
-        stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1);
+          stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1);
 
-        /* Enable/disable Swap mode. */
+          /* Enable/disable Swap mode. */
 
-        uint32_t cr = stm32serial_getreg(priv, STM32_USART_CR2_OFFSET);
+          uint32_t cr = stm32serial_getreg(priv, STM32_USART_CR2_OFFSET);
 
-        if (arg == SER_SWAP_ENABLED)
-          {
-            cr |= USART_CR2_SWAP;
-          }
-        else
-          {
-            cr &= ~USART_CR2_SWAP;
-          }
+          if (arg == SER_SWAP_ENABLED)
+            {
+              cr |= USART_CR2_SWAP;
+            }
+          else
+            {
+              cr &= ~USART_CR2_SWAP;
+            }
 
-        stm32serial_putreg(priv, STM32_USART_CR2_OFFSET, cr);
+          stm32serial_putreg(priv, STM32_USART_CR2_OFFSET, cr);
 
-        /* Re-enable UE if appropriate */
+          /* Re-enable UE if appropriate */
 
-        stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1 | cr1_ue);
-        leave_critical_section(flags);
-      }
-     break;
+          stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1 | cr1_ue);
+          leave_critical_section(flags);
+        }
+        break;
 #endif
 
 #ifdef CONFIG_SERIAL_TERMIOS
-    case TCGETS:
-      {
-        struct termios *termiosp = (struct termios *)arg;
+      case TCGETS:
+        {
+          struct termios *termiosp = (struct termios *)arg;
 
-        if (!termiosp)
-          {
-            ret = -EINVAL;
-            break;
-          }
+          if (!termiosp)
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        cfsetispeed(termiosp, priv->baud);
+          cfsetispeed(termiosp, priv->baud);
 
-        /* Note that since we only support 8/9 bit modes and
-         * there is no way to report 9-bit mode, we always claim 8.
-         */
+          /* Note that since we only support 8/9 bit modes and
+           * there is no way to report 9-bit mode, we always claim 8.
+           */
 
-        termiosp->c_cflag =
-          ((priv->parity != 0) ? PARENB : 0) |
-          ((priv->parity == 1) ? PARODD : 0) |
-          ((priv->stopbits2) ? CSTOPB : 0) |
+          termiosp->c_cflag =
+            ((priv->parity != 0) ? PARENB : 0) |
+            ((priv->parity == 1) ? PARODD : 0) |
+            ((priv->stopbits2) ? CSTOPB : 0) |
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-          ((priv->oflow) ? CCTS_OFLOW : 0) |
+            ((priv->oflow) ? CCTS_OFLOW : 0) |
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-          ((priv->iflow) ? CRTS_IFLOW : 0) |
+            ((priv->iflow) ? CRTS_IFLOW : 0) |
 #endif
-          CS8;
+            CS8;
 
-        /* TODO: CRTS_IFLOW, CCTS_OFLOW */
-      }
-      break;
+          /* TODO: CRTS_IFLOW, CCTS_OFLOW */
+        }
+        break;
 
-    case TCSETS:
-      {
-        struct termios *termiosp = (struct termios *)arg;
+      case TCSETS:
+        {
+          struct termios *termiosp = (struct termios *)arg;
 
-        if (!termiosp)
-          {
-            ret = -EINVAL;
-            break;
-          }
+          if (!termiosp)
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        /* Perform some sanity checks before accepting any changes */
+          /* Perform some sanity checks before accepting any changes */
 
-        if (((termiosp->c_cflag & CSIZE) != CS8)
+          if (((termiosp->c_cflag & CSIZE) != CS8)
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-            || ((termiosp->c_cflag & CCTS_OFLOW) && (priv->cts_gpio == 0))
+              || ((termiosp->c_cflag & CCTS_OFLOW) && (priv->cts_gpio == 0))
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-            || ((termiosp->c_cflag & CRTS_IFLOW) && (priv->rts_gpio == 0))
+              || ((termiosp->c_cflag & CRTS_IFLOW) && (priv->rts_gpio == 0))
 #endif
-           )
-          {
-            ret = -EINVAL;
-            break;
-          }
+             )
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        if (termiosp->c_cflag & PARENB)
-          {
-            priv->parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
-          }
-        else
-          {
-            priv->parity = 0;
-          }
+          if (termiosp->c_cflag & PARENB)
+            {
+              priv->parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
+            }
+          else
+            {
+              priv->parity = 0;
+            }
 
-        priv->stopbits2 = (termiosp->c_cflag & CSTOPB) != 0;
+          priv->stopbits2 = (termiosp->c_cflag & CSTOPB) != 0;
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-        priv->oflow = (termiosp->c_cflag & CCTS_OFLOW) != 0;
+          priv->oflow = (termiosp->c_cflag & CCTS_OFLOW) != 0;
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-        priv->iflow = (termiosp->c_cflag & CRTS_IFLOW) != 0;
+          priv->iflow = (termiosp->c_cflag & CRTS_IFLOW) != 0;
 #endif
 
-        /* Note that since there is no way to request 9-bit mode
-         * and no way to support 5/6/7-bit modes, we ignore them
-         * all here.
-         */
+          /* Note that since there is no way to request 9-bit mode
+           * and no way to support 5/6/7-bit modes, we ignore them
+           * all here.
+           */
 
-        /* Note that only cfgetispeed is used because we have knowledge
-         * that only one speed is supported.
-         */
+          /* Note that only cfgetispeed is used because we have knowledge
+           * that only one speed is supported.
+           */
 
-        priv->baud = cfgetispeed(termiosp);
+          priv->baud = cfgetispeed(termiosp);
 
-        /* Effect the changes immediately - note that we do not implement
-         * TCSADRAIN / TCSAFLUSH
-         */
+          /* Effect the changes immediately - note that we do not implement
+           * TCSADRAIN / TCSAFLUSH
+           */
 
-        stm32serial_setformat(dev);
-      }
-      break;
+          stm32serial_setformat(dev);
+        }
+        break;
 #endif /* CONFIG_SERIAL_TERMIOS */
 
 #ifdef CONFIG_STM32_USART_BREAKS
 #  ifdef CONFIG_STM32_SERIALBRK_BSDCOMPAT
-    case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
-      {
-        irqstate_t flags;
+      case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
+        {
+          irqstate_t flags;
 
-        flags = enter_critical_section();
+          flags = enter_critical_section();
 
-        /* Disable any further tx activity */
+          /* Disable any further tx activity */
 
-        priv->ie |= USART_CR1_IE_BREAK_INPROGRESS;
+          priv->ie |= USART_CR1_IE_BREAK_INPROGRESS;
 
-        stm32serial_txint(dev, false);
+          stm32serial_txint(dev, false);
 
-        /* Configure TX as a GPIO output pin and Send a break signal */
+          /* Configure TX as a GPIO output pin and Send a break signal */
 
-        if (priv->tx_gpio != 0)
-          {
-            uint32_t tx_break = GPIO_OUTPUT |
-                    (~(GPIO_MODE_MASK | GPIO_OUTPUT_SET) & priv->tx_gpio);
-            stm32_configgpio(tx_break);
-          }
+          if (priv->tx_gpio != 0)
+            {
+              uint32_t tx_break = GPIO_OUTPUT |
+                      (~(GPIO_MODE_MASK | GPIO_OUTPUT_SET) & priv->tx_gpio);
 
-        leave_critical_section(flags);
-      }
-      break;
+              stm32_configgpio(tx_break);
+            }
 
-    case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
-      {
-        irqstate_t flags;
+          leave_critical_section(flags);
+        }
+        break;
 
-        flags = enter_critical_section();
+      case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
+        {
+          irqstate_t flags;
 
-        /* Configure TX back to U(S)ART */
+          flags = enter_critical_section();
 
-        if (priv->tx_gpio != 0)
-          {
-            stm32_configgpio(priv->tx_gpio);
-          }
+          /* Configure TX back to U(S)ART */
 
-        priv->ie &= ~USART_CR1_IE_BREAK_INPROGRESS;
+          if (priv->tx_gpio != 0)
+            {
+              stm32_configgpio(priv->tx_gpio);
+            }
 
-        /* Enable further tx activity */
+          priv->ie &= ~USART_CR1_IE_BREAK_INPROGRESS;
 
-        stm32serial_txint(dev, true);
+          /* Enable further tx activity */
 
-        leave_critical_section(flags);
-      }
-      break;
+          stm32serial_txint(dev, true);
+
+          leave_critical_section(flags);
+        }
+        break;
 #  else
-    case TIOCSBRK:  /* No BSD compatibility: Turn break on for M bit times */
-      {
-        uint32_t cr1;
-        irqstate_t flags;
+      case TIOCSBRK:  /* No BSD compatibility: Turn break on for M bit times */
+        {
+          uint32_t cr1;
+          irqstate_t flags;
 
-        flags = enter_critical_section();
-        cr1   = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
-        stm32serial_putreg(priv, STM32_USART_CR1_OFFSET,
-                             cr1 | USART_CR1_SBK);
-        leave_critical_section(flags);
-      }
-      break;
+          flags = enter_critical_section();
+          cr1   = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
+          stm32serial_putreg(priv, STM32_USART_CR1_OFFSET,
+                               cr1 | USART_CR1_SBK);
+          leave_critical_section(flags);
+        }
+        break;
 
-    case TIOCCBRK:  /* No BSD compatibility: May turn off break too soon */
-      {
-        uint32_t cr1;
-        irqstate_t flags;
+      case TIOCCBRK:  /* No BSD compatibility: May turn off break too soon */
+        {
+          uint32_t cr1;
+          irqstate_t flags;
 
-        flags = enter_critical_section();
-        cr1   = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
-        stm32serial_putreg(priv, STM32_USART_CR1_OFFSET,
-                             cr1 & ~USART_CR1_SBK);
-        leave_critical_section(flags);
-      }
-      break;
+          flags = enter_critical_section();
+          cr1   = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
+          stm32serial_putreg(priv, STM32_USART_CR1_OFFSET,
+                               cr1 & ~USART_CR1_SBK);
+          leave_critical_section(flags);
+        }
+        break;
 #  endif
 #endif
 #ifdef HAVE_RS485
-    case TIOCSRS485:  /* Set RS485 mode, arg: pointer to struct serial_rs485 */
-      {
-        ret = stm32serial_set_rs485_mode(
-          priv, (const struct serial_rs485 *)((uintptr_t)arg));
-      }
-      break;
+      case TIOCSRS485:  /* Set RS485 mode, arg: pointer to struct serial_rs485 */
+        {
+          ret = stm32serial_set_rs485_mode(
+            priv, (const struct serial_rs485 *)((uintptr_t)arg));
+        }
+        break;
 
-    case TIOCGRS485:  /* Get RS485 mode, arg: pointer to struct serial_rs485 */
-      {
-        ret = stm32serial_get_rs485_mode(
-          priv, (struct serial_rs485 *)((uintptr_t)arg));
-      }
-      break;
+      case TIOCGRS485:  /* Get RS485 mode, arg: pointer to struct serial_rs485 */
+        {
+          ret = stm32serial_get_rs485_mode(
+            priv, (struct serial_rs485 *)((uintptr_t)arg));
+        }
+        break;
 #endif
-    default:
-      ret = -ENOTTY;
-      break;
+      default:
+        ret = -ENOTTY;
+        break;
     }
 
   return ret;
@@ -3910,62 +4174,62 @@ static int stm32serial_pmprepare(struct pm_callback_s *cb, int domain,
 
   switch (pmstate)
     {
-    case PM_NORMAL:
-    case PM_IDLE:
-      break;
+      case PM_NORMAL:
+      case PM_IDLE:
+        break;
 
-    case PM_STANDBY:
-    case PM_SLEEP:
+      case PM_STANDBY:
+      case PM_SLEEP:
 
 #ifdef SERIAL_HAVE_DMA
-      /* Flush Rx DMA buffers before checking state of serial device
-       * buffers.
-       */
+        /* Flush Rx DMA buffers before checking state of serial device
+         * buffers.
+         */
 
-      stm32_serial_dma_poll();
+        stm32_serial_dma_poll();
 #endif
 
-      /* Check if any of the active ports have data pending on Tx/Rx
-       * buffers.
-       */
+        /* Check if any of the active ports have data pending on Tx/Rx
+         * buffers.
+         */
 
-      for (n = 0; n < STM32_NLPUART + STM32_NUSART + STM32_NUART; n++)
-        {
-          struct stm32_serial_s *priv = g_uart_devs[n];
+        for (n = 0; n < STM32_NLPUART + STM32_NUSART + STM32_NUART; n++)
+          {
+            struct stm32_serial_s *priv = g_uart_devs[n];
 
-          if (!priv || !priv->initialized)
-            {
-              /* Not active, skip. */
+            if (!priv || !priv->initialized)
+              {
+                /* Not active, skip. */
 
-              continue;
-            }
+                continue;
+              }
 
-          if (priv->suspended)
-            {
-              /* Port already suspended, skip. */
+            if (priv->suspended)
+              {
+                /* Port already suspended, skip. */
 
-              continue;
-            }
+                continue;
+              }
 
-          /* Check if port has data pending (Rx & Tx). */
+            /* Check if port has data pending (Rx & Tx). */
 
-          if (priv->dev.xmit.head != priv->dev.xmit.tail)
-            {
-              return ERROR;
-            }
+            if (priv->dev.xmit.head != priv->dev.xmit.tail)
+              {
+                return ERROR;
+              }
 
-          if (priv->dev.recv.head != priv->dev.recv.tail)
-            {
-              return ERROR;
-            }
-        }
-      break;
+            if (priv->dev.recv.head != priv->dev.recv.tail)
+              {
+                return ERROR;
+              }
+          }
+        break;
 
-    default:
+      default:
 
-      /* Should not get here */
+        /* Should not get here */
 
-      break;
+        break;
     }
 
   return OK;
@@ -4108,9 +4372,9 @@ void arm_serialinit(void)
 #ifdef SERIAL_HAVE_DMA
 void stm32_serial_dma_poll(void)
 {
-    irqstate_t flags;
+  irqstate_t flags;
 
-    flags = enter_critical_section();
+  flags = enter_critical_section();
 
 #ifdef CONFIG_LPUART1_RXDMA
   if (g_lpuart1priv.rxdma != NULL)

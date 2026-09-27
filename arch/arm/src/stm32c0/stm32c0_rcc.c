@@ -195,10 +195,10 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR_USBEN;
 #endif
 
-#ifdef CONFIG_STM32_CRC
-  /* CRC clock enable */
+#if defined(CONFIG_STM32_CRS) || defined(STM32_USE_HSI48)
+  /* Clock recovery system clock enable */
 
-  regval |= RCC_APB1ENR_CRCEN;
+  regval |= RCC_APB1ENR_CRSEN;
 #endif
 
 #ifdef CONFIG_STM32_USART2
@@ -464,6 +464,15 @@ static void stm32_stdclockconfig(void)
   regval |= STM32_FDCAN1_SEL;
   putreg32(regval, STM32_RCC_CCIPR1);
 #endif
+
+#ifdef CONFIG_STM32_USB
+  /* USB kernel clock from HSIUSB48 */
+
+  regval  = getreg32(STM32_RCC_CCIPR2);
+  regval &= ~RCC_CCIPR2_USBSEL_MASK;
+  regval |= RCC_CCIPR2_USBSEL_HSIUSB48;
+  putreg32(regval, STM32_RCC_CCIPR2);
+#endif
 }
 #endif
 
@@ -477,6 +486,12 @@ static inline void rcc_enableperipherals(void)
   rcc_enableahb();
   rcc_enableapb2();
   rcc_enableapb1();
+
+#ifdef STM32_USE_HSI48
+  /* Enable HSIUSB48 clocking for USB */
+
+  stm32_enable_hsi48(STM32_HSI48_SYNCSRC);
+#endif
 }
 
 /****************************************************************************

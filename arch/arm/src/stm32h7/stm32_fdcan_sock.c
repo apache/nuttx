@@ -514,49 +514,57 @@ static void fdcan_errint(struct fdcan_driver_s *priv, bool enable);
 #ifdef CONFIG_STM32_FDCAN_REGDEBUG
 static void fdcan_dumpregs(struct fdcan_driver_s *priv)
 {
-  printf("-------------- FDCAN Reg Dump ----------------\n");
-  printf("CAN%d Base: 0x%lx\n", priv->iface_idx, priv->base);
+  ninfo("-------------- FDCAN Reg Dump ----------------\n");
+  ninfo("CAN%d Base: 0x%lx\n", priv->iface_idx, priv->base);
 
   uint32_t regval;
 
   regval = getreg32(priv->base + STM32_FDCAN_CCCR_OFFSET);
-  printf("CCCR = 0x%lx\n", regval);
+  ninfo("CCCR = 0x%lx\n", regval);
   regval = getreg32(priv->base + STM32_FDCAN_ECR_OFFSET);
-  printf("ECR  = 0x%lx\n", regval);
+  ninfo("ECR  = 0x%lx\n", regval);
 
   regval = getreg32(priv->base + STM32_FDCAN_NBTP_OFFSET);
-  printf("NBTP = 0x%lx\n", regval);
+  ninfo("NBTP = 0x%lx\n", regval);
   regval = getreg32(priv->base + STM32_FDCAN_DBTP_OFFSET);
-  printf("DBTP = 0x%lx\n", regval);
+  ninfo("DBTP = 0x%lx\n", regval);
 
   regval = getreg32(priv->base + STM32_FDCAN_TXBC_OFFSET);
-  printf("TXBC = 0x%lx\n", regval);
+  ninfo("TXBC = 0x%lx\n", regval);
+  regval = getreg32(priv->base + STM32_FDCAN_TXFQS_OFFSET);
+  ninfo("TXFQS = 0x%lx\n", regval);
   regval = getreg32(priv->base + STM32_FDCAN_RXF0C_OFFSET);
-  printf("RXF0C = 0x%lx\n", regval);
+  ninfo("RXF0C = 0x%lx\n", regval);
+  regval = getreg32(priv->base + STM32_FDCAN_RXF0S_OFFSET);
+  ninfo("RXF0S = 0x%lx\n", regval);
+  regval = getreg32(priv->base + STM32_FDCAN_RXF1C_OFFSET);
+  ninfo("RXF1C = 0x%lx\n", regval);
+  regval = getreg32(priv->base + STM32_FDCAN_RXF1S_OFFSET);
+  ninfo("RXF1S = 0x%lx\n", regval);
 
   regval = getreg32(priv->base + STM32_FDCAN_TXESC_OFFSET);
-  printf("TXESC = 0x%lx\n", regval);
+  ninfo("TXESC = 0x%lx\n", regval);
   regval = getreg32(priv->base + STM32_FDCAN_RXESC_OFFSET);
-  printf("RXESC = 0x%lx\n", regval);
+  ninfo("RXESC = 0x%lx\n", regval);
 
   regval = getreg32(priv->base + STM32_FDCAN_IE_OFFSET);
-  printf("IE   = 0x%lx\n", regval);
+  ninfo("IE   = 0x%lx\n", regval);
   regval = getreg32(priv->base + STM32_FDCAN_ILE_OFFSET);
-  printf("ILE = 0x%lx\n", regval);
+  ninfo("ILE = 0x%lx\n", regval);
   regval = getreg32(priv->base + STM32_FDCAN_ILS_OFFSET);
-  printf("ILS = 0x%lx\n", regval);
+  ninfo("ILS = 0x%lx\n", regval);
 
   /* Print out some possibly interesting unhandled interrupts */
 
   regval = getreg32(priv->base + STM32_FDCAN_IR_OFFSET);
-  printf("IR   = 0x%lx\n", regval);
+  ninfo("IR   = 0x%lx\n", regval);
 
   if (regval & FDCAN_IR_PEA || regval & FDCAN_IR_PED)
     {
       /* Protocol error -- check protocol status register for details */
 
       regval = getreg32(priv->base + STM32_FDCAN_PSR_OFFSET);
-      printf("--PSR.LEC = %" PRId32 "\n", regval & FDCAN_PSR_LEC_MASK);
+      ninfo("--PSR.LEC = %" PRId32 "\n", regval & FDCAN_PSR_LEC_MASK);
     }
 }
 #endif

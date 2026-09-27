@@ -63,6 +63,7 @@
 
 #include <nuttx/debug.h>
 #include <string.h>
+#include <time.h>
 
 #include <nuttx/compiler.h>
 #include <nuttx/kmalloc.h>
@@ -109,6 +110,9 @@ struct sim_netdev_s
 #endif
   uint8_t buf[SIM_NETDEV_BUFSIZE]; /* Used when packet buffer is fragmented */
   struct work_s work;
+#ifdef CONFIG_NET_TIMESTAMP
+  netpkt_queue_t tstampq;          /* TX timestamp loopback queue */
+#endif
 };
 
 /****************************************************************************
@@ -163,6 +167,25 @@ static int netdriver_send(struct netdev_lowerhalf_s *dev, netpkt_t *pkt)
       sim_netdev_send(DEVIDX(dev), netpkt_getdata(dev, pkt), len);
     }
 
+#ifdef CONFIG_NET_TIMESTAMP
+  /* If the packet is tagged for TX timestamping, generate a
+   * software timestamp and loop it back through the RX path
+   * so the protocol layer can deliver it via MSG_ERRQUEUE.
+   * Reuse the original pkt directly to avoid clone overhead.
+   */
+
+  if (pkt->io_conn != NULL)
+    {
+      FAR struct sim_netdev_s *priv = (FAR struct sim_netdev_s *)dev;
+
+      clock_gettime(CLOCK_REALTIME, &pkt->io_time);
+      iob_add_queue(pkt, &priv->tstampq);
+      atomic_add(&dev->quota_ptr[NETPKT_TX], 1);
+      netdev_lower_rxready(dev);
+      return OK;
+    }
+#endif
+
   netpkt_free(dev, pkt, NETPKT_TX);
   return OK;
 }
@@ -171,6 +194,26 @@ static netpkt_t *netdriver_recv(struct netdev_lowerhalf_s *dev)
 {
   netpkt_t *pkt = NULL;
   unsigned int len;
+
+#ifdef CONFIG_NET_TIMESTAMP
+  /* Return any TX timestamp loopback packets first.
+   * Fast-path: skip locking when the queue is empty.
+   */
+
+  FAR struct sim_netdev_s *priv = (FAR struct sim_netdev_s *)dev;
+
+  if (!IOB_QEMPTY(&priv->tstampq))
+    {
+      netdev_lock(&dev->netdev);
+      pkt = iob_remove_queue(&priv->tstampq);
+      netdev_unlock(&dev->netdev);
+      if (pkt != NULL)
+        {
+          atomic_sub(&dev->quota_ptr[NETPKT_RX], 1);
+          return pkt;
+        }
+    }
+#endif
 
   if (sim_netdev_avail(DEVIDX(dev)))
     {
@@ -237,8 +280,23 @@ static int netdriver_ifup(struct netdev_lowerhalf_s *dev)
 
 static int netdriver_ifdown(struct netdev_lowerhalf_s *dev)
 {
+#ifdef CONFIG_NET_TIMESTAMP
+  /* Drain any pending TX timestamp loopback packets.
+   * Detach the entire queue under lock, then free outside.
+   */
+
+  FAR struct sim_netdev_s *priv = (FAR struct sim_netdev_s *)dev;
+  FAR netpkt_t *pkt;
+
+  while ((pkt = iob_remove_queue(&priv->tstampq)) != NULL)
+    {
+      netpkt_free(dev, pkt, NETPKT_TX);
+    }
+#endif
+
   netdev_lower_carrier_off(dev);
   sim_netdev_ifdown(DEVIDX(dev));
+
   return OK;
 }
 
@@ -259,12 +317,14 @@ static int netdriver_rmmac(struct netdev_lowerhalf_s *dev,
 static void netdriver_txdone_interrupt(void *priv)
 {
   struct netdev_lowerhalf_s *dev = (struct netdev_lowerhalf_s *)priv;
+
   netdev_lower_txdone(dev);
 }
 
 static void netdriver_rxready_interrupt(void *priv)
 {
   struct netdev_lowerhalf_s *dev = (struct netdev_lowerhalf_s *)priv;
+
   netdev_lower_rxready(dev);
 }
 
@@ -273,7 +333,11 @@ static void sim_netdev_work(void *arg)
   struct sim_netdev_s *priv = (struct sim_netdev_s *)arg;
   struct netdev_lowerhalf_s *dev = (struct netdev_lowerhalf_s *)&priv->dev;
 
-  if (sim_netdev_avail(DEVIDX(dev)))
+  if (sim_netdev_avail(DEVIDX(dev))
+#ifdef CONFIG_NET_TIMESTAMP
+      || !IOB_QEMPTY(&priv->tstampq)
+#endif
+     )
     {
       netdev_lower_rxready(dev);
     }
@@ -347,15 +411,20 @@ void sim_netdriver_setmacaddr(int devidx, unsigned char *macaddr)
 void sim_netdriver_setmtu(int devidx, int mtu)
 {
   IDXDEV(devidx)->netdev.d_pktsize = MIN(SIM_NETDEV_BUFSIZE,
-                                               mtu + ETH_HDRLEN);
+                                         mtu + ETH_HDRLEN);
 }
 
 void sim_netdriver_loop(void)
 {
   int devidx;
+
   for (devidx = 0; devidx < CONFIG_SIM_NETDEV_NUMBER; devidx++)
     {
-      if (sim_netdev_avail(devidx))
+      if (sim_netdev_avail(devidx)
+#ifdef CONFIG_NET_TIMESTAMP
+          || !IOB_QEMPTY(&g_sim_dev[devidx].tstampq)
+#endif
+         )
         {
           netdev_lower_rxready(IDXDEV(devidx));
         }

@@ -109,6 +109,13 @@ uint64_t host_gettime(bool rtc)
   struct timespec tp;
   uint64_t current;
 
+#ifdef CONFIG_SIM_BSIM_TIME
+  if (!rtc && host_bsimtime_is_enabled())
+    {
+      return host_bsimtime_gettime();
+    }
+#endif
+
   clock_gettime(rtc ? CLOCK_REALTIME : CLOCK_MONOTONIC, &tp);
   current = 1000000000ull * tp.tv_sec + tp.tv_nsec;
 
@@ -128,6 +135,14 @@ uint64_t host_gettime(bool rtc)
 
 void host_sleep(uint64_t nsec)
 {
+#ifdef CONFIG_SIM_BSIM_TIME
+  if (host_bsimtime_is_enabled())
+    {
+      host_sleepuntil(host_gettime(false) + nsec);
+      return;
+    }
+#endif
+
   usleep((nsec + 999) / 1000);
 }
 
@@ -138,6 +153,14 @@ void host_sleep(uint64_t nsec)
 void host_sleepuntil(uint64_t nsec)
 {
   uint64_t now;
+
+#ifdef CONFIG_SIM_BSIM_TIME
+  if (host_bsimtime_is_enabled())
+    {
+      host_bsimtime_sleepuntil(nsec);
+      return;
+    }
+#endif
 
   now = host_gettime(false);
   if (nsec > now + 1000)

@@ -208,9 +208,13 @@ int inode_reserve(FAR const char *path,
 
   /* Find the location to insert the new subtree */
 
-  SETUP_SEARCH(&desc, path, false);
+  ret = inode_search_setup(&desc, path, false);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
-  ret = inode_search(&desc);
+  ret = inode_search(&desc, NULL);
   if (ret != -ENOENT)
     {
       /* It is an error if the node already exists in the tree (or if it
@@ -291,6 +295,6 @@ int inode_reserve(FAR const char *path,
     }
 
 errout_with_search:
-  RELEASE_SEARCH(&desc);
+  inode_search_release(&desc);
   return ret;
 }

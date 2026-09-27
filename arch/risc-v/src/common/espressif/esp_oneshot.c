@@ -55,9 +55,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Oneshot Timer is assigned to the Timer 0 of TimerGroup 1 */
+/* Oneshot Timer is assigned to the Timer 0 of the last TimerGroup */
 
-#define GROUP_ID  1
+#define GROUP_ID  (TIMG_LL_GET(INST_NUM) - 1)
 #define TIMER_ID  0
 
 /* Resolution of 1 microsecond */
@@ -309,6 +309,7 @@ static void esp_oneshot_cancel(struct oneshot_lowerhalf_s *lower)
   else
     {
       timer_hal_context_t *hal = &(priv->hal);
+
       timer_ll_enable_intr(hal->dev, TIMER_LL_EVENT_ALARM(hal->timer_id),
                            false);
       timer_ll_enable_counter(hal->dev, hal->timer_id, false);
@@ -546,6 +547,7 @@ int esp_oneshot_initialize(void)
 {
   struct oneshot_lowerhalf_s *lower = oneshot_initialize(0,
                                                          ONESHOT_RESOLUTION);
+
   if (lower == NULL)
     {
       tmrerr("Failed to initialize oneshot timer\n");
@@ -560,6 +562,7 @@ int esp_oneshot_initialize(void)
 
 #else
   int ret = oneshot_register("/dev/oneshot", lower);
+
   if (ret < 0)
     {
       tmrerr("Failed to register oneshot: %d\n", ret);

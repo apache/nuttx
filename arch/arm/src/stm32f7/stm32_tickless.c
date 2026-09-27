@@ -219,6 +219,15 @@ static inline void stm32_tickless_ackint(int channel)
 }
 
 /****************************************************************************
+ * Name: stm32_tickless_trigint
+ ****************************************************************************/
+
+static inline void stm32_tickless_trigint(int channel)
+{
+  stm32_putreg16(STM32_GTIM_EGR_OFFSET, 1 << channel);
+}
+
+/****************************************************************************
  * Name: stm32_tickless_getint
  ****************************************************************************/
 
@@ -379,9 +388,9 @@ static int stm32_tickless_handler(int irq, void *context, void *arg)
   return OK;
 }
 
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
 /****************************************************************************
  * Name: stm32_get_counter
- *
  ****************************************************************************/
 
 static uint64_t stm32_get_counter(void)
@@ -394,6 +403,7 @@ static uint64_t stm32_get_counter(void)
          STM32_TIM_GETCOUNTER(g_tickless.tch);
 #endif
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -877,15 +887,9 @@ int up_timer_cancel(struct timespec *ts)
              (unsigned long)period, (unsigned long)count);
 
 #ifndef HAVE_32BIT_TICKLESS
-      if (count > period)
-        {
-          /* Handle rollover */
-
-          period += UINT16_MAX;
-        }
-      else if (count == period)
+      if ((int16_t)(period - count) <= 0)
 #else
-      if (count >= period)
+      if ((int32_t)(period - count) <= 0)
 #endif
         {
           /* No time remaining */
@@ -903,8 +907,13 @@ int up_timer_cancel(struct timespec *ts)
        *   usecs     = (ticks * USEC_PER_SEC) / frequency;
        */
 
-      usec        = (((uint64_t)(period - count)) * USEC_PER_SEC) /
+#ifndef HAVE_32BIT_TICKLESS
+      usec        = (((uint64_t)(uint16_t)(period - count)) * USEC_PER_SEC) /
                     g_tickless.frequency;
+#else
+      usec        = (((uint64_t)(uint32_t)(period - count)) * USEC_PER_SEC) /
+                    g_tickless.frequency;
+#endif
 
       /* Return the time remaining in the correct form */
 
@@ -973,18 +982,35 @@ int up_timer_start(const struct timespec *ts)
 
   /* Express the delay in microseconds */
 
-  usec = ts->tv_sec * USEC_PER_SEC +
-         (ts->tv_nsec / NSEC_PER_USEC);
+  if (ts->tv_sec < 0 || (ts->tv_sec == 0 && ts->tv_nsec <= 0))
+    {
+      period = 0;
+    }
+  else
+    {
+      usec = ts->tv_sec * USEC_PER_SEC +
+             (ts->tv_nsec / NSEC_PER_USEC);
 
-  /* Get the timer counter frequency and determine the number of counts need
-   * to achieve the requested delay.
-   *
-   *   frequency = ticks / second
-   *   ticks     = seconds * frequency
-   *             = (usecs * frequency) / USEC_PER_SEC;
-   */
+      /* Get the timer counter frequency and determine the number of counts
+       * need to achieve the requested delay.
+       *
+       *   frequency = ticks / second
+       *   ticks     = seconds * frequency
+       *             = (usecs * frequency) / USEC_PER_SEC;
+       */
 
-  period = (usec * (uint64_t)g_tickless.frequency) / USEC_PER_SEC;
+      period = (usec * (uint64_t)g_tickless.frequency) / USEC_PER_SEC;
+    }
+
+  if (period == 0)
+    {
+      stm32_tickless_enableint(g_tickless.channel);
+      stm32_tickless_trigint(g_tickless.channel);
+      g_tickless.pending = true;
+      leave_critical_section(flags);
+      return OK;
+    }
+
   count  = STM32_TIM_GETCOUNTER(g_tickless.tch);
 
   tmrinfo("usec=%llu period=%08llx\n", usec, period);
@@ -1012,6 +1038,24 @@ int up_timer_start(const struct timespec *ts)
   stm32_tickless_enableint(g_tickless.channel);
 
   g_tickless.pending = true;
+
+  /* Check if the counter already reached or passed the compare target
+   * while we were configuring the registers.
+   */
+
+#ifdef HAVE_32BIT_TICKLESS
+  if ((uint32_t)(STM32_TIM_GETCOUNTER(g_tickless.tch) - count) >=
+      (uint32_t)period)
+#else
+  if ((uint16_t)(STM32_TIM_GETCOUNTER(g_tickless.tch) - (uint16_t)count) >=
+      (uint16_t)period)
+#endif
+    {
+      /* Target time already elapsed; force the interrupt immediately */
+
+      stm32_tickless_trigint(g_tickless.channel);
+    }
+
   leave_critical_section(flags);
   return OK;
 }

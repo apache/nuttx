@@ -670,7 +670,6 @@ static void IRAM_ATTR esp_task_yield_from_isr(void)
 
 static void *esp_semphr_create(uint32_t max, uint32_t init)
 {
-  int ret;
   sem_t *sem;
   int tmp;
 
@@ -682,13 +681,7 @@ static void *esp_semphr_create(uint32_t max, uint32_t init)
       return NULL;
     }
 
-  ret = nxsem_init(sem, 0, init);
-  if (ret)
-    {
-      wlerr("Failed to initialize sem error=%d\n", ret);
-      kmm_free(sem);
-      return NULL;
-    }
+  nxsem_init(sem, 0, init);
 
   return sem;
 }
@@ -2697,6 +2690,7 @@ static void esp_log_write_wrapper(unsigned int level,
   if (level <= max_level)
     {
       va_list list;
+
       va_start(list, format);
       esp_log_writev(level, tag, format, list);
       va_end(list);
@@ -2764,6 +2758,7 @@ static void *esp_realloc_internal(void *ptr, size_t size)
   void *old_ptr = ptr;
   void *new_ptr = NULL;
   size_t old_size = 0;
+
   if (size == 0)
     {
       kmm_free(ptr);
@@ -2813,6 +2808,7 @@ static void *esp_calloc_internal(size_t n, size_t size)
   return xtensa_imm_calloc(n, size);
 #else
   void *ptr = kmm_calloc(n, size);
+
   if (ptr != NULL)
     {
       if (esp32_ptr_extram(ptr))
@@ -2848,6 +2844,7 @@ static void *esp_zalloc_internal(size_t size)
   return xtensa_imm_zalloc(size);
 #else
   void *ptr = kmm_zalloc(size);
+
   if (ptr != NULL)
     {
       if (esp32_ptr_extram(ptr))

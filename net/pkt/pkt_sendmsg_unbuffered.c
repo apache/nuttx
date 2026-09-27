@@ -131,9 +131,18 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           pstate->snd_sent          = pstate->snd_buflen;
           pstate->snd_conn->pendiob = dev->d_iob;
 
+#ifdef CONFIG_NET_TIMESTAMP
+          if (_SO_GETOPT(pstate->snd_conn->sconn.s_options,
+                         SO_TIMESTAMPING))
+            {
+              dev->d_iob->io_conn = &pstate->snd_conn->sconn;
+            }
+#endif
+
           if (pstate->snd_sock->s_type == SOCK_DGRAM)
             {
               FAR struct eth_hdr_s *ethhdr = NETLLBUF;
+
               memcpy(ethhdr->dest, pstate->addr->sll_addr, ETHER_ADDR_LEN);
               memcpy(ethhdr->src, &dev->d_mac.ether, ETHER_ADDR_LEN);
               ethhdr->type = pstate->addr->sll_protocol;

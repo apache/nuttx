@@ -258,11 +258,7 @@ static int zipfs_open(FAR struct file *filep, FAR const char *relpath,
       return -ENOMEM;
     }
 
-  ret = nxmutex_init(&fp->lock);
-  if (ret < 0)
-    {
-      goto err_with_fp;
-    }
+  nxmutex_init(&fp->lock);
 
   fp->uf = unzOpen2_64(fs->abspath, &zipfs_real_ops);
   if (fp->uf == NULL)
@@ -295,7 +291,6 @@ err_with_zip:
       unzClose(fp->uf);
 err_with_mutex:
       nxmutex_destroy(&fp->lock);
-err_with_fp:
       fs_heap_free(fp);
     }
 
@@ -391,7 +386,7 @@ static off_t zipfs_seek(FAR struct file *filep, off_t offset,
             goto err_with_lock;
           }
 
-          offset += file_info.uncompressed_size;
+        offset += file_info.uncompressed_size;
         break;
       default:
         ret = -EINVAL;
@@ -488,7 +483,6 @@ static int zipfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 {
   FAR struct zipfs_mountpt_s *fs = mountpt->i_private;
   FAR struct zipfs_dir_s *zdir;
-  int ret;
 
   DEBUGASSERT(fs != NULL);
 
@@ -498,12 +492,7 @@ static int zipfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
       return -ENOMEM;
     }
 
-  ret = nxmutex_init(&zdir->lock);
-  if (ret < 0)
-    {
-      fs_heap_free(zdir);
-      return ret;
-    }
+  nxmutex_init(&zdir->lock);
 
   zdir->uf = unzOpen2_64(fs->abspath, &zipfs_real_ops);
   if (zdir->uf == NULL)
@@ -515,7 +504,7 @@ static int zipfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
   zdir->last = false;
   *dir = &zdir->base;
-  return ret;
+  return OK;
 }
 
 static int zipfs_closedir(FAR struct inode *mountpt,

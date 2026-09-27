@@ -329,29 +329,17 @@ void downgrade_write(FAR rw_semaphore_t *rwsem)
 
 int init_rwsem(FAR rw_semaphore_t *rwsem)
 {
-  int ret = OK;
-
   /* Initialize structure information */
 
-  ret = nxmutex_init(&rwsem->protected);
-  if (ret >= 0)
-    {
-      ret = nxsem_init(&rwsem->waiting, 0, 0);
-      if (ret >= 0)
-        {
-          rwsem->reader = 0;
-          rwsem->writer = 0;
-          rwsem->waiter = 0;
-          rwsem->holder = RWSEM_NO_HOLDER;
-          ret = OK;
-        }
-      else
-        {
-          nxmutex_destroy(&rwsem->protected);
-        }
-    }
+  nxmutex_init(&rwsem->protected);
+  nxsem_init(&rwsem->waiting, 0, 0);
 
-  return ret;
+  rwsem->reader = 0;
+  rwsem->writer = 0;
+  rwsem->waiter = 0;
+  rwsem->holder = RWSEM_NO_HOLDER;
+
+  return OK;
 }
 
 /****************************************************************************

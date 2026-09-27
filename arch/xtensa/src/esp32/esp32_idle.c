@@ -135,6 +135,10 @@ static void esp32_idlepm(void)
       /* Keep working in normal stage */
 
       pm_changestate(PM_IDLE_DOMAIN, PM_NORMAL);
+
+      /* Release the stay above: it only forces this one state change. */
+
+      pm_relax(PM_IDLE_DOMAIN, PM_NORMAL);
       newstate = PM_NORMAL;
     }
 
@@ -174,31 +178,31 @@ static void esp32_idlepm(void)
 
       switch (newstate)
         {
-        case PM_NORMAL:
-          break;
+          case PM_NORMAL:
+            break;
 
-        case PM_IDLE:
-          break;
+          case PM_IDLE:
+            break;
 
-        case PM_STANDBY:
-          {
-            /* Enter Force-sleep mode */
+          case PM_STANDBY:
+            {
+              /* Enter Force-sleep mode */
 
-            esp_pmstandby(CONFIG_PM_ALARM_SEC * 1000000 +
-                          CONFIG_PM_ALARM_NSEC / 1000);
-          }
-          break;
+              esp_pmstandby(CONFIG_PM_ALARM_SEC * 1000000 +
+                            CONFIG_PM_ALARM_NSEC / 1000);
+            }
+            break;
 
-        case PM_SLEEP:
-          {
-            /* Enter Deep-sleep mode */
+          case PM_SLEEP:
+            {
+              /* Enter Deep-sleep mode */
 
-            esp_pmsleep(CONFIG_PM_SLEEP_WAKEUP_SEC * 1000000 +
-                        CONFIG_PM_SLEEP_WAKEUP_NSEC / 1000);
-          }
+              esp_pmsleep(CONFIG_PM_SLEEP_WAKEUP_SEC * 1000000 +
+                          CONFIG_PM_SLEEP_WAKEUP_NSEC / 1000);
+            }
 
-        default:
-          break;
+          default:
+            break;
         }
     }
   else

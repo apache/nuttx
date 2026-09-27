@@ -41,9 +41,10 @@ Subdirectories of ``nuttx/drivers``
 
   1wire device drivers.
 
-* ``aie/``
+* ``aie/`` :doc:`character/aie`
 
-  AI engine acceleration drivers, gated by ``CONFIG_AI_ENGINE``.
+  Upper-half character driver for hardware AI / NPU engines.
+  See ``include/nuttx/aie/ai_engine.h``.
 
 * ``analog/`` :doc:`character/analog/index`
 

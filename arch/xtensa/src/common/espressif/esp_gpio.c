@@ -72,6 +72,13 @@ static gpio_hal_context_t g_gpio_hal =
   .dev = GPIO_HAL_GET_HW(GPIO_PORT_0)
 };
 
+/* Mirrors the attr last applied to each pin via esp_configgpio(), so a
+ * caller that has to temporarily reconfigure a pin (e.g. PM wake-source
+ * setup) can read it back and restore it afterward.
+ */
+
+static gpio_pinattr_t g_gpio_lastattr[SOC_GPIO_PIN_COUNT];
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -138,6 +145,8 @@ int esp_configgpio(int pin, gpio_pinattr_t attr)
 {
   DEBUGASSERT(pin >= 0 && pin < SOC_GPIO_PIN_COUNT);
 
+  g_gpio_lastattr[pin] = attr;
+
   /* Handle input pins */
 
   if ((attr & INPUT) != 0)
@@ -191,6 +200,7 @@ int esp_configgpio(int pin, gpio_pinattr_t attr)
   if ((attr & DRIVE_MASK) != 0)
     {
       uint32_t val = ((attr & DRIVE_MASK) >> DRIVE_SHIFT) - 1;
+
       gpio_hal_set_drive_capability(&g_gpio_hal, pin, val);
     }
   else
@@ -202,6 +212,7 @@ int esp_configgpio(int pin, gpio_pinattr_t attr)
   if ((attr & FUNCTION_MASK) != 0)
     {
       uint32_t val = ((attr & FUNCTION_MASK) >> FUNCTION_SHIFT) - 1;
+
       gpio_hal_func_sel(&g_gpio_hal, pin, val);
     }
   else
@@ -210,6 +221,27 @@ int esp_configgpio(int pin, gpio_pinattr_t attr)
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: esp_getconfiggpio
+ *
+ * Description:
+ *   Return the attr last passed to esp_configgpio() for this pin.
+ *
+ * Input Parameters:
+ *   pin - GPIO pin to query.
+ *
+ * Returned Value:
+ *   The attr last passed to esp_configgpio() for this pin.
+ *
+ ****************************************************************************/
+
+gpio_pinattr_t esp_getconfiggpio(int pin)
+{
+  DEBUGASSERT(pin >= 0 && pin < SOC_GPIO_PIN_COUNT);
+
+  return g_gpio_lastattr[pin];
 }
 
 /****************************************************************************

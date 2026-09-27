@@ -44,6 +44,7 @@
 
 #define AMEBA_UART0           0
 #define AMEBA_UART1           1
+#define AMEBA_UART2           2
 
 /****************************************************************************
  * Public Function Prototypes

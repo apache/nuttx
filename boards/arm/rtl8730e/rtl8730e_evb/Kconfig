@@ -1,0 +1,27 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_RTL8730E_EVB
+
+config RTL8730E_WIFI
+	bool "WiFi (WHC host, CA32 AP-IPC to KM4)"
+	default n
+	depends on WIRELESS && NET
+	---help---
+		Enable the WHC WiFi host stack on CA32.  KM4 runs the WiFi
+		MAC/PHY firmware (WHC DEVICE).  CA32 talks to it over the on-chip
+		AP-IPC (GIC SPI 24, NuttX IRQ 56).  Registers wlan0 for WAPI.
+
+config RTL8730E_FLASH_FS
+	bool "On-chip SPI NOR flash littlefs data partition"
+	default n
+	depends on FS_LITTLEFS && MTD
+	---help---
+		Mount the SDK VFS1 partition (default 0x08600000, 2 MiB) as a
+		littlefs filesystem at /data.  Uses the SDK flash primitives
+		(FLASH_ReadStream/WriteStream/EraseXIP) which coordinate with KM4
+		via IPC before programming.
+
+endif

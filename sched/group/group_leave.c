@@ -33,6 +33,7 @@
 #include <nuttx/debug.h>
 #include <nuttx/irq.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 #include <nuttx/sched.h>
 #include <nuttx/spinlock.h>
@@ -47,6 +48,10 @@
 #include "mqueue/mqueue.h"
 #include "group/group.h"
 #include "tls/tls.h"
+
+#ifdef CONFIG_FS_CHROOT
+#  include "../../fs/fs_heap.h"
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -103,6 +108,16 @@ static inline void group_release(FAR struct task_group_s *group)
   /* Free resources held by the file descriptor list */
 
   fdlist_free(&group->tg_fdlist);
+
+#ifdef CONFIG_FS_CHROOT
+  /* Drop the chroot jail path */
+
+  if (group->tg_root != NULL)
+    {
+      fs_heap_free(group->tg_root);
+      group->tg_root = NULL;
+    }
+#endif
 
   /* Release all shared environment variables */
 

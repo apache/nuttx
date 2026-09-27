@@ -37,7 +37,6 @@
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
-#include "clock/clock.h"
 
 /****************************************************************************
  * Private Functions
@@ -51,76 +50,45 @@ int process_sporadic(FAR struct tcb_s *tcb,
   FAR struct sporadic_s *sporadic;
   clock_t repl_ticks;
   clock_t budget_ticks;
-  int ret = -EINVAL;
+  int ret;
 
-  if (param->sched_ss_max_repl >= 1 &&
-      param->sched_ss_max_repl <= CONFIG_SCHED_SPORADIC_MAXREPL)
+  ret = nxsched_validate_sporadic(param, &repl_ticks, &budget_ticks);
+  if (ret < 0)
     {
-      /* Convert timespec values to system clock ticks */
+      return ret;
+    }
 
-      repl_ticks = clock_time2ticks(&param->sched_ss_repl_period);
-      budget_ticks = clock_time2ticks(&param->sched_ss_init_budget);
+  /* Initialize or reset current sporadic scheduling */
 
-      /* Avoid zero/negative times */
+  if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+    {
+      ret = nxsched_reset_sporadic(tcb);
+    }
+  else
+    {
+      ret = nxsched_initialize_sporadic(tcb);
+    }
 
-      if (repl_ticks < 1)
-        {
-          repl_ticks = 1;
-        }
+  /* Save the sporadic scheduling parameters. */
 
-      if (budget_ticks < 1)
-        {
-          budget_ticks = 1;
-        }
+  if (ret >= 0)
+    {
+      tcb->flags            &= ~TCB_FLAG_POLICY_MASK;
+      tcb->flags            |= TCB_FLAG_SCHED_SPORADIC;
+      tcb->timeslice         = budget_ticks;
 
-      /* The replenishment period must be greater than or equal to the
-       * budget period.
-       */
+      sporadic               = tcb->sporadic;
+      DEBUGASSERT(sporadic != NULL);
 
-#if 1
-      /* REVISIT: In the current implementation, the budget cannot
-       * exceed half the duty.
-       */
+      sporadic->hi_priority  = param->sched_priority;
+      sporadic->low_priority = param->sched_ss_low_priority;
+      sporadic->max_repl     = param->sched_ss_max_repl;
+      sporadic->repl_period  = repl_ticks;
+      sporadic->budget       = budget_ticks;
 
-      if (repl_ticks >= (2 * budget_ticks))
-#else
-      if (repl_ticks < budget_ticks)
-#endif
-        {
-          /* Initialize or reset current sporadic scheduling */
+      /* And restart at the next replenishment interval */
 
-          if ((tcb->flags & TCB_FLAG_POLICY_MASK) ==
-              TCB_FLAG_SCHED_SPORADIC)
-            {
-              ret = nxsched_reset_sporadic(tcb);
-            }
-          else
-            {
-              ret = nxsched_initialize_sporadic(tcb);
-            }
-
-          /* Save the sporadic scheduling parameters. */
-
-          if (ret >= 0)
-            {
-              tcb->flags            &= ~TCB_FLAG_POLICY_MASK;
-              tcb->flags            |= TCB_FLAG_SCHED_SPORADIC;
-              tcb->timeslice         = budget_ticks;
-
-              sporadic               = tcb->sporadic;
-              DEBUGASSERT(sporadic != NULL);
-
-              sporadic->hi_priority  = param->sched_priority;
-              sporadic->low_priority = param->sched_ss_low_priority;
-              sporadic->max_repl     = param->sched_ss_max_repl;
-              sporadic->repl_period  = repl_ticks;
-              sporadic->budget       = budget_ticks;
-
-              /* And restart at the next replenishment interval */
-
-              ret = nxsched_start_sporadic(tcb);
-            }
-        }
+      ret = nxsched_start_sporadic(tcb);
     }
 
   return ret;

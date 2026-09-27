@@ -106,7 +106,7 @@
 
 #define TIM_PRESCALER_SHIFT                (0)                        /* Bits 0-3: Prescaler value */
 #define TIM_PRESCALER_MAX                  (9)
-#define TIM_PRESCALER_MASK                 (TIM_PRESCALER_MAX << TIM_PRESCALER_SHIFT)
+#define TIM_PRESCALER_MASK                 (0xf << TIM_PRESCALER_SHIFT)
 
 /* ONESHOT Register */
 

@@ -265,7 +265,7 @@ static const struct spi_ops_s g_spi2ops =
 #  ifdef CONFIG_SPI_EXCHANGE
   .exchange          = nrf91_spi_exchange,
 #  else
-  .sndlock           = nrf91_spi_sndblock,
+  .sndblock          = nrf91_spi_sndblock,
   .recvblock         = nrf91_spi_recvblock,
 #  endif
 #ifdef CONFIG_SPI_TRIGGER
@@ -318,7 +318,7 @@ static const struct spi_ops_s g_spi3ops =
 #  ifdef CONFIG_SPI_EXCHANGE
   .exchange          = nrf91_spi_exchange,
 #  else
-  .sndlock           = nrf91_spi_sndblock,
+  .sndblock          = nrf91_spi_sndblock,
   .recvblock         = nrf91_spi_recvblock,
 #  endif
 #ifdef CONFIG_SPI_TRIGGER
@@ -713,10 +713,10 @@ static uint32_t nrf91_spi_setfrequency(struct spi_dev_s *dev,
   switch (frequency)
     {
       case 125000:
-      {
-        regval = SPIM_FREQUENCY_125KBPS;
-        break;
-      }
+        {
+          regval = SPIM_FREQUENCY_125KBPS;
+          break;
+        }
 
       case 250000:
         {
@@ -737,10 +737,10 @@ static uint32_t nrf91_spi_setfrequency(struct spi_dev_s *dev,
         }
 
       case 2000000:
-      {
-        regval = SPIM_FREQUENCY_2MBPS;
-        break;
-      }
+        {
+          regval = SPIM_FREQUENCY_2MBPS;
+          break;
+        }
 
       case 4000000:
         {

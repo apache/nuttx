@@ -38,7 +38,7 @@ NuttX is a real time embedded operating system (RTOS). Its goals are:
   Non-restrictive Apache license.
 
 * **GNU Toolchains**
-  Compatible GNU toolchains based on `buildroot <http://buildroot.uclibc.org/>`__ available for `download <https://bitbucket.org/nuttx/buildroot/downloads/>`__
+  Compatible GNU toolchains based on `buildroot <http://buildroot.uclibc.org/>`__ available for `download <https://github.com/patacongo/buildroot>`__
   to provide a complete development environment for many architectures.
 
 Feature Set

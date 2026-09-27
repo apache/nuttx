@@ -110,8 +110,7 @@ void nxmutex_add_backtrace(FAR mutex_t *mutex);
  *
  * Return Value:
  *   This is an internal OS interface and should not be used by applications.
- *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success.  A negated errno value is returned on failure.
+ *   Zero (OK) is always returned.
  *
  ****************************************************************************/
 
@@ -471,8 +470,7 @@ static inline_function bool nxmutex_is_locked(FAR mutex_t *mutex)
  *
  * Return Value:
  *   This is an internal OS interface and should not be used by applications.
- *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success.  A negated errno value is returned on failure.
+ *   Zero (OK) is always returned.
  *
  ****************************************************************************/
 
@@ -735,8 +733,7 @@ static inline_function int nxmutex_setprioceiling(FAR mutex_t *mutex,
  *
  * Return Value:
  *   This is an internal OS interface and should not be used by applications.
- *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success.  A negated errno value is returned on failure.
+ *   Zero (OK) is always returned.
  *
  ****************************************************************************/
 
@@ -757,8 +754,7 @@ static inline_function int nxrmutex_init(FAR rmutex_t *rmutex)
  *
  * Return Value:
  *   This is an internal OS interface and should not be used by applications.
- *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success.  A negated errno value is returned on failure.
+ *   Zero (OK) is always returned.
  *
  ****************************************************************************/
 
@@ -766,11 +762,7 @@ static inline_function int nxrmutex_destroy(FAR rmutex_t *rmutex)
 {
   int ret = nxmutex_destroy(&rmutex->mutex);
 
-  if (ret >= 0)
-    {
-      rmutex->count = 0;
-    }
-
+  rmutex->count = 0;
   return ret;
 }
 

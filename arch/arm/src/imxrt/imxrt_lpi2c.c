@@ -168,11 +168,11 @@ struct imxrt_lpi2c_config_s
   uint16_t busy_idle;         /* LPI2C Bus Idle Timeout */
   uint8_t filtscl;            /* Glitch Filter for SCL pin */
   uint8_t filtsda;            /* Glitch Filter for SDA pin */
-  uint32_t scl_pin;           /* Peripheral configuration for SCL as SCL */
-  uint32_t sda_pin;           /* Peripheral configuration for SDA as SDA */
+  gpio_pinset_t scl_pin;      /* Peripheral configuration for SCL as SCL */
+  gpio_pinset_t sda_pin;      /* Peripheral configuration for SDA as SDA */
 #if defined(CONFIG_I2C_RESET)
-  uint32_t reset_scl_pin;     /* GPIO configuration for SCL as SCL */
-  uint32_t reset_sda_pin;     /* GPIO configuration for SDA as SDA */
+  gpio_pinset_t reset_scl_pin; /* GPIO configuration for SCL as SCL */
+  gpio_pinset_t reset_sda_pin; /* GPIO configuration for SDA as SDA */
 #endif
   uint8_t mode;               /* Master or Slave mode */
 #ifndef CONFIG_I2C_POLLED
@@ -1072,7 +1072,8 @@ static void imxrt_lpi2c_tracedump(struct imxrt_lpi2c_priv_s *priv)
 static void imxrt_lpi2c_setclock(struct imxrt_lpi2c_priv_s *priv,
                                  uint32_t frequency)
 {
-#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#if !defined(CONFIG_ARCH_FAMILY_IMXRT117x) && \
+    !defined(CONFIG_ARCH_FAMILY_IMXRT118x)
   uint32_t pll3_div = 0;
   uint32_t lpi2c_clk_div;
 #endif
@@ -1108,7 +1109,8 @@ static void imxrt_lpi2c_setclock(struct imxrt_lpi2c_priv_s *priv,
 
           /* Get the LPI2C clock source frequency */
 
-#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#if defined(CONFIG_ARCH_FAMILY_IMXRT117x) || \
+    defined(CONFIG_ARCH_FAMILY_IMXRT118x)
           if (priv->config->base == IMXRT_LPI2C1_BASE)
             {
               imxrt_get_rootclock(CCM_CR_LPI2C1, &src_freq);
@@ -1653,6 +1655,7 @@ static int imxrt_lpi2c_isr(int irq, void *context, void *arg)
 
   DEBUGASSERT(priv != NULL);
   int rv = imxrt_lpi2c_isr_process(priv);
+
   return rv;
 }
 #endif
@@ -1681,7 +1684,8 @@ void imxrt_lpi2c_clock_enable (uint32_t base)
     }
   else if (base == IMXRT_LPI2C4_BASE)
     {
-#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#if !defined(CONFIG_ARCH_FAMILY_IMXRT117x) && \
+    !defined(CONFIG_ARCH_FAMILY_IMXRT118x)
       imxrt_clockall_lpi2c4_serial();
 #else
       imxrt_clockall_lpi2c4();
@@ -1721,7 +1725,8 @@ void imxrt_lpi2c_clock_disable (uint32_t base)
     }
   else if (base == IMXRT_LPI2C4_BASE)
     {
-#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#if !defined(CONFIG_ARCH_FAMILY_IMXRT117x) && \
+    !defined(CONFIG_ARCH_FAMILY_IMXRT118x)
       imxrt_clockoff_lpi2c4_serial();
 #else
       imxrt_clockoff_lpi2c4();
@@ -1862,6 +1867,7 @@ static int imxrt_lpi2c_deinit(struct imxrt_lpi2c_priv_s *priv)
 static int imxrt_lpi2c_dma_configure_mder(struct imxrt_lpi2c_priv_s *priv)
 {
   struct imxrt_edma_xfrconfig_s config;
+
   memset(&config, 0, sizeof(config));
 
   config.saddr  = (uint32_t) &g_lpi2c_mder_rdde;
@@ -1894,6 +1900,7 @@ static int imxrt_lpi2c_dma_command_configure(struct imxrt_lpi2c_priv_s *priv,
                                              uint16_t *ccmd, uint32_t ncmd)
 {
   struct imxrt_edma_xfrconfig_s config;
+
   memset(&config, 0, sizeof(config));
 
   config.saddr  = (uint32_t) ccmd;
@@ -1926,6 +1933,7 @@ static int imxrt_lpi2c_dma_data_configure(struct imxrt_lpi2c_priv_s *priv,
                                           struct i2c_msg_s *msg)
 {
   struct imxrt_edma_xfrconfig_s config;
+
   memset(&config, 0, sizeof(config));
 
   config.iter   = msg->length;
@@ -2250,8 +2258,8 @@ static int imxrt_lpi2c_transfer(struct i2c_master_s *dev,
         {
           if (msgs[m].flags & I2C_M_READ)
             {
-            up_invalidate_dcache((uintptr_t)msgs[m].buffer,
-                                (uintptr_t)msgs[m].buffer + msgs[m].length);
+              up_invalidate_dcache((uintptr_t)msgs[m].buffer,
+                (uintptr_t)msgs[m].buffer + msgs[m].length);
             }
         }
     }
@@ -2281,8 +2289,8 @@ static int imxrt_lpi2c_reset(struct i2c_master_s *dev)
   struct imxrt_lpi2c_priv_s *priv = (struct imxrt_lpi2c_priv_s *)dev;
   unsigned int clock_count;
   unsigned int stretch_count;
-  uint32_t scl_gpio;
-  uint32_t sda_gpio;
+  gpio_pinset_t scl_gpio;
+  gpio_pinset_t sda_gpio;
   uint32_t frequency;
   int ret;
 
@@ -2419,37 +2427,57 @@ struct i2c_master_s *imxrt_i2cbus_initialize(int port)
   switch (port)
     {
 #ifdef CONFIG_IMXRT_LPI2C1
-    case 1:
-      priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c1_priv;
-      break;
+      case 1:
+        {
+          priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c1_priv;
+          break;
+        }
+
 #endif
 #ifdef CONFIG_IMXRT_LPI2C2
-    case 2:
-      priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c2_priv;
-      break;
+      case 2:
+        {
+          priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c2_priv;
+          break;
+        }
+
 #endif
 #ifdef CONFIG_IMXRT_LPI2C3
-    case 3:
-      priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c3_priv;
-      break;
+      case 3:
+        {
+          priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c3_priv;
+          break;
+        }
+
 #endif
 #ifdef CONFIG_IMXRT_LPI2C4
-    case 4:
-      priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c4_priv;
-      break;
+      case 4:
+        {
+          priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c4_priv;
+          break;
+        }
+
 #endif
 #ifdef CONFIG_IMXRT_LPI2C5
-    case 5:
-      priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c5_priv;
-      break;
+      case 5:
+        {
+          priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c5_priv;
+          break;
+        }
+
 #endif
 #ifdef CONFIG_IMXRT_LPI2C6
-    case 6:
-      priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c6_priv;
-      break;
+      case 6:
+        {
+          priv = (struct imxrt_lpi2c_priv_s *)&imxrt_lpi2c6_priv;
+          break;
+        }
+
 #endif
-    default:
-      return NULL;
+      default:
+        {
+          return NULL;
+        }
     }
 
   /* Initialize private data for the first time, increment reference count,

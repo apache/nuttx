@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <sys/param.h>
 
+#include <nuttx/fdpic.h>
 #include <nuttx/lib/lib.h>
 #include <nuttx/lib/elf.h>
 
@@ -404,6 +405,11 @@ FAR void *libelf_insert(FAR const char *filename, FAR const char *modname)
 
   modp->textalloc = (FAR void *)loadinfo.textalloc;
   modp->dataalloc = (FAR void *)loadinfo.datastart;
+  modp->gotbase   = loadinfo.fdpic ? loadinfo.gotbase : 0;
+#ifdef HAVE_LIBC_ELF_PIN
+  modp->pinfile     = loadinfo.pinfile;
+  loadinfo.pinfile  = NULL;
+#endif
 #ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
   modp->sectalloc = (FAR void **)loadinfo.sectalloc;
   modp->nsect = loadinfo.ehdr.e_shnum;
@@ -414,7 +420,11 @@ FAR void *libelf_insert(FAR const char *filename, FAR const char *modname)
   modp->datasize  = loadinfo.datasize;
 #endif
 
-  /* Call the module initializer */
+  /* Call the module initializer.  An FDPIC object's constructors reach its
+   * globals through its own data base, which the loading thread does not
+   * carry; for anything else modp->gotbase is zero and they are called
+   * directly.
+   */
 
   switch (loadinfo.ehdr.e_type)
     {
@@ -426,7 +436,7 @@ FAR void *libelf_insert(FAR const char *filename, FAR const char *modname)
         array = (FAR void (**)(void))loadinfo.preiarr;
         for (i = 0; i < loadinfo.nprei; i++)
           {
-            array[i]();
+            fdpic_call(0, array[i], modp->gotbase);
           }
 
         /* Process any init_array entries */
@@ -434,7 +444,7 @@ FAR void *libelf_insert(FAR const char *filename, FAR const char *modname)
         array = (FAR void (**)(void))loadinfo.initarr;
         for (i = 0; i < loadinfo.ninit; i++)
           {
-            array[i]();
+            fdpic_call(0, array[i], modp->gotbase);
           }
 
         modp->initarr = loadinfo.initarr;

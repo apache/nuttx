@@ -108,6 +108,7 @@ static int pkt_sockif_alloc(FAR struct socket *psock)
    */
 
   FAR struct pkt_conn_s *conn = pkt_alloc();
+
   if (conn == NULL)
     {
       /* Failed to reserve a connection structure */
@@ -367,6 +368,10 @@ static int pkt_close(FAR struct socket *psock)
               /* Yes... free any read-ahead data */
 
               iob_free_queue(&conn->readahead);
+
+#ifdef CONFIG_NET_TIMESTAMP
+              iob_free_queue(&conn->errahead);
+#endif
 
 #ifdef CONFIG_NET_PKT_WRITE_BUFFERS
               /* Free write buffer callback. */

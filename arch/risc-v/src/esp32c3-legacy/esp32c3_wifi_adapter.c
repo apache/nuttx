@@ -1136,7 +1136,6 @@ static void IRAM_ATTR esp_task_yield_from_isr(void)
 
 static void *esp_semphr_create(uint32_t max, uint32_t init)
 {
-  int ret;
   sem_t *sem;
   int tmp;
 
@@ -1148,13 +1147,7 @@ static void *esp_semphr_create(uint32_t max, uint32_t init)
       return NULL;
     }
 
-  ret = nxsem_init(sem, 0, init);
-  if (ret)
-    {
-      wlerr("ERROR: Failed to initialize sem error=%d\n", ret);
-      kmm_free(sem);
-      return NULL;
-    }
+  nxsem_init(sem, 0, init);
 
   return sem;
 }
@@ -4702,9 +4695,9 @@ esp_err_t esp_wifi_deinit(void)
     }
 
 #ifdef CONFIG_PM
-    esp32c3_pm_unregister_skip_sleep_callback(
+  esp32c3_pm_unregister_skip_sleep_callback(
                     esp_wifi_internal_is_tsf_active);
-    esp32c3_pm_unregister_inform_out_sleep_overhead_callback(
+  esp32c3_pm_unregister_inform_out_sleep_overhead_callback(
                     esp_wifi_internal_update_light_sleep_wake_ahead_time);
 #endif
   return ret;
@@ -5471,6 +5464,7 @@ int esp_wifi_sta_connect(void)
         {
           int scan_retry = 3;
           int retry_cnt =  0;
+
           memset(&config, 0x0, sizeof(wifi_scan_config_t));
           config.scan_type  = IW_SCAN_TYPE_ACTIVE;
           config.channel = g_channel;
@@ -6923,6 +6917,7 @@ void esp_wifi_stop_callback(void)
   wlinfo("Trying to stop Wi-Fi...");
 
   int ret = esp_wifi_stop();
+
   if (ret)
     {
       wlerr("ERROR: Failed to stop Wi-Fi ret=%d\n", ret);

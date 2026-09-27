@@ -33,6 +33,21 @@
 #  define DATA
 #endif
 
+/* A chip that selects CONFIG_ARCH_HAVE_TEXT_HEAP_WORD_ALIGNED_READ cannot
+ * read its text region as data, so the loader puts every section that is not
+ * executable in the data region.  A fully linked program is loaded at the
+ * addresses in its own headers, so .rodata has to be linked there too: it
+ * leads the data region and .data follows it.
+ */
+
+#ifdef CONFIG_ARCH_HAVE_TEXT_HEAP_WORD_ALIGNED_READ
+#  define RODATA     DATA
+#  define DATA_START
+#else
+#  define RODATA
+#  define DATA_START DATA
+#endif
+
 #if defined(CONFIG_LIBC_ARCH_ELF_64BIT)
 #  define SECTIONS_ALIGN 8
 #else
@@ -72,6 +87,8 @@ SECTIONS
   .text TEXT :
     {
       _stext = . ;
+      *(.literal)
+      *(.literal.*)
       *(.text)
       *(.text.*)
       *(.gnu.warning)
@@ -79,11 +96,19 @@ SECTIONS
       *(.glue_7)
       *(.glue_7t)
       *(.jcr)
+
+      /* C++ support: the .init and .fini sections hold the logic that runs
+       * the static constructors and destructors.
+       */
+
+      *(.gnu.linkonce.t.*)
+      *(.init)
+      *(.fini)
       . = ALIGN(SECTIONS_ALIGN);
       _etext = . ;
     } PHDR_TEXT
 
-  .rodata :
+  .rodata RODATA :
     {
       _srodata = . ;
       *(.rodata)
@@ -94,9 +119,15 @@ SECTIONS
       _erodata = . ;
     } PHDR_TEXT
 
+  .eh_frame :
+    {
+      KEEP (*(.eh_frame))
+      *(.eh_frame.*)
+    } PHDR_TEXT
+
   DATA_ALIGN
 
-  .data DATA :
+  .data DATA_START :
     {
       _sdata = . ;
       *(.data)

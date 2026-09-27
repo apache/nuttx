@@ -294,6 +294,13 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
   iob_reserve(iob, CONFIG_NET_LL_GUARDSIZE);
   iob_update_pktlen(iob, 0, false);
 
+#ifdef CONFIG_NET_TIMESTAMP
+  if (_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMPING))
+    {
+      iob->io_conn = &conn->sconn;
+    }
+#endif
+
   /* Copy the user data into the write buffer.  We cannot wait for
    * buffer space if the socket was opened non-blocking.
    */
@@ -329,6 +336,7 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
     {
       FAR struct eth_hdr_s *ethhdr =
           (FAR struct eth_hdr_s *)(IOB_DATA(iob) - NET_LL_HDRLEN(dev));
+
       memcpy(ethhdr->dest, addr->sll_addr, ETHER_ADDR_LEN);
       memcpy(ethhdr->src, &dev->d_mac.ether, ETHER_ADDR_LEN);
       ethhdr->type = addr->sll_protocol;

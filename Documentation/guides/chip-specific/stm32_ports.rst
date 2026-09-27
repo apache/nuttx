@@ -228,7 +228,7 @@ SPI/I2S       v2            arch/arm/src/common/stm32/stm32_spi_m0_v1.c
 SYSCFG        to be done    not supported                                    
 TIM           v1            arch/arm/src/common/stm32/stm32_tim_m0_v1.c      
 USART/LPUART  v4            arch/arm/src/common/stm32/stm32_serial_m0_v4.c   
-USB           device        not supported                                    
+USB           device v2     arch/arm/src/common/stm32/stm32_usbdev_m0_v1.c
 WWDG          v1            arch/arm/src/common/stm32/stm32_wwdg_m0_v1.c     
 ============  ============  =================================================
 
@@ -296,7 +296,7 @@ SPI/I2S       v2            arch/arm/src/common/stm32/stm32_spi_m0_v1.c
 SYSCFG        to be done    not supported                                    
 TIM           v1            arch/arm/src/common/stm32/stm32_tim_m0_v1.c      
 USART/LPUART  v3            arch/arm/src/common/stm32/stm32_serial_m0_v3.c   
-USB           device        arch/arm/src/common/stm32/stm32_usbdev_m0_v1.c   
+USB           device v1     arch/arm/src/common/stm32/stm32_usbdev_m0_v1.c
 WWDG          v1            arch/arm/src/common/stm32/stm32_wwdg_m0_v1.c     
 ============  ============  =================================================
 
@@ -554,7 +554,7 @@ SPI/I2S       v2            arch/arm/src/common/stm32/stm32_spi_m0_v1.c
 SYSCFG        to be done    not supported                                    
 TIM           v1            arch/arm/src/common/stm32/stm32_tim_m0_v1.c      
 USART/LPUART  v4            arch/arm/src/common/stm32/stm32_serial_m0_v4.c   
-USB           device        arch/arm/src/common/stm32/stm32_usbdev_m0_v1.c   
+USB           device v2     arch/arm/src/common/stm32/stm32_usbdev_m0_v1.c
 WWDG          v1            arch/arm/src/common/stm32/stm32_wwdg_m0_v1.c     
 ============  ============  =================================================
 
@@ -657,7 +657,7 @@ RTC           RTCC M0       not supported
 SPI/I2S       v1            arch/arm/src/common/stm32/stm32_spi_m0_v1.c      
 TIM           v1            arch/arm/src/common/stm32/stm32_tim_m0_v1.c      
 USART/LPUART  v3            arch/arm/src/common/stm32/stm32_serial_m0_v3.c   
-USB           device        arch/arm/src/common/stm32/stm32_usbdev_m0_v1.c   
+USB           device v1     arch/arm/src/common/stm32/stm32_usbdev_m0_v1.c
 WWDG          v1            arch/arm/src/common/stm32/stm32_wwdg_m0_v1.c     
 ============  ============  =================================================
 

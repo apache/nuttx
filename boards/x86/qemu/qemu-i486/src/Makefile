@@ -28,4 +28,10 @@ ifeq ($(CONFIG_QEMU_VGA),y)
   CSRCS += qemu_vga_lcd.c
 endif
 
+ifeq ($(CONFIG_ETC_ROMFS),y)
+ifeq ($(CONFIG_SYSTEM_NXINIT),y)
+  RCSRCS += etc/init.d/init.rc
+endif
+endif
+
 include $(TOPDIR)/boards/Board.mk

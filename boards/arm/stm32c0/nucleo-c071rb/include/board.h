@@ -52,6 +52,15 @@
 #define STM32_HSE_FREQUENCY     STM32_BOARD_XTAL
 #define STM32_LSE_FREQUENCY     32768              /* X2 on board */
 
+/* HSIUSB48 is the only 48MHz USB clock source on STM32C0 and is trimmed
+ * by the CRS from the USB start of frame packet.
+ */
+
+#ifdef CONFIG_STM32_USB
+#  define STM32_USE_CLK48       1
+#  define STM32_HSI48_SYNCSRC   SYNCSRC_USB
+#endif
+
 /* Configure HSI48 clock division factor (48 MHz) */
 
 #define STM32_RCC_HSIDIV        RCC_CR_HSIDIV_HSI

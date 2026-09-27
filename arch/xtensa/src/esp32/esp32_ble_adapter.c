@@ -978,7 +978,6 @@ static void IRAM_ATTR task_yield_from_isr(void)
 
 static void *semphr_create_wrapper(uint32_t max, uint32_t init)
 {
-  int ret;
   struct bt_sem_s *bt_sem;
   int tmp;
 
@@ -991,14 +990,7 @@ static void *semphr_create_wrapper(uint32_t max, uint32_t init)
       return NULL;
     }
 
-  ret = nxsem_init(&bt_sem->sem, 0, init);
-  DEBUGASSERT(ret == OK);
-  if (ret)
-    {
-      wlerr("ERROR: Failed to initialize sem error=%d\n", ret);
-      kmm_free(bt_sem);
-      return NULL;
-    }
+  nxsem_init(&bt_sem->sem, 0, init);
 
 #ifdef CONFIG_ESPRESSIF_SPIFLASH
   esp_init_semcache(&bt_sem->sc, &bt_sem->sem);
@@ -1024,6 +1016,7 @@ static void *semphr_create_wrapper(uint32_t max, uint32_t init)
 static void semphr_delete_wrapper(void *semphr)
 {
   struct bt_sem_s *bt_sem = (struct bt_sem_s *)semphr;
+
   sem_destroy(&bt_sem->sem);
   kmm_free(bt_sem);
 }
@@ -1541,6 +1534,7 @@ static int32_t task_create_wrapper(void *task_func, const char *name,
 static void task_delete_wrapper(void *task_handle)
 {
   pid_t pid = (pid_t)((uintptr_t)task_handle);
+
   kthread_delete(pid);
 }
 
@@ -1710,6 +1704,7 @@ static uint32_t IRAM_ATTR btdm_lpcycles_2_us(uint32_t cycles)
    */
 
   uint64_t us = (uint64_t)g_btdm_lpcycle_us * cycles;
+
   us = (us + (1 << (g_btdm_lpcycle_us_frac - 1))) >> g_btdm_lpcycle_us_frac;
   return (uint32_t)us;
 }
@@ -1736,6 +1731,7 @@ static uint32_t IRAM_ATTR btdm_us_2_lpcycles(uint32_t us)
    */
 
   uint64_t cycles;
+
   cycles = ((uint64_t)(us) << g_btdm_lpcycle_us_frac) / g_btdm_lpcycle_us;
   return (uint32_t)cycles;
 }
@@ -2501,6 +2497,7 @@ static void IRAM_ATTR cause_sw_intr(void *arg)
   /* just convert void * to int, because the width is the same */
 
   uint32_t intr_no = (uint32_t)arg;
+
   XTHAL_SET_INTSET((1 << intr_no));
 }
 

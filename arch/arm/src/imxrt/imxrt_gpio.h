@@ -33,6 +33,17 @@
 #include <stdbool.h>
 
 #include "chip.h"
+
+#ifdef CONFIG_IMXRT_RGPIO
+
+/* The RGPIO IP block (used by RT118x) has its public interface in a
+ * separate header and driver source.
+ */
+
+#  include "imxrt_rgpio.h"
+
+#else
+
 #include "hardware/imxrt_gpio.h"
 
 /****************************************************************************
@@ -380,4 +391,6 @@ int imxrt_dump_gpio(uint32_t pinset, const char *msg);
 #if defined(__cplusplus)
 }
 #endif
+
+#endif /* CONFIG_IMXRT_RGPIO */
 #endif /* __ARCH_ARM_SRC_IMXRT_IMXRT_GPIO_H */

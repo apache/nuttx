@@ -30,6 +30,28 @@
 
 #include "t3-gem-o1.h"
 
+#ifdef CONFIG_AM67_MCSPI0
+#include "am67_mcspi.h"
+#include "am67_gpio.h"
+#endif
+
+#if defined(CONFIG_AM67_I2C0) || defined(CONFIG_AM67_WKUP_I2C0)
+#include "am67_i2c.h"
+#endif
+
+#if defined(CONFIG_AM67_EPWM0) || defined(CONFIG_AM67_EPWM1)
+#include "am67_pwm.h"
+#endif
+
+#if defined(CONFIG_AM67_ECAP0) || defined(CONFIG_AM67_ECAP1) || \
+    defined(CONFIG_AM67_ECAP2)
+#include "am67_ecap.h"
+#endif
+
+#ifdef CONFIG_RPTUN
+#include "am67_rptun.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -52,6 +74,25 @@ int am67_bringup(void)
 {
   int ret = OK;
 
+#ifdef CONFIG_AM67_MCSPI0
+  am67_sensors_power_enable(true);
+  am67_spiinitialize();
+  am67_spidev_initialize();
+#endif
+
+#if defined(CONFIG_AM67_I2C0) || defined(CONFIG_AM67_WKUP_I2C0)
+  am67_i2cdev_initialize();
+#endif
+
+#if defined(CONFIG_AM67_EPWM0) || defined(CONFIG_AM67_EPWM1)
+  am67_pwmdev_initialize();
+#endif
+
+#if defined(CONFIG_AM67_ECAP0) || defined(CONFIG_AM67_ECAP1) || \
+    defined(CONFIG_AM67_ECAP2)
+  am67_ecapdev_initialize();
+#endif
+
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
@@ -59,6 +100,22 @@ int am67_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_RPTUN
+  /* Initialize the rptun device.  This registers the resource table
+   * (RPMsg + virtio-net) with NuttX's OpenAMP stack and starts the
+   * rptun thread.  Linux remoteproc must be running and must have
+   * already booted the R5F core (i.e. we arrive here after remoteproc
+   * has written the vdev status/features into the resource table).
+   *
+   */
+
+  ret = am67_rptun_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: am67_rptun_init failed: %d\n", ret);
     }
 #endif
 

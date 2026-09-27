@@ -126,6 +126,7 @@ SECTIONS
         *(.got)
         *(.gcc_except_table)
         *(.gnu.linkonce.r.*)
+#include <nuttx/linker/common-rom.ld>
         _etext = ABSOLUTE(.);
     } > flash
 
@@ -156,6 +157,7 @@ SECTIONS
         *(.data .data.*)
         *(.gnu.linkonce.d.*)
         CONSTRUCTORS
+#include <nuttx/linker/common-ram.ld>
         . = ALIGN(4);
         _edata = ABSOLUTE(.);
     } > sram AT > flash

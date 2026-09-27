@@ -98,6 +98,17 @@ int aio_error(FAR const struct aiocb *aiocbp)
       return EINVAL;
     }
 
+  if (aiocbp->aio_offset < 0)
+    {
+      return -aiocbp->aio_result;
+    }
+
+  if (aiocbp->aio_result == -EINVAL)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
   if (aiocbp->aio_result < 0)
     {
       return -aiocbp->aio_result;

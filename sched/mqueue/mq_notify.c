@@ -34,6 +34,10 @@
 #include <nuttx/irq.h>
 #include <nuttx/sched.h>
 
+#if defined(CONFIG_FDPIC) && defined(CONFIG_SIG_EVTHREAD)
+#  include <nuttx/fdpic.h>
+#endif
+
 #include "sched/sched.h"
 #include "mqueue/mqueue.h"
 
@@ -156,6 +160,25 @@ int mq_notify(mqd_t mqdes, FAR const struct sigevent *notification)
                  sizeof(struct sigevent));
 
           msgq->ntpid = rtcb->pid;
+
+#if defined(CONFIG_FDPIC) && defined(CONFIG_SIG_EVTHREAD)
+          /* Record the callback here, where this still runs in the
+           * module's context.  It fires later on a worker that carries no
+           * data base, so the base travels with it.  The function shares a
+           * union with the thread ID, so only a SIGEV_THREAD event has one
+           * to record.
+           */
+
+          if ((notification->sigev_notify & SIGEV_THREAD) != 0)
+            {
+              FAR void *fn = (FAR void *)notification->sigev_notify_function;
+
+              fdpic_init(&msgq->ntwork.func, fn);
+
+              msgq->ntevent.sigev_notify_function =
+                (sigev_notify_function_t)fdpic_callback(fn);
+            }
+#endif
         }
     }
 

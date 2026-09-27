@@ -23,7 +23,7 @@ modified to point to the correct path to the SH toolchain (if different from the
 default).
 
 If you have no SH toolchain, one can be downloaded from the NuttX Bitbucket
-download site (https://bitbucket.org/nuttx/buildroot/downloads/).
+repository (https://github.com/patacongo/buildroot).
 
 1. You must have already configured NuttX in <some-dir>nuttx.
 

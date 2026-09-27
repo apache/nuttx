@@ -405,7 +405,7 @@ static int nrf52_rtc_setcc(struct nrf52_rtc_dev_s *dev, uint8_t i,
 
   /* Is the channel supported? */
 
-  if (i > rtc->chan)
+  if (i >= rtc->chan)
     {
       rtcerr("ERROR: unsupported RTCER channel %d\n", i);
       ret = -EINVAL;
@@ -435,7 +435,7 @@ static int nrf52_rtc_getcc(struct nrf52_rtc_dev_s *dev, uint8_t i,
 
   /* Is the channel supported? */
 
-  if (i > rtc->chan)
+  if (i >= rtc->chan)
     {
       rtcerr("ERROR: unsupported RTCER channel %d\n", i);
       ret = -EINVAL;
@@ -735,6 +735,7 @@ errout:
 static uint32_t nrf52_rtc_getbase(struct nrf52_rtc_dev_s *dev)
 {
   struct nrf52_rtc_priv_s *rtc = (struct nrf52_rtc_priv_s *)dev;
+
   DEBUGASSERT(dev);
 
   return rtc->base;
@@ -796,6 +797,10 @@ struct nrf52_rtc_dev_s *nrf52_rtc_init(int rtc)
       /* RTC already in use */
 
       priv = NULL;
+    }
+  else
+    {
+      priv->inuse = true;
     }
 
 errout:

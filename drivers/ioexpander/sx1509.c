@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <nuttx/debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/irq.h>
 #include <nuttx/i2c/i2c_master.h>
@@ -84,6 +85,10 @@ static int sx1509_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
              FAR bool *value);
 static int sx1509_readbuf(FAR struct ioexpander_dev_s *dev, uint8_t pin,
              FAR bool *value);
+#ifdef CONFIG_IOEXPANDER_PWM
+static int sx1509_setpwm(FAR struct ioexpander_dev_s *dev, uint8_t pin,
+             uint16_t duty);
+#endif
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
 static FAR void *sx1509_attach(FAR struct ioexpander_dev_s *dev,
              ioe_pinset_t pinset, ioe_callback_t callback, FAR void *arg);
@@ -146,9 +151,12 @@ static const struct ioexpander_ops_s g_sx1509_ops =
   , sx1509_attach
   , sx1509_detach
 #endif
+#ifdef CONFIG_IOEXPANDER_PWM
+  , sx1509_setpwm
+#endif
 };
 
-#ifdef CONFIG_USERLED_EFFECTS
+#if defined(CONFIG_SX1509_LED_ENABLE) || defined(CONFIG_IOEXPANDER_PWM)
 /* LED driver registers:
  *   TON, ION, OFF, TRISE, TFALL
  */
@@ -664,6 +672,66 @@ static int sx1509_readbuf(FAR struct ioexpander_dev_s *dev, uint8_t pin,
   return ret;
 }
 
+#ifdef CONFIG_IOEXPANDER_PWM
+/****************************************************************************
+ * Name: sx1509_setpwm
+ *
+ * Description:
+ *   Set the pin PWM duty cycle.  The pin must be configured as a LED
+ *   driver output; the duty cycle is mapped to the LED driver ON
+ *   intensity. Optional.
+ *
+ * Input Parameters:
+ *   dev  - Device-specific state data
+ *   pin  - The index of the pin to alter in this call
+ *   duty - The duty cycle, where 0 is off and 0xffff is fully on
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
+ *
+ ****************************************************************************/
+
+static int sx1509_setpwm(FAR struct ioexpander_dev_s *dev, uint8_t pin,
+                         uint16_t duty)
+{
+  FAR struct sx1509_dev_s *priv = (FAR struct sx1509_dev_s *)dev;
+  uint8_t buf[2];
+  int ret;
+
+  if (pin >= SX1509_NR_GPIO_MAX)
+    {
+      return -EINVAL;
+    }
+
+  /* Get exclusive access to the SX1509 */
+
+  ret = nxmutex_lock(&priv->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Set the ON intensity and drive the pin active only for a non-zero
+   * duty cycle.
+   */
+
+  buf[0] = g_sx1509_led_regs[pin][SX1509_LEDREGS_ION];
+  buf[1] = duty >> 8;
+
+  ret = sx1509_write(priv, buf, 2);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  ret = sx1509_setbit(priv, SX1509_REGDATA_A, pin, duty > 0);
+
+errout:
+  nxmutex_unlock(&priv->lock);
+  return ret;
+}
+#endif
+
 #ifdef CONFIG_SX1509_INT_ENABLE
 /****************************************************************************
  * Name: sx1509_attach
@@ -819,6 +887,7 @@ static void sx1509_irqworker(void *arg)
               /* Did any of the requested pin interrupts occur? */
 
               ioe_pinset_t match = pinset & priv->cb[i].pinset;
+
               if (match != 0)
                 {
                   /* Yes.. perform the callback */
@@ -1355,4 +1424,5 @@ int sx1509_leds_initialize(FAR struct ioexpander_dev_s *ioe,
 
   return userled_register(devname, &priv->userleds);
 }
+
 #endif

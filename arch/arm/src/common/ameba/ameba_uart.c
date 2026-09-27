@@ -108,6 +108,17 @@
 /* Line status register (LSR) bits. */
 
 #define AMEBA_UART_LSR_TX_EMPTY ((uint32_t)1 << 5)  /* Tx FIFO empty        */
+#define AMEBA_UART_LSR_TIMEOUT  ((uint32_t)1 << 9)  /* Rx timeout (latched) */
+
+/* Interrupt clear register bit for the RX-timeout source (TOICF).  The
+ * RX-timeout interrupt is latched and is NOT cleared by draining the FIFO;
+ * it must be acknowledged explicitly.  On the GIC-based RTL8730E this
+ * matters because a still-asserted level line re-enters the handler and
+ * live-locks the system; the Cortex-M33 members are unaffected but the
+ * extra write is benign.
+ */
+
+#define AMEBA_UART_INT_TOICF    ((uint32_t)1 << 1)
 
 /* Second/third argument to fwlib "state" style APIs. */
 
@@ -182,6 +193,7 @@ extern void UART_CharPut(void *uartx, uint8_t txdata);
 extern void UART_CharGet(void *uartx, uint8_t *rxbyte);
 extern void UART_INTConfig(void *uartx, uint32_t uart_it, uint32_t newstate);
 extern uint32_t UART_LineStatusGet(void *uartx);
+extern void UART_INT_Clear(void *uartx, uint32_t uart_it);
 
 /* Serial lower-half operations. */
 
@@ -309,17 +321,29 @@ static int ameba_uart_interrupt(int irq, void *context, void *arg)
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct ameba_uart_dev_s *priv = (struct ameba_uart_dev_s *)dev;
   void *uartx = (void *)priv->base;
+  uint32_t lsr;
 
   UNUSED(irq);
   UNUSED(context);
 
   /* Reading the line status register clears any latched RX error bits. */
 
-  UART_LineStatusGet(uartx);
+  lsr = UART_LineStatusGet(uartx);
 
   if (UART_Readable(uartx))
     {
       uart_recvchars(dev);
+    }
+
+  /* The RX-timeout interrupt is a latched source: draining the FIFO does
+   * not clear it, so acknowledge it explicitly.  Otherwise, on the
+   * level-triggered GIC (RTL8730E), the still-asserted line immediately
+   * re-enters this handler and live-locks the CPU.
+   */
+
+  if (lsr & AMEBA_UART_LSR_TIMEOUT)
+    {
+      UART_INT_Clear(uartx, AMEBA_UART_INT_TOICF);
     }
 
   if (priv->txint && UART_Writable(uartx))
@@ -497,6 +521,13 @@ static void ameba_uart_rxint(struct uart_dev_s *dev, bool enable)
   struct ameba_uart_dev_s *priv = (struct ameba_uart_dev_s *)dev;
   irqstate_t flags;
 
+  /* UART_INTConfig() is a read-modify-write of the interrupt-enable
+   * register that the ISR also touches (uart_xmitchars() disables the TX
+   * source when the buffer drains).  Guard the RMW with the per-instance
+   * spinlock, which also disables local interrupts so the ISR cannot preempt
+   * the update on this core, and serializes against the other CPU under SMP.
+   */
+
   flags = spin_lock_irqsave(&priv->lock);
 
   /* Enable both the RX-trigger and RX-timeout sources so that bytes still
@@ -546,6 +577,12 @@ static void ameba_uart_txint(struct uart_dev_s *dev, bool enable)
 {
   struct ameba_uart_dev_s *priv = (struct ameba_uart_dev_s *)dev;
   irqstate_t flags;
+
+  /* Guard the interrupt-enable RMW with the per-instance spinlock (see
+   * ameba_uart_rxint()); the ISR also calls back here through
+   * uart_xmitchars() to disable the TX source, and this is safe on the other
+   * CPU under SMP.
+   */
 
   flags = spin_lock_irqsave(&priv->lock);
 

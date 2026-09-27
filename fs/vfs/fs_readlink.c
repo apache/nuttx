@@ -71,7 +71,6 @@ ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize)
 {
   struct inode_search_s desc;
   FAR struct inode *node;
-  int errcode;
   int ret;
 
   DEBUGASSERT(path != NULL && buf != NULL && bufsize > 0);
@@ -80,18 +79,18 @@ ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize)
    * symbolic link node.
    */
 
-  SETUP_SEARCH(&desc, path, true);
-
-  ret = inode_find(&desc);
+  ret = inode_search_setup(&desc, path, true);
   if (ret < 0)
     {
-      errcode = -ret;
+      goto errout;
+    }
+
+  ret = inode_find(&desc, &node);
+  if (ret < 0)
+    {
       goto errout_with_search;
     }
 
-  /* Get the search results */
-
-  node = desc.node;
   DEBUGASSERT(node != NULL);
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
@@ -106,13 +105,12 @@ ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize)
           ret = node->u.i_mops->readlink(node, desc.relpath, buf, bufsize);
           if (ret < 0)
             {
-              errcode = -ret;
               goto errout_with_inode;
             }
         }
       else
         {
-          errcode = ENOSYS;
+          ret = -ENOSYS;
           goto errout_with_inode;
         }
     }
@@ -122,7 +120,6 @@ ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize)
       ret = inode_checkpathperm(node, 0, 0);
       if (ret < 0)
         {
-          errcode = -ret;
           goto errout_with_inode;
         }
 
@@ -134,7 +131,7 @@ ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize)
 
       if (!INODE_IS_SOFTLINK(node))
         {
-          errcode = EINVAL;
+          ret = -EINVAL;
           goto errout_with_inode;
         }
 
@@ -146,15 +143,17 @@ ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize)
   /* Release our reference on the inode and return the length */
 
   inode_release(node);
-  RELEASE_SEARCH(&desc);
+  inode_search_release(&desc);
   return strlen(buf);
 
 errout_with_inode:
   inode_release(node);
 
 errout_with_search:
-  RELEASE_SEARCH(&desc);
-  set_errno(errcode);
+  inode_search_release(&desc);
+
+errout:
+  set_errno(-ret);
   return ERROR;
 }
 

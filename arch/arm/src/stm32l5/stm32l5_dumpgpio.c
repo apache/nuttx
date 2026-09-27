@@ -39,8 +39,8 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "stm32l5_gpio.h"
-#include "stm32l5_rcc.h"
+#include "stm32_gpio.h"
+#include "stm32_rcc.h"
 
 #ifdef CONFIG_DEBUG_FEATURES
 

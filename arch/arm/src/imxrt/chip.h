@@ -45,10 +45,15 @@
 
 #define ARMV7M_PERIPHERAL_INTERRUPTS IMXRT_IRQ_NEXTINT
 
-/* Cache line sizes (in bytes)for the i.MX RT */
+/* Cache line sizes (in bytes) for the i.MX RT. */
 
-#define ARMV7M_DCACHE_LINESIZE 32  /* 32 bytes (8 words) */
-#define ARMV7M_ICACHE_LINESIZE 32  /* 32 bytes (8 words) */
+#ifdef CONFIG_ARCH_CORTEXM33
+#  define ARMV8M_DCACHE_LINESIZE 32  /* 32 bytes (8 words) */
+#  define ARMV8M_ICACHE_LINESIZE 32  /* 32 bytes (8 words) */
+#else
+#  define ARMV7M_DCACHE_LINESIZE 32  /* 32 bytes (8 words) */
+#  define ARMV7M_ICACHE_LINESIZE 32  /* 32 bytes (8 words) */
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -775,7 +775,6 @@ static void task_yield_from_isr(void)
 
 static void *semphr_create_wrapper(uint32_t max, uint32_t init)
 {
-  int ret;
   struct bt_sem_s *bt_sem;
   int tmp;
 
@@ -783,8 +782,7 @@ static void *semphr_create_wrapper(uint32_t max, uint32_t init)
   bt_sem = kmm_malloc(tmp);
   DEBUGASSERT(bt_sem);
 
-  ret = nxsem_init(&bt_sem->sem, 0, init);
-  DEBUGASSERT(ret == OK);
+  nxsem_init(&bt_sem->sem, 0, init);
 
 #ifdef CONFIG_ESP32C3_SPIFLASH
   esp32c3_wl_init_semcache(&bt_sem->sc, &bt_sem->sem);
@@ -2284,7 +2282,7 @@ int esp32c3_bt_controller_enable(esp_bt_mode_t mode)
 
   if (g_lp_cntl.enable)
     {
-        btdm_controller_enable_sleep(true);
+      btdm_controller_enable_sleep(true);
     }
 
   if (btdm_controller_enable(mode) != 0)
@@ -2383,6 +2381,7 @@ void esp32c3_vhci_host_send_packet(uint8_t *data, uint16_t len)
 int esp32c3_vhci_register_callback(const esp_vhci_host_callback_t *callback)
 {
   int ret = -1;
+
   if (btdm_controller_status != ESP_BT_CONTROLLER_STATUS_ENABLED)
     {
       return ret;

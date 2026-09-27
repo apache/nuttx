@@ -95,7 +95,7 @@ static const uint32_t ODR_TO_INTERVAL[] =
     [NAU7802_ODR_40HZ] = 25000,
     [NAU7802_ODR_80HZ] = 12500,
     [NAU7802_ODR_320HZ] = 3125
-  };
+};
 
 typedef struct
 {
@@ -238,6 +238,7 @@ static int nau7802_read_bit(FAR nau7802_dev_s *dev, uint8_t addr,
 static int nau7802_reset(FAR nau7802_dev_s *dev)
 {
   int err = 0;
+
   err = nau7802_set_bits(dev, REG_PU_CTRL, 1, BIT_RR, 1);
   if (err < 0)
     {
@@ -261,6 +262,7 @@ static int nau7802_reset(FAR nau7802_dev_s *dev)
   usleep(200);
 
   uint8_t reg_val;
+
   err = nau7802_read_reg(dev, REG_PU_CTRL, &reg_val, sizeof(reg_val));
   if (err < 0)
     {
@@ -291,6 +293,7 @@ static int nau7802_reset(FAR nau7802_dev_s *dev)
 static int nau7802_enable(FAR nau7802_dev_s *dev, bool enable)
 {
   int err = 0;
+
   if (!enable)
     {
       err = nau7802_set_bits(dev, REG_PU_CTRL, 1, BIT_PUA, 0);
@@ -329,6 +332,7 @@ static int nau7802_enable(FAR nau7802_dev_s *dev, bool enable)
     }
 
   bool reg_val;
+
   err = nau7802_read_bit(dev, REG_PU_CTRL, BIT_PUR, &reg_val);
   if (err < 0 || !reg_val)
     {
@@ -419,6 +423,7 @@ static int nau7802_set_ldo(FAR nau7802_dev_s *dev, nau7802_ldo_e voltage)
     }
 
   int err = 0;
+
   err = nau7802_set_bits(dev, REG_PU_CTRL, 1, BIT_AVVDS, 1);
   if (err < 0)
     {
@@ -503,6 +508,7 @@ static int nau7802_push_data(FAR nau7802_dev_s *dev)
     }
 
   bool data_ready;
+
   err = nau7802_data_available(dev, &data_ready);
   if (err < 0 || !data_ready)
     {
@@ -588,6 +594,7 @@ static int nau7802_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
   uint8_t reg_b0 = calibvalue & 0xff;
 
   int err = 0;
+
   err = nau7802_write_reg(dev, REG_GCAL1_B3, &reg_b3, sizeof(reg_b3));
   if (err < 0)
     {
@@ -651,6 +658,7 @@ static int nau7802_calibrate(FAR struct sensor_lowerhalf_s *lower,
   /* Wait for calibration to complete */
 
   bool reg_val;
+
   do
     {
       err = nau7802_read_bit(dev, REG_CTRL_2, CAL_START, &reg_val);
@@ -699,26 +707,26 @@ static int nau7802_control(FAR struct sensor_lowerhalf_s *lower,
 
   switch (cmd)
     {
-    case SNIOC_RESET:
-      err = nau7802_reset(dev);
-      break;
+      case SNIOC_RESET:
+        err = nau7802_reset(dev);
+        break;
 
-    case SNIOC_SET_GAIN:
-      err = nau7802_set_gain(dev, arg);
-      break;
+      case SNIOC_SET_GAIN:
+        err = nau7802_set_gain(dev, arg);
+        break;
 
-    case SNIOC_SET_LDO:
-      err = nau7802_set_ldo(dev, arg);
-      break;
+      case SNIOC_SET_LDO:
+        err = nau7802_set_ldo(dev, arg);
+        break;
 
-    case SNIOC_GET_CALIBVALUE:
-      err = nau7802_get_calibvalue(dev, arg);
-      break;
+      case SNIOC_GET_CALIBVALUE:
+        err = nau7802_get_calibvalue(dev, arg);
+        break;
 
-    default:
-      err = -EINVAL;
-      snerr("Unknown command for NAU7802: %d\n", cmd);
-      break;
+      default:
+        err = -EINVAL;
+        snerr("Unknown command for NAU7802: %d\n", cmd);
+        break;
     }
 
   nxmutex_unlock(&dev->devlock);
@@ -755,6 +763,7 @@ static int nau7802_activate(FAR struct sensor_lowerhalf_s *lower,
         }
 
       uint8_t reg_val;
+
       err = nau7802_read_reg(dev, 0x1f, &reg_val, sizeof(reg_val));
       if (err < 0 || (reg_val & 0xf) != 0xf)
         {
@@ -916,6 +925,7 @@ int nau7802_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr)
 {
   int err;
   FAR nau7802_dev_s *priv = kmm_zalloc(sizeof(nau7802_dev_s));
+
   DEBUGASSERT(i2c != NULL);
   DEBUGASSERT(addr == 0x2a);
 
@@ -925,19 +935,9 @@ int nau7802_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr)
       return -ENOMEM;
     }
 
-  err = nxmutex_init(&priv->devlock);
-  if (err < 0)
-    {
-      snerr("Failed to register nau7802 driver: %d\n", err);
-      goto del_mem;
-    }
+  nxmutex_init(&priv->devlock);
 
-  err = nxsem_init(&priv->run, 0, 0);
-  if (err < 0)
-    {
-      snerr("Failed to register nau7802 driver: %d\n", err);
-      goto del_mutex;
-    }
+  nxsem_init(&priv->run, 0, 0);
 
   priv->i2c = i2c;
   priv->addr = addr;
@@ -956,6 +956,7 @@ int nau7802_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr)
 
   FAR char *argv[2];
   char arg1[32];
+
   snprintf(arg1, 16, "%p", priv);
   argv[0] = arg1;
   argv[1] = NULL;
@@ -973,13 +974,11 @@ int nau7802_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr)
 
   if (err < 0)
     {
-    sensor_unreg:
+sensor_unreg:
       sensor_unregister(&priv->lower, devno);
-    del_sem:
+del_sem:
       nxsem_destroy(&priv->run);
-    del_mutex:
       nxmutex_destroy(&priv->devlock);
-    del_mem:
       kmm_free(priv);
       return err;
     }

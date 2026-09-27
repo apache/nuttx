@@ -142,13 +142,9 @@
 
 /* Clock recovery RC register */
 
-#define RCC_CRRCR_HSI48ON           (1 << 0)  /* Bits 0: 48MHz HSI clock enable */
-#define RCC_CRRCR_HSI48RDY          (1 << 1)  /* Bits 1: 48MHz HSI clock ready */
-#define RCC_CRRCR_HSI48DIV6EN       (1 << 2)  /* Bits 2: 48MHz HSI clock divided by 6 output enable */
-                                              /* Bits 3-7: Reserved */
-#define RCC_CRRCR_HSI48CAL_SHIFT    (8)       /* Bits 8: 48 MHz HSI reset calibration */
-#define RCC_CRRCR_HSI48CAL_MASK     (0xff << RCC_CRRCR_HSI48CAL_SHIFT)
-                                              /* Bits 16-31: Reserved */
+#define RCC_CRRCR_HSIUSB48CAL_SHIFT (0)       /* Bits 0-8: HSIUSB48 clock calibration */
+#define RCC_CRRCR_HSIUSB48CAL_MASK  (0x1ff << RCC_CRRCR_HSIUSB48CAL_SHIFT)
+                                              /* Bits 9-31: Reserved */
 
 /* Clock configuration register */
 
@@ -240,7 +236,7 @@
 #define RCC_APB1RSTR_USBRST         (1 << 13) /* Bit 13: USB reset */
 #define RCC_APB1RSTR_SPI2RST        (1 << 14) /* Bit 14: SPI 2 reset */
                                               /* Bit 15: Reserved */
-#define RCC_APB1RSTR_CRCRST         (1 << 16) /* Bit 15: CRC reset */
+#define RCC_APB1RSTR_CRSRST         (1 << 16) /* Bit 16: CRS reset */
 #define RCC_APB1RSTR_USART2RST      (1 << 17) /* Bit 17: USART 2 reset */
 #define RCC_APB1RSTR_USART3RST      (1 << 18) /* Bit 18: USART 3 reset */
 #define RCC_APB1RSTR_USART4RST      (1 << 19) /* Bit 19: USART 4 reset */
@@ -293,7 +289,7 @@
 #define RCC_APB1ENR_USBEN            (1 << 13) /* Bit 13: USB clock enable */
 #define RCC_APB1ENR_SPI2EN           (1 << 14) /* Bit 14: SPI 2 clock enable */
                                                /* Bit 15: Reserved */
-#define RCC_APB1ENR_CRCEN            (1 << 16) /* Bit 16: CRC clock enable */
+#define RCC_APB1ENR_CRSEN            (1 << 16) /* Bit 16: CRS clock enable */
 #define RCC_APB1ENR_USART2EN         (1 << 17) /* Bit 17: USART 2 clock enable */
 #define RCC_APB1ENR_USART3EN         (1 << 18) /* Bit 18: USART 3 clock enable */
 #define RCC_APB1ENR_USART4EN         (1 << 19) /* Bit 19: USART 4 clock enable */
@@ -351,9 +347,10 @@
 
 /* RCC peripherals independent clock configuration register 2 */
 
-#define RCC_CCIPR2_USBSEL_SHIFT       (12) /* Bit 12: SB clock source selection */
-#define RCC_CCIPR2_USBSEL_HSIUSB48    (0 << RCC_CCIPR2_USBSEL_SHIFT)
-#define RCC_CCIPR2_USBSEL_HSE         (1 << RCC_CCIPR2_USBSEL_SHIFT)
+#define RCC_CCIPR2_USBSEL_SHIFT       (12) /* Bit 12: USB clock source selection */
+#define RCC_CCIPR2_USBSEL_MASK        (1 << RCC_CCIPR2_USBSEL_SHIFT)
+#  define RCC_CCIPR2_USBSEL_HSIUSB48  (0 << RCC_CCIPR2_USBSEL_SHIFT)
+#  define RCC_CCIPR2_USBSEL_HSE       (1 << RCC_CCIPR2_USBSEL_SHIFT)
 
 /* Clock configuration register 1 */
 

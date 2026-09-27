@@ -57,7 +57,7 @@ CROSSDEV ?= i686-elf-
 endif
 
 CC = $(CROSSDEV)gcc
-CPP = $(CROSSDEV)gcc -E -x c
+CPP = $(CROSSDEV)gcc -E -P -x c
 LD = $(CROSSDEV)ld
 STRIP = $(CROSSDEV)strip --strip-unneeded
 AR = $(CROSSDEV)ar rcs

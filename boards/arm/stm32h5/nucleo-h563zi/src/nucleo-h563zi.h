@@ -115,6 +115,18 @@
 
 int stm32_bringup(void);
 
+/****************************************************************************
+ * Name: stm32_mpu_configure_otp
+ *
+ * Description:
+ *   Initialize MPU and configure the OTP flash region.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARM_MPU) && defined(CONFIG_STM32_ICACHE)
+void stm32_mpu_configure_otp(void);
+#endif
+
 #ifdef CONFIG_STM32_SPI
 /****************************************************************************
  * Name: stm32_spiregister

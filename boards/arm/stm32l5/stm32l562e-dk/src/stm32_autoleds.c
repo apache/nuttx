@@ -36,7 +36,7 @@
 
 #include "chip.h"
 #include "arm_internal.h"
-#include "stm32l5_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l562e-dk.h"
 
 #include <arch/board/board.h>
@@ -94,44 +94,44 @@ void board_autoled_on(int led)
 {
   switch (led)
     {
-    default:
-      break;
+      default:
+        break;
 
-    case LED_HEAPALLOCATE:
-      phy_set_led(BOARD_LED_RED, true);
-      phy_set_led(BOARD_LED_GREEN, false);
-      break;
+      case LED_HEAPALLOCATE:
+        phy_set_led(BOARD_LED_RED, true);
+        phy_set_led(BOARD_LED_GREEN, false);
+        break;
 
-    case LED_IRQSENABLED:
-      phy_set_led(BOARD_LED_RED, true);
-      phy_set_led(BOARD_LED_GREEN, true);
-      break;
+      case LED_IRQSENABLED:
+        phy_set_led(BOARD_LED_RED, true);
+        phy_set_led(BOARD_LED_GREEN, true);
+        break;
 
-    case LED_STACKCREATED:
-      phy_set_led(BOARD_LED_RED, false);
-      phy_set_led(BOARD_LED_GREEN, true);
-      break;
+      case LED_STACKCREATED:
+        phy_set_led(BOARD_LED_RED, false);
+        phy_set_led(BOARD_LED_GREEN, true);
+        break;
 
-    case LED_INIRQ:
-      phy_set_led(BOARD_LED_RED, true);
-      break;
+      case LED_INIRQ:
+        phy_set_led(BOARD_LED_RED, true);
+        break;
 
-    case LED_SIGNAL:
-      phy_set_led(BOARD_LED_RED, true);
-      break;
+      case LED_SIGNAL:
+        phy_set_led(BOARD_LED_RED, true);
+        break;
 
-    case LED_ASSERTION:
-      phy_set_led(BOARD_LED_RED, true);
-      break;
+      case LED_ASSERTION:
+        phy_set_led(BOARD_LED_RED, true);
+        break;
 
-    case LED_PANIC:
-      phy_set_led(BOARD_LED_RED, true);
-      phy_set_led(BOARD_LED_GREEN, false);
-      break;
+      case LED_PANIC:
+        phy_set_led(BOARD_LED_RED, true);
+        phy_set_led(BOARD_LED_GREEN, false);
+        break;
 
-    case LED_IDLE:
-      phy_set_led(BOARD_LED_GREEN, true);
-      break;
+      case LED_IDLE:
+        phy_set_led(BOARD_LED_GREEN, true);
+        break;
     }
 }
 
@@ -143,29 +143,29 @@ void board_autoled_off(int led)
 {
   switch (led)
     {
-    default:
-      break;
+      default:
+        break;
 
-    case LED_SIGNAL:
-      phy_set_led(BOARD_LED_RED, false);
-      break;
+      case LED_SIGNAL:
+        phy_set_led(BOARD_LED_RED, false);
+        break;
 
-    case LED_INIRQ:
-      phy_set_led(BOARD_LED_RED, false);
-      break;
+      case LED_INIRQ:
+        phy_set_led(BOARD_LED_RED, false);
+        break;
 
-    case LED_ASSERTION:
-      phy_set_led(BOARD_LED_RED, false);
-      break;
+      case LED_ASSERTION:
+        phy_set_led(BOARD_LED_RED, false);
+        break;
 
-    case LED_PANIC:
-      phy_set_led(BOARD_LED_RED, false);
-      phy_set_led(BOARD_LED_GREEN, false);
-      break;
+      case LED_PANIC:
+        phy_set_led(BOARD_LED_RED, false);
+        phy_set_led(BOARD_LED_GREEN, false);
+        break;
 
-    case LED_IDLE:
-      phy_set_led(BOARD_LED_GREEN, false);
-      break;
+      case LED_IDLE:
+        phy_set_led(BOARD_LED_GREEN, false);
+        break;
     }
 }
 

@@ -229,6 +229,17 @@ static int can_in(FAR struct net_driver_s *dev)
       return OK;
     }
 
+  /* Storing reception timestamp provided by realtime
+   * if timestamp no provided by hardware.
+   */
+
+#ifdef CONFIG_NET_TIMESTAMP
+  if ((dev->d_features & NETDEV_RX_STAMP) == 0)
+    {
+      clock_gettime(CLOCK_REALTIME, &dev->d_iob->io_time);
+    }
+#endif /* CONFIG_NET_TIMESTAMP */
+
   can_conn_list_lock();
 
   /* Do we have second connection that can hold this packet? */
@@ -311,7 +322,7 @@ int can_input(FAR struct net_driver_s *dev)
   if (ret < 0)
     {
 #ifdef CONFIG_NET_STATISTICS
-    g_netstats.can.drop++;
+      g_netstats.can.drop++;
 #endif
     }
 

@@ -188,7 +188,7 @@
 
 /* Required for asynchronous I/O */
 
-#define _POSIX_AIO_LISTIO_MAX 2
+#define _POSIX_AIO_LISTIO_MAX CONFIG_FS_AIO_LISTIO_MAX
 #define _POSIX_AIO_MAX        1
 
 /* Required for POSIX message passing */

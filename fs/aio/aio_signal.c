@@ -98,6 +98,32 @@ int aio_signal(pid_t pid, FAR struct aiocb *aiocbp)
         }
     }
 
+  if (list_in_list(&aiocbp->lio_link))
+    {
+      /* This I/O is queued by lio_listio, remove this I/O from the list,
+       * signal the client when all I/O is completed
+       */
+
+      aio_lock();
+      status = list_is_empty(&aiocbp->lio_link);
+      list_delete(&aiocbp->lio_link);
+      aio_unlock();
+
+      if (status)
+        {
+          status = nxsig_notification(pid, &aiocbp->lio_sigevent, SI_ASYNCIO,
+                                      &aiocbp->lio_sigwork);
+          if (status < 0)
+            {
+              ferr("ERROR: nxsig_notification failed: %d\n", status);
+              if (ret >= OK)
+                {
+                  ret = status;
+                }
+            }
+        }
+    }
+
   /* Make sure that errno is set correctly on return */
 
   if (ret < 0)

@@ -372,24 +372,26 @@ int nx_mount(FAR const char *source, FAR const char *target,
     {
       ferr("ERROR: Failed to find block driver %s\n", source);
 
-      ret = -ENOTBLK;
-      goto errout;
+      return -ENOTBLK;
     }
 
   inode_lock();
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   /* Check if the inode already exists */
 
-  SETUP_SEARCH(&desc, target, false);
+  ret = inode_search_setup(&desc, target, false);
+  if (ret < 0)
+    {
+      goto errout_with_lock;
+    }
 
-  ret = inode_find(&desc);
+  ret = inode_find(&desc, &mountpt_inode);
   if (ret >= 0)
     {
       /* Successfully found.  The reference count on the inode has been
        * incremented.
        */
 
-      mountpt_inode = desc.node;
       DEBUGASSERT(mountpt_inode != NULL);
 
       /* But is it a directory node (i.e., not a driver or other special
@@ -401,7 +403,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
           ferr("ERROR: target %s exists and is a special node\n", target);
           ret = -ENOTDIR;
           inode_release(mountpt_inode);
-          goto errout_with_lock;
+          goto errout_with_search;
         }
 
       /* Require search on ancestors and write on the mount target. */
@@ -410,7 +412,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
       if (ret < 0)
         {
           inode_release(mountpt_inode);
-          goto errout_with_lock;
+          goto errout_with_search;
         }
     }
 #endif
@@ -426,7 +428,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
 
       ferr("ERROR: Filesystem does not support bind\n");
       ret = -EINVAL;
-      goto errout_with_lock;
+      goto errout_with_search;
     }
 
   /* Increment reference count for the reference we pass to the file system */
@@ -468,7 +470,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
         }
 #endif
 
-      goto errout_with_lock;
+      goto errout_with_search;
     }
 
   /* Insert a dummy node -- we need to hold the inode semaphore
@@ -521,7 +523,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
 #endif
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  RELEASE_SEARCH(&desc);
+  inode_search_release(&desc);
 #endif
 #ifdef CONFIG_FS_NOTIFY
   notify_create(target);
@@ -536,11 +538,13 @@ errout_with_bind:
       mops->unbind(fshandle, &drvr_inode, 0);
     }
 
-errout_with_lock:
-  inode_unlock();
+errout_with_search:
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  RELEASE_SEARCH(&desc);
+  inode_search_release(&desc);
+
+errout_with_lock:
 #endif
+  inode_unlock();
 
 errout_with_inode:
 #if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
@@ -550,7 +554,6 @@ errout_with_inode:
     }
 #endif
 
-errout:
   return ret;
 
 #else

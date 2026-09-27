@@ -33,7 +33,7 @@
 
 #include "arm_internal.h"
 #include "stm32l5_pwr.h"
-#include "stm32l5_rcc.h"
+#include "stm32_rcc.h"
 
 /****************************************************************************
  * Private Functions

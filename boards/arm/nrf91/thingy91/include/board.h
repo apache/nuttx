@@ -83,4 +83,29 @@
 #define BOARD_I2C2_SCL_PIN (GPIO_OUTPUT | GPIO_PORT0 | GPIO_PIN(12))
 #define BOARD_I2C2_SDA_PIN (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(11))
 
+/* PWM Pins *****************************************************************/
+
+/* The Thingy:91 has two RGB LEDs, both on the 3.3 V rail controlled by the
+ * ADP5360 PMIC:
+ *
+ * PWM0 drives the "lightwell" RGB LED (large LED in the enclosure light
+ * pipe):
+ *   RED   - P0.29
+ *   GREEN - P0.30
+ *   BLUE  - P0.31
+ *
+ * PWM1 drives the "sense" RGB LED (next to the environmental/light sensors):
+ *   RED   - P0.00
+ *   GREEN - P0.01
+ *   BLUE  - P0.02
+ */
+
+#define NRF91_PWM0_CH0_PIN (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(29))
+#define NRF91_PWM0_CH1_PIN (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(30))
+#define NRF91_PWM0_CH2_PIN (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(31))
+
+#define NRF91_PWM1_CH0_PIN (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(0))
+#define NRF91_PWM1_CH1_PIN (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(1))
+#define NRF91_PWM1_CH2_PIN (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(2))
+
 #endif /* __BOARDS_ARM_NRF91_THINGY91_INCLUDE_BOARD_H */

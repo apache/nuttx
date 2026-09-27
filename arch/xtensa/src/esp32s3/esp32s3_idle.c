@@ -100,7 +100,16 @@ static void up_idlepm(void)
       /* Keep working in normal stage */
 
       pm_changestate(PM_IDLE_DOMAIN, PM_NORMAL);
-      newstate = PM_NORMAL;
+
+      /* Release the stay above: it only forces this one state change. */
+
+      pm_relax(PM_IDLE_DOMAIN, PM_NORMAL);
+
+      /* Without this, oldstate goes stale after the first wakeup and the
+       * state machine wedges in PM_NORMAL forever -- see commit message.
+       */
+
+      oldstate = PM_NORMAL;
     }
 
   /* Decide, which power saving level can be obtained */
@@ -139,31 +148,37 @@ static void up_idlepm(void)
 
       switch (newstate)
         {
-        case PM_NORMAL:
-          break;
+          case PM_NORMAL:
+            break;
 
-        case PM_IDLE:
-          break;
+          case PM_IDLE:
+            break;
 
-        case PM_STANDBY:
-          {
-            /* Enter Force-sleep mode */
+          case PM_STANDBY:
+            {
+              /* Enter Force-sleep mode */
 
-            esp_pmstandby(CONFIG_PM_ALARM_SEC * 1000000 +
-                          CONFIG_PM_ALARM_NSEC / 1000);
-          }
-          break;
+              esp_pmstandby(CONFIG_PM_ALARM_SEC * 1000000 +
+                            CONFIG_PM_ALARM_NSEC / 1000);
 
-        case PM_SLEEP:
-          {
-            /* Enter Deep-sleep mode */
+              /* Without this, /proc/pm/state0 bills sleep time to wake[]
+               * -- pm_stats() needs PM_RESTORE to know time was asleep.
+               */
 
-            esp_pmsleep(CONFIG_PM_SLEEP_WAKEUP_SEC * 1000000 +
-                        CONFIG_PM_SLEEP_WAKEUP_NSEC / 1000);
-          }
+              pm_changestate(PM_IDLE_DOMAIN, PM_RESTORE);
+            }
+            break;
 
-        default:
-          break;
+          case PM_SLEEP:
+            {
+              /* Enter Deep-sleep mode */
+
+              esp_pmsleep(CONFIG_PM_SLEEP_WAKEUP_SEC * 1000000 +
+                          CONFIG_PM_SLEEP_WAKEUP_NSEC / 1000);
+            }
+
+          default:
+            break;
         }
     }
   else
@@ -228,9 +243,9 @@ void up_idle(void)
       __asm__ __volatile__ ("waiti 0");
 #  endif
 
-  /* Perform IDLE mode power management */
+      /* Perform IDLE mode power management */
 
-  up_idlepm();
+      up_idlepm();
 #endif /* CONFIG_SUPPRESS_INTERRUPTS || CONFIG_SUPPRESS_TIMER_INTS */
 
 #ifdef CONFIG_ESP32S3_SPEED_UP_ISR

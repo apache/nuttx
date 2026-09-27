@@ -37,7 +37,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define AM67_NUM_OF_MPU_REGION    (5)
+#define AM67_NUM_OF_MPU_REGION    (7)
 
 #define AM67_REGISTER_START_ADDR  (0x0)
 #define AM67_TCMA_START_ADDR      (0x0)
@@ -51,6 +51,25 @@
 #define AM67_MCU_MSRAM_SIZE       (512ul * 1024)
 
 #define AM67_DDR_SIZE             (2ul * 1024 * 1024 * 1024)
+
+/* Shared IPC memory (Non-cacheable). The R5F is NOT hardware-coherent
+ * with the A53, so the OpenAMP/rptun shared structures in DDR -- dma
+ * buffers, the
+ * resource table (vdev status incl. DRIVER_OK) and the virtio/rpmsg
+ * vrings --
+ * must be Non-cacheable, or NuttX reads them from stale cache: it never sees
+ * the A53's DRIVER_OK/vring updates and the handshake hangs (no eth0, TX
+ * timeout). Two power-of-2, naturally-aligned regions cover 0xA2000000-
+ * 0xA223FFFF exactly; NuttX's own RAM (0xA2240000+) stays cacheable. These
+ *  are
+ * configured AFTER the DDR region so they win the overlap (on the Cortex-R5
+ * MPU the highest-numbered matching region takes priority).
+ */
+
+#define AM67_IPC_SHM0_START_ADDR  (0xa2000000)  /* dma buffers + resource table */
+#define AM67_IPC_SHM0_SIZE        (0x200000)    /* 2 MB   (0xa2000000-0xa21fffff) */
+#define AM67_IPC_SHM1_START_ADDR  (0xa2200000)  /* virtio/rpmsg vrings           */
+#define AM67_IPC_SHM1_SIZE        (0x40000)     /* 256 KB (0xa2200000-0xa223ffff) */
 
 #define AM67_SCTLR_BG_REGION_EN (1 << 17)
 
@@ -114,6 +133,21 @@
   mpu_configure_region(base, size, MPU_RACR_TEX(1)  | \
                                    MPU_RACR_C       | \
                                    MPU_RACR_B       | \
+                                   MPU_RACR_AP_RWRW)
+
+/* SHARED IPC REGION
+ *   Normal memory, Outer & Inner Non-cacheable (TEX=0b001, C=0, B=0)
+ *   Non-shareable
+ *   P:RW   U:RW
+ *
+ * For the R5F<->A53 OpenAMP shared memory. Non-cacheable means every R5F
+ *  access
+ * goes straight to DDR, so it stays coherent with the (coherent) A53 with no
+ * cache maintenance. Kept Non-shareable so it does not hit the Cortex-R5
+ * LDREX-on-Shareable external-monitor abort described on the DDR region.
+ */
+#define am67_ipc_shm_region(base, size) \
+  mpu_configure_region(base, size, MPU_RACR_TEX(1)  | \
                                    MPU_RACR_AP_RWRW)
 
 /****************************************************************************

@@ -1,0 +1,191 @@
+############################################################################
+# arch/arm/src/n32h7/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# Common ARM and Cortex-M7 files
+
+include armv7-m/Make.defs
+
+CHIP_CSRCS = n32_allocateheap.c n32_exti_gpio.c n32_gpio.c n32_irq.c \
+        n32_rcc.c n32_lowputc.c n32_serial.c n32_cordic.c n32_uid.c \
+        n32_systemreset.c n32_start.c
+
+ifeq ($(CONFIG_N32H7_PROGMEM),y)
+CHIP_CSRCS += n32_flash.c
+endif
+
+ifeq ($(CONFIG_ARCH_N32H7_DUALCORE),y)
+CHIP_CSRCS += n32_dualcore.c
+endif
+
+ifeq ($(CONFIG_N32H7_HSEM),y)
+CHIP_CSRCS += n32_hsem.c
+endif
+
+ifeq ($(CONFIG_RPTUN),y)
+CHIP_CSRCS += n32_rptun.c
+endif
+
+ifeq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += n32_tickless.c
+else
+CHIP_CSRCS += n32_timerisr.c
+endif
+
+ifeq ($(CONFIG_N32H7_ONESHOT),y)
+CHIP_CSRCS += n32_oneshot.c
+endif
+
+ifeq ($(CONFIG_ONESHOT),y)
+CHIP_CSRCS += n32_oneshot_lowerhalf.c
+endif
+
+ifeq ($(CONFIG_ARM_MPU),y)
+CHIP_CSRCS += n32_mpuinit.c
+endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CHIP_CSRCS += n32_userspace.c
+endif
+
+ifeq ($(CONFIG_N32H7_ADC),y)
+CHIP_CSRCS += n32_adc.c
+endif
+
+ifeq ($(CONFIG_N32H7_FDCAN),y)
+CHIP_CSRCS += n32_fdcan_sock.c
+endif
+
+ifeq ($(CONFIG_N32H7_BBSRAM),y)
+CHIP_CSRCS += n32_bbsram.c
+endif
+
+ifeq ($(CONFIG_N32H7_DMA),y)
+CHIP_CSRCS += n32_dma.c
+endif
+
+ifeq ($(CONFIG_N32H7_FMC),y)
+CHIP_CSRCS += n32_fmc.c
+endif
+
+ifeq ($(CONFIG_N32H7_IWDG)$(CONFIG_N32H7_RTC_LSICLOCK),yy)
+CHIP_CSRCS += n32_lsi.c
+endif
+
+ifeq ($(CONFIG_N32H7_RTC_LSECLOCK),y)
+CHIP_CSRCS += n32_lse.c
+endif
+
+ifeq ($(CONFIG_N32H7_I2C),y)
+CHIP_CSRCS += n32_i2c.c
+endif
+
+ifeq ($(CONFIG_N32H7_PWR),y)
+CHIP_CSRCS += n32_pwr.c
+endif
+
+ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+CHIP_CSRCS += n32_idle.c
+endif
+
+ifeq ($(CONFIG_N32H7_QUADSPI),y)
+CHIP_CSRCS += n32_qspi.c
+endif
+
+ifeq ($(CONFIG_N32H7_RTC),y)
+CHIP_CSRCS += n32_rtc.c
+ifeq ($(CONFIG_RTC_ALARM),y)
+CHIP_CSRCS += n32_exti_alarm.c
+endif
+ifeq ($(CONFIG_RTC_PERIODIC),y)
+CHIP_CSRCS += n32_exti_wakeup.c
+endif
+ifeq ($(CONFIG_RTC_DRIVER),y)
+CHIP_CSRCS += n32_rtc_lowerhalf.c
+endif
+endif
+
+ifeq ($(CONFIG_N32H7_SPI),y)
+CHIP_CSRCS += n32_spi.c
+endif
+
+ifeq ($(CONFIG_SPI_SLAVE),y)
+CHIP_CSRCS += n32_spi_slave.c
+endif
+
+ifeq ($(CONFIG_N32H7_SDMMC),y)
+CHIP_CSRCS += n32_sdmmc.c
+endif
+
+ifeq ($(CONFIG_TIMER),y)
+CHIP_CSRCS += n32_tim_lowerhalf.c
+endif
+
+ifeq ($(CONFIG_USBDEV),y)
+CHIP_CSRCS += n32_usbhsdev.c
+endif
+
+ifeq ($(CONFIG_USBHOST),y)
+CHIP_CSRCS += n32_usbhshost.c
+endif
+
+ifeq ($(CONFIG_N32H7_TIM),y)
+CHIP_CSRCS += n32_tim.c
+endif
+
+ifeq ($(CONFIG_N32H7_LPTIM),y)
+CHIP_CSRCS += n32_lptim.c
+endif
+
+ifeq ($(CONFIG_N32H7_CAPTURE),y)
+CHIP_CSRCS += n32_capture.c
+endif
+
+ifeq ($(CONFIG_CAPTURE),y)
+CHIP_CSRCS += n32_capture_lowerhalf.c
+endif
+
+ifeq ($(CONFIG_N32H7_PWM),y)
+CHIP_CSRCS += n32_pwm.c
+endif
+
+ifeq ($(CONFIG_N32H7_ETHMAC),y)
+CHIP_CSRCS += n32_ethernet.c
+endif
+
+ifeq ($(CONFIG_SENSORS_QENCODER),y)
+CHIP_CSRCS += n32_qencoder.c
+endif
+
+ifeq ($(CONFIG_PM),y)
+CHIP_CSRCS += n32_pmsleep.c n32_pmstandby.c n32_pmstop.c
+ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
+CHIP_CSRCS += n32_pminitialize.c
+endif
+endif
+
+ifeq ($(CONFIG_N32H7_IWDG),y)
+CHIP_CSRCS += n32_iwdg.c
+endif
+
+ifeq ($(CONFIG_N32H7_WWDG),y)
+CHIP_CSRCS += n32_wwdg.c
+endif

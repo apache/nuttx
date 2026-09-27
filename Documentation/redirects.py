@@ -102,6 +102,9 @@ _PLATFORM_ALIGNMENT = [
     ("platforms/arm/lpc40xx/boards/lx_cpu/index",
      "platforms/arm/lpc17xx_40xx/boards/lx_cpu/index"),
 
+    # added upstream after the fork, filed here by where its code lives
+    ("implementation/chroot", "os/filesystem/chroot"),
+
     # upstream typo: the page was named intex.rst
     ("platforms/arm/nrf52/boards/nrf52-feather/intex",
      "platforms/arm/nrf52/boards/nrf52-feather/index"),

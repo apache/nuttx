@@ -42,6 +42,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/mutex.h>
+#include <nuttx/power/pm.h>
 #include <nuttx/semaphore.h>
 
 #include <arch/board/board.h>
@@ -87,6 +88,19 @@
 
 #define ESP32S3_I2CTIMEOTICKS \
     (SEC2TICK(CONFIG_ESP32S3_I2CTIMEOSEC) + MSEC2TICK(CONFIG_ESP32S3_I2CTIMEOMS))
+
+/* Light sleep gates the APB clock mid-transfer, so an in-flight transfer
+ * never completes and times out.  PM_IDLE is the lightest stay that keeps
+ * the domain out of PM_STANDBY/PM_SLEEP without blocking plain WFI idle.
+ */
+
+#ifdef CONFIG_PM
+#  define i2c_pm_stay()  pm_stay(PM_IDLE_DOMAIN, PM_IDLE)
+#  define i2c_pm_relax() pm_relax(PM_IDLE_DOMAIN, PM_IDLE)
+#else
+#  define i2c_pm_stay()
+#  define i2c_pm_relax()
+#endif
 
 /* Default option */
 
@@ -779,6 +793,7 @@ static void i2c_init_clock(struct esp32s3_i2c_priv_s *priv,
 static void i2c_init(struct esp32s3_i2c_priv_s *priv)
 {
   const struct esp32s3_i2c_config_s *config = priv->config;
+
   if (priv->id != ESP32S3_RTC_I2C)
     {
       esp_gpiowrite(config->scl_pin, 1);
@@ -1136,6 +1151,12 @@ static int i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs,
       return ret;
     }
 
+  /* Hold the domain out of light sleep for the whole transfer -- see the
+   * comment on i2c_pm_stay() above.
+   */
+
+  i2c_pm_stay();
+
   /* If previous state is different than idle,
    * reset the FSMC to the idle state.
    */
@@ -1256,6 +1277,7 @@ static int i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs,
   /* Dump the trace result */
 
   i2c_tracedump(priv);
+  i2c_pm_relax();
   nxmutex_unlock(&priv->lock);
 
   return ret;
@@ -1490,6 +1512,7 @@ static void i2c_tracedump(struct esp32s3_i2c_priv_s *priv)
   for (int i = 0; i < priv->tndx; i++)
     {
       struct esp32s3_trace_s *trace = &priv->trace[i];
+
       syslog(LOG_DEBUG,
              "%2d. STATUS: %08" PRIx32 " COUNT: %3" PRIu32 " EVENT: %s(%2d)"
              " PARM: %08" PRIx32 " TIME: %" PRId64 "\n",
@@ -1527,6 +1550,7 @@ static int i2c_irq(int cpuint, void *context, void *arg)
    */
 
   uint32_t irq_status = getreg32(I2C_INT_STATUS_REG(priv->id));
+
   putreg32(irq_status, I2C_INT_CLR_REG(priv->id));
 
   i2c_process(priv, irq_status);

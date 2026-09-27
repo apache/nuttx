@@ -214,33 +214,23 @@ extern uint8_t _rodata_reserved_end[];
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
 /****************************************************************************
- * Name: map_rom_segments
+ * Name: modify_rom_segments_lma
  *
  * Description:
- *   Configure the MMU and Cache peripherals for accessing ROM code and data.
+ *   Retrieve the correct rom segment load address from image
  *
  * Input Parameters:
- *   None.
+ *   Pointer to irom and drom load addresses
  *
  * Returned Value:
- *   None.
- *
+ *   0 if OK, -EIO on error
  ****************************************************************************/
 
-#if defined(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT) || \
-    defined(CONFIG_ESPRESSIF_SIMPLE_BOOT)
-static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
-                            uint32_t app_drom_size, uint32_t app_irom_start,
-                            uint32_t app_irom_vaddr, uint32_t app_irom_size)
+int modify_rom_segments_lma(uint32_t *app_irom_start,
+                            uint32_t *app_drom_start)
 {
-  uint32_t rc = 0;
-  uint32_t actual_mapped_len = 0;
-  uint32_t app_irom_start_aligned = app_irom_start & MMU_FLASH_MASK;
-  uint32_t app_irom_vaddr_aligned = app_irom_vaddr & MMU_FLASH_MASK;
-  uint32_t app_drom_start_aligned = app_drom_start & MMU_FLASH_MASK;
-  uint32_t app_drom_vaddr_aligned = app_drom_vaddr & MMU_FLASH_MASK;
-#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
   esp_image_header_t image_header; /* Header for entire image */
   esp_image_segment_header_t WORD_ALIGNED_ATTR segment_hdr;
   bool padding_checksum = false;
@@ -248,9 +238,6 @@ static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
   unsigned int ram_segments = 0;
   unsigned int rom_segments = 0;
   size_t offset = CONFIG_BOOTLOADER_OFFSET_IN_FLASH;
-#endif
-
-#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
 
   /* Read image header */
 
@@ -259,7 +246,7 @@ static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
                             true) != ESP_OK)
     {
       ets_printf("Failed to load image header!\n");
-      abort();
+      return -EIO;
     }
 
   offset += sizeof(esp_image_header_t);
@@ -275,7 +262,7 @@ static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
                                 true) != ESP_OK)
         {
           ets_printf("failed to read segment header at %x\n", offset);
-          abort();
+          return -EIO;
         }
 
       if (IS_NONE(segment_hdr.load_addr))
@@ -315,16 +302,14 @@ static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
       if (IS_DROM(segment_hdr.load_addr) &&
           segment_hdr.load_addr == (uint32_t)_image_drom_vma)
         {
-          app_drom_start = offset + sizeof(esp_image_segment_header_t);
-          app_drom_start_aligned = app_drom_start & MMU_FLASH_MASK;
+          *app_drom_start = offset + sizeof(esp_image_segment_header_t);
           rom_segments++;
         }
 
       if (IS_IROM(segment_hdr.load_addr) &&
           segment_hdr.load_addr == (uint32_t)_image_irom_vma)
         {
-          app_irom_start = offset + sizeof(esp_image_segment_header_t);
-          app_irom_start_aligned = app_irom_start & MMU_FLASH_MASK;
+          *app_irom_start = offset + sizeof(esp_image_segment_header_t);
           rom_segments++;
         }
 
@@ -347,7 +332,36 @@ static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
     }
 
   ets_printf("total segments stored %d\n", segments - 1);
+  return 0;
+}
 #endif
+
+/****************************************************************************
+ * Name: map_rom_segments
+ *
+ * Description:
+ *   Configure the MMU and Cache peripherals for accessing ROM code and data.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT) || \
+    defined(CONFIG_ESPRESSIF_SIMPLE_BOOT)
+static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
+                            uint32_t app_drom_size, uint32_t app_irom_start,
+                            uint32_t app_irom_vaddr, uint32_t app_irom_size)
+{
+  uint32_t rc = 0;
+  uint32_t actual_mapped_len = 0;
+  uint32_t app_irom_start_aligned = app_irom_start & MMU_FLASH_MASK;
+  uint32_t app_irom_vaddr_aligned = app_irom_vaddr & MMU_FLASH_MASK;
+  uint32_t app_drom_start_aligned = app_drom_start & MMU_FLASH_MASK;
+  uint32_t app_drom_vaddr_aligned = app_drom_vaddr & MMU_FLASH_MASK;
 
   cache_hal_disable(CACHE_LL_LEVEL_EXT_MEM, CACHE_TYPE_ALL);
 
@@ -369,6 +383,7 @@ static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
 
   cache_bus_mask_t bus_mask = cache_ll_l1_get_bus(0, app_drom_vaddr_aligned,
                                                   app_drom_size);
+
   cache_ll_l1_enable_bus(0, bus_mask);
   bus_mask = cache_ll_l1_get_bus(0, app_irom_vaddr_aligned, app_irom_size);
   cache_ll_l1_enable_bus(0, bus_mask);
@@ -411,8 +426,9 @@ static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
 #if defined(CONFIG_ARCH_CHIP_ESP32C6) || defined(CONFIG_ARCH_CHIP_ESP32H2)
 static void IRAM_ATTR NOINLINE_ATTR recalib_bbpll(void)
 {
-    rtc_cpu_freq_config_t old_config;
-    rtc_clk_cpu_freq_get_config(&old_config);
+  rtc_cpu_freq_config_t old_config;
+
+  rtc_clk_cpu_freq_get_config(&old_config);
 
   if (old_config.source == SOC_CPU_CLK_SRC_PLL
 #ifdef CONFIG_ARCH_CHIP_ESP32H2
@@ -522,6 +538,13 @@ void __esp_start(void)
   uint32_t app_drom_start = partition_offset + (uint32_t)_image_drom_lma;
   uint32_t app_drom_size  = (uint32_t)_image_drom_size;
   uint32_t app_drom_vaddr = (uint32_t)_image_drom_vma;
+
+#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
+  if (modify_rom_segments_lma(&app_irom_start, &app_drom_start) != 0)
+    {
+      while (true);
+    }
+#endif
 
   if (map_rom_segments(app_drom_start, app_drom_vaddr, app_drom_size,
                        app_irom_start, app_irom_vaddr, app_irom_size) != 0)
@@ -646,6 +669,7 @@ void __esp_start(void)
    */
 
   wdt_hal_context_t rwdt_ctx = RWDT_HAL_CONTEXT_DEFAULT();
+
   wdt_hal_write_protect_disable(&rwdt_ctx);
   wdt_hal_set_flashboot_en(&rwdt_ctx, false);
   wdt_hal_disable(&rwdt_ctx);

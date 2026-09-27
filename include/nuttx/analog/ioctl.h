@@ -86,8 +86,17 @@
                                                  * IN: None
                                                  * OUT: struct dac_info_s * */
 
+/* COMP */
+
+#define ANIOC_COMP_ENABLE       _ANIOC(0x000d)  /* Enable comparator
+                                                 * IN: None
+                                                 * OUT: None */
+#define ANIOC_COMP_DISABLE      _ANIOC(0x000e)  /* Disable comparator
+                                                 * IN: None
+                                                 * OUT: None */
+
 #define AN_FIRST          0x0001          /* First common command */
-#define AN_NCMDS          12              /* Number of common commands */
+#define AN_NCMDS          14              /* Number of common commands */
 
 /* User defined ioctl commands are also supported. These will be forwarded
  * by the upper-half driver to the lower-half driver via the ioctl()

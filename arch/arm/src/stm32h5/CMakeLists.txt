@@ -42,7 +42,8 @@ list(
   stm32_timerisr.c
   stm32_lse.c
   stm32_lsi.c
-  stm32_exti_gpio.c)
+  stm32_exti_gpio.c
+  stm32_sdmmc.c)
 
 if(CONFIG_STM32_USART)
   list(APPEND SRCS stm32_serial.c)
@@ -108,6 +109,10 @@ if(CONFIG_STM32_ETHMAC)
   list(APPEND SRCS stm32_ethernet.c)
 endif()
 
+if(CONFIG_MDIO_BUS)
+  list(APPEND SRCS stm32_mdio.c)
+endif()
+
 if(CONFIG_STM32_DMA)
   list(APPEND SRCS stm32_dma.c)
 endif()
@@ -122,6 +127,10 @@ endif()
 
 if(CONFIG_STM32_IWDG)
   list(APPEND SRCS stm32_iwdg.c)
+endif()
+
+if(CONFIG_ARM_MPU)
+  list(APPEND SRCS stm32_mpuinit.c)
 endif()
 
 # Required chip type specific files

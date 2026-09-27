@@ -881,7 +881,6 @@ static void IRAM_ATTR task_yield_from_isr(void)
 
 static void *semphr_create_wrapper(uint32_t max, uint32_t init)
 {
-  int ret;
   struct bt_sem_s *bt_sem;
   int tmp;
 
@@ -894,14 +893,7 @@ static void *semphr_create_wrapper(uint32_t max, uint32_t init)
       return NULL;
     }
 
-  ret = nxsem_init(&bt_sem->sem, 0, init);
-  DEBUGASSERT(ret == OK);
-  if (ret)
-    {
-      wlerr("ERROR: Failed to initialize sem error=%d\n", ret);
-      kmm_free(bt_sem);
-      return NULL;
-    }
+  nxsem_init(&bt_sem->sem, 0, init);
 
 #ifdef CONFIG_ESPRESSIF_SPIFLASH
   esp_init_semcache(&bt_sem->sc, &bt_sem->sem);
@@ -927,6 +919,7 @@ static void *semphr_create_wrapper(uint32_t max, uint32_t init)
 static void semphr_delete_wrapper(void *semphr)
 {
   struct bt_sem_s *bt_sem = (struct bt_sem_s *)semphr;
+
   nxsem_destroy(&bt_sem->sem);
   kmm_free(bt_sem);
 }
@@ -1440,6 +1433,7 @@ static int task_create_wrapper(void *task_func, const char *name,
 static void task_delete_wrapper(void *task_handle)
 {
   pid_t pid = (pid_t)((uintptr_t)task_handle);
+
   kthread_delete(pid);
 }
 
@@ -1479,6 +1473,7 @@ static bool IRAM_ATTR is_in_isr_wrapper(void)
 static void *malloc_wrapper(size_t size)
 {
   void * p = kmm_malloc(size);
+
   DEBUGASSERT(p);
 
   return p;
@@ -2575,6 +2570,7 @@ static esp_err_t btdm_low_power_mode_init(esp_bt_controller_config_t *cfg)
 static void btdm_controller_mem_init(void)
 {
   extern void btdm_controller_rom_data_init(void);
+
   btdm_controller_rom_data_init();
 }
 
@@ -2606,8 +2602,8 @@ static void bt_controller_deinit_internal(void)
 
   if (g_osi_funcs_p != NULL)
     {
-    free(g_osi_funcs_p);
-    g_osi_funcs_p = NULL;
+      free(g_osi_funcs_p);
+      g_osi_funcs_p = NULL;
     }
 
   g_btdm_controller_status = ESP_BT_CONTROLLER_STATUS_IDLE;
@@ -3313,7 +3309,7 @@ error:
 #endif
 
 #if CONFIG_ESPRESSIF_WIFI_BT_COEXIST
-    coex_disable();
+  coex_disable();
 #endif
   if (g_lp_stat.phy_enabled)
     {
@@ -3484,6 +3480,7 @@ void esp_vhci_host_send_packet(uint8_t *data, uint16_t len)
 int esp_vhci_register_callback(const esp_vhci_host_callback_t *callback)
 {
   int ret = ERROR;
+
   if (g_btdm_controller_status != ESP_BT_CONTROLLER_STATUS_ENABLED)
     {
       return ret;

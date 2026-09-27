@@ -706,6 +706,91 @@ static inline void rcc_enableapb3(void)
 
 static inline void rcc_enableccip(void)
 {
+  /* Configure UART source clock */
+#if defined(STM32_RCC_CCIPR1_USART1SEL)
+  uint32_t regval = getreg32(STM32_RCC_CCIPR1);
+
+  regval &= ~RCC_CCIPR1_USART1SEL_MASK;
+  regval |= STM32_RCC_CCIPR1_USART1SEL;
+  putreg32(regval, STM32_RCC_CCIPR1);
+#endif
+#if defined(STM32_RCC_CCIPR1_USART2SEL)
+  uint32_t regval = getreg32(STM32_RCC_CCIPR1);
+
+  regval &= ~RCC_CCIPR1_USART2SEL_MASK;
+  regval |= STM32_RCC_CCIPR1_USART2SEL;
+  putreg32(regval, STM32_RCC_CCIPR1);
+#endif
+#if defined(STM32_RCC_CCIPR1_USART3SEL)
+  uint32_t regval = getreg32(STM32_RCC_CCIPR1);
+
+  regval &= ~RCC_CCIPR1_USART3SEL_MASK;
+  regval |= STM32_RCC_CCIPR1_USART3SEL;
+  putreg32(regval, STM32_RCC_CCIPR1);
+#endif
+#if defined(STM32_RCC_CCIPR1_UART4SEL)
+  uint32_t regval = getreg32(STM32_RCC_CCIPR1);
+
+  regval &= ~RCC_CCIPR1_UART4SEL_MASK;
+  regval |= STM32_RCC_CCIPR1_UART4SEL;
+  putreg32(regval, STM32_RCC_CCIPR1);
+#endif
+#if defined(STM32_RCC_CCIPR1_UART5SEL)
+  uint32_t regval = getreg32(STM32_RCC_CCIPR1);
+
+  regval &= ~RCC_CCIPR1_UART5SEL_MASK;
+  regval |= STM32_RCC_CCIPR1_UART5SEL;
+  putreg32(regval, STM32_RCC_CCIPR1);
+#endif
+#if defined(STM32_RCC_CCIPR1_USART6SEL)
+  uint32_t regval = getreg32(STM32_RCC_CCIPR1);
+
+  regval &= ~RCC_CCIPR1_USART6SEL_MASK;
+  regval |= STM32_RCC_CCIPR1_USART6SEL;
+  putreg32(regval, STM32_RCC_CCIPR1);
+#endif
+#if defined(STM32_RCC_CCIPR1_UART7SEL)
+  uint32_t regval = getreg32(STM32_RCC_CCIPR1);
+
+  regval &= ~RCC_CCIPR1_UART7SEL_MASK;
+  regval |= STM32_RCC_CCIPR1_UART7SEL;
+  putreg32(regval, STM32_RCC_CCIPR1);
+#endif
+#if defined(STM32_RCC_CCIPR1_UART8SEL)
+  uint32_t regval = getreg32(STM32_RCC_CCIPR1);
+
+  regval &= ~RCC_CCIPR1_UART8SEL_MASK;
+  regval |= STM32_RCC_CCIPR1_UART8SEL;
+  putreg32(regval, STM32_RCC_CCIPR1);
+#endif
+#if defined(STM32_RCC_CCIPR1_UART9SEL)
+  uint32_t regval = getreg32(STM32_RCC_CCIPR1);
+
+  regval &= ~RCC_CCIPR1_UART9SEL_MASK;
+  regval |= STM32_RCC_CCIPR1_UART9SEL;
+  putreg32(regval, STM32_RCC_CCIPR1);
+#endif
+#if defined(STM32_RCC_CCIPR1_USART10SEL)
+  uint32_t regval = getreg32(STM32_RCC_CCIPR1);
+
+  regval &= ~RCC_CCIPR1_USART10SEL_MASK;
+  regval |= STM32_RCC_CCIPR1_USART10SEL;
+  putreg32(regval, STM32_RCC_CCIPR1);
+#endif
+#if defined(STM32_RCC_CCIPR2_USART11SEL)
+  uint32_t regval = getreg32(STM32_RCC_CCIPR2);
+
+  regval &= ~RCC_CCIPR2_USART11SEL_MASK;
+  regval |= STM32_RCC_CCIPR2_USART11SEL;
+  putreg32(regval, STM32_RCC_CCIPR2);
+#endif
+#if defined(STM32_RCC_CCIPR2_UART12SEL)
+  uint32_t regval = getreg32(STM32_RCC_CCIPR2);
+
+  regval &= ~RCC_CCIPR2_UART12SEL_MASK;
+  regval |= STM32_RCC_CCIPR2_UART12SEL;
+  putreg32(regval, STM32_RCC_CCIPR2);
+#endif
 }
 
 /****************************************************************************
@@ -876,6 +961,9 @@ void stm32_stdclockconfig(void)
 
   regval  = getreg32(STM32_RCC_CR);
   regval |= RCC_CR_HSION;           /* Enable HSI */
+#ifdef STM32_BOARD_HSIKERON_ENABLE
+  regval |= RCC_CR_HSIKERON;        /* Keep HSI on during stop mode */
+#endif
 
 #if defined(STM32_BOARD_HSIDIV)
   regval &= ~RCC_CR_HSIDIV_MASK;
@@ -1024,6 +1112,12 @@ void stm32_stdclockconfig(void)
       regval  = getreg32(STM32_RCC_CR);
       regval |= RCC_CR_PLL2ON;
       putreg32(regval, STM32_RCC_CR);
+
+      /* Wait until PLL2 is ready */
+
+      while ((getreg32(STM32_RCC_CR) & RCC_CR_PLL2RDY) == 0)
+        {
+        }
 
 #ifdef STM32_PLLCFG_PLL2FRACR
       regval = STM32_PLLCFG_PLL2FRACR;

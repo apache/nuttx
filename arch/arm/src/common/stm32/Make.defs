@@ -504,7 +504,8 @@ CHIP_CSRCS += stm32_hsi48_m0_v1.c
 endif
 
 ifeq ($(CONFIG_STM32_USB),y)
-ifeq ($(CONFIG_STM32_HAVE_IP_USBDEV_M0_V1),y)
+ifneq ($(filter y,$(CONFIG_STM32_HAVE_IP_USBDEV_M0_V1) \
+            $(CONFIG_STM32_HAVE_IP_USBDEV_M0_V2)),)
 CHIP_CSRCS += stm32_usbdev_m0_v1.c
 endif
 endif

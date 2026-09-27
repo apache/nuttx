@@ -590,11 +590,69 @@
 
 #define SENSOR_TYPE_ENG                             58
 
+/* Voltage
+ * A sensor of this type returns the measured voltage between two points.
+ * The value is in SI units volt(V).
+ */
+
+#define SENSOR_TYPE_VOLTAGE                         59
+
+/* Current
+ * A sensor of this type returns the measured current flowing through a
+ * path. The value is in SI units ampere(A) and is signed: a negative value
+ * indicates that the current flows in the opposite direction.
+ */
+
+#define SENSOR_TYPE_CURRENT                         60
+
+/* Power
+ * A sensor of this type returns the measured instantaneous active power.
+ * The value is in SI units watt(W). The accumulated energy is reported by
+ * SENSOR_TYPE_ENERGY. The AC power components (reactive, apparent and
+ * power factor) are not covered by this type.
+ */
+
+#define SENSOR_TYPE_POWER                           61
+
+/* Resistance
+ * A sensor of this type returns the measured DC resistance. The value is
+ * in SI units Ohm(Ω). Use SENSOR_TYPE_IMPEDANCE instead when the reactance
+ * is also needed.
+ */
+
+#define SENSOR_TYPE_RESISTANCE                      62
+
+/* Electrical conductivity
+ * A sensor of this type returns the measured electrical conductivity of a
+ * medium. The value is in SI units siemens per metre(S/m), where 1 S/m
+ * equals 1e4 uS/cm.
+ */
+
+#define SENSOR_TYPE_CONDUCTIVITY                    63
+
+/* Energy
+ * A sensor of this type returns the electrical energy accumulated since
+ * the accumulator was last reset. The value is in uJ, where 1 Wh equals
+ * 3.6e9 uJ. The value is signed: a negative value indicates that the
+ * energy flows in the direction opposite to the reference direction.
+ */
+
+#define SENSOR_TYPE_ENERGY                          64
+
+/* Charge
+ * A sensor of this type returns the electrical charge accumulated since
+ * the accumulator was last reset, that is the time integral of the
+ * current. The value is in uC, where 1 Ah equals 3.6e9 uC. The value is
+ * signed and uses the same direction convention as SENSOR_TYPE_CURRENT.
+ */
+
+#define SENSOR_TYPE_CHARGE                          65
+
 /* The total number of sensor
  * please increase it if you added a new sensor type!
  */
 
-#define SENSOR_TYPE_COUNT                           59
+#define SENSOR_TYPE_COUNT                           66
 
 /* The additional sensor open flags */
 
@@ -1031,6 +1089,51 @@ struct sensor_eng           /* Type: ENG */
   uint64_t timestamp;       /* Unit is microseconds */
   float voltage[4];         /* Voltage unit in mV */
   uint32_t stat;            /* Status. bit3:0 - value 3:0 is valid or not */
+};
+
+struct sensor_voltage        /* Type: Voltage */
+{
+  uint64_t      timestamp;   /* Unit is microseconds */
+  sensor_data_t voltage;     /* in SI units V */
+};
+
+struct sensor_current        /* Type: Current */
+{
+  uint64_t      timestamp;   /* Unit is microseconds */
+  sensor_data_t current;     /* in SI units A, signed */
+};
+
+struct sensor_power          /* Type: Power */
+{
+  uint64_t      timestamp;   /* Unit is microseconds */
+  sensor_data_t power;       /* Instantaneous active power, SI units W */
+};
+
+struct sensor_resistance     /* Type: Resistance */
+{
+  uint64_t      timestamp;   /* Unit is microseconds */
+  sensor_data_t resistance;  /* in SI units Ohm(Ω) */
+};
+
+struct sensor_conductivity   /* Type: Electrical conductivity */
+{
+  uint64_t      timestamp;   /* Unit is microseconds */
+
+  /* In SI units S/m, where 1 S/m is 1e4 uS/cm */
+
+  sensor_data_t conductivity;
+};
+
+struct sensor_energy        /* Type: Energy */
+{
+  uint64_t timestamp;       /* Unit is microseconds */
+  int64_t energy;           /* Accumulated energy. Unit is uJ. */
+};
+
+struct sensor_charge        /* Type: Charge */
+{
+  uint64_t timestamp;       /* Unit is microseconds */
+  int64_t charge;           /* Accumulated charge. Unit is uC. */
 };
 
 struct sensor_gnss          /* Type: GNSS */

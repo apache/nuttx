@@ -169,7 +169,7 @@ config STM32_ETH_ENHANCEDDESC
 
 config STM32_ETH_PTP_GPIO
 	bool "PTP pulse-per-second output signal"
-	depends on STM32_COMMON_LEGACY && STM32_ETH_PTP
+	depends on (STM32_COMMON_LEGACY || STM32_COMMON_H7_H5) && STM32_ETH_PTP
 	default n
 	---help---
 		Enables pulse-per-second output on GPIO pin.
@@ -187,12 +187,19 @@ config STM32_ETH_PTP_RTC_HIRES
 
 config STM32_ETH_TIMESTAMP_RX
 	bool "Hardware timestamping of received packets"
-	depends on STM32_COMMON_LEGACY && STM32_ETH_PTP && NET_TIMESTAMP && STM32_ETH_ENHANCEDDESC
-	select ARCH_HAVE_NETDEV_TIMESTAMP
+	depends on STM32_ETH_PTP && NET_TIMESTAMP && (STM32_COMMON_H7_H5 || (STM32_COMMON_LEGACY && STM32_ETH_ENHANCEDDESC))
 	default n
 	---help---
 		Timestamp all received Ethernet packets.
 		Timestamp is available to application through SO_TIMESTAMP socket option.
+
+config STM32_ETH_TIMESTAMP_TX
+	bool "Hardware timestamping of transmitted packets"
+	depends on STM32_ETH_PTP && NET_TIMESTAMP && (STM32_COMMON_H7_H5 || (STM32_COMMON_LEGACY && STM32_ETH_ENHANCEDDESC))
+	default n
+	---help---
+		Enables hardware timestamp capture on transmitted Ethernet frames.
+		Timestamp is looped back to userspace via MSG_ERRQUEUE with SO_TIMESTAMPING.
 
 config STM32_RMII
 	bool

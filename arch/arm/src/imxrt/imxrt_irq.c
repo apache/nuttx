@@ -200,12 +200,20 @@ static void imxrt_dumpnvic(const char *msg, int irq)
           getreg32(NVIC_IRQ204_207_PRIORITY));
 #endif
 #if IMXRT_IRQ_NEXTINT > 208
-  irqinfo("              %08x %08x %08x\n",
+  irqinfo("              %08x %08x %08x %08x\n",
           getreg32(NVIC_IRQ208_211_PRIORITY),
           getreg32(NVIC_IRQ212_215_PRIORITY),
-          getreg32(NVIC_IRQ216_219_PRIORITY));
+          getreg32(NVIC_IRQ216_219_PRIORITY),
+          getreg32(NVIC_IRQ220_223_PRIORITY));
 #endif
-#if IMXRT_IRQ_NEXTINT > 218
+#if IMXRT_IRQ_NEXTINT > 224
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ224_227_PRIORITY),
+          getreg32(NVIC_IRQ228_231_PRIORITY),
+          getreg32(NVIC_IRQ232_235_PRIORITY),
+          getreg32(NVIC_IRQ236_239_PRIORITY));
+#endif
+#if IMXRT_IRQ_NEXTINT > 240
 #  warning Missing logic
 #endif
 
@@ -294,59 +302,67 @@ static int imxrt_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
     {
       if (extint < 32)
         {
-           *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
-           *bit     = 1 << extint;
+          *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
+          *bit = 1 << extint;
         }
       else
 #if IMXRT_IRQ_NEXTINT > 32
       if (extint < 64)
         {
-           *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
-           *bit     = 1 << (extint - 32);
+          *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
+          *bit = 1 << (extint - 32);
         }
       else
 #endif
 #if IMXRT_IRQ_NEXTINT > 64
       if (extint < 96)
         {
-           *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
-           *bit     = 1 << (extint - 64);
+          *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
+          *bit = 1 << (extint - 64);
         }
       else
 #endif
 #if IMXRT_IRQ_NEXTINT > 96
       if (extint < 128)
         {
-           *regaddr = (NVIC_IRQ96_127_ENABLE + offset);
-           *bit     = 1 << (extint - 96);
+          *regaddr = (NVIC_IRQ96_127_ENABLE + offset);
+          *bit = 1 << (extint - 96);
         }
       else
 #endif
 #if IMXRT_IRQ_NEXTINT > 128
       if (extint < 160)
         {
-           *regaddr = (NVIC_IRQ128_159_ENABLE + offset);
-           *bit     = 1 << (extint - 128);
+          *regaddr = (NVIC_IRQ128_159_ENABLE + offset);
+          *bit = 1 << (extint - 128);
         }
       else
 #endif
 #if IMXRT_IRQ_NEXTINT > 160
       if (extint < 192)
         {
-           *regaddr = (NVIC_IRQ160_191_ENABLE + offset);
-           *bit     = 1 << (extint - 160);
+          *regaddr = (NVIC_IRQ160_191_ENABLE + offset);
+          *bit = 1 << (extint - 160);
         }
       else
 #endif
 #if IMXRT_IRQ_NEXTINT > 192
-      if (extint < 219)
+      if (extint < 224)
         {
-           *regaddr = (NVIC_IRQ192_223_ENABLE + offset);
-           *bit     = 1 << (extint - 192);
+          *regaddr = (NVIC_IRQ192_223_ENABLE + offset);
+          *bit = 1 << (extint - 192);
         }
       else
 #endif
-#if IMXRT_IRQ_NEXTINT > 218
+#if IMXRT_IRQ_NEXTINT > 224
+      if (extint < 240)
+        {
+          *regaddr = (NVIC_IRQ224_239_ENABLE + offset);
+          *bit     = 1 << (extint - 224);
+        }
+      else
+#endif
+#if IMXRT_IRQ_NEXTINT > 240
 #  error Missing logic
 #endif
         {

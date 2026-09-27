@@ -528,11 +528,11 @@ static void imx9_dmaterminate(struct imx9_dmach_s *dmach, int result)
        * if not continue to free tcds in chain
        */
 
-       next = dmach->flags & EDMA_CONFIG_LOOPDEST ?
-              NULL : (struct imx9_edmatcd_s *)
-              imx9_edma_dmaaddr_to_addr(tcd->dlastsga);
+      next = dmach->flags & EDMA_CONFIG_LOOPDEST ? NULL :
+             (struct imx9_edmatcd_s *)imx9_edma_dmaaddr_to_addr(
+                                        tcd->dlastsga);
 
-       imx9_tcd_free_nolock(tcd);
+      imx9_tcd_free_nolock(tcd);
     }
 
   dmach->head = NULL;
@@ -548,12 +548,12 @@ static void imx9_dmaterminate(struct imx9_dmach_s *dmach, int result)
   dmach->arg      = NULL;
   dmach->state    = IMX9_DMA_IDLE;
 
+  spin_unlock_irqrestore_nopreempt(&g_edma.lock, flags);
+
   if (callback)
     {
       callback((DMACH_HANDLE)dmach, arg, true, result);
     }
-
-  spin_unlock_irqrestore_nopreempt(&g_edma.lock, flags);
 }
 
 /****************************************************************************
@@ -1526,6 +1526,7 @@ unsigned int imx9_dmach_getcount(DMACH_HANDLE handle)
 unsigned int imx9_dmach_idle(DMACH_HANDLE handle)
 {
   struct imx9_dmach_s *dmach = (struct imx9_dmach_s *)handle;
+
   return dmach->state == IMX9_DMA_IDLE ? 0 : -1;
 }
 

@@ -108,6 +108,7 @@ The main task thread does not have thread-specific data.
 
  - :c:func:`pthread_kill`
  - :c:func:`pthread_sigmask`
+ - :c:func:`pthread_sigqueue`
 
 No support for the following pthread interfaces is provided by NuttX:
 
@@ -1711,6 +1712,29 @@ No support for the following pthread interfaces is provided by NuttX:
   -  ``oset``. Location to store the old signal mask.
 
   **Returned Value:**
+
+  **Assumptions/Limitations:**
+
+  **POSIX Compatibility:** Comparable to the POSIX interface of the same
+  name.
+
+.. c:function:: int pthread_sigqueue(pthread_t thread, int sig, const union sigval value);
+
+  This function queues a signal and data to a thread. It operates similarly to
+  ``sigqueue()``.
+
+  **Input Parameters:**
+
+  -  ``thread``. The ID of a thread in the same process as the caller.
+  -  ``sig``. The signal to be sent
+  -  ``value``. Data to accompany the signal (see ``sigqueue``)
+
+  **Returned Value:**
+
+  -  ``EAGAIN``. The limit of signals which may be queued has been reached.
+  -  ``EINVAL``. ``sig`` was invalid.
+  -  ``ENOSYS``. ``pthread_sigqueue()`` is not supported on this system.
+  -  ``ESRCH``. ``thread`` is not valid.
 
   **Assumptions/Limitations:**
 

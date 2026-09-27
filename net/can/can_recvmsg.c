@@ -63,18 +63,46 @@ struct can_recvfrom_s
 {
   FAR struct can_conn_s *pr_conn;      /* Connection associated with the socket */
   FAR struct devif_callback_s *pr_cb;  /* Reference to callback instance */
+  FAR struct msghdr *pr_msg;           /* Pointer to receive buffer */
   sem_t        pr_sem;                 /* Semaphore signals recv completion */
-  size_t       pr_buflen;              /* Length of receive buffer */
-  FAR uint8_t *pr_buffer;              /* Pointer to receive buffer */
   ssize_t      pr_recvlen;             /* The received length */
-  size_t       pr_msglen;              /* Length of msg buffer */
-  FAR uint8_t *pr_msgbuf;              /* Pointer to msg buffer */
   int          pr_result;              /* Success:OK, failure:negated errno */
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: can_recvfrom_initialize
+ *
+ * Description:
+ *   Initialize the state structure
+ *
+ * Input Parameters:
+ *   conn     The CAN connection of interest
+ *   msg      Receive info and buffer for receive data
+ *   pstate   A pointer to the state structure to be initialized
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void can_recvfrom_initialize(FAR struct can_conn_s *conn,
+                                    FAR struct msghdr *msg,
+                                    FAR struct can_recvfrom_s *pstate)
+{
+  /* Initialize the state structure. */
+
+  memset(pstate, 0, sizeof(struct can_recvfrom_s));
+  nxsem_init(&pstate->pr_sem, 0, 0);
+
+  pstate->pr_conn = conn;
+  pstate->pr_msg  = msg;
+}
 
 /****************************************************************************
  * Name: can_add_recvlen
@@ -102,8 +130,6 @@ static inline void can_add_recvlen(FAR struct can_recvfrom_s *pstate,
     }
 
   pstate->pr_recvlen += recvlen;
-  pstate->pr_buffer  += recvlen;
-  pstate->pr_buflen  -= recvlen;
 }
 
 /****************************************************************************
@@ -129,31 +155,20 @@ static size_t can_recvfrom_newdata(FAR struct net_driver_s *dev,
 {
   unsigned int offset;
   size_t recvlen;
-#ifdef CONFIG_NET_TIMESTAMP
-  FAR struct can_conn_s *conn = pstate->pr_conn;
 
-  if (_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP) &&
-      pstate->pr_msglen == sizeof(struct timeval))
-    {
-      iob_copyout(pstate->pr_msgbuf, dev->d_iob, sizeof(struct timeval),
-                  -CONFIG_NET_LL_GUARDSIZE);
-    }
+#ifdef CONFIG_NET_TIMESTAMP
+  cmsg_store_timestamp(pstate->pr_msg, &dev->d_iob->io_time,
+                       pstate->pr_conn->sconn.s_options);
 #endif
 
-  if (dev->d_len > pstate->pr_buflen)
-    {
-      recvlen = pstate->pr_buflen;
-    }
-  else
-    {
-      recvlen = dev->d_len;
-    }
+  recvlen = MIN(pstate->pr_msg->msg_iov->iov_len, dev->d_len);
 
   /* Copy the new packet data into the user buffer */
 
   offset = (dev->d_appdata - dev->d_iob->io_data) - dev->d_iob->io_offset;
 
-  recvlen = iob_copyout(pstate->pr_buffer, dev->d_iob, recvlen, offset);
+  recvlen = iob_copyout(pstate->pr_msg->msg_iov->iov_base,
+                        dev->d_iob, recvlen, offset);
 
   /* Trim the copied buffers */
 
@@ -238,27 +253,28 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
    * buffer.
    */
 
-  pstate->pr_recvlen = -1;
+  pstate->pr_recvlen = -ENODATA;
 
-  if (pstate->pr_buflen > 0 &&
+  if (pstate->pr_msg->msg_iov->iov_len > 0 &&
       (iob = iob_remove_queue(&conn->readahead)) != NULL)
     {
       DEBUGASSERT(iob->io_pktlen > 0);
 
 #ifdef CONFIG_NET_TIMESTAMP
-      if (_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP) &&
-          pstate->pr_msglen == sizeof(struct timeval))
-        {
-          iob_copyout(pstate->pr_msgbuf, iob, sizeof(struct timeval),
-                      -CONFIG_NET_LL_GUARDSIZE);
-        }
+      cmsg_store_timestamp(pstate->pr_msg, &iob->io_time,
+                           conn->sconn.s_options);
 #endif
 
       /* Transfer that buffered data from the I/O buffer chain into
        * the user buffer.
        */
 
-      recvlen = iob_copyout(pstate->pr_buffer, iob, pstate->pr_buflen, 0);
+      recvlen = iob_copyout(pstate->pr_msg->msg_iov->iov_base,
+                            iob, pstate->pr_msg->msg_iov->iov_len, 0);
+
+      /* Update the accumulated size of the data read */
+
+      pstate->pr_recvlen = recvlen;
 
       /* We should have taken all of the data from the I/O buffer chain,
        * so release it. There is no trimming needed, since One CAN/CANFD
@@ -297,8 +313,7 @@ static uint32_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
 
   if (pstate)
     {
-#if (defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)) \
-     || defined(CONFIG_NET_TIMESTAMP)
+#if defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)
       struct can_conn_s *conn = pstate->pr_conn;
 #endif
 
@@ -309,15 +324,7 @@ static uint32_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
           if (!_SO_GETOPT(conn->sconn.s_options, CAN_RAW_FD_FRAMES))
 #endif
             {
-#ifdef CONFIG_NET_TIMESTAMP
-              if ((_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP) &&
-                   dev->d_len > sizeof(struct can_frame) +
-                   sizeof(struct timeval)) ||
-                  (!_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP) &&
-                   dev->d_len > sizeof(struct can_frame)))
-#else
               if (dev->d_len > sizeof(struct can_frame))
-#endif
                 {
                   /* DO WE NEED TO CLEAR FLAGS?? */
 
@@ -442,25 +449,7 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   /* Initialize the state structure. */
 
-  memset(&state, 0, sizeof(struct can_recvfrom_s));
-  nxsem_init(&state.pr_sem, 0, 0); /* Doesn't really fail */
-
-  state.pr_buflen = msg->msg_iov->iov_len;
-  state.pr_buffer = msg->msg_iov->iov_base;
-
-#ifdef CONFIG_NET_TIMESTAMP
-  if (_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP))
-    {
-      state.pr_msgbuf = cmsg_append(msg, SOL_SOCKET, SO_TIMESTAMP,
-                                    NULL, sizeof(struct timeval));
-      if (state.pr_msgbuf != NULL)
-        {
-          state.pr_msglen = sizeof(struct timeval);
-        }
-    }
-#endif
-
-  state.pr_conn = conn;
+  can_recvfrom_initialize(conn, msg, &state);
 
   /* Handle any any CAN data already buffered in a read-ahead buffer.  NOTE
    * that there may be read-ahead data to be retrieved even after the

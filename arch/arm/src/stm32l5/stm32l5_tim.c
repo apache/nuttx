@@ -41,7 +41,7 @@
 #include "chip.h"
 #include "arm_internal.h"
 #include "stm32.h"
-#include "stm32l5_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l5_tim.h"
 
 /****************************************************************************
@@ -484,6 +484,7 @@ static inline void stm32_putreg32(struct stm32_tim_dev_s *dev,
 static void stm32_tim_reload_counter(struct stm32_tim_dev_s *dev)
 {
   uint16_t val = stm32_getreg16(dev, STM32_GTIM_EGR_OFFSET);
+
   val |= GTIM_EGR_UG;
   stm32_putreg16(dev, STM32_GTIM_EGR_OFFSET, val);
 }
@@ -495,6 +496,7 @@ static void stm32_tim_reload_counter(struct stm32_tim_dev_s *dev)
 static void stm32_tim_enable(struct stm32_tim_dev_s *dev)
 {
   uint16_t val = stm32_getreg16(dev, STM32_GTIM_CR1_OFFSET);
+
   val |= GTIM_CR1_CEN;
   stm32_tim_reload_counter(dev);
   stm32_putreg16(dev, STM32_GTIM_CR1_OFFSET, val);
@@ -507,6 +509,7 @@ static void stm32_tim_enable(struct stm32_tim_dev_s *dev)
 static void stm32_tim_disable(struct stm32_tim_dev_s *dev)
 {
   uint16_t val = stm32_getreg16(dev, STM32_GTIM_CR1_OFFSET);
+
   val &= ~GTIM_CR1_CEN;
   stm32_putreg16(dev, STM32_GTIM_CR1_OFFSET, val);
 }
@@ -616,11 +619,11 @@ static int stm32_tim_setmode(struct stm32_tim_dev_s *dev,
 #if STM32_NATIM > 0
   /* Advanced registers require Main Output Enable */
 
-    if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM1_BASE ||
-        ((struct stm32_tim_priv_s *)dev)->base == STM32_TIM8_BASE)
-      {
-        stm32_modifyreg16(dev, STM32_ATIM_BDTR_OFFSET, 0, ATIM_BDTR_MOE);
-      }
+  if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM1_BASE ||
+      ((struct stm32_tim_priv_s *)dev)->base == STM32_TIM8_BASE)
+    {
+      stm32_modifyreg16(dev, STM32_ATIM_BDTR_OFFSET, 0, ATIM_BDTR_MOE);
+    }
 #endif
 
   return OK;
@@ -759,6 +762,7 @@ static uint32_t stm32_tim_getclock(struct stm32_tim_dev_s *dev)
 {
   uint32_t freqin;
   uint32_t clock;
+
   DEBUGASSERT(dev != NULL);
 
   /* Get the input clock frequency for this timer.  These vary with
@@ -1490,6 +1494,7 @@ static int stm32_tim_checkint(struct stm32_tim_dev_s *dev,
                                 int source)
 {
   uint16_t regval = stm32_getreg16(dev, STM32_GTIM_SR_OFFSET);
+
   return (regval & GTIM_SR_UIF) ? 1 : 0;
 }
 

@@ -11,11 +11,11 @@ The is the most natural development environment for NuttX. Any version
 of the GCC/binutils toolchain may be used. There is a highly modified
 `buildroot <http://buildroot.uclibc.org/>`__ available for download from
 the `NuttX
-Bitbucket.org <https://bitbucket.org/nuttx/buildroot/downloads/>`__
-page. This download may be used to build a NuttX-compatible ELF
+buildroot <https://github.com/patacongo/buildroot>`__
+repository. This download may be used to build a NuttX-compatible ELF
 toolchain under Linux or Cygwin. That toolchain will support ARM, m68k,
 m68hc11, m68hc12, and SuperH ports. The buildroot GIT may be accessed in
-the NuttX `buildroot GIT <https://bitbucket.org/nuttx/buildroot>`__.
+the NuttX `buildroot repository <https://github.com/patacongo/buildroot>`__.
 
 Linux + GNU ``make`` + SDCC for Linux
 =====================================
@@ -33,7 +33,7 @@ Windows with Cygwin + GNU ``make`` + GCC/binutils (custom built under Cygwin)
 This combination works well too. It works just as well as the native
 Linux environment except that compilation and build times are a little
 longer. The custom NuttX
-`buildroot <https://bitbucket.org/nuttx/buildroot/downloads/>`__
+`buildroot <https://github.com/patacongo/buildroot>`__
 referenced above may be build in the Cygwin environment as well.
 
 Windows with Cygwin + GNU ``make`` + SDCC (custom built under Cygwin)

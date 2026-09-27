@@ -1,0 +1,21 @@
+# Realtek RTL8730E (AmebaSmart) vendor blobs and build artefacts.
+#
+# These are NOT NuttX source and must never be committed upstream (vendor
+# blobs are kept out of the NuttX tree).  They are vendor outputs from the
+# ameba-rtos SDK, placed here by the integrator:
+#
+#   libs/*.a / libs/wifi_obj/*.o   pre-compiled chip archives + WiFi glue
+#   bl2.bin / bl32.bin / boot.bin  prebuilt secure-boot / KM4-KM0 blobs
+#   vendor_prefix.bin              image header prepended to the AP image
+#   platform_autoconf.h            static minimal header maintained in-tree
+#                                  (NOT from SDK menuconfig; only the defines
+#                                  our fwlib sources actually need)
+#   fiptool                        vendored FIP packaging tool binary
+#   *_uuid.txt                     FIP entry UUIDs for the packer
+#
+# Everything in this directory is ignored, except platform_autoconf.h which
+# is a hand-maintained NuttX-side file that must be present on a clean clone.
+
+*
+!.gitignore
+!platform_autoconf.h

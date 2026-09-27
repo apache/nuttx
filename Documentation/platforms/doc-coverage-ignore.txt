@@ -53,3 +53,4 @@ xtensa/lilygo_tbeam_lora_gps
 xtensa/ttgo_eink5_v2
 xtensa/ttgo_lora_esp32
 xtensa/ttgo_t_display_esp32
+risc-v/esp8684-devkitm

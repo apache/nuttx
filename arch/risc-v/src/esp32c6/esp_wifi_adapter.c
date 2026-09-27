@@ -1703,6 +1703,7 @@ static void esp_log_write_wrapper(unsigned int level,
   if (level <= max_level)
     {
       va_list list;
+
       va_start(list, format);
       esp_log_writev(level, tag, format, list);
       va_end(list);
@@ -2891,7 +2892,6 @@ static int32_t xqueue_send_adapter(void *queue,
 
 void *xsemaphore_create_counting_adapter(uint32_t max, uint32_t init)
 {
-  int ret;
   sem_t *sem;
   int tmp;
 
@@ -2903,13 +2903,7 @@ void *xsemaphore_create_counting_adapter(uint32_t max, uint32_t init)
       return NULL;
     }
 
-  ret = nxsem_init(sem, 0, init);
-  if (ret)
-    {
-      wlerr("Failed to initialize sem error=%d\n", ret);
-      kmm_free(sem);
-      return NULL;
-    }
+  nxsem_init(sem, 0, init);
 
   return sem;
 }

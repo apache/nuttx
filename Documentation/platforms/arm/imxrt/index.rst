@@ -25,8 +25,32 @@ RT1060  Yes             Cortex-M7        600 MHz
 RT1064  Yes             Cortex-M7        600 MHz
 RT1160  No              Cortex-M7 + M4   600 Mhz + 240 MHz
 RT1170  Yes (Only M7)   Cortex-M7 + M4   1 GHz + 400 MHz
-RT1180  No              Cortex-M7 + M33  800 Mhz + 300 MHz
+RT1180  Yes             Cortex-M7 + M33  800 Mhz + 300 MHz
 ======  ==============  ===============  =================
+
+i.MX RT118x
+===========
+
+The i.MX RT118x family is supported on both the Cortex-M33 and Cortex-M7
+cores. The Cortex-M33 is the boot core; it can run NuttX directly, or it
+can run a small bootloader that releases the Cortex-M7 to run a separate
+NuttX image.
+
+The current clock configuration runs the Cortex-M7 at 798 MHz and the
+Cortex-M33 at 266 MHz due to ARM_PLL and divider setting limitations.
+
+RT118x uses the generation 3 clock configuration driver for the clock
+roots found on this family. It also uses the generation 3 IOMUXC driver
+for the RT118x pinmux layout and GPIO mode selection.
+
+RT118x uses the RGPIO driver and the matching RGPIO interrupt driver
+instead of the legacy i.MX RT GPIO block. The version 2 eDMA driver is
+selected for the newer RT118x eDMA IP.
+
+The EdgeLock Enclave driver provides the messaging path used for RT118x
+ELE firmware, and the TRDC driver configures access to RT118x memory and
+peripheral resources. The Cortex-M7 release helper is used by Cortex-M33
+firmware to set the Cortex-M7 boot vector and start the M7 core.
 
 Data and Instruction Cache
 ==========================

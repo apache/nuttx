@@ -35,6 +35,9 @@
 
 #include <nuttx/wqueue.h>
 #include <nuttx/sched.h>
+#ifdef CONFIG_FDPIC
+#  include <nuttx/fdpic.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -67,7 +70,14 @@ struct sigwork_s
 {
   struct work_s work;           /* Work queue structure */
   union sigval value;           /* Data passed with notification */
+#ifdef CONFIG_FDPIC
+  struct fdpic_desc_s func;     /* Notification function, and the data base
+                                 * of a module callback or zero.  The base is
+                                 * captured at registration and installed
+                                 * around the call on the worker thread. */
+#else
   sigev_notify_function_t func; /* Notification function */
+#endif
 };
 
 #ifdef __cplusplus

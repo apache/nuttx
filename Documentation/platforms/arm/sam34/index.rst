@@ -14,7 +14,7 @@ Cygwin (with native Windows GNU tools or Cygwin-based GNU tools).
 2) Cygwin/MSYS with Cygwin GNU toolchain, 3) Cygwin/MSYS with Windows
 native toolchain (CodeSourcery or devkitARM), or 4) Native Windows. A
 DIY toolchain for inux or Cygwin is provided by the NuttX
-`buildroot <https://bitbucket.org/nuttx/buildroot/downloads/>`__
+`buildroot <https://github.com/patacongo/buildroot>`__
 package.
 
 Microchip SAM3X
@@ -139,7 +139,7 @@ FLASH file system.
 with Windows native GNU Cortex-M3 or M4 toolchain (CodeSourcery or
 devkitARM), or 4) Native Windows. A DIY toolchain for Linux or Cygwin is
 provided by the NuttX
-`buildroot <https://bitbucket.org/nuttx/buildroot/downloads/>`__
+`buildroot <https://github.com/patacongo/buildroot>`__
 package.
 
 Supported Boards

@@ -214,6 +214,7 @@ static int irq_callback(int irq, FAR struct irq_info_s *info,
   else
     {
       uint64_t intcount = ((uint64_t)intpart * elapsed);
+
       fracpart = (unsigned int)
         (((copy.count * TICK_PER_SEC - intcount) * 1000) / elapsed);
     }
@@ -231,12 +232,12 @@ static int irq_callback(int irq, FAR struct irq_info_s *info,
 
   /* Output information about this interrupt */
 
-  linesize = snprintf(irqfile->line, IRQ_LINELEN, IRQ_FMT,
-                      (unsigned int)irq,
-                      (unsigned long)((uintptr_t)copy.handler),
-                      (unsigned long)((uintptr_t)copy.arg),
-                      count, intpart, fracpart,
-                      (unsigned long)delta.tv_nsec / 1000);
+  linesize = procfs_snprintf(irqfile->line, IRQ_LINELEN, IRQ_FMT,
+                             (unsigned int)irq,
+                             (unsigned long)((uintptr_t)copy.handler),
+                             (unsigned long)((uintptr_t)copy.arg),
+                             count, intpart, fracpart,
+                             (unsigned long)delta.tv_nsec / 1000);
 
   copysize  = procfs_memcpy(irqfile->line, linesize, irqfile->buffer,
                             irqfile->remaining, &irqfile->offset);

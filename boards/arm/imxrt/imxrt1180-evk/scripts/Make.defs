@@ -1,0 +1,102 @@
+############################################################################
+# boards/arm/imxrt/imxrt1180-evk/scripts/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
+
+# Select the right Toolchain.defs (ARMv7-M for the M7 build, ARMv8-M for the
+# M33 build) and the matching per-core linker script.
+
+ifeq ($(CONFIG_ARCH_CORTEXM33),y)
+include $(TOPDIR)/arch/arm/src/armv8-m/Toolchain.defs
+LDSCRIPT = flash-m33.ld
+else
+include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
+LDSCRIPT = flash.ld
+endif
+
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+
+ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
+
+CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
+CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
+CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+AFLAGS := $(CFLAGS) -D__ASSEMBLY__
+
+# Post-build: assemble the flashable image "flash.bin" for CM33 builds.
+#
+# CM33 builds
+#   flash.bin = FCB (0x400)
+#             + AHAB container (this NuttX image) at 0x1000
+#   Programmed at FlexSPI offset 0 (flash address 0x28000000).  The M33
+#   image is confined to the first 512 KB of NOR.
+#
+# The AHAB container is a single, unsigned application container.
+# In the simples case, use a standalone tools/imxrt1180/mkahab host tool
+# to create the container. If ELE FW is needed, download and use the the
+# full SPSDK toolkit.
+
+ifeq ($(CONFIG_IMXRT_ELE_FW),y)
+include $(TOPDIR)/tools/imxrt1180/Config.mk
+
+# Restore "all" as the default goal: Config.mk's FW target would
+# otherwise become it, since this file is included before "all" is
+# defined.
+.DEFAULT_GOAL := all
+endif
+
+ifeq ($(CONFIG_IMXRT_ELE_FW),y)
+ifneq ($(CONFIG_IMXRT_ELE_LOAD_FW),y)
+FLASH_BUILDER_NEEDS_SPSDK = 1
+endif
+endif
+
+ifeq ($(FLASH_BUILDER_NEEDS_SPSDK),1)
+FLASH_BUILDER = $(TOPDIR)$(DELIM)tools$(DELIM)imxrt1180$(DELIM)build_flash_image.sh
+FLASH_BUILDER_ARGS = --ele-fw $(IMXRT_ELE_FW_ABS)
+else
+FLASH_BUILDER = $(TOPDIR)$(DELIM)tools$(DELIM)imxrt1180$(DELIM)mkahab$(HOSTEXEEXT)
+FLASH_BUILDER_ARGS =
+endif
+
+ifeq ($(CONFIG_ARCH_CORTEXM33),y)
+define POSTBUILD
+	$(Q) echo "Assembling MIMXRT1180-EVK FlexSPI NOR image (CM33 target)"
+	$(Q) $(OBJCOPY) -O binary -R .bss -R .initstack $(BIN) nuttx.bin
+	$(if $(IMXRT_ELE_FW_ABS),$(Q) $(MAKE) $(IMXRT_ELE_FW_ABS))
+	$(if $(filter 1,$(FLASH_BUILDER_NEEDS_SPSDK)),,+$(Q) $(MAKE) -C $(TOPDIR)$(DELIM)tools$(DELIM)imxrt1180 -f Makefile.host)
+	$(Q) $(FLASH_BUILDER) \
+	     --m33 nuttx.bin \
+	     --out flash.bin \
+	     $(FLASH_BUILDER_ARGS)
+	$(if $(filter 1,$(FLASH_BUILDER_NEEDS_SPSDK)),,+$(Q) $(MAKE) -C $(TOPDIR)$(DELIM)tools$(DELIM)imxrt1180 -f Makefile.host clean)
+	$(Q) echo "flash.bin" >> nuttx.manifest
+endef
+else
+define POSTBUILD
+	$(Q) echo "Building MIMXRT1180-EVK Cortex-M7 payload (nuttx.bin)"
+	$(Q) $(OBJCOPY) -O binary -R .bss -R .initstack $(BIN) nuttx.bin
+endef
+endif

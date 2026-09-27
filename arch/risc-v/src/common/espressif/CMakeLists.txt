@@ -233,7 +233,7 @@ if(DEFINED ENV{ESP_HAL_3RDPARTY_VERSION})
       CACHE STRING "ESP HAL 3rdparty version")
 else()
   set(ESP_HAL_3RDPARTY_VERSION
-      8d0a898910084206721a0892ab093021bca1496a
+      772738e470cbf64b7c0e481fe17b03c922cc6fb5
       CACHE STRING "ESP HAL 3rdparty version")
 endif()
 

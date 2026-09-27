@@ -668,7 +668,27 @@ uint16_t icmpv6_chksum(FAR struct net_driver_s *dev, unsigned int iplen);
  ****************************************************************************/
 
 FAR void *cmsg_append(FAR struct msghdr *msg, int level, int type,
-                      FAR void *value, int value_len);
+                      FAR const void *value, int value_len);
+
+/****************************************************************************
+ * Name: cmsg_store_timestamp
+ *
+ * Description:
+ *   Store the timestamp in the cmsg
+ *
+ * Input Parameters:
+ *   msg    - Pointer to the msghdr containing ancillary data (CMSG).
+ *   tstamp - Timestamp information.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TIMESTAMP
+void cmsg_store_timestamp(FAR struct msghdr *msg,
+                          FAR const struct timespec *tstamp, sockopt_t opt);
+#endif /* CONFIG_NET_TIMESTAMP */
 
 #undef EXTERN
 #ifdef __cplusplus

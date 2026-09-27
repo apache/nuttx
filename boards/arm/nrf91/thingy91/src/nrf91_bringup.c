@@ -164,6 +164,19 @@ int nrf91_bringup(void)
     }
 #endif /* CONFIG_MTD */
 
+#ifdef CONFIG_RGBLED
+  /* Register the RGB LED (PWM0). Note: the LED is on the 3.3 V rail, which
+   * is controlled by the ADP5360 PMIC and must be enabled for the LED
+   * to light.
+   */
+
+  ret = nrf91_rgbled_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize RGB LED: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

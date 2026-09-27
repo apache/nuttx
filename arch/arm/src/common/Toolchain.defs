@@ -619,7 +619,10 @@ endif
 
 # Loadable module definitions
 
+# CXXMODULEFLAGS is what apps/Library.mk compiles a C++ shared library with.
+
 CMODULEFLAGS = $(CFLAGS) -fvisibility=hidden -mlong-calls # --target1-abs
+CXXMODULEFLAGS = $(CXXFLAGS) -fvisibility=hidden -mlong-calls
 LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 
 # ELF module definitions
@@ -633,9 +636,11 @@ CELFFLAGS = $(filter-out --fixed-r9,$(CFLAGS)) -fvisibility=hidden \
 CXXELFFLAGS = $(filter-out --fixed-r9,$(CXXFLAGS)) -fvisibility=hidden \
               -mlong-calls
 
-# __dso_handle comes from crtbegin, which a module does not link
+# __dso_handle comes from crtbegin, which neither a module nor a shared
+# library links
 
 CXXELFFLAGS += -fno-use-cxa-atexit
+CXXMODULEFLAGS += -fno-use-cxa-atexit
 
 ifeq ($(CONFIG_PIC),y)
   # ARCHCFLAGS, not CFLAGS: board Make.defs reassign CFLAGS with ':='
@@ -673,6 +678,20 @@ ifeq ($(CONFIG_FDPIC),y)
   CXXELFFLAGS += -mfdpic -fPIC -Wa,--noexecstack
 
   LDELFFLAGS += -m armelf_linux_fdpiceabi -shared -z now
+
+  # A loadable module and a shared library are the same kind of object here,
+  # so they are built the same way.  The partial link the module path uses
+  # elsewhere leaves no dynamic section, and the loader has nothing to bind
+  # an import to.
+  #
+  # The entry point is left to the caller:  a module is entered at _start,
+  # a library is only called into.
+
+  CMODULEFLAGS += -mfdpic -fPIC -Wa,--noexecstack
+  CXXMODULEFLAGS += -mfdpic -fPIC -Wa,--noexecstack
+
+  LDMODULEFLAGS = -m armelf_linux_fdpiceabi -shared -z now \
+                  -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 else
   CELFFLAGS += $(PICFLAGS) -mpic-register=r9
   CXXELFFLAGS += $(PICFLAGS) -mpic-register=r9

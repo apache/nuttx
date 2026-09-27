@@ -50,6 +50,9 @@
  * Private Data
  ****************************************************************************/
 
+/* CLOCK_TIMEKEEPING provides its own software-based adjtime(). */
+
+#ifndef CONFIG_CLOCK_TIMEKEEPING
 static struct wdog_s g_adjtime_wdog;
 static long g_adjtime_ppb;
 static spinlock_t g_adjtime_lock = SP_UNLOCKED;
@@ -216,6 +219,7 @@ int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta)
       return OK;
     }
 }
+#endif /* !CONFIG_CLOCK_TIMEKEEPING */
 
 /****************************************************************************
  * Name: nxclock_adjtime

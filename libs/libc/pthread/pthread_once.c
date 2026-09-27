@@ -33,6 +33,10 @@
 #include <nuttx/mutex.h>
 #include <nuttx/debug.h>
 
+#ifdef CONFIG_FDPIC
+#  include <nuttx/fdpic.h>
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -72,6 +76,15 @@ int pthread_once(FAR pthread_once_t *once_control,
     {
       return EINVAL;
     }
+
+#ifdef CONFIG_FDPIC
+  /* Resolve the descriptor here.  The value is a local copy, so a later
+   * call through the same once_control resolves afresh.
+   */
+
+  init_routine = (CODE void (*)(void))
+                 fdpic_callback((FAR void *)init_routine);
+#endif
 
   if (!once_control->done)
     {

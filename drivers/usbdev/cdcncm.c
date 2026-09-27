@@ -806,6 +806,7 @@ static int cdcmbim_poll(FAR struct file *filep, FAR struct pollfd *fds,
       /* This is a request to tear down the poll. */
 
       FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+
       DEBUGASSERT(slot);
 
       /* Remove all memory of the poll setup */
@@ -1847,45 +1848,45 @@ static int cdcnm_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc,
   switch (id)
     {
 #ifndef CONFIG_CDCNCM_COMPOSITE
-    case 0:
-      {
-        /* Descriptor 0 is the language id */
+      case 0:
+        {
+          /* Descriptor 0 is the language id */
 
-        strdesc->len  = 4;
-        strdesc->type = USB_DESC_TYPE_STRING;
-        data[0] = LSBYTE(CDCECM_STR_LANGUAGE);
-        data[1] = MSBYTE(CDCECM_STR_LANGUAGE);
-        return 4;
-      }
+          strdesc->len  = 4;
+          strdesc->type = USB_DESC_TYPE_STRING;
+          data[0] = LSBYTE(CDCECM_STR_LANGUAGE);
+          data[1] = MSBYTE(CDCECM_STR_LANGUAGE);
+          return 4;
+        }
 
-    case CDCECM_MANUFACTURERSTRID:
-      str = CONFIG_CDCNCM_VENDORSTR;
-      break;
+      case CDCECM_MANUFACTURERSTRID:
+        str = CONFIG_CDCNCM_VENDORSTR;
+        break;
 
-    case CDCECM_PRODUCTSTRID:
-      str = isncm ? CONFIG_CDCNCM_PRODUCTSTR : CONFIG_CDCMBIM_PRODUCTSTR;
-      break;
+      case CDCECM_PRODUCTSTRID:
+        str = isncm ? CONFIG_CDCNCM_PRODUCTSTR : CONFIG_CDCMBIM_PRODUCTSTR;
+        break;
 
-    case CDCECM_SERIALSTRID:
+      case CDCECM_SERIALSTRID:
 #ifdef CONFIG_BOARD_USBDEV_SERIALSTR
-      str = board_usbdev_serialstr();
+        str = board_usbdev_serialstr();
 #else
-      str = "0";
+        str = "0";
 #endif
-      break;
+        break;
 
-    case CDCECM_CONFIGSTRID:
-      str = "Default";
-      break;
+      case CDCECM_CONFIGSTRID:
+        str = "Default";
+        break;
 #endif
 
-    case CDCECM_MACSTRID:
-      str = "020000112233";
-      break;
+      case CDCECM_MACSTRID:
+        str = "020000112233";
+        break;
 
-    default:
-      uerr("Unknown string descriptor index: %d\n", id);
-      return -EINVAL;
+      default:
+        uerr("Unknown string descriptor index: %d\n", id);
+        return -EINVAL;
     }
 
   /* The string is utf16-le.  The poor man's utf-8 to utf16-le
@@ -1949,88 +1950,88 @@ static int cdcmbim_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
 static void cdcncm_mkepcompdesc(int epidx,
                                 FAR struct usb_ss_epcompdesc_s *epcompdesc)
 {
-    switch (epidx)
+  switch (epidx)
     {
-    case CDCNCM_EP_INTIN_IDX: /* Interrupt IN endpoint */
-      {
-        epcompdesc->len  = USB_SIZEOF_SS_EPCOMPDESC;                      /* Descriptor length */
-        epcompdesc->type = USB_DESC_TYPE_ENDPOINT_COMPANION;              /* Descriptor type */
+      case CDCNCM_EP_INTIN_IDX: /* Interrupt IN endpoint */
+        {
+          epcompdesc->len  = USB_SIZEOF_SS_EPCOMPDESC;                      /* Descriptor length */
+          epcompdesc->type = USB_DESC_TYPE_ENDPOINT_COMPANION;              /* Descriptor type */
 
-        if (CONFIG_CDCNCM_EPINTIN_MAXBURST >= USB_SS_INT_EP_MAXBURST)
-          {
-            epcompdesc->mxburst = USB_SS_INT_EP_MAXBURST - 1;
-          }
-        else
-          {
-            epcompdesc->mxburst = CONFIG_CDCNCM_EPINTIN_MAXBURST;
-          }
+          if (CONFIG_CDCNCM_EPINTIN_MAXBURST >= USB_SS_INT_EP_MAXBURST)
+            {
+              epcompdesc->mxburst = USB_SS_INT_EP_MAXBURST - 1;
+            }
+          else
+            {
+              epcompdesc->mxburst = CONFIG_CDCNCM_EPINTIN_MAXBURST;
+            }
 
-        epcompdesc->attr      = 0;
-        epcompdesc->wbytes[0] = LSBYTE((epcompdesc->mxburst + 1) *
-                                       CONFIG_CDCNCM_EPINTIN_SSSIZE);
-        epcompdesc->wbytes[1] = MSBYTE((epcompdesc->mxburst + 1) *
-                                       CONFIG_CDCNCM_EPINTIN_SSSIZE);
-      }
-      break;
+          epcompdesc->attr      = 0;
+          epcompdesc->wbytes[0] = LSBYTE((epcompdesc->mxburst + 1) *
+                                         CONFIG_CDCNCM_EPINTIN_SSSIZE);
+          epcompdesc->wbytes[1] = MSBYTE((epcompdesc->mxburst + 1) *
+                                         CONFIG_CDCNCM_EPINTIN_SSSIZE);
+        }
+        break;
 
-    case CDCNCM_EP_BULKOUT_IDX:
-      {
-        epcompdesc->len  = USB_SIZEOF_SS_EPCOMPDESC;                      /* Descriptor length */
-        epcompdesc->type = USB_DESC_TYPE_ENDPOINT_COMPANION;              /* Descriptor type */
+      case CDCNCM_EP_BULKOUT_IDX:
+        {
+          epcompdesc->len  = USB_SIZEOF_SS_EPCOMPDESC;                      /* Descriptor length */
+          epcompdesc->type = USB_DESC_TYPE_ENDPOINT_COMPANION;              /* Descriptor type */
 
-        if (CONFIG_CDCNCM_EPBULKOUT_MAXBURST >= USB_SS_BULK_EP_MAXBURST)
-          {
-            epcompdesc->mxburst = USB_SS_BULK_EP_MAXBURST - 1;
-          }
-        else
-          {
-            epcompdesc->mxburst = CONFIG_CDCNCM_EPBULKOUT_MAXBURST;
-          }
+          if (CONFIG_CDCNCM_EPBULKOUT_MAXBURST >= USB_SS_BULK_EP_MAXBURST)
+            {
+              epcompdesc->mxburst = USB_SS_BULK_EP_MAXBURST - 1;
+            }
+          else
+            {
+              epcompdesc->mxburst = CONFIG_CDCNCM_EPBULKOUT_MAXBURST;
+            }
 
-        if (CONFIG_CDCNCM_EPBULKOUT_MAXSTREAM > USB_SS_BULK_EP_MAXSTREAM)
-          {
-            epcompdesc->attr = USB_SS_BULK_EP_MAXSTREAM;
-          }
-        else
-          {
-            epcompdesc->attr = CONFIG_CDCNCM_EPBULKOUT_MAXSTREAM;
-          }
+          if (CONFIG_CDCNCM_EPBULKOUT_MAXSTREAM > USB_SS_BULK_EP_MAXSTREAM)
+            {
+              epcompdesc->attr = USB_SS_BULK_EP_MAXSTREAM;
+            }
+          else
+            {
+              epcompdesc->attr = CONFIG_CDCNCM_EPBULKOUT_MAXSTREAM;
+            }
 
-        epcompdesc->wbytes[0] = 0;
-        epcompdesc->wbytes[1] = 0;
-      }
-      break;
+          epcompdesc->wbytes[0] = 0;
+          epcompdesc->wbytes[1] = 0;
+        }
+        break;
 
-    case CDCNCM_EP_BULKIN_IDX:
-      {
-        epcompdesc->len  = USB_SIZEOF_SS_EPCOMPDESC;                      /* Descriptor length */
-        epcompdesc->type = USB_DESC_TYPE_ENDPOINT_COMPANION;              /* Descriptor type */
+      case CDCNCM_EP_BULKIN_IDX:
+        {
+          epcompdesc->len  = USB_SIZEOF_SS_EPCOMPDESC;                      /* Descriptor length */
+          epcompdesc->type = USB_DESC_TYPE_ENDPOINT_COMPANION;              /* Descriptor type */
 
-        if (CONFIG_CDCNCM_EPBULKIN_MAXBURST >= USB_SS_BULK_EP_MAXBURST)
-          {
-            epcompdesc->mxburst = USB_SS_BULK_EP_MAXBURST - 1;
-          }
-        else
-          {
-            epcompdesc->mxburst = CONFIG_CDCNCM_EPBULKIN_MAXBURST;
-          }
+          if (CONFIG_CDCNCM_EPBULKIN_MAXBURST >= USB_SS_BULK_EP_MAXBURST)
+            {
+              epcompdesc->mxburst = USB_SS_BULK_EP_MAXBURST - 1;
+            }
+          else
+            {
+              epcompdesc->mxburst = CONFIG_CDCNCM_EPBULKIN_MAXBURST;
+            }
 
-        if (CONFIG_CDCNCM_EPBULKIN_MAXSTREAM > USB_SS_BULK_EP_MAXSTREAM)
-          {
-            epcompdesc->attr = USB_SS_BULK_EP_MAXSTREAM;
-          }
-        else
-          {
-            epcompdesc->attr = CONFIG_CDCNCM_EPBULKIN_MAXSTREAM;
-          }
+          if (CONFIG_CDCNCM_EPBULKIN_MAXSTREAM > USB_SS_BULK_EP_MAXSTREAM)
+            {
+              epcompdesc->attr = USB_SS_BULK_EP_MAXSTREAM;
+            }
+          else
+            {
+              epcompdesc->attr = CONFIG_CDCNCM_EPBULKIN_MAXSTREAM;
+            }
 
-        epcompdesc->wbytes[0] = 0;
-        epcompdesc->wbytes[1] = 0;
-      }
-      break;
+          epcompdesc->wbytes[0] = 0;
+          epcompdesc->wbytes[1] = 0;
+        }
+        break;
 
-    default:
-      break;
+      default:
+        break;
     }
 }
 #endif
@@ -2462,36 +2463,36 @@ static int cdcncm_getdescriptor(FAR struct cdcncm_driver_s *self,
   switch (type)
     {
 #ifndef CONFIG_CDCNCM_COMPOSITE
-    case USB_DESC_TYPE_DEVICE:
-      if (self->isncm)
-        {
-          return usbdev_copy_devdesc(desc,
-                                     &g_ncmdevdesc,
-                                     self->usbdev.speed);
-        }
+      case USB_DESC_TYPE_DEVICE:
+        if (self->isncm)
+          {
+            return usbdev_copy_devdesc(desc,
+                                       &g_ncmdevdesc,
+                                       self->usbdev.speed);
+          }
 #  ifdef CONFIG_NET_CDCMBIM
-      else
-        {
-          memcpy(desc, &g_mbimdevdesc, sizeof(g_mbimdevdesc));
-          return sizeof(g_mbimdevdesc);
-        }
+        else
+          {
+            memcpy(desc, &g_mbimdevdesc, sizeof(g_mbimdevdesc));
+            return sizeof(g_mbimdevdesc);
+          }
 #  endif
-      break;
+        break;
 #endif
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-    case USB_DESC_TYPE_OTHERSPEEDCONFIG:
+      case USB_DESC_TYPE_OTHERSPEEDCONFIG:
 #endif /* CONFIG_USBDEV_DUALSPEED */
-    case USB_DESC_TYPE_CONFIG:
-      return cdcncm_mkcfgdesc((FAR uint8_t *)desc, &self->devinfo,
-                              self->usbdev.speed, type);
+      case USB_DESC_TYPE_CONFIG:
+        return cdcncm_mkcfgdesc((FAR uint8_t *)desc, &self->devinfo,
+                                self->usbdev.speed, type);
 
-    case USB_DESC_TYPE_STRING:
-      return cdcncm_mkstrdesc(index, (FAR struct usb_strdesc_s *)desc);
+      case USB_DESC_TYPE_STRING:
+        return cdcncm_mkstrdesc(index, (FAR struct usb_strdesc_s *)desc);
 
-    default:
-      uerr("Unsupported descriptor type: 0x%02hhx\n", type);
-      break;
+      default:
+        uerr("Unsupported descriptor type: 0x%02hhx\n", type);
+        break;
     }
 
   return -ENOTSUP;
@@ -2595,13 +2596,7 @@ static int cdcncm_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* The single write request just allocated is available now. */
 
-  ret = nxsem_init(&self->wrreq_idle, 0, 1);
-
-  if (ret != OK)
-    {
-      uerr("nxsem_init failed. ret: %d\n", ret);
-      goto error;
-    }
+  nxsem_init(&self->wrreq_idle, 0, 1);
 
   self->txdone    = false;
 
@@ -2773,7 +2768,10 @@ static int cdcncm_setup(FAR struct usbdevclass_driver_s *driver,
 
           case NCM_SET_NTB_FORMAT:
             if (len != 0 || index != self->devinfo.ifnobase)
-              break;
+              {
+                break;
+              }
+
             switch (value)
               {
                 case 0x0000:
@@ -2847,6 +2845,7 @@ static int cdcncm_setup(FAR struct usbdevclass_driver_s *driver,
               FAR struct cdcmbim_driver_s *mbim =
                                          (FAR struct cdcmbim_driver_s *)self;
               FAR struct iob_s *iob;
+
               ret = -ENOSPC;
 
               if ((iob = iob_remove_queue(&mbim->tx_queue)) != NULL)

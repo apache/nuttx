@@ -120,6 +120,10 @@ static void    uart_poll_notify(FAR uart_dev_t *dev, unsigned int min,
 
 /* Write support */
 
+#ifdef CONFIG_SERIAL_TXBULK
+static size_t  uart_putxmitbuf(FAR uart_dev_t *dev, FAR const char *buf,
+                               size_t len);
+#endif
 static int     uart_putxmitchar(FAR uart_dev_t *dev, int ch,
                                 bool oktoblock);
 static inline ssize_t uart_irqwrite(FAR uart_dev_t *dev,
@@ -248,6 +252,71 @@ static void uart_poll_notify(FAR uart_dev_t *dev, unsigned int min,
   sched_unlock();
   leave_critical_section(flags);
 }
+
+#ifdef CONFIG_SERIAL_TXBULK
+/****************************************************************************
+ * Name: uart_putxmitbuf
+ *
+ * Description:
+ *   Copy as many bytes as currently fit into the TX buffer, without
+ *   blocking.  Returns the number of bytes copied, which may be zero if
+ *   the TX buffer is full.  The caller handles a full buffer with
+ *   uart_putxmitchar().
+ *
+ ****************************************************************************/
+
+static size_t uart_putxmitbuf(FAR uart_dev_t *dev, FAR const char *buf,
+                              size_t len)
+{
+  size_t total = 0;
+  size_t nfree;
+  size_t ncopy;
+  int head = dev->xmit.head;
+  int tail = dev->xmit.tail;  /* Snapshot: the drain side only frees space */
+
+  while (total < len)
+    {
+      /* Contiguous free space at the head, keeping one byte unused to
+       * distinguish a full buffer from an empty one.
+       */
+
+      if (head < tail)
+        {
+          nfree = tail - head - 1;
+        }
+      else if (tail > 0)
+        {
+          nfree = dev->xmit.size - head;
+        }
+      else
+        {
+          nfree = dev->xmit.size - head - 1;
+        }
+
+      if (nfree == 0)
+        {
+          break;
+        }
+
+      ncopy = MIN(len - total, nfree);
+      memcpy(&dev->xmit.buffer[head], buf + total, ncopy);
+      total += ncopy;
+
+      /* Publish the new head only after the data is in place */
+
+      head += ncopy;
+      if (head >= dev->xmit.size)
+        {
+          head = 0;
+        }
+
+      dev->xmit.head = head;
+    }
+
+  return total;
+}
+
+#endif /* CONFIG_SERIAL_TXBULK */
 
 /****************************************************************************
  * Name: uart_putxmitchar
@@ -407,6 +476,7 @@ static inline void uart_putchars(FAR uart_dev_t *dev,
       if (dev->ops->sendbuf)
         {
           ssize_t ret = uart_sendbuf(dev, pbuf, len);
+
           if (ret > 0)
             {
               pbuf += ret;
@@ -481,12 +551,14 @@ static inline ssize_t uart_irqwritev(FAR uart_dev_t *dev,
   for (i = 0; i < iovcnt; i++)
     {
       const struct iovec *iov = &uio->uio_iov[i];
+
       if (iov->iov_len == 0)
         {
           continue;
         }
 
       ssize_t written = uart_irqwrite(dev, iov->iov_base, iov->iov_len);
+
       if (written < 0)
         {
           error = written;
@@ -1053,6 +1125,7 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
               if (recvd > 0)
                 {
                   static const char zero = '\0';
+
                   uio_copyfrom(uio, recvd, &zero, 1);
                   recvd--;
                   if (dev->tc_lflag & ECHO)
@@ -1070,7 +1143,7 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
                     }
                 }
 
-                continue;
+              continue;
             }
 
           /* Specifically not handled:
@@ -1483,6 +1556,9 @@ static ssize_t uart_writev(FAR struct file *filep, FAR struct uio *uio)
   FAR const char   *segbuf   = NULL;
   size_t            seglen   = 0;
   size_t            nseg     = 0;
+#ifdef CONFIG_SERIAL_TXBULK
+  size_t            ncopy;
+#endif
   ssize_t           nwritten;
   ssize_t           buflen;
   bool              oktoblock;
@@ -1557,7 +1633,7 @@ static ssize_t uart_writev(FAR struct file *filep, FAR struct uio *uio)
    */
 
   uart_disabletxint(dev);
-  for (; buflen; buflen--, nseg++)
+  while (buflen > 0)
     {
       if (nseg >= seglen)
         {
@@ -1571,6 +1647,29 @@ static ssize_t uart_writev(FAR struct file *filep, FAR struct uio *uio)
           seglen = uio->uio_iov->iov_len - uio->uio_offset_in_iov;
           nseg   = 0;
         }
+
+      /* With no output processing, copy whole runs into the TX buffer at
+       * once.  The bulk copy caches the head index, so it is only used
+       * when this thread is provably the sole producer: ECHO makes
+       * uart_readv() echo into the same buffer, and on a console
+       * uart_irqwrite() produces into it from interrupt context.  A full
+       * TX buffer falls through to uart_putxmitchar() below, which keeps
+       * the canonical blocking, disconnect and O_NONBLOCK handling.
+       */
+
+#ifdef CONFIG_SERIAL_TXBULK
+      if ((dev->tc_oflag & OPOST) == 0 && (dev->tc_lflag & ECHO) == 0 &&
+          !dev->isconsole)
+        {
+          ncopy = uart_putxmitbuf(dev, segbuf + nseg, seglen - nseg);
+          if (ncopy > 0)
+            {
+              nseg   += ncopy;
+              buflen -= ncopy;
+              continue;
+            }
+        }
+#endif
 
       ch  = segbuf[nseg];
       ret = OK;
@@ -1645,6 +1744,9 @@ static ssize_t uart_writev(FAR struct file *filep, FAR struct uio *uio)
 
           break;
         }
+
+      buflen--;
+      nseg++;
     }
 
   /* Consume the bytes that were successfully queued */
@@ -2041,7 +2143,7 @@ static int uart_poll(FAR struct file *filep,
 
       if (dev->disconnected)
         {
-           eventset |= (POLLERR | POLLHUP);
+          eventset |= (POLLERR | POLLHUP);
         }
 #endif
 

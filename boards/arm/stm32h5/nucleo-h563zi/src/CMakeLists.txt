@@ -52,6 +52,10 @@ if(CONFIG_STM32_USBFS_HOST)
   list(APPEND SRCS stm32_usb.c)
 endif()
 
+if(CONFIG_ARM_MPU)
+  list(APPEND SRCS stm32_mpu.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flash.ld")

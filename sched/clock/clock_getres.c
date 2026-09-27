@@ -81,13 +81,17 @@ int clock_getres(clockid_t clock_id, struct timespec *res)
           FAR struct file *filep;
 
           ret = ptp_clockid_to_filep(clock_id, &filep);
-          if (ret < 0)
+          if (ret >= 0)
             {
-              return ret;
+              ret = file_ioctl(filep, PTP_CLOCK_GETRES, res);
+              file_put(filep);
             }
 
-          ret = file_ioctl(filep, PTP_CLOCK_GETRES, res);
-          file_put(filep);
+          if (ret < 0)
+            {
+              set_errno(-ret);
+              ret = ERROR;
+            }
         }
         break;
 #endif

@@ -681,26 +681,32 @@ static inline void imxrt_lpspi_master_set_delay_scaler(
 {
   switch (type)
     {
-    case LPSPI_PCS_TO_SCK:
-      imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CCR_OFFSET,
-                              LPSPI_CCR_PCSSCK_MASK, 0);
-      imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CCR_OFFSET, 0,
-                              LPSPI_CCR_PCSSCK(scaler));
-      break;
+      case LPSPI_PCS_TO_SCK:
+        {
+          imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CCR_OFFSET,
+                                  LPSPI_CCR_PCSSCK_MASK, 0);
+          imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CCR_OFFSET, 0,
+                                  LPSPI_CCR_PCSSCK(scaler));
+          break;
+        }
 
-    case LPSPI_LAST_SCK_TO_PCS:
-      imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CCR_OFFSET,
-                              LPSPI_CCR_SCKPCS_MASK, 0);
-      imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CCR_OFFSET, 0,
-                              LPSPI_CCR_SCKPCS(scaler));
-      break;
+      case LPSPI_LAST_SCK_TO_PCS:
+        {
+          imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CCR_OFFSET,
+                                  LPSPI_CCR_SCKPCS_MASK, 0);
+          imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CCR_OFFSET, 0,
+                                  LPSPI_CCR_SCKPCS(scaler));
+          break;
+        }
 
-    case LPSPI_BETWEEN_TRANSFER:
-      imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CCR_OFFSET,
-                                    LPSPI_CCR_DBT_MASK, 0);
-      imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CCR_OFFSET, 0,
-                              LPSPI_CCR_DBT(scaler));
-      break;
+      case LPSPI_BETWEEN_TRANSFER:
+        {
+          imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CCR_OFFSET,
+                                  LPSPI_CCR_DBT_MASK, 0);
+          imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CCR_OFFSET, 0,
+                                  LPSPI_CCR_DBT(scaler));
+          break;
+        }
     }
 }
 
@@ -725,7 +731,8 @@ static inline void imxrt_lpspi_master_set_delays(
                              uint32_t delay_ns,
                              enum imxrt_delay_e type)
 {
-#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#if !defined(CONFIG_ARCH_FAMILY_IMXRT117x) && \
+    !defined(CONFIG_ARCH_FAMILY_IMXRT118x)
   uint32_t pll3_div;
   uint32_t pll_freq;
 #endif
@@ -739,7 +746,8 @@ static inline void imxrt_lpspi_master_set_delays(
   uint32_t clock_div_prescaler;
   uint32_t additional_scaler;
 
-#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#if defined(CONFIG_ARCH_FAMILY_IMXRT117x) || \
+    defined(CONFIG_ARCH_FAMILY_IMXRT118x)
   if (priv->spibase == IMXRT_LPSPI1_BASE)
     {
       imxrt_get_rootclock(CCM_CR_LPSPI1, &src_freq);
@@ -936,7 +944,8 @@ static uint32_t imxrt_lpspi_setfrequency(struct spi_dev_s *dev,
 {
   struct imxrt_lpspidev_s *priv = (struct imxrt_lpspidev_s *)dev;
 
-#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#if !defined(CONFIG_ARCH_FAMILY_IMXRT117x) && \
+    !defined(CONFIG_ARCH_FAMILY_IMXRT118x)
   uint32_t pll_freq;
   uint32_t pll3_div;
 #endif
@@ -964,7 +973,8 @@ static uint32_t imxrt_lpspi_setfrequency(struct spi_dev_s *dev,
                                         LPSPI_CR_MEN, 0);
         }
 
-#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#if defined(CONFIG_ARCH_FAMILY_IMXRT117x) || \
+    defined(CONFIG_ARCH_FAMILY_IMXRT118x)
       if (priv->spibase == IMXRT_LPSPI1_BASE)
         {
           imxrt_get_rootclock(CCM_CR_LPSPI1, &src_freq);
@@ -1123,28 +1133,38 @@ static void imxrt_lpspi_setmode(struct spi_dev_s *dev,
 
       switch (mode)
         {
-        case SPIDEV_MODE0:     /* CPOL=0; CPHA=0 */
-          setbits = 0;
-          clrbits = LPSPI_TCR_CPOL | LPSPI_TCR_CPHA;
-          break;
+          case SPIDEV_MODE0:   /* CPOL=0; CPHA=0 */
+            {
+              setbits = 0;
+              clrbits = LPSPI_TCR_CPOL | LPSPI_TCR_CPHA;
+              break;
+            }
 
-        case SPIDEV_MODE1:     /* CPOL=0; CPHA=1 */
-          setbits = LPSPI_TCR_CPHA;
-          clrbits = LPSPI_TCR_CPOL;
-          break;
+          case SPIDEV_MODE1:   /* CPOL=0; CPHA=1 */
+            {
+              setbits = LPSPI_TCR_CPHA;
+              clrbits = LPSPI_TCR_CPOL;
+              break;
+            }
 
-        case SPIDEV_MODE2:     /* CPOL=1; CPHA=0 */
-          setbits = LPSPI_TCR_CPOL;
-          clrbits = LPSPI_TCR_CPHA;
-          break;
+          case SPIDEV_MODE2:   /* CPOL=1; CPHA=0 */
+            {
+              setbits = LPSPI_TCR_CPOL;
+              clrbits = LPSPI_TCR_CPHA;
+              break;
+            }
 
-        case SPIDEV_MODE3:     /* CPOL=1; CPHA=1 */
-          setbits = LPSPI_TCR_CPOL | LPSPI_TCR_CPHA;
-          clrbits = 0;
-          break;
+          case SPIDEV_MODE3:   /* CPOL=1; CPHA=1 */
+            {
+              setbits = LPSPI_TCR_CPOL | LPSPI_TCR_CPHA;
+              clrbits = 0;
+              break;
+            }
 
-        default:
-          return;
+          default:
+            {
+              return;
+            }
         }
 
       imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_TCR_OFFSET,
@@ -1361,6 +1381,7 @@ static void imxrt_lpspi_exchange_nodma(struct spi_dev_s *dev,
 #endif
 {
   struct imxrt_lpspidev_s *priv = (struct imxrt_lpspidev_s *)dev;
+
   DEBUGASSERT(priv && priv->spibase);
 
   spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
@@ -1581,8 +1602,8 @@ static void imxrt_lpspi_exchange(struct spi_dev_s *dev,
 
   if (rxbuffer)
     {
-     up_invalidate_dcache((uintptr_t)rxbuffer,
-                          (uintptr_t)rxbuffer + nbytes);
+      up_invalidate_dcache((uintptr_t)rxbuffer,
+                           (uintptr_t)rxbuffer + nbytes);
     }
 }
 

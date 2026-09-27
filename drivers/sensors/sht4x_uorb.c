@@ -157,7 +157,7 @@ static const uint8_t g_crc_lookup[] =
         0x56, 0x78, 0x49, 0x1a, 0x2b, 0xbc, 0x8d, 0xde, 0xef, 0x82, 0xb3,
         0xe0, 0xd1, 0x46, 0x77, 0x24, 0x15, 0x3b, 0xa,  0x59, 0x68, 0xff,
         0xce, 0x9d, 0xac,
-}
+    }
 #endif
 
 /* Measurement times for the various precisions, in microseconds. */
@@ -244,6 +244,7 @@ static const struct sensor_ops_s g_sensor_ops =
 uint8_t sht4x_crc_lookup(const uint8_t *buf, uint8_t nbytes)
 {
   uint8_t crc = SHT4X_CRC_INIT;
+
   for (uint8_t byte = 0; byte < nbytes; byte++)
     {
       crc = g_crc_lookup[crc ^ buf[byte]];
@@ -265,6 +266,7 @@ uint8_t sht4x_crc_lookup(const uint8_t *buf, uint8_t nbytes)
 uint8_t sht4x_crc_bitwise(const uint8_t *buf, uint8_t nbytes)
 {
   uint8_t crc = SHT4X_CRC_INIT;
+
   for (uint8_t byte = 0; byte < nbytes; byte++)
     {
       crc ^= buf[byte];
@@ -581,6 +583,7 @@ static int sht4x_set_interval(FAR struct sensor_lowerhalf_s *lower,
   FAR struct sht4x_sensor_s *priv =
       container_of(lower, FAR struct sht4x_sensor_s, sensor_lower);
   FAR struct sht4x_dev_s *dev = priv->dev;
+
   dev->interval = *period_us;
   return 0;
 }
@@ -637,63 +640,67 @@ static int sht4x_control(FAR struct sensor_lowerhalf_s *lower,
 
   switch (cmd)
     {
-    case SNIOC_RESET:
-      err = sht4x_reset(dev);
-      break;
+      case SNIOC_RESET:
+        err = sht4x_reset(dev);
+        break;
 
-    case SNIOC_WHO_AM_I:
-      {
-        union sht4x_serialno_t serialno;
-        err = sht4x_cmd(dev, SHT4X_READ_SERIAL, 10, &serialno.halves.msb,
-                        &serialno.halves.lsb);
-        *((FAR uint32_t *)(arg)) = serialno.full;
-      }
-      break;
+      case SNIOC_WHO_AM_I:
+        {
+          union sht4x_serialno_t serialno;
 
-    case SNIOC_HEAT:
-      {
-        struct timespec now;
-        clock_systime_timespec(&now);
+          err = sht4x_cmd(dev, SHT4X_READ_SERIAL, 10, &serialno.halves.msb,
+                          &serialno.halves.lsb);
+          *((FAR uint32_t *)(arg)) = serialno.full;
+        }
+        break;
 
-        /* Check if it has been one second since the last heat command. */
+      case SNIOC_HEAT:
+        {
+          struct timespec now;
 
-        if (!has_time_passed(now, dev->last_heat, 1))
-          {
-            err = -EAGAIN; /* Signal to try again in some time. */
-            break;
-          }
+          clock_systime_timespec(&now);
 
-        /* Check for invalid heater command */
+          /* Check if it has been one second since the last heat command. */
 
-        if (0 < arg || arg >= (sizeof(g_heat_cmds) / sizeof(g_heat_cmds[0])))
-          {
-            return -EINVAL;
-          }
+          if (!has_time_passed(now, dev->last_heat, 1))
+            {
+              err = -EAGAIN; /* Signal to try again in some time. */
+              break;
+            }
 
-        /* Heat for the desired period */
+          /* Check for invalid heater command */
 
-        uint16_t trash;
-        err = sht4x_cmd(dev, g_heat_cmds[arg], g_heat_times[arg], &trash,
-                        &trash);
-        if (err)
-          {
-            break;
-          }
+          if (0 < arg ||
+              arg >= (sizeof(g_heat_cmds) / sizeof(g_heat_cmds[0])))
+            {
+              return -EINVAL;
+            }
 
-        clock_systime_timespec(&dev->last_heat); /* Update last heat time. */
-      }
-      break;
+          /* Heat for the desired period */
 
-    case SNIOC_CONFIGURE:
+          uint16_t trash;
 
-      /* Caller must pass precision option as argument. */
+          err = sht4x_cmd(dev, g_heat_cmds[arg], g_heat_times[arg], &trash,
+                          &trash);
+          if (err)
+            {
+              break;
+            }
 
-      dev->precision = arg;
-      break;
+          clock_systime_timespec(&dev->last_heat); /* Update last heat time. */
+        }
+        break;
 
-    default:
-      err = -EINVAL;
-      break;
+      case SNIOC_CONFIGURE:
+
+        /* Caller must pass precision option as argument. */
+
+        dev->precision = arg;
+        break;
+
+      default:
+        err = -EINVAL;
+        break;
     }
 
   nxmutex_unlock(&dev->devlock);
@@ -849,22 +856,9 @@ int sht4x_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr)
 
   priv->last_heat.tv_sec -= 1;
 
-  err = nxmutex_init(&priv->devlock);
-  if (err < 0)
-    {
-      snerr("ERROR: Failed to register SHT4X driver: %d\n", err);
-      kmm_free(priv);
-      return err;
-    }
+  nxmutex_init(&priv->devlock);
 
-  err = nxsem_init(&priv->run, 0, 0);
-  if (err < 0)
-    {
-      snerr("Failed to register SHT4X driver: %d\n", err);
-      nxmutex_destroy(&priv->devlock);
-      kmm_free(priv);
-      return err;
-    }
+  nxsem_init(&priv->run, 0, 0);
 
   /* Register lower half for humidity */
 

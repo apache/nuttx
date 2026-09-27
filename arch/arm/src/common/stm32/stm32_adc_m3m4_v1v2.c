@@ -371,6 +371,14 @@
 #define ANIOC_TRIGGER_REGULAR  (1 << 0)
 #define ANIOC_TRIGGER_INJECTED (1 << 1)
 
+/* ADC differential mode selection configuration */
+
+#ifdef HAVE_IP_ADC_V2
+#  define ADC_DIFSEL_DEFAULT      0
+#  define ADC_DIFSEL_ALL_SINGLE   0x0
+#  define ADC_DIFSEL_ALL_DIFF     0x7ffff
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -446,6 +454,9 @@ struct stm32_dev_s
 #endif
 #ifdef ADC_HAVE_JEXTCFG
   uint32_t jextcfg;          /* External event configuration for injected group */
+#endif
+#ifdef HAVE_IP_ADC_V2
+  uint32_t difsel;           /* ADCx_DIFSEL (Differential Mode) value */
 #endif
 #ifdef ADC_HAVE_TIMER
   uint32_t tbase;            /* Base address of timer used by this ADC block */
@@ -596,7 +607,6 @@ static int adc_extcfg_set(struct stm32_dev_s *priv, uint32_t extcfg);
 #ifdef ADC_HAVE_JEXTCFG
 static int adc_jextcfg_set(struct stm32_dev_s *priv, uint32_t jextcfg);
 #endif
-
 static void adc_dumpregs(struct stm32_dev_s *priv);
 
 #ifdef CONFIG_STM32_ADC_LL_OPS
@@ -787,6 +797,13 @@ static struct stm32_dev_s g_adcpriv1 =
 #ifdef ADC1_HAVE_JEXTCFG
   .jextcfg     = ADC1_JEXTCFG_VALUE,
 #endif
+#ifdef HAVE_IP_ADC_V2
+#  ifdef BOARD_ADC1_DIFSEL
+  .difsel      = BOARD_ADC1_DIFSEL,
+#  else
+  .difsel      = ADC_DIFSEL_DEFAULT,
+#  endif
+#endif
 #ifdef ADC1_HAVE_TIMER
   .trigger     = CONFIG_STM32_ADC1_TIMTRIG,
   .tbase       = ADC1_TIMER_BASE,
@@ -854,6 +871,13 @@ static struct stm32_dev_s g_adcpriv2 =
 #endif
 #ifdef ADC2_HAVE_JEXTCFG
   .jextcfg     = ADC2_JEXTCFG_VALUE,
+#endif
+#ifdef HAVE_IP_ADC_V2
+#  ifdef BOARD_ADC2_DIFSEL
+  .difsel      = BOARD_ADC2_DIFSEL,
+#  else
+  .difsel      = ADC_DIFSEL_DEFAULT,
+#  endif
 #endif
 #ifdef ADC2_HAVE_TIMER
   .trigger     = CONFIG_STM32_ADC2_TIMTRIG,
@@ -923,6 +947,13 @@ static struct stm32_dev_s g_adcpriv3 =
 #ifdef ADC3_HAVE_JEXTCFG
   .jextcfg     = ADC3_JEXTCFG_VALUE,
 #endif
+#ifdef HAVE_IP_ADC_V2
+#  ifdef BOARD_ADC3_DIFSEL
+  .difsel      = BOARD_ADC3_DIFSEL,
+#  else
+  .difsel      = ADC_DIFSEL_DEFAULT,
+#  endif
+#endif
 #ifdef ADC3_HAVE_TIMER
   .trigger     = CONFIG_STM32_ADC3_TIMTRIG,
   .tbase       = ADC3_TIMER_BASE,
@@ -983,6 +1014,13 @@ static struct stm32_dev_s g_adcpriv4 =
 #endif
 #ifdef ADC4_HAVE_JEXTCFG
   .jextcfg     = ADC4_JEXTCFG_VALUE,
+#endif
+#ifdef HAVE_IP_ADC_V2
+#  ifdef BOARD_ADC4_DIFSEL
+  .difsel      = BOARD_ADC4_DIFSEL,
+#  else
+  .difsel      = ADC_DIFSEL_DEFAULT,
+#  endif
 #endif
 #ifdef ADC4_HAVE_TIMER
   .trigger     = CONFIG_STM32_ADC4_TIMTRIG,
@@ -1255,6 +1293,7 @@ static void tim_modifyreg32(struct stm32_dev_s *priv, int offset,
                             uint32_t clrbits, uint32_t setbits)
 {
   uint32_t addr = priv->tbase + offset;
+
   putreg32((getreg32(addr) & ~clrbits) | setbits, addr);
 }
 #endif
@@ -2387,18 +2426,29 @@ static void adc_watchdog_cfg(struct stm32_dev_s *priv)
 #if defined(HAVE_IP_ADC_V2)
 static void adc_calibrate(struct stm32_dev_s *priv)
 {
-#if 0 /* Doesn't work */
-  /* Calibrate the ADC */
+  /* Calibrate single-ended channels if necessary */
 
-  adc_modifyreg(priv, STM32_ADC_CR_OFFSET, ADC_CR_ADCALDIF, AD_CR_ADCAL);
+  if (priv->difsel != ADC_DIFSEL_ALL_DIFF)
+    {
+      adc_modifyreg(priv, STM32_ADC_CR_OFFSET, ADC_CR_ADCALDIF, 0);
+      adc_modifyreg(priv, STM32_ADC_CR_OFFSET, 0, ADC_CR_ADCAL);
 
-  /* Wait for the calibration to complete */
+      /* Wait for the single-ended calibration to complete */
 
-  while ((adc_getreg(priv, STM32_ADC_CR_OFFSET) & ADC_CR_ADCAL) != 0);
+      while ((adc_getreg(priv, STM32_ADC_CR_OFFSET) & ADC_CR_ADCAL) != 0);
+    }
 
-#else
-  UNUSED(priv);
-#endif
+  /* Calibrate differential channels if necessary */
+
+  if (priv->difsel != ADC_DIFSEL_ALL_SINGLE)
+    {
+      adc_modifyreg(priv, STM32_ADC_CR_OFFSET, 0, ADC_CR_ADCALDIF);
+      adc_modifyreg(priv, STM32_ADC_CR_OFFSET, 0, ADC_CR_ADCAL);
+
+      /* Wait for the differential calibration to complete */
+
+      while ((adc_getreg(priv, STM32_ADC_CR_OFFSET) & ADC_CR_ADCAL) != 0);
+    }
 }
 #elif defined(HAVE_IP_ADC_V1) && defined(HAVE_BASIC_ADC)
 static void adc_calibrate(struct stm32_dev_s *priv)
@@ -2746,7 +2796,7 @@ static void adc_configure(struct adc_dev_s *dev)
 
   adc_voltreg_cfg(priv);
 
-  /* Calibrate ADC - doesn't work for now */
+  /* Calibrate ADC */
 
   adc_calibrate(priv);
 
@@ -2807,6 +2857,12 @@ static void adc_configure(struct adc_dev_s *dev)
   /* Configure external event for regular group */
 
   adc_extcfg_set(priv, priv->extcfg);
+#endif
+
+#ifdef HAVE_IP_ADC_V2
+  /* Configure differential mode */
+
+  adc_putreg(priv, STM32_ADC_DIFSEL_OFFSET, priv->difsel);
 #endif
 
   /* Enable ADC */
@@ -2922,8 +2978,8 @@ out:
 #ifdef HAVE_HSI_CONTROL
 static void adc_reset_hsi_disable(struct adc_dev_s *dev)
 {
-    adc_reset(dev);
-    adc_shutdown(dev);
+  adc_reset(dev);
+  adc_shutdown(dev);
 }
 #endif
 
@@ -4656,8 +4712,8 @@ static void adc_llops_dumpregs(struct stm32_adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static int adc_llops_multicfg(struct stm32_adc_dev_s *dev, uint8_t mode)
 #if defined(HAVE_IP_ADC_V2)
+static int adc_llops_multicfg(struct stm32_adc_dev_s *dev, uint8_t mode)
 {
   struct stm32_dev_s *priv    = (struct stm32_dev_s *)dev;
   int                 ret     = OK;
@@ -4710,6 +4766,7 @@ errout:
   return ret;
 }
 #elif defined(HAVE_IP_ADC_V1) && !defined(HAVE_BASIC_ADC)
+static int adc_llops_multicfg(struct stm32_adc_dev_s *dev, uint8_t mode)
 {
   struct stm32_dev_s *priv    = (struct stm32_dev_s *)dev;
   int                 ret     = OK;
@@ -4784,6 +4841,7 @@ errout:
   return ret;
 }
 #else  /* ADV IPv1 BASIC */
+static int adc_llops_multicfg(struct stm32_adc_dev_s *dev, uint8_t mode)
 {
   if (mode != ADC_MULTIMODE_INDEP)
     {

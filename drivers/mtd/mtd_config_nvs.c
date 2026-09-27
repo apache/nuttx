@@ -629,6 +629,7 @@ static int nvs_flash_block_move(FAR struct nvs_fs *fs,
   while (len)
     {
       size_t bytes_to_copy = MIN(buf_size, len);
+
       rc = nvs_flash_rd(fs, addr, buf, bytes_to_copy);
       if (rc)
         {
@@ -650,6 +651,7 @@ static int nvs_flash_block_move(FAR struct nvs_fs *fs,
 
           uint32_t end_addr = MIN(data_end, addr + bytes_to_copy);
           uint32_t begin_addr = MAX(data_begin, addr);
+
           data_crc8 = crc8part(buf + (begin_addr - addr),
                                end_addr - begin_addr, data_crc8);
         }
@@ -853,6 +855,7 @@ static int nvs_flash_wrt_entry(FAR struct nvs_fs *fs, uint32_t id,
                                FAR const void *data, size_t len)
 {
   size_t ate_size = nvs_ate_size(fs);
+
   NVS_ATE(entry, ate_size);
   uint8_t buf[NVS_BUFFER_SIZE(fs)];
   uint16_t copy_len = 0;
@@ -947,6 +950,7 @@ static int nvs_recover_last_ate(FAR struct nvs_fs *fs,
                                 FAR uint32_t *addr)
 {
   size_t ate_size = nvs_ate_size(fs);
+
   NVS_ATE(end_ate, ate_size);
   uint32_t data_end_addr;
   uint32_t ate_end_addr;
@@ -1001,6 +1005,7 @@ static int nvs_prev_ate(FAR struct nvs_fs *fs, FAR uint32_t *addr,
                         FAR struct nvs_ate *ate)
 {
   size_t ate_size = nvs_ate_size(fs);
+
   NVS_ATE(close_ate, ate_size);
   int rc;
 
@@ -1088,6 +1093,7 @@ static void nvs_block_advance(FAR struct nvs_fs *fs, FAR uint32_t *addr)
 static int nvs_block_close(FAR struct nvs_fs *fs)
 {
   size_t ate_size = nvs_ate_size(fs);
+
   NVS_ATE(close_ate, ate_size);
   int rc;
 
@@ -1123,6 +1129,7 @@ static int nvs_block_close(FAR struct nvs_fs *fs)
 static int nvs_add_gc_done_ate(FAR struct nvs_fs *fs)
 {
   size_t ate_size = nvs_ate_size(fs);
+
   NVS_ATE(gc_done_ate, ate_size);
 
   finfo("Adding gc done ate at %" PRIx32 "\n",
@@ -1144,6 +1151,7 @@ static int nvs_add_gc_done_ate(FAR struct nvs_fs *fs)
 static int nvs_expire_ate(FAR struct nvs_fs *fs, uint32_t addr)
 {
   uint8_t expired[NVS_BUFFER_SIZE(fs)];
+
   memset(expired, ~fs->erasestate, fs->progsize);
 
   return nvs_flash_wrt(fs, addr + nvs_align_up(fs, sizeof(struct nvs_ate)),
@@ -1163,6 +1171,7 @@ static int nvs_expire_ate(FAR struct nvs_fs *fs, uint32_t addr)
 static int nvs_gc(FAR struct nvs_fs *fs)
 {
   size_t ate_size = nvs_ate_size(fs);
+
   NVS_ATE(close_ate, ate_size);
   NVS_ATE(gc_ate, ate_size);
   uint32_t gc_prev_addr;
@@ -1328,6 +1337,7 @@ static int nvs_startup(FAR struct nvs_fs *fs)
   fs->progsize  = geo.blocksize;
 
   size_t ate_size = nvs_ate_size(fs);
+
   NVS_ATE(second_ate, ate_size);
   NVS_ATE(last_ate, ate_size);
 
@@ -1477,6 +1487,7 @@ static int nvs_startup(FAR struct nvs_fs *fs)
        */
 
       bool gc_done_marker = false;
+
       NVS_ATE(gc_done_ate, ate_size);
 
       addr = fs->ate_wra + ate_size;
@@ -1825,6 +1836,7 @@ static ssize_t nvs_write(FAR struct nvs_fs *fs,
   size_t data_size;
   size_t key_size;
   size_t ate_size = nvs_ate_size(fs);
+
   NVS_ATE(wlk_ate, ate_size);
   uint32_t wlk_addr;
   uint32_t rd_addr;
@@ -2475,12 +2487,7 @@ int mtdconfig_register_by_path(FAR struct mtd_dev_s *mtd,
   /* Initialize the mtdnvs device structure */
 
   fs->mtd = mtd;
-  rc = nxmutex_init(&fs->nvs_lock);
-  if (rc < 0)
-    {
-      ferr("ERROR: nxmutex_init failed: %d\n", rc);
-      goto errout;
-    }
+  nxmutex_init(&fs->nvs_lock);
 
   rc = nvs_startup(fs);
   if (rc < 0)
@@ -2500,8 +2507,6 @@ int mtdconfig_register_by_path(FAR struct mtd_dev_s *mtd,
 
 mutex_err:
   nxmutex_destroy(&fs->nvs_lock);
-
-errout:
   kmm_free(fs);
   return rc;
 }

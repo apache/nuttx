@@ -136,4 +136,44 @@
 #define DCDC_REG3_DISABLE_STEP              (1 << 30) /* Bit 30: Disable stepping */
                                                       /* Bit 31: Reserved */
 
+#ifdef CONFIG_ARCH_FAMILY_IMXRT118x
+
+/* i.MX RT118x adds per-core target control registers (IMXRT1180RM Rev. 10
+ * sec. 22.7.1.11 / 22.7.1.13).  Both cores share a single VDD1P0 rail: the
+ * DCDC applies the *higher* of the TRG_SW_0 and TRG_SW_1 voltage targets,
+ * so a core that needs the higher voltage must raise both.
+ */
+
+#define IMXRT_DCDC_TRG_SW_0_OFFSET          0x0024  /* Target SW control, CORE 0 */
+#define IMXRT_DCDC_TRG_SW_1_OFFSET          0x0034  /* Target SW control, CORE 1 */
+#define IMXRT_DCDC_CURRENT_TRG_OFFSET       0x0018  /* Arbitrated target in use */
+
+#define IMXRT_DCDC_TRG_SW_0                 (IMXRT_DCDC_BASE + IMXRT_DCDC_TRG_SW_0_OFFSET)
+#define IMXRT_DCDC_TRG_SW_1                 (IMXRT_DCDC_BASE + IMXRT_DCDC_TRG_SW_1_OFFSET)
+#define IMXRT_DCDC_CURRENT_TRG              (IMXRT_DCDC_BASE + IMXRT_DCDC_CURRENT_TRG_OFFSET)
+
+/* TRG_SW_0 / TRG_SW_1 (reset value 0010_0C10h) */
+
+#define DCDC_TRG_SW_VDD1P0CTRL_TRG_SHIFT    (0)       /* Bits 0-4: VDD1P0 run mode target */
+#define DCDC_TRG_SW_VDD1P0CTRL_TRG_MASK     (0x1f << DCDC_TRG_SW_VDD1P0CTRL_TRG_SHIFT)
+#  define DCDC_TRG_SW_VDD1P0CTRL_TRG(n)     ((uint32_t)(n) << DCDC_TRG_SW_VDD1P0CTRL_TRG_SHIFT)
+#define DCDC_TRG_SW_VDD1P8CTRL_TRG_SHIFT    (8)       /* Bits 8-12: VDD1P8 run mode target */
+#define DCDC_TRG_SW_VDD1P8CTRL_TRG_MASK     (0x1f << DCDC_TRG_SW_VDD1P8CTRL_TRG_SHIFT)
+#define DCDC_TRG_SW_VDD1P0CTRL_LP_TRG_SHIFT (16)      /* Bits 16-20: VDD1P0 low power target */
+#define DCDC_TRG_SW_VDD1P0CTRL_LP_TRG_MASK  (0x1f << DCDC_TRG_SW_VDD1P0CTRL_LP_TRG_SHIFT)
+#define DCDC_TRG_SW_LP_EN_1P0               (1 << 31) /* Bit 31: Low power enable */
+
+/* CURRENT_TRG: arbitrated target actually applied by the DCDC analog */
+
+#define DCDC_CURRENT_TRG_VDD1P0CTRL_TRG_SHIFT (0)     /* Bits 0-4 */
+#define DCDC_CURRENT_TRG_VDD1P0CTRL_TRG_MASK  (0x1f << DCDC_CURRENT_TRG_VDD1P0CTRL_TRG_SHIFT)
+#define DCDC_CURRENT_TRG_DCDC_UPDATING        (1 << 15) /* Bit 15: change in progress */
+
+/* VDD1P0 target encoding: 25 mV per step, 0x00 = 0.6 V, 0x10 = 1.0 V */
+
+#define DCDC_1P0_TARGET_1P000V              (0x10)
+#define DCDC_1P0_TARGET_1P125V              (0x15)    /* HSRUN / OverDrive */
+
+#endif /* CONFIG_ARCH_FAMILY_IMXRT118x */
+
 #endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_DCDC_H */

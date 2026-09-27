@@ -158,6 +158,25 @@ extern "C"
 int esp_configgpio(int pin, gpio_pinattr_t attr);
 
 /****************************************************************************
+ * Name: esp_getconfiggpio
+ *
+ * Description:
+ *   Return the attr last passed to esp_configgpio() for this pin, so a
+ *   caller that has to temporarily reconfigure a pin (e.g. PM wake-source
+ *   setup) can restore it afterward without needing its own knowledge of
+ *   what the pin is normally used for.
+ *
+ * Input Parameters:
+ *   pin - GPIO pin to query.
+ *
+ * Returned Value:
+ *   The attr last passed to esp_configgpio() for this pin.
+ *
+ ****************************************************************************/
+
+gpio_pinattr_t esp_getconfiggpio(int pin);
+
+/****************************************************************************
  * Name: esp_gpio_matrix_in
  *
  * Description:

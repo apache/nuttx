@@ -22,6 +22,19 @@
 
 #include <nuttx/config.h>
 
+/* A kernel build archives the architecture objects into libkarch.a rather
+ * than libarch.a, so the placement rules below have to name the right one.
+ * Getting this wrong is silent and fatal: the octal-flash bring-up functions
+ * stay in mapped flash and are called while that mapping is being
+ * reconfigured.
+ */
+
+#ifdef CONFIG_BUILD_KERNEL
+#  define ARCHLIB *libkarch.a
+#else
+#  define ARCHLIB *libarch.a
+#endif
+
 /* Default entry point: */
 
 ENTRY(__start);
@@ -78,19 +91,19 @@ SECTIONS
 
     *(.iram1 .iram1.*)
 
-    *libarch.a:esp32s3_cpuindex.*(.literal .text .literal.* .text.*)
-    *libarch.a:esp32s3_user.*(.literal .text .literal.* .text.*)
-    *libarch.a:esp32s3_spiflash.*(.literal .text .literal.* .text.*)
-    *libarch.a:xtensa_assert.*(.literal .text .literal.* .text.*)
-    *libarch.a:xtensa_cpuint.*(.literal .text .literal.* .text.*)
-    *libarch.a:xtensa_cpupause.*(.literal .text .literal.* .text.*)
-    *libarch.a:xtensa_irqdispatch.*(.literal .text .literal.* .text.*)
-    *libarch.a:xtensa_modifyreg32.*(.literal .text .literal.* .text.*)
-    *libarch.a:xtensa_testset.*(.literal .text .literal.* .text.*)
-    *libarch.a:esp_app_desc.*(.literal .text .literal.* .text.*)
+    ARCHLIB:esp32s3_cpuindex.*(.literal .text .literal.* .text.*)
+    ARCHLIB:esp32s3_user.*(.literal .text .literal.* .text.*)
+    ARCHLIB:esp32s3_spiflash.*(.literal .text .literal.* .text.*)
+    ARCHLIB:xtensa_assert.*(.literal .text .literal.* .text.*)
+    ARCHLIB:xtensa_cpuint.*(.literal .text .literal.* .text.*)
+    ARCHLIB:xtensa_cpupause.*(.literal .text .literal.* .text.*)
+    ARCHLIB:xtensa_irqdispatch.*(.literal .text .literal.* .text.*)
+    ARCHLIB:xtensa_modifyreg32.*(.literal .text .literal.* .text.*)
+    ARCHLIB:xtensa_testset.*(.literal .text .literal.* .text.*)
+    ARCHLIB:esp_app_desc.*(.literal .text .literal.* .text.*)
 
-    *libarch.a:*esp_rom_spiflash.*(.literal .text .literal.* .text.*)
-    *libarch.a:*esp_rom_cache_esp32s2_esp32s3.*(.literal .text .literal.* .text.*)
+    ARCHLIB:*esp_rom_spiflash.*(.literal .text .literal.* .text.*)
+    ARCHLIB:*esp_rom_cache_esp32s2_esp32s3.*(.literal .text .literal.* .text.*)
 
     *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
 
@@ -112,11 +125,11 @@ SECTIONS
     *libc.a:arch_atomic.*(.literal .text .literal.* .text.*)
 
 #ifdef CONFIG_ESP32S3_SPEED_UP_ISR
-    *libarch.a:xtensa_switchcontext.*(.literal.up_switch_context .text.up_switch_context)
+    ARCHLIB:xtensa_switchcontext.*(.literal.up_switch_context .text.up_switch_context)
 
-    *libarch.a:esp32s3_timerisr.*(.literal.systimer_isr .text.systimer_isr)
-    *libarch.a:esp32s3_idle.*(.literal.up_idle .text.up_idle)
-    *libarch.a:esp32s3_dma.*(.literal.esp32s3_dma_load .text.esp32s3_dma_load \
+    ARCHLIB:esp32s3_timerisr.*(.literal.systimer_isr .text.systimer_isr)
+    ARCHLIB:esp32s3_idle.*(.literal.up_idle .text.up_idle)
+    ARCHLIB:esp32s3_dma.*(.literal.esp32s3_dma_load .text.esp32s3_dma_load \
                              .literal.esp32s3_dma_enable .text.esp32s3_dma_enable)
 
     *libsched.a:sched_processtimer.*(.literal.nxsched_process_timer .text.nxsched_process_timer)
@@ -132,33 +145,33 @@ SECTIONS
     *libc.a:sq_remfirst.*(.literal.sq_remfirst .text.sq_remfirst)
 #endif
 
-    *libarch.a:esp32s3_spi_timing.*(.literal .text .literal.* .text.*)
+    ARCHLIB:esp32s3_spi_timing.*(.literal .text .literal.* .text.*)
 #ifdef CONFIG_ESP32S3_SPIRAM_MODE_QUAD
-    *libarch.a:esp32s3_psram_quad.*(.literal .text .literal.* .text.*)
+    ARCHLIB:esp32s3_psram_quad.*(.literal .text .literal.* .text.*)
 #endif
 #ifdef CONFIG_ESP32S3_SPIRAM_MODE_OCT
-    *libarch.a:esp32s3_psram_octal.*(.literal .text .literal.* .text.*)
+    ARCHLIB:esp32s3_psram_octal.*(.literal .text .literal.* .text.*)
 #endif
 #if defined(CONFIG_STACK_CANARIES) && \
     (defined(CONFIG_ESP32S3_SPIFLASH) || \
      defined(CONFIG_ESP32S3_SPIRAM))
     *libc.a:lib_stackchk.*(.literal .text .literal.* .text.*)
 #endif
-    *libarch.a:*cache_hal.*(.text .text.* .literal .literal.*)
-    *libarch.a:*esp_rom_cache_esp32s2_esp32s3.*(.literal .text .literal.* .text.*)
-    *libarch.a:esp_cache.*(.literal .literal.* .text .text.*)
-    *libarch.a:cache_utils.*(.literal .literal.* .text .text.*)
-    *libarch.a:spi_flash_hal_iram.*(.literal .literal.* .text .text.*)
-    *libarch.a:spi_flash_hal_gpspi.*(.literal .literal.* .text .text.*)
-    *libarch.a:spi_flash_encrypt_hal_iram.*(.text .text.* .literal .literal.*)
-    *libarch.a:spi_flash_chip*.*(.literal .literal.* .text .text.*)
-    *libarch.a:spi_flash_wrap.*(.literal .literal.* .text .text.*)
-    *libarch.a:esp_spiflash.*(.literal .text .literal.* .text.*)
-    *libarch.a:esp_flash_spi_init.*(.text .text.* .literal .literal.*)
-    *libarch.a:esp_flash_api.*(.text .text.* .literal .literal.*)
-    *libarch.a:spi_flash_os_func*.*(.literal .literal.* .text .text.*)
-    *libarch.a:*flash_brownout_hook.*(.literal .literal.* .text .text.*)
-    *libarch.a:memspi_host_driver.*(.literal .literal.* .text .text.*)
+    ARCHLIB:*cache_hal.*(.text .text.* .literal .literal.*)
+    ARCHLIB:*esp_rom_cache_esp32s2_esp32s3.*(.literal .text .literal.* .text.*)
+    ARCHLIB:esp_cache.*(.literal .literal.* .text .text.*)
+    ARCHLIB:cache_utils.*(.literal .literal.* .text .text.*)
+    ARCHLIB:spi_flash_hal_iram.*(.literal .literal.* .text .text.*)
+    ARCHLIB:spi_flash_hal_gpspi.*(.literal .literal.* .text .text.*)
+    ARCHLIB:spi_flash_encrypt_hal_iram.*(.text .text.* .literal .literal.*)
+    ARCHLIB:spi_flash_chip*.*(.literal .literal.* .text .text.*)
+    ARCHLIB:spi_flash_wrap.*(.literal .literal.* .text .text.*)
+    ARCHLIB:esp_spiflash.*(.literal .text .literal.* .text.*)
+    ARCHLIB:esp_flash_spi_init.*(.text .text.* .literal .literal.*)
+    ARCHLIB:esp_flash_api.*(.text .text.* .literal .literal.*)
+    ARCHLIB:spi_flash_os_func*.*(.literal .literal.* .text .text.*)
+    ARCHLIB:*flash_brownout_hook.*(.literal .literal.* .text .text.*)
+    ARCHLIB:memspi_host_driver.*(.literal .literal.* .text .text.*)
 
     *(.wifirxiram .wifirxiram.*)
     *(.wifi0iram  .wifi0iram.*)
@@ -242,27 +255,27 @@ SECTIONS
     *(.dram1 .dram1.*)
 
     *libphy.a:(.rodata  .rodata.*)
-    *libarch.a:xtensa_context.*(.rodata  .rodata.*)
-    *libarch.a:*cache_hal.*(.rodata .rodata.*)
+    ARCHLIB:xtensa_context.*(.rodata  .rodata.*)
+    ARCHLIB:*cache_hal.*(.rodata .rodata.*)
 #if defined(CONFIG_STACK_CANARIES) && \
     (defined(CONFIG_ESP32S3_SPIFLASH) || \
      defined(CONFIG_ESP32S3_SPIRAM))
     *libc.a:lib_stackchk.*(.rodata  .rodata.*)
 #endif
 
-    *libarch.a:esp_cache.*(.rodata .rodata.*)
-    *libarch.a:cache_utils.*(.rodata .rodata.*)
-    *libarch.a:spi_flash_hal_iram.*(.rodata .rodata.*)
-    *libarch.a:spi_flash_hal_gpspi.*(.rodata .rodata.*)
-    *libarch.a:spi_flash_encrypt_hal_iram.*(.rodata .rodata.*)
-    *libarch.a:spi_flash_chip*.*(.rodata .rodata.*)
-    *libarch.a:spi_flash_wrap.*(.rodata .rodata.*)
-    *libarch.a:esp_spiflash.*(.rodata .rodata.*)
-    *libarch.a:esp_flash_spi_init.*(.rodata .rodata.*)
-    *libarch.a:esp_flash_api.*(.rodata .rodata.*)
-    *libarch.a:spi_flash_os_func*.*(.rodata .rodata.*)
-    *libarch.a:flash_brownout_hook.*(.rodata .rodata.*)
-    *libarch.a:memspi_host_driver.*(.rodata .rodata.*)
+    ARCHLIB:esp_cache.*(.rodata .rodata.*)
+    ARCHLIB:cache_utils.*(.rodata .rodata.*)
+    ARCHLIB:spi_flash_hal_iram.*(.rodata .rodata.*)
+    ARCHLIB:spi_flash_hal_gpspi.*(.rodata .rodata.*)
+    ARCHLIB:spi_flash_encrypt_hal_iram.*(.rodata .rodata.*)
+    ARCHLIB:spi_flash_chip*.*(.rodata .rodata.*)
+    ARCHLIB:spi_flash_wrap.*(.rodata .rodata.*)
+    ARCHLIB:esp_spiflash.*(.rodata .rodata.*)
+    ARCHLIB:esp_flash_spi_init.*(.rodata .rodata.*)
+    ARCHLIB:esp_flash_api.*(.rodata .rodata.*)
+    ARCHLIB:spi_flash_os_func*.*(.rodata .rodata.*)
+    ARCHLIB:flash_brownout_hook.*(.rodata .rodata.*)
+    ARCHLIB:memspi_host_driver.*(.rodata .rodata.*)
     *libc.a:arch_atomic.*(.rodata .rodata.*)
     _edata = ABSOLUTE(.);
     . = ALIGN(4);

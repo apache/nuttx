@@ -31,25 +31,24 @@
 
 #ifndef __ASSEMBLY__
 
+struct spi_dev_s;
+
 /****************************************************************************
  * Public Functions Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: am67_bringup
- *
- * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
- *     Called from the NSH library
- *
- ****************************************************************************/
-
 int am67_bringup(void);
+
+#ifdef CONFIG_AM67_MCSPI0
+void am67_spi0select(FAR struct spi_dev_s *dev, uint32_t devid,
+                     bool selected);
+uint8_t am67_spi0status(FAR struct spi_dev_s *dev, uint32_t devid);
+void am67_spidev_initialize(void);
+#endif
+
+#if defined(CONFIG_AM67_I2C0) || defined(CONFIG_AM67_WKUP_I2C0)
+void am67_i2cdev_initialize(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_T3_GEM_O1_SRC_T3_GEM_O1_H */

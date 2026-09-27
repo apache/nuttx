@@ -155,6 +155,7 @@ static int nrf91_gpiote_isr(int irq, void *context, void *arg)
 
               xcpt_t callback = g_gpiote_ch_callbacks[i].callback;
               void *cbarg = g_gpiote_ch_callbacks[i].arg;
+
               ret = callback(irq, context, cbarg);
 
               /* Clear event */
@@ -183,11 +184,11 @@ static int nrf91_gpiote_isr(int irq, void *context, void *arg)
             {
               case 0:
                 addr = NRF91_GPIO_P0_BASE + NRF91_GPIO_LATCH_OFFSET;
-              break;
+                break;
 #ifdef CONFIG_NRF91_HAVE_PORT1
               case 1:
                 addr = NRF91_GPIO_P1_BASE + NRF91_GPIO_LATCH_OFFSET;
-              break;
+                break;
 #endif
             }
 
@@ -231,7 +232,7 @@ static int nrf91_gpiote_isr(int irq, void *context, void *arg)
               ret = callback(irq, context, cbarg);
             }
 #endif
-       }
+        }
     }
 
   return ret;
@@ -326,7 +327,7 @@ void nrf91_gpiote_set_port_event(uint32_t pinset, xcpt_t func, void *arg)
 
       for (i = 0; i < NRF91_GPIO_NPORTS; i++)
         {
-          if (g_gpiote_port_callback[port].callback)
+          if (g_gpiote_port_callback[i].callback)
             {
               break;
             }
@@ -476,27 +477,43 @@ int nrf91_gpiote_set_event(uint32_t pinset,
 
   flags = enter_critical_section();
 
-  /* Get free channel or channel already used by pinset */
+  /* Get channel already used by pinset */
 
   for (i = 0; i < GPIOTE_CHANNELS; i++)
     {
-      if (g_gpiote_ch_callbacks[i].callback == NULL ||
+      if (g_gpiote_ch_callbacks[i].callback != NULL &&
           g_gpiote_ch_callbacks[i].pinset == pinset)
         {
-          g_gpiote_ch_callbacks[i].pinset = pinset;
-
-          /* Configure channel */
-
-          nrf91_gpiote_set_ch_event(pinset, i,
-                                    risingedge, fallingedge,
-                                    func, arg);
-
-          /* Return the channel index */
-
-          ret = i;
-
           break;
         }
+    }
+
+  /* Otherwise get a free channel */
+
+  if (i == GPIOTE_CHANNELS && func != NULL)
+    {
+      for (i = 0; i < GPIOTE_CHANNELS; i++)
+        {
+          if (g_gpiote_ch_callbacks[i].callback == NULL)
+            {
+              break;
+            }
+        }
+    }
+
+  if (i < GPIOTE_CHANNELS)
+    {
+      g_gpiote_ch_callbacks[i].pinset = pinset;
+
+      /* Configure channel */
+
+      nrf91_gpiote_set_ch_event(pinset, i,
+                                risingedge, fallingedge,
+                                func, arg);
+
+      /* Return the channel index */
+
+      ret = i;
     }
 
   leave_critical_section(flags);
@@ -505,7 +522,7 @@ int nrf91_gpiote_set_event(uint32_t pinset,
 }
 
 /****************************************************************************
- * Name: nrf91_gpio_set_task
+ * Name: nrf91_gpiote_set_task
  *
  * Description:
  *   Configure GPIO in TASK mode (to be controlled via tasks).
@@ -590,10 +607,10 @@ int nrf91_gpiote_init(void)
 {
   /* Clear LATCH register(s) */
 
-  putreg32(0, NRF91_GPIO_P0_BASE + NRF91_GPIO_LATCH_OFFSET);
+  putreg32(0xffffffff, NRF91_GPIO_P0_BASE + NRF91_GPIO_LATCH_OFFSET);
 
 #ifdef CONFIG_NRF91_HAVE_PORT1
-  putreg32(0, NRF91_GPIO_P1_BASE + NRF91_GPIO_LATCH_OFFSET);
+  putreg32(0xffffffff, NRF91_GPIO_P1_BASE + NRF91_GPIO_LATCH_OFFSET);
 #endif
 
   /* Reset GPIOTE data */

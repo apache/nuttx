@@ -366,6 +366,7 @@ static int mcp9600_config_alert(FAR struct mcp9600_dev_s *priv,
   /* Configure limit */
 
   int16_t limit = config->limit << 2; /* 2 LSBs must be 0 for this reg */
+
   err = mcp9600_write_reg(priv, g_alert_limits[config->alert], &limit,
                           sizeof(limit));
   if (err < 0)
@@ -376,6 +377,7 @@ static int mcp9600_config_alert(FAR struct mcp9600_dev_s *priv,
   /* Configure the config register */
 
   uint8_t config_reg = 0;
+
   config_reg |= (config->enable);
   config_reg |= (config->int_mode << 1);
   config_reg |= (config->active_high << 2);
@@ -398,6 +400,7 @@ static int mcp9600_config_alert(FAR struct mcp9600_dev_s *priv,
 static int mcp9600_write_devconf(FAR struct mcp9600_dev_s *dev)
 {
   uint8_t reg = 0;
+
   reg |= (dev->conf.mode & 0x3);
   reg |= ((dev->conf.num_samples & 0x7) << 2);
   reg |= ((dev->conf.resolution & 0x3) << 5);
@@ -467,6 +470,7 @@ static int mcp9600_set_interval(FAR struct sensor_lowerhalf_s *lower,
 {
   FAR struct mcp9600_sens_s *sens =
       container_of(lower, FAR struct mcp9600_sens_s, lower);
+
   sens->dev->interval = *period_us;
   return 0;
 }
@@ -586,156 +590,160 @@ static int mcp9600_control(FAR struct sensor_lowerhalf_s *lower,
 
   switch (cmd)
     {
-      /* Set thermocouple type */
+        /* Set thermocouple type */
 
-    case SNIOC_SET_THERMO:
-      {
-        dev->conf.thermo_type = g_thermo_types[arg];
-        err = mcp9600_write_devconf(dev);
-      }
-      break;
-
-      /* Device ID */
-
-    case SNIOC_WHO_AM_I:
-      {
-        struct mcp9600_devinfo_s *devinfo =
-                    (struct mcp9600_devinfo_s *)(arg);
-        if (devinfo == NULL)
-          {
-            err = -EINVAL;
-            break;
-          }
-
-        err = mcp9600_read_reg(dev, REG_DEVID, devinfo, sizeof(*devinfo));
-      }
-      break;
-
-      /* Raw ADC data */
-
-    case SNIOC_READ_RAW_DATA:
-      {
-        int32_t *raw_data = (int32_t *)(arg);
-        if (raw_data == NULL)
-          {
-            err = -EINVAL;
-            break;
-          }
-
-        err = mcp9600_read_reg(dev, REG_RAW_ADC, raw_data,
-                               3); /* Only read 24 bits */
-
-        /* Sign bit 1, set all upper bits to 1 for correct value in 32-bit
-         * signed integer.
-         */
-
-        if (*raw_data & 0x100000)
-          {
-            *raw_data |= 0xfffc0000;
-          }
-      }
-
-    case SNIOC_CHECK_STATUS_REG:
-      {
-        uint8_t status_reg;
-        struct mcp9600_status_s *status = (struct mcp9600_status_s *)(arg);
-        if (status == NULL)
-          {
-            err = -EINVAL;
-            break;
-          }
-
-        err = mcp9600_read_reg(dev, REG_STATUS, &status_reg,
-                               sizeof(status_reg));
-        if (err < 0)
-          {
-            break;
-          }
-
-        /* Set bits */
-
-        status->burst_complete = status_reg & 0x80;
-        status->temp_update = status_reg & 0x40;
-        status->temp_exceeded = status_reg & 0x10;
-        status->alerts[0] = status_reg & 0x1;
-        status->alerts[1] = status_reg & 0x2;
-        status->alerts[2] = status_reg & 0x4;
-        status->alerts[3] = status_reg & 0x8;
-
-        /* Clear what has been read (burst & temp registers) */
-
-        status_reg &= 0x3f;
-        err = mcp9600_write_reg(dev, REG_STATUS, &status_reg,
-                                sizeof(status_reg));
-      }
-      break;
-
-      /* Configure the MCP9600 */
-
-    case SNIOC_CONFIGURE:
-      {
-        uint8_t registers[2] =
+      case SNIOC_SET_THERMO:
         {
-          0, 0
-        };
+          dev->conf.thermo_type = g_thermo_types[arg];
+          err = mcp9600_write_devconf(dev);
+        }
+        break;
 
-        struct mcp9600_devconf_s *conf = (struct mcp9600_devconf_s *)(arg);
+        /* Device ID */
 
-        /* Validate options */
+      case SNIOC_WHO_AM_I:
+        {
+          struct mcp9600_devinfo_s *devinfo =
+                      (struct mcp9600_devinfo_s *)(arg);
 
-        err = mcp9600_validate_conf(conf);
-        if (err < 0)
+          if (devinfo == NULL)
+            {
+              err = -EINVAL;
+              break;
+            }
+
+          err = mcp9600_read_reg(dev, REG_DEVID, devinfo, sizeof(*devinfo));
+        }
+        break;
+
+        /* Raw ADC data */
+
+      case SNIOC_READ_RAW_DATA:
+        {
+          int32_t *raw_data = (int32_t *)(arg);
+
+          if (raw_data == NULL)
+            {
+              err = -EINVAL;
+              break;
+            }
+
+          err = mcp9600_read_reg(dev, REG_RAW_ADC, raw_data,
+                                 3); /* Only read 24 bits */
+
+          /* Sign bit 1, set all upper bits to 1 for correct value in 32-bit
+           * signed integer.
+           */
+
+          if (*raw_data & 0x100000)
+            {
+              *raw_data |= 0xfffc0000;
+            }
+        }
+
+      case SNIOC_CHECK_STATUS_REG:
+        {
+          uint8_t status_reg;
+          struct mcp9600_status_s *status = (struct mcp9600_status_s *)(arg);
+
+          if (status == NULL)
+            {
+              err = -EINVAL;
+              break;
+            }
+
+          err = mcp9600_read_reg(dev, REG_STATUS, &status_reg,
+                                 sizeof(status_reg));
+          if (err < 0)
+            {
+              break;
+            }
+
+          /* Set bits */
+
+          status->burst_complete = status_reg & 0x80;
+          status->temp_update = status_reg & 0x40;
+          status->temp_exceeded = status_reg & 0x10;
+          status->alerts[0] = status_reg & 0x1;
+          status->alerts[1] = status_reg & 0x2;
+          status->alerts[2] = status_reg & 0x4;
+          status->alerts[3] = status_reg & 0x8;
+
+          /* Clear what has been read (burst & temp registers) */
+
+          status_reg &= 0x3f;
+          err = mcp9600_write_reg(dev, REG_STATUS, &status_reg,
+                                  sizeof(status_reg));
+        }
+        break;
+
+        /* Configure the MCP9600 */
+
+      case SNIOC_CONFIGURE:
+        {
+          uint8_t registers[2] =
           {
-            break;
+            0, 0
           };
 
-        /* Sensor configuration */
+          struct mcp9600_devconf_s *conf = (struct mcp9600_devconf_s *)(arg);
 
-        registers[0] |= ((conf->thermo_type & 0x7) << 4);
-        registers[0] |= (conf->filter_coeff & 0x7);
+          /* Validate options */
 
-        /* Device configuration */
+          err = mcp9600_validate_conf(conf);
+          if (err < 0)
+            {
+              break;
+            };
 
-        registers[1] |= (conf->mode & 0x3);
-        registers[1] |= ((conf->num_samples & 0x7) << 2);
-        registers[1] |= ((conf->resolution & 0x3) << 5);
-        registers[1] |= ((conf->cold_res & 0x1) << 7);
+          /* Sensor configuration */
 
-        /* Copy in options. Since the sensor configuration and device
-         * configuration registers are sequential, we can do this in one
-         * write operation.
-         */
+          registers[0] |= ((conf->thermo_type & 0x7) << 4);
+          registers[0] |= (conf->filter_coeff & 0x7);
 
-        err = mcp9600_write_reg(dev, REG_THERMO_SEN_CONF, registers,
-                                sizeof(registers));
-        if (err < 0)
-          {
-            break;
-          };
+          /* Device configuration */
 
-        /* Store this as the official configuration */
+          registers[1] |= (conf->mode & 0x3);
+          registers[1] |= ((conf->num_samples & 0x7) << 2);
+          registers[1] |= ((conf->resolution & 0x3) << 5);
+          registers[1] |= ((conf->cold_res & 0x1) << 7);
 
-        memcpy(&dev->conf, conf, sizeof(dev->conf));
-      }
+          /* Copy in options. Since the sensor configuration and device
+           * configuration registers are sequential, we can do this in one
+           * write operation.
+           */
 
-      /* Configure alerts */
+          err = mcp9600_write_reg(dev, REG_THERMO_SEN_CONF, registers,
+                                  sizeof(registers));
+          if (err < 0)
+            {
+              break;
+            };
 
-    case SNIOC_WRITECONF:
-      {
-        struct mcp9600_alert_conf_s *conf =
-            (struct mcp9600_alert_conf_s *)(arg);
-        if (conf == NULL)
-          {
-            err = -EINVAL;
-            break;
-          }
+          /* Store this as the official configuration */
 
-        err = mcp9600_config_alert(dev, conf);
-      }
+          memcpy(&dev->conf, conf, sizeof(dev->conf));
+        }
 
-    default:
-      err = -EINVAL;
-      break;
+        /* Configure alerts */
+
+      case SNIOC_WRITECONF:
+        {
+          struct mcp9600_alert_conf_s *conf =
+              (struct mcp9600_alert_conf_s *)(arg);
+
+          if (conf == NULL)
+            {
+              err = -EINVAL;
+              break;
+            }
+
+          err = mcp9600_config_alert(dev, conf);
+        }
+
+      default:
+        err = -EINVAL;
+        break;
     }
 
   nxmutex_unlock(&dev->devlock);
@@ -873,22 +881,11 @@ int mcp9600_register(FAR struct i2c_master_s *i2c, uint8_t addr,
 
   /* Initialize semaphore */
 
-  err = nxsem_init(&priv->run, 0, 0);
-  if (err < 0)
-    {
-      snerr("Failed to register MCP9600 driver: %d\n", err);
-      kmm_free(priv);
-      return err;
-    }
+  nxsem_init(&priv->run, 0, 0);
 
   /* Initialize mutex */
 
-  err = nxmutex_init(&priv->devlock);
-  if (err < 0)
-    {
-      snerr("ERROR: Failed to register MCP9600 driver: %d\n", err);
-      goto del_sem;
-    }
+  nxmutex_init(&priv->devlock);
 
   /* Cold junction lower half */
 
@@ -944,13 +941,12 @@ int mcp9600_register(FAR struct i2c_master_s *i2c, uint8_t addr,
     {
       snerr("Failed to create the MCP9600 notification kthread.\n");
       sensor_unregister(&priv->delta.lower, d_devno);
-    unreg_hot:
+unreg_hot:
       sensor_unregister(&priv->hot_junc.lower, h_devno);
-    unreg_cold:
+unreg_cold:
       sensor_unregister(&priv->cold_junc.lower, c_devno);
-    del_mutex:
+del_mutex:
       nxmutex_destroy(&priv->devlock);
-    del_sem:
       nxsem_destroy(&priv->run);
       kmm_free(priv);
       return err;

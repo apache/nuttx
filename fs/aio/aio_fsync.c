@@ -79,7 +79,7 @@ static void aio_fsync_worker(FAR void *arg)
 #ifdef CONFIG_PRIORITY_INHERITANCE
   prio   = aioc->aioc_prio;
 #endif
-  aiocbp = aioc_decant(aioc);
+  aiocbp = aioc->aioc_aiocbp;
 
   /* Perform the fsync using aioc_filep */
 
@@ -97,6 +97,7 @@ static void aio_fsync_worker(FAR void *arg)
   /* Signal the client */
 
   aio_signal(pid, aiocbp);
+  aioc_decant(aioc);
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
   /* Restore the low priority worker thread default priority */
@@ -193,19 +194,29 @@ int aio_fsync(int op, FAR struct aiocb *aiocbp)
   FAR struct aio_container_s *aioc;
   int ret;
 
-  if (op != O_SYNC)
+  /* SUSv2 / POSIX Issue 5 specified that a NULL aiocbp produces no
+   * status through aiocbp and no completion signal. POSIX Issue 6 removed
+   * that special case, so reject NULL defensively.
+   */
+
+  if (op != O_SYNC || aiocbp == NULL)
     {
       set_errno(EINVAL);
       return ERROR;
     }
 
-  DEBUGASSERT(aiocbp);
-
   /* The result -EINPROGRESS means that the transfer has not yet completed */
 
   sigwork_init(&aiocbp->aio_sigwork);
   aiocbp->aio_result = -EINPROGRESS;
-  aiocbp->aio_priv   = NULL;
+
+  /* Clear lio_link so list_in_list() returns false and aio_signal() skips
+   * the lio_listio path; list_initialize() would leave prev non-NULL, so
+   * list_in_list() wrongly returns true and aio_signal() notifies through
+   * the uninitialized lio_sigevent/lio_sigwork.
+   */
+
+  list_clear_node(&aiocbp->lio_link);
 
   /* Create a container for the AIO control block.  This may cause us to
    * block if there are insufficient resources to satisfy the request.

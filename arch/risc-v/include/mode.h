@@ -53,6 +53,7 @@
 #  define CSR_IPH           CSR_SIPH
 #  define CSR_TOPEI         CSR_STOPEI       /* Top external interrupt register */
 #  define CSR_TOPI          CSR_STOPI        /* Top interrupt register */
+#  define CSR_INTTHRESH     CSR_SINTTHRESH   /* Interrupt threshold register */
 
 /* In status register */
 
@@ -102,6 +103,7 @@
 #  define CSR_IPH           CSR_MIPH
 #  define CSR_TOPEI         CSR_MTOPEI       /* Top external interrupt register */
 #  define CSR_TOPI          CSR_MTOPI        /* Top interrupt register */
+#  define CSR_INTTHRESH     CSR_MINTTHRESH   /* Interrupt threshold register */
 
 /* In status register */
 

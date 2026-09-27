@@ -309,7 +309,7 @@ int wd_start_realtime(FAR struct wdog_s *wdog,
  *
  * Input Parameters:
  *   wdog     - Pointer of the periodic watchdog.
- *   delay    - Delayed time in system ticks.
+ *   delay    - Positive delay in system ticks.
  *   wdentry  - Function to call on timeout.
  *   arg      - Parameter to pass to wdentry.
  *
@@ -331,7 +331,7 @@ int wd_start_next(FAR struct wdog_s *wdog, clock_t delay,
 {
   /* Ensure delay is within the range the wdog can handle. */
 
-  if (delay < 0 || delay > WDOG_MAX_DELAY)
+  if (delay <= 0 || delay > WDOG_MAX_DELAY)
     {
       return -EINVAL;
     }

@@ -224,6 +224,13 @@ static const struct sensor_meta_s g_sensor_meta[] =
   {sizeof(struct sensor_pm10),                "pm10"},
   {sizeof(struct sensor_uv),                  "uv"},
   {sizeof(struct sensor_eng),                 "eng"},
+  {sizeof(struct sensor_voltage),             "voltage"},
+  {sizeof(struct sensor_current),             "current"},
+  {sizeof(struct sensor_power),               "power"},
+  {sizeof(struct sensor_resistance),          "resistance"},
+  {sizeof(struct sensor_conductivity),        "conductivity"},
+  {sizeof(struct sensor_energy),              "energy"},
+  {sizeof(struct sensor_charge),              "charge"},
 };
 
 static const struct file_operations g_sensor_fops =
@@ -246,12 +253,14 @@ static const struct file_operations g_sensor_fops =
 static void sensor_lock(FAR void *priv)
 {
   FAR struct sensor_upperhalf_s *upper = priv;
+
   nxrmutex_lock(&upper->lock);
 }
 
 static void sensor_unlock(FAR void *priv)
 {
   FAR struct sensor_upperhalf_s *upper = priv;
+
   nxrmutex_unlock(&upper->lock);
 }
 
@@ -300,6 +309,7 @@ again:
           min_interval != upper->state.min_interval)
         {
           uint32_t expected_interval = min_interval;
+
           orig_min_interval = upper->state.min_interval;
           nxrmutex_unlock(&upper->lock);
           ret = lower->ops->set_interval(lower, filep, &min_interval);
@@ -493,6 +503,7 @@ static void sensor_generate_timing(FAR struct sensor_upperhalf_s *upper,
 {
   uint32_t interval = upper->state.min_interval != UINT32_MAX ?
                       upper->state.min_interval : 1;
+
   while (nums-- > 0)
     {
       upper->state.generation += interval;
@@ -854,6 +865,8 @@ static int sensor_close(FAR struct file *filep)
     }
 
   list_delete(&user->node);
+  user->fds = NULL;
+  wd_cancel(&user->wdog);
 
   /* The user is closed, notify to other users */
 
@@ -1087,7 +1100,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-     case SNIOC_GET_EVENTS:
+      case SNIOC_GET_EVENTS:
         {
           nxrmutex_lock(&upper->lock);
           *(FAR unsigned int *)(uintptr_t)arg = user->event;
@@ -1097,7 +1110,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-     case SNIOC_FLUSH:
+      case SNIOC_FLUSH:
         {
           /* If the sensor is not activated, return -EINVAL. */
 
@@ -1228,7 +1241,7 @@ static int sensor_poll(FAR struct file *filep,
           eventset |= POLLPRI;
         }
 
-        poll_notify(&fds, 1, eventset);
+      poll_notify(&fds, 1, eventset);
     }
   else
     {

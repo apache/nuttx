@@ -794,6 +794,7 @@ void esp_pmstandby(uint64_t time_in_us)
 #endif
 #ifdef CONFIG_PM_EXT1_WAKEUP
   int64_t ext1_mask;
+
   esp_pm_ext1_wakeup_prepare();
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP
@@ -812,7 +813,7 @@ void esp_pmstandby(uint64_t time_in_us)
   esp_pm_light_sleep_start(&rtc_diff_us);
 
 #ifdef CONFIG_SCHED_TICKLESS
-  up_step_idletime((uint32_t)time_in_us);
+  up_step_idletime((uint32_t)rtc_diff_us);
 #endif
 
   cause = esp_sleep_get_wakeup_cause();

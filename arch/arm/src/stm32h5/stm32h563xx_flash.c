@@ -115,6 +115,19 @@
 #define FLASH_ERASEDVALUE_DW  0xffffffffu
 #define FLASH_TIMEOUT_VALUE   5000000   /* 5s */
 
+#define FLASH_OTP_SIZE              2048           /* OTP area size: 2048 bytes */
+#define FLASH_OTP_BLOCK_SIZE        64             /* 32 words * 2 bytes = 64 bytes per block */
+#define FLASH_OTP_TOTAL_BLOCKS      32             /* Total OTP blocks (0-31) */
+#define FLASH_OTP_WORDS_PER_BLOCK   32             /* 32 words per block */
+#define OTP_WORD_SIZE               2              /* 16-bit words as per manual */
+
+#define FLASH_NSSR_ALL_ERRORS  (FLASH_NSSR_BSY | FLASH_NSSR_WBNE |       \
+                                FLASH_NSSR_DBNE |FLASH_NSSR_EOP |        \
+                                FLASH_NSSR_WRPERR | FLASH_NSSR_PGSERR |  \
+                                FLASH_NSSR_STRBERR | FLASH_NSSR_INCERR | \
+                                FLASH_NSSR_OBKERR | FLASH_NSSR_OBKWERR | \
+                                FLASH_NSSR_OPTCHANGERR )
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -340,6 +353,255 @@ static void flash_lock_opt(void)
 }
 
 /****************************************************************************
+ * Name: stm32h5_otp_is_space_available
+ *
+ * Description:
+ *   Validates if the memory region can be written. OTP memory may only be
+ *   written once, and after writing data to a specific block - this block
+ *   should be locked for writing to prevent potential overwrite attempt.
+ *   Even if the 64-bytes block was only used partially, it should be locked
+ *   because there is no mechanism to validate whether the memory was written
+ *   or not, so the entire block is locked after write even a single bit
+ *
+ * Returned Value:
+ *   True if there is enough consecutive bytes in OTP to store the data
+ *   False otherwise
+ *
+ ****************************************************************************/
+
+static bool stm32h5_otp_is_space_available(uint8_t start_block,
+    uint8_t end_block)
+{
+  uint32_t lockbl_cur = getreg32(STM32_FLASH_OTBPBLR_CUR);
+
+  for (uint8_t i = start_block; i <= end_block; i++)
+    {
+      if (lockbl_cur & (1 << i))
+        {
+          return false;
+        }
+    }
+
+  return true;
+}
+
+/****************************************************************************
+ * Name: stm32h5_otp_clear_errors
+ *
+ * Description:
+ *   Clear all OTP error flags from previous operations
+ *
+ * Returned Value:
+ *   Zero on success or negative error value
+ *
+ ****************************************************************************/
+
+static int stm32h5_otp_clear_errors(void)
+{
+  uint32_t error_flags = getreg32(STM32_FLASH_NSSR) & FLASH_NSSR_ALL_ERRORS;
+
+  UP_DSB();
+
+  if (error_flags != 0)
+    {
+      putreg32(error_flags, STM32_FLASH_NSCCR);
+
+      error_flags = getreg32(STM32_FLASH_NSSR) & FLASH_NSSR_ALL_ERRORS;
+      if (error_flags != 0)
+        {
+          return -EAGAIN;
+        }
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: stm32h5_otp_lock_block
+ *
+ * Description:
+ *   Lock the OTP block to prevent further data changes
+ *
+ * Input Parameters:
+ *   block_number - the number of block to lock
+ *
+ * Returned Value:
+ *   Zero on success or negative error value
+ *
+ ****************************************************************************/
+
+static int stm32h5_otp_lock_block(uint8_t block_number)
+{
+  int ret;
+  uint32_t reg;
+  bool was_locked;
+  uint32_t lockbl_cur;
+
+  if (block_number >= FLASH_OTP_TOTAL_BLOCKS)
+    {
+      return -EINVAL;
+    }
+
+  lockbl_cur = getreg32(STM32_FLASH_OTBPBLR_CUR);
+  if (lockbl_cur & (1 << block_number))
+    {
+      /* Block is already locked */
+
+      return -EACCES;
+    }
+
+  /* Wait for any ongoing flash operations */
+
+  ret = flash_wait_for_operation();
+  if (ret != 0)
+    {
+      return -EBUSY;
+    }
+
+  /* Check that data buffer is empty */
+
+  reg = getreg32(STM32_FLASH_NSSR);
+  if (reg & FLASH_NSSR_DBNE)
+    {
+      return -EBUSY;
+    }
+
+  /* Unlock option bytes for programming */
+
+  was_locked = flash_unlock_opt();
+
+  /* Set the bit in the OTP block lock programming register */
+
+  modifyreg32(STM32_FLASH_OTBPBLR_PRG, 0, (1 << block_number));
+
+  /* Start the option bytes programming sequence */
+
+  modifyreg32(STM32_FLASH_OPTCR, 0, FLASH_OPTCR_OPTSTRT);
+
+  /* Wait for programming operation to complete */
+
+  while (getreg32(STM32_FLASH_NSSR) & FLASH_NSSR_BSY)
+    {
+    }
+
+  /* Check for programming errors */
+
+  reg = getreg32(STM32_FLASH_NSSR);
+  if (reg & FLASH_NSSR_ALL_ERRORS)
+    {
+      /* Clear errors and return failure */
+
+      putreg32(reg & FLASH_NSSR_ALL_ERRORS, STM32_FLASH_NSCCR);
+      ret = -EIO;
+    }
+  else
+    {
+      /* Verify the lock was applied */
+
+      lockbl_cur = getreg32(STM32_FLASH_OTBPBLR_CUR);
+      if (!(lockbl_cur & (1 << block_number)))
+        {
+          ret = -EIO;
+        }
+      else
+        {
+          ret = OK;
+        }
+    }
+
+  /* Re-lock option bytes if they were locked before */
+
+  if (was_locked)
+    {
+      flash_lock_opt();
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: stm32h5_otp_write_word
+ *
+ * Description:
+ *   Write OTP word (16 bits total) following the manual sequence
+ *   Follows steps 1-7 from the STM32H5 reference manual. Locking
+ *   written block (as step 8) is done after all data is written
+ *
+ * Input Parameters:
+ *   otp_address - OTP address (must be 4-byte aligned)
+ *   data        - 16-bit data (one 16-bit words)
+ *
+ * Returned Value:
+ *   Zero on success or negative error value
+ *
+ ****************************************************************************/
+
+static int stm32h5_otp_write_word(uint32_t otp_address, const uint16_t *data)
+{
+  volatile uint16_t *otp_addr = (volatile uint16_t *)otp_address;
+  int ret;
+
+  /* Step 1: Check that no memory operations are ongoing */
+
+  ret = flash_wait_for_operation();
+  if (ret != OK)
+    {
+      return ret;
+    }
+
+  /* Verify data buffer is empty (DBNE bit) */
+
+  if (getreg32(STM32_FLASH_NSSR) & FLASH_NSSR_DBNE)
+    {
+      return -EBUSY;
+    }
+
+  /* Step 2: Check and clear all error flags */
+
+  ret = stm32h5_otp_clear_errors();
+  if (ret != OK)
+    {
+      return ret;
+    }
+
+  /* Step 3: Set PG bit in FLASH_NSCR register */
+
+  modifyreg32(STM32_FLASH_NSCR, 0, FLASH_NSCR_PG);
+
+  UP_DSB();
+  UP_ISB();
+
+  /* Step 5: Write OTP word (16 bits total) */
+
+  *otp_addr = *data;
+
+  UP_DSB();
+  UP_ISB();
+
+  /* Step 6: Wait for BSY bit to be cleared */
+
+  ret = flash_wait_for_operation();
+  if (ret != OK)
+    {
+      modifyreg32(STM32_FLASH_NSCR, FLASH_NSCR_PG, 0);
+      return ret;
+    }
+
+  /* Step 7: Clear PG bit */
+
+  modifyreg32(STM32_FLASH_NSCR, FLASH_NSCR_PG, 0);
+
+  /* Verify the write by reading back */
+
+  if (*otp_addr != *data)
+    {
+      return -EIO;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -494,6 +756,237 @@ int stm32_flash_swapbanks(void)
   return 0;
 }
 
+/****************************************************************************
+ * Name: stm32_otp_write
+ *
+ * Description:
+ *   Writes data to OTP section starting from the offset.
+ *   The involved blocks will be locked afterward.
+ *
+ * Input Parameters:
+ *   data   - Pointer to data buffer
+ *   len    - Length in bytes of data to write
+ *   offset - 4-aligned offset in bytes within OTP area
+ *            (0 to FLASH_OTP_SIZE-4)
+ *
+ * Returned Value:
+ *   Zero on success or negative error value
+ *
+ ****************************************************************************/
+
+int stm32_otp_write(const uint16_t *data, uint16_t len, uint32_t offset)
+{
+  uint32_t otp_address;
+  uint16_t remaining_bytes;
+  int ret;
+  uint16_t i;
+  uint8_t start_block;
+  uint8_t end_block;
+  uint16_t words_to_write;
+
+  if (data == NULL || len == 0)
+    {
+      return -EINVAL;
+    }
+
+  if (offset + len > FLASH_OTP_SIZE)
+    {
+      return -ENOMEM;
+    }
+
+  /* Ensure 4-byte alignment for writing */
+
+  if (offset % 4 != 0)
+    {
+      return -EINVAL;
+    }
+
+  start_block = offset / FLASH_OTP_BLOCK_SIZE;
+  end_block = (offset + len - 1) / FLASH_OTP_BLOCK_SIZE;
+
+  /* Calculate actual OTP address */
+
+  otp_address = STM32_OTP_BASE + offset;
+
+  /* Calculate number of complete 16-bit words */
+
+  words_to_write = len / OTP_WORD_SIZE;
+  remaining_bytes = len % OTP_WORD_SIZE;
+
+  ret = nxmutex_lock(&g_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (!stm32h5_otp_is_space_available(start_block, end_block))
+    {
+      nxmutex_unlock(&g_lock);
+      return -EACCES;
+    }
+
+  /* Unlock flash for programming */
+
+  flash_unlock_nscr();
+
+  /* Write complete 16-bit pairs (two 16-bit words each) */
+
+  for (i = 0; i < words_to_write; i++)
+    {
+      ret = stm32h5_otp_write_word(otp_address + (i * OTP_WORD_SIZE),
+          data + i);
+
+      if (ret != OK)
+        {
+          goto exit_with_unlock;
+        }
+    }
+
+  /* Handle remaining bytes (less than OTP_WORD_SIZE bytes) */
+
+  if (remaining_bytes > 0)
+    {
+      uint16_t write_word = 0xffff; /* Default erased value for unused bits */
+
+      /* Fill the remaining bytes */
+
+      memcpy(&write_word, data + words_to_write, remaining_bytes);
+
+      ret = stm32h5_otp_write_word(
+          otp_address + (words_to_write * OTP_WORD_SIZE), &write_word);
+      if (ret != OK)
+        {
+          goto exit_with_unlock;
+        }
+    }
+
+  for (i = start_block; i <= end_block; i++)
+    {
+      ret = stm32h5_otp_lock_block(i);
+      if (ret != OK)
+        {
+          break;
+        }
+    }
+
+exit_with_unlock:
+  flash_lock_nscr();
+  nxmutex_unlock(&g_lock);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: stm32_otp_read
+ *
+ * Description:
+ *   Reads data from OTP section starting from the offset
+ *
+ * Input Parameters:
+ *   data   - Pointer to data buffer to store read data.
+ *   len    - Length in bytes of data to read
+ *   offset - 4-aligned offset in bytes within OTP area
+ *            (0 to FLASH_OTP_SIZE-4)
+ *
+ * Returned Value:
+ *   Zero on success or negative error value
+ *
+ ****************************************************************************/
+
+int stm32_otp_read(uint16_t *data, uint16_t len, uint32_t offset)
+{
+  uint32_t otp_address;
+  uint16_t remaining_bytes;
+  int ret;
+  uint16_t i;
+  uint16_t words_to_read;
+
+  if (data == NULL || len == 0)
+    {
+      return -EINVAL;
+    }
+
+  if (offset + len > FLASH_OTP_SIZE)
+    {
+      return -ENOMEM;
+    }
+
+  /* Ensure 4-byte alignment for OTP reading */
+
+  if (offset % 4 != 0)
+    {
+      return -EINVAL;
+    }
+
+  /* Calculate actual OTP address */
+
+  otp_address = STM32_OTP_BASE + offset;
+
+  /* Calculate number of complete 16-bit words */
+
+  words_to_read = len / OTP_WORD_SIZE;
+  remaining_bytes = len % OTP_WORD_SIZE;
+
+  ret = nxmutex_lock(&g_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Wait for any ongoing operations to complete */
+
+  ret = flash_wait_for_operation();
+  if (ret != OK)
+    {
+      nxmutex_unlock(&g_lock);
+      return ret;
+    }
+
+  /* Read complete 16-bit words */
+
+  for (i = 0; i < words_to_read; i++)
+    {
+      volatile uint16_t *otp_addr = (volatile uint16_t *)(otp_address +
+          (i * OTP_WORD_SIZE));
+      uint16_t *dest = data + i;
+
+      *dest = *otp_addr;
+    }
+
+  /* Handle remaining bytes (less than OTP_WORD_SIZE bytes) */
+
+  if (remaining_bytes > 0)
+    {
+      volatile uint16_t *otp_addr = (volatile uint16_t *)(otp_address +
+          (words_to_read * OTP_WORD_SIZE));
+      uint16_t read_data = *otp_addr;
+
+      /* Copy only the needed bytes */
+
+      memcpy(data + words_to_read, &read_data,
+          remaining_bytes);
+    }
+
+  nxmutex_unlock(&g_lock);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: stm32_otp_getlockstatus
+ *
+ * Description:
+ *   Get the lock status of all OTP blocks
+ *
+ * Returned Value:
+ *   32-bit value representing lock status of blocks 0-31
+ *
+ ****************************************************************************/
+
+uint32_t stm32_otp_getlockstatus(void)
+{
+  return getreg32(STM32_FLASH_OTBPBLR_CUR);
+}
+
 #ifdef CONFIG_ARCH_HAVE_PROGMEM
 
 /* up_progmem_x functions defined in nuttx/include/nuttx/progmem.h
@@ -527,6 +1020,7 @@ ssize_t up_progmem_getpage(size_t addr)
 size_t up_progmem_getaddress(size_t page)
 {
   struct stm32h5_flash_priv_s *priv;
+
   if (page >= H5_FLASH_NPAGES)
     {
       return SIZE_MAX;

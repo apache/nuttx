@@ -157,6 +157,7 @@ static int set_baud_rate(l86xxx_dev_s *dev, int br)
 {
   struct termios opt;
   int err;
+
   err = file_ioctl(&dev->uart, TCGETS, &opt);
   if (err < 0)
     {
@@ -175,17 +176,17 @@ static int set_baud_rate(l86xxx_dev_s *dev, int br)
       case 38400:
       case 57600:
       case 115200:
-      {
-        cfsetispeed(&opt, br);
-        cfsetospeed(&opt, br);
-        break;
-      }
+        {
+          cfsetispeed(&opt, br);
+          cfsetospeed(&opt, br);
+          break;
+        }
 
       default:
-      {
-        snerr("Invalid baud rate, %ld\n", br);
-        return -EINVAL;
-      }
+        {
+          snerr("Invalid baud rate, %ld\n", br);
+          return -EINVAL;
+        }
     }
 
   err = file_ioctl(&dev->uart, TCSETS, &opt);
@@ -196,8 +197,8 @@ static int set_baud_rate(l86xxx_dev_s *dev, int br)
     }
 
   /* These calls to read_line will flush out the buffer
-  after the baud rate change
-  */
+   * after the baud rate change
+   */
 
   for (int i = 0; i < 5; ++i)
     {
@@ -247,43 +248,43 @@ static int send_command(l86xxx_dev_s *dev,
   uint8_t checksum;
 
   switch (cmd)
-  {
-    case CMD_HOT_START:
-    case CMD_WARM_START:
-    case CMD_COLD_START:
-    case CMD_FULL_COLD_START:
     {
-      bw1 = snprintf(buf, sizeof(buf), "$PMTK%d", cmd);
-      break;
-    }
+      case CMD_HOT_START:
+      case CMD_WARM_START:
+      case CMD_COLD_START:
+      case CMD_FULL_COLD_START:
+        {
+          bw1 = snprintf(buf, sizeof(buf), "$PMTK%d", cmd);
+          break;
+        }
 
-    case CMD_STANDBY_MODE:
-    {
-      bw1 = snprintf(buf, sizeof(buf), "$PMTK%d,0", cmd);
-      break;
-    }
+      case CMD_STANDBY_MODE:
+        {
+          bw1 = snprintf(buf, sizeof(buf), "$PMTK%d,0", cmd);
+          break;
+        }
 
-    case SET_NMEA_BAUDRATE:
-    {
-      bw1 = snprintf(buf, sizeof(buf), "$PMTK%d,%d", cmd, (int)arg);
-      break;
-    }
+      case SET_NMEA_BAUDRATE:
+        {
+          bw1 = snprintf(buf, sizeof(buf), "$PMTK%d,%d", cmd, (int)arg);
+          break;
+        }
 
-    case SET_POS_FIX:
-    {
-      bw1 = snprintf(buf, sizeof(buf), "$PMTK%d,%d", cmd, (int)arg);
-      break;
-    }
+      case SET_POS_FIX:
+        {
+          bw1 = snprintf(buf, sizeof(buf), "$PMTK%d,%d", cmd, (int)arg);
+          break;
+        }
 
-    case FR_MODE:
-    {
-      bw1 = snprintf(buf, sizeof(buf), "$PMTK%d,%d", cmd, (int)arg);
-      break;
-    }
+      case FR_MODE:
+        {
+          bw1 = snprintf(buf, sizeof(buf), "$PMTK%d,%d", cmd, (int)arg);
+          break;
+        }
 
-    default:
-      return -ENOSYS;
-  }
+      default:
+        return -ENOSYS;
+    }
 
   sninfo("Sending command: %s to L86", buf);
   checksum = minmea_checksum(buf);
@@ -292,10 +293,10 @@ static int send_command(l86xxx_dev_s *dev,
   nxmutex_lock(&dev->devlock);
   err = file_write(&dev->uart, buf, bw1 + bw2);
   if (err < 0)
-  {
-    snerr("Could not send command to device\n");
-    goto early_ret;
-  }
+    {
+      snerr("Could not send command to device\n");
+      goto early_ret;
+    }
 
   /* These commands do not send ACKs so just return after they've been
    * written
@@ -315,15 +316,15 @@ static int send_command(l86xxx_dev_s *dev,
    */
 
   if (cmd == SET_NMEA_BAUDRATE)
-  {
+    {
 #ifdef CONFIG_SERIAL_TERMIOS
-    nxsched_usleep(20000); /* Should wait for a bit before changing interface baud rate */
-    err = set_baud_rate(dev, (int)arg);
+      nxsched_usleep(20000); /* Should wait for a bit before changing interface baud rate */
+      err = set_baud_rate(dev, (int)arg);
 #else
-    err = -EINVAL;
+      err = -EINVAL;
 #endif
-    goto early_ret;
-  }
+      goto early_ret;
+    }
 
   /* Some commands will send ACKs,
    * wait for them here before unlocking the mutex
@@ -358,24 +359,24 @@ static int send_command(l86xxx_dev_s *dev,
   sninfo("ACK received!\n");
 
   /* Flag num is always in position 13 of ack, subtract by '0'
-  to obtain return val
-  */
+   * to obtain return val
+   */
 
   switch (dev->buffer[13] - '0')
     {
-    case 1:
-      err = -ENOSYS;
-      break;
-    case 2:
-      err = -EIO;
-      break;
-    case 3:
-      err = 0;
-      break;
-    default:
-      err = -EINVAL;
-      break;
-      break;
+      case 1:
+        err = -ENOSYS;
+        break;
+      case 2:
+        err = -EIO;
+        break;
+      case 3:
+        err = 0;
+        break;
+      default:
+        err = -EINVAL;
+        break;
+        break;
     }
 
 early_ret:
@@ -439,41 +440,42 @@ static int l86xxx_control(FAR struct gnss_lowerhalf_s *lower,
 {
   FAR l86xxx_dev_s *dev = container_of(lower, FAR l86xxx_dev_s, lower);
   L86XXX_PMTK_COMMAND pmtk_cmd;
-  switch (cmd)
-  {
-    case SNIOC_HOT_START:
-      pmtk_cmd = CMD_HOT_START;
-      break;
-    case SNIOC_WARM_START:
-      pmtk_cmd = CMD_WARM_START;
-      break;
-    case SNIOC_COLD_START:
-      pmtk_cmd = CMD_COLD_START;
-      break;
-    case SNIOC_FULL_COLD_START:
-      pmtk_cmd = CMD_FULL_COLD_START;
-      break;
-    case SNIOC_SET_INTERVAL:
-      pmtk_cmd = SET_POS_FIX;
-      break;
-    case SNIOC_SET_BAUD:
-      pmtk_cmd = SET_NMEA_BAUDRATE;
-      break;
-    case SNIOC_SET_OPERATIONAL_MODE:
-      if (arg == STANDBY)
-        {
-          pmtk_cmd = CMD_STANDBY_MODE;
-        }
-      else
-        {
-          pmtk_cmd = FR_MODE;
-        }
 
-      break;
-    default:
-      snerr("Unsupported command\n");
-      return -ENOSYS;
-  }
+  switch (cmd)
+    {
+      case SNIOC_HOT_START:
+        pmtk_cmd = CMD_HOT_START;
+        break;
+      case SNIOC_WARM_START:
+        pmtk_cmd = CMD_WARM_START;
+        break;
+      case SNIOC_COLD_START:
+        pmtk_cmd = CMD_COLD_START;
+        break;
+      case SNIOC_FULL_COLD_START:
+        pmtk_cmd = CMD_FULL_COLD_START;
+        break;
+      case SNIOC_SET_INTERVAL:
+        pmtk_cmd = SET_POS_FIX;
+        break;
+      case SNIOC_SET_BAUD:
+        pmtk_cmd = SET_NMEA_BAUDRATE;
+        break;
+      case SNIOC_SET_OPERATIONAL_MODE:
+        if (arg == STANDBY)
+          {
+            pmtk_cmd = CMD_STANDBY_MODE;
+          }
+        else
+          {
+            pmtk_cmd = FR_MODE;
+          }
+
+        break;
+      default:
+        snerr("Unsupported command\n");
+        return -ENOSYS;
+    }
 
   return send_command(dev, pmtk_cmd, arg);
 }
@@ -640,21 +642,11 @@ int l86xxx_register(FAR const char *uartpath, int devno)
 
   /* Initialize mutex */
 
-  err = nxmutex_init(&priv->devlock);
-  if (err < 0)
-    {
-      snerr("Failed to initialize mutex for L86-XXX device: %d\n", err);
-      goto free_mem;
-    }
+  nxmutex_init(&priv->devlock);
 
   /* Initialize semaphore */
 
-  err = nxsem_init(&priv->run, 0, 0);
-  if (err < 0)
-    {
-      snerr("Failed to register L86-XXX driver: %d\n", err);
-      goto destroy_mutex;
-    }
+  nxsem_init(&priv->run, 0, 0);
 
   /* Open UART interface for use */
 
@@ -732,9 +724,7 @@ close_file:
   file_close(&priv->uart);
 destroy_sem:
   nxsem_destroy(&priv->run);
-destroy_mutex:
   nxmutex_destroy(&priv->devlock);
-free_mem:
   kmm_free(priv);
 
   return err;

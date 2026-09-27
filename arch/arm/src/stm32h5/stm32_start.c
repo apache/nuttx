@@ -40,6 +40,10 @@
 #include "stm32_gpio.h"
 #include "stm32_start.h"
 
+#ifdef CONFIG_ARM_MPU
+#  include "stm32_mpuinit.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -219,6 +223,15 @@ void __start(void)
   arm_earlyserialinit();
 #endif
   showprogress('B');
+
+  /* Configure the MPU to permit user-space access to its FLASH and RAM (for
+   * CONFIG_BUILD_PROTECTED) or to manage cache properties of external
+   * memory regions (in a flat build).
+   */
+
+#ifdef CONFIG_ARM_MPU
+  stm32_mpuinitialize();
+#endif
 
   /* Initialize onboard resources */
 

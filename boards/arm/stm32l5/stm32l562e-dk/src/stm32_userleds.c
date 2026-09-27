@@ -34,7 +34,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "stm32l5_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l562e-dk.h"
 
 #ifndef CONFIG_ARCH_LEDS

@@ -26,9 +26,16 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+
 #include <nuttx/board.h>
+#include <nuttx/irq.h>
+#include <nuttx/usb/usbdev.h>
 #include <arch/board/board.h>
 
+#include "arm_internal.h"
+#include "hardware/stm32_usbdev.h"
+#include "stm32_usbdev.h"
 #include "nucleo-c071rb.h"
 
 /****************************************************************************
@@ -60,6 +67,44 @@ void stm32_boardinitialize(void)
   stm32_spidev_initialize();
 #endif
 }
+
+#if defined(CONFIG_STM32_USB) && defined(CONFIG_USBDEV)
+
+/****************************************************************************
+ * Name: stm32_usbpullup
+ *
+ * Description:
+ *   Drive the embedded DP pull-up, which connects the device to the host.
+ *
+ ****************************************************************************/
+
+int stm32_usbpullup(struct usbdev_s *dev, bool enable)
+{
+  irqstate_t flags;
+  uint32_t regval;
+
+  flags = enter_critical_section();
+  regval = getreg32(STM32_USB_BCDR);
+
+  if (enable)
+    {
+      regval |= USB_BCDR_DPPU;
+    }
+  else
+    {
+      regval &= ~USB_BCDR_DPPU;
+    }
+
+  putreg32(regval, STM32_USB_BCDR);
+  leave_critical_section(flags);
+
+  return OK;
+}
+
+void stm32_usbsuspend(struct usbdev_s *dev, bool resume)
+{
+}
+#endif
 
 /****************************************************************************
  * Name: board_late_initialize

@@ -88,6 +88,8 @@ config ARCH_CHIP_AM67
 	select ARCH_CORTEXR5
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_VHOST_IOMAP
+	select SCHED_HPWORK if RPTUN
 	---help---
 		TI AM67 family
 
@@ -198,16 +200,14 @@ config ARCH_CHIP_IMX9_CORTEX_M
 
 config ARCH_CHIP_IMXRT
 	bool "NXP/Freescale iMX.RT"
-	select ARCH_CORTEXM7
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_RAMFUNCS
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_SPI_CS_CONTROL
 	select ARM_HAVE_MPU_UNIFIED
-	select ARMV7M_HAVE_STACKCHECK
 	---help---
-		NXP i.MX RT (ARM Cortex-M7) architectures
+		NXP i.MX RT (ARM Cortex-M7 or Cortex-M33) architectures.
 
 config ARCH_CHIP_KINETIS
 	bool "NXP/Freescale Kinetis"
@@ -303,6 +303,22 @@ config ARCH_CHIP_MOXART
 	---help---
 		MoxART family
 
+config ARCH_CHIP_N32H7
+	bool "N32 H7"
+	select ARCH_CORTEXM7
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_PROGMEM
+#	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_SPI_BITORDER
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_HAVE_STACKCHECK
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_TIMEKEEPING
+	---help---
+		Nation Tech N32H7 architectures (ARM Cortex-M7 or
+		dual ARM Cortex-M7 Cortex-M4).
+
 config ARCH_CHIP_NRF52
 	bool "Nordic nRF52"
 	select ARCH_CORTEXM4
@@ -324,6 +340,16 @@ config ARCH_CHIP_NRF53
 	depends on EXPERIMENTAL
 	---help---
 		Nordic nRF53 architectures (ARM dual Cortex-M33).
+
+config ARCH_CHIP_NRF54L
+	bool "Nordic nRF54L"
+	select ARCH_CORTEXM33
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select ARM_HAVE_DSP
+	select ARCH_DMA_NO_FLASH_TRANSFER
+	---help---
+		Nordic nRF54L application Cortex-M33, standalone secure image.
 
 config ARCH_CHIP_NRF91
 	bool "Nordic nRF91"
@@ -890,6 +916,14 @@ config ARCH_CHIP_QEMU_ARM
 	---help---
 		QEMU virt platform (ARMv7a)
 
+config ARCH_CHIP_RTL8730E
+	bool "Realtek AmebaSmart (RTL8730E) application core (ARMv7a)"
+	select ARCH_HAVE_POWEROFF
+	select ARCH_HAVE_RESET
+	select ARCH_IDLE_CUSTOM
+	---help---
+		Realtek AmebaSmart (RTL8730E) Cortex-A32 application core.
+
 config ARCH_CHIP_GOLDFISH_ARM
 	bool "GOLDFISH virt platform (ARMv7a)"
 	select ARCH_HAVE_POWEROFF
@@ -1317,8 +1351,10 @@ config ARCH_CHIP
 	default "lpc54xx"	if ARCH_CHIP_LPC54XX
 	default "max326xx"	if ARCH_CHIP_MAX326XX
 	default "moxart"	if ARCH_CHIP_MOXART
+	default "n32h7"		if ARCH_CHIP_N32H7
 	default "nrf52"		if ARCH_CHIP_NRF52
 	default "nrf53"		if ARCH_CHIP_NRF53
+	default "nrf54l"	if ARCH_CHIP_NRF54L
 	default "nrf91"		if ARCH_CHIP_NRF91
 	default "nuc1xx"	if ARCH_CHIP_NUC1XX
 	default "ra4"			if ARCH_CHIP_RA4
@@ -1361,6 +1397,7 @@ config ARCH_CHIP
 	default "phy62xx"	if ARCH_CHIP_PHY62XX
 	default "tlsr82"	if ARCH_CHIP_TLSR82
 	default "qemu"		if ARCH_CHIP_QEMU_ARM
+default "rtl8730e"	if ARCH_CHIP_RTL8730E
 	default "mps"		if ARCH_CHIP_MPS
 	default "rtl8721dx"	if ARCH_CHIP_RTL8721DX
 	default "rtl8720f"	if ARCH_CHIP_RTL8720F
@@ -1811,11 +1848,17 @@ endif
 if ARCH_CHIP_MOXART
 source "arch/arm/src/moxart/Kconfig"
 endif
+if ARCH_CHIP_N32H7
+source "arch/arm/src/n32h7/Kconfig"
+endif
 if ARCH_CHIP_NRF52
 source "arch/arm/src/nrf52/Kconfig"
 endif
 if ARCH_CHIP_NRF53
 source "arch/arm/src/nrf53/Kconfig"
+endif
+if ARCH_CHIP_NRF54L
+source "arch/arm/src/nrf54l/Kconfig"
 endif
 if ARCH_CHIP_NRF91
 source "arch/arm/src/nrf91/Kconfig"
@@ -1939,6 +1982,9 @@ source "arch/arm/src/tlsr82/Kconfig"
 endif
 if ARCH_CHIP_QEMU_ARM
 source "arch/arm/src/qemu/Kconfig"
+endif
+if ARCH_CHIP_RTL8730E
+source "arch/arm/src/rtl8730e/Kconfig"
 endif
 if ARCH_CHIP_MPS
 source "arch/arm/src/mps/Kconfig"

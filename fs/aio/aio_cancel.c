@@ -32,6 +32,7 @@
 #include <errno.h>
 
 #include <nuttx/wqueue.h>
+#include <nuttx/fs/fs.h>
 
 #include "aio/aio.h"
 
@@ -83,17 +84,22 @@
 
 int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
 {
-  if (fildes < 0)
-    {
-      set_errno(EBADF);
-      return ERROR;
-    }
-
   FAR struct aio_container_s *aioc;
   FAR struct aio_container_s *next;
+  FAR struct file            *filep;
+
   pid_t pid;
   int status;
   int ret;
+
+  ret = file_get(fildes, &filep);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
+    }
+
+  file_put(filep);
 
   /* Check if a non-NULL aiocbp was provided */
 
@@ -165,14 +171,16 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
     {
       /* No aiocbp.. cancel all outstanding I/O for the fildes */
 
-      next = (FAR struct aio_container_s *)g_aio_pending.head;
-      do
+      for (aioc = (FAR struct aio_container_s *)g_aio_pending.head;
+           aioc;
+           aioc = next)
         {
-          /* Find the next container with this AIO control block */
+          next = (FAR struct aio_container_s *)aioc->aioc_link.flink;
 
-          for (aioc = next;
-               aioc && aioc->aioc_aiocbp->aio_fildes != fildes;
-               aioc = (FAR struct aio_container_s *)aioc->aioc_link.flink);
+          if (aioc->aioc_aiocbp->aio_fildes != fildes)
+            {
+              continue;
+            }
 
           /* Did we find the container?  We should; the aio_result says
            * that the transfer is pending.  If not we return AIO_ALLDONE.
@@ -195,8 +203,6 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
                    * transfers
                    */
 
-                  next   =
-                    (FAR struct aio_container_s *)aioc->aioc_link.flink;
                   pid    = aioc->aioc_pid;
                   aiocbp = aioc_decant(aioc);
                   DEBUGASSERT(aiocbp);
@@ -217,7 +223,6 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
                 }
             }
         }
-      while (aioc);
     }
 
   aio_unlock();

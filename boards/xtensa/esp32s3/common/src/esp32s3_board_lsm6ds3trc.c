@@ -110,13 +110,13 @@ int board_lsm6ds3trc_initialize(int devno, int busno)
     .attach = board_lsm6ds3trc_attach,
   };
 
-  /* The IMU drives INT1 push-pull, active high by default (CTRL3_C
-   * H_LACTIVE reset value) -- rising edge signals data ready. No pull
-   * needed once the sensor drives the line, but PULLDOWN gives a defined
-   * idle state before CTRL registers are written during registration.
+  /* INT1 is a level (FIFO over watermark), not a pulse -- ONHIGH, not
+   * RISING, or the disable/re-enable around servicing can miss the line
+   * already back high and never fire again. PULLDOWN just gives a defined
+   * idle state before CTRL registers are written.
    */
 
-  esp_configgpio(LSM6DS3TRC_IRQ_PIN, INPUT_FUNCTION_2 | PULLDOWN | RISING);
+  esp_configgpio(LSM6DS3TRC_IRQ_PIN, INPUT_FUNCTION_2 | PULLDOWN | ONHIGH);
 
   i2c = esp32s3_i2cbus_initialize(busno);
   if (i2c == NULL)

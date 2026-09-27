@@ -190,6 +190,19 @@ struct module_s
   uint16_t nsect;                      /* Number of entries in sectalloc array */
 #endif
   int dynamic;                         /* Module is a dynamic shared object */
+  uintptr_t gotbase;                   /* An FDPIC object's data base, to
+                                        * enter its destructors with.  Zero
+                                        * for anything else, so it also says
+                                        * which kind of object this is: an
+                                        * FDPIC one placed its two segments
+                                        * separately and its text may be
+                                        * media rather than an allocation
+                                        */
+#ifdef HAVE_LIBC_ELF_PIN
+  FAR struct file *pinfile;            /* Holds the XIP pin on the text until
+                                        * the module is unloaded
+                                        */
+#endif
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
   size_t textsize;                     /* Size of the kernel .text memory allocation */
   size_t datasize;                     /* Size of the kernel .bss/.data memory allocation */

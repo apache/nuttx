@@ -30,6 +30,7 @@ if(NOT CONFIG_DISABLE_PTHREAD)
       pthread_getschedparam.c
       pthread_setschedparam.c
       pthread_sigmask.c
+      pthread_sigqueue.c
       pthread_cancel.c
       pthread_completejoin.c
       pthread_findjoininfo.c

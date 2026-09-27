@@ -4,6 +4,12 @@
 
 # COMP supported only for M3M4 for now
 
+config STM32_COMP_INIT_DISABLED
+	bool "Do not enable the comparator at initialization"
+	default n
+	---help---
+		The comparator is kept disabled until ioctl() enable command.
+
 if STM32_HAVE_IP_COMP_M3M4_V2
 
 if STM32_COMP1

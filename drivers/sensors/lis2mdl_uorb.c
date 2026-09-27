@@ -1019,6 +1019,7 @@ static int lis2mdl_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
   /* Get user calibration values */
 
   FAR float *vals = (float *)(arg);
+
   if (vals == NULL)
     {
       err = -EINVAL;
@@ -1061,6 +1062,7 @@ static int lis2mdl_fetch(FAR struct sensor_lowerhalf_s *lower,
 {
   FAR struct lis2mdl_dev_s *dev =
       container_of(lower, FAR struct lis2mdl_dev_s, lower);
+
   return lis2mdl_push_data(dev);
 }
 #endif /* CONFIG_SENSORS_LIS2MDL_FETCH */
@@ -1085,63 +1087,64 @@ static int lis2mdl_control(FAR struct sensor_lowerhalf_s *lower,
 
   switch (cmd)
     {
-      /* Get the WHOAMI register value */
+        /* Get the WHOAMI register value */
 
-    case SNIOC_WHO_AM_I:
-      {
-        uint8_t *id = ((uint8_t *)(arg));
-        if (id == NULL)
-          {
-            err = -EINVAL;
-            break;
-          }
+      case SNIOC_WHO_AM_I:
+        {
+          uint8_t *id = ((uint8_t *)(arg));
 
-        err = lis2mdl_read_reg(dev, REG_WHO_AM_I, id, 1);
-      }
-      break;
+          if (id == NULL)
+            {
+              err = -EINVAL;
+              break;
+            }
 
-      /* Set low power mode if `arg` is truthy */
+          err = lis2mdl_read_reg(dev, REG_WHO_AM_I, id, 1);
+        }
+        break;
 
-    case SNIOC_SET_POWER_MODE:
-      {
-        err = lis2mdl_low_power(dev, arg);
-      }
-      break;
+        /* Set low power mode if `arg` is truthy */
 
-      /* Soft reset */
+      case SNIOC_SET_POWER_MODE:
+        {
+          err = lis2mdl_low_power(dev, arg);
+        }
+        break;
 
-    case SNIOC_RESET:
-      {
-        err = lis2mdl_reset(dev);
-      }
-      break;
+        /* Soft reset */
 
-      /* Reboot memory contents */
+      case SNIOC_RESET:
+        {
+          err = lis2mdl_reset(dev);
+        }
+        break;
 
-    case SNIOC_SENSOR_OFF:
-      {
-        err = lis2mdl_reboot(dev);
-      }
-      break;
+        /* Reboot memory contents */
 
-      /* Enable/disable temperature compensation */
+      case SNIOC_SENSOR_OFF:
+        {
+          err = lis2mdl_reboot(dev);
+        }
+        break;
 
-    case SNIOC_SET_TEMP_OFFSET:
-      {
-        err = lis2mdl_temp_compensation(dev, arg);
-      }
-      break;
+        /* Enable/disable temperature compensation */
 
-    case SNIOC_LPF:
-      {
-        err = lis2mdl_enable_lpf(dev, arg);
-      }
-      break;
+      case SNIOC_SET_TEMP_OFFSET:
+        {
+          err = lis2mdl_temp_compensation(dev, arg);
+        }
+        break;
 
-    default:
-      err = -EINVAL;
-      snerr("Unknown command for LIS2MDL: %d\n", cmd);
-      break;
+      case SNIOC_LPF:
+        {
+          err = lis2mdl_enable_lpf(dev, arg);
+        }
+        break;
+
+      default:
+        err = -EINVAL;
+        snerr("Unknown command for LIS2MDL: %d\n", cmd);
+        break;
     }
 
   nxmutex_unlock(&dev->devlock);
@@ -1159,6 +1162,7 @@ static int lis2mdl_control(FAR struct sensor_lowerhalf_s *lower,
 static void lis2mdl_worker(FAR void *arg)
 {
   FAR struct lis2mdl_dev_s *dev = (FAR struct lis2mdl_dev_s *)(arg);
+
   DEBUGASSERT(dev != NULL);
   lis2mdl_push_data(dev);
 }
@@ -1175,6 +1179,7 @@ static int lis2mdl_int_handler(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct lis2mdl_dev_s *dev = (FAR struct lis2mdl_dev_s *)(arg);
   int err;
+
   (void)context;
 
   DEBUGASSERT(dev != NULL);
@@ -1295,19 +1300,9 @@ int lis2mdl_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr,
   priv->i2c = i2c;
   priv->addr = addr;
 
-  err = nxmutex_init(&priv->devlock);
-  if (err < 0)
-    {
-      snerr("Failed to register LIS2MDL driver: %d\n", err);
-      goto del_mem;
-    }
+  nxmutex_init(&priv->devlock);
 
-  err = nxsem_init(&priv->run, 0, 0);
-  if (err < 0)
-    {
-      snerr("Failed to register LIS2MDL driver: %d\n", err);
-      goto del_mutex;
-    }
+  nxsem_init(&priv->run, 0, 0);
 
   /* Register UORB Sensor */
 
@@ -1376,13 +1371,11 @@ int lis2mdl_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr,
 
   if (err < 0)
     {
-    sensor_unreg:
+sensor_unreg:
       sensor_unregister(&priv->lower, devno);
-    del_sem:
+del_sem:
       nxsem_destroy(&priv->run);
-    del_mutex:
       nxmutex_destroy(&priv->devlock);
-    del_mem:
       kmm_free(priv);
       return err;
     }

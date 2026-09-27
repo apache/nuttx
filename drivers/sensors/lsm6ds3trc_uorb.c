@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 #include <nuttx/nuttx.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/fs/fs.h>
@@ -202,6 +203,8 @@ struct lsm6ds3trc_dev_s
   bool interrupt_mode;            /* True if using the INT pin instead of
                                    * kthread polling */
   enum lsm6ds3trc_int_e int_pin;  /* Shared INT pin (interrupt mode only) */
+  int irq;                        /* IRQ number for int_pin, saved by the
+                                   * ISR so the worker can re-enable it */
   struct work_s work;             /* Shared interrupt work queue
                                    * structure -- one burst read serves
                                    * both sub-sensors */
@@ -213,6 +216,21 @@ struct lsm6ds3trc_dev_s
                                    * (both), 0 if neither is */
   enum lsm6ds3trc_odr_e fifo_odr; /* Shared ODR currently driving
                                    * FIFO_CTRL5 */
+  FAR int16_t *fifo_raw;          /* Drain buffer, FIFO_MAX_WORDS entries.
+                                   *
+                                   * On the heap, not the stack.
+                                   * FIFO_MAX_WORDS scales with
+                                   * CONFIG_SENSORS_LSM6DS3TRC_FIFO_
+                                   * WATERMARK, so at the watermark this
+                                   * board uses the old on-stack array was
+                                   * 6000 bytes inside an 8192-byte HPWORK
+                                   * stack -- 73% of it, before the call
+                                   * frame and the whole I2C stack below
+                                   * it.  The Kconfig default watermark of
+                                   * 8 needs only 192 bytes, which is
+                                   * presumably why this was never hit.
+                                   * Allocated once at registration so the
+                                   * drain path stays allocation free. */
 #endif
 };
 
@@ -834,11 +852,10 @@ static int accel_thread(int argc, char **argv)
  *
  ****************************************************************************/
 
-static void lsm6ds3trc_fifo_worker(FAR void *arg)
+static void lsm6ds3trc_fifo_worker_body(FAR struct lsm6ds3trc_dev_s *dev)
 {
-  FAR struct lsm6ds3trc_dev_s *dev = arg;
   uint8_t status[2];
-  int16_t raw[FIFO_MAX_WORDS];
+  FAR int16_t *raw = dev->fifo_raw;
   int16_t raw_temp;
   float temp_c;
   uint16_t diff_words;
@@ -916,8 +933,23 @@ static void lsm6ds3trc_fifo_worker(FAR void *arg)
                               nwords * sizeof(int16_t));
   if (err < 0)
     {
-      nxmutex_unlock(&dev->devlock);
+      uint8_t ctrl5;
+
       snerr("ERROR: Failed to read FIFO data: %d\n", err);
+
+      /* Recover instead of wedging: a FIFO left above watermark holds
+       * level-triggered INT1 asserted, re-entering this worker forever.
+       * Emptying it through Bypass costs one batch but deasserts the line;
+       * restore the previous mode bits to keep fifo_configure()'s ODR.
+       */
+
+      if (lsm6ds3trc_read_bytes(dev, FIFO_CTRL5, &ctrl5, 1) >= 0)
+        {
+          lsm6ds3trc_set_bits(dev, FIFO_CTRL5, FIFO_MODE_BYPASS, 0x07);
+          lsm6ds3trc_set_bits(dev, FIFO_CTRL5, ctrl5 & 0x07, 0x07);
+        }
+
+      nxmutex_unlock(&dev->devlock);
       return;
     }
 
@@ -980,6 +1012,24 @@ static void lsm6ds3trc_fifo_worker(FAR void *arg)
     }
 }
 
+/****************************************************************************
+ * Name: lsm6ds3trc_fifo_worker
+ *
+ * Description:
+ *   work_queue() entry point. Re-enables the IRQ lsm6ds3trc_interrupt()
+ *   disabled, after the FIFO has actually been drained -- see the comment
+ *   on lsm6ds3trc_interrupt() for why the order matters.
+ *
+ ****************************************************************************/
+
+static void lsm6ds3trc_fifo_worker(FAR void *arg)
+{
+  FAR struct lsm6ds3trc_dev_s *dev = arg;
+
+  lsm6ds3trc_fifo_worker_body(dev);
+  up_enable_irq(dev->irq);
+}
+
 #else
 /****************************************************************************
  * Name: lsm6ds3trc_worker
@@ -993,9 +1043,8 @@ static void lsm6ds3trc_fifo_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-static void lsm6ds3trc_worker(FAR void *arg)
+static void lsm6ds3trc_worker_body(FAR struct lsm6ds3trc_dev_s *dev)
 {
-  FAR struct lsm6ds3trc_dev_s *dev = arg;
   int16_t raw[7]; /* temp, gx, gy, gz, ax, ay, az */
   struct sensor_gyro gyro_data;
   struct sensor_accel accel_data;
@@ -1043,6 +1092,24 @@ static void lsm6ds3trc_worker(FAR void *arg)
                                   sizeof(accel_data));
     }
 }
+
+/****************************************************************************
+ * Name: lsm6ds3trc_worker
+ *
+ * Description:
+ *   work_queue() entry point. Re-enables the IRQ lsm6ds3trc_interrupt()
+ *   disabled, after the measurement has actually been drained -- see the
+ *   comment on lsm6ds3trc_interrupt() for why the order matters.
+ *
+ ****************************************************************************/
+
+static void lsm6ds3trc_worker(FAR void *arg)
+{
+  FAR struct lsm6ds3trc_dev_s *dev = arg;
+
+  lsm6ds3trc_worker_body(dev);
+  up_enable_irq(dev->irq);
+}
 #endif
 
 /****************************************************************************
@@ -1052,6 +1119,13 @@ static void lsm6ds3trc_worker(FAR void *arg)
  *   ISR for the shared INT pin. Timestamps here, where the burst really
  *   became ready -- the I2C read cannot run in interrupt context, so it's
  *   deferred to lsm6ds3trc_worker()/lsm6ds3trc_fifo_worker() on HPWORK.
+ *
+ *   The IRQ is disabled here and only re-enabled once the worker has
+ *   drained the condition that raised it: if a PM wake source ever leaves
+ *   this pin level-triggered instead of edge-triggered (or the line is
+ *   simply slow to fall), leaving the IRQ enabled would re-fire it
+ *   continuously and starve every task, including the worker that would
+ *   otherwise clear it.
  *
  ****************************************************************************/
 
@@ -1063,6 +1137,9 @@ static int lsm6ds3trc_interrupt(int irq, FAR void *context, FAR void *arg)
   (void)(context);
 
   DEBUGASSERT(arg != NULL);
+
+  dev->irq = irq;
+  up_disable_irq(irq);
 
   dev->timestamp = sensor_get_timestamp();
 
@@ -1520,30 +1597,27 @@ int lsm6ds3trc_register(FAR struct i2c_master_s *i2c, uint8_t addr,
     }
 
   priv->i2c = i2c;
+
+#ifdef CONFIG_SENSORS_LSM6DS3TRC_FIFO
+  priv->fifo_raw = kmm_malloc(FIFO_MAX_WORDS * sizeof(int16_t));
+  if (priv->fifo_raw == NULL)
+    {
+      snerr("ERROR: no memory for the %d-byte FIFO drain buffer\n",
+            (int)(FIFO_MAX_WORDS * sizeof(int16_t)));
+      kmm_free(priv);
+      return -ENOMEM;
+    }
+#endif
+
   priv->addr = addr;
   priv->interrupt_mode = config->attach != NULL;
   priv->int_pin = config->int_pin;
 
-  err = nxmutex_init(&priv->devlock);
-  if (err < 0)
-    {
-      snerr("Failed to initialize mutex: %d\n", err);
-      goto free_mem;
-    }
+  nxmutex_init(&priv->devlock);
 
-  err = nxsem_init(&priv->gyro.run, 0, 0);
-  if (err < 0)
-    {
-      snerr("Failed to initialize gyro semaphore: %d\n", err);
-      goto del_mutex;
-    }
+  nxsem_init(&priv->gyro.run, 0, 0);
 
-  err = nxsem_init(&priv->accel.run, 0, 0);
-  if (err < 0)
-    {
-      snerr("Failed to initialize accel semaphore: %d\n", err);
-      goto del_gyro_sem;
-    }
+  nxsem_init(&priv->accel.run, 0, 0);
 
   /* Create gyro lower half */
 
@@ -1582,6 +1656,84 @@ int lsm6ds3trc_register(FAR struct i2c_master_s *i2c, uint8_t addr,
             "%d\n", err);
       goto unreg_gyro;
     }
+
+  /* Put the sensor into its power-on register state before anything else
+   * touches it, and in particular before the interrupt is attached.
+   *
+   * The LSM6DS3TR-C has its own supply and its own reset: a plain MCU
+   * reset does not reset the sensor, so it comes up still holding
+   * whatever the previous session configured.  For this driver that
+   * means INT1_CTRL.INT1_FTH still set and a FIFO still over its
+   * watermark -- i.e. INT1 asserted, immediately, at registration time.
+   *
+   * The board is expected to configure INT1 as level-triggered (a FIFO
+   * watermark is a level condition, not a pulse).  Arming an interrupt
+   * on a line that is already active when config->attach() enables it
+   * can re-fire continuously and wedge the caller with no diagnostic
+   * output, depending on the arch's own interrupt-controller behavior.
+   *
+   * SW_RESET (CTRL3_C bit 0) clears INT1_CTRL and FIFO_CTRL back to 0,
+   * which deasserts INT1.  It self-clears in ~50us; poll rather than
+   * assume, and carry on if the sensor does not answer -- a sensor that
+   * cannot be reset is a problem for the caller to report, not a reason
+   * to arm an interrupt line we know may be stuck high.
+   */
+
+  {
+    uint8_t ctrl3_c;
+    int attempt;
+    int tries;
+    bool reset_done = false;
+
+    /* The I2C bus is not always ready the instant we get here -- a write
+     * at this point has been seen to fail with -EIO on a cold boot.  Give
+     * it a few attempts with a short pause between them.
+     */
+
+    for (attempt = 0; attempt < 3 && !reset_done; attempt++)
+      {
+        ctrl3_c = 0x01;                 /* SW_RESET */
+
+        err = lsm6ds3trc_write_bytes(priv, CTRL3_C, &ctrl3_c, 1);
+        if (err < 0)
+          {
+            snwarn("Software reset write failed (attempt %d): %d\n",
+                   attempt + 1, err);
+            nxsig_usleep(10000);
+            continue;
+          }
+
+        for (tries = 0; tries < 20; tries++)
+          {
+            nxsig_usleep(1000);
+
+            if (lsm6ds3trc_read_bytes(priv, CTRL3_C, &ctrl3_c, 1) >= 0 &&
+                (ctrl3_c & 0x01) == 0)
+              {
+                reset_done = true;
+                break;
+              }
+          }
+      }
+
+    /* Carry on even if it never took.  Not resetting the sensor risks the
+     * interrupt storm this reset exists to prevent (see the comment
+     * above), but that is a far better failure than refusing to register
+     * the device at all: an unregistered sensor leaves the application
+     * with no /dev/uorb/sensor_accel0 to open, which is fatal to it.
+     * Losing the whole sensor to protect against a maybe-storm is the
+     * wrong trade -- a single -EIO here has taken a board down completely
+     * before.
+     */
+
+    if (!reset_done)
+      {
+        snerr("Software reset did not complete; continuing unreset. "
+              "INT1 may already be asserted -- watch for an IRQ storm.\n");
+      }
+
+    err = OK;
+  }
 
   /* Write CTRL1_XL's FS_XL bits to match the software default above --
    * ODR is set later by activate(), but FSR needs to be right from the
@@ -1659,11 +1811,8 @@ unreg_gyro:
   sensor_unregister(&priv->gyro.lower, devno);
 del_accel_sem:
   nxsem_destroy(&priv->accel.run);
-del_gyro_sem:
   nxsem_destroy(&priv->gyro.run);
-del_mutex:
   nxmutex_destroy(&priv->devlock);
-free_mem:
   kmm_free(priv);
   snerr("ERROR: Failed to register LSM6DS3TR-C driver: %d\n", err);
   return err;

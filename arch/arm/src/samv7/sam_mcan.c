@@ -1296,6 +1296,7 @@ static uint32_t mcan_getreg(struct sam_mcan_s *priv, int offset)
 static uint32_t mcan_getreg(struct sam_mcan_s *priv, int offset)
 {
   const struct sam_config_s *config = priv->config;
+
   return getreg32(config->base + offset);
 }
 
@@ -1891,12 +1892,12 @@ static int mcan_add_extfilter(struct sam_mcan_s *priv,
               regval |= (MCAN_CCCR_INIT | MCAN_CCCR_CCE);
               mcan_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
 
-             /* Update the Global Filter Configuration so that received
-              * messages are rejected if they do not match the acceptance
-              * filter.
-              *
-              *   ANFE=2: Discard all rejected frames
-              */
+              /* Update the Global Filter Configuration so that received
+               * messages are rejected if they do not match the acceptance
+               * filter.
+               *
+               *   ANFE=2: Discard all rejected frames
+               */
 
               regval  = mcan_getreg(priv, SAM_MCAN_GFC_OFFSET);
               regval &= ~MCAN_GFC_ANFE_MASK;
@@ -2158,12 +2159,12 @@ static int mcan_add_stdfilter(struct sam_mcan_s *priv,
               regval |= (MCAN_CCCR_INIT | MCAN_CCCR_CCE);
               mcan_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
 
-             /* Update the Global Filter Configuration so that received
-              * messages are rejected if they do not match the acceptance
-              * filter.
-              *
-              *   ANFS=2: Discard all rejected frames
-              */
+              /* Update the Global Filter Configuration so that received
+               * messages are rejected if they do not match the acceptance
+               * filter.
+               *
+               *   ANFS=2: Discard all rejected frames
+               */
 
               regval  = mcan_getreg(priv, SAM_MCAN_GFC_OFFSET);
               regval &= ~MCAN_GFC_ANFS_MASK;
@@ -3222,12 +3223,21 @@ static bool mcan_txready(struct can_dev_s *dev)
 
 #ifdef CONFIG_DEBUG_FEATURES
   /* As a sanity check, the txfsem should also track the number of elements
-   * the TX FIFO/queue.  Make sure that they are consistent.
+   * the TX FIFO/queue. Check only if the value doesn't exceed number of
+   * FIFO queue members. Sanity check comparing semaphore value with notfull
+   * flag may not always work, because SAM_MCAN_TXFQS register may signalize
+   * not full queue before we process the interrupt and increment the
+   * semaphore. The sanity checks should not be necessary because
+   * mcan_buffer_reserve function will take care of fixing the semaphore
+   * value if it doesn't match with the FIFO.
+   *
+   * REVISIT: The entire semaphore logic is a bit weird and probably not
+   * necessary. All we need to do is to check SAM_MCAN_TXFQS register
+   * if there is at least one free slot in the queue.
    */
 
   nxsem_get_value(&priv->txfsem, &sval);
-  DEBUGASSERT(((notfull && sval > 0) || (!notfull && sval <= 0)) &&
-              (sval <= priv->config->ntxfifoq));
+  DEBUGASSERT((sval <= priv->config->ntxfifoq));
 #endif
 
   nxmutex_unlock(&priv->lock);
@@ -3779,14 +3789,14 @@ static int mcan_interrupt(int irq, void *context, void *arg)
 
           if ((priv->rev == 0) && ((ie & MCAN_INT_ACKE) == 0))
             {
-                ie |= MCAN_INT_ACKE;
-                mcan_putreg(priv, SAM_MCAN_IE_OFFSET, ie);
+              ie |= MCAN_INT_ACKE;
+              mcan_putreg(priv, SAM_MCAN_IE_OFFSET, ie);
             }
           else if ((priv->rev == 1) &&
                    ((ie & (MCAN_INT_PEA | MCAN_INT_PED)) == 0))
             {
-                ie |= MCAN_INT_PEA | MCAN_INT_PED;
-                mcan_putreg(priv, SAM_MCAN_IE_OFFSET, ie);
+              ie |= MCAN_INT_PEA | MCAN_INT_PED;
+              mcan_putreg(priv, SAM_MCAN_IE_OFFSET, ie);
             }
 
           /* Clear the pending TX completion interrupt (and all
@@ -4237,10 +4247,10 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
 
   if (config->loopback)
     {
-     /* MCAN_CCCR_TEST  - Test mode enable
-      * MCAN_CCCR_MON   - Bus monitoring mode (for internal loopback)
-      * MCAN_TEST_LBCK  - Loopback mode
-      */
+      /* MCAN_CCCR_TEST  - Test mode enable
+       * MCAN_CCCR_MON   - Bus monitoring mode (for internal loopback)
+       * MCAN_TEST_LBCK  - Loopback mode
+       */
 
       regval = mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET);
       regval |= (MCAN_CCCR_TEST | MCAN_CCCR_MON);

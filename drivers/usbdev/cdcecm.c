@@ -1071,45 +1071,45 @@ static int cdcecm_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
   switch (id)
     {
 #ifndef CONFIG_CDCECM_COMPOSITE
-    case 0:
-      {
-        /* Descriptor 0 is the language id */
+      case 0:
+        {
+          /* Descriptor 0 is the language id */
 
-        strdesc->len  = 4;
-        strdesc->type = USB_DESC_TYPE_STRING;
-        data[0] = LSBYTE(CDCECM_STR_LANGUAGE);
-        data[1] = MSBYTE(CDCECM_STR_LANGUAGE);
-        return 4;
-      }
+          strdesc->len  = 4;
+          strdesc->type = USB_DESC_TYPE_STRING;
+          data[0] = LSBYTE(CDCECM_STR_LANGUAGE);
+          data[1] = MSBYTE(CDCECM_STR_LANGUAGE);
+          return 4;
+        }
 
-    case CDCECM_MANUFACTURERSTRID:
-      str = CONFIG_CDCECM_VENDORSTR;
-      break;
+      case CDCECM_MANUFACTURERSTRID:
+        str = CONFIG_CDCECM_VENDORSTR;
+        break;
 
-    case CDCECM_PRODUCTSTRID:
-      str = CONFIG_CDCECM_PRODUCTSTR;
-      break;
+      case CDCECM_PRODUCTSTRID:
+        str = CONFIG_CDCECM_PRODUCTSTR;
+        break;
 
-    case CDCECM_SERIALSTRID:
+      case CDCECM_SERIALSTRID:
 #ifdef CONFIG_BOARD_USBDEV_SERIALSTR
-      str = board_usbdev_serialstr();
+        str = board_usbdev_serialstr();
 #else
-      str = "0";
+        str = "0";
 #endif
-      break;
+        break;
 
-    case CDCECM_CONFIGSTRID:
-      str = "Default";
-      break;
+      case CDCECM_CONFIGSTRID:
+        str = "Default";
+        break;
 #endif
 
-    case CDCECM_MACSTRID:
-      str = "020000112233";
-      break;
+      case CDCECM_MACSTRID:
+        str = "020000112233";
+        break;
 
-    default:
-      uwarn("Unknown string descriptor index: %d\n", id);
-      return -EINVAL;
+      default:
+        uwarn("Unknown string descriptor index: %d\n", id);
+        return -EINVAL;
     }
 
   /* The string is utf16-le.  The poor man's utf-8 to utf16-le
@@ -1145,88 +1145,88 @@ static int cdcecm_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
 static void cdcecm_mkepcompdesc(int epidx,
                                 FAR struct usb_ss_epcompdesc_s *epcompdesc)
 {
-    switch (epidx)
+  switch (epidx)
     {
-    case CDCECM_EP_INTIN_IDX:  /* Interrupt IN endpoint */
-      {
-        epcompdesc->len  = USB_SIZEOF_SS_EPCOMPDESC;                      /* Descriptor length */
-        epcompdesc->type = USB_DESC_TYPE_ENDPOINT_COMPANION;              /* Descriptor type */
+      case CDCECM_EP_INTIN_IDX:  /* Interrupt IN endpoint */
+        {
+          epcompdesc->len  = USB_SIZEOF_SS_EPCOMPDESC;                      /* Descriptor length */
+          epcompdesc->type = USB_DESC_TYPE_ENDPOINT_COMPANION;              /* Descriptor type */
 
-        if (CONFIG_CDCECM_EPINTIN_MAXBURST >= USB_SS_INT_EP_MAXBURST)
-          {
-            epcompdesc->mxburst = USB_SS_INT_EP_MAXBURST - 1;
-          }
-        else
-          {
-            epcompdesc->mxburst = CONFIG_CDCECM_EPINTIN_MAXBURST;
-          }
+          if (CONFIG_CDCECM_EPINTIN_MAXBURST >= USB_SS_INT_EP_MAXBURST)
+            {
+              epcompdesc->mxburst = USB_SS_INT_EP_MAXBURST - 1;
+            }
+          else
+            {
+              epcompdesc->mxburst = CONFIG_CDCECM_EPINTIN_MAXBURST;
+            }
 
-        epcompdesc->attr      = 0;
-        epcompdesc->wbytes[0] = LSBYTE((epcompdesc->mxburst + 1) *
-                                       CONFIG_CDCECM_EPINTIN_SSSIZE);
-        epcompdesc->wbytes[1] = MSBYTE((epcompdesc->mxburst + 1) *
-                                       CONFIG_CDCECM_EPINTIN_SSSIZE);
-      }
-      break;
+          epcompdesc->attr      = 0;
+          epcompdesc->wbytes[0] = LSBYTE((epcompdesc->mxburst + 1) *
+                                         CONFIG_CDCECM_EPINTIN_SSSIZE);
+          epcompdesc->wbytes[1] = MSBYTE((epcompdesc->mxburst + 1) *
+                                         CONFIG_CDCECM_EPINTIN_SSSIZE);
+        }
+        break;
 
-    case CDCECM_EP_BULKOUT_IDX:
-      {
-        epcompdesc->len  = USB_SIZEOF_SS_EPCOMPDESC;                      /* Descriptor length */
-        epcompdesc->type = USB_DESC_TYPE_ENDPOINT_COMPANION;              /* Descriptor type */
+      case CDCECM_EP_BULKOUT_IDX:
+        {
+          epcompdesc->len  = USB_SIZEOF_SS_EPCOMPDESC;                      /* Descriptor length */
+          epcompdesc->type = USB_DESC_TYPE_ENDPOINT_COMPANION;              /* Descriptor type */
 
-        if (CONFIG_CDCECM_EPBULKOUT_MAXBURST >= USB_SS_BULK_EP_MAXBURST)
-          {
-            epcompdesc->mxburst = USB_SS_BULK_EP_MAXBURST - 1;
-          }
-        else
-          {
-            epcompdesc->mxburst = CONFIG_CDCECM_EPBULKOUT_MAXBURST;
-          }
+          if (CONFIG_CDCECM_EPBULKOUT_MAXBURST >= USB_SS_BULK_EP_MAXBURST)
+            {
+              epcompdesc->mxburst = USB_SS_BULK_EP_MAXBURST - 1;
+            }
+          else
+            {
+              epcompdesc->mxburst = CONFIG_CDCECM_EPBULKOUT_MAXBURST;
+            }
 
-        if (CONFIG_CDCECM_EPBULKOUT_MAXSTREAM > USB_SS_BULK_EP_MAXSTREAM)
-          {
-            epcompdesc->attr = USB_SS_BULK_EP_MAXSTREAM;
-          }
-        else
-          {
-            epcompdesc->attr = CONFIG_CDCECM_EPBULKOUT_MAXSTREAM;
-          }
+          if (CONFIG_CDCECM_EPBULKOUT_MAXSTREAM > USB_SS_BULK_EP_MAXSTREAM)
+            {
+              epcompdesc->attr = USB_SS_BULK_EP_MAXSTREAM;
+            }
+          else
+            {
+              epcompdesc->attr = CONFIG_CDCECM_EPBULKOUT_MAXSTREAM;
+            }
 
-        epcompdesc->wbytes[0] = 0;
-        epcompdesc->wbytes[1] = 0;
-      }
-      break;
+          epcompdesc->wbytes[0] = 0;
+          epcompdesc->wbytes[1] = 0;
+        }
+        break;
 
-    case CDCECM_EP_BULKIN_IDX:
-      {
-        epcompdesc->len  = USB_SIZEOF_SS_EPCOMPDESC;                      /* Descriptor length */
-        epcompdesc->type = USB_DESC_TYPE_ENDPOINT_COMPANION;              /* Descriptor type */
+      case CDCECM_EP_BULKIN_IDX:
+        {
+          epcompdesc->len  = USB_SIZEOF_SS_EPCOMPDESC;                      /* Descriptor length */
+          epcompdesc->type = USB_DESC_TYPE_ENDPOINT_COMPANION;              /* Descriptor type */
 
-        if (CONFIG_CDCECM_EPBULKIN_MAXBURST >= USB_SS_BULK_EP_MAXBURST)
-          {
-            epcompdesc->mxburst = USB_SS_BULK_EP_MAXBURST - 1;
-          }
-        else
-          {
-            epcompdesc->mxburst = CONFIG_CDCECM_EPBULKIN_MAXBURST;
-          }
+          if (CONFIG_CDCECM_EPBULKIN_MAXBURST >= USB_SS_BULK_EP_MAXBURST)
+            {
+              epcompdesc->mxburst = USB_SS_BULK_EP_MAXBURST - 1;
+            }
+          else
+            {
+              epcompdesc->mxburst = CONFIG_CDCECM_EPBULKIN_MAXBURST;
+            }
 
-        if (CONFIG_CDCECM_EPBULKIN_MAXSTREAM > USB_SS_BULK_EP_MAXSTREAM)
-          {
-            epcompdesc->attr = USB_SS_BULK_EP_MAXSTREAM;
-          }
-        else
-          {
-            epcompdesc->attr = CONFIG_CDCECM_EPBULKIN_MAXSTREAM;
-          }
+          if (CONFIG_CDCECM_EPBULKIN_MAXSTREAM > USB_SS_BULK_EP_MAXSTREAM)
+            {
+              epcompdesc->attr = USB_SS_BULK_EP_MAXSTREAM;
+            }
+          else
+            {
+              epcompdesc->attr = CONFIG_CDCECM_EPBULKIN_MAXSTREAM;
+            }
 
-        epcompdesc->wbytes[0] = 0;
-        epcompdesc->wbytes[1] = 0;
-      }
-      break;
+          epcompdesc->wbytes[0] = 0;
+          epcompdesc->wbytes[1] = 0;
+        }
+        break;
 
-    default:
-      break;
+      default:
+        break;
     }
 }
 #endif
@@ -1589,32 +1589,32 @@ static int cdcecm_getdescriptor(FAR struct cdcecm_driver_s *self,
   switch (type)
     {
 #ifndef CONFIG_CDCECM_COMPOSITE
-    case USB_DESC_TYPE_DEVICE:
-      {
-        return usbdev_copy_devdesc(desc, &g_devdesc, self->usbdev.speed);
-      }
-      break;
+      case USB_DESC_TYPE_DEVICE:
+        {
+          return usbdev_copy_devdesc(desc, &g_devdesc, self->usbdev.speed);
+        }
+        break;
 #endif
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-    case USB_DESC_TYPE_OTHERSPEEDCONFIG:
+      case USB_DESC_TYPE_OTHERSPEEDCONFIG:
 #endif /* CONFIG_USBDEV_DUALSPEED */
-    case USB_DESC_TYPE_CONFIG:
-      {
-        return cdcecm_mkcfgdesc((FAR uint8_t *)desc, &self->devinfo,
-                                self->usbdev.speed, type);
-      }
-      break;
+      case USB_DESC_TYPE_CONFIG:
+        {
+          return cdcecm_mkcfgdesc((FAR uint8_t *)desc, &self->devinfo,
+                                  self->usbdev.speed, type);
+        }
+        break;
 
-    case USB_DESC_TYPE_STRING:
-      {
-        return cdcecm_mkstrdesc(index, (FAR struct usb_strdesc_s *)desc);
-      }
-      break;
+      case USB_DESC_TYPE_STRING:
+        {
+          return cdcecm_mkstrdesc(index, (FAR struct usb_strdesc_s *)desc);
+        }
+        break;
 
-    default:
-      uwarn("Unsupported descriptor type: 0x%02hhx\n", type);
-      break;
+      default:
+        uwarn("Unsupported descriptor type: 0x%02hhx\n", type);
+        break;
     }
 
   return -ENOTSUP;
@@ -1708,13 +1708,7 @@ static int cdcecm_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* The single write request just allocated is available now. */
 
-  ret = nxsem_init(&self->wrreq_idle, 0, 1);
-
-  if (ret != OK)
-    {
-      uerr("nxsem_init failed. ret: %d\n", ret);
-      goto error;
-    }
+  nxsem_init(&self->wrreq_idle, 0, 1);
 
   self->txdone = false;
   self->dev.d_len = 0;

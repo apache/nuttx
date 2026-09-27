@@ -666,15 +666,17 @@ static int esp_adc_calibrate(struct adc_dev_s *dev)
   for (i = 0; i < priv->channels; i++)
     {
       handle = &priv->os_dev.ch_list[i].cali_handle;
+
+#ifdef ADC_CALI_SCHEME_CURVE_FITTING_SUPPORTED
       cali_config.chan = priv->os_dev.ch_list[i].channel;
 
-#if SOC_ADC_CALIB_CHAN_COMPENS_SUPPORTED
+#  if SOC_ADC_CALIB_CHAN_COMPENS_SUPPORTED
       /* Load the channel compensation from efuse if supported */
 
       adc_load_hw_calibration_chan_compens(priv->unit,
                                            cali_config.chan,
                                            cali_config.atten);
-#endif
+#  endif
 
       ainfo("curve fitting unit %d, chan %u, atten %u, bitwidth %u\n",
             cali_config.unit_id, cali_config.chan, cali_config.atten,
@@ -688,6 +690,21 @@ static int esp_adc_calibrate(struct adc_dev_s *dev)
         }
 
       ret = adc_cali_create_scheme_curve_fitting(&cali_config, handle);
+#endif
+
+#ifdef ADC_CALI_SCHEME_LINE_FITTING_SUPPORTED
+      ainfo("line fitting unit %d, atten %u, bitwidth %u\n",
+            cali_config.unit_id, cali_config.atten, cali_config.bitwidth);
+
+      /* Make sure calibration handle is clear */
+
+      if (*handle != NULL)
+        {
+          adc_cali_delete_scheme_line_fitting(*handle);
+        }
+
+      ret = adc_cali_create_scheme_line_fitting(&cali_config, handle);
+#endif
 
       if (ret == OK)
         {
@@ -695,7 +712,7 @@ static int esp_adc_calibrate(struct adc_dev_s *dev)
         }
       else
         {
-          aerr("ERROR: curve fitting calibration failed. "
+          aerr("ERROR: ADC calibration failed. "
                "Check ADC efuses are burned.\n");
         }
     }

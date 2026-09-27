@@ -134,6 +134,8 @@ static struct esp_timer_lowerhalf_s g_timer0_lowerhalf =
 #endif
 };
 
+#if TIMG_LL_GET(INST_NUM) > 1
+
 /* TIMER1 lower-half */
 
 static struct esp_timer_lowerhalf_s g_timer1_lowerhalf =
@@ -144,6 +146,7 @@ static struct esp_timer_lowerhalf_s g_timer1_lowerhalf =
   .pm_lock = NULL,
 #endif
 };
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -297,6 +300,7 @@ static int esp_timer_stop(struct timer_lowerhalf_s *lower)
     }
 
   timer_hal_context_t *hal = &(priv->hal);
+
   timer_ll_enable_intr(hal->dev, TIMER_LL_EVENT_ALARM(hal->timer_id),
                        false);
   timer_ll_enable_counter(hal->dev, hal->timer_id, false);
@@ -371,6 +375,7 @@ static int esp_timer_getstatus(struct timer_lowerhalf_s *lower,
 
   volatile timg_hwtimer_reg_t *hw_timer =
     &(hal->dev->hw_timer[hal->timer_id]);
+
   alarm_value = ((uint64_t)hw_timer->alarmhi.tx_alarm_hi << 32) |
                  (hw_timer->alarmlo.tx_alarm_lo);
 
@@ -547,8 +552,8 @@ IRAM_ATTR static int esp_timer_isr(int irq, void *context, void *arg)
  *
  * Description:
  *   Initialize a timer device.
- *   Important: ESP32-C3|C6|H2 each has two timer groups.
- *   Each group has one timer and one watchdog timer.
+ *   Important: ESP32-C3|C6|H2 each has two timer groups, while ESP32-C2 has
+ *   a single one. Each group has one timer and one watchdog timer.
  *   This initialization function is used to initialize the timer 0 of the
  *   specified group.
  *
@@ -582,12 +587,14 @@ int esp_timer_initialize(int group_id)
           lower->hal.timer_id = timer_id;
         }
         break;
+#if TIMG_LL_GET(INST_NUM) > 1
       case 1:
         {
           lower = &g_timer1_lowerhalf;
           lower->hal.timer_id = timer_id;
         }
         break;
+#endif
       default:
         {
           return -ENODEV;

@@ -822,6 +822,7 @@ static int rn2xx3_setbw(FAR struct rn2xx3_dev_s *priv, uint32_t bw)
 {
   char bwstr[16];
   ssize_t length;
+
   length =
       file_write(&priv->uart, "radio set bw ", sizeof("radio set bw ") - 1);
   if (length < 0)
@@ -1666,167 +1667,179 @@ static int rn2xx3_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-    case WLIOC_RESET:
-      {
-        err = rn2xx3_reset(priv);
-        break;
-      }
+      case WLIOC_RESET:
+        {
+          err = rn2xx3_reset(priv);
+          break;
+        }
 
-    case WLIOC_IQIEN:
-      {
-        err = rn2xx3_iqi_en(priv, arg);
-        break;
-      }
+      case WLIOC_IQIEN:
+        {
+          err = rn2xx3_iqi_en(priv, arg);
+          break;
+        }
 
-    case WLIOC_CRCEN:
-      {
-        err = rn2xx3_crc_en(priv, arg);
-        break;
-      }
+      case WLIOC_CRCEN:
+        {
+          err = rn2xx3_crc_en(priv, arg);
+          break;
+        }
 
-    case WLIOC_GETSNR:
-      {
-        FAR int8_t *snr = (FAR int8_t *)(arg);
-        DEBUGASSERT(snr != NULL);
-        err = rn2xx3_getsnr(priv, snr);
-        break;
-      }
+      case WLIOC_GETSNR:
+        {
+          FAR int8_t *snr = (FAR int8_t *)(arg);
 
-    case WLIOC_SETRADIOFREQ:
-      {
-        err = rn2xx3_setfreq(priv, arg);
-        break;
-      }
+          DEBUGASSERT(snr != NULL);
+          err = rn2xx3_getsnr(priv, snr);
+          break;
+        }
 
-    case WLIOC_GETRADIOFREQ:
-      {
-        FAR uint32_t *freq = (FAR uint32_t *)(arg);
-        DEBUGASSERT(freq != NULL);
-        err = rn2xx3_getfreq(priv, freq);
-        break;
-      }
+      case WLIOC_SETRADIOFREQ:
+        {
+          err = rn2xx3_setfreq(priv, arg);
+          break;
+        }
 
-    case WLIOC_SETTXPOWERF:
-      {
-        FAR int32_t *txpwr = (FAR int32_t *)(arg);
-        DEBUGASSERT(txpwr != NULL);
-        err = rn2xx3_settxpwr(priv, txpwr);
-        break;
-      }
+      case WLIOC_GETRADIOFREQ:
+        {
+          FAR uint32_t *freq = (FAR uint32_t *)(arg);
 
-    case WLIOC_GETTXPOWERF:
-      {
-        FAR int32_t *txpwr = (FAR int32_t *)(arg);
-        DEBUGASSERT(txpwr != NULL);
-        err = rn2xx3_gettxpwr(priv, txpwr);
-        break;
-      }
+          DEBUGASSERT(freq != NULL);
+          err = rn2xx3_getfreq(priv, freq);
+          break;
+        }
 
-    case WLIOC_SETBANDWIDTH:
-      {
-        err = rn2xx3_setbw(priv, arg);
-        break;
-      }
+      case WLIOC_SETTXPOWERF:
+        {
+          FAR int32_t *txpwr = (FAR int32_t *)(arg);
 
-    case WLIOC_GETBANDWIDTH:
-      {
-        FAR uint32_t *bw = (FAR uint32_t *)(arg);
-        DEBUGASSERT(bw != NULL);
-        err = rn2xx3_getbw(priv, bw);
-        break;
-      }
+          DEBUGASSERT(txpwr != NULL);
+          err = rn2xx3_settxpwr(priv, txpwr);
+          break;
+        }
 
-    case WLIOC_SETSPREAD:
-      {
-        err = rn2xx3_setsf(priv, arg);
-        break;
-      }
+      case WLIOC_GETTXPOWERF:
+        {
+          FAR int32_t *txpwr = (FAR int32_t *)(arg);
 
-    case WLIOC_GETSPREAD:
-      {
-        FAR uint8_t *sf = (FAR uint8_t *)(arg);
-        DEBUGASSERT(sf != NULL);
-        err = rn2xx3_getsf(priv, sf);
-        break;
-      }
+          DEBUGASSERT(txpwr != NULL);
+          err = rn2xx3_gettxpwr(priv, txpwr);
+          break;
+        }
 
-    case WLIOC_SETPRLEN:
-      {
-        err = rn2xx3_setprlen(priv, arg);
-        break;
-      }
+      case WLIOC_SETBANDWIDTH:
+        {
+          err = rn2xx3_setbw(priv, arg);
+          break;
+        }
 
-    case WLIOC_GETPRLEN:
-      {
-        FAR uint16_t *prlen = (FAR uint16_t *)(arg);
-        DEBUGASSERT(prlen != NULL);
-        err = rn2xx3_getprlen(priv, prlen);
-        break;
-      }
+      case WLIOC_GETBANDWIDTH:
+        {
+          FAR uint32_t *bw = (FAR uint32_t *)(arg);
 
-    case WLIOC_SETMOD:
-      {
-        err = rn2xx3_setmod(priv, arg);
-        break;
-      }
+          DEBUGASSERT(bw != NULL);
+          err = rn2xx3_getbw(priv, bw);
+          break;
+        }
 
-    case WLIOC_GETMOD:
-      {
-        FAR enum rn2xx3_mod_e *mod = (FAR enum rn2xx3_mod_e *)(arg);
-        DEBUGASSERT(mod != NULL);
-        err = rn2xx3_getmod(priv, mod);
-        break;
-      }
+      case WLIOC_SETSPREAD:
+        {
+          err = rn2xx3_setsf(priv, arg);
+          break;
+        }
 
-    case WLIOC_SETSYNC:
-      {
-        FAR uint64_t *syncword = (FAR uint64_t *)(arg);
-        DEBUGASSERT(syncword != NULL);
-        err = rn2xx3_setsync(priv, *syncword);
-        break;
-      }
+      case WLIOC_GETSPREAD:
+        {
+          FAR uint8_t *sf = (FAR uint8_t *)(arg);
 
-    case WLIOC_GETSYNC:
-      {
-        FAR uint64_t *sync = (FAR uint64_t *)(arg);
-        DEBUGASSERT(sync != NULL);
-        err = rn2xx3_getsync(priv, sync);
-        break;
-      }
+          DEBUGASSERT(sf != NULL);
+          err = rn2xx3_getsf(priv, sf);
+          break;
+        }
 
-    case WLIOC_SETBITRATE:
-      {
-        err = rn2xx3_setbitrate(priv, arg);
-        break;
-      }
+      case WLIOC_SETPRLEN:
+        {
+          err = rn2xx3_setprlen(priv, arg);
+          break;
+        }
 
-    case WLIOC_GETBITRATE:
-      {
-        FAR uint32_t *bitrate = (FAR uint32_t *)(arg);
-        DEBUGASSERT(bitrate != NULL);
-        err = rn2xx3_getbitrate(priv, bitrate);
-        break;
-      }
+      case WLIOC_GETPRLEN:
+        {
+          FAR uint16_t *prlen = (FAR uint16_t *)(arg);
 
-    case WLIOC_SETCODERATE:
-      {
-        err = rn2xx3_setcr(priv, arg);
-        break;
-      }
+          DEBUGASSERT(prlen != NULL);
+          err = rn2xx3_getprlen(priv, prlen);
+          break;
+        }
 
-    case WLIOC_GETCODERATE:
-      {
-        FAR enum rn2xx3_cr_e *cr = (FAR enum rn2xx3_cr_e *)(arg);
-        DEBUGASSERT(cr != NULL);
-        err = rn2xx3_getcr(priv, cr);
-        break;
-      }
+      case WLIOC_SETMOD:
+        {
+          err = rn2xx3_setmod(priv, arg);
+          break;
+        }
 
-    default:
-      {
-        err = -EINVAL;
-        break;
-      }
+      case WLIOC_GETMOD:
+        {
+          FAR enum rn2xx3_mod_e *mod = (FAR enum rn2xx3_mod_e *)(arg);
+
+          DEBUGASSERT(mod != NULL);
+          err = rn2xx3_getmod(priv, mod);
+          break;
+        }
+
+      case WLIOC_SETSYNC:
+        {
+          FAR uint64_t *syncword = (FAR uint64_t *)(arg);
+
+          DEBUGASSERT(syncword != NULL);
+          err = rn2xx3_setsync(priv, *syncword);
+          break;
+        }
+
+      case WLIOC_GETSYNC:
+        {
+          FAR uint64_t *sync = (FAR uint64_t *)(arg);
+
+          DEBUGASSERT(sync != NULL);
+          err = rn2xx3_getsync(priv, sync);
+          break;
+        }
+
+      case WLIOC_SETBITRATE:
+        {
+          err = rn2xx3_setbitrate(priv, arg);
+          break;
+        }
+
+      case WLIOC_GETBITRATE:
+        {
+          FAR uint32_t *bitrate = (FAR uint32_t *)(arg);
+
+          DEBUGASSERT(bitrate != NULL);
+          err = rn2xx3_getbitrate(priv, bitrate);
+          break;
+        }
+
+      case WLIOC_SETCODERATE:
+        {
+          err = rn2xx3_setcr(priv, arg);
+          break;
+        }
+
+      case WLIOC_GETCODERATE:
+        {
+          FAR enum rn2xx3_cr_e *cr = (FAR enum rn2xx3_cr_e *)(arg);
+
+          DEBUGASSERT(cr != NULL);
+          err = rn2xx3_getcr(priv, cr);
+          break;
+        }
+
+      default:
+        {
+          err = -EINVAL;
+          break;
+        }
     }
 
 early_ret:
@@ -1874,12 +1887,7 @@ int rn2xx3_register(FAR const char *devpath, FAR const char *uartpath)
 
   /* Initialize mutex */
 
-  err = nxmutex_init(&priv->devlock);
-  if (err < 0)
-    {
-      wlerr("Failed to initialize mutex for RN2xx3 device: %d\n", err);
-      goto free_mem;
-    }
+  nxmutex_init(&priv->devlock);
 
   /* Open UART interface for use */
 
@@ -1924,11 +1932,10 @@ int rn2xx3_register(FAR const char *devpath, FAR const char *uartpath)
 
   if (err < 0)
     {
-    close_file:
+close_file:
       file_close(&priv->uart);
-    destroy_mutex:
+destroy_mutex:
       nxmutex_destroy(&priv->devlock);
-    free_mem:
       kmm_free(priv);
     }
 

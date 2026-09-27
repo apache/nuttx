@@ -30,6 +30,10 @@
 
 #include <nuttx/pthread.h>
 
+#ifdef CONFIG_FDPIC
+#  include <nuttx/fdpic.h>
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -88,6 +92,16 @@ static void pthread_startup(pthread_startroutine_t entry,
 int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
                    pthread_startroutine_t pthread_entry, pthread_addr_t arg)
 {
+#ifdef CONFIG_FDPIC
+  /* Resolve the descriptor once, in the public entry point.  The new
+   * thread inherits the creator's D-Space, so it needs only the code
+   * address.
+   */
+
+  pthread_entry = (pthread_startroutine_t)
+                  fdpic_callback((FAR void *)pthread_entry);
+#endif
+
   return nx_pthread_create(pthread_startup, thread, attr, pthread_entry,
                            arg);
 }

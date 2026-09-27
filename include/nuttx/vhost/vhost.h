@@ -72,6 +72,20 @@ struct vhost_driver
   CODE void        (*remove)(FAR struct vhost_device *hdev);
 };
 
+/* Peer buffer described by its full 64-bit guest physical address.  On
+ * targets where the CPU cannot address all of the peer's memory directly
+ * (e.g. a 32-bit remote core with the driver side on a 64-bit host),
+ * vhost_get_vq_buffers() is unusable because converting the descriptor
+ * address to a CPU pointer truncates it; this variant hands the raw
+ * address to the class driver, which must map it appropriately.
+ */
+
+struct vhost_buf_s
+{
+  uint64_t addr;               /* Guest physical address from descriptor */
+  uint32_t len;                /* Descriptor length */
+};
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -91,6 +105,28 @@ int vhost_unregister_device(FAR struct vhost_device *hdev);
 int vhost_get_vq_buffers(FAR struct virtqueue *vq,
                          FAR struct virtqueue_buf *vb, size_t vbsize,
                          FAR size_t *vbcnt);
+int vhost_get_vq_buffers_pa(FAR struct virtqueue *vq,
+                            FAR struct vhost_buf_s *vb, size_t vbsize,
+                            FAR size_t *vbcnt);
+
+#ifdef CONFIG_ARCH_HAVE_VHOST_IOMAP
+/* Arch-provided: map a peer 64-bit physical address into CPU-reachable
+ * memory.  Returns the mapped VA; *avail (if non-NULL) receives the number
+ * of contiguous bytes reachable from it.  The mapping may be invalidated
+ * by the next call (e.g. a sliding hardware window), so callers must
+ * serialize use.
+ *
+ * This exists because the libmetal path used by virtqueue_phys_to_virt()
+ * cannot express such an address: metal_phys_addr_t is an unsigned long
+ * and up_addrenv_pa_to_va() takes a uintptr_t, both 32-bit on the cores
+ * that need this hook, so the descriptor address would be truncated
+ * before any translation happens.  Arches whose peer memory does fit a
+ * pointer need neither this hook nor vhost_get_vq_buffers_pa(); they are
+ * served by up_addrenv_pa_to_va() like the rest of libmetal.
+ */
+
+FAR void *up_vhost_iomap(uint64_t pa, FAR size_t *avail);
+#endif
 
 /****************************************************************************
  * Name: vhost_register_drivers

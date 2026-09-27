@@ -5,10 +5,14 @@
 ``apps/mlearning/cmsis`` fetches `CMSIS 5
 <https://github.com/ARM-software/CMSIS_5>`_ and builds CMSIS-DSP and
 CMSIS-NN from that tree. Default version is ``5.8.0``
-(``CONFIG_CMSIS_VER``).
+(``CONFIG_CMSIS_VER``). ARM archived the CMSIS 5 repository on 18
+December 2025; NuttX still vendors this tree because NNABLA uses the
+CHW helpers in ``cmsis-nn-support_nnabla.patch``. There is no CMake
+build for this package.
 
 This package is aimed at NNABLA and generic DSP use. For TensorFlow Lite
 Micro kernel acceleration, use :doc:`../cmsis-nn/index` instead.
+``CONFIG_CMSIS_NN`` here is not ``CONFIG_MLEARNING_CMSIS_NN``.
 
 Enable ``CONFIG_CMSIS`` from :menuselection:`Application Configuration -->
 Machine Learning Support --> CMSIS Libraries`.

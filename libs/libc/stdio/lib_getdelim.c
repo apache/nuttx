@@ -99,10 +99,14 @@ ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
       goto errout;
     }
 
-  /* Verify the buffer size */
+  /* Verify the buffer size.  POSIX requires that a NULL *lineptr be
+   * (re)allocated regardless of the value of *n, so do not trust *n when
+   * there is no buffer: a caller may legitimately pass *lineptr == NULL with
+   * an uninitialized *n.
+   */
 
   bufsize = *n;
-  if (bufsize == 0)
+  if (*lineptr == NULL || bufsize == 0)
     {
       /* Pick an initial buffer size */
 

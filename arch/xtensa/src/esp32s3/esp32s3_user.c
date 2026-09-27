@@ -27,6 +27,10 @@
 #include <stdint.h>
 
 #include "xtensa.h"
+#include <arch/xtensa/xtensa_corebits.h>
+#ifdef CONFIG_ESP32S3_PAGEFAULT
+#include "esp32s3_pagefault.h"
+#endif
 #ifdef CONFIG_ESPRESSIF_SPIFLASH
 #include "esp_private/cache_utils.h"
 #endif
@@ -72,6 +76,30 @@ uint32_t *xtensa_user(int exccause, uint32_t *regs)
       spi_flash_restore_cache(cpu, 0);
     }
 #endif /* CONFIG_ESPRESSIF_SPIFLASH */
+
+#ifdef CONFIG_ESP32S3_PAGEFAULT
+  /* A cache-attribute permission violation raises a precise, restartable
+   * exception: Load/Store/InstrFetch Prohibited (EXCCAUSE 28/29/20), with
+   * EXCVADDR holding the exact faulting address.  This is proven on silicon
+   * (see esp32s3_pagefault.c) and is the recoverable-fault primitive.  Offer
+   * these to the dispatcher; if serviced, return the register frame so that
+   * the RFE in the exception vector re-executes the faulting instruction.
+   *
+   * Note: ESP32-S3 PMS (World Controller) memory-protection violations are
+   * NOT delivered as these precise causes; they raise the asynchronous
+   * DRAM0/IRAM0 PMS-monitor interrupt instead (handled elsewhere).
+   */
+
+  if (exccause == EXCCAUSE_LOAD_PROHIBITED  ||
+      exccause == EXCCAUSE_STORE_PROHIBITED ||
+      exccause == EXCCAUSE_INSTR_PROHIBITED)
+    {
+      if (esp32s3_pagefault_dispatch(exccause, regs) == OK)
+        {
+          return regs;
+        }
+    }
+#endif
 
   /* xtensa_user_panic never returns. */
 

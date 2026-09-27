@@ -60,8 +60,6 @@
 
 int sem_destroy(FAR sem_t *sem)
 {
-  int ret;
-
   /* Assure a valid semaphore is specified */
 
   if (sem == NULL)
@@ -70,12 +68,6 @@ int sem_destroy(FAR sem_t *sem)
       return ERROR;
     }
 
-  ret = nxsem_destroy(sem);
-  if (ret < 0)
-    {
-      set_errno(-ret);
-      ret = ERROR;
-    }
-
-  return ret;
+  nxsem_destroy(sem);
+  return OK;
 }

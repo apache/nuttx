@@ -158,45 +158,47 @@ int irqchain_attach(int ndx, xcpt_t isr, FAR void *arg)
   flags = spin_lock_irqsave(&g_irqchainlock);
   if (isr != irq_unexpected_isr)
     {
-      if (g_irqvector[ndx].handler != irqchain_dispatch)
+      node = (FAR struct irqchain_s *)
+             sq_remfirst(&g_irqchainfreelist);
+      if (node == NULL)
         {
-          if (sq_count(&g_irqchainfreelist) < 2u)
+          ret = -ENOMEM;
+        }
+      else
+        {
+          node->handler = isr;
+          node->arg     = arg;
+          node->next    = NULL;
+
+          if (g_irqvector[ndx].handler != irqchain_dispatch)
             {
-              ret = -ENOMEM;
-            }
-          else
-            {
-              node = (FAR struct irqchain_s *)
+              curr = (FAR struct irqchain_s *)
                      sq_remfirst(&g_irqchainfreelist);
-              DEBUGASSERT(node != NULL);
-
-              node->handler = g_irqvector[ndx].handler;
-              node->arg     = g_irqvector[ndx].arg;
-              node->next    = NULL;
-
-              g_irqvector[ndx].handler = irqchain_dispatch;
-              g_irqvector[ndx].arg     = node;
-
-              node = (FAR struct irqchain_s *)
-                     sq_remfirst(&g_irqchainfreelist);
-              if (node == NULL)
+              if (curr == NULL)
                 {
+                  sq_addfirst((FAR struct sq_entry_s *)node,
+                              &g_irqchainfreelist);
                   ret = -ENOMEM;
                 }
               else
                 {
-                  node->handler = isr;
-                  node->arg     = arg;
-                  node->next    = NULL;
+                  curr->handler = g_irqvector[ndx].handler;
+                  curr->arg     = g_irqvector[ndx].arg;
+                  curr->next    = node;
 
-                  curr = g_irqvector[ndx].arg;
-                  while (curr->next != NULL)
-                    {
-                      curr = curr->next;
-                    }
-
-                  curr->next = node;
+                  g_irqvector[ndx].handler = irqchain_dispatch;
+                  g_irqvector[ndx].arg     = curr;
                 }
+            }
+          else
+            {
+              curr = g_irqvector[ndx].arg;
+              while (curr->next != NULL)
+                {
+                  curr = curr->next;
+                }
+
+              curr->next = node;
             }
         }
     }
@@ -217,6 +219,7 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg)
   FAR struct irqchain_s *curr;
   FAR struct irqchain_s *first;
   int ndx = IRQ_TO_NDX(irq);
+
   if (ndx < 0)
     {
       ret = ndx;

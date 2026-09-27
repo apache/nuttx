@@ -156,20 +156,24 @@ int irq_attach_thread(int irq, xcpt_t isr, xcpt_t isrthread, FAR void *arg,
   char arg4[32];  /* arg */
   pid_t pid;
   int ndx = IRQ_TO_NDX(irq);
+
   if (ndx < 0)
     {
       ret = ndx;
     }
-  else if(isrthread == NULL)
+  else if (isrthread == NULL)
     {
       /* If the isrthread is NULL, then the ISR is being detached. */
 
       irq_detach(irq);
-      DEBUGASSERT(irq_thread_pid[ndx] != 0);
-      kthread_delete(irq_thread_pid[ndx]);
+      if (irq_thread_pid[ndx] > 0)
+        {
+          kthread_delete(irq_thread_pid[ndx]);
+        }
+
       irq_thread_pid[ndx] = 0;
     }
-  else if(irq_thread_pid[ndx] != 0)
+  else if (irq_thread_pid[ndx] != 0)
     {
       ret = -EINVAL;
     }
@@ -191,8 +195,10 @@ int irq_attach_thread(int irq, xcpt_t isr, xcpt_t isrthread, FAR void *arg,
         {
           ret = pid;
         }
-
-      irq_thread_pid[ndx] = pid;
+      else
+        {
+          irq_thread_pid[ndx] = pid;
+        }
     }
 #endif /* NR_IRQS */
 

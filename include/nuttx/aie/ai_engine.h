@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/aie/ai_engine.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -85,10 +87,10 @@ struct aie_lowerhalf_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ai_engine_register
+ * Name: aie_register
  *
  * Description:
- *   Register all ai engine related drivers.
+ *   Register an AI engine character driver at path.
  *
  ****************************************************************************/
 

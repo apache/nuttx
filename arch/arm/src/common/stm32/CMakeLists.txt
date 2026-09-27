@@ -450,7 +450,8 @@ if(CONFIG_ARCH_CORTEXM0)
     list(APPEND SRCS stm32_hsi48_m0_v1.c)
   endif()
 
-  if(CONFIG_STM32_USB AND CONFIG_STM32_HAVE_IP_USBDEV_M0_V1)
+  if(CONFIG_STM32_USB AND (CONFIG_STM32_HAVE_IP_USBDEV_M0_V1
+                           OR CONFIG_STM32_HAVE_IP_USBDEV_M0_V2))
     list(APPEND SRCS stm32_usbdev_m0_v1.c)
   endif()
 

@@ -132,10 +132,8 @@ static inline int nxspawn_open(FAR struct tcb_s *tcb,
  *   attr - The attributes to use
  *
  * Returned Value:
- *   Errors are not reported by this function.  This is not because errors
- *   cannot occur, but rather that the new task has already been started
- *   so there is no graceful way to handle errors detected in this context
- *   (unless we delete the new task and recover).
+ *   Zero (OK) is returned on success.  A negated errno value is returned
+ *   on failure.
  *
  * Assumptions:
  *   That task has been started but has not yet executed because pre-
@@ -150,10 +148,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
 
   DEBUGASSERT(attr);
 
-  /* Now set the attributes.  Note that we ignore all of the return values
-   * here because we have already successfully started the task.  If we
-   * return an error value, then we would also have to stop the task.
-   */
+  /* Now set the attributes. */
 
   /* Firstly, set the signal mask if requested to do so */
 
@@ -161,6 +156,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
   if ((attr->flags & POSIX_SPAWN_SETSIGMASK) != 0u)
     {
       FAR struct tcb_s *tcb = nxsched_get_tcb(pid);
+
       if (tcb)
         {
           tcb->sigprocmask = attr->sigmask;
@@ -231,7 +227,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
       param.sched_ss_init_budget.tv_sec  = attr->budget.tv_sec;
       param.sched_ss_init_budget.tv_nsec = attr->budget.tv_nsec;
 #endif
-      nxsched_set_scheduler(pid, attr->policy, &param);
+      ret = nxsched_set_scheduler(pid, attr->policy, &param);
     }
 
   return ret;

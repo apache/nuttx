@@ -170,9 +170,16 @@ bool os_heap_add(uint8_t *start_addr, size_t heap_size)
  * the NP DMAs them, so an unaligned base would clobber neighbouring data on
  * cache maintenance.  whc_ipc_host_init_skb() outright rejects an unaligned
  * skb_data_buf ("skb_data_buf malloc fail!"), leaving the skb pool empty and
- * the TX path handing the NP a garbage buffer pointer.  This is guaranteed
- * by CONFIG_MM_DEFAULT_ALIGNMENT=32 (>= SKB_CACHE_SZ) -- every NuttX heap
- * block is then cache-line aligned, so plain kmm_* suffices here.
+ * the TX path handing the NP a garbage buffer pointer.  Worse, when the pool
+ * squeaks past that check but is not aligned to the full cache line, the
+ * driver's by-VA DCache_Clean/Invalidate spills onto the neighbouring skb
+ * struct and corrupts its (immutable) buf pointer, so a later TX memcpy
+ * faults on a garbage skb->data (seen as skb->buf = 0x05).
+ *
+ * This is guaranteed by CONFIG_MM_DEFAULT_ALIGNMENT >= SKB_CACHE_SZ -- every
+ * NuttX heap block is then cache-line aligned, so plain kmm_* suffices here.
+ * SKB_CACHE_SZ is 32 on the other Ameba WHC parts but 64 on AmebaSmart
+ * (RTL8730E), so that board's defconfig sets CONFIG_MM_DEFAULT_ALIGNMENT=64.
  */
 
 void *rtos_mem_malloc(uint32_t size)
@@ -210,7 +217,6 @@ void rtos_mem_free(void *pbuf)
 struct ameba_qobj_s *ameba_qobj_alloc(uint8_t tag)
 {
   struct ameba_qobj_s *obj = kmm_zalloc(sizeof(struct ameba_qobj_s));
-  int ret;
 
   if (obj == NULL)
     {
@@ -222,11 +228,11 @@ struct ameba_qobj_s *ameba_qobj_alloc(uint8_t tag)
   switch (tag)
     {
       case AMEBA_QOBJ_MUTEX:
-        ret = nxmutex_init(&obj->u.mutex);
+        nxmutex_init(&obj->u.mutex);
         break;
 
       case AMEBA_QOBJ_RMUTEX:
-        ret = nxrmutex_init(&obj->u.rmutex);
+        nxrmutex_init(&obj->u.rmutex);
         break;
 
       case AMEBA_QOBJ_SEM:
@@ -234,14 +240,7 @@ struct ameba_qobj_s *ameba_qobj_alloc(uint8_t tag)
 
         /* Caller initialises the semaphore counts via nxsem_init below. */
 
-        ret = OK;
         break;
-    }
-
-  if (ret < 0)
-    {
-      kmm_free(obj);
-      return NULL;
     }
 
   return obj;
@@ -379,11 +378,7 @@ int rtos_sema_create(rtos_sema_t *pp_handle, uint32_t init_count,
       return RTK_FAIL;
     }
 
-  if (nxsem_init(&obj->u.sem, 0, init_count) < 0)
-    {
-      kmm_free(obj);
-      return RTK_FAIL;
-    }
+  nxsem_init(&obj->u.sem, 0, init_count);
 
   *pp_handle = (rtos_sema_t)obj;
   return RTK_SUCCESS;
@@ -777,6 +772,7 @@ int rtos_sema_delete_static(rtos_sema_t p_handle)
 uint32_t rtos_mem_get_free_heap_size(void)
 {
   struct mallinfo info = mallinfo();
+
   return (uint32_t)info.fordblks;
 }
 
@@ -933,6 +929,7 @@ int rtos_timer_change_period(rtos_timer_t p_handle, uint32_t interval_ms,
 uint32_t rtos_timer_is_timer_active(rtos_timer_t p_handle)
 {
   struct ameba_timer_s *t = (struct ameba_timer_s *)p_handle;
+
   return (t != NULL && t->active) ? 1 : 0;
 }
 
@@ -961,6 +958,7 @@ int rtos_timer_delete_static(rtos_timer_t p_handle, uint32_t wait_ms)
 uint32_t rtos_timer_get_id(rtos_timer_t p_handle)
 {
   struct ameba_timer_s *t = (struct ameba_timer_s *)p_handle;
+
   return (t != NULL) ? t->id : 0;
 }
 

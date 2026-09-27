@@ -159,9 +159,6 @@ struct udp_conn_s
 
   struct udp_poll_s pollinfo[CONFIG_NET_UDP_NPOLLWAITERS];
 
-#ifdef CONFIG_NET_TIMESTAMP
-  int timestamp; /* Nonzero when SO_TIMESTAMP is enabled */
-#endif
   FAR sem_t *txdrain_sem;
 };
 

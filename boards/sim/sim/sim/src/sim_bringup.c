@@ -179,6 +179,7 @@ int sim_bringup(void)
       /* Initialized the RAM MTD */
 
       struct mtd_dev_s *mtd = rammtd_initialize(ramstart, 128 * 1024);
+
       if (mtd == NULL)
         {
           syslog(LOG_ERR, "ERROR: rammtd_initialize failed\n");
@@ -366,6 +367,16 @@ int sim_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: sim_tsc_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SIM_MOUSE
+  /* Initialize the mouse */
+
+  ret = sim_mouse_initialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sim_mouse_initialize failed: %d\n", ret);
     }
 #endif
 
@@ -562,6 +573,7 @@ int sim_bringup(void)
   /* Set up a MAC address for the RNDIS device. */
 
   uint8_t mac[6];
+
   mac[0] = (CONFIG_SIM_RNDIS_MACADDR >> (8 * 5)) & 0xff;
   mac[1] = (CONFIG_SIM_RNDIS_MACADDR >> (8 * 4)) & 0xff;
   mac[2] = (CONFIG_SIM_RNDIS_MACADDR >> (8 * 3)) & 0xff;

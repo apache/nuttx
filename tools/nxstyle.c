@@ -193,6 +193,7 @@ static const char *g_white_prefix[] =
   "ASCII_",  /* Ref:  include/nuttx/ascii.h */
   "Dl_info", /* Ref:  include/dlfcn.h */
   "Elf",     /* Ref:  include/elf.h, include/elf32.h, include/elf64.h */
+  "GL",      /* Ref:  apps/graphics/tinygl/tinygl/include/GL/gl.h */
   "Ifx",     /* Ref:  arch/tricore/src */
   "PRId",    /* Ref:  inttypes.h */
   "PRIi",    /* Ref:  inttypes.h */
@@ -213,6 +214,8 @@ static const char *g_white_prefix[] =
   "b16",     /* Ref:  include/fixedmath.h */
   "b32",     /* Ref:  include/fixedmath.h */
   "cJSON",   /* Ref:  apps/wireless/wapi/src */
+  "gl",      /* Ref:  apps/graphics/tinygl/tinygl/include/GL/gl.h */
+  "ZB",      /* Ref:  apps/graphics/tinygl/tinygl/include/zbuffer.h */
   "ub8",     /* Ref:  include/fixedmath.h */
   "ub16",    /* Ref:  include/fixedmath.h */
   "ub32",    /* Ref:  include/fixedmath.h */
@@ -285,6 +288,8 @@ static const char *g_white_prefix[] =
   "Cache_",
   "DCache_",
   "ChipInfo_",
+  "CPU_",             /* CPU_InInterrupt — amebasmart SDK exception check */
+  "Diag",             /* DiagPrintf, DiagVprintf, DiagPrintfNano — SDK log */
   "EFUSE_",
   "FLASH_",
   "GPIO_",
@@ -299,6 +304,7 @@ static const char *g_white_prefix[] =
   "PAD_",
   "PLL_",             /* PLL_ClkGet — amebadplus SPI ip_clk query */
   "Pinmux_",
+  "_Pinmux_",           /* _Pinmux_Config — ROM symbol for RTL8730E pad mux */
   "RCC_",
   "RTC_",             /* RTC_InitTypeDef, RTC_Enable, RTC_SetTime, etc. */
   "RTCIO_",
@@ -309,8 +315,11 @@ static const char *g_white_prefix[] =
   "SYSCFG_",
   "SYSTIMER_",
   "SYS_PLL_",         /* SYS_PLL_ClkGet — RTL8720F SPI ip_clk query */
+  "System_",          /* System_Reset — amebasmart SDK power management */
+  "TRNG_",            /* TRNG_get_random_bytes — amebasmart SDK TRNG */
   "UART_",
   "WDG_",             /* WDG_Init, WDG_Refresh, WDG_INTConfig, etc. */
+  "vPort",            /* vPortGateOtherCore, vPortWakeOtherCore — FreeRTOS SMP */
   "SystemCoreClock",  /* SystemCoreClock, SystemCoreClockUpdate */
   "cmse_",            /* ARM CMSE TrustZone intrinsics (arm_cmse.h) */
   "MQTTErrors",       /* apps/tools/netutils/mqttc/MQTT-C/include/mqtt.h */

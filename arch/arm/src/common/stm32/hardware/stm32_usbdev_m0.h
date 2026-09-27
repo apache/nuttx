@@ -57,7 +57,7 @@
 #define STM32_USB_ISTR_OFFSET        0x0044  /* USB interrupt status register */
 #define STM32_USB_FNR_OFFSET         0x0048  /* USB frame number register */
 #define STM32_USB_DADDR_OFFSET       0x004c  /* USB device address */
-#ifndef CONFIG_STM32_STM32G0
+#ifndef CONFIG_STM32_HAVE_IP_USBDEV_M0_V2
 #  define STM32_USB_BTABLE_OFFSET    0x0050  /* Buffer table address (16-bits) */
 #endif
 #define STM32_USB_LPMCSR_OFFSET      0x0054  /* LPM control and status register */
@@ -65,7 +65,7 @@
 
 /* Buffer Descriptor Table (Relative to BTABLE address) */
 
-#ifdef CONFIG_STM32_STM32G0
+#ifdef CONFIG_STM32_HAVE_IP_USBDEV_M0_V2
 #  define STM32_USB_TX_WOFFSET       (0)     /* Transmission descriptor n (32-bits) */
 #  define STM32_USB_RX_WOFFSET       (4)     /* Reception descriptor n (32-bits) */
 #  define STM32_USB_BTABLE_RADDR(ep,o) \
@@ -99,7 +99,7 @@
 #define STM32_USB_ISTR               (STM32_USB_BASE + STM32_USB_ISTR_OFFSET)
 #define STM32_USB_FNR                (STM32_USB_BASE + STM32_USB_FNR_OFFSET)
 #define STM32_USB_DADDR              (STM32_USB_BASE + STM32_USB_DADDR_OFFSET)
-#ifndef CONFIG_STM32_STM32G0
+#ifndef CONFIG_STM32_HAVE_IP_USBDEV_M0_V2
 #  define STM32_USB_BTABLE           (STM32_USB_BASE + STM32_USB_BTABLE_OFFSET)
 #endif
 #define STM32_USB_LPMCSR             (STM32_USB_BASE + STM32_USB_LPMCSR_OFFSET)
@@ -107,7 +107,7 @@
 
 /* Buffer Descriptor Table (Relative to BTABLE address) */
 
-#ifdef CONFIG_STM32_STM32G0
+#ifdef CONFIG_STM32_HAVE_IP_USBDEV_M0_V2
 #  define STM32_USB_BTABLE_ADDR(ep,o) STM32_USB_BTABLE_RADDR(ep,o)
 #  define STM32_USB_TX(ep)           STM32_USB_BTABLE_RADDR(ep,STM32_USB_TX_WOFFSET)
 #  define STM32_USB_RX(ep)           STM32_USB_BTABLE_RADDR(ep,STM32_USB_RX_WOFFSET)
@@ -253,7 +253,7 @@
 
 /* Reception buffer address */
 
-#ifdef CONFIG_STM32_STM32G0
+#ifdef CONFIG_STM32_HAVE_IP_USBDEV_M0_V2
 #  define USB_ADDR_RX_SHIFT            (2)       /* Bits 15:2: Reception buffer address */
 #  define USB_ADDR_RX_MASK             (0x3fff << USB_ADDR_RX_SHIFT)
 #else
@@ -264,7 +264,7 @@
 
 /* Reception byte count */
 
-#ifdef CONFIG_STM32_STM32G0
+#ifdef CONFIG_STM32_HAVE_IP_USBDEV_M0_V2
 #  define USB_COUNT_RX_BL_SIZE         (1 << 31) /* Bit 31: Block size */
 #  define USB_COUNT_RX_NUM_BLOCK_SHIFT (26)      /* Bits 30-26: Number of blocks */
 #  define USB_COUNT_RX_SHIFT           (16)      /* Bits 25-16: Reception byte count */

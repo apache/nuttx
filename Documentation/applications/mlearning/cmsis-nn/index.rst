@@ -9,8 +9,9 @@ TensorFlow Lite Micro uses when ``CONFIG_MLEARNING_CMSIS_NN`` is enabled.
 It is distinct from :doc:`../cmsis/index`, which vendors the older CMSIS 5
 tree (DSP plus NN) for NNABLA.
 
-Enable with ``CONFIG_MLEARNING_CMSIS_NN``. The Makefile downloads a pinned
-CMSIS-NN commit and compiles:
+Enable with ``CONFIG_MLEARNING_CMSIS_NN``. The Makefile and CMake build
+download a pinned CMSIS-NN commit
+(``72e1ebf623ab1660a3e14e4e36fdcddce46f1991``) and compile:
 
 - Activation functions
 - Basic math

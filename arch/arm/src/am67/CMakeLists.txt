@@ -20,8 +20,18 @@
 #
 # ##############################################################################
 
-set(SRCS am67_boot.c am67_irq.c am67_mpuinit.c am67_pinmux.c am67_serial.c
-         am67_timer.c)
+set(SRCS
+    am67_boot.c
+    am67_irq.c
+    am67_mpuinit.c
+    am67_pinmux.c
+    am67_rat.c
+    am67_serial.c
+    am67_timer.c)
+
+if(CONFIG_RPTUN)
+  list(APPEND SRCS am67_rptun.c)
+endif()
 
 target_link_options(nuttx PRIVATE -Wl,--entry=_vector_start)
 

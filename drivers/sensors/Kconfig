@@ -2354,6 +2354,24 @@ config SENSORS_TMP112_UORB
 
 endif #SENSORS_TMP112
 
+config SENSORS_TC74
+	bool "Microchip TC74 Temperature Sensor support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Microchip TC74 digital temperature sensor.
+
+if SENSORS_TC74
+
+config TC74_I2C_FREQUENCY
+	int "TC74 I2C frequency"
+	default 100000
+	range 1 100000
+	---help---
+		I2C clock frequency for the TC74 sensor. Default is 100 kHz.
+
+endif # SENSORS_TC74
+
 config SENSORS_QMI8658
 	bool "QST QMI8658 6-Axis IMU Sensor support"
 	default n
