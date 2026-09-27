@@ -585,6 +585,16 @@ ARCHPICFLAGS ?= -fpic -msingle-pic-base -mpic-register=r9
 # out of CONFIG_ARM_THUMB rather than having to say anything.
 
 ifeq ($(CONFIG_NXFLAT),y)
+  # A module's D-Space is separate from its I-Space, so its read-only data is
+  # not at a fixed offset from its text.  gnu-nxflat-gotoff.ld reaches that
+  # data through the GOT; this makes the compiler do the same.  lm3s6965-ek
+  # carried the flag in its own Make.defs, and the CMake build gives it to
+  # every PIC configuration.  See issue #3737.  Clang has no such option.
+
+  ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),)
+    ARCHPICFLAGS += -mno-pic-data-is-text-relative
+  endif
+
   ifeq ($(CONFIG_ARM_THUMB),y)
     MKNXFLAT ?= $(TOPDIR)$(DELIM)tools$(DELIM)mknxflat$(HOSTEXEEXT) -a thumb2
   else
