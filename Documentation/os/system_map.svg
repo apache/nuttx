@@ -85,7 +85,7 @@
   <text class="band-t" x="34" y="462">ARCHITECTURE, CHIP, BOARD</text>
   <rect class="blk-hw" x="34" y="470" rx="6" width="240" height="30"/>
   <text class="lbl-on" x="48" y="490">arch/&lt;arch&gt;/src/&lt;chip&gt;</text>
-  <rect class="blk-hw" x="286" y="470" rx="6" width="240" height="30"/>
+  <rect class="blk-hw" x="286" y="470" rx="6" width="258" height="30"/>
   <text class="lbl-on" x="300" y="490">boards/&lt;arch&gt;/&lt;chip&gt;/&lt;board&gt;</text>
-  <text class="sub" x="546" y="490">the only code that touches a register</text>
+  <text class="sub" x="562" y="490">where register access belongs</text>
 </svg>

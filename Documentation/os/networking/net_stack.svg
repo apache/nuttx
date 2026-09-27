@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 568" width="900" height="568"
+     font-family="Charter, Georgia, 'Times New Roman', serif" role="img"
+     aria-label="The NuttX networking stack. An application calls socket(); net/socket/ offers each new socket to a usrsock daemon first and otherwise falls back to the in-kernel protocol stacks, which reach drivers/net/ through net/devif/. net/netdev/ is drawn as a column, not a layer, because it is entered from the socket layer for ioctl and from the drivers for registration. On the right, the usrsock daemon holds two file descriptors: /dev/usrsock, which is net/usrsock/, and an ordinary character driver such as /dev/gs2200m or /dev/alt1250, through which it reaches a TCP/IP stack running inside the module itself.">
+  <style>
+    .band   { fill: #f4f6fa; stroke: #c3cbd9; stroke-width: 1.2; }
+    .band-k { fill: #eef0fb; stroke: #b9bdf0; stroke-width: 1.2; }
+    .blk    { fill: #ffffff; stroke: #3c34e3; stroke-width: 1.5; }
+    .blk-s  { fill: #ffffff; stroke: #5a96bd; stroke-width: 1.4; }
+    .blk-hi { fill: #3c34e3; stroke: #2b2787; stroke-width: 1.5; }
+    .blk-hw { fill: #2b2787; stroke: #2b2787; }
+    .blk-x  { fill: #ffffff; stroke: #9aa3b4; stroke-width: 1.4; stroke-dasharray: 4 3; }
+    .lbl    { fill: #1b2233; font-size: 12.5px; font-weight: 600;
+              font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; }
+    .lbl-on { fill: #ffffff; font-size: 12.5px; font-weight: 600;
+              font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; }
+    .sub    { fill: #5a6478; font-size: 10.5px; }
+    .sub-on { fill: #d9d7fb; font-size: 10.5px; }
+    .band-t { fill: #6b7689; font-size: 11px; letter-spacing: .12em;
+              font-family: system-ui, sans-serif; }
+    .dir    { fill: #7b839a; font-size: 10.5px; font-family: ui-monospace, monospace; }
+    .edge   { stroke: #4a5266; stroke-width: 1.4; fill: none; }
+    .edge-d { stroke: #5a96bd; stroke-width: 1.4; fill: none; stroke-dasharray: 5 3; }
+    .note   { fill: #3f4757; font-size: 11px; font-style: italic; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+            orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#4a5266"/></marker>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+            orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a96bd"/></marker>
+  </defs>
+
+  <rect class="band" x="10" y="14" rx="9" width="880" height="66"/>
+  <text class="band-t" x="26" y="34">APPLICATION</text>
+  <text class="dir" x="620" y="34">apps/wireless/gs2200m/  apps/lte/alt1250/</text>
+  <rect class="blk" x="26" y="40" rx="6" width="560" height="32"/>
+  <text class="lbl" x="40" y="61">socket() · connect() · send() · recv() · ioctl()</text>
+  <rect class="blk-s" x="606" y="40" rx="6" width="268" height="32"/>
+  <text class="lbl" x="620" y="61">a usrsock daemon</text>
+
+  <rect class="band-k" x="10" y="92" rx="9" width="880" height="270"/>
+  <text class="band-t" x="26" y="112">THE STACK · net/</text>
+
+  <rect class="blk-s" x="26" y="122" rx="6" width="118" height="214"/>
+  <text class="lbl" x="38" y="144">net/</text>
+  <text class="lbl" x="38" y="160">netdev/</text>
+  <text class="sub" x="38" y="184">the device</text>
+  <text class="sub" x="38" y="198">registry.</text>
+  <text class="sub" x="38" y="220">psock_ioctl()</text>
+  <text class="sub" x="38" y="234">lives here, and</text>
+  <text class="sub" x="38" y="248">so does the</text>
+  <text class="sub" x="38" y="262">register call a</text>
+  <text class="sub" x="38" y="276">driver makes.</text>
+  <text class="sub" x="38" y="300">Reached from</text>
+  <text class="sub" x="38" y="314">both ends, not</text>
+  <text class="sub" x="38" y="328">a layer.</text>
+
+  <rect class="blk-hi" x="160" y="122" rx="6" width="426" height="56"/>
+  <text class="lbl-on" x="174" y="142">net/socket/ · psock_socket()</text>
+  <text class="sub-on" x="174" y="160">offers each new socket to the daemon first,</text>
+  <text class="sub-on" x="174" y="172">then falls back to the stack below</text>
+
+  <rect class="blk" x="160" y="192" rx="6" width="426" height="50"/>
+  <text class="lbl" x="174" y="212">the protocol stacks</text>
+  <text class="dir" x="174" y="230">net/tcp/ udp/ icmp/ icmpv6/ igmp/ arp/ pkt/ local/ …</text>
+
+  <rect class="blk" x="160" y="256" rx="6" width="426" height="46"/>
+  <text class="lbl" x="174" y="276">net/devif/</text>
+  <text class="sub" x="174" y="292">the data path: ipv4_input, devif_send, devif_poll</text>
+
+  <rect class="blk-s" x="160" y="312" rx="6" width="426" height="24"/>
+  <text class="dir" x="174" y="328">net/route/  net/utils/  net/netfilter/  net/procfs/</text>
+
+  <rect class="blk-s" x="606" y="122" rx="6" width="230" height="56"/>
+  <text class="lbl" x="620" y="142">net/usrsock/</text>
+  <text class="sub" x="620" y="160">carried over /dev/usrsock,</text>
+  <text class="sub" x="620" y="172">RPMSG or a custom transport</text>
+
+  <path class="edge" d="M 373 178 L 373 186" marker-end="url(#a)"/>
+  <path class="edge" d="M 373 242 L 373 250" marker-end="url(#a)"/>
+  <path class="edge-d" d="M 586 150 L 600 150" marker-end="url(#b)"/>
+  <path class="edge-d" d="M 144 150 L 154 150" marker-end="url(#b)"/>
+  <path class="edge-d" d="M 144 279 L 154 279" marker-end="url(#b)"/>
+  <path class="edge-d" d="M 690 76 L 690 116" marker-start="url(#b)" marker-end="url(#b)"/>
+
+  <rect class="band" x="10" y="374" rx="9" width="576" height="180"/>
+  <text class="band-t" x="26" y="394">DRIVERS AND HARDWARE</text>
+  <rect class="blk-hw" x="26" y="402" rx="6" width="544" height="80"/>
+  <text class="lbl-on" x="40" y="422">drivers/net/ · arch/&lt;arch&gt;/src/&lt;chip&gt;/</text>
+  <text class="sub-on" x="40" y="440">registers with netdev, hands packets to devif</text>
+  <text class="sub-on" x="40" y="456">one struct net_driver_s per interface</text>
+  <text class="sub-on" x="40" y="472">59 files under arch/ call netdev_register(), 12 in drivers/net/</text>
+  <rect class="blk-x" x="26" y="492" rx="6" width="544" height="48"/>
+  <text class="lbl" x="40" y="513">the hardware</text>
+  <text class="sub" x="40" y="530">an Ethernet MAC, a Wi-Fi radio, a CAN controller</text>
+
+  <rect class="band" x="606" y="374" rx="9" width="284" height="180"/>
+  <text class="band-t" x="620" y="394">OFFLOADED</text>
+  <rect class="blk-hw" x="606" y="402" rx="6" width="268" height="80"/>
+  <text class="lbl-on" x="620" y="422">the daemon's other fd</text>
+  <text class="sub-on" x="620" y="440">a plain character driver:</text>
+  <text class="sub-on" x="620" y="456">/dev/gs2200m, /dev/alt1250</text>
+  <text class="sub-on" x="620" y="472">drivers/wireless/, drivers/modem/</text>
+  <rect class="blk-x" x="606" y="492" rx="6" width="268" height="48"/>
+  <text class="lbl" x="620" y="513">a hardware TCP/IP stack</text>
+  <text class="sub" x="620" y="530">in a modem or Wi-Fi module</text>
+
+  <path class="edge" d="M 298 336 L 298 398" marker-end="url(#a)"/>
+  <path class="edge" d="M 298 482 L 298 488" marker-end="url(#a)"/>
+  <path class="edge" d="M 862 76 L 862 398" marker-end="url(#a)"/>
+  <path class="edge" d="M 740 482 L 740 488" marker-end="url(#a)"/>
+</svg>

@@ -31,7 +31,7 @@
   <text class="s" x="40" y="84">by a peripheral</text>
   <rect class="box" x="248" y="46" rx="6" width="200" height="46"/>
   <text class="t" x="262" y="68">vector, save context</text>
-  <text class="s" x="262" y="84">interrupts now disabled</text>
+  <text class="s" x="262" y="84">interrupts disabled (most archs)</text>
   <rect class="box" x="490" y="46" rx="6" width="200" height="46"/>
   <text class="t" x="504" y="68">irq_dispatch()</text>
   <text class="s" x="504" y="84">find the handler</text>
@@ -39,7 +39,7 @@
   <path class="edge" d="M 448 69 L 484 69" marker-end="url(#c)"/>
 
   <rect class="lane-k" x="10" y="124" rx="9" width="880" height="112"/>
-  <text class="lname" x="26" y="144">INTERRUPT HANDLER · cannot block, cannot wait, cannot allocate</text>
+  <text class="lname" x="26" y="144">INTERRUPT HANDLER · cannot block, cannot wait, malloc may fail</text>
   <rect class="box-hi" x="26" y="156" rx="6" width="280" height="60"/>
   <text class="t-on" x="40" y="180">the driver's ISR</text>
   <text class="s-on" x="40" y="198">clear the cause, read the register</text>
@@ -49,7 +49,7 @@
   <path class="edge" d="M 306 186 L 346 186" marker-end="url(#c)"/>
   <text class="warn" x="664" y="182">This is the rule the whole</text>
   <text class="warn" x="664" y="198">section follows.</text>
-  <path class="edge" d="M 590 92 L 590 114 L 18 114 L 18 186 L 20 186" marker-end="url(#c)"/>
+  <path class="edge" d="M 590 92 L 590 114 L 4 114 L 4 186 L 20 186" marker-end="url(#c)"/>
 
   <rect class="lane" x="10" y="252" rx="9" width="880" height="94"/>
   <text class="lname" x="26" y="272">BOTTOM HALF · a worker thread, later</text>

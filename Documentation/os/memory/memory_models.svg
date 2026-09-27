@@ -25,7 +25,7 @@
   <text class="s" x="40" y="114">kernel and application allocate</text>
   <text class="s" x="40" y="130">from the same pool</text>
   <text class="s" x="40" y="156">malloc() and kmm_malloc()</text>
-  <text class="s" x="40" y="172">are the same allocator</text>
+  <text class="s" x="40" y="172">are the same allocator by default</text>
   <text class="note" x="26" y="288">Nothing separates them, so nothing</text>
   <text class="note" x="26" y="304">has to be copied at a boundary.</text>
   <text class="note" x="26" y="320">This is why flat is the smallest.</text>
@@ -53,7 +53,7 @@
   <text class="cap" x="622" y="56">one heap per process</text>
   <rect class="kheap" x="622" y="72" rx="6" width="252" height="60"/>
   <text class="t" x="636" y="94">kernel heap</text>
-  <text class="s" x="636" y="112">physical addresses</text>
+  <text class="s" x="636" y="112">one, shared by every process</text>
   <path class="bar" d="M 614 144 L 882 144"/>
   <rect x="722" y="134" width="52" height="20" fill="#f4f6fa"/>
   <text class="barl" x="748" y="148" text-anchor="middle">MMU</text>
