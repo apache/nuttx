@@ -44,11 +44,12 @@ SMP can be enabled on NuttX with the following configuration settings:
   on a multi-CPU platform.
 * ``CONFIG_SMP_NCPUS`` - This value identifies the number of CPUs support
   by the processor that will be used for SMP.
-* ``CONFIG_SMP_IDLETHREAD_STACKSIZE`` - Each CPU will have its own IDLE task.
-  System initialization occurs on CPU0 and uses
-  ``CONFIG_IDLETHREAD_STACKSIZE``.
-  This setting provides the stack size for the IDLE task on CPUS 1
-  through ``(CONFIG_SMP_NCPUS-1)``.
+* Each CPU has its own IDLE task, and every one of them is given a stack of
+  ``CONFIG_IDLETHREAD_STACKSIZE``: ``nx_start()`` calls
+  ``up_cpu_idlestack(i, tcb, CONFIG_IDLETHREAD_STACKSIZE)`` in the loop over
+  CPUs.  There is no separate setting for the secondary CPUs; earlier versions
+  of this page named a ``CONFIG_SMP_IDLETHREAD_STACKSIZE``, which no Kconfig
+  declares and no code reads.
 
 This section provides the origin design specification for the implementation.
 As a result, you may find that the test uses future and conditional tenses
