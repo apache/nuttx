@@ -32,6 +32,8 @@
  * dependency was never deep: the upstream tool used it only to open the
  * file and enumerate symbols, never to relocate or rewrite anything.
  *
+ * The reading itself is in nxflat_elf.c, which ldnxflat uses as well.
+ *
  * The emitted text is unchanged.  The format strings live in the .def
  * files, which are carried here byte-for-byte from upstream.
  ****************************************************************************/
@@ -50,7 +52,28 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "nxflat_elf.h"
 #include "nxflat_thunk.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define STB_WEAK                2
+#define MAX_EXPORT_NAMES        1024
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* One imported symbol, in symbol table order */
+
+struct import_s
+{
+  const char *name;
+  int   is_object;
+  int   is_weak;
+};
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -71,78 +94,6 @@
  */
 
 #define EI_NIDENT       16
-#define ELFCLASS32      1
-#define ELFDATA2LSB     1
-#define ELFDATA2MSB     2
-
-#define SHT_SYMTAB      2
-#define SHT_DYNSYM      11
-
-#define SHN_UNDEF       0
-
-#define STB_WEAK        2
-#define STT_OBJECT      1
-
-#define ELF_ST_BIND(i)  ((i) >> 4)
-#define ELF_ST_TYPE(i)  ((i) & 0x0f)
-
-#define MAX_EXPORT_NAMES 1024
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-struct elf32_ehdr_s
-{
-  unsigned char e_ident[EI_NIDENT];
-  uint16_t e_type;
-  uint16_t e_machine;
-  uint32_t e_version;
-  uint32_t e_entry;
-  uint32_t e_phoff;
-  uint32_t e_shoff;
-  uint32_t e_flags;
-  uint16_t e_ehsize;
-  uint16_t e_phentsize;
-  uint16_t e_phnum;
-  uint16_t e_shentsize;
-  uint16_t e_shnum;
-  uint16_t e_shstrndx;
-};
-
-struct elf32_shdr_s
-{
-  uint32_t sh_name;
-  uint32_t sh_type;
-  uint32_t sh_flags;
-  uint32_t sh_addr;
-  uint32_t sh_offset;
-  uint32_t sh_size;
-  uint32_t sh_link;
-  uint32_t sh_info;
-  uint32_t sh_addralign;
-  uint32_t sh_entsize;
-};
-
-struct elf32_sym_s
-{
-  uint32_t st_name;
-  uint32_t st_value;
-  uint32_t st_size;
-  unsigned char st_info;
-  unsigned char st_other;
-  uint16_t st_shndx;
-};
-
-/* One imported symbol, in symbol table order */
-
-struct import_s
-{
-  const char *name;
-  int   is_object;
-  int   is_weak;
-};
-
 typedef int (*namefunc_type)(const char *name, void *arg);
 
 /****************************************************************************
@@ -153,7 +104,6 @@ typedef int (*namefunc_type)(const char *name, void *arg);
 
 static int verbose = 0;
 static int weak_imports = 0;
-static int dsyms = 0;
 
 /* Characteristics of things */
 
@@ -175,12 +125,6 @@ static struct import_s *imports = NULL;
 static long number_undefined = 0;
 
 static int counter;
-
-/* Big-endian input?  ARM is normally little-endian but big-endian ARM
- * exists, so honour EI_DATA rather than assuming.
- */
-
-static int need_swap = 0;
 
 /****************************************************************************
  * Private constant data
@@ -209,70 +153,6 @@ static const char *const nonreturners[] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: swap16 / swap32
- ****************************************************************************/
-
-static uint16_t swap16(uint16_t v)
-{
-  return need_swap ? (uint16_t)((v >> 8) | (v << 8)) : v;
-}
-
-static uint32_t swap32(uint32_t v)
-{
-  if (!need_swap)
-    {
-      return v;
-    }
-
-  return ((v & 0x000000fful) << 24) | ((v & 0x0000ff00ul) << 8) |
-         ((v & 0x00ff0000ul) >> 8)  | ((v & 0xff000000ul) >> 24);
-}
-
-/****************************************************************************
- * Name: xread
- *
- * Description:
- *   Read exactly nbytes at an absolute offset, or die.
- *
- ****************************************************************************/
-
-static void xread(int fd, void *buffer, size_t nbytes, off_t offset)
-{
-  ssize_t nread;
-
-  if (lseek(fd, offset, SEEK_SET) == (off_t)-1)
-    {
-      fprintf(stderr, "%s: seek to %ld failed: %s\n",
-              elf_filename, (long)offset, strerror(errno));
-      exit(2);
-    }
-
-  while (nbytes > 0)
-    {
-      nread = read(fd, buffer, nbytes);
-      if (nread < 0)
-        {
-          if (errno == EINTR)
-            {
-              continue;
-            }
-
-          fprintf(stderr, "%s: read failed: %s\n",
-                  elf_filename, strerror(errno));
-          exit(2);
-        }
-      else if (nread == 0)
-        {
-          fprintf(stderr, "%s: unexpected end of file\n", elf_filename);
-          exit(2);
-        }
-
-      buffer  = (char *)buffer + nread;
-      nbytes -= nread;
-    }
-}
-
-/****************************************************************************
  * Name: load_imports
  *
  * Description:
@@ -290,136 +170,29 @@ static void xread(int fd, void *buffer, size_t nbytes, off_t offset)
 
 static void load_imports(void)
 {
-  struct elf32_ehdr_s ehdr;
-  struct elf32_shdr_s *shdrs;
-  struct elf32_sym_s *syms;
-  char *strtab;
-  int wanted = dsyms ? SHT_DYNSYM : SHT_SYMTAB;
-  int symidx = -1;
-  size_t nsyms;
-  size_t strsize;
+  struct nxflat_elf_s elf;
+  size_t strsize = 0;
   size_t i;
-  uint16_t probe;
-  int host_le;
-  int obj_le;
-  int fd;
 
-  fd = open(elf_filename, O_RDONLY);
-  if (fd < 0)
+  nxflat_elf_read(&elf, elf_filename, program_name);
+
+  /* The size of the string table the symbols point into, which bounds
+   * st_name.  nxflat_elf_read() has located the table itself.
+   */
+
+  for (i = 0; i < elf.ehdr->e_shnum; i++)
     {
-      fprintf(stderr, "%s: cannot open: %s\n",
-              elf_filename, strerror(errno));
-      exit(2);
-    }
-
-  xread(fd, &ehdr, sizeof(ehdr), 0);
-
-  if (memcmp(ehdr.e_ident, "\177ELF", 4) != 0)
-    {
-      fprintf(stderr, "%s: not an ELF file\n", elf_filename);
-      exit(2);
-    }
-
-  if (ehdr.e_ident[4] != ELFCLASS32)
-    {
-      fprintf(stderr, "%s: not a 32-bit ELF file\n", elf_filename);
-      exit(2);
-    }
-
-  /* Decide whether the host and the object disagree about byte order */
-
-  probe   = 1;
-  host_le = *(const unsigned char *)&probe;
-  obj_le  = (ehdr.e_ident[5] == ELFDATA2LSB);
-
-  need_swap = (host_le != obj_le);
-
-  /* Re-read the fields that mattered now that byte order is known */
-
-  ehdr.e_shoff     = swap32(ehdr.e_shoff);
-  ehdr.e_shnum     = swap16(ehdr.e_shnum);
-  ehdr.e_shentsize = swap16(ehdr.e_shentsize);
-
-  if (ehdr.e_shnum == 0 || ehdr.e_shentsize != sizeof(struct elf32_shdr_s))
-    {
-      fprintf(stderr, "%s: no usable section header table\n", elf_filename);
-      exit(2);
-    }
-
-  shdrs = malloc((size_t)ehdr.e_shnum * sizeof(struct elf32_shdr_s));
-  if (shdrs == NULL)
-    {
-      fprintf(stderr, "Failed to allocate section headers\n");
-      exit(3);
-    }
-
-  xread(fd, shdrs, (size_t)ehdr.e_shnum * sizeof(struct elf32_shdr_s),
-        ehdr.e_shoff);
-
-  for (i = 0; i < ehdr.e_shnum; i++)
-    {
-      shdrs[i].sh_type    = swap32(shdrs[i].sh_type);
-      shdrs[i].sh_offset  = swap32(shdrs[i].sh_offset);
-      shdrs[i].sh_size    = swap32(shdrs[i].sh_size);
-      shdrs[i].sh_link    = swap32(shdrs[i].sh_link);
-      shdrs[i].sh_entsize = swap32(shdrs[i].sh_entsize);
-
-      if ((int)shdrs[i].sh_type == wanted && symidx < 0)
+      if (elf.shdr[i].sh_type == SHT_SYMTAB)
         {
-          symidx = (int)i;
+          strsize = elf.shdr[elf.shdr[i].sh_link].sh_size;
+          break;
         }
     }
 
-  if (symidx < 0)
-    {
-      fprintf(stderr, "%s: no %s section\n", elf_filename,
-              dsyms ? "dynamic symbol table" : "symbol table");
-      exit(2);
-    }
-
-  if (shdrs[symidx].sh_entsize != sizeof(struct elf32_sym_s))
-    {
-      fprintf(stderr, "%s: unexpected symbol entry size\n", elf_filename);
-      exit(2);
-    }
-
-  nsyms = shdrs[symidx].sh_size / sizeof(struct elf32_sym_s);
-
-  syms = malloc(shdrs[symidx].sh_size);
-  if (syms == NULL)
-    {
-      fprintf(stderr, "Failed to allocate symbol table\n");
-      exit(3);
-    }
-
-  xread(fd, syms, shdrs[symidx].sh_size, shdrs[symidx].sh_offset);
-
-  /* The linked string table holds the names */
-
-  if (shdrs[symidx].sh_link >= ehdr.e_shnum)
-    {
-      fprintf(stderr, "%s: symbol table has no string table\n",
-              elf_filename);
-      exit(2);
-    }
-
-  strsize = shdrs[shdrs[symidx].sh_link].sh_size;
-  strtab  = malloc(strsize + 1);
-  if (strtab == NULL)
-    {
-      fprintf(stderr, "Failed to allocate string table\n");
-      exit(3);
-    }
-
-  xread(fd, strtab, strsize, shdrs[shdrs[symidx].sh_link].sh_offset);
-  strtab[strsize] = '\0';
-
-  close(fd);
-
-  imports = calloc(nsyms + 1, sizeof(struct import_s));
+  imports = malloc((elf.nsyms + 1) * sizeof(struct import_s));
   if (imports == NULL)
     {
-      fprintf(stderr, "Failed to allocate import table\n");
+      fprintf(stderr, "Failed to allocate imports\n");
       exit(3);
     }
 
@@ -434,20 +207,18 @@ static void load_imports(void)
   imports[0].is_weak   = 0;
   number_undefined     = 1;
 
-  for (i = 0; i < nsyms; i++)
+  for (i = 0; i < elf.nsyms; i++)
     {
-      uint32_t st_name  = swap32(syms[i].st_name);
-      uint32_t st_value = swap32(syms[i].st_value);
-      uint16_t st_shndx = swap16(syms[i].st_shndx);
-      unsigned char info = syms[i].st_info;
+      const struct elf32_sym_s *sym = &elf.syms[i];
+      unsigned char info = sym->st_info;
 
-      if (st_shndx != SHN_UNDEF || st_value != 0 || st_name == 0 ||
-          st_name >= strsize)
+      if (sym->st_shndx != SHN_UNDEF || sym->st_value != 0 ||
+          sym->st_name == 0 || sym->st_name >= strsize)
         {
           continue;
         }
 
-      if (ELF_ST_TYPE(info) == STT_OBJECT)
+      if (ELF32_ST_TYPE(info) == STT_OBJECT)
         {
           /* An undefined object is not something a thunk can stand in
            * for; leave it to the link to complain.
@@ -456,15 +227,12 @@ static void load_imports(void)
           continue;
         }
 
-      imports[number_undefined].name = &strtab[st_name];
+      imports[number_undefined].name      = elf.strtab + sym->st_name;
       imports[number_undefined].is_object = 0;
-      imports[number_undefined].is_weak =
-        (ELF_ST_BIND(info) == STB_WEAK);
+      imports[number_undefined].is_weak   =
+        (ELF32_ST_BIND(info) == STB_WEAK);
       number_undefined++;
     }
-
-  free(shdrs);
-  free(syms);
 
   dbg("Found %ld undefined symbols\n", number_undefined);
 }
@@ -631,7 +399,6 @@ static void show_usage(void)
   fprintf(stderr, "  -a <arch>\n");
   fprintf(stderr, "     Instruction set of the module: arm or thumb2\n");
   fprintf(stderr, "     [thumb2]\n");
-  fprintf(stderr, "  -d Use dynamic symbol table. [symtab]\n");
   fprintf(stderr, "  -o <out-filename>\n");
   fprintf(stderr, "     Output to <out-filename> [stdout]\n");
   fprintf(stderr, "  -v Verbose output [no output]\n");
@@ -653,16 +420,12 @@ static void parse_args(int argc, char **argv)
 
   program_name = argv[0];
 
-  while ((opt = getopt(argc, argv, "a:do:vw")) != -1)
+  while ((opt = getopt(argc, argv, "a:o:vw")) != -1)
     {
       switch (opt)
         {
           case 'a':
             arch = optarg;
-            break;
-
-          case 'd':
-            dsyms++;
             break;
 
           case 'o':
