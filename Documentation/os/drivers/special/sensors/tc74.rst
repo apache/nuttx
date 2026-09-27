@@ -8,7 +8,7 @@ I2C addresses range from 0x48 through 0x4f (suffixes A0 through A7), allowing
 up to eight parts on the same bus.
 
 This driver uses the :doc:`uorb
-</components/drivers/special/sensors/sensors_uorb>` interface, so the reading
+</os/drivers/special/sensors/sensors_uorb>` interface, so the reading
 appears as a topic the common sensor tools can read.
 
 Application Programming Interface
