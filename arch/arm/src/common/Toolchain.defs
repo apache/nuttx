@@ -601,12 +601,12 @@ ifeq ($(CONFIG_NXFLAT),y)
     MKNXFLAT ?= $(TOPDIR)$(DELIM)tools$(DELIM)mknxflat$(HOSTEXEEXT) -a arm
   endif
 
-  # ldnxflat is still an out-of-tree tool, so this is a PATH lookup.  It is
-  # named here only so that a board which never assigned it -- lm3s6965-ek
-  # is one -- does not expand it to nothing and hand make a recipe starting
-  # with '-e', whose leading dash make then eats as "ignore errors".
+  # Both tools are in the tree.  Naming ldnxflat here also keeps a board that
+  # never assigned it -- lm3s6965-ek is one -- from expanding it to nothing
+  # and handing make a recipe that starts with '-e', whose leading dash make
+  # then eats as "ignore errors".
 
-  LDNXFLAT ?= ldnxflat
+  LDNXFLAT ?= $(TOPDIR)$(DELIM)tools$(DELIM)ldnxflat$(HOSTEXEEXT)
 endif
 
 # --fixed-r9 reserves r9 across the base firmware so a callback into module
