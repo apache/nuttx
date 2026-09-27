@@ -175,13 +175,20 @@ being the leading contributor and I claiming only a support role). You
 can get more information at the Open1788 board from the WaveShare
 website.
 
+NXP LPC40xx
+-----------
+
+The LPC40xx is the same architecture directory with a Cortex-M4F in place of
+the LPC17xx's Cortex-M3.  :doc:`lpc40xx` covers what differs; its boards are
+in the list below, together with the LPC17xx ones.
+
 .. toctree::
-   :maxdepth: 1
+   :hidden:
 
    lpc40xx.rst
 
 Supported Boards
-================
+----------------
 
 .. toctree::
    :glob:

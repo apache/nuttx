@@ -8,12 +8,29 @@ Architectural support for the LPC40xx family was built on top of the
 existing LPC17xx by jjlange in NuttX-7.31. With that architectural
 support came support for two boards also contributed by jjlange:
 
-**LX CPU**. Pavel Pisa add support for the PiKRON LX CPU board. This
-board may be configured to use either the LPC4088 or the LPC1788.
+.. container:: review-authored
 
-**Driver Status.**
+   Those two are the Embedded Artists **LPC4088 Developer's Kit** and
+   **LPC4088 Quickstart**, merged together on 2019-07-11 and released in
+   NuttX-7.31 on 2019-07-21.  Neither is named above because neither has a
+   page: their directories here carry only a ``README.txt``, so they never
+   reach a board list.
+
+**LX CPU**. Pavel Pisa added support for the PiKRON LX CPU board. This
+board may be configured to use either the LPC4088 or the LPC1788.
 
 .. container:: review-authored
 
-   The LPC40xx boards are listed together with the LPC17xx boards on the
-   :doc:`index` page.
+   **Driver status.**  There is no separate set of LPC40xx drivers to report
+   on, which is the point of the family: it shares
+   ``arch/arm/src/lpc17xx_40xx/`` with the LPC17xx, and of the 37 source
+   files there, 8 carry LPC40xx-specific code --
+   ``lpc17_40_clockconfig.c``, ``lpc178x_40xx_clockconfig.c``,
+   ``lpc17_40_gpio.c``, ``lpc17_40_gpioint.c``, ``lpc17_40_gpiodbg.c``,
+   ``lpc17_40_can.c``, ``lpc17_40_ssp.c`` and ``lpc17_40_lowputc.c``.
+   The Kconfig declares five chips -- ``LPC4072``, ``LPC4074``, ``LPC4076``,
+   ``LPC4078`` and ``LPC4088`` -- across the ``ARCH_FAMILY_LPC407X`` and
+   ``ARCH_FAMILY_LPC408X`` families.
+
+   All three LPC4088 boards are listed together with the LPC17xx boards on
+   the :doc:`index` page.
