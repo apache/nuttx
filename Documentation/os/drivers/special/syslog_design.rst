@@ -291,7 +291,7 @@ Low-Level Serial Output
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 If you are using a SYSLOG console channel (``CONFIG_SYSLOG_CONSOLE``)
-with a serial console (``CONFIG_SYSLOG_SERIAL_CONSOLE``) and if the underlying
+with a serial console and if the underlying
 architecture supports the low-level ``up_putc()`` interface
 (``CONFIG_ARCH_LOWPUTC``), then the SYLOG logic will direct the output
 to ``up_putc()`` which is capable of generating the serial output
@@ -356,17 +356,14 @@ The configuration options that affect this channel selection include:
   There is no user selection.
 * ``CONFIG_SYSLOG_CONSOLE``: This configuration option is manually selected
   from the SYSLOG menu. This is the option that acutally enables the SYSLOG
-  console device. It depends on ``CONFIG_DEV_CONSOLE`` and it will
-  automatically select ``CONFIG_SYSLOG_SERIAL_CONSOLE`` if
-  ``CONFIG_SERIAL_CONSOLE`` is selected.
+  console device. It depends on ``CONFIG_DEV_CONSOLE``.
 * ``CONFIG_ARCH_LOWPUTC``: This is an indication from the architecture
   configuration that the platform supports the ``up_putc()`` interface.
   ``up_putc()`` is a very low level UART interface that can even be used
   from interrupt handling.
-* ``CONFIG_SYSLOG_SERIAL_CONSOLE``: This enables certain features
-  of the SYSLOG operation that depend on a serial console.
-  If ``CONFIG_ARCH_LOWPUTC`` is also selected, for example,
-  then ``up_putc()`` will be used for the forced SYSLOG output.
+  (``CONFIG_SYSLOG_SERIAL_CONSOLE`` used to appear here as well; it was
+  removed from the tree in "syslog: Remove SYSLOG_SERIAL_CONSOLE which
+  isn't really used" and no Kconfig declares it.)
 
 Interrupt level SYSLOG output will be lost unless:
 
@@ -411,7 +408,7 @@ no other dependencies. Differences fromthe SYSLOG console channel include:
 2. The forced SYSLOG output always goes to the bit-bucket.
    This means that interrupt level SYSLOG output will be lost unless
    the interrupt buffer is enabled to support serialization.
-3. ``CONFIG_SYSLOG_CHAR_CRLF``: If ``CONFIG_SYSLOG_CHAR_CRLF`` is selected,
+3. ``CONFIG_SYSLOG_CRLF``: If ``CONFIG_SYSLOG_CRLF`` is selected,
    then inefeeds in the SYSLOG output will be expanded to
    Carriage Return + Linefeed. Since the character device is not a console
    device, the addition of carriage returns to line feeds would
@@ -524,23 +521,16 @@ RAMLOG Configuration options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * ``CONFIG_RAMLOG`` - Enables the RAM logging feature.
-* ``CONFIG_RAMLOG_CONSOLE`` - Use the RAM logging device as a system console.
-  If this feature is enabled (along with ``CONFIG_DEV_CONSOLE``),
-  then all console output will be re-directed to a circular buffer in RAM.
-  This might be useful, for example, if the only console is a Telnet console.
-  Then in that case, console output from non-Telnet threads will go to the
-  circular buffer and can be viewed using the NSH ``dmesg`` command.
-  This optional is not useful in other scenarios.
 * ``CONFIG_RAMLOG_SYSLOG`` - Use the RAM logging device for the syslogging
   interface. If this feature is enabled, then all debug output will be
   re-directed to the circular buffer in RAM. This RAM log can be viewed
   from NSH using the ``dmesg`` command.
   NOTE: Unlike the limited, generic character driver SYSLOG device,
   the RAMLOG can be used to capture debug output from interrupt level handlers.
-* ``CONFIG_RAMLOG_NPOLLWAITERS`` - The number of threads than can be waiting
-  for this driver on ``poll()``. Default: 4.
+* ``CONFIG_RAMLOG_POLLTHRESHOLD`` - How many bytes have to accumulate in the
+  circular buffer before ``poll()`` reports the log readable. Default: 1.
 
-If ``CONFIG_RAMLOG_CONSOLE`` or ``CONFIG_RAMLOG_SYSLOG`` is selected,
+If ``CONFIG_RAMLOG_SYSLOG`` is selected,
 then the following must also be provided:
 
 * ``CONFIG_RAMLOG_BUFSIZE`` - The size of the circular buffer to use.
@@ -548,14 +538,12 @@ then the following must also be provided:
 
 Other miscellaneous settings:
 
-* ``CONFIG_RAMLOG_CRLF`` - Pre-pend a carriage return before every linefeed
-  that goes into the RAM log.
+* ``CONFIG_SYSLOG_CRLF`` - Pre-pend a carriage return before every linefeed.
+  A SYSLOG-wide option rather than a RAMLOG one; it defaults to ``y``.
 * ``CONFIG_RAMLOG_NONBLOCKING`` - Reading from the RAMLOG will never block
   if the RAMLOG is empty. If the RAMLOG is empty, then zero is returned
   (usually interpreted as end-of-file). If you do not define this, the NSH
   ``dmsg`` command will lock up when called! So you probably do want this!
-* ``CONFIG_RAMLOG_NPOLLWAITERS`` - The maximum number of threads that
-  may be waiting on the poll method.
 
 
 SYSLOG (Input) Character Device

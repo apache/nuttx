@@ -536,25 +536,24 @@ RAMLOG Configuration options
    device, the RAMLOG *can* be used to capture debug output from
    interrupt level handlers.
 
--  ``CONFIG_RAMLOG_NPOLLWAITERS``: The number of threads than can
-   be waiting for this driver on ``poll()``. Default: 4
+-  ``CONFIG_RAMLOG_POLLTHRESHOLD``: How many bytes have to accumulate in
+   the circular buffer before ``poll()`` reports the log readable.
+   Default: 1
 
 -  ``CONFIG_RAMLOG_BUFSIZE``: The size of the circular buffer to
    use. Default: 1024 bytes.
 
 Other miscellaneous settings
 
--  ``CONFIG_RAMLOG_CRLF``: Prepend a carriage return before every
-   linefeed that goes into the RAM log.
+-  ``CONFIG_SYSLOG_CRLF``: Prepend a carriage return before every
+   linefeed.  This is a SYSLOG-wide option, not a RAMLOG one, and it
+   defaults to ``y``.
 
 -  ``CONFIG_RAMLOG_NONBLOCKING``: Reading from the RAMLOG will
    never block if the RAMLOG is empty. If the RAMLOG is empty,
    then zero is returned (usually interpreted as end-of-file). If
    you do not define this, the NSH ``dmesg`` command will lock up
    when called! So you probably do want this!
-
--  ``CONFIG_RAMLOG_NPOLLWAITERS``: The maximum number of threads
-   that may be waiting on the poll method.
 
 RAMLOG Rate Limiting
 --------------------
@@ -636,7 +635,7 @@ Basic Debug Log Level Configuration
 These options control the base debug assertion and log level filtering,
 defining which severity levels of messages are captured by the syslog system.
 
-- ``CONFIG_DEBUG_ASSERT``: Enable assertion checks in the syslog subsystem.
+- ``CONFIG_DEBUG_ASSERTIONS``: Enable assertion checks.
 - ``CONFIG_DEBUG_ERROR``: Enable logging of error-level (``LOG_ERR``) messages.
 - ``CONFIG_DEBUG_WARN``: Enable logging of warning-level (``LOG_WARNING``) messages.
 - ``CONFIG_DEBUG_INFO``: Enable logging of info-level (``LOG_INFO``) messages.
@@ -663,7 +662,6 @@ Message Metadata & Prefix
 - ``CONFIG_SYSLOG_PRIORITY``: Include message priority level in the syslog prefix.
 - ``CONFIG_SYSLOG_PROCESS_NAME``: Include the process name in the syslog prefix.
 - ``CONFIG_SYSLOG_PROCESSID``: Include the process ID (PID) in the syslog prefix.
-- ``CONFIG_SYSLOG_CPUID``: Include the CPU ID (for SMP systems) in the syslog prefix.
 - ``CONFIG_SYSLOG_PREFIX``: Enable custom prefix support for syslog messages.
 - ``CONFIG_SYSLOG_PREFIX_STRING``: Define a static custom string to prepend to all syslog messages (requires ``CONFIG_SYSLOG_PREFIX``).
 
@@ -695,7 +693,7 @@ Core Channel Settings
 
 Individual Channel & Destination Options
 ----------------------------------------
-- ``CONFIG_SYSLOG_RAMLOG``: Enable the **ramlog channel** (outputs syslog messages to RAM for later retrieval).
+- ``CONFIG_RAMLOG_SYSLOG``: Enable the **ramlog channel** (outputs syslog messages to RAM for later retrieval).
 - ``CONFIG_SYSLOG_RPMSG``: Enable the **rpmsg channel** (routes syslog messages over IPC via rpmsg).
 - ``CONFIG_SYSLOG_FILE``: Enable the **dev channel** (supports output to character devices or regular files via a character driver).
 
@@ -729,7 +727,7 @@ Usage Notes
 ===========
 
 1. **Interrupt Context Logging**: Always enable ``CONFIG_SYSLOG_INTBUFFER`` if logging from interrupt handlers to avoid race conditions.
-2. **RAM Log Usage**: The RAM log (``CONFIG_SYSLOG_RAMLOG``) is useful for systems without persistent storage; retrieve logs via the ramlog driver.
+2. **RAM Log Usage**: The RAM log (``CONFIG_RAMLOG_SYSLOG``) is useful for systems without persistent storage; retrieve logs via the ramlog driver.
 3. **rpmsg Logging**: When using ``CONFIG_SYSLOG_RPMSG``, ensure the rpmsg subsystem is properly configured for inter-processor communication.
 4. **Timestamps**: For accurate real-time timestamps, enable an RTC driver and ``CONFIG_SYSLOG_TIMESTAMP_REALTIME``.
 5. **Color Output**: Disable ``CONFIG_SYSLOG_COLOR_OUTPUT`` if logging to non-ANSI terminals (e.g., raw UART terminals without color support).

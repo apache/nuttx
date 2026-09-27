@@ -60,10 +60,10 @@ Memory Models
 ~~~~~~~~~~~~~
 
 * Small Memory Model.  If the MCU supports only 16-bit data addressing
-  then the small memory model is automatically used.  The maximum size
-  of the heap is then 64K.  The small memory model can also be forced
-  MCUs with wider addressing by defining CONFIG_SMALL_MEMORY in the
-  NuttX configuration file.
+  then the small memory model is used.  The maximum size of the heap is
+  then 64K.  The switch is ``CONFIG_SMALL_MEMORY``, and it is not a
+  Kconfig option: ``include/nuttx/compiler.h`` defines it itself, in the
+  per-compiler branches for the targets that need it.
 * Large Memory Model.  Otherwise, the allocator uses a model that
   supports a heap of up to 4G.
 
