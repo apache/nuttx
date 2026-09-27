@@ -137,7 +137,8 @@ endif
 
 # mknxflat - Generate the thunk file for an NXFLAT module
 
-MKNXFLAT_SRCS = nxflat/mknxflat.c nxflat/thunk_arm.c nxflat/thunk_thumb2.c
+MKNXFLAT_SRCS = nxflat/mknxflat.c nxflat/thunk_arm.c nxflat/thunk_thumb2.c \
+  nxflat/nxflat_elf.c
 
 mknxflat$(HOSTEXEEXT): $(MKNXFLAT_SRCS)
 	$(Q) $(HOSTCC) $(HOSTCFLAGS) -Inxflat -o mknxflat$(HOSTEXEEXT) \
