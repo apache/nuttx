@@ -92,12 +92,19 @@ _PLATFORM_ALIGNMENT = [
 
     # lpc40xx -> lpc17xx_40xx
     ("platforms/arm/lpc40xx/index", "platforms/arm/lpc17xx_40xx/lpc40xx"),
+    # These two boards carry only a README.txt -- they had no page before the
+    # move and have none now, so the old URLs point at the family page that
+    # names them rather than at a board page that never existed.
     ("platforms/arm/lpc40xx/boards/lpc4088-devkit/index",
-     "platforms/arm/lpc17xx_40xx/boards/lpc4088-devkit/index"),
+     "platforms/arm/lpc17xx_40xx/lpc40xx"),
     ("platforms/arm/lpc40xx/boards/lpc4088-quickstart/index",
-     "platforms/arm/lpc17xx_40xx/boards/lpc4088-quickstart/index"),
+     "platforms/arm/lpc17xx_40xx/lpc40xx"),
     ("platforms/arm/lpc40xx/boards/lx_cpu/index",
      "platforms/arm/lpc17xx_40xx/boards/lx_cpu/index"),
+
+    # upstream typo: the page was named intex.rst
+    ("platforms/arm/nrf52/boards/nrf52-feather/intex",
+     "platforms/arm/nrf52/boards/nrf52-feather/index"),
 
     # boards filed under a name the source tree does not use
     ("platforms/arm/stm32f1/boards/hymini-stm32/index",

@@ -88,7 +88,7 @@
   <text class="lbl-on" x="40" y="422">drivers/net/ · arch/&lt;arch&gt;/src/&lt;chip&gt;/</text>
   <text class="sub-on" x="40" y="440">registers with netdev, hands packets to devif</text>
   <text class="sub-on" x="40" y="456">one struct net_driver_s per interface</text>
-  <text class="sub-on" x="40" y="472">59 files under arch/ call netdev_register(), 12 in drivers/net/</text>
+  <text class="sub-on" x="40" y="472">64 files under arch/ call netdev_register(), 12 in drivers/net/</text>
   <rect class="blk-x" x="26" y="492" rx="6" width="544" height="48"/>
   <text class="lbl" x="40" y="513">the hardware</text>
   <text class="sub" x="40" y="530">an Ethernet MAC, a Wi-Fi radio, a CAN controller</text>

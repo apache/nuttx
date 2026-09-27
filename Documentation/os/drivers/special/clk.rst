@@ -65,7 +65,11 @@ Seeing the tree
 With procfs mounted, ``/proc/clk`` prints one line per clock -- the name,
 the enable count, the rate and the phase.  That is the direct answer to "is
 my clock actually on", which is otherwise a peripheral that will not answer
-register reads.  ``CONFIG_FS_PROCFS_EXCLUDE_CLK`` leaves it out.
+register reads.  ``CONFIG_FS_PROCFS_EXCLUDE_CLK`` leaves it out -- with a
+catch: the code honours that symbol in seven places, across
+``drivers/clk/clk.c`` and ``fs/procfs/fs_procfs.c``, but no Kconfig declares
+it.  The other twenty-one ``FS_PROCFS_EXCLUDE_*`` options are selectable;
+this one is not, so setting it means defining it by hand.
 
 A board can also call ``clk_disable_unused()`` after bring-up, declared in
 ``include/nuttx/clk/clk.h``.  It walks the tree and turns off every clock

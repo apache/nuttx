@@ -23,9 +23,10 @@ board may be configured to use either the LPC4088 or the LPC1788.
 
    **Driver status.**  There is no separate set of LPC40xx drivers to report
    on, which is the point of the family: it shares
-   ``arch/arm/src/lpc17xx_40xx/`` with the LPC17xx, and of the 37 source
-   files there, 8 carry LPC40xx-specific code --
-   ``lpc17_40_clockconfig.c``, ``lpc178x_40xx_clockconfig.c``,
+   ``arch/arm/src/lpc17xx_40xx/`` with the LPC17xx.  Of the 37 source files
+   there, two are LPC178x/40xx implementations of their own --
+   ``lpc178x_40xx_clockconfig.c`` and ``lpc178x_40xx_gpio.c`` -- and seven
+   more are shared files that branch on the family: ``lpc17_40_clockconfig.c``,
    ``lpc17_40_gpio.c``, ``lpc17_40_gpioint.c``, ``lpc17_40_gpiodbg.c``,
    ``lpc17_40_can.c``, ``lpc17_40_ssp.c`` and ``lpc17_40_lowputc.c``.
    The Kconfig declares five chips -- ``LPC4072``, ``LPC4074``, ``LPC4076``,

@@ -50,6 +50,7 @@ REVIEW_PAGES = {
     "os/interrupts/index",
     "os/video",
     "os/openamp",
+    "os/libs/libbuiltin",
     "os/libs/libm",
     "os/filesystem/romfs",
     "os/filesystem/aio",

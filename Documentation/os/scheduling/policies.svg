@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" width="900" height="520"
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-55 0 955 520" width="955" height="520"
      font-family="Charter, Georgia, 'Times New Roman', serif" role="img"
      aria-label="The three scheduling policies over time. Under SCHED_FIFO a thread keeps the CPU until it blocks. Under SCHED_RR threads of equal priority take turns every CONFIG_RR_INTERVAL. Under SCHED_SPORADIC a thread runs at a high priority while it has budget, drops to a low priority when the budget is spent, and is promoted again one replenishment period later.">
   <style>
@@ -62,7 +62,7 @@
   <path class="axis" d="M 92 336 L 92 452"/>
   <path class="axis" d="M 92 452 L 868 452"/>
   <text class="ax" x="86" y="348" text-anchor="end">sched_priority</text>
-  <text class="ax" x="86" y="440" text-anchor="end">ss_low_priority</text>
+  <text class="ax" x="86" y="440" text-anchor="end">sched_ss_low_priority</text>
   <path class="tick" d="M 92 344 L 868 344"/>
   <path class="tick" d="M 92 434 L 868 434"/>
 
@@ -73,10 +73,10 @@
   <path class="axis" d="M 92 476 L 304 476"/>
   <path class="axis" d="M 92 472 L 92 480"/>
   <path class="axis" d="M 304 472 L 304 480"/>
-  <text class="note" x="198" y="492" text-anchor="middle">ss_init_budget</text>
+  <text class="note" x="198" y="492" text-anchor="middle">sched_ss_init_budget</text>
 
   <path class="axis" d="M 92 504 L 516 504"/>
   <path class="axis" d="M 92 500 L 92 508"/>
   <path class="axis" d="M 516 500 L 516 508"/>
-  <text class="note" x="304" y="518" text-anchor="middle">ss_repl_period — budget comes back, priority is restored</text>
+  <text class="note" x="304" y="518" text-anchor="middle">sched_ss_repl_period — budget comes back, priority is restored</text>
 </svg>

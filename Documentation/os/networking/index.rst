@@ -75,7 +75,7 @@ Network Support
    a driver calls.  The data path is ``net/devif/``.
 
 One thing the picture cannot show is how little of the driver work happens in
-``drivers/net/``.  Twelve files there call ``netdev_register()``, against **59**
+``drivers/net/``.  Twelve files there call ``netdev_register()``, against **64**
 under ``arch/`` -- ``arch/arm/src/`` alone accounts for 41 -- because the common
 case is a MAC built into the SoC, driven by chip-specific code that has to live
 with the chip.  What stays in ``drivers/net/`` is what is *not* tied to one SoC:

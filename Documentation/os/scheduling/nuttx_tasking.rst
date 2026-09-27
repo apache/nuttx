@@ -119,7 +119,9 @@ bits saying whether it is prioritized, whether it is indexed by CPU, and
 whether it holds running tasks.
 
 Most of these lists are prioritized so that common list handling logic can be
-used.  ``g_inactivetasks`` is the only one that is not.
+used, but not all of them.  Three carry ``attr = 0`` in the table:
+``g_inactivetasks``, ``g_waitingforsignal`` and ``g_stoppedtasks``.  A fourth
+entry, ``TSTATE_TASK_INVALID``, has no list at all.
 
 All new tasks start in an initial, non-running state:
 

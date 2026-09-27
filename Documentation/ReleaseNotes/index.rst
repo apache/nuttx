@@ -10,8 +10,10 @@ Over the course of time NuttX has used several different repositories --
 CVS, two SVN repositories and currently git -- so revision information
 specific to an older repository may not be meaningful today.  To make it
 easier to find those older versions in the current git repository, a
-lightweight tag has been applied for each release; the tag name is the
+lightweight tag has been applied to most releases; the tag name is the
 release name (for example, release 6.27 has the tag ``nuttx-6.27``).
+Tagging starts at ``nuttx-4.14``: the 46 releases from 0.1.0 to 0.4.13
+predate it and have no tag.
 
 .. note::
    When cutting a release, add the new notes file here and prepend it to the
