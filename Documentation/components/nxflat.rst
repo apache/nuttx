@@ -346,8 +346,10 @@ The NXFLAT header carries no version field -- ``h_magic`` is written by
 ``ldnxflat``, which lives outside this repository and cannot be changed in
 step with the loader -- so the module ABI is declared through the import
 table instead.  Every module built by ``mknxflat`` imports the symbol
-``__nxflat_abi_v2``, the base firmware defines it, and the loader refuses a
-module whose import table does not name it.  The generation is bumped
+``__nxflat_abi_v2``, libc defines it, and the loader refuses a module whose
+import table does not name it.  Being in libc, the marker is in every image
+that can pass ``exec()`` a symbol table: the user image of a protected or
+kernel build as well as the base firmware.  The generation is bumped
 whenever the module ABI changes; v2 is the move of the PIC base register to
 r9, and a v1 module's thunks would add r10 and branch to a wild address on
 the first call into the base firmware.

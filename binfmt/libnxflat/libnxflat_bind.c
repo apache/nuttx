@@ -62,22 +62,6 @@
 #endif
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* The module ABI marker.  Every module built by tools/nxflat/mknxflat
- * imports this, and a board's exported symbol table picks it up the same
- * way it picks up any other imported name, so nothing has to special-case
- * it in the build.  Its value is never used; only its presence matters.
- *
- * A module built against a newer ABI than the firmware therefore fails
- * with "Exported symbol __nxflat_abi_vN not found", which names the
- * problem, and a module built against an older one is caught below.
- */
-
-void *NXFLAT_ABI_MARKER;
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -480,9 +464,9 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
             (offset + loadinfo->ispace + sizeof(struct nxflat_hdr_s));
 
           /* Note the ABI marker as it goes past.  It resolves like any
-           * other import -- the base firmware defines it below -- so the
-           * only thing special about it is that its absence means the
-           * module was built before the ABI it names.
+           * other import -- libc defines it -- so the only thing special
+           * about it is that its absence means the module was built before
+           * the ABI it names.
            */
 
           if (strcmp(symname, NXFLAT_ABI_SYMBOL) == 0)

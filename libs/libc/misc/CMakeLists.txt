@@ -115,6 +115,12 @@ if(CONFIG_LIBC_SLCDCODEC)
   list(APPEND SRCS lib_slcdencode.c lib_slcddecode.c)
 endif()
 
+# The NXFLAT module ABI marker
+
+if(CONFIG_NXFLAT)
+  list(APPEND SRCS lib_nxflat.c)
+endif()
+
 # Environment search path support
 
 if(CONFIG_LIBC_ENVPATH)
