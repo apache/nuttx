@@ -42,7 +42,7 @@ static FAR char *strcasechr(FAR const char *s, int uc)
   for (; *s != '\0'; s++)
     {
       ch = *s;
-      if (toupper(ch) == uc)
+      if (toupper((unsigned char)ch) == uc)
         {
           return (FAR char *)s;
         }
@@ -59,6 +59,7 @@ FAR char *strcasestr(FAR const char *str, FAR const char *substr)
 {
   FAR const char *candidate; /* Candidate in str with matching start character */
   char ch;                   /* First character of the substring */
+  int uc;                    /* Upper case of the first character */
   size_t len;                /* The length of the substring */
 
   /* Special case the empty substring */
@@ -78,15 +79,15 @@ FAR char *strcasestr(FAR const char *str, FAR const char *substr)
   /* Search for the substring */
 
   candidate = str;
-  ch        = toupper(ch);
+  uc        = toupper((unsigned char)ch);
 
   for (; ; )
     {
       /* strcasechr() will return a pointer to the next occurrence of the
-       * character ch in the string (ignoring case)
+       * character uc in the string (ignoring case)
        */
 
-      candidate = strcasechr(candidate, ch);
+      candidate = strcasechr(candidate, uc);
       if (!candidate || strlen(candidate) < len)
         {
           /* First character of the substring does not appear in the string
