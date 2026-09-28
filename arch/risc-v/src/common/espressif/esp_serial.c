@@ -579,7 +579,6 @@ static int esp_setup(uart_dev_t *dev)
     {
       uart_hal_set_tx_idle_num(priv->hal, 1);
     }
-  else
 #endif
 
   leave_critical_section(flags);
