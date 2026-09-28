@@ -47,6 +47,10 @@
 #define IMXRT_LPSPI_DMR0_OFFSET        0x0030  /* Data Match Register 0 offset */
 #define IMXRT_LPSPI_DMR1_OFFSET        0x0034  /* Data Match Register 1 offset */
 #define IMXRT_LPSPI_CCR_OFFSET         0x0040  /* Clock Configuration Register offset */
+#define IMXRT_LPSPI_CCR_SCKDIV_OFFSET  0x0040  /* SCK divider byte offset */
+#define IMXRT_LPSPI_CCR_DBT_OFFSET     0x0041  /* Delay between transfers byte offset */
+#define IMXRT_LPSPI_CCR_PCSSCK_OFFSET  0x0042  /* PCS-to-SCK delay byte offset */
+#define IMXRT_LPSPI_CCR_SCKPCS_OFFSET  0x0043  /* SCK-to-PCS delay byte offset */
 #define IMXRT_LPSPI_FCR_OFFSET         0x0058  /* FIFO Control Register offset */
 #define IMXRT_LPSPI_FSR_OFFSET         0x005C  /* FIFO Status Register offset */
 #define IMXRT_LPSPI_TCR_OFFSET         0x0060  /* Transmit Command Register offset */
