@@ -350,15 +350,33 @@ static int uart_handler(int irq, void *context, void *arg)
   uint32_t int_status = uart_hal_get_intsts_mask(priv->hal);
 
 #ifdef HAVE_RS485
-  if ((int_status & UART_INTR_TX_BRK_IDLE) != 0 &&
-      esp_txempty(dev))
+  /* Release the RS-485 driver once the frame has physically left the
+   * transmitter.  TX_DONE stays enabled while DIR is asserted (see
+   * esp_txint()): the upper half disables TX interrupts as soon as its
+   * software buffer drains, while the last bytes are still in the FIFO.
+   * TX_BRK_IDLE is not usable here: it belongs to the break feature
+   * (UART_TXD_BRK), which this driver never enables.
+   */
+
+  if (priv->rs485_dir_gpio != 0 &&
+      (int_status & UART_INTR_TX_DONE) != 0 &&
+      dev->xmit.tail == dev->xmit.head &&
+      uart_hal_get_txfifo_len(priv->hal) == SOC_UART_FIFO_LEN)
     {
-      uart_hal_clr_intsts_mask(priv->hal, UART_INTR_TX_BRK_IDLE);
-      if (dev->xmit.tail == dev->xmit.head)
+      /* TX_DONE can precede the transmitter FSM returning to idle by the
+       * tail of the last stop bit; wait for it (bounded) so the stop bit
+       * is not clipped.
+       */
+
+      int i;
+
+      for (i = 0; i < 1000 && !esp_txempty(dev); i++)
         {
-          esp_gpiowrite(priv->rs485_dir_gpio,
-                        !priv->rs485_dir_polarity);
+          up_udelay(1);
         }
+
+      esp_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
+      uart_hal_disable_intr_mask(priv->hal, UART_INTR_TX_DONE);
     }
 #endif
 
@@ -734,16 +752,6 @@ static void esp_txint(uart_dev_t *dev, bool enable)
 
   if (enable)
     {
-      /* After all bytes physically transmitted in the RS485 bus
-       * the TX_BRK_IDLE will indicate we can disable the TX pin.
-       */
-#ifdef HAVE_RS485
-      if (priv->rs485_dir_gpio != 0)
-        {
-          uart_hal_ena_intr_mask(priv->hal, UART_INTR_TX_BRK_IDLE);
-        }
-
-#endif
       /* Set to receive an interrupt when the TX holding register register
        * is empty
        */
@@ -754,9 +762,21 @@ static void esp_txint(uart_dev_t *dev, bool enable)
     }
   else
     {
-      /* Disable the TX interrupt */
+      /* Disable the TX interrupt.  In RS-485 mode keep TX_DONE enabled:
+       * uart_handler() needs it to release DIR once the FIFO has drained,
+       * and disables it itself when it does.
+       */
 
-      uart_hal_disable_intr_mask(priv->hal, ints_mask);
+#ifdef HAVE_RS485
+      if (priv->rs485_dir_gpio != 0)
+        {
+          uart_hal_disable_intr_mask(priv->hal, UART_INTR_TXFIFO_EMPTY);
+        }
+      else
+#endif
+        {
+          uart_hal_disable_intr_mask(priv->hal, ints_mask);
+        }
     }
 }
 
@@ -860,11 +880,11 @@ static bool esp_txempty(uart_dev_t *dev)
 {
   struct esp_uart_s *priv = dev->priv;
 
-#if defined(CONFIG_ARCH_CHIP_ESP32P4)
-  return priv->hal->dev->int_raw.txfifo_empty_int_raw != 0;
-#else
-  return priv->hal->dev->int_raw.txfifo_empty != 0;
-#endif
+  /* FIFO drained and the transmitter FSM idle.  The raw TXFIFO_EMPTY bit
+   * is not usable: it only means the FIFO is below its empty threshold.
+   */
+
+  return uart_hal_is_tx_idle(priv->hal);
 }
 
 /****************************************************************************
