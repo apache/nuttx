@@ -684,28 +684,43 @@ static inline void imxrt_lpspi_master_set_delay_scaler(
     {
       case LPSPI_PCS_TO_SCK:
         {
+#ifdef CONFIG_ARCH_FAMILY_IMXRT118x
+          putreg8((uint8_t)scaler,
+                  priv->spibase + IMXRT_LPSPI_CCR_PCSSCK_OFFSET);
+#else
           imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CCR_OFFSET,
                                   LPSPI_CCR_PCSSCK_MASK, 0);
           imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CCR_OFFSET, 0,
                                   LPSPI_CCR_PCSSCK(scaler));
+#endif
           break;
         }
 
       case LPSPI_LAST_SCK_TO_PCS:
         {
+#ifdef CONFIG_ARCH_FAMILY_IMXRT118x
+          putreg8((uint8_t)scaler,
+                  priv->spibase + IMXRT_LPSPI_CCR_SCKPCS_OFFSET);
+#else
           imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CCR_OFFSET,
                                   LPSPI_CCR_SCKPCS_MASK, 0);
           imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CCR_OFFSET, 0,
                                   LPSPI_CCR_SCKPCS(scaler));
+#endif
           break;
         }
 
       case LPSPI_BETWEEN_TRANSFER:
         {
+#ifdef CONFIG_ARCH_FAMILY_IMXRT118x
+          putreg8((uint8_t)scaler,
+                  priv->spibase + IMXRT_LPSPI_CCR_DBT_OFFSET);
+#else
           imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CCR_OFFSET,
                                   LPSPI_CCR_DBT_MASK, 0);
           imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CCR_OFFSET, 0,
                                   LPSPI_CCR_DBT(scaler));
+#endif
           break;
         }
     }
@@ -1064,9 +1079,14 @@ static uint32_t imxrt_lpspi_setfrequency(struct spi_dev_s *dev,
 
       /* Write the best values in the CCR register */
 
+#ifdef CONFIG_ARCH_FAMILY_IMXRT118x
+      putreg8((uint8_t)best_scaler,
+              priv->spibase + IMXRT_LPSPI_CCR_SCKDIV_OFFSET);
+#else
       imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CCR_OFFSET,
                               LPSPI_CCR_SCKDIV_MASK,
                               LPSPI_CCR_SCKDIV(best_scaler));
+#endif
 
       imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_TCR_OFFSET,
                               LPSPI_TCR_PRESCALE_MASK,
