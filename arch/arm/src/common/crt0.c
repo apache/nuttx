@@ -31,6 +31,7 @@
 
 #include <nuttx/addrenv.h>
 #include <nuttx/arch.h>
+#include <nuttx/fdpic.h>
 
 #include <arch/syscall.h>
 
@@ -114,7 +115,9 @@ static void exec_ctors(void)
 {
   for (initializer_t *ctor = _sctors; ctor != _ectors; ctor++)
     {
-      (*ctor)();
+      /* Under FDPIC the entry is a code address, not a descriptor */
+
+      fdpic_call(0, *ctor, fdpic_base());
     }
 }
 
@@ -130,7 +133,9 @@ static void exec_dtors(void)
 {
   for (initializer_t *dtor = _sdtors; dtor != _edtors; dtor++)
     {
-      (*dtor)();
+      /* Under FDPIC the entry is a code address, not a descriptor */
+
+      fdpic_call(0, *dtor, fdpic_base());
     }
 }
 
