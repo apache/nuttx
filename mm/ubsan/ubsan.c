@@ -53,34 +53,57 @@ static FAR const char *const g_type_check_kinds[] =
 };
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static bool g_ubsan_reporting;
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static void ubsan_prologue(FAR struct source_location *loc,
+static bool ubsan_prologue(FAR struct source_location *loc,
                            FAR const char *reason)
 {
+  /* Printing a report can trip another check; never report recursively. */
+
+  if (g_ubsan_reporting)
+    {
+      return false;
+    }
+
+  g_ubsan_reporting = true;
   _alert("========================================"
          "========================================\n");
   _alert("UBSAN: %s in %s:%" PRIu32 ":%" PRIu32"\n",
          reason, loc->file_name, loc->line, loc->column);
+  return true;
 }
 
 static void ubsan_epilogue(void)
 {
   _alert("========================================"
          "========================================\n");
+  g_ubsan_reporting = false;
 }
 
 static void ubsan_prologue_epilogue(FAR struct source_location *loc,
                                     FAR const char *reason)
 {
-  ubsan_prologue(loc, reason);
+  if (!ubsan_prologue(loc, reason))
+    {
+      return;
+    }
+
   ubsan_epilogue();
 }
 
 static void handle_null_ptr_deref(FAR struct type_mismatch_data_common *data)
 {
-  ubsan_prologue(data->location, "null-pointer-dereference");
+  if (!ubsan_prologue(data->location, "null-pointer-dereference"))
+    {
+      return;
+    }
 
   _alert("%s null pointer of type %s\n",
          g_type_check_kinds[data->type_check_kind], data->type->type_name);
@@ -91,7 +114,10 @@ static void handle_null_ptr_deref(FAR struct type_mismatch_data_common *data)
 static void handle_misaligned_access(
     FAR struct type_mismatch_data_common *data, uintptr_t ptr)
 {
-  ubsan_prologue(data->location, "misaligned-access");
+  if (!ubsan_prologue(data->location, "misaligned-access"))
+    {
+      return;
+    }
 
   _alert("%s misaligned address %p for type %s\n",
          g_type_check_kinds[data->type_check_kind], (FAR void *)ptr,
@@ -104,7 +130,10 @@ static void handle_misaligned_access(
 static void handle_object_size_mismatch(
     FAR struct type_mismatch_data_common *data, uintptr_t ptr)
 {
-  ubsan_prologue(data->location, "object-size-mismatch");
+  if (!ubsan_prologue(data->location, "object-size-mismatch"))
+    {
+      return;
+    }
 
   _alert("%s address %p with insufficient space\n",
          g_type_check_kinds[data->type_check_kind], (FAR void *)ptr);
@@ -211,7 +240,10 @@ void __ubsan_handle_out_of_bounds(FAR void *data, FAR void *index)
   FAR struct out_of_bounds_data *info = data;
   char index_str[40];
 
-  ubsan_prologue(&info->location, "array-index-out-of-bounds");
+  if (!ubsan_prologue(&info->location, "array-index-out-of-bounds"))
+    {
+      return;
+    }
 
   val_to_string(index_str, sizeof(index_str), info->index_type, index);
   _alert("index %s is out of range for type %s\n",
@@ -228,7 +260,10 @@ void __ubsan_handle_shift_out_of_bounds(FAR void *data,
   char rhs_str[40];
   char lhs_str[40];
 
-  ubsan_prologue(&info->location, "shift-out-of-bounds");
+  if (!ubsan_prologue(&info->location, "shift-out-of-bounds"))
+    {
+      return;
+    }
 
   val_to_string(rhs_str, sizeof(rhs_str), rhs_type, rhs);
   val_to_string(lhs_str, sizeof(lhs_str), lhs_type, lhs);
@@ -262,7 +297,10 @@ void __ubsan_handle_divrem_overflow(FAR void *data,
   FAR struct overflow_data *info = data;
   char rhs_val_str[40];
 
-  ubsan_prologue(&info->location, "division-overflow");
+  if (!ubsan_prologue(&info->location, "division-overflow"))
+    {
+      return;
+    }
 
   val_to_string(rhs_val_str, sizeof(rhs_val_str), info->type, rhs);
 
@@ -275,6 +313,8 @@ void __ubsan_handle_divrem_overflow(FAR void *data,
     {
       _alert("division by zero\n");
     }
+
+  ubsan_epilogue();
 }
 
 void __ubsan_handle_alignment_assumption(FAR void *data, uintptr_t ptr,
@@ -283,7 +323,10 @@ void __ubsan_handle_alignment_assumption(FAR void *data, uintptr_t ptr,
   FAR struct alignment_assumption_data *info = data;
   uintptr_t real_ptr;
 
-  ubsan_prologue(&info->location, "alignment-assumption");
+  if (!ubsan_prologue(&info->location, "alignment-assumption"))
+    {
+      return;
+    }
 
   if (offset)
     {
