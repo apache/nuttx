@@ -869,9 +869,21 @@ int libelf_load(FAR struct mod_loadinfo_s *loadinfo)
 
           if (loadinfo->datasize > 0)
             {
+#  if defined(CONFIG_ARCH_USE_DATA_HEAP) && \
+      defined(CONFIG_ARCH_USE_SEPARATED_SECTION)
+              loadinfo->datastart =
+                (uintptr_t)up_dataheap_memalign(".data",
+                                                loadinfo->dataalign,
+                                                loadinfo->datasize);
+#  elif defined(CONFIG_ARCH_USE_DATA_HEAP)
+              loadinfo->datastart =
+                (uintptr_t)up_dataheap_memalign(loadinfo->dataalign,
+                                                loadinfo->datasize);
+#  else
               loadinfo->datastart =
                 (uintptr_t)lib_memalign(loadinfo->dataalign,
                                         loadinfo->datasize);
+#  endif
               if (!loadinfo->datastart)
                 {
                   berr("ERROR: Failed to allocate the module's data\n");

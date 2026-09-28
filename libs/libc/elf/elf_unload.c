@@ -96,7 +96,11 @@ int libelf_unload(FAR struct mod_loadinfo_s *loadinfo)
 
       if (loadinfo->datastart != 0)
         {
+#ifdef CONFIG_ARCH_USE_DATA_HEAP
+          up_dataheap_free((FAR void *)loadinfo->datastart);
+#else
           lib_free((FAR void *)loadinfo->datastart);
+#endif
           loadinfo->datastart = 0;
         }
 
