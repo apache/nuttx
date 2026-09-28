@@ -644,6 +644,34 @@ static int libelf_relocateadd(FAR struct module_s *modp,
 }
 
 /****************************************************************************
+ * Name: libelf_fileoff
+ *
+ * Description:
+ *   Translate a link-time address named by a dynamic tag into its offset in
+ *   the file.  They are the same only when its segment starts at offset 0.
+ *
+ ****************************************************************************/
+
+static off_t libelf_fileoff(FAR struct mod_loadinfo_s *loadinfo,
+                            uintptr_t vaddr)
+{
+  int i;
+
+  for (i = 0; loadinfo->phdr != NULL && i < loadinfo->ehdr.e_phnum; i++)
+    {
+      FAR Elf_Phdr *phdr = &loadinfo->phdr[i];
+
+      if (phdr->p_type == PT_LOAD && vaddr >= phdr->p_vaddr &&
+          vaddr - phdr->p_vaddr < phdr->p_filesz)
+        {
+          return phdr->p_offset + (vaddr - phdr->p_vaddr);
+        }
+    }
+
+  return vaddr;
+}
+
+/****************************************************************************
  * Name: libelf_relocatedyn
  *
  * Description:
@@ -714,7 +742,8 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
       switch (dyn[i].d_tag)
         {
           case DT_REL:
-            reldata.reloff[I_REL] = dyn[i].d_un.d_val;
+            reldata.reloff[I_REL] = libelf_fileoff(loadinfo,
+                                                   dyn[i].d_un.d_ptr);
             break;
           case DT_RELSZ:
             reldata.relsz[I_REL] = dyn[i].d_un.d_val;
@@ -729,7 +758,8 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
             reldata.stroff = dyn[i].d_un.d_val;
             break;
           case DT_JMPREL:
-            reldata.reloff[I_PLT] = dyn[i].d_un.d_val;
+            reldata.reloff[I_PLT] = libelf_fileoff(loadinfo,
+                                                   dyn[i].d_un.d_ptr);
             break;
           case DT_PLTRELSZ:
             reldata.relsz[I_PLT] = dyn[i].d_un.d_val;
