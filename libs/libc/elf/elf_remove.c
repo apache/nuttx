@@ -180,7 +180,11 @@ int libelf_uninit(FAR struct module_s *modp)
 #endif
             }
 
+#ifdef CONFIG_ARCH_USE_DATA_HEAP
+          up_dataheap_free((FAR void *)modp->dataalloc);
+#else
           lib_free((FAR void *)modp->dataalloc);
+#endif
         }
       else
         {
