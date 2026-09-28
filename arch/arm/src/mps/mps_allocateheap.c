@@ -164,6 +164,16 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
   /* Allow user-mode access to the user heap memory */
 
   mpu_user_intsram(ubase, usize);
+
+#  if defined(CONFIG_ARCH_USE_TEXT_HEAP) || defined(CONFIG_ARCH_USE_DATA_HEAP)
+  /* A module loaded for a user task runs out of the text and data heaps in
+   * SRAM2, so user code must be able to execute it as well as read and
+   * write it.  mpu_user_intsram() would make it execute-never.
+   */
+
+  mpu_configure_region(MPS_SRAM2_START, MPS_SRAM2_SIZE,
+                       MPU_RBAR_AP_RWRW, MPU_RLAR_NONCACHEABLE);
+#  endif
 #elif defined(CONFIG_BUILD_PIC)
 
   /* Use different heap useful to debug */
