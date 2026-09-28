@@ -610,10 +610,11 @@ void imxrt_periphclk_configure(uintptr_t regaddr, unsigned int index,
 
 #endif
 
-#endif /* !CONFIG_ARCH_FAMILY_IMXRT118x */
-
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
+
+#endif /* !CONFIG_IMXRT_CLOCKCONFIG_VER3 */
+
 #endif /* __ARCH_ARM_SRC_IMXRT_IMXRT_PERIPHCLKS_H */
