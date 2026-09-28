@@ -193,6 +193,7 @@ static struct elf32_shdr_s   *g_shdr;
 static struct elf32_sym_s    *g_syms;
 static size_t                 g_nsyms;
 static const char            *g_strtab;
+static const char            *g_shstrtab;
 static enum segment_e        *g_segof;   /* Per section */
 
 static const struct nxflat_arch_s *g_arch;
@@ -279,6 +280,7 @@ static void read_elf(void)
   g_syms     = elf.syms;
   g_nsyms    = elf.nsyms;
   g_strtab   = elf.strtab;
+  g_shstrtab = elf.shstrtab;
 
   if (g_ehdr->e_type != ET_REL)
     {
@@ -311,6 +313,10 @@ static void read_elf(void)
  *   Executable is I-Space; everything else allocated is D-Space, read-only
  *   data included, because the model reaches that through the GOT.
  *
+ *   ARM unwind tables are left out.  Their entries are PC-relative from
+ *   D-Space into I-Space, which the container cannot express, and nothing
+ *   unwinds through a module.
+ *
  ****************************************************************************/
 
 static void place_sections(void)
@@ -330,7 +336,9 @@ static void place_sections(void)
       struct elf32_shdr_s *s = &g_shdr[i];
       uint32_t end = s->sh_addr + s->sh_size;
 
-      if ((s->sh_flags & SHF_ALLOC) == 0)
+      if ((s->sh_flags & SHF_ALLOC) == 0 ||
+          strncmp(g_shstrtab + s->sh_name, ".ARM.exidx", 10) == 0 ||
+          strncmp(g_shstrtab + s->sh_name, ".ARM.extab", 10) == 0)
         {
           continue;
         }
