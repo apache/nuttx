@@ -46,5 +46,9 @@
 
 int eic7700x_bringup(void)
 {
+#ifdef CONFIG_EIC7700X_WDT
+  eic7700x_board_wdt_initialize();
+#endif
+
   return OK;
 }
