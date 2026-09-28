@@ -1611,14 +1611,15 @@ pid_t nxsched_getppid(void);
  * Name: nxsched_collect_deadlock
  *
  * Description:
- *   Check if there is a deadlock and get the thread pid of the deadlock.
+ *   Find mutex deadlocks and collect the IDs of participating threads.
  *
  * Input parameters:
- *   pid   - The array to store the thread pid of the deadlock.
- *   count - The size of the pid array.
+ *   pid   - The array to store deadlocked thread IDs.
+ *   count - The maximum number of thread IDs to store.
  *
  * Returned Value:
- *   The number of thread deadlocks.
+ *   The number of thread IDs stored in pid.  A return value equal to count
+ *   may indicate that the result was truncated.
  *
  ****************************************************************************/
 
