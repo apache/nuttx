@@ -27,109 +27,150 @@
  * Included Files
  ****************************************************************************/
 
-#include "bcm2711_memmap.h"
 #include <arch/types.h>
+
+#include <nuttx/compiler.h>
+
+#include "bcm2711_memmap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* DMA channel offsets */
+#define BCM_DMA_CHANNUM (16) /* Number of DMA channels */
 
-#define BCM_DMA_CH0_OFFSET 0x000
-#define BCM_DMA_CH1_OFFSET 0x100
-#define BCM_DMA_CH2_OFFSET 0x200
-#define BCM_DMA_CH3_OFFSET 0x300
-#define BCM_DMA_CH4_OFFSET 0x400
-#define BCM_DMA_CH5_OFFSET 0x500
-#define BCM_DMA_CH6_OFFSET 0x600
-#define BCM_DMA_CH7_OFFSET 0x700
-#define BCM_DMA_CH8_OFFSET 0x800
-#define BCM_DMA_CH9_OFFSET 0x900
-#define BCM_DMA_CH10_OFFSET 0xa00
-#define BCM_DMA_CH11_OFFSET 0xb00
-#define BCM_DMA_CH12_OFFSET 0xc00
-#define BCM_DMA_CH13_OFFSET 0xd00
-#define BCM_DMA_CH14_OFFSET 0xe00
-#define BCM_DMA_CH15_OFFSET 0x000
+/* DMA channel addresses
+ *
+ * NOTE:
+ *
+ * DMA 7-10 are DMA Lite channels.
+ * DMA 11-14 are DMA4 channels.
+ *
+ * DMA15 has its own unique base address and cannot be looked up with the
+ * BCM_DMA(n) macro. It is exclusively used by the VPU.
+ *
+ * DMA11 can access the PCIe interface.
+ *
+ * DMA0 and DMA15 have an external 128-bit 8-word read FIFO.
+ */
 
-/* DMA channel addresses */
-
-#define BCM_DMA0 (BCM_DMA0_BASE + BCM_DMA_CH0_OFFSET)
-#define BCM_DMA1 (BCM_DMA0_BASE + BCM_DMA_CH1_OFFSET)
-#define BCM_DMA2 (BCM_DMA0_BASE + BCM_DMA_CH2_OFFSET)
-#define BCM_DMA3 (BCM_DMA0_BASE + BCM_DMA_CH3_OFFSET)
-#define BCM_DMA4 (BCM_DMA0_BASE + BCM_DMA_CH4_OFFSET)
-#define BCM_DMA5 (BCM_DMA0_BASE + BCM_DMA_CH5_OFFSET)
-#define BCM_DMA6 (BCM_DMA0_BASE + BCM_DMA_CH6_OFFSET)
-#define BCM_DMA7 (BCM_DMA0_BASE + BCM_DMA_CH7_OFFSET)   /* Lite */
-#define BCM_DMA8 (BCM_DMA0_BASE + BCM_DMA_CH8_OFFSET)   /* Lite */
-#define BCM_DMA9 (BCM_DMA0_BASE + BCM_DMA_CH9_OFFSET)   /* Lite */
-#define BCM_DMA10 (BCM_DMA0_BASE + BCM_DMA_CH10_OFFSET) /* Lite */
-#define BCM_DMA11 (BCM_DMA0_BASE + BCM_DMA_CH11_OFFSET) /* DMA4 */
-#define BCM_DMA12 (BCM_DMA0_BASE + BCM_DMA_CH12_OFFSET) /* DMA4 */
-#define BCM_DMA13 (BCM_DMA0_BASE + BCM_DMA_CH13_OFFSET) /* DMA4 */
-#define BCM_DMA14 (BCM_DMA0_BASE + BCM_DMA_CH14_OFFSET) /* DMA4 */
-#define BCM_DMA15 (BCM_DMA15_BASE + BCM_DMA_CH15_OFFSET)
+#define BCM_DMA(n) (BCM_DMA0_BASE + 0x100 * (n))
+#define BCM_DMA15 (BCM_DMA15_BASE)
 
 /* DMA control block data structures */
 
-/* DMA control block definition */
-
-struct bcm2711_dma_cb_s
-{
-  _uint32_t ti;        /* Transfer information */
-  _uint32_t source_ad; /* Source address */
-  _uint32_t dest_ad;   /* Destination address */
-  _uint32_t txfr_len;  /* Transfer length */
-  _uint32_t stride;    /* 2D mode stride */
-  _uint32_t nextconbk; /* Next control block address */
-  _uint32_t _reserved1;
-  _uint32_t _reserved2;
-};
-
-/* DMA Lite control block definition */
-
-struct bcm2711_dmalite_cb_s
-{
-  _uint32_t ti;        /* Transfer information */
-  _uint32_t source_ad; /* Source address */
-  _uint32_t dest_ad;   /* Destination address */
-  _uint32_t txfr_len;  /* Transfer length */
-  _uint32_t _reserved1;
-  _uint32_t nextconbk; /* Next control block address */
-  _uint32_t _reserved2;
-  _uint32_t _reserved3;
-};
-
-/* DMA 4 control block definition */
-
-struct bcm2711_dma4_cb_s
-{
-  _uint32_t ti;        /* Transfer information */
-  _uint32_t src;       /* Source address */
-  _uint32_t srci;      /* Source information */
-  _uint32_t dest;      /* Destination address */
-  _uint32_t desti;     /* Destination information */
-  _uint32_t len;       /* Transfer length */
-  _uint32_t nextconbk; /* Next control block address */
-  _uint32_t _reserved;
-};
-
-/* DMA registers offsets */
-
-#define BCM_DMA_CS_OFFSET 0x00        /* Control and status */
-#define BCM_DMA_CONBLK_AD_OFFSET 0x04 /* Control block address */
-#define BCM_DMA_DEBUG 0x020           /* Debug */
-
-/* TODO: Do I need to do base + offset for the above three for all 14
- * channels?
+/* DMA control block definition.
+ *
+ * Must start at a 256-bit aligned address.
+ * Fields marked reserved must be zeroed.
  */
 
-/* DMA registers */
+begin_packed_struct struct bcm2711_dma_cb_s
+{
+  volatile _uint32_t ti;        /* Transfer information */
+  volatile _uint32_t source_ad; /* Source address */
+  volatile _uint32_t dest_ad;   /* Destination address */
+  volatile _uint32_t txfr_len;  /* Transfer length */
+  volatile _uint32_t stride;    /* 2D mode stride */
+  volatile _uint32_t nextconbk; /* Next control block address */
+  volatile _uint32_t _reserved1;
+  volatile _uint32_t _reserved2;
+} aligned_data(32) end_packed_struct;
+
+/* DMA Lite control block definition
+ *
+ * DMA Lite has a 128 bit internal data structure, so a 128-bit wide read
+ * burst will stall the bus if more than 1 beat.
+ *
+ * 2D transfers are not supported with stride registers.
+ *
+ * Length register is 16 bits, so max transfer is 65536 bytes.
+ */
+
+begin_packed_struct struct bcm2711_dmalite_cb_s
+{
+  volatile _uint32_t ti;        /* Transfer information */
+  volatile _uint32_t source_ad; /* Source address */
+  volatile _uint32_t dest_ad;   /* Destination address */
+  volatile _uint32_t txfr_len;  /* Transfer length */
+  volatile _uint32_t _reserved1;
+  volatile _uint32_t nextconbk; /* Next control block address */
+  volatile _uint32_t _reserved2;
+  volatile _uint32_t _reserved3;
+} aligned_data(32) end_packed_struct;
+
+/* DMA 4 control block definition
+ *
+ * Higher performance; decoupled read/write. Can access 40 address bits. Can
+ * perform write bursts.
+ */
+
+begin_packed_struct struct bcm2711_dma4_cb_s
+{
+  volatile _uint32_t ti;        /* Transfer information */
+  volatile _uint32_t src;       /* Source address */
+  volatile _uint32_t srci;      /* Source information */
+  volatile _uint32_t dest;      /* Destination address */
+  volatile _uint32_t desti;     /* Destination information */
+  volatile _uint32_t len;       /* Transfer length */
+  volatile _uint32_t nextconbk; /* Next control block address */
+  volatile _uint32_t _reserved;
+} aligned_data(32) end_packed_struct;
+
+/* Regular & DMA Lite register offsets */
+
+#define BCM_DMA_CS_OFFSET 0x00        /* Control and status */
+#define BCM_DMA_CONBLK_AD_OFFSET 0x04 /* Cntrl blk address */
+#define BCM_DMA_TI_OFFSET 0x08        /* Cntrl blk transfer info */
+#define BCM_DMA_SOURCE_AD_OFFSET 0x0c /* Cntrl blk source address */
+#define BCM_DMA_DEST_AD_OFFSET 0x10   /* Cntrl blk destination address */
+#define BCM_DMA_TXFR_LEN_OFFSET 0x14  /* Cntrl blk txfr length remaining */
+#define BCM_DMA_STRIDE_OFFSET 0x18    /* Cntrl blk 2D stride */
+#define BCM_DMA_NEXTCONBK_OFFSET 0x1c /* Next cntrl blk address */
+#define BCM_DMA_DEBUG_OFFSET 0x20     /* Debug */
+
+/* DMA4 register offsets */
+
+#define BCM_DMA4_CS_OFFSET BCM_DMA_CS_OFFSET
+#define BCM_DMA4_CB_OFFSET BCM_DMA_CONBLK_AD_OFFSET /* Cntrl blk address */
+#define BCM_DMA4_DEBUG_OFFSET 0x0c                  /* Debug */
+#define BCM_DMA4_TI_OFFSET 0x10                     /* Cntrl blk txfr info */
+#define BCM_DMA4_SRC_OFFSET 0x14     /* Cntrl blk source addr */
+#define BCM_DMA4_SRCI_OFFSET 0x18    /* Cntrl blk source addr & info */
+#define BCM_DMA4_DEST_OFFSET 0x1c    /* Cntrl blk dest addr */
+#define BCM_DMA4_DESTI_OFFSET 0x20   /* Cntrl blk dest addr & info */
+#define BCM_DMA4_LEN_OFFSET 0x24     /* Cntrl blk txfr length remaining */
+#define BCM_DMA4_NEXT_CB_OFFSET 0x28 /* Next cntrl blk addr */
+
+/* Regular & DMA Lite registers */
+
+#define BCM_DMA_CS(base) ((base) + BCM_DMA_CS_OFFSET)
+#define BCM_DMA_CONBLK_AD(base) ((base) + BCM_DMA_CONBLK_AD_OFFSET)
+#define BCM_DMA_TI(base) ((base) + BCM_DMA_TI_OFFSET)
+#define BCM_DMA_SOURCE_AD(base) ((base) + BCM_DMA_SOURCE_AD_OFFSET)
+#define BCM_DMA_DEST_AD(base) ((base) + BCM_DMA_DEST_AD_OFFSET)
+#define BCM_DMA_TXFR_LEN(base) ((base) + BCM_DMA_TXFR_LEN_OFFSET)
+#define BCM_DMA_STRIDE(base) ((base) + BCM_DMA_STRIDE_OFFSET)
+#define BCM_DMA_NEXTCONBK(base) ((base) + BCM_DMA_NEXTCONBK_OFFSET)
+#define BCM_DMA_DEBUG(base) ((base) + BCM_DMA_DEBUG_OFFSET)
+
+/* DMA4 registers */
+
+#define BCM_DMA4_CS(base) ((base) + BCM_DMA4_CS_OFFSET)
+#define BCM_DMA4_CB(base) ((base) + BCM_DMA4_CB_OFFSET)
+#define BCM_DMA4_DEBUG(base) ((base) + BCM_DMA4_DEBUG_OFFSET)
+#define BCM_DMA4_TI(base) ((base) + BCM_DMA4_TI_OFFSET)
+#define BCM_DMA4_SRC(base) ((base) + BCM_DMA4_SRC_OFFSET)
+#define BCM_DMA4_SRCI(base) ((base) + BCM_DMA4_SRCI_OFFSET)
+#define BCM_DMA4_DEST(base) ((base) + BCM_DMA4_DEST_OFFSET)
+#define BCM_DMA4_DESTI(base) ((base) + BCM_DMA4_DESTI_OFFSET)
+#define BCM_DMA4_LEN(base) ((base) + BCM_DMA4_LEN_OFFSET)
+#define BCM_DMA4_NEXT_CB(base) ((base) + BCM_DMA4_NEXT_CB_OFFSET)
+
+/* Global DMA registers used for interrupt status and enabling */
 
 #define BCM_DMA_INT_STATUS (BCM_DMA0_BASE + 0xfe0) /* Interrupt status */
-#define BCM_DMA_INT_ENABLE (BCM_DMA0_BASE + 0xff0) /* Enable bits */
+#define BCM_DMA_ENABLE (BCM_DMA0_BASE + 0xff0)     /* Enable bits */
 
 /* DMA register bit definitions */
 
@@ -223,6 +264,7 @@ struct bcm2711_dma4_cb_s
 #define BCM_DMA4_SRCI_INC (1 << 12)         /* Increment source address */
 #define BCM_DMA4_SRCI_BURSTLEN (0xf << 8)   /* Burst transfer length */
 #define BCM_DMA4_SRCI_ADDR (0xff)           /* High bits of source address */
+#define BCM_DMA4_SRCI_ADDR_SHIFT (32)       /* Bit shift high bits down */
 
 #define BCM_DMA4_DESTI_STRIDE (0xffff << 16) /* Destination stride */
 #define BCM_DMA4_DESTI_IGNORE (1 << 15)      /* Ignore writes */
@@ -230,6 +272,7 @@ struct bcm2711_dma4_cb_s
 #define BCM_DMA4_DESTI_INC (1 << 12)         /* Increment dest address */
 #define BCM_DMA4_DESTI_BURSTLEN (0xf << 8)   /* Burst transfer length */
 #define BCM_DMA4_DESTI_ADDR (0xff)           /* High bits of dest address */
+#define BCM_DMA4_DESTI_ADDR_SHIFT (32)       /* Bit shift high bits down */
 
 #define BCM_DMA4_LEN_YLENGTH (0x3fff << 16) /* Y transfer len in 2D mode */
 #define BCM_DMA4_LEN_XLENGTH (0xffff)       /* X transfer len in bytes */
@@ -239,41 +282,14 @@ struct bcm2711_dma4_cb_s
 
 /* Interrupt status register bit definitions */
 
-#define BCM_DMA_INT15 (1 << 15) /* Interrupt status of DMA15 */
-#define BCM_DMA_INT14 (1 << 14) /* Interrupt status of DMA14 */
-#define BCM_DMA_INT13 (1 << 13) /* Interrupt status of DMA13 */
-#define BCM_DMA_INT12 (1 << 12) /* Interrupt status of DMA12 */
-#define BCM_DMA_INT11 (1 << 11) /* Interrupt status of DMA11 */
-#define BCM_DMA_INT10 (1 << 10) /* Interrupt status of DMA10 */
-#define BCM_DMA_INT9 (1 << 9)   /* Interrupt status of DMA9 */
-#define BCM_DMA_INT8 (1 << 8)   /* Interrupt status of DMA8 */
-#define BCM_DMA_INT7 (1 << 7)   /* Interrupt status of DMA7 */
-#define BCM_DMA_INT6 (1 << 6)   /* Interrupt status of DMA6 */
-#define BCM_DMA_INT5 (1 << 5)   /* Interrupt status of DMA5 */
-#define BCM_DMA_INT4 (1 << 4)   /* Interrupt status of DMA4 */
-#define BCM_DMA_INT2 (1 << 2)   /* Interrupt status of DMA2 */
-#define BCM_DMA_INT1 (1 << 1)   /* Interrupt status of DMA1 */
-#define BCM_DMA_INT0 (1 << 0)   /* Interrupt status of DMA0 */
+#define BCM_DMA_INT_STATUS_INT(n)                                            \
+  (1 << (n)) /* Interrupt status of DMA channel 'n' */
 
 /* Enable register bit definitions */
 
 #define BCM_DMA_ENABLE_PAGELITE (0xf << 28) /* Set 1G SDRAM page */
 #define BCM_DMA_ENABLE_PAGE (0xf << 24)     /* Set 1G SDRAM page */
-#define BCM_DMA_ENABLE_EN14 (1 << 14)       /* Enable DMA14 */
-#define BCM_DMA_ENABLE_EN13 (1 << 13)       /* Enable DMA13 */
-#define BCM_DMA_ENABLE_EN12 (1 << 12)       /* Enable DMA12 */
-#define BCM_DMA_ENABLE_EN11 (1 << 11)       /* Enable DMA11 */
-#define BCM_DMA_ENABLE_EN10 (1 << 10)       /* Enable DMA10 */
-#define BCM_DMA_ENABLE_EN9 (1 << 9)         /* Enable DMA9 */
-#define BCM_DMA_ENABLE_EN8 (1 << 8)         /* Enable DMA8 */
-#define BCM_DMA_ENABLE_EN7 (1 << 7)         /* Enable DMA7 */
-#define BCM_DMA_ENABLE_EN6 (1 << 6)         /* Enable DMA6 */
-#define BCM_DMA_ENABLE_EN5 (1 << 5)         /* Enable DMA5 */
-#define BCM_DMA_ENABLE_EN4 (1 << 4)         /* Enable DMA4 */
-#define BCM_DMA_ENABLE_EN3 (1 << 3)         /* Enable DMA3 */
-#define BCM_DMA_ENABLE_EN2 (1 << 2)         /* Enable DMA2 */
-#define BCM_DMA_ENABLE_EN1 (1 << 1)         /* Enable DMA1 */
-#define BCM_DMA_ENABLE_EN0 (1 << 0)         /* Enable DMA0 */
+#define BCM_DMA_ENABLE_EN(n) (1 << (n))     /* Enable DMA channel 'n' */
 
 /* TODO: Section 4.2.1.3 Peripheral DREQ Signals of Datasheet */
 
