@@ -64,6 +64,12 @@ ifeq ($(CONFIG_LIBC_SLCDCODEC),y)
 CSRCS += lib_slcdencode.c lib_slcddecode.c
 endif
 
+# The NXFLAT module ABI marker
+
+ifeq ($(CONFIG_NXFLAT),y)
+CSRCS += lib_nxflat.c
+endif
+
 # Environment search path support
 
 ifeq ($(CONFIG_LIBC_ENVPATH),y)
