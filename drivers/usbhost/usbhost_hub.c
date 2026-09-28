@@ -387,77 +387,82 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_class_s *hubclass,
       desc = (FAR struct usb_desc_s *)configdesc;
       switch (desc->type)
         {
-        /* Interface descriptor. We really should get the number of endpoints
-         * from this descriptor too.
-         */
+          /* Interface descriptor.  We really should get the number of
+           * endpoints
+           * from this descriptor too.
+           */
 
-        case USB_DESC_TYPE_INTERFACE:
-          {
-            FAR struct usb_ifdesc_s *ifdesc =
-              (FAR struct usb_ifdesc_s *)configdesc;
+          case USB_DESC_TYPE_INTERFACE:
+            {
+              FAR struct usb_ifdesc_s *ifdesc =
+                (FAR struct usb_ifdesc_s *)configdesc;
 
-            uinfo("Interface descriptor\n");
-            DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
+              uinfo("Interface descriptor\n");
+              DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
 
-            /* Save the interface number and mark ONLY the interface found */
+              /* Save the interface number and mark ONLY the interface
+               * found.
+               */
 
-            priv->ifno = ifdesc->ifno;
-            found      = USBHOST_IFFOUND;
-          }
-          break;
+              priv->ifno = ifdesc->ifno;
+              found      = USBHOST_IFFOUND;
+            }
+            break;
 
-        /* Endpoint descriptor. Here, we expect one interrupt IN endpoints. */
+          /* Endpoint descriptor.  Here, we expect one interrupt IN
+           * endpoint.
+           */
 
-        case USB_DESC_TYPE_ENDPOINT:
-          {
-            FAR struct usb_epdesc_s *epdesc =
-              (FAR struct usb_epdesc_s *)configdesc;
+          case USB_DESC_TYPE_ENDPOINT:
+            {
+              FAR struct usb_epdesc_s *epdesc =
+                (FAR struct usb_epdesc_s *)configdesc;
 
-            uinfo("Endpoint descriptor\n");
-            DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
+              uinfo("Endpoint descriptor\n");
+              DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
 
-            /* Check for an interrupt endpoint. */
+              /* Check for an interrupt endpoint. */
 
-            if ((epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) ==
-                USB_EP_ATTR_XFER_INT)
-              {
-                /* Yes.. it is a interrupt endpoint.  IN or OUT? */
+              if ((epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) ==
+                  USB_EP_ATTR_XFER_INT)
+                {
+                  /* Yes.. it is a interrupt endpoint.  IN or OUT? */
 
-                if (USB_ISEPOUT(epdesc->addr))
-                  {
-                    /* It is an OUT interrupt endpoint. Ignore */
+                  if (USB_ISEPOUT(epdesc->addr))
+                    {
+                      /* It is an OUT interrupt endpoint. Ignore */
 
-                    uinfo("Interrupt OUT EP addr:%d mxpacketsize:%d\n",
-                          (epdesc->addr & USB_EP_ADDR_NUMBER_MASK),
-                          usbhost_getle16(epdesc->mxpacketsize));
-                  }
-                else
-                  {
-                    /* It is an IN interrupt endpoint. */
+                      uinfo("Interrupt OUT EP addr:%d mxpacketsize:%d\n",
+                            (epdesc->addr & USB_EP_ADDR_NUMBER_MASK),
+                            usbhost_getle16(epdesc->mxpacketsize));
+                    }
+                  else
+                    {
+                      /* It is an IN interrupt endpoint. */
 
-                    found |= USBHOST_EPINFOUND;
+                      found |= USBHOST_EPINFOUND;
 
-                    /* Save the interrupt IN endpoint information */
+                      /* Save the interrupt IN endpoint information */
 
-                    intindesc.addr         = epdesc->addr &
-                                             USB_EP_ADDR_NUMBER_MASK;
-                    intindesc.interval     = epdesc->interval;
-                    intindesc.mxpacketsize = usbhost_getle16(
-                                             epdesc->mxpacketsize);
+                      intindesc.addr         = epdesc->addr &
+                                               USB_EP_ADDR_NUMBER_MASK;
+                      intindesc.interval     = epdesc->interval;
+                      intindesc.mxpacketsize = usbhost_getle16(
+                                               epdesc->mxpacketsize);
 
-                    uinfo("Interrupt IN EP:");
-                    uinfo(" addr=%d interval=%d mxpacketsize=%d\n",
-                        intindesc.addr, intindesc.interval,
-                         intindesc.mxpacketsize);
-                  }
-              }
-          }
-          break;
+                      uinfo("Interrupt IN EP:");
+                      uinfo(" addr=%d interval=%d mxpacketsize=%d\n",
+                          intindesc.addr, intindesc.interval,
+                           intindesc.mxpacketsize);
+                    }
+                }
+            }
+            break;
 
-        /* Other descriptors are just ignored for now */
+          /* Other descriptors are just ignored for now */
 
-        default:
-          break;
+          default:
+            break;
         }
 
       /* If we found everything we need with this interface, then break out
@@ -1023,6 +1028,7 @@ static void usbhost_hub_event(FAR void *arg)
 
                   bool ishubclass =
                     (connport->devclass->connect == usbhost_connect);
+
                   CLASS_DISCONNECTED(connport->devclass);
 
                   if (ishubclass)
