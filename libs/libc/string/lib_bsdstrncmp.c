@@ -129,6 +129,6 @@ int strncmp(FAR const char *cs, FAR const char *ct, size_t nb)
       ct++;
     }
 
-  return *cs - *ct;
+  return (unsigned char)*cs - (unsigned char)*ct;
 }
 #endif
