@@ -218,6 +218,7 @@ void up_allocate_kheap(void **heap_start, size_t *heap_size)
                     CONFIG_MM_KERNEL_HEAPSIZE;
   size_t    usize = PRIMARY_RAM_END - ubase;
   uint8_t   log2;
+
   DEBUGASSERT(ubase < PRIMARY_RAM_END);
 
   /* Adjust that size to account for MPU alignment requirements.
