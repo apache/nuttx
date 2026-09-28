@@ -321,13 +321,31 @@ static int uart_handler(int irq, void *context, void *arg)
   int_status = getreg32(UART_INT_ST_REG(priv->id));
 
 #ifdef HAVE_RS485
-  if ((int_status & UART_TX_BRK_IDLE_DONE_INT_ST_M) != 0 &&
-      esp32s3_txempty(dev))
+  /* Release the RS-485 driver once the frame has physically left the
+   * transmitter.  TX_DONE stays enabled while DIR is asserted (see
+   * esp32s3_txint()): the upper half disables TX interrupts as soon as its
+   * software buffer drains, while the last bytes are still in the FIFO.
+   * TX_BRK_IDLE_DONE is not usable here: it belongs to the break feature
+   * (UART_TXD_BRK), which this driver never enables.
+   */
+
+  if (priv->rs485_dir_gpio != 0 &&
+      (int_status & UART_TX_DONE_INT_ST_M) != 0 &&
+      dev->xmit.tail == dev->xmit.head &&
+      REG_MASK(getreg32(UART_STATUS_REG(priv->id)), UART_TXFIFO_CNT) == 0)
     {
-      if (dev->xmit.tail == dev->xmit.head)
+      /* TX_DONE can precede the transmitter FSM returning to idle by the
+       * tail of the last stop bit; wait for it (bounded) so the stop bit
+       * is not clipped.
+       */
+
+      for (int i = 0; i < 1000 && !esp32s3_txempty(dev); i++)
         {
-          esp_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
+          up_udelay(1);
         }
+
+      esp_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
+      modifyreg32(UART_INT_ENA_REG(priv->id), UART_TX_DONE_INT_ENA_M, 0);
     }
 #endif
 
@@ -616,18 +634,6 @@ static void esp32s3_txint(struct uart_dev_s *dev, bool enable)
 
   if (enable)
     {
-      /* After all bytes physically transmitted in the RS485 bus
-       * the TX_BRK_IDLE will indicate we can disable the TX pin.
-       */
-
-#ifdef HAVE_RS485
-      if (priv->rs485_dir_gpio != 0)
-        {
-          modifyreg32(UART_INT_ENA_REG(priv->id),
-                      0, UART_TX_BRK_IDLE_DONE_INT_ENA);
-        }
-#endif
-
       /* Set to receive an interrupt when the TX holding register register
        * is empty
        */
@@ -638,9 +644,22 @@ static void esp32s3_txint(struct uart_dev_s *dev, bool enable)
     }
   else
     {
-      /* Disable the TX interrupt */
+      /* Disable the TX interrupt.  In RS-485 mode keep TX_DONE enabled:
+       * uart_handler() needs it to release DIR once the FIFO has drained,
+       * and disables it itself when it does.
+       */
 
-      modifyreg32(UART_INT_ENA_REG(priv->id), ints_mask, 0);
+#ifdef HAVE_RS485
+      if (priv->rs485_dir_gpio != 0)
+        {
+          modifyreg32(UART_INT_ENA_REG(priv->id),
+                      UART_TXFIFO_EMPTY_INT_ENA_M, 0);
+        }
+      else
+#endif
+        {
+          modifyreg32(UART_INT_ENA_REG(priv->id), ints_mask, 0);
+        }
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
@@ -755,13 +774,19 @@ static bool esp32s3_txready(struct uart_dev_s *dev)
 
 static bool esp32s3_txempty(struct uart_dev_s *dev)
 {
-  uint32_t reg;
   struct esp32s3_uart_s *priv = dev->priv;
 
-  reg = getreg32(UART_INT_RAW_REG(priv->id));
-  reg = REG_MASK(reg, UART_TX_DONE_INT_RAW);
+  /* Same test as ESP-IDF's uart_ll_is_tx_idle(): FIFO drained and the
+   * transmitter FSM idle.  The raw TX_DONE bit is not usable: it reads 0
+   * before the first transmission, and uart_handler() clears it whenever
+   * the TX_DONE interrupt is enabled -- in RS-485 mode, until DIR has been
+   * released after each frame.
+   */
 
-  return reg > 0;
+  return REG_MASK(getreg32(UART_STATUS_REG(priv->id)),
+                  UART_TXFIFO_CNT) == 0 &&
+         REG_MASK(getreg32(UART_FSM_STATUS_REG(priv->id)),
+                  UART_ST_UTX_OUT) == 0;
 }
 
 /****************************************************************************
