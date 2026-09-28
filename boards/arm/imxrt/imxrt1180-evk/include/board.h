@@ -74,7 +74,7 @@
  * LPUART: no pull, high drive strength.
  */
 
-#define IOMUX_LPUART_DEFAULT (IOMUXC_PAD_PDRV_HIGH | IOMUXC_PAD_PULL_NONE)
+#define IOMUX_LPUART_DEFAULT (IOMUXC_PAD_DSE)
 
 #define GPIO_LPUART1_TX  IOMUX_PIN(IOMUXC_PAD_GPIO_AON_08_LPUART1_TX, \
                                    IOMUX_LPUART_DEFAULT, 0)
@@ -85,7 +85,7 @@
  *            D7 (red)   on GPIO_AD_26 = RGPIO4.26.
  */
 
-#define IOMUX_LED_DEFAULT   (IOMUXC_PAD_PDRV_HIGH | IOMUXC_PAD_PULL_NONE)
+#define IOMUX_LED_DEFAULT   (IOMUXC_PAD_DSE)
 
 #define GPIO_LED1           IOMUX_GPIO(IOMUXC_PAD_GPIO_AD_27_GPIO4_IO27,  \
                                        IOMUX_LED_DEFAULT,                \
@@ -101,8 +101,8 @@
  *   GPIO_AON_16 -> LPI2C2_SCL
  */
 
-#define IOMUX_LPI2C_DEFAULT (IOMUXC_PAD_PDRV_HIGH | IOMUXC_PAD_PULL_UP | \
-                             IOMUXC_PAD_ODE_ON)
+#define IOMUX_LPI2C_DEFAULT (IOMUXC_PAD_DSE | IOMUXC_PAD_PUE | \
+                             IOMUXC_PAD_PUS | IOMUXC_PAD_ODE)
 
 #define GPIO_LPI2C2_SDA  IOMUX_PIN(IOMUXC_PAD_GPIO_AON_15_LPI2C2_SDA,   \
                                    IOMUX_LPI2C_DEFAULT, IOMUXC_MUX_SION_ON)
@@ -116,7 +116,7 @@
  *   GPIO_AON_07 -> LPSPI1_SDI
  */
 
-#define IOMUX_LPSPI_DEFAULT (IOMUXC_PAD_PDRV_HIGH | IOMUXC_PAD_PULL_NONE)
+#define IOMUX_LPSPI_DEFAULT (IOMUXC_PAD_DSE)
 
 #define GPIO_LPSPI1_SCK  IOMUX_PIN(IOMUXC_PAD_GPIO_AON_04_LPSPI1_SCK,   \
                                    IOMUX_LPSPI_DEFAULT, 0)
