@@ -41,13 +41,22 @@
  *   [3:0] MUX_MODE  (alternate function 0..12)
  *   [4]   SION      (force input path)
  *
- * SW_PAD_CTL_PAD register:
- *   [1]   PDRV      (0 = high driver, 1 = normal driver)
- *   [3:2] PULL      (00 = keep, 01 = pull-up, 10 = pull-down, 11 = disabled)
+ * SW_PAD_CTL_PAD registers use two layouts:
+ *
+ * GPIO_AD_* and GPIO_AON_*:
+ *   [0]   SRE       (0 = fast slew, 1 = slow slew)
+ *   [1]   DSE       (0 = normal driver, 1 = high driver)
+ *   [2]   PUE       (0 = pull disabled, 1 = pull enabled)
+ *   [3]   PUS       (0 = pull-down, 1 = pull-up)
  *   [4]   ODE       (open drain enable)
- *   [5]   HYS       (Schmitt trigger / hysteresis enable)
- *   [6]   FSEL_APC  (fast/slow slew select)
- *   [7]   DDR_MODE  (DDR input mode; only implemented on selected pads)
+ *   [7]   IBE_OFF   (GPIO_AD_* only; force input buffer off)
+ *
+ * GPIO_EMC_*, GPIO_SD_*, GPIO_B1_* and GPIO_B2_*:
+ *   [0]   Reserved
+ *   [1]   PDRV      (0 = high driver, 1 = normal driver)
+ *   [3:2] PULL      (00 = forbidden, 01 = pull-up, 10 = pull-down,
+ *                    11 = disabled)
+ *   [4]   ODE       (open drain enable)
  */
 
 /* MUX_CTL fields */
@@ -74,7 +83,18 @@
 #  define IOMUXC_MUX_SION_OFF     (0u << IOMUXC_MUX_SION_SHIFT)
 #  define IOMUXC_MUX_SION_ON      (1u << IOMUXC_MUX_SION_SHIFT)
 
-/* PAD_CTL fields */
+/* GPIO_AD_* and GPIO_AON_* PAD_CTL fields */
+
+#define IOMUXC_PAD_SRE            (1u << 0)  /* Slow slew rate */
+#define IOMUXC_PAD_DSE            (1u << 1)  /* High drive strength */
+#define IOMUXC_PAD_PUE            (1u << 2)  /* Pull enable */
+#define IOMUXC_PAD_PUS            (1u << 3)  /* Pull up, else pull down */
+
+/* IBE_OFF is available on GPIO_AD_* pads */
+
+#define IOMUXC_PAD_IBE_OFF        (1u << 7)  /* Input buffer disable */
+
+/* GPIO_EMC_*, GPIO_SD_*, GPIO_B1_* and GPIO_B2_* PAD_CTL fields */
 
 #define IOMUXC_PAD_PDRV_SHIFT     (1)
 #define IOMUXC_PAD_PDRV_MASK      (0x01u << IOMUXC_PAD_PDRV_SHIFT)
@@ -83,30 +103,13 @@
 
 #define IOMUXC_PAD_PULL_SHIFT     (2)
 #define IOMUXC_PAD_PULL_MASK      (0x03u << IOMUXC_PAD_PULL_SHIFT)
-#  define IOMUXC_PAD_PULL_KEEP    (0u << IOMUXC_PAD_PULL_SHIFT)
 #  define IOMUXC_PAD_PULL_UP      (1u << IOMUXC_PAD_PULL_SHIFT)
 #  define IOMUXC_PAD_PULL_DOWN    (2u << IOMUXC_PAD_PULL_SHIFT)
 #  define IOMUXC_PAD_PULL_NONE    (3u << IOMUXC_PAD_PULL_SHIFT)
 
-#define IOMUXC_PAD_ODE_SHIFT      (4)
-#define IOMUXC_PAD_ODE_MASK       (0x01u << IOMUXC_PAD_ODE_SHIFT)
-#  define IOMUXC_PAD_ODE_OFF      (0u << IOMUXC_PAD_ODE_SHIFT)
-#  define IOMUXC_PAD_ODE_ON       (1u << IOMUXC_PAD_ODE_SHIFT)
+/* ODE has the same location and meaning in both PAD_CTL layouts */
 
-#define IOMUXC_PAD_HYS_SHIFT      (5)
-#define IOMUXC_PAD_HYS_MASK       (0x01u << IOMUXC_PAD_HYS_SHIFT)
-#  define IOMUXC_PAD_HYS_OFF      (0u << IOMUXC_PAD_HYS_SHIFT)
-#  define IOMUXC_PAD_HYS_ON       (1u << IOMUXC_PAD_HYS_SHIFT)
-
-#define IOMUXC_PAD_FSEL_SHIFT     (6)
-#define IOMUXC_PAD_FSEL_MASK      (0x01u << IOMUXC_PAD_FSEL_SHIFT)
-#  define IOMUXC_PAD_FSEL_SLOW    (0u << IOMUXC_PAD_FSEL_SHIFT)
-#  define IOMUXC_PAD_FSEL_FAST    (1u << IOMUXC_PAD_FSEL_SHIFT)
-
-#define IOMUXC_PAD_DDR_SHIFT      (7)
-#define IOMUXC_PAD_DDR_MASK       (0x01u << IOMUXC_PAD_DDR_SHIFT)
-#  define IOMUXC_PAD_DDR_OFF      (0u << IOMUXC_PAD_DDR_SHIFT)
-#  define IOMUXC_PAD_DDR_ON       (1u << IOMUXC_PAD_DDR_SHIFT)
+#define IOMUXC_PAD_ODE            (1u << 4)  /* Open drain enable */
 
 /****************************************************************************
  * IMXRT_PADCFG packed encoding
