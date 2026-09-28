@@ -43,8 +43,9 @@ int strcasecmp(FAR const char *cs, FAR const char *ct)
 
   for (; ; )
     {
-      if ((result = toupper(*cs) - toupper(*ct)) != 0 ||
-          *cs == '\0')
+      result = toupper((unsigned char)*cs) -
+               toupper((unsigned char)*ct);
+      if (result != 0 || *cs == '\0')
         {
           break;
         }

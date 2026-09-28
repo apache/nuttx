@@ -42,7 +42,7 @@ static FAR char *strcasechr(FAR const char *s, int uc)
   for (; *s != '\0'; s++)
     {
       ch = *s;
-      if (toupper(ch) == uc)
+      if (toupper((unsigned char)ch) == uc)
         {
           return (FAR char *)s;
         }
@@ -78,7 +78,7 @@ FAR char *strcasestr(FAR const char *str, FAR const char *substr)
   /* Search for the substring */
 
   candidate = str;
-  ch        = toupper(ch);
+  ch        = (char)toupper((unsigned char)ch);
 
   for (; ; )
     {
