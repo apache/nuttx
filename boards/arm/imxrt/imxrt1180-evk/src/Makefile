@@ -42,6 +42,10 @@ ifeq ($(CONFIG_IMXRT1180_EVK_BOOTLOADER),y)
 CSRCS += imxrt_bootloader.c
 endif
 
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS += imxrt_buttons.c
+endif
+
 ifeq ($(CONFIG_USBDEV_DMAMEMORY),y)
 CSRCS += imxrt_dma_alloc.c
 endif
