@@ -876,6 +876,51 @@ Set the attribute ``__attribute__ ((section (".ext_ram.bss")))`` to the variable
 
 This is particularly useful when the internal RAM is not enough to hold all the data.
 
+Memory Protection and Build Modes
+=================================
+
+The ESP32-S3 supports the three NuttX build modes:
+
+* **FLAT**: the kernel and the applications are one image, with no
+  protection between them.
+* **PROTECTED**: the kernel and the applications are two images.  The World
+  Controller (WC) and the Permission Control (PMS) run the applications in the
+  unprivileged world, which cannot reach kernel memory or the peripherals.
+  See :ref:`esp32s3-devkit:knsh <platforms/xtensa/esp32s3/boards/esp32s3-devkit/index:knsh>` and :ref:`esp32s3-devkit:ksta_softap <platforms/xtensa/esp32s3/boards/esp32s3-devkit/index:ksta_softap>`.
+* **KERNEL**: every program is a separate ELF file with its own address
+  environment, protected by WC and PMS in the same way.  The MMU maps flash
+  and PSRAM in pages of 64 KiB.  The pages of every process come from a page
+  pool in PSRAM, and the kernel switches the mappings with the process.  This
+  is the only build mode with ``fork()``.
+  See :ref:`esp32s3-devkit:kernel_oct <platforms/xtensa/esp32s3/boards/esp32s3-devkit/index:kernel_oct>` and :ref:`esp32s3-devkit:kernel_n8r2 <platforms/xtensa/esp32s3/boards/esp32s3-devkit/index:kernel_n8r2>`.
+
+Faults in User Code
+-------------------
+
+In a PROTECTED or a KERNEL build, a user task that makes a forbidden access,
+or takes any other fault that cannot be serviced, receives ``SIGSEGV``.  Its
+default action terminates only that task, and the rest of the system keeps
+running.  This is ``CONFIG_ESP32S3_USERFAULT_ABORT``, which is enabled by
+default.  A fault in kernel mode still halts the system: a kernel thread, a
+system call and an interrupt handler have no task that can safely be killed.
+
+The console names the cause of the fault::
+
+    pms_violation_isr: SIGSEGV (PMS) task sandbox: PC=42c0195f
+    pms_violation_isr: SIGSEGV (MMU entry) task sandbox: PC=42c01967
+
+``(PMS)`` is an access that the permission control refused, for example to
+kernel memory or to a peripheral.  ``(MMU entry)`` is an access to an address
+that has no valid MMU entry.
+
+``CONFIG_ESP32S3_PAGEFAULT`` routes these permission faults to a dispatcher
+that can service them and restart the instruction.  This is the base for
+guard pages and for growing a stack or a heap on demand.  It is disabled by
+default.
+
+.. warning:: The World Controller and the Permission Control **do not**
+  prevent user code from accessing the CPU system registers.
+
 .. _esp32s3_ulp:
 
 ULP RISC-V Coprocessor

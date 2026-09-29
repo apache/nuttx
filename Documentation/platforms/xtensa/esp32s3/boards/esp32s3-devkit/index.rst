@@ -425,9 +425,31 @@ A one byte symbol means that the linker took the stub.  Delete
 ``boards/xtensa/esp32s3/esp32s3-devkit/src/romfs_stub.o`` and ``libboard.a``,
 then link again.
 
-The shell needs the full path of a program in this build mode::
+The programs are in ``/system/bin``, which is in ``PATH``, so the shell finds
+them by name.
 
-    nsh> /system/bin/ostest
+A process runs in the unprivileged world and cannot reach kernel memory, the
+peripherals or the pages of another process.  If it tries, only that process
+is terminated.  See
+:ref:`Memory Protection and Build Modes <platforms/xtensa/esp32s3/index:Memory Protection and Build Modes>`.
+
+Two programs in the ROMFS show this on the board.  ``ostest`` includes the
+``fork()`` and ``vfork()`` tests::
+
+    nsh> ostest
+    ...
+    fork_test: Parent and child had independent memory
+    ...
+    ostest_main: Exiting with status 0
+
+``sandbox`` makes one allowed access and three forbidden ones: to kernel
+memory, to a peripheral register and to an address without a mapping.  Each
+offender must be terminated, the caller must survive, and the memory and the
+file descriptors of the offender must be given back::
+
+    nsh> sandbox
+    ...
+    sandbox: CONTAINED - 4 target(s), every check passed
 
 knsh
 ----
@@ -448,6 +470,13 @@ Flash and PSRAM).
 
 .. warning:: The World Controller and Permission Control **do not** prevent
   the application from accessing CPU System Registers.
+
+ksta_softap
+-----------
+
+A PROTECTED build, like ``knsh``, with Wi-Fi in station and SoftAP mode at
+the same time.  It includes ``wapi``, a DHCP server and ``iperf``.  The Wi-Fi
+commands are the same as in :ref:`esp32s3-devkit:sta_softap <platforms/xtensa/esp32s3/boards/esp32s3-devkit/index:sta_softap>`.
 
 mbedtls
 -------
