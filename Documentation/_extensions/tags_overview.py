@@ -135,8 +135,11 @@ def _toctree(names, tags):
     body = [".. toctree::", "   :maxdepth: 1", ""] + _entries(names, tags)
     if len(names) < COLUMN_THRESHOLD:
         return body + [""]
-    return [".. container:: tag-columns", ""] + \
-           [f"   {line}" if line else "" for line in body] + [""]
+    return (
+        [".. container:: tag-columns", ""]
+        + [f"   {line}" if line else "" for line in body]
+        + [""]
+    )
 
 
 def _entries(names, tags):
@@ -229,12 +232,14 @@ def _overview_tree(grouped, tags):
         # The count has to be what the rows below add up to, not the number of
         # distinct names: qemu is a family of arm, arm64 and x86_64, and is
         # listed under each because each is a different chip.
-        rows.append((
-            1,
-            FAMILY_HEADING,
-            sum(len(v) for v in by_arch.values()),
-            _label("section", FAMILY_HEADING),
-        ))
+        rows.append(
+            (
+                1,
+                FAMILY_HEADING,
+                sum(len(v) for v in by_arch.values()),
+                _label("section", FAMILY_HEADING),
+            )
+        )
         # Alphabetical, like the sections below.  Ordering the map by size and
         # the page by name makes the reader look twice for the same thing.
         for arch in sorted(by_arch):
@@ -248,15 +253,18 @@ def _overview_tree(grouped, tags):
         for name in parts:
             for family in _chip_families(tags[name][1]) or ["(unknown)"]:
                 by_family[family].append(name)
-        rows.append((
-            1,
-            f"{PART_HEADING}, under {len(by_family)} families",
-            sum(len(v) for v in by_family.values()),
-            _label("section", PART_HEADING),
-        ))
+        rows.append(
+            (
+                1,
+                f"{PART_HEADING}, under {len(by_family)} families",
+                sum(len(v) for v in by_family.values()),
+                _label("section", PART_HEADING),
+            )
+        )
 
-    return ["", ".. parsed-literal::", ""] + \
-           [f"   {line}" for line in _tree(rows)] + [""]
+    return (
+        ["", ".. parsed-literal::", ""] + [f"   {line}" for line in _tree(rows)] + [""]
+    )
 
 
 def write_overview(app: Sphinx):
@@ -303,16 +311,16 @@ def write_overview(app: Sphinx):
     families = sorted(grouped.get("chip") or [])
     parts = grouped.get("part") or []
     if families or parts:
-        out += _section(CHIP_HEADING, "=", CHIP_INTRO,
-                        _label("section", CHIP_HEADING))
+        out += _section(CHIP_HEADING, "=", CHIP_INTRO, _label("section", CHIP_HEADING))
 
     if families:
         # A chip tag names its family, so it needs no working out.  Grouping
         # them by architecture is what turns a run of 134 names into
         # something you can scan: nobody arrives at this page without already
         # knowing whether they are holding an Arm or a RISC-V board.
-        out += _section(FAMILY_HEADING, "-", FAMILY_INTRO,
-                        _label("section", FAMILY_HEADING))
+        out += _section(
+            FAMILY_HEADING, "-", FAMILY_INTRO, _label("section", FAMILY_HEADING)
+        )
         by_arch = defaultdict(list)
         for name in families:
             for arch in _architectures(tags[name][1]) or ["(unknown)"]:
@@ -322,8 +330,7 @@ def write_overview(app: Sphinx):
             out += _toctree(by_arch[arch], tags)
 
     if parts:
-        out += _section(PART_HEADING, "-", PART_INTRO,
-                        _label("section", PART_HEADING))
+        out += _section(PART_HEADING, "-", PART_INTRO, _label("section", PART_HEADING))
         by_family = defaultdict(list)
         for name in parts:
             found = _chip_families(tags[name][1])
@@ -349,8 +356,7 @@ def write_overview(app: Sphinx):
     logger.info(
         "[tags_overview] grouped %d tags into %d sections",
         len(tags),
-        sum(1 for ns, _, _ in NAMESPACES if grouped.get(ns))
-        + bool(families or parts),
+        sum(1 for ns, _, _ in NAMESPACES if grouped.get(ns)) + bool(families or parts),
     )
 
 

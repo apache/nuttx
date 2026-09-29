@@ -175,7 +175,8 @@ def chip_families(root):
         src = arch / "src"
         if src.is_dir():
             families[arch.name] = {
-                d.name for d in src.iterdir()
+                d.name
+                for d in src.iterdir()
                 if d.is_dir() and d.name not in ("common", "cmake")
             }
     return families
@@ -205,7 +206,7 @@ def check_board_tags(root):
         parts = page.relative_to(platforms).parts
         arch = parts[0]
         known = families.get(arch, set())
-        chain = list(parts[1:parts.index("boards")])
+        chain = list(parts[1 : parts.index("boards")])
         chips, chip_parts = split_path(chain, known)
         rel = page.relative_to(root)
         if not chips:
@@ -249,9 +250,7 @@ def check_board_tags(root):
         tags = [t.strip() for t in match.group(1).split(",") if t.strip()]
         missing = [t for t in expected if t not in tags]
         if missing:
-            problems.append(
-                f"error: {rel} is missing the tags {', '.join(missing)}"
-            )
+            problems.append(f"error: {rel} is missing the tags {', '.join(missing)}")
         for tag in tags:
             if tag != tag.lower():
                 problems.append(
@@ -400,11 +399,15 @@ def read_ignore(root):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "-C", "--directory", default=".", type=Path,
+        "-C",
+        "--directory",
+        default=".",
+        type=Path,
         help="path inside the NuttX checkout to check (default: .)",
     )
     parser.add_argument(
-        "--list-stale", action="store_true",
+        "--list-stale",
+        action="store_true",
         help="list ignore entries that are no longer needed and exit",
     )
     args = parser.parse_args()

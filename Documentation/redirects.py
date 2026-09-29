@@ -59,65 +59,99 @@ _PLATFORM_ALIGNMENT = [
     # misco -> misoc
     ("platforms/misco/index", "platforms/misoc/index"),
     ("platforms/misco/lm32/index", "platforms/misoc/lm32/index"),
-    ("platforms/misco/lm32/boards/misoc/index",
-     "platforms/misoc/lm32/boards/misoc/index"),
-
+    (
+        "platforms/misco/lm32/boards/misoc/index",
+        "platforms/misoc/lm32/boards/misoc/index",
+    ),
     # ra4m1 -> ra4
     ("platforms/arm/ra4m1/index", "platforms/arm/ra4/index"),
-    ("platforms/arm/ra4m1/boards/arduino-r4-minima/index",
-     "platforms/arm/ra4/boards/arduino-r4-minima/index"),
-    ("platforms/arm/ra4m1/boards/xiao-ra4m1/index",
-     "platforms/arm/ra4/boards/xiao-ra4m1/index"),
-
+    (
+        "platforms/arm/ra4m1/boards/arduino-r4-minima/index",
+        "platforms/arm/ra4/boards/arduino-r4-minima/index",
+    ),
+    (
+        "platforms/arm/ra4m1/boards/xiao-ra4m1/index",
+        "platforms/arm/ra4/boards/xiao-ra4m1/index",
+    ),
     # lpc17xx -> lpc17xx_40xx
     ("platforms/arm/lpc17xx/index", "platforms/arm/lpc17xx_40xx/index"),
-    ("platforms/arm/lpc17xx/boards/lincoln60/index",
-     "platforms/arm/lpc17xx_40xx/boards/lincoln60/index"),
-    ("platforms/arm/lpc17xx/boards/lpcxpresso-lpc1768/index",
-     "platforms/arm/lpc17xx_40xx/boards/lpcxpresso-lpc1768/index"),
-    ("platforms/arm/lpc17xx/boards/mbed/index",
-     "platforms/arm/lpc17xx_40xx/boards/mbed/index"),
-    ("platforms/arm/lpc17xx/boards/mcb1700/index",
-     "platforms/arm/lpc17xx_40xx/boards/mcb1700/index"),
-    ("platforms/arm/lpc17xx/boards/olimex-lpc1766stk/index",
-     "platforms/arm/lpc17xx_40xx/boards/olimex-lpc1766stk/index"),
-    ("platforms/arm/lpc17xx/boards/open1788/index",
-     "platforms/arm/lpc17xx_40xx/boards/open1788/index"),
-    ("platforms/arm/lpc17xx/boards/pnev5180b/index",
-     "platforms/arm/lpc17xx_40xx/boards/pnev5180b/index"),
-    ("platforms/arm/lpc17xx/boards/u-blox-c027/index",
-     "platforms/arm/lpc17xx_40xx/boards/u-blox-c027/index"),
-    ("platforms/arm/lpc17xx/boards/zkit-arm-1769/index",
-     "platforms/arm/lpc17xx_40xx/boards/zkit-arm-1769/index"),
-
+    (
+        "platforms/arm/lpc17xx/boards/lincoln60/index",
+        "platforms/arm/lpc17xx_40xx/boards/lincoln60/index",
+    ),
+    (
+        "platforms/arm/lpc17xx/boards/lpcxpresso-lpc1768/index",
+        "platforms/arm/lpc17xx_40xx/boards/lpcxpresso-lpc1768/index",
+    ),
+    (
+        "platforms/arm/lpc17xx/boards/mbed/index",
+        "platforms/arm/lpc17xx_40xx/boards/mbed/index",
+    ),
+    (
+        "platforms/arm/lpc17xx/boards/mcb1700/index",
+        "platforms/arm/lpc17xx_40xx/boards/mcb1700/index",
+    ),
+    (
+        "platforms/arm/lpc17xx/boards/olimex-lpc1766stk/index",
+        "platforms/arm/lpc17xx_40xx/boards/olimex-lpc1766stk/index",
+    ),
+    (
+        "platforms/arm/lpc17xx/boards/open1788/index",
+        "platforms/arm/lpc17xx_40xx/boards/open1788/index",
+    ),
+    (
+        "platforms/arm/lpc17xx/boards/pnev5180b/index",
+        "platforms/arm/lpc17xx_40xx/boards/pnev5180b/index",
+    ),
+    (
+        "platforms/arm/lpc17xx/boards/u-blox-c027/index",
+        "platforms/arm/lpc17xx_40xx/boards/u-blox-c027/index",
+    ),
+    (
+        "platforms/arm/lpc17xx/boards/zkit-arm-1769/index",
+        "platforms/arm/lpc17xx_40xx/boards/zkit-arm-1769/index",
+    ),
     # lpc40xx -> lpc17xx_40xx
     ("platforms/arm/lpc40xx/index", "platforms/arm/lpc17xx_40xx/lpc40xx"),
     # These two boards carry only a README.txt -- they had no page before the
     # move and have none now, so the old URLs point at the family page that
     # names them rather than at a board page that never existed.
-    ("platforms/arm/lpc40xx/boards/lpc4088-devkit/index",
-     "platforms/arm/lpc17xx_40xx/lpc40xx"),
-    ("platforms/arm/lpc40xx/boards/lpc4088-quickstart/index",
-     "platforms/arm/lpc17xx_40xx/lpc40xx"),
-    ("platforms/arm/lpc40xx/boards/lx_cpu/index",
-     "platforms/arm/lpc17xx_40xx/boards/lx_cpu/index"),
-
+    (
+        "platforms/arm/lpc40xx/boards/lpc4088-devkit/index",
+        "platforms/arm/lpc17xx_40xx/lpc40xx",
+    ),
+    (
+        "platforms/arm/lpc40xx/boards/lpc4088-quickstart/index",
+        "platforms/arm/lpc17xx_40xx/lpc40xx",
+    ),
+    (
+        "platforms/arm/lpc40xx/boards/lx_cpu/index",
+        "platforms/arm/lpc17xx_40xx/boards/lx_cpu/index",
+    ),
     # added upstream after the fork, filed here by where its code lives
     ("implementation/chroot", "os/filesystem/chroot"),
-
     # upstream typo: the page was named intex.rst
-    ("platforms/arm/nrf52/boards/nrf52-feather/intex",
-     "platforms/arm/nrf52/boards/nrf52-feather/index"),
-
+    (
+        "platforms/arm/nrf52/boards/nrf52-feather/intex",
+        "platforms/arm/nrf52/boards/nrf52-feather/index",
+    ),
     # boards filed under a name the source tree does not use
-    ("platforms/arm/stm32f1/boards/hymini-stm32/index",
-     "platforms/arm/stm32f1/boards/hymini-stm32v/index"),
-    ("platforms/arm/mps/boards/mps2-an512/index",
-     "platforms/arm/mps/boards/mps2-an521/index"),
-    ("platforms/mips/jz4780/boards/mips-creator-ci20/index",
-     "platforms/mips/jz4780/boards/ci20/index"),
-    ("platforms/tricore/tc397/boards/kit_a2g_tc397_tft/index",
-     "platforms/tricore/tc397/boards/a2g-tc397-5v-tft/index"),
+    (
+        "platforms/arm/stm32f1/boards/hymini-stm32/index",
+        "platforms/arm/stm32f1/boards/hymini-stm32v/index",
+    ),
+    (
+        "platforms/arm/mps/boards/mps2-an512/index",
+        "platforms/arm/mps/boards/mps2-an521/index",
+    ),
+    (
+        "platforms/mips/jz4780/boards/mips-creator-ci20/index",
+        "platforms/mips/jz4780/boards/ci20/index",
+    ),
+    (
+        "platforms/tricore/tc397/boards/kit_a2g_tc397_tft/index",
+        "platforms/tricore/tc397/boards/a2g-tc397-5v-tft/index",
+    ),
 ]
 
 # Normalising the tag vocabulary.  Tag pages have stable URLs under _tags/,
@@ -135,7 +169,6 @@ _TAG_VOCABULARY = [
     ("_tags/ethernet", "_tags/tagsindex"),
     ("_tags/wifi", "_tags/tagsindex"),
     ("_tags/experimental", "_tags/tagsindex"),
-
     # Dropped: armv8-m and cortex-m33 are cores, not architectures, and the
     # pages that carried them already carry arch:arm.
     ("_tags/arch-armv8m", "_tags/tagsindex"),
@@ -277,8 +310,10 @@ _DROPPED_FACTS = [
 # only the tags were wrong.
 _SOURCE_TREE_TRUTH = [
     ("platforms/tricore/tc4d9/index", "platforms/tricore/tc4da/index"),
-    ("platforms/tricore/tc4d9/boards/triboard_tc4x9_com/index",
-     "platforms/tricore/tc4da/boards/triboard_tc4x9_com/index"),
+    (
+        "platforms/tricore/tc4d9/boards/triboard_tc4x9_com/index",
+        "platforms/tricore/tc4da/boards/triboard_tc4x9_com/index",
+    ),
     ("_tags/chip-tc4d9", "_tags/chip-tc4da"),
     ("_tags/chip-atmega128", "_tags/part-atmega128"),
     ("_tags/chip-atmega1284p", "_tags/part-atmega1284p"),
@@ -289,8 +324,10 @@ _SOURCE_TREE_TRUTH = [
 # so that is where its page belongs.  platforms/x86_64/intel64/ stays: it is a
 # real family under arch/x86_64/src/, it just has no boards of its own.
 _X86_64_BOARD = [
-    ("platforms/x86_64/intel64/boards/qemu-intel64/index",
-     "platforms/x86_64/qemu/boards/qemu-intel64/index"),
+    (
+        "platforms/x86_64/intel64/boards/qemu-intel64/index",
+        "platforms/x86_64/qemu/boards/qemu-intel64/index",
+    ),
 ]
 
 # Grouping the OS documentation by subsystem instead of by how deep it goes.
@@ -302,8 +339,10 @@ _OS_SCHEDULING = [
     ("implementation/nuttx_tasking", "os/scheduling/nuttx_tasking"),
     ("implementation/tasks_vs_threads", "os/scheduling/tasks_vs_threads"),
     ("implementation/processes_vs_tasks", "os/scheduling/processes_vs_tasks"),
-    ("implementation/kernel_threads_vs_pthreads",
-     "os/scheduling/kernel_threads_vs_pthreads"),
+    (
+        "implementation/kernel_threads_vs_pthreads",
+        "os/scheduling/kernel_threads_vs_pthreads",
+    ),
     ("implementation/context_switches", "os/scheduling/context_switches"),
     ("implementation/preemption_latency", "os/scheduling/preemption_latency"),
     ("implementation/cancellation_points", "os/scheduling/cancellation_points"),
@@ -340,15 +379,16 @@ _OS_PAGES = [
     ("implementation/drivers_design", "os/drivers/drivers_design"),
     ("implementation/ioctl", "os/drivers/ioctl"),
     ("implementation/usb", "os/drivers/usb"),
-    ("implementation/power_management",
-     "os/drivers/special/power/power_management"),
+    ("implementation/power_management", "os/drivers/special/power/power_management"),
     ("implementation/syslog", "os/drivers/special/syslog_design"),
     ("implementation/file_descriptors", "os/filesystem/file_descriptors"),
     ("implementation/file_permission", "os/filesystem/file_permission"),
     ("implementation/memory_configurations", "os/memory/memory_configurations"),
     ("implementation/crc", "os/libs/crc"),
-    ("implementation/kernel_modules_vs_shared_libraries",
-     "os/binfmt/kernel_modules_vs_shared_libraries"),
+    (
+        "implementation/kernel_modules_vs_shared_libraries",
+        "os/binfmt/kernel_modules_vs_shared_libraries",
+    ),
     ("implementation/tls", "os/scheduling/tls"),
     ("implementation/user_identity", "os/scheduling/user_identity"),
     ("implementation/bottomhalf_interrupt", "os/interrupts/bottomhalf_interrupt"),
@@ -356,8 +396,10 @@ _OS_PAGES = [
     ("implementation/critical_sections", "os/interrupts/critical_sections"),
     ("implementation/tickless_os", "os/time/tickless_os"),
     ("implementation/short_time_delays", "os/time/short_time_delays"),
-    ("implementation/oneshot_timers_and_cpu_load",
-     "os/time/oneshot_timers_and_cpu_load"),
+    (
+        "implementation/oneshot_timers_and_cpu_load",
+        "os/time/oneshot_timers_and_cpu_load",
+    ),
     ("implementation/signal_handlers", "os/ipc/signal_handlers"),
     ("reference/os/index", "os/index"),
     ("reference/os/addrenv", "os/memory/addrenv"),
@@ -398,11 +440,20 @@ def _moved_trees(pairs):
 # guides/ split by subject.  60 files in one directory, in no order anybody
 # could use; each one now sits under the thing it is about.
 _GUIDES = [
-    ("guides/armv7m_runtimestackcheck", "guides/chip-specific/armv7m_runtimestackcheck"),
+    (
+        "guides/armv7m_runtimestackcheck",
+        "guides/chip-specific/armv7m_runtimestackcheck",
+    ),
     ("guides/automounter", "guides/filesystem/automounter"),
-    ("guides/building_nuttx_with_app_out_of_src_tree", "guides/build/building_nuttx_with_app_out_of_src_tree"),
+    (
+        "guides/building_nuttx_with_app_out_of_src_tree",
+        "guides/build/building_nuttx_with_app_out_of_src_tree",
+    ),
     ("guides/building_uclibcpp", "guides/build/building_uclibcpp"),
-    ("guides/changing_systemclockconfig", "guides/chip-specific/changing_systemclockconfig"),
+    (
+        "guides/changing_systemclockconfig",
+        "guides/chip-specific/changing_systemclockconfig",
+    ),
     ("guides/cpp_cmake", "guides/build/cpp_cmake"),
     ("guides/custom_app_directories", "guides/build/custom_app_directories"),
     ("guides/customapps", "guides/build/customapps"),
@@ -416,14 +467,20 @@ _GUIDES = [
     ("guides/include_files_board_h", "guides/porting/include_files_board_h"),
     ("guides/integrate_newlib", "guides/build/integrate_newlib"),
     ("guides/ipv6", "guides/networking/ipv6"),
-    ("guides/kernel_threads_with_custom_stacks", "guides/concurrency/kernel_threads_with_custom_stacks"),
+    (
+        "guides/kernel_threads_with_custom_stacks",
+        "guides/concurrency/kernel_threads_with_custom_stacks",
+    ),
     ("guides/logging_rambuffer", "guides/drivers/logging_rambuffer"),
     ("guides/lwl", "guides/drivers/lwl"),
     ("guides/multiple_nsh_sessions", "guides/nsh/multiple_nsh_sessions"),
     ("guides/nestedinterrupts", "guides/concurrency/nestedinterrupts"),
     ("guides/nfs", "guides/networking/nfs"),
     ("guides/nix_flake", "guides/build/nix_flake"),
-    ("guides/nsh_network_link_management", "guides/networking/nsh_network_link_management"),
+    (
+        "guides/nsh_network_link_management",
+        "guides/networking/nsh_network_link_management",
+    ),
     ("guides/ofloader", "guides/drivers/ofloader"),
     ("guides/optee", "guides/security/optee"),
     ("guides/partially_linked_elf", "guides/programs/partially_linked_elf"),
@@ -431,7 +488,10 @@ _GUIDES = [
     ("guides/port", "guides/porting/port"),
     ("guides/port_bootsequence", "guides/porting/port_bootsequence"),
     ("guides/port_drivers_to_stm32f7", "guides/chip-specific/port_drivers_to_stm32f7"),
-    ("guides/port_relatedkernelconfigrations", "guides/porting/port_relatedkernelconfigrations"),
+    (
+        "guides/port_relatedkernelconfigrations",
+        "guides/porting/port_relatedkernelconfigrations",
+    ),
     ("guides/protected_build", "guides/programs/protected_build"),
     ("guides/pysimcoder", "guides/languages/pysimcoder"),
     ("guides/qemu_tips", "guides/simulation/qemu_tips"),
@@ -442,25 +502,44 @@ _GUIDES = [
     ("guides/rndis", "guides/drivers/rndis"),
     ("guides/rust", "guides/languages/rust"),
     ("guides/semihosting", "guides/chip-specific/semihosting"),
-    ("guides/signal_events_interrupt_handlers", "guides/concurrency/signal_events_interrupt_handlers"),
-    ("guides/signaling_sem_priority_inheritance", "guides/concurrency/signaling_sem_priority_inheritance"),
+    (
+        "guides/signal_events_interrupt_handlers",
+        "guides/concurrency/signal_events_interrupt_handlers",
+    ),
+    (
+        "guides/signaling_sem_priority_inheritance",
+        "guides/concurrency/signaling_sem_priority_inheritance",
+    ),
     ("guides/simulator", "guides/simulation/simulator"),
     ("guides/smaller_vector_tables", "guides/chip-specific/smaller_vector_tables"),
-    ("guides/specialstuff_in_nuttxheaderfiles", "guides/porting/specialstuff_in_nuttxheaderfiles"),
+    (
+        "guides/specialstuff_in_nuttxheaderfiles",
+        "guides/porting/specialstuff_in_nuttxheaderfiles",
+    ),
     ("guides/stm32_ports", "guides/chip-specific/stm32_ports"),
     ("guides/stm32ccm", "guides/chip-specific/stm32ccm"),
     ("guides/stm32nullpointer", "guides/chip-specific/stm32nullpointer"),
     ("guides/testingtcpip", "guides/networking/testingtcpip"),
     ("guides/thread_local_storage", "guides/concurrency/thread_local_storage"),
-    ("guides/updating_release_system_elf", "guides/programs/updating_release_system_elf"),
+    (
+        "guides/updating_release_system_elf",
+        "guides/programs/updating_release_system_elf",
+    ),
     ("guides/usbtrace", "guides/drivers/usbtrace"),
     ("guides/usingkernelthreads", "guides/concurrency/usingkernelthreads"),
-    ("guides/versioning_and_task_names", "guides/concurrency/versioning_and_task_names"),
+    (
+        "guides/versioning_and_task_names",
+        "guides/concurrency/versioning_and_task_names",
+    ),
     ("guides/zerolatencyinterrupts", "guides/concurrency/zerolatencyinterrupts"),
-    ("guides/porting-case-studies/bcm2711-rpi4b",
-     "guides/porting/case-studies/bcm2711-rpi4b"),
-    ("guides/porting-case-studies/port_arm_cm4",
-     "guides/porting/case-studies/port_arm_cm4"),
+    (
+        "guides/porting-case-studies/bcm2711-rpi4b",
+        "guides/porting/case-studies/bcm2711-rpi4b",
+    ),
+    (
+        "guides/porting-case-studies/port_arm_cm4",
+        "guides/porting/case-studies/port_arm_cm4",
+    ),
 ]
 
 redirects = _moved(
