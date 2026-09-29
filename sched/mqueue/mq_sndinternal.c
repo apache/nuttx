@@ -286,7 +286,10 @@ void nxmq_notify_send(FAR struct mqueue_inode_s *msgq)
 
       DEBUGASSERT(btcb);
 
-      wd_cancel(&btcb->waitdog);
+      if (WDOG_ISACTIVE(&btcb->waitdog))
+        {
+          wd_cancel(&btcb->waitdog);
+        }
 
       msgq->cmn.nwaitnotempty--;
 

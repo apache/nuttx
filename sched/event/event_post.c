@@ -104,7 +104,11 @@ int nxevent_post(FAR nxevent_t *event, nxevent_mask_t events,
 
           /* Stop timeout watchdog */
 
-          wd_cancel(&wtcb->waitdog);
+          if (WDOG_ISACTIVE(&wtcb->waitdog))
+            {
+              wd_cancel(&wtcb->waitdog);
+            }
+
           wtcb->waitobj = NULL;
 
           /* Make task ready-to-run */
