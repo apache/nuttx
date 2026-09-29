@@ -204,7 +204,19 @@ extern const uint32_t _ram_size[];    /* See linker script */
  * already been assigned as the primary RAM.
  */
 
-#if defined(CONFIG_IMXRT_OCRAM_HEAP) && !defined(IMXRT_OCRAM_ASSIGNED)
+#if defined(CONFIG_IMXRT_TCM_PRIMARY) && \
+    defined(CONFIG_IMXRT_OCRAM_HEAP)
+/* With TCM as primary RAM, the linker defines the usable OCRAM range so
+ * that board-reserved and DMA-only storage is excluded.
+ */
+
+extern const uint8_t _socramheap[];
+extern const uint8_t _eocramheap[];
+#  define REGION1_RAM_START    ((uintptr_t)_socramheap)
+#  define REGION1_RAM_SIZE     ((uintptr_t)_eocramheap - \
+                               (uintptr_t)_socramheap)
+#  define IMXRT_OCRAM_ASSIGNED 1
+#elif defined(CONFIG_IMXRT_OCRAM_HEAP) && !defined(IMXRT_OCRAM_ASSIGNED)
 #  define REGION1_RAM_START    IMXRT_OCRAM_START
 #  define REGION1_RAM_SIZE     IMXRT_OCRAM_SIZE
 #  define IMXRT_OCRAM_ASSIGNED 1
