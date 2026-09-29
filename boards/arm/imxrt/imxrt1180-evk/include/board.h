@@ -127,4 +127,25 @@
 #define GPIO_LPSPI1_MISO IOMUX_PIN(IOMUXC_PAD_GPIO_AON_07_LPSPI1_SDI,   \
                                    IOMUX_LPSPI_DEFAULT, IOMUXC_MUX_SION_ON)
 
+/* Buttons ******************************************************************/
+
+/* The MIMXRT1180-EVK has one general purpose user button, SW8 ("GPIO INT
+ * BUTTON"), on GPIO_AON_04 = RGPIO1.4.  The button shorts the pin to GND
+ * when pressed.  The external pull-up (R2154) is not fitted, so the
+ * internal pull-up is used.
+ */
+
+#define BUTTON_SW8        0
+#define NUM_BUTTONS       1
+
+#define BUTTON_SW8_BIT    (1 << BUTTON_SW8)
+
+#define IOMUX_SW_DEFAULT  (IOMUXC_PAD_PUE | IOMUXC_PAD_PUS)
+
+#define GPIO_SW8          (IOMUX_GPIO(IOMUXC_PAD_GPIO_AON_04_GPIO1_IO04, \
+                                      IOMUX_SW_DEFAULT,                 \
+                                      GPIO_INTERRUPT |                  \
+                                      GPIO_PORT1 | GPIO_PIN4) |         \
+                           GPIO_INTBOTH_EDGES)
+
 #endif /* __BOARDS_ARM_IMXRT_IMXRT1180_EVK_INCLUDE_BOARD_H */

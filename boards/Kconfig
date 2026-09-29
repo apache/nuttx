@@ -1031,6 +1031,8 @@ config ARCH_BOARD_IMX93_QSB
 config ARCH_BOARD_IMXRT1180_EVK
 	bool "NXP i.MX RT 1180 EVK"
 	depends on ARCH_CHIP_MIMXRT1189CVM8C || ARCH_CHIP_MIMXRT1189CVM8C_CM33
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This is the board configuration for the port of NuttX to the NXP i.MXRT
 		evaluation kit, MIMXRT1180-EVK. This board features the IMXRT1189 MCU.
