@@ -1,0 +1,130 @@
+menu "lwIP Auxiliary Stack"
+
+depends on NET
+
+config NET_LWIP
+	bool "Enable the lwIP 2.0.3 auxiliary stack"
+	depends on ARCH_BOARD_SIM && NET_PKT
+	---help---
+		Build lwIP as an independent TCP/IP stack alongside the native
+		NuttX network stack.  The current link-layer adapter supports the
+		simulator Ethernet driver.
+
+		This does not replace NuttX native socket routing.
+		Applications should use lwIP's prefixed socket API (lwip_socket,
+		lwip_bind, lwip_connect, ...).
+
+if NET_LWIP
+
+config NET_LWIP_MEM_ALIGNMENT
+	int "lwIP memory alignment"
+	default 4
+
+config NET_LWIP_MEM_SIZE
+	int "lwIP heap size"
+	default 16384
+
+config NET_LWIP_PBUF_NUM
+	int "MEMP_NUM_PBUF"
+	default 16
+
+config NET_LWIP_NETCONN_NUM
+	int "MEMP_NUM_NETCONN"
+	default 8
+
+config NET_LWIP_TCP_PCB_NUM
+	int "MEMP_NUM_TCP_PCB"
+	default 8
+
+config NET_LWIP_UDP_PCB_NUM
+	int "MEMP_NUM_UDP_PCB"
+	default 8
+
+config NET_LWIP_TCP_SEG_NUM
+	int "MEMP_NUM_TCP_SEG"
+	default 32
+
+config NET_LWIP_PBUF_POOL_SIZE
+	int "PBUF_POOL_SIZE"
+	default 16
+
+config NET_LWIP_PBUF_POOL_BUFSIZE
+	int "PBUF_POOL_BUFSIZE"
+	default 1536
+
+config NET_LWIP_TCP_MSS
+	int "TCP_MSS"
+	default 1460
+
+config NET_LWIP_TCP_WND
+	int "TCP_WND"
+	default 8192
+
+config NET_LWIP_TCP_SND_BUF
+	int "TCP_SND_BUF"
+	default 8192
+
+config NET_LWIP_TCPIP_STACKSIZE
+	int "TCPIP thread stack size"
+	default 4096
+
+config NET_LWIP_TCPIP_PRIORITY
+	int "TCPIP thread priority"
+	default 100
+
+config NET_LWIP_TCPIP_MBOX_SIZE
+	int "TCPIP mailbox size"
+	default 16
+
+config NET_LWIP_DEFAULT_STACKSIZE
+	int "Default worker stack size"
+	default 2048
+
+config NET_LWIP_DEFAULT_PRIORITY
+	int "Default worker priority"
+	default 100
+
+config NET_LWIP_RXTHREAD_STACKSIZE
+	int "RX helper thread stack size"
+	default 2048
+
+config NET_LWIP_RXTHREAD_PRIORITY
+	int "RX helper thread priority"
+	default 100
+
+config NET_LWIP_MTU
+	int "Ethernet MTU"
+	default 1500
+
+config NET_LWIP_DHCP
+	bool "Enable DHCP client"
+	default n
+	---help---
+		DHCP is disabled by default because lwIP shares the simulator
+		Ethernet device with the native NuttX stack.  Use a distinct
+		static IPv4 address unless the native stack configuration is
+		disabled on that interface.
+
+config NET_LWIP_DNS
+	bool "Enable DNS client"
+	default y
+
+config NET_LWIP_TCP
+	bool "Enable TCP"
+	default y
+
+config NET_LWIP_UDP
+	bool "Enable UDP"
+	default y
+
+config NET_LWIP_RAW
+	bool "Enable RAW sockets"
+	default n
+
+config NET_LWIP_IPV6
+	bool "Enable IPv6"
+	default n
+
+endif
+
+endmenu

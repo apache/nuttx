@@ -436,6 +436,23 @@ int sim_netdriver_init(void);
 void sim_netdriver_setmacaddr(int devidx, unsigned char *macaddr);
 void sim_netdriver_setmtu(int devidx, int mtu);
 
+#ifdef CONFIG_NET_LWIP
+typedef void (*sim_netdriver_l2rx_cb_t)(void *arg,
+                                        const uint8_t *buf,
+                                        unsigned int len);
+
+int sim_netdriver_l2tap_register(int devidx,
+                                 sim_netdriver_l2rx_cb_t callback,
+                                 void *arg);
+int sim_netdriver_l2tap_unregister(int devidx,
+                                   sim_netdriver_l2rx_cb_t callback,
+                                   void *arg);
+int sim_netdriver_l2tap_xmit(int devidx, const uint8_t *buf,
+                             unsigned int len);
+int sim_netdriver_l2tap_getmac(int devidx, uint8_t *mac);
+int sim_netdriver_ifname_to_devidx(const char *ifname);
+#endif
+
 /* sim_rptun.c **************************************************************/
 
 #ifdef CONFIG_RPTUN

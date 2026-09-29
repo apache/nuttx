@@ -1,0 +1,41 @@
+############################################################################
+# net/lwip/Make.defs
+############################################################################
+
+ifeq ($(CONFIG_NET_LWIP),y)
+LWIP_SRC = lwip/lwip-2.0.3/src
+
+NET_CSRCS += lwip/lwip_init.c
+NET_CSRCS += lwip/sys_arch_nuttx.c
+NET_CSRCS += lwip/ethernetif_nuttx.c
+ifeq ($(CONFIG_ARCH_BOARD_SIM)$(CONFIG_NET_PKT),yy)
+NET_CSRCS += lwip/lwip_pktif_sim.c
+endif
+NET_CSRCS += $(notdir $(wildcard $(TOPDIR)/net/$(LWIP_SRC)/core/*.c))
+NET_CSRCS += $(notdir $(wildcard $(TOPDIR)/net/$(LWIP_SRC)/core/ipv4/*.c))
+NET_CSRCS += $(notdir $(wildcard $(TOPDIR)/net/$(LWIP_SRC)/api/*.c))
+NET_CSRCS += $(notdir $(wildcard $(TOPDIR)/net/$(LWIP_SRC)/netif/*.c))
+
+ifeq ($(CONFIG_NET_LWIP_IPV6),y)
+NET_CSRCS += $(notdir $(wildcard $(TOPDIR)/net/$(LWIP_SRC)/core/ipv6/*.c))
+endif
+
+DEPPATH += --dep-path lwip
+DEPPATH += --dep-path lwip/lwip-2.0.3/src/core
+DEPPATH += --dep-path lwip/lwip-2.0.3/src/core/ipv4
+DEPPATH += --dep-path lwip/lwip-2.0.3/src/api
+DEPPATH += --dep-path lwip/lwip-2.0.3/src/netif
+VPATH += :lwip
+VPATH += :lwip/lwip-2.0.3/src/core
+VPATH += :lwip/lwip-2.0.3/src/core/ipv4
+VPATH += :lwip/lwip-2.0.3/src/api
+VPATH += :lwip/lwip-2.0.3/src/netif
+
+ifeq ($(CONFIG_NET_LWIP_IPV6),y)
+DEPPATH += --dep-path lwip/lwip-2.0.3/src/core/ipv6
+VPATH += :lwip/lwip-2.0.3/src/core/ipv6
+endif
+
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)net$(DELIM)lwip
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)net$(DELIM)lwip$(DELIM)lwip-2.0.3$(DELIM)src$(DELIM)include
+endif

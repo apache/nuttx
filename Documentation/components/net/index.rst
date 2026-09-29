@@ -20,6 +20,7 @@ Network Support
   tcp_network_perf.rst
   delay_act_and_tcp_perf.rst
   tcp_state_machine.rst
+  lwip.rst
 
 ``net`` Directory Structure ::
 

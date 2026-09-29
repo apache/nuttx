@@ -62,6 +62,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/debug.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
@@ -137,6 +138,17 @@ static int netdriver_rmmac(struct netdev_lowerhalf_s *dev,
 /* Ethernet peripheral state */
 
 static struct sim_netdev_s g_sim_dev[CONFIG_SIM_NETDEV_NUMBER];
+
+#ifdef CONFIG_NET_LWIP
+struct sim_l2tap_s
+{
+  sim_netdriver_l2rx_cb_t callback;
+  void *arg;
+};
+
+static struct sim_l2tap_s g_l2tap[CONFIG_SIM_NETDEV_NUMBER];
+#endif
+
 static const struct netdev_ops_s g_ops =
 {
   netdriver_ifup,   /* ifup */
@@ -217,6 +229,8 @@ static netpkt_t *netdriver_recv(struct netdev_lowerhalf_s *dev)
 
   if (sim_netdev_avail(DEVIDX(dev)))
     {
+      FAR uint8_t *rxbuf;
+
       pkt = netpkt_alloc(dev, NETPKT_RX);
       if (pkt == NULL)
         {
@@ -228,16 +242,25 @@ static netpkt_t *netdriver_recv(struct netdev_lowerhalf_s *dev)
        */
 
 #ifdef SIM_NETDEV_RECV_OFFLOAD
-      len = sim_netdev_read(DEVIDX(dev), netpkt_getdata(dev, pkt),
-                            SIM_NETDEV_BUFSIZE);
+      rxbuf = netpkt_getdata(dev, pkt);
+      len = sim_netdev_read(DEVIDX(dev), rxbuf, SIM_NETDEV_BUFSIZE);
 #else
-      len = sim_netdev_read(DEVIDX(dev), DEVBUF(dev), SIM_NETDEV_BUFSIZE);
+      rxbuf = DEVBUF(dev);
+      len = sim_netdev_read(DEVIDX(dev), rxbuf, SIM_NETDEV_BUFSIZE);
 #endif
       if (len == 0)
         {
           netpkt_free(dev, pkt, NETPKT_RX);
           return NULL;
         }
+
+#ifdef CONFIG_NET_LWIP
+      if (g_l2tap[DEVIDX(dev)].callback != NULL)
+        {
+          g_l2tap[DEVIDX(dev)].callback(g_l2tap[DEVIDX(dev)].arg,
+                                        rxbuf, len);
+        }
+#endif
 
 #ifdef SIM_NETDEV_RECV_OFFLOAD
       netpkt_setdatalen(dev, pkt, len);
@@ -430,3 +453,81 @@ void sim_netdriver_loop(void)
         }
     }
 }
+
+#ifdef CONFIG_NET_LWIP
+int sim_netdriver_l2tap_register(int devidx,
+                                 sim_netdriver_l2rx_cb_t callback,
+                                 void *arg)
+{
+  if (devidx < 0 || devidx >= CONFIG_SIM_NETDEV_NUMBER || callback == NULL)
+    {
+      return -EINVAL;
+    }
+
+  g_l2tap[devidx].callback = callback;
+  g_l2tap[devidx].arg = arg;
+  return OK;
+}
+
+int sim_netdriver_l2tap_unregister(int devidx,
+                                   sim_netdriver_l2rx_cb_t callback,
+                                   void *arg)
+{
+  if (devidx < 0 || devidx >= CONFIG_SIM_NETDEV_NUMBER)
+    {
+      return -EINVAL;
+    }
+
+  if (g_l2tap[devidx].callback == callback && g_l2tap[devidx].arg == arg)
+    {
+      g_l2tap[devidx].callback = NULL;
+      g_l2tap[devidx].arg = NULL;
+    }
+
+  return OK;
+}
+
+int sim_netdriver_l2tap_xmit(int devidx, const uint8_t *buf,
+                             unsigned int len)
+{
+  if (devidx < 0 || devidx >= CONFIG_SIM_NETDEV_NUMBER ||
+      buf == NULL || len == 0)
+    {
+      return -EINVAL;
+    }
+
+  sim_netdev_send(devidx, (unsigned char *)buf, len);
+  return OK;
+}
+
+int sim_netdriver_l2tap_getmac(int devidx, uint8_t *mac)
+{
+  if (devidx < 0 || devidx >= CONFIG_SIM_NETDEV_NUMBER || mac == NULL)
+    {
+      return -EINVAL;
+    }
+
+  memcpy(mac, IDXDEV(devidx)->netdev.d_mac.ether.ether_addr_octet,
+         IFHWADDRLEN);
+  return OK;
+}
+
+int sim_netdriver_ifname_to_devidx(const char *ifname)
+{
+  char *endptr;
+  long devidx;
+
+  if (ifname == NULL || strncmp(ifname, "eth", 3) != 0)
+    {
+      return -ENODEV;
+    }
+
+  devidx = strtol(ifname + 3, &endptr, 10);
+  if (*endptr != '\0' || devidx < 0 || devidx >= CONFIG_SIM_NETDEV_NUMBER)
+    {
+      return -ENODEV;
+    }
+
+  return (int)devidx;
+}
+#endif
