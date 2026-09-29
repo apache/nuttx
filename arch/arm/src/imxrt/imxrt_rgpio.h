@@ -46,9 +46,9 @@
  *
  *               1111 1100 0000 0000
  *               5432 1098 7654 3210
- *   ENCODING    MMVX BEEG GGGP PPPP
- *   GPIO INPUT  00.. BEEG GGGP PPPP
- *   INT INPUT   11.. BEEG GGGP PPPP
+ *   ENCODING    MMVX IIIG GGGP PPPP
+ *   GPIO INPUT  00.. ...G GGGP PPPP
+ *   INT INPUT   10.. IIIG GGGP PPPP
  *   GPIO OUTPUT 01V. ...G GGGP PPPP
  */
 
@@ -68,20 +68,15 @@
 #  define GPIO_OUTPUT_ZERO     (0u << GPIO_OUTPUT_SHIFT)
 #  define GPIO_OUTPUT_ONE      (1u << GPIO_OUTPUT_SHIFT)
 
-/* Interrupt "both edges" flag: bit 11 (only for GPIO_INTERRUPT) */
+/* Interrupt edge/level configuration: bits 9-11 (only for GPIO_INTERRUPT) */
 
-#define GPIO_INTBOTHCFG_SHIFT  (11)
-#define GPIO_INTBOTHCFG_MASK   (1u << GPIO_INTBOTHCFG_SHIFT)
-#  define GPIO_INTBOTH_EDGES   (1u << GPIO_INTBOTHCFG_SHIFT)
-
-/* Interrupt edge/level configuration: bits 9-10 (only for GPIO_INTERRUPT) */
-
-#define GPIO_INTCFG_SHIFT      (9)
-#define GPIO_INTCFG_MASK       (0x3u << GPIO_INTCFG_SHIFT)
-#  define GPIO_INT_LOWLEVEL    (0u << GPIO_INTCFG_SHIFT)
-#  define GPIO_INT_HIGHLEVEL   (1u << GPIO_INTCFG_SHIFT)
-#  define GPIO_INT_RISINGEDGE  (2u << GPIO_INTCFG_SHIFT)
-#  define GPIO_INT_FALLINGEDGE (3u << GPIO_INTCFG_SHIFT)
+#define GPIO_INTCFG_SHIFT      (9 + IMXRT_PINSET_GPIO_SHIFT)
+#define GPIO_INTCFG_MASK       ((imxrt_pinset_t)7 << GPIO_INTCFG_SHIFT)
+#  define GPIO_INT_LOWLEVEL    ((imxrt_pinset_t)0 << GPIO_INTCFG_SHIFT)
+#  define GPIO_INT_HIGHLEVEL   ((imxrt_pinset_t)1 << GPIO_INTCFG_SHIFT)
+#  define GPIO_INT_RISINGEDGE  ((imxrt_pinset_t)2 << GPIO_INTCFG_SHIFT)
+#  define GPIO_INT_FALLINGEDGE ((imxrt_pinset_t)3 << GPIO_INTCFG_SHIFT)
+#  define GPIO_INTBOTH_EDGES   ((imxrt_pinset_t)4 << GPIO_INTCFG_SHIFT)
 
 /* GPIO Port Number: bits 5-8 (GPIO1..GPIO6) */
 
