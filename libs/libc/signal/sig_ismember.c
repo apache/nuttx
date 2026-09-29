@@ -34,45 +34,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsig_ismember
- *
- * Description:
- *   This function tests whether the signal specified by signo is a member
- *   of the set specified by set.
- *
- * Input Parameters:
- *   set - Signal set to test
- *   signo - Signal to test for
- *
- * Returned Value:
- *   This is an internal OS interface and should not be used by applications.
- *   On success, it returns 0 if the signal is not a member, 1 if the signal
- *   is a member of the set.
- *   A negated errno value is returned on failure.
- *
- *    EINVAL - The signo argument is invalid.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-int nxsig_ismember(FAR const sigset_t *set, int signo)
-{
-  /* Verify the signal */
-
-  if (!GOOD_SIGNO(signo))
-    {
-      return -EINVAL;
-    }
-  else
-    {
-      /* Check if the signal is in the set */
-
-      return (set->_elem[_SIGSET_NDX(signo)] & _SIGNO2SET(signo)) ? 1 : 0;
-    }
-}
-
-/****************************************************************************
  * Name: sigismember
  *
  * Description:

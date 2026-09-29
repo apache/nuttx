@@ -33,45 +33,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsig_addset
- *
- * Description:
- *   This function adds the signal specified by signo to the signal set
- *   specified by set.
- *
- * Input Parameters:
- *   set   - Signal set to add signal to
- *   signo - Signal to add
- *
- * Returned Value:
- *   This is an internal OS interface and should not be used by applications.
- *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success.  A negated errno value is returned on failure.
- *
- *    EINVAL - The signo argument is invalid.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-int nxsig_addset(FAR sigset_t *set, int signo)
-{
-  /* Verify the signal */
-
-  if (!GOOD_SIGNO(signo))
-    {
-      return -EINVAL;
-    }
-  else
-    {
-      /* Add the signal to the set */
-
-      set->_elem[_SIGSET_NDX(signo)] |= _SIGNO2SET(signo);
-      return OK;
-    }
-}
-
-/****************************************************************************
  * Name: sigaddset
  *
  * Description:
