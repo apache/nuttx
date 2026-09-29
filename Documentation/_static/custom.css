@@ -279,39 +279,6 @@ div.version-selector
   outline: none;
 }
 
-/* Review aid ---------------------------------------------------------------
- *
- * Marks the prose written for the documentation reorganisation, so that it
- * can be read against the text that was only moved.  Temporary: delete this
- * block, _extensions/review_highlight.py and its entry in conf.py to turn it
- * off.
- */
-
-.review-authored {
-  background: #fff8c4;
-  box-shadow: 0 0 0 6px #fff8c4;
-  border-radius: 2px;
-}
-
-.review-authored .review-authored {
-  box-shadow: none;
-}
-
-.review-authored pre,
-.review-authored .highlight {
-  background: #fffdf0 !important;
-}
-
-/* Tables and admonitions inside a highlighted block carry their own
- * background, which would hide the mark. */
-
-.review-authored table,
-.review-authored .wy-table-responsive table,
-.review-authored table td,
-.review-authored table th {
-  background: transparent !important;
-}
-
 /* Reading text ------------------------------------------------------------
  *
  * Three changes, all about how long a reader can stay on a page.

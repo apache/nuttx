@@ -2,12 +2,10 @@
 NXP LPC17xx/LPC40xx
 ====================
 
-.. container:: review-authored
-
-   The LPC17xx and LPC40xx families share a single architecture directory in
-   the source tree, ``arch/arm/src/lpc17xx_40xx/``, and a single board
-   directory, ``boards/arm/lpc17xx_40xx/``.  They are documented together
-   here for the same reason.
+The LPC17xx and LPC40xx families share a single architecture directory in
+the source tree, ``arch/arm/src/lpc17xx_40xx/``, and a single board
+directory, ``boards/arm/lpc17xx_40xx/``.  They are documented together
+here for the same reason.
 
 NXP LPC176x
 -----------

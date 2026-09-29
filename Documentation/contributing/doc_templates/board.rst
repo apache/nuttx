@@ -2,56 +2,54 @@
 Board Documentation Example
 ===========================
 
-.. container:: review-authored
+The tags go at the very top of the page, before anything else, like this:
 
-   The tags go at the very top of the page, before anything else, like this:
+.. literalinclude:: board-tags-example.txt
+   :language: rst
 
-   .. literalinclude:: board-tags-example.txt
-      :language: rst
+That example is pulled in from a ``.txt`` file rather than written here
+directly.  ``sphinx_tags`` collects tags by scanning the raw text of every
+``.rst`` file for the line, without caring whether it sits in a code block,
+so a directive written out on this page -- even as an example -- would file
+the template itself in the tag index, next to the boards it is a template
+for.
 
-   That example is pulled in from a ``.txt`` file rather than written here
-   directly.  ``sphinx_tags`` collects tags by scanning the raw text of every
-   ``.rst`` file for the line, without caring whether it sits in a code block,
-   so a directive written out on this page -- even as an example -- would file
-   the template itself in the tag index, next to the boards it is a template
-   for.
+Tags are what lets a board be found by what it is rather than only by where
+it sits in the tree, so the vocabulary is controlled and checked by
+``tools/ci/check_doc_coverage.py``.  Use only these namespaces, all lower
+case:
 
-   Tags are what lets a board be found by what it is rather than only by where
-   it sits in the tree, so the vocabulary is controlled and checked by
-   ``tools/ci/check_doc_coverage.py``.  Use only these namespaces, all lower
-   case:
+``arch:``
+   The architecture, spelled exactly as the directory under ``arch/`` and
+   ``boards/`` -- ``arm``, ``arm64``, ``risc-v``, ``xtensa``, ``avr``, and so
+   on.  Not the CPU core: ``armv8-m`` and ``cortex-m33`` are not architectures.
 
-   ``arch:``
-      The architecture, spelled exactly as the directory under ``arch/`` and
-      ``boards/`` -- ``arm``, ``arm64``, ``risc-v``, ``xtensa``, ``avr``, and so
-      on.  Not the CPU core: ``armv8-m`` and ``cortex-m33`` are not architectures.
+``chip:``
+   The chip family, spelled exactly as the directory under
+   ``arch/<arch>/src/`` -- ``stm32f4``, ``esp32s3``, ``nrf52``.  A board built
+   around two chips carries both.  This is checked against the directory the
+   page lives in, so it cannot be anything else.
 
-   ``chip:``
-      The chip family, spelled exactly as the directory under
-      ``arch/<arch>/src/`` -- ``stm32f4``, ``esp32s3``, ``nrf52``.  A board built
-      around two chips carries both.  This is checked against the directory the
-      page lives in, so it cannot be anything else.
+``part:``
+   The exact chip on the board -- ``stm32f407``, ``nrf52840``.  Only you know
+   this one; it is what somebody holding the board will search for.  The tag
+   index lists parts underneath their family.
 
-   ``part:``
-      The exact chip on the board -- ``stm32f407``, ``nrf52840``.  Only you know
-      this one; it is what somebody holding the board will search for.  The tag
-      index lists parts underneath their family.
+``vendor:``
+   Who makes the chip.  Derived from the chip family through
+   ``Documentation/platforms/chip-vendors.txt``, so there is nothing to decide
+   -- but a chip family missing from that file will fail the check, because
+   adding a family is the moment somebody knows who makes it.  The board maker
+   is not tagged: it is already in the board name.
 
-   ``vendor:``
-      Who makes the chip.  Derived from the chip family through
-      ``Documentation/platforms/chip-vendors.txt``, so there is nothing to decide
-      -- but a chip family missing from that file will fail the check, because
-      adding a family is the moment somebody knows who makes it.  The board maker
-      is not tagged: it is already in the board name.
+What the board offers and how far the port has been taken are **not** tags.
+They belong in the Support Status and Peripheral Support sections below, where
+there is room to be exact and where a reader looking at this one board will
+actually see them.
 
-   What the board offers and how far the port has been taken are **not** tags.
-   They belong in the Support Status and Peripheral Support sections below, where
-   there is room to be exact and where a reader looking at this one board will
-   actually see them.
-
-   ``arch:``, ``chip:`` and ``vendor:`` are checked against the directory the page
-   lives in by ``tools/ci/check_doc_coverage.py``, so they cannot drift from the
-   source tree.
+``arch:``, ``chip:`` and ``vendor:`` are checked against the directory the page
+lives in by ``tools/ci/check_doc_coverage.py``, so they cannot drift from the
+source tree.
 
 .. figure:: example-board.jpg
    :scale: 30 %

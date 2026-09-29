@@ -26,61 +26,59 @@ There are some RTOS functions that are implemented by internal threads,
 for instance :ref:`kernel-threads-vs-pthreads`, :ref:`tasks-vs-threads`,
 :ref:`kernel-modules`.
 
-.. container:: review-authored
+These are the threads the OS starts for itself.  Everything else running on
+a NuttX system was started by an application.
 
-   These are the threads the OS starts for itself.  Everything else running on
-   a NuttX system was started by an application.
+.. list-table::
+   :header-rows: 1
+   :widths: 18 16 66
 
-   .. list-table::
-      :header-rows: 1
-      :widths: 18 16 66
+   * - Thread
+     - Priority
+     - What it is for
+   * - ``Idle_Task``
+     - 0
+     - What runs when nothing else can.  It is not really created: the
+       system boots into it, and its task control block is the statically
+       allocated ``g_idletcb``, an array of ``CONFIG_SMP_NCPUS`` entries --
+       so under ``CONFIG_SMP`` there is one idle thread per CPU, and CPU 0's
+       is what starts the others.  The name differs there too: ``Idle_Task``
+       is used only in a non-SMP build, while an SMP build names each one
+       ``CPU0 IDLE``, ``CPU1 IDLE`` and so on.  Priority 0 is below anything
+       a task can be given -- ``SCHED_PRIORITY_MIN`` is 1 -- so it never
+       competes with real work, and the idle thread is the only one with
+       both ``pid`` and ``sched_priority`` of 0.
+   * - ``hpwork``
+     - 224
+     - The high priority work queue, enabled by ``CONFIG_SCHED_HPWORK``.
+       This is where an interrupt handler sends work that has to happen soon
+       but cannot happen in a handler.  The priority is high on purpose:
+       work queued here is meant to run ahead of ordinary threads.
+   * - ``lpwork``
+     - 100
+     - The low priority work queue, enabled by ``CONFIG_SCHED_LPWORK``.  For
+       work that has to leave the handler but is not urgent, and for
+       anything that might block for a while -- which is why a driver
+       waiting on a bus uses this one rather than ``hpwork``.
+   * - ``pgfill``
+     - ``CONFIG_PAGING_DEFPRIO``
+     - The page fill thread, started only with on-demand paging.  It reads
+       in the pages that faulting threads are waiting for.  See
+       :doc:`/os/memory/paging`.
 
-      * - Thread
-        - Priority
-        - What it is for
-      * - ``Idle_Task``
-        - 0
-        - What runs when nothing else can.  It is not really created: the
-          system boots into it, and its task control block is the statically
-          allocated ``g_idletcb``, an array of ``CONFIG_SMP_NCPUS`` entries --
-          so under ``CONFIG_SMP`` there is one idle thread per CPU, and CPU 0's
-          is what starts the others.  The name differs there too: ``Idle_Task``
-          is used only in a non-SMP build, while an SMP build names each one
-          ``CPU0 IDLE``, ``CPU1 IDLE`` and so on.  Priority 0 is below anything
-          a task can be given -- ``SCHED_PRIORITY_MIN`` is 1 -- so it never
-          competes with real work, and the idle thread is the only one with
-          both ``pid`` and ``sched_priority`` of 0.
-      * - ``hpwork``
-        - 224
-        - The high priority work queue, enabled by ``CONFIG_SCHED_HPWORK``.
-          This is where an interrupt handler sends work that has to happen soon
-          but cannot happen in a handler.  The priority is high on purpose:
-          work queued here is meant to run ahead of ordinary threads.
-      * - ``lpwork``
-        - 100
-        - The low priority work queue, enabled by ``CONFIG_SCHED_LPWORK``.  For
-          work that has to leave the handler but is not urgent, and for
-          anything that might block for a while -- which is why a driver
-          waiting on a bus uses this one rather than ``hpwork``.
-      * - ``pgfill``
-        - ``CONFIG_PAGING_DEFPRIO``
-        - The page fill thread, started only with on-demand paging.  It reads
-          in the pages that faulting threads are waiting for.  See
-          :doc:`/os/memory/paging`.
+Those names are the ones that show up in ``ps``, which makes them useful
+when something is wrong: a system where ``lpwork`` is always running is
+telling you that work is being queued faster than it is being drained.
 
-   Those names are the ones that show up in ``ps``, which makes them useful
-   when something is wrong: a system where ``lpwork`` is always running is
-   telling you that work is being queued faster than it is being drained.
+Beyond these, a driver may start a thread of its own -- a sensor that polls,
+a Bluetooth stack that needs somewhere to run its transmit path.  Those
+belong to the driver rather than to the scheduler, and are documented with
+it.
 
-   Beyond these, a driver may start a thread of its own -- a sensor that polls,
-   a Bluetooth stack that needs somewhere to run its transmit path.  Those
-   belong to the driver rather than to the scheduler, and are documented with
-   it.
-
-   Last comes the thread the system exists for.  ``nx_bringup()`` starts the
-   application entry point -- ``CONFIG_INIT_ENTRYPOINT``, or a program named by
-   ``CONFIG_INIT_FILEPATH`` -- as an ordinary task.  From there the OS is
-   running, and every thread after that one is the application's doing.
+Last comes the thread the system exists for.  ``nx_bringup()`` starts the
+application entry point -- ``CONFIG_INIT_ENTRYPOINT``, or a program named by
+``CONFIG_INIT_FILEPATH`` -- as an ordinary task.  From there the OS is
+running, and every thread after that one is the application's doing.
 
 The Scheduler
 =============
@@ -224,33 +222,29 @@ macros, and ``sched/init/nx_start.c`` for ``tasklist_initialize()``.
 State Transition Diagram
 ========================
 
-.. container:: review-authored
+.. figure:: task_states.svg
+   :align: center
+   :width: 100%
+   :alt: A task is created inactive, becomes ready to run, is given a CPU,
+         may block waiting for a resource and return to ready, and finally
+         exits.
 
-   .. figure:: task_states.svg
-      :align: center
-      :width: 100%
-      :alt: A task is created inactive, becomes ready to run, is given a CPU,
-            may block waiting for a resource and return to ready, and finally
-            exits.
-
-      The values of ``task_state``, drawn as the states a thread moves
-      through.  The lists above are the other half of the pair: this is what
-      ``g_tasklisttable[]`` is indexed by.
+   The values of ``task_state``, drawn as the states a thread moves
+   through.  The lists above are the other half of the pair: this is what
+   ``g_tasklisttable[]`` is indexed by.
 
 Scheduling Policies
 ===================
 
-.. container:: review-authored
+Which of ``SCHED_FIFO``, ``SCHED_RR`` and ``SCHED_SPORADIC`` a thread runs
+under decides only how threads of *equal* priority share the CPU.  The
+policies, their parameters and when to choose each one are described in
+:doc:`index`.
 
-   Which of ``SCHED_FIFO``, ``SCHED_RR`` and ``SCHED_SPORADIC`` a thread runs
-   under decides only how threads of *equal* priority share the CPU.  The
-   policies, their parameters and when to choose each one are described in
-   :doc:`index`.
-
-   What matters here is where the decision lands in the data structures above:
-   the thread that runs is always the one whose TCB sits at the head of
-   ``g_readytorun``, and a policy is no more than a rule for keeping that list
-   in the right order.
+What matters here is where the decision lands in the data structures above:
+the thread that runs is always the one whose TCB sits at the head of
+``g_readytorun``, and a policy is no more than a rule for keeping that list
+in the right order.
 
 Task IDs
 ========

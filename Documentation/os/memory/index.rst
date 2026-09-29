@@ -4,34 +4,32 @@ Memory Management
 
 This page discusses the NuttX memory management logic.
 
-.. container:: review-authored
+How many heaps there are, and what separates them, follows from the build
+mode:
 
-   How many heaps there are, and what separates them, follows from the build
-   mode:
+.. figure:: memory_models.svg
+   :align: center
+   :width: 100%
+   :alt: A flat build has one heap shared by kernel and applications; a
+         protected build splits it into a kernel heap and a user heap
+         separated by an MPU; a kernel build gives each process its own heap
+         in its own virtual address space, provided by an MMU.
 
-   .. figure:: memory_models.svg
-      :align: center
-      :width: 100%
-      :alt: A flat build has one heap shared by kernel and applications; a
-            protected build splits it into a kernel heap and a user heap
-            separated by an MPU; a kernel build gives each process its own heap
-            in its own virtual address space, provided by an MMU.
+   One heap, two heaps, or one per process.  See :doc:`/os/index` for what
+   each build mode is.
 
-      One heap, two heaps, or one per process.  See :doc:`/os/index` for what
-      each build mode is.
+The practical consequence is which allocator a piece of code may call.
+Whether there are two is decided by ``CONFIG_MM_KERNEL_HEAP``, not by the
+build mode directly -- the build mode only sets its default, on for
+protected and kernel builds and off for flat.  With it off, ``KRN_HEAP``
+*is* ``USR_HEAP``: ``malloc()`` and ``kmm_malloc()`` reach the same pool.
+With it on they do not, and kernel code that calls ``malloc()`` is a bug
+-- it would hand out memory the application is not allowed to touch, or
+that the kernel cannot reach.
 
-   The practical consequence is which allocator a piece of code may call.
-   Whether there are two is decided by ``CONFIG_MM_KERNEL_HEAP``, not by the
-   build mode directly -- the build mode only sets its default, on for
-   protected and kernel builds and off for flat.  With it off, ``KRN_HEAP``
-   *is* ``USR_HEAP``: ``malloc()`` and ``kmm_malloc()`` reach the same pool.
-   With it on they do not, and kernel code that calls ``malloc()`` is a bug
-   -- it would hand out memory the application is not allowed to touch, or
-   that the kernel cannot reach.
-
-   The distinction matters in a flat build too.  The Kconfig offers
-   ``CONFIG_MM_KERNEL_HEAP`` there on purpose, so that a microcontroller
-   with external RAM can place the two heaps in different memory.
+The distinction matters in a flat build too.  The Kconfig offers
+``CONFIG_MM_KERNEL_HEAP`` there on purpose, so that a microcontroller
+with external RAM can place the two heaps in different memory.
 
 .. toctree::
    :maxdepth: 1
