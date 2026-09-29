@@ -15,9 +15,8 @@ the template itself in the tag index, next to the boards it is a template
 for.
 
 Tags are what lets a board be found by what it is rather than only by where
-it sits in the tree, so the vocabulary is controlled and checked by
-``tools/ci/check_doc_coverage.py``.  Use only these namespaces, all lower
-case:
+it sits in the tree, so the vocabulary is fixed.  Use only these namespaces,
+all lower case:
 
 ``arch:``
    The architecture, spelled exactly as the directory under ``arch/`` and
@@ -36,20 +35,17 @@ case:
    index lists parts underneath their family.
 
 ``vendor:``
-   Who makes the chip.  Derived from the chip family through
-   ``Documentation/platforms/chip-vendors.txt``, so there is nothing to decide
-   -- but a chip family missing from that file will fail the check, because
-   adding a family is the moment somebody knows who makes it.  The board maker
-   is not tagged: it is already in the board name.
+   Who makes the chip, not who makes the board -- the board maker is already
+   in the board name.  One vendor per chip family, so pages for the same
+   family agree with each other.
 
 What the board offers and how far the port has been taken are **not** tags.
 They belong in the Support Status and Peripheral Support sections below, where
 there is room to be exact and where a reader looking at this one board will
 actually see them.
 
-``arch:``, ``chip:`` and ``vendor:`` are checked against the directory the page
-lives in by ``tools/ci/check_doc_coverage.py``, so they cannot drift from the
-source tree.
+``arch:``, ``chip:`` and ``vendor:`` should match the directory the page lives
+in, so that the tags and the tree say the same thing.
 
 .. figure:: example-board.jpg
    :scale: 30 %

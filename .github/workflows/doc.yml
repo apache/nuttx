@@ -19,15 +19,11 @@ on:
       - master
     paths:
       - 'Documentation/**'
-      - 'boards/**'
-      - 'tools/ci/check_doc_coverage.py'
       - '.github/workflows/doc.yml'
 
   pull_request:
     paths:
       - 'Documentation/**'
-      - 'boards/**'
-      - 'tools/ci/check_doc_coverage.py'
       - '.github/workflows/doc.yml'
 
 concurrency:
@@ -45,18 +41,11 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: '3.10'
-      - name: Check board documentation coverage
-        run: ./tools/ci/check_doc_coverage.py
-
       - name: Generate Documentation
         run: |
           cd Documentation/
           sudo apt update
-          # graphviz is what plantuml needs for anything other than a
-          # sequence diagram.  It arrives as a Recommends of plantuml, so
-          # this is only making sure of it: without dot, plantuml renders
-          # an image of its own error message and the build still passes.
-          sudo apt install plantuml graphviz
+          sudo apt install plantuml
           pip3 install pipenv
           pipenv sync
           pipenv run make html

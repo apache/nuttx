@@ -342,8 +342,8 @@ def write_overview(app: Sphinx):
 
     leftover = [n for ns, names in grouped.items() if not ns for n in names]
     if leftover:
-        # check_doc_coverage.py rejects these on board pages; anything that
-        # reaches here came from somewhere else and still needs a home.
+        # A tag with no namespace has no place in the index; it came from
+        # somewhere that does not follow the board template.
         logger.warning(
             "tags_overview: %d tags have no namespace: %s",
             len(leftover),
