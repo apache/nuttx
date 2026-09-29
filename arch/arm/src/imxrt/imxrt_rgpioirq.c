@@ -207,8 +207,7 @@ int imxrt_gpioirq_enable(gpio_pinset_t pinset)
   uint16_t  gpio = IMXRT_PINSET_GPIO(pinset);
   uint32_t  port = (gpio & GPIO_PORT_MASK)       >> GPIO_PORT_SHIFT;
   uint32_t  pin  = (gpio & GPIO_PIN_MASK)        >> GPIO_PIN_SHIFT;
-  uint32_t  both = (gpio & GPIO_INTBOTHCFG_MASK) >> GPIO_INTBOTHCFG_SHIFT;
-  uint32_t  icr  = (gpio & GPIO_INTCFG_MASK);
+  imxrt_pinset_t intcfg = (pinset & GPIO_INTCFG_MASK);
   uint32_t  regval;
   uintptr_t regaddr;
 
@@ -218,25 +217,29 @@ int imxrt_gpioirq_enable(gpio_pinset_t pinset)
   regval  = getreg32(regaddr);
   regval &= ~IMXRT_GPIO_ICRN_MASK;
 
-  if (both)
+  if (intcfg == GPIO_INTBOTH_EDGES)
     {
       regval |= IMXRT_GPIO_ICRN_BOTH;
     }
-  else if (icr == GPIO_INT_LOWLEVEL)
+  else if (intcfg == GPIO_INT_LOWLEVEL)
     {
       regval |= IMXRT_GPIO_ICRN_ZERO;
     }
-  else if (icr == GPIO_INT_HIGHLEVEL)
+  else if (intcfg == GPIO_INT_HIGHLEVEL)
     {
       regval |= IMXRT_GPIO_ICRN_ONE;
     }
-  else if (icr == GPIO_INT_RISINGEDGE)
+  else if (intcfg == GPIO_INT_RISINGEDGE)
     {
       regval |= IMXRT_GPIO_ICRN_RISING;
     }
-  else
+  else if (intcfg == GPIO_INT_FALLINGEDGE)
     {
       regval |= IMXRT_GPIO_ICRN_FALLING;
+    }
+  else
+    {
+      return -EINVAL;
     }
 
   putreg32(regval, regaddr);
