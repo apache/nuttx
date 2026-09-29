@@ -1755,6 +1755,7 @@ static void set_intr_wrapper(int32_t cpu_no, uint32_t intr_source,
                              uint32_t intr_num, int32_t intr_prio)
 {
   intr_handle_t handle;
+  vector_desc_t *desc;
   int irq = ESP_SOURCE2IRQ(intr_source);
   esp_err_t err;
 
@@ -1764,27 +1765,39 @@ static void set_intr_wrapper(int32_t cpu_no, uint32_t intr_source,
 
   esp_rom_route_intr_matrix(cpu_no, intr_source, intr_num);
 
-  handle = kmm_calloc(1, sizeof(intr_handle_data_t));
-  if (handle == NULL)
-    {
-      wlerr("Failed to kmm_calloc\n");
-      return;
-    }
-
-  handle->vector_desc = get_desc_for_int(intr_num, cpu_no);
-  if (handle->vector_desc == NULL)
+  desc = get_desc_for_int(intr_num, cpu_no);
+  if (desc == NULL)
     {
       wlerr("get_desc_for_int failed\n");
-      kmm_free(handle);
       return;
     }
 
+  /* The Wi-Fi driver calls this on every esp_wifi_start(), not only on
+   * the first one, and nothing clears the handle in between (see
+   * clear_intr_wrapper()).  Reuse the registered handle: a new one would
+   * be refused by esp_set_handle() and leaked.
+   */
+
+  handle = esp_get_handle(cpu_no, irq);
+  if (handle == IRQ_UNMAPPED)
+    {
+      handle = kmm_calloc(1, sizeof(intr_handle_data_t));
+      if (handle == NULL)
+        {
+          wlerr("Failed to kmm_calloc\n");
+          return;
+        }
+
+      /* Register the handle - it contains all needed information
+       * (cpuint, cpu)
+       */
+
+      esp_set_handle(cpu_no, irq, handle);
+    }
+
+  handle->vector_desc = desc;
   handle->vector_desc->source = intr_source;
   handle->shared_vector_desc = NULL;
-
-  /* Register the handle - it contains all needed information (cpuint, cpu) */
-
-  esp_set_handle(cpu_no, irq, handle);
 
   err = esp_intr_set_in_iram(handle, false);
   if (err != OK)
