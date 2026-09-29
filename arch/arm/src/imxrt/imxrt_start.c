@@ -135,7 +135,7 @@ static inline void imxrt_tcmenable(void)
 
   UP_MB();
 
-#ifdef CONFIG_ARMV7M_ITCM
+#if defined(CONFIG_ARMV7M_ITCM) && !defined(CONFIG_ARCH_FAMILY_IMXRT118x)
   /* Copy TCM code from flash to ITCM */
 
 #warning Missing logic
@@ -212,7 +212,7 @@ void __start(void)
     }
 
   /* Copy any necessary code sections from FLASH to RAM.  The correct
-   * destination in OCRAM is given by _sramfuncs and _eramfuncs.  The
+   * destination in RAM is given by _sramfuncs and _eramfuncs.  The
    * temporary location is in flash after the data initialization code
    * at _framfuncs.  This should be done before imxrt_clockconfig() is
    * called (in case it has some dependency on initialized C variables).
