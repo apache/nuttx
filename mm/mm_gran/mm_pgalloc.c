@@ -126,6 +126,7 @@ void mm_pginitialize(FAR void *heap_start, size_t heap_size)
 void mm_pgreserve(uintptr_t start, size_t size)
 {
   FAR void * ret = gran_reserve(g_pgalloc, start, size);
+
   DEBUGASSERT(ret != NULL);
 }
 
@@ -171,6 +172,7 @@ uintptr_t mm_pgalloc_align(unsigned int npages, unsigned int align)
 {
   size_t alloc_size = (size_t)npages << MM_PGSHIFT;
   size_t align_size = (size_t)align << MM_PGSHIFT;
+
   return (uintptr_t)gran_alloc_align(g_pgalloc, alloc_size, align_size);
 }
 
