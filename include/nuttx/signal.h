@@ -692,6 +692,24 @@ unsigned int nxsig_sleep(unsigned int seconds);
 int nxsig_usleep(useconds_t usec);
 
 /****************************************************************************
+ * Name: nxsig_event_valid
+ *
+ * Description:
+ *   Check a sigevent handed in by the calling task before it is stored:
+ *   its signal must exist and a SIGEV_THREAD_ID target must be one of the
+ *   caller's own threads.
+ *
+ * Input Parameters:
+ *   event - The instance of struct sigevent to check.
+ *
+ * Returned Value:
+ *   Zero (OK) if the event may be stored; -EINVAL if not.
+ *
+ ****************************************************************************/
+
+int nxsig_event_valid(FAR const struct sigevent *event);
+
+/****************************************************************************
  * Name: nxsig_notification
  *
  * Description:
