@@ -215,6 +215,14 @@ endif
 
 ifeq ($(CONFIG_STM32_ROMFS),y)
   CSRCS += stm32_romfs_initialize.c
+stm32_romfs_initialize.o: ../../../$(patsubst "%",%,$(CONFIG_STM32_ROMFS_IMAGEFILE))
+../../../../../apps/examples/elf/main/elf_romfs.img:
+	$(MAKE) -C ../../../../../apps/platform all APPDIR=.. TOPDIR=$(TOPDIR)
+	for i in `ls -d ../../../../../apps/examples/elf/tests/*/`;		\
+	do									\
+	  $(MAKE) -C $$i all install APPDIR=../../../.. TOPDIR=$(TOPDIR);	\
+	done
+	$(MAKE) -C $(dir $@) postinstall APPDIR=../../.. TOPDIR=$(TOPDIR)
 endif
 
 ifeq ($(CONFIG_STM32_SPI_TEST),y)
