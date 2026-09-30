@@ -28,6 +28,7 @@
 
 #include <stdint.h>
 #include <assert.h>
+#include <errno.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/addrenv.h>
@@ -74,6 +75,18 @@ uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
   if (irq >= RISCV_IRQ_ECALLU && irq <= RISCV_IRQ_ECALLM)
     {
       regs[REG_EPC] += 4;
+
+#ifndef CONFIG_BUILD_FLAT
+      if (irq == RISCV_IRQ_ECALLU &&
+          (regs[REG_A0] != SYS_signal_handler_return ||
+           tcb->xcp.sigreturn == 0))
+        {
+          regs[REG_A0] = -ENOSYS;
+          board_autoled_off(LED_INIRQ);
+          return regs;
+        }
+#endif
+
       if (regs[REG_A0] != SYS_restore_context)
         {
           (*running_task)->xcp.regs = regs;
