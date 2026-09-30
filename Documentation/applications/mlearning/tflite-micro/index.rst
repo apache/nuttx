@@ -113,36 +113,48 @@ model as a C array; see *Embedding a model in an application* below.
 
    Utility to use tflite micro on nuttx.
    [ -C       ] Compile tflite model into c++ codes.
-   [ -E       ] Do once evaluation (for profiling).
+   [ -E       ] Run inference and print the outputs.
+   [ -I       ] Print model information and arena usage.
    [ -i <str> ] Readable model file path.
    [ -o <str> ] Writable c++ file path (required with -C).
    [ -p <str> ] Prefix of compiled code.
    [ -a <int> ] Arena size (mempool).
+   [ -d <str> ] Comma separated input values, e.g. 0.5,1,2 (implies
+                -E). One value fills the whole tensor. Quantized
+                inputs are quantized automatically.
+   [ -x <str> ] Raw input tensor file (implies -E).
+                -d/-x may be repeated for models with several inputs.
+   [ -n <int> ] Number of inferences to run for timing (implies -E).
    [ -h       ] Print this message.
 
 ``-i`` is required. ``-o`` is required only with ``-C``. Defaults are
 prefix ``NXAI`` and arena size 8192 bytes.
 
+The tool checks the file with the FlatBuffers verifier before using it.
+It then registers only the operators that the model uses. About 90
+built-in operators are supported, including convolution, pooling,
+fully connected, LSTM, activation, element-wise, and reshaping
+operators. An unsupported builtin or custom operator is reported by
+name, for example ``Unsupported custom operator: SignalWindow``.
+
+``-I`` prints the operators, the name, type, shape, and quantization
+parameters of every input and output tensor, and the number of arena
+bytes used. Use that number to choose ``-a``.
+
+``-E`` runs inference and prints every output tensor. Quantized outputs
+are dequantized with the tensor scale and zero point. Tensors with more
+than one element also print the index of the largest value (argmax).
+Inputs come from ``-d`` or ``-x``. The first ``-d`` or ``-x`` feeds
+input 0, the next one feeds input 1, and so on. Inputs without data are
+set to zero. ``-x`` expects a file whose size equals the tensor size in
+bytes. ``-n`` repeats the inference and prints the total and average
+time spent in ``Invoke()``. The profiler CSV is printed for the last
+run.
+
 ``-C`` appears in the help text but is not functional in NuttX builds.
 Model compilation requires ``TFLITE_MODEL_COMPILER``, which neither the
 Makefile nor the CMake integration defines. ``tflm -C`` prints
 ``Not supported compiling``.
-
-The built-in operator resolver registers nine generic (float and
-quantized) ops:
-
-- ``CONV_2D``
-- ``DEPTHWISE_CONV_2D``
-- ``MAX_POOL_2D``
-- ``QUANTIZE``
-- ``DEQUANTIZE``
-- ``MEAN``
-- ``RESHAPE``
-- ``FULLY_CONNECTED``
-- ``SOFTMAX``
-
-Models that need other operators must change the resolver in
-``apps/mlearning/tflite-micro/tflm_tool.cc``.
 
 Hello-world example
 ===================
@@ -191,13 +203,23 @@ and the NuttX apps tree next to ``nuttx`` (``../apps`` or
    allocator and profiler information, then
    ``~~~ALL TESTS PASSED~~~``.
 
-3. Optional: invoke a ``.tflite`` file from the host filesystem (the
-   sim configuration includes hostfs)::
+3. Optional: run the hello-world sine models from the host filesystem
+   (the sim configuration includes hostfs). NSH limits the command
+   line length, so mount a short host path, for example a symlink
+   ``/tmp/m`` to
+   ``apps/mlearning/tflite-micro/tflite-micro/tensorflow/lite/micro/examples/hello_world/models``::
 
-     nsh> tflm -E -i /path/to/model.tflite -a 8192
+     nsh> mount -t hostfs -o fs=/tmp/m /models
+     nsh> tflm -I -i /models/hello_world_int8.tflite
+     nsh> tflm -i /models/hello_world_int8.tflite -d 1.5708
 
-   The tool fails with ``AllocateTensors failed`` if the arena is too
-   small or the model uses operators outside the nine registered ops.
+   ``-I`` lists three ``FULLY_CONNECTED`` operators and one ``INT8``
+   input and output with their quantization parameters. Running with
+   ``-d 1.5708`` (pi/2) prints an output close to ``1.0``, the sine of
+   the input.
+
+   If the arena is too small the tool prints
+   ``AllocateTensors failed`` and suggests a larger ``-a``.
 
 CMake is equivalent: ``cmake -B build -DBOARD_CONFIG=sim:tflm -GNinja``
 then ``cmake --build build`` and ``./build/nuttx``.
