@@ -67,7 +67,7 @@ void env_release(FAR struct task_group_s *group)
 
   DEBUGASSERT(group != NULL);
 
-  if (group->tg_envp)
+  if (group->tg_envp && !env_user(group))
     {
       /* Free any allocate environment strings */
 

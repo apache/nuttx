@@ -31,6 +31,7 @@
 #include <sched.h>
 #include <stdlib.h>
 #include "sched/sched.h"
+#include "environ/environ.h"
 
 #undef get_environ_ptr
 
@@ -60,5 +61,17 @@ FAR char **get_environ_ptr(void)
 
   return tcb->group->tg_envp;
 }
+
+#ifdef CONFIG_BUILD_KERNEL
+void set_environ_ptr(FAR char **envp)
+{
+  FAR struct task_group_s *group = this_task()->group;
+
+  if (env_user(group))
+    {
+      group->tg_envp = envp;
+    }
+}
+#endif
 
 #endif /* CONFIG_DISABLE_ENVIRON */

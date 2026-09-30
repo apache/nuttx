@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/addrenv.h>
 #include <nuttx/sched.h>
 
 /****************************************************************************
@@ -40,6 +41,14 @@
 #else
 
 #  define SCHED_ENVIRON_RESERVED (4)
+
+#  ifdef CONFIG_BUILD_KERNEL
+#    define env_user(g)      (((g)->tg_flags & GROUP_FLAG_PRIVILEGED) == 0)
+#    define env_uaccess(g,p) (!env_user(g) || uaccess_ok((p), 1))
+#  else
+#    define env_user(g)      false
+#    define env_uaccess(g,p) true
+#  endif
 
 /****************************************************************************
  * Public Data
