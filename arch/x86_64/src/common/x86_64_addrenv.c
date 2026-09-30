@@ -994,3 +994,20 @@ int up_addrenv_detach(struct tcb_s *tcb)
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: up_addrenv_user_vaddr
+ *
+ * Description:
+ *   Check if a virtual address is in user virtual address space.
+ *
+ ****************************************************************************/
+
+bool up_addrenv_user_vaddr(uintptr_t vaddr)
+{
+  return (vaddr >= ARCH_ADDRENV_VBASE && vaddr < ARCH_ADDRENV_VEND)
+#ifdef CONFIG_ARCH_VMA_MAPPING
+         || (vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr < ARCH_SHM_VEND)
+#endif
+         ;
+}
