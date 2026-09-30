@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 #include <nuttx/debug.h>
 #include <syscall.h>
 
@@ -485,15 +486,12 @@ uint32_t *arm_syscall(uint32_t *regs)
           struct tcb_s *rtcb = this_task();
           int index = rtcb->xcp.nsyscalls;
 
-          /* Verify that the SYS call number is within range */
-
-          DEBUGASSERT(cmd >= CONFIG_SYS_RESERVED && cmd < SYS_maxsyscall);
-
-          /* Make sure that there is a no saved SYSCALL return address.  We
-           * cannot yet handle nested system calls.
-           */
-
-          DEBUGASSERT(index < CONFIG_SYS_NNEST);
+          if (cmd < CONFIG_SYS_RESERVED || cmd >= SYS_maxsyscall ||
+              index >= CONFIG_SYS_NNEST)
+            {
+              regs[REG_R0] = -ENOSYS;
+              break;
+            }
 
           /* Setup to return to dispatch_syscall in privileged mode. */
 
