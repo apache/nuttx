@@ -565,9 +565,13 @@ void uaccess_check(FAR const void *ptr, size_t len)
 {
   if (!uaccess_ok(ptr, len))
     {
-      _alert("%s: %p is not user memory\n",
-             get_task_name(this_task()), ptr);
-      _exit(SIGSEGV);
+      uaccess_fault(ptr);
     }
+}
+
+void uaccess_fault(FAR const void *ptr)
+{
+  _alert("%s: %p is not user memory\n", get_task_name(this_task()), ptr);
+  _exit(SIGSEGV);
 }
 #endif

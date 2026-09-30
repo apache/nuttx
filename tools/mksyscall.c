@@ -35,8 +35,28 @@
  * Private Data
  ****************************************************************************/
 
+struct uvalue_s
+{
+  const char *name;
+  int parm;
+};
+
 static bool g_inline;
 static FILE *g_stubstream;
+
+static const char * const g_uwrapped[] =
+{
+  "boardctl", "fcntl", "ioctl", "nx_pthread_create", "nx_vsyslog", "prctl",
+  "readv", "recvmsg", "sendmsg", "writev", NULL
+};
+
+static const struct uvalue_s g_uvalues[] =
+{
+  { "mmap", 1 },
+  { "rmmod", 1 },
+  { "shmat", 2 },
+  { NULL, 0 }
+};
 
 /****************************************************************************
  * Private Functions
@@ -368,6 +388,36 @@ static void generate_proxy(int nfixed, int nparms)
   fclose(stream);
 }
 
+static bool is_uwrapped(const char *name)
+{
+  int i;
+
+  for (i = 0; g_uwrapped[i] != NULL; i++)
+    {
+      if (strcmp(g_uwrapped[i], name) == 0)
+        {
+          return true;
+        }
+    }
+
+  return false;
+}
+
+static bool is_uvalue(const char *name, int parm)
+{
+  int i;
+
+  for (i = 0; g_uvalues[i].name != NULL; i++)
+    {
+      if (strcmp(g_uvalues[i].name, name) == 0 && g_uvalues[i].parm == parm)
+        {
+          return true;
+        }
+    }
+
+  return false;
+}
+
 static FILE *open_stub(void)
 {
   if (g_inline)
@@ -435,6 +485,16 @@ static void generate_stub(int nfixed, int nparms)
   fprintf(stream, "#include <string.h>\n");
   fprintf(stream, "#endif\n");
 
+  if (is_uwrapped(g_parm[NAME_INDEX]))
+    {
+      fprintf(stream, "\n#ifdef CONFIG_BUILD_KERNEL\n");
+      fprintf(stream, "#  define %s uaccess_%s\n",
+              g_parm[NAME_INDEX], g_parm[NAME_INDEX]);
+      fprintf(stream, "#endif\n\n");
+    }
+
+  fprintf(stream, "#include <nuttx/addrenv.h>\n");
+
   if (strlen(g_parm[HEADER_INDEX]) > 0)
     {
       fprintf(stream, "#include <%s>\n", g_parm[HEADER_INDEX]);
@@ -486,6 +546,17 @@ static void generate_stub(int nfixed, int nparms)
           fprintf(stream, "  _parm%d = (%s)((%s)parm%d);\n",
                           i + 1, formal, actual, i + 1);
           fprintf(stream, "#endif\n");
+        }
+      else if (strchr(actual, '*') != NULL &&
+               !is_uvalue(g_parm[NAME_INDEX], i + 1))
+        {
+          fprintf(stream, "#ifdef CONFIG_BUILD_KERNEL\n");
+          fprintf(stream, "  if (parm%d != 0)\n", i + 1);
+          fprintf(stream, "    {\n");
+          fprintf(stream, "      uaccess_check((FAR const void *)");
+          fprintf(stream, "parm%d, 1);\n", i + 1);
+          fprintf(stream, "    }\n");
+          fprintf(stream, "#endif\n\n");
         }
     }
 
