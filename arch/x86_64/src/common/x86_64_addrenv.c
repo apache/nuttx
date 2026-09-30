@@ -1007,3 +1007,41 @@ bool up_addrenv_user_vaddr(uintptr_t vaddr)
 {
   return x86_64_uservaddr(vaddr);
 }
+
+/****************************************************************************
+ * Name: up_addrenv_va_to_pa
+ *
+ * Description:
+ *   Translate a virtual address through the active page tables; 0 when it
+ *   is not mapped.
+ *
+ ****************************************************************************/
+
+uintptr_t up_addrenv_va_to_pa(FAR void *va)
+{
+  uintptr_t vaddr   = (uintptr_t)va;
+  uintptr_t lnvaddr = x86_64_pgvaddr(get_pml4());
+  uintptr_t mask;
+  uintptr_t pte;
+  uint32_t  ptlevel;
+
+  for (ptlevel = 0; ptlevel < X86_MMU_PT_LEVELS && lnvaddr; ptlevel++)
+    {
+      pte = mmu_ln_getentry(ptlevel, lnvaddr, vaddr);
+      if ((pte & X86_PAGE_PRESENT) == 0)
+        {
+          break;
+        }
+
+      if (ptlevel == X86_MMU_PT_LEVELS - 1 ||
+          (ptlevel > 0 && (pte & X86_PAGE_HUGE) != 0))
+        {
+          mask = ((uintptr_t)1 << X86_MMU_VADDR_SHIFT(ptlevel)) - 1;
+          return (mmu_pte_to_paddr(pte) & ~mask) | (vaddr & mask);
+        }
+
+      lnvaddr = x86_64_pgvaddr(mmu_pte_to_paddr(pte));
+    }
+
+  return 0;
+}
