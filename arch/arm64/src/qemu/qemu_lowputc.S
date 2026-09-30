@@ -70,7 +70,7 @@ SECTION_FUNC(text, arm64_earlyprintinit)
 .macro early_uart_ready xb, wt
 1:
     ldrh  \wt, [\xb, #0x18]      /* <- UARTFR (Flag register) */
-    tst   \wt, #0x8              /* Check BUSY bit */
+    tst   \wt, #0x20             /* Check TXFF bit */
     b.ne  1b                     /* Wait for the UART to be ready */
 .endm
 
