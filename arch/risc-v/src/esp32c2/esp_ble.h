@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c2/common/scripts/esp32c2_aliases.ld
+ * arch/risc-v/src/esp32c2/esp_ble.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,11 +20,33 @@
  *
  ****************************************************************************/
 
-cache_set_idrom_mmu_size = Cache_Set_IDROM_MMU_Size;
-cache_dbus_mmu_set = Cache_Dbus_MMU_Set;
-cache_ibus_mmu_set = Cache_Ibus_MMU_Set;
-cache_invalidate_icache_all = Cache_Invalidate_ICache_All;
-cache_resume_icache = Cache_Resume_ICache;
-cache_suspend_icache = Cache_Suspend_ICache;
-cache_invalidate_icache_all = Cache_Invalidate_ICache_All;
-_interrupt_handler = exception_common;
+#ifndef __ARCH_RISCV_SRC_ESP32C2_ESP_BLE_H
+#define __ARCH_RISCV_SRC_ESP32C2_ESP_BLE_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp_ble_initialize
+ *
+ * Description:
+ *   Init BT controller
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   success or fail
+ *
+ ****************************************************************************/
+
+int esp_ble_initialize(void);
+
+#endif /* __ARCH_RISCV_SRC_ESP32C2_ESP_BLE_H */

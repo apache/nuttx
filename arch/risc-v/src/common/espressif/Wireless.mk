@@ -30,7 +30,7 @@ INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY
 ifeq ($(CONFIG_ARCH_CHIP_ESP32C3),y)
 EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)bt$(DELIM)controller$(DELIM)lib_esp32c3_family$(DELIM)$(CHIP_SERIES)
 endif
-ifneq ($(filter y,$(CONFIG_ARCH_CHIP_ESP32C6) $(CONFIG_ARCH_CHIP_ESP32H2)),)
+ifneq ($(filter y,$(CONFIG_ARCH_CHIP_ESP32C2) $(CONFIG_ARCH_CHIP_ESP32C6) $(CONFIG_ARCH_CHIP_ESP32H2)),)
 ifeq ($(CONFIG_ESPRESSIF_BLE),y)
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)bt$(DELIM)common$(DELIM)osi$(DELIM)include
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)bt$(DELIM)common$(DELIM)tinycrypt$(DELIM)include
@@ -63,6 +63,12 @@ CHIP_CSRCS += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)nuttx$(DELIM)src$(DELI
 
 CFLAGS += $(DEFINE_PREFIX)ESP_PLATFORM=1
 
+ifeq ($(CONFIG_ARCH_CHIP_ESP32C2),y)
+EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)bt$(DELIM)controller$(DELIM)lib_esp32c2$(DELIM)esp32c2-bt-lib
+
+CHIP_CSRCS += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)bt$(DELIM)controller$(DELIM)$(CHIP_SERIES)$(DELIM)dummy.c
+endif
+
 ifeq ($(CONFIG_ARCH_CHIP_ESP32C6),y)
 EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)bt$(DELIM)controller$(DELIM)lib_esp32c6$(DELIM)esp32c6-bt-lib$(DELIM)esp32c6
 endif
@@ -83,11 +89,14 @@ EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$
 
 EXTRA_LIBS += -lphy -lcoexist
 
-ifneq ($(CONFIG_ARCH_CHIP_ESP32H2),y)
-EXTRA_LIBS += -lmesh -lespnow
-endif
-
 ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
+
+ifneq ($(CONFIG_ARCH_CHIP_ESP32H2),y)
+ifneq ($(CONFIG_ARCH_CHIP_ESP32C2),y)
+EXTRA_LIBS += -lmesh
+endif
+EXTRA_LIBS += -lespnow
+endif
 
 ifeq ($(CONFIG_WPA_WAPI_PSK),y)
 EXTRA_LIBS += -lwapi
@@ -178,8 +187,10 @@ CHIP_CSRCS += esp_timing.c
 
 LDFLAGS += -u mbedtls_psa_crypto_init_include_impl
 
+ifneq ($(CONFIG_ARCH_CHIP_ESP32C2),y)
 VPATH += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)mbedtls$(DELIM)port$(DELIM)psa_driver$(DELIM)esp_mac
 CHIP_CSRCS += psa_crypto_driver_esp_hmac_opaque.c
+endif
 
 VPATH += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)mbedtls$(DELIM)port$(DELIM)psa_driver$(DELIM)esp_md
 CHIP_CSRCS += psa_crypto_driver_esp_md5.c
