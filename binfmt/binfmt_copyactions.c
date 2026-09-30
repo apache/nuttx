@@ -39,6 +39,12 @@
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_BINFMT_DISABLE)
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define MAX_FILE_ACTIONS 256
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -64,17 +70,20 @@ int binfmt_copyactions(FAR const posix_spawn_file_actions_t **copy,
                        FAR const posix_spawn_file_actions_t *actions)
 {
   FAR struct spawn_general_file_action_s *entry;
-  FAR struct spawn_general_file_action_s *prev;
-  FAR struct spawn_close_file_action_s *close;
+  FAR struct spawn_general_file_action_s *prev = NULL;
   FAR struct spawn_open_file_action_s *open;
-  FAR struct spawn_open_file_action_s *tmp;
-  FAR struct spawn_dup2_file_action_s *dup2;
-  FAR void *buffer;
-  int size = 0;
+  FAR struct spawn_open_file_action_s *src;
+  enum spawn_file_actions_e action;
+  FAR char *buffer;
+  FAR char *end;
+  size_t size = 0;
+  size_t len;
+  int count = 0;
+  int i;
 
+  *copy = NULL;
   if (actions == NULL)
     {
-      *copy = NULL;
       return OK;
     }
 
@@ -82,6 +91,11 @@ int binfmt_copyactions(FAR const posix_spawn_file_actions_t **copy,
        entry != NULL;
        entry = entry->flink)
     {
+      if (++count > MAX_FILE_ACTIONS)
+        {
+          return -EFAULT;
+        }
+
       switch (entry->action)
         {
           case SPAWN_FILE_ACTION_CLOSE:
@@ -103,72 +117,75 @@ int binfmt_copyactions(FAR const posix_spawn_file_actions_t **copy,
         }
     }
 
-  *copy = buffer = kmm_malloc(size);
+  buffer = kmm_malloc(size);
   if (buffer == NULL)
     {
       return -ENOMEM;
     }
 
-  /* We need to copy and re-organize the flink chain,  be care not modify
-   * the actions it self,  the prev have to point to the last time foreach
-   * item.
-   */
+  *copy = (FAR const posix_spawn_file_actions_t *)buffer;
+  end   = buffer + size;
+  entry = (FAR struct spawn_general_file_action_s *)actions;
 
-  for (entry = (FAR struct spawn_general_file_action_s *)actions,
-       prev = NULL; entry != NULL; entry = entry->flink)
+  for (i = 0; i < count; i++, entry = entry->flink)
     {
-      switch (entry->action)
+      if (entry == NULL)
+        {
+          goto errout;
+        }
+
+      action = entry->action;
+      switch (action)
         {
           case SPAWN_FILE_ACTION_CLOSE:
-            close = buffer;
-            memcpy(close, entry, sizeof(struct spawn_close_file_action_s));
-            close->flink = NULL;
-            if (prev)
-              {
-                prev->flink = (FAR void *)close;
-              }
-
-            prev   = (FAR void *)close;
-            buffer = close + 1;
+            len = sizeof(struct spawn_close_file_action_s);
             break;
 
           case SPAWN_FILE_ACTION_DUP2:
-            dup2 = buffer;
-            memcpy(dup2, entry, sizeof(struct spawn_dup2_file_action_s));
-            dup2->flink = NULL;
-            if (prev)
-              {
-                prev->flink = (FAR void *)dup2;
-              }
-
-            prev   = (FAR void *)dup2;
-            buffer = dup2 + 1;
+            len = sizeof(struct spawn_dup2_file_action_s);
             break;
 
           case SPAWN_FILE_ACTION_OPEN:
-            tmp = (FAR struct spawn_open_file_action_s *)entry;
-            open = buffer;
-            memcpy(open, entry, sizeof(struct spawn_open_file_action_s));
-            open->flink = NULL;
-            if (prev)
-              {
-                prev->flink = (FAR void *)open;
-              }
-
-            strcpy(open->path, tmp->path);
-
-            prev   = (FAR void *)open;
-            buffer = (FAR char *)buffer +
-                     ALIGN_UP(SIZEOF_OPEN_FILE_ACTION_S(strlen(tmp->path)),
-                              sizeof(FAR void *));
+            len = sizeof(struct spawn_open_file_action_s);
             break;
 
           default:
-            break;
+            goto errout;
         }
+
+      if (len > end - buffer)
+        {
+          goto errout;
+        }
+
+      memcpy(buffer, entry, len);
+      if (action == SPAWN_FILE_ACTION_OPEN)
+        {
+          open = (FAR struct spawn_open_file_action_s *)buffer;
+          src  = (FAR struct spawn_open_file_action_s *)entry;
+          len  = strnlen(src->path, end - buffer - len);
+          memcpy(open->path, src->path, len);
+          open->path[len] = '\0';
+          len = ALIGN_UP(SIZEOF_OPEN_FILE_ACTION_S(len), sizeof(FAR void *));
+        }
+
+      ((FAR struct spawn_general_file_action_s *)buffer)->flink  = NULL;
+      ((FAR struct spawn_general_file_action_s *)buffer)->action = action;
+      if (prev)
+        {
+          prev->flink = (FAR struct spawn_general_file_action_s *)buffer;
+        }
+
+      prev    = (FAR struct spawn_general_file_action_s *)buffer;
+      buffer += len;
     }
 
   return OK;
+
+errout:
+  kmm_free((FAR void *)*copy);
+  *copy = NULL;
+  return -EFAULT;
 }
 
 /****************************************************************************
