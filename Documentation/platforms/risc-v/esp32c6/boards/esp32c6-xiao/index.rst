@@ -2,6 +2,8 @@
 Seeed Studio XIAO ESP32C6
 =========================
 
+.. tags:: arch:risc-v, chip:esp32c6, vendor:espressif
+
 The `Seeed Studio XIAO ESP32C6 <https://wiki.seeedstudio.com/xiao_esp32c6_getting_started/>`_ is a general purpose board supplied by
 Seeed Studio and it is compatible with the Espressif ESP32C6 ecosystem, sharing the same MCU as ESP32-C6-DevKitC.
 

@@ -2,7 +2,7 @@
 ST Nucleo H7S3L8
 =================
 
-.. tags:: chip:stm32, chip:stm32h7, chip:stm32h7s3
+.. tags:: arch:arm, chip:stm32h7, part:stm32h7s3, vendor:st
 
 This page describes the NuttX port for the STMicro NUCLEO-H7S3L8
 development board.  The board is based on the 600 MHz STM32H7S3L8

@@ -2,6 +2,8 @@
 sam4cmp-db
 ==========
 
+.. tags:: arch:arm, chip:sam34, vendor:microchip
+
 README for the NuttX port to the SAM4CMP-DB board.
 
 The `SAM4CMP-DB <http://www.atmel.com/tools/SAM4CMP-DB.aspx>`_ board is used

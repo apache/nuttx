@@ -2,7 +2,7 @@
 ST Nucleo-H533RE
 ================
 
-.. tags:: chip:stm32, chip:stm32h5, chip:stm32h533
+.. tags:: arch:arm, chip:stm32h5, part:stm32h533, vendor:st
 
 Board Information
 =================

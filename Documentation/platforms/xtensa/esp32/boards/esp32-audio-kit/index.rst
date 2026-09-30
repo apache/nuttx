@@ -2,7 +2,7 @@
 ESP32-AUDIO-KIT
 ===============
 
-.. tags:: chip:esp32, chip:esp32a1s
+.. tags:: arch:xtensa, chip:esp32, part:esp32a1s, vendor:espressif
 
 The `Ai-Thinker ESP32 Audio Kit <https://docs.ai-thinker.com/en/esp32-audio-kit>`_ is a development board for the ESP32 SoC from Espressif, based on Ai-Thinker ESP32-A1S audio module.
 

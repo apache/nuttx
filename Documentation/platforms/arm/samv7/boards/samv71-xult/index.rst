@@ -2,6 +2,8 @@
 SAMV71 Xplained Ultra
 =====================
 
+.. tags:: arch:arm, chip:samv7, vendor:microchip
+
 This entry discusses the port of NuttX to the Atmel SAM V71 Xplained
 Ultra Evaluation Kit (SAMV71-XULT).  This board features the ATSAMV71Q21 Cortex-M7
 microcontroller.

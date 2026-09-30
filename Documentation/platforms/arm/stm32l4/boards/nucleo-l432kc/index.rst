@@ -2,7 +2,7 @@
 ST Nucleo L432KC
 ================
 
-.. tags:: chip:stm32, chip:stm32l4, chip:stm32l432
+.. tags:: arch:arm, chip:stm32l4, part:stm32l432, vendor:st
 
 This page discusses issues unique to NuttX configurations for the ST
 Nucleo-l432kc board from ST Micro.  See

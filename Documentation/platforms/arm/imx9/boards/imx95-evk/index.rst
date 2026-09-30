@@ -2,6 +2,8 @@
 IMX95LPD5EVK-19
 ===============
 
+.. tags:: arch:arm, chip:imx9, vendor:nxp
+
 The IMX95LPD5EVK-19 board is a platform designed to show the most commonly
 used features of the
 `i.MX 95 automotive applications processor

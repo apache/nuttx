@@ -2,7 +2,7 @@
 linum-stm32h753bi
 =================
 
-.. tags:: chip:stm32, chip:stm32h7, chip:stm32h753
+.. tags:: arch:arm, chip:stm32h7, part:stm32h753, vendor:st
 
 This page discusses issues unique to NuttX configurations for the
 LINUM-STM32H753BI board.

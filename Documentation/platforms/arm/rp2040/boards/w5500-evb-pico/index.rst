@@ -2,7 +2,7 @@
 W5500-EVB-Pico
 ===============================
 
-.. tags:: chip:rp2040, ethernet
+.. tags:: arch:arm, chip:rp2040, vendor:raspberry-pi
 
 The `W5500-EVB-Pico <https://docs.wiznet.io/Product/iEthernet/W5500/w5500-evb-pico/>`_
 is a microcontroller evaluation board based on the Raspberry Pi RP2040 and fully

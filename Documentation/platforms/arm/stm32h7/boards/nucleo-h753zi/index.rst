@@ -2,7 +2,7 @@
 ST Nucleo H753ZI
 =================
 
-.. tags:: chip:stm32, chip:stm32h7, chip:stm32h753
+.. tags:: arch:arm, chip:stm32h7, part:stm32h753, vendor:st
 
 .. figure:: nucleo-h753zi.jpg
    :align: center

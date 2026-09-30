@@ -2,7 +2,7 @@
 RTL8720F EVB
 ============
 
-.. tags:: chip:rtl8720f, arch:arm, vendor:realtek
+.. tags:: arch:arm, chip:rtl8720f, vendor:realtek
 
 .. todo::
 

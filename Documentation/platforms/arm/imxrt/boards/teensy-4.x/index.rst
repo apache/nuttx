@@ -2,6 +2,8 @@
 Teensy-4.x
 ==========
 
+.. tags:: arch:arm, chip:imxrt, vendor:nxp
+
 The `Teensy 4.0 <https://www.pjrc.com/store/teensy40.html>`_ and `Teensy 4.1 <https://www.pjrc.com/store/teensy41.html>`_
 are development boards from PJRC. Both boards use i.MX RT1060 MCU, feature several I/Os pins and on-board LED.
 

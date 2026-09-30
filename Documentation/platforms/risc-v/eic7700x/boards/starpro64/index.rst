@@ -2,7 +2,7 @@
 PINE64 StarPro64
 ================
 
-.. tags:: chip:eic7700x, arch:risc-v, vendor:pine64, experimental
+.. tags:: arch:risc-v, chip:eic7700x, vendor:eswin
 
 `PINE64 StarPro64 <https://lupyuen.github.io/articles/starpro64>`_
 is a RISC-V Single-Board Computer based on the ESWIN EIC7700X RISC-V SoC

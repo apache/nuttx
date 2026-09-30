@@ -2,6 +2,8 @@
 SAM3U-EK
 ========
 
+.. tags:: arch:arm, chip:sam34, vendor:microchip
+
 This documentation discusses issues unique to NuttX configurations for the Atmel
 SAM3U-EK development board featuring the ATAM3U. This board features the
 ATSAM3U4E MCU running at 96MHz.

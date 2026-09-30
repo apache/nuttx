@@ -2,7 +2,7 @@
 ST Nucleo U083RC
 ================
 
-.. tags:: chip:stm32, chip:stm32u0, chip:stm32u083
+.. tags:: arch:arm, chip:stm32u0, part:stm32u083, vendor:st
 
 The Nucleo U083RC is a member of the Nucleo-64 board family.
 

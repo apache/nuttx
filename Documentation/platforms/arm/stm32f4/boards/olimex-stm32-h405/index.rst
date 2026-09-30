@@ -2,7 +2,7 @@
 Olimex STM32-P207
 =================
 
-.. tags:: chip:stm32, chip:stm32f4, chip:stm32f405
+.. tags:: arch:arm, chip:stm32f4, part:stm32f405, vendor:st
 
 The NuttX configuration for the Olimex STM32-H405 is based on the configuration
 Olimex STM32-P207.

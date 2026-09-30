@@ -2,6 +2,8 @@
 ARCX Socket Grid
 ================
 
+.. tags:: arch:arm, chip:imxrt, vendor:nxp
+
 The ARCX Socket Grid is an industrial board from ARCX. This boards uses the i.MX RT1052 crossover MCU with ARM Cortex M7 core.
 
 .. figure:: arc_socket_grid.jpg

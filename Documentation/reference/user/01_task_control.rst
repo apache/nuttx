@@ -366,7 +366,7 @@ Functions
      absent from ``unistd.h`` and code that calls it fails to build.  That
      is deliberate.  A build error naming the function is strictly better
      than a ``fork()`` that silently gives the child the parent's memory.
-     See :doc:`/guides/fork_vfork_migration` for how to move code that
+     See :doc:`/guides/concurrency/fork_vfork_migration` for how to move code that
      relied on the previous behaviour.
 
      There is no copy-on-write, because NuttX has no demand paging to build

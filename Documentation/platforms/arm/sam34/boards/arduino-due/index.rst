@@ -2,6 +2,8 @@
 Arduino Due
 ===========
 
+.. tags:: arch:arm, chip:sam34, vendor:microchip
+
 This documentation discusses issues unique to NuttX configurations for the
 Arduino DUE board featuring the Atmel ATSAM3X8E MCU running at 84 MHz.
 

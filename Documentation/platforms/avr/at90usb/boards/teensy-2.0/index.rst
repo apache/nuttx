@@ -2,7 +2,7 @@
 Teensy 2.0
 ==========
 
-.. tags:: arch:avr, chip:at90usb
+.. tags:: arch:avr, chip:at90usb, vendor:microchip
 
 This is the documentation for the port of NuttX to the PJRC Teensy++ 2.0 board.
 This board is developed by http://pjrc.com/teensy/. The Teensy++ 2.0 is based on

@@ -2,7 +2,7 @@
 ST STM32F4-Discovery
 ====================
 
-.. tags:: chip:stm32, chip:stm32f4, chip:stm32f407
+.. tags:: arch:arm, chip:stm32f4, part:stm32f407, vendor:st
 
 The STM32F4Discover board (also known as STM32F407G-DISC1) is a low cost
 development board released by STMicroelectronics.
@@ -2440,7 +2440,7 @@ Connect the HX711 to the STM32F4 board using the following pins:
     -4
     -4
 
-For more details, refer to the official `HX711 NuttX documentation <https://nuttx.apache.org/docs/latest/components/drivers/character/analog/adc/hx711/index.html>`_.
+For more details, refer to the official `HX711 NuttX documentation <https://nuttx.apache.org/docs/latest/os/drivers/character/analog/adc/hx711/index.html>`_.
 
 nxscope_cdcacm
 --------------

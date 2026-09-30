@@ -2,7 +2,7 @@
 ``nxflatxip`` NXFLAT Executed In Place from XIPFS
 =================================================
 
-Writes an NXFLAT module into a :doc:`XIPFS </components/filesystem/xipfs>`
+Writes an NXFLAT module into a :doc:`XIPFS </os/filesystem/xipfs>`
 volume at run time, the way a download would, and runs two instances of it
 concurrently. The module's text is executed directly out of flash and shared
 between the instances; each instance gets its own data.
@@ -63,7 +63,7 @@ Building the module
 The module is built from ``module/xipmod.c`` at build time, exactly the way
 :doc:`../nxflat/index` builds its test programs, so it needs the same host
 tools: ``mknxflat``, which NuttX builds itself, and ``ldnxflat``, which has
-to come from the buildroot toolchain.  See :doc:`/components/nxflat`.
+to come from the buildroot toolchain.  See :doc:`/os/binfmt/nxflat`.
 
 The module has no static data and no string constants, and reports through a
 callback into the firmware rather than formatting its own output. The comment

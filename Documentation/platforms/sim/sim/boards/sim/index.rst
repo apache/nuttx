@@ -2,7 +2,7 @@
 SIM
 ===
 
-.. tags:: arch:sim
+.. tags:: arch:sim, chip:sim
 
 This documentation page describes the contents of the build configurations
 available for the NuttX "sim" target. The sim target is a NuttX port that runs

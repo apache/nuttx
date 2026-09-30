@@ -2,7 +2,7 @@
 ST STM3240G-EVAL
 =================
 
-.. tags:: chip:stm32, chip:stm32f4, chip:stm32f407, ethernet
+.. tags:: arch:arm, chip:stm32f4, part:stm32f407, vendor:st
 
 This page discusses issues unique to NuttX configurations for the
 STMicro STM3240G-EVAL development board.

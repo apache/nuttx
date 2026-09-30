@@ -4,7 +4,7 @@
 ST B-L072Z-LRWAN1
 =================
 
-.. tags:: chip:stm32, chip:stm32l0, chip:stm32l072
+.. tags:: arch:arm, chip:stm32l0, part:stm32l072, vendor:st
 
 .. figure:: b-l072z-lrwan1.jpg
    :align: center

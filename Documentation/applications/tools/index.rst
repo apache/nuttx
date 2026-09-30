@@ -49,7 +49,7 @@ Processes and Programs in the KERNEL Build
 
 In the kernel build, there are no tasks. There are only processes and all
 code lives in its own, private address space.
-See :doc:`/implementation/processes_vs_tasks`.
+See :doc:`/os/scheduling/processes_vs_tasks`.
 
 One consequence of that is that functions like ``task_create()`` and friends
 cannot be used in the KERNEL build mode. Instead, all processes must be loaded

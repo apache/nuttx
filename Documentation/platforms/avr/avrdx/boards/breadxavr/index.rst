@@ -4,6 +4,8 @@
 AVR128DA28 on breadboard
 ========================
 
+.. tags:: arch:avr, chip:avrdx, vendor:microchip
+
 This is a AVR128DA28 stuck into a breadboard for the purpose
 of developing this port for NuttX. It can also be used as a reference
 for making ports for other boards.

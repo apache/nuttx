@@ -2,7 +2,7 @@
 ST Nucleo WB55RG
 ================
 
-.. tags:: chip:stm32, chip:stm32wb, chip:stm32wb55
+.. tags:: arch:arm, chip:stm32wb, part:stm32wb55, vendor:st
 
 This page file discusses the port of NuttX to the STMicroelectronics
 NUCLEO-WB55RG board.  That board features the multi-protocol wireless and

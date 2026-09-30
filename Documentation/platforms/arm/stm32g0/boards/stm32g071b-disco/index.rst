@@ -2,7 +2,7 @@
 ST STM32G071B-DISCO
 ===================
 
-.. tags:: chip:stm32, chip:stm32g0, chip:stm32g071
+.. tags:: arch:arm, chip:stm32g0, part:stm32g071, vendor:st
 
 This page discusses issues unique to NuttX configurations for the
 STMicro STM32G071B-DISCO development board.  The STM32G071B-DISCO board

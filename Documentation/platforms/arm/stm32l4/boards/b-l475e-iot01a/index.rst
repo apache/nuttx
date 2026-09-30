@@ -2,7 +2,7 @@
 ST B-L475E-IOT01A
 =================
 
-.. tags:: chip:stm32, chip:stm32l4, chip:stm32l475
+.. tags:: arch:arm, chip:stm32l4, part:stm32l475, vendor:st
 
 This page discusses the port of NuttX to the STMicro B-L475E-IOT01A
 Discovery kit powered by STM32L475VG Cortex-M4.  This board targets IoT

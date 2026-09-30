@@ -2,7 +2,7 @@
  ST STM32L Discovery
 =====================
 
-.. tags:: chip:stm32, chip:stm32l1, chip:stm32l152
+.. tags:: arch:arm, chip:stm32l1, part:stm32l152, vendor:st
 
 This page discusses issues unique to NuttX configurations for the
 STMicro STM32L-Discovery development board.  The STM32L-Discovery board

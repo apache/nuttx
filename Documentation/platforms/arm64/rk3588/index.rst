@@ -2,7 +2,7 @@
 Rockchip RK3588
 ===============
 
-.. tags:: arch:arm64, chip:rk3588, vendor:rockchip, experimental
+.. tags:: arch:arm64, chip:rk3588, vendor:rockchip
 
 .. warning::
 

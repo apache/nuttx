@@ -9,21 +9,6 @@ interface with are also identified in ``include/nuttx/arch.h`` or
 in other header files.
 
 .. toctree::
-  addrenv.rst
-  app_vs_os.rst
-  arch.rst
-  board.rst
-  conventions.rst
-  iob.rst
-  led.rst
-  mutex.rst
-  newreno.rst
-  notifier.rst
-  nuttx.rst
   paging.rst
   shm.rst
   smp.rst
-  sleep.rst
-  time_clock.rst
-  wqueue.rst
-  events.rst

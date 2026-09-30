@@ -2,7 +2,7 @@
 ESWIN EIC7700X
 ==============
 
-.. tags:: chip:eic7700x, arch:risc-v, vendor:eswin
+.. tags:: arch:risc-v, chip:eic7700x, vendor:eswin
 
 `ESWIN EIC7700X <https://www.eswincomputing.com/en/products/index/36.html>`_ is a 64-bit RISC-V SoC with 4 RISC-V Cores:
 

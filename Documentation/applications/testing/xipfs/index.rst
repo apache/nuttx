@@ -2,7 +2,7 @@
 ``xipfs`` XIPFS File System Test
 ==================================
 
-Exercises the :doc:`XIPFS </components/filesystem/xipfs>` file system: the
+Exercises the :doc:`XIPFS </os/filesystem/xipfs>` file system: the
 routine VFS paths, the write-once rules, both flavours of mapping, and then
 the two properties that are easy to get wrong and quiet when they are --
 release of execute-in-place pins, and power-loss atomicity of the metadata

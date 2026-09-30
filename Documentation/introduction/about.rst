@@ -51,7 +51,7 @@ Key features of NuttX include:
   * Fully pre-emptible.
   * Naturally scalable.
   * Highly configurable.
-  * Easily extensible to new processor architectures, SoC architecture, or board architectures. :doc:`/reference/os/index` is available.
+  * Easily extensible to new processor architectures, SoC architecture, or board architectures. :doc:`/os/index` is available.
   * FIFO and round-robin scheduling.
   * Realtime, deterministic, with support for priority inheritance
   * Tickless Operation
@@ -95,10 +95,10 @@ Key features of NuttX include:
   * Union filesystem - Supports combining and overlaying file systems.
   * UserFS - User application file system.
   * ``procfs/`` pseudo-filesystem support.
-  * :doc:`/components/binfmt` with support for the following formats:
+  * :doc:`/os/binfmt/index` with support for the following formats:
 
     - Separately linked ELF modules.
-    - Separately linked :doc:`/components/nxflat` modules. NXFLAT is a binary format that can be XIP from a
+    - Separately linked :doc:`/os/binfmt/nxflat` modules. NXFLAT is a binary format that can be XIP from a
       file system.
     - "Built-In" applications.
 
@@ -120,7 +120,7 @@ Key features of NuttX include:
   * Graphics: framebuffer drivers, graphic- and segment-LCD drivers. VNC server.
   * Audio subsystem: CODECs, audio input and output drivers. Command line and graphic media player applications.
   * Cryptographic subsystem.
-  * :doc:`/components/drivers/special/power/pm/index` sub-system.
+  * :doc:`/os/drivers/special/power/pm/index` sub-system.
   * ModBus support provided by built-in `FreeModBus <https://www.embedded-experts.at/en/freemodbus/>`__ version 1.5.0.
 
 * **C/C++ Libraries**
@@ -155,7 +155,7 @@ Key features of NuttX include:
   * ICMPv6 autonomous auto-configuration
   * NFS Client. Client side support for a Network File System (NFS, version 3, UDP).
   * A NuttX port of Jeff Poskanzer's `THTTPD <http://acme.com/software/thttpd>`__
-    HTTP server integrated with the NuttX :doc:`/components/binfmt` to provide true, embedded CGI.
+    HTTP server integrated with the NuttX :doc:`/os/binfmt/index` to provide true, embedded CGI.
   * PHY Link Status Management.
   * UDP Network Discovery (Contributed by Richard Cochran).
   * XML RPC Server (Contributed by Richard Cochran).
@@ -185,7 +185,7 @@ Key features of NuttX include:
   * Device-dependent USB class drivers available for USB serial (CDC/ACM and a PL2303 emulation),
     for USB mass storage, for USB networking (RNDIS and CDC/ECM), DFU, and for a dynamically
     configurable, composite USB devices.
-  * Built-in :doc:`/guides/usbtrace` and USB host trace functionality for non-invasive USB debug.
+  * Built-in :doc:`/guides/drivers/usbtrace` and USB host trace functionality for non-invasive USB debug.
 
 * **Graphics Support**
 
@@ -195,7 +195,7 @@ Key features of NuttX include:
   * VNC Server.
   * ``mmap``-able, framebuffer character driver.
   * NX: A graphics library, tiny windowing system and tiny font support that works with either
-    framebuffer or LCD drivers. Documented in the :doc:`/components/nxgraphics/index` manual.
+    framebuffer or LCD drivers. Documented in the :doc:`/os/graphics/index` manual.
   * Font management sub-system.
   * :doc:`/applications/graphics/nxwidgets/index`: NXWidgets is library of graphic objects, or "widgets," (labels,
     buttons, text boxes, images, sliders, progress bars, etc.). NXWidgets is written in C++ and

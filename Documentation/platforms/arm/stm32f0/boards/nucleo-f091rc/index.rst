@@ -4,7 +4,7 @@
 ST Nucleo F091RC
 =================
 
-.. tags:: chip:stm32, chip:stm32f0, chip:stm32f091
+.. tags:: arch:arm, chip:stm32f0, part:stm32f091, vendor:st
 
 That board features the STM32F091RCT6 MCU with 256KiB of FLASH
 and 32KiB of SRAM.

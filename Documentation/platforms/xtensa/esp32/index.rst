@@ -547,7 +547,7 @@ Linker Segments
 ESP32 has 4 generic timers of 64 bits (2 from Group 0 and 2 from Group 1). They're
 accessible as character drivers, the configuration along with a guidance on how
 to run the example and the description of the application level interface
-can be found :doc:`here </components/drivers/character/timers/timer>`.
+can be found :doc:`here </os/drivers/character/timers/timer>`.
 
 Watchdog Timers
 ===============
@@ -556,7 +556,7 @@ ESP32 has 3 WDTs. 2 MWDTS from the Timers Module and 1 RWDT from the RTC Module
 (Currently not supported yet). They're accessible as character drivers,
 The configuration along with a guidance on how to run the example and the description
 of the application level interface can be found
-:doc:`here </components/drivers/character/timers/watchdog>`.
+:doc:`here </os/drivers/character/timers/watchdog>`.
 
 SMP
 ===

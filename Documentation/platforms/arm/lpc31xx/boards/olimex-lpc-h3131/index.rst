@@ -2,6 +2,8 @@
 Olimex LPC-H3131
 ================
 
+.. tags:: arch:arm, chip:lpc31xx, vendor:nxp
+
 This documentation discusses the port of NuttX to the Olimex LPC-H3131 board.
 
 .. note::

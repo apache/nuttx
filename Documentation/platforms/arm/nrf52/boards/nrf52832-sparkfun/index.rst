@@ -2,7 +2,7 @@
 Sparkfun nRF52832 Breakout
 ==========================
 
-.. tags:: chip:nrf52, chip:nrf52832
+.. tags:: arch:arm, chip:nrf52, part:nrf52832, vendor:nordic
 
 The `Sparkfun nRF52832 Breakout <https://wiki.makerdiary.co/nrf52832-mdk>`_ is basic board providing
 access to all I/O pins, a 32kHz crystal and LED. 

@@ -2,7 +2,7 @@
 Seeed Studio XIAO nRF52840
 ==========================
 
-.. tags:: chip:nrf52, chip:nrf52840
+.. tags:: arch:arm, chip:nrf52, part:nrf52840, vendor:nordic
 
 The `Seeed Studio XIAO nRF52840 <https://wiki.seeedstudio.com/XIAO_BLE/>`_ is a general purpose board supplied by
 Seeed Studio and it is compatible with the Nordic nRF52840 ecosystem as they share the same MCU.

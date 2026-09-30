@@ -2,7 +2,7 @@
 ST STM32H745I-DISCO
 ===================
 
-.. tags:: chip:stm32, chip:stm32h7, chip:stm32h745
+.. tags:: arch:arm, chip:stm32h7, part:stm32h745, vendor:st
 
 Dual core support
 =================

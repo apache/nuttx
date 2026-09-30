@@ -2,6 +2,8 @@
 teensy-lc
 =========
 
+.. tags:: arch:arm, chip:kl, vendor:nxp
+
 This is the NuttX port for the PJRC Teensy LC board. The Teensy LC is a
 DIP-style breakout board for the MKL25Z64 and includes a USB-based
 bootloader.

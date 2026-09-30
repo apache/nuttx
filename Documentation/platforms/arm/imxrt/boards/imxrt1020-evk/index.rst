@@ -2,6 +2,8 @@
 i.MX RT1020 EVK
 ===============
 
+.. tags:: arch:arm, chip:imxrt, vendor:nxp
+
 `i.MX RT1020 EVK <https://www.nxp.com/design/development-boards/i-mx-evaluation-and-development-boards/i-mx-rt1020-evaluation-kit:MIMXRT1020-EVK>`_
 is an evaluation kit by NXP company. This kit uses the i.MX RT1020 crossover MCU in LQFP144 package with ARM Cortex M7 core.
 

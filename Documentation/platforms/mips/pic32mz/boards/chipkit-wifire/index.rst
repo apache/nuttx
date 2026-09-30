@@ -2,7 +2,7 @@
 chipKIT Wi-FIRE
 ===============
 
-.. tags:: arch:mips, chip:pic32mz
+.. tags:: arch:mips, chip:pic32mz, vendor:microchip
 
 .. figure:: chipkit-wifire.jpg
    :figwidth: 40%

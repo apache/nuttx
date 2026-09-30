@@ -2,7 +2,7 @@
 Olimex STM32-P207
 =================
 
-.. tags:: chip:stm32, chip:stm32f4, chip:stm32f407
+.. tags:: arch:arm, chip:stm32f4, part:stm32f407, vendor:st
 
 The NuttX configuration for the Olimex STM32-P407 is derives more or less
 directly from the Olimex STM32-P207 board support.  The P207 and P407 seem

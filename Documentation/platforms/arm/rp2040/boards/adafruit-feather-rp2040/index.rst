@@ -2,7 +2,7 @@
 Adafruit Feather RP2040
 =======================
 
-.. tags:: chip:rp2040
+.. tags:: arch:arm, chip:rp2040, vendor:raspberry-pi
 
 The Feather RP2040 is a general purpose RP2040 board supplied by 
 Adafruit.

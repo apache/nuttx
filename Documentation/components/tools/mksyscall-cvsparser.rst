@@ -20,5 +20,5 @@ kernel function call (in kernel-mode) on behalf of the proxy function.
 Information about the stubs and proxies is maintained in a comma separated
 value (CSV) file in the syscall/ directory.  The mksyscall program will
 accept this CVS file as input and generate all of the required proxy or
-stub files as output.  See :doc:`/components/syscall` for additional information.
+stub files as output.  See :doc:`/os/syscall` for additional information.
 

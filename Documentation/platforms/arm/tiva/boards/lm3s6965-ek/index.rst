@@ -2,6 +2,8 @@
 lm3s6965-ek
 ===========
 
+.. tags:: arch:arm, chip:tiva, vendor:ti
+
 The `Stellaris LM3S6965 Evaluation Kit
 <https://www.ti.com/tool/EK-LM3S6965>`_ is an ARM Cortex-M3 based
 development board featuring the LM3S6965 microcontroller with an

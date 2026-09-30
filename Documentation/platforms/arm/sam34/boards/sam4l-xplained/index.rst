@@ -2,6 +2,8 @@
 SAM4L Xplained
 ==============
 
+.. tags:: arch:arm, chip:sam34, vendor:microchip
+
 This documentation discusses issues unique to NuttX configurations for the Atmel
 SAM4L Xplained Pro development board.  This board features the ATSAM4LC4C MCU.
 

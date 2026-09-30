@@ -2,7 +2,7 @@
 i.MX95 Evaluation Kit
 =====================
 
-.. tags:: chip:imx95, arch:arm64
+.. tags:: arch:arm64, chip:imx9, part:imx95, vendor:nxp
 
 The kit i.MX95 Evaluation Kit has a pre-installed Linux image which contains
 u-boot and the i.MX95 reference Linux installation.

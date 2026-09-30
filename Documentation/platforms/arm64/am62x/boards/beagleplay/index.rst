@@ -2,7 +2,7 @@
 BeaglePlay
 ==========
 
-.. tags:: chip:am62x, arch:arm64, vendor:beagleboard
+.. tags:: arch:arm64, chip:am62x, vendor:ti
 
 `BeaglePlay <https://www.beagleboard.org/boards/beagleplay>`_ is an
 open-hardware single-board computer from BeagleBoard.org based on the

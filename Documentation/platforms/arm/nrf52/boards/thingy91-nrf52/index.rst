@@ -2,7 +2,7 @@
 Nordic Thingy:91 (nRF52840)
 ===========================
 
-.. tags:: chip:nrf52, chip:nrf52840
+.. tags:: arch:arm, chip:nrf52, part:nrf52840, vendor:nordic
 
 The `Thingy:91 (PCA0035) <https://www.nordicsemi.com/Products/Development-hardware/Nordic-Thingy-91>`_
 is a development board based on the nRF9160 and nRF52840 from Nordic.

@@ -2,7 +2,7 @@
 N32H762IIL7 Development Board
 =============================
 
-.. tags:: chip:n32h762, arch:armv7e-m, vendor:nations
+.. tags:: arch:arm, arch:armv7e-m, chip:n32h7, part:n32h762, vendor:nations
 
 .. figure:: n32h762iil7.png
    :scale: 30 %

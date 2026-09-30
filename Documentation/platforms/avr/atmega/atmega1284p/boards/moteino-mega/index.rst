@@ -2,7 +2,7 @@
 Moteino-Mega
 ============
 
-.. tags:: arch:avr, chip:atmega1284p
+.. tags:: arch:avr, chip:atmega, part:atmega1284p, vendor:microchip
 
 This port was contributed by jeditekunum.
 

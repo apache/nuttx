@@ -2,7 +2,7 @@
 Orange Pi 5 Pro
 ================
 
-.. tags:: arch:arm64, chip:rk3588, vendor:xunlong, experimental
+.. tags:: arch:arm64, chip:rk3588, vendor:rockchip
 
 .. warning::
 
