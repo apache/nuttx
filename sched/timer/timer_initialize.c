@@ -35,6 +35,7 @@
 #include <nuttx/queue.h>
 #include <nuttx/trace.h>
 
+#include "sched/sched.h"
 #include "timer/timer.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
@@ -200,6 +201,16 @@ FAR struct posix_timer_s *timer_gethandle(timer_t timerid)
         }
 
       spin_unlock_irqrestore(&g_locktimers, flags);
+    }
+
+  if (timer != NULL && !up_interrupt_context())
+    {
+      FAR struct tcb_s *owner = nxsched_get_tcb(timer->pt_owner);
+
+      if (owner == NULL || owner->group != this_task()->group)
+        {
+          timer = NULL;
+        }
     }
 
   return timer;
