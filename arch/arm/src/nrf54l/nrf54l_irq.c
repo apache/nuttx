@@ -135,21 +135,21 @@ static void nrf54l_dumpnvic(const char *msg, int irq)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_FEATURES
-static int nrf54l_nmi(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! NMI received\n");
-  PANIC();
-  return 0;
-}
-
 static int nrf54l_pendsv(int irq, void *context, void *arg)
 {
   /* ARMv8-M uses PendSV to finish a context switch requested by a direct
    * interrupt.  arm_doirq() performs the switch after this callback.
    */
 
+  return 0;
+}
+
+#ifdef CONFIG_DEBUG_FEATURES
+static int nrf54l_nmi(int irq, void *context, void *arg)
+{
+  up_irq_save();
+  _err("PANIC!!! NMI received\n");
+  PANIC();
   return 0;
 }
 
@@ -336,6 +336,10 @@ void up_irqinitialize(void)
   up_enable_irq(NRF54L_IRQ_MEMFAULT);
 #endif
 
+  /* PendSV is always needed: arm_doirq() dispatches it */
+
+  irq_attach(NRF54L_IRQ_PENDSV, nrf54l_pendsv, NULL);
+
   /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -345,7 +349,6 @@ void up_irqinitialize(void)
 #endif
   irq_attach(NRF54L_IRQ_BUSFAULT, arm_busfault, NULL);
   irq_attach(NRF54L_IRQ_USAGEFAULT, arm_usagefault, NULL);
-  irq_attach(NRF54L_IRQ_PENDSV, nrf54l_pendsv, NULL);
   arm_enable_dbgmonitor();
   irq_attach(NRF54L_IRQ_DBGMONITOR, arm_dbgmonitor, NULL);
   irq_attach(NRF54L_IRQ_RESERVED, nrf54l_reserved, NULL);
