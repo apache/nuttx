@@ -404,6 +404,7 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
       case MTDIOC_GEOMETRY:
         {
           FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)arg;
+
           if (geo != NULL)
             {
               memcpy(geo, &priv->geo, sizeof(*geo));
@@ -416,6 +417,7 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         {
           FAR struct partition_info_s *info =
             (FAR struct partition_info_s *)arg;
+
           if (info != NULL)
             {
               info->numsectors  = priv->geo.neraseblocks * priv->blkpererase;
@@ -426,7 +428,7 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
                       sizeof(info->parent));
 
               ret = OK;
-          }
+            }
         }
         break;
 
@@ -470,10 +472,7 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
           FAR struct mtd_erase_s *erase = (FAR struct mtd_erase_s *)arg;
 
-          ret = priv->parent->erase(priv->parent,
-                                    priv->firstblock / priv->blkpererase +
-                                    erase->startblock,
-                                    erase->nblocks);
+          ret = part_erase(dev, erase->startblock, erase->nblocks);
         }
         break;
 
