@@ -121,10 +121,11 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
   vaddr   = brkaddr;
   ptlevel = MMU_PGT_LEVEL_MAX;
 
-  /* Sanity checks */
-
-  DEBUGASSERT(brkaddr >= addrenv->heapvbase);
-  DEBUGASSERT(MM_ISALIGNED(brkaddr));
+  if (brkaddr < addrenv->heapvbase || !MM_ISALIGNED(brkaddr) ||
+      npages > (ARCH_ADDRENV_VEND - brkaddr + 1) / MM_PGSIZE)
+    {
+      return 0;
+    }
 
   for (; npages > 0; npages--)
     {
