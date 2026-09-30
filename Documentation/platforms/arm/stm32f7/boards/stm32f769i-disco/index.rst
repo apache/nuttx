@@ -2,7 +2,7 @@
 ST STM32F769I-DISCO
 ===================
 
-.. tags:: chip:stm32, chip:stm32f7, chip:stm32f769
+.. tags:: arch:arm, chip:stm32f7, part:stm32f769, vendor:st
 
 This page discusses issues unique to NuttX configurations for the
 STMicro STM32F769I-DISCO development board featuring the STM32F769NIH6

@@ -2,7 +2,7 @@
 IMX93QSB-M33
 ============
 
-.. tags:: arch:arm, arch:armv8m, arch:cm33, chip:imx93, vendor:nxp
+.. tags:: arch:arm, chip:imx9, part:imx93, vendor:nxp
 
 The IMX93-QSB board is a platform made by NXP, designed to show the most commonly
 used features of the `i.MX 93 applications processor <https://www.nxp.com/products/processors-and-microcontrollers/arm-processors/i-mx-applications-processors/i-mx-9-processors/i-mx-93-applications-processor-family-arm-cortex-a55-ml-acceleration-power-efficient-mpu:i.MX93>`_.

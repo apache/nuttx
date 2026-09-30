@@ -2,6 +2,8 @@
 hpm6360evk
 ==========
 
+.. tags:: arch:risc-v, chip:hpm6000, vendor:hpmicro
+
 1. Download and install toolchain::
 
     $ wget https://github.com/hpmicro/riscv-gnu-toolchain/releases/download/2022.05.15/riscv32-unknown-elf-newlib-multilib_2022.05.15_linux.tar.gz

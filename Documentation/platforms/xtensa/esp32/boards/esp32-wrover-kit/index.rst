@@ -2,7 +2,7 @@
 ESP-WROVER-KIT
 ==============
 
-.. tags:: chip:esp32, chip:esp32wrover32
+.. tags:: arch:xtensa, chip:esp32, part:esp32wrover32, vendor:espressif
 
 The `ESP-WROVER-KIT <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/esp32/get-started-wrover-kit.html>`_ is a development board for the ESP32 SoC from Espressif, based on a ESP32-WROVER-B module.
 

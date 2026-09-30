@@ -4,7 +4,7 @@
 
 This application is a simple demonstration which serves to test the
 :doc:`framebuffer character driver
-</components/nxgraphics/framebuffer_char_driver>`.
+</os/graphics/framebuffer_char_driver>`.
 
 The program interacts with the framebuffer through the interfaces described in
 the linked page in order to render a very simple image consisting of 6

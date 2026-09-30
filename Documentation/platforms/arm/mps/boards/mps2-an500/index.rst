@@ -2,6 +2,8 @@
 MPS2 AN500 Board
 ================
 
+.. tags:: arch:arm, chip:mps, vendor:arm
+
 This board configuration will use QEMU to emulate generic ARM v7-M series
 hardware platform and provides support for these devices:
 

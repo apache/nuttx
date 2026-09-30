@@ -2,6 +2,8 @@
 MPS3 AN547 Board
 ================
 
+.. tags:: arch:arm, chip:mps, vendor:arm
+
 The MPS3 AN547 board configuration uses QEMU to emulate a generic ARM v8-M
 series hardware platform and provides support for the following devices:
 

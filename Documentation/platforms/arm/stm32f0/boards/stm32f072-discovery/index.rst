@@ -2,7 +2,7 @@
 ST STM32F072-DISCOVERY
 ======================
 
-.. tags:: chip:stm32, chip:stm32f0, chip:stm32f072
+.. tags:: arch:arm, chip:stm32f0, part:stm32f072, vendor:st
 
 STATUS
 ======

@@ -2,6 +2,8 @@
 NXP UCANS32K146
 ===============
 
+.. tags:: arch:arm, chip:s32k1xx, vendor:nxp
+
 `NXP UCANS32K146 <https://www.nxp.com/design/development-boards/automotive-development-platforms/s32k-mcu-platforms/s32k146-uavcan-v1-and-mavcan-development-system:UCANS32K146>`_ is a CAN Node reference design and development platform for mobile robotics applications, such as drones and rovers. It features the `NXP S32K146 MCU <https://www.nxp.com/products/processors-and-microcontrollers/s32-automotive-platform/s32k-general-purpose-mcus/s32k1-microcontrollers-for-general-purpose:S32K1>`_ based on an Arm Cortex-M4F core. There exist a few different revisions/variants of this board. All variants with the S32K146 microcontroller are supported.
 
 Features

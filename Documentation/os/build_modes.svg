@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 430" width="900" height="430"
+     font-family="Charter, Georgia, 'Times New Roman', serif" role="img"
+     aria-label="The same call to write() under the three build modes. In a flat build it is a function call. In a protected build it crosses a system call boundary enforced by an MPU. In a kernel build it crosses the same boundary, and each process also has its own address space provided by an MMU.">
+  <style>
+    .col    { fill: #f4f6fa; stroke: #c3cbd9; stroke-width: 1.2; }
+    .ttl    { fill: #1b2233; font-size: 13.5px; font-weight: 600;
+              font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; }
+    .cap    { fill: #5a6478; font-size: 11px; }
+    .user   { fill: #ffffff; stroke: #5a96bd; stroke-width: 1.4; }
+    .kern   { fill: #eef0fb; stroke: #3c34e3; stroke-width: 1.5; }
+    .lbl    { fill: #1b2233; font-size: 12px;
+              font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; }
+    .zone   { fill: #6b7689; font-size: 10.5px; letter-spacing: .1em;
+              font-family: system-ui, sans-serif; }
+    .edge   { stroke: #4a5266; stroke-width: 1.5; fill: none; }
+    .bar    { stroke: #3c34e3; stroke-width: 2.4; stroke-dasharray: 7 4; }
+    .barlbl { fill: #3c34e3; font-size: 10.5px; font-style: italic; }
+    .cost   { fill: #5a6478; font-size: 11px; font-style: italic; }
+  </style>
+  <defs>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+            orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#4a5266"/></marker>
+  </defs>
+
+  <g>
+    <rect class="col" x="10" y="34" rx="9" width="282" height="356"/>
+    <text class="ttl" x="26" y="22">CONFIG_BUILD_FLAT</text>
+    <text class="cap" x="26" y="56">one address space, no protection</text>
+    <text class="zone" x="26" y="82">APPLICATION</text>
+    <rect class="user" x="26" y="90" rx="6" width="250" height="34"/>
+    <text class="lbl" x="40" y="112">write(fd, buf, n)</text>
+    <path class="edge" d="M 151 124 L 151 176" marker-end="url(#b)"/>
+    <text class="cost" x="161" y="154">a function call</text>
+    <text class="zone" x="26" y="194">KERNEL</text>
+    <rect class="kern" x="26" y="202" rx="6" width="250" height="34"/>
+    <text class="lbl" x="40" y="224">nx_writev()</text>
+    <path class="edge" d="M 151 236 L 151 276" marker-end="url(#b)"/>
+    <rect class="kern" x="26" y="284" rx="6" width="250" height="34"/>
+    <text class="lbl" x="40" y="306">the driver</text>
+    <text class="cost" x="26" y="348">Smallest and fastest.  A bug in</text>
+    <text class="cost" x="26" y="364">the application can corrupt the</text>
+    <text class="cost" x="26" y="380">kernel.</text>
+  </g>
+
+  <g>
+    <rect class="col" x="308" y="34" rx="9" width="282" height="356"/>
+    <text class="ttl" x="324" y="22">CONFIG_BUILD_PROTECTED</text>
+    <text class="cap" x="324" y="56">one address space, MPU enforced</text>
+    <text class="zone" x="324" y="82">APPLICATION</text>
+    <rect class="user" x="324" y="90" rx="6" width="250" height="34"/>
+    <text class="lbl" x="338" y="112">write(fd, buf, n)</text>
+    <path class="edge" d="M 449 124 L 449 176" marker-end="url(#b)"/>
+    <path class="bar" d="M 316 150 L 582 150"/>
+    <rect x="376" y="140" width="146" height="20" fill="#f4f6fa"/>
+  <text class="barlbl" x="449" y="154" text-anchor="middle">system call · MPU</text>
+    <text class="zone" x="324" y="194">KERNEL</text>
+    <rect class="kern" x="324" y="202" rx="6" width="250" height="34"/>
+    <text class="lbl" x="338" y="224">nx_writev()</text>
+    <path class="edge" d="M 449 236 L 449 276" marker-end="url(#b)"/>
+    <rect class="kern" x="324" y="284" rx="6" width="250" height="34"/>
+    <text class="lbl" x="338" y="306">the driver</text>
+    <text class="cost" x="324" y="348">The application cannot reach</text>
+    <text class="cost" x="324" y="364">kernel memory.  Addresses are</text>
+    <text class="cost" x="324" y="380">still shared, so there is no fork().</text>
+  </g>
+
+  <g>
+    <rect class="col" x="606" y="34" rx="9" width="284" height="356"/>
+    <text class="ttl" x="622" y="22">CONFIG_BUILD_KERNEL</text>
+    <text class="cap" x="622" y="56">one address space per process, MMU</text>
+    <text class="zone" x="622" y="82">PROCESS</text>
+    <rect class="user" x="622" y="90" rx="6" width="252" height="34"/>
+    <text class="lbl" x="636" y="112">write(fd, buf, n)</text>
+    <path class="edge" d="M 748 124 L 748 176" marker-end="url(#b)"/>
+    <path class="bar" d="M 614 150 L 882 150"/>
+    <rect x="675" y="140" width="146" height="20" fill="#f4f6fa"/>
+  <text class="barlbl" x="748" y="154" text-anchor="middle">system call · MMU</text>
+    <text class="zone" x="622" y="194">KERNEL</text>
+    <rect class="kern" x="622" y="202" rx="6" width="252" height="34"/>
+    <text class="lbl" x="636" y="224">nx_writev()</text>
+    <path class="edge" d="M 748 236 L 748 276" marker-end="url(#b)"/>
+    <rect class="kern" x="622" y="284" rx="6" width="252" height="34"/>
+    <text class="lbl" x="636" y="306">the driver</text>
+    <text class="cost" x="622" y="348">Each process has its own virtual</text>
+    <text class="cost" x="622" y="364">addresses, so fork() and on-demand</text>
+    <text class="cost" x="622" y="380">paging work.  Needs an MMU.</text>
+  </g>
+</svg>

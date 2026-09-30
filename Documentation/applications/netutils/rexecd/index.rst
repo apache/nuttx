@@ -30,7 +30,7 @@ Options
 ``-r``
   Specify the address family as ``AF_RPMSG``. This serves the daemon over
   an RPMsg link instead of TCP/IP, allowing a remote processor in an AMP
-  system to execute commands. See :doc:`/components/drivers/special/rpmsg/concepts`
+  system to execute commands. See :doc:`/os/drivers/special/rpmsg/concepts`
   for details on RPMsg.
 
 ``-t``

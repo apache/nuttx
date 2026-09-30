@@ -2,6 +2,8 @@
 Starcat Jupiter Nano
 ====================
 
+.. tags:: arch:arm, chip:sama5, vendor:microchip
+
 This page file describes the port of NuttX to the Starcat Jupiter Nano
 development board. This board features the Atmel SAMA5D27 microprocessor
 as a SIP with 128KB on-chip LPDDR2 RAM (part number `ATSAMA5D27C-LD1G`).

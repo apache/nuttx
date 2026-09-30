@@ -32,16 +32,42 @@
 #
 # import os
 
+import datetime
+import os
+import pathlib
 import sys
+import time
 
 # Add the '_extensions' directory to sys.path, to enable finding Sphinx
 # extensions within.
 sys.path.insert(0, "_extensions")
+sys.path.insert(0, ".")
+
+from redirects import redirects  # noqa: E402,F401  (used by sphinx_reredirects)
+
+# sphinx-reredirects writes a small page at every old URL.  Its default one
+# is a bare meta refresh, which drops the #anchor of a link to a section; this
+# template carries the anchor across with one line of script, and keeps the
+# meta refresh as the fallback when scripts are off.
+redirect_html_template_file = "_templates/redirect.html"
 
 # -- Project information -----------------------------------------------------
 
 project = "NuttX"
-copyright = "2023, The Apache Software Foundation"
+
+# The start year is the one the NOTICE file at the repository root carries;
+# the end year is the year the documentation is built, so that the footer
+# stops going stale the moment a release slips past New Year.  SOURCE_DATE_EPOCH
+# is honoured so that a build stays reproducible, which is what the ASF release
+# process needs -- Sphinx rewrites the trailing year from it as well, and this
+# way the two agree instead of fighting.
+_COPYRIGHT_SINCE = 2020
+_build_year = datetime.datetime.fromtimestamp(
+    int(os.environ.get("SOURCE_DATE_EPOCH", time.time())),
+    datetime.timezone.utc,
+).year
+
+copyright = f"{_COPYRIGHT_SINCE}-{_build_year}, The Apache Software Foundation"
 author = "NuttX community"
 version = release = "latest"
 
@@ -60,9 +86,11 @@ extensions = [
     "sphinx_copybutton",
     "warnings_filter",
     "sphinx_tags",
+    "tags_overview",
     "sphinx_design",
     "sphinx_collapse",
     "sphinxcontrib.plantuml",
+    "sphinx_reredirects",
 ]
 
 source_suffix = [".rst", ".md"]
@@ -70,6 +98,18 @@ source_suffix = [".rst", ".md"]
 todo_include_todos = True
 
 autosectionlabel_prefix_document = True
+
+# The release notes under ReleaseNotes/ are a frozen archive: each file is the
+# text exactly as it was written at the time of the release.  They reuse the
+# same section titles over and over ("Bug Fixes", "New Features", one per
+# subsystem), which makes autosectionlabel emit a duplicate-label warning for
+# every repetition.  Nothing cross-references a section *inside* a release
+# note, so simply stop indexing them.  The list is derived from the directory
+# so that new releases are covered automatically.
+suppress_warnings = [
+    f"autosectionlabel.ReleaseNotes/{path.stem}"
+    for path in sorted(pathlib.Path(__file__).parent.glob("ReleaseNotes/NuttX-*.md"))
+]
 
 # do not set Python as primary domain for code blocks
 highlight_language = "none"
@@ -85,6 +125,7 @@ exclude_patterns = [
     "_build",
     "Thumbs.db",
     ".DS_Store",
+    # Not a page of its own: it is inlined by introduction/resources.rst.
     "legacy_README.md",
     "venv",
     ".venv",

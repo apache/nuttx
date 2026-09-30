@@ -2,7 +2,7 @@
 ST NUCLEO-C562RE
 =================
 
-.. tags:: chip:stm32, chip:stm32c5, chip:stm32c562
+.. tags:: arch:arm, chip:stm32c5, part:stm32c562, vendor:st
 
 The `NUCLEO-C562RE <https://www.st.com/en/evaluation-tools/nucleo-c562re.html>`_
 is an STM32 Nucleo-64 board featuring an STM32C562RE microcontroller with

@@ -2,7 +2,7 @@
 Raspberry Pi Pico W
 ===============================
 
-.. tags:: chip:rp2040, wifi
+.. tags:: arch:arm, chip:rp2040, vendor:raspberry-pi
 
 The `Raspberry Pi Pico <https://www.raspberrypi.com/products/raspberry-pi-pico/>`_ is a general purpose board supplied by
 Raspberry Pi. The W variant adds built in WiFi and Bluetooth communications.

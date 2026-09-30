@@ -2,7 +2,7 @@
 ST B-U585I-IOT02A
 =================
 
-.. tags:: chip:stm32, chip:stm32u5, chip:stm32u585
+.. tags:: arch:arm, chip:stm32u5, part:stm32u585, vendor:st
 
 This page discusses the port of NuttX to the STMicroelectronics
 B-U585I-IOT02A board.  That board features the STM32U585AII6QU MCU with 2MiB

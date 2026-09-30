@@ -2,7 +2,7 @@
 ``xipfs`` XIPFS Compaction and Block Map
 =========================================
 
-Compacts a :doc:`XIPFS </components/filesystem/xipfs>` volume and reports how
+Compacts a :doc:`XIPFS </os/filesystem/xipfs>` volume and reports how
 its erase blocks are laid out.
 
 Because a XIPFS file is a single contiguous extent, an allocation can fail

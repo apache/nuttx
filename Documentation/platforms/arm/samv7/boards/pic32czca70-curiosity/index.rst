@@ -2,6 +2,8 @@
 PIC32CZ CA70 Curiosity Evaluation Kit
 =====================================
 
+.. tags:: arch:arm, chip:samv7, vendor:microchip
+
 The `PIC32CZ CA70 Curiosity <https://www.microchip.com/en-us/development-tool/EV56T44A>`_
 is an evaluation kit for PIC32CZ CA70 series.
 

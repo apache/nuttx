@@ -2,7 +2,7 @@
 ESWIN EIC7700 EVB
 =================
 
-.. tags:: chip:eic7700x, arch:risc-v, vendor:eswin, experimental
+.. tags:: arch:risc-v, chip:eic7700x, vendor:eswin
 
 .. figure:: eic7700-evb.jpg
    :align: center

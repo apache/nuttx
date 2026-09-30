@@ -2,6 +2,8 @@
 olimex-lpc2378
 ==============
 
+.. tags:: arch:arm, chip:lpc2378, vendor:nxp
+
 The Olimex LPC2378 board has only a small amount of board-specific porting
 information recorded in the original notes.
 

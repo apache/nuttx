@@ -2,7 +2,7 @@
 SKP16C26
 ========
 
-.. tags:: arch:renesas
+.. tags:: arch:renesas, chip:m16c, vendor:renesas
 
 1. The buildroot package can be used to build an M16C toolchain. The toolchain
    buildroot can be downloaded from buildroot in the NuttX GIT. Instructions for

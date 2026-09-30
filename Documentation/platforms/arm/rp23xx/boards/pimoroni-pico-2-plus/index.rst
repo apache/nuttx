@@ -2,7 +2,7 @@
 Pimoroni Pico Plus 2
 ===============================
 
-.. tags:: chip:rp2350
+.. tags:: arch:arm, chip:rp23xx, part:rp2350, vendor:raspberry-pi
 
 The `Pimoroni Pico Plus 2 <https://shop.pimoroni.com/products/pimoroni-pico-plus-2>`_
 is an RP2350B based board in the Raspberry Pi Pico form factor, with a
@@ -182,4 +182,4 @@ xipfs-nxflat
 
 Same as ``xipfs``, plus the NXFLAT execute-in-place demo.  Building this
 configuration requires ``ldnxflat``, which is not part of a standard
-toolchain installation; see :doc:`/components/nxflat`.
+toolchain installation; see :doc:`/os/binfmt/nxflat`.

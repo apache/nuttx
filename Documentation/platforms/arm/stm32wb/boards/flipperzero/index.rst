@@ -2,7 +2,7 @@
 Flipper Zero
 ============
 
-.. tags:: chip:stm32, chip:stm32wb, chip:stm32wb55
+.. tags:: arch:arm, chip:stm32wb, part:stm32wb55, vendor:st
 
 This page file discusses the port of NuttX to the Flipper Zero multi-tool
 device. See https://flipperzero.one/ for device details.

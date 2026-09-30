@@ -2,7 +2,7 @@
 Holybro Pixhawk 6X-RT
 =====================
 
-.. tags:: chip:imxrt, chip:imxrt1176, vendor:holybro
+.. tags:: arch:arm, chip:imxrt, part:imxrt1176, vendor:nxp
 
 .. figure:: pixhawk6x-rt.png
    :scale: 50 %

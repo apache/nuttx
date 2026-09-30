@@ -2,7 +2,7 @@
 ST STM32H747I-DISCO
 ===================
 
-.. tags:: chip:stm32, chip:stm32h7, chip:stm32h747
+.. tags:: arch:arm, chip:stm32h7, part:stm32h747, vendor:st
 
 This page discusses issues unique to NuttX configurations for the
 STMicro STM32H747I-DISCO development board featuring the STM32H747I

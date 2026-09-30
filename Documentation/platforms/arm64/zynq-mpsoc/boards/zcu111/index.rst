@@ -2,7 +2,7 @@
 Zynq UltraScale+ RFSoC ZCU111
 =============================
 
-.. tags:: chip:xczu28dr, chip:fpga, chip:zynq, chip:ultrascale
+.. tags:: arch:arm64, chip:zynq-mpsoc, part:fpga, part:ultrascale, part:xczu28dr, vendor:amd
 
 The `ZCU111 <https://www.xilinx.com/products/boards-and-kits/zcu111.html>`_ is a
 development board based on the Zynq UltraScale+ RFSoC(XCZU28DR) from XilinX(AMD).

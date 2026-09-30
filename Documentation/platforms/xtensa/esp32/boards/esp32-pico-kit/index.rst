@@ -1,7 +1,7 @@
 ESP32-PICO-KIT V4
 =================
 
-.. tags:: chip:esp32, chip:esp32picod4
+.. tags:: arch:xtensa, chip:esp32, part:esp32picod4, vendor:espressif
 
 This guide shows how to get started with the ESP32-PICO-KIT V4/V4.1 mini development board.
 

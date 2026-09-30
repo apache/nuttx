@@ -2,7 +2,7 @@
 RX65N RSK2MB
 ============
 
-.. tags:: arch:renesas
+.. tags:: arch:renesas, chip:rx65n, vendor:renesas
 
 This README file discusses the port of NuttX to the RX65N RSK2MB board. This board features the RX65N (R5F565NEHDFC
 176 pin)

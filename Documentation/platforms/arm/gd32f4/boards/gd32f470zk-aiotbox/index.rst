@@ -2,6 +2,8 @@
 gd32f470zk-aiotbox
 ==================
 
+.. tags:: arch:arm, chip:gd32f4, vendor:gigadevice
+
 The GD32F470Z-AIOTBOX board is a Xiaomi AIoT development platform U1
 control board that uses the GD32F470ZK chip as the core. 
 

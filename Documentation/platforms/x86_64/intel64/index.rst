@@ -138,9 +138,3 @@ You can find this in most Linux distributions::
 
 Supported Boards
 ================
-
-.. toctree::
-   :glob:
-   :maxdepth: 1
-
-   boards/*/*

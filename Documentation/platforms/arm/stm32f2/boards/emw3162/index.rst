@@ -2,7 +2,7 @@
 emw3162
 =======
 
-.. tags:: chip:stm32, chip:stm32f2, chip:stm32f205
+.. tags:: arch:arm, chip:stm32f2, part:stm32f205, vendor:st
 
 EMW3162 board (https://www.waveshare.com/EMW3162.htm) features the
 STM32F205RG MCU and Broadcom BCM43362KUBG Wi-Fi chip.

@@ -2,7 +2,7 @@
 ST Nucleo C071RB
 ================
 
-.. tags:: chip:stm32, chip:stm32c0, chip:stm32c071
+.. tags:: arch:arm, chip:stm32c0, part:stm32c071, vendor:st
 
 The Nucleo C071RB is a member of the Nucleo-64 board family.
 

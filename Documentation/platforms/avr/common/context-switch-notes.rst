@@ -47,7 +47,7 @@ where it gave the CPU up, which is inside ``up_switch_context()``.
 This function is supposed to be executed with interrupt disabled ("This
 function is called only from the NuttX scheduling logic. Interrupts
 will always be disabled when this function is
-called." https://nuttx.apache.org/docs/latest/reference/os/arch.html ) Caller
+called." https://nuttx.apache.org/docs/latest/os/arch/arch_api.html ) Caller
 of the context switch method is therefore responsible
 for re-enabling interrupts.
 

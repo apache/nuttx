@@ -2,6 +2,8 @@
 EA3131
 ======
 
+.. tags:: arch:arm, chip:lpc31xx, vendor:nxp
+
 This documentation discusses the port of NuttX to the Embedded Artists EA3131 board.
 
 Development Environment
@@ -629,7 +631,7 @@ pgnsh
 -----
 
 This is the same configuration as nsh, but with On-Demand paging enabled.  See
-https://nuttx.apache.org/docs/latest/components/paging.html. This configuration
+https://nuttx.apache.org/docs/latest/os/memory/paging.html. This configuration
 is an experiment for the purposes of test and debug.  At present, this does not
 produce functioning, usable system
 

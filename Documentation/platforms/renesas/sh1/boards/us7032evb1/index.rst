@@ -2,7 +2,7 @@
 US7032EVB1
 ==========
 
-.. tags:: arch:renesas, experimental
+.. tags:: arch:renesas, chip:sh1, vendor:renesas
 
 .. warning::
 

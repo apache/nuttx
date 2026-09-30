@@ -16,7 +16,7 @@ and temperature information on animated gauges.
 To use the barometer dashboard, just ensure there is a ``sensor_baro`` topic
 registered on the target and then run ``baromonitor``. These sensor topics are
 registered by NuttX barometer sensor drivers (see
-:doc:`/components/drivers/special/sensors/sensors_uorb`).
+:doc:`/os/drivers/special/sensors/sensors_uorb`).
 
 By default, the application attempts to subscribe to ``sensor_baro0``, but if
 you wish to monitor a different barometer topic you can pass the instance number

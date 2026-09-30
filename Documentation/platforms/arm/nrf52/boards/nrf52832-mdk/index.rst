@@ -2,7 +2,7 @@
 MakerDiary nRF52832-MDK
 =======================
 
-.. tags:: chip:nrf52, chip:nrf52832
+.. tags:: arch:arm, chip:nrf52, part:nrf52832, vendor:nordic
 
 The `nRF52832-MDK <https://wiki.makerdiary.co/nrf52832-mdk>`_ is a development board for
 the nRF52832 SoC from Nordic. It features 24 I/Os an on-board RGB led and a chip antenna.

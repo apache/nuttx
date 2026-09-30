@@ -1,6 +1,9 @@
 ================
 ST Nucleo G0B1RE
 ================
+
+.. tags:: arch:arm, chip:stm32g0, vendor:st
+
 .. figure:: nucleo-g0b1re.png
    :align: center
 

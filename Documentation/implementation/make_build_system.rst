@@ -13,7 +13,7 @@ As stated in :doc:`/introduction/inviolables`, multiple platforms should be supp
 - :ref:`win_mk`: handles windows platform support.
 - :ref:`unix_mk`: handles unix-like platforms support.
 
-NuttX supports multiple build modes. See :doc:`/guides/protected_build`:
+NuttX supports multiple build modes. See :doc:`/guides/programs/protected_build`:
 
 - :ref:`flatlibs_mk`: Kernel and user-space built into a single ``blob``.
 - :ref:`protectedlibs_mk`: Kernel and user-space built as two separate ``blobs``.

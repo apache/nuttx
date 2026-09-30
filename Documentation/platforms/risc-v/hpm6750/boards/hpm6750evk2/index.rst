@@ -2,7 +2,7 @@
 HPM6750EVK2
 ===========
 
-.. tags:: arch:riscv, vendor:hpmicro, experimental
+.. tags:: arch:risc-v, chip:hpm6750, vendor:hpmicro
 
 .. figure:: hpm6750evk2.png
    :figwidth: 50%

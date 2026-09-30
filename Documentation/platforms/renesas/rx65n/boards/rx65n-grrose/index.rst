@@ -2,7 +2,7 @@
 RX65N GRROSE
 ============
 
-.. tags:: arch:renesas
+.. tags:: arch:renesas, chip:rx65n, vendor:renesas
 
 This documentation discusses the port of NuttX to “GR-ROSE” board produced by
 Gadget Renesas. This board features the RX65N (R5F565NEHDFP 100pin QFP).

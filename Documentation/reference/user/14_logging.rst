@@ -4,7 +4,7 @@ Logging
 
 NuttX provides the SYSLOG for application and OS logging, which can be
 configured in various ways to select how these messages are displayed
-(see details :doc:`here </components/drivers/special/syslog>`).
+(see details :doc:`here </os/drivers/special/syslog>`).
 
 Applications can emit logging messages using the standard :c:func:`syslog`
 interface.

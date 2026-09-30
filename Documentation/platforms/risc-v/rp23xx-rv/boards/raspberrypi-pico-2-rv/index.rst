@@ -2,7 +2,7 @@
 Raspberry Pi Pico 2 RISC-V
 ===============================
 
-.. tags:: chip:rp2350
+.. tags:: arch:risc-v, chip:rp23xx-rv, part:rp2350, vendor:raspberry-pi
 
 The `Raspberry Pi Pico 2 <https://www.raspberrypi.com/products/raspberry-pi-pico-2/>`_ is a general purpose board supplied by
 Raspberry Pi.

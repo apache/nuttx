@@ -2,7 +2,7 @@
 Raspberry Pi rp2350
 ===================
 
-.. tags:: chip:rp2350
+.. tags:: arch:arm, chip:rp23xx, part:rp2350, vendor:raspberry-pi
 
 The rp2350 is a dual core chip produced by Raspberry Pi that
 is based on ARM Cortex-M33 or the Hazard3 RISC-V.

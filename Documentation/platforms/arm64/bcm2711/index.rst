@@ -2,7 +2,7 @@
 BCM2711
 =======
 
-.. tags:: arch:arm64, chip:bcm2711, vendor:broadcom, experimental
+.. tags:: arch:arm64, chip:bcm2711, vendor:broadcom
 
 .. warning::
 

@@ -2,7 +2,7 @@
 ST STM32L0538-DISO
 ==================
 
-.. tags:: chip:stm32, chip:stm32l0, chip:stm32l053
+.. tags:: arch:arm, chip:stm32l0, part:stm32l053, vendor:st
 
 This page discusses issues unique to NuttX configurations for the
 STMicro STM32L0538-DISO development board.  The STM32L0538-DISO board

@@ -2,7 +2,7 @@
 weact-stm32h750
 ===============
 
-.. tags:: chip:stm32, chip:stm32h7, chip:stm32h750
+.. tags:: arch:arm, chip:stm32h7, part:stm32h750, vendor:st
 
 This page discusses issues unique to NuttX configurations for the
 WeAct STM32H750 board.

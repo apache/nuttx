@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" width="900" height="500"
+     font-family="Charter, Georgia, 'Times New Roman', serif" role="img"
+     aria-label="Task state machine: a task is created inactive, becomes ready to run, is given a CPU, may block waiting for a resource and return to ready, and finally exits.">
+  <style>
+    .panel    { fill: #f4f6fa; stroke: #c3cbd9; stroke-width: 1.2; }
+    .plabel   { fill: #6b7689; font-size: 11.5px; letter-spacing: .12em;
+                font-family: system-ui, sans-serif; }
+    .node     { fill: #ffffff; stroke: #3c34e3; stroke-width: 1.6; }
+    .node-run { fill: #3c34e3; stroke: #2b2787; stroke-width: 1.6; }
+    .node-blk { fill: #ffffff; stroke: #8a93a6; stroke-width: 1.3; }
+    .nm       { fill: #1b2233; font-size: 14.5px; font-weight: 600;
+                font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; }
+    .nm-on    { fill: #ffffff; font-size: 14.5px; font-weight: 600;
+                font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; }
+    .sub      { fill: #5a6478; font-size: 11.5px; }
+    .sub-on   { fill: #d9d7fb; font-size: 11.5px; }
+    .edge     { stroke: #4a5266; stroke-width: 1.5; fill: none; }
+    .lbl      { fill: #3f4757; font-size: 12px; font-style: italic; }
+    .api      { fill: #7b839a; font-size: 11px; font-family: ui-monospace, monospace; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+            orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#4a5266"/></marker>
+  </defs>
+
+  <text class="api" x="44" y="28">task_create()</text>
+  <path class="edge" d="M 44 38 L 44 56" marker-end="url(#a)"/>
+  <rect class="node" x="36" y="62" rx="7" width="184" height="56"/>
+  <text class="nm" x="52" y="86">INACTIVE</text>
+  <text class="sub" x="52" y="104">created, not started</text>
+  <path class="edge" d="M 128 118 L 128 186" marker-end="url(#a)"/>
+  <text class="api" x="138" y="150">task_activate()</text>
+
+  <rect class="panel" x="36" y="192" rx="10" width="472" height="152"/>
+  <text class="plabel" x="52" y="213">READY TO RUN</text>
+
+  <rect class="node" x="60" y="248" rx="7" width="180" height="62"/>
+  <text class="nm" x="76" y="274">READYTORUN</text>
+  <text class="sub" x="76" y="292">waiting for a CPU</text>
+  <rect class="node-run" x="304" y="248" rx="7" width="180" height="62"/>
+  <text class="nm-on" x="320" y="274">RUNNING</text>
+  <text class="sub-on" x="320" y="292">holding a CPU</text>
+
+  <path class="edge" d="M 240 268 L 298 268" marker-end="url(#a)"/>
+  <text class="lbl" x="272" y="238" text-anchor="middle">highest priority</text>
+  <path class="edge" d="M 304 292 L 246 292" marker-end="url(#a)"/>
+  <text class="lbl" x="272" y="332" text-anchor="middle">pre-empted</text>
+
+  <rect class="panel" x="560" y="192" rx="10" width="304" height="254"/>
+  <text class="plabel" x="576" y="213">BLOCKED</text>
+  <g class="node-blk">
+    <rect x="576" y="226" rx="6" width="272" height="36"/>
+    <rect x="576" y="268" rx="6" width="272" height="36"/>
+    <rect x="576" y="310" rx="6" width="272" height="36"/>
+    <rect x="576" y="352" rx="6" width="272" height="36"/>
+    <rect x="576" y="394" rx="6" width="272" height="36"/>
+  </g>
+  <text class="nm" x="590" y="243" font-size="12.5">WAIT_SEM</text>
+  <text class="sub" x="590" y="257">a semaphore</text>
+  <text class="nm" x="590" y="285" font-size="12.5">WAIT_SIG</text>
+  <text class="sub" x="590" y="299">a signal, or sleeping</text>
+  <text class="nm" x="590" y="327" font-size="12.5">WAIT_EVENT</text>
+  <text class="sub" x="590" y="341">an event</text>
+  <text class="nm" x="590" y="369" font-size="12.5">WAIT_MQNOTEMPTY · NOTFULL</text>
+  <text class="sub" x="590" y="383">a message, or room for one</text>
+  <text class="nm" x="590" y="411" font-size="12.5">STOPPED</text>
+  <text class="sub" x="590" y="425">waiting for SIGCONT</text>
+
+  <path class="edge" d="M 484 262 L 554 262" marker-end="url(#a)"/>
+  <text class="lbl" x="519" y="250" text-anchor="middle">waits</text>
+  <path class="edge" d="M 560 472 L 150 472 L 150 316" marker-end="url(#a)"/>
+  <text class="lbl" x="330" y="466" text-anchor="middle">what it waited for happened</text>
+
+  <rect class="node" x="304" y="376" rx="22" width="180" height="46"/>
+  <text class="nm" x="320" y="404">exited</text>
+  <path class="edge" d="M 394 310 L 394 370" marker-end="url(#a)"/>
+  <text class="api" x="404" y="344">exit()</text>
+</svg>

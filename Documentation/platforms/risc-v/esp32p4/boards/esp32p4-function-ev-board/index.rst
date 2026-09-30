@@ -4,7 +4,7 @@
 ESP32-P4-Function-EV-Board
 ==========================
 
-.. tags:: chip:esp32p4, arch:risc-v, vendor:espressif
+.. tags:: arch:risc-v, chip:esp32p4, vendor:espressif
 
 .. figure:: esp32-p4-function-ev-board-isometric_v1.5.2.png
    :align: center

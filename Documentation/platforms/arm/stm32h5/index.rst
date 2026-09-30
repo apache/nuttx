@@ -195,7 +195,7 @@ eFuse Character Device
 ``CONFIG_STM32H5_EFUSE`` (which selects ``CONFIG_STM32H5_OTP_WORD``)
 registers the OTP area as a NuttX efuse character device, by default
 ``/dev/efuse``, built on the word API above. See
-:doc:`/components/drivers/character/efuse` for the ``EFUSEIOC_READ_FIELD``/
+:doc:`/os/drivers/character/efuse` for the ``EFUSEIOC_READ_FIELD``/
 ``EFUSEIOC_WRITE_FIELD`` ioctl interface. Field bit offsets index into the
 flat bit space of the OTP area at 16 bits per word, the same as the word
 API's ``word`` index. Writing a field requires ``CONFIG_STM32H5_OTP_WRITE``;

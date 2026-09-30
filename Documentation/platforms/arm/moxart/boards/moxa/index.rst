@@ -2,6 +2,8 @@
 moxa
 ====
 
+.. tags:: arch:arm, chip:moxart, vendor:moxa
+
 Configurations
 ==============
 

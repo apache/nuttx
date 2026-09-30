@@ -2,7 +2,7 @@
 Raspberry Pi 4B
 ===============
 
-.. tags:: arch:arm64, chip:bcm2711, vendor:raspberry-pi, experimental
+.. tags:: arch:arm64, chip:bcm2711, vendor:broadcom
 
 .. warning::
 
