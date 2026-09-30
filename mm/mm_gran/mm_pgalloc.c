@@ -30,6 +30,7 @@
 
 #include <nuttx/mm/gran.h>
 #include <nuttx/pgalloc.h>
+#include <nuttx/semaphore.h>
 
 #include "mm_gran/mm_gran.h"
 
@@ -195,6 +196,10 @@ uintptr_t mm_pgalloc_align(unsigned int npages, unsigned int align)
 
 void mm_pgfree(uintptr_t paddr, unsigned int npages)
 {
+#if defined(CONFIG_BUILD_KERNEL) && defined(__KERNEL__)
+  nxsem_release_shadows(paddr, (size_t)npages << MM_PGSHIFT);
+#endif
+
   gran_free(g_pgalloc, (FAR void *)paddr, (size_t)npages << MM_PGSHIFT);
 }
 

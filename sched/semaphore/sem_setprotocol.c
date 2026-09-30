@@ -74,7 +74,7 @@
  *
  ****************************************************************************/
 
-int nxsem_set_protocol(FAR sem_t *sem, int protocol)
+static int nxsem_set_protocol_resolved(FAR sem_t *sem, int protocol)
 {
   DEBUGASSERT(sem != NULL);
 
@@ -106,6 +106,15 @@ int nxsem_set_protocol(FAR sem_t *sem, int protocol)
 
   sem->flags = protocol;
   return OK;
+}
+
+int nxsem_set_protocol(FAR sem_t *sem, int protocol)
+{
+  FAR sem_t *resolved = nxsem_resolve(sem);
+  int ret = nxsem_set_protocol_resolved(resolved, protocol);
+
+  nxsem_unresolve(sem, resolved);
+  return ret;
 }
 
 #endif /* CONFIG_PRIORITY_INHERITANCE */
