@@ -2,7 +2,7 @@
 ESP32S3-8048S043
 ================
 
-.. tags:: chip:esp32, chip:esp32s3
+.. tags:: arch:xtensa, chip:esp32s3, vendor:espressif
 
 The `ESP32S3-8048S343 <https://www.openhasp.com/0.7.0/hardware/sunton/esp32-8048s0xx/>` is a dual-core MCU, integrated WI-FI and Bluetooth functions, the main frequency can reach 240MHz, 512KB SRAM, 384KB ROM, 8M PSRAM, Flash size is 16MB.
 

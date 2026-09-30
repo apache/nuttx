@@ -2,6 +2,8 @@
 GD32VW553-HMQ
 =============
 
+.. tags:: arch:risc-v, chip:gd32vw55x, vendor:gigadevice
+
 The GD32VW553-HMQ is the generic evaluation board for the GD32VW553HMQ6
 (Nuclei N307, Wi-Fi 6 + BLE 5.3).  It carries an on-board USB/Serial port
 provides the USB serial console.

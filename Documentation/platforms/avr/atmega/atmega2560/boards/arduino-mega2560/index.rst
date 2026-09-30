@@ -2,7 +2,7 @@
 Arduino Mega2560
 ================
 
-.. tags:: chip:atmega2560, chip:atmega, vendor:arduino, arch:avr
+.. tags:: arch:avr, chip:atmega, part:atmega2560, vendor:microchip
 
 This is the documentation for the port of NuttX to the `Arduino Mega 2560 Rev3
 <https://www.arduino.cc/en/Main/ArduinoBoardMega2560>`_. The board is based on

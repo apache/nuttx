@@ -2,7 +2,7 @@
 ST Nucleo-H563ZI
 ================
 
-.. tags:: chip:stm32, chip:stm32h5, chip:stm32h563
+.. tags:: arch:arm, chip:stm32h5, part:stm32h563, vendor:st
 
 .. figure:: nucleo-h563zi.png
    :align: center

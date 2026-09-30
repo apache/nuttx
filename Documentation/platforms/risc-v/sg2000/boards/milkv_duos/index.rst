@@ -2,6 +2,8 @@
 Milk-V Duo S
 ============
 
+.. tags:: arch:risc-v, chip:sg2000, vendor:sophgo
+
 `Milk-V Duo S <https://milkv.io/duo-s>`_ is a RISC-V Single-Board Computer
 based on the SOPHGO SG2000 RISC-V SoC with T-Head C906 64-bit Main Processor,
 512 MB of SIP DRAM memory and 100 Mbps Ethernet.

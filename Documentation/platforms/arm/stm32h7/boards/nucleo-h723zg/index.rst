@@ -2,7 +2,7 @@
 ST Nucleo H723ZG
 ================
 
-.. tags:: chip:stm32, chip:stm32h7, chip:stm32h723
+.. tags:: arch:arm, chip:stm32h7, part:stm32h723, vendor:st
 
 This page discusses issues unique to NuttX configurations for the
 STMicro Nucleo-H723ZG development board featuring the STM32H723ZG

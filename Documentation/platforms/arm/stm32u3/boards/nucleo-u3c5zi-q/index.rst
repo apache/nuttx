@@ -2,7 +2,7 @@
 ST NUCLEO-U3C5ZI-Q
 ======================
 
-.. tags:: chip:stm32, chip:stm32u3, chip:stm32u3c5
+.. tags:: arch:arm, chip:stm32u3, part:stm32u3c5, vendor:st
 
 The `NUCLEO-U3C5ZI-Q <https://www.st.com/en/evaluation-tools/nucleo-u3c5zi-q.html>`_
 is an STM32 Nucleo-144 board featuring an STM32U3C5ZI microcontroller with

@@ -2,6 +2,8 @@
 NXP S32K144EVB
 ==============
 
+.. tags:: arch:arm, chip:s32k1xx, vendor:nxp
+
 `NXP S32K144EVB-Q100 <https://www.nxp.com/design/development-boards/automotive-development-platforms/s32k-mcu-platforms/s32k144-q100-general-purpose-evaluation-board:S32K144EVB>`_ is an evaluation board for the `NXP S32K144 MCU <https://www.nxp.com/products/processors-and-microcontrollers/s32-automotive-platform/s32k-general-purpose-mcus/s32k1-microcontrollers-for-general-purpose:S32K1>`_ based on an Arm Cortex-M4F core.
 
 Features

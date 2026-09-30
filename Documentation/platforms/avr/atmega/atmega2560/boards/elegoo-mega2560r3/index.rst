@@ -2,7 +2,7 @@
 Elegoo Mega2560 Rev3
 ====================
 
-.. tags:: chip:atmega2560, chip:atmega, arch:avr, vendor:elegoo, experimental
+.. tags:: arch:avr, chip:atmega, part:atmega2560, vendor:microchip
 
 .. figure:: elegoo-mega2560r3.jpg
    :scale: 40 %

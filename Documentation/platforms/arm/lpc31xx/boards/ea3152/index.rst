@@ -2,6 +2,8 @@
 EA3152
 ======
 
+.. tags:: arch:arm, chip:lpc31xx, vendor:nxp
+
 This documentation discusses the port of NuttX to the Embedded Artists EA3152
 board.
 

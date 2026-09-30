@@ -2,7 +2,7 @@
 ST STM32U083C-DK
 ================
 
-.. tags:: chip:stm32, chip:stm32u0, chip:stm32u083
+.. tags:: arch:arm, chip:stm32u0, part:stm32u083, vendor:st
 
 The STM32U083C-DK is a Discovery kit based on the STM32U083MC MCU.
 

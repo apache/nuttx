@@ -2,7 +2,7 @@
 ST STM32L476VG-DISCO
 ====================
 
-.. tags:: chip:stm32, chip:stm32l4, chip:stm32l476
+.. tags:: arch:arm, chip:stm32l4, part:stm32l476, vendor:st
 
 XXX all this needs review and update
 

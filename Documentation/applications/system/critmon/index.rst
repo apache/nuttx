@@ -87,6 +87,6 @@ Stop the monitoring daemon:
 See Also
 ========
 
-- :doc:`/implementation/critical_sections`
+- :doc:`/os/interrupts/critical_sections`
 - :doc:`../stackmonitor/index`
 - :doc:`../gprof/index`

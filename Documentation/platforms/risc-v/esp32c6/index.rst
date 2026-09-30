@@ -934,7 +934,7 @@ adds every source and header file into project and builds it.
 
 To sum up, here is an example. ``ulp_example/ulp (../ulp_example/ulp)`` folder selected as example
 to create a subfolder for ULP but folder that includes ULP source code can be anywhere. For more information about
-custom apps, please follow NuttX `Custom Apps How-to <https://nuttx.apache.org/docs/latest/guides/customapps.html#custom-apps-how-to>`__ guide,
+custom apps, please follow NuttX `Custom Apps How-to <https://nuttx.apache.org/docs/latest/guides/build/customapps.html#custom-apps-how-to>`__ guide,
 this example will demonstrate how to add ULP code into a custom application:
 
 - Tree view:

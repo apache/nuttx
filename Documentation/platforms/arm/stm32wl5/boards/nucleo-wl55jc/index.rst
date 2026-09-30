@@ -2,7 +2,7 @@
 ST Nucleo WL55JC
 ================
 
-.. tags:: chip:stm32, chip:stm32wl, chip:stm32wl55
+.. tags:: arch:arm, chip:stm32wl5, part:stm32wl55, vendor:st
 
 The `Nucleo-WL55JC <https://www.st.com/en/evaluation-tools/nucleo-wl55jc.html>`_
 is a development board for the STM32WL55 SoC from ST. It features 64 I/O,

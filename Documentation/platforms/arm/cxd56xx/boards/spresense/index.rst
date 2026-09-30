@@ -2,7 +2,7 @@
 Sony Spresense
 ==============
 
-.. tags:: chip:cxd56xx, chip:cxd5602
+.. tags:: arch:arm, chip:cxd56xx, part:cxd5602, vendor:sony
 
 The `Spresense <https://developer.sony.com/develop/spresense/>`_ is a compact
 development board based on Sony's power-efficient multicore microcontroller

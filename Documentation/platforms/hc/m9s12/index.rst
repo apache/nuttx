@@ -2,7 +2,7 @@
 Freescale M9S12
 ===============
 
-.. tags:: vendor:freescale
+.. tags:: arch:hc, chip:m9s12, vendor:nxp
 
 Freescale M68HCS12
 ------------------

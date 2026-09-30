@@ -2,6 +2,8 @@
 NXP MR-CANHUBK3
 ===============
 
+.. tags:: arch:arm, chip:s32k3xx, vendor:nxp
+
 s a CAN Node reference design and development platform for mobile robotics applications, such as drones and rovers
 
 NXP MR-CANHUBK3 is a reference design and development platform for redundant networking and functional safety applications in Mobile Robotics, such as drones and rovers. It features the `NXP S32K344 MCU <https://www.nxp.com/products/processors-and-microcontrollers/s32-automotive-platform/s32k-general-purpose-mcus/s32k3-microcontrollers-for-general-purpose:S32K3>`_ based on a Arm Cortex-M7 core (Lock-Step).

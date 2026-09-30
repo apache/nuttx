@@ -2,6 +2,8 @@
 PINE64 Star64
 =============
 
+.. tags:: arch:risc-v, chip:jh7110, vendor:starfive
+
 `Star64 <https://wiki.pine64.org/wiki/STAR64>`_ is a 64-bit RISC-V based
 Single Board Computer powered by StarFive JH7110 Quad-Core SiFive U74 64-Bit CPU,
 Imagination Technology BX-4-32 GPU and supports up to 8GB 1866MHz LPDDR4 memory.

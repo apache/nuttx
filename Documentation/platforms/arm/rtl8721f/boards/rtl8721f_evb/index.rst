@@ -2,7 +2,7 @@
 RTL8721F EVB
 ============
 
-.. tags:: chip:rtl8721f, arch:arm, vendor:realtek
+.. tags:: arch:arm, chip:rtl8721f, vendor:realtek
 
 .. figure:: rtl8721f_evb.png
    :scale: 50 %

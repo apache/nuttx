@@ -2,6 +2,8 @@
 Seeed Studio XIAO SAMD21
 ========================
 
+.. tags:: arch:arm, chip:samd2l2, vendor:microchip
+
 The `Seeed Studio Xiao SAM21 <https://wiki.seeedstudio.com/Seeeduino-XIAO/>`_ is the first of the XIAO family, and is a
 general purpose, low-power and tiny board. It can be referred to as the "Seeed Studio Xiao SAMD21" or the "Xiao
 Seeeduino".

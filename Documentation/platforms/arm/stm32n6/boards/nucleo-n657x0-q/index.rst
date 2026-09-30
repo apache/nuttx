@@ -2,7 +2,7 @@
 ST Nucleo-N657X0-Q
 ==================
 
-.. tags:: chip:stm32, chip:stm32n6, chip:stm32n657
+.. tags:: arch:arm, chip:stm32n6, part:stm32n657, vendor:st
 
 .. figure:: nucleo-n657x0-q.jpg
    :width: 50 %

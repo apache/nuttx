@@ -2,7 +2,7 @@
 Maix Bit
 ========
 
-.. tags:: experimental, arch:risc-v, chip:k210, vendor:sipeed
+.. tags:: arch:risc-v, chip:k210, vendor:canaan
 
 .. figure:: maix-bit.png
    :figwidth: 50%

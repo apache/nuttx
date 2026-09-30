@@ -2,7 +2,7 @@
 ESP32S3-WS-LCD128
 =================
 
-.. tags:: chip:esp32s3
+.. tags:: arch:xtensa, chip:esp32s3, vendor:espressif
 
 .. figure:: ESP32-S3-Touch-LCD-1.28.jpg 
    :align: center

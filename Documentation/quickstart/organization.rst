@@ -85,7 +85,7 @@ README.md file for information on how to build it.
 
 This sub-directory holds the NuttX supported architectures.
 
-For details see :doc:`/components/arch/index`.
+For details see :doc:`/os/arch/index`.
 
 ``nuttx/binfmt``
 ================
@@ -131,14 +131,14 @@ For details see :doc:`/components/cmake`.
 
 This sub-directory holds the NuttX cryptographic sub-system.
 
-For details see :doc:`/components/crypto`.
+For details see :doc:`/os/crypto`.
 
 ``nuttx/drivers``
 =================
 
 This directory holds architecture-independent device drivers.
 
-For details see :doc:`/components/drivers/index`.
+For details see :doc:`/os/drivers/index`.
 
 ``nuttx/fs``
 ============
@@ -152,7 +152,7 @@ described `below <#NxFileSystem>`__.
 This directory contains files for graphics/video support under
 NuttX.
 
-For details see :doc:`/components/nxgraphics/index`.
+For details see :doc:`/os/graphics/index`.
 
 ``nuttx/include``
 =================
@@ -166,14 +166,14 @@ file retained in can be included in the *normal* fashion:
 This directory holds a collection of standard libc-like functions
 with custom interfaces into NuttX.
 
-For details see :doc:`/components/libs/index`.
+For details see :doc:`/os/libs/index`.
 
 ``nuttx/mm``
 ============
 
 This is the NuttX memory manager.
 
-For details see :doc:`/components/mm/index`.
+For details see :doc:`/os/memory/index`.
 
 ``nuttx/net``
 =============
@@ -181,14 +181,14 @@ For details see :doc:`/components/mm/index`.
 This directory contains the implementation of the NuttX networking
 layer including internal socket APIs.
 
-For details see :doc:`/components/net/index`.
+For details see :doc:`/os/networking/index`.
 
 ``nuttx/openamp``
 =================
 
 This directory contains OpenAMP support for NuttX.
 
-For details see :doc:`/components/openamp`.
+For details see :doc:`/os/openamp`.
 
 ``nuttx/pass1``
 ===============
@@ -217,7 +217,7 @@ the contents of this directory are built. This directory holds a
 syscall interface that can be used for communication between
 user-mode applications and the kernel-mode RTOS.
 
-For details see :doc:`/components/syscall`.
+For details see :doc:`/os/syscall`.
 
 ``nuttx/tools``
 ===============
@@ -235,7 +235,7 @@ building <#configandbuild>`__ NuttX.
 
 This directory holds support for video sub-system.
 
-For details see :doc:`/components/video`.
+For details see :doc:`/os/video`.
 
 ``nuttx/wireless``
 ==================
@@ -243,7 +243,7 @@ For details see :doc:`/components/video`.
 This directory holds support for hardware-independent wireless
 support.
 
-For details see :doc:`/components/wireless`.
+For details see :doc:`/os/wireless`.
 
 ``nuttx/CMakeLists.txt``
 ========================

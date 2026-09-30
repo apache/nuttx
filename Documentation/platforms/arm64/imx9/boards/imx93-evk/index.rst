@@ -2,7 +2,7 @@
 i.MX93 Evaluation Kit
 =====================
 
-.. tags:: chip:imx93, arch:arm64
+.. tags:: arch:arm64, chip:imx9, part:imx93, vendor:nxp
 
 The kit i.MX93 Evaluation Kit has a pre-installed Linux image which contains
 u-boot and the i.MX93 reference Linux installation.

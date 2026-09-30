@@ -13,4 +13,4 @@ series and boards supported in NuttX:
    :titlesonly:
    
    */index
-
+   /_tags/tagsindex.rst

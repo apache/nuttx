@@ -72,4 +72,4 @@ If any step fails, the script will exit immediately with an error message.
   ``cxx-oot-build`` defconfig is preconfigured to build correctly but is
   **not suitable for running applications**.
 - For functional OOT builds, please follow the procedure documented in
-  :doc:`here </guides/cpp_cmake>`.
+  :doc:`here </guides/build/cpp_cmake>`.

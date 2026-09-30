@@ -2,7 +2,7 @@
 ST Nucleo F410RB
 ================
 
-.. tags:: chip:stm32, chip:stm32f4, chip:stm32f401
+.. tags:: arch:arm, chip:stm32f4, part:stm32f401, vendor:st
 
 This page discusses issues unique to NuttX configurations for the ST
 Nucleo F410RB board from ST Micro.  See

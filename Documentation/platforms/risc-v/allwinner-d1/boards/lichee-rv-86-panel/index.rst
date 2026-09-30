@@ -2,6 +2,8 @@
 Lichee RV 86 Panel
 ==================
 
+.. tags:: arch:risc-v, chip:allwinner-d1, vendor:allwinner
+
 The Sipeed Lichee RV 86 Panel is based on the Allwinner D1 SoC.  The board
 contains a single T-Head C906 RV64 core and 512 MiB of external DDR3 memory.
 This NuttX port runs in supervisor mode under OpenSBI and uses a FLAT address

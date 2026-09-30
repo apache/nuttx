@@ -2,7 +2,7 @@
 QEMU ARMv8-A
 ============
 
-.. tags:: chip:virt, arch:arm64
+.. tags:: arch:arm64, chip:qemu, part:virt
 
 This board configuration will use QEMU to emulate generic ARM64 v8-A series
 hardware platform and provides support for these devices:

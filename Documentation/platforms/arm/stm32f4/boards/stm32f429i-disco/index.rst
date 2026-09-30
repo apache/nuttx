@@ -2,7 +2,7 @@
 ST STM32F429I-DISCO
 ===================
 
-.. tags:: chip:stm32, chip:stm32f4, chip:stm32f429
+.. tags:: arch:arm, chip:stm32f4, part:stm32f429, vendor:st
 
 .. figure:: stm32f429i-disco.png
    :align: center

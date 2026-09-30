@@ -2,6 +2,8 @@
 rv-virt
 =======
 
+.. tags:: arch:risc-v, chip:qemu-rv
+
 RISC-V Toolchain
 ================
 

@@ -2,7 +2,7 @@
 ST Nucleo L452RE
 ================
 
-.. tags:: chip:stm32, chip:stm32l4, chip:stm32l452
+.. tags:: arch:arm, chip:stm32l4, part:stm32l452, vendor:st
 
 This page file discusses the port of NuttX to the STMicro Nucleo-L452RE
 board.  That board features the STM32L452RET6 MCU with 512KiB of FLASH

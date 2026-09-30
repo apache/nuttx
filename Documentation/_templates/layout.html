@@ -19,26 +19,31 @@
 
 {% extends "!layout.html" %}
 {% block sidebartitle %}
-  {% if logo and theme_logo_only %}
-    <a href="{{ pathto(master_doc) }}">
-  {% else %}
-    <a href="{{ pathto(master_doc) }}" class="icon icon-home"> {{ project }}
-  {% endif %}
+  {#- Sphinx passes the logo as `logo_url`; it used to be `logo`, and when
+      that changed this template quietly stopped rendering the mark at all,
+      leaving only the theme's house icon.  Accept both so the logo shows on
+      either. -#}
+  {%- set nuttx_logo = logo_url if logo_url else (pathto('_static/' + logo, 1) if logo else none) %}
 
-  {% if logo %}
-    {# Not strictly valid HTML, but it's the only way to display/scale
-       it properly, without weird scripting or heaps of work
-    #}
-    <img src="{{ pathto('_static/' + logo, 1) }}" class="logo" alt="{{ _('Logo') }}"/>
-  {% endif %}
+  <a href="{{ pathto(master_doc) }}" class="nuttx-brand">
+    {% if nuttx_logo %}
+      <img src="{{ nuttx_logo }}" class="logo" alt="{{ _('NuttX logo') }}"/>
+    {% endif %}
+    {% if not theme_logo_only %}
+      <span class="nuttx-brand-name">{{ project }}</span>
+    {% endif %}
   </a>
 
-  <!-- this version selector is quite ugly, should be probably replaced by something
-       more modern -->
-
   <div class="version-selector">
-    <select onchange="javascript:location.href = this.value;">
-    {% for nuttx_version in nuttx_versions.split(',') %}
+    <label class="nuttx-version-label" for="nuttx-version">{{ _('Version') }}</label>
+    <select id="nuttx-version"
+            onchange="javascript:location.href = this.value;">
+    {#- The Makefile builds this list as "latest,$(NUTTX_VERSIONS)", so an
+        unset NUTTX_VERSIONS leaves a trailing comma and an empty entry.
+        Dropping the blanks here keeps a nameless option pointing at ./../
+        out of the menu. -#}
+    {% for nuttx_version in nuttx_versions.split(',') if nuttx_version.strip() %}
+    {%- set nuttx_version = nuttx_version.strip() %}
     <option value="{{ url_root }}../{{ nuttx_version }}" {% if nuttx_version == version %}selected="selected"{% endif %}>{{ nuttx_version }}</option>
     {% endfor %}
     </select>
@@ -46,4 +51,3 @@
 
   {% include "searchbox.html" %}
 {% endblock %}
-

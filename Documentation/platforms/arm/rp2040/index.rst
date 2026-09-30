@@ -2,7 +2,7 @@
 Raspberry Pi rp2040
 ===================
 
-.. tags:: chip:rp2040
+.. tags:: arch:arm, chip:rp2040, vendor:raspberry-pi
 
 .. figure:: rp2040.png
    :align: center

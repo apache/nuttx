@@ -593,7 +593,7 @@ Monitor debug output:
 Related Documentation
 =====================
 
-- :doc:`/components/drivers/special/ptp` - PTP Clock Driver Framework
+- :doc:`/os/drivers/special/ptp` - PTP Clock Driver Framework
 - :doc:`/applications/netutils/index` - Network Utilities Overview
 - IEEE 1588-2008 Standard - Precision Time Protocol specification
 - IEEE 802.1AS Standard - Timing and Synchronization for Time-Sensitive Applications (gPTP)

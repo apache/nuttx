@@ -2,6 +2,8 @@
 qemu-armv7a
 ===========
 
+.. tags:: arch:arm, chip:qemu
+
 This board configuration will use QEMU to emulate generic ARM v7-A series
 hardware platform and provides support for these devices:
 

@@ -2,7 +2,7 @@
 TM4C123G Tiva C LaunchPad
 =========================
 
-.. tags:: chip:tm4c123, arch:arm, vendor:tiva
+.. tags:: arch:arm, chip:tiva, part:tm4c123, vendor:ti
 
 .. figure:: tm4c123g.jpg
    :scale: 30 %
@@ -213,7 +213,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
 Building OpenOCD under Cygwin:
 
-  Refer to Documentation/platforms/arm/lpc17xx/boards/olimex-lpc1766stk/README.txt
+  Refer to Documentation/platforms/arm/lpc17xx_40xx/boards/olimex-lpc1766stk/README.txt
 
 Installing OpenOCD in Linux:
 

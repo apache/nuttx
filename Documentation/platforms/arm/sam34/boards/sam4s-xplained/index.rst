@@ -2,6 +2,8 @@
 SAM4S Xplained
 ==============
 
+.. tags:: arch:arm, chip:sam34, vendor:microchip
+
 This README discusses issues unique to NuttX configurations for the Atmel SAM4S
 Xplained development board. This board features the ATSAM4S16C MCU with 1MB
 FLASH and 128KB.

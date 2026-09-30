@@ -2,6 +2,8 @@
 Arduino Portenta H7
 ===================
 
+.. tags:: arch:arm, chip:stm32h7, vendor:st
+
 This page discusses issues unique to NuttX configurations for the
 Arduino Portenta H7 board. This port applies to all versions of
 Portenta H7:

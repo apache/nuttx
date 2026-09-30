@@ -2,7 +2,7 @@
 ST Nucleo F722ZE
 ================
 
-.. tags:: chip:stm32, chip:stm32f7, chip:stm32f722
+.. tags:: arch:arm, chip:stm32f7, part:stm32f722, vendor:st
 
 This page discusses issues unique to NuttX configurations for the STMicro
 Nucleo-144 board.  See ST document STM32 Nucleo-144 boards (UM1974):

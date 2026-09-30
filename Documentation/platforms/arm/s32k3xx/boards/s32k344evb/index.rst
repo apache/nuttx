@@ -2,6 +2,8 @@
 NXP S32K344EVB
 ==============
 
+.. tags:: arch:arm, chip:s32k3xx, vendor:nxp
+
 `NXP S32K3X4EVB-Q257 <https://www.nxp.com/design/development-boards/automotive-development-platforms/s32k-mcu-platforms/s32k3x4-q257-full-featured-general-purpose-development-board:S32K3X4EVB-Q257>`_ is an evaluation board for the `NXP S32K344 MCU <https://www.nxp.com/products/processors-and-microcontrollers/s32-automotive-platform/s32k-general-purpose-mcus/s32k3-microcontrollers-for-general-purpose:S32K3>`_ based on a Arm Cortex-M7 core (Lock-Step).
 
 Features

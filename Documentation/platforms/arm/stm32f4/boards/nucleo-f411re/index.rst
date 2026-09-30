@@ -2,7 +2,7 @@
 ST Nucleo F411RE
 ================
 
-.. tags:: chip:stm32, chip:stm32f4, chip:stm32f411
+.. tags:: arch:arm, chip:stm32f4, part:stm32f411, vendor:st
 
 This page discusses issues unique to NuttX configurations for the ST
 NucleoF411RE board from ST Micro.  See

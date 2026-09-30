@@ -2,7 +2,7 @@
 i.MX RT1180 EVK
 ================
 
-.. tags:: arch:arm, arch:armv7m, arch:armv8m, arch:cm7, arch:cm33, chip:imxrt, chip:imxrt1180, vendor:nxp, ethernet, usb
+.. tags:: arch:arm, arch:armv7m, arch:armv8m, arch:cm7, arch:cm33, chip:imxrt, part:imxrt1180, vendor:nxp
 
 The `i.MX RT1180 EVK
 <https://www.nxp.com/design/design-center/development-boards-and-designs/MIMXRT1180-EVK>`_

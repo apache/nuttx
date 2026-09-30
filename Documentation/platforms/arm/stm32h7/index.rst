@@ -193,7 +193,7 @@ Clock device
 With ``CONFIG_PTP_CLOCK`` the driver registers the counter as a PTP hardware
 clock, ``/dev/ptp0`` for the first Ethernet interface (the number of the
 device is the number of the interface). It follows the generic framework
-described in :doc:`/components/drivers/special/ptp` and offers reading and
+described in :doc:`/os/drivers/special/ptp` and offers reading and
 setting the time, the resolution (the increment of the counter, 10 ns with
 ``HCLK`` at 200 MHz), frequency adjustment (``ADJ_FREQUENCY``, up to +/- 50 %)
 and phase steps (``ADJ_OFFSET`` and ``ADJ_SETOFFSET``). It does not offer the

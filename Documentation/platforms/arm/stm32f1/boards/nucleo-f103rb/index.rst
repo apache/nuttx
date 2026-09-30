@@ -2,7 +2,7 @@
 ST Nucleo F103RB
 ================
 
-.. tags:: chip:stm32, chip:stm32f1, chip:stm32f103
+.. tags:: arch:arm, chip:stm32f1, part:stm32f103, vendor:st
 
 The Nucleo F103RB is a member of the Nucleo-64 board family.
 

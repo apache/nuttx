@@ -2,6 +2,8 @@
 Flip&Click SAM3X
 ================
 
+.. tags:: arch:arm, chip:sam34, vendor:microchip
+
 This documentation discusses issues unique to NuttX configurations for the
 Mikroe Flip&Click SAM3X board. This board is an Arduino-Due work-alike with four
 Mikroe Click bus interfaces. Like the Arduino-Due, this board features the Atmel

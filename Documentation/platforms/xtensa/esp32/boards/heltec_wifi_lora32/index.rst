@@ -4,7 +4,7 @@
 Heltec WiFi LoRa 32 V2
 ======================
 
-.. tags:: chip:esp32, chip:esp32wrover32
+.. tags:: arch:xtensa, chip:esp32, part:esp32wrover32, vendor:espressif
 
 The Heltec WiFi LoRa32 is a development board based on an ESP32 microcontroller. It is designed for LoRa application.
 

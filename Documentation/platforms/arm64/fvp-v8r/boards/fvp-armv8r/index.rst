@@ -2,7 +2,7 @@
 FVP ARMv8-r
 ===========
 
-.. tags:: chip:virt, arch:arm64
+.. tags:: arch:arm64, chip:fvp-v8r, part:virt, vendor:arm
 
 This board configuration will use FVP_BaseR_AEMv8R to emulate generic ARM64v8-R
 (Cotex-R82) series hardware platform and provides support for these devices:

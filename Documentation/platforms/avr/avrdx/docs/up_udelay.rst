@@ -3,7 +3,7 @@ AVR DA/DB family ``up_udelay`` implementation
 =============================================
 
 NuttX provides functions for busy sleep, these are documented
-:doc:`here </reference/os/sleep>`. These functions
+:doc:`here </os/time/sleep>`. These functions
 use ``BOARD_LOOPSPERMSEC`` configuration value to determine how many loops need
 to be done to cause requested delay. Creator of a the board code is supposed
 to calibrate this value to make the delay as precise as possible.
