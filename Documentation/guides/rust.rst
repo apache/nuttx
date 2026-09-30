@@ -58,6 +58,9 @@ Please ensure that you have a working NuttX build environment, and with the foll
 Please enable the following configurations in your NuttX configuration:
 
 - CONFIG_FS_LARGEFILE
+- CONFIG_LIBC_MUTEX_BACKTRACE = 0
+
+In addition if you want to use `std`, these are also required (they are not required if you only use `libc` with `#![no_std]`):
 - CONFIG_TLS_NELEM = 16
 - CONFIG_DEV_URANDOM
 
