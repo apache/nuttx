@@ -39,9 +39,14 @@
 
 #include <nuttx/addrenv.h>
 #include <nuttx/arch.h>
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/pthread.h>
 #include <nuttx/syslog/syslog.h>
+
+#ifdef CONFIG_CDCACM
+#  include <nuttx/usb/cdcacm.h>
+#endif
 
 #ifdef CONFIG_BUILD_KERNEL
 
@@ -273,6 +278,20 @@ int uaccess_ioctl(int fd, int req, ...)
   va_start(ap, req);
   arg = va_arg(ap, unsigned long);
   va_end(ap);
+
+  switch (req)
+    {
+      case BIOC_XIPBASE:
+      case DIOC_GETPRIV:
+#ifdef CONFIG_CDCACM
+      case CAIOC_REGISTERCB:
+#endif
+        set_errno(EPERM);
+        return ERROR;
+
+      default:
+        break;
+    }
 
   if (!uaccess_arg(arg))
     {
