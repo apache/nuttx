@@ -65,6 +65,9 @@
 #include "soc/rtc.h"
 
 #include "bootloader_init.h"
+#ifdef CONFIG_BUILD_PROTECTED
+#  include "esp_userspace.h"
+#endif
 #include "bootloader_sha.h"
 
 #ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
@@ -88,6 +91,48 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* A protected build must own the PMP outright.  Without
+ * CONFIG_ESPRESSIF_KERNEL_OWNS_PMP the HAL programs every entry with the
+ * lock bit set, from bootloader_init() and before any NuttX code can
+ * intervene; the ESP32-P4 has no Smepmp, so those entries can never be
+ * re-described.  The build would succeed, boot, run NSH in user mode and
+ * enforce nothing -- which is worse than a flat build, because it looks
+ * protected.  Refuse to build it instead.
+ */
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_ARCH_CHIP_ESP32P4) && \
+    !defined(CONFIG_ESPRESSIF_KERNEL_OWNS_PMP)
+#  error "BUILD_PROTECTED needs ESPRESSIF_KERNEL_OWNS_PMP; the HAL locks every PMP entry"
+#endif
+
+/* configure_mpu() in esp_userspace.c resets PMP entries 0-15 before
+ * describing the user regions.  That covers every entry the HAL programs
+ * on revision 0.x and 1.x silicon, which uses 0-15 and no more.  Revision
+ * 3.0 and later take a different HAL layout that programs entries through
+ * 31, and those would survive the reset: unlocked entries do not restrain
+ * machine mode, but they do grant user mode whatever they describe, so
+ * leftovers would silently widen the user-accessible set.
+ */
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_ARCH_CHIP_ESP32P4) && \
+    !defined(CONFIG_ESP32P4_SELECTS_REV_LESS_V3)
+#  error "BUILD_PROTECTED tested with ESP32P4_SELECTS_REV_LESS_V3; the rev3 HAL \
+layout uses PMP entries 16-31, which configure_mpu() does not reset"
+#endif
+
+/* Region protection would re-run esp_cpu_configure_region_protection()
+ * late in esp_start(), after bootloader_init() has already programmed the
+ * regions, racing the userspace PMP setup.  Enforced here rather than with
+ * a Kconfig dependency: both symbols select ARCH_USE_MPU, which
+ * BUILD_PROTECTED depends on, so a Kconfig dependency on the build type
+ * would be circular.
+ */
+
+#if defined(CONFIG_BUILD_PROTECTED) && \
+    defined(CONFIG_ESPRESSIF_REGION_PROTECTION)
+#  error "BUILD_PROTECTED needs ESPRESSIF_REGION_PROTECTION disabled"
+#endif
 
 #ifdef CONFIG_DEBUG_FEATURES
 #  define showprogress(c)     esp_rom_printf(c)
@@ -682,6 +727,16 @@ void __esp_start(void)
   esp_board_initialize();
 
   showprogress("D");
+
+#ifdef CONFIG_BUILD_PROTECTED
+  /* Initialise the user-space image and put the PMP boundaries in place
+   * before any user code becomes reachable.
+   */
+
+  esp_userspace();
+
+  showprogress("E");
+#endif
 
   nx_start();
 

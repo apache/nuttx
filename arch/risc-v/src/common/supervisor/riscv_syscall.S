@@ -113,6 +113,17 @@ sys_call6:
 
   REGSTORE   x1, REG_EPC(sp)           /* save ra to epc */
 
+#ifdef REG_MCAUSE
+  /* This frame is synthesised, not latched by a trap, and SYS_switch_context
+   * can save it for a later restore.  On a CLIC part mret consumes mcause,
+   * so the slot cannot be left holding whatever was on the stack.  Zero is
+   * the correct value: it is what the other synthesised frames carry, and it
+   * tells the CLIC this is not a return from an interrupt in flight.
+   */
+
+  REGSTORE   x0, REG_MCAUSE(sp)
+#endif
+
   addi       s0, sp, XCPTCONTEXT_SIZE
   REGSTORE   s0, REG_SP(sp)            /* original SP */
 
