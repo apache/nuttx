@@ -117,7 +117,7 @@ void clock_increase_sched_ticks(clock_t ticks)
 clock_t clock_get_sched_ticks(void)
 {
   clock_t ret;
-  unsigned int seq;
+  uint32_t seq;
 
   do
     {
