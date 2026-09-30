@@ -103,7 +103,7 @@ uintptr_t x86_64_get_pgtable(arch_addrenv_t *addrenv, uintptr_t vaddr)
         {
           /* Determine page table flags */
 
-          if (x86_64_uservaddr(vaddr))
+          if (up_addrenv_user_vaddr(vaddr))
             {
               flags = MMU_UPGT_FLAGS;
             }
