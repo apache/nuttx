@@ -2,7 +2,7 @@
 Microchip Atmega
 ================
 
-.. tags:: chip:atmega, arch:avr, vendor:microchip
+.. tags:: arch:avr, chip:atmega, vendor:microchip
 
 ATMega chips share some common NuttX code in their implementations.
 

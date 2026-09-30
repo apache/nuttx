@@ -2,6 +2,8 @@
 GD32VW553K-START
 ================
 
+.. tags:: arch:risc-v, chip:gd32vw55x, vendor:gigadevice
+
 The GD32VW553K-START is the GigaDevice evaluation board for the GD32VW553KMQ
 (Nuclei N307, Wi-Fi 6 + BLE 5.3).  It carries an on-board GD-Link debug probe
 which also provides the USB serial console.

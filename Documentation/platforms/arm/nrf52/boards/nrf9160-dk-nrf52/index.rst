@@ -2,7 +2,7 @@
 Nordic nRF9160 DK (nRF52840)
 ============================
 
-.. tags:: chip:nrf52, chip:nrf91, chip:nrf52840, chip:nrf9160
+.. tags:: arch:arm, chip:nrf52, chip:nrf91, part:nrf52840, part:nrf9160, vendor:nordic
 
 The `nRF9160-DK (PCA10090) <https://www.nordicsemi.com/Products/Development-hardware/nrf9160-dk>`_
 is a development board based on the nRF9160 and nRF52840 from Nordic.

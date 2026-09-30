@@ -2,6 +2,8 @@
 PolarFire SoC Icicle Kit
 ========================
 
+.. tags:: arch:risc-v, chip:mpfs, vendor:microchip
+
 .. list-table::
    :align: center
 

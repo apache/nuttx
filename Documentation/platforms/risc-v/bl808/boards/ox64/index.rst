@@ -2,6 +2,8 @@
 PINE64 Ox64
 ===========
 
+.. tags:: arch:risc-v, chip:bl808, vendor:bouffalolab
+
 `Ox64 <https://wiki.pine64.org/wiki/Ox64>`_ is a RISC-V Single-Board Computer
 based on the Bouffalo Lab BL808 RISC-V SoC with C906 64-bit CPU Core and
 E907 / E902 32-bit CPU Cores supported by 64 MB of embedded PSRAM memory,

@@ -2,7 +2,7 @@
 Nordic Thingy:52
 =================
 
-.. tags:: chip:nrf52, chip:nrf52832
+.. tags:: arch:arm, chip:nrf52, part:nrf52832, vendor:nordic
 
 The `Thingy:52 (PCA20020) <https://www.nordicsemi.com/Products/Development-hardware/Nordic-Thingy-52>`_
 is a prototyping platform build around the nRF52832 from Nordic.

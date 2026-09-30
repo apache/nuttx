@@ -2,6 +2,8 @@
 i.MX RT1050 EVK
 ===============
 
+.. tags:: arch:arm, chip:imxrt, vendor:nxp
+
 `i.MX RT1050 EVK <https://www.nxp.com/design/development-boards/i-mx-evaluation-and-development-boards/i-mx-rt1050-evaluation-kit:MIMXRT1050-EVK>`_
 is an evaluation kit by NXP company. This kit uses the i.MX RT1050 crossover MCU with ARM Cortex M7 core.
 

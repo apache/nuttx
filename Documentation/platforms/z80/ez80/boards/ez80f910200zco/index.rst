@@ -2,6 +2,8 @@
 ez80f0910200zco
 ===============
 
+.. tags:: arch:z80, chip:ez80, vendor:zilog
+
 ez80Acclaim! Microcontroller.  This port use the Zilog ez80f0910200zco
 development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
 tools.  The development environment is Cygwin under WinXP.

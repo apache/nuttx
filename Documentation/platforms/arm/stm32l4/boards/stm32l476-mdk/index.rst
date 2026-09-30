@@ -2,7 +2,7 @@
 STM32L476-mdk
 =============
 
-.. tags:: chip:stm32, chip:stm32l4, chip:stm32l476
+.. tags:: arch:arm, chip:stm32l4, part:stm32l476, vendor:st
 
 This page discusses issues unique to NuttX configurations for STM32L476ME
 part in the Motorola MDK.  This is referred to as the MuC in Motorola

@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" width="900" height="520"
+     font-family="Charter, Georgia, 'Times New Roman', serif" role="img"
+     aria-label="The layers of NuttX, from applications down through the C library and the system call boundary to the kernel subsystems, the device drivers, and the architecture, chip and board code that touches the hardware.">
+  <style>
+    .band   { fill: #f4f6fa; stroke: #c3cbd9; stroke-width: 1.2; }
+    .band-k { fill: #eef0fb; stroke: #b9bdf0; stroke-width: 1.2; }
+    .blk    { fill: #ffffff; stroke: #3c34e3; stroke-width: 1.5; }
+    .blk-s  { fill: #ffffff; stroke: #5a96bd; stroke-width: 1.4; }
+    .blk-hw { fill: #2b2787; stroke: #2b2787; }
+    .lbl    { fill: #1b2233; font-size: 13.5px; font-weight: 600;
+              font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; }
+    .lbl-on { fill: #ffffff; font-size: 13.5px; font-weight: 600;
+              font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; }
+    .sub    { fill: #5a6478; font-size: 11px; }
+    .band-t { fill: #6b7689; font-size: 11.5px; letter-spacing: .12em;
+              font-family: system-ui, sans-serif; }
+    .dir    { fill: #7b839a; font-size: 11px; font-family: ui-monospace, monospace; }
+    .sysb   { stroke: #3c34e3; stroke-width: 2; stroke-dasharray: 7 4; }
+    .sysl   { fill: #3c34e3; font-size: 11.5px; font-style: italic; }
+  </style>
+
+  <!-- applications -->
+  <rect class="band" x="16" y="16" rx="9" width="868" height="76"/>
+  <text class="band-t" x="34" y="38">APPLICATIONS</text>
+  <rect class="blk" x="34" y="48" rx="6" width="180" height="32"/>
+  <text class="lbl" x="48" y="69">nsh</text>
+  <rect class="blk" x="226" y="48" rx="6" width="180" height="32"/>
+  <text class="lbl" x="240" y="69">your program</text>
+  <rect class="blk" x="418" y="48" rx="6" width="180" height="32"/>
+  <text class="lbl" x="432" y="69">examples</text>
+  <text class="dir" x="620" y="69">apps/ — a separate repository</text>
+
+  <!-- libc -->
+  <rect class="band" x="16" y="104" rx="9" width="868" height="62"/>
+  <text class="band-t" x="34" y="126">C LIBRARY</text>
+  <rect class="blk" x="34" y="132" rx="6" width="564" height="26"/>
+  <text class="lbl" x="48" y="150">libc · libm · libc++</text>
+  <text class="dir" x="620" y="150">libs/</text>
+
+  <!-- syscall boundary -->
+  <path class="sysb" d="M 16 182 L 884 182"/>
+  <text class="sysl" x="34" y="176">system call boundary — present only in PROTECTED and KERNEL builds</text>
+  <text class="dir" x="620" y="176">syscall/</text>
+
+  <!-- kernel -->
+  <rect class="band-k" x="16" y="194" rx="9" width="868" height="146"/>
+  <text class="band-t" x="34" y="216">KERNEL</text>
+  <rect class="blk" x="34" y="226" rx="6" width="196" height="46"/>
+  <text class="lbl" x="48" y="246">scheduler</text>
+  <text class="sub" x="48" y="262">tasks, threads, IPC</text>
+  <rect class="blk" x="242" y="226" rx="6" width="196" height="46"/>
+  <text class="lbl" x="256" y="246">VFS</text>
+  <text class="sub" x="256" y="262">files, mountpoints</text>
+  <rect class="blk" x="450" y="226" rx="6" width="196" height="46"/>
+  <text class="lbl" x="464" y="246">network stack</text>
+  <text class="sub" x="464" y="262">sockets, TCP/IP</text>
+  <rect class="blk" x="658" y="226" rx="6" width="196" height="46"/>
+  <text class="lbl" x="672" y="246">memory</text>
+  <text class="sub" x="672" y="262">heaps, allocators</text>
+  <rect class="blk-s" x="34" y="284" rx="6" width="196" height="40"/>
+  <text class="lbl" x="48" y="309">binfmt</text>
+  <rect class="blk-s" x="242" y="284" rx="6" width="196" height="40"/>
+  <text class="lbl" x="256" y="309">file systems</text>
+  <rect class="blk-s" x="450" y="284" rx="6" width="196" height="40"/>
+  <text class="lbl" x="464" y="309">graphics · audio</text>
+  <rect class="blk-s" x="658" y="284" rx="6" width="196" height="40"/>
+  <text class="lbl" x="672" y="309">crypto · wireless</text>
+  <text class="dir" x="34" y="336">sched/  fs/  net/  mm/  binfmt/  graphics/  audio/  crypto/  wireless/</text>
+
+  <!-- drivers -->
+  <rect class="band" x="16" y="352" rx="9" width="868" height="76"/>
+  <text class="band-t" x="34" y="374">DEVICE DRIVERS</text>
+  <rect class="blk" x="34" y="384" rx="6" width="152" height="32"/>
+  <text class="lbl" x="48" y="405">character</text>
+  <rect class="blk" x="198" y="384" rx="6" width="152" height="32"/>
+  <text class="lbl" x="212" y="405">block · MTD</text>
+  <rect class="blk" x="362" y="384" rx="6" width="152" height="32"/>
+  <text class="lbl" x="376" y="405">network</text>
+  <rect class="blk" x="526" y="384" rx="6" width="152" height="32"/>
+  <text class="lbl" x="540" y="405">USB · sensors</text>
+  <text class="dir" x="700" y="405">drivers/</text>
+
+  <!-- arch -->
+  <rect class="band" x="16" y="440" rx="9" width="868" height="70"/>
+  <text class="band-t" x="34" y="462">ARCHITECTURE, CHIP, BOARD</text>
+  <rect class="blk-hw" x="34" y="470" rx="6" width="240" height="30"/>
+  <text class="lbl-on" x="48" y="490">arch/&lt;arch&gt;/src/&lt;chip&gt;</text>
+  <rect class="blk-hw" x="286" y="470" rx="6" width="258" height="30"/>
+  <text class="lbl-on" x="300" y="490">boards/&lt;arch&gt;/&lt;chip&gt;/&lt;board&gt;</text>
+  <text class="sub" x="562" y="490">where register access belongs</text>
+</svg>

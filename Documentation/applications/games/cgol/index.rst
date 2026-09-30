@@ -19,7 +19,7 @@ Requirements
 ------------
 
 The CGOL implementation for NuttX relies on a frame buffer driver, that is:
-:doc:`/components/nxgraphics/framebuffer_char_driver`. If you have
+:doc:`/os/graphics/framebuffer_char_driver`. If you have
 ``VIDEO_FB`` enabled, you should be able to use the app. The visuals for the
 game are rendered to a display through the provided frame buffer.
 

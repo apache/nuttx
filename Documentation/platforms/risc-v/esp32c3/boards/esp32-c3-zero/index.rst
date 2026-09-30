@@ -2,7 +2,7 @@
 Waveshare ESP32-C3-Zero
 ===============================
 
-.. tags:: chip:ESP32-C3
+.. tags:: arch:risc-v, chip:esp32c3, vendor:espressif
 
 The `Waveshare ESP32-C3-Zero <https://www.waveshare.com/wiki/ESP32-C3-Zero>`_ is a compact development board supplied by Waveshare.
 

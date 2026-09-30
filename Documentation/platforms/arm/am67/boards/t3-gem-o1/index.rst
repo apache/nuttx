@@ -2,7 +2,7 @@
 T3 Gemstone O1
 ==============
 
-.. tags:: chip:am67, arch:arm, experimental
+.. tags:: arch:arm, chip:am67, vendor:ti
 
 .. list-table::
    :align: center

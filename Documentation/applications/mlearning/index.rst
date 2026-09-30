@@ -28,7 +28,7 @@ TFLM). CMake currently builds ``tflite-micro`` and ``cmsis-nn`` only.
 A ready-to-build simulator configuration is ``sim:tflm``. See
 :doc:`/platforms/sim/sim/boards/sim/index`. The kernel also has an
 optional AI-engine character driver (``CONFIG_AI_ENGINE``); see
-:doc:`/components/drivers/character/aie`.
+:doc:`/os/drivers/character/aie`.
 
 .. toctree::
    :glob:

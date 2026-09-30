@@ -8,8 +8,10 @@ In the following sections you will find basic information introducing main NuttX
   :maxdepth: 1
 
   about.rst
+  inviolables.rst
   development_environments.rst
   licensing.rst
   trademarks.rst
   resources.rst
+  /standards/index.rst
 

@@ -2,7 +2,7 @@
 ESP32 DevKitC
 =============
 
-.. tags:: chip:esp32, chip:esp32wroom32
+.. tags:: arch:xtensa, chip:esp32, part:esp32wroom32, vendor:espressif
 
 The `ESP32 DevKitC <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/modules-and-boards.html#esp32-devkitc-v4>`_ is a development board for the ESP32 SoC from Espressif, based on a ESP-WROOM-32 module. You can find the original V2 version and the newer V4 variant. They are
 pin compatible.

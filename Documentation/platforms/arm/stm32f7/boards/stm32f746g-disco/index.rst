@@ -2,7 +2,7 @@
 ST STM32F746G-DISCO
 ===================
 
-.. tags:: chip:stm32, chip:stm32f7, chip:stm32f746
+.. tags:: arch:arm, chip:stm32f7, part:stm32f746, vendor:st
 
 This page discusses issues unique to NuttX configurations for the
 STMicro STM32F746G-DISCO development board featuring the STM32F746NGH6

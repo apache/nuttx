@@ -2,7 +2,7 @@
 ST Nucleo L496ZG
 ================
 
-.. tags:: chip:stm32, chip:stm32l4, chip:stm32l496
+.. tags:: arch:arm, chip:stm32l4, part:stm32l496, vendor:st
 
 This page discusses issues unique to NuttX configurations for the STMicro
 Nucleo-144 board for STM32L4 chips.

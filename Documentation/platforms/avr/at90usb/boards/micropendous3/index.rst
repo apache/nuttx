@@ -2,7 +2,7 @@
 Micropendous 3
 ==============
 
-.. tags:: arch:avr, chip:at90usb
+.. tags:: arch:avr, chip:at90usb, vendor:microchip
 
 This is the documentation page for the port of NuttX to the Micropendous 3
 board. This board is developed by `opendous

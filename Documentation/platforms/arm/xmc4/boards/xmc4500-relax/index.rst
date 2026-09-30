@@ -2,6 +2,8 @@
 XMC4500 Relax
 =============
 
+.. tags:: arch:arm, chip:xmc4, vendor:infineon
+
 There are to variants of this board:  There is a Lite version
 that has fewer features, for example, no 32.768KHz crystal.
 

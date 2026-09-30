@@ -4,7 +4,7 @@
 nRF52840-DK
 ===========
 
-.. tags:: chip:nrf52, chip:nrf52840
+.. tags:: arch:arm, chip:nrf52, part:nrf52840, vendor:nordic
 
 The `NRF52840-DK (PCA10056) <https://www.nordicsemi.com/Products/Development-hardware/nRF52840-DK>`_
 is a development board for the nRF52840 SoC from Nordic.

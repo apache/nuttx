@@ -2,6 +2,8 @@
 ESP32-C3 DevKit (Legacy)
 ========================
 
+.. tags:: arch:risc-v, chip:esp32c3-legacy, vendor:espressif
+
 The ESP32-C3 DevKit is an entry-level development board equipped with either
 an ESP32-C3-WROOM-02 or an ESP32-C3-MINI-1.
 ESP32-C3-WROOM-02 and ESP32-C3-MINI-1 are SoMs based on the RISC-V ESP32-C3 CPU.

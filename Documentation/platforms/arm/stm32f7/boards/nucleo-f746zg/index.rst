@@ -4,7 +4,7 @@
 ST Nucleo F746ZG
 ================
 
-.. tags:: chip:stm32, chip:stm32f7, chip:stm32f746
+.. tags:: arch:arm, chip:stm32f7, part:stm32f746, vendor:st
 
 .. figure:: nucleo-f746zg.jpg
    :align: center

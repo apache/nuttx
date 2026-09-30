@@ -2,6 +2,8 @@
 Atmega MEGA1284P-XPLAINED
 =========================
 
+.. tags:: arch:avr, chip:atmega, part:atmega1284p, vendor:microchip
+
 The `MEGA1284P-XPLAINED <https://www.microchip.com/en-us/development-tool/ATMEGA1284P-XPLD>`_
 is a development board for the Atmega1284P from Microchip/Atmel.
 

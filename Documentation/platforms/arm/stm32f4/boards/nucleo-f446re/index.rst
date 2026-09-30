@@ -2,7 +2,7 @@
 ST Nucleo F446RE
 ================
 
-.. tags:: chip:stm32, chip:stm32f4, chip:stm32f446
+.. tags:: arch:arm, chip:stm32f4, part:stm32f446, vendor:st
 
 This page discusses issues unique to NuttX configurations for the ST
 NucleoF446RE boards from ST Micro.  See

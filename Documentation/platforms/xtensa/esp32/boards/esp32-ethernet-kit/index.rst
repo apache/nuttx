@@ -5,7 +5,7 @@
 ESP32-Ethernet-Kit V1.2
 =======================
 
-.. tags:: chip:esp32, chip:esp32wrover32
+.. tags:: arch:xtensa, chip:esp32, part:esp32wrover32, vendor:espressif
 
 The ESP32-Ethernet-Kit is an Ethernet-to-Wi-Fi development board that enables Ethernet
 devices to be interconnected over Wi-Fi. At the same time, to provide more flexible power

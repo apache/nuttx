@@ -2,7 +2,7 @@
 ESP32-S3-LCD-EV
 ===============
 
-.. tags:: chip:esp32, chip:esp32s3
+.. tags:: arch:xtensa, chip:esp32s3, vendor:espressif
 
 The `ESP32-S3-LCD-EV-Board <https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32s3/esp32-s3-lcd-ev-board/user_guide.html>`_  is a small-sized AI development board from Espressif featuring the ESP32-S3 CPU with a touchscreen LCD display, dual microphone, an 16 MB Octal PSRAM and an 16 MB flash.
 

@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 440" width="900" height="440"
+     font-family="Charter, Georgia, 'Times New Roman', serif" role="img"
+     aria-label="What happens when an interrupt arrives: the architecture entry code saves the context and calls the handler, the handler does only what cannot wait and hands the rest to a work queue, and on return the scheduler may switch to a different thread.">
+  <style>
+    .lane   { fill: #f4f6fa; stroke: #c3cbd9; stroke-width: 1.2; }
+    .lane-k { fill: #eef0fb; stroke: #b9bdf0; stroke-width: 1.2; }
+    .lname  { fill: #6b7689; font-size: 11px; letter-spacing: .11em;
+              font-family: system-ui, sans-serif; }
+    .box    { fill: #ffffff; stroke: #3c34e3; stroke-width: 1.5; }
+    .box-w  { fill: #ffffff; stroke: #5a96bd; stroke-width: 1.4; }
+    .box-hi { fill: #3c34e3; stroke: #2b2787; stroke-width: 1.5; }
+    .t      { fill: #1b2233; font-size: 12.5px;
+              font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; }
+    .t-on   { fill: #ffffff; font-size: 12.5px;
+              font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; }
+    .s      { fill: #5a6478; font-size: 10.5px; }
+    .s-on   { fill: #d9d7fb; font-size: 10.5px; }
+    .edge   { stroke: #4a5266; stroke-width: 1.5; fill: none; }
+    .note   { fill: #3f4757; font-size: 11.5px; font-style: italic; }
+    .warn   { fill: #2b2787; font-size: 11.5px; font-style: italic; }
+  </style>
+  <defs>
+    <marker id="c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+            orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#4a5266"/></marker>
+  </defs>
+
+  <rect class="lane" x="10" y="16" rx="9" width="880" height="92"/>
+  <text class="lname" x="26" y="36">HARDWARE AND ARCHITECTURE ENTRY · arch/&lt;arch&gt;/src/</text>
+  <rect class="box" x="26" y="46" rx="6" width="180" height="46"/>
+  <text class="t" x="40" y="68">IRQ asserted</text>
+  <text class="s" x="40" y="84">by a peripheral</text>
+  <rect class="box" x="248" y="46" rx="6" width="200" height="46"/>
+  <text class="t" x="262" y="68">vector, save context</text>
+  <text class="s" x="262" y="84">interrupts disabled (most archs)</text>
+  <rect class="box" x="490" y="46" rx="6" width="200" height="46"/>
+  <text class="t" x="504" y="68">irq_dispatch()</text>
+  <text class="s" x="504" y="84">find the handler</text>
+  <path class="edge" d="M 206 69 L 242 69" marker-end="url(#c)"/>
+  <path class="edge" d="M 448 69 L 484 69" marker-end="url(#c)"/>
+
+  <rect class="lane-k" x="10" y="124" rx="9" width="880" height="112"/>
+  <text class="lname" x="26" y="144">INTERRUPT HANDLER · cannot block, cannot wait, malloc may fail</text>
+  <rect class="box-hi" x="26" y="156" rx="6" width="280" height="60"/>
+  <text class="t-on" x="40" y="180">the driver's ISR</text>
+  <text class="s-on" x="40" y="198">clear the cause, read the register</text>
+  <rect class="box-w" x="352" y="156" rx="6" width="280" height="60"/>
+  <text class="t" x="366" y="180">work_queue()</text>
+  <text class="s" x="366" y="198">hand off everything that can wait</text>
+  <path class="edge" d="M 306 186 L 346 186" marker-end="url(#c)"/>
+  <text class="warn" x="664" y="182">This is the rule the whole</text>
+  <text class="warn" x="664" y="198">section follows.</text>
+  <path class="edge" d="M 590 92 L 590 114 L 4 114 L 4 186 L 20 186" marker-end="url(#c)"/>
+
+  <rect class="lane" x="10" y="252" rx="9" width="880" height="94"/>
+  <text class="lname" x="26" y="272">BOTTOM HALF · a worker thread, later</text>
+  <rect class="box-w" x="26" y="282" rx="6" width="280" height="50"/>
+  <text class="t" x="40" y="304">the work queue thread</text>
+  <text class="s" x="40" y="321">may block, may take a lock</text>
+  <path class="edge" d="M 492 216 L 492 307 L 312 307" marker-end="url(#c)"/>
+  <text class="note" x="512" y="300">The device is served here,</text>
+  <text class="note" x="512" y="316">where waiting is allowed.</text>
+
+  <rect class="lane" x="10" y="362" rx="9" width="880" height="68"/>
+  <text class="lname" x="26" y="382">RETURN FROM INTERRUPT</text>
+  <rect class="box" x="26" y="392" rx="6" width="280" height="30"/>
+  <text class="t" x="40" y="412">restore context</text>
+  <text class="note" x="330" y="412">— but not necessarily the same thread: a handler may have</text>
+  <text class="note" x="330" y="428">made a higher-priority thread ready, and NuttX switches to it.</text>
+</svg>

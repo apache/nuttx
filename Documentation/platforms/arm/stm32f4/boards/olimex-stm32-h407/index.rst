@@ -2,7 +2,7 @@
 Olimex STM32-H407
 =================
 
-.. tags:: chip:stm32, chip:stm32f4, chip:stm32f407
+.. tags:: arch:arm, chip:stm32f4, part:stm32f407, vendor:st
 
 The Olimex STM32-H407 configuration is based on
 stm32Fdiscovery and Olimex STM32-H405.

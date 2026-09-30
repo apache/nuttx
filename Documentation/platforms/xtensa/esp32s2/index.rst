@@ -529,7 +529,7 @@ Linker Segments
 ESP32-S2 has 4 generic timers of 64 bits (2 from Group 0 and 2 from Group 1).
 They're accessible as character drivers, the configuration along with a
 guidance on how to run the example and the description of the application level
-interface can be found in the :doc:`timer documentation </components/drivers/character/timers/timer>`.
+interface can be found in the :doc:`timer documentation </os/drivers/character/timers/timer>`.
 
 Watchdog Timers
 ===============
@@ -538,7 +538,7 @@ ESP32-S2 has 3 WDTs. 2 MWDTs from the Timers Module and 1 RWDT from the RTC Modu
 (Currently not supported yet). They're accessible as character drivers,
 The configuration along with a guidance on how to run the example and the description
 of the application level interface can be found in the
-:doc:`watchdog documentation </components/drivers/character/timers/watchdog>`.
+:doc:`watchdog documentation </os/drivers/character/timers/watchdog>`.
 
 I2S
 ===
@@ -1066,7 +1066,7 @@ adds every source and header file into project and builds it.
 
 To sum up, here is an example. ``ulp_example/ulp (../ulp_example/ulp)`` folder selected as example
 to create a subfolder for ULP but folder that includes ULP source code can be anywhere. For more information about
-custom apps, please follow NuttX `Custom Apps How-to <https://nuttx.apache.org/docs/latest/guides/customapps.html#custom-apps-how-to>`__ guide,
+custom apps, please follow NuttX `Custom Apps How-to <https://nuttx.apache.org/docs/latest/guides/build/customapps.html#custom-apps-how-to>`__ guide,
 this example will demonstrate how to add ULP code into a custom application:
 
 - Tree view:

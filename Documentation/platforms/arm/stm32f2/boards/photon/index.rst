@@ -2,7 +2,7 @@
 Particle.io Photon
 ==================
 
-.. tags:: chip:stm32, chip:stm32f2, chip:stm32f205
+.. tags:: arch:arm, chip:stm32f2, part:stm32f205, vendor:st
 
 This page discusses issues unique to NuttX configurations for the
 Particle.io Photon board featuring the STM32F205RG MCU.

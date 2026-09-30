@@ -2,6 +2,8 @@
 verdin-mx8mp
 =============
 
+.. tags:: arch:arm, chip:mx8mp, vendor:nxp
+
 This directory provides board support for the Toradex Verdin i.MX8MP. This
 port runs on the internal Cortex-M7 auxiliary core, not on the main
 Cortex-A53 complex.

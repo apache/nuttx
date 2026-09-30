@@ -91,3 +91,270 @@ div.version-selector
 {
   margin-bottom: 1em;
 }
+
+/* Tag overview ------------------------------------------------------------
+ *
+ * The tag overview is a tree: architectures hold chip families, and families
+ * hold the parts fitted to boards.  sphinx_rtd_theme lays nested sections
+ * flush against the same left margin, so the reader gets four levels of
+ * heading with nothing saying which belongs to which.  Indent each level and
+ * draw the line it hangs from.
+ *
+ * The line is grey rather than a theme colour so that it survives being read
+ * through a dark mode extension, which tends to rewrite anything with a hue.
+ * !important throughout, for the same reason as the table rules above: on
+ * Read the Docs the common stylesheets load after this one.
+ */
+
+.tag-overview section {
+  margin-left: .25em !important;
+  padding-left: 1.75em !important;
+  border-left: 2px solid rgba(127, 127, 127, .45) !important;
+}
+
+/* Nothing may pull a heading back out of its own section: that cancels the
+ * indentation and puts every level back on the same margin, which is the bug
+ * this whole block exists to fix.
+ */
+
+.tag-overview section > h2,
+.tag-overview section > h3,
+.tag-overview section > h4 {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  margin-top: 1.3em !important;
+  margin-bottom: .4em !important;
+}
+
+/* The long lists -- arm alone holds 71 chip families -- leave most of the
+ * width empty in one column and turn the page into scrolling.  Only the lists
+ * worth splitting get the class, which the page generator decides; a short
+ * list stays in one column, because sending the eye across the width for
+ * three names costs more than it saves.
+ *
+ * The column width is in em so that the columns collapse back to one on a
+ * narrow screen instead of being cut off.
+ */
+
+.tag-overview .tag-columns .toctree-wrapper ul {
+  column-width: 16em;
+  column-gap: 2.5em;
+}
+
+.tag-overview .toctree-wrapper ul {
+  margin-bottom: 12px !important;
+}
+
+.tag-overview .toctree-wrapper li {
+  break-inside: avoid;
+}
+
+/* Sidebar header ----------------------------------------------------------
+ *
+ * The logo, the version selector and the search box, in the block at the top
+ * of the sidebar.
+ *
+ * The colours are not chosen, they are the ones in logos/NuttX_Simple.svg --
+ * the logo the NuttX Logos page names as the one to use on documentation.
+ * Taken from the SVG rather than sampled from a PNG, so they are the exact
+ * values the artwork carries:
+ *
+ *   #3c34e3  the indigo of the diamond
+ *   #2b2787  the navy it is shadowed in
+ *   #5a96bd  the steel blue of the trailing strokes
+ *   #cee3f1  the pale blue of the letterform highlights
+ *
+ * This is also why the header stopped clashing with the logo standing in it:
+ * the theme's default #2980b9 is a cyan the NuttX mark has nothing to do
+ * with.
+ */
+
+.wy-side-nav-search {
+  padding: 1.4em .9em 1.1em;
+  background: linear-gradient(160deg, #3c34e3 0%, #2b2787 72%) !important;
+}
+
+/* Mark above wordmark, sharing one link.  The theme's house icon is gone: the
+ * logo is the link home, and two ways home side by side is one too many.
+ */
+
+.wy-side-nav-search > a.nuttx-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .45em;
+  margin: 0 0 1em;
+  padding: 0;
+  background: none;
+}
+
+.wy-side-nav-search > a.nuttx-brand img.logo {
+  width: 58px;
+  height: 58px;
+  margin: 0;
+  padding: 0;
+  background: none;
+}
+
+.nuttx-brand-name {
+  font-size: 1.5em;
+  font-weight: 600;
+  letter-spacing: .015em;
+  line-height: 1;
+  color: #fff;
+}
+
+/* The version selector carried a comment in the template asking for
+ * something less raw than a bare OS dropdown.  Give it the same shape and
+ * weight as the search field below so the two read as a pair.
+ */
+
+.version-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5em;
+  margin-bottom: .75em;
+}
+
+.nuttx-version-label {
+  font-size: .7em;
+  font-weight: 600;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: #cee3f1;
+  opacity: .8;
+}
+
+.version-selector select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: .32em 1.9em .32em .75em;
+  border: 1px solid rgba(90, 150, 189, .75);
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, .1);
+  color: #fff;
+  font-size: .85em;
+  line-height: 1.4;
+  cursor: pointer;
+  /* The chevron is drawn here rather than fetched, so the sidebar needs no
+   * extra asset and no network. */
+  background-image:
+    linear-gradient(45deg, transparent 50%, rgba(255, 255, 255, .75) 50%),
+    linear-gradient(135deg, rgba(255, 255, 255, .75) 50%, transparent 50%);
+  background-position: right 1em center, right .65em center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.version-selector select:hover,
+.version-selector select:focus {
+  border-color: rgba(255, 255, 255, .55);
+  background-color: rgba(255, 255, 255, .18);
+  outline: none;
+}
+
+.version-selector select option {
+  color: #404040;
+  background: #fff;
+}
+
+.wy-side-nav-search input[type="text"] {
+  border: 1px solid rgba(90, 150, 189, .75) !important;
+  border-radius: 20px !important;
+  background-color: rgba(255, 255, 255, .1) !important;
+  color: #fff;
+  padding: .5em 1em;
+  box-shadow: none !important;
+}
+
+.wy-side-nav-search input[type="text"]::placeholder {
+  color: #cee3f1;
+  opacity: .75;
+}
+
+.wy-side-nav-search input[type="text"]:focus {
+  border-color: rgba(255, 255, 255, .55) !important;
+  background-color: rgba(255, 255, 255, .16) !important;
+  outline: none;
+}
+
+/* Reading text ------------------------------------------------------------
+ *
+ * Three changes, all about how long a reader can stay on a page.
+ *
+ * Justified prose, with hyphenation on.  Justifying without hyphens is what
+ * produces the rivers of white space that make justified text worse than
+ * ragged-right, so the two go together and neither is useful alone.
+ *
+ * Prose uses the full width of the content column, the same as the cards,
+ * the tables and the diagrams.  A narrower measure reads better in the
+ * abstract -- 60 to 80 characters against the column's 107 -- but it gives
+ * a page two different right margins, and a paragraph that stops short of
+ * the boxes underneath it looks like a mistake rather than like
+ * typography.  Hyphenation is what keeps the long line honest.
+ *
+ * A darker body colour.  The theme's #404040 on white is a little washed
+ * out; #2b3137 raises the contrast from about 10:1 to 13:1, which reads as
+ * sharper without going to black, and black on white is its own kind of
+ * tiring.
+ *
+ * Links take the indigo from logos/NuttX_Simple.svg, the same colour as the
+ * sidebar, instead of the theme's unrelated cyan.
+ */
+
+.rst-content p,
+.rst-content li,
+.rst-content dd {
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+/* Anything that is not running prose keeps its own alignment: code has
+ * meaningful whitespace, and a short line in a table or a card only looks
+ * stretched when justified.
+ */
+
+.rst-content pre,
+.rst-content pre *,
+.rst-content .highlight,
+.rst-content .highlight *,
+.rst-content table p,
+.rst-content table li,
+.rst-content .sd-card p,
+.rst-content .sd-card li,
+.rst-content .caption-text,
+.rst-content figcaption,
+.rst-content figcaption p,
+.rst-content .toctree-wrapper li,
+.rst-content dl.c dt,
+.wy-menu-vertical li {
+  text-align: left !important;
+  hyphens: manual;
+  max-width: none;
+}
+
+.rst-content,
+.rst-content p,
+.rst-content li,
+.rst-content dd,
+.rst-content .section,
+.wy-plain-list-disc li {
+  color: #2b3137;
+}
+
+.rst-content p,
+.rst-content li,
+.rst-content dd {
+  line-height: 1.72;
+}
+
+.rst-content a,
+.rst-content a:visited {
+  color: #3c34e3;
+}
+
+.rst-content a:hover {
+  color: #2b2787;
+}

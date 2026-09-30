@@ -2,6 +2,8 @@
 ESP32-C6-DevKitM-1
 ==================
 
+.. tags:: arch:risc-v, chip:esp32c6, vendor:espressif
+
 ESP32-C6-DevKitM-1 is an entry-level development board based on ESP32-C6-MINI-1(U),
 a general-purpose module with a 4 MB SPI flash. This board integrates complete Wi-Fi,
 Bluetooth LE, Zigbee, and Thread functions. You can find the board schematic

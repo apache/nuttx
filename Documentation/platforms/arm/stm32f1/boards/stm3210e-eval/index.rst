@@ -2,7 +2,7 @@
 ST STM3210E-EVAL
 ================
 
-.. tags:: chip:stm32, chip:stm32f1, chip:stm32f103
+.. tags:: arch:arm, chip:stm32f1, part:stm32f103, vendor:st
 
 This page discusses issues unique to NuttX configurations for the
 STMicro STM3210E-EVAL development board.

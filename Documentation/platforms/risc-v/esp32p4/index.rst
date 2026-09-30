@@ -2,7 +2,7 @@
 Espressif ESP32-P4
 ==================
 
-.. tags:: chip:esp32p4, arch:risc-v, vendor:espressif
+.. tags:: arch:risc-v, chip:esp32p4, vendor:espressif
 
 The ESP32-P4 is a high-performance, highly integrated SoC featuring RISC-V
 processors, rich multimedia capabilities, and abundant peripherals. It targets
@@ -562,7 +562,7 @@ adds every source and header file into project and builds it.
 
 To sum up, here is an example. ``ulp_example/ulp (../ulp_example/ulp)`` folder selected as example
 to create a subfolder for ULP but folder that includes ULP source code can be anywhere. For more information about
-custom apps, please follow NuttX `Custom Apps How-to <https://nuttx.apache.org/docs/latest/guides/customapps.html#custom-apps-how-to>`__ guide,
+custom apps, please follow NuttX `Custom Apps How-to <https://nuttx.apache.org/docs/latest/guides/build/customapps.html#custom-apps-how-to>`__ guide,
 this example will demonstrate how to add ULP code into a custom application:
 
 - Tree view:

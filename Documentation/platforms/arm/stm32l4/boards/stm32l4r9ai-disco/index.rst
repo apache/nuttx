@@ -2,7 +2,7 @@
 ST STM32L4R9AI-DISCO
 ====================
 
-.. tags:: chip:stm32, chip:stm32l4, chip:stm32l4r9
+.. tags:: arch:arm, chip:stm32l4, part:stm32l4r9, vendor:st
 
 This page discusses issues unique to NuttX configurations for the ST
 STM32L4R9AI Discovery board from ST Micro.  See

@@ -2,6 +2,8 @@
 NXP S32K118EVB
 ==============
 
+.. tags:: arch:arm, chip:s32k1xx, vendor:nxp
+
 NXP S32K118EVB-Q064 is an evaluation board for the `NXP S32K118 MCU <https://www.nxp.com/products/processors-and-microcontrollers/s32-automotive-platform/s32k-general-purpose-mcus/s32k1-microcontrollers-for-general-purpose:S32K1>`_ based on an Arm Cortex-M0+ core.
 
 Features

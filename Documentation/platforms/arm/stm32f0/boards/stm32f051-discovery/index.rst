@@ -2,7 +2,7 @@
 ST STM32F051-DISCOVERY
 ======================
 
-.. tags:: chip:stm32, chip:stm32f0, chip:stm32f051
+.. tags:: arch:arm, chip:stm32f0, part:stm32f051, vendor:st
 
 STATUS
 ======

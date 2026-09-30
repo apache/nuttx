@@ -2,7 +2,7 @@
 32F3348DISCOVERY
 ================
 
-.. tags:: chip:stm32, chip:stm32f3, chip:stm32f334
+.. tags:: arch:arm, chip:stm32f3, part:stm32f334, vendor:st
 
 This README discusses issues unique to NuttX configurations for the
 STMicro 32F3348DISCOVERY development board featuring the STM32F334C8

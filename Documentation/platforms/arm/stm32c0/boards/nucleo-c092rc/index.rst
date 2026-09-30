@@ -2,7 +2,7 @@
 ST Nucleo C092RC
 ================
 
-.. tags:: chip:stm32, chip:stm32c0, chip:stm32c092
+.. tags:: arch:arm, chip:stm32c0, part:stm32c092, vendor:st
 
 The Nucleo C092RC is a member of the Nucleo-64 board family.
 

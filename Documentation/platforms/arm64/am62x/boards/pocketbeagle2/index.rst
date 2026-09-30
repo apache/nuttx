@@ -2,7 +2,7 @@
 PocketBeagle 2
 ==============
 
-.. tags:: chip:am62x, arch:arm64, vendor:beagleboard
+.. tags:: arch:arm64, chip:am62x, vendor:ti
 
 `PocketBeagle 2 <https://docs.beagleboard.org/boards/pocketbeagle-2/>`_ is a
 compact open-hardware board from BeagleBoard.org based on the TI AM6254 SoC.

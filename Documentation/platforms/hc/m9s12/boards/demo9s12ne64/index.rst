@@ -2,7 +2,7 @@
 demo9s12ne64
 ============
 
-.. tags:: vendor:freescale
+.. tags:: arch:hc, chip:m9s12, vendor:nxp
 
 This README discusses issues unique to NuttX configurations for the Freescale
 DEMO9S12NE64 development board.

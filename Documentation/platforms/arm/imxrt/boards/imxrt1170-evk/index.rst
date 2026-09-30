@@ -2,6 +2,8 @@
 i.MX RT1170 EVK
 ===============
 
+.. tags:: arch:arm, chip:imxrt, vendor:nxp
+
 `i.MX RT1170 EVK <https://www.nxp.com/design/development-boards/i-mx-evaluation-and-development-boards/mimxRT1170-evk-i-mx-RT1170-evaluation-kit:MIMXRT1170-EVK>`_
 is an evaluation kit by NXP company. This kit uses the i.MX RT1170 crossover MCU with ARM Cortex M7 core.
 

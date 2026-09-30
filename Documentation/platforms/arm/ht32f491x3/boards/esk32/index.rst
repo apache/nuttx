@@ -2,7 +2,7 @@
 ESK32 (HT32F49163)
 ==================
 
-.. tags:: arch:arm, chip:ht32f491x3, chip:ht32f49163, vendor:holtek
+.. tags:: arch:arm, chip:ht32f491x3, part:ht32f49163, vendor:holtek
 
 The ESK32 is a development board based on the Holtek HT32F49163 MCU.
 The current NuttX port targets the HT32F49163 device used on the

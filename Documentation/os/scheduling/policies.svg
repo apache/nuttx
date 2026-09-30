@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-55 0 955 520" width="955" height="520"
+     font-family="Charter, Georgia, 'Times New Roman', serif" role="img"
+     aria-label="The three scheduling policies over time. Under SCHED_FIFO a thread keeps the CPU until it blocks. Under SCHED_RR threads of equal priority take turns every CONFIG_RR_INTERVAL. Under SCHED_SPORADIC a thread runs at a high priority while it has budget, drops to a low priority when the budget is spent, and is promoted again one replenishment period later.">
+  <style>
+    .ttl   { fill: #1b2233; font-size: 14px; font-weight: 600;
+             font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; }
+    .cap   { fill: #5a6478; font-size: 11.5px; }
+    .axis  { stroke: #a8b0c0; stroke-width: 1.2; }
+    .tick  { stroke: #c7cedb; stroke-width: 1; }
+    .aA    { fill: #3c34e3; }
+    .aB    { fill: #5a96bd; }
+    .idle  { fill: #dfe4ed; }
+    .barlbl{ fill: #ffffff; font-size: 12px; font-weight: 600;
+             font-family: ui-monospace, monospace; }
+    .step  { stroke: #3c34e3; stroke-width: 2.4; fill: none; }
+    .budget{ fill: #3c34e3; opacity: .13; }
+    .dim   { stroke: #8a93a6; stroke-width: 1; stroke-dasharray: 4 3; }
+    .note  { fill: #3f4757; font-size: 11.5px; font-style: italic; }
+    .ax    { fill: #6b7689; font-size: 11px; font-family: system-ui, sans-serif; }
+  </style>
+
+  <!-- SCHED_FIFO -->
+  <text class="ttl" x="0" y="26">SCHED_FIFO</text>
+  <text class="cap" x="0" y="44">a thread keeps the CPU until it blocks</text>
+  <rect class="aA" x="0" y="58" rx="3" width="300" height="34"/>
+  <text class="barlbl" x="14" y="80">thread A</text>
+  <rect class="aB" x="302" y="58" rx="3" width="330" height="34"/>
+  <text class="barlbl" x="316" y="80">thread B</text>
+  <rect class="aA" x="634" y="58" rx="3" width="226" height="34"/>
+  <text class="barlbl" x="648" y="80">thread A</text>
+  <path class="dim" d="M 301 50 L 301 100"/>
+  <text class="note" x="301" y="112" text-anchor="middle">A blocks</text>
+  <path class="dim" d="M 633 50 L 633 100"/>
+  <text class="note" x="633" y="112" text-anchor="middle">B blocks</text>
+
+  <!-- SCHED_RR -->
+  <text class="ttl" x="0" y="162">SCHED_RR</text>
+  <text class="cap" x="0" y="180">equal priority, equal turns</text>
+  <g>
+    <rect class="aA" x="0"   y="194" rx="3" width="141" height="34"/>
+    <rect class="aB" x="143" y="194" rx="3" width="141" height="34"/>
+    <rect class="aA" x="286" y="194" rx="3" width="141" height="34"/>
+    <rect class="aB" x="429" y="194" rx="3" width="141" height="34"/>
+    <rect class="aA" x="572" y="194" rx="3" width="141" height="34"/>
+    <rect class="aB" x="715" y="194" rx="3" width="145" height="34"/>
+  </g>
+  <text class="barlbl" x="12" y="216">A</text>
+  <text class="barlbl" x="155" y="216">B</text>
+  <text class="barlbl" x="298" y="216">A</text>
+  <text class="barlbl" x="441" y="216">B</text>
+  <text class="barlbl" x="584" y="216">A</text>
+  <text class="barlbl" x="727" y="216">B</text>
+  <path class="axis" d="M 0 240 L 141 240"/>
+  <path class="axis" d="M 0 236 L 0 244"/>
+  <path class="axis" d="M 141 236 L 141 244"/>
+  <text class="note" x="70" y="256" text-anchor="middle">CONFIG_RR_INTERVAL</text>
+
+  <!-- SCHED_SPORADIC -->
+  <text class="ttl" x="0" y="300">SCHED_SPORADIC</text>
+  <text class="cap" x="0" y="318">high priority while there is budget, low priority after it runs out</text>
+
+  <path class="axis" d="M 92 336 L 92 452"/>
+  <path class="axis" d="M 92 452 L 868 452"/>
+  <text class="ax" x="86" y="348" text-anchor="end">sched_priority</text>
+  <text class="ax" x="86" y="440" text-anchor="end">sched_ss_low_priority</text>
+  <path class="tick" d="M 92 344 L 868 344"/>
+  <path class="tick" d="M 92 434 L 868 434"/>
+
+  <rect class="budget" x="92" y="336" width="212" height="116"/>
+  <rect class="budget" x="516" y="336" width="212" height="116"/>
+  <path class="step" d="M 92 344 L 304 344 L 304 434 L 516 434 L 516 344 L 728 344 L 728 434 L 860 434"/>
+
+  <path class="axis" d="M 92 476 L 304 476"/>
+  <path class="axis" d="M 92 472 L 92 480"/>
+  <path class="axis" d="M 304 472 L 304 480"/>
+  <text class="note" x="198" y="492" text-anchor="middle">sched_ss_init_budget</text>
+
+  <path class="axis" d="M 92 504 L 516 504"/>
+  <path class="axis" d="M 92 500 L 92 508"/>
+  <path class="axis" d="M 516 500 L 516 508"/>
+  <text class="note" x="304" y="518" text-anchor="middle">sched_ss_repl_period — budget comes back, priority is restored</text>
+</svg>

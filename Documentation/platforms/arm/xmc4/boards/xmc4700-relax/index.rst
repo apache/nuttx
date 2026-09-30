@@ -2,6 +2,8 @@
  XMC4700 Relax
 ==============
 
+.. tags:: arch:arm, chip:xmc4, vendor:infineon
+
 The directory provides board support for the Infineon XMC4700 Relax Kit.
 
 Status

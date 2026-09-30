@@ -4,7 +4,7 @@
 M5Stack Tab5
 ==============
 
-.. tags:: chip:esp32p4, arch:risc-v, vendor:espressif
+.. tags:: arch:risc-v, chip:esp32p4, vendor:espressif
 
 .. figure:: esp32p4-tab5-m5stack-1.png
    :align: center

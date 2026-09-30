@@ -2,7 +2,7 @@
 IMX8QM MEK
 ==========
 
-.. tags:: chip:imx8, arch:arm64, experimental
+.. tags:: arch:arm64, chip:imx8, vendor:nxp
 
 .. todo::
 

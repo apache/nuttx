@@ -4,7 +4,7 @@
 M5Stack Cardputer
 =================
 
-.. tags:: chip:esp32, chip:esp32s3, arch:xtensa, vendor:espressif
+.. tags:: arch:xtensa, chip:esp32s3, vendor:espressif
 
 .. figure:: esp32-cardputer-image-1.png
    :align: center

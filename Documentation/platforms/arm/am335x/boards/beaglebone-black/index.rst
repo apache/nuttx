@@ -2,6 +2,8 @@
 beaglebone-black
 ================
 
+.. tags:: arch:arm, chip:am335x, vendor:ti
+
 This directory contains the port of NuttX to the Beaglebone Black board
 See http://beagleboard.org for information about Beaglebone Black. This
 board is based around the TI AM335x Sitara Cortex-A8 CPU.

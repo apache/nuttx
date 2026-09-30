@@ -32,7 +32,7 @@ Usage
 
 In order to test your application using the Unity framework in NuttX, you can
 create a test application. Documentation for creating a custom NuttX application
-can be found :doc:`here </guides/customapps>`.
+can be found :doc:`here </guides/build/customapps>`.
 
 Just mark your application to depend on any Unity options you use:
 
