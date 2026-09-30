@@ -127,6 +127,8 @@ int iob_clone_partial(FAR struct iob_s *iob1, unsigned int len,
 
   iob2->io_pktlen = len + offset2;
 
+  iob2->io_conn = iob1->io_conn;
+
 #ifdef CONFIG_NET_TIMESTAMP
   iob2->io_time = iob1->io_time;
 #endif

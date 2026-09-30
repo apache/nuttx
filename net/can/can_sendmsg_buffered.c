@@ -303,6 +303,8 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
   iob_reserve(wb_iob, CONFIG_NET_LL_GUARDSIZE);
   iob_update_pktlen(wb_iob, 0, false);
 
+  wb_iob->io_conn = &conn->sconn;
+
   /* Copy the user data into the write buffer.  We cannot wait for
    * buffer space if the socket was opened non-blocking.
    */

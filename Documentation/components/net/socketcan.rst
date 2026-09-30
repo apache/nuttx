@@ -146,3 +146,80 @@ Features
 -  **Read Buffering**: Supports data read buffering to prevent data loss
 -  **CAN FD Support**: Supports CAN FD frames if enabled in configuration
 -  **Extensible**: Easy to extend for additional CAN protocols
+
+Socket Options
+--------------
+
+SocketCAN supports the following socket options via ``setsockopt()`` and
+``getsockopt()`` at the ``SOL_CAN_RAW`` level. These options require
+``CONFIG_NET_CANPROTO_OPTIONS`` to be enabled.
+
+CAN_RAW_FILTER
+~~~~~~~~~~~~~~
+
+Set CAN ID filters to control which frames are received by the socket.
+
+.. code-block:: c
+
+   struct can_filter rfilter[2];
+   rfilter[0].can_id   = 0x123;
+   rfilter[0].can_mask = CAN_SFF_MASK;
+   rfilter[1].can_id   = 0x200;
+   rfilter[1].can_mask = 0x700;
+   setsockopt(sock, SOL_CAN_RAW, CAN_RAW_FILTER,
+              &rfilter, sizeof(rfilter));
+
+CAN_RAW_LOOPBACK
+~~~~~~~~~~~~~~~~~
+
+Control whether transmitted CAN frames are looped back to local sockets
+bound to the same CAN interface.  This option is **enabled by default**,
+matching standard Linux SocketCAN behavior.
+
+When loopback is enabled, a copy of each outgoing frame is fed back into
+the local receive path so that other local sockets can observe all traffic
+on the bus (including frames sent by the local host).
+
+.. code-block:: c
+
+   int loopback = 1; /* 1 = enable (default), 0 = disable */
+   setsockopt(sock, SOL_CAN_RAW, CAN_RAW_LOOPBACK,
+              &loopback, sizeof(loopback));
+
+CAN_RAW_RECV_OWN_MSGS
+~~~~~~~~~~~~~~~~~~~~~~
+
+Control whether the sending socket itself receives its own transmitted
+frames.  This option is **disabled by default**.
+
+When ``CAN_RAW_LOOPBACK`` is enabled, looped-back frames are delivered to
+all *other* local sockets by default.  Enabling ``CAN_RAW_RECV_OWN_MSGS``
+causes the sending socket to also receive its own frames.  Such frames have
+the ``MSG_CONFIRM`` flag set in ``recvmsg()``, allowing applications to
+identify them as TX confirmations.
+
+.. code-block:: c
+
+   int recv_own = 1; /* 1 = receive own messages, 0 = skip (default) */
+   setsockopt(sock, SOL_CAN_RAW, CAN_RAW_RECV_OWN_MSGS,
+              &recv_own, sizeof(recv_own));
+
+CAN_RAW_FD_FRAMES
+~~~~~~~~~~~~~~~~~~
+
+Enable reception and transmission of CAN FD frames.  Requires
+``CONFIG_NET_CAN_CANFD`` to be enabled.
+
+.. code-block:: c
+
+   int fd_on = 1;
+   setsockopt(sock, SOL_CAN_RAW, CAN_RAW_FD_FRAMES,
+              &fd_on, sizeof(fd_on));
+
+CAN_RAW_TX_DEADLINE
+~~~~~~~~~~~~~~~~~~~~
+
+Enable TX deadline support.  Requires ``CONFIG_NET_CAN_RAW_TX_DEADLINE``
+to be enabled.  When set, a deadline timestamp can be passed via
+``sendmsg()`` control message to specify when the frame should be dropped
+if not yet transmitted.

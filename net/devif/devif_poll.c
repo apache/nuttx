@@ -33,6 +33,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/net.h>
+#include <nuttx/net/can.h>
 
 #include "devif/devif.h"
 #include "netdev/netdev.h"
@@ -316,7 +317,31 @@ devif_poll_can_connections(FAR struct net_driver_s *dev,
 
           if (dev->d_len > 0)
             {
-              bstop = callback(dev);
+              if (!IFF_IS_LOOPBACK(dev->d_flags)
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+                  && _SO_GETOPT(can_conn->sconn.s_options, CAN_RAW_LOOPBACK)
+#endif
+                 )
+                {
+                  FAR struct iob_s *iob = can_iob_clone(dev);
+
+                  bstop = callback(dev);
+
+                  if (bstop && iob != NULL)
+                    {
+                      dev->d_iob = iob;
+                      can_input(dev);
+                      netdev_iob_release(dev);
+                    }
+                  else
+                    {
+                      iob_free_chain(iob);
+                    }
+                }
+              else
+                {
+                  bstop = callback(dev);
+                }
             }
         }
     }
