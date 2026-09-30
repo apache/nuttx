@@ -804,6 +804,23 @@ config ARCH_RV_HAVE_CLIC
 		threshold (MINTTHRESH/SINTTHRESH) CSRs for interrupt control
 		instead of the standard IE bit in STATUS register.
 
+config ARCH_RV_HAVE_CLIC_INTTHRESH_MMIO
+	bool
+	default n
+	depends on ARCH_RV_HAVE_CLIC
+	---help---
+		Some CLIC implementations predate the ratified specification and
+		expose the interrupt threshold as a memory-mapped register rather
+		than the mintthresh CSR, on which a read raises an illegal
+		instruction.  A chip with such a CLIC selects this and supplies the
+		address as ARCH_RV_CLIC_INTTHRESH_MMIO and the mask-everything value
+		as ARCH_RV_CLIC_INTTHRESH_MMIO_MAX, both from its own Kconfig since
+		only the chip knows them.
+
+		The common RISC-V code then drives the threshold through that
+		register instead of the CSR.  Parts that implement the CSR leave
+		this unset and are unaffected.
+
 config ARCH_RV_EXT_AIA
 	bool "Enable RISC-V SxAIA support"
 	default n

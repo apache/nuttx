@@ -833,7 +833,7 @@ int up_this_cpu(void);
 
 #ifdef CONFIG_ARCH_RV_HAVE_CLIC
 
-#ifdef CONFIG_ARCH_RV_CLIC_INTTHRESH_MMIO
+#ifdef CONFIG_ARCH_RV_HAVE_CLIC_INTTHRESH_MMIO
 
 /****************************************************************************
  * Name: up_irq_save
@@ -934,7 +934,7 @@ void up_irq_restore(irqstate_t flags)
   WRITE_CSR(CSR_INTTHRESH, flags);
 }
 
-#endif /* CONFIG_ARCH_RV_CLIC_INTTHRESH_MMIO */
+#endif /* CONFIG_ARCH_RV_HAVE_CLIC_INTTHRESH_MMIO */
 
 #else
 

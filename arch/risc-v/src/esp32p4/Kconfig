@@ -10,6 +10,7 @@ source "arch/risc-v/src/common/espressif/Kconfig"
 config ESP32P4_SELECTS_REV_LESS_V3
 	bool "Select ESP32-P4 revisions <3.0 (No >=3.x Support)"
 	default n
+	select ARCH_RV_HAVE_CLIC_INTTHRESH_MMIO
 	---help---
 		Select this option to support ESP32-P4 revisions 0.x and 1.x.
 		Revisions higher than 3.0 (included) and revisions less than 3.0
@@ -149,12 +150,15 @@ config ARCH_RV_CLIC_INTTHRESH_MMIO
 	hex
 	default 0x20800008 if ESP32P4_SELECTS_REV_LESS_V3
 	---help---
-		Pre-v3 ESP32-P4 silicon implements a non-standard CLIC: the interrupt
-		threshold lives in this memory-mapped register rather than in the
-		mintthresh CSR, and reading that CSR raises an illegal instruction.
-		Defining this switches the common RISC-V code over to the
-		memory-mapped register; it is left undefined on parts that implement
-		the CSR, which then keep using it.
+		Address of the memory-mapped interrupt threshold register on pre-v3
+		ESP32-P4 silicon, which implements a non-standard CLIC: the
+		threshold lives here rather than in the mintthresh CSR, and reading
+		that CSR raises an illegal instruction.
+
+		The capability itself is declared as ARCH_RV_HAVE_CLIC_INTTHRESH_MMIO
+		in arch/risc-v/Kconfig, where the common code that consumes it can
+		be seen to depend on something.  Only the address is chip knowledge,
+		so only the address is declared here.
 
 config ARCH_RV_CLIC_INTTHRESH_MMIO_MAX
 	hex
