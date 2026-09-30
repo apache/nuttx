@@ -994,3 +994,16 @@ int up_addrenv_detach(struct tcb_s *tcb)
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: up_addrenv_user_vaddr
+ *
+ * Description:
+ *   Check if a virtual address is in user virtual address space.
+ *
+ ****************************************************************************/
+
+bool up_addrenv_user_vaddr(uintptr_t vaddr)
+{
+  return x86_64_uservaddr(vaddr);
+}
