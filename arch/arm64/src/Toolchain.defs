@@ -32,7 +32,15 @@
 #                   reliable code generation.
 #
 
-ifeq ($(CONFIG_ARCH_ARMV8A),y)
+ifeq ($(CONFIG_ARCH_CORTEX_A53),y)
+  ARCHCPUFLAGS += -mcpu=cortex-a53
+else ifeq ($(CONFIG_ARCH_CORTEX_A55),y)
+  ARCHCPUFLAGS += -mcpu=cortex-a55
+else ifeq ($(CONFIG_ARCH_CORTEX_A57),y)
+  ARCHCPUFLAGS += -mcpu=cortex-a57
+else ifeq ($(CONFIG_ARCH_CORTEX_A72),y)
+  ARCHCPUFLAGS += -mcpu=cortex-a72
+else ifeq ($(CONFIG_ARCH_ARMV8A),y)
   ifeq ($(CONFIG_ARCH_AS_HAS_ARMV8_5),y)
     OPTION_MARCH = -march=armv8.5-a
   else
@@ -48,14 +56,6 @@ else ifeq ($(CONFIG_ARCH_ARMV8R),y)
   else
     ARCHCPUFLAGS += -march=armv8-r+nofp
   endif
-else ifeq ($(CONFIG_ARCH_CORTEX_A53),y)
-  ARCHCPUFLAGS += -mcpu=cortex-a53
-else ifeq ($(CONFIG_ARCH_CORTEX_A55),y)
-  ARCHCPUFLAGS += -mcpu=cortex-a55
-else ifeq ($(CONFIG_ARCH_CORTEX_A57),y)
-  ARCHCPUFLAGS += -mcpu=cortex-a57
-else ifeq ($(CONFIG_ARCH_CORTEX_A72),y)
-  ARCHCPUFLAGS += -mcpu=cortex-a72
 else ifeq ($(CONFIG_ARCH_CORTEX_R82),y)
   ARCHCPUFLAGS += -mcpu=cortex-r82
 endif
