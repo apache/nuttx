@@ -93,6 +93,50 @@ static void nxsig_notification_worker(FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxsig_event_valid
+ *
+ * Description:
+ *   Check a sigevent handed in by the calling task before it is stored:
+ *   its signal must exist and a SIGEV_THREAD_ID target must be one of the
+ *   caller's own threads.
+ *
+ * Input Parameters:
+ *   event - The instance of struct sigevent to check.
+ *
+ * Returned Value:
+ *   Zero (OK) if the event may be stored; -EINVAL if not.
+ *
+ ****************************************************************************/
+
+int nxsig_event_valid(FAR const struct sigevent *event)
+{
+  FAR struct tcb_s *target;
+
+  if ((event->sigev_notify & SIGEV_SIGNAL) == 0)
+    {
+      return OK;
+    }
+
+  if (!GOOD_SIGNO(event->sigev_signo))
+    {
+      return -EINVAL;
+    }
+
+  if ((event->sigev_notify & SIGEV_THREAD_ID) == 0)
+    {
+      return OK;
+    }
+
+  target = nxsched_get_tcb(event->sigev_notify_thread_id);
+  if (target == NULL || target->group != nxsched_self()->group)
+    {
+      return -EINVAL;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: nxsig_notification
  *
  * Description:
