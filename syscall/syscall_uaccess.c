@@ -30,6 +30,8 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <stdarg.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <string.h>
 #include <sys/boardctl.h>
 #include <sys/ioctl.h>
@@ -46,6 +48,22 @@
 
 #ifdef CONFIG_CDCACM
 #  include <nuttx/usb/cdcacm.h>
+#endif
+
+#ifdef CONFIG_I2C_DRIVER
+#  include <nuttx/i2c/i2c_master.h>
+#endif
+
+#ifdef CONFIG_MMCSD
+#  include <nuttx/mmcsd.h>
+#endif
+
+#ifdef CONFIG_NET
+#  include <net/if.h>
+#endif
+
+#ifdef CONFIG_SPI_DRIVER
+#  include <nuttx/spi/spi_transfer.h>
 #endif
 
 #ifdef CONFIG_BUILD_KERNEL
@@ -187,6 +205,214 @@ static ssize_t uaccess_msg(int sockfd, FAR struct msghdr *msg, int flags,
 }
 #endif
 
+#ifdef CONFIG_NET
+static int uaccess_ifconf(int fd, int req, unsigned long arg)
+{
+  union
+  {
+    struct ifconf ifc;
+    struct lifconf lifc;
+  } copy;
+
+  FAR size_t *len;
+  FAR void *buf;
+  size_t size;
+  int ret;
+
+  size = req == SIOCGIFCONF ? sizeof(copy.ifc) : sizeof(copy.lifc);
+  uaccess_check((FAR const void *)arg, size);
+  memcpy(&copy, (FAR const void *)arg, size);
+
+  if (req == SIOCGIFCONF)
+    {
+      len = &copy.ifc.ifc_len;
+      buf = copy.ifc.ifc_buf;
+    }
+  else
+    {
+      len = &copy.lifc.lifc_len;
+      buf = copy.lifc.lifc_buf;
+    }
+
+  if (*len > 0 && !uaccess_ok(buf, *len))
+    {
+      set_errno(EFAULT);
+      return ERROR;
+    }
+
+  ret = ioctl(fd, req, (unsigned long)&copy);
+  if (ret >= 0)
+    {
+      memcpy((FAR void *)arg, &copy, size);
+    }
+
+  return ret;
+}
+#endif
+
+#ifdef CONFIG_MMCSD
+static bool uaccess_mmccmd(FAR const struct mmc_ioc_cmd *cmd)
+{
+  uint64_t len = (uint64_t)cmd->blksz * cmd->blocks;
+
+  return cmd->data_ptr == 0 ||
+         uaccess_ok((FAR const void *)(uintptr_t)cmd->data_ptr,
+                    len > 512 ? len : 512);
+}
+
+static int uaccess_mmc(int fd, int req, unsigned long arg)
+{
+  FAR struct mmc_ioc_cmd *cmds;
+  FAR void *copy;
+  uint64_t ncmds = 1;
+  size_t size = sizeof(struct mmc_ioc_cmd);
+  uint64_t i;
+  int ret;
+
+  if (req == MMC_IOC_MULTI_CMD)
+    {
+      uaccess_check((FAR const void *)arg, sizeof(uint64_t));
+      ncmds = ((FAR struct mmc_ioc_multi_cmd *)arg)->num_of_cmds;
+      if (ncmds > MMC_IOC_MAX_CMDS)
+        {
+          set_errno(EINVAL);
+          return ERROR;
+        }
+
+      size = offsetof(struct mmc_ioc_multi_cmd, cmds) +
+             ncmds * sizeof(struct mmc_ioc_cmd);
+    }
+
+  uaccess_check((FAR const void *)arg, size);
+  copy = kmm_malloc(size);
+  if (copy == NULL)
+    {
+      set_errno(ENOMEM);
+      return ERROR;
+    }
+
+  memcpy(copy, (FAR const void *)arg, size);
+  cmds = copy;
+  if (req == MMC_IOC_MULTI_CMD)
+    {
+      ((FAR struct mmc_ioc_multi_cmd *)copy)->num_of_cmds = ncmds;
+      cmds = ((FAR struct mmc_ioc_multi_cmd *)copy)->cmds;
+    }
+
+  for (i = 0; i < ncmds; i++)
+    {
+      if (!uaccess_mmccmd(&cmds[i]))
+        {
+          kmm_free(copy);
+          set_errno(EFAULT);
+          return ERROR;
+        }
+    }
+
+  ret = ioctl(fd, req, (unsigned long)copy);
+  if (ret >= 0)
+    {
+      memcpy((FAR void *)arg, copy, size);
+    }
+
+  kmm_free(copy);
+  return ret;
+}
+#endif
+
+#ifdef CONFIG_I2C_DRIVER
+static int uaccess_i2c(int fd, FAR const struct i2c_transfer_s *utrans)
+{
+  struct i2c_transfer_s trans;
+  FAR struct i2c_msg_s *msgv;
+  size_t i;
+  int ret;
+
+  uaccess_check(utrans, sizeof(trans));
+  memcpy(&trans, utrans, sizeof(trans));
+  if (trans.msgc == 0 || trans.msgc > SIZE_MAX / sizeof(*msgv))
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
+  uaccess_check(trans.msgv, trans.msgc * sizeof(*msgv));
+  msgv = kmm_malloc(trans.msgc * sizeof(*msgv));
+  if (msgv == NULL)
+    {
+      set_errno(ENOMEM);
+      return ERROR;
+    }
+
+  memcpy(msgv, trans.msgv, trans.msgc * sizeof(*msgv));
+  for (i = 0; i < trans.msgc; i++)
+    {
+      if (msgv[i].length < 0 ||
+          (msgv[i].length > 0 &&
+           !uaccess_ok(msgv[i].buffer, msgv[i].length)))
+        {
+          kmm_free(msgv);
+          set_errno(EFAULT);
+          return ERROR;
+        }
+    }
+
+  trans.msgv = msgv;
+  ret = ioctl(fd, I2CIOC_TRANSFER, (unsigned long)&trans);
+  kmm_free(msgv);
+  return ret;
+}
+#endif
+
+#ifdef CONFIG_SPI_DRIVER
+static int uaccess_spi(int fd, FAR const struct spi_sequence_s *useq)
+{
+  struct spi_sequence_s seq;
+  FAR struct spi_trans_s *trans;
+  size_t width;
+  size_t i;
+  int ret;
+
+  uaccess_check(useq, sizeof(seq));
+  memcpy(&seq, useq, sizeof(seq));
+  if (seq.ntrans == 0)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
+  width = seq.nbits <= 8 ? 1 : seq.nbits <= 16 ? 2 : 4;
+  uaccess_check(seq.trans, seq.ntrans * sizeof(*trans));
+  trans = kmm_malloc(seq.ntrans * sizeof(*trans));
+  if (trans == NULL)
+    {
+      set_errno(ENOMEM);
+      return ERROR;
+    }
+
+  memcpy(trans, seq.trans, seq.ntrans * sizeof(*trans));
+  for (i = 0; i < seq.ntrans; i++)
+    {
+      if (trans[i].nwords > SIZE_MAX / width ||
+          (trans[i].nwords > 0 &&
+           ((trans[i].txbuffer != NULL &&
+             !uaccess_ok(trans[i].txbuffer, trans[i].nwords * width)) ||
+            (trans[i].rxbuffer != NULL &&
+             !uaccess_ok(trans[i].rxbuffer, trans[i].nwords * width)))))
+        {
+          kmm_free(trans);
+          set_errno(EFAULT);
+          return ERROR;
+        }
+    }
+
+  seq.trans = trans;
+  ret = ioctl(fd, SPIIOC_TRANSFER, (unsigned long)&seq);
+  kmm_free(trans);
+  return ret;
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -288,6 +514,28 @@ int uaccess_ioctl(int fd, int req, ...)
 #endif
         set_errno(EPERM);
         return ERROR;
+
+#ifdef CONFIG_NET
+      case SIOCGIFCONF:
+      case SIOCGLIFCONF:
+        return uaccess_ifconf(fd, req, arg);
+#endif
+
+#ifdef CONFIG_MMCSD
+      case MMC_IOC_CMD:
+      case MMC_IOC_MULTI_CMD:
+        return uaccess_mmc(fd, req, arg);
+#endif
+
+#ifdef CONFIG_I2C_DRIVER
+      case I2CIOC_TRANSFER:
+        return uaccess_i2c(fd, (FAR const struct i2c_transfer_s *)arg);
+#endif
+
+#ifdef CONFIG_SPI_DRIVER
+      case SPIIOC_TRANSFER:
+        return uaccess_spi(fd, (FAR const struct spi_sequence_s *)arg);
+#endif
 
       default:
         break;
