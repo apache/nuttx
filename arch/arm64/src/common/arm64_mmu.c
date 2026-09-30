@@ -39,6 +39,10 @@
 #include "arm64_fatal.h"
 #include "arm64_mmu.h"
 
+#ifdef CONFIG_BUILD_KERNEL
+#  include "addrenv.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -458,6 +462,27 @@ static void split_pte_block_desc(uint64_t *pte, int level)
   set_pte_table_desc(pte, new_table, level);
 }
 
+#ifdef CONFIG_BUILD_KERNEL
+static bool is_user_overlap(uintptr_t virt, size_t size)
+{
+  uintptr_t last = virt + size - 1;
+
+  if (virt <= ARCH_ADDRENV_VEND && last >= ARCH_ADDRENV_VBASE)
+    {
+      return true;
+    }
+
+#ifdef CONFIG_ARCH_VMA_MAPPING
+  if (virt <= ARCH_SHM_VEND && last >= CONFIG_ARCH_SHM_VBASE)
+    {
+      return true;
+    }
+#endif
+
+  return false;
+}
+#endif
+
 /* Create/Populate translation table(s) for given region */
 
 static void init_xlat_tables(const struct arm_mmu_region *region)
@@ -473,6 +498,13 @@ static void init_xlat_tables(const struct arm_mmu_region *region)
 
 #ifdef CONFIG_MMU_DEBUG
   sinfo("mmap: virt %lux phys %lux size %lux\n", virt, phys, size);
+#endif
+
+#ifdef CONFIG_BUILD_KERNEL
+  if (size > 0 && is_user_overlap(virt, size))
+    {
+      PANIC();
+    }
 #endif
 
   /* check minimum alignment requirement for given mmap region */
@@ -648,17 +680,21 @@ int arm64_mmu_set_memregion(const struct arm_mmu_region *region)
   uint64_t virt = region->base_va;
   uint64_t size = region->size;
 
-  if (((virt & (PAGE_SIZE - 1)) == 0) &&
-      ((size & (PAGE_SIZE - 1)) == 0))
-    {
-      init_xlat_tables(region);
-    }
-  else
+  if (((virt & (PAGE_SIZE - 1)) != 0) ||
+      ((size & (PAGE_SIZE - 1)) != 0))
     {
       sinfo("address/size are not page aligned\n");
       return -EINVAL;
     }
 
+#ifdef CONFIG_BUILD_KERNEL
+  if (size > 0 && is_user_overlap(virt, size))
+    {
+      return -EINVAL;
+    }
+#endif
+
+  init_xlat_tables(region);
   return 0;
 }
 
