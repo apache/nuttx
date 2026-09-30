@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/eic7700x/starpro64/src/eic7700x_bringup.c
+ * arch/risc-v/src/eic7700x/eic7700x_wdt.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,35 +20,55 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_RISCV_SRC_EIC7700X_EIC7700X_WDT_H
+#define __ARCH_RISCV_SRC_EIC7700X_EIC7700X_WDT_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#ifndef __ASSEMBLY__
 
-#include "board_config.h"
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: eic7700x_bringup
- *
- * Description:
- *   Bring up this board's devices, in this board's order.  Device drivers
- *   register here as the port grows; the common layer owns everything that
- *   is true of the SoC rather than of this board.
- *
- ****************************************************************************/
-
-int eic7700x_bringup(void)
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-#ifdef CONFIG_EIC7700X_WDT
-  eic7700x_board_wdt_initialize();
+#else
+#define EXTERN extern
 #endif
 
-  return OK;
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: eic7700x_wdt_initialize
+ *
+ * Description:
+ *   Bring up one of the four watchdogs and register it with the
+ *   framework.  With the auto-monitor configured this also arms it: the
+ *   framework starts every watchdog it is handed and feeds it from a
+ *   kernel timer until an application claims it.
+ *
+ * Input Parameters:
+ *   n       - Which instance, 0 to 3.
+ *   devpath - The node to register, such as "/dev/watchdog0".
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno if the clock, interrupt or
+ *   registration fails.
+ *
+ ****************************************************************************/
+
+int eic7700x_wdt_initialize(int n, FAR const char *devpath);
+
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_RISCV_SRC_EIC7700X_EIC7700X_WDT_H */
