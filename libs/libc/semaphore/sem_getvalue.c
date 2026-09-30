@@ -61,16 +61,28 @@
  *
  ****************************************************************************/
 
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 int nxsem_get_value(FAR sem_t *sem, FAR int *sval)
 {
-  if (sem != NULL && sval != NULL && !NXSEM_IS_MUTEX(sem))
+  FAR sem_t *resolved;
+  int ret = -EINVAL;
+
+  if (sem == NULL || sval == NULL)
     {
-      *sval = atomic_read(NXSEM_COUNT(sem));
-      return OK;
+      return ret;
     }
 
-  return -EINVAL;
+  resolved = nxsem_resolve(sem);
+  if (!NXSEM_IS_MUTEX(resolved))
+    {
+      *sval = atomic_read(NXSEM_COUNT(resolved));
+      ret = OK;
+    }
+
+  nxsem_unresolve(sem, resolved);
+  return ret;
 }
+#endif
 
 /****************************************************************************
  * Name:  sem_getvalue

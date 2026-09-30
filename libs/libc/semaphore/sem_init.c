@@ -67,6 +67,11 @@ int nxsem_init(FAR sem_t *sem, int pshared, int32_t value)
 
   DEBUGASSERT(sem != NULL);
 
+  if (nxsem_shadowed(sem))
+    {
+      nxsem_destroy(sem);
+    }
+
   /* Initialize the semaphore count or mutex holder */
 
   sem->val.semcount = (int32_t)value;

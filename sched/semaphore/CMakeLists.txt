@@ -39,6 +39,10 @@ if(CONFIG_PRIORITY_INHERITANCE)
   list(APPEND CSRCS sem_initialize.c sem_holder.c sem_setprotocol.c)
 endif()
 
+if(CONFIG_BUILD_KERNEL)
+  list(APPEND CSRCS sem_shadow.c)
+endif()
+
 if(CONFIG_PRIORITY_PROTECT)
   list(APPEND CSRCS sem_protect.c)
 endif()
