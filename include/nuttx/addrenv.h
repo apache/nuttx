@@ -36,6 +36,7 @@
 #endif
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #include <nuttx/atomic.h>
@@ -320,6 +321,11 @@ struct addrenv_reserve_s
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /****************************************************************************
  * Name: addrenv_allocate
  *
@@ -529,6 +535,16 @@ int addrenv_give(FAR struct addrenv_s *addrenv);
  ****************************************************************************/
 
 void addrenv_drop(FAR struct addrenv_s *addrenv, bool deferred);
+
+#ifdef CONFIG_BUILD_KERNEL
+bool uaccess_ok(FAR const void *ptr, size_t len);
+bool uaccess_nested(FAR const void *parent, FAR const void *ptr);
+void uaccess_check(FAR const void *ptr, size_t len);
+#endif
+
+#ifdef __cplusplus
+}
+#endif
 
 /****************************************************************************
  * Address Environment Interfaces

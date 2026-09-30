@@ -29,6 +29,8 @@
 #include <assert.h>
 #include <errno.h>
 #include <nuttx/debug.h>
+#include <signal.h>
+#include <unistd.h>
 
 #include <nuttx/addrenv.h>
 #include <nuttx/atomic.h>
@@ -543,3 +545,29 @@ void addrenv_drop(FAR struct addrenv_s *addrenv, bool deferred)
         }
     }
 }
+
+#ifdef CONFIG_BUILD_KERNEL
+bool uaccess_ok(FAR const void *ptr, size_t len)
+{
+  uintptr_t start = (uintptr_t)ptr;
+  uintptr_t end = start + len - 1;
+
+  return up_addrenv_user_vaddr(start) &&
+         (len == 0 || (end >= start && up_addrenv_user_vaddr(end)));
+}
+
+bool uaccess_nested(FAR const void *parent, FAR const void *ptr)
+{
+  return !up_addrenv_user_vaddr((uintptr_t)parent) || uaccess_ok(ptr, 1);
+}
+
+void uaccess_check(FAR const void *ptr, size_t len)
+{
+  if (!uaccess_ok(ptr, len))
+    {
+      _alert("%s: %p is not user memory\n",
+             get_task_name(this_task()), ptr);
+      _exit(SIGSEGV);
+    }
+}
+#endif
