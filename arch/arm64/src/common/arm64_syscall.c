@@ -110,7 +110,7 @@ uintptr_t dispatch_syscall(unsigned int nbr, uintptr_t parm1,
 
   /* Valid system call ? */
 
-  if (x0 > SYS_maxsyscall)
+  if (x0 >= SYS_maxsyscall)
     {
       /* Nope, get out */
 
