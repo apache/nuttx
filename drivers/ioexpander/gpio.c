@@ -829,6 +829,13 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #if CONFIG_DEV_GPIO_NSIGNALS > 0
             if (arg)
               {
+                ret = nxsig_event_valid((FAR struct sigevent *)arg);
+                if (ret < 0)
+                  {
+                    leave_critical_section(flags);
+                    break;
+                  }
+
                 pid = nxsched_getpid();
                 for (i = 0; i < CONFIG_DEV_GPIO_NSIGNALS; i++)
                   {

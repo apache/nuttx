@@ -290,6 +290,12 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid,
       return phy_notify_unsubscribe(intf, pid);
     }
 
+  ret = nxsig_event_valid(event);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Check if this client already exists */
 
   client = phy_find_assigned(intf, pid);
