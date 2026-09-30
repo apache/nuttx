@@ -31,6 +31,7 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
+#include <errno.h>
 #include <signal.h>
 
 #include <nuttx/wqueue.h>
@@ -138,10 +139,8 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Function Prototypes
+ * Inline Functions
  ****************************************************************************/
-
-struct timespec;  /* Forward reference */
 
 /****************************************************************************
  * Name: nxsig_ismember
@@ -166,7 +165,15 @@ struct timespec;  /* Forward reference */
  *
  ****************************************************************************/
 
-int nxsig_ismember(FAR const sigset_t *set, int signo);
+static inline int nxsig_ismember(FAR const sigset_t *set, int signo)
+{
+  if (!GOOD_SIGNO(signo))
+    {
+      return -EINVAL;
+    }
+
+  return (set->_elem[_SIGSET_NDX(signo)] & _SIGNO2SET(signo)) ? 1 : 0;
+}
 
 /****************************************************************************
  * Name: nxsig_addset
@@ -190,7 +197,16 @@ int nxsig_ismember(FAR const sigset_t *set, int signo);
  *
  ****************************************************************************/
 
-int nxsig_addset(FAR sigset_t *set, int signo);
+static inline int nxsig_addset(FAR sigset_t *set, int signo)
+{
+  if (!GOOD_SIGNO(signo))
+    {
+      return -EINVAL;
+    }
+
+  set->_elem[_SIGSET_NDX(signo)] |= _SIGNO2SET(signo);
+  return OK;
+}
 
 /****************************************************************************
  * Name: nxsig_delset
@@ -214,7 +230,22 @@ int nxsig_addset(FAR sigset_t *set, int signo);
  *
  ****************************************************************************/
 
-int nxsig_delset(FAR sigset_t *set, int signo);
+static inline int nxsig_delset(FAR sigset_t *set, int signo)
+{
+  if (!GOOD_SIGNO(signo))
+    {
+      return -EINVAL;
+    }
+
+  set->_elem[_SIGSET_NDX(signo)] &= ~_SIGNO2SET(signo);
+  return OK;
+}
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+struct timespec;  /* Forward reference */
 
 /****************************************************************************
  * Name: nxsig_nandset
