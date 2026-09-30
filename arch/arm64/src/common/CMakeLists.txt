@@ -74,9 +74,10 @@ endif()
 if(CONFIG_ARCH_HAVE_MMU)
   list(APPEND SRCS arm64_mmu.c)
 
-  # drivers/misc/addrenv.c defines the same entry points from a table.
+  # Outside a kernel build, drivers/misc/addrenv.c defines the same entry point
+  # from a table.
 
-  if(NOT CONFIG_DEV_SIMPLE_ADDRENV)
+  if(NOT CONFIG_DEV_SIMPLE_ADDRENV OR CONFIG_BUILD_KERNEL)
     list(APPEND SRCS arm64_physpgaddr.c)
   endif()
 endif()
