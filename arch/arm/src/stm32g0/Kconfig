@@ -369,6 +369,7 @@ config STM32_STM32G0B1
 	default n
 	select STM32_STM32G0
 	select STM32_STM32G0BX
+	select STM32_HAVE_SPI2
 	select STM32_HAVE_DAC1
 	select STM32_HAVE_COMP1
 	select STM32_HAVE_COMP2
