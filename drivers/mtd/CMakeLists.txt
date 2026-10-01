@@ -146,6 +146,10 @@ if(CONFIG_MTD)
     list(APPEND SRCS at25.c)
   endif()
 
+  if(CONFIG_MTD_MX66UW1G45G)
+    list(APPEND SRCS mx66uw1g45g.c)
+  endif()
+
   if(CONFIG_MTD_M25P)
     list(APPEND SRCS m25px.c)
   endif()
