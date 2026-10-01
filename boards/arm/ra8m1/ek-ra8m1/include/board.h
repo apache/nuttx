@@ -321,6 +321,49 @@
 #define GPIO_SCI9_RX   GPIO_RXD9_MISO9_SCL9_3  /* PA15 */
 #define GPIO_SCI9_TX   GPIO_TXD9_MOSI9_SDA9_3  /* PA14 */
 
+/* Arduino shield header pin selections *************************************/
+
+/* D2-D5 are wired as inputs, D6-D13 as outputs (see
+ * Documentation/platforms/arm/ra8m1/boards/ek-ra8m1 or the schematic,
+ * "EK-RA8M1 Arduino Shield Connection", for the D0-D13/port mapping this is
+ * taken from).  D0/D1 are left alone here since they are SCI9's RXD/TXD
+ * pins, already covered by GPIO_SCI9_RX/GPIO_SCI9_TX above.
+ */
+
+#define GPIO_ARDUINO_D2   (gpio_pinset_t){ PORT9, PIN6,  GPIO_INPUT }  /* P906 */
+#define GPIO_ARDUINO_D3   (gpio_pinset_t){ PORT9, PIN7,  GPIO_INPUT }  /* P907 */
+#define GPIO_ARDUINO_D4   (gpio_pinset_t){ PORT9, PIN5,  GPIO_INPUT }  /* P905 */
+#define GPIO_ARDUINO_D5   (gpio_pinset_t){ PORT6, PIN1,  GPIO_INPUT }  /* P601 */
+
+#define GPIO_ARDUINO_D6   (gpio_pinset_t){ PORT6, PIN2,  (GPIO_OUTPUT | GPIO_LOW_DRIVE | GPIO_OUTPUT_LOW) }  /* P602 */
+#define GPIO_ARDUINO_D7   (gpio_pinset_t){ PORT9, PIN8,  (GPIO_OUTPUT | GPIO_LOW_DRIVE | GPIO_OUTPUT_LOW) }  /* P908 */
+#define GPIO_ARDUINO_D8   (gpio_pinset_t){ PORT9, PIN9,  (GPIO_OUTPUT | GPIO_LOW_DRIVE | GPIO_OUTPUT_LOW) }  /* P909 */
+#define GPIO_ARDUINO_D9   (gpio_pinset_t){ PORT6, PIN3,  (GPIO_OUTPUT | GPIO_LOW_DRIVE | GPIO_OUTPUT_LOW) }  /* P603 */
+#define GPIO_ARDUINO_D10  (gpio_pinset_t){ PORT4, PIN13, (GPIO_OUTPUT | GPIO_LOW_DRIVE | GPIO_OUTPUT_LOW) }  /* P413 */
+#define GPIO_ARDUINO_D11  (gpio_pinset_t){ PORT4, PIN11, (GPIO_OUTPUT | GPIO_LOW_DRIVE | GPIO_OUTPUT_LOW) }  /* P411 */
+#define GPIO_ARDUINO_D12  (gpio_pinset_t){ PORT4, PIN10, (GPIO_OUTPUT | GPIO_LOW_DRIVE | GPIO_OUTPUT_LOW) }  /* P410 */
+#define GPIO_ARDUINO_D13  (gpio_pinset_t){ PORT4, PIN12, (GPIO_OUTPUT | GPIO_LOW_DRIVE | GPIO_OUTPUT_LOW) }  /* P412 */
+
+/* Index values for use with the /dev/gpioN devices ra8m1_gpio.c registers:
+ * inputs first (D2-D5, in header order), then outputs (D6-D13).
+ */
+
+#define BOARD_ARDUINO_D2_GPIO   0
+#define BOARD_ARDUINO_D3_GPIO   1
+#define BOARD_ARDUINO_D4_GPIO   2
+#define BOARD_ARDUINO_D5_GPIO   3
+#define BOARD_NGPIOIN           4
+
+#define BOARD_ARDUINO_D6_GPIO   0
+#define BOARD_ARDUINO_D7_GPIO   1
+#define BOARD_ARDUINO_D8_GPIO   2
+#define BOARD_ARDUINO_D9_GPIO   3
+#define BOARD_ARDUINO_D10_GPIO  4
+#define BOARD_ARDUINO_D11_GPIO  5
+#define BOARD_ARDUINO_D12_GPIO  6
+#define BOARD_ARDUINO_D13_GPIO  7
+#define BOARD_NGPIOOUT          8
+
 /* LED pin selections *******************************************************/
 
 /* The EK-RA8M1 has three user LEDs.  They are driven active high. */

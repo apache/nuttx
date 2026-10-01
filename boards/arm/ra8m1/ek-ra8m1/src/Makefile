@@ -28,4 +28,8 @@ else
 CSRCS += ra8m1_userleds.c
 endif
 
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += ra8m1_gpio.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
