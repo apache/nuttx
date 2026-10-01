@@ -460,6 +460,12 @@ void nxsched_critmon_csection(FAR struct tcb_s *tcb, bool state,
                               FAR void *caller);
 #endif
 
+#ifdef CONFIG_SCHED_CAPABILITIES
+bool nxsched_may_control(pid_t pid);
+#else
+#  define nxsched_may_control(pid) true
+#endif
+
 /* TCB operations */
 
 bool nxsched_verify_tcb(FAR struct tcb_s *tcb);
@@ -628,4 +634,5 @@ static inline_function int nxsched_select_cpu(cpu_set_t affinity)
   return cpu;
 }
 #  endif
+
 #endif /* __SCHED_SCHED_SCHED_H */

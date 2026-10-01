@@ -158,6 +158,12 @@ int kill(pid_t pid, int signo)
 {
   int ret;
 
+  if (signo != 0 && !nxsched_may_control(pid))
+    {
+      set_errno(EPERM);
+      return ERROR;
+    }
+
   /* Let nxsig_kill() do all of the work */
 
   ret = nxsig_kill(pid, signo);
