@@ -240,24 +240,24 @@ static off_t bch_seek(FAR struct file *filep, off_t offset, int whence)
 
   switch (whence)
     {
-    case SEEK_CUR:
-      newpos = filep->f_pos + offset;
-      break;
+      case SEEK_CUR:
+        newpos = filep->f_pos + offset;
+        break;
 
-    case SEEK_SET:
-      newpos = offset;
-      break;
+      case SEEK_SET:
+        newpos = offset;
+        break;
 
-    case SEEK_END:
-      newpos = (off_t)bch->sectsize * bch->nsectors + offset;
-      break;
+      case SEEK_END:
+        newpos = (off_t)bch->sectsize * bch->nsectors + offset;
+        break;
 
-    default:
+      default:
 
-      /* Return EINVAL if the whence argument is invalid */
+        /* Return EINVAL if the whence argument is invalid */
 
-      nxmutex_unlock(&bch->lock);
-      return -EINVAL;
+        nxmutex_unlock(&bch->lock);
+        return -EINVAL;
     }
 
   /* Opengroup.org:
