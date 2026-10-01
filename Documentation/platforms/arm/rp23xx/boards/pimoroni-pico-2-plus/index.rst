@@ -177,6 +177,21 @@ xipfs
 XIPFS mounted on the on-board flash, with the ``xipfs`` command and the
 XIPFS test suite.
 
+xipfs-fdpic
+-----------
+
+Same as ``xipfs``, plus the FDPIC module loader and the
+``fdpicxip`` demo, so the ``fdpic`` and ``reject`` sections of the XIPFS
+test suite have something to run.  The demo carries its modules as
+committed byte arrays, so nothing beyond the ordinary ARM toolchain is
+needed to build it; rebuilding those from source needs
+``arm-uclinuxfdpiceabi`` binutils.  See :doc:`/components/fdpic`.
+
+``CONFIG_ELF_STACKSIZE`` is 4096 here rather than the 2048 the rest of
+the board's tasks use.  A module that calls into the firmware's printf
+family overflows 2048, and with no MPU that is a lockup rather than a
+diagnostic.
+
 xipfs-nxflat
 ------------
 
