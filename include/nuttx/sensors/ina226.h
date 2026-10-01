@@ -142,8 +142,33 @@ extern "C"
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SENSORS_INA226_UORB
 int ina226_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                     uint8_t addr, int32_t shuntval, uint16_t config);
+#else
+/****************************************************************************
+ * Name: ina226_register_uorb
+ *
+ * Description:
+ *   Register the part as uORB voltage, current and power sensors, all
+ *   sharing one topic number and one reading.
+ *
+ * Input Parameters:
+ *   devno    - The topic number
+ *   i2c      - An instance of the I2C interface to use
+ *   addr     - The I2C address of the INA226
+ *   shuntval - The shunt resistance in micro-ohms
+ *   config   - Averaging and conversion times; the mode bits are managed
+ *              by the driver
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int ina226_register_uorb(int devno, FAR struct i2c_master_s *i2c,
+                         uint8_t addr, int32_t shuntval, uint16_t config);
+#endif /* CONFIG_SENSORS_INA226_UORB */
 
 #undef EXTERN
 #ifdef __cplusplus
