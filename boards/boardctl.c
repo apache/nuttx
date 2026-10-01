@@ -604,8 +604,8 @@ int boardctl(unsigned int cmd, uintptr_t arg)
           FAR const struct boardioc_symtab_s *symdesc =
             (FAR const struct boardioc_symtab_s *)arg;
 
-         DEBUGASSERT(symdesc != NULL);
-         exec_setsymtab(symdesc->symtab, symdesc->nsymbols);
+          DEBUGASSERT(symdesc != NULL);
+          exec_setsymtab(symdesc->symtab, symdesc->nsymbols);
         }
         break;
 #endif
@@ -625,8 +625,8 @@ int boardctl(unsigned int cmd, uintptr_t arg)
           FAR const struct boardioc_symtab_s *symdesc =
             (FAR const struct boardioc_symtab_s *)arg;
 
-         DEBUGASSERT(symdesc != NULL);
-         libelf_setsymtab(symdesc->symtab, symdesc->nsymbols);
+          DEBUGASSERT(symdesc != NULL);
+          libelf_setsymtab(symdesc->symtab, symdesc->nsymbols);
         }
         break;
 #endif
@@ -658,8 +658,8 @@ int boardctl(unsigned int cmd, uintptr_t arg)
           FAR const struct boardioc_builtin_s *builtin =
             (FAR const struct boardioc_builtin_s *)arg;
 
-         DEBUGASSERT(builtin != NULL);
-         builtin_setlist(builtin->builtins, builtin->count);
+          DEBUGASSERT(builtin != NULL);
+          builtin_setlist(builtin->builtins, builtin->count);
 #endif
         }
         break;
@@ -843,19 +843,19 @@ int boardctl(unsigned int cmd, uintptr_t arg)
           else if (spinlock->action == BOARDIOC_SPINLOCK_TRYLOCK)
             {
               if (lock != NULL)
-              {
-                if (flags != NULL)
-                  {
-                    if (!spin_trylock_irqsave(lock, *flags))
-                      {
-                        ret = -EBUSY;
-                      }
-                  }
-                else if (!spin_trylock(lock))
-                  {
-                    ret = -EBUSY;
-                  }
-              }
+                {
+                  if (flags != NULL)
+                    {
+                      if (!spin_trylock_irqsave(lock, *flags))
+                        {
+                          ret = -EBUSY;
+                        }
+                    }
+                  else if (!spin_trylock(lock))
+                    {
+                      ret = -EBUSY;
+                    }
+                }
             }
           else if (spinlock->action == BOARDIOC_SPINLOCK_UNLOCK)
             {
@@ -908,8 +908,8 @@ int boardctl(unsigned int cmd, uintptr_t arg)
       /* CMD:           BOARDIOC_IRQ_AFFINITY
        * DESCRIPTION:   Set an IRQ affinity by software.
        * ARG:           Integer array:
-                        member 0 is the interrupt number
-                        member 1 is the CPU index
+       *                member 0 is the interrupt number
+       *                member 1 is the CPU index
        * CONFIGURATION: CONFIG_BOARDCTL_IRQ_AFFINITY
        * DEPENDENCIES:  Bound Multi-Processing (CONFIG_BMP)
        */
@@ -917,6 +917,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
       case BOARDIOC_IRQ_AFFINITY:
         {
           FAR unsigned int *affinity = (FAR unsigned int *)arg;
+
           up_affinity_irq(affinity[0], affinity[1]);
           ret = OK;
         }
@@ -958,21 +959,21 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
-       default:
-         {
+      default:
+        {
 #ifdef CONFIG_BOARDCTL_IOCTL
-           /* Boards may also select CONFIG_BOARDCTL_IOCTL=y to enable
-            * board-specific commands.  In this case, all commands not
-            * recognized by boardctl() will be forwarded to the board-
-            * provided board_ioctl() function.
-            */
+          /* Boards may also select CONFIG_BOARDCTL_IOCTL=y to enable
+           * board-specific commands.  In this case, all commands not
+           * recognized by boardctl() will be forwarded to the board-
+           * provided board_ioctl() function.
+           */
 
-           ret = board_ioctl(cmd, arg);
+          ret = board_ioctl(cmd, arg);
 #else
-           ret = -ENOTTY;
+          ret = -ENOTTY;
 #endif
-         }
-         break;
+        }
+        break;
     }
 
   /* Set the errno value on any errors */
