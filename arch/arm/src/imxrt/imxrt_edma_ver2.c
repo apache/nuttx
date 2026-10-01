@@ -65,8 +65,10 @@
 #include "chip.h"
 #include "imxrt_edma.h"
 #include "imxrt_clockconfig.h"
+#include "imxrt_dtcm.h"
 
 #include "hardware/imxrt_ccm.h"
+#include "hardware/imxrt_memorymap.h"
 #include "hardware/rt118x/imxrt118x_edma.h"
 #include "hardware/imxrt_dmamux.h"
 
@@ -177,6 +179,51 @@ static struct imxrt_edmatcd_s g_tcd_pool[CONFIG_IMXRT_EDMA_NTCD]
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/* An eDMA minor loop advances the address by offset once per transfer
+ * unit; the major loop repeats that sequence iter times.  Check both
+ * extremes before replacing a local DTCM address with its bus alias.
+ */
+
+static inline bool imxrt_dma_transfer_address(uint32_t address,
+                                               uint16_t iter,
+                                               uint32_t nbytes,
+                                               int16_t offset,
+                                               uint8_t size,
+                                               uint32_t *dma_address)
+{
+#ifdef USE_DTCM_SHADOW_ADDRESSING
+  if (address >= IMXRT_DTCM_BASE &&
+      address - IMXRT_DTCM_BASE < DTCM_SIZE)
+    {
+      if (size > 6 || iter == 0 || nbytes == 0 ||
+          nbytes % (1u << size) != 0)
+        {
+          return false;
+        }
+
+      uint32_t beats = nbytes >> size;
+      int64_t major = (int64_t)(iter - 1) * beats * offset;
+      int64_t minor = (int64_t)(beats - 1) * offset;
+      int64_t low = major < 0 ? major : 0;
+      int64_t high = major > 0 ? major : 0;
+      int64_t dtcm_offset = (int64_t)address - IMXRT_DTCM_BASE;
+
+      low += minor < 0 ? minor : 0;
+      high += minor > 0 ? minor : 0;
+      high += 1u << size;
+
+      if (dtcm_offset + low < 0 ||
+          dtcm_offset + high > DTCM_SIZE)
+        {
+          return false;
+        }
+    }
+#endif
+
+  return imxrt_dma_address((const void *)(uintptr_t)address, 1,
+                           dma_address);
+}
 
 /****************************************************************************
  * Name: imxrt_tcd_alloc
@@ -485,7 +532,8 @@ static void imxrt_dmaterminate(struct imxrt_dmach_s *dmach, int result)
        */
 
       next = dmach->flags & EDMA_CONFIG_LOOPDEST ?
-             NULL : (struct imxrt_edmatcd_s *)((uintptr_t)tcd->dlastsga);
+             NULL : (struct imxrt_edmatcd_s *)
+                    imxrt_dma_cpu_address(tcd->dlastsga);
 
       imxrt_tcd_free_nolock(tcd);
     }
@@ -1094,9 +1142,11 @@ int imxrt_dmach_xfrsetup(DMACH_HANDLE handle,
 {
   struct imxrt_dmach_s *dmach = (struct imxrt_dmach_s *)handle;
   uintptr_t base = IMXRT_EDMA_TCD(dmach->base, dmach->chan);
+  struct imxrt_edma_xfrconfig_s dma_config;
 #if CONFIG_IMXRT_EDMA_NTCD > 0
   struct imxrt_edmatcd_s *tcd;
   struct imxrt_edmatcd_s *prev;
+  uint32_t tcd_dma_address;
   uint16_t mask = config->flags & EDMA_CONFIG_INTMAJOR ? 0 :
                                   EDMA_TCD_CSR_INTMAJOR;
   uint16_t regval16;
@@ -1106,6 +1156,32 @@ int imxrt_dmach_xfrsetup(DMACH_HANDLE handle,
 
   DEBUGASSERT(dmach != NULL);
   dmainfo("dmach%u: %p config: %p\n", dmach->chan, dmach, config);
+
+  dma_config = *config;
+#if defined(CONFIG_IMXRT_EDMA_MOD) && \
+    defined(USE_DTCM_SHADOW_ADDRESSING)
+  if ((config->smod != 0 &&
+       config->saddr >= IMXRT_DTCM_BASE &&
+       config->saddr - IMXRT_DTCM_BASE < DTCM_SIZE) ||
+      (config->dmod != 0 &&
+       config->daddr >= IMXRT_DTCM_BASE &&
+       config->daddr - IMXRT_DTCM_BASE < DTCM_SIZE))
+    {
+      dmaerr("ERROR: DTCM eDMA modulo transfers are not supported\n");
+      return -ERANGE;
+    }
+#endif
+
+  if (!imxrt_dma_transfer_address(config->saddr, config->iter,
+                                  config->nbytes, config->soff,
+                                  config->ssize, &dma_config.saddr) ||
+      !imxrt_dma_transfer_address(config->daddr, config->iter,
+                                  config->nbytes, config->doff,
+                                  config->dsize, &dma_config.daddr))
+    {
+      dmaerr("ERROR: eDMA transfer crosses DTCM boundary\n");
+      return -ERANGE;
+    }
 
   dmach->flags  = config->flags;
 
@@ -1118,7 +1194,7 @@ int imxrt_dmach_xfrsetup(DMACH_HANDLE handle,
 
   /* Configure current TCD block transfer. */
 
-  imxrt_tcd_configure(tcd, config);
+  imxrt_tcd_configure(tcd, &dma_config);
 
   /* Enable the interrupt when the major iteration count completes for this
    * TCD.  For "normal" DMAs, this will correspond to the DMA DONE
@@ -1151,6 +1227,13 @@ int imxrt_dmach_xfrsetup(DMACH_HANDLE handle,
           return -EINVAL;
         }
 
+      if (!imxrt_dma_address(tcd, sizeof(*tcd), &tcd_dma_address))
+        {
+          imxrt_tcd_free(tcd);
+          dmaerr("ERROR: eDMA TCD crosses DTCM boundary\n");
+          return -ERANGE;
+        }
+
       /* Chain from previous descriptor in the list. */
 
       /* Enable scatter/gather feature in the previous TCD. */
@@ -1161,7 +1244,7 @@ int imxrt_dmach_xfrsetup(DMACH_HANDLE handle,
       regval16      |= EDMA_TCD_CSR_ESG;
       prev->csr      = regval16;
 
-      prev->dlastsga = (uint32_t)((uintptr_t)tcd);
+      prev->dlastsga = tcd_dma_address;
       dmach->tail    = tcd;
 
       /* Clean cache associated with the previous TCD memory */
@@ -1183,7 +1266,7 @@ int imxrt_dmach_xfrsetup(DMACH_HANDLE handle,
           regval16 |= EDMA_TCD_CSR_ESG;
           putreg16(regval16, base + IMXRT_EDMA_TCD_CSR_OFFSET);
 
-          putreg32((uint32_t)((uintptr_t)tcd),
+          putreg32(tcd_dma_address,
                    base + IMXRT_EDMA_TCD_DLAST_SGA_OFFSET);
         }
     }
@@ -1210,7 +1293,7 @@ int imxrt_dmach_xfrsetup(DMACH_HANDLE handle,
   /* Configure channel TCD registers to the values specified in config. */
 
   imxrt_tcd_configure((struct imxrt_edmatcd_s *)
-                     (base + IMXRT_EDMA_TCD_SADDR_OFFSET), config);
+                     (base + IMXRT_EDMA_TCD_SADDR_OFFSET), &dma_config);
 
   /* Enable the DONE interrupt when the major iteration count completes. */
 
