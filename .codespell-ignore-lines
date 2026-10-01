@@ -180,3 +180,12 @@ libs/libc/tre-mem.c
    *    message using the Neighbor Discovery (ND) protocol. It then listens
 PIO   DUE SCHEM. PIN MAPPING    SAM3X       DUE SCHEM. BOARD LABEL
     # instruct the gsize to generate a "*.siz" file that contains the detailed section size
+#  define R_GPT_GTBER_ADTTA_TRANSFER_AT_TROUGH (2 << R_GPT_GTBER_ADTTA_SHIFT)  /* Transfer at trough */
+#  define R_GPT_GTBER_ADTTA_V11 (3 << R_GPT_GTBER_ADTTA_SHIFT)                 /* Transfer at both crest and trough */
+#  define R_GPT_GTBER_ADTTB_TRANSFER_AT_TROUGH (2 << R_GPT_GTBER_ADTTB_SHIFT)  /* Transfer at trough */
+#  define R_GPT_GTBER_ADTTB_V11 (3 << R_GPT_GTBER_ADTTB_SHIFT)                 /* Transfer at both crest and trough */
+#  define R_GPT_GTCR_MD_V101 (5 << R_GPT_GTCR_MD_SHIFT)                       /* Triangle-wave PWM mode 2 (32-bit transfer at crest and trough) (single buffer or double buffer possible) */
+#  define R_GPT_GTCR_MD_V110 (6 << R_GPT_GTCR_MD_SHIFT)                       /* Triangle-wave PWM mode 3 (64-bit transfer at trough) fixed buffer operation) */
+           * next trough (manual 21.2.16/Table 21.5) -- the counter
+   * every trough, including the very first one after this start/
+next trough with no gap in counting, matching the reload behavior of

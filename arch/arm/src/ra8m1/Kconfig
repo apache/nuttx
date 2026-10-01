@@ -18,6 +18,20 @@ config ARCH_CHIP_R7FA8M1AFECAM
 	select RA_HAVE_SCI_B3
 	select RA_HAVE_SCI_B4
 	select RA_HAVE_SCI_B9
+	select RA_HAVE_GPT0
+	select RA_HAVE_GPT1
+	select RA_HAVE_GPT2
+	select RA_HAVE_GPT3
+	select RA_HAVE_GPT4
+	select RA_HAVE_GPT5
+	select RA_HAVE_GPT6
+	select RA_HAVE_GPT7
+	select RA_HAVE_GPT8
+	select RA_HAVE_GPT9
+	select RA_HAVE_GPT10
+	select RA_HAVE_GPT11
+	select RA_HAVE_GPT12
+	select RA_HAVE_GPT13
 	select RA8M1_FAMILY
 
 config ARCH_CHIP_R7FA8M1AFECBD
@@ -28,6 +42,20 @@ config ARCH_CHIP_R7FA8M1AFECBD
 	select RA_HAVE_SCI_B3
 	select RA_HAVE_SCI_B4
 	select RA_HAVE_SCI_B9
+	select RA_HAVE_GPT0
+	select RA_HAVE_GPT1
+	select RA_HAVE_GPT2
+	select RA_HAVE_GPT3
+	select RA_HAVE_GPT4
+	select RA_HAVE_GPT5
+	select RA_HAVE_GPT6
+	select RA_HAVE_GPT7
+	select RA_HAVE_GPT8
+	select RA_HAVE_GPT9
+	select RA_HAVE_GPT10
+	select RA_HAVE_GPT11
+	select RA_HAVE_GPT12
+	select RA_HAVE_GPT13
 	select RA8M1_FAMILY
 
 config ARCH_CHIP_R7FA8M1AFECFB
@@ -38,6 +66,20 @@ config ARCH_CHIP_R7FA8M1AFECFB
 	select RA_HAVE_SCI_B3
 	select RA_HAVE_SCI_B4
 	select RA_HAVE_SCI_B9
+	select RA_HAVE_GPT0
+	select RA_HAVE_GPT1
+	select RA_HAVE_GPT2
+	select RA_HAVE_GPT3
+	select RA_HAVE_GPT4
+	select RA_HAVE_GPT5
+	select RA_HAVE_GPT6
+	select RA_HAVE_GPT7
+	select RA_HAVE_GPT8
+	select RA_HAVE_GPT9
+	select RA_HAVE_GPT10
+	select RA_HAVE_GPT11
+	select RA_HAVE_GPT12
+	select RA_HAVE_GPT13
 	select RA8M1_FAMILY
 
 config ARCH_CHIP_R7FA8M1AFECFC
@@ -48,6 +90,20 @@ config ARCH_CHIP_R7FA8M1AFECFC
 	select RA_HAVE_SCI_B3
 	select RA_HAVE_SCI_B4
 	select RA_HAVE_SCI_B9
+	select RA_HAVE_GPT0
+	select RA_HAVE_GPT1
+	select RA_HAVE_GPT2
+	select RA_HAVE_GPT3
+	select RA_HAVE_GPT4
+	select RA_HAVE_GPT5
+	select RA_HAVE_GPT6
+	select RA_HAVE_GPT7
+	select RA_HAVE_GPT8
+	select RA_HAVE_GPT9
+	select RA_HAVE_GPT10
+	select RA_HAVE_GPT11
+	select RA_HAVE_GPT12
+	select RA_HAVE_GPT13
 	select RA8M1_FAMILY
 
 config ARCH_CHIP_R7FA8M1AFECFP
@@ -58,6 +114,20 @@ config ARCH_CHIP_R7FA8M1AFECFP
 	select RA_HAVE_SCI_B3
 	select RA_HAVE_SCI_B4
 	select RA_HAVE_SCI_B9
+	select RA_HAVE_GPT0
+	select RA_HAVE_GPT1
+	select RA_HAVE_GPT2
+	select RA_HAVE_GPT3
+	select RA_HAVE_GPT4
+	select RA_HAVE_GPT5
+	select RA_HAVE_GPT6
+	select RA_HAVE_GPT7
+	select RA_HAVE_GPT8
+	select RA_HAVE_GPT9
+	select RA_HAVE_GPT10
+	select RA_HAVE_GPT11
+	select RA_HAVE_GPT12
+	select RA_HAVE_GPT13
 	select RA8M1_FAMILY
 
 config ARCH_CHIP_R7FA8M1AHECAM
@@ -68,6 +138,20 @@ config ARCH_CHIP_R7FA8M1AHECAM
 	select RA_HAVE_SCI_B3
 	select RA_HAVE_SCI_B4
 	select RA_HAVE_SCI_B9
+	select RA_HAVE_GPT0
+	select RA_HAVE_GPT1
+	select RA_HAVE_GPT2
+	select RA_HAVE_GPT3
+	select RA_HAVE_GPT4
+	select RA_HAVE_GPT5
+	select RA_HAVE_GPT6
+	select RA_HAVE_GPT7
+	select RA_HAVE_GPT8
+	select RA_HAVE_GPT9
+	select RA_HAVE_GPT10
+	select RA_HAVE_GPT11
+	select RA_HAVE_GPT12
+	select RA_HAVE_GPT13
 	select RA8M1_FAMILY
 
 config ARCH_CHIP_R7FA8M1AHECBD
@@ -78,6 +162,20 @@ config ARCH_CHIP_R7FA8M1AHECBD
 	select RA_HAVE_SCI_B3
 	select RA_HAVE_SCI_B4
 	select RA_HAVE_SCI_B9
+	select RA_HAVE_GPT0
+	select RA_HAVE_GPT1
+	select RA_HAVE_GPT2
+	select RA_HAVE_GPT3
+	select RA_HAVE_GPT4
+	select RA_HAVE_GPT5
+	select RA_HAVE_GPT6
+	select RA_HAVE_GPT7
+	select RA_HAVE_GPT8
+	select RA_HAVE_GPT9
+	select RA_HAVE_GPT10
+	select RA_HAVE_GPT11
+	select RA_HAVE_GPT12
+	select RA_HAVE_GPT13
 	select RA8M1_FAMILY
 
 config ARCH_CHIP_R7FA8M1AHECFB
@@ -88,6 +186,20 @@ config ARCH_CHIP_R7FA8M1AHECFB
 	select RA_HAVE_SCI_B3
 	select RA_HAVE_SCI_B4
 	select RA_HAVE_SCI_B9
+	select RA_HAVE_GPT0
+	select RA_HAVE_GPT1
+	select RA_HAVE_GPT2
+	select RA_HAVE_GPT3
+	select RA_HAVE_GPT4
+	select RA_HAVE_GPT5
+	select RA_HAVE_GPT6
+	select RA_HAVE_GPT7
+	select RA_HAVE_GPT8
+	select RA_HAVE_GPT9
+	select RA_HAVE_GPT10
+	select RA_HAVE_GPT11
+	select RA_HAVE_GPT12
+	select RA_HAVE_GPT13
 	select RA8M1_FAMILY
 
 config ARCH_CHIP_R7FA8M1AHECFC
@@ -98,6 +210,20 @@ config ARCH_CHIP_R7FA8M1AHECFC
 	select RA_HAVE_SCI_B3
 	select RA_HAVE_SCI_B4
 	select RA_HAVE_SCI_B9
+	select RA_HAVE_GPT0
+	select RA_HAVE_GPT1
+	select RA_HAVE_GPT2
+	select RA_HAVE_GPT3
+	select RA_HAVE_GPT4
+	select RA_HAVE_GPT5
+	select RA_HAVE_GPT6
+	select RA_HAVE_GPT7
+	select RA_HAVE_GPT8
+	select RA_HAVE_GPT9
+	select RA_HAVE_GPT10
+	select RA_HAVE_GPT11
+	select RA_HAVE_GPT12
+	select RA_HAVE_GPT13
 	select RA8M1_FAMILY
 
 config ARCH_CHIP_R7FA8M1AHECFP
@@ -108,6 +234,20 @@ config ARCH_CHIP_R7FA8M1AHECFP
 	select RA_HAVE_SCI_B3
 	select RA_HAVE_SCI_B4
 	select RA_HAVE_SCI_B9
+	select RA_HAVE_GPT0
+	select RA_HAVE_GPT1
+	select RA_HAVE_GPT2
+	select RA_HAVE_GPT3
+	select RA_HAVE_GPT4
+	select RA_HAVE_GPT5
+	select RA_HAVE_GPT6
+	select RA_HAVE_GPT7
+	select RA_HAVE_GPT8
+	select RA_HAVE_GPT9
+	select RA_HAVE_GPT10
+	select RA_HAVE_GPT11
+	select RA_HAVE_GPT12
+	select RA_HAVE_GPT13
 	select RA8M1_FAMILY
 
 endchoice # RA Chip Selection
@@ -140,6 +280,62 @@ config RA_HAVE_SCI_B4
 	default n
 
 config RA_HAVE_SCI_B9
+	bool
+	default n
+
+config RA_HAVE_GPT0
+	bool
+	default n
+
+config RA_HAVE_GPT1
+	bool
+	default n
+
+config RA_HAVE_GPT2
+	bool
+	default n
+
+config RA_HAVE_GPT3
+	bool
+	default n
+
+config RA_HAVE_GPT4
+	bool
+	default n
+
+config RA_HAVE_GPT5
+	bool
+	default n
+
+config RA_HAVE_GPT6
+	bool
+	default n
+
+config RA_HAVE_GPT7
+	bool
+	default n
+
+config RA_HAVE_GPT8
+	bool
+	default n
+
+config RA_HAVE_GPT9
+	bool
+	default n
+
+config RA_HAVE_GPT10
+	bool
+	default n
+
+config RA_HAVE_GPT11
+	bool
+	default n
+
+config RA_HAVE_GPT12
+	bool
+	default n
+
+config RA_HAVE_GPT13
 	bool
 	default n
 
@@ -182,5 +378,87 @@ config RA_SCI9_UART
 	default n
 	depends on RA_HAVE_SCI_B9
 	select SCI9_SERIALDRIVER
+
+config RA_GPT_TIMER
+	bool "GPT timer (/dev/timerN)"
+	default n
+	select TIMER
+	---help---
+		Register enabled GPT channels as generic timers.  Each enabled
+		channel uses one ICU slot (its overflow event).
+
+if RA_GPT_TIMER
+
+config RA_GPT0_GPT
+	bool "GPT0 (32-bit)"
+	default n
+	depends on RA_HAVE_GPT0
+
+config RA_GPT1_GPT
+	bool "GPT1 (32-bit)"
+	default n
+	depends on RA_HAVE_GPT1
+
+config RA_GPT2_GPT
+	bool "GPT2 (32-bit)"
+	default n
+	depends on RA_HAVE_GPT2
+
+config RA_GPT3_GPT
+	bool "GPT3 (32-bit)"
+	default n
+	depends on RA_HAVE_GPT3
+
+config RA_GPT4_GPT
+	bool "GPT4 (32-bit)"
+	default n
+	depends on RA_HAVE_GPT4
+
+config RA_GPT5_GPT
+	bool "GPT5 (32-bit)"
+	default n
+	depends on RA_HAVE_GPT5
+
+config RA_GPT6_GPT
+	bool "GPT6 (32-bit)"
+	default n
+	depends on RA_HAVE_GPT6
+
+config RA_GPT7_GPT
+	bool "GPT7 (32-bit)"
+	default n
+	depends on RA_HAVE_GPT7
+
+config RA_GPT8_GPT
+	bool "GPT8 (16-bit)"
+	default n
+	depends on RA_HAVE_GPT8
+
+config RA_GPT9_GPT
+	bool "GPT9 (16-bit)"
+	default n
+	depends on RA_HAVE_GPT9
+
+config RA_GPT10_GPT
+	bool "GPT10 (16-bit)"
+	default n
+	depends on RA_HAVE_GPT10
+
+config RA_GPT11_GPT
+	bool "GPT11 (16-bit)"
+	default n
+	depends on RA_HAVE_GPT11
+
+config RA_GPT12_GPT
+	bool "GPT12 (16-bit)"
+	default n
+	depends on RA_HAVE_GPT12
+
+config RA_GPT13_GPT
+	bool "GPT13 (16-bit)"
+	default n
+	depends on RA_HAVE_GPT13
+
+endif # RA_GPT_TIMER
 
 endmenu # RA8M1 Peripheral Support
