@@ -188,7 +188,15 @@ errout:
 int sched_setaffinity(pid_t pid, size_t cpusetsize,
                       FAR const cpu_set_t *mask)
 {
-  int ret = nxsched_set_affinity(pid, cpusetsize, mask);
+  int ret;
+
+  if (!nxsched_may_control(pid))
+    {
+      set_errno(EPERM);
+      return ERROR;
+    }
+
+  ret = nxsched_set_affinity(pid, cpusetsize, mask);
   if (ret < 0)
     {
       set_errno(-ret);

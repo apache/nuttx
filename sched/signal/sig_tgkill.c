@@ -149,6 +149,12 @@ int tgkill(pid_t pid, pid_t tid, int signo)
 {
   int ret;
 
+  if (signo != 0 && !nxsched_may_control(tid))
+    {
+      set_errno(EPERM);
+      return ERROR;
+    }
+
   ret = nxsig_tgkill(pid, tid, signo);
   if (ret < 0)
     {

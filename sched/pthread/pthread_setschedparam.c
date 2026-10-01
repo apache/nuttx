@@ -35,6 +35,7 @@
 #include <nuttx/sched.h>
 
 #include "pthread/pthread.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Public Functions
@@ -94,6 +95,11 @@ int pthread_setschedparam(pthread_t thread, int policy,
   int ret;
 
   sinfo("thread ID=%d policy=%d param=%p\n", thread, policy, param);
+
+  if (!nxsched_may_control((pid_t)thread))
+    {
+      return EPERM;
+    }
 
   /* Let nxsched_set_scheduler do all of the work */
 
