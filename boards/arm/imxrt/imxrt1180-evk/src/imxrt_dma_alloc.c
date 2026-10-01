@@ -61,6 +61,7 @@
  * overhead and other endpoints.
  */
 
+#define IMXRT_DMA_ALIGNMENT   32
 #define IMXRT_DMA_POOL_SIZE   (6 * 1024)
 
 /****************************************************************************
@@ -105,14 +106,15 @@ int imxrt_dma_alloc_init(void)
  *
  *   gran_free() needs to know the size of the allocation being freed, but
  *   usbdev_dma_free() is not given a size (see include/nuttx/usb/usbdev.h).
- *   We work around this by prepending a small header that records the
- *   total granule allocation size.
+ *   Reserve one alignment unit before the returned buffer and record the
+ *   total allocation size there.  This keeps the buffer cache-line aligned.
  *
  ****************************************************************************/
 
 struct usbdma_header_s
 {
   size_t allocsize;
+  uint8_t padding[IMXRT_DMA_ALIGNMENT - sizeof(size_t)];
 };
 
 void *usbdev_dma_alloc(size_t size)

@@ -207,12 +207,18 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
 #endif
 
 #if defined(CONFIG_ARMV7M_DCACHE)
+#  define USB_DCACHE_LINESIZE ARMV7M_DCACHE_LINESIZE
+#elif defined(CONFIG_ARMV8M_DCACHE)
+#  define USB_DCACHE_LINESIZE ARMV8M_DCACHE_LINESIZE
+#endif
+
+#if defined(CONFIG_ARMV7M_DCACHE) || defined(CONFIG_ARMV8M_DCACHE)
 #  define cache_aligned_alloc(s) \
-     kmm_memalign(ARMV7M_DCACHE_LINESIZE, \
-                  (((s) + ARMV7M_DCACHE_LINESIZE - 1) & \
-                   ~(ARMV7M_DCACHE_LINESIZE - 1)))
-#  define CACHE_ALIGNED_DATA     aligned_data(ARMV7M_DCACHE_LINESIZE)
-#  define DCACHE_LINEMASK        (ARMV7M_DCACHE_LINESIZE - 1)
+     kmm_memalign(USB_DCACHE_LINESIZE, \
+                  (((s) + USB_DCACHE_LINESIZE - 1) & \
+                   ~(USB_DCACHE_LINESIZE - 1)))
+#  define CACHE_ALIGNED_DATA     aligned_data(USB_DCACHE_LINESIZE)
+#  define DCACHE_LINEMASK        (USB_DCACHE_LINESIZE - 1)
 #  define DCACHE_ALIGN_UP(a)     (((a) + DCACHE_LINEMASK) & ~DCACHE_LINEMASK)
 #  define IS_CACHE_ALIGNED(x,y) \
      (((uintptr_t)(x) & DCACHE_LINEMASK) == 0 && \
