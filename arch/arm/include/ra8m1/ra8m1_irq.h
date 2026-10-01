@@ -38,12 +38,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Vector number of the first external interrupt.  Defined here, ahead of
+ * the event enumeration below that is based on it.
+ */
+
+#define RA_IRQ_FIRST          (16)
+
 /* Total number of IRQ numbers.
  *
  * Every ICU IELSR slot is runtime-configurable -- any peripheral event
  * can be routed to any slot -- so RA_IRQ_IELSRn below are just the raw
- * vector numbers; RA_IRQ_NEXTINT is the total slot count. Both come
- * directly from this chip's .rzone <processor DnumInterrupts>.
+ * vector numbers; RA_IRQ_NEXTINT is the total slot count.
  */
 
 #define RA_IRQ_IELSR0 (RA_IRQ_FIRST + 0)    /* 0: Event selected in the ICU.IELSR0 register */
@@ -145,48 +150,116 @@
 
 #define RA_IRQ_NEXTINT        (96)
 
-/* SCI_B interrupt events.
+/* Peripheral interrupt events.
  *
- * The ICU routes any peripheral event to any of the IELSR slots, so the
- * SCI_B events are simply given fixed slots: four per channel (receive data
- * full, transmit data empty, transmit end, receive error).  The numbers do
- * not depend on which channels a build enables, so every file that uses
- * them (ra_serial.c, ra_icu.c) sees the same value.  Only RA_IRQ_IELSR0 to
- * RA_IRQ_IELSR23 are used; ra_attach_icu() routes the events of the enabled
- * channels to their slots.
+ * The ICU can route any peripheral event to any IELSR slot.  Each event
+ * that an enabled peripheral needs is given a slot here, packed from
+ * RA_IRQ_FIRST in the order below, so only the events a build uses take a
+ * slot (the ICU has RA_IRQ_NEXTINT of them).
  *
- * RA8M1 has SCI_B0-4 and SCI_B9 (no SCI_B5-8), named SCI0-4 and SCI9 here.
+ * ra_attach_icu() (ra_icu.c) writes the matching event number to
+ * IELSR(<irq> - RA_IRQ_FIRST) for each of these.
+ *
+ * To give a peripheral another event (for example a GPT compare match),
+ * add an enumerator under its own Kconfig option and route it in
+ * ra_attach_icu().
  */
 
-#define SCI0_RXI   (RA_IRQ_FIRST + 0)   /* Receive data full */
-#define SCI0_TXI   (RA_IRQ_FIRST + 1)   /* Transmit data empty */
-#define SCI0_TEI   (RA_IRQ_FIRST + 2)   /* Transmit end */
-#define SCI0_ERI   (RA_IRQ_FIRST + 3)   /* Receive error */
+#ifndef __ASSEMBLY__
+enum ra_icu_event_irq_e
+{
+  RA_IRQ_EVT_START = RA_IRQ_FIRST - 1,  /* Not an IRQ: first event = FIRST */
 
-#define SCI1_RXI   (RA_IRQ_FIRST + 4)   /* Receive data full */
-#define SCI1_TXI   (RA_IRQ_FIRST + 5)   /* Transmit data empty */
-#define SCI1_TEI   (RA_IRQ_FIRST + 6)   /* Transmit end */
-#define SCI1_ERI   (RA_IRQ_FIRST + 7)   /* Receive error */
+#ifdef CONFIG_RA_SCI0_UART
+  SCI0_RXI,                             /* Receive data full */
+  SCI0_TXI,                             /* Transmit data empty */
+  SCI0_TEI,                             /* Transmit end */
+  SCI0_ERI,                             /* Receive error */
+#endif
 
-#define SCI2_RXI   (RA_IRQ_FIRST + 8)   /* Receive data full */
-#define SCI2_TXI   (RA_IRQ_FIRST + 9)   /* Transmit data empty */
-#define SCI2_TEI   (RA_IRQ_FIRST + 10)  /* Transmit end */
-#define SCI2_ERI   (RA_IRQ_FIRST + 11)  /* Receive error */
+#ifdef CONFIG_RA_SCI1_UART
+  SCI1_RXI,                             /* Receive data full */
+  SCI1_TXI,                             /* Transmit data empty */
+  SCI1_TEI,                             /* Transmit end */
+  SCI1_ERI,                             /* Receive error */
+#endif
 
-#define SCI3_RXI   (RA_IRQ_FIRST + 12)  /* Receive data full */
-#define SCI3_TXI   (RA_IRQ_FIRST + 13)  /* Transmit data empty */
-#define SCI3_TEI   (RA_IRQ_FIRST + 14)  /* Transmit end */
-#define SCI3_ERI   (RA_IRQ_FIRST + 15)  /* Receive error */
+#ifdef CONFIG_RA_SCI2_UART
+  SCI2_RXI,                             /* Receive data full */
+  SCI2_TXI,                             /* Transmit data empty */
+  SCI2_TEI,                             /* Transmit end */
+  SCI2_ERI,                             /* Receive error */
+#endif
 
-#define SCI4_RXI   (RA_IRQ_FIRST + 16)  /* Receive data full */
-#define SCI4_TXI   (RA_IRQ_FIRST + 17)  /* Transmit data empty */
-#define SCI4_TEI   (RA_IRQ_FIRST + 18)  /* Transmit end */
-#define SCI4_ERI   (RA_IRQ_FIRST + 19)  /* Receive error */
+#ifdef CONFIG_RA_SCI3_UART
+  SCI3_RXI,                             /* Receive data full */
+  SCI3_TXI,                             /* Transmit data empty */
+  SCI3_TEI,                             /* Transmit end */
+  SCI3_ERI,                             /* Receive error */
+#endif
 
-#define SCI9_RXI   (RA_IRQ_FIRST + 20)  /* Receive data full */
-#define SCI9_TXI   (RA_IRQ_FIRST + 21)  /* Transmit data empty */
-#define SCI9_TEI   (RA_IRQ_FIRST + 22)  /* Transmit end */
-#define SCI9_ERI   (RA_IRQ_FIRST + 23)  /* Receive error */
+#ifdef CONFIG_RA_SCI4_UART
+  SCI4_RXI,                             /* Receive data full */
+  SCI4_TXI,                             /* Transmit data empty */
+  SCI4_TEI,                             /* Transmit end */
+  SCI4_ERI,                             /* Receive error */
+#endif
+
+#ifdef CONFIG_RA_SCI9_UART
+  SCI9_RXI,                             /* Receive data full */
+  SCI9_TXI,                             /* Transmit data empty */
+  SCI9_TEI,                             /* Transmit end */
+  SCI9_ERI,                             /* Receive error */
+#endif
+
+  /* GPT: only the counter overflow, which is the timer expiry */
+
+#ifdef CONFIG_RA_GPT0_GPT
+  GPT0_COUNTER_OVERFLOW,
+#endif
+#ifdef CONFIG_RA_GPT1_GPT
+  GPT1_COUNTER_OVERFLOW,
+#endif
+#ifdef CONFIG_RA_GPT2_GPT
+  GPT2_COUNTER_OVERFLOW,
+#endif
+#ifdef CONFIG_RA_GPT3_GPT
+  GPT3_COUNTER_OVERFLOW,
+#endif
+#ifdef CONFIG_RA_GPT4_GPT
+  GPT4_COUNTER_OVERFLOW,
+#endif
+#ifdef CONFIG_RA_GPT5_GPT
+  GPT5_COUNTER_OVERFLOW,
+#endif
+#ifdef CONFIG_RA_GPT6_GPT
+  GPT6_COUNTER_OVERFLOW,
+#endif
+#ifdef CONFIG_RA_GPT7_GPT
+  GPT7_COUNTER_OVERFLOW,
+#endif
+#ifdef CONFIG_RA_GPT8_GPT
+  GPT8_COUNTER_OVERFLOW,
+#endif
+#ifdef CONFIG_RA_GPT9_GPT
+  GPT9_COUNTER_OVERFLOW,
+#endif
+#ifdef CONFIG_RA_GPT10_GPT
+  GPT10_COUNTER_OVERFLOW,
+#endif
+#ifdef CONFIG_RA_GPT11_GPT
+  GPT11_COUNTER_OVERFLOW,
+#endif
+#ifdef CONFIG_RA_GPT12_GPT
+  GPT12_COUNTER_OVERFLOW,
+#endif
+#ifdef CONFIG_RA_GPT13_GPT
+  GPT13_COUNTER_OVERFLOW,
+#endif
+
+  RA_IRQ_EVT_END                        /* Not an IRQ: one past the last */
+};
+#endif /* __ASSEMBLY__ */
 
 /****************************************************************************
  * Public Types

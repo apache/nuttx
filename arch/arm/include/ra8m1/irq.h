@@ -64,10 +64,6 @@
 #define RA_IRQ_PENDSV        (14) /* Vector 14: Pendable system service request */
 #define RA_IRQ_SYSTICK       (15) /* Vector 15: System tick */
 
-/* Chip-Specific External interrupts */
-
-#define RA_IRQ_FIRST        (16) /* Vector number of the first external interrupt */
-
 #define NR_IRQS               (RA_IRQ_FIRST + RA_IRQ_NEXTINT)
 
 /****************************************************************************

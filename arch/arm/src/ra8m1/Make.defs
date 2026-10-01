@@ -36,3 +36,7 @@ CHIP_CSRCS += ra_serial.c
 CHIP_CSRCS += ra_lowputc.c
 CHIP_CSRCS += ra_allocateheap.c
 CHIP_CSRCS += ra_timerisr.c
+
+ifeq ($(CONFIG_RA_GPT_TIMER),y)
+CHIP_CSRCS += ra_gpt.c
+endif

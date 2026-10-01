@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <stdint.h>
 
 #include <nuttx/irq.h>
@@ -32,6 +33,11 @@
 #include "hardware/ra8m1_icu.h"
 #include "hardware/ra8m1_elc.h"
 #include "ra_icu.h"
+
+/* More events than IELSR slots is a configuration error */
+
+static_assert(RA_IRQ_EVT_END <= NR_IRQS,
+              "Too many ICU events enabled for the IELSR slots");
 
 /****************************************************************************
  * Public Functions
@@ -85,6 +91,62 @@ void ra_attach_icu(void)
   putreg32(EVENT_SCI9_TXI, R_ICU_IELSR(SCI9_TXI - RA_IRQ_FIRST));
   putreg32(EVENT_SCI9_TEI, R_ICU_IELSR(SCI9_TEI - RA_IRQ_FIRST));
   putreg32(EVENT_SCI9_ERI, R_ICU_IELSR(SCI9_ERI - RA_IRQ_FIRST));
+#endif
+#ifdef CONFIG_RA_GPT0_GPT
+  putreg32(EVENT_GPT0_COUNTER_OVERFLOW,
+           R_ICU_IELSR(GPT0_COUNTER_OVERFLOW - RA_IRQ_FIRST));
+#endif
+#ifdef CONFIG_RA_GPT1_GPT
+  putreg32(EVENT_GPT1_COUNTER_OVERFLOW,
+           R_ICU_IELSR(GPT1_COUNTER_OVERFLOW - RA_IRQ_FIRST));
+#endif
+#ifdef CONFIG_RA_GPT2_GPT
+  putreg32(EVENT_GPT2_COUNTER_OVERFLOW,
+           R_ICU_IELSR(GPT2_COUNTER_OVERFLOW - RA_IRQ_FIRST));
+#endif
+#ifdef CONFIG_RA_GPT3_GPT
+  putreg32(EVENT_GPT3_COUNTER_OVERFLOW,
+           R_ICU_IELSR(GPT3_COUNTER_OVERFLOW - RA_IRQ_FIRST));
+#endif
+#ifdef CONFIG_RA_GPT4_GPT
+  putreg32(EVENT_GPT4_COUNTER_OVERFLOW,
+           R_ICU_IELSR(GPT4_COUNTER_OVERFLOW - RA_IRQ_FIRST));
+#endif
+#ifdef CONFIG_RA_GPT5_GPT
+  putreg32(EVENT_GPT5_COUNTER_OVERFLOW,
+           R_ICU_IELSR(GPT5_COUNTER_OVERFLOW - RA_IRQ_FIRST));
+#endif
+#ifdef CONFIG_RA_GPT6_GPT
+  putreg32(EVENT_GPT6_COUNTER_OVERFLOW,
+           R_ICU_IELSR(GPT6_COUNTER_OVERFLOW - RA_IRQ_FIRST));
+#endif
+#ifdef CONFIG_RA_GPT7_GPT
+  putreg32(EVENT_GPT7_COUNTER_OVERFLOW,
+           R_ICU_IELSR(GPT7_COUNTER_OVERFLOW - RA_IRQ_FIRST));
+#endif
+#ifdef CONFIG_RA_GPT8_GPT
+  putreg32(EVENT_GPT8_COUNTER_OVERFLOW,
+           R_ICU_IELSR(GPT8_COUNTER_OVERFLOW - RA_IRQ_FIRST));
+#endif
+#ifdef CONFIG_RA_GPT9_GPT
+  putreg32(EVENT_GPT9_COUNTER_OVERFLOW,
+           R_ICU_IELSR(GPT9_COUNTER_OVERFLOW - RA_IRQ_FIRST));
+#endif
+#ifdef CONFIG_RA_GPT10_GPT
+  putreg32(EVENT_GPT10_COUNTER_OVERFLOW,
+           R_ICU_IELSR(GPT10_COUNTER_OVERFLOW - RA_IRQ_FIRST));
+#endif
+#ifdef CONFIG_RA_GPT11_GPT
+  putreg32(EVENT_GPT11_COUNTER_OVERFLOW,
+           R_ICU_IELSR(GPT11_COUNTER_OVERFLOW - RA_IRQ_FIRST));
+#endif
+#ifdef CONFIG_RA_GPT12_GPT
+  putreg32(EVENT_GPT12_COUNTER_OVERFLOW,
+           R_ICU_IELSR(GPT12_COUNTER_OVERFLOW - RA_IRQ_FIRST));
+#endif
+#ifdef CONFIG_RA_GPT13_GPT
+  putreg32(EVENT_GPT13_COUNTER_OVERFLOW,
+           R_ICU_IELSR(GPT13_COUNTER_OVERFLOW - RA_IRQ_FIRST));
 #endif
 }
 
