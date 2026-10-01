@@ -87,6 +87,12 @@ int prctl(int option, ...)
               pid = va_arg(ap, int);
             }
 
+          if (option == PR_SET_NAME_EXT && !nxsched_may_control(pid))
+            {
+              errcode = EPERM;
+              goto errout;
+            }
+
           /* Get the TCB associated with the PID (handling the special case
            * of pid==0 meaning "this thread")
            */
