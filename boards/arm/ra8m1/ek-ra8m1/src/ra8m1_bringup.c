@@ -37,6 +37,10 @@
 
 #include "ek_ra8m1.h"
 
+#ifdef CONFIG_RA_GPT_TIMER
+#  include "ra_gpt.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -72,6 +76,34 @@ int ra8m1_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_RA_GPT0_GPT
+  /* GPT0 is a 32-bit timer */
+
+  ret = ra_gpt_timer_initialize("/dev/timer0", 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: GPT0 timer failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_RA_GPT9_GPT
+  /* GPT9 is a 16-bit timer */
+
+  ret = ra_gpt_timer_initialize("/dev/timer1", 9);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: GPT9 timer failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DEV_GPIO
+  ret = ra8m1_gpio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: ra8m1_gpio_initialize() failed: %d\n", ret);
     }
 #endif
 

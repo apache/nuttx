@@ -26,6 +26,10 @@ else()
   list(APPEND SRCS ra8m1_userleds.c)
 endif()
 
+if(CONFIG_DEV_GPIO)
+  list(APPEND SRCS ra8m1_gpio.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/ek_ra8m1.ld")

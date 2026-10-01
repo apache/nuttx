@@ -51,5 +51,18 @@
 
 int ra8m1_bringup(void);
 
+/****************************************************************************
+ * Name: ra8m1_gpio_initialize
+ *
+ * Description:
+ *   Register the Arduino shield header's D2-D13 with the generic GPIO
+ *   expander driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_GPIO
+int ra8m1_gpio_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_RA8M1_EK_RA8M1_SRC_EK_RA8M1_H */
