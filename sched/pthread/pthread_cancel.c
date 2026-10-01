@@ -57,6 +57,11 @@ int pthread_cancel(pthread_t thread)
       return ESRCH;
     }
 
+  if (!nxsched_may_control((pid_t)thread))
+    {
+      return EPERM;
+    }
+
   tcb = nxsched_get_tcb((pid_t)thread);
   if (tcb == NULL)
     {
