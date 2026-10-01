@@ -237,3 +237,4 @@ In this section
    wqueue.rst
    tls.rst
    user_identity.rst
+   capabilities.rst
