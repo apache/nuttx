@@ -45,11 +45,25 @@ if(CONFIG_BUILD_KERNEL)
                     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/romfs_boot.c)
   add_dependencies(board board_romfs)
   list(APPEND SRCS ${CMAKE_CURRENT_BINARY_DIR}/romfs_boot.c)
-elseif(CONFIG_BOARD_LATE_INITIALIZE)
+elseif(CONFIG_BOARD_LATE_INITIALIZE AND NOT CONFIG_ETC_ROMFS)
   # empty ROMFS placeholder, see Makefile
   list(APPEND SRCS romfs_stub.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})
+
+if(CONFIG_ETC_ROMFS AND CONFIG_SYSTEM_NXINIT)
+  nuttx_add_romfs(
+    NAME
+    etc
+    MOUNTPOINT
+    etc
+    RCSRCS
+    etc/init.d/init.rc
+    PATH
+    ${CMAKE_CURRENT_BINARY_DIR}/etc)
+
+  target_link_libraries(board PRIVATE romfs_etc)
+endif()
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/qemu.ld")

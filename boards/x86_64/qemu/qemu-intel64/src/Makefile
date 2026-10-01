@@ -23,10 +23,19 @@
 include $(TOPDIR)/Make.defs
 
 CSRCS = qemu_boot.c qemu_bringup.c qemu_net.c qemu_boardinit.c
-CSRCS += $(if $(wildcard romfs_boot.c), romfs_boot.c, romfs_stub.c)
+
+ifneq ($(CONFIG_ETC_ROMFS),y)
+  CSRCS += $(if $(wildcard romfs_boot.c), romfs_boot.c, romfs_stub.c)
+endif
 
 ifeq ($(CONFIG_BOARDCTL_RESET),y)
   CSRCS += qemu_reset.c
+endif
+
+ifeq ($(CONFIG_ETC_ROMFS),y)
+ifeq ($(CONFIG_SYSTEM_NXINIT),y)
+  RCSRCS += etc/init.d/init.rc
+endif
 endif
 
 include $(TOPDIR)/boards/Board.mk

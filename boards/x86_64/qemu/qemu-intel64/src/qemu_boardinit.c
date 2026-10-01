@@ -90,6 +90,7 @@ void board_late_initialize(void)
 
   /* Create ROM disk for mount in nx_start_application */
 
+#ifdef CONFIG_BUILD_KERNEL
   if (NSECTORS(romfs_img_len) > 1)
     {
       ret = romdisk_register(0, romfs_img, NSECTORS(romfs_img_len),
@@ -99,5 +100,6 @@ void board_late_initialize(void)
           ferr("ERROR: Failed to register romfs: %d\n", -ret);
         }
     }
+#endif
 }
 #endif
