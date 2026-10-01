@@ -105,6 +105,41 @@ Without ``CONFIG_ARCH_LEDS``, the LEDs are available through the
 ``userled`` upper half at ``/dev/userleds`` (bit 0 = LED1, bit 1 = LED2,
 bit 2 = LED3), or individually through the ``ULEDIOC_SETLED`` ioctl.
 
+Arduino Shield GPIO
+====================
+
+The Arduino Uno shield header's D2-D5 are wired as inputs and D6-D13 as
+outputs, through the generic GPIO expander driver (``CONFIG_DEV_GPIO``):
+
+    ====  =============  =========  ==========
+    Pin   R7FA8M1AHECBD  Direction  Device
+    ====  =============  =========  ==========
+    D2    P906            Input      /dev/gpio0
+    D3    P907            Input      /dev/gpio1
+    D4    P905            Input      /dev/gpio2
+    D5    P601            Input      /dev/gpio3
+    D6    P602            Output     /dev/gpio4
+    D7    P908            Output     /dev/gpio5
+    D8    P909            Output     /dev/gpio6
+    D9    P603            Output     /dev/gpio7
+    D10   P413            Output     /dev/gpio8
+    D11   P411            Output     /dev/gpio9
+    D12   P410            Output     /dev/gpio10
+    D13   P412            Output     /dev/gpio11
+    ====  =============  =========  ==========
+
+D0/D1 are not registered here: they are SCI9's RXD9/TXD9 pins (see
+`Serial Console`_ below).  The inputs are plain floating inputs, with no
+pull-up or pull-down.
+
+``src/ra8m1_gpio.c`` registers these pins with ``gpio_pin_register()``.
+``apps/examples/gpio`` reads or writes any of them from ``nsh``:
+
+.. code-block:: console
+
+    nsh> gpio /dev/gpio0
+    nsh> gpio -o 1 /dev/gpio4
+
 Serial Console
 ===============
 
@@ -119,6 +154,32 @@ SCI9:
     ==================   ============
 
 SCI9 is the serial console in the default configurations, at 115200 8N1.
+
+Timers
+======
+
+Any of the GPT channels can be registered as a timer.  The board registers
+GPT0 (32-bit) as ``/dev/timer0`` and GPT9 (16-bit) as ``/dev/timer1`` when
+``CONFIG_RA_GPT0_GPT`` and ``CONFIG_RA_GPT9_GPT`` are set (see the
+``GPT`` section of the RA8M1 platform page).  No pins are used.  PCLKD, which
+clocks the timers, is 120 MHz in this port.
+
+The ``timer-gpio`` configuration builds on ``nsh`` with both channels
+enabled, the GPIO expander driver (see `Arduino Shield GPIO`_ above), and
+``apps/examples/timer_gpio`` built in.  Unlike ``apps/examples/timer``,
+which only logs samples to the console, ``timer_gpio`` toggles a GPIO pin
+once per timer period -- so the timer's actual accuracy can be checked
+directly with an oscilloscope or logic analyzer on the pin, rather than
+trusted from console output alone:
+
+.. code-block:: console
+
+    nsh> timer_gpio -t /dev/timer0 -g /dev/gpio4
+
+The period comes from ``CONFIG_EXAMPLES_TIMER_GPIO_INTERVAL`` (200 ms in
+this configuration).  Note that ``/dev/timer1`` (GPT9, 16-bit) tops out at
+about 559 ms at this port's 120 MHz PCLKD: a period that fits
+``/dev/timer0`` may return ``-ERANGE`` on ``/dev/timer1``.
 
 Loading Code
 ============
@@ -165,3 +226,12 @@ nsh-leds
 Same as ``nsh``, but without ``ostest``, and enables the ``userled``
 driver on ``/dev/userleds`` (``CONFIG_ARCH_LEDS`` is not set, so NuttX
 does not drive the LEDs itself; see `LEDs`_ above).
+
+timer-gpio
+----------
+
+Same as ``nsh``, but registers GPT0 and GPT9 as ``/dev/timer0`` and
+``/dev/timer1``, enables the GPIO expander driver on the Arduino shield
+header (see `Arduino Shield GPIO`_ above), and builds in
+``apps/examples/gpio`` and ``apps/examples/timer_gpio`` (see `Timers`_
+above).
