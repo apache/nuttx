@@ -96,6 +96,8 @@
 #define W25_BE                     0xd8    /* Block Erase (64KB)             */
 #define W25_SE                     0x20    /* Sector erase (4KB)             */
 #define W25_CE                     0xc7    /* Chip erase                     */
+#define W25_EN4B                   0xb7    /* Enter 4-byte address mode      */
+#define W25_EX4B                   0xe9    /* Exit 4-byte address mode       */
 #define W25_PD                     0xb9    /* Power down                     */
 #define W25_PURDID                 0xab    /* Release PD, Device ID          */
 #define W25_RDMFID                 0x90    /* Read Manufacturer / Device     */
@@ -127,6 +129,8 @@
 #define W25_JEDEC_CAPACITY_32MBIT  0x16  /* 1024x4096 = 32Mbit memory capacity */
 #define W25_JEDEC_CAPACITY_64MBIT  0x17  /* 2048x4096 = 64Mbit memory capacity */
 #define W25_JEDEC_CAPACITY_128MBIT 0x18  /* 4096x4096 = 128Mbit memory capacity */
+#define W25_JEDEC_CAPACITY_256MBIT 0x19  /* 8192x4096 = 256Mbit memory capacity */
+#define W25_JEDEC_CAPACITY_512MBIT 0x20  /* 16384x4096 = 512Mbit memory capacity */
 
 #define NSECTORS_2MBIT             64    /* 64 sectors x 4096 bytes/sector = 256Kb */
 #define NSECTORS_8MBIT             256   /* 256 sectors x 4096 bytes/sector = 1Mb */
@@ -134,6 +138,8 @@
 #define NSECTORS_32MBIT            1024  /* 1024 sectors x 4096 bytes/sector = 4Mb */
 #define NSECTORS_64MBIT            2048  /* 2048 sectors x 4096 bytes/sector = 8Mb */
 #define NSECTORS_128MBIT           4096  /* 4096 sectors x 4096 bytes/sector = 16Mb */
+#define NSECTORS_256MBIT           8192  /* 8192 sectors x 4096 bytes/sector = 32Mb */
+#define NSECTORS_512MBIT           16384 /* 16384 sectors x 4096 bytes/sector = 64Mb */
 
 /* Status register bit definitions */
 
@@ -239,8 +245,9 @@ struct w25_dev_s
 {
   struct mtd_dev_s      mtd;         /* MTD interface */
   FAR struct spi_dev_s *spi;         /* Saved SPI interface instance */
-  uint16_t              nsectors;    /* Number of erase sectors */
+  uint32_t              nsectors;    /* Number of erase sectors */
   uint8_t               prev_instr;  /* Previous instruction given to W25 device */
+  uint8_t               addresslen;  /* Address length in bytes: 3 or 4 */
 
 #if defined(CONFIG_W25_SECTOR512) && !defined(CONFIG_W25_READONLY)
   uint8_t               flags;       /* Buffered sector flags */
@@ -259,12 +266,14 @@ static inline void w25_purdid(FAR struct w25_dev_s *priv);
 static void w25_lock(FAR struct spi_dev_s *spi);
 static inline void w25_unlock(FAR struct spi_dev_s *spi);
 static inline int w25_readid(FAR struct w25_dev_s *priv);
+static void w25_enter4b(FAR struct w25_dev_s *priv);
 #ifndef CONFIG_W25_READONLY
 static void w25_unprotect(FAR struct w25_dev_s *priv);
 #endif
 static uint8_t w25_waitwritecomplete(FAR struct w25_dev_s *priv);
 static inline void w25_wren(FAR struct w25_dev_s *priv);
 static inline void w25_wrdi(FAR struct w25_dev_s *priv);
+static inline void w25_sendaddr(FAR struct w25_dev_s *priv, off_t address);
 static bool w25_is_erased(struct w25_dev_s *priv,
                           off_t address,
                           off_t size);
@@ -436,6 +445,10 @@ static inline int w25_readid(struct w25_dev_s *priv)
        memory == W25Q_JEDEC_MEMORY_TYPE_C ||
        memory == W25Q_JEDEC_MEMORY_TYPE_D))
     {
+      /* Default to 3-byte address mode */
+
+      priv->addresslen = 3;
+
       /* Okay.. is it a FLASH capacity that we understand? If so, save
        * the FLASH capacity.
        */
@@ -447,7 +460,7 @@ static inline int w25_readid(struct w25_dev_s *priv)
 
       if (capacity == W25_JEDEC_CAPACITY_2MBIT)
         {
-           priv->nsectors = NSECTORS_2MBIT;
+          priv->nsectors = NSECTORS_2MBIT;
         }
 
       /* 8M-bit / 1M-byte
@@ -457,7 +470,7 @@ static inline int w25_readid(struct w25_dev_s *priv)
 
       else if (capacity == W25_JEDEC_CAPACITY_8MBIT)
         {
-           priv->nsectors = NSECTORS_8MBIT;
+          priv->nsectors = NSECTORS_8MBIT;
         }
 
       /* 16M-bit / 2M-byte (2,097,152)
@@ -467,7 +480,7 @@ static inline int w25_readid(struct w25_dev_s *priv)
 
       else if (capacity == W25_JEDEC_CAPACITY_16MBIT)
         {
-           priv->nsectors = NSECTORS_16MBIT;
+          priv->nsectors = NSECTORS_16MBIT;
         }
 
       /* 32M-bit / 4M-byte (4,194,304)
@@ -477,7 +490,7 @@ static inline int w25_readid(struct w25_dev_s *priv)
 
       else if (capacity == W25_JEDEC_CAPACITY_32MBIT)
         {
-           priv->nsectors = NSECTORS_32MBIT;
+          priv->nsectors = NSECTORS_32MBIT;
         }
 
       /* 64M-bit / 8M-byte (8,388,608)
@@ -487,7 +500,7 @@ static inline int w25_readid(struct w25_dev_s *priv)
 
       else if (capacity == W25_JEDEC_CAPACITY_64MBIT)
         {
-           priv->nsectors = NSECTORS_64MBIT;
+          priv->nsectors = NSECTORS_64MBIT;
         }
 
       /* 128M-bit / 16M-byte (16,777,216)
@@ -497,7 +510,29 @@ static inline int w25_readid(struct w25_dev_s *priv)
 
       else if (capacity == W25_JEDEC_CAPACITY_128MBIT)
         {
-           priv->nsectors = NSECTORS_128MBIT;
+          priv->nsectors = NSECTORS_128MBIT;
+        }
+
+      /* 256M-bit / 32M-byte (33,554,432)
+       *
+       * W25Q256JV
+       */
+
+      else if (capacity == W25_JEDEC_CAPACITY_256MBIT)
+        {
+          priv->nsectors   = NSECTORS_256MBIT;
+          priv->addresslen = 4;
+        }
+
+      /* 512M-bit / 64M-byte (67,108,864)
+       *
+       * W25Q512JV, W25Q512NW
+       */
+
+      else if (capacity == W25_JEDEC_CAPACITY_512MBIT)
+        {
+          priv->nsectors   = NSECTORS_512MBIT;
+          priv->addresslen = 4;
         }
       else
         {
@@ -515,6 +550,30 @@ static inline int w25_readid(struct w25_dev_s *priv)
   w25_ferr("ERROR: Unrecognized manufacturer/memory type: %02x/%02x\n",
        manufacturer, memory);
   return -ENODEV;
+}
+
+/****************************************************************************
+ * Name: w25_enter4b
+ ****************************************************************************/
+
+static void w25_enter4b(FAR struct w25_dev_s *priv)
+{
+  /* Lock and configure the SPI bus */
+
+  w25_lock(priv->spi);
+
+  /* Select this FLASH part */
+
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
+
+  /* Send the "Enter 4-byte Address Mode (EN4B)" instruction */
+
+  SPI_SEND(priv->spi, W25_EN4B);
+
+  /* Deselect the FLASH and unlock the bus */
+
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
+  w25_unlock(priv->spi);
 }
 
 /****************************************************************************
@@ -698,6 +757,22 @@ static bool w25_is_erased(struct w25_dev_s *priv, off_t address, off_t size)
 }
 
 /****************************************************************************
+ * Name: w25_sendaddr
+ ****************************************************************************/
+
+static inline void w25_sendaddr(FAR struct w25_dev_s *priv, off_t address)
+{
+  if (priv->addresslen == 4)
+    {
+      SPI_SEND(priv->spi, (address >> 24) & 0xff);
+    }
+
+  SPI_SEND(priv->spi, (address >> 16) & 0xff);
+  SPI_SEND(priv->spi, (address >> 8) & 0xff);
+  SPI_SEND(priv->spi, address & 0xff);
+}
+
+/****************************************************************************
  * Name:  w25_sectorerase
  ****************************************************************************/
 
@@ -737,9 +812,7 @@ static void w25_sectorerase(struct w25_dev_s *priv, off_t sector)
    * (those corresponding to the sector) have any meaning.
    */
 
-  SPI_SEND(priv->spi, (address >> 16) & 0xff);
-  SPI_SEND(priv->spi, (address >> 8) & 0xff);
-  SPI_SEND(priv->spi, address & 0xff);
+  w25_sendaddr(priv, address);
 
   /* Deselect the FLASH */
 
@@ -814,9 +887,7 @@ static void w25_byteread(FAR struct w25_dev_s *priv, FAR uint8_t *buffer,
 
   /* Send the address high byte first. */
 
-  SPI_SEND(priv->spi, (address >> 16) & 0xff);
-  SPI_SEND(priv->spi, (address >> 8) & 0xff);
-  SPI_SEND(priv->spi, address & 0xff);
+  w25_sendaddr(priv, address);
 
   /* Send a dummy byte */
 
@@ -869,9 +940,7 @@ static void w25_pagewrite(struct w25_dev_s *priv, FAR const uint8_t *buffer,
 
       /* Send the address high byte first. */
 
-      SPI_SEND(priv->spi, (address >> 16) & 0xff);
-      SPI_SEND(priv->spi, (address >> 8) & 0xff);
-      SPI_SEND(priv->spi, address & 0xff);
+      w25_sendaddr(priv, address);
 
       /* Then send the page of data */
 
@@ -928,9 +997,7 @@ static inline void w25_bytewrite(struct w25_dev_s *priv,
 
   /* Send the page offset high byte first. */
 
-  SPI_SEND(priv->spi, (offset >> 16) & 0xff);
-  SPI_SEND(priv->spi, (offset >> 8) & 0xff);
-  SPI_SEND(priv->spi, offset & 0xff);
+  w25_sendaddr(priv, offset);
 
   /* Then write the specified number of bytes */
 
@@ -1049,6 +1116,7 @@ static void w25_cacheerase(struct w25_dev_s *priv, off_t sector)
   if (!IS_ERASED(priv))
     {
       off_t esectno  = sector >> (W25_SECTOR_SHIFT - W25_SECTOR512_SHIFT);
+
       w25_finfo("sector: %ld esectno: %d\n", sector, esectno);
 
       w25_sectorerase(priv, esectno);
@@ -1094,6 +1162,7 @@ static void w25_cachewrite(FAR struct w25_dev_s *priv,
         {
           off_t esectno  = sector >>
                            (W25_SECTOR_SHIFT - W25_SECTOR512_SHIFT);
+
           w25_finfo("sector: %ld esectno: %d\n", sector, esectno);
 
           w25_sectorerase(priv, esectno);
@@ -1344,6 +1413,7 @@ static int w25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         {
           FAR struct mtd_geometry_s *geo =
             (FAR struct mtd_geometry_s *)((uintptr_t)arg);
+
           if (geo)
             {
               memset(geo, 0, sizeof(*geo));
@@ -1381,6 +1451,7 @@ static int w25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         {
           FAR struct partition_info_s *info =
             (FAR struct partition_info_s *)arg;
+
           if (info != NULL)
             {
 #ifdef CONFIG_W25_SECTOR512
@@ -1401,19 +1472,19 @@ static int w25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
       case MTDIOC_BULKERASE:
         {
-            /* Erase the entire device */
+          /* Erase the entire device */
 
-            w25_lock(priv->spi);
-            ret = w25_chiperase(priv);
-            w25_unlock(priv->spi);
+          w25_lock(priv->spi);
+          ret = w25_chiperase(priv);
+          w25_unlock(priv->spi);
         }
         break;
 
       case MTDIOC_ERASESTATE:
         {
           FAR uint8_t *result = (FAR uint8_t *)arg;
-          *result = W25_ERASED_STATE;
 
+          *result = W25_ERASED_STATE;
           ret = OK;
         }
         break;
@@ -1492,6 +1563,13 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
         }
       else
         {
+          /* Enter 4-byte address mode if required */
+
+          if (priv->addresslen == 4)
+            {
+              w25_enter4b(priv);
+            }
+
           /* Make sure that the FLASH is unprotected so that we can write
            * into it.
            */
