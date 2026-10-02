@@ -786,6 +786,7 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case GPIOC_READ:
         {
           FAR bool *ptr = (FAR bool *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
 
           filep->f_priv = (FAR void *)dev->int_count;
@@ -805,6 +806,7 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR enum gpio_pintype_e *ptr =
             (FAR enum gpio_pintype_e *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
 
           *ptr = (enum gpio_pintype_e)dev->gp_pintype;
@@ -1027,9 +1029,10 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
        *              false to unmask the interrupt.
        */
 
-    case GPIOC_IRQ_SETMASK:
+      case GPIOC_IRQ_SETMASK:
         {
           bool mask = (bool)arg;
+
           DEBUGASSERT(dev->gp_ops->go_setmask != NULL);
           ret = dev->gp_ops->go_setmask(dev, mask);
           break;
@@ -1258,6 +1261,7 @@ int gpio_pin_register_byname(FAR struct gpio_dev_s *dev,
 int gpio_pin_unregister(FAR struct gpio_dev_s *dev, int minor)
 {
   char devname[16];
+
   snprintf(devname, sizeof(devname), "gpio%u", (unsigned int)minor);
   return gpio_pin_unregister_byname(dev, devname);
 }
