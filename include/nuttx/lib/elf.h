@@ -92,12 +92,12 @@
  *   portion of the build
  */
 
-/* dlopen() needs a name too: it is the only way to tell that a library is
- * already loaded.
+/* A name is also the only way to tell that a library is already loaded, so
+ * dlopen() and DT_NEEDED need one.
  */
 
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__) || \
-    defined(CONFIG_LIBC_DLFCN)
+    defined(CONFIG_LIBC_DLFCN) || CONFIG_LIBC_ELF_MAXDEPEND > 0
 #  define HAVE_LIBC_ELF_NAMES
 #  define LIBC_ELF_NAMEMAX NAME_MAX
 #endif
@@ -798,7 +798,9 @@ FAR const void *libelf_getsymbol(FAR void *handle, FAR const char *name);
  * Name: libelf_uninit
  *
  * Description:
- *   Uninitialize module resources.
+ *   Uninitialize module resources.  Gives up everything the module holds,
+ *   the DT_NEEDED libraries included, so the caller must hold the last
+ *   reference.
  *
  ****************************************************************************/
 

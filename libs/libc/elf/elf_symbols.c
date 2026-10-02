@@ -78,6 +78,57 @@ extern int nglobals;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: libelf_symcallback
+ *
+ * Description:
+ *   libelf_registry_foreach() callback function.  Test if the provided
+ *   module, modp, exports the symbol of interest.  If so, return that symbol
+ *   value and setup the module dependency relationship.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+static int libelf_symcallback(FAR struct module_s *modp, FAR void *arg)
+{
+  FAR struct mod_exportinfo_s *exportinfo = (FAR struct mod_exportinfo_s *)
+                                            arg;
+
+  /* Check if this module exports a symbol of that name */
+
+  exportinfo->symbol = symtab_findbyname(modp->modinfo.exports,
+                                         exportinfo->name,
+                                         modp->modinfo.nexports);
+
+  if (exportinfo->symbol != NULL)
+    {
+      /* Yes.. save the dependency relationship and return SYM_FOUND to
+       * stop the traversal.
+       */
+
+#if CONFIG_LIBC_ELF_MAXDEPEND > 0
+      int ret = libelf_depend(exportinfo->modp, modp);
+
+      if (ret < 0)
+        {
+          berr("ERROR: libelf_depend failed: %d\n", ret);
+          return ret;
+        }
+#endif
+
+      return SYM_FOUND;
+    }
+
+  return SYM_NOT_FOUND;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: libelf_symname
  *
  * Description:
@@ -93,8 +144,8 @@ extern int nglobals;
  *
  ****************************************************************************/
 
-static int libelf_symname(FAR struct mod_loadinfo_s *loadinfo,
-                          FAR const Elf_Sym *sym, Elf_Off sh_offset)
+int libelf_symname(FAR struct mod_loadinfo_s *loadinfo,
+                   FAR const Elf_Sym *sym, Elf_Off sh_offset)
 {
   FAR uint8_t *buffer;
   off_t  offset;
@@ -186,57 +237,6 @@ static int libelf_symname(FAR struct mod_loadinfo_s *loadinfo,
 
   return OK;
 }
-
-/****************************************************************************
- * Name: libelf_symcallback
- *
- * Description:
- *   libelf_registry_foreach() callback function.  Test if the provided
- *   module, modp, exports the symbol of interest.  If so, return that symbol
- *   value and setup the module dependency relationship.
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-static int libelf_symcallback(FAR struct module_s *modp, FAR void *arg)
-{
-  FAR struct mod_exportinfo_s *exportinfo = (FAR struct mod_exportinfo_s *)
-                                            arg;
-
-  /* Check if this module exports a symbol of that name */
-
-  exportinfo->symbol = symtab_findbyname(modp->modinfo.exports,
-                                         exportinfo->name,
-                                         modp->modinfo.nexports);
-
-  if (exportinfo->symbol != NULL)
-    {
-      /* Yes.. save the dependency relationship and return SYM_FOUND to
-       * stop the traversal.
-       */
-
-#if CONFIG_LIBC_ELF_MAXDEPEND > 0
-      int ret = libelf_depend(exportinfo->modp, modp);
-
-      if (ret < 0)
-        {
-          berr("ERROR: libelf_depend failed: %d\n", ret);
-          return ret;
-        }
-#endif
-
-      return SYM_FOUND;
-    }
-
-  return SYM_NOT_FOUND;
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Name: libelf_findsymtab

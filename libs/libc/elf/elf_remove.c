@@ -42,7 +42,9 @@
  * Name: libelf_uninit
  *
  * Description:
- *   Uninitialize module resources.
+ *   Uninitialize module resources.  Gives up everything the module holds,
+ *   the DT_NEEDED libraries included, so the caller must hold the last
+ *   reference.
  *
  ****************************************************************************/
 
@@ -244,8 +246,8 @@ int libelf_remove(FAR void *handle)
     }
 
   /* Give back a reference.  The module goes only when the last one does,
-   * so an rmmod() cannot pull a module out from under a dlopen() that is
-   * still holding it.
+   * so an rmmod() cannot pull a module out from under a dlopen(), or from
+   * under a module that names it in DT_NEEDED.
    */
 
   if (modp->nopen > 1)
