@@ -57,7 +57,6 @@
 /* The first 16 KB of OCRAM1 is reserved by the boot ROM */
 
 #define IMXRT_OCRAM_BASE                (IMXRT_OCRAM1_BASE + 0x4000)
-#define IMXRT_OCRAM_SIZE                (512 * 1024 - 0x4000)
 
 /* WAKEUPMIX Peripheral Domain (0x4200_0000 - 0x42FF_FFFF) ******************/
 

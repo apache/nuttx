@@ -129,7 +129,8 @@
  * The pieces of the OCRAM used for DTCM and ITCM DTCM and ITCM memory spaces
  */
 
-#if defined(CONFIG_ARCH_FAMILY_IMXRT117x)
+#if defined(CONFIG_ARCH_FAMILY_IMXRT117x) || \
+    defined(CONFIG_ARCH_FAMILY_IMXRT118x)
 # define _IMXRT_OCRAM_BASE IMXRT_OCRAM_BASE
 #elif defined(IMXRT_OCRAM2_BASE)
 # define _IMXRT_OCRAM_BASE IMXRT_OCRAM2_BASE
@@ -177,7 +178,12 @@ extern const uint32_t _ram_size[];    /* See linker script */
 #  define PRIMARY_RAM_SIZE     ((uint32_t)_ram_size)
 #elif defined(CONFIG_IMXRT_OCRAM_PRIMARY)
 #  define PRIMARY_RAM_START    _IMXRT_OCRAM_BASE
-#  define PRIMARY_RAM_SIZE     IMXRT_OCRAM_SIZE - (CONFIG_ITCM_USED + CONFIG_DTCM_USED)
+#  if defined(CONFIG_ARCH_FAMILY_IMXRT118x)
+#    define PRIMARY_RAM_SIZE   IMXRT_OCRAM_SIZE
+#  else
+#    define PRIMARY_RAM_SIZE   IMXRT_OCRAM_SIZE - \
+                               (CONFIG_ITCM_USED + CONFIG_DTCM_USED)
+#  endif
 #  define IMXRT_OCRAM_ASSIGNED 1
 #elif defined(CONFIG_IMXRT_SDRAM_PRIMARY)
 #  define PRIMARY_RAM_START    CONFIG_IMXRT_SDRAM_START /* CONFIG_RAM_START */
