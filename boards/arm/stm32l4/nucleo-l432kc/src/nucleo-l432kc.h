@@ -65,6 +65,14 @@
 #  undef HAVE_AT45DB
 #endif
 
+/* Check if we can support W25 FLASH file system */
+
+#if !defined(CONFIG_STM32_SPI1) || !defined(CONFIG_MTD_W25)
+#  undef HAVE_W25
+#else
+#  define HAVE_W25 1
+#endif
+
 /* LED.  User LD3: the green LED is a user LED connected to Arduino signal
  * D13 corresponding to MCU I/O PB3 (pin 26)
  * target.
@@ -82,6 +90,12 @@
 
 #ifdef CONFIG_MTD_AT45DB
 #  define AT45DB_SPI1_CS \
+     (GPIO_PORTA | GPIO_PIN11 | GPIO_OUTPUT_SET | GPIO_OUTPUT | GPIO_PUSHPULL | \
+      GPIO_SPEED_50MHz)
+#endif
+
+#ifdef CONFIG_MTD_W25
+#  define W25_SPI1_CS \
      (GPIO_PORTA | GPIO_PIN11 | GPIO_OUTPUT_SET | GPIO_OUTPUT | GPIO_PUSHPULL | \
       GPIO_SPEED_50MHz)
 #endif
@@ -233,6 +247,18 @@ int stm32_dac7571initialize(const char *devpath);
 
 #ifdef CONFIG_MTD_AT45DB
 int stm32_at45dbinitialize(int minor);
+#endif
+
+/****************************************************************************
+ * Name: stm32_w25initialize
+ *
+ * Description:
+ *   Initialize and register the W25 driver.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_W25
+int stm32_w25initialize(int minor);
 #endif
 
 /****************************************************************************
