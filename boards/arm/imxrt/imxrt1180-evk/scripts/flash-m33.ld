@@ -48,6 +48,8 @@ MEMORY
   flash (rx)  : ORIGIN = 0x28000000, LENGTH = 512K   /* FlexSPI XIP window reserved for the M33 image */
   systcm (rwx): ORIGIN = 0x20000000, LENGTH = 128K   /* CM33 private System TCM */
   ocram2 (rw) : ORIGIN = 0x20500000, LENGTH = 16K    /* OCRAM2 (DMA/TRDC accessible); USB DMA buffers only */
+  itcm_m7 (rw): ORIGIN = 0x303c0000, LENGTH = 256K   /* M7 ITCM alias, accessible to M33 eDMA */
+  dtcm_m7 (rw): ORIGIN = 0x30400000, LENGTH = 256K   /* M7 DTCM alias, accessible to M33 eDMA */
 }
 
 OUTPUT_ARCH(arm)
@@ -180,6 +182,11 @@ SECTIONS
     _boot_loadaddr = ORIGIN(flash);
     _boot_size = LENGTH(flash);
     _ram_size = LENGTH(systcm);
+
+    _sitcm_m7 = ORIGIN(itcm_m7);
+    _eitcm_m7 = ORIGIN(itcm_m7) + LENGTH(itcm_m7);
+    _sdtcm_m7 = ORIGIN(dtcm_m7);
+    _edtcm_m7 = ORIGIN(dtcm_m7) + LENGTH(dtcm_m7);
 }
 
 /* The M7 image starts at 0x2808_0000.  Fail the link rather than silently
