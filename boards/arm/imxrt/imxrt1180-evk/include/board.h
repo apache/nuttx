@@ -33,6 +33,25 @@
 #include "hardware/rt118x/imxrt118x_pinmux.h"
 #include "imxrt_iomuxc.h"
 
+/* FlexSPI1 Port A is connected to the EVK's 16 MiB W25Q128JW NOR.  These
+ * assignments match the MCUXpresso SDK evkmimxrt1180 XIP example.
+ */
+
+#define GPIO_FLEXSPI_DQS IOMUX_PIN( \
+  IOMUXC_PAD_GPIO_B2_07_FLEXSPI1_BUS2BIT_A_DQS, 0, 0)
+#define GPIO_FLEXSPI_SCK IOMUX_PIN( \
+  IOMUXC_PAD_GPIO_B2_08_FLEXSPI1_BUS2BIT_A_SCLK, 0, 0)
+#define GPIO_FLEXSPI_CS IOMUX_PIN( \
+  IOMUXC_PAD_GPIO_B2_09_FLEXSPI1_BUS2BIT_A_SS0_B, 0, 0)
+#define GPIO_FLEXSPI_IO0 IOMUX_PIN( \
+  IOMUXC_PAD_GPIO_B2_10_FLEXSPI1_BUS2BIT_A_DATA00, 0, 0)
+#define GPIO_FLEXSPI_IO1 IOMUX_PIN( \
+  IOMUXC_PAD_GPIO_B2_11_FLEXSPI1_BUS2BIT_A_DATA01, 0, 0)
+#define GPIO_FLEXSPI_IO2 IOMUX_PIN( \
+  IOMUXC_PAD_GPIO_B2_12_FLEXSPI1_BUS2BIT_A_DATA02, 0, 0)
+#define GPIO_FLEXSPI_IO3 IOMUX_PIN( \
+  IOMUXC_PAD_GPIO_B2_13_FLEXSPI1_BUS2BIT_A_DATA03, 0, 0)
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
