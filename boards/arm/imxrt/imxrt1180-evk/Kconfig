@@ -5,6 +5,16 @@
 
 if ARCH_BOARD_IMXRT1180_EVK
 
+config IMXRT_DMA_POOL_SIZE
+	int "RT1180 USB DMA pool size"
+	depends on ARCH_FAMILY_IMXRT118x && IMXRT_USBDEV && USBDEV_DMAMEMORY
+	default 6144
+	range 1024 65536
+	---help---
+		Size in bytes of the RT1180 USB DMA-capable memory pool.
+		The default is 6 KiB.  Increase this when a composite USB
+		configuration requires additional request buffers.
+
 config IMXRT1180_EVK_BOOTLOADER
 	bool "Cortex-M33 bootloader application"
 	default n
