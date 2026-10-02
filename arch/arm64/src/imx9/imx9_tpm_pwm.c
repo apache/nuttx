@@ -541,6 +541,11 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
           break;
         }
 
+      if (info->channels[i].channel == 0)
+        {
+          continue;
+        }
+
       ret = pwm_update_duty(priv, info->channels[i].channel,
                             info->channels[i].duty);
     }
