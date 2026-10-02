@@ -447,7 +447,7 @@ config IMXRT_EDMA_VER2
 		(arch/arm/src/imxrt/imxrt_edma_ver2.c) used by RT118x.
 
 config IMXRT_TRDC
-	bool
+	bool "Trusted Resource Domain Controller (TRDC)"
 	default n
 	---help---
 		Enable the Trusted Resource Domain Controller driver
@@ -455,7 +455,7 @@ config IMXRT_TRDC
 		SoCs.
 
 config IMXRT_ELE
-	bool
+	bool "EdgeLock Enclave (ELE)"
 	default n
 	---help---
 		Enable the NXP EdgeLock Enclave (ELE) messaging driver
