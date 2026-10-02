@@ -313,7 +313,7 @@ static void nxsig_stop_task(int signo)
       if (group->tg_statloc != NULL)
         {
           *group->tg_statloc = 0;
-           group->tg_statloc = NULL;
+          group->tg_statloc = NULL;
         }
 
       /* tg_waitflags == 0 means that the flags are available to another
