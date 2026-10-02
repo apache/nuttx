@@ -817,6 +817,17 @@ config SCHED_NGROUPS
 
 endif # SCHED_USER_IDENTITY
 
+config SCHED_CAPABILITIES
+	bool "Process capabilities"
+	default !DEFAULT_SMALL
+	---help---
+		Task groups hold PR_CAP_RAWIO, PR_CAP_SPAWN and PR_CAP_ADMIN,
+		inherit them from their creator and can drop them with
+		prctl(PR_CAPS_DROP). Raw storage, mount, spawn, reset and
+		power-off then need the matching capability. Without this
+		option every check passes and prctl() refuses PR_CAPS_DROP and
+		PR_CAPS_GET.
+
 config SCHED_THREAD_LOCAL
 	bool "Support __thread/thread_local keyword"
 	default n
