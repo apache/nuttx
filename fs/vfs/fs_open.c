@@ -148,6 +148,13 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
     }
 #endif
 
+  if ((INODE_IS_BLOCK(inode) || INODE_IS_MTD(inode)) &&
+      !nxsched_capable(PR_CAP_RAWIO))
+    {
+      ret = -EPERM;
+      goto errout_with_inode;
+    }
+
 #if defined(CONFIG_BCH) && \
     !defined(CONFIG_DISABLE_MOUNTPOINT) && \
     !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
