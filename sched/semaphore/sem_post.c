@@ -69,7 +69,7 @@
  *
  ****************************************************************************/
 
-int nxsem_post_slow(FAR sem_t *sem)
+static int nxsem_post_slow_resolved(FAR sem_t *sem)
 {
   FAR struct tcb_s *stcb = NULL;
   irqstate_t flags;
@@ -209,6 +209,7 @@ int nxsem_post_slow(FAR sem_t *sem)
                 {
                   uint32_t blocking_bit = dq_empty(SEM_WAITLIST(sem)) ?
                     0 : NXSEM_MBLOCKING_BIT;
+
                   atomic_set(NXSEM_MHOLDER(sem),
                             ((uint32_t)stcb->pid) | blocking_bit);
                 }
@@ -266,5 +267,14 @@ int nxsem_post_slow(FAR sem_t *sem)
 
   leave_critical_section(flags);
 
+  return ret;
+}
+
+int nxsem_post_slow(FAR sem_t *sem)
+{
+  FAR sem_t *resolved = nxsem_resolve(sem);
+  int ret = nxsem_post_slow_resolved(resolved);
+
+  nxsem_unresolve(sem, resolved);
   return ret;
 }
