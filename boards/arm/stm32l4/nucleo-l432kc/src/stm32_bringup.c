@@ -210,6 +210,18 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef HAVE_W25
+  /* Initialize and register the W25 FLASH. */
+
+  ret = stm32_w25initialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize W25 minor %d: %d\n",
+             0, ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_PWM
   /* Initialize PWM and register the PWM device. */
 

@@ -52,6 +52,10 @@ if(CONFIG_MTD_AT45DB)
   list(APPEND SRCS stm32_at45db.c)
 endif()
 
+if(CONFIG_MTD_W25)
+  list(APPEND SRCS stm32_w25.c)
+endif()
+
 if(CONFIG_SENSORS_INA226)
   list(APPEND SRCS stm32_ina226.c)
 endif()
