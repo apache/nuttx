@@ -27,6 +27,8 @@
 #include <nuttx/config.h>
 
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <syslog.h>
 
 #include <nuttx/syslog/syslog.h>
@@ -63,7 +65,15 @@ void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
        * of structures in the NuttX syscalls does not work.
        */
 
-#ifdef va_copy
+#if defined(CONFIG_BUILD_KERNEL) && !defined(__KERNEL__)
+      FAR char *msg;
+
+      if (vasprintf(&msg, fmt, ap) >= 0)
+        {
+          nx_vsyslog(priority, msg, NULL);
+          free(msg);
+        }
+#elif defined(va_copy)
       va_list copy;
 
       va_copy(copy, ap);
