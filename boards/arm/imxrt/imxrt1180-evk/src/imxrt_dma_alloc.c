@@ -64,7 +64,7 @@
  */
 
 #define IMXRT_DMA_ALIGNMENT   32
-#define IMXRT_DMA_POOL_SIZE   (6 * 1024)
+#define IMXRT_DMA_POOL_SIZE   CONFIG_IMXRT_DMA_POOL_SIZE
 
 /****************************************************************************
  * Private Data
