@@ -69,6 +69,11 @@ int pthread_setschedprio(pthread_t thread, int prio)
   struct sched_param param;
   int ret;
 
+  if (!nxsched_may_control((pid_t)thread))
+    {
+      return EPERM;
+    }
+
 #ifdef CONFIG_SCHED_SPORADIC
   /* Get the current sporadic scheduling parameters.  Those will not be
    * modified.

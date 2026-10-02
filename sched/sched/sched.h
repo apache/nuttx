@@ -628,4 +628,18 @@ static inline_function int nxsched_select_cpu(cpu_set_t affinity)
   return cpu;
 }
 #  endif
+
+static inline_function bool nxsched_may_control(pid_t pid)
+{
+  FAR struct tcb_s *tcb;
+
+  if (pid == 0 || nxsched_capable(PR_CAP_ADMIN))
+    {
+      return true;
+    }
+
+  tcb = nxsched_get_tcb(pid);
+  return tcb == NULL || tcb->group == nxsched_self()->group;
+}
+
 #endif /* __SCHED_SCHED_SCHED_H */

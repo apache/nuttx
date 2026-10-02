@@ -37,6 +37,7 @@
 #include <nuttx/sched.h>
 
 #include "pthread/pthread.h"
+#include "sched/sched.h"
 
 #ifdef CONFIG_SMP
 
@@ -78,6 +79,11 @@ int pthread_setaffinity_np(pthread_t thread, size_t cpusetsize,
 
   sinfo("thread ID=%d cpusetsize=%zu cpuset=%ju\n",
         (int)thread, cpusetsize, (uintmax_t)*cpuset);
+
+  if (!nxsched_may_control((pid_t)thread))
+    {
+      return EPERM;
+    }
 
   /* Let nxsched_set_affinity do all of the work, adjusting the return
    * value.

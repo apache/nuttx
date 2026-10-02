@@ -165,6 +165,11 @@ int nxtask_create(FAR const char *name, int priority,
                   FAR void *stack_addr, int stack_size, main_t entry,
                   FAR char * const argv[], FAR char * const envp[])
 {
+  if (!nxsched_capable(PR_CAP_SPAWN))
+    {
+      return -EPERM;
+    }
+
   return nxthread_create(name, TCB_FLAG_TTYPE_TASK, priority, stack_addr,
                          stack_size, entry, argv, envp ? envp : environ);
 }

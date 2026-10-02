@@ -39,6 +39,7 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/drivers/drivers.h>
@@ -121,6 +122,11 @@ static int bch_open(FAR struct file *filep)
   FAR struct inode *inode = filep->f_inode;
   FAR struct bchlib_s *bch;
   int ret = OK;
+
+  if (!nxsched_capable(PR_CAP_RAWIO))
+    {
+      return -EPERM;
+    }
 
   DEBUGASSERT(inode->i_private);
   bch = inode->i_private;
@@ -240,24 +246,24 @@ static off_t bch_seek(FAR struct file *filep, off_t offset, int whence)
 
   switch (whence)
     {
-    case SEEK_CUR:
-      newpos = filep->f_pos + offset;
-      break;
+      case SEEK_CUR:
+        newpos = filep->f_pos + offset;
+        break;
 
-    case SEEK_SET:
-      newpos = offset;
-      break;
+      case SEEK_SET:
+        newpos = offset;
+        break;
 
-    case SEEK_END:
-      newpos = (off_t)bch->sectsize * bch->nsectors + offset;
-      break;
+      case SEEK_END:
+        newpos = (off_t)bch->sectsize * bch->nsectors + offset;
+        break;
 
-    default:
+      default:
 
-      /* Return EINVAL if the whence argument is invalid */
+        /* Return EINVAL if the whence argument is invalid */
 
-      nxmutex_unlock(&bch->lock);
-      return -EINVAL;
+        nxmutex_unlock(&bch->lock);
+        return -EINVAL;
     }
 
   /* Opengroup.org:
