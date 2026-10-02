@@ -61,7 +61,12 @@ int bootloader_main(int argc, char *argv[])
   up_disable_irq(IMXRT_IRQ_LPUART1);
   irq_detach(IMXRT_IRQ_LPUART1);
 
-  if (imxrt118x_release_cm7(M7_ENTRY) < 0)
+  if (imxrt118x_prepare_cm7(M7_ENTRY) < 0)
+    {
+      return EXIT_FAILURE;
+    }
+
+  if (imxrt118x_start_cm7() < 0)
     {
       return EXIT_FAILURE;
     }

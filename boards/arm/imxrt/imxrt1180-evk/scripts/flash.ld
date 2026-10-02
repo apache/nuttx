@@ -30,18 +30,17 @@
  *   0x2800_0000 .. 0x2807_FFFF   M33 image (512 KB reserved)
  *   0x2808_0000 .. 0x287F_FFFF   M7 image  (this script, 7.5 MB window)
  *
- * NuttX's stack, .data, .ramfunc and .bss live in OCRAM1, which the M33
- * grants the M7 R/W/X through TRDC2 MRC_W3 before releasing it.  DTCM and
- * ITCM are declared above but are not used by any section; they are
- * tightly-coupled to the M7 core and have no TRDC in the access path, so
- * they remain available for opt-in placement.
+ * NuttX's .data, .bss, idle stack and primary heap live in DTCM.  OCRAM1,
+ * which the M33 grants the M7 R/W/X through TRDC2 MRC_W3 before releasing
+ * it, holds USB DMA storage and the secondary heap.  ITCM holds the
+ * .ramfunc section, including selected hot code.
  */
 
 MEMORY
 {
   flash (rx)  : ORIGIN = 0x28080000, LENGTH = 4M      /* Cortex-M7 XIP window (after the 512K M33/bl reserve) */
   ocram (rwx) : ORIGIN = 0x20484000, LENGTH = 480K    /* OCRAM1 minus ROM patch (0x20480000..0x20483fff) and M33 reserve (0x204fc000..0x204fffff) */
-  dtcm  (rwx) : ORIGIN = 0x20000000, LENGTH = 256K    /* M7 DTCM (opt-in) */
+  dtcm  (rwx) : ORIGIN = 0x20000000, LENGTH = 256K    /* M7 DTCM primary RAM */
   itcm  (rwx) : ORIGIN = 0x00000000, LENGTH = 256K    /* M7 ITCM (opt-in) */
 }
 
@@ -51,10 +50,34 @@ ENTRY(_stext)
 
 SECTIONS
 {
-    .text : ALIGN(4)
+    .vectors :
     {
         _stext = ABSOLUTE(.);
-        *(.vectors)
+        KEEP(*(.vectors))
+    } > flash
+
+    .ramfunc :
+    {
+        . = ALIGN(8);
+        _sramfuncs = ABSOLUTE(.);
+        FILL(0xff)
+        . = 0x40;
+        *(.text.exception_common)
+        *(.text.arm_doirq)
+        *(.text.arm_ack_irq)
+        *(.text.irq_dispatch)
+        *(.text.imxrt_gpio_interrupt)
+        *(.text.memcpy)
+        *(.text.memset)
+        *(.ramfunc .ramfunc.*)
+        . = ALIGN(8);
+        _eramfuncs = ABSOLUTE(.);
+    } > itcm AT > flash
+
+    _framfuncs = LOADADDR(.ramfunc);
+
+    .text : ALIGN(4)
+    {
         *(.text .text.*)
         *(.fixup)
         *(.gnu.warning)
@@ -111,16 +134,19 @@ SECTIONS
         CONSTRUCTORS
         . = ALIGN(4);
         _edata = ABSOLUTE(.);
-    } > ocram AT > flash
+    } > dtcm AT > flash
 
-    .ramfunc ALIGN(4):
+    .dmamemory (NOLOAD) :
     {
-        _sramfuncs = ABSOLUTE(.);
-        *(.ramfunc  .ramfunc.*)
-        _eramfuncs = ABSOLUTE(.);
-    } > ocram AT > flash
+        . = ALIGN(2048);
+        _sdmamemory = ABSOLUTE(.);
+        *(.dmamemory .dmamemory.*)
+        . = ALIGN(32);
+        _edmamemory = ABSOLUTE(.);
+    } > ocram
 
-    _framfuncs = LOADADDR(.ramfunc);
+    _socramheap = ALIGN(8);
+    _eocramheap = ORIGIN(ocram) + LENGTH(ocram);
 
     .bss :
     {
@@ -130,7 +156,7 @@ SECTIONS
         *(COMMON)
         . = ALIGN(8);
         _ebss = ABSOLUTE(.);
-    } > ocram
+    } > dtcm
 
     /* Stabs debugging sections. */
 
@@ -149,5 +175,5 @@ SECTIONS
 
     _boot_loadaddr = ORIGIN(flash);
     _boot_size = LENGTH(flash);
-    _ram_size = LENGTH(ocram);
+    _ram_size = LENGTH(dtcm);
 }
