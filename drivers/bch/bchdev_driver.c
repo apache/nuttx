@@ -39,6 +39,7 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/drivers/drivers.h>
@@ -121,6 +122,11 @@ static int bch_open(FAR struct file *filep)
   FAR struct inode *inode = filep->f_inode;
   FAR struct bchlib_s *bch;
   int ret = OK;
+
+  if (!nxsched_capable(PR_CAP_RAWIO))
+    {
+      return -EPERM;
+    }
 
   DEBUGASSERT(inode->i_private);
   bch = inode->i_private;
