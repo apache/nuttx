@@ -196,6 +196,7 @@ int group_allocate(FAR struct tcb_s *tcb, uint8_t ttype)
     {
       group = &g_kthread_group;
       tcb->group = group;
+      group->tg_caps = PR_CAP_ALL;
       if (group->tg_info)
         {
           return OK;
@@ -249,6 +250,9 @@ int group_allocate(FAR struct tcb_s *tcb, uint8_t ttype)
     {
       goto errout_with_group;
     }
+
+  group->tg_caps = this_task()->group != NULL ?
+                   this_task()->group->tg_caps : PR_CAP_ALL;
 
   /* Initialize file descriptors for the TCB */
 
