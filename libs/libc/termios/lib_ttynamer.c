@@ -29,6 +29,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <nuttx/lib/lib.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -63,25 +65,36 @@ int ttyname_r(int fd, FAR char *buf, size_t buflen)
       return ENOTTY;
     }
 
-  if (buflen >= TTY_NAME_MAX)
+  /* The F_GETPATH handler copies the file path into the caller buffer
+   * bounded by PATH_MAX, not by any tty-specific limit, so the path must
+   * always land in a PATH_MAX-sized buffer first.  Only a caller buffer
+   * of that size can receive it directly.
+   */
+
+  if (buflen >= PATH_MAX)
     {
       return fcntl(fd, F_GETPATH, buf) < 0 ? get_errno() : 0;
     }
   else
     {
-      char name[TTY_NAME_MAX];
+      FAR char *path = lib_get_tempbuffer(PATH_MAX);
+      int ret;
 
-      if (fcntl(fd, F_GETPATH, name) < 0)
+      if (fcntl(fd, F_GETPATH, path) < 0)
         {
-          return get_errno();
+          ret = get_errno();
+        }
+      else if (strlen(path) >= buflen)
+        {
+          ret = ERANGE;
+        }
+      else
+        {
+          strlcpy(buf, path, buflen);
+          ret = OK;
         }
 
-      if (strlen(name) >= buflen)
-        {
-          return ERANGE;
-        }
-
-      strlcpy(buf, name, buflen);
-      return OK;
+      lib_put_tempbuffer(path);
+      return ret;
     }
 }
