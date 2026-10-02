@@ -62,6 +62,27 @@ config STM32_SDMMC_IDMA
 	---help---
 		Support IDMA data transfers.
 
+config STM32_SDMMC_IDMA_BOUNCE_BUFFER
+	bool "Support an SDMMC IDMA bounce buffer"
+	depends on STM32_SDMMC_IDMA
+	---help---
+		Use an internal, cache-line aligned buffer when a client buffer
+		cannot be accessed directly by the STM32H7 SDMMC IDMA or does not
+		meet its alignment requirements.  The internal buffer must be
+		linked into IDMA-accessible memory, normally AXI SRAM.
+
+config STM32_SDMMC_IDMA_BOUNCE_BLOCKS
+	int "SDMMC IDMA bounce buffer size in 512-byte blocks"
+	default 8
+	range 1 128
+	depends on STM32_SDMMC_IDMA_BOUNCE_BUFFER
+	---help---
+		Number of 512-byte blocks held by each SDMMC IDMA bounce buffer.
+		The driver advertises this size as its maximum request size so the
+		MMC/SD layer automatically splits larger block I/O.  Other direct
+		SDIO users must still honor the advertised maximum; DMA preflight
+		rejects any request larger than this buffer.
+
 if STM32_SDMMC
 
 config STM32_SDMMC_XFRDEBUG
