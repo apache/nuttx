@@ -41,6 +41,7 @@
 #include <nuttx/binfmt/symtab.h>
 #include <nuttx/drivers/ramdisk.h>
 #include <nuttx/reboot_notifier.h>
+#include <nuttx/sched.h>
 #include <nuttx/trace.h>
 
 #ifdef CONFIG_NX
@@ -413,6 +414,12 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 
       case BOARDIOC_POWEROFF:
         {
+          if (!nxsched_capable(PR_CAP_ADMIN))
+            {
+              ret = -EPERM;
+              break;
+            }
+
           reboot_notifier_call_chain(SYS_POWER_OFF, (FAR void *)arg);
           up_flush_dcache_all();
           ret = board_power_off((int)arg);
@@ -430,6 +437,12 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 
       case BOARDIOC_RESET:
         {
+          if (!nxsched_capable(PR_CAP_ADMIN))
+            {
+              ret = -EPERM;
+              break;
+            }
+
           g_nx_initstate = OSINIT_RESET;
           sched_trace_mark("RESET");
           reboot_notifier_call_chain(SYS_RESTART, (FAR void *)arg);
