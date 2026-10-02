@@ -587,7 +587,10 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
             }
 
           sigemptyset(&stcb->sigwaitmask);
-          wd_cancel(&stcb->waitdog);
+          if (WDOG_ISACTIVE(&stcb->waitdog))
+            {
+              wd_cancel(&stcb->waitdog);
+            }
 
           /* Remove the task from waiting list */
 
@@ -650,7 +653,10 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
             }
 
           sigemptyset(&stcb->sigwaitmask);
-          wd_cancel(&stcb->waitdog);
+          if (WDOG_ISACTIVE(&stcb->waitdog))
+            {
+              wd_cancel(&stcb->waitdog);
+            }
 
           /* Remove the task from waiting list */
 
@@ -788,6 +794,7 @@ int nxsig_dispatch(pid_t pid, FAR siginfo_t *info, bool thread)
        */
 
       FAR struct task_group_s *group = task_getgroup(pid);
+
       if (group != NULL)
         {
           return group_signal(group, info);
@@ -799,6 +806,7 @@ int nxsig_dispatch(pid_t pid, FAR siginfo_t *info, bool thread)
       /* Get the TCB associated with the thread TID */
 
       FAR struct tcb_s *stcb = nxsched_get_tcb(pid);
+
       if (stcb != NULL)
         {
           return nxsig_tcbdispatch(stcb, info, false);
