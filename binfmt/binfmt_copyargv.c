@@ -71,9 +71,12 @@
 int binfmt_copyargv(FAR char * const **copy, FAR char * const *argv)
 {
   FAR char **argvbuf = NULL;
+  FAR const char *arg;
   FAR char *ptr;
+  FAR char *end;
   size_t argvsize;
   size_t argsize = 0;
+  size_t len;
   int nargs = 0;
   int i;
 
@@ -81,13 +84,13 @@ int binfmt_copyargv(FAR char * const **copy, FAR char * const *argv)
 
   if (argv)
     {
-      for (i = 0; argv[i]; i++)
+      for (i = 0; (arg = argv[i]) != NULL; i++)
         {
           /* Increment the size of the allocation with the size of the next
            * string
            */
 
-          argsize += strlen(argv[i]) + 1;
+          argsize += strlen(arg) + 1;
           nargs++;
 
           /* This is a sanity check to prevent running away with an
@@ -121,12 +124,20 @@ int binfmt_copyargv(FAR char * const **copy, FAR char * const *argv)
 
           argvbuf = (FAR char **)ptr;
           ptr    += argvsize;
-          for (i = 0; argv[i]; i++)
+          end     = ptr + argsize;
+          for (i = 0; i < nargs; i++)
             {
-              argvbuf[i] = ptr;
-              argsize    = strlen(argv[i]) + 1;
-              memcpy(ptr, argv[i], argsize);
-              ptr       += argsize;
+              arg = argv[i];
+              if (ptr == end || arg == NULL)
+                {
+                  kmm_free(argvbuf);
+                  return -EFAULT;
+                }
+
+              len        = strnlen(arg, end - ptr - 1);
+              argvbuf[i] = memcpy(ptr, arg, len);
+              ptr[len]   = '\0';
+              ptr       += len + 1;
             }
 
           /* Terminate the argv[] list */
