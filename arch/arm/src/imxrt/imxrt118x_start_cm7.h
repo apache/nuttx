@@ -35,6 +35,7 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-int imxrt118x_release_cm7(uintptr_t vtor);
+int imxrt118x_prepare_cm7(uintptr_t vtor);
+int imxrt118x_start_cm7(void);
 
 #endif /* __ARCH_ARM_SRC_IMXRT_IMXRT118X_START_CM7_H */
