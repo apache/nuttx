@@ -32,6 +32,7 @@
 #include <assert.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/sched.h>
 
 #include "inode/inode.h"
 #include "vfs/vfs.h"
@@ -61,6 +62,11 @@ int nx_umount2(FAR const char *target, unsigned int flags)
   FAR struct inode *blkdrvr_inode = NULL;
   struct inode_search_s desc;
   int ret;
+
+  if (!nxsched_capable(PR_CAP_RAWIO))
+    {
+      return -EPERM;
+    }
 
   /* Verify required pointer arguments */
 
