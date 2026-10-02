@@ -36,7 +36,10 @@
 #include "arm_internal.h"
 #include "imxrt118x_ele.h"
 #include "imxrt118x_start_cm7.h"
+#include "imxrt_edma.h"
 #include "hardware/imxrt_ccm.h"
+#include "imxrt_clockconfig_ver3.h"
+#include "hardware/rt118x/imxrt118x_edma.h"
 #include "hardware/rt117x/imxrt117x_dcdc.h"
 #include "hardware/rt118x/imxrt118x_anadig.h"
 #include "hardware/rt118x/imxrt118x_blkctrl.h"
@@ -48,6 +51,21 @@
 
 #define CCM_M7_ROOT_CONFIG          (CCM_CR_CTRL_MUX_SRCSEL(2) | \
                                      CCM_CR_CTRL_DIV(1))
+
+extern char _sitcm_m7[];
+extern char _eitcm_m7[];
+extern char _sdtcm_m7[];
+extern char _edtcm_m7[];
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Zero fill pattern for the M7 TCM ECC initialization.  It lives in flash
+ * (.rodata), which is readable by eDMA4 and guaranteed to be zero.
+ */
+
+static const uint64_t g_m7_tcm_fill aligned_data(8) = 0;
 
 /****************************************************************************
  * Private Functions
@@ -169,14 +187,114 @@ static int prepare_m7_power(void)
 }
 
 /****************************************************************************
+ * Name: imxrt118x_initialize_m7_tcm_ecc
+ *
+ * Description:
+ *   Initialize the M7 ITCM and DTCM ECC using eDMA before starting the M7.
+ *
+ ****************************************************************************/
+
+static int imxrt118x_initialize_m7_tcm_ecc(void)
+{
+  const uintptr_t starts[] =
+  {
+    (uintptr_t)_sitcm_m7,
+    (uintptr_t)_sdtcm_m7
+  };
+
+  const uintptr_t ends[] =
+  {
+    (uintptr_t)_eitcm_m7,
+    (uintptr_t)_edtcm_m7
+  };
+
+  uintptr_t tcd = IMXRT_EDMA_TCD(IMXRT_DMA4_BASE, 0);
+  unsigned int i;
+
+  /* The bootloader only needs this focused eDMA4 write to initialize the
+   * M7 TCM ECC; it does not need to initialize the full NuttX DMA subsystem.
+   */
+
+  /* Run eDMA4 from WAKEUP_AXI at SYS_PLL3_OUT / 2 (240 MHz). */
+
+  if (imxrt_ccm_configure_root_clock(CCM_CR_WAKEUP_AXI,
+                                     SYS_PLL3_OUT, 2) < 0 ||
+      imxrt_ccm_gate_on(CCM_LPCG_EDMA4, true) < 0)
+    {
+      return -EIO;
+    }
+
+  for (i = 0; i < sizeof(starts) / sizeof(starts[0]); i++)
+    {
+      /* Clear stale DONE and error status.  Hardware requests and the error
+       * interrupt stay disabled; the transfer is started by software and
+       * completion is polled.
+       */
+
+      putreg32(EDMA_CH_CSR_DONE, tcd + IMXRT_EDMA_CH_CSR_OFFSET);
+      putreg32(EDMA_CH_ES_ERR, tcd + IMXRT_EDMA_CH_ES_OFFSET);
+
+      /* Fill the whole region with 64-bit zero writes. */
+
+      putreg32((uintptr_t)&g_m7_tcm_fill,
+               tcd + IMXRT_EDMA_TCD_SADDR_OFFSET);
+      putreg32(starts[i], tcd + IMXRT_EDMA_TCD_DADDR_OFFSET);
+      putreg32(ends[i] - starts[i], tcd + IMXRT_EDMA_TCD_NBYTES_OFFSET);
+      putreg16(EDMA_TCD_ATTR_DSIZE(EDMA_64BIT) |
+               EDMA_TCD_ATTR_SSIZE(EDMA_64BIT),
+               tcd + IMXRT_EDMA_TCD_ATTR_OFFSET);
+
+      /* Keep re-reading the same zero source; step the destination by one
+       * 64-bit write.
+       */
+
+      putreg16(0, tcd + IMXRT_EDMA_TCD_SOFF_OFFSET);
+      putreg16(sizeof(g_m7_tcm_fill), tcd + IMXRT_EDMA_TCD_DOFF_OFFSET);
+
+      /* One major loop iteration; the whole region is in NBYTES. */
+
+      putreg16(1, tcd + IMXRT_EDMA_TCD_CITER_OFFSET);
+      putreg16(1, tcd + IMXRT_EDMA_TCD_BITER_OFFSET);
+
+      /* No destination address adjustment or scatter/gather chain. */
+
+      putreg32(0, tcd + IMXRT_EDMA_TCD_DLAST_SGA_OFFSET);
+
+      /* Launch the transfer by software request. */
+
+      putreg16(EDMA_TCD_CSR_START | EDMA_TCD_CSR_DREQ,
+               tcd + IMXRT_EDMA_TCD_CSR_OFFSET);
+
+      /* An error does not set DONE, so poll for both. */
+
+      while ((getreg32(tcd + IMXRT_EDMA_CH_CSR_OFFSET) &
+              EDMA_CH_CSR_DONE) == 0)
+        {
+          if ((getreg32(tcd + IMXRT_EDMA_CH_ES_OFFSET) &
+               EDMA_CH_ES_ERR) != 0)
+            {
+              /* Clear error and return */
+
+              putreg32(EDMA_CH_ES_ERR, tcd + IMXRT_EDMA_CH_ES_OFFSET);
+              return -EIO;
+            }
+        }
+
+      putreg32(EDMA_CH_CSR_DONE, tcd + IMXRT_EDMA_CH_CSR_OFFSET);
+    }
+
+  return 0;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: imxrt118x_release_cm7
+ * Name: imxrt118x_prepare_cm7
  ****************************************************************************/
 
-int imxrt118x_release_cm7(uintptr_t vtor)
+int imxrt118x_prepare_cm7(uintptr_t vtor)
 {
   uint32_t cfg;
   int ret;
@@ -205,7 +323,8 @@ int imxrt118x_release_cm7(uintptr_t vtor)
   /* Program the M7 initial VTOR and force its clocks on. */
 
   cfg = getreg32(IMXRT_AON_M7_CFG);
-  cfg = (cfg & ~AON_M7_CFG_INITVTOR_MASK) |
+  cfg = (cfg & ~(AON_M7_CFG_TCM_SIZE_MASK |
+                 AON_M7_CFG_INITVTOR_MASK)) |
         AON_M7_CFG_INITVTOR(vtor >> AON_M7_CFG_INITVTOR_SHIFT) |
         AON_M7_CFG_HCLK_FORCE_ON |
         AON_M7_CFG_CORECLK_FORCE_ON;
@@ -223,6 +342,21 @@ int imxrt118x_release_cm7(uintptr_t vtor)
       return ret;
     }
 
+  ret = imxrt118x_initialize_m7_tcm_ecc();
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: imxrt118x_start_cm7
+ ****************************************************************************/
+
+int imxrt118x_start_cm7(void)
+{
   /* Kick the M7 by toggling its clock around WAIT deassertion.
    */
 
