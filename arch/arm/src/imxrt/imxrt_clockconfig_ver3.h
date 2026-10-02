@@ -282,6 +282,13 @@ EXTERN const struct clock_configuration_s g_initial_clkconfig;
 #define imxrt_clockoff_usboh3()     imxrt_ccm_gate_on(CCM_LPCG_USB, false)
 #define imxrt_clockrun_usboh3()     imxrt_ccm_gate_on(CCM_LPCG_USB, true)
 
+#define imxrt_clockall_flexspi()    imxrt_ccm_gate_on(CCM_LPCG_FLEXSPI1, true)
+#define imxrt_clockoff_flexspi()    imxrt_ccm_gate_on(CCM_LPCG_FLEXSPI1, false)
+#define imxrt_clockrun_flexspi()    imxrt_ccm_gate_on(CCM_LPCG_FLEXSPI1, true)
+#define imxrt_clockall_flexspi2()   imxrt_ccm_gate_on(CCM_LPCG_FLEXSPI2, true)
+#define imxrt_clockoff_flexspi2()   imxrt_ccm_gate_on(CCM_LPCG_FLEXSPI2, false)
+#define imxrt_clockrun_flexspi2()   imxrt_ccm_gate_on(CCM_LPCG_FLEXSPI2, true)
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
