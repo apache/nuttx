@@ -115,6 +115,14 @@
 
 #define BOARD_WD_PRESCALER     1048576
 
+/* Ethernet MII management clock (MDC).
+ *
+ * The MIIM module is clocked at 100 MHz (PBCLK5), as on the other PIC32MZ
+ * parts.  The LAN8720A accepts MDC up to 2.5 MHz.
+ */
+
+#define BOARD_EMAC_MIIM_DIV    40        /* 100MHz/40 = 2.5MHz */
+
 /* LED definitions **********************************************************
  *
  * Two user LEDs (EV49N51A schematic 02-01134 rev 2), both active high

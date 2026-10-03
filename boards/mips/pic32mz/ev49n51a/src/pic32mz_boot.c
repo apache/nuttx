@@ -48,6 +48,17 @@
 
 void pic32mz_boardinitialize(void)
 {
+#ifdef CONFIG_PIC32MZ_ETHERNET
+  /* Reset the PHY now that its 50 MHz reference clock is running, so that
+   * it starts from a known state.  The LAN8720A needs nRST low for at
+   * least 100 us.
+   */
+
+  pic32mz_configgpio(GPIO_PHY_NRST);
+  up_udelay(200);
+  pic32mz_gpiowrite(GPIO_PHY_NRST, true);
+#endif
+
 #ifdef CONFIG_PIC32MZ_SPI1
   pic32mz_spidev_initialize();
 #endif

@@ -70,8 +70,8 @@ to Wi-Fi Bridge) board, based on the WFI32E01PE module
 
 The W1 special function register layout and clock tree differ from the
 EC/EF families, and software must start the oscillator, the PLLs and the
-power management unit at boot. Supported: UART, timers, GPIO and SPI
-(tested), I2C (build only). Ethernet and Wi-Fi are not supported.
+power management unit at boot. Supported: UART, timers, GPIO, SPI and
+Ethernet (tested), I2C (build only). Wi-Fi is not supported.
 
 Supported Boards
 ================
