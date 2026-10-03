@@ -82,11 +82,19 @@
 /* EWPLL: 40 MHz POSC / 4 * 160 = 1600 MHz VCO; / 32 = 50 MHz RMII
  * reference on ETH_CLK_OUT, / 10 (CFGCON3.ETHPLLPOSTDIV2) = 160 MHz for
  * Wi-Fi.  Field layout [DS Reg 11-6]; the field values, and starting it
- * with RST and PWDN set, are [EX].
+ * with RST and PWDN set, are [EX].  ETH_CLK_OUT is only enabled when the
+ * Ethernet MAC uses it as its RMII reference clock [DS Reg 11-6, 38-2].
  */
 
+#if defined(CONFIG_PIC32MZ_ETHERNET) && \
+    !defined(CONFIG_PIC32MZ_W1_ETH_EXTREFCLK)
+#  define WFI32_EWPLL_CLKOUTEN  PLLCON_CLKOUTEN
+#else
+#  define WFI32_EWPLL_CLKOUTEN  0
+#endif
+
 #define WFI32_EWPLLCON \
-  (PLLCON_CLKOUTEN | PLLCON_REFDIV(4) | PLLCON_FBDIV(160) | \
+  (WFI32_EWPLL_CLKOUTEN | PLLCON_REFDIV(4) | PLLCON_FBDIV(160) | \
    PLLCON_RST | PLLCON_POSTDIV1(32) | PLLCON_PWDN | PLLCON_BSWSEL(2))
 
 #define WFI32_CFGCON3           CFGCON3_ETHPLLPOSTDIV2(10) /* [EX] */

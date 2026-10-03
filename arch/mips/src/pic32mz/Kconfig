@@ -121,6 +121,18 @@ config PIC32MZ_W1_FLASH_WAITSTATES
 		WFI32_Ethernet_Wi-Fi_Bridge_OOB example.  The reset value, 7, is
 		the most conservative choice.
 
+config PIC32MZ_W1_ETH_EXTREFCLK
+	bool "PIC32MZ-W1: RMII reference clock from an external oscillator"
+	default n
+	depends on ARCH_CHIP_PIC32MZW1 && PIC32MZ_ETHERNET
+	---help---
+		By default the Ethernet/Wi-Fi PLL drives the 50 MHz RMII reference
+		clock on ETH_CLK_OUT (RC12), which feeds both the MAC and the PHY.
+		Select this option if the board has a 50 MHz oscillator that
+		clocks the PHY and the MAC reference clock input (EREFCLK)
+		instead.  ETH_CLK_OUT is then left disabled
+		(EWPLLCON.ETHCLKOUTEN = 0).
+
 config PIC32MZ_W1_BOOTTRACE
 	bool "PIC32MZ-W1 early boot trace on UART1"
 	default n
@@ -1263,6 +1275,7 @@ config PIC32MZ_FMIIEN
 	int "Ethernet MII"
 	default 1
 	range 0 1
+	depends on !ARCH_CHIP_PIC32MZW1
 	---help---
 		Ethernet MII enable selection
 
@@ -1288,6 +1301,7 @@ config PIC32MZ_FETHIO
 	int "Ethernet I/O pins"
 	default 1
 	range 0 1
+	depends on !ARCH_CHIP_PIC32MZW1
 	---help---
 		Ethernet I/O pin selection
 
