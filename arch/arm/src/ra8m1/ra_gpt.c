@@ -45,6 +45,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -151,7 +152,7 @@ static const struct ra_gpt_prescaler_s g_prescalers[] =
   { 1024, R_GPT_GTCR_TPCS_PCLKGPTNPCLKC_1024 },
 };
 
-#define GPT_NPRESCALERS  (sizeof(g_prescalers) / sizeof(g_prescalers[0]))
+#define GPT_NPRESCALERS  (nitems(g_prescalers))
 
 /* Per-channel state, only for the channels enabled in Kconfig.  Channels
  * 0-7 are GPT32, 8-13 are GPT16.  The module-stop bit is MSTPCRE.MSTPE

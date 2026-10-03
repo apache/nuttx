@@ -34,6 +34,7 @@
 #include <nuttx/atomic.h>
 #include <nuttx/compiler.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 
 #include "riscv_internal.h"
@@ -49,7 +50,7 @@ extern void mpfs_opensbi_prepare_hart(void);
  ****************************************************************************/
 
 #define ENTRY_STACK 512
-#define ENTRYPT_CNT sizeof(g_app_entrypoints) / sizeof(g_app_entrypoints[0])
+#define ENTRYPT_CNT nitems(g_app_entrypoints)
 
 /* Default PMP permissions */
 

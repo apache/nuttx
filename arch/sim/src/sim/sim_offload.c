@@ -24,6 +24,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <sys/param.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/debug.h>
 
@@ -269,7 +270,7 @@ static int sim_mad_check(uint32_t header)
   sr_idx  = (header >> 10) & 3;
   padding = (header >> 9) & 1;
 
-  if (sr_idx >= sizeof(g_mad_freq_tab) / sizeof(g_mad_freq_tab[0]) ||
+  if (sr_idx >= nitems(g_mad_freq_tab) ||
       br_idx >= 0xf)
     {
       return -EINVAL;

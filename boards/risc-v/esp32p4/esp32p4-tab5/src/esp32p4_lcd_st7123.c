@@ -32,6 +32,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <errno.h>
 #include <syslog.h>
 #include <string.h>
@@ -309,7 +310,7 @@ static const struct st7123_init_cmd_s g_st7123_init[] =
   },
 };
 
-#define ST7123_INIT_COUNT (sizeof(g_st7123_init) / sizeof(g_st7123_init[0]))
+#define ST7123_INIT_COUNT (nitems(g_st7123_init))
 
 /****************************************************************************
  * Private Functions

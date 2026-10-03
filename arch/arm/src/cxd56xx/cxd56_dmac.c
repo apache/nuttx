@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 #include <nuttx/kmalloc.h>
 
+#include <sys/param.h>
 #include <assert.h>
 #include <errno.h>
 #include <stdint.h>
@@ -133,9 +134,6 @@ struct dmac080_register_map
 #define DMAC_CH_HALT   (1u<<18)
 #define DMAC_CH_ACTIVE (1u<<17)
 
-#ifndef itemsof
-#define itemsof(a) (sizeof(a)/sizeof(a[0]))
-#endif
 
 /****************************************************************************
  * Link list item structure for use scatter/gather operation

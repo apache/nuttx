@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
@@ -40,9 +41,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef ARRAY_SZ
-#  define ARRAY_SZ(array) (sizeof(array)/sizeof(array[0]))
-#endif
 
 #define ALTCOM_GETEDRX_TYPE_UE         0
 #define ALTCOM_GETEDRX_TYPE_NEGOTIATED 1
@@ -197,7 +195,7 @@ static int32_t altcombs_convert_api_edrx_value(
               return -EINVAL;
             }
 
-          table_size = ARRAY_SZ(g_edrx_ptw_nbs1_table);
+          table_size = nitems(g_edrx_ptw_nbs1_table);
 
           for (i = 0; i < table_size; i++)
             {

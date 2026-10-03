@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -1870,7 +1871,7 @@ void hciuart_initialize(void)
 
   /* Configure all UARTs */
 
-  for (i = 0; i < sizeof(g_hciuarts) / sizeof(g_hciuarts[0]); i++)
+  for (i = 0; i < nitems(g_hciuarts); i++)
     {
       config = g_hciuarts[i];
       if (config != NULL)

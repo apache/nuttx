@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <string.h>
 #include <assert.h>
@@ -242,7 +243,7 @@ static const struct nla_policy g_ifa_ipv4_policy[] =
   {NLA_U32, 0, NULL},                               /* IFA_RT_PRIORITY */
 };
 
-static_assert(sizeof(g_ifa_ipv4_policy) / sizeof(g_ifa_ipv4_policy[0]) ==
+static_assert(nitems(g_ifa_ipv4_policy) ==
               IFA_MAX + 1, "The policy definition has changed,"
               " please check it");
 #  endif
@@ -261,7 +262,7 @@ static const struct nla_policy g_ifa_ipv6_policy[] =
   {0, sizeof(uint32_t), NULL},                      /* IFA_RT_PRIORITY */
 };
 
-static_assert(sizeof(g_ifa_ipv6_policy) / sizeof(g_ifa_ipv6_policy[0]) ==
+static_assert(nitems(g_ifa_ipv6_policy) ==
               IFA_MAX + 1, "The policy definition has changed,"
               " please check it");
 #  endif

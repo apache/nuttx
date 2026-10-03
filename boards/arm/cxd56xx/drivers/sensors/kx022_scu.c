@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fixedmath.h>
@@ -88,9 +89,6 @@
 #define KX022_ODCNTL_LPRO       (1 << 6)
 #define KX022_ODCNTL_IIR_BYPASS (1 << 7)
 
-#ifndef itemsof
-#  define itemsof(array) (sizeof(array)/sizeof(array[0]))
-#endif
 
 /****************************************************************************
  * Private Types
@@ -269,7 +267,7 @@ static int kx022_seqinit(struct kx022_dev_s *priv)
 
   seq_setinstruction(priv->seq,
                      g_kx022inst,
-                     itemsof(g_kx022inst));
+                     nitems(g_kx022inst));
   seq_setsample(priv->seq,
                 KX022_BYTESPERSAMPLE,
                 0,

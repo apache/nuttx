@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <errno.h>
 #include <arpa/inet.h>
 #include "altcom_errno.h"
@@ -34,9 +35,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef ARRAY_SZ
-#  define ARRAY_SZ(array) (sizeof(array)/sizeof(array[0]))
-#endif
 
 #define TABLE_CONTENT(errno_name) { ALTCOM_##errno_name, errno_name }
 
@@ -192,7 +190,7 @@ int altcom_errno2nuttx(int altcom_errno)
 {
   int i;
 
-  for (i = 0; i < ARRAY_SZ(g_converrno_tbl); i++)
+  for (i = 0; i < nitems(g_converrno_tbl); i++)
     {
       if (g_converrno_tbl[i].altcom_errno == altcom_errno)
         {

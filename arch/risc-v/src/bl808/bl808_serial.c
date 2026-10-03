@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -977,7 +978,7 @@ void bl808_serialinit(void)
   /* Register all UARTs */
 
   strlcpy(devname, "/dev/ttySx", sizeof(devname));
-  for (i = 0; i < sizeof(g_uart_devs) / sizeof(g_uart_devs[0]); i++)
+  for (i = 0; i < nitems(g_uart_devs); i++)
     {
       if (g_uart_devs[i] == 0)
         {

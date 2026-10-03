@@ -32,6 +32,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <errno.h>
 #include <syslog.h>
 
@@ -267,7 +268,7 @@ static const struct st7121_init_cmd_s g_st7121_init[] =
   {0x35, g_st7121_cmd_35, sizeof(g_st7121_cmd_35), 0},
 };
 
-#define ST7121_INIT_COUNT (sizeof(g_st7121_init) / sizeof(g_st7121_init[0]))
+#define ST7121_INIT_COUNT (nitems(g_st7121_init))
 
 /****************************************************************************
  * Private Functions

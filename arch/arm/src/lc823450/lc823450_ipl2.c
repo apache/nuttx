@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -512,7 +513,7 @@ static void chg_disable(void)
 
       if (ret == OK && freq == R2A20056BM_SCL)
         {
-          ret = I2C_TRANSFER(i2c, msg, sizeof(msg) / sizeof(msg[0]));
+          ret = I2C_TRANSFER(i2c, msg, nitems(msg));
 
           if (ret != OK)
             {

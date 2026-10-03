@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -2189,26 +2190,26 @@ unsigned int kinetis_uart_serialinit(unsigned int first)
 
   /* Register all UARTs */
 
-  devname[(sizeof(devname) / sizeof(devname[0]))-2] = '0' + first++;
+  devname[(nitems(devname))-2] = '0' + first++;
   uart_register(devname, &TTYS0_DEV);
 #ifdef TTYS1_DEV
-  devname[(sizeof(devname) / sizeof(devname[0]))-2] = '0' + first++;
+  devname[(nitems(devname))-2] = '0' + first++;
   uart_register(devname, &TTYS1_DEV);
 #endif
 #ifdef TTYS2_DEV
-  devname[(sizeof(devname) / sizeof(devname[0]))-2] = '0' + first++;
+  devname[(nitems(devname))-2] = '0' + first++;
   uart_register(devname, &TTYS2_DEV);
 #endif
 #ifdef TTYS3_DEV
-  devname[(sizeof(devname) / sizeof(devname[0]))-2] = '0' + first++;
+  devname[(nitems(devname))-2] = '0' + first++;
   uart_register(devname, &TTYS3_DEV);
 #endif
 #ifdef TTYS4_DEV
-  devname[(sizeof(devname) / sizeof(devname[0]))-2] = '0' + first++;
+  devname[(nitems(devname))-2] = '0' + first++;
   uart_register(devname, &TTYS4_DEV);
 #endif
 #ifdef TTYS5_DEV
-  devname[(sizeof(devname) / sizeof(devname[0]))-2] = '0' + first++;
+  devname[(nitems(devname))-2] = '0' + first++;
   uart_register(devname, &TTYS5_DEV);
 #endif
   return first;

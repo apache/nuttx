@@ -22,6 +22,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -2583,7 +2584,7 @@ static void up_pm_setsuspend(bool suspend)
 {
   /* Iterate all UARTs to suspend/resume */
 
-  for (int i = 0; i < sizeof(g_uart_devs) / sizeof(g_uart_devs[0]); i++)
+  for (int i = 0; i < nitems(g_uart_devs); i++)
     {
       struct up_dev_s *priv = g_uart_devs[i];
 
@@ -2627,7 +2628,7 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
 
   if (pmstate == PM_SLEEP || pmstate == PM_STANDBY)
     {
-      for (int i = 0; i < sizeof(g_uart_devs) / sizeof(g_uart_devs[0]); i++)
+      for (int i = 0; i < nitems(g_uart_devs); i++)
         {
           struct up_dev_s *priv = g_uart_devs[i];
 
@@ -2664,7 +2665,7 @@ uart_dev_t *n32_serial_get_uart(int uart_num)
 {
   int idx = uart_num - 1;
 
-  if (idx < 0 || idx >= (int)(sizeof(g_uart_devs) / sizeof(g_uart_devs[0])))
+  if (idx < 0 || idx >= (int)(nitems(g_uart_devs)))
     {
       return NULL;
     }
@@ -2688,7 +2689,7 @@ void arm_earlyserialinit(void)
 #ifdef HAVE_UART
   /* Disable all UART interrupts */
 
-  for (int i = 0; i < sizeof(g_uart_devs) / sizeof(g_uart_devs[0]); i++)
+  for (int i = 0; i < nitems(g_uart_devs); i++)
     {
       if (g_uart_devs[i])
         {
@@ -2740,7 +2741,7 @@ void arm_serialinit(void)
 
   /* Register remaining UARTs */
 
-  for (int i = 0; i < sizeof(g_uart_devs) / sizeof(g_uart_devs[0]); i++)
+  for (int i = 0; i < nitems(g_uart_devs); i++)
     {
       if (!g_uart_devs[i])
         {

@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <nuttx/modem/alt1250.h>
@@ -48,9 +49,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef ARRAY_SZ
-#  define ARRAY_SZ(array) (sizeof(array)/sizeof(array[0]))
-#endif
 
 /****************************************************************************
  * Private Types
@@ -236,7 +234,7 @@ compose_handler_t alt1250_composehdlr(uint32_t cmdid)
   int i;
   compose_handler_t ret = NULL;
 
-  for (i = 0; i < ARRAY_SZ(g_composehdlrs); i++)
+  for (i = 0; i < nitems(g_composehdlrs); i++)
     {
       if (g_composehdlrs[i].cmdid == cmdid)
         {
@@ -265,7 +263,7 @@ parse_handler_t alt1250_parsehdlr(uint16_t altcid, uint8_t altver)
         }
     }
 
-  for (i = 0; i < ARRAY_SZ(g_parsehdlrs); i++)
+  for (i = 0; i < nitems(g_parsehdlrs); i++)
     {
       if (g_parsehdlrs[i].altcid == altcid)
         {
