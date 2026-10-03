@@ -31,6 +31,7 @@
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/sched.h>
 #include <nuttx/binfmt/binfmt.h>
 
 #include "binfmt.h"
@@ -85,6 +86,11 @@ static int exec_internal(FAR const char *filename,
 #endif
   int pid;
   int ret;
+
+  if (!nxsched_capable(PR_CAP_SPAWN))
+    {
+      return -EPERM;
+    }
 
 #ifndef CONFIG_BINFMT_LOADABLE
   bin = &sbin;

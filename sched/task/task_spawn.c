@@ -94,6 +94,11 @@ static int nxtask_spawn_create(FAR const char *name, int priority,
   pid_t pid;
   int ret;
 
+  if (!nxsched_capable(PR_CAP_SPAWN))
+    {
+      return -EPERM;
+    }
+
   /* Allocate a TCB for the new task. */
 
   tcb = kmm_zalloc(sizeof(struct tcb_s));
