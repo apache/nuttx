@@ -37,6 +37,7 @@
 
 #include "spifi/inc/spifilib_dev.h"
 #include "spifi/inc/private/spifilib_chiphw.h"
+#include <sys/param.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
@@ -489,7 +490,7 @@ static
   /* Read the status bytes needed */
 
   for (index = 0;
-       index < (sizeof(spifiCmdOp) / sizeof(spifiCmdOp[0]));
+       index < (nitems(spifiCmdOp));
        ++index)
     {
       spifi_HW_SetCmd(pSpifiCtrlAddr,
@@ -542,7 +543,7 @@ uint32_t spifiDeviceDataGetStatusS25FL164K(const SPIFI_HANDLE_T *pHandle)
                    (LPC_SPIFI_CHIPHW_T *) pHandle->pInfoData->spifiCtrlAddr;
   uint32_t idx;
 
-  for (idx = 0; idx < sizeof(spifiCmdOp) / sizeof(spifiCmdOp[0]); ++idx)
+  for (idx = 0; idx < nitems(spifiCmdOp); ++idx)
     {
       spifi_HW_SetCmd(pSpifiCtrlAddr,
                      (SPIFI_CMD_OPCODE(spifiCmdOp[idx]) |
@@ -609,7 +610,7 @@ uint32_t spifiDeviceDataGetStatusW25Q80BV(const SPIFI_HANDLE_T *pHandle)
   /* Read the status bytes needed */
 
   for (index = 0;
-       index < (sizeof(spifiCmdOp) / sizeof(spifiCmdOp[0]));
+       index < (nitems(spifiCmdOp));
        ++index)
     {
       spifi_HW_SetCmd(pSpifiCtrlAddr,

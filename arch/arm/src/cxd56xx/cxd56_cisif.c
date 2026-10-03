@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
@@ -543,7 +544,7 @@ static int cisif_intc_handler(int irq, void *context, void *arg)
   value = (value & enable);
 
   for (index = 0;
-       index < sizeof(g_intcomp_func) / sizeof(g_intcomp_func[0]);
+       index < nitems(g_intcomp_func);
        index++)
     {
       if ((value & (1 << index)) != 0)

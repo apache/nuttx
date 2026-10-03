@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -1367,7 +1368,7 @@ void sensor_remap_vector_raw16(FAR const int16_t *in, FAR int16_t *out,
   FAR const struct sensor_axis_map_s *remap;
   int16_t tmp[3];
 
-  DEBUGASSERT(place < (sizeof(g_remap_tbl) / sizeof(g_remap_tbl[0])));
+  DEBUGASSERT(place < (nitems(g_remap_tbl)));
 
   remap = &g_remap_tbl[place];
   tmp[0] = in[remap->src_x] * remap->sign_x;

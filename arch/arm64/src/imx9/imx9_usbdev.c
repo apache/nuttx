@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -574,7 +575,7 @@ static struct imx9_usb_s g_usbdev[] =
 #endif
 };
 
-static const int n_usbdevs =  sizeof(g_usbdev) / sizeof(g_usbdev[0]);
+static const int n_usbdevs =  nitems(g_usbdev);
 
 static const struct usbdev_epops_s g_epops =
 {

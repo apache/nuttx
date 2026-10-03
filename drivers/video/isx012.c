@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -206,7 +207,7 @@ struct isx012_dev_s
 
 typedef struct isx012_dev_s isx012_dev_t;
 
-#define ARRAY_NENTRIES(a) (sizeof(a)/sizeof(a[0]))
+#define ARRAY_NENTRIES(a) (nitems(a))
 
 /****************************************************************************
  * Private Function Prototypes

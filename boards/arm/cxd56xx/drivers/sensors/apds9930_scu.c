@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fixedmath.h>
@@ -129,9 +130,6 @@
 #define SETENABLE_TYPE_PS              0
 #define SETENABLE_TYPE_ALS             1
 
-#ifndef itemsof
-#  define itemsof(array) (sizeof(array)/sizeof(array[0]))
-#endif
 
 /****************************************************************************
  * Private Types
@@ -488,7 +486,7 @@ static int apds9930als_seqinit(struct apds9930_dev_s *priv)
 
   seq_setinstruction(priv->seq,
                      g_apds9930alsinst,
-                     itemsof(g_apds9930alsinst));
+                     nitems(g_apds9930alsinst));
   seq_setsample(priv->seq,
                 APDS9930_ALS_BYTESPERSAMPLE,
                 0,
@@ -527,7 +525,7 @@ static int apds9930ps_seqinit(struct apds9930_dev_s *priv)
 
   seq_setinstruction(priv->seq,
                      g_apds9930psinst,
-                     itemsof(g_apds9930psinst));
+                     nitems(g_apds9930psinst));
   seq_setsample(priv->seq,
                 APDS9930_PS_BYTESPERSAMPLE,
                 0,

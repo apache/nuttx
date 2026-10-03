@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <nuttx/arch.h>
 
 #include <assert.h>
@@ -45,7 +46,7 @@
 
 /* Number of IRQs for GPIO interrupts */
 
-#define NUM_GPIO_IRQS (sizeof(g_gpio_irqs) / sizeof(g_gpio_irqs[0]))
+#define NUM_GPIO_IRQS (nitems(g_gpio_irqs))
 
 /****************************************************************************
  * Private Types

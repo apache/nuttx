@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fixedmath.h>
@@ -107,9 +108,6 @@
 #define SETMODECONTROL_TYPE_PS        0
 #define SETMODECONTROL_TYPE_ALS       1
 
-#ifndef itemsof
-#  define itemsof(array) (sizeof(array)/sizeof(array[0]))
-#endif
 
 /****************************************************************************
  * Private Types
@@ -447,7 +445,7 @@ static int rpr0521rsals_seqinit(struct rpr0521rs_dev_s *priv)
 
   seq_setinstruction(priv->seq,
                      g_rpr0521rsalsinst,
-                     itemsof(g_rpr0521rsalsinst));
+                     nitems(g_rpr0521rsalsinst));
   seq_setsample(priv->seq,
                 RPR0521RS_ALS_BYTESPERSAMPLE,
                 0,
@@ -486,7 +484,7 @@ static int rpr0521rsps_seqinit(struct rpr0521rs_dev_s *priv)
 
   seq_setinstruction(priv->seq,
                      g_rpr0521rspsinst,
-                     itemsof(g_rpr0521rspsinst));
+                     nitems(g_rpr0521rspsinst));
   seq_setsample(priv->seq,
                 RPR0521RS_PS_BYTESPERSAMPLE,
                 0,

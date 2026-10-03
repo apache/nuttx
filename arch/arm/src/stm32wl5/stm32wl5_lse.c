@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <assert.h>
 
 #include "arm_internal.h"
@@ -155,7 +156,7 @@ void stm32_rcc_enablelse(void)
               break;
             }
         }
-      while (drive < sizeof(drives) / sizeof(drives[0]));
+      while (drive < nitems(drives));
 #endif
 
       if (timeout != 0)

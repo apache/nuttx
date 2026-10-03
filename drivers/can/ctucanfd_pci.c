@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <assert.h>
 #include <nuttx/debug.h>
 #include <errno.h>
@@ -764,7 +765,7 @@ static void ctucanfd_chardev_receive(FAR struct ctucanfd_can_s *priv)
 
       /* buff[0] populated the frame->fmt.rwcnt. Check before use. */
 
-      if (frame->fmt.rwcnt > sizeof(buff) / sizeof(buff[0]) - 1)
+      if (frame->fmt.rwcnt > nitems(buff) - 1)
         {
           canerr("ERROR: CAN read/write count is too large.  Dropped\n");
           return;
@@ -1261,7 +1262,7 @@ static FAR netpkt_t *ctucanfd_sock_recv(FAR struct netdev_lowerhalf_s *dev)
 
   /* buff[0] populated the frame->fmt.rwcnt. Check before use. */
 
-  if (rxframe->fmt.rwcnt > sizeof(buff) / sizeof(buff[0]) - 1)
+  if (rxframe->fmt.rwcnt > nitems(buff) - 1)
     {
       canerr("ERROR: CAN read/write count is too large.  Dropped\n");
       netpkt_free(dev, pkt, NETPKT_RX);

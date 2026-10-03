@@ -3214,7 +3214,7 @@ struct sdio_dev_s *cxd56_sdhci_initialize(int slotno)
 
 #ifdef CONFIG_SDIO_DMA
   for (i = 0;
-       i < sizeof(cxd56_sdhci_adma_dscr) / sizeof(cxd56_sdhci_adma_dscr[0]);
+       i < nitems(cxd56_sdhci_adma_dscr);
        i++)
     {
       cxd56_sdhci_adma_dscr[i] = 0;

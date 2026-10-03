@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 
 #include <stdbool.h>
@@ -264,7 +265,7 @@ static uart_dev_t *const g_uart_devs[] =
 #endif
 };
 
-#define HT32_NUART_PORTS (sizeof(g_uart_devs) / sizeof(g_uart_devs[0]))
+#define HT32_NUART_PORTS (nitems(g_uart_devs))
 
 #if CONSOLE_USART == 1
 #  define CONSOLE_DEVPTR (&g_usart1port)

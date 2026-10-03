@@ -41,6 +41,7 @@
 
 #include <nuttx/config.h>
 #include <stdint.h>
+#include <sys/param.h>
 #include <stdbool.h>
 #include <nuttx/debug.h>
 #include <errno.h>
@@ -265,8 +266,7 @@ static int render_framebuffers(void)
 {
   int i;
   int ret;
-  const int overlay_len = sizeof(g_pinephone_overlays) /
-                          sizeof(g_pinephone_overlays[0]);
+  const int overlay_len = nitems(g_pinephone_overlays);
 
   /* Validate the Frame Buffer Sizes */
 
@@ -452,8 +452,7 @@ static int pinephone_getoverlayinfo(struct fb_vtable_s *vtable,
                                     int overlayno,
                                     struct fb_overlayinfo_s *oinfo)
 {
-  const int overlay_len = sizeof(g_pinephone_overlays) /
-                          sizeof(g_pinephone_overlays[0]);
+  const int overlay_len = nitems(g_pinephone_overlays);
 
   ginfo("vtable=%p overlay=%d oinfo=%p\n", vtable, overlayno, oinfo);
   DEBUGASSERT(vtable != NULL && vtable == &g_pinephone_vtable);
@@ -877,8 +876,8 @@ void pinephone_display_test_pattern(void)
   int i;
   int x;
   int y;
-  const int fb0_len = sizeof(g_pinephone_fb0) / sizeof(g_pinephone_fb0[0]);
-  const int fb1_len = sizeof(g_pinephone_fb1) / sizeof(g_pinephone_fb1[0]);
+  const int fb0_len = nitems(g_pinephone_fb0);
+  const int fb1_len = nitems(g_pinephone_fb1);
 
   /* Zero the Framebuffers */
 

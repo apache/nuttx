@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fixedmath.h>
@@ -126,9 +127,6 @@
 #define AK09912_BYTESPERSAMPLE  6
 #define AK09912_ELEMENTSIZE     2
 
-#ifndef itemsof
-#  define itemsof(array) (sizeof(array)/sizeof(array[0]))
-#endif
 
 /****************************************************************************
  * Private Types
@@ -314,7 +312,7 @@ static int ak09912_seqinit(struct ak09912_dev_s *priv)
 
   /* Set instruction and sample data information to sequencer */
 
-  seq_setinstruction(priv->seq, g_ak09912inst, itemsof(g_ak09912inst));
+  seq_setinstruction(priv->seq, g_ak09912inst, nitems(g_ak09912inst));
   seq_setsample(priv->seq, AK09912_BYTESPERSAMPLE, 0,
                 AK09912_ELEMENTSIZE, false);
 

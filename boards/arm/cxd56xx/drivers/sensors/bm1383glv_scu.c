@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fixedmath.h>
@@ -83,9 +84,6 @@
 #define BM1383AGLV_MODE_CONTROL_RESERVED   (1 << 3)
 #define BM1383AGLV_MODE_CONTROL_CONTINUOUS (2 << 0)
 
-#ifndef itemsof
-#  define itemsof(array) (sizeof(array)/sizeof(array[0]))
-#endif
 
 /****************************************************************************
  * Private Types
@@ -274,12 +272,12 @@ static int bm1383glv_seqinit(struct bm1383glv_dev_s *priv)
   if (g_is_bm1383glv)
     {
       inst = g_bm1383glvinst;
-      nr   = itemsof(g_bm1383glvinst);
+      nr   = nitems(g_bm1383glvinst);
     }
   else
     {
       inst = g_bm1383aglvinst;
-      nr   = itemsof(g_bm1383aglvinst);
+      nr   = nitems(g_bm1383aglvinst);
     }
 
   seq_setinstruction(priv->seq, inst, nr);

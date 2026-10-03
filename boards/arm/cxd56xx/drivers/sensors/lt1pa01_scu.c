@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fixedmath.h>
@@ -124,9 +125,6 @@
 #define LT1PA01_PROX_INT_TL_DEFAULT   0x03
 #define LT1PA01_PROX_INT_TH_DEFAULT   0x03
 
-#ifndef itemsof
-#  define itemsof(array) (sizeof(array)/sizeof(array[0]))
-#endif
 
 /****************************************************************************
  * Private Types
@@ -336,7 +334,7 @@ static int lt1pa01als_seqinit(struct lt1pa01_dev_s *priv)
 
   seq_setinstruction(priv->seq,
                      g_lt1pa01alsinst,
-                     itemsof(g_lt1pa01alsinst));
+                     nitems(g_lt1pa01alsinst));
   seq_setsample(priv->seq,
                 LT1PA01_ALS_BYTESPERSAMPLE,
                 0,
@@ -375,7 +373,7 @@ static int lt1pa01prox_seqinit(struct lt1pa01_dev_s *priv)
 
   seq_setinstruction(priv->seq,
                      g_lt1pa01proxinst,
-                     itemsof(g_lt1pa01proxinst));
+                     nitems(g_lt1pa01proxinst));
   seq_setsample(priv->seq,
                 LT1PA01_PROX_BYTESPERSAMPLE,
                 0,

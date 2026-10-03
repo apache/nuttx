@@ -83,6 +83,7 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
+#include <sys/param.h>
 #include <sys/types.h>
 #include <assert.h>
 #include <nuttx/debug.h>
@@ -1021,7 +1022,7 @@ int ee24xx_initialize(FAR struct i2c_master_s *bus, uint8_t devaddr,
   /* Check device type early */
 
   if ((devtype < 0) ||
-      (devtype >= sizeof(g_ee24xx_devices) / sizeof(g_ee24xx_devices[0])))
+      (devtype >= nitems(g_ee24xx_devices)))
     {
       return -EINVAL;
     }
