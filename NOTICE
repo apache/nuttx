@@ -58,6 +58,21 @@ NXP Restriction for SPIFI code
    copyright, permission, and disclaimer notice must appear in all copies of
    this code.
 
+Apache Mynewt NimBLE
+====================
+
+  The BLE Link Layer (wireless/ble_ll) and the nRF52 BLE radio driver
+  (arch/arm/src/nrf52/nrf52_ble*) are heavily based on Apache Mynewt NimBLE:
+
+    Apache Mynewt NimBLE
+    Copyright 2015-2024 The Apache Software Foundation
+
+    This product includes software developed at
+    The Apache Software Foundation (http://www.apache.org/).
+
+    Portions of this software were developed at
+    Runtime Inc, copyright 2015.
+
 Documentation
 =============
 

@@ -8605,3 +8605,20 @@ libs/libdsp/lib_matrix.c
  Copyright (C) 2026 Djordje Vulovic
 
  SPDX-License-Identifier: Apache-2.0
+
+wireless/ble_ll
+include/nuttx/wireless/bluetooth/ble_ll.h
+arch/arm/src/nrf52/nrf52_ble.c
+arch/arm/src/nrf52/nrf52_ble_hw.c
+arch/arm/src/nrf52/nrf52_ble_phy.c
+arch/arm/src/nrf52/nrf52_ble_priv.h
+=========================================
+
+ Heavily based on Apache Mynewt NimBLE
+ (https://github.com/apache/mynewt-nimble,
+ commit b6831813cfe6da9b25c8be7136b40ce060bf9710).
+
+ Copyright 2015-2024 The Apache Software Foundation
+ Portions of this software were developed at Runtime Inc, copyright 2015.
+
+ SPDX-License-Identifier: Apache-2.0
