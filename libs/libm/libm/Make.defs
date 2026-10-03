@@ -109,8 +109,16 @@ ifneq ($(CONFIG_LIBM_ARCH_SQRTF),y)
 CSRCS += lib_sqrtf.c
 endif
 
+ifneq ($(CONFIG_LIBM_ARCH_FMAF),y)
+CSRCS += lib_fmaf.c
+endif
+
 ifeq ($(CONFIG_ARCH_ARM),y)
 include $(TOPDIR)/libs/libm/libm/arm/Make.defs
+endif
+
+ifeq ($(CONFIG_ARCH_RISCV),y)
+include $(TOPDIR)/libs/libm/libm/risc-v/Make.defs
 endif
 
 # Add the floating point math directory to the build

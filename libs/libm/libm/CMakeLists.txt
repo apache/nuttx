@@ -25,6 +25,10 @@ if(CONFIG_LIBM)
     nuttx_add_subdirectory(arm)
   endif()
 
+  if(CONFIG_ARCH_RISCV)
+    nuttx_add_subdirectory(risc-v)
+  endif()
+
   # Add the floating point math C files to the build
   set(SRCS
       lib_acosf.c
@@ -197,6 +201,10 @@ if(CONFIG_LIBM)
 
   if(NOT CONFIG_LIBM_ARCH_SQRTF)
     list(APPEND SRCS lib_sqrtf.c)
+  endif()
+
+  if(NOT CONFIG_LIBM_ARCH_FMAF)
+    list(APPEND SRCS lib_fmaf.c)
   endif()
 
   target_sources(c PRIVATE ${SRCS})

@@ -1,0 +1,18 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_RISCV
+
+config RISCV_LIBM
+	bool "Architecture specific FPU optimizations"
+	default n
+	select LIBM_ARCH_FMAF
+	depends on ARCH_FPU
+	depends on LIBM
+	---help---
+		Enable RISC-V specific floating point optimizations
+		for fmaf() using the fmadd.s instruction.
+
+endif
