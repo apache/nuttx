@@ -848,347 +848,351 @@ static int pic32mz_i2c_isr_process(struct pic32mz_i2c_priv_s *priv)
 
   switch (priv->process_state)
     {
-    /* The process starts from this state after a call to i2c_transfer.
-     * It may return here in the case of a write/read transaction,
-     * to send the address with the READ bit set.
-     */
-
-    case PROCESS_STATE_SEND_ADDR:
-
-      pic32mz_i2c_traceevent(priv, I2CEVENT_SENDADDR, priv->msgc);
-
-      if (priv->msgc > 0 && priv->msgv != NULL)
-        {
-          priv->ptr = priv->msgv->buffer;
-          priv->dcnt = priv->msgv->length;
-          priv->flags = priv->msgv->flags;
-
-          /* Send the address byte and set the next state to either
-           * read or transmit the data.
-           */
-
-          if (priv->flags & I2C_M_READ)
-            {
-              pic32mz_i2c_transmitbyte(priv, I2C_M_READ | priv->msgv->addr);
-
-              priv->process_state = PROCESS_STATE_ENABLE_READ;
-            }
-          else
-            {
-              pic32mz_i2c_transmitbyte(priv, priv->msgv->addr);
-
-              priv->process_state = PROCESS_STATE_SEND_DATA;
-            }
-        }
-      else
-        {
-#ifndef CONFIG_I2C_POLLED
-          mips_clrpend_irq(priv->config->ev_irq);
-#endif
-        }
-      break;
-
-    /* This state is reached either after sending the address to the slave,
-     * or, in the case of multi-byte buffer, after sending a byte.
-     * We should first check that the previous transmission is not in
-     * progress, and that the slave had acknowledged it.
-     */
-
-    case PROCESS_STATE_SEND_DATA:
-
-      pic32mz_i2c_traceevent(priv, I2CEVENT_SENDBYTE, priv->dcnt);
-
-      /* No transmission is in progress. */
-
-      if ((status & I2C_STAT_TRSTAT) == 0)
-        {
-          /* ACK received from the slave. */
-
-          if ((status & I2C_STAT_ACKSTAT) == 0)
-            {
-              /* We need to keep one byte to send before we leave this state.
-               * This way we can trigger an interrupt and move to the next
-               * state.
-               */
-
-              if (priv->dcnt > 1)
-                {
-                  pic32mz_i2c_transmitbyte(priv, *priv->ptr++);
-
-                  priv->dcnt--;
-                }
-              else
-                {
-                  pic32mz_i2c_transmitbyte(priv, *priv->ptr++);
-
-                  priv->dcnt--;
-
-                  priv->process_state = PROCESS_STATE_FETCH_NEXT;
-                }
-            }
-        }
-      break;
-
-    /* This state is reached after sending the address to the slave with
-     * the read bit set, or, in the case of multi-byte transfer,
-     * after reading the first byte.
-     * We should first check that the previous transmission is not in
-     * progress, and that the slave had acknowledged it.
-     */
-
-    case PROCESS_STATE_ENABLE_READ:
-
-      pic32mz_i2c_traceevent(priv, I2CEVENT_RCVMODEEN, 0);
-
-      /* No transmit is in progress. */
-
-      if ((status & I2C_STAT_TRSTAT) == 0)
-        {
-          /* ACK received from the slave. */
-
-          if ((status & I2C_STAT_ACKSTAT) == 0)
-            {
-              /* The master logic should be inactive before
-               * attempting to enable receive mode.
-               */
-
-              if (pic32mz_i2c_master_inactive(priv))
-                {
-                  pic32mz_i2c_putreg(priv, PIC32MZ_I2C_CONSET_OFFSET,
-                                     I2C_CON_RCEN);
-
-                  priv->process_state = PROCESS_STATE_READ_DATA;
-                }
-            }
-        }
-      break;
-
-    /* This state reads a byte from the receive buffer.
-     * If there are more than one byte to read,
-     * it should go back to the previous state to enable
-     * the receive mode.
-     */
-
-    case PROCESS_STATE_READ_DATA:
-
-      pic32mz_i2c_traceevent(priv, I2CEVENT_RCVBYTE, priv->dcnt);
-
-      /* Is data available in the receiver buffer? */
-
-      if ((status & I2C_STAT_RBF) != 0)
-        {
-          /* Read and send an ACK */
-
-          if (priv->dcnt > 1)
-            {
-#ifdef CONFIG_I2C_POLLED
-              irqstate_t flags = enter_critical_section();
-#endif
-
-              *priv->ptr++ = pic32mz_i2c_receivebyte(priv);
-
-              priv->dcnt--;
-
-              /* The master logic should be inactive before
-               * attempting to issue an ACK.
-               */
-
-              if (pic32mz_i2c_master_inactive(priv))
-                {
-                  pic32mz_i2c_send_ack(priv, true);
-                }
-
-#ifdef CONFIG_I2C_POLLED
-              leave_critical_section(flags);
-#endif
-              /* Go back and re-enable read mode to handle the rest of
-               * the data.
-               * It is cleared by the hardware at the end of the eighth bit.
-               */
-
-              priv->process_state = PROCESS_STATE_ENABLE_READ;
-            }
-
-          /* Last byte, read and send a NACK */
-
-          else
-            {
-#ifdef CONFIG_I2C_POLLED
-              irqstate_t flags = enter_critical_section();
-#endif
-              *priv->ptr++ = pic32mz_i2c_receivebyte(priv);
-
-              priv->dcnt--;
-
-              /* The master logic should be inactive before
-               * attempting to issue a NACK.
-               */
-
-              if (pic32mz_i2c_master_inactive(priv))
-                {
-                  pic32mz_i2c_send_ack(priv, false);
-                }
-
-#ifdef CONFIG_I2C_POLLED
-              leave_critical_section(flags);
-#endif
-              priv->process_state = PROCESS_STATE_FETCH_NEXT;
-            }
-        }
-
-      break;
-
-    /* In this state we fetch the next mssage.
-     * Increment to next pointer and decrement message count.
-     * If we have an other set of data we will:
-     *      - Issue a repeated start (I2C_M_NOSTOP flag set).
-     *      - Continue with no start (I2C_M_NOSTART flag set).
-     *      - Issue a start (No flag set).
-     * If no more data to send, issue a stop.
-     */
-
-    case PROCESS_STATE_FETCH_NEXT:
-
-      priv->msgv++;
-      priv->msgc--;
-
-      if (priv->msgc > 0 && priv->msgv != NULL)
-        {
-          /* If the previous message had the I2C_M_NOSTOP flag set,
-           * this implies that we should issue a repeated start.
-           * (Note: priv->flags still has the previous flags.)
-           */
-
-          if (priv->flags & I2C_M_NOSTOP)
-            {
-              pic32mz_i2c_traceevent(priv, I2CEVENT_STARTRESTART, 0);
-
-              /* The bus should be in idle before issuing a repeated start. */
-
-              if ((pic32mz_i2c_master_inactive(priv)) &&
-                  (status & I2C_STAT_TRSTAT) == 0)
-                {
-                  pic32mz_i2c_send_repeatedstart(priv);
-                  priv->process_state = PROCESS_STATE_SEND_ADDR;
-                }
-            }
-
-          /* If the new message has the I2C_M_NOSTART flag set,
-           * this means that it's a continuation of the same transfer.
-           * We can't just move back to SEND_DATA as we need an interrupt.
-           * So one byte must be sent from here first.
-           */
-
-          else if (priv->msgv->flags & I2C_M_NOSTART)
-            {
-              priv->ptr = priv->msgv->buffer;
-              priv->dcnt = priv->msgv->length;
-              priv->flags = priv->msgv->flags;
-
-              pic32mz_i2c_traceevent(priv, I2CEVENT_NOSTART, priv->dcnt);
-
-              if ((status & I2C_STAT_TRSTAT) == 0)
-                {
-                  if ((status & I2C_STAT_ACKSTAT) == 0)
-                    {
-                      /* We have more than one byte.
-                       * Send the first one, this will trigger an interrupt
-                       * the rest will get sent later.
-                       */
-
-                      if (priv->dcnt > 1)
-                        {
-                          pic32mz_i2c_transmitbyte(priv, *priv->ptr++);
-
-                          priv->dcnt--;
-
-                          priv->process_state = PROCESS_STATE_SEND_DATA;
-                        }
-
-                      /* Send the only byte we have and stay in this state
-                       * to fetch the next message.
-                       */
-
-                      else
-                        {
-                          pic32mz_i2c_transmitbyte(priv, *priv->ptr++);
-
-                          priv->dcnt--;
-                        }
-                    }
-                }
-            }
-
-          /* If neither the I2C_M_NOSTOP nor the I2C_M_NOSTART is set,
-           * just issue a start and let the isr process the data.
-           */
-
-          else
-            {
-              /* The bus should be in idle before issuing a start. */
-
-              if ((pic32mz_i2c_master_inactive(priv)) &&
-                  (status & I2C_STAT_TRSTAT) == 0)
-                {
-                  pic32mz_i2c_send_start(priv);
-
-                  priv->process_state = PROCESS_STATE_SEND_ADDR;
-                }
-            }
-        }
-      else
-        {
-          /* The stop should be initiated here,
-           * as there is no other way to trigger an interrupt.
-           */
-
-          pic32mz_i2c_traceevent(priv, I2CEVENT_STOP, 0);
-
-          /* The master logic should be inactive before
-           * attempting to issue a STOP.
-           */
-
-          if (pic32mz_i2c_master_inactive(priv))
-            {
-              pic32mz_i2c_send_stop(priv);
-
-              priv->process_state = PROCESS_STATE_TRANSFERT_DONE;
-            }
-        }
-      break;
-
-    /* Arriving here, the transfer is complete.
-     * Wake up any thread that has been waiting for this event.
-     */
-
-    case PROCESS_STATE_TRANSFERT_DONE:
-
-      pic32mz_i2c_traceevent(priv, I2CEVENT_WAKEUP, 0);
-
-      if (priv->msgv)
-        {
-          /* Is there a thread waiting for this event (there should be) */
-
-          if (priv->intstate == INTSTATE_WAITING)
+      /* The process starts from this state after a call to i2c_transfer.
+       * It may return here in the case of a write/read transaction,
+       * to send the address with the READ bit set.
+       */
+
+      case PROCESS_STATE_SEND_ADDR:
+
+        pic32mz_i2c_traceevent(priv, I2CEVENT_SENDADDR, priv->msgc);
+
+        if (priv->msgc > 0 && priv->msgv != NULL)
+          {
+            priv->ptr = priv->msgv->buffer;
+            priv->dcnt = priv->msgv->length;
+            priv->flags = priv->msgv->flags;
+
+            /* Send the address byte and set the next state to either
+             * read or transmit the data.
+             */
+
+            if (priv->flags & I2C_M_READ)
+              {
+                pic32mz_i2c_transmitbyte(priv,
+                                         I2C_M_READ | priv->msgv->addr);
+
+                priv->process_state = PROCESS_STATE_ENABLE_READ;
+              }
+            else
+              {
+                pic32mz_i2c_transmitbyte(priv, priv->msgv->addr);
+
+                priv->process_state = PROCESS_STATE_SEND_DATA;
+              }
+          }
+        else
           {
 #ifndef CONFIG_I2C_POLLED
-            nxsem_post(&priv->sem_isr);
+            mips_clrpend_irq(priv->config->ev_irq);
 #endif
-            priv->intstate = INTSTATE_DONE;
+          }
+        break;
+
+      /* This state is reached either after sending the address to the slave,
+       * or, in the case of multi-byte buffer, after sending a byte.
+       * We should first check that the previous transmission is not in
+       * progress, and that the slave had acknowledged it.
+       */
+
+      case PROCESS_STATE_SEND_DATA:
+
+        pic32mz_i2c_traceevent(priv, I2CEVENT_SENDBYTE, priv->dcnt);
+
+        /* No transmission is in progress. */
+
+        if ((status & I2C_STAT_TRSTAT) == 0)
+          {
+            /* ACK received from the slave. */
+
+            if ((status & I2C_STAT_ACKSTAT) == 0)
+              {
+                /* We need to keep one byte to send before we leave this
+                 * state.  This way we can trigger an interrupt and move to
+                 * the next state.
+                 */
+
+                if (priv->dcnt > 1)
+                  {
+                    pic32mz_i2c_transmitbyte(priv, *priv->ptr++);
+
+                    priv->dcnt--;
+                  }
+                else
+                  {
+                    pic32mz_i2c_transmitbyte(priv, *priv->ptr++);
+
+                    priv->dcnt--;
+
+                    priv->process_state = PROCESS_STATE_FETCH_NEXT;
+                  }
+              }
+          }
+        break;
+
+      /* This state is reached after sending the address to the slave with
+       * the read bit set, or, in the case of multi-byte transfer,
+       * after reading the first byte.
+       * We should first check that the previous transmission is not in
+       * progress, and that the slave had acknowledged it.
+       */
+
+      case PROCESS_STATE_ENABLE_READ:
+
+        pic32mz_i2c_traceevent(priv, I2CEVENT_RCVMODEEN, 0);
+
+        /* No transmit is in progress. */
+
+        if ((status & I2C_STAT_TRSTAT) == 0)
+          {
+            /* ACK received from the slave. */
+
+            if ((status & I2C_STAT_ACKSTAT) == 0)
+              {
+                /* The master logic should be inactive before
+                 * attempting to enable receive mode.
+                 */
+
+                if (pic32mz_i2c_master_inactive(priv))
+                  {
+                    pic32mz_i2c_putreg(priv, PIC32MZ_I2C_CONSET_OFFSET,
+                                       I2C_CON_RCEN);
+
+                    priv->process_state = PROCESS_STATE_READ_DATA;
+                  }
+              }
+          }
+        break;
+
+      /* This state reads a byte from the receive buffer.
+       * If there are more than one byte to read,
+       * it should go back to the previous state to enable
+       * the receive mode.
+       */
+
+      case PROCESS_STATE_READ_DATA:
+
+        pic32mz_i2c_traceevent(priv, I2CEVENT_RCVBYTE, priv->dcnt);
+
+        /* Is data available in the receiver buffer? */
+
+        if ((status & I2C_STAT_RBF) != 0)
+          {
+            /* Read and send an ACK */
+
+            if (priv->dcnt > 1)
+              {
+#ifdef CONFIG_I2C_POLLED
+                irqstate_t flags = enter_critical_section();
+#endif
+
+                *priv->ptr++ = pic32mz_i2c_receivebyte(priv);
+
+                priv->dcnt--;
+
+                /* The master logic should be inactive before
+                 * attempting to issue an ACK.
+                 */
+
+                if (pic32mz_i2c_master_inactive(priv))
+                  {
+                    pic32mz_i2c_send_ack(priv, true);
+                  }
+
+#ifdef CONFIG_I2C_POLLED
+                leave_critical_section(flags);
+#endif
+                /* Go back and re-enable read mode to handle the rest of
+                 * the data.
+                 * It is cleared by the hardware at the end of the eighth
+                 * bit.
+                 */
+
+                priv->process_state = PROCESS_STATE_ENABLE_READ;
+              }
+
+            /* Last byte, read and send a NACK */
+
+            else
+              {
+#ifdef CONFIG_I2C_POLLED
+                irqstate_t flags = enter_critical_section();
+#endif
+                *priv->ptr++ = pic32mz_i2c_receivebyte(priv);
+
+                priv->dcnt--;
+
+                /* The master logic should be inactive before
+                 * attempting to issue a NACK.
+                 */
+
+                if (pic32mz_i2c_master_inactive(priv))
+                  {
+                    pic32mz_i2c_send_ack(priv, false);
+                  }
+
+#ifdef CONFIG_I2C_POLLED
+                leave_critical_section(flags);
+#endif
+                priv->process_state = PROCESS_STATE_FETCH_NEXT;
+              }
           }
 
-          /* Mark that we have stopped with this transaction. */
+        break;
 
-          priv->msgv = NULL;
-        }
+      /* In this state we fetch the next mssage.
+       * Increment to next pointer and decrement message count.
+       * If we have an other set of data we will:
+       *      - Issue a repeated start (I2C_M_NOSTOP flag set).
+       *      - Continue with no start (I2C_M_NOSTART flag set).
+       *      - Issue a start (No flag set).
+       * If no more data to send, issue a stop.
+       */
 
-      break;
+      case PROCESS_STATE_FETCH_NEXT:
 
-    default:
+        priv->msgv++;
+        priv->msgc--;
 
-      /* Nothing goes here! */
+        if (priv->msgc > 0 && priv->msgv != NULL)
+          {
+            /* If the previous message had the I2C_M_NOSTOP flag set,
+             * this implies that we should issue a repeated start.
+             * (Note: priv->flags still has the previous flags.)
+             */
 
-      break;
+            if (priv->flags & I2C_M_NOSTOP)
+              {
+                pic32mz_i2c_traceevent(priv, I2CEVENT_STARTRESTART, 0);
+
+                /* The bus should be in idle before issuing a repeated
+                 * start.
+                 */
+
+                if ((pic32mz_i2c_master_inactive(priv)) &&
+                    (status & I2C_STAT_TRSTAT) == 0)
+                  {
+                    pic32mz_i2c_send_repeatedstart(priv);
+                    priv->process_state = PROCESS_STATE_SEND_ADDR;
+                  }
+              }
+
+            /* If the new message has the I2C_M_NOSTART flag set,
+             * this means that it's a continuation of the same transfer.
+             * We can't just move back to SEND_DATA as we need an interrupt.
+             * So one byte must be sent from here first.
+             */
+
+            else if (priv->msgv->flags & I2C_M_NOSTART)
+              {
+                priv->ptr = priv->msgv->buffer;
+                priv->dcnt = priv->msgv->length;
+                priv->flags = priv->msgv->flags;
+
+                pic32mz_i2c_traceevent(priv, I2CEVENT_NOSTART, priv->dcnt);
+
+                if ((status & I2C_STAT_TRSTAT) == 0)
+                  {
+                    if ((status & I2C_STAT_ACKSTAT) == 0)
+                      {
+                        /* We have more than one byte.
+                         * Send the first one, this will trigger an interrupt
+                         * the rest will get sent later.
+                         */
+
+                        if (priv->dcnt > 1)
+                          {
+                            pic32mz_i2c_transmitbyte(priv, *priv->ptr++);
+
+                            priv->dcnt--;
+
+                            priv->process_state = PROCESS_STATE_SEND_DATA;
+                          }
+
+                        /* Send the only byte we have and stay in this state
+                         * to fetch the next message.
+                         */
+
+                        else
+                          {
+                            pic32mz_i2c_transmitbyte(priv, *priv->ptr++);
+
+                            priv->dcnt--;
+                          }
+                      }
+                  }
+              }
+
+            /* If neither the I2C_M_NOSTOP nor the I2C_M_NOSTART is set,
+             * just issue a start and let the isr process the data.
+             */
+
+            else
+              {
+                /* The bus should be in idle before issuing a start. */
+
+                if ((pic32mz_i2c_master_inactive(priv)) &&
+                    (status & I2C_STAT_TRSTAT) == 0)
+                  {
+                    pic32mz_i2c_send_start(priv);
+
+                    priv->process_state = PROCESS_STATE_SEND_ADDR;
+                  }
+              }
+          }
+        else
+          {
+            /* The stop should be initiated here,
+             * as there is no other way to trigger an interrupt.
+             */
+
+            pic32mz_i2c_traceevent(priv, I2CEVENT_STOP, 0);
+
+            /* The master logic should be inactive before
+             * attempting to issue a STOP.
+             */
+
+            if (pic32mz_i2c_master_inactive(priv))
+              {
+                pic32mz_i2c_send_stop(priv);
+
+                priv->process_state = PROCESS_STATE_TRANSFERT_DONE;
+              }
+          }
+        break;
+
+      /* Arriving here, the transfer is complete.
+       * Wake up any thread that has been waiting for this event.
+       */
+
+      case PROCESS_STATE_TRANSFERT_DONE:
+
+        pic32mz_i2c_traceevent(priv, I2CEVENT_WAKEUP, 0);
+
+        if (priv->msgv)
+          {
+            /* Is there a thread waiting for this event (there should be) */
+
+            if (priv->intstate == INTSTATE_WAITING)
+              {
+#ifndef CONFIG_I2C_POLLED
+                nxsem_post(&priv->sem_isr);
+#endif
+                priv->intstate = INTSTATE_DONE;
+              }
+
+            /* Mark that we have stopped with this transaction. */
+
+            priv->msgv = NULL;
+          }
+
+        break;
+
+      default:
+
+        /* Nothing goes here! */
+
+        break;
     }
 
   /* Clear the master interrupt flag. */
@@ -1783,36 +1787,36 @@ struct i2c_master_s *pic32mz_i2cbus_initialize(int port)
   switch (port)
     {
 #ifdef CONFIG_PIC32MZ_I2C1
-    case 1:
-      priv = (struct pic32mz_i2c_priv_s *)&pic32mz_i2c1_priv;
-      break;
+      case 1:
+        priv = (struct pic32mz_i2c_priv_s *)&pic32mz_i2c1_priv;
+        break;
 #endif
 
 #ifdef CONFIG_PIC32MZ_I2C2
-    case 2:
-      priv = (struct pic32mz_i2c_priv_s *)&pic32mz_i2c2_priv;
-      break;
+      case 2:
+        priv = (struct pic32mz_i2c_priv_s *)&pic32mz_i2c2_priv;
+        break;
 #endif
 
 #ifdef CONFIG_PIC32MZ_I2C3
-    case 3:
-      priv = (struct pic32mz_i2c_priv_s *)&pic32mz_i2c3_priv;
-      break;
+      case 3:
+        priv = (struct pic32mz_i2c_priv_s *)&pic32mz_i2c3_priv;
+        break;
 #endif
 #ifdef CONFIG_PIC32MZ_I2C4
-    case 4:
-      priv = (struct pic32mz_i2c_priv_s *)&pic32mz_i2c4_priv;
-      break;
+      case 4:
+        priv = (struct pic32mz_i2c_priv_s *)&pic32mz_i2c4_priv;
+        break;
 #endif
 
 #ifdef CONFIG_PIC32MZ_I2C5
-    case 5:
-      priv = (struct pic32mz_i2c_priv_s *)&pic32mz_i2c5_priv;
-      break;
+      case 5:
+        priv = (struct pic32mz_i2c_priv_s *)&pic32mz_i2c5_priv;
+        break;
 #endif
 
-    default:
-      return NULL;
+      default:
+        return NULL;
     }
 
   /* Initialize private data for the first time, increment reference count,
