@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fixedmath.h>
@@ -81,9 +82,6 @@
 
 #define BH1745NUC_MODE_CONTROL3_VAL            (0x02)
 
-#ifndef itemsof
-#  define itemsof(array) (sizeof(array)/sizeof(array[0]))
-#endif
 
 /****************************************************************************
  * Private Types
@@ -262,7 +260,7 @@ static int bh1745nuc_seqinit(struct bh1745nuc_dev_s *priv)
   /* Set instruction and sample data information to sequencer */
 
   seq_setinstruction(priv->seq, g_bh1745nucinst,
-                     itemsof(g_bh1745nucinst));
+                     nitems(g_bh1745nucinst));
   seq_setsample(priv->seq,
                 BH1745NUC_BYTESPERSAMPLE,
                 0,

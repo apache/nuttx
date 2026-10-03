@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 #include <nuttx/timers/pwm.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <inttypes.h>
 #include <stdint.h>
@@ -65,9 +66,6 @@
 #define PWM_PARAM_OFFPERIOD_SHIFT   (16)
 #define PWM_PHASE_PRESCALE_SHIFT    (16)
 
-#ifndef itemsof
-#  define itemsof(array) (sizeof(array)/sizeof(array[0]))
-#endif
 
 /****************************************************************************
  * Private Types
@@ -187,11 +185,11 @@ static int pwm_pin_config(uint32_t channel)
 
   if ((channel == CXD56_PWM_CH0) || (channel == CXD56_PWM_CH1))
     {
-      ret = cxd56_pin_configs(pingroupa, itemsof(pingroupa));
+      ret = cxd56_pin_configs(pingroupa, nitems(pingroupa));
     }
   else
     {
-      ret = cxd56_pin_configs(pingroupb, itemsof(pingroupb));
+      ret = cxd56_pin_configs(pingroupb, nitems(pingroupb));
     }
 
   return ret;

@@ -30,6 +30,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <assert.h>
 #include <nuttx/debug.h>
@@ -1450,8 +1451,7 @@ static int ee25xx_populatedev(FAR struct ee25xx_dev_s **eedev,
   /* Check the device type early */
 
   const int devtype_idx = (int)devtype;
-  if (devtype_idx >=
-      (sizeof(g_ee25xx_devices) / sizeof(g_ee25xx_devices[0])))
+  if (devtype_idx >= nitems(g_ee25xx_devices))
     {
       return -EINVAL;
     }

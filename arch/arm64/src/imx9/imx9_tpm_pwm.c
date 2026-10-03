@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -645,7 +646,7 @@ struct pwm_lowerhalf_s *imx9_tpm_pwm_init(tpm_pwm_id_t pwmid)
   struct imx9_pwmtimer_s *lower = NULL;
   int i;
 
-  for (i = 0; i <  sizeof(g_pwmdev) / sizeof(g_pwmdev[0]); i++)
+  for (i = 0; i <  nitems(g_pwmdev); i++)
     {
       if (pwmid == g_pwmdev[i].id)
         {

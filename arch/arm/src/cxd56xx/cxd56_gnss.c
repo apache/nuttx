@@ -34,6 +34,7 @@
 #include <poll.h>
 #include <errno.h>
 #include <nuttx/debug.h>
+#include <sys/param.h>
 #include <sys/stat.h>
 
 #include <nuttx/kmalloc.h>
@@ -3214,7 +3215,7 @@ static int cxd56_gnss_register(const char *devpath)
       goto err0;
     }
 
-  for (i = 0; i < sizeof(devsig_table) / sizeof(devsig_table[0]); i++)
+  for (i = 0; i < nitems(devsig_table); i++)
     {
       ret = cxd56_cpu1siginit(devsig_table[i].sigtype, priv);
       if (ret < 0)

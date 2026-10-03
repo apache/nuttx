@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 #include <nuttx/nuttx.h>
 
+#include <sys/param.h>
 #include <nuttx/debug.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -671,7 +672,7 @@ static int sht4x_control(FAR struct sensor_lowerhalf_s *lower,
           /* Check for invalid heater command */
 
           if (0 < arg ||
-              arg >= (sizeof(g_heat_cmds) / sizeof(g_heat_cmds[0])))
+              arg >= (nitems(g_heat_cmds)))
             {
               return -EINVAL;
             }

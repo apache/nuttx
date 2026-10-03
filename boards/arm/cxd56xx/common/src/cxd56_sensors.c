@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <stdio.h>
 #include <nuttx/debug.h>
 #include <errno.h>
@@ -267,7 +268,7 @@ int board_sensors_initialize(void)
 
   /* Initialize each sensor device */
 
-  for (i = 0; i < sizeof(sensor_device) / sizeof(sensor_device[0]); i++)
+  for (i = 0; i < nitems(sensor_device); i++)
     {
       dev = &sensor_device[i];
       if (dev->devpath)

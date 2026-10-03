@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fixedmath.h>
@@ -217,9 +218,6 @@
 #define MAG_PM_NORMAL         (0x19)
 #define MAG_PM_LOWPOWER       (0x1A)
 
-#ifndef itemsof
-#  define itemsof(array) (sizeof(array)/sizeof(array[0]))
-#endif
 
 /****************************************************************************
  * Private Types
@@ -478,7 +476,7 @@ static int bmi160_seqinit_gyro(struct bmi160_dev_s *priv)
 
   seq_setinstruction(priv->seq,
                      g_bmi160gyroinst,
-                     itemsof(g_bmi160gyroinst));
+                     nitems(g_bmi160gyroinst));
   seq_setsample(priv->seq,
                 BMI160_BYTESPERSAMPLE,
                 0,
@@ -517,7 +515,7 @@ static int bmi160_seqinit_accel(struct bmi160_dev_s *priv)
 
   seq_setinstruction(priv->seq,
                      g_bmi160accelinst,
-                     itemsof(g_bmi160accelinst));
+                     nitems(g_bmi160accelinst));
   seq_setsample(priv->seq,
                 BMI160_BYTESPERSAMPLE,
                 0,

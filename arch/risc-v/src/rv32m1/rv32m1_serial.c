@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -1073,7 +1074,7 @@ void riscv_serialinit(void)
     },
   };
 
-  nuart = (int)(sizeof(ttydevs) / sizeof(ttydevs[0]));
+  nuart = (int)(nitems(ttydevs));
 
   /* Register the console */
 

@@ -48,6 +48,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -182,7 +183,7 @@ uint32_t eic7700x_cpuclk_measure(void)
 
 const uint32_t *eic7700x_cpuclk_rates(size_t *count)
 {
-  *count = sizeof(g_cpuclk_rates) / sizeof(g_cpuclk_rates[0]);
+  *count = nitems(g_cpuclk_rates);
   return g_cpuclk_rates;
 }
 
@@ -206,7 +207,7 @@ int eic7700x_cpuclk_setrate(uint32_t hz)
   int ret;
   size_t i;
 
-  for (i = 0; i < sizeof(g_cpuclk_rates) / sizeof(g_cpuclk_rates[0]); i++)
+  for (i = 0; i < nitems(g_cpuclk_rates); i++)
     {
       if (g_cpuclk_rates[i] == hz)
         {
