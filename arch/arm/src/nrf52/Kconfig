@@ -231,6 +231,7 @@ config NRF52_UART1
 config NRF52_RNG
 	bool "Random Generator"
 	default n
+	depends on !NRF52_BLE_CONTROLLER
 	select ARCH_HAVE_RNG
 
 config NRF52_QSPI
@@ -246,7 +247,7 @@ config NRF52_WDT
 config NRF52_RADIO
 	bool "RADIO"
 	depends on EXPERIMENTAL
-	depends on !NRF52_SOFTDEVICE_CONTROLLER
+	depends on !NRF52_SOFTDEVICE_CONTROLLER && !NRF52_BLE_CONTROLLER
 	default n
 
 config NRF52_NFCT
@@ -260,7 +261,7 @@ config NRF52_SAADC
 config NRF52_TIMER0
 	bool "TIMER0"
 	select NRF52_TIMER
-	depends on !NRF52_SOFTDEVICE_CONTROLLER
+	depends on !NRF52_SOFTDEVICE_CONTROLLER && !NRF52_BLE_CONTROLLER
 	default n
 
 config NRF52_TIMER1
@@ -311,7 +312,7 @@ config NRF52_PPI
 config NRF52_RTC0
 	bool "RTC0"
 	select NRF52_RTC
-	depends on !NRF52_SOFTDEVICE_CONTROLLER
+	depends on !NRF52_SOFTDEVICE_CONTROLLER && !NRF52_BLE_CONTROLLER
 	default n
 
 config NRF52_RTC1
@@ -421,8 +422,8 @@ if NRF52_SYSTIMER_RTC
 
 config NRF52_SYSTIMER_RTC_INSTANCE
 	int "RTC timer instance"
-	default 0 if !NRF52_SOFTDEVICE_CONTROLLER
-	default 1 if NRF52_SOFTDEVICE_CONTROLLER
+	default 1 if NRF52_SOFTDEVICE_CONTROLLER || NRF52_BLE_CONTROLLER
+	default 0
 	range 0 2
 	---help---
 		Which RTC instance to use to drive the system timer
@@ -1032,3 +1033,35 @@ config NRF52_SDC_PUB_ADDR
 	default 0x0000000000
 
 endif # NRF52_SOFTDEVICE_CONTROLLER
+
+menuconfig NRF52_BLE_CONTROLLER
+	bool "BLE Link Layer radio"
+	depends on WIRELESS_BLE_LL
+	depends on !NRF52_SOFTDEVICE_CONTROLLER
+	select NRF52_USE_LFCLK
+	select BLE_LL_HAVE_HW_WHITELIST
+	---help---
+		Radio lower half for the BLE Link Layer (wireless/ble_ll).
+
+		It makes use of RADIO, TIMER0, RTC0, CCM, AAR, ECB and RNG so
+		these will be unavailable for direct use by user.  It also uses
+		the pre-programmed PPI channels 20, 21, 23, 25, 26, 27 and 31 and
+		two configurable PPI channels.
+
+if NRF52_BLE_CONTROLLER
+
+config NRF52_BLE_PPI_WFR0
+	int "Wait for response PPI channel 0"
+	default 4
+	range 0 19
+	---help---
+		PPI channel connecting RADIO ADDRESS event to TIMER0 CAPTURE[3].
+
+config NRF52_BLE_PPI_WFR1
+	int "Wait for response PPI channel 1"
+	default 5
+	range 0 19
+	---help---
+		PPI channel connecting TIMER0 COMPARE[3] event to RADIO DISABLE.
+
+endif # NRF52_BLE_CONTROLLER
