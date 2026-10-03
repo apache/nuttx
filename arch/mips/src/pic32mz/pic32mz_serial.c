@@ -914,226 +914,228 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
-    case TIOCSERGSTRUCT:
-      {
-         struct up_dev_s *user = (struct up_dev_s *)arg;
-         if (!user)
-           {
-             ret = -EINVAL;
-           }
-         else
-           {
-             memcpy(user, dev, sizeof(struct up_dev_s));
-           }
-       }
-       break;
+      case TIOCSERGSTRUCT:
+        {
+          struct up_dev_s *user = (struct up_dev_s *)arg;
+
+          if (!user)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              memcpy(user, dev, sizeof(struct up_dev_s));
+            }
+        }
+        break;
 #endif
 
 #ifdef CONFIG_SERIAL_TERMIOS
-    case TCGETS:
-      {
-        struct termios *termiosp = (struct termios *)arg;
-        tcflag_t ccflag = 0;
+      case TCGETS:
+        {
+          struct termios *termiosp = (struct termios *)arg;
+          tcflag_t ccflag = 0;
 
-        if (!termiosp)
-          {
-            ret = -EINVAL;
-            break;
-          }
+          if (!termiosp)
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        if (priv->bits >= 5 && priv->bits <= 8)
-          {
-            ccflag |= (CS5 + (priv->bits - 5));
-          }
+          if (priv->bits >= 5 && priv->bits <= 8)
+            {
+              ccflag |= (CS5 + (priv->bits - 5));
+            }
 
-        if (priv->stopbits2)
-          {
-            ccflag |= CSTOPB;
-          }
+          if (priv->stopbits2)
+            {
+              ccflag |= CSTOPB;
+            }
 
-        if (priv->parity == 1)
-          {
-            ccflag |= PARENB;
-          }
-        else if (priv->parity == 2)
-          {
-            ccflag |= PARENB | PARODD;
-          }
+          if (priv->parity == 1)
+            {
+              ccflag |= PARENB;
+            }
+          else if (priv->parity == 2)
+            {
+              ccflag |= PARENB | PARODD;
+            }
 
-        /* TODO: Other termios fields are not yet returned.
-         *
-         * TODO: append support for CCTS_OFLOW, CRTS_IFLOW, HUPCL, and
-         *       CLOCAL as well as os-compliant break sequence.
-         *
-         * Note that cfsetospeed is not necessary because we have
-         * knowledge that only one speed is supported.
-         */
+          /* TODO: Other termios fields are not yet returned.
+           *
+           * TODO: append support for CCTS_OFLOW, CRTS_IFLOW, HUPCL, and
+           *       CLOCAL as well as os-compliant break sequence.
+           *
+           * Note that cfsetospeed is not necessary because we have
+           * knowledge that only one speed is supported.
+           */
 
-        termiosp->c_cflag = ccflag;
+          termiosp->c_cflag = ccflag;
 
-        cfsetispeed(termiosp, priv->baud);
-      }
-      break;
+          cfsetispeed(termiosp, priv->baud);
+        }
+        break;
 
-    case TCSETS:
-      {
-        struct termios *termiosp = (struct termios *)arg;
-        unsigned int nbits;
+      case TCSETS:
+        {
+          struct termios *termiosp = (struct termios *)arg;
+          unsigned int nbits;
 
-        if (!termiosp)
-          {
-            ret = -EINVAL;
-            break;
-          }
+          if (!termiosp)
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        /* Perform some sanity checks before accepting any changes */
+          /* Perform some sanity checks before accepting any changes */
 
-        if (termiosp->c_cflag & CRTSCTS)
-          {
-            /* We don't support flow control right now, so we report an
-             * error
-             */
+          if (termiosp->c_cflag & CRTSCTS)
+            {
+              /* We don't support flow control right now, so we report an
+               * error
+               */
 
-            ret = -EINVAL;
-            break;
-          }
+              ret = -EINVAL;
+              break;
+            }
 
-        nbits = (termiosp->c_cflag & CSIZE) + 5;
-        if ((nbits < 8) || (nbits > 9))
-          {
-            /* We only support 8 or 9 data bits on this arch, so we
-             * report an error
-             */
+          nbits = (termiosp->c_cflag & CSIZE) + 5;
+          if ((nbits < 8) || (nbits > 9))
+            {
+              /* We only support 8 or 9 data bits on this arch, so we
+               * report an error
+               */
 
-            ret = -EINVAL;
-            break;
-          }
+              ret = -EINVAL;
+              break;
+            }
 
-        /* Sanity checks passed; apply settings. */
+          /* Sanity checks passed; apply settings. */
 
-        priv->bits = nbits;
+          priv->bits = nbits;
 
-        if (termiosp->c_cflag & PARENB)
-          {
-            priv->parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
-          }
-        else
-          {
-            priv->parity = 0;
-          }
+          if (termiosp->c_cflag & PARENB)
+            {
+              priv->parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
+            }
+          else
+            {
+              priv->parity = 0;
+            }
 
-        priv->stopbits2 = (termiosp->c_cflag & CSTOPB) != 0;
+          priv->stopbits2 = (termiosp->c_cflag & CSTOPB) != 0;
 
-        /* TODO:  Handle other termios settings.
-         * Note that only cfgetispeed is used because we have knowledge
-         * that only one speed is supported.
-         */
+          /* TODO:  Handle other termios settings.
+           * Note that only cfgetispeed is used because we have knowledge
+           * that only one speed is supported.
+           */
 
-        priv->baud = cfgetispeed(termiosp);
-        pic32mz_uartconfigure(priv->uartbase, priv->baud, priv->parity,
-                              priv->bits, priv->stopbits2);
-      }
-      break;
+          priv->baud = cfgetispeed(termiosp);
+          pic32mz_uartconfigure(priv->uartbase, priv->baud, priv->parity,
+                                priv->bits, priv->stopbits2);
+        }
+        break;
 #endif /* CONFIG_SERIAL_TERMIOS */
 
 #ifdef CONFIG_PIC32MZ_UART_BREAKS
 #  ifdef CONFIG_PIC32MZ_SERIALBRK_BSDCOMPAT
-    case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
-      {
-        irqstate_t flags;
+      case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
+        {
+          irqstate_t flags;
 
-        flags = enter_critical_section();
+          flags = enter_critical_section();
 
-        /* Disable any further TX activity */
+          /* Disable any further TX activity */
 
-        priv->brk = true;
-        up_txint(dev, false);
+          priv->brk = true;
+          up_txint(dev, false);
 
-        /* Configure TX as a GPIO output pin driven low to send break */
+          /* Configure TX as a GPIO output pin driven low to send break */
 
-        pic32mz_configgpio(priv->tx_gpio);
-        putreg32(0, priv->tx_pps_reg);
+          pic32mz_configgpio(priv->tx_gpio);
+          putreg32(0, priv->tx_pps_reg);
 
-        leave_critical_section(flags);
-      }
-      break;
+          leave_critical_section(flags);
+        }
+        break;
 
-    case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
-      {
-        irqstate_t flags;
+      case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
+        {
+          irqstate_t flags;
 
-        flags = enter_critical_section();
+          flags = enter_critical_section();
 
-        /* Configure TX back to UART */
+          /* Configure TX back to UART */
 
-        putreg32(priv->tx_pps_val, priv->tx_pps_reg);
+          putreg32(priv->tx_pps_val, priv->tx_pps_reg);
 
-        /* Enable further tx activity */
+          /* Enable further tx activity */
 
-        priv->brk = false;
-        up_txint(dev, true);
+          priv->brk = false;
+          up_txint(dev, true);
 
-        leave_critical_section(flags);
-      }
-      break;
+          leave_critical_section(flags);
+        }
+        break;
 #  else
-    case TIOCSBRK:  /* No BSD compatibility: Turn break on for 12 bit times */
-      {
-        uint32_t regval;
-        irqstate_t flags;
+      case TIOCSBRK:  /* No BSD compatibility: Turn break on for 12 bit times */
+        {
+          uint32_t regval;
+          irqstate_t flags;
 
-        flags = enter_critical_section();
+          flags = enter_critical_section();
 
-        /* Disable any further TX activity */
+          /* Disable any further TX activity */
 
-        priv->brk = true;
-        up_txint(dev, false);
+          priv->brk = true;
+          up_txint(dev, false);
 
-        /* Enable break transmission */
+          /* Enable break transmission */
 
-        regval = up_serialin(priv, PIC32MZ_UART_STA_OFFSET);
-        regval |= UART_STA_UTXBRK;
-        up_serialout(priv, PIC32MZ_UART_STA_OFFSET, regval);
+          regval = up_serialin(priv, PIC32MZ_UART_STA_OFFSET);
+          regval |= UART_STA_UTXBRK;
+          up_serialout(priv, PIC32MZ_UART_STA_OFFSET, regval);
 
-        /* A dummy write to TXREG is needed to start sending the break. The
-         * caller should ensure that there are no pending transmit data in
-         * the UART FIFO before executing this IOCTL or the break will
-         * consume a byte of that data instead of the dummy write.
-         */
+          /* A dummy write to TXREG is needed to start sending the break. The
+           * caller should ensure that there are no pending transmit data in
+           * the UART FIFO before executing this IOCTL or the break will
+           * consume a byte of that data instead of the dummy write.
+           */
 
-        up_send(dev, 0);
+          up_send(dev, 0);
 
-        leave_critical_section(flags);
-      }
-      break;
+          leave_critical_section(flags);
+        }
+        break;
 
-    case TIOCCBRK:  /* No BSD compatibility: May turn off break too soon */
-      {
-        irqstate_t flags;
+      case TIOCCBRK:  /* No BSD compatibility: May turn off break too soon */
+        {
+          irqstate_t flags;
 
-        flags = enter_critical_section();
+          flags = enter_critical_section();
 
-        /* Enable further tx activity. We do not clear the UTXBRK bit
-         * because hardware does it automatically after transmitting the
-         * break. In fact, the PIC32MZ manual, rev G, section 21.5.4, says:
-         * "If the user application clears the UTXBRK bit prior to sequence
-         * completion, unexpected module behavior can result." It should be
-         * safe to re-enable transmit here because the hardware specifically
-         * allows to queue up the next character to follow the break.
-         */
+          /* Enable further tx activity. We do not clear the UTXBRK bit
+           * because hardware does it automatically after transmitting the
+           * break. In fact, the PIC32MZ manual, rev G, section 21.5.4,
+           * says: "If the user application clears the UTXBRK bit prior to
+           * sequence completion, unexpected module behavior can result." It
+           * should be safe to re-enable transmit here because the hardware
+           * specifically allows to queue up the next character to follow
+           * the break.
+           */
 
-        priv->brk = false;
-        up_txint(dev, true);
+          priv->brk = false;
+          up_txint(dev, true);
 
-        leave_critical_section(flags);
-      }
-      break;
+          leave_critical_section(flags);
+        }
+        break;
 #  endif
 #endif
 
-    default:
-      ret = -ENOTTY;
-      break;
+      default:
+        ret = -ENOTTY;
+        break;
     }
 
   return ret;
@@ -1237,6 +1239,7 @@ static bool up_rxavailable(struct uart_dev_s *dev)
 static void up_send(struct uart_dev_s *dev, int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+
   up_serialout(priv, PIC32MZ_UART_TXREG_OFFSET, (uint32_t)ch);
 }
 
