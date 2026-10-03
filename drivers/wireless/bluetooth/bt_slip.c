@@ -87,7 +87,6 @@
 #define BT_SLIP_GET_TXWIN(payload) (payload[2] & 0x07)
 #define BT_SLIP_IS_DIC(payload) ((payload[2] & 0x10) == 0x10)
 
-#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
 
 /****************************************************************************
  * Private Types
@@ -471,22 +470,22 @@ static int bt_slip_link_packet_hanlde(FAR struct sliphci_s *priv,
   FAR const uint8_t *payload = header + BT_SLIP_HEADER_LEN;
   int ret = len;
 
-  if (memcmp(payload, g_sync_req, ARRAY_SIZE(g_sync_req)) == 0)
+  if (memcmp(payload, g_sync_req, nitems(g_sync_req)) == 0)
     {
-      bt_slip_send_link_control(priv, g_sync_rsp, ARRAY_SIZE(g_sync_rsp));
+      bt_slip_send_link_control(priv, g_sync_rsp, nitems(g_sync_rsp));
     }
-  else if (memcmp(payload, g_sync_rsp, ARRAY_SIZE(g_sync_rsp)) == 0)
+  else if (memcmp(payload, g_sync_rsp, nitems(g_sync_rsp)) == 0)
     {
       wlinfo("h5: initialized");
       priv->linkstate = BT_SLIP_INITIALIZED;
-      bt_slip_send_link_control(priv, g_conf_req, ARRAY_SIZE(g_conf_req));
+      bt_slip_send_link_control(priv, g_conf_req, nitems(g_conf_req));
     }
-  else if (memcmp(payload, g_conf_req, ARRAY_SIZE(g_conf_req) - 1) == 0)
+  else if (memcmp(payload, g_conf_req, nitems(g_conf_req) - 1) == 0)
     {
-      bt_slip_send_link_control(priv, g_conf_rsp, ARRAY_SIZE(g_conf_rsp));
-      bt_slip_send_link_control(priv, g_conf_req, ARRAY_SIZE(g_conf_req));
+      bt_slip_send_link_control(priv, g_conf_rsp, nitems(g_conf_rsp));
+      bt_slip_send_link_control(priv, g_conf_req, nitems(g_conf_req));
     }
-  else if (memcmp(payload, g_conf_rsp, ARRAY_SIZE(g_conf_rsp)) == 0)
+  else if (memcmp(payload, g_conf_rsp, nitems(g_conf_rsp)) == 0)
     {
       if (BT_SLIP_GET_LEN(header) > 2)
         {

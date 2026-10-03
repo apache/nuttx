@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <syslog.h>
 #include <assert.h>
 #include <errno.h>
@@ -175,7 +176,7 @@ static int gt911_read_reg(struct gt911_dev_s *dev,
     }
   };
 
-  const int msgv_len = sizeof(msgv) / sizeof(msgv[0]);
+  const int msgv_len = nitems(msgv);
 
   iinfo("reg=0x%x, buflen=%d\n", reg, buflen);
   DEBUGASSERT(dev && dev->i2c && buf);
@@ -242,7 +243,7 @@ static int gt911_write_reg(struct gt911_dev_s *dev,
     }
   };
 
-  const int msgv_len = sizeof(msgv) / sizeof(msgv[0]);
+  const int msgv_len = nitems(msgv);
 
   iinfo("reg=0x%x, val=%d\n", reg, val);
   DEBUGASSERT(dev && dev->i2c);

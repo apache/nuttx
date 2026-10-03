@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fixedmath.h>
@@ -120,9 +121,6 @@
 #define BMP280TEMP_BYTESPERSAMPLE   3
 #define BMP280TEMP_ELEMENTSIZE      3
 
-#ifndef itemsof
-#  define itemsof(array) (sizeof(array)/sizeof(array[0]))
-#endif
 
 /****************************************************************************
  * Private Types
@@ -495,7 +493,7 @@ static int bmp280_seqinit_press(struct bmp280_dev_s *priv)
   /* Set instruction and sample data information to sequencer */
 
   seq_setinstruction(priv->seq, g_bmp280pressinst,
-                     itemsof(g_bmp280pressinst));
+                     nitems(g_bmp280pressinst));
   seq_setsample(priv->seq, BMP280PRESS_BYTESPERSAMPLE, 0,
                 BMP280PRESS_ELEMENTSIZE, false);
 
@@ -521,7 +519,7 @@ static int bmp280_seqinit_temp(struct bmp280_dev_s *priv)
   /* Set instruction and sample data information to sequencer */
 
   seq_setinstruction(priv->seq, g_bmp280tempinst,
-                     itemsof(g_bmp280tempinst));
+                     nitems(g_bmp280tempinst));
   seq_setsample(priv->seq, BMP280TEMP_BYTESPERSAMPLE, 0,
                 BMP280TEMP_ELEMENTSIZE, false);
 

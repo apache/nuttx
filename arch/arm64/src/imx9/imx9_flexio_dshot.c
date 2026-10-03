@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -1113,7 +1114,7 @@ struct dshot_lowerhalf_s *imx9_flexio_dshot_init(flexio_dshot_id_t id)
   struct imx9_flexio_dshot_s *priv = NULL;
   int i;
 
-  for (i = 0; i < sizeof(g_dshot_dev) / sizeof(g_dshot_dev[0]); i++)
+  for (i = 0; i < nitems(g_dshot_dev); i++)
     {
       if (g_dshot_dev[i].id == id)
         {

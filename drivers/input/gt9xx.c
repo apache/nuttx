@@ -31,6 +31,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -196,7 +197,7 @@ static int gt9xx_i2c_read(FAR struct gt9xx_dev_s *dev,
     }
   };
 
-  const int msgv_len = sizeof(msgv) / sizeof(msgv[0]);
+  const int msgv_len = nitems(msgv);
 
   iinfo("reg=0x%x, buflen=%zu\n", reg, buflen);
   DEBUGASSERT(dev && dev->i2c && buf);
@@ -265,7 +266,7 @@ static int gt9xx_i2c_write(FAR struct gt9xx_dev_s *dev,
     }
   };
 
-  const int msgv_len = sizeof(msgv) / sizeof(msgv[0]);
+  const int msgv_len = nitems(msgv);
 
   iinfo("reg=0x%x, val=%d\n", reg, val);
   DEBUGASSERT(dev && dev->i2c);

@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fixedmath.h>
@@ -56,9 +57,6 @@
 #define BH1721FVC_POWERON               0x01
 #define BH1721FVC_AUTORESOLUTION        0x10
 
-#ifndef itemsof
-#  define itemsof(array) (sizeof(array)/sizeof(array[0]))
-#endif
 
 /****************************************************************************
  * Private Types
@@ -172,7 +170,7 @@ static int bh1721fvc_seqinit(struct bh1721fvc_dev_s *priv)
 
   seq_setinstruction(priv->seq,
                      g_bh1721fvcinst,
-                     itemsof(g_bh1721fvcinst));
+                     nitems(g_bh1721fvcinst));
   seq_setsample(priv->seq,
                 BH1721FVC_BYTESPERSAMPLE,
                 0,

@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <stdint.h>
 #include "chip.h"
 #include "arm_internal.h"

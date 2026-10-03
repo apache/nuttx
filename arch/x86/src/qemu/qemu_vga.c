@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -80,7 +81,7 @@
 #define R_H564 0x80
 #define R_H600 0x80
 
-#define SZ(x) (sizeof(x)/sizeof(x[0]))
+#define SZ(x) (nitems(x))
 
 #define VGA_XRES         320
 #define VGA_YRES         240

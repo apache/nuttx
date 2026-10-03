@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <assert.h>
 #include <nuttx/debug.h>
 #include <errno.h>
@@ -48,9 +49,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef ARRAY_SIZE
-#  define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-#endif
 
 #define TOUCHPAD_REFH               (TOUCH_HVOLT_2V7)
 #define TOUCHPAD_REFL               (TOUCH_LVOLT_0V5)
@@ -197,7 +195,7 @@ uint32_t board_buttons(void)
   bool b1;
   int n;
 
-  for (uint8_t btn_id = 0; btn_id < ARRAY_SIZE(g_buttons); btn_id++)
+  for (uint8_t btn_id = 0; btn_id < nitems(g_buttons); btn_id++)
     {
       iinfo("Reading button %d\n", btn_id);
 
@@ -266,7 +264,7 @@ uint32_t board_buttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
 int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 {
-  DEBUGASSERT(id < ARRAY_SIZE(g_buttons));
+  DEBUGASSERT(id < nitems(g_buttons));
 
   int ret;
   struct button_type_s button_info = g_buttons[id];

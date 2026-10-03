@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fixedmath.h>
@@ -97,9 +98,6 @@
 
 #define BM1422GMV_CNTL4_VAL         0x0000
 
-#ifndef itemsof
-#  define itemsof(array) (sizeof(array)/sizeof(array[0]))
-#endif
 
 /****************************************************************************
  * Private Types
@@ -285,7 +283,7 @@ static int bm1422gmv_seqinit(struct bm1422gmv_dev_s *priv)
 
   /* Set instruction and sample data information to sequencer */
 
-  seq_setinstruction(priv->seq, g_bm1422gmvinst, itemsof(g_bm1422gmvinst));
+  seq_setinstruction(priv->seq, g_bm1422gmvinst, nitems(g_bm1422gmvinst));
   seq_setsample(priv->seq, BM1422GMV_BYTESPERSAMPLE, 0,
                 BM1422GMV_ELEMENTSIZE, false);
 

@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <syslog.h>
 #include <errno.h>
@@ -135,7 +136,7 @@ static int stm32_capture_setup(void)
       /* TODO: LPTIMy_CAP */
     };
 
-  size_t count = sizeof(lower) / sizeof(lower[0]);
+  size_t count = nitems(lower);
 
   /* Nothing to do if no timers enabled */
 

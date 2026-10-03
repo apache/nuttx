@@ -71,6 +71,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <sys/param.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -896,7 +897,7 @@ static void select_arch(uint16_t machine)
 {
   size_t i;
 
-  for (i = 0; i < sizeof(g_arches) / sizeof(g_arches[0]); i++)
+  for (i = 0; i < nitems(g_arches); i++)
     {
       if (g_arches[i].machine == machine)
         {
