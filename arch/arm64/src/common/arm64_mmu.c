@@ -39,6 +39,10 @@
 #include "arm64_fatal.h"
 #include "arm64_mmu.h"
 
+#ifdef CONFIG_BUILD_KERNEL
+#  include "addrenv.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -358,44 +362,44 @@ static void set_pte_block_desc(uint64_t *pte, uint64_t addr_pa,
 
   switch (mem_type)
     {
-    case MT_DEVICE_NGNRNE:
-    case MT_DEVICE_NGNRE:
-    case MT_DEVICE_GRE:
-      {
-        /* Access to Device memory and non-cacheable memory are coherent
-         * for all observers in the system and are treated as
-         * Outer shareable, so, for these 2 types of memory,
-         * it is not strictly needed to set shareability field
-         */
+      case MT_DEVICE_NGNRNE:
+      case MT_DEVICE_NGNRE:
+      case MT_DEVICE_GRE:
+        {
+          /* Access to Device memory and non-cacheable memory are coherent
+           * for all observers in the system and are treated as
+           * Outer shareable, so, for these 2 types of memory,
+           * it is not strictly needed to set shareability field
+           */
 
-        desc |= PTE_BLOCK_DESC_OUTER_SHARE;
+          desc |= PTE_BLOCK_DESC_OUTER_SHARE;
 
-        /* Map device memory as execute-never */
+          /* Map device memory as execute-never */
 
-        desc |= PTE_BLOCK_DESC_PXN;
-        desc |= PTE_BLOCK_DESC_UXN;
-        break;
-      }
+          desc |= PTE_BLOCK_DESC_PXN;
+          desc |= PTE_BLOCK_DESC_UXN;
+          break;
+        }
 
-    case MT_NORMAL_NC:
-    case MT_NORMAL:
-      {
-        /* Make Normal RW memory as execute never */
+      case MT_NORMAL_NC:
+      case MT_NORMAL:
+        {
+          /* Make Normal RW memory as execute never */
 
-        if (attrs & MT_EXECUTE_NEVER)
-          {
-            desc |= PTE_BLOCK_DESC_PXN;
-          }
+          if (attrs & MT_EXECUTE_NEVER)
+            {
+              desc |= PTE_BLOCK_DESC_PXN;
+            }
 
-        if (mem_type == MT_NORMAL)
-          {
-            desc |= PTE_BLOCK_DESC_INNER_SHARE;
-          }
-        else
-          {
-            desc |= PTE_BLOCK_DESC_OUTER_SHARE;
-          }
-      }
+          if (mem_type == MT_NORMAL)
+            {
+              desc |= PTE_BLOCK_DESC_INNER_SHARE;
+            }
+          else
+            {
+              desc |= PTE_BLOCK_DESC_OUTER_SHARE;
+            }
+        }
     }
 
 #if defined(CONFIG_MMU_DEBUG) && defined(CONFIG_MMU_DUMP_PTE)
@@ -458,6 +462,27 @@ static void split_pte_block_desc(uint64_t *pte, int level)
   set_pte_table_desc(pte, new_table, level);
 }
 
+#ifdef CONFIG_BUILD_KERNEL
+static bool is_user_overlap(uintptr_t virt, size_t size)
+{
+  uintptr_t last = virt + size - 1;
+
+  if (virt <= ARCH_ADDRENV_VEND && last >= ARCH_ADDRENV_VBASE)
+    {
+      return true;
+    }
+
+#ifdef CONFIG_ARCH_VMA_MAPPING
+  if (virt <= ARCH_SHM_VEND && last >= CONFIG_ARCH_SHM_VBASE)
+    {
+      return true;
+    }
+#endif
+
+  return false;
+}
+#endif
+
 /* Create/Populate translation table(s) for given region */
 
 static void init_xlat_tables(const struct arm_mmu_region *region)
@@ -473,6 +498,13 @@ static void init_xlat_tables(const struct arm_mmu_region *region)
 
 #ifdef CONFIG_MMU_DEBUG
   sinfo("mmap: virt %lux phys %lux size %lux\n", virt, phys, size);
+#endif
+
+#ifdef CONFIG_BUILD_KERNEL
+  if (size > 0 && is_user_overlap(virt, size))
+    {
+      PANIC();
+    }
 #endif
 
   /* check minimum alignment requirement for given mmap region */
@@ -531,7 +563,8 @@ static void init_xlat_tables(const struct arm_mmu_region *region)
 
 static void setup_page_tables(void)
 {
-  uint64_t max_va = 0, max_pa = 0;
+  uint64_t max_va = 0;
+  uint64_t max_pa = 0;
   const struct arm_mmu_region *region;
   unsigned int index;
 
@@ -574,6 +607,7 @@ static void setup_page_tables(void)
 static void enable_mmu_el3(unsigned int flags)
 {
   uint64_t value;
+
   UNUSED(flags);
 
   /* Set MAIR, TCR and TBBR registers */
@@ -606,6 +640,7 @@ static void enable_mmu_el3(unsigned int flags)
 static void enable_mmu_el1(unsigned int flags)
 {
   uint64_t value;
+
   UNUSED(flags);
 
   /* Set MAIR, TCR and TBBR registers */
@@ -645,17 +680,21 @@ int arm64_mmu_set_memregion(const struct arm_mmu_region *region)
   uint64_t virt = region->base_va;
   uint64_t size = region->size;
 
-  if (((virt & (PAGE_SIZE - 1)) == 0) &&
-      ((size & (PAGE_SIZE - 1)) == 0))
-    {
-      init_xlat_tables(region);
-    }
-  else
+  if (((virt & (PAGE_SIZE - 1)) != 0) ||
+      ((size & (PAGE_SIZE - 1)) != 0))
     {
       sinfo("address/size are not page aligned\n");
       return -EINVAL;
     }
 
+#ifdef CONFIG_BUILD_KERNEL
+  if (size > 0 && is_user_overlap(virt, size))
+    {
+      return -EINVAL;
+    }
+#endif
+
+  init_xlat_tables(region);
   return 0;
 }
 
