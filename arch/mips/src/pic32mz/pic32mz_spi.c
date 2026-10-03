@@ -52,9 +52,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* All SPI peripherals are clocked by PBCLK2 */
+/* Peripheral bus clock feeding the SPI baud rate generators: PBCLK2 on
+ * PIC32MZ EC/EF, PBCLK3 on PIC32MZ-W1 (DS70005425 Table 11-1).
+ */
 
-#define BOARD_PBCLOCK BOARD_PBCLK2
+#ifdef CONFIG_ARCH_CHIP_PIC32MZW1
+#  define BOARD_PBCLOCK BOARD_PBCLK3
+#else
+#  define BOARD_PBCLOCK BOARD_PBCLK2
+#endif
 
 #ifdef CONFIG_PIC32MZ_SPI_DMA
 
@@ -120,7 +126,8 @@ struct pic32mz_config_s
 #endif
   uint8_t          sdipps;     /* SDI peripheral pin selection */
   uint8_t          sdopps;     /* SDO peripheral pin selection */
-  uintptr_t        sdoreg;     /* SDO peripheral pin configuration register */
+  uintptr_t        sdoreg;     /* SDO peripheral pin configuration register
+                                * (0: dedicated pins, no PPS) */
 };
 
 /* This structure describes the state of the SPI driver */
@@ -274,9 +281,11 @@ static const struct pic32mz_config_s g_spi1config =
   .rxirq             = PIC32MZ_IRQ_SPI1RX,
   .txirq             = PIC32MZ_IRQ_SPI1TX,
 #endif
+#if defined(BOARD_SDI1_PPS) || !defined(CONFIG_ARCH_CHIP_PIC32MZW1)
   .sdipps            = BOARD_SDI1_PPS,
   .sdopps            = PPS_OUTPUT_REGVAL(BOARD_SDO1_PPS),
   .sdoreg            = PPS_OUTPUT_REGADDR(BOARD_SDO1_PPS)
+#endif
 };
 
 static struct pic32mz_dev_s g_spi1dev =
@@ -2023,11 +2032,17 @@ struct spi_dev_s *pic32mz_spibus_initialize(int port)
   regval = spi_getreg(priv, PIC32MZ_SPI_BUF_OFFSET);
 
   /* Configure SPI SDI (input) and SDO (output) pins. SS (output) pins are
-   * managed as GPIOs; CLK (output) pins are not selectable.
+   * managed as GPIOs; CLK (output) pins are not selectable.  On PIC32MZ-W1,
+   * SPI1 may instead use its dedicated pins (DEVCFG1.HSSPIEN), which do not
+   * go through PPS.
    */
 
-  spi_putaddr(priv, regaddr, (uint32_t)priv->config->sdipps);
-  spi_putaddr(priv, priv->config->sdoreg, (uint32_t)priv->config->sdopps);
+  if (priv->config->sdoreg != 0)
+    {
+      spi_putaddr(priv, regaddr, (uint32_t)priv->config->sdipps);
+      spi_putaddr(priv, priv->config->sdoreg,
+                  (uint32_t)priv->config->sdopps);
+    }
 
 #ifdef CONFIG_PIC32MZ_SPI_DMA
   /* Allocate the RX and TX DMA channels, configuration will be done later. */

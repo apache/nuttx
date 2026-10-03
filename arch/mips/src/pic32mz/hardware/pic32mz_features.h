@@ -33,6 +33,8 @@
 #  include "hardware/pic32mzec_features.h"
 #elif defined(CONFIG_ARCH_CHIP_PIC32MZEF)
 #  include "hardware/pic32mzef_features.h"
+#elif defined(CONFIG_ARCH_CHIP_PIC32MZW1)
+#  include "hardware/pic32mzw1_features.h"
 #else
 #  error Unknown PIC32MZ family
 #endif

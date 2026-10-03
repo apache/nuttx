@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <assert.h>
@@ -57,6 +58,21 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
+/* Peripheral bus clocks feeding the I2C baud rate generators.  All I2C
+ * modules are on PBCLK2 on PIC32MZ EC/EF.  On PIC32MZ-W1, I2C1 is on
+ * PBCLK2 and I2C2 on PBCLK3 (DS70005425 Table 11-1).
+ */
+
+#define I2C1_PBCLK BOARD_PBCLK2
+#ifdef CONFIG_ARCH_CHIP_PIC32MZW1
+#  define I2C2_PBCLK BOARD_PBCLK3
+#else
+#  define I2C2_PBCLK BOARD_PBCLK2
+#endif
+#define I2C3_PBCLK BOARD_PBCLK2
+#define I2C4_PBCLK BOARD_PBCLK2
+#define I2C5_PBCLK BOARD_PBCLK2
 
 /* CONFIG_I2C_POLLED may be set so that I2C interrupts will not be used.
  * Instead CPU-intensive polling will be used.
@@ -166,6 +182,7 @@ struct pic32mz_trace_s
 struct pic32mz_i2c_config_s
 {
   uint32_t base;              /* I2C base address */
+  uint32_t pbclk;             /* Peripheral bus clock frequency (Hz) */
   uint32_t scl_pin;           /* GPIO configuration for SCL as SCL */
   uint32_t sda_pin;           /* GPIO configuration for SDA as SDA */
   uint8_t mode;               /* Master or Slave mode */
@@ -323,6 +340,7 @@ static const struct i2c_ops_s pic32mz_i2c_ops =
 static const struct pic32mz_i2c_config_s pic32mz_i2c1_config =
 {
   .base          = PIC32MZ_I2C1_K1BASE,
+  .pbclk         = I2C1_PBCLK,
   .scl_pin       = GPIO_I2C1_SCL,
   .sda_pin       = GPIO_I2C1_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -355,6 +373,7 @@ static struct pic32mz_i2c_priv_s pic32mz_i2c1_priv =
 static const struct pic32mz_i2c_config_s pic32mz_i2c2_config =
 {
   .base          = PIC32MZ_I2C2_K1BASE,
+  .pbclk         = I2C2_PBCLK,
   .scl_pin       = GPIO_I2C2_SCL,
   .sda_pin       = GPIO_I2C2_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -387,6 +406,7 @@ static struct pic32mz_i2c_priv_s pic32mz_i2c2_priv =
 static const struct pic32mz_i2c_config_s pic32mz_i2c3_config =
 {
   .base          = PIC32MZ_I2C3_K1BASE,
+  .pbclk         = I2C3_PBCLK,
   .scl_pin       = GPIO_I2C3_SCL,
   .sda_pin       = GPIO_I2C3_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -419,6 +439,7 @@ static struct pic32mz_i2c_priv_s pic32mz_i2c3_priv =
 static const struct pic32mz_i2c_config_s pic32mz_i2c4_config =
 {
   .base          = PIC32MZ_I2C4_K1BASE,
+  .pbclk         = I2C4_PBCLK,
   .scl_pin       = GPIO_I2C4_SCL,
   .sda_pin       = GPIO_I2C4_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -451,6 +472,7 @@ static struct pic32mz_i2c_priv_s pic32mz_i2c4_priv =
 static const struct pic32mz_i2c_config_s pic32mz_i2c5_config =
 {
   .base          = PIC32MZ_I2C5_K1BASE,
+  .pbclk         = I2C5_PBCLK,
   .scl_pin       = GPIO_I2C5_SCL,
   .sda_pin       = GPIO_I2C5_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -825,7 +847,8 @@ pic32mz_i2c_sem_waitidle(struct pic32mz_i2c_priv_s *priv)
 
   /* If we get here then a timeout occurred with the bus still in idle */
 
-  i2cinfo("Timeout with I2CxCON: %04x I2CxSTAT: %04x\n", con, stat);
+  i2cinfo("Timeout with I2CxCON: %04" PRIx32 " I2CxSTAT: %04" PRIx32 "\n",
+          con, stat);
 }
 
 /****************************************************************************
@@ -1254,10 +1277,10 @@ pic32mz_i2c_setbaudrate(struct pic32mz_i2c_priv_s *priv,
 
   if (frequency != priv->frequency)
     {
-      /* BOARD_PBCLK and frequency are both given in Hz. */
+      /* pbclk and frequency are both given in Hz. */
 
-      baudrate = (uint32_t)(((BOARD_PBCLK2 / (2 * frequency)) -
-                        (BOARD_PBCLK2 / 10000000) - 2));
+      baudrate = (uint32_t)(((priv->config->pbclk / (2 * frequency)) -
+                        (priv->config->pbclk / 10000000) - 2));
 
       /* Values of 0x0 and 0x1 are prohibited. */
 
@@ -1598,7 +1621,8 @@ static int pic32mz_i2c_transfer(struct i2c_master_s *dev,
       status = pic32mz_i2c_getstatus(priv);
       ret = -ETIMEDOUT;
 
-      i2cerr("ERROR: Timed out: CON: 0x%04x status: 0x%04x\n",
+      i2cerr("ERROR: Timed out: CON: 0x%04" PRIx32 " status: 0x%04" PRIx32
+             "\n",
              pic32mz_i2c_getreg(priv, PIC32MZ_I2C_CON_OFFSET), status);
     }
   else

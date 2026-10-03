@@ -264,6 +264,13 @@
 
 /* Device Configuration *****************************************************/
 
+/* PIC32MZ-W1 does not use the classic EC/EF DEVCFG0-3 layout (see
+ * hardware/pic32mzw1_features.h); its words are composed in the #else
+ * branch at the end of this block.
+ */
+
+#ifndef CONFIG_ARCH_CHIP_PIC32MZW1
+
 /* DEVCFG3 */
 
 /* Configurable settings */
@@ -594,6 +601,155 @@
 #define CONFIG_PIC32MZ_FSLEEP   DEVCFG0_FSLEEP_OFF
 #define CONFIG_PIC32MZ_DBGPER   DEVCFG0_DBGPER_ALL
 #define CONFIG_PIC32MZ_EJTAGBEN DEVCFG0_EJTAG_NORMAL
+
+#else /* CONFIG_ARCH_CHIP_PIC32MZW1 */
+
+/* PIC32MZ-W1 boot-flash configuration words, emitted by pic32mz_head.S.
+ * Field layouts: hardware/pic32mzw1_features.h.  Values that NuttX relies
+ * on are fixed; the rest follow the existing PIC32MZ Kconfig options.
+ * Everything else matches factory-programmed parts.
+ *
+ * Only '|' and '<<' are used: the result must be usable by the assembler.
+ */
+
+/* FUSERID */
+
+#define W1CFG_FUSERID           (CONFIG_PIC32MZ_USERID & 0xffff)
+
+/* DEVCFG4: VBAT/Deep Sleep zero-power BOR on, DSWDT clocked by LPRC */
+
+#define W1CFG_DEVCFG4           (DEVCFG4_VBZPBOREN | DEVCFG4_DSZPBOREN | \
+                                 DEVCFG4_DSWDTOSC)
+
+/* DEVCFG2.  CKSWEN is required: pic32mz_wfi32_pwrclk.c switches SYSCLK in
+ * software.  DMT stays off; POSC in HS mode (40 MHz crystal).
+ */
+
+#ifdef CONFIG_PIC32MZ_WDTENABLE
+#if BOARD_WD_PRESCALER == 1
+#  define W1CFG_WDTPS            0
+#elif BOARD_WD_PRESCALER == 2
+#  define W1CFG_WDTPS            1
+#elif BOARD_WD_PRESCALER == 4
+#  define W1CFG_WDTPS            2
+#elif BOARD_WD_PRESCALER == 8
+#  define W1CFG_WDTPS            3
+#elif BOARD_WD_PRESCALER == 16
+#  define W1CFG_WDTPS            4
+#elif BOARD_WD_PRESCALER == 32
+#  define W1CFG_WDTPS            5
+#elif BOARD_WD_PRESCALER == 64
+#  define W1CFG_WDTPS            6
+#elif BOARD_WD_PRESCALER == 128
+#  define W1CFG_WDTPS            7
+#elif BOARD_WD_PRESCALER == 256
+#  define W1CFG_WDTPS            8
+#elif BOARD_WD_PRESCALER == 512
+#  define W1CFG_WDTPS            9
+#elif BOARD_WD_PRESCALER == 1024
+#  define W1CFG_WDTPS            10
+#elif BOARD_WD_PRESCALER == 2048
+#  define W1CFG_WDTPS            11
+#elif BOARD_WD_PRESCALER == 4096
+#  define W1CFG_WDTPS            12
+#elif BOARD_WD_PRESCALER == 8192
+#  define W1CFG_WDTPS            13
+#elif BOARD_WD_PRESCALER == 16384
+#  define W1CFG_WDTPS            14
+#elif BOARD_WD_PRESCALER == 32768
+#  define W1CFG_WDTPS            15
+#elif BOARD_WD_PRESCALER == 65536
+#  define W1CFG_WDTPS            16
+#elif BOARD_WD_PRESCALER == 131072
+#  define W1CFG_WDTPS            17
+#elif BOARD_WD_PRESCALER == 262144
+#  define W1CFG_WDTPS            18
+#elif BOARD_WD_PRESCALER == 524288
+#  define W1CFG_WDTPS            19
+#elif BOARD_WD_PRESCALER == 1048576
+#  define W1CFG_WDTPS            20
+#else
+#  error "Unsupported BOARD_WD_PRESCALER"
+#endif
+#  define W1CFG_WDTEN           DEVCFG2_WDTEN
+#else
+#  define W1CFG_WDTPS           0
+#  define W1CFG_WDTEN           0
+#endif
+
+#define W1CFG_DEVCFG2           ((6 << DEVCFG2_DMTINTV_SHIFT) | \
+                                 DEVCFG2_POSCMOD_HS | \
+                                 (3 << DEVCFG2_WDTRMCS_SHIFT) | \
+                                 DEVCFG2_SOSCSEL | DEVCFG2_WAKE2SPD | \
+                                 DEVCFG2_CKSWEN | DEVCFG2_FSCMEN | \
+                                 (W1CFG_WDTPS << DEVCFG2_WDTPS_SHIFT) | \
+                                 DEVCFG2_WDTSPGM | DEVCFG2_WINDIS | \
+                                 W1CFG_WDTEN | \
+                                 (3 << DEVCFG2_WDTWINSZ_SHIFT) | \
+                                 (0x17 << DEVCFG2_DMTCNT_SHIFT))
+
+/* DEVCFG1.  UART1 and SPI1 use their dedicated (non-PPS) pins unless the
+ * board routes them through PPS (BOARD_U1RX_PPS/BOARD_SDI1_PPS defined).
+ * Ethernet in RMII mode with the reference clock on ETH_CLK_OUT.
+ */
+
+#ifdef CONFIG_PIC32MZ_DEBUGGER_ENABLE
+#  define W1CFG_DEBUG           DEVCFG1_DEBUG_ENABLED
+#else
+#  define W1CFG_DEBUG           DEVCFG1_DEBUG_DISABLED
+#endif
+
+#ifdef CONFIG_PIC32MZ_ICESEL_CH2
+#  define W1CFG_ICESEL          DEVCFG1_ICESEL_PGX2
+#else
+#  define W1CFG_ICESEL          DEVCFG1_ICESEL_PGX1
+#endif
+
+#ifdef CONFIG_PIC32MZ_TRACE_ENABLE
+#  define W1CFG_TRCEN           DEVCFG1_TRCEN
+#else
+#  define W1CFG_TRCEN           0
+#endif
+
+#ifdef BOARD_U1RX_PPS
+#  define W1CFG_HSUARTEN        0
+#else
+#  define W1CFG_HSUARTEN        DEVCFG1_HSUARTEN
+#endif
+
+#ifdef BOARD_SDI1_PPS
+#  define W1CFG_HSSPIEN         0
+#else
+#  define W1CFG_HSSPIEN         DEVCFG1_HSSPIEN
+#endif
+
+#define W1CFG_DEVCFG1           (W1CFG_DEBUG | W1CFG_ICESEL | W1CFG_TRCEN | \
+                                 DEVCFG1_CLASSBDIS | DEVCFG1_USBIDIO | \
+                                 DEVCFG1_VBUSIO | W1CFG_HSSPIEN | \
+                                 DEVCFG1_SMCLR | W1CFG_HSUARTEN)
+
+/* DEVCFG0.  PMU/PMD/peripheral-pin/configuration locks off and all PLLs
+ * under software control (pic32mz_wfi32_pwrclk.c programs them).
+ */
+
+#ifdef CONFIG_PIC32MZ_JTAG_ENABLE
+#  define W1CFG_JTAGEN          DEVCFG0_JTAGEN
+#else
+#  define W1CFG_JTAGEN          0
+#endif
+
+#define W1CFG_DEVCFG0           (DEVCFG0_TDOEN | W1CFG_JTAGEN | \
+                                 DEVCFG0_PCM | \
+                                 (CONFIG_PIC32MZ_ECC_OPTION << \
+                                  DEVCFG0_FECCCON_SHIFT))
+
+/* FBCFG0: boot and exception code are MIPS32 (pic32mz_head.S);
+ * BINFOVALID, PCSCMODE and BUHSWEN cleared.
+ */
+
+#define W1CFG_FBCFG0            FBCFG0_BOOTISA
+
+#endif /* CONFIG_ARCH_CHIP_PIC32MZW1 */
 
 /****************************************************************************
  * Public Types

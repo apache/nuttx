@@ -215,6 +215,47 @@
 #  define CHIP_NJTAG        1    /* Has JTAG */
 #  define CHIP_NTRACE       1    /* Has trace capability */
 
+/* WFI32E01 modules (e.g. WFI32E01PE on the Microchip EV49N51A) are
+ * PIC32MZ-W1 family members: MIPS32 M-Class core with integrated
+ * Wi-Fi, a much smaller pin count than EC/EF, and a reorganized SFR map
+ * (see hardware/pic32mzw1_memorymap.h).  Counts below were derived from
+ * the Microchip PIC32MZ-W_DFP (WFI32E01 variant).
+ */
+
+#elif defined(CONFIG_ARCH_CHIP_WFI32E01)
+#  undef  CHIP_PIC32MZEC         /* Not PIC32MZEC family */
+#  undef  CHIP_PIC32MZEF         /* Not PIC32MZEF family */
+#  define CHIP_PIC32MZW1    1    /* PIC32MZ-W1 family */
+#  define CHIP_BOOTFLASH_KB 0    /* No separate boot FLASH region */
+#  define CHIP_PROGFLASH_KB 1024 /* 1024Kb program FLASH */
+#  define CHIP_DATAMEM_KB   256  /* 256Kb data memory (shared with Wi-Fi fw) */
+#  define CHIP_NTIMERS      7    /* T1-T7 (no T8/T9) */
+#  define CHIP_NIC          4    /* 4 input capture */
+#  define CHIP_NOC          4    /* 4 output compare */
+#  define CHIP_NUARTS       2    /* UART1-UART2 usable; UART3 is a non-contiguous
+                                   * low-power/debug UART not yet wired up
+                                   * (see pic32mzw1_memorymap.h) */
+#  define CHIP_UARTFIFOD    8    /* 8 level deep UART FIFOs */
+#  define CHIP_NSPI         2    /* 2 SPI/I2S interfaces */
+#  define CHIP_NCAN         1    /* 1 CAN interface */
+#  define CHIP_NCRTYPO      1    /* Has crypto support */
+#  define CHIP_RNG          1    /* 1 Random number generator */
+#  define CHIP_NDMACH       8    /* 8 programmable DMA channels */
+#  define CHIP_NUSBDMACHAN  0    /* No dedicated USB DMA channels */
+#  define CHIP_NADC10       24   /* 24 ADC channels */
+#  define CHIP_NCM          0    /* No analog comparators */
+#  define CHIP_USBHSOTG     1    /* 1 USB 2.0 OTG */
+#  define CHIP_NI2C         2    /* 2 I2C interfaces */
+#  define CHIP_NPMP         0    /* No parallel master port */
+#  define CHIP_NEBI         0    /* No external bus interface */
+#  define CHIP_NSQI         1    /* 1 Serial quad interface (external flash) */
+#  define CHIP_NRTCC        1    /* Has RTCC */
+#  define CHIP_NETHERNET    1    /* 1 Ethernet MAC */
+#  define CHIP_NPORTS       10   /* GPIO letter index space (only A-C, K populated) */
+#  define CHIP_NJTAG        1    /* Has JTAG */
+#  define CHIP_NTRACE       0    /* No trace capability */
+#  define CHIP_WIFI11N      1    /* Integrated 802.11n Wi-Fi subsystem */
+
 #else
 #  error "Unrecognized PIC32MZ device"
 #endif

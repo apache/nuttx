@@ -46,13 +46,17 @@
 /* Timer Setup **************************************************************/
 
 /* Timer 1 is a type A timer.  Setting the TCS bit in the timer control
- * register will select the SOSC as the clock source.  Otherwise, PBCLK3
- * is the clock source.
+ * register will select the SOSC as the clock source.  Otherwise, the
+ * peripheral bus clock is the clock source: PBCLK3 on PIC32MZ EC/EF,
+ * PBCLK1 on PIC32MZ-W1 (DS70005425 Figure 15-1).
  */
 
 #ifdef CONFIG_PIC32MZ_T1_SOSC
 #  define TIMER1_SRC_FREQ BOARD_SOSC_FREQ
 #  define TIMER1_CON_TCS  TIMER_CON_TCS
+#elif defined(CONFIG_ARCH_CHIP_PIC32MZW1)
+#  define TIMER1_SRC_FREQ BOARD_PBCLK1
+#  define TIMER1_CON_TCS  (0)
 #else
 #  define TIMER1_SRC_FREQ BOARD_PBCLK3
 #  define TIMER1_CON_TCS  (0)

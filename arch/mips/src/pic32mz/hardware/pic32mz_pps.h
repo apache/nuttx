@@ -37,6 +37,8 @@
 #  include "hardware/pic32mzec_pps.h"
 #elif defined(CONFIG_ARCH_CHIP_PIC32MZEF)
 #  include "hardware/pic32mzef_pps.h"
+#elif defined(CONFIG_ARCH_CHIP_PIC32MZW1)
+#  include "hardware/pic32mzw1_pps.h"
 #else
 #  error Unknown PIC32MZ family
 #endif
@@ -88,6 +90,58 @@
  * NOTE: This is written in the same odd macro forms as above for the same
  * reason.
  */
+#ifdef CONFIG_ARCH_CHIP_PIC32MZW1
+/* W1 only bonds out PORTA/PORTB/PORTK (see hardware/pic32mzw1_pps.h) -
+ * RPC/D/E/F/G pin macros referenced by the EC/EF version of this macro
+ * below do not exist for this chip.
+ */
+
+#define __PPS_OUTPUT_REGADDR_TO_GPIO(a,b) ((uint32_t)( \
+          ((b) == PIC32MZ_RPA0R)  ? (GPIO_PORTA | GPIO_PIN0)  : \
+          ((b) == PIC32MZ_RPA1R)  ? (GPIO_PORTA | GPIO_PIN1)  : \
+          ((b) == PIC32MZ_RPA2R)  ? (GPIO_PORTA | GPIO_PIN2)  : \
+          ((b) == PIC32MZ_RPA3R)  ? (GPIO_PORTA | GPIO_PIN3)  : \
+          ((b) == PIC32MZ_RPA4R)  ? (GPIO_PORTA | GPIO_PIN4)  : \
+          ((b) == PIC32MZ_RPA5R)  ? (GPIO_PORTA | GPIO_PIN5)  : \
+          ((b) == PIC32MZ_RPA10R) ? (GPIO_PORTA | GPIO_PIN10) : \
+          ((b) == PIC32MZ_RPA11R) ? (GPIO_PORTA | GPIO_PIN11) : \
+          ((b) == PIC32MZ_RPA12R) ? (GPIO_PORTA | GPIO_PIN12) : \
+          ((b) == PIC32MZ_RPA13R) ? (GPIO_PORTA | GPIO_PIN13) : \
+          ((b) == PIC32MZ_RPA14R) ? (GPIO_PORTA | GPIO_PIN14) : \
+          ((b) == PIC32MZ_RPA15R) ? (GPIO_PORTA | GPIO_PIN15) : \
+          ((b) == PIC32MZ_RPB0R)  ? (GPIO_PORTB | GPIO_PIN0)  : \
+          ((b) == PIC32MZ_RPB1R)  ? (GPIO_PORTB | GPIO_PIN1)  : \
+          ((b) == PIC32MZ_RPB2R)  ? (GPIO_PORTB | GPIO_PIN2)  : \
+          ((b) == PIC32MZ_RPB3R)  ? (GPIO_PORTB | GPIO_PIN3)  : \
+          ((b) == PIC32MZ_RPB4R)  ? (GPIO_PORTB | GPIO_PIN4)  : \
+          ((b) == PIC32MZ_RPB5R)  ? (GPIO_PORTB | GPIO_PIN5)  : \
+          ((b) == PIC32MZ_RPB6R)  ? (GPIO_PORTB | GPIO_PIN6)  : \
+          ((b) == PIC32MZ_RPB7R)  ? (GPIO_PORTB | GPIO_PIN7)  : \
+          ((b) == PIC32MZ_RPB8R)  ? (GPIO_PORTB | GPIO_PIN8)  : \
+          ((b) == PIC32MZ_RPB9R)  ? (GPIO_PORTB | GPIO_PIN9)  : \
+          ((b) == PIC32MZ_RPB10R) ? (GPIO_PORTB | GPIO_PIN10) : \
+          ((b) == PIC32MZ_RPB11R) ? (GPIO_PORTB | GPIO_PIN11) : \
+          ((b) == PIC32MZ_RPB12R) ? (GPIO_PORTB | GPIO_PIN12) : \
+          ((b) == PIC32MZ_RPB13R) ? (GPIO_PORTB | GPIO_PIN13) : \
+          ((b) == PIC32MZ_RPB14R) ? (GPIO_PORTB | GPIO_PIN14) : \
+          ((b) == PIC32MZ_RPK0R)  ? (GPIO_PORTK | GPIO_PIN0)  : \
+          ((b) == PIC32MZ_RPK1R)  ? (GPIO_PORTK | GPIO_PIN1)  : \
+          ((b) == PIC32MZ_RPK2R)  ? (GPIO_PORTK | GPIO_PIN2)  : \
+          ((b) == PIC32MZ_RPK3R)  ? (GPIO_PORTK | GPIO_PIN3)  : \
+          ((b) == PIC32MZ_RPK4R)  ? (GPIO_PORTK | GPIO_PIN4)  : \
+          ((b) == PIC32MZ_RPK5R)  ? (GPIO_PORTK | GPIO_PIN5)  : \
+          ((b) == PIC32MZ_RPK6R)  ? (GPIO_PORTK | GPIO_PIN6)  : \
+          ((b) == PIC32MZ_RPK7R)  ? (GPIO_PORTK | GPIO_PIN7)  : \
+          ((b) == PIC32MZ_RPK8R)  ? (GPIO_PORTK | GPIO_PIN8)  : \
+          ((b) == PIC32MZ_RPK9R)  ? (GPIO_PORTK | GPIO_PIN9)  : \
+          ((b) == PIC32MZ_RPK10R) ? (GPIO_PORTK | GPIO_PIN10) : \
+          ((b) == PIC32MZ_RPK11R) ? (GPIO_PORTK | GPIO_PIN11) : \
+          ((b) == PIC32MZ_RPK12R) ? (GPIO_PORTK | GPIO_PIN12) : \
+          ((b) == PIC32MZ_RPK13R) ? (GPIO_PORTK | GPIO_PIN13) : \
+          ((b) == PIC32MZ_RPK14R) ? (GPIO_PORTK | GPIO_PIN14) : \
+          0                                                     \
+        ))
+#else
 #define __PPS_OUTPUT_REGADDR_TO_GPIO(a,b) ((uint32_t)( \
           ((b) == PIC32MZ_RPA14R) ? (GPIO_PORTA | GPIO_PIN14) : \
           ((b) == PIC32MZ_RPA15R) ? (GPIO_PORTA | GPIO_PIN15) : \
@@ -144,6 +198,7 @@
           ((b) == PIC32MZ_RPG9R)  ? (GPIO_PORTG | GPIO_PIN9)  : \
           0                                                     \
         ))
+#endif /* CONFIG_ARCH_CHIP_PIC32MZW1 */
 #define PPS_OUTPUT_REGADDR_TO_GPIO(a) __PPS_OUTPUT_REGADDR_TO_GPIO(a)
 
 /****************************************************************************
