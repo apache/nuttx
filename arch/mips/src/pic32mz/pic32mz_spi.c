@@ -950,6 +950,7 @@ static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 {
   struct pic32mz_dev_s *priv = (struct pic32mz_dev_s *)arg;
+
   DEBUGASSERT(priv != NULL);
 
   /* Cancel the watchdog timeout */
@@ -1007,6 +1008,7 @@ static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 static void spi_dmatimeout(wdparm_t arg)
 {
   struct pic32mz_dev_s *priv = (struct pic32mz_dev_s *)arg;
+
   DEBUGASSERT(priv != NULL);
 
   /* Sample DMA registers at the time of the timeout */
@@ -1250,9 +1252,13 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev,
    *
    * frequency = BOARD_PBCLOCK / (2 * divisor), or
    * divisor  = (BOARD_PBCLOCK / 2) / frequency
+   *
+   * Round up so that the actual frequency never exceeds the requested one.
+   * This also keeps the divisor >= 1 when the request is above
+   * BOARD_PBCLOCK / 2.
    */
 
-  divisor = (BOARD_PBCLOCK / 2) / frequency;
+  divisor = (BOARD_PBCLOCK / 2 + frequency - 1) / frequency;
 
   /* The a BRG register value is that divisor minus one
    *
@@ -1260,11 +1266,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev,
    * BRG       = (BOARD_PBCLOCK / 2) / frequency - 1
    */
 
-  regval = divisor;
-  if (regval > 0)
-    {
-      regval--;
-    }
+  regval = divisor - 1;
 
   /* Save the new BRG value */
 
@@ -1339,29 +1341,29 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CPOL=0; CPHA=0 => CKP=0; CKE=1 */
-          spi_putreg(priv, PIC32MZ_SPI_CONCLR_OFFSET, SPI_CON_CKP);
-          spi_putreg(priv, PIC32MZ_SPI_CONSET_OFFSET, SPI_CON_CKE);
-          break;
+          case SPIDEV_MODE0: /* CPOL=0; CPHA=0 => CKP=0; CKE=1 */
+            spi_putreg(priv, PIC32MZ_SPI_CONCLR_OFFSET, SPI_CON_CKP);
+            spi_putreg(priv, PIC32MZ_SPI_CONSET_OFFSET, SPI_CON_CKE);
+            break;
 
-        case SPIDEV_MODE1: /* CPOL=0; CPHA=1 => CKP=0; CKE=0 */
-          spi_putreg(priv, PIC32MZ_SPI_CONCLR_OFFSET, SPI_CON_CKP);
-          spi_putreg(priv, PIC32MZ_SPI_CONCLR_OFFSET, SPI_CON_CKE);
-          break;
+          case SPIDEV_MODE1: /* CPOL=0; CPHA=1 => CKP=0; CKE=0 */
+            spi_putreg(priv, PIC32MZ_SPI_CONCLR_OFFSET, SPI_CON_CKP);
+            spi_putreg(priv, PIC32MZ_SPI_CONCLR_OFFSET, SPI_CON_CKE);
+            break;
 
-        case SPIDEV_MODE2: /* CPOL=1; CPHA=0 => CKP=1; CKE=1 */
-          spi_putreg(priv, PIC32MZ_SPI_CONSET_OFFSET, SPI_CON_CKP);
-          spi_putreg(priv, PIC32MZ_SPI_CONSET_OFFSET, SPI_CON_CKE);
-          break;
+          case SPIDEV_MODE2: /* CPOL=1; CPHA=0 => CKP=1; CKE=1 */
+            spi_putreg(priv, PIC32MZ_SPI_CONSET_OFFSET, SPI_CON_CKP);
+            spi_putreg(priv, PIC32MZ_SPI_CONSET_OFFSET, SPI_CON_CKE);
+            break;
 
-        case SPIDEV_MODE3: /* CPOL=1; CPHA=1 => CKP=1; CKE=0 */
-          spi_putreg(priv, PIC32MZ_SPI_CONSET_OFFSET, SPI_CON_CKP);
-          spi_putreg(priv, PIC32MZ_SPI_CONCLR_OFFSET, SPI_CON_CKE);
-          break;
+          case SPIDEV_MODE3: /* CPOL=1; CPHA=1 => CKP=1; CKE=0 */
+            spi_putreg(priv, PIC32MZ_SPI_CONSET_OFFSET, SPI_CON_CKP);
+            spi_putreg(priv, PIC32MZ_SPI_CONCLR_OFFSET, SPI_CON_CKE);
+            break;
 
-        default:
-          DEBUGASSERT(FALSE);
-          return;
+          default:
+            DEBUGASSERT(FALSE);
+            return;
         }
 
       /* Save the mode so that subsequent re-configurations will be faster */
