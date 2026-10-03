@@ -88,8 +88,11 @@
 #include "stm32_rcc.h"
 #include "stm32_ethernet.h"
 #include "stm32_uid.h"
-#include "stm32_mdio.h"
-
+#ifdef CONFIG_STM32_ETH_MDIO_GPIO
+#  include "stm32_mdio_gpio.h"
+#else
+#  include "stm32_mdio.h"
+#endif
 #include <arch/board/board.h>
 
 /* STM32_NETHERNET determines the number of physical interfaces that can
@@ -4037,8 +4040,13 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
 
   /* MDC and MDIO are common to both modes */
 # ifndef CONFIG_STM32_NO_PHY
+#   ifdef CONFIG_STM32_ETH_MDIO_GPIO
+  stm32_configgpio(GPIO_ETH_MDC_GPIO);
+  stm32_configgpio(GPIO_ETH_MDIO_GPIO_OUT);
+#   else
   stm32_configgpio(GPIO_ETH_MDC);
   stm32_configgpio(GPIO_ETH_MDIO);
+#   endif
 # endif
 
   /* Set up the MII interface */
@@ -5126,7 +5134,13 @@ static inline int stm32_ethinitialize(int intf)
 
   /* Initialize the MDIO device */
 
+#ifdef CONFIG_STM32_ETH_MDIO_GPIO
+  priv->mdio = stm32_mdiogpio_bus_initialize(GPIO_ETH_MDC_GPIO,
+                                             GPIO_ETH_MDIO_GPIO_OUT,
+                                             GPIO_ETH_MDIO_GPIO_IN);
+#else
   priv->mdio = stm32_mdio_bus_initialize();
+#endif
   if (!priv->mdio)
     {
       nerr("ERROR: Failed to initialize MDIO bus\n");

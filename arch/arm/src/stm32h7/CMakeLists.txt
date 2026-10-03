@@ -193,7 +193,11 @@ if(CONFIG_STM32_ETHMAC)
 endif()
 
 if(CONFIG_MDIO_BUS)
-  list(APPEND SRCS stm32_mdio.c)
+  if(CONFIG_STM32_ETH_MDIO_GPIO)
+    list(APPEND SRCS stm32_mdio_gpio.c)
+  else()
+    list(APPEND SRCS stm32_mdio.c)
+  endif()
 endif()
 
 if(CONFIG_SENSORS_QENCODER)

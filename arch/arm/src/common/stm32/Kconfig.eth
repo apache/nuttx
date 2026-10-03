@@ -23,6 +23,12 @@ config STM32_PHYINIT
 		provide stm32_phyinitialize();  The STM32 Ethernet driver will call this function
 		one time before it first uses the PHY.
 
+config STM32_ETH_MDIO_GPIO
+	bool "Use GPIO-based MDIO communications"
+	---help---
+		Enable to use GPIO pins (and bit-bang clause-22 MDIO comms)
+                instead of using the SMA module provided in MAC.
+
 config STM32_MII
 	bool "Use MII interface"
 	---help---
