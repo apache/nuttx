@@ -357,6 +357,9 @@ static struct up_dev_s g_uart1priv =
 #ifdef CONFIG_PIC32MZ_UART_BREAKS
   .brk        = false,
 #  ifdef CONFIG_PIC32MZ_SERIALBRK_BSDCOMPAT
+#    ifndef BOARD_U1TX_PPS
+#      error "BSD-compatible breaks require a PPS-routed UART1 TX pin"
+#    endif
   .tx_gpio    = PPS_OUTPUT_REGADDR_TO_GPIO(BOARD_U1TX_PPS)
                   | GPIO_OUTPUT | GPIO_VALUE_ZERO,
   .tx_pps_reg = PPS_OUTPUT_REGADDR(BOARD_U1TX_PPS),

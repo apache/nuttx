@@ -83,12 +83,20 @@
 
 /* I2C Peripheral Addresses *************************************************/
 
-#define PIC32MZ_I2Cn_K1BASE(n)     (PIC32MZ_I2C_K1BASE+PIC32MZ_I2Cn_OFFSET(n))
+/* On PIC32MZ EC/EF the I2C modules are 0x200 apart, starting at
+ * PIC32MZ_I2C_K1BASE.  On PIC32MZ-W1 they are not contiguous (I2C1 is on
+ * peripheral bus 2, I2C2 on bus 3) and the chip memory map defines
+ * PIC32MZ_I2Cn_K1BASE for each module instead.
+ */
+
+#ifdef PIC32MZ_I2C_K1BASE
+#  define PIC32MZ_I2Cn_K1BASE(n)   (PIC32MZ_I2C_K1BASE+PIC32MZ_I2Cn_OFFSET(n))
 #  define PIC32MZ_I2C1_K1BASE      (PIC32MZ_I2C_K1BASE+PIC32MZ_I2C1_OFFSET)
 #  define PIC32MZ_I2C2_K1BASE      (PIC32MZ_I2C_K1BASE+PIC32MZ_I2C2_OFFSET)
 #  define PIC32MZ_I2C3_K1BASE      (PIC32MZ_I2C_K1BASE+PIC32MZ_I2C3_OFFSET)
 #  define PIC32MZ_I2C4_K1BASE      (PIC32MZ_I2C_K1BASE+PIC32MZ_I2C4_OFFSET)
 #  define PIC32MZ_I2C5_K1BASE      (PIC32MZ_I2C_K1BASE+PIC32MZ_I2C5_OFFSET)
+#endif
 
 /* I2C Register Addresses ***************************************************/
 

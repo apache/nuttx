@@ -63,6 +63,10 @@ CHIP_CSRCS += pic32mz_lowconsole.c pic32mz_serial.c
 
 # Configuration-dependent PIC32MZ files
 
+ifeq ($(CONFIG_ARCH_CHIP_WFI32E01),y)
+CHIP_CSRCS += pic32mz_wfi32_pwrclk.c
+endif
+
 ifeq ($(CONFIG_PIC32MZ_GPIOIRQ),y)
 CHIP_CSRCS += pic32mz_gpioirq.c
 endif

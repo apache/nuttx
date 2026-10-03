@@ -48,6 +48,14 @@ config ARCH_CHIP_PIC32MZ2048EFM
 		Microchip PIC32MZ2048EFH with Crypto Engine (MIPS32 M5150) such as
 		the PIC32MZ2048EFM144-I/PH used in the PIC32MZ EF STARTER KIT
 
+config ARCH_CHIP_WFI32E01
+	bool "WFI32E01"
+	select ARCH_CHIP_PIC32MZW1
+	---help---
+		Microchip WFI32E01 (PIC32MZ-W1 family, MIPS32 M-Class core with
+		integrated 802.11n Wi-Fi), as found in the WFI32E01PC/PE/UC/UE
+		modules.
+
 endchoice
 
 config ARCH_CHIP_PIC32MZEC
@@ -61,6 +69,13 @@ config ARCH_CHIP_PIC32MZEF
 	bool
 	default n
 	select ARCH_MIPS_M5150
+	select MIPS32_HAVE_ICACHE
+	select MIPS32_HAVE_DCACHE
+
+config ARCH_CHIP_PIC32MZW1
+	bool
+	default n
+	select ARCH_MIPS_MICROAPTIV
 	select MIPS32_HAVE_ICACHE
 	select MIPS32_HAVE_DCACHE
 
@@ -83,6 +98,38 @@ config PIC32MZ_TIMER
 config PIC32MZ_T1
 	bool
 	default y
+
+config PIC32MZ_W1_PMU_MLDO
+	bool "PIC32MZ-W1: keep the PMU in its power-on MLDO mode"
+	default n
+	depends on ARCH_CHIP_PIC32MZW1
+	---help---
+		Skip the regulator reconfiguration (MLDO -> buck on B0 silicon,
+		MLDO trim update on A1/G) and leave the PMU in the MLDO mode it
+		powers up in with factory-calibrated settings (DS70005425 36.1).
+		Less efficient, but uses only documented behaviour.
+
+config PIC32MZ_W1_FLASH_WAITSTATES
+	int "PIC32MZ-W1: program flash wait states"
+	default 5
+	range 0 7
+	depends on ARCH_CHIP_PIC32MZW1
+	---help---
+		Value written to PRECON.PFMWS.  DS70005425 gives no
+		SYSCLK-to-wait-state table for PIC32MZ-W1; the default of 5 at
+		200 MHz SYSCLK is the value used by Microchip's
+		WFI32_Ethernet_Wi-Fi_Bridge_OOB example.  The reset value, 7, is
+		the most conservative choice.
+
+config PIC32MZ_W1_BOOTTRACE
+	bool "PIC32MZ-W1 early boot trace on UART1"
+	default n
+	depends on ARCH_CHIP_PIC32MZW1 && PIC32MZ_UART1
+	---help---
+		Bring-up aid.  Right after reset, run UART1 from the internal FRC
+		(independent of the PLLs) at ~115200 8N1 and emit one character
+		per PMU/clock bring-up step, so a hang can be located without a
+		debugger.  The normal console takes over afterwards.
 
 menu "PIC32MZ Peripheral Support"
 

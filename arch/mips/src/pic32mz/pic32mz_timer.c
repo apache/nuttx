@@ -82,6 +82,16 @@
 #  undef CONFIG_PIC32MZ_T9
 #endif
 
+/* Peripheral bus clock feeding the timers: PBCLK3 on PIC32MZ EC/EF,
+ * PBCLK1 on PIC32MZ-W1 (DS70005425 Figure 16-1).
+ */
+
+#ifdef CONFIG_ARCH_CHIP_PIC32MZW1
+#  define TIMER_PBCLK BOARD_PBCLK1
+#else
+#  define TIMER_PBCLK BOARD_PBCLK3
+#endif
+
 /* Prescale values */
 
 #define  PIC32MZ_TIMER_PRESCALE_1_1    0
@@ -934,11 +944,11 @@ static uint32_t pic32mz_timer_getfreq(struct pic32mz_timer_dev_s *dev)
 
   if (prescale == PIC32MZ_TIMER_PRESCALE_1_256)
     {
-      freq = BOARD_PBCLK3 / (1 << (prescale + 1));
+      freq = TIMER_PBCLK / (1 << (prescale + 1));
     }
   else
     {
-      freq = BOARD_PBCLK3 / (1 << prescale);
+      freq = TIMER_PBCLK / (1 << prescale);
     }
 
   return freq;
@@ -969,7 +979,7 @@ static bool pic32mz_timer_setfreq(struct pic32mz_timer_dev_s *dev,
       return 0;
     }
 
-  prescale = BOARD_PBCLK3 / freq;
+  prescale = TIMER_PBCLK / freq;
 
   tmrinfo("Prescale value calculated %d\n", prescale);
 
