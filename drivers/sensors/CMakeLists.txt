@@ -172,6 +172,10 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS lps25h.c)
     endif()
 
+    if(CONFIG_SENSORS_CCS811)
+      list(APPEND SRCS ccs811_uorb.c)
+    endif()
+
     if(CONFIG_ADXL345_I2C)
       list(APPEND SRCS adxl345_i2c.c)
     endif()
