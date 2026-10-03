@@ -4,7 +4,7 @@ W25Q NOR Flash
 
 NuttX provides support for both QSPI and SPI based NOR flashes from W25Q
 family. QSPI based flashes are supported up to 1 Gbit (128 MB) capacity,
-SPI based flashes are supported up to 128 Mbit (16 MB) capacity.
+SPI based flashes are supported up to 512 Mbit (64 MB) capacity.
 
 ----------
 QSPI flash

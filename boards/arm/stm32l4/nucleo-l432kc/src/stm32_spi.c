@@ -68,24 +68,28 @@ struct spi_dev_s *g_spi2;
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SPI_DRIVER
 void stm32_spiregister(void)
 {
 #ifdef CONFIG_STM32_SPI1
-      int ret = spi_register(g_spi1, 1);
-      if (ret < 0)
-        {
-          spierr("ERROR: FAILED to register driver of SPI port 1\n");
-        }
+  int ret = spi_register(g_spi1, 1);
+
+  if (ret < 0)
+    {
+      spierr("ERROR: FAILED to register driver of SPI port 1\n");
+    }
 #endif
 
 #ifdef CONFIG_STM32_SPI2
-      int ret = spi_register(g_spi2, 2);
-      if (ret < 0)
-        {
-          spierr("ERROR: FAILED to register driver of SPI port 2\n");
-        }
+  int ret = spi_register(g_spi2, 2);
+
+  if (ret < 0)
+    {
+      spierr("ERROR: FAILED to register driver of SPI port 2\n");
+    }
 #endif
 }
+#endif
 
 /****************************************************************************
  * Name: stm32_spiinitialize
@@ -115,6 +119,10 @@ void stm32_spiinitialize(void)
 
 #ifdef CONFIG_MTD_AT45DB
   stm32_configgpio(AT45DB_SPI1_CS);      /* FLASH chip select */
+#endif
+
+#ifdef CONFIG_MTD_W25
+  stm32_configgpio(W25_SPI1_CS);         /* FLASH chip select */
 #endif
 #endif
 
@@ -174,10 +182,24 @@ void stm32_spi1select(struct spi_dev_s *dev, uint32_t devid,
       stm32_gpiowrite(AT45DB_SPI1_CS, !selected);
     }
 #endif
+
+#ifdef CONFIG_MTD_W25
+  if (devid == SPIDEV_FLASH(0))
+    {
+      stm32_gpiowrite(W25_SPI1_CS, !selected);
+    }
+#endif
 }
 
 uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid)
 {
+#ifdef CONFIG_MTD_W25
+  if (devid == SPIDEV_FLASH(0))
+    {
+      return SPI_STATUS_PRESENT;
+    }
+#endif
+
   return 0;
 }
 #endif
