@@ -35,6 +35,10 @@ config NRF54L_TIMER
 
 menu "nRF54L Peripheral Selection"
 
+config NRF54L_GPIOTE
+	bool "GPIOTE (GPIO interrupts)"
+	default n
+
 config NRF54L_UART0
 	bool "UART0"
 	default n
@@ -209,6 +213,17 @@ config NRF54L_DEBUG_ACCESS
 	---help---
 		Open unlocked TAMPC debug signals for SWD/RTT development.
 		Signals locked by an earlier boot stage are left unchanged.
+
+menu "GPIO Interrupt Configuration"
+
+config NRF54L_PER_PIN_INTERRUPTS
+	bool "Per-pin interrupt callbacks"
+	default n
+	depends on NRF54L_GPIOTE
+	---help---
+		Dispatch PORT events to separate callbacks for each pin.
+
+endmenu # GPIO Interrupt Configuration
 
 menuconfig NRF54L_SOFTDEVICE_CONTROLLER
 	bool "SoftDevice Controller"

@@ -15,7 +15,7 @@ The following list indicates peripherals supported in NuttX:
 Peripheral  Support Notes
 ==========  ======= =====================================
 GPIO        Yes
-GPIOTE      No
+GPIOTE      Yes
 GRTC        Yes     Counter and tickless scheduling
 PWM         No
 QDEC        No
@@ -34,6 +34,10 @@ GPIO
 ----
 
 Pins can be configured and operated using ``nrf54l_gpio_*`` functions.
+GPIOTE supports channel events and tasks, with optional per-pin callbacks
+for PORT events. Channels 0 through 7 belong to GPIOTE20 and serve P1 and
+P3. Channels 8 through 11 belong to GPIOTE30 and serve P0. P2 does not
+support GPIOTE.
 
 GRTC
 ----
