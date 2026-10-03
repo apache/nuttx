@@ -36,6 +36,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
+#include <sched/sched.h>
 
 #include "mips_internal.h"
 #include "hardware/pic32mz_int.h"
@@ -140,6 +141,12 @@ uint32_t *pic32mz_decodeirq(uint32_t *regs)
    */
 
   regs = up_current_regs();
+
+  /* Record the task that will run when the interrupt returns.  Its state
+   * is saved to its TCB on the next interrupt entry (see above).
+   */
+
+  *running_task = this_task();
 
 #if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
   /* Check for a context switch.  If a context switch occurred, then
