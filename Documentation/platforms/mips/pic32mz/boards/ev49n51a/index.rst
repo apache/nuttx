@@ -45,7 +45,7 @@ Timers                    Yes     System tick
 GPIO                      Yes
 SPI1                      Yes     SST26VF032B; reads tested only
 I2C1/I2C2                 Build   Not tested; no I2C device on board
-Ethernet                  No
+Ethernet                  Yes     LAN8720A, RMII, 10/100 Mbps
 Wi-Fi                     No
 ========================= ======= ====================================
 
@@ -69,10 +69,15 @@ RPC7           SPI1 SDI         Dedicated SPI1 pin
 RPC8           SPI1 SDO         Dedicated SPI1 pin
 RB4 / RB5      PGC2 / PGD2      ICSP (J204), debug channel 2
 RA4 / RA5      I2C1             GPIO header footprint (not fitted)
+RC12           ETH_CLK_OUT      50 MHz RMII reference clock to MAC and PHY
+RC13           ETXEN            Dedicated Ethernet pin
+RC15 / RC14    ETXD0 / ETXD1    Dedicated Ethernet pins
+RC11 / RC10    ERXD0 / ERXD1    Dedicated Ethernet pins
+RK12           ECRSDV           Dedicated Ethernet pin
+RC9            ERXERR           Dedicated Ethernet pin
+RK14 / RK13    EMDC / EMDIO     PHY management interface, PHY address 0
+RA14           PHY nRST         GPIO, active low
 ============== ================ =============================================
-
-The Ethernet PHY uses RPC9-RPC15, RPK6, RPK12-RPK14 and RPA14, but there
-is no Ethernet driver yet.
 
 Buttons and LEDs
 ================
@@ -116,7 +121,9 @@ PLLs from the configuration words. At boot, ``pic32mz_wfi32_pwrclk.c``:
    MLDO mode.
 #. Starts the 40 MHz primary oscillator inside the module.
 #. Programs the system PLL (40 MHz / 5 * 150 / 6 = 200 MHz) and the
-   Ethernet/Wi-Fi PLL, and switches SYSCLK to the system PLL.
+   Ethernet/Wi-Fi PLL, and switches SYSCLK to the system PLL. When the
+   Ethernet MAC is enabled, the Ethernet/Wi-Fi PLL also drives the 50 MHz
+   RMII reference clock on ETH_CLK_OUT.
 
 The peripheral bus clocks are set in ``include/board.h``:
 
@@ -253,6 +260,49 @@ The SST26VF032B serial flash is registered as ``/dev/mtdblock0``.
     crw-rw-rw-           0 ttyS0
     crw-rw-rw-           0 zero
 
+netnsh
+------
+
+The ``nsh`` configuration with networking: Ethernet, IPv4, TCP, UDP and
+ICMP, the ``ping`` command and a Telnet server on port 23. The interface is
+brought up at boot with the default static address of the network
+initialization (``CONFIG_NETINIT_IPADDR``, 10.0.0.2/24 with 10.0.0.1 as
+the default router) and the MAC address 02:e0:de:ad:be:ef
+(``CONFIG_NETINIT_MACADDR_1/2``). Change these to match your network.
+The example below was taken with ``CONFIG_NETINIT_IPADDR`` set to
+192.168.100.2 and ``CONFIG_NETINIT_DRIPADDR`` to 192.168.100.1:
+
+.. code:: console
+
+   nsh> ifconfig
+   eth0    Link encap:Ethernet HWaddr 02:e0:de:ad:be:ef at RUNNING mtu 1500
+           inet addr:192.168.100.2 DRaddr:192.168.100.1 Mask:255.255.255.0
+   nsh> ping -c 3 192.168.100.1
+   PING 192.168.100.1 56 bytes of data
+   56 bytes from 192.168.100.1: icmp_seq=0 time=0.0 ms
+   56 bytes from 192.168.100.1: icmp_seq=1 time=0.0 ms
+   56 bytes from 192.168.100.1: icmp_seq=2 time=0.0 ms
+   3 packets transmitted, 3 received, 0% packet loss, time 3030 ms
+   rtt min/avg/max/mdev = 0.000/0.000/0.000/0.000 ms
+
+Ethernet
+========
+
+The LAN8720A PHY is connected to the MAC through RMII and is managed
+through MDIO at PHY address 0. The board code pulses the PHY reset (RA14)
+at boot, after the reference clock is running. The PHY interrupt output is
+not connected (R309 is not fitted), so the driver does not use it.
+
+The 50 MHz RMII reference clock comes from ETH_CLK_OUT (RC12) through R313.
+The board also has a footprint for a 50 MHz oscillator (X1, not fitted)
+that can clock the PHY through R314 (not fitted). If you fit X1 and R314,
+select ``CONFIG_PIC32MZ_W1_ETH_EXTREFCLK`` so that ETH_CLK_OUT is left
+disabled and the MAC uses the oscillator clock on the same pin.
+
+The PIC32MZ-W1 has no factory-programmed Ethernet MAC address. Assign one
+with ``CONFIG_NETINIT_NOMAC`` or with the ``SIOCSIFHWADDR`` ioctl before the
+interface is brought up.
+
 Boot trace
 ==========
 
@@ -267,7 +317,7 @@ Silicon tested: WFI32E01PE, revision B0 (DEVID 0x0A400000).
 Limitations
 ===========
 
-* No Ethernet or Wi-Fi driver.
+* No Wi-Fi driver.
 * I2C1/I2C2 build but are not tested.
 * SPI flash: only reads were tested (JEDEC ID and data), not writes or
   erases.

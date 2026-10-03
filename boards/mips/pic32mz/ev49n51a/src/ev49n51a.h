@@ -50,6 +50,12 @@
 
 #define GPIO_SST26_CS   (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTA | GPIO_PIN1)
 
+/* LAN8720A Ethernet PHY (U301) reset on RA14, active low.  R304 pulls it
+ * high, so the PHY also runs when the pin is left as an input.
+ */
+
+#define GPIO_PHY_NRST   (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTA | GPIO_PIN14)
+
 /* SST26 MTD partition is exported as /dev/mtdblock<SST26_MTD_MINOR> */
 
 #define SST26_MTD_MINOR 0
