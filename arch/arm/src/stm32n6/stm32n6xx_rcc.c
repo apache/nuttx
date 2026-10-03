@@ -135,9 +135,8 @@ void stm32_rcc_enableperipherals(void)
  *   clock tree is laid out in the board header; see board.h for the full
  *   diagram.
  *
- *   IMPORTANT: CFGR1 locks after the first write -- CPUSW and SYSSW must
- *   be written together in a single putreg32().  CFGR2 (bus prescalers)
- *   also locks after CFGR1 is written, so it must be set first.
+ *   Switch CPU and system clocks to HSI before changing PLL1, since the
+ *   boot ROM may already be using PLL1 with a different clock tree.
  *
  ****************************************************************************/
 
@@ -146,22 +145,30 @@ void stm32_stdclockconfig(void)
   volatile int32_t timeout;
   uint32_t regval;
 
-  /* If clocks are already configured (e.g. FSBL set up PLL1 and switched
-   * CPUSW to IC1), skip PLL1/CFGR1 reconfiguration.  CFGR1 locks after
-   * the first write - a second write crashes the system (SRAM goes
-   * offline).
-   */
+  /* Keep HSI running while PLL1 and the IC dividers are reconfigured. */
 
-  regval = getreg32(STM32_RCC_CFGR1);
-  if ((regval & RCC_CFGR1_CPUSWS_MASK) == RCC_CFGR1_CPUSWS_IC1 &&
-      (regval & RCC_CFGR1_SYSSWS_MASK) == RCC_CFGR1_SYSSWS_IC2_IC6_IC11)
-    {
-      return;
-    }
+  putreg32(RCC_CR_HSION, STM32_RCC_CSR);
 
   for (timeout = HSIRDY_TIMEOUT; timeout > 0; timeout--)
     {
       if ((getreg32(STM32_RCC_SR) & RCC_SR_HSIRDY) != 0)
+        {
+          break;
+        }
+    }
+
+  /* The flash boot ROM leaves CPUCLK at 400 MHz.  Move both CPU and
+   * system clocks off PLL1 before disabling it, then establish the
+   * board clock tree instead of inheriting the ROM's configuration.
+   */
+
+  modifyreg32(STM32_RCC_CFGR1,
+              RCC_CFGR1_CPUSW_MASK | RCC_CFGR1_SYSSW_MASK, 0);
+
+  for (timeout = HSIRDY_TIMEOUT; timeout > 0; timeout--)
+    {
+      if ((getreg32(STM32_RCC_CFGR1) &
+           (RCC_CFGR1_CPUSWS_MASK | RCC_CFGR1_SYSSWS_MASK)) == 0)
         {
           break;
         }
@@ -229,9 +236,8 @@ void stm32_stdclockconfig(void)
          | RCC_DIVENR_IC6EN | RCC_DIVENR_IC11EN,
            STM32_RCC_DIVENSR);
 
-  /* CFGR2 (bus prescalers) and CFGR1 (clock-source switch) both lock
-   * after CFGR1 is written, so CFGR2 must be set first and CFGR1 must
-   * be written exactly once with both CPUSW and SYSSW in place.
+  /* Set the bus prescalers before switching CPU and system clocks to
+   * the configured PLL1 outputs.
    */
 
   putreg32(RCC_CFGR2_HPRE_SYSCLKd2, STM32_RCC_CFGR2);
