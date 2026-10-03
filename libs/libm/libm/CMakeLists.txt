@@ -151,6 +151,12 @@ if(CONFIG_LIBM)
   # Use the C versions of some functions only if architecture specific optimized
   # versions are not provided.
 
+  if(CONFIG_LIBM_ARCH_FMAF)
+    list(APPEND SRCS risc-v/lib_fmaf_riscv.c)
+  else()
+    list(APPEND SRCS lib_fmaf.c)
+  endif()
+
   if(NOT CONFIG_LIBM_ARCH_CEIL)
     list(APPEND SRCS lib_ceil.c)
   endif()

@@ -30,6 +30,14 @@ CSRCS += lib_acoshf.c lib_atanhf.c lib_erff.c lib_copysignf.c
 CSRCS += lib_scalbnf.c lib_scalbn.c lib_scalbnl.c lib_sincos.c
 CSRCS += lib_sincosf.c lib_sincosl.c
 
+ifeq ($(CONFIG_LIBM_ARCH_FMAF),y)
+CSRCS += lib_fmaf_riscv.c
+DEPPATH += --dep-path libm/risc-v
+VPATH += :libm/risc-v
+else
+CSRCS += lib_fmaf.c
+endif
+
 CSRCS += lib_acos.c lib_asin.c lib_atan.c lib_atan2.c lib_cos.c
 CSRCS += lib_cosh.c lib_exp.c lib_fabs.c lib_fmod.c lib_frexp.c
 CSRCS += lib_ldexp.c lib_log.c lib_log10.c lib_log2.c lib_modf.c
