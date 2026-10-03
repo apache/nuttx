@@ -60,6 +60,19 @@ This was a collaborative effort between Kristopher Tate, David Sidrane
 and myself. The basic port is functional and a NuttShell (NSH)
 configuration is available.
 
+Microchip PIC32MZ-W1
+--------------------
+
+PIC32MZ-W1 family (MIPS32 M-Class core with 2.4 GHz Wi-Fi), including the
+WFI32E01 module. A port is available for the Microchip EV49N51A (Ethernet
+to Wi-Fi Bridge) board, based on the WFI32E01PE module
+(PIC32MZ1025W104132).
+
+The W1 special function register layout and clock tree differ from the
+EC/EF families, and software must start the oscillator, the PLLs and the
+power management unit at boot. Supported: UART, timers, GPIO and SPI
+(tested), I2C (build only). Ethernet and Wi-Fi are not supported.
+
 Supported Boards
 ================
 
