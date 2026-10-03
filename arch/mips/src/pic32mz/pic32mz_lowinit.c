@@ -42,6 +42,11 @@
 #include "pic32mz_lowconsole.h"
 #include "pic32mz_lowinit.h"
 
+#ifdef CONFIG_ARCH_CHIP_WFI32E01
+#  include "hardware/pic32mzw1_pmuclk.h"
+#  include "pic32mz_wfi32_pwrclk.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -178,6 +183,18 @@
 
 static inline void pic32mz_prefetch(void)
 {
+#ifdef CONFIG_ARCH_CHIP_PIC32MZW1
+  /* PIC32MZ-W1 differs from EC/EF here (DS70005425 Reg 9-1): PREFEN only
+   * accepts 00 (off) and 01 (cacheable regions), and the data sheet gives
+   * no SYSCLK-to-PFMWS table.  The wait-state count comes from Kconfig;
+   * its default (5 at 200 MHz) is the value used by Microchip's OOB
+   * example [EX].
+   */
+
+  modifyreg32(PIC32MZ_PRECON, PRECON_PREFEN_MASK | PRECON_PFMWS_MASK,
+              (1 << PRECON_PREFEN_SHIFT) |
+              PRECON_PFMWS(CONFIG_PIC32MZ_W1_FLASH_WAITSTATES));
+#else
   unsigned int nwaits;
   uint32_t regval;
 
@@ -216,6 +233,7 @@ static inline void pic32mz_prefetch(void)
    */
 
   putreg32(regval, PIC32MZ_PRECON);
+#endif
 }
 
 /****************************************************************************
@@ -305,12 +323,28 @@ static inline void pic32mz_pbclk(void)
  *   Peripherals:
  */
 
+#if defined(CONFIG_ARCH_CHIP_PIC32MZW1) && !defined(BOARD_PBCLK6_ENABLE)
+  /* On PIC32MZ-W1, PBCLK6 clocks the CPU and cannot be turned off
+   * (DS70005425 Reg 11-9 note 2).  Writing 0 here (divide-by-1, "off")
+   * hangs the CPU (verified on hardware), so leave the reset divider.
+   */
+
+#else
 #ifdef BOARD_PBCLK6_ENABLE
   regval = (PBDIV_ON | PBDIV(BOARD_PB6DIV));
 #else
   regval = 0;
 #endif
   putreg32(regval, PIC32MZ_PB6DIV);
+#endif
+
+#ifndef CONFIG_ARCH_CHIP_PIC32MZW1
+  /* PIC32MZ-W1 has no PB7/PB8 bus (CPU clocking and EBI are not
+   * independently divided on this family); PIC32MZ_PB7DIV/PB8DIV are
+   * unimplemented placeholders that alias PB6DIV's real address on this
+   * chip (see hardware/pic32mz_osc.h), so they must never be written
+   * here.
+   */
 
 /* PBCLK7
  *   Peripherals:  CPU, Deadman timer
@@ -333,6 +367,7 @@ static inline void pic32mz_pbclk(void)
   regval = 0;
 #endif
   putreg32(regval, PIC32MZ_PB8DIV);
+#endif /* !CONFIG_ARCH_CHIP_PIC32MZW1 */
 }
 
 /****************************************************************************
@@ -347,6 +382,22 @@ static inline void pic32mz_pbclk(void)
 
 static inline void pic32mz_adcdisable(void)
 {
+#ifdef CONFIG_ARCH_CHIP_PIC32MZW1
+  /* Only PORTA, PORTB and PORTK physically exist on this family;
+   * CHIP_NPORTS is kept at 10 for compatibility with the shared
+   * GPIO_PORTx letter-index encoding (see hardware/pic32mz_ioport.h),
+   * so the generic per-letter loop below cannot be used as-is here -
+   * PORTC-PORTJ's "addresses" are not real IOPORT registers on this
+   * chip and must not be written.
+   */
+
+  putreg32(0xffffffff, PIC32MZ_IOPORTA_K1BASE +
+                       PIC32MZ_IOPORT_ANSELCLR_OFFSET);
+  putreg32(0xffffffff, PIC32MZ_IOPORTB_K1BASE +
+                       PIC32MZ_IOPORT_ANSELCLR_OFFSET);
+  putreg32(0xffffffff, PIC32MZ_IOPORTK_K1BASE +
+                       PIC32MZ_IOPORT_ANSELCLR_OFFSET);
+#else
   putreg32(0xffffffff, PIC32MZ_IOPORTA_K1BASE +
                        PIC32MZ_IOPORT_ANSELCLR_OFFSET);
 #if CHIP_NPORTS > 1
@@ -381,6 +432,7 @@ static inline void pic32mz_adcdisable(void)
   putreg32(0xffffffff, PIC32MZ_IOPORTJ_K1BASE +
                        PIC32MZ_IOPORT_ANSELCLR_OFFSET);
 #endif
+#endif /* CONFIG_ARCH_CHIP_PIC32MZW1 */
 }
 
 /****************************************************************************
@@ -400,21 +452,74 @@ static inline void pic32mz_adcdisable(void)
 
 void pic32mz_lowinit(void)
 {
+#ifdef CONFIG_ARCH_CHIP_WFI32E01
+  /* On PIC32MZ-W1, the system PLL and Wi-Fi coprocessor PMU are NOT
+   * configured by DEVCFG fuses (unlike EC/EF) and must be brought up by
+   * software before anything else, including flash wait-state
+   * calculations, which depend on the final CPU clock.
+   */
+
+#ifdef CONFIG_PIC32MZ_W1_BOOTTRACE
+  pic32mz_wfi32_trace_init();
+  pic32mz_wfi32_trace('\r');
+  pic32mz_wfi32_trace('\n');
+  pic32mz_wfi32_trace('R');
+  pic32mz_wfi32_trace_hex(getreg32(PIC32MZ_RCON));
+  pic32mz_wfi32_trace(' ');
+  pic32mz_wfi32_trace('A');
+#endif
+
+  pic32mz_wfi32_pmu_initialize();
+
+#ifdef CONFIG_PIC32MZ_W1_BOOTTRACE
+  /* Clear the reset cause only after the PMU set-up has looked at it, so
+   * that the next boot trace shows what caused that reset.
+   */
+
+  putreg32(0xffffffff, PIC32MZ_RCONCLR);
+#endif
+
+  pic32mz_wfi32_clk_initialize();
+#endif
+
+#ifdef CONFIG_PIC32MZ_W1_BOOTTRACE
+  pic32mz_wfi32_trace('B');
+#endif
+
   /* Initialize FLASH wait states */
 
   pic32mz_prefetch();
+
+#ifdef CONFIG_PIC32MZ_W1_BOOTTRACE
+  pic32mz_wfi32_trace('F');
+#endif
 
   /* Configure peripheral clocking */
 
   pic32mz_pbclk();
 
+#ifdef CONFIG_PIC32MZ_W1_BOOTTRACE
+  pic32mz_wfi32_trace('P');
+#endif
+
   /* Init IO pins (Disable all ADC circuits) */
 
   pic32mz_adcdisable();
 
+#ifdef CONFIG_PIC32MZ_W1_BOOTTRACE
+  pic32mz_wfi32_trace('D');
+  pic32mz_wfi32_trace('\r');
+  pic32mz_wfi32_trace('\n');
+  pic32mz_wfi32_trace_end();
+#endif
+
   /* Initialize a console (probably a serial console) */
 
   pic32mz_consoleinit();
+
+#ifdef CONFIG_PIC32MZ_W1_BOOTTRACE
+  mips_lowputc('c');
+#endif
 
   /* Perform early serial initialization (so that we will have debug output
    * available as soon as possible).
@@ -424,7 +529,17 @@ void pic32mz_lowinit(void)
   mips_earlyserialinit();
 #endif
 
+#ifdef CONFIG_PIC32MZ_W1_BOOTTRACE
+  mips_lowputc('e');
+#endif
+
   /* Perform board-level initialization */
 
   pic32mz_boardinitialize();
+
+#ifdef CONFIG_PIC32MZ_W1_BOOTTRACE
+  mips_lowputc('b');
+  mips_lowputc('\r');
+  mips_lowputc('\n');
+#endif
 }

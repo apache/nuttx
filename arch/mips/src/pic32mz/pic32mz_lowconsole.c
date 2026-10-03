@@ -86,6 +86,14 @@
 #  endif
 #endif
 
+/* Peripheral bus clock feeding the UART baud rate generators */
+
+#ifdef CONFIG_ARCH_CHIP_PIC32MZW1
+#  define UART_PBCLK BOARD_PBCLK3
+#else
+#  define UART_PBCLK BOARD_PBCLK2
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -145,11 +153,14 @@ static inline uint32_t pic32mz_getreg(uintptr_t uart_base,
  *   Configure the UART baud rate.
  *
  *   With BRGH=0
- *     BAUD = PBCLK2 / 16 / (BRG+1)
- *     BRG  = PBCLK2 / 16 / BAUD - 1
+ *     BAUD = PBCLK / 16 / (BRG+1)
+ *     BRG  = PBCLK / 16 / BAUD - 1
  *   With BRGH=1
- *     BAUD = PBCLK2 / 4 / (BRG+1)
- *     BRG  = PBCLK2 / 4 / BAUD - 1
+ *     BAUD = PBCLK / 4 / (BRG+1)
+ *     BRG  = PBCLK / 4 / BAUD - 1
+ *
+ *   PBCLK is PBCLK2 on PIC32MZ EC/EF.  On PIC32MZ-W1, UART1 and UART2 are
+ *   clocked from PBCLK3 (DS70005425 Figure 24-1).
  *
  *
  ****************************************************************************/
@@ -166,7 +177,7 @@ static void pic32mz_uartsetbaud(uintptr_t uart_base, uint32_t baudrate)
    * Subject to BRG <= 65536.
    */
 
-  tmp = BOARD_PBCLK2 / baudrate;
+  tmp = UART_PBCLK / baudrate;
 
   /* Try BRGH=1 first.  This will select the 4x divisor and will produce the
    * larger BRG divisor, given all other things equal.
@@ -323,11 +334,18 @@ void pic32mz_consoleinit(void)
    */
 
 #ifdef CONFIG_PIC32MZ_UART1
-  /* Configure UART1 RX (input) and TX (output) pins */
+  /* Configure UART1 RX (input) and TX (output) pins.  Boards that use
+   * UART1's dedicated, non-PPS pins (PIC32MZ-W1 RA8/RA9) leave
+   * BOARD_U1RX_PPS/BOARD_U1TX_PPS undefined.
+   */
 
+#if defined(BOARD_U1RX_PPS) && defined(BOARD_U1TX_PPS)
   putreg32(BOARD_U1RX_PPS, PIC32MZ_U1RXR);
   putreg32(PPS_OUTPUT_REGVAL(BOARD_U1TX_PPS),
            PPS_OUTPUT_REGADDR(BOARD_U1TX_PPS));
+#elif !defined(CONFIG_ARCH_CHIP_PIC32MZW1)
+#  error "BOARD_U1RX_PPS and BOARD_U1TX_PPS must be defined in board.h"
+#endif
 
 #ifdef CONFIG_UART1_OFLOWCONTROL
   /* Configure the UART1 CTS input pin */

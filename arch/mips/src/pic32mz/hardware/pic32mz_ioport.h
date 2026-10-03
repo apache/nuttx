@@ -60,7 +60,19 @@
 #  define PIC32MZ_IOPORTG_OFFSET       0x0600
 #  define PIC32MZ_IOPORTH_OFFSET       0x0700
 #  define PIC32MZ_IOPORTJ_OFFSET       0x0800
+
+#ifdef CONFIG_ARCH_CHIP_PIC32MZW1
+/* The PIC32MZ-W1 family only implements PORTA, PORTB, PORTC and PORTK.
+ * PORTK is not the 10th 0x100 block as on EC/EF parts; it follows PORTC
+ * at offset 0x300.  The PORTD-PORTJ offsets above are therefore
+ * unimplemented placeholders on this family (other peripherals live
+ * there) and must never be referenced.
+ */
+
+#  define PIC32MZ_IOPORTK_OFFSET       0x0300
+#else
 #  define PIC32MZ_IOPORTK_OFFSET       0x0900
+#endif
 
 /* Register Offsets *********************************************************/
 

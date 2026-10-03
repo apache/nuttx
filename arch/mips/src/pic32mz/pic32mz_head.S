@@ -178,7 +178,9 @@
 	.global	__reset
 	.global __start
 	.global halt
+#ifndef CONFIG_ARCH_CHIP_PIC32MZW1
 	.global	devcfg
+#endif
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	.global g_intstackalloc
 	.global g_intstacktop
@@ -833,8 +835,12 @@ halt:
 
 /****************************************************************************
  * Device Configuration
+ *
+ * NOTE: PIC32MZ-W1 uses a different set of words at different addresses
+ * (see hardware/pic32mzw1_features.h); it is handled by the #else branch.
  ****************************************************************************/
 
+#ifndef CONFIG_ARCH_CHIP_PIC32MZW1
 	.section .devcfg, "a"
 	.type	devcfg, object
 devcfg:
@@ -920,6 +926,36 @@ adevcfg0:
 			CONFIG_PIC32MZ_EJTAGBEN | DEVCFG0_RW0
 
 	.size	adevcfg, .-adevcfg
+#else /* CONFIG_ARCH_CHIP_PIC32MZW1 */
+
+/* Primary copy at 0xbfc55f88, FCPN0 at 0xbfc55fbc, FSIGN0 at 0xbfc55fdc.
+ * Each block goes to its own linker region: the addresses in between are
+ * not implemented and must not appear in the image.
+ */
+
+	.section .devcfg, "a"
+	.type	devcfg, object
+devcfg:
+	.long	W1CFG_FUSERID
+	.long	W1CFG_DEVCFG4
+	.long	W1CFG_DEVCFG2
+	.long	W1CFG_DEVCFG1
+	.long	W1CFG_DEVCFG0
+	.long	W1CFG_FBCFG0
+	.size	devcfg, .-devcfg
+
+	.section .devcfg_cp, "a"
+	.long	W1CFG_FCPN0_VALUE
+
+	.section .devcfg_sign, "a"
+	.long	W1CFG_FSIGN0_VALUE
+
+/* No alternate copy (0xbfc55e88) is emitted: MPLAB IPE does not program
+ * it from the image but writes the DFP default values there itself, and
+ * does not verify it (checked on hardware).
+ */
+
+#endif /* CONFIG_ARCH_CHIP_PIC32MZW1 */
 
 /****************************************************************************
  * Public Data
