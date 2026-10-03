@@ -690,8 +690,12 @@
 
 /* DEVCFG1.  UART1 and SPI1 use their dedicated (non-PPS) pins unless the
  * board routes them through PPS (BOARD_U1RX_PPS/BOARD_SDI1_PPS defined).
- * Ethernet in RMII mode with the reference clock on ETH_CLK_OUT.
+ * Ethernet in RMII mode (FMIIEN = 0) with the reference clock on
+ * ETH_CLK_OUT (ETHEXEREF = 0).  PIC32MZ-W1 only has the RMII interface
+ * [DS Tables 33-1, 33-2]; the Ethernet driver checks CONFIG_PIC32MZ_FMIIEN.
  */
+
+#define CONFIG_PIC32MZ_FMIIEN   0
 
 #ifdef CONFIG_PIC32MZ_DEBUGGER_ENABLE
 #  define W1CFG_DEBUG           DEVCFG1_DEBUG_ENABLED
