@@ -304,6 +304,24 @@ static int imxrt_caam_ring_init(void)
 
   for (timeout = CAAM_TIMEOUT; timeout > 0; timeout--)
     {
+      if ((getreg32(IMXRT_CAAM_JRINT) & CAAM_JRINT_ERR_HALT_MASK) !=
+          CAAM_JRINT_ERR_HALT_INPROG)
+        {
+          break;
+        }
+    }
+
+  if ((getreg32(IMXRT_CAAM_JRINT) & CAAM_JRINT_ERR_HALT_MASK) !=
+      CAAM_JRINT_ERR_HALT_DONE)
+    {
+      _err("ERROR: job ring would not halt\n");
+      return -ETIMEDOUT;
+    }
+
+  putreg32(CAAM_JRCR_RESET, IMXRT_CAAM_JRCR);
+
+  for (timeout = CAAM_TIMEOUT; timeout > 0; timeout--)
+    {
       if ((getreg32(IMXRT_CAAM_JRCR) & CAAM_JRCR_RESET) == 0)
         {
           break;
