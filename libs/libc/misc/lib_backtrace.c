@@ -493,6 +493,18 @@ FAR void *backtrace_record(int skip)
  *   Return 0 if success, otherwise return a negative value.
  ****************************************************************************/
 
+/* nosanitize_address: backtrace_remove is on the hot path of every
+ * allocation/free (mempool_record calls it for each when
+ * CONFIG_MM_RECORD_STACK is on).  On KASAN-enabled debug builds the loads
+ * of entry->ref, the bucket slot and the collision chain each trip a
+ * per-access shadow check; across a heavy allocation phase (e.g. recursive
+ * directory scan at boot) this pushes wall time past the test framework's
+ * busy-loop threshold.  All pointers touched are pool-internal, so skipping
+ * the check is safe -- same reasoning as backtrace_hash()/backtrace_find();
+ * this is the remaining uninstrumented accessor on the same path.
+ */
+
+nosanitize_address
 void backtrace_remove(FAR void *index)
 {
   FAR struct backtrace_pool_s *bp = &g_backtrace_pool;
