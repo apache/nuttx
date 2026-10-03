@@ -78,8 +78,17 @@ config LIBM_ARCH_SQRTF
 	bool
 	default n
 
+config LIBM_ARCH_FMAF
+	bool
+	default n
+	depends on LIBM
+
 # One or more the of above may be selected by architecture specific logic
 
 if ARCH_ARM
 source "libs/libm/libm/arm/Kconfig"
+endif
+
+if ARCH_RISCV
+source "libs/libm/libm/risc-v/Kconfig"
 endif
