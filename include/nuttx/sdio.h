@@ -486,6 +486,28 @@
 #define SDIO_CAPS_SD_HS_MODE      0x80 /* Bit 7=1: Supports SD card high speed mode */
 
 /****************************************************************************
+ * Name: SDIO_MAXREQUEST
+ *
+ * Description:
+ *   Return the maximum number of bytes that the host can transfer in one
+ *   request.  A return value of zero means that the host does not impose an
+ *   additional limit.  A nonzero limit applies to all buffers, including
+ *   directly DMA-accessible buffers.  Callers must split requests or reject
+ *   commands that cannot be split.  A limit smaller than a block cannot
+ *   support block I/O.
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *
+ * Returned Value:
+ *   Maximum request size in bytes, or zero for no host-specific limit.
+ *
+ ****************************************************************************/
+
+#define SDIO_MAXREQUEST(dev) \
+  ((dev)->maxrequest ? (dev)->maxrequest(dev) : 0)
+
+/****************************************************************************
  * Name: SDIO_STATUS
  *
  * Description:
@@ -1066,6 +1088,12 @@ struct sdio_dev_s
 #endif /* CONFIG_SDIO_DMA */
   CODE void  (*gotextcsd)(FAR struct sdio_dev_s *dev,
                           FAR const uint8_t *buffer);
+
+  /* Optional request limit in bytes; NULL means no additional limit.
+   * Keep optional extensions at the end for positional initializers.
+   */
+
+  CODE size_t (*maxrequest)(FAR struct sdio_dev_s *dev);
 };
 
 /****************************************************************************

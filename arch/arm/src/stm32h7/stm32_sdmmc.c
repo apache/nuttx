@@ -105,6 +105,11 @@
  *     DMA support for SDMMC. If disabled, the SDMMC will work in
  *     interrupt mode and still use the IDMA to a local buffer for data
  *     lengths less the 32 bytes due to the FIFO limitations.
+ *   CONFIG_STM32_SDMMC_IDMA_BOUNCE_BUFFER - Enable an IDMA-accessible
+ *     buffer for client memory that IDMA cannot reach or that does not meet
+ *     data-cache alignment requirements.
+ *   CONFIG_STM32_SDMMC_IDMA_BOUNCE_BLOCKS - Size of each bounce buffer in
+ *     512-byte blocks.
  *   CONFIG_SDMMC1/2_WIDTH_D1_ONLY - This may be selected to force the driver
  *     operate with only a single data line (the default is to use all
  *     4 SD data lines).
@@ -133,11 +138,20 @@
 
 #if !defined(CONFIG_STM32_SDMMC_IDMA)
 #  warning "Large Non-DMA transfer may result in RX overrun failures"
-#elif defined(CONFIG_STM32_SDMMC1)
-#  define SRAM123_START STM32_SRAM123_BASE
-#  define SRAM123_END   (SRAM123_START + STM32_SRAM123_SIZE)
-#  define SRAM4_START   STM32_SRAM4_BASE
-#  define SRAM4_END     (SRAM4_START + STM32_SRAM4_SIZE)
+#else
+#  define AXISRAM_START  STM32_AXISRAM_BASE
+#  define AXISRAM_END    (AXISRAM_START + STM32_SRAM_SIZE)
+#  if defined(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7) && \
+      !defined(CONFIG_STM32_STM32H72XXX_OR_STM32H73XXX) && \
+      (defined(CONFIG_STM32_STM32H7X0XX) || \
+       defined(CONFIG_STM32_STM32H7X3XX) || \
+       defined(CONFIG_STM32_STM32H7X5XX))
+#    define HAVE_SDMMC2_D2D3_IDMA 1
+#    define SRAM123_START STM32_SRAM123_BASE
+#    define SRAM123_END   (SRAM123_START + STM32_SRAM123_SIZE)
+#    define SRAM4_START   STM32_SRAM4_BASE
+#    define SRAM4_END     (SRAM4_START + STM32_SRAM4_SIZE)
+#  endif
 #endif
 
 #if !defined(CONFIG_SCHED_WORKQUEUE) || !defined(CONFIG_SCHED_HPWORK)
@@ -247,6 +261,13 @@
 
 #define SDMMC_MAX_BLOCK_SIZE          (512)
 
+#if defined(CONFIG_STM32_SDMMC_IDMA_BOUNCE_BUFFER)
+#  define SDMMC_IDMA_BUFFER_SIZE \
+    (CONFIG_STM32_SDMMC_IDMA_BOUNCE_BLOCKS * SDMMC_MAX_BLOCK_SIZE)
+#else
+#  define SDMMC_IDMA_BUFFER_SIZE SDMMC_MAX_BLOCK_SIZE
+#endif
+
 /* Data transfer interrupt mask bits */
 
 /* DMA interrupts */
@@ -305,6 +326,8 @@
                                    STM32_SDMMC_ICR_DTIMEOUTC |   \
                                    STM32_SDMMC_ICR_RXOVERRC  |   \
                                    STM32_SDMMC_ICR_TXUNDERRC |   \
+                                   STM32_SDMMC_ICR_IDMATEC   |   \
+                                   STM32_SDMMC_ICR_IDMABTCC  |   \
                                    STM32_SDMMC_ICR_DBCKENDC)
 
 #define STM32_SDMMC_WAITALL_ICR   (STM32_SDMMC_CMDDONE_ICR   |   \
@@ -391,11 +414,13 @@ struct stm32_dev_s
   uint8_t            rxfifo[FIFO_SIZE_IN_BYTES] /* To offload with IDMA and support un-alinged buffers */
                      aligned_data(ARMV7M_DCACHE_LINESIZE);
   bool               unaligned_rx; /* read buffer is not cache-line or 32 bit aligned */
+#if defined(CONFIG_STM32_SDMMC_IDMA_BOUNCE_BUFFER)
+  bool               bounce_rx;    /* Receive uses the IDMA bounce buffer */
+#endif
 
-  /* Input dma buffer for unaligned transfers */
+  /* IDMA buffer for unaligned and inaccessible transfers */
 #if defined(CONFIG_STM32_SDMMC_IDMA)
-  uint8_t sdmmc_rxbuffer[SDMMC_MAX_BLOCK_SIZE]
-          aligned_data(ARMV7M_DCACHE_LINESIZE);
+  uint8_t           *sdmmc_idmabuffer;
 #endif
 };
 
@@ -457,9 +482,18 @@ static void stm32_dumpsamples(struct stm32_dev_s *priv);
 /* Data Transfer Helpers ****************************************************/
 
 static uint8_t stm32_log2(uint16_t value);
+#if defined(CONFIG_STM32_SDMMC_IDMA)
+static bool stm32_idma_accessible(struct stm32_dev_s *priv,
+                                  const uint8_t *buffer, size_t buflen);
+#endif
+#if defined(CONFIG_STM32_SDMMC_IDMA_BOUNCE_BUFFER)
+static bool stm32_idma_bounce_required(struct stm32_dev_s *priv,
+                                       const uint8_t *buffer, size_t buflen);
+#endif
 static void stm32_dataconfig(struct stm32_dev_s *priv, uint32_t timeout,
                              uint32_t dlen, bool receive);
 static void stm32_datadisable(struct stm32_dev_s *priv);
+static void stm32_datastop(struct stm32_dev_s *priv);
 #ifndef CONFIG_STM32_SDMMC_IDMA
 static void stm32_sendfifo(struct stm32_dev_s *priv);
 static void stm32_recvfifo(struct stm32_dev_s *priv);
@@ -491,6 +525,9 @@ static int stm32_lock(struct sdio_dev_s *dev, bool lock);
 
 static void stm32_reset(struct sdio_dev_s *dev);
 static sdio_capset_t stm32_capabilities(struct sdio_dev_s *dev);
+#if defined(CONFIG_STM32_SDMMC_IDMA_BOUNCE_BUFFER)
+static size_t stm32_maxrequest(struct sdio_dev_s *dev);
+#endif
 static sdio_statset_t stm32_status(struct sdio_dev_s *dev);
 static void stm32_widebus(struct sdio_dev_s *dev, bool enable);
 static void stm32_clock(struct sdio_dev_s *dev,
@@ -532,10 +569,8 @@ static int  stm32_registercallback(struct sdio_dev_s *dev,
 /* DMA */
 
 #if defined(CONFIG_STM32_SDMMC_IDMA)
-#  if defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
 static int  stm32_dmapreflight(struct sdio_dev_s *dev,
                                const uint8_t *buffer, size_t buflen);
-#  endif
 static int  stm32_dmarecvsetup(struct sdio_dev_s *dev,
                                uint8_t *buffer, size_t buflen);
 static int  stm32_dmasendsetup(struct sdio_dev_s *dev,
@@ -550,6 +585,11 @@ static void stm32_default(struct stm32_dev_s *priv);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+#if defined(CONFIG_STM32_SDMMC_IDMA) && defined(CONFIG_STM32_SDMMC1)
+static uint8_t g_sdmmc1_idmabuffer[SDMMC_IDMA_BUFFER_SIZE]
+               aligned_data(ARMV7M_DCACHE_LINESIZE);
+#endif
+
 #if defined(CONFIG_STM32_SDMMC1)
 struct stm32_dev_s g_sdmmcdev1 =
 {
@@ -560,6 +600,9 @@ struct stm32_dev_s g_sdmmcdev1 =
 #endif
     .reset            = stm32_reset,
     .capabilities     = stm32_capabilities,
+#if defined(CONFIG_STM32_SDMMC_IDMA_BOUNCE_BUFFER)
+    .maxrequest       = stm32_maxrequest,
+#endif
     .status           = stm32_status,
     .widebus          = stm32_widebus,
     .clock            = stm32_clock,
@@ -603,8 +646,17 @@ struct stm32_dev_s g_sdmmcdev1 =
 #if defined(HAVE_SDMMC_SDIO_MODE) && defined(CONFIG_SDMMC1_SDIO_MODE)
   .sdiomode           = true,
 #endif
+#if defined(CONFIG_STM32_SDMMC_IDMA)
+  .sdmmc_idmabuffer   = g_sdmmc1_idmabuffer,
+#endif
 };
 #endif
+
+#if defined(CONFIG_STM32_SDMMC_IDMA) && defined(CONFIG_STM32_SDMMC2)
+static uint8_t g_sdmmc2_idmabuffer[SDMMC_IDMA_BUFFER_SIZE]
+               aligned_data(ARMV7M_DCACHE_LINESIZE);
+#endif
+
 #if defined(CONFIG_STM32_SDMMC2)
 struct stm32_dev_s g_sdmmcdev2 =
 {
@@ -615,6 +667,9 @@ struct stm32_dev_s g_sdmmcdev2 =
 #endif
     .reset            = stm32_reset,
     .capabilities     = stm32_capabilities,
+#if defined(CONFIG_STM32_SDMMC_IDMA_BOUNCE_BUFFER)
+    .maxrequest       = stm32_maxrequest,
+#endif
     .status           = stm32_status,
     .widebus          = stm32_widebus,
     .clock            = stm32_clock,
@@ -657,6 +712,9 @@ struct stm32_dev_s g_sdmmcdev2 =
   .waitsem            = SEM_INITIALIZER(0),
 #if defined(HAVE_SDMMC_SDIO_MODE) && defined(CONFIG_SDMMC2_SDIO_MODE)
   .sdiomode           = true,
+#endif
+#if defined(CONFIG_STM32_SDMMC_IDMA)
+  .sdmmc_idmabuffer   = g_sdmmc2_idmabuffer,
 #endif
 };
 #endif
@@ -946,6 +1004,7 @@ static void stm32_sdiosample(struct stm32_dev_s *priv,
 static void stm32_sample(struct stm32_dev_s *priv, int index)
 {
   struct stm32_sampleregs_s *regs = &g_sampleregs[index];
+
   stm32_sdiosample(priv, &regs->sdio);
 }
 #endif
@@ -1115,7 +1174,7 @@ static void stm32_dataconfig(struct stm32_dev_s *priv, uint32_t timeout,
 
       if (priv->unaligned_rx)
         {
-          DEBUGASSERT(priv->blocksize <= sizeof(priv->sdmmc_rxbuffer));
+          DEBUGASSERT(priv->blocksize <= SDMMC_IDMA_BUFFER_SIZE);
           dlen = priv->blocksize;
         }
 #endif
@@ -1190,6 +1249,60 @@ static void stm32_datadisable(struct stm32_dev_s *priv)
   regval &= ~(STM32_SDMMC_DCTRL_DTEN  | STM32_SDMMC_DCTRL_DBLOCKSIZE_MASK |
               STM32_SDMMC_DCTRL_DTDIR | STM32_SDMMC_DCTRL_DTMODE_MASK);
   sdmmc_putreg32(priv, regval, STM32_SDMMC_DCTRL_OFFSET);
+}
+
+/****************************************************************************
+ * Name: stm32_datastop
+ *
+ * Description:
+ *   Stop data access before releasing a buffer.  IDMAEN is writable only
+ *   while DPSMACT is clear (RM0433).  Reset the host if an aborted transfer
+ *   is still active; preserve the bus settings so the MMC/SD layer can send
+ *   STOP_TRANSMISSION or reinitialize the card.  The caller excludes IRQs.
+ *
+ ****************************************************************************/
+
+static void stm32_datastop(struct stm32_dev_s *priv)
+{
+  if ((sdmmc_getreg32(priv, STM32_SDMMC_STA_OFFSET) &
+       STM32_SDMMC_STA_DPSMACT) != 0)
+    {
+      uint32_t clkcr = sdmmc_getreg32(priv, STM32_SDMMC_CLKCR_OFFSET);
+      uint32_t power = sdmmc_getreg32(priv, STM32_SDMMC_POWER_OFFSET);
+      uint32_t mask = sdmmc_getreg32(priv, STM32_SDMMC_MASK_OFFSET);
+      uint32_t dctrl = sdmmc_getreg32(priv, STM32_SDMMC_DCTRL_OFFSET) &
+                       STM32_SDMMC_DCTRL_SDIOEN;
+      uint32_t regaddress = 0;
+      uint32_t rstbit = 0;
+
+#if defined(CONFIG_STM32_SDMMC1)
+      if (priv->base == STM32_SDMMC1_BASE)
+        {
+          regaddress = STM32_RCC_AHB3RSTR;
+          rstbit = RCC_AHB3RSTR_SDMMC1RST;
+        }
+
+#endif
+#if defined(CONFIG_STM32_SDMMC2)
+      if (priv->base == STM32_SDMMC2_BASE)
+        {
+          regaddress = STM32_RCC_AHB2RSTR;
+          rstbit = RCC_AHB2RSTR_SDMMC2RST;
+        }
+#endif
+
+      DEBUGASSERT(rstbit != 0);
+      modifyreg32(regaddress, 0, rstbit);
+      up_udelay(2);
+      modifyreg32(regaddress, rstbit, 0);
+
+      sdmmc_putreg32(priv, power, STM32_SDMMC_POWER_OFFSET);
+      sdmmc_putreg32(priv, clkcr, STM32_SDMMC_CLKCR_OFFSET);
+      sdmmc_putreg32(priv, dctrl, STM32_SDMMC_DCTRL_OFFSET);
+      sdmmc_putreg32(priv, mask, STM32_SDMMC_MASK_OFFSET);
+    }
+
+  stm32_datadisable(priv);
 }
 
 /****************************************************************************
@@ -1345,12 +1458,12 @@ static void stm32_recvdma(struct stm32_dev_s *priv)
 
       /* Copy the received data to client buffer */
 
-      memcpy(priv->buffer, priv->sdmmc_rxbuffer, priv->blocksize);
+      memcpy(priv->buffer, priv->sdmmc_idmabuffer, priv->blocksize);
 
       /* Invalidate the cache before receiving next block */
 
-      up_invalidate_dcache((uintptr_t)priv->sdmmc_rxbuffer,
-                           (uintptr_t)priv->sdmmc_rxbuffer +
+      up_invalidate_dcache((uintptr_t)priv->sdmmc_idmabuffer,
+                           (uintptr_t)priv->sdmmc_idmabuffer +
                            priv->blocksize);
 
       /* Update how much there is left to receive */
@@ -1373,8 +1486,17 @@ static void stm32_recvdma(struct stm32_dev_s *priv)
        * affected.
        */
 
-      up_invalidate_dcache((uintptr_t)priv->buffer,
-                           (uintptr_t)priv->buffer + priv->receivecnt);
+#if defined(CONFIG_STM32_SDMMC_IDMA_BOUNCE_BUFFER)
+      if (!priv->bounce_rx)
+#endif
+        {
+          up_invalidate_dcache((uintptr_t)priv->buffer,
+                               (uintptr_t)priv->buffer + priv->receivecnt);
+        }
+
+      /* Bounced RX invalidates the aligned IDMA buffer in eventwait.
+       * Its client buffer may share cache lines with unrelated data.
+       */
 
       priv->remaining = 0;
     }
@@ -1445,12 +1567,20 @@ static void stm32_eventtimeout(wdparm_t arg)
     {
       /* Yes.. wake up any waiting threads */
 
+      if ((priv->waitevents & SDIOWAIT_TRANSFERDONE) != 0)
+        {
+          stm32_endtransfer(priv, SDIOWAIT_TIMEOUT);
+        }
+      else
+        {
 #ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
-      stm32_endwait(priv, SDIOWAIT_TIMEOUT |
-                    (priv->waitevents & SDIOWAIT_WRCOMPLETE));
+          stm32_endwait(priv, SDIOWAIT_TIMEOUT |
+                        (priv->waitevents & SDIOWAIT_WRCOMPLETE));
 #else
-      stm32_endwait(priv, SDIOWAIT_TIMEOUT);
+          stm32_endwait(priv, SDIOWAIT_TIMEOUT);
 #endif
+        }
+
       mcerr("Timeout: remaining: %zu\n", priv->remaining);
     }
 }
@@ -1532,6 +1662,12 @@ static void stm32_endtransfer(struct stm32_dev_s *priv,
   /* Clearing pending interrupt status on all transfer related interrupts */
 
   sdmmc_putreg32(priv, STM32_SDMMC_XFRDONE_ICR, STM32_SDMMC_ICR_OFFSET);
+
+  /* Release IDMA ownership before waking the thread that consumes the
+   * receive buffer.  DATAEND includes completion of the IDMA transfer.
+   */
+
+  stm32_datastop(priv);
 
   /* DMA debug instrumentation */
 
@@ -1701,7 +1837,17 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
 
           /* Handle data end events */
 
-          if ((pending & STM32_SDMMC_STA_DATAEND) != 0)
+          if ((sdmmc_getreg32(priv, STM32_SDMMC_STA_OFFSET) &
+               STM32_SDMMC_STA_IDMATE) != 0)
+            {
+              stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE |
+                                      SDIOWAIT_ERROR);
+            }
+          else if ((pending & STM32_SDMMC_STA_DATAEND) != 0 &&
+              (pending & (STM32_SDMMC_STA_DCRCFAIL |
+                          STM32_SDMMC_STA_DTIMEOUT |
+                          STM32_SDMMC_STA_RXOVERR |
+                          STM32_SDMMC_STA_TXUNDERR)) == 0)
             {
               /* Handle any data remaining the RX FIFO.  If the RX FIFO is
                * less than half full at the end of the transfer, then no
@@ -1818,7 +1964,7 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
                 {
                   /* Yes.. wake the thread up */
 
-                   stm32_endwait(priv, SDIOWAIT_RESPONSEDONE);
+                  stm32_endwait(priv, SDIOWAIT_RESPONSEDONE);
                 }
             }
 
@@ -1969,6 +2115,9 @@ static void stm32_reset(struct sdio_dev_s *dev)
   priv->buffer     = 0;      /* Address of current R/W buffer */
   priv->remaining  = 0;      /* Number of bytes remaining in the transfer */
   priv->xfrmask    = 0;      /* Interrupt enables for data transfer */
+#if defined(CONFIG_STM32_SDMMC_IDMA_BOUNCE_BUFFER)
+  priv->bounce_rx  = false;  /* No pending receive copy */
+#endif
 
 #ifdef HAVE_SDMMC_SDIO_MODE
   priv->sdiointmask = 0;     /* SDIO card in-band interrupt mask */
@@ -2025,6 +2174,24 @@ static sdio_capset_t stm32_capabilities(struct sdio_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: stm32_maxrequest
+ *
+ * Description:
+ *   Return the largest request that can always be handled, including when
+ *   the client buffer requires the IDMA bounce buffer.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_STM32_SDMMC_IDMA_BOUNCE_BUFFER)
+static size_t stm32_maxrequest(struct sdio_dev_s *dev)
+{
+  DEBUGASSERT(dev != NULL);
+  UNUSED(dev);
+  return SDMMC_IDMA_BUFFER_SIZE;
+}
+#endif
+
+/****************************************************************************
  * Name: stm32_status
  *
  * Description:
@@ -2041,6 +2208,7 @@ static sdio_capset_t stm32_capabilities(struct sdio_dev_s *dev)
 static sdio_statset_t stm32_status(struct sdio_dev_s *dev)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+
   return priv->cdstatus;
 }
 
@@ -2105,47 +2273,47 @@ static void stm32_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
   uint32_t clckr;
 
   switch (rate)
-  {
-    /* Disable clocking (with default ID mode divisor) */
+    {
+      /* Disable clocking (with default ID mode divisor) */
 
-    default:
-    case CLOCK_SDIO_DISABLED:
-      clckr = STM32_CLCKCR_INIT;
-      break;
+      default:
+      case CLOCK_SDIO_DISABLED:
+        clckr = STM32_CLCKCR_INIT;
+        break;
 
-    /* Enable in initial ID mode clocking (<400KHz) */
+      /* Enable in initial ID mode clocking (<400KHz) */
 
-    case CLOCK_IDMODE:
-      clckr = STM32_CLCKCR_INIT;
-      break;
+      case CLOCK_IDMODE:
+        clckr = STM32_CLCKCR_INIT;
+        break;
 
-    /* Enable in MMC normal operation clocking */
+      /* Enable in MMC normal operation clocking */
 
-    case CLOCK_MMC_TRANSFER:
-      clckr = STM32_SDMMC_CLKCR_MMCXFR;
-      break;
+      case CLOCK_MMC_TRANSFER:
+        clckr = STM32_SDMMC_CLKCR_MMCXFR;
+        break;
 
-    /* Enable in MMC wide (4-bit) operation clocking */
+      /* Enable in MMC wide (4-bit) operation clocking */
 
-    case CLOCK_MMC_TRANSFER_4BIT:
-      clckr = STM32_SDMMC_CLKCR_MMCXFR4;
-      break;
+      case CLOCK_MMC_TRANSFER_4BIT:
+        clckr = STM32_SDMMC_CLKCR_MMCXFR4;
+        break;
 
-    /* SD normal operation clocking (wide 4-bit mode) */
+      /* SD normal operation clocking (wide 4-bit mode) */
 
-    case CLOCK_SD_TRANSFER_4BIT:
-      if (!priv->onebit)
-        {
-          clckr = STM32_SDMMC_CLCKR_SDWIDEXFR;
-          break;
-        }
+      case CLOCK_SD_TRANSFER_4BIT:
+        if (!priv->onebit)
+          {
+            clckr = STM32_SDMMC_CLCKR_SDWIDEXFR;
+            break;
+          }
 
-    /* SD normal operation clocking (narrow 1-bit mode) */
+      /* SD normal operation clocking (narrow 1-bit mode) */
 
-    case CLOCK_SD_TRANSFER_1BIT:
-      clckr = STM32_SDMMC_CLCKR_SDXFR;
-      break;
-  }
+      case CLOCK_SD_TRANSFER_1BIT:
+        clckr = STM32_SDMMC_CLCKR_SDXFR;
+        break;
+    }
 
   /* Set the new clock frequency along with the clock enable/disable bit */
 
@@ -2270,20 +2438,20 @@ static int stm32_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
 
   switch (cmd & MMCSD_DATAXFR_MASK)
     {
-    case MMCSD_RDDATAXFR: /* Read block transfer */
-    case MMCSD_WRDATAXFR: /* Write block transfer */
-    case MMCSD_RDSTREAM:  /* MMC Read stream */
-    case MMCSD_WRSTREAM:  /* MMC Write stream */
+      case MMCSD_RDDATAXFR: /* Read block transfer */
+      case MMCSD_WRDATAXFR: /* Write block transfer */
+      case MMCSD_RDSTREAM:  /* MMC Read stream */
+      case MMCSD_WRSTREAM:  /* MMC Write stream */
         regval |= STM32_SDMMC_CMD_CMDTRANS;
         break;
 
-    case MMCSD_NODATAXFR:
-    default:
-      if ((cmd & MMCSD_STOPXFR) != 0)
-        {
-          regval |= STM32_SDMMC_CMD_CMDSTOP;
-        }
-      break;
+      case MMCSD_NODATAXFR:
+      default:
+        if ((cmd & MMCSD_STOPXFR) != 0)
+          {
+            regval |= STM32_SDMMC_CMD_CMDSTOP;
+          }
+        break;
     }
 
   /* Clear interrupts */
@@ -2479,6 +2647,7 @@ static int stm32_sendsetup(struct sdio_dev_s *dev, const
 static int stm32_cancel(struct sdio_dev_s *dev)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+  irqstate_t flags = enter_critical_section();
 
   /* Disable all transfer- and event- related interrupts */
 
@@ -2490,15 +2659,15 @@ static int stm32_cancel(struct sdio_dev_s *dev)
   sdmmc_putreg32(priv, STM32_SDMMC_CMD_CMDSTOP,
                  STM32_SDMMC_CMD_OFFSET);
 
-  /* If this was a IDMA transfer, make sure that IDMA is stopped */
-
-  sdmmc_putreg32(priv, 0, STM32_SDMMC_IDMACTRLR_OFFSET);
-
   /* Clearing pending interrupt status on all transfer- and event- related
    * interrupts
    */
 
   sdmmc_putreg32(priv, STM32_SDMMC_WAITALL_ICR, STM32_SDMMC_ICR_OFFSET);
+
+  /* Stop IDMA after acknowledging the transfer status. */
+
+  stm32_datastop(priv);
 
   /* Cancel any watchdog timeout */
 
@@ -2507,6 +2676,13 @@ static int stm32_cancel(struct sdio_dev_s *dev)
   /* Mark no transfer in progress */
 
   priv->remaining = 0;
+  priv->receivecnt = 0;
+  priv->unaligned_rx = false;
+  nxsem_reset(&priv->waitsem, 0);
+#if defined(CONFIG_STM32_SDMMC_IDMA_BOUNCE_BUFFER)
+  priv->bounce_rx = false;
+#endif
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2664,7 +2840,7 @@ static int stm32_recvshortcrc(struct sdio_dev_s *dev, uint32_t cmd,
           ret = -EIO;
         }
 #if defined(CONFIG_DEBUG_FEATURES)
-    else
+      else
         {
           /* Check response received is of desired command */
 
@@ -2827,8 +3003,10 @@ static void stm32_waitenable(struct sdio_dev_s *dev,
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
   uint32_t waitmask = 0;
+  irqstate_t flags;
 
   DEBUGASSERT(priv != NULL);
+  flags = enter_critical_section();
 
   /* Disable event-related interrupts */
 
@@ -2886,7 +3064,8 @@ static void stm32_waitenable(struct sdio_dev_s *dev,
 
       if (!timeout)
         {
-          priv->wkupevent = SDIOWAIT_TIMEOUT;
+          stm32_endwait(priv, SDIOWAIT_TIMEOUT);
+          leave_critical_section(flags);
           return;
         }
 
@@ -2898,8 +3077,11 @@ static void stm32_waitenable(struct sdio_dev_s *dev,
       if (ret < OK)
         {
           mcerr("ERROR: wd_start failed: %d\n", ret);
+          stm32_endwait(priv, SDIOWAIT_ERROR);
         }
     }
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -3012,9 +3194,42 @@ static sdio_eventset_t stm32_eventwait(struct sdio_dev_s *dev)
   /* Disable event-related interrupts */
 
 errout_with_waitints:
-  stm32_configwaitints(priv, 0, 0, 0);
+  if ((wkupevent & (SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR)) != 0)
+    {
+      stm32_cancel(dev);
+    }
+  else
+    {
+      stm32_configwaitints(priv, 0, 0, 0);
+    }
 
   leave_critical_section(flags);
+
+#if defined(CONFIG_STM32_SDMMC_IDMA_BOUNCE_BUFFER)
+  if (priv->bounce_rx)
+    {
+      /* stm32_endtransfer disabled IDMA before releasing this thread.
+       * Complete a successful bounced receive here rather than copying a
+       * multi-block transfer in interrupt context.
+       */
+
+      if ((wkupevent & SDIOWAIT_TRANSFERDONE) != 0 &&
+          (wkupevent & ~SDIOWAIT_TRANSFERDONE) == 0)
+        {
+          DEBUGASSERT(priv->receivecnt <= SDMMC_IDMA_BUFFER_SIZE);
+
+#  if defined(CONFIG_ARMV7M_DCACHE)
+          up_invalidate_dcache((uintptr_t)priv->sdmmc_idmabuffer,
+                               (uintptr_t)priv->sdmmc_idmabuffer +
+                               priv->receivecnt);
+#  endif
+          memcpy(priv->buffer, priv->sdmmc_idmabuffer, priv->receivecnt);
+        }
+
+      priv->bounce_rx = false;
+    }
+#endif
+
   stm32_dumpsamples(priv);
   return wkupevent;
 }
@@ -3092,6 +3307,82 @@ static int stm32_registercallback(struct sdio_dev_s *dev,
 }
 
 /****************************************************************************
+ * Name: stm32_idma_accessible
+ *
+ * Description:
+ *   Return true only when the complete client buffer is in RAM that the
+ *   selected SDMMC instance can access directly through IDMA.  Keep this as
+ *   a positive allow-list: addresses not explicitly covered must bounce or
+ *   be rejected.
+ ****************************************************************************/
+
+#if defined(CONFIG_STM32_SDMMC_IDMA)
+static bool stm32_idma_accessible(struct stm32_dev_s *priv,
+                                  const uint8_t *buffer, size_t buflen)
+{
+  uintptr_t start = (uintptr_t)buffer;
+  uintptr_t end   = start + buflen;
+
+  if (buflen == 0 || end < start)
+    {
+      return false;
+    }
+
+  /* All STM32H7 SDMMC instances can reach D1 AXI SRAM. */
+
+  if (start >= AXISRAM_START && end <= AXISRAM_END)
+    {
+      return true;
+    }
+
+  /* On the STM32H74x/H75x family, SDMMC2 can also reach the D2 SRAM1/2/3
+   * and D3 SRAM4 regions.  Other families remain conservatively limited to
+   * AXI SRAM until their bus matrix has an explicit allow-list.  Cortex-M4
+   * uses a private 0x100... alias for SRAM123, which must not be exposed to
+   * an IDMA bus master.
+   */
+
+#if defined(CONFIG_STM32_SDMMC2) && defined(HAVE_SDMMC2_D2D3_IDMA)
+  if (priv->base == STM32_SDMMC2_BASE &&
+      ((start >= SRAM123_START && end <= SRAM123_END) ||
+       (start >= SRAM4_START && end <= SRAM4_END)))
+    {
+      return true;
+    }
+#endif
+
+  return false;
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_idma_bounce_required
+ *
+ * Description:
+ *   Return true when IDMA cannot safely access a client buffer directly.
+ ****************************************************************************/
+
+#if defined(CONFIG_STM32_SDMMC_IDMA_BOUNCE_BUFFER)
+static bool stm32_idma_bounce_required(struct stm32_dev_s *priv,
+                                       const uint8_t *buffer, size_t buflen)
+{
+  uintptr_t start = (uintptr_t)buffer;
+
+  if (!stm32_idma_accessible(priv, buffer, buflen))
+    {
+      return true;
+    }
+
+#if defined(CONFIG_ARMV7M_DCACHE)
+  return (start & (ARMV7M_DCACHE_LINESIZE - 1)) != 0 ||
+         (buflen & (ARMV7M_DCACHE_LINESIZE - 1)) != 0;
+#else
+  return (start & 3) != 0;
+#endif
+}
+#endif
+
+/****************************************************************************
  * Name: stm32_dmapreflight
  *
  * Description:
@@ -3107,32 +3398,41 @@ static int stm32_registercallback(struct sdio_dev_s *dev,
  *   OK on success; a negated errno on failure
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_SDMMC_IDMA) && defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
+#if defined(CONFIG_STM32_SDMMC_IDMA)
 static int stm32_dmapreflight(struct sdio_dev_s *dev,
                               const uint8_t *buffer, size_t buflen)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
-  DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 
-  /* IDMA must be possible to the buffer */
+  DEBUGASSERT(priv != NULL);
 
-#if defined(CONFIG_STM32_SDMMC1)
-  if (priv->base == STM32_SDMMC1_BASE)
+  if (buffer == NULL || buflen == 0 ||
+      buflen > UINTPTR_MAX - (uintptr_t)buffer)
     {
-      /* For SDMMC1, IDMA cannot access SRAM123 or SRAM4. */
+      return -EINVAL;
+    }
 
-      if (((uintptr_t)buffer >= SRAM123_START &&
-          (uintptr_t)buffer + buflen <= SRAM123_END) ||
-          ((uintptr_t)buffer >= SRAM4_START &&
-          (uintptr_t)buffer + buflen <= SRAM4_END))
-        {
-          mcerr("invalid IDMA address "
-                "buffer:0x%08" PRIxPTR " end:0x%08" PRIxPTR "\n",
-                (uintptr_t)buffer, (uintptr_t)(buffer + buflen - 1));
-          return -EFAULT;
-        }
+#if defined(CONFIG_STM32_SDMMC_IDMA_BOUNCE_BUFFER)
+  if (buflen > SDMMC_IDMA_BUFFER_SIZE)
+    {
+      return -E2BIG;
+    }
+
+  if (stm32_idma_bounce_required(priv, buffer, buflen))
+    {
+      return OK;
     }
 #endif
+
+  /* IDMA must be able to access the complete buffer directly. */
+
+  if (!stm32_idma_accessible(priv, buffer, buflen))
+    {
+      mcerr("invalid IDMA address "
+            "buffer:0x%08" PRIxPTR " end:0x%08" PRIxPTR "\n",
+            (uintptr_t)buffer, (uintptr_t)(buffer + buflen - 1));
+      return -EFAULT;
+    }
 
 #if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
   /* buffer alignment is required for DMA transfers with dcache in buffered
@@ -3181,44 +3481,56 @@ static int stm32_dmarecvsetup(struct sdio_dev_s *dev,
                               uint8_t *buffer, size_t buflen)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+  int ret;
 
-  DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
-#if defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
-  DEBUGASSERT(stm32_dmapreflight(dev, buffer, buflen) == 0);
-#endif
-
-#if defined(CONFIG_ARMV7M_DCACHE)
-  if (((uintptr_t)buffer & (ARMV7M_DCACHE_LINESIZE - 1)) != 0 ||
-       (buflen & (ARMV7M_DCACHE_LINESIZE - 1)) != 0)
+  ret = stm32_dmapreflight(dev, buffer, buflen);
+  if (ret < 0)
     {
-      /* The read buffer is not cache-line aligned. Read to an internal
-       * buffer instead.
+      return ret;
+    }
+
+  /* Stop the previous data path before touching receive buffers. */
+
+  stm32_datadisable(priv);
+
+#if defined(CONFIG_STM32_SDMMC_IDMA_BOUNCE_BUFFER)
+  priv->bounce_rx = stm32_idma_bounce_required(priv, buffer, buflen);
+  priv->unaligned_rx = false;
+
+#  if defined(CONFIG_ARMV7M_DCACHE)
+  if (priv->bounce_rx)
+    {
+      up_invalidate_dcache((uintptr_t)priv->sdmmc_idmabuffer,
+                           (uintptr_t)priv->sdmmc_idmabuffer + buflen);
+    }
+  else
+    {
+      up_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+    }
+#  endif
+#else
+#  if defined(CONFIG_ARMV7M_DCACHE)
+  if (((uintptr_t)buffer & (ARMV7M_DCACHE_LINESIZE - 1)) != 0 ||
+      (buflen & (ARMV7M_DCACHE_LINESIZE - 1)) != 0)
+    {
+      /* Preserve the legacy single-block bounce path when the new
+       * multi-block bounce buffer is disabled.
        */
 
-      up_invalidate_dcache((uintptr_t)priv->sdmmc_rxbuffer,
-                           (uintptr_t)priv->sdmmc_rxbuffer +
+      up_invalidate_dcache((uintptr_t)priv->sdmmc_idmabuffer,
+                           (uintptr_t)priv->sdmmc_idmabuffer +
                            priv->blocksize);
-
       priv->unaligned_rx = true;
     }
   else
     {
-      up_invalidate_dcache((uintptr_t)buffer,
-                           (uintptr_t)buffer + buflen);
-
+      up_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
       priv->unaligned_rx = false;
     }
-#else
-
-  /* IDMA access must be 32 bit aligned */
-
-  priv->unaligned_rx = ((uintptr_t)buffer & 0x3) != 0;
-
+#  else
+  priv->unaligned_rx = ((uintptr_t)buffer & 3) != 0;
+#  endif
 #endif
-
-  /* Reset the DPSM configuration */
-
-  stm32_datadisable(priv);
 
   /* Initialize register sampling */
 
@@ -3239,9 +3551,17 @@ static int stm32_dmarecvsetup(struct sdio_dev_s *dev,
 
   /* Configure the RX DMA */
 
+#if defined(CONFIG_STM32_SDMMC_IDMA_BOUNCE_BUFFER)
+  if (priv->bounce_rx)
+    {
+      sdmmc_putreg32(priv, (uintptr_t)priv->sdmmc_idmabuffer,
+                     STM32_SDMMC_IDMABASE0R_OFFSET);
+    }
+  else
+#endif
   if (priv->unaligned_rx)
     {
-      sdmmc_putreg32(priv, (uintptr_t)priv->sdmmc_rxbuffer,
+      sdmmc_putreg32(priv, (uintptr_t)priv->sdmmc_idmabuffer,
                      STM32_SDMMC_IDMABASE0R_OFFSET);
     }
   else
@@ -3286,13 +3606,19 @@ static int stm32_dmasendsetup(struct sdio_dev_s *dev,
                               const uint8_t *buffer, size_t buflen)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+  const uint8_t *dma_buffer = buffer;
+  int ret;
 
-  DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
-#if defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
-  DEBUGASSERT(stm32_dmapreflight(dev, buffer, buflen) == 0);
-#endif
+  ret = stm32_dmapreflight(dev, buffer, buflen);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   priv->unaligned_rx = false;
+#if defined(CONFIG_STM32_SDMMC_IDMA_BOUNCE_BUFFER)
+  priv->bounce_rx = false;
+#endif
 
   /* Reset the DPSM configuration */
 
@@ -3303,20 +3629,29 @@ static int stm32_dmasendsetup(struct sdio_dev_s *dev,
   stm32_sampleinit();
   stm32_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
+#if defined(CONFIG_STM32_SDMMC_IDMA_BOUNCE_BUFFER)
+  if (stm32_idma_bounce_required(priv, buffer, buflen))
+    {
+      memcpy(priv->sdmmc_idmabuffer, buffer, buflen);
+      dma_buffer = priv->sdmmc_idmabuffer;
+    }
+#endif
+
   /* Flush cache to physical memory when not in DTCM memory */
 
 #if defined(CONFIG_ARMV7M_DCACHE) && \
       !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
-  if ((uintptr_t)buffer < DTCM_START ||
-      (uintptr_t)buffer + buflen > DTCM_END)
+  if ((uintptr_t)dma_buffer < DTCM_START ||
+      (uintptr_t)dma_buffer + buflen > DTCM_END)
     {
-      up_clean_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+      up_clean_dcache((uintptr_t)dma_buffer,
+                      (uintptr_t)dma_buffer + buflen);
     }
 #endif
 
   /* Save the source buffer information for use by the interrupt handler */
 
-  priv->buffer     = (uint32_t *)buffer;
+  priv->buffer     = (uint32_t *)dma_buffer;
   priv->remaining  = buflen;
   priv->receivecnt = 0;
 
@@ -3535,6 +3870,15 @@ struct sdio_dev_s *sdio_initialize(int slotno)
       mcerr("ERROR: Unsupported SDMMC slot: %d\n", slotno);
       return NULL;
     }
+
+#if defined(CONFIG_STM32_SDMMC_IDMA_BOUNCE_BUFFER)
+  if (stm32_idma_bounce_required(priv, priv->sdmmc_idmabuffer,
+                                 SDMMC_IDMA_BUFFER_SIZE))
+    {
+      mcerr("ERROR: SDMMC IDMA bounce buffer is not DMA accessible\n");
+      return NULL;
+    }
+#endif
 
   /* Reset the card and assure that it is in the initial, unconfigured
    * state.

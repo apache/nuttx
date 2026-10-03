@@ -194,6 +194,7 @@ static int     mmcsd_switch(FAR struct mmcsd_state_s *priv, uint32_t arg);
 /* Transfer helpers *********************************************************/
 
 static bool    mmcsd_wrprotected(FAR struct mmcsd_state_s *priv);
+static size_t  mmcsd_blocklimit(FAR struct mmcsd_state_s *priv);
 static int     mmcsd_eventwait(FAR struct mmcsd_state_s *priv,
                                sdio_eventset_t failevents);
 static int     mmcsd_transferready(FAR struct mmcsd_state_s *priv);
@@ -1281,6 +1282,36 @@ static int mmcsd_verifystate(FAR struct mmcsd_state_s *priv, uint32_t state)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: mmcsd_blocklimit
+ *
+ * Description:
+ *   Return the maximum number of blocks for one transfer.  Combine the
+ *   generic MMC/SD configuration limit with a limit advertised by the host
+ *   controller.
+ *
+ ****************************************************************************/
+
+static size_t mmcsd_blocklimit(FAR struct mmcsd_state_s *priv)
+{
+  size_t maxrequest = SDIO_MAXREQUEST(priv->dev);
+  size_t blocklimit = MMCSD_MULTIBLOCK_LIMIT;
+
+  DEBUGASSERT(priv->blocksize > 0);
+
+  if (maxrequest > 0)
+    {
+      size_t hostlimit = maxrequest / priv->blocksize;
+
+      if (blocklimit > hostlimit)
+        {
+          blocklimit = hostlimit;
+        }
+    }
+
+  return blocklimit;
+}
+
+/****************************************************************************
  * Name: mmcsd_wrprotected
  *
  * Description:
@@ -1715,6 +1746,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_part_s *part,
 {
   FAR struct mmcsd_state_s *priv = part->priv;
   size_t nbytes = nblocks << priv->blockshift;
+  size_t maxrequest = SDIO_MAXREQUEST(priv->dev);
 #ifdef CONFIG_MMCSD_MMCSUPPORT
   uint32_t partnum = part - priv->part;
 #endif
@@ -1723,6 +1755,11 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_part_s *part,
 
   finfo("startblock=%jd nblocks=%zu\n", (intmax_t)startblock, nblocks);
   DEBUGASSERT(priv != NULL && buffer != NULL);
+
+  if (maxrequest > 0 && nbytes > maxrequest)
+    {
+      return -E2BIG;
+    }
 
   /* Check if the card is locked */
 
@@ -1842,6 +1879,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_part_s *part,
       ret = mmcsd_setblockcount(priv, nblocks);
       if (ret != OK)
         {
+          SDIO_CANCEL(priv->dev);
           return ret;
         }
     }
@@ -1865,6 +1903,11 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_part_s *part,
   if (ret != OK)
     {
       ferr("ERROR: CMD18 transfer failed: %d\n", ret);
+      if (IS_SD(priv->type) && !priv->cmd23support)
+        {
+          mmcsd_stoptransmission(priv);
+        }
+
       return ret;
     }
 
@@ -1877,6 +1920,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_part_s *part,
       if (ret != OK)
         {
           ferr("ERROR: mmcsd_stoptransmission failed: %d\n", ret);
+          return ret;
         }
     }
 
@@ -2094,6 +2138,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_part_s *part,
 {
   FAR struct mmcsd_state_s *priv = part->priv;
   size_t nbytes = nblocks << priv->blockshift;
+  size_t maxrequest = SDIO_MAXREQUEST(priv->dev);
 #ifdef CONFIG_MMCSD_MMCSUPPORT
   uint32_t partnum = part - priv->part;
 #endif
@@ -2103,6 +2148,11 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_part_s *part,
 
   finfo("startblock=%jd nblocks=%zu\n", (intmax_t)startblock, nblocks);
   DEBUGASSERT(priv != NULL && buffer != NULL);
+
+  if (maxrequest > 0 && nbytes > maxrequest)
+    {
+      return -E2BIG;
+    }
 
   /* Check if the card is locked or write protected (either via software or
    * via the mechanical write protect on the card)
@@ -2448,6 +2498,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
   FAR struct mmcsd_part_s *part;
   size_t sector;
   size_t endsector;
+  size_t blocklimit;
   ssize_t nread;
   ssize_t ret = nsectors;
 
@@ -2468,6 +2519,13 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 
       ret = nsectors;
       endsector = startsector + nsectors;
+      blocklimit = mmcsd_blocklimit(priv);
+      if (blocklimit == 0)
+        {
+          mmcsd_unlock(priv);
+          return -E2BIG;
+        }
+
       for (sector = startsector; sector < endsector; sector += nread)
         {
           /* Read this sector into the user buffer */
@@ -2478,9 +2536,9 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
           nread = mmcsd_readsingle(part, buffer, sector);
 #else
           nread = endsector - sector;
-          if (nread > MMCSD_MULTIBLOCK_LIMIT)
+          if (nread > blocklimit)
             {
-              nread = MMCSD_MULTIBLOCK_LIMIT;
+              nread = blocklimit;
             }
 
           if (nread == 1)
@@ -2529,6 +2587,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
   FAR struct mmcsd_part_s *part;
   size_t sector;
   size_t endsector;
+  size_t blocklimit;
   ssize_t nwrite;
   ssize_t ret = nsectors;
 
@@ -2549,6 +2608,13 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
 
       ret = nsectors;
       endsector = startsector + nsectors;
+      blocklimit = mmcsd_blocklimit(priv);
+      if (blocklimit == 0)
+        {
+          mmcsd_unlock(priv);
+          return -E2BIG;
+        }
+
       for (sector = startsector; sector < endsector; sector += nwrite)
         {
           /* Write this sector into the user buffer */
@@ -2559,9 +2625,9 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
           nwrite = mmcsd_writesingle(part, buffer, sector);
 #else
           nwrite = endsector - sector;
-          if (nwrite > MMCSD_MULTIBLOCK_LIMIT)
+          if (nwrite > blocklimit)
             {
-              nwrite = MMCSD_MULTIBLOCK_LIMIT;
+              nwrite = blocklimit;
             }
 
           if (nwrite == 1)
