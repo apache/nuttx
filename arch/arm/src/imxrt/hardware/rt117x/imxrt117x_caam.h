@@ -115,6 +115,7 @@
 #define CAAM_JRCR_RESET               (1 << 0)
 #define CAAM_JRINT_ERR_HALT_MASK      (3 << 2)
 #define CAAM_JRINT_ERR_HALT_INPROG    (1 << 2)
+#define CAAM_JRINT_ERR_HALT_DONE      (2 << 2)
 #define CAAM_JRCFG1_IMSK              (1 << 0)   /* Mask the ring interrupt */
 
 /* RTMCTL, RTSDCTL, RDSTA */
