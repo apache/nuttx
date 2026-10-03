@@ -1047,10 +1047,12 @@ static int smartfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case FIOC_FILEPATH:
         {
           FAR char *path = (FAR char *)(uintptr_t)arg;
+
           ret = inode_getpath(inode, path, PATH_MAX);
           if (ret >= 0)
             {
               size_t len = strlen(path);
+
               if (path[len - 1] != '/')
                 {
                   path[len++] = '/';
@@ -2131,9 +2133,12 @@ static void smartfs_stat_common(FAR struct smartfs_mountpt_s *fs,
     }
   else
     {
-      /* Mask out the file type */
+      /* Preserve only the permission bits.  The other directory-entry
+       * flags include SMARTFS_DIRENT_RESERVED, which overlaps the POSIX
+       * setuid, setgid, and sticky mode bits.
+       */
 
-      buf->st_mode = entry->flags & ~S_IFMT;
+      buf->st_mode = entry->flags & SMARTFS_DIRENT_MODE;
 
       /* Add the file type based on the SmartFS entry flags */
 
