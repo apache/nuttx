@@ -565,102 +565,103 @@ static int btn_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   ret = -EINVAL;
   switch (cmd)
     {
-    /* Command:     BTNIOC_SUPPORTED
-     * Description: Report the set of button events supported by the
-     *              hardware;
-     * Argument:    A pointer to writeable integer value in which to return
-     *              the set of supported buttons.
-     * Return:      Zero (OK) on success.  Minus one will be returned on
-     *              failure with the errno value set appropriately.
-     */
+      /* Command:     BTNIOC_SUPPORTED
+       * Description: Report the set of button events supported by the
+       *              hardware;
+       * Argument:    A pointer to writeable integer value in which to return
+       *              the set of supported buttons.
+       * Return:      Zero (OK) on success.  Minus one will be returned on
+       *              failure with the errno value set appropriately.
+       */
 
-    case BTNIOC_SUPPORTED:
-      {
-        FAR btn_buttonset_t *supported =
-          (FAR btn_buttonset_t *)((uintptr_t)arg);
+      case BTNIOC_SUPPORTED:
+        {
+          FAR btn_buttonset_t *supported =
+            (FAR btn_buttonset_t *)((uintptr_t)arg);
 
-        if (supported)
-          {
-            lower = priv->bu_lower;
-            DEBUGASSERT(lower && lower->bl_supported);
+          if (supported)
+            {
+              lower = priv->bu_lower;
+              DEBUGASSERT(lower && lower->bl_supported);
 
-            *supported = lower->bl_supported(lower);
-            ret = OK;
-          }
-      }
-      break;
+              *supported = lower->bl_supported(lower);
+              ret = OK;
+            }
+        }
+        break;
 
-    /* Command:     BTNIOC_POLLEVENTS
-     * Description: Specify the set of button events that can cause a poll()
-     *              to awaken.  The default is all button depressions and
-     *              all button releases (all supported buttons);
-     * Argument:    A read-only pointer to an instance of struct
-     *              btn_pollevents_s
-     * Return:      Zero (OK) on success.  Minus one will be returned on
-     *              failure with the errno value set appropriately.
-     */
+      /* Command:     BTNIOC_POLLEVENTS
+       * Description: Specify the set of button events that can cause a
+       *              poll() to awaken.  The default is all button
+       *              depressions and all button releases (all supported
+       *              buttons);
+       * Argument:    A read-only pointer to an instance of struct
+       *              btn_pollevents_s
+       * Return:      Zero (OK) on success.  Minus one will be returned on
+       *              failure with the errno value set appropriately.
+       */
 
-    case BTNIOC_POLLEVENTS:
-      {
-        FAR struct btn_pollevents_s *pollevents =
-          (FAR struct btn_pollevents_s *)((uintptr_t)arg);
+      case BTNIOC_POLLEVENTS:
+        {
+          FAR struct btn_pollevents_s *pollevents =
+            (FAR struct btn_pollevents_s *)((uintptr_t)arg);
 
-        if (pollevents)
-          {
-            /* Save the poll events */
+          if (pollevents)
+            {
+              /* Save the poll events */
 
-            opriv->bo_pollevents.bp_press   = pollevents->bp_press;
-            opriv->bo_pollevents.bp_release = pollevents->bp_release;
+              opriv->bo_pollevents.bp_press   = pollevents->bp_press;
+              opriv->bo_pollevents.bp_release = pollevents->bp_release;
 
-            /* Enable/disable interrupt handling */
+              /* Enable/disable interrupt handling */
 
-            btn_enable(priv);
-            ret = OK;
-          }
-      }
-      break;
+              btn_enable(priv);
+              ret = OK;
+            }
+        }
+        break;
 
-    /* Command:     BTNIOC_REGISTER
-     * Description: Register to receive a signal whenever there is a change
-     *              in any of the discrete buttone inputs.  This feature,
-     *              of course, depends upon interrupt GPIO support from the
-     *              platform.
-     * Argument:    A read-only pointer to an instance of struct
-     *              btn_notify_s
-     * Return:      Zero (OK) on success.  Minus one will be returned on
-     *              failure with the errno value set appropriately.
-     */
+      /* Command:     BTNIOC_REGISTER
+       * Description: Register to receive a signal whenever there is a change
+       *              in any of the discrete buttone inputs.  This feature,
+       *              of course, depends upon interrupt GPIO support from the
+       *              platform.
+       * Argument:    A read-only pointer to an instance of struct
+       *              btn_notify_s
+       * Return:      Zero (OK) on success.  Minus one will be returned on
+       *              failure with the errno value set appropriately.
+       */
 
-    case BTNIOC_REGISTER:
-      {
+      case BTNIOC_REGISTER:
+        {
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
-        FAR struct btn_notify_s *notify =
-          (FAR struct btn_notify_s *)((uintptr_t)arg);
+          FAR struct btn_notify_s *notify =
+            (FAR struct btn_notify_s *)((uintptr_t)arg);
 
-        if (notify)
-          {
-            /* Save the notification events */
+          if (notify && nxsig_event_valid(&notify->bn_event) == OK)
+            {
+              /* Save the notification events */
 
-            opriv->bo_notify.bn_press   = notify->bn_press;
-            opriv->bo_notify.bn_release = notify->bn_release;
-            opriv->bo_notify.bn_event   = notify->bn_event;
-            opriv->bo_pid               = nxsched_getpid();
+              opriv->bo_notify.bn_press   = notify->bn_press;
+              opriv->bo_notify.bn_release = notify->bn_release;
+              opriv->bo_notify.bn_event   = notify->bn_event;
+              opriv->bo_pid               = nxsched_getpid();
 
-            /* Enable/disable interrupt handling */
+              /* Enable/disable interrupt handling */
 
-            btn_enable(priv);
-            ret = OK;
-          }
+              btn_enable(priv);
+              ret = OK;
+            }
 #else
-        ret = -ENOSYS;
+          ret = -ENOSYS;
 #endif
-      }
-      break;
+        }
+        break;
 
-    default:
-      iinfo("ERROR: Unrecognized command: %d\n", cmd);
-      ret = -ENOTTY;
-      break;
+      default:
+        iinfo("ERROR: Unrecognized command: %d\n", cmd);
+        ret = -ENOTTY;
+        break;
     }
 
   leave_critical_section(flags);

@@ -169,8 +169,7 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp,
 
   if (timerid == NULL || (clockid != CLOCK_REALTIME &&
       clockid != CLOCK_MONOTONIC && clockid != CLOCK_BOOTTIME) ||
-      (evp != NULL && evp->sigev_notify == SIGEV_SIGNAL &&
-       !GOOD_SIGNO(evp->sigev_signo)))
+      (evp != NULL && nxsig_event_valid(evp) < 0))
     {
       set_errno(EINVAL);
     }
