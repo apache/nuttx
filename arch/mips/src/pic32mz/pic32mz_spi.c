@@ -1252,9 +1252,13 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev,
    *
    * frequency = BOARD_PBCLOCK / (2 * divisor), or
    * divisor  = (BOARD_PBCLOCK / 2) / frequency
+   *
+   * Round up so that the actual frequency never exceeds the requested one.
+   * This also keeps the divisor >= 1 when the request is above
+   * BOARD_PBCLOCK / 2.
    */
 
-  divisor = (BOARD_PBCLOCK / 2) / frequency;
+  divisor = (BOARD_PBCLOCK / 2 + frequency - 1) / frequency;
 
   /* The a BRG register value is that divisor minus one
    *
@@ -1262,11 +1266,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev,
    * BRG       = (BOARD_PBCLOCK / 2) / frequency - 1
    */
 
-  regval = divisor;
-  if (regval > 0)
-    {
-      regval--;
-    }
+  regval = divisor - 1;
 
   /* Save the new BRG value */
 
