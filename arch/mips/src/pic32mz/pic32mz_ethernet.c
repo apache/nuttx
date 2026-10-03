@@ -1931,7 +1931,7 @@ static int pic32mz_interrupt(int irq, void *context, void *arg)
        * expiration and the deferred interrupt processing.
        */
 
-       wd_cancel(&priv->pd_txtimeout);
+      wd_cancel(&priv->pd_txtimeout);
     }
 
   /* Schedule to perform the interrupt processing on the worker thread. */
@@ -3273,7 +3273,8 @@ static void pic32mz_ethreset(struct pic32mz_driver_s *priv)
   /* Wait activity abort by polling the ETHBUSY bit */
 
   while ((pic32mz_getreg(PIC32MZ_ETH_STAT) & ETH_STAT_ETHBUSY) != 0)
-    continue;
+    {
+    }
 
   /* Turn the Ethernet controller on. */
 
