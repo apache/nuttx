@@ -393,6 +393,10 @@ uint8_t g_buffers[PIC32MZ_NBUFFERS * PIC32MZ_ALIGNED_BUFSIZE]
 
 static struct pic32mz_driver_s g_ethdrvr[CONFIG_PIC32MZ_NINTERFACES];
 
+/* All-zero MAC address: no address assigned to the device */
+
+static const uint8_t g_zeromac[IFHWADDRLEN];
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -801,7 +805,7 @@ static inline void pic32mz_txdescinit(struct pic32mz_driver_s *priv)
        * creating a ring.
        */
 
-      if (i == (CONFIG_PIC32MZ_ETH_NRXDESC - 1))
+      if (i == (CONFIG_PIC32MZ_ETH_NTXDESC - 1))
         {
           txdesc->nexted = PHYS_ADDR(g_txdesc);
         }
@@ -1403,6 +1407,13 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
 
       pic32mz_dumprxdesc(rxdesc, "RX Complete");
 
+      /* The hardware increments ETHSTAT.BUFCNT for each descriptor that it
+       * fills; software decrements it once for each descriptor that it
+       * processes.
+       */
+
+      pic32mz_putreg(ETH_CON1_BUFCDEC, PIC32MZ_ETH_CON1SET);
+
       /* Get the packet length */
 
       priv->pd_dev.d_len = (rxdesc->rsv2 & RXDESC_RSV2_BYTECOUNT_MASK) >>
@@ -1468,10 +1479,22 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
 
           DEBUGASSERT(priv->pd_dev.d_buf != NULL);
 
-          /* Replace the buffer in the RX descriptor with a new one */
+          /* Replace the buffer in the RX descriptor with a new one.  If
+           * there is no free buffer, drop the packet and give the
+           * descriptor back to the hardware with its current buffer.
+           */
 
           rxbuffer = pic32mz_allocbuffer(priv);
-          DEBUGASSERT(rxbuffer != NULL);
+          if (rxbuffer == NULL)
+            {
+              nwarn("WARNING: No free buffer, packet dropped\n");
+              NETDEV_RXDROPPED(&priv->pd_dev);
+              priv->pd_dev.d_buf = NULL;
+              priv->pd_dev.d_len = 0;
+              pic32mz_rxreturn(rxdesc);
+              continue;
+            }
+
           rxdesc->address = PHYS_ADDR(rxbuffer);
 
           /* And give the RX descriptor back to the hardware */
@@ -2192,37 +2215,41 @@ static int pic32mz_ifup(struct net_driver_s *dev)
   pic32mz_putreg(CONFIG_NET_ETH_PKTSIZE, PIC32MZ_EMAC1_MAXF);
 
   /* Configure the MAC station address in the EMAC1SA0, EMAC1SA1 and
-   * EMAC1SA2 registers (these registers are loaded at reset from the
-   * factory preprogrammed station address).
+   * EMAC1SA2 registers.  On PIC32MZ EC/EF these registers are loaded at
+   * reset from the factory preprogrammed station address; on PIC32MZ-W1
+   * they reset to zero.  Use the address assigned to the device (e.g. with
+   * SIOCSIFHWADDR) if there is one, otherwise keep the factory address.
    */
 
-#if 0
-  regval = (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[5] << 8 |
-           (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[4];
-  pic32mz_putreg(regval, PIC32MZ_EMAC1_SA0);
+  if (memcmp(priv->pd_dev.d_mac.ether.ether_addr_octet, g_zeromac,
+             sizeof(g_zeromac)) != 0)
+    {
+      regval = (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[5] << 8 |
+               (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[4];
+      pic32mz_putreg(regval, PIC32MZ_EMAC1_SA0);
 
-  regval = (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[3] << 8 |
-           (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[2];
-  pic32mz_putreg(regval, PIC32MZ_EMAC1_SA1);
+      regval = (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[3] << 8 |
+               (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[2];
+      pic32mz_putreg(regval, PIC32MZ_EMAC1_SA1);
 
-  regval = (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[1] << 8 |
-           (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[0];
-  pic32mz_putreg(regval, PIC32MZ_EMAC1_SA2);
-#else
-  regval = pic32mz_getreg(PIC32MZ_EMAC1_SA0);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[4] = (uint32_t)(regval & 0xff);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[5] = (uint32_t)((regval >> 8) &
-                                                             0xff);
+      regval = (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[1] << 8 |
+               (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[0];
+      pic32mz_putreg(regval, PIC32MZ_EMAC1_SA2);
+    }
+  else
+    {
+      regval = pic32mz_getreg(PIC32MZ_EMAC1_SA0);
+      priv->pd_dev.d_mac.ether.ether_addr_octet[4] = regval & 0xff;
+      priv->pd_dev.d_mac.ether.ether_addr_octet[5] = (regval >> 8) & 0xff;
 
-  regval = pic32mz_getreg(PIC32MZ_EMAC1_SA1);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[2] = (uint32_t)(regval & 0xff);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[3] = (uint32_t)((regval >> 8) &
-                                                             0xff);
+      regval = pic32mz_getreg(PIC32MZ_EMAC1_SA1);
+      priv->pd_dev.d_mac.ether.ether_addr_octet[2] = regval & 0xff;
+      priv->pd_dev.d_mac.ether.ether_addr_octet[3] = (regval >> 8) & 0xff;
 
-  regval = pic32mz_getreg(PIC32MZ_EMAC1_SA2);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[0] = (uint32_t)(regval & 0xff);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[1] = (uint32_t)((regval >> 8) &
-                                                             0xff);
+      regval = pic32mz_getreg(PIC32MZ_EMAC1_SA2);
+      priv->pd_dev.d_mac.ether.ether_addr_octet[0] = regval & 0xff;
+      priv->pd_dev.d_mac.ether.ether_addr_octet[1] = (regval >> 8) & 0xff;
+    }
 
   ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         dev->d_mac.ether.ether_addr_octet[0],
@@ -2231,7 +2258,6 @@ static int pic32mz_ifup(struct net_driver_s *dev)
         dev->d_mac.ether.ether_addr_octet[3],
         dev->d_mac.ether.ether_addr_octet[4],
         dev->d_mac.ether.ether_addr_octet[5]);
-#endif
 
   /* Continue Ethernet Controller Initialization ****************************/
 
