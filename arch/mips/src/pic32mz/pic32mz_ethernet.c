@@ -334,7 +334,11 @@
 /* Misc Helper Macros *******************************************************/
 
 #define PHYS_ADDR(va) ((uint32_t)(va) & 0x1fffffff)
-#define VIRT_ADDR(pa) (KSEG1_BASE | (uint32_t)(pa))
+/* Buffers are always accessed through the segment g_buffers is linked in
+ * (KSEG0 or KSEG1), so that no buffer is ever reached through two aliases.
+ */
+
+#define VIRT_ADDR(pa) (((uint32_t)g_buffers & 0xe0000000) | (uint32_t)(pa))
 
 /****************************************************************************
  * Private Types
@@ -445,6 +449,7 @@ static void pic32mz_dumprxdesc(struct pic32mz_rxdesc_s *rxdesc,
 
 static inline void pic32mz_bufferinit(struct pic32mz_driver_s *priv);
 static uint8_t *pic32mz_allocbuffer(struct pic32mz_driver_s *priv);
+static uint8_t *pic32mz_rxbuffer(struct pic32mz_driver_s *priv);
 static void pic32mz_freebuffer(struct pic32mz_driver_s *priv,
                                uint8_t *buffer);
 
@@ -769,6 +774,36 @@ static uint8_t *pic32mz_allocbuffer(struct pic32mz_driver_s *priv)
 }
 
 /****************************************************************************
+ * Function: pic32mz_rxbuffer
+ *
+ * Description:
+ *   Allocate one buffer for an RX descriptor.  The free list link and any
+ *   data left by the network stack may still sit in dirty D-Cache lines;
+ *   they are discarded so that a later eviction cannot overwrite the frame
+ *   written by the DMA.
+ *
+ * Input Parameters:
+ *   priv - Pointer to EMAC device driver structure
+ *
+ * Returned Value:
+ *   Pointer to the allocated buffer (or NULL on failure)
+ *
+ ****************************************************************************/
+
+static uint8_t *pic32mz_rxbuffer(struct pic32mz_driver_s *priv)
+{
+  uint8_t *buffer = pic32mz_allocbuffer(priv);
+
+  if (buffer != NULL)
+    {
+      up_invalidate_dcache((uintptr_t)buffer,
+                           (uintptr_t)buffer + PIC32MZ_ALIGNED_BUFSIZE);
+    }
+
+  return buffer;
+}
+
+/****************************************************************************
  * Function: pic32mz_freebuffer
  *
  * Description:
@@ -905,7 +940,7 @@ static inline void pic32mz_rxdescinit(struct pic32mz_driver_s *priv)
 
       rxdesc->rsv1    = 0;
       rxdesc->rsv2    = 0;
-      rxdesc->address = PHYS_ADDR(pic32mz_allocbuffer(priv));
+      rxdesc->address = PHYS_ADDR(pic32mz_rxbuffer(priv));
       rxdesc->status  = RXDESC_STATUS_EOWN | RXDESC_STATUS_NPV;
 
       /* Set the NEXTED pointer.  If this is the last descriptor in the
@@ -1514,7 +1549,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
            * descriptor back to the hardware with its current buffer.
            */
 
-          rxbuffer = pic32mz_allocbuffer(priv);
+          rxbuffer = pic32mz_rxbuffer(priv);
           if (rxbuffer == NULL)
             {
               nwarn("WARNING: No free buffer, packet dropped\n");
