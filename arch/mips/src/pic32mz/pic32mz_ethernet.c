@@ -203,6 +203,10 @@
 
 #define PIC32MZ_MIITIMEOUT     (666666)
 
+/* Busy flag polls after an MII management command */
+
+#define PIC32MZ_MIIBUSY_POLLS  (1000)
+
 /* Ethernet MII clocking.
  *
  * The clock divider used to create the MII Management Clock (MDC).  The MIIM
@@ -2752,6 +2756,42 @@ static void pic32mz_phybusywait(void)
 }
 
 /****************************************************************************
+ * Function: pic32mz_phystartwait
+ *
+ * Description:
+ *   Wait until the MII management command just issued sets the busy flag.
+ *   The flag is set a few clock cycles after the command; a fixed number of
+ *   NOPs is not enough when the code runs from the I-Cache, and the
+ *   following busy wait would then return before the command has even
+ *   started.  A management frame lasts 64 MDC cycles, so the flag cannot
+ *   be missed.  The wait is bounded in case the command already finished.
+ *
+ * Input Parameters:
+ *  None
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef PIC32MZ_HAVE_PHY
+static void pic32mz_phystartwait(void)
+{
+  int i;
+
+  for (i = 0; i < PIC32MZ_MIIBUSY_POLLS; i++)
+    {
+      if ((pic32mz_getreg(PIC32MZ_EMAC1_MIND) & EMAC1_MIND_MIIMBUSY) != 0)
+        {
+          break;
+        }
+    }
+}
+#endif
+
+/****************************************************************************
  * Function: pic32mz_phywrite
  *
  * Description:
@@ -2789,15 +2829,9 @@ static void pic32mz_phywrite(uint8_t phyaddr, uint8_t regaddr,
 
   pic32mz_putreg((uint32_t)phydata, PIC32MZ_EMAC1_MWTD);
 
-  /* Sixteen clock cycles until busy is set from the write operation */
+  /* Wait until the command has started */
 
-  __asm__ __volatile__
-    (
-      "nop; nop; nop; nop;"
-      "nop; nop; nop; nop;"
-      "nop; nop; nop; nop;"
-      "nop; nop; nop; nop;"
-    );
+  pic32mz_phystartwait();
 }
 #endif
 
@@ -2837,15 +2871,9 @@ static uint16_t pic32mz_phyread(uint8_t phyaddr, uint8_t regaddr)
 
   pic32mz_putreg(EMAC1_MCMD_READ, PIC32MZ_EMAC1_MCMDSET);
 
-  /* Sixteen clock cycles until busy is set from the write operation */
+  /* Wait until the command has started */
 
-  __asm__ __volatile__
-    (
-      "nop; nop; nop; nop;"
-      "nop; nop; nop; nop;"
-      "nop; nop; nop; nop;"
-      "nop; nop; nop; nop;"
-    );
+  pic32mz_phystartwait();
 
   /* Wait for the PHY command to complete */
 
