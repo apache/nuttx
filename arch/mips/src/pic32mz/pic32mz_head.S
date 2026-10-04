@@ -94,13 +94,15 @@
 #  define PIC32MZ_HEAP_BASE     PIC32MZ_STACK_TOP
 #endif
 
+/* Config.K0 sets the cache algorithm for both the I- and the D-Cache, so
+ * the tags of both caches must be initialized when K0 is made cacheable,
+ * even if only one of them is enabled.  The fallback sizes are an upper
+ * bound: index operations on non-existent lines just wrap around.
+ */
+
 #if defined (CONFIG_MIPS32_ICACHE) || defined (CONFIG_MIPS32_DCACHE)
 #  define K0_CACHE_ALGORITHM CP0_CONFIG_K0_CACHEABLE
-#else
-#  define K0_CACHE_ALGORITHM CP0_CONFIG_K0_UNCACHED
-#endif
 
-#ifdef CONFIG_MIPS32_ICACHE
 #  ifdef CONFIG_MIPS32_ICACHE_SIZE
 #    define PIC32MZ_ICACHE_SIZE CONFIG_MIPS32_ICACHE_SIZE
 #  else
@@ -113,15 +115,16 @@
 #    define PIC32MZ_ILINE_SIZE 16
 #  endif
 
-#  define PIC32MZ_KSEG0_IBASE CONFIG_MIPS32_KSEG0_IBASE
-#  define PIC32MZ_INDEXSTORETAG_I 8
-#endif
+#  ifdef CONFIG_MIPS32_KSEG0_IBASE
+#    define PIC32MZ_KSEG0_IBASE CONFIG_MIPS32_KSEG0_IBASE
+#  else
+#    define PIC32MZ_KSEG0_IBASE 0x9d000000
+#  endif
 
-#ifdef CONFIG_MIPS32_DCACHE
 #  ifdef CONFIG_MIPS32_DCACHE_SIZE
 #    define PIC32MZ_DCACHE_SIZE CONFIG_MIPS32_DCACHE_SIZE
 #  else
-#    define PIC32MZ_DCACHE_SIZE 4096
+#    define PIC32MZ_DCACHE_SIZE 16384
 #  endif
 
 #  ifdef CONFIG_MIPS32_DLINE_SIZE
@@ -130,8 +133,16 @@
 #    define PIC32MZ_DLINE_SIZE 16
 #  endif
 
-#  define PIC32MZ_KSEG0_DBASE CONFIG_MIPS32_KSEG0_DBASE
+#  ifdef CONFIG_MIPS32_KSEG0_DBASE
+#    define PIC32MZ_KSEG0_DBASE CONFIG_MIPS32_KSEG0_DBASE
+#  else
+#    define PIC32MZ_KSEG0_DBASE 0x80000000
+#  endif
+
+#  define PIC32MZ_INDEXSTORETAG_I 8
 #  define PIC32MZ_INDEXSTORETAG_D 9
+#else
+#  define K0_CACHE_ALGORITHM CP0_CONFIG_K0_UNCACHED
 #endif
 
 /****************************************************************************
@@ -480,7 +491,6 @@ __start:
   mtc0 zero, PIC32MZ_CP0_TAGLO
   ehb
 
-#  ifdef CONFIG_MIPS32_ICACHE
   /* Init I-Cache (Copy content of TagLo) */
 
   li t0, PIC32MZ_KSEG0_IBASE
@@ -489,9 +499,7 @@ __start:
   addu t0, t0, PIC32MZ_ILINE_SIZE
   bne t0, t1, .icacheloop
   cache PIC32MZ_INDEXSTORETAG_I, -4(t0)
-#  endif
 
-#  ifdef CONFIG_MIPS32_DCACHE
   /* Init D-Cache (Copy content of TagLo) */
 
   li t0, PIC32MZ_KSEG0_DBASE
@@ -500,7 +508,6 @@ __start:
   addu t0, t0, PIC32MZ_DLINE_SIZE
   bne t0, t1, .dcacheloop
   cache PIC32MZ_INDEXSTORETAG_D, -4(t0)
-#  endif
 
   /* Force memory synchronization */
 
@@ -521,6 +528,7 @@ __start:
   xori t0, CP0_CONFIG_K0_MASK
   ori  t0, K0_CACHE_ALGORITHM
   mtc0 t0, PIC32MZ_CP0_CONFIG
+  ehb
 
   showprogress 'C'
 
