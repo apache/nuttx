@@ -247,7 +247,7 @@ int pnt_se05x_get_key(FAR struct se05x_dev_s *se05x,
 int pnt_se05x_get_data(FAR struct se05x_dev_s *se05x,
                        FAR struct se05x_key_transmission_s *get_key_args)
 {
-  uint16_t remainder;
+  uint16_t remainder = 0;
   smStatus_t status = Se05x_API_ReadSize(&(se05x->pnt->session),
                                          get_key_args->entry.id, &remainder);
 
