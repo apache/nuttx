@@ -34,10 +34,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Control PDUs must be contiguous in the first I/O buffer */
+/* Control PDUs and extended advertising headers must be contiguous in the
+ * first I/O buffer
+ */
 
-static_assert(CONFIG_IOB_BUFSIZE >= 64 + BLE_LL_IOB_PREPEND +
-              sizeof(struct ble_ll_pkthdr_s),
+static_assert(CONFIG_IOB_BUFSIZE >= BLE_LL_IOB_HEADROOM + 66,
               "CONFIG_IOB_BUFSIZE too small for BLE Link Layer PDUs");
 
 /****************************************************************************
@@ -92,11 +93,20 @@ struct iob_s *ble_ll_iob_alloc(void)
 
 void ble_ll_iob_adj(struct iob_s *iob, unsigned int len)
 {
-  DEBUGASSERT(len <= iob->io_len);
+  struct iob_s *cur;
+  unsigned int n;
 
-  iob->io_offset += len;
-  iob->io_len    -= len;
+  DEBUGASSERT(len <= iob->io_pktlen);
+
   iob->io_pktlen -= len;
+
+  for (cur = iob; cur != NULL && len > 0; cur = cur->io_flink)
+    {
+      n               = MIN(len, cur->io_len);
+      cur->io_offset += n;
+      cur->io_len    -= n;
+      len            -= n;
+    }
 }
 
 /****************************************************************************

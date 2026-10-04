@@ -157,9 +157,7 @@ extern FAR struct kwork_wqueue_s *g_ble_ll_wq;
 
 struct iob_s *ble_ll_iob_alloc(void);
 
-/* Remove len bytes from the head of the PDU (must fit in the first I/O
- * buffer).
- */
+/* Remove len bytes from the head of the PDU */
 
 void ble_ll_iob_adj(struct iob_s *iob, unsigned int len);
 

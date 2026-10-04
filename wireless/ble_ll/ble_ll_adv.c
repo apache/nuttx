@@ -3917,6 +3917,7 @@ static inline uint8_t ble_ll_adv_convert_phy_opt(uint8_t cmd_phy_opt)
         return BLE_HCI_LE_PHY_CODED_S8_PREF;
       default:
         DEBUGASSERT(0);
+        return BLE_HCI_LE_PHY_CODED_ANY;
     }
 }
 

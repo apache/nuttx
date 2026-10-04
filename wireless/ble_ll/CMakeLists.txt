@@ -43,6 +43,14 @@ if(CONFIG_WIRELESS_BLE_LL)
 
   if(CONFIG_BLE_LL_ROLE_OBSERVER)
     list(APPEND SRCS ble_ll_scan.c)
+
+    if(CONFIG_BLE_LL_CFG_FEAT_LL_EXT_ADV)
+      list(APPEND SRCS ble_ll_scan_aux.c)
+    endif()
+
+    if(CONFIG_BLE_LL_CFG_FEAT_LL_PERIODIC_ADV)
+      list(APPEND SRCS ble_ll_sync.c)
+    endif()
   endif()
 
   if(CONFIG_BLE_LL_ROLE_CENTRAL OR CONFIG_BLE_LL_ROLE_PERIPHERAL)

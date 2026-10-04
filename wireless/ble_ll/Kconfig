@@ -10,6 +10,12 @@ config BLE_LL_HAVE_HW_WHITELIST
 		Selected by radio lower halves that implement hardware filter
 		accept list matching.
 
+config BLE_LL_HAVE_CODED_PHY
+	bool
+	default n
+	---help---
+		Selected by radio lower halves that support the LE Coded PHY.
+
 menuconfig WIRELESS_BLE_LL
 	bool "BLE Link Layer (controller)"
 	default n
@@ -110,9 +116,55 @@ config BLE_LL_CFG_FEAT_LE_2M_PHY
 	bool "LE 2M PHY"
 	default y
 
+config BLE_LL_CFG_FEAT_LE_CODED_PHY
+	bool "LE Coded PHY"
+	default n
+	depends on BLE_LL_HAVE_CODED_PHY
+
 config BLE_LL_CFG_FEAT_LE_CSA2
 	bool "Channel Selection Algorithm #2"
 	default y
+
+config BLE_LL_CFG_FEAT_LL_EXT_ADV
+	bool "Extended advertising"
+	default n
+	select BLE_LL_CFG_FEAT_LE_CSA2
+	---help---
+		Extended advertising, extended scanning and connection
+		establishment on the secondary advertising channels.
+
+config BLE_LL_CFG_FEAT_LL_PERIODIC_ADV
+	bool "Periodic advertising"
+	default n
+	depends on BLE_LL_CFG_FEAT_LL_EXT_ADV
+	---help---
+		Periodic advertising and synchronization to periodic advertising
+		trains.
+
+config BLE_LL_CFG_FEAT_LL_PERIODIC_ADV_SYNC_TRANSFER
+	bool "Periodic Advertising Sync Transfer"
+	default n
+	depends on BLE_LL_CFG_FEAT_LL_PERIODIC_ADV
+	depends on BLE_LL_ROLE_CENTRAL || BLE_LL_ROLE_PERIPHERAL
+	depends on BLE_LL_BT_VERSION >= 51
+
+config BLE_LL_CFG_FEAT_LL_PERIODIC_ADV_ADI_SUPPORT
+	bool "Periodic Advertising ADI"
+	default n
+	depends on BLE_LL_CFG_FEAT_LL_PERIODIC_ADV
+	depends on BLE_LL_BT_VERSION >= 53
+
+config BLE_LL_CFG_FEAT_LL_ENHANCED_CONN_UPDATE
+	bool "LE Enhanced Connection Update (subrating)"
+	default n
+	depends on BLE_LL_ROLE_CENTRAL || BLE_LL_ROLE_PERIPHERAL
+	depends on BLE_LL_BT_VERSION >= 53
+
+config BLE_LL_ADV_CODING_SELECTION
+	bool "Advertising Coding Selection"
+	default n
+	depends on BLE_LL_CFG_FEAT_LL_EXT_ADV && BLE_LL_CFG_FEAT_LE_CODED_PHY
+	depends on BLE_LL_BT_VERSION >= 54
 
 config BLE_LL_CFG_FEAT_CTRL_TO_HOST_FLOW_CONTROL
 	bool "Controller to Host flow control"
@@ -124,33 +176,12 @@ config BLE_LL_CFG_FEAT_LL_SCA_UPDATE
 	default n
 	depends on BLE_LL_BT_VERSION >= 52
 
-# Not supported yet
-
-config BLE_LL_CFG_FEAT_LE_CODED_PHY
-	bool
-
-config BLE_LL_CFG_FEAT_LL_EXT_ADV
-	bool
-
-config BLE_LL_CFG_FEAT_LL_PERIODIC_ADV
-	bool
-
-config BLE_LL_CFG_FEAT_LL_PERIODIC_ADV_SYNC_TRANSFER
-	bool
-
-config BLE_LL_CFG_FEAT_LL_PERIODIC_ADV_ADI_SUPPORT
-	bool
-
-config BLE_LL_CFG_FEAT_LL_ENHANCED_CONN_UPDATE
-	bool
-
-config BLE_LL_ADV_CODING_SELECTION
-	bool
-
 config BLE_LL_EXT_ADV_ADVA_IN_AUX
-	bool
+	bool "Put AdvA in AUX_ADV_IND"
 	default y
 	depends on BLE_LL_CFG_FEAT_LL_EXT_ADV
+	---help---
+		Put AdvA in AUX_ADV_IND instead of ADV_EXT_IND.
 
 config BLE_LL_PHY
 	bool
@@ -308,21 +339,57 @@ config BLE_LL_NUM_COMP_PKT_ITVL_MS
 	int "Number of completed packets event interval (msec)"
 	default 2000
 
+config BLE_LL_MULTI_ADV_INSTANCES
+	int "Additional advertising sets" if BLE_LL_ROLE_BROADCASTER
+	default 0
+	---help---
+		Number of advertising sets in addition to the default one.
+
+config BLE_LL_EXT_ADV_MAX_SIZE
+	int "Maximum advertising data size" if BLE_LL_CFG_FEAT_LL_EXT_ADV
+	default 31
+	range 31 1650
+
+config BLE_LL_SCAN_AUX_SEGMENT_CNT
+	int "Concurrently scanned auxiliary segments"
+	default 8
+	depends on BLE_LL_CFG_FEAT_LL_EXT_ADV && BLE_LL_ROLE_OBSERVER
+
+config BLE_LL_CFG_FEAT_LL_PERIODIC_ADV_SYNC_CNT
+	int "Maximum number of periodic syncs"
+	default 1
+	depends on BLE_LL_CFG_FEAT_LL_PERIODIC_ADV && BLE_LL_ROLE_OBSERVER
+
+config BLE_LL_CFG_FEAT_LL_PERIODIC_ADV_SYNC_LIST_CNT
+	int "Periodic advertiser list size"
+	default 1
+	depends on BLE_LL_CFG_FEAT_LL_PERIODIC_ADV && BLE_LL_ROLE_OBSERVER
+
 config BLE_LL_SCHED_AUX_MAFS_DELAY
-	int
+	int "Extra AUX_ADV_IND delay (usec)" if BLE_LL_CFG_FEAT_LL_EXT_ADV
 	default 0
 
 config BLE_LL_SCHED_AUX_CHAIN_MAFS_DELAY
-	int
+	int "Extra AUX_CHAIN_IND delay (usec)" if BLE_LL_CFG_FEAT_LL_EXT_ADV
 	default 0
 
-config BLE_LL_EXT_ADV_MAX_SIZE
-	int
-	default 31
+config BLE_LL_SCHED_SCAN_AUX_PDU_LEN
+	int "Expected AUX_ADV_IND PDU length"
+	default 41
+	range 1 257
+	depends on BLE_LL_CFG_FEAT_LL_EXT_ADV && BLE_LL_ROLE_OBSERVER
+	---help---
+		Time reserved by the scheduler when scanning AUX_ADV_IND and
+		AUX_CHAIN_IND PDUs.
 
-config BLE_LL_MULTI_ADV_INSTANCES
-	int
-	default 0
+config BLE_LL_SCHED_SCAN_SYNC_PDU_LEN
+	int "Expected AUX_SYNC_IND PDU length"
+	default 32
+	range 1 257
+	depends on BLE_LL_CFG_FEAT_LL_PERIODIC_ADV && BLE_LL_ROLE_OBSERVER
+	---help---
+		Time reserved by the scheduler when scanning AUX_SYNC_IND and
+		AUX_CHAIN_IND PDUs.
 
 endmenu # Link Layer parameters
 
@@ -351,6 +418,10 @@ config BLE_LL_EVT_SIZE
 	int "HCI event buffer size"
 	default 70
 	range 70 257
+	---help---
+		Maximum HCI event size.  Advertising reports longer than this are
+		split into multiple events.  It must not exceed the event buffer
+		size of the host.
 
 config BLE_LL_HCI_VS_OCF_OFFSET
 	int
