@@ -82,11 +82,12 @@ MEMORY
     kseg1_devsign  (r)  : ORIGIN = 0xbfc55fdc, LENGTH = 4
 
     /* WFI32E01 has 256Kb of data memory at physical address 0x00000000,
-     * always accessed through KSEG1 (no data cache).  640 bytes are set
+     * accessed through KSEG0 so that it goes through the D-Cache when the
+     * cache is enabled (KSEG0 is uncached otherwise).  640 bytes are set
      * aside at the start, matching the margin EC/EF boards reserve.
      */
 
-    kseg1_datamem (rw!x) : ORIGIN = 0xa0000200, LENGTH = 256K - 640
+    kseg0_datamem (rw!x) : ORIGIN = 0x80000200, LENGTH = 256K - 640
 }
 
 /* No OUTPUT_FORMAT: XC32 names its little-endian ELF target
@@ -212,7 +213,7 @@ SECTIONS
         *(.gnu.linkonce.d.*)
         KEEP (*(.gnu.linkonce.d.*personality*))
         *(.data1)
-    } > kseg1_datamem AT > kseg0_progmem
+    } > kseg0_datamem AT > kseg0_progmem
 
     .eh_frame : ONLY_IF_RW { KEEP (*(.eh_frame)) }
     _gp = ALIGN(16) + 0x7FF0 ;
@@ -220,24 +221,24 @@ SECTIONS
     .got :
     {
         *(.got.plt) *(.got)
-    } > kseg1_datamem AT > kseg0_progmem
+    } > kseg0_datamem AT > kseg0_progmem
 
     .sdata :
     {
         *(.sdata .sdata.* .gnu.linkonce.s.*)
-    } > kseg1_datamem AT > kseg0_progmem
+    } > kseg0_datamem AT > kseg0_progmem
 
     .lit8 :
     {
         *(.lit8)
-    } > kseg1_datamem AT > kseg0_progmem
+    } > kseg0_datamem AT > kseg0_progmem
 
     .lit4 :
     {
         *(.lit4)
         . = ALIGN(4);
         _edata = ABSOLUTE(.);
-    } >kseg1_datamem AT>kseg0_progmem
+    } >kseg0_datamem AT>kseg0_progmem
 
     .sbss :
     {
@@ -246,7 +247,7 @@ SECTIONS
         *(.dynsbss)
         *(.sbss .sbss.* .gnu.linkonce.sb.*)
         *(.scommon)
-    } >kseg1_datamem
+    } >kseg0_datamem
 
     .bss :
     {
@@ -256,7 +257,7 @@ SECTIONS
         *(COMMON)
         . = ALIGN(16);
         _ebss = ABSOLUTE(.);
-    } > kseg1_datamem
+    } > kseg0_datamem
 
     /* Stabs debugging sections */
 
