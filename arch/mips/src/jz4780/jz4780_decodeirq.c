@@ -82,6 +82,7 @@ uint32_t *jz4780_decodeirq(uint32_t *regs)
   unsigned int source1 = getreg32(ICPR1);
 
   int irq = -1;
+
   if (source != 0)
     {
       irq = 31 - __builtin_clz(source);
@@ -112,6 +113,7 @@ uint32_t *jz4780_decodeirq(uint32_t *regs)
   else if (irq == JZ4780_IRQ_TCU2)
     {
       uint32_t tfcr = getreg32(TFR) & 0xdf;
+
       if (!tfcr)
         {
           irq = -1;
@@ -119,6 +121,7 @@ uint32_t *jz4780_decodeirq(uint32_t *regs)
       else
         {
           int n = 31 - __builtin_clz(tfcr);
+
           putreg32(TFCR_FFCL(n), TFCR);
           irq = IRQ_TMR0 + n;
         }
