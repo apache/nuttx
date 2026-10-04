@@ -109,6 +109,10 @@
 #define NRF52_ERRATA_VAR1_ALT   (0xf0000fe0)
 #define NRF52_ERRATA_VAR2_ALT   (0xf0000fe8)
 
+/* Undocumented RADIO register used by errata 191 workaround */
+
+#define NRF52_RADIO_ERRATA191   (NRF52_RADIO_BASE + 0x740)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -285,6 +289,53 @@ static bool nrf52_ble_errata_102_106_107(void)
 #endif
 
 /****************************************************************************
+ * Name: nrf52_ble_errata_191
+ *
+ * Description:
+ *   RADIO errata 191 (nRF52840): high packet error rate in BLE Long Range
+ *   mode.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_BLE_LL_CFG_FEAT_LE_CODED_PHY) && \
+    defined(CONFIG_ARCH_CHIP_NRF52840)
+static bool nrf52_ble_errata_191(void)
+{
+  return getreg32(NRF52_ERRATA_VAR1) == 0x08 &&
+         getreg32(NRF52_ERRATA_VAR2) != 0x00;
+}
+
+static bool ble_phy_mode_is_coded(uint8_t phy_mode)
+{
+  return phy_mode == BLE_PHY_MODE_CODED_125KBPS ||
+         phy_mode == BLE_PHY_MODE_CODED_500KBPS;
+}
+
+static void nrf52_ble_errata_191_apply(uint8_t new_phy_mode)
+{
+  bool from_coded = ble_phy_mode_is_coded(g_ble_phy_data.phy_cur_phy_mode);
+  bool to_coded = ble_phy_mode_is_coded(new_phy_mode);
+
+  /* Apply only when switching to or from LE Coded */
+
+  if (from_coded == to_coded)
+    {
+      return;
+    }
+
+  if (to_coded)
+    {
+      modifyreg32(NRF52_RADIO_ERRATA191, 0x8000ff00,
+                  0x80000000 | (196 << 8));
+    }
+  else
+    {
+      modifyreg32(NRF52_RADIO_ERRATA191, 0x80000000, 0);
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: timer0_reset
  ****************************************************************************/
 
@@ -444,6 +495,14 @@ static void ble_phy_mode_apply(uint8_t phy_mode)
     {
       return;
     }
+
+#if defined(CONFIG_BLE_LL_CFG_FEAT_LE_CODED_PHY) && \
+    defined(CONFIG_ARCH_CHIP_NRF52840)
+  if (nrf52_ble_errata_191())
+    {
+      nrf52_ble_errata_191_apply(phy_mode);
+    }
+#endif
 
   switch (phy_mode)
     {
