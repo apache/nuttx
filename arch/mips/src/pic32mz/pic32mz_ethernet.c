@@ -46,6 +46,10 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
 
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+#  include <nuttx/net/phy.h>
+#endif
+
 #ifdef CONFIG_NET_PKT
 #  include <nuttx/net/pkt.h>
 #endif
@@ -284,6 +288,16 @@
 #  undef PIC32MZ_HAVE_PHY
 #endif
 
+/* PHY interrupt source/mask registers and the link up/down events */
+
+#if defined(CONFIG_ETH0_PHY_LAN8720) || defined(CONFIG_ETH0_PHY_LAN8740) || \
+    defined(CONFIG_ETH0_PHY_LAN8740A)
+#  define PIC32MZ_PHY_ISR      MII_LAN8720_ISR
+#  define PIC32MZ_PHY_IMR      MII_LAN8720_IMR
+#  define PIC32MZ_PHY_INTEN    (MII_LAN8720_INT_LINKDOWN | \
+                                MII_LAN8720_INT_ANCOMPLETE)
+#endif
+
 /* These definitions are used to remember the speed/duplex settings */
 
 #define PIC32MZ_SPEED_MASK     0x01
@@ -471,6 +485,10 @@ static int pic32mz_txavail(struct net_driver_s *dev);
 static int pic32mz_addmac(struct net_driver_s *dev, const uint8_t *mac);
 static int pic32mz_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
+#if defined(CONFIG_NETDEV_IOCTL) && defined(PIC32MZ_HAVE_PHY)
+static int pic32mz_ioctl(struct net_driver_s *dev, int cmd,
+                         unsigned long arg);
+#endif
 
 /* PHY initialization functions */
 
@@ -492,6 +510,9 @@ static inline int pic32mz_phyautoneg(uint8_t phyaddr);
 static int pic32mz_phymode(uint8_t phyaddr, uint8_t mode);
 #  endif
 static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv);
+#  if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+static int pic32mz_phyintenable(struct pic32mz_driver_s *priv);
+#  endif
 #else
 #  define pic32mz_phyinit(priv)
 #endif
@@ -2557,6 +2578,94 @@ static int pic32mz_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 #endif
 
 /****************************************************************************
+ * Function: pic32mz_ioctl
+ *
+ * Description:
+ *   Handle network IOCTL commands directed to this device.
+ *
+ * Input Parameters:
+ *   dev - Reference to the NuttX driver state structure
+ *   cmd - The IOCTL command
+ *   arg - The argument for the IOCTL command
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *   The network device is locked.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETDEV_IOCTL) && defined(PIC32MZ_HAVE_PHY)
+static int pic32mz_ioctl(struct net_driver_s *dev, int cmd,
+                         unsigned long arg)
+{
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+  struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)dev->d_private;
+#endif
+  int ret;
+
+  switch (cmd)
+    {
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_ARCH_PHY_INTERRUPT
+      case SIOCMIINOTIFY: /* Set up for PHY event notifications */
+        {
+          struct mii_ioctl_notify_s *req =
+            (struct mii_ioctl_notify_s *)((uintptr_t)arg);
+
+          ret = phy_notify_subscribe(dev->d_ifname, req->pid, &req->event);
+          if (ret == OK)
+            {
+              /* Enable PHY link up/down interrupts */
+
+              ret = pic32mz_phyintenable(priv);
+            }
+        }
+        break;
+#endif
+
+      case SIOCGMIIPHY: /* Get MII PHY address */
+        {
+          struct mii_ioctl_data_s *req =
+            (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
+          req->phy_id = priv->pd_phyaddr;
+          ret = OK;
+        }
+        break;
+
+      case SIOCGMIIREG: /* Get register from MII PHY */
+        {
+          struct mii_ioctl_data_s *req =
+            (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
+          req->val_out = pic32mz_phyread(req->phy_id, req->reg_num);
+          ret = OK;
+        }
+        break;
+
+      case SIOCSMIIREG: /* Set register in MII PHY */
+        {
+          struct mii_ioctl_data_s *req =
+            (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
+          pic32mz_phywrite(req->phy_id, req->reg_num, req->val_in);
+          ret = OK;
+        }
+        break;
+#endif /* CONFIG_NETDEV_PHY_IOCTL */
+
+      default:
+        ret = -ENOTTY;
+        break;
+    }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Name: pic32mz_showmii
  *
  * Description:
@@ -2583,6 +2692,36 @@ static void pic32mz_showmii(uint8_t phyaddr, const char *msg)
   ninfo("  EXPANSION: %04x\n", pic32mz_phyread(phyaddr, MII_EXPANSION));
 #ifdef CONFIG_ETH0_PHY_KS8721
   ninfo("  10BTCR:    %04x\n", pic32mz_phyread(phyaddr, MII_KS8721_10BTCR));
+#endif
+}
+#endif
+
+/****************************************************************************
+ * Function: pic32mz_phyintenable
+ *
+ * Description:
+ *   Enable the PHY link up/down interrupts.  Reading the interrupt source
+ *   register clears any pending event, so the PHY interrupt output is
+ *   released before the new events are enabled.
+ *
+ * Input Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   OK on success; -ENOSYS if the PHY interrupts are not supported.
+ *
+ ****************************************************************************/
+
+#if defined(PIC32MZ_HAVE_PHY) && defined(CONFIG_NETDEV_PHY_IOCTL) && \
+    defined(CONFIG_ARCH_PHY_INTERRUPT)
+static int pic32mz_phyintenable(struct pic32mz_driver_s *priv)
+{
+#ifdef PIC32MZ_PHY_INTEN
+  pic32mz_phyread(priv->pd_phyaddr, PIC32MZ_PHY_ISR);
+  pic32mz_phywrite(priv->pd_phyaddr, PIC32MZ_PHY_IMR, PIC32MZ_PHY_INTEN);
+  return OK;
+#else
+  return -ENOSYS;
 #endif
 }
 #endif
@@ -3398,6 +3537,9 @@ static inline int pic32mz_ethinitialize(int intf)
 #ifdef CONFIG_NET_MCASTGROUP
   priv->pd_dev.d_addmac  = pic32mz_addmac;  /* Add multicast MAC address */
   priv->pd_dev.d_rmmac   = pic32mz_rmmac;   /* Remove multicast MAC address */
+#endif
+#if defined(CONFIG_NETDEV_IOCTL) && defined(PIC32MZ_HAVE_PHY)
+  priv->pd_dev.d_ioctl   = pic32mz_ioctl;   /* Support PHY ioctl() calls */
 #endif
   priv->pd_dev.d_private = priv;            /* Used to recover private state from dev */
 
