@@ -488,8 +488,9 @@ static uint16_t pic32mz_phyread(uint8_t phyaddr, uint8_t regaddr);
 static inline int pic32mz_phyreset(uint8_t phyaddr);
 #  ifdef CONFIG_PIC32MZ_PHY_AUTONEG
 static inline int pic32mz_phyautoneg(uint8_t phyaddr);
-#  endif
+#  else
 static int pic32mz_phymode(uint8_t phyaddr, uint8_t mode);
+#  endif
 static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv);
 #else
 #  define pic32mz_phyinit(priv)
@@ -2829,7 +2830,7 @@ static inline int pic32mz_phyautoneg(uint8_t phyaddr)
  *
  ****************************************************************************/
 
-#ifdef PIC32MZ_HAVE_PHY
+#if defined(PIC32MZ_HAVE_PHY) && !defined(CONFIG_PIC32MZ_PHY_AUTONEG)
 static int pic32mz_phymode(uint8_t phyaddr, uint8_t mode)
 {
   int32_t timeout;
@@ -2914,7 +2915,7 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
   unsigned int phyaddr;
   uint16_t phyreg;
   uint32_t regval;
-  int ret;
+  int ret = OK;
 
 #if CONFIG_PIC32MZ_FMIIEN == 0
   /* Set the RMII operation mode. This usually requires access to a vendor
@@ -3181,11 +3182,16 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
         (priv->pd_mode & PIC32MZ_DUPLEX_MASK) ==
           PIC32MZ_DUPLEX_FULL ?"full" : "half");
 
-  /* Disable auto-configuration.  Set the fixed speed/duplex mode.
-   * (probably more than little redundant).
+#ifndef CONFIG_PIC32MZ_PHY_AUTONEG
+  /* Set the fixed speed/duplex mode (again).  With auto-negotiation, the
+   * negotiated mode is not forced: auto-negotiation stays enabled so that
+   * the PHY negotiates again when the cable is reconnected.  Forcing the
+   * mode would leave the link down against an auto-negotiating partner.
    */
 
   ret = pic32mz_phymode(phyaddr, priv->pd_mode);
+#endif
+
   pic32mz_showmii(phyaddr, "After final configuration");
   return ret;
 }
