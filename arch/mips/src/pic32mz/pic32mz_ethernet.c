@@ -146,6 +146,10 @@
 #define DESC_SIZE      20
 #define DESC_PADSIZE   DMA_ALIGN_UP(DESC_SIZE)
 
+/* The RX DMA also stores the 4-byte frame check sequence in the buffer */
+
+#define PIC32MZ_FCS_SIZE 4
+
 /* Make sure that the size of each buffer is a multiple of 4 bytes.  This
  * will force alignment of all buffers to 4-byte boundaries (this is needed
  * by the queuing logic which will cast each buffer address to a pointer
@@ -158,7 +162,8 @@
  * above by aligning the buffer to D-Cache size.
  */
 
-#define PIC32MZ_ALIGNED_BUFSIZE DMA_ALIGN_UP(CONFIG_NET_ETH_PKTSIZE)
+#define PIC32MZ_ALIGNED_BUFSIZE DMA_ALIGN_UP(CONFIG_NET_ETH_PKTSIZE + \
+                                             PIC32MZ_FCS_SIZE)
 
 /* The number of buffers will, then, be one for each descriptor plus one
  * extra
@@ -1479,10 +1484,16 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
 
       pic32mz_putreg(ETH_CON1_BUFCDEC, PIC32MZ_ETH_CON1SET);
 
-      /* Get the packet length */
+      /* Get the packet length, without the FCS included in the byte
+       * count.
+       */
 
       priv->pd_dev.d_len = (rxdesc->rsv2 & RXDESC_RSV2_BYTECOUNT_MASK) >>
                             RXDESC_RSV2_BYTECOUNT_SHIFT;
+      if (priv->pd_dev.d_len >= PIC32MZ_FCS_SIZE)
+        {
+          priv->pd_dev.d_len -= PIC32MZ_FCS_SIZE;
+        }
 
       /* Update statistics */
 
@@ -2275,9 +2286,11 @@ static int pic32mz_ifup(struct net_driver_s *dev)
    * untagged maximum size Ethernet frame is 1518 octets. A tagged frame adds
    * four octets for a total of 1522 octets. If a shorter/longer maximum
    * length restriction is desired, program this 16-bit field.
+   * The maximum includes the FCS.
    */
 
-  pic32mz_putreg(CONFIG_NET_ETH_PKTSIZE, PIC32MZ_EMAC1_MAXF);
+  pic32mz_putreg(CONFIG_NET_ETH_PKTSIZE + PIC32MZ_FCS_SIZE,
+                 PIC32MZ_EMAC1_MAXF);
 
   /* Configure the MAC station address in the EMAC1SA0, EMAC1SA1 and
    * EMAC1SA2 registers.  On PIC32MZ EC/EF these registers are loaded at
@@ -2354,10 +2367,13 @@ static int pic32mz_ifup(struct net_driver_s *dev)
   /* Set the size of the RX buffers in the RXBUFSZ bit (ETHCON2:4-10) (all
    * receive descriptors use the same buffer size). Keep in mind that using
    * packets that are too small leads to packet fragmentation and has a
-   * noticeable impact on the performance.
+   * noticeable impact on the performance.  RXBUFSZ is in units of 16
+   * bytes: use the aligned buffer size, which has room for the FCS, so
+   * that a full size frame is not truncated into two fragments.
    */
 
-  pic32mz_putreg(ETH_CON2_RXBUFSZ(CONFIG_NET_ETH_PKTSIZE), PIC32MZ_ETH_CON2);
+  pic32mz_putreg(ETH_CON2_RXBUFSZ(PIC32MZ_ALIGNED_BUFSIZE),
+                 PIC32MZ_ETH_CON2);
 
   /* Reset state variables */
 
