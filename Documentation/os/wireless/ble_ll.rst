@@ -58,13 +58,19 @@ Supported features
 * LE Data Packet Length Extension
 * LL Privacy
 * LE 2M PHY
+* LE Coded PHY (if supported by the radio)
 * Channel Selection Algorithm #2
 * Controller to Host flow control
 * Sleep Clock Accuracy Update procedure
+* Extended advertising and scanning, multiple advertising sets
+* Periodic advertising and periodic advertising synchronization
+* Periodic Advertising Sync Transfer
+* Periodic Advertising ADI
+* LE Enhanced Connection Update (connection subrating)
+* Advertising Coding Selection
 
-Not supported yet: extended and periodic advertising, LE Coded PHY,
-isochronous channels, Direct Test Mode, Channel Sounding, vendor specific
-HCI commands and external front-end modules.
+Not supported yet: isochronous channels, Direct Test Mode, Channel Sounding,
+vendor specific HCI commands and external front-end modules.
 
 Configuration
 =============
@@ -81,6 +87,15 @@ connections.
 
 The Bluetooth network driver passes each HCI packet in a single I/O buffer,
 so ``CONFIG_IOB_BUFSIZE`` must be at least 260 for 251 byte data PDUs.
+
+Advertising reports longer than ``CONFIG_BLE_LL_EVT_SIZE`` are split into
+multiple HCI events.  ``CONFIG_BLE_LL_EVT_SIZE`` must not exceed the event
+buffer size of the host, which is 70 bytes for the NimBLE host from apps.
+
+Extended advertising requires host support (``CONFIG_NIMBLE_BLE_EXT_ADV``
+for the NimBLE host).  A host using a ``PF_BLUETOOTH`` socket is limited to
+HCI packets of ``BLUETOOTH_MAX_FRAMELEN`` bytes, which limits the
+extended advertising data it can set to about 70 bytes.
 
 The Link Layer thread priority (``CONFIG_BLE_LL_PRIORITY``) must be higher
 than other users with scheduling deadlines.

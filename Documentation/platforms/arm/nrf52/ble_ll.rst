@@ -13,6 +13,9 @@ Apache Mynewt NimBLE nRF5x driver.  It is enabled with
 
 It cannot be used together with the SoftDevice Controller.
 
+LE Coded PHY (``CONFIG_BLE_LL_CFG_FEAT_LE_CODED_PHY``) is available on
+nRF52833 and nRF52840.
+
 Reserved peripherals
 ====================
 
