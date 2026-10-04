@@ -28,6 +28,10 @@ ifeq ($(CONFIG_PIC32MZ_SPI1),y)
 CSRCS += pic32mz_spi.c
 endif
 
+ifeq ($(CONFIG_EV49N51A_PHY_INTERRUPT),y)
+CSRCS += pic32mz_ethernet.c
+endif
+
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += pic32mz_autoleds.c
 endif

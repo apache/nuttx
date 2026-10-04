@@ -290,8 +290,14 @@ Ethernet
 
 The LAN8720A PHY is connected to the MAC through RMII and is managed
 through MDIO at PHY address 0. The board code pulses the PHY reset (RA14)
-at boot, after the reference clock is running. The PHY interrupt output is
-not connected (R309 is not fitted), so the driver does not use it.
+at boot, after the reference clock is running.
+
+The PHY interrupt output (nINT) reaches RK6 only through R309, which is not
+fitted. If you fit R309, select ``CONFIG_EV49N51A_PHY_INTERRUPT`` to use it
+as a link up/down interrupt. With ``CONFIG_NETINIT_MONITOR`` the network
+initialization thread then takes the interface down when the cable is
+removed and brings it up again when it is reconnected, including when the
+board boots without a cable.
 
 The 50 MHz RMII reference clock comes from ETH_CLK_OUT (RC12) through R313.
 The board also has a footprint for a 50 MHz oscillator (X1, not fitted)

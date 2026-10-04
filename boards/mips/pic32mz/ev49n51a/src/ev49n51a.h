@@ -56,6 +56,15 @@
 
 #define GPIO_PHY_NRST   (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTA | GPIO_PIN14)
 
+/* LAN8720A interrupt output (nINT, open drain, active low) on RK6 through
+ * R309 (not fitted on the EV49N51A).  The PHY holds it low until the
+ * interrupt source register is read, so a falling edge marks a new event.
+ */
+
+#define GPIO_PHY_NINT   (GPIO_INPUT | GPIO_INTERRUPT | GPIO_PULLUP | \
+                         GPIO_EDGE_DETECT | GPIO_EDGE_FALLING | \
+                         GPIO_PORTK | GPIO_PIN6)
+
 /* SST26 MTD partition is exported as /dev/mtdblock<SST26_MTD_MINOR> */
 
 #define SST26_MTD_MINOR 0
