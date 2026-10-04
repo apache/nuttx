@@ -152,6 +152,27 @@ static struct ioport_level2_s * const g_level2_handlers[CHIP_NPORTS] =
 #endif
 };
 
+#ifdef CONFIG_ARCH_CHIP_PIC32MZW1
+/* Look-up of port to change notification IRQ.  The PIC32MZ-W1 implements
+ * only PORTA, PORTB, PORTC and PORTK, so the port index cannot be added to
+ * the PORTA IRQ number.  Zero marks an unimplemented port.
+ */
+
+static const uint8_t g_cnirq[CHIP_NPORTS] =
+{
+  [PIC32MZ_IOPORTA] = PIC32MZ_IRQ_CNA,
+  [PIC32MZ_IOPORTB] = PIC32MZ_IRQ_CNB,
+  [PIC32MZ_IOPORTC] = PIC32MZ_IRQ_CNC,
+  [PIC32MZ_IOPORTK] = PIC32MZ_IRQ_CNK,
+};
+
+#  define pic32mz_cnirq(ioport)     ((int)g_cnirq[ioport])
+#  define pic32mz_haveport(ioport)  (g_cnirq[ioport] != 0)
+#else
+#  define pic32mz_cnirq(ioport)     (PIC32MZ_IRQ_PORTA + (ioport))
+#  define pic32mz_haveport(ioport)  (true)
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -225,12 +246,11 @@ static int pic32mz_cninterrupt(int irq, void *context, void *arg)
   int ret = OK;
   int i;
 
-  /* Get the IO port index from the IRQ number.  This, of course,
-   * assumes that the irq numbers are consecutive beginning with
-   * IOPORTA.
+  /* The IO port index was provided as the argument when the handler was
+   * attached.
    */
 
-  ioport   = irq - PIC32MZ_IRQ_PORTA;
+  ioport   = (int)(uintptr_t)arg;
   DEBUGASSERT(ioport >= 0 && ioport < CHIP_NPORTS);
 
   /* If we got this interrupt, then there must also be an array
@@ -377,6 +397,13 @@ void pic32mz_gpioirqinitialize(void)
 
   for (i = 0; i < CHIP_NPORTS; i++)
     {
+      /* Skip IO ports that are not implemented on this part */
+
+      if (!pic32mz_haveport(i))
+        {
+          continue;
+        }
+
       /* Get the base address of this IO port peripheral */
 
       base = g_gpiobase[i];
@@ -395,11 +422,12 @@ void pic32mz_gpioirqinitialize(void)
       if (g_level2_handlers[i] != NULL)
         {
           /* Yes.. Attach the common change notice interrupt handler
-           * to the IO port interrupt.  Notice that this assumes that
-           * each IRQ number is consecutive beginning with IOPORTA.
+           * to the IO port interrupt.  The IO port index is passed as the
+           * argument.
            */
 
-          ret = irq_attach(PIC32MZ_IRQ_PORTA + i, pic32mz_cninterrupt, NULL);
+          ret = irq_attach(pic32mz_cnirq(i), pic32mz_cninterrupt,
+                           (void *)(uintptr_t)i);
           DEBUGASSERT(ret == OK);
           UNUSED(ret);
 
@@ -414,9 +442,9 @@ void pic32mz_gpioirqinitialize(void)
           regval = getreg32(base + PIC32MZ_IOPORT_PORT_OFFSET);
           UNUSED(regval);
 
-          /* Clear the CN interrupt flag. Same assumption as above. */
+          /* Clear the CN interrupt flag. */
 
-          mips_clrpend_irq(PIC32MZ_IRQ_PORTA + i);
+          mips_clrpend_irq(pic32mz_cnirq(i));
         }
     }
 }
@@ -605,7 +633,7 @@ void pic32mz_gpioirqenable(pinset_t pinset)
 
       /* And enable the interrupt. */
 
-      up_enable_irq(ioport + PIC32MZ_IRQ_PORTA);
+      up_enable_irq(pic32mz_cnirq(ioport));
     }
 }
 

@@ -998,26 +998,32 @@ config PIC32MZ_GPIOIRQ_PORTC
 config PIC32MZ_GPIOIRQ_PORTD
 	bool "I/O PORTD Interrupt Support"
 	default n
+	depends on !ARCH_CHIP_PIC32MZW1
 
 config PIC32MZ_GPIOIRQ_PORTE
 	bool "I/O PORTE Interrupt Support"
 	default n
+	depends on !ARCH_CHIP_PIC32MZW1
 
 config PIC32MZ_GPIOIRQ_PORTF
 	bool "I/O PORTF Interrupt Support"
 	default n
+	depends on !ARCH_CHIP_PIC32MZW1
 
 config PIC32MZ_GPIOIRQ_PORTG
 	bool "I/O PORTG Interrupt Support"
 	default n
+	depends on !ARCH_CHIP_PIC32MZW1
 
 config PIC32MZ_GPIOIRQ_PORTH
 	bool "I/O PORTH Interrupt Support"
 	default n
+	depends on !ARCH_CHIP_PIC32MZW1
 
 config PIC32MZ_GPIOIRQ_PORTJ
 	bool "I/O PORTJ Interrupt Support"
 	default n
+	depends on !ARCH_CHIP_PIC32MZW1
 
 config PIC32MZ_GPIOIRQ_PORTK
 	bool "I/O PORTK Interrupt Support"
