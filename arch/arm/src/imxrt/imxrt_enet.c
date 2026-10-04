@@ -1912,6 +1912,7 @@ static int imxrt_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_ioctl_data_s *req =
             (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
           req->phy_id = priv->phyaddr;
           ret = OK;
         }
@@ -1944,6 +1945,7 @@ static int imxrt_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_ioctl_data_s *req =
             (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
           ret = imxrt_writemii(priv, req->phy_id, req->reg_num, req->val_in);
         }
         break;
@@ -2300,6 +2302,7 @@ static int imxrt_phy_status(struct imxrt_driver_s *priv, int phydata,
                             uint16_t mask)
 {
   int rv = mask;
+
   if (g_board_phys[priv->current_phy].status != 0xffff)
     {
       rv &= phydata;
@@ -3130,7 +3133,7 @@ int imxrt_netinitialize(int intf)
   imxrt_config_gpio(GPIO_ENET_TX_CLK);
   imxrt_config_gpio(GPIO_ENET_TX_EN);
 #  ifdef GPIO_ENET_RX_ER
-    imxrt_config_gpio(GPIO_ENET_RX_ER);
+  imxrt_config_gpio(GPIO_ENET_RX_ER);
 #  endif
 #endif
 
@@ -3145,7 +3148,7 @@ int imxrt_netinitialize(int intf)
   imxrt_config_gpio(GPIO_ENET2_TX_CLK);
   imxrt_config_gpio(GPIO_ENET2_TX_EN);
 #  ifdef GPIO_ENET2_RX_ER
-    imxrt_config_gpio(GPIO_ENET2_RX_ER);
+  imxrt_config_gpio(GPIO_ENET2_RX_ER);
 #  endif
 #endif
 
