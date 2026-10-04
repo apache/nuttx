@@ -520,8 +520,8 @@ int pic32mz_gpioattach(pinset_t pinset, xcpt_t handler, void *arg)
                * the debugger).
                */
 
-               putreg32(1 << pin, base + PIC32MZ_IOPORT_CNPUCLR_OFFSET);
-               putreg32(1 << pin, base + PIC32MZ_IOPORT_CNPDCLR_OFFSET);
+              putreg32(1 << pin, base + PIC32MZ_IOPORT_CNPUCLR_OFFSET);
+              putreg32(1 << pin, base + PIC32MZ_IOPORT_CNPDCLR_OFFSET);
             }
 
           /* Whether attaching or detaching, the next state of the interrupt
