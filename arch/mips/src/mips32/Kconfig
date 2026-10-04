@@ -119,8 +119,10 @@ config MIPS32_ICACHE
 	default n
 	depends on MIPS32_HAVE_ICACHE
 	select ARCH_ICACHE
+	select MIPS32_DCACHE if MIPS32_HAVE_DCACHE
 	---help---
-		Enable K0 I-Cache
+		Enable K0 I-Cache.  The K0 cache algorithm applies to both caches,
+		so this also enables the D-Cache when there is one.
 
 config MIPS32_ICACHE_SIZE
 	int "I-Cache Size"
@@ -149,7 +151,8 @@ config MIPS32_DCACHE
 	depends on MIPS32_HAVE_DCACHE
 	select ARCH_DCACHE
 	---help---
-		Enable K0 D-Cache
+		Enable K0 D-Cache.  The K0 cache algorithm applies to both caches,
+		so the I-Cache is active too.
 
 config MIPS32_DCACHE_SIZE
 	int "D-Cache Size"
