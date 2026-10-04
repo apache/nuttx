@@ -712,7 +712,9 @@ static void pic32mz_dumprxdesc(struct pic32mz_rxdesc_s *rxdesc,
  * Function: pic32mz_bufferinit
  *
  * Description:
- *   Initialize the buffers by placing them all in a free list
+ *   Initialize the buffers by placing them all in an empty free list.  The
+ *   list is re-initialized on every ifup, when it may still hold the
+ *   buffers that were free when the interface was taken down.
  *
  * Input Parameters:
  *   priv - Pointer to EMAC device driver structure
@@ -726,6 +728,8 @@ static inline void pic32mz_bufferinit(struct pic32mz_driver_s *priv)
 {
   uint8_t *buffer;
   int i;
+
+  sq_init(&priv->pd_freebuffers);
 
   for (i = 0, buffer = g_buffers; i < PIC32MZ_NBUFFERS; i++)
     {
