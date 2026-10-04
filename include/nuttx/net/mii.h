@@ -468,6 +468,16 @@
 #define MII_LAN8720_SPSCR_GPIO1      (1 << 8)  /* Bit 8:  GPIO1 */
 #define MII_LAN8720_SPSCR_GPIO2      (1 << 9)  /* Bit 9:  GPIO2 */
                                                /* Bit 10-11: Reserved */
+
+/* SMSC LAN8720 ISR and IMR register bits (same layout on the LAN8740) */
+
+#define MII_LAN8720_INT_ANPAGE       (1 << 1)  /* Bit 1:  Auto-negotiation page received */
+#define MII_LAN8720_INT_PDFAULT      (1 << 2)  /* Bit 2:  Parallel detection fault */
+#define MII_LAN8720_INT_ANLPACK      (1 << 3)  /* Bit 3:  Auto-negotiation LP acknowledge */
+#define MII_LAN8720_INT_LINKDOWN     (1 << 4)  /* Bit 4:  Link down */
+#define MII_LAN8720_INT_REMFAULT     (1 << 5)  /* Bit 5:  Remote fault detected */
+#define MII_LAN8720_INT_ANCOMPLETE   (1 << 6)  /* Bit 6:  Auto-negotiation complete */
+#define MII_LAN8720_INT_ENERGYON     (1 << 7)  /* Bit 7:  ENERGYON generated */
 #define MII_LAN8720_SPSCR_ANEGDONE   (1 << 12) /* Bit 12: Autonegotiation complete */
                                                /* Bits 13-15: Reserved */
 
