@@ -46,6 +46,10 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
 
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+#  include <nuttx/net/phy.h>
+#endif
+
 #ifdef CONFIG_NET_PKT
 #  include <nuttx/net/pkt.h>
 #endif
@@ -284,6 +288,16 @@
 #  undef PIC32MZ_HAVE_PHY
 #endif
 
+/* PHY interrupt source/mask registers and the link up/down events */
+
+#if defined(CONFIG_ETH0_PHY_LAN8720) || defined(CONFIG_ETH0_PHY_LAN8740) || \
+    defined(CONFIG_ETH0_PHY_LAN8740A)
+#  define PIC32MZ_PHY_ISR      MII_LAN8720_ISR
+#  define PIC32MZ_PHY_IMR      MII_LAN8720_IMR
+#  define PIC32MZ_PHY_INTEN    (MII_LAN8720_INT_LINKDOWN | \
+                                MII_LAN8720_INT_ANCOMPLETE)
+#endif
+
 /* These definitions are used to remember the speed/duplex settings */
 
 #define PIC32MZ_SPEED_MASK     0x01
@@ -393,6 +407,10 @@ uint8_t g_buffers[PIC32MZ_NBUFFERS * PIC32MZ_ALIGNED_BUFSIZE]
 
 static struct pic32mz_driver_s g_ethdrvr[CONFIG_PIC32MZ_NINTERFACES];
 
+/* All-zero MAC address: no address assigned to the device */
+
+static const uint8_t g_zeromac[IFHWADDRLEN];
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -467,6 +485,10 @@ static int pic32mz_txavail(struct net_driver_s *dev);
 static int pic32mz_addmac(struct net_driver_s *dev, const uint8_t *mac);
 static int pic32mz_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
+#if defined(CONFIG_NETDEV_IOCTL) && defined(PIC32MZ_HAVE_PHY)
+static int pic32mz_ioctl(struct net_driver_s *dev, int cmd,
+                         unsigned long arg);
+#endif
 
 /* PHY initialization functions */
 
@@ -484,9 +506,13 @@ static uint16_t pic32mz_phyread(uint8_t phyaddr, uint8_t regaddr);
 static inline int pic32mz_phyreset(uint8_t phyaddr);
 #  ifdef CONFIG_PIC32MZ_PHY_AUTONEG
 static inline int pic32mz_phyautoneg(uint8_t phyaddr);
-#  endif
+#  else
 static int pic32mz_phymode(uint8_t phyaddr, uint8_t mode);
+#  endif
 static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv);
+#  if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+static int pic32mz_phyintenable(struct pic32mz_driver_s *priv);
+#  endif
 #else
 #  define pic32mz_phyinit(priv)
 #endif
@@ -686,7 +712,9 @@ static void pic32mz_dumprxdesc(struct pic32mz_rxdesc_s *rxdesc,
  * Function: pic32mz_bufferinit
  *
  * Description:
- *   Initialize the buffers by placing them all in a free list
+ *   Initialize the buffers by placing them all in an empty free list.  The
+ *   list is re-initialized on every ifup, when it may still hold the
+ *   buffers that were free when the interface was taken down.
  *
  * Input Parameters:
  *   priv - Pointer to EMAC device driver structure
@@ -700,6 +728,8 @@ static inline void pic32mz_bufferinit(struct pic32mz_driver_s *priv)
 {
   uint8_t *buffer;
   int i;
+
+  sq_init(&priv->pd_freebuffers);
 
   for (i = 0, buffer = g_buffers; i < PIC32MZ_NBUFFERS; i++)
     {
@@ -801,7 +831,7 @@ static inline void pic32mz_txdescinit(struct pic32mz_driver_s *priv)
        * creating a ring.
        */
 
-      if (i == (CONFIG_PIC32MZ_ETH_NRXDESC - 1))
+      if (i == (CONFIG_PIC32MZ_ETH_NTXDESC - 1))
         {
           txdesc->nexted = PHYS_ADDR(g_txdesc);
         }
@@ -1403,6 +1433,13 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
 
       pic32mz_dumprxdesc(rxdesc, "RX Complete");
 
+      /* The hardware increments ETHSTAT.BUFCNT for each descriptor that it
+       * fills; software decrements it once for each descriptor that it
+       * processes.
+       */
+
+      pic32mz_putreg(ETH_CON1_BUFCDEC, PIC32MZ_ETH_CON1SET);
+
       /* Get the packet length */
 
       priv->pd_dev.d_len = (rxdesc->rsv2 & RXDESC_RSV2_BYTECOUNT_MASK) >>
@@ -1468,10 +1505,22 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
 
           DEBUGASSERT(priv->pd_dev.d_buf != NULL);
 
-          /* Replace the buffer in the RX descriptor with a new one */
+          /* Replace the buffer in the RX descriptor with a new one.  If
+           * there is no free buffer, drop the packet and give the
+           * descriptor back to the hardware with its current buffer.
+           */
 
           rxbuffer = pic32mz_allocbuffer(priv);
-          DEBUGASSERT(rxbuffer != NULL);
+          if (rxbuffer == NULL)
+            {
+              nwarn("WARNING: No free buffer, packet dropped\n");
+              NETDEV_RXDROPPED(&priv->pd_dev);
+              priv->pd_dev.d_buf = NULL;
+              priv->pd_dev.d_len = 0;
+              pic32mz_rxreturn(rxdesc);
+              continue;
+            }
+
           rxdesc->address = PHYS_ADDR(rxbuffer);
 
           /* And give the RX descriptor back to the hardware */
@@ -1931,7 +1980,7 @@ static int pic32mz_interrupt(int irq, void *context, void *arg)
        * expiration and the deferred interrupt processing.
        */
 
-       wd_cancel(&priv->pd_txtimeout);
+      wd_cancel(&priv->pd_txtimeout);
     }
 
   /* Schedule to perform the interrupt processing on the worker thread. */
@@ -2192,37 +2241,41 @@ static int pic32mz_ifup(struct net_driver_s *dev)
   pic32mz_putreg(CONFIG_NET_ETH_PKTSIZE, PIC32MZ_EMAC1_MAXF);
 
   /* Configure the MAC station address in the EMAC1SA0, EMAC1SA1 and
-   * EMAC1SA2 registers (these registers are loaded at reset from the
-   * factory preprogrammed station address).
+   * EMAC1SA2 registers.  On PIC32MZ EC/EF these registers are loaded at
+   * reset from the factory preprogrammed station address; on PIC32MZ-W1
+   * they reset to zero.  Use the address assigned to the device (e.g. with
+   * SIOCSIFHWADDR) if there is one, otherwise keep the factory address.
    */
 
-#if 0
-  regval = (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[5] << 8 |
-           (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[4];
-  pic32mz_putreg(regval, PIC32MZ_EMAC1_SA0);
+  if (memcmp(priv->pd_dev.d_mac.ether.ether_addr_octet, g_zeromac,
+             sizeof(g_zeromac)) != 0)
+    {
+      regval = (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[5] << 8 |
+               (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[4];
+      pic32mz_putreg(regval, PIC32MZ_EMAC1_SA0);
 
-  regval = (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[3] << 8 |
-           (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[2];
-  pic32mz_putreg(regval, PIC32MZ_EMAC1_SA1);
+      regval = (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[3] << 8 |
+               (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[2];
+      pic32mz_putreg(regval, PIC32MZ_EMAC1_SA1);
 
-  regval = (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[1] << 8 |
-           (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[0];
-  pic32mz_putreg(regval, PIC32MZ_EMAC1_SA2);
-#else
-  regval = pic32mz_getreg(PIC32MZ_EMAC1_SA0);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[4] = (uint32_t)(regval & 0xff);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[5] = (uint32_t)((regval >> 8) &
-                                                             0xff);
+      regval = (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[1] << 8 |
+               (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[0];
+      pic32mz_putreg(regval, PIC32MZ_EMAC1_SA2);
+    }
+  else
+    {
+      regval = pic32mz_getreg(PIC32MZ_EMAC1_SA0);
+      priv->pd_dev.d_mac.ether.ether_addr_octet[4] = regval & 0xff;
+      priv->pd_dev.d_mac.ether.ether_addr_octet[5] = (regval >> 8) & 0xff;
 
-  regval = pic32mz_getreg(PIC32MZ_EMAC1_SA1);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[2] = (uint32_t)(regval & 0xff);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[3] = (uint32_t)((regval >> 8) &
-                                                             0xff);
+      regval = pic32mz_getreg(PIC32MZ_EMAC1_SA1);
+      priv->pd_dev.d_mac.ether.ether_addr_octet[2] = regval & 0xff;
+      priv->pd_dev.d_mac.ether.ether_addr_octet[3] = (regval >> 8) & 0xff;
 
-  regval = pic32mz_getreg(PIC32MZ_EMAC1_SA2);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[0] = (uint32_t)(regval & 0xff);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[1] = (uint32_t)((regval >> 8) &
-                                                             0xff);
+      regval = pic32mz_getreg(PIC32MZ_EMAC1_SA2);
+      priv->pd_dev.d_mac.ether.ether_addr_octet[0] = regval & 0xff;
+      priv->pd_dev.d_mac.ether.ether_addr_octet[1] = (regval >> 8) & 0xff;
+    }
 
   ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         dev->d_mac.ether.ether_addr_octet[0],
@@ -2231,7 +2284,6 @@ static int pic32mz_ifup(struct net_driver_s *dev)
         dev->d_mac.ether.ether_addr_octet[3],
         dev->d_mac.ether.ether_addr_octet[4],
         dev->d_mac.ether.ether_addr_octet[5]);
-#endif
 
   /* Continue Ethernet Controller Initialization ****************************/
 
@@ -2530,6 +2582,94 @@ static int pic32mz_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 #endif
 
 /****************************************************************************
+ * Function: pic32mz_ioctl
+ *
+ * Description:
+ *   Handle network IOCTL commands directed to this device.
+ *
+ * Input Parameters:
+ *   dev - Reference to the NuttX driver state structure
+ *   cmd - The IOCTL command
+ *   arg - The argument for the IOCTL command
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *   The network device is locked.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETDEV_IOCTL) && defined(PIC32MZ_HAVE_PHY)
+static int pic32mz_ioctl(struct net_driver_s *dev, int cmd,
+                         unsigned long arg)
+{
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+  struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)dev->d_private;
+#endif
+  int ret;
+
+  switch (cmd)
+    {
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_ARCH_PHY_INTERRUPT
+      case SIOCMIINOTIFY: /* Set up for PHY event notifications */
+        {
+          struct mii_ioctl_notify_s *req =
+            (struct mii_ioctl_notify_s *)((uintptr_t)arg);
+
+          ret = phy_notify_subscribe(dev->d_ifname, req->pid, &req->event);
+          if (ret == OK)
+            {
+              /* Enable PHY link up/down interrupts */
+
+              ret = pic32mz_phyintenable(priv);
+            }
+        }
+        break;
+#endif
+
+      case SIOCGMIIPHY: /* Get MII PHY address */
+        {
+          struct mii_ioctl_data_s *req =
+            (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
+          req->phy_id = priv->pd_phyaddr;
+          ret = OK;
+        }
+        break;
+
+      case SIOCGMIIREG: /* Get register from MII PHY */
+        {
+          struct mii_ioctl_data_s *req =
+            (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
+          req->val_out = pic32mz_phyread(req->phy_id, req->reg_num);
+          ret = OK;
+        }
+        break;
+
+      case SIOCSMIIREG: /* Set register in MII PHY */
+        {
+          struct mii_ioctl_data_s *req =
+            (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
+          pic32mz_phywrite(req->phy_id, req->reg_num, req->val_in);
+          ret = OK;
+        }
+        break;
+#endif /* CONFIG_NETDEV_PHY_IOCTL */
+
+      default:
+        ret = -ENOTTY;
+        break;
+    }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Name: pic32mz_showmii
  *
  * Description:
@@ -2556,6 +2696,36 @@ static void pic32mz_showmii(uint8_t phyaddr, const char *msg)
   ninfo("  EXPANSION: %04x\n", pic32mz_phyread(phyaddr, MII_EXPANSION));
 #ifdef CONFIG_ETH0_PHY_KS8721
   ninfo("  10BTCR:    %04x\n", pic32mz_phyread(phyaddr, MII_KS8721_10BTCR));
+#endif
+}
+#endif
+
+/****************************************************************************
+ * Function: pic32mz_phyintenable
+ *
+ * Description:
+ *   Enable the PHY link up/down interrupts.  Reading the interrupt source
+ *   register clears any pending event, so the PHY interrupt output is
+ *   released before the new events are enabled.
+ *
+ * Input Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   OK on success; -ENOSYS if the PHY interrupts are not supported.
+ *
+ ****************************************************************************/
+
+#if defined(PIC32MZ_HAVE_PHY) && defined(CONFIG_NETDEV_PHY_IOCTL) && \
+    defined(CONFIG_ARCH_PHY_INTERRUPT)
+static int pic32mz_phyintenable(struct pic32mz_driver_s *priv)
+{
+#ifdef PIC32MZ_PHY_INTEN
+  pic32mz_phyread(priv->pd_phyaddr, PIC32MZ_PHY_ISR);
+  pic32mz_phywrite(priv->pd_phyaddr, PIC32MZ_PHY_IMR, PIC32MZ_PHY_INTEN);
+  return OK;
+#else
+  return -ENOSYS;
 #endif
 }
 #endif
@@ -2803,7 +2973,7 @@ static inline int pic32mz_phyautoneg(uint8_t phyaddr)
  *
  ****************************************************************************/
 
-#ifdef PIC32MZ_HAVE_PHY
+#if defined(PIC32MZ_HAVE_PHY) && !defined(CONFIG_PIC32MZ_PHY_AUTONEG)
 static int pic32mz_phymode(uint8_t phyaddr, uint8_t mode)
 {
   int32_t timeout;
@@ -3155,11 +3325,19 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
         (priv->pd_mode & PIC32MZ_DUPLEX_MASK) ==
           PIC32MZ_DUPLEX_FULL ?"full" : "half");
 
-  /* Disable auto-configuration.  Set the fixed speed/duplex mode.
-   * (probably more than little redundant).
+#ifdef CONFIG_PIC32MZ_PHY_AUTONEG
+  /* Keep auto-negotiation enabled so that the PHY negotiates again when
+   * the cable is reconnected.  Forcing the negotiated mode here would
+   * leave the link down against an auto-negotiating partner.
    */
 
+  ret = OK;
+#else
+  /* Set the fixed speed/duplex mode (again) */
+
   ret = pic32mz_phymode(phyaddr, priv->pd_mode);
+#endif
+
   pic32mz_showmii(phyaddr, "After final configuration");
   return ret;
 }
@@ -3273,7 +3451,8 @@ static void pic32mz_ethreset(struct pic32mz_driver_s *priv)
   /* Wait activity abort by polling the ETHBUSY bit */
 
   while ((pic32mz_getreg(PIC32MZ_ETH_STAT) & ETH_STAT_ETHBUSY) != 0)
-    continue;
+    {
+    }
 
   /* Turn the Ethernet controller on. */
 
@@ -3362,6 +3541,9 @@ static inline int pic32mz_ethinitialize(int intf)
 #ifdef CONFIG_NET_MCASTGROUP
   priv->pd_dev.d_addmac  = pic32mz_addmac;  /* Add multicast MAC address */
   priv->pd_dev.d_rmmac   = pic32mz_rmmac;   /* Remove multicast MAC address */
+#endif
+#if defined(CONFIG_NETDEV_IOCTL) && defined(PIC32MZ_HAVE_PHY)
+  priv->pd_dev.d_ioctl   = pic32mz_ioctl;   /* Support PHY ioctl() calls */
 #endif
   priv->pd_dev.d_private = priv;            /* Used to recover private state from dev */
 
