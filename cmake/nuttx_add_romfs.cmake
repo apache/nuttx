@@ -260,6 +260,11 @@ function(process_all_directory_romfs)
     return()
   endif()
 
+  # Is there a etc folder?
+  if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/etc)
+    return()
+  endif()
+
   # collect all ROMFS files
   get_property(
     board_rcsrcs
