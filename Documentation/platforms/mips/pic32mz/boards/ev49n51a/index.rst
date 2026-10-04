@@ -309,6 +309,19 @@ The PIC32MZ-W1 has no factory-programmed Ethernet MAC address. Assign one
 with ``CONFIG_NETINIT_NOMAC`` or with the ``SIOCSIFHWADDR`` ioctl before the
 interface is brought up.
 
+L1 cache
+========
+
+Both configurations enable the 16 KB instruction and 16 KB data caches
+(``CONFIG_MIPS32_ICACHE``, which also selects ``CONFIG_MIPS32_DCACHE``).
+The linker script places the data memory in KSEG0, so that it goes through
+the D-Cache; KSEG0 is uncached when the caches are disabled. The Ethernet
+driver performs the D-Cache maintenance around its DMA transfers.
+
+``CONFIG_BOARD_LOOPSPERMSEC`` (22224) is calibrated with the caches
+enabled. If you disable them, set it to 7245, or the busy-wait delays will
+be about three times too long.
+
 Boot trace
 ==========
 
