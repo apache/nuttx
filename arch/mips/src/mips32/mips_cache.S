@@ -45,13 +45,14 @@
 
 /* Cache Operations  ********************************************************/
 
-#define INDEX_INVALIDATE_I 0x00
-#define INDEX_INVALIDATE_D 0x01
-#define INDEX_STORE_TAG_I  0x08
-#define INDEX_STORE_TAG_D  0x09
-#define HIT_INVALIDATE_I   0x10
-#define HIT_INVALIDATE_D   0x11
-#define HIT_WRITEBACK_D    0x15
+#define INDEX_INVALIDATE_I    0x00
+#define INDEX_WRITEBACK_INV_D 0x01
+#define INDEX_STORE_TAG_I     0x08
+#define INDEX_STORE_TAG_D     0x09
+#define HIT_INVALIDATE_I      0x10
+#define HIT_INVALIDATE_D      0x11
+#define HIT_WRITEBACK_INV_D   0x15
+#define HIT_WRITEBACK_D       0x19
 
 /****************************************************************************
  * Public Symbols
@@ -67,15 +68,22 @@
  * Name: CACHE_OP
 
  * Description:
- *   Performs cache operation on an address range.
+ *   Performs cache operation on an address range.  start and end must be
+ *   aligned to lsize; nothing is done if start is not below end.  Must be
+ *   used with noreorder.  Clobbers t5.
  *
  ****************************************************************************/
 
   .macro CACHE_OP  op, start, end, lsize
-1:
+  sltu     t5, \start, \end
+  beqz     t5, .Lcacheop_done\@
+  nop
+.Lcacheop_loop\@:
   cache    \op, 0(\start)
   addu     \start, \start, \lsize
-  bne      \start, \end, 1b
+  bne      \start, \end, .Lcacheop_loop\@
+  nop
+.Lcacheop_done\@:
   .endm
 
 /****************************************************************************
@@ -128,7 +136,7 @@ icache_linesize:
 
   srl t1, t1, CP0_CONFIG1_IL_SHIFT
   li t2, 2
-  srl v0, t2, t1 /* Cache line size = 2 << IL_VALUE */
+  sll v0, t2, t1 /* Cache line size = 2 << IL_VALUE */
 #endif
 
 1:
@@ -337,7 +345,7 @@ dcache_linesize:
 
   srl t1, t1, CP0_CONFIG1_DL_SHIFT
   li t2, 2
-  srl v0, t2, t1 /* Cache line size = 2 << DL_VALUE */
+  sll v0, t2, t1 /* Cache line size = 2 << DL_VALUE */
 #endif
 
 1:
@@ -643,7 +651,8 @@ up_invalidate_icache:
 
   and  t0, a0, t3
 
-  subu t1, a1, 1
+  addu t1, a1, t2
+  subu t1, t1, 1
   and  t1, t1, t3
 
   /* Perform the cache operation */
@@ -715,7 +724,7 @@ up_invalidate_icache_all:
 
   /* Perform the cache operation */
 
-  CACHE_OP HIT_INVALIDATE_I, t3, t4, t1
+  CACHE_OP INDEX_INVALIDATE_I, t3, t4, t1
 
   /* Ensure all pending cache operations are completed. */
 
@@ -875,7 +884,8 @@ up_invalidate_dcache:
 
   and  t0, a0, t3
 
-  subu t1, a1, 1
+  addu t1, a1, t2
+  subu t1, t1, 1
   and  t1, t1, t3
 
   /* Perform the cache operation */
@@ -945,9 +955,13 @@ up_invalidate_dcache_all:
   li t3, CONFIG_MIPS32_KSEG0_DBASE
   addu t4, t3, t0
 
-  /* Perform the cache operation */
+  /* Write a zero (invalid) tag to every line, discarding its contents */
 
-  CACHE_OP HIT_INVALIDATE_D, t3, t4, t1
+  mtc0 zero, MIPS32_CP0_ERRCTL
+  mtc0 zero, MIPS32_CP0_TAGLO
+  ehb
+
+  CACHE_OP INDEX_STORE_TAG_D, t3, t4, t1
 
   /* Ensure all pending cache operations are completed. */
 
@@ -1009,7 +1023,8 @@ up_clean_dcache:
 
   and  t0, a0, t3
 
-  subu t1, a1, 1
+  addu t1, a1, t2
+  subu t1, t1, 1
   and  t1, t1, t3
 
   /* Perform the cache operation */
@@ -1038,7 +1053,8 @@ up_clean_dcache:
  *
  * Description:
  *   Clean the entire data cache within the specified region by flushing the
- *   contents of the data cache to memory.
+ *   contents of the data cache to memory.  MIPS32 has no indexed write-back
+ *   without invalidate, so the lines are invalidated too.
  *
  * Input Parameters:
  *   None
@@ -1082,7 +1098,7 @@ up_clean_dcache_all:
 
   /* Perform the cache operation */
 
-  CACHE_OP HIT_WRITEBACK_D, t3, t4, t1
+  CACHE_OP INDEX_WRITEBACK_INV_D, t3, t4, t1
 
   /* Ensure all pending cache operations are completed. */
 
@@ -1144,12 +1160,13 @@ up_flush_dcache:
 
   and  t0, a0, t3
 
-  subu t1, a1, 1
+  addu t1, a1, t2
+  subu t1, t1, 1
   and  t1, t1, t3
 
   /* Perform the cache operation */
 
-  CACHE_OP HIT_WRITEBACK_D, t0, t1, t2
+  CACHE_OP HIT_WRITEBACK_INV_D, t0, t1, t2
 
   /* Ensure all pending cache operations are completed. */
 
@@ -1216,7 +1233,7 @@ up_flush_dcache_all:
 
   /* Perform the cache operation */
 
-  CACHE_OP HIT_WRITEBACK_D, t3, t4, t1
+  CACHE_OP INDEX_WRITEBACK_INV_D, t3, t4, t1
 
   /* Ensure all pending cache operations are completed. */
 
@@ -1277,10 +1294,12 @@ up_coherent_dcache:
   jal up_flush_dcache
   nop
 
+#ifdef CONFIG_MIPS32_ICACHE
   /* Invalidate the entire I-Cache */
 
   jal up_invalidate_icache_all
   nop
+#endif
 
 1:
   lw ra, 0(sp)
