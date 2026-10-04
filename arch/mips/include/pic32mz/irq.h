@@ -38,6 +38,8 @@
 #  include <arch/pic32mz/irq_pic32mzxxxec.h>
 #elif defined(CHIP_PIC32MZEF)
 #  include <arch/pic32mz/irq_pic32mzxxxef.h>
+#elif defined(CHIP_PIC32MZW1)
+#  include <arch/pic32mz/irq_pic32mzw1.h>
 #else
 #  error "Unknown PIC32MZ family"
 #endif

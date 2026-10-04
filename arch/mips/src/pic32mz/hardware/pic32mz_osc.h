@@ -40,26 +40,60 @@
 #define PIC32MZ_OSCCON_OFFSET     0x0000 /* Oscillator control register offset */
 #define PIC32MZ_OSCTUN_OFFSET     0x0010 /* FRC tuning register offset */
 #define PIC32MZ_SPLLCON_OFFSET    0x0020 /* System PLL control register */
-#define PIC32MZ_REFO1CON_OFFSET   0x0080 /* Reference oscillator control register 1 */
-#define PIC32MZ_REFO1TRIM_OFFSET  0x00a0 /* Reference oscillator trim register 1 */
-#define PIC32MZ_REFO2CON_OFFSET   0x00b0 /* Reference oscillator control register 2 */
-#define PIC32MZ_REFO2TRIM_OFFSET  0x00c0 /* Reference oscillator trim register 2 */
-#define PIC32MZ_REFO3CON_OFFSET   0x00d0 /* Reference oscillator control register 3 */
-#define PIC32MZ_REFO3TRIM_OFFSET  0x00e0 /* Reference oscillator trim register 3 */
-#define PIC32MZ_REFO4CON_OFFSET   0x00f0 /* Reference oscillator control register 4 */
-#define PIC32MZ_REFO4TRIM_OFFSET  0x0100 /* Reference oscillator trim register 4 */
-#define PIC32MZ_PB1DIV_OFFSET     0x0100 /* Peripheral bus 1 clock divisor control register */
-#define PIC32MZ_PB2DIV_OFFSET     0x0110 /* Peripheral bus 2 clock divisor control register */
-#define PIC32MZ_PB3DIV_OFFSET     0x0120 /* Peripheral bus 3 clock divisor control register */
-#define PIC32MZ_PB4DIV_OFFSET     0x0130 /* Peripheral bus 4 clock divisor control register */
-#define PIC32MZ_PB5DIV_OFFSET     0x0140 /* Peripheral bus 5 clock divisor control register */
-#define PIC32MZ_PB6DIV_OFFSET     0x0150 /* Peripheral bus 6 clock divisor control register */
-#define PIC32MZ_PB7DIV_OFFSET     0x0160 /* Peripheral bus 7 clock divisor control register */
-#define PIC32MZ_PB8DIV_OFFSET     0x0170 /* Peripheral bus 8 clock divisor control register */
+
+#ifdef CONFIG_ARCH_CHIP_PIC32MZW1
+/* On PIC32MZ-W1, everything from REFO1CON onward is shifted +0x20
+ * relative to EC/EF (confirmed against the real WFI32E01 SFR
+ * addresses).  W1 also only implements PB1DIV-PB6DIV (no PB7/PB8).
+ */
+
+#  define PIC32MZ_REFO1CON_OFFSET   0x00a0
+#  define PIC32MZ_REFO1TRIM_OFFSET  0x00b0
+#  define PIC32MZ_REFO2CON_OFFSET   0x00c0
+#  define PIC32MZ_REFO2TRIM_OFFSET  0x00d0
+#  define PIC32MZ_REFO3CON_OFFSET   0x00e0
+#  define PIC32MZ_REFO3TRIM_OFFSET  0x00f0
+#  define PIC32MZ_REFO4CON_OFFSET   0x0100
+#  define PIC32MZ_REFO4TRIM_OFFSET  0x0110
+#  define PIC32MZ_PB1DIV_OFFSET     0x0120
+#  define PIC32MZ_PB2DIV_OFFSET     0x0130
+#  define PIC32MZ_PB3DIV_OFFSET     0x0140
+#  define PIC32MZ_PB4DIV_OFFSET     0x0150
+#  define PIC32MZ_PB5DIV_OFFSET     0x0160
+#  define PIC32MZ_PB6DIV_OFFSET     0x0170
+
+/* W1 has no PB7/PB8; these are unused placeholders so that the
+ * unconditional PIC32MZ_PB7DIV/PB8DIV address macros below still
+ * compile (gated off at the board.h level via BOARD_PBCLKn_ENABLE).
+ */
+
+#  define PIC32MZ_PB7DIV_OFFSET     0x0170
+#  define PIC32MZ_PB8DIV_OFFSET     0x0170
+#else
+#  define PIC32MZ_REFO1CON_OFFSET   0x0080 /* Reference oscillator control register 1 */
+#  define PIC32MZ_REFO1TRIM_OFFSET  0x00a0 /* Reference oscillator trim register 1 */
+#  define PIC32MZ_REFO2CON_OFFSET   0x00b0 /* Reference oscillator control register 2 */
+#  define PIC32MZ_REFO2TRIM_OFFSET  0x00c0 /* Reference oscillator trim register 2 */
+#  define PIC32MZ_REFO3CON_OFFSET   0x00d0 /* Reference oscillator control register 3 */
+#  define PIC32MZ_REFO3TRIM_OFFSET  0x00e0 /* Reference oscillator trim register 3 */
+#  define PIC32MZ_REFO4CON_OFFSET   0x00f0 /* Reference oscillator control register 4 */
+#  define PIC32MZ_REFO4TRIM_OFFSET  0x0100 /* Reference oscillator trim register 4 */
+#  define PIC32MZ_PB1DIV_OFFSET     0x0100 /* Peripheral bus 1 clock divisor control register */
+#  define PIC32MZ_PB2DIV_OFFSET     0x0110 /* Peripheral bus 2 clock divisor control register */
+#  define PIC32MZ_PB3DIV_OFFSET     0x0120 /* Peripheral bus 3 clock divisor control register */
+#  define PIC32MZ_PB4DIV_OFFSET     0x0130 /* Peripheral bus 4 clock divisor control register */
+#  define PIC32MZ_PB5DIV_OFFSET     0x0140 /* Peripheral bus 5 clock divisor control register */
+#  define PIC32MZ_PB6DIV_OFFSET     0x0150 /* Peripheral bus 6 clock divisor control register */
+#  define PIC32MZ_PB7DIV_OFFSET     0x0160 /* Peripheral bus 7 clock divisor control register */
+#  define PIC32MZ_PB8DIV_OFFSET     0x0170 /* Peripheral bus 8 clock divisor control register */
+#endif
 
 /* Register Addresses *******************************************************/
 
 #define PIC32MZ_OSCCON            (PIC32MZ_OSC_K1BASE+PIC32MZ_OSCCON_OFFSET)
+#define PIC32MZ_OSCCONCLR         (PIC32MZ_OSCCON+4)
+#define PIC32MZ_OSCCONSET         (PIC32MZ_OSCCON+8)
+#define PIC32MZ_OSCCONINV         (PIC32MZ_OSCCON+12)
 #define PIC32MZ_OSCTUN            (PIC32MZ_OSC_K1BASE+PIC32MZ_OSCTUN_OFFSET)
 
 #define PIC32MZ_SPLLCON           (PIC32MZ_OSC_K1BASE+PIC32MZ_SPLLCON_OFFSET)

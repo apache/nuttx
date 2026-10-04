@@ -1,0 +1,66 @@
+############################################################################
+# boards/mips/pic32mz/ev49n51a/scripts/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
+include $(TOPDIR)/tools/pic32/Config.mk
+include $(TOPDIR)/arch/mips/src/mips32/Toolchain.defs
+
+# mips-debug.ld is plain GNU ld syntax and works with every supported
+# toolchain (XC32, Pinguino, generic mips-elf), so override the
+# per-toolchain default from Toolchain.defs.
+
+LDSCRIPT = mips-debug.ld
+
+# MPLAB XC32 (Linux).  XC32 v6+ requires an explicit Device Family Pack
+# (DFP) path via -mdfp - it no longer bundles device support.  Point
+# WFI32E01_DFP_DIR at an extracted Microchip PIC32MZ-W_DFP
+# (packs.download.microchip.com) if it is not already at this default
+# path.
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL_XC32),y)
+  MIPS_MPROCESSOR = WFI32E01
+  WFI32E01_DFP_DIR ?= $(HOME)/microchip/WFI32-W_DFP
+  ARCHCPUFLAGS += -mdfp=$(WFI32E01_DFP_DIR)
+
+  # -mprocessor=WFI32E01 lets XC32 emit DSP ASE instructions (e.g. lwx).
+  # They trap unless CP0 Status.MX is set, which NuttX's head.S does not
+  # do, and NuttX's MIPS context switch does not save the DSP state, so
+  # keep the compiler away from the DSP ASE (verified on hardware: the
+  # first lwx hung the boot).
+
+  ARCHCPUFLAGS += -mno-dsp -mno-dspr2
+endif
+
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+
+# The linker is invoked directly, not through gcc, so it does not see the
+# -EL from ARCHCPUFLAGS (see the note in mips-debug.ld).
+
+LDFLAGS += -EL
+
+CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
+CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
+CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+AFLAGS := $(CFLAGS) -D__ASSEMBLY__
