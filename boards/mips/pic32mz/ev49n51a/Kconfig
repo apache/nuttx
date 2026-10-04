@@ -5,4 +5,17 @@
 
 if ARCH_BOARD_EV49N51A
 
+config EV49N51A_PHY_INTERRUPT
+	bool "LAN8720A interrupt on RK6"
+	default n
+	depends on PIC32MZ_ETHERNET
+	select ARCH_PHY_INTERRUPT
+	select PIC32MZ_GPIOIRQ
+	select PIC32MZ_GPIOIRQ_PORTK
+	---help---
+		Use the LAN8720A nINT output as a link up/down interrupt (for
+		example for NETINIT_MONITOR).  nINT reaches RK6 only through R309,
+		which is not fitted on the EV49N51A, so select this option only if
+		R309 is fitted or nINT is otherwise wired to RK6.
+
 endif # ARCH_BOARD_EV49N51A
