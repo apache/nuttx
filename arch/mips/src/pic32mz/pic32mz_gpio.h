@@ -115,7 +115,7 @@
 #  define GPIO_PULLDOWN      (4  << GPIO_CN_SHIFT)  /* Bit 10: Change notification pull-down */
 #  define GPIO_EDGE_DETECT   (8  << GPIO_CN_SHIFT)  /* Bit 11: Change notification interrupt mode */
 #  define GPIO_MISMATCH      (0)
-#  define GPIO_EDGE_RISING   (12 << GPIO_CN_SHIFT)  /* Bit 12: Change notification edge type */
+#  define GPIO_EDGE_RISING   (16 << GPIO_CN_SHIFT)  /* Bit 12: Change notification edge type */
 #  define GPIO_EDGE_FALLING  (0)
 
 /* GPIO Port.
