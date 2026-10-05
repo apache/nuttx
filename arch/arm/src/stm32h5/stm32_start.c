@@ -240,6 +240,20 @@ void __start(void)
 
 #ifdef CONFIG_STM32_ICACHE
   stm32_enable_icache();
+#else
+  /* Disable an ICACHE left enabled by a bootloader: the OTP and RO flash
+   * areas cannot be read through it (RM0481 7.3.2).
+   */
+
+  if ((getreg32(STM32_ICACHE_CR) & ICACHE_CR_EN) != 0)
+    {
+      uint32_t regval;
+
+      regval = getreg32(STM32_ICACHE_CR);
+      regval &= ~(ICACHE_CR_EN);
+      putreg32(regval, STM32_ICACHE_CR);
+    }
+
 #endif
   showprogress('G');
 
