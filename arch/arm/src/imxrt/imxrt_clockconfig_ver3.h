@@ -275,6 +275,9 @@ EXTERN const struct clock_configuration_s g_initial_clkconfig;
 #define imxrt_clockoff_lpspi5()     imxrt_ccm_gate_on(CCM_LPCG_LPSPI5, false)
 #define imxrt_clockoff_lpspi6()     imxrt_ccm_gate_on(CCM_LPCG_LPSPI6, false)
 
+#define imxrt_clockall_usdhc1()     imxrt_ccm_gate_on(CCM_LPCG_USDHC1, true)
+#define imxrt_clockall_usdhc2()     imxrt_ccm_gate_on(CCM_LPCG_USDHC2, true)
+
 #define imxrt_clockall_usboh3()     imxrt_ccm_gate_on(CCM_LPCG_USB, true)
 #define imxrt_clockoff_usboh3()     imxrt_ccm_gate_on(CCM_LPCG_USB, false)
 #define imxrt_clockrun_usboh3()     imxrt_ccm_gate_on(CCM_LPCG_USB, true)
