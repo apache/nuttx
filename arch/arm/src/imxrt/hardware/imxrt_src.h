@@ -30,6 +30,10 @@
 #include <nuttx/config.h>
 #include "hardware/imxrt_memorymap.h"
 
+#if defined(CONFIG_ARCH_FAMILY_IMXRT118x)
+#  include "hardware/rt118x/imxrt118x_src.h"
+#else
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -140,5 +144,7 @@
  * NOTE:  Ald GPR registers are used by the ROM code and should not be used
  * by application software.
  */
+
+#endif /* CONFIG_ARCH_FAMILY_IMXRT118x */
 
 #endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_SRC_H */

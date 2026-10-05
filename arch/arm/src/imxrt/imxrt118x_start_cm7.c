@@ -41,6 +41,7 @@
 #include "hardware/rt118x/imxrt118x_anadig.h"
 #include "hardware/rt118x/imxrt118x_blkctrl.h"
 #include "hardware/rt118x/imxrt118x_gpc.h"
+#include "hardware/imxrt_src.h"
 
 /****************************************************************************
  * Pre-processor Definitions
