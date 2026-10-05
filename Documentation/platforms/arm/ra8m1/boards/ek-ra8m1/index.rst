@@ -155,6 +155,18 @@ SCI9:
 
 SCI9 is the serial console in the default configurations, at 115200 8N1.
 
+SCI0 is also wired out on this board, for use as a second UART
+(``CONFIG_RA_SCI0_UART``) independent of the console:
+
+    ==================   ============
+    Signal               R7FA8M1AHECBD
+    ==================   ============
+    TXD0                 P609
+    RXD0                 P610
+    ==================   ============
+
+Tested with an external USB-serial adapter.
+
 Timers
 ======
 
@@ -235,3 +247,29 @@ Same as ``nsh``, but registers GPT0 and GPT9 as ``/dev/timer0`` and
 header (see `Arduino Shield GPIO`_ above), and builds in
 ``apps/examples/gpio`` and ``apps/examples/timer_gpio`` (see `Timers`_
 above).
+
+serial-test
+-----------
+
+Same as ``nsh``, but also enables SCI0 as ``/dev/ttyS1`` (see `Serial
+Console`_ above) with its FIFO (``CONFIG_RA_SCI0_FIFO``, TTRG=15/
+RTRG=0 -- the best overrun-resistant setting measured on hardware) and
+1024-byte RX/TX buffers, ``CONFIG_SERIAL_TERMIOS`` and
+``apps/system/stty``, and builds in ``apps/examples/serialblaster``
+and ``apps/examples/serialrx``, both pointed at ``/dev/ttyS1``, for
+exercising SCI0 at a range of baud rates independent of the console.
+
+To test, with an external loopback wired across SCI0's TX/RX pins
+(see `Serial Console`_ above for the pinout):
+
+.. code-block:: console
+
+    nsh> stty -F /dev/ttyS1 speed 3000000
+    nsh> serialrx /dev/ttyS1 1000 &
+    nsh> serialblaster /dev/ttyS1 1000
+
+Keep the byte count at or below the 1024-byte RX buffer.
+``serialrx`` prints every received byte to the (115200) console as it
+reads, far slower than a multi-Mbps port fills the buffer; a transfer
+longer than the buffer overflows it in software, in the generic
+NuttX serial core, well before SCI0's own FIFO is the limiting factor.
