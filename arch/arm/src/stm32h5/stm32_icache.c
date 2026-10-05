@@ -248,6 +248,26 @@ static void stm32_icache_setup_region(struct stm32_icache_region region)
 }
 #endif
 
+static bool stm32_icache_wait_invalidate(void)
+{
+  uint32_t timeout = STM32_ICACHE_BUSY_TIMEOUT;
+
+  /* Wait for a running invalidate (after reset, CACHEINV or EN=0) to end;
+   * the ICACHE should not be enabled before (RM0481 8.4.5).  Returns false
+   * on timeout.
+   */
+
+  while ((getreg32(STM32_ICACHE_SR) & ICACHE_SR_BUSYF) != 0)
+    {
+      if (--timeout == 0)
+        {
+          return false;
+        }
+    }
+
+  return true;
+}
+
 static void stm32_icache_mpu_setup(void)
 {
   /* Non-cacheable, execute-never.  stm32_mpuinitialize() enabled the MPU. */
@@ -362,6 +382,14 @@ void stm32_disable_icache(void)
   regval = getreg32(STM32_ICACHE_CR);
   regval &= ~(ICACHE_CR_EN);
   putreg32(regval, STM32_ICACHE_CR);
+
+  /* Disabling the ICACHE starts a full invalidate, wait for it to finish.
+   * The ICACHE is disabled whether or not the wait times out, so there is
+   * nothing to report: stm32_enable_icache() waits again before enabling.
+   */
+
+  stm32_icache_wait_invalidate();
+  putreg32(ICACHE_FCR_CBSYENDF | ICACHE_FCR_CERRF, STM32_ICACHE_FCR);
 }
 
 bool stm32_icache_enabled(void)
@@ -369,14 +397,28 @@ bool stm32_icache_enabled(void)
   return (getreg32(STM32_ICACHE_CR) & ICACHE_CR_EN) != 0;
 }
 
-void stm32_enable_icache(void)
+int stm32_enable_icache(void)
 {
   uint32_t regval;
 
   if (icache1.initialized != true)
     {
+      /* A bootloader may have left the ICACHE enabled.  Disable it, which
+       * also invalidates it: WAYSEL and the region registers can only be
+       * written while EN=0 (RM0481 8.4.4, 8.4.7).
+       */
+
+      stm32_disable_icache();
+
       stm32_icache_initialize();
       icache1.initialized = true;
+    }
+
+  /* If the invalidate times out, leave the ICACHE disabled */
+
+  if (!stm32_icache_wait_invalidate())
+    {
+      return -ETIMEDOUT;
     }
 
   /* Enable the ICACHE */
@@ -384,6 +426,7 @@ void stm32_enable_icache(void)
   regval = getreg32(STM32_ICACHE_CR);
   regval |= ICACHE_CR_EN;
   putreg32(regval, STM32_ICACHE_CR);
+  return OK;
 }
 
 void stm32_invalidate_icache(void)
