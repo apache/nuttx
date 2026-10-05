@@ -43,6 +43,14 @@
  * (hardware/rt118x/imxrt118x_memorymap.h).
  */
 
+#define IMXRT_XBAR1_INDEX     IMXRT_XBARA1_INDEX
+#define IMXRT_XBAR2_INDEX     IMXRT_XBARA2_INDEX
+#define IMXRT_XBAR3_INDEX     IMXRT_XBARA3_INDEX
+
+#define IMXRT_XBAR1(side, select)  IMXRT_XBARA1(side, select)
+#define IMXRT_XBAR2(side, select)  IMXRT_XBARA2(side, select)
+#define IMXRT_XBAR3(side, select)  IMXRT_XBARA3(side, select)
+
 /****************************************************************************
  * XBAR Input Assignments (IMXRT1180RM Table 14)
  ****************************************************************************/
