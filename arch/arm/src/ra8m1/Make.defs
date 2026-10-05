@@ -40,3 +40,7 @@ CHIP_CSRCS += ra_timerisr.c
 ifeq ($(CONFIG_RA_GPT_TIMER),y)
 CHIP_CSRCS += ra_gpt.c
 endif
+
+ifeq ($(CONFIG_RA_DTC),y)
+CHIP_CSRCS += ra_dtc.c
+endif

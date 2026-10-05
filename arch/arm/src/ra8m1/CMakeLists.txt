@@ -34,4 +34,8 @@ if(CONFIG_RA_GPT_TIMER)
   list(APPEND SRCS ra_gpt.c)
 endif()
 
+if(CONFIG_RA_DTC)
+  list(APPEND SRCS ra_dtc.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

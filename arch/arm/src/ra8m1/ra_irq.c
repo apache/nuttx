@@ -37,6 +37,10 @@
 #include "arm_internal.h"
 #include "ra_icu.h"
 
+#ifdef CONFIG_RA_DTC
+#  include "ra_dtc.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -243,6 +247,14 @@ void up_irqinitialize(void)
   /* Attach the ICU events to the IRQ vector table */
 
   ra_attach_icu();
+
+#ifdef CONFIG_RA_DTC
+  /* Bring up the DTC after the ICU events are routed: ra_dtc_enable()
+   * arms DTC activation on an already-routed IELSR slot.
+   */
+
+  ra_dtc_initialize();
+#endif
 
   ra_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
 

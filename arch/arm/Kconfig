@@ -386,6 +386,7 @@ config ARCH_CHIP_RA8M1
 	bool "Renesas RA8M1"
 	select ARCH_CORTEXM85
 	select ARCH_HAVE_FPU
+	select ARCH_HAVE_SERIAL_TERMIOS
 	---help---
 		Renesas RA8M1 Family (ARM Cortex-M85).
 
