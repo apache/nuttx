@@ -217,6 +217,10 @@ static inline void stm32_icache_disable_monitors(void)
   putreg32(regval, STM32_ICACHE_CR);
 }
 
+#if defined(CONFIG_STM32_ICACHE_REGION0) || \
+    defined(CONFIG_STM32_ICACHE_REGION1) || \
+    defined(CONFIG_STM32_ICACHE_REGION2) || \
+    defined(CONFIG_STM32_ICACHE_REGION3)
 static void stm32_icache_setup_region(struct stm32_icache_region region)
 {
   uint32_t regval = 0;
@@ -232,10 +236,13 @@ static void stm32_icache_setup_region(struct stm32_icache_region region)
 
   putreg32(regval, STM32_ICACHE_CRR(region.num));
 }
+#endif
 
 void stm32_icache_initialize(void)
 {
+#ifdef CONFIG_STM32_ICACHE_DIRECT
   uint32_t regval;
+#endif
 
   /* Set associativity */
 
@@ -281,14 +288,14 @@ void stm32_icache_initialize(void)
 
   if (ret == OK)
     {
-      regval = 0;
+      uint32_t ier = 0;
 #  ifdef CONFIG_STM32_ICACHE_INV_INT
-      regval |= ICACHE_IER_BSYENDIE;
+      ier |= ICACHE_IER_BSYENDIE;
 #  endif
 #  ifdef CONFIG_STM32_ICACHE_ERR_INT
-      regval |= ICACHE_IER_ERRIE;
+      ier |= ICACHE_IER_ERRIE;
 #  endif
-      stm32_icache_set_ier(regval);
+      stm32_icache_set_ier(ier);
 
       up_enable_irq(STM32_IRQ_ICACHE);
     }
