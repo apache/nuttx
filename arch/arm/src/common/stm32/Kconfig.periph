@@ -324,6 +324,12 @@ config STM32_ICACHE
 	bool "ICACHE"
 	default n
 	depends on STM32_HAVE_ICACHE
+	select ARM_MPU
+	---help---
+		Enable the instruction cache (ICACHE) on the C-AHB bus.  The OTP,
+		read-only and high-cycle data flash areas cannot be cached
+		(RM0481 7.3.2), so this option selects ARM_MPU and maps them
+		non-cacheable.
 
 config STM32_DCACHE1
 	depends on STM32_HAVE_DCACHE1

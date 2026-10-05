@@ -34,6 +34,7 @@
 #include <stdint.h>
 
 #include "arm_internal.h"
+#include "mpu.h"
 #include "stm32.h"
 
 /****************************************************************************
@@ -42,6 +43,15 @@
 
 #define STM32_ICACHE_INTERRUPT  (defined(CONFIG_STM32_ICACHE_INV_INT) ||\
                                    defined(CONFIG_STM32_ICACHE_ERR_INT))
+
+/* The OTP (0x08fff000), read-only (0x08fff800, UID) and EDATA
+ * (0x09000000-0x09017fff) flash areas only accept 16/32-bit accesses
+ * (RM0481 Table 77) and must be mapped non-cacheable (RM0481 7.3.2).  They
+ * are contiguous, so one MPU region covers them.
+ */
+
+#define STM32_ICACHE_NC_BASE      0x08fff000
+#define STM32_ICACHE_NC_END       0x09018000
 
 /****************************************************************************
  * Private Types
@@ -238,11 +248,29 @@ static void stm32_icache_setup_region(struct stm32_icache_region region)
 }
 #endif
 
+static void stm32_icache_mpu_setup(void)
+{
+  /* Non-cacheable, execute-never.  stm32_mpuinitialize() enabled the MPU. */
+
+  DEBUGASSERT((getreg32(MPU_CTRL) & MPU_CTRL_ENABLE) != 0);
+
+  mpu_configure_region(STM32_ICACHE_NC_BASE,
+                       STM32_ICACHE_NC_END - STM32_ICACHE_NC_BASE,
+                       MPU_RBAR_XN | MPU_RBAR_AP_RWRW | MPU_RBAR_SH_NO,
+                       MPU_RLAR_NONCACHEABLE);
+}
+
 void stm32_icache_initialize(void)
 {
 #ifdef CONFIG_STM32_ICACHE_DIRECT
   uint32_t regval;
 #endif
+
+  /* The flash areas that cannot be cached must be excluded before the
+   * ICACHE is enabled.
+   */
+
+  stm32_icache_mpu_setup();
 
   /* Set associativity */
 
