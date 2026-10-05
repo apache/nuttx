@@ -44,14 +44,14 @@ CLOCK       Yes      MOCO, HOCO, MOSC, PLL1, PLL2, SCICLK
 ICU         Yes
 KINT        No
 ELC         No
-DTC         No
+DTC         Yes      Used by SCI (see SCI below); normal mode only
 DMAC        No
 GPT         Yes      Timer only: /dev/timerN (GPT0-7 32-bit, GPT8-13 16-bit)
 AGT         No
 RTC         No
 WDT         No
 IWDT        No
-SCI         Yes      Just UART (SCI_B0-4, SCI_B9)
+SCI         Yes      UART only (SCI_B0-4, SCI_B9); FIFO, DTC, termios
 IIC         No
 SPI         No
 SSIE        No
@@ -88,7 +88,39 @@ The Serial Communications Interface, Type B (SCI_B) is configurable to
 support several serial communication modes: Asynchronous (UART), Clock
 synchronous, Simple SPI, Smart card interface, Simple IIC (master-only).
 NuttX driver support covers UART mode.  RA8M1 has SCI_B0-4 and SCI_B9 (no
-SCI_B5-8); each channel's baud rate generator runs from SCICLK.
+SCI_B5-8); each channel's baud rate generator runs from SCICLK.  Each
+instance is enabled with its own ``CONFIG_RA_SCIn_UART``.
+
+Each instance can independently use its 16-stage hardware FIFO or the
+DTC (see `DTC`_ below) to move data, but not both: ``CONFIG_RA_SCIn_FIFO``
+and ``CONFIG_RA_SCIn_TXDTC``/``RXDTC`` are mutually exclusive.  Measured on
+hardware, a low receive trigger level (``CONFIG_RA_SCIn_FIFO_RXTRG``) gives
+better overrun resistance at high baud rates than RX DTC does, since DTC
+only protects a byte while its single-activation transfer is actually
+armed, not continuously -- see the Kconfig help for each option for the
+detail.
+
+``CONFIG_SERIAL_TERMIOS`` enables ``TCGETS``/``TCSETS`` (baud rate, parity,
+stop bits only -- word length and the FIFO/DTC choice are fixed at build
+time).  ``apps/system/stty`` can change these live, e.g.
+``stty -F /dev/ttyS1 speed 3000000`` (FIFO with TTRG=15/RTRG=0 tested
+clean up to 3 Mbps).
+
+``CONFIG_SERIAL_TIOCGICOUNT`` exposes frame/overrun/parity counters
+through the standard ``TIOCGICOUNT`` ioctl; nothing pushes a
+notification, an application has to poll it.
+
+DTC
+---
+
+The Data Transfer Controller offloads repetitive, register-triggered
+transfers (e.g. UART TX/RX) from the CPU: the ICU event that would
+otherwise interrupt the CPU instead activates the DTC for one transfer,
+and once its count is exhausted it still interrupts the CPU normally.
+Only normal mode (one activation, one transfer) is implemented; repeat
+and block modes are not.  Enabled with ``CONFIG_RA_DTC``; peripheral
+drivers that support it expose their own per-channel options (e.g.
+``CONFIG_RA_SCI9_TXDTC``).
 
 GPIO
 ----
