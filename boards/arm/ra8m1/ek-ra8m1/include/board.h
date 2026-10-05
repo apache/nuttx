@@ -321,6 +321,9 @@
 #define GPIO_SCI9_RX   GPIO_RXD9_MISO9_SCL9_3  /* PA15 */
 #define GPIO_SCI9_TX   GPIO_TXD9_MOSI9_SDA9_3  /* PA14 */
 
+#define GPIO_SCI0_RX   GPIO_RXD0_MISO0_SCL0_3  /* P610 */
+#define GPIO_SCI0_TX   GPIO_TXD0_MOSI0_SDA0_3  /* P609 */
+
 /* Arduino shield header pin selections *************************************/
 
 /* D2-D5 are wired as inputs, D6-D13 as outputs (see
