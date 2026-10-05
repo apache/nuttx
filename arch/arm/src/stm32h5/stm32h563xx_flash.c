@@ -374,12 +374,11 @@ static void flash_lock_opt(void)
  * Name: flash_read_eccsafe16
  *
  * Description:
- *   Read one 16-bit half-word of EDATA or OTP.  Both only support 16 and
- *   32-bit reads, so the ICACHE, which would fill whole lines, is disabled
- *   for the read.  Reading a blank (erased, never programmed) half-word
- *   raises the Flash ECC NMI, which is masked in the SBS first and handled
- *   instead by checking ECCDETR afterwards.  Both are restored before
- *   returning.
+ *   Read one 16-bit half-word of EDATA or OTP.  Both areas are mapped
+ *   non-cacheable by the ICACHE driver, so the read bypasses the ICACHE.
+ *   Reading a blank (erased, never programmed) half-word raises the Flash
+ *   ECC NMI, which is masked in the SBS first and handled instead by
+ *   checking ECCDETR afterwards.  The mask is restored before returning.
  *
  * Input Parameters:
  *   addr    - Address of the half-word
@@ -398,19 +397,8 @@ static uint16_t flash_read_eccsafe16(uintptr_t addr, uint32_t eccd,
   irqstate_t flags;
   uint16_t   value;
   uint32_t   eccnmir;
-#ifdef CONFIG_STM32_ICACHE
-  bool       icache;
-#endif
 
   flags = up_irq_save();
-
-#ifdef CONFIG_STM32_ICACHE
-  icache = stm32_icache_enabled();
-  if (icache)
-    {
-      stm32_disable_icache();
-    }
-#endif
 
   eccnmir = getreg32(STM32_SBS_ECCNMIR);
   putreg32(eccnmir | SBS_ECCNMIR_ECCNMI_MASK_EN, STM32_SBS_ECCNMIR);
@@ -426,13 +414,6 @@ static uint16_t flash_read_eccsafe16(uintptr_t addr, uint32_t eccd,
     }
 
   putreg32(eccnmir, STM32_SBS_ECCNMIR);
-
-#ifdef CONFIG_STM32_ICACHE
-  if (icache)
-    {
-      stm32_enable_icache();
-    }
-#endif
 
   up_irq_restore(flags);
 
