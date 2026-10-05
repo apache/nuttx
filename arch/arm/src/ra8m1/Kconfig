@@ -349,11 +349,155 @@ config RA_SCI0_UART
 	depends on RA_HAVE_SCI_B0
 	select SCI0_SERIALDRIVER
 
+config RA_SCI0_FIFO
+	bool "Use SCI0's 16-stage FIFO"
+	default n
+	depends on RA_SCI0_UART
+	select RA_SCI_FIFO
+	---help---
+		Switch SCI0 to its 16-stage FIFO (CCR3.FM=1): fewer interrupts
+		on a continuous stream, and enables the receive-timeout ("idle
+		line") event (SCIn_RXI fires on fewer-than-trigger-level bytes
+		within 15 ETUs of the last stop bit).
+
+		Mutually exclusive with CONFIG_RA_SCI0_TXDTC/RXDTC (see their help).
+
+if RA_SCI0_FIFO
+
+config RA_SCI0_FIFO_TXTRG
+	int "Transmit FIFO trigger level (FCR.TTRG)"
+	range 0 15
+	default 0
+	---help---
+		SCIn_TXI fires once the transmit-FIFO's occupancy drops to this
+		level or below.  0 (the Renesas FSP default) waits for the FIFO
+		to empty completely before the next interrupt, for the fewest
+		interrupts on a continuous stream.
+
+config RA_SCI0_FIFO_RXTRG
+	int "Receive FIFO trigger level (FCR.RTRG)"
+	range 0 15
+	default 15
+	---help---
+		SCIn_RXI fires once the receive-FIFO's occupancy reaches this
+		level.  The idle-line timeout only ever fires when 0 < count <
+		RTRG, so it never fires at RTRG 0 or 1.  Lower values give more
+		overrun margin (confirmed on hardware: RTRG=0 ran clean to
+		3 Mbps); higher values mean fewer interrupts but less margin --
+		the default of 15 is the worst setting for high-baud overrun
+		resistance.
+
+endif # RA_SCI0_FIFO
+
+config RA_SCI0_TXDTC
+	bool "Transmit SCI0 through the DTC"
+	default n
+	depends on RA_SCI0_UART && RA_DTC && !RA_SCI0_FIFO
+	select SERIAL_TXDMA
+	---help---
+		Move transmit data out of the ring buffer into TDR through the
+		DTC in the background, instead of one byte per SCIn_TXI: one
+		completion interrupt per chunk, not per byte (up_dma_send_at()
+		in ra_serial.c).
+
+		Mutually exclusive with CONFIG_RA_SCI0_FIFO (see its help).
+
+config RA_SCI0_RXDTC
+	bool "Receive SCI0 through the DTC"
+	default n
+	depends on RA_SCI0_UART && RA_DTC && !RA_SCI0_FIFO
+	---help---
+		Move each received byte out of RDR through the DTC as it
+		arrives: one DTC activation per byte, with a CPU interrupt on
+		every one (no interrupt-count reduction like TXDTC, since byte
+		arrival isn't known in advance).
+
+		Its register move avoids NVIC latency, but only while armed --
+		the gap between a byte being consumed and up_dma_rxarm()
+		re-arming is serviced by the CPU instead.  At very high baud
+		rates that gap can matter more than FIFO's standing multi-byte
+		margin: do not assume this beats CONFIG_RA_SCI0_FIFO with a low
+		receive trigger level.
+
+		Mutually exclusive with CONFIG_RA_SCI0_FIFO (see its help).
+
 config RA_SCI1_UART
 	bool "UART 1"
 	default n
 	depends on RA_HAVE_SCI_B1
 	select SCI1_SERIALDRIVER
+
+config RA_SCI1_FIFO
+	bool "Use SCI1's 16-stage FIFO"
+	default n
+	depends on RA_SCI1_UART
+	select RA_SCI_FIFO
+	---help---
+		Switch SCI1 to its 16-stage FIFO (CCR3.FM=1): fewer interrupts
+		on a continuous stream, and enables the receive-timeout ("idle
+		line") event (SCIn_RXI fires on fewer-than-trigger-level bytes
+		within 15 ETUs of the last stop bit).
+
+		Mutually exclusive with CONFIG_RA_SCI1_TXDTC/RXDTC (see their help).
+
+if RA_SCI1_FIFO
+
+config RA_SCI1_FIFO_TXTRG
+	int "Transmit FIFO trigger level (FCR.TTRG)"
+	range 0 15
+	default 0
+	---help---
+		SCIn_TXI fires once the transmit-FIFO's occupancy drops to this
+		level or below.  0 (the Renesas FSP default) waits for the FIFO
+		to empty completely before the next interrupt, for the fewest
+		interrupts on a continuous stream.
+
+config RA_SCI1_FIFO_RXTRG
+	int "Receive FIFO trigger level (FCR.RTRG)"
+	range 0 15
+	default 15
+	---help---
+		SCIn_RXI fires once the receive-FIFO's occupancy reaches this
+		level.  The idle-line timeout only ever fires when 0 < count <
+		RTRG, so it never fires at RTRG 0 or 1.  Lower values give more
+		overrun margin (confirmed on hardware: RTRG=0 ran clean to
+		3 Mbps); higher values mean fewer interrupts but less margin --
+		the default of 15 is the worst setting for high-baud overrun
+		resistance.
+
+endif # RA_SCI1_FIFO
+
+config RA_SCI1_TXDTC
+	bool "Transmit SCI1 through the DTC"
+	default n
+	depends on RA_SCI1_UART && RA_DTC && !RA_SCI1_FIFO
+	select SERIAL_TXDMA
+	---help---
+		Move transmit data out of the ring buffer into TDR through the
+		DTC in the background, instead of one byte per SCIn_TXI: one
+		completion interrupt per chunk, not per byte (up_dma_send_at()
+		in ra_serial.c).
+
+		Mutually exclusive with CONFIG_RA_SCI1_FIFO (see its help).
+
+config RA_SCI1_RXDTC
+	bool "Receive SCI1 through the DTC"
+	default n
+	depends on RA_SCI1_UART && RA_DTC && !RA_SCI1_FIFO
+	---help---
+		Move each received byte out of RDR through the DTC as it
+		arrives: one DTC activation per byte, with a CPU interrupt on
+		every one (no interrupt-count reduction like TXDTC, since byte
+		arrival isn't known in advance).
+
+		Its register move avoids NVIC latency, but only while armed --
+		the gap between a byte being consumed and up_dma_rxarm()
+		re-arming is serviced by the CPU instead.  At very high baud
+		rates that gap can matter more than FIFO's standing multi-byte
+		margin: do not assume this beats CONFIG_RA_SCI1_FIFO with a low
+		receive trigger level.
+
+		Mutually exclusive with CONFIG_RA_SCI1_FIFO (see its help).
 
 config RA_SCI2_UART
 	bool "UART 2"
@@ -361,11 +505,155 @@ config RA_SCI2_UART
 	depends on RA_HAVE_SCI_B2
 	select SCI2_SERIALDRIVER
 
+config RA_SCI2_FIFO
+	bool "Use SCI2's 16-stage FIFO"
+	default n
+	depends on RA_SCI2_UART
+	select RA_SCI_FIFO
+	---help---
+		Switch SCI2 to its 16-stage FIFO (CCR3.FM=1): fewer interrupts
+		on a continuous stream, and enables the receive-timeout ("idle
+		line") event (SCIn_RXI fires on fewer-than-trigger-level bytes
+		within 15 ETUs of the last stop bit).
+
+		Mutually exclusive with CONFIG_RA_SCI2_TXDTC/RXDTC (see their help).
+
+if RA_SCI2_FIFO
+
+config RA_SCI2_FIFO_TXTRG
+	int "Transmit FIFO trigger level (FCR.TTRG)"
+	range 0 15
+	default 0
+	---help---
+		SCIn_TXI fires once the transmit-FIFO's occupancy drops to this
+		level or below.  0 (the Renesas FSP default) waits for the FIFO
+		to empty completely before the next interrupt, for the fewest
+		interrupts on a continuous stream.
+
+config RA_SCI2_FIFO_RXTRG
+	int "Receive FIFO trigger level (FCR.RTRG)"
+	range 0 15
+	default 15
+	---help---
+		SCIn_RXI fires once the receive-FIFO's occupancy reaches this
+		level.  The idle-line timeout only ever fires when 0 < count <
+		RTRG, so it never fires at RTRG 0 or 1.  Lower values give more
+		overrun margin (confirmed on hardware: RTRG=0 ran clean to
+		3 Mbps); higher values mean fewer interrupts but less margin --
+		the default of 15 is the worst setting for high-baud overrun
+		resistance.
+
+endif # RA_SCI2_FIFO
+
+config RA_SCI2_TXDTC
+	bool "Transmit SCI2 through the DTC"
+	default n
+	depends on RA_SCI2_UART && RA_DTC && !RA_SCI2_FIFO
+	select SERIAL_TXDMA
+	---help---
+		Move transmit data out of the ring buffer into TDR through the
+		DTC in the background, instead of one byte per SCIn_TXI: one
+		completion interrupt per chunk, not per byte (up_dma_send_at()
+		in ra_serial.c).
+
+		Mutually exclusive with CONFIG_RA_SCI2_FIFO (see its help).
+
+config RA_SCI2_RXDTC
+	bool "Receive SCI2 through the DTC"
+	default n
+	depends on RA_SCI2_UART && RA_DTC && !RA_SCI2_FIFO
+	---help---
+		Move each received byte out of RDR through the DTC as it
+		arrives: one DTC activation per byte, with a CPU interrupt on
+		every one (no interrupt-count reduction like TXDTC, since byte
+		arrival isn't known in advance).
+
+		Its register move avoids NVIC latency, but only while armed --
+		the gap between a byte being consumed and up_dma_rxarm()
+		re-arming is serviced by the CPU instead.  At very high baud
+		rates that gap can matter more than FIFO's standing multi-byte
+		margin: do not assume this beats CONFIG_RA_SCI2_FIFO with a low
+		receive trigger level.
+
+		Mutually exclusive with CONFIG_RA_SCI2_FIFO (see its help).
+
 config RA_SCI3_UART
 	bool "UART 3"
 	default n
 	depends on RA_HAVE_SCI_B3
 	select SCI3_SERIALDRIVER
+
+config RA_SCI3_FIFO
+	bool "Use SCI3's 16-stage FIFO"
+	default n
+	depends on RA_SCI3_UART
+	select RA_SCI_FIFO
+	---help---
+		Switch SCI3 to its 16-stage FIFO (CCR3.FM=1): fewer interrupts
+		on a continuous stream, and enables the receive-timeout ("idle
+		line") event (SCIn_RXI fires on fewer-than-trigger-level bytes
+		within 15 ETUs of the last stop bit).
+
+		Mutually exclusive with CONFIG_RA_SCI3_TXDTC/RXDTC (see their help).
+
+if RA_SCI3_FIFO
+
+config RA_SCI3_FIFO_TXTRG
+	int "Transmit FIFO trigger level (FCR.TTRG)"
+	range 0 15
+	default 0
+	---help---
+		SCIn_TXI fires once the transmit-FIFO's occupancy drops to this
+		level or below.  0 (the Renesas FSP default) waits for the FIFO
+		to empty completely before the next interrupt, for the fewest
+		interrupts on a continuous stream.
+
+config RA_SCI3_FIFO_RXTRG
+	int "Receive FIFO trigger level (FCR.RTRG)"
+	range 0 15
+	default 15
+	---help---
+		SCIn_RXI fires once the receive-FIFO's occupancy reaches this
+		level.  The idle-line timeout only ever fires when 0 < count <
+		RTRG, so it never fires at RTRG 0 or 1.  Lower values give more
+		overrun margin (confirmed on hardware: RTRG=0 ran clean to
+		3 Mbps); higher values mean fewer interrupts but less margin --
+		the default of 15 is the worst setting for high-baud overrun
+		resistance.
+
+endif # RA_SCI3_FIFO
+
+config RA_SCI3_TXDTC
+	bool "Transmit SCI3 through the DTC"
+	default n
+	depends on RA_SCI3_UART && RA_DTC && !RA_SCI3_FIFO
+	select SERIAL_TXDMA
+	---help---
+		Move transmit data out of the ring buffer into TDR through the
+		DTC in the background, instead of one byte per SCIn_TXI: one
+		completion interrupt per chunk, not per byte (up_dma_send_at()
+		in ra_serial.c).
+
+		Mutually exclusive with CONFIG_RA_SCI3_FIFO (see its help).
+
+config RA_SCI3_RXDTC
+	bool "Receive SCI3 through the DTC"
+	default n
+	depends on RA_SCI3_UART && RA_DTC && !RA_SCI3_FIFO
+	---help---
+		Move each received byte out of RDR through the DTC as it
+		arrives: one DTC activation per byte, with a CPU interrupt on
+		every one (no interrupt-count reduction like TXDTC, since byte
+		arrival isn't known in advance).
+
+		Its register move avoids NVIC latency, but only while armed --
+		the gap between a byte being consumed and up_dma_rxarm()
+		re-arming is serviced by the CPU instead.  At very high baud
+		rates that gap can matter more than FIFO's standing multi-byte
+		margin: do not assume this beats CONFIG_RA_SCI3_FIFO with a low
+		receive trigger level.
+
+		Mutually exclusive with CONFIG_RA_SCI3_FIFO (see its help).
 
 config RA_SCI4_UART
 	bool "UART 4"
@@ -373,11 +661,175 @@ config RA_SCI4_UART
 	depends on RA_HAVE_SCI_B4
 	select SCI4_SERIALDRIVER
 
+config RA_SCI4_FIFO
+	bool "Use SCI4's 16-stage FIFO"
+	default n
+	depends on RA_SCI4_UART
+	select RA_SCI_FIFO
+	---help---
+		Switch SCI4 to its 16-stage FIFO (CCR3.FM=1): fewer interrupts
+		on a continuous stream, and enables the receive-timeout ("idle
+		line") event (SCIn_RXI fires on fewer-than-trigger-level bytes
+		within 15 ETUs of the last stop bit).
+
+		Mutually exclusive with CONFIG_RA_SCI4_TXDTC/RXDTC (see their help).
+
+if RA_SCI4_FIFO
+
+config RA_SCI4_FIFO_TXTRG
+	int "Transmit FIFO trigger level (FCR.TTRG)"
+	range 0 15
+	default 0
+	---help---
+		SCIn_TXI fires once the transmit-FIFO's occupancy drops to this
+		level or below.  0 (the Renesas FSP default) waits for the FIFO
+		to empty completely before the next interrupt, for the fewest
+		interrupts on a continuous stream.
+
+config RA_SCI4_FIFO_RXTRG
+	int "Receive FIFO trigger level (FCR.RTRG)"
+	range 0 15
+	default 15
+	---help---
+		SCIn_RXI fires once the receive-FIFO's occupancy reaches this
+		level.  The idle-line timeout only ever fires when 0 < count <
+		RTRG, so it never fires at RTRG 0 or 1.  Lower values give more
+		overrun margin (confirmed on hardware: RTRG=0 ran clean to
+		3 Mbps); higher values mean fewer interrupts but less margin --
+		the default of 15 is the worst setting for high-baud overrun
+		resistance.
+
+endif # RA_SCI4_FIFO
+
+config RA_SCI4_TXDTC
+	bool "Transmit SCI4 through the DTC"
+	default n
+	depends on RA_SCI4_UART && RA_DTC && !RA_SCI4_FIFO
+	select SERIAL_TXDMA
+	---help---
+		Move transmit data out of the ring buffer into TDR through the
+		DTC in the background, instead of one byte per SCIn_TXI: one
+		completion interrupt per chunk, not per byte (up_dma_send_at()
+		in ra_serial.c).
+
+		Mutually exclusive with CONFIG_RA_SCI4_FIFO (see its help).
+
+config RA_SCI4_RXDTC
+	bool "Receive SCI4 through the DTC"
+	default n
+	depends on RA_SCI4_UART && RA_DTC && !RA_SCI4_FIFO
+	---help---
+		Move each received byte out of RDR through the DTC as it
+		arrives: one DTC activation per byte, with a CPU interrupt on
+		every one (no interrupt-count reduction like TXDTC, since byte
+		arrival isn't known in advance).
+
+		Its register move avoids NVIC latency, but only while armed --
+		the gap between a byte being consumed and up_dma_rxarm()
+		re-arming is serviced by the CPU instead.  At very high baud
+		rates that gap can matter more than FIFO's standing multi-byte
+		margin: do not assume this beats CONFIG_RA_SCI4_FIFO with a low
+		receive trigger level.
+
+		Mutually exclusive with CONFIG_RA_SCI4_FIFO (see its help).
+
 config RA_SCI9_UART
 	bool "UART 9"
 	default n
 	depends on RA_HAVE_SCI_B9
 	select SCI9_SERIALDRIVER
+
+config RA_SCI_FIFO
+	bool
+	default n
+	---help---
+		Hidden aggregate selected by any CONFIG_RA_SCIn_FIFO: lets
+		ra_serial.c's shared FIFO code use one compile-time guard
+		instead of checking every instance's own option.
+
+config RA_SCI9_FIFO
+	bool "Use SCI9's 16-stage FIFO"
+	default n
+	depends on RA_SCI9_UART
+	select RA_SCI_FIFO
+	---help---
+		Switch SCI9 to its 16-stage FIFO (CCR3.FM=1): fewer interrupts
+		on a continuous stream, and enables the receive-timeout ("idle
+		line") event (SCIn_RXI fires on fewer-than-trigger-level bytes
+		within 15 ETUs of the last stop bit).
+
+		Mutually exclusive with CONFIG_RA_SCI9_TXDTC/RXDTC (see their help).
+
+if RA_SCI9_FIFO
+
+config RA_SCI9_FIFO_TXTRG
+	int "Transmit FIFO trigger level (FCR.TTRG)"
+	range 0 15
+	default 0
+	---help---
+		SCIn_TXI fires once the transmit-FIFO's occupancy drops to this
+		level or below.  0 (the Renesas FSP default) waits for the FIFO
+		to empty completely before the next interrupt, for the fewest
+		interrupts on a continuous stream.
+
+config RA_SCI9_FIFO_RXTRG
+	int "Receive FIFO trigger level (FCR.RTRG)"
+	range 0 15
+	default 15
+	---help---
+		SCIn_RXI fires once the receive-FIFO's occupancy reaches this
+		level.  The idle-line timeout only ever fires when 0 < count <
+		RTRG, so it never fires at RTRG 0 or 1.  Lower values give more
+		overrun margin (confirmed on hardware: RTRG=0 ran clean to
+		3 Mbps); higher values mean fewer interrupts but less margin --
+		the default of 15 is the worst setting for high-baud overrun
+		resistance.
+
+endif # RA_SCI9_FIFO
+
+config RA_SCI9_TXDTC
+	bool "Transmit SCI9 through the DTC"
+	default n
+	depends on RA_SCI9_UART && RA_DTC && !RA_SCI9_FIFO
+	select SERIAL_TXDMA
+	---help---
+		Move transmit data out of the ring buffer into TDR through the
+		DTC in the background, instead of one byte per SCIn_TXI: one
+		completion interrupt per chunk, not per byte (up_dma_send_at()
+		in ra_serial.c).
+
+		Mutually exclusive with CONFIG_RA_SCI9_FIFO (see its help).
+
+config RA_SCI9_RXDTC
+	bool "Receive SCI9 through the DTC"
+	default n
+	depends on RA_SCI9_UART && RA_DTC && !RA_SCI9_FIFO
+	---help---
+		Move each received byte out of RDR through the DTC as it
+		arrives: one DTC activation per byte, with a CPU interrupt on
+		every one (no interrupt-count reduction like TXDTC, since byte
+		arrival isn't known in advance).
+
+		Its register move avoids NVIC latency, but only while armed --
+		the gap between a byte being consumed and up_dma_rxarm()
+		re-arming is serviced by the CPU instead.  At very high baud
+		rates that gap can matter more than FIFO's standing multi-byte
+		margin: do not assume this beats CONFIG_RA_SCI9_FIFO with a low
+		receive trigger level.
+
+		Mutually exclusive with CONFIG_RA_SCI9_FIFO (see its help).
+
+config RA_DTC
+	bool "Data Transfer Controller (DTC)"
+	default n
+	---help---
+		Enable the RA8M1 Data Transfer Controller.  The DTC offloads
+		repetitive, register-triggered data transfers (e.g. UART TX/RX)
+		from the CPU: the same ICU event that would otherwise interrupt
+		the CPU instead activates the DTC, which performs one transfer
+		and, once its transfer count is exhausted, still interrupts the
+		CPU normally.  Peripheral drivers that support it expose their
+		own per-channel options (e.g. RA_SCI9_TXDTC, RA_SCI9_RXDTC).
 
 config RA_GPT_TIMER
 	bool "GPT timer (/dev/timerN)"
