@@ -49,6 +49,7 @@
 #include "arm_internal.h"
 #include "imxrt_config.h"
 #include "imxrt_gpio.h"
+#include "imxrt_dtcm.h"
 #include "hardware/imxrt_pinmux.h"
 #include "hardware/imxrt_ccm.h"
 #include "imxrt_periphclks.h"
@@ -198,7 +199,7 @@ struct imxrt_dev_s
   void *do_sdio_arg;                  /* arg for SDIO card ISR */
 
   uint32_t addr;                      /* Base address of this instances */
-  uint32_t sw_cd_gpio;                /* If a non USDHCx CD pin is used,
+  gpio_pinset_t sw_cd_gpio;           /* If a non USDHCx CD pin is used,
                                        * this is its GPIO */
   uint32_t cd_invert;                 /* If true invert the CD pin */
 };
@@ -1036,6 +1037,9 @@ static void imxrt_recvdma(struct imxrt_dev_s *priv)
   else
     {
       /* In an aligned case, we have always received all blocks */
+
+      up_invalidate_dcache((uintptr_t)priv->buffer,
+                           (uintptr_t)priv->buffer + priv->remaining);
 
       priv->remaining = 0;
     }
@@ -3005,6 +3009,8 @@ static int imxrt_dmarecvsetup(struct sdio_dev_s *dev,
                               uint8_t *buffer, size_t buflen)
 {
   struct imxrt_dev_s *priv = (struct imxrt_dev_s *)dev;
+  uint32_t dma_address;
+  bool ok;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 #if defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
@@ -3062,18 +3068,27 @@ static int imxrt_dmarecvsetup(struct sdio_dev_s *dev,
   /* Configure the RX DMA */
 
   imxrt_configxfrints(priv, USDHC_DMADONE_INTS);
+
 #if defined(CONFIG_ARMV7M_DCACHE)
   if (priv->unaligned_rx)
     {
-      putreg32((uint32_t) priv->rxbuffer,
-               priv->addr + IMXRT_USDHC_DSADDR_OFFSET);
+      ok = imxrt_dma_address(priv->rxbuffer, priv->blocksize,
+                             &dma_address);
     }
   else
 #endif
     {
-      putreg32((uint32_t) priv->buffer,
-               priv->addr + IMXRT_USDHC_DSADDR_OFFSET);
+      ok = imxrt_dma_address(priv->buffer, buflen, &dma_address);
     }
+
+  if (!ok)
+    {
+      mcerr("ERROR: buffer %p (len %zu) is not DMA-reachable\n",
+            priv->buffer, buflen);
+      return -EFAULT;
+    }
+
+  putreg32(dma_address, priv->addr + IMXRT_USDHC_DSADDR_OFFSET);
 
   /* Sample the register state */
 
@@ -3106,6 +3121,7 @@ static int imxrt_dmasendsetup(struct sdio_dev_s *dev,
                               const uint8_t *buffer, size_t buflen)
 {
   struct imxrt_dev_s *priv = (struct imxrt_dev_s *)dev;
+  uint32_t dma_address;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32_t) buffer & 3) == 0);
@@ -3136,7 +3152,14 @@ static int imxrt_dmasendsetup(struct sdio_dev_s *dev,
 
   /* Configure the TX DMA */
 
-  putreg32((uint32_t) buffer, priv->addr + IMXRT_USDHC_DSADDR_OFFSET);
+  if (!imxrt_dma_address(buffer, buflen, &dma_address))
+    {
+      mcerr("ERROR: buffer %p (len %zu) is not DMA-reachable\n",
+            buffer, buflen);
+      return -EFAULT;
+    }
+
+  putreg32(dma_address, priv->addr + IMXRT_USDHC_DSADDR_OFFSET);
 
   /* Sample the register state */
 
