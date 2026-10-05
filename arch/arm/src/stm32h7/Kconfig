@@ -210,6 +210,7 @@ config ARCH_CHIP_STM32H7S3L8
 	bool "STM32H7S3L8"
 	select STM32_STM32H7RSXX
 	select STM32H7_IO_CONFIG_L
+	select STM32_HAVE_SMPS
 	---help---
 		STM32 H7 Cortex-M7, 64 KiB FLASH, 620 KiB SRAM, TFBGA225.
 
@@ -629,6 +630,8 @@ config STM32_PWR_DIRECT_SMPS_SUPPLY
 	bool "Use direct SMPS supply mode"
 	depends on STM32_HAVE_SMPS
 	default n
+	---help---
+		Select this option for using the swich-mode step down converter.
 
 config STM32_PWR_EXTERNAL_SOURCE_SUPPLY
 	bool "Use external source as power supply"

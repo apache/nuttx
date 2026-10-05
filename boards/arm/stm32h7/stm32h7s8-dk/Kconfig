@@ -1,0 +1,15 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_STM32H7S8_DK
+
+config STM32H7S8_DK_USE_HSE
+	bool "Use the HSE clock source"
+	default n
+	help
+		Use the 24 MHz external clock supplied to the HSE input.
+
+
+endif # ARCH_BOARD_STM32H7S8_DK
