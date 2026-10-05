@@ -39,7 +39,7 @@ FDCAN       Yes
 GPDMA       Yes
 GPIO        Yes
 I2C         Yes
-ICACHE      Yes
+ICACHE      Yes      Uses the MPU to keep OTP, RO and EDATA flash uncached.
 RCC         Yes
 USART       Yes
 LPUART      Yes
