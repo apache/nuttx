@@ -56,14 +56,17 @@ if(CONFIG_FDPIC)
       "${FDPIC_LD}"
       CACHE INTERNAL "Linker for FDPIC modules")
 
-  nuttx_elf_compile_options(-mfdpic -fPIC -Wa,--noexecstack)
+  # GCC before 14 does not pass --fdpic to the assembler for -mfdpic, and the
+  # assembler then rejects the FDPIC relocations, so pass it here.
+
+  nuttx_elf_compile_options(-mfdpic -fPIC -Wa,--noexecstack -Wa,--fdpic)
 
   nuttx_elf_link_options(-m armelf_linux_fdpiceabi -shared -z now)
 
   # A shared library is an FDPIC shared object too, as LDMODULEFLAGS makes it in
   # common/Toolchain.defs
 
-  nuttx_mod_compile_options(-mfdpic -fPIC -Wa,--noexecstack)
+  nuttx_mod_compile_options(-mfdpic -fPIC -Wa,--noexecstack -Wa,--fdpic)
 
   nuttx_mod_link_options(-m armelf_linux_fdpiceabi -shared -z now)
 
