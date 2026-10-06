@@ -254,7 +254,10 @@ int libelf_findsymtab(FAR struct mod_loadinfo_s *loadinfo)
 {
   int i;
 
-  /* Find the symbol table section header and its associated string table */
+  /* Find the symbol table section header and its associated string table.
+   * A stripped shared object keeps only its dynamic symbol table, which
+   * holds every symbol that it imports or exports.
+   */
 
   for (i = 1; i < loadinfo->ehdr.e_shnum; i++)
     {
@@ -263,6 +266,13 @@ int libelf_findsymtab(FAR struct mod_loadinfo_s *loadinfo)
           loadinfo->symtabidx = i;
           loadinfo->strtabidx = loadinfo->shdr[i].sh_link;
           break;
+        }
+
+      if (loadinfo->shdr[i].sh_type == SHT_DYNSYM &&
+          loadinfo->ehdr.e_type == ET_DYN)
+        {
+          loadinfo->symtabidx = i;
+          loadinfo->strtabidx = loadinfo->shdr[i].sh_link;
         }
     }
 
