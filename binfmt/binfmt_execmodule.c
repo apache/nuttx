@@ -39,6 +39,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>
+#include <nuttx/tls.h>
 #include <sched/sched.h>
 #include <task/spawn.h>
 #include <nuttx/spawn.h>
@@ -78,6 +79,10 @@ static void exec_swap(FAR struct tcb_s *ptcb, FAR struct tcb_s *chtcb)
   int        chndx;
   pid_t      pid;
   irqstate_t flags;
+  FAR struct tls_info_s *info;
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+  FAR struct addrenv_s *oldenv;
+#endif
 #ifdef CONFIG_SCHED_HAVE_PARENT
 #  ifdef CONFIG_SCHED_CHILD_STATUS
   FAR struct child_status_s *tg_children;
@@ -131,6 +136,27 @@ static void exec_swap(FAR struct tcb_s *ptcb, FAR struct tcb_s *chtcb)
 #endif
 
   leave_critical_section(flags);
+
+  /* getpid() and gettid() read copies of the pids in TLS.  The address
+   * environment of the child is current here, and the TLS of the caller
+   * is in its own.
+   */
+
+  info = (FAR struct tls_info_s *)chtcb->stack_alloc_ptr;
+  info->tl_tid = chtcb->pid;
+  chtcb->group->tg_info->ta_pid = chtcb->group->tg_pid;
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+  addrenv_select(ptcb->addrenv_own, &oldenv);
+#endif
+
+  info = (FAR struct tls_info_s *)ptcb->stack_alloc_ptr;
+  info->tl_tid = ptcb->pid;
+  ptcb->group->tg_info->ta_pid = ptcb->group->tg_pid;
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+  addrenv_restore(oldenv);
+#endif
 }
 
 /****************************************************************************
