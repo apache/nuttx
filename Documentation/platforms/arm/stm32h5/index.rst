@@ -87,6 +87,17 @@ OTP         Yes
 
 ==========  =======  =====
 
+ICACHE
+------
+
+With ``CONFIG_STM32_ICACHE`` the OTP, read-only (UID, flash size, package) and
+EDATA flash areas (0x08fff000-0x09017fff) are mapped non-cacheable with an MPU
+region, so they can be read like any other memory.
+
+The MPU is not applied in the HardFault and NMI handlers (``HFNMIENA=0``), so
+these areas must not be read from NMI or HardFault context: with the ICACHE
+enabled such a read raises a bus fault.
+
 USB FS Host
 -----------
 
