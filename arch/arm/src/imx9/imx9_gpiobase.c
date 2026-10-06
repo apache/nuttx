@@ -33,8 +33,10 @@
  * Public Data
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_CHIP_IMX93)
-/* Base address for the GPIO memory mapped registers */
+#if defined(CONFIG_ARCH_CHIP_IMX95_M7)
+/* Base address for the GPIO memory mapped registers.  The i.MX95 has five
+ * GPIO instances.
+ */
 
 const uintptr_t g_gpio_base[] =
 {
@@ -42,9 +44,12 @@ const uintptr_t g_gpio_base[] =
   IMX9_GPIO2_BASE,
   IMX9_GPIO3_BASE,
   IMX9_GPIO4_BASE,
+  IMX9_GPIO5_BASE,
 };
-#elif defined(CONFIG_ARCH_CHIP_IMX9_CORTEX_M)
-/* Base address for the GPIO memory mapped registers */
+#elif defined(CONFIG_ARCH_CHIP_IMX93) || defined(CONFIG_ARCH_CHIP_IMX93_M33)
+/* Base address for the GPIO memory mapped registers.  The i.MX93 has four
+ * GPIO instances.
+ */
 
 const uintptr_t g_gpio_base[] =
 {
