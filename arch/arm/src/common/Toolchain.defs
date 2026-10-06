@@ -684,8 +684,11 @@ ifeq ($(CONFIG_FDPIC),y)
     MODULELD = $(SHELL) -c 'echo "ERROR: $(FDPIC_NO_LD_MSG)" 1>&2; exit 1' --
   endif
 
-  CELFFLAGS += -mfdpic -fPIC -Wa,--noexecstack
-  CXXELFFLAGS += -mfdpic -fPIC -Wa,--noexecstack
+  # GCC before 14 does not pass --fdpic to the assembler for -mfdpic, and the
+  # assembler then rejects the FDPIC relocations, so pass it here.
+
+  CELFFLAGS += -mfdpic -fPIC -Wa,--noexecstack -Wa,--fdpic
+  CXXELFFLAGS += -mfdpic -fPIC -Wa,--noexecstack -Wa,--fdpic
 
   LDELFFLAGS += -m armelf_linux_fdpiceabi -shared -z now
 
@@ -697,8 +700,8 @@ ifeq ($(CONFIG_FDPIC),y)
   # The entry point is left to the caller:  a module is entered at _start,
   # a library is only called into.
 
-  CMODULEFLAGS += -mfdpic -fPIC -Wa,--noexecstack
-  CXXMODULEFLAGS += -mfdpic -fPIC -Wa,--noexecstack
+  CMODULEFLAGS += -mfdpic -fPIC -Wa,--noexecstack -Wa,--fdpic
+  CXXMODULEFLAGS += -mfdpic -fPIC -Wa,--noexecstack -Wa,--fdpic
 
   LDMODULEFLAGS = -m armelf_linux_fdpiceabi -shared -z now \
                   -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
