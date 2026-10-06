@@ -124,9 +124,9 @@ struct esp32s3_spi_config_s
   enum spi_mode_e mode;       /* SPI default mode */
 
   uint8_t id;                 /* ESP32-S3 SPI device ID: SPIx {2,3} */
-  uint8_t cs_pin;             /* GPIO configuration for CS */
-  uint8_t mosi_pin;           /* GPIO configuration for MOSI */
-  uint8_t miso_pin;           /* GPIO configuration for MISO */
+  int8_t cs_pin;              /* GPIO configuration for CS */
+  int8_t mosi_pin;            /* GPIO configuration for MOSI */
+  int8_t miso_pin;            /* GPIO configuration for MISO */
   uint8_t clk_pin;            /* GPIO configuration for CLK */
 #ifdef CONFIG_ESP32S3_SPI_DMA
   uint8_t periph;             /* Peripheral ID */
