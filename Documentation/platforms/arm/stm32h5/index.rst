@@ -116,6 +116,34 @@ Options:
 
 - STM32H5_USBDRD_DESCSIZE - Maximum size of a descriptor.  Default: 128
 
+Timer Capture
+-------------
+
+The STM32H5 timer capture driver measures the frequency and the duty cycle of
+a PWM input signal using the PWM input mode of the timer. It is registered as
+``/dev/cap0``, ``/dev/cap1``, ... (see ``include/nuttx/timers/capture.h``).
+
+Only the timers with two input channels can be used: TIM1, TIM2, TIM3, TIM4,
+TIM5, TIM8, TIM12 and TIM15.
+
+Pre-requisites:
+
+- ``CONFIG_CAPTURE`` - Enable the upper-half capture driver
+- ``CONFIG_STM32_TIMn`` and ``CONFIG_STM32_TIMn_CAP`` - Reserve timer ``n`` for capture
+
+Options:
+
+- ``CONFIG_STM32_TIMn_CHANNEL`` - The input channel, 1 or 2. The signal is measured
+  on the pin of that channel. The other channel is mapped internally to the same input.
+- ``CONFIG_STM32_TIMn_CLOCK`` - The counter frequency. It limits the resolution
+  of the measurement and the lowest frequency that can be measured (the counter must not
+  overflow within a period of the input signal).
+
+The board must define the pin of the selected channel in ``board.h``, e.g.
+``GPIO_TIM4_CH1IN`` (see ``GPIO_TIMn_CHmIN_x`` in the pin map) and register the drivers
+with ``stm32_cap_initialize()`` and ``cap_register_multiple()``, see the nucleo-h563zi
+board for an example.
+
 OTP
 ---
 

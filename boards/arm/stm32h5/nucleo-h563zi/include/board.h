@@ -364,6 +364,13 @@
 
 #define GPIO_TIM1_CH1OUT GPIO_TIM1_CH1OUT_2 /* PE9 */
 
+/* TIM4 capture (PWM input).  The capture driver measures the signal on the
+ * pin of the selected channel (CONFIG_STM32_TIM4_CHANNEL, 1 by default).
+ */
+
+#define GPIO_TIM4_CH1IN  GPIO_TIM4_CH1IN_1  /* PB6 */
+#define GPIO_TIM4_CH2IN  GPIO_TIM4_CH2IN_1  /* PB7 */
+
 /* USART3 GPIOs *************************************************************/
 
 /* USART3 (Nucleo Virtual Console): Default board solder bridge configuration

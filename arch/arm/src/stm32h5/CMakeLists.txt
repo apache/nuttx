@@ -104,6 +104,13 @@ if(CONFIG_STM32_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()
 
+if(CONFIG_STM32_TIMX_CAP)
+  list(APPEND SRCS stm32_capture.c)
+  if(CONFIG_CAPTURE)
+    list(APPEND SRCS stm32_capture_lowerhalf.c)
+  endif()
+endif()
+
 # Required chip type specific files
 
 if(CONFIG_STM32_STM32H5XXXX)

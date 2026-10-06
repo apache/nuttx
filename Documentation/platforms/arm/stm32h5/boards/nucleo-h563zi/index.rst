@@ -159,6 +159,15 @@ accessed at pin D6 on the CN10 A0 connector. TIM1_CH1 is configured
 as a pwm output at /dev/pwm0, and can be tested with the example pwm
 application.
 
+capture:
+--------
+
+This configuration configures TIM4 as a capture timer to measure the frequency and
+the duty cycle of a PWM input signal on TIM4_CH1 (pin PB6). It is registered at
+/dev/cap0 and can be tested with the example capture application (``cap``), which prints
+the measured frequency and duty cycle. The capture counter runs at 100 kHz, so only
+input signals that have a period of up to 655 ms (down to about 1.5 Hz) can be measured.
+
 adc_watchdog:
 --------------
 
