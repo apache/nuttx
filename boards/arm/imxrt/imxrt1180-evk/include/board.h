@@ -127,6 +127,75 @@
 #define GPIO_LPSPI1_MISO IOMUX_PIN(IOMUXC_PAD_GPIO_AON_07_LPSPI1_SDI,   \
                                    IOMUX_LPSPI_DEFAULT, IOMUXC_MUX_SION_ON)
 
+/* USDHC1: microSD card slot.
+ *   GPIO_SD_B1_00 -> USDHC1_CMD
+ *   GPIO_SD_B1_01 -> USDHC1_CLK
+ *   GPIO_SD_B1_02 -> USDHC1_DATA0
+ *   GPIO_SD_B1_03 -> USDHC1_DATA1
+ *   GPIO_SD_B1_04 -> USDHC1_DATA2
+ *   GPIO_SD_B1_05 -> USDHC1_DATA3
+ *   GPIO_AD_15    -> card detect (plain GPIO, active low)
+ *   GPIO_AD_14    -> card power enable (active low)
+ *   GPIO_AD_34    -> I/O voltage select (low keeps 3.3 V signalling)
+ */
+
+#define IOMUX_USDHC1_CLK_DEFAULT  (IOMUXC_PAD_PDRV_HIGH | IOMUXC_PAD_PULL_NONE)
+#define IOMUX_USDHC1_CMD_DEFAULT  (IOMUXC_PAD_PDRV_HIGH | IOMUXC_PAD_PULL_UP)
+#define IOMUX_USDHC1_DATA_DEFAULT (IOMUXC_PAD_PDRV_HIGH | IOMUXC_PAD_PULL_UP)
+#define IOMUX_USDHC1_CD_DEFAULT (IOMUXC_PAD_DSE | IOMUXC_PAD_PUE | \
+                                 IOMUXC_PAD_PUS)
+
+#define PIN_USDHC1_CMD   IOMUX_PIN(IOMUXC_PAD_GPIO_SD_B1_00_USDHC1_CMD,   \
+                                   IOMUX_USDHC1_CMD_DEFAULT, 0)
+#define PIN_USDHC1_DCLK  IOMUX_PIN(IOMUXC_PAD_GPIO_SD_B1_01_USDHC1_CLK,   \
+                                   IOMUX_USDHC1_CLK_DEFAULT, 0)
+#define PIN_USDHC1_D0    IOMUX_PIN(IOMUXC_PAD_GPIO_SD_B1_02_USDHC1_DATA0, \
+                                   IOMUX_USDHC1_DATA_DEFAULT, 0)
+#define PIN_USDHC1_D1    IOMUX_PIN(IOMUXC_PAD_GPIO_SD_B1_03_USDHC1_DATA1, \
+                                   IOMUX_USDHC1_DATA_DEFAULT, 0)
+#define PIN_USDHC1_D2    IOMUX_PIN(IOMUXC_PAD_GPIO_SD_B1_04_USDHC1_DATA2, \
+                                   IOMUX_USDHC1_DATA_DEFAULT, 0)
+#define PIN_USDHC1_D3    IOMUX_PIN(IOMUXC_PAD_GPIO_SD_B1_05_USDHC1_DATA3, \
+                                   IOMUX_USDHC1_DATA_DEFAULT, 0)
+
+#define PIN_USDHC1_CD_GPIO IOMUX_GPIO(IOMUXC_PAD_GPIO_AD_15_GPIO4_IO15, \
+                                      IOMUX_USDHC1_CD_DEFAULT,         \
+                                      GPIO_INPUT | GPIO_PORT4 | GPIO_PIN15)
+
+#define IOMUX_SDCARD_DEFAULT (IOMUXC_PAD_DSE)
+
+#define GPIO_SD_PWREN    IOMUX_GPIO(IOMUXC_PAD_GPIO_AD_14_GPIO4_IO14, \
+                                    IOMUX_SDCARD_DEFAULT,            \
+                                    GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
+                                    GPIO_PORT4  | GPIO_PIN14)
+
+#define GPIO_SD1_VSELECT IOMUX_GPIO(IOMUXC_PAD_GPIO_AD_34_GPIO5_IO02, \
+                                    IOMUX_SDCARD_DEFAULT,            \
+                                    GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
+                                    GPIO_PORT5  | GPIO_PIN2)
+
+/* USDHC clock dividers used by arch/arm/src/imxrt/imxrt_usdhc.c. The
+ * uSDHC1 root clock is configured to 198 MHz (SYS_PLL2_PFD2 / 2); see
+ * the usdhc1_clk_root entry in imxrt_clockconfig_m7.c.
+ */
+
+#define BOARD_USDHC_IDMODE_PRESCALER    USDHC_SYSCTL_SDCLKFS_DIV256
+#define BOARD_USDHC_IDMODE_DIVISOR      USDHC_SYSCTL_DVS_DIV(2)
+
+#define BOARD_USDHC_MMCMODE_PRESCALER   USDHC_SYSCTL_SDCLKFS_DIV8
+#define BOARD_USDHC_MMCMODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(1)
+
+#define BOARD_USDHC_SD1MODE_PRESCALER   USDHC_SYSCTL_SDCLKFS_DIV8
+#define BOARD_USDHC_SD1MODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(1)
+
+#define BOARD_USDHC_SD4MODE_PRESCALER   USDHC_SYSCTL_SDCLKFS_DIV8
+#define BOARD_USDHC_SD4MODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(1)
+
+/* SD high speed mode (wide 4-bit, up to 50 MHz): 198 MHz / 4 = 49.5 MHz. */
+
+#define BOARD_USDHC_SD4MODE_HS_PRESCALER USDHC_SYSCTL_SDCLKFS_DIV4
+#define BOARD_USDHC_SD4MODE_HS_DIVISOR   USDHC_SYSCTL_DVS_DIV(1)
+
 /* Buttons ******************************************************************/
 
 /* The MIMXRT1180-EVK has one general purpose user button, SW8 ("GPIO INT

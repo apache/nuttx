@@ -46,7 +46,7 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += imxrt_buttons.c
 endif
 
-ifeq ($(CONFIG_USBDEV_DMAMEMORY),y)
+ifneq ($(CONFIG_USBDEV_DMAMEMORY)$(CONFIG_FAT_DMAMEMORY),)
 CSRCS += imxrt_dma_alloc.c
 endif
 
