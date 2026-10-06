@@ -32,7 +32,9 @@
 
 #include <nuttx/mm/gran.h>
 #include <nuttx/compiler.h>
+#include <nuttx/kmalloc.h>
 
+#include "chip.h"
 #include "imxrt1180-evk.h"
 
 #if defined(CONFIG_GRAN)
@@ -160,3 +162,27 @@ void usbdev_dma_free(void *mem)
 }
 
 #endif /* CONFIG_GRAN */
+
+/****************************************************************************
+ * Name: fat_dma_alloc and fat_dma_free
+ *
+ * Description:
+ *   Allocate/free a cache-line-aligned buffer for the FAT filesystem's
+ *   sector buffers (see CONFIG_FAT_DMAMEMORY).  DTCM addresses are
+ *   DMA-reachable via imxrt_usdhc.c's address translation, so a plain,
+ *   suitably-aligned heap allocation is all that is needed here -- no
+ *   special memory region required.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FAT_DMAMEMORY
+void *fat_dma_alloc(size_t size)
+{
+  return kmm_memalign(ARMV7M_DCACHE_LINESIZE, size);
+}
+
+void fat_dma_free(void *memory, size_t size)
+{
+  kmm_free(memory);
+}
+#endif

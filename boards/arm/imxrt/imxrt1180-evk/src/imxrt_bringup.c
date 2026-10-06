@@ -28,14 +28,53 @@
 
 #include <sys/mount.h>
 #include <syslog.h>
+#include <errno.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/sdio.h>
+#include <nuttx/mmcsd.h>
 
 #ifdef CONFIG_INPUT_BUTTONS
 #  include <nuttx/input/buttons.h>
 #endif
 
+#include "imxrt_gpio.h"
+#include "imxrt_usdhc.h"
 #include "imxrt1180-evk.h"
+#include <arch/board/board.h>  /* Must always be included last */
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_IMXRT_USDHC
+static int imxrt_sdmmc_initialize(void)
+{
+  struct sdio_dev_s *sdmmc;
+  int ret;
+
+  /* Power the slot and select 3.3 V I/O signalling. */
+
+  imxrt_config_gpio(GPIO_SD_PWREN);
+  imxrt_config_gpio(GPIO_SD1_VSELECT);
+
+  sdmmc = imxrt_usdhc_initialize(0);
+  if (sdmmc == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize USDHC1\n");
+      return -ENODEV;
+    }
+
+  ret = mmcsd_slotinitialize(0, sdmmc);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to bind USDHC1 to the MMC/SD "
+             "driver: %d\n", ret);
+    }
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -54,7 +93,7 @@ int imxrt_bringup(void)
 {
   int ret = OK;
 
-#ifdef CONFIG_USBDEV_DMAMEMORY
+#if defined(CONFIG_USBDEV_DMAMEMORY) || defined(CONFIG_FAT_DMAMEMORY)
   ret = imxrt_dma_alloc_init();
   if (ret < 0)
     {
@@ -76,6 +115,14 @@ int imxrt_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_IMXRT_USDHC
+  ret = imxrt_sdmmc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: imxrt_sdmmc_initialize() failed: %d\n", ret);
     }
 #endif
 

@@ -147,7 +147,12 @@ const struct clock_configuration_s g_initial_clkconfig =
     },
     .i3c1_clk_root          = CCM_CLOCK_ROOT_DISABLE,
     .i3c2_clk_root          = CCM_CLOCK_ROOT_DISABLE,
-    .usdhc1_clk_root        = CCM_CLOCK_ROOT_DISABLE,
+    .usdhc1_clk_root =
+    {
+      .action = CCM_CLOCK_ROOT_CONFIGURE,
+      .div    = 2,
+      .mux    = SYS_PLL2_PFD2,
+    },
     .usdhc2_clk_root        = CCM_CLOCK_ROOT_DISABLE,
     .semc_clk_root          = CCM_CLOCK_ROOT_IGNORE,
     .adc1_clk_root          = CCM_CLOCK_ROOT_DISABLE,
