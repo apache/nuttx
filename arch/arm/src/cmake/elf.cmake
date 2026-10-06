@@ -60,6 +60,13 @@ if(CONFIG_FDPIC)
 
   nuttx_elf_link_options(-m armelf_linux_fdpiceabi -shared -z now)
 
+  # A shared library is an FDPIC shared object too, as LDMODULEFLAGS makes it in
+  # common/Toolchain.defs
+
+  nuttx_mod_compile_options(-mfdpic -fPIC -Wa,--noexecstack)
+
+  nuttx_mod_link_options(-m armelf_linux_fdpiceabi -shared -z now)
+
 elseif(CONFIG_PIC)
 
   # An ELF module needs r9 as its PIC base, so it must not also have the
@@ -81,7 +88,9 @@ if(CONFIG_BINFMT_ELF_RELOCATABLE AND NOT CONFIG_PIC)
   nuttx_elf_link_options(-r)
 endif()
 
-nuttx_mod_link_options(-r)
+if(NOT CONFIG_FDPIC)
+  nuttx_mod_link_options(-r)
+endif()
 
 nuttx_elf_link_options_ifdef(CONFIG_BUILD_KERNEL -Bstatic)
 
