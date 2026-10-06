@@ -395,23 +395,23 @@ int stm32_configgpio(uint32_t cfgset)
    */
 
   if (alt_setting == 0)
-      {
-        if (pin < 8)
-          {
-            regoffset = STM32_GPIO_AFRL_OFFSET;
-            pos       = pin;
-          }
-        else
-          {
-            regoffset = STM32_GPIO_AFRH_OFFSET;
-            pos       = pin - 8;
-          }
+    {
+      if (pin < 8)
+        {
+          regoffset = STM32_GPIO_AFRL_OFFSET;
+          pos       = pin;
+        }
+      else
+        {
+          regoffset = STM32_GPIO_AFRH_OFFSET;
+          pos       = pin - 8;
+        }
 
-        regval  = getreg32(base + regoffset);
-        regval &= ~GPIO_AFR_MASK(pos);
-        regval |= (alt_setting << GPIO_AFR_SHIFT(pos));
-        putreg32(regval, base + regoffset);
-      }
+      regval  = getreg32(base + regoffset);
+      regval &= ~GPIO_AFR_MASK(pos);
+      regval |= (alt_setting << GPIO_AFR_SHIFT(pos));
+      putreg32(regval, base + regoffset);
+    }
 
   /* Set speed (Only outputs and alternate function pins) */
 

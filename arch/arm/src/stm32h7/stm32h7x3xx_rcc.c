@@ -630,6 +630,7 @@ static inline void rcc_enableapb3(void)
    */
 
   uint32_t rcc_gcr = getreg32(STM32_RCC_GCR);
+
   rcc_gcr |= RCC_GCR_WW1RSC;
   putreg32(rcc_gcr, STM32_RCC_GCR);
   regval |= RCC_APB3ENR_WWDG1EN;
