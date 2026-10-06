@@ -3000,6 +3000,17 @@ config IMXRT_USDHC1_INVERT_CD
 		If the board defines PIN_USDHC1_CD_GPIO it is assumed to be active low.
 		Selecting IMXRT_USDHC1_INVERT_CD will make it active high.
 
+config IMXRT_USDHC1_SD_HS_MODE
+	bool "Support SD card high speed mode on USDHC1"
+	default n
+	depends on IMXRT_USDHC1
+	---help---
+		Report SDIO_CAPS_SD_HS_MODE so that the generic MMC/SD driver
+		switches an inserted SD card into high speed mode (CMD6) and
+		raises the bus clock accordingly, once the card confirms the
+		switch. The board must provide BOARD_USDHC_SD4MODE_HS_PRESCALER/
+		BOARD_USDHC_SD4MODE_HS_DIVISOR in board.h for the higher clock.
+
 choice
 	depends on IMXRT_USDHC2
 	prompt "Bus width for USDHC2"
@@ -3026,6 +3037,17 @@ config IMXRT_USDHC2_INVERT_CD
 
 		If the board defines PIN_USDHC2_CD_GPIO it is assumed to be active low.
 		Selecting IMXRT_USDHC2_INVERT_CD will make it active high.
+
+config IMXRT_USDHC2_SD_HS_MODE
+	bool "Support SD card high speed mode on USDHC2"
+	default n
+	depends on IMXRT_USDHC2
+	---help---
+		Report SDIO_CAPS_SD_HS_MODE so that the generic MMC/SD driver
+		switches an inserted SD card into high speed mode (CMD6) and
+		raises the bus clock accordingly, once the card confirms the
+		switch. The board must provide BOARD_USDHC_SD4MODE_HS_PRESCALER/
+		BOARD_USDHC_SD4MODE_HS_DIVISOR in board.h for the higher clock.
 
 endmenu # USDHC Configuration
 

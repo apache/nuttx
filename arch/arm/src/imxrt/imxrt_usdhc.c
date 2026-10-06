@@ -1512,6 +1512,9 @@ static sdio_capset_t imxrt_capabilities(struct sdio_dev_s *dev)
 #ifdef CONFIG_IMXRT_USDHC1_WIDTH_D1_D4
         caps |= SDIO_CAPS_4BIT;
 #endif
+#ifdef CONFIG_IMXRT_USDHC1_SD_HS_MODE
+        caps |= SDIO_CAPS_SD_HS_MODE;
+#endif
         break;
 
       case IMXRT_USDHC2_BASE:
@@ -1523,6 +1526,9 @@ static sdio_capset_t imxrt_capabilities(struct sdio_dev_s *dev)
 #endif
 #ifdef CONFIG_IMXRT_USDHC2_WIDTH_D1_D8
         caps |= SDIO_CAPS_8BIT;
+#endif
+#ifdef CONFIG_IMXRT_USDHC2_SD_HS_MODE
+        caps |= SDIO_CAPS_SD_HS_MODE;
 #endif
         break;
 
@@ -1855,6 +1861,21 @@ static void imxrt_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
                     BOARD_USDHC_SD4MODE_DIVISOR);
         }
         break;
+
+#if defined(CONFIG_IMXRT_USDHC1_SD_HS_MODE) || \
+    defined(CONFIG_IMXRT_USDHC2_SD_HS_MODE)
+      case CLOCK_SD_TRANSFER_4BIT_HS:
+        {
+          /* SD high speed clocking (wide 4-bit mode), sent only after the
+           * card has confirmed the CMD6 high speed switch.
+           */
+
+          mcinfo("4BITTRANSFER_HS\n");
+          regval |= (BOARD_USDHC_SD4MODE_HS_PRESCALER |
+                    BOARD_USDHC_SD4MODE_HS_DIVISOR);
+        }
+        break;
+#endif
     }
 
   putreg32(regval, priv->addr + IMXRT_USDHC_SYSCTL_OFFSET);
