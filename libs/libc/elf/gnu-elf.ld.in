@@ -69,6 +69,12 @@
 #  define PHDR_DATA :data
 #  define DATA_ALIGN . = ALIGN(0x1000);
 
+/* .got.plt comes first, as in the linker's own script.  The linker places
+ * the function descriptors of a lazy PLT on that assumption.
+ */
+
+#  define GOT_PLT *(.got.plt) *(.igot.plt)
+
 PHDRS
 {
   text    PT_LOAD FLAGS(5);    /* Read and execute */
@@ -80,6 +86,7 @@ PHDRS
 #  define PHDR_TEXT
 #  define PHDR_DATA
 #  define DATA_ALIGN
+#  define GOT_PLT
 #endif
 
 SECTIONS
@@ -124,6 +131,32 @@ SECTIONS
       KEEP (*(.eh_frame))
       *(.eh_frame.*)
     } PHDR_TEXT
+
+#ifdef CONFIG_FDPIC
+  /* DT_JMPREL names .rel.plt, so it is an output section of its own, after
+   * the other dynamic relocations, as in the linker's own script.
+   */
+
+  .rel.dyn :
+    {
+      *(.rel.init)
+      *(.rel.text .rel.text.*)
+      *(.rel.fini)
+      *(.rel.rodata .rel.rodata.*)
+      *(.rel.data.rel.ro .rel.data.rel.ro.*)
+      *(.rel.data .rel.data.*)
+      *(.rel.ctors)
+      *(.rel.dtors)
+      *(.rel.got)
+      *(.rel.bss .rel.bss.*)
+      *(.rel.iplt)
+    } PHDR_TEXT
+
+  .rel.plt :
+    {
+      *(.rel.plt)
+    } PHDR_TEXT
+#endif
 
   DATA_ALIGN
 
@@ -170,6 +203,7 @@ SECTIONS
 
   .got :
     {
+      GOT_PLT
       *(.got*)
     } PHDR_DATA
 
