@@ -39,9 +39,82 @@
 
 #include "board_common.h"
 
+#if defined(CONFIG_CAPTURE) && defined(CONFIG_STM32_TIMX_CAP)
+#  include <errno.h>
+#  include <nuttx/timers/capture.h>
+#  include "stm32_capture.h"
+#  define HAVE_CAPTURE 1
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_capture_setup
+ *
+ * Description:
+ *   Initialize and register the capture drivers of the timers that are
+ *   configured for capture.  They are registered as /dev/cap0, /dev/cap1,
+ *   etc. in the order of the timer numbers.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_CAPTURE
+static int stm32_capture_setup(void)
+{
+  struct cap_lowerhalf_s *lower[] =
+    {
+#ifdef CONFIG_STM32_TIM1_CAP
+      stm32_cap_initialize(1),
+#endif
+#ifdef CONFIG_STM32_TIM2_CAP
+      stm32_cap_initialize(2),
+#endif
+#ifdef CONFIG_STM32_TIM3_CAP
+      stm32_cap_initialize(3),
+#endif
+#ifdef CONFIG_STM32_TIM4_CAP
+      stm32_cap_initialize(4),
+#endif
+#ifdef CONFIG_STM32_TIM5_CAP
+      stm32_cap_initialize(5),
+#endif
+#ifdef CONFIG_STM32_TIM8_CAP
+      stm32_cap_initialize(8),
+#endif
+#ifdef CONFIG_STM32_TIM12_CAP
+      stm32_cap_initialize(12),
+#endif
+#ifdef CONFIG_STM32_TIM15_CAP
+      stm32_cap_initialize(15),
+#endif
+    };
+
+  size_t count = sizeof(lower) / sizeof(lower[0]);
+  size_t i;
+
+  for (i = 0; i < count; i++)
+    {
+      if (lower[i] == NULL)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to initialize a capture timer\n");
+          return -ENODEV;
+        }
+    }
+
+  /* This will register "/dev/cap0" ... "/dev/cap<count-1>" */
+
+  return cap_register_multiple("/dev/cap", lower, count);
+}
+#endif /* HAVE_CAPTURE */
 
 /****************************************************************************
  * Public Functions
@@ -144,6 +217,16 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef HAVE_CAPTURE
+  /* Initialize the capture drivers and register them as /dev/capN */
+
+  ret = stm32_capture_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_capture_setup() failed: %d\n", ret);
     }
 #endif
 

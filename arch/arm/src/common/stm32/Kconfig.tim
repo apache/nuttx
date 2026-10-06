@@ -137,7 +137,7 @@ endmenu # Timer Configuration
 
 config STM32_TIMX_CAP
 	bool "Helpers for Capture Drivers"
-	depends on ARCH_CHIP_STM32H7
+	depends on ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5
 	default n
 
 choice
@@ -1229,8 +1229,9 @@ config STM32_TIM1_CH6OUT
 
 config STM32_TIM1_CHANNEL
 	int "TIM1 PWM Output Channel"
-	depends on (STM32_TIM1_PWM && !STM32_PWM_MULTICHAN) || (STM32_TIM1_CAP && ((STM32_HAVE_IP_TIMERS && STM32_TIM) || ARCH_CHIP_STM32H7))
+	depends on (STM32_TIM1_PWM && !STM32_PWM_MULTICHAN) || (STM32_TIM1_CAP && ((STM32_HAVE_IP_TIMERS && STM32_TIM) || ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5))
 	default 1
+	range 1 2 if ARCH_CHIP_STM32H5 && STM32_TIM1_CAP
 	range 1 6 if ARCH_CHIP_STM32H7 && STM32_TIM1_CAP
 	range 1 4 if !ARCH_CHIP_STM32H7 || !STM32_TIM1_CAP
 	---help---
@@ -1373,8 +1374,9 @@ config STM32_TIM2_CH4OUT
 
 config STM32_TIM2_CHANNEL
 	int "TIM2 PWM Output Channel"
-	depends on (STM32_TIM2_PWM && !STM32_PWM_MULTICHAN) || (STM32_TIM2_CAP && ((STM32_HAVE_IP_TIMERS && STM32_TIM) || ARCH_CHIP_STM32H7))
+	depends on (STM32_TIM2_PWM && !STM32_PWM_MULTICHAN) || (STM32_TIM2_CAP && ((STM32_HAVE_IP_TIMERS && STM32_TIM) || ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5))
 	default 1
+	range 1 2 if ARCH_CHIP_STM32H5 && STM32_TIM2_CAP
 	range 1 4
 	---help---
 		If TIM2 is enabled for PWM usage, you also need specifies the timer output
@@ -1516,8 +1518,9 @@ config STM32_TIM3_CH4OUT
 
 config STM32_TIM3_CHANNEL
 	int "TIM3 PWM Output Channel"
-	depends on (STM32_TIM3_PWM && !STM32_PWM_MULTICHAN) || (STM32_TIM3_CAP && ((STM32_HAVE_IP_TIMERS && STM32_TIM) || ARCH_CHIP_STM32H7))
+	depends on (STM32_TIM3_PWM && !STM32_PWM_MULTICHAN) || (STM32_TIM3_CAP && ((STM32_HAVE_IP_TIMERS && STM32_TIM) || ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5))
 	default 1
+	range 1 2 if ARCH_CHIP_STM32H5 && STM32_TIM3_CAP
 	range 1 4
 	---help---
 		If TIM3 is enabled for PWM usage, you also need specifies the timer output
@@ -1659,8 +1662,9 @@ config STM32_TIM4_CH4OUT
 
 config STM32_TIM4_CHANNEL
 	int "TIM4 PWM Output Channel"
-	depends on (STM32_TIM4_PWM && !STM32_PWM_MULTICHAN) || (STM32_TIM4_CAP && ((STM32_HAVE_IP_TIMERS && STM32_TIM) || ARCH_CHIP_STM32H7))
+	depends on (STM32_TIM4_PWM && !STM32_PWM_MULTICHAN) || (STM32_TIM4_CAP && ((STM32_HAVE_IP_TIMERS && STM32_TIM) || ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5))
 	default 1
+	range 1 2 if ARCH_CHIP_STM32H5 && STM32_TIM4_CAP
 	range 1 4
 	---help---
 		If TIM4 is enabled for PWM usage, you also need specifies the timer output
@@ -1802,8 +1806,9 @@ config STM32_TIM5_CH4OUT
 
 config STM32_TIM5_CHANNEL
 	int "TIM5 PWM Output Channel"
-	depends on (STM32_TIM5_PWM && !STM32_PWM_MULTICHAN) || (STM32_TIM5_CAP && ((STM32_HAVE_IP_TIMERS && STM32_TIM) || ARCH_CHIP_STM32H7))
+	depends on (STM32_TIM5_PWM && !STM32_PWM_MULTICHAN) || (STM32_TIM5_CAP && ((STM32_HAVE_IP_TIMERS && STM32_TIM) || ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5))
 	default 1
+	range 1 2 if ARCH_CHIP_STM32H5 && STM32_TIM5_CAP
 	range 1 4
 	---help---
 		If TIM5 is enabled for PWM usage, you also need specifies the timer output
@@ -2042,8 +2047,9 @@ config STM32_TIM8_CH6OUT
 
 config STM32_TIM8_CHANNEL
 	int "TIM8 PWM Output Channel"
-	depends on (STM32_TIM8_PWM && !STM32_PWM_MULTICHAN) || (STM32_TIM8_CAP && ((STM32_HAVE_IP_TIMERS && STM32_TIM) || ARCH_CHIP_STM32H7))
+	depends on (STM32_TIM8_PWM && !STM32_PWM_MULTICHAN) || (STM32_TIM8_CAP && ((STM32_HAVE_IP_TIMERS && STM32_TIM) || ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5))
 	default 1
+	range 1 2 if ARCH_CHIP_STM32H5 && STM32_TIM8_CAP
 	range 1 6 if ARCH_CHIP_STM32H7 && STM32_TIM8_CAP
 	range 1 4 if !ARCH_CHIP_STM32H7 || !STM32_TIM8_CAP
 	---help---
@@ -2305,8 +2311,9 @@ config STM32_TIM12_CH2OUT
 
 config STM32_TIM12_CHANNEL
 	int "TIM12 PWM Output Channel"
-	depends on (STM32_TIM12_PWM && !STM32_PWM_MULTICHAN) || (STM32_TIM12_CAP && ((STM32_HAVE_IP_TIMERS && STM32_TIM) || ARCH_CHIP_STM32H7))
+	depends on (STM32_TIM12_PWM && !STM32_PWM_MULTICHAN) || (STM32_TIM12_CAP && ((STM32_HAVE_IP_TIMERS && STM32_TIM) || ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5))
 	default 1
+	range 1 2 if ARCH_CHIP_STM32H5 && STM32_TIM12_CAP
 	range 1 4 if STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM12_CAP
 	range 1 2 if !STM32_HAVE_IP_TIMERS || !STM32_TIM12_CAP
 	---help---
@@ -2531,8 +2538,9 @@ config STM32_TIM15_CH2OUT
 
 config STM32_TIM15_CHANNEL
 	int "TIM15 PWM Output Channel"
-	depends on (STM32_TIM15_PWM && !STM32_PWM_MULTICHAN) || (ARCH_CHIP_STM32H7 && STM32_TIM15_CAP)
+	depends on (STM32_TIM15_PWM && !STM32_PWM_MULTICHAN) || ((ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM15_CAP)
 	default 1
+	range 1 2 if ARCH_CHIP_STM32H5 && STM32_TIM15_CAP
 	range 1 2
 	---help---
 		If TIM15 is enabled for PWM usage, you also need specifies the timer output
@@ -2799,7 +2807,7 @@ config STM32_TIM1_CAP
 	bool "TIM1 Capture"
 	depends on STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM1 || (STM32_COMMON_F7_H7_H5) && STM32_TIM1 || STM32_COMMON_L4_L5_U5 && STM32_HAVE_TIM1
 	select STM32_CAP if STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM1
-	select STM32_TIMX_CAP if ARCH_CHIP_STM32H7 && STM32_TIM1
+	select STM32_TIMX_CAP if (ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM1
 	---help---
 		Reserve timer 1 for use by Capture
 
@@ -2808,9 +2816,9 @@ config STM32_TIM1_CAP
 
 config STM32_TIM1_CLOCK
 	int "TIM1 work frequency for capture"
-	depends on (STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM1_CAP) || (ARCH_CHIP_STM32H7 && STM32_TIM1_CAP)
+	depends on (STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM1_CAP) || ((ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM1_CAP)
 	default 1000000 if STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM1_CAP
-	default 100000 if ARCH_CHIP_STM32H7 && STM32_TIM1_CAP
+	default 100000 if (ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM1_CAP
 	---help---
 		This clock frequency limiting the count rate at the expense of resolution.
 
@@ -2818,7 +2826,7 @@ config STM32_TIM2_CAP
 	bool "TIM2 Capture"
 	depends on STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM2 || (STM32_COMMON_F7_H7_H5) && STM32_TIM2 || STM32_COMMON_L4_L5_U5 && STM32_HAVE_TIM2
 	select STM32_CAP if STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM2
-	select STM32_TIMX_CAP if ARCH_CHIP_STM32H7 && STM32_TIM2
+	select STM32_TIMX_CAP if (ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM2
 	---help---
 		Reserve timer 2 for use by Capture
 
@@ -2827,9 +2835,9 @@ config STM32_TIM2_CAP
 
 config STM32_TIM2_CLOCK
 	int "TIM2 work frequency for capture"
-	depends on (STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM2_CAP) || (ARCH_CHIP_STM32H7 && STM32_TIM2_CAP)
+	depends on (STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM2_CAP) || ((ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM2_CAP)
 	default 1000000 if STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM2_CAP
-	default 100000 if ARCH_CHIP_STM32H7 && STM32_TIM2_CAP
+	default 100000 if (ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM2_CAP
 	---help---
 		This clock frequency limiting the count rate at the expense of resolution.
 
@@ -2837,7 +2845,7 @@ config STM32_TIM3_CAP
 	bool "TIM3 Capture"
 	depends on STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM3 || (STM32_COMMON_F7_H7_H5) && STM32_TIM3 || STM32_COMMON_L4_L5_U5 && STM32_HAVE_TIM3
 	select STM32_CAP if STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM3
-	select STM32_TIMX_CAP if ARCH_CHIP_STM32H7 && STM32_TIM3
+	select STM32_TIMX_CAP if (ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM3
 	---help---
 		Reserve timer 3 for use by Capture
 
@@ -2846,9 +2854,9 @@ config STM32_TIM3_CAP
 
 config STM32_TIM3_CLOCK
 	int "TIM3 work frequency for capture"
-	depends on (STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM3_CAP) || (ARCH_CHIP_STM32H7 && STM32_TIM3_CAP)
+	depends on (STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM3_CAP) || ((ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM3_CAP)
 	default 1000000 if STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM3_CAP
-	default 100000 if ARCH_CHIP_STM32H7 && STM32_TIM3_CAP
+	default 100000 if (ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM3_CAP
 	---help---
 		This clock frequency limiting the count rate at the expense of resolution.
 
@@ -2856,7 +2864,7 @@ config STM32_TIM4_CAP
 	bool "TIM4 Capture"
 	depends on STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM4 || (STM32_COMMON_F7_H7_H5) && STM32_TIM4 || STM32_COMMON_L4_L5_U5 && STM32_HAVE_TIM4
 	select STM32_CAP if STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM4
-	select STM32_TIMX_CAP if ARCH_CHIP_STM32H7 && STM32_TIM4
+	select STM32_TIMX_CAP if (ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM4
 	---help---
 		Reserve timer 4 for use by Capture
 
@@ -2865,9 +2873,9 @@ config STM32_TIM4_CAP
 
 config STM32_TIM4_CLOCK
 	int "TIM4 work frequency for capture"
-	depends on (STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM4_CAP) || (ARCH_CHIP_STM32H7 && STM32_TIM4_CAP)
+	depends on (STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM4_CAP) || ((ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM4_CAP)
 	default 1000000 if STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM4_CAP
-	default 100000 if ARCH_CHIP_STM32H7 && STM32_TIM4_CAP
+	default 100000 if (ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM4_CAP
 	---help---
 		This clock frequency limiting the count rate at the expense of resolution.
 
@@ -2875,7 +2883,7 @@ config STM32_TIM5_CAP
 	bool "TIM5 Capture"
 	depends on STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM5 || (STM32_COMMON_F7_H7_H5) && STM32_TIM5 || STM32_COMMON_L4_L5_U5 && STM32_HAVE_TIM5
 	select STM32_CAP if STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM5
-	select STM32_TIMX_CAP if ARCH_CHIP_STM32H7 && STM32_TIM5
+	select STM32_TIMX_CAP if (ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM5
 	---help---
 		Reserve timer 5 for use by Capture
 
@@ -2884,9 +2892,9 @@ config STM32_TIM5_CAP
 
 config STM32_TIM5_CLOCK
 	int "TIM5 work frequency for capture"
-	depends on (STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM5_CAP) || (ARCH_CHIP_STM32H7 && STM32_TIM5_CAP)
+	depends on (STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM5_CAP) || ((ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM5_CAP)
 	default 1000000 if STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM5_CAP
-	default 100000 if ARCH_CHIP_STM32H7 && STM32_TIM5_CAP
+	default 100000 if (ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM5_CAP
 	---help---
 		This clock frequency limiting the count rate at the expense of resolution.
 
@@ -2894,7 +2902,7 @@ config STM32_TIM8_CAP
 	bool "TIM8 Capture"
 	depends on STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM8 || (STM32_COMMON_F7_H7_H5) && STM32_TIM8 || STM32_COMMON_L4_L5_U5 && STM32_HAVE_TIM8
 	select STM32_CAP if STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM8
-	select STM32_TIMX_CAP if ARCH_CHIP_STM32H7 && STM32_TIM8
+	select STM32_TIMX_CAP if (ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM8
 	---help---
 		Reserve timer 8 for use by Capture
 
@@ -2903,9 +2911,9 @@ config STM32_TIM8_CAP
 
 config STM32_TIM8_CLOCK
 	int "TIM8 work frequency for capture"
-	depends on (STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM8_CAP) || (ARCH_CHIP_STM32H7 && STM32_TIM8_CAP)
+	depends on (STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM8_CAP) || ((ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM8_CAP)
 	default 1000000 if STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM8_CAP
-	default 100000 if ARCH_CHIP_STM32H7 && STM32_TIM8_CAP
+	default 100000 if (ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM8_CAP
 	---help---
 		This clock frequency limiting the count rate at the expense of resolution.
 
@@ -2943,7 +2951,7 @@ config STM32_TIM12_CAP
 	bool "TIM12 Capture"
 	depends on STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM12 || (STM32_COMMON_F7_H7_H5) && STM32_TIM12
 	select STM32_CAP if STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM12
-	select STM32_TIMX_CAP if ARCH_CHIP_STM32H7 && STM32_TIM12
+	select STM32_TIMX_CAP if (ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM12
 	---help---
 		Reserve timer 12 for use by Capture
 
@@ -2952,15 +2960,15 @@ config STM32_TIM12_CAP
 
 config STM32_TIM12_CLOCK
 	int "TIM12 work frequency for capture"
-	depends on (STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM12_CAP) || (ARCH_CHIP_STM32H7 && STM32_TIM12_CAP)
+	depends on (STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM12_CAP) || ((ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM12_CAP)
 	default 1000000 if STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM12_CAP
-	default 100000 if ARCH_CHIP_STM32H7 && STM32_TIM12_CAP
+	default 100000 if (ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM12_CAP
 	---help---
 		This clock frequency limiting the count rate at the expense of resolution.
 
 config STM32_TIM13_CAP
 	bool "TIM13 Capture"
-	depends on STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM13 || (STM32_COMMON_F7_H7_H5) && STM32_TIM13
+	depends on STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM13 || (STM32_COMMON_F7_H7) && STM32_TIM13
 	select STM32_CAP if STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM13
 	select STM32_TIMX_CAP if ARCH_CHIP_STM32H7 && STM32_TIM13
 	---help---
@@ -2979,7 +2987,7 @@ config STM32_TIM13_CLOCK
 
 config STM32_TIM14_CAP
 	bool "TIM14 Capture"
-	depends on STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM14 || (STM32_COMMON_F7_H7_H5) && STM32_TIM14
+	depends on STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM14 || (STM32_COMMON_F7_H7) && STM32_TIM14
 	select STM32_CAP if STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_TIM14
 	select STM32_TIMX_CAP if ARCH_CHIP_STM32H7 && STM32_TIM14
 	---help---
@@ -3893,27 +3901,27 @@ config STM32_TIM17_CH1NOUT
 config STM32_TIM15_CAP
 	bool "TIM15 Capture"
 	depends on STM32_COMMON_H7_H5 && STM32_TIM15
-	select STM32_TIMX_CAP if ARCH_CHIP_STM32H7 && STM32_TIM15
+	select STM32_TIMX_CAP if (ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM15
 	---help---
 		Reserve timer 15 for use by the capture driver.
 
 config STM32_TIM16_CAP
 	bool "TIM16 Capture"
-	depends on STM32_COMMON_H7_H5 && STM32_TIM16
+	depends on ARCH_CHIP_STM32H7 && STM32_TIM16
 	select STM32_TIMX_CAP if ARCH_CHIP_STM32H7 && STM32_TIM16
 	---help---
 		Reserve timer 16 for use by the capture driver.
 
 config STM32_TIM17_CAP
 	bool "TIM17 Capture"
-	depends on STM32_COMMON_H7_H5 && STM32_TIM17
+	depends on ARCH_CHIP_STM32H7 && STM32_TIM17
 	select STM32_TIMX_CAP if ARCH_CHIP_STM32H7 && STM32_TIM17
 	---help---
 		Reserve timer 17 for use by the capture driver.
 
 config STM32_TIM15_CLOCK
 	int "TIM15 capture frequency (Hz)"
-	depends on ARCH_CHIP_STM32H7 && STM32_TIM15_CAP
+	depends on (ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_TIM15_CAP
 	default 100000
 	---help---
 		This clock frequency determines the timer's counting rate.
