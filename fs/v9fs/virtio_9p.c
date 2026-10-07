@@ -150,6 +150,7 @@ static void virtio_9p_destroy(FAR struct v9fs_transport_s *transport)
 {
   FAR struct virtio_9p_priv_s *priv =
             container_of(transport, struct virtio_9p_priv_s, transport);
+
   virtio_unregister_driver(&priv->vdrv);
   fs_heap_free(priv);
 }
