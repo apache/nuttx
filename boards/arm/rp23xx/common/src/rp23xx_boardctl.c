@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/rp23xx/rp23xx_serial.h
+ * boards/arm/rp23xx/common/src/rp23xx_boardctl.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,47 +20,58 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RP23XX_RP23XX_SERIAL_H
-#define __ARCH_ARM_SRC_RP23XX_RP23XX_SERIAL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "rp23xx_uart.h"
+
+#include <errno.h>
+
+#include <nuttx/board.h>
+#include <arch/chip/pm.h>
+
+#include "rp23xx_pm.h"
+
+#ifdef CONFIG_BOARDCTL_IOCTL
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: rp23xx_serial_resume
+ * Name: board_ioctl
  *
  * Description:
- *   Set up the UARTs again after a suspend to RAM, in place of
- *   arm_earlyserialinit().
+ *   Handle the rp23xx boardctl() commands of arch/chip/pm.h.
  *
  ****************************************************************************/
 
+int board_ioctl(unsigned int cmd, uintptr_t arg)
+{
+  switch (cmd)
+    {
 #ifdef CONFIG_RP23XX_PM_SUSPEND
-void rp23xx_serial_resume(void);
+      case BOARDIOC_RP23XX_SUSPEND:
+        {
+          FAR struct rp23xx_suspend_s *suspend =
+            (FAR struct rp23xx_suspend_s *)arg;
+          int ret;
+
+          if (suspend == NULL)
+            {
+              return -EINVAL;
+            }
+
+          ret = rp23xx_pm_suspend(suspend->wake_ms);
+          suspend->wake_source = rp23xx_pm_wake_source();
+          return ret;
+        }
 #endif
 
-#endif /* __ARCH_ARM_SRC_RP23XX_RP23XX_SERIAL_H */
+      default:
+        return -ENOTTY;
+    }
+}
+
+#endif /* CONFIG_BOARDCTL_IOCTL */

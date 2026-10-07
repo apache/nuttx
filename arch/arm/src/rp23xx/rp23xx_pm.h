@@ -113,6 +113,57 @@ int rp23xx_pm_gpio_wakeup_disable(int gpio);
 void rp23xx_pm_pads_quiesce(void);
 #endif
 
+/****************************************************************************
+ * Name: g_pm_resume_stack
+ *
+ * Description:
+ *   The stack a resume boots on.  The idle stack still holds the frames of
+ *   the idle thread, which the resumed system returns to.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RP23XX_PM_SUSPEND
+#  define RP23XX_PM_RESUME_STACK_WORDS (CONFIG_IDLETHREAD_STACKSIZE / 4)
+
+EXTERN uint32_t g_pm_resume_stack[RP23XX_PM_RESUME_STACK_WORDS];
+#endif
+
+/****************************************************************************
+ * Name: rp23xx_pm_suspend
+ *
+ * Description:
+ *   Power the switched core down (POWMAN P1.0) and return after the wake.
+ *   Memory is kept, but every peripheral comes back reset.
+ *
+ * Input Parameters:
+ *   wake_ms - Timed wake in milliseconds, or 0 for none.  An RTC alarm
+ *             that comes first also wakes the chip.
+ *
+ * Returned Value:
+ *   Zero after the resume; a negated errno if the request was refused.
+ *
+ * Name: rp23xx_pm_gpio_wakeup_restore
+ *
+ * Description:
+ *   Arm the dormant-wake GPIOs again after a resume.
+ *
+ * Name: rp23xx_pm_resume_pending / rp23xx_pm_resume
+ *
+ * Description:
+ *   Called from __start only.  rp23xx_pm_resume_pending() tells if this
+ *   boot is a resume, before .bss and .data are touched.
+ *   rp23xx_pm_resume() then replaces nx_start() and does not return.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RP23XX_PM_SUSPEND
+int rp23xx_pm_suspend(uint32_t wake_ms);
+void rp23xx_pm_gpio_wakeup_restore(void);
+uint32_t rp23xx_pm_wake_source(void);
+bool rp23xx_pm_resume_pending(void);
+void rp23xx_pm_resume(void);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

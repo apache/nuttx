@@ -33,6 +33,10 @@ ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += rp23xx_reset.c
 endif
 
+ifeq ($(CONFIG_BOARDCTL_IOCTL),y)
+CSRCS += rp23xx_boardctl.c
+endif
+
 ifeq ($(CONFIG_SPI),y)
 CSRCS += rp23xx_spi.c
 endif

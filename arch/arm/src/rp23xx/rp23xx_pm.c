@@ -348,6 +348,13 @@ static uint64_t g_pm_wakeup_gpios;
 
 static volatile bool g_pm_woken;
 
+#ifdef CONFIG_RP23XX_PM_SUSPEND
+/* Their trigger, to arm them again after a suspend to RAM */
+
+static uint64_t g_pm_wakeup_edge;
+static uint64_t g_pm_wakeup_high;
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -720,6 +727,14 @@ int rp23xx_pm_gpio_wakeup(int gpio, bool edge, bool high)
                          rp23xx_pm_wake_irq, NULL);
 
   g_pm_wakeup_gpios |= 1ull << gpio;
+
+#ifdef CONFIG_RP23XX_PM_SUSPEND
+  g_pm_wakeup_edge = edge ? g_pm_wakeup_edge | (1ull << gpio) :
+                            g_pm_wakeup_edge & ~(1ull << gpio);
+  g_pm_wakeup_high = high ? g_pm_wakeup_high | (1ull << gpio) :
+                            g_pm_wakeup_high & ~(1ull << gpio);
+#endif
+
   return OK;
 }
 
@@ -740,3 +755,23 @@ int rp23xx_pm_gpio_wakeup_disable(int gpio)
   g_pm_wakeup_gpios &= ~(1ull << gpio);
   return OK;
 }
+
+#ifdef CONFIG_RP23XX_PM_SUSPEND
+/****************************************************************************
+ * Name: rp23xx_pm_gpio_wakeup_restore
+ ****************************************************************************/
+
+void rp23xx_pm_gpio_wakeup_restore(void)
+{
+  int gpio;
+
+  for (gpio = 0; gpio < RP23XX_GPIO_NUM; gpio++)
+    {
+      if ((g_pm_wakeup_gpios & (1ull << gpio)) != 0)
+        {
+          rp23xx_pm_gpio_wakeup(gpio, (g_pm_wakeup_edge >> gpio) & 1,
+                                (g_pm_wakeup_high >> gpio) & 1);
+        }
+    }
+}
+#endif

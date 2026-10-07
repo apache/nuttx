@@ -1048,6 +1048,46 @@ void arm_earlyserialinit(void)
 #endif
 
 /****************************************************************************
+ * Name: rp23xx_serial_resume
+ *
+ * Description:
+ *   Set up the open UARTs again after a suspend to RAM.  up_setup() reads
+ *   the interrupt mask back from the reset hardware, so restore the mask
+ *   that the driver kept in RAM.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RP23XX_PM_SUSPEND
+static void up_resume_one(struct uart_dev_s *dev)
+{
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  uint32_t ier;
+
+  if (dev->open_count == 0 && !dev->isconsole)
+    {
+      return;
+    }
+
+  ier = priv->ier;
+
+  up_setup(dev);
+
+  priv->ier = ier;
+  up_serialout(priv, RP23XX_UART_UARTIMSC_OFFSET, ier);
+}
+
+void rp23xx_serial_resume(void)
+{
+#ifdef TTYS0_DEV
+  up_resume_one(&TTYS0_DEV);
+#endif
+#ifdef TTYS1_DEV
+  up_resume_one(&TTYS1_DEV);
+#endif
+}
+#endif
+
+/****************************************************************************
  * Name: arm_serialinit
  *
  * Description:

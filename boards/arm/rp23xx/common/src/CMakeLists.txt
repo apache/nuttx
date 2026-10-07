@@ -30,6 +30,10 @@ if(CONFIG_ARCH_BOARD_COMMON)
     list(APPEND SRCS rp23xx_reset.c)
   endif()
 
+  if(CONFIG_BOARDCTL_IOCTL)
+    list(APPEND SRCS rp23xx_boardctl.c)
+  endif()
+
   if(CONFIG_SPI)
     list(APPEND SRCS rp23xx_spi.c)
   endif()
