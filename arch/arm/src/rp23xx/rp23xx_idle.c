@@ -29,10 +29,12 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/power/pm.h>
 
 #include <nuttx/irq.h>
 
 #include "arm_internal.h"
+#include "rp23xx_pm.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -57,6 +59,75 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: rp23xx_idlepm
+ *
+ * Description:
+ *   Perform IDLE state power management.  Without CONFIG_RP23XX_PM every
+ *   state is a plain WFI.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static void rp23xx_idlepm(void)
+{
+  static enum pm_state_e oldstate = PM_NORMAL;
+  enum pm_state_e newstate;
+  irqstate_t flags;
+  int ret;
+
+  /* Decide which power saving level can be obtained */
+
+  newstate = pm_checkstate(PM_IDLE_DOMAIN);
+
+  /* Check for state changes */
+
+  if (newstate != oldstate)
+    {
+      flags = enter_critical_section();
+
+      ret = pm_changestate(PM_IDLE_DOMAIN, newstate);
+      if (ret < 0)
+        {
+          /* The new state change failed, revert to the preceding state */
+
+          pm_changestate(PM_IDLE_DOMAIN, oldstate);
+        }
+      else
+        {
+          /* Save the new state */
+
+          oldstate = newstate;
+        }
+
+      leave_critical_section(flags);
+    }
+
+  /* Enter the state on every pass, not only on a change.  Not in a
+   * critical section: a masked interrupt does not end a WFI.
+   */
+
+  switch (oldstate)
+    {
+#ifdef CONFIG_RP23XX_PM
+      case PM_STANDBY:
+        rp23xx_pm_standby();
+        break;
+
+      case PM_SLEEP:
+        rp23xx_pm_sleep();
+        break;
+#endif
+
+      case PM_NORMAL:
+      case PM_IDLE:
+      default:
+        asm("WFI");
+        break;
+    }
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -88,7 +159,11 @@ void up_idle(void)
   /* Sleep until an interrupt occurs to save power */
 
   BEGIN_IDLE();
+#ifdef CONFIG_PM
+  rp23xx_idlepm();
+#else
   asm("WFI");
+#endif
   END_IDLE();
 #endif
 }

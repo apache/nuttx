@@ -414,6 +414,7 @@ config ARCH_CHIP_RP23XX
 	select ARM_HAVE_DSP
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_PM
 	select ARCH_BOARD_COMMON
 	select ARCH_USBDEV_STALLQUEUE if USBDEV
 	---help---

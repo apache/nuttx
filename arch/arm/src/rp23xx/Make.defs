@@ -119,6 +119,14 @@ CHIP_CSRCS += rp23xx_rtc_lowerhalf.c
 endif
 endif
 
+ifeq ($(CONFIG_PM),y)
+CHIP_CSRCS += rp23xx_pminitialize.c
+endif
+
+ifeq ($(CONFIG_RP23XX_PM),y)
+CHIP_CSRCS += rp23xx_pm.c
+endif
+
 ifeq ($(CONFIG_RP23XX_OTP),y)
 CHIP_CSRCS += rp23xx_otp.c
 endif
