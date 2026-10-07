@@ -292,7 +292,11 @@ static void sim_can_work(void *arg)
   struct can_hdr_s      hdr;
   int                   ret;
 
-  if (host_can_avail(&priv->host))
+  /* Drain all frames queued on the host socket, otherwise only one frame
+   * is delivered per work period and the RX path lags behind the bus.
+   */
+
+  while (host_can_avail(&priv->host))
     {
       /* Wait for data from host stack */
 
