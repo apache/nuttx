@@ -39,7 +39,8 @@
  *      boot by the linker script, which is the same mechanism the Pico SDK
  *      spells __not_in_flash_func(),
  *   2. runs with interrupts disabled, because an ISR vector or handler
- *      living in flash would be fetched mid-erase, and
+ *      living in flash would be fetched mid-erase -- one 64K block erase
+ *      or one 256 byte page program at a time, and
  *   3. parks the other core, because it is very likely executing from
  *      flash as well.
  *
@@ -153,6 +154,16 @@ struct rp23xx_flash_dev_s
   mutex_t          lock;
 };
 
+/* One flash operation.  It is static, so that it is in SRAM. */
+
+struct rp23xx_flash_op_s
+{
+  CODE void (*func)(FAR struct rp23xx_flash_op_s *op);
+  uint32_t addr;
+  FAR const uint8_t *data;
+  size_t count;
+};
+
 /* QSPI state saved over a flash operation */
 
 struct rp23xx_qspi_state_s
@@ -231,6 +242,12 @@ static struct rp23xx_flash_dev_s g_flash_dev =
 };
 
 static bool g_initialized = false;
+
+static struct rp23xx_flash_op_s g_flash_op;
+
+#ifdef CONFIG_SMP
+static struct smp_isolation_s g_smp_isolation;
+#endif
 
 static struct
 {
@@ -340,11 +357,11 @@ static void enter_smp_isolation(struct smp_isolation_s *const data)
           spin_lock(&cpu_data->cpu_wait);
           spin_lock(&cpu_data->cpu_pause);
           spin_unlock(&cpu_data->cpu_resume);
-        }
 
-      nxsched_smp_call_init(&cpu_data->call_data, pause_cpu_handler,
-                            cpu_data);
-      nxsched_smp_call_single_async(other_cpuid, &cpu_data->call_data);
+          nxsched_smp_call_init(&cpu_data->call_data, pause_cpu_handler,
+                                cpu_data);
+          nxsched_smp_call_single_async(other_cpuid, &cpu_data->call_data);
+        }
     }
 
   /* Wait until every other CPU has actually parked */
@@ -481,24 +498,18 @@ static void RAM_CODE(rp23xx_flash_end)(struct rp23xx_qspi_state_s *state)
  * Name: do_erase
  *
  * Description:
- *   Erase a byte range.  Runs from RAM with interrupts already disabled and
- *   the other core already parked.
+ *   Erase one sector or block.  Runs from RAM with interrupts disabled and
+ *   the other core parked.
  *
  ****************************************************************************/
 
-static void RAM_CODE(do_erase)(uint32_t addr, size_t count)
+static void RAM_CODE(do_erase)(FAR struct rp23xx_flash_op_s *op)
 {
   struct rp23xx_qspi_state_s state;
 
   rp23xx_flash_begin(&state);
-
-  /* The bootrom erases whole 64K blocks where address and length allow it
-   * and falls back to 4K sectors otherwise.
-   */
-
-  g_rom.flash_range_erase(addr, count, FLASH_BLOCK_SIZE,
+  g_rom.flash_range_erase(op->addr, op->count, FLASH_BLOCK_SIZE,
                           FLASH_BLOCK_ERASE_CMD);
-
   rp23xx_flash_end(&state);
 }
 
@@ -506,31 +517,58 @@ static void RAM_CODE(do_erase)(uint32_t addr, size_t count)
  * Name: do_write
  ****************************************************************************/
 
-static void RAM_CODE(do_write)(uint32_t addr, const uint8_t *data,
-                               size_t count)
+static void RAM_CODE(do_write)(FAR struct rp23xx_flash_op_s *op)
 {
   struct rp23xx_qspi_state_s state;
 
   rp23xx_flash_begin(&state);
-  g_rom.flash_range_program(addr, data, count);
+  g_rom.flash_range_program(op->addr, op->data, op->count);
   rp23xx_flash_end(&state);
 }
 
 /****************************************************************************
+ * Name: rp23xx_flash_run
+ *
+ * Description:
+ *   Run g_flash_op with interrupts disabled and the other core parked.
+ *   The caller holds the device lock.
+ *
+ ****************************************************************************/
+
+static void rp23xx_flash_run(void)
+{
+  irqstate_t flags;
+
+#ifdef CONFIG_SMP
+  init_smp_isolation(&g_smp_isolation);
+  enter_smp_isolation(&g_smp_isolation);
+#endif
+
+  flags = enter_critical_section();
+  g_flash_op.func(&g_flash_op);
+  leave_critical_section(flags);
+
+#ifdef CONFIG_SMP
+  leave_smp_isolation(&g_smp_isolation);
+#endif
+}
+
+/****************************************************************************
  * Name: rp23xx_flash_erase
+ *
+ * Description:
+ *   Erase one 64K block or 4K sector at a time, so that interrupts are
+ *   disabled for one block erase at most.
+ *
  ****************************************************************************/
 
 static int rp23xx_flash_erase(struct mtd_dev_s *dev, off_t startblock,
                               size_t nblocks)
 {
   struct rp23xx_flash_dev_s *priv = (struct rp23xx_flash_dev_s *)dev;
-  irqstate_t flags;
+  uint32_t addr;
+  uint32_t end;
   int ret;
-
-#ifdef CONFIG_SMP
-  struct smp_isolation_s smp_isolation;
-  init_smp_isolation(&smp_isolation);
-#endif
 
   if (startblock < 0 || startblock + nblocks > FS_SECTORS)
     {
@@ -545,20 +583,23 @@ static int rp23xx_flash_erase(struct mtd_dev_s *dev, off_t startblock,
       return ret;
     }
 
-#ifdef CONFIG_SMP
-  enter_smp_isolation(&smp_isolation);
-#endif
+  addr = FS_OFFSET + startblock * FLASH_SECTOR_SIZE;
+  end  = addr + nblocks * FLASH_SECTOR_SIZE;
 
-  flags = enter_critical_section();
+  while (addr < end)
+    {
+      g_flash_op.func  = do_erase;
+      g_flash_op.addr  = addr;
+      g_flash_op.count = FLASH_SECTOR_SIZE;
 
-  do_erase(FS_OFFSET + startblock * FLASH_SECTOR_SIZE,
-           nblocks * FLASH_SECTOR_SIZE);
+      if ((addr % FLASH_BLOCK_SIZE) == 0 && end - addr >= FLASH_BLOCK_SIZE)
+        {
+          g_flash_op.count = FLASH_BLOCK_SIZE;
+        }
 
-  leave_critical_section(flags);
-
-#ifdef CONFIG_SMP
-  leave_smp_isolation(&smp_isolation);
-#endif
+      rp23xx_flash_run();
+      addr += g_flash_op.count;
+    }
 
   nxmutex_unlock(&priv->lock);
   return nblocks;
@@ -601,19 +642,19 @@ static ssize_t rp23xx_flash_bread(struct mtd_dev_s *dev, off_t startblock,
 
 /****************************************************************************
  * Name: rp23xx_flash_bwrite
+ *
+ * Description:
+ *   Program one page at a time, so that interrupts are disabled for one
+ *   page program at most.
+ *
  ****************************************************************************/
 
 static ssize_t rp23xx_flash_bwrite(struct mtd_dev_s *dev, off_t startblock,
                                    size_t nblocks, const uint8_t *buffer)
 {
   struct rp23xx_flash_dev_s *priv = (struct rp23xx_flash_dev_s *)dev;
-  irqstate_t flags;
+  size_t i;
   int ret;
-
-#ifdef CONFIG_SMP
-  struct smp_isolation_s smp_isolation;
-  init_smp_isolation(&smp_isolation);
-#endif
 
   if (startblock < 0 || startblock + nblocks > FS_PAGES)
     {
@@ -626,20 +667,15 @@ static ssize_t rp23xx_flash_bwrite(struct mtd_dev_s *dev, off_t startblock,
       return ret;
     }
 
-#ifdef CONFIG_SMP
-  enter_smp_isolation(&smp_isolation);
-#endif
+  for (i = 0; i < nblocks; i++)
+    {
+      g_flash_op.func  = do_write;
+      g_flash_op.addr  = FS_OFFSET + (startblock + i) * FLASH_PAGE_SIZE;
+      g_flash_op.data  = buffer + i * FLASH_PAGE_SIZE;
+      g_flash_op.count = FLASH_PAGE_SIZE;
 
-  flags = enter_critical_section();
-
-  do_write(FS_OFFSET + startblock * FLASH_PAGE_SIZE, buffer,
-           nblocks * FLASH_PAGE_SIZE);
-
-  leave_critical_section(flags);
-
-#ifdef CONFIG_SMP
-  leave_smp_isolation(&smp_isolation);
-#endif
+      rp23xx_flash_run();
+    }
 
   finfo("write page %ld count %zu\n", (long)startblock, nblocks);
 

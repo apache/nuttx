@@ -1217,8 +1217,9 @@ config RP23XX_FLASH_MTD
 
 		Note that erasing or programming this flash stalls all instruction
 		fetches from it.  The driver therefore runs those operations from
-		SRAM with interrupts disabled and the other core parked, which will
-		visibly affect interrupt latency for the duration.
+		SRAM with interrupts disabled and the other core parked, one 64K
+		block erase or one 256 byte page program at a time.  This will
+		visibly affect interrupt latency.
 
 if RP23XX_FLASH_MTD
 

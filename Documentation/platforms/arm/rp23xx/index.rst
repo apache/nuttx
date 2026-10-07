@@ -326,8 +326,10 @@ offset fails at boot instead of corrupting the running firmware.
 
 Erase and program go through the bootrom flash routines.  Because those
 operations stall instruction fetch from the same flash, the driver runs them
-from SRAM with interrupts disabled and, on SMP builds, the other core parked;
-expect interrupt latency to suffer for the duration of a write.  Afterwards the
+from SRAM with interrupts disabled and, on SMP builds, the other core parked.
+It does so for one 64K block erase or one 256 byte page program at a time, and
+enables interrupts between them; expect interrupt latency to suffer for that
+long (a block erase can take hundreds of milliseconds).  Afterwards the
 QSPI interface is put back into execute-in-place mode -- by default with a
 copy of the XIP setup function that the bootrom leaves in boot RAM, which
 restores the read mode found at boot, or, with
