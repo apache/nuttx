@@ -338,6 +338,11 @@ restores the read mode found at boot, or, with
 only on the documented bootrom entry point.  The driver also saves and
 restores the QSPI pads and the PSRAM configuration on chip select 1.
 
+Flash and PSRAM cannot be read while an erase or program is in progress.  So
+the driver copies a page to SRAM before it programs it if the data is in flash
+or PSRAM, and a caller with its stack in PSRAM runs the operation on a small
+SRAM stack.
+
 The driver answers the ``BIOC_XIPBASE`` ioctl with the memory-mapped address of
 the region, so a filesystem that supports execute in place can hand out real
 flash pointers instead of copying into RAM.
