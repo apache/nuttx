@@ -302,6 +302,7 @@ static void kvaser_putreg_sja(FAR struct kvaser_sja_s *priv,
                               uint8_t value)
 {
   uintptr_t addr = priv->base + offset;
+
   pci_write_io_byte(priv->pcidev, addr, value);
 }
 
@@ -328,6 +329,7 @@ static void kvaser_putreg_s5920(FAR struct kvaser_driver_s *priv,
                                 uint32_t value)
 {
   uintptr_t addr = priv->s5920_base + offset;
+
   pci_write_io_dword(priv->pcidev, addr, value);
 }
 
