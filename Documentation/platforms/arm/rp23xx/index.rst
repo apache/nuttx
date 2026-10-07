@@ -328,11 +328,13 @@ Erase and program go through the bootrom flash routines.  Because those
 operations stall instruction fetch from the same flash, the driver runs them
 from SRAM with interrupts disabled and, on SMP builds, the other core parked;
 expect interrupt latency to suffer for the duration of a write.  Afterwards the
-QSPI interface is put back into execute-in-place mode -- by default restoring
-the fast read mode the bootrom set up at boot, or, with
+QSPI interface is put back into execute-in-place mode -- by default with a
+copy of the XIP setup function that the bootrom leaves in boot RAM, which
+restores the read mode found at boot, or, with
 ``RP23XX_FLASH_MTD_SAFE_XIP``, always through the bootrom
 ``flash_enter_cmd_xip`` routine, which is slower to execute from but depends
-only on the documented bootrom entry point.
+only on the documented bootrom entry point.  The driver also saves and
+restores the QSPI pads and the PSRAM configuration on chip select 1.
 
 The driver answers the ``BIOC_XIPBASE`` ioctl with the memory-mapped address of
 the region, so a filesystem that supports execute in place can hand out real

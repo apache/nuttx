@@ -114,15 +114,11 @@
 
 #define RP23XX_FLASH_MAX_SIZE     0x04000000
 
-/* Bootrom XIP read modes, and the clock divisor to run them at.  Quad is
- * the fast one; the bootrom validates the part can do it.
+/* Size of the XIP setup function the bootrom leaves at the start of boot
+ * RAM (datasheet 5.2.7).
  */
 
-#define RP23XX_XIP_MODE_03H_SERIAL 0
-#define RP23XX_XIP_MODE_0BH_SERIAL 1
-#define RP23XX_XIP_MODE_BBH_DUAL   2
-#define RP23XX_XIP_MODE_EBH_QUAD   3
-#define RP23XX_XIP_CLKDIV          4
+#define XIP_SETUP_WORDS           64
 
 /* Smallest unit that can be programmed, and smallest that can be erased */
 
@@ -172,7 +168,7 @@ typedef void (*flash_range_erase_f)(uint32_t, size_t, uint32_t, uint8_t);
 typedef void (*flash_range_program_f)(uint32_t, const uint8_t *, size_t);
 typedef void (*flash_flush_cache_f)(void);
 typedef void (*flash_enter_cmd_xip_f)(void);
-typedef bool (*select_xip_read_mode_f)(uint32_t mode, uint8_t clkdiv);
+typedef void (*xip_setup_f)(void);
 
 #ifdef CONFIG_SMP
 /* Locks coordinating "pause" and "resume" with the handler that blocks a
@@ -245,14 +241,17 @@ static struct
   flash_flush_cache_f      flash_flush_cache;
   flash_enter_cmd_xip_f    flash_enter_cmd_xip;
 
-  /* Restores a fast XIP read mode.  flash_enter_cmd_xip works everywhere
-   * but leaves the flash in a slow 03h serial mode, which costs roughly an
-   * order of magnitude of read bandwidth -- and the base firmware executes
-   * from this same flash, so it is not a cost confined to the filesystem.
+  /* SRAM copy of the bootrom XIP setup function.  It restores the read
+   * mode and clock divisor found at boot.  NULL if there is none:
+   * flash_enter_cmd_xip then gives a slow 03h serial mode.
    */
 
-  select_xip_read_mode_f   select_xip_read_mode;
+  xip_setup_f              xip_setup;
 } g_rom;
+
+#ifndef CONFIG_RP23XX_FLASH_MTD_SAFE_XIP
+static uint32_t g_xip_setup[XIP_SETUP_WORDS];
+#endif
 
 /* End of the NuttX image in flash, provided by the linker script.  Declared
  * weak so that a RAM-only memory map, which does not define it, still
@@ -454,14 +453,11 @@ static void RAM_CODE(rp23xx_flash_end)(struct rp23xx_qspi_state_s *state)
 
   g_rom.flash_flush_cache();
 
-  /* Ask the bootrom to put the flash back into a fast quad read mode.  It
-   * reports whether it managed to, so a part that cannot do quad falls
-   * back rather than leaving the interface unusable.
-   */
-
-  if (g_rom.select_xip_read_mode == NULL ||
-      !g_rom.select_xip_read_mode(RP23XX_XIP_MODE_EBH_QUAD,
-                                  RP23XX_XIP_CLKDIV))
+  if (g_rom.xip_setup != NULL)
+    {
+      g_rom.xip_setup();
+    }
+  else
     {
       g_rom.flash_enter_cmd_xip();
     }
@@ -766,6 +762,10 @@ static int rp23xx_flash_ioctl(struct mtd_dev_s *dev, int cmd,
 
 struct mtd_dev_s *rp23xx_flash_mtd_initialize(void)
 {
+#ifndef CONFIG_RP23XX_FLASH_MTD_SAFE_XIP
+  int i;
+#endif
+
   if (g_initialized)
     {
       set_errno(EBUSY);
@@ -816,24 +816,29 @@ struct mtd_dev_s *rp23xx_flash_mtd_initialize(void)
       return NULL;
     }
 
-  /* Resolve the fast XIP read mode selector.  Unlike the bootrom's saved
-   * XIP setup pointer -- which is a data table entry whose semantics this
-   * driver got wrong, and calling it with flash torn down hangs the core
-   * unrecoverably -- this is an ordinary ROM function looked up exactly
-   * like the others above, and it returns a status.
+  /* Copy the bootrom XIP setup function out of boot RAM, which is not
+   * executable, as the Pico SDK does.  Boot RAM is empty when the image
+   * was not started by a flash boot.
    */
 
 #ifndef CONFIG_RP23XX_FLASH_MTD_SAFE_XIP
-  g_rom.select_xip_read_mode =
-    rom_func_lookup(ROM_FUNC_FLASH_SELECT_XIP_READ_MODE);
-
-  if (g_rom.select_xip_read_mode == NULL)
+  for (i = 0; i < XIP_SETUP_WORDS; i++)
     {
-      fwarn("rp23xx_flash: no fast XIP selector; reads will be slow after "
-            "every flash operation\n");
+      g_xip_setup[i] = getreg32(RP23XX_BOOTRAM_BASE + 4 * i);
     }
-#else
-  g_rom.select_xip_read_mode = NULL;
+
+  UP_DSB();
+  UP_ISB();
+
+  if (g_xip_setup[0] != 0)
+    {
+      g_rom.xip_setup = (xip_setup_f)((uintptr_t)g_xip_setup | 1);
+    }
+  else
+    {
+      fwarn("rp23xx_flash: no XIP setup function in boot RAM; reads will "
+            "be slow after every flash operation\n");
+    }
 #endif
 
   g_initialized = true;
