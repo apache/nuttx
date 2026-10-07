@@ -58,15 +58,22 @@ if(CONFIG_FDPIC)
 
   # GCC before 14 does not pass --fdpic to the assembler for -mfdpic, and the
   # assembler then rejects the FDPIC relocations, so pass it here.
+  #
+  # With -mlong-calls, GCC turns a call in tail position into a branch to the
+  # function descriptor rather than through it, which faults.  Keep it from
+  # making tail calls.
 
-  nuttx_elf_compile_options(-mfdpic -fPIC -Wa,--noexecstack -Wa,--fdpic)
+  set(FDPIC_FLAGS -mfdpic -fPIC -Wa,--noexecstack -Wa,--fdpic
+                  -fno-optimize-sibling-calls)
+
+  nuttx_elf_compile_options(${FDPIC_FLAGS})
 
   nuttx_elf_link_options(-m armelf_linux_fdpiceabi -shared -z now)
 
   # A shared library is an FDPIC shared object too, as LDMODULEFLAGS makes it in
   # common/Toolchain.defs
 
-  nuttx_mod_compile_options(-mfdpic -fPIC -Wa,--noexecstack -Wa,--fdpic)
+  nuttx_mod_compile_options(${FDPIC_FLAGS})
 
   nuttx_mod_link_options(-m armelf_linux_fdpiceabi -shared -z now)
 
