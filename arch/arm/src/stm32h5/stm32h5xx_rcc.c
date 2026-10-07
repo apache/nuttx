@@ -1229,9 +1229,19 @@ void stm32_stdclockconfig(void)
 
 #endif /* STM32_USE_LSE */
 
-      /* Configure ADC source clock */
+      /* Configure ADC source clock.  The DAC shares this kernel clock, and
+       * its output voltage is invalid unless the clock is HCLK or SYSCLK
+       * (see the "Invalid DAC output voltage for several DAC kernel clocks"
+       * erratum).
+       */
 
 #if defined(STM32_RCC_CCIPR5_ADCDACSEL)
+#  if defined(CONFIG_STM32_DAC1) && \
+      STM32_RCC_CCIPR5_ADCDACSEL != RCC_CCIPR5_ADCDACSEL_RCCHCLK && \
+      STM32_RCC_CCIPR5_ADCDACSEL != RCC_CCIPR5_ADCDACSEL_SYSCK
+#    error "The DAC needs STM32_RCC_CCIPR5_ADCDACSEL set to HCLK or SYSCLK"
+#  endif
+
       regval = getreg32(STM32_RCC_CCIPR5);
       regval &= ~RCC_CCIPR5_ADCDACSEL_MASK;
       regval |= STM32_RCC_CCIPR5_ADCDACSEL;

@@ -38,6 +38,7 @@
 
 #include "chip.h"
 #include "stm32_adc.h"
+#include "stm32_dac.h"
 #include "stm32_dbgmcu.h"
 #include "stm32_dma.h"
 #include "stm32_dts.h"
