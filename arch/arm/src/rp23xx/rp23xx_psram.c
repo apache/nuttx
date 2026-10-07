@@ -352,10 +352,22 @@ rp23xx_psramconfig(void)
 
   flags = up_irq_save();
 
-  size = rp23xx_psram_detect();
-  if (size != 0)
+  if (g_psram_size != 0)
     {
+      /* A resume from suspend to RAM: the PSRAM kept its power and is
+       * still in quad mode, which detection cannot handle.
+       */
+
       rp23xx_psram_apply_format();
+      size = g_psram_size;
+    }
+  else
+    {
+      size = rp23xx_psram_detect();
+      if (size != 0)
+        {
+          rp23xx_psram_apply_format();
+        }
     }
 
   up_irq_restore(flags);

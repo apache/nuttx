@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <assert.h>
 #include <nuttx/debug.h>
 #include <sys/param.h>
@@ -39,6 +40,11 @@
 #include "rp23xx_clock.h"
 #include "rp23xx_uart.h"
 #include "hardware/rp23xx_sio.h"
+
+#ifdef CONFIG_RP23XX_PM_SUSPEND
+#  include "rp23xx_pm.h"
+#  include "rp23xx_serial.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -71,24 +77,23 @@ const uintptr_t g_idle_topstack = IDLE_STACK;
 #endif
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: __start
+ * Name: rp23xx_hwinit
  *
  * Description:
- *   This is the reset entry point.
+ *   Set up the hardware of the switched core: clocks, pins, spinlocks, FPU,
+ *   console and board.  A resume from suspend to RAM does this too, but not
+ *   the memory initialisation of __start.
+ *
+ * Input Parameters:
+ *   resume - True when this is a resume rather than a cold boot.
  *
  ****************************************************************************/
 
-void __start(void)
+static void rp23xx_hwinit(bool resume)
 {
-#ifdef CONFIG_BOOT_RUNFROMFLASH
-  const uint32_t *src;
-#endif
-  uint32_t       *dest;
-  size_t         i;
+  size_t i;
+
+  UNUSED(resume);
 
   /* Errata RP2350-E2 SIO SPINLOCK writes are mirrored at +0x80 offset
    * Use only safe SPINLOCKS
@@ -102,42 +107,6 @@ void __start(void)
     20, 21, 22, 23, 24, 25, 26,
     27, 28, 29, 30, 31
   };
-
-  /* Set MSP to the top of the IDLE stack */
-
-  __asm__ __volatile__ ("\tmsr msp, %0\n" :: "r" (g_idle_topstack));
-
-  if (this_cpu() != 0)
-    {
-      while (1)
-        {
-          __asm__ volatile ("wfe");
-        }
-    }
-
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
-
-  for (dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
-    {
-      *dest++ = 0;
-    }
-
-  /* Move the initialized data section from its temporary holding spot in
-   * FLASH into the correct place in SRAM.  The correct place in SRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
-   * end of all of the other read-only data (.text, .rodata) at _eronly.
-   */
-
-#ifdef CONFIG_BOOT_RUNFROMFLASH
-  for (src = (const uint32_t *)_eronly,
-       dest = (uint32_t *)_sdata; dest < (uint32_t *)_edata;
-      )
-    {
-      *dest++ = *src++;
-    }
-#endif
 
   /* Set up clock */
 
@@ -165,10 +134,22 @@ void __start(void)
   rp23xx_lowsetup();
   showprogress('A');
 
-  /* Perform early serial initialization */
+  /* Perform early serial initialization.  On a resume, the UARTs are reset
+   * but the driver state is not, so restore the hardware from it.
+   */
 
 #ifdef USE_EARLYSERIALINIT
-  arm_earlyserialinit();
+#  ifdef CONFIG_RP23XX_PM_SUSPEND
+  if (resume)
+    {
+      rp23xx_serial_resume();
+    }
+  else
+#  endif
+    {
+      arm_earlyserialinit();
+    }
+
 #endif
   showprogress('B');
 
@@ -179,14 +160,132 @@ void __start(void)
    */
 
 #ifdef CONFIG_BUILD_PROTECTED
-  rp23xx_userspace();
-  showprogress('C');
+  /* Not on a resume: the user data and bss hold the resumed state */
+
+  if (!resume)
+    {
+      rp23xx_userspace();
+      showprogress('C');
+    }
 #endif
 
   /* Initialize onboard resources */
 
   rp23xx_boardinitialize();
   showprogress('D');
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_RP23XX_PM_SUSPEND
+
+/****************************************************************************
+ * Name: rp23xx_resume_boot
+ *
+ * Description:
+ *   The rest of a boot that is a resume from suspend to RAM.  __start
+ *   branches here on its own stack.  Does not return.
+ *
+ ****************************************************************************/
+
+void rp23xx_resume_boot(void)
+{
+  rp23xx_hwinit(true);
+
+  /* The IO bank lost its dormant-wake enables */
+
+  rp23xx_pm_gpio_wakeup_restore();
+
+#ifdef CONFIG_RP23XX_PM_QUIESCE_PADS
+  /* The pads came back reset, and a resume does not run
+   * arm_pminitialize()
+   */
+
+  rp23xx_pm_pads_quiesce();
+#endif
+
+  showprogress('\r');
+  showprogress('\n');
+
+  rp23xx_pm_resume();
+
+  for (; ; );
+}
+#endif
+
+/****************************************************************************
+ * Name: __start
+ *
+ * Description:
+ *   This is the reset entry point.
+ *
+ ****************************************************************************/
+
+void __start(void)
+{
+#ifdef CONFIG_BOOT_RUNFROMFLASH
+  const uint32_t *src;
+#endif
+  uint32_t       *dest;
+
+  /* Set MSP to the top of the IDLE stack */
+
+  __asm__ __volatile__ ("\tmsr msp, %0\n" :: "r" (g_idle_topstack));
+
+  if (this_cpu() != 0)
+    {
+      while (1)
+        {
+          __asm__ volatile ("wfe");
+        }
+    }
+
+#ifdef CONFIG_RP23XX_PM_SUSPEND
+  /* A resume comes through the bootrom like a cold boot.  Check before
+   * .bss and .data are touched, and leave the idle stack at once: the idle
+   * thread still runs on it.
+   */
+
+  if (rp23xx_pm_resume_pending())
+    {
+      __asm__ __volatile__
+      (
+        "msr msp, %0\n"
+        "b   rp23xx_resume_boot\n"
+        :
+        : "r" (&g_pm_resume_stack[RP23XX_PM_RESUME_STACK_WORDS])
+        : "memory"
+      );
+    }
+#endif
+
+  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
+   * certain that there are no issues with the state of global variables.
+   */
+
+  for (dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
+    {
+      *dest++ = 0;
+    }
+
+  /* Move the initialized data section from its temporary holding spot in
+   * FLASH into the correct place in SRAM.  The correct place in SRAM is
+   * give by _sdata and _edata.  The temporary location is in FLASH at the
+   * end of all of the other read-only data (.text, .rodata) at _eronly.
+   */
+
+#ifdef CONFIG_BOOT_RUNFROMFLASH
+  for (src = (const uint32_t *)_eronly,
+       dest = (uint32_t *)_sdata; dest < (uint32_t *)_edata;
+      )
+    {
+      *dest++ = *src++;
+    }
+#endif
+
+  rp23xx_hwinit(false);
 
   /* Then start NuttX */
 

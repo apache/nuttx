@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/rp23xx/rp23xx_serial.h
+ * arch/arm/include/rp23xx/pm.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,47 +20,37 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RP23XX_RP23XX_SERIAL_H
-#define __ARCH_ARM_SRC_RP23XX_RP23XX_SERIAL_H
+#ifndef __ARCH_ARM_INCLUDE_RP23XX_PM_H
+#define __ARCH_ARM_INCLUDE_RP23XX_PM_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "rp23xx_uart.h"
+
+#include <stdint.h>
+#include <sys/boardctl.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* boardctl() command: suspend to RAM (POWMAN P1.0).  The argument is a
+ * pointer to struct rp23xx_suspend_s.  Needs CONFIG_RP23XX_PM_SUSPEND and
+ * CONFIG_BOARDCTL_IOCTL.  An armed RTC alarm also ends the suspend.
+ */
+
+#define BOARDIOC_RP23XX_SUSPEND  (BOARDIOC_USER + 0x0001)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+struct rp23xx_suspend_s
+{
+  uint32_t wake_ms;      /* In: timed wake in milliseconds, 0 for none */
+  uint32_t wake_source;  /* Out: POWMAN LAST_SWCORE_PWRUP after the wake */
+};
 
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: rp23xx_serial_resume
- *
- * Description:
- *   Set up the UARTs again after a suspend to RAM, in place of
- *   arm_earlyserialinit().
- *
- ****************************************************************************/
-
-#ifdef CONFIG_RP23XX_PM_SUSPEND
-void rp23xx_serial_resume(void);
-#endif
-
-#endif /* __ARCH_ARM_SRC_RP23XX_RP23XX_SERIAL_H */
+#endif /* __ARCH_ARM_INCLUDE_RP23XX_PM_H */

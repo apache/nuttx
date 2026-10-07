@@ -123,6 +123,10 @@ if(CONFIG_RP23XX_PM)
   list(APPEND SRCS rp23xx_pm.c)
 endif()
 
+if(CONFIG_RP23XX_PM_SUSPEND)
+  list(APPEND SRCS rp23xx_pm_suspend.c)
+endif()
+
 if(CONFIG_RP23XX_OTP)
   list(APPEND SRCS rp23xx_otp.c)
 endif()

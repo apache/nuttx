@@ -305,6 +305,65 @@ int rp23xx_rtc_cancelalarm(void)
 }
 
 /****************************************************************************
+ * Name: rp23xx_rtc_savealarm
+ ****************************************************************************/
+
+void rp23xx_rtc_savealarm(FAR struct rp23xx_alarm_state_s *state)
+{
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  *state = g_alarm;
+
+  powman_alarm_disable();
+
+  g_alarm.active = false;
+  g_alarm.cb     = NULL;
+  g_alarm.arg    = NULL;
+
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
+ * Name: rp23xx_rtc_restorealarm
+ ****************************************************************************/
+
+void rp23xx_rtc_restorealarm(FAR const struct rp23xx_alarm_state_s *state)
+{
+  rp23xx_alarm_callback_t cb;
+  FAR void *cbarg;
+  irqstate_t flags;
+
+  if (!state->active)
+    {
+      return;
+    }
+
+  flags = enter_critical_section();
+
+  if (state->time > powman_get_ms())
+    {
+      g_alarm = *state;
+      powman_set_alarm_ms(state->time);
+      leave_critical_section(flags);
+      return;
+    }
+
+  /* The time passed while the alarm was saved: report it now */
+
+  cb    = state->cb;
+  cbarg = state->arg;
+
+  leave_critical_section(flags);
+
+  if (cb != NULL)
+    {
+      cb(cbarg);
+    }
+}
+
+/****************************************************************************
  * Name: rp23xx_rtc_rdalarm
  ****************************************************************************/
 

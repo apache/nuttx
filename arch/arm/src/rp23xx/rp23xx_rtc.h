@@ -135,6 +135,19 @@ int rp23xx_rtc_cancelalarm(void);
 
 int rp23xx_rtc_rdalarm(FAR uint64_t *time);
 
+/****************************************************************************
+ * Name: rp23xx_rtc_savealarm / rp23xx_rtc_restorealarm
+ *
+ * Description:
+ *   Save the alarm and disarm it, so that the power management can use the
+ *   comparator; then arm it again.  An alarm whose time passed meanwhile
+ *   fires at once.
+ *
+ ****************************************************************************/
+
+void rp23xx_rtc_savealarm(FAR struct rp23xx_alarm_state_s *state);
+void rp23xx_rtc_restorealarm(FAR const struct rp23xx_alarm_state_s *state);
+
 #endif /* CONFIG_RTC_ALARM */
 
 /****************************************************************************

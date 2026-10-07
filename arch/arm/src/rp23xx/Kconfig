@@ -946,6 +946,18 @@ config RP23XX_PM_QUIESCE_PADS
 		near 2.2V (erratum RP2350-E9) and its input buffer then draws a
 		static current in every state.
 
+config RP23XX_PM_SUSPEND
+	bool "Suspend to RAM (POWMAN P1.0)"
+	default n
+	select ARCH_SETJMP_H
+	---help---
+		Power the switched core off, and keep the XIP cache and SRAM.  Every
+		peripheral loses its registers, and the chip comes back through
+		the boot path, so the idle governor never selects this state.  An
+		application asks for it with the BOARDIOC_RP23XX_SUSPEND boardctl()
+		command (arch/chip/pm.h, needs BOARDCTL_IOCTL).  The wake is a GPIO
+		(RP23XX_PM_WAKEUP_GPIO) or the always-on timer alarm.
+
 endif # RP23XX_PM
 
 config RP23XX_ADC
