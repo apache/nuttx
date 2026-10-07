@@ -34,6 +34,11 @@
 #include "arm64_arch.h"
 #include "arm64_internal.h"
 
+#ifdef CONFIG_ARCH_PGPOOL_MAPPING
+#  include <nuttx/pgalloc.h>
+#  include "pgalloc.h"
+#endif
+
 #ifndef CONFIG_DEV_SIMPLE_ADDRENV
 
 /****************************************************************************
@@ -96,6 +101,43 @@ uintptr_t up_addrenv_va_to_pa(void *va)
 
   return (uintptr_t)((par & PAR_PA_MASK) |
                      ((uintptr_t)va & VA_PAGE_OFFSET_MASK));
+}
+
+/****************************************************************************
+ * Name: up_addrenv_pa_to_va
+ *
+ * Description:
+ *   Map a physical address to a kernel virtual address: through the page
+ *   pool or kernel RAM mapping, otherwise the same address.  The MMU must
+ *   confirm the result.
+ *
+ * Input Parameters:
+ *   pa - The physical address to be mapped.
+ *
+ * Returned Value:
+ *   Virtual address on success; NULL if no kernel mapping was found.
+ *
+ ****************************************************************************/
+
+void *up_addrenv_pa_to_va(uintptr_t pa)
+{
+  uintptr_t va = 0;
+
+#ifdef CONFIG_ARCH_PGPOOL_MAPPING
+  va = arm64_pgvaddr(pa);
+#endif
+
+  if (va == 0)
+    {
+      va = pa;
+    }
+
+  if (up_addrenv_va_to_pa((void *)va) != pa)
+    {
+      return NULL;
+    }
+
+  return (void *)va;
 }
 
 #endif /* CONFIG_DEV_SIMPLE_ADDRENV */
