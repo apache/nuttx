@@ -71,19 +71,4 @@ size_t rp23xx_psramconfig(void);
 
 size_t rp23xx_psram_size(void);
 
-/****************************************************************************
- * Name: rp23xx_psram_restore
- *
- * Description:
- *   Re-apply the QMI M1 (PSRAM) format and timing registers.  Programming
- *   the flash goes through the bootrom, which reconfigures the shared QMI
- *   interface for chip select 0; this restores the CS1 configuration
- *   afterwards so the memory-mapped PSRAM keeps working across a flash
- *   erase or program.  Runs from RAM and does nothing when no PSRAM was
- *   detected.
- *
- ****************************************************************************/
-
-void rp23xx_psram_restore(void);
-
 #endif /* __ARCH_ARM_SRC_RP23XX_RP23XX_PSRAM_H */
