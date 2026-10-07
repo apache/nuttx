@@ -1241,7 +1241,8 @@ config RP23XX_FLASH_MTD_SIZE
 	---help---
 		Size of the MTD region in bytes.  Must be a multiple of the 4096
 		byte erase sector, and must fit within the flash fitted to the
-		board.
+		board.  The driver reads the flash size from its JEDEC ID, and
+		refuses to initialize if the region does not fit.
 
 config RP23XX_FLASH_MTD_SAFE_XIP
 	bool "Always restore XIP with the bootrom command mode"

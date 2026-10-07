@@ -142,6 +142,11 @@
 #define FLASH_BLOCK_SIZE          65536
 #define FLASH_BLOCK_ERASE_CMD     0xd8
 
+/* JEDEC ID: command, manufacturer, memory type, capacity (log2 bytes) */
+
+#define FLASH_READ_ID_CMD         0x9f
+#define FLASH_READ_ID_SIZE        4
+
 #define FS_OFFSET                 CONFIG_RP23XX_FLASH_MTD_OFFSET
 #define FS_SIZE                   CONFIG_RP23XX_FLASH_MTD_SIZE
 
@@ -171,7 +176,7 @@ struct rp23xx_flash_op_s
 {
   CODE void (*func)(FAR struct rp23xx_flash_op_s *op);
   uint32_t addr;
-  FAR const uint8_t *data;
+  FAR uint8_t *data;
   size_t count;
 };
 
@@ -546,6 +551,63 @@ static void RAM_CODE(do_write)(FAR struct rp23xx_flash_op_s *op)
 }
 
 /****************************************************************************
+ * Name: do_read_id
+ *
+ * Description:
+ *   Read the JEDEC ID in QMI direct mode, as the Pico SDK flash_do_cmd()
+ *   does.
+ *
+ ****************************************************************************/
+
+static void RAM_CODE(do_read_id)(FAR struct rp23xx_flash_op_s *op)
+{
+  struct rp23xx_qspi_state_s state;
+  size_t tx = 0;
+  size_t rx = 0;
+  uint32_t csr;
+
+  rp23xx_flash_begin(&state);
+
+  putreg32(getreg32(RP23XX_QMI_DIRECT_CSR) |
+           RP23XX_QMI_DIRECT_CSR_ASSERT_CS0N, RP23XX_QMI_DIRECT_CSR);
+  putreg32(getreg32(RP23XX_QMI_DIRECT_CSR) | RP23XX_QMI_DIRECT_CSR_EN,
+           RP23XX_QMI_DIRECT_CSR);
+
+  while ((getreg32(RP23XX_QMI_DIRECT_CSR) & RP23XX_QMI_DIRECT_CSR_BUSY) != 0)
+    {
+    }
+
+  while (tx < op->count || rx < op->count)
+    {
+      csr = getreg32(RP23XX_QMI_DIRECT_CSR);
+
+      if ((csr & RP23XX_QMI_DIRECT_CSR_TXFULL) == 0 && tx < op->count)
+        {
+          putreg32(tx == 0 ? FLASH_READ_ID_CMD : 0, RP23XX_QMI_DIRECT_TX);
+          tx++;
+        }
+
+      if ((csr & RP23XX_QMI_DIRECT_CSR_RXEMPTY) == 0 && rx < op->count)
+        {
+          op->data[rx++] = (uint8_t)getreg32(RP23XX_QMI_DIRECT_RX);
+        }
+    }
+
+  /* BUSY stays high for half an SCK after the last bit, for CS timing */
+
+  while ((getreg32(RP23XX_QMI_DIRECT_CSR) & RP23XX_QMI_DIRECT_CSR_BUSY) != 0)
+    {
+    }
+
+  putreg32(getreg32(RP23XX_QMI_DIRECT_CSR) & ~RP23XX_QMI_DIRECT_CSR_EN,
+           RP23XX_QMI_DIRECT_CSR);
+  putreg32(getreg32(RP23XX_QMI_DIRECT_CSR) &
+           ~RP23XX_QMI_DIRECT_CSR_ASSERT_CS0N, RP23XX_QMI_DIRECT_CSR);
+
+  rp23xx_flash_end(&state);
+}
+
+/****************************************************************************
  * Name: rp23xx_flash_call
  *
  * Description:
@@ -605,6 +667,42 @@ static void rp23xx_flash_run(void)
 #ifdef CONFIG_SMP
   leave_smp_isolation(&g_smp_isolation);
 #endif
+}
+
+/****************************************************************************
+ * Name: rp23xx_flash_size
+ *
+ * Description:
+ *   Return the flash size from its JEDEC ID, or 0 if the ID is not valid.
+ *
+ ****************************************************************************/
+
+static size_t rp23xx_flash_size(void)
+{
+  FAR uint8_t *id = g_flash_page;
+
+  if (nxmutex_lock(&g_flash_dev.lock) < 0)
+    {
+      return 0;
+    }
+
+  g_flash_op.func  = do_read_id;
+  g_flash_op.data  = id;
+  g_flash_op.count = FLASH_READ_ID_SIZE;
+
+  rp23xx_flash_run();
+  nxmutex_unlock(&g_flash_dev.lock);
+
+  finfo("rp23xx_flash: JEDEC ID %02x %02x %02x\n", id[1], id[2], id[3]);
+
+  /* Accept a capacity from 64K to 64M */
+
+  if (id[1] == 0x00 || id[1] == 0xff || id[3] < 16 || id[3] > 26)
+    {
+      return 0;
+    }
+
+  return (size_t)1 << id[3];
 }
 
 /****************************************************************************
@@ -725,7 +823,7 @@ static ssize_t rp23xx_flash_bwrite(struct mtd_dev_s *dev, off_t startblock,
     {
       g_flash_op.func  = do_write;
       g_flash_op.addr  = FS_OFFSET + (startblock + i) * FLASH_PAGE_SIZE;
-      g_flash_op.data  = buffer + i * FLASH_PAGE_SIZE;
+      g_flash_op.data  = (FAR uint8_t *)buffer + i * FLASH_PAGE_SIZE;
       g_flash_op.count = FLASH_PAGE_SIZE;
 
       if (IS_XIP_ADDR(g_flash_op.data))
@@ -858,6 +956,7 @@ static int rp23xx_flash_ioctl(struct mtd_dev_s *dev, int cmd,
 
 struct mtd_dev_s *rp23xx_flash_mtd_initialize(void)
 {
+  size_t size;
 #ifndef CONFIG_RP23XX_FLASH_MTD_SAFE_XIP
   int i;
 #endif
@@ -936,6 +1035,23 @@ struct mtd_dev_s *rp23xx_flash_mtd_initialize(void)
             "be slow after every flash operation\n");
     }
 #endif
+
+  /* An address past the end of the flash wraps around to the start, where
+   * the NuttX image is.  Refuse a region that does not fit.
+   */
+
+  size = rp23xx_flash_size();
+  if (size == 0)
+    {
+      fwarn("rp23xx_flash: unknown flash size; not checked\n");
+    }
+  else if (FS_OFFSET + FS_SIZE > size)
+    {
+      merr("ERROR: flash MTD region ends at 0x%08x, past the end of the "
+           "%zu byte flash\n", (unsigned)(FS_OFFSET + FS_SIZE), size);
+      set_errno(EINVAL);
+      return NULL;
+    }
 
   g_initialized = true;
 
