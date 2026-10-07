@@ -591,17 +591,14 @@ static bool telnet_putchar(FAR struct telnet_dev_s *priv, uint8_t ch,
 
   if (ch != TELNET_CR)
     {
-      /* Add all other characters to the destination buffer */
-
       index = *nread;
-      priv->td_txbuffer[index++] = ch;
 
-      /* Check for line feeds */
+      /* Telnet end of line is CR LF (RFC 854): put the carriage return
+       * before the line feed.
+       */
 
       if (ch == TELNET_NL)
         {
-          /* Now add the carriage return */
-
           priv->td_txbuffer[index++] = TELNET_CR;
 
           /* End of line */
@@ -609,6 +606,9 @@ static bool telnet_putchar(FAR struct telnet_dev_s *priv, uint8_t ch,
           ret = true;
         }
 
+      /* Add all other characters to the destination buffer */
+
+      priv->td_txbuffer[index++] = ch;
       *nread = index;
     }
 
