@@ -54,7 +54,7 @@ CEC         No
 CORDIC      No
 CRC         Yes
 CRS         No
-DAC         No
+DAC         Yes
 DBG         No
 DCACHE      No
 DCMI        No

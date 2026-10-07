@@ -83,7 +83,7 @@ config STM32_DAC1CH1_MODE
 
 config STM32_DAC1CH1_DMA
 	bool "DAC1CH1 DMA"
-	depends on STM32_DAC1CH1
+	depends on STM32_DAC1CH1 && !ARCH_CHIP_STM32H5
 	default n
 	---help---
 		If DMA is selected, then a timer and output frequency must also be
@@ -165,7 +165,7 @@ config STM32_DAC1CH2_MODE
 
 config STM32_DAC1CH2_DMA
 	bool "DAC1CH2 DMA"
-	depends on STM32_DAC1CH2
+	depends on STM32_DAC1CH2 && !ARCH_CHIP_STM32H5
 	default n
 	---help---
 		If DMA is selected, then a timer and output frequency must also be
