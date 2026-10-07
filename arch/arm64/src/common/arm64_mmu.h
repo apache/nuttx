@@ -456,6 +456,12 @@ static inline void mmu_invalidate_tlbs(void)
 static inline void mmu_write_ttbr0(uintptr_t reg)
 {
   write_sysreg(reg, ttbr0_el1);
+
+  /* Until this ISB, walks can still use the old table and cache its
+   * entries after the TLB invalidation below.
+   */
+
+  UP_ISB();
   mmu_invalidate_tlbs();
 }
 
