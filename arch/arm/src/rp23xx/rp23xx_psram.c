@@ -110,6 +110,22 @@ static size_t g_psram_size;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: rp23xx_psram_wait_busy
+ *
+ * Description:
+ *   Wait until the QMI direct mode is idle.  Runs from RAM.
+ *
+ ****************************************************************************/
+
+static void RP23XX_PSRAM_RAMFUNC
+rp23xx_psram_wait_busy(void)
+{
+  while ((getreg32(RP23XX_QMI_DIRECT_CSR) & RP23XX_QMI_DIRECT_CSR_BUSY) != 0)
+    {
+    }
+}
+
+/****************************************************************************
  * Name: rp23xx_psram_apply_format
  *
  * Description:
@@ -152,13 +168,13 @@ rp23xx_psram_detect(void)
   size_t size;
   size_t i;
 
-  /* Enable direct mode at a conservative clock divisor.  No BUSY wait is
-   * needed for the previous XIP transfer's cooldown: it drains before the
-   * first chip-select assertion below (verified on hardware).
+  /* Enable direct mode at a conservative clock divisor, and wait for any
+   * XIP transfer still in its cooldown to finish (datasheet 12.14.5).
    */
 
   putreg32((30 << RP23XX_QMI_DIRECT_CSR_CLKDIV_SHIFT) |
            RP23XX_QMI_DIRECT_CSR_EN, RP23XX_QMI_DIRECT_CSR);
+  rp23xx_psram_wait_busy();
 
   /* Nudge the part out of any quad-continuation mode left by a prior init by
    * clocking one quad byte with CS asserted.
@@ -175,9 +191,7 @@ rp23xx_psram_detect(void)
    * detection fails (verified on hardware).
    */
 
-  while ((getreg32(RP23XX_QMI_DIRECT_CSR) & RP23XX_QMI_DIRECT_CSR_BUSY) != 0)
-    {
-    }
+  rp23xx_psram_wait_busy();
 
   (void)getreg32(RP23XX_QMI_DIRECT_RX);
   putreg32(getreg32(RP23XX_QMI_DIRECT_CSR) &
@@ -199,10 +213,7 @@ rp23xx_psram_detect(void)
        * ahead of it is redundant -- BUSY already covers the whole transfer.
        */
 
-      while ((getreg32(RP23XX_QMI_DIRECT_CSR) &
-              RP23XX_QMI_DIRECT_CSR_BUSY) != 0)
-        {
-        }
+      rp23xx_psram_wait_busy();
 
       if (i == 5)
         {
@@ -231,6 +242,7 @@ rp23xx_psram_detect(void)
 
   putreg32((30 << RP23XX_QMI_DIRECT_CSR_CLKDIV_SHIFT) |
            RP23XX_QMI_DIRECT_CSR_EN, RP23XX_QMI_DIRECT_CSR);
+  rp23xx_psram_wait_busy();
 
   for (i = 0; i < 3; i++)
     {
@@ -256,10 +268,7 @@ rp23xx_psram_detect(void)
        * the QMI's own minimum-deselect timing covers it.
        */
 
-      while ((getreg32(RP23XX_QMI_DIRECT_CSR) &
-              RP23XX_QMI_DIRECT_CSR_BUSY) != 0)
-        {
-        }
+      rp23xx_psram_wait_busy();
 
       putreg32(getreg32(RP23XX_QMI_DIRECT_CSR) &
                ~RP23XX_QMI_DIRECT_CSR_ASSERT_CS1N, RP23XX_QMI_DIRECT_CSR);
