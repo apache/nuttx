@@ -1022,6 +1022,7 @@ void up_putc(int ch)
 #ifdef HAVE_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
   uint32_t ier;
+
   up_disableuartint(priv, &ier);
 #endif
 
