@@ -230,3 +230,12 @@ smp
 
 Basic NuttShell configuration (console enabled in UART0, at 115200 bps) with
 both ARM cores enabled.
+
+pm
+--
+
+Power management (console on UART0, at 115200 bps).  The idle governor
+uses the standby state, and the dormant state 30 seconds after boot; a
+character on the console receive pin (GPIO 1) wakes the board.  Suspend to
+RAM is available through the ``BOARDIOC_RP23XX_SUSPEND`` boardctl()
+command, and ``/dev/rtc0`` has an alarm.
