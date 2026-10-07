@@ -97,7 +97,7 @@ implemented as a thin wrapper around the same module library that the kernel
 module support uses:
 
 * ``dlopen()`` loads the library, or takes an additional reference on it if
-  it is already loaded, and returns a handle to it. See
+  it is already loaded in the task group, and returns a handle to it. See
   `Opening a Library More Than Once`_.
 * ``dlclose()`` releases one reference. The library is unloaded, as
   ``rmmod()`` would, only when the last handle is closed.
@@ -139,12 +139,16 @@ FLAT build.
 Opening a Library More Than Once
 ================================
 
-In the FLAT and PROTECTED builds, ``dlopen()`` of a library that is already
+In the FLAT and PROTECTED builds, each task group has its own list of
+loaded libraries. ``dlopen()`` of a library that the task group already
 loaded does not load a second copy and does not fail. It returns a handle to
 the library that is already loaded and takes an additional reference on it.
 Each successful ``dlopen()`` must be matched by a ``dlclose()``; the library
 is unloaded only when the last handle is closed. Up to 255 handles may be
 outstanding on one library; beyond that ``dlopen()`` fails with ``EMFILE``.
+The libraries that a task group did not close are closed when it exits.
+In the PROTECTED build only ``exit()`` closes them, so a task group that
+ends in another way leaves them loaded.
 
 Some consequences worth keeping in mind:
 
@@ -152,27 +156,35 @@ Some consequences worth keeping in mind:
   ``dlopen()``. Two files with the same basename in different directories
   are treated as the same library, and the second ``dlopen()`` will return
   the first one.
-* There is only one instance of the library's ``.data`` and ``.bss``. Global
-  and static data are shared by every user of the library, and by every task
-  group in the system.
-* Constructors in ``.init_array`` run once, when the library is first loaded,
-  and destructors in ``.fini_array`` run once, when the last handle is
-  closed. They do not run per ``dlopen()``/``dlclose()`` pair.
+* Each task group that opens a library loads its own copy. Global and static
+  data are shared by the threads of one task group, not between task groups.
+  Only an FDPIC library executed in place from xipfs shares its ``.text``
+  between task groups.
+* Constructors in ``.init_array`` run once per task group, when the library
+  is first loaded in it, and destructors in ``.fini_array`` run once, when
+  its last handle in the task group is closed. They do not run per
+  ``dlopen()``/``dlclose()`` pair.
+* The libraries that a program loaded by ``exec()`` names in ``DT_NEEDED``
+  belong to its task group in the FLAT build, so ``dlopen()`` of one of them
+  returns the copy that the program uses.
 * Symbols obtained with ``dlsym()`` remain valid until the last handle is
   closed, not until the caller's own handle is closed.
 
-Kernel modules deliberately behave differently: ``insmod()`` fails with
-``EEXIST`` if a module of that name is already installed, and ``rmmod()``
-removes it immediately. A kernel module is a singleton and is not reference
-counted.
+Kernel modules deliberately behave differently: there is one list of them
+for the system, ``insmod()`` fails with ``EEXIST`` if a module of that name
+is already installed, and ``rmmod()`` removes it immediately. A kernel module
+is a singleton and is not reference counted. ``/proc/modules`` shows the
+kernel modules only.
 
 
 Better FLAT and PROTECTED Mode Shared Libraries
 ===============================================
 
+Each NuttX task group has its own copy of a library, ``.text`` included,
+except for an FDPIC library executed in place.
 A better implementation of shared libraries in the FLAT and PROTECTED builds
-would, however, have a separate copy of the ``.bss`` and ``.data`` region
-for each NuttX task group.
+would have a separate copy of only the ``.bss`` and ``.data`` region for each
+task group, and one ``.text`` for all of them.
 
 A task group is the moral equivalent of a Unix process.
 That is how a shared library would have to work in uClinux, for example.
