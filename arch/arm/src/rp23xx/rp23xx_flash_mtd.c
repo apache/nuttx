@@ -74,6 +74,9 @@
 #include "rp23xx_flash_mtd.h"
 #include "rp23xx_rom.h"
 #include "hardware/rp23xx_memorymap.h"
+#include "hardware/rp23xx_pads_qspi.h"
+#include "hardware/rp23xx_qmi.h"
+#include "hardware/rp23xx_xip.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -86,6 +89,24 @@
  */
 
 #define RP23XX_XIP_NOCACHE_BASE   0x14000000
+
+/* XIP cache maintenance window.  A clean by set/way must use the top of the
+ * window to avoid erratum RP2350-E11, as the Pico SDK does.
+ */
+
+#define RP23XX_XIP_MAINT_BASE     0x18000000
+#define XIP_CACHE_SIZE            (16 * 1024)
+#define XIP_CACHE_LINE_SIZE       8
+#define XIP_CACHE_CLEAN_SET_WAY   1
+#define XIP_CACHE_CLEAN_BASE      (RP23XX_XIP_MAINT_BASE + 0x04000000 - \
+                                   XIP_CACHE_SIZE + XIP_CACHE_CLEAN_SET_WAY)
+
+/* QSPI pads (SCLK, SD0-SD3, SS) and QMI window 1 registers (TIMING, RFMT,
+ * RCMD, WFMT, WCMD).  The bootrom flash functions change both.
+ */
+
+#define QSPI_PAD_COUNT            6
+#define QMI_M1_REG_COUNT          5
 
 /* Largest flash the XIP window can address, used only to sanity check a
  * pointer before it is called with the flash interface torn down.
@@ -134,6 +155,15 @@ struct rp23xx_flash_dev_s
 {
   struct mtd_dev_s mtd;
   mutex_t          lock;
+};
+
+/* QSPI state saved over a flash operation */
+
+struct rp23xx_qspi_state_s
+{
+  uint32_t pads[QSPI_PAD_COUNT];
+  uint32_t m1[QMI_M1_REG_COUNT];
+  uint32_t xip_ctrl;
 };
 
 typedef void (*connect_internal_flash_f)(void);
@@ -368,16 +398,60 @@ static void leave_smp_isolation(struct smp_isolation_s *const data)
 #endif /* CONFIG_SMP */
 
 /****************************************************************************
- * Name: rp23xx_flash_restore_xip
+ * Name: rp23xx_flash_begin
  *
  * Description:
- *   Put the QSPI interface back into execute-in-place mode.  Must run from
- *   RAM: until it returns, nothing can be fetched from flash.
+ *   Save the QSPI state and put the flash in serial command mode, as the
+ *   Pico SDK does.  Must run from RAM: XIP is not available until
+ *   rp23xx_flash_end() returns.
  *
  ****************************************************************************/
 
-static void RAM_CODE(rp23xx_flash_restore_xip)(void)
+static void RAM_CODE(rp23xx_flash_begin)(struct rp23xx_qspi_state_s *state)
 {
+  int i;
+
+  /* Write back dirty PSRAM lines.  flash_flush_cache() discards them. */
+
+  for (i = 0; i < XIP_CACHE_SIZE; i += XIP_CACHE_LINE_SIZE)
+    {
+      putreg8(0, XIP_CACHE_CLEAN_BASE + i);
+    }
+
+  UP_DSB();
+  UP_ISB();
+
+  for (i = 0; i < QSPI_PAD_COUNT; i++)
+    {
+      state->pads[i] = getreg32(RP23XX_PADS_QSPI_GPIO_QSPI_SCLK + 4 * i);
+    }
+
+  for (i = 0; i < QMI_M1_REG_COUNT; i++)
+    {
+      state->m1[i] = getreg32(RP23XX_QMI_M1_TIMING + 4 * i);
+    }
+
+  state->xip_ctrl = getreg32(RP23XX_XIP_CTRL_BASE);
+
+  __asm__ volatile ("" : : : "memory");
+
+  g_rom.connect_internal_flash();
+  g_rom.flash_exit_xip();
+}
+
+/****************************************************************************
+ * Name: rp23xx_flash_end
+ *
+ * Description:
+ *   Put the QSPI interface back into execute-in-place mode, then restore
+ *   the pads and the chip select 1 (PSRAM) window that the bootrom reset.
+ *
+ ****************************************************************************/
+
+static void RAM_CODE(rp23xx_flash_end)(struct rp23xx_qspi_state_s *state)
+{
+  int i;
+
   g_rom.flash_flush_cache();
 
   /* Ask the bootrom to put the flash back into a fast quad read mode.  It
@@ -391,6 +465,20 @@ static void RAM_CODE(rp23xx_flash_restore_xip)(void)
     {
       g_rom.flash_enter_cmd_xip();
     }
+
+  for (i = 0; i < QSPI_PAD_COUNT; i++)
+    {
+      putreg32(state->pads[i], RP23XX_PADS_QSPI_GPIO_QSPI_SCLK + 4 * i);
+    }
+
+  for (i = 0; i < QMI_M1_REG_COUNT; i++)
+    {
+      putreg32(state->m1[i], RP23XX_QMI_M1_TIMING + 4 * i);
+    }
+
+  putreg32(getreg32(RP23XX_XIP_CTRL_BASE) |
+           (state->xip_ctrl & RP23XX_XIP_CTRL_WRITABLE_M1),
+           RP23XX_XIP_CTRL_BASE);
 }
 
 /****************************************************************************
@@ -404,10 +492,9 @@ static void RAM_CODE(rp23xx_flash_restore_xip)(void)
 
 static void RAM_CODE(do_erase)(uint32_t addr, size_t count)
 {
-  __asm__ volatile ("" : : : "memory");
+  struct rp23xx_qspi_state_s state;
 
-  g_rom.connect_internal_flash();
-  g_rom.flash_exit_xip();
+  rp23xx_flash_begin(&state);
 
   /* The bootrom erases whole 64K blocks where address and length allow it
    * and falls back to 4K sectors otherwise.
@@ -416,7 +503,7 @@ static void RAM_CODE(do_erase)(uint32_t addr, size_t count)
   g_rom.flash_range_erase(addr, count, FLASH_BLOCK_SIZE,
                           FLASH_BLOCK_ERASE_CMD);
 
-  rp23xx_flash_restore_xip();
+  rp23xx_flash_end(&state);
 }
 
 /****************************************************************************
@@ -426,14 +513,11 @@ static void RAM_CODE(do_erase)(uint32_t addr, size_t count)
 static void RAM_CODE(do_write)(uint32_t addr, const uint8_t *data,
                                size_t count)
 {
-  __asm__ volatile ("" : : : "memory");
+  struct rp23xx_qspi_state_s state;
 
-  g_rom.connect_internal_flash();
-  g_rom.flash_exit_xip();
-
+  rp23xx_flash_begin(&state);
   g_rom.flash_range_program(addr, data, count);
-
-  rp23xx_flash_restore_xip();
+  rp23xx_flash_end(&state);
 }
 
 /****************************************************************************

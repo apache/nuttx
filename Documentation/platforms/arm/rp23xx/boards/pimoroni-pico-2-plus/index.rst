@@ -66,10 +66,9 @@ heap, separate heap, or user heap) is selectable.  See the
 
    The PSRAM is considerably slower than the internal SRAM.  The QMI is
    shared with the flash: writing to the flash goes through the bootrom,
-   which reconfigures the QMI for chip select 0 and disturbs the PSRAM
-   configuration on chip select 1.  ``rp23xx_psram_restore()`` re-applies it
-   and is intended to be called from the flash write path after each erase or
-   program.
+   which resets the PSRAM configuration on chip select 1.  The flash MTD
+   driver (``RP23XX_FLASH_MTD``) saves that configuration before each erase
+   or program and restores it afterwards.
 
 Supported Capabilities
 ======================
