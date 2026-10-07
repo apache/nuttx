@@ -679,26 +679,40 @@ void up_irqinitialize(void)
   up_irq_restore(X86_64_RFLAGS_IF);
 #endif
 
-  /* Attach default handlers for faults.
-   *
-   * ISR6, ISR13 and ISR14 are attributable to the instruction that raised
-   * them, so an unprivileged task that raises one is killed on its own and
-   * the system runs on.  The double fault is not:  it says an exception
-   * could not be delivered at all, and there is nothing left to trust.
+  /* The vector table is shared by all CPUs, so attach the common handlers
+   * only once.  Attaching them again on every CPU would add duplicate
+   * entries to the IRQ chains when CONFIG_IRQCHAIN is enabled.
    */
 
-  irq_attach(ISR0, x86_64_fault_kill_isr, NULL);
-  irq_attach(ISR6, x86_64_fault_user_isr, NULL);
-  irq_attach(ISR8, x86_64_fault_panic_isr, NULL);
-  irq_attach(ISR13, x86_64_fault_user_isr, NULL);
-  irq_attach(ISR14, x86_64_fault_user_isr, NULL);
-  irq_attach(ISR16, x86_64_fault_kill_isr, NULL);
+  if (cpu == 0)
+    {
+      /* Attach default handlers for faults.
+       *
+       * ISR6, ISR13 and ISR14 are attributable to the instruction that
+       * raised them, so an unprivileged task that raises one is killed on
+       * its own and the system runs on.  The double fault is not:  it says
+       * an exception could not be delivered at all, and there is nothing
+       * left to trust.
+       */
+
+      irq_attach(ISR0, x86_64_fault_kill_isr, NULL);
+      irq_attach(ISR6, x86_64_fault_user_isr, NULL);
+      irq_attach(ISR8, x86_64_fault_panic_isr, NULL);
+      irq_attach(ISR13, x86_64_fault_user_isr, NULL);
+      irq_attach(ISR14, x86_64_fault_user_isr, NULL);
+      irq_attach(ISR16, x86_64_fault_kill_isr, NULL);
 
 #ifdef CONFIG_SMP
-  /* Attach TLB shootdown handler */
+      /* Attach TLB shootdown and SMP call handlers.  IPIs don't use the
+       * IOAPIC but are sent directly to the CPU, so up_enable_irq() is not
+       * needed for them.
+       */
 
-  irq_attach(SMP_IPI_TLBSHOOTDOWN_IRQ, x86_64_tlb_handler, NULL);
+      irq_attach(SMP_IPI_TLBSHOOTDOWN_IRQ, x86_64_tlb_handler, NULL);
+      irq_attach(SMP_IPI_CALL_IRQ, x86_64_smp_call_handler, NULL);
+      irq_attach(SMP_IPI_SCHED_IRQ, x86_64_smp_sched_handler, NULL);
 #endif
+    }
 }
 
 /****************************************************************************
