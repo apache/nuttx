@@ -141,6 +141,17 @@ void stm32_spiinitialize(void);
 int stm32_adc_setup(void);
 #endif
 
+/****************************************************************************
+ * Name: stm32_dac_setup
+ *
+ * Description:
+ *   Initialize the DAC and register the DAC driver.
+ ****************************************************************************/
+
+#ifdef CONFIG_DAC
+int stm32_dac_setup(void);
+#endif
+
 #ifdef CONFIG_STM32_DTS
 int stm32_dts_setup(int devno);
 #endif
