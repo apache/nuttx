@@ -352,7 +352,7 @@ static ssize_t telnet_receive(FAR struct telnet_dev_s *priv,
               {
                 telnet_getchar(priv, ch, dest, &nread);
                 priv->td_state = STATE_NORMAL;
-             }
+              }
             else
               {
                 switch (ch)
@@ -1095,19 +1095,19 @@ static int telnet_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
        * process.
        */
 
-    case TIOCSCTTY:
-      {
-        /* Check if the ISIG flag is set in the termios c_lflag to enable
-         * this feature.  This flag is set automatically for a serial console
-         * device.
-         */
+      case TIOCSCTTY:
+        {
+          /* Check if the ISIG flag is set in the termios c_lflag to enable
+           * this feature.  This flag is set automatically for a serial
+           * console device.
+           */
 
-        /* Save the PID of the recipient of the SIGINT signal. */
+          /* Save the PID of the recipient of the SIGINT signal. */
 
-        priv->td_pid = (pid_t)arg;
-        DEBUGASSERT((unsigned long)(priv->td_pid) == arg);
-      }
-      break;
+          priv->td_pid = (pid_t)arg;
+          DEBUGASSERT((unsigned long)(priv->td_pid) == arg);
+        }
+        break;
 #endif
 
 #ifdef CONFIG_TELNET_SUPPORT_NAWS
@@ -1120,54 +1120,54 @@ static int telnet_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           pw->ws_row = priv->td_rows;
           pw->ws_col = priv->td_cols;
         }
-      break;
+        break;
 #endif
 
-    /* Handle TERMIOS command */
+      /* Handle TERMIOS command */
 
-    case TCGETS:
-      {
-        termiosp = (FAR struct termios *)((uintptr_t)arg);
-        DEBUGASSERT(termiosp != NULL);
+      case TCGETS:
+        {
+          termiosp = (FAR struct termios *)((uintptr_t)arg);
+          DEBUGASSERT(termiosp != NULL);
 
-        cfmakeraw(termiosp);
+          cfmakeraw(termiosp);
 
-        termiosp->c_lflag = priv->td_lflag;
-      }
-      break;
+          termiosp->c_lflag = priv->td_lflag;
+        }
+        break;
 
-    case TCSETS:
-      {
-        termiosp = (FAR struct termios *)((uintptr_t)arg);
-        DEBUGASSERT(termiosp != NULL);
+      case TCSETS:
+        {
+          termiosp = (FAR struct termios *)((uintptr_t)arg);
+          DEBUGASSERT(termiosp != NULL);
 
-        /* Save the termios settings */
+          /* Save the termios settings */
 
-        priv->td_lflag = termiosp->c_lflag;
+          priv->td_lflag = termiosp->c_lflag;
 
-        if ((priv->td_lflag & ECHO) != 0)
-          {
-            /* If ECHO is set, then we need to send the won't echo option
-             * to the client, let the client do echo to emulate
-             * the behavior of a real terminal.
-             */
+          if ((priv->td_lflag & ECHO) != 0)
+            {
+              /* If ECHO is set, then we need to send the won't echo option
+               * to the client, let the client do echo to emulate
+               * the behavior of a real terminal.
+               */
 
-            telnet_sendopt(priv, TELNET_WONT, TELNET_ECHO);
-          }
-        else
-          {
-            /* Otherwise, we need to send the will echo option to the
-             * client, let the client don't echo to disable the echo.
-             */
+              telnet_sendopt(priv, TELNET_WONT, TELNET_ECHO);
+            }
+          else
+            {
+              /* Otherwise, we need to send the will echo option to the
+               * client, let the client don't echo to disable the echo.
+               */
 
-            telnet_sendopt(priv, TELNET_WILL, TELNET_ECHO);
-          }
-      }
-      break;
+              telnet_sendopt(priv, TELNET_WILL, TELNET_ECHO);
+            }
+        }
+        break;
 
-    default:
-      ret = psock_ioctl(&priv->td_psock, cmd, arg);
-      break;
+      default:
+        ret = psock_ioctl(&priv->td_psock, cmd, arg);
+        break;
     }
 
   return ret;
@@ -1223,32 +1223,32 @@ static int factory_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-    /* Command:      SIOCTELNET
-     * Description:  Create a Telnet sessions.
-     * Argument:     A pointer to a write-able instance of struct
-     *               telnet_session_s.
-     * Dependencies: CONFIG_NETDEV_TELNET
-     */
+      /* Command:      SIOCTELNET
+       * Description:  Create a Telnet sessions.
+       * Argument:     A pointer to a write-able instance of struct
+       *               telnet_session_s.
+       * Dependencies: CONFIG_NETDEV_TELNET
+       */
 
-    case SIOCTELNET:
-      {
-        FAR struct telnet_session_s *session =
-            (FAR struct telnet_session_s *)((uintptr_t)arg);
+      case SIOCTELNET:
+        {
+          FAR struct telnet_session_s *session =
+              (FAR struct telnet_session_s *)((uintptr_t)arg);
 
-        if (session == NULL)
-          {
-            ret = -EINVAL;
-          }
-        else
-          {
-            ret = telnet_session(session);
-          }
-      }
-      break;
+          if (session == NULL)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              ret = telnet_session(session);
+            }
+        }
+        break;
 
-    default:
-      ret = -ENOTTY;
-      break;
+      default:
+        ret = -ENOTTY;
+        break;
     }
 
   return ret;
