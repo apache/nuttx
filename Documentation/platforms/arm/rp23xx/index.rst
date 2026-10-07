@@ -322,7 +322,9 @@ The region is described by ``RP23XX_FLASH_MTD_OFFSET`` (byte offset from
 ``0x10000000``) and ``RP23XX_FLASH_MTD_SIZE``, both of which must be multiples
 of the 4096 byte erase sector.  The driver refuses to initialize if the region
 would overlap the NuttX image (it checks ``__flash_binary_end``), so a bad
-offset fails at boot instead of corrupting the running firmware.
+offset fails at boot instead of corrupting the running firmware.  It also
+reads the flash size from the JEDEC ID and refuses a region that ends past the
+end of the flash, because such an address wraps around to the image.
 
 Erase and program go through the bootrom flash routines.  Because those
 operations stall instruction fetch from the same flash, the driver runs them
