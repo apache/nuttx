@@ -64,5 +64,5 @@
 
 FAR const void *modsym(FAR void *handle, FAR const char *name)
 {
-  return libelf_getsymbol(handle, name);
+  return libelf_getsymbol(libelf_registry_kernel(), handle, name);
 }

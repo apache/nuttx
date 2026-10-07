@@ -87,7 +87,7 @@ FAR void *dlsym(FAR void *handle, FAR const char *name)
    * dlgetsem() is essentially a clone of modsym().
    */
 
-  return (FAR void *)libelf_getsymbol(handle, name);
+  return (FAR void *)libelf_getsymbol(libelf_registry(), handle, name);
 
 #else /* if defined(CONFIG_BUILD_KERNEL) */
   /* The KERNEL build is considerably more complex:  In order to be shared,

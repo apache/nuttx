@@ -35,6 +35,7 @@
 
 #include <nuttx/tls.h>
 #include <nuttx/pthread.h>
+#include <nuttx/lib/elf.h>
 
 #if defined(CONFIG_BUILD_FLAT) || !defined(__KERNEL__)
 
@@ -107,6 +108,15 @@ void exit(int status)
   /* Run the registered exit functions */
 
   atexit_call_exitfuncs(status, false);
+
+#if defined(CONFIG_LIBC_ELF) && defined(CONFIG_BUILD_PROTECTED)
+  /* Close what dlopen() left open.  The kernel cannot reach this registry.
+   * A flat build does it in the kernel, after the last thread.  A kernel
+   * build has no registry in user space.
+   */
+
+  libelf_closeall(libelf_registry());
+#endif
 
 #if defined(CONFIG_TLS_TASK_NELEM) && CONFIG_TLS_TASK_NELEM > 0
   task_tls_destruct();

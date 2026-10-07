@@ -175,6 +175,10 @@ struct fdpic_desc_s;
 struct module_s
 {
   FAR struct module_s *flink;          /* Supports a singly linked list */
+  FAR struct module_s **registry;      /* The registry this module is on */
+  FAR struct module_s *libraries;      /* exec(): its own registry, for
+                                        * its DT_NEEDED libraries
+                                        */
 #ifdef HAVE_LIBC_ELF_NAMES
   char modname[LIBC_ELF_NAMEMAX];        /* Module name */
 #endif
@@ -582,13 +586,27 @@ void libelf_registry_lock(void);
 void libelf_registry_unlock(void);
 
 /****************************************************************************
+ * Name: libelf_registry / libelf_registry_kernel
+ *
+ * Description:
+ *   Return a module registry.  libelf_registry() is the one of the calling
+ *   task group, which holds what dlopen() loads.  libelf_registry_kernel()
+ *   holds the kernel modules of insmod().
+ *
+ ****************************************************************************/
+
+FAR struct module_s **libelf_registry(void);
+FAR struct module_s **libelf_registry_kernel(void);
+
+/****************************************************************************
  * Name: libelf_registry_add
  *
  * Description:
  *   Add a new entry to the module registry.
  *
  * Input Parameters:
- *   modp - The module data structure to be registered.
+ *   registry - The registry.
+ *   modp     - The module data structure to be registered.
  *
  * Returned Value:
  *   None
@@ -598,7 +616,8 @@ void libelf_registry_unlock(void);
  *
  ****************************************************************************/
 
-void libelf_registry_add(FAR struct module_s *modp);
+void libelf_registry_add(FAR struct module_s **registry,
+                         FAR struct module_s *modp);
 
 /****************************************************************************
  * Name: libelf_registry_del
@@ -621,13 +640,28 @@ void libelf_registry_add(FAR struct module_s *modp);
 int libelf_registry_del(FAR struct module_s *modp);
 
 /****************************************************************************
+ * Name: libelf_registry_move
+ *
+ * Description:
+ *   Move every module of one registry to another.
+ *
+ * Assumptions:
+ *   The caller holds the lock on the module registry.
+ *
+ ****************************************************************************/
+
+void libelf_registry_move(FAR struct module_s **from,
+                          FAR struct module_s **to);
+
+/****************************************************************************
  * Name: libelf_registry_find
  *
  * Description:
  *   Find an entry in the module registry using the name of the module.
  *
  * Input Parameters:
- *   modname - The name of the module to be found
+ *   registry - The registry.
+ *   modname  - The name of the module to be found
  *
  * Returned Value:
  *   If the registry entry is found, a pointer to the module entry is
@@ -639,7 +673,8 @@ int libelf_registry_del(FAR struct module_s *modp);
  ****************************************************************************/
 
 #ifdef HAVE_LIBC_ELF_NAMES
-FAR struct module_s *libelf_registry_find(FAR const char *modname);
+FAR struct module_s *libelf_registry_find(FAR struct module_s **registry,
+                                          FAR const char *modname);
 #endif
 
 /****************************************************************************
@@ -651,7 +686,8 @@ FAR struct module_s *libelf_registry_find(FAR const char *modname);
  *   the handle is probably a stale pointer.
  *
  * Input Parameters:
- *   modp - The registry entry to be verified.
+ *   registry - The registry.
+ *   modp     - The registry entry to be verified.
  *
  * Returned Value:
  *   Returns OK is the module is valid; -ENOENT otherwise.
@@ -661,7 +697,8 @@ FAR struct module_s *libelf_registry_find(FAR const char *modname);
  *
  ****************************************************************************/
 
-int libelf_registry_verify(FAR struct module_s *modp);
+int libelf_registry_verify(FAR struct module_s **registry,
+                           FAR struct module_s *modp);
 
 /****************************************************************************
  * Name: libelf_registry_foreach
@@ -671,6 +708,7 @@ int libelf_registry_verify(FAR struct module_s *modp);
  *   not available for use by applications.
  *
  * Input Parameters:
+ *   registry - The registry.
  *   callback - This callback function was be called for each entry in the
  *     registry.
  *   arg - This opaque argument will be passed to the callback function.
@@ -685,7 +723,8 @@ int libelf_registry_verify(FAR struct module_s *modp);
  *
  ****************************************************************************/
 
-int libelf_registry_foreach(mod_callback_t callback, FAR void *arg);
+int libelf_registry_foreach(FAR struct module_s **registry,
+                            mod_callback_t callback, FAR void *arg);
 
 /****************************************************************************
  * Name: libelf_freesymtab
@@ -748,6 +787,7 @@ void libelf_dumpentrypt(FAR struct mod_loadinfo_s *loadinfo);
  *
  * Input Parameters:
  *
+ *   registry - The registry to load into, or to find the module on.
  *   filename - Full path to the module binary to be loaded
  *   modname  - The name that can be used to refer to the module after
  *     it has been loaded.
@@ -760,7 +800,8 @@ void libelf_dumpentrypt(FAR struct mod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-FAR void *libelf_insert(FAR const char *filename, FAR const char *modname);
+FAR void *libelf_insert(FAR struct module_s **registry,
+                        FAR const char *filename, FAR const char *modname);
 
 /****************************************************************************
  * Name: libelf_getsymbol
@@ -776,9 +817,10 @@ FAR void *libelf_insert(FAR const char *filename, FAR const char *modname);
  *   called.
  *
  * Input Parameters:
- *   handle - The opaque, non-NULL value returned by a previous successful
- *            call to libelf_insert().
- *   name   - A pointer to the symbol name string.
+ *   registry - The registry the module is on.
+ *   handle   - The opaque, non-NULL value returned by a previous successful
+ *              call to libelf_insert().
+ *   name     - A pointer to the symbol name string.
  *
  * Returned Value:
  *   The address associated with the symbol is returned on success.
@@ -792,7 +834,8 @@ FAR void *libelf_insert(FAR const char *filename, FAR const char *modname);
  *
  ****************************************************************************/
 
-FAR const void *libelf_getsymbol(FAR void *handle, FAR const char *name);
+FAR const void *libelf_getsymbol(FAR struct module_s **registry,
+                                 FAR void *handle, FAR const char *name);
 
 /****************************************************************************
  * Name: libelf_uninit
@@ -813,7 +856,8 @@ int libelf_uninit(FAR struct module_s *modp);
  *   Remove a previously installed module from memory.
  *
  * Input Parameters:
- *   handle - The module handler previously returned by libelf_insert().
+ *   registry - The registry the module is on.
+ *   handle   - The module handler previously returned by libelf_insert().
  *
  * Returned Value:
  *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
@@ -821,7 +865,18 @@ int libelf_uninit(FAR struct module_s *modp);
  *
  ****************************************************************************/
 
-int libelf_remove(FAR void *handle);
+int libelf_remove(FAR struct module_s **registry, FAR void *handle);
+
+/****************************************************************************
+ * Name: libelf_closeall
+ *
+ * Description:
+ *   Give back every reference that dlopen() took in a registry, as at
+ *   process exit.
+ *
+ ****************************************************************************/
+
+void libelf_closeall(FAR struct module_s **registry);
 
 /****************************************************************************
  * Name: libelf_modhandle
@@ -832,7 +887,8 @@ int libelf_remove(FAR void *handle);
  *   determine if a module has been loaded or not.
  *
  * Input Parameters:
- *   name   - A pointer to the module name string.
+ *   registry - The registry.
+ *   name     - A pointer to the module name string.
  *
  * Returned Value:
  *   The non-NULL module handle previously returned by libelf_insert() is
@@ -843,9 +899,10 @@ int libelf_remove(FAR void *handle);
  ****************************************************************************/
 
 #ifdef HAVE_LIBC_ELF_NAMES
-FAR void *libelf_gethandle(FAR const char *name);
+FAR void *libelf_gethandle(FAR struct module_s **registry,
+                           FAR const char *name);
 #else
-#  define libelf_gethandle(n) NULL
+#  define libelf_gethandle(r, n) NULL
 #endif
 
 /****************************************************************************

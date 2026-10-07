@@ -292,6 +292,7 @@ static int libelf_loadsymtab(FAR struct module_s *modp,
  *
  * Input Parameters:
  *
+ *   registry - The registry to load into, or to find the module on.
  *   filename - Full path to the module binary to be loaded
  *   modname  - The name that can be used to refer to the module after
  *     it has been loaded.
@@ -304,7 +305,8 @@ static int libelf_loadsymtab(FAR struct module_s *modp,
  *
  ****************************************************************************/
 
-FAR void *libelf_insert(FAR const char *filename, FAR const char *modname)
+FAR void *libelf_insert(FAR struct module_s **registry,
+                        FAR const char *filename, FAR const char *modname)
 {
   FAR const struct symtab_s *exports;
   struct mod_loadinfo_s loadinfo;
@@ -314,21 +316,20 @@ FAR void *libelf_insert(FAR const char *filename, FAR const char *modname)
   int ret;
   int i;
 
-  DEBUGASSERT(filename != NULL && modname != NULL);
+  DEBUGASSERT(registry != NULL && filename != NULL && modname != NULL);
   binfo("Loading file: %s\n", filename);
 
   /* Get exclusive access to the module registry */
 
   libelf_registry_lock();
 
-  /* Already installed?  Take another reference rather than load a second
-   * copy: there is one instance of a module per name, and every caller
-   * shares it.  The count is kept here so that insmod()/rmmod() and
+  /* Already on this registry?  Take another reference rather than load a
+   * second copy.  The count is kept here so that insmod()/rmmod() and
    * dlopen()/dlclose() get the same behaviour from the same code.
    */
 
 #ifdef HAVE_LIBC_ELF_NAMES
-  modp = libelf_registry_find(modname);
+  modp = libelf_registry_find(registry, modname);
   if (modp != NULL)
     {
       if (modp->nopen == UINT8_MAX)
@@ -363,6 +364,10 @@ FAR void *libelf_insert(FAR const char *filename, FAR const char *modname)
       ret = -ENOMEM;
       goto errout_with_loadinfo;
     }
+
+  /* Its DT_NEEDED libraries go on the same registry */
+
+  modp->registry = registry;
 
 #ifdef HAVE_LIBC_ELF_NAMES
   /* Save the module name in the registry entry */
@@ -456,7 +461,7 @@ FAR void *libelf_insert(FAR const char *filename, FAR const char *modname)
 
   /* Add the new module entry to the registry */
 
-  libelf_registry_add(modp);
+  libelf_registry_add(registry, modp);
 
   libelf_uninitialize(&loadinfo);
   libelf_registry_unlock();

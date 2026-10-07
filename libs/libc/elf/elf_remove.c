@@ -217,7 +217,8 @@ int libelf_uninit(FAR struct module_s *modp)
  *   Remove a previously installed module from memory.
  *
  * Input Parameters:
- *   handle - The module handler previously returned by libelf_insert().
+ *   registry - The registry the module is on.
+ *   handle   - The module handler previously returned by libelf_insert().
  *
  * Returned Value:
  *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
@@ -225,7 +226,7 @@ int libelf_uninit(FAR struct module_s *modp)
  *
  ****************************************************************************/
 
-int libelf_remove(FAR void *handle)
+int libelf_remove(FAR struct module_s **registry, FAR void *handle)
 {
   FAR struct module_s *modp = (FAR struct module_s *)handle;
   int ret;
@@ -238,7 +239,7 @@ int libelf_remove(FAR void *handle)
 
   /* Verify that the module is in the registry */
 
-  ret = libelf_registry_verify(modp);
+  ret = libelf_registry_verify(registry, modp);
   if (ret < 0)
     {
       berr("ERROR: Failed to verify module: %d\n", ret);
@@ -288,4 +289,43 @@ errout_with_lock:
   libelf_registry_unlock();
   set_errno(-ret);
   return ERROR;
+}
+
+/****************************************************************************
+ * Name: libelf_closeall
+ *
+ * Description:
+ *   Give back every reference that dlopen() took in a registry.  A module
+ *   that another one still depends on goes with its last dependent.
+ *
+ ****************************************************************************/
+
+void libelf_closeall(FAR struct module_s **registry)
+{
+  FAR struct module_s *modp;
+
+  libelf_registry_lock();
+
+  /* A removal can unload other modules, so start again after each one */
+
+  modp = *registry;
+  while (modp != NULL)
+    {
+      if (modp->nopen > 0)
+        {
+          modp->nopen = 0;
+#if CONFIG_LIBC_ELF_MAXDEPEND > 0
+          if (modp->dependents == 0)
+#endif
+            {
+              libelf_remove(registry, modp);
+              modp = *registry;
+              continue;
+            }
+        }
+
+      modp = modp->flink;
+    }
+
+  libelf_registry_unlock();
 }

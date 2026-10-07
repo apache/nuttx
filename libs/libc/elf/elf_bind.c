@@ -135,7 +135,8 @@ struct reldata_s
  * Description:
  *   Load a library a module names in DT_NEEDED.  A bare name is looked for
  *   along LD_LIBRARY_PATH, as dlopen() looks for it, and the module is
- *   registered under its base name, so a library two modules name is loaded
+ *   registered under its base name on the registry of the module that
+ *   needs it, so a library two modules of one task group name is loaded
  *   once and reference counted.
  *
  * Returned Value:
@@ -143,7 +144,8 @@ struct reldata_s
  *
  ****************************************************************************/
 
-static FAR void *libelf_insertneeded(FAR const char *name)
+static FAR void *libelf_insertneeded(FAR struct module_s **registry,
+                                     FAR const char *name)
 {
   FAR const char *modname;
 
@@ -162,7 +164,7 @@ static FAR void *libelf_insertneeded(FAR const char *name)
         {
           while ((fullpath = envpath_next(env, name)) != NULL)
             {
-              handle = libelf_insert(fullpath, modname);
+              handle = libelf_insert(registry, fullpath, modname);
               lib_free(fullpath);
 
               if (handle != NULL)
@@ -178,7 +180,7 @@ static FAR void *libelf_insertneeded(FAR const char *name)
     }
 #endif
 
-  return libelf_insert(name, modname);
+  return libelf_insert(registry, name, modname);
 }
 #endif
 
@@ -982,7 +984,8 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
           return ret;
         }
 
-      handle = libelf_insertneeded((FAR const char *)loadinfo->iobuffer);
+      handle = libelf_insertneeded(modp->registry,
+                                   (FAR const char *)loadinfo->iobuffer);
       if (handle == NULL)
         {
           berr("ERROR: Cannot open needed library %s\n",
@@ -1012,7 +1015,7 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
         {
           berr("ERROR: Cannot depend on %s: %d\n",
                (FAR char *)loadinfo->iobuffer, ret);
-          libelf_remove(handle);
+          libelf_remove(modp->registry, handle);
           lib_free(sym);
           lib_free(rels);
           lib_free(dyn);
@@ -1143,7 +1146,7 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
                       if (dep != NULL)
                         {
                           ep = (FAR void *)
-                            libelf_getsymbol(dep,
+                            libelf_getsymbol(dep->registry, dep,
                                              (FAR char *)loadinfo->iobuffer);
 
                           /* An FDPIC object exports descriptors */

@@ -52,7 +52,7 @@
 
 int rmmod(FAR void *handle)
 {
-  return libelf_remove(handle);
+  return libelf_remove(libelf_registry_kernel(), handle);
 }
 
 #endif /* CONFIG_MODULE */

@@ -93,12 +93,12 @@ static inline FAR void *dlinsert(FAR const char *filename)
   modname = strrchr(filename, '/');
   modname = modname != NULL ? modname + 1 : filename;
 
-  /* libelf_insert() returns the module already loaded under this name,
-   * with another reference taken, so a library opened twice is one
-   * instance shared by both callers.
+  /* libelf_insert() returns the module already loaded under this name in
+   * this task group, with another reference taken, so a library opened
+   * twice in a task group is one instance.
    */
 
-  return libelf_insert(filename, modname);
+  return libelf_insert(libelf_registry(), filename, modname);
 }
 #else /* if defined(CONFIG_BUILD_KERNEL) */
 /* The KERNEL build is considerably more complex:  In order to be shared,

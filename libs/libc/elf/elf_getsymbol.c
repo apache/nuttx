@@ -48,9 +48,10 @@
  *   called.
  *
  * Input Parameters:
- *   handle - The opaque, non-NULL value returned by a previous successful
- *            call to libelf_insert().
- *   name   - A pointer to the symbol name string.
+ *   registry - The registry the module is on.
+ *   handle   - The opaque, non-NULL value returned by a previous successful
+ *              call to libelf_insert().
+ *   name     - A pointer to the symbol name string.
  *
  * Returned Value:
  *   The address associated with the symbol is returned on success.
@@ -64,7 +65,8 @@
  *
  ****************************************************************************/
 
-FAR const void *libelf_getsymbol(FAR void *handle, FAR const char *name)
+FAR const void *libelf_getsymbol(FAR struct module_s **registry,
+                                 FAR void *handle, FAR const char *name)
 {
   FAR struct module_s *modp = handle;
   FAR const struct symtab_s *symbol;
@@ -74,7 +76,7 @@ FAR const void *libelf_getsymbol(FAR void *handle, FAR const char *name)
   /* Verify that the module is in the registry */
 
   libelf_registry_lock();
-  ret = libelf_registry_verify(modp);
+  ret = libelf_registry_verify(registry, modp);
   if (ret < 0)
     {
       berr("ERROR: Failed to verify module: %d\n", ret);

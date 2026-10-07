@@ -34,6 +34,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/lib/elf.h>
 #include <nuttx/net/net.h>
 #include <nuttx/sched.h>
 #include <nuttx/spinlock.h>
@@ -80,6 +81,29 @@ static inline void group_release(FAR struct task_group_s *group)
   /* Destroy the mutex */
 
   nxrmutex_destroy(&group->tg_mutex);
+
+#if defined(CONFIG_LIBC_ELF) && defined(CONFIG_BUILD_FLAT)
+  /* Close what dlopen() left open.  No thread of the group runs now. */
+
+  if (group->tg_info->ta_modules != NULL)
+    {
+      libelf_closeall(&group->tg_info->ta_modules);
+
+#  ifdef CONFIG_BINFMT_LOADABLE
+      /* The rest is used by the program: binfmt_exit() unloads it */
+
+      if (group->tg_bininfo != NULL)
+        {
+          libelf_registry_lock();
+          libelf_registry_move(&group->tg_info->ta_modules,
+                               &group->tg_bininfo->mod.libraries);
+          group->tg_bininfo->mod.registry =
+            &group->tg_bininfo->mod.libraries;
+          libelf_registry_unlock();
+        }
+#  endif
+    }
+#endif
 
   task_uninit_info(group);
 

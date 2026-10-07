@@ -98,7 +98,7 @@ int dlclose(FAR void *handle)
    * one goes, so closing one of two handles leaves the other usable.
    */
 
-  return libelf_remove(handle);
+  return libelf_remove(libelf_registry(), handle);
 
 #else /* if defined(CONFIG_BUILD_KERNEL) */
   /* The KERNEL build is considerably more complex:  In order to be shared,
