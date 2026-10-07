@@ -109,6 +109,17 @@
 #define QSPI_PAD_COUNT            6
 #define QMI_M1_REG_COUNT          5
 
+/* True for an address in the XIP space (flash or PSRAM), which cannot be
+ * accessed while the QMI is in direct mode.
+ */
+
+#define IS_XIP_ADDR(a) \
+  ((uintptr_t)(a) >= RP23XX_FLASH_BASE && (uintptr_t)(a) < RP23XX_SRAM_BASE)
+
+/* SRAM stack for a flash operation called with its stack in PSRAM */
+
+#define FLASH_OP_STACK_SIZE       1024
+
 /* Largest flash the XIP window can address, used only to sanity check a
  * pointer before it is called with the flash interface torn down.
  */
@@ -244,6 +255,14 @@ static struct rp23xx_flash_dev_s g_flash_dev =
 static bool g_initialized = false;
 
 static struct rp23xx_flash_op_s g_flash_op;
+
+/* SRAM copy of a page whose source is in the XIP space */
+
+static uint8_t g_flash_page[FLASH_PAGE_SIZE] aligned_data(4);
+
+#ifdef CONFIG_RP23XX_PSRAM
+static uint64_t g_flash_stack[FLASH_OP_STACK_SIZE / 8];
+#endif
 
 #ifdef CONFIG_SMP
 static struct smp_isolation_s g_smp_isolation;
@@ -527,6 +546,41 @@ static void RAM_CODE(do_write)(FAR struct rp23xx_flash_op_s *op)
 }
 
 /****************************************************************************
+ * Name: rp23xx_flash_call
+ *
+ * Description:
+ *   Call g_flash_op.func.  PSRAM is not accessible during the operation,
+ *   so if the stack is in PSRAM, switch to an SRAM stack first.
+ *
+ ****************************************************************************/
+
+static void rp23xx_flash_call(void)
+{
+#ifdef CONFIG_RP23XX_PSRAM
+  if (IS_XIP_ADDR(up_getsp()))
+    {
+      __asm__ __volatile__
+      (
+        "mov r4, sp\n\t"
+        "mov sp, %[top]\n\t"
+        "mov r0, %[op]\n\t"
+        "blx %[func]\n\t"
+        "mov sp, r4\n\t"
+        :
+        : [top] "r" (&g_flash_stack[FLASH_OP_STACK_SIZE / 8]),
+          [op] "r" (&g_flash_op),
+          [func] "r" (g_flash_op.func)
+        : "r0", "r1", "r2", "r3", "r4", "r12", "lr", "memory", "cc"
+      );
+
+      return;
+    }
+#endif
+
+  g_flash_op.func(&g_flash_op);
+}
+
+/****************************************************************************
  * Name: rp23xx_flash_run
  *
  * Description:
@@ -545,7 +599,7 @@ static void rp23xx_flash_run(void)
 #endif
 
   flags = enter_critical_section();
-  g_flash_op.func(&g_flash_op);
+  rp23xx_flash_call();
   leave_critical_section(flags);
 
 #ifdef CONFIG_SMP
@@ -645,7 +699,7 @@ static ssize_t rp23xx_flash_bread(struct mtd_dev_s *dev, off_t startblock,
  *
  * Description:
  *   Program one page at a time, so that interrupts are disabled for one
- *   page program at most.
+ *   page program at most.  Copy a page from flash or PSRAM to SRAM first.
  *
  ****************************************************************************/
 
@@ -673,6 +727,12 @@ static ssize_t rp23xx_flash_bwrite(struct mtd_dev_s *dev, off_t startblock,
       g_flash_op.addr  = FS_OFFSET + (startblock + i) * FLASH_PAGE_SIZE;
       g_flash_op.data  = buffer + i * FLASH_PAGE_SIZE;
       g_flash_op.count = FLASH_PAGE_SIZE;
+
+      if (IS_XIP_ADDR(g_flash_op.data))
+        {
+          memcpy(g_flash_page, g_flash_op.data, FLASH_PAGE_SIZE);
+          g_flash_op.data = g_flash_page;
+        }
 
       rp23xx_flash_run();
     }
