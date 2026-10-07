@@ -1664,6 +1664,7 @@ int v9fs_client_init(FAR struct v9fs_client_s *client,
   while (*options != '\0')
     {
       FAR const char *sep = strchr(options, ',');
+
       length = sep ? sep - options : strlen(options);
 
       if (strncmp(options, "uname=", 6) == 0)
@@ -1845,5 +1846,6 @@ int v9fs_fid_get(FAR struct v9fs_client_s *client, uint32_t fid)
 ssize_t v9fs_parse_size(FAR const void *buffer)
 {
   FAR const struct v9fs_header_s *ptr = buffer;
+
   return ptr->size;
 }
