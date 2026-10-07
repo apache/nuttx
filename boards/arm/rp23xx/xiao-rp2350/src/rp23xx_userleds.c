@@ -204,6 +204,7 @@ void rp23xx_led_pminitialize(void)
   /* Register to receive power management callbacks */
 
   int ret = pm_register(&g_ledscb);
+
   if (ret != OK)
     {
       board_autoled_on(LED_ASSERTION);
