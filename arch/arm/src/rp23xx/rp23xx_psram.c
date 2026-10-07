@@ -165,8 +165,7 @@ rp23xx_psram_wait_busy(void)
  *
  * Description:
  *   Program the QMI M1 timing/format/command registers and mark the region
- *   writable.  Shared by the initial configuration and the post-flash
- *   restore.  Runs from RAM.
+ *   writable.  Runs from RAM.
  *
  ****************************************************************************/
 
@@ -372,19 +371,6 @@ rp23xx_psramconfig(void)
 size_t rp23xx_psram_size(void)
 {
   return g_psram_size;
-}
-
-/****************************************************************************
- * Name: rp23xx_psram_restore
- ****************************************************************************/
-
-void RP23XX_PSRAM_RAMFUNC
-rp23xx_psram_restore(void)
-{
-  if (g_psram_size != 0)
-    {
-      rp23xx_psram_apply_format();
-    }
 }
 
 #endif /* CONFIG_RP23XX_PSRAM */
