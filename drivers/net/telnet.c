@@ -69,6 +69,7 @@
 
 /* Telnet protocol stuff ****************************************************/
 
+#define TELNET_NUL            0x00
 #define TELNET_NL             0x0a
 #define TELNET_CR             0x0d
 
@@ -119,6 +120,7 @@ struct telnet_dev_s
   uint8_t           td_crefs;     /* The number of open references to the session */
   uint8_t           td_minor;     /* Minor device number */
   bool              td_sb_iac;    /* Saw IAC within sub-negotiation payload */
+  bool              td_txcr;      /* Last byte sent was a CR */
   uint16_t          td_offset;    /* Offset to the valid, pending bytes in the rxbuffer */
   uint16_t          td_pending;   /* Number of valid, pending bytes in the rxbuffer */
 #ifdef CONFIG_TELNET_SUPPORT_NAWS
@@ -582,35 +584,39 @@ static ssize_t telnet_receive(FAR struct telnet_dev_s *priv,
 static bool telnet_putchar(FAR struct telnet_dev_s *priv, uint8_t ch,
                            int *nread)
 {
-  register int index;
+  register int index = *nread;
   bool ret = false;
 
-  /* Ignore carriage returns (we will put these in automatically as
-   * necessary).
+  /* Telnet end of line is CR LF and a carriage return alone is CR NUL
+   * (RFC 854): a CR must be followed by LF or NUL.  A CR from the user
+   * buffer is sent at once; the next character decides whether a NUL is
+   * needed after it.
    */
 
-  if (ch != TELNET_CR)
+  if (priv->td_txcr && ch != TELNET_NL)
     {
-      index = *nread;
+      priv->td_txbuffer[index++] = TELNET_NUL;
+    }
 
-      /* Telnet end of line is CR LF (RFC 854): put the carriage return
-       * before the line feed.
+  if (ch == TELNET_NL)
+    {
+      /* Put the carriage return before the line feed, unless it was
+       * already sent.
        */
 
-      if (ch == TELNET_NL)
+      if (!priv->td_txcr)
         {
           priv->td_txbuffer[index++] = TELNET_CR;
-
-          /* End of line */
-
-          ret = true;
         }
 
-      /* Add all other characters to the destination buffer */
+      /* End of line */
 
-      priv->td_txbuffer[index++] = ch;
-      *nread = index;
+      ret = true;
     }
+
+  priv->td_txbuffer[index++] = ch;
+  priv->td_txcr = (ch == TELNET_CR);
+  *nread = index;
 
   return ret;
 }
