@@ -768,15 +768,15 @@ static void imxrt_dataconfig(struct imxrt_dev_s *priv, bool bwrite,
   putreg32(regval, priv->addr + IMXRT_USDHC_SYSCTL_OFFSET);
 
 #if defined(CONFIG_IMXRT_USDHC_DMA) && defined(CONFIG_ARMV7M_DCACHE)
-      /* If cache is enabled, and this is an unaligned receive,
-       * receive one block at a time to the internal buffer
-       */
+  /* If cache is enabled, and this is an unaligned receive,
+   * receive one block at a time to the internal buffer
+   */
 
-      if (!bwrite && priv->unaligned_rx)
-        {
-          DEBUGASSERT(priv->blocksize <= sizeof(priv->rxbuffer));
-          datalen = priv->blocksize;
-        }
+  if (!bwrite && priv->unaligned_rx)
+    {
+      DEBUGASSERT(priv->blocksize <= sizeof(priv->rxbuffer));
+      datalen = priv->blocksize;
+    }
 #endif
 
   /* Set the watermark level */
@@ -1564,9 +1564,9 @@ static sdio_statset_t imxrt_status(struct sdio_dev_s *dev)
     }
   else
     {
-  /* This register reflects the state of CD no matter if it's a separate pin
-   * or DAT3
-   */
+      /* This register reflects the state of CD no matter if it's a separate
+       * pin or DAT3
+       */
 
       present = ((getreg32(priv->addr + IMXRT_USDHC_PRSSTAT_OFFSET) &
                 USDHC_PRSSTAT_CINS) != 0) ^ priv->cd_invert;
@@ -1775,8 +1775,8 @@ static void imxrt_frequency(struct sdio_dev_s *dev, uint32_t frequency)
 
 static void imxrt_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
 {
-  struct imxrt_dev_s *priv =
-    (struct imxrt_dev_s *)dev; uint32_t regval;
+  struct imxrt_dev_s *priv = (struct imxrt_dev_s *)dev;
+  uint32_t regval;
 
   /* Clear the old prescaler and divisor values so that new ones can be
    * ORed in.
@@ -1792,64 +1792,65 @@ static void imxrt_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
   switch (rate)
     {
-    default:
-    case CLOCK_SDIO_DISABLED:      /* Clock is disabled */
-      {
-        /* Clear the prescaler and divisor settings */
+      default:
+      case CLOCK_SDIO_DISABLED:      /* Clock is disabled */
+        {
+          /* Clear the prescaler and divisor settings */
 
-        putreg32(regval, priv->addr + IMXRT_USDHC_SYSCTL_OFFSET);
-        mcinfo("DISABLED, SYSCTRL: %08" PRIx32 "\n",
-               getreg32(priv->addr + IMXRT_USDHC_SYSCTL_OFFSET)); return;
-      }
-      break;
+          putreg32(regval, priv->addr + IMXRT_USDHC_SYSCTL_OFFSET);
+          mcinfo("DISABLED, SYSCTRL: %08" PRIx32 "\n",
+                 getreg32(priv->addr + IMXRT_USDHC_SYSCTL_OFFSET));
+          return;
+        }
+        break;
 
-    case CLOCK_IDMODE:
-      {
-        /* Initial ID mode clocking (<400KHz) */
+      case CLOCK_IDMODE:
+        {
+          /* Initial ID mode clocking (<400KHz) */
 
-        mcinfo("IDMODE\n");
+          mcinfo("IDMODE\n");
 
-        /* Put out an additional 80 clocks in case this is a power-up
-         * sequence.
-         */
+          /* Put out an additional 80 clocks in case this is a power-up
+           * sequence.
+           */
 
-        regval |= (BOARD_USDHC_IDMODE_PRESCALER |
-                   BOARD_USDHC_IDMODE_DIVISOR |
-                   USDHC_SYSCTL_INITA);
-      }
-      break;
+          regval |= (BOARD_USDHC_IDMODE_PRESCALER |
+                     BOARD_USDHC_IDMODE_DIVISOR |
+                     USDHC_SYSCTL_INITA);
+        }
+        break;
 
-    case CLOCK_MMC_TRANSFER:
-      {
-        /* MMC normal operation clocking */
+      case CLOCK_MMC_TRANSFER:
+        {
+          /* MMC normal operation clocking */
 
-        mcinfo("MMCTRANSFER\n");
-        regval |= (BOARD_USDHC_MMCMODE_PRESCALER |
-                   BOARD_USDHC_MMCMODE_DIVISOR);
-      }
-      break;
+          mcinfo("MMCTRANSFER\n");
+          regval |= (BOARD_USDHC_MMCMODE_PRESCALER |
+                     BOARD_USDHC_MMCMODE_DIVISOR);
+        }
+        break;
 
-    case CLOCK_SD_TRANSFER_1BIT:
-      {
+      case CLOCK_SD_TRANSFER_1BIT:
+        {
 #ifndef CONFIG_IMXRT_USDHC_WIDTH_D1_ONLY
-        /* SD normal operation clocking (narrow 1-bit mode) */
+          /* SD normal operation clocking (narrow 1-bit mode) */
 
-        mcinfo("1BITTRANSFER\n");
-        regval |= (BOARD_USDHC_SD1MODE_PRESCALER |
-                   BOARD_USDHC_SD1MODE_DIVISOR);
-      }
-      break;
+          mcinfo("1BITTRANSFER\n");
+          regval |= (BOARD_USDHC_SD1MODE_PRESCALER |
+                     BOARD_USDHC_SD1MODE_DIVISOR);
+        }
+        break;
 #endif
 
-    case CLOCK_SD_TRANSFER_4BIT:
-      {
-        /* SD normal operation clocking (wide 4-bit mode) */
+      case CLOCK_SD_TRANSFER_4BIT:
+        {
+          /* SD normal operation clocking (wide 4-bit mode) */
 
-        mcinfo("4BITTRANSFER\n");
-        regval |= (BOARD_USDHC_SD4MODE_PRESCALER |
-                  BOARD_USDHC_SD4MODE_DIVISOR);
-      }
-      break;
+          mcinfo("4BITTRANSFER\n");
+          regval |= (BOARD_USDHC_SD4MODE_PRESCALER |
+                    BOARD_USDHC_SD4MODE_DIVISOR);
+        }
+        break;
     }
 
   putreg32(regval, priv->addr + IMXRT_USDHC_SYSCTL_OFFSET);
@@ -1993,48 +1994,48 @@ static int imxrt_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
 
   switch (cmd & MMCSD_DATAXFR_MASK)
     {
-    default:
-    case MMCSD_NODATAXFR:
-      {
-        /* No.. no data transfer */
-      }
-      break;
+      default:
+      case MMCSD_NODATAXFR:
+        {
+          /* No.. no data transfer */
+        }
+        break;
 
-      /* The following two cases are probably missing some setup logic */
+        /* The following two cases are probably missing some setup logic */
 
-    case MMCSD_RDSTREAM:
-      {
-        /* Yes.. streaming read data transfer */
+      case MMCSD_RDSTREAM:
+        {
+          /* Yes.. streaming read data transfer */
 
-        regval |= USDHC_XFERTYP_DPSEL;
-        mcrregval |= USDHC_MC_DTDSEL;
-      }
-      break;
+          regval |= USDHC_XFERTYP_DPSEL;
+          mcrregval |= USDHC_MC_DTDSEL;
+        }
+        break;
 
-    case MMCSD_WRSTREAM:
-      {
-        /* Yes.. streaming write data transfer */
+      case MMCSD_WRSTREAM:
+        {
+          /* Yes.. streaming write data transfer */
 
-       regval |= USDHC_XFERTYP_DPSEL;
-      }
-      break;
+          regval |= USDHC_XFERTYP_DPSEL;
+        }
+        break;
 
-    case MMCSD_RDDATAXFR:
-      {
-        /* Yes.. normal read data transfer */
+      case MMCSD_RDDATAXFR:
+        {
+          /* Yes.. normal read data transfer */
 
-        regval |= USDHC_XFERTYP_DPSEL;
-        mcrregval |= USDHC_MC_DTDSEL;
-      }
-      break;
+          regval |= USDHC_XFERTYP_DPSEL;
+          mcrregval |= USDHC_MC_DTDSEL;
+        }
+        break;
 
-    case MMCSD_WRDATAXFR:
-      {
-        /* Yes.. normal write data transfer */
+      case MMCSD_WRDATAXFR:
+        {
+          /* Yes.. normal write data transfer */
 
-        regval |= USDHC_XFERTYP_DPSEL;
-      }
-      break;
+          regval |= USDHC_XFERTYP_DPSEL;
+        }
+        break;
     }
 
   /* Is it a multi-block transfer? */
@@ -2050,7 +2051,7 @@ static int imxrt_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
         {
           /* Yes.. Indefinite block transfer (not SDIO) */
 
-            mcrregval |= USDHC_MC_AC12EN;
+          mcrregval |= USDHC_MC_AC12EN;
         }
       else
         {
@@ -2064,49 +2065,49 @@ static int imxrt_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
 
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
-    case MMCSD_NO_RESPONSE:
-      {
-        /* No response */
+      case MMCSD_NO_RESPONSE:
+        {
+          /* No response */
 
-        regval |= USDHC_XFERTYP_RSPTYP_NONE;
-      }
-      break;
+          regval |= USDHC_XFERTYP_RSPTYP_NONE;
+        }
+        break;
 
-    case MMCSD_R1B_RESPONSE:
-      {
-        /* Response length 48, check busy & cmdindex */
+      case MMCSD_R1B_RESPONSE:
+        {
+          /* Response length 48, check busy & cmdindex */
 
-        regval |=
-          (USDHC_XFERTYP_RSPTYP_LEN48BSY | USDHC_XFERTYP_CICEN |
-           USDHC_XFERTYP_CCCEN);
-      }
-      break;
+          regval |=
+            (USDHC_XFERTYP_RSPTYP_LEN48BSY | USDHC_XFERTYP_CICEN |
+             USDHC_XFERTYP_CCCEN);
+        }
+        break;
 
-    case MMCSD_R1_RESPONSE: /* Response length 48, check cmdindex */
-    case MMCSD_R5_RESPONSE:
-    case MMCSD_R6_RESPONSE:
-      {
-        regval |=
-          (USDHC_XFERTYP_RSPTYP_LEN48 | USDHC_XFERTYP_CICEN |
-           USDHC_XFERTYP_CCCEN);
-      }
-      break;
+      case MMCSD_R1_RESPONSE: /* Response length 48, check cmdindex */
+      case MMCSD_R5_RESPONSE:
+      case MMCSD_R6_RESPONSE:
+        {
+          regval |=
+            (USDHC_XFERTYP_RSPTYP_LEN48 | USDHC_XFERTYP_CICEN |
+             USDHC_XFERTYP_CCCEN);
+        }
+        break;
 
-    case MMCSD_R2_RESPONSE:
-      {
-        /* Response length 136, check CRC */
+      case MMCSD_R2_RESPONSE:
+        {
+          /* Response length 136, check CRC */
 
-        regval |= (USDHC_XFERTYP_RSPTYP_LEN136 | USDHC_XFERTYP_CCCEN);
-      }
-      break;
+          regval |= (USDHC_XFERTYP_RSPTYP_LEN136 | USDHC_XFERTYP_CCCEN);
+        }
+        break;
 
-    case MMCSD_R3_RESPONSE: /* Response length 48 */
-    case MMCSD_R4_RESPONSE:
-    case MMCSD_R7_RESPONSE:
-      {
-        regval |= USDHC_XFERTYP_RSPTYP_LEN48;
-      }
-      break;
+      case MMCSD_R3_RESPONSE: /* Response length 48 */
+      case MMCSD_R4_RESPONSE:
+      case MMCSD_R7_RESPONSE:
+        {
+          regval |= USDHC_XFERTYP_RSPTYP_LEN48;
+        }
+        break;
     }
 
 #ifdef CONFIG_IMXRT_USDHC_DMA
@@ -2248,6 +2249,7 @@ static int imxrt_recvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
                            size_t nbytes)
 {
   struct imxrt_dev_s *priv = (struct imxrt_dev_s *)dev;
+
   DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
   DEBUGASSERT(((uint32_t) buffer & 3) == 0);
 
@@ -2299,6 +2301,7 @@ static int imxrt_sendsetup(struct sdio_dev_s *dev,
                            size_t nbytes)
 {
   struct imxrt_dev_s *priv = (struct imxrt_dev_s *)dev;
+
   DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
   DEBUGASSERT(((uint32_t) buffer & 3) == 0);
 
@@ -2409,33 +2412,33 @@ static int imxrt_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
 
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
-    case MMCSD_NO_RESPONSE:
-      timeout = USDHC_CMDTIMEOUT;
-      errors  = 0;
-      break;
-
-    case MMCSD_R1_RESPONSE:
-    case MMCSD_R1B_RESPONSE:
-    case MMCSD_R2_RESPONSE:
-    case MMCSD_R4_RESPONSE:
-    case MMCSD_R5_RESPONSE:
-    case MMCSD_R6_RESPONSE:
-      {
-        timeout = USDHC_LONGTIMEOUT;
-        errors  = USDHC_RESPERR_INTS;
-      }
-      break;
-
-    case MMCSD_R3_RESPONSE:
-    case MMCSD_R7_RESPONSE:
-      {
+      case MMCSD_NO_RESPONSE:
         timeout = USDHC_CMDTIMEOUT;
-        errors  = USDHC_RESPERR_INTS;
-      }
-      break;
+        errors  = 0;
+        break;
 
-    default:
-      return -EINVAL;
+      case MMCSD_R1_RESPONSE:
+      case MMCSD_R1B_RESPONSE:
+      case MMCSD_R2_RESPONSE:
+      case MMCSD_R4_RESPONSE:
+      case MMCSD_R5_RESPONSE:
+      case MMCSD_R6_RESPONSE:
+        {
+          timeout = USDHC_LONGTIMEOUT;
+          errors  = USDHC_RESPERR_INTS;
+        }
+        break;
+
+      case MMCSD_R3_RESPONSE:
+      case MMCSD_R7_RESPONSE:
+        {
+          timeout = USDHC_CMDTIMEOUT;
+          errors  = USDHC_RESPERR_INTS;
+        }
+        break;
+
+      default:
+        return -EINVAL;
     }
 
   /* Then wait for the Command Complete (CC) indication (or timeout).  The
@@ -2944,6 +2947,7 @@ static int imxrt_dmapreflight(struct sdio_dev_s *dev,
                               const uint8_t *buffer, size_t buflen)
 {
   struct imxrt_dev_s *priv = (struct imxrt_dev_s *)dev;
+
   DEBUGASSERT(priv != NULL && buflen > 0);
 
   /* DMA must be possible to the buffer and it must be word (4 bytes) aligned
@@ -3001,6 +3005,7 @@ static int imxrt_dmarecvsetup(struct sdio_dev_s *dev,
                               uint8_t *buffer, size_t buflen)
 {
   struct imxrt_dev_s *priv = (struct imxrt_dev_s *)dev;
+
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 #if defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
   /* Normally imxrt_dmapreflight is called prior to imxrt_dmarecvsetup
@@ -3101,6 +3106,7 @@ static int imxrt_dmasendsetup(struct sdio_dev_s *dev,
                               const uint8_t *buffer, size_t buflen)
 {
   struct imxrt_dev_s *priv = (struct imxrt_dev_s *)dev;
+
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32_t) buffer & 3) == 0);
 
@@ -3117,9 +3123,7 @@ static int imxrt_dmasendsetup(struct sdio_dev_s *dev,
   /* Flush cache to physical memory when not in DTCM memory */
 
 #  if !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
-    {
-      up_clean_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
-    }
+  up_clean_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
 
 #  endif
 #endif
@@ -3305,75 +3309,75 @@ struct sdio_dev_s *imxrt_usdhc_initialize(int slotno)
 
   switch (priv->addr)
     {
-    case IMXRT_USDHC1_BASE:
-      /* Configure pins for 1 or 4-bit, wide-bus operation (the chip is
-       * capable of 8-bit wide bus operation but D4-D7 are not configured).
-       * If bus is multiplexed then there is a custom bus configuration
-       * utility in the scope of the board support package.
-       */
+      case IMXRT_USDHC1_BASE:
+        /* Configure pins for 1 or 4-bit, wide-bus operation (the chip is
+         * capable of 8-bit wide bus operation but D4-D7 are not configured).
+         * If bus is multiplexed then there is a custom bus configuration
+         * utility in the scope of the board support package.
+         */
 
 #ifndef CONFIG_SDIO_MUXBUS
 #if defined(CONFIG_IMXRT_USDHC1_WIDTH_D1_D4)
-      imxrt_config_gpio(PIN_USDHC1_D1);
-      imxrt_config_gpio(PIN_USDHC1_D2);
-      imxrt_config_gpio(PIN_USDHC1_D3);
+        imxrt_config_gpio(PIN_USDHC1_D1);
+        imxrt_config_gpio(PIN_USDHC1_D2);
+        imxrt_config_gpio(PIN_USDHC1_D3);
 #endif
-      /* Clocking and CMD pins (all data widths) */
+        /* Clocking and CMD pins (all data widths) */
 
-      imxrt_config_gpio(PIN_USDHC1_D0);
-      imxrt_config_gpio(PIN_USDHC1_DCLK);
-      imxrt_config_gpio(PIN_USDHC1_CMD);
+        imxrt_config_gpio(PIN_USDHC1_D0);
+        imxrt_config_gpio(PIN_USDHC1_DCLK);
+        imxrt_config_gpio(PIN_USDHC1_CMD);
 #endif
 
 #if defined(CONFIG_MMCSD_HAVE_CARDDETECT)
 #  if defined(PIN_USDHC1_CD)
-      imxrt_config_gpio(PIN_USDHC1_CD);
+        imxrt_config_gpio(PIN_USDHC1_CD);
 #  else
-      if (priv->sw_cd_gpio != 0)
-        {
-          imxrt_config_gpio(priv->sw_cd_gpio);
-        }
+        if (priv->sw_cd_gpio != 0)
+          {
+            imxrt_config_gpio(priv->sw_cd_gpio);
+          }
 #  endif
 #endif
 
-      imxrt_clockall_usdhc1();
-      break;
+        imxrt_clockall_usdhc1();
+        break;
 
 #if defined(CONFIG_IMXRT_USDHC2)
-    case IMXRT_USDHC2_BASE:
-      imxrt_config_gpio(PIN_USDHC2_D0);
-      imxrt_config_gpio(PIN_USDHC2_DCLK);
-      imxrt_config_gpio(PIN_USDHC2_CMD);
+      case IMXRT_USDHC2_BASE:
+        imxrt_config_gpio(PIN_USDHC2_D0);
+        imxrt_config_gpio(PIN_USDHC2_DCLK);
+        imxrt_config_gpio(PIN_USDHC2_CMD);
 
 #  if defined(CONFIG_IMXRT_USDHC2_WIDTH_D1_D4) || defined(CONFIG_IMXRT_USDHC2_WIDTH_D1_D8)
-      imxrt_config_gpio(PIN_USDHC2_D1);
-      imxrt_config_gpio(PIN_USDHC2_D2);
-      imxrt_config_gpio(PIN_USDHC2_D3);
+        imxrt_config_gpio(PIN_USDHC2_D1);
+        imxrt_config_gpio(PIN_USDHC2_D2);
+        imxrt_config_gpio(PIN_USDHC2_D3);
 #  endif
 
 #  if defined(CONFIG_IMXRT_USDHC2_WIDTH_D1_D8)
-      imxrt_config_gpio(PIN_USDHC2_D4);
-      imxrt_config_gpio(PIN_USDHC2_D5);
-      imxrt_config_gpio(PIN_USDHC2_D6);
-      imxrt_config_gpio(PIN_USDHC2_D7);
+        imxrt_config_gpio(PIN_USDHC2_D4);
+        imxrt_config_gpio(PIN_USDHC2_D5);
+        imxrt_config_gpio(PIN_USDHC2_D6);
+        imxrt_config_gpio(PIN_USDHC2_D7);
 #  endif
 
 #  if defined(CONFIG_MMCSD_HAVE_CARDDETECT)
 #    if defined(PIN_USDHC2_CD)
-      imxrt_config_gpio(PIN_USDHC2_CD);
+        imxrt_config_gpio(PIN_USDHC2_CD);
 #    else
-      if (priv->sw_cd_gpio != 0)
-        {
-          imxrt_config_gpio(priv->sw_cd_gpio);
-        }
+        if (priv->sw_cd_gpio != 0)
+          {
+            imxrt_config_gpio(priv->sw_cd_gpio);
+          }
 #    endif
 #  endif
 
-      imxrt_clockall_usdhc2();
-      break;
+        imxrt_clockall_usdhc2();
+        break;
 #endif
-    default:
-      return NULL;
+      default:
+        return NULL;
     }
 
   imxrt_reset(&priv->dev);
