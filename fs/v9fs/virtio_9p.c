@@ -112,8 +112,8 @@ static int virtio_9p_create(FAR struct v9fs_transport_s **transport,
 
   start += 4;
   end = strchr(start, ',');
-  length = end ? end - start + 1 : strlen(start) + 1;
-  priv = fs_heap_zalloc(sizeof(struct virtio_9p_priv_s) + length);
+  length = end ? end - start : strlen(start);
+  priv = fs_heap_zalloc(sizeof(struct virtio_9p_priv_s) + length + 1);
   if (priv == NULL)
     {
       return -ENOMEM;
