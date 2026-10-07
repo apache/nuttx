@@ -518,10 +518,15 @@ int up_debugpoint_remove(int type, void *addr, size_t size)
 
 void x86_64_hwdebug_init(void)
 {
-  /* Attach debug interrupt and breakpoint interrupt */
+  /* Attach debug interrupt and breakpoint interrupt.  The vector table is
+   * shared by all CPUs, so do this only once.
+   */
 
-  irq_attach(ISR1, x86_64_debug_handler, NULL);
-  irq_attach(ISR3, x86_64_debug_handler, NULL);
+  if (this_cpu() == 0)
+    {
+      irq_attach(ISR1, x86_64_debug_handler, NULL);
+      irq_attach(ISR3, x86_64_debug_handler, NULL);
+    }
 
   /* Disable all breakpoints */
 

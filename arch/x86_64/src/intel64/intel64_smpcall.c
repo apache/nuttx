@@ -41,6 +41,7 @@
 #include "sched/sched.h"
 
 #include "x86_64_internal.h"
+#include "intel64.h"
 
 /****************************************************************************
  * Public Data

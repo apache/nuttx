@@ -53,8 +53,6 @@
  ****************************************************************************/
 
 extern void __ap_entry(void);
-extern int x86_64_smp_call_handler(int irq, void *c, void *arg);
-extern int x86_64_smp_sched_handler(int irq, void *c, void *arg);
 extern uint64_t get_tsc_adjust(void);
 
 /****************************************************************************
@@ -167,15 +165,6 @@ void x86_64_ap_boot(void)
 #endif
 
   sinfo("cpu=%d\n", cpu);
-
-  /* Connect Pause IRQ to CPU */
-
-  irq_attach(SMP_IPI_CALL_IRQ, x86_64_smp_call_handler, NULL);
-  irq_attach(SMP_IPI_SCHED_IRQ, x86_64_smp_sched_handler, NULL);
-
-  /* NOTE: IPC interrupts don't use IOAPIC but interrupts are sent
-   * directly to CPU, so we don't use up_enable_irq() API here.
-   */
 
 #ifdef CONFIG_STACK_COLORATION
   /* If stack debug is enabled, then fill the stack with a
