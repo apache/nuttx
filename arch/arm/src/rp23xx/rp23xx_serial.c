@@ -51,6 +51,10 @@
 #include "rp23xx_config.h"
 #include "rp23xx_serial.h"
 
+#ifdef CONFIG_RP23XX_PM
+#  include <nuttx/power/pm.h>
+#endif
+
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
@@ -109,6 +113,10 @@ static void up_send(struct uart_dev_s *dev, int ch);
 static void up_txint(struct uart_dev_s *dev, bool enable);
 static bool up_txready(struct uart_dev_s *dev);
 static bool up_txempty(struct uart_dev_s *dev);
+#ifdef CONFIG_RP23XX_PM
+static int up_pm_prepare(struct pm_callback_s *cb, int domain,
+                         enum pm_state_e pmstate);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -132,6 +140,13 @@ static const struct uart_ops_s g_uart_ops =
   .txready       = up_txready,
   .txempty       = up_txempty,
 };
+
+#ifdef CONFIG_RP23XX_PM
+static struct pm_callback_s g_serial_pmcb =
+{
+  .prepare       = up_pm_prepare,
+};
+#endif
 
 /* I/O buffers */
 
@@ -609,6 +624,15 @@ static int up_interrupt(int irq, void *context, void *arg)
 
       if (status & (RP23XX_UART_UARTICR_RXIC | RP23XX_UART_UARTICR_RTIC))
         {
+#ifdef CONFIG_RP23XX_PM
+          /* The dormant state stops the UART: stay out of it while input
+           * arrives.
+           */
+
+          pm_staytimeout(PM_IDLE_DOMAIN, PM_STANDBY,
+                         CONFIG_RP23XX_PM_WAKE_HOLD_MS);
+#endif
+
           uart_recvchars(dev);
         }
 
@@ -959,6 +983,42 @@ static bool up_txempty(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: up_pm_prepare
+ *
+ * Description:
+ *   Refuse PM_SLEEP while a UART transmits.  The dormant state stops
+ *   clk_peri, which would hold the transmit until the next wake.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RP23XX_PM
+static int up_pm_prepare(struct pm_callback_s *cb, int domain,
+                         enum pm_state_e pmstate)
+{
+  if (domain != PM_IDLE_DOMAIN || pmstate < PM_SLEEP)
+    {
+      return OK;
+    }
+
+#ifdef CONFIG_RP23XX_UART0
+  if ((getreg32(RP23XX_UART0_UARTFR) & RP23XX_UART_UARTFR_BUSY) != 0)
+    {
+      return -EBUSY;
+    }
+#endif
+
+#ifdef CONFIG_RP23XX_UART1
+  if ((getreg32(RP23XX_UART1_UARTFR) & RP23XX_UART_UARTFR_BUSY) != 0)
+    {
+      return -EBUSY;
+    }
+#endif
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1006,6 +1066,10 @@ void arm_serialinit(void)
 #endif
 #ifdef TTYS1_DEV
   uart_register("/dev/ttyS1", &TTYS1_DEV);
+#endif
+
+#ifdef CONFIG_RP23XX_PM
+  pm_register(&g_serial_pmcb);
 #endif
 }
 

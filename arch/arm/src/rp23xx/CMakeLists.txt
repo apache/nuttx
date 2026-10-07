@@ -115,6 +115,14 @@ if(CONFIG_RP23XX_RTC)
   endif()
 endif()
 
+if(CONFIG_PM)
+  list(APPEND SRCS rp23xx_pminitialize.c)
+endif()
+
+if(CONFIG_RP23XX_PM)
+  list(APPEND SRCS rp23xx_pm.c)
+endif()
+
 if(CONFIG_RP23XX_OTP)
   list(APPEND SRCS rp23xx_otp.c)
 endif()

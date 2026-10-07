@@ -881,6 +881,73 @@ config RP23XX_RTC
 		The always-on timer also has one alarm comparator.  Select
 		RTC_ALARM to expose it through /dev/rtc0.
 
+#####################################################################
+#  Power Management
+#####################################################################
+
+menuconfig RP23XX_PM
+	bool "Power management (SLEEP and DORMANT states)"
+	default n
+	depends on PM
+	---help---
+		Map the NuttX power management states onto the RP2350 low-power
+		modes.  PM_STANDBY gates the clocks of the blocks that have no
+		driver in the configuration during a WFI.  PM_SLEEP is the dormant
+		state: the PLLs and the crystal oscillator stop, and only a GPIO
+		can wake the chip.
+
+if RP23XX_PM
+
+config RP23XX_PM_WAKEUP_GPIO
+	int "Wake-up GPIO for the dormant state (-1 to disable)"
+	default -1
+	range -1 47
+	---help---
+		GPIO that ends the dormant state.  With -1 the dormant state is
+		never entered, and PM_SLEEP gives the standby state.
+
+		The pin keeps its function, so the console UART receive pin can
+		be used: a keypress then wakes the board, but its first
+		character is lost.
+
+config RP23XX_PM_WAKEUP_GPIO_HIGH
+	bool "Wake on a high level or rising edge"
+	default n
+	depends on RP23XX_PM_WAKEUP_GPIO >= 0
+	---help---
+		The default is a low level or falling edge, which suits a button
+		to ground and a UART receive line.
+
+config RP23XX_PM_WAKEUP_GPIO_EDGE
+	bool "Wake on an edge rather than a level"
+	default y
+	depends on RP23XX_PM_WAKEUP_GPIO >= 0
+	---help---
+		A level that stays active keeps the chip out of the dormant state.
+
+config RP23XX_PM_WAKE_HOLD_MS
+	int "Stay out of the dormant state after a wake or UART input (ms)"
+	default 3000
+	---help---
+		The dormant state stops the UARTs, so the characters that arrive
+		then, and in the few milliseconds the wake takes, are lost.  After
+		a dormant wake, and after each character a UART receives, a
+		PM_STANDBY wakelock (pm_staytimeout()) is held for this time.
+
+		A dormant chip does not answer SWD.  To keep a debugger able to
+		attach after boot, set PM_GOVERNOR_EXPLICIT_RELAX.
+
+config RP23XX_PM_QUIESCE_PADS
+	bool "Isolate unused pads and reset unused blocks"
+	default y
+	---help---
+		At start-up, isolate every GPIO pad that nothing uses and hold the
+		blocks that have no driver in reset.  A floating input settles
+		near 2.2V (erratum RP2350-E9) and its input buffer then draws a
+		static current in every state.
+
+endif # RP23XX_PM
+
 config RP23XX_ADC
 	bool "Enable ADC Support"
 	default n
