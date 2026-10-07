@@ -11,5 +11,31 @@ config STM32H7S8_DK_USE_HSE
 	help
 		Use the 24 MHz external clock supplied to the HSE input.
 
+config STM32H7S8_DK_XIP
+	bool "Run from external XSPI2 flash"
+	default n
+	select STM32_BYPASS_CLOCKCONFIG
+	help
+		Link NuttX for execution from the board's MX66UW1G45G flash at
+		0x70000000.  The internal flash must contain a loader which
+		initializes XSPI2 before transferring control to NuttX.
+
+config STM32H7S8_DK_XIP_BOOTLOADER
+	bool "Boot an external XIP image"
+	default n
+	depends on STM32_XSPI && MTD_MX66UW1G45G
+	help
+		Build a NuttX bootloader in internal flash.  It initializes the
+		MX66UW1G45G flash in memory-mapped mode and starts a raw Arm image
+		linked at 0x70000000.  Image selection, update and integrity checking
+		are not provided.
+
+config STM32H7S8_DK_XIP_BOOTLOADER_BANNER
+	default n
+	bool "Display identifying banner during bootloader startup"
+	depends on STM32H7S8_DK_XIP_BOOTLOADER
+	help
+		If enabled display UTS name information during bootloader
+		startup including release, version, machine and board name.
 
 endif # ARCH_BOARD_STM32H7S8_DK
