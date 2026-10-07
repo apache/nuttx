@@ -1658,7 +1658,13 @@ int v9fs_client_init(FAR struct v9fs_client_s *client,
           client->msize = atoi(options + 6);
         }
 
-      options += length + 1;
+      /* The last option has no comma after it */
+
+      options += length;
+      if (*options == ',')
+        {
+          options++;
+        }
     }
 
   if (client->msize == 0)
