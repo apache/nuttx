@@ -47,4 +47,29 @@ config ARCH_CHIP_QEMU_WITH_HV
 
 endmenu # "Qemu Chip Selection"
 
+config QEMU_RTC_PL031_BASE
+	hex "PL031 RTC base address"
+	default 0x09010000
+	depends on RTC_PL031
+	---help---
+		Physical address of the PL031 RTC of the QEMU virt machine.
+
+config QEMU_RTC_PL031_IRQ
+	int "PL031 RTC interrupt"
+	default 34
+	depends on RTC_PL031
+	---help---
+		Interrupt of the PL031 RTC of the QEMU virt machine (SPI 2).
+
+config QEMU_RTC_PL031_SYNC
+	bool "Start the system time at an RTC second boundary"
+	default n
+	depends on RTC_PL031
+	---help---
+		The PL031 counts whole seconds, so the system time starts up to a
+		second behind the host.  Files that the host writes then look
+		up to a second in the future, and make warns about clock skew.
+		With this option the boot waits (up to a second) for the RTC
+		second to change, so the time is correct to a few milliseconds.
+
 endif # ARCH_CHIP_QEMU
