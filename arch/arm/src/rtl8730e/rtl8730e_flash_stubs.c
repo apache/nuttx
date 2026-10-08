@@ -275,6 +275,18 @@ int DiagVprintfNano(const char *fmt, va_list ap)
   return vprintf(fmt, ap);
 }
 
+/* The full-size variant is reached from log.c rtk_log_write(), which the
+ * RTK_LOGx() macros in the I2C fwlib expand to.  DiagPrintf itself is a weak
+ * definition inside lib_rom.a, but DiagVprintf is not in the ROM symbol
+ * table, so it must be supplied here.  Weak, because rtl8730e_wifi_stubs.c
+ * defines it strongly when WiFi is enabled (both route to vprintf).
+ */
+
+__attribute__((weak)) int DiagVprintf(const char *fmt, va_list ap)
+{
+  return vprintf(fmt, ap);
+}
+
 /****************************************************************************
  * __km0_ipc_memory_start__
  *

@@ -75,6 +75,15 @@ if(CONFIG_AMEBA_UART)
   endif()
 endif()
 
+if(CONFIG_AMEBA_I2C)
+  list(APPEND SRCS ${AMEBA_COMMON}/ameba_i2c.c)
+  if(NOT CONFIG_RTL8730E_FLASH_FS
+     AND NOT CONFIG_AMEBA_GPIO
+     AND NOT CONFIG_AMEBA_UART)
+    list(APPEND SRCS rtl8730e_flash_stubs.c)
+  endif()
+endif()
+
 target_include_directories(arch PRIVATE ${AMEBA_COMMON})
 target_sources(arch PRIVATE ${SRCS})
 
@@ -162,6 +171,11 @@ if(CONFIG_RTL8730E_FLASH_FS OR CONFIG_RTL8730E_WIFI)
     list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_hp/ameba_uart.c)
   endif()
 
+  # The whole amebasmart I2C fwlib lives in RAM, not in lib_rom.a.
+  if(CONFIG_AMEBA_I2C)
+    list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_i2c.c)
+  endif()
+
   # Silence SDK warnings, activate CA32 code paths.  No -mcmse (ARMv7-A).
   set(AMEBA_FWLIB_INC
       -Wno-int-conversion
@@ -199,13 +213,16 @@ set(AMEBA_EXTRA_LIBS)
 # Pinmux_Config, flash MTD primitives).
 if(CONFIG_AMEBA_GPIO
    OR CONFIG_AMEBA_UART
+   OR CONFIG_AMEBA_I2C
    OR CONFIG_RTL8730E_FLASH_FS)
   list(APPEND AMEBA_EXTRA_LIBS
        ${AMEBA_SOC}/project/${AMEBA_KM_PROJ}/lib/soc/lib_rom.a)
 endif()
 
 # fwlib archive linked whenever any driver needs its RAM-side tables/code.
-if(CONFIG_RTL8730E_FLASH_FS OR CONFIG_AMEBA_UART)
+if(CONFIG_RTL8730E_FLASH_FS
+   OR CONFIG_AMEBA_UART
+   OR CONFIG_AMEBA_I2C)
   list(APPEND AMEBA_EXTRA_LIBS ${AMEBA_FWLIB_A})
 endif()
 
