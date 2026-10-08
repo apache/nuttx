@@ -221,7 +221,7 @@ void inode_runlock(void);
  *           cares about existence (e.g. inode_reserve).
  *
  * Assumptions:
- *   The caller holds the g_inode_sem semaphore
+ *   The caller holds the inode tree lock (inode_lock() or inode_rlock())
  *   The descriptor was initialized with inode_search_setup()
  *
  ****************************************************************************/
