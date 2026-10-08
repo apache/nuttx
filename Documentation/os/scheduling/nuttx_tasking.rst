@@ -58,9 +58,9 @@ Task Lists
 These TCBs are retained in lists. The state of a task is indicated both
 by the ``task_state`` field of the TCB and by a series of task lists.
 Although it is not always necessary, most of these lists are prioritized
-so that common list handling logic can be used (only the ``g_readytorun``,
-the ``g_pendingtasks``, and the ``g_waitingforsemaphore`` lists
-need to be prioritized).
+so that common list handling logic can be used (only the ``g_readytorun``
+and ``g_pendingtasks`` lists, and the wait lists in each semaphore, event and
+message queue, need to be prioritized).
 
 All new tasks start in an initial, non-running state:
 
@@ -104,13 +104,13 @@ All new tasks start in an initial, non-running state:
   the ``g_readytorun`` to ``the g_pendingtasks`` lists, depending up
   if pre-emption is disabled and upon the priority of the tasks.
 
-Here are the blocked task lists:
+A task that waits for a semaphore, an event or a message queue is not on a
+global list.  It is on a prioritized wait list in that object: ``waitlist``
+in ``sem_t`` and in ``nxevent_t``, and ``waitfornotempty`` or
+``waitfornotfull`` in a message queue.  The ``waitobj`` field of the TCB points
+to the object.
 
-.. code-block:: c
-
-  volatile dq_queue_t g_waitingforsemaphore;
-
-* This is the list of all tasks that are blocked waiting for a semaphore.
+Here are the other blocked task lists:
 
 .. code-block:: c
 
@@ -118,20 +118,6 @@ Here are the blocked task lists:
 
 * This is the list of all tasks that are blocked waiting for a signal
   (only if signal support has not been disabled).
-
-.. code-block:: c
-
-  volatile dq_queue_t g_waitingformqnotempty;
-
-* This is the list of all tasks that are blocked waiting for a message queue
-  to become non-empty (only if message queue support has not been disabled).
-
-.. code-block:: c
-
-  volatile dq_queue_t g_waitingformqnotfull;
-
-* This is the list of all tasks that are blocked waiting for a message queue
-  to become non-full (only if message queue support has not been disabled).
 
 .. code-block:: c
 
@@ -169,7 +155,7 @@ at the same priority.
 
   1. If there is only one task at this priority, ``SCHED_RR`` and
      ``SCHED_FIFO`` are the same, AND
-  2. ``SCHED_FIFO`` tasks are never pre-empted in this way.
+  2. ``SCHED_FIFO`` tasks are never preempted in this way.
 
 Task IDs
 ========
