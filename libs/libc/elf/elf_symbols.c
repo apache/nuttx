@@ -428,10 +428,20 @@ int libelf_symvalue(FAR struct module_s *modp,
                                          nexports);
             }
 
-          /* Was the symbol found from any exporter? */
+          /* Was the symbol found from any exporter?  A weak reference may
+           * stay undefined; its value is then 0, as in a static link.
+           */
 
           if (symbol == NULL)
             {
+              if (ELF_ST_BIND(sym->st_info) == STB_WEAK)
+                {
+                  binfo("SHN_UNDEF: weak \"%s\" stays 0\n",
+                        loadinfo->iobuffer);
+                  sym->st_value = 0;
+                  break;
+                }
+
               berr("ERROR: SHN_UNDEF: Exported symbol \"%s\" not found\n",
                    loadinfo->iobuffer);
               return -ENOENT;
