@@ -396,6 +396,7 @@ static int v9fs_vfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   if (cmd == FIOC_FILEPATH)
     {
       FAR char *ptr = (FAR char *)((uintptr_t)arg);
+
       inode_getpath(filep->f_inode, ptr, PATH_MAX);
       ret = v9fs_client_getname(client, file->fid, ptr);
     }
