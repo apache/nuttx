@@ -86,6 +86,7 @@ FAR char *getenv(FAR const char *name)
     }
 
   nxrmutex_lock(&group->tg_mutex);
+  env_sync_in(group);
   ret = env_findvar(group, name);
   if (ret < 0)
     {

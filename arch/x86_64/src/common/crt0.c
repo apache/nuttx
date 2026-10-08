@@ -159,6 +159,16 @@ void _start(int argc, char *argv[])
 
 #ifdef CONFIG_BUILD_KERNEL
   ARCH_DATA_RESERVE->ar_sigtramp = (addrenv_sigtramp_t)sig_trampoline;
+
+#  ifndef CONFIG_DISABLE_ENVIRON
+  /* environ is a variable of the program.  Set it to the environment
+   * first, then tell the kernel where it is, so that the kernel keeps it
+   * up to date and takes over an array that the program assigns.
+   */
+
+  environ = get_environ_ptr();
+  ARCH_DATA_RESERVE->ar_environ = &environ;
+#  endif
 #endif
 
 #ifdef CONFIG_HAVE_CXXINITIALIZE

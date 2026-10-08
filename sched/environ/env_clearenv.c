@@ -66,6 +66,7 @@ int clearenv(void)
 
   nxrmutex_lock(&group->tg_mutex);
   env_release(group);
+  env_sync_out(group);
   nxrmutex_unlock(&group->tg_mutex);
   return OK;
 }

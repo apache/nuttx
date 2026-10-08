@@ -60,13 +60,18 @@
 
 #define MB_CUR_MAX 4
 
-/* The environ variable, normally 'char **environ;' is not implemented as a
- * function call.  However, get_environ_ptr() can be used in its place.
+/* In a flat or protected build, all tasks share the C library data, so
+ * environ is not a variable but a call: get_environ_ptr() returns the
+ * environment of the calling task group.  In the user space of a kernel
+ * build every process has its own copy of the C library data, and environ
+ * is the variable that POSIX specifies (declared below): the program may
+ * assign it, and the kernel takes the new array over (see
+ * sched/environ/env_sync.c).
  */
 
 #ifdef CONFIG_DISABLE_ENVIRON
 #  define environ NULL
-#else
+#elif !defined(CONFIG_BUILD_KERNEL) || defined(__KERNEL__)
 #  define environ get_environ_ptr()
 #endif
 
@@ -172,6 +177,10 @@ uint32_t  arc4random(void);
 /* Environment variable support */
 
 FAR char **get_environ_ptr(void);
+#if !defined(CONFIG_DISABLE_ENVIRON) && defined(CONFIG_BUILD_KERNEL) && \
+    !defined(__KERNEL__)
+EXTERN FAR char **environ;
+#endif
 FAR char *getenv(FAR const char *name);
 FAR char *secure_getenv(FAR const char *name);
 int       putenv(FAR const char *string);

@@ -78,6 +78,7 @@ int unsetenv(FAR const char *name)
   /* Check if the variable exists */
 
   nxrmutex_lock(&group->tg_mutex);
+  env_sync_in(group);
   if (group && (idx = env_findvar(group, name)) >= 0)
     {
       /* It does!  Remove the name=value pair from the environment. */
@@ -85,6 +86,7 @@ int unsetenv(FAR const char *name)
       env_removevar(group, idx);
     }
 
+  env_sync_out(group);
   nxrmutex_unlock(&group->tg_mutex);
   return OK;
 }

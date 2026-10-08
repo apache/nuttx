@@ -162,6 +162,29 @@ ssize_t env_findvar(FAR struct task_group_s *group, FAR const char *pname);
 
 void env_removevar(FAR struct task_group_s *group, ssize_t index);
 
+/****************************************************************************
+ * Name: env_sync_in, env_sync_out
+ *
+ * Description:
+ *   In the user space of a kernel build, environ is a variable of the
+ *   program (see include/stdlib.h).  env_sync_in() takes over the array
+ *   that the program assigned to environ, if it is not the group's
+ *   environment.  env_sync_out() points environ at the group's
+ *   environment after it has changed.  Both do nothing for kernel threads
+ *   and for programs that did not register environ (crt0 does).
+ *
+ *   The caller holds group->tg_mutex.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_KERNEL
+void env_sync_in(FAR struct task_group_s *group);
+void env_sync_out(FAR struct task_group_s *group);
+#else
+#  define env_sync_in(group)
+#  define env_sync_out(group)
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

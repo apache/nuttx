@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/environ/env_getenvironptr.c
+ * libs/libc/stdlib/lib_environ.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,52 +26,23 @@
 
 #include <nuttx/config.h>
 
-#ifndef CONFIG_DISABLE_ENVIRON
-
-#include <sched.h>
 #include <stdlib.h>
-#include "sched/sched.h"
-#include "environ/environ.h"
 
-#undef get_environ_ptr
+#if !defined(CONFIG_DISABLE_ENVIRON) && defined(CONFIG_BUILD_KERNEL) && \
+    !defined(__KERNEL__)
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* The environ variable of a kernel-build process.  crt0 sets it to the
+ * environment and registers its address with the kernel.
+ */
+
+FAR char **environ;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: get_environ_ptr
- *
- * Description:
- *   Return a pointer to the thread specific environ variable.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   A pointer to the per-thread environ variable.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-FAR char **get_environ_ptr(void)
-{
-  FAR struct task_group_s *group = this_task()->group;
-#ifdef CONFIG_BUILD_KERNEL
-  FAR char **envp;
-
-  /* The program may have assigned its own array to environ */
-
-  nxrmutex_lock(&group->tg_mutex);
-  env_sync_in(group);
-  envp = group->tg_envp;
-  nxrmutex_unlock(&group->tg_mutex);
-
-  return envp;
-#else
-  return group->tg_envp;
 #endif
-}
-
-#endif /* CONFIG_DISABLE_ENVIRON */
