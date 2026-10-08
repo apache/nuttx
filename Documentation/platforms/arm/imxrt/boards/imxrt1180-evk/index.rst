@@ -42,8 +42,10 @@ Features
 - Two software-controlled user LEDs
 
 The current NuttX configurations provide the serial console, USB device
-support, image generation, and multicore boot flow. The other on-board
-interfaces listed above are not enabled by the supplied configurations.
+support, image generation, and multicore boot flow. The Cortex-M7 ``nsh``
+configuration also enables the onboard MicroSD socket through USDHC1. Other
+on-board interfaces listed above are not enabled by the supplied
+configurations.
 
 Buttons and LEDs
 ================
@@ -246,7 +248,8 @@ nsh
 Runs NSH on the Cortex-M7. The output ``nuttx.bin`` is a raw XIP payload that
 must be programmed at offset ``0x80000`` and started by the ``bl``
 configuration. NSH is available on LPUART1 at the MCU-Link virtual COM port.
-This configuration also enables USB CDC/ACM and the ``ostest`` application.
+This configuration also enables USB CDC/ACM, the ``ostest`` application, and
+the onboard MicroSD socket via USDHC1.
 
 License Exceptions
 ==================
