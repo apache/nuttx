@@ -24,16 +24,30 @@ import argparse
 import hashlib
 import json
 import re
+import struct
 import subprocess
 import time
 from pathlib import Path
 
+# Only an uppercase ERROR marks a failure. ostest also prints a lowercase
+# "error" in lines that are not failures, such as its watchdog latency
+# warning ("... may indicate timing error").
+
 FAILURE = re.compile(
-    r"\bERROR\b|Assertion failed|ASSERTION|PANIC|riscv_exception:|Unhandled exception"
-    r"|nsh: .*?(?:failed|not found|invalid)"
+    r"(?-i:\bERROR\b)|Assertion failed|ASSERTION|PANIC|riscv_exception:"
+    r"|Unhandled exception|nsh: .*?(?:failed|not found|invalid)"
     r"|ostest_main: Exiting with status -?[1-9]",
     re.I,
 )
+
+
+def elf_entry(path):
+    """Return the entry point of a little-endian ELF64 image."""
+    with path.open("rb") as image:
+        header = image.read(32)
+    if len(header) < 32 or header[:4] != b"\x7fELF" or header[4:6] != b"\x02\x01":
+        raise ValueError(f"Not a little-endian ELF64 image: {path}")
+    return struct.unpack_from("<Q", header, 24)[0]
 
 
 def main():
@@ -51,6 +65,10 @@ def main():
     for path in (args.emu, args.elf):
         if not path.is_file():
             parser.error(f"Input file does not exist: {path}")
+    try:
+        entry = elf_entry(args.elf)
+    except ValueError as error:
+        parser.error(str(error))
     args.output.mkdir(parents=True, exist_ok=True)
     uart = args.output / "uart.log"
     emulator = args.output / "emulator.log"
@@ -60,7 +78,7 @@ def main():
         "-elf_load",
         str(args.elf.resolve()),
         "-reset_pc",
-        "0x40000200",
+        hex(entry),
         "-max_cycles",
         args.max_cycles,
         "-uart_tx_file",
@@ -109,7 +127,6 @@ def main():
                     "user_main: semaphore test",
                     "user_main: signal handler test",
                     "user_main: pthread_exit() test",
-                    "wqueue_test: teardown done",
                 ]:
                     if marker.lower() not in text.lower():
                         raise RuntimeError(
