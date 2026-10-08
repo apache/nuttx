@@ -312,6 +312,7 @@ static int bat_gauge_ioctl(FAR struct file *filep,
       case BATIOC_STATE:
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->state(dev, ptr);
@@ -322,6 +323,7 @@ static int bat_gauge_ioctl(FAR struct file *filep,
       case BATIOC_ONLINE:
         {
           FAR bool *ptr = (FAR bool *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->online(dev, ptr);
@@ -332,6 +334,7 @@ static int bat_gauge_ioctl(FAR struct file *filep,
       case BATIOC_VOLTAGE:
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->voltage(dev, ptr);
@@ -342,6 +345,7 @@ static int bat_gauge_ioctl(FAR struct file *filep,
       case BATIOC_CAPACITY:
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->capacity(dev, ptr);
@@ -349,9 +353,10 @@ static int bat_gauge_ioctl(FAR struct file *filep,
         }
         break;
 
-        case BATIOC_CURRENT:
+      case BATIOC_CURRENT:
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->current(dev, ptr);
@@ -359,9 +364,10 @@ static int bat_gauge_ioctl(FAR struct file *filep,
         }
         break;
 
-        case BATIOC_TEMPERATURE:
+      case BATIOC_TEMPERATURE:
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->temp(dev, ptr);
@@ -372,6 +378,7 @@ static int bat_gauge_ioctl(FAR struct file *filep,
       case BATIOC_CHIPID:
         {
           FAR unsigned int *ptr = (FAR unsigned int *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->chipid(dev, ptr);
@@ -382,6 +389,7 @@ static int bat_gauge_ioctl(FAR struct file *filep,
       case BATIOC_OPERATE:
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->operate(dev, ptr);
