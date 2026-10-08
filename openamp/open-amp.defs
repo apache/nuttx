@@ -85,6 +85,7 @@ open-amp.zip:
 	$(Q) patch -p0 < 0017-lib-virtio-virtqueue-change-the-virtqueue-dump-log-l.patch
 	$(Q) patch -p0 < 0018-lib-rpmsg-add-priority-support-for-rpmsg-endpoint.patch
 	$(Q) patch -p0 < 0019-rpmsg-Add-VIRTIO_RPMSG_F_BUFADDR-to-support-specify-.patch
+	$(Q) patch -p0 < 0020-rpmsg_virtio-do-not-trust-lengths-written-by-the-remote.patch
 
 .openamp_headers: open-amp.zip
 else
