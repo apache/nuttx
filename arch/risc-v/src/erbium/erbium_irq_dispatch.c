@@ -32,6 +32,18 @@
 #include "riscv_internal.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* An exception is dispatched with its 5-bit cause code as the IRQ number,
+ * so every code must lie below the first interrupt IRQ number.
+ */
+
+#if RISCV_IRQ_ASYNC < 32
+#  error "ET-Minion exception codes would alias interrupt IRQ numbers"
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -39,8 +51,10 @@
  * Name: riscv_dispatch_irq
  *
  * Description:
- *   Dispatch hart-local traps or claim, dispatch and complete a PLIC
- *   interrupt. Complete nonzero claims even if their source is unsupported.
+ *   Dispatch an exception as IRQ <cause> (0-31) and a hart-local
+ *   interrupt as IRQ RISCV_IRQ_ASYNC + <cause>, or claim, dispatch and
+ *   complete a PLIC interrupt. Complete nonzero claims even if their
+ *   source is unsupported.
  *
  * Input Parameters:
  *   vector - Trap cause register value.

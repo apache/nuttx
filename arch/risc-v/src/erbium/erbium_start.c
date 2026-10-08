@@ -63,8 +63,9 @@ void erbium_start(void)
     }
 
 #ifdef CONFIG_ARCH_FPU
-  /* Erbium traps FENCE.I to microcode. The ELF loader has already installed
-   * the image, so initialize the FPU without the common FENCE.I sequence.
+  /* FENCE.I raises exception 30 (M-code emulation) on ET-Minion. The ELF
+   * loader has already installed the image, so initialize the FPU without
+   * the common FENCE.I sequence.
    */
 
   SET_CSR(CSR_STATUS, MSTATUS_FS_INIT);
