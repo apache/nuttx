@@ -106,7 +106,8 @@ if(CONFIG_FILE_STREAM)
     lib_open_memstream.c
     lib_fgetwc.c
     lib_getwc.c
-    lib_ungetwc.c)
+    lib_ungetwc.c
+    lib_stdio_ext.c)
 endif()
 
 target_sources(c PRIVATE ${SRCS})
