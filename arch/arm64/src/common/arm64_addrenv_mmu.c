@@ -267,14 +267,13 @@ static int create_region(arch_addrenv_t *addrenv, uintptr_t vaddr,
   uintptr_t ptlast;
   uintptr_t ptprev;
   uintptr_t paddr;
+  uintptr_t vend;
+  uintptr_t tend;
   uint32_t  ptlevel;
   int       npages;
-  int       nmapped;
-  int       i;
-  int       j;
 
-  nmapped   = 0;
   npages    = MM_NPAGES(size);
+  vend      = vaddr + ((uintptr_t)npages << MM_PGSHIFT);
   ptlevel   = MMU_PGT_LEVEL_MAX - 1;
   ptprev    = arm64_pgvaddr(addrenv->spgtables[ptlevel]);
 
@@ -284,8 +283,19 @@ static int create_region(arch_addrenv_t *addrenv, uintptr_t vaddr,
 
   /* Begin allocating memory for the page tables */
 
-  for (i = 0; i < npages; i += ENTRIES_PER_PGT)
+  while (vaddr < vend)
     {
+      /* One final level table maps ENTRIES_PER_PGT pages.  The region need
+       * not start at the beginning of a table, so stop at the end of this
+       * one and look up the next.
+       */
+
+      tend = (vaddr | ((ENTRIES_PER_PGT << MM_PGSHIFT) - 1)) + 1;
+      if (tend > vend || tend == 0)
+        {
+          tend = vend;
+        }
+
       /* Get the current final level entry corresponding to this vaddr */
 
       paddr = mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, ptprev, vaddr));
@@ -313,13 +323,7 @@ static int create_region(arch_addrenv_t *addrenv, uintptr_t vaddr,
 
       /* Then allocate memory for the region data */
 
-      for (j = 0;
-#ifdef CONFIG_PAGING
-           j < 1;
-#else
-           j < ENTRIES_PER_PGT && nmapped < size;
-#endif
-           j++)
+      do
         {
           paddr = mm_pgalloc(1);
           if (!paddr)
@@ -334,9 +338,17 @@ static int create_region(arch_addrenv_t *addrenv, uintptr_t vaddr,
           /* Then map the virtual address to the physical address */
 
           mmu_ln_setentry(ptlevel + 1, ptlast, paddr, vaddr, mmuflags);
-          nmapped += MM_PGSIZE;
-          vaddr   += MM_PGSIZE;
+          vaddr += MM_PGSIZE;
         }
+#ifdef CONFIG_PAGING
+      while (0);
+
+      /* Only the first page of each table; the rest come on demand */
+
+      vaddr = tend;
+#else
+      while (vaddr < tend);
+#endif
     }
 
   /* Synchronize data and instruction pipelines */
