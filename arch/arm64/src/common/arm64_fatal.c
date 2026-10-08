@@ -472,7 +472,7 @@ static int arm64_el1_exception_handler(uint64_t esr,
           serr("64-bit el1h sync, esr = 0x%x", ec);
           ret = -EINVAL;
         }
-  }
+    }
 
   return ret;
 }
