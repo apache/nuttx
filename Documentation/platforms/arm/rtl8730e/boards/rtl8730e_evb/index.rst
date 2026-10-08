@@ -38,6 +38,8 @@ Supported in this NuttX port:
 * General-purpose UARTs exposed as ``/dev/ttySN`` serial devices, driven
   through the SDK fwlib ROM layer (the LOG-UART owns the console and
   ``/dev/ttyS0``)
+* I2C master buses exposed as ``/dev/i2cN`` character devices, driven in
+  polling mode through the SDK fwlib register layer
 * littlefs persistent storage mounted at ``/data`` (a dedicated SPI NOR flash
   partition), backing the Wi-Fi key-value store
 * Wi-Fi station and SoftAP through the ``wapi`` tool
@@ -97,6 +99,23 @@ back to RX, or wire it to a host serial adapter)::
 The line format can be changed at runtime through ``tcsetattr()`` (the config
 enables ``CONFIG_SERIAL_TERMIOS``). UART3 is reserved for Bluetooth and is not
 exposed by the driver.
+
+i2c
+---
+
+Minimal NSH with the I2C master driver and the ``i2ctool`` (``system/i2c``)
+enabled (no Wi-Fi). The board registers its I2C controllers from a table (see
+``boards/arm/rtl8730e/rtl8730e_evb/src/rtl8730e_i2c.c``): I2C0 at
+``/dev/i2c0`` on PA10/PA9, I2C1 at ``/dev/i2c1`` on PA4/PA3 and I2C2 at
+``/dev/i2c2`` on PB11/PB10 (SCL/SDA). Edit that table -- controller and
+SCL/SDA pads -- to match a board's wiring; the pads use the same
+``AMEBA_PA()`` / ``AMEBA_PB()`` encoding as the GPIO table and are muxed to
+the I2C function through the SDK ROM. Unlike the GPIO and UART crossbars, a
+pad reaches exactly one I2C controller, and pads the audio codec drives
+cannot be used. The I2C bus is open-drain, so fit external pull-ups on
+SCL/SDA. Probe a bus with the tool::
+
+    nsh> i2c dev -b 0 0x03 0x77     # scan /dev/i2c0 for devices
 
 Wi-Fi
 =====
