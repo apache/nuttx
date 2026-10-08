@@ -54,14 +54,16 @@ struct setjmp_buf_s
   uint64_t gap;
 
 #ifdef CONFIG_ARCH_FPU
-  float    q8;
-  float    q9;
-  float    q10;
-  float    q11;
-  float    q12;
-  float    q13;
-  float    q14;
-  float    q15;
+  /* The low 64 bits of v8-v15, the callee-saved FP registers */
+
+  uint64_t d8;
+  uint64_t d9;
+  uint64_t d10;
+  uint64_t d11;
+  uint64_t d12;
+  uint64_t d13;
+  uint64_t d14;
+  uint64_t d15;
 #endif
 };
 
