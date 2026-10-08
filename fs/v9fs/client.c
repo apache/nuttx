@@ -379,6 +379,24 @@ struct v9fs_fid_s
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: v9fs_qid_ino
+ *
+ * Description:
+ *   Return the file serial number (st_ino, d_ino) for a qid path.  The
+ *   qid path identifies the file on the server; it is folded into ino_t
+ *   and never 0, because programs such as GNU make skip directory entries
+ *   with d_ino 0.
+ *
+ ****************************************************************************/
+
+static inline ino_t v9fs_qid_ino(uint64_t path)
+{
+  ino_t ino = (ino_t)(path ^ (path >> 32));
+
+  return ino != 0 ? ino : 1;
+}
+
+/****************************************************************************
  * v9fs_get_tagid
  ****************************************************************************/
 
@@ -814,6 +832,7 @@ int v9fs_client_stat(FAR struct v9fs_client_s *client, uint32_t fid,
       return ret;
     }
 
+  buf->st_ino   = v9fs_qid_ino(response.qid.path);
   buf->st_mode  = response.mode;
   buf->st_uid   = response.uid;
   buf->st_gid   = response.gid;
@@ -1016,6 +1035,7 @@ ssize_t v9fs_client_convertdir(FAR const uint8_t *buffer, size_t bufsize,
                                off_t head, FAR off_t *offset,
                                FAR struct dirent *entry)
 {
+  uint64_t qidpath;
   uint64_t off;
   uint16_t name_len;
   off_t next = head;
@@ -1030,8 +1050,13 @@ ssize_t v9fs_client_convertdir(FAR const uint8_t *buffer, size_t bufsize,
       return -EIO;
     }
 
-  /* Skip the qid part (13 Bytes) */
+  /* The qid part (13 Bytes): type, version, then the path that identifies
+   * the file.
+   */
 
+  memcpy(&qidpath, buffer + next + V9FS_BIT8SZ + V9FS_BIT32SZ,
+         sizeof(uint64_t));
+  entry->d_ino = v9fs_qid_ino(qidpath);
   next += V9FS_QIDSZ;
 
   /* Read the offset (8 bytes) */
