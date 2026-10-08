@@ -36,3 +36,7 @@ endif
 ifeq ($(CONFIG_PM),y)
 CHIP_CSRCS += qemu_initialize.c
 endif
+
+ifeq ($(CONFIG_RTC_PL031),y)
+CHIP_CSRCS += qemu_rtc.c
+endif
