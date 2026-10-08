@@ -312,3 +312,18 @@ NuttX provides support for the following MTD devices.
   :glob:
 
   devices/*
+
+RAMTRON SPI FRAM byte writes
+===========================
+
+With ``CONFIG_MTD_RAMTRON`` and ``CONFIG_MTD_BYTE_WRITE`` enabled, the
+RAMTRON driver implements ``MTD_WRITE()`` for arbitrary byte offsets and
+lengths. Writes need not align to the emulated block or erase geometry.
+The callback returns the number of bytes written; requests outside the
+physical device return ``-EINVAL``. A zero-length request within the
+device, including its end offset, returns zero without SPI traffic.
+
+When ``CONFIG_RAMTRON_CHUNKING`` is enabled, writes to parts marked as
+chunk-limited are split at their write-buffer boundaries. Each transfer
+has its own write-enable and write-command sequence. Existing block-write
+operations are unchanged.
