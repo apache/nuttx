@@ -165,6 +165,7 @@ retry:
 
   g_running_tasks[this_cpu()] = NULL;
   rtcb->xcp.regs = rtcb->xcp.saved_regs;
+  rtcb->xcp.saved_regs = NULL;
   arm_fullcontextrestore();
   UNUSED(regs);
 }
