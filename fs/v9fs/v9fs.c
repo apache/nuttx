@@ -627,6 +627,16 @@ static int v9fs_vfs_readdir(FAR struct inode *mountpt,
               break;
             }
 
+          /* The server returns no entries at the end of the directory.
+           * -ENOENT tells the VFS that this is the end, not an error.
+           */
+
+          if (ret == 0)
+            {
+              ret = -ENOENT;
+              break;
+            }
+
           fsdir->head = 0;
           fsdir->size = ret;
         }
