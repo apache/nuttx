@@ -106,6 +106,7 @@ SAI         No
 SPDIF       No
 SPI         Yes
 UART        Yes
+uSDHC       Yes
 USB         Yes
 ==========  =======
 
@@ -280,6 +281,13 @@ UART
 
 Universal Asynchronous Receiver/Transmitter module. UART is initialized automatically during
 MCU boot.
+
+uSDHC
+-----
+
+The uSDHC driver provides SD/MMC support and is available on the i.MX RT118x.
+The i.MX RT1180 EVK NSH configuration enables USDHC1 for its onboard MicroSD
+socket.
 
 USB
 ---
