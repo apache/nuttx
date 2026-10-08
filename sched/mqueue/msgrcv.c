@@ -238,7 +238,7 @@ ssize_t msgrcv(int msqid, FAR void *msgp, size_t msgsz, long msgtyp,
       FAR struct tcb_s *rtcb = this_task();
 
       /* Find the highest priority task that is waiting for
-       * this queue to be not-full in g_waitingformqnotfull list.
+       * this queue to be not-full, in the waitfornotfull list of the queue.
        * This must be performed in a critical section because
        * messages can be sent from interrupt handlers.
        */

@@ -233,8 +233,8 @@ int msgsnd(int msqid, FAR const void *msgp, size_t msgsz, int msgflg)
           FAR struct tcb_s *rtcb = this_task();
 
           /* Find the highest priority task that is waiting for
-           * this queue to be non-empty in g_waitingformqnotempty
-           * list. enter_critical_section() should give us sufficient
+           * this queue to be non-empty, in the waitfornotempty list of
+           * the queue. enter_critical_section() should give us sufficient
            * protection since interrupts should never cause a change
            * in this list
            */
