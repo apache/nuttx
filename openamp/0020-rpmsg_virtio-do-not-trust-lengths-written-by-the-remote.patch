@@ -1,0 +1,62 @@
+From 6710e18a7b9631f5da2bdc8010ba0a79ac0e4317 Mon Sep 17 00:00:00 2001
+From: Lourens Naude <lourens@bearmetal.eu>
+Date: Thu, 8 Oct 2026 22:14:33 +0100
+Subject: [PATCH 20/20] rpmsg_virtio: do not trust lengths written by the
+ remote
+
+On the driver side every TX buffer is h2r_buf_size long and every RX
+buffer r2h_buf_size long; used->len and rpmsg_hdr.len come from the
+remote.  A used->len of 0 turned into a 4 GB payload capacity, a header
+length larger than the buffer let endpoint callbacks read past it.
+
+Signed-off-by: Lourens Naude <lourens@bearmetal.eu>
+---
+ lib/rpmsg/rpmsg_virtio.c | 16 ++++++++++++++--
+ 1 file changed, 14 insertions(+), 2 deletions(-)
+
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 9913d87..45783ab 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -198,9 +198,11 @@ static void *rpmsg_virtio_get_tx_buffer(struct rpmsg_virtio_device *rvdev,
+ 		if (!data && rvdev->svq->vq_free_cnt) {
+ 			data = rpmsg_virtio_shm_pool_get_buffer(rvdev->shpool,
+ 					rvdev->config.h2r_buf_size);
+-			*len = rvdev->config.h2r_buf_size;
+ 			*idx = 0;
+ 		}
++		/* used->len was written by the remote; the buffer is ours */
++		if (data)
++			*len = rvdev->config.h2r_buf_size;
+ 	} else if (VIRTIO_ROLE_IS_DEVICE(rvdev->vdev)) {
+ 		data = virtqueue_get_first_avail_buffer(rvdev->svq, idx, len);
+ 	}
+@@ -227,6 +229,9 @@ static void *rpmsg_virtio_get_rx_buffer(struct rpmsg_virtio_device *rvdev,
+ 
+ 	if (VIRTIO_ROLE_IS_DRIVER(rvdev->vdev)) {
+ 		data = virtqueue_get_buffer(rvdev->rvq, len, idx);
++		/* used->len was written by the remote; never exceed our buffer */
++		if (data && *len > rvdev->config.r2h_buf_size)
++			*len = rvdev->config.r2h_buf_size;
+ 		*last = virtqueue_nused(rvdev->rvq) == 0;
+ 	}
+ 
+@@ -578,7 +583,14 @@ static void rpmsg_virtio_rx_callback(struct virtqueue *vq)
+ 		rp_hdr->reserved = idx;
+ 
+ 		/* Get the channel node from the remote device channels list. */
+-		ept = rpmsg_get_ept_from_addr(rdev, rp_hdr->dst);
++		/* The header was written by the remote: a payload length that
++		 * does not fit the buffer is dropped without a callback.
++		 */
++		if (len >= sizeof(*rp_hdr) &&
++		    rp_hdr->len <= len - sizeof(*rp_hdr))
++			ept = rpmsg_get_ept_from_addr(rdev, rp_hdr->dst);
++		else
++			ept = NULL;
+ 		rpmsg_ept_incref(ept);
+ 		RPMSG_BUF_HELD_INC(rp_hdr);
+ 		metal_mutex_release(&rdev->lock);
+-- 
+2.53.0
+
