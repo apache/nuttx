@@ -86,6 +86,11 @@ void up_schedule_sigaction(struct tcb_s *tcb)
   struct tcb_s *rtcb = running_task();
   uint32_t      ipsr = getipsr();
 
+  if (tcb->xcp.saved_regs != NULL)
+    {
+      return;
+    }
+
   /* First, handle some special cases when the signal is
    * being delivered to the currently executing task.
    */
