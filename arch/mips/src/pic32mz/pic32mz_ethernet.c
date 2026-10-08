@@ -2356,11 +2356,17 @@ static int pic32mz_ifup(struct net_driver_s *dev)
    * multicast addresses (if so configured).  NOTE: There is a selection
    * CONFIG_NET_BROADCAST, but this enables receipt of UDP broadcast packets
    * inside of the stack.
+   *
+   * In promiscuous mode, also accept multicast frames and unicast frames
+   * sent to other stations (NOTMEEN).
    */
 
   regval  = ETH_RXFC_BCEN | ETH_RXFC_UCEN | ETH_RXFC_PMMODE_DISABLED;
-#ifdef CONFIG_PIC32MZ_MULTICAST
+#if defined(CONFIG_PIC32MZ_MULTICAST) || defined(CONFIG_NET_PROMISCUOUS)
   regval |= ETH_RXFC_MCEN;
+#endif
+#ifdef CONFIG_NET_PROMISCUOUS
+  regval |= ETH_RXFC_NOTMEEN;
 #endif
   pic32mz_putreg(regval, PIC32MZ_ETH_RXFC);
 
