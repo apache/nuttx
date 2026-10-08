@@ -33,7 +33,7 @@
 #include "sched/sched.h"
 #include "environ/environ.h"
 
-#ifdef CONFIG_BUILD_KERNEL
+#if defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_LIBC_ENVIRON_ASSIGNABLE)
 
 /****************************************************************************
  * Private Functions
@@ -43,14 +43,21 @@
  * Name: env_user_environ
  *
  * Description:
- *   Return the address of the program's environ variable, or NULL if the
- *   caller cannot reach it: a kernel thread, a task of another group, or a
- *   program that did not register the variable.
+ *   Return the location that the group's environ names, or NULL if the
+ *   caller cannot reach it.
+ *
+ *   In a kernel build it is the program's environ variable, registered by
+ *   crt0.  Only a user task of the group, running in the group's address
+ *   environment, can reach it, and only if the program registered it.
+ *
+ *   In a flat or protected build it is a field of the group's
+ *   task_info_s, which the kernel can always reach.
  *
  ****************************************************************************/
 
 static FAR char ***env_user_environ(FAR struct task_group_s *group)
 {
+#ifdef CONFIG_BUILD_KERNEL
   FAR struct tcb_s *rtcb = this_task();
 
   if (rtcb->group != group ||
@@ -61,6 +68,9 @@ static FAR char ***env_user_environ(FAR struct task_group_s *group)
     }
 
   return ARCH_DATA_RESERVE->ar_environ;
+#else
+  return group->tg_info != NULL ? &group->tg_info->ta_environ : NULL;
+#endif
 }
 
 /****************************************************************************
@@ -134,4 +144,4 @@ void env_sync_out(FAR struct task_group_s *group)
     }
 }
 
-#endif /* CONFIG_BUILD_KERNEL */
+#endif /* CONFIG_BUILD_KERNEL || CONFIG_LIBC_ENVIRON_ASSIGNABLE */

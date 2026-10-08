@@ -28,21 +28,41 @@
 
 #include <stdlib.h>
 
-#if !defined(CONFIG_DISABLE_ENVIRON) && defined(CONFIG_BUILD_KERNEL) && \
-    !defined(__KERNEL__)
+#include <nuttx/tls.h>
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
+#if !defined(CONFIG_DISABLE_ENVIRON) && defined(CONFIG_BUILD_KERNEL) && \
+    !defined(__KERNEL__)
 /* The environ variable of a kernel-build process.  crt0 sets it to the
  * environment and registers its address with the kernel.
  */
 
 FAR char **environ;
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+#ifdef CONFIG_LIBC_ENVIRON_ASSIGNABLE
+
+/****************************************************************************
+ * Name: get_environ_location
+ *
+ * Description:
+ *   Return the location that environ names in a flat or protected build:
+ *   a field of the task group's task_info_s.  The kernel keeps it pointing
+ *   at the group's environment and takes over an array that the program
+ *   stores there.
+ *
+ ****************************************************************************/
+
+FAR char ***get_environ_location(void)
+{
+  return &task_get_info()->ta_environ;
+}
 
 #endif

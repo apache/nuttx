@@ -58,7 +58,7 @@
 FAR char **get_environ_ptr(void)
 {
   FAR struct task_group_s *group = this_task()->group;
-#ifdef CONFIG_BUILD_KERNEL
+#if defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_LIBC_ENVIRON_ASSIGNABLE)
   FAR char **envp;
 
   /* The program may have assigned its own array to environ */

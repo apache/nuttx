@@ -37,6 +37,18 @@ config LIBC_MAX_EXITFUNS
 		Configure the amount of exit functions for atexit/on_exit. The ANSI
 		default is 32, but most likely we don't need as many.
 
+config LIBC_ENVIRON_ASSIGNABLE
+	bool "Assignable environ in flat and protected builds"
+	default n
+	depends on !DISABLE_ENVIRON && !BUILD_KERNEL
+	---help---
+		In flat and protected builds environ is a call to
+		get_environ_ptr(), so a program cannot assign it.  With this
+		option environ names a location in the task group's
+		task_info_s: "environ = array;" and "extern char **environ;"
+		compile, and the kernel takes the assigned array over.  Kernel
+		builds always support this.  It adds about 330 bytes.
+
 config LIBC_DISABLE_HEXSTR_TO_FLOAT
 	bool "Disable hex-string to float/double conversions"
 	default DEFAULT_SMALL
