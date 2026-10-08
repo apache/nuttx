@@ -150,7 +150,7 @@ static int _inode_compare(FAR const char *fname, FAR struct inode *inode)
  *   the soft link.
  *
  * Assumptions:
- *   The caller holds the g_inode_sem semaphore
+ *   The caller holds the inode tree lock (inode_lock() or inode_rlock())
  *
  ****************************************************************************/
 
@@ -577,7 +577,7 @@ int inode_search_setup(FAR struct inode_search_s *desc,
  *   that link WILL be deferenced unconditionally.
  *
  * Assumptions:
- *   The caller holds the g_inode_sem semaphore
+ *   The caller holds the inode tree lock (inode_lock() or inode_rlock())
  *   The descriptor was initialized with inode_search_setup()
  *
  ****************************************************************************/
