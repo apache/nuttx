@@ -630,6 +630,9 @@ config STM32_HAVE_IP_PWR_G0
 config STM32_HAVE_IP_PWR_M3M4_V1
 	bool
 
+config STM32_HAVE_IP_PWR_M33_V1
+	bool
+
 config STM32_HAVE_SMPS
 	bool
 
