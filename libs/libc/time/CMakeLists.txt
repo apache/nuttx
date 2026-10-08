@@ -41,7 +41,7 @@ set(SRCS
 if(CONFIG_LIBC_LOCALTIME)
   list(APPEND SRCS lib_localtime.c)
 else()
-  list(APPEND SRCS lib_timegm.c lib_gmtime.c lib_gmtimer.c)
+  list(APPEND SRCS lib_timegm.c lib_gmtime.c lib_gmtimer.c lib_tzset.c)
 endif()
 
 if(CONFIG_ALLOW_MIT_COMPONENTS)

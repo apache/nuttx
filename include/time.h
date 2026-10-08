@@ -237,9 +237,7 @@ int clock_nanosleep(clockid_t clockid, int flags,
                     FAR struct timespec *rmtp);
 int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp);
 
-#ifdef CONFIG_LIBC_LOCALTIME
 void tzset(void);
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

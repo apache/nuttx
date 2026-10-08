@@ -31,7 +31,7 @@ CSRCS += lib_gethrtime.c
 ifdef CONFIG_LIBC_LOCALTIME
 CSRCS += lib_localtime.c
 else
-CSRCS += lib_timegm.c lib_gmtime.c lib_gmtimer.c
+CSRCS += lib_timegm.c lib_gmtime.c lib_gmtimer.c lib_tzset.c
 endif
 
 ifdef CONFIG_ALLOW_MIT_COMPONENTS
