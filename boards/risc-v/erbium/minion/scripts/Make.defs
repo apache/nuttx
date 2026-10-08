@@ -24,8 +24,8 @@ include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/risc-v/src/common/Toolchain.defs
 
-# Erbium executes floating-point divide and square root in microcode, which
-# this image does not provide. Use software helpers for those operations.
+# ET-Minion has no hardware for floating-point divide and square root; they
+# raise exception 30 (M-code emulation). Use software helpers instead.
 
 ifeq ($(CONFIG_ARCH_FPU),y)
   ARCHCPUFLAGS += -mno-fdiv

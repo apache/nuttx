@@ -25,11 +25,31 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <assert.h>
 #include <stdint.h>
+#include <sys/param.h>
 #include <nuttx/irq.h>
 
 #include "chip.h"
 #include "riscv_internal.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* riscv_exception() names an exception with g_reasons_str[code], which has
+ * RISCV_MAX_EXCEPTION + 1 entries. The chip's part of that table must name
+ * every code after the common part; this copy only checks its length.
+ */
+
+static const char * const g_custom_reasons[] unused_data =
+{
+  RISCV_CUSTOM_EXCEPTION_REASONS
+};
+
+static_assert(nitems(g_custom_reasons) ==
+              RISCV_MAX_EXCEPTION + 1 - ERBIUM_FIRST_CUSTOM_EXCEPTION,
+              "RISCV_CUSTOM_EXCEPTION_REASONS must end at code 31");
 
 /****************************************************************************
  * Public Functions
@@ -40,7 +60,8 @@
  *
  * Description:
  *   Initialize hart 0 interrupt state and PLIC priorities, attach the
- *   common exception handlers, and enable interrupts unless suppressed.
+ *   exception handlers, including those for the ET-specific exception
+ *   codes, and enable interrupts unless suppressed.
  *
  * Input Parameters:
  *   None.
@@ -69,6 +90,16 @@ void up_irqinitialize(void)
 
   putreg32(0, ERBIUM_PLIC_THRESHOLD);
   riscv_exception_attach();
+
+  /* riscv_exception_attach() covers codes 0-15 only. Report the other
+   * codes, among them the ET-specific ones and M-code instructions that
+   * are not emulated, as fatal exceptions.
+   */
+
+  for (id = RISCV_IRQ_RESERVED16; id <= RISCV_MAX_EXCEPTION; id++)
+    {
+      irq_attach(id, riscv_exception, NULL);
+    }
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   up_irq_enable();

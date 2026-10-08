@@ -20,8 +20,8 @@
 #
 # ##############################################################################
 
-# Erbium executes floating-point divide and square root in microcode, which this
-# image does not provide. Use software helpers for those operations.
+# ET-Minion has no hardware for floating-point divide and square root; they
+# raise exception 30 (M-code emulation). Use software helpers instead.
 
 if(CONFIG_ARCH_FPU)
   add_compile_options(-mno-fdiv)
