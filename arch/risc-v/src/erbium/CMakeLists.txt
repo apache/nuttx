@@ -23,4 +23,8 @@
 set(SRCS erbium_head.S erbium_start.c erbium_irq.c erbium_irq_dispatch.c
          erbium_timerisr.c erbium_serial.c)
 
+if(CONFIG_ERBIUM_MCODE_EMULATION)
+  list(APPEND SRCS erbium_mcode.c erbium_mcode_fpr.S)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

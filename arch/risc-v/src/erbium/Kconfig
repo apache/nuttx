@@ -20,3 +20,20 @@ config ERBIUM_MTIMER_FREQ
 	---help---
 		Machine timer frequency after the reference clock divider and
 		timer prescaler. The ET-platform emulator defaults to 2 MHz.
+
+config ERBIUM_MCODE_EMULATION
+	bool "Emulate the 64-bit integer FCVT instructions"
+	default y
+	depends on ARCH_FPU && !ARCH_USE_S_MODE
+	---help---
+		ET-Minion has no hardware for FCVT.L.S, FCVT.LU.S, FCVT.S.L and
+		FCVT.S.LU, which GCC emits for every conversion between float and
+		a 64-bit integer type (long, int64_t, size_t, time_t). They raise
+		exception 30 (M-code emulation). With this option the trap handler
+		performs them in software, with the ET-Minion rule that a subnormal
+		input reads as zero and sets fflags bit 31, and resumes after the
+		instruction. Each conversion then costs a trap, about 260
+		instructions in erbium_emu. Without this option they stop the
+		system with an "M-code emulation" exception report. FDIV.S,
+		FSQRT.S, FENCE.I, SFENCE.VMA and the ET packed instructions are
+		never emulated.

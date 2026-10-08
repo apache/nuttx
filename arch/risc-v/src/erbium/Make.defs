@@ -26,3 +26,8 @@ HEAD_ASRC = erbium_head.S
 
 CHIP_CSRCS  = erbium_start.c erbium_irq_dispatch.c erbium_irq.c
 CHIP_CSRCS += erbium_timerisr.c erbium_serial.c
+
+ifeq ($(CONFIG_ERBIUM_MCODE_EMULATION),y)
+CHIP_CSRCS += erbium_mcode.c
+CHIP_ASRCS += erbium_mcode_fpr.S
+endif
