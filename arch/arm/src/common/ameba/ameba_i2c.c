@@ -172,6 +172,9 @@ struct ameba_i2c_dev_s
   uint8_t   sdapin;            /* SDA pad (AMEBA_PA()/AMEBA_PB() encoding) */
   uint8_t   sclfid;            /* Pin mux function code for the SCL pad */
   uint8_t   sdafid;            /* Pin mux function code for the SDA pad */
+#ifdef AMEBA_I2C_IPCLK_FN
+  uint32_t  ipclk;             /* I2C IP reference clock (Hz) */
+#endif
   mutex_t   lock;              /* Serializes bus access */
 };
 
@@ -233,6 +236,12 @@ static const uint32_t  g_i2c_clk[AMEBA_NI2C]   = AMEBA_I2C_APBPERIPH_CLK;
 static const uint8_t   g_i2c_sclfid[AMEBA_NI2C] = AMEBA_I2C_SCLFID;
 static const uint8_t   g_i2c_sdafid[AMEBA_NI2C] = AMEBA_I2C_SDAFID;
 
+/* A chip whose I2C_StructInit() does not already fill in a usable I2C IP
+ * reference clock supplies AMEBA_I2C_IPCLK_FN(bus) in its chip header; the
+ * value is resolved once per bus at registration time.  See the note at
+ * AMEBA_I2C_IPCLK_FN in the per-chip ameba_i2c_chip.h.
+ */
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -268,6 +277,14 @@ static void ameba_i2c_reconfigure(struct ameba_i2c_dev_s *priv,
    */
 
   init.mstrestr = AMEBA_ENABLE;
+
+#ifdef AMEBA_I2C_IPCLK_FN
+  /* Correct the IP reference clock that I2C_SetSpeed() divides down to the
+   * SCL high/low counts; on this chip I2C_StructInit() left a placeholder.
+   */
+
+  init.ipclk = priv->ipclk;
+#endif
 
   if (frequency <= I2C_SPEED_STANDARD)
     {
@@ -585,6 +602,9 @@ int ameba_i2c_register(int bus, uint8_t sclpin, uint8_t sdapin)
   priv->sdapin  = sdapin;
   priv->sclfid  = g_i2c_sclfid[bus];
   priv->sdafid  = g_i2c_sdafid[bus];
+#ifdef AMEBA_I2C_IPCLK_FN
+  priv->ipclk   = AMEBA_I2C_IPCLK_FN(bus);
+#endif
   priv->address = 0xffff;
   nxmutex_init(&priv->lock);
 

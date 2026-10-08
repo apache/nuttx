@@ -260,6 +260,17 @@ int rtl8730e_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_AMEBA_I2C
+  /* Register the board's I2C master buses at /dev/i2cN. */
+
+  ret = rtl8730e_i2c_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize I2C: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

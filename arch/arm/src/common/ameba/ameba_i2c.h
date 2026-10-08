@@ -43,6 +43,7 @@
 
 #define AMEBA_I2C0            0
 #define AMEBA_I2C1            1
+#define AMEBA_I2C2            2    /* amebasmart only */
 
 /****************************************************************************
  * Public Function Prototypes
@@ -64,7 +65,8 @@ extern "C"
  *   the NuttX I2C character driver at /dev/i2cN, where N is the bus number.
  *
  * Input Parameters:
- *   bus    - The controller index, AMEBA_I2C0 or AMEBA_I2C1.  Also used as
+ *   bus    - The controller index, AMEBA_I2C0 .. AMEBA_I2C2 depending on how
+ *            many controllers the chip exposes (AMEBA_NI2C).  Also used as
  *            the /dev/i2cN minor number.
  *   sclpin - The SCL pad, encoded with AMEBA_PA()/AMEBA_PB().
  *   sdapin - The SDA pad, encoded with AMEBA_PA()/AMEBA_PB().
