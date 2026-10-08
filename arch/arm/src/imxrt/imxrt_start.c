@@ -282,6 +282,10 @@ void __start(void)
   imxrt_mpu_initialize();
 #endif
 
+#ifdef CONFIG_ARCH_PERF_EVENTS
+  up_perf_init((void *)BOARD_CPU_FREQUENCY);
+#endif
+
   /* Enable I- and D-Caches */
 
   up_enable_icache();
