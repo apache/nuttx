@@ -535,6 +535,89 @@ cp -f "${TOPDIR}/tools/link.sh" "${EXPORTDIR}/tools/"
 cp -f "${TOPDIR}/tools/unlink.bat" "${EXPORTDIR}/tools/"
 cp -f "${TOPDIR}/tools/unlink.sh" "${EXPORTDIR}/tools/"
 
+# Install the compiler wrapper for programs built outside the tree, and the
+# flags it needs.  Warning options are left out: they are this tree's policy
+# (-Werror), not part of the ABI.  -Wa, -Wl and -Wp pass options on and stay.
+# Paths into this tree (some boards put crt0.o in LDELFFLAGS) are left out:
+# they do not exist where the package is used, and the wrapper adds the
+# exported crt0.o itself.
+
+noWarnings() {
+  for flag in $1; do
+    case ${flag} in
+      -Wa,* | -Wl,* | -Wp,*) printf '%s ' "${flag}" ;;
+      -W*) ;;
+      *) printf '%s ' "${flag}" ;;
+    esac
+  done
+}
+
+noTreePaths() {
+  for flag in $1; do
+    case ${flag} in
+      "${TOPDIR}"/*) ;;
+      *) printf '%s ' "${flag}" ;;
+    esac
+  done
+}
+
+isSet() {
+  grep -q "^$1=y" "${TOPDIR}/.config"
+}
+
+CCDEFINES="-D__NuttX__"
+if isSet CONFIG_NDEBUG; then
+  CCDEFINES="${CCDEFINES} -DNDEBUG"
+fi
+
+CCXXINCDIRS=
+if isSet CONFIG_LIBCXX; then
+  CCXXINCDIRS="libcxx"
+elif isSet CONFIG_UCLIBCXX; then
+  CCXXINCDIRS="uClibc++"
+fi
+CCXXINCDIRS="${CCXXINCDIRS} cxx"
+
+CCLIBS=
+CCNOUNDEF=n
+if [ "${NUTTX_BUILD}" = "kernel" ]; then
+  CCNOUNDEF=y
+  if isSet CONFIG_NX; then
+    CCLIBS="nx"
+  fi
+  CCLIBS="${CCLIBS} mm c proxies"
+  if isSet CONFIG_HAVE_CXX; then
+    CCLIBS="${CCLIBS} xx"
+  fi
+  if [ -f "${EXPORTDIR}/libs/libm${LIBEXT}" ]; then
+    CCLIBS="${CCLIBS} m"
+  fi
+  CCLIBS="${CCLIBS} gcc"
+fi
+
+CCLDSCRIPT=
+if [ -f "${EXPORTDIR}/scripts/${APPLD}" ]; then
+  CCLDSCRIPT=${APPLD}
+fi
+
+{
+  echo "NUTTXCC_CC='${CC}'"
+  echo "NUTTXCC_CXX='${CXX}'"
+  echo "NUTTXCC_CPUFLAGS='${ARCHCPUFLAGS}'"
+  echo "NUTTXCC_CFLAGS='$(noWarnings "${ARCHCFLAGS}")${ARCHPICFLAGS} ${CCDEFINES}'"
+  echo "NUTTXCC_CXXFLAGS='$(noWarnings "${ARCHCXXFLAGS}")${ARCHPICFLAGS} ${CCDEFINES}'"
+  echo "NUTTXCC_CXXINCDIRS='${CCXXINCDIRS}'"
+  echo "NUTTXCC_LDFLAGS='$(noTreePaths "${LDELFFLAGS}")-Bstatic'"
+  echo "NUTTXCC_LDSCRIPT='${CCLDSCRIPT}'"
+  echo "NUTTXCC_LIBS='${CCLIBS}'"
+  echo "NUTTXCC_NOUNDEF='${CCNOUNDEF}'"
+} >"${EXPORTDIR}/scripts/nuttx-cc.conf"
+
+mkdir -p "${EXPORTDIR}/bin"
+cp -f "${TOPDIR}/tools/nuttx-cc.sh" "${EXPORTDIR}/bin/nuttx-cc"
+cp -f "${TOPDIR}/tools/nuttx-cc.sh" "${EXPORTDIR}/bin/nuttx-c++"
+chmod 755 "${EXPORTDIR}/bin/nuttx-cc" "${EXPORTDIR}/bin/nuttx-c++"
+
 # Now tar up the whole export directory
 
 cd "${TOPDIR}" || \
