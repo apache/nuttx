@@ -29,7 +29,8 @@
 
 #if (defined(CONFIG_STM32_HAVE_IP_PWR_M0_V1) + \
      defined(CONFIG_STM32_HAVE_IP_PWR_G0) + \
-     defined(CONFIG_STM32_HAVE_IP_PWR_M3M4_V1)) > 1
+     defined(CONFIG_STM32_HAVE_IP_PWR_M3M4_V1) + \
+     defined(CONFIG_STM32_HAVE_IP_PWR_M33_V1)) > 1
 #  error Only one STM32 PWR IP version must be selected
 #endif
 
@@ -38,6 +39,8 @@
 #  include "hardware/stm32_pwr_v1_m0_g0.h"
 #elif defined(CONFIG_STM32_HAVE_IP_PWR_M3M4_V1)
 #  include "hardware/stm32_pwr_v1.h"
+#elif defined(CONFIG_STM32_HAVE_IP_PWR_M33_V1)
+#  include "hardware/stm32u5xx_pwr.h"
 #else
 #  error "Unsupported STM32 PWR"
 #endif

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32u5/hardware/stm32_pwr.h
+ * arch/arm/src/stm32u5/hardware/stm32u5xx_pwr.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32_PWR_H
-#define __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32_PWR_H
+#ifndef __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U5XX_PWR_H
+#define __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U5XX_PWR_H
 
 /****************************************************************************
  * Included Files
@@ -202,4 +202,4 @@
 #define PWR_SVMSR_VDDA1RDY       (1 << 26)                     /* Bit 26: V_DDA is equal or above ~1.6V */
 #define PWR_SVMSR_VDDA2RDY       (1 << 27)                     /* Bit 27: V_DDA is equal or above ~1.8V */
 
-#endif /* __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32_PWR_H */
+#endif /* __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U5XX_PWR_H */

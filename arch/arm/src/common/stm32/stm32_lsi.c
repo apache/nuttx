@@ -29,6 +29,10 @@
 #include "arm_internal.h"
 #include "stm32_rcc.h"
 
+#ifdef CONFIG_STM32_HAVE_IP_PWR_M33_V1
+#  include "stm32_pwr.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -83,6 +87,15 @@
 
 void stm32_rcc_enablelsi(void)
 {
+#ifdef CONFIG_STM32_HAVE_IP_PWR_M33_V1
+  /* The LSI is in the backup domain and write access is denied to this
+   * domain after reset, you have to enable write access using DBP bit in
+   * the PWR register before configuring the LSI.
+   */
+
+  stm32_pwr_enablebkp(true);
+#endif
+
   /* Enable the Internal Low-Speed (LSI) RC Oscillator by setting the LSION
    * bit in the controlling RCC register.
    */
@@ -92,6 +105,12 @@ void stm32_rcc_enablelsi(void)
   /* Wait for the internal LSI oscillator to be stable. */
 
   while ((getreg32(STM32_RCC_LSI_REG) & RCC_LSI_LSIRDY) == 0);
+
+#ifdef CONFIG_STM32_HAVE_IP_PWR_M33_V1
+  /* Disable backup domain access */
+
+  stm32_pwr_enablebkp(false);
+#endif
 }
 
 /****************************************************************************
@@ -104,11 +123,19 @@ void stm32_rcc_enablelsi(void)
 
 void stm32_rcc_disablelsi(void)
 {
+#ifdef CONFIG_STM32_HAVE_IP_PWR_M33_V1
+  stm32_pwr_enablebkp(true);
+#endif
+
   /* Disable the Internal Low-Speed (LSI) RC Oscillator by resetting the
    * LSION bit in the controlling RCC register.
    */
 
   modifyreg32(STM32_RCC_LSI_REG, RCC_LSI_LSION, 0);
+
+#ifdef CONFIG_STM32_HAVE_IP_PWR_M33_V1
+  stm32_pwr_enablebkp(false);
+#endif
 
   /* LSIRDY should go low after 3 LSI clock cycles */
 }
