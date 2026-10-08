@@ -314,7 +314,7 @@ NuttX provides support for the following MTD devices.
   devices/*
 
 RAMTRON SPI FRAM byte writes
-===========================
+============================
 
 With ``CONFIG_MTD_RAMTRON`` and ``CONFIG_MTD_BYTE_WRITE`` enabled, the
 RAMTRON driver implements ``MTD_WRITE()`` for arbitrary byte offsets and
