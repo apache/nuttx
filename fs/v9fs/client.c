@@ -1024,7 +1024,8 @@ ssize_t v9fs_client_convertdir(FAR const uint8_t *buffer, size_t bufsize,
    * (qid, offset, type, name_len)
    */
 
-  if (bufsize < V9FS_QIDSZ + V9FS_BIT64SZ + V9FS_BIT8SZ + V9FS_BIT16SZ)
+  if (bufsize - head < V9FS_QIDSZ + V9FS_BIT64SZ + V9FS_BIT8SZ +
+                       V9FS_BIT16SZ)
     {
       return -EIO;
     }
