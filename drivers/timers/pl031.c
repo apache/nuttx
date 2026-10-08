@@ -108,7 +108,9 @@ struct pl031_lowerhalf_s
 {
   FAR const struct rtc_ops_s *ops;
   uintptr_t base;
+#ifdef CONFIG_RTC_ALARM
   struct lower_setalarm_s alarm;
+#endif
 };
 
 /****************************************************************************
