@@ -25,11 +25,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <errno.h>
 #include <stdint.h>
 #include <nuttx/irq.h>
 
 #include "hardware/erbium_plic.h"
 #include "riscv_internal.h"
+#include "erbium_mcode.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -54,7 +56,9 @@
  *   Dispatch an exception as IRQ <cause> (0-31) and a hart-local
  *   interrupt as IRQ RISCV_IRQ_ASYNC + <cause>, or claim, dispatch and
  *   complete a PLIC interrupt. Complete nonzero claims even if their
- *   source is unsupported.
+ *   source is unsupported. With CONFIG_ERBIUM_MCODE_EMULATION, first try
+ *   to emulate an instruction that raised exception 30 (M-code
+ *   emulation).
  *
  * Input Parameters:
  *   vector - Trap cause register value.
@@ -74,6 +78,28 @@ void *riscv_dispatch_irq(uintreg_t vector, uintreg_t *regs)
     {
       irq += RISCV_IRQ_ASYNC;
     }
+#ifdef CONFIG_ERBIUM_MCODE_EMULATION
+  else if (irq == ERBIUM_IRQ_MCODE)
+    {
+      /* Emulate the instruction and resume after it. Do not go through
+       * riscv_doirq(): the trap may be nested in an interrupt handler, and
+       * riscv_doirq() would end the outer interrupt context and clear the
+       * running task's saved-register pointer.
+       */
+
+      int ret = erbium_mcode_emulate(regs);
+
+      if (ret == OK)
+        {
+          return regs;
+        }
+
+      if (ret == -EINVAL)
+        {
+          irq = RISCV_IRQ_IINSTRUCTION;
+        }
+    }
+#endif
 
   if (irq == RISCV_IRQ_EXT)
     {
