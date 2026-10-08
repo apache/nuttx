@@ -33,5 +33,6 @@ if(CONFIG_LIBC_LOCALE)
             lib_gettext.c
             lib_langinfo.c
             lib_iconv.c
-            lib_maxlocale.c)
+            lib_maxlocale.c
+            lib_getlocalename_l.c)
 endif()

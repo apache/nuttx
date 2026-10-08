@@ -117,6 +117,7 @@ locale_t duplocale(locale_t locobj);
 void freelocale(locale_t locobj);
 
 locale_t uselocale(locale_t newloc);
+FAR const char *getlocalename_l(int category, locale_t locobj);
 
 #undef EXTERN
 #ifdef __cplusplus
