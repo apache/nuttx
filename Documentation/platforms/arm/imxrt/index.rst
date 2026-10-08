@@ -326,6 +326,15 @@ The driver:
 - Starts the remote from :c:func:`rptun_initialize` when the board sets ``autostart``; otherwise
   ``RPTUNIOC_START`` on ``/dev/rptun/<name>`` or :c:func:`rptun_boot` starts it.
 
+The ``fmu-v6xrt:rptun`` configuration is the reference user: ``imxrt_cm4_initialize()`` in the board
+bring-up registers ``/dev/rptun/cm4`` with the memory map below, maps the shared window non-cacheable
+and leaves the core held. Copy an ELF built for the CM4 to the SD card as
+``CONFIG_FMU_V6XRT_CM4_FIRMWARE`` (``/mnt/sd/cm4.elf``), then from nsh::
+
+    mount -t vfat /dev/mmcsd0 /mnt/sd
+    rptun start /dev/rptun/cm4
+    rptun ping /dev/rptun/cm4 100 64 3 0
+
 Memory map rules the board must follow:
 
 - The CM7 reaches the CM4 TCM through the LMEM backdoor window at ``IMXRT_OCRAM_M4_BASE``. Only the

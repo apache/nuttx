@@ -92,14 +92,16 @@ Installation
 The toolchain is the same as for every i.MX RT board; see
 :doc:`the platform page <../../index>`.
 
-Flashing needs ``px_uploader.py`` from the PX4 source tree. The bootloader
-enumerates as a USB CDC/ACM device for roughly five seconds after reset, so
-start the uploader first and then reset the board:
+Flashing uses the uploader from the PX4 source tree, ``Tools/px4_uploader.py``.
+PX4 releases before 1.18 ship it as ``px_uploader.py``, without the ``4``, with
+the same arguments. The bootloader enumerates as a USB CDC/ACM device for
+roughly five seconds after reset, so start the uploader first and then reset
+the board:
 
 .. code-block:: console
 
    $ python Tools/px_mkfw.py --prototype firmware.prototype --image nuttx.bin > nuttx.px4
-   $ python Tools/px_uploader.py --port "/dev/serial/by-id/*PX4*" nuttx.px4
+   $ python Tools/px4_uploader.py --port "/dev/serial/by-id/*PX4*" nuttx.px4
 
 The uploader expects a ``.px4`` container rather than a raw binary.
 
@@ -113,3 +115,34 @@ The basic NuttShell configuration. The console is USB CDC/ACM, so the shell
 appears on the same connector used for flashing, at ``/dev/ttyACM0`` on the
 host. ``/dev/random`` and ``/dev/urandom`` are backed by the CAAM hardware
 entropy source.
+
+rptun
+-----
+
+``nsh`` plus the SD card and the RPTUN backend for the CM4
+(``CONFIG_IMXRT_RPTUN``). The board bring-up registers ``/dev/rptun/cm4`` and
+holds the core; ``rptun start`` loads the ELF named by
+``CONFIG_FMU_V6XRT_CM4_FIRMWARE`` (``/mnt/sd/cm4.elf``) into the CM4 code TCM
+and releases it. The image must carry a ``.resource_table`` section and link
+to ``0x1ffe0000`` with its shared memory in the upper 64 KB of that TCM; see
+the RPTUN section of :doc:`the platform page <../../index>`.
+
+.. code-block:: console
+
+   nsh> mount -t vfat /dev/mmcsd0 /mnt/sd
+   nsh> rptun start /dev/rptun/cm4
+   nsh> sleep 2
+   nsh> rpmsg ping /dev/rpmsg/cm4 100 64 3 0
+   nsh> rpmsg dump all
+   nsh> rptun stop /dev/rptun/cm4
+
+Start is asynchronous; the rpmsg node ``/dev/rpmsg/cm4`` appears once the CM4
+has announced its endpoints. ``rpmsg ping`` and ``rpmsg dump`` report through
+syslog, which this configuration keeps in a RAM log: read it with ``dmesg``.
+After ``rptun stop`` the CM4 is parked in a ``wfi`` loop at its boot address;
+the next start reloads the image.
+
+To run without an SD card, enable ``CONFIG_FMU_V6XRT_CM4_ROMFS`` and copy the CM4 image to
+``boards/arm/imxrt/fmu-v6xrt/src/etc/cm4.elf`` before building. It is baked into the etc ROMFS
+that NuttX mounts at boot and the firmware path becomes ``/etc/cm4.elf``, so the ``mount`` step
+goes away. The file is ignored by git.

@@ -337,5 +337,18 @@ int imxrt_flexspi_nor_initialize(void);
 int imxrt_flexspi_fram_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: imxrt_cm4_initialize
+ *
+ * Description:
+ *   Register the CM4 as an RPTUN remote (/dev/rptun/cm4) and map its shared
+ *   window non-cacheable.  The core is started with "rptun start".
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IMXRT_RPTUN
+int imxrt_cm4_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_IMXRT_FMU_V6XRT_SRC_FMU_V6XRT_H */

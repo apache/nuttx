@@ -35,4 +35,26 @@ config IMXRT1170_FLEXSPI_FRAM
 	depends on IMXRT_FLEXSPI
 	select MTD
 
+config FMU_V6XRT_CM4_ROMFS
+	bool "Embed the CM4 firmware in the etc ROMFS"
+	default n
+	depends on IMXRT_RPTUN
+	select FS_ROMFS
+	select ETC_ROMFS
+	---help---
+		Build boards/arm/imxrt/fmu-v6xrt/src/etc/cm4.elf into the etc
+		ROMFS that is mounted at boot, so no SD card is needed.  The file
+		is not part of the tree; copy the CM4 image there before building.
+
+config FMU_V6XRT_CM4_FIRMWARE
+	string "CM4 firmware path"
+	default "/mnt/sd/cm4.elf"
+	depends on IMXRT_RPTUN && !FMU_V6XRT_CM4_ROMFS
+	---help---
+		ELF image the RPTUN loader writes into the CM4 TCM on
+		"rptun start /dev/rptun/cm4".  It must carry a .resource_table
+		section and link against the CM4 code TCM at 0x1ffe0000, with
+		its shared memory in the upper 64 KB of that TCM.  With
+		FMU_V6XRT_CM4_ROMFS the path is /etc/cm4.elf.
+
 endif
