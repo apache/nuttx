@@ -33,6 +33,11 @@ emulator's timer rate. The Erbium documentation specifies a 10 MHz
 ``mtime`` (one tick every 100 ns) on silicon, so set this option to match
 the target.
 
+ET-Minion also has exception codes of its own: 25 and 26 (instruction bus
+and ECC error), 27 and 28 (load and store split-page fault) and 30
+(M-code emulation, see Toolchain). NuttX reports codes 25 to 28 as fatal
+exceptions with their names.
+
 Toolchain
 =========
 
@@ -40,18 +45,39 @@ Use a GNU RISC-V bare-metal toolchain with RV64 single-precision ABI
 support, such as ``riscv64-unknown-elf-gcc``. The normal RISC-V toolchain
 logic derives ``rv64imfc_zicsr_zifencei`` and ``lp64f`` from Kconfig.
 
-Erbium handles floating-point divide and square root through microcode.
-This standalone image does not supply that microcode, so the port uses
-``-mno-fdiv`` to generate software helper calls for those operations.
-Other single-precision instructions and FPU context switching remain
-enabled, including the FPU portion of ``ostest``. Double-precision
+ET-Minion has no hardware for some instructions. Executing one raises
+exception 30, "M-code emulation": ``FDIV.S``, ``FSQRT.S``, ``FCVT.L.S``,
+``FCVT.LU.S``, ``FCVT.S.L``, ``FCVT.S.LU``, ``FENCE.I``, ``SFENCE.VMA`` and
+some ET packed instructions that GCC does not emit. NuttX reports the
+exception, with the instruction in ``MTVAL``, and stops.
+
+The port compiles with ``-mno-fdiv``, so floating-point divide and square
+root use software helpers. GCC has no such option for the four 64-bit
+conversions: with the FPU enabled, every conversion between ``float`` and
+a 64-bit integer type such as ``long``, ``int64_t``, ``size_t`` or
+``time_t`` uses one. In NuttX's libm, ``rintf()``, ``lroundf()``,
+``llroundf()`` and ``expf()`` use them, and so does every function built
+on ``expf()``, such as ``logf()``, ``powf()`` and the hyperbolic
+functions.
+
+Other single-precision instructions run in hardware, and FPU context
+switching works, including the FPU portion of ``ostest``. Double-precision
 arithmetic uses software. The atomic instruction extension is not enabled.
 NuttX provides atomic operations through interrupt masking on hart 0.
-Startup also avoids the microcode-dependent ``FENCE.I`` instruction; this
-port expects the emulator's ELF loader to install the executable image.
+Startup also avoids ``FENCE.I``; this port expects the emulator's ELF
+loader to install the executable image.
 NuttX's dynamic ELF module loader is disabled in both configurations because
 its instruction-cache synchronization also uses ``FENCE.I``. This does not
 affect the ``nuttx`` ELF output file loaded by the emulator.
+
+To find these instructions in an image, search its disassembly::
+
+  riscv64-unknown-elf-objdump -d nuttx | \
+    grep -E 'fdiv\.s|fsqrt\.s|fcvt\.(l|lu)\.s|fcvt\.s\.lu?\s|fence\.i|sfence\.vma'
+
+In the ``nsh`` and ``ostest`` images, the only match is ``FENCE.I`` in the
+common ``riscv_fpuconfig`` routine, which Erbium does not call. Any other
+match stops the system when it executes.
 
 Configurations
 ==============
