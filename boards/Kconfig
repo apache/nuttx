@@ -2821,14 +2821,14 @@ config ARCH_BOARD_SABRE_6QUAD
 
 config ARCH_BOARD_A2G_TC397_5V_TFT
 	bool "Infineon's AURIX TC397 board: KIT_A2G_TC397_5V_TFT"
-	depends on ARCH_CHIP_TC397
+	depends on ARCH_CHIP_TC39X
 	---help---
 		This options selects support for NuttX on the Infineon's AURIX board
 		board featuring the TC397 6Quad CPU.
 
 config ARCH_BOARD_TRIBOARD_TC4X9_COM
 	bool "Infineon's AURIX TC4DA board: TRIBOARD_TC4X9_COM"
-	depends on ARCH_CHIP_TC4DA
+	depends on ARCH_CHIP_TC4DX
 	---help---
 		This options selects support for NuttX on the Infineon's AURIX board
 		board featuring the TC4DA 6Quad CPU.
@@ -4635,7 +4635,7 @@ if ARCH_BOARD_SABRE_6QUAD
 source "boards/arm/imx6/sabre-6quad/Kconfig"
 endif
 if ARCH_BOARD_A2G_TC397_5V_TFT
-source "boards/tricore/tc397/a2g-tc397-5v-tft/Kconfig"
+source "boards/tricore/tc3xx/a2g-tc397-5v-tft/Kconfig"
 endif
 if ARCH_BOARD_MPS2_AN500
 source "boards/arm/mps/mps2-an500/Kconfig"

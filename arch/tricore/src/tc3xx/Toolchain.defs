@@ -20,7 +20,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_ARCH_CHIP_TC397),y)
+ifeq ($(CONFIG_ARCH_CHIP_TC39X),y)
   ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
     ARCHCPUFLAGS += --cpu=tc39xb
     LDFLAGS      += -Ctc39xb
