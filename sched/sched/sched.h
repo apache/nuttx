@@ -48,8 +48,8 @@
  * and by a series of task lists.  All of these tasks lists are declared
  * below. Although it is not always necessary, most of these lists are
  * prioritized so that common list handling logic can be used (only the
- * g_readytorun, the g_pendingtasks, and the g_waitingforsemaphore lists
- * need to be prioritized).
+ * g_readytorun and g_pendingtasks lists, and the wait lists in each
+ * semaphore, event and message queue, need to be prioritized).
  */
 
 #define list_readytorun()        (&g_readytorun)
@@ -154,8 +154,8 @@ enum task_deliver_e
  * and by a series of task lists.  All of these tasks lists are declared
  * below. Although it is not always necessary, most of these lists are
  * prioritized so that common list handling logic can be used (only the
- * g_readytorun, the g_pendingtasks, and the g_waitingforsemaphore lists
- * need to be prioritized).
+ * g_readytorun and g_pendingtasks lists, and the wait lists in each
+ * semaphore, event and message queue, need to be prioritized).
  */
 
 /* This is the list of all tasks that are ready to run.  This is a
