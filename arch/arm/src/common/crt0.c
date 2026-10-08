@@ -50,7 +50,7 @@ extern initializer_t _edtors[];
  * Public Function Prototypes
  ****************************************************************************/
 
-int main(int argc, char *argv[]);
+int main(int argc, char *argv[], char *envp[]);
 
 /****************************************************************************
  * Private Functions
@@ -189,9 +189,16 @@ void _start(int argc, char *argv[])
 #  endif
 #endif
 
-  /* Call the main() entry point passing argc and argv. */
+  /* Call the main() entry point passing argc, argv and the environment.
+   * The third argument is a common Unix extension; a two-argument main()
+   * ignores it.
+   */
 
-  ret = main(argc, argv);
+#ifdef CONFIG_DISABLE_ENVIRON
+  ret = main(argc, argv, NULL);
+#else
+  ret = main(argc, argv, environ);
+#endif
 
 #if defined(CONFIG_HAVE_CXXINITIALIZE) && CONFIG_LIBC_MAX_EXITFUNS <= 0
   exec_dtors();
