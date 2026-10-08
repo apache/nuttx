@@ -31,4 +31,12 @@ else ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
 CSRCS += imxrt_bringup.c
 endif
 
+ifeq ($(CONFIG_IMXRT_RPTUN),y)
+CSRCS += imxrt_cm4.c
+endif
+
+ifeq ($(CONFIG_FMU_V6XRT_CM4_ROMFS),y)
+RCRAWS = etc/cm4.elf
+endif
+
 include $(TOPDIR)/boards/Board.mk

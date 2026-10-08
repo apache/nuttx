@@ -23,7 +23,24 @@
 set(SRCS imxrt_boot.c imxrt_flexspi_nor_boot.c imxrt_flexspi_nor_flash.c
          imxrt_clockconfig.c imxrt_bringup.c)
 
+if(CONFIG_IMXRT_RPTUN)
+  list(APPEND SRCS imxrt_cm4.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
+
+if(CONFIG_FMU_V6XRT_CM4_ROMFS)
+  nuttx_add_romfs(
+    NAME
+    etc
+    MOUNTPOINT
+    etc
+    RCRAWS
+    etc/cm4.elf
+    PATH
+    ${CMAKE_CURRENT_BINARY_DIR}/etc)
+  target_link_libraries(board PRIVATE romfs_etc)
+endif()
 
 if(CONFIG_BOOT_RUNFROMFLASH)
   set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flash.ld")
