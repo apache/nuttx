@@ -43,6 +43,11 @@
 
 FAR int *getopterrp(void)
 {
+#ifdef GETOPT_PUBLIC_VARIABLES
+  return &opterr;
+#else
   FAR struct getopt_s *go = getoptvars();
+
   return &go->go_opterr;
+#endif
 }

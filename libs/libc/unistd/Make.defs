@@ -25,7 +25,7 @@
 CSRCS += lib_access.c lib_daemon.c lib_swab.c lib_pathconf.c lib_sysconf.c
 CSRCS += lib_getcwd.c lib_getentropy.c lib_getopt_common.c lib_getopt.c
 CSRCS += lib_getopt_long.c lib_getopt_longonly.c lib_getoptvars.c lib_getoptargp.c
-CSRCS += lib_getopterrp.c lib_getoptindp.c lib_getoptoptp.c lib_times.c
+CSRCS += lib_getopterrp.c lib_getoptindp.c lib_getoptoptp.c lib_getoptpublic.c lib_times.c
 CSRCS += lib_alarm.c lib_fstatvfs.c lib_statvfs.c lib_sleep.c lib_nice.c
 CSRCS += lib_getrusage.c lib_utime.c lib_utimes.c
 CSRCS += lib_setrlimit.c lib_getrlimit.c lib_setpriority.c lib_getpriority.c

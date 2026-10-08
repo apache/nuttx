@@ -289,12 +289,19 @@
 #define getdtablesize(f)                 ((int)sysconf(_SC_OPEN_MAX))
 #define getpagesize(f)                   ((int)sysconf(_SC_PAGESIZE))
 
-/* Accessor functions associated with getopt(). */
+/* Accessor functions associated with getopt().  In the user space of a
+ * kernel build every process has its own copy of the C library data, so
+ * optarg, opterr, optind and optopt are the plain variables that POSIX
+ * specifies (see below).  Programs that bring their own getopt() depend
+ * on that.
+ */
 
-#define optarg                           (*(getoptargp()))
-#define opterr                           (*(getopterrp()))
-#define optind                           (*(getoptindp()))
-#define optopt                           (*(getoptoptp()))
+#if !defined(CONFIG_BUILD_KERNEL) || defined(__KERNEL__)
+#  define optarg                         (*(getoptargp()))
+#  define opterr                         (*(getopterrp()))
+#  define optind                         (*(getoptindp()))
+#  define optopt                         (*(getoptoptp()))
+#endif
 
 #if defined(CONFIG_FS_LARGEFILE)
 #  define lseek64                        lseek
@@ -480,6 +487,13 @@ FAR char **getoptargp(void);  /* Optional argument following option */
 FAR int   *getopterrp(void);  /* Print error message */
 FAR int   *getoptindp(void);  /* Index into argv */
 FAR int   *getoptoptp(void);  /* Unrecognized option character */
+
+#if defined(CONFIG_BUILD_KERNEL) && !defined(__KERNEL__)
+EXTERN FAR char *optarg;      /* Optional argument following option */
+EXTERN int       opterr;      /* Print error message */
+EXTERN int       optind;      /* Index into argv */
+EXTERN int       optopt;      /* Unrecognized option character */
+#endif
 
 int     gethostname(FAR char *name, size_t namelen);
 int     sethostname(FAR const char *name, size_t namelen);
