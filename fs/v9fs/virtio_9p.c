@@ -29,6 +29,10 @@
 
 #include <nuttx/nuttx.h>
 #include <nuttx/spinlock.h>
+#ifdef CONFIG_ARCH_ADDRENV
+#  include <nuttx/arch.h>
+#  include <nuttx/pgalloc.h>
+#endif
 #include <nuttx/virtio/virtio.h>
 
 #include "client.h"
@@ -88,6 +92,67 @@ const struct v9fs_transport_ops_s g_virtio_9p_transport_ops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifdef CONFIG_ARCH_ADDRENV
+
+/****************************************************************************
+ * Name: virtio_9p_split
+ *
+ * Description:
+ *   A buffer in a user address environment is contiguous only in virtual
+ *   memory, but the device reads and writes physical memory, and one
+ *   descriptor covers one physical range.  Split the buffer where its
+ *   physical pages are not adjacent.  With vb NULL, only count.
+ *
+ * Returned Value:
+ *   The number of descriptors the buffer needs.
+ *
+ ****************************************************************************/
+
+static size_t virtio_9p_split(FAR void *buf, size_t len,
+                              FAR struct virtqueue_buf *vb)
+{
+  uintptr_t va = (uintptr_t)buf;
+  uintptr_t next = 0;
+  size_t n = 0;
+
+  while (len > 0)
+    {
+      size_t chunk = MM_PGSIZE - (va & MM_PGMASK);
+      uintptr_t pa;
+
+      if (chunk > len)
+        {
+          chunk = len;
+        }
+
+      pa = up_addrenv_va_to_pa((FAR void *)va);
+      if (n > 0 && pa == next)
+        {
+          if (vb != NULL)
+            {
+              vb[n - 1].len += chunk;
+            }
+        }
+      else
+        {
+          if (vb != NULL)
+            {
+              vb[n].buf = (FAR void *)va;
+              vb[n].len = chunk;
+            }
+
+          n++;
+        }
+
+      next = pa + chunk;
+      va  += chunk;
+      len -= chunk;
+    }
+
+  return n;
+}
+#endif
 
 /****************************************************************************
  * Name: virtio_9p_create
@@ -165,26 +230,63 @@ static int virtio_9p_request(FAR struct v9fs_transport_s *transport,
   FAR struct virtio_9p_priv_s *priv =
              container_of(transport, struct virtio_9p_priv_s, transport);
   FAR struct virtqueue *vq = priv->vdev->vrings_info[0].vq;
-  struct virtqueue_buf vb[payload->wcount + payload->rcount];
+#ifdef CONFIG_ARCH_ADDRENV
+  size_t wcount = 0;
+  size_t rcount = 0;
+  size_t n;
+#else
+  size_t wcount = payload->wcount;
+  size_t rcount = payload->rcount;
+#endif
   irqstate_t flags;
   size_t i;
   int ret;
 
+#ifdef CONFIG_ARCH_ADDRENV
   for (i = 0; i < payload->wcount; i++)
+    {
+      wcount += virtio_9p_split(payload->wiov[i].iov_base,
+                                payload->wiov[i].iov_len, NULL);
+    }
+
+  for (i = 0; i < payload->rcount; i++)
+    {
+      rcount += virtio_9p_split(payload->riov[i].iov_base,
+                                payload->riov[i].iov_len, NULL);
+    }
+#endif
+
+  struct virtqueue_buf vb[wcount + rcount];
+
+#ifdef CONFIG_ARCH_ADDRENV
+  n = 0;
+  for (i = 0; i < payload->wcount; i++)
+    {
+      n += virtio_9p_split(payload->wiov[i].iov_base,
+                           payload->wiov[i].iov_len, &vb[n]);
+    }
+
+  for (i = 0; i < payload->rcount; i++)
+    {
+      n += virtio_9p_split(payload->riov[i].iov_base,
+                           payload->riov[i].iov_len, &vb[n]);
+    }
+#else
+  for (i = 0; i < wcount; i++)
     {
       vb[i].buf = payload->wiov[i].iov_base;
       vb[i].len = payload->wiov[i].iov_len;
     }
 
-  for (i = 0; i < payload->rcount; i++)
+  for (i = 0; i < rcount; i++)
     {
-      vb[payload->wcount + i].buf = payload->riov[i].iov_base;
-      vb[payload->wcount + i].len = payload->riov[i].iov_len;
+      vb[wcount + i].buf = payload->riov[i].iov_base;
+      vb[wcount + i].len = payload->riov[i].iov_len;
     }
+#endif
 
   flags = spin_lock_irqsave(&priv->lock);
-  ret = virtqueue_add_buffer(vq, vb, payload->wcount, payload->rcount,
-                             payload);
+  ret = virtqueue_add_buffer(vq, vb, wcount, rcount, payload);
   if (ret < 0)
     {
       vrterr("virtqueue_add_buffer failed, ret=%d\n", ret);
