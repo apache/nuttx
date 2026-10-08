@@ -4568,7 +4568,6 @@ arch/arm/src/stm32u5/hardware/stm32_gpio.h mijung@gmx.net alin.jerpelea@sony.com
 arch/arm/src/stm32u5/hardware/stm32_i2c.h cheshmedzhiev@gmail.com alin.jerpelea@sony.com
 arch/arm/src/stm32u5/hardware/stm32_memorymap.h mijung@gmx.net cheshmedzhiev@gmail.com alin.jerpelea@sony.com 101105604+simbit18@users.noreply.github.com
 arch/arm/src/stm32u5/hardware/stm32_pinmap.h mijung@gmx.net cheshmedzhiev@gmail.com alin.jerpelea@sony.com
-arch/arm/src/stm32u5/hardware/stm32_pwr.h mijung@gmx.net devel@sumpfralle.de alin.jerpelea@sony.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32u5/hardware/stm32_rcc.h cheshmedzhiev@gmail.com devel@sumpfralle.de alin.jerpelea@sony.com 101105604+simbit18@users.noreply.github.com
 arch/arm/src/stm32u5/hardware/stm32_spi.h mijung@gmx.net cheshmedzhiev@gmail.com alin.jerpelea@sony.com 101105604+simbit18@users.noreply.github.com
 arch/arm/src/stm32u5/hardware/stm32_syscfg.h mijung@gmx.net cheshmedzhiev@gmail.com alin.jerpelea@sony.com
@@ -4576,6 +4575,7 @@ arch/arm/src/stm32u5/hardware/stm32_tim.h mijung@gmx.net devel@sumpfralle.de ali
 arch/arm/src/stm32u5/hardware/stm32_uart.h mijung@gmx.net alin.jerpelea@sony.com
 arch/arm/src/stm32u5/hardware/stm32u5xx_dbgmcu.h cheshmedzhiev@gmail.com alin.jerpelea@sony.com
 arch/arm/src/stm32u5/hardware/stm32u5xx_pinmap.h cheshmedzhiev@gmail.com devel@sumpfralle.de alin.jerpelea@sony.com
+arch/arm/src/stm32u5/hardware/stm32u5xx_pwr.h mijung@gmx.net devel@sumpfralle.de alin.jerpelea@sony.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32u5/hardware/stm32u5xx_spi.h cheshmedzhiev@gmail.com 101105604+simbit18@users.noreply.github.com alin.jerpelea@sony.com
 arch/arm/src/stm32u5/hardware/stm32u5xx_syscfg.h cheshmedzhiev@gmail.com 101105604+simbit18@users.noreply.github.com alin.jerpelea@sony.com
 arch/arm/src/stm32u5/stm32.h mijung@gmx.net alin.jerpelea@sony.com
