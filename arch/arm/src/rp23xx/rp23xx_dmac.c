@@ -238,6 +238,7 @@ DMA_HANDLE rp23xx_dmachannel(void)
   for (ch = 0, dmach = NULL; ch < RP23XX_DMA_NCHANNELS; ch++)
     {
       struct dma_channel_s *candidate = &g_dmach[ch];
+
       if (!candidate->inuse)
         {
           dmach        = candidate;
