@@ -76,8 +76,8 @@
 #      define bool uint8_t
 #    endif
 
-#    define true  (bool)1
-#    define false (bool)0
+#    define true  1
+#    define false 0
 
 #    define __bool_true_false_are_defined 1
 #  else
