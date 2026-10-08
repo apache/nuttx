@@ -74,6 +74,14 @@ size_t     strlcat(FAR char *, FAR const char *, size_t);
 FAR char  *strncat(FAR char *, FAR const char *, size_t);
 int        strcmp(FAR const char *, FAR const char *);
 int        strncmp(FAR const char *, FAR const char *, size_t);
+
+/* Also declared in <strings.h>.  Other C libraries declare them in
+ * <string.h> as well, and some programs rely on that.
+ */
+
+int        strcasecmp(FAR const char *, FAR const char *);
+int        strncasecmp(FAR const char *, FAR const char *, size_t);
+
 int        strcoll(FAR const char *, FAR const char *s2);
 FAR char  *strcpy(FAR char *dest, FAR const char *src);
 FAR char  *stpcpy(FAR char *dest, FAR const char *src);
