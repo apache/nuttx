@@ -732,6 +732,16 @@ static void netdev_upper_rxpoll_work(FAR struct netdev_upperhalf_s *upper)
       pkt_input(dev);
 #endif
 
+#ifdef CONFIG_NET_BRIDGE
+      /* Frames received on a bridge port belong to the bridge */
+
+      if (dev->d_bridge != NULL)
+        {
+          bridge_input(dev);
+          continue;
+        }
+#endif
+
       switch (dev->d_lltype)
         {
 #ifdef CONFIG_NET_LOOPBACK

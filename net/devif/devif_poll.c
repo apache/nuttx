@@ -41,6 +41,7 @@
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"
+#include "bridge/bridge.h"
 #include "bluetooth/bluetooth.h"
 #include "ieee802154/ieee802154.h"
 #include "icmp/icmp.h"
@@ -999,6 +1000,14 @@ static int devif_poll_connections(FAR struct net_driver_s *dev,
 
           case IPFWD_POLL:
             bstop = devif_poll_forward(dev, callback);
+            break;
+#endif
+#ifdef CONFIG_NET_BRIDGE
+
+          /* Send the frames that a bridge queued on this port */
+
+          case BRIDGE_POLL:
+            bstop = bridge_poll(dev, callback);
             break;
 #endif
           default:

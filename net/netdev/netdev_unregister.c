@@ -40,6 +40,7 @@
 #include "mld/mld.h"
 #include "utils/utils.h"
 #include "netdev/netdev.h"
+#include "bridge/bridge.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -118,6 +119,10 @@ int netdev_unregister(FAR struct net_driver_s *dev)
 
   if (dev)
     {
+#ifdef CONFIG_NET_BRIDGE
+      bridge_netdev_unregister(dev);
+#endif
+
       netdev_list_lock();
 
       /* Find the device in the list of known network devices */

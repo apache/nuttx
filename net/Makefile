@@ -52,6 +52,7 @@ include devif/Make.defs
 include ipfilter/Make.defs
 include ipforward/Make.defs
 include nat/Make.defs
+include bridge/Make.defs
 include netfilter/Make.defs
 include route/Make.defs
 include procfs/Make.defs

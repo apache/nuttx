@@ -10,6 +10,7 @@ Network Support
        |
        +- arp        - Address resolution protocol (IPv4)
        +- bluetooth  - PF_BLUETOOTH socket interface
+       +- bridge     - Ethernet bridge
        +- can        - SocketCAN
        +- devif      - Stack/device interface layer
        +- icmp       - Internet Control Message Protocol (IPv4)
@@ -64,6 +65,7 @@ Network Support
   pkt.rst
   ipfilter.rst
   nat.rst
+  bridge.rst
   netdev.rst
   netdriver.rst
   mdio.rst
