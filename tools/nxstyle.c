@@ -336,6 +336,12 @@ static const char *g_white_prefix[] =
   "kSE05x_",
   "smStatus_t",
   "pScp03_",
+
+  /* Ref:  arch/mips/src/pic32mz/pic32mz_w1_wlan.c, callbacks of Microchip's
+   * PIC32MZ-W1 WLAN library
+   */
+
+  "DRV_PIC32MZW_",
   NULL
 };
 
