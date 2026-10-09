@@ -215,26 +215,26 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
             {
               switch (c)
                 {
-                case '0':
-                  flags |= FL_ZFILL;
-                  continue;
+                  case '0':
+                    flags |= FL_ZFILL;
+                    continue;
 
-                case '+':
-                  flags |= FL_PLUS;
+                  case '+':
+                    flags |= FL_PLUS;
 
-                  /* FALLTHROUGH */
+                    /* FALLTHROUGH */
 
-                case ' ':
-                  flags |= FL_SPACE;
-                  continue;
+                  case ' ':
+                    flags |= FL_SPACE;
+                    continue;
 
-                case '-':
-                  flags |= FL_LPAD;
-                  continue;
+                  case '-':
+                    flags |= FL_LPAD;
+                    continue;
 
-                case '#':
-                  flags |= FL_ALT;
-                  continue;
+                  case '#':
+                    flags |= FL_ALT;
+                    continue;
                 }
             }
 
@@ -585,12 +585,10 @@ flt_oper:
               value = arglist->value[argnumber - 1].d;
             }
           else
+#endif
             {
               value = va_arg(ap, double);
             }
-#else
-          value = va_arg(ap, double);
-#endif
 
           ndigs = __dtoa_engine(value, &_dtoa, ndigs,
                                 ndecimal);
@@ -872,59 +870,57 @@ flt_oper:
 
       switch (c)
         {
-        case 'c':
+          case 'c':
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
-          if ((flags & FL_ARGNUMBER) != 0)
-            {
-              buf[0] = (int)arglist->value[argnumber - 1].u;
-            }
-          else
-            {
-              buf[0] = va_arg(ap, int);
-            }
-#else
-          buf[0] = va_arg(ap, int);
+            if ((flags & FL_ARGNUMBER) != 0)
+              {
+                buf[0] = (int)arglist->value[argnumber - 1].u;
+              }
+            else
 #endif
-          pnt = buf;
-          size = 1;
-          goto str_lpad;
+              {
+                buf[0] = va_arg(ap, int);
+              }
 
-        case 's':
-        case 'S':
+            pnt = buf;
+            size = 1;
+            goto str_lpad;
+
+          case 's':
+          case 'S':
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
-          if ((flags & FL_ARGNUMBER) != 0)
-            {
-              pnt = arglist->value[argnumber - 1].cp;
-            }
-          else
-            {
-              pnt = va_arg(ap, FAR char *);
-            }
-#else
-          pnt = va_arg(ap, FAR char *);
+            if ((flags & FL_ARGNUMBER) != 0)
+              {
+                pnt = arglist->value[argnumber - 1].cp;
+              }
+            else
 #endif
-          if (pnt == NULL)
-            {
-              pnt = g_nullstring;
-            }
+              {
+                pnt = va_arg(ap, FAR char *);
+              }
 
-          size = strnlen(pnt, (flags & FL_PREC) ? prec : ~0);
+            if (pnt == NULL)
+              {
+                pnt = g_nullstring;
+              }
+
+            size = strnlen(pnt, (flags & FL_PREC) ? prec : ~0);
 
 str_lpad:
-          if ((flags & FL_LPAD) == 0)
-            {
-              while (size < width)
-                {
-                  stream_putc(' ', stream);
-                  width--;
-                }
-            }
+            if ((flags & FL_LPAD) == 0)
+              {
+                while (size < width)
+                  {
+                    stream_putc(' ', stream);
+                    width--;
+                  }
+              }
 
-          stream_puts(pnt, size, stream);
-          width = width >= size ? width - size : 0;
-          size = 0;
+            stream_puts(pnt, size, stream);
+            width = width >= size ? width - size : 0;
+            size = 0;
 
-          goto tail;
+            goto tail;
         }
 
       if (c == 'd' || c == 'i')
@@ -939,12 +935,10 @@ str_lpad:
                   x = (long long)arglist->value[argnumber - 1].ull;
                 }
               else
+#endif
                 {
                   x = va_arg(ap, long long);
                 }
-#else
-                x = va_arg(ap, long long);
-#endif
             }
           else
           if ((flags & FL_LONG) != 0)
@@ -955,12 +949,10 @@ str_lpad:
                   x = (long)arglist->value[argnumber - 1].ul;
                 }
               else
+#endif
                 {
                   x = va_arg(ap, long);
                 }
-#else
-                x = va_arg(ap, long);
-#endif
             }
           else
             {
@@ -970,12 +962,11 @@ str_lpad:
                   x = (int)arglist->value[argnumber - 1].u;
                 }
               else
+#endif
                 {
                   x = va_arg(ap, int);
                 }
-#else
-                x = va_arg(ap, int);
-#endif
+
               if ((flags & FL_SHORT) != 0)
                 {
                   if ((flags & FL_REPD_TYPE) == 0)
@@ -1018,12 +1009,10 @@ str_lpad:
                   x = arglist->value[argnumber - 1].ull;
                 }
               else
+#endif
                 {
                   x = va_arg(ap, unsigned long long);
                 }
-#else
-                x = va_arg(ap, unsigned long long);
-#endif
             }
           else
           if ((flags & FL_LONG) != 0)
@@ -1034,12 +1023,10 @@ str_lpad:
                   x = arglist->value[argnumber - 1].ul;
                 }
               else
+#endif
                 {
                   x = va_arg(ap, unsigned long);
                 }
-#else
-                x = va_arg(ap, unsigned long);
-#endif
             }
           else
             {
@@ -1049,12 +1036,11 @@ str_lpad:
                   x = (unsigned int)arglist->value[argnumber - 1].u;
                 }
               else
+#endif
                 {
                   x = va_arg(ap, unsigned int);
                 }
-#else
-                x = va_arg(ap, unsigned int);
-#endif
+
               if ((flags & FL_SHORT) != 0)
                 {
                   if ((flags & FL_REPD_TYPE) == 0)
@@ -1072,107 +1058,107 @@ str_lpad:
 
           switch (c)
             {
-            case 'u':
-              flags &= ~FL_ALT;
-              base = 10;
-              break;
+              case 'u':
+                flags &= ~FL_ALT;
+                base = 10;
+                break;
 
-            case 'o':
-              base = 8;
-              break;
+              case 'o':
+                base = 8;
+                break;
 
-            case 'p':
+              case 'p':
 #ifdef CONFIG_LIBC_PRINT_EXTENSION
-              c = fmt_char(fmt);
-              switch (c)
-                {
-                  case 'B':
-                    {
-                      FAR struct va_format *vaf = (FAR void *)(uintptr_t)x;
+                c = fmt_char(fmt);
+                switch (c)
+                  {
+                    case 'B':
+                      {
+                        FAR struct va_format *vaf = (FAR void *)(uintptr_t)x;
 
-                      lib_bsprintf(stream, vaf->fmt, vaf->va);
-                      continue;
-                    }
+                        lib_bsprintf(stream, vaf->fmt, vaf->va);
+                        continue;
+                      }
 
-                  case 'V':
-                    {
-                      FAR struct va_format *vaf = (FAR void *)(uintptr_t)x;
+                    case 'V':
+                      {
+                        FAR struct va_format *vaf = (FAR void *)(uintptr_t)x;
 #  ifdef va_copy
-                      va_list copy;
+                        va_list copy;
 
-                      va_copy(copy, *vaf->va);
-                      lib_vsprintf(stream, vaf->fmt, copy);
-                      va_end(copy);
+                        va_copy(copy, *vaf->va);
+                        lib_vsprintf(stream, vaf->fmt, copy);
+                        va_end(copy);
 #  else
-                      lib_vsprintf(stream, vaf->fmt, *vaf->va);
+                        lib_vsprintf(stream, vaf->fmt, *vaf->va);
 #  endif
-                      continue;
-                    }
+                        continue;
+                      }
 
-                  case 'S':
-                  case 's':
-                    {
+                    case 'S':
+                    case 's':
+                      {
 #  ifdef CONFIG_ALLSYMS
-                      FAR const struct symtab_s *symbol;
-                      FAR void *addr = (FAR void *)(uintptr_t)x;
-                      size_t symbolsize;
+                        FAR const struct symtab_s *symbol;
+                        FAR void *addr = (FAR void *)(uintptr_t)x;
+                        size_t symbolsize;
 
-                      symbol = allsyms_findbyvalue(addr, &symbolsize);
-                      if (symbol != NULL)
-                        {
-                          pnt = symbol->sym_name;
-                          while (*pnt != '\0')
-                            {
-                              stream_putc(*pnt++, stream);
-                            }
+                        symbol = allsyms_findbyvalue(addr, &symbolsize);
+                        if (symbol != NULL)
+                          {
+                            pnt = symbol->sym_name;
+                            while (*pnt != '\0')
+                              {
+                                stream_putc(*pnt++, stream);
+                              }
 
-                          if (c == 'S')
-                            {
-                              total_len +=
-                              lib_sprintf_internal(stream,
-                                                   "+%#tx/%#zx",
-                                                   addr - symbol->sym_value,
-                                                   symbolsize);
-                            }
+                            if (c == 'S')
+                              {
+                                total_len +=
+                                lib_sprintf_internal(stream,
+                                      "+%#tx/%#zx",
+                                      addr - symbol->sym_value,
+                                      symbolsize);
+                              }
 
-                          continue;
-                        }
+                            continue;
+                          }
 #  endif
-                      break;
-                    }
+                        break;
+                      }
 
-                  default:
-                    fmt_ungetc(fmt);
-                    break;
-                }
+                    default:
+                      fmt_ungetc(fmt);
+                      break;
+                  }
 #endif
 
-              flags |= FL_ALT;
+                flags |= FL_ALT;
 
-              /* no break */
+                /* no break */
 
-            case 'x':
-              if ((flags & FL_ALT) != 0)
-                {
-                  flags |= FL_ALTHEX;
-                }
+              case 'x':
+                if ((flags & FL_ALT) != 0)
+                  {
+                    flags |= FL_ALTHEX;
+                  }
 
-              base = 16;
-              break;
+                base = 16;
+                break;
 
-            case 'X':
-              if ((flags & FL_ALT) != 0)
-                {
-                  flags |= (FL_ALTHEX | FL_ALTUPP);
-                }
+              case 'X':
+                if ((flags & FL_ALT) != 0)
+                  {
+                    flags |= (FL_ALTHEX | FL_ALTUPP);
+                  }
 
-              base = 16 | XTOA_UPPER;
-              break;
+                base = 16 | XTOA_UPPER;
+                break;
 
-            default:
-              stream_putc('%', stream);
-              stream_putc(c, stream);
-              continue;
+              default:
+                stream_putc('%', stream);
+                stream_putc(c, stream);
+                continue;
             }
 
           if ((flags & FL_PREC) != 0 && prec == 0 && x == 0)
@@ -1254,6 +1240,7 @@ str_lpad:
       else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
         {
           unsigned char z = ' ';
+
           if ((flags & FL_PLUS) != 0)
             {
               z = '+';
@@ -1314,27 +1301,27 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
     {
       switch (arglist.type[i])
         {
-        case TYPE_LONG_LONG:
-          arglist.value[i].ull = va_arg(ap, unsigned long long);
-          break;
+          case TYPE_LONG_LONG:
+            arglist.value[i].ull = va_arg(ap, unsigned long long);
+            break;
 
-        case TYPE_LONG:
-          arglist.value[i].ul = va_arg(ap, unsigned long);
-          break;
+          case TYPE_LONG:
+            arglist.value[i].ul = va_arg(ap, unsigned long);
+            break;
 
-        case TYPE_INT:
-          arglist.value[i].u = va_arg(ap, unsigned int);
-          break;
+          case TYPE_INT:
+            arglist.value[i].u = va_arg(ap, unsigned int);
+            break;
 
 #ifdef CONFIG_HAVE_DOUBLE
-        case TYPE_DOUBLE:
-          arglist.value[i].d = va_arg(ap, double);
-          break;
+          case TYPE_DOUBLE:
+            arglist.value[i].d = va_arg(ap, double);
+            break;
 #endif
 
-        case TYPE_CHAR_POINTER:
-          arglist.value[i].cp = va_arg(ap, FAR char *);
-          break;
+          case TYPE_CHAR_POINTER:
+            arglist.value[i].cp = va_arg(ap, FAR char *);
+            break;
         }
     }
 
