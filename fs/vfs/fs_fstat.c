@@ -211,14 +211,22 @@ int file_fstat(FAR struct file *filep, FAR struct stat *buf)
   else
 #endif
     {
-      /* Check if the inode is a proxy for a block or MTD driver */
+      /* A directory opened with open() has a stand-in inode; stat the
+       * directory itself.
+       */
 
-      ret = proxy_fstat(filep, inode, buf);
-      if (ret < 0)
+      ret = dir_fstat(filep, buf);
+      if (ret == -ENOTTY)
         {
-          /* The inode is part of the root pseudo file system. */
+          /* Check if the inode is a proxy for a block or MTD driver */
 
-          ret = inode_stat(inode, buf, 0);
+          ret = proxy_fstat(filep, inode, buf);
+          if (ret < 0)
+            {
+              /* The inode is part of the root pseudo file system. */
+
+              ret = inode_stat(inode, buf, 0);
+            }
         }
     }
 
