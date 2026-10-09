@@ -134,7 +134,6 @@ struct dmac080_register_map
 #define DMAC_CH_HALT   (1u<<18)
 #define DMAC_CH_ACTIVE (1u<<17)
 
-
 /****************************************************************************
  * Link list item structure for use scatter/gather operation
  ****************************************************************************/
@@ -336,12 +335,13 @@ static struct dmac_register_map *get_device(int ch)
         return (struct dmac_register_map *)DMAC3_REG_BASE;
     }
 
-    return NULL;
+  return NULL;
 }
 
 static struct dmac_ch_register_map *get_channel(int ch)
 {
   struct dmac_register_map *dev = get_device(ch);
+
   if (dev == NULL)
     {
       return NULL;
@@ -431,6 +431,7 @@ static void _dmac_intc_handler(int ch)
   if (dmach->callback)
     {
       int flags = itc ? CXD56_DMA_INTR_ITC : 0;
+
       flags |= err ? CXD56_DMA_INTR_ERR : 0;
       dmach->callback((DMA_HANDLE)dmach, flags, dmach->arg);
     }
@@ -590,7 +591,7 @@ static int dma_close(int ch)
     }
   else if (is_dmac(3, dmac))
     {
-        shift = ch - 2;
+      shift = ch - 2;
     }
 
   enabled = dmac->enbldchns;
@@ -611,7 +612,7 @@ static int dma_close(int ch)
     }
   else if (is_dmac(3, dmac))
     {
-        chmask = 0x1fu << 2;
+      chmask = 0x1fu << 2;
     }
 
   open_channels &= ~(1u << ch);
@@ -632,6 +633,7 @@ static int dma_setconfig(int ch, int itc, int ierr, int flowctrl,
                          int destperi, int srcperi)
 {
   struct dmac_ch_register_map *channel = get_channel(ch);
+
   if (channel == NULL)
     {
       return -ENODEV;
@@ -676,6 +678,7 @@ static int dma_clearintrcallback(int ch)
 static int dma_start(int ch, dmac_lli_t *list)
 {
   struct dmac_ch_register_map *channel = get_channel(ch);
+
   if (channel == NULL)
     {
       return -ENODEV;
@@ -697,6 +700,7 @@ static int dma_start(int ch, dmac_lli_t *list)
 static int dma_stop(int ch)
 {
   struct dmac_ch_register_map *channel = get_channel(ch);
+
   if (channel == NULL)
     {
       return -ENODEV;

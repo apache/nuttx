@@ -49,7 +49,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-
 #define TOUCHPAD_REFH               (TOUCH_HVOLT_2V7)
 #define TOUCHPAD_REFL               (TOUCH_LVOLT_0V5)
 #define TOUCHPAD_ATTEN              (TOUCH_HVOLT_ATTEN_1V)
@@ -210,6 +209,7 @@ uint32_t board_buttons(void)
       else
         {
           int i;
+
           b0 = esp_gpioread(button_info.input.gpio);
 
           for (i = 0; i < 10; i++)

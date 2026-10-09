@@ -541,6 +541,7 @@ static void cxd56_configxfrints(struct cxd56_sdiodev_s *priv,
             uint32_t xfrints)
 {
   irqstate_t flags;
+
   flags = enter_critical_section();
   priv->xfrints = xfrints;
   putreg32(priv->xfrints | priv->waitints | SDHCI_INT_CINT,
@@ -1394,6 +1395,7 @@ static sdio_capset_t cxd56_sdio_capabilities(struct sdio_dev_s *dev)
 static sdio_statset_t cxd56_sdio_status(struct sdio_dev_s *dev)
 {
   struct cxd56_sdiodev_s *priv = (struct cxd56_sdiodev_s *)dev;
+
   return priv->cdstatus;
 }
 
@@ -1522,11 +1524,15 @@ static void cxd56_sdio_clock(struct sdio_dev_s *dev,
   /* sdclk_dly_sel */
 
   if (rate <= CLOCK_SD_TRANSFER_4BIT)
-    putreg32((getreg32(CXD56_SDHCI_USERDEF2CTL) & ~(0x7)) | 0x1,
-              CXD56_SDHCI_USERDEF2CTL);
+    {
+      putreg32((getreg32(CXD56_SDHCI_USERDEF2CTL) & ~(0x7)) | 0x1,
+               CXD56_SDHCI_USERDEF2CTL);
+    }
   else
-    putreg32((getreg32(CXD56_SDHCI_USERDEF2CTL) & ~(0x7)) | 0x0,
-              CXD56_SDHCI_USERDEF2CTL);
+    {
+      putreg32((getreg32(CXD56_SDHCI_USERDEF2CTL) & ~(0x7)) | 0x0,
+               CXD56_SDHCI_USERDEF2CTL);
+    }
 
   /* Select the new prescaler and divisor values based on the requested mode
    * and the settings from the board.h file.
@@ -1537,37 +1543,38 @@ static void cxd56_sdio_clock(struct sdio_dev_s *dev,
 
   switch (rate)
     {
-    default:
-    case CLOCK_SDIO_DISABLED :     /* Clock is disabled */
-      {
-        /* Clear the prescaler and divisor settings and other clock
-         * enables as well.
-         */
+      default:
+      case CLOCK_SDIO_DISABLED :   /* Clock is disabled */
+        {
+          /* Clear the prescaler and divisor settings and other clock
+           * enables as well.
+           */
 
-        regval &= ~(SDHCI_SYSCTL_SDCLKFS_MASK | SDHCI_SYSCTL_SDCLKFSUP_MASK);
-        putreg32(regval, CXD56_SDHCI_SYSCTL);
-        cxd56_sdio_frequency(CONFIG_CXD56_IDMODE_FREQ);
-        mcinfo("SYSCTRL: %08" PRIx32 "\n", getreg32(CXD56_SDHCI_SYSCTL));
-        return;
-      }
+          regval &= ~(SDHCI_SYSCTL_SDCLKFS_MASK |
+                      SDHCI_SYSCTL_SDCLKFSUP_MASK);
+          putreg32(regval, CXD56_SDHCI_SYSCTL);
+          cxd56_sdio_frequency(CONFIG_CXD56_IDMODE_FREQ);
+          mcinfo("SYSCTRL: %08" PRIx32 "\n", getreg32(CXD56_SDHCI_SYSCTL));
+          return;
+        }
 
-    case CLOCK_IDMODE :            /* Initial ID mode clocking (<400KHz) */
-      frequency = CONFIG_CXD56_IDMODE_FREQ;
-      break;
+      case CLOCK_IDMODE :          /* Initial ID mode clocking (<400KHz) */
+        frequency = CONFIG_CXD56_IDMODE_FREQ;
+        break;
 
-    case CLOCK_MMC_TRANSFER :      /* MMC normal operation clocking */
-      frequency = CONFIG_CXD56_MMCXFR_FREQ;
-      break;
+      case CLOCK_MMC_TRANSFER :    /* MMC normal operation clocking */
+        frequency = CONFIG_CXD56_MMCXFR_FREQ;
+        break;
 
-    case CLOCK_SD_TRANSFER_1BIT :  /* SD normal operation clocking (narrow 1-bit mode) */
+      case CLOCK_SD_TRANSFER_1BIT : /* SD normal operation clocking (narrow 1-bit mode) */
 #ifndef CONFIG_CXD56_SDIO_WIDTH_D1_ONLY
-      frequency = CONFIG_CXD56_SD1BIT_FREQ;
-      break;
+        frequency = CONFIG_CXD56_SD1BIT_FREQ;
+        break;
 #endif
 
-    case CLOCK_SD_TRANSFER_4BIT :  /* SD normal operation clocking (wide 4-bit mode) */
-      frequency = CONFIG_CXD56_SD4BIT_FREQ;
-      break;
+      case CLOCK_SD_TRANSFER_4BIT : /* SD normal operation clocking (wide 4-bit mode) */
+        frequency = CONFIG_CXD56_SD4BIT_FREQ;
+        break;
     }
 
   cxd56_sdio_frequency(frequency);
@@ -1677,27 +1684,27 @@ static int cxd56_sdio_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
 
       switch (cmd & MMCSD_DATAXFR_MASK)
         {
-        default:
-        case MMCSD_NODATAXFR : /* No.. no data transfer */
-          break;
+          default:
+          case MMCSD_NODATAXFR : /* No.. no data transfer */
+            break;
 
           /* The following two cases are probably missing some setup logic */
 
-        case MMCSD_RDSTREAM :  /* Yes.. streaming read data transfer */
-          regval |= (SDHCI_XFERTYP_DPSEL | SDHCI_XFERTYP_DTDSEL);
-          break;
+          case MMCSD_RDSTREAM :  /* Yes.. streaming read data transfer */
+            regval |= (SDHCI_XFERTYP_DPSEL | SDHCI_XFERTYP_DTDSEL);
+            break;
 
-        case MMCSD_WRSTREAM :  /* Yes.. streaming write data transfer */
-          regval |= SDHCI_XFERTYP_DPSEL;
-          break;
+          case MMCSD_WRSTREAM :  /* Yes.. streaming write data transfer */
+            regval |= SDHCI_XFERTYP_DPSEL;
+            break;
 
-        case MMCSD_RDDATAXFR : /* Yes.. normal read data transfer */
-          regval |= (SDHCI_XFERTYP_DPSEL | SDHCI_XFERTYP_DTDSEL);
-          break;
+          case MMCSD_RDDATAXFR : /* Yes.. normal read data transfer */
+            regval |= (SDHCI_XFERTYP_DPSEL | SDHCI_XFERTYP_DTDSEL);
+            break;
 
-        case MMCSD_WRDATAXFR : /* Yes.. normal write data transfer */
-          regval |= SDHCI_XFERTYP_DPSEL;
-          break;
+          case MMCSD_WRDATAXFR : /* Yes.. normal write data transfer */
+            regval |= SDHCI_XFERTYP_DPSEL;
+            break;
         }
 
       /* Is it a multi-block transfer? */
@@ -1725,31 +1732,31 @@ static int cxd56_sdio_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
 
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
-    case MMCSD_NO_RESPONSE:                /* No response */
-      regval |= SDHCI_XFERTYP_RSPTYP_NONE;
-      break;
+      case MMCSD_NO_RESPONSE:   /* No response */
+        regval |= SDHCI_XFERTYP_RSPTYP_NONE;
+        break;
 
-    case MMCSD_R1B_RESPONSE:              /* Response length 48, check busy & cmdindex */
-      regval |= (SDHCI_XFERTYP_RSPTYP_LEN48BSY | SDHCI_XFERTYP_CICEN |
-                 SDHCI_XFERTYP_CCCEN);
-      break;
+      case MMCSD_R1B_RESPONSE: /* Response length 48, check busy & cmdindex */
+        regval |= (SDHCI_XFERTYP_RSPTYP_LEN48BSY | SDHCI_XFERTYP_CICEN |
+                   SDHCI_XFERTYP_CCCEN);
+        break;
 
-    case MMCSD_R1_RESPONSE:              /* Response length 48, check cmdindex */
-    case MMCSD_R5_RESPONSE:
-    case MMCSD_R6_RESPONSE:
-      regval |= (SDHCI_XFERTYP_RSPTYP_LEN48 | SDHCI_XFERTYP_CICEN |
-                 SDHCI_XFERTYP_CCCEN);
-      break;
+      case MMCSD_R1_RESPONSE: /* Response length 48, check cmdindex */
+      case MMCSD_R5_RESPONSE:
+      case MMCSD_R6_RESPONSE:
+        regval |= (SDHCI_XFERTYP_RSPTYP_LEN48 | SDHCI_XFERTYP_CICEN |
+                   SDHCI_XFERTYP_CCCEN);
+        break;
 
-    case MMCSD_R2_RESPONSE:              /* Response length 136, check CRC */
-      regval |= (SDHCI_XFERTYP_RSPTYP_LEN136 | SDHCI_XFERTYP_CCCEN);
-      break;
+      case MMCSD_R2_RESPONSE: /* Response length 136, check CRC */
+        regval |= (SDHCI_XFERTYP_RSPTYP_LEN136 | SDHCI_XFERTYP_CCCEN);
+        break;
 
-    case MMCSD_R3_RESPONSE:              /* Response length 48 */
-    case MMCSD_R4_RESPONSE:
-    case MMCSD_R7_RESPONSE:
-      regval |= SDHCI_XFERTYP_RSPTYP_LEN48;
-      break;
+      case MMCSD_R3_RESPONSE: /* Response length 48 */
+      case MMCSD_R4_RESPONSE:
+      case MMCSD_R7_RESPONSE:
+        regval |= SDHCI_XFERTYP_RSPTYP_LEN48;
+        break;
     }
 
   /* Enable DMA */
@@ -2106,29 +2113,29 @@ static int cxd56_sdio_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
 
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
-    case MMCSD_NO_RESPONSE:
-      timeout = SDHCI_CMDTIMEOUT;
-      errors  = 0;
-      return OK;
+      case MMCSD_NO_RESPONSE:
+        timeout = SDHCI_CMDTIMEOUT;
+        errors  = 0;
+        return OK;
 
-    case MMCSD_R1_RESPONSE:
-    case MMCSD_R1B_RESPONSE:
-    case MMCSD_R2_RESPONSE:
-    case MMCSD_R6_RESPONSE:
-      timeout = SDHCI_LONGTIMEOUT;
-      errors  = SDHCI_RESPERR_INTS;
-      break;
+      case MMCSD_R1_RESPONSE:
+      case MMCSD_R1B_RESPONSE:
+      case MMCSD_R2_RESPONSE:
+      case MMCSD_R6_RESPONSE:
+        timeout = SDHCI_LONGTIMEOUT;
+        errors  = SDHCI_RESPERR_INTS;
+        break;
 
-    case MMCSD_R4_RESPONSE:
-    case MMCSD_R5_RESPONSE:
-    case MMCSD_R3_RESPONSE:
-    case MMCSD_R7_RESPONSE:
-      timeout = SDHCI_CMDTIMEOUT;
-      errors  = SDHCI_RESPERR_INTS;
-      break;
+      case MMCSD_R4_RESPONSE:
+      case MMCSD_R5_RESPONSE:
+      case MMCSD_R3_RESPONSE:
+      case MMCSD_R7_RESPONSE:
+        timeout = SDHCI_CMDTIMEOUT;
+        errors  = SDHCI_RESPERR_INTS;
+        break;
 
-    default:
-      return -EINVAL;
+      default:
+        return -EINVAL;
     }
 
   /* Then wait for the Command Complete (CC) indication (or timeout).  The
@@ -2730,6 +2737,7 @@ static int cxd56_sdio_admasetup(const uint8_t *buffer, size_t buflen)
   uint32_t remaining;
   uint32_t len;
   uint32_t data_addr = CXD56_PHYSADDR(buffer);
+
   remaining = buflen;
 
   putreg32(0x0, CXD56_SDHCI_ADSADDR_H);
@@ -3178,6 +3186,7 @@ struct sdio_dev_s *cxd56_sdhci_initialize(int slotno)
   /* There is only one slot */
 
   struct cxd56_sdiodev_s *priv = &g_sdhcdev;
+
   DEBUGASSERT(slotno == 0);
 
   /* Initialize the pins */
@@ -3270,6 +3279,7 @@ struct sdio_dev_s *cxd56_sdhci_finalize(int slotno)
   /* There is only one slot */
 
   struct cxd56_sdiodev_s *priv = &g_sdhcdev;
+
   DEBUGASSERT(slotno == 0);
 
   /* Enable clocking to the SDHC module.  Clocking is still disabled in
@@ -3422,6 +3432,7 @@ void cxd56_sdhci_wrprotect(struct sdio_dev_s *dev, bool wrprotect)
 void cxd56_sdio_resetstatus(struct sdio_dev_s *dev)
 {
   struct cxd56_sdiodev_s *priv = (struct cxd56_sdiodev_s *)dev;
+
   priv->cdstatus = 0;
   priv->cbevents = SDIOMEDIA_INSERTED;
 }

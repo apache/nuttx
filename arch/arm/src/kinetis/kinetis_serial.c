@@ -993,6 +993,7 @@ static int up_dma_setup(struct uart_dev_s *dev)
   /* Configure for circular DMA reception into the RX FIFO */
 
   struct kinetis_edma_xfrconfig_s config;
+
   config.saddr  = priv->uartbase + KINETIS_UART_D_OFFSET;
   config.daddr  = (uint32_t) priv->rxfifo;
   config.soff   = 0;
@@ -1431,267 +1432,269 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
-    case TIOCSERGSTRUCT:
-      {
-        struct up_dev_s *user = (struct up_dev_s *)arg;
-        if (!user)
-          {
-            ret = -EINVAL;
-          }
-        else
-          {
-            memcpy(user, dev, sizeof(struct up_dev_s));
-          }
-      }
-      break;
+      case TIOCSERGSTRUCT:
+        {
+          struct up_dev_s *user = (struct up_dev_s *)arg;
+
+          if (!user)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              memcpy(user, dev, sizeof(struct up_dev_s));
+            }
+        }
+        break;
 #endif
 
 #ifdef CONFIG_KINETIS_UART_SINGLEWIRE
-    case TIOCSSINGLEWIRE:
-      {
-        if ((arg & SER_SINGLEWIRE_PULLUP) != 0)
-          {
-            ret = -EINVAL; /* Not supported */
-            break;
-          }
+      case TIOCSSINGLEWIRE:
+        {
+          if ((arg & SER_SINGLEWIRE_PULLUP) != 0)
+            {
+              ret = -EINVAL; /* Not supported */
+              break;
+            }
 
-        /* Change to single-wire operation. the RXD pin is disconnected from
-         * the UART and the UART implements a half-duplex serial connection.
-         * The UART uses the TXD pin for both receiving and transmitting
-         */
+          /* Change to single-wire operation. the RXD pin is disconnected
+           * from the UART and the UART implements a half-duplex serial
+           * connection. The UART uses the TXD pin for both receiving and
+           * transmitting
+           */
 
-        regval = up_serialin(priv, KINETIS_UART_C1_OFFSET);
+          regval = up_serialin(priv, KINETIS_UART_C1_OFFSET);
 
-        if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
-          {
-            regval |= (UART_C1_LOOPS | UART_C1_RSRC);
-          }
-        else
-          {
-            regval &= ~(UART_C1_LOOPS | UART_C1_RSRC);
-          }
+          if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
+            {
+              regval |= (UART_C1_LOOPS | UART_C1_RSRC);
+            }
+          else
+            {
+              regval &= ~(UART_C1_LOOPS | UART_C1_RSRC);
+            }
 
-        up_serialout(priv, KINETIS_UART_C1_OFFSET, regval);
-      }
-     break;
+          up_serialout(priv, KINETIS_UART_C1_OFFSET, regval);
+        }
+        break;
 #endif
 
 #ifdef CONFIG_SERIAL_TERMIOS
-    case TCGETS:
-      {
-        struct termios *termiosp = (struct termios *)arg;
+      case TCGETS:
+        {
+          struct termios *termiosp = (struct termios *)arg;
 
-        if (!termiosp)
-          {
-            ret = -EINVAL;
-            break;
-          }
+          if (!termiosp)
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        /* Note: CSIZE only supports 5-8 bits. The driver only support
-         * 8/9 bit modes and therefore is no way to report 9-bit mode, we
-         * always claim 8 bit mode.
-         */
+          /* Note: CSIZE only supports 5-8 bits. The driver only support
+           * 8/9 bit modes and therefore is no way to report 9-bit mode, we
+           * always claim 8 bit mode.
+           */
 
-        termiosp->c_cflag =
-          ((priv->parity != 0) ? PARENB : 0) |
-          ((priv->parity == 1) ? PARODD : 0) |
-          ((priv->stop2) ? CSTOPB : 0) |
+          termiosp->c_cflag =
+            ((priv->parity != 0) ? PARENB : 0) |
+            ((priv->parity == 1) ? PARODD : 0) |
+            ((priv->stop2) ? CSTOPB : 0) |
 #  ifdef CONFIG_SERIAL_OFLOWCONTROL
-          ((priv->oflow) ? CCTS_OFLOW : 0) |
+            ((priv->oflow) ? CCTS_OFLOW : 0) |
 #  endif
 #  ifdef CONFIG_SERIAL_IFLOWCONTROL
-          ((priv->iflow) ? CRTS_IFLOW : 0) |
+            ((priv->iflow) ? CRTS_IFLOW : 0) |
 #  endif
-          CS8;
+            CS8;
 
-        cfsetispeed(termiosp, priv->baud);
+          cfsetispeed(termiosp, priv->baud);
 
-        /* TODO: CRTS_IFLOW, CCTS_OFLOW */
-      }
-      break;
+          /* TODO: CRTS_IFLOW, CCTS_OFLOW */
+        }
+        break;
 
-    case TCSETS:
-      {
-        struct termios *termiosp = (struct termios *)arg;
+      case TCSETS:
+        {
+          struct termios *termiosp = (struct termios *)arg;
 
-        if (!termiosp)
-          {
-            ret = -EINVAL;
-            break;
-          }
+          if (!termiosp)
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        /* Perform some sanity checks before accepting any changes */
+          /* Perform some sanity checks before accepting any changes */
 
-        if (((termiosp->c_cflag & CSIZE) != CS8)
+          if (((termiosp->c_cflag & CSIZE) != CS8)
 #  ifdef CONFIG_SERIAL_OFLOWCONTROL
-            || ((termiosp->c_cflag & CCTS_OFLOW) && (priv->cts_gpio == 0))
+              || ((termiosp->c_cflag & CCTS_OFLOW) && (priv->cts_gpio == 0))
 #  endif
 #  ifdef CONFIG_SERIAL_IFLOWCONTROL
-            || ((termiosp->c_cflag & CRTS_IFLOW) && (priv->rts_gpio == 0))
+              || ((termiosp->c_cflag & CRTS_IFLOW) && (priv->rts_gpio == 0))
 #  endif
-           )
-          {
-            ret = -EINVAL;
-            break;
-          }
+             )
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        if (termiosp->c_cflag & PARENB)
-          {
-            priv->parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
-          }
-        else
-          {
-            priv->parity = 0;
-          }
+          if (termiosp->c_cflag & PARENB)
+            {
+              priv->parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
+            }
+          else
+            {
+              priv->parity = 0;
+            }
 
-        priv->stop2 = (termiosp->c_cflag & CSTOPB) != 0;
+          priv->stop2 = (termiosp->c_cflag & CSTOPB) != 0;
 #  ifdef CONFIG_SERIAL_OFLOWCONTROL
-        priv->oflow = (termiosp->c_cflag & CCTS_OFLOW) != 0;
-        oflow = priv->oflow;
+          priv->oflow = (termiosp->c_cflag & CCTS_OFLOW) != 0;
+          oflow = priv->oflow;
 #  endif
 #  ifdef CONFIG_SERIAL_IFLOWCONTROL
-        priv->iflow = (termiosp->c_cflag & CRTS_IFLOW) != 0;
-        iflow = priv->iflow;
+          priv->iflow = (termiosp->c_cflag & CRTS_IFLOW) != 0;
+          iflow = priv->iflow;
 #  endif
 
-        /* Note that since there is no way to request 9-bit mode
-         * and no way to support 5/6/7-bit modes, we ignore them
-         * all here.
-         */
+          /* Note that since there is no way to request 9-bit mode
+           * and no way to support 5/6/7-bit modes, we ignore them
+           * all here.
+           */
 
-        /* Note that only cfgetispeed is used because we have knowledge
-         * that only one speed is supported.
-         */
+          /* Note that only cfgetispeed is used because we have knowledge
+           * that only one speed is supported.
+           */
 
-        priv->baud = cfgetispeed(termiosp);
+          priv->baud = cfgetispeed(termiosp);
 
-        /* Effect the changes immediately - note that we do not implement
-         * TCSADRAIN / TCSAFLUSH
-         */
+          /* Effect the changes immediately - note that we do not implement
+           * TCSADRAIN / TCSAFLUSH
+           */
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_SERIAL_RS485CONTROL)
-        kinetis_uartconfigure(priv->uartbase, priv->baud, priv->clock,
-                                priv->parity, priv->bits, priv->stop2,
-                                iflow, oflow, priv->rs485control);
+          kinetis_uartconfigure(priv->uartbase, priv->baud, priv->clock,
+                                  priv->parity, priv->bits, priv->stop2,
+                                  iflow, oflow, priv->rs485control);
 #else
-        kinetis_uartconfigure(priv->uartbase, priv->baud, priv->clock,
-                                priv->parity, priv->bits, priv->stop2,
-                                iflow, oflow, false);
+          kinetis_uartconfigure(priv->uartbase, priv->baud, priv->clock,
+                                  priv->parity, priv->bits, priv->stop2,
+                                  iflow, oflow, false);
 #endif
-      }
-      break;
+        }
+        break;
 #endif /* CONFIG_SERIAL_TERMIOS */
 
 #ifdef CONFIG_KINETIS_UART_BREAKS
-    case TIOCSBRK:
-      {
-        irqstate_t flags;
+      case TIOCSBRK:
+        {
+          irqstate_t flags;
 
-        flags = enter_critical_section();
+          flags = enter_critical_section();
 
-        /* Send a longer break signal */
+          /* Send a longer break signal */
 
-        regval = up_serialin(priv, KINETIS_UART_S2_OFFSET);
-        regval &= ~UART_S2_BRK13;
+          regval = up_serialin(priv, KINETIS_UART_S2_OFFSET);
+          regval &= ~UART_S2_BRK13;
 # ifdef CONFIG_KINETIS_UART_EXTEDED_BREAK
-        regval |= UART_S2_BRK13;
+          regval |= UART_S2_BRK13;
 #  endif
-        up_serialout(priv, KINETIS_UART_S2_OFFSET, regval);
+          up_serialout(priv, KINETIS_UART_S2_OFFSET, regval);
 
-        /* Send a break signal */
+          /* Send a break signal */
 
-        regval = up_serialin(priv, KINETIS_UART_C2_OFFSET);
-        regval |= UART_C2_SBK;
-        up_serialout(priv, KINETIS_UART_C2_OFFSET, regval);
+          regval = up_serialin(priv, KINETIS_UART_C2_OFFSET);
+          regval |= UART_C2_SBK;
+          up_serialout(priv, KINETIS_UART_C2_OFFSET, regval);
 
 #  ifdef CONFIG_KINETIS_SERIALBRK_BSDCOMPAT
-        /* BSD compatibility: Turn break on, and leave it on */
+          /* BSD compatibility: Turn break on, and leave it on */
 
-        up_txint(dev, false);
+          up_txint(dev, false);
 #  else
-        /* Send a single break character
-         * Toggling SBK sends one break character. Per the manual
-         * Toggling implies clearing the SBK field before the break
-         * character has finished transmitting.
-         */
+          /* Send a single break character
+           * Toggling SBK sends one break character. Per the manual
+           * Toggling implies clearing the SBK field before the break
+           * character has finished transmitting.
+           */
 
-        regval &= ~(UART_C2_SBK);
-        up_serialout(priv, KINETIS_UART_C2_OFFSET, regval);
+          regval &= ~(UART_C2_SBK);
+          up_serialout(priv, KINETIS_UART_C2_OFFSET, regval);
 #endif
 
-        leave_critical_section(flags);
-      }
-      break;
+          leave_critical_section(flags);
+        }
+        break;
 
-    case TIOCCBRK:
-      {
-        irqstate_t flags;
+      case TIOCCBRK:
+        {
+          irqstate_t flags;
 
-        flags = enter_critical_section();
+          flags = enter_critical_section();
 
-        /* Configure TX back to UART
-         * If non BSD compatible: This code has no effect, the SBRK
-         * was already cleared.
-         * but for BSD compatibility: Turn break off
-         */
+          /* Configure TX back to UART
+           * If non BSD compatible: This code has no effect, the SBRK
+           * was already cleared.
+           * but for BSD compatibility: Turn break off
+           */
 
-        regval = up_serialin(priv, KINETIS_UART_C2_OFFSET);
-        regval &= ~UART_C2_SBK;
-        up_serialout(priv, KINETIS_UART_C2_OFFSET, regval);
+          regval = up_serialin(priv, KINETIS_UART_C2_OFFSET);
+          regval &= ~UART_C2_SBK;
+          up_serialout(priv, KINETIS_UART_C2_OFFSET, regval);
 
 #  ifdef CONFIG_KINETIS_SERIALBRK_BSDCOMPAT
-        /* Enable further tx activity */
+          /* Enable further tx activity */
 
-        up_txint(dev, true);
+          up_txint(dev, true);
 #  endif
-        leave_critical_section(flags);
-      }
-      break;
+          leave_critical_section(flags);
+        }
+        break;
 #endif /* CONFIG_KINETIS_UART_BREAKS */
 
 #ifdef CONFIG_KINETIS_UART_INVERT
-    case TIOCSINVERT:
-      {
-        uint8_t s2;
-        uint8_t c3;
-        irqstate_t flags;
+      case TIOCSINVERT:
+        {
+          uint8_t s2;
+          uint8_t c3;
+          irqstate_t flags;
 
-        flags = enter_critical_section();
+          flags = enter_critical_section();
 
-        s2 = up_serialin(priv, KINETIS_UART_S2_OFFSET);
-        c3 = up_serialin(priv, KINETIS_UART_C3_OFFSET);
+          s2 = up_serialin(priv, KINETIS_UART_S2_OFFSET);
+          c3 = up_serialin(priv, KINETIS_UART_C3_OFFSET);
 
-        /* {R|T}XINV bit fields can written any time */
+          /* {R|T}XINV bit fields can written any time */
 
-        if (arg & SER_INVERT_ENABLED_RX)
-          {
-            s2 |= UART_S2_RXINV;
-          }
-        else
-          {
-            s2 &= ~UART_S2_RXINV;
-          }
+          if (arg & SER_INVERT_ENABLED_RX)
+            {
+              s2 |= UART_S2_RXINV;
+            }
+          else
+            {
+              s2 &= ~UART_S2_RXINV;
+            }
 
-        if (arg & SER_INVERT_ENABLED_TX)
-          {
-            c3 |= UART_C3_TXINV;
-          }
-        else
-          {
-            c3 &= ~UART_C3_TXINV;
-          }
+          if (arg & SER_INVERT_ENABLED_TX)
+            {
+              c3 |= UART_C3_TXINV;
+            }
+          else
+            {
+              c3 &= ~UART_C3_TXINV;
+            }
 
-        up_serialout(priv, KINETIS_UART_S2_OFFSET, s2);
-        up_serialout(priv, KINETIS_UART_C3_OFFSET, c3);
+          up_serialout(priv, KINETIS_UART_S2_OFFSET, s2);
+          up_serialout(priv, KINETIS_UART_C3_OFFSET, c3);
 
-        leave_critical_section(flags);
-      }
-     break;
+          leave_critical_section(flags);
+        }
+        break;
 #endif
 
-    default:
-      ret = -ENOTTY;
-      break;
+      default:
+        ret = -ENOTTY;
+        break;
     }
 
   UNUSED(regval);
@@ -1998,6 +2001,7 @@ static int up_dma_nextrx(struct up_dev_s *priv)
 static void up_send(struct uart_dev_s *dev, int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+
   up_serialout(priv, KINETIS_UART_D_OFFSET, (uint8_t)ch);
 }
 
@@ -2229,9 +2233,9 @@ unsigned int kinetis_uart_serialinit(unsigned int first)
 #ifdef SERIAL_HAVE_DMA
 void kinetis_serial_dma_poll(void)
 {
-    irqstate_t flags;
+  irqstate_t flags;
 
-    flags = enter_critical_section();
+  flags = enter_critical_section();
 
 #ifdef CONFIG_KINETIS_UART0_RXDMA
   if (g_uart0priv.rxdma != NULL)

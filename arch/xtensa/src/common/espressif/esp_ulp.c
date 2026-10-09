@@ -199,6 +199,7 @@ static void esp_ulp_register(void)
 int esp_ulp_load_bin(const char *buffer, size_t buflen)
 {
   int ret = ERROR;
+
   ulp_riscv_halt();
   ulp_riscv_reset();
   ret = ulp_riscv_load_binary((const uint8_t *)buffer, buflen);

@@ -130,7 +130,6 @@
 #define SETENABLE_TYPE_PS              0
 #define SETENABLE_TYPE_ALS             1
 
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -815,6 +814,7 @@ static int apds9930_ioctl_ps(struct file *filep, int cmd,
       case SNIOC_GETINTSTATUS:
         {
           uint8_t intstatus = apds9930_getreg8(priv, APDS9930_STATUS);
+
           *(uint8_t *)(uintptr_t)arg = intstatus;
           sninfo("Get proximity IntStatus 0x%02x\n", intstatus);
         }

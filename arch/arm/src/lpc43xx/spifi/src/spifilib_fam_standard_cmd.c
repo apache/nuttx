@@ -1539,7 +1539,7 @@ static SPIFI_ERR_T spifiFamFxPageProgram(const SPIFI_HANDLE_T *pHandle,
                 }
               spifi_HW_WaitCMD(pSpifiCtrlAddr);
             }
-    }
+        }
 
     /* If block is disabled, exit now */
 
@@ -1743,141 +1743,141 @@ SPIFI_FAM_NODE_T *spifi_REG_FAMILY_CommonCommandSet(void)
 
   /* Add support for W25Q80BV */
 
-    {
-      static const SPIFI_DEVICE_DATA_T pData =
+  {
+    static const SPIFI_DEVICE_DATA_T pData =
+      {
+        "W25Q80BV",
         {
-          "W25Q80BV",
           {
-            {
-              0xef, 0x40, 0x14
-            },
-            0,
-            {
-              0
-            }
-          },                                     /* JEDEC ID, extCount, ext data  */
-          (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
-          SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_FULLLOCK |
-          SPIFI_CAP_NOBLOCK | SPIFI_CAP_SUBBLKERASE),
-          16,                                    /* # of blocks */
-          0x10000,                               /* block size */
-          256,                                   /* # of sub-blocks */
-          0x1000,                                /* sub-block size */
-          0x100,                                 /* page size */
-          MAX_SINGLE_READ,                       /* max single read bytes */
-          104,                                   /* max clock rate in MHz */
-          104,                                   /* max read clock rate in MHz */
-          104,                                   /* max high speed read clock rate in MHz */
-          104,                                   /* max program clock rate in MHz */
-          104,                                   /* max high speed program clock rate in MHz */
-          FX_spifiDeviceDataInitDeinit,          /* (Fx Id) use generic deviceInit / deInit */
-          FX_spifiDeviceDataClearStatusNone,     /* (Fx Id) Does not have persistent status */
-          FX_spifiDeviceDataGetStatusW25Q80BV,   /* (Fx Id) getStatus */
-          FX_spifiDeviceDataSetStatusS25FL032P,  /* (Fx Id) setStatus (uses S25FL032P variant) */
-          FX_spifiDeviceDataSetOptsQuadModeBit9, /* (Fx Id) to set/clr options */
-          FX_spifiDeviceInitReadCommand,         /* (Fx Id) to get memoryMode Cmd */
-          FX_spifiDeviceInitWriteCommand         /* (Fx Id) to get program Cmd */
-        };
+            0xef, 0x40, 0x14
+          },
+          0,
+          {
+            0
+          }
+        },                                     /* JEDEC ID, extCount, ext data  */
+        (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
+        SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_FULLLOCK |
+        SPIFI_CAP_NOBLOCK | SPIFI_CAP_SUBBLKERASE),
+        16,                                    /* # of blocks */
+        0x10000,                               /* block size */
+        256,                                   /* # of sub-blocks */
+        0x1000,                                /* sub-block size */
+        0x100,                                 /* page size */
+        MAX_SINGLE_READ,                       /* max single read bytes */
+        104,                                   /* max clock rate in MHz */
+        104,                                   /* max read clock rate in MHz */
+        104,                                   /* max high speed read clock rate in MHz */
+        104,                                   /* max program clock rate in MHz */
+        104,                                   /* max high speed program clock rate in MHz */
+        FX_spifiDeviceDataInitDeinit,          /* (Fx Id) use generic deviceInit / deInit */
+        FX_spifiDeviceDataClearStatusNone,     /* (Fx Id) Does not have persistent status */
+        FX_spifiDeviceDataGetStatusW25Q80BV,   /* (Fx Id) getStatus */
+        FX_spifiDeviceDataSetStatusS25FL032P,  /* (Fx Id) setStatus (uses S25FL032P variant) */
+        FX_spifiDeviceDataSetOptsQuadModeBit9, /* (Fx Id) to set/clr options */
+        FX_spifiDeviceInitReadCommand,         /* (Fx Id) to get memoryMode Cmd */
+        FX_spifiDeviceInitWriteCommand         /* (Fx Id) to get program Cmd */
+      };
 
-      static SPIFI_DEV_NODE_T data;              /* Create persistent node */
+    static SPIFI_DEV_NODE_T data;              /* Create persistent node */
 
-      data.pDevData = &pData;                    /* save the data in the node */
-      spifiDevRegister(&devFamily, &data);       /* Register the new device */
-    }
+    data.pDevData = &pData;                    /* save the data in the node */
+    spifiDevRegister(&devFamily, &data);       /* Register the new device */
+  }
   #endif
 
   #if SPIFI_DEVICE_ALL || SPIFI_DEVICE_W25Q64FV
 
   /* Add support for W25Q64FV */
 
-    {
-      static const SPIFI_DEVICE_DATA_T pData =
+  {
+    static const SPIFI_DEVICE_DATA_T pData =
+      {
+        "W25Q64FV",
         {
-          "W25Q64FV",
           {
-            {
-              0xef, 0x40, 0x17
-            },
-            0,
-            {
-              0
-            }
-          },          /* JEDEC ID, extCount, ext data  */
-          (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ  |
-           SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_FULLLOCK |
-          SPIFI_CAP_NOBLOCK | SPIFI_CAP_SUBBLKERASE),
-          128,                                   /* # of blocks */
-          0x10000,                               /* block size */
-          2048,                                  /* # of sub-blocks */
-          0x1000,                                /* sub-block size */
-          0x100,                                 /* page size */
-          MAX_SINGLE_READ,                       /* max single read bytes */
-          104,                                   /* max clock rate in MHz */
-          104,                                   /* max read clock rate in MHz */
-          104,                                   /* max high speed read clock rate in MHz */
-          104,                                   /* max program clock rate in MHz */
-          104,                                   /* max high speed program clock rate in MHz */
-          FX_spifiDeviceDataInitDeinit,          /* (Fx Id) use generic deviceInit / deInit */
-          FX_spifiDeviceDataClearStatusNone,     /* (Fx Id) Does not have persistent status */
-          FX_spifiDeviceDataGetStatusW25Q80BV,   /* (Fx Id) getStatus */
-          FX_spifiDeviceDataSetStatusS25FL032P,  /* (Fx Id) setStatus (uses S25FL032P variant) */
-          FX_spifiDeviceDataSetOptsQuadModeBit9, /* (Fx Id) to set/clr options */
-          FX_spifiDeviceInitReadCommand,         /* (Fx Id) to get memoryMode Cmd */
-          FX_spifiDeviceInitWriteCommand         /* (Fx Id) to get program Cmd */
-        };
+            0xef, 0x40, 0x17
+          },
+          0,
+          {
+            0
+          }
+        },          /* JEDEC ID, extCount, ext data  */
+        (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ  |
+         SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_FULLLOCK |
+        SPIFI_CAP_NOBLOCK | SPIFI_CAP_SUBBLKERASE),
+        128,                                   /* # of blocks */
+        0x10000,                               /* block size */
+        2048,                                  /* # of sub-blocks */
+        0x1000,                                /* sub-block size */
+        0x100,                                 /* page size */
+        MAX_SINGLE_READ,                       /* max single read bytes */
+        104,                                   /* max clock rate in MHz */
+        104,                                   /* max read clock rate in MHz */
+        104,                                   /* max high speed read clock rate in MHz */
+        104,                                   /* max program clock rate in MHz */
+        104,                                   /* max high speed program clock rate in MHz */
+        FX_spifiDeviceDataInitDeinit,          /* (Fx Id) use generic deviceInit / deInit */
+        FX_spifiDeviceDataClearStatusNone,     /* (Fx Id) Does not have persistent status */
+        FX_spifiDeviceDataGetStatusW25Q80BV,   /* (Fx Id) getStatus */
+        FX_spifiDeviceDataSetStatusS25FL032P,  /* (Fx Id) setStatus (uses S25FL032P variant) */
+        FX_spifiDeviceDataSetOptsQuadModeBit9, /* (Fx Id) to set/clr options */
+        FX_spifiDeviceInitReadCommand,         /* (Fx Id) to get memoryMode Cmd */
+        FX_spifiDeviceInitWriteCommand         /* (Fx Id) to get program Cmd */
+      };
 
-      static SPIFI_DEV_NODE_T data;              /* Create persistent node */
+    static SPIFI_DEV_NODE_T data;              /* Create persistent node */
 
-      data.pDevData = &pData;                    /* save the data in the node */
-      spifiDevRegister(&devFamily, &data);       /* Register the new device */
-    }
+    data.pDevData = &pData;                    /* save the data in the node */
+    spifiDevRegister(&devFamily, &data);       /* Register the new device */
+  }
   #endif
 
   #if SPIFI_DEVICE_ALL || SPIFI_DEVICE_W25Q32FV
 
   /* Add support for W25Q32FV */
 
-    {
-      static const SPIFI_DEVICE_DATA_T pData =
+  {
+    static const SPIFI_DEVICE_DATA_T pData =
+      {
+        "W25Q32FV",
         {
-          "W25Q32FV",
           {
-            {
-              0xef, 0x40, 0x16
-            },
-            0,
-            {
-              0
-            }
-          },                                      /* JEDEC ID, extCount, ext data  */
-          (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
-           SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_FULLLOCK |
-           SPIFI_CAP_NOBLOCK | SPIFI_CAP_SUBBLKERASE),
-           64,                                    /* # of blocks */
-           0x10000,                               /* block size */
-           1024,                                  /* # of sub-blocks */
-           0x1000,                                /* sub-block size */
-           0x100,                                 /* page size */
-           MAX_SINGLE_READ,                       /* max single read bytes */
-           104,                                   /* max clock rate in MHz */
-           104,                                   /* max read clock rate in MHz */
-           104,                                   /* max high speed read clock rate in MHz */
-           104,                                   /* max program clock rate in MHz */
-           104,                                   /* max high speed program clock rate in MHz */
-           FX_spifiDeviceDataInitDeinit,          /* (Fx Id) use generic deviceInit / deInit */
-           FX_spifiDeviceDataClearStatusNone,     /* (Fx Id) Does not have persistent status */
-           FX_spifiDeviceDataGetStatusW25Q80BV,   /* (Fx Id) getStatus */
-           FX_spifiDeviceDataSetStatusS25FL032P,  /* (Fx Id) setStatus (uses S25FL032P variant) */
-           FX_spifiDeviceDataSetOptsQuadModeBit9, /* (Fx Id) to set/clr options */
-           FX_spifiDeviceInitReadCommand,         /* (Fx Id) to get memoryMode Cmd */
-           FX_spifiDeviceInitWriteCommand         /* (Fx Id) to get program Cmd */
-        };
+            0xef, 0x40, 0x16
+          },
+          0,
+          {
+            0
+          }
+        },                                      /* JEDEC ID, extCount, ext data  */
+        (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
+         SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_FULLLOCK |
+         SPIFI_CAP_NOBLOCK | SPIFI_CAP_SUBBLKERASE),
+         64,                                    /* # of blocks */
+         0x10000,                               /* block size */
+         1024,                                  /* # of sub-blocks */
+         0x1000,                                /* sub-block size */
+         0x100,                                 /* page size */
+         MAX_SINGLE_READ,                       /* max single read bytes */
+         104,                                   /* max clock rate in MHz */
+         104,                                   /* max read clock rate in MHz */
+         104,                                   /* max high speed read clock rate in MHz */
+         104,                                   /* max program clock rate in MHz */
+         104,                                   /* max high speed program clock rate in MHz */
+         FX_spifiDeviceDataInitDeinit,          /* (Fx Id) use generic deviceInit / deInit */
+         FX_spifiDeviceDataClearStatusNone,     /* (Fx Id) Does not have persistent status */
+         FX_spifiDeviceDataGetStatusW25Q80BV,   /* (Fx Id) getStatus */
+         FX_spifiDeviceDataSetStatusS25FL032P,  /* (Fx Id) setStatus (uses S25FL032P variant) */
+         FX_spifiDeviceDataSetOptsQuadModeBit9, /* (Fx Id) to set/clr options */
+         FX_spifiDeviceInitReadCommand,         /* (Fx Id) to get memoryMode Cmd */
+         FX_spifiDeviceInitWriteCommand         /* (Fx Id) to get program Cmd */
+      };
 
-      static SPIFI_DEV_NODE_T data;               /* Create persistent node */
+    static SPIFI_DEV_NODE_T data;               /* Create persistent node */
 
-      data.pDevData = &pData;                     /* save the data in the node */
-      spifiDevRegister(&devFamily, &data);        /* Register the new device */
-    }
+    data.pDevData = &pData;                     /* save the data in the node */
+    spifiDevRegister(&devFamily, &data);        /* Register the new device */
+  }
   #endif
 
   /* Begin Spansion devices */
@@ -1886,431 +1886,431 @@ SPIFI_FAM_NODE_T *spifi_REG_FAMILY_CommonCommandSet(void)
 
   /* Add support for S25FL512S 256K Sector */
 
-    {
-      static const SPIFI_DEVICE_DATA_T pData =
+  {
+    static const SPIFI_DEVICE_DATA_T pData =
+      {
+        "S25FL512S",
         {
-          "S25FL512S",
           {
-            {
-              0x01, 0x02, 0x20
-            },
-            0,
-            {
-              0
-            }
-          },                                      /* JEDEC ID, extCount, ext data  */
-          (SPIFI_CAP_4BYTE_ADDR | SPIFI_CAP_DUAL_READ  |
-          SPIFI_CAP_QUAD_READ | SPIFI_CAP_QUAD_WRITE |
-          SPIFI_CAP_FULLLOCK | SPIFI_CAP_NOBLOCK),
-          256,                                    /* # of blocks */
-          0x40000,                                /* block size */
-          0,                                      /* # of sub-blocks
-                                                   * (Does NOT support full sub-block erase) */
-          0,                                      /* sub-block size */
-          512,                                    /* page size */
-          MAX_SINGLE_READ,                        /* max single read bytes */
-          80,                                     /* max clock rate in MHz */
-          104,                                    /* max read clock rate in MHz */
-          80,                                     /* max high speed read clock rate in MHz */
-          104,                                    /* max program clock rate in MHz */
-          80,                                     /* max high speed program clock rate in MHz */
-          FX_spifiDeviceDataInitDeinit,           /* (Fx Id) use generic deviceInit / deInit */
-          FX_spifiDeviceDataClearStatusS25FL032P, /* (Fx Id) has persistent bits in status register */
-          FX_spifiDeviceDataGetStatusS25FL032P,   /* (Fx Id) getStatus */
-          FX_spifiDeviceDataSetStatusS25FL032P,   /* (Fx Id) setStatus */
-          FX_spifiDeviceDataSetOptsQuadModeBit9,  /* (Fx Id) to set/clr options */
-          FX_spifiDevice4BInitReadCommand,        /* (Fx Id) to get memoryMode Cmd */
-          FX_spifiDevice4BInitWriteCommand        /* (Fx Id) to get program Cmd */
-        };
+            0x01, 0x02, 0x20
+          },
+          0,
+          {
+            0
+          }
+        },                                      /* JEDEC ID, extCount, ext data  */
+        (SPIFI_CAP_4BYTE_ADDR | SPIFI_CAP_DUAL_READ  |
+        SPIFI_CAP_QUAD_READ | SPIFI_CAP_QUAD_WRITE |
+        SPIFI_CAP_FULLLOCK | SPIFI_CAP_NOBLOCK),
+        256,                                    /* # of blocks */
+        0x40000,                                /* block size */
+        0,                                      /* # of sub-blocks
+                                                 * (Does NOT support full sub-block erase) */
+        0,                                      /* sub-block size */
+        512,                                    /* page size */
+        MAX_SINGLE_READ,                        /* max single read bytes */
+        80,                                     /* max clock rate in MHz */
+        104,                                    /* max read clock rate in MHz */
+        80,                                     /* max high speed read clock rate in MHz */
+        104,                                    /* max program clock rate in MHz */
+        80,                                     /* max high speed program clock rate in MHz */
+        FX_spifiDeviceDataInitDeinit,           /* (Fx Id) use generic deviceInit / deInit */
+        FX_spifiDeviceDataClearStatusS25FL032P, /* (Fx Id) has persistent bits in status register */
+        FX_spifiDeviceDataGetStatusS25FL032P,   /* (Fx Id) getStatus */
+        FX_spifiDeviceDataSetStatusS25FL032P,   /* (Fx Id) setStatus */
+        FX_spifiDeviceDataSetOptsQuadModeBit9,  /* (Fx Id) to set/clr options */
+        FX_spifiDevice4BInitReadCommand,        /* (Fx Id) to get memoryMode Cmd */
+        FX_spifiDevice4BInitWriteCommand        /* (Fx Id) to get program Cmd */
+      };
 
-      static SPIFI_DEV_NODE_T data;               /* Create persistent node */
+    static SPIFI_DEV_NODE_T data;               /* Create persistent node */
 
-      data.pDevData = &pData;                     /* save the data in the node */
-      spifiDevRegister(&devFamily, &data);        /* Register the new device */
-    }
+    data.pDevData = &pData;                     /* save the data in the node */
+    spifiDevRegister(&devFamily, &data);        /* Register the new device */
+  }
   #endif
 
   #if SPIFI_DEVICE_ALL || SPIFI_DEVICE_S25FL256S_256K
 
   /* Add support for S25FL256S 256K Sector */
 
-    {
-      static const SPIFI_DEVICE_DATA_T pData =
+  {
+    static const SPIFI_DEVICE_DATA_T pData =
+      {
+        "S25FL256S 256kSec",
         {
-          "S25FL256S 256kSec",
           {
-            {
-              0x01, 0x02, 0x19
-            },
-            2,
-            {
-              0x4d, 0x0
-            }
-          },                                      /* JEDEC ID, extCount, ext data  */
-          (SPIFI_CAP_4BYTE_ADDR | SPIFI_CAP_DUAL_READ |
-          SPIFI_CAP_QUAD_READ | SPIFI_CAP_QUAD_WRITE |
-          SPIFI_CAP_FULLLOCK | SPIFI_CAP_NOBLOCK),
-          128,                                    /* # of blocks */
-          0x40000,                                /* block size */
-          0,                                      /* # of sub-blocks
-                                                   * (Does NOT support full sub-block erase) */
-          0,                                      /* sub-block size */
-          256,                                    /* page size */
-          MAX_SINGLE_READ,                        /* max single read bytes */
-          80,                                     /* max clock rate in MHz */
-          104,                                    /* max read clock rate in MHz */
-          80,                                     /* max high speed read clock rate in MHz */
-          104,                                    /* max program clock rate in MHz */
-          80,                                     /* max high speed program clock rate in MHz */
-          FX_spifiDeviceDataInitDeinit,           /* (Fx Id) use generic deviceInit / deInit */
-          FX_spifiDeviceDataClearStatusS25FL032P, /* (Fx Id) has persistent bits in status register */
-          FX_spifiDeviceDataGetStatusS25FL032P,   /* (Fx Id) getStatus */
-          FX_spifiDeviceDataSetStatusS25FL032P,   /* (Fx Id) setStatus */
-          FX_spifiDeviceDataSetOptsQuadModeBit9,  /* (Fx Id) to set/clr options */
-          FX_spifiDevice4BInitReadCommand,        /* (Fx Id) to get memoryMode Cmd */
-          FX_spifiDevice4BInitWriteCommand        /* (Fx Id) to get program Cmd */
-        };
+            0x01, 0x02, 0x19
+          },
+          2,
+          {
+            0x4d, 0x0
+          }
+        },                                      /* JEDEC ID, extCount, ext data  */
+        (SPIFI_CAP_4BYTE_ADDR | SPIFI_CAP_DUAL_READ |
+        SPIFI_CAP_QUAD_READ | SPIFI_CAP_QUAD_WRITE |
+        SPIFI_CAP_FULLLOCK | SPIFI_CAP_NOBLOCK),
+        128,                                    /* # of blocks */
+        0x40000,                                /* block size */
+        0,                                      /* # of sub-blocks
+                                                 * (Does NOT support full sub-block erase) */
+        0,                                      /* sub-block size */
+        256,                                    /* page size */
+        MAX_SINGLE_READ,                        /* max single read bytes */
+        80,                                     /* max clock rate in MHz */
+        104,                                    /* max read clock rate in MHz */
+        80,                                     /* max high speed read clock rate in MHz */
+        104,                                    /* max program clock rate in MHz */
+        80,                                     /* max high speed program clock rate in MHz */
+        FX_spifiDeviceDataInitDeinit,           /* (Fx Id) use generic deviceInit / deInit */
+        FX_spifiDeviceDataClearStatusS25FL032P, /* (Fx Id) has persistent bits in status register */
+        FX_spifiDeviceDataGetStatusS25FL032P,   /* (Fx Id) getStatus */
+        FX_spifiDeviceDataSetStatusS25FL032P,   /* (Fx Id) setStatus */
+        FX_spifiDeviceDataSetOptsQuadModeBit9,  /* (Fx Id) to set/clr options */
+        FX_spifiDevice4BInitReadCommand,        /* (Fx Id) to get memoryMode Cmd */
+        FX_spifiDevice4BInitWriteCommand        /* (Fx Id) to get program Cmd */
+      };
 
-        static SPIFI_DEV_NODE_T data;             /* Create persistent node */
+    static SPIFI_DEV_NODE_T data;             /* Create persistent node */
 
-        data.pDevData = &pData;                   /* save the data in the node */
-        spifiDevRegister(&devFamily, &data);      /* Register the new device */
-    }
+    data.pDevData = &pData;                   /* save the data in the node */
+    spifiDevRegister(&devFamily, &data);      /* Register the new device */
+  }
   #endif
 
   #if SPIFI_DEVICE_ALL || SPIFI_DEVICE_S25FL256S_64K
 
   /* Add support for S25FL256S 64k sector */
 
-    {
-      static const SPIFI_DEVICE_DATA_T pData =
+  {
+    static const SPIFI_DEVICE_DATA_T pData =
+      {
+        "S25FL256S 64kSec",
         {
-          "S25FL256S 64kSec",
           {
-            {
-              0x01, 0x02, 0x19
-            },
-            2,
-            {
-              0x4d, 0x01
-            }
-          },                                      /* JEDEC ID, extCount, ext data  */
-          (SPIFI_CAP_4BYTE_ADDR | SPIFI_CAP_DUAL_READ |
-          SPIFI_CAP_QUAD_READ | SPIFI_CAP_QUAD_WRITE |
-          SPIFI_CAP_FULLLOCK | SPIFI_CAP_NOBLOCK),
-          512,                                    /* # of blocks */
-          0x10000,                                /* block size */
-          0,                                      /* # of sub-blocks
-                                                   * (Does NOT support full sub-block erase) */
-          0,                                      /* sub-block size 0x1000 */
-          256,                                    /* page size */
-          MAX_SINGLE_READ,                        /* max single read bytes */
-          80,                                     /* max clock rate in MHz */
-          104,                                    /* max read clock rate in MHz */
-          80,                                     /* max high speed read clock rate in MHz */
-          104,                                    /* max program clock rate in MHz */
-          80,                                     /* max high speed program clock rate in MHz */
-          FX_spifiDeviceDataInitDeinit,           /* (Fx Id) use generic deviceInit / deInit */
-          FX_spifiDeviceDataClearStatusS25FL032P, /* (Fx Id) has persistent bits in status register */
-          FX_spifiDeviceDataGetStatusS25FL032P,   /* (Fx Id) getStatus */
-          FX_spifiDeviceDataSetStatusS25FL032P,   /* (Fx Id) setStatus */
-          FX_spifiDeviceDataSetOptsQuadModeBit9,  /* (Fx Id) to set/clr options */
-          FX_spifiDevice4BInitReadCommand,        /* (Fx Id) to get memoryMode Cmd */
-          FX_spifiDevice4BInitWriteCommand        /* (Fx Id) to get program Cmd */
-        };
+            0x01, 0x02, 0x19
+          },
+          2,
+          {
+            0x4d, 0x01
+          }
+        },                                      /* JEDEC ID, extCount, ext data  */
+        (SPIFI_CAP_4BYTE_ADDR | SPIFI_CAP_DUAL_READ |
+        SPIFI_CAP_QUAD_READ | SPIFI_CAP_QUAD_WRITE |
+        SPIFI_CAP_FULLLOCK | SPIFI_CAP_NOBLOCK),
+        512,                                    /* # of blocks */
+        0x10000,                                /* block size */
+        0,                                      /* # of sub-blocks
+                                                 * (Does NOT support full sub-block erase) */
+        0,                                      /* sub-block size 0x1000 */
+        256,                                    /* page size */
+        MAX_SINGLE_READ,                        /* max single read bytes */
+        80,                                     /* max clock rate in MHz */
+        104,                                    /* max read clock rate in MHz */
+        80,                                     /* max high speed read clock rate in MHz */
+        104,                                    /* max program clock rate in MHz */
+        80,                                     /* max high speed program clock rate in MHz */
+        FX_spifiDeviceDataInitDeinit,           /* (Fx Id) use generic deviceInit / deInit */
+        FX_spifiDeviceDataClearStatusS25FL032P, /* (Fx Id) has persistent bits in status register */
+        FX_spifiDeviceDataGetStatusS25FL032P,   /* (Fx Id) getStatus */
+        FX_spifiDeviceDataSetStatusS25FL032P,   /* (Fx Id) setStatus */
+        FX_spifiDeviceDataSetOptsQuadModeBit9,  /* (Fx Id) to set/clr options */
+        FX_spifiDevice4BInitReadCommand,        /* (Fx Id) to get memoryMode Cmd */
+        FX_spifiDevice4BInitWriteCommand        /* (Fx Id) to get program Cmd */
+      };
 
-      static SPIFI_DEV_NODE_T data;               /* Create persistent node */
+    static SPIFI_DEV_NODE_T data;               /* Create persistent node */
 
-      data.pDevData = &pData;                     /* save the data in the node */
-      spifiDevRegister(&devFamily, &data);        /* Register the new device */
-    }
+    data.pDevData = &pData;                     /* save the data in the node */
+    spifiDevRegister(&devFamily, &data);        /* Register the new device */
+  }
   #endif
 
   #if SPIFI_DEVICE_ALL || SPIFI_DEVICE_S25FL164K
 
   /* Add support for S25FL164K */
 
-    {
-      static const SPIFI_DEVICE_DATA_T pData =
+  {
+    static const SPIFI_DEVICE_DATA_T pData =
+      {
+        "S25FL164K",
         {
-          "S25FL164K",
           {
-            {
-              0x01, 0x40, 0x17
-            },
-            0,
-            {
-              0
-            }
-          },                                     /* JEDEC ID, extCount, ext data  */
-          (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
-          SPIFI_CAP_FULLLOCK | SPIFI_CAP_NOBLOCK |
-          SPIFI_CAP_SUBBLKERASE),                /* does NOT support Quad Write */
-          128,                                   /* # of blocks */
-          0x10000,                               /* block size */
-          2048,                                  /* # of sub-blocks */
-          0x1000,                                /* sub-block size */
-          256,                                   /* page size */
-          MAX_SINGLE_READ,                       /* max single read bytes */
-          50,                                    /* max clock rate in MHz */
-          97,                                    /* max read clock rate in MHz */
-          97,                                    /* max high speed read clock rate in MHz */
-          97,                                    /* max program clock rate in MHz */
-          97,                                    /* max high speed program clock rate in MHz */
-          FX_spifiDeviceDataInitDeinitS25FL164K, /* (Fx Id) device init / deInit */
-          FX_spifiDeviceDataClearStatusNone,     /* (Fx Id) No persistent status */
-          FX_spifiDeviceDataGetStatusS25FL164K,  /* (Fx Id) getStatus */
-          FX_spifiDeviceDataSetStatusS25FL164K,  /* (Fx Id) setStatus */
-          FX_spifiDeviceDataSetOptsQuadModeBit9, /* (Fx Id) to set/clr options */
-          FX_spifiDeviceInitReadCommand,         /* (Fx Id) to get memoryMode Cmd */
-          FX_spifiDeviceInitWriteCommand         /* (Fx Id) to get program Cmd */
-        };
+            0x01, 0x40, 0x17
+          },
+          0,
+          {
+            0
+          }
+        },                                     /* JEDEC ID, extCount, ext data  */
+        (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
+        SPIFI_CAP_FULLLOCK | SPIFI_CAP_NOBLOCK |
+        SPIFI_CAP_SUBBLKERASE),                /* does NOT support Quad Write */
+        128,                                   /* # of blocks */
+        0x10000,                               /* block size */
+        2048,                                  /* # of sub-blocks */
+        0x1000,                                /* sub-block size */
+        256,                                   /* page size */
+        MAX_SINGLE_READ,                       /* max single read bytes */
+        50,                                    /* max clock rate in MHz */
+        97,                                    /* max read clock rate in MHz */
+        97,                                    /* max high speed read clock rate in MHz */
+        97,                                    /* max program clock rate in MHz */
+        97,                                    /* max high speed program clock rate in MHz */
+        FX_spifiDeviceDataInitDeinitS25FL164K, /* (Fx Id) device init / deInit */
+        FX_spifiDeviceDataClearStatusNone,     /* (Fx Id) No persistent status */
+        FX_spifiDeviceDataGetStatusS25FL164K,  /* (Fx Id) getStatus */
+        FX_spifiDeviceDataSetStatusS25FL164K,  /* (Fx Id) setStatus */
+        FX_spifiDeviceDataSetOptsQuadModeBit9, /* (Fx Id) to set/clr options */
+        FX_spifiDeviceInitReadCommand,         /* (Fx Id) to get memoryMode Cmd */
+        FX_spifiDeviceInitWriteCommand         /* (Fx Id) to get program Cmd */
+      };
 
-      static SPIFI_DEV_NODE_T data;              /* Create persistent node */
+    static SPIFI_DEV_NODE_T data;              /* Create persistent node */
 
-      data.pDevData = &pData;                    /* save the data in the node */
-      spifiDevRegister(&devFamily, &data);       /* Register the new device */
-    }
+    data.pDevData = &pData;                    /* save the data in the node */
+    spifiDevRegister(&devFamily, &data);       /* Register the new device */
+  }
   #endif
 
   #if SPIFI_DEVICE_ALL || SPIFI_DEVICE_S25FL129P_256K
 
   /* Add support for S25FL129P 256K Sector. Clone: S25FL128S */
 
-    {
-      static const SPIFI_DEVICE_DATA_T pData =
+  {
+    static const SPIFI_DEVICE_DATA_T pData =
+      {
+        "S25FL129P 256kSec",
         {
-          "S25FL129P 256kSec",
           {
-            {
-              0x01, 0x20, 0x18
-            },
-            2,
-            {
-              0x4d, 0x0
-            }
-          },                                      /* JEDEC ID, extCount, ext data  */
-          (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
-          SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_FULLLOCK |
-          SPIFI_CAP_NOBLOCK),
-          64,                                     /* # of blocks */
-          0x40000,                                /* block size */
-          0,                                      /* # of sub-blocks
-                                                   * (Does NOT support full sub-block erase) */
-          0,                                      /* sub-block size */
-          256,                                    /* page size */
-          MAX_SINGLE_READ,                        /* max single read bytes */
-          80,                                     /* max clock rate in MHz */
-          104,                                    /* max read clock rate in MHz */
-          80,                                     /* max high speed read clock rate in MHz */
-          104,                                    /* max program clock rate in MHz */
-          80,                                     /* max high speed program clock rate in MHz */
-          FX_spifiDeviceDataInitDeinit,           /* (Fx Id) use generic deviceInit / deInit */
-          FX_spifiDeviceDataClearStatusS25FL032P, /* (Fx Id) has persistent bits in status register */
-          FX_spifiDeviceDataGetStatusS25FL032P,   /* (Fx Id) getStatus */
-          FX_spifiDeviceDataSetStatusS25FL032P,   /* (Fx Id) setStatus */
-          FX_spifiDeviceDataSetOptsQuadModeBit9,  /* (Fx Id) to set/clr options */
-          FX_spifiDeviceInitReadCommand,          /* (Fx Id) to get memoryMode Cmd */
-          FX_spifiDeviceInitWriteCommand          /* (Fx Id) to get program Cmd */
-        };
+            0x01, 0x20, 0x18
+          },
+          2,
+          {
+            0x4d, 0x0
+          }
+        },                                      /* JEDEC ID, extCount, ext data  */
+        (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
+        SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_FULLLOCK |
+        SPIFI_CAP_NOBLOCK),
+        64,                                     /* # of blocks */
+        0x40000,                                /* block size */
+        0,                                      /* # of sub-blocks
+                                                 * (Does NOT support full sub-block erase) */
+        0,                                      /* sub-block size */
+        256,                                    /* page size */
+        MAX_SINGLE_READ,                        /* max single read bytes */
+        80,                                     /* max clock rate in MHz */
+        104,                                    /* max read clock rate in MHz */
+        80,                                     /* max high speed read clock rate in MHz */
+        104,                                    /* max program clock rate in MHz */
+        80,                                     /* max high speed program clock rate in MHz */
+        FX_spifiDeviceDataInitDeinit,           /* (Fx Id) use generic deviceInit / deInit */
+        FX_spifiDeviceDataClearStatusS25FL032P, /* (Fx Id) has persistent bits in status register */
+        FX_spifiDeviceDataGetStatusS25FL032P,   /* (Fx Id) getStatus */
+        FX_spifiDeviceDataSetStatusS25FL032P,   /* (Fx Id) setStatus */
+        FX_spifiDeviceDataSetOptsQuadModeBit9,  /* (Fx Id) to set/clr options */
+        FX_spifiDeviceInitReadCommand,          /* (Fx Id) to get memoryMode Cmd */
+        FX_spifiDeviceInitWriteCommand          /* (Fx Id) to get program Cmd */
+      };
 
-      static SPIFI_DEV_NODE_T data;               /* Create persistent node */
+    static SPIFI_DEV_NODE_T data;               /* Create persistent node */
 
-      data.pDevData = &pData;                     /* save the data in the node */
-      spifiDevRegister(&devFamily, &data);        /* Register the new device */
-    }
+    data.pDevData = &pData;                     /* save the data in the node */
+    spifiDevRegister(&devFamily, &data);        /* Register the new device */
+  }
   #endif
 
   #if SPIFI_DEVICE_ALL || SPIFI_DEVICE_S25FL129P_64K
 
   /* Add support for S25FL129P 64k sector */
 
-    {
-      static const SPIFI_DEVICE_DATA_T pData =
+  {
+    static const SPIFI_DEVICE_DATA_T pData =
+      {
+        "S25FL129P 64kSec",
         {
-          "S25FL129P 64kSec",
           {
-            {
-              0x01, 0x20, 0x18
-            },
-            2,
-            {
-              0x4d, 0x01
-            }
-          },                                      /* JEDEC ID, extCount, ext data  */
-          (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
-          SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_FULLLOCK |
-          SPIFI_CAP_NOBLOCK),
-          256,                                    /* # of blocks */
-          0x10000,                                /* block size */
-          0,                                      /* # of sub-blocks
-                                                   * (Does NOT support full sub-block erase) */
-          0,                                      /* sub-block size 0x1000 */
-          256,                                    /* page size */
-          MAX_SINGLE_READ,                        /* max single read bytes */
-          80,                                     /* max clock rate in MHz */
-          104,                                    /* max read clock rate in MHz */
-          80,                                     /* max high speed read clock rate in MHz */
-          104,                                    /* max program clock rate in MHz */
-          80,                                     /* max high speed program clock rate in MHz */
-          FX_spifiDeviceDataInitDeinit,           /* (Fx Id) use generic deviceInit / deInit */
-          FX_spifiDeviceDataClearStatusS25FL032P, /* (Fx Id) has persistent bits in status register */
-          FX_spifiDeviceDataGetStatusS25FL032P,   /* (Fx Id) getStatus */
-          FX_spifiDeviceDataSetStatusS25FL032P,   /* (Fx Id) setStatus */
-          FX_spifiDeviceDataSetOptsQuadModeBit9,  /* (Fx Id) to set/clr options */
-          FX_spifiDeviceInitReadCommand,          /* (Fx Id) to get memoryMode Cmd */
-          FX_spifiDeviceInitWriteCommand          /* (Fx Id) to get program Cmd */
-        };
+            0x01, 0x20, 0x18
+          },
+          2,
+          {
+            0x4d, 0x01
+          }
+        },                                      /* JEDEC ID, extCount, ext data  */
+        (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
+        SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_FULLLOCK |
+        SPIFI_CAP_NOBLOCK),
+        256,                                    /* # of blocks */
+        0x10000,                                /* block size */
+        0,                                      /* # of sub-blocks
+                                                 * (Does NOT support full sub-block erase) */
+        0,                                      /* sub-block size 0x1000 */
+        256,                                    /* page size */
+        MAX_SINGLE_READ,                        /* max single read bytes */
+        80,                                     /* max clock rate in MHz */
+        104,                                    /* max read clock rate in MHz */
+        80,                                     /* max high speed read clock rate in MHz */
+        104,                                    /* max program clock rate in MHz */
+        80,                                     /* max high speed program clock rate in MHz */
+        FX_spifiDeviceDataInitDeinit,           /* (Fx Id) use generic deviceInit / deInit */
+        FX_spifiDeviceDataClearStatusS25FL032P, /* (Fx Id) has persistent bits in status register */
+        FX_spifiDeviceDataGetStatusS25FL032P,   /* (Fx Id) getStatus */
+        FX_spifiDeviceDataSetStatusS25FL032P,   /* (Fx Id) setStatus */
+        FX_spifiDeviceDataSetOptsQuadModeBit9,  /* (Fx Id) to set/clr options */
+        FX_spifiDeviceInitReadCommand,          /* (Fx Id) to get memoryMode Cmd */
+        FX_spifiDeviceInitWriteCommand          /* (Fx Id) to get program Cmd */
+      };
 
-      static SPIFI_DEV_NODE_T data;               /* Create persistent node */
+    static SPIFI_DEV_NODE_T data;               /* Create persistent node */
 
-      data.pDevData = &pData;                     /* save the data in the node */
-      spifiDevRegister(&devFamily, &data);        /* Register the new device */
-    }
+    data.pDevData = &pData;                     /* save the data in the node */
+    spifiDevRegister(&devFamily, &data);        /* Register the new device */
+  }
   #endif
 
   #if SPIFI_DEVICE_ALL || SPIFI_DEVICE_S25FL064P
 
   /* Add support for S25FL064P */
 
-    {
-      static const SPIFI_DEVICE_DATA_T pData =
+  {
+    static const SPIFI_DEVICE_DATA_T pData =
+      {
+        "S25FL064P",
         {
-          "S25FL064P",
           {
-            {
-              0x01, 0x02, 0x16
-            },
-            1,
-            {
-              0x4d
-            }
-          },                                      /* JEDEC ID, extCount, ext data  */
-          (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
-          SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_FULLLOCK |
-          SPIFI_CAP_NOBLOCK),                     /* Capabilities */
-          128,                                    /* # of blocks */
-          0x10000,                                /* block size */
-          0,                                      /* # of sub-blocks
-                                                   * (Does NOT support full sub-block erase) */
-          0,                                      /* sub-block size  0x1000 */
-          256,                                    /* page size */
-          MAX_SINGLE_READ,                        /* max single read bytes */
-          80,                                     /* max clock rate in MHz */
-          104,                                    /* max read clock rate in MHz */
-          80,                                     /* max high speed read clock rate in MHz */
-          104,                                    /* max program clock rate in MHz */
-          80,                                     /* max high speed program clock rate in MHz */
-          FX_spifiDeviceDataInitDeinit,           /* (Fx Id) use generic deviceInit / deInit */
-          FX_spifiDeviceDataClearStatusS25FL032P, /* (Fx Id) has persistent bits in status register */
-          FX_spifiDeviceDataGetStatusS25FL032P,   /* (Fx Id) getStatus */
-          FX_spifiDeviceDataSetStatusS25FL032P,   /* (Fx Id) setStatus */
-          FX_spifiDeviceDataSetOptsQuadModeBit9,  /* (Fx Id) to set/clr options */
-          FX_spifiDeviceInitReadCommand,          /* (Fx Id) to get memoryMode Cmd */
-          FX_spifiDeviceInitWriteCommand          /* (Fx Id) to get program Cmd */
-        };
+            0x01, 0x02, 0x16
+          },
+          1,
+          {
+            0x4d
+          }
+        },                                      /* JEDEC ID, extCount, ext data  */
+        (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
+        SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_FULLLOCK |
+        SPIFI_CAP_NOBLOCK),                     /* Capabilities */
+        128,                                    /* # of blocks */
+        0x10000,                                /* block size */
+        0,                                      /* # of sub-blocks
+                                                 * (Does NOT support full sub-block erase) */
+        0,                                      /* sub-block size  0x1000 */
+        256,                                    /* page size */
+        MAX_SINGLE_READ,                        /* max single read bytes */
+        80,                                     /* max clock rate in MHz */
+        104,                                    /* max read clock rate in MHz */
+        80,                                     /* max high speed read clock rate in MHz */
+        104,                                    /* max program clock rate in MHz */
+        80,                                     /* max high speed program clock rate in MHz */
+        FX_spifiDeviceDataInitDeinit,           /* (Fx Id) use generic deviceInit / deInit */
+        FX_spifiDeviceDataClearStatusS25FL032P, /* (Fx Id) has persistent bits in status register */
+        FX_spifiDeviceDataGetStatusS25FL032P,   /* (Fx Id) getStatus */
+        FX_spifiDeviceDataSetStatusS25FL032P,   /* (Fx Id) setStatus */
+        FX_spifiDeviceDataSetOptsQuadModeBit9,  /* (Fx Id) to set/clr options */
+        FX_spifiDeviceInitReadCommand,          /* (Fx Id) to get memoryMode Cmd */
+        FX_spifiDeviceInitWriteCommand          /* (Fx Id) to get program Cmd */
+      };
 
-      static SPIFI_DEV_NODE_T data;               /* Create persistent node */
+    static SPIFI_DEV_NODE_T data;               /* Create persistent node */
 
-      data.pDevData = &pData;                     /* save the data in the node */
-      spifiDevRegister(&devFamily, &data);        /* Register the new device */
-    }
+    data.pDevData = &pData;                     /* save the data in the node */
+    spifiDevRegister(&devFamily, &data);        /* Register the new device */
+  }
   #endif
 
   #if SPIFI_DEVICE_ALL || SPIFI_DEVICE_S25FL032P
 
   /* Add support for S25FL032P */
 
-    {
-      static const SPIFI_DEVICE_DATA_T pData =
+  {
+    static const SPIFI_DEVICE_DATA_T pData =
+      {
+        "S25FL032P",
         {
-          "S25FL032P",
           {
-            {
-              0x01, 0x02, 0x15
-            },
-            0,
-            {
-              0
-            }
-          },                                      /* JEDEC ID, extCount, ext data  */
-          (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
-          SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_FULLLOCK |
-          SPIFI_CAP_NOBLOCK),                     /* Capabilities */
-          64,                                     /* # of blocks */
-          0x10000,                                /* block size */
-          0,                                      /* # of sub-blocks
-                                                   * (Does NOT support full sub-block erase) */
-          0,                                      /* sub-block size  0x1000 */
-          256,                                    /* page size */
-          MAX_SINGLE_READ,                        /* max single read bytes */
-          80,                                     /* max clock rate in MHz */
-          104,                                    /* max read clock rate in MHz */
-          80,                                     /* max high speed read clock rate in MHz */
-          104,                                    /* max program clock rate in MHz */
-          80,                                     /* max high speed program clock rate in MHz */
-          FX_spifiDeviceDataInitDeinit,           /* (Fx Id) use generic deviceInit / deInit */
-          FX_spifiDeviceDataClearStatusS25FL032P, /* (Fx Id) has persistent bits in status register */
-          FX_spifiDeviceDataGetStatusS25FL032P,   /* (Fx Id) getStatus */
-          FX_spifiDeviceDataSetStatusS25FL032P,   /* (Fx Id) setStatus */
-          FX_spifiDeviceDataSetOptsQuadModeBit9,  /* Fx* to set/clr options */
-          FX_spifiDeviceInitReadCommand,          /* (Fx Id) to get memoryMode Cmd */
-          FX_spifiDeviceInitWriteCommand          /* (Fx Id) to get program Cmd */
-        };
+            0x01, 0x02, 0x15
+          },
+          0,
+          {
+            0
+          }
+        },                                      /* JEDEC ID, extCount, ext data  */
+        (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
+        SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_FULLLOCK |
+        SPIFI_CAP_NOBLOCK),                     /* Capabilities */
+        64,                                     /* # of blocks */
+        0x10000,                                /* block size */
+        0,                                      /* # of sub-blocks
+                                                 * (Does NOT support full sub-block erase) */
+        0,                                      /* sub-block size  0x1000 */
+        256,                                    /* page size */
+        MAX_SINGLE_READ,                        /* max single read bytes */
+        80,                                     /* max clock rate in MHz */
+        104,                                    /* max read clock rate in MHz */
+        80,                                     /* max high speed read clock rate in MHz */
+        104,                                    /* max program clock rate in MHz */
+        80,                                     /* max high speed program clock rate in MHz */
+        FX_spifiDeviceDataInitDeinit,           /* (Fx Id) use generic deviceInit / deInit */
+        FX_spifiDeviceDataClearStatusS25FL032P, /* (Fx Id) has persistent bits in status register */
+        FX_spifiDeviceDataGetStatusS25FL032P,   /* (Fx Id) getStatus */
+        FX_spifiDeviceDataSetStatusS25FL032P,   /* (Fx Id) setStatus */
+        FX_spifiDeviceDataSetOptsQuadModeBit9,  /* Fx* to set/clr options */
+        FX_spifiDeviceInitReadCommand,          /* (Fx Id) to get memoryMode Cmd */
+        FX_spifiDeviceInitWriteCommand          /* (Fx Id) to get program Cmd */
+      };
 
-      static SPIFI_DEV_NODE_T data;               /* Create persistent node */
+    static SPIFI_DEV_NODE_T data;               /* Create persistent node */
 
-      data.pDevData = &pData;                     /* save the data in the node */
-      spifiDevRegister(&devFamily, &data);        /* Register the new device */
-    }
+    data.pDevData = &pData;                     /* save the data in the node */
+    spifiDevRegister(&devFamily, &data);        /* Register the new device */
+  }
   #endif
 
   #if SPIFI_DEVICE_ALL || SPIFI_DEVICE_S25FL016K
 
   /* Add support for S25FL016K */
 
-    {
-      static const SPIFI_DEVICE_DATA_T pData =
+  {
+    static const SPIFI_DEVICE_DATA_T pData =
+      {
+        "S25FL016K",
         {
-          "S25FL016K",
           {
-            {
-              0xef, 0x40, 0x15
-            },
-            0,
-            {
-              0
-            }
-          },                                           /* JEDEC ID, extCount, ext data  */
-          (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
-          SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_FULLLOCK |
-          SPIFI_CAP_NOBLOCK | SPIFI_CAP_SUBBLKERASE),  /* Capabilities */
-          32,                                          /* # of blocks */
-          0x10000,                                     /* block size */
-          512,                                         /* # of sub-blocks
-                                                                      *  (Does NOT support full sub-block erase) */
-          0x1000,                                      /* sub-block size  0x1000 */
-          256,                                         /* page size */
-          MAX_SINGLE_READ,                             /* max single read bytes */
-          80,                                          /* max clock rate in MHz */
-          104,                                         /* max read clock rate in MHz */
-          80,                                          /* max high speed read clock rate in MHz */
-          104,                                         /* max program clock rate in MHz */
-          80,                                          /* max high speed program clock rate in MHz */
-          FX_spifiDeviceDataInitDeinit,                /* (Fx Id) use generic deviceInit / deInit */
-          FX_spifiDeviceDataClearStatusNone,           /* (Fx Id) Does not have persistent status */
-          FX_spifiDeviceDataGetStatusS25FL032P,        /* (Fx Id) getStatus */
-          FX_spifiDeviceDataSetStatusS25FL032P,        /* (Fx Id) setStatus */
-          FX_spifiDeviceDataSetOptsQuadModeBit9,       /* (Fx Id) to set/clr options */
-          FX_spifiDeviceInitReadCommand,               /* (Fx Id) to get memoryMode Cmd */
-          FX_spifiDeviceInitWriteCommand               /* (Fx Id) to get program Cmd */
-        };
+            0xef, 0x40, 0x15
+          },
+          0,
+          {
+            0
+          }
+        },                                           /* JEDEC ID, extCount, ext data  */
+        (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
+        SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_FULLLOCK |
+        SPIFI_CAP_NOBLOCK | SPIFI_CAP_SUBBLKERASE),  /* Capabilities */
+        32,                                          /* # of blocks */
+        0x10000,                                     /* block size */
+        512,                                         /* # of sub-blocks
+                                                                    *  (Does NOT support full sub-block erase) */
+        0x1000,                                      /* sub-block size  0x1000 */
+        256,                                         /* page size */
+        MAX_SINGLE_READ,                             /* max single read bytes */
+        80,                                          /* max clock rate in MHz */
+        104,                                         /* max read clock rate in MHz */
+        80,                                          /* max high speed read clock rate in MHz */
+        104,                                         /* max program clock rate in MHz */
+        80,                                          /* max high speed program clock rate in MHz */
+        FX_spifiDeviceDataInitDeinit,                /* (Fx Id) use generic deviceInit / deInit */
+        FX_spifiDeviceDataClearStatusNone,           /* (Fx Id) Does not have persistent status */
+        FX_spifiDeviceDataGetStatusS25FL032P,        /* (Fx Id) getStatus */
+        FX_spifiDeviceDataSetStatusS25FL032P,        /* (Fx Id) setStatus */
+        FX_spifiDeviceDataSetOptsQuadModeBit9,       /* (Fx Id) to set/clr options */
+        FX_spifiDeviceInitReadCommand,               /* (Fx Id) to get memoryMode Cmd */
+        FX_spifiDeviceInitWriteCommand               /* (Fx Id) to get program Cmd */
+      };
 
-      static SPIFI_DEV_NODE_T data;                    /* Create persistent node */
+    static SPIFI_DEV_NODE_T data;                    /* Create persistent node */
 
-      data.pDevData = &pData;                          /* save the data in the node */
-      spifiDevRegister(&devFamily, &data);             /* Register the new device */
-    }
+    data.pDevData = &pData;                          /* save the data in the node */
+    spifiDevRegister(&devFamily, &data);             /* Register the new device */
+  }
   #endif
 
   /* Begin Maxronix devices */
@@ -2319,188 +2319,188 @@ SPIFI_FAM_NODE_T *spifi_REG_FAMILY_CommonCommandSet(void)
 
   /* Add support for MX25L8035E */
 
-    {
-      static const SPIFI_DEVICE_DATA_T pData =
+  {
+    static const SPIFI_DEVICE_DATA_T pData =
+      {
+        "MX25L8035E",
         {
-          "MX25L8035E",
           {
-            {
-              0xc2, 0x20, 0x14
-            },
-            0,
-            {
-              0
-            }
-          },                                     /* JEDEC ID, extCount, ext data  */
-          (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
-          SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_NOBLOCK |
-          SPIFI_CAP_SUBBLKERASE),                /* capabilities */
-          16,                                    /* # of blocks */
-          0x10000,                               /* block size */
-          256,                                   /* # of sub-blocks */
-          0x1000,                                /* sub-block size */
-          256,                                   /* page size */
-          MAX_SINGLE_READ,                       /* max single read bytes */
-          80,                                    /* max clock rate in MHz */
-          108,                                   /* max read clock rate in MHz */
-          108,                                   /* max high speed read clock rate in MHz */
-          104,                                   /* max program clock rate in MHz */
-          104,                                   /* max high speed program clock rate in MHz */
-          FX_spifiDeviceDataInitDeinit,          /* (Fx Id) use generic deviceInit / deInit */
-          FX_spifiDeviceDataClearStatusNone,     /* (Fx Id) no persistent status */
-          FX_spifiDeviceDataGetStatusMX25L3235E, /* (Fx Id) getStatus */
-          FX_spifiDeviceDataSetStatusMX25L3235E, /* (Fx Id) setStatus */
-          FX_spifiDeviceDataSetOptsQuadModeBit6, /* (Fx Id) to set/clr options */
-          FX_spifiDeviceInitReadCommand,         /* (Fx Id) to get memoryMode Cmd */
-          FX_spifiDeviceInitWriteCommandMacronix /* (Fx Id) to get program Cmd */
-        };
+            0xc2, 0x20, 0x14
+          },
+          0,
+          {
+            0
+          }
+        },                                     /* JEDEC ID, extCount, ext data  */
+        (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
+        SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_NOBLOCK |
+        SPIFI_CAP_SUBBLKERASE),                /* capabilities */
+        16,                                    /* # of blocks */
+        0x10000,                               /* block size */
+        256,                                   /* # of sub-blocks */
+        0x1000,                                /* sub-block size */
+        256,                                   /* page size */
+        MAX_SINGLE_READ,                       /* max single read bytes */
+        80,                                    /* max clock rate in MHz */
+        108,                                   /* max read clock rate in MHz */
+        108,                                   /* max high speed read clock rate in MHz */
+        104,                                   /* max program clock rate in MHz */
+        104,                                   /* max high speed program clock rate in MHz */
+        FX_spifiDeviceDataInitDeinit,          /* (Fx Id) use generic deviceInit / deInit */
+        FX_spifiDeviceDataClearStatusNone,     /* (Fx Id) no persistent status */
+        FX_spifiDeviceDataGetStatusMX25L3235E, /* (Fx Id) getStatus */
+        FX_spifiDeviceDataSetStatusMX25L3235E, /* (Fx Id) setStatus */
+        FX_spifiDeviceDataSetOptsQuadModeBit6, /* (Fx Id) to set/clr options */
+        FX_spifiDeviceInitReadCommand,         /* (Fx Id) to get memoryMode Cmd */
+        FX_spifiDeviceInitWriteCommandMacronix /* (Fx Id) to get program Cmd */
+      };
 
-      static SPIFI_DEV_NODE_T data;              /* Create persistent node */
+    static SPIFI_DEV_NODE_T data;              /* Create persistent node */
 
-      data.pDevData = &pData;                    /* save the data in the node */
-      spifiDevRegister(&devFamily, &data);       /* Register the new device */
-    }
+    data.pDevData = &pData;                    /* save the data in the node */
+    spifiDevRegister(&devFamily, &data);       /* Register the new device */
+  }
   #endif
 
   #if SPIFI_DEVICE_ALL || SPIFI_DEVICE_MX25L6435E
 
   /* Add support for MX25L6435E */
 
-    {
-      static const SPIFI_DEVICE_DATA_T pData =
+  {
+    static const SPIFI_DEVICE_DATA_T pData =
+      {
+        "MX25L6435E",
         {
-          "MX25L6435E",
           {
-            {
-              0xc2, 0x20, 0x17
-            },
-            0,
-            {
-              0
-            }
-          },                                     /* JEDEC ID, extCount, ext data  */
-          (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
-          SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_NOBLOCK |
-          SPIFI_CAP_SUBBLKERASE),                /* capabilities */
-          128,                                   /* # of blocks */
-          0x10000,                               /* block size */
-          2048,                                  /* # of sub-blocks */
-          0x1000,                                /* sub-block size */
-          256,                                   /* page size */
-          MAX_SINGLE_READ,                       /* max single read bytes */
-          80,                                    /* max clock rate in MHz */
-          104,                                   /* max read clock rate in MHz */
-          86,                                    /* max high speed read clock rate in MHz */
-          104,                                   /* max program clock rate in MHz */
-          104,                                   /* max high speed program clock rate in MHz */
-          FX_spifiDeviceDataInitDeinit,          /* (Fx Id) use generic deviceInit / deInit */
-          FX_spifiDeviceDataClearStatusNone,     /* (Fx Id) no persistent status */
-          FX_spifiDeviceDataGetStatusMX25L3235E, /* (Fx Id) getStatus function */
-          FX_spifiDeviceDataSetStatusMX25L3235E, /* (Fx Id) setStatus function */
-          FX_spifiDeviceDataSetOptsQuadModeBit6, /* (Fx Id) to set/clr options */
-          FX_spifiDeviceInitReadCommand,         /* (Fx Id) to get memoryMode Cmd */
-          FX_spifiDeviceInitWriteCommandMacronix /* (Fx Id) to get program Cmd */
-        };
+            0xc2, 0x20, 0x17
+          },
+          0,
+          {
+            0
+          }
+        },                                     /* JEDEC ID, extCount, ext data  */
+        (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
+        SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_NOBLOCK |
+        SPIFI_CAP_SUBBLKERASE),                /* capabilities */
+        128,                                   /* # of blocks */
+        0x10000,                               /* block size */
+        2048,                                  /* # of sub-blocks */
+        0x1000,                                /* sub-block size */
+        256,                                   /* page size */
+        MAX_SINGLE_READ,                       /* max single read bytes */
+        80,                                    /* max clock rate in MHz */
+        104,                                   /* max read clock rate in MHz */
+        86,                                    /* max high speed read clock rate in MHz */
+        104,                                   /* max program clock rate in MHz */
+        104,                                   /* max high speed program clock rate in MHz */
+        FX_spifiDeviceDataInitDeinit,          /* (Fx Id) use generic deviceInit / deInit */
+        FX_spifiDeviceDataClearStatusNone,     /* (Fx Id) no persistent status */
+        FX_spifiDeviceDataGetStatusMX25L3235E, /* (Fx Id) getStatus function */
+        FX_spifiDeviceDataSetStatusMX25L3235E, /* (Fx Id) setStatus function */
+        FX_spifiDeviceDataSetOptsQuadModeBit6, /* (Fx Id) to set/clr options */
+        FX_spifiDeviceInitReadCommand,         /* (Fx Id) to get memoryMode Cmd */
+        FX_spifiDeviceInitWriteCommandMacronix /* (Fx Id) to get program Cmd */
+      };
 
-      static SPIFI_DEV_NODE_T data;              /* Create persistent node */
+    static SPIFI_DEV_NODE_T data;              /* Create persistent node */
 
-      data.pDevData = &pData;                    /* save the data in the node */
-      spifiDevRegister(&devFamily, &data);       /* Register the new device */
-    }
+    data.pDevData = &pData;                    /* save the data in the node */
+    spifiDevRegister(&devFamily, &data);       /* Register the new device */
+  }
   #endif
 
   #if SPIFI_DEVICE_ALL || SPIFI_DEVICE_MX25L3235E
 
   /* Add support for MX25L3235E */
 
-    {
-      static const SPIFI_DEVICE_DATA_T pData =
+  {
+    static const SPIFI_DEVICE_DATA_T pData =
+      {
+        "MX25L3235E",
         {
-          "MX25L3235E",
           {
-            {
-              0xc2, 0x20, 0x16
-            },
-            0,
-            {
-              0
-            }
-          },                                     /* JEDEC ID, extCount, ext data  */
-          (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
-          SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_NOBLOCK |
-          SPIFI_CAP_SUBBLKERASE),                /* capabilities */
-          64,                                    /* # of blocks */
-          0x10000,                               /* block size */
-          1024,                                  /* # of sub-blocks */
-          0x1000,                                /* sub-block size */
-          256,                                   /* page size */
-          MAX_SINGLE_READ,                       /* max single read bytes */
-          80,                                    /* max clock rate in MHz */
-          104,                                   /* max read clock rate in MHz */
-          86,                                    /* max high speed read clock rate in MHz */
-          104,                                   /* max program clock rate in MHz */
-          104,                                   /* max high speed program clock rate in MHz */
-          FX_spifiDeviceDataInitDeinit,          /* (Fx Id) use generic deviceInit / deInit */
-          FX_spifiDeviceDataClearStatusNone,     /* (Fx Id) no persistent status */
-          FX_spifiDeviceDataGetStatusMX25L3235E, /* (Fx Id) getStatus function */
-          FX_spifiDeviceDataSetStatusMX25L3235E, /* (Fx Id) setStatus function */
-          FX_spifiDeviceDataSetOptsQuadModeBit6, /* (Fx Id) to set/clr options */
-          FX_spifiDeviceInitReadCommand,         /* (Fx Id) to get memoryMode Cmd */
-          FX_spifiDeviceInitWriteCommandMacronix /* (Fx Id) to get program Cmd */
-        };
+            0xc2, 0x20, 0x16
+          },
+          0,
+          {
+            0
+          }
+        },                                     /* JEDEC ID, extCount, ext data  */
+        (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
+        SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_NOBLOCK |
+        SPIFI_CAP_SUBBLKERASE),                /* capabilities */
+        64,                                    /* # of blocks */
+        0x10000,                               /* block size */
+        1024,                                  /* # of sub-blocks */
+        0x1000,                                /* sub-block size */
+        256,                                   /* page size */
+        MAX_SINGLE_READ,                       /* max single read bytes */
+        80,                                    /* max clock rate in MHz */
+        104,                                   /* max read clock rate in MHz */
+        86,                                    /* max high speed read clock rate in MHz */
+        104,                                   /* max program clock rate in MHz */
+        104,                                   /* max high speed program clock rate in MHz */
+        FX_spifiDeviceDataInitDeinit,          /* (Fx Id) use generic deviceInit / deInit */
+        FX_spifiDeviceDataClearStatusNone,     /* (Fx Id) no persistent status */
+        FX_spifiDeviceDataGetStatusMX25L3235E, /* (Fx Id) getStatus function */
+        FX_spifiDeviceDataSetStatusMX25L3235E, /* (Fx Id) setStatus function */
+        FX_spifiDeviceDataSetOptsQuadModeBit6, /* (Fx Id) to set/clr options */
+        FX_spifiDeviceInitReadCommand,         /* (Fx Id) to get memoryMode Cmd */
+        FX_spifiDeviceInitWriteCommandMacronix /* (Fx Id) to get program Cmd */
+      };
 
-      static SPIFI_DEV_NODE_T data;              /* Create persistent node */
+    static SPIFI_DEV_NODE_T data;              /* Create persistent node */
 
-      data.pDevData = &pData;                    /* save the data in the node */
-      spifiDevRegister(&devFamily, &data);       /* Register the new device */
-    }
+    data.pDevData = &pData;                    /* save the data in the node */
+    spifiDevRegister(&devFamily, &data);       /* Register the new device */
+  }
   #endif
 
   #if SPIFI_DEVICE_ALL || SPIFI_DEVICE_MX25L1635E
 
   /* Add support for MX25L1635E */
 
-    {
-      static const SPIFI_DEVICE_DATA_T pData =
+  {
+    static const SPIFI_DEVICE_DATA_T pData =
+      {
+        "MX25L1635E",
         {
-          "MX25L1635E",
           {
-            {
-              0xc2, 0x25, 0x15
-            },
-            0,
-            {
-              0
-            }
-          },                                    /* JEDEC ID, extCount, ext data  */
-          (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
-          SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_NOBLOCK |
-          SPIFI_CAP_SUBBLKERASE),                /* capabilities */
-          32,                                    /* # of blocks */
-          0x10000,                               /* block size */
-          512,                                   /* # of sub-blocks */
-          0x1000,                                /* sub-block size */
-          256,                                   /* page size */
-          MAX_SINGLE_READ,                       /* max single read bytes */
-          80,                                    /* max clock rate in MHz */
-          104,                                   /* max read clock rate in MHz */
-          86,                                    /* max high speed read clock rate in MHz */
-          104,                                   /* max program clock rate in MHz */
-          104,                                   /* max high speed program clock rate in MHz */
-          FX_spifiDeviceDataInitDeinit,          /* (Fx Id) use generic deviceInit / deInit */
-          FX_spifiDeviceDataClearStatusNone,     /* (Fx Id) no persistent status */
-          FX_spifiDeviceDataGetStatusMX25L3235E, /* (Fx Id) getStatus function */
-          FX_spifiDeviceDataSetStatusMX25L3235E, /* (Fx Id) setStatus function */
-          FX_spifiDeviceDataSetOptsQuadModeBit6, /* (Fx Id) to set/clr options */
-          FX_spifiDeviceInitReadCommand,         /* (Fx Id) to get memoryMode Cmd */
-          FX_spifiDeviceInitWriteCommandMacronix /* (Fx Id) to get program Cmd */
-        };
+            0xc2, 0x25, 0x15
+          },
+          0,
+          {
+            0
+          }
+        },                                    /* JEDEC ID, extCount, ext data  */
+        (SPIFI_CAP_DUAL_READ | SPIFI_CAP_QUAD_READ |
+        SPIFI_CAP_QUAD_WRITE | SPIFI_CAP_NOBLOCK |
+        SPIFI_CAP_SUBBLKERASE),                /* capabilities */
+        32,                                    /* # of blocks */
+        0x10000,                               /* block size */
+        512,                                   /* # of sub-blocks */
+        0x1000,                                /* sub-block size */
+        256,                                   /* page size */
+        MAX_SINGLE_READ,                       /* max single read bytes */
+        80,                                    /* max clock rate in MHz */
+        104,                                   /* max read clock rate in MHz */
+        86,                                    /* max high speed read clock rate in MHz */
+        104,                                   /* max program clock rate in MHz */
+        104,                                   /* max high speed program clock rate in MHz */
+        FX_spifiDeviceDataInitDeinit,          /* (Fx Id) use generic deviceInit / deInit */
+        FX_spifiDeviceDataClearStatusNone,     /* (Fx Id) no persistent status */
+        FX_spifiDeviceDataGetStatusMX25L3235E, /* (Fx Id) getStatus function */
+        FX_spifiDeviceDataSetStatusMX25L3235E, /* (Fx Id) setStatus function */
+        FX_spifiDeviceDataSetOptsQuadModeBit6, /* (Fx Id) to set/clr options */
+        FX_spifiDeviceInitReadCommand,         /* (Fx Id) to get memoryMode Cmd */
+        FX_spifiDeviceInitWriteCommandMacronix /* (Fx Id) to get program Cmd */
+      };
 
-      static SPIFI_DEV_NODE_T data;              /* Create persistent node */
+    static SPIFI_DEV_NODE_T data;              /* Create persistent node */
 
-      data.pDevData = &pData;                    /* save the data in the node */
-      spifiDevRegister(&devFamily, &data);       /* Register the new device */
-    }
+    data.pDevData = &pData;                    /* save the data in the node */
+    spifiDevRegister(&devFamily, &data);       /* Register the new device */
+  }
   #endif
 
   /* finally return the family device structure */

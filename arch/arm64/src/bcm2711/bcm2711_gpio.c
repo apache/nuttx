@@ -265,7 +265,10 @@ static int bcm2711_gpio_irqs_init(void)
   for (int i = 0; i < NUM_GPIO_IRQS; i++)
     {
       err = irq_attach(g_gpio_irqs[i], bcm2711_gpio_interrupt_handler, NULL);
-      if (err) return err;
+      if (err)
+        {
+          return err;
+        }
     }
 
   /* Enable all GPIO IRQs. */
@@ -312,6 +315,7 @@ void bcm2711_gpio_set_pulls(uint32_t gpio, bool up, bool down)
   /* Pick direction. */
 
   uint32_t direction = 0;
+
   if (up)
     {
       direction = BCM_GPIO_PULLUP;
@@ -328,6 +332,7 @@ void bcm2711_gpio_set_pulls(uint32_t gpio, bool up, bool down)
   /* Set GPIO pin resistor. */
 
   uint32_t value = 0;
+
   if (gpio <= 15)
     {
       value = (direction << (gpio * 2));
@@ -371,6 +376,7 @@ void bcm2711_gpio_set_func(uint32_t gpio, enum bcm2711_gpio_func_e func)
   DEBUGASSERT(gpio < BCM_GPIO_NUM);
 
   uint32_t value = 0;
+
   if (gpio <= 9)
     {
       value = (g_fsel_map[func] << (gpio * 3));
@@ -626,7 +632,10 @@ int bcm2711_gpio_irq_attach(uint32_t gpio, xcpt_t isr, void *arg)
   if (!g_gpio_irqs_init)
     {
       ret = bcm2711_gpio_irqs_init();
-      if (ret < 0) return ret; /* Early return if primary attach failed. */
+      if (ret < 0)
+        {
+          return ret; /* Early return if primary attach failed. */
+        }
     }
 
   /* Save handler information for this pin. */

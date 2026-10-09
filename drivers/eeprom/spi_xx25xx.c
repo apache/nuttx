@@ -937,36 +937,36 @@ static off_t ee25xx_seek(FAR struct file *filep, off_t offset, int whence)
 
   switch (whence)
     {
-    case SEEK_CUR:
-      newpos = filep->f_pos + offset;
-      if (newpos < 0 || newpos > eedev->size)
-        {
-          return -EINVAL;
-        }
-      break;
+      case SEEK_CUR:
+        newpos = filep->f_pos + offset;
+        if (newpos < 0 || newpos > eedev->size)
+          {
+            return -EINVAL;
+          }
+        break;
 
-    case SEEK_SET:
-      newpos = offset;
-      if (newpos < 0 || newpos > eedev->size)
-        {
-          return -EINVAL;
-        }
-      break;
+      case SEEK_SET:
+        newpos = offset;
+        if (newpos < 0 || newpos > eedev->size)
+          {
+            return -EINVAL;
+          }
+        break;
 
-    case SEEK_END:
-      newpos = eedev->size + offset;
-      if (newpos < 0 || newpos > eedev->size)
-        {
-          return -EINVAL;
-        }
-      break;
+      case SEEK_END:
+        newpos = eedev->size + offset;
+        if (newpos < 0 || newpos > eedev->size)
+          {
+            return -EINVAL;
+          }
+        break;
 
-    default:
+      default:
 
-      /* Return EINVAL if the whence argument is invalid */
+        /* Return EINVAL if the whence argument is invalid */
 
-      nxmutex_unlock(&eedev->lock);
-      return -EINVAL;
+        nxmutex_unlock(&eedev->lock);
+        return -EINVAL;
     }
 
   /* Opengroup.org:
@@ -1086,6 +1086,7 @@ static ssize_t ee25xx_read(FAR struct ee25xx_dev_s *eedev, off_t offset,
     }
 
   const int ret = nxmutex_lock(&eedev->lock);
+
   if (ret < 0)
     {
       return ret;
@@ -1353,6 +1354,7 @@ static int ee25xx_ioctl(FAR struct ee25xx_dev_s *eedev, int cmd,
         {
           FAR struct eeprom_geometry_s *geo =
             (FAR struct eeprom_geometry_s *)arg;
+
           if (geo != NULL)
             {
               geo->npages   = 0;
@@ -1373,10 +1375,10 @@ static int ee25xx_ioctl(FAR struct ee25xx_dev_s *eedev, int cmd,
         {
           ret = nxmutex_lock(&eedev->lock);
           if (ret == OK)
-          {
-            eedev->freq = (uint32_t)arg;
-            nxmutex_unlock(&eedev->lock);
-          }
+            {
+              eedev->freq = (uint32_t)arg;
+              nxmutex_unlock(&eedev->lock);
+            }
         }
         break;
 
@@ -1451,6 +1453,7 @@ static int ee25xx_populatedev(FAR struct ee25xx_dev_s **eedev,
   /* Check the device type early */
 
   const int devtype_idx = (int)devtype;
+
   if (devtype_idx >= nitems(g_ee25xx_devices))
     {
       return -EINVAL;

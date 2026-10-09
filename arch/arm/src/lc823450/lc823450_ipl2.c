@@ -370,7 +370,8 @@ static int check_forceusbboot(void)
   /* wait for adc done */
 
   while ((getreg32(ADCSTS) & ADCSTS_ADCMPL) == 0)
-    ;
+    {
+    }
 
   val = getreg32(ADC0DT);
   val1 = getreg32(ADC1DT);
@@ -429,6 +430,7 @@ static void sysreset(void)
 static int get_config(int num, char *buf)
 {
   int ret;
+
   ret = blk_read(buf, 512, CONFIG_MTD_CONFIG_DEVPATH, num * 512);
   return ret;
 }
@@ -440,6 +442,7 @@ static int get_config(int num, char *buf)
 static int set_config(int num, char *buf)
 {
   int ret;
+
   ret = blk_write(buf, 512, CONFIG_MTD_CONFIG_DEVPATH, num * 512);
   return ret;
 }

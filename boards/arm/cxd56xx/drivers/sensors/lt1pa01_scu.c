@@ -125,7 +125,6 @@
 #define LT1PA01_PROX_INT_TL_DEFAULT   0x03
 #define LT1PA01_PROX_INT_TH_DEFAULT   0x03
 
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -685,6 +684,7 @@ static int lt1pa01_ioctl_prox(struct file *filep, int cmd,
       case SNIOC_GETINTSTATUS:
         {
           uint8_t intstatus = lt1pa01_getreg8(priv, LT1PA01_INTCONFIG);
+
           *(uint8_t *)(uintptr_t)arg = intstatus;
           sninfo("Get proximity IntStatus 0x%02x\n", intstatus);
         }
