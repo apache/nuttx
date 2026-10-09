@@ -107,6 +107,30 @@ uint8_t crc8ccitt(FAR const uint8_t *src, size_t len);
 uint8_t crc8ccittpart(FAR const uint8_t *src, size_t len, uint8_t crc8val);
 
 /****************************************************************************
+ * Name: crc8smbuspart
+ *
+ * Description:
+ *   Continue an SMBus packet error code (PEC) calculation with polynomial
+ *   0x07, no reflection and no final XOR.  Pass zero for the first buffer
+ *   and the previous result for subsequent buffers.  An empty buffer returns
+ *   crc8val unchanged.
+ *
+ ****************************************************************************/
+
+uint8_t crc8smbuspart(FAR const uint8_t *src, size_t len, uint8_t crc8val);
+
+/****************************************************************************
+ * Name: crc8smbus
+ *
+ * Description:
+ *   Calculate an SMBus PEC using polynomial 0x07, initial value zero,
+ *   no reflection and no final XOR.  An empty buffer returns zero.
+ *
+ ****************************************************************************/
+
+uint8_t crc8smbus(FAR const uint8_t *src, size_t len);
+
+/****************************************************************************
  * Name: crc8rohcpart
  ****************************************************************************/
 
