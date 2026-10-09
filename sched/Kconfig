@@ -3,6 +3,52 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+choice POSIX_PROFILE_CHOICE
+	prompt "POSIX Realtime Profile (IEEE 1003.13)"
+	default POSIX_PROFILE_CHOICE_NONE
+	depends on EXPERIMENTAL
+
+config POSIX_PROFILE_CHOICE_NONE
+	bool "None (No POSIX Realtime Profile enforced)"
+
+config POSIX_PROFILE_CHOICE_PSE51
+	bool "Minimal Realtime System Profile (PSE51)"
+	select POSIX_PSE51
+
+config POSIX_PROFILE_CHOICE_PSE52
+	bool "Realtime Controller System Profile (PSE52)"
+	select POSIX_PSE51
+	select POSIX_PSE52
+
+config POSIX_PROFILE_CHOICE_PSE53
+	bool "Dedicated Realtime System Profile (PSE53)"
+	depends on BUILD_KERNEL
+	select POSIX_PSE51
+	select POSIX_PSE52
+	select POSIX_PSE53
+
+config POSIX_PROFILE_CHOICE_PSE54
+	bool "Multi-purpose realtime system (PSE54)"
+	depends on BUILD_KERNEL
+	select POSIX_PSE51
+	select POSIX_PSE52
+	select POSIX_PSE53
+	select POSIX_PSE54
+
+endchoice
+
+config POSIX_PSE51
+	bool
+
+config POSIX_PSE52
+	bool
+
+config POSIX_PSE53
+	bool
+
+config POSIX_PSE54
+	bool
+
 menuconfig DISABLE_OS_API
 	bool "Disable NuttX interfaces"
 	default y
