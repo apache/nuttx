@@ -286,8 +286,6 @@
 /* Helpers and legacy compatibility definitions */
 
 #define fdatasync(f)                     fsync(f)
-#define getdtablesize(f)                 ((int)sysconf(_SC_OPEN_MAX))
-#define getpagesize(f)                   ((int)sysconf(_SC_PAGESIZE))
 
 /* Accessor functions associated with getopt(). */
 
@@ -398,6 +396,11 @@ int     isatty(int fd);
 
 FAR char *ttyname(int fd);
 int       ttyname_r(int fd, FAR char *buf, size_t buflen);
+
+/* Legacy BSD interfaces */
+
+int       getdtablesize(void);
+int       getpagesize(void);
 
 /* The name of the user */
 

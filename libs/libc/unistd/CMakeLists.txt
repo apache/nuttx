@@ -26,6 +26,8 @@ set(SRCS
     lib_swab.c
     lib_pathconf.c
     lib_sysconf.c
+    lib_getdtablesize.c
+    lib_getpagesize.c
     lib_getcwd.c
     lib_getentropy.c
     lib_getopt_common.c
