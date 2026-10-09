@@ -26,6 +26,7 @@
  * kernel thread, three RF interrupts and a byte-coded configuration
  * protocol ("WIDs").  The network device is a netdev_upperhalf lower half
  * with the wireless operations used by wapi (scan, essid, psk, mode, freq).
+ * WPA3-Personal needs the BA414E engine (pic32mz_ba414e.c).
  *
  * Every hardware or library fact below is tagged with where it comes from:
  *
@@ -73,6 +74,9 @@
 #include "mips_internal.h"
 #include "hardware/pic32mzw1_pmuclk.h"
 #include "pic32mz_w1_wlan.h"
+#ifdef CONFIG_PIC32MZ_W1_BA414E
+#  include "pic32mz_ba414e.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -141,6 +145,7 @@
 #define WID_GET_SCAN_RESULTS    0x3034
 #define WID_REG_DOMAIN          0x4010
 #define WID_STA_JOIN_INFO       0x4008
+#define WID_RSNA_PASSWORD       0x4012
 #define WID_SSID                0x4020
 
 #define WID_TYPE(w)             ((w) >> 12)
@@ -161,7 +166,9 @@
 #define DOT11I_CCMP128          0x0040
 #define DOT11I_TKIP             0x0080
 #define DOT11I_BIPCMAC128       0x0100
+#define DOT11I_MFP_REQUIRED     0x0200
 #define DOT11I_PSK              0x0800
+#define DOT11I_SAE              0x1000
 #define DOT11I_AP               0x8000
 
 /* [EX] Harmony's WPA2-Personal and WPA/WPA2-Personal settings */
@@ -171,6 +178,14 @@
    DOT11I_PSK)
 #define DOT11I_WPAWPA2_PERSONAL \
   (DOT11I_WPA2_PERSONAL | DOT11I_WPAIE | DOT11I_TKIP)
+
+/* [EX] Harmony's WPA3-Personal settings (SAE, management frame protection
+ * required)
+ */
+
+#define DOT11I_WPA3_PERSONAL \
+  (DOT11I_PRIVACY | DOT11I_RSNE | DOT11I_CCMP128 | DOT11I_BIPCMAC128 | \
+   DOT11I_MFP_REQUIRED | DOT11I_SAE)
 
 /* Soft-AP channel when none was requested */
 
@@ -187,6 +202,8 @@
 
 #define WLAN_RX_QUOTA           8
 #define WLAN_TX_QUOTA           4
+
+#define WLAN_CRYPTO_DEFER_MAX   8
 
 #define IW_EVENT_SIZE(field) \
   (offsetof(struct iw_event, u) + sizeof(((union iwreq_data *)0)->field))
@@ -217,6 +234,13 @@ struct wid_msg_s
   char op;                      /* 'W' write or 'Q' query */
 };
 
+struct wlan_crypto_defer_s
+{
+  wlan_crypto_cb_t cb;
+  int result;
+  uintptr_t context;
+};
+
 enum wlan_scan_e
 {
   WLAN_SCAN_IDLE = 0,
@@ -240,6 +264,12 @@ struct pic32mz_wlan_s
   bool macvalid;
   bool ready;
   uint8_t mac[6];
+
+  /* Deferred crypto completion callbacks (ring) */
+
+  struct wlan_crypto_defer_s defer[WLAN_CRYPTO_DEFER_MAX];
+  uint8_t defer_head;
+  uint8_t defer_tail;
 
   /* Network device */
 
@@ -801,6 +831,30 @@ static void wlan_send_init(void)
     }
 }
 
+/* Run the deferred crypto callbacks; called with the library lock held */
+
+static void wlan_crypto_run(void)
+{
+  struct wlan_crypto_defer_s d;
+  irqstate_t flags;
+
+  for (; ; )
+    {
+      flags = enter_critical_section();
+      if (g_wlan.defer_head == g_wlan.defer_tail)
+        {
+          leave_critical_section(flags);
+          break;
+        }
+
+      d = g_wlan.defer[g_wlan.defer_tail];
+      g_wlan.defer_tail = (g_wlan.defer_tail + 1) % WLAN_CRYPTO_DEFER_MAX;
+      leave_critical_section(flags);
+
+      d.cb(d.result, d.context);
+    }
+}
+
 static int wlan_thread(int argc, FAR char *argv[])
 {
   FAR sq_entry_t *entry;
@@ -827,6 +881,7 @@ static int wlan_thread(int argc, FAR char *argv[])
           wdrv_pic32mzw_process_cfg_message(wlan_data(entry));
         }
 
+      wlan_crypto_run();
       wdrv_pic32mzw_mac_controller_task();
       nxmutex_unlock(&g_wlan.lock);
 
@@ -946,6 +1001,12 @@ static int wlan_dot11i(FAR uint32_t *dot11i)
         *dot11i = DOT11I_WPA2_PERSONAL;
         break;
 
+#ifdef CONFIG_PIC32MZ_W1_BA414E
+      case IW_AUTH_WPA_VERSION_WPA3:
+        *dot11i = DOT11I_WPA3_PERSONAL;
+        break;
+#endif
+
       default:
         wlerr("WPA version %" PRIu32 " not supported\n", g_wlan.wpaver);
         return -ENOTSUP;
@@ -985,6 +1046,11 @@ static int wlan_apstart(uint32_t dot11i)
   if (dot11i & DOT11I_PSK)
     {
       wid_data(&msg, WID_11I_PSK, g_wlan.psk, g_wlan.psklen);
+    }
+
+  if (dot11i & DOT11I_SAE)
+    {
+      wid_data(&msg, WID_RSNA_PASSWORD, g_wlan.psk, g_wlan.psklen);
     }
 
   wid_value(&msg, WID_11G_OPERATING_MODE, 2);
@@ -1043,6 +1109,11 @@ static int wlan_connect(FAR struct netdev_lowerhalf_s *dev)
   if (dot11i & DOT11I_PSK)
     {
       wid_data(&msg, WID_11I_PSK, g_wlan.psk, g_wlan.psklen);
+    }
+
+  if (dot11i & DOT11I_SAE)
+    {
+      wid_data(&msg, WID_RSNA_PASSWORD, g_wlan.psk, g_wlan.psklen);
     }
 
   wid_value(&msg, WID_11G_OPERATING_MODE, 2);
@@ -1618,6 +1689,39 @@ int pic32mzw1_putchar(int c)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: pic32mz_wlan_crypto_defer
+ *
+ * Description:
+ *   Queue a crypto completion callback; the WLAN thread runs it with the
+ *   library lock held ([EX] as Harmony's DRV_PIC32MZW_CryptoCallbackPush()).
+ *
+ ****************************************************************************/
+
+void pic32mz_wlan_crypto_defer(wlan_crypto_cb_t cb, int result,
+                               uintptr_t context)
+{
+  irqstate_t flags;
+  uint8_t next;
+
+  flags = enter_critical_section();
+  next = (g_wlan.defer_head + 1) % WLAN_CRYPTO_DEFER_MAX;
+  if (next == g_wlan.defer_tail)
+    {
+      leave_critical_section(flags);
+      wlerr("crypto callback queue full\n");
+      return;
+    }
+
+  g_wlan.defer[g_wlan.defer_head].cb      = cb;
+  g_wlan.defer[g_wlan.defer_head].result  = result;
+  g_wlan.defer[g_wlan.defer_head].context = context;
+  g_wlan.defer_head = next;
+  leave_critical_section(flags);
+
+  nxsem_post(&g_wlan.evsem);
+}
+
+/****************************************************************************
  * Name: pic32mz_wlan_initialize
  *
  * Description:
@@ -1644,6 +1748,14 @@ int pic32mz_wlan_initialize(void)
   wlan_pool_init();
 
   g_wlan.wpaver = IW_AUTH_WPA_VERSION_DISABLED;
+
+#ifdef CONFIG_PIC32MZ_W1_BA414E
+  ret = pic32mz_ba414e_initialize();
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
 
   /* [EX] Turn the WLAN LDO on */
 
