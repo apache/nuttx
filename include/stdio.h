@@ -33,8 +33,17 @@
 #include <stdarg.h>
 #include <time.h>
 
-#include <nuttx/fs/fs.h>
-#include <nuttx/lib/lib.h>
+#include <nuttx/fs/cookie.h>
+
+/* Kernel code, and every program of a flat or protected build, still sees
+ * the file system and C library internals through stdio.h.  The programs
+ * of a kernel build cannot use them, and do not see them.
+ */
+
+#if !defined(CONFIG_BUILD_KERNEL) || defined(__KERNEL__)
+#  include <nuttx/fs/fs.h>
+#  include <nuttx/lib/lib.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -131,6 +140,10 @@ extern "C"
  ****************************************************************************/
 
 /* ANSI-like File System Interfaces */
+
+/* The standard streams, see stdin, stdout and stderr above */
+
+FAR FILE *lib_get_stream(int fd);
 
 /* Operations on streams (FILE) */
 
