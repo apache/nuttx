@@ -94,6 +94,7 @@ static bool set_enable_pin(FAR struct se05x_dev_s *se05x, bool state)
 int pnt_se05x_open(FAR struct se05x_dev_s *se05x)
 {
   int ret;
+
   se05x->pnt = kmm_malloc(sizeof(struct pnt_handle));
 
   if (se05x->pnt == NULL)
@@ -150,6 +151,7 @@ int pnt_se05x_get_info(FAR struct se05x_dev_s *se05x,
 {
   bool result = select_card_manager(&(se05x->pnt->session));
   identify_rsp_t identify_response;
+
   if (result)
     {
       result = se05x_identify(&(se05x->pnt->session), &identify_response);
@@ -173,6 +175,7 @@ int pnt_se05x_get_uid(FAR struct se05x_dev_s *se05x,
   smStatus_t status = Se05x_API_CheckObjectExists(
       &(se05x->pnt->session), KSE05X_APPLETRESID_UNIQUE_ID, &dummy);
   int result = status == SM_OK ? 0 : -ENODATA;
+
   if (result == 0)
     {
       status = Se05x_API_ReadObject(&(se05x->pnt->session),
@@ -192,6 +195,7 @@ int pnt_se05x_generate_keypair(
       &(se05x->pnt->session), NULL, 0, generate_keypair_args->id,
       kSE05x_ECCurve_NIST_P256, NULL, 0, NULL, 0, kSE05x_INS_NA,
       kSE05x_KeyPart_Pair);
+
   return status == SM_OK ? 0 : -EIO;
 }
 
@@ -204,6 +208,7 @@ int pnt_se05x_set_public_key(
       kSE05x_ECCurve_NIST_P256, NULL, 0, set_publickey_args->content.buffer,
       set_publickey_args->content.buffer_size, kSE05x_INS_NA,
       kSE05x_KeyPart_Public);
+
   return status == SM_OK ? 0 : -EIO;
 }
 
@@ -220,6 +225,7 @@ int pnt_se05x_set_data(
     {
       size_t chunk_size =
           remainder > DATA_CHUNK_SIZE ? DATA_CHUNK_SIZE : remainder;
+
       status = Se05x_API_WriteBinary(
           &(se05x->pnt->session), NULL, set_publickey_args->entry.id, offset,
           first_cycle ? set_publickey_args->content.buffer_size : 0,
@@ -241,6 +247,7 @@ int pnt_se05x_get_key(FAR struct se05x_dev_s *se05x,
       Se05x_API_ReadObject(&(se05x->pnt->session), get_key_args->entry.id, 0,
                            0, get_key_args->content.buffer,
                            &get_key_args->content.buffer_content_size);
+
   return status == SM_OK ? 0 : -EIO;
 }
 
@@ -262,6 +269,7 @@ int pnt_se05x_get_data(FAR struct se05x_dev_s *se05x,
     {
       size_t chunk_size =
           remainder > DATA_CHUNK_SIZE ? DATA_CHUNK_SIZE : remainder;
+
       status = Se05x_API_ReadObject(
           &(se05x->pnt->session), get_key_args->entry.id, offset, chunk_size,
           get_key_args->content.buffer + offset, &chunk_size);
@@ -277,6 +285,7 @@ int pnt_se05x_delete_key(FAR struct se05x_dev_s *se05x, uint32_t key_id)
 {
   smStatus_t status =
       Se05x_API_DeleteSecureObject(&(se05x->pnt->session), key_id);
+
   return status == SM_OK ? 0 : -EIO;
 }
 
