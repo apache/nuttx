@@ -149,6 +149,18 @@ Accelerometer, used to measure the acceleration vector of the device. Units: m/s
 Event data structure: (This indicates that there is a specific data structure for
 accelerometer events, but the actual structure is not provided in the text you gave.)
 
+**SENSOR_TYPE_INCLINOMETER**
+
+Inclinometer, used to measure the static tilt of the device X, Y and Z axes
+relative to the horizontal plane, derived from the gravity vector. Units:
+degrees, signed, in the range [-90, +90]: 0 means the axis is horizontal,
++90 means it points straight up (away from gravity) and -90 straight down.
+Event data structure: ``struct sensor_inclinometer`` (x, y, z and
+temperature in degrees Celsius). Unlike ``SENSOR_TYPE_ANGLE``, which is the
+angle between two mechanical parts of a device (for example a hinge), it is
+referenced to gravity and only meaningful while the device is not
+accelerating.
+
 (won't introduce them one by one since there are many)
 
 **Sensor Topic Definition**
