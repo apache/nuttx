@@ -1744,12 +1744,6 @@ static void pic32mz_txdone(struct pic32mz_driver_s *priv)
   priv->pd_inten &= ~ETH_TXINTS;
   pic32mz_putreg(priv->pd_inten, PIC32MZ_ETH_IEN);
 
-  /* Verify that the hardware is ready to send another packet.  Since a Tx
-   * just completed, this must be the case.
-   */
-
-  DEBUGASSERT(pic32mz_txdesc(priv) != NULL);
-
   /* Inspect the list of TX descriptors to see if the EOWN bit is cleared.
    * If it is, this descriptor is now under software control and the message
    * was transmitted. Use TSV to check for the transmission result.
@@ -1800,6 +1794,12 @@ static void pic32mz_txdone(struct pic32mz_driver_s *priv)
             }
         }
     }
+
+  /* Verify that the hardware is ready to send another packet.  Since a Tx
+   * just completed and its buffer was freed, this must be the case.
+   */
+
+  DEBUGASSERT(pic32mz_txdesc(priv) != NULL);
 
   /* Check if there is a pending Tx transfer that was deferred by Rx handling
    * because there were no available Tx descriptors.  If so, process that
