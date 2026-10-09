@@ -28,6 +28,7 @@
 
 #include <nuttx/instrument.h>
 #include <nuttx/note/note_driver.h>
+#include <nuttx/note/note_itm.h>
 #include <nuttx/note/noteram_driver.h>
 #include <nuttx/note/notectl_driver.h>
 #include <nuttx/note/notesnap_driver.h>
@@ -172,6 +173,15 @@ int note_initialize(void)
   if (ret < 0)
     {
       serr("notertt_register failed %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_ARMV7M_NOTE_ITM
+  ret = noteitm_register();
+  if (ret < 0)
+    {
+      serr("noteitm_register failed %d\n", ret);
       return ret;
     }
 #endif

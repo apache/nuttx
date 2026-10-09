@@ -48,6 +48,9 @@ ifeq ($(CONFIG_ARMV7M_ITMSYSLOG),y)
   CMN_CSRCS += arm_itm_syslog.c
 endif
 
+ifeq ($(CONFIG_ARMV7M_NOTE_ITM),y)
+  CMN_CSRCS += arm_note_itm.c
+endif
 ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
   CMN_CSRCS += arm_stackcheck.c
 endif
