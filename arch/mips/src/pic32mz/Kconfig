@@ -153,9 +153,9 @@ config PIC32MZ_W1_WLAN
 		Wi-Fi network device (wlan0) built on Microchip's closed PIC32MZ-W1
 		WLAN library (pic32mzw1.a from the MPLAB Harmony wireless_wifi
 		repository, downloaded at build time under Microchip's license).
-		Station or Soft-AP, open or WPA/WPA2-Personal, configured through
-		wapi.  The library is built with XC32 (microMIPS, soft-float), so
-		only XC32 is supported.
+		Station or Soft-AP, open or WPA/WPA2-Personal (WPA3-Personal with
+		PIC32MZ_W1_BA414E), configured through wapi.  The library is built
+		with XC32 (microMIPS, soft-float), so only XC32 is supported.
 
 if PIC32MZ_W1_WLAN
 
@@ -166,6 +166,58 @@ config PIC32MZ_W1_WLAN_PRIORITY
 config PIC32MZ_W1_WLAN_STACKSIZE
 	int "WLAN thread stack size"
 	default 4096
+
+config PIC32MZ_W1_BA414E
+	bool "BA414E public key engine (WPA3-Personal)"
+	default n
+	---help---
+		Use the BA414E public key engine for the big number and elliptic
+		curve operations of WPA3-Personal (SAE), station and Soft-AP.
+		Without it only open and WPA/WPA2-Personal networks are
+		supported.  The engine runs a microcode program from Microchip's
+		MPLAB Harmony driver source (drivers/ba414e/src/drv_ba414e.c in
+		https://github.com/Microchip-MPLAB-Harmony/crypto), which is
+		under Microchip's license and not part of NuttX.
+
+if PIC32MZ_W1_BA414E
+
+choice
+	prompt "BA414E microcode"
+	default PIC32MZ_W1_BA414E_UCODE_BUILTIN
+
+config PIC32MZ_W1_BA414E_UCODE_BUILTIN
+	bool "Download at build time"
+	---help---
+		Download drv_ba414e.c (Harmony crypto v3.9.0) at build time and
+		link its microcode into the image.
+
+config PIC32MZ_W1_BA414E_UCODE_FILE
+	bool "Load from a file"
+	---help---
+		Load the microcode from a file when the engine is first used,
+		that is on the first WPA3 connection or Soft-AP start.  The file
+		holds the 810 32-bit values of the init_ucode_array[810]
+		initializer of drv_ba414e.c, in array order, each little endian:
+		no header, exactly 3240 bytes.  Any file system works (ROMFS,
+		tmpfs, a flash file system...) as long as the file is there
+		before the first use.
+
+endchoice
+
+config PIC32MZ_W1_BA414E_UCODE_PATH
+	string "Microcode file"
+	default "/etc/ba414e.bin"
+	depends on PIC32MZ_W1_BA414E_UCODE_FILE
+
+config PIC32MZ_W1_BA414E_SELFTEST
+	bool "BA414E self-test"
+	default n
+	---help---
+		Run known-answer tests of the BA414E primitives (P-256 and
+		modular arithmetic) once the microcode is loaded, and log the
+		results and times.
+
+endif # PIC32MZ_W1_BA414E
 
 endif # PIC32MZ_W1_WLAN
 

@@ -106,11 +106,47 @@ LDFLAGS += --defsym=NVMADDR=0xbf800630 --defsym=NVMDATA0=0xbf800640
 LDFLAGS += --defsym=NVMSRCADDR=0xbf8006c0 --defsym=NVMLBWP=0xbf8006f0
 endif
 
-# Delete the downloaded library and its copy whatever the configuration
+ifeq ($(CONFIG_PIC32MZ_W1_BA414E),y)
+CHIP_CSRCS += pic32mz_ba414e.c
+endif
+
+ifeq ($(CONFIG_PIC32MZ_W1_BA414E_UCODE_BUILTIN),y)
+CHIP_CSRCS += pic32mz_ba414e_ucode.c
+
+# The BA414E microcode is not part of NuttX either: download Microchip's
+# driver source from the MPLAB Harmony crypto repository and generate a C
+# file with its init_ucode_array values (810 32-bit words).
+
+BA414E_VER = v3.9.0
+BA414E_URL = https://github.com/Microchip-MPLAB-Harmony/crypto/raw/$(BA414E_VER)/drivers/ba414e/src
+BA414E_SRC = chip$(DELIM)drv_ba414e.c
+BA414E_UCODE = chip$(DELIM)pic32mz_ba414e_ucode.c
+
+$(BA414E_SRC):
+	$(call DOWNLOAD,$(BA414E_URL),drv_ba414e.c,$(BA414E_SRC))
+
+$(BA414E_UCODE): $(BA414E_SRC)
+	$(Q) n=`sed -n '/init_ucode_array\[810\]/,/};/p' $< | grep -o 0x | wc -l`; \
+	  if [ $$n -ne 810 ]; then \
+	    echo "ERROR: no BA414E microcode in $<"; rm -f $<; exit 1; \
+	  fi
+	$(Q) { echo "/* Generated from Microchip's drv_ba414e.c $(BA414E_VER) */"; \
+	  echo "#include <stdint.h>"; \
+	  echo "const uint32_t g_ba414e_ucode[810] ="; \
+	  echo "{"; \
+	  sed -n '/init_ucode_array\[810\]/,/};/p' $< | sed '1d;$$d'; \
+	  echo "};"; } > $@
+
+context:: $(BA414E_UCODE)
+endif
+
+# Delete the downloaded and generated files whatever the configuration
 
 distclean::
 	$(call DELFILE, chip$(DELIM)pic32mzw1.a)
 	$(call DELFILE, chip$(DELIM)libpic32mzw1_nx.a)
+	$(call DELFILE, chip$(DELIM)drv_ba414e.c)
+	$(call DELFILE, chip$(DELIM)pic32mz_ba414e_ucode.c)
 
 ifeq ($(CONFIG_PIC32MZ_GPIOIRQ),y)
 CHIP_CSRCS += pic32mz_gpioirq.c

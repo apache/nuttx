@@ -40,6 +40,10 @@
  * in pic32mz_w1_wlan.c.
  */
 
+/* Completion callback of the crypto services (DRV_PIC32MZW_CRYPTO_CB) */
+
+typedef CODE void (*wlan_crypto_cb_t)(int result, uintptr_t context);
+
 struct pic32mz_wlan_init_s
 {
   int alarm_1ms;
@@ -96,5 +100,10 @@ int pic32mzw1_putchar(int c);
 /* NuttX interface */
 
 int pic32mz_wlan_initialize(void);
+
+/* Run a crypto completion callback later from the WLAN thread */
+
+void pic32mz_wlan_crypto_defer(wlan_crypto_cb_t cb, int result,
+                               uintptr_t context);
 
 #endif /* __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_W1_WLAN_H */
