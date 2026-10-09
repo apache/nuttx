@@ -36,6 +36,10 @@
 #  include "pic32mz_spi.h"
 #endif
 
+#ifdef CONFIG_PIC32MZ_W1_WLAN
+#  include "pic32mz_w1_wlan.h"
+#endif
+
 #include "ev49n51a.h"
 
 /****************************************************************************
@@ -95,5 +99,13 @@ int pic32mz_bringup(void)
 #endif
 
   UNUSED(ret);
+#ifdef CONFIG_PIC32MZ_W1_WLAN
+  ret = pic32mz_wlan_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: pic32mz_wlan_initialize() failed: %d\n", ret);
+    }
+#endif
+
   return OK;
 }
