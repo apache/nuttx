@@ -56,6 +56,14 @@ struct grp_user_s
   int             count;      /* Number of group IDs found so far */
 };
 
+/* Context used by grp_match_index() to find the record with a given index */
+
+struct grp_index_s
+{
+  int index;                  /* Index of the record to find */
+  int current;                /* Index of the record being visited */
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -108,6 +116,31 @@ static int grp_match_gid(FAR const struct group *entry, uintptr_t arg)
   int match_gid = (int)arg;
 
   return match_gid == entry->gr_gid ? 1 : 0;
+}
+
+/****************************************************************************
+ * Name: grp_match_index
+ *
+ * Description:
+ *   Called for each record in the group file.  Returns "1" for the record
+ *   with the index in the context (passed as arg).
+ *
+ * Input Parameters:
+ *   entry  - The parsed group file record
+ *   arg    - A pointer to the struct grp_index_s context
+ *
+ * Returned Value:
+ *   = 0 :  This is not the record with the index.
+ *   = 1 :  This is the record with the index.
+ *
+ ****************************************************************************/
+
+static int grp_match_index(FAR const struct group *entry, uintptr_t arg)
+{
+  FAR struct grp_index_s *ctx = (FAR struct grp_index_s *)arg;
+
+  UNUSED(entry);
+  return ctx->current++ == ctx->index ? 1 : 0;
 }
 
 /****************************************************************************
@@ -399,6 +432,36 @@ int grp_findby_gid(gid_t gid, FAR struct group *entry, FAR char *buffer,
                    size_t buflen)
 {
   return grp_foreach(grp_match_gid, (uintptr_t)gid, entry, buffer, buflen);
+}
+
+/****************************************************************************
+ * Name: grp_findby_index
+ *
+ * Description:
+ *   Find the group file entry with the given index (0 is the first).
+ *
+ * Input Parameters:
+ *   index  - The index of the entry
+ *   entry  - Location to return the parsed group file entry
+ *   buffer - I/O buffer used to access the group file
+ *   buflen - The size of the I/O buffer in bytes
+ *
+ * Returned Value:
+ *   < 0 :  An error has occurred.
+ *   = 0 :  There is no entry with this index.
+ *   = 1 :  The entry with this index was found.
+ *
+ ****************************************************************************/
+
+int grp_findby_index(int index, FAR struct group *entry, FAR char *buffer,
+                     size_t buflen)
+{
+  struct grp_index_s ctx;
+
+  ctx.index   = index;
+  ctx.current = 0;
+  return grp_foreach(grp_match_index, (uintptr_t)&ctx, entry, buffer,
+                     buflen);
 }
 
 /****************************************************************************
