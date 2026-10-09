@@ -145,6 +145,12 @@ int sigqueue(int pid, int signo, union sigval value)
 {
   int ret;
 
+  if (signo != 0 && !nxsched_may_control(pid))
+    {
+      set_errno(EPERM);
+      return ERROR;
+    }
+
   /* Let nxsig_queue() do all of the real work */
 
   ret = nxsig_queue(pid, signo, value);

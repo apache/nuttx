@@ -48,7 +48,7 @@ they are not alike.  ``ASSIGNED`` is ``READYTORUN`` with a CPU already
 picked, and it is the conditional one -- it exists only under
 ``CONFIG_SMP``.  ``PENDING`` is always compiled, and it is narrower than its
 name suggests: a thread goes there only if it became ready while another
-thread held ``sched_lock()`` **and** would have pre-empted it.
+thread held ``sched_lock()`` **and** would have preempted it.
 ``nxsched_add_readytorun()`` tests both halves --
 ``nxsched_islocked_tcb(rtcb)`` and a new priority higher than the running
 thread's -- so a thread that becomes ready at equal or lower priority under
@@ -84,7 +84,7 @@ lower-priority thread run ahead of a higher-priority one.
 ``SCHED_FIFO`` -- run to completion
 -----------------------------------
 
-A thread runs until it blocks, exits, or is pre-empted by something of
+A thread runs until it blocks, exits, or is preempted by something of
 higher priority.  Two threads of the same priority do not share the CPU: the
 first one to start keeps it until it gives it up.
 
@@ -154,7 +154,7 @@ worth reading twice.  ``sched_sporadic.c`` asserts
 Give a thread a 10 ms budget and a 100 ms period and it runs high for up to
 10 ms, low for the other 90, and is promoted again 100 ms after the cycle
 began -- not 100 ms after the budget ran out.  ``sched_ss_max_repl`` bounds a
-second mechanism rather than this one: when the thread is pre-empted part-way
+second mechanism rather than this one: when the thread is preempted part-way
 through its budget, each fragment is replenished one period after it was
 consumed, and the field caps how many such replenishments may be outstanding
 at once.
@@ -210,7 +210,7 @@ Two interfaces are specific to NuttX and worth naming here:
    Hold off the scheduler without disabling interrupts.  Interrupts still
    run; what is suspended is the switch to another thread.  A thread that
    becomes ready while pre-emption is locked goes to ``PENDING``, provided it
-   would have pre-empted the thread holding the lock.  This is
+   would have preempted the thread holding the lock.  This is
    cheaper and far less disruptive than disabling interrupts, and it is
    almost always the right tool when the goal is "do not switch away from
    me" rather than "do not interrupt me".  See
@@ -237,3 +237,4 @@ In this section
    wqueue.rst
    tls.rst
    user_identity.rst
+   capabilities.rst

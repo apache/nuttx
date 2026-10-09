@@ -87,6 +87,12 @@ int prctl(int option, ...)
               pid = va_arg(ap, int);
             }
 
+          if (option == PR_SET_NAME_EXT && !nxsched_may_control(pid))
+            {
+              errcode = EPERM;
+              goto errout;
+            }
+
           /* Get the TCB associated with the PID (handling the special case
            * of pid==0 meaning "this thread")
            */
@@ -187,20 +193,24 @@ int prctl(int option, ...)
         goto errout;
 #endif
 
+#ifdef CONFIG_SCHED_CAPABILITIES
+      case PR_CAPS_DROP:
+        this_task()->group->tg_caps &= ~va_arg(ap, int);
+        break;
+
+      case PR_CAPS_GET:
+        va_end(ap);
+        return this_task()->group->tg_caps;
+#endif
+
       default:
         serr("ERROR: Unrecognized option: %d\n", option);
         errcode = EINVAL;
         goto errout;
     }
 
-  /* Not reachable unless CONFIG_TASK_NAME_SIZE is > 0.  NOTE: This might
-   * change if additional commands are supported.
-   */
-
-#if CONFIG_TASK_NAME_SIZE > 0
   va_end(ap);
   return OK;
-#endif
 
 errout:
   va_end(ap);
