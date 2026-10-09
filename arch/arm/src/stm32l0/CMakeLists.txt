@@ -24,9 +24,5 @@ set(SRCS)
 
 list(APPEND SRCS stm32_rcc.c)
 
-if(CONFIG_BUILD_PROTECTED)
-  list(APPEND SRCS stm32_userspace.c)
-endif()
-
 target_sources(arch PRIVATE ${SRCS})
 add_subdirectory(${NUTTX_DIR}/arch/arm/src/common/stm32 stm32_common)

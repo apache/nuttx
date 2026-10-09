@@ -3,7 +3,7 @@
 #
 
 menu "FDCAN Driver Configuration"
-	depends on STM32_HAVE_FDCAN_H7 && (STM32_FDCAN1 || STM32_FDCAN2 || STM32_FDCAN3)
+	depends on STM32_HAVE_IP_FDCAN_M7_V1 && (STM32_FDCAN1 || STM32_FDCAN2 || STM32_FDCAN3)
 
 menu "FDCAN1 Configuration"
 	depends on STM32_FDCAN1

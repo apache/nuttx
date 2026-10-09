@@ -107,7 +107,7 @@ endchoice # Low speed clock source
 
 config STM32_BLE_LS_CLK_SRC
 	int
-	default 1 if STM32_BLE_LS_CLKSRC_HSE
+	default 1 if STM32_BLE_LS_CLK_SRC_HSE
 	default 0
 
 config STM32_BLE_MAX_CONN_EVT_LENGTH

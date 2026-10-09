@@ -34,18 +34,7 @@ endif()
 
 # Required STM32H5 files
 
-list(
-  APPEND
-  SRCS
-  stm32_rcc.c
-  stm32_pwr.c
-  stm32_lse.c
-  stm32_lsi.c
-  stm32_sdmmc.c)
-
-if(CONFIG_TIMER)
-  list(APPEND SRCS stm32_tim_lowerhalf.c)
-endif()
+list(APPEND SRCS stm32_rcc.c stm32_pwr.c stm32_lse.c stm32_sdmmc.c)
 
 if(CONFIG_STM32_I2C)
   list(APPEND SRCS stm32_i2c.c)
@@ -57,10 +46,6 @@ endif()
 
 if(CONFIG_STM32_FDCAN_CHARDRIVER)
   list(APPEND SRCS stm32_fdcan.c)
-endif()
-
-if(CONFIG_STM32_RNG)
-  list(APPEND SRCS stm32_rng.c)
 endif()
 
 if(CONFIG_STM32_ICACHE)
@@ -77,10 +62,6 @@ endif()
 
 if(CONFIG_STM32_QSPI1)
   list(APPEND SRCS stm32_qspi.c)
-endif()
-
-if(CONFIG_STM32_TIM)
-  list(APPEND SRCS stm32_tim.c)
 endif()
 
 if(CONFIG_STM32_LPTIM)
@@ -121,6 +102,10 @@ endif()
 
 if(CONFIG_STM32_IWDG)
   list(APPEND SRCS stm32_iwdg.c)
+endif()
+
+if(CONFIG_STM32_WWDG)
+  list(APPEND SRCS stm32_wwdg.c)
 endif()
 
 # Required chip type specific files

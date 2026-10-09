@@ -84,16 +84,8 @@ CHIP_CSRCS += stm32_rtc_lowerhalf.c
 endif
 endif
 
-ifeq ($(filter y,$(CONFIG_STM32_IWDG) $(CONFIG_STM32_RTC_LSICLOCK)),y)
-CHIP_CSRCS += stm32_lsi.c
-endif
-
 ifeq ($(CONFIG_STM32_RTC_LSECLOCK),y)
 CHIP_CSRCS += stm32_lse.c
-endif
-
-ifeq ($(CONFIG_STM32_I2C),y)
-CHIP_CSRCS += stm32_i2c.c
 endif
 
 ifeq ($(CONFIG_STM32_I2S),y)
@@ -123,10 +115,6 @@ endif
 endif
 endif
 
-ifeq ($(CONFIG_STM32_TIM),y)
-CHIP_CSRCS += stm32_tim.c stm32_tim_lowerhalf.c
-endif
-
 ifeq ($(CONFIG_STM32_ADC),y)
 CHIP_CSRCS += stm32_adc.c
 endif
@@ -147,21 +135,10 @@ ifeq ($(CONFIG_STM32_BBSRAM),y)
 CHIP_CSRCS += stm32_bbsram.c
 endif
 
-ifeq ($(CONFIG_STM32_RNG),y)
-CHIP_CSRCS += stm32_rng.c
-endif
-
 ifeq ($(CONFIG_STM32_LTDC),y)
 CHIP_CSRCS += stm32_ltdc.c
 endif
 
-ifeq ($(CONFIG_STM32_DMA2D),y)
-CHIP_CSRCS += stm32_dma2d.c
-endif
-
-ifeq ($(CONFIG_SENSORS_QENCODER),y)
-CHIP_CSRCS += stm32_qencoder.c
-endif
 
 ifeq ($(CONFIG_STM32_CAN_CHARDRIVER),y)
 CHIP_CSRCS += stm32_can.c

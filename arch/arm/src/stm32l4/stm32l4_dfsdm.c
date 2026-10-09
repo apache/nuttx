@@ -43,7 +43,7 @@
 
 #include "chip.h"
 #include "stm32l4_rcc.h"
-#include "stm32l4_tim.h"
+#include "stm32_tim.h"
 #include "stm32l4_dma.h"
 #include "stm32l4_dfsdm.h"
 

@@ -34,14 +34,6 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS +=  stm32_buttons.c
 endif
 
-ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
-CSRCS += stm32_idle.c
-endif
-
-ifeq ($(CONFIG_STM32_FSMC),y)
-CSRCS += stm32_extmem.c
-endif
-
 ifeq ($(CONFIG_STM32_OTGFS),y)
 CSRCS += stm32_usb.c
 endif

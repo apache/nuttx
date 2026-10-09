@@ -28,14 +28,8 @@ list(
   stm32l5_rcc.c
   stm32l5_spi.c
   stm32l5_lse.c
-  stm32l5_lsi.c
   stm32l5_pwr.c
-  stm32l5_tim.c
   stm32l5_flash.c)
-
-if(CONFIG_TIMER)
-  list(APPEND SRCS stm32l5_tim_lowerhalf.c)
-endif()
 
 if(CONFIG_BUILD_PROTECTED)
   list(APPEND SRCS stm32l5_userspace.c stm32l5_mpuinit.c)

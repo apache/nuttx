@@ -24,6 +24,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 #include <stdint.h>
 
@@ -51,6 +53,8 @@ static uint32_t g_stm32_sesnum = 0;
 
 static int stm32_newsession(uint32_t *sid, struct cryptoini *cri)
 {
+  int klen;
+
   if (sid == NULL || cri == NULL)
     {
       return -EINVAL;
@@ -62,9 +66,10 @@ static int stm32_newsession(uint32_t *sid, struct cryptoini *cri)
         *sid = g_stm32_sesnum++;
         break;
       case CRYPTO_AES_CTR:
-        if ((cri->cri_klen / 8 - 4) != 16)
+        klen = cri->cri_klen / 8 - 4;
+        if ((klen != 16) && (klen != 24) && (klen != 32))
           {
-            /* stm32 aes-ctr key bits just support 128 */
+            /* stm32h7 aes-ctr key bits support 128, 192, or 256 */
 
             return -EINVAL;
           }
@@ -110,22 +115,26 @@ static int stm32_process(struct cryptop *crp)
         {
           case CRYPTO_AES_CBC:
             return aes_cypher(crp->crp_dst, crp->crp_buf, crd->crd_len,
-                              crd->crd_iv, crd->crd_key, 16,
+                              crp->crp_iv, crd->crd_key, 16,
                               AES_MODE_CBC, crd->crd_flags & CRD_F_ENCRYPT);
           case CRYPTO_AES_CTR:
 
             memcpy(iv, crd->crd_key + crd->crd_klen / 8 - AESCTR_NONCESIZE,
                    AESCTR_NONCESIZE);
-            memcpy(iv + AESCTR_NONCESIZE, crd->crd_iv, AESCTR_IVSIZE);
-            memset(iv + AESCTR_NONCESIZE + AESCTR_IVSIZE , 0, 4);
+            memcpy(iv + AESCTR_NONCESIZE, crp->crp_iv, AESCTR_IVSIZE);
+            memcpy(iv + AESCTR_NONCESIZE + AESCTR_IVSIZE,
+                   (uint8_t *)crp->crp_iv + AESCTR_IVSIZE, 4);
 
-            return aes_cypher(crp->crp_dst, crp->crp_buf, crd->crd_len,
-                              iv, crd->crd_key, crd->crd_klen / 8 - 4,
+            return aes_cypher(crp->crp_dst, crp->crp_buf,
+                              crd->crd_len, iv, crd->crd_key,
+                              crd->crd_klen / 8 - AESCTR_NONCESIZE,
                               AES_MODE_CTR, crd->crd_flags & CRD_F_ENCRYPT);
           default:
             return -EINVAL;
         }
     }
+
+  return OK;
 }
 
 /****************************************************************************

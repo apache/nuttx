@@ -34,7 +34,7 @@
 
 #include "chip.h"
 #include "arm_internal.h"
-#include "stm32l4_qencoder.h"
+#include "stm32_qencoder.h"
 #include "nucleo-l432kc.h"
 
 /****************************************************************************

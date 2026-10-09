@@ -25,15 +25,9 @@ set(SRCS
     stm32_i2c.c
     stm32_spi.c
     stm32_lse.c
-    stm32_lsi.c
     stm32u5xx_rcc.c
     stm32_pwr.c
-    stm32_tim.c
     stm32_flash.c)
-
-if(CONFIG_TIMER)
-  list(APPEND SRCS stm32_tim_lowerhalf.c)
-endif()
 
 if(CONFIG_BUILD_PROTECTED)
   list(APPEND SRCS stm32_userspace.c stm32_mpuinit.c)
@@ -41,10 +35,6 @@ endif()
 
 if(CONFIG_DEBUG_FEATURES)
   list(APPEND SRCS stm32_dumpgpio.c)
-endif()
-
-if(CONFIG_USBDEV)
-  list(APPEND SRCS stm32_otgdev.c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})

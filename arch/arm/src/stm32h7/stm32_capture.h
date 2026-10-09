@@ -31,7 +31,7 @@
 
 #include "chip.h"
 #include <arch/board/board.h>
-#include "hardware/stm32_tim.h"
+#include "hardware/stm32h7_tim.h"
 
 /****************************************************************************
  * Pre-processor Definitions

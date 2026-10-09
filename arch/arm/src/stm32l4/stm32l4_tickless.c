@@ -78,8 +78,8 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 
-#include "stm32l4_oneshot.h"
-#include "stm32l4_freerun.h"
+#include "stm32_oneshot.h"
+#include "stm32_freerun.h"
 
 #ifdef CONFIG_SCHED_TICKLESS
 

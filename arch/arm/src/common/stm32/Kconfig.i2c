@@ -263,7 +263,7 @@ config STM32_I2CTIMEOTICKS
 config STM32_I2C_ALT
 	bool "Alternate I2C implementation"
 	default STM32F1_PERFORMANCELINE
-	depends on !STM32_STM32F30XX && STM32_COMMON_LEGACY
+	depends on STM32_HAVE_IP_I2C_M3M4_V1
 	---help---
 		This selection enables an alternative I2C driver.  This alternate
 		driver implements some rather complex workarounds for errata against
@@ -274,7 +274,7 @@ config STM32_I2C_ALT
 config STM32_I2C_DUTY16_9
 	bool "Frequency with Tlow/Thigh = 16/9"
 	default n
-	depends on STM32_I2C && STM32_COMMON_LEGACY
+	depends on STM32_I2C && STM32_HAVE_IP_I2C_M3M4_V1
 
 config STM32_I2C_DMA
 	bool "I2C DMA Support"

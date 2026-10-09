@@ -42,11 +42,7 @@ endif
 
 CHIP_CSRCS += stm32_rcc.c
 CHIP_CSRCS += stm32_pwr.c
-CHIP_CSRCS += stm32_lse.c stm32_lsi.c stm32_sdmmc.c
-
-ifeq ($(CONFIG_TIMER),y)
-CHIP_CSRCS += stm32_tim_lowerhalf.c
-endif
+CHIP_CSRCS += stm32_lse.c stm32_sdmmc.c
 
 ifeq ($(CONFIG_STM32_I2C),y)
 CHIP_CSRCS += stm32_i2c.c
@@ -58,10 +54,6 @@ endif
 
 ifeq ($(CONFIG_STM32_FDCAN_CHARDRIVER),y)
 CHIP_CSRCS += stm32_fdcan.c
-endif
-
-ifeq ($(CONFIG_STM32_RNG),y)
-CHIP_CSRCS += stm32_rng.c
 endif
 
 ifeq ($(CONFIG_STM32_ICACHE),y)
@@ -78,10 +70,6 @@ endif
 
 ifeq ($(CONFIG_STM32_QSPI1),y)
 CHIP_CSRCS += stm32_qspi.c
-endif
-
-ifeq ($(CONFIG_STM32_TIM),y)
-CHIP_CSRCS += stm32_tim.c
 endif
 
 ifeq ($(CONFIG_STM32_LPTIM),y)

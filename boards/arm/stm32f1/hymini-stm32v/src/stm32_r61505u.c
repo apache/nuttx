@@ -41,6 +41,7 @@
 
 #include "arm_internal.h"
 #include "stm32.h"
+#include "stm32_tim.h"
 #include "hymini-stm32v.h"
 
 #include <arch/board/board.h>  /* Should always be included last due to dependencies */
@@ -379,6 +380,7 @@ static void write_reg(unsigned char reg_addr, unsigned short reg_val)
 static unsigned short read_reg(unsigned char reg_addr)
 {
   unsigned short val;
+
   write_cmd(reg_addr);
   val = read_data();
   return (val);
