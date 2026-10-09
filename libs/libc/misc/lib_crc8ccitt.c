@@ -101,3 +101,32 @@ uint8_t crc8ccitt(FAR const uint8_t *src, size_t len)
 {
   return crc8ccittpart(src, len, 0);
 }
+
+/***************************************************************************
+ * Name: crc8smbuspart
+ *
+ * Description:
+ *   Continue an SMBus packet error code calculation using polynomial 0x07,
+ *   without reflection or a final XOR.  Pass zero for the initial CRC.
+ *
+ ***************************************************************************/
+
+uint8_t crc8smbuspart(FAR const uint8_t *src, size_t len, uint8_t crc8val)
+{
+  /* Cancel the entry and exit inversions in the shared table helper. */
+
+  return crc8table(crc8_tab, src, len, crc8val ^ 0xff) ^ 0xff;
+}
+
+/***************************************************************************
+ * Name: crc8smbus
+ *
+ * Description:
+ *   Calculate an SMBus packet error code with an initial CRC of zero.
+ *
+ ***************************************************************************/
+
+uint8_t crc8smbus(FAR const uint8_t *src, size_t len)
+{
+  return crc8smbuspart(src, len, 0);
+}
