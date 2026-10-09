@@ -24,7 +24,7 @@ Features
   * MIPS32 M-Class core at 200 MHz
   * 1 MB program flash, 256 KB data RAM
   * 40 MHz crystal inside the module
-  * 2.4 GHz IEEE 802.11 b/g/n Wi-Fi (not supported by NuttX)
+  * 2.4 GHz IEEE 802.11 b/g/n Wi-Fi
 
 * SST26VF032B 32 Mbit (4 MB) SPI serial flash (U202)
 * LAN8720A 10/100 Ethernet PHY (U301, RMII) with RJ45 connector J301
@@ -46,7 +46,8 @@ GPIO                      Yes
 SPI1                      Yes     SST26VF032B; reads tested only
 I2C1/I2C2                 Build   Not tested; no I2C device on board
 Ethernet                  Yes     LAN8720A, RMII, 10/100 Mbps
-Wi-Fi                     No
+Wi-Fi                     Yes     Station or Soft-AP, WPA2-Personal;
+                                  XC32 only, see `Wi-Fi`_
 ========================= ======= ====================================
 
 Pin mapping
@@ -168,7 +169,8 @@ The port builds with two toolchains:
      $ export PATH=$PWD/p32/bin:$PATH
 
 * ``CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL_XC32``: Microchip MPLAB XC32 for
-  Linux (tested with v6.00), selected by the ``nsh`` defconfig.
+  Linux (tested with v6.00), selected by all defconfigs. The ``wlan``
+  configuration builds with XC32 only.
 
 XC32 v6 and later no longer include device support and need the
 `PIC32MZ-W Device Family Pack
@@ -285,6 +287,24 @@ The example below was taken with ``CONFIG_NETINIT_IPADDR`` set to
    3 packets transmitted, 3 received, 0% packet loss, time 3030 ms
    rtt min/avg/max/mdev = 0.000/0.000/0.000/0.000 ms
 
+wlan
+----
+
+The ``nsh`` configuration with Wi-Fi instead of Ethernet: the ``wlan0``
+network device, IPv4, TCP, UDP and ICMP, the ``wapi`` and ``ping``
+commands, a DHCP client (``renew``) and a Telnet server. It downloads
+Microchip's WLAN library at build time (see `Wi-Fi`_) and builds with XC32
+only. Join a WPA2-Personal network and get an address by DHCP:
+
+.. code:: console
+
+   nsh> wapi psk wlan0 <passphrase> 3 2
+   nsh> wapi essid wlan0 <ssid> 1
+   nsh> renew wlan0
+
+``3`` selects CCMP and ``2`` WPA2. ``wapi scan wlan0`` lists the access
+points in range.
+
 Ethernet
 ========
 
@@ -309,10 +329,49 @@ The PIC32MZ-W1 has no factory-programmed Ethernet MAC address. Assign one
 with ``CONFIG_NETINIT_NOMAC`` or with the ``SIOCSIFHWADDR`` ioctl before the
 interface is brought up.
 
+Wi-Fi
+=====
+
+The Wi-Fi MAC and baseband of the PIC32MZ-W1 are driven by Microchip's
+closed WLAN library ``pic32mzw1.a``, which runs on the CPU. The NuttX
+driver (``CONFIG_PIC32MZ_W1_WLAN``) provides the services the library
+needs (memory, interrupts, a kernel thread, hash and HMAC) and registers
+the ``wlan0`` network device, configured with ``wapi``.
+
+The library is not part of NuttX. The build downloads it from the MPLAB
+Harmony `wireless_wifi <https://github.com/Microchip-MPLAB-Harmony/wireless_wifi>`_
+repository (v3.13.0, ``driver/pic32mzw1/pic32mzw1.a``) into
+``arch/mips/src/pic32mz``, unless a copy is already there, and links a
+copy with three symbols renamed that clash with NuttX. The library is
+distributed under Microchip's license (``Microchip_SLA001.md`` in that
+repository), which only allows its use with Microchip devices.
+
+The library is built with XC32 (microMIPS, soft-float) and uses the DSP
+ASE, so the driver requires XC32 and enables the DSP ASE at boot. It keeps
+its reserved packet buffers in the 64 KB Data Buffer Memory at
+0x00040000. The MAC address and the RF calibration come from the module's
+OTP memory.
+
+Station mode is the default. To start a Soft-AP instead, select master
+mode before the SSID:
+
+.. code:: console
+
+   nsh> wapi mode wlan0 3
+   nsh> wapi psk wlan0 <passphrase> 3 2
+   nsh> wapi freq wlan0 6 1
+   nsh> wapi essid wlan0 <ssid> 1
+   nsh> ifconfig wlan0 10.0.0.1
+
+``wapi freq`` sets the channel (1 if not set). Skip ``wapi psk`` for an
+open network. ``wapi essid wlan0 "" 0`` stops the AP. A DHCP server for
+the stations can be started on ``wlan0`` with the ``dhcpd`` application
+(``CONFIG_NETUTILS_DHCPD``).
+
 L1 cache
 ========
 
-Both configurations enable the 16 KB instruction and 16 KB data caches
+All configurations enable the 16 KB instruction and 16 KB data caches
 (``CONFIG_MIPS32_ICACHE``, which also selects ``CONFIG_MIPS32_DCACHE``).
 The linker script places the data memory in KSEG0, so that it goes through
 the D-Cache; KSEG0 is uncached when the caches are disabled. The Ethernet
@@ -336,7 +395,12 @@ Silicon tested: WFI32E01PE, revision B0 (DEVID 0x0A400000).
 Limitations
 ===========
 
-* No Wi-Fi driver.
+* Wi-Fi: open and WPA2-Personal networks only (WPA/WPA2 mixed mode can be
+  selected but is not tested), no WPA3 or enterprise security. Station or
+  Soft-AP, not both at the same time; no scanning while the AP runs. With
+  management frame protection (PMF) negotiated, unprotected Public Action
+  frames from the AP (such as Fast Initial Link Setup discovery frames) are
+  dropped by the library with a "decap action fail" message.
 * I2C1/I2C2 build but are not tested.
 * SPI flash: only reads were tested (JEDEC ID and data), not writes or
   erases.
