@@ -1,0 +1,290 @@
+=======
+SCL3300
+=======
+
+Overview
+========
+
+The Murata SCL3300-D01 is a 3-axis MEMS inclinometer. It measures the
+acceleration on three axes and computes the inclination of each axis
+relative to the horizontal plane. It has a 4-wire SPI interface only and no
+interrupt or data-ready pin, so the driver polls it.
+
+This driver uses the :doc:`uorb </os/drivers/special/sensors/sensors_uorb>`
+interface. All section and table numbers below refer to the Murata
+SCL3300-D01 Data Sheet, Doc.No. 4921, Rev. 4.
+
+uORB topics and units
+=====================
+
+Registering the driver creates these topics, where ``n`` is ``devno``:
+
+``/dev/uorb/sensor_inclinometer<n>`` (``struct sensor_inclinometer``)
+  The tilt of the X, Y and Z axes relative to the horizontal plane, in
+  degrees. Each value is signed, in the range [-90, +90]. 0 means the axis
+  is horizontal. +90 means the axis points straight up, away from gravity
+  (an accelerometer on that axis reads +1 g). -90 means it points straight
+  down. The ``temperature`` field is in degrees Celsius.
+
+``/dev/uorb/sensor_accel<n>`` (``struct sensor_accel``)
+  Only when ``CONFIG_SENSORS_SCL3300_ACCEL`` is enabled. The acceleration in
+  m/s², converted with the datasheet value of g, 9.819 m/s² (Table 2).
+  ``temperature`` is in degrees Celsius.
+
+When the sensor flags its temperature as out of range, the event still goes
+out, but ``temperature`` is set to NAN, or to ``INT32_MIN`` in
+``CONFIG_SENSORS_USE_B16`` builds.
+
+Both topics read in the same SPI burst carry the same timestamp.
+
+``SENSOR_TYPE_INCLINOMETER`` and ``SENSOR_TYPE_ANGLE`` are different.
+``SENSOR_TYPE_ANGLE`` (topic ``sensor_hinge_angle``) is one scalar: the
+angle between two mechanical parts of a device, such as a hinge or fold,
+with no reference to gravity. ``SENSOR_TYPE_INCLINOMETER`` is three
+per-axis tilt angles relative to the horizontal plane, referenced to
+gravity, plus temperature. Tilt angles are only meaningful while the device
+is not accelerating.
+
+Operation modes
+===============
+
+============ ======================= ============ ====== =========== ==========
+Mode         Range                   Sensitivity  LPF    Noise (RMS) Settling
+============ ======================= ============ ====== =========== ==========
+1 (default)  ±1.2 g, ±90° tilt       6000 LSB/g   40 Hz  0.32 mg     25 ms
+2            ±2.4 g, ±90° tilt       3000 LSB/g   70 Hz  0.49 mg     15 ms
+3            Inclination, about ±10° 12000 LSB/g  10 Hz  0.13 mg     100 ms
+4            Inclination, about ±10° 12000 LSB/g  10 Hz  0.08 mg     100 ms
+                                                         (X, Z),
+                                                         0.06 mg (Y)
+============ ======================= ============ ====== =========== ==========
+
+The angle outputs have the same scale in every mode: 2^14 / 90, about
+182 LSB per degree. The output data rate is fixed at 2000 Hz (§4.1).
+
+* **Mode 1** is the general-purpose mode.
+* **Mode 2** has the widest range and bandwidth. Use it when the device
+  sees vibration or dynamic motion.
+* **Mode 4** is for very small tilts near level. Keep the tilt within ±10°
+  and do not mount the device with the Y axis parallel to gravity
+  (§2.11.1). The bandwidth is 10 Hz. For the best accuracy, average several
+  samples and zero the readings after mounting.
+* **Mode 3** behaves like Mode 4, with higher noise.
+
+In Modes 3 and 4 the accelerometer topic is still published, but its values
+are only meaningful within the ±10° inclination range of these modes.
+
+Configuration
+=============
+
+``CONFIG_SENSORS_SCL3300`` (default ``n``)
+  Enable the driver. Selects ``CONFIG_SPI``.
+
+``CONFIG_SENSORS_SCL3300_ACCEL`` (default ``y``)
+  Also publish ``sensor_accel<n>``.
+
+``CONFIG_SENSORS_SCL3300_SPI_FREQUENCY`` (default ``2000000``)
+  SPI clock in Hz, from 100 kHz to 8 MHz (Table 8). The datasheet
+  recommends 2 to 4 MHz.
+
+``CONFIG_SENSORS_SCL3300_POLL`` (default ``y``)
+  Poll the sensor from a kernel thread. If disabled, data is read only on
+  ``fetch()``.
+
+``CONFIG_SENSORS_SCL3300_POLL_INTERVAL`` (default ``10000``)
+  Default interval in µs. Applications can change it, down to 500 µs.
+
+``CONFIG_SENSORS_SCL3300_THREAD_STACKSIZE`` (default ``1024``)
+  Stack size of the poll thread.
+
+The operation mode and the idle power policy are not Kconfig options. They
+are set by the board (platform data) and can be changed at run time.
+
+Board integration
+=================
+
+.. code-block:: c
+
+   #include <nuttx/sensors/scl3300.h>
+
+   enum scl3300_mode_e
+   {
+     SCL3300_MODE_1 = 1,             /* +/-1.2 g, 40 Hz LPF (default) */
+     SCL3300_MODE_2 = 2,             /* +/-2.4 g, 70 Hz LPF */
+     SCL3300_MODE_3 = 3,             /* Inclination mode, 10 Hz LPF */
+     SCL3300_MODE_4 = 4              /* Inclination mode, 10 Hz LPF, low noise */
+   };
+
+   enum scl3300_power_e
+   {
+     SCL3300_POWER_ALWAYS_ON = 0,    /* Stay powered when idle (default) */
+     SCL3300_POWER_DOWN_IDLE = 1     /* Power down when no topic is active */
+   };
+
+   struct scl3300_config_s
+   {
+     uint8_t mode;                   /* enum scl3300_mode_e, 0 = default */
+     uint8_t power;                  /* enum scl3300_power_e */
+   };
+
+   int scl3300_register(int devno, FAR struct spi_dev_s *spi,
+                        FAR const struct scl3300_config_s *config);
+
+The driver copies ``*config``, so the structure does not need to outlive
+the call. Pass ``NULL`` for Mode 1 and ``SCL3300_POWER_ALWAYS_ON``. An
+invalid mode or power value returns ``-EINVAL`` and registers nothing.
+
+At registration the driver runs the start-up sequence of Table 11 and
+checks WHOAMI. If ``CONFIG_DEBUG_SENSORS_INFO`` is enabled, it also logs
+the serial number.
+
+The chip select is ``SPIDEV_ACCELEROMETER(devno)``, so the board's
+``<chip>_spiNselect()`` function must handle that device ID.
+
+.. code-block:: c
+
+   /* Defaults: Mode 1, always on */
+
+   ret = scl3300_register(0, spi, NULL);
+
+   /* Low-noise inclination mode, powered down while no one listens */
+
+   static const struct scl3300_config_s config =
+   {
+     .mode  = SCL3300_MODE_4,
+     .power = SCL3300_POWER_DOWN_IDLE,
+   };
+
+   ret = scl3300_register(0, spi, &config);
+
+STM32 boards can use the common helper ``board_scl3300_initialize(devno,
+busno)`` from ``boards/arm/common/stm32``, which registers the driver with
+``NULL``.
+
+Run-time control
+================
+
+These ioctls go through any of the two topics and apply to the whole
+device:
+
+============================== ============================ ==================
+Command                        Argument                     Behaviour
+============================== ============================ ==================
+``SNIOC_SET_OPERATIONAL_MODE`` ``enum scl3300_mode_e`` by   Store the mode and,
+                               value (1 to 4)               if the device is
+                                                            powered, rerun the
+                                                            start-up in it.
+                                                            ``-EINVAL`` if out
+                                                            of range
+``SNIOC_SET_POWER_MODE``       ``enum scl3300_power_e`` by  Change the idle
+                               value                        power policy. It
+                                                            takes effect at
+                                                            once
+``SNIOC_RESET``                none                         SW reset and
+                                                            start-up with the
+                                                            stored mode. Also
+                                                            clears a failed
+                                                            state
+``SNIOC_WHO_AM_I``             ``uint8_t *``                Returns WHOAMI
+                                                            (0xC1)
+============================== ============================ ==================
+
+.. code-block:: c
+
+   #include <fcntl.h>
+   #include <sys/ioctl.h>
+   #include <nuttx/sensors/ioctl.h>
+   #include <nuttx/sensors/scl3300.h>
+
+   int fd = open("/dev/uorb/sensor_inclinometer0", O_RDONLY);
+   if (fd >= 0)
+     {
+       if (ioctl(fd, SNIOC_SET_OPERATIONAL_MODE, SCL3300_MODE_4) < 0)
+         {
+           printf("Mode change failed: %d\n", errno);
+         }
+
+       close(fd);
+     }
+
+``SNIOC_GET_INFO`` returns the range and resolution of the current mode.
+For the inclinometer that is 90° and 0.0054932°. For the accelerometer it
+is the mode's full scale and g / sensitivity.
+
+Self-test and error handling
+============================
+
+``SNIOC_SELFTEST`` checks three things:
+
+* WHOAMI reads 0xC1.
+* STATUS reports no fault.
+* 16 consecutive self-test (STO) readings are within the threshold of the
+  current mode (Table 23: ±1800, ±900, ±3600 and ±3600 LSB).
+
+If the device is powered down, the self-test wakes it and powers it down
+again afterwards. The result is 0 or ``-EIO``. Run it with the device at
+rest.
+
+Every response frame is checked for CRC, for the echoed operation code and
+for its return status:
+
+* A bad CRC or a wrong echo drops the sample. After three failed bursts in
+  a row, the driver resets the device.
+* When the sensor reports an error (RS = 11), the driver reads STATUS:
+
+  * Saturation (SAT) drops the sample. A rate-limited warning reports the
+    number of dropped samples.
+  * A temperature flag publishes the sample with an unused temperature.
+  * Internal faults (DIGI1, DIGI2, CLK, MEM, an unexpected PWR, PD or
+    MODE_CHANGE, pin continuity) trigger a SW reset and a full start-up.
+  * If the fault comes back before a good sample was read, the device is
+    marked failed. It stops publishing, ``fetch`` and the self-test return
+    ``-EIO``, and an error is logged once. ``SNIOC_RESET`` can bring it
+    back.
+
+Usage
+=====
+
+The ``stm32f4discovery:scl3300`` configuration is a ready-to-use example.
+
+.. code-block:: console
+
+   nsh> uorb_listener -n 3 sensor_inclinometer
+
+   Monitor objects num:1
+   object_name:sensor_inclinometer, object_instance:0
+   sensor_inclinometer(now:18850000):timestamp:18850000,x:3.856201,y:35.403442,z:54.316406,temperature:25.994720
+   sensor_inclinometer(now:18870000):timestamp:18870000,x:3.823242,y:35.419922,z:54.305420,temperature:25.994720
+   sensor_inclinometer(now:18890000):timestamp:18890000,x:3.839722,y:35.403442,z:54.316406,temperature:25.994720
+   Object name:sensor_inclinometer0, received:3
+   Total number of received Message:3/3
+
+   nsh> sensortest -n 3 -i 100000 inclinometer0
+   SensorTest: Test /dev/uorb/sensor_inclinometer0 with interval(100000us), latency(0us)
+   inclinometer0: timestamp:14050000 x:3.78 y:35.29 z:54.44, temperature:25.41
+   inclinometer0: timestamp:14150000 x:3.76 y:35.29 z:54.44, temperature:25.41
+   inclinometer0: timestamp:14250000 x:3.77 y:35.36 z:54.37, temperature:25.41
+   SensorTest: Received message: inclinometer0, number:3/3
+
+   nsh> sensortest -n 3 accel0
+   SensorTest: Test /dev/uorb/sensor_accel0 with interval(1000000us), latency(0us)
+   accel0: timestamp:29370000 x:0.65 y:5.61 z:7.86, temperature:25.89
+   accel0: timestamp:30380000 x:0.64 y:5.61 z:7.87, temperature:25.89
+   accel0: timestamp:31390000 x:0.65 y:5.61 z:7.87, temperature:25.89
+   SensorTest: Received message: accel0, number:3/3
+
+This output comes from an STM32F4Discovery with the sensor tilted about 35
+degrees around its X axis. The tilt angles match the acceleration vector:
+for example, asin(5.61 / 9.68) = 35.4 degrees for Y.
+
+Limitations
+===========
+
+* No internal oversampling. The sensor runs at 2000 Hz, and the datasheet
+  noise figures assume that every sample is read (§4.1). The driver reads
+  only one sample per interval.
+* No stored offset calibration (``calibrate`` and ``set_calibvalue`` are
+  not implemented).
+* The absolute offset can be up to ±1.15° (Table 2). For precise work,
+  zero the readings after mounting.
+* There is no interrupt pin, so the driver always polls.

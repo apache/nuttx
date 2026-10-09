@@ -37,6 +37,7 @@ tool for monitoring sensor activity at runtime.
     sensors/mpu6050.rst
     sensors/nau7802.rst
     sensors/qmi8658.rst
+    sensors/scl3300.rst
     sensors/sht4x.rst
     sensors/tc74.rst
     sensors/tmp112.rst

@@ -2101,6 +2101,77 @@ You will see something like this::
         code : 66
         type : 0
 
+scl3300
+-------
+
+This configuration enables the :doc:`Murata SCL3300 inclinometer driver
+</os/drivers/special/sensors/scl3300>`, the ``uorb_listener`` and the
+``sensortest`` application. The sensor uses the same SPI1 pins as the
+on-board LIS3DSH, with its own chip select on PC4:
+
+================= ======================================================
+STM32F4Discovery  SCL3300
+================= ======================================================
+3V [1]            4 VDD, 9 DVIO
+GND               1 AVSS, 3 RESERVED, 11 DVSS, 12 EMC_GND
+PC4               5 CSB
+SPI1 MOSI (PA7)   7 MOSI
+SPI1 MISO (PA6)   6 MISO
+SPI1 SCK (PA5)    8 SCK
+\-                2 A_EXTC and 10 D_EXTC: 100 nF to GND each, plus
+                  100 nF decoupling on VDD and DVIO (datasheet §7.1)
+================= ======================================================
+
+1: The SCL3300 needs 3.0 V to 3.6 V on VDD and DVIO, and DVIO must never be
+higher than VDD. The board's 3V rail comes through diode D3 and sits near
+3.0 V, the sensor's minimum. Measure it. If it is below 3.0 V, use the D3
+bypass described in the ``mt6816`` section, or an external 3.3 V supply
+shared by VDD and DVIO (with a common GND).
+
+Notes:
+
+* PE3, the chip select of the on-board LIS3DSH, is driven high whenever
+  the SCL3300 driver is enabled. This keeps the LIS3DSH off the shared
+  MISO line.
+* The SCL3300 uses ``SPIDEV_ACCELEROMETER(n)`` and the topics
+  ``sensor_inclinometer<n>`` and ``sensor_accel<n>``. ``n`` is 0. It
+  becomes 1 when a LIS3DSH or LIS3MDL driver is also enabled, because
+  those drivers own instance 0.
+* The default configuration is Mode 1, always on. Other modes and the
+  power-down policy can be selected at run time with ioctls (see the
+  driver page).
+
+Build and flash::
+
+    $ ./tools/configure.sh stm32f4discovery:scl3300
+    $ make -j
+    $ openocd -f interface/stlink.cfg -f target/stm32f4x.cfg \
+        -c "program nuttx.bin 0x08000000 verify reset exit"
+
+The serial number is logged at boot when ``CONFIG_DEBUG_SENSORS_INFO`` is
+enabled. Example output with the sensor tilted about 35 degrees around its
+X axis (lying flat, component side up, X and Y read about 0 and Z about
++90)::
+
+    nsh> uorb_listener -n 3 sensor_inclinometer
+
+    Monitor objects num:1
+    object_name:sensor_inclinometer, object_instance:0
+    sensor_inclinometer(now:18850000):timestamp:18850000,x:3.856201,y:35.403442,z:54.316406,temperature:25.994720
+    sensor_inclinometer(now:18870000):timestamp:18870000,x:3.823242,y:35.419922,z:54.305420,temperature:25.994720
+    sensor_inclinometer(now:18890000):timestamp:18890000,x:3.839722,y:35.403442,z:54.316406,temperature:25.994720
+    Object name:sensor_inclinometer0, received:3
+    Total number of received Message:3/3
+
+    nsh> sensortest -n 3 accel0
+    SensorTest: Test /dev/uorb/sensor_accel0 with interval(1000000us), latency(0us)
+    accel0: timestamp:29370000 x:0.65 y:5.61 z:7.86, temperature:25.89
+    accel0: timestamp:30380000 x:0.64 y:5.61 z:7.87, temperature:25.89
+    accel0: timestamp:31390000 x:0.65 y:5.61 z:7.87, temperature:25.89
+    SensorTest: Received message: accel0, number:3/3
+
+The ``scl3300test`` example program tests the ioctls on the board.
+
 sporadic
 --------
 
