@@ -93,11 +93,11 @@ static int work_qqueue(FAR struct kwork_wqueue_s *wqueue,
    * logic or interrupt handling logic.
    */
 
-  flags = spin_lock_irqsave(&wqueue->lock);
+  flags = spin_lock_irqsave_nopreempt(&wqueue->lock);
 
   if (wqueue->exit)
     {
-      spin_unlock_irqrestore(&wqueue->lock, flags);
+      spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
       return -ESHUTDOWN;
     }
 
@@ -144,15 +144,14 @@ static int work_qqueue(FAR struct kwork_wqueue_s *wqueue,
       work_timer_reset(wqueue);
     }
 
-  spin_unlock_irqrestore(&wqueue->lock, flags);
-
   if (delay == 0)
     {
-      /* Immediately wake up the worker thread. */
+      /* Post while the queue lock keeps the semaphore alive. */
 
       nxsem_post(&wqueue->sem);
     }
 
+  spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
   return OK;
 }
 
