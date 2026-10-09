@@ -152,7 +152,7 @@ static int work_notifier_key(void)
  * Name: work_notifier_worker
  *
  * Description:
- *   Forward to the real worker and free the notification.
+ *   Forward to the real worker and recycle the notification entry.
  *
  ****************************************************************************/
 
@@ -170,17 +170,9 @@ static void work_notifier_worker(FAR void *arg)
 
   flags = spin_lock_irqsave(&g_notifier_lock);
 
-  /* Remove the notification from the pending list */
+  /* Make the entry available for a subsequent notification setup. */
 
-  notifier = work_notifier_find(notifier->key);
-  if (notifier != NULL)
-    {
-      dq_rem(&notifier->entry, &g_notifier_pending);
-
-      /* Put the notification to the free list */
-
-      dq_addlast(&notifier->entry, &g_notifier_free);
-    }
+  dq_addlast(&notifier->entry, &g_notifier_free);
 
   spin_unlock_irqrestore(&g_notifier_lock, flags);
 }
@@ -389,17 +381,21 @@ void work_notifier_signal(enum work_evtype_e evtype,
 
       if (info->evtype == evtype && info->qualifier == qualifier)
         {
-          /* Mark the notification as no longer pending */
+          /* Prevent another signal from matching this notification. */
 
-          info->qualifier = NULL;
+          dq_rem(&notifier->entry, &g_notifier_pending);
 
-          /* Schedule the work.  The entire notifier entry is passed as an
-           * argument to the work function because that function is
-           * responsible for freeing the allocated memory.
-           */
+          /* Keep the entry owned by the callback until it is recycled. */
 
-          work_queue(info->qid, &notifier->work,
-                     work_notifier_worker, entry, 0);
+          if (work_queue(info->qid, &notifier->work,
+                         work_notifier_worker, notifier, 0) < 0)
+            {
+              /* Preserve the notification until the callback can be
+               * queued.
+               */
+
+              dq_addlast(&notifier->entry, &g_notifier_pending);
+            }
         }
     }
 
