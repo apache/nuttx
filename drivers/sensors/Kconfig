@@ -1996,6 +1996,50 @@ config SCD41_DEBUG
 
 endif # SENSORS_SCD41
 
+config SENSORS_SCL3300
+	bool "Murata SCL3300 3-axis inclinometer"
+	default n
+	select SPI
+	---help---
+		Enable the uORB driver for the Murata SCL3300-D01 3-axis
+		inclinometer with SPI interface. Publishes sensor_inclinometer
+		and, optionally, sensor_accel topics. The operation mode and the
+		idle power policy are set by the board (struct scl3300_config_s)
+		and can be changed at run time with ioctls.
+
+if SENSORS_SCL3300
+
+config SENSORS_SCL3300_ACCEL
+	bool "Also publish the accelerometer topic"
+	default y
+
+config SENSORS_SCL3300_SPI_FREQUENCY
+	int "SPI frequency (Hz)"
+	default 2000000
+	range 100000 8000000
+
+config SENSORS_SCL3300_POLL
+	bool "Poll the sensor from a kernel thread"
+	default y
+	---help---
+		The SCL3300 has no data-ready interrupt pin, so polling is the
+		normal mode. When disabled, data is only read on fetch().
+
+if SENSORS_SCL3300_POLL
+
+config SENSORS_SCL3300_POLL_INTERVAL
+	int "Default polling interval in microseconds"
+	default 10000
+	range 500 4294967295
+
+config SENSORS_SCL3300_THREAD_STACKSIZE
+	int "Worker thread stack size"
+	default 1024
+
+endif # SENSORS_SCL3300_POLL
+
+endif # SENSORS_SCL3300
+
 config SENSORS_SGP30
 	bool "Sensirion SGP30 Gas Platform sensor"
 	default n

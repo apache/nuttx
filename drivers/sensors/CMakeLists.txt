@@ -448,6 +448,10 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS as5048a.c)
     endif()
 
+    if(CONFIG_SENSORS_SCL3300)
+      list(APPEND SRCS scl3300_uorb.c)
+    endif()
+
   endif() # CONFIG_SPI
 
   # These drivers depend on 1WIRE support
