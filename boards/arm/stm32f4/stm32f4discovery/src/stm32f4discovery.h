@@ -303,6 +303,23 @@
 #define GPIO_CS_MFRC522      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                             GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN3)
 
+/* Murata SCL3300 inclinometer on SPI1 (PA5 SCK, PA6 MISO, PA7 MOSI) with
+ * chip select on PC4.  It uses SPIDEV_ACCELEROMETER(SCL3300_DEVNO) and
+ * the uORB topics sensor_inclinometer<SCL3300_DEVNO> and
+ * sensor_accel<SCL3300_DEVNO>.  Instance 0 belongs to the on-board MEMS
+ * (LIS3DSH) when its driver is enabled, so the SCL3300 moves to 1.
+ */
+
+#define GPIO_SCL3300_CS   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN4)
+
+#if defined(CONFIG_SENSORS_LIS3MDL) || defined(CONFIG_SENSORS_LIS3DSH_UORB) || \
+    defined(CONFIG_LIS3DSH)
+#  define SCL3300_DEVNO   1
+#else
+#  define SCL3300_DEVNO   0
+#endif
+
 /* Use same pins as ENC28J60 to W5500 */
 
 #define GPIO_W5500_CS      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\

@@ -92,6 +92,10 @@ ifeq ($(CONFIG_SENSORS_MT6816),y)
   CSRCS += stm32_mt6816.c
 endif
 
+ifeq ($(CONFIG_SENSORS_SCL3300),y)
+  CSRCS += stm32_scl3300.c
+endif
+
 ifeq ($(CONFIG_INPUT_MPR121_KEYPAD),y)
   CSRCS += stm32_mpr121.c
 endif
