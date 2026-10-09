@@ -1795,11 +1795,20 @@ static void pic32mz_txdone(struct pic32mz_driver_s *priv)
         }
     }
 
-  /* Verify that the hardware is ready to send another packet.  Since a Tx
-   * just completed and its buffer was freed, this must be the case.
+  /* The TX done event may belong to a packet that an earlier call already
+   * reclaimed, and the ring may be full again.  Then wait for the next TX
+   * done event.
    */
 
-  DEBUGASSERT(pic32mz_txdesc(priv) != NULL);
+  if (pic32mz_txdesc(priv) == NULL)
+    {
+      priv->pd_inten |= ETH_TXINTS;
+      pic32mz_putreg(priv->pd_inten, PIC32MZ_ETH_IEN);
+
+      wd_start(&priv->pd_txtimeout, PIC32MZ_TXTIMEOUT,
+               pic32mz_txtimeout_expiry, (wdparm_t)priv);
+      return;
+    }
 
   /* Check if there is a pending Tx transfer that was deferred by Rx handling
    * because there were no available Tx descriptors.  If so, process that
