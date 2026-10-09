@@ -648,11 +648,23 @@
 
 #define SENSOR_TYPE_CHARGE                          65
 
+/* Inclinometer
+ * A sensor of this type returns the static inclination (tilt) of the
+ * device X, Y and Z axes relative to the horizontal plane, derived from
+ * the gravity vector. Each value is in degrees and signed, in the range
+ * [-90, +90]: 0 means the axis is horizontal, +90 means the axis points
+ * straight up (away from gravity, where an accelerometer on that axis
+ * reads +1g) and -90 means it points straight down. The values are only
+ * meaningful while the device is not accelerating.
+ */
+
+#define SENSOR_TYPE_INCLINOMETER                    66
+
 /* The total number of sensor
  * please increase it if you added a new sensor type!
  */
 
-#define SENSOR_TYPE_COUNT                           66
+#define SENSOR_TYPE_COUNT                           67
 
 /* The additional sensor open flags */
 
@@ -1134,6 +1146,15 @@ struct sensor_charge        /* Type: Charge */
 {
   uint64_t timestamp;       /* Unit is microseconds */
   int64_t charge;           /* Accumulated charge. Unit is uC. */
+};
+
+struct sensor_inclinometer   /* Type: Inclinometer */
+{
+  uint64_t      timestamp;   /* Units is microseconds */
+  sensor_data_t x;           /* X axis inclination in degrees */
+  sensor_data_t y;           /* Y axis inclination in degrees */
+  sensor_data_t z;           /* Z axis inclination in degrees */
+  sensor_data_t temperature; /* Temperature in degrees celsius */
 };
 
 struct sensor_gnss          /* Type: GNSS */
