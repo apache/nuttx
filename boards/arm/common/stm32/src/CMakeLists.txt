@@ -86,6 +86,10 @@ if(CONFIG_SENSORS_MT6816)
   list(APPEND SRCS stm32_mt6816.c)
 endif()
 
+if(CONFIG_SENSORS_SCL3300)
+  list(APPEND SRCS stm32_scl3300.c)
+endif()
+
 if(CONFIG_SENSORS_ZEROCROSS)
   list(APPEND SRCS stm32_zerocross.c)
 endif()

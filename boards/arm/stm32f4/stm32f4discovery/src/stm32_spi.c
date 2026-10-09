@@ -70,8 +70,17 @@ void weak_function stm32_spidev_initialize(void)
 #endif
 
 #if defined(CONFIG_STM32_SPI1) && (defined(CONFIG_SENSORS_LIS3MDL) || \
-    defined(CONFIG_SENSORS_LIS3DSH_UORB) || defined(CONFIG_LIS3DSH))
-  stm32_configgpio(GPIO_CS_MEMS);    /* MEMS chip select */
+    defined(CONFIG_SENSORS_LIS3DSH_UORB) || defined(CONFIG_LIS3DSH) || \
+    defined(CONFIG_SENSORS_SCL3300))
+  /* MEMS chip select.  Also driven high with the SCL3300 so that the
+   * on-board LIS3DSH, which shares SPI1, never drives MISO.
+   */
+
+  stm32_configgpio(GPIO_CS_MEMS);
+#endif
+
+#if defined(CONFIG_STM32_SPI1) && defined(CONFIG_SENSORS_SCL3300)
+  stm32_configgpio(GPIO_SCL3300_CS);  /* SCL3300 chip select */
 #endif
 
 #if defined(CONFIG_STM32_SPI1) && defined(CONFIG_CL_MFRC522)
@@ -202,6 +211,13 @@ void stm32_spi1select(struct spi_dev_s *dev, uint32_t devid,
   if (devid == SPIDEV_MAG_ENCODER(0))
     {
       stm32_gpiowrite(GPIO_CS_MT6816, !selected);
+    }
+#endif
+
+#if defined(CONFIG_SENSORS_SCL3300)
+  if (devid == SPIDEV_ACCELEROMETER(SCL3300_DEVNO))
+    {
+      stm32_gpiowrite(GPIO_SCL3300_CS, !selected);
     }
 #endif
 

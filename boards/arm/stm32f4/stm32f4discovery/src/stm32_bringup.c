@@ -67,6 +67,10 @@
 #include "stm32_mt6816.h"
 #endif
 
+#ifdef CONFIG_SENSORS_SCL3300
+#include "stm32_scl3300.h"
+#endif
+
 #ifdef CONFIG_INPUT_MPR121_KEYPAD
 #include "stm32_mpr121.h"
 #endif
@@ -279,6 +283,18 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_mt6816_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_SCL3300
+  /* Initialize the SCL3300 inclinometer on SPI1 as
+   * /dev/uorb/sensor_inclinometer<SCL3300_DEVNO>
+   */
+
+  ret = board_scl3300_initialize(SCL3300_DEVNO, 1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_scl3300_initialize failed: %d\n", ret);
     }
 #endif
 
@@ -666,6 +682,7 @@ int stm32_bringup(void)
 
 #if defined(CONFIG_RNDIS) && !defined(CONFIG_RNDIS_COMPOSITE)
   uint8_t mac[6];
+
   mac[0] = 0xa0; /* TODO */
   mac[1] = (CONFIG_NETINIT_MACADDR_2 >> (8 * 0)) & 0xff;
   mac[2] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 3)) & 0xff;
