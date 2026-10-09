@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/grp.h
+ * libs/libc/grp/lib_getgrent.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,67 +20,90 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_GRP_H
-#define __INCLUDE_GRP_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
-#include <sys/types.h>
+#include <grp.h>
+
+#include "grp/lib_grp.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Data
+ ****************************************************************************/
+
+/* Index of the next entry that getgrent() returns */
+
+static int g_group_index;
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Type Definitions
+ * Name: setgrent
+ *
+ * Description:
+ *   Rewind the group database, so that the next getgrent() returns the
+ *   first entry.
+ *
  ****************************************************************************/
 
-struct group
+void setgrent(void)
 {
-  FAR char  *gr_name;
-  FAR char  *gr_passwd;
-  gid_t      gr_gid;
-  FAR char **gr_mem;
-};
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-FAR struct group *getgrnam(FAR const char *name);
-FAR struct group *getgrgid(gid_t gid);
-FAR struct group *getgrent(void);
-void setgrent(void);
-void endgrent(void);
-int getgrnam_r(FAR const char *name,
-               FAR struct group *grp,
-               FAR char *buf,
-               size_t buflen,
-               FAR struct group **result);
-int getgrgid_r(gid_t gid, FAR struct group *grp,
-               FAR char *buf, size_t buflen,
-               FAR struct group **result);
-int initgroups(FAR const char *user, gid_t group);
-int getgrouplist(FAR const char *user, gid_t group, FAR gid_t *groups,
-                 FAR int *ngroups);
-
-#undef EXTERN
-#if defined(__cplusplus)
+  g_group_index = 0;
 }
-#endif
 
-#endif /* __INCLUDE_GRP_H */
+/****************************************************************************
+ * Name: endgrent
+ *
+ * Description:
+ *   Close the group database.  The next getgrent() returns the first entry.
+ *
+ ****************************************************************************/
+
+void endgrent(void)
+{
+  g_group_index = 0;
+}
+
+/****************************************************************************
+ * Name: getgrent
+ *
+ * Description:
+ *   Return the next entry of the group database.
+ *
+ * Returned Value:
+ *   A pointer to a statically allocated group structure, or NULL if there
+ *   are no more entries or an error occurs.
+ *
+ ****************************************************************************/
+
+FAR struct group *getgrent(void)
+{
+#ifdef CONFIG_LIBC_GROUP_FILE
+  int ret;
+
+  ret = grp_findby_index(g_group_index, &g_group, g_group_buffer,
+                         GRPBUF_RESERVE_SIZE);
+  if (ret != 1)
+    {
+      return NULL;
+    }
+
+  g_group_index++;
+  return &g_group;
+#else
+  /* The only group is root */
+
+  if (g_group_index != 0)
+    {
+      return NULL;
+    }
+
+  g_group_index++;
+  return getgrbuf(ROOT_GID, ROOT_NAME, ROOT_PASSWD);
+#endif
+}
