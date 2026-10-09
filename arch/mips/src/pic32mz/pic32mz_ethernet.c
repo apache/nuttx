@@ -389,6 +389,7 @@ struct pic32mz_driver_s
   uint8_t    pd_phyaddr;        /* PHY device address */
 #endif
   uint8_t    pd_txnext;         /* Index to the next Tx descriptor */
+  uint8_t    pd_rxnext;         /* Index to the next Rx descriptor */
   uint32_t   pd_inten;          /* Shadow copy of INTEN register */
   struct wdog_s pd_txtimeout;   /* TX timeout timer */
   struct work_s pd_irqwork;     /* For deferring interrupt work to the work queue */
@@ -463,7 +464,8 @@ static inline void pic32mz_rxdescinit(struct pic32mz_driver_s *priv);
 static inline struct pic32mz_txdesc_s *pic32mz_txdesc(
   struct pic32mz_driver_s *priv);
 static inline void pic32mz_txnext(struct pic32mz_driver_s *priv);
-static inline void pic32mz_rxreturn(struct pic32mz_rxdesc_s *rxdesc);
+static void pic32mz_rxreturn(struct pic32mz_driver_s *priv,
+                             struct pic32mz_rxdesc_s *rxdesc);
 static struct pic32mz_rxdesc_s *pic32mz_rxdesc(
   struct pic32mz_driver_s *priv);
 
@@ -972,6 +974,10 @@ static inline void pic32mz_rxdescinit(struct pic32mz_driver_s *priv)
                   CONFIG_PIC32MZ_ETH_NRXDESC *
                   sizeof(union pic32mz_rxdesc_u));
 
+  /* Position the Rx index to the first descriptor in the ring */
+
+  priv->pd_rxnext = 0;
+
   /* Update the ETHRXST register with the physical address of the head of the
    * RX descriptors list.
    */
@@ -1075,9 +1081,11 @@ static inline void pic32mz_txnext(struct pic32mz_driver_s *priv)
  * Function: pic32mz_rxreturn
  *
  * Description:
- *   Return an RX descriptor to the hardware.
+ *   Return the RX descriptor at the head of the ring to the hardware and
+ *   advance the ring index to the next descriptor.
  *
  * Input Parameters:
+ *   priv   - Reference to the driver state structure
  *   rxdesc - Reference to the RX descriptor to be returned
  *
  * Returned Value:
@@ -1087,24 +1095,48 @@ static inline void pic32mz_txnext(struct pic32mz_driver_s *priv)
  *
  ****************************************************************************/
 
-static inline void pic32mz_rxreturn(struct pic32mz_rxdesc_s *rxdesc)
+static void pic32mz_rxreturn(struct pic32mz_driver_s *priv,
+                             struct pic32mz_rxdesc_s *rxdesc)
 {
+  int rxnext;
+
   rxdesc->rsv1   = 0;
   rxdesc->rsv2   = 0;
   rxdesc->status = RXDESC_STATUS_EOWN | RXDESC_STATUS_NPV;
   pic32mz_dumprxdesc(rxdesc, "Returned to hardware");
 
-  /* Flush the content of the modified TX descriptor into physical memory. */
+  /* Flush the content of the modified RX descriptor into physical memory. */
 
   up_flush_dcache((uintptr_t)rxdesc,
                   (uintptr_t)rxdesc + sizeof(union pic32mz_rxdesc_u));
+
+  /* The hardware increments ETHSTAT.BUFCNT for each descriptor that it
+   * fills; software decrements it once for each descriptor that it
+   * processes.  The decrement must come after the descriptor is owned by
+   * the hardware again: if the RX DMA has stopped on this descriptor (no
+   * descriptor available), the decrement makes it fetch the descriptor
+   * again, and a descriptor still owned by software would leave the
+   * reception stalled.
+   */
+
+  pic32mz_putreg(ETH_CON1_BUFCDEC, PIC32MZ_ETH_CON1SET);
+
+  /* Advance to the next descriptor in the ring */
+
+  rxnext = priv->pd_rxnext + 1;
+  if (rxnext >= CONFIG_PIC32MZ_ETH_NRXDESC)
+    {
+      rxnext = 0;
+    }
+
+  priv->pd_rxnext = rxnext;
 }
 
 /****************************************************************************
  * Function: pic32mz_rxdesc
  *
  * Description:
- *   Check if a RX descriptor is owned by the software.
+ *   Check if the next RX descriptor in the ring is owned by the software.
  *
  * Input Parameters:
  *   priv - Reference to the driver state structure
@@ -1122,35 +1154,30 @@ static inline void pic32mz_rxreturn(struct pic32mz_rxdesc_s *rxdesc)
 static struct pic32mz_rxdesc_s *pic32mz_rxdesc(struct pic32mz_driver_s *priv)
 {
   struct pic32mz_rxdesc_s *rxdesc;
-  int i;
 
-  /* Inspect the list of RX descriptors to see if the EOWN bit is cleared.
-   * If it is, this descriptor is now under software control and a message
-   * was received. Use SOP and EOP to extract the message, use BYTE_COUNT,
-   * RXF_RSV, RSV and PKT_CHECKSUM to get the message characteristics.
+  /* The hardware fills the descriptors in ring order, so the received
+   * frames must be taken in the same order, starting from the descriptor
+   * after the last one processed.  If the EOWN bit of that descriptor is
+   * cleared, it is now under software control and a message was received.
+   * Use SOP and EOP to extract the message, use BYTE_COUNT, RXF_RSV, RSV
+   * and PKT_CHECKSUM to get the message characteristics.
    */
 
-  for (i = 0; i < CONFIG_PIC32MZ_ETH_NRXDESC; i++)
+  rxdesc = &g_rxdesc[priv->pd_rxnext].rxdesc;
+
+  /* Force the RX descriptor to be re-read from physical memory */
+
+  up_invalidate_dcache((uintptr_t)rxdesc,
+                       (uintptr_t)rxdesc + sizeof(union pic32mz_rxdesc_u));
+
+  if ((rxdesc->status & RXDESC_STATUS_EOWN) == 0)
     {
-      /* Check if software owns this descriptor */
+      /* Yes.. return a pointer to the descriptor */
 
-      rxdesc = &g_rxdesc[i].rxdesc;
-
-      /* Forces the first RX descriptor to be re-read from physical memory */
-
-      up_invalidate_dcache((uintptr_t)rxdesc,
-                           (uintptr_t)rxdesc +
-                            sizeof(union pic32mz_rxdesc_u));
-
-      if ((rxdesc->status & RXDESC_STATUS_EOWN) == 0)
-        {
-          /* Yes.. return a pointer to the descriptor */
-
-          return rxdesc;
-        }
+      return rxdesc;
     }
 
-  /* All descriptors are owned by the Ethernet controller.. return NULL */
+  /* The descriptor is owned by the Ethernet controller.. return NULL */
 
   return NULL;
 }
@@ -1458,11 +1485,16 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
    * the producer index is not equal to the consumer index.
    */
 
-  for (; ; )
+  /* While a response is pending (no TX descriptor was available), the
+   * packet buffer is still holding it: no more packets can be received
+   * until it is sent by pic32mz_txdone().
+   */
+
+  while (!priv->pd_txpending)
     {
-      /* Check if any RX descriptor has the EOWN bit cleared meaning that the
-       * this descriptor is now under software control and a message was
-       * received.
+      /* Check if the next RX descriptor has the EOWN bit cleared meaning
+       * that the this descriptor is now under software control and a
+       * message was received.
        */
 
       rxdesc = pic32mz_rxdesc(priv);
@@ -1476,13 +1508,6 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
         }
 
       pic32mz_dumprxdesc(rxdesc, "RX Complete");
-
-      /* The hardware increments ETHSTAT.BUFCNT for each descriptor that it
-       * fills; software decrements it once for each descriptor that it
-       * processes.
-       */
-
-      pic32mz_putreg(ETH_CON1_BUFCDEC, PIC32MZ_ETH_CON1SET);
 
       /* Get the packet length, without the FCS included in the byte
        * count.
@@ -1506,7 +1531,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
           nwarn("WARNING. rsv1: %08" PRIx32 " rsv2: %08" PRIx32 "\n",
                 rxdesc->rsv1, rxdesc->rsv2);
           NETDEV_RXERRORS(&priv->pd_dev);
-          pic32mz_rxreturn(rxdesc);
+          pic32mz_rxreturn(priv, rxdesc);
         }
 
       /* If the packet length is greater then the buffer, then we cannot
@@ -1521,7 +1546,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
                 "rxdesc: %08" PRIx32 "\n",
                 priv->pd_dev.d_len, rxdesc->status);
           NETDEV_RXERRORS(&priv->pd_dev);
-          pic32mz_rxreturn(rxdesc);
+          pic32mz_rxreturn(priv, rxdesc);
         }
 
       /* We don't have any logic here for reassembling packets from
@@ -1535,7 +1560,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
                 "rxdesc: %08" PRIx32 "\n",
                 priv->pd_dev.d_len, rxdesc->status);
           NETDEV_RXFRAGMENTS(&priv->pd_dev);
-          pic32mz_rxreturn(rxdesc);
+          pic32mz_rxreturn(priv, rxdesc);
         }
       else
         {
@@ -1567,7 +1592,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
               NETDEV_RXDROPPED(&priv->pd_dev);
               priv->pd_dev.d_buf = NULL;
               priv->pd_dev.d_len = 0;
-              pic32mz_rxreturn(rxdesc);
+              pic32mz_rxreturn(priv, rxdesc);
               continue;
             }
 
@@ -1575,7 +1600,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
 
           /* And give the RX descriptor back to the hardware */
 
-          pic32mz_rxreturn(rxdesc);
+          pic32mz_rxreturn(priv, rxdesc);
           pic32mz_dumppacket("Received packet",
                              priv->pd_dev.d_buf, priv->pd_dev.d_len);
 
@@ -1667,7 +1692,14 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
               NETDEV_RXDROPPED(&priv->pd_dev);
             }
 
-          /* Discard any buffers still attached to the device structure */
+          /* Keep the buffer if it holds a pending response.  Otherwise,
+           * discard any buffers still attached to the device structure.
+           */
+
+          if (priv->pd_txpending)
+            {
+              break;
+            }
 
           priv->pd_dev.d_len = 0;
           if (priv->pd_dev.d_buf)
@@ -1786,6 +1818,12 @@ static void pic32mz_txdone(struct pic32mz_driver_s *priv)
 
       priv->pd_inten    |= ETH_RXINTS;
       pic32mz_putreg(priv->pd_inten, PIC32MZ_ETH_IEN);
+
+      /* The RX done events were cleared while RX was halted: process the
+       * packets received in the meantime.
+       */
+
+      pic32mz_rxdone(priv);
     }
 
   /* Otherwise poll the network for new XMIT data */
@@ -1889,9 +1927,13 @@ static void pic32mz_interrupt_work(void *arg)
        * or CPU write of a '1' to the CLR register.
        */
 
-      if ((status & ETH_INT_RXDONE) != 0)
+      if ((status & (ETH_INT_RXDONE | ETH_INT_RXBUFNA |
+                     ETH_INT_RXOVFLW)) != 0)
         {
-          /* We have received at least one new incoming packet. */
+          /* We have received at least one new incoming packet.  After an
+           * overflow or when no descriptor was available, process the
+           * received packets to give the descriptors back to the hardware.
+           */
 
           pic32mz_rxdone(priv);
         }
@@ -2385,6 +2427,8 @@ static int pic32mz_ifup(struct net_driver_s *dev)
 
   priv->pd_polling   = false;
   priv->pd_txpending = false;
+  priv->pd_dev.d_buf = NULL;
+  priv->pd_dev.d_len = 0;
 
   /* Initialize the buffer list */
 
@@ -2529,9 +2573,11 @@ static void pic32mz_txavail_work(void *arg)
   net_lock();
   if (priv->pd_ifup)
     {
-      /* Check if the next Tx descriptor is available. */
+      /* Check if the next Tx descriptor is available and that the packet
+       * buffer is not holding a pending response.
+       */
 
-      if (pic32mz_txdesc(priv) != NULL)
+      if (!priv->pd_txpending && pic32mz_txdesc(priv) != NULL)
         {
           /* If so, then poll the network for new XMIT data.
            * First allocate a buffer to perform the poll
