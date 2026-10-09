@@ -936,6 +936,29 @@ config MX25RXX_LXX
 
 endif # MTD_MX25RXX
 
+config MTD_MX66UW1G45G
+	bool "Macronix MX66UW1G45G XSPI flash"
+	default n
+	---help---
+		Enable the MTD driver for the 1-Gbit Macronix MX66UW1G45G
+		OctaBus flash memory.  The driver uses the QSPI interface.
+
+if MTD_MX66UW1G45G
+
+config MX66UW1G45G_QSPIMODE
+	int "MX66UW1G45G QSPI mode"
+	default 0
+	---help---
+		The MX66UW1G45G supports QSPI mode 0 or 3.
+
+config MX66UW1G45G_QSPI_FREQUENCY
+	int "MX66UW1G45G QSPI frequency"
+	default 75000000
+	---help---
+		Clock frequency used for MX66UW1G45G transfers.
+
+endif # MTD_MX66UW1G45G
+
 config MTD_GD55
 	bool "QuadSPI-based GigaDevices GD55 family FLASH"
 	default n
