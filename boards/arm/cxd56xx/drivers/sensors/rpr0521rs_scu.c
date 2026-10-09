@@ -108,7 +108,6 @@
 #define SETMODECONTROL_TYPE_PS        0
 #define SETMODECONTROL_TYPE_ALS       1
 
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -794,6 +793,7 @@ static int rpr0521rs_ioctl_ps(struct file *filep,
         {
           uint8_t intstatus = rpr0521rs_getreg8(priv,
                                                 RPR0521RS_INTERRUPT);
+
           *(uint8_t *)(uintptr_t)arg = intstatus;
           sninfo("Get proximity IntStatus 0x%02x\n", intstatus);
         }

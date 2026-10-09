@@ -790,45 +790,45 @@ static ssize_t hciuart_copytorxbuffer(const struct hciuart_config_s *config)
   rxhead = state->rxhead;
   rxtail = state->rxtail;
 
-    {
-      /* Is there data available in the Rx FIFO? */
+  {
+    /* Is there data available in the Rx FIFO? */
 
-      while ((hciuart_getreg32(config, TIVA_UART_FR_OFFSET) & UART_FR_RXFE)
-             == 0)
-        {
-          /* Compare the Rx buffer head and tail indices.  If the
-           * incremented tail index would make the Rx buffer appear empty,
-           * then we must stop the copy.  If there is data pending in the Rx
-           * FIFO, this could be very bad because a data overrun condition
-           * is likely to* occur.
-           */
+    while ((hciuart_getreg32(config, TIVA_UART_FR_OFFSET) & UART_FR_RXFE)
+           == 0)
+      {
+        /* Compare the Rx buffer head and tail indices.  If the
+         * incremented tail index would make the Rx buffer appear empty,
+         * then we must stop the copy.  If there is data pending in the Rx
+         * FIFO, this could be very bad because a data overrun condition
+         * is likely to* occur.
+         */
 
-          rxnext = rxtail + 1;
-          if (rxnext >= config->rxbufsize)
-            {
-              rxnext = 0;
-            }
+        rxnext = rxtail + 1;
+        if (rxnext >= config->rxbufsize)
+          {
+            rxnext = 0;
+          }
 
-          /* Would this make the Rx buffer appear full? */
+        /* Would this make the Rx buffer appear full? */
 
-          if (rxnext == rxhead)
-            {
-              /* Yes, stop the copy and update the indices */
+        if (rxnext == rxhead)
+          {
+            /* Yes, stop the copy and update the indices */
 
-              break;
-            }
+            break;
+          }
 
-          /* Get a byte from the Rx FIFO buffer */
+        /* Get a byte from the Rx FIFO buffer */
 
-          rxbyte = hciuart_getreg32(config, TIVA_UART_DR_OFFSET) & 0xff;
+        rxbyte = hciuart_getreg32(config, TIVA_UART_DR_OFFSET) & 0xff;
 
-          /* And add it to the tail of the Rx buffer */
+        /* And add it to the tail of the Rx buffer */
 
-          config->rxbuffer[rxtail] = rxbyte;
-          rxtail = rxnext;
-          nbytes++;
-        }
-    }
+        config->rxbuffer[rxtail] = rxbyte;
+        rxtail = rxnext;
+        nbytes++;
+      }
+  }
 
   /* Save the updated Rx buffer tail index */
 
@@ -1328,28 +1328,28 @@ static void hciuart_rxenable(const struct btuart_lowerhalf_s *lower,
 
   DEBUGASSERT(config != NULL && config->state != NULL);
 
-    {
-      uint32_t intset;
-      irqstate_t flags;
+  {
+    uint32_t intset;
+    irqstate_t flags;
 
-      flags = spin_lock_irqsave(&config->lock);
-      if (enable)
-        {
-          /* Receive an interrupt when their is anything in the Rx data
-           * register (or an Rx timeout occurs).
-           */
+    flags = spin_lock_irqsave(&config->lock);
+    if (enable)
+      {
+        /* Receive an interrupt when their is anything in the Rx data
+         * register (or an Rx timeout occurs).
+         */
 
-          intset = UART_IM_RXIM | UART_IM_RTIM;
-          hciuart_enableints(config, intset);
-        }
-      else
-        {
-          intset = UART_IM_RXIM | UART_IM_RTIM;
-          hciuart_disableints(config, intset);
-        }
+        intset = UART_IM_RXIM | UART_IM_RTIM;
+        hciuart_enableints(config, intset);
+      }
+    else
+      {
+        intset = UART_IM_RXIM | UART_IM_RTIM;
+        hciuart_disableints(config, intset);
+      }
 
-      spin_unlock_irqrestore(&config->lock, flags);
-    }
+    spin_unlock_irqrestore(&config->lock, flags);
+  }
 }
 
 /****************************************************************************

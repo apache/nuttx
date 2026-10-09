@@ -1036,8 +1036,11 @@ static void imx9_reqcomplete(struct imx9_ep_s *privep,
    */
 
   bool stalled = privep->stalled;
+
   if (privep->epphy == IMX9_EP0_IN)
-    privep->stalled = privep->dev->stalled;
+    {
+      privep->stalled = privep->dev->stalled;
+    }
 
   /* Save the result in the request structure */
 
@@ -1063,7 +1066,9 @@ static void imx9_reqcomplete(struct imx9_ep_s *privep,
 static void imx9_cancelrequests(struct imx9_ep_s *privep, int16_t status)
 {
   if (!imx9_rqempty(privep))
+    {
       imx9_flushep(privep);
+    }
 
   while (!imx9_rqempty(privep))
     {
@@ -1309,19 +1314,19 @@ static inline void imx9_ep0state(struct imx9_usb_s *priv,
 
   switch (state)
     {
-    case EP0STATE_WAIT_NAK_IN:
-      imx9_putreg(priv,  IMX9_USBDEV_ENDPTNAKEN_OFFSET,
-                  IMX9_ENDPTMASK(IMX9_EP0_IN));
-      break;
+      case EP0STATE_WAIT_NAK_IN:
+        imx9_putreg(priv,  IMX9_USBDEV_ENDPTNAKEN_OFFSET,
+                    IMX9_ENDPTMASK(IMX9_EP0_IN));
+        break;
 
-    case EP0STATE_WAIT_NAK_OUT:
-      imx9_putreg(priv, IMX9_USBDEV_ENDPTNAKEN_OFFSET,
-                  IMX9_ENDPTMASK(IMX9_EP0_OUT));
-      break;
+      case EP0STATE_WAIT_NAK_OUT:
+        imx9_putreg(priv, IMX9_USBDEV_ENDPTNAKEN_OFFSET,
+                    IMX9_ENDPTMASK(IMX9_EP0_OUT));
+        break;
 
-    default:
-      imx9_putreg(priv, IMX9_USBDEV_ENDPTNAKEN_OFFSET, 0);
-      break;
+      default:
+        imx9_putreg(priv, IMX9_USBDEV_ENDPTNAKEN_OFFSET, 0);
+        break;
     }
 
   UP_DSB();
@@ -1408,315 +1413,323 @@ static inline void imx9_ep0setup(struct imx9_usb_s *priv)
 
       switch (ctrl->req)
         {
-        case USB_REQ_GETSTATUS:
-          {
-            /* type:  device-to-host; recipient = device, interface, endpoint
-             * value: 0
-             * index: zero interface endpoint
-             * len:   2; data = status
-             */
+          case USB_REQ_GETSTATUS:
+            {
+              /* type:  device-to-host; recipient = device, interface,
+               * endpoint
+               * value: 0
+               * index: zero interface endpoint
+               * len:   2; data = status
+               */
 
-            usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_GETSTATUS), 0);
-            if (!priv->paddrset || len != 2 ||
-                (ctrl->type & USB_REQ_DIR_IN) == 0 || value != 0)
-              {
-                priv->stalled = true;
-              }
-            else
-              {
-                switch (ctrl->type & USB_REQ_RECIPIENT_MASK)
-                  {
-                  case USB_REQ_RECIPIENT_ENDPOINT:
+              usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_GETSTATUS), 0);
+              if (!priv->paddrset || len != 2 ||
+                  (ctrl->type & USB_REQ_DIR_IN) == 0 || value != 0)
+                {
+                  priv->stalled = true;
+                }
+              else
+                {
+                  switch (ctrl->type & USB_REQ_RECIPIENT_MASK)
                     {
-                      usbtrace(
-                          TRACE_INTDECODE(IMX9_TRACEINTID_EPGETSTATUS), 0);
-                      privep = imx9_epfindbyaddr(priv, index);
-                      if (!privep)
+                      case USB_REQ_RECIPIENT_ENDPOINT:
                         {
                           usbtrace(
-                              TRACE_DEVERROR(IMX9_TRACEERR_BADEPGETSTATUS),
+                              TRACE_INTDECODE(IMX9_TRACEINTID_EPGETSTATUS),
                               0);
-                          priv->stalled = true;
-                        }
-                      else
-                        {
-                          if (privep->stalled)
+                          privep = imx9_epfindbyaddr(priv, index);
+                          if (!privep)
                             {
-                              priv->ep0.buf[0] = 1; /* Stalled */
+                              usbtrace(TRACE_DEVERROR(
+                                  IMX9_TRACEERR_BADEPGETSTATUS), 0);
+                              priv->stalled = true;
                             }
                           else
                             {
-                              priv->ep0.buf[0] = 0; /* Not stalled */
+                              if (privep->stalled)
+                                {
+                                  priv->ep0.buf[0] = 1; /* Stalled */
+                                }
+                              else
+                                {
+                                  priv->ep0.buf[0] = 0; /* Not stalled */
+                                }
+
+                              priv->ep0.buf[1] = 0;
+
+                              imx9_ep0xfer(priv, IMX9_EP0_IN,
+                                           priv->ep0.buf, 2);
+                              imx9_ep0state(priv, EP0STATE_SHORTWRITE);
                             }
+                        }
+                        break;
 
+                      case USB_REQ_RECIPIENT_DEVICE:
+                        {
+                          if (index == 0)
+                            {
+                              usbtrace(TRACE_INTDECODE(
+                                  IMX9_TRACEINTID_DEVGETSTATUS), 0);
+
+                              /* Features:  Remote Wakeup=YES;
+                               * selfpowered=?
+                               */
+
+                              priv->ep0.buf[0] =
+                                (priv->selfpowered <<
+                                USB_FEATURE_SELFPOWERED) |
+                                (1 << USB_FEATURE_REMOTEWAKEUP);
+                              priv->ep0.buf[1] = 0;
+
+                              imx9_ep0xfer(priv, IMX9_EP0_IN,
+                                           priv->ep0.buf, 2);
+                              imx9_ep0state(priv, EP0STATE_SHORTWRITE);
+                            }
+                          else
+                            {
+                              usbtrace(TRACE_DEVERROR(
+                                  IMX9_TRACEERR_BADDEVGETSTATUS), 0);
+                              priv->stalled = true;
+                            }
+                        }
+                        break;
+
+                      case USB_REQ_RECIPIENT_INTERFACE:
+                        {
+                          usbtrace(TRACE_INTDECODE(
+                              IMX9_TRACEINTID_IFGETSTATUS), 0);
+                          priv->ep0.buf[0] = 0;
                           priv->ep0.buf[1] = 0;
 
                           imx9_ep0xfer(priv, IMX9_EP0_IN, priv->ep0.buf, 2);
                           imx9_ep0state(priv, EP0STATE_SHORTWRITE);
                         }
-                    }
-                    break;
+                        break;
 
-                  case USB_REQ_RECIPIENT_DEVICE:
-                    {
-                      if (index == 0)
+                      default:
                         {
-                          usbtrace(
-                              TRACE_INTDECODE(IMX9_TRACEINTID_DEVGETSTATUS),
-                              0);
-
-                          /* Features:  Remote Wakeup=YES; selfpowered=? */
-
-                          priv->ep0.buf[0] =
-                            (priv->selfpowered << USB_FEATURE_SELFPOWERED) |
-                            (1 << USB_FEATURE_REMOTEWAKEUP);
-                          priv->ep0.buf[1] = 0;
-
-                          imx9_ep0xfer(priv, IMX9_EP0_IN, priv->ep0.buf, 2);
-                          imx9_ep0state(priv, EP0STATE_SHORTWRITE);
-                        }
-                      else
-                        {
-                          usbtrace(
-                              TRACE_DEVERROR(IMX9_TRACEERR_BADDEVGETSTATUS),
-                              0);
+                          usbtrace(TRACE_DEVERROR(
+                              IMX9_TRACEERR_BADGETSTATUS), 0);
                           priv->stalled = true;
                         }
+                        break;
                     }
-                    break;
-
-                  case USB_REQ_RECIPIENT_INTERFACE:
-                    {
-                      usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_IFGETSTATUS),
-                               0);
-                      priv->ep0.buf[0] = 0;
-                      priv->ep0.buf[1] = 0;
-
-                      imx9_ep0xfer(priv, IMX9_EP0_IN, priv->ep0.buf, 2);
-                      imx9_ep0state(priv, EP0STATE_SHORTWRITE);
-                    }
-                    break;
-
-                  default:
-                    {
-                      usbtrace(TRACE_DEVERROR(IMX9_TRACEERR_BADGETSTATUS),
-                               0);
-                      priv->stalled = true;
-                    }
-                    break;
                 }
             }
-        }
-        break;
+            break;
 
-      case USB_REQ_CLEARFEATURE:
-        {
-          /* type:  host-to-device; recipient = device, interface or endpoint
-           * value: feature selector
-           * index: zero interface endpoint;
-           * len:   zero, data = none
-           */
-
-          usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_CLEARFEATURE), 0);
-          if ((ctrl->type & USB_REQ_RECIPIENT_MASK) !=
-              USB_REQ_RECIPIENT_ENDPOINT)
+          case USB_REQ_CLEARFEATURE:
             {
-              imx9_dispatchrequest(priv, ctrl);
-            }
-          else if (priv->paddrset != 0 &&
-              value == USB_FEATURE_ENDPOINTHALT &&
-              len == 0 && (privep = imx9_epfindbyaddr(priv, index)) != NULL)
-            {
-              imx9_epstall(&privep->ep, true);
-              imx9_ep0state(priv, EP0STATE_WAIT_NAK_IN);
-            }
-          else
-            {
-              usbtrace(TRACE_DEVERROR(IMX9_TRACEERR_BADCLEARFEATURE), 0);
-              priv->stalled = true;
-            }
-        }
-        break;
-
-      case USB_REQ_SETFEATURE:
-        {
-          /* type:  host-to-device; recipient = device, interface, endpoint
-           * value: feature selector
-           * index: zero interface endpoint;
-           * len:   0; data = none
-           */
-
-          usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_SETFEATURE), 0);
-          if (((ctrl->type & USB_REQ_RECIPIENT_MASK) ==
-              USB_REQ_RECIPIENT_DEVICE) && value == USB_FEATURE_TESTMODE)
-            {
-              uinfo("test mode: %d\n", index);
-            }
-          else if ((ctrl->type & USB_REQ_RECIPIENT_MASK) !=
-              USB_REQ_RECIPIENT_ENDPOINT)
-            {
-              imx9_dispatchrequest(priv, ctrl);
-            }
-          else if (priv->paddrset != 0 &&
-              value == USB_FEATURE_ENDPOINTHALT &&
-              len == 0 && (privep = imx9_epfindbyaddr(priv, index)) != NULL)
-            {
-              imx9_epstall(&privep->ep, false);
-              imx9_ep0state(priv, EP0STATE_WAIT_NAK_IN);
-            }
-          else
-            {
-              usbtrace(TRACE_DEVERROR(IMX9_TRACEERR_BADSETFEATURE), 0);
-              priv->stalled = true;
-            }
-        }
-        break;
-
-      case USB_REQ_SETADDRESS:
-        {
-          /* type:  host-to-device; recipient = device
-           * value: device address
-           * index: 0
-           * len:   0; data = none
-           */
-
-          usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_EP0SETUPSETADDRESS),
-                   value);
-          if (((ctrl->type & USB_REQ_RECIPIENT_MASK) ==
-              USB_REQ_RECIPIENT_DEVICE) &&
-              index == 0 && len == 0 && value < 128)
-            {
-              /* Save the address.  We cannot actually change to the next
-               * address until the completion of the status phase.
+              /* type:  host-to-device; recipient = device, interface or
+               * endpoint
+               * value: feature selector
+               * index: zero interface endpoint;
+               * len:   zero, data = none
                */
 
-              priv->paddr = ctrl->value[0];
-              priv->paddrset = false;
-              imx9_ep0state(priv, EP0STATE_WAIT_NAK_IN);
+              usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_CLEARFEATURE), 0);
+              if ((ctrl->type & USB_REQ_RECIPIENT_MASK) !=
+                  USB_REQ_RECIPIENT_ENDPOINT)
+                {
+                  imx9_dispatchrequest(priv, ctrl);
+                }
+              else if (priv->paddrset != 0 &&
+                  value == USB_FEATURE_ENDPOINTHALT &&
+                  len == 0 &&
+                      (privep = imx9_epfindbyaddr(priv, index)) != NULL)
+                {
+                  imx9_epstall(&privep->ep, true);
+                  imx9_ep0state(priv, EP0STATE_WAIT_NAK_IN);
+                }
+              else
+                {
+                  usbtrace(TRACE_DEVERROR(IMX9_TRACEERR_BADCLEARFEATURE), 0);
+                  priv->stalled = true;
+                }
             }
-          else
+            break;
+
+          case USB_REQ_SETFEATURE:
             {
-              usbtrace(TRACE_DEVERROR(IMX9_TRACEERR_BADSETADDRESS), 0);
-              priv->stalled = true;
+              /* type:  host-to-device; recipient = device, interface,
+               * endpoint
+               * value: feature selector
+               * index: zero interface endpoint;
+               * len:   0; data = none
+               */
+
+              usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_SETFEATURE), 0);
+              if (((ctrl->type & USB_REQ_RECIPIENT_MASK) ==
+                  USB_REQ_RECIPIENT_DEVICE) && value == USB_FEATURE_TESTMODE)
+                {
+                  uinfo("test mode: %d\n", index);
+                }
+              else if ((ctrl->type & USB_REQ_RECIPIENT_MASK) !=
+                  USB_REQ_RECIPIENT_ENDPOINT)
+                {
+                  imx9_dispatchrequest(priv, ctrl);
+                }
+              else if (priv->paddrset != 0 &&
+                  value == USB_FEATURE_ENDPOINTHALT &&
+                  len == 0 &&
+                      (privep = imx9_epfindbyaddr(priv, index)) != NULL)
+                {
+                  imx9_epstall(&privep->ep, false);
+                  imx9_ep0state(priv, EP0STATE_WAIT_NAK_IN);
+                }
+              else
+                {
+                  usbtrace(TRACE_DEVERROR(IMX9_TRACEERR_BADSETFEATURE), 0);
+                  priv->stalled = true;
+                }
             }
-        }
-        break;
+            break;
 
-      case USB_REQ_GETDESCRIPTOR:
-        /* type:  device-to-host; recipient = device
-         * value: descriptor type and index
-         * index: 0 or language ID;
-         * len:   descriptor len; data = descriptor
-         */
-
-      case USB_REQ_SETDESCRIPTOR:
-        /* type:  host-to-device; recipient = device
-         * value: descriptor type and index
-         * index: 0 or language ID;
-         * len:   descriptor len; data = descriptor
-         */
-
-        {
-          usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_GETSETDESC), 0);
-          if ((ctrl->type & USB_REQ_RECIPIENT_MASK) ==
-              USB_REQ_RECIPIENT_DEVICE)
+          case USB_REQ_SETADDRESS:
             {
-              imx9_dispatchrequest(priv, ctrl);
-            }
-          else
-            {
-              usbtrace(TRACE_DEVERROR(IMX9_TRACEERR_BADGETSETDESC), 0);
-              priv->stalled = true;
-            }
-        }
-        break;
+              /* type:  host-to-device; recipient = device
+               * value: device address
+               * index: 0
+               * len:   0; data = none
+               */
 
-      case USB_REQ_GETCONFIGURATION:
-        /* type:  device-to-host; recipient = device
-         * value: 0;
-         * index: 0;
-         * len:   1; data = configuration value
-         */
-
-        {
-          usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_GETCONFIG), 0);
-          if (priv->paddrset &&
-              ((ctrl->type & USB_REQ_RECIPIENT_MASK) ==
+              usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_EP0SETUPSETADDRESS),
+                       value);
+              if (((ctrl->type & USB_REQ_RECIPIENT_MASK) ==
                   USB_REQ_RECIPIENT_DEVICE) &&
-                  value == 0 && index == 0 && len == 1)
+                  index == 0 && len == 0 && value < 128)
+                {
+                  /* Save the address.  We cannot actually change to the next
+                   * address until the completion of the status phase.
+                   */
+
+                  priv->paddr = ctrl->value[0];
+                  priv->paddrset = false;
+                  imx9_ep0state(priv, EP0STATE_WAIT_NAK_IN);
+                }
+              else
+                {
+                  usbtrace(TRACE_DEVERROR(IMX9_TRACEERR_BADSETADDRESS), 0);
+                  priv->stalled = true;
+                }
+            }
+            break;
+
+          case USB_REQ_GETDESCRIPTOR:
+            /* type:  device-to-host; recipient = device
+             * value: descriptor type and index
+             * index: 0 or language ID;
+             * len:   descriptor len; data = descriptor
+             */
+
+          case USB_REQ_SETDESCRIPTOR:
+            /* type:  host-to-device; recipient = device
+             * value: descriptor type and index
+             * index: 0 or language ID;
+             * len:   descriptor len; data = descriptor
+             */
+
             {
+              usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_GETSETDESC), 0);
+              if ((ctrl->type & USB_REQ_RECIPIENT_MASK) ==
+                  USB_REQ_RECIPIENT_DEVICE)
+                {
+                  imx9_dispatchrequest(priv, ctrl);
+                }
+              else
+                {
+                  usbtrace(TRACE_DEVERROR(IMX9_TRACEERR_BADGETSETDESC), 0);
+                  priv->stalled = true;
+                }
+            }
+            break;
+
+          case USB_REQ_GETCONFIGURATION:
+            /* type:  device-to-host; recipient = device
+             * value: 0;
+             * index: 0;
+             * len:   1; data = configuration value
+             */
+
+            {
+              usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_GETCONFIG), 0);
+              if (priv->paddrset &&
+                  ((ctrl->type & USB_REQ_RECIPIENT_MASK) ==
+                      USB_REQ_RECIPIENT_DEVICE) &&
+                      value == 0 && index == 0 && len == 1)
+                {
+                  imx9_dispatchrequest(priv, ctrl);
+                }
+              else
+                {
+                  usbtrace(TRACE_DEVERROR(IMX9_TRACEERR_BADGETCONFIG), 0);
+                  priv->stalled = true;
+                }
+            }
+            break;
+
+          case USB_REQ_SETCONFIGURATION:
+            /* type:  host-to-device; recipient = device
+             * value: configuration value
+             * index: 0;
+             * len:   0; data = none
+             */
+
+            {
+              usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_SETCONFIG), 0);
+              if (((ctrl->type & USB_REQ_RECIPIENT_MASK) ==
+                  USB_REQ_RECIPIENT_DEVICE) && index == 0 && len == 0)
+                {
+                  imx9_dispatchrequest(priv, ctrl);
+                }
+              else
+                {
+                  usbtrace(TRACE_DEVERROR(IMX9_TRACEERR_BADSETCONFIG), 0);
+                  priv->stalled = true;
+                }
+            }
+            break;
+
+          case USB_REQ_GETINTERFACE:
+            /* type:  device-to-host; recipient = interface
+             * value: 0
+             * index: interface;
+             * len:   1; data = alt interface
+             */
+
+          case USB_REQ_SETINTERFACE:
+            /* type:  host-to-device; recipient = interface
+             * value: alternate setting
+             * index: interface;
+             * len:   0; data = none
+             */
+
+            {
+              usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_GETSETIF), 0);
               imx9_dispatchrequest(priv, ctrl);
             }
-          else
+            break;
+
+          case USB_REQ_SYNCHFRAME:
+            /* type:  device-to-host; recipient = endpoint
+             * value: 0
+             * index: endpoint;
+             * len:   2; data = frame number
+             */
+
             {
-              usbtrace(TRACE_DEVERROR(IMX9_TRACEERR_BADGETCONFIG), 0);
+              usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_SYNCHFRAME), 0);
+            }
+            break;
+
+          default:
+            {
+              usbtrace(TRACE_DEVERROR(IMX9_TRACEERR_INVALIDCTRLREQ), 0);
               priv->stalled = true;
             }
+            break;
         }
-        break;
-
-      case USB_REQ_SETCONFIGURATION:
-        /* type:  host-to-device; recipient = device
-         * value: configuration value
-         * index: 0;
-         * len:   0; data = none
-         */
-
-        {
-          usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_SETCONFIG), 0);
-          if (((ctrl->type & USB_REQ_RECIPIENT_MASK) ==
-              USB_REQ_RECIPIENT_DEVICE) && index == 0 && len == 0)
-            {
-              imx9_dispatchrequest(priv, ctrl);
-            }
-          else
-            {
-              usbtrace(TRACE_DEVERROR(IMX9_TRACEERR_BADSETCONFIG), 0);
-              priv->stalled = true;
-            }
-        }
-        break;
-
-      case USB_REQ_GETINTERFACE:
-        /* type:  device-to-host; recipient = interface
-         * value: 0
-         * index: interface;
-         * len:   1; data = alt interface
-         */
-
-      case USB_REQ_SETINTERFACE:
-        /* type:  host-to-device; recipient = interface
-         * value: alternate setting
-         * index: interface;
-         * len:   0; data = none
-         */
-
-        {
-          usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_GETSETIF), 0);
-          imx9_dispatchrequest(priv, ctrl);
-        }
-        break;
-
-      case USB_REQ_SYNCHFRAME:
-        /* type:  device-to-host; recipient = endpoint
-         * value: 0
-         * index: endpoint;
-         * len:   2; data = frame number
-         */
-
-        {
-          usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_SYNCHFRAME), 0);
-        }
-        break;
-
-      default:
-        {
-          usbtrace(TRACE_DEVERROR(IMX9_TRACEERR_INVALIDCTRLREQ), 0);
-          priv->stalled = true;
-        }
-        break;
-      }
-  }
+    }
 
   if (priv->stalled)
     {
@@ -1744,69 +1757,69 @@ static void imx9_ep0complete(struct imx9_usb_s *priv, uint8_t epphy)
 
   switch (priv->ep0.state)
     {
-    case EP0STATE_DATA_IN:
-      if (imx9_rqempty(privep))
-        {
-          return;
-        }
+      case EP0STATE_DATA_IN:
+        if (imx9_rqempty(privep))
+          {
+            return;
+          }
 
-      if (imx9_epcomplete(priv, epphy))
-        {
-          imx9_ep0state(priv, EP0STATE_WAIT_NAK_OUT);
-        }
-      break;
+        if (imx9_epcomplete(priv, epphy))
+          {
+            imx9_ep0state(priv, EP0STATE_WAIT_NAK_OUT);
+          }
+        break;
 
-    case EP0STATE_DATA_OUT:
-      if (imx9_rqempty(privep))
-        {
-          return;
-        }
+      case EP0STATE_DATA_OUT:
+        if (imx9_rqempty(privep))
+          {
+            return;
+          }
 
-      if (imx9_epcomplete(priv, epphy))
-        {
-          imx9_ep0state(priv, EP0STATE_WAIT_NAK_IN);
-        }
-      break;
+        if (imx9_epcomplete(priv, epphy))
+          {
+            imx9_ep0state(priv, EP0STATE_WAIT_NAK_IN);
+          }
+        break;
 
-    case EP0STATE_SHORTREAD:
-      imx9_dispatchrequest(priv, &priv->ep0.ctrl);
-      imx9_ep0state(priv, EP0STATE_WAIT_NAK_IN);
-      break;
+      case EP0STATE_SHORTREAD:
+        imx9_dispatchrequest(priv, &priv->ep0.ctrl);
+        imx9_ep0state(priv, EP0STATE_WAIT_NAK_IN);
+        break;
 
-    case EP0STATE_SHORTWRITE:
-      imx9_ep0state(priv, EP0STATE_WAIT_NAK_OUT);
-      break;
+      case EP0STATE_SHORTWRITE:
+        imx9_ep0state(priv, EP0STATE_WAIT_NAK_OUT);
+        break;
 
-    case EP0STATE_WAIT_STATUS_IN:
-      imx9_ep0state(priv, EP0STATE_IDLE);
+      case EP0STATE_WAIT_STATUS_IN:
+        imx9_ep0state(priv, EP0STATE_IDLE);
 
-      /* If we've received a SETADDRESS packet, then we set the address
-       * now that the status phase has completed
-       */
+        /* If we've received a SETADDRESS packet, then we set the address
+         * now that the status phase has completed
+         */
 
-      if (!priv->paddrset && priv->paddr != 0)
-        {
-          usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_EP0INSETADDRESS),
-                   (uint16_t)priv->paddr);
-          imx9_set_address(priv, priv->paddr);
-        }
+        if (!priv->paddrset && priv->paddr != 0)
+          {
+            usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_EP0INSETADDRESS),
+                     (uint16_t)priv->paddr);
+            imx9_set_address(priv, priv->paddr);
+          }
 
-      break;
+        break;
 
-    case EP0STATE_WAIT_STATUS_OUT:
-      imx9_ep0state(priv, EP0STATE_IDLE);
-      break;
+      case EP0STATE_WAIT_STATUS_OUT:
+        imx9_ep0state(priv, EP0STATE_IDLE);
+        break;
 
-    default:
-#ifdef CONFIG_DEBUG_FEATURES
-      DEBUGASSERT(priv->ep0.state != EP0STATE_DATA_IN &&
-          priv->ep0.state != EP0STATE_DATA_OUT        &&
-          priv->ep0.state != EP0STATE_SHORTWRITE      &&
-          priv->ep0.state != EP0STATE_WAIT_STATUS_IN  &&
-          priv->ep0.state != EP0STATE_WAIT_STATUS_OUT);
-#endif
-      priv->stalled = true;
-      break;
+      default:
+  #ifdef CONFIG_DEBUG_FEATURES
+        DEBUGASSERT(priv->ep0.state != EP0STATE_DATA_IN &&
+            priv->ep0.state != EP0STATE_DATA_OUT        &&
+            priv->ep0.state != EP0STATE_SHORTWRITE      &&
+            priv->ep0.state != EP0STATE_WAIT_STATUS_IN  &&
+            priv->ep0.state != EP0STATE_WAIT_STATUS_OUT);
+  #endif
+        priv->stalled = true;
+        break;
     }
 
   if (priv->stalled)
@@ -1833,23 +1846,23 @@ static void imx9_ep0nak(struct imx9_usb_s *priv, uint8_t epphy)
 
   switch (priv->ep0.state)
     {
-    case EP0STATE_WAIT_NAK_IN:
-      imx9_ep0xfer(priv, IMX9_EP0_IN, NULL, 0);
-      imx9_ep0state(priv, EP0STATE_WAIT_STATUS_IN);
-      break;
+      case EP0STATE_WAIT_NAK_IN:
+        imx9_ep0xfer(priv, IMX9_EP0_IN, NULL, 0);
+        imx9_ep0state(priv, EP0STATE_WAIT_STATUS_IN);
+        break;
 
-    case EP0STATE_WAIT_NAK_OUT:
-      imx9_ep0xfer(priv, IMX9_EP0_OUT, NULL, 0);
-      imx9_ep0state(priv, EP0STATE_WAIT_STATUS_OUT);
-      break;
+      case EP0STATE_WAIT_NAK_OUT:
+        imx9_ep0xfer(priv, IMX9_EP0_OUT, NULL, 0);
+        imx9_ep0state(priv, EP0STATE_WAIT_STATUS_OUT);
+        break;
 
-    default:
-#ifdef CONFIG_DEBUG_FEATURES
-      DEBUGASSERT(priv->ep0.state != EP0STATE_WAIT_NAK_IN &&
-                  priv->ep0.state != EP0STATE_WAIT_NAK_OUT);
-#endif
-      priv->stalled = true;
-      break;
+      default:
+  #ifdef CONFIG_DEBUG_FEATURES
+        DEBUGASSERT(priv->ep0.state != EP0STATE_WAIT_NAK_IN &&
+                    priv->ep0.state != EP0STATE_WAIT_NAK_OUT);
+  #endif
+        priv->stalled = true;
+        break;
     }
 
   if (priv->stalled)
@@ -1901,6 +1914,7 @@ bool imx9_epcomplete(struct imx9_usb_s *priv, uint8_t epphy)
   privreq->req.xfrd += xfrd;
 
   bool complete = true;
+
   if (IMX9_EPPHYOUT(privep->epphy))
     {
       /* read(OUT) completes when request filled, or a short transfer is
@@ -2041,9 +2055,13 @@ static int imx9_usbinterrupt(int irq, void *context, void *arg)
       portsc1 = imx9_getreg(priv, IMX9_USBDEV_PORTSC1_OFFSET);
 
       if (portsc1 & USBDEV_PRTSC1_HSP)
-        priv->usbdev.speed = USB_SPEED_HIGH;
+        {
+          priv->usbdev.speed = USB_SPEED_HIGH;
+        }
       else
-        priv->usbdev.speed = USB_SPEED_FULL;
+        {
+          priv->usbdev.speed = USB_SPEED_FULL;
+        }
 
       if (portsc1 & USBDEV_PRTSC1_FPR)
         {
@@ -2118,6 +2136,7 @@ static int imx9_usbinterrupt(int irq, void *context, void *arg)
 
       uint32_t setupstat = imx9_getreg(priv,
                                        IMX9_USBDEV_ENDPTSETUPSTAT_OFFSET);
+
       if (setupstat)
         {
           /* Clear the endpoint complete CTRL OUT and IN when a Setup is
@@ -2203,6 +2222,7 @@ static int imx9_epconfigure(struct usbdev_ep_s *ep,
   /* Initialise EP capabilities */
 
   uint16_t maxsize = GETUINT16(desc->mxpacketsize);
+
   if ((desc->attr & USB_EP_ATTR_XFERTYPE_MASK) == USB_EP_ATTR_XFER_ISOC)
     {
       dqh->capability = (DQH_CAPABILITY_MAX_PACKET(maxsize) |
@@ -2410,6 +2430,7 @@ static void *imx9_epallocbuffer(struct usbdev_ep_s *ep, uint16_t bytes)
    */
 
   struct imx9_ep_s *privep = (struct imx9_ep_s *)ep;
+
   UNUSED(privep);
 
   usbtrace(TRACE_EPALLOCBUFFER, privep->epphy);
@@ -2433,6 +2454,7 @@ static void *imx9_epallocbuffer(struct usbdev_ep_s *ep, uint16_t bytes)
 static void imx9_epfreebuffer(struct usbdev_ep_s *ep, void *buf)
 {
   struct imx9_ep_s *privep = (struct imx9_ep_s *)ep;
+
   UNUSED(privep);
 
   usbtrace(TRACE_EPFREEBUFFER, privep->epphy);
@@ -2677,22 +2699,22 @@ static struct usbdev_ep_s *imx9_allocep(struct usbdev_s *dev,
 
   switch (eptype)
     {
-    case USB_EP_ATTR_XFER_INT: /* Interrupt endpoint */
-      epset &= IMX9_EPINTRSET;
-      break;
+      case USB_EP_ATTR_XFER_INT: /* Interrupt endpoint */
+        epset &= IMX9_EPINTRSET;
+        break;
 
-    case USB_EP_ATTR_XFER_BULK: /* Bulk endpoint */
-      epset &= IMX9_EPBULKSET;
-      break;
+      case USB_EP_ATTR_XFER_BULK: /* Bulk endpoint */
+        epset &= IMX9_EPBULKSET;
+        break;
 
-    case USB_EP_ATTR_XFER_ISOC: /* Isochronous endpoint */
-      epset &= IMX9_EPISOCSET;
-      break;
+      case USB_EP_ATTR_XFER_ISOC: /* Isochronous endpoint */
+        epset &= IMX9_EPISOCSET;
+        break;
 
-    case USB_EP_ATTR_XFER_CONTROL: /* Control endpoint -- not a valid choice */
-    default:
-      usbtrace(TRACE_DEVERROR(IMX9_TRACEERR_BADEPTYPE), (uint16_t)eptype);
-      return NULL;
+      case USB_EP_ATTR_XFER_CONTROL: /* Control endpoint -- not a valid choice */
+      default:
+        usbtrace(TRACE_DEVERROR(IMX9_TRACEERR_BADEPTYPE), (uint16_t)eptype);
+        return NULL;
     }
 
   /* Is the resulting endpoint supported by the IMX9? */
@@ -2712,6 +2734,7 @@ static struct usbdev_ep_s *imx9_allocep(struct usbdev_s *dev,
           for (epndx = 2; epndx < IMX9_NPHYSENDPOINTS; epndx++)
             {
               uint32_t bit = 1 << epndx;
+
               if ((epset & bit) != 0)
                 {
                   /* Mark endpoint no longer available */
@@ -2856,6 +2879,7 @@ static int imx9_pullup(struct usbdev_s *dev, bool enable)
   usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
 
   irqstate_t flags = enter_critical_section();
+
   if (enable)
     {
       imx9_modifyreg(priv, IMX9_USBDEV_USBCMD_OFFSET, 0, USBDEV_USBCMD_RS);

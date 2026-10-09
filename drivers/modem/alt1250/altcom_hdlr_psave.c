@@ -41,7 +41,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-
 #define ALTCOM_GETEDRX_TYPE_UE         0
 #define ALTCOM_GETEDRX_TYPE_NEGOTIATED 1
 #define ALTCOM_GETPSM_TYPE_UE          0
@@ -116,7 +115,7 @@ static int32_t altcombs_convert_api_edrx_value(
         {
           cmd_edrx->acttype = APICMD_EDRX_ACTTYPE_NOTUSE;
         }
-       else
+      else
         {
           m_err("Operation is not allowed[act_type : %d].\n",
                 api_edrx->act_type);

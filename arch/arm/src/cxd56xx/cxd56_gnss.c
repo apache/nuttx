@@ -638,6 +638,7 @@ static int cxd56_gnss_set_receiver_position_orthogonal(
 static int cxd56_gnss_set_ope_mode(struct file *filep, unsigned long arg)
 {
   struct cxd56_gnss_ope_mode_param_s *ope_mode;
+
   if (!arg)
     {
       return -EINVAL;
@@ -667,6 +668,7 @@ static int cxd56_gnss_set_ope_mode(struct file *filep, unsigned long arg)
 static int cxd56_gnss_get_ope_mode(struct file *filep, unsigned long arg)
 {
   struct cxd56_gnss_ope_mode_param_s *ope_mode;
+
   if (!arg)
     {
       return -EINVAL;
@@ -2456,6 +2458,7 @@ static void cxd56_gnss_common_signalhandler(uint32_t data,
   for (i = 0; i < CONFIG_CXD56_GNSS_NSIGNALRECEIVERS; i++)
     {
       struct cxd56_gnss_sig_s *sig = &priv->sigs[i];
+
       if (sig->enable && sig->info.gnsssig == sigtype)
         {
           union sigval value;
@@ -2500,60 +2503,60 @@ static void cxd56_gnss_default_sighandler(uint32_t data, void *userdata)
 
   switch (dtype)
     {
-    case CXD56_GNSS_NOTIFY_TYPE_REQCEPDAT:
-      {
-        priv->cepbuf = cxd56_gnss_read_cep_file(
-          &priv->cepfp, priv->shared_info.argv[GNSS_ARGS_FILE_OFFSET],
-          priv->shared_info.argv[GNSS_ARGS_FILE_LENGTH],
-          &priv->shared_info.retval);
+      case CXD56_GNSS_NOTIFY_TYPE_REQCEPDAT:
+        {
+          priv->cepbuf = cxd56_gnss_read_cep_file(
+            &priv->cepfp, priv->shared_info.argv[GNSS_ARGS_FILE_OFFSET],
+            priv->shared_info.argv[GNSS_ARGS_FILE_LENGTH],
+            &priv->shared_info.retval);
+          return;
+        }
+
+      case CXD56_GNSS_NOTIFY_TYPE_REQCEPBUFFREE:
+        if (priv->cepbuf)
+          {
+            kmm_free(priv->cepbuf);
+          }
+
         return;
-      }
 
-    case CXD56_GNSS_NOTIFY_TYPE_REQCEPBUFFREE:
-      if (priv->cepbuf)
-        {
-          kmm_free(priv->cepbuf);
-        }
+      case CXD56_GNSS_NOTIFY_TYPE_BOOTCOMP:
+        if (priv->num_open == 0)
+          {
+            /* Post to wait-semaphore in cxd56_gnss_open to notify completion
+             * of GNSS core initialization in first device open.
+             */
 
-      return;
+            priv->notify_data = dtype;
+            nxsem_post(&priv->syncsem);
+          }
 
-    case CXD56_GNSS_NOTIFY_TYPE_BOOTCOMP:
-      if (priv->num_open == 0)
-        {
-          /* Post to wait-semaphore in cxd56_gnss_open to notify completion
-           * of GNSS core initialization in first device open.
-           */
+        return;
 
-          priv->notify_data = dtype;
-          nxsem_post(&priv->syncsem);
-        }
+      case CXD56_GNSS_NOTIFY_TYPE_REQBKUPDAT:
+        cxd56_gnss_read_backup_file(&priv->shared_info.retval);
+        return;
 
-      return;
+      case CXD56_GNSS_NOTIFY_TYPE_REQCEPOPEN:
+        if (priv->cepfp.f_inode != NULL)
+          {
+            file_close(&priv->cepfp);
+          }
 
-    case CXD56_GNSS_NOTIFY_TYPE_REQBKUPDAT:
-      cxd56_gnss_read_backup_file(&priv->shared_info.retval);
-      return;
+        file_open(&priv->cepfp, CONFIG_CXD56_GNSS_CEP_FILENAME,
+                  O_RDONLY | O_CLOEXEC);
+        return;
 
-    case CXD56_GNSS_NOTIFY_TYPE_REQCEPOPEN:
-      if (priv->cepfp.f_inode != NULL)
-        {
-          file_close(&priv->cepfp);
-        }
+      case CXD56_GNSS_NOTIFY_TYPE_REQCEPCLOSE:
+        if (priv->cepfp.f_inode != NULL)
+          {
+            file_close(&priv->cepfp);
+          }
 
-      file_open(&priv->cepfp, CONFIG_CXD56_GNSS_CEP_FILENAME,
-                O_RDONLY | O_CLOEXEC);
-      return;
+        return;
 
-    case CXD56_GNSS_NOTIFY_TYPE_REQCEPCLOSE:
-      if (priv->cepfp.f_inode != NULL)
-        {
-          file_close(&priv->cepfp);
-        }
-
-      return;
-
-    default:
-      break;
+      default:
+        break;
     }
 
   ret = nxmutex_lock(&priv->devlock);

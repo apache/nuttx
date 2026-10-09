@@ -87,7 +87,6 @@
 #define BT_SLIP_GET_TXWIN(payload) (payload[2] & 0x07)
 #define BT_SLIP_IS_DIC(payload) ((payload[2] & 0x10) == 0x10)
 
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -288,17 +287,17 @@ static FAR uint8_t *bt_slip_unslip_byte(FAR uint8_t *packet,
 
   switch (packet[1])
     {
-    case SLIP_ESC_DELIM:
-      *byte = SLIP_DELIMITER;
-      offset = 1;
-      break;
-    case SLIP_ESC_ESC:
-      *byte = SLIP_ESC;
-      offset = 1;
-      break;
-    default:
-      wlerr("err: invalid escape byte %x\n", *byte);
-      return NULL;
+      case SLIP_ESC_DELIM:
+        *byte = SLIP_DELIMITER;
+        offset = 1;
+        break;
+      case SLIP_ESC_ESC:
+        *byte = SLIP_ESC;
+        offset = 1;
+        break;
+      default:
+        wlerr("err: invalid escape byte %x\n", *byte);
+        return NULL;
     }
 
   packet += offset;
@@ -311,19 +310,19 @@ static uint8_t *bt_slip_slip_byte(FAR uint8_t *packet, FAR uint8_t byte)
 
   switch (byte)
     {
-    case SLIP_DELIMITER:
-      packet[0] = SLIP_ESC;
-      packet[1] = SLIP_ESC_DELIM;
-      offset = 2;
-      break;
-    case SLIP_ESC:
-      packet[0] = SLIP_ESC;
-      packet[1] = SLIP_ESC_ESC;
-      offset = 2;
-      break;
-    default:
-      packet[0] = byte;
-      break;
+      case SLIP_DELIMITER:
+        packet[0] = SLIP_ESC;
+        packet[1] = SLIP_ESC_DELIM;
+        offset = 2;
+        break;
+      case SLIP_ESC:
+        packet[0] = SLIP_ESC;
+        packet[1] = SLIP_ESC_ESC;
+        offset = 2;
+        break;
+      default:
+        packet[0] = byte;
+        break;
     }
 
   packet += offset;
@@ -355,13 +354,13 @@ static bool bt_slip_reliable_packet(uint8_t type)
 {
   switch (type)
     {
-    case HCI_COMMAND_PKT:
-    case HCI_ACLDATA_PKT:
-    case HCI_EVENT_PKT:
-    case HCI_ISODATA_PKT:
-      return true;
-    default:
-      return false;
+      case HCI_COMMAND_PKT:
+      case HCI_ACLDATA_PKT:
+      case HCI_EVENT_PKT:
+      case HCI_ISODATA_PKT:
+        return true;
+      default:
+        return false;
     }
 }
 
@@ -592,17 +591,17 @@ static int bt_slip_hci_packet_handle(FAR struct bt_driver_s *dev,
 
   switch (type)
     {
-    case HCI_EVENT_PKT:
-      var = BT_EVT;
-      break;
-    case HCI_ACLDATA_PKT:
-      var = BT_ACL_IN;
-      break;
-    case HCI_ISODATA_PKT:
-      var = BT_ISO_IN;
-      break;
-    default:
-      return -EINVAL;
+      case HCI_EVENT_PKT:
+        var = BT_EVT;
+        break;
+      case HCI_ACLDATA_PKT:
+        var = BT_ACL_IN;
+        break;
+      case HCI_ISODATA_PKT:
+        var = BT_ISO_IN;
+        break;
+      default:
+        return -EINVAL;
     }
 
   return bt_netdev_receive(dev, var, data, len);
@@ -625,25 +624,25 @@ static int bt_slip_packet_receive(FAR struct sliphci_s *priv,
 
   switch (BT_SLIP_GET_PKT_TYPE(header))
     {
-    case HCI_EVENT_PKT:
-    case HCI_ACLDATA_PKT:
-    case HCI_ISODATA_PKT:
-      {
-        ret = bt_slip_hci_packet_handle(&priv->dev,
-                                        BT_SLIP_GET_PKT_TYPE (header),
-                                        payload, BT_SLIP_GET_LEN (header));
-      }
-      break;
-    case HCI_3WIRE_LINK_PKT:
-      {
-        ret = bt_slip_link_packet_hanlde(priv, header, len);
-      }
-      break;
-    default:
-      {
-        ret = -ENAVAIL;
-      }
-      break;
+      case HCI_EVENT_PKT:
+      case HCI_ACLDATA_PKT:
+      case HCI_ISODATA_PKT:
+        {
+          ret = bt_slip_hci_packet_handle(&priv->dev,
+                                          BT_SLIP_GET_PKT_TYPE (header),
+                                          payload, BT_SLIP_GET_LEN (header));
+        }
+        break;
+      case HCI_3WIRE_LINK_PKT:
+        {
+          ret = bt_slip_link_packet_hanlde(priv, header, len);
+        }
+        break;
+      default:
+        {
+          ret = -ENAVAIL;
+        }
+        break;
     }
 
   return ret;
@@ -722,18 +721,18 @@ static int bt_slip_send(FAR struct bt_driver_s *dev,
 
   switch (type)
     {
-    case BT_CMD:
-      var = HCI_COMMAND_PKT;
-      break;
-    case BT_ACL_OUT:
-      var = HCI_ACLDATA_PKT;
-      break;
-    case BT_ISO_OUT:
-      var = HCI_ISODATA_PKT;
-      break;
-    default:
-      ret = -EINVAL;
-      goto end;
+      case BT_CMD:
+        var = HCI_COMMAND_PKT;
+        break;
+      case BT_ACL_OUT:
+        var = HCI_ACLDATA_PKT;
+        break;
+      case BT_ISO_OUT:
+        var = HCI_ISODATA_PKT;
+        break;
+      default:
+        ret = -EINVAL;
+        goto end;
     }
 
   ret = bt_slip_send_packet(priv, var, data, len);
@@ -778,14 +777,15 @@ static int bt_slip_receive(FAR struct bt_driver_s *drv,
   size_t remaining;
   uint8_t state;
   int ret;
+
   enum
-    {
-      PACKET_START,
-      PACKET_HEADER,
-      PACKET_PAYLOAD,
-      PACKET_DICHECK,
-      PACKET_END,
-    };
+  {
+    PACKET_START,
+    PACKET_HEADER,
+    PACKET_PAYLOAD,
+    PACKET_DICHECK,
+    PACKET_END,
+  };
 
   ret = nxmutex_lock(&priv->sliplock);
   if (ret < 0)
@@ -798,179 +798,180 @@ static int bt_slip_receive(FAR struct bt_driver_s *drv,
     {
       switch (state)
         {
-        case PACKET_START:
-          {
-            if (*packet == SLIP_DELIMITER)
-              {
-                state = PACKET_HEADER;
-                remaining = BT_SLIP_HEADER_LEN;
-              }
-          }
-          break;
-        case PACKET_HEADER:
-          {
-            if (*packet == SLIP_DELIMITER)
-              {
-                break;
-              }
-
-            pointer = bt_slip_unslip_byte(packet, &byte);
-            if (!pointer)
-              {
-                state = PACKET_START;
-                break;
-              }
-
-            packet = pointer;
-            *cursor++ = byte;
-            remaining--;
-
-            if (remaining)
-              {
-                break;
-              }
-
-            /* A packet from bt maybe consists of two H5 hci frame.
-             */
-
-            header = cursor - BT_SLIP_HEADER_LEN;
-
-            wlinfo("rx t:%d l:%d s:%d a:%d", BT_SLIP_GET_PKT_TYPE(header),
-                    BT_SLIP_GET_LEN(header), BT_SLIP_GET_SEQ(header),
-                    BT_SLIP_GET_ACK(header));
-
-            if (!BT_SLIP_IS_HDRVALIDED(header))
-              {
-                wlerr("err: invalid header checksum");
-                state = PACKET_START;
-                break;
-              }
-
-            if (BT_SLIP_IS_RELIABLE(header)
-                && BT_SLIP_GET_SEQ(header) != priv->txack)
-              {
-                wlerr("err: out of order packet arrived(%u != %u)",
-                       BT_SLIP_GET_SEQ(header), priv->txack);
-                state = PACKET_START;
-                break;
-              }
-
-            switch (BT_SLIP_GET_PKT_TYPE(header))
-              {
-              case HCI_EVENT_PKT:
-              case HCI_ACLDATA_PKT:
-              case HCI_ISODATA_PKT:
-              case HCI_3WIRE_LINK_PKT:
-              case HCI_3WIRE_ACK_PKT:
+          case PACKET_START:
+            {
+              if (*packet == SLIP_DELIMITER)
                 {
-                  /* In DIC mode, Ack packet which has 0 byte paylod
-                   * and has 2 byte data integrity check
-                   */
-
-                  if (BT_SLIP_GET_LEN(header))
-                    {
-                      state = PACKET_PAYLOAD;
-                      remaining = BT_SLIP_GET_LEN(header);
-                    }
-                  else if (BT_SLIP_GET_CRC(header))
-                    {
-                      state = PACKET_DICHECK;
-                      remaining = BT_SLIP_CHECKSUM_LEN;
-                    }
-                  else
-                    {
-                      state = PACKET_END;
-                      remaining = 0;
-                    }
+                  state = PACKET_HEADER;
+                  remaining = BT_SLIP_HEADER_LEN;
                 }
-                break;
-              default:
+            }
+            break;
+          case PACKET_HEADER:
+            {
+              if (*packet == SLIP_DELIMITER)
                 {
-                  wlerr("err: packet type:%u", BT_SLIP_GET_PKT_TYPE(header));
+                  break;
+                }
+
+              pointer = bt_slip_unslip_byte(packet, &byte);
+              if (!pointer)
+                {
                   state = PACKET_START;
+                  break;
                 }
-                break;
-              }
-          }
-          break;
-        case PACKET_PAYLOAD:
-          {
-            pointer = bt_slip_unslip_byte(packet, &byte);
-            if (!pointer)
-              {
-                state = PACKET_START;
-                break;
-              }
 
-            packet = pointer;
-            *cursor++ = byte;
-            remaining--;
+              packet = pointer;
+              *cursor++ = byte;
+              remaining--;
 
-            if (remaining)
-              {
-                break;
-              }
+              if (remaining)
+                {
+                  break;
+                }
 
-            if (BT_SLIP_GET_CRC(header))
-              {
-                state = PACKET_DICHECK;
-                remaining = BT_SLIP_CHECKSUM_LEN;
-              }
-            else
-              {
-                state = PACKET_END;
-              }
-          }
-          break;
-        case PACKET_DICHECK:
-          {
-            pointer = bt_slip_unslip_byte(packet, &byte);
-            if (!pointer)
-              {
-                state = PACKET_START;
-                break;
-              }
+              /* A packet from bt maybe consists of two H5 hci frame.
+               */
 
-            packet = pointer;
-            *cursor++ = byte;
-            remaining--;
+              header = cursor - BT_SLIP_HEADER_LEN;
 
-            if (remaining)
-              {
-                break;
-              }
+              wlinfo("rx t:%d l:%d s:%d a:%d", BT_SLIP_GET_PKT_TYPE(header),
+                      BT_SLIP_GET_LEN(header), BT_SLIP_GET_SEQ(header),
+                      BT_SLIP_GET_ACK(header));
 
-            /* Remove 2 bytes crc payload, then calculate packet
-             * checksum with packet header and body.
-             */
+              if (!BT_SLIP_IS_HDRVALIDED(header))
+                {
+                  wlerr("err: invalid header checksum");
+                  state = PACKET_START;
+                  break;
+                }
 
-            cursor -= BT_SLIP_CHECKSUM_LEN;
-            checksum = crc16ccittpart(header, cursor - header, 0xffff);
+              if (BT_SLIP_IS_RELIABLE(header)
+                  && BT_SLIP_GET_SEQ(header) != priv->txack)
+                {
+                  wlerr("err: out of order packet arrived(%u != %u)",
+                         BT_SLIP_GET_SEQ(header), priv->txack);
+                  state = PACKET_START;
+                  break;
+                }
 
-            if (bt_slip_bit16_reverse(checksum) != bt_slip_get_crc(cursor))
-              {
-                wlerr("err: checksum(0x%04x) not match(0x%04x)", checksum,
-                      bt_slip_get_crc(cursor));
-                state = PACKET_START;
-                break;
-              }
+              switch (BT_SLIP_GET_PKT_TYPE(header))
+                {
+                  case HCI_EVENT_PKT:
+                  case HCI_ACLDATA_PKT:
+                  case HCI_ISODATA_PKT:
+                  case HCI_3WIRE_LINK_PKT:
+                  case HCI_3WIRE_ACK_PKT:
+                    {
+                      /* In DIC mode, Ack packet which has 0 byte paylod
+                       * and has 2 byte data integrity check
+                       */
 
-            state = PACKET_END;
-          }
-          break;
-        case PACKET_END:
-          {
-            if (*packet != SLIP_DELIMITER)
-              {
-                wlerr("err: miss slip end");
-                state = PACKET_START;
-                break;
-              }
+                      if (BT_SLIP_GET_LEN(header))
+                        {
+                          state = PACKET_PAYLOAD;
+                          remaining = BT_SLIP_GET_LEN(header);
+                        }
+                      else if (BT_SLIP_GET_CRC(header))
+                        {
+                          state = PACKET_DICHECK;
+                          remaining = BT_SLIP_CHECKSUM_LEN;
+                        }
+                      else
+                        {
+                          state = PACKET_END;
+                          remaining = 0;
+                        }
+                    }
+                    break;
+                  default:
+                    {
+                      wlerr("err: packet type:%u",
+                            BT_SLIP_GET_PKT_TYPE(header));
+                      state = PACKET_START;
+                    }
+                    break;
+                }
+            }
+            break;
+          case PACKET_PAYLOAD:
+            {
+              pointer = bt_slip_unslip_byte(packet, &byte);
+              if (!pointer)
+                {
+                  state = PACKET_START;
+                  break;
+                }
 
-            bt_slip_packet_receive(priv, header, cursor - header);
-            state = PACKET_START;
-          }
-          break;
+              packet = pointer;
+              *cursor++ = byte;
+              remaining--;
+
+              if (remaining)
+                {
+                  break;
+                }
+
+              if (BT_SLIP_GET_CRC(header))
+                {
+                  state = PACKET_DICHECK;
+                  remaining = BT_SLIP_CHECKSUM_LEN;
+                }
+              else
+                {
+                  state = PACKET_END;
+                }
+            }
+            break;
+          case PACKET_DICHECK:
+            {
+              pointer = bt_slip_unslip_byte(packet, &byte);
+              if (!pointer)
+                {
+                  state = PACKET_START;
+                  break;
+                }
+
+              packet = pointer;
+              *cursor++ = byte;
+              remaining--;
+
+              if (remaining)
+                {
+                  break;
+                }
+
+              /* Remove 2 bytes crc payload, then calculate packet
+               * checksum with packet header and body.
+               */
+
+              cursor -= BT_SLIP_CHECKSUM_LEN;
+              checksum = crc16ccittpart(header, cursor - header, 0xffff);
+
+              if (bt_slip_bit16_reverse(checksum) != bt_slip_get_crc(cursor))
+                {
+                  wlerr("err: checksum(0x%04x) not match(0x%04x)", checksum,
+                        bt_slip_get_crc(cursor));
+                  state = PACKET_START;
+                  break;
+                }
+
+              state = PACKET_END;
+            }
+            break;
+          case PACKET_END:
+            {
+              if (*packet != SLIP_DELIMITER)
+                {
+                  wlerr("err: miss slip end");
+                  state = PACKET_START;
+                  break;
+                }
+
+              bt_slip_packet_receive(priv, header, cursor - header);
+              state = PACKET_START;
+            }
+            break;
         }
     }
 
