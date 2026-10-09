@@ -231,6 +231,7 @@ static const struct sensor_meta_s g_sensor_meta[] =
   {sizeof(struct sensor_conductivity),        "conductivity"},
   {sizeof(struct sensor_energy),              "energy"},
   {sizeof(struct sensor_charge),              "charge"},
+  {sizeof(struct sensor_inclinometer),        "inclinometer"},
 };
 
 static const struct file_operations g_sensor_fops =
