@@ -110,7 +110,17 @@ static int nxposix_spawn_exec(FAR pid_t *pidp, FAR const char *path,
   if (pid < 0)
     {
       ret = -pid;
-      serr("ERROR: exec failed: %d\n", ret);
+
+      /* No such program (ENOENT) or not a loadable format (ENOEXEC) is an
+       * ordinary result for the caller, for example a shell that tries a
+       * program before its built-in command.
+       */
+
+      if (ret != ENOENT && ret != ENOEXEC)
+        {
+          serr("ERROR: exec failed: %d\n", ret);
+        }
+
       return ret;
     }
 
