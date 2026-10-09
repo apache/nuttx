@@ -65,6 +65,7 @@
 #include <sys/time.h>
 #include <sys/uio.h>
 
+#include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -359,14 +360,19 @@ void sim_tapdev_send(int devidx, unsigned char *buf, unsigned int buflen)
     }
 #endif
 
+  /* A failed write drops the frame, like a NIC without carrier: the host
+   * fails every write with EIO while the TAP interface is down.
+   */
+
   ret = write(gtapdevfd[devidx], buf, buflen);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "TAPDEV: write failed: %d\n", -ret);
-      exit(1);
+      syslog(LOG_ERR, "TAPDEV: write failed: %d\n", errno);
     }
-
-  dump_ethhdr("write", buf, buflen);
+  else
+    {
+      dump_ethhdr("write", buf, buflen);
+    }
 
   /* Emulate TX done interrupt */
 
