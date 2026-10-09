@@ -35,6 +35,10 @@ ifeq ($(CONFIG_REGULATOR_GPIO),y)
 CSRCS += regulator_gpio.c
 endif
 
+ifeq ($(CONFIG_REGULATOR_MPQ8785),y)
+CSRCS += mpq8785.c
+endif
+
 ifeq ($(CONFIG_REGULATOR_RPMSG),y)
 CSRCS += regulator_rpmsg.c
 endif
