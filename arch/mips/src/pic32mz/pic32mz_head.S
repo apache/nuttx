@@ -679,6 +679,18 @@ __start:
 	and		t0, t0, ~CP0_STATUS_BEV	/* Clear BEV */
 	mtc0	t0, PIC32MZ_CP0_STATUS
 
+#ifdef CONFIG_PIC32MZ_W1_WLAN
+	/* Microchip's WLAN library uses the DSP ASE indexed loads (lbux, lhx,
+	 * lwx), which trap unless Status.MX is set.  It uses no DSP state
+	 * other than accumulator 0 (HI/LO), which the context switch already
+	 * saves.  Tasks inherit this Status value (mips_initialstate.c).
+	 */
+
+	mfc0	t0, PIC32MZ_CP0_STATUS
+	or		t0, t0, CP0_STATUS_MX	/* Enable the DSP ASE */
+	mtc0	t0, PIC32MZ_CP0_STATUS
+#endif
+
 #ifdef CONFIG_MIPS_MICROMIPS
 	/* Exception handlers are also being compiled for microMIPS, so enable
 	 * config3ISAOnExc now that exception vectors have been [re]located.
