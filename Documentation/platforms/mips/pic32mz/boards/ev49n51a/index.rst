@@ -46,7 +46,7 @@ GPIO                      Yes
 SPI1                      Yes     SST26VF032B; reads tested only
 I2C1/I2C2                 Build   Not tested; no I2C device on board
 Ethernet                  Yes     LAN8720A, RMII, 10/100 Mbps
-Wi-Fi                     Yes     Station or Soft-AP, WPA2-Personal;
+Wi-Fi                     Yes     Station or Soft-AP, WPA2/WPA3-Personal;
                                   XC32 only, see `Wi-Fi`_
 ========================= ======= ====================================
 
@@ -293,8 +293,9 @@ wlan
 The ``nsh`` configuration with Wi-Fi instead of Ethernet: the ``wlan0``
 network device, IPv4, TCP, UDP and ICMP, the ``wapi`` and ``ping``
 commands, a DHCP client (``renew``) and a Telnet server. It downloads
-Microchip's WLAN library at build time (see `Wi-Fi`_) and builds with XC32
-only. Join a WPA2-Personal network and get an address by DHCP:
+Microchip's WLAN library and the BA414E microcode at build time (see
+`Wi-Fi`_) and builds with XC32 only. Join a WPA2-Personal network and get
+an address by DHCP:
 
 .. code:: console
 
@@ -302,8 +303,9 @@ only. Join a WPA2-Personal network and get an address by DHCP:
    nsh> wapi essid wlan0 <ssid> 1
    nsh> renew wlan0
 
-``3`` selects CCMP and ``2`` WPA2. ``wapi scan wlan0`` lists the access
-points in range.
+``3`` selects CCMP and ``2`` WPA2; use ``3`` instead of ``2`` for a
+WPA3-Personal network. ``wapi scan wlan0`` lists the access points in
+range.
 
 Ethernet
 ========
@@ -364,9 +366,39 @@ mode before the SSID:
    nsh> ifconfig wlan0 10.0.0.1
 
 ``wapi freq`` sets the channel (1 if not set). Skip ``wapi psk`` for an
-open network. ``wapi essid wlan0 "" 0`` stops the AP. A DHCP server for
+open network, or use ``wapi psk wlan0 <passphrase> 3 3`` for WPA3-Personal. ``wapi essid wlan0 "" 0`` stops the AP. A DHCP server for
 the stations can be started on ``wlan0`` with the ``dhcpd`` application
 (``CONFIG_NETUTILS_DHCPD``).
+
+WPA3-Personal
+-------------
+
+WPA3-Personal (SAE) needs big number and elliptic curve (P-256)
+operations, which the driver runs on the PIC32MZ-W1's BA414E public key
+engine (``CONFIG_PIC32MZ_W1_BA414E``, enabled in the ``wlan``
+configuration). Without it, only open and WPA/WPA2-Personal networks are
+supported.
+
+The BA414E runs a microcode program that is not part of NuttX either. By
+default (``CONFIG_PIC32MZ_W1_BA414E_UCODE_BUILTIN``) the build downloads
+``drivers/ba414e/src/drv_ba414e.c`` from the MPLAB Harmony
+`crypto <https://github.com/Microchip-MPLAB-Harmony/crypto>`_ repository
+(v3.9.0) into ``arch/mips/src/pic32mz`` and links the microcode it
+contains into the image. That file is distributed under Microchip's
+license (``mplab_harmony_license.md`` in that repository), which only
+allows its use with Microchip devices. ``make distclean`` deletes the
+downloaded files.
+
+With ``CONFIG_PIC32MZ_W1_BA414E_UCODE_FILE`` the microcode is instead read
+from a file (``CONFIG_PIC32MZ_W1_BA414E_UCODE_PATH``, ``/etc/ba414e.bin``
+by default) the first time the engine is used, that is on the first WPA3
+connection or Soft-AP start. The file holds the 810 32-bit values of the
+``init_ucode_array`` initializer of ``drv_ba414e.c``, in array order, each
+stored little endian, without a header (3240 bytes). It can be in any
+file system that is mounted by then.
+
+``CONFIG_PIC32MZ_W1_BA414E_SELFTEST`` runs known-answer tests of the engine
+when the microcode is loaded and logs the results.
 
 L1 cache
 ========
@@ -395,8 +427,9 @@ Silicon tested: WFI32E01PE, revision B0 (DEVID 0x0A400000).
 Limitations
 ===========
 
-* Wi-Fi: open and WPA2-Personal networks only (WPA/WPA2 mixed mode can be
-  selected but is not tested), no WPA3 or enterprise security. Station or
+* Wi-Fi: open, WPA2-Personal and WPA3-Personal networks (WPA/WPA2 mixed
+  mode can be selected but is not tested); no WPA2/WPA3 transition mode
+  and no enterprise security. Station or
   Soft-AP, not both at the same time; no scanning while the AP runs. With
   management frame protection (PMF) negotiated, unprotected Public Action
   frames from the AP (such as Fast Initial Link Setup discovery frames) are
