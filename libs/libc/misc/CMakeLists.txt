@@ -48,7 +48,8 @@ list(
   lib_mkdirat.c
   lib_utimensat.c
   lib_mallopt.c
-  lib_getnprocs.c)
+  lib_getnprocs.c
+  lib_mntent.c)
 
 if(CONFIG_LIBC_TEMPBUFFER)
   list(APPEND SRCS lib_tempbuffer.c)
