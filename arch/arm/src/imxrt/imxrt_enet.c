@@ -990,6 +990,12 @@ static void imxrt_receive(struct imxrt_driver_s *priv)
 
   do
     {
+      if (imxrt_txringfull(priv))
+        {
+          priv->ints &= ~RX_INTERRUPTS;
+          break;
+        }
+
       /* Invalidate the Rx descriptor.  Since it has been modified via DMA,
        * we must assure that we must invalid any cached values and re-read
        * the descriptor from the memory.
@@ -1132,6 +1138,12 @@ static void imxrt_txdone(struct imxrt_driver_s *priv)
       priv->ints &= ~TX_INTERRUPTS;
       imxrt_enet_modifyreg32(priv, IMXRT_ENET_EIMR_OFFSET, TX_INTERRUPTS,
                              priv->ints);
+    }
+
+  if ((priv->ints & RX_INTERRUPTS) == 0)
+    {
+      priv->ints |= RX_INTERRUPTS;
+      imxrt_receive(priv);
     }
 
   /* There should be space for a new TX in any event.  Poll the network for
