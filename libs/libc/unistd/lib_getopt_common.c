@@ -167,20 +167,20 @@ static int getopt_long_option(FAR struct getopt_s *go,
                 {
                   FAR char *next;
 
-                  case no_argument:
-                    /* No, no arguments. Just return the argument that we
-                     * found.
-                     */
+                  /* No, no arguments. Just return the argument that we
+                   * found.
+                   */
 
+                  case no_argument:
                     go->go_optptr = NULL;
                     go->go_optind++;
                     break;
 
-                  case optional_argument:
-                    /* Check if there is a following argument and if that
-                     * following argument is another option.
-                     */
+                  /* Check if there is a following argument and if that
+                   * following argument is another option.
+                   */
 
+                  case optional_argument:
                     next = argv[go->go_optind + 1];
                     if (next == NULL || next[0] == '-')
                       {
@@ -345,6 +345,7 @@ int getopt_common(int argc, FAR char * const argv[],
   /* Get thread-specific getopt() variables */
 
   FAR struct getopt_s *go = getoptvars();
+
   if (go == NULL)
     {
       return '?';
