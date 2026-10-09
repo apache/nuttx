@@ -143,6 +143,32 @@ config PIC32MZ_W1_BOOTTRACE
 		per PMU/clock bring-up step, so a hang can be located without a
 		debugger.  The normal console takes over afterwards.
 
+config PIC32MZ_W1_WLAN
+	bool "PIC32MZ-W1: Wi-Fi"
+	default n
+	depends on ARCH_CHIP_PIC32MZW1 && MIPS32_TOOLCHAIN_MICROCHIPL_XC32
+	depends on NETDEVICES && DRIVERS_IEEE80211 && NETDEV_WIRELESS_HANDLER
+	select CRYPTO
+	---help---
+		Wi-Fi network device (wlan0) built on Microchip's closed PIC32MZ-W1
+		WLAN library (pic32mzw1.a from the MPLAB Harmony wireless_wifi
+		repository, downloaded at build time under Microchip's license).
+		Station or Soft-AP, open or WPA/WPA2-Personal, configured through
+		wapi.  The library is built with XC32 (microMIPS, soft-float), so
+		only XC32 is supported.
+
+if PIC32MZ_W1_WLAN
+
+config PIC32MZ_W1_WLAN_PRIORITY
+	int "WLAN thread priority"
+	default 100
+
+config PIC32MZ_W1_WLAN_STACKSIZE
+	int "WLAN thread stack size"
+	default 4096
+
+endif # PIC32MZ_W1_WLAN
+
 menu "PIC32MZ Peripheral Support"
 
 config PIC32MZ_WDT

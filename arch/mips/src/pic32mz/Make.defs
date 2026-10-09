@@ -67,6 +67,51 @@ ifeq ($(CONFIG_ARCH_CHIP_WFI32E01),y)
 CHIP_CSRCS += pic32mz_wfi32_pwrclk.c
 endif
 
+ifeq ($(CONFIG_PIC32MZ_W1_WLAN),y)
+CHIP_CSRCS += pic32mz_w1_wlan.c pic32mz_w1_wlan_crypto.c
+
+# Microchip's WLAN library is not part of NuttX: download it from the
+# MPLAB Harmony wireless_wifi repository, unless a copy is already there.
+
+WLAN_VER = v3.13.0
+WLAN_URL = https://github.com/Microchip-MPLAB-Harmony/wireless_wifi/raw/$(WLAN_VER)/driver/pic32mzw1
+WLAN_SRCLIB = chip$(DELIM)pic32mzw1.a
+WLAN_LIB = chip$(DELIM)libpic32mzw1_nx.a
+
+# Link a copy of the library with some symbols renamed: the global
+# symbols that clash with NuttX (net checksum(), crypto aes_key_wrap() and
+# aes_key_unwrap()), and the C library output functions it calls, so that
+# the driver can send its messages to the syslog.  __printf_npuxX is XC32's
+# printf variant for formats that only use %n, %p, %u, %x and %X.
+
+WLAN_RENAME = checksum aes_key_wrap aes_key_unwrap printf puts putchar
+
+$(WLAN_SRCLIB):
+	$(call DOWNLOAD,$(WLAN_URL),pic32mzw1.a,$(WLAN_SRCLIB))
+
+$(WLAN_LIB): $(WLAN_SRCLIB)
+	$(Q) $(OBJCOPY) $(foreach s,$(WLAN_RENAME),--redefine-sym $(s)=pic32mzw1_$(s)) \
+	  --redefine-sym __printf_npuxX=pic32mzw1_printf_npux $< $@
+
+context:: $(WLAN_LIB)
+
+EXTRA_LIBS += $(ARCH_SRCDIR)$(DELIM)$(WLAN_LIB)
+
+# The library refers to a few SFRs by name, as XC32's device support
+# defines them (DS70005425 / PIC32MZ-W_DFP pwfi32e01.h).
+
+LDFLAGS += --defsym=DEVID=0xbf800060 --defsym=IEC2=0xbf8100e0
+LDFLAGS += --defsym=NVMCON=0xbf800600 --defsym=NVMKEY=0xbf800620
+LDFLAGS += --defsym=NVMADDR=0xbf800630 --defsym=NVMDATA0=0xbf800640
+LDFLAGS += --defsym=NVMSRCADDR=0xbf8006c0 --defsym=NVMLBWP=0xbf8006f0
+endif
+
+# Delete the downloaded library and its copy whatever the configuration
+
+distclean::
+	$(call DELFILE, chip$(DELIM)pic32mzw1.a)
+	$(call DELFILE, chip$(DELIM)libpic32mzw1_nx.a)
+
 ifeq ($(CONFIG_PIC32MZ_GPIOIRQ),y)
 CHIP_CSRCS += pic32mz_gpioirq.c
 endif
