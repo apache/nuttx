@@ -180,6 +180,16 @@ int file_fstat(FAR struct file *filep, FAR struct stat *buf)
       return -EBADF;
     }
 
+  /* A directory opened with open() has a stand-in inode; stat the
+   * directory itself.
+   */
+
+  ret = dir_fstat(filep, buf);
+  if (ret != -ENOTTY)
+    {
+      return ret;
+    }
+
   /* The way we handle the stat depends on the type of inode that we
    * are dealing with.
    */

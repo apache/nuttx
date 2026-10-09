@@ -668,3 +668,30 @@ int dir_allocate(FAR struct file *filep, FAR const char *relpath)
   lib_put_pathbuffer(path_prefix);
   return ret;
 }
+
+/****************************************************************************
+ * Name: dir_fstat
+ *
+ * Description:
+ *   fstat() of a file descriptor that open() returned for a directory.
+ *   Such a descriptor has a stand-in inode, so stat the directory itself
+ *   by its path.
+ *
+ * Returned Value:
+ *   Zero (OK) on success, a negated errno value on failure, or -ENOTTY if
+ *   filep is not a directory opened with open().
+ *
+ ****************************************************************************/
+
+int dir_fstat(FAR struct file *filep, FAR struct stat *buf)
+{
+  FAR struct fs_dirent_s *dir;
+
+  if (filep->f_inode != &g_dir_inode)
+    {
+      return -ENOTTY;
+    }
+
+  dir = filep->f_priv;
+  return nx_stat(dir->fd_path, buf, 1);
+}
