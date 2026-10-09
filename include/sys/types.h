@@ -31,6 +31,17 @@
 #include <nuttx/compiler.h>
 
 #ifndef __ASSEMBLY__
+#  include <arch/types.h>
+
+/* Wide character type, defined before <stdint.h> is included: a program's
+ * own <stdint.h> may include <inttypes.h>, which uses wchar_t while this
+ * file is still being read.  wchar_t is a built-in type in C++.
+ */
+
+#  if !defined(__cplusplus)
+typedef _wchar_t     wchar_t;
+#  endif
+
 #  include <stdint.h>
 #endif
 
@@ -172,16 +183,6 @@ typedef int32_t      key_t;
 /* Signed integral type of the result of subtracting two pointers */
 
 typedef intptr_t     ptrdiff_t;
-
-#if !defined(__cplusplus)
-/* Wide character types.  wchar_t is a built-in type in C++ and
- * its declaration here may cause compilation errors on some compilers.
- *
- * REVISIT: wchar_t belongs in stddef.h
- */
-
-typedef _wchar_t     wchar_t;
-#endif
 
 /* wint_t
  *   An integral type capable of storing any valid value of wchar_t, or WEOF.
