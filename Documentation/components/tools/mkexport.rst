@@ -13,3 +13,7 @@ USAGE: tools/mkexport.sh [-d] [-z] [-u] -t <top-dir> [-x <lib-ext>] -l "lib1 [li
 This script also depends on the environment variable MAKE which is set
 in the top-level Makefile before starting mkexport.sh.  If MAKE is not
 defined, the script will set it to `which make`.
+
+The package also contains ``bin/nuttx-cc`` and ``bin/nuttx-c++``, a compiler
+wrapper for programs that are built outside the NuttX tree. See
+:doc:`nuttx-cc`.
