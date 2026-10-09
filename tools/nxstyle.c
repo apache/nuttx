@@ -328,6 +328,14 @@ static const char *g_white_prefix[] =
 
   "SOPC_",
   "OpcUa_",
+
+  /* Ref:  drivers/crypto/pnt, NXP Plug&Trust middleware */
+
+  "Se05x",
+  "SE05x_",
+  "kSE05x_",
+  "smStatus_t",
+  "pScp03_",
   NULL
 };
 
