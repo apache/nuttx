@@ -264,6 +264,20 @@
 
 #define SNIOC_SET_MOVING_AVG       _SNIOC(0x006e)
 
+/* IOCTL commands unique to SCL3300 */
+
+/* Command:      SNIOC_SET_OPERATIONAL_MODE
+ * Description:  Select the operation mode
+ *               Reuse from ISL29023
+ * Arg:          enum scl3300_mode_e by value
+ */
+
+/* Command:      SNIOC_SET_POWER_MODE
+ * Description:  Select the idle power policy
+ *               Reuse from LIS3DH
+ * Arg:          enum scl3300_power_e by value
+ */
+
 /* Command:      SNIOC_GET_STATE
  * Description:  Get state for all subscribers, include min_interval,
  *               min_latency and the number of subscribers.
