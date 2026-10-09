@@ -47,7 +47,9 @@
 #endif
 
 #include <assert.h>
+#include <limits.h>
 #include <string.h>
+#include <wchar.h>
 #include <sys/param.h>
 
 #include "lib_dtoa_engine.h"
@@ -166,6 +168,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
   FAR const char *pnt;
   size_t size;
+  int ch;
   unsigned char len;
   int total_len = 0;
 
@@ -874,16 +877,39 @@ flt_oper:
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
             if ((flags & FL_ARGNUMBER) != 0)
               {
-                buf[0] = (int)arglist->value[argnumber - 1].u;
+                ch = (int)arglist->value[argnumber - 1].u;
               }
             else
 #endif
               {
-                buf[0] = va_arg(ap, int);
+                ch = va_arg(ap, int);
+              }
+
+#ifdef CONFIG_LIBC_LOCALE
+            if ((flags & FL_LONG) != 0)
+              {
+                mbstate_t ps;
+
+                /* %lc: a wide character, written as its multibyte
+                 * sequence.
+                 */
+
+                memset(&ps, 0, sizeof(ps));
+                size = wcrtomb(buf, (wchar_t)ch, &ps);
+                if (size == (size_t)-1)
+                  {
+                    total_len = -1;
+                    goto ret;
+                  }
+              }
+            else
+#endif
+              {
+                buf[0] = ch;
+                size = 1;
               }
 
             pnt = buf;
-            size = 1;
             goto str_lpad;
 
           case 's':
@@ -903,6 +929,61 @@ flt_oper:
               {
                 pnt = g_nullstring;
               }
+#ifdef CONFIG_LIBC_LOCALE
+            else if (c == 's' && (flags & FL_LONG) != 0)
+              {
+                FAR const wchar_t *ws = (FAR const wchar_t *)pnt;
+                char mb[MB_LEN_MAX];
+                mbstate_t ps;
+                size_t n;
+                int i;
+
+                /* %ls: a wide string, written as multibyte characters.  The
+                 * precision limits the bytes, and a character that does not
+                 * fit is not written in part.  First count the bytes.
+                 */
+
+                memset(&ps, 0, sizeof(ps));
+                for (size = 0, i = 0; ws[i] != L'\0'; i++)
+                  {
+                    n = wcrtomb(mb, ws[i], &ps);
+                    if (n == (size_t)-1)
+                      {
+                        total_len = -1;
+                        goto ret;
+                      }
+
+                    if ((flags & FL_PREC) != 0 && size + n > (size_t)prec)
+                      {
+                        break;
+                      }
+
+                    size += n;
+                  }
+
+                if ((flags & FL_LPAD) == 0)
+                  {
+                    while (size < width)
+                      {
+                        stream_putc(' ', stream);
+                        width--;
+                      }
+                  }
+
+                memset(&ps, 0, sizeof(ps));
+                for (n = 0, i = 0; n < size; i++)
+                  {
+                    size_t m = wcrtomb(mb, ws[i], &ps);
+
+                    stream_puts(mb, m, stream);
+                    n += m;
+                  }
+
+                width = width >= size ? width - size : 0;
+                size = 0;
+                goto tail;
+              }
+#endif
 
             size = strnlen(pnt, (flags & FL_PREC) ? prec : ~0);
 
