@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/environ/env_unsetenv.c
+ * libs/libc/stdlib/lib_environ.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,69 +26,43 @@
 
 #include <nuttx/config.h>
 
-#ifndef CONFIG_DISABLE_ENVIRON
+#include <stdlib.h>
 
-#include <sched.h>
-#include <string.h>
-#include <assert.h>
-#include <errno.h>
+#include <nuttx/tls.h>
 
-#include <nuttx/kmalloc.h>
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
-#include "sched/sched.h"
-#include "environ/environ.h"
+#if !defined(CONFIG_DISABLE_ENVIRON) && defined(CONFIG_BUILD_KERNEL) && \
+    !defined(__KERNEL__)
+/* The environ variable of a kernel-build process.  crt0 sets it to the
+ * environment and registers its address with the kernel.
+ */
+
+FAR char **environ;
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
+#ifdef CONFIG_LIBC_ENVIRON_ASSIGNABLE
+
 /****************************************************************************
- * Name: unsetenv
+ * Name: get_environ_location
  *
  * Description:
- *   The unsetenv() function deletes the variable name from the environment.
- *
- * Input Parameters:
- *   name - The name of the variable to delete
- *
- * Returned Value:
- *   Zero on success
- *
- * Assumptions:
- *   Not called from an interrupt handler
+ *   Return the location that environ names in a flat or protected build:
+ *   a field of the task group's task_info_s.  The kernel keeps it pointing
+ *   at the group's environment and takes over an array that the program
+ *   stores there.
  *
  ****************************************************************************/
 
-int unsetenv(FAR const char *name)
+FAR char ***get_environ_location(void)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  FAR struct task_group_s *group = rtcb->group;
-  ssize_t idx;
-
-  DEBUGASSERT(group);
-
-  /* Check the incoming parameter */
-
-  if (name == NULL || *name == '\0' || strchr(name, '=') != NULL)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
-
-  /* Check if the variable exists */
-
-  nxrmutex_lock(&group->tg_mutex);
-  env_sync_in(group);
-  if (group && (idx = env_findvar(group, name)) >= 0)
-    {
-      /* It does!  Remove the name=value pair from the environment. */
-
-      env_removevar(group, idx);
-    }
-
-  env_sync_out(group);
-  nxrmutex_unlock(&group->tg_mutex);
-  return OK;
+  return &task_get_info()->ta_environ;
 }
 
-#endif /* CONFIG_DISABLE_ENVIRON */
+#endif

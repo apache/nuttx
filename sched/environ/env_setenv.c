@@ -115,6 +115,7 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
   DEBUGASSERT(group);
 
   nxrmutex_lock(&group->tg_mutex);
+  env_sync_in(group);
 
   /* Check if the variable already exists */
 
@@ -197,6 +198,7 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
   /* Now, put the new name=value string into the environment buffer */
 
   snprintf(pvar, varlen, "%s=%s", name, value);
+  env_sync_out(group);
   nxrmutex_unlock(&group->tg_mutex);
   return OK;
 

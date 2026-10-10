@@ -162,6 +162,29 @@ ssize_t env_findvar(FAR struct task_group_s *group, FAR const char *pname);
 
 void env_removevar(FAR struct task_group_s *group, ssize_t index);
 
+/****************************************************************************
+ * Name: env_sync_in, env_sync_out
+ *
+ * Description:
+ *   A program may assign environ (see include/stdlib.h).  env_sync_in()
+ *   takes over the array that the program assigned, if it is not the
+ *   group's environment.  env_sync_out() points environ at the group's
+ *   environment after it has changed.  Both do nothing when the caller
+ *   cannot reach the group's environ (see env_sync.c), and in flat and
+ *   protected builds without CONFIG_LIBC_ENVIRON_ASSIGNABLE.
+ *
+ *   The caller holds group->tg_mutex.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_LIBC_ENVIRON_ASSIGNABLE)
+void env_sync_in(FAR struct task_group_s *group);
+void env_sync_out(FAR struct task_group_s *group);
+#else
+#  define env_sync_in(group)
+#  define env_sync_out(group)
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

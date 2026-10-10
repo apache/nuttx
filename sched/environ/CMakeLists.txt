@@ -34,5 +34,6 @@ if(NOT CONFIG_DISABLE_ENVIRON)
             env_setenv.c
             env_unsetenv.c
             env_foreach.c
-            env_secureexec.c)
+            env_secureexec.c
+            env_sync.c)
 endif()

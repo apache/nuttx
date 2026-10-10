@@ -31,6 +31,7 @@
 #include <sched.h>
 #include <stdlib.h>
 #include "sched/sched.h"
+#include "environ/environ.h"
 
 #undef get_environ_ptr
 
@@ -56,9 +57,21 @@
 
 FAR char **get_environ_ptr(void)
 {
-  FAR struct tcb_s *tcb = this_task();
+  FAR struct task_group_s *group = this_task()->group;
+#if defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_LIBC_ENVIRON_ASSIGNABLE)
+  FAR char **envp;
 
-  return tcb->group->tg_envp;
+  /* The program may have assigned its own array to environ */
+
+  nxrmutex_lock(&group->tg_mutex);
+  env_sync_in(group);
+  envp = group->tg_envp;
+  nxrmutex_unlock(&group->tg_mutex);
+
+  return envp;
+#else
+  return group->tg_envp;
+#endif
 }
 
 #endif /* CONFIG_DISABLE_ENVIRON */

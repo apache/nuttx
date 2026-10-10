@@ -60,13 +60,25 @@
 
 #define MB_CUR_MAX 4
 
-/* The environ variable, normally 'char **environ;' is not implemented as a
- * function call.  However, get_environ_ptr() can be used in its place.
+/* environ is the environment of the task group (the process), and a
+ * program may assign it.  The kernel then takes the new array over (see
+ * sched/environ/env_sync.c).
+ *
+ * In the user space of a kernel build every process has its own copy of
+ * the C library data, so environ is the plain variable that POSIX
+ * specifies (declared below).  In a flat or protected build all tasks
+ * share the C library data.  There, with CONFIG_LIBC_ENVIRON_ASSIGNABLE,
+ * environ names a per-task-group location that a program may assign.  As
+ * for errno, a program's own "extern char **environ;" then compiles with
+ * a -Wstrict-prototypes warning.  Otherwise, and in kernel code of a
+ * kernel build, environ is get_environ_ptr() and cannot be assigned.
  */
 
 #ifdef CONFIG_DISABLE_ENVIRON
 #  define environ NULL
-#else
+#elif defined(CONFIG_LIBC_ENVIRON_ASSIGNABLE)
+#  define environ (*get_environ_location())
+#elif !defined(CONFIG_BUILD_KERNEL) || defined(__KERNEL__)
 #  define environ get_environ_ptr()
 #endif
 
@@ -172,6 +184,12 @@ uint32_t  arc4random(void);
 /* Environment variable support */
 
 FAR char **get_environ_ptr(void);
+#if !defined(CONFIG_DISABLE_ENVIRON) && defined(CONFIG_BUILD_KERNEL) && \
+    !defined(__KERNEL__)
+EXTERN FAR char **environ;
+#elif defined(CONFIG_LIBC_ENVIRON_ASSIGNABLE)
+FAR char ***get_environ_location(void);
+#endif
 FAR char *getenv(FAR const char *name);
 FAR char *secure_getenv(FAR const char *name);
 int       putenv(FAR const char *string);

@@ -141,6 +141,7 @@ int env_dup(FAR struct task_group_s *group, FAR char * const *envcp)
       /* Save the child environment allocation. */
 
       group->tg_envp = envp;
+      env_sync_out(group);
       nxrmutex_unlock(&group->tg_mutex);
     }
 

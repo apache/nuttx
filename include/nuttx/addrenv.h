@@ -302,6 +302,7 @@ struct addrenv_reserve_s
 {
   addrenv_sigtramp_t ar_sigtramp;  /* Signal trampoline */
   struct mm_heap_s  *ar_usrheap;   /* User space heap structure */
+  FAR char        ***ar_environ;   /* The program's environ variable */
 };
 
 /* Each instance of this structure resides at the beginning of the user-
