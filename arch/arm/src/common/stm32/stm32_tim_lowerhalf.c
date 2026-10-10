@@ -603,6 +603,7 @@ static void stm32_setcallback(struct timer_lowerhalf_s *lower,
 int stm32_timer_initialize(const char *devpath, int timer)
 {
   struct stm32_lowerhalf_s *lower;
+  struct stm32_tim_dev_s *tim;
   void *drvr;
 
   tmrinfo("Init TIM%d\n", timer);
@@ -698,16 +699,17 @@ int stm32_timer_initialize(const char *devpath, int timer)
         return -ENODEV;
     }
 
+  tim = stm32_tim_init(timer);
+  if (tim == NULL)
+    {
+      return -EINVAL;
+    }
+
   /* Initialize the elements of lower half state structure */
 
   lower->started  = false;
   lower->callback = NULL;
-  lower->tim      = stm32_tim_init(timer);
-
-  if (lower->tim == NULL)
-    {
-      return -EINVAL;
-    }
+  lower->tim      = tim;
 
   /* Register the timer driver as /dev/timerX.  The returned value from
    * timer_register is a handle that could be used with timer_unregister().
