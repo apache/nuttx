@@ -222,7 +222,7 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
     }
 
 #if defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)
-  if (_SO_GETOPT(conn->sconn.s_options, CAN_RAW_FD_FRAMES))
+  if (_SO_GETOPT(conn->raw_options, CAN_RAW_FD_FRAMES))
     {
       if (msg->msg_iov->iov_len != CANFD_MTU &&
           msg->msg_iov->iov_len != CAN_MTU)

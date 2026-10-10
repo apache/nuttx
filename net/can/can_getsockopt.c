@@ -166,7 +166,7 @@ int can_getsockopt(FAR struct socket *psock, int level, int option,
          * a macro will do.
          */
 
-        *(FAR int *)value = _SO_GETOPT(conn->sconn.s_options, option);
+        *(FAR int *)value = _SO_GETOPT(conn->raw_options, option);
         *value_len        = sizeof(int);
         break;
 

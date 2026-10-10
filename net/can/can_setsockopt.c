@@ -164,11 +164,11 @@ int can_setsockopt(FAR struct socket *psock, int level, int option,
 
         if (*(FAR int *)value)
           {
-            _SO_SETOPT(conn->sconn.s_options, option);
+            _SO_SETOPT(conn->raw_options, option);
           }
         else
           {
-            _SO_CLROPT(conn->sconn.s_options, option);
+            _SO_CLROPT(conn->raw_options, option);
           }
 
         conn_unlock(&conn->sconn);
