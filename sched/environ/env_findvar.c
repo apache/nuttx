@@ -100,9 +100,16 @@ ssize_t env_findvar(FAR struct task_group_s *group, FAR const char *pname)
 
   /* Search for a name=value string with matching name */
 
-  for (i = 0; group->tg_envp[i] != NULL; i++)
+  for (i = 0; ; i++)
     {
-      if (env_cmpname(pname, group->tg_envp[i]))
+      FAR const char *var = group->tg_envp[i];
+
+      if (var == NULL || !env_uaccess(group, var))
+        {
+          break;
+        }
+
+      if (env_cmpname(pname, var))
         {
           return i;
         }

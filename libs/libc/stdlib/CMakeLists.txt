@@ -25,6 +25,7 @@
 set(SRCS
     lib_abs.c
     lib_abort.c
+    lib_environ.c
     lib_atof.c
     lib_atoi.c
     lib_getprogname.c

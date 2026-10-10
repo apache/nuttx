@@ -38,7 +38,7 @@ else
 WRAP_SRCS += syscall_names.c
 endif
 endif
-STUB_SRCS += syscall_stublookup.c
+STUB_SRCS += syscall_stublookup.c syscall_uaccess.c
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
