@@ -39,7 +39,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "hardware/stm32l4_tim.h"
+#include "hardware/stm32_tim.h"
 #include "hardware/stm32l4_lptim.h"
 
 /****************************************************************************

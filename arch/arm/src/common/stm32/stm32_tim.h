@@ -41,16 +41,6 @@
     defined(CONFIG_STM32_HAVE_IP_TIMERS_V2) || \
     defined(CONFIG_STM32_HAVE_IP_TIMERS_V3)
 #  include "hardware/stm32_tim.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32L4)
-#  include "hardware/stm32l4_tim.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32L5)
-#  include "hardware/stm32l5_tim.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32WL5)
-#  include "hardware/stm32wl5_tim.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32F7)
-#  include "hardware/stm32f7_tim.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32H7)
-#  include "hardware/stm32h7_tim.h"
 #endif
 
 #include <nuttx/irq.h>

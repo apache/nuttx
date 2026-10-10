@@ -40,6 +40,7 @@ endchoice # STM32 WL5 Chip Selection
 
 config STM32_STM32WL5XXX
 	bool
+	select STM32_HAVE_IP_TIMERS_V2
 
 config STM32_STM32WL5XXX_CPU1
 	bool
