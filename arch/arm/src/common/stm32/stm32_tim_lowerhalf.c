@@ -368,6 +368,7 @@ static int stm32_start(struct timer_lowerhalf_s *lower)
       if (priv->callback != NULL)
         {
           STM32_TIM_SETISR(priv->tim, stm32_timer_handler, priv, 0);
+          STM32_TIM_ACKINT(priv->tim, GTIM_SR_UIF);
           STM32_TIM_ENABLEINT(priv->tim, GTIM_DIER_UIE);
         }
 
