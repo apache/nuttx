@@ -226,6 +226,27 @@ menu "PIC32MZ Peripheral Support"
 config PIC32MZ_WDT
 	bool "Watchdog timer (WDT)"
 	default n
+	depends on ARCH_CHIP_WFI32E01
+	select WATCHDOG
+	---help---
+		Watchdog timer driver (/dev/watchdog0).  The time-out is fixed
+		by the device configuration (BOARD_WD_PRESCALER in board.h).  If
+		PIC32MZ_WDTENABLE is set the watchdog is running from reset and
+		cannot be stopped, otherwise the application starts it.
+
+if PIC32MZ_WDT
+
+config PIC32MZ_WDT_BASE_US
+	int "Watchdog base period (microseconds)"
+	default 1000
+	range 1 1000000
+	---help---
+		Duration of the 1:1 postscaler step of the watchdog.  The time-out
+		is this value times BOARD_WD_PRESCALER.  The datasheet does not
+		state it for the run-mode watchdog (LPRC based, so only accurate
+		to about -18%/+13%).
+
+endif # PIC32MZ_WDT
 
 config PIC32MZ_T2
 	bool "Timer 2 (T2)"
