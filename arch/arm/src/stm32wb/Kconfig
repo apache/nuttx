@@ -27,6 +27,7 @@ config STM32_WB_PERIPHERALS
 	select STM32_HAVE_SPI1
 	select STM32_HAVE_SYSCFG
 	select STM32_HAVE_USART1
+	select STM32_HAVE_IP_DBGMCU_V6
 
 choice
 	prompt "STM32 WB Chip Selection"

@@ -428,41 +428,41 @@ void up_timer_initialize(void)
 #ifdef CONFIG_STM32_TIM1
       case 1:
         g_tickless.base = STM32_TIM1_BASE;
-        modifyreg32(STM32_DBGMCU_APB2FZ1, 0, DBGMCU_APB2Z1_TIM1STOP);
+        modifyreg32(STM32_DBGMCU_TIM1_FZ, 0, DBGMCU_TIM1_STOP);
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM2
       case 2:
         g_tickless.base = STM32_TIM2_BASE;
-        modifyreg32(STM32_DBGMCU_APB1LFZ1, 0, DBGMCU_APB1L_TIM2STOP);
+        modifyreg32(STM32_DBGMCU_TIM2_FZ, 0, DBGMCU_TIM2_STOP);
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM3
       case 3:
         g_tickless.base = STM32_TIM3_BASE;
-        modifyreg32(STM32_DBGMCU_APB1LFZ1, 0, DBGMCU_APB1L_TIM3STOP);
+        modifyreg32(STM32_DBGMCU_TIM3_FZ, 0, DBGMCU_TIM3_STOP);
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM4
       case 4:
         g_tickless.base = STM32_TIM4_BASE;
-        modifyreg32(STM32_DBGMCU_APB1LFZ1, 0, DBGMCU_APB1L_TIM4STOP);
+        modifyreg32(STM32_DBGMCU_TIM4_FZ, 0, DBGMCU_TIM4_STOP);
         break;
 #endif
 #ifdef CONFIG_STM32_TIM5
       case 5:
         g_tickless.base = STM32_TIM5_BASE;
-        modifyreg32(STM32_DBGMCU_APB1LFZ1, 0, DBGMCU_APB1L_TIM5STOP);
+        modifyreg32(STM32_DBGMCU_TIM5_FZ, 0, DBGMCU_TIM5_STOP);
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM8
       case 8:
         g_tickless.base = STM32_TIM8_BASE;
-        modifyreg32(STM32_DBGMCU_APB2FZ1, 0, DBGMCU_APB2Z1_TIM8STOP);
+        modifyreg32(STM32_DBGMCU_TIM8_FZ, 0, DBGMCU_TIM8_STOP);
         break;
 #endif
 
@@ -494,40 +494,40 @@ void up_timer_initialize(void)
 #ifdef CONFIG_STM32_TIM12
       case 12:
         g_tickless.base = STM32_TIM12_BASE;
-        modifyreg32(STM32_DBGMCU_APB1LFZ1, 0, DBGMCU_APB1L_TIM12STOP);
+        modifyreg32(STM32_DBGMCU_TIM12_FZ, 0, DBGMCU_TIM12_STOP);
         break;
 #endif
 #ifdef CONFIG_STM32_TIM13
       case 13:
         g_tickless.base = STM32_TIM13_BASE;
-        modifyreg32(STM32_DBGMCU_APB1LFZ1, 0, DBGMCU_APB1L_TIM13STOP);
+        modifyreg32(STM32_DBGMCU_TIM13_FZ, 0, DBGMCU_TIM13_STOP);
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM14
       case 14:
         g_tickless.base = STM32_TIM14_BASE;
-        modifyreg32(STM32_DBGMCU_APB1LFZ1, 0, DBGMCU_APB1L_TIM14STOP);
+        modifyreg32(STM32_DBGMCU_TIM14_FZ, 0, DBGMCU_TIM14_STOP);
         break;
 #endif
 #ifdef CONFIG_STM32_TIM15
       case 15:
         g_tickless.base = STM32_TIM15_BASE;
-        modifyreg32(STM32_DBGMCU_APB2FZ1, 0, DBGMCU_APB2Z1_TIM15STOP);
+        modifyreg32(STM32_DBGMCU_TIM15_FZ, 0, DBGMCU_TIM15_STOP);
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM16
       case 16:
         g_tickless.base = STM32_TIM16_BASE;
-        modifyreg32(STM32_DBGMCU_APB2FZ1, 0, DBGMCU_APB2Z1_TIM16STOP);
+        modifyreg32(STM32_DBGMCU_TIM16_FZ, 0, DBGMCU_TIM16_STOP);
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM17
       case 17:
         g_tickless.base = STM32_TIM17_BASE;
-        modifyreg32(STM32_DBGMCU_APB2FZ1, 0, DBGMCU_APB2Z1_TIM17STOP);
+        modifyreg32(STM32_DBGMCU_TIM17_FZ, 0, DBGMCU_TIM17_STOP);
         break;
 #endif
 

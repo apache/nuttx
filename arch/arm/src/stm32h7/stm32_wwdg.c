@@ -37,6 +37,7 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
+#include "hardware/stm32_dbgmcu.h"
 #include "stm32_wdg.h"
 
 #if defined(CONFIG_WATCHDOG) && defined(CONFIG_STM32_WWDG)
@@ -787,9 +788,7 @@ void stm32_wwdginitialize(const char *devpath)
     defined(CONFIG_STM32_JTAG_NOJNTRST_ENABLE) || \
     defined(CONFIG_STM32_JTAG_SW_ENABLE)
     {
-      uint32_t cr = getreg32(STM32_DBGMCU_APB3_FZ1);
-      cr |= DBGMCU_APB3_WWDG1STOP;
-      putreg32(cr, STM32_DBGMCU_APB3_FZ1);
+      modifyreg32(STM32_DBGMCU_WWDG_FZ, 0, DBGMCU_WWDG_STOP);
     }
 #endif
 }

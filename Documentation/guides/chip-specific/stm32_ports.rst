@@ -250,7 +250,7 @@ AES/CRYP      v1            not supported
 CAN/FDCAN     FDCAN         arch/arm/src/common/stm32/stm32_fdcan_m0_v1.c    
 CRC           to be done    not supported                                    
 DAC           v1            not supported                                    
-DBGMCU        v1            not supported                                    
+DBGMCU        v3            not supported                                    
 DMA           v1            arch/arm/src/common/stm32/stm32_dma_m0_v1_7ch.c  
 DMAMUX        v1 7ch        arch/arm/src/common/stm32/stm32_dma_m0_v1_7ch.c  
 EXTI          v2            arch/arm/src/common/stm32/stm32_exti_gpio_m0_v1.c
@@ -282,7 +282,7 @@ CORDIC        to be done    not supported
 CRC           to be done    not supported
 CRS           to be done    not supported
 DAC           to be done    not supported
-DBGMCU        to be done    not supported
+DBGMCU        v5            not supported
 EXTI          M33 v1        arch/arm/src/common/stm32/stm32_exti_gpio_m33_v1.c
 FDCAN         FDCAN         not supported
 FLASH         to be done    not supported
@@ -823,7 +823,7 @@ COMP          to be done    not supported
 CRC           to be done    not supported
 CRS           to be done    not supported
 DAC           to be done    not supported
-DBGMCU        to be done    not supported
+DBGMCU        v5            not supported
 DLYB          to be done    not supported
 EXTI          M33 v1        arch/arm/src/common/stm32/stm32_exti_gpio_m33_v1.c
 FDCAN         to be done    not supported

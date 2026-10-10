@@ -390,9 +390,7 @@ CHIP_CSRCS += stm32_wwdg_m3m4_v1.c
 endif
 
 ifeq ($(CONFIG_DEBUG_FEATURES),y)
-ifneq ($(filter y,$(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V1) \
-            $(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V2) \
-            $(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V3)),)
+ifeq ($(CONFIG_STM32_HAVE_IP_GPIO_M3M4_V1),y)
 CHIP_CSRCS += stm32_dumpgpio_m3m4_v1.c
 endif
 endif
