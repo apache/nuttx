@@ -40,6 +40,8 @@
 #  include "hardware/stm32h7x3xx_spi.h"
 #elif defined(CONFIG_STM32_STM32H7X7XX)
 #  include "hardware/stm32h7x3xx_spi.h"
+#elif defined(CONFIG_STM32_STM32H7RSXX)
+/* SPI register definitions are not provided for H7RS */
 #else
 #  error "Unsupported STM32 H7 sub family"
 #endif
