@@ -662,8 +662,37 @@ static FAR netpkt_t *igb_receive(FAR struct netdev_lowerhalf_s *dev)
   priv->rx_pkt[desc] = netpkt_alloc(dev, NETPKT_RX);
   if (priv->rx_pkt[desc] == NULL)
     {
-      nerr("alloc pkt_new failed\n");
-      PANIC();
+      int i;
+
+      /* No free packet (e.g. the IOBs are held by the stack): drop this
+       * frame and the other received frames in the ring and give the
+       * descriptors their packets back, so that the ring keeps receiving
+       * and the next interrupt starts a new RX poll.  Stop after one pass
+       * over the ring, so that the stack can run and free packets.
+       */
+
+      priv->rx_pkt[desc] = pkt;
+
+      for (i = 0; i < IGB_RX_DESC; i++)
+        {
+          NETDEV_RXDROPPED(&priv->dev.netdev);
+
+          rx->len    = 0;
+          rx->status = 0;
+
+          igb_putreg_mem(priv, IGB_RDT0, desc);
+
+          desc = priv->rx_now;
+          rx   = &priv->rx[desc];
+          if (!(rx->status & IGB_RDESC_STATUS_DD))
+            {
+              break;
+            }
+
+          priv->rx_now = (priv->rx_now + 1) % IGB_RX_DESC;
+        }
+
+      return NULL;
     }
 
   /* Set packet length */
