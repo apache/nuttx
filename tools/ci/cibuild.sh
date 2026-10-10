@@ -114,6 +114,7 @@ function usage {
 
 function enable_ccache {
   export CCACHE_DIR="${CIWORKSPACE}"/tools/ccache
+  export CCACHE_MAXSIZE="${CCACHE_MAXSIZE:-1G}"
 }
 
 function setup_repos {
