@@ -35,6 +35,14 @@ list(APPEND SRCS stm32_waste.c)
 list(APPEND SRCS stm32_uid.c)
 list(APPEND SRCS stm32_lsi.c)
 
+if(CONFIG_STM32_IWDG)
+  list(APPEND SRCS stm32_iwdg.c)
+endif()
+
+if(CONFIG_STM32_WWDG)
+  list(APPEND SRCS stm32_wwdg.c)
+endif()
+
 if(NOT CONFIG_ARCH_CUSTOM_PMINIT AND (CONFIG_STM32_COMMON_LEGACY
                                       OR CONFIG_ARCH_CORTEXM33))
   list(APPEND SRCS stm32_pminitialize_default.c)
@@ -373,18 +381,6 @@ if(CONFIG_STM32_COMMON_LEGACY)
   endif()
 endif()
 
-if(CONFIG_STM32_COMMON_LEGACY
-   OR CONFIG_ARCH_CHIP_STM32H7
-   OR CONFIG_ARCH_CHIP_STM32L4)
-  if(CONFIG_STM32_IWDG AND CONFIG_STM32_HAVE_IP_WDG_M3M4_V1)
-    list(APPEND SRCS stm32_iwdg_m3m4_v1.c)
-  endif()
-
-  if(CONFIG_STM32_WWDG AND CONFIG_STM32_HAVE_IP_WDG_M3M4_V1)
-    list(APPEND SRCS stm32_wwdg_m3m4_v1.c)
-  endif()
-endif()
-
 if(CONFIG_ARCH_CORTEXM0)
   list(APPEND SRCS stm32_irq_m0_v1.c stm32_start_m0_v1.c)
 
@@ -491,14 +487,6 @@ if(CONFIG_ARCH_CORTEXM0)
 
   if(CONFIG_STM32_RNG AND CONFIG_STM32_HAVE_IP_RNG_M0_V1)
     list(APPEND SRCS stm32_rng_m0_v1.c)
-  endif()
-
-  if(CONFIG_STM32_IWDG AND CONFIG_STM32_HAVE_IP_WDG_M0_V1)
-    list(APPEND SRCS stm32_iwdg_m0_v1.c)
-  endif()
-
-  if(CONFIG_STM32_WWDG AND CONFIG_STM32_HAVE_IP_WDG_M0_V1)
-    list(APPEND SRCS stm32_wwdg_m0_v1.c)
   endif()
 
   if(CONFIG_STM32_FDCAN AND CONFIG_STM32_HAVE_IP_FDCAN_MCAN_M0_V1)

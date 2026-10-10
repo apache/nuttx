@@ -27,17 +27,158 @@
  * Included Files
  ****************************************************************************/
 
-#if (defined(CONFIG_STM32_HAVE_IP_WDG_M0_V1) + \
-     defined(CONFIG_STM32_HAVE_IP_WDG_M3M4_V1)) > 1
-#  error Only one STM32 WDG IP version must be selected
+#include <nuttx/config.h>
+
+#include "chip.h"
+
+#if (defined(CONFIG_STM32_HAVE_IP_WDG_V1) + \
+     defined(CONFIG_STM32_HAVE_IP_WDG_V2) + \
+     defined(CONFIG_STM32_HAVE_IP_WDG_V3)) != 1
+#  error Exactly one STM32 WDG IP version must be selected
 #endif
 
-#if defined(CONFIG_STM32_HAVE_IP_WDG_M0_V1)
-#  include "hardware/stm32_wdg_m0.h"
-#elif defined(CONFIG_STM32_HAVE_IP_WDG_M3M4_V1)
-#  include "hardware/stm32_wdg_v1v2.h"
-#else
-#  error "Unsupported STM32 WDG"
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* H7 numbers its watchdog instances (IWDG1/WWDG1 belong to CPU1); alias
+ * them to the unnumbered names used by the common drivers.
+ */
+
+#if !defined(STM32_IWDG_BASE) && defined(STM32_IWDG1_BASE)
+#  define STM32_IWDG_BASE        STM32_IWDG1_BASE
 #endif
+
+#if !defined(STM32_WWDG_BASE) && defined(STM32_WWDG1_BASE)
+#  define STM32_WWDG_BASE        STM32_WWDG1_BASE
+#endif
+
+/* Register Offsets *********************************************************/
+
+#define STM32_IWDG_KR_OFFSET     0x0000  /* Key register (32-bit) */
+#define STM32_IWDG_PR_OFFSET     0x0004  /* Prescaler register (32-bit) */
+#define STM32_IWDG_RLR_OFFSET    0x0008  /* Reload register (32-bit) */
+#define STM32_IWDG_SR_OFFSET     0x000c  /* Status register (32-bit) */
+#define STM32_IWDG_WINR_OFFSET   0x0010  /* Window register (32-bit) */
+
+#define STM32_WWDG_CR_OFFSET     0x0000  /* Control Register (32-bit) */
+#define STM32_WWDG_CFR_OFFSET    0x0004  /* Configuration register (32-bit) */
+#define STM32_WWDG_SR_OFFSET     0x0008  /* Status register (32-bit) */
+
+/* Register Addresses *******************************************************/
+
+#define STM32_IWDG_KR            (STM32_IWDG_BASE+STM32_IWDG_KR_OFFSET)
+#define STM32_IWDG_PR            (STM32_IWDG_BASE+STM32_IWDG_PR_OFFSET)
+#define STM32_IWDG_RLR           (STM32_IWDG_BASE+STM32_IWDG_RLR_OFFSET)
+#define STM32_IWDG_SR            (STM32_IWDG_BASE+STM32_IWDG_SR_OFFSET)
+#define STM32_IWDG_WINR          (STM32_IWDG_BASE+STM32_IWDG_WINR_OFFSET)
+
+#define STM32_WWDG_CR            (STM32_WWDG_BASE+STM32_WWDG_CR_OFFSET)
+#define STM32_WWDG_CFR           (STM32_WWDG_BASE+STM32_WWDG_CFR_OFFSET)
+#define STM32_WWDG_SR            (STM32_WWDG_BASE+STM32_WWDG_SR_OFFSET)
+
+/* Register Bitfield Definitions ********************************************/
+
+/* Key register (32-bit) */
+
+#define IWDG_KR_KEY_SHIFT        (0)       /* Bits 15-0: Key value (write only, read 0000h) */
+#define IWDG_KR_KEY_MASK         (0xffff << IWDG_KR_KEY_SHIFT)
+
+#define IWDG_KR_KEY_ENABLE       (0x5555)  /* Enable register access */
+#define IWDG_KR_KEY_DISABLE      (0x0000)  /* Disable register access */
+#define IWDG_KR_KEY_RELOAD       (0xaaaa)  /* Reload the counter */
+#define IWDG_KR_KEY_START        (0xcccc)  /* Start the watchdog */
+
+/* Prescaler register (32-bit) */
+
+#define IWDG_PR_SHIFT            (0)       /* Bits 2-0 or 3-0: Prescaler divider */
+#ifdef CONFIG_STM32_HAVE_IP_WDG_V3
+#  define IWDG_PR_MASK           (15 << IWDG_PR_SHIFT)
+#  define IWDG_PR_MAX            (8)
+#else
+#  define IWDG_PR_MASK           (7 << IWDG_PR_SHIFT)
+#  define IWDG_PR_MAX            (6)
+#endif
+#  define IWDG_PR_DIV4           (0 << IWDG_PR_SHIFT) /* divider /4 */
+#  define IWDG_PR_DIV8           (1 << IWDG_PR_SHIFT) /* divider /8 */
+#  define IWDG_PR_DIV16          (2 << IWDG_PR_SHIFT) /* divider /16 */
+#  define IWDG_PR_DIV32          (3 << IWDG_PR_SHIFT) /* divider /32 */
+#  define IWDG_PR_DIV64          (4 << IWDG_PR_SHIFT) /* divider /64 */
+#  define IWDG_PR_DIV128         (5 << IWDG_PR_SHIFT) /* divider /128 */
+#  define IWDG_PR_DIV256         (6 << IWDG_PR_SHIFT) /* divider /256 */
+#ifdef CONFIG_STM32_HAVE_IP_WDG_V3
+#  define IWDG_PR_DIV512         (7 << IWDG_PR_SHIFT) /* divider /512 */
+#  define IWDG_PR_DIV1024        (8 << IWDG_PR_SHIFT) /* divider /1024 */
+#endif
+
+/* Reload register (32-bit) */
+
+#define IWDG_RLR_RL_SHIFT        (0)       /* Bits11:0 RL[11:0]: Watchdog counter reload value */
+#define IWDG_RLR_RL_MASK         (0x0fff << IWDG_RLR_RL_SHIFT)
+
+#define IWDG_RLR_MAX             (0xfff)
+
+/* Status register (32-bit) */
+
+#define IWDG_SR_PVU              (1 << 0)  /* Bit 0: Watchdog prescaler value update */
+#define IWDG_SR_RVU              (1 << 1)  /* Bit 1: Watchdog counter reload value update */
+#define IWDG_SR_WVU              (1 << 2)  /* Bit 2: Watchdog counter window value update */
+
+/* Window register (32-bit) */
+
+#define IWDG_WINR_SHIFT          (0)       /* Bits 11:0 WIN[11:0]: Watchdog counter window value */
+#define IWDG_WINR_MASK           (0x0fff << IWDG_WINR_SHIFT)
+
+/* Control Register (32-bit) */
+
+#define WWDG_CR_T_SHIFT          (0)       /* Bits 6:0 T[6:0]: 7-bit counter (MSB to LSB) */
+#define WWDG_CR_T_MASK           (0x7f << WWDG_CR_T_SHIFT)
+#  define WWDG_CR_T_MAX          (0x3f << WWDG_CR_T_SHIFT)
+#  define WWDG_CR_T_RESET        (0x40 << WWDG_CR_T_SHIFT)
+#define WWDG_CR_WDGA             (1 << 7)  /* Bit 7: Activation bit */
+
+/* Configuration register (32-bit) */
+
+#define WWDG_CFR_W_SHIFT         (0)       /* Bits 6:0 W[6:0] 7-bit window value */
+#define WWDG_CFR_W_MASK          (0x7f << WWDG_CFR_W_SHIFT)
+#ifndef CONFIG_STM32_HAVE_IP_WDG_V1
+#define WWDG_CFR_WDGTB_SHIFT     (11)      /* Bits 13:11 [2:0]: Timer Base */
+#define WWDG_CFR_WDGTB_MASK      (7 << WWDG_CFR_WDGTB_SHIFT)
+#define WWDG_CFR_WDGTB_MAX       (7)
+#  define WWDG_CFR_PCLK1         (0 << WWDG_CFR_WDGTB_SHIFT) /* 000: CK Counter Clock (PCLK1 div 4096) div 1 */
+#  define WWDG_CFR_PCLK1d2       (1 << WWDG_CFR_WDGTB_SHIFT) /* 001: CK Counter Clock (PCLK1 div 4096) div 2 */
+#  define WWDG_CFR_PCLK1d4       (2 << WWDG_CFR_WDGTB_SHIFT) /* 010: CK Counter Clock (PCLK1 div 4096) div 4 */
+#  define WWDG_CFR_PCLK1d8       (3 << WWDG_CFR_WDGTB_SHIFT) /* 011: CK Counter Clock (PCLK1 div 4096) div 8 */
+#  define WWDG_CFR_PCLK1d16      (4 << WWDG_CFR_WDGTB_SHIFT) /* 100: CK Counter Clock (PCLK1 div 4096) div 16 */
+#  define WWDG_CFR_PCLK1d32      (5 << WWDG_CFR_WDGTB_SHIFT) /* 101: CK Counter Clock (PCLK1 div 4096) div 32 */
+#  define WWDG_CFR_PCLK1d64      (6 << WWDG_CFR_WDGTB_SHIFT) /* 110: CK Counter Clock (PCLK1 div 4096) div 64 */
+#  define WWDG_CFR_PCLK1d128     (7 << WWDG_CFR_WDGTB_SHIFT) /* 111: CK Counter Clock (PCLK1 div 4096) div 128 */
+#else
+#define WWDG_CFR_WDGTB_SHIFT     (7)       /* Bits 8:7 [1:0]: Timer Base */
+#define WWDG_CFR_WDGTB_MASK      (3 << WWDG_CFR_WDGTB_SHIFT)
+#define WWDG_CFR_WDGTB_MAX       (3)
+#  define WWDG_CFR_PCLK1         (0 << WWDG_CFR_WDGTB_SHIFT) /* 00: CK Counter Clock (PCLK1 div 4096) div 1 */
+#  define WWDG_CFR_PCLK1d2       (1 << WWDG_CFR_WDGTB_SHIFT) /* 01: CK Counter Clock (PCLK1 div 4096) div 2 */
+#  define WWDG_CFR_PCLK1d4       (2 << WWDG_CFR_WDGTB_SHIFT) /* 10: CK Counter Clock (PCLK1 div 4096) div 4 */
+#  define WWDG_CFR_PCLK1d8       (3 << WWDG_CFR_WDGTB_SHIFT) /* 11: CK Counter Clock (PCLK1 div 4096) div 8 */
+#endif
+
+#define WWDG_CFR_EWI             (1 << 9)  /* Bit 9: Early Wakeup Interrupt */
+
+/* Status register (32-bit) */
+
+#define WWDG_SR_EWIF             (1 << 0)  /* Bit 0: Early Wakeup Interrupt Flag */
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_WDG_H */

@@ -1222,8 +1222,11 @@ config STM32_HAVE_USB
 
 # WDG capabilities
 
-config STM32_HAVE_IP_WDG_M0_V1
+config STM32_HAVE_IP_WDG_V1
 	bool
 
-config STM32_HAVE_IP_WDG_M3M4_V1
+config STM32_HAVE_IP_WDG_V2
+	bool
+
+config STM32_HAVE_IP_WDG_V3
 	bool
