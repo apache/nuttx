@@ -201,7 +201,7 @@
 #define WLAN_SCAN_TIMEOUT       SEC2TICK(10)
 
 #define WLAN_RX_QUOTA           8
-#define WLAN_TX_QUOTA           4
+#define WLAN_TX_QUOTA           16
 
 #define WLAN_CRYPTO_DEFER_MAX   8
 
@@ -955,7 +955,13 @@ static int wlan_transmit(FAR struct netdev_lowerhalf_s *dev,
     }
 
   netpkt_copyout(dev, buf + WLAN_TX_HDROFFSET, pkt, len, 0);
-  netpkt_free(dev, pkt, NETPKT_TX);
+
+  /* The packet is kept (and so its TX quota) until the library frees the
+   * buffer, see DRV_PIC32MZW_MemFree().  This bounds the frames queued in
+   * the library, which would otherwise be limited by the heap only.
+   */
+
+  wlan_hdr(buf)->spare = pkt;
 
   /* [EX] The library frees the buffer once it has been sent */
 
@@ -1472,6 +1478,7 @@ int8_t DRV_PIC32MZW_MemAddUsers(FAR void *buf, int count)
 int8_t DRV_PIC32MZW_MemFree(FAR void *buf)
 {
   FAR struct wlan_hdr_s *hdr;
+  FAR netpkt_t *pkt;
   irqstate_t flags;
 
   if (buf == NULL)
@@ -1493,16 +1500,28 @@ int8_t DRV_PIC32MZW_MemFree(FAR void *buf)
       g_pktmem_pri[hdr->prio].num_allocd--;
     }
 
+  /* A transmitted frame: release its network packet */
+
+  pkt        = hdr->spare;
+  hdr->spare = NULL;
+
   if (wlan_inpool(hdr))
     {
       sq_addlast((FAR sq_entry_t *)hdr, &g_wlan.pool);
       leave_critical_section(flags);
-      return 1;
+    }
+  else
+    {
+      leave_critical_section(flags);
+      kmm_free(hdr->alloc);
     }
 
-  leave_critical_section(flags);
+  if (pkt != NULL)
+    {
+      netpkt_free(&g_wlan.dev, pkt, NETPKT_TX);
+      netdev_lower_txdone(&g_wlan.dev);
+    }
 
-  kmm_free(hdr->alloc);
   return 1;
 }
 
