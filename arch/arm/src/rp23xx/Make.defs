@@ -23,6 +23,7 @@
 include armv8-m/Make.defs
 
 CFLAGS += -Wno-array-bounds
+LDFLAGS += --no-warn-rwx-segments
 
 CHIP_CSRCS += rp23xx_idle.c
 CHIP_CSRCS += rp23xx_irq.c
