@@ -29,6 +29,7 @@
 #include <sched.h>
 #include <nuttx/debug.h>
 #include <errno.h>
+#include <string.h>
 
 #include <nuttx/lib/lib.h>
 #include <nuttx/envpath.h>
@@ -89,8 +90,8 @@ static int load_default_priority(FAR struct binary_s *bin)
  *
  * Description:
  *   Load a module into memory, bind it to an exported symbol table, and
- *   prep the module for execution.  filename is known to be an absolute
- *   path to the file to be loaded.
+ *   prep the module for execution.  filename is the path to the file to
+ *   be loaded: absolute, or relative to the current working directory.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -184,12 +185,14 @@ int load_module(FAR struct binary_s *bin, FAR const char *filename,
           return ret;
         }
 
-      /* Were we given a relative path?  Or an absolute path to the file to
-       * be loaded?  Absolute paths start with '/'.
+      /* A bare file name (no '/') is searched for in PATH.  Any other path
+       * is used as given: an absolute path, or a path relative to the
+       * current working directory, as POSIX specifies for a name that
+       * contains a '/'.
        */
 
 #ifdef CONFIG_LIBC_ENVPATH
-      if (filename[0] != '/')
+      if (strchr(filename, '/') == NULL)
         {
           FAR char *fullpath;
           ENVPATH_HANDLE handle;
@@ -229,8 +232,8 @@ int load_module(FAR struct binary_s *bin, FAR const char *filename,
       else
 #endif
         {
-          /* We already have the one and only absolute path to the file to
-           * be loaded.
+          /* We already have the one and only path to the file to be
+           * loaded.
            */
 
           ret = load_absmodule(bin, filename, exports, nexports);
