@@ -109,11 +109,14 @@
 #undef BOARD_PBCLK7_ENABLE
 #undef BOARD_PBCLK8_ENABLE
 
-/* Watchdog pre-scaler (not yet used - WDT is left disabled by the
- * reference config; revisit if/when WDT support is added for this chip).
+/* Watchdog pre-scaler: the time-out is this value times the base period of
+ * the LPRC-clocked watchdog (CONFIG_PIC32MZ_WDT_BASE_US).  It is programmed
+ * in the device configuration and cannot be changed at run time.  The
+ * watchdog itself is started by software (PIC32MZ_WDT) unless
+ * CONFIG_PIC32MZ_WDTENABLE hardware-enables it from reset.
  */
 
-#define BOARD_WD_PRESCALER     1048576
+#define BOARD_WD_PRESCALER     8192
 
 /* Ethernet MII management clock (MDC).
  *
