@@ -114,6 +114,18 @@
 #define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLKd2
 #define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
 
+/* Timers will receive PCLK1 * 2 */
+
+#define STM32_TIM1_CLKIN   (2 * STM32_PCLK1_FREQUENCY)
+#define STM32_TIM2_CLKIN   (2 * STM32_PCLK1_FREQUENCY)
+#define STM32_TIM3_CLKIN   (2 * STM32_PCLK1_FREQUENCY)
+#define STM32_TIM6_CLKIN   (2 * STM32_PCLK1_FREQUENCY)
+#define STM32_TIM7_CLKIN   (2 * STM32_PCLK1_FREQUENCY)
+#define STM32_TIM14_CLKIN  (2 * STM32_PCLK1_FREQUENCY)
+#define STM32_TIM15_CLKIN  (2 * STM32_PCLK1_FREQUENCY)
+#define STM32_TIM16_CLKIN  (2 * STM32_PCLK1_FREQUENCY)
+#define STM32_TIM17_CLKIN  (2 * STM32_PCLK1_FREQUENCY)
+
 /* LED definitions **********************************************************/
 
 /* LED index values for use with board_userled() */
