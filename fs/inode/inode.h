@@ -525,6 +525,17 @@ int foreach_inode(foreach_inode_t handler, FAR void *arg);
 int dir_allocate(FAR struct file *filep, FAR const char *relpath);
 
 /****************************************************************************
+ * Name: dir_fstat
+ *
+ * Description:
+ *   fstat() of a directory opened with open().  Returns -ENOTTY if filep
+ *   is not such a directory.
+ *
+ ****************************************************************************/
+
+int dir_fstat(FAR struct file *filep, FAR struct stat *buf);
+
+/****************************************************************************
  * Name: pseudofile_create
  *
  * Description:
