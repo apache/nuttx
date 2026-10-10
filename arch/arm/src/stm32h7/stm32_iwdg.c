@@ -39,6 +39,7 @@
 
 #include "arm_internal.h"
 #include "stm32_rcc.h"
+#include "hardware/stm32_dbgmcu.h"
 #include "stm32_wdg.h"
 
 #if defined(CONFIG_WATCHDOG) && defined(CONFIG_STM32_IWDG)
@@ -685,9 +686,7 @@ void stm32_iwdginitialize(const char *devpath, uint32_t lsifreq)
     defined(CONFIG_STM32_JTAG_NOJNTRST_ENABLE) || \
     defined(CONFIG_STM32_JTAG_SW_ENABLE)
     {
-      uint32_t cr = getreg32(STM32_DBGMCU_APB4_FZ1);
-      cr |= DBGMCU_APB4_WDGLSD1;
-      putreg32(cr, STM32_DBGMCU_APB4_FZ1);
+      modifyreg32(STM32_DBGMCU_IWDG_FZ, 0, DBGMCU_IWDG_STOP);
     }
 #endif
 }

@@ -38,6 +38,7 @@
 #  define STM32_FMC_BANK3     0x80000000    /* 0x80000000-0x8fffffff:   256Mb NAND FLASH */
 #  define STM32_OCTOSPI1_BANK 0x90000000    /* 0x90000000-0x9fffffff:   256Mb QUADSPI */
 #define STM32_CORTEX_BASE     0xE0000000    /* 0xe0000000-0xffffffff: 512Mb Cortex-M4 block */
+#define STM32_DBGMCU_BASE     0xE0044000    /* 0xe0044000-0xe00443ff: DBGMCU */
 
 #define STM32_REGION_MASK     0xF0000000
 #define STM32_IS_SRAM(a)      ((((uint32_t)(a)) & STM32_REGION_MASK) == STM32_SRAM_BASE)

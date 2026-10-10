@@ -98,10 +98,3 @@ config STM32_FORCEPOWER
 		unconditionally at power up.  (Otherwise, the device is powered when it is
 		initialized).
 
-# Debug MCU options
-
-config STM32_DBGMCU_HAVE_TIM_FZ_IN_CR
-	bool
-
-config STM32_DBGMCU_HAVE_TIM_FZ_IN_APB2_FZ
-	bool

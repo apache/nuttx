@@ -37,7 +37,7 @@
 /* Peripherals **************************************************************/
 
 #include "chip.h"
-#include "stm32l5_dbgmcu.h"
+#include "stm32_dbgmcu.h"
 #include "stm32l5_flash.h"
 #include "stm32_gpio.h"
 #include "stm32l5_pwr.h"

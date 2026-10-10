@@ -143,11 +143,7 @@
 
 /* Debug register for PWM timers */
 
-#if defined(CONFIG_STM32_DBGMCU_HAVE_TIM_FZ_IN_APB2_FZ)
-#  define FOC_PWM_FZ_REG    (STM32_DBGMCU_APB2_FZ)
-#elif defined(CONFIG_STM32_DBGMCU_HAVE_TIM_FZ_IN_CR)
-#  define FOC_PWM_FZ_REG    (STM32_DBGMCU_CR)
-#endif
+#define FOC_PWM_FZ_REG    (STM32_DBGMCU_TIM1_FZ)
 
 /* FOC0 always use TIMER1 for PWM */
 
@@ -155,11 +151,7 @@
 #  define FOC0_PWM           (1)
 #  define FOC0_PWM_NCHANNELS (PWM_TIM1_NCHANNELS)
 #  define FOC0_PWM_BASE      (STM32_TIM1_BASE)
-#  if defined(CONFIG_STM32_DBGMCU_HAVE_TIM_FZ_IN_APB2_FZ)
-#    define FOC0_PWM_FZ_BIT    (DBGMCU_APB2_TIM1STOP)
-#  elif defined(CONFIG_STM32_DBGMCU_HAVE_TIM_FZ_IN_CR)
-#    define FOC0_PWM_FZ_BIT    (DBGMCU_CR_TIM1STOP)
-#  endif
+#  define FOC0_PWM_FZ_BIT    (DBGMCU_TIM1_STOP)
 #  if CONFIG_STM32_TIM1_MODE != 2
 #    error TIM1 must be configured in center-aligned mode 1
 #  endif
@@ -171,11 +163,7 @@
 #  define FOC1_PWM           (8)
 #  define FOC1_PWM_NCHANNELS (PWM_TIM8_NCHANNELS)
 #  define FOC1_PWM_BASE      (STM32_TIM8_BASE)
-#  if defined(CONFIG_STM32_DBGMCU_HAVE_TIM_FZ_IN_APB2_FZ)
-#    define FOC1_PWM_FZ_BIT    (DBGMCU_APB2_TIM8STOP)
-#  elif defined(CONFIG_STM32_DBGMCU_HAVE_TIM_FZ_IN_CR)
-#    define FOC1_PWM_FZ_BIT    (DBGMCU_CR_TIM8STOP)
-#  endif
+#  define FOC1_PWM_FZ_BIT    (DBGMCU_TIM8_STOP)
 #  if CONFIG_STM32_TIM8_MODE != 2
 #    error TIM8 must be configured in center-aligned mode 1
 #  endif
@@ -2657,9 +2645,9 @@ stm32_foc_initialize(int inst, struct stm32_foc_board_s *board)
       goto errout;
     }
 
-    /* Get ADC private part */
+  /* Get ADC private part */
 
-    foc_dev->adc = (struct stm32_adc_dev_s *)foc_dev->adc_dev->ad_priv;
+  foc_dev->adc = (struct stm32_adc_dev_s *)foc_dev->adc_dev->ad_priv;
 
 #ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
   /* Get ADC configuration */

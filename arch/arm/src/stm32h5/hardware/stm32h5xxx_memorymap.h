@@ -187,6 +187,7 @@
 /* AHB3 Base Addresses ******************************************************/
 
 #define STM32_DEBUG_BASE      0x44024000
+#define STM32_DBGMCU_BASE     0x44024000
 #define STM32_EXTI_BASE       0x44022000
 #define STM32_RCC_BASE        0x44020C00
 #define STM32_PWR_BASE        0x44020800
