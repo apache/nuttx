@@ -10,6 +10,11 @@
 # Default settings for C library functions that may be replaced with
 # architecture-specific versions.
 
+config LIBM_ARCH_FMAF
+	bool
+	default y
+	depends on LIBM && ARCH_RISCV && ARCH_FPU
+
 config LIBM_ARCH_CEIL
 	bool
 	default n
