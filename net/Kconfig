@@ -312,6 +312,54 @@ config NET_VLAN_COUNT
 
 endif # NET_VLAN
 
+menuconfig NET_BRIDGE
+	bool "Ethernet bridge support"
+	default n
+	depends on NET_ETHERNET
+	select NETDEV_IFINDEX
+	---help---
+		Enable a transparent, learning Ethernet bridge (IEEE 802.1D without
+		spanning tree).  A bridge is a virtual network device (e.g. br0)
+		created with the SIOCBRADDBR ioctl.  Ethernet (or IEEE 802.11)
+		devices are added to it as ports with SIOCBRADDIF.  Frames received
+		on a port are forwarded to the other ports based on a filtering
+		database of learned MAC addresses, and frames for the local host are
+		passed to the network stack through the bridge device, which holds
+		the IP configuration.
+
+		Only network drivers that use the upper-half interface
+		(netdev_lowerhalf_s) can be bridge ports.
+
+		There is no spanning tree protocol: the network must not contain
+		loops through the bridge.
+
+		Port devices must accept frames for foreign destination MAC
+		addresses (promiscuous mode, see NET_PROMISCUOUS) to forward unicast
+		traffic.
+
+if NET_BRIDGE
+
+config NET_BRIDGE_MAX_PORTS
+	int "Maximum number of ports per bridge"
+	default 4
+	range 2 32
+
+config NET_BRIDGE_FDB_SIZE
+	int "Filtering database size"
+	default 32
+	---help---
+		Number of MAC addresses that each bridge can learn.  When the table
+		is full, the oldest entry is replaced.
+
+config NET_BRIDGE_AGEING_TIME
+	int "Filtering database ageing time (seconds)"
+	default 300
+	---help---
+		A learned MAC address is forgotten after this many seconds without
+		receiving a frame from it.
+
+endif # NET_BRIDGE
+
 config NETDEV_LATEINIT
 	bool "Late driver initialization"
 	default n
