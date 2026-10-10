@@ -695,17 +695,23 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
                   if (conn->keepretries >= conn->keepcnt)
                     {
-                      /* Yes... stop the network monitor, closing the
-                       * connection and all sockets associated with the
-                       * connection.
+                      /* Yes... the peer is dead.  Close the connection
+                       * as on a retransmission timeout.
                        */
 
-                      devif_conn_event(conn->dev, TCP_ABORT,
-                                       conn->sconn.list);
+                      conn->tcpstateflags = TCP_CLOSED;
+                      ninfo("TCP state: TCP_CLOSED\n");
 
-                      /* We also send a reset packet to the remote host. */
+                      /* We send a reset packet to the remote host. */
 
                       tcp_send(dev, conn, TCP_RST | TCP_ACK, hdrlen);
+
+                      /* We also call tcp_callback() with TCP_TIMEDOUT to
+                       * inform all sockets and the connection monitor
+                       * that the connection has timed out.
+                       */
+
+                      tcp_callback(dev, conn, TCP_TIMEDOUT);
 
                       /* Stop the timer work */
 

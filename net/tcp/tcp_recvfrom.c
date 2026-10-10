@@ -505,7 +505,12 @@ static uint32_t tcp_recvhandler(FAR struct net_driver_s *dev,
               tcp_lost_connection(conn, pstate->ir_cb, flags);
             }
 
-          pstate->ir_result = -ENOTCONN;
+          /* Report a timed out connection (too many retransmissions or
+           * unanswered keep-alive probes) as ETIMEDOUT.
+           */
+
+          pstate->ir_result = (flags & TCP_TIMEDOUT) != 0 ? -ETIMEDOUT :
+                                                            -ENOTCONN;
 
           /* Wake up the waiting thread */
 
