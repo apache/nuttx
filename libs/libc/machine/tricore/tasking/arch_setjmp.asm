@@ -38,9 +38,9 @@
 ;    32: a12   36: a13   40: a14   44: a15
 ;    48: d12   52: d13   56: d14   60: d15
 ;
-;   On entry a11 holds the caller's return address (TriCore call ABI).
+;   On entry a11 holds the return address of the caller (TriCore call ABI).
 ;   Save it into env[12] first, then repoint a11 at .Lsaveregs and execute
-;   `ret' which jumps through a11.  The fall-through at .Lsaveregs stores
+;   `ret` which jumps through a11.  The fall-through at .Lsaveregs stores
 ;   the remaining callee-saved registers and the PCXI/PSW control registers,
 ;   loads the saved return address into a2, sets d2 = 0, and jumps back
 ;   to the caller.  longjmp() returns through the same path with a nonzero
@@ -98,7 +98,7 @@ setjmp:	.type	func
 ;   The result passed back equals max(val, 1) per POSIX.
 ;
 ;   The unwind loop forces PSW.IO = Supervisor and PSW.PRS[2] = 0 on every
-;   iteration so that the `ret'-released upper contexts do not drop the CPU
+;   iteration so that the `ret`-released upper contexts do not drop the CPU
 ;   into user mode while env is still being accessed.  Once the loop exits,
 ;   the original PSW saved at setjmp time is restored before the indirect
 ;   jump back to the setjmp call site.
@@ -165,7 +165,7 @@ longjmp:	.type	func
 	j	.Lloop
 
 .Lupper:
-	; Release one upper context via `ret' (restores the upper context
+	; Release one upper context via `ret` (restores the upper context
 	; from CSA and jumps through a11).  Point a11 back at .Lloop so
 	; we re-enter the depth check after the release.
 
