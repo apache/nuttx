@@ -198,6 +198,7 @@ static void can_txready_work(FAR void *arg)
 static FAR struct can_reader_s *init_can_reader(FAR struct file *filep)
 {
   FAR struct can_reader_s *reader = kmm_zalloc(sizeof(struct can_reader_s));
+
   DEBUGASSERT(reader != NULL);
 
   nxsem_init(&reader->fifo.rx_sem, 0, 0);
@@ -1064,6 +1065,7 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             {
               FAR const struct can_transv_ops_s *ct_ops =
                                                 dev->cd_transv->ct_ops;
+
               ret = ct_ops->ct_setstate(dev->cd_transv, arg);
             }
           else
@@ -1088,6 +1090,7 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               int *state = (FAR int *)arg;
               FAR const struct can_transv_ops_s *ct_ops =
                                                 dev->cd_transv->ct_ops;
+
               ret = ct_ops->ct_getstate(dev->cd_transv, state);
             }
           else
@@ -1387,6 +1390,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
   list_for_every(&dev->cd_readers, node)
     {
       FAR struct can_reader_s *reader = (FAR struct can_reader_s *)node;
+
       fifo = &reader->fifo;
       was_empty = fifo->rx_head == fifo->rx_tail;
 
@@ -1565,6 +1569,7 @@ int can_txdone(FAR struct can_dev_s *dev)
       list_for_every(&dev->cd_readers, node)
         {
           FAR struct can_reader_s *reader = (FAR struct can_reader_s *)node;
+
           poll_notify(&reader->cd_fds, 1, POLLOUT);
         }
 
