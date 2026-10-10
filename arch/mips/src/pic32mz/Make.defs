@@ -167,6 +167,10 @@ CHIP_CSRCS += pic32mz_timer_lowerhalf.c
 endif
 endif
 
+ifeq ($(CONFIG_PIC32MZ_WDT),y)
+CHIP_CSRCS += pic32mz_wdt.c
+endif
+
 ifeq ($(CONFIG_PIC32MZ_FREERUN),y)
 CHIP_CSRCS += pic32mz_freerun.c
 endif

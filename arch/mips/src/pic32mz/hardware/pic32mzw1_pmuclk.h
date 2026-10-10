@@ -136,6 +136,7 @@
 
 #define RCON_POR                (1 << 0)  /* Bit 0: power-on reset */
 #define RCON_BOR                (1 << 1)  /* Bit 1: brown-out reset */
+#define RCON_WDTO               (1 << 4)  /* Bit 4: watchdog time-out reset */
 
 /* Additional PLLs and clock status (OSC block) *****************************/
 

@@ -159,6 +159,7 @@
 #define DEVCFG2_CKSWEN           (1 << 14) /* Software clock switching */
 #define DEVCFG2_FSCMEN           (1 << 15) /* Fail-safe clock monitor */
 #define DEVCFG2_WDTPS_SHIFT      (16)      /* Bits 16-20: WDT postscaler */
+#define DEVCFG2_WDTPS_MASK       (0x1f)    /* WDTPS field width */
 #define DEVCFG2_WDTSPGM          (1 << 21) /* WDT stop during flash prog. */
 #define DEVCFG2_WINDIS           (1 << 22) /* WDT window disable */
 #define DEVCFG2_WDTEN            (1 << 23) /* WDT enable */
