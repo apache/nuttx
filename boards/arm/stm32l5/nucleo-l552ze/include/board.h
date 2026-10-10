@@ -141,13 +141,15 @@
 #define STM32_PCLK2_FREQUENCY   (STM32_HCLK_FREQUENCY / 1)
 
 #define STM32_TIM1_CLKIN   (STM32_PCLK2_FREQUENCY)
+#define STM32_TIM8_CLKIN   (STM32_PCLK2_FREQUENCY)
 #define STM32_TIM15_CLKIN  (STM32_PCLK2_FREQUENCY)
 #define STM32_TIM16_CLKIN  (STM32_PCLK2_FREQUENCY)
+#define STM32_TIM17_CLKIN  (STM32_PCLK2_FREQUENCY)
 
 /* The timer clock frequencies are automatically defined by hardware.  If the
  * APB prescaler equals 1, the timer clock frequencies are set to the same
  * frequency as that of the APB domain. Otherwise they are set to twice.
- * Note: TIM1,15,16 are on APB2, others on APB1
+ * Note: TIM1,8,15,16,17 are on APB2, others on APB1
  */
 
 #define STM32_LPTIM1_CLKIN      STM32_HCLK_FREQUENCY
