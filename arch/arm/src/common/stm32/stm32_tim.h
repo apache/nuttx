@@ -37,9 +37,9 @@
  */
 
 #if defined(CONFIG_STM32_HAVE_IP_TIMERS_M0_V1) || \
-    defined(CONFIG_STM32_HAVE_IP_TIMERS_M3M4_V1) || \
-    defined(CONFIG_STM32_HAVE_IP_TIMERS_M3M4_V2) || \
-    defined(CONFIG_STM32_HAVE_IP_TIMERS_M3M4_V3)
+    defined(CONFIG_STM32_HAVE_IP_TIMERS_V1) || \
+    defined(CONFIG_STM32_HAVE_IP_TIMERS_V2) || \
+    defined(CONFIG_STM32_HAVE_IP_TIMERS_V3)
 #  include "hardware/stm32_tim.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32L4)
 #  include "hardware/stm32l4_tim.h"
