@@ -26,7 +26,9 @@
 
 #include <nuttx/debug.h>
 #include <stdio.h>
+#include <time.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 
@@ -290,6 +292,9 @@ static void sim_can_work(void *arg)
   struct sim_canchar_s *priv = arg;
   struct canfd_frame    frame;
   struct can_hdr_s      hdr;
+#ifdef CONFIG_CAN_TIMESTAMP
+  struct timespec       ts;
+#endif
   int                   ret;
 
   /* Drain all frames queued on the host socket, otherwise only one frame
@@ -325,7 +330,9 @@ static void sim_can_work(void *arg)
 #endif
       hdr.ch_tcf   = 0;
 #ifdef CONFIG_CAN_TIMESTAMP
-      hdr.ch_ts    = 0;
+      clock_gettime(CLOCK_MONOTONIC, &ts);
+      hdr.ch_ts.tv_sec  = ts.tv_sec;
+      hdr.ch_ts.tv_usec = ts.tv_nsec / NSEC_PER_USEC;
 #endif
 
       /* Notify upper-half */
