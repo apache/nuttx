@@ -88,6 +88,7 @@
 #include "route/route.h"
 #include "netlink/netlink.h"
 #include "utils/utils.h"
+#include "bridge/bridge.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -2009,6 +2010,15 @@ int psock_vioctl(FAR struct socket *psock, int cmd, va_list ap)
     {
       ret = netdev_cell_ioctl(psock, cmd,
                               (FAR struct icellreq *)(uintptr_t)arg);
+    }
+#endif
+
+#ifdef CONFIG_NET_BRIDGE
+  /* Check for a bridge command */
+
+  if (ret == -ENOTTY)
+    {
+      ret = bridge_ioctl(cmd, arg);
     }
 #endif
 

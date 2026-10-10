@@ -220,7 +220,7 @@
 
 #define NETDEV_DOWN        (1 << 17)
 
-/* Bits 18-24: device specific poll events.  Unlike connection
+/* Bits 18-25: device specific poll events.  Unlike connection
  * oriented poll events, device related poll events must distinguish
  * between what is being polled for since the callbacks all reside in
  * the same list in the network device structure.
@@ -233,6 +233,7 @@
 #define ICMP_POLL          (1 << 22)
 #define ICMPv6_POLL        (1 << 23)
 #define IPFWD_POLL         (1 << 24)
+#define BRIDGE_POLL        (1 << 25)
 
 /* The set of events that and implications to the TCP connection state */
 

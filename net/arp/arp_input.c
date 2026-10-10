@@ -236,6 +236,16 @@ void arp_input(FAR struct net_driver_s *dev)
 {
   FAR uint8_t *buf;
 
+#ifdef CONFIG_NET_BRIDGE
+  /* Frames received on a bridge port belong to the bridge */
+
+  if (dev->d_bridge != NULL)
+    {
+      bridge_input(dev);
+      return;
+    }
+#endif
+
   if (IFF_IS_NOARP(dev->d_flags))
     {
       /* No arp */

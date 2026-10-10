@@ -323,6 +323,9 @@ struct netdev_rss_s
  */
 
 struct devif_callback_s; /* Forward reference */
+#ifdef CONFIG_NET_BRIDGE
+struct bridge_port_s;    /* Forward reference */
+#endif
 
 struct net_driver_s
 {
@@ -449,6 +452,12 @@ struct net_driver_s
 
 #ifdef CONFIG_NET_ARP_SEND_QUEUE
   struct iob_queue_s d_arpout;
+#endif
+
+#ifdef CONFIG_NET_BRIDGE
+  /* Bridge port state, non-NULL if this device is a port of a bridge */
+
+  FAR struct bridge_port_s *d_bridge;
 #endif
 
   /* The d_buf array is used to hold incoming and outgoing packets. The
@@ -656,6 +665,33 @@ int ipv4_input(FAR struct net_driver_s *dev);
 
 #ifdef CONFIG_NET_IPv6
 int ipv6_input(FAR struct net_driver_s *dev);
+#endif
+
+/****************************************************************************
+ * Name: bridge_input
+ *
+ * Description:
+ *   Pass a frame received on a bridge port (dev->d_bridge != NULL) to the
+ *   bridge.  The frame is either in dev->d_iob or, for drivers using a
+ *   flat buffer, in dev->d_buf.  The bridge takes the frame; on return
+ *   dev->d_len is zero, so the driver sends nothing.
+ *
+ *   ipv4_input(), ipv6_input() and arp_input() call this function, so
+ *   network drivers do not need to call it.
+ *
+ * Input Parameters:
+ *   dev - The bridge port that received the frame.
+ *
+ * Returned Value:
+ *   Always OK.
+ *
+ * Assumptions:
+ *   Called with the port device locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_BRIDGE
+int bridge_input(FAR struct net_driver_s *dev);
 #endif
 
 #ifdef CONFIG_NET_6LOWPAN

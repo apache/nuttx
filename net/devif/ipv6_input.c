@@ -715,6 +715,15 @@ int ipv6_input(FAR struct net_driver_s *dev)
   FAR uint8_t *buf;
   int ret;
 
+#ifdef CONFIG_NET_BRIDGE
+  /* Frames received on a bridge port belong to the bridge */
+
+  if (dev->d_bridge != NULL)
+    {
+      return bridge_input(dev);
+    }
+#endif
+
   netdev_lock(dev);
 
   if (dev->d_iob != NULL)
