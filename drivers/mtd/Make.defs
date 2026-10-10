@@ -165,6 +165,10 @@ ifeq ($(CONFIG_MTD_MX35),y)
 CSRCS += mx35.c
 endif
 
+ifeq ($(CONFIG_MTD_MX66UW1G45G),y)
+CSRCS += mx66uw1g45g.c
+endif
+
 ifeq ($(CONFIG_MTD_S25FL1),y)
 CSRCS += s25fl1.c
 endif
