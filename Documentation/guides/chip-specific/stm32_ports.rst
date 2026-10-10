@@ -208,11 +208,11 @@ IP core     Selector                           Families
 M0_V1       ``STM32_HAVE_IP_TIMERS_M0_V1``      Cortex-M0 (C0, F0, G0, L0, U0)
 V1          ``STM32_HAVE_IP_TIMERS_V1``         F1, F2, F4, L1, F37x
 V2          ``STM32_HAVE_IP_TIMERS_V2``         F30x, F33x, WB
-V3          ``STM32_HAVE_IP_TIMERS_V3``         G4
+V3          ``STM32_HAVE_IP_TIMERS_V3``         G4, H5, U5
 ==========  =================================  =================================
 
-Families with their own timer register header (F7, H7, H5, L4, L5, U5, WL5)
-use the same ``STM32_TIM_*`` programming model and are built from the same
+Families with their own timer register header (F7, H7, L4, L5, WL5) use the
+same ``STM32_TIM_*`` programming model and are built from the same
 common driver.
 
 The one functional difference that matters to a generic timer user is the
@@ -622,7 +622,7 @@ OCTOSPI       to be done    arch/arm/src/stm32h5/stm32_qspi.c
 PWR           to be done    arch/arm/src/stm32h5/stm32_pwr.c       
 RCC           to be done    arch/arm/src/stm32h5/stm32_rcc.c       
 SPI/I2S       to be done    arch/arm/src/stm32h5/stm32_spi.c       
-TIM           to be done    arch/arm/src/common/stm32/stm32_tim.c  
+TIM           v3            arch/arm/src/common/stm32/stm32_tim.c  
 USART/LPUART  v3            arch/arm/src/stm32h5/stm32_serial.c    
 USB           FS            arch/arm/src/stm32h5/stm32_usbfs.c     
 WWDG          v1            arch/arm/src/stm32h7/stm32_wwdg.c      
@@ -890,7 +890,7 @@ SAES/AES      to be done    not supported
 SDMMC         to be done    not supported                         
 SPI/I2S       to be done    arch/arm/src/stm32u5/stm32_spi.c      
 TAMP          to be done    not supported                         
-TIM/LPTIM     to be done    arch/arm/src/common/stm32/stm32_tim.c 
+TIM/LPTIM     v3            arch/arm/src/common/stm32/stm32_tim.c 
 USART/LPUART  v3            arch/arm/src/stm32u5/stm32_serial.c   
 USB           device        not supported                         
 ============  ============  ======================================
