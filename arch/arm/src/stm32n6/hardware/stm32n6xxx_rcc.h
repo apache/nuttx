@@ -48,6 +48,8 @@
 #define STM32_RCC_IC6CFGR_OFFSET      0x00d8  /* IC6 configuration register */
 #define STM32_RCC_IC11CFGR_OFFSET     0x00ec  /* IC11 configuration register */
 #define STM32_RCC_CCIPR13_OFFSET      0x0174  /* Peripheral kernel clock select register 13 */
+#define STM32_RCC_APB1LRSTR_OFFSET    0x0224  /* APB1 peripheral reset register 1 */
+#define STM32_RCC_APB2RSTR_OFFSET     0x022c  /* APB2 peripheral reset register */
 
 /* Peripheral clock enable / set / clear register offsets.  Each enable
  * register (xxxENR) has a paired set register (xxxENSR) that performs an
@@ -98,6 +100,8 @@
 #define STM32_RCC_IC6CFGR             (STM32_RCC_BASE + STM32_RCC_IC6CFGR_OFFSET)
 #define STM32_RCC_IC11CFGR            (STM32_RCC_BASE + STM32_RCC_IC11CFGR_OFFSET)
 #define STM32_RCC_CCIPR13             (STM32_RCC_BASE + STM32_RCC_CCIPR13_OFFSET)
+#define STM32_RCC_APB1LRSTR           (STM32_RCC_BASE + STM32_RCC_APB1LRSTR_OFFSET)
+#define STM32_RCC_APB2RSTR            (STM32_RCC_BASE + STM32_RCC_APB2RSTR_OFFSET)
 
 #define STM32_RCC_DIVENR              (STM32_RCC_BASE + STM32_RCC_DIVENR_OFFSET)
 #define STM32_RCC_DIVENSR             (STM32_RCC_BASE + STM32_RCC_DIVENSR_OFFSET)
@@ -133,11 +137,13 @@
 
 #define RCC_CR_PLL1ON                 (1 << 8)  /* Bit 8:  PLL1 enable */
 #define RCC_CR_HSION                  (1 << 3)  /* Bit 3:  HSI enable */
+#define RCC_CR_LSION                  (1 << 0)  /* Bit 0:  LSI enable */
 
 /* Clock status register */
 
 #define RCC_SR_PLL1RDY                (1 << 8)  /* Bit 8:  PLL1 clock ready */
 #define RCC_SR_HSIRDY                 (1 << 3)  /* Bit 3:  HSI clock ready */
+#define RCC_SR_LSIRDY                 (1 << 0)  /* Bit 0:  LSI clock ready */
 
 /* Clock configuration register 1.  SYSSW = 0b11 selects three IC dividers
  * (IC2 for SYSCLK, IC6 for AHB, IC11 for APB) -- the SVD names this state
@@ -241,11 +247,52 @@
 
 /* APB1 peripheral clock enable register 1 */
 
+#define RCC_APB1LENR_TIM11EN          (1 << 13)  /* Bit 13: TIM11 enable */
+#define RCC_APB1LENR_TIM10EN          (1 << 12)  /* Bit 12: TIM10 enable */
+#define RCC_APB1LENR_TIM14EN          (1 << 8)   /* Bit 8:  TIM14 enable */
+#define RCC_APB1LENR_TIM13EN          (1 << 7)   /* Bit 7:  TIM13 enable */
+#define RCC_APB1LENR_TIM12EN          (1 << 6)   /* Bit 6:  TIM12 enable */
+#define RCC_APB1LENR_TIM7EN           (1 << 5)   /* Bit 5:  TIM7 enable */
+#define RCC_APB1LENR_TIM6EN           (1 << 4)   /* Bit 4:  TIM6 enable */
+#define RCC_APB1LENR_TIM5EN           (1 << 3)   /* Bit 3:  TIM5 enable */
+#define RCC_APB1LENR_TIM4EN           (1 << 2)   /* Bit 2:  TIM4 enable */
+#define RCC_APB1LENR_TIM3EN           (1 << 1)   /* Bit 1:  TIM3 enable */
 #define RCC_APB1LENR_TIM2EN           (1 << 0)   /* Bit 0:  TIM2 enable */
 
 /* APB2 peripheral clock enable register */
 
+#define RCC_APB2ENR_TIM9EN            (1 << 19)  /* Bit 19: TIM9 enable */
+#define RCC_APB2ENR_TIM17EN           (1 << 18)  /* Bit 18: TIM17 enable */
+#define RCC_APB2ENR_TIM16EN           (1 << 17)  /* Bit 17: TIM16 enable */
+#define RCC_APB2ENR_TIM15EN           (1 << 16)  /* Bit 16: TIM15 enable */
+#define RCC_APB2ENR_TIM18EN           (1 << 15)  /* Bit 15: TIM18 enable */
 #define RCC_APB2ENR_USART1EN          (1 << 4)   /* Bit 4:  USART1 enable */
+#define RCC_APB2ENR_TIM8EN            (1 << 1)   /* Bit 1:  TIM8 enable */
+#define RCC_APB2ENR_TIM1EN            (1 << 0)   /* Bit 0:  TIM1 enable */
+
+/* APB1 peripheral reset register 1 */
+
+#define RCC_APB1LRSTR_TIM11RST        (1 << 13)  /* Bit 13: TIM11 reset */
+#define RCC_APB1LRSTR_TIM10RST        (1 << 12)  /* Bit 12: TIM10 reset */
+#define RCC_APB1LRSTR_TIM14RST        (1 << 8)   /* Bit 8:  TIM14 reset */
+#define RCC_APB1LRSTR_TIM13RST        (1 << 7)   /* Bit 7:  TIM13 reset */
+#define RCC_APB1LRSTR_TIM12RST        (1 << 6)   /* Bit 6:  TIM12 reset */
+#define RCC_APB1LRSTR_TIM7RST         (1 << 5)   /* Bit 5:  TIM7 reset */
+#define RCC_APB1LRSTR_TIM6RST         (1 << 4)   /* Bit 4:  TIM6 reset */
+#define RCC_APB1LRSTR_TIM5RST         (1 << 3)   /* Bit 3:  TIM5 reset */
+#define RCC_APB1LRSTR_TIM4RST         (1 << 2)   /* Bit 2:  TIM4 reset */
+#define RCC_APB1LRSTR_TIM3RST         (1 << 1)   /* Bit 1:  TIM3 reset */
+#define RCC_APB1LRSTR_TIM2RST         (1 << 0)   /* Bit 0:  TIM2 reset */
+
+/* APB2 peripheral reset register */
+
+#define RCC_APB2RSTR_TIM9RST          (1 << 19)  /* Bit 19: TIM9 reset */
+#define RCC_APB2RSTR_TIM17RST         (1 << 18)  /* Bit 18: TIM17 reset */
+#define RCC_APB2RSTR_TIM16RST         (1 << 17)  /* Bit 17: TIM16 reset */
+#define RCC_APB2RSTR_TIM15RST         (1 << 16)  /* Bit 16: TIM15 reset */
+#define RCC_APB2RSTR_TIM18RST         (1 << 15)  /* Bit 15: TIM18 reset */
+#define RCC_APB2RSTR_TIM8RST          (1 << 1)   /* Bit 1:  TIM8 reset */
+#define RCC_APB2RSTR_TIM1RST          (1 << 0)   /* Bit 0:  TIM1 reset */
 
 /* APB4 peripheral clock enable register 2 */
 
@@ -273,11 +320,40 @@
 
 /* APB1 peripheral clock enable in Sleep mode (register 1) */
 
+#define RCC_APB1LLPENR_TIM11LPEN      (1 << 13)  /* Bit 13: TIM11 enable in CSLEEP */
+#define RCC_APB1LLPENR_TIM10LPEN      (1 << 12)  /* Bit 12: TIM10 enable in CSLEEP */
+#define RCC_APB1LLPENR_TIM14LPEN      (1 << 8)   /* Bit 8:  TIM14 enable in CSLEEP */
+#define RCC_APB1LLPENR_TIM13LPEN      (1 << 7)   /* Bit 7:  TIM13 enable in CSLEEP */
+#define RCC_APB1LLPENR_TIM12LPEN      (1 << 6)   /* Bit 6:  TIM12 enable in CSLEEP */
+#define RCC_APB1LLPENR_TIM7LPEN       (1 << 5)   /* Bit 5:  TIM7 enable in CSLEEP */
+#define RCC_APB1LLPENR_TIM6LPEN       (1 << 4)   /* Bit 4:  TIM6 enable in CSLEEP */
+#define RCC_APB1LLPENR_TIM5LPEN       (1 << 3)   /* Bit 3:  TIM5 enable in CSLEEP */
+#define RCC_APB1LLPENR_TIM4LPEN       (1 << 2)   /* Bit 2:  TIM4 enable in CSLEEP */
+#define RCC_APB1LLPENR_TIM3LPEN       (1 << 1)   /* Bit 1:  TIM3 enable in CSLEEP */
 #define RCC_APB1LLPENR_TIM2LPEN       (1 << 0)   /* Bit 0:  TIM2 enable in CSLEEP */
+
+#define RCC_APB1LLPENR_ALLTIM         (RCC_APB1LLPENR_TIM2LPEN | RCC_APB1LLPENR_TIM3LPEN | \
+                                       RCC_APB1LLPENR_TIM4LPEN | RCC_APB1LLPENR_TIM5LPEN | \
+                                       RCC_APB1LLPENR_TIM6LPEN | RCC_APB1LLPENR_TIM7LPEN | \
+                                       RCC_APB1LLPENR_TIM10LPEN | RCC_APB1LLPENR_TIM11LPEN | \
+                                       RCC_APB1LLPENR_TIM12LPEN | RCC_APB1LLPENR_TIM13LPEN | \
+                                       RCC_APB1LLPENR_TIM14LPEN)
 
 /* APB2 peripheral clock enable in Sleep mode */
 
+#define RCC_APB2LPENR_TIM9LPEN        (1 << 19)  /* Bit 19: TIM9 enable in CSLEEP */
+#define RCC_APB2LPENR_TIM17LPEN       (1 << 18)  /* Bit 18: TIM17 enable in CSLEEP */
+#define RCC_APB2LPENR_TIM16LPEN       (1 << 17)  /* Bit 17: TIM16 enable in CSLEEP */
+#define RCC_APB2LPENR_TIM15LPEN       (1 << 16)  /* Bit 16: TIM15 enable in CSLEEP */
+#define RCC_APB2LPENR_TIM18LPEN       (1 << 15)  /* Bit 15: TIM18 enable in CSLEEP */
 #define RCC_APB2LPENR_USART1LPEN      (1 << 4)   /* Bit 4:  USART1 enable in CSLEEP */
+#define RCC_APB2LPENR_TIM8LPEN        (1 << 1)   /* Bit 1:  TIM8 enable in CSLEEP */
+#define RCC_APB2LPENR_TIM1LPEN        (1 << 0)   /* Bit 0:  TIM1 enable in CSLEEP */
+
+#define RCC_APB2LPENR_ALLTIM          (RCC_APB2LPENR_TIM1LPEN | RCC_APB2LPENR_TIM8LPEN | \
+                                       RCC_APB2LPENR_TIM9LPEN | RCC_APB2LPENR_TIM15LPEN | \
+                                       RCC_APB2LPENR_TIM16LPEN | RCC_APB2LPENR_TIM17LPEN | \
+                                       RCC_APB2LPENR_TIM18LPEN)
 
 /* Peripheral kernel clock select register 13 */
 

@@ -226,6 +226,10 @@ void __start_c(void)
 #ifdef CONFIG_STM32_USART1
   putreg32(RCC_APB2LPENR_USART1LPEN, STM32_RCC_APB2LPENSR);
 #endif
+#ifdef CONFIG_STM32_TIM
+  putreg32(RCC_APB1LLPENR_ALLTIM, STM32_RCC_APB1LLPENSR);
+  putreg32(RCC_APB2LPENR_ALLTIM, STM32_RCC_APB2LPENSR);
+#endif
 
   /* Mark the board's I/O voltage domains as supply-valid before any GPIO
    * pad is driven.  The mask of PWR_SVMCR3_* bits is board-specific and

@@ -79,7 +79,12 @@
 #define STM32_TIM5_BASE       0x50000c00
 #define STM32_TIM6_BASE       0x50001000
 #define STM32_TIM7_BASE       0x50001400
+#define STM32_TIM12_BASE      0x50001800
+#define STM32_TIM13_BASE      0x50001c00
+#define STM32_TIM14_BASE      0x50002000
 #define STM32_LPTIM1_BASE     0x50002400
+#define STM32_TIM10_BASE      0x50003000
+#define STM32_TIM11_BASE      0x50003400
 #define STM32_SPI2_BASE       0x50003800
 #define STM32_SPI3_BASE       0x50003c00
 #define STM32_USART2_BASE     0x50004400
@@ -97,9 +102,11 @@
 #define STM32_USART1_BASE     0x52001000
 #define STM32_SPI1_BASE       0x52003000
 #define STM32_SPI4_BASE       0x52003400
+#define STM32_TIM18_BASE      0x52003c00
 #define STM32_TIM15_BASE      0x52004000
 #define STM32_TIM16_BASE      0x52004400
 #define STM32_TIM17_BASE      0x52004800
+#define STM32_TIM9_BASE       0x52004c00
 #define STM32_SPI5_BASE       0x52005000
 
 /* APB4 peripherals *********************************************************/

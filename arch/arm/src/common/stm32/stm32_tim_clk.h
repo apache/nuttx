@@ -37,10 +37,11 @@
 
 /* RCC clock-enable and reset aliases for the common timer drivers.
  *
- * TIM1, TIM8, TIM9-11 and TIM15-17 are on APB2, TIM2-7 and TIM13 are on
- * APB1.  TIM12 and TIM14 are on APB2 on some families, which is detected
- * from the RCC bit definitions.  The APB1 register names differ between
- * families and are selected from the RCC registers the family defines.
+ * TIM1, TIM8, TIM9 and TIM15-17 are on APB2, TIM2-7 and TIM13 are on
+ * APB1.  TIM10-12 and TIM14 are on APB2 or APB1 depending on the family,
+ * which is detected from the RCC bit definitions.  The APB1 register
+ * names differ between families and are selected from the RCC registers
+ * the family defines.
  * The timer input clock is provided by each board as STM32_TIMn_CLKIN.
  */
 
@@ -73,14 +74,6 @@
 #define STM32_RCC_TIM9_EN       RCC_APB2ENR_TIM9EN
 #define STM32_RCC_TIM9_RST_REG  STM32_RCC_APB2RSTR
 #define STM32_RCC_TIM9_RST      RCC_APB2RSTR_TIM9RST
-#define STM32_RCC_TIM10_EN_REG  STM32_RCC_APB2ENR
-#define STM32_RCC_TIM10_EN      RCC_APB2ENR_TIM10EN
-#define STM32_RCC_TIM10_RST_REG STM32_RCC_APB2RSTR
-#define STM32_RCC_TIM10_RST     RCC_APB2RSTR_TIM10RST
-#define STM32_RCC_TIM11_EN_REG  STM32_RCC_APB2ENR
-#define STM32_RCC_TIM11_EN      RCC_APB2ENR_TIM11EN
-#define STM32_RCC_TIM11_RST_REG STM32_RCC_APB2RSTR
-#define STM32_RCC_TIM11_RST     RCC_APB2RSTR_TIM11RST
 #define STM32_RCC_TIM15_EN_REG  STM32_RCC_APB2ENR
 #define STM32_RCC_TIM15_EN      RCC_APB2ENR_TIM15EN
 #define STM32_RCC_TIM15_RST_REG STM32_RCC_APB2RSTR
@@ -122,6 +115,30 @@
 #define STM32_RCC_TIM13_EN      STM32_RCC_TIM_APB1EN(13)
 #define STM32_RCC_TIM13_RST_REG STM32_RCC_TIM_APB1RST_REG
 #define STM32_RCC_TIM13_RST     STM32_RCC_TIM_APB1RST(13)
+
+#ifdef RCC_APB2ENR_TIM10EN
+#  define STM32_RCC_TIM10_EN_REG  STM32_RCC_APB2ENR
+#  define STM32_RCC_TIM10_EN      RCC_APB2ENR_TIM10EN
+#  define STM32_RCC_TIM10_RST_REG STM32_RCC_APB2RSTR
+#  define STM32_RCC_TIM10_RST     RCC_APB2RSTR_TIM10RST
+#else
+#  define STM32_RCC_TIM10_EN_REG  STM32_RCC_TIM_APB1EN_REG
+#  define STM32_RCC_TIM10_EN      STM32_RCC_TIM_APB1EN(10)
+#  define STM32_RCC_TIM10_RST_REG STM32_RCC_TIM_APB1RST_REG
+#  define STM32_RCC_TIM10_RST     STM32_RCC_TIM_APB1RST(10)
+#endif
+
+#ifdef RCC_APB2ENR_TIM11EN
+#  define STM32_RCC_TIM11_EN_REG  STM32_RCC_APB2ENR
+#  define STM32_RCC_TIM11_EN      RCC_APB2ENR_TIM11EN
+#  define STM32_RCC_TIM11_RST_REG STM32_RCC_APB2RSTR
+#  define STM32_RCC_TIM11_RST     RCC_APB2RSTR_TIM11RST
+#else
+#  define STM32_RCC_TIM11_EN_REG  STM32_RCC_TIM_APB1EN_REG
+#  define STM32_RCC_TIM11_EN      STM32_RCC_TIM_APB1EN(11)
+#  define STM32_RCC_TIM11_RST_REG STM32_RCC_TIM_APB1RST_REG
+#  define STM32_RCC_TIM11_RST     STM32_RCC_TIM_APB1RST(11)
+#endif
 
 #ifdef RCC_APB2ENR_TIM12EN
 #  define STM32_RCC_TIM12_EN_REG  STM32_RCC_APB2ENR

@@ -45,12 +45,18 @@
  *   - STM32C5        : RCC_RTCCR (LSION/LSIRDY)
  *   - STM32WB        : RCC_CSR   (LSI1ON/LSI1RDY)
  *   - STM32H5/U5     : RCC_BDCR  (LSION/LSIRDY)
+ *   - STM32N6        : RCC_CR    (LSION), RCC_SR (LSIRDY)
  *
  * A single driver therefore serves all of them, selecting the register with
  * the preprocessor below.
  */
 
-#if defined(CONFIG_ARCH_CHIP_STM32C5)
+#if defined(CONFIG_ARCH_CHIP_STM32N6)
+#  define STM32_RCC_LSI_REG STM32_RCC_CR
+#  define STM32_RCC_LSIRDY_REG STM32_RCC_SR
+#  define RCC_LSI_LSION      RCC_CR_LSION
+#  define RCC_LSI_LSIRDY     RCC_SR_LSIRDY
+#elif defined(CONFIG_ARCH_CHIP_STM32C5)
 #  define STM32_RCC_LSI_REG STM32_RCC_RTCCR
 #  define RCC_LSI_LSION      RCC_RTCCR_LSION
 #  define RCC_LSI_LSIRDY     RCC_RTCCR_LSIRDY
@@ -71,6 +77,10 @@
 #  define STM32_RCC_LSI_REG STM32_RCC_CSR
 #  define RCC_LSI_LSION      RCC_CSR_LSION
 #  define RCC_LSI_LSIRDY     RCC_CSR_LSIRDY
+#endif
+
+#ifndef STM32_RCC_LSIRDY_REG
+#  define STM32_RCC_LSIRDY_REG STM32_RCC_LSI_REG
 #endif
 
 /****************************************************************************
@@ -104,7 +114,7 @@ void stm32_rcc_enablelsi(void)
 
   /* Wait for the internal LSI oscillator to be stable. */
 
-  while ((getreg32(STM32_RCC_LSI_REG) & RCC_LSI_LSIRDY) == 0);
+  while ((getreg32(STM32_RCC_LSIRDY_REG) & RCC_LSI_LSIRDY) == 0);
 
 #ifdef CONFIG_STM32_HAVE_IP_PWR_M33_V1
   /* Disable backup domain access */
