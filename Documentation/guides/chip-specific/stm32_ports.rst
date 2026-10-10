@@ -207,13 +207,9 @@ IP core     Selector                           Families
 ==========  =================================  =================================
 M0_V1       ``STM32_HAVE_IP_TIMERS_M0_V1``      Cortex-M0 (C0, F0, G0, L0, U0)
 V1          ``STM32_HAVE_IP_TIMERS_V1``         F1, F2, F4, L1, F37x
-V2          ``STM32_HAVE_IP_TIMERS_V2``         F30x, F33x, WB
-V3          ``STM32_HAVE_IP_TIMERS_V3``         G4, H5, U5
+V2          ``STM32_HAVE_IP_TIMERS_V2``         F30x, F33x, F7, H7, L4, L5, WB, WL5
+V3          ``STM32_HAVE_IP_TIMERS_V3``         G4, H5, H7RS, U5
 ==========  =================================  =================================
-
-Families with their own timer register header (F7, H7, L4, L5, WL5) use the
-same ``STM32_TIM_*`` programming model and are built from the same
-common driver.
 
 The one functional difference that matters to a generic timer user is the
 **counter width**.  Every timer is 16-bit except TIM2 and TIM5, which are
@@ -521,7 +517,7 @@ RTC           to be done    arch/arm/src/stm32l4/stm32l4_rtc.c
 SAI           to be done    arch/arm/src/stm32l4/stm32l4_sai.c       
 SDMMC         to be done    arch/arm/src/stm32l4/stm32l4_sdmmc.c     
 SPI/I2S       to be done    arch/arm/src/stm32l4/stm32l4_spi.c       
-TIM           to be done    arch/arm/src/common/stm32/stm32_tim.c    
+TIM           v2            arch/arm/src/common/stm32/stm32_tim.c    
 USART/LPUART  v3            arch/arm/src/stm32l4/stm32l4_serial.c    
 USB           OTG FS        arch/arm/src/stm32l4/stm32l4_otgfsdev.c  
 PULSECOUNT    n/a           arch/arm/src/common/stm32/stm32_pulsecount.c
@@ -556,7 +552,7 @@ RNG           to be done    arch/arm/src/stm32f7/stm32_rng.c
 RTC           to be done    arch/arm/src/stm32f7/stm32_rtc.c       
 SDMMC         to be done    arch/arm/src/stm32f7/stm32_sdmmc.c     
 SPI/I2S       to be done    arch/arm/src/stm32f7/stm32_i2s.c       
-TIM           to be done    arch/arm/src/common/stm32/stm32_tim.c  
+TIM           v2            arch/arm/src/common/stm32/stm32_tim.c  
 USART/LPUART  v3            arch/arm/src/stm32f7/stm32_serial.c    
 USB           OTG FS/HS     arch/arm/src/stm32f7/stm32_otgdev.c    
 WWDG          v1            not supported                          
@@ -662,7 +658,7 @@ RNG           to be done    arch/arm/src/stm32h7/stm32_rng.c
 RTC           to be done    arch/arm/src/stm32h7/stm32_rtc.c       
 SDMMC         to be done    arch/arm/src/stm32h7/stm32_sdmmc.c     
 SPI/I2S       to be done    arch/arm/src/stm32h7/stm32_spi.c       
-TIM           to be done    arch/arm/src/common/stm32/stm32_tim.c  
+TIM           v2, H7RS v3   arch/arm/src/common/stm32/stm32_tim.c  
 USART/LPUART  v4            arch/arm/src/stm32h7/stm32_serial.c    
 USB           OTG FS/HS     arch/arm/src/stm32h7/stm32_otgdev.c    
 WWDG          v1            arch/arm/src/stm32h7/stm32_wwdg.c      
@@ -753,7 +749,7 @@ RNG           to be done    not supported
 RTC           to be done    not supported                           
 SDMMC         to be done    not supported                           
 SPI/I2S       to be done    arch/arm/src/stm32l5/stm32l5_spi.c      
-TIM/LPTIM     to be done    arch/arm/src/common/stm32/stm32_tim.c   
+TIM/LPTIM     v2            arch/arm/src/common/stm32/stm32_tim.c   
 USART/LPUART  v3            arch/arm/src/stm32l5/stm32l5_serial.c   
 USB           device        not supported                           
 ============  ============  ========================================
@@ -942,7 +938,7 @@ RCC           to be done    arch/arm/src/stm32wl5/stm32wl5_rcc.c
 RNG           to be done    not supported                             
 RTC           to be done    not supported                             
 SPI/I2S       to be done    arch/arm/src/stm32wl5/stm32wl5_spi.c      
-TIM/LPTIM     to be done    arch/arm/src/common/stm32/stm32_tim.c     
+TIM/LPTIM     v2            arch/arm/src/common/stm32/stm32_tim.c     
 USART/LPUART  v3            arch/arm/src/stm32wl5/stm32wl5_serial.c   
 USB           to be done    not supported                             
 ============  ============  ==========================================

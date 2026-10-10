@@ -3902,7 +3902,6 @@ arch/arm/src/stm32f7/hardware/stm32_sai.h cuichaochao916@gmail.com alin.jerpelea
 arch/arm/src/stm32f7/hardware/stm32_sdmmc.h julian@oes.ch alin.jerpelea@sony.com
 arch/arm/src/stm32f7/hardware/stm32_spi.h alin.jerpelea@sony.com
 arch/arm/src/stm32f7/hardware/stm32_syscfg.h alin.jerpelea@sony.com
-arch/arm/src/stm32f7/hardware/stm32f7_tim.h alin.jerpelea@sony.com
 arch/arm/src/stm32f7/hardware/stm32_uart.h alin.jerpelea@sony.com
 arch/arm/src/stm32f7/hardware/stm32f72xx73xx_adc.h alin.jerpelea@sony.com petro.karashchenko@gmail.com raiden00@railab.me
 arch/arm/src/stm32f7/hardware/stm32f72xx73xx_dbgmcu.h alin.jerpelea@sony.com petro.karashchenko@gmail.com xiaoxiang@xiaomi.com
@@ -3916,7 +3915,6 @@ arch/arm/src/stm32f7/hardware/stm32f72xx73xx_pwr.h alin.jerpelea@sony.com
 arch/arm/src/stm32f7/hardware/stm32f72xx73xx_rcc.h alin.jerpelea@sony.com
 arch/arm/src/stm32f7/hardware/stm32f72xx73xx_spi.h alin.jerpelea@sony.com
 arch/arm/src/stm32f7/hardware/stm32f72xx73xx_syscfg.h alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com gustavo.nihei@espressif.com
-arch/arm/src/stm32f7/hardware/stm32f72xx73xx_tim.h alin.jerpelea@sony.com devel@sumpfralle.de 101105604+simbit18@users.noreply.github.com anthony@vergeaero.com
 arch/arm/src/stm32f7/hardware/stm32f72xx73xx_uart.h alin.jerpelea@sony.com gustavo.nihei@espressif.com
 arch/arm/src/stm32f7/hardware/stm32f74xx75xx_dbgmcu.h alin.jerpelea@sony.com petro.karashchenko@gmail.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32f7/hardware/stm32f74xx75xx_dma.h alin.jerpelea@sony.com petro.karashchenko@gmail.com
@@ -3928,7 +3926,6 @@ arch/arm/src/stm32f7/hardware/stm32f74xx75xx_pinmap_legacy.h David.Sidrane@NscDg
 arch/arm/src/stm32f7/hardware/stm32f74xx75xx_pwr.h alin.jerpelea@sony.com
 arch/arm/src/stm32f7/hardware/stm32f74xx75xx_rcc.h alin.jerpelea@sony.com
 arch/arm/src/stm32f7/hardware/stm32f74xx75xx_syscfg.h alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com
-arch/arm/src/stm32f7/hardware/stm32f74xx75xx_tim.h alin.jerpelea@sony.com devel@sumpfralle.de 101105604+simbit18@users.noreply.github.com anthony@vergeaero.com
 arch/arm/src/stm32f7/hardware/stm32f74xx77xx_adc.h alin.jerpelea@sony.com raiden00@railab.me
 arch/arm/src/stm32f7/hardware/stm32f74xx77xx_i2c.h alin.jerpelea@sony.com petro.karashchenko@gmail.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32f7/hardware/stm32f74xx77xx_spi.h alin.jerpelea@sony.com
@@ -3943,7 +3940,6 @@ arch/arm/src/stm32f7/hardware/stm32f76xx77xx_pinmap_legacy.h David.Sidrane@NscDg
 arch/arm/src/stm32f7/hardware/stm32f76xx77xx_pwr.h alin.jerpelea@sony.com
 arch/arm/src/stm32f7/hardware/stm32f76xx77xx_rcc.h alin.jerpelea@sony.com gustavo.nihei@espressif.com
 arch/arm/src/stm32f7/hardware/stm32f76xx77xx_syscfg.h alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com xiaoxiang@xiaomi.com
-arch/arm/src/stm32f7/hardware/stm32f76xx77xx_tim.h alin.jerpelea@sony.com dpo@certi.org.br devel@sumpfralle.de 101105604+simbit18@users.noreply.github.com
 arch/arm/src/stm32f7/stm32_adc.c raiden00@railab.me Lok Tep xiaoxiang@xiaomi.com david_s5@nscdg.com
 arch/arm/src/stm32f7/stm32_adc.h Lok Tep raiden00@railab.me alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com
 arch/arm/src/stm32f7/stm32_alarm.h david_s5@nscdg.com juha.niskanen@haltian.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com
@@ -4182,7 +4178,6 @@ arch/arm/src/stm32h7/hardware/stm32_rtcc.h david.sidrane@nscdg.com alin.jerpelea
 arch/arm/src/stm32h7/hardware/stm32_sdmmc.h alin.jerpelea@sony.com raiden00@railab.me javiercasas@geotab.com po@lambdaconcept.com
 arch/arm/src/stm32h7/hardware/stm32_spi.h raiden00@railab.me alin.jerpelea@sony.com alexanderlunev@mail.ru javiercasas@geotab.com
 arch/arm/src/stm32h7/hardware/stm32_syscfg.h alin.jerpelea@sony.com raiden00@railab.me javiercasas@geotab.com lwazeh@gmail.com
-arch/arm/src/stm32h7/hardware/stm32h7_tim.h raiden00pl@gmail.com alin.jerpelea@sony.com anthony@vergeaero.com dpo@certi.org.br
 arch/arm/src/stm32h7/hardware/stm32_uart.h alin.jerpelea@sony.com raiden00@railab.me javiercasas@geotab.com lwazeh@gmail.com
 arch/arm/src/stm32h7/hardware/stm32_wdg.h jlange@2g-eng.com alin.jerpelea@sony.com petro.karashchenko@gmail.com
 arch/arm/src/stm32h7/hardware/stm32h7b3xx_flash.h javiercasas@geotab.com 101105604+simbit18@users.noreply.github.com alin.jerpelea@sony.com
@@ -4342,7 +4337,6 @@ arch/arm/src/stm32l4/hardware/stm32l4_sai.h alin.jerpelea@sony.com xiaoxiang@xia
 arch/arm/src/stm32l4/hardware/stm32l4_sdmmc.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32l4/hardware/stm32l4_spi.h alin.jerpelea@sony.com juha.niskanen@haltian.com kychu@qq.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32l4/hardware/stm32l4_syscfg.h alin.jerpelea@sony.com
-arch/arm/src/stm32l4/hardware/stm32l4_tim.h alin.jerpelea@sony.com matias@imap.cc s.nikitenko@me.com anthony@vergeaero.com
 arch/arm/src/stm32l4/hardware/stm32l4_uart.h alin.jerpelea@sony.com juha.niskanen@haltian.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32l4/hardware/stm32l4_usbdev.h alin.jerpelea@sony.com jussi.kivilinna@haltian.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32l4/hardware/stm32l4_wdg.h alin.jerpelea@sony.com
@@ -4489,7 +4483,6 @@ arch/arm/src/stm32l5/hardware/stm32l5_pinmap.h mijung@gmx.net alin.jerpelea@sony
 arch/arm/src/stm32l5/hardware/stm32l5_pwr.h mijung@gmx.net alin.jerpelea@sony.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32l5/hardware/stm32l5_spi.h mijung@gmx.net alin.jerpelea@sony.com
 arch/arm/src/stm32l5/hardware/stm32l5_syscfg.h mijung@gmx.net alin.jerpelea@sony.com
-arch/arm/src/stm32l5/hardware/stm32l5_tim.h mijung@gmx.net alin.jerpelea@sony.com devel@sumpfralle.de anthony@vergeaero.com
 arch/arm/src/stm32l5/hardware/stm32l5_uart.h mijung@gmx.net alin.jerpelea@sony.com
 arch/arm/src/stm32l5/stm32l5.h mijung@gmx.net alin.jerpelea@sony.com
 arch/arm/src/stm32l5/stm32l562xx_rcc.c mijung@gmx.net xiaoxiang@xiaomi.com alin.jerpelea@sony.com
@@ -4671,7 +4664,6 @@ arch/arm/src/stm32wl5/hardware/stm32wl5_pinmap.h michal.lyszczek@bofc.pl alin.je
 arch/arm/src/stm32wl5/hardware/stm32wl5_pwr.h michal.lyszczek@bofc.pl devel@sumpfralle.de alin.jerpelea@sony.com
 arch/arm/src/stm32wl5/hardware/stm32wl5_spi.h 49699333+dependabot[bot]@users.noreply.github.com alin.jerpelea@sony.com
 arch/arm/src/stm32wl5/hardware/stm32wl5_syscfg.h michal.lyszczek@bofc.pl alin.jerpelea@sony.com
-arch/arm/src/stm32wl5/hardware/stm32wl5_tim.h michal.lyszczek@bofc.pl devel@sumpfralle.de alin.jerpelea@sony.com
 arch/arm/src/stm32wl5/hardware/stm32wl5_uart.h michal.lyszczek@bofc.pl alin.jerpelea@sony.com
 arch/arm/src/stm32wl5/stm32wl5.h michal.lyszczek@bofc.pl 49699333+dependabot[bot]@users.noreply.github.com alin.jerpelea@sony.com
 arch/arm/src/stm32wl5/stm32wl5_allocateheap.c michal.lyszczek@bofc.pl xiaoxiang@xiaomi.com alin.jerpelea@sony.com huangqi3@xiaomi.com
