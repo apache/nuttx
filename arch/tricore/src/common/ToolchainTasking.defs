@@ -165,3 +165,13 @@ CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
 
 LDELFFLAGS = -r -e _start
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)elf$(DELIM)gnu-elf.ld)
+
+# The astc assembler has no C preprocessor and .asm files need explicit preprocessing with ctc -E.
+
+define ASSEMBLE
+	$(ECHO_BEGIN)"AS: $1 "
+	$(Q) ctc -E $(filter-out --%,$(AFLAGS)) $1 $($(strip $1)_AFLAGS) -o $2.pp.asm
+	$(Q) $(CC) -c $(AFLAGS) $2.pp.asm $($(strip $1)_AFLAGS) -o $2
+	$(call DELFILE,$2.pp.asm)
+	$(ECHO_END)
+endef
