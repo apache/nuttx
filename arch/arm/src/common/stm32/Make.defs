@@ -43,6 +43,14 @@ CHIP_CSRCS += stm32_waste.c
 CHIP_CSRCS += stm32_uid.c
 CHIP_CSRCS += stm32_lsi.c
 
+ifeq ($(CONFIG_STM32_IWDG),y)
+CHIP_CSRCS += stm32_iwdg.c
+endif
+
+ifeq ($(CONFIG_STM32_WWDG),y)
+CHIP_CSRCS += stm32_wwdg.c
+endif
+
 ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
 ifneq ($(filter y,$(CONFIG_STM32_COMMON_LEGACY) \
             $(CONFIG_ARCH_CORTEXM33)),)
@@ -423,16 +431,6 @@ endif
 
 endif
 
-ifneq ($(CONFIG_STM32_COMMON_LEGACY)$(CONFIG_ARCH_CHIP_STM32H7)$(CONFIG_ARCH_CHIP_STM32L4),)
-ifeq ($(CONFIG_STM32_IWDG)$(CONFIG_STM32_HAVE_IP_WDG_M3M4_V1),yy)
-CHIP_CSRCS += stm32_iwdg_m3m4_v1.c
-endif
-
-ifeq ($(CONFIG_STM32_WWDG)$(CONFIG_STM32_HAVE_IP_WDG_M3M4_V1),yy)
-CHIP_CSRCS += stm32_wwdg_m3m4_v1.c
-endif
-endif
-
 ifeq ($(CONFIG_ARCH_CORTEXM0),y)
 
 CHIP_CSRCS += stm32_irq_m0_v1.c
@@ -547,13 +545,6 @@ CHIP_CSRCS += stm32_rng_m0_v1.c
 endif
 
 
-ifeq ($(CONFIG_STM32_IWDG)$(CONFIG_STM32_HAVE_IP_WDG_M0_V1),yy)
-CHIP_CSRCS += stm32_iwdg_m0_v1.c
-endif
-
-ifeq ($(CONFIG_STM32_WWDG)$(CONFIG_STM32_HAVE_IP_WDG_M0_V1),yy)
-CHIP_CSRCS += stm32_wwdg_m0_v1.c
-endif
 
 ifeq ($(CONFIG_STM32_FDCAN),y)
 ifeq ($(CONFIG_STM32_HAVE_IP_FDCAN_MCAN_M0_V1),y)

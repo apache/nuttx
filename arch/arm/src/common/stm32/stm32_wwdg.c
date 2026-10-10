@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_wwdg_m3m4_v1.c
+ * arch/arm/src/common/stm32/stm32_wwdg.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -339,6 +339,10 @@ static int stm32_start(struct watchdog_lowerhalf_s *lower)
 
   wdinfo("Entry\n");
   DEBUGASSERT(priv);
+
+  /* Clear the pending interrupt bit */
+
+  modifyreg32(STM32_WWDG_SR, WWDG_SR_EWIF, 0);
 
   /* The watchdog is always disabled after a reset. It is enabled by setting
    * the WDGA bit in the WWDG_CR register, then it cannot be disabled again

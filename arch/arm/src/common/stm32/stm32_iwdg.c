@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_iwdg_m0_v1.c
+ * arch/arm/src/common/stm32/stm32_iwdg.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -45,12 +45,6 @@
 
 #if defined(CONFIG_WATCHDOG) && defined(CONFIG_STM32_IWDG)
 
-/* STM32C0 uses the second CSR register for LSI. */
-
-#ifdef CONFIG_ARCH_CHIP_STM32C0
-#  define STM32_RCC_CSR  STM32_RCC_CSR2
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -72,7 +66,7 @@
  *   1000 * 4095 / Fmin = 34,944 MSec
  */
 
-#define IWDG_FMIN       (STM32_LSI_FREQUENCY / 256)
+#define IWDG_FMIN       (STM32_LSI_FREQUENCY / (4 << IWDG_PR_MAX))
 #define IWDG_MAXTIMEOUT (1000 * IWDG_RLR_MAX / IWDG_FMIN)
 
 /* Configuration ************************************************************/
@@ -533,15 +527,7 @@ static int stm32_settimeout(struct watchdog_lowerhalf_s *lower,
 
   for (prescaler = 0; ; prescaler++)
     {
-      /* PR = 0 -> Divider = 4   = 1 << 2
-       * PR = 1 -> Divider = 8   = 1 << 3
-       * PR = 2 -> Divider = 16  = 1 << 4
-       * PR = 3 -> Divider = 32  = 1 << 5
-       * PR = 4 -> Divider = 64  = 1 << 6
-       * PR = 5 -> Divider = 128 = 1 << 7
-       * PR = 6 -> Divider = 256 = 1 << 8
-       * PR = n -> Divider       = 1 << (n+2)
-       */
+      /* PR = n -> Divider = 1 << (n + 2), n = 0..IWDG_PR_MAX */
 
       shift = prescaler + 2;
 
@@ -564,7 +550,7 @@ static int stm32_settimeout(struct watchdog_lowerhalf_s *lower,
        * settings.
        */
 
-      if (reload <= IWDG_RLR_MAX || prescaler == 6)
+      if (reload <= IWDG_RLR_MAX || prescaler == IWDG_PR_MAX)
         {
           /* Note that we explicitly break out of the loop rather than using
            * the 'for' loop termination logic because we do not want the
@@ -669,7 +655,13 @@ void stm32_iwdginitialize(const char *devpath, uint32_t lsifreq)
    */
 
   stm32_rcc_enablelsi();
+#if defined(STM32_RCC_CSR)
   wdinfo("RCC CSR: %08" PRIx32 "\n", getreg32(STM32_RCC_CSR));
+#elif defined(STM32_RCC_CSR2)
+  wdinfo("RCC CSR2: %08" PRIx32 "\n", getreg32(STM32_RCC_CSR2));
+#elif defined(STM32_RCC_BDCR)
+  wdinfo("RCC BDCR: %08" PRIx32 "\n", getreg32(STM32_RCC_BDCR));
+#endif
 
   /* Select an arbitrary initial timeout value.  But don't start the watchdog
    * yet. NOTE: If the "Hardware watchdog" feature is enabled through the
@@ -691,11 +683,9 @@ void stm32_iwdginitialize(const char *devpath, uint32_t lsifreq)
 #if defined(CONFIG_STM32_JTAG_FULL_ENABLE) || \
     defined(CONFIG_STM32_JTAG_NOJNTRST_ENABLE) || \
     defined(CONFIG_STM32_JTAG_SW_ENABLE)
-    {
-#ifdef DBGMCU_IWDG_STOP
-      modifyreg32(STM32_DBGMCU_IWDG_FZ, 0, DBGMCU_IWDG_STOP);
-#endif
-    }
+#  ifdef DBGMCU_IWDG_STOP
+  modifyreg32(STM32_DBGMCU_IWDG_FZ, 0, DBGMCU_IWDG_STOP);
+#  endif
 #endif
 }
 
