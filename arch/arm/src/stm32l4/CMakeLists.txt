@@ -44,9 +44,7 @@ if(NOT CONFIG_ARCH_IDLE_CUSTOM)
   list(APPEND SRCS stm32l4_idle.c)
 endif()
 
-if(NOT CONFIG_SCHED_TICKLESS)
-  list(APPEND SRCS stm32l4_timerisr.c)
-else()
+if(CONFIG_SCHED_TICKLESS)
   list(APPEND SRCS stm32l4_tickless.c)
 endif()
 

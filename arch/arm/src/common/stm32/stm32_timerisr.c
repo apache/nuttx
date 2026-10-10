@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32l4/stm32l4_timerisr.c
+ * arch/arm/src/common/stm32/stm32_timerisr.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -31,13 +31,16 @@
 
 #include <nuttx/debug.h>
 #include <nuttx/arch.h>
+#include <nuttx/timers/arch_timer.h>
 #include <arch/board/board.h>
 
 #include "nvic.h"
 #include "clock/clock.h"
 #include "arm_internal.h"
+#include "systick.h"
+
 #include "chip.h"
-#include "stm32.h"
+#include "stm32_systick.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -47,28 +50,22 @@
  * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
  * system clock ticks per second.  That value is a user configurable setting
  * that defaults to 100 (100 ticks per second = 10 MS interval).
- *
- * The RCC feeds the Cortex System Timer (SysTick) with the AHB clock (HCLK)
- * divided by 8.  The SysTick can work either with this clock or with the
- * Cortex clock (HCLK), configurable in the SysTick Control and Status
- * register.
  */
 
-#undef CONFIG_STM32_SYSTICK_HCLKd8 /* Power up default is HCLK, not HCLK/8 */
-                                   /* And I don't know now to re-configure it yet */
-
-#ifdef CONFIG_STM32_SYSTICK_HCLKd8
-#  define SYSTICK_RELOAD ((STM32_HCLK_FREQUENCY / 8 / CLK_TCK) - 1)
-#else
-#  define SYSTICK_RELOAD ((STM32_HCLK_FREQUENCY / CLK_TCK) - 1)
-#endif
+#define SYSTICK_RELOAD ((STM32_SYSTICK_CLOCK / CLK_TCK) - 1)
 
 /* The size of the reload field is 24 bits.  Verify that the reload value
  * will fit in the reload register.
  */
 
-#if SYSTICK_RELOAD > 0x00ffffff
+#define SYSTICK_MAX 0x00ffffff
+#if SYSTICK_RELOAD > SYSTICK_MAX
 #  error SYSTICK_RELOAD exceeds the range of the RELOAD register
+#endif
+
+#if (defined(CONFIG_ARMV7M_SYSTICK) || defined(CONFIG_ARMV8M_SYSTICK)) && \
+    defined(CONFIG_TIMER_ARCH)
+#  define HAVE_SYSTICK_LOWERHALF 1
 #endif
 
 /****************************************************************************
@@ -84,6 +81,7 @@
  *
  ****************************************************************************/
 
+#ifndef HAVE_SYSTICK_LOWERHALF
 static int stm32_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Process timer interrupt */
@@ -91,10 +89,48 @@ static int stm32_timerisr(int irq, uint32_t *regs, void *arg)
   nxsched_process_timer();
   return 0;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Function:  up_adjtime
+ *
+ * Description:
+ *   Adjusts timer period. This call is used when adjusting timer period as
+ *   defined in adjtime() function.
+ *
+ * Input Parameters:
+ *   ppb - Adjustment in parts per billion (nanoseconds per second).
+ *         Zero is default rate, positive value makes clock run faster
+ *         and negative value slower.
+ *
+ * Assumptions:
+ *   Called from within critical section or interrupt context.
+ ****************************************************************************/
+
+#ifdef CONFIG_CLOCK_ADJTIME
+void up_adjtime(long ppb)
+{
+  uint32_t period = SYSTICK_RELOAD;
+
+  if (ppb != 0)
+    {
+      period -= (long long)ppb * SYSTICK_RELOAD / 1000000000;
+    }
+
+  /* Check whether period is at maximum value. */
+
+  if (period > SYSTICK_MAX)
+    {
+      period = SYSTICK_MAX;
+    }
+
+  putreg32(period, NVIC_SYSTICK_RELOAD);
+}
+#endif
 
 /****************************************************************************
  * Function:  up_timer_initialize
@@ -116,21 +152,14 @@ void up_timer_initialize(void)
   regval |= (NVIC_SYSH_PRIORITY_DEFAULT << NVIC_SYSH_PRIORITY_PR15_SHIFT);
   putreg32(regval, NVIC_SYSH12_15_PRIORITY);
 
-  /* Make sure that the SYSTICK clock source is set correctly */
-
-#if 0 /* Does not work.  Comes up with HCLK source and I can't change it */
-  regval = getreg32(NVIC_SYSTICK_CTRL);
-#ifdef CONFIG_STM32_SYSTICK_HCLKd8
-  regval &= ~NVIC_SYSTICK_CTRL_CLKSOURCE;
+#ifdef HAVE_SYSTICK_LOWERHALF
+  up_timer_set_lowerhalf(systick_initialize(STM32_SYSTICK_CORECLK,
+                                            STM32_SYSTICK_CLOCK, -1));
 #else
-  regval |= NVIC_SYSTICK_CTRL_CLKSOURCE;
-#endif
-  putreg32(regval, NVIC_SYSTICK_CTRL);
-#endif
-
   /* Configure SysTick to interrupt at the requested rate */
 
   putreg32(SYSTICK_RELOAD, NVIC_SYSTICK_RELOAD);
+  putreg32(0, NVIC_SYSTICK_CURRENT);
 
   /* Attach the timer interrupt vector */
 
@@ -138,10 +167,16 @@ void up_timer_initialize(void)
 
   /* Enable SysTick interrupts */
 
-  putreg32((NVIC_SYSTICK_CTRL_CLKSOURCE | NVIC_SYSTICK_CTRL_TICKINT |
-            NVIC_SYSTICK_CTRL_ENABLE), NVIC_SYSTICK_CTRL);
+  regval = NVIC_SYSTICK_CTRL_TICKINT | NVIC_SYSTICK_CTRL_ENABLE;
+  if (STM32_SYSTICK_CORECLK)
+    {
+      regval |= NVIC_SYSTICK_CTRL_CLKSOURCE;
+    }
+
+  putreg32(regval, NVIC_SYSTICK_CTRL);
 
   /* And enable the timer interrupt */
 
   up_enable_irq(STM32_IRQ_SYSTICK);
+#endif
 }
