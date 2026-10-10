@@ -33,6 +33,8 @@
 #include <errno.h>
 #include <string.h>
 
+#include "libc.h"
+
 #ifdef CONFIG_FILE_STREAM
 
 /****************************************************************************
@@ -114,6 +116,7 @@ wint_t fgetwc_unlocked(FAR FILE *f)
 wint_t fgetwc(FAR FILE *f)
 {
   wint_t c;
+
   flockfile(f);
   c = fgetwc_unlocked(f);
   funlockfile(f);
