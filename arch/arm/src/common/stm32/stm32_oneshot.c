@@ -226,8 +226,8 @@ int stm32_oneshot_max_delay(struct stm32_oneshot_s *oneshot, uint64_t *usec)
 {
   DEBUGASSERT(oneshot != NULL && usec != NULL);
 
-  *usec = (uint64_t)(UINT32_MAX / oneshot->frequency) *
-          (uint64_t)USEC_PER_SEC;
+  *usec = ((((uint64_t)1 << STM32_TIM_GETWIDTH(oneshot->tch)) - 1) *
+           USEC_PER_SEC) / oneshot->frequency;
   return OK;
 }
 
@@ -264,22 +264,6 @@ int stm32_oneshot_start(struct stm32_oneshot_s *oneshot,
   DEBUGASSERT(oneshot && handler && ts);
   DEBUGASSERT(oneshot->tch);
 
-  /* Was the oneshot already running? */
-
-  flags = enter_critical_section();
-  if (oneshot->running)
-    {
-      /* Yes.. then cancel it */
-
-      tmrinfo("Already running... cancelling\n");
-      stm32_oneshot_cancel(oneshot, NULL);
-    }
-
-  /* Save the new handler and its argument */
-
-  oneshot->handler = handler;
-  oneshot->arg     = arg;
-
   /* Express the delay in microseconds */
 
   usec = ts->tv_sec * USEC_PER_SEC +
@@ -296,7 +280,30 @@ int stm32_oneshot_start(struct stm32_oneshot_s *oneshot,
   period = (usec * (uint64_t)oneshot->frequency) / USEC_PER_SEC;
 
   tmrinfo("usec=%llu period=%08llx\n", usec, period);
-  DEBUGASSERT(period <= UINT32_MAX);
+
+  /* The period must fit in the timer counter */
+
+  if (period > ((uint64_t)1 << STM32_TIM_GETWIDTH(oneshot->tch)) - 1)
+    {
+      tmrerr("ERROR: delay too long for the timer\n");
+      return -ERANGE;
+    }
+
+  /* Was the oneshot already running? */
+
+  flags = enter_critical_section();
+  if (oneshot->running)
+    {
+      /* Yes.. then cancel it */
+
+      tmrinfo("Already running... cancelling\n");
+      stm32_oneshot_cancel(oneshot, NULL);
+    }
+
+  /* Save the new handler and its argument */
+
+  oneshot->handler = handler;
+  oneshot->arg     = arg;
 
   /* Set up to receive the callback when the interrupt occurs */
 
