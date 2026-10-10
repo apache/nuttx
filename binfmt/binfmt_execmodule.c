@@ -44,6 +44,7 @@
 #include <task/spawn.h>
 #include <nuttx/spawn.h>
 #include <nuttx/binfmt/binfmt.h>
+#include <nuttx/lib/elf.h>
 
 #include "binfmt.h"
 #include "environ/environ.h"
@@ -387,6 +388,20 @@ int exec_module(FAR struct binary_s *binp,
 
 #ifdef CONFIG_BINFMT_LOADABLE
   tcb->group->tg_bininfo = binp;
+#endif
+
+#if defined(CONFIG_BINFMT_LOADABLE) && defined(CONFIG_LIBC_ELF) && \
+    defined(CONFIG_BUILD_FLAT)
+  /* The libraries the program needs belong to its task group, where its
+   * own dlopen() finds them.  Only in a flat build: elsewhere the program
+   * has another libc, with its own lock and heap.
+   */
+
+  libelf_registry_lock();
+  libelf_registry_move(&binp->mod.libraries,
+                       &tcb->group->tg_info->ta_modules);
+  binp->mod.registry = &tcb->group->tg_info->ta_modules;
+  libelf_registry_unlock();
 #endif
 
   /* Then activate the task at the provided priority */

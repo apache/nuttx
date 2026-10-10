@@ -91,6 +91,8 @@ extern "C"
 
 typedef CODE void (*tls_dtor_t)(FAR void *);
 
+struct module_s;
+
 /* This structure encapsulates all variables associated with getopt(). */
 
 struct getopt_s
@@ -148,6 +150,9 @@ struct task_info_s
 
 #ifdef CONFIG_PTHREAD_ATFORK
   struct list_node ta_atfork; /* Holds the pthread_atfork_s list */
+#endif
+#ifdef CONFIG_LIBC_ELF
+  FAR struct module_s *ta_modules; /* ELF objects this task group loaded */
 #endif
   pid_t ta_pid; /* Process ID */
 };

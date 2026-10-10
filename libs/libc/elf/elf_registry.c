@@ -32,6 +32,7 @@
 #include <errno.h>
 
 #include <nuttx/mutex.h>
+#include <nuttx/tls.h>
 #include <nuttx/lib/elf.h>
 
 /****************************************************************************
@@ -46,12 +47,34 @@
  * Private Data
  ****************************************************************************/
 
+/* One lock for every registry.  g_mod_registry holds the kernel modules of
+ * insmod(); what dlopen() loads is on the registry of the task group.
+ */
+
 static rmutex_t g_modlock = NXRMUTEX_INITIALIZER;
 static FAR struct module_s *g_mod_registry;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: libelf_registry
+ ****************************************************************************/
+
+FAR struct module_s **libelf_registry(void)
+{
+  return &task_get_info()->ta_modules;
+}
+
+/****************************************************************************
+ * Name: libelf_registry_kernel
+ ****************************************************************************/
+
+FAR struct module_s **libelf_registry_kernel(void)
+{
+  return &g_mod_registry;
+}
 
 /****************************************************************************
  * Name: libelf_registry_lock
@@ -98,7 +121,8 @@ void libelf_registry_unlock(void)
  *   Add a new entry to the module registry.
  *
  * Input Parameters:
- *   modp - The module data structure to be registered.
+ *   registry - The registry.
+ *   modp     - The module data structure to be registered.
  *
  * Returned Value:
  *   None
@@ -108,11 +132,13 @@ void libelf_registry_unlock(void)
  *
  ****************************************************************************/
 
-void libelf_registry_add(FAR struct module_s *modp)
+void libelf_registry_add(FAR struct module_s **registry,
+                         FAR struct module_s *modp)
 {
-  DEBUGASSERT(modp);
-  modp->flink = g_mod_registry;
-  g_mod_registry = modp;
+  DEBUGASSERT(registry != NULL && modp != NULL);
+  modp->flink    = *registry;
+  modp->registry = registry;
+  *registry      = modp;
 }
 
 /****************************************************************************
@@ -138,7 +164,9 @@ int libelf_registry_del(FAR struct module_s *modp)
   FAR struct module_s *prev;
   FAR struct module_s *curr;
 
-  for (prev = NULL, curr = g_mod_registry;
+  DEBUGASSERT(modp->registry != NULL);
+
+  for (prev = NULL, curr = *modp->registry;
        curr != NULL && curr != modp;
        prev = curr, curr = curr->flink);
 
@@ -150,7 +178,7 @@ int libelf_registry_del(FAR struct module_s *modp)
 
   if (prev == NULL)
     {
-      g_mod_registry = modp->flink;
+      *modp->registry = modp->flink;
     }
   else
     {
@@ -162,13 +190,30 @@ int libelf_registry_del(FAR struct module_s *modp)
 }
 
 /****************************************************************************
+ * Name: libelf_registry_move
+ ****************************************************************************/
+
+void libelf_registry_move(FAR struct module_s **from,
+                          FAR struct module_s **to)
+{
+  FAR struct module_s *modp;
+
+  while ((modp = *from) != NULL)
+    {
+      *from = modp->flink;
+      libelf_registry_add(to, modp);
+    }
+}
+
+/****************************************************************************
  * Name: libelf_registry_find
  *
  * Description:
  *   Find an entry in the module registry using the name of the module.
  *
  * Input Parameters:
- *   modname - The name of the module to be found
+ *   registry - The registry.
+ *   modname  - The name of the module to be found
  *
  * Returned Value:
  *   If the registry entry is found, a pointer to the module entry is
@@ -180,11 +225,12 @@ int libelf_registry_del(FAR struct module_s *modp)
  ****************************************************************************/
 
 #ifdef HAVE_LIBC_ELF_NAMES
-FAR struct module_s *libelf_registry_find(FAR const char *modname)
+FAR struct module_s *libelf_registry_find(FAR struct module_s **registry,
+                                          FAR const char *modname)
 {
   FAR struct module_s *modp;
 
-  for (modp = g_mod_registry;
+  for (modp = *registry;
        modp != NULL &&
        strncmp(modp->modname, modname, LIBC_ELF_NAMEMAX) != 0;
        modp = modp->flink);
@@ -202,7 +248,8 @@ FAR struct module_s *libelf_registry_find(FAR const char *modname)
  *   the handle is probably a stale pointer.
  *
  * Input Parameters:
- *   modp - The registry entry to be verified.
+ *   registry - The registry.
+ *   modp     - The registry entry to be verified.
  *
  * Returned Value:
  *   Returns OK is the module is valid; -ENOENT otherwise.
@@ -212,11 +259,12 @@ FAR struct module_s *libelf_registry_find(FAR const char *modname)
  *
  ****************************************************************************/
 
-int libelf_registry_verify(FAR struct module_s *modp)
+int libelf_registry_verify(FAR struct module_s **registry,
+                           FAR struct module_s *modp)
 {
   FAR struct module_s *node;
 
-  for (node = g_mod_registry; node != NULL; node = node->flink)
+  for (node = *registry; node != NULL; node = node->flink)
     {
       if (node == modp)
         {
@@ -234,6 +282,7 @@ int libelf_registry_verify(FAR struct module_s *modp)
  *   Visit each module in the registry
  *
  * Input Parameters:
+ *   registry - The registry.
  *   callback - This callback function was be called for each entry in the
  *     registry.
  *   arg - This opaque argument will be passed to the callback function.
@@ -245,7 +294,8 @@ int libelf_registry_verify(FAR struct module_s *modp)
  *
  ****************************************************************************/
 
-int libelf_registry_foreach(mod_callback_t callback, FAR void *arg)
+int libelf_registry_foreach(FAR struct module_s **registry,
+                            mod_callback_t callback, FAR void *arg)
 {
   FAR struct module_s *modp;
   int ret = OK;
@@ -256,7 +306,7 @@ int libelf_registry_foreach(mod_callback_t callback, FAR void *arg)
 
   /* Visit each installed module */
 
-  for (modp = g_mod_registry; modp != NULL; modp = modp->flink)
+  for (modp = *registry; modp != NULL; modp = modp->flink)
     {
       /* Perform the callback */
 

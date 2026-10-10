@@ -70,13 +70,13 @@ FAR void *insmod(FAR const char *filename, FAR const char *modname)
    * dlopen() wants and insmod() does not.
    */
 
-  if (libelf_gethandle(modname) != NULL)
+  if (libelf_gethandle(libelf_registry_kernel(), modname) != NULL)
     {
       set_errno(EEXIST);
       return NULL;
     }
 
-  return libelf_insert(filename, modname);
+  return libelf_insert(libelf_registry_kernel(), filename, modname);
 }
 
 #endif /* CONFIG_MODULE */

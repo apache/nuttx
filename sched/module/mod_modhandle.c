@@ -55,7 +55,7 @@
 
 FAR void *modhandle(FAR const char *name)
 {
-  return libelf_gethandle(name);
+  return libelf_gethandle(libelf_registry_kernel(), name);
 }
 
 #endif /* CONFIG_MODULE */

@@ -181,7 +181,7 @@ int libelf_undepend(FAR struct module_s *importer)
 
           if (exporter->dependents == 0 && exporter->nopen == 0)
             {
-              libelf_remove(exporter);
+              libelf_remove(exporter->registry, exporter);
             }
         }
     }
