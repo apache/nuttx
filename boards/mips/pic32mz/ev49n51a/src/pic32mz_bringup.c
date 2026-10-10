@@ -40,6 +40,10 @@
 #  include "pic32mz_w1_wlan.h"
 #endif
 
+#ifdef CONFIG_PIC32MZ_WDT
+#  include "pic32mz_wdt.h"
+#endif
+
 #include "ev49n51a.h"
 
 /****************************************************************************
@@ -66,6 +70,16 @@ int pic32mz_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n",
              ret);
+    }
+#endif
+
+#ifdef CONFIG_PIC32MZ_WDT
+  /* Watchdog timer */
+
+  ret = pic32mz_wdt_initialize(CONFIG_WATCHDOG_DEVPATH);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register the watchdog: %d\n", ret);
     }
 #endif
 
