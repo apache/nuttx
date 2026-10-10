@@ -1044,11 +1044,18 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case FIONREAD:
         {
-          *(FAR uint8_t *)arg =
+          int count = reader->fifo.rx_tail - reader->fifo.rx_head;
+
+          if (count < 0)
+            {
+              count += CONFIG_CAN_RXFIFOSIZE;
+            }
+
 #ifdef CONFIG_CAN_ERRORS
-                            (reader->fifo.rx_error != 0) +
+          count += (reader->fifo.rx_error != 0);
 #endif
-                            reader->fifo.rx_tail - reader->fifo.rx_head;
+
+          *(FAR int *)arg = count;
         }
         break;
 
