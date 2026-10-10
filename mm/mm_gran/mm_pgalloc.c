@@ -30,6 +30,7 @@
 
 #include <nuttx/mm/gran.h>
 #include <nuttx/pgalloc.h>
+#include <nuttx/semaphore.h>
 
 #include "mm_gran/mm_gran.h"
 
@@ -126,6 +127,7 @@ void mm_pginitialize(FAR void *heap_start, size_t heap_size)
 void mm_pgreserve(uintptr_t start, size_t size)
 {
   FAR void * ret = gran_reserve(g_pgalloc, start, size);
+
   DEBUGASSERT(ret != NULL);
 }
 
@@ -171,6 +173,7 @@ uintptr_t mm_pgalloc_align(unsigned int npages, unsigned int align)
 {
   size_t alloc_size = (size_t)npages << MM_PGSHIFT;
   size_t align_size = (size_t)align << MM_PGSHIFT;
+
   return (uintptr_t)gran_alloc_align(g_pgalloc, alloc_size, align_size);
 }
 
@@ -193,6 +196,10 @@ uintptr_t mm_pgalloc_align(unsigned int npages, unsigned int align)
 
 void mm_pgfree(uintptr_t paddr, unsigned int npages)
 {
+#if defined(CONFIG_BUILD_KERNEL) && defined(__KERNEL__)
+  nxsem_release_shadows(paddr, (size_t)npages << MM_PGSHIFT);
+#endif
+
   gran_free(g_pgalloc, (FAR void *)paddr, (size_t)npages << MM_PGSHIFT);
 }
 

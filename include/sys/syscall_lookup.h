@@ -94,8 +94,15 @@ SYSCALL_LOOKUP(nxsem_timedwait,            2)
 SYSCALL_LOOKUP(nxsem_trywait_slow,         1)
 SYSCALL_LOOKUP(nxsem_wait_slow,            1)
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
+#if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_BUILD_KERNEL)
   SYSCALL_LOOKUP(nxsem_set_protocol,       2)
+#endif
+
+#ifdef CONFIG_BUILD_KERNEL
+  SYSCALL_LOOKUP(nxsem_get_value,          2)
+#  ifdef CONFIG_CUSTOM_SEMAPHORE_MAXVALUE
+  SYSCALL_LOOKUP(nxsem_setmaxvalue,        2)
+#  endif
 #endif
 
 #ifdef CONFIG_PRIORITY_PROTECT

@@ -60,7 +60,7 @@
  *
  ****************************************************************************/
 
-int nxsem_trywait_slow(FAR sem_t *sem)
+static int nxsem_trywait_slow_resolved(FAR sem_t *sem)
 {
   irqstate_t flags;
   int ret = OK;
@@ -133,5 +133,14 @@ int nxsem_trywait_slow(FAR sem_t *sem)
   /* Interrupts may now be enabled. */
 
   leave_critical_section(flags);
+  return ret;
+}
+
+int nxsem_trywait_slow(FAR sem_t *sem)
+{
+  FAR sem_t *resolved = nxsem_resolve(sem);
+  int ret = nxsem_trywait_slow_resolved(resolved);
+
+  nxsem_unresolve(sem, resolved);
   return ret;
 }
