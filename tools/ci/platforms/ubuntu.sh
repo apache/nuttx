@@ -119,6 +119,7 @@ bloaty() {
 }
 
 c_cache() {
+  add_path "${NUTTXTOOLS}"/ccache/bin
   if ! type ccache > /dev/null 2>&1; then
     sudo apt-get install -y ccache
   fi

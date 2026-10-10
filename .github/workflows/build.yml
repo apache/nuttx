@@ -326,6 +326,14 @@ jobs:
       - name: Extract sources
         run: tar zxf sources.tar.gz
 
+      - name: Restore ccache
+        uses: actions/cache@v6
+        with:
+          path: sources/tools/ccache
+          key: ${{ runner.os }}-${{ matrix.boards }}-ccache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.boards }}-ccache-
+
       - name: Docker Login
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f  # v4.6.0
         with:
@@ -394,6 +402,13 @@ jobs:
                 ( sleep 7200 ; echo Killing pytest after timeout... ; pkill -f pytest )&
                 ./cibuild.sh -c -A -N -R -S testlist/${{matrix.boards}}.dat
             fi
+
+      - name: Prepare ccache for caching
+        if: always()
+        run: |
+          if [ -d sources/tools/ccache ]; then
+            sudo chmod -R a+rwX sources/tools/ccache
+          fi
 
       - name: Run host_info sanity check
         uses: ./sources/nuttx/.github/actions/ci-container
