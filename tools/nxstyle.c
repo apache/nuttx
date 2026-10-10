@@ -867,6 +867,14 @@ static const char *g_white_files[] =
   "phy62xx/start.c",
   "lpc4370-link2/src/lpc43_spifilib_init.c",
 
+  /* Skip Mixed case in the NXP LPC43xx SPIFI family command set
+   * (vendor SDK code).
+   * Ref:
+   * arch/arm/src/lpc43xx/spifi/src/spifilib_fam_standard_cmd.c
+   */
+
+  "lpc43xx/spifi/src/spifilib_fam_standard_cmd.c",
+
   /* Skip infineon illd files
    * Ref:
    * arch/tricore/src/illd
