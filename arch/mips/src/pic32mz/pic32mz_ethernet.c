@@ -395,13 +395,15 @@ struct pic32mz_driver_s
   struct work_s pd_irqwork;     /* For deferring interrupt work to the work queue */
   mutex_t    pd_lock;           /* Protects the descriptor rings */
 
-  /* The packet whose data was copied to each TX descriptor buffer.  It is
-   * held, and counted against the TX quota, until the descriptor is
-   * reclaimed so that the network stack never queues more packets than
-   * the number of TX descriptors.
+  /* The packet being sent by each TX descriptor, kept in the descriptor
+   * that holds the end of the packet.  It is held until that descriptor is
+   * reclaimed.  A packet takes one TX quota unit per descriptor, so that
+   * the network stack never queues more packets than there are free
+   * descriptors: pd_txfrags is the number of descriptors of the packet.
    */
 
   netpkt_t  *pd_txpkt[CONFIG_PIC32MZ_ETH_NTXDESC];
+  uint8_t    pd_txfrags[CONFIG_PIC32MZ_ETH_NTXDESC];
 };
 
 /****************************************************************************
@@ -1098,6 +1100,41 @@ static struct pic32mz_rxdesc_s *pic32mz_rxdesc(struct pic32mz_driver_s *priv)
 }
 
 /****************************************************************************
+ * Function: pic32mz_txrelease
+ *
+ * Description:
+ *   Release the packet held by a TX descriptor, with the TX quota of all
+ *   the descriptors of the packet.
+ *
+ * Input Parameters:
+ *   priv - Reference to the driver state structure
+ *   idx  - Index of the descriptor that holds the packet
+ *
+ * Assumptions:
+ *   The descriptor ring lock is held.
+ *
+ ****************************************************************************/
+
+static void pic32mz_txrelease(struct pic32mz_driver_s *priv, int idx)
+{
+  netpkt_t *pkt = priv->pd_txpkt[idx];
+
+  if (pkt != NULL)
+    {
+      int extra = priv->pd_txfrags[idx] - 1;
+
+      priv->pd_txpkt[idx] = NULL;
+
+      if (extra > 0)
+        {
+          atomic_add(&priv->pd_dev.quota_ptr[NETPKT_TX], extra);
+        }
+
+      netpkt_free(&priv->pd_dev, pkt, NETPKT_TX);
+    }
+}
+
+/****************************************************************************
  * Function: pic32mz_txflush
  *
  * Description:
@@ -1121,11 +1158,7 @@ static void pic32mz_txflush(struct pic32mz_driver_s *priv)
 
   for (i = 0; i < CONFIG_PIC32MZ_ETH_NTXDESC; i++)
     {
-      if (priv->pd_txpkt[i] != NULL)
-        {
-          netpkt_free(&priv->pd_dev, priv->pd_txpkt[i], NETPKT_TX);
-          priv->pd_txpkt[i] = NULL;
-        }
+      pic32mz_txrelease(priv, i);
     }
 }
 
@@ -1205,12 +1238,7 @@ static int pic32mz_txreap(struct pic32mz_driver_s *priv)
                           (uintptr_t)txdesc +
                           sizeof(union pic32mz_txdesc_u));
 
-          if (priv->pd_txpkt[i] != NULL)
-            {
-              netpkt_free(&priv->pd_dev, priv->pd_txpkt[i], NETPKT_TX);
-              priv->pd_txpkt[i] = NULL;
-            }
-
+          pic32mz_txrelease(priv, i);
           reaped++;
         }
     }
@@ -1271,6 +1299,73 @@ static void pic32mz_txdone(struct pic32mz_driver_s *priv)
 }
 
 /****************************************************************************
+ * Function: pic32mz_txfrags
+ *
+ * Description:
+ *   Count the buffers of a packet, if each of them can be sent by one TX
+ *   descriptor.
+ *
+ * Returned Value:
+ *   The number of buffers, or zero if the packet cannot be sent in place.
+ *
+ ****************************************************************************/
+
+static int pic32mz_txfrags(netpkt_t *pkt)
+{
+  int n = 0;
+
+  for (; pkt != NULL; pkt = pkt->io_flink)
+    {
+      /* The BYTE_COUNT of a descriptor has 11 bits.  The first buffer is
+       * preceded by the Ethernet header.
+       */
+
+      if (pkt->io_len == 0 || pkt->io_len + ETH_HDRLEN > 2047 ||
+          ++n > CONFIG_PIC32MZ_ETH_NTXDESC)
+        {
+          return 0;
+        }
+    }
+
+  return n;
+}
+
+/****************************************************************************
+ * Function: pic32mz_txfree
+ *
+ * Description:
+ *   Check if the next n TX descriptors of the ring are available.
+ *
+ * Assumptions:
+ *   The descriptor ring lock is held.
+ *
+ ****************************************************************************/
+
+static bool pic32mz_txfree(struct pic32mz_driver_s *priv, int n)
+{
+  int i;
+
+  for (i = 0; i < n; i++)
+    {
+      struct pic32mz_txdesc_s *txdesc =
+        &g_txdesc[(priv->pd_txnext + i) %
+                  CONFIG_PIC32MZ_ETH_NTXDESC].txdesc;
+
+      up_invalidate_dcache((uintptr_t)txdesc,
+                           (uintptr_t)txdesc +
+                           sizeof(union pic32mz_txdesc_u));
+
+      if ((txdesc->status & TXDESC_STATUS_EOWN) != 0 ||
+          txdesc->address != 0)
+        {
+          return false;
+        }
+    }
+
+  return true;
+}
+
+/****************************************************************************
  * Function: pic32mz_transmit
  *
  * Description:
@@ -1294,8 +1389,11 @@ static int pic32mz_transmit(struct netdev_lowerhalf_s *dev, netpkt_t *pkt)
   unsigned int len = netpkt_getdatalen(dev, pkt);
   uint8_t *buffer;
   uint32_t status;
+  int nfrags;
+  int last;
   int idx;
   int ret;
+  int i;
 
   if (len == 0 || len > CONFIG_NET_ETH_PKTSIZE)
     {
@@ -1321,65 +1419,107 @@ static int pic32mz_transmit(struct netdev_lowerhalf_s *dev, netpkt_t *pkt)
       goto errout;
     }
 
-  idx    = priv->pd_txnext;
-  buffer = PIC32MZ_TXBUFFER(idx);
+  idx = priv->pd_txnext;
 
-  /* Copy the packet to the DMA buffer of the descriptor */
+  /* Send the buffers of the packet in place, one descriptor each, if
+   * there are enough free descriptors.  Otherwise copy the packet to the
+   * DMA buffer of the first descriptor.
+   */
 
-  ret = netpkt_copyout(dev, buffer, pkt, len, 0);
-  if (ret < 0)
+  nfrags = pic32mz_txfrags(pkt);
+  if (nfrags > 0 && pic32mz_txfree(priv, nfrags))
     {
-      goto errout;
+      FAR struct iovec iov[CONFIG_PIC32MZ_ETH_NTXDESC];
+
+      netpkt_to_iov(dev, pkt, iov, nfrags);
+
+      /* Fill all the descriptors, but give the first one to the hardware
+       * last, so that it never sees an incomplete packet.
+       */
+
+      for (i = nfrags - 1; i >= 0; i--)
+        {
+          int d = (idx + i) % CONFIG_PIC32MZ_ETH_NTXDESC;
+
+          txdesc = &g_txdesc[d].txdesc;
+
+          up_flush_dcache((uintptr_t)iov[i].iov_base,
+                          (uintptr_t)iov[i].iov_base + iov[i].iov_len);
+
+          txdesc->address = PHYS_ADDR(iov[i].iov_base);
+
+          status = (iov[i].iov_len << TXDESC_STATUS_BYTECOUNT_SHIFT) |
+                   TXDESC_STATUS_NPV;
+          if (i == 0)
+            {
+              status |= TXDESC_STATUS_SOP;
+            }
+
+          if (i == nfrags - 1)
+            {
+              status |= TXDESC_STATUS_EOP;
+            }
+
+          txdesc->status = status | TXDESC_STATUS_EOWN;
+          up_flush_dcache((uintptr_t)txdesc,
+                          (uintptr_t)txdesc +
+                          sizeof(union pic32mz_txdesc_u));
+        }
+    }
+  else
+    {
+      nfrags = 1;
+      buffer = PIC32MZ_TXBUFFER(idx);
+
+      ret = netpkt_copyout(dev, buffer, pkt, len, 0);
+      if (ret < 0)
+        {
+          goto errout;
+        }
+
+      pic32mz_dumppacket("Transmit packet", buffer, len);
+
+      /* Flush the content of the TX buffer into physical memory */
+
+      up_flush_dcache((uintptr_t)buffer,
+                      (uintptr_t)buffer + DMA_ALIGN_UP(len));
+
+      /* The SOP, EOP, DATA_BUFFER_ADDRESS and BYTE_COUNT are updated when
+       * a message has to be transmitted. The DATA_BUFFER_ADDRESS contains
+       * the physical address of the message, the BYTE_COUNT its size.
+       * SOP and EOP are set as the whole message is in one buffer.
+       */
+
+      pic32mz_dumptxdesc(txdesc, "Before transmit setup");
+
+      txdesc->address = PHYS_ADDR(buffer);
+      txdesc->status  = (len << TXDESC_STATUS_BYTECOUNT_SHIFT) |
+                        TXDESC_STATUS_EOWN | TXDESC_STATUS_NPV |
+                        TXDESC_STATUS_EOP | TXDESC_STATUS_SOP;
+      pic32mz_dumptxdesc(txdesc, "After transmit setup");
+
+      /* Flush the content of the modified TX descriptor */
+
+      up_flush_dcache((uintptr_t)txdesc,
+                      (uintptr_t)txdesc + sizeof(union pic32mz_txdesc_u));
     }
 
-  pic32mz_dumppacket("Transmit packet", buffer, len);
-
-  /* Flush the content of the TX buffer into physical memory */
-
-  up_flush_dcache((uintptr_t)buffer,
-                  (uintptr_t)buffer + DMA_ALIGN_UP(len));
-
-  /* In order to transmit a message:
-   *
-   * The SOP, EOP, DATA_BUFFER_ADDRESS and BYTE_COUNT will be updated when a
-   * particular message has to be transmitted. The DATA_BUFFER_ADDRESS will
-   * contain the physical address of the message, the BYTE_COUNT message
-   * size. SOP and EOP are set depending on how many packets are needed to
-   * transmit the message.
+  /* Hold the packet until its last descriptor is reclaimed.  The
+   * descriptors after the first take TX quota too.
    */
 
-  pic32mz_dumptxdesc(txdesc, "Before transmit setup");
+  last                  = (idx + nfrags - 1) % CONFIG_PIC32MZ_ETH_NTXDESC;
+  priv->pd_txpkt[last]  = pkt;
+  priv->pd_txfrags[last] = nfrags;
 
-  txdesc->address = PHYS_ADDR(buffer);
-
-  /* Set the BYTE_COUNT for in the TX descriptor with the number of bytes
-   * contained in the buffer.
-   */
-
-  status = (len << TXDESC_STATUS_BYTECOUNT_SHIFT);
-
-  /* Set EOWN = 1 to indicate that the packet belongs to Ethernet and set
-   * both SOP and EOP to indicate that the packet both begins and ends with
-   * this frame.
-   */
-
-  status        |= (TXDESC_STATUS_EOWN | TXDESC_STATUS_NPV |
-                   TXDESC_STATUS_EOP | TXDESC_STATUS_SOP);
-  txdesc->status = status;
-  pic32mz_dumptxdesc(txdesc, "After transmit setup");
-
-  /* Flush the content of the modified TX descriptor into physical memory */
-
-  up_flush_dcache((uintptr_t)txdesc,
-                  (uintptr_t)txdesc + sizeof(union pic32mz_txdesc_u));
-
-  /* Hold the packet until the descriptor is reclaimed */
-
-  priv->pd_txpkt[idx] = pkt;
+  if (nfrags > 1)
+    {
+      atomic_sub(&priv->pd_dev.quota_ptr[NETPKT_TX], nfrags - 1);
+    }
 
   /* Update the index to the next descriptor to use in the Tx ring */
 
-  pic32mz_txnext(priv);
+  priv->pd_txnext = (idx + nfrags) % CONFIG_PIC32MZ_ETH_NTXDESC;
 
   /* Enable the transmission of the message by setting the TXRTS bit
    * (ETHCON1:9).
