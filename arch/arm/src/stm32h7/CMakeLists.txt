@@ -52,8 +52,6 @@ endif()
 
 if(CONFIG_SCHED_TICKLESS)
   list(APPEND SRCS stm32_tickless.c)
-else()
-  list(APPEND SRCS stm32_timerisr.c)
 endif()
 
 if(CONFIG_ARM_MPU)

@@ -43,6 +43,14 @@ CHIP_CSRCS += stm32_waste.c
 CHIP_CSRCS += stm32_uid.c
 CHIP_CSRCS += stm32_lsi.c
 
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+ifeq ($(CONFIG_ARCH_ARMV6M),y)
+CHIP_CSRCS += stm32_timerisr_armv6m.c
+else
+CHIP_CSRCS += stm32_timerisr.c
+endif
+endif
+
 ifeq ($(CONFIG_STM32_IWDG),y)
 CHIP_CSRCS += stm32_iwdg.c
 endif
@@ -79,7 +87,6 @@ ifeq ($(CONFIG_STM32_COMMON_M33),y)
 CHIP_CSRCS += stm32_allocateheap_m33_v1.c
 CHIP_CSRCS += stm32_irq_m33_v1.c
 CHIP_CSRCS += stm32_start_m33_v1.c
-CHIP_CSRCS += stm32_timerisr_m33_v1.c
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += stm32_idle_m33_v1.c
 endif
@@ -165,12 +172,6 @@ endif
 
 ifdef CONFIG_STM32_TICKLESS_TIMER
 CHIP_CSRCS += stm32_tickless_m3m4_v1.c
-else
-ifeq ($(CONFIG_ARCH_ARMV6M),y)
-CHIP_CSRCS += stm32_timerisr_armv6m.c
-else
-CHIP_CSRCS += stm32_timerisr_armv7m.c
-endif
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
@@ -459,14 +460,6 @@ endif
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += stm32_idle_m0_v1.c
-endif
-
-ifneq ($(CONFIG_SCHED_TICKLESS),y)
-ifeq ($(CONFIG_ARCH_ARMV6M),y)
-CHIP_CSRCS += stm32_timerisr_armv6m.c
-else
-CHIP_CSRCS += stm32_timerisr_armv7m.c
-endif
 endif
 
 ifeq ($(CONFIG_STM32_PWR),y)

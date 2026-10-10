@@ -82,6 +82,24 @@ config STM32_SYSTICK_CORECLK_DIV16
 
 endchoice
 
+choice
+	prompt "SysTick clock source"
+	depends on ARCH_ARMV7M || ARCH_ARMV8M
+	default STM32_SYSTICK_CPUCLK
+
+config STM32_SYSTICK_CPUCLK
+	bool "CPU clock"
+
+config STM32_SYSTICK_HCLK_DIV8
+	bool "HCLK divided by 8"
+	depends on !ARCH_CHIP_STM32H7 && !ARCH_CHIP_STM32N6
+	---help---
+		SysTick external reference clock.  Not offered on STM32H7, where
+		on silicon revision Y the external clock is not divided by 8
+		(ES0392 erratum 2.2.3), and on STM32N6, where it is not verified.
+
+endchoice
+
 config ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
 	bool "Custom clock configuration"
 	default n

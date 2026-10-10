@@ -35,6 +35,14 @@ list(APPEND SRCS stm32_waste.c)
 list(APPEND SRCS stm32_uid.c)
 list(APPEND SRCS stm32_lsi.c)
 
+if(NOT CONFIG_SCHED_TICKLESS)
+  if(CONFIG_ARCH_ARMV6M)
+    list(APPEND SRCS stm32_timerisr_armv6m.c)
+  else()
+    list(APPEND SRCS stm32_timerisr.c)
+  endif()
+endif()
+
 if(CONFIG_STM32_IWDG)
   list(APPEND SRCS stm32_iwdg.c)
 endif()
@@ -66,7 +74,7 @@ endif()
 
 if(CONFIG_STM32_COMMON_M33)
   list(APPEND SRCS stm32_allocateheap_m33_v1.c stm32_irq_m33_v1.c
-       stm32_start_m33_v1.c stm32_timerisr_m33_v1.c)
+       stm32_start_m33_v1.c)
 
   if(NOT CONFIG_ARCH_IDLE_CUSTOM)
     list(APPEND SRCS stm32_idle_m33_v1.c)
@@ -164,10 +172,6 @@ if(CONFIG_STM32_COMMON_LEGACY)
 
   if(CONFIG_STM32_TICKLESS_TIMER)
     list(APPEND SRCS stm32_tickless_m3m4_v1.c)
-  elseif(CONFIG_ARCH_ARMV6M)
-    list(APPEND SRCS stm32_timerisr_armv6m.c)
-  else()
-    list(APPEND SRCS stm32_timerisr_armv7m.c)
   endif()
 
   if(CONFIG_BUILD_PROTECTED)
@@ -404,14 +408,6 @@ if(CONFIG_ARCH_CORTEXM0)
 
   if(NOT CONFIG_ARCH_IDLE_CUSTOM)
     list(APPEND SRCS stm32_idle_m0_v1.c)
-  endif()
-
-  if(NOT CONFIG_SCHED_TICKLESS)
-    if(CONFIG_ARCH_ARMV6M)
-      list(APPEND SRCS stm32_timerisr_armv6m.c)
-    else()
-      list(APPEND SRCS stm32_timerisr_armv7m.c)
-    endif()
   endif()
 
   if(CONFIG_STM32_PWR)
