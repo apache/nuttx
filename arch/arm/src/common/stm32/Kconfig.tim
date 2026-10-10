@@ -28,7 +28,6 @@ config STM32_CAP
 
 config STM32_PULSECOUNT
 	bool
-	depends on STM32_HAVE_IP_TIMERS || STM32_COMMON_F0_L0_G0_C0 || STM32_COMMON_F7_H7 || ARCH_CHIP_STM32L4 || ARCH_CHIP_STM32H5
 	select ARCH_HAVE_PULSECOUNT
 	select PULSECOUNT
 
@@ -41,27 +40,6 @@ config STM32_PWM_MULTICHAN_L5_TIMERS
 	default y if STM32_TIM1_PWM || STM32_TIM2_PWM || STM32_TIM3_PWM
 	default y if STM32_TIM4_PWM || STM32_TIM5_PWM || STM32_TIM8_PWM
 	default y if STM32_TIM15_PWM || STM32_TIM16_PWM || STM32_TIM17_PWM
-
-config STM32_QENCODER_TIMS_1_4
-	bool
-	default y if STM32_TIM1 || STM32_TIM2 || STM32_TIM3 || STM32_TIM4
-
-config STM32_QENCODER_TIMS_1_8
-	bool
-	default y if STM32_QENCODER_TIMS_1_4
-	default y if STM32_TIM5 || STM32_TIM8
-
-config STM32_QENCODER_MAIN
-	bool
-	default y if STM32_HAVE_QENCODER_MAIN && SENSORS_QENCODER && STM32_QENCODER_TIMS_1_8
-
-config STM32_QENCODER_STM32
-	bool
-	default y if STM32_HAVE_IP_TIMERS && SENSORS_QENCODER && STM32_QENCODER_TIMS_1_8
-
-config STM32_QENCODER_F0
-	bool
-	default y if STM32_HAVE_IP_TIMERS && SENSORS_QENCODER && STM32_QENCODER_TIMS_1_4
 
 config STM32_PWM
 	bool
@@ -1000,7 +978,7 @@ endchoice
 
 config STM32_ONESHOT
 	bool "TIM one-shot wrapper"
-	depends on (STM32_HAVE_IP_TIMERS && STM32_TIM) || STM32_COMMON_H7_H5 || ARCH_CHIP_STM32WB || STM32_COMMON_L4_L5_U5 || ((ARCH_CHIP_STM32C5 || ARCH_CHIP_STM32U3 || ARCH_CHIP_STM32WL5) && STM32_TIM)
+	depends on STM32_TIM
 	default y if STM32_COMMON_L4_L5_U5 && SCHED_TICKLESS
 	---help---
 		Enable a wrapper around the low level timer/counter functions to
@@ -1008,7 +986,7 @@ config STM32_ONESHOT
 
 config STM32_FREERUN
 	bool "TIM free-running wrapper"
-	depends on (STM32_HAVE_IP_TIMERS && STM32_TIM) || ARCH_CHIP_STM32WB || STM32_COMMON_L4_L5_U5 || ((ARCH_CHIP_STM32C5 || ARCH_CHIP_STM32U3 || ARCH_CHIP_STM32WL5) && STM32_TIM)
+	depends on STM32_TIM
 	default y if STM32_COMMON_L4_L5_U5 && SCHED_TICKLESS
 	---help---
 		Enable a wrapper around the low level timer/counter functions to
@@ -1017,7 +995,6 @@ config STM32_FREERUN
 config STM32_ONESHOT_MAXTIMERS
 	int "Maximum number of oneshot timers"
 	depends on STM32_ONESHOT
-	depends on (STM32_HAVE_IP_TIMERS && STM32_TIM) || ARCH_CHIP_STM32H7 || STM32_COMMON_L4_H5_L5_U5 || ARCH_CHIP_STM32WB
 	default 1
 	range 1 8
 	---help---
@@ -2751,7 +2728,6 @@ config STM32_PWM_MULTICHAN
 config STM32_TIM1_PULSECOUNT
 	bool "TIM1 pulse count"
 	depends on STM32_TIM1
-	depends on STM32_HAVE_IP_TIMERS || STM32_COMMON_F7_H7 || ARCH_CHIP_STM32L4 || ARCH_CHIP_STM32H5
 	select STM32_PULSECOUNT
 	---help---
 		Reserve timer 1 for pulse count output.
@@ -2785,7 +2761,6 @@ endif # STM32_TIM1_PULSECOUNT
 config STM32_TIM8_PULSECOUNT
 	bool "TIM8 pulse count"
 	depends on STM32_TIM8
-	depends on (STM32_HAVE_IP_TIMERS && STM32_TIM) || STM32_COMMON_F7_H7 || ARCH_CHIP_STM32L4 || ARCH_CHIP_STM32H5
 	select STM32_PULSECOUNT
 	---help---
 		Reserve timer 8 for pulse count output.
@@ -3793,7 +3768,7 @@ config STM32_TIM17_CH1IDLE
 
 config STM32_QENCODER_DISABLE_EXTEND16BTIMERS
 	bool "Disable QEncoder timers extension from 16-bit to 32-bit"
-	depends on STM32_HAVE_QENCODER_16BIT
+	depends on SENSORS_QENCODER
 	---help---
 		Disable the extension of 16-bit timers to 32-bit via interrupt-based
 		overflow tracking. When enabled, timers will use their native hardware
@@ -3802,7 +3777,7 @@ config STM32_QENCODER_DISABLE_EXTEND16BTIMERS
 
 config STM32_QENCODER_INDEX_PIN
 	bool "Enable QEncoder timers support for index pin"
-	depends on STM32_HAVE_QENCODER_16BIT
+	depends on SENSORS_QENCODER
 	---help---
 		Enable support for quadrature encoder index pin. The index pin can be
 		used to reset the encoder position to a known value when the index
@@ -3810,14 +3785,14 @@ config STM32_QENCODER_INDEX_PIN
 
 config STM32_TIM1_QE
 	bool "TIM1 QE"
-	depends on (STM32_QENCODER_MAIN && STM32_TIM1) || (STM32_HAVE_IP_TIMERS && STM32_TIM1)
+	depends on STM32_TIM1
 	select STM32_QE
 	---help---
 		Reserve TIM1 for use by QEncoder.
 
 config STM32_TIM1_QEPSC
 	int "TIM1 QE pulse prescaler"
-	depends on (STM32_QENCODER_MAIN || STM32_QENCODER_F0) && STM32_TIM1_QE
+	depends on STM32_TIM1_QE
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses,
@@ -3825,14 +3800,14 @@ config STM32_TIM1_QEPSC
 
 config STM32_TIM2_QE
 	bool "TIM2 QE"
-	depends on (STM32_QENCODER_MAIN && STM32_TIM2) || (STM32_HAVE_IP_TIMERS && STM32_TIM2)
+	depends on STM32_TIM2
 	select STM32_QE
 	---help---
 		Reserve TIM2 for use by QEncoder.
 
 config STM32_TIM2_QEPSC
 	int "TIM2 QE pulse prescaler"
-	depends on (STM32_QENCODER_MAIN || STM32_QENCODER_F0) && STM32_TIM2_QE
+	depends on STM32_TIM2_QE
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses,
@@ -3840,14 +3815,14 @@ config STM32_TIM2_QEPSC
 
 config STM32_TIM3_QE
 	bool "TIM3 QE"
-	depends on (STM32_QENCODER_MAIN && STM32_TIM3) || (STM32_HAVE_IP_TIMERS && STM32_TIM3)
+	depends on STM32_TIM3
 	select STM32_QE
 	---help---
 		Reserve TIM3 for use by QEncoder.
 
 config STM32_TIM3_QEPSC
 	int "TIM3 QE pulse prescaler"
-	depends on (STM32_QENCODER_MAIN || STM32_QENCODER_F0) && STM32_TIM3_QE
+	depends on STM32_TIM3_QE
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses,
@@ -3855,14 +3830,14 @@ config STM32_TIM3_QEPSC
 
 config STM32_TIM4_QE
 	bool "TIM4 QE"
-	depends on (STM32_QENCODER_MAIN && STM32_TIM4) || (STM32_HAVE_IP_TIMERS && STM32_TIM4)
+	depends on STM32_TIM4
 	select STM32_QE
 	---help---
 		Reserve TIM4 for use by QEncoder.
 
 config STM32_TIM4_QEPSC
 	int "TIM4 QE pulse prescaler"
-	depends on (STM32_QENCODER_MAIN || STM32_QENCODER_F0) && STM32_TIM4_QE
+	depends on STM32_TIM4_QE
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses,
@@ -3870,14 +3845,14 @@ config STM32_TIM4_QEPSC
 
 config STM32_TIM5_QE
 	bool "TIM5 QE"
-	depends on STM32_QENCODER_MAIN && STM32_TIM5
+	depends on STM32_TIM5
 	select STM32_QE
 	---help---
 		Reserve TIM5 for use by QEncoder.
 
 config STM32_TIM5_QEPSC
 	int "TIM5 QE pulse prescaler"
-	depends on STM32_QENCODER_MAIN && STM32_TIM5_QE
+	depends on STM32_TIM5_QE
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses,
@@ -3885,14 +3860,14 @@ config STM32_TIM5_QEPSC
 
 config STM32_TIM8_QE
 	bool "TIM8 QE"
-	depends on STM32_QENCODER_MAIN && STM32_TIM8
+	depends on STM32_TIM8
 	select STM32_QE
 	---help---
 		Reserve TIM8 for use by QEncoder.
 
 config STM32_TIM8_QEPSC
 	int "TIM8 QE pulse prescaler"
-	depends on STM32_QENCODER_MAIN && STM32_TIM8_QE
+	depends on STM32_TIM8_QE
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses,
@@ -3900,7 +3875,7 @@ config STM32_TIM8_QEPSC
 
 config STM32_QENCODER_FILTER
 	bool "Enable filtering on STM32 QEncoder input"
-	depends on STM32_QENCODER_MAIN || STM32_QENCODER_F0
+	depends on SENSORS_QENCODER
 	default y
 	---help---
 		Enable input filtering on quadrature encoder channels to reduce noise.
