@@ -20,6 +20,8 @@
 #
 # ##############################################################################
 
+add_subdirectory(${NUTTX_DIR}/arch/arm/src/common/stm32 stm32_common)
+
 set(SRCS)
 
 # Required STM32N6 files

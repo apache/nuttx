@@ -208,7 +208,7 @@ IP core     Selector                           Families
 M0_V1       ``STM32_HAVE_IP_TIMERS_M0_V1``      Cortex-M0 (C0, F0, G0, L0, U0)
 V1          ``STM32_HAVE_IP_TIMERS_V1``         F1, F2, F4, L1, F37x
 V2          ``STM32_HAVE_IP_TIMERS_V2``         F30x, F33x, F7, H7, L4, L5, WB, WL5
-V3          ``STM32_HAVE_IP_TIMERS_V3``         C5, G4, H5, H7RS, U3, U5
+V3          ``STM32_HAVE_IP_TIMERS_V3``         C5, G4, H5, H7RS, N6, U3, U5
 ==========  =================================  =================================
 
 The one functional difference that matters to a generic timer user is the
@@ -771,7 +771,7 @@ I2C           to be done    not supported
 PWR           to be done    arch/arm/src/stm32n6/stm32_pwr.c   
 RCC           to be done    arch/arm/src/stm32n6/stm32_rcc.c   
 SPI/I2S       to be done    not supported                      
-TIM           to be done    not supported                      
+TIM           v3            arch/arm/src/common/stm32/stm32_tim.c
 USART/LPUART  v4            arch/arm/src/stm32n6/stm32_serial.c
 USB           device        not supported
 XSPI          to be done    not supported

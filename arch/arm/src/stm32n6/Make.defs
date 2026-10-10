@@ -28,6 +28,7 @@ HEAD_ASRC =
 # Common ARM and Cortex-M55 files (ARMv8-M base)
 
 include armv8-m/Make.defs
+include common/stm32/Make.defs
 
 # Required STM32N6 files
 
