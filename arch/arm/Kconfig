@@ -607,6 +607,7 @@ config ARCH_CHIP_STM32F0
 	bool "STMicro STM32 F0"
 	select ARCH_CHIP_STM32
 	select ARCH_CORTEXM0
+	select ARCH_HAVE_TICKLESS
 	---help---
 		STMicro STM32F0 architectures (ARM Cortex-M0).
 
@@ -614,6 +615,7 @@ config ARCH_CHIP_STM32L0
 	bool "STMicro STM32 L0"
 	select ARCH_CHIP_STM32
 	select ARCH_CORTEXM0
+	select ARCH_HAVE_TICKLESS
 	---help---
 		STMicro STM32L0 architectures (ARM Cortex-M0+).
 
@@ -622,6 +624,7 @@ config ARCH_CHIP_STM32G0
 	select ARCH_CHIP_STM32
 	select ARCH_CORTEXM0
 	select ARCH_HAVE_PROGMEM
+	select ARCH_HAVE_TICKLESS
 	---help---
 		STMicro STM32G0 architectures (ARM Cortex-M0+).
 
@@ -629,6 +632,7 @@ config ARCH_CHIP_STM32C0
 	bool "STMicro STM32 C0"
 	select ARCH_CHIP_STM32
 	select ARCH_CORTEXM0
+	select ARCH_HAVE_TICKLESS
 	---help---
 		STMicro STM32C0 architectures (ARM Cortex-M0+).
 
@@ -636,6 +640,7 @@ config ARCH_CHIP_STM32U0
 	bool "STMicro STM32 U0"
 	select ARCH_CHIP_STM32
 	select ARCH_CORTEXM0
+	select ARCH_HAVE_TICKLESS
 	---help---
 		STMicro STM32U0 architectures (ARM Cortex-M0+).
 
@@ -711,6 +716,7 @@ config ARCH_CHIP_STM32N6
 	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_TRUSTZONE
 	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_TICKLESS
 	---help---
 		STMicro STM32N6 architectures (ARM Cortex-M55).
 
@@ -754,6 +760,7 @@ config ARCH_CHIP_STM32U3
 	select ARCH_HAVE_HEAPCHECK
 	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_TRUSTZONE
+	select ARCH_HAVE_TICKLESS
 	---help---
 		STMicro STM32 U3 architectures (ARM Cortex-M33).
 
@@ -765,6 +772,7 @@ config ARCH_CHIP_STM32C5
 	select ARM_HAVE_DSP
 	select ARCH_HAVE_HEAPCHECK
 	select ARM_HAVE_MPU_UNIFIED
+	select ARCH_HAVE_TICKLESS
 	---help---
 		STMicro STM32 C5 architectures (ARM Cortex-M33).
 
