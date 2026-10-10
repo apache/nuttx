@@ -1,22 +1,38 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_tickless.c
+ * arch/arm/src/common/stm32/stm32_tickless.c
  *
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2016-2017 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2017 Ansync Labs. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Konstantin Berezenko <kpberezenko@gmail.com>
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.  The
- * ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations
- * under the License.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
 
@@ -72,31 +88,86 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/timers/arch_timer.h>
 #include <nuttx/debug.h>
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-
 #include "stm32_tim.h"
-#include "stm32_dbgmcu.h"
 
-#include "systick.h"
+#if defined(CONFIG_ARMV7M_SYSTICK) || defined(CONFIG_ARMV8M_SYSTICK)
+#  include "systick.h"
+#  include "stm32_systick.h"
+#endif
+
+#include "hardware/stm32_dbgmcu.h"
 
 #ifdef CONFIG_SCHED_TICKLESS
 
-/* Only TIM2 and TIM5 timers may be 32-bits in width */
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 #undef HAVE_32BIT_TICKLESS
 
-#if (CONFIG_STM32_TICKLESS_TIMER == 2) || \
-    (CONFIG_STM32_TICKLESS_TIMER == 5)
- #define HAVE_32BIT_TICKLESS 1
+#if (CONFIG_STM32_TICKLESS_TIMER == 2 && \
+     defined(CONFIG_STM32_HAVE_TIM2_32BITS)) || \
+    (CONFIG_STM32_TICKLESS_TIMER == 5 && \
+     defined(CONFIG_STM32_HAVE_TIM5_32BITS))
+#  define HAVE_32BIT_TICKLESS 1
 #endif
 
 #if (CONFIG_STM32_TICKLESS_TIMER == 6) || \
     (CONFIG_STM32_TICKLESS_TIMER == 7)
-# error Basic timers not supported by the tickless driver
+#  error Basic timers not supported by the tickless driver
+#endif
+
+/* Debug MCU freeze bit of the tickless timer */
+
+#if CONFIG_STM32_TICKLESS_TIMER == 1 && defined(DBGMCU_TIM1_STOP)
+#  define TICKLESS_DBGMCU_FZ   STM32_DBGMCU_TIM1_FZ
+#  define TICKLESS_DBGMCU_STOP DBGMCU_TIM1_STOP
+#elif CONFIG_STM32_TICKLESS_TIMER == 2 && defined(DBGMCU_TIM2_STOP)
+#  define TICKLESS_DBGMCU_FZ   STM32_DBGMCU_TIM2_FZ
+#  define TICKLESS_DBGMCU_STOP DBGMCU_TIM2_STOP
+#elif CONFIG_STM32_TICKLESS_TIMER == 3 && defined(DBGMCU_TIM3_STOP)
+#  define TICKLESS_DBGMCU_FZ   STM32_DBGMCU_TIM3_FZ
+#  define TICKLESS_DBGMCU_STOP DBGMCU_TIM3_STOP
+#elif CONFIG_STM32_TICKLESS_TIMER == 4 && defined(DBGMCU_TIM4_STOP)
+#  define TICKLESS_DBGMCU_FZ   STM32_DBGMCU_TIM4_FZ
+#  define TICKLESS_DBGMCU_STOP DBGMCU_TIM4_STOP
+#elif CONFIG_STM32_TICKLESS_TIMER == 5 && defined(DBGMCU_TIM5_STOP)
+#  define TICKLESS_DBGMCU_FZ   STM32_DBGMCU_TIM5_FZ
+#  define TICKLESS_DBGMCU_STOP DBGMCU_TIM5_STOP
+#elif CONFIG_STM32_TICKLESS_TIMER == 8 && defined(DBGMCU_TIM8_STOP)
+#  define TICKLESS_DBGMCU_FZ   STM32_DBGMCU_TIM8_FZ
+#  define TICKLESS_DBGMCU_STOP DBGMCU_TIM8_STOP
+#elif CONFIG_STM32_TICKLESS_TIMER == 9 && defined(DBGMCU_TIM9_STOP)
+#  define TICKLESS_DBGMCU_FZ   STM32_DBGMCU_TIM9_FZ
+#  define TICKLESS_DBGMCU_STOP DBGMCU_TIM9_STOP
+#elif CONFIG_STM32_TICKLESS_TIMER == 10 && defined(DBGMCU_TIM10_STOP)
+#  define TICKLESS_DBGMCU_FZ   STM32_DBGMCU_TIM10_FZ
+#  define TICKLESS_DBGMCU_STOP DBGMCU_TIM10_STOP
+#elif CONFIG_STM32_TICKLESS_TIMER == 11 && defined(DBGMCU_TIM11_STOP)
+#  define TICKLESS_DBGMCU_FZ   STM32_DBGMCU_TIM11_FZ
+#  define TICKLESS_DBGMCU_STOP DBGMCU_TIM11_STOP
+#elif CONFIG_STM32_TICKLESS_TIMER == 12 && defined(DBGMCU_TIM12_STOP)
+#  define TICKLESS_DBGMCU_FZ   STM32_DBGMCU_TIM12_FZ
+#  define TICKLESS_DBGMCU_STOP DBGMCU_TIM12_STOP
+#elif CONFIG_STM32_TICKLESS_TIMER == 13 && defined(DBGMCU_TIM13_STOP)
+#  define TICKLESS_DBGMCU_FZ   STM32_DBGMCU_TIM13_FZ
+#  define TICKLESS_DBGMCU_STOP DBGMCU_TIM13_STOP
+#elif CONFIG_STM32_TICKLESS_TIMER == 14 && defined(DBGMCU_TIM14_STOP)
+#  define TICKLESS_DBGMCU_FZ   STM32_DBGMCU_TIM14_FZ
+#  define TICKLESS_DBGMCU_STOP DBGMCU_TIM14_STOP
+#elif CONFIG_STM32_TICKLESS_TIMER == 15 && defined(DBGMCU_TIM15_STOP)
+#  define TICKLESS_DBGMCU_FZ   STM32_DBGMCU_TIM15_FZ
+#  define TICKLESS_DBGMCU_STOP DBGMCU_TIM15_STOP
+#elif CONFIG_STM32_TICKLESS_TIMER == 16 && defined(DBGMCU_TIM16_STOP)
+#  define TICKLESS_DBGMCU_FZ   STM32_DBGMCU_TIM16_FZ
+#  define TICKLESS_DBGMCU_STOP DBGMCU_TIM16_STOP
+#elif CONFIG_STM32_TICKLESS_TIMER == 17 && defined(DBGMCU_TIM17_STOP)
+#  define TICKLESS_DBGMCU_FZ   STM32_DBGMCU_TIM17_FZ
+#  define TICKLESS_DBGMCU_STOP DBGMCU_TIM17_STOP
 #endif
 
 #if CONFIG_STM32_TICKLESS_CHANNEL == 1
@@ -237,7 +308,7 @@ static int stm32_tickless_setchannel(uint8_t channel)
 
   /* Further we use range as 0..3; if channel=0 it will also overflow here */
 
-  if (--channel > 4)
+  if (--channel > 3)
     {
       return -EINVAL;
     }
@@ -246,16 +317,6 @@ static int stm32_tickless_setchannel(uint8_t channel)
 
   ccer_val &= ~((GTIM_CCER_CC1P | GTIM_CCER_CC1E) <<
                 GTIM_CCER_CCXBASE(channel));
-
-  /* This function is not supported on basic timers. To enable or
-   * disable it, simply set its clock to valid frequency or zero.
-   */
-
-  if (g_tickless.base == STM32_TIM6_BASE ||
-      g_tickless.base == STM32_TIM7_BASE)
-    {
-      return -EINVAL;
-    }
 
   /* Frozen mode because we don't want to change the GPIO, preload register
    * disabled.
@@ -428,98 +489,100 @@ void up_timer_initialize(void)
 #ifdef CONFIG_STM32_TIM1
       case 1:
         g_tickless.base = STM32_TIM1_BASE;
-        modifyreg32(STM32_DBGMCU_TIM1_FZ, 0, DBGMCU_TIM1_STOP);
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM2
       case 2:
         g_tickless.base = STM32_TIM2_BASE;
-        modifyreg32(STM32_DBGMCU_TIM2_FZ, 0, DBGMCU_TIM2_STOP);
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM3
       case 3:
         g_tickless.base = STM32_TIM3_BASE;
-        modifyreg32(STM32_DBGMCU_TIM3_FZ, 0, DBGMCU_TIM3_STOP);
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM4
       case 4:
         g_tickless.base = STM32_TIM4_BASE;
-        modifyreg32(STM32_DBGMCU_TIM4_FZ, 0, DBGMCU_TIM4_STOP);
         break;
 #endif
 #ifdef CONFIG_STM32_TIM5
       case 5:
         g_tickless.base = STM32_TIM5_BASE;
-        modifyreg32(STM32_DBGMCU_TIM5_FZ, 0, DBGMCU_TIM5_STOP);
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM8
       case 8:
         g_tickless.base = STM32_TIM8_BASE;
-        modifyreg32(STM32_DBGMCU_TIM8_FZ, 0, DBGMCU_TIM8_STOP);
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM9
       case 9:
         g_tickless.base = STM32_TIM9_BASE;
-
-        /* A freeze bit for TIM9 doesn't seem to exist */
-
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM10
+      case 10:
+        g_tickless.base = STM32_TIM10_BASE;
         break;
 #endif
 
-      /* Note: TIM10 and TIM11 do not exist on STM32H7 */
-
+#ifdef CONFIG_STM32_TIM11
+      case 11:
+        g_tickless.base = STM32_TIM11_BASE;
+        break;
+#endif
 #ifdef CONFIG_STM32_TIM12
       case 12:
         g_tickless.base = STM32_TIM12_BASE;
-        modifyreg32(STM32_DBGMCU_TIM12_FZ, 0, DBGMCU_TIM12_STOP);
         break;
 #endif
 #ifdef CONFIG_STM32_TIM13
       case 13:
         g_tickless.base = STM32_TIM13_BASE;
-        modifyreg32(STM32_DBGMCU_TIM13_FZ, 0, DBGMCU_TIM13_STOP);
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM14
       case 14:
         g_tickless.base = STM32_TIM14_BASE;
-        modifyreg32(STM32_DBGMCU_TIM14_FZ, 0, DBGMCU_TIM14_STOP);
         break;
 #endif
 #ifdef CONFIG_STM32_TIM15
       case 15:
         g_tickless.base = STM32_TIM15_BASE;
-        modifyreg32(STM32_DBGMCU_TIM15_FZ, 0, DBGMCU_TIM15_STOP);
+
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM16
       case 16:
         g_tickless.base = STM32_TIM16_BASE;
-        modifyreg32(STM32_DBGMCU_TIM16_FZ, 0, DBGMCU_TIM16_STOP);
+
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM17
       case 17:
         g_tickless.base = STM32_TIM17_BASE;
-        modifyreg32(STM32_DBGMCU_TIM17_FZ, 0, DBGMCU_TIM17_STOP);
+
         break;
 #endif
 
       default:
         DEBUGPANIC();
     }
+
+#ifdef TICKLESS_DBGMCU_FZ
+  /* Stop the timer when the core is halted by a debugger */
+
+  modifyreg32(TICKLESS_DBGMCU_FZ, 0, TICKLESS_DBGMCU_STOP);
+#endif
 
   /* Get the TC frequency that corresponds to the requested resolution */
 
@@ -531,10 +594,10 @@ void up_timer_initialize(void)
   g_tickless.overflow  = 0;
 
   tmrinfo("timer=%d channel=%d frequency=%lu Hz\n",
-          g_tickless.timer, g_tickless.channel, g_tickless.frequency);
+           g_tickless.timer, g_tickless.channel, g_tickless.frequency);
 
   g_tickless.tch = stm32_tim_init(g_tickless.timer);
-  if (g_tickless.tch == NULL)
+  if (!g_tickless.tch)
     {
       tmrerr("ERROR: Failed to allocate TIM%d\n", g_tickless.timer);
       DEBUGPANIC();
@@ -577,9 +640,10 @@ void up_timer_initialize(void)
   STM32_TIM_ACKINT(g_tickless.tch, ~0);
   STM32_TIM_ENABLEINT(g_tickless.tch, GTIM_DIER_UIE);
 
-#if defined(CONFIG_ARMV7M_SYSTICK) && defined(CONFIG_CPULOAD_PERIOD)
-  nxsched_period_extclk(systick_initialize(true,
-                                           STM32_CPUCLK_FREQUENCY, -1));
+#if (defined(CONFIG_ARMV7M_SYSTICK) || defined(CONFIG_ARMV8M_SYSTICK)) && \
+    defined(CONFIG_CPULOAD_PERIOD)
+  nxsched_period_extclk(systick_initialize(STM32_SYSTICK_CORECLK,
+                                           STM32_SYSTICK_CLOCK, -1));
 #endif
 }
 
@@ -630,7 +694,7 @@ int up_timer_gettime(struct timespec *ts)
 
   /* Timer not initialized yet, return zero */
 
-  if (g_tickless.tch == NULL)
+  if (g_tickless.tch == 0)
     {
       ts->tv_nsec = 0;
       ts->tv_sec  = 0;
@@ -807,7 +871,7 @@ int up_timer_cancel(struct timespec *ts)
        * (as when pre-emption is enabled and disabled).
        */
 
-      if (ts != NULL)
+      if (ts)
         {
           ts->tv_sec  = 0;
           ts->tv_nsec = 0;

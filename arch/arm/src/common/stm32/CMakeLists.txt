@@ -43,6 +43,10 @@ if(NOT CONFIG_SCHED_TICKLESS)
   endif()
 endif()
 
+if(CONFIG_STM32_TICKLESS_TIMER)
+  list(APPEND SRCS stm32_tickless.c)
+endif()
+
 if(CONFIG_STM32_IWDG)
   list(APPEND SRCS stm32_iwdg.c)
 endif()
@@ -168,10 +172,6 @@ if(CONFIG_STM32_COMMON_LEGACY)
     list(APPEND SRCS stm32_flash_m3m4_f2f4.c)
   elseif(CONFIG_STM32_HAVE_IP_FLASH_M3M4_G4)
     list(APPEND SRCS stm32_flash_m3m4_g4.c)
-  endif()
-
-  if(CONFIG_STM32_TICKLESS_TIMER)
-    list(APPEND SRCS stm32_tickless_m3m4_v1.c)
   endif()
 
   if(CONFIG_BUILD_PROTECTED)
