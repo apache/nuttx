@@ -1262,6 +1262,15 @@ config PIC32MZ_ETH_NRXDESC
 	---help---
 		Configured number of Rx descriptors. Default: 4
 
+		The ring must absorb the burst that the TCP window allows, which
+		is about (free IOBs - IOB_THROTTLE) * IOB_BUFSIZE / frame size
+		frames.  At 100 Mbit/s the sender sends the window at line rate,
+		and a ring that is too small overruns in the hardware without any
+		counter; the TCP throughput then collapses to a few Mbit/s because
+		of retransmission timeouts.  For example, 32 descriptors for 48
+		IOBs of 1600 bytes with IOB_THROTTLE=16.  The default of 4 only
+		suits small IOBs and windows (24 IOBs of 196 bytes).
+
 config PIC32MZ_ETH_PRIORITY
 	int "Interrupt priority"
 	default 7
