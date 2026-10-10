@@ -233,6 +233,7 @@ static void i3c_bus_init_addrslots(FAR struct i3c_bus *bus)
 static void i3c_bus_init(FAR struct i3c_bus *i3cbus)
 {
   FAR struct i3c_master_controller *master;
+
   master = i3c_bus_to_i3c_master(i3cbus);
 
   nxmutex_init(&i3cbus->lock);
@@ -299,9 +300,9 @@ static int i3c_bus_set_mode(FAR struct i3c_bus *i3cbus,
 
   if (i3cbus->scl_rate.i3c > I3C_BUS_MAX_I3C_SCL_RATE ||
       i3cbus->scl_rate.i2c > I3C_BUS_I2C_FM_PLUS_SCL_RATE)
-      {
-        return -EINVAL;
-      }
+    {
+      return -EINVAL;
+    }
 
   return 0;
 }
@@ -660,6 +661,7 @@ static int i3c_master_getpid_locked(FAR struct i3c_master_controller *master,
   for (i = 0; i < sizeof(getpid->pid); i++)
     {
       int sft = (sizeof(getpid->pid) - i - 1) * 8;
+
       info->pid |= (uint64_t)getpid->pid[i] << sft;
     }
 
@@ -891,6 +893,11 @@ static int i3c_master_reattach_i3c_dev(FAR struct i3c_dev_desc *dev,
       i3c_bus_set_addr_slot_status(&master->bus,
                dev->info.dyn_addr,
                I3C_ADDR_SLOT_I3C_DEV);
+      if (old_dyn_addr)
+        {
+          i3c_bus_set_addr_slot_status(&master->bus, old_dyn_addr,
+                      I3C_ADDR_SLOT_FREE);
+        }
     }
 
   if (master->ops->reattach_i3c_dev)
@@ -1688,12 +1695,6 @@ int i3c_master_add_i3c_dev_locked(FAR struct i3c_master_controller *master,
 
       i3c_master_detach_i3c_dev(olddev);
       kmm_free(olddev);
-    }
-
-  ret = i3c_master_reattach_i3c_dev(newdev, old_dyn_addr);
-  if (ret)
-    {
-      goto err_detach_dev;
     }
 
   /* Depending on our previous state, the expected dynamic address might
