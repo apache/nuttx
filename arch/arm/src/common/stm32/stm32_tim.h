@@ -51,10 +51,6 @@
 #  include "hardware/stm32f7_tim.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32H7)
 #  include "hardware/stm32h7_tim.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32H5)
-#  include "hardware/stm32h5_tim.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32U5)
-#  include "hardware/stm32u5_tim.h"
 #endif
 
 #include <nuttx/irq.h>
