@@ -206,9 +206,9 @@ keeps the same programming model:
 IP core     Selector                           Families
 ==========  =================================  =================================
 M0_V1       ``STM32_HAVE_IP_TIMERS_M0_V1``      Cortex-M0 (C0, F0, G0, L0, U0)
-M3M4_V1     ``STM32_HAVE_IP_TIMERS_M3M4_V1``    F1, F2, F4, L1, F37x
-M3M4_V2     ``STM32_HAVE_IP_TIMERS_M3M4_V2``    F30x, F33x, WB
-M3M4_V3     ``STM32_HAVE_IP_TIMERS_M3M4_V3``    G4
+V1          ``STM32_HAVE_IP_TIMERS_V1``         F1, F2, F4, L1, F37x
+V2          ``STM32_HAVE_IP_TIMERS_V2``         F30x, F33x, WB
+V3          ``STM32_HAVE_IP_TIMERS_V3``         G4
 ==========  =================================  =================================
 
 Families with their own timer register header (F7, H7, H5, L4, L5, U5, WL5)
@@ -218,7 +218,7 @@ common driver.
 The one functional difference that matters to a generic timer user is the
 **counter width**.  Every timer is 16-bit except TIM2 and TIM5, which are
 32-bit on most families.  Because counter width does not follow the IP-core
-version (e.g. TIM2 is 16-bit on F1 but 32-bit on F4, both ``M3M4_V1``), it is
+version (e.g. TIM2 is 16-bit on F1 but 32-bit on F4, both ``V1``), it is
 carried by its own capability flags rather than by the IP selector or a chip
 ``#ifdef``:
 
@@ -1039,16 +1039,17 @@ of a peripheral on a given core is ``V1``.
 
 - M0: ``CONFIG_STM32_HAVE_IP_GPIO_M0_V1``, ``CONFIG_STM32_HAVE_IP_ADC_M0_V1``
 - M3/M4: ``CONFIG_STM32_HAVE_IP_GPIO_M3M4_V1``,
-  ``CONFIG_STM32_HAVE_IP_ADC_M3M4_V1``, ``CONFIG_STM32_HAVE_IP_ADC_M3M4_V2``,
-  ``CONFIG_STM32_HAVE_IP_TIMERS_M3M4_V1``, ``CONFIG_STM32_HAVE_IP_TIMERS_M3M4_V2``,
-  ``CONFIG_STM32_HAVE_IP_TIMERS_M3M4_V3``
+  ``CONFIG_STM32_HAVE_IP_ADC_M3M4_V1``, ``CONFIG_STM32_HAVE_IP_ADC_M3M4_V2``
 - M33: ``CONFIG_STM32_HAVE_IP_GPIO_M33_V1``,
   ``CONFIG_STM32_HAVE_IP_EXTI_M33_V1``, and
   ``CONFIG_STM32_HAVE_IP_USART_M33_V3``
+- No core prefix (used by several core classes):
+  ``CONFIG_STM32_HAVE_IP_TIMERS_V1``, ``CONFIG_STM32_HAVE_IP_TIMERS_V2``,
+  ``CONFIG_STM32_HAVE_IP_TIMERS_V3``
 
-Note that in the future the core prefix may be dropped and a single
-version number space used across all cores.  For now the core prefix is
-kept to make migration of families into common code simpler.
+The core prefix is dropped once an IP is used by more than one core
+class.  Until then it is kept to make migration of families into common
+code simpler.
 
 Common STM32 files should follow these rules:
 
