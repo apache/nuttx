@@ -66,6 +66,14 @@ extern "C"
  * getopt_long_only() that is being emulated by getopt_common().
  */
 
+/* In the user space of a kernel build, the public getopt() variables are
+ * plain variables (see include/unistd.h).
+ */
+
+#if defined(CONFIG_BUILD_KERNEL) && !defined(__KERNEL__)
+#  define GETOPT_PUBLIC_VARIABLES 1
+#endif
+
 enum getopt_mode_e
 {
   GETOPT_MODE           = 0,

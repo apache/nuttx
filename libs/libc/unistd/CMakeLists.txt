@@ -39,6 +39,7 @@ set(SRCS
     lib_getopterrp.c
     lib_getoptindp.c
     lib_getoptoptp.c
+    lib_getoptpublic.c
     lib_times.c
     lib_alarm.c
     lib_fstatvfs.c

@@ -43,6 +43,11 @@
 
 int *getoptoptp(void)
 {
+#ifdef GETOPT_PUBLIC_VARIABLES
+  return &optopt;
+#else
   FAR struct getopt_s *go = getoptvars();
+
   return &go->go_optopt;
+#endif
 }

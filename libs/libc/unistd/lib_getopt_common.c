@@ -167,20 +167,20 @@ static int getopt_long_option(FAR struct getopt_s *go,
                 {
                   FAR char *next;
 
-                  case no_argument:
-                    /* No, no arguments. Just return the argument that we
-                     * found.
-                     */
+                  /* No, no arguments. Just return the argument that we
+                   * found.
+                   */
 
+                  case no_argument:
                     go->go_optptr = NULL;
                     go->go_optind++;
                     break;
 
-                  case optional_argument:
-                    /* Check if there is a following argument and if that
-                     * following argument is another option.
-                     */
+                  /* Check if there is a following argument and if that
+                   * following argument is another option.
+                   */
 
+                  case optional_argument:
                     next = argv[go->go_optind + 1];
                     if (next == NULL || next[0] == '-')
                       {
@@ -334,17 +334,26 @@ errout:
  *
  ****************************************************************************/
 
+#ifdef GETOPT_PUBLIC_VARIABLES
+static int getopt_internal(int argc, FAR char * const argv[],
+                           FAR const char *optstring,
+                           FAR const struct option *longopts,
+                           FAR int *longindex,
+                           enum getopt_mode_e mode)
+#else
 int getopt_common(int argc, FAR char * const argv[],
                   FAR const char *optstring,
                   FAR const struct option *longopts,
                   FAR int *longindex,
                   enum getopt_mode_e mode)
+#endif
 {
   int ret;
 
   /* Get thread-specific getopt() variables */
 
   FAR struct getopt_s *go = getoptvars();
+
   if (go == NULL)
     {
       return '?';
@@ -640,3 +649,31 @@ int getopt_common(int argc, FAR char * const argv[],
   go->go_binitialized = false;
   return ERROR;
 }
+
+#ifdef GETOPT_PUBLIC_VARIABLES
+int getopt_common(int argc, FAR char * const argv[],
+                  FAR const char *optstring,
+                  FAR const struct option *longopts,
+                  FAR int *longindex,
+                  enum getopt_mode_e mode)
+{
+  FAR struct getopt_s *go = getoptvars();
+  int ret;
+
+  /* The program may have set optind (to restart) or opterr */
+
+  go->go_optarg = optarg;
+  go->go_opterr = opterr;
+  go->go_optind = optind;
+  go->go_optopt = optopt;
+
+  ret = getopt_internal(argc, argv, optstring, longopts, longindex, mode);
+
+  optarg = go->go_optarg;
+  opterr = go->go_opterr;
+  optind = go->go_optind;
+  optopt = go->go_optopt;
+
+  return ret;
+}
+#endif

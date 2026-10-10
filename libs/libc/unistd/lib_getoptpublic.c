@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_getoptindp.c
+ * libs/libc/unistd/lib_getoptpublic.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -28,26 +28,25 @@
 
 #include "unistd.h"
 
+#ifdef GETOPT_PUBLIC_VARIABLES
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* The public getopt() variables of a kernel-build process.  They are in a
+ * file of their own, so that a program that defines its own does not get
+ * a second definition from the C library.
+ * getopt_common() copies them to and from its internal state.
+ */
+
+FAR char *optarg;
+int opterr = 1;
+int optind = 1;
+int optopt = '?';
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: getoptindp
- *
- * Description:
- *   Returns a pointer to optind.  This function is only used for external
- *   modules that need to access the base, global variable, optind.
- *
- ****************************************************************************/
-
-int *getoptindp(void)
-{
-#ifdef GETOPT_PUBLIC_VARIABLES
-  return &optind;
-#else
-  FAR struct getopt_s *go = getoptvars();
-
-  return &go->go_optind;
-#endif
-}
+#endif /* GETOPT_PUBLIC_VARIABLES */
