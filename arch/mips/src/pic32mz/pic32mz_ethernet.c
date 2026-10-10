@@ -41,17 +41,15 @@
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/mutex.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/netdev_lowerhalf.h>
 
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
 #  include <nuttx/net/phy.h>
-#endif
-
-#ifdef CONFIG_NET_PKT
-#  include <nuttx/net/pkt.h>
 #endif
 
 #include <arch/irq.h>
@@ -165,12 +163,13 @@
 #define PIC32MZ_ALIGNED_BUFSIZE DMA_ALIGN_UP(CONFIG_NET_ETH_PKTSIZE + \
                                              PIC32MZ_FCS_SIZE)
 
-/* The number of buffers will, then, be one for each descriptor plus one
- * extra
+/* One DMA buffer is permanently assigned to each descriptor: the RX
+ * buffers come first, followed by the TX buffers.  Frames are copied
+ * between these buffers and the netpkt of the network stack.
  */
 
 #define PIC32MZ_NBUFFERS (CONFIG_PIC32MZ_ETH_NRXDESC + \
-                          CONFIG_PIC32MZ_ETH_NTXDESC + 1)
+                          CONFIG_PIC32MZ_ETH_NTXDESC)
 
 /* Debug Configuration ******************************************************/
 
@@ -255,14 +254,6 @@
                     ETH_INT_RXDONE | ETH_INT_RXBUSE)
 #define ETH_TXINTS (ETH_INT_TXABORT | ETH_INT_TXDONE | ETH_INT_TXBUSE)
 
-/* Misc. Helpers ************************************************************/
-
-/* This is a helper pointer for accessing the contents of the Ethernet
- * header
- */
-
-#define BUF ((struct eth_hdr_s *)priv->pd_dev.d_buf)
-
 /* PHYs *********************************************************************/
 
 /* Select PHY-specific values.  Add more PHYs as needed. */
@@ -345,6 +336,11 @@
 
 #define VIRT_ADDR(pa) (((uint32_t)g_buffers & 0xe0000000) | (uint32_t)(pa))
 
+#define PIC32MZ_RXBUFFER(i) \
+  (&g_buffers[(i) * PIC32MZ_ALIGNED_BUFSIZE])
+#define PIC32MZ_TXBUFFER(i) \
+  (&g_buffers[(CONFIG_PIC32MZ_ETH_NRXDESC + (i)) * PIC32MZ_ALIGNED_BUFSIZE])
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -371,6 +367,12 @@ union pic32mz_rxdesc_u
 
 struct pic32mz_driver_s
 {
+  /* This holds the information visible to the NuttX network.  It must be
+   * the first field: the lower half pointer is cast to the driver state.
+   */
+
+  struct netdev_lowerhalf_s pd_dev;
+
   /* The following fields would only be necessary on chips that support
    * multiple Ethernet controllers.
    */
@@ -382,8 +384,6 @@ struct pic32mz_driver_s
 #endif
 
   bool       pd_ifup;           /* true:ifup false:ifdown */
-  bool       pd_txpending;      /* There is a pending Tx in pd_dev */
-  bool       pd_polling;        /* Avoid concurrent attempts to poll */
   uint8_t    pd_mode;           /* Speed/duplex */
 #ifdef PIC32MZ_HAVE_PHY
   uint8_t    pd_phyaddr;        /* PHY device address */
@@ -393,13 +393,15 @@ struct pic32mz_driver_s
   uint32_t   pd_inten;          /* Shadow copy of INTEN register */
   struct wdog_s pd_txtimeout;   /* TX timeout timer */
   struct work_s pd_irqwork;     /* For deferring interrupt work to the work queue */
-  struct work_s pd_pollwork;    /* For deferring poll work to the work queue */
+  mutex_t    pd_lock;           /* Protects the descriptor rings */
 
-  sq_queue_t pd_freebuffers;    /* The free buffer list */
+  /* The packet whose data was copied to each TX descriptor buffer.  It is
+   * held, and counted against the TX quota, until the descriptor is
+   * reclaimed so that the network stack never queues more packets than
+   * the number of TX descriptors.
+   */
 
-  /* This holds the information visible to the NuttX network */
-
-  struct net_driver_s pd_dev;  /* Interface understood by the network */
+  netpkt_t  *pd_txpkt[CONFIG_PIC32MZ_ETH_NTXDESC];
 };
 
 /****************************************************************************
@@ -453,12 +455,6 @@ static void pic32mz_dumprxdesc(struct pic32mz_rxdesc_s *rxdesc,
 #  define pic32mz_dumprxdesc(rxdesc,msg)
 #endif
 
-static inline void pic32mz_bufferinit(struct pic32mz_driver_s *priv);
-static uint8_t *pic32mz_allocbuffer(struct pic32mz_driver_s *priv);
-static uint8_t *pic32mz_rxbuffer(struct pic32mz_driver_s *priv);
-static void pic32mz_freebuffer(struct pic32mz_driver_s *priv,
-                               uint8_t *buffer);
-
 static inline void pic32mz_txdescinit(struct pic32mz_driver_s *priv);
 static inline void pic32mz_rxdescinit(struct pic32mz_driver_s *priv);
 static inline struct pic32mz_txdesc_s *pic32mz_txdesc(
@@ -471,14 +467,11 @@ static struct pic32mz_rxdesc_s *pic32mz_rxdesc(
 
 /* Common TX logic */
 
-static int  pic32mz_transmit(struct pic32mz_driver_s *priv);
-static int  pic32mz_txpoll(struct net_driver_s *dev);
-static void pic32mz_poll(struct pic32mz_driver_s *priv);
+static void pic32mz_txflush(struct pic32mz_driver_s *priv);
+static int  pic32mz_txreap(struct pic32mz_driver_s *priv);
 
 /* Interrupt handling */
 
-static void pic32mz_response(struct pic32mz_driver_s *priv);
-static void pic32mz_rxdone(struct pic32mz_driver_s *priv);
 static void pic32mz_txdone(struct pic32mz_driver_s *priv);
 
 static void pic32mz_interrupt_work(void *arg);
@@ -491,20 +484,40 @@ static void pic32mz_txtimeout_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
-static int pic32mz_ifup(struct net_driver_s *dev);
-static int pic32mz_ifdown(struct net_driver_s *dev);
-
-static void pic32mz_txavail_work(void *arg);
-static int pic32mz_txavail(struct net_driver_s *dev);
+static int pic32mz_ifup(struct netdev_lowerhalf_s *dev);
+static int pic32mz_ifdown(struct netdev_lowerhalf_s *dev);
+static int pic32mz_transmit(struct netdev_lowerhalf_s *dev, netpkt_t *pkt);
+static netpkt_t *pic32mz_receive(struct netdev_lowerhalf_s *dev);
+static void pic32mz_reclaim(struct netdev_lowerhalf_s *dev);
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int pic32mz_addmac(struct net_driver_s *dev, const uint8_t *mac);
-static int pic32mz_rmmac(struct net_driver_s *dev, const uint8_t *mac);
+static int pic32mz_addmac(struct netdev_lowerhalf_s *dev,
+                          const uint8_t *mac);
+static int pic32mz_rmmac(struct netdev_lowerhalf_s *dev,
+                         const uint8_t *mac);
 #endif
 #if defined(CONFIG_NETDEV_IOCTL) && defined(PIC32MZ_HAVE_PHY)
-static int pic32mz_ioctl(struct net_driver_s *dev, int cmd,
+static int pic32mz_ioctl(struct netdev_lowerhalf_s *dev, int cmd,
                          unsigned long arg);
 #endif
+
+/* Network device operations */
+
+static const struct netdev_ops_s g_pic32mz_ops =
+{
+  .ifup     = pic32mz_ifup,
+  .ifdown   = pic32mz_ifdown,
+  .transmit = pic32mz_transmit,
+  .receive  = pic32mz_receive,
+#ifdef CONFIG_NET_MCASTGROUP
+  .addmac   = pic32mz_addmac,
+  .rmmac    = pic32mz_rmmac,
+#endif
+#if defined(CONFIG_NETDEV_IOCTL) && defined(PIC32MZ_HAVE_PHY)
+  .ioctl    = pic32mz_ioctl,
+#endif
+  .reclaim  = pic32mz_reclaim,
+};
 
 /* PHY initialization functions */
 
@@ -725,114 +738,6 @@ static void pic32mz_dumprxdesc(struct pic32mz_rxdesc_s *rxdesc,
 #endif
 
 /****************************************************************************
- * Function: pic32mz_bufferinit
- *
- * Description:
- *   Initialize the buffers by placing them all in an empty free list.  The
- *   list is re-initialized on every ifup, when it may still hold the
- *   buffers that were free when the interface was taken down.
- *
- * Input Parameters:
- *   priv - Pointer to EMAC device driver structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void pic32mz_bufferinit(struct pic32mz_driver_s *priv)
-{
-  uint8_t *buffer;
-  int i;
-
-  sq_init(&priv->pd_freebuffers);
-
-  for (i = 0, buffer = g_buffers; i < PIC32MZ_NBUFFERS; i++)
-    {
-      /* Add the buffer to the end of the list of free buffers */
-
-      sq_addlast((sq_entry_t *)buffer, &priv->pd_freebuffers);
-
-      /* Get the address of the next buffer */
-
-      buffer += PIC32MZ_ALIGNED_BUFSIZE;
-    }
-}
-
-/****************************************************************************
- * Function: pic32mz_allocbuffer
- *
- * Description:
- *   Allocate one buffer by removing it from the free list
- *
- * Input Parameters:
- *   priv - Pointer to EMAC device driver structure
- *
- * Returned Value:
- *   Pointer to the allocated buffer (or NULL on failure)
- *
- ****************************************************************************/
-
-static uint8_t *pic32mz_allocbuffer(struct pic32mz_driver_s *priv)
-{
-  /* Return the next free buffer from the head of the free buffer list */
-
-  return (uint8_t *)sq_remfirst(&priv->pd_freebuffers);
-}
-
-/****************************************************************************
- * Function: pic32mz_rxbuffer
- *
- * Description:
- *   Allocate one buffer for an RX descriptor.  The free list link and any
- *   data left by the network stack may still sit in dirty D-Cache lines;
- *   they are discarded so that a later eviction cannot overwrite the frame
- *   written by the DMA.
- *
- * Input Parameters:
- *   priv - Pointer to EMAC device driver structure
- *
- * Returned Value:
- *   Pointer to the allocated buffer (or NULL on failure)
- *
- ****************************************************************************/
-
-static uint8_t *pic32mz_rxbuffer(struct pic32mz_driver_s *priv)
-{
-  uint8_t *buffer = pic32mz_allocbuffer(priv);
-
-  if (buffer != NULL)
-    {
-      up_invalidate_dcache((uintptr_t)buffer,
-                           (uintptr_t)buffer + PIC32MZ_ALIGNED_BUFSIZE);
-    }
-
-  return buffer;
-}
-
-/****************************************************************************
- * Function: pic32mz_freebuffer
- *
- * Description:
- *   Free one buffer by returning it to the free list
- *
- * Input Parameters:
- *   priv - Pointer to EMAC device driver structure
- *
- * Returned Value:
- *   Pointer to the allocated buffer (or NULL on failure)
- *
- ****************************************************************************/
-
-static void pic32mz_freebuffer(struct pic32mz_driver_s *priv,
-                               uint8_t *buffer)
-{
-  /* Add the buffer to the end of the free buffer list */
-
-  sq_addlast((sq_entry_t *)buffer, &priv->pd_freebuffers);
-}
-
-/****************************************************************************
  * Function: pic32mz_txdescinit
  *
  * Description:
@@ -947,7 +852,7 @@ static inline void pic32mz_rxdescinit(struct pic32mz_driver_s *priv)
 
       rxdesc->rsv1    = 0;
       rxdesc->rsv2    = 0;
-      rxdesc->address = PHYS_ADDR(pic32mz_rxbuffer(priv));
+      rxdesc->address = PHYS_ADDR(PIC32MZ_RXBUFFER(i));
       rxdesc->status  = RXDESC_STATUS_EOWN | RXDESC_STATUS_NPV;
 
       /* Set the NEXTED pointer.  If this is the last descriptor in the
@@ -966,6 +871,16 @@ static inline void pic32mz_rxdescinit(struct pic32mz_driver_s *priv)
 
       pic32mz_dumprxdesc(rxdesc, "Initial");
     }
+
+  /* The RX buffers were last written by the CPU when .bss was cleared:
+   * discard any dirty line so that a later eviction cannot overwrite a
+   * frame written by the DMA.
+   */
+
+  up_invalidate_dcache((uintptr_t)g_buffers,
+                       (uintptr_t)g_buffers +
+                       CONFIG_PIC32MZ_ETH_NRXDESC *
+                       PIC32MZ_ALIGNED_BUFSIZE);
 
   /* Flush all of the initialized RX descriptors to physical memory */
 
@@ -1183,48 +1098,246 @@ static struct pic32mz_rxdesc_s *pic32mz_rxdesc(struct pic32mz_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: pic32mz_transmit
+ * Function: pic32mz_txflush
  *
  * Description:
- *   Start hardware transmission.  Called either from the txdone interrupt
- *   handling or from watchdog based polling.
+ *   Release the packets held for TX descriptors.  Used when the descriptor
+ *   ring is about to be reset.
+ *
+ * Input Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The descriptor ring lock is held.
+ *
+ ****************************************************************************/
+
+static void pic32mz_txflush(struct pic32mz_driver_s *priv)
+{
+  int i;
+
+  for (i = 0; i < CONFIG_PIC32MZ_ETH_NTXDESC; i++)
+    {
+      if (priv->pd_txpkt[i] != NULL)
+        {
+          netpkt_free(&priv->pd_dev, priv->pd_txpkt[i], NETPKT_TX);
+          priv->pd_txpkt[i] = NULL;
+        }
+    }
+}
+
+/****************************************************************************
+ * Function: pic32mz_txreap
+ *
+ * Description:
+ *   Give the TX descriptors that were sent back to the software, releasing
+ *   the packet held by each of them.  The TX interrupts are disabled when
+ *   no descriptor remains in the hardware and the TX timeout is cancelled.
+ *
+ * Input Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   The number of descriptors reclaimed.
+ *
+ * Assumptions:
+ *   The descriptor ring lock is held.
+ *
+ ****************************************************************************/
+
+static int pic32mz_txreap(struct pic32mz_driver_s *priv)
+{
+  struct pic32mz_txdesc_s *txdesc;
+  int reaped = 0;
+  int pending = 0;
+  int i;
+
+  /* Inspect the list of TX descriptors to see if the EOWN bit is cleared.
+   * If it is, this descriptor is now under software control and the message
+   * was transmitted. Use TSV to check for the transmission result.
+   */
+
+  for (i = 0; i < CONFIG_PIC32MZ_ETH_NTXDESC; i++)
+    {
+      txdesc = &g_txdesc[i].txdesc;
+
+      /* Force re-reading of the TX descriptor from physical memory.
+       * The descriptor may have been owned by the Ethernet controller.
+       * Cache data would be stale in this case.
+       */
+
+      up_invalidate_dcache((uintptr_t)txdesc,
+                           (uintptr_t)txdesc +
+                           sizeof(union pic32mz_txdesc_u));
+
+      if ((txdesc->status & TXDESC_STATUS_EOWN) != 0)
+        {
+          /* Still owned by the hardware */
+
+          pending++;
+          continue;
+        }
+
+      /* Software owns this descriptor.  Check if a buffer is attached */
+
+      if (txdesc->address != 0)
+        {
+          pic32mz_dumptxdesc(txdesc, "Freeing TX buffer");
+
+          /* Release the descriptor and the packet held for it */
+
+          txdesc->address = 0;
+
+          /* Reset status */
+
+          txdesc->tsv1    = 0;
+          txdesc->tsv2    = 0;
+          txdesc->status  = TXDESC_STATUS_SOWN | TXDESC_STATUS_NPV;
+
+          pic32mz_dumptxdesc(txdesc, "TX buffer freed");
+
+          /* Flush the content of the modified TX descriptor. */
+
+          up_flush_dcache((uintptr_t)txdesc,
+                          (uintptr_t)txdesc +
+                          sizeof(union pic32mz_txdesc_u));
+
+          if (priv->pd_txpkt[i] != NULL)
+            {
+              netpkt_free(&priv->pd_dev, priv->pd_txpkt[i], NETPKT_TX);
+              priv->pd_txpkt[i] = NULL;
+            }
+
+          reaped++;
+        }
+    }
+
+  if (pending == 0)
+    {
+      /* Nothing left in the hardware: cancel the TX timeout and disable
+       * the TX interrupts until the next transmission.
+       */
+
+      wd_cancel(&priv->pd_txtimeout);
+
+      priv->pd_inten &= ~ETH_TXINTS;
+      pic32mz_putreg(priv->pd_inten, PIC32MZ_ETH_IEN);
+    }
+  else if (reaped > 0)
+    {
+      /* The hardware made progress: restart the TX timeout */
+
+      wd_start(&priv->pd_txtimeout, PIC32MZ_TXTIMEOUT,
+               pic32mz_txtimeout_expiry, (wdparm_t)priv);
+    }
+
+  return reaped;
+}
+
+/****************************************************************************
+ * Function: pic32mz_txdone
+ *
+ * Description:
+ *   An interrupt was received indicating that the last TX packet(s) is done
  *
  * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
- *   OK on success; a negated errno on failure
+ *   None
  *
  * Assumptions:
- *   May or may not be called from an interrupt handler.  In either case,
- *   global interrupts are disabled, either explicitly or indirectly through
- *   interrupt handling logic.
+ *   Called from the worker thread.
  *
  ****************************************************************************/
 
-static int pic32mz_transmit(struct pic32mz_driver_s *priv)
+static void pic32mz_txdone(struct pic32mz_driver_s *priv)
 {
-  struct pic32mz_txdesc_s *txdesc;
-  uint32_t status;
+  int reaped;
 
-  /* Verify that the hardware is ready to send another packet.  If we get
-   * here, then we are committed to sending a packet; Higher level logic
-   * must have assured that there is no transmission in progress.
+  nxmutex_lock(&priv->pd_lock);
+  reaped = pic32mz_txreap(priv);
+  nxmutex_unlock(&priv->pd_lock);
+
+  /* Tell the upper half that there is room for more packets */
+
+  if (reaped > 0)
+    {
+      netdev_lower_txdone(&priv->pd_dev);
+    }
+}
+
+/****************************************************************************
+ * Function: pic32mz_transmit
+ *
+ * Description:
+ *   NuttX Callback: copy a packet to the next TX descriptor buffer and
+ *   start the hardware transmission.  The packet is held until the
+ *   descriptor is reclaimed.
+ *
+ * Input Parameters:
+ *   dev - Reference to the lower half driver state structure
+ *   pkt - The packet to be sent
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+static int pic32mz_transmit(struct netdev_lowerhalf_s *dev, netpkt_t *pkt)
+{
+  struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)dev;
+  struct pic32mz_txdesc_s *txdesc;
+  unsigned int len = netpkt_getdatalen(dev, pkt);
+  uint8_t *buffer;
+  uint32_t status;
+  int idx;
+  int ret;
+
+  if (len == 0 || len > CONFIG_NET_ETH_PKTSIZE)
+    {
+      return -EMSGSIZE;
+    }
+
+  nxmutex_lock(&priv->pd_lock);
+
+  if (!priv->pd_ifup)
+    {
+      ret = -ENETDOWN;
+      goto errout;
+    }
+
+  /* Find the next available TX descriptor.  The TX quota is the number of
+   * descriptors, so there is one unless the interface was reset.
    */
 
-  DEBUGASSERT(priv->pd_dev.d_buf != NULL &&
-              priv->pd_dev.d_len <= CONFIG_NET_ETH_PKTSIZE);
+  txdesc = pic32mz_txdesc(priv);
+  if (txdesc == NULL)
+    {
+      ret = -EAGAIN;
+      goto errout;
+    }
 
-  /* Increment statistics and dump the packet (if so configured) */
+  idx    = priv->pd_txnext;
+  buffer = PIC32MZ_TXBUFFER(idx);
 
-  NETDEV_TXPACKETS(&priv->pd_dev);
-  pic32mz_dumppacket("Transmit packet",
-                      priv->pd_dev.d_buf, priv->pd_dev.d_len);
+  /* Copy the packet to the DMA buffer of the descriptor */
+
+  ret = netpkt_copyout(dev, buffer, pkt, len, 0);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  pic32mz_dumppacket("Transmit packet", buffer, len);
 
   /* Flush the content of the TX buffer into physical memory */
 
-  up_flush_dcache((uintptr_t)priv->pd_dev.d_buf,
-                  (uintptr_t)priv->pd_dev.d_buf + PIC32MZ_ALIGNED_BUFSIZE);
+  up_flush_dcache((uintptr_t)buffer,
+                  (uintptr_t)buffer + DMA_ALIGN_UP(len));
 
   /* In order to transmit a message:
    *
@@ -1235,28 +1348,15 @@ static int pic32mz_transmit(struct pic32mz_driver_s *priv)
    * transmit the message.
    */
 
-  /* Find the next available TX descriptor.  We are guaranteed that is will
-   * not fail by upstream logic that assures that a TX packet is available
-   * before polling the network.
-   */
-
-  txdesc = pic32mz_txdesc(priv);
-  DEBUGASSERT(txdesc != NULL);
   pic32mz_dumptxdesc(txdesc, "Before transmit setup");
 
-  /* Remove the transmit buffer from the device structure and assign it to
-   * the TX descriptor.
-   */
-
-  txdesc->address    = PHYS_ADDR(priv->pd_dev.d_buf);
-  priv->pd_dev.d_buf = NULL;
+  txdesc->address = PHYS_ADDR(buffer);
 
   /* Set the BYTE_COUNT for in the TX descriptor with the number of bytes
    * contained in the buffer.
    */
 
-  status = ((uint32_t)priv->pd_dev.d_len << TXDESC_STATUS_BYTECOUNT_SHIFT);
-  priv->pd_dev.d_len = 0;
+  status = (len << TXDESC_STATUS_BYTECOUNT_SHIFT);
 
   /* Set EOWN = 1 to indicate that the packet belongs to Ethernet and set
    * both SOP and EOP to indicate that the packet both begins and ends with
@@ -1264,7 +1364,7 @@ static int pic32mz_transmit(struct pic32mz_driver_s *priv)
    */
 
   status        |= (TXDESC_STATUS_EOWN | TXDESC_STATUS_NPV |
-                    TXDESC_STATUS_EOP | TXDESC_STATUS_SOP);
+                   TXDESC_STATUS_EOP | TXDESC_STATUS_SOP);
   txdesc->status = status;
   pic32mz_dumptxdesc(txdesc, "After transmit setup");
 
@@ -1272,6 +1372,10 @@ static int pic32mz_transmit(struct pic32mz_driver_s *priv)
 
   up_flush_dcache((uintptr_t)txdesc,
                   (uintptr_t)txdesc + sizeof(union pic32mz_txdesc_u));
+
+  /* Hold the packet until the descriptor is reclaimed */
+
+  priv->pd_txpkt[idx] = pkt;
 
   /* Update the index to the next descriptor to use in the Tx ring */
 
@@ -1293,204 +1397,41 @@ static int pic32mz_transmit(struct pic32mz_driver_s *priv)
   wd_start(&priv->pd_txtimeout, PIC32MZ_TXTIMEOUT,
            pic32mz_txtimeout_expiry, (wdparm_t)priv);
 
-  return OK;
+  ret = OK;
+
+errout:
+  nxmutex_unlock(&priv->pd_lock);
+  return ret;
 }
 
 /****************************************************************************
- * Function: pic32mz_txpoll
+ * Function: pic32mz_receive
  *
  * Description:
- *   The transmitter is available, check if the network has any outgoing
- *   packets ready to send.  This is a callback from devif_poll().
- *   devif_poll() may be called:
- *
- *   1. When the preceding TX packet send is complete,
- *   2. When the preceding TX packet send timesout and the interface is reset
- *   3. During normal TX polling
+ *   NuttX Callback: take the next received frame from the RX descriptor
+ *   ring.  The frame is copied to a netpkt and the descriptor is given
+ *   back to the hardware.
  *
  * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
+ *   dev - Reference to the lower half driver state structure
  *
  * Returned Value:
- *   OK on success; a negated errno on failure
- *
- * Assumptions:
- *   May or may not be called from an interrupt handler.  In either case,
- *   global interrupts are disabled, either explicitly or indirectly through
- *   interrupt handling logic.
+ *   The received packet, or NULL if there is none.
  *
  ****************************************************************************/
 
-static int pic32mz_txpoll(struct net_driver_s *dev)
+static netpkt_t *pic32mz_receive(struct netdev_lowerhalf_s *dev)
 {
-  struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)dev->d_private;
-
-  /* Send this packet.  In this context, we know that there is space
-   * for at least one more packet in the descriptor list.
-   */
-
-  pic32mz_transmit(priv);
-
-  /* Check if the next TX descriptor is available. If not, return a
-   * non-zero value to terminate the poll.
-   */
-
-  if (pic32mz_txdesc(priv) == NULL)
-    {
-      /* There are no more TX descriptors/buffers available..
-       * stop the poll
-       */
-
-      return -EAGAIN;
-    }
-
-  /* Get the next Tx buffer needed in order to continue the poll */
-
-  priv->pd_dev.d_buf = pic32mz_allocbuffer(priv);
-  if (priv->pd_dev.d_buf == NULL)
-    {
-      /* We have no more buffers available for the next Tx..
-       * stop the poll
-       */
-
-      return -ENOMEM;
-    }
-
-  /* If zero is returned, the polling will continue until all connections
-   * have been examined.
-   */
-
-  return 0;
-}
-
-/****************************************************************************
- * Function: pic32mz_poll
- *
- * Description:
- *   Perform the network poll.
- *
- * Input Parameters:
- *   priv  - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void pic32mz_poll(struct pic32mz_driver_s *priv)
-{
-  /* Is there already a poll in progress.  This happens, for example, when
-   * debugging output is enabled.  Interrupts may be re-enabled while debug
-   * output is performed and a timer expiration could attempt a concurrent
-   * poll.
-   */
-
-  if (!priv->pd_polling)
-    {
-      /* Assign a buffer for the poll */
-
-      DEBUGASSERT(priv->pd_dev.d_buf == NULL);
-      priv->pd_dev.d_buf = pic32mz_allocbuffer(priv);
-      if (priv->pd_dev.d_buf != NULL)
-        {
-          /* And perform the poll */
-
-          priv->pd_polling = true;
-          devif_poll(&priv->pd_dev, pic32mz_txpoll);
-
-          /* Free any buffer left attached after the poll */
-
-          if (priv->pd_dev.d_buf != NULL)
-            {
-              pic32mz_freebuffer(priv, priv->pd_dev.d_buf);
-              priv->pd_dev.d_buf = NULL;
-            }
-
-          priv->pd_polling = false;
-        }
-    }
-}
-
-/****************************************************************************
- * Function: pic32mz_response
- *
- * Description:
- *   While processing an RxDone event, higher logic decides to send a packet,
- *   possibly a response to the incoming packet (but probably not in reality)
- *   However, since the Rx and Tx operations are decoupled, there is no
- *   guarantee that there will be a Tx descriptor available at that time.
- *   This function will perform that check and, if no Tx descriptor is
- *   available, this function will (1) stop incoming Rx processing (bad), and
- *   (2) hold the outgoing packet in a pending state until the next Tx
- *   interrupt occurs.
- *
- * Input Parameters:
- *   priv  - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by interrupt handling logic.
- *
- ****************************************************************************/
-
-static void pic32mz_response(struct pic32mz_driver_s *priv)
-{
-  struct pic32mz_txdesc_s *txdesc;
-
-  /* Check if the next TX descriptor is available. */
-
-  txdesc = pic32mz_txdesc(priv);
-  if (txdesc != NULL)
-    {
-      /* Yes.. queue the packet now. */
-
-      pic32mz_transmit(priv);
-    }
-  else
-    {
-      /* No.. mark the Tx as pending and halt further Rx interrupts */
-
-      DEBUGASSERT((priv->pd_inten & ETH_INT_TXDONE) != 0);
-
-      priv->pd_txpending = true;
-      priv->pd_inten    &= ~ETH_RXINTS;
-      pic32mz_putreg(priv->pd_inten, PIC32MZ_ETH_IEN);
-    }
-}
-
-/****************************************************************************
- * Function: pic32mz_rxdone
- *
- * Description:
- *   An interrupt was received indicating the availability of a new RX packet
- *
- * Input Parameters:
- *   priv  - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by interrupt handling logic.
- *
- ****************************************************************************/
-
-static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
-{
+  struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)dev;
   struct pic32mz_rxdesc_s *rxdesc;
+  netpkt_t *pkt = NULL;
+  uint8_t *buffer;
+  unsigned int len;
+  int ret;
 
-  /* Loop while there are incoming packets to be processed, that is, while
-   * the producer index is not equal to the consumer index.
-   */
+  nxmutex_lock(&priv->pd_lock);
 
-  /* While a response is pending (no TX descriptor was available), the
-   * packet buffer is still holding it: no more packets can be received
-   * until it is sent by pic32mz_txdone().
-   */
-
-  while (!priv->pd_txpending)
+  while (priv->pd_ifup)
     {
       /* Check if the next RX descriptor has the EOWN bit cleared meaning
        * that the this descriptor is now under software control and a
@@ -1504,7 +1445,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
            * are finished here.
            */
 
-          return;
+          break;
         }
 
       pic32mz_dumprxdesc(rxdesc, "RX Complete");
@@ -1513,16 +1454,12 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
        * count.
        */
 
-      priv->pd_dev.d_len = (rxdesc->rsv2 & RXDESC_RSV2_BYTECOUNT_MASK) >>
-                            RXDESC_RSV2_BYTECOUNT_SHIFT;
-      if (priv->pd_dev.d_len >= PIC32MZ_FCS_SIZE)
+      len = (rxdesc->rsv2 & RXDESC_RSV2_BYTECOUNT_MASK) >>
+            RXDESC_RSV2_BYTECOUNT_SHIFT;
+      if (len >= PIC32MZ_FCS_SIZE)
         {
-          priv->pd_dev.d_len -= PIC32MZ_FCS_SIZE;
+          len -= PIC32MZ_FCS_SIZE;
         }
-
-      /* Update statistics */
-
-      NETDEV_RXPACKETS(&priv->pd_dev);
 
       /* Check for errors */
 
@@ -1530,8 +1467,9 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
         {
           nwarn("WARNING. rsv1: %08" PRIx32 " rsv2: %08" PRIx32 "\n",
                 rxdesc->rsv1, rxdesc->rsv2);
-          NETDEV_RXERRORS(&priv->pd_dev);
+          NETDEV_RXERRORS(&priv->pd_dev.netdev);
           pic32mz_rxreturn(priv, rxdesc);
+          continue;
         }
 
       /* If the packet length is greater then the buffer, then we cannot
@@ -1540,300 +1478,96 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
        * imply that the packet is too big.
        */
 
-      else if (priv->pd_dev.d_len > CONFIG_NET_ETH_PKTSIZE)
+      if (len > CONFIG_NET_ETH_PKTSIZE)
         {
-          nwarn("WARNING: Too big. packet length: %d "
-                "rxdesc: %08" PRIx32 "\n",
-                priv->pd_dev.d_len, rxdesc->status);
-          NETDEV_RXERRORS(&priv->pd_dev);
+          nwarn("WARNING: Too big. packet length: %u "
+                "rxdesc: %08" PRIx32 "\n", len, rxdesc->status);
+          NETDEV_RXERRORS(&priv->pd_dev.netdev);
           pic32mz_rxreturn(priv, rxdesc);
+          continue;
         }
 
       /* We don't have any logic here for reassembling packets from
        * fragments.
        */
 
-      else if ((rxdesc->status & (RXDESC_STATUS_EOP | RXDESC_STATUS_SOP)) !=
-               (RXDESC_STATUS_EOP | RXDESC_STATUS_SOP))
+      if (len == 0 ||
+          (rxdesc->status & (RXDESC_STATUS_EOP | RXDESC_STATUS_SOP)) !=
+          (RXDESC_STATUS_EOP | RXDESC_STATUS_SOP))
         {
-          nwarn("WARNING: Fragment. packet length: %d "
-                "rxdesc: %08" PRIx32 "\n",
-                priv->pd_dev.d_len, rxdesc->status);
-          NETDEV_RXFRAGMENTS(&priv->pd_dev);
+          nwarn("WARNING: Fragment. packet length: %u "
+                "rxdesc: %08" PRIx32 "\n", len, rxdesc->status);
+          NETDEV_RXFRAGMENTS(&priv->pd_dev.netdev);
           pic32mz_rxreturn(priv, rxdesc);
+          continue;
         }
-      else
+
+      /* Get a packet for the frame.  If there is none, drop the frame and
+       * give the descriptor back to the hardware.
+       */
+
+      pkt = netpkt_alloc(dev, NETPKT_RX);
+      if (pkt == NULL)
         {
-          uint8_t *rxbuffer;
-
-          /* Get the Rx buffer address from the Rx descriptor */
-
-          priv->pd_dev.d_buf = (uint8_t *)VIRT_ADDR(rxdesc->address);
-
-          /* Force the completed RX DMA buffer to be re-read from
-           * physical memory.
-           */
-
-          up_invalidate_dcache((uintptr_t)priv->pd_dev.d_buf,
-                               (uintptr_t)priv->pd_dev.d_buf +
-                               PIC32MZ_ALIGNED_BUFSIZE);
-
-          DEBUGASSERT(priv->pd_dev.d_buf != NULL);
-
-          /* Replace the buffer in the RX descriptor with a new one.  If
-           * there is no free buffer, drop the packet and give the
-           * descriptor back to the hardware with its current buffer.
-           */
-
-          rxbuffer = pic32mz_rxbuffer(priv);
-          if (rxbuffer == NULL)
-            {
-              nwarn("WARNING: No free buffer, packet dropped\n");
-              NETDEV_RXDROPPED(&priv->pd_dev);
-              priv->pd_dev.d_buf = NULL;
-              priv->pd_dev.d_len = 0;
-              pic32mz_rxreturn(priv, rxdesc);
-              continue;
-            }
-
-          rxdesc->address = PHYS_ADDR(rxbuffer);
-
-          /* And give the RX descriptor back to the hardware */
-
+          nwarn("WARNING: No free buffer, packet dropped\n");
+          NETDEV_RXDROPPED(&priv->pd_dev.netdev);
           pic32mz_rxreturn(priv, rxdesc);
-          pic32mz_dumppacket("Received packet",
-                             priv->pd_dev.d_buf, priv->pd_dev.d_len);
-
-#ifdef CONFIG_NET_PKT
-          /* When packet sockets are enabled, feed the frame into the packet
-           * tap.
-           */
-
-          pkt_input(&priv->pd_dev);
-#endif
-
-          /* We only accept IP packets of the configured type and ARP
-           * packets
-           */
-
-#ifdef CONFIG_NET_IPv4
-          if (BUF->type == HTONS(ETHTYPE_IP))
-            {
-              ninfo("IPv4 frame\n");
-              NETDEV_RXIPV4(&priv->pd_dev);
-
-              /* Receive an IPv4 packet from the network device */
-
-              ipv4_input(&priv->pd_dev);
-
-              /* If the above function invocation resulted in data that
-               * should be sent out on the network, the field d_len will
-               * set to a value > 0.
-               */
-
-              if (priv->pd_dev.d_len > 0)
-                {
-                  /* And send the packet */
-
-                  pic32mz_response(priv);
-                }
-            }
-          else
-#endif
-#ifdef CONFIG_NET_IPv6
-          if (BUF->type == HTONS(ETHTYPE_IP6))
-            {
-              ninfo("IPv6 frame\n");
-              NETDEV_RXIPV6(&priv->pd_dev);
-
-              /* Give the IPv6 packet to the network layer */
-
-              ipv6_input(&priv->pd_dev);
-
-              /* If the above function invocation resulted in data that
-               * should be sent out on the network, the field d_len will
-               * set to a value > 0.
-               */
-
-              if (priv->pd_dev.d_len > 0)
-                {
-                  /* And send the packet */
-
-                  pic32mz_response(priv);
-                }
-            }
-          else
-#endif
-#ifdef CONFIG_NET_ARP
-          if (BUF->type == HTONS(ETHTYPE_ARP))
-            {
-              /* Handle the incoming ARP packet */
-
-              NETDEV_RXARP(&priv->pd_dev);
-              arp_input(&priv->pd_dev);
-
-              /* If the above function invocation resulted in data that
-               * should be sent out on the network, the field  d_len will
-               * set to a value > 0.
-               */
-
-              if (priv->pd_dev.d_len > 0)
-                {
-                  pic32mz_response(priv);
-                }
-            }
-          else
-#endif
-            {
-              /* Unrecognized... drop it. */
-
-              nwarn("WARNING: Unrecognized packet type dropped: %04x\n",
-                    NTOHS(BUF->type));
-              NETDEV_RXDROPPED(&priv->pd_dev);
-            }
-
-          /* Keep the buffer if it holds a pending response.  Otherwise,
-           * discard any buffers still attached to the device structure.
-           */
-
-          if (priv->pd_txpending)
-            {
-              break;
-            }
-
-          priv->pd_dev.d_len = 0;
-          if (priv->pd_dev.d_buf)
-            {
-              pic32mz_freebuffer(priv, priv->pd_dev.d_buf);
-              priv->pd_dev.d_buf = NULL;
-            }
+          continue;
         }
+
+      /* Each RX descriptor owns the buffer with its own index.  Force the
+       * completed RX DMA buffer to be re-read from physical memory.
+       */
+
+      buffer = PIC32MZ_RXBUFFER(priv->pd_rxnext);
+
+      up_invalidate_dcache((uintptr_t)buffer,
+                           (uintptr_t)buffer + PIC32MZ_ALIGNED_BUFSIZE);
+
+      ret = netpkt_copyin(dev, pkt, buffer, len, 0);
+      pic32mz_dumppacket("Received packet", buffer, len);
+
+      /* And give the RX descriptor back to the hardware */
+
+      pic32mz_rxreturn(priv, rxdesc);
+
+      if (ret < 0)
+        {
+          nwarn("WARNING: netpkt_copyin failed: %d\n", ret);
+          NETDEV_RXDROPPED(&priv->pd_dev.netdev);
+          netpkt_free(dev, pkt, NETPKT_RX);
+          pkt = NULL;
+          continue;
+        }
+
+      break;
     }
+
+  nxmutex_unlock(&priv->pd_lock);
+  return pkt;
 }
 
 /****************************************************************************
- * Function: pic32mz_txdone
+ * Function: pic32mz_reclaim
  *
  * Description:
- *   An interrupt was received indicating that the last TX packet(s) is done
+ *   NuttX Callback: reclaim the TX descriptors that were already sent.
  *
  * Input Parameters:
- *   priv  - Reference to the driver state structure
+ *   dev - Reference to the lower half driver state structure
  *
  * Returned Value:
  *   None
  *
- * Assumptions:
- *   Global interrupts are disabled by interrupt handling logic.
- *
  ****************************************************************************/
 
-static void pic32mz_txdone(struct pic32mz_driver_s *priv)
+static void pic32mz_reclaim(struct netdev_lowerhalf_s *dev)
 {
-  struct pic32mz_txdesc_s *txdesc;
-  int i;
+  struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)dev;
 
-  /* Cancel the pending Tx timeout */
-
-  wd_cancel(&priv->pd_txtimeout);
-
-  /* Disable further Tx interrupts.  Tx interrupts may be re-enabled again
-   * depending upon the result of the poll.
-   */
-
-  priv->pd_inten &= ~ETH_TXINTS;
-  pic32mz_putreg(priv->pd_inten, PIC32MZ_ETH_IEN);
-
-  /* Inspect the list of TX descriptors to see if the EOWN bit is cleared.
-   * If it is, this descriptor is now under software control and the message
-   * was transmitted. Use TSV to check for the transmission result.
-   */
-
-  for (i = 0; i < CONFIG_PIC32MZ_ETH_NTXDESC; i++)
-    {
-      txdesc = &g_txdesc[i].txdesc;
-
-      /* Force re-reading of the TX descriptor from physical memory.
-       * The descriptor may have been owned by the Ethernet controller.
-       * Cache data would be stale in this case.
-       */
-
-      up_invalidate_dcache((uintptr_t)txdesc,
-                           (uintptr_t)txdesc +
-                           sizeof(union pic32mz_txdesc_u));
-
-      /* Check if software owns this descriptor */
-
-      if ((txdesc->status & TXDESC_STATUS_EOWN) == 0)
-        {
-          /* Yes.. Check if there is a buffer attached? */
-
-          if (txdesc->address != 0)
-            {
-              pic32mz_dumptxdesc(txdesc, "Freeing TX buffer");
-
-              /* Free the TX buffer */
-
-              pic32mz_freebuffer(priv,
-                                 (uint8_t *)VIRT_ADDR(txdesc->address));
-              txdesc->address = 0;
-
-              /* Reset status */
-
-              txdesc->tsv1    = 0;
-              txdesc->tsv2    = 0;
-              txdesc->status  = TXDESC_STATUS_SOWN | TXDESC_STATUS_NPV;
-
-              pic32mz_dumptxdesc(txdesc, "TX buffer freed");
-
-              /* Flush the content of the modified TX descriptor. */
-
-              up_flush_dcache((uintptr_t)txdesc,
-                              (uintptr_t)txdesc +
-                              sizeof(union pic32mz_txdesc_u));
-            }
-        }
-    }
-
-  /* Verify that the hardware is ready to send another packet.  Since a Tx
-   * just completed and its buffer was freed, this must be the case.
-   */
-
-  DEBUGASSERT(pic32mz_txdesc(priv) != NULL);
-
-  /* Check if there is a pending Tx transfer that was deferred by Rx handling
-   * because there were no available Tx descriptors.  If so, process that
-   * pending Tx now.
-   */
-
-  if (priv->pd_txpending)
-    {
-      /* Clear the pending condition, send the packet, and restore Rx
-       * interrupts
-       */
-
-      priv->pd_txpending = false;
-
-      pic32mz_transmit(priv);
-
-      priv->pd_inten    |= ETH_RXINTS;
-      pic32mz_putreg(priv->pd_inten, PIC32MZ_ETH_IEN);
-
-      /* The RX done events were cleared while RX was halted: process the
-       * packets received in the meantime.
-       */
-
-      pic32mz_rxdone(priv);
-    }
-
-  /* Otherwise poll the network for new XMIT data */
-
-  else
-    {
-      /* Perform the network poll */
-
-      pic32mz_poll(priv);
-    }
+  nxmutex_lock(&priv->pd_lock);
+  pic32mz_txreap(priv);
+  nxmutex_unlock(&priv->pd_lock);
 }
 
 /****************************************************************************
@@ -1860,8 +1594,6 @@ static void pic32mz_interrupt_work(void *arg)
 
   /* Process pending Ethernet interrupts */
 
-  net_lock();
-
   /* Get the interrupt status (zero means no interrupts pending). */
 
   status = pic32mz_getreg(PIC32MZ_ETH_IRQ);
@@ -1883,7 +1615,7 @@ static void pic32mz_interrupt_work(void *arg)
       if ((status & ETH_INT_RXOVFLW) != 0)
         {
           nerr("ERROR: RX Overrun. status: %08" PRIx32 "\n", status);
-          NETDEV_RXERRORS(&priv->pd_dev);
+          NETDEV_RXERRORS(&priv->pd_dev.netdev);
         }
 
       /* RXBUFNA: Receive Buffer Not Available Interrupt.  This bit is set by
@@ -1895,7 +1627,7 @@ static void pic32mz_interrupt_work(void *arg)
         {
           nerr("ERROR: RX buffer descriptor overrun. "
                "status: %08" PRIx32 "\n", status);
-          NETDEV_RXERRORS(&priv->pd_dev);
+          NETDEV_RXERRORS(&priv->pd_dev.netdev);
         }
 
       /* RXBUSE: Receive BVCI Bus Error Interrupt.  This bit is set when the
@@ -1906,7 +1638,7 @@ static void pic32mz_interrupt_work(void *arg)
       if ((status & ETH_INT_RXBUSE) != 0)
         {
           nerr("ERROR: RX BVCI bus error. status: %08" PRIx32 "\n", status);
-          NETDEV_RXERRORS(&priv->pd_dev);
+          NETDEV_RXERRORS(&priv->pd_dev.netdev);
         }
 
       /* Receive Normal Events **********************************************/
@@ -1931,11 +1663,12 @@ static void pic32mz_interrupt_work(void *arg)
                      ETH_INT_RXOVFLW)) != 0)
         {
           /* We have received at least one new incoming packet.  After an
-           * overflow or when no descriptor was available, process the
-           * received packets to give the descriptors back to the hardware.
+           * overflow or when no descriptor was available, the received
+           * packets must be taken to give the descriptors back to the
+           * hardware.
            */
 
-          pic32mz_rxdone(priv);
+          netdev_lower_rxready(&priv->pd_dev);
         }
 
       /* Transmit Errors ****************************************************/
@@ -1955,7 +1688,7 @@ static void pic32mz_interrupt_work(void *arg)
       if ((status & ETH_INT_TXABORT) != 0)
         {
           nerr("ERROR: TX abort. status: %08" PRIx32 "\n", status);
-          NETDEV_TXERRORS(&priv->pd_dev);
+          NETDEV_TXERRORS(&priv->pd_dev.netdev);
         }
 
       /* TXBUSE: Transmit BVCI Bus Error Interrupt. This bit is set when the
@@ -1966,7 +1699,7 @@ static void pic32mz_interrupt_work(void *arg)
       if ((status & ETH_INT_TXBUSE) != 0)
         {
           nerr("ERROR: TX BVCI bus error. status: %08" PRIx32 "\n", status);
-          NETDEV_TXERRORS(&priv->pd_dev);
+          NETDEV_TXERRORS(&priv->pd_dev.netdev);
         }
 
       /* TXDONE: Transmit Done Interrupt.  This bit is set when the currently
@@ -1978,8 +1711,6 @@ static void pic32mz_interrupt_work(void *arg)
 
       if ((status & ETH_INT_TXDONE) != 0)
         {
-          NETDEV_TXDONE(&priv->pd_dev);
-
           /* A packet transmission just completed */
 
           pic32mz_txdone(priv);
@@ -2009,7 +1740,6 @@ static void pic32mz_interrupt_work(void *arg)
 #else
   mips_clrpend_irq(PIC32MZ_IRQ_ETH);
 #endif
-  net_unlock();
 
   /* Re-enable Ethernet interrupts */
 
@@ -2104,24 +1834,19 @@ static void pic32mz_txtimeout_work(void *arg)
 
   /* Increment statistics and dump debug info */
 
-  net_lock();
-  NETDEV_TXTIMEOUTS(&priv->pd_dev);
+  NETDEV_TXTIMEOUTS(&priv->pd_dev.netdev);
   if (priv->pd_ifup)
     {
       /* Then reset the hardware. ifup() will reset the interface, then bring
-       * it back up.
+       * it back up.  The packets held for the TX descriptors are released.
        */
 
       pic32mz_ifup(&priv->pd_dev);
 
-      /* Then poll the network for new XMIT data (We are guaranteed to have
-       * a free buffer here).
-       */
+      /* Then let the network send again */
 
-      pic32mz_poll(priv);
+      netdev_lower_txdone(&priv->pd_dev);
     }
-
-  net_unlock();
 }
 
 /****************************************************************************
@@ -2179,15 +1904,16 @@ static void pic32mz_txtimeout_expiry(wdparm_t arg)
  *
  ****************************************************************************/
 
-static int pic32mz_ifup(struct net_driver_s *dev)
+static int pic32mz_ifup(struct netdev_lowerhalf_s *dev)
 {
-  struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)dev->d_private;
+  struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)dev;
+  uint8_t *mac = priv->pd_dev.netdev.d_mac.ether.ether_addr_octet;
   uint32_t regval;
   int ret;
 
   ninfo("Bringing up: %u.%u.%u.%u\n",
-        ip4_addr1(dev->d_ipaddr), ip4_addr2(dev->d_ipaddr),
-        ip4_addr3(dev->d_ipaddr), ip4_addr4(dev->d_ipaddr));
+        ip4_addr1(dev->netdev.d_ipaddr), ip4_addr2(dev->netdev.d_ipaddr),
+        ip4_addr3(dev->netdev.d_ipaddr), ip4_addr4(dev->netdev.d_ipaddr));
 
   /* Reset the Ethernet controller (again) */
 
@@ -2341,43 +2067,37 @@ static int pic32mz_ifup(struct net_driver_s *dev)
    * SIOCSIFHWADDR) if there is one, otherwise keep the factory address.
    */
 
-  if (memcmp(priv->pd_dev.d_mac.ether.ether_addr_octet, g_zeromac,
-             sizeof(g_zeromac)) != 0)
+  if (memcmp(mac, g_zeromac, sizeof(g_zeromac)) != 0)
     {
-      regval = (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[5] << 8 |
-               (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[4];
+      regval = (uint32_t)mac[5] << 8 |
+               (uint32_t)mac[4];
       pic32mz_putreg(regval, PIC32MZ_EMAC1_SA0);
 
-      regval = (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[3] << 8 |
-               (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[2];
+      regval = (uint32_t)mac[3] << 8 |
+               (uint32_t)mac[2];
       pic32mz_putreg(regval, PIC32MZ_EMAC1_SA1);
 
-      regval = (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[1] << 8 |
-               (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[0];
+      regval = (uint32_t)mac[1] << 8 |
+               (uint32_t)mac[0];
       pic32mz_putreg(regval, PIC32MZ_EMAC1_SA2);
     }
   else
     {
       regval = pic32mz_getreg(PIC32MZ_EMAC1_SA0);
-      priv->pd_dev.d_mac.ether.ether_addr_octet[4] = regval & 0xff;
-      priv->pd_dev.d_mac.ether.ether_addr_octet[5] = (regval >> 8) & 0xff;
+      mac[4] = regval & 0xff;
+      mac[5] = (regval >> 8) & 0xff;
 
       regval = pic32mz_getreg(PIC32MZ_EMAC1_SA1);
-      priv->pd_dev.d_mac.ether.ether_addr_octet[2] = regval & 0xff;
-      priv->pd_dev.d_mac.ether.ether_addr_octet[3] = (regval >> 8) & 0xff;
+      mac[2] = regval & 0xff;
+      mac[3] = (regval >> 8) & 0xff;
 
       regval = pic32mz_getreg(PIC32MZ_EMAC1_SA2);
-      priv->pd_dev.d_mac.ether.ether_addr_octet[0] = regval & 0xff;
-      priv->pd_dev.d_mac.ether.ether_addr_octet[1] = (regval >> 8) & 0xff;
+      mac[0] = regval & 0xff;
+      mac[1] = (regval >> 8) & 0xff;
     }
 
   ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-        dev->d_mac.ether.ether_addr_octet[0],
-        dev->d_mac.ether.ether_addr_octet[1],
-        dev->d_mac.ether.ether_addr_octet[2],
-        dev->d_mac.ether.ether_addr_octet[3],
-        dev->d_mac.ether.ether_addr_octet[4],
-        dev->d_mac.ether.ether_addr_octet[5]);
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Continue Ethernet Controller Initialization ****************************/
 
@@ -2423,16 +2143,12 @@ static int pic32mz_ifup(struct net_driver_s *dev)
   pic32mz_putreg(ETH_CON2_RXBUFSZ(PIC32MZ_ALIGNED_BUFSIZE),
                  PIC32MZ_ETH_CON2);
 
-  /* Reset state variables */
+  /* Initialize the descriptor lists.  The packets still held for the TX
+   * descriptors of a previous session are released first.
+   */
 
-  priv->pd_polling   = false;
-  priv->pd_txpending = false;
-  priv->pd_dev.d_buf = NULL;
-  priv->pd_dev.d_len = 0;
-
-  /* Initialize the buffer list */
-
-  pic32mz_bufferinit(priv);
+  nxmutex_lock(&priv->pd_lock);
+  pic32mz_txflush(priv);
 
   /* Initialize the TX descriptor list */
 
@@ -2441,6 +2157,7 @@ static int pic32mz_ifup(struct net_driver_s *dev)
   /* Initialize the RX descriptor list */
 
   pic32mz_rxdescinit(priv);
+  nxmutex_unlock(&priv->pd_lock);
 
   /* Enable the Ethernet Controller by setting the ON bit (ETHCON1:15).
    * Enable the receiving of messages by setting the RXEN bit (ETHCON1:8).
@@ -2497,7 +2214,7 @@ static int pic32mz_ifup(struct net_driver_s *dev)
   up_enable_irq(PIC32MZ_IRQ_ETH);
 #endif
 
-  netdev_carrier_on(dev);
+  netdev_lower_carrier_on(dev);
 
   return OK;
 }
@@ -2518,9 +2235,9 @@ static int pic32mz_ifup(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static int pic32mz_ifdown(struct net_driver_s *dev)
+static int pic32mz_ifdown(struct netdev_lowerhalf_s *dev)
 {
-  struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)dev->d_private;
+  struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)dev;
   irqstate_t flags;
 
   /* Disable the Ethernet interrupt */
@@ -2542,88 +2259,13 @@ static int pic32mz_ifdown(struct net_driver_s *dev)
   priv->pd_ifup = false;
   leave_critical_section(flags);
 
-  netdev_carrier_off(dev);
+  /* The hardware no longer owns any descriptor: release the packets */
 
-  return OK;
-}
+  nxmutex_lock(&priv->pd_lock);
+  pic32mz_txflush(priv);
+  nxmutex_unlock(&priv->pd_lock);
 
-/****************************************************************************
- * Function: pic32mz_txavail_work
- *
- * Description:
- *   Perform an out-of-cycle poll on the worker thread.
- *
- * Input Parameters:
- *   arg - Reference to the NuttX driver state structure (cast to void*)
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called on the higher priority worker thread.
- *
- ****************************************************************************/
-
-static void pic32mz_txavail_work(void *arg)
-{
-  struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)arg;
-
-  /* Ignore the notification if the interface is not yet up */
-
-  net_lock();
-  if (priv->pd_ifup)
-    {
-      /* Check if the next Tx descriptor is available and that the packet
-       * buffer is not holding a pending response.
-       */
-
-      if (!priv->pd_txpending && pic32mz_txdesc(priv) != NULL)
-        {
-          /* If so, then poll the network for new XMIT data.
-           * First allocate a buffer to perform the poll
-           */
-
-          pic32mz_poll(priv);
-        }
-    }
-
-  net_unlock();
-}
-
-/****************************************************************************
- * Function: pic32mz_txavail
- *
- * Description:
- *   Driver callback invoked when new TX data is available.  This is a
- *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
- *   latency.
- *
- * Input Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- ****************************************************************************/
-
-static int pic32mz_txavail(struct net_driver_s *dev)
-{
-  struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)dev->d_private;
-
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions and we will have to ignore the Tx
-   * availability action.
-   */
-
-  if (work_available(&priv->pd_pollwork))
-    {
-      /* Schedule to serialize the poll on the worker thread. */
-
-      work_queue(ETHWORK, &priv->pd_pollwork, pic32mz_txavail_work, priv, 0);
-    }
+  netdev_lower_carrier_off(dev);
 
   return OK;
 }
@@ -2647,9 +2289,10 @@ static int pic32mz_txavail(struct net_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int pic32mz_addmac(struct net_driver_s *dev, const uint8_t *mac)
+static int pic32mz_addmac(struct netdev_lowerhalf_s *dev,
+                          const uint8_t *mac)
 {
-  struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)dev->d_private;
+  struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)dev;
 
   /* Add the MAC address to the hardware multicast routing table */
 
@@ -2677,9 +2320,10 @@ static int pic32mz_addmac(struct net_driver_s *dev, const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int pic32mz_rmmac(struct net_driver_s *dev, const uint8_t *mac)
+static int pic32mz_rmmac(struct netdev_lowerhalf_s *dev,
+                         const uint8_t *mac)
 {
-  struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)dev->d_private;
+  struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)dev;
 
   /* Add the MAC address to the hardware multicast routing table */
 
@@ -2708,11 +2352,11 @@ static int pic32mz_rmmac(struct net_driver_s *dev, const uint8_t *mac)
  ****************************************************************************/
 
 #if defined(CONFIG_NETDEV_IOCTL) && defined(PIC32MZ_HAVE_PHY)
-static int pic32mz_ioctl(struct net_driver_s *dev, int cmd,
+static int pic32mz_ioctl(struct netdev_lowerhalf_s *dev, int cmd,
                          unsigned long arg)
 {
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-  struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)dev->d_private;
+  struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)dev;
 #endif
   int ret;
 
@@ -2725,7 +2369,8 @@ static int pic32mz_ioctl(struct net_driver_s *dev, int cmd,
           struct mii_ioctl_notify_s *req =
             (struct mii_ioctl_notify_s *)((uintptr_t)arg);
 
-          ret = phy_notify_subscribe(dev->d_ifname, req->pid, &req->event);
+          ret = phy_notify_subscribe(dev->netdev.d_ifname, req->pid,
+                                     &req->event);
           if (ret == OK)
             {
               /* Enable PHY link up/down interrupts */
@@ -3663,17 +3308,18 @@ static inline int pic32mz_ethinitialize(int intf)
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct pic32mz_driver_s));
-  priv->pd_dev.d_ifup    = pic32mz_ifup;    /* I/F down callback */
-  priv->pd_dev.d_ifdown  = pic32mz_ifdown;  /* I/F up (new IP address) callback */
-  priv->pd_dev.d_txavail = pic32mz_txavail; /* New TX data callback */
-#ifdef CONFIG_NET_MCASTGROUP
-  priv->pd_dev.d_addmac  = pic32mz_addmac;  /* Add multicast MAC address */
-  priv->pd_dev.d_rmmac   = pic32mz_rmmac;   /* Remove multicast MAC address */
-#endif
-#if defined(CONFIG_NETDEV_IOCTL) && defined(PIC32MZ_HAVE_PHY)
-  priv->pd_dev.d_ioctl   = pic32mz_ioctl;   /* Support PHY ioctl() calls */
-#endif
-  priv->pd_dev.d_private = priv;            /* Used to recover private state from dev */
+  priv->pd_dev.ops = &g_pic32mz_ops;
+  nxmutex_init(&priv->pd_lock);
+
+  /* The TX quota is the number of TX descriptors: a packet is held by the
+   * driver until its descriptor is reclaimed.  The RX packets are handed
+   * over to the network stack as soon as they are copied.
+   */
+
+  priv->pd_dev.quota[NETPKT_TX] = CONFIG_PIC32MZ_ETH_NTXDESC;
+  priv->pd_dev.quota[NETPKT_RX] = CONFIG_PIC32MZ_ETH_NRXDESC;
+  priv->pd_dev.rxtype           = NETDEV_RX_WORK;
+  priv->pd_dev.priority         = ETHWORK;
 
 #if CONFIG_PIC32MZ_NINTERFACES > 1
 #  error "A mechanism to associate base address an IRQ with an interface is needed"
@@ -3691,7 +3337,8 @@ static inline int pic32mz_ethinitialize(int intf)
    * pic32mz_ifup() is called.
    */
 
-  pic32mz_ifdown(&priv->pd_dev);
+  pic32mz_ethreset(priv);
+  priv->pd_ifup = false;
 
   /* Attach the IRQ to the driver */
 
@@ -3709,7 +3356,13 @@ static inline int pic32mz_ethinitialize(int intf)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  netdev_register(&priv->pd_dev, NET_LL_ETHERNET);
+  ret = netdev_lower_register(&priv->pd_dev, NET_LL_ETHERNET);
+  if (ret < 0)
+    {
+      nerr("ERROR: netdev_lower_register failed: %d\n", ret);
+      return ret;
+    }
+
   return OK;
 }
 
