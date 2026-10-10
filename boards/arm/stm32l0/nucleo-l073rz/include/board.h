@@ -86,6 +86,13 @@
 #define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLKd2
 #define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
 
+/* APB1 timers 2, 3, 6 and 7 will receive PCLK1 * 2 */
+
+#define STM32_TIM2_CLKIN        (2 * STM32_PCLK1_FREQUENCY)
+#define STM32_TIM3_CLKIN        (2 * STM32_PCLK1_FREQUENCY)
+#define STM32_TIM6_CLKIN        (2 * STM32_PCLK1_FREQUENCY)
+#define STM32_TIM7_CLKIN        (2 * STM32_PCLK1_FREQUENCY)
+
 /* 48MHz clock configuration */
 
 #if defined(CONFIG_STM32_USB) || defined(CONFIG_STM32_RNG)
