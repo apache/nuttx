@@ -733,6 +733,14 @@ The process listening on the socket must be started before NuttX. If that
 process opens a real UART device, it still needs permission to access that UART
 device.
 
+bridge
+------
+
+Ethernet bridge test configuration with two TAP network devices, the bridge
+support (``CONFIG_NET_BRIDGE``), ``brctl``, ``ping`` and ``iperf``.  The
+network devices stay down at boot.  See :doc:`/os/networking/bridge` for how
+to bridge the two TAP devices and test the bridge from the Linux host.
+
 configdata
 ----------
 
