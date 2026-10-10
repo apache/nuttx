@@ -69,6 +69,10 @@ if(CONFIG_NET)
     list(APPEND SRCS vlan.c)
   endif()
 
+  if(CONFIG_NET_BRIDGE)
+    list(APPEND SRCS bridge.c)
+  endif()
+
   if(CONFIG_NET_FTMAC100)
     list(APPEND SRCS ftmac100.c)
   endif()

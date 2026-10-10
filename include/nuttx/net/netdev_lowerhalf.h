@@ -369,6 +369,61 @@ int netdev_lower_vlan_del(FAR struct netdev_lowerhalf_s *dev, uint16_t vid);
 #endif
 
 /****************************************************************************
+ * Name: netdev_lower_get
+ *
+ * Description:
+ *   Get the lower half of a network device.
+ *
+ * Input Parameters:
+ *   dev - The network device
+ *
+ * Returned Value:
+ *   The lower half device driver structure, or NULL if the device is not
+ *   managed by the upper half network driver (e.g. legacy drivers).
+ *
+ ****************************************************************************/
+
+FAR struct netdev_lowerhalf_s *
+netdev_lower_get(FAR struct net_driver_s *dev);
+
+/****************************************************************************
+ * Name: netdev_lower_input
+ *
+ * Description:
+ *   Pass a packet to the network stack as if the device had received it.
+ *   Used by virtual devices (bridge) that get their packets from another
+ *   device.
+ *
+ * Input Parameters:
+ *   dev - The lower half device driver structure
+ *   pkt - The packet, owned by the network stack from now on
+ *
+ ****************************************************************************/
+
+void netdev_lower_input(FAR struct netdev_lowerhalf_s *dev,
+                        FAR netpkt_t *pkt);
+
+/****************************************************************************
+ * Name: netdev_lower_bridge_set
+ *
+ * Description:
+ *   Make the device a port of a bridge, or release it from the bridge.
+ *   The packets received by a bridge port are given to the bridge instead
+ *   of the network stack.
+ *
+ * Input Parameters:
+ *   dev  - The lower half device driver structure
+ *   port - The bridge port, or NULL to release the device
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_BRIDGE
+struct bridge_port_s;
+void netdev_lower_bridge_set(FAR struct netdev_lowerhalf_s *dev,
+                             FAR struct bridge_port_s *port);
+#endif
+
+/****************************************************************************
  * Name: netpkt_alloc
  *
  * Description:

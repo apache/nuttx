@@ -46,6 +46,7 @@
 #include <nuttx/ethtool.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/radiodev.h>
+#include <nuttx/net/bridge.h>
 #include <nuttx/net/vlan.h>
 
 #ifdef CONFIG_NET_6LOWPAN
@@ -2019,6 +2020,15 @@ int psock_vioctl(FAR struct socket *psock, int cmd, va_list ap)
     {
       ret = netdev_vlan_ioctl(psock, cmd,
                               (FAR struct vlan_ioctl_args *)(uintptr_t)arg);
+    }
+#endif
+
+#ifdef CONFIG_NET_BRIDGE
+  /* Check for a bridge command */
+
+  if (ret == -ENOTTY)
+    {
+      ret = bridge_ioctl(cmd, arg);
     }
 #endif
 

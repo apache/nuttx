@@ -70,6 +70,10 @@ ifeq ($(CONFIG_NET_VLAN),y)
   CSRCS += vlan.c
 endif
 
+ifeq ($(CONFIG_NET_BRIDGE),y)
+  CSRCS += bridge.c
+endif
+
 ifeq ($(CONFIG_NET_FTMAC100),y)
   CSRCS += ftmac100.c
 endif
