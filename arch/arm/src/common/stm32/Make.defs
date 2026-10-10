@@ -51,6 +51,10 @@ CHIP_CSRCS += stm32_timerisr.c
 endif
 endif
 
+ifdef CONFIG_STM32_TICKLESS_TIMER
+CHIP_CSRCS += stm32_tickless.c
+endif
+
 ifeq ($(CONFIG_STM32_IWDG),y)
 CHIP_CSRCS += stm32_iwdg.c
 endif
@@ -168,10 +172,6 @@ endif
 CHIP_CSRCS += stm32_capture_m3m4_v1.c
 ifeq ($(CONFIG_STM32_HAVE_IP_DFUMODE_M3M4_V1),y)
 CHIP_CSRCS += stm32_dfumode_m3m4_v1.c
-endif
-
-ifdef CONFIG_STM32_TICKLESS_TIMER
-CHIP_CSRCS += stm32_tickless_m3m4_v1.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)

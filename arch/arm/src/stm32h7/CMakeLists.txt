@@ -50,10 +50,6 @@ if(CONFIG_RPTUN)
   list(APPEND SRCS stm32_rptun.c)
 endif()
 
-if(CONFIG_SCHED_TICKLESS)
-  list(APPEND SRCS stm32_tickless.c)
-endif()
-
 if(CONFIG_ARM_MPU)
   list(APPEND SRCS stm32_mpuinit.c)
 endif()

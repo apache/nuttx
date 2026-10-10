@@ -41,10 +41,6 @@ ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += stm32wb_idle.c
 endif
 
-ifeq ($(CONFIG_SCHED_TICKLESS),y)
-CHIP_CSRCS += stm32wb_tickless.c
-endif
-
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += stm32wb_userspace.c stm32wb_mpuinit.c
 endif

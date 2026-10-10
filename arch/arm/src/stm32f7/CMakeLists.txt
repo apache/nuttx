@@ -35,10 +35,6 @@ list(
   stm32_start.c
   stm32_capture.c)
 
-if(CONFIG_SCHED_TICKLESS)
-  list(APPEND SRCS stm32_tickless.c)
-endif()
-
 if(CONFIG_STM32_PROGMEM)
   list(APPEND SRCS stm32_flash.c)
 endif()
