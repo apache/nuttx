@@ -233,8 +233,20 @@
    (a)->s6_addr32[1] == 0 && \
    (a)->s6_addr32[2] == HTONL(0xffff))
 
+#define IN6_IS_ADDR_MC_NODELOCAL(a) \
+  (IN6_IS_ADDR_MULTICAST(a) && ((a)->s6_addr[1] & 0xf) == 0x1)
+
 #define IN6_IS_ADDR_MC_LINKLOCAL(a) \
   (IN6_IS_ADDR_MULTICAST(a) && ((a)->s6_addr[1] & 0xf) == 0x2)
+
+#define IN6_IS_ADDR_MC_SITELOCAL(a) \
+  (IN6_IS_ADDR_MULTICAST(a) && ((a)->s6_addr[1] & 0xf) == 0x5)
+
+#define IN6_IS_ADDR_MC_ORGLOCAL(a) \
+  (IN6_IS_ADDR_MULTICAST(a) && ((a)->s6_addr[1] & 0xf) == 0x8)
+
+#define IN6_IS_ADDR_MC_GLOBAL(a) \
+  (IN6_IS_ADDR_MULTICAST(a) && ((a)->s6_addr[1] & 0xf) == 0xe)
 
 #define IN6_IS_ADDR_SITELOCAL(a) \
   (((a)->s6_addr16[0] & HTONS(0xffc0)) == HTONS(0xfec0))
@@ -369,9 +381,10 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* Global IPv6 in6addr_any */
+/* Global IPv6 in6addr_any and in6addr_loopback */
 
 EXTERN const struct in6_addr in6addr_any;
+EXTERN const struct in6_addr in6addr_loopback;
 
 /****************************************************************************
  * Public Function Prototypes
