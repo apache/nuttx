@@ -220,6 +220,9 @@ void arm64_boot_el1_init(void)
 #ifndef CONFIG_ARM64_ICACHE_DISABLE
          SCTLR_I_BIT |        /* Enable i-cache */
 #endif
+         SCTLR_DZE_BIT |      /* EL0 may use DC ZVA */
+         SCTLR_UCT_BIT |      /* EL0 may read CTR_EL0 */
+         SCTLR_UCI_BIT |      /* EL0 may clean and invalidate by VA */
          SCTLR_SA_BIT);       /* Enable SP alignment check */
   write_sysreg(reg, sctlr_el1);
 
