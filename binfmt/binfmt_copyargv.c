@@ -38,16 +38,6 @@
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_BINFMT_DISABLE)
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* This is an artificial limit to detect error conditions where an argv[]
- * list is not properly terminated.
- */
-
-#define MAX_EXEC_ARGS 256
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -95,11 +85,11 @@ int binfmt_copyargv(FAR char * const **copy, FAR char * const *argv)
 
           /* This is a sanity check to prevent running away with an
            * unterminated argv[] list.
-           * MAX_EXEC_ARGS should be sufficiently large that this
+           * CONFIG_TASK_MAX_ARGS should be sufficiently large that this
            * never happens in normal usage.
            */
 
-          if (nargs > MAX_EXEC_ARGS)
+          if (nargs > CONFIG_TASK_MAX_ARGS)
             {
               berr("ERROR: Too many arguments: %zu\n", argsize);
               return -E2BIG;
