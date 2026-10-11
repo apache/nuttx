@@ -664,6 +664,28 @@ config TASK_NAME_SIZE
 		will be TASK_NAME_SIZE + 1.  The default of 31 then results in
 		a align-able 32-byte allocation.
 
+config TASK_ARG_MAX
+	int "Maximum size of the arguments and environment of a new task"
+	default 4096
+	range 4096 2097152
+	---help---
+		_POSIX_ARG_MAX and ARG_MAX in limits.h, and sysconf(_SC_ARG_MAX): the
+		length in bytes of the arguments plus the environment that
+		programs may pass to exec() or posix_spawn().  POSIX requires at
+		least 4096.  Programs such as xargs size their command lines from
+		it.  The length is not checked when a task starts, but the
+		arguments are copied to the stack of the new task, so its stack
+		must be large enough for them.
+
+config TASK_MAX_ARGS
+	int "Maximum number of arguments of a new task"
+	default 256
+	range 16 65536
+	---help---
+		The maximum number of arguments that a new task can get from
+		exec(), posix_spawn() or task_create().  A longer list fails with
+		E2BIG.
+
 config SCHED_HAVE_PARENT
 	bool "Support parent/child task relationships"
 	default n
