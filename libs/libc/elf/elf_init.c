@@ -66,6 +66,7 @@ static inline int libelf_fileinfo(FAR struct mod_loadinfo_s *loadinfo)
   if (ret < 0)
     {
       int errval = _NX_GETERRNO(ret);
+
       berr("ERROR: Failed to stat file: %d\n", errval);
       return -errval;
     }
@@ -113,6 +114,7 @@ int libelf_initialize(FAR const char *filename,
   if (loadinfo->filfd < 0)
     {
       int errval = _NX_GETERRNO(loadinfo->filfd);
+
       berr("ERROR: Failed to open ELF binary %s: %d\n", filename, errval);
       return -errval;
     }
