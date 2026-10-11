@@ -101,8 +101,8 @@ int sysinfo(FAR struct sysinfo *info)
 #ifdef CONFIG_MM_PGALLOC
       mm_pginfo(&pginfo);
 
-      info->totalram += pginfo.ntotal << MM_PGSHIFT;
-      info->freeram  += pginfo.nfree  << MM_PGSHIFT;
+      info->totalram += (unsigned long)pginfo.ntotal << MM_PGSHIFT;
+      info->freeram  += (unsigned long)pginfo.nfree  << MM_PGSHIFT;
 #endif
 
       info->uptime   = TICK2SEC(clock_systime_ticks());

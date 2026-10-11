@@ -124,10 +124,10 @@ GRAN_HANDLE gran_initialize(FAR void *heapstart, size_t heapsize,
   alignedsize  = (heapend - alignedstart) & ~mask;
   ngranules    = alignedsize >> log2gran;
 
-  /* Reject oversized pools. */
+  /* Reject empty pools. */
 
-  DEBUGASSERT(ngranules > 0 && ngranules <= UINT16_MAX);
-  if (ngranules == 0 || ngranules > UINT16_MAX)
+  DEBUGASSERT(ngranules > 0);
+  if (ngranules == 0)
     {
       return NULL;
     }
