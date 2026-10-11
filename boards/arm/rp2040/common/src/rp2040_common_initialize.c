@@ -195,5 +195,6 @@ void rp2040_common_initialize(void)
   /* W5500 Interrupt input */
 
   rp2040_gpio_init(CONFIG_RP2040_W5500_INT_GPIO);
+  rp2040_gpio_set_pulls(CONFIG_RP2040_W5500_INT_GPIO, true, false);
 #endif
 }
