@@ -595,7 +595,34 @@ jobs:
           git config --global --add safe.directory /github/workspace/sources/nuttx
           git config --global --add safe.directory /github/workspace/sources/apps
           cd sources/nuttx/tools/ci
-          ./cibuild.sh -g -i -A -C -N -R testlist/${{matrix.boards}}.dat
+
+          # The builds take about 15 minutes.  If they still run after 20,
+          # print every process with its command line, and again every 10
+          # minutes, to show what does not end.
+
+          done=$(mktemp -u)
+          start=$(date +%s)
+          (
+            next=$((start + 1200))
+            while [ ! -e $done ]; do
+              sleep 30
+              if [ ! -e $done ] && [ $(date +%s) -ge $next ]; then
+                echo "::group::Processes after $((($(date +%s) - start) / 60)) minutes"
+                ps -efW
+                powershell -NoProfile -Command "Get-CimInstance Win32_Process | Sort-Object ProcessId | Format-Table ProcessId,ParentProcessId,CommandLine -AutoSize -Wrap | Out-String -Width 4096"
+                echo "::endgroup::"
+                next=$((next + 600))
+              fi
+            done
+          ) &
+          watchdog=$!
+
+          ret=0
+          ./cibuild.sh -g -i -A -C -N -R testlist/${{matrix.boards}}.dat || ret=$?
+          touch $done
+          wait $watchdog
+          rm -f $done
+          exit $ret
 
       - uses: actions/upload-artifact@v7.0.1
         with:
