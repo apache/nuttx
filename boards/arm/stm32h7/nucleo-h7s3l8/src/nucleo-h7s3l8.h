@@ -64,14 +64,6 @@
 
 /* procfs file system */
 
-#ifdef CONFIG_FS_PROCFS
-#  ifdef CONFIG_NSH_PROC_MOUNTPOINT
-#    define STM32_PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
-#  else
-#    define STM32_PROCFS_MOUNTPOINT "/proc"
-#  endif
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

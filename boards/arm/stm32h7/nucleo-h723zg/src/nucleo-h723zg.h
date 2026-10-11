@@ -38,7 +38,6 @@
 
 /* Configuration ************************************************************/
 
-#define HAVE_PROC            1
 #define HAVE_USBDEV          1
 #define HAVE_USBMONITOR      1
 #define HAVE_MTDCONFIG       1
@@ -85,16 +84,6 @@
 /* flash  */
 #if defined(CONFIG_MMCSD)
 #  define FLASH_BASED_PARAMS
-#endif
-
-/* procfs File System */
-
-#ifdef CONFIG_FS_PROCFS
-#  ifdef CONFIG_NSH_PROC_MOUNTPOINT
-#    define STM32_PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
-#  else
-#    define STM32_PROCFS_MOUNTPOINT "/proc"
-#  endif
 #endif
 
 /* Check if we can support the RTC driver */

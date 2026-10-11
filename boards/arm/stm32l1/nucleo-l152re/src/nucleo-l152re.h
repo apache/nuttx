@@ -110,15 +110,6 @@ struct lcd_dev_s *stm32_ili93418b_initialize(void);
 int stm32_spisd_initialize(int port, int minor);
 #endif
 
-/* procfs File System */
-
-#ifdef CONFIG_FS_PROCFS
-    #ifdef CONFIG_NSH_PROC_MOUNTPOINT
-    #define STM32_PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
-    #else
-    #define STM32_PROCFS_MOUNTPOINT "/proc"
-    #endif
-#endif /* CONFIG_FS_PROCFS */
 #endif /* __BOARDS_ARM_STM32_NUCLEO_L152RE_SRC_NUCLEO_L152RE_H */
 
 /****************************************************************************

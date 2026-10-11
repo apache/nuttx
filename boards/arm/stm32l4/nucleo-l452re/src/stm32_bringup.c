@@ -82,16 +82,6 @@ int stm32_bringup(void)
              ret);
     }
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to mount procfs at /proc: %d\n", ret);
-    }
-#endif
-
 #ifdef CONFIG_INPUT_BUTTONS
 #ifdef CONFIG_INPUT_BUTTONS_LOWER
   iinfo("Initializing button driver\n");

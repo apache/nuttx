@@ -26,7 +26,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
 #include <sys/types.h>
 #include <nuttx/debug.h>
 
@@ -101,16 +100,6 @@ int stm32_bringup(void)
       syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
              ret);
     }
-
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to mount procfs at /proc: %d\n", ret);
-    }
-#endif
 
 #if defined(CONFIG_I2C)
   i2c1_m = stm32_i2cbus_initialize(1);

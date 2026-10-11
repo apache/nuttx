@@ -26,8 +26,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
-
 #include <nuttx/debug.h>
 #include <nuttx/board.h>
 #include <nuttx/input/buttons.h>
@@ -50,14 +48,6 @@ int stm32_bringup(void)
       syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
              ret);
     }
-
-#ifdef CONFIG_FS_PROCFS
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      return ret;
-    }
-#endif
 
 #ifdef CONFIG_INPUT_BUTTONS
   /* Register the BUTTON lower-half driver. */

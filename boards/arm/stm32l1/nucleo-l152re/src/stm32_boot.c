@@ -179,17 +179,6 @@ void board_late_initialize(void)
     }
 #endif
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = nx_mount(0, STM32_PROCFS_MOUNTPOINT, "procfs", 0, 0);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
-             STM32_PROCFS_MOUNTPOINT, ret);
-    }
-#endif
-
 #ifdef CONFIG_MMCSD_SPI
 
   /* Initialize the MMC/SD SPI driver (SPI1 is used) */

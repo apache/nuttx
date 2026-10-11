@@ -27,6 +27,9 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <syslog.h>
+
+#include <nuttx/fs/fs.h>
 
 #include <arch/board/board.h>
 
@@ -35,6 +38,24 @@
 #endif
 
 #include "board_common.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_DISABLE_MOUNTPOINT)
+#  define HAVE_PROCFS
+#endif
+
+#if defined(CONFIG_FS_TMPFS) && !defined(CONFIG_DISABLE_MOUNTPOINT)
+#  define HAVE_TMPFS
+#endif
+
+#ifdef CONFIG_NSH_PROC_MOUNTPOINT
+#  define PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
+#else
+#  define PROCFS_MOUNTPOINT "/proc"
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -50,6 +71,30 @@
 
 int stm32_common_initialize(void)
 {
+  int ret;
+
+#ifdef HAVE_PROCFS
+  /* Mount the procfs file system */
+
+  ret = nx_mount(NULL, PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
+             PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+
+#ifdef HAVE_TMPFS
+  /* Mount the tmpfs file system */
+
+  ret = nx_mount(NULL, CONFIG_LIBC_TMPDIR, "tmpfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount tmpfs at %s: %d\n",
+             CONFIG_LIBC_TMPDIR, ret);
+    }
+#endif
+
 #ifdef CONFIG_STM32_IWDG
   /* Initialize the independent watchdog */
 
@@ -62,5 +107,6 @@ int stm32_common_initialize(void)
   stm32_wwdginitialize("/dev/watchdog1");
 #endif
 
+  UNUSED(ret);
   return OK;
 }

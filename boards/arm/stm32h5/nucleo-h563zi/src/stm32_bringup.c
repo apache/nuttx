@@ -26,7 +26,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
 #include <sys/types.h>
 #include <nuttx/debug.h>
 
@@ -73,16 +72,6 @@ int stm32_bringup(void)
       syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
              ret);
     }
-
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to mount procfs at /proc: %d\n", ret);
-    }
-#endif
 
 #if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
   /* Register the LED driver */
