@@ -154,7 +154,7 @@
 #define REG_SP_EL0          (34)
 #define REG_EXE_DEPTH       (35)
 #define REG_SCTLR_EL1       (36)
-#define REG_RESERVED        (37)
+#define REG_TPIDR_EL0       (37)
 
 /* In Armv8-A Architecture, the stack must align with 16 byte */
 
