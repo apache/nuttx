@@ -284,7 +284,8 @@
 
 #define RCC_APB1ENR_TIM2EN           (1 << 0)  /* Bit 0:  Timer 2 clock enable */
 #define RCC_APB1ENR_TIM3EN           (1 << 1)  /* Bit 1:  Timer 3 clock enable */
-                                               /* Bits 2-11: Reserved */
+                                               /* Bits 2-10: Reserved */
+#define RCC_APB1ENR_WWDGEN           (1 << 11) /* Bit 11: Window watchdog clock enable */
 #define RCC_APB1ENR_FDCANEN          (1 << 12) /* Bit 12: FDCAN clock enable */
 #define RCC_APB1ENR_USBEN            (1 << 13) /* Bit 13: USB clock enable */
 #define RCC_APB1ENR_SPI2EN           (1 << 14) /* Bit 14: SPI 2 clock enable */
