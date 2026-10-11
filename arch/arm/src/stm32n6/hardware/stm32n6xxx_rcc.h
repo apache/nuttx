@@ -50,6 +50,7 @@
 #define STM32_RCC_CCIPR13_OFFSET      0x0174  /* Peripheral kernel clock select register 13 */
 #define STM32_RCC_APB1LRSTR_OFFSET    0x0224  /* APB1 peripheral reset register 1 */
 #define STM32_RCC_APB2RSTR_OFFSET     0x022c  /* APB2 peripheral reset register */
+#define STM32_RCC_APB4LRSTR_OFFSET    0x0234  /* APB4 peripheral reset register 1 */
 
 /* Peripheral clock enable / set / clear register offsets.  Each enable
  * register (xxxENR) has a paired set register (xxxENSR) that performs an
@@ -62,6 +63,7 @@
 #define STM32_RCC_AHB4ENR_OFFSET      0x025c  /* AHB4 peripheral clock enable register */
 #define STM32_RCC_APB1LENR_OFFSET     0x0264  /* APB1 peripheral clock enable register 1 */
 #define STM32_RCC_APB2ENR_OFFSET      0x026c  /* APB2 peripheral clock enable register */
+#define STM32_RCC_APB4LENR_OFFSET     0x0274  /* APB4 peripheral clock enable register 1 */
 #define STM32_RCC_APB4HENR_OFFSET     0x0278  /* APB4 peripheral clock enable register 2 */
 #define STM32_RCC_BUSLPENR_OFFSET     0x0284  /* Bus clocks enable in Sleep mode */
 #define STM32_RCC_MEMLPENR_OFFSET     0x028c  /* SRAM clocks enable in Sleep mode */
@@ -102,6 +104,7 @@
 #define STM32_RCC_CCIPR13             (STM32_RCC_BASE + STM32_RCC_CCIPR13_OFFSET)
 #define STM32_RCC_APB1LRSTR           (STM32_RCC_BASE + STM32_RCC_APB1LRSTR_OFFSET)
 #define STM32_RCC_APB2RSTR            (STM32_RCC_BASE + STM32_RCC_APB2RSTR_OFFSET)
+#define STM32_RCC_APB4LRSTR           (STM32_RCC_BASE + STM32_RCC_APB4LRSTR_OFFSET)
 
 #define STM32_RCC_DIVENR              (STM32_RCC_BASE + STM32_RCC_DIVENR_OFFSET)
 #define STM32_RCC_DIVENSR             (STM32_RCC_BASE + STM32_RCC_DIVENSR_OFFSET)
@@ -110,6 +113,7 @@
 #define STM32_RCC_AHB4ENR             (STM32_RCC_BASE + STM32_RCC_AHB4ENR_OFFSET)
 #define STM32_RCC_APB1LENR            (STM32_RCC_BASE + STM32_RCC_APB1LENR_OFFSET)
 #define STM32_RCC_APB2ENR             (STM32_RCC_BASE + STM32_RCC_APB2ENR_OFFSET)
+#define STM32_RCC_APB4LENR            (STM32_RCC_BASE + STM32_RCC_APB4LENR_OFFSET)
 #define STM32_RCC_APB4HENR            (STM32_RCC_BASE + STM32_RCC_APB4HENR_OFFSET)
 #define STM32_RCC_BUSLPENR            (STM32_RCC_BASE + STM32_RCC_BUSLPENR_OFFSET)
 #define STM32_RCC_MEMLPENR            (STM32_RCC_BASE + STM32_RCC_MEMLPENR_OFFSET)
@@ -250,6 +254,7 @@
 #define RCC_APB1LENR_TIM11EN          (1 << 13)  /* Bit 13: TIM11 enable */
 #define RCC_APB1LENR_TIM10EN          (1 << 12)  /* Bit 12: TIM10 enable */
 #define RCC_APB1LENR_WWDGEN           (1 << 11)  /* Bit 11: WWDG enable */
+#define RCC_APB1LENR_LPTIM1EN         (1 << 9)   /* Bit 9:  LPTIM1 enable */
 #define RCC_APB1LENR_TIM14EN          (1 << 8)   /* Bit 8:  TIM14 enable */
 #define RCC_APB1LENR_TIM13EN          (1 << 7)   /* Bit 7:  TIM13 enable */
 #define RCC_APB1LENR_TIM12EN          (1 << 6)   /* Bit 6:  TIM12 enable */
@@ -276,6 +281,7 @@
 #define RCC_APB1LRSTR_TIM11RST        (1 << 13)  /* Bit 13: TIM11 reset */
 #define RCC_APB1LRSTR_TIM10RST        (1 << 12)  /* Bit 12: TIM10 reset */
 #define RCC_APB1LRSTR_WWDGRST         (1 << 11)  /* Bit 11: WWDG reset */
+#define RCC_APB1LRSTR_LPTIM1RST       (1 << 9)   /* Bit 9:  LPTIM1 reset */
 #define RCC_APB1LRSTR_TIM14RST        (1 << 8)   /* Bit 8:  TIM14 reset */
 #define RCC_APB1LRSTR_TIM13RST        (1 << 7)   /* Bit 7:  TIM13 reset */
 #define RCC_APB1LRSTR_TIM12RST        (1 << 6)   /* Bit 6:  TIM12 reset */
@@ -295,6 +301,20 @@
 #define RCC_APB2RSTR_TIM18RST         (1 << 15)  /* Bit 15: TIM18 reset */
 #define RCC_APB2RSTR_TIM8RST          (1 << 1)   /* Bit 1:  TIM8 reset */
 #define RCC_APB2RSTR_TIM1RST          (1 << 0)   /* Bit 0:  TIM1 reset */
+
+/* APB4 peripheral clock enable register 1 */
+
+#define RCC_APB4LENR_LPTIM5EN         (1 << 12)  /* Bit 12: LPTIM5 enable */
+#define RCC_APB4LENR_LPTIM4EN         (1 << 11)  /* Bit 11: LPTIM4 enable */
+#define RCC_APB4LENR_LPTIM3EN         (1 << 10)  /* Bit 10: LPTIM3 enable */
+#define RCC_APB4LENR_LPTIM2EN         (1 << 9)   /* Bit 9:  LPTIM2 enable */
+
+/* APB4 peripheral reset register 1 */
+
+#define RCC_APB4LRSTR_LPTIM5RST       (1 << 12)  /* Bit 12: LPTIM5 reset */
+#define RCC_APB4LRSTR_LPTIM4RST       (1 << 11)  /* Bit 11: LPTIM4 reset */
+#define RCC_APB4LRSTR_LPTIM3RST       (1 << 10)  /* Bit 10: LPTIM3 reset */
+#define RCC_APB4LRSTR_LPTIM2RST       (1 << 9)   /* Bit 9:  LPTIM2 reset */
 
 /* APB4 peripheral clock enable register 2 */
 

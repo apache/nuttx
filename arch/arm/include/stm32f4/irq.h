@@ -323,7 +323,7 @@
 #  define STM32_IRQ_RESERVED94   (STM32_IRQ_FIRST+94) /* 94: Reserved */
 #  define STM32_IRQ_RESERVED95   (STM32_IRQ_FIRST+95) /* 95: Reserved */
 #  define STM32_IRQ_RESERVED96   (STM32_IRQ_FIRST+96) /* 96: Reserved */
-#  define STM32_IRQ_RESERVED97   (STM32_IRQ_FIRST+97) /* 97: Reserved */
+#  define STM32_IRQ_LPTIM1       (STM32_IRQ_FIRST+97) /* 97: LPTIM1 global interrupt */
 #endif
 
 #if defined(CONFIG_STM32_STM32F401) || defined(CONFIG_STM32_STM32F411) || \

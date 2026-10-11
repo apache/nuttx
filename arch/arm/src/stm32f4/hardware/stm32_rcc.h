@@ -327,6 +327,7 @@
 #define RCC_APB1RSTR_TIM12RST       (1 << 6)  /* Bit 6:  TIM12 reset */
 #define RCC_APB1RSTR_TIM13RST       (1 << 7)  /* Bit 7:  TIM13 reset */
 #define RCC_APB1RSTR_TIM14RST       (1 << 8)  /* Bit 8:  TIM14 reset */
+#define RCC_APB1RSTR_LPTIM1RST      (1 << 9)  /* Bit 9:  LPTIM1 reset */
 #define RCC_APB1RSTR_WWDGRST        (1 << 11) /* Bit 11: Window watchdog reset */
 #define RCC_APB1RSTR_SPI2RST        (1 << 14) /* Bit 14: SPI 2 reset */
 #define RCC_APB1RSTR_SPI3RST        (1 << 15) /* Bit 15: SPI 3 reset */
@@ -469,6 +470,7 @@
 #define RCC_APB1ENR_TIM12EN         (1 << 6)  /* Bit 6:  TIM12 clock enable */
 #define RCC_APB1ENR_TIM13EN         (1 << 7)  /* Bit 7:  TIM13 clock enable */
 #define RCC_APB1ENR_TIM14EN         (1 << 8)  /* Bit 8:  TIM14 clock enable */
+#define RCC_APB1ENR_LPTIM1EN        (1 << 9)  /* Bit 9:  LPTIM1 clock enable */
 #define RCC_APB1ENR_RTCAPBEN        (1 << 10) /* Bit 10:  RTCAPB clock enable */
 #define RCC_APB1ENR_WWDGEN          (1 << 11) /* Bit 11: Window watchdog clock enable */
 #define RCC_APB1ENR_SPI2EN          (1 << 14) /* Bit 14: SPI2 clock enable */

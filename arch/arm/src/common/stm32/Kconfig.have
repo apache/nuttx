@@ -1065,6 +1065,12 @@ config STM32_HAVE_LPTIM3
 config STM32_HAVE_LPTIM4
 	bool
 
+config STM32_HAVE_LPTIM5
+	bool
+
+config STM32_HAVE_LPTIM6
+	bool
+
 # TSC capabilities
 
 config STM32_HAVE_TSC
