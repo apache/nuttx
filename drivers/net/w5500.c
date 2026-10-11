@@ -106,6 +106,12 @@
 
 #define NUM_TXBUFS ((16 * 1024) / (CONFIG_NET_ETH_PKTSIZE))
 
+/* Maximum consecutive receive errors before declaring fatal hardware
+ * failure.
+ */
+
+#define W5500_MAX_RX_ERRORS 5
+
 /* W5500 SPI Host Interface *************************************************/
 
 #define W5500_BSB_COMMON_REGS         0x00u
@@ -364,6 +370,7 @@
 struct w5500_driver_s
 {
   bool w_bifup;               /* true:ifup false:ifdown */
+  uint8_t rx_errcnt;          /* Consecutive receive error count */
   struct wdog_s w_txtimeout;  /* TX timeout timer */
   struct work_s w_irqwork;    /* For deferring interrupt work to the work queue */
   struct work_s w_pollwork;   /* For deferring poll work to the work queue */
@@ -400,6 +407,12 @@ static struct w5500_driver_s g_w5500[CONFIG_NET_W5500_NINTERFACES];
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+/* Low-level helpers */
+
+static int  w5500_cmd(FAR struct w5500_driver_s *self, uint8_t s,
+                      uint8_t cmd);
+static int  w5500_resync_socket0(FAR struct w5500_driver_s *self);
 
 /* Common TX logic */
 
@@ -648,6 +661,43 @@ static void w5500_write8(FAR struct w5500_driver_s *self,
               offset,
               &value,
               sizeof(value));
+}
+
+/****************************************************************************
+ * Name: w5500_cmd
+ *
+ * Description:
+ *   Write a command to the socket Command Register (Sn_CR) and wait for
+ *   the hardware to clear Sn_CR, indicating that the command has completed.
+ *
+ * Input Parameters:
+ *   self - The respective w5500 device
+ *   s    - Socket number (0-7)
+ *   cmd  - Command byte to execute
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int w5500_cmd(FAR struct w5500_driver_s *self, uint8_t s, uint8_t cmd)
+{
+  int retry = 1000;
+
+  w5500_write8(self, W5500_BSB_SOCKET_REGS(s), W5500_SN_CR, cmd);
+
+  while (w5500_read8(self, W5500_BSB_SOCKET_REGS(s), W5500_SN_CR) != 0)
+    {
+      if (--retry == 0)
+        {
+          nerr("Timed out waiting for Sn_CR (cmd 0x%02" PRIx8 ")\n", cmd);
+          return -ETIMEDOUT;
+        }
+
+      up_udelay(5);
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -919,6 +969,79 @@ static bool w5500_txbuf_next(FAR struct w5500_driver_s *self)
 }
 
 /****************************************************************************
+ * Name: w5500_resync_socket0
+ *
+ * Description:
+ *   Resynchronize socket 0 after a receive glitch without bringing down
+ *   the entire interface. Closes and reopens socket 0 in MACRAW mode and
+ *   resets the TX buffer mirroring state.
+ *
+ * Input Parameters:
+ *   self - The respective w5500 device
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int w5500_resync_socket0(FAR struct w5500_driver_s *self)
+{
+  uint8_t value;
+  int ret;
+
+  nwarn("Resyncing socket 0 after RX glitch\n");
+
+  /* Close socket 0 */
+
+  ret = w5500_cmd(self, 0, SN_CR_CLOSE);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Configure socket 0 for raw MAC access with MAC filtering enabled */
+
+  w5500_write8(self,
+               W5500_BSB_SOCKET_REGS(0),
+               W5500_SN_MR,
+               SM_MR_MACRAW | SN_MR_MFEN);
+
+  /* Enable RECV interrupts on socket 0 */
+
+  w5500_write8(self,
+               W5500_BSB_SOCKET_REGS(0),
+               W5500_SN_IMR,
+               SN_INT_RECV);
+
+  /* Open socket 0 */
+
+  ret = w5500_cmd(self, 0, SN_CR_OPEN);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Verify socket 0 is open in MACRAW mode */
+
+  value = w5500_read8(self,
+                      W5500_BSB_SOCKET_REGS(0),
+                      W5500_SN_SR);
+
+  if (value != SN_SR_SOCK_MACRAW)
+    {
+      nerr("Socket 0 status not MACRAW after reopen: 0x%02" PRIx8 "\n",
+           value);
+      return -EIO;
+    }
+
+  /* Reset Tx buffer management state */
+
+  w5500_txbuf_reset(self);
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: w5500_fence
  *
  * Description:
@@ -956,6 +1079,7 @@ static int w5500_unfence(FAR struct w5500_driver_s *self)
 {
   uint8_t value;
   int i;
+  int ret;
 
   /* Initialize PHYs, Ethernet interface, and setup up Ethernet interrupts */
 
@@ -1021,10 +1145,11 @@ static int w5500_unfence(FAR struct w5500_driver_s *self)
 
   /* Open socket 0 */
 
-  w5500_write8(self,
-               W5500_BSB_SOCKET_REGS(0),
-               W5500_SN_CR, /* Control Register */
-               SN_CR_OPEN);
+  ret = w5500_cmd(self, 0, SN_CR_OPEN);
+  if (ret < 0)
+    {
+      goto error;
+    }
 
   /* Check whether socket 0 is open in MACRAW mode. */
 
@@ -1248,12 +1373,13 @@ static void w5500_reply(FAR struct w5500_driver_s *self)
 
 static void w5500_receive(FAR struct w5500_driver_s *self)
 {
+  int ret;
+
   do
     {
       uint16_t s0_rx_rd;
       uint16_t s0_rx_rsr;
       uint16_t pktlen;
-      int ret;
 
       /* Check if the packet is a valid size for the network buffer
        * configuration.
@@ -1265,7 +1391,7 @@ static void w5500_receive(FAR struct w5500_driver_s *self)
                                 &s0_rx_rsr);
       if (ret != OK)
         {
-          goto error;
+          goto rx_err;
         }
 
       if (s0_rx_rsr == 0)
@@ -1282,7 +1408,7 @@ static void w5500_receive(FAR struct w5500_driver_s *self)
       if (s0_rx_rsr < sizeof(pktlen))
         {
           nerr("Received size too small. S0_RX_RSR %"PRIu16"\n", s0_rx_rsr);
-          goto error;
+          goto rx_err;
         }
 
       /* Get the Socket 0 RX Read Pointer. */
@@ -1301,10 +1427,14 @@ static void w5500_receive(FAR struct w5500_driver_s *self)
         {
           nerr("Incomplete packet: pktlen %"PRIu16", S0_RX_RSR %"PRIu16"\n",
                pktlen,
-               s0_rx_rd);
+               s0_rx_rsr);
 
-          goto error;
+          goto rx_err;
         }
+
+      /* Packet header read successfully; reset consecutive error counter */
+
+      self->rx_errcnt = 0;
 
       if (pktlen < s0_rx_rsr)
         {
@@ -1336,10 +1466,11 @@ static void w5500_receive(FAR struct w5500_driver_s *self)
                     W5500_SN_RX_RD0,
                     s0_rx_rd + pktlen);
 
-      w5500_write8(self,
-                   W5500_BSB_SOCKET_REGS(0),
-                   W5500_SN_CR,
-                   SN_CR_RECV);
+      ret = w5500_cmd(self, 0, SN_CR_RECV);
+      if (ret < 0)
+        {
+          goto rx_err;
+        }
 
       /* Check for errors and update statistics */
 
@@ -1434,8 +1565,33 @@ static void w5500_receive(FAR struct w5500_driver_s *self)
 
   return;
 
-error:
+rx_err:
+  self->rx_errcnt++;
+  NETDEV_RXERRORS(&self->w_dev);
+
+  nerr("RX error (count %" PRIu8 "/%d)\n",
+       self->rx_errcnt, W5500_MAX_RX_ERRORS);
+
+  if (self->rx_errcnt >= W5500_MAX_RX_ERRORS)
+    {
+      nerr("Consecutive RX error threshold exceeded; fencing device.\n");
+      goto fatal_error;
+    }
+
+  /* Attempt soft recovery: resync socket 0 and drop partial frame */
+
+  ret = w5500_resync_socket0(self);
+  if (ret < 0)
+    {
+      nerr("Socket 0 resync failed (%d); fencing device.\n", ret);
+      goto fatal_error;
+    }
+
+  return;
+
+fatal_error:
   w5500_fence(self);
+  netdev_carrier_off(&self->w_dev);
 }
 
 /****************************************************************************
@@ -1541,10 +1697,30 @@ static void w5500_interrupt_work(FAR void *arg)
 
   if (ir[2] & ~SIR(0))
     {
+      uint8_t sn_ir;
+      int i;
+
       nwarn("Interrupt pending for unused socket. SIR: 0x%02"PRIx8"\n",
             ir[2]);
 
-      goto error;
+      /* Clear pending interrupts on unused sockets 1-7 */
+
+      for (i = 1; i < 8; i++)
+        {
+          if (ir[2] & SIR(i))
+            {
+              sn_ir = w5500_read8(self,
+                                  W5500_BSB_SOCKET_REGS(i),
+                                  W5500_SN_IR);
+              if (sn_ir != 0)
+                {
+                  w5500_write8(self,
+                               W5500_BSB_SOCKET_REGS(i),
+                               W5500_SN_IR,
+                               sn_ir);
+                }
+            }
+        }
     }
 
   if (ir[2] == 0)
@@ -1554,23 +1730,24 @@ static void w5500_interrupt_work(FAR void *arg)
       goto done;
     }
 
-  /* Get and clear interrupt status bits */
+  /* Get and clear socket 0 interrupt status bits */
 
   ir[0] = w5500_read8(self,
                       W5500_BSB_SOCKET_REGS(0),
                       W5500_SN_IR);
 
-  if ((ir[0] == 0) || ir[0] & ~(SN_INT_RECV | SN_INT_SEND_OK))
+  if (ir[0] != 0)
     {
-      nerr("Unsupported socket interrupts: %02"PRIx8"\n", ir[0]);
-
-      goto error;
+      w5500_write8(self,
+                   W5500_BSB_SOCKET_REGS(0),
+                   W5500_SN_IR,
+                   ir[0]);
     }
 
-  w5500_write8(self,
-               W5500_BSB_SOCKET_REGS(0),
-               W5500_SN_IR,
-               ir[0]);
+  if (ir[0] & ~(SN_INT_RECV | SN_INT_SEND_OK))
+    {
+      nwarn("Unexpected socket interrupts: %02"PRIx8"\n", ir[0]);
+    }
 
   /* Handle interrupts according to status bit settings */
 
@@ -1594,15 +1771,14 @@ static void w5500_interrupt_work(FAR void *arg)
 done:
   netdev_unlock(&self->w_dev);
 
-  /* Re-enable Ethernet interrupts */
+  /* Re-enable Ethernet interrupts only if the interface is still up */
 
-  self->lower->enable(self->lower, true);
+  if (self->w_bifup)
+    {
+      self->lower->enable(self->lower, true);
+    }
 
   return;
-
-error:
-  w5500_fence(self);
-  netdev_unlock(&self->w_dev);
 }
 
 /****************************************************************************
@@ -1769,7 +1945,8 @@ static int w5500_ifup(FAR struct net_driver_s *dev)
 
   /* Enable the Ethernet interrupt */
 
-  self->w_bifup = true;
+  self->w_bifup   = true;
+  self->rx_errcnt = 0;
   self->lower->enable(self->lower, true);
 
   netdev_carrier_on(dev);
