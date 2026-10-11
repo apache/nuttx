@@ -674,6 +674,13 @@ config ARCH_SETJMP_H
 		ARCH_SETJMP_H=y and providing. If ARCH_SETJMP_H, is not defined, then
 		the setjmp.h header file will stay out-of-the-way in include/nuttx/.
 
+config ARCH_HAVE_UCONTEXT
+	bool
+	default n
+	---help---
+		The architecture provides getcontext(), setcontext(), makecontext()
+		and swapcontext() in libc.
+
 choice
 	prompt "debug.h selection"
 	default ARCH_NONE_DEBUG_H
