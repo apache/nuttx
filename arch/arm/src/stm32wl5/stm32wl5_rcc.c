@@ -328,6 +328,12 @@ static inline void stm32_rcc_enableapb1(void)
   regval |= RCC_APB1ENR1_TIM2EN;
 #endif
 
+#ifdef CONFIG_STM32_WWDG
+  /* Window watchdog clock enable */
+
+  regval |= RCC_APB1ENR1_WWDGEN;
+#endif
+
 #ifdef CONFIG_STM32_SPI2
   /* SPI2 clock enable */
 
@@ -587,12 +593,12 @@ void stm32_clockenable(void)
 
 void stm32_rcc_enableperipherals(void)
 {
-    stm32_rcc_enableccip();
-    stm32_rcc_enableahb1();
-    stm32_rcc_enableahb2();
-    stm32_rcc_enableahb3();
-    stm32_rcc_enableapb1();
-    stm32_rcc_enableapb2();
+  stm32_rcc_enableccip();
+  stm32_rcc_enableahb1();
+  stm32_rcc_enableahb2();
+  stm32_rcc_enableahb3();
+  stm32_rcc_enableapb1();
+  stm32_rcc_enableapb2();
 }
 
 /****************************************************************************

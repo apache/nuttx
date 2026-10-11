@@ -54,6 +54,7 @@
  */
 
 #define STM32_HSI_FREQUENCY     64000000ul
+#define STM32_LSI_FREQUENCY     32000
 
 #define STM32_PLL1_M            4
 #define STM32_PLL1_N            50
