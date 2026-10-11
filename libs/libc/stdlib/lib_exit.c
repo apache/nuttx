@@ -101,13 +101,15 @@ void exit(int status)
 
   tls_cleanup_popall(tls_get_info());
 
+  /* Run the registered exit functions.  They run before the destructors
+   * of the thread-specific data, which they may still use.
+   */
+
+  atexit_call_exitfuncs(status, false);
+
 #if defined(CONFIG_TLS_NELEM) && CONFIG_TLS_NELEM > 0
   tls_destruct();
 #endif
-
-  /* Run the registered exit functions */
-
-  atexit_call_exitfuncs(status, false);
 
 #if defined(CONFIG_LIBC_DLFCN) && defined(CONFIG_BUILD_PROTECTED)
   /* Close what dlopen() left open.  The kernel cannot reach this registry.
@@ -162,13 +164,15 @@ void quick_exit(int status)
 
   tls_cleanup_popall(tls_get_info());
 
+  /* Run the registered exit functions.  They run before the destructors
+   * of the thread-specific data, which they may still use.
+   */
+
+  atexit_call_exitfuncs(status, true);
+
 #if defined(CONFIG_TLS_NELEM) && CONFIG_TLS_NELEM > 0
   tls_destruct();
 #endif
-
-  /* Run the registered exit functions */
-
-  atexit_call_exitfuncs(status, true);
 
   /* Then perform the exit */
 
