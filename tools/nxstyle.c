@@ -2166,7 +2166,11 @@ int main(int argc, char **argv, char **envp)
 
                   else if (strncmp(&line[ii], "include", 7) == 0)
                     {
-                      if (g_section != INCLUDED_FILES)
+                      /* A file included in an initializer provides the
+                       * data of the initializer.
+                       */
+
+                      if (g_section != INCLUDED_FILES && dnest == 0)
                         {
                           /* Only a warning because there is some usage of
                            * include outside the Included Files section
