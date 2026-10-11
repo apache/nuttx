@@ -38,7 +38,9 @@
 #include <arch/board/board.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/clock.h>
 #include <nuttx/mutex.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
 #include "riscv_internal.h"
@@ -115,7 +117,7 @@ static void spi_dmatxsetup(struct rp23xx_spidev_s *priv,
                            const void *txbuffer, size_t nwords);
 static void spi_dmarxsetup(struct rp23xx_spidev_s *priv,
                            const void *rxbuffer, size_t nwords);
-static void spi_dmatrxwait(struct rp23xx_spidev_s *priv);
+static int  spi_dmatrxwait(struct rp23xx_spidev_s *priv, size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
 static void spi_dmasndblock(struct spi_dev_s *dev,
                             const void *buffer, size_t nwords);
@@ -361,6 +363,7 @@ static void spi_enable_ssp(struct spi_dev_s *dev)
 {
   struct rp23xx_spidev_s *priv = (struct rp23xx_spidev_s *)dev;
   uint32_t regval = spi_getreg(priv, RP23XX_RV_SPI_SSPCR1_OFFSET);
+
   regval |= RP23XX_RV_SPI_SSPCR1_SSE;
   spi_putreg(priv, RP23XX_RV_SPI_SSPCR1_OFFSET, regval);
 }
@@ -383,6 +386,7 @@ static void spi_disable_ssp(struct spi_dev_s *dev)
 {
   struct rp23xx_spidev_s *priv = (struct rp23xx_spidev_s *)dev;
   uint32_t regval = spi_getreg(priv, RP23XX_RV_SPI_SSPCR1_OFFSET);
+
   regval &= ~RP23XX_RV_SPI_SSPCR1_SSE;
   spi_putreg(priv, RP23XX_RV_SPI_SSPCR1_OFFSET, regval);
 }
@@ -608,7 +612,8 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
 
   while (!(spi_getreg(priv, RP23XX_RV_SPI_SSPSR_OFFSET) &
            RP23XX_RV_SPI_SSPSR_TNF))
-    ;
+    {
+    }
 
   /* Write the byte to the TX FIFO */
 
@@ -618,7 +623,8 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
 
   while (!(spi_getreg(priv, RP23XX_RV_SPI_SSPSR_OFFSET) &
            RP23XX_RV_SPI_SSPSR_RNE))
-    ;
+    {
+    }
 
   /* Get the value from the RX FIFO and return it */
 
@@ -976,19 +982,24 @@ void spi_flush(struct spi_dev_s *dev)
 
   while (!(spi_getreg(priv, RP23XX_RV_SPI_SSPSR_OFFSET) &
                             RP23XX_RV_SPI_SSPSR_TNF))
-    ;
+    {
+    }
+
   spi_putreg(priv, RP23XX_RV_SPI_SSPDR_OFFSET, 0xff);
 
   /* Wait until TX FIFO and TX shift buffer are empty */
 
   while (spi_getreg(priv, RP23XX_RV_SPI_SSPSR_OFFSET) &
-                          RP23XX_RV_SPI_SSPSR_BSY);
+                          RP23XX_RV_SPI_SSPSR_BSY)
+    {
+    }
 
   /* Wait until RX FIFO is not empty */
 
   while (!(spi_getreg(priv, RP23XX_RV_SPI_SSPSR_OFFSET) &
                             RP23XX_RV_SPI_SSPSR_RNE))
-    ;
+    {
+    }
 
   /* Then read and discard bytes until the RX FIFO is empty */
 
@@ -1030,7 +1041,7 @@ static void spi_dmaexchange(struct spi_dev_s *dev,
 
   /* Then wait for each to complete */
 
-  spi_dmatrxwait(priv);
+  spi_dmatrxwait(priv, nwords);
 }
 
 #ifndef CONFIG_SPI_EXCHANGE
@@ -1192,22 +1203,45 @@ static void spi_dmarxsetup(struct rp23xx_spidev_s *priv,
  * Name: spi_dmatrxwait
  *
  * Description:
- *   Wait for TX RX DMA to complete.
+ *   Wait for TX RX DMA to complete with a bounded timeout.
  *
  ****************************************************************************/
 
-static void spi_dmatrxwait(struct rp23xx_spidev_s *priv)
+static int spi_dmatrxwait(struct rp23xx_spidev_s *priv, size_t nwords)
 {
+  uint32_t freq;
   uint32_t val;
+  uint64_t bits;
+  unsigned int ms;
+  clock_t timeout;
+  int ret;
 
-  if (nxsem_wait_uninterruptible(&priv->dmasem) != OK)
+  /* Calculate timeout based on transfer size and SPI clock frequency.
+   * Add a 100ms safety margin to allow for OS scheduling delays.
+   */
+
+  freq = priv->actual > 0 ? priv->actual : priv->frequency;
+  if (freq == 0)
     {
-      spierr("dma error\n");
+      freq = 1000000;
     }
 
-  if (nxsem_wait_uninterruptible(&priv->dmasem) != OK)
+  bits = (uint64_t)nwords * (priv->nbits > 0 ? priv->nbits : 8);
+  ms = (unsigned int)((bits * 1000) / freq) + 100;
+  timeout = MSEC2TICK(ms);
+
+  ret = nxsem_tickwait_uninterruptible(&priv->dmasem, timeout);
+  if (ret < 0)
     {
-      spierr("dma error\n");
+      spierr("ERROR: DMA TX wait failed or timed out: %d\n", ret);
+    }
+  else
+    {
+      ret = nxsem_tickwait_uninterruptible(&priv->dmasem, timeout);
+      if (ret < 0)
+        {
+          spierr("ERROR: DMA RX wait failed or timed out: %d\n", ret);
+        }
     }
 
   rp23xx_dmastop(priv->txdmach);
@@ -1216,6 +1250,21 @@ static void spi_dmatrxwait(struct rp23xx_spidev_s *priv)
   val = spi_getreg(priv, RP23XX_RV_SPI_SSPDMACR_OFFSET);
   val &= ~(RP23XX_RV_SPI_SSPDMACR_RXDMAE | RP23XX_RV_SPI_SSPDMACR_TXDMAE);
   spi_putreg(priv, RP23XX_RV_SPI_SSPDMACR_OFFSET, val);
+
+  if (ret < 0)
+    {
+      /* Clean up residual semaphore count and flush RX FIFO */
+
+      nxsem_reset(&priv->dmasem, 0);
+
+      while (spi_getreg(priv, RP23XX_RV_SPI_SSPSR_OFFSET) &
+             RP23XX_RV_SPI_SSPSR_RNE)
+        {
+          spi_getreg(priv, RP23XX_RV_SPI_SSPDR_OFFSET);
+        }
+    }
+
+  return ret;
 }
 
 #endif
