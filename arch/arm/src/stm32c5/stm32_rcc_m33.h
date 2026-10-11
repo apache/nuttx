@@ -85,6 +85,8 @@ void stm32_clockenable(void);
 #endif
 
 void stm32_rcc_enableperipherals(void);
+void stm32_rcc_enablelsi(void);
+void stm32_rcc_disablelsi(void);
 
 #ifdef __cplusplus
 }

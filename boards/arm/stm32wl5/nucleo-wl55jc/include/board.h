@@ -46,6 +46,10 @@
 
 #define STM32_BOARD_USETCXO
 
+/* LSI clock, used by the IWDG */
+
+#define STM32_LSI_FREQUENCY       32000
+
 /* Prescaler common to all PLL inputs */
 
 #define STM32_PLLCFG_PLLM         RCC_PLLCFG_PLLM(2)  /* 32MHz / 2 = 16MHz */

@@ -249,6 +249,7 @@
 
 #define RCC_APB1LENR_TIM11EN          (1 << 13)  /* Bit 13: TIM11 enable */
 #define RCC_APB1LENR_TIM10EN          (1 << 12)  /* Bit 12: TIM10 enable */
+#define RCC_APB1LENR_WWDGEN           (1 << 11)  /* Bit 11: WWDG enable */
 #define RCC_APB1LENR_TIM14EN          (1 << 8)   /* Bit 8:  TIM14 enable */
 #define RCC_APB1LENR_TIM13EN          (1 << 7)   /* Bit 7:  TIM13 enable */
 #define RCC_APB1LENR_TIM12EN          (1 << 6)   /* Bit 6:  TIM12 enable */
@@ -274,6 +275,7 @@
 
 #define RCC_APB1LRSTR_TIM11RST        (1 << 13)  /* Bit 13: TIM11 reset */
 #define RCC_APB1LRSTR_TIM10RST        (1 << 12)  /* Bit 12: TIM10 reset */
+#define RCC_APB1LRSTR_WWDGRST         (1 << 11)  /* Bit 11: WWDG reset */
 #define RCC_APB1LRSTR_TIM14RST        (1 << 8)   /* Bit 8:  TIM14 reset */
 #define RCC_APB1LRSTR_TIM13RST        (1 << 7)   /* Bit 7:  TIM13 reset */
 #define RCC_APB1LRSTR_TIM12RST        (1 << 6)   /* Bit 6:  TIM12 reset */

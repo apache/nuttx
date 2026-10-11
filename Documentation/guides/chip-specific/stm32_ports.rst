@@ -291,7 +291,7 @@ HASH          to be done    not supported
 I2C           to be done    not supported
 I3C           to be done    not supported
 ICACHE        to be done    not supported
-IWDG          to be done    not supported
+IWDG          v3            arch/arm/src/common/stm32/stm32_iwdg.c
 LPDMA         GPDMA         arch/arm/src/common/stm32/stm32_dma_gpdma.c
 LPTIM         to be done    not supported
 LPUART        M33 v3        arch/arm/src/common/stm32/stm32_serial_m33_v3.c
@@ -306,7 +306,7 @@ TAMP          to be done    not supported
 TIM           v3            arch/arm/src/common/stm32/stm32_tim.c
 USART/UART    M33 v3        arch/arm/src/common/stm32/stm32_serial_m33_v3.c
 USB_FS        FS            not supported
-WWDG          to be done    not supported
+WWDG          v3            arch/arm/src/common/stm32/stm32_wwdg.c
 ============  ============  ==============================================================
 
 STM32F0
@@ -743,6 +743,7 @@ GPIO          to be done    arch/arm/src/stm32l5/stm32l5_gpio.c
 GTZC          to be done    not supported                           
 HASH          to be done    not supported                           
 I2C           to be done    not supported                           
+IWDG          v2            arch/arm/src/common/stm32/stm32_iwdg.c
 OCTOSPI       to be done    not supported                           
 PWR           to be done    arch/arm/src/stm32l5/stm32l5_pwr.c      
 RCC           to be done    arch/arm/src/stm32l5/stm32l5_rcc.c      
@@ -753,6 +754,7 @@ SPI/I2S       to be done    arch/arm/src/stm32l5/stm32l5_spi.c
 TIM/LPTIM     v2            arch/arm/src/common/stm32/stm32_tim.c   
 USART/LPUART  v3            arch/arm/src/stm32l5/stm32l5_serial.c   
 USB           device        not supported                           
+WWDG          v2            arch/arm/src/common/stm32/stm32_wwdg.c
 ============  ============  ========================================
 
 STM32N6
@@ -769,12 +771,14 @@ EXTI          to be done    not supported
 GPIO          to be done    arch/arm/src/stm32n6/stm32_gpio.c  
 GPDMA         to be done    not supported                      
 I2C           to be done    not supported                      
+IWDG          v3            arch/arm/src/common/stm32/stm32_iwdg.c
 PWR           to be done    arch/arm/src/stm32n6/stm32_pwr.c   
 RCC           to be done    arch/arm/src/stm32n6/stm32_rcc.c   
 SPI/I2S       to be done    not supported                      
 TIM           v3            arch/arm/src/common/stm32/stm32_tim.c
 USART/LPUART  v4            arch/arm/src/stm32n6/stm32_serial.c
 USB           device        not supported
+WWDG          v3            arch/arm/src/common/stm32/stm32_wwdg.c
 XSPI          to be done    not supported
 ============  ============  ===================================
 
@@ -837,8 +841,8 @@ HSP           to be done    not supported
 I2C           to be done    not supported
 I3C           to be done    not supported
 ICACHE        to be done    not supported
-IWDG          to be done    not supported
 LPTIM         to be done    not supported
+IWDG          v3            arch/arm/src/common/stm32/stm32_iwdg.c
 LPUART        M33 v3        arch/arm/src/common/stm32/stm32_serial_m33_v3.c
 OCTOSPI       to be done    not supported
 OPAMP         to be done    not supported
@@ -859,7 +863,7 @@ TSC           to be done    not supported
 USART/UART    M33 v3        arch/arm/src/common/stm32/stm32_serial_m33_v3.c
 USB_DRD_FS    to be done    not supported
 VREFBUF       to be done    not supported
-WWDG          to be done    not supported
+WWDG          v3            arch/arm/src/common/stm32/stm32_wwdg.c
 ============  ============  =============================================================
 
 STM32U5
@@ -907,6 +911,7 @@ FLASH         to be done    arch/arm/src/stm32wb/stm32wb_flash.c
 GPIO          to be done    arch/arm/src/stm32wb/stm32wb_gpio.c     
 I2C           to be done    arch/arm/src/stm32wb/stm32wb_i2c.c      
 IPCC          to be done    arch/arm/src/stm32wb/stm32wb_ipcc.c     
+IWDG          v2            arch/arm/src/common/stm32/stm32_iwdg.c
 PWR           to be done    arch/arm/src/stm32wb/stm32wb_pwr.c      
 Radio         to be done    not supported                           
 RCC           to be done    arch/arm/src/stm32wb/stm32wb_rcc.c      
@@ -916,6 +921,7 @@ SPI/I2S       to be done    arch/arm/src/stm32wb/stm32wb_spi.c
 TIM/LPTIM     v2            arch/arm/src/common/stm32/stm32_tim.c   
 USART/LPUART  v4            arch/arm/src/stm32wb/stm32wb_serial.c   
 USB           device        not supported                           
+WWDG          v2            arch/arm/src/common/stm32/stm32_wwdg.c
 ============  ============  ========================================
 
 STM32WL5
@@ -933,6 +939,7 @@ FLASH         to be done    arch/arm/src/stm32wl5/stm32wl5_flash.c
 GPIO          to be done    arch/arm/src/stm32wl5/stm32wl5_gpio.c     
 I2C           to be done    not supported                             
 IPCC          to be done    arch/arm/src/stm32wl5/stm32wl5_ipcc.c     
+IWDG          v2            arch/arm/src/common/stm32/stm32_iwdg.c
 PWR           to be done    arch/arm/src/stm32wl5/stm32wl5_pwr.c      
 Radio         to be done    not supported                             
 RCC           to be done    arch/arm/src/stm32wl5/stm32wl5_rcc.c      
@@ -942,6 +949,7 @@ SPI/I2S       to be done    arch/arm/src/stm32wl5/stm32wl5_spi.c
 TIM/LPTIM     v2            arch/arm/src/common/stm32/stm32_tim.c     
 USART/LPUART  v3            arch/arm/src/stm32wl5/stm32wl5_serial.c   
 USB           to be done    not supported                             
+WWDG          v2            arch/arm/src/common/stm32/stm32_wwdg.c
 ============  ============  ==========================================
 
 Kconfig option organization
