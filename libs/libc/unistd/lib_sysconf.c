@@ -239,6 +239,9 @@ long sysconf(int name)
       case _SC_CLK_TCK:
         return CLOCKS_PER_SEC;
 
+      case _SC_ARG_MAX:
+        return ARG_MAX;
+
       case _SC_OPEN_MAX:
         return OPEN_MAX;
 
