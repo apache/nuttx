@@ -654,6 +654,13 @@ config ARCH_HAVE_SETJMP
 	bool
 	default n
 
+config ARCH_HAVE_UCONTEXT
+	bool
+	default n
+	---help---
+		The architecture provides getcontext(), setcontext(), makecontext()
+		and swapcontext() in libc.
+
 config ARCH_SETJMP_H
 	bool "setjmp.h"
 	default n
