@@ -526,6 +526,7 @@ jobs:
     needs: msys2-Arch
     if: ${{ needs.msys2-Arch.outputs.skip_all_builds != '1' }}
     runs-on: windows-latest
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       max-parallel: 1
@@ -537,7 +538,7 @@ jobs:
         shell: msys2 {0}
     steps:
       - uses: actions/checkout@v7
-      - uses: msys2/setup-msys2@v2
+      - uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2.32.0
         with:
           msystem: MSYS
           update: false
