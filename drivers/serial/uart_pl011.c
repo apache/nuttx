@@ -795,6 +795,7 @@ static int pl011_receive(FAR struct uart_dev_s *dev,
 static int pl011_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   int ret = OK;
+
   UNUSED(filep);
   UNUSED(arg);
 
@@ -826,6 +827,7 @@ static int pl011_irq_handler(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct uart_dev_s        *dev = arg;
   FAR struct pl011_uart_port_s *sport;
+
   UNUSED(irq);
   UNUSED(context);
 
