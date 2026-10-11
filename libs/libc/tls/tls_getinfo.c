@@ -32,8 +32,6 @@
 #include <nuttx/tls.h>
 #include <nuttx/sched.h>
 
-#ifndef up_tls_info
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -43,8 +41,9 @@
  *
  * Description:
  *   Return a reference to the tls_info_s structure.  This is used as part
- *   of the internal implementation of tls_get/set_elem() and ONLY for the
- *   where CONFIG_TLS_ALIGNED is *not* defined or __KERNEL__ is defined.
+ *   of the internal implementation of tls_get/set_elem() when neither
+ *   up_tls_info() nor CONFIG_TLS_ALIGNED gives it, and in the kernel,
+ *   where up_tls_info() may not be used.
  *
  * Input Parameters:
  *   None.
@@ -75,4 +74,3 @@ FAR struct tls_info_s *tls_get_info(void)
   return info;
 }
 
-#endif /* !defined(up_tls_info) */

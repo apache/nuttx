@@ -57,6 +57,14 @@
 #define UP_WFE() __asm__ __volatile__ ("wfe" : : : "memory")
 #define UP_SEV() __asm__ __volatile__ ("sev" : : : "memory")
 
+/* The kernel keeps the address of the running thread's TLS info in
+ * TPIDR_EL0, so user code finds it whatever stack it runs on.
+ */
+
+#if !defined(__ASSEMBLY__) && !defined(__KERNEL__)
+#  define up_tls_info() ((struct tls_info_s *)read_sysreg(tpidr_el0))
+#endif
+
 /****************************************************************************
  * Inline functions
  ****************************************************************************/
