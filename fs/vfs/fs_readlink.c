@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdbool.h>
 #include <string.h>
@@ -71,6 +72,7 @@ ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize)
 {
   struct inode_search_s desc;
   FAR struct inode *node;
+  ssize_t nread;
   int ret;
 
   DEBUGASSERT(path != NULL && buf != NULL && bufsize > 0);
@@ -102,9 +104,11 @@ ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize)
     {
       if (node->u.i_mops && node->u.i_mops->readlink)
         {
-          ret = node->u.i_mops->readlink(node, desc.relpath, buf, bufsize);
-          if (ret < 0)
+          nread = node->u.i_mops->readlink(node, desc.relpath, buf,
+                                           bufsize);
+          if (nread < 0)
             {
+              ret = nread;
               goto errout_with_inode;
             }
         }
@@ -137,14 +141,15 @@ ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize)
 
       /* Copy the link target path to the user-provided buffer. */
 
-      strlcpy(buf, node->u.i_link, bufsize);
+      nread = strlcpy(buf, node->u.i_link, bufsize);
+      nread = MIN(nread, bufsize);
     }
 
   /* Release our reference on the inode and return the length */
 
   inode_release(node);
   inode_search_release(&desc);
-  return strlen(buf);
+  return nread;
 
 errout_with_inode:
   inode_release(node);
