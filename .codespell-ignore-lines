@@ -189,3 +189,4 @@ PIO   DUE SCHEM. PIN MAPPING    SAM3X       DUE SCHEM. BOARD LABEL
            * next trough (manual 21.2.16/Table 21.5) -- the counter
    * every trough, including the very first one after this start/
 next trough with no gap in counting, matching the reload behavior of
+  ``0xFF`` (``IAC``), including negotiation commands ``WILL`` (``0xFB``), ``WONT`` (``0xFC``),
