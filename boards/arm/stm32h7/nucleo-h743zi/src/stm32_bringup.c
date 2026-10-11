@@ -71,6 +71,10 @@
 #  include <nuttx/usb/rndis.h>
 #endif
 
+#ifdef CONFIG_CDCACM
+#  include <nuttx/usb/cdcacm.h>
+#endif
+
 #include "stm32_gpio.h"
 
 /****************************************************************************
