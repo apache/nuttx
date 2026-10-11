@@ -340,6 +340,21 @@ struct xcptcontext
 #endif
 };
 
+/* The machine context of getcontext() and makecontext().  The assembly code
+ * in libs/libc/machine/arm64/arch_ucontext.S knows this layout.
+ */
+
+typedef struct mcontext_s
+{
+  uint64_t args[8];    /* x0-x7, the arguments of makecontext() */
+  uint64_t regs[12];   /* x19-x30, the callee-saved registers */
+  uint64_t sp;
+  uint64_t pc;
+#ifdef CONFIG_ARCH_FPU
+  uint64_t fpregs[8];  /* d8-d15, the callee-saved FP registers */
+#endif
+} mcontext_t;
+
 /* Name: up_irq_save, up_irq_restore, and friends.
  *
  * NOTE: This function should never be called from application code and,
