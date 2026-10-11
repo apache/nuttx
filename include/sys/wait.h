@@ -46,10 +46,10 @@
 #define WEXITSTATUS(s)  (((s) >> 8) & 0xff) /* Return exit status */
 #define WIFEXITED(s)    (((s) & 0xff) == 0) /* True: Child exited normally */
 
-#define WIFCONTINUED(s) (false)             /* True: Child has been continued */
-#define WIFSIGNALED(s)  (false)             /* True: Child exited due to uncaught signal */
-#define WIFSTOPPED(s)   (false)             /* True: Child is currently stopped */
-#define WSTOPSIG(s)     (false)             /* Return signal number that caused process to stop */
+#define WIFCONTINUED(s) (0)                 /* True: Child has been continued */
+#define WIFSIGNALED(s)  (0)                 /* True: Child exited due to uncaught signal */
+#define WIFSTOPPED(s)   (0)                 /* True: Child is currently stopped */
+#define WSTOPSIG(s)     (0)                 /* Return signal number that caused process to stop */
 #define WTERMSIG(s)     (((s) >> 8) & 0x7f) /* Return signal number that caused process to terminate */
 #define WCOREDUMP(s)    (((s) >> 8) & 0x80) /* True: Child has produced a core dump */
 
