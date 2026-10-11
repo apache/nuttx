@@ -105,20 +105,6 @@ int stm32_bringup(void)
              ret);
     }
 
-#ifdef HAVE_PROC
-  /* Mount the proc filesystem */
-
-  syslog(LOG_INFO, "Mounting procfs to /proc\n");
-
-  ret = nx_mount(NULL, CONFIG_NSH_PROC_MOUNTPOINT, "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount the PROC filesystem: %d\n",
-             ret);
-      return ret;
-    }
-#endif
-
 #if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
   /* Register the LED driver */
 

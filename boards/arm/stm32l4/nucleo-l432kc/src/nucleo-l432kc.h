@@ -40,18 +40,8 @@
 
 /* Configuration ************************************************************/
 
-#define HAVE_PROC             1
 #define HAVE_RTC_DRIVER       1
 #define HAVE_AT45DB           1
-
-#if !defined(CONFIG_FS_PROCFS)
-#  undef HAVE_PROC
-#endif
-
-#if defined(HAVE_PROC) && defined(CONFIG_DISABLE_MOUNTPOINT)
-#  warning Mountpoints disabled.  No procfs support
-#  undef HAVE_PROC
-#endif
 
 /* Check if we can support the RTC driver */
 

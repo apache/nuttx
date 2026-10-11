@@ -270,28 +270,6 @@ int stm32_bringup(void)
   stm32_i2ctool();
 #endif
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = nx_mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to mount the PROC filesystem: %d\n",  ret);
-    }
-#endif /* CONFIG_FS_PROCFS */
-
-#ifdef CONFIG_FS_TMPFS
-  /* Mount the tmpfs file system */
-
-  ret = nx_mount(NULL, CONFIG_LIBC_TMPDIR, "tmpfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount tmpfs at %s: %d\n",
-             CONFIG_LIBC_TMPDIR, ret);
-    }
-#endif
-
 #ifdef CONFIG_STM32_ROMFS
   /* Mount the romfs partition */
 

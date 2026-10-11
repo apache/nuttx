@@ -39,17 +39,6 @@
 
 /* Configuration ************************************************************/
 
-#define HAVE_PROC             1
-
-#if !defined(CONFIG_FS_PROCFS)
-#  undef HAVE_PROC
-#endif
-
-#if defined(HAVE_PROC) && defined(CONFIG_DISABLE_MOUNTPOINT)
-#  warning Mountpoints disabled.  No procfs support
-#  undef HAVE_PROC
-#endif
-
 #if defined(CONFIG_LCD_SSD1680)
 
 /* There is no E-ink display on a board.

@@ -29,7 +29,6 @@
 #include <nuttx/debug.h>
 
 #include <sys/types.h>
-#include <sys/mount.h>
 #include <stdio.h>
 #include <syslog.h>
 #include <errno.h>
@@ -122,21 +121,6 @@ void board_late_initialize(void)
       syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
              ret);
     }
-
-#ifdef HAVE_PROC
-  /* Mount the proc filesystem */
-
-  syslog(LOG_INFO, "Mounting procfs to /proc\n");
-
-  ret = nx_mount(NULL, CONFIG_NSH_PROC_MOUNTPOINT, "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to mount the PROC filesystem: %d (%d)\n",
-             ret, errno);
-      return;
-    }
-#endif
 
 #ifdef CONFIG_RTC_DRIVER
   /* Instantiate the STM32WB lower-half RTC driver */
