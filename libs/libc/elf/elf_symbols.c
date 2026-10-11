@@ -229,6 +229,68 @@ static int libelf_symcallback(FAR struct module_s *modp, FAR void *arg)
 }
 
 /****************************************************************************
+ * Name: libelf_findsymbol_bulk
+ *
+ * Description:
+ *   Locate a symbol by its name with the symbol table and the string table
+ *   read into memory at once.
+ *
+ * Returned Value:
+ *   0 (OK) if the symbol was found, -ENOENT if it was not, -ENOMEM if there
+ *   is no memory for the tables, or another negated errno on failure.
+ *
+ ****************************************************************************/
+
+static int libelf_findsymbol_bulk(FAR struct mod_loadinfo_s *loadinfo,
+                                  FAR const char *name, FAR Elf_Sym *sym,
+                                  size_t num)
+{
+  FAR const Elf_Shdr *symtab = &loadinfo->shdr[loadinfo->symtabidx];
+  FAR const Elf_Shdr *strtab = &loadinfo->shdr[loadinfo->strtabidx];
+  FAR Elf_Sym *syms;
+  FAR char *strs;
+  size_t symsize = num * sizeof(Elf_Sym);
+  size_t i;
+  int ret;
+
+  syms = lib_malloc(symsize + strtab->sh_size + 1);
+  if (syms == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  strs = (FAR char *)syms + symsize;
+
+  ret = libelf_read(loadinfo, (FAR uint8_t *)syms, symsize,
+                    symtab->sh_offset);
+  if (ret >= 0)
+    {
+      ret = libelf_read(loadinfo, (FAR uint8_t *)strs, strtab->sh_size,
+                        strtab->sh_offset);
+    }
+
+  if (ret >= 0)
+    {
+      strs[strtab->sh_size] = '\0';
+      ret = -ENOENT;
+
+      for (i = 0; i < num; i++)
+        {
+          if (syms[i].st_name < strtab->sh_size &&
+              strcmp(&strs[syms[i].st_name], name) == 0)
+            {
+              *sym = syms[i];
+              ret = OK;
+              break;
+            }
+        }
+    }
+
+  lib_free(syms);
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -680,9 +742,21 @@ int libelf_findsymbol(FAR struct mod_loadinfo_s *loadinfo,
         }
     }
 
+  num = loadinfo->shdr[loadinfo->symtabidx].sh_size / sizeof(Elf_Sym);
+
+  /* Reading each symbol and then its name costs two file reads per
+   * symbol, which is slow for a large program on a slow file system.  If
+   * there is memory for it, read both tables at once.
+   */
+
+  ret = libelf_findsymbol_bulk(loadinfo, name, sym, num);
+  if (ret != -ENOMEM)
+    {
+      return ret;
+    }
+
   /* Loop through all symbols in the symbol table */
 
-  num = loadinfo->shdr[loadinfo->symtabidx].sh_size / sizeof(Elf_Sym);
   for (i = 0; i < num; i++)
     {
       /* Read the symbol entry */
