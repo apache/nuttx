@@ -211,6 +211,12 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR_USBEN;
 #endif
 
+#ifdef CONFIG_STM32_WWDG
+  /* Window watchdog clock enable */
+
+  regval |= RCC_APB1ENR_WWDGEN;
+#endif
+
 #ifdef CONFIG_STM32_SPI2
   /* SPI 2 clock enable */
 
