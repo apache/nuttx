@@ -46,16 +46,6 @@
 #include "task/task.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* This is an artificial limit to detect error conditions where an argv[]
- * list is not properly terminated.
- */
-
-#define MAX_STACK_ARGS 256
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -570,12 +560,12 @@ int nxtask_setup_stackargs(FAR struct tcb_s *tcb,
             {
               /* Increment the number of args.  Here is a sanity check to
                * prevent running away with an unterminated argv[] list.
-               * MAX_STACK_ARGS should be sufficiently large that this never
-               * happens in normal usage.
+               * CONFIG_TASK_MAX_ARGS should be sufficiently large that this
+               * never happens in normal usage.
                */
 
-              DEBUGASSERT(argc <= MAX_STACK_ARGS);
-              if (++argc > MAX_STACK_ARGS)
+              DEBUGASSERT(argc <= CONFIG_TASK_MAX_ARGS);
+              if (++argc > CONFIG_TASK_MAX_ARGS)
                 {
                   ret = -E2BIG;
                 }
