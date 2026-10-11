@@ -108,17 +108,17 @@ int fclose(FAR FILE *stream)
           errcode = get_errno();
         }
 
-      /* Skip close the builtin streams(stdin, stdout and stderr) */
+      /* The builtin streams (stdin, stdout and stderr) stay in the stream
+       * list and are not freed, but their file descriptor is closed as for
+       * any other stream.
+       */
 
-      if (stdstream)
+      if (!stdstream)
         {
-          nxmutex_unlock(&slist->sl_lock);
-          goto done;
+          /* Remove FILE structure from the stream list */
+
+          sq_rem(&stream->fs_entry, &slist->sl_queue);
         }
-
-      /* Remove FILE structure from the stream list */
-
-      sq_rem(&stream->fs_entry, &slist->sl_queue);
 
       nxmutex_unlock(&slist->sl_lock);
 
@@ -150,6 +150,16 @@ int fclose(FAR FILE *stream)
         {
           ret = status;
           errcode = get_errno();
+        }
+
+      if (stdstream)
+        {
+          /* A later use of the stream fails, and does not reach a file
+           * that gets the same descriptor.
+           */
+
+          stream->fs_cookie = (FAR void *)(intptr_t)-1;
+          goto done;
         }
 
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
