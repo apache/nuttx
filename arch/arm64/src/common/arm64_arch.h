@@ -97,7 +97,10 @@
 #define SCTLR_C_BIT         BIT(2)
 #define SCTLR_SA_BIT        BIT(3)
 #define SCTLR_I_BIT         BIT(12)
+#define SCTLR_DZE_BIT       BIT(14)
+#define SCTLR_UCT_BIT       BIT(15)
 #define SCTLR_BR_BIT        BIT(17)
+#define SCTLR_UCI_BIT       BIT(26)
 
 /* Controls the impact of tag check faults
  * due to loads and stores in EL0 EL1.
