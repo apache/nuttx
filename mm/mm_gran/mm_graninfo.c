@@ -488,7 +488,7 @@ void gran_info(GRAN_HANDLE handle, FAR struct graninfo_s *info)
   FAR struct gran_s *priv = (FAR struct gran_s *)handle;
   uint32_t mask;
   uint32_t value;
-  uint16_t mxfree;
+  uint32_t mxfree;
   unsigned int nbits;
   unsigned int granidx;
   unsigned int gatidx;
