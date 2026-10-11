@@ -133,6 +133,7 @@ int fclose(FAR FILE *stream)
           int fd = (int)(intptr_t)stream->fs_cookie;
 #ifdef CONFIG_FDSAN
           uint64_t tag;
+
           tag = android_fdsan_create_owner_tag(ANDROID_FDSAN_OWNER_TYPE_FILE,
                                                (uintptr_t)stream);
           status = android_fdsan_close_with_tag(fd, tag);
