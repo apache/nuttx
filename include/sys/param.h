@@ -34,6 +34,7 @@
  ****************************************************************************/
 
 #define MAXHOSTNAMELEN HOST_NAME_MAX
+#define MAXPATHLEN     PATH_MAX
 
 /* Macros for min/max. */
 
