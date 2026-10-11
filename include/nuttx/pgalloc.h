@@ -89,9 +89,9 @@
 
 struct pginfo_s
 {
-  uint16_t  ntotal;  /* The total number of pages */
-  uint16_t  nfree;   /* The number of free pages */
-  uint16_t  mxfree;  /* The longest sequence of free pages */
+  uint32_t  ntotal;  /* The total number of pages */
+  uint32_t  nfree;   /* The number of free pages */
+  uint32_t  mxfree;  /* The longest sequence of free pages */
 };
 
 /****************************************************************************
