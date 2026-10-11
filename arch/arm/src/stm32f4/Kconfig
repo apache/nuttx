@@ -334,6 +334,7 @@ config STM32_STM32F401
 config STM32_STM32F410
 	bool
 	default n
+	select STM32_HAVE_LPTIM1
 	select STM32_HAVE_USART6
 	select STM32_HAVE_TIM1
 	select STM32_HAVE_TIM2

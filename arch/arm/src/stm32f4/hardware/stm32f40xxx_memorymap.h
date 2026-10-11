@@ -133,6 +133,7 @@
 #define STM32_TIM12_BASE     0x40001800     /* 0x40001800-0x40001bff: TIM12 timer */
 #define STM32_TIM13_BASE     0x40001c00     /* 0x40001c00-0x40001fff: TIM13 timer */
 #define STM32_TIM14_BASE     0x40002000     /* 0x40002000-0x400023ff: TIM14 timer */
+#define STM32_LPTIM1_BASE    0x40002400     /* 0x40002400-0x400027ff: LPTIM1 timer */
 #define STM32_RTC_BASE       0x40002800     /* 0x40002800-0x40002bff: RTC & BKP registers */
 #define STM32_WWDG_BASE      0x40002c00     /* 0x40002c00-0x40002fff: Window watchdog (WWDG) */
 #define STM32_IWDG_BASE      0x40003000     /* 0x40003000-0x400033ff: Independent watchdog (IWDG) */
