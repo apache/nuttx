@@ -134,8 +134,10 @@ int libelf_initialize(FAR const char *filename,
                     sizeof(Elf_Ehdr), 0);
   if (ret < 0)
     {
+      /* A file that is shorter than an ELF header is not an ELF file */
+
       berr("ERROR: Failed to read ELF header: %d\n", ret);
-      return ret;
+      return ret == -ENODATA ? -ENOEXEC : ret;
     }
 
   libelf_dumpbuffer("ELF header", (FAR const uint8_t *)&loadinfo->ehdr,
