@@ -35,6 +35,8 @@
 #endif
 #ifdef CONFIG_STM32_FDCAN_SOCKET
 #  include "stm32_fdcan.h"
+#elif defined(CONFIG_ARCH_CHIP_STM32L4)
+#  include "stm32l4_can.h"
 #else
 #  include "stm32_can.h"
 #endif
