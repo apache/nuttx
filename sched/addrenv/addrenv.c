@@ -125,6 +125,7 @@ static void addrenv_destroy(FAR void *arg)
 
 int addrenv_switch(FAR struct tcb_s *tcb)
 {
+  FAR struct addrenv_s *drop = NULL;
   FAR struct addrenv_s *curr;
   FAR struct addrenv_s *next;
   irqstate_t flags;
@@ -180,12 +181,9 @@ int addrenv_switch(FAR struct tcb_s *tcb)
           berr("ERROR: up_addrenv_select failed: %d\n", ret);
         }
 
-      /* This is a safe spot to drop the current address environment */
+      /* The current address environment is dropped below */
 
-      if (curr)
-        {
-          addrenv_drop(curr, true);
-        }
+      drop = curr;
 
       /* Save the new, current address environment group */
 
@@ -193,6 +191,13 @@ int addrenv_switch(FAR struct tcb_s *tcb)
     }
 
   spin_unlock_irqrestore_nopreempt(&g_addrenv_lock, flags);
+
+  /* Drop the old address environment after the lock is released:
+   * addrenv_drop() may queue work, which enters the critical section.
+   * Another CPU can hold the critical section and wait for this lock.
+   */
+
+  addrenv_drop(drop, true);
   return OK;
 }
 
