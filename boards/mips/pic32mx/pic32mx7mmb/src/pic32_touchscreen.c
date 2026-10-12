@@ -627,225 +627,225 @@ static void tc_worker(void *arg)
 
   switch (priv->state)
     {
-    /* The touchscreen is IDLE and we are ready to begin the next sample */
+      /* The touchscreen is IDLE and we are ready to begin the next sample */
 
-    case TC_READY:
-      {
-        /* Start Y- sampling */
+      case TC_READY:
+        {
+          /* Start Y- sampling */
 
-        tc_yminus_sample();
+          tc_yminus_sample();
 
-        /* Allow time for the Y- pend down sampling */
+          /* Allow time for the Y- pend down sampling */
 
-        priv->state = TC_YMPENDOWN;
-        delay       = TC_SAMPLE_TICKS;
-      }
+          priv->state = TC_YMPENDOWN;
+          delay       = TC_SAMPLE_TICKS;
+        }
       break;
 
-    /* The Y- sampling time has elapsed and the Y- value should be ready
-     * for conversion
-     */
+      /* The Y- sampling time has elapsed and the Y- value should be ready
+       * for conversion
+       */
 
-    case TC_YMPENDOWN:
-      {
-        /* Convert the Y- sample value */
+      case TC_YMPENDOWN:
+        {
+          /* Convert the Y- sample value */
 
-        value = tc_adc_convert();
+          value = tc_adc_convert();
 
-        /* A converted value at the minimum would mean that there is no touch
-         * and that the sampling period is complete.
-         */
+          /* A converted value at the minimum would mean that there is no
+           * touch and that the sampling period is complete.
+           */
 
-        if (!tc_valid_sample(value))
-          {
-            priv->state = TC_PENUP;
-          }
-        else
-          {
-            /* Allow time for touch inputs to stabilize */
+          if (!tc_valid_sample(value))
+            {
+              priv->state = TC_PENUP;
+            }
+          else
+            {
+              /* Allow time for touch inputs to stabilize */
 
-            priv->state = TC_DEBOUNCE;
-            delay       = TC_DEBOUNCE_TICKS;
-          }
-      }
-      break;
+              priv->state = TC_DEBOUNCE;
+              delay       = TC_DEBOUNCE_TICKS;
+            }
+        }
+        break;
 
-    /* The debounce time period has elapsed and we are ready to re-sample
-     * the touchscreen.
-     */
+      /* The debounce time period has elapsed and we are ready to re-sample
+       * the touchscreen.
+       */
 
-    case TC_RESAMPLE:
-    case TC_DEBOUNCE:
-      {
-        /* (Re-)start Y- sampling */
+      case TC_RESAMPLE:
+      case TC_DEBOUNCE:
+        {
+          /* (Re-)start Y- sampling */
 
-        tc_yminus_sample();
+          tc_yminus_sample();
 
-        /* Allow time for the Y- sampling */
+          /* Allow time for the Y- sampling */
 
-        priv->state = TC_YMSAMPLE;
-        delay       = TC_SAMPLE_TICKS;
-      }
-      break;
+          priv->state = TC_YMSAMPLE;
+          delay       = TC_SAMPLE_TICKS;
+        }
+        break;
 
-    /* The Y- sampling period has elapsed and we are ready to perform the
-     * conversion.
-     */
+      /* The Y- sampling period has elapsed and we are ready to perform the
+       * conversion.
+       */
 
-    case TC_YMSAMPLE:
-      {
-        /* Convert and save the Y- sample value */
+      case TC_YMSAMPLE:
+        {
+          /* Convert and save the Y- sample value */
 
-        value = tc_adc_convert();
+          value = tc_adc_convert();
 
-        /* A converted value at the minimum would mean that there is no touch
-         * and that the sampling period is complete.  At converted value at
-         * the maximum value is probably bad too.
-         */
+          /* A converted value at the minimum would mean that there is no
+           * touch and that the sampling period is complete.  At converted
+           * value at the maximum value is probably bad too.
+           */
 
-        if (!tc_valid_sample(value))
-          {
-            priv->state = TC_PENUP;
-          }
-        else
-          {
-            /* Save the Y- sample and start Y+ sampling */
+          if (!tc_valid_sample(value))
+            {
+              priv->state = TC_PENUP;
+            }
+          else
+            {
+              /* Save the Y- sample and start Y+ sampling */
 
-            priv->value = value;
-            tc_yplus_sample();
+              priv->value = value;
+              tc_yplus_sample();
 
-            /* Allow time for the Y+ sampling */
+              /* Allow time for the Y+ sampling */
 
-            priv->state = TC_YPSAMPLE;
-            delay       = TC_SAMPLE_TICKS;
-          }
-      }
-      break;
+              priv->state = TC_YPSAMPLE;
+              delay       = TC_SAMPLE_TICKS;
+            }
+        }
+        break;
 
-    /* The Y+ sampling period has elapsed and we are ready to perform the
-     * conversion.
-     */
+      /* The Y+ sampling period has elapsed and we are ready to perform the
+       * conversion.
+       */
 
-    case TC_YPSAMPLE:                         /* Allowing time for the Y+ sampling */
-      {
-        /* Read the Y+ axis position */
+      case TC_YPSAMPLE:                         /* Allowing time for the Y+ sampling */
+        {
+          /* Read the Y+ axis position */
 
-        value = tc_adc_convert();
+          value = tc_adc_convert();
 
-        /* A converted value at the minimum would mean that we lost the
-         * contact before all of the conversions were completed.
-         *  At converted value at the maximum value is probably bad too.
-         */
+          /* A converted value at the minimum would mean that we lost the
+           * contact before all of the conversions were completed.
+           *  At converted value at the maximum value is probably bad too.
+           */
 
-        if (!tc_valid_sample(value))
-          {
+          if (!tc_valid_sample(value))
+            {
 #ifdef CONFIG_TOUCHSCREEN_RESAMPLE
-            priv->state = TC_RESAMPLE;
-            delay       = TC_RESAMPLE_TICKS;
+              priv->state = TC_RESAMPLE;
+              delay       = TC_RESAMPLE_TICKS;
 #else
-            priv->state = TC_PENUP;
+              priv->state = TC_PENUP;
 #endif
-          }
-        else
-          {
-            value      = MAX_ADC - value;
-            priv->newy = (value + priv->value) >> 1;
-            iinfo("Y-=%d Y+=%d[%d] Y=%d\n", priv->value,
-                   value, MAX_ADC - value, priv->newy);
+            }
+          else
+            {
+              value      = MAX_ADC - value;
+              priv->newy = (value + priv->value) >> 1;
+              iinfo("Y-=%d Y+=%d[%d] Y=%d\n", priv->value,
+                     value, MAX_ADC - value, priv->newy);
 
-            /* Start X+ sampling */
+              /* Start X+ sampling */
 
-            tc_xplus_sample();
+              tc_xplus_sample();
 
-            /* Allow time for the X+ sampling */
+              /* Allow time for the X+ sampling */
 
-            priv->state = TC_XPSAMPLE;
-            delay       = TC_SAMPLE_TICKS;
-          }
-      }
-      break;
+              priv->state = TC_XPSAMPLE;
+              delay       = TC_SAMPLE_TICKS;
+            }
+        }
+        break;
 
-    /* The X+ sampling period has elapsed and we are ready to perform the
-     * conversion.
-     */
+      /* The X+ sampling period has elapsed and we are ready to perform the
+       * conversion.
+       */
 
-    case TC_XPSAMPLE:
-      {
-        /* Convert the X+ sample value */
+      case TC_XPSAMPLE:
+        {
+          /* Convert the X+ sample value */
 
-        value = tc_adc_convert();
+          value = tc_adc_convert();
 
-        /* A converted value at the minimum would mean that we lost the
-         * contact before all of the conversions were completed.
-         * At converted value at the maximum value is probably bad too.
-         */
+          /* A converted value at the minimum would mean that we lost the
+           * contact before all of the conversions were completed.
+           * At converted value at the maximum value is probably bad too.
+           */
 
-        if (!tc_valid_sample(value))
-          {
+          if (!tc_valid_sample(value))
+            {
 #ifdef CONFIG_TOUCHSCREEN_RESAMPLE
-            priv->state = TC_RESAMPLE;
-            delay       = TC_RESAMPLE_TICKS;
+              priv->state = TC_RESAMPLE;
+              delay       = TC_RESAMPLE_TICKS;
 #else
-            priv->state = TC_PENUP;
+              priv->state = TC_PENUP;
 #endif
-          }
-        else
-          {
-            /* Save the X+ sample value */
+            }
+          else
+            {
+              /* Save the X+ sample value */
 
-            priv->value = value;
+              priv->value = value;
 
-            /* Start X- sampling */
+              /* Start X- sampling */
 
-            tc_xminus_sample();
+              tc_xminus_sample();
 
-            /* Allow time for the X- pend down sampling */
+              /* Allow time for the X- pend down sampling */
 
-            priv->state = TC_XMSAMPLE;
-            delay       = TC_SAMPLE_TICKS;
-          }
-      }
-      break;
+              priv->state = TC_XMSAMPLE;
+              delay       = TC_SAMPLE_TICKS;
+            }
+        }
+        break;
 
-    /* The X+ sampling period has elapsed and we are ready to perform the
-     * conversion.
-     */
+      /* The X+ sampling period has elapsed and we are ready to perform the
+       * conversion.
+       */
 
-    case TC_XMSAMPLE:                         /* Allowing time for the X- sampling */
-      {
-        /* Read the converted X- axis position */
+      case TC_XMSAMPLE:                         /* Allowing time for the X- sampling */
+        {
+          /* Read the converted X- axis position */
 
-        value = tc_adc_convert();
+          value = tc_adc_convert();
 
-        /* A converted value at the minimum would mean that we lost the
-         * contact before all of the conversions were completed.
-         * At converted value at the maximum value is probably bad too.
-         */
+          /* A converted value at the minimum would mean that we lost the
+           * contact before all of the conversions were completed.
+           * At converted value at the maximum value is probably bad too.
+           */
 
-        if (!tc_valid_sample(value))
-          {
+          if (!tc_valid_sample(value))
+            {
 #ifdef CONFIG_TOUCHSCREEN_RESAMPLE
-            priv->state = TC_RESAMPLE;
-            delay       = TC_RESAMPLE_TICKS;
+              priv->state = TC_RESAMPLE;
+              delay       = TC_RESAMPLE_TICKS;
 #else
-            priv->state = TC_PENUP;
+              priv->state = TC_PENUP;
 #endif
-          }
-        else
-          {
-            /* Calculate the X- axis position */
+            }
+          else
+            {
+              /* Calculate the X- axis position */
 
-            value = MAX_ADC - value;
-            newx  = (value + priv->value) >> 1;
-            iinfo("X+=%d X-=%d[%d] X=%d\n", priv->value,
-                   value, MAX_ADC - value, newx);
+              value = MAX_ADC - value;
+              newx  = (value + priv->value) >> 1;
+              iinfo("X+=%d X-=%d[%d] X=%d\n", priv->value,
+                     value, MAX_ADC - value, newx);
 
-            /* Samples are available */
+              /* Samples are available */
 
-            priv->state = TC_PENDOWN;
-          }
-      }
-      break;
+              priv->state = TC_PENDOWN;
+            }
+        }
+        break;
     }
 
   /* Check for terminal conditions.. */
