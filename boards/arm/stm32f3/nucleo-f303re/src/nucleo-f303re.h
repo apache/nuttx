@@ -182,16 +182,4 @@ int stm32_pwm_setup(void);
 int stm32_adc_setup(void);
 #endif
 
-/****************************************************************************
- * Name: stm32_can_setup
- *
- * Description:
- *  Initialize CAN and register the CAN device
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32_CAN_CHARDRIVER
-int stm32_can_setup(void);
-#endif
-
 #endif /* __BOARDS_ARM_STM32_NUCLEO_F303RE_SRC_NUCLEO_F303RE_H */

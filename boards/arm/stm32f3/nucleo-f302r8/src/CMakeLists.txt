@@ -48,15 +48,6 @@ else()
   endif()
 endif()
 
-if(CONFIG_STM32_CAN)
-  if(CONFIG_STM32_CAN_CHARDRIVER)
-    list(APPEND SRCS stm32_can.c)
-  endif()
-  if(CONFIG_STM32_CAN_SOCKET)
-    list(APPEND SRCS stm32_cansock.c)
-  endif()
-endif()
-
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/ld.script")

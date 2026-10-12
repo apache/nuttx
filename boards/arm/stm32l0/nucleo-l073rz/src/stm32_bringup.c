@@ -34,6 +34,7 @@
 #include <nuttx/usb/cdcacm.h>
 
 #include "nucleo-l073rz.h"
+#include "stm32_mfrc522.h"
 
 /****************************************************************************
  * Pre-processor Definitions

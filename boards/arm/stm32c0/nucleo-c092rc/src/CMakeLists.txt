@@ -36,15 +36,6 @@ if(CONFIG_ADC)
   list(APPEND SRCS stm32_adc.c)
 endif()
 
-if(CONFIG_STM32_FDCAN)
-  if(CONFIG_STM32_FDCAN_CHARDRIVER)
-    list(APPEND SRCS stm32_can.c)
-  endif()
-  if(CONFIG_STM32_FDCAN_SOCKET)
-    list(APPEND SRCS stm32_cansock.c)
-  endif()
-endif()
-
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flash.ld")

@@ -173,6 +173,11 @@
 #define GPIO_FDCAN1_RX      (GPIO_FDCAN1_RX_8|GPIO_SPEED_HIGH)    /* PD0 */
 #define GPIO_FDCAN1_TX      (GPIO_FDCAN1_TX_9|GPIO_SPEED_HIGH)    /* PD1 */
 
+/* MCP2562FDT transceiver STBY - PD2 */
+
+#define BOARD_CAN_GPIO_STBY (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_MEDIUM | \
+                             GPIO_OUTPUT_SET | GPIO_PORTD | GPIO_PIN2)
+
 /* Qencoder on TIM3:
  *   TIM3_CH1IN - PB4 (D5)
  *   TIM3_CH2IN - PC7 (D3)

@@ -45,6 +45,8 @@
 #endif
 
 #include "nucleo-g431rb.h"
+#include "stm32_can_setup.h"
+#include "stm32_cansock_setup.h"
 
 /****************************************************************************
  * Pre-processor Definitions

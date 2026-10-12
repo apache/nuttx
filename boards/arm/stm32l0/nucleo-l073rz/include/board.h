@@ -196,6 +196,12 @@ bool stm32_usb_pullup_enabled(void);
 #define GPIO_SPI2_MOSI (GPIO_SPI2_MOSI_1|GPIO_SPEED_MEDIUM) /* PB15 */
 #define GPIO_SPI2_SCK  (GPIO_SPI2_SCK_1|GPIO_SPEED_MEDIUM)  /* PB10 */
 
+/* MFRC522 on SPI2, RESET - PB11 */
+
+#define BOARD_MFRC522_SPI        2
+#define BOARD_MFRC522_GPIO_RESET (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_HIGH|  \
+                                  GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN11)
+
 /* USART */
 
 /* By default the USART2 is connected to STLINK Virtual COM Port:

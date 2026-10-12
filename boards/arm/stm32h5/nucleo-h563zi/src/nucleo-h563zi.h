@@ -156,18 +156,6 @@ int stm32_dts_setup(int devno);
 #endif
 
 /****************************************************************************
- * Name: stm32_can_setup
- *
- * Description:
- *  Initialize CAN and register the CAN device
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32_FDCAN_CHARDRIVER
-int stm32_can_setup(uint8_t port);
-#endif
-
-/****************************************************************************
  * Name: stm32_pwm_setup
  *
  * Description:

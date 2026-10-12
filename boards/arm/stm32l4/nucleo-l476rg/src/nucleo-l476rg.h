@@ -326,19 +326,6 @@ int stm32_gpio_initialize(void);
 #endif
 
 /****************************************************************************
- * Name: stm32_can_setup -- DisruptiveNL
- *
- * Description:
- *   Initialize CAN and register the CAN device.
- *   Added by: Ben vd Veen (DisruptiveNL) -- www.nuttx.nl
- *
- ****************************************************************************/
-
-#ifdef CONFIG_CAN
-int stm32_can_setup(void);
-#endif
-
-/****************************************************************************
  * Name: stm32_pwm_setup
  *
  * Description:

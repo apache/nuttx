@@ -58,6 +58,8 @@
 #include <arch/board/board.h>
 
 #include "nucleo-c092rc.h"
+#include "stm32_can_setup.h"
+#include "stm32_cansock_setup.h"
 
 /****************************************************************************
  * Pre-processor Definitions

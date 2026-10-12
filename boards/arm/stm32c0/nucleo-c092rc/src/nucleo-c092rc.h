@@ -62,13 +62,6 @@
 #define GPIO_BTN_USER   (GPIO_INPUT | GPIO_PULLUP | GPIO_EXTI | \
                          GPIO_PORTC | GPIO_PIN13)
 
-/* FDCAN:
- *   MCP2562FDT STBY - PD2
- */
-
-#define GPIO_FDCAN_STBY (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_MEDIUM | \
-                         GPIO_OUTPUT_SET | GPIO_PORTD | GPIO_PIN2)
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -106,30 +99,6 @@ int stm32_bringup(void);
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
-#endif
-
-/****************************************************************************
- * Name: stm32_can_setup
- *
- * Description:
- *  Initialize CAN and register the CAN device
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32_FDCAN_CHARDRIVER
-int stm32_can_setup(void);
-#endif
-
-/****************************************************************************
- * Name: stm32_cansock_setup
- *
- * Description:
- *  Initialize CAN socket interface
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32_FDCAN_SOCKET
-int stm32_cansock_setup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
