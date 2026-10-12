@@ -27,6 +27,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <errno.h>
 #include <sched.h>
 
 #include <nuttx/debug.h>
@@ -204,5 +205,5 @@ int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       return OK;
     }
 
-  return ERROR;
+  return -ENOMEM;
 }

@@ -388,6 +388,9 @@ void up_initial_state(FAR struct tcb_s *tcb);
  *     Stacks for user tasks and threads must come from memory that is
  *     accessible to user code.
  *
+ * Returned Value:
+ *   Zero (OK) on success; -ENOMEM if the stack cannot be allocated.
+ *
  ****************************************************************************/
 
 int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype);
