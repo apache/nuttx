@@ -34,6 +34,7 @@
 #include <nuttx/leds/userled.h>
 
 #include "nucleo-f303re.h"
+#include "stm32_can_setup.h"
 
 /****************************************************************************
  * Pre-processor Definitions

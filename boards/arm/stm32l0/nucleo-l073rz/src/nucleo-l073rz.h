@@ -102,13 +102,10 @@
 
 /* MFRC522
  * CS    - PB4
- * RESET - PB11
  */
 
 #define GPIO_MFRC522_CS    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_HIGH|  \
                             GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN4)
-#define GPIO_MFRC522_RESET (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_HIGH|  \
-                            GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN11)
 
 /****************************************************************************
  * Public Data
@@ -166,18 +163,6 @@ int stm32_wlinitialize(void);
 
 #ifdef CONFIG_LPWAN_SX127X
 int stm32_lpwaninitialize(void);
-#endif
-
-/****************************************************************************
- * Name: stm32_mfrc522initialize
- *
- * Description:
- *   Function used to initialize the MFRC522 RFID Transceiver
- *
- ****************************************************************************/
-
-#ifdef CONFIG_CL_MFRC522
-int stm32_mfrc522initialize(const char *devpath);
 #endif
 
 #endif /* __BOARDS_ARM_STM32F0L0G0_NUCLEO_L073RZ_SRC_NUCLEO_L073RZ_H */

@@ -68,6 +68,8 @@
 #  include "stm32_romfs.h"
 #endif
 #include "nucleo-f446re.h"
+#include "stm32_can_setup.h"
+#include "stm32_cansock_setup.h"
 
 /****************************************************************************
  * Public Functions

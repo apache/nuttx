@@ -44,10 +44,6 @@ if(CONFIG_LPWAN_SX127X)
   list(APPEND SRCS stm32_sx127x.c)
 endif()
 
-if(CONFIG_CL_MFRC522)
-  list(APPEND SRCS stm32_mfrc522.c)
-endif()
-
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/ld.script")

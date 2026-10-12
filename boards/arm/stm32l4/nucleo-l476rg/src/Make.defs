@@ -51,9 +51,6 @@ CSRCS += stm32_gpio.c
 endif
 
 # Ben vd Veen (DisruptiveNL) -- 31-03-2018
-ifeq ($(CONFIG_CAN),y)
-CSRCS += stm32_can.c
-endif
 
 ifeq ($(CONFIG_MMCSD_SPI),y)
 CSRCS += stm32_spimmcsd.c
@@ -85,10 +82,6 @@ endif
 
 ifeq ($(CONFIG_SENSORS_BMP180),y)
 CSRCS += stm32_bmp180.c
-endif
-
-ifeq ($(CONFIG_SENSORS_BMP280),y)
-  CSRCS += stm32_bmp280.c
 endif
 
 ifeq ($(CONFIG_SENSORS_MPU9250),y)

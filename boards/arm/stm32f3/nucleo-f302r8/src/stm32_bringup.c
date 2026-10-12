@@ -50,6 +50,8 @@
 #endif
 
 #include "nucleo-f302r8.h"
+#include "stm32_can_setup.h"
+#include "stm32_cansock_setup.h"
 
 /****************************************************************************
  * Pre-processor Definitions

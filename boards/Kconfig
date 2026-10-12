@@ -1863,6 +1863,7 @@ config ARCH_BOARD_NUCLEO_F429ZI
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo-F429zi board based on the STMicro STM32F429ZIT6 MCU.
 
@@ -1872,6 +1873,7 @@ config ARCH_BOARD_NUCLEO_F722ZE
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo F722ZE board based on STM32F722ZET6,
 		a 216MHz Cortex-M7, w/FPU, 512KiB Flash memory and 256KiB SRAM.
@@ -1882,6 +1884,7 @@ config ARCH_BOARD_NUCLEO_F746ZG
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo F746ZG board based on STM32F746ZGT6
 		a 216MHz Cortex-M7, w/FPU, 1024KiB Flash memory and 320KiB SRAM.
@@ -1892,6 +1895,7 @@ config ARCH_BOARD_NUCLEO_F767ZI
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo F767ZI board based on STM32F767ZIT6,
 		a 216MHz Cortex-M7, w/DPFPU 2048KiB Flash memory and 512KiB SRAM.
@@ -1902,6 +1906,7 @@ config ARCH_BOARD_NUCLEO_L073RZ
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo L073RZ board based on the STMicro STM32L073RZU6 MCU.
 
@@ -1911,6 +1916,7 @@ config ARCH_BOARD_NUCLEO_L496ZG
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo-144 development board featuring STMicroelectronics
 		F2, F3, F4, F7 and L4 MCU families.  The board is a "Hardware pattern"
@@ -1937,6 +1943,7 @@ config ARCH_BOARD_NUCLEO_F072RB
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo F072RB board based on the STMicro STM32F072RBT6 MCU.
 
@@ -1946,6 +1953,7 @@ config ARCH_BOARD_NUCLEO_F091RC
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo F091RC board based on the STMicro STM32F091RCT6 MCU.
 
@@ -1955,6 +1963,7 @@ config ARCH_BOARD_NUCLEO_F103RB
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo F103RB board based on the STMicro STM32F103RBT6 MCU.
 
@@ -1964,6 +1973,7 @@ config ARCH_BOARD_NUCLEO_F207ZG
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo F207ZG board based on the STMicro STM32F207ZGT6 MCU.
 
@@ -1973,6 +1983,7 @@ config ARCH_BOARD_NUCLEO_F302R8
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo F302R8 board based on the STMicro STM32F302R8T6 MCU.
 
@@ -1982,6 +1993,7 @@ config ARCH_BOARD_NUCLEO_F303RE
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo F303RE board based on the STMicro STM32F303RET6 MCU.
 
@@ -1991,6 +2003,7 @@ config ARCH_BOARD_NUCLEO_F303ZE
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo F303ZE board based on the STMicro STM32F303ZET6 MCU.
 
@@ -2000,6 +2013,7 @@ config ARCH_BOARD_NUCLEO_F334R8
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo F334R8 board based on the STMicro STM32F334R8 MCU.
 
@@ -2009,6 +2023,7 @@ config ARCH_BOARD_NUCLEO_F401RE
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		This is a minimal configuration that supports low-level test of the
 		Nucleo F401RE in the NuttX source tree.
@@ -2029,6 +2044,7 @@ config ARCH_BOARD_NUCLEO_F410RB
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		This is a minimal configuration that supports low-level test of the
 		Nucleo F410RB in the NuttX source tree.
@@ -2039,6 +2055,7 @@ config ARCH_BOARD_NUCLEO_F411RE
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		This is a minimal configuration that supports low-level test of the
 		Nucleo F411RE in the NuttX source tree.
@@ -2047,6 +2064,7 @@ config ARCH_BOARD_NUCLEO_F412ZG
 	bool "STM32F412 Nucleo F412ZG"
 	depends on ARCH_CHIP_STM32F412ZG
 	select ARCH_HAVE_LEDS
+	select ARCH_BOARD_COMMON
 	---help---
 		This is a minimal configuration that supports low-level test of the
 		Nucleo F412ZG in the NuttX source tree.
@@ -2057,6 +2075,7 @@ config ARCH_BOARD_NUCLEO_F446RE
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		This is a minimal configuration that supports low-level test of the
 		Nucleo F446RE in the NuttX source tree.
@@ -2075,6 +2094,7 @@ config ARCH_BOARD_NUCLEO_G070RB
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		This is a minimal configuration that supports low-level test of the
 		Nucleo G070RB in the NuttX source tree.
@@ -2085,6 +2105,7 @@ config ARCH_BOARD_NUCLEO_G071RB
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		This is a minimal configuration that supports low-level test of the
 		Nucleo G071RB in the NuttX source tree.
@@ -2095,6 +2116,7 @@ config ARCH_BOARD_NUCLEO_G0B1RE
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		This is a minimal configuration that supports low-level test of the
 		Nucleo G0B1RE in the NuttX source tree.
@@ -2132,6 +2154,7 @@ config ARCH_BOARD_NUCLEO_H723ZG
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo H723ZG board based on the STMicro STM32H723ZG MCU.
 
@@ -2140,6 +2163,7 @@ config ARCH_BOARD_NUCLEO_H743ZI
 	depends on ARCH_CHIP_STM32H743ZI
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
+	select ARCH_BOARD_COMMON
 # TODO:	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		STMicro Nucleo H743ZI board based on the STMicro STM32H743ZI MCU.
@@ -2150,6 +2174,7 @@ config ARCH_BOARD_NUCLEO_H743ZI2
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo H743ZI2 board based on the STMicro STM32H743ZI MCU.
 
@@ -2159,6 +2184,7 @@ config ARCH_BOARD_NUCLEO_H745ZI
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select STM32H7_HAVE_PWR_DIRECT_SMPS_SUPPLY
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo H745ZI board based on the STMicro STM32H745ZI MCU.
 
@@ -2200,6 +2226,7 @@ config ARCH_BOARD_NUCLEO_H753ZI
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo H753ZI board based on the STMicro STM32H753ZI MCU.
 
@@ -2209,6 +2236,7 @@ config ARCH_BOARD_NUCLEO_H7S3L8
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo H7S3L8 board based on the STM32H7S3L8 MCU.
 
@@ -2241,6 +2269,7 @@ config ARCH_BOARD_NUCLEO_L152RE
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo L152RE board based on the STMicro STM32L152REU6 MCU.
 
@@ -2250,6 +2279,7 @@ config ARCH_BOARD_NUCLEO_L432KC
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo-32 L432KC board based on the STMicro STM32L432KCU6 MCU.
 
@@ -2259,6 +2289,7 @@ config ARCH_BOARD_NUCLEO_L452RE
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo L452RE board based on the STMicro STM32L452RET6 MCU.
 
@@ -2268,6 +2299,7 @@ config ARCH_BOARD_NUCLEO_L476RG
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo L476RG board based on the STMicro STM32L476RGT6 MCU.
 
@@ -2284,6 +2316,7 @@ config ARCH_BOARD_NUCLEO_L552ZE
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo STM32L552 board based on the STMicro STM32L552ZET6 MCU.
 
@@ -2302,6 +2335,7 @@ config ARCH_BOARD_NUCLEO_WB55RG
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo WB55RG board based on the STMicro STM32WB55RGV6 MCU.
 
@@ -2311,6 +2345,7 @@ config ARCH_BOARD_NUCLEO_WL55JC
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo STM32WL55 board based on the STMicro STM32WL55JC MCU.
 
@@ -3222,6 +3257,7 @@ config ARCH_BOARD_NUCLEO_C071RB
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro NUCLEO C071RB board based on the STMicro STM32C071RB MCU.
 
@@ -3231,6 +3267,7 @@ config ARCH_BOARD_NUCLEO_C092RC
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro NUCLEO C092RC board based on the STMicro STM32C092RC MCU.
 
@@ -3240,6 +3277,7 @@ config ARCH_BOARD_NUCLEO_U083RC
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro NUCLEO U083RC board based on the STMicro STM32U083RC MCU.
 
@@ -3389,6 +3427,7 @@ config ARCH_BOARD_NUCLEO_G431KB
 	bool "STM32G431KB Nucleo G431KB"
 	depends on ARCH_CHIP_STM32G431K
 	select ARCH_HAVE_LEDS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo-G431KB board based on the STMicro STM32G431KB MCU.
 
@@ -3398,6 +3437,7 @@ config ARCH_BOARD_NUCLEO_G431RB
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo-G431RB board based on the STMicro STM32G431RB MCU.
 
@@ -3406,6 +3446,7 @@ config ARCH_BOARD_NUCLEO_G474RE
 	depends on ARCH_CHIP_STM32G474R
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo-G474RE board based on the STMicro STM32G474RET6
 		MCU, a Cortex-M4 with FPU, 170 MHz, 128 KB SRAM, 512 KB code.
@@ -3439,6 +3480,7 @@ config ARCH_BOARD_B_U585I_IOT02A
 config ARCH_BOARD_NUCLEO_U5A5ZJ_Q
 	bool "STMicro NUCLEO-U5A5ZJ-Q board"
 	depends on ARCH_CHIP_STM32U5A5ZJT
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro development board featuring the STM32U5A5
 		MCU. The STM32U5A5 is a Cortex-M33 optimised for low-power operation
@@ -3447,6 +3489,7 @@ config ARCH_BOARD_NUCLEO_U5A5ZJ_Q
 config ARCH_BOARD_NUCLEO_U3C5ZI_Q
 	bool "STMicro NUCLEO-U3C5ZI-Q board"
 	depends on ARCH_CHIP_STM32U3C5ZI
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro NUCLEO-U3C5ZI-Q development board featuring the STM32U3C5ZI,
 		a Cortex-M33 MCU running at up to 96 MHz with 2 MiB Flash and
@@ -3458,6 +3501,7 @@ config ARCH_BOARD_NUCLEO_C562RE
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro NUCLEO-C562RE development board featuring the STM32C562RE,
 		a Cortex-M33 MCU running at up to 144 MHz with 512 KiB Flash and
@@ -3502,6 +3546,7 @@ config ARCH_BOARD_NUCLEO_H503RB
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo-H503RB board based on the STMicro STM32H503RB MCU.
 
@@ -3511,6 +3556,7 @@ config ARCH_BOARD_NUCLEO_H533RE
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo-H533RE board based on the STMicro STM32H533RE MCU.
 
@@ -3520,6 +3566,7 @@ config ARCH_BOARD_NUCLEO_H563ZI
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo-H563ZI board based on the STMicro STM32H563ZI MCU.
 
@@ -3536,6 +3583,7 @@ config ARCH_BOARD_NUCLEO_N657X0_Q
 	bool "NUCLEO_N657X0_Q"
 	depends on ARCH_CHIP_STM32N657X0
 	select ARCH_HAVE_LEDS
+	select ARCH_BOARD_COMMON
 	---help---
 		STMicro Nucleo-N657X0-Q development board based on the STMicro
 		STM32N657X0 MCU (Cortex-M55).  Boots in DEV mode by loading
