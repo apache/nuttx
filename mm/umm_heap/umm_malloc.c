@@ -66,7 +66,7 @@ FAR void *malloc(size_t size)
   ret = mm_malloc(USR_HEAP, size);
   if (ret == NULL)
     {
-      set_errno(ENOMEM);
+      umm_set_errno(ENOMEM);
     }
   else
     {
