@@ -221,7 +221,7 @@ int fchmod(int fd, mode_t mode)
 {
   struct stat buf;
 
-  buf.st_mode = mode & 0777;
+  buf.st_mode = mode & 07777;
 
   return fchstat(fd, &buf, CH_STAT_MODE);
 }
