@@ -161,6 +161,7 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
 
   if (ret < OK)
     {
+      ret = -ENOMEM;
       goto errout_with_group;
     }
 

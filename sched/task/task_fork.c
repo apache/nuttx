@@ -359,6 +359,7 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr, bool vfork)
 
   if (ret < OK)
     {
+      ret = -ENOMEM;
       goto errout_with_tcb;
     }
 
