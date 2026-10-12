@@ -225,7 +225,10 @@ failure:
     {
       size_t tmp;
 
-      v = gran->gat[c];
+      /* v holds only the used bits inside the range.  A used bit above the
+       * range must not move the search past the free bits below it.
+       */
+
       DEBUGASSERT(v);
 
       if (v == GATCFULL)
