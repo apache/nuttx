@@ -129,9 +129,16 @@ static int load_absmodule(FAR struct binary_s *bin, FAR const char *filename,
           strlcpy(bin->fname, filename, sizeof(bin->fname));
 #endif
 
-          /* Save the unload method for use by unload_module */
+          /* Save the unload method for use by unload_module.  A handler
+           * without one that loaded another module through load_module()
+           * (a script loads its interpreter) keeps that module's method.
+           */
 
-          bin->unload = binfmt->unload;
+          if (binfmt->unload != NULL)
+            {
+              bin->unload = binfmt->unload;
+            }
+
           binfmt_dumpmodule(bin);
           break;
         }
