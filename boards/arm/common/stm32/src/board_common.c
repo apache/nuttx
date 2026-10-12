@@ -33,8 +33,29 @@
 
 #include <arch/board/board.h>
 
+/* The STM32H7 FDCAN driver has its own SocketCAN interface */
+
+#if (defined(CONFIG_STM32_CAN_CHARDRIVER) || \
+     defined(CONFIG_STM32_FDCAN_CHARDRIVER)) && \
+    !defined(CONFIG_STM32_HAVE_FDCAN_H7)
+#  define HAVE_CAN_SETUP
+#endif
+
+#if (defined(CONFIG_STM32_CAN_SOCKET) || defined(CONFIG_STM32_FDCAN_SOCKET)) && \
+    !defined(CONFIG_STM32_HAVE_FDCAN_H7)
+#  define HAVE_CANSOCK_SETUP
+#endif
+
 #if defined(CONFIG_STM32_IWDG) || defined(CONFIG_STM32_WWDG)
 #  include "stm32_wdg.h"
+#endif
+
+#ifdef HAVE_CAN_SETUP
+#  include "stm32_can_setup.h"
+#endif
+
+#ifdef HAVE_CANSOCK_SETUP
+#  include "stm32_cansock_setup.h"
 #endif
 
 #include "board_common.h"
@@ -105,6 +126,26 @@ int stm32_common_initialize(void)
   /* Initialize the window watchdog */
 
   stm32_wwdginitialize("/dev/watchdog1");
+#endif
+
+#ifdef HAVE_CAN_SETUP
+  /* Register the CAN character drivers */
+
+  ret = stm32_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_can_setup() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef HAVE_CANSOCK_SETUP
+  /* Initialize the SocketCAN interfaces */
+
+  ret = stm32_cansock_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_cansock_setup() failed: %d\n", ret);
+    }
 #endif
 
   UNUSED(ret);

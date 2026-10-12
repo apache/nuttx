@@ -69,8 +69,6 @@
 #endif
 #include "nucleo-f446re.h"
 #include "board_common.h"
-#include "stm32_can_setup.h"
-#include "stm32_cansock_setup.h"
 
 /****************************************************************************
  * Public Functions
@@ -188,26 +186,6 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: pulsecount_register failed: %d\n", ret);
       return ret;
-    }
-#endif
-
-#ifdef CONFIG_STM32_CAN_CHARDRIVER
-  /* Initialize CAN and register the CAN driver. */
-
-  ret = stm32_can_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_STM32_CAN_SOCKET
-  /* Initialize CAN socket interface */
-
-  ret = stm32_cansock_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_cansock_setup failed: %d\n", ret);
     }
 #endif
 
