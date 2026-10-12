@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-55 0 955 520" width="955" height="520"
      font-family="Charter, Georgia, 'Times New Roman', serif" role="img"
-     aria-label="The three scheduling policies over time. Under SCHED_FIFO a thread keeps the CPU until it blocks. Under SCHED_RR threads of equal priority take turns every CONFIG_RR_INTERVAL. Under SCHED_SPORADIC a thread runs at a high priority while it has budget, drops to a low priority when the budget is spent, and is promoted again one replenishment period later.">
+     aria-label="The three scheduling policies over time. Under SCHED_FIFO a thread keeps the CPU until it blocks or yields. Under SCHED_RR threads of equal priority take turns every CONFIG_RR_INTERVAL. Under SCHED_SPORADIC a thread runs at a high priority while it has budget, drops to a low priority when the budget is spent, and is promoted again one replenishment period later.">
   <style>
     .ttl   { fill: #1b2233; font-size: 14px; font-weight: 600;
              font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; }
@@ -21,7 +21,7 @@
 
   <!-- SCHED_FIFO -->
   <text class="ttl" x="0" y="26">SCHED_FIFO</text>
-  <text class="cap" x="0" y="44">a thread keeps the CPU until it blocks</text>
+  <text class="cap" x="0" y="44">a thread keeps the CPU until it blocks or yields</text>
   <rect class="aA" x="0" y="58" rx="3" width="300" height="34"/>
   <text class="barlbl" x="14" y="80">thread A</text>
   <rect class="aB" x="302" y="58" rx="3" width="330" height="34"/>
