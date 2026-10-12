@@ -93,7 +93,7 @@ FAR void *memalign(size_t alignment, size_t size)
   ret = mm_memalign(USR_HEAP, alignment, size);
   if (ret == NULL)
     {
-      set_errno(ENOMEM);
+      umm_set_errno(ENOMEM);
     }
   else
     {

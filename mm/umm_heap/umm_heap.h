@@ -29,12 +29,26 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
+
 #include <nuttx/addrenv.h>
 #include <nuttx/mm/mm.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* errno is in the TLS of the calling thread.  The kernel uses the user heap
+ * through kumm_*(), also while the address environment of another process
+ * is selected, where that TLS is not mapped.  As kmm_*(), the kernel copy
+ * of the user heap does not set errno.
+ */
+
+#if defined(CONFIG_BUILD_FLAT) || !defined(__KERNEL__)
+#  define umm_set_errno(e) set_errno(e)
+#else
+#  define umm_set_errno(e) ((void)(e))
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
