@@ -432,12 +432,13 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr, bool vfork)
 
 errout_with_tcb:
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_HAVE_FORK)
-  /* Get back into the parent's address environment before unwinding.  If the
-   * duplication above never happened this is the environment we are already
-   * in, and addrenv_restore() is then a no-op.
+  /* Get back into the parent's address environment before unwinding.  Only
+   * a successful duplication selected the child's environment: otherwise
+   * addrenv_restore() would give back a reference that was never taken.
    */
 
-  if (!vfork && ttype != TCB_FLAG_TTYPE_KERNEL)
+  if (!vfork && ttype != TCB_FLAG_TTYPE_KERNEL &&
+      child->addrenv_own != NULL)
     {
       fork_restore_parent_env();
     }
