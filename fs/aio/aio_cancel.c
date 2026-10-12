@@ -85,8 +85,8 @@
 
 int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
 {
-  FAR struct aio_container_s *aioc;
-  FAR struct aio_container_s *next;
+  FAR struct aio_container_s *aioc = NULL;
+  FAR struct aio_container_s *temp;
   FAR struct file            *filep;
 
   pid_t pid;
@@ -119,9 +119,15 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
         {
           /* No.. Find the container for this AIO control block */
 
-          for (aioc = (FAR struct aio_container_s *)g_aio_pending.head;
-               aioc && aioc->aioc_aiocbp != aiocbp;
-               aioc = (FAR struct aio_container_s *)aioc->aioc_link.flink);
+          list_for_every_entry(&g_aio_pending, temp, struct aio_container_s,
+                               aioc_link)
+            {
+              if (temp->aioc_aiocbp == aiocbp)
+                {
+                  aioc = temp;
+                  break;
+                }
+            }
 
           /* Did we find a container for this fildes?  We should; the
            * aio_result says that the transfer is pending.  If not we return
@@ -172,12 +178,9 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
     {
       /* No aiocbp.. cancel all outstanding I/O for the fildes */
 
-      for (aioc = (FAR struct aio_container_s *)g_aio_pending.head;
-           aioc;
-           aioc = next)
+      list_for_every_entry_safe(&g_aio_pending, aioc, temp,
+                                struct aio_container_s, aioc_link)
         {
-          next = (FAR struct aio_container_s *)aioc->aioc_link.flink;
-
           if (aioc->aioc_aiocbp->aio_fildes != fildes)
             {
               continue;
@@ -258,10 +261,10 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
 void aio_cleanup(pid_t pid)
 {
   FAR struct aio_container_s *aioc;
-  FAR struct aio_container_s *next;
-  dq_queue_t queue;
+  FAR struct aio_container_s *temp;
+  struct list_node queue;
 
-  dq_init(&queue);
+  list_initialize(&queue);
 
   /* Take ownership of every container submitted by the exiting task: mark
    * it so aioc_decant() will not touch it, detach it from the pending list
@@ -271,20 +274,17 @@ void aio_cleanup(pid_t pid)
 
   aio_lock();
 
-  for (aioc = (FAR struct aio_container_s *)g_aio_pending.head;
-       aioc;
-       aioc = next)
+  list_for_every_entry_safe(&g_aio_pending, aioc, temp,
+                            struct aio_container_s, aioc_link)
     {
-      next = (FAR struct aio_container_s *)aioc->aioc_link.flink;
-
       if (aioc->aioc_pid != pid)
         {
           continue;
         }
 
       aioc->aioc_pid = INVALID_PROCESS_ID;
-      dq_rem(&aioc->aioc_link, &g_aio_pending);
-      dq_addlast(&aioc->aioc_link, &queue);
+      list_delete(&aioc->aioc_link);
+      list_add_tail(&queue, &aioc->aioc_link);
     }
 
   aio_unlock();
@@ -299,8 +299,8 @@ void aio_cleanup(pid_t pid)
    * of the ownership marker.
    */
 
-  while ((aioc = (FAR struct aio_container_s *)
-          dq_remfirst(&queue)) != NULL)
+  while ((aioc = list_remove_head_type(&queue, struct aio_container_s,
+                                       aioc_link)) != NULL)
     {
       work_cancel_sync(LPWORK, &aioc->aioc_work);
       file_put(aioc->aioc_filep);

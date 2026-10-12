@@ -47,7 +47,7 @@ static struct aio_container_s g_aioc_alloc[CONFIG_FS_NAIOC];
 
 /* This is a list of free AIO containers */
 
-static dq_queue_t g_aioc_free;
+static struct list_node g_aioc_free = LIST_INITIAL_VALUE(g_aioc_free);
 
 /* This counting semaphore tracks the number of free AIO containers */
 
@@ -68,7 +68,7 @@ static rmutex_t g_aio_lock = NXRMUTEX_INITIALIZER;
  * lock on this list in order to access the list.
  */
 
-dq_queue_t g_aio_pending;
+struct list_node g_aio_pending = LIST_INITIAL_VALUE(g_aio_pending);
 
 /****************************************************************************
  * Public Functions
@@ -98,7 +98,7 @@ void aio_initialize(void)
     {
       /* Add the container to the free list */
 
-      dq_addlast(&g_aioc_alloc[i].aioc_link, &g_aioc_free);
+      list_add_tail(&g_aioc_free, &g_aioc_alloc[i].aioc_link);
     }
 }
 
@@ -165,7 +165,8 @@ FAR struct aio_container_s *aioc_alloc(void)
   ret = aio_lock();
   if (ret >= 0)
     {
-      aioc = (FAR struct aio_container_s *)dq_remfirst(&g_aioc_free);
+      aioc = list_remove_head_type(&g_aioc_free, struct aio_container_s,
+                                   aioc_link);
       aio_unlock();
 
       DEBUGASSERT(aioc);
@@ -209,7 +210,7 @@ void aioc_free(FAR struct aio_container_s *aioc)
     }
   while (ret < 0);
 
-  dq_addlast(&aioc->aioc_link, &g_aioc_free);
+  list_add_tail(&g_aioc_free, &aioc->aioc_link);
   aio_unlock();
 
   /* The post the counting semaphore, announcing the availability of the

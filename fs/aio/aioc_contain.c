@@ -109,7 +109,7 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
       goto err_putfilep;
     }
 
-  dq_addlast(&aioc->aioc_link, &g_aio_pending);
+  list_add_tail(&g_aio_pending, &aioc->aioc_link);
   aio_unlock();
 
   return aioc;
@@ -161,7 +161,7 @@ FAR struct aiocb *aioc_decant(FAR struct aio_container_s *aioc)
 
       if (aioc->aioc_pid != INVALID_PROCESS_ID)
         {
-          dq_rem(&aioc->aioc_link, &g_aio_pending);
+          list_delete(&aioc->aioc_link);
 
           /* De-cant the AIO control block and return the container to the
            * free list.
