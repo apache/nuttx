@@ -95,7 +95,7 @@ int env_dup(FAR struct task_info_s *info, FAR char * const *envcp)
         {
           /* There is an environment, duplicate it */
 
-          envp = lib_umalloc(sizeof(*envp) * info->ta_envpc);
+          envp = env_malloc(info, sizeof(*envp) * info->ta_envpc);
           if (envp == NULL)
             {
               /* The parent's environment can not be inherited due to a
@@ -113,15 +113,15 @@ int env_dup(FAR struct task_info_s *info, FAR char * const *envcp)
               while (envc-- > 0)
                 {
                   size = strlen(envcp[envc]) + 1;
-                  envp[envc] = lib_umalloc(size);
+                  envp[envc] = env_malloc(info, size);
                   if (envp[envc] == NULL)
                     {
                       while (envp[++envc] != NULL)
                         {
-                          lib_ufree(envp[envc]);
+                          env_free(info, envp[envc]);
                         }
 
-                      lib_ufree(envp);
+                      env_free(info, envp);
                       envp = NULL;
                       ret = -ENOMEM;
                       break;

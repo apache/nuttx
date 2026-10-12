@@ -61,7 +61,7 @@ void env_removevar(FAR struct task_info_s *info, ssize_t index)
 
   /* Free the allocate environment string */
 
-  lib_ufree(info->ta_envp[index]);
+  env_free(info, info->ta_envp[index]);
 
   /* Exchange the last env and the index env */
 
@@ -80,7 +80,7 @@ void env_removevar(FAR struct task_info_s *info, ssize_t index)
 
   if (info->ta_envc == 0)
     {
-      lib_ufree(info->ta_envp);
+      env_free(info, info->ta_envp);
       info->ta_envp = NULL;
       info->ta_envpc = 0;
     }
@@ -91,7 +91,7 @@ void env_removevar(FAR struct task_info_s *info, ssize_t index)
 
       info->ta_envpc = info->ta_envc + SCHED_ENVIRON_RESERVED + 1;
 
-      info->ta_envp = lib_urealloc(info->ta_envp,
+      info->ta_envp = env_realloc(info, info->ta_envp,
          sizeof(*info->ta_envp) * info->ta_envpc);
       DEBUGASSERT(info->ta_envp != NULL);
     }

@@ -28,6 +28,9 @@
 #include <errno.h>
 
 #include <nuttx/lib/lib.h>
+#include <nuttx/tls.h>
+
+#include "environ.h"
 
 /****************************************************************************
  * Public Functions
@@ -57,8 +60,10 @@
 
 int putenv(FAR const char *string)
 {
+  FAR struct task_info_s *info = task_get_info();
   FAR char *pname;
   FAR char *pequal;
+  size_t len;
   int ret = OK;
 
   /* Verify that a string was passed */
@@ -71,12 +76,15 @@ int putenv(FAR const char *string)
 
   /* Parse the name=value string */
 
-  pname = strdup(string);
+  len   = strlen(string) + 1;
+  pname = env_malloc(info, len);
   if (!pname)
     {
       ret = ENOMEM;
       goto errout;
     }
+
+  memcpy(pname, string, len);
 
   pequal = strchr(pname, '=');
   if (pequal)
@@ -87,7 +95,7 @@ int putenv(FAR const char *string)
       ret = setenv(pname, pequal + 1, TRUE);
     }
 
-  lib_ufree(pname);
+  env_free(info, pname);
   return ret;
 
 errout:
