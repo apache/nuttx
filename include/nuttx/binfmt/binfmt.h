@@ -116,6 +116,9 @@ struct binary_s
                                         * example the interpreter of a
                                         * script, its argument and the
                                         * script.  Freed by unload_module() */
+#ifdef CONFIG_BINFMT_SCRIPT
+  uint8_t scriptdepth;                 /* Scripts being loaded */
+#endif
 
   /* Unload module callback */
 

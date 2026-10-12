@@ -44,6 +44,12 @@
 
 #define SCRIPT_HEADER_MAX 128
 
+/* The interpreter of a script can be a script, up to four levels, as in
+ * Linux.
+ */
+
+#define SCRIPT_DEPTH_MAX  4
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -188,6 +194,12 @@ static int script_loadbinary(FAR struct binary_s *binp,
       return -ENOEXEC;
     }
 
+  if (binp->scriptdepth >= SCRIPT_DEPTH_MAX)
+    {
+      berr("ERROR: Too many script interpreters for %s\n", filename);
+      return -ELOOP;
+    }
+
   /* Terminate at newline */
 
   end = strchr(header + 2, '\n');
@@ -255,7 +267,9 @@ static int script_loadbinary(FAR struct binary_s *binp,
       return ret;
     }
 
+  binp->scriptdepth++;
   ret = load_module(binp, interp, exports, nexports);
+  binp->scriptdepth--;
   if (ret < 0)
     {
       kmm_free(binp->argv);
