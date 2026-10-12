@@ -215,7 +215,7 @@ int chmod(FAR const char *path, mode_t mode)
 {
   struct stat buf;
 
-  buf.st_mode = mode & 0777;
+  buf.st_mode = mode & 07777;
 
   return chstat(path, &buf, CH_STAT_MODE, 1);
 }
@@ -241,7 +241,7 @@ int lchmod(FAR const char *path, mode_t mode)
 {
   struct stat buf;
 
-  buf.st_mode = mode & 0777;
+  buf.st_mode = mode & 07777;
 
   return chstat(path, &buf, CH_STAT_MODE, 0);
 }
