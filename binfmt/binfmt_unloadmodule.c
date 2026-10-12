@@ -86,6 +86,11 @@ int unload_module(FAR struct binary_s *binp)
             }
         }
 
+      /* Free the argument list of the loader */
+
+      kmm_free(binp->argv);
+      binp->argv = NULL;
+
       /* Unmap mapped address spaces */
 
       if (binp->mapped)

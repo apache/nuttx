@@ -35,11 +35,74 @@
 
 #include "binfmt.h"
 
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_BINFMT_DISABLE)
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: binfmt_nargs
+ *
+ * Description:
+ *   Count the arguments of the list that binfmt_copyargv() builds: all of
+ *   ldargv, then argv without argv[0] if ldargv is not NULL, or all of argv
+ *   if it is.
+ *
+ ****************************************************************************/
+
+static int binfmt_nargs(FAR char * const *ldargv, FAR char * const *argv,
+                        FAR int *nld)
+{
+  int nargs = 0;
+  int i;
+
+  *nld = 0;
+  if (ldargv != NULL)
+    {
+      while (ldargv[*nld] != NULL)
+        {
+          (*nld)++;
+        }
+    }
+
+  if (argv != NULL)
+    {
+      for (i = ldargv != NULL && argv[0] != NULL; argv[i] != NULL; i++)
+        {
+          if (++nargs > CONFIG_TASK_MAX_ARGS)
+            {
+              berr("ERROR: Too many arguments\n");
+              return -E2BIG;
+            }
+        }
+    }
+
+  return *nld + nargs;
+}
+
+/****************************************************************************
+ * Name: binfmt_arg
+ *
+ * Description:
+ *   Return argument i of the list that binfmt_copyargv() builds.
+ *
+ ****************************************************************************/
+
+static FAR char *binfmt_arg(FAR char * const *ldargv,
+                            FAR char * const *argv, int nld, int i)
+{
+  if (i < nld)
+    {
+      return ldargv[i];
+    }
+
+  return argv[i - nld + (ldargv != NULL)];
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
 
 /****************************************************************************
  * Name: binfmt_copyargv
@@ -50,15 +113,22 @@
  *   address environment of the new process address environment.  So we
  *   do not have any real option other than to copy the callers argv[] list.
  *
+ *   If ldargv is not NULL, it takes the place of argv[0]: a loader gives
+ *   the program to run and its first arguments (for example, the
+ *   interpreter of a script).
+ *
  * Input Parameters:
+ *   copy     - The copy of the argument list
+ *   ldargv   - The argument list of the loader, or NULL
  *   argv     - Argument list
  *
  * Returned Value:
- *   A non-zero copy is returned on success.
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int binfmt_copyargv(FAR char * const **copy, FAR char * const *argv)
+int binfmt_copyargv(FAR char * const **copy, FAR char * const *ldargv,
+                    FAR char * const *argv)
 {
   FAR char **argvbuf = NULL;
   FAR const char *arg;
@@ -67,73 +137,60 @@ int binfmt_copyargv(FAR char * const **copy, FAR char * const *argv)
   size_t argvsize;
   size_t argsize = 0;
   size_t len;
-  int nargs = 0;
+  int nargs;
+  int nld;
   int i;
 
   /* Get the number of arguments and the size of the argument list */
 
-  if (argv)
+  nargs = binfmt_nargs(ldargv, argv, &nld);
+  if (nargs < 0)
     {
-      for (i = 0; (arg = argv[i]) != NULL; i++)
+      return nargs;
+    }
+
+  for (i = 0; i < nargs; i++)
+    {
+      argsize += strlen(binfmt_arg(ldargv, argv, nld, i)) + 1;
+    }
+
+  binfo("args=%d argsize=%zu\n", nargs, argsize);
+
+  /* Allocate the argv array and an argument buffer */
+
+  if (argsize > 0)
+    {
+      argvsize = (nargs + 1) * sizeof(FAR char *);
+      ptr      = kmm_malloc(argvsize + argsize);
+      if (!ptr)
         {
-          /* Increment the size of the allocation with the size of the next
-           * string
-           */
-
-          argsize += strlen(arg) + 1;
-          nargs++;
-
-          /* This is a sanity check to prevent running away with an
-           * unterminated argv[] list.
-           * CONFIG_TASK_MAX_ARGS should be sufficiently large that this
-           * never happens in normal usage.
-           */
-
-          if (nargs > CONFIG_TASK_MAX_ARGS)
-            {
-              berr("ERROR: Too many arguments: %zu\n", argsize);
-              return -E2BIG;
-            }
+          berr("ERROR: Failed to allocate the argument buffer\n");
+          return -ENOMEM;
         }
 
-      binfo("args=%d argsize=%zu\n", nargs, argsize);
+      /* Copy the argv list */
 
-      /* Allocate the argv array and an argument buffer */
-
-      if (argsize > 0)
+      argvbuf = (FAR char **)ptr;
+      ptr    += argvsize;
+      end     = ptr + argsize;
+      for (i = 0; i < nargs; i++)
         {
-          argvsize = (nargs + 1) * sizeof(FAR char *);
-          ptr      = kmm_malloc(argvsize + argsize);
-          if (!ptr)
+          arg = binfmt_arg(ldargv, argv, nld, i);
+          if (ptr == end || arg == NULL)
             {
-              berr("ERROR: Failed to allocate the argument buffer\n");
-              return -ENOMEM;
+              kmm_free(argvbuf);
+              return -EFAULT;
             }
 
-          /* Copy the argv list */
-
-          argvbuf = (FAR char **)ptr;
-          ptr    += argvsize;
-          end     = ptr + argsize;
-          for (i = 0; i < nargs; i++)
-            {
-              arg = argv[i];
-              if (ptr == end || arg == NULL)
-                {
-                  kmm_free(argvbuf);
-                  return -EFAULT;
-                }
-
-              len        = strnlen(arg, end - ptr - 1);
-              argvbuf[i] = memcpy(ptr, arg, len);
-              ptr[len]   = '\0';
-              ptr       += len + 1;
-            }
-
-          /* Terminate the argv[] list */
-
-          argvbuf[i] = NULL;
+          len        = strnlen(arg, end - ptr - 1);
+          argvbuf[i] = memcpy(ptr, arg, len);
+          ptr[len]   = '\0';
+          ptr       += len + 1;
         }
+
+      /* Terminate the argv[] list */
+
+      argvbuf[i] = NULL;
     }
 
   *copy = argvbuf;
@@ -148,20 +205,102 @@ int binfmt_copyargv(FAR char * const **copy, FAR char * const *argv)
  *
  * Input Parameters:
  *   argv     - Argument list
+ *   ldargv   - The argument list of the loader that binfmt_copyargv() got
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void binfmt_freeargv(FAR char * const *argv)
+void binfmt_freeargv(FAR char * const *argv, FAR char * const *ldargv)
 {
   /* Is there an allocated argument buffer */
+
+  UNUSED(ldargv);
 
   if (argv)
     {
       /* Free the argument buffer */
 
+      kmm_free((FAR char **)argv);
+    }
+}
+
+#else
+
+/****************************************************************************
+ * Name: binfmt_copyargv
+ *
+ * Description:
+ *   All tasks share one address space, so the caller's argv[] list is used
+ *   as it is.  If ldargv is not NULL, it takes the place of argv[0]: the
+ *   new list of pointers is allocated, the strings are not copied.
+ *
+ * Input Parameters:
+ *   copy     - The argument list to use
+ *   ldargv   - The argument list of the loader, or NULL
+ *   argv     - Argument list
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int binfmt_copyargv(FAR char * const **copy, FAR char * const *ldargv,
+                    FAR char * const *argv)
+{
+  FAR char **argvbuf;
+  int nargs;
+  int nld;
+  int i;
+
+  if (ldargv == NULL)
+    {
+      *copy = argv;
+      return OK;
+    }
+
+  nargs = binfmt_nargs(ldargv, argv, &nld);
+  if (nargs < 0)
+    {
+      return nargs;
+    }
+
+  argvbuf = kmm_malloc((nargs + 1) * sizeof(FAR char *));
+  if (argvbuf == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  for (i = 0; i < nargs; i++)
+    {
+      argvbuf[i] = binfmt_arg(ldargv, argv, nld, i);
+    }
+
+  argvbuf[nargs] = NULL;
+  *copy = argvbuf;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: binfmt_freeargv
+ *
+ * Description:
+ *   Release the list that binfmt_copyargv() allocated, if it did.
+ *
+ * Input Parameters:
+ *   argv     - Argument list
+ *   ldargv   - The argument list of the loader that binfmt_copyargv() got
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void binfmt_freeargv(FAR char * const *argv, FAR char * const *ldargv)
+{
+  if (ldargv != NULL)
+    {
       kmm_free((FAR char **)argv);
     }
 }

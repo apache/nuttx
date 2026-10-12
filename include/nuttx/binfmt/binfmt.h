@@ -30,7 +30,6 @@
 #include <nuttx/config.h>
 
 #include <spawn.h>
-#include <stdbool.h>
 #include <sys/types.h>
 
 #include <nuttx/sched.h>
@@ -112,9 +111,11 @@ struct binary_s
   FAR void *stackaddr;                 /* Task stack address */
 #endif
 
-  bool filename;                       /* Use filename as task name instead
-                                        * of argv[0]; preserve full argv.
-                                        */
+  FAR char **argv;                     /* Arguments in place of argv[0],
+                                        * from the loader, or NULL: for
+                                        * example the interpreter of a
+                                        * script, its argument and the
+                                        * script.  Freed by unload_module() */
 
   /* Unload module callback */
 

@@ -84,44 +84,44 @@ int binfmt_dumpmodule(FAR const struct binary_s *bin);
  * Name: binfmt_copyargv
  *
  * Description:
+ *   Get the argument list of the new program.  If ldargv is not NULL, it
+ *   takes the place of argv[0]: a loader gives the program to run and its
+ *   first arguments (for example, the interpreter of a script).
+ *
  *   In the kernel build, the argv list will likely lie in the caller's
  *   address environment and, hence, be inaccessible when we switch to the
  *   address environment of the new process address environment.  So we
  *   do not have any real option other than to copy the callers argv[] list.
  *
  * Input Parameters:
+ *   copy     - The argument list to use
+ *   ldargv   - The argument list of the loader, or NULL
  *   argv     - Argument list
  *
  * Returned Value:
- *   A non-zero copy is returned on success.
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
-int binfmt_copyargv(FAR char * const **copy, FAR char * const *argv);
-#else
-#  define binfmt_copyargv(copy, argv) (*(copy) = (argv), 0)
-#endif
+int binfmt_copyargv(FAR char * const **copy, FAR char * const *ldargv,
+                    FAR char * const *argv);
 
 /****************************************************************************
  * Name: binfmt_freeargv
  *
  * Description:
- *   Release the copied argv[] list.
+ *   Release the list that binfmt_copyargv() returned, if it allocated it.
  *
  * Input Parameters:
  *   argv     - Argument list
+ *   ldargv   - The argument list of the loader that binfmt_copyargv() got
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
-void binfmt_freeargv(FAR char * const *argv);
-#else
-#  define binfmt_freeargv(argv)
-#endif
+void binfmt_freeargv(FAR char * const *argv, FAR char * const *ldargv);
 
 /****************************************************************************
  * Name: binfmt_copyenv
@@ -142,7 +142,7 @@ void binfmt_freeargv(FAR char * const *argv);
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_ENVIRON
-#  define binfmt_copyenv(copy, envp) binfmt_copyargv(copy, envp)
+#  define binfmt_copyenv(copy, envp) binfmt_copyargv(copy, NULL, envp)
 #else
 #  define binfmt_copyenv(copy, envp) (*(copy) = (envp), 0)
 #endif
@@ -162,7 +162,7 @@ void binfmt_freeargv(FAR char * const *argv);
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_ENVIRON
-#  define binfmt_freeenv(envp) binfmt_freeargv(envp)
+#  define binfmt_freeenv(envp) binfmt_freeargv(envp, NULL)
 #else
 #  define binfmt_freeenv(envp)
 #endif
