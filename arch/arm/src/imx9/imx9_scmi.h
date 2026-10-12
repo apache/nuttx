@@ -128,6 +128,20 @@ typedef struct
     uint32_t value; /* The configuration value */
 } scmi_pin_config_t;
 
+/* Length of the silicon name string returned by MISC_SI_INFO */
+
+#define SCMI_MISC_MAX_SINAME 16u
+
+/* SCMI silicon info, as reported by the misc protocol MISC_SI_INFO */
+
+typedef struct
+{
+    uint32_t deviceid;                     /* Silicon specific device ID */
+    uint32_t sirev;                        /* Silicon specific revision */
+    uint32_t partnum;                      /* Silicon specific part number */
+    uint8_t  siname[SCMI_MISC_MAX_SINAME]; /* Silicon name/revision string */
+} scmi_si_info_t;
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -153,5 +167,23 @@ int32_t imx9_scmi_clockconfigset(uint32_t channel, uint32_t clockid,
     uint32_t attributes, uint32_t oem_config_val);
 int32_t imx9_scmi_pinctrlconfigset(uint32_t channel, uint32_t identifier,
     uint32_t attributes, const scmi_pin_config_t *configs);
+
+/****************************************************************************
+ * Name: imx9_scmi_siinfoget
+ *
+ * Description:
+ *   Read the silicon info (device ID, revision, part number and name) from
+ *   the System Manager via the SCMI misc protocol.
+ *
+ * Input Parameters:
+ *   channel - SCMI channel to use
+ *   info    - Returned silicon info
+ *
+ * Returned Value:
+ *   OK on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int32_t imx9_scmi_siinfoget(uint32_t channel, scmi_si_info_t *info);
 
 #endif /* __ARCH_ARM_SRC_IMX9_IMX9_SCMI_H */

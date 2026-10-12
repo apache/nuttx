@@ -114,6 +114,10 @@
 #define SCMI_MSG_PINCTRL_REQUEST 0x8u         /* Request a pin */
 #define SCMI_MSG_PINCTRL_RELEASE 0x9u         /* Release a pin */
 
+/* SCMI misc protocol message IDs */
+
+#define SCMI_MSG_MISC_SI_INFO 0xbu /* Get silicon info */
+
 /* SCMI header creation */
 
 #define SCMI_HEADER_MSG(x)      (((x) & 0xffu) << 0u)
@@ -399,16 +403,17 @@ static int32_t imx9_smt_tx(uint32_t smtchannel, uint32_t len, bool callee,
 
       switch (impStatus)
         {
-        case SMT_CRC_XOR:
-          buf->imp_crc =
-                imx9_crcxor((const uint32_t *)&buf->header, len / 4u);
-          break;
-        case SMT_CRC_CRC32:
-          buf->imp_crc = imx9_crc32((const uint8_t *)&buf->header, len);
-          break;
-        default:
-          ; /* Intentional empty while */
-          break;
+          case SMT_CRC_XOR:
+            buf->imp_crc =
+                  imx9_crcxor((const uint32_t *)&buf->header, len / 4u);
+            break;
+
+          case SMT_CRC_CRC32:
+            buf->imp_crc = imx9_crc32((const uint8_t *)&buf->header, len);
+            break;
+
+          default:
+            break;
         }
 
       if (callee)
@@ -480,24 +485,25 @@ static int32_t imx9_smt_rx(uint32_t smtchannel, uint32_t *len, bool callee)
 
       switch (impStatus)
         {
-        case SMT_CRC_XOR:
-          if (buf->imp_crc
-                != imx9_crcxor((const uint32_t *)msgrx, *len / 4u))
-            {
-              status = -EIO;
-            }
+          case SMT_CRC_XOR:
+            if (buf->imp_crc
+                  != imx9_crcxor((const uint32_t *)msgrx, *len / 4u))
+              {
+                status = -EIO;
+              }
 
-          break;
-        case SMT_CRC_CRC32:
-          if (buf->imp_crc != imx9_crc32((const uint8_t *)msgrx, *len))
-            {
-              status = -EIO;
-            }
+            break;
 
-          break;
-        default:
-          ; /* Intentional empty while */
-          break;
+          case SMT_CRC_CRC32:
+            if (buf->imp_crc != imx9_crc32((const uint8_t *)msgrx, *len))
+              {
+                status = -EIO;
+              }
+
+            break;
+
+          default:
+            break;
         }
     }
 
@@ -1022,6 +1028,79 @@ int32_t imx9_scmi_pinctrlconfigset(uint32_t channel, uint32_t identifier,
   if (status == OK)
     {
       status = imx9_scmi_a2prx(channel, sizeof(msg_status_t), header);
+    }
+
+  /* Release lock */
+
+  SCMI_A2P_UNLOCK(channel);
+
+  /* Return status */
+
+  return status;
+}
+
+int32_t imx9_scmi_siinfoget(uint32_t channel, scmi_si_info_t *info)
+{
+  int32_t status;
+  uint32_t header;
+  void *msg;
+
+  /* Response message structure */
+
+  typedef struct
+  {
+    uint32_t header;
+    int32_t status;
+    uint32_t deviceid;
+    uint32_t sirev;
+    uint32_t partnum;
+    uint8_t siname[SCMI_MISC_MAX_SINAME];
+  } msg_rmiscd11_t;
+
+  /* Acquire lock */
+
+  SCMI_A2P_LOCK(channel);
+
+  /* Init buffer */
+
+  status = imx9_scmi_bufinit(channel, &msg);
+
+  /* Send request */
+
+  if (status == OK)
+    {
+      /* Send message, the request carries the header only */
+
+      status = imx9_scmi_a2ptx(channel, SCMI_PROTOCOL_MISC,
+                               SCMI_MSG_MISC_SI_INFO,
+                               sizeof(uint32_t), &header);
+    }
+
+  /* Receive response */
+
+  if (status == OK)
+    {
+      status = imx9_scmi_a2prx(channel, sizeof(msg_rmiscd11_t), header);
+    }
+
+  /* Copy out if no error */
+
+  if (status == OK)
+    {
+      const msg_rmiscd11_t *msgrx = (const msg_rmiscd11_t *)msg;
+
+      if (info != NULL)
+        {
+          info->deviceid = msgrx->deviceid;
+          info->sirev    = msgrx->sirev;
+          info->partnum  = msgrx->partnum;
+
+          memcpy(info->siname, msgrx->siname, SCMI_MISC_MAX_SINAME);
+
+          /* Make sure the name is terminated */
+
+          info->siname[SCMI_MISC_MAX_SINAME - 1u] = '\0';
+        }
     }
 
   /* Release lock */
