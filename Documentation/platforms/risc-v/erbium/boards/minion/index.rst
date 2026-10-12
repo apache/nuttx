@@ -51,23 +51,27 @@ exception 30, "M-code emulation": ``FDIV.S``, ``FSQRT.S``, ``FCVT.L.S``,
 some ET packed instructions that GCC does not emit.
 
 The port compiles with ``-mno-fdiv``, so floating-point divide and square
-root use software helpers. GCC has no such option for the four 64-bit
-conversions: with the FPU enabled, every conversion between ``float`` and
-a 64-bit integer type such as ``long``, ``int64_t``, ``size_t`` or
-``time_t`` uses one. In NuttX's libm, ``rintf()``, ``lroundf()``,
-``llroundf()`` and ``expf()`` use them, and so does every function built
-on ``expf()``, such as ``logf()``, ``powf()`` and the hyperbolic
-functions.
+root in NuttX and applications use software helpers. Prebuilt code, such
+as a toolchain's libm, still contains ``FDIV.S`` and ``FSQRT.S``. GCC has
+no option like ``-mno-fdiv`` for the four 64-bit conversions: with the FPU
+enabled, every conversion between ``float`` and a 64-bit integer type such
+as ``long``, ``int64_t``, ``size_t`` or ``time_t`` uses one. In NuttX's
+libm, ``rintf()``, ``lroundf()``, ``llroundf()`` and ``expf()`` use them,
+and so does every function built on ``expf()``, such as ``logf()``,
+``powf()`` and the hyperbolic functions.
 
 With ``CONFIG_ERBIUM_MCODE_EMULATION``, which is enabled by default when
-the FPU is, the trap handler performs these four conversions in software
-and resumes after the instruction. Each conversion then costs a trap,
-about 260 instructions in ``erbium_emu``. The emulation follows the RISC-V
-rules for rounding, saturation and floating-point flags. As ET-Minion does
-for ``FCVT.W.S``, a subnormal input reads as zero and sets bit 31 of
-``fflags``. Any other of these instructions, or a conversion when the
-emulation is disabled, is reported as an exception, with the instruction
-in ``MTVAL``, and stops the system.
+the FPU is, the trap handler performs the four conversions, ``FDIV.S`` and
+``FSQRT.S`` in software and resumes after the instruction. In
+``erbium_emu`` the trap costs about 260 instructions for a conversion, 310
+for a division and 500 for a square root. The results follow the RISC-V
+rules for rounding, saturation, NaNs and floating-point flags, and the
+subnormal rules of ET-Minion's other F instructions: a subnormal input
+reads as zero and sets bit 31 of ``fflags``, and a result that is tiny
+after rounding is flushed to zero. ``FENCE.I``, ``SFENCE.VMA``, the packed
+instructions, or any of these instructions when the emulation is
+disabled, are reported as an exception, with the instruction in
+``MTVAL``, and stop the system.
 
 Other single-precision instructions run in hardware, and FPU context
 switching works, including the FPU portion of ``ostest``. Double-precision
@@ -86,8 +90,8 @@ To find these instructions in an image, search its disassembly::
 
 In the ``nsh`` and ``ostest`` images, the only match is ``FENCE.I`` in the
 common ``riscv_fpuconfig`` routine, which Erbium does not call. Any other
-match stops the system when it executes, except the four conversions while
-the emulation is enabled.
+match stops the system when it executes, except the four conversions,
+``FDIV.S`` and ``FSQRT.S`` while the emulation is enabled.
 
 Configurations
 ==============
