@@ -53,6 +53,7 @@
 
 #include "arm_internal.h"
 #include "nucleo-wl55jc.h"
+#include "board_common.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -107,6 +108,15 @@ void stm32_board_initialize(void)
 void board_late_initialize(void)
 {
   int ret;
+
+  /* Initialize the board features common to all STM32 boards */
+
+  ret = stm32_common_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
+             ret);
+    }
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2S2)
   stm32_spidev_initialize();

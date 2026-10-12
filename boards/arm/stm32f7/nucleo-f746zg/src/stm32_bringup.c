@@ -64,6 +64,8 @@
 #  include <semaphore.h>
 #endif
 
+#include "board_common.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -89,6 +91,15 @@ int stm32_bringup(void)
   struct mpu_config_s *mpu_config;
 #endif
 #endif
+
+  /* Initialize the board features common to all STM32 boards */
+
+  ret = stm32_common_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
+             ret);
+    }
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */

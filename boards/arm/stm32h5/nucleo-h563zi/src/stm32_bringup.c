@@ -38,9 +38,7 @@
 
 #include <arch/board/board.h>
 
-#ifdef CONFIG_STM32_IWDG
-#  include "stm32_wdg.h"
-#endif
+#include "board_common.h"
 
 #include "stm32_can_setup.h"
 
@@ -67,11 +65,14 @@ int stm32_bringup(void)
 {
   int ret;
 
-#ifdef CONFIG_STM32_IWDG
-  /* Initialize the watchdog timer */
+  /* Initialize the board features common to all STM32 boards */
 
-  stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);
-#endif
+  ret = stm32_common_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
+             ret);
+    }
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */

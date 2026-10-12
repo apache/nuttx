@@ -35,6 +35,7 @@
 
 #include "nucleo-g070rb.h"
 #include "stm32_i2c.h"
+#include "board_common.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -128,6 +129,15 @@ static void stm32_i2ctool(void)
 int stm32_bringup(void)
 {
   int ret;
+
+  /* Initialize the board features common to all STM32 boards */
+
+  ret = stm32_common_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
+             ret);
+    }
 
 #ifdef HAVE_LEDS
   /* Register the LED driver */

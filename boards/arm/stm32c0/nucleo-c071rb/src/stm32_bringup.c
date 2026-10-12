@@ -38,10 +38,6 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
-#ifdef CONFIG_STM32_IWDG
-#  include <stm32_wdg.h>
-#endif
-
 #ifdef CONFIG_SENSORS_QENCODER
 #  include "board_qencoder.h"
 #endif
@@ -57,6 +53,7 @@
 #include <arch/board/board.h>
 
 #include "nucleo-c071rb.h"
+#include "board_common.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -81,11 +78,14 @@ int stm32_bringup(void)
 {
   int ret;
 
-#ifdef CONFIG_STM32_IWDG
-  /* Initialize the watchdog timer */
+  /* Initialize the board features common to all STM32 boards */
 
-  stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);
-#endif
+  ret = stm32_common_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
+             ret);
+    }
 
 #if defined(CONFIG_CDCACM) && !defined(CONFIG_CDCACM_CONSOLE)
   /* Register the CDC/ACM device at boot. */

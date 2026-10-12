@@ -52,6 +52,7 @@
 #endif
 
 #include "nucleo-wb55rg.h"
+#include "board_common.h"
 
 /****************************************************************************
  * Public Functions
@@ -112,6 +113,15 @@ void board_late_initialize(void)
   struct rtc_lowerhalf_s *rtclower;
 #endif
   int ret = OK;
+
+  /* Initialize the board features common to all STM32 boards */
+
+  ret = stm32_common_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
+             ret);
+    }
 
 #ifdef HAVE_PROC
   /* Mount the proc filesystem */
