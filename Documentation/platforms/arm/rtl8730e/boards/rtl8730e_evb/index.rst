@@ -40,6 +40,8 @@ Supported in this NuttX port:
   ``/dev/ttyS0``)
 * I2C master buses exposed as ``/dev/i2cN`` character devices, driven in
   polling mode through the SDK fwlib register layer
+* SPI master buses exposed as ``/dev/spiN`` character devices, driven in
+  polling mode through the SDK fwlib register layer
 * littlefs persistent storage mounted at ``/data`` (a dedicated SPI NOR flash
   partition), backing the Wi-Fi key-value store
 * Wi-Fi station and SoftAP through the ``wapi`` tool
@@ -116,6 +118,29 @@ cannot be used. The I2C bus is open-drain, so fit external pull-ups on
 SCL/SDA. Probe a bus with the tool::
 
     nsh> i2c dev -b 0 0x03 0x77     # scan /dev/i2c0 for devices
+
+spi
+---
+
+Minimal NSH with the SPI master driver and the ``spitool`` (``system/spi``)
+enabled (no Wi-Fi). The board registers its SPI controllers from a table (see
+``boards/arm/rtl8730e/rtl8730e_evb/src/rtl8730e_spi.c``): SPI0 at
+``/dev/spi0`` on PB18/PB19/PB20/PB21 and SPI1 at ``/dev/spi1`` on
+PA11/PA9/PA10/PA12 (CLK/MOSI/MISO/CS). Edit that table --
+controller and pads -- to match a board's wiring; the pads use the same
+``AMEBA_PA()`` / ``AMEBA_PB()`` encoding as the GPIO table and are muxed to
+the SPI function through the SDK ROM. As with I2C -- and unlike the GPIO and
+UART crossbars -- a pad reaches exactly one SPI controller: SPI0 is wired to
+PB18-PB21, while SPI1 can use either PB25-PB28 or PA9-PA12, so a pad can only
+be swapped for another from that controller's own set. The PA9-PA12 set shares
+PA9/PA10 with I2C0, so a config registering both must put SPI1 on PB25-PB28.
+Pads the audio codec drives cannot be used.
+The chip select is driven as a plain GPIO (software CS) rather than by the
+controller. Both controllers power up as SPI slaves and the driver switches
+them to master before use. Exchange bytes with the tool::
+
+    nsh> spi bus                    # list the registered buses
+    nsh> spi exch -b 0 -x 4 0xde    # send 4 bytes on /dev/spi0
 
 Wi-Fi
 =====
