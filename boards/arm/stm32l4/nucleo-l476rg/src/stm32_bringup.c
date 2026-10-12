@@ -65,6 +65,7 @@
 #include "stm32_mpu9250.h"
 #endif
 
+#include "board_common.h"
 #include "stm32_can_setup.h"
 
 /****************************************************************************
@@ -162,6 +163,15 @@ int stm32_bringup(void)
   char buf[9];
 #endif
   int ret = OK;
+
+  /* Initialize the board features common to all STM32 boards */
+
+  ret = stm32_common_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
+             ret);
+    }
 
 #ifdef HAVE_PROC
   /* Mount the proc filesystem */

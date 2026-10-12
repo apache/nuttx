@@ -37,6 +37,8 @@
 
 #include <arch/board/board.h>
 
+#include "board_common.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -57,9 +59,18 @@
 
 int stm32_bringup(void)
 {
-#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
   int ret;
 
+  /* Initialize the board features common to all STM32 boards */
+
+  ret = stm32_common_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
+             ret);
+    }
+
+#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
   /* Register the LED driver */
 
   ret = userled_lower_initialize("/dev/userleds");

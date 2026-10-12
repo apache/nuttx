@@ -26,9 +26,13 @@
 
 #include <nuttx/config.h>
 
+#include <syslog.h>
+
 #include <sys/mount.h>
 
 #include <nuttx/board.h>
+
+#include "board_common.h"
 
 /****************************************************************************
  * Public Functions
@@ -36,9 +40,18 @@
 
 int stm32_bringup(void)
 {
-#ifdef CONFIG_FS_PROCFS
   int ret;
 
+  /* Initialize the board features common to all STM32 boards */
+
+  ret = stm32_common_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
+             ret);
+    }
+
+#ifdef CONFIG_FS_PROCFS
   ret = mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {

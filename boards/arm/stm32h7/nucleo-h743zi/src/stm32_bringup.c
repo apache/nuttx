@@ -63,10 +63,6 @@
 #  include "stm32_capture.h"
 #endif
 
-#ifdef CONFIG_STM32_IWDG
-#  include "stm32_wdg.h"
-#endif
-
 #ifdef CONFIG_RNDIS
 #  include <nuttx/usb/rndis.h>
 #endif
@@ -76,6 +72,7 @@
 #endif
 
 #include "stm32_gpio.h"
+#include "board_common.h"
 
 /****************************************************************************
  * Private Functions
@@ -257,6 +254,15 @@ int stm32_bringup(void)
 #ifdef HAVE_RTC_DRIVER
   struct rtc_lowerhalf_s *lower;
 #endif
+
+  /* Initialize the board features common to all STM32 boards */
+
+  ret = stm32_common_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
+             ret);
+    }
 
   UNUSED(ret);
 
@@ -492,12 +498,6 @@ int stm32_bringup(void)
     }
 #endif /* HAVE_PROGMEM_CHARDEV */
 #endif /* CONFIG_MTD */
-
-#ifdef CONFIG_STM32_IWDG
-  /* Initialize the watchdog timer */
-
-  stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);
-#endif
 
   return OK;
 }

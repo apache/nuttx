@@ -40,6 +40,8 @@
 
 #include <arch/board/board.h>
 
+#include "board_common.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -70,6 +72,15 @@ int stm32_bringup(void)
   struct i2c_master_s *i2c;
 #endif
   int ret;
+
+  /* Initialize the board features common to all STM32 boards */
+
+  ret = stm32_common_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
+             ret);
+    }
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */

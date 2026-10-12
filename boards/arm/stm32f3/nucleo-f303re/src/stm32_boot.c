@@ -34,6 +34,7 @@
 #include <nuttx/leds/userled.h>
 
 #include "nucleo-f303re.h"
+#include "board_common.h"
 #include "stm32_can_setup.h"
 
 /****************************************************************************
@@ -112,6 +113,15 @@ void stm32_boardinitialize(void)
 void board_late_initialize(void)
 {
   int ret;
+
+  /* Initialize the board features common to all STM32 boards */
+
+  ret = stm32_common_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
+             ret);
+    }
 
 #ifdef HAVE_LEDS
   /* Register the LED driver */

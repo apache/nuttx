@@ -37,6 +37,8 @@
 #  include "stm32_usbhost.h"
 #endif
 
+#include "board_common.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -55,6 +57,15 @@
 int stm32_bringup(void)
 {
   int ret = OK;
+
+  /* Initialize the board features common to all STM32 boards */
+
+  ret = stm32_common_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
+             ret);
+    }
 
 #if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBHOST)
   /* Initialize USB host operation.  stm32_usbhost_initialize() starts a

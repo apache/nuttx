@@ -57,6 +57,8 @@
 #  include <nuttx/input/buttons.h>
 #endif
 
+#include "board_common.h"
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -85,6 +87,15 @@ int stm32_bringup(void)
 #ifdef CONFIG_RAMMTD
   uint8_t *ramstart;
 #endif
+
+  /* Initialize the board features common to all STM32 boards */
+
+  ret = stm32_common_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
+             ret);
+    }
 
   UNUSED(ret);
 
@@ -122,6 +133,7 @@ int stm32_bringup(void)
       /* Initialized the RAM MTD */
 
       struct mtd_dev_s *mtd = rammtd_initialize(ramstart, 128 * 1024);
+
       if (mtd == NULL)
         {
           syslog(LOG_ERR, "ERROR: rammtd_initialize failed\n");
