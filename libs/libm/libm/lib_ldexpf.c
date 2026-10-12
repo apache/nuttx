@@ -36,5 +36,5 @@
 
 float ldexpf(float x, int n)
 {
-  return (x * powf(2.0F, (float)n));
+  return scalbnf(x, n);
 }

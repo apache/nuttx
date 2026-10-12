@@ -40,6 +40,6 @@
 #ifdef CONFIG_HAVE_LONG_DOUBLE
 long double ldexpl(long double x, int n)
 {
-  return (x * powl(2.0, (long double)n));
+  return scalbnl(x, n);
 }
 #endif

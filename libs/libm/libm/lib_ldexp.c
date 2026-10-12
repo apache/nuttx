@@ -40,6 +40,6 @@
 #ifdef CONFIG_HAVE_DOUBLE
 double ldexp(double x, int n)
 {
-  return (x * pow(2.0, (double)n));
+  return scalbn(x, n);
 }
 #endif
