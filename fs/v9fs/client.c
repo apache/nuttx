@@ -632,7 +632,13 @@ static int v9fs_client_rpc(FAR struct v9fs_transport_s *transport,
       return ret;
     }
 
-  nxsem_wait(&payload.resp);
+  /* The transport writes the reply into payload and into the buffers of
+   * the caller, all on the stack: wait for it even if a signal wakes this
+   * thread.
+   */
+
+  nxsem_wait_uninterruptible(&payload.resp);
+
   nxsem_destroy(&payload.resp);
 
   return payload.ret;
