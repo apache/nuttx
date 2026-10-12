@@ -1,0 +1,17 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_NVMPG_STM32F1
+
+config NVMPG_STM32F1_HSE_8MHZ
+	bool "Clock from an 8MHz HSE crystal (72MHz)"
+	default n
+	---help---
+		The original NVMPG firmware clocks the PLL from HSI/2, so the
+		crystal fitted on the board is not known.  By default NuttX does
+		the same (HSI/2 x 16 = 64MHz).  Select this if the board has an
+		8MHz crystal to run at 72MHz from the HSE instead.
+
+endif # ARCH_BOARD_NVMPG_STM32F1
