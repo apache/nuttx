@@ -29,7 +29,7 @@
   <text class="nm" x="52" y="86">INACTIVE</text>
   <text class="sub" x="52" y="104">created, not started</text>
   <path class="edge" d="M 128 118 L 128 186" marker-end="url(#a)"/>
-  <text class="api" x="138" y="150">task_activate()</text>
+  <text class="api" x="138" y="150">nxtask_activate()</text>
 
   <rect class="panel" x="36" y="192" rx="10" width="472" height="152"/>
   <text class="plabel" x="52" y="213">READY TO RUN</text>
@@ -68,7 +68,7 @@
 
   <path class="edge" d="M 484 262 L 554 262" marker-end="url(#a)"/>
   <text class="lbl" x="519" y="250" text-anchor="middle">waits</text>
-  <path class="edge" d="M 560 472 L 150 472 L 150 316" marker-end="url(#a)"/>
+  <path class="edge" d="M 560 472 L 150 472 L 150 350" marker-end="url(#a)"/>
   <text class="lbl" x="330" y="466" text-anchor="middle">what it waited for happened</text>
 
   <rect class="node" x="304" y="376" rx="22" width="180" height="46"/>
