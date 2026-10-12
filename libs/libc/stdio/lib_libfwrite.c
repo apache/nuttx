@@ -168,6 +168,15 @@ ssize_t lib_fwrite_unlocked(FAR const void *ptr, size_t count,
       src += count;
     }
 
+  /* A line buffered stream is flushed when a newline is written */
+
+  if ((stream->fs_flags & __FS_FLAG_LBF) != 0 &&
+      memchr(start, '\n', src - start) != NULL &&
+      lib_fflush_unlocked(stream) < 0)
+    {
+      goto errout;
+    }
+
   /* Return the number of bytes written */
 
   ret = (uintptr_t)src - (uintptr_t)start;
