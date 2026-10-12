@@ -34,6 +34,7 @@
 
 #include <nuttx/binfmt/binfmt.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/kmalloc.h>
 
 #include "binfmt.h"
 
@@ -68,14 +69,84 @@ static struct binfmt_s g_script_binfmt =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: script_setargv
+ *
+ * Description:
+ *   Set binp->argv to: interp, arg (if not NULL), filename, then the
+ *   entries after the first of the old list (a script whose interpreter is
+ *   a script).  All strings are copied into one allocation.
+ *
+ ****************************************************************************/
+
+static int script_setargv(FAR struct binary_s *binp, FAR const char *interp,
+                          FAR const char *arg, FAR const char *filename)
+{
+  FAR char **old = binp->argv;
+  FAR const char *src[3];
+  FAR char **list;
+  FAR char *str;
+  size_t size = 0;
+  int nsrc = 0;
+  int nold = 0;
+  int nargs;
+  int i;
+
+  src[nsrc++] = interp;
+  if (arg != NULL)
+    {
+      src[nsrc++] = arg;
+    }
+
+  src[nsrc++] = filename;
+
+  if (old != NULL)
+    {
+      while (old[nold] != NULL)
+        {
+          nold++;
+        }
+    }
+
+  nargs = nsrc + (nold > 1 ? nold - 1 : 0);
+  for (i = 0; i < nsrc; i++)
+    {
+      size += strlen(src[i]) + 1;
+    }
+
+  for (i = 1; i < nold; i++)
+    {
+      size += strlen(old[i]) + 1;
+    }
+
+  list = kmm_malloc((nargs + 1) * sizeof(FAR char *) + size);
+  if (list == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  str = (FAR char *)&list[nargs + 1];
+  for (i = 0; i < nargs; i++)
+    {
+      FAR const char *s = i < nsrc ? src[i] : old[i - nsrc + 1];
+
+      list[i] = strcpy(str, s);
+      str += strlen(s) + 1;
+    }
+
+  list[nargs] = NULL;
+  binp->argv = list;
+  return OK;
+}
+
+/****************************************************************************
  * Name: script_loadbinary
  *
  * Description:
  *   Verify that the file starts with "#!" and parse the shebang line to
  *   extract the interpreter path (and optional argument), then delegate
- *   loading to the interpreter via load_module().  Sets binp->filename
- *   so exec_module() launches the interpreter with the script path
- *   preserved in the forwarded argv.
+ *   loading to the interpreter via load_module().  Sets binp->argv
+ *   so exec_module() runs the interpreter with the optional argument and
+ *   the script path before the caller's arguments.
  *
  ****************************************************************************/
 
@@ -85,7 +156,9 @@ static int script_loadbinary(FAR struct binary_s *binp,
                              int nexports)
 {
   char header[SCRIPT_HEADER_MAX];
+  FAR char **oldargv = binp->argv;
   FAR char *interp;
+  FAR char *arg = NULL;
   FAR char *end;
   struct file file;
   int ret;
@@ -137,10 +210,9 @@ static int script_loadbinary(FAR struct binary_s *binp,
       return -ENOEXEC;
     }
 
-  /* Terminate the interpreter token at the first whitespace.  Any
-   * optional argument after the interpreter is ignored -- the
-   * interpreter is relaunched with the script path as argv[1], which
-   * is enough for sh / lua / python to auto-execute the script.
+  /* The interpreter ends at the first whitespace.  The rest of the line,
+   * without the whitespace around it, is one optional argument, as in
+   * Linux.
    */
 
   end = interp;
@@ -149,18 +221,50 @@ static int script_loadbinary(FAR struct binary_s *binp,
       end++;
     }
 
-  *end = '\0';
+  if (*end != '\0')
+    {
+      *end++ = '\0';
+      while (isspace(*end))
+        {
+          end++;
+        }
 
-  binfo("Script: interp='%s' script='%s'\n", interp, filename);
+      if (*end != '\0')
+        {
+          arg = end;
+          end = arg + strlen(arg);
+          while (isspace(*(end - 1)))
+            {
+              end--;
+            }
 
-  /* Ask exec_module() to keep the original filename as the task name and
-   * forward the unchanged argv, so the interpreter receives the script
-   * path (the original filename) at argv[1].
+          *end = '\0';
+        }
+    }
+
+  binfo("Script: interp='%s' arg='%s' script='%s'\n",
+        interp, arg ? arg : "", filename);
+
+  /* The interpreter runs with: interp [arg] filename argv[1] ...
+   * filename is the path that was loaded, after the PATH search.
    */
 
-  binp->filename = true;
+  ret = script_setargv(binp, interp, arg, filename);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
-  return load_module(binp, interp, exports, nexports);
+  ret = load_module(binp, interp, exports, nexports);
+  if (ret < 0)
+    {
+      kmm_free(binp->argv);
+      binp->argv = oldargv;
+      return ret;
+    }
+
+  kmm_free(oldargv);
+  return ret;
 }
 
 /****************************************************************************
