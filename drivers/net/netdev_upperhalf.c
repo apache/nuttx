@@ -929,7 +929,28 @@ static inline void netdev_upper_queue_work(FAR struct net_driver_s *dev)
 
 static int netdev_upper_txavail(FAR struct net_driver_s *dev)
 {
-  netdev_upper_txavail_work(dev->d_private);
+  FAR struct netdev_upperhalf_s *upper = dev->d_private;
+
+  if (upper->lower->rxtype == NETDEV_RX_DIRECT)
+    {
+      netdev_upper_txavail_work(upper);
+    }
+  else if (nxrmutex_trylock(&dev->d_lock) >= 0)
+    {
+      /* Lock free or held by us: transmit now so txq can't overflow.
+       * Drop the extra reference of the recursive lock.
+       */
+
+      netdev_upper_txavail_work(upper);
+      nxrmutex_unlock(&dev->d_lock);
+    }
+  else
+    {
+      /* Locked by another thread: don't wait (ABBA when forwarding) */
+
+      netdev_upper_queue_work(dev);
+    }
+
   return OK;
 }
 
