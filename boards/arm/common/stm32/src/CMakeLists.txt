@@ -20,7 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS)
+set(SRCS board_common.c)
 
 if(CONFIG_SENSORS_BMP180)
   list(APPEND SRCS stm32_bmp180.c)
