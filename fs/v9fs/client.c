@@ -898,7 +898,7 @@ int v9fs_client_chstat(FAR struct v9fs_client_s *client, uint32_t fid,
 
   request.fid = fid;
   request.valid = v9fs_map_setattr_flags(flags);
-  request.mode = v9fs_map_open_flags(buf->st_mode);
+  request.mode = buf->st_mode & 07777;
   request.uid = buf->st_uid;
   request.gid = buf->st_gid;
   request.size = buf->st_size;
