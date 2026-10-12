@@ -35,7 +35,6 @@
 
 #include "nucleo-f303re.h"
 #include "board_common.h"
-#include "stm32_can_setup.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -164,16 +163,6 @@ void board_late_initialize(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_STM32_CAN_CHARDRIVER
-  /* Initialize CAN and register the CAN driver. */
-
-  ret = stm32_can_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
     }
 #endif
 

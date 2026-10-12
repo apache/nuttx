@@ -40,14 +40,6 @@
 
 #include "stm32_i2c.h"
 
-#ifdef CONFIG_STM32_CAN_CHARDRIVER
-#  include "stm32_can_setup.h"
-#endif
-
-#ifdef CONFIG_STM32_CAN_SOCKET
-#  include "stm32_cansock_setup.h"
-#endif
-
 #ifdef CONFIG_STM32_ROMFS
 #  include "stm32_romfs.h"
 #endif
@@ -240,23 +232,6 @@ int stm32_bringup(void)
     }
 #endif
 
-#endif
-
-#ifdef CONFIG_STM32_CAN_CHARDRIVER
-  ret = stm32_can_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32f7_can_setup failed: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_STM32_CAN_SOCKET
-  ret = stm32_cansock_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_cansock_setup failed: %d\n", ret);
-    }
 #endif
 
 #if defined(CONFIG_I2C) && defined(CONFIG_STM32_I2C1)

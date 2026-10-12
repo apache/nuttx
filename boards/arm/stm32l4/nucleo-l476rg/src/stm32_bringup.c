@@ -66,7 +66,6 @@
 #endif
 
 #include "board_common.h"
-#include "stm32_can_setup.h"
 
 /****************************************************************************
  * Private Data
@@ -273,15 +272,6 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_CAN
-  ret = stm32_can_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
-      return ret;
     }
 #endif
 
