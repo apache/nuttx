@@ -33,7 +33,11 @@
 #include <nuttx/sensors/bmp280.h>
 #include <nuttx/i2c/i2c_master.h>
 
-#include "stm32_i2c.h"
+#ifdef CONFIG_ARCH_CHIP_STM32L4
+#  include "stm32l4_i2c.h"
+#else
+#  include "stm32_i2c.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
