@@ -510,7 +510,7 @@ int tcp_selectport(uint8_t domain,
 
   /* Generate port base dynamically */
 
-  if (g_last_tcp_port == 0)
+  if (portno == 0 && g_last_tcp_port == 0)
     {
       NET_PORT_RANDOM_INIT(g_last_tcp_port);
     }
