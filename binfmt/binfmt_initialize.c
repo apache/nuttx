@@ -50,6 +50,19 @@ void binfmt_initialize(void)
 {
   int ret;
 
+  /* Each handler goes to the head of the list, so the first one registered
+   * is tried last.  The script handler reads the file of every program
+   * that it is asked to load: try it after the other formats.
+   */
+
+#ifdef CONFIG_BINFMT_SCRIPT
+  ret = script_initialize();
+  if (ret < 0)
+    {
+      berr("ERROR: script_initialize failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_BUILTIN
   ret = builtin_initialize();
   if (ret < 0)
@@ -71,14 +84,6 @@ void binfmt_initialize(void)
   if (ret < 0)
     {
       berr("ERROR: nxflat_initialize failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_BINFMT_SCRIPT
-  ret = script_initialize();
-  if (ret < 0)
-    {
-      berr("ERROR: script_initialize failed: %d\n", ret);
     }
 #endif
 
