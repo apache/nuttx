@@ -342,6 +342,7 @@ static int stm32_wait_for_clr(uintptr_t regaddr, uint32_t bitmask,
                               uint32_t timeout)
 {
   uint32_t regval;
+
   while (timeout--)
     {
       regval = stm32crypto_getreg32(regaddr);
@@ -366,6 +367,7 @@ static int stm32_wait_for_set(uintptr_t regaddr, uint32_t bitmask,
                               uint32_t timeout)
 {
   uint32_t regval;
+
   while (timeout--)
     {
       regval = stm32crypto_getreg32(regaddr);
@@ -547,7 +549,7 @@ static int hash_init(struct stm32_crypto_data *sw)
       case CRYPTO_SHA2_224_HMAC:
         regval = HASH_CR_ALGO_SHA2_224;
         sw->u.hash.dsize = 28;
-      break;
+        break;
       case CRYPTO_SHA2_256:
       case CRYPTO_SHA2_256_HMAC:
         regval = HASH_CR_ALGO_SHA2_256;
@@ -561,14 +563,14 @@ static int hash_init(struct stm32_crypto_data *sw)
   /* If HMAC set mode, and key is large set HASH_CR_LKEY bit */
 
   if (sw->u.hash.hmac)
-  {
-    regval |= HASH_CR_MODE_HMAC;
-    stm32cryptoinfo("klen %" PRIx32 "", sw->u.hash.klen);
-    if (sw->u.hash.klen > 64)
     {
-      regval |= HASH_CR_LKEY_GT_64;
+      regval |= HASH_CR_MODE_HMAC;
+      stm32cryptoinfo("klen %" PRIx32 "", sw->u.hash.klen);
+      if (sw->u.hash.klen > 64)
+        {
+          regval |= HASH_CR_LKEY_GT_64;
+        }
     }
-  }
 
   regval |= HASH_CR_INIT;       /* set init to configure HASH algorithm */
   regval |= HASH_CR_DATATYPE_8; /* 8-bit data... */
@@ -786,10 +788,10 @@ static int stm32_freesession(uint64_t tid)
           case CRYPTO_SHA2_224_HMAC:
           case CRYPTO_SHA2_256_HMAC:
             if (sw->u.hash.key)
-            {
-              explicit_bzero(sw->u.hash.key, sw->u.hash.klen);
-              kmm_free(sw->u.hash.key);
-            }
+              {
+                explicit_bzero(sw->u.hash.key, sw->u.hash.klen);
+                kmm_free(sw->u.hash.key);
+              }
             break;
 
           case CRYPTO_CRC32:
@@ -911,9 +913,9 @@ static int stm32_newsession(uint32_t *sid, struct cryptoini *cri)
             sw->u.hash.klen = cri->cri_klen / 8;
             sw->u.hash.key = kmm_malloc(sw->u.hash.klen);
             if (sw->u.hash.key == NULL)
-            {
-              return -ENOBUFS;
-            }
+              {
+                return -ENOBUFS;
+              }
 
             bcopy(cri->cri_key, sw->u.hash.key, sw->u.hash.klen);
 
@@ -949,9 +951,9 @@ static int stm32_newsession(uint32_t *sid, struct cryptoini *cri)
             sw->u.hash.hmac = false;
             ret = hash_init(sw);
             if (ret < 0)
-            {
-              return ret;
-            }
+              {
+                return ret;
+              }
             break;
 
           case CRYPTO_CRC32:
@@ -964,11 +966,11 @@ static int stm32_newsession(uint32_t *sid, struct cryptoini *cri)
           case CRYPTO_AES_CTR:
             klen = cri->cri_klen / 8 - 4;
             if ((klen != 16) && (klen != 24) && (klen != 32))
-            {
-              /* stm32h7 aes-ctr key bits support 128, 192, or 256 */
+              {
+                /* stm32h7 aes-ctr key bits support 128, 192, or 256 */
 
-              return -EINVAL;
-            }
+                return -EINVAL;
+              }
 
             break;
 
@@ -1108,13 +1110,13 @@ static int stm32_process(struct cryptop *crp)
 
           case CRYPTO_CRC32:
             if (crd->crd_flags & CRD_F_UPDATE)
-            {
-              return crc32_update(sw, crp->crp_buf, crd->crd_len);
-            }
+              {
+                return crc32_update(sw, crp->crp_buf, crd->crd_len);
+              }
             else
-            {
-              return crc32_final(sw, crp->crp_mac);
-            }
+              {
+                return crc32_final(sw, crp->crp_mac);
+              }
             break;
           case CRYPTO_AES_CBC:
             return aes_cypher(crp->crp_dst, crp->crp_buf, crd->crd_len,

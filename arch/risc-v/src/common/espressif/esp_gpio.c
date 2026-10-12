@@ -190,6 +190,7 @@ int esp_configgpio(int pin, gpio_pinattr_t attr)
   if ((attr & DRIVE_MASK) != 0)
     {
       uint32_t val = ((attr & DRIVE_MASK) >> DRIVE_SHIFT) - 1;
+
       gpio_hal_set_drive_capability(&g_gpio_hal, pin, val);
     }
   else
@@ -201,6 +202,7 @@ int esp_configgpio(int pin, gpio_pinattr_t attr)
   if ((attr & FUNCTION_MASK) != 0)
     {
       uint32_t val = ((attr & FUNCTION_MASK) >> FUNCTION_SHIFT) - 1;
+
       gpio_hal_func_sel(&g_gpio_hal, pin, val);
     }
   else

@@ -958,57 +958,57 @@ struct i2c_master_s *xmc4_i2cbus_initialize(int port)
     {
 #ifdef CONFIG_XMC4_I2C0
       case 0:
-      {
-        priv = (struct xmc4_i2cdev_s *)&g_i2c0;
-        break;
-      }
+        {
+          priv = (struct xmc4_i2cdev_s *)&g_i2c0;
+          break;
+        }
 #endif
 
 #ifdef CONFIG_XMC4_I2C1
       case 1:
-      {
-        priv = (struct xmc4_i2cdev_s *)&g_i2c1;
-        break;
-      }
+        {
+          priv = (struct xmc4_i2cdev_s *)&g_i2c1;
+          break;
+        }
 #endif
 
 #ifdef CONFIG_XMC4_I2C2
       case 2:
-      {
-        priv = (struct xmc4_i2cdev_s *)&g_i2c2;
-        break;
-      }
+        {
+          priv = (struct xmc4_i2cdev_s *)&g_i2c2;
+          break;
+        }
 #endif
 
 #ifdef CONFIG_XMC4_I2C3
       case 3:
-      {
-        priv = (struct xmc4_i2cdev_s *)&g_i2c3;
-        break;
-      }
+        {
+          priv = (struct xmc4_i2cdev_s *)&g_i2c3;
+          break;
+        }
 #endif
 
 #ifdef CONFIG_XMC4_I2C4
       case 4:
-      {
-        priv = (struct xmc4_i2cdev_s *)&g_i2c4;
-        break;
-      }
+        {
+          priv = (struct xmc4_i2cdev_s *)&g_i2c4;
+          break;
+        }
 #endif
 
 #ifdef CONFIG_XMC4_I2C5
       case 5:
-      {
-        priv = (struct xmc4_i2cdev_s *)&g_i2c5;
-        break;
-      }
+        {
+          priv = (struct xmc4_i2cdev_s *)&g_i2c5;
+          break;
+        }
 #endif
 
       default:
-      {
-        i2cerr("No such i2c module.\n");
-        return NULL;
-      }
+        {
+          i2cerr("No such i2c module.\n");
+          return NULL;
+        }
     }
 
   nxmutex_lock(&priv->lock);
@@ -1016,6 +1016,7 @@ struct i2c_master_s *xmc4_i2cbus_initialize(int port)
   if (priv->refs++ == 0)
     {
       int ret = i2c_initialize(priv);
+
       if (ret < 0)
         {
           nxmutex_unlock(&priv->lock);

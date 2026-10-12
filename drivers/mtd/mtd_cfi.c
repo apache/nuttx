@@ -231,6 +231,7 @@ static int cfi_mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
       case MTDIOC_ERASESECTORS:
         {
           FAR struct mtd_erase_s *erase = (FAR struct mtd_erase_s *)arg;
+
           ret = cfi_mtd_erase(dev, erase->startblock, erase->nblocks);
         }
         break;
@@ -238,6 +239,7 @@ static int cfi_mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
       case MTDIOC_ERASESTATE:
         {
           FAR uint8_t *result = (FAR uint8_t *)arg;
+
           *result = 0xff;
           break;
         }

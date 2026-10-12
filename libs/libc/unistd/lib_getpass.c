@@ -69,7 +69,7 @@ FAR char *getpass(FAR const char *prompt)
     {
       if (bytes_read > 0 && g_password[total_bytes_read] == '\n')
         {
-            break;
+          break;
         }
 
       total_bytes_read += bytes_read;

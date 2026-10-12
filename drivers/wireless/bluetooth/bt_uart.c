@@ -125,48 +125,48 @@ static void btuart_rxwork(FAR void *arg)
 
       switch (upper->rxbuf[0])
         {
-        case H4_EVT:
-          if (upper->rxlen < H4_HEADER_SIZE +
-              sizeof(struct bt_hci_evt_hdr_s))
-            {
-              wlwarn("WARNING: Incomplete HCI event header\n");
-              return;
-            }
+          case H4_EVT:
+            if (upper->rxlen < H4_HEADER_SIZE +
+                sizeof(struct bt_hci_evt_hdr_s))
+              {
+                wlwarn("WARNING: Incomplete HCI event header\n");
+                return;
+              }
 
-          type = BT_EVT;
-          pktlen = H4_HEADER_SIZE +
-                   sizeof(struct bt_hci_evt_hdr_s) + hdr->evt.len;
-          break;
+            type = BT_EVT;
+            pktlen = H4_HEADER_SIZE +
+                     sizeof(struct bt_hci_evt_hdr_s) + hdr->evt.len;
+            break;
 
-        case H4_ACL:
-          if (upper->rxlen < H4_HEADER_SIZE +
-              sizeof(struct bt_hci_acl_hdr_s))
-            {
-              wlwarn("WARNING: Incomplete HCI ACL header\n");
-              return;
-            }
+          case H4_ACL:
+            if (upper->rxlen < H4_HEADER_SIZE +
+                sizeof(struct bt_hci_acl_hdr_s))
+              {
+                wlwarn("WARNING: Incomplete HCI ACL header\n");
+                return;
+              }
 
-          type = BT_ACL_IN;
-          pktlen = H4_HEADER_SIZE +
-                   sizeof(struct bt_hci_acl_hdr_s) + hdr->acl.len;
-          break;
+            type = BT_ACL_IN;
+            pktlen = H4_HEADER_SIZE +
+                     sizeof(struct bt_hci_acl_hdr_s) + hdr->acl.len;
+            break;
 
-        case H4_ISO:
-          if (upper->rxlen < H4_HEADER_SIZE +
-              sizeof(struct bt_hci_iso_hdr_s))
-            {
-              wlwarn("WARNING: Incomplete HCI ISO header\n");
-              return;
-            }
+          case H4_ISO:
+            if (upper->rxlen < H4_HEADER_SIZE +
+                sizeof(struct bt_hci_iso_hdr_s))
+              {
+                wlwarn("WARNING: Incomplete HCI ISO header\n");
+                return;
+              }
 
-          type = BT_ISO_IN;
-          pktlen = H4_HEADER_SIZE +
-                   sizeof(struct bt_hci_iso_hdr_s) + hdr->iso.len;
-          break;
+            type = BT_ISO_IN;
+            pktlen = H4_HEADER_SIZE +
+                     sizeof(struct bt_hci_iso_hdr_s) + hdr->iso.len;
+            break;
 
-        default:
-          wlerr("ERROR: Unknown H4 type %u\n", upper->rxbuf[0]);
-          return;
+          default:
+            wlerr("ERROR: Unknown H4 type %u\n", upper->rxbuf[0]);
+            return;
         }
 
       if (upper->rxlen < pktlen)
@@ -196,6 +196,7 @@ static void btuart_rxcallback(FAR const struct btuart_lowerhalf_s *lower,
   upper = (FAR struct btuart_upperhalf_s *)arg;
 
   int ret = work_queue(HPWORK, &upper->work, btuart_rxwork, arg, 0);
+
   if (ret < 0)
     {
       wlerr("ERROR: work_queue failed: %d\n", ret);

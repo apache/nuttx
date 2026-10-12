@@ -233,7 +233,7 @@ static int tm4c_mpu60x0_setup(int bus)
       syslog(LOG_ERR, "ERROR: Failed to allocate mpu60x0 driver\n");
       return -ENOMEM;
     }
-    else
+  else
     {
       mpu_config->i2c = i2c;
       mpu_config->addr = 0x68;

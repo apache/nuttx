@@ -168,7 +168,9 @@ static int fuzzycmp(FAR const unsigned char *a, FAR const unsigned char *b)
   for (; *a && *b; a++, b++)
     {
       while (*a && (*a | 32U) - 'a' > 26 && *a - '0' > 10U)
-        a++;
+        {
+          a++;
+        }
 
       if ((*a | 32U) != *b)
         {
@@ -520,24 +522,24 @@ size_t iconv(iconv_t cd, FAR char **in, FAR size_t *inb,
 
               if ((unsigned)(c - 0xd800) < 0x400)
                 {
-                if (type - UCS2BE < 2U)
+                  if (type - UCS2BE < 2U)
                     {
                       goto ilseq;
                     }
 
-                l = 4;
-                if (*inb < 4)
+                  l = 4;
+                  if (*inb < 4)
                     {
                       goto starved;
                     }
 
-                d = get_16((FAR void *)(*in + 2), type);
-                if ((unsigned)(d - 0xdc00) >= 0x400)
+                  d = get_16((FAR void *)(*in + 2), type);
+                  if ((unsigned)(d - 0xdc00) >= 0x400)
                     {
                       goto ilseq;
                     }
 
-                c = ((c - 0xd7c0) << 10) + (d - 0xdc00);
+                  c = ((c - 0xd7c0) << 10) + (d - 0xdc00);
                 }
             }
             break;
@@ -554,7 +556,9 @@ size_t iconv(iconv_t cd, FAR char **in, FAR size_t *inb,
               if (!scd->state)
                 {
                   if (*inb < 2)
-                    goto starved;
+                    {
+                      goto starved;
+                    }
 
                   c = get_16((FAR void *)*in, 0);
                   scd->state = (type == UCS2
@@ -580,17 +584,17 @@ size_t iconv(iconv_t cd, FAR char **in, FAR size_t *inb,
               l = 0;
               if (!scd->state)
                 {
-                if (*inb < 4)
+                  if (*inb < 4)
                     {
                       goto starved;
                     }
 
-                c = get_32((FAR void *)*in, 0);
-                scd->state = (c == 0xfffe0000 ? UTF_32LE : UTF_32BE);
-                if (c == 0xfffe0000 || c == 0xfeff)
-                  {
-                    l = 4;
-                  }
+                  c = get_32((FAR void *)*in, 0);
+                  scd->state = (c == 0xfffe0000 ? UTF_32LE : UTF_32BE);
+                  if (c == 0xfffe0000 || c == 0xfeff)
+                    {
+                      l = 4;
+                    }
                 }
 
               type = scd->state;
@@ -634,22 +638,22 @@ size_t iconv(iconv_t cd, FAR char **in, FAR size_t *inb,
               c *= 2;
               if (d - 64 <= 158 - 64)
                 {
-                if (d == 127)
+                  if (d == 127)
                     {
                       goto ilseq;
                     }
 
-                if (d > 127)
+                  if (d > 127)
                     {
                       d--;
                     }
 
-                d -= 64;
+                  d -= 64;
                 }
               else if (d - 159 <= 252 - 159)
                 {
-                c++;
-                d -= 159;
+                  c++;
+                  d -= 159;
                 }
 
               c = g_jis0208[c][d];
@@ -725,10 +729,10 @@ size_t iconv(iconv_t cd, FAR char **in, FAR size_t *inb,
 
                   switch (128 * (c == '$') + d)
                     {
-                    if (scd == NULL)
-                      {
-                        goto starved;
-                      }
+                        if (scd == NULL)
+                          {
+                            goto starved;
+                          }
 
                       case 'B':
                         {
@@ -1166,6 +1170,7 @@ size_t iconv(iconv_t cd, FAR char **in, FAR size_t *inb,
               if (*outb < 4)
                 {
                   char tmp[4];
+
                   k = wctomb(tmp, c);
                   if (*outb < k)
                     {
