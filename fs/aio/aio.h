@@ -31,7 +31,7 @@
 #include <string.h>
 #include <aio.h>
 
-#include <nuttx/queue.h>
+#include <nuttx/list.h>
 #include <nuttx/wqueue.h>
 
 #ifdef CONFIG_FS_AIO
@@ -60,7 +60,7 @@
 struct file;
 struct aio_container_s
 {
-  dq_entry_t aioc_link;            /* Supports a doubly linked list */
+  struct list_node aioc_link;      /* Supports a doubly linked list */
   FAR struct aiocb *aioc_aiocbp;   /* The contained AIO control block */
   FAR struct file *aioc_filep;     /* File structure to use with the I/O */
   struct work_s aioc_work;         /* Used to defer I/O to the work thread */
@@ -87,7 +87,7 @@ extern "C"
  * lock on this list in order to access the list.
  */
 
-extern dq_queue_t g_aio_pending;
+extern struct list_node g_aio_pending;
 
 /****************************************************************************
  * Public Function Prototypes
