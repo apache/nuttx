@@ -258,7 +258,7 @@ jobs:
       # Apply failures rewrite the report file; the step output remains "ok".
       - name: Upload depends-on report
         if: ${{ always() && (steps.gittargets.outputs.status == 'ok' || steps.gittargets.outputs.status == 'invalid') }}
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: depends-on-report
           path: depends-on-report/
@@ -267,7 +267,7 @@ jobs:
         run: tar zcf sources.tar.gz sources
 
       - name: Archive Source Bundle
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: source-bundle
           path: sources.tar.gz
@@ -421,7 +421,7 @@ jobs:
         if: always()
         run: df -h
 
-      - uses: actions/upload-artifact@v7.0.1
+      - uses: actions/upload-artifact@v7.0.2
         if: ${{ always() }}
         with:
           name: linux-${{matrix.boards}}-builds
@@ -466,7 +466,7 @@ jobs:
             cd sources/nuttx
             ./tools/ci/cibuild-oot.sh
 
-      - uses: actions/upload-artifact@v7.0.1
+      - uses: actions/upload-artifact@v7.0.2
         if: ${{ always() }}
         with:
           name: oot-build-artifacts
@@ -529,7 +529,7 @@ jobs:
           cd sources/nuttx/tools/ci
           ./cibuild.sh -i -c -A -R testlist/${{matrix.boards}}.dat
 
-      - uses: actions/upload-artifact@v7.0.1
+      - uses: actions/upload-artifact@v7.0.2
         with:
           name: macos-${{matrix.boards}}-builds
           path: buildartifacts/
@@ -613,7 +613,7 @@ jobs:
           cd sources/nuttx/tools/ci
           ./cibuild.sh -g -i -A -C -N -R testlist/${{matrix.boards}}.dat
 
-      - uses: actions/upload-artifact@v7.0.1
+      - uses: actions/upload-artifact@v7.0.2
         with:
           name: msys2-${{matrix.boards}}-builds
           path: buildartifacts/
@@ -665,7 +665,7 @@ jobs:
           cd sources\nuttx\tools\ci
           .\cibuild.ps1 -n -i -A -C -N testlist\windows.dat
 
-      - uses: actions/upload-artifact@v7.0.1
+      - uses: actions/upload-artifact@v7.0.2
         with:
           name: msvc-builds
           path: ./sources/buildartifacts/
