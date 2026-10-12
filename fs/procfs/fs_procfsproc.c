@@ -1738,55 +1738,55 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
 
   switch (procfile->node->node)
     {
-    case PROC_STATUS: /* Task/thread status */
-      ret = proc_status(procfile, tcb, buffer, buflen, filep->f_pos);
-      break;
+      case PROC_STATUS: /* Task/thread status */
+        ret = proc_status(procfile, tcb, buffer, buflen, filep->f_pos);
+        break;
 
-    case PROC_CMDLINE: /* Task command line */
-      ret = proc_cmdline(procfile, tcb, buffer, buflen, filep->f_pos);
-      break;
+      case PROC_CMDLINE: /* Task command line */
+        ret = proc_cmdline(procfile, tcb, buffer, buflen, filep->f_pos);
+        break;
 
 #ifndef CONFIG_SCHED_CPULOAD_NONE
-    case PROC_LOADAVG: /* Average CPU utilization */
-      ret = proc_loadavg(procfile, tcb, buffer, buflen, filep->f_pos);
-      break;
+      case PROC_LOADAVG: /* Average CPU utilization */
+        ret = proc_loadavg(procfile, tcb, buffer, buflen, filep->f_pos);
+        break;
 #endif
 #ifdef CONFIG_SCHED_CRITMONITOR
-    case PROC_CRITMON: /* Critical section monitor */
-      ret = proc_critmon(procfile, tcb, buffer, buflen, filep->f_pos);
-      break;
+      case PROC_CRITMON: /* Critical section monitor */
+        ret = proc_critmon(procfile, tcb, buffer, buflen, filep->f_pos);
+        break;
 #endif
 #if CONFIG_MM_BACKTRACE >= 0
-    case PROC_HEAP: /* Task heap info */
-      ret = proc_heap(procfile, tcb, buffer, buflen, filep->f_pos);
-      break;
+      case PROC_HEAP: /* Task heap info */
+        ret = proc_heap(procfile, tcb, buffer, buflen, filep->f_pos);
+        break;
 #endif
 #ifdef CONFIG_DEBUG_MM
-    case PROC_HEAP_CHECK: /* Task heap check flag */
-      ret = proc_heapcheck(procfile, tcb, buffer, buflen, filep->f_pos);
-      break;
+      case PROC_HEAP_CHECK: /* Task heap check flag */
+        ret = proc_heapcheck(procfile, tcb, buffer, buflen, filep->f_pos);
+        break;
 #endif
-    case PROC_STACK: /* Task stack info */
-      ret = proc_stack(procfile, tcb, buffer, buflen, filep->f_pos);
-      break;
+      case PROC_STACK: /* Task stack info */
+        ret = proc_stack(procfile, tcb, buffer, buflen, filep->f_pos);
+        break;
 
-    case PROC_GROUP_STATUS: /* Task group status */
-      ret = proc_groupstatus(procfile, tcb, buffer, buflen, filep->f_pos);
-      break;
+      case PROC_GROUP_STATUS: /* Task group status */
+        ret = proc_groupstatus(procfile, tcb, buffer, buflen, filep->f_pos);
+        break;
 
-    case PROC_GROUP_FD: /* Group file descriptors */
-      ret = proc_groupfd(procfile, tcb, buffer, buflen, filep->f_pos);
-      break;
+      case PROC_GROUP_FD: /* Group file descriptors */
+        ret = proc_groupfd(procfile, tcb, buffer, buflen, filep->f_pos);
+        break;
 
 #if !defined(CONFIG_DISABLE_ENVIRON) && !defined(CONFIG_FS_PROCFS_EXCLUDE_ENVIRON)
-    case PROC_GROUP_ENV: /* Group environment variables */
-      ret = proc_groupenv(procfile, tcb, buffer, buflen, filep->f_pos);
-      break;
+      case PROC_GROUP_ENV: /* Group environment variables */
+        ret = proc_groupenv(procfile, tcb, buffer, buflen, filep->f_pos);
+        break;
 #endif
 
-     default:
-      ret = -EINVAL;
-      break;
+      default:
+        ret = -EINVAL;
+        break;
     }
 
   leave_critical_section(flags);
@@ -2083,18 +2083,18 @@ static int proc_readdir(FAR struct fs_dirent_s *dir,
 
       switch (procdir->node->node)
         {
-         case PROC_LEVEL0: /* Top level directory */
-           DEBUGASSERT(procdir->base.level == 1);
-           node = g_level0info[index];
-           break;
+          case PROC_LEVEL0: /* Top level directory */
+            DEBUGASSERT(procdir->base.level == 1);
+            node = g_level0info[index];
+            break;
 
-         case PROC_GROUP:  /* Group sub-directory */
-           DEBUGASSERT(procdir->base.level == 2);
-           node = g_groupinfo[index];
-           break;
+          case PROC_GROUP:  /* Group sub-directory */
+            DEBUGASSERT(procdir->base.level == 2);
+            node = g_groupinfo[index];
+            break;
 
-         default:
-           return -ENOENT;
+          default:
+            return -ENOENT;
         }
 
       /* Save the filename and file type */
