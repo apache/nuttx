@@ -77,7 +77,7 @@ FAR void *calloc(size_t n, size_t elem_size)
 
   if (mem == NULL)
     {
-      set_errno(ENOMEM);
+      umm_set_errno(ENOMEM);
     }
   else
     {
