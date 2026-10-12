@@ -28,17 +28,51 @@
 
 #include <nuttx/debug.h>
 
-#include "stm32_can.h"
+#include <arch/board/board.h>
+
+#ifdef BOARD_CAN_GPIO_STBY
+#  include "stm32_gpio.h"
+#endif
+#ifdef CONFIG_STM32_FDCAN_SOCKET
+#  include "stm32_fdcan.h"
+#else
+#  include "stm32_can.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-
-#if !defined(CONFIG_STM32_CAN1) && !defined(CONFIG_STM32_CAN2)
-#  error "No CAN is enable. Please enable at least one CAN device"
+#ifdef CONFIG_STM32_FDCAN_SOCKET
+#  define CANSOCK_INITIALIZE(port) stm32_fdcansockinitialize(port)
+#else
+#  define CANSOCK_INITIALIZE(port) stm32_cansockinitialize(port)
 #endif
+
+#if !defined(CONFIG_STM32_CAN1) && !defined(CONFIG_STM32_CAN2) && \
+    !defined(CONFIG_STM32_CAN3) && !defined(CONFIG_STM32_FDCAN1) && \
+    !defined(CONFIG_STM32_FDCAN2) && !defined(CONFIG_STM32_FDCAN3)
+#  error "No CAN is enabled. Please enable at least one CAN device"
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Enabled CAN instances */
+
+static const uint8_t g_can_ports[] =
+{
+#if defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_FDCAN1)
+  1,
+#endif
+#if defined(CONFIG_STM32_CAN2) || defined(CONFIG_STM32_FDCAN2)
+  2,
+#endif
+#if defined(CONFIG_STM32_CAN3) || defined(CONFIG_STM32_FDCAN3)
+  3,
+#endif
+};
 
 /****************************************************************************
  * Public Functions
@@ -54,32 +88,26 @@
 
 int stm32_cansock_setup(void)
 {
-  int ret = OK;
+  int ret;
+  int i;
 
-  UNUSED(ret);
+#ifdef BOARD_CAN_GPIO_STBY
+  /* Enable the CAN transceiver */
 
-#ifdef CONFIG_STM32_CAN1
-  /* Call stm32_caninitialize() to get an instance of the CAN interface */
-
-  ret = stm32_cansockinitialize(1);
-  if (ret < 0)
-    {
-      canerr("ERROR:  Failed to get CAN interface %d\n", ret);
-      goto errout;
-    }
+  stm32_configgpio(BOARD_CAN_GPIO_STBY);
+  stm32_gpiowrite(BOARD_CAN_GPIO_STBY, false);
 #endif
 
-#ifdef CONFIG_STM32_CAN2
-  /* Call stm32_caninitialize() to get an instance of the CAN interface */
-
-  ret = stm32_cansockinitialize(2);
-  if (ret < 0)
+  for (i = 0; i < sizeof(g_can_ports); i++)
     {
-      canerr("ERROR:  Failed to get CAN interface %d\n", ret);
-      goto errout;
+      ret = CANSOCK_INITIALIZE(g_can_ports[i]);
+      if (ret < 0)
+        {
+          canerr("ERROR: Failed to get CAN%d interface %d\n",
+                 g_can_ports[i], ret);
+          return ret;
+        }
     }
-#endif
 
-errout:
-  return ret;
+  return OK;
 }
