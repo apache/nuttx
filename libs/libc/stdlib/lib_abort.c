@@ -26,8 +26,11 @@
 
 #include <nuttx/config.h>
 
+#include <signal.h>
 #include <stdlib.h>
+#include <string.h>
 #include <pthread.h>
+#include <unistd.h>
 
 /****************************************************************************
  * Public Functions
@@ -60,12 +63,29 @@
 
 void abort(void)
 {
-  /* NuttX does not support standard signal functionality (like the
-   * behavior of the SIGABRT signal).  So no attempt is made to provide
-   * a conformant version of abort() at this time.  This version does not
-   * signal the calling thread all.
-   *
-   * _exit() will close all open files and terminate the thread.
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
+  struct sigaction act;
+  sigset_t set;
+
+  /* Unblock SIGABRT and raise it: a handler can catch it */
+
+  sigemptyset(&set);
+  sigaddset(&set, SIGABRT);
+  sigprocmask(SIG_UNBLOCK, &set, NULL);
+  raise(SIGABRT);
+
+  /* The handler returned, or SIGABRT is ignored: restore the default
+   * action and raise SIGABRT again.
+   */
+
+  memset(&act, 0, sizeof(act));
+  act.sa_handler = SIG_DFL;
+  sigaction(SIGABRT, &act, NULL);
+  raise(SIGABRT);
+#endif
+
+  /* SIGABRT has no default action, or signals are not enabled.  _exit()
+   * closes all open files and terminates the process.
    */
 
   _exit(EXIT_FAILURE);
