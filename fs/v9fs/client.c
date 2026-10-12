@@ -408,7 +408,7 @@ begin_packed_struct struct v9fs_rreadlink_s
 {
   struct v9fs_header_s header;
   uint16_t target_len;
-  uint8_t target[PATH_MAX];
+  uint8_t target[];
 } end_packed_struct;
 
 struct v9fs_map_s
@@ -2381,14 +2381,26 @@ ssize_t v9fs_client_readlink(FAR struct v9fs_client_s *client, uint32_t fid,
                              FAR char *buffer, size_t buflen)
 {
   struct v9fs_readlink_s request;
-  struct v9fs_rreadlink_s response;
+  FAR struct v9fs_rreadlink_s *response;
   struct iovec wiov[1];
   struct iovec riov[1];
+  FAR char *rbuf;
+  size_t len;
   int ret;
 
   /* size[4] Treadlink tag[2] fid[4]
    * size[4] Rreadlink tag[2] target[s]
+   *
+   * The response is too big for the stack.
    */
+
+  rbuf = lib_get_tempbuffer(sizeof(struct v9fs_rreadlink_s) + PATH_MAX);
+  if (rbuf == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  response = (FAR struct v9fs_rreadlink_s *)rbuf;
 
   request.fid = fid;
   request.header.size = V9FS_HDRSZ + V9FS_BIT32SZ;
@@ -2397,22 +2409,30 @@ ssize_t v9fs_client_readlink(FAR struct v9fs_client_s *client, uint32_t fid,
 
   wiov[0].iov_base = &request;
   wiov[0].iov_len = V9FS_HDRSZ + V9FS_BIT32SZ;
-  riov[0].iov_base = &response;
-  riov[0].iov_len = sizeof(response);
+  riov[0].iov_base = response;
+  riov[0].iov_len = sizeof(struct v9fs_rreadlink_s) + PATH_MAX;
 
   ret = v9fs_client_rpc(client->transport, wiov, 1, riov, 1,
                         request.header.tag);
   if (ret < 0)
     {
-      return ret;
+      goto out;
     }
 
-  if (response.target_len > buflen)
+  if (response->target_len > PATH_MAX)
     {
-      return -ENAMETOOLONG;
+      ret = -EIO;
+      goto out;
     }
 
-  memcpy(buffer, response.target, response.target_len);
-  return response.target_len;
+  /* Like readlink(), truncate the target to the size of the buffer */
+
+  len = MIN(response->target_len, buflen);
+  memcpy(buffer, response->target, len);
+  ret = len;
+
+out:
+  lib_put_tempbuffer(rbuf);
+  return ret;
 }
 #endif
