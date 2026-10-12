@@ -476,15 +476,21 @@ static netpkt_t *virtio_net_recv(FAR struct netdev_lowerhalf_s *dev)
     {
       /* If we have no buffer left, enable RX callback. */
 
-      virtqueue_enable_cb(vq);
-      spin_unlock_irqrestore(&priv->lock[VIRTIO_NET_RX], flags);
+      if (virtqueue_enable_cb(vq))
+        {
+          /* A buffer was received before the callback was enabled */
 
+          virtqueue_disable_cb(vq);
+          hdr = virtqueue_get_buffer(vq, &len, NULL);
+        }
+    }
+
+  spin_unlock_irqrestore(&priv->lock[VIRTIO_NET_RX], flags);
+
+  if (hdr == NULL)
+    {
       vrtinfo("get NULL buffer\n");
       return NULL;
-    }
-  else
-    {
-      spin_unlock_irqrestore(&priv->lock[VIRTIO_NET_RX], flags);
     }
 
   /* Set the received pkt length */
