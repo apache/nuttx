@@ -271,6 +271,17 @@ int rtl8730e_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_AMEBA_SPI
+  /* Register the board's SPI master buses at /dev/spiN. */
+
+  ret = rtl8730e_spi_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize SPI: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

@@ -69,5 +69,9 @@ int rtl8730e_uart_initialize(void);
 int rtl8730e_i2c_initialize(void);
 #endif
 
+#ifdef CONFIG_AMEBA_SPI
+int rtl8730e_spi_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_RTL8730E_RTL8730E_EVB_SRC_RTL8730E_EVB_H */

@@ -39,6 +39,12 @@ if(CONFIG_AMEBA_I2C)
                              PRIVATE ${NUTTX_DIR}/arch/arm/src/common/ameba)
 endif()
 
+if(CONFIG_AMEBA_SPI)
+  list(APPEND SRCS rtl8730e_spi.c)
+  target_include_directories(board
+                             PRIVATE ${NUTTX_DIR}/arch/arm/src/common/ameba)
+endif()
+
 if(CONFIG_LIBC_FDT)
   target_include_directories(board
                              PRIVATE ${NUTTX_DIR}/libs/libc/fdt/dtc/libfdt)
