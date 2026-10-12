@@ -554,6 +554,7 @@ static struct esp_buffer_s *i2s_buf_allocate(struct esp_i2s_s *priv)
   for (i = 0; i < I2S_DMADESC_NUM; i++)
     {
       size_t size = ALIGN_UP(sizeof(lldesc_t), alignment);
+
       bfcontainer->dma_link[i] = (lldesc_t *)kmm_memalign(alignment, size);
     }
 
@@ -2095,6 +2096,7 @@ static int32_t i2s_check_mclkfrequency(struct esp_i2s_s *priv)
 static uint32_t i2s_set_datawidth(struct esp_i2s_s *priv)
 {
   int width;
+
   if (priv->config->tx_en)
     {
       i2s_ll_tx_set_sample_bit(priv->config->ctx->dev,
@@ -3288,13 +3290,13 @@ static int i2s_dma_setup(struct esp_i2s_s *priv)
 
 #if SOC_I2S_NUM > 1
       case I2S_NUM_1:
-      trig = GDMA_MAKE_TRIGGER(GDMA_TRIG_PERIPH_I2S, 1);
-      break;
+        trig = GDMA_MAKE_TRIGGER(GDMA_TRIG_PERIPH_I2S, 1);
+        break;
 #endif
 
       case I2S_NUM_0:
-      trig = GDMA_MAKE_TRIGGER(GDMA_TRIG_PERIPH_I2S, 0);
-      break;
+        trig = GDMA_MAKE_TRIGGER(GDMA_TRIG_PERIPH_I2S, 0);
+        break;
 
       default:
         i2serr("Unsupported I2S port number");
@@ -3478,6 +3480,7 @@ struct i2s_dev_s *esp_i2sbus_initialize(int port)
   if (priv->config->pm_lock == NULL)
     {
       esp_pm_lock_handle_t pm_lock = priv->config->pm_lock;
+
       ret =  esp_pm_lock_create(pm_type,
                                 0,
                                 "i2s_driver",

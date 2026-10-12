@@ -1082,19 +1082,19 @@ static int oa_tc6_init_by_id(FAR struct spi_dev_s *spi,
     {
 #ifdef CONFIG_NET_OA_TC6_NCV7410
       case OA_TC6_NCV7410_PHYID:
-          ninfo("Info: Detected NCV7410 or NCN26010\n");
-          return ncv7410_initialize(spi, config);
+        ninfo("Info: Detected NCV7410 or NCN26010\n");
+        return ncv7410_initialize(spi, config);
 #endif
 #ifdef CONFIG_NET_OA_TC6_LAN865X
       case OA_TC6_LAN865X_PHYID:
-          ninfo("Info: Detected LAN865x\n");
-          return lan865x_initialize(spi, config);
+        ninfo("Info: Detected LAN865x\n");
+        return lan865x_initialize(spi, config);
 #endif
       default:
-          nerr("Error: Unknown PHYID 0x%08lX. "
-               "Is the support enabled in Kconfig? "
-               "Does the revision match?\n", phyid);
-          return -EINVAL;
+        nerr("Error: Unknown PHYID 0x%08lX. "
+             "Is the support enabled in Kconfig? "
+             "Does the revision match?\n", phyid);
+        return -EINVAL;
     }
 }
 
@@ -1452,29 +1452,29 @@ static int oa_tc6_get_mmd_base(uint8_t mmd,
   switch (mmd)
     {
       case 1:
-          *mms  = OA_TC6_MMD_1_BASE_MMS;
-          *addr = OA_TC6_MMD_1_BASE_ADDR;
-          return OK;
+        *mms  = OA_TC6_MMD_1_BASE_MMS;
+        *addr = OA_TC6_MMD_1_BASE_ADDR;
+        return OK;
       case 3:
-          *mms  = OA_TC6_MMD_3_BASE_MMS;
-          *addr = OA_TC6_MMD_3_BASE_ADDR;
-          return OK;
+        *mms  = OA_TC6_MMD_3_BASE_MMS;
+        *addr = OA_TC6_MMD_3_BASE_ADDR;
+        return OK;
       case 7:
-          *mms  = OA_TC6_MMD_7_BASE_MMS;
-          *addr = OA_TC6_MMD_7_BASE_ADDR;
-          return OK;
+        *mms  = OA_TC6_MMD_7_BASE_MMS;
+        *addr = OA_TC6_MMD_7_BASE_ADDR;
+        return OK;
       case 13:
-          *mms  = OA_TC6_MMD_13_BASE_MMS;
-          *addr = OA_TC6_MMD_13_BASE_ADDR;
-          return OK;
+        *mms  = OA_TC6_MMD_13_BASE_MMS;
+        *addr = OA_TC6_MMD_13_BASE_ADDR;
+        return OK;
       case 29:
-          *mms  = OA_TC6_MMD_29_BASE_MMS;
-          *addr = OA_TC6_MMD_29_BASE_ADDR;
-          return OK;
+        *mms  = OA_TC6_MMD_29_BASE_MMS;
+        *addr = OA_TC6_MMD_29_BASE_ADDR;
+        return OK;
       case 31:
-          *mms  = OA_TC6_MMD_31_BASE_MMS;
-          *addr = OA_TC6_MMD_31_BASE_ADDR;
-          return OK;
+        *mms  = OA_TC6_MMD_31_BASE_MMS;
+        *addr = OA_TC6_MMD_31_BASE_ADDR;
+        return OK;
     }
 
   return ERROR;
@@ -1503,6 +1503,7 @@ static int oa_tc6_ifup(FAR struct netdev_lowerhalf_s *dev)
   FAR struct oa_tc6_driver_s *priv = (FAR struct oa_tc6_driver_s *)dev;
 
   int err = nxmutex_lock(&priv->lock);
+
   if (err)
     {
       nerr("Error: Failed to acquire lock\n");
@@ -1588,6 +1589,7 @@ static int oa_tc6_ifdown(FAR struct netdev_lowerhalf_s *dev)
   FAR struct oa_tc6_driver_s *priv = (FAR struct oa_tc6_driver_s *)dev;
 
   int err = nxmutex_lock(&priv->lock);
+
   if (err)
     {
       nerr("Error: Failed to acquire lock\n");
@@ -1651,6 +1653,7 @@ static int oa_tc6_transmit(FAR struct netdev_lowerhalf_s *dev,
   FAR struct oa_tc6_driver_s *priv = (FAR struct oa_tc6_driver_s *)dev;
 
   int err = nxmutex_lock(&priv->lock);
+
   if (err)
     {
       nerr("Error: Failed to acquire lock\n");
@@ -1890,6 +1893,7 @@ int oa_tc6_write_reg(FAR struct oa_tc6_driver_s *priv,
                     | (mms  << OA_TC6_MMS_POS)
                     | (addr << OA_TC6_ADDR_POS);
   int parity = oa_tc6_get_parity(header);
+
   header |= parity ? 0 : OA_TC6_P_MASK;  /* Make header odd parity */
 
   /* Convert to big endian */

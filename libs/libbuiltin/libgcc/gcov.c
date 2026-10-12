@@ -507,6 +507,7 @@ void __gcov_dump(void)
     {
       struct lib_rawoutstream_s stream;
       int fd = _NX_OPEN(prefix, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+
       if (fd < 0)
         {
           syslog(LOG_ERR, "open %s failed! ret: %d\n", prefix, ret);

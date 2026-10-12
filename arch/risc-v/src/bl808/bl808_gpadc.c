@@ -197,6 +197,7 @@ uint8_t bl808_gpadc_get_count()
   uint32_t status = getreg32(BL808_GPADC_CONFIG);
   uint8_t count = (status & GPADC_FIFO_DATA_COUNT_MASK)
     >> GPADC_FIFO_DATA_COUNT_SHIFT;
+
   return count;
 }
 
@@ -231,6 +232,7 @@ static int __gpadc_interrupt(int irq, void *context, void *arg)
 
               int receive_ret =
                 priv->callback->au_receive(dev, channel, adc_val);
+
               if (receive_ret)
                 {
                   aerr("ADC driver upper half receive error");
@@ -365,6 +367,7 @@ static int bl808_gpadc_setup(struct adc_dev_s *dev)
       if (channel < 12)
         {
           int pin = ch_to_gpio_map[channel];
+
           bl808_configgpio(pin, GPIO_INPUT
                            | GPIO_FLOAT
                            | GPIO_FUNC_ANA);
@@ -449,40 +452,40 @@ static int bl808_gpadc_ioctl(struct adc_dev_s *dev,
 
   switch (cmd)
     {
-    case ANIOC_TRIGGER:
-      {
-        modifyreg32(BL808_GPADC_CMD, 0, GPADC_CONV_START);
-        ret = OK;
-        break;
-      }
+      case ANIOC_TRIGGER:
+        {
+          modifyreg32(BL808_GPADC_CMD, 0, GPADC_CONV_START);
+          ret = OK;
+          break;
+        }
 
-    case ANIOC_GET_NCHANNELS:
-      {
-        ret = priv->nchannels;
-        break;
-      }
+      case ANIOC_GET_NCHANNELS:
+        {
+          ret = priv->nchannels;
+          break;
+        }
 
-    case ANIOC_RESET_FIFO:
-      {
-        modifyreg32(BL808_GPADC_CONFIG, 0,
-                    GPADC_FIFO_CLR);
-        ret = OK;
-        break;
-      }
+      case ANIOC_RESET_FIFO:
+        {
+          modifyreg32(BL808_GPADC_CONFIG, 0,
+                      GPADC_FIFO_CLR);
+          ret = OK;
+          break;
+        }
 
-    case ANIOC_SAMPLES_ON_READ:
-      {
-        ret = bl808_gpadc_get_count();
-        break;
-      }
+      case ANIOC_SAMPLES_ON_READ:
+        {
+          ret = bl808_gpadc_get_count();
+          break;
+        }
 
-    default:
-      {
-        /* Other commands not implemented */
+      default:
+        {
+          /* Other commands not implemented */
 
-        ret = -ENOTTY;
-        break;
-      }
+          ret = -ENOTTY;
+          break;
+        }
     }
 
   return ret;
@@ -495,6 +498,7 @@ static int bl808_gpadc_ioctl(struct adc_dev_s *dev,
 int bl808_gpadc_init(void)
 {
   struct adc_dev_s *dev = kmm_zalloc(sizeof(struct adc_dev_s));
+
   dev->ad_ops  = &gpadc_ops;
   dev->ad_priv = &gpadc_priv;
 

@@ -303,6 +303,7 @@ static int mcp47x6_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
   uint8_t buffer[BUFFER_SIZE];
 
   uint32_t data;
+
   data = msg->am_data & MCP47X6_DATA_MASK;
   data <<= MCP47X6_DATA_SHIFT;
   buffer[0] = (uint8_t)(data >> 8) | MCP47X6_COMMAND_WRITE_DAC;
@@ -365,7 +366,7 @@ static int mcp47x6_ioctl(FAR struct dac_dev_s *dev, int cmd,
                 ret = -EINVAL;
                 break;
             }
-          }
+        }
         break;
 
       case ANIOC_MCP47X6_DAC_SET_REFERENCE:
@@ -386,7 +387,7 @@ static int mcp47x6_ioctl(FAR struct dac_dev_s *dev, int cmd,
         }
         break;
 
-    /* Command was not recognized */
+        /* Command was not recognized */
 
       default:
         aerr("MCP47X6 ERROR: Unrecognized cmd: %d", cmd);
@@ -397,6 +398,7 @@ static int mcp47x6_ioctl(FAR struct dac_dev_s *dev, int cmd,
   if (command_prepared)
     {
       uint8_t raw_cmd = MCP47X6_COMMAND_WRITE_CONFIG | priv->cmd;
+
       ret = mcp47x6_i2c_write(priv, &raw_cmd, sizeof(raw_cmd));
     }
 

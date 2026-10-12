@@ -738,230 +738,233 @@ static void tc_worker(void *arg)
 
   switch (priv->state)
     {
-    /* The touchscreen is IDLE and we are ready to begin the next sample */
+      /* The touchscreen is IDLE and we are ready to begin the next sample */
 
-    case TC_READY:
-      {
-        /* Select DRIVE for Y sampling */
+      case TC_READY:
+        {
+          /* Select DRIVE for Y sampling */
 
-        /* Configure XL, XR with drive voltages and disable YU drive.  Note
-         * that this is configuring the DRIVEA and DRIVEB outputs to enable
-         * the on-board transistor drive logic to energize the touch panel.
-         */
+          /* Configure XL, XR with drive voltages and disable YU drive.  Note
+           * that this is configuring the DRIVEA and DRIVEB outputs to enable
+           * the on-board transistor drive logic to energize the touch panel.
+           */
 
-        *((uint32_t *)LCD_TP_PORT_SETRESET) = LCD_SAMPY_BITS;
+          *((uint32_t *)LCD_TP_PORT_SETRESET) = LCD_SAMPY_BITS;
 
-        /* Allow time for the Y DRIVE to settle */
+          /* Allow time for the Y DRIVE to settle */
 
-        priv->resamplecount = 0;
-        priv->sampcount = 0;
-        priv->value = 0;
-        priv->state = TC_READY_SETTLE;
-        delay       = TC_SETTLE_TICKS;
-      }
-      break;
+          priv->resamplecount = 0;
+          priv->sampcount = 0;
+          priv->value = 0;
+          priv->state = TC_READY_SETTLE;
+          delay       = TC_SETTLE_TICKS;
+        }
+        break;
 
-    case TC_READY_SETTLE:
-      {
-        /* Start Y sampling */
+      case TC_READY_SETTLE:
+        {
+          /* Start Y sampling */
 
-        tc_y_sample();
+          tc_y_sample();
 
-        /* Allow time for the Y pend down sampling */
+          /* Allow time for the Y pend down sampling */
 
-        priv->state = TC_YPENDOWN;
-        delay       = TC_SAMPLE_TICKS;
-      }
-      break;
+          priv->state = TC_YPENDOWN;
+          delay       = TC_SAMPLE_TICKS;
+        }
+        break;
 
-    /* The Y sampling time has elapsed and the Y value should be ready
-     * for conversion
-     */
+      /* The Y sampling time has elapsed and the Y value should be ready
+       * for conversion
+       */
 
-    case TC_YPENDOWN:
-      {
-        /* Convert the Y sample value */
+      case TC_YPENDOWN:
+        {
+          /* Convert the Y sample value */
 
-        value = tc_adc_read_sample();
+          value = tc_adc_read_sample();
 
-        /* A converted value at the minimum would mean that there is no touch
-         * and that the sampling period is complete.
-         */
+          /* A converted value at the minimum would mean that there is no
+           * touch and that the sampling period is complete.
+           */
 
-        if (!tc_valid_sample(value))
-          {
-            priv->state = TC_PENUP;
-          }
-        else
-          {
-            /* Allow time for touch inputs to stabilize */
+          if (!tc_valid_sample(value))
+            {
+              priv->state = TC_PENUP;
+            }
+          else
+            {
+              /* Allow time for touch inputs to stabilize */
 
-            priv->state = TC_DEBOUNCE;
-            delay       = TC_DEBOUNCE_TICKS;
-          }
-      }
-      break;
+              priv->state = TC_DEBOUNCE;
+              delay       = TC_DEBOUNCE_TICKS;
+            }
+        }
+        break;
 
-    /* The debounce time period has elapsed and we are ready to re-sample
-     * the touchscreen.
-     */
+      /* The debounce time period has elapsed and we are ready to re-sample
+       * the touchscreen.
+       */
 
-    case TC_RESAMPLE:
-      {
-        /* Select DRIVE for Y sampling */
+      case TC_RESAMPLE:
+        {
+          /* Select DRIVE for Y sampling */
 
-        /* Configure XL, XR with drive voltages and disable YU drive.  Note
-         * that this is configuring the DRIVEA and DRIVEB outputs to enable
-         * the on-board transistor drive logic to energize the touch panel.
-         */
+          /* Configure XL, XR with drive voltages and disable YU drive.  Note
+           * that this is configuring the DRIVEA and DRIVEB outputs to enable
+           * the on-board transistor drive logic to energize the touch panel.
+           */
 
-        *((uint32_t *)LCD_TP_PORT_SETRESET) = LCD_SAMPY_BITS;
+          *((uint32_t *)LCD_TP_PORT_SETRESET) = LCD_SAMPY_BITS;
 
-        /* Allow time for the Y DRIVE to settle */
+          /* Allow time for the Y DRIVE to settle */
 
-        priv->state = TC_DEBOUNCE;
-        delay       = TC_SETTLE_TICKS;
-      }
-      break;
+          priv->state = TC_DEBOUNCE;
+          delay       = TC_SETTLE_TICKS;
+        }
+        break;
 
-    case TC_DEBOUNCE:
-      {
-        /* (Re-)start Y sampling */
+      case TC_DEBOUNCE:
+        {
+          /* (Re-)start Y sampling */
 
-        tc_y_sample();
+          tc_y_sample();
 
-        /* Allow time for the Y sampling */
+          /* Allow time for the Y sampling */
 
-        priv->state = TC_YSAMPLE;
-        delay       = TC_SAMPLE_TICKS;
-      }
-      break;
+          priv->state = TC_YSAMPLE;
+          delay       = TC_SAMPLE_TICKS;
+        }
+        break;
 
-    /* The Y sampling period has elapsed and we are ready to perform the
-     * conversion.
-     */
+      /* The Y sampling period has elapsed and we are ready to perform the
+       * conversion.
+       */
 
-    case TC_YSAMPLE:                          /* Allowing time for the Y sampling */
-      {
-        /* Read the Y axis position */
+      case TC_YSAMPLE:                          /* Allowing time for the Y sampling */
+        {
+          /* Read the Y axis position */
 
-        value = tc_adc_read_sample();
+          value = tc_adc_read_sample();
 
-        /* A converted value at the minimum would mean that we lost the
-         * contact before all of the conversions were completed.  At
-         * converted value at the maximum value is probably bad too.
-         */
+          /* A converted value at the minimum would mean that we lost the
+           * contact before all of the conversions were completed.  At
+           * converted value at the maximum value is probably bad too.
+           */
 
-        if (!tc_valid_sample(value))
-          {
+          if (!tc_valid_sample(value))
+            {
 #ifdef CONFIG_TOUCHSCREEN_RESAMPLE
-            priv->state = TC_RESAMPLE;
-            delay       = TC_RESAMPLE_TICKS;
+              priv->state = TC_RESAMPLE;
+              delay       = TC_RESAMPLE_TICKS;
 #else
-            priv->state = TC_PENUP;
+              priv->state = TC_PENUP;
 #endif
-          }
-        else
-          {
-            value       = MAX_ADC - value;
-            priv->value += value;
-            if (++priv->sampcount < CONFIG_TOUCHSCREEN_AVG_SAMPLES)
-              {
-                priv->state = TC_READY_SETTLE;
-                delay = 1;
-                break;
-              }
+            }
+          else
+            {
+              value       = MAX_ADC - value;
+              priv->value += value;
+              if (++priv->sampcount < CONFIG_TOUCHSCREEN_AVG_SAMPLES)
+                {
+                  priv->state = TC_READY_SETTLE;
+                  delay = 1;
+                  break;
+                }
 
-            priv->newy  = value / CONFIG_TOUCHSCREEN_AVG_SAMPLES;
-            priv->value = 0;
-            priv->sampcount = 0;
-            iinfo("Y=%d\n", priv->newy);
+              priv->newy  = value / CONFIG_TOUCHSCREEN_AVG_SAMPLES;
+              priv->value = 0;
+              priv->sampcount = 0;
+              iinfo("Y=%d\n", priv->newy);
 
-            /* Configure YU and YD with drive voltages and disable XR drive.
-             * Note that this is configuring the DRIVEA and DRIVEB outputs
-             * to enable the on-board transistor drive logic to energize the
-             * touch panel.
-             */
+              /* Configure YU and YD with drive voltages and disable XR
+               * drive. Note that this is configuring the DRIVEA and DRIVEB
+               * outputs to enable the on-board transistor drive logic to
+               * energize the touch panel.
+               */
 
-            *((uint32_t *)LCD_TP_PORT_SETRESET) = LCD_SAMPX_BITS;
+              *((uint32_t *)LCD_TP_PORT_SETRESET) = LCD_SAMPX_BITS;
 
-            /* Allow time for the X sampling */
+              /* Allow time for the X sampling */
 
-            priv->state = TC_XSETTLE;
-            delay       = TC_SETTLE_TICKS;
-          }
-      }
-      break;
+              priv->state = TC_XSETTLE;
+              delay       = TC_SETTLE_TICKS;
+            }
+        }
+        break;
 
-    case TC_XRESAMPLE:                /* Perform X resampling */
-      {
-        if (priv->resamplecount-- == 0)
-          {
-            priv->state = TC_PENUP;
-            break;
-          }
-      }
+      case TC_XRESAMPLE:                /* Perform X resampling */
+        {
+          if (priv->resamplecount-- == 0)
+            {
+              priv->state = TC_PENUP;
+              break;
+            }
+        }
 
-    case TC_XSETTLE:                  /* Allowing time X to settle after changing DRIVE */
-      {
-        /* The X Drive settling time has elaspsed and it's time to start
-         * the conversion
-         */
+      case TC_XSETTLE:                  /* Allowing time X to settle after changing DRIVE */
+        {
+          /* The X Drive settling time has elaspsed and it's time to start
+           * the conversion
+           */
 
-        /* Start X sampling */
+          /* Start X sampling */
 
-        tc_x_sample();
+          tc_x_sample();
 
-        /* Allow time for the X sampling */
+          /* Allow time for the X sampling */
 
-        priv->state = TC_XSAMPLE;
-        delay       = TC_SAMPLE_TICKS;
-      }
-      break;
+          priv->state = TC_XSAMPLE;
+          delay       = TC_SAMPLE_TICKS;
+        }
+        break;
 
-    case TC_XSAMPLE:                 /* Allowing time for the X sampling */
-      {
-        /* Read the converted X axis position */
+      case TC_XSAMPLE:                 /* Allowing time for the X sampling */
+        {
+          /* Read the converted X axis position */
 
-        value = tc_adc_read_sample();
+          value = tc_adc_read_sample();
 
-        /* A converted value at the minimum would mean that we lost the
-         * contact before all of the conversions were completed.  At
-         * converted value at the maximum value is probably bad too.
-         */
+          /* A converted value at the minimum would mean that we lost the
+           * contact before all of the conversions were completed.  At
+           * converted value at the maximum value is probably bad too.
+           */
 
-        if (!tc_valid_sample(value))
-          {
+          if (!tc_valid_sample(value))
+            {
 #ifdef CONFIG_TOUCHSCREEN_RESAMPLE
-            priv->state = TC_XRESAMPLE;
-            if (priv->resamplecount == 0)
-                priv->resamplecount = 1;
-            delay       = TC_RESAMPLE_TICKS;
+              priv->state = TC_XRESAMPLE;
+              if (priv->resamplecount == 0)
+                {
+                  priv->resamplecount = 1;
+                }
+
+              delay       = TC_RESAMPLE_TICKS;
 #else
-            priv->state = TC_PENUP;
+              priv->state = TC_PENUP;
 #endif
-          }
-        else
-          {
-            /* Calculate the X axis position */
+            }
+          else
+            {
+              /* Calculate the X axis position */
 
-            priv->value += value;
-            if (++priv->sampcount < CONFIG_TOUCHSCREEN_AVG_SAMPLES)
-              {
-                priv->state = TC_XSETTLE;
-                delay = 1;
-                break;
-              }
+              priv->value += value;
+              if (++priv->sampcount < CONFIG_TOUCHSCREEN_AVG_SAMPLES)
+                {
+                  priv->state = TC_XSETTLE;
+                  delay = 1;
+                  break;
+                }
 
-            newx  = value / CONFIG_TOUCHSCREEN_AVG_SAMPLES;
-            iinfo("X=%d\n", newx);
+              newx  = value / CONFIG_TOUCHSCREEN_AVG_SAMPLES;
+              iinfo("X=%d\n", newx);
 
-            /* Samples are available */
+              /* Samples are available */
 
-            priv->state = TC_PENDOWN;
-          }
-      }
-      break;
+              priv->state = TC_PENDOWN;
+            }
+        }
+        break;
     }
 
   /* Check for terminal conditions.. */
@@ -1417,6 +1420,7 @@ static int tc_poll(struct file *filep, struct pollfd *fds, bool setup)
       /* This is a request to tear down the poll. */
 
       struct pollfd **slot = (struct pollfd **)fds->priv;
+
       DEBUGASSERT(slot != NULL);
 
       /* Remove all memory of the poll setup */
