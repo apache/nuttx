@@ -32,6 +32,7 @@
 #include <nuttx/compiler.h>
 
 #include <math.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Public Functions
@@ -40,7 +41,44 @@
 #ifdef CONFIG_HAVE_DOUBLE
 double frexp(double x, int *exponent)
 {
-  *exponent = (int)ceil(log2(x));
-  return x / ldexp(1.0, *exponent);
+  union
+    {
+      double f;
+      uint64_t i;
+    } u;
+
+  int e;
+
+  u.f = x;
+  e = (int)(u.i >> 52) & 0x7ff;
+
+  if (e == 0)
+    {
+      if (x == 0.0)
+        {
+          *exponent = 0;
+          return x;
+        }
+
+      /* Subnormal: scale into the normal range first */
+
+      x = frexp(x * 0x1p64, exponent);
+      *exponent -= 64;
+      return x;
+    }
+  else if (e == 0x7ff)
+    {
+      /* Infinity or NaN */
+
+      *exponent = 0;
+      return x;
+    }
+
+  /* Keep the sign and the fraction, and set the exponent of 0.5 */
+
+  *exponent = e - 0x3fe;
+  u.i &= UINT64_C(0x800fffffffffffff);
+  u.i |= UINT64_C(0x3fe0000000000000);
+  return u.f;
 }
 #endif

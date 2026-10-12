@@ -40,7 +40,46 @@
 #ifdef CONFIG_HAVE_LONG_DOUBLE
 long double frexpl(long double x, int *exponent)
 {
-  *exponent = (int)ceill(log2(x));
-  return x / ldexpl(1.0, *exponent);
+  long double a = x < 0.0L ? -x : x;
+  int e = 0;
+
+  /* Zero, NaN and infinity */
+
+  if (a == 0.0L || a != a || a - a != 0.0L)
+    {
+      *exponent = 0;
+      return x;
+    }
+
+  /* Multiplication by a power of two is exact here, for any format of
+   * long double: scale by 2^64 first, then by 2.
+   */
+
+  while (a >= 0x1p64l)
+    {
+      a /= 0x1p64l;
+      e += 64;
+    }
+
+  while (a * 0x1p64l < 1.0L)
+    {
+      a *= 0x1p64l;
+      e -= 64;
+    }
+
+  while (a >= 1.0L)
+    {
+      a *= 0.5L;
+      e++;
+    }
+
+  while (a < 0.5L)
+    {
+      a *= 2.0L;
+      e--;
+    }
+
+  *exponent = e;
+  return x < 0.0L ? -a : a;
 }
 #endif
