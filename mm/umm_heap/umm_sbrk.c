@@ -121,6 +121,6 @@ FAR void *sbrk(intptr_t incr)
   return (FAR void *)brkaddr;
 
 errout:
-  set_errno(errcode);
+  umm_set_errno(errcode);
   return (FAR void *)-1;
 }

@@ -73,7 +73,7 @@ FAR void *zalloc(size_t size)
   ret = mm_zalloc(USR_HEAP, size);
   if (ret == NULL)
     {
-      set_errno(ENOMEM);
+      umm_set_errno(ENOMEM);
     }
   else
     {
