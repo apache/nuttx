@@ -67,12 +67,12 @@ void env_release(FAR struct task_info_s *info)
 
       for (i = 0; info->ta_envp[i] != NULL; i++)
         {
-          lib_ufree(info->ta_envp[i]);
+          env_free(info, info->ta_envp[i]);
         }
 
       /* Free the environment */
 
-      lib_ufree(info->ta_envp);
+      env_free(info, info->ta_envp);
     }
 
   /* In any event, make sure that all environment-related variables in the

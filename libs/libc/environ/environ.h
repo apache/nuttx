@@ -33,6 +33,10 @@
 
 #include <nuttx/lib/lib.h>
 
+#ifdef __KERNEL__
+#  include <nuttx/kmalloc.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -40,6 +44,25 @@
 #ifndef CONFIG_DISABLE_ENVIRON
 
 #  define SCHED_ENVIRON_RESERVED (4)
+
+/* The environment is in the heap that holds the task information: the
+ * kernel heap for a kernel thread, the user heap for a user task.  Kernel
+ * code also changes the environment of kernel threads (the idle task at
+ * boot) and of a new user task.
+ */
+
+#  ifdef __KERNEL__
+#    define env_malloc(info, n) \
+       (kmm_heapmember(info) ? kmm_malloc(n) : kumm_malloc(n))
+#    define env_realloc(info, p, n) \
+       (kmm_heapmember(info) ? kmm_realloc(p, n) : kumm_realloc(p, n))
+#    define env_free(info, p) \
+       (kmm_heapmember(info) ? kmm_free(p) : kumm_free(p))
+#  else
+#    define env_malloc(info, n)     ((void)(info), lib_umalloc(n))
+#    define env_realloc(info, p, n) ((void)(info), lib_urealloc(p, n))
+#    define env_free(info, p)       ((void)(info), lib_ufree(p))
+#  endif
 
 /****************************************************************************
  * Public Data
