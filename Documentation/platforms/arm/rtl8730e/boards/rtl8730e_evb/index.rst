@@ -42,6 +42,8 @@ Supported in this NuttX port:
   polling mode through the SDK fwlib register layer
 * SPI master buses exposed as ``/dev/spiN`` character devices, driven in
   polling mode through the SDK fwlib register layer
+* PWM output exposed as a ``/dev/pwm0`` character device, driven directly on
+  the SDK fwlib timer layer
 * littlefs persistent storage mounted at ``/data`` (a dedicated SPI NOR flash
   partition), backing the Wi-Fi key-value store
 * Wi-Fi station and SoftAP through the ``wapi`` tool
@@ -122,25 +124,39 @@ SCL/SDA. Probe a bus with the tool::
 spi
 ---
 
-Minimal NSH with the SPI master driver and the ``spitool`` (``system/spi``)
-enabled (no Wi-Fi). The board registers its SPI controllers from a table (see
+Minimal NSH with the SPI master driver and the ``spi`` tool (``system/spi``)
+enabled (no Wi-Fi). The board registers two buses from its table (see
 ``boards/arm/rtl8730e/rtl8730e_evb/src/rtl8730e_spi.c``): SPI0 at
-``/dev/spi0`` on PB18/PB19/PB20/PB21 and SPI1 at ``/dev/spi1`` on
-PA11/PA9/PA10/PA12 (CLK/MOSI/MISO/CS). Edit that table --
-controller and pads -- to match a board's wiring; the pads use the same
-``AMEBA_PA()`` / ``AMEBA_PB()`` encoding as the GPIO table and are muxed to
-the SPI function through the SDK ROM. As with I2C -- and unlike the GPIO and
-UART crossbars -- a pad reaches exactly one SPI controller: SPI0 is wired to
-PB18-PB21, while SPI1 can use either PB25-PB28 or PA9-PA12, so a pad can only
-be swapped for another from that controller's own set. The PA9-PA12 set shares
-PA9/PA10 with I2C0, so a config registering both must put SPI1 on PB25-PB28.
-Pads the audio codec drives cannot be used.
-The chip select is driven as a plain GPIO (software CS) rather than by the
-controller. Both controllers power up as SPI slaves and the driver switches
-them to master before use. Exchange bytes with the tool::
+``/dev/spi0`` with CLK/MOSI/MISO/CS on PB18/PB19/PB20/PB21 and SPI1 at
+``/dev/spi1`` on PA11/PA9/PA10/PA12. The pads use the same ``AMEBA_PA()`` /
+``AMEBA_PB()`` encoding as the GPIO table and are muxed to the SPI function
+through the SDK ROM, while the chip-select is driven as a plain GPIO. As with
+I2C -- and unlike the GPIO and UART crossbars -- a pad reaches exactly one
+controller, so edit that table within each controller's own set: PB18-PB21
+for SPI0, PB25-PB28 or PA9-PA12 for SPI1. Pads the audio codec drives cannot
+be used. Exercise a bus with the tool::
 
-    nsh> spi bus                    # list the registered buses
-    nsh> spi exch -b 0 -x 4 0xde    # send 4 bytes on /dev/spi0
+    nsh> spi exch -b 0 -x 4 deadbeef     # full-duplex transfer on /dev/spi0
+
+pwm
+---
+
+Minimal NSH with the PWM driver and the ``pwm`` example (``examples/pwm``)
+enabled (no Wi-Fi). The board registers one timer at ``/dev/pwm0`` (see
+``boards/arm/rtl8730e/rtl8730e_evb/src/rtl8730e_pwm.c``): TIM8 drives six
+compare channels off one shared time base, so every channel shares one
+frequency and each carries its own duty cycle. The table routes the channels
+to PA7/PA9/PA10/PA4/PA5/PA6. Despite the chip having a single
+``PINMUX_FUNCTION_PWM`` code, each pad is tied to one channel -- the pin-mux
+table names a pad's PWM function ``HS_PWM<n>``, which is channel n + 1 -- so
+an entry may only be cleared to ``AMEBA_PWM_PIN_NC`` or swapped for another
+pad carrying the same ``HS_PWM<n>``; PB14-PB16 are the alternative for
+channels 1-3. Avoid PA14/PA13, which are SWD_CLK/SWD_DATA and stay muxed to
+the debug port unless the board calls ``Pinmux_Swdoff()``. Set
+``CONFIG_PWM_NCHANNELS`` to the number of channels used. Exercise it with the
+example::
+
+    nsh> pwm -d 25 -f 1000     # 1 kHz, 25% duty on /dev/pwm0
 
 Wi-Fi
 =====
