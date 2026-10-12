@@ -290,8 +290,9 @@ static int script_loadbinary(FAR struct binary_s *binp,
  *
  * Description:
  *   Register the script binary format handler.  Called from
- *   binfmt_initialize() AFTER builtin and ELF handlers so those
- *   formats are tried first.
+ *   binfmt_initialize() BEFORE the other handlers: register_binfmt() adds
+ *   to the head of the list, so the builtin and ELF formats are tried
+ *   first.
  *
  ****************************************************************************/
 
