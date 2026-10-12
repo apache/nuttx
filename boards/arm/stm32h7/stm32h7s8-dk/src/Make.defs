@@ -34,6 +34,10 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += stm32_buttons.c
 endif
 
+ifeq ($(CONFIG_STM32H7S8_DK_XIP_BOOTLOADER),y)
+CSRCS += stm32_mx66uw1g45g.c stm32_xip_boot.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board

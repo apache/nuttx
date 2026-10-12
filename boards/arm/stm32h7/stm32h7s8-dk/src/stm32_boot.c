@@ -51,9 +51,19 @@
 
 void stm32_boardinitialize(void)
 {
+  uint32_t regval;
+
   /* Enable VDD33USB and VDDXSPI1 domains to power LED GPIO pins. */
 
   modifyreg32(STM32_PWR_CSR2, 0, PWR_CSR2_EN_XSPIM1 | PWR_CSR2_USB33DEN);
+
+  /* Wait for VDD33USB to be ready */
+
+  regval = getreg32(STM32_PWR_CSR2);
+  while (!(regval & PWR_CSR2_USB33RDY))
+    {
+      regval = getreg32(STM32_PWR_CSR2);
+    }
 
 #ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */

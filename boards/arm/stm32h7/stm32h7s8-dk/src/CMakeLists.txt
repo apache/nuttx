@@ -32,9 +32,17 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS stm32_buttons.c)
 endif()
 
+if(CONFIG_STM32H7S8_DK_XIP_BOOTLOADER)
+  list(APPEND SRCS stm32_mx66uw1g45g.c stm32_xip_boot.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
-set(LD_SCRIPT flash.ld)
+if(CONFIG_STM32H7S8_DK_XIP)
+  set(LD_SCRIPT xip.ld)
+else()
+  set(LD_SCRIPT flash.ld)
+endif()
 
 set_property(GLOBAL PROPERTY LD_SCRIPT
                              "${NUTTX_BOARD_DIR}/scripts/${LD_SCRIPT}")
