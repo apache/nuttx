@@ -159,5 +159,7 @@ ifeq ($(CONFIG_ARM64_SEMIHOSTING_HOSTFS),y)
 endif
 
 ifeq ($(CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS),y)
-  CMN_UCSRCS += arm64_perf.c
+  ifneq ($(CONFIG_BUILD_FLAT),y)
+    CMN_UCSRCS += arm64_perf.c
+  endif
 endif

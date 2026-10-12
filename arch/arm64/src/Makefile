@@ -136,10 +136,10 @@ vpath nuttx$(EXEEXT) $(TOPDIR)
 
 all: $(HEAD_OBJ) $(BIN)
 
-$(AOBJS) $(UAOBJS) $(HEAD_OBJ): %$(OBJEXT): %.S
+$(sort $(AOBJS) $(UAOBJS) $(HEAD_OBJ)): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
 
-$(COBJS) $(UCOBJS): %$(OBJEXT): %.c
+$(sort $(COBJS) $(UCOBJS)): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
 $(STARTUP_OBJS): %$(OBJEXT): %.c
