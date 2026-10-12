@@ -157,10 +157,13 @@
 /* Table 7: Special Section Indexes */
 
 #define SHN_UNDEF          0
+#define SHN_LORESERVE      0xff00
 #define SHN_LOPROC         0xff00
 #define SHN_HIPROC         0xff1f
 #define SHN_ABS            0xfff1
 #define SHN_COMMON         0xfff2
+#define SHN_XINDEX         0xffff
+#define SHN_HIRESERVE      0xffff
 
 /* Figure 4-9: Section Types, sh_type */
 
@@ -179,6 +182,8 @@
 #define SHT_INIT_ARRAY     14
 #define SHT_FINI_ARRAY     15
 #define SHT_PREINIT_ARRAY  16
+#define SHT_GROUP          17
+#define SHT_SYMTAB_SHNDX   18
 #define SHT_LOPROC         0x70000000
 #define SHT_HIPROC         0x7fffffff
 #define SHT_LOUSER         0x80000000
