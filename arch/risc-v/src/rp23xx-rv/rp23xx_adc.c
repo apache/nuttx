@@ -472,7 +472,7 @@ static void my_reset(struct adc_dev_s *dev)
       if (a_gpio >= 0)
         {
           rp23xx_gpio_setdir(a_gpio, false);
-          rp23xx_gpio_set_function(a_gpio, GPIO_FUNC_NULL);
+          rp23xx_gpio_set_function(a_gpio, RP23XX_GPIO_FUNC_NULL);
           rp23xx_gpio_set_pulls(a_gpio, false, false);
         }
     }
