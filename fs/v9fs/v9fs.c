@@ -205,7 +205,8 @@ static int v9fs_vfs_open(FAR struct file *filep, FAR const char *relpath,
       return -ENOMEM;
     }
 
-  ret = v9fs_client_walk(client, relpath, NULL, false);
+  ret = v9fs_client_walk(client, relpath, NULL,
+                         (oflags & O_NOFOLLOW) != 0);
   if (ret >= 0)
     {
       file->fid = ret;
@@ -216,7 +217,7 @@ static int v9fs_vfs_open(FAR struct file *filep, FAR const char *relpath,
           goto err_put;
         }
     }
-  else if ((oflags & O_CREAT) != 0)
+  else if (ret == -ENOENT && (oflags & O_CREAT) != 0)
     {
       /* We expect to create this file */
 
@@ -240,7 +241,6 @@ static int v9fs_vfs_open(FAR struct file *filep, FAR const char *relpath,
       /* We expect to open this file */
 
       ferr("ERROR: Can't find the fid of relpath: %d\n", ret);
-      ret = -ENOENT;
       goto err_free;
     }
 
