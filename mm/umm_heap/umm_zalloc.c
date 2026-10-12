@@ -58,9 +58,10 @@ FAR void *zalloc(size_t size)
   /* Use malloc() because it implements the sbrk() logic */
 
   FAR void *mem = malloc(size);
+
   if (mem)
     {
-       memset(mem, 0, size);
+      memset(mem, 0, size);
     }
 
   return mem;
