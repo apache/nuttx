@@ -85,6 +85,17 @@ highest speed. With baud rate 57600, performance was dependent
 on read/write buffer size. With buffer size of 8 there were still
 some missed bytes.
 
+Since NuttX version 13.1, this was observed to be even worse when
+the system is under load and uses round-robin preemptive scheduling.
+This version fixed multiple scheduling bugs on a tickless system
+but the fixes unfortunately add more accounting work that needs
+to be performed during preemption.
+
+Because the preemption code runs with interrupts disabled, the UART driver
+may be unable to retrieve received bytes for almost a millisecond
+of time with the chip running at 24MHz (maximum) clock. That causes
+an overrun of the 2-byte receive buffer even with 38400 baud rate.
+
 To be able to use standard serial driver, it is needed to enable
 the peripheral in MCU-specific configuration in
 :menuselection:`System Type --> AVR DA/DB Peripheral Selections`
