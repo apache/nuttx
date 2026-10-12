@@ -1,0 +1,55 @@
+=====================
+STM32 Nucleo standard
+=====================
+
+Status: draft, see `issue 19296
+<https://github.com/apache/nuttx/issues/19296>`_.
+
+This page collects the rules that all STM32 Nucleo boards in NuttX follow.
+It starts with the common board initialization and grows as more of the
+board logic becomes shared.
+
+Common board initialization
+===========================
+
+Initialization that does not depend on the board lives in
+``boards/arm/common/stm32/src/board_common.c``. It is part of the common
+STM32 board logic (``CONFIG_ARCH_BOARD_COMMON``), which every Nucleo board
+selects, and provides one function:
+
+.. code-block:: c
+
+   #include "board_common.h"
+
+   int stm32_common_initialize(void);
+
+Every Nucleo board calls ``stm32_common_initialize()`` early in its
+bringup, in ``stm32_bringup()`` or, if the board has none, in
+``board_late_initialize()``. A failure is logged and the bringup continues.
+
+The function currently handles:
+
+=========  ==================================  ================================
+Feature    Enabled by                          Result
+=========  ==================================  ================================
+procfs     ``CONFIG_FS_PROCFS``                mounted at
+                                               ``CONFIG_NSH_PROC_MOUNTPOINT``
+                                               or ``/proc``
+tmpfs      ``CONFIG_FS_TMPFS``                 mounted at
+                                               ``CONFIG_LIBC_TMPDIR``
+IWDG       ``CONFIG_STM32_IWDG``               ``/dev/watchdog0``
+WWDG       ``CONFIG_STM32_WWDG``               ``/dev/watchdog1``
+CAN        ``CONFIG_STM32_CAN_CHARDRIVER``     ``/dev/can0``, ``/dev/can1``,
+           ``CONFIG_STM32_FDCAN_CHARDRIVER``   ... in instance order
+SocketCAN  ``CONFIG_STM32_CAN_SOCKET``         interfaces for all enabled
+           ``CONFIG_STM32_FDCAN_SOCKET``       instances
+=========  ==================================  ================================
+
+The file systems are not mounted when ``CONFIG_DISABLE_MOUNTPOINT`` is
+set. The IWDG uses ``STM32_LSI_FREQUENCY`` from the board ``board.h``.
+
+Rules for boards:
+
+- Do not repeat any of the features above in the board directory.
+- Board-independent initialization is added to
+  ``stm32_common_initialize()``, not to individual boards.

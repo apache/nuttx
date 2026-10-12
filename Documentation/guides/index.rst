@@ -108,6 +108,7 @@ Guides
    chip-specific/port_drivers_to_stm32f7.rst
    chip-specific/semihosting.rst
    chip-specific/smaller_vector_tables.rst
+   chip-specific/stm32_nucleo.rst
    chip-specific/stm32_ports.rst
    chip-specific/stm32ccm.rst
    chip-specific/stm32nullpointer.rst
