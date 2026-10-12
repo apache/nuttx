@@ -13,4 +13,15 @@ config BREADXAVR_BUTTONS_DRIVER
 		If set, button driver registered as /dev/buttons
 		for PORT A and PORT C (pins 2 and 3 for both ports.)
 
+config BREADXAVR_WS2812_DRIVER
+	bool "Register default names for WS2812 LEDs"
+	depends on AVR_AVRDX_DRIVER_WS2812
+	default n
+	---help---
+		If set, all WS2812 lower-half drivers that use builtin
+		peripherals will have their LED device(s) enabled automatically.
+
+		For USART drivers, LED chains will be registered as /dev/ledUSARTx
+		with "x" replaced by the index of the peripheral.
+
 endif

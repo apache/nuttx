@@ -31,7 +31,9 @@
 #ifdef CONFIG_BREADXAVR_BUTTONS_DRIVER
 #  include <nuttx/input/buttons.h>
 #endif
-
+#ifdef CONFIG_BREADXAVR_WS2812_DRIVER
+#  include "avrdx_ws2812.h"
+#endif
 #include <assert.h>
 #include <avr/io.h>
 
@@ -118,6 +120,39 @@ void board_early_initialize(void)
 
 void board_late_initialize(void)
 {
+#  if defined(CONFIG_BREADXAVR_WS2812_DRIVER)
+  int ret = OK;
+#  endif
+
+#  ifdef CONFIG_BREADXAVR_WS2812_DRIVER
+#    ifdef CONFIG_AVR_AVRDX_WS2812_USART0
+  ret = avrdx_ws2812_register("/dev/ledUSART0", CONFIG_WS2812_LED_COUNT,
+                              AVRDX_WS2812_LANE_USART0, FALSE);
+  if (ret != OK)
+    {
+      PANIC();
+    }
+
+#    endif
+#    ifdef CONFIG_AVR_AVRDX_WS2812_USART1
+  ret = avrdx_ws2812_register("/dev/ledUSART1", CONFIG_WS2812_LED_COUNT,
+                              AVRDX_WS2812_LANE_USART1, FALSE);
+  if (ret != OK)
+    {
+      PANIC();
+    }
+
+#    endif
+#    ifdef CONFIG_AVR_AVRDX_WS2812_USART2
+  ret = avrdx_ws2812_register("/dev/ledUSART2", CONFIG_WS2812_LED_COUNT,
+                              AVRDX_WS2812_LANE_USART2, FALSE);
+  if (ret != OK)
+    {
+      PANIC();
+    }
+
+#    endif
+#  endif
 }
 
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */
