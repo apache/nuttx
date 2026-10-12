@@ -94,6 +94,17 @@ if(CONFIG_AMEBA_SPI)
   endif()
 endif()
 
+if(CONFIG_AMEBA_PWM)
+  list(APPEND SRCS ${AMEBA_COMMON}/ameba_pwm.c)
+  if(NOT CONFIG_RTL8730E_FLASH_FS
+     AND NOT CONFIG_AMEBA_GPIO
+     AND NOT CONFIG_AMEBA_UART
+     AND NOT CONFIG_AMEBA_I2C
+     AND NOT CONFIG_AMEBA_SPI)
+    list(APPEND SRCS rtl8730e_flash_stubs.c)
+  endif()
+endif()
+
 target_include_directories(arch PRIVATE ${AMEBA_COMMON})
 target_sources(arch PRIVATE ${SRCS})
 
@@ -191,6 +202,11 @@ if(CONFIG_RTL8730E_FLASH_FS OR CONFIG_RTL8730E_WIFI)
     list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_hp/ameba_spi.c)
   endif()
 
+  # The AP ROM carries only part of the RTIM API; the rest lives here.
+  if(CONFIG_AMEBA_PWM)
+    list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_tim.c)
+  endif()
+
   # Silence SDK warnings, activate CA32 code paths.  No -mcmse (ARMv7-A).
   set(AMEBA_FWLIB_INC
       -Wno-int-conversion
@@ -230,6 +246,7 @@ if(CONFIG_AMEBA_GPIO
    OR CONFIG_AMEBA_UART
    OR CONFIG_AMEBA_I2C
    OR CONFIG_AMEBA_SPI
+   OR CONFIG_AMEBA_PWM
    OR CONFIG_RTL8730E_FLASH_FS)
   list(APPEND AMEBA_EXTRA_LIBS
        ${AMEBA_SOC}/project/${AMEBA_KM_PROJ}/lib/soc/lib_rom.a)
@@ -239,7 +256,8 @@ endif()
 if(CONFIG_RTL8730E_FLASH_FS
    OR CONFIG_AMEBA_UART
    OR CONFIG_AMEBA_I2C
-   OR CONFIG_AMEBA_SPI)
+   OR CONFIG_AMEBA_SPI
+   OR CONFIG_AMEBA_PWM)
   list(APPEND AMEBA_EXTRA_LIBS ${AMEBA_FWLIB_A})
 endif()
 

@@ -282,6 +282,17 @@ int rtl8730e_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_AMEBA_PWM
+  /* Register the board's PWM timer at /dev/pwm0. */
+
+  ret = rtl8730e_pwm_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize PWM: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }
