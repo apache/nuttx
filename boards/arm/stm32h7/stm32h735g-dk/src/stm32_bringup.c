@@ -79,6 +79,32 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_STM32_FDCAN_CHARDRIVER
+#  ifdef CONFIG_STM32_FDCAN1
+  ret = stm32_can_setup(1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register FDCAN1: %d\n", ret);
+    }
+#  endif
+
+#  ifdef CONFIG_STM32_FDCAN2
+  ret = stm32_can_setup(2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register FDCAN2: %d\n", ret);
+    }
+#  endif
+
+#  ifdef CONFIG_STM32_FDCAN3
+  ret = stm32_can_setup(3);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register FDCAN3: %d\n", ret);
+    }
+#  endif
+#endif
+
 #ifdef CONFIG_VIDEO_FB
   ret = fb_register(0, 0);
   if (ret < 0)

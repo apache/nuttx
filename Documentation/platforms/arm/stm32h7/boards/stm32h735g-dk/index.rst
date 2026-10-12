@@ -37,3 +37,12 @@ lvgl
 
 LVGL widgets demo with the on-board LCD and GT911 touchscreen.
 Run ``lvgldemo widgets &`` from NSH.
+
+fdcan
+-----
+
+FDCAN1 and FDCAN2 character drivers (``/dev/can0``, ``/dev/can1``) in CAN FD
+mode with bit rate switching and internal loopback. Run ``can`` from NSH.
+
+The FDCAN kernel clock is PLL2Q at 80 MHz. FDCAN1 is on PH13/PH14 and
+FDCAN2 on PB6/PB5. FDCAN3 (PF7/PF6) needs SB29 and SB30 closed.

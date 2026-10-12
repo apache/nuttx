@@ -64,4 +64,8 @@ int stm32_bringup(void);
 int stm32_tsc_setup(int minor);
 #endif
 
+#ifdef CONFIG_STM32_FDCAN_CHARDRIVER
+int stm32_can_setup(uint8_t port);
+#endif
+
 #endif /* __BOARDS_ARM_STM32H7_STM32H735G_DK_SRC_STM32H735G_DK_H */

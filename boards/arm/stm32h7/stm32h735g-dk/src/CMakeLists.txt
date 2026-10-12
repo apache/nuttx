@@ -40,5 +40,9 @@ if(CONFIG_INPUT_GT9XX)
   list(APPEND SRCS stm32_touchscreen.c)
 endif()
 
+if(CONFIG_STM32_FDCAN_CHARDRIVER)
+  list(APPEND SRCS stm32_can.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flash.ld")
