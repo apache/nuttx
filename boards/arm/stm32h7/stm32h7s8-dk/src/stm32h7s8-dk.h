@@ -89,4 +89,17 @@
 
 int stm32_bringup(void);
 
+/****************************************************************************
+ * Name: stm32_xspi_flash_initialize
+ *
+ * Description:
+ *   Initialize the external MX66UW1G45G flash for memory-mapped access.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32H7S8_DK_XIP_BOOTLOADER
+int stm32_xspi_flash_initialize(void);
+int stm32_xip_boot(int argc, char *argv[]);
+#endif
+
 #endif /* __BOARDS_ARM_STM32H7_STM32H7S8_DK_SRC_STM32H7S8_DK_H */
