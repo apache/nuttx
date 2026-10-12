@@ -475,6 +475,7 @@ static int ads1115_bind(FAR struct adc_dev_s *dev,
                         FAR const struct adc_callback_s *callback)
 {
   FAR struct ads1115_dev_s *priv = (FAR struct ads1115_dev_s *)dev->ad_priv;
+
   DEBUGASSERT(priv != NULL);
   priv->cb = callback;
   return 0;
@@ -492,6 +493,7 @@ static int ads1115_bind(FAR struct adc_dev_s *dev,
 static void ads1115_reset(FAR struct adc_dev_s *dev)
 {
   FAR struct ads1115_dev_s *priv = (FAR struct ads1115_dev_s *)dev->ad_priv;
+
   cmdbyte_init(priv);
 }
 
@@ -508,6 +510,7 @@ static void ads1115_reset(FAR struct adc_dev_s *dev)
 static int ads1115_setup(FAR struct adc_dev_s *dev)
 {
   FAR struct ads1115_dev_s *priv = (FAR struct ads1115_dev_s *)dev->ad_priv;
+
   return ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
                                 htobe16(priv->cmdbyte));
 }
@@ -527,6 +530,7 @@ static int ads1115_setup(FAR struct adc_dev_s *dev)
 static void ads1115_shutdown(FAR struct adc_dev_s *dev)
 {
   FAR struct ads1115_dev_s *priv = (FAR struct ads1115_dev_s *)dev->ad_priv;
+
   priv->cmdbyte |= ADS1115_MODE_MASK;
   ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
                          htobe16(priv->cmdbyte));
@@ -561,189 +565,190 @@ static int ads1115_ioctl(FAR struct adc_dev_s *dev, int cmd,
 
   switch (cmd)
     {
-    case ANIOC_TRIGGER:
-      {
-        struct adc_msg_s msg;
+      case ANIOC_TRIGGER:
+        {
+          struct adc_msg_s msg;
 
-        /* Read all channels in sequence */
+          /* Read all channels in sequence */
 
-        for (uint8_t i = 0; i < ADS1115_NUM_CHANNELS; i++)
-          {
-            msg.am_channel = i;
-            ret = ads1115_readchannel(priv, &msg);
-            if (ret)
-              {
-                aerr("Error reading channel %d with error %d \n", i, ret);
-                break;
-              }
+          for (uint8_t i = 0; i < ADS1115_NUM_CHANNELS; i++)
+            {
+              msg.am_channel = i;
+              ret = ads1115_readchannel(priv, &msg);
+              if (ret)
+                {
+                  aerr("Error reading channel %d with error %d \n", i, ret);
+                  break;
+                }
 
-            priv->cb->au_receive(dev, i, msg.am_data);
-          }
-      }
-      break;
+              priv->cb->au_receive(dev, i, msg.am_data);
+            }
+        }
+        break;
 
-    case ANIOC_ADS1115_SET_PGA:
-      {
-        DEBUGASSERT(arg >= ADS1115_PGA1 && arg <= ADS1115_PGA8);
+      case ANIOC_ADS1115_SET_PGA:
+        {
+          DEBUGASSERT(arg >= ADS1115_PGA1 && arg <= ADS1115_PGA8);
 
-        priv->cmdbyte &= ~ADS1115_PGA_MASK;
-        priv->cmdbyte |= arg << ADS1115_PGA_SHIFT;
-        ret = ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
-                                     htobe16(priv->cmdbyte));
-      }
-      break;
+          priv->cmdbyte &= ~ADS1115_PGA_MASK;
+          priv->cmdbyte |= arg << ADS1115_PGA_SHIFT;
+          ret = ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
+                                       htobe16(priv->cmdbyte));
+        }
+        break;
 
-    case ANIOC_ADS1115_SET_MODE:
-      {
-        if (arg == ADS1115_MODE1)
-          {
-            priv->cmdbyte &= ~ADS1115_MODE_MASK;
-          }
-        else if (arg == ADS1115_MODE2)
-          {
-            priv->cmdbyte |= ADS1115_MODE_MASK;
-          }
-        else
-          {
-            ret = -EINVAL;
-            break;
-          }
+      case ANIOC_ADS1115_SET_MODE:
+        {
+          if (arg == ADS1115_MODE1)
+            {
+              priv->cmdbyte &= ~ADS1115_MODE_MASK;
+            }
+          else if (arg == ADS1115_MODE2)
+            {
+              priv->cmdbyte |= ADS1115_MODE_MASK;
+            }
+          else
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        ret = ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
-                                     htobe16(priv->cmdbyte));
-      }
-      break;
+          ret = ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
+                                       htobe16(priv->cmdbyte));
+        }
+        break;
 
-    case ANIOC_ADS1115_SET_DR:
-      {
-        DEBUGASSERT(arg >= ADS1115_DR1 && arg <= ADS1115_DR8);
-        priv->cmdbyte &= ~ADS1115_DR_MASK;
-        priv->cmdbyte |= arg << ADS1115_DR_SHIFT;
+      case ANIOC_ADS1115_SET_DR:
+        {
+          DEBUGASSERT(arg >= ADS1115_DR1 && arg <= ADS1115_DR8);
+          priv->cmdbyte &= ~ADS1115_DR_MASK;
+          priv->cmdbyte |= arg << ADS1115_DR_SHIFT;
 
-        ret = ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
-                                     htobe16(priv->cmdbyte));
-      }
-      break;
+          ret = ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
+                                       htobe16(priv->cmdbyte));
+        }
+        break;
 
-    case ANIOC_ADS1115_SET_COMP_POL:
-      {
-        if (arg == ADS1115_COMP_POL1)
-          {
-            priv->cmdbyte &= ~ADS1115_COMP_POL_MASK;
-          }
-        else if (arg == ADS1115_COMP_POL2)
-          {
-            priv->cmdbyte |= ADS1115_COMP_POL_MASK;
-          }
-        else
-          {
-            ret = -EINVAL;
-            break;
-          }
+      case ANIOC_ADS1115_SET_COMP_POL:
+        {
+          if (arg == ADS1115_COMP_POL1)
+            {
+              priv->cmdbyte &= ~ADS1115_COMP_POL_MASK;
+            }
+          else if (arg == ADS1115_COMP_POL2)
+            {
+              priv->cmdbyte |= ADS1115_COMP_POL_MASK;
+            }
+          else
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        ret = ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
-                                     htobe16(priv->cmdbyte));
-      }
-      break;
+          ret = ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
+                                       htobe16(priv->cmdbyte));
+        }
+        break;
 
-    case ANIOC_ADS1115_SET_COMP_MODE:
-      {
-        if (arg == ADS1115_COMP_MODE1)
-          {
-            priv->cmdbyte &= ~ADS1115_COMP_MODE_MASK;
-          }
-        else if (arg == ADS1115_COMP_MODE2)
-          {
-            priv->cmdbyte |= ADS1115_COMP_MODE_MASK;
-          }
-        else
-          {
-            ret = -EINVAL;
-            break;
-          }
+      case ANIOC_ADS1115_SET_COMP_MODE:
+        {
+          if (arg == ADS1115_COMP_MODE1)
+            {
+              priv->cmdbyte &= ~ADS1115_COMP_MODE_MASK;
+            }
+          else if (arg == ADS1115_COMP_MODE2)
+            {
+              priv->cmdbyte |= ADS1115_COMP_MODE_MASK;
+            }
+          else
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        ret = ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
-                                     htobe16(priv->cmdbyte));
-      }
-      break;
+          ret = ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
+                                       htobe16(priv->cmdbyte));
+        }
+        break;
 
-    case ANIOC_ADS1115_SET_COMP_LAT:
-      {
-        if (arg == ADS1115_COMP_LAT1)
-          {
-            priv->cmdbyte &= ~ADS1115_COMP_LAT_MASK;
-          }
-        else if (arg == ADS1115_COMP_LAT2)
-          {
-            priv->cmdbyte |= ADS1115_COMP_LAT_MASK;
-          }
-        else
-          {
-            ret = -EINVAL;
-            break;
-          }
+      case ANIOC_ADS1115_SET_COMP_LAT:
+        {
+          if (arg == ADS1115_COMP_LAT1)
+            {
+              priv->cmdbyte &= ~ADS1115_COMP_LAT_MASK;
+            }
+          else if (arg == ADS1115_COMP_LAT2)
+            {
+              priv->cmdbyte |= ADS1115_COMP_LAT_MASK;
+            }
+          else
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        ret = ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
-                                     htobe16(priv->cmdbyte));
-      }
-      break;
+          ret = ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
+                                       htobe16(priv->cmdbyte));
+        }
+        break;
 
-    case ANIOC_ADS1115_SET_COMP_QUEUE:
-      {
-        DEBUGASSERT(arg >= ADS1115_COMP_QUEUE1 &&
-                    arg <= ADS1115_COMP_QUEUE4);
+      case ANIOC_ADS1115_SET_COMP_QUEUE:
+        {
+          DEBUGASSERT(arg >= ADS1115_COMP_QUEUE1 &&
+                      arg <= ADS1115_COMP_QUEUE4);
 
-        priv->cmdbyte &= ~ADS1115_COMP_QUE_MASK;
-        priv->cmdbyte |= arg << ADS1115_COMP_QUE_SHIFT;
+          priv->cmdbyte &= ~ADS1115_COMP_QUE_MASK;
+          priv->cmdbyte |= arg << ADS1115_COMP_QUE_SHIFT;
 
-        ret = ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
-                                     htobe16(priv->cmdbyte));
-      }
-      break;
+          ret = ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
+                                       htobe16(priv->cmdbyte));
+        }
+        break;
 
-    case ANIOC_ADS1115_READ_CHANNEL:
-      {
-        ret = ads1115_readchannel(priv, (FAR struct adc_msg_s *)arg);
-      }
-      break;
+      case ANIOC_ADS1115_READ_CHANNEL:
+        {
+          ret = ads1115_readchannel(priv, (FAR struct adc_msg_s *)arg);
+        }
+        break;
 
-    case ANIOC_ADS1115_TRIGGER_CONVERSION:
-      {
-        ret = ads1115_trigger_conversion(priv, (FAR struct adc_msg_s *)arg);
-      }
-      break;
+      case ANIOC_ADS1115_TRIGGER_CONVERSION:
+        {
+          ret = ads1115_trigger_conversion(priv,
+                                           (FAR struct adc_msg_s *)arg);
+        }
+        break;
 
-    case ANIOC_ADS1115_READ_CHANNEL_NO_CONVERSION:
-      {
-        ret = ads1115_read_conversion(priv, (FAR struct adc_msg_s *)arg);
-      }
-      break;
+      case ANIOC_ADS1115_READ_CHANNEL_NO_CONVERSION:
+        {
+          ret = ads1115_read_conversion(priv, (FAR struct adc_msg_s *)arg);
+        }
+        break;
 
-    case ANIOC_ADS1115_SET_HI_THRESH:
-      {
-        DEBUGASSERT(arg >= 0 && arg <= UINT16_MAX);
-        ret = ads1115_write_register(priv, ADS1115_HI_THRESH_REGISTER,
-                                     htobe16(arg));
-      }
-      break;
+      case ANIOC_ADS1115_SET_HI_THRESH:
+        {
+          DEBUGASSERT(arg >= 0 && arg <= UINT16_MAX);
+          ret = ads1115_write_register(priv, ADS1115_HI_THRESH_REGISTER,
+                                       htobe16(arg));
+        }
+        break;
 
-    case ANIOC_ADS1115_SET_LO_THRESH:
-      {
-        DEBUGASSERT(arg >= 0 && arg <= UINT16_MAX);
-        ret = ads1115_write_register(priv, ADS1115_LO_THRESH_REGISTER,
-                                     htobe16(arg));
-      }
-      break;
+      case ANIOC_ADS1115_SET_LO_THRESH:
+        {
+          DEBUGASSERT(arg >= 0 && arg <= UINT16_MAX);
+          ret = ads1115_write_register(priv, ADS1115_LO_THRESH_REGISTER,
+                                       htobe16(arg));
+        }
+        break;
 
-    case ANIOC_GET_NCHANNELS:
-      {
-        ret = ADS1115_NUM_CHANNELS;
-      }
-      break;
+      case ANIOC_GET_NCHANNELS:
+        {
+          ret = ADS1115_NUM_CHANNELS;
+        }
+        break;
 
-    default:
-      ret = -ENOTTY;
-      break;
+      default:
+        ret = -ENOTTY;
+        break;
     }
 
   return ret;

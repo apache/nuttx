@@ -391,23 +391,24 @@ static int gdb_send_packet(FAR struct gdb_state_s *state)
     }
 
 #ifdef CONFIG_LIB_GDBSTUB_DEBUG
-    {
-      size_t p;
-      GDB_DEBUG(state, "-> ");
-      for (p = 0; p < len; p++)
-        {
-          if (isprint(buf[p]))
-            {
-              GDB_DEBUG(state, "%c", buf[p]);
-            }
-          else
-            {
-              GDB_DEBUG(state, "\\x%02x", buf[p] & 0xff);
-            }
-        }
+  {
+    size_t p;
 
-      GDB_DEBUG(state, "\n");
-    }
+    GDB_DEBUG(state, "-> ");
+    for (p = 0; p < len; p++)
+      {
+        if (isprint(buf[p]))
+          {
+            GDB_DEBUG(state, "%c", buf[p]);
+          }
+        else
+          {
+            GDB_DEBUG(state, "\\x%02x", buf[p] & 0xff);
+          }
+      }
+
+    GDB_DEBUG(state, "\n");
+  }
 #endif
 
   while (i < len)
@@ -581,23 +582,24 @@ static int gdb_recv_packet(FAR struct gdb_state_s *state)
     }
 
 #ifdef CONFIG_LIB_GDBSTUB_DEBUG
-    {
-      size_t p;
-      GDB_DEBUG(state, "<- ");
-      for (p = 0; p < state->pkt_len; p++)
-        {
-          if (isprint(state->pkt_buf[p]))
-            {
-              GDB_DEBUG(state, "%c", state->pkt_buf[p]);
-            }
-          else
-            {
-              GDB_DEBUG(state, "\\x%02x", state->pkt_buf[p] & 0xff);
-            }
-        }
+  {
+    size_t p;
 
-      GDB_DEBUG(state, "\n");
-    }
+    GDB_DEBUG(state, "<- ");
+    for (p = 0; p < state->pkt_len; p++)
+      {
+        if (isprint(state->pkt_buf[p]))
+          {
+            GDB_DEBUG(state, "%c", state->pkt_buf[p]);
+          }
+        else
+          {
+            GDB_DEBUG(state, "\\x%02x", state->pkt_buf[p] & 0xff);
+          }
+      }
+
+    GDB_DEBUG(state, "\n");
+  }
 #endif
 
   ret = gdb_hex2bin(&expected, 1, buf, 2);
@@ -1651,6 +1653,7 @@ retry:
 static int gdb_smp_debugpoint_add(FAR void *arg)
 {
   FAR struct gdb_debugpoint_s *point = arg;
+
   return up_debugpoint_add(point->type, point->addr, point->size,
                            point->callback, point->arg);
 }
@@ -1666,6 +1669,7 @@ static int gdb_smp_debugpoint_add(FAR void *arg)
 static int gdb_smp_debugpoint_remove(FAR void *arg)
 {
   FAR struct gdb_debugpoint_s *point = arg;
+
   return up_debugpoint_remove(point->type, point->addr, point->size);
 }
 #endif
@@ -1888,6 +1892,7 @@ int gdb_debugpoint_add(int type, FAR void *addr, size_t size,
 {
 #ifdef CONFIG_SMP
   struct gdb_debugpoint_s point;
+
   point.type = type;
   point.addr = addr;
   point.size = size;
@@ -1909,6 +1914,7 @@ int gdb_debugpoint_remove(int type, FAR void *addr, size_t size)
 {
 #ifdef CONFIG_SMP
   struct gdb_debugpoint_s point;
+
   point.type = type;
   point.addr = addr;
   point.size = size;
@@ -2117,7 +2123,7 @@ int gdb_process(FAR struct gdb_state_s *state, int stopreason,
 #endif
           default:
             ret = -EPROTONOSUPPORT;
-      }
+        }
 
       if (ret == -EPROTONOSUPPORT)
         {
