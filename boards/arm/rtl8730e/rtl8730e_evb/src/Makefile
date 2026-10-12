@@ -34,7 +34,7 @@ ifeq ($(CONFIG_LIBC_FDT),y)
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)fdt$(DELIM)dtc$(DELIM)libfdt
 endif
 
-ifneq ($(CONFIG_RTL8730E_FLASH_FS)$(CONFIG_AMEBA_GPIO)$(CONFIG_AMEBA_UART)$(CONFIG_AMEBA_I2C)$(CONFIG_AMEBA_SPI),)
+ifneq ($(CONFIG_RTL8730E_FLASH_FS)$(CONFIG_AMEBA_GPIO)$(CONFIG_AMEBA_UART)$(CONFIG_AMEBA_I2C)$(CONFIG_AMEBA_SPI)$(CONFIG_AMEBA_PWM),)
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)arm$(DELIM)src$(DELIM)common$(DELIM)ameba
 endif
 
@@ -52,6 +52,10 @@ endif
 
 ifeq ($(CONFIG_AMEBA_SPI),y)
 CSRCS += rtl8730e_spi.c
+endif
+
+ifeq ($(CONFIG_AMEBA_PWM),y)
+CSRCS += rtl8730e_pwm.c
 endif
 
 include $(TOPDIR)/boards/Board.mk
