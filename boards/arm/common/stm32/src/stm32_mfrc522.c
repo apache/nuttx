@@ -33,16 +33,24 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/contactless/mfrc522.h>
 
+#include <arch/board/board.h>
+
 #include "stm32.h"
 #include "stm32_spi.h"
 
-#if defined(CONFIG_SPI) && defined(CONFIG_STM32_SPI1) && defined(CONFIG_CL_MFRC522)
+#if defined(CONFIG_SPI) && defined(CONFIG_CL_MFRC522)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define MFRC522_SPI_PORTNO 1   /* On SPI1 */
+/* The board can select the SPI bus with BOARD_MFRC522_SPI, SPI1 by default */
+
+#ifdef BOARD_MFRC522_SPI
+#  define MFRC522_SPI_PORTNO BOARD_MFRC522_SPI
+#else
+#  define MFRC522_SPI_PORTNO 1
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -66,6 +74,14 @@ int stm32_mfrc522initialize(const char *devpath)
 {
   struct spi_dev_s *spi;
   int ret;
+
+#ifdef BOARD_MFRC522_GPIO_RESET
+  /* MFRC522 hardware reset on rising edge */
+
+  stm32_configgpio(BOARD_MFRC522_GPIO_RESET);
+  stm32_gpiowrite(BOARD_MFRC522_GPIO_RESET, true);
+#endif
+
   spi = stm32_spibus_initialize(MFRC522_SPI_PORTNO);
   if (!spi)
     {
