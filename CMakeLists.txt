@@ -756,6 +756,10 @@ if(NOT CONFIG_ARCH_SIM)
     # Remove executable suffix
     set(CMAKE_EXECUTABLE_SUFFIX "")
   else()
+    if(NUTTX_EXTRA_FLAGS)
+      list(REMOVE_DUPLICATES NUTTX_EXTRA_FLAGS)
+    endif()
+
     target_link_libraries(
       nuttx
       PRIVATE ${NUTTX_EXTRA_FLAGS}

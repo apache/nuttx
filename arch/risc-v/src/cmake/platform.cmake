@@ -35,6 +35,10 @@ foreach(FLAG ${TOOLCHAIN_DIR_FLAGS})
   endif()
 endforeach()
 
+if(NUTTX_EXTRA_FLAGS)
+  list(REMOVE_DUPLICATES NUTTX_EXTRA_FLAGS)
+endif()
+
 separate_arguments(CMAKE_C_FLAG_ARGS NATIVE_COMMAND ${CMAKE_C_FLAGS})
 
 nuttx_find_toolchain_lib()
