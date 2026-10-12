@@ -384,7 +384,7 @@ begin_packed_struct struct v9fs_symlink_s
   struct v9fs_header_s header;
   uint32_t fid;
   uint16_t name_len;
-  uint8_t buffer[V9FS_BIT16SZ + 2 * NAME_MAX + V9FS_BIT32SZ];
+  uint8_t buffer[NAME_MAX + V9FS_BIT16SZ + PATH_MAX + V9FS_BIT32SZ];
 } end_packed_struct;
 
 #define v9fs_rsymlink_s v9fs_rattach_s
@@ -2300,42 +2300,63 @@ int v9fs_client_symlink(FAR struct v9fs_client_s *client, uint32_t fid,
                         FAR const char *name, FAR const char *symtgt,
                         int mode)
 {
-  struct v9fs_symlink_s request;
+  FAR struct v9fs_symlink_s *request;
+  FAR char *sbuf;
   struct v9fs_rsymlink_s response;
   struct iovec wiov[1];
   struct iovec riov[1];
   uint32_t gid = getgid();
   off_t offset = 0;
   uint16_t symtgt_len;
+  size_t name_len;
+  uint16_t tag;
+  int ret;
 
   /* size[4] Tsymlink tag[2] fid[4] name[s] symtgt[s] gid[4]
    * size[4] Rsymlink tag[2] qid[13]
    */
 
-  request.fid = fid;
-  request.name_len = strlen(name);
-  symtgt_len = strlen(symtgt);
-  request.header.size = V9FS_HDRSZ + V9FS_BIT32SZ * 2 + V9FS_BIT16SZ * 2 +
-                        request.name_len + symtgt_len;
-  request.header.type = V9FS_TSYMLINK;
-  request.header.tag = v9fs_get_tagid(client);
+  name_len = strlen(name);
+  symtgt_len = strnlen(symtgt, PATH_MAX);
+  if (name_len > NAME_MAX || symtgt_len >= PATH_MAX)
+    {
+      return -ENAMETOOLONG;
+    }
 
-  memcpy(&request.buffer[offset], name, request.name_len);
-  offset += request.name_len;
-  memcpy(&request.buffer[offset], &symtgt_len, V9FS_BIT16SZ);
+  /* The request is too big for the stack */
+
+  sbuf = lib_get_tempbuffer(sizeof(struct v9fs_symlink_s));
+  if (sbuf == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  request = (FAR struct v9fs_symlink_s *)sbuf;
+
+  tag = v9fs_get_tagid(client);
+  request->fid = fid;
+  request->name_len = name_len;
+  request->header.size = V9FS_HDRSZ + V9FS_BIT32SZ * 2 +
+                         V9FS_BIT16SZ * 2 + name_len + symtgt_len;
+  request->header.type = V9FS_TSYMLINK;
+  request->header.tag = tag;
+
+  memcpy(&request->buffer[offset], name, name_len);
+  offset += name_len;
+  memcpy(&request->buffer[offset], &symtgt_len, V9FS_BIT16SZ);
   offset += V9FS_BIT16SZ;
-  memcpy(&request.buffer[offset], symtgt, symtgt_len);
+  memcpy(&request->buffer[offset], symtgt, symtgt_len);
   offset += symtgt_len;
-  memcpy(&request.buffer[offset], &gid, V9FS_BIT32SZ);
+  memcpy(&request->buffer[offset], &gid, V9FS_BIT32SZ);
 
-  wiov[0].iov_base = &request;
-  wiov[0].iov_len = V9FS_HDRSZ + V9FS_BIT32SZ * 2 + V9FS_BIT16SZ * 2 +
-                    request.name_len + symtgt_len;
+  wiov[0].iov_base = request;
+  wiov[0].iov_len = request->header.size;
   riov[0].iov_base = &response;
   riov[0].iov_len = V9FS_HDRSZ + V9FS_QIDSZ;
 
-  return v9fs_client_rpc(client->transport, wiov, 1, riov, 1,
-                         request.header.tag);
+  ret = v9fs_client_rpc(client->transport, wiov, 1, riov, 1, tag);
+  lib_put_tempbuffer(sbuf);
+  return ret;
 }
 
 /****************************************************************************
@@ -2353,6 +2374,11 @@ int v9fs_client_link(FAR struct v9fs_client_s *client, uint32_t dfid,
   /* size[4] Tlink tag[2] dfid[4] fid[4] name[s]
    * size[4] Rlink tag[2]
    */
+
+  if (strlen(name) > NAME_MAX)
+    {
+      return -ENAMETOOLONG;
+    }
 
   request.dfid = dfid;
   request.fid = fid;
