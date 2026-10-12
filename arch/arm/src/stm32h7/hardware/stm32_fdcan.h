@@ -214,7 +214,7 @@
 #define FDCAN_DBTP_DTSEG2_MASK    (0xFU << FDCAN_DBTP_DTSEG2_SHIFT)             /* 0x000000F0 */
 #define FDCAN_DBTP_DTSEG2         FDCAN_DBTP_DTSEG2_MASK                        /* Data time segment after sample point    */
 #define FDCAN_DBTP_DTSEG1_SHIFT   (8U)
-#define FDCAN_DBTP_DTSEG1_MASK    (0xFU << FDCAN_DBTP_DTSEG1_SHIFT)             /* 0x00000F00 */
+#define FDCAN_DBTP_DTSEG1_MASK    (0x1FU << FDCAN_DBTP_DTSEG1_SHIFT)            /* 0x00001F00 */
 #define FDCAN_DBTP_DTSEG1         FDCAN_DBTP_DTSEG1_MASK                        /* Data time segment before sample point   */
 #define FDCAN_DBTP_DBRP_SHIFT     (16U)
 #define FDCAN_DBTP_DBRP_MASK      (0x1FU << FDCAN_DBTP_DBRP_SHIFT)              /* 0x001F0000 */
@@ -963,7 +963,7 @@
 
 /* ***************  Bit definition for FDCAN_RXF1C register  ****************/
 #define FDCAN_RXF1C_F1SA_SHIFT    (2U)
-#define FDCAN_RXF1C_F1SA_MASK     (0x3FU << FDCAN_RXF1C_F1SA_SHIFT)             /* 0x000000FC */
+#define FDCAN_RXF1C_F1SA_MASK     (0x3FFFU << FDCAN_RXF1C_F1SA_SHIFT)           /* 0x0000FFFC */
 #define FDCAN_RXF1C_F1SA          FDCAN_RXF1C_F1SA_MASK                         /* Rx FIFO 1 Start Address                   */
 #define FDCAN_RXF1C_F1S_SHIFT     (16U)
 #define FDCAN_RXF1C_F1S_MASK      (0x7FU << FDCAN_RXF1C_F1S_SHIFT)              /* 0x007F0000 */
@@ -1078,7 +1078,7 @@
 
 /* ***************  Bit definition for FDCAN_TXEFC register  ****************/
 #define FDCAN_TXEFC_EFSA_SHIFT    (2U)
-#define FDCAN_TXEFC_EFSA_MASK     (0x3FU << FDCAN_TXEFC_EFSA_SHIFT)             /* 0x000000FC */
+#define FDCAN_TXEFC_EFSA_MASK     (0x3FFFU << FDCAN_TXEFC_EFSA_SHIFT)           /* 0x0000FFFC */
 #define FDCAN_TXEFC_EFSA          FDCAN_TXEFC_EFSA_MASK                         /* Event FIFO Start Address                  */
 #define FDCAN_TXEFC_EFS_SHIFT     (8U)
 #define FDCAN_TXEFC_EFS_MASK      (0x3FU << FDCAN_TXEFC_EFS_SHIFT)              /* 0x00003F00 */
