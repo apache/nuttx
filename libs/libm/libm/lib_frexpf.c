@@ -31,6 +31,7 @@
 #include <nuttx/compiler.h>
 
 #include <math.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Public Functions
@@ -38,21 +39,43 @@
 
 float frexpf(float x, FAR int *exponent)
 {
-  float res;
-
-  *exponent = (int)ceilf(log2f(fabsf(x)));
-  res = x / ldexpf(1.0F, *exponent);
-  if (res >= 1.0)
+  union
     {
-      res -= 0.5;
-      *exponent += 1;
+      float f;
+      uint32_t i;
+    } u;
+
+  int e;
+
+  u.f = x;
+  e = (int)(u.i >> 23) & 0xff;
+
+  if (e == 0)
+    {
+      if (x == 0.0F)
+        {
+          *exponent = 0;
+          return x;
+        }
+
+      /* Subnormal: scale into the normal range first */
+
+      x = frexpf(x * 0x1p64f, exponent);
+      *exponent -= 64;
+      return x;
+    }
+  else if (e == 0xff)
+    {
+      /* Infinity or NaN */
+
+      *exponent = 0;
+      return x;
     }
 
-  if (res <= -1.0)
-    {
-      res += 0.5;
-      *exponent += 1;
-    }
+  /* Keep the sign and the fraction, and set the exponent of 0.5 */
 
-  return res;
+  *exponent = e - 0x7e;
+  u.i &= UINT32_C(0x807fffff);
+  u.i |= UINT32_C(0x3f000000);
+  return u.f;
 }
