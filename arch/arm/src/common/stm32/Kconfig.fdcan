@@ -3,7 +3,7 @@
 #
 
 menu "FDCAN Driver Configuration"
-	depends on STM32_HAVE_FDCAN_H7 && (STM32_FDCAN1 || STM32_FDCAN2 || STM32_FDCAN3)
+	depends on STM32_HAVE_FDCAN_H7 && STM32_FDCAN_SOCKET && (STM32_FDCAN1 || STM32_FDCAN2 || STM32_FDCAN3)
 
 menu "FDCAN1 Configuration"
 	depends on STM32_FDCAN1
@@ -70,6 +70,7 @@ endmenu # FDCAN Driver
 choice
 	prompt "FDCAN character driver or SocketCAN support"
 	depends on STM32_FDCAN
+	default STM32_FDCAN_SOCKET if ARCH_CHIP_STM32H7
 	default STM32_FDCAN_CHARDRIVER
 
 config STM32_FDCAN_CHARDRIVER
@@ -183,7 +184,7 @@ config STM32_FDCAN_QUEUE_MODE
 
 config STM32_FDCAN_LOOPBACK
 	bool "Enable FDCAN loopback mode"
-	depends on ARCH_CHIP_STM32H7 && STM32_FDCAN
+	depends on ARCH_CHIP_STM32H7 && STM32_FDCAN_SOCKET
 	default n
 	---help---
 		Enable the FDCAN local loopback mode for testing purposes.
@@ -217,7 +218,7 @@ endchoice # FDCAN Loopback Mode
 
 choice
 	prompt "FDCAN WorkQueue Selection"
-	depends on ARCH_CHIP_STM32H7 && STM32_FDCAN
+	depends on ARCH_CHIP_STM32H7 && STM32_FDCAN_SOCKET
 	default STM32_FDCAN_LPWORK
 
 config STM32_FDCAN_LPWORK
@@ -250,7 +251,7 @@ config STM32_FDCAN1_BITRATE
 
 config STM32_FDCAN1_AUTO_BIT_TIMING
 	bool "FDCAN1 automatic bit timing"
-	depends on ARCH_CHIP_STM32H5
+	depends on ARCH_CHIP_STM32H5 || ARCH_CHIP_STM32H7
 	default y
 	---help---
 		Automatically determine FDCAN1 bit timing (nominal and data)
@@ -335,7 +336,7 @@ config STM32_FDCAN2_BITRATE
 
 config STM32_FDCAN2_AUTO_BIT_TIMING
 	bool "FDCAN2 automatic bit timing"
-	depends on ARCH_CHIP_STM32H5
+	depends on ARCH_CHIP_STM32H5 || ARCH_CHIP_STM32H7
 	default y
 	---help---
 		Automatically determine FDCAN2 bit timing (nominal and data)
@@ -458,6 +459,16 @@ config STM32_FDCAN3_BITRATE
 	---help---
 		FDCAN3 bitrate in bits per second.  Required if STM32_FDCAN3 is defined.
 
+config STM32_FDCAN3_AUTO_BIT_TIMING
+	bool "FDCAN3 automatic bit timing"
+	depends on ARCH_CHIP_STM32H7
+	default y
+	---help---
+		Automatically determine FDCAN3 bit timing (nominal and data)
+		based on bitrate.
+
+if !STM32_FDCAN3_AUTO_BIT_TIMING
+
 comment "FDCAN3 nominal bit timing"
 
 config STM32_FDCAN3_NTSEG1
@@ -481,6 +492,8 @@ config STM32_FDCAN3_NSJW
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
+endif # !STM32_FDCAN3_AUTO_BIT_TIMING
+
 config STM32_FDCAN3_DBITRATE
 	int "FDCAN3 data bitrate"
 	depends on CAN_FD && STM32_FDCAN3_FD_BRS
@@ -488,7 +501,7 @@ config STM32_FDCAN3_DBITRATE
 	---help---
 		FDCAN3 bitrate in bits per second.  Required if operating in FD mode with bit rate switching (BRS).
 
-if CAN_FD && STM32_FDCAN3_FD_BRS
+if CAN_FD && STM32_FDCAN3_FD_BRS && !STM32_FDCAN3_AUTO_BIT_TIMING
 
 comment "FDCAN3 data bit timing"
 
@@ -513,6 +526,6 @@ config STM32_FDCAN3_DSJW
 	---help---
 		The duration of a synchronization jump is Tcan_clk x DSJW.
 
-endif # CAN_FD && STM32_FDCAN3_FD_BRS
+endif # CAN_FD && STM32_FDCAN3_FD_BRS && !STM32_FDCAN3_AUTO_BIT_TIMING
 
 endif # STM32_FDCAN3
