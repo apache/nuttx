@@ -43,6 +43,7 @@
 
 /* The board has a 25 MHz HSE oscillator and a 32.768 kHz LSE crystal.
  * PLL1 supplies a 400 MHz CPU clock, 200 MHz AHB and 100 MHz APB clocks.
+ * PLL2Q supplies the 80 MHz FDCAN kernel clock.
  */
 
 /* rcc_reset() leaves the 64 MHz HSI oscillator divided by four. */
@@ -81,14 +82,24 @@
 #define STM32_PLL1P_FREQUENCY    (STM32_VCO1_FREQUENCY / 2)
 #define STM32_PLL1Q_FREQUENCY    (STM32_VCO1_FREQUENCY / 4)
 
-/* PLL2 is unused. */
+/* PLL2, wide 4 - 8 MHz input, enable DIVQ
+ *
+ *   PLL2_VCO = (25,000,000 / 5) * 80 = 400 MHz
+ *
+ *   PLL2Q = PLL2_VCO/5  = 400 MHz / 5   = 80 MHz
+ */
 
-#define STM32_PLLCFG_PLL2CFG     0
-#define STM32_PLLCFG_PLL2M       0
-#define STM32_PLLCFG_PLL2N       0
-#define STM32_PLLCFG_PLL2P       0
-#define STM32_PLLCFG_PLL2Q       0
-#define STM32_PLLCFG_PLL2R       0
+#define STM32_PLLCFG_PLL2CFG     (RCC_PLLCFGR_PLL2VCOSEL_WIDE | \
+                                  RCC_PLLCFGR_PLL2RGE_4_8_MHZ | \
+                                  RCC_PLLCFGR_DIVQ2EN)
+#define STM32_PLLCFG_PLL2M       RCC_PLLCKSELR_DIVM2(5)
+#define STM32_PLLCFG_PLL2N       RCC_PLL2DIVR_N2(80)
+#define STM32_PLLCFG_PLL2P       RCC_PLL2DIVR_P2(5)
+#define STM32_PLLCFG_PLL2Q       RCC_PLL2DIVR_Q2(5)
+#define STM32_PLLCFG_PLL2R       RCC_PLL2DIVR_R2(5)
+
+#define STM32_VCO2_FREQUENCY     ((STM32_HSE_FREQUENCY / 5) * 80)
+#define STM32_PLL2Q_FREQUENCY    (STM32_VCO2_FREQUENCY / 5)
 #ifdef CONFIG_STM32_LTDC
 /* PLL3R supplies the LCD pixel clock: 800 MHz / 83 = 9.64 MHz. */
 
@@ -167,6 +178,11 @@
 #define STM32_TIM16_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 #define STM32_TIM17_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 
+/* FDCAN 1 2 3 clock source - PLL2Q */
+
+#define STM32_RCC_D2CCIP1R_FDCANSEL  RCC_D2CCIP1R_FDCANSEL_PLL2
+#define STM32_FDCANCLK               STM32_PLL2Q_FREQUENCY
+
 /* Four flash wait states at 200 MHz ACLK. */
 
 #define BOARD_FLASH_WAITSTATES  4
@@ -175,6 +191,17 @@
 
 #define GPIO_USART3_RX         (GPIO_USART3_RX_3 | GPIO_SPEED_100MHz)
 #define GPIO_USART3_TX         (GPIO_USART3_TX_3 | GPIO_SPEED_100MHz)
+
+/* FDCAN1 on PH13/PH14 and FDCAN2 on PB6/PB5, both with transceivers.
+ * FDCAN3 (PF7/PF6) needs SB29 and SB30 closed.
+ */
+
+#define GPIO_CAN1_RX           (GPIO_CAN1_RX_4 | GPIO_SPEED_50MHz)  /* PH14 */
+#define GPIO_CAN1_TX           (GPIO_CAN1_TX_4 | GPIO_SPEED_50MHz)  /* PH13 */
+#define GPIO_CAN2_RX           (GPIO_CAN2_RX_2 | GPIO_SPEED_50MHz)  /* PB5 */
+#define GPIO_CAN2_TX           (GPIO_CAN2_TX_2 | GPIO_SPEED_50MHz)  /* PB6 */
+#define GPIO_CAN3_RX           (GPIO_CAN3_RX_2 | GPIO_SPEED_50MHz)  /* PF6 */
+#define GPIO_CAN3_TX           (GPIO_CAN3_TX_2 | GPIO_SPEED_50MHz)  /* PF7 */
 
 /* I2C4: touchscreen on PF14/PF15. */
 
