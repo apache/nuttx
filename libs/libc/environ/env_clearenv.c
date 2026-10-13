@@ -27,6 +27,8 @@
 #include <nuttx/environ.h>
 #include <nuttx/tls.h>
 
+#include "environ/environ.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -54,7 +56,20 @@ int clearenv(void)
   FAR struct task_info_s *info = task_get_info();
 
   nxrmutex_lock(&info->ta_lock);
-  env_release(info);
+
+  /* Free the array of libc if environ still names it.  The strings stay
+   * until exit, as a pointer that getenv() returned can still be in use.
+   */
+
+  if (info->ta_envarr != NULL && info->ta_envp == info->ta_envarr)
+    {
+      env_free(info, info->ta_envarr);
+    }
+
+  info->ta_envp   = NULL;
+  info->ta_envarr = NULL;
+  info->ta_envpc  = 0;
+  info->ta_envc   = 0;
   nxrmutex_unlock(&info->ta_lock);
   return OK;
 }

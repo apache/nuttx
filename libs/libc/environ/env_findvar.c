@@ -26,6 +26,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <string.h>
 
 #include <nuttx/tls.h>
 
@@ -39,22 +40,10 @@
  * Name: env_cmpname
  ****************************************************************************/
 
-static bool env_cmpname(const char *pszname, const char *peqname)
+static bool env_cmpname(FAR const char *pname, size_t namelen,
+                        FAR const char *peqname)
 {
-  /* Search until we find anything different in the two names */
-
-  for (; *pszname == *peqname; pszname++, peqname++)
-    {
-    }
-
-  /* On success, pszname will end with '\0' and peqname with '=' */
-
-  if (*pszname == '\0' && *peqname == '=')
-    {
-      return true;
-    }
-
-  return false;
+  return strncmp(pname, peqname, namelen) == 0 && peqname[namelen] == '=';
 }
 
 /****************************************************************************
@@ -69,8 +58,9 @@ static bool env_cmpname(const char *pszname, const char *peqname)
  *   specified name.
  *
  * Input Parameters:
- *   group - The task group containing environment array to be searched.
- *   pname - The variable name to find
+ *   info    - The task containing environment array to be searched.
+ *   pname   - The variable name to find.  It needs no terminating NUL.
+ *   namelen - The length of the name.
  *
  * Returned Value:
  *   A index to the name=value string in the environment
@@ -81,7 +71,8 @@ static bool env_cmpname(const char *pszname, const char *peqname)
  *
  ****************************************************************************/
 
-ssize_t env_findvar(FAR struct task_info_s *info, FAR const char *pname)
+ssize_t env_findvar(FAR struct task_info_s *info, FAR const char *pname,
+                    size_t namelen)
 {
   ssize_t i;
 
@@ -98,7 +89,7 @@ ssize_t env_findvar(FAR struct task_info_s *info, FAR const char *pname)
 
   for (i = 0; info->ta_envp[i] != NULL; i++)
     {
-      if (env_cmpname(pname, info->ta_envp[i]))
+      if (env_cmpname(pname, namelen, info->ta_envp[i]))
         {
           return i;
         }

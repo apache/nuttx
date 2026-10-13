@@ -165,9 +165,13 @@ struct task_info_s
 #ifndef CONFIG_DISABLE_ENVIRON
   /* Environment variables **************************************************/
 
-  FAR char            **ta_envp;    /* Allocated environment strings        */
-  ssize_t               ta_envpc;   /* Maximum entries of environment array */
-  ssize_t               ta_envc;    /* Number of environment strings        */
+  FAR char            **ta_envp;    /* The array that environ names         */
+  FAR char            **ta_envarr;  /* The array that libc allocated        */
+  FAR void             *ta_envmem;  /* Blocks that libc allocated, freed at
+                                     * exit
+                                     */
+  size_t                ta_envpc;   /* Maximum entries of environment array */
+  size_t                ta_envc;    /* Number of environment strings        */
 #endif
 };
 

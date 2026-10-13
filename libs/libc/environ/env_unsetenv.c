@@ -57,6 +57,7 @@ int unsetenv(FAR const char *name)
 {
   FAR struct task_info_s *info = task_get_info();
   ssize_t idx;
+  int ret;
 
   /* Check the incoming parameter */
 
@@ -66,12 +67,21 @@ int unsetenv(FAR const char *name)
       return ERROR;
     }
 
+  nxrmutex_lock(&info->ta_lock);
+
   /* Check if the variable exists */
 
-  nxrmutex_lock(&info->ta_lock);
-  if (info && (idx = env_findvar(info, name)) >= 0)
+  if ((idx = env_findvar(info, name, strlen(name))) >= 0)
     {
-      /* It does!  Remove the name=value pair from the environment. */
+      /* It does!  Remove the name=value pair from an array of libc. */
+
+      ret = env_reserve(info, 0);
+      if (ret < 0)
+        {
+          nxrmutex_unlock(&info->ta_lock);
+          set_errno(-ret);
+          return ERROR;
+        }
 
       env_removevar(info, idx);
     }
