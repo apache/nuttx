@@ -56,7 +56,7 @@
 
 #ifdef CONFIG_SCHED_CHILD_STATUS
 static inline void nxtask_exitstatus(FAR struct task_group_s *group,
-                                     int status)
+                                     pid_t pid, int status)
 {
   FAR struct child_status_s *child;
 
@@ -68,7 +68,7 @@ static inline void nxtask_exitstatus(FAR struct task_group_s *group,
     {
       /* No.. Find the exit status entry for this task in the parent TCB */
 
-      child = group_find_child(group, nxsched_getpid());
+      child = group_find_child(group, pid);
       if (child)
         {
           /* Save the exit status..  For the case of HAVE_GROUP_MEMBERS,
@@ -84,7 +84,7 @@ static inline void nxtask_exitstatus(FAR struct task_group_s *group,
 }
 #else
 
-#  define nxtask_exitstatus(group,status) (group)->tg_exitcode = (status);
+#  define nxtask_exitstatus(group,pid,status) (group)->tg_exitcode = (status);
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */
 
@@ -97,7 +97,8 @@ static inline void nxtask_exitstatus(FAR struct task_group_s *group,
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_CHILD_STATUS
-static inline void nxtask_groupexit(FAR struct task_group_s *group)
+static inline void nxtask_groupexit(FAR struct task_group_s *group,
+                                    pid_t pid)
 {
   FAR struct child_status_s *child;
 
@@ -109,7 +110,7 @@ static inline void nxtask_groupexit(FAR struct task_group_s *group)
     {
       /* No.. Find the exit status entry for this task in the parent TCB */
 
-      child = group_find_child(group, nxsched_getpid());
+      child = group_find_child(group, pid);
       if (child)
         {
           /* Mark that all members of the child task group has exited */
@@ -121,7 +122,7 @@ static inline void nxtask_groupexit(FAR struct task_group_s *group)
 
 #else
 
-#  define nxtask_groupexit(group)
+#  define nxtask_groupexit(group,pid)
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */
 
@@ -169,7 +170,7 @@ static inline void nxtask_sigchild(pid_t ppid, FAR struct tcb_s *ctcb,
   if ((ctcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
 #endif
     {
-      nxtask_exitstatus(pgrp, status);
+      nxtask_exitstatus(pgrp, ctcb->pid, status);
     }
 
   /* But only the final exiting thread in a task group, whatever it is,
@@ -180,7 +181,7 @@ static inline void nxtask_sigchild(pid_t ppid, FAR struct tcb_s *ctcb,
     {
       /* Mark that all of the threads in the task group have exited */
 
-      nxtask_groupexit(pgrp);
+      nxtask_groupexit(pgrp, chgrp->tg_pid);
 
       /* Create the siginfo structure.  We don't actually know the cause.
        * That is a bug. Let's just say that the child task just exited
@@ -219,7 +220,7 @@ static inline void nxtask_sigchild(FAR struct tcb_s *ptcb,
 #ifdef CONFIG_SCHED_CHILD_STATUS
       /* Save the exit status now of the main thread */
 
-      nxtask_exitstatus(ptcb->group, status);
+      nxtask_exitstatus(ptcb->group, ctcb->pid, status);
 
 #else /* CONFIG_SCHED_CHILD_STATUS */
       /* Exit status is not retained.  Just decrement the number of
