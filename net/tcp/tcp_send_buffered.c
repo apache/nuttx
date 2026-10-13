@@ -118,9 +118,11 @@ static void psock_insert_segment(FAR struct tcp_wrbuffer_s *wrb,
   FAR sq_entry_t *insert = NULL;
 
   FAR sq_entry_t *itr;
+
   for (itr = sq_peek(q); itr; itr = sq_next(itr))
     {
       FAR struct tcp_wrbuffer_s *wrb0 = (FAR struct tcp_wrbuffer_s *)itr;
+
       if (TCP_WBSEQNO(wrb0) < TCP_WBSEQNO(wrb))
         {
           insert = itr;
@@ -870,16 +872,16 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
         }
 
 #ifdef CONFIG_NET_TCP_CC_NEWRENO
-          /* After Fast retransmitted, set ssthresh to the maximum of
-           * the unacked and the 2*SMSS, and enter to Fast Recovery.
-           * ssthresh = max (FlightSize / 2, 2*SMSS) referring to rfc5681
-           * cwnd=ssthresh + 3*SMSS  referring to rfc5681
-           */
+      /* After Fast retransmitted, set ssthresh to the maximum of
+       * the unacked and the 2*SMSS, and enter to Fast Recovery.
+       * ssthresh = max (FlightSize / 2, 2*SMSS) referring to rfc5681
+       * cwnd=ssthresh + 3*SMSS  referring to rfc5681
+       */
 
-          if (conn->flags & TCP_INFT)
-            {
-              tcp_cc_update(conn, NULL);
-            }
+      if (conn->flags & TCP_INFT)
+        {
+          tcp_cc_update(conn, NULL);
+        }
 #endif
     }
   else
@@ -1152,7 +1154,7 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
           if (TCP_SEQ_GT(predicted_seqno, conn->sndseq_max))
             {
-               conn->sndseq_max = predicted_seqno;
+              conn->sndseq_max = predicted_seqno;
             }
 
           ninfo("SEND: wrb=%p nrtx=%u tx_unacked=%" PRIu32
@@ -1235,6 +1237,7 @@ static uint32_t tcp_max_wrb_size(FAR struct tcp_conn_s *conn)
   if (size > mss)
     {
       const uint32_t odd = size % mss;
+
       size -= odd;
     }
 
