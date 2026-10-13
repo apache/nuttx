@@ -103,6 +103,8 @@ static int sig_handler(FAR void *cookie)
  *
  * Returned Value:
  *   Returns 0 (OK) on success or a negated errno value on failure.
+ *   *deliver is set to true if the caller must deliver the signal to the
+ *   calling thread when it leaves the critical section.
  *
  * Assumptions:
  *   Called in critical section
@@ -111,7 +113,8 @@ static int sig_handler(FAR void *cookie)
 
 static int nxsig_queue_action(FAR struct tcb_s *stcb,
                               FAR sigactq_t *sigact,
-                              FAR siginfo_t *info)
+                              FAR siginfo_t *info,
+                              FAR bool *deliver)
 {
   FAR sigq_t    *sigq;
   int            ret = OK;
@@ -187,10 +190,11 @@ static int nxsig_queue_action(FAR struct tcb_s *stcb,
                   stcb->sigdeliver = nxsig_deliver;
                   if (stcb == this_task() && !up_interrupt_context())
                     {
-                      /* In this case just deliver the signal now. */
+                      /* Deliver the signal now, but out of the critical
+                       * section: the handler must not run with it held.
+                       */
 
-                      (stcb->sigdeliver)(stcb);
-                      stcb->sigdeliver = NULL;
+                      *deliver = true;
                     }
                   else
                     {
@@ -496,6 +500,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
   FAR sigpendq_t *sigpend = NULL;
 #ifdef CONFIG_ENABLE_ALL_SIGNALS
   FAR sigactq_t *sigact;
+  bool deliver = false;
 #endif
 
   sinfo("TCB=%p pid=%d signo=%d code=%d value=%d masked=%s\n",
@@ -633,7 +638,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
 
       /* Queue any sigaction's requested by this task. */
 
-      ret = nxsig_queue_action(stcb, sigact, info);
+      ret = nxsig_queue_action(stcb, sigact, info, &deliver);
 #endif
       /* Deliver of the signal must be performed in a critical section */
 
@@ -730,6 +735,27 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
     }
 
   leave_critical_section(flags);
+
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
+  /* Run the signal handlers of the calling thread, now that the critical
+   * section is free.  A signal that an interrupt queues meanwhile is
+   * delivered in the same loop.
+   */
+
+  while (deliver)
+    {
+      (stcb->sigdeliver)(stcb);
+
+      flags = enter_critical_section();
+      if (sq_empty(&stcb->sigpendactionq))
+        {
+          stcb->sigdeliver = NULL;
+          deliver = false;
+        }
+
+      leave_critical_section(flags);
+    }
+#endif
 
   /* Dispatch kernel action, if needed, in case a pending signal was added */
 
