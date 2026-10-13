@@ -99,6 +99,9 @@ struct send_s
 #endif
   int                     snd_dup_acks; /* Duplicate ACK counter */
 #endif
+#ifdef CONFIG_NET_TCPURGDATA
+  int                     snd_flags;    /* Send flags (e.g., MSG_OOB) */
+#endif
 };
 
 /****************************************************************************
@@ -296,6 +299,18 @@ static uint32_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
           goto end_wait;
         }
 
+#ifdef CONFIG_NET_TCPURGDATA
+      if ((pstate->snd_flags & MSG_OOB) != 0 &&
+          (pstate->snd_acked + sndlen >= pstate->snd_buflen))
+        {
+          conn->urg_offset = sndlen;
+        }
+      else
+        {
+          conn->urg_offset = 0;
+        }
+#endif
+
       /* Continue waiting */
 
       return flags;
@@ -382,6 +397,18 @@ static uint32_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
               pstate->snd_sent = ret;
               goto end_wait;
             }
+
+#ifdef CONFIG_NET_TCPURGDATA
+          if ((pstate->snd_flags & MSG_OOB) != 0 &&
+              (pstate->snd_sent + sndlen >= pstate->snd_buflen))
+            {
+              conn->urg_offset = sndlen;
+            }
+          else
+            {
+              conn->urg_offset = 0;
+            }
+#endif
 
           /* Update the amount of data sent (but not necessarily ACKed) */
 
@@ -576,6 +603,9 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
   state.snd_conn   = conn; /* Socket descriptor to use */
   state.snd_buflen = len;  /* Number of bytes to send */
   state.snd_buffer = buf;  /* Buffer to send from */
+#ifdef CONFIG_NET_TCPURGDATA
+  state.snd_flags  = flags;
+#endif
 
   if (len > 0)
     {
