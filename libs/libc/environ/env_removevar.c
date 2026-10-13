@@ -55,44 +55,16 @@
  *
  ****************************************************************************/
 
-void env_removevar(FAR struct task_info_s *info, ssize_t index)
+void env_removevar(FAR struct task_info_s *info, size_t index)
 {
-  DEBUGASSERT(info != NULL && index >= 0 && index < info->ta_envc);
+  DEBUGASSERT(info != NULL && index < info->ta_envc);
+  DEBUGASSERT(info->ta_envp == info->ta_envarr);
 
-  /* Free the allocate environment string */
-
-  env_free(info, info->ta_envp[index]);
-
-  /* Exchange the last env and the index env */
+  /* Move the last entry into its place.  The string is not freed: the
+   * program can still use it.  env_release() frees it at exit.
+   */
 
   info->ta_envc--;
-  if (index == info->ta_envc)
-    {
-      info->ta_envp[index] = NULL;
-    }
-  else
-    {
-      info->ta_envp[index] = info->ta_envp[info->ta_envc];
-      info->ta_envp[info->ta_envc] = NULL;
-    }
-
-  /* Free the old environment (if there was one) */
-
-  if (info->ta_envc == 0)
-    {
-      env_free(info, info->ta_envp);
-      info->ta_envp = NULL;
-      info->ta_envpc = 0;
-    }
-  else if (info->ta_envc <=
-           (info->ta_envpc - SCHED_ENVIRON_RESERVED * 2))
-    {
-      /* Reallocate the environment to reclaim a little memory */
-
-      info->ta_envpc = info->ta_envc + SCHED_ENVIRON_RESERVED + 1;
-
-      info->ta_envp = env_realloc(info, info->ta_envp,
-         sizeof(*info->ta_envp) * info->ta_envpc);
-      DEBUGASSERT(info->ta_envp != NULL);
-    }
+  info->ta_envp[index] = info->ta_envp[info->ta_envc];
+  info->ta_envp[info->ta_envc] = NULL;
 }

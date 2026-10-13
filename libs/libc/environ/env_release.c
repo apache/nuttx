@@ -57,29 +57,21 @@
 
 void env_release(FAR struct task_info_s *info)
 {
-  int i;
-
   DEBUGASSERT(info != NULL);
 
-  if (info->ta_envp)
+  /* Free every block that libc allocated for the environment */
+
+  while (info->ta_envmem != NULL)
     {
-      /* Free any allocate environment strings */
-
-      for (i = 0; info->ta_envp[i] != NULL; i++)
-        {
-          env_free(info, info->ta_envp[i]);
-        }
-
-      /* Free the environment */
-
-      env_free(info, info->ta_envp);
+      env_free(info, info->ta_envmem);
     }
 
   /* In any event, make sure that all environment-related variables in the
    * task group structure are reset to initial values.
    */
 
-  info->ta_envp  = NULL;
-  info->ta_envpc = 0;
-  info->ta_envc  = 0;
+  info->ta_envp   = NULL;
+  info->ta_envarr = NULL;
+  info->ta_envpc  = 0;
+  info->ta_envc   = 0;
 }

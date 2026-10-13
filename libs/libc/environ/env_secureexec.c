@@ -101,19 +101,32 @@ static bool env_is_unsafe(FAR const char *pair)
 #ifdef CONFIG_SCHED_USER_IDENTITY
 void env_sanitize_secure(FAR struct task_info_s *info)
 {
-  ssize_t index;
+  size_t index;
 
   DEBUGASSERT(info != NULL);
 
   nxrmutex_lock(&info->ta_lock);
 
-  for (index = info->ta_envc - 1; index >= 0; )
+  if (env_reserve(info, 0) < 0)
     {
-      FAR char *pair = info->ta_envp[index];
+      /* Without an array of libc to change, drop the whole environment */
+
+      info->ta_envp = NULL;
+      info->ta_envc = 0;
+    }
+
+  /* Walk down from the last entry.  env_removevar() moves the last entry
+   * into the removed one, so the same index is checked again.
+   */
+
+  index = info->ta_envc;
+  while (index > 0)
+    {
+      FAR char *pair = info->ta_envp[index - 1];
 
       if (pair != NULL && env_is_unsafe(pair))
         {
-          env_removevar(info, index);
+          env_removevar(info, index - 1);
         }
       else
         {

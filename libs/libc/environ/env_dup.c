@@ -59,9 +59,11 @@
 
 int env_dup(FAR struct task_info_s *info, FAR char * const *envcp)
 {
-  FAR char **envp = NULL;
+  FAR char **envp;
+  FAR char *str;
   size_t envc = 0;
-  size_t size;
+  size_t size = 0;
+  size_t i;
   int ret = OK;
 
   DEBUGASSERT(info != NULL);
@@ -70,21 +72,14 @@ int env_dup(FAR struct task_info_s *info, FAR char * const *envcp)
 
   if (envcp != NULL && info->ta_envp == NULL)
     {
-      /* Pre-emption must be disabled throughout the following because the
-       * environment may be shared.
-       */
-
       nxrmutex_lock(&info->ta_lock);
 
-      /* Count the strings */
+      /* Count the strings and their size */
 
       while (envcp[envc] != NULL)
         {
-          envc++;
+          size += strlen(envcp[envc++]) + 1;
         }
-
-      info->ta_envc = envc;
-      info->ta_envpc = (envc + SCHED_ENVIRON_RESERVED + 1);
 
       /* A special case is that the parent has an "empty" environment
        * allocation, i.e., there is an allocation in place but it
@@ -93,48 +88,49 @@ int env_dup(FAR struct task_info_s *info, FAR char * const *envcp)
 
       if (envc > 0)
         {
-          /* There is an environment, duplicate it */
+          /* Duplicate the parent environment: one block for the array and
+           * one for all of the strings.
+           */
 
-          envp = env_malloc(info, sizeof(*envp) * info->ta_envpc);
-          if (envp == NULL)
+          info->ta_envpc = envc + SCHED_ENVIRON_RESERVED + 1;
+          envp = env_alloc(info, sizeof(*envp) * info->ta_envpc);
+          str  = env_alloc(info, size);
+          if (envp == NULL || str == NULL)
             {
               /* The parent's environment can not be inherited due to a
                * failure in the allocation of the child environment.
                */
 
+              if (envp != NULL)
+                {
+                  env_free(info, envp);
+                }
+
+              if (str != NULL)
+                {
+                  env_free(info, str);
+                }
+
+              info->ta_envpc = 0;
               ret = -ENOMEM;
             }
           else
             {
-              envp[envc] = NULL;
-
-              /* Duplicate the parent environment. */
-
-              while (envc-- > 0)
+              for (i = 0; i < envc; i++)
                 {
-                  size = strlen(envcp[envc]) + 1;
-                  envp[envc] = env_malloc(info, size);
-                  if (envp[envc] == NULL)
-                    {
-                      while (envp[++envc] != NULL)
-                        {
-                          env_free(info, envp[envc]);
-                        }
-
-                      env_free(info, envp);
-                      envp = NULL;
-                      ret = -ENOMEM;
-                      break;
-                    }
-
-                  strlcpy(envp[envc], envcp[envc], size);
+                  size = strlen(envcp[i]) + 1;
+                  memcpy(str, envcp[i], size);
+                  envp[i] = str;
+                  str += size;
                 }
+
+              envp[envc]      = NULL;
+              info->ta_envp   = envp;
+              info->ta_envarr = envp;
+              info->ta_envc   = envc;
             }
         }
 
-      /* Save the child environment allocation. */
-
-      info->ta_envp = envp;
       nxrmutex_unlock(&info->ta_lock);
     }
 

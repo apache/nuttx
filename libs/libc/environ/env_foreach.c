@@ -89,7 +89,5 @@ int env_foreach(FAR struct task_info_s *info,
         }
     }
 
-  DEBUGASSERT(ret != OK || info->ta_envc == i);
-
   return ret;
 }

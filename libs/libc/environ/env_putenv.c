@@ -27,7 +27,6 @@
 #include <string.h>
 #include <errno.h>
 
-#include <nuttx/lib/lib.h>
 #include <nuttx/tls.h>
 
 #include "environ.h"
@@ -60,45 +59,33 @@
 
 int putenv(FAR const char *string)
 {
-  FAR struct task_info_s *info = task_get_info();
-  FAR char *pname;
-  FAR char *pequal;
-  size_t len;
-  int ret = OK;
+  FAR const char *pequal;
+  int ret;
 
   /* Verify that a string was passed */
 
   if (!string)
     {
-      ret = EINVAL;
-      goto errout;
+      set_errno(EINVAL);
+      return ERROR;
     }
 
   /* Parse the name=value string */
 
-  len   = strlen(string) + 1;
-  pname = env_malloc(info, len);
-  if (!pname)
+  pequal = strchr(string, '=');
+  if (pequal == NULL)
     {
-      ret = ENOMEM;
-      goto errout;
+      return OK;
     }
 
-  memcpy(pname, string, len);
+  /* Then let env_setvar do all of the work */
 
-  pequal = strchr(pname, '=');
-  if (pequal)
+  ret = env_setvar(string, pequal - string, pequal + 1, TRUE);
+  if (ret < 0)
     {
-      /* Then let setenv do all of the work */
-
-      *pequal = '\0';
-      ret = setenv(pname, pequal + 1, TRUE);
+      set_errno(-ret);
+      return ERROR;
     }
 
-  env_free(info, pname);
-  return ret;
-
-errout:
-  set_errno(ret);
-  return ERROR;
+  return OK;
 }

@@ -73,7 +73,7 @@ FAR char *getenv(FAR const char *name)
     }
 
   nxrmutex_lock(&info->ta_lock);
-  ret = env_findvar(info, name);
+  ret = env_findvar(info, name, strlen(name));
   if (ret < 0)
     {
       nxrmutex_unlock(&info->ta_lock);

@@ -33,10 +33,6 @@
 
 #include <nuttx/lib/lib.h>
 
-#ifdef __KERNEL__
-#  include <nuttx/kmalloc.h>
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -44,25 +40,6 @@
 #ifndef CONFIG_DISABLE_ENVIRON
 
 #  define SCHED_ENVIRON_RESERVED (4)
-
-/* The environment is in the heap that holds the task information: the
- * kernel heap for a kernel thread, the user heap for a user task.  Kernel
- * code also changes the environment of kernel threads (the idle task at
- * boot) and of a new user task.
- */
-
-#  ifdef __KERNEL__
-#    define env_malloc(info, n) \
-       (kmm_heapmember(info) ? kmm_malloc(n) : kumm_malloc(n))
-#    define env_realloc(info, p, n) \
-       (kmm_heapmember(info) ? kmm_realloc(p, n) : kumm_realloc(p, n))
-#    define env_free(info, p) \
-       (kmm_heapmember(info) ? kmm_free(p) : kumm_free(p))
-#  else
-#    define env_malloc(info, n)     ((void)(info), lib_umalloc(n))
-#    define env_realloc(info, p, n) ((void)(info), lib_urealloc(p, n))
-#    define env_free(info, p)       ((void)(info), lib_ufree(p))
-#  endif
 
 /****************************************************************************
  * Public Data
@@ -88,8 +65,9 @@ extern "C"
  *   specified name.
  *
  * Input Parameters:
- *   info  - The task containing environment array to be searched.
- *   pname - The variable name to find
+ *   info    - The task containing environment array to be searched.
+ *   pname   - The variable name to find.  It needs no terminating NUL.
+ *   namelen - The length of the name.
  *
  * Returned Value:
  *   A index to the name=value string in the environment
@@ -100,7 +78,85 @@ extern "C"
  *
  ****************************************************************************/
 
-ssize_t env_findvar(FAR struct task_info_s *info, FAR const char *pname);
+ssize_t env_findvar(FAR struct task_info_s *info, FAR const char *pname,
+                    size_t namelen);
+
+/****************************************************************************
+ * Name: env_setvar
+ *
+ * Description:
+ *   setenv() with the length of the name, so that putenv() can pass the
+ *   name part of its string without a copy.  An empty value removes the
+ *   variable, as in setenv().
+ *
+ * Input Parameters:
+ *   name      - The name of the variable.  It needs no terminating NUL.
+ *   namelen   - The length of the name.
+ *   value     - The new value of the variable.
+ *   overwrite - Replace any existing value if non-zero.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int env_setvar(FAR const char *name, size_t namelen,
+               FAR const char *value, int overwrite);
+
+/****************************************************************************
+ * Name: env_alloc
+ *
+ * Description:
+ *   Allocate a block for the environment of a task.  The block goes on a
+ *   list of the task, and env_release() frees it when the task exits.
+ *   libc does not free the strings before then, so a pointer that getenv()
+ *   returned stays valid, and the program can keep a string or an array
+ *   that it took from environ.
+ *
+ * Input Parameters:
+ *   info - The task that owns the environment.
+ *   size - The size of the block.
+ *
+ * Returned Value:
+ *   The block, or NULL if there is no memory.
+ *
+ ****************************************************************************/
+
+FAR void *env_alloc(FAR struct task_info_s *info, size_t size);
+
+/****************************************************************************
+ * Name: env_free
+ *
+ * Description:
+ *   Free a block from env_alloc().  Before the task exits, only for a block
+ *   that nothing else can reach.
+ *
+ ****************************************************************************/
+
+void env_free(FAR struct task_info_s *info, FAR void *mem);
+
+/****************************************************************************
+ * Name: env_reserve
+ *
+ * Description:
+ *   Make environ an array that libc allocated, with room for more entries.
+ *   The program can assign environ, as POSIX allows.  Then the array is
+ *   copied, and the array of the program is not changed.  The strings are
+ *   not copied.
+ *
+ * Input Parameters:
+ *   info - The task whose environment is changed.
+ *   more - The number of entries to add.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; -ENOMEM if there is no memory.
+ *
+ * Assumptions:
+ *   The caller holds ta_lock.
+ *
+ ****************************************************************************/
+
+int env_reserve(FAR struct task_info_s *info, size_t more);
 
 /****************************************************************************
  * Name: env_removevar
@@ -118,12 +174,11 @@ ssize_t env_findvar(FAR struct task_info_s *info, FAR const char *pname);
  *
  * Assumptions:
  *   - Not called from an interrupt handler
- *   - Caller has pre-emption disabled
- *   - Caller will reallocate the environment structure to the correct size
+ *   - The caller holds ta_lock and called env_reserve()
  *
  ****************************************************************************/
 
-void env_removevar(FAR struct task_info_s *info, ssize_t index);
+void env_removevar(FAR struct task_info_s *info, size_t index);
 
 #undef EXTERN
 #ifdef __cplusplus
