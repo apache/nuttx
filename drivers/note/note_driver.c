@@ -611,7 +611,8 @@ void sched_note_add(FAR const void *data, size_t len)
        * claims more than is left would wrap len and walk off the packet.
        */
 
-      if (notelen < sizeof(struct note_common_s) || notelen > len)
+      if (notelen < sizeof(struct note_common_s) ||
+          NOTE_ALIGN(notelen) > len)
         {
           break;
         }
