@@ -132,6 +132,13 @@ int task_init_info(FAR struct task_group_s *group)
   list_initialize(&info->ta_atfork);
 #endif
 
+#if defined(CONFIG_LIBC_ELF) || defined(CONFIG_BINFMT_LOADABLE)
+  /* The ELF objects that the task group loads with dlopen() */
+
+  nxrmutex_init(&info->ta_modlock);
+  list_initialize(&info->ta_modules);
+#endif
+
 #ifdef CONFIG_FILE_STREAM
   /* Initialize file streams for the task group */
 

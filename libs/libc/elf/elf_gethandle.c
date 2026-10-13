@@ -42,7 +42,8 @@
  *   determine if a module has been loaded or not.
  *
  * Input Parameters:
- *   name   - A pointer to the module name string.
+ *   registry - The registry.
+ *   name     - A pointer to the module name string.
  *
  * Returned Value:
  *   The non-NULL module handle previously returned by libelf_insert() is
@@ -50,30 +51,29 @@
  *   libelf_modhandle() will return a NULL handle and the errno variable
  *   will be set appropriately.
  *
+ * Assumptions:
+ *   The caller holds the lock of the registry.
+ *
  ****************************************************************************/
 
 #ifdef HAVE_LIBC_ELF_NAMES
 
-FAR void *libelf_gethandle(FAR const char *name)
+FAR void *libelf_gethandle(FAR struct list_node *registry,
+                           FAR const char *name)
 {
   FAR struct module_s *modp;
 
   DEBUGASSERT(name != NULL);
 
-  /* Get exclusive access to the module registry */
-
-  libelf_registry_lock();
-
   /* Find the module entry for this name in the registry */
 
-  modp = libelf_registry_find(name);
+  modp = libelf_registry_find(registry, name);
   if (modp == NULL)
     {
       berr("ERROR: Failed to find module %s\n", name);
       set_errno(ENOENT);
     }
 
-  libelf_registry_unlock();
   return modp;
 }
 

@@ -184,6 +184,10 @@ int load_module(FAR struct binary_s *bin, FAR const char *filename,
   if (bin && filename)
 #endif
     {
+      /* The libraries the program needs go here */
+
+      list_initialize(&bin->libraries);
+
       /* Set the default priority of the new program. */
 
       ret = load_default_priority(bin);

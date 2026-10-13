@@ -33,6 +33,7 @@
 #include <elf.h>
 
 #include <nuttx/addrenv.h>
+#include <nuttx/list.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -174,7 +175,7 @@ struct fdpic_desc_s;
 
 struct module_s
 {
-  FAR struct module_s *flink;          /* Supports a singly linked list */
+  struct list_node node;               /* Node in the list of its registry */
 #ifdef HAVE_LIBC_ELF_NAMES
   char modname[LIBC_ELF_NAMEMAX];        /* Module name */
 #endif
@@ -306,6 +307,13 @@ struct mod_loadinfo_s
   FAR struct fdpic_desc_s *descpool;
   uint16_t      ndesc;       /* Capacity */
   uint16_t      usedesc;     /* Next free slot */
+
+  /* The registry that the object goes on.  Its DT_NEEDED libraries go on
+   * it too, and its undefined symbols are also looked for in the modules on
+   * it.  NULL for none.
+   */
+
+  FAR struct list_node *registry;
 
   /* Address environment.
    *
@@ -550,75 +558,44 @@ int libelf_findsection(FAR struct mod_loadinfo_s *loadinfo,
                        FAR const char *sectname);
 
 /****************************************************************************
- * Name: libelf_registry_lock
- *
- * Description:
- *   Get exclusive access to the module registry.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void libelf_registry_lock(void);
-
-/****************************************************************************
- * Name: libelf_registry_unlock
- *
- * Description:
- *   Relinquish the lock on the module registry
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void libelf_registry_unlock(void);
-
-/****************************************************************************
  * Name: libelf_registry_add
  *
  * Description:
  *   Add a new entry to the module registry.
  *
  * Input Parameters:
- *   modp - The module data structure to be registered.
+ *   registry - The registry.
+ *   modp     - The module data structure to be registered.
  *
  * Returned Value:
  *   None
  *
  * Assumptions:
- *   The caller holds the lock on the module registry.
+ *   The caller holds the lock of the registry.
  *
  ****************************************************************************/
 
-void libelf_registry_add(FAR struct module_s *modp);
+void libelf_registry_add(FAR struct list_node *registry,
+                         FAR struct module_s *modp);
 
 /****************************************************************************
  * Name: libelf_registry_del
  *
  * Description:
- *   Remove a module entry from the registry
+ *   Remove a module entry from its registry.
  *
  * Input Parameters:
  *   modp - The registry entry to be removed.
  *
  * Returned Value:
- *   Zero (OK) is returned if the registry entry was deleted.  Otherwise,
- *   a negated errno value is returned.
+ *   None
  *
  * Assumptions:
- *   The caller holds the lock on the module registry.
+ *   The caller holds the lock of the registry.
  *
  ****************************************************************************/
 
-int libelf_registry_del(FAR struct module_s *modp);
+void libelf_registry_del(FAR struct module_s *modp);
 
 /****************************************************************************
  * Name: libelf_registry_find
@@ -627,19 +604,21 @@ int libelf_registry_del(FAR struct module_s *modp);
  *   Find an entry in the module registry using the name of the module.
  *
  * Input Parameters:
- *   modname - The name of the module to be found
+ *   registry - The registry.
+ *   modname  - The name of the module to be found
  *
  * Returned Value:
  *   If the registry entry is found, a pointer to the module entry is
  *   returned.  NULL is returned if the entry is not found.
  *
  * Assumptions:
- *   The caller holds the lock on the module registry.
+ *   The caller holds the lock of the registry.
  *
  ****************************************************************************/
 
 #ifdef HAVE_LIBC_ELF_NAMES
-FAR struct module_s *libelf_registry_find(FAR const char *modname);
+FAR struct module_s *libelf_registry_find(FAR struct list_node *registry,
+                                          FAR const char *modname);
 #endif
 
 /****************************************************************************
@@ -651,17 +630,19 @@ FAR struct module_s *libelf_registry_find(FAR const char *modname);
  *   the handle is probably a stale pointer.
  *
  * Input Parameters:
- *   modp - The registry entry to be verified.
+ *   registry - The registry.
+ *   modp     - The registry entry to be verified.
  *
  * Returned Value:
  *   Returns OK is the module is valid; -ENOENT otherwise.
  *
  * Assumptions:
- *   The caller holds the lock on the module registry.
+ *   The caller holds the lock of the registry.
  *
  ****************************************************************************/
 
-int libelf_registry_verify(FAR struct module_s *modp);
+int libelf_registry_verify(FAR struct list_node *registry,
+                           FAR struct module_s *modp);
 
 /****************************************************************************
  * Name: libelf_registry_foreach
@@ -671,6 +652,7 @@ int libelf_registry_verify(FAR struct module_s *modp);
  *   not available for use by applications.
  *
  * Input Parameters:
+ *   registry - The registry.
  *   callback - This callback function was be called for each entry in the
  *     registry.
  *   arg - This opaque argument will be passed to the callback function.
@@ -681,11 +663,12 @@ int libelf_registry_verify(FAR struct module_s *modp);
  *   that non-zero value will be returned.
  *
  * Assumptions:
- *   The caller does NOT hold the lock on the module registry.
+ *   The caller holds the lock of the registry.
  *
  ****************************************************************************/
 
-int libelf_registry_foreach(mod_callback_t callback, FAR void *arg);
+int libelf_registry_foreach(FAR struct list_node *registry,
+                            mod_callback_t callback, FAR void *arg);
 
 /****************************************************************************
  * Name: libelf_freesymtab
@@ -748,6 +731,7 @@ void libelf_dumpentrypt(FAR struct mod_loadinfo_s *loadinfo);
  *
  * Input Parameters:
  *
+ *   registry - The registry to load into, or to find the module on.
  *   filename - Full path to the module binary to be loaded
  *   modname  - The name that can be used to refer to the module after
  *     it has been loaded.
@@ -758,9 +742,13 @@ void libelf_dumpentrypt(FAR struct mod_loadinfo_s *loadinfo);
  *   unable to load the module libelf_insert() will return a NULL handle
  *   and the errno variable will be set appropriately.
  *
+ * Assumptions:
+ *   The caller holds the lock of the registry.
+ *
  ****************************************************************************/
 
-FAR void *libelf_insert(FAR const char *filename, FAR const char *modname);
+FAR void *libelf_insert(FAR struct list_node *registry,
+                        FAR const char *filename, FAR const char *modname);
 
 /****************************************************************************
  * Name: libelf_getsymbol
@@ -790,6 +778,9 @@ FAR void *libelf_insert(FAR const char *filename, FAR const char *modname);
  *   NOTE: This means that the address zero can never be a valid return
  *   value.
  *
+ * Assumptions:
+ *   The caller holds the lock of the registry.
+ *
  ****************************************************************************/
 
 FAR const void *libelf_getsymbol(FAR void *handle, FAR const char *name);
@@ -813,15 +804,37 @@ int libelf_uninit(FAR struct module_s *modp);
  *   Remove a previously installed module from memory.
  *
  * Input Parameters:
- *   handle - The module handler previously returned by libelf_insert().
+ *   registry - The registry the module is on.
+ *   handle   - The module handler previously returned by libelf_insert().
  *
  * Returned Value:
  *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
  *   errno value is set appropriately.
  *
+ * Assumptions:
+ *   The caller holds the lock of the registry.
+ *
  ****************************************************************************/
 
-int libelf_remove(FAR void *handle);
+int libelf_remove(FAR struct list_node *registry, FAR void *handle);
+
+/****************************************************************************
+ * Name: libelf_removeall
+ *
+ * Description:
+ *   Give back every reference that dlopen() took in a registry, as at
+ *   process exit.  A module that another module still depends on stays,
+ *   and goes with its last dependent.
+ *
+ * Input Parameters:
+ *   registry - The registry.
+ *
+ * Assumptions:
+ *   The caller holds the lock of the registry.
+ *
+ ****************************************************************************/
+
+void libelf_removeall(FAR struct list_node *registry);
 
 /****************************************************************************
  * Name: libelf_modhandle
@@ -832,7 +845,8 @@ int libelf_remove(FAR void *handle);
  *   determine if a module has been loaded or not.
  *
  * Input Parameters:
- *   name   - A pointer to the module name string.
+ *   registry - The registry.
+ *   name     - A pointer to the module name string.
  *
  * Returned Value:
  *   The non-NULL module handle previously returned by libelf_insert() is
@@ -840,12 +854,16 @@ int libelf_remove(FAR void *handle);
  *   libelf_modhandle() will return a NULL handle and the errno variable
  *   will be set appropriately.
  *
+ * Assumptions:
+ *   The caller holds the lock of the registry.
+ *
  ****************************************************************************/
 
 #ifdef HAVE_LIBC_ELF_NAMES
-FAR void *libelf_gethandle(FAR const char *name);
+FAR void *libelf_gethandle(FAR struct list_node *registry,
+                           FAR const char *name);
 #else
-#  define libelf_gethandle(n) NULL
+#  define libelf_gethandle(r, n) NULL
 #endif
 
 /****************************************************************************

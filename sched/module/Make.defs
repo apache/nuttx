@@ -24,13 +24,15 @@ ifeq ($(CONFIG_MODULE),y)
 
 # OS module interfaces
 
-CSRCS += mod_insmod.c mod_rmmod.c mod_modsym.c mod_modhandle.c
+CSRCS += mod_insmod.c mod_rmmod.c mod_modsym.c mod_modhandle.c mod_registry.c
 
 # procfs support
 
+ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 ifeq ($(CONFIG_FS_PROCFS),y)
 ifneq ($(CONFIG_FS_PROCFS_EXCLUDE_MODULE),y)
 CSRCS += mod_procfs.c
+endif
 endif
 endif
 

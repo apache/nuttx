@@ -29,7 +29,7 @@
 #include <nuttx/module.h>
 #include <nuttx/lib/elf.h>
 
-#ifdef CONFIG_MODULE
+#include "module/module.h"
 
 /****************************************************************************
  * Public Functions
@@ -52,7 +52,11 @@
 
 int rmmod(FAR void *handle)
 {
-  return libelf_remove(handle);
-}
+  FAR struct list_node *registry;
+  int ret;
 
-#endif /* CONFIG_MODULE */
+  registry = mod_registry_lock();
+  ret = libelf_remove(registry, handle);
+  mod_registry_unlock();
+  return ret;
+}

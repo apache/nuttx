@@ -29,6 +29,8 @@
 #include <nuttx/module.h>
 #include <nuttx/lib/elf.h>
 
+#include "module/module.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -64,5 +66,10 @@
 
 FAR const void *modsym(FAR void *handle, FAR const char *name)
 {
-  return libelf_getsymbol(handle, name);
+  FAR const void *symbol;
+
+  mod_registry_lock();
+  symbol = libelf_getsymbol(handle, name);
+  mod_registry_unlock();
+  return symbol;
 }
