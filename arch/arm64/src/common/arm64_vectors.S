@@ -117,9 +117,16 @@ SECTION_FUNC(text, arm64_jump_to_user)
     str x2,  [sp, #8 * REG_X1]
     str x3,  [sp, #8 * REG_X2]
     str x4,  [sp, #8 * REG_SP_EL0]
-    mrs x0,  spsr_el1
-    and x0,  x0, #~SPSR_MODE_MASK
-    #orr x0, x0, #SPSR_MODE_EL0T # EL0T=0x00, out of range for orr
+
+    /* EL0 with IRQs enabled.  Do not copy SPSR_EL1: it holds the state of
+     * the last exception on this CPU, which can have IRQs masked.
+     */
+
+#ifdef CONFIG_ARM64_DECODEFIQ
+    mov x0,  #SPSR_MODE_EL0T
+#else
+    mov x0,  #(SPSR_MODE_EL0T | (1 << SPSR_DAIF_SHIFT)) /* FIQ masked */
+#endif
     str x0,  [sp, #8 * REG_SPSR]
 
 #ifdef CONFIG_ARM64_MTE
