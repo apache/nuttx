@@ -1662,11 +1662,17 @@ static void ctucanfd_sock_interrupt(FAR struct ctucanfd_driver_s *priv)
 
       ctucanfd_putreg(&priv->devs[i], CTUCANFD_INTSTAT, stat);
 
-      /* Re-enable TX interrupts.
-       * NOTE: RX interrupts are re-enabled in ctucanfd_sock_recv.
+      /* Re-enable TX interrupts.  Re-enable RX interrupts too unless
+       * RBNEI is pending; then ctucanfd_sock_recv() re-enables them once
+       * the RX buffer is drained.
        */
 
       ctucanfd_txint(&priv->devs[i], true);
+
+      if ((stat & CTUCANFD_INT_RBNEI) == 0)
+        {
+          ctucanfd_rxint(&priv->devs[i], true);
+        }
     }
 }
 #endif    /* CONFIG_CAN_CTUCANFD_SOCKET */
