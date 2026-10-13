@@ -668,7 +668,6 @@ int rpmsgfs_client_ioctl(FAR void *handle, int fd,
   FAR struct rpmsgfs_ioctl_s *msg;
   uint32_t space;
   size_t len;
-  int ret;
 
   if (arglen < 0)
     {
@@ -677,38 +676,31 @@ int rpmsgfs_client_ioctl(FAR void *handle, int fd,
 
   len = sizeof(*msg) + arglen;
 
-  while (1)
+  msg = rpmsgfs_get_tx_payload_buffer(priv, &space);
+  if (msg == NULL)
     {
-      msg = rpmsgfs_get_tx_payload_buffer(priv, &space);
-      if (msg == NULL)
-        {
-          return -ENOMEM;
-        }
-
-      DEBUGASSERT(len <= space);
-
-      msg->fd      = fd;
-      msg->request = request == FIOC_SETLKW ? FIOC_SETLK : request;
-      msg->arg     = arg;
-      msg->arglen  = arglen;
-
-      if (arglen > 0)
-        {
-          memcpy(msg->buf, (FAR void *)(uintptr_t)arg, arglen);
-        }
-
-      ret = rpmsgfs_send_recv(handle, RPMSGFS_IOCTL, false,
-                              (FAR struct rpmsgfs_header_s *)msg, len,
-                              arglen > 0 ? (FAR void *)arg : NULL);
-      if (request != FIOC_SETLKW || ret != -EAGAIN)
-        {
-          break;
-        }
-
-      usleep(20000);
+      return -ENOMEM;
     }
 
-  return ret;
+  DEBUGASSERT(len <= space);
+
+  msg->fd      = fd;
+  msg->request = request;
+  msg->arg     = arg;
+  msg->arglen  = arglen;
+
+  if (arglen > 0)
+    {
+      memcpy(msg->buf, (FAR void *)(uintptr_t)arg, arglen);
+    }
+
+  /* FIOC_SETLKW blocks here: the server defers its reply until the lock is
+   * granted, so only this caller waits (rpmsg_wait is uninterruptible).
+   */
+
+  return rpmsgfs_send_recv(handle, RPMSGFS_IOCTL, false,
+                           (FAR struct rpmsgfs_header_s *)msg, len,
+                           arglen > 0 ? (FAR void *)arg : NULL);
 }
 
 int rpmsgfs_client_sync(FAR void *handle, int fd)
