@@ -507,13 +507,12 @@ static void qspi_dumpregs(struct stm32h7_qspidev_s *priv, const char *msg)
 
   regval = getreg32(priv->base + STM32_QUADSPI_CR_OFFSET);    /* Control Register */
   spiinfo("CR:%08" PRIx32 "\n", regval);
-  spiinfo("  EN:%1d ABORT:%1d DMAEN:%1d TCEN:%1d SSHIFT:%1d\n"
+  spiinfo("  EN:%1d ABORT:%1d TCEN:%1d SSHIFT:%1d\n"
           "  FTHRES: %d\n"
           "  TEIE:%1d TCIE:%1d FTIE:%1d SMIE:%1d TOIE:%1d APMS:%1d PMM:%1d\n"
           "  PRESCALER: %d\n",
           (regval & QSPI_CR_EN) ? 1 : 0,
           (regval & QSPI_CR_ABORT) ? 1 : 0,
-          (regval & QSPI_CR_DMAEN) ? 1 : 0,
           (regval & QSPI_CR_TCEN) ? 1 : 0,
           (regval & QSPI_CR_SSHIFT) ? 1 : 0,
           (regval & QSPI_CR_FTHRES_MASK) >> QSPI_CR_FTHRES_SHIFT,
@@ -585,6 +584,7 @@ static void qspi_dumpregs(struct stm32h7_qspidev_s *priv, const char *msg)
 static void qspi_dumpgpioconfig(const char *msg)
 {
   uint32_t regval;
+
   spiinfo("%s:\n", msg);
 
   /* Port B */
@@ -1044,12 +1044,14 @@ static void qspi_waitstatusflags(struct stm32h7_qspidev_s *priv,
   if (polarity)
     {
       while (!((regval = qspi_getreg(priv, STM32_QUADSPI_SR_OFFSET)) & mask))
-        ;
+        {
+        }
     }
   else
     {
       while (((regval = qspi_getreg(priv, STM32_QUADSPI_SR_OFFSET)) & mask))
-        ;
+        {
+        }
     }
 }
 
@@ -1380,6 +1382,7 @@ static int qspi0_interrupt(int irq, void *context, void *arg)
 static void qspi_dma_timeout(wdparm_t arg)
 {
   struct stm32h7_qspidev_s *priv = (struct stm32h7_qspidev_s *)arg;
+
   DEBUGASSERT(priv != NULL);
 
   /* Sample DMA registers at the time of the timeout */
@@ -1416,6 +1419,7 @@ static void qspi_dma_timeout(wdparm_t arg)
 static void qspi_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg)
 {
   struct stm32h7_qspidev_s *priv = (struct stm32h7_qspidev_s *)arg;
+
   DEBUGASSERT(priv != NULL);
 
   /* Cancel the watchdog timeout */
@@ -1490,7 +1494,6 @@ static int qspi_memory_dma(struct stm32h7_qspidev_s *priv,
                            struct qspi_xctnspec_s *xctn)
 {
   uint32_t dmaflags;
-  uint32_t regval;
   int ret;
 
   /* Initialize register sampling */
@@ -1522,12 +1525,6 @@ static int qspi_memory_dma(struct stm32h7_qspidev_s *priv,
 
   qspi_dma_sample(priv, DMA_AFTER_SETUP);
 
-  /* Enable the memory transfer */
-
-  regval = qspi_getreg(priv, STM32_QUADSPI_CR_OFFSET);
-  regval |= QSPI_CR_DMAEN;
-  qspi_putreg(priv, regval, STM32_QUADSPI_CR_OFFSET);
-
   /* Set up the Communications Configuration Register as per command info */
 
   qspi_ccrconfig(priv, xctn,
@@ -1556,7 +1553,7 @@ static int qspi_memory_dma(struct stm32h7_qspidev_s *priv,
                      qspi_dma_timeout, (wdparm_t)priv);
       if (ret < 0)
         {
-           spierr("ERROR: wd_start failed: %d\n", ret);
+          spierr("ERROR: wd_start failed: %d\n", ret);
         }
 
       /* Wait for the DMA complete */
@@ -1584,9 +1581,6 @@ static int qspi_memory_dma(struct stm32h7_qspidev_s *priv,
           if (ret != -EINTR)
             {
               DEBUGPANIC();
-              regval = qspi_getreg(priv, STM32_QUADSPI_CR_OFFSET);
-              regval &= ~QSPI_CR_DMAEN;
-              qspi_putreg(priv, regval, STM32_QUADSPI_CR_OFFSET);
               return ret;
             }
         }
@@ -1615,10 +1609,6 @@ static int qspi_memory_dma(struct stm32h7_qspidev_s *priv,
    */
 
   stm32_dmastop(priv->dmach);
-
-  regval = qspi_getreg(priv, STM32_QUADSPI_CR_OFFSET);
-  regval &= ~QSPI_CR_DMAEN;
-  qspi_putreg(priv, regval, STM32_QUADSPI_CR_OFFSET);
 
   /* Complain if the DMA fails */
 
@@ -1961,19 +1951,19 @@ static void qspi_setmode(struct qspi_dev_s *dev, enum qspi_mode_e mode)
 
       switch (mode)
         {
-        case QSPIDEV_MODE0: /* CPOL=0; CPHA=0 */
-          break;
+          case QSPIDEV_MODE0: /* CPOL=0; CPHA=0 */
+            break;
 
-        case QSPIDEV_MODE3: /* CPOL=1; CPHA=1 */
-          regval |= (QSPI_DCR_CKMODE);
-          break;
+          case QSPIDEV_MODE3: /* CPOL=1; CPHA=1 */
+            regval |= (QSPI_DCR_CKMODE);
+            break;
 
-        case QSPIDEV_MODE1: /* CPOL=0; CPHA=1 */
-        case QSPIDEV_MODE2: /* CPOL=1; CPHA=0 */
-          spiinfo("unsupported mode=%d\n", mode);
-        default:
-          DEBUGASSERT(FALSE);
-          return;
+          case QSPIDEV_MODE1: /* CPOL=0; CPHA=1 */
+          case QSPIDEV_MODE2: /* CPOL=1; CPHA=0 */
+            spiinfo("unsupported mode=%d\n", mode);
+          default:
+            DEBUGASSERT(FALSE);
+            return;
         }
 
       qspi_putreg(priv, regval, STM32_QUADSPI_DCR_OFFSET);
