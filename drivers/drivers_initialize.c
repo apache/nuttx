@@ -63,6 +63,7 @@
 #include <nuttx/vhost/vhost.h>
 #include <nuttx/virtio/virtio.h>
 #include <nuttx/drivers/optee.h>
+#include <nuttx/video/video_fake.h>
 #include <nuttx/usb/usbhost.h>
 
 /****************************************************************************
@@ -332,6 +333,10 @@ void drivers_initialize(void)
 
 #ifdef CONFIG_THERMAL
   thermal_init();
+#endif
+
+#ifdef CONFIG_VIDEO_FAKE
+  video_fake_initialize();
 #endif
 
 #ifdef CONFIG_PTP_CLOCK_DUMMY

@@ -553,6 +553,38 @@ config GOLDFISH_CAMERA_PIPE_PATH
 
 endif # GOLDFISH_CAMERA
 
+config VIDEO_FAKE
+	bool "Fake video device"
+	depends on VIDEO_STREAM
+	select SCHED_LPWORK
+	default n
+	---help---
+		Software-only V4L2 capture devices that generate deterministic
+		test patterns without camera hardware or a host device.
+
+if VIDEO_FAKE
+
+config VIDEO_FAKE_DEVICE_PARAMS
+	string "Fake video device params"
+	default ""
+	---help---
+		One initializer per device: {devpath, formats, sizes, fps}.
+		The first item in each list is the default, and every list is
+		zero terminated.  A device may declare up to
+		VIDEO_FAKE_FORMATS_MAX formats, VIDEO_FAKE_SIZES_MAX sizes and
+		VIDEO_FAKE_FPS_MAX frame rates.
+
+		Set this in the board defconfig, as AUDIO_FAKE_DEVICE_PARAMS
+		does: the initializer is too long for a Kconfig default and
+		Kconfig continuation lines would insert tabs into it.
+
+		Example:
+		CONFIG_VIDEO_FAKE_DEVICE_PARAMS="{\"/dev/video0\", \
+		  {V4L2_PIX_FMT_YUV420, V4L2_PIX_FMT_NV12}, \
+		  {{640, 480}, {320, 240}}, {30, 15}}"
+
+endif # VIDEO_FAKE
+
 source "drivers/video/vnc/Kconfig"
 source "drivers/video/mipidsi/Kconfig"
 

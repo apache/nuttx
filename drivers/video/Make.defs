@@ -111,6 +111,10 @@ ifeq ($(CONFIG_GOLDFISH_CAMERA),y)
   CSRCS += goldfish_camera.c
 endif
 
+ifeq ($(CONFIG_VIDEO_FAKE),y)
+  CSRCS += video_fake.c
+endif
+
 include video/vnc/Make.defs
 include video/mipidsi/Make.defs
 

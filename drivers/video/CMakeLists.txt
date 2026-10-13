@@ -94,6 +94,10 @@ if(CONFIG_DRIVERS_VIDEO)
   if(CONFIG_GOLDFISH_CAMERA)
     list(APPEND SRCS goldfish_camera.c)
   endif()
+
+  if(CONFIG_VIDEO_FAKE)
+    list(APPEND SRCS video_fake.c)
+  endif()
   # These video drivers depend on SPI support
 
   if(CONFIG_SPI)
