@@ -111,6 +111,7 @@
 #define TCB_FLAG_JOIN_COMPLETED    (1 << 14)                     /* Bit 14: Pthread join completed */
 #define TCB_FLAG_FREE_TCB          (1 << 15)                     /* Bit 15: Free tcb after exit */
 #define TCB_FLAG_PREEMPT_SCHED     (1 << 16)                     /* Bit 16: tcb is PREEMPT_SCHED */
+#define TCB_FLAG_SIGMASK_SAVED     (1 << 17)                     /* Bit 17: sigsavedmask to restore */
 
 /* Values for struct task_group tg_flags */
 
@@ -693,6 +694,7 @@ struct tcb_s
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
   sigset_t   sigprocmask;                /* Signals that are blocked        */
   sigset_t   sigwaitmask;                /* Waiting for pending signals     */
+  sigset_t   sigsavedmask;               /* Mask to restore at syscall exit */
   siginfo_t  *sigunbinfo;                /* Signal info when task unblocked */
 #endif /* !CONFIG_DISABLE_ALL_SIGNALS */
 
