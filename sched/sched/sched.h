@@ -474,8 +474,16 @@ FAR char **nxsched_get_stackargs(FAR struct tcb_s *tcb);
  * Inline functions
  ****************************************************************************/
 
-static inline_function bool nxsched_add_prioritized(FAR struct tcb_s *tcb,
-                                                    DSEG dq_queue_t *list)
+/* Single body for both forms: inline in every caller, or emitted once by
+ * sched_addprioritized.c (which defines SCHED_ADDPRIORITIZED_IMPL).
+ */
+
+#if defined(CONFIG_SCHED_INLINE_ADDPRIORITIZED) || \
+    defined(SCHED_ADDPRIORITIZED_IMPL)
+#  ifdef CONFIG_SCHED_INLINE_ADDPRIORITIZED
+static inline_function
+#  endif
+bool nxsched_add_prioritized(FAR struct tcb_s *tcb, DSEG dq_queue_t *list)
 {
   FAR struct tcb_s *next;
   FAR struct tcb_s *prev;
@@ -552,6 +560,9 @@ static inline_function bool nxsched_add_prioritized(FAR struct tcb_s *tcb,
 
   return ret;
 }
+#else
+bool nxsched_add_prioritized(FAR struct tcb_s *tcb, DSEG dq_queue_t *list);
+#endif
 
 #  ifdef CONFIG_SMP
 
