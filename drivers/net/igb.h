@@ -73,13 +73,17 @@
 #define IGB_EEDIAG                (0x01038)  /* EEPROM Diagnostic */
 #define IGB_VPDDIAG               (0x01060)  /* VPD Diagnostic */
 
-/* Interrupt registers */
+/* Interrupt registers.
+ *
+ * ICR, ICS, IMS, IMC and IAM are accessed at their alias offsets
+ * 0x00c0-0x00e0.  The QEMU igb model does not decode them at 0x1500-0x1510.
+ */
 
-#define IGB_ICR                   (0x1500)   /* Interrupt Cause Read */
-#define IGB_ICS                   (0x1504)   /* Interrupt Cause Set */
-#define IGB_IMS                   (0x1508)   /* Interrupt Mask Set */
-#define IGB_IMC                   (0x150c)   /* Interrupt Mask Clear */
-#define IGB_IAM                   (0x1510)   /* Interrupt Acknowledge Auto–Mask */
+#define IGB_ICR                   (0x00c0)   /* Interrupt Cause Read */
+#define IGB_ICS                   (0x00c8)   /* Interrupt Cause Set */
+#define IGB_IMS                   (0x00d0)   /* Interrupt Mask Set */
+#define IGB_IMC                   (0x00d8)   /* Interrupt Mask Clear */
+#define IGB_IAM                   (0x00e0)   /* Interrupt Acknowledge Auto–Mask */
 #define IGB_EICS                  (0x1520)   /* Extended Interrupt Cause Set */
 #define IGB_EIMS                  (0x1524)   /* Extended Interrupt Mask Set/Read */
 #define IGB_EIMC                  (0x1528)   /* Extended Interrupt Mask Clear */
