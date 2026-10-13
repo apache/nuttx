@@ -1082,10 +1082,12 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
            * packet gets refused by devif_iob_send(). Detect this situation
            * and send tiny TCP packets until we manage to free up some space.
            * We do not want to exhaust all of the remaining iobs by sending
-           * the maximum size packet that would fit.
+           * the maximum size packet that would fit.  Never send more than
+           * sndlen, which is limited by the MSS and the send window.
            */
 
-          if (sndlen > iob_navail(false) * CONFIG_IOB_BUFSIZE)
+          if (sndlen > iob_navail(false) * CONFIG_IOB_BUFSIZE &&
+              sndlen > CONFIG_IOB_BUFSIZE)
             {
               nwarn("Running low on iobs, limiting packet size\n");
               sndlen = CONFIG_IOB_BUFSIZE;
