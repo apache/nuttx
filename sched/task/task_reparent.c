@@ -147,8 +147,6 @@ int task_reparent(pid_t ppid, pid_t chpid)
    * all members of the child's task group.
    */
 
-  chgrp->tg_ppid = ppid;
-
 #ifdef CONFIG_SCHED_CHILD_STATUS
   /* Remove the child status entry from old parent task group */
 
@@ -193,6 +191,11 @@ int task_reparent(pid_t ppid, pid_t chpid)
   ret = OK;
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */
+
+  if (ret == OK)
+    {
+      chgrp->tg_ppid = ppid;
+    }
 
 errout_with_ints:
   leave_critical_section(flags);
@@ -267,8 +270,6 @@ int task_reparent(pid_t ppid, pid_t chpid)
    * parent.
    */
 
-  chtcb->group->tg_ppid = ppid;
-
 #ifdef CONFIG_SCHED_CHILD_STATUS
   /* Remove the child status entry from old parent TCB */
 
@@ -314,6 +315,11 @@ int task_reparent(pid_t ppid, pid_t chpid)
   ret = OK;
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */
+
+  if (ret == OK)
+    {
+      chtcb->group->tg_ppid = ppid;
+    }
 
 errout_with_ints:
   leave_critical_section(flags);
