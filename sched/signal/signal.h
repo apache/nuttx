@@ -213,6 +213,8 @@ FAR sigpendq_t    *nxsig_remove_pendingsignal(FAR struct tcb_s *stcb,
                                               int signo);
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
 bool               nxsig_unmask_pendingsignal(void);
+void               nxsig_restoremask(FAR struct tcb_s *rtcb,
+                                     FAR const sigset_t *mask);
 #else
 static inline bool nxsig_unmask_pendingsignal(void)
 {

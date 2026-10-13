@@ -102,7 +102,7 @@ int pselect(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
        * us to not wait. Restore the original sigprocmask.
        */
 
-      rtcb->sigprocmask = saved_sigprocmask;
+      nxsig_restoremask(rtcb, &saved_sigprocmask);
       leave_critical_section(flags);
       set_errno(EINTR);
     }
@@ -124,7 +124,7 @@ int pselect(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
       /* We are running again, restore the original sigprocmask */
 
-      rtcb->sigprocmask = saved_sigprocmask;
+      nxsig_restoremask(rtcb, &saved_sigprocmask);
       leave_critical_section(flags);
 
       /* Now, handle the (rare?) case where (a) a blocked signal was received

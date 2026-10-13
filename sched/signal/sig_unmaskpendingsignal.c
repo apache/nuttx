@@ -34,11 +34,11 @@
 #include "signal/signal.h"
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsig_unmask_pendingsignal
+ * Name: nxsig_dispatch_unmasked
  *
  * Description:
  *   Based upon the current setting of the sigprocmask, this function
@@ -47,9 +47,8 @@
  *
  ****************************************************************************/
 
-bool nxsig_unmask_pendingsignal(void)
+static bool nxsig_dispatch_unmasked(FAR struct tcb_s *rtcb)
 {
-  FAR struct tcb_s *rtcb = this_task();
   sigset_t unmaskedset;
   FAR sigpendq_t *pendingsig;
   int signo;
@@ -117,4 +116,73 @@ bool nxsig_unmask_pendingsignal(void)
 
   sched_unlock();
   return true;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxsig_unmask_pendingsignal
+ *
+ * Description:
+ *   Dispatch the pending signals that the signal mask of the calling thread
+ *   does not block.  At the end of a system call, also restore the mask
+ *   that nxsig_restoremask() saved, after the signals that the temporary
+ *   mask of pselect(), ppoll() or sigsuspend() unblocks are dispatched.
+ *
+ * Returned Value:
+ *   true if one or more signals were dispatched.
+ *
+ ****************************************************************************/
+
+bool nxsig_unmask_pendingsignal(void)
+{
+  FAR struct tcb_s *rtcb = this_task();
+  bool dispatched;
+
+  dispatched = nxsig_dispatch_unmasked(rtcb);
+
+  if ((rtcb->flags & (TCB_FLAG_SYSCALL | TCB_FLAG_SIGMASK_SAVED)) ==
+      TCB_FLAG_SIGMASK_SAVED)
+    {
+      rtcb->sigprocmask = rtcb->sigsavedmask;
+      rtcb->flags &= ~TCB_FLAG_SIGMASK_SAVED;
+
+      if (nxsig_dispatch_unmasked(rtcb))
+        {
+          dispatched = true;
+        }
+    }
+
+  return dispatched;
+}
+
+/****************************************************************************
+ * Name: nxsig_restoremask
+ *
+ * Description:
+ *   Restore the signal mask after the temporary mask of pselect(), ppoll()
+ *   or sigsuspend().  In a system call, a signal that the temporary mask
+ *   unblocked is still on the pending list: it is dispatched only at the
+ *   end of the system call.  So keep the temporary mask until then, and
+ *   let nxsig_unmask_pendingsignal() restore this one.
+ *
+ * Input Parameters:
+ *   rtcb - The calling thread.
+ *   mask - The signal mask to restore.
+ *
+ ****************************************************************************/
+
+void nxsig_restoremask(FAR struct tcb_s *rtcb, FAR const sigset_t *mask)
+{
+  if ((rtcb->flags & TCB_FLAG_SYSCALL) != 0)
+    {
+      rtcb->sigsavedmask = *mask;
+      rtcb->flags |= TCB_FLAG_SIGMASK_SAVED;
+    }
+  else
+    {
+      rtcb->sigprocmask = *mask;
+    }
 }
