@@ -58,6 +58,7 @@ set(SRCS
     lib_index.c
     lib_rindex.c
     lib_timingsafe_bcmp.c
+    lib_timingsafe_memcmp.c
     lib_strverscmp.c
     lib_mempcpy.c
     lib_rawmemchr.c

@@ -405,6 +405,7 @@
 "tfind","search.h","","FAR void *","FAR const void *","FAR void * const *","int(*)(FAR const void *,FAR const void *)"
 "thrd_exit","threads.h","!defined(CONFIG_DISABLE_PTHREAD)","noreturn","int"
 "time","time.h","","time_t","FAR time_t *"
+"timingsafe_memcmp","string.h","","int","FAR const void *","FAR const void *","size_t"
 "tolower","ctype.h","","int","int"
 "toupper","ctype.h","","int","int"
 "towlower","wchar.h","","wint_t","wint_t"
