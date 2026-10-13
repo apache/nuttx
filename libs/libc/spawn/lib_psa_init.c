@@ -82,6 +82,7 @@ int posix_spawnattr_init(posix_spawnattr_t *attr)
 
   /* Set the default scheduler policy to the policy of this task */
 
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
   ret = _SCHED_GETSCHEDULER(0);
   if (ret < 0)
     {
@@ -89,6 +90,9 @@ int posix_spawnattr_init(posix_spawnattr_t *attr)
     }
 
   attr->policy              = ret;
+#else
+  attr->policy              = SCHED_FIFO;
+#endif
 
   /* Empty signal mask */
 
