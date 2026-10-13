@@ -423,7 +423,7 @@
 #define IGC_IVAR0_RXQ0_SHIFT      (0)        /* Bits 0-4: MSI-X vector assigned to RxQ0 */
 #define IGC_IVAR0_RXQ0_VAL        (1 << 7)   /* Bit 7: Valid bit for RxQ0 */
 #define IGC_IVAR0_TXQ0_SHIFT      (8)        /* Bits 8-12: MSI-X vector assigned to TxQ0 */
-#define IGC_IVAR0_TXQ0_VAL        (1 << 7)   /* Bit 7: Valid bit for TxQ0 */
+#define IGC_IVAR0_TXQ0_VAL        (1 << 15)  /* Bit 15: Valid bit for TxQ0 */
 
 /* Interrupt Vector Allocation Registers - Misc */
 
