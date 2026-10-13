@@ -113,6 +113,12 @@ int task_reparent(pid_t ppid, pid_t chpid)
       /* Get the grandparent task's task group (pgrp) */
 
       ppid = ogrp->tg_ppid;
+      if (ppid <= 0)
+        {
+          ret = -ESRCH;
+          goto errout_with_ints;
+        }
+
       pgrp = task_getgroup(ppid);
     }
   else
@@ -241,6 +247,11 @@ int task_reparent(pid_t ppid, pid_t chpid)
   if (ppid == 0)
     {
       ppid = otcb->group->tg_ppid;
+      if (ppid <= 0)
+        {
+          ret = -ESRCH;
+          goto errout_with_ints;
+        }
     }
 
   /* Get the new parent task's TCB (ptcb) */
