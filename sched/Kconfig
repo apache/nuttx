@@ -614,6 +614,14 @@ config ETC_FATMOUNTPT
 
 endif # ETC_ROMFS
 
+config SCHED_INLINE_ADDPRIORITIZED
+	bool "Inline nxsched_add_prioritized()"
+	default !DEFAULT_SMALL
+	---help---
+		Inline nxsched_add_prioritized() into every scheduler, semaphore and
+		message queue caller for speed.  Disable to emit one shared copy
+		instead and save code space.
+
 config RR_INTERVAL
 	int "Round robin timeslice (MSEC)"
 	default 0
