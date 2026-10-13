@@ -26,11 +26,10 @@
 
 #include <nuttx/config.h>
 
-#include <assert.h>
-
-#include <nuttx/mm/mm.h>
-
-/* Emit the out-of-line definition of mm_addfreechunk() from mm.h. */
+/* Emit the out-of-line definition of mm_addfreechunk().  Must precede
+ * the first inclusion of mm_heap/mm.h, or its include guard suppresses
+ * the definition.
+ */
 #define MM_ADDFREECHUNK_IMPL
 #include "mm_heap/mm.h"
 
