@@ -219,8 +219,8 @@ get_capture_type_inf(FAR capture_mng_t *cmng, uint8_t type);
 static enum capture_state_e
 estimate_next_capture_state(FAR capture_mng_t *cmng,
                             enum capture_state_cause_e cause);
-static void change_capture_state(FAR capture_mng_t *cmng,
-                                 enum capture_state_e next_state);
+static int change_capture_state(FAR capture_mng_t *cmng,
+                                enum capture_state_e next_state);
 static bool is_taking_still_picture(FAR capture_mng_t *cmng);
 static bool is_bufsize_sufficient(FAR capture_mng_t *cmng, uint32_t bufsize);
 static void cleanup_resources(FAR capture_mng_t *cmng);
@@ -999,6 +999,8 @@ static int start_capture(FAR struct capture_mng_s *cmng,
 
   imgdata_interval_t di;
   imgsensor_interval_t si;
+  imgsensor_stream_type_t stream_type;
+  int ret;
 
   ASSERT(fmt && interval && cmng->imgsensor && cmng->imgdata);
 
@@ -1011,15 +1013,39 @@ static int start_capture(FAR struct capture_mng_s *cmng,
   convert_to_imgsensorfmt(&fmt[CAPTURE_FMT_SUB], &sf[IMGSENSOR_FMT_SUB]);
   convert_to_imgsensorinterval(interval, &si);
 
-  IMGDATA_SET_BUF(cmng->imgdata,
-     nr_fmt, df, (FAR uint8_t *)bufaddr, bufsize);
-  IMGDATA_START_CAPTURE(cmng->imgdata,
-     nr_fmt, df, &di, complete_capture, cmng);
-  IMGSENSOR_START_CAPTURE(cmng->imgsensor,
-     type == V4L2_BUF_TYPE_VIDEO_CAPTURE ?
-     IMGSENSOR_STREAM_TYPE_VIDEO : IMGSENSOR_STREAM_TYPE_STILL,
-     nr_fmt, sf, &si);
-  return OK;
+  stream_type = type == V4L2_BUF_TYPE_VIDEO_CAPTURE ?
+                IMGSENSOR_STREAM_TYPE_VIDEO :
+                IMGSENSOR_STREAM_TYPE_STILL;
+
+  ret = IMGDATA_SET_BUF(cmng->imgdata, nr_fmt, df,
+                        (FAR uint8_t *)bufaddr, bufsize);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = IMGDATA_START_CAPTURE(cmng->imgdata, nr_fmt, df, &di,
+                              complete_capture, cmng);
+  if (ret < 0)
+    {
+      /* Nothing started, so there is nothing to unwind. */
+
+      return ret;
+    }
+
+  ret = IMGSENSOR_START_CAPTURE(cmng->imgsensor, stream_type,
+                                nr_fmt, sf, &si);
+  if (ret < 0)
+    {
+      /* The sensor never started, so only the data half is rolled back.
+       * Calling the sensor's stop here would ask it to tear down a stream
+       * it never opened.
+       */
+
+      IMGDATA_STOP_CAPTURE(cmng->imgdata);
+    }
+
+  return ret;
 }
 
 static void stop_capture(FAR struct capture_mng_s *cmng,
@@ -1033,11 +1059,12 @@ static void stop_capture(FAR struct capture_mng_s *cmng,
     IMGSENSOR_STREAM_TYPE_VIDEO : IMGSENSOR_STREAM_TYPE_STILL);
 }
 
-static void change_capture_state(FAR capture_mng_t *cmng,
-                                 enum capture_state_e next_state)
+static int change_capture_state(FAR capture_mng_t *cmng,
+                                enum capture_state_e next_state)
 {
   enum capture_state_e current_state = cmng->capture_inf.state;
   enum capture_state_e updated_next_state = next_state;
+  int ret;
 
   if (current_state != CAPTURE_STATE_CAPTURE &&
       next_state    == CAPTURE_STATE_CAPTURE)
@@ -1047,15 +1074,20 @@ static void change_capture_state(FAR capture_mng_t *cmng,
 
       if (container != NULL)
         {
+          ret = start_capture(cmng,
+                              V4L2_BUF_TYPE_VIDEO_CAPTURE,
+                              cmng->capture_inf.nr_fmt,
+                              cmng->capture_inf.fmt,
+                              &cmng->capture_inf.clip,
+                              &cmng->capture_inf.frame_interval,
+                              container->buf.m.userptr,
+                              container->buf.length);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
           cmng->capture_inf.seqnum = 0;
-          start_capture(cmng,
-                        V4L2_BUF_TYPE_VIDEO_CAPTURE,
-                        cmng->capture_inf.nr_fmt,
-                        cmng->capture_inf.fmt,
-                        &cmng->capture_inf.clip,
-                        &cmng->capture_inf.frame_interval,
-                        container->buf.m.userptr,
-                        container->buf.length);
         }
       else
         {
@@ -1069,6 +1101,7 @@ static void change_capture_state(FAR capture_mng_t *cmng,
     }
 
   cmng->capture_inf.state = updated_next_state;
+  return OK;
 }
 
 static bool is_taking_still_picture(FAR capture_mng_t *cmng)
@@ -1555,6 +1588,13 @@ static size_t get_bufsize(FAR video_format_t *vf)
       case V4L2_PIX_FMT_ENTROPY:
         return ret;
     }
+}
+
+static bool is_bufsize_exact(FAR video_format_t *vf)
+{
+  return vf->sizeimage > 0 ||
+         (vf->pixelformat != V4L2_PIX_FMT_JPEG &&
+          vf->pixelformat != V4L2_PIX_FMT_ENTROPY);
 }
 
 static size_t get_heapsize(FAR capture_type_inf_t *type_inf)
@@ -2548,7 +2588,9 @@ static int capture_qbuf(FAR struct file *filep,
   FAR capture_mng_t *cmng = inode->i_private;
   FAR capture_type_inf_t *type_inf;
   FAR vbuf_container_t *container;
+  FAR vbuf_container_t *queued;
   enum capture_state_e next_capture_state;
+  int ret = OK;
 
   if (cmng == NULL || buf == NULL)
     {
@@ -2556,7 +2598,33 @@ static int capture_qbuf(FAR struct file *filep,
     }
 
   type_inf = get_capture_type_inf(cmng, buf->type);
-  if (type_inf == NULL)
+  if (type_inf == NULL ||
+      buf->index >= type_inf->bufinf.container_size)
+    {
+      return -EINVAL;
+    }
+
+#ifdef CONFIG_DMA_SHARED_BUFFER
+  if (buf->memory != V4L2_MEMORY_MMAP &&
+      buf->memory != V4L2_MEMORY_USERPTR &&
+      buf->memory != V4L2_MEMORY_DMABUF)
+#else
+  if (buf->memory != V4L2_MEMORY_MMAP &&
+      buf->memory != V4L2_MEMORY_USERPTR)
+#endif
+    {
+      return -EINVAL;
+    }
+
+  if (buf->memory == V4L2_MEMORY_MMAP && type_inf->bufheap == NULL)
+    {
+      return -EINVAL;
+    }
+
+  if (buf->memory == V4L2_MEMORY_USERPTR &&
+      (buf->m.userptr == 0 ||
+       (is_bufsize_exact(&type_inf->fmt[CAPTURE_FMT_MAIN]) &&
+        buf->length < get_bufsize(&type_inf->fmt[CAPTURE_FMT_MAIN]))))
     {
       return -EINVAL;
     }
@@ -2572,6 +2640,7 @@ static int capture_qbuf(FAR struct file *filep,
       return -ENOMEM;
     }
 
+  queued = container;
   memcpy(&container->buf, buf, sizeof(struct v4l2_buffer));
   if (buf->memory == V4L2_MEMORY_MMAP)
     {
@@ -2588,12 +2657,6 @@ static int capture_qbuf(FAR struct file *filep,
 
       FAR struct capture_dmabuf_s *dbinfo;
 
-      if (buf->index >= V4L2_REQBUFS_COUNT_MAX)
-        {
-          video_framebuff_free_container(&type_inf->bufinf, container);
-          return -EINVAL;
-        }
-
       dbinfo = &type_inf->dmabufinf[buf->index];
 
       /* Release previous import if any */
@@ -2607,8 +2670,10 @@ static int capture_qbuf(FAR struct file *filep,
           return -EINVAL;
         }
 
-      /* A dmabuf smaller than one frame would hand the lower half a target
-       * it may write past the end of.
+      /* The size is only known once the fd is resolved, so this check
+       * cannot move up with the MMAP and USERPTR ones.  A dmabuf smaller
+       * than one frame would hand the lower half a target it may write
+       * past the end of.
        */
 
       if (dbinfo->dmabuf->size <
@@ -2657,7 +2722,7 @@ static int capture_qbuf(FAR struct file *filep,
           nxmutex_lock(&cmng->still_inf.lock_state);
           next_capture_state =
             estimate_next_capture_state(cmng, CAUSE_CAPTURE_START);
-          change_capture_state(cmng, next_capture_state);
+          ret = change_capture_state(cmng, next_capture_state);
           nxmutex_unlock(&cmng->still_inf.lock_state);
         }
       else
@@ -2666,22 +2731,38 @@ static int capture_qbuf(FAR struct file *filep,
             video_framebuff_get_vacant_container(&type_inf->bufinf);
           if (container != NULL)
             {
-              type_inf->seqnum = 0;
-              start_capture(cmng,
-                            buf->type,
-                            type_inf->nr_fmt,
-                            type_inf->fmt,
-                            &type_inf->clip,
-                            &type_inf->frame_interval,
-                            container->buf.m.userptr,
-                            container->buf.length);
-              type_inf->state = CAPTURE_STATE_CAPTURE;
+              ret = start_capture(cmng,
+                                  buf->type,
+                                  type_inf->nr_fmt,
+                                  type_inf->fmt,
+                                  &type_inf->clip,
+                                  &type_inf->frame_interval,
+                                  container->buf.m.userptr,
+                                  container->buf.length);
+              if (ret == OK)
+                {
+                  type_inf->seqnum = 0;
+                  type_inf->state = CAPTURE_STATE_CAPTURE;
+                }
             }
         }
     }
 
+  if (ret < 0 &&
+      video_framebuff_cancel_container(&type_inf->bufinf, queued))
+    {
+#ifdef CONFIG_DMA_SHARED_BUFFER
+      if (buf->memory == V4L2_MEMORY_DMABUF)
+        {
+          capture_dmabuf_release(type_inf, buf->index);
+        }
+#endif
+
+      video_framebuff_free_container(&type_inf->bufinf, queued);
+    }
+
   nxmutex_unlock(&type_inf->lock_state);
-  return OK;
+  return ret;
 }
 
 static int capture_dqbuf(FAR struct file *filep,
@@ -2693,6 +2774,7 @@ static int capture_dqbuf(FAR struct file *filep,
   FAR vbuf_container_t *container;
   FAR sem_t *dqbuf_wait_flg;
   enum capture_state_e next_capture_state;
+  int ret;
 
   if (cmng == NULL || buf == NULL)
     {
@@ -2728,8 +2810,12 @@ static int capture_dqbuf(FAR struct file *filep,
               nxmutex_lock(&cmng->mutex);
               next_capture_state =
                 estimate_next_capture_state(cmng, CAUSE_CAPTURE_DQBUF);
-              change_capture_state(cmng, next_capture_state);
+              ret = change_capture_state(cmng, next_capture_state);
               nxmutex_unlock(&cmng->mutex);
+              if (ret < 0)
+                {
+                  return ret;
+                }
             }
 
           nxsem_wait_uninterruptible(dqbuf_wait_flg);
@@ -3083,7 +3169,7 @@ static int capture_streamon(FAR struct file *filep,
     {
       next_capture_state =
         estimate_next_capture_state(cmng, CAUSE_CAPTURE_START);
-      change_capture_state(cmng, next_capture_state);
+      ret = change_capture_state(cmng, next_capture_state);
     }
 
   nxmutex_unlock(&type_inf->lock_state);
@@ -3127,7 +3213,7 @@ static int capture_streamoff(FAR struct file *filep,
     {
       next_capture_state =
         estimate_next_capture_state(cmng, CAUSE_CAPTURE_STOP);
-      change_capture_state(cmng, next_capture_state);
+      ret = change_capture_state(cmng, next_capture_state);
     }
 
   nxmutex_unlock(&cmng->mutex);
@@ -3191,33 +3277,54 @@ static int capture_takepict_start(FAR struct file *filep,
       /* Control video stream prior to still stream */
 
       nxmutex_lock(&cmng->mutex);
-
       next_capture_state = estimate_next_capture_state(cmng,
-                                                   CAUSE_STILL_START);
-      change_capture_state(cmng, next_capture_state);
-
+                                                       CAUSE_STILL_START);
+      ret = change_capture_state(cmng, next_capture_state);
       nxmutex_unlock(&cmng->mutex);
 
       container =
         video_framebuff_get_vacant_container(&cmng->still_inf.bufinf);
-      if (container != NULL)
+      if (ret == OK && container != NULL)
         {
-          /* Start still stream capture */
-
-          start_capture(cmng,
-                        V4L2_BUF_TYPE_STILL_CAPTURE,
-                        cmng->still_inf.nr_fmt,
-                        cmng->still_inf.fmt,
-                        &cmng->still_inf.clip,
-                        &cmng->still_inf.frame_interval,
-                        container->buf.m.userptr,
-                        container->buf.length);
-
-          cmng->still_inf.state = CAPTURE_STATE_CAPTURE;
+          ret = start_capture(cmng,
+                              V4L2_BUF_TYPE_STILL_CAPTURE,
+                              cmng->still_inf.nr_fmt,
+                              cmng->still_inf.fmt,
+                              &cmng->still_inf.clip,
+                              &cmng->still_inf.frame_interval,
+                              container->buf.m.userptr,
+                              container->buf.length);
+          if (ret == OK)
+            {
+              cmng->still_inf.seqnum = 0;
+              cmng->still_inf.state = CAPTURE_STATE_CAPTURE;
+            }
         }
-      else
+      else if (ret == OK)
         {
           cmng->still_inf.state = CAPTURE_STATE_STREAMON;
+        }
+
+      if (ret < 0)
+        {
+          cmng->still_inf.state = CAPTURE_STATE_STREAMOFF;
+          cmng->still_inf.remaining_capnum = REMAINING_CAPNUM_INFINITY;
+
+          nxmutex_lock(&cmng->capture_inf.lock_state);
+          next_capture_state = estimate_next_capture_state(cmng,
+                                                           CAUSE_STILL_STOP);
+          if (change_capture_state(cmng, next_capture_state) < 0)
+            {
+              /* Resuming the video stream failed as well, and the state was
+               * left at STREAMON by change_capture_state().  Record what
+               * the lower half is really doing, or the next DQBUF waits
+               * forever for a stream that is not running.
+               */
+
+              cmng->capture_inf.state = CAPTURE_STATE_STREAMOFF;
+            }
+
+          nxmutex_unlock(&cmng->capture_inf.lock_state);
         }
     }
 
@@ -3263,7 +3370,7 @@ static int capture_takepict_stop(FAR struct file *filep,
       nxmutex_lock(&cmng->capture_inf.lock_state);
       next_capture_state = estimate_next_capture_state(cmng,
                                                    CAUSE_STILL_STOP);
-      change_capture_state(cmng, next_capture_state);
+      ret = change_capture_state(cmng, next_capture_state);
       nxmutex_unlock(&cmng->capture_inf.lock_state);
     }
 
