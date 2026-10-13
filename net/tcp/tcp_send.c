@@ -174,8 +174,24 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
       tcp->wnd[1] = recvwndo & 0xff;
     }
 
+#ifdef CONFIG_NET_TCPURGDATA
+  /* If caller explicitly asked for URG, set the urgent pointer from conn */
+
+  if ((tcp->flags & TCP_URG) != 0 && conn->urg_offset > 0)
+    {
+      tcp->urgp[0] = (uint8_t)(conn->urg_offset >> 8);
+      tcp->urgp[1] = (uint8_t)(conn->urg_offset & 0xff);
+      conn->urg_offset = 0;
+    }
+  else
+    {
+      tcp->urgp[0] = 0;
+      tcp->urgp[1] = 0;
+    }
+#else
   tcp->urgp[0] = 0;
   tcp->urgp[1] = 0;
+#endif
 
   /* Update device buffer length before setup the IP header */
 
@@ -471,6 +487,7 @@ void tcp_reset(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
   else
     {
       uint32_t ackno;
+
       tcp->flags = TCP_RST | TCP_ACK;
       tcp_setsequence(tcp->seqno, 0);
       ackno = tcp_addsequence(tcp->ackno, acklen);

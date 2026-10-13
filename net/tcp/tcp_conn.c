@@ -691,6 +691,12 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
 
       nxsem_init(&conn->snd_sem, 0, 0);
 #endif
+#ifdef CONFIG_NET_TCPURGDATA
+      conn->urg_data      = 0;
+      conn->urg_state     = TCP_URG_NOTSEEN;
+      conn->urg_offset    = 0;
+      conn->urg_seq       = 0;
+#endif
       nxrmutex_init(&conn->sconn.s_lock);
 
       /* Set the default value of mss to max, this field will changed when

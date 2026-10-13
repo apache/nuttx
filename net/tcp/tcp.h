@@ -176,6 +176,15 @@ struct tcp_sack_s
   uint32_t right;   /* Right edge of the SACK */
 };
 
+#ifdef CONFIG_NET_TCPURGDATA
+/* Urgent data states */
+
+#define TCP_URG_NOTSEEN     0     /* No urgent data received or announced */
+#define TCP_URG_AWAITING    1     /* Urgent pointer announced, byte pending */
+#define TCP_URG_VALID       2     /* Urgent byte received and available */
+#define TCP_URG_READ        3     /* Urgent byte was read by recv(..., MSG_OOB) */
+#endif
+
 struct tcp_conn_s
 {
   /* Common prologue of all connection structures. */
@@ -297,6 +306,15 @@ struct tcp_conn_s
 
   FAR struct iob_s *readahead;   /* Read-ahead buffering */
 
+#ifdef CONFIG_NET_TCPURGDATA
+  /* Urgent (out-of-band) data handling */
+
+  uint8_t           urg_data;     /* Received urgent byte */
+  uint8_t           urg_state;    /* Urgent data state (TCP_URG_*) */
+  uint16_t          urg_offset;   /* Outgoing urgent data offset (0 if none) */
+  uint32_t          urg_seq;      /* Sequence number of urgent data byte */
+#endif
+
 #ifdef CONFIG_NET_TCP_OUT_OF_ORDER
 
   /* Number of out-of-order segments */
@@ -414,6 +432,9 @@ struct tcp_wrbuffer_s
   uint8_t    wb_nack;      /* The number of ack count */
 #endif
   struct iob_s *wb_iob;    /* Head of the I/O buffer chain */
+#ifdef CONFIG_NET_TCPURGDATA
+  uint16_t   wb_urg;       /* Offset of urgent data in this buffer */
+#endif
 };
 #endif
 
