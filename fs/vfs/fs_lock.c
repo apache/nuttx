@@ -58,28 +58,21 @@
  * Private Types
  ****************************************************************************/
 
-struct file_lock_s
-{
-  struct flock     fl_lock;  /* File lock related information */
-  FAR struct file  *fl_file; /* Identifies the file descriptor information
-                              * held by the caller
-                              */
-  struct list_node fl_node;  /* Used to manage each filelock by means of a
-                              * chained list.
-                              */
-};
-
 struct file_lock_bucket_s
 {
   struct list_node list;         /* Manage a chained list for each
                                   * filelock
                                   */
-  sem_t            wait;         /* Blocking lock, called when SETLKW is
-                                  * called and there is a conflict.
-                                  */
-  size_t           nwaiter;      /* Indicates how many blocking locks are
-                                  * currently blocked.
-                                  */
+  struct list_node waiters;      /* Pending file_setlk_async() requests. */
+};
+
+/* A blocking file_setlk() waiting on its own file_setlk_async() request. */
+
+struct file_lock_sync_s
+{
+  struct file_lock_waiter_s waiter;
+  sem_t                     done;
+  int                       result;
 };
 
 /****************************************************************************
@@ -245,7 +238,7 @@ static void file_lock_delete_bucket(FAR struct file_lock_bucket_s *bucket,
    * released
    */
 
-  if (list_is_empty(&bucket->list) && bucket->nwaiter == 0)
+  if (list_is_empty(&bucket->list) && list_is_empty(&bucket->waiters))
     {
       /* At this point, the file has no lock information context, so we can
        * remove it from the hash table, and the return result is 0 or 1 means
@@ -260,27 +253,40 @@ static void file_lock_delete_bucket(FAR struct file_lock_bucket_s *bucket,
 
 /****************************************************************************
  * Name: file_lock_is_conflict
+ *
+ * Description:
+ *   Return the first lock on the bucket that conflicts with request, or
+ *   NULL if there is none.
+ *
  ****************************************************************************/
 
-static bool file_lock_is_conflict(FAR struct flock *request,
-                                  FAR struct file *request_filep,
-                                  FAR struct file_lock_s *internal)
+static FAR struct file_lock_s *
+file_lock_is_conflict(FAR struct file_lock_bucket_s *bucket,
+                      FAR struct flock *request,
+                      FAR struct file *request_filep)
 {
-  /* If the request is not exactly to the left or right of the internal,
-   * then there is an overlap.
-   */
+  FAR struct file_lock_s *file_lock;
+  FAR struct flock *internal;
 
-  if (request->l_start <= internal->fl_lock.l_end && request->l_end >=
-      internal->fl_lock.l_start)
+  list_for_every_entry(&bucket->list, file_lock, struct file_lock_s, fl_node)
     {
-      if (request->l_type == F_WRLCK || internal->fl_lock.l_type == F_WRLCK)
+      internal = &file_lock->fl_lock;
+
+      /* If the request is not exactly to the left or right of the internal,
+       * then there is an overlap.
+       */
+
+      if (request->l_start <= internal->l_end &&
+          request->l_end >= internal->l_start &&
+          (request->l_type == F_WRLCK || internal->l_type == F_WRLCK) &&
+          (request->l_pid != internal->l_pid ||
+           request_filep != file_lock->fl_file))
         {
-          return request->l_pid != internal->fl_lock.l_pid ||
-                 request_filep != internal->fl_file;
+          return file_lock;
         }
     }
 
-  return false;
+  return NULL;
 }
 
 /****************************************************************************
@@ -350,7 +356,7 @@ file_lock_create_bucket(FAR const char *filepath)
     }
 
   list_initialize(&bucket->list);
-  nxsem_init(&bucket->wait, 0, 0);
+  list_initialize(&bucket->waiters);
 
   return bucket;
 }
@@ -548,6 +554,79 @@ static int file_lock_modify(FAR struct file *filep,
 }
 
 /****************************************************************************
+ * Name: file_lock_wake
+ *
+ * Description:
+ *   A lock on the bucket changed.  Grant every waiter that no longer
+ *   conflicts, moving it to the caller supplied granted list.  Callbacks
+ *   must run outside g_protect_lock, so the caller fires them after
+ *   unlocking.  Called with g_protect_lock held.
+ *
+ ****************************************************************************/
+
+static void file_lock_wake(FAR struct file_lock_bucket_s *bucket,
+                           FAR struct list_node *granted)
+{
+  FAR struct file_lock_waiter_s *waiter;
+
+restart:
+  list_for_every_entry(&bucket->waiters, waiter,
+                       struct file_lock_waiter_s, fl.fl_node)
+    {
+      if (file_lock_is_conflict(bucket, &waiter->fl.fl_lock,
+                                waiter->fl.fl_file))
+        {
+          continue;
+        }
+
+      if (file_lock_modify(waiter->fl.fl_file, bucket,
+                           &waiter->fl.fl_lock) < 0)
+        {
+          continue;
+        }
+
+      list_delete(&waiter->fl.fl_node);
+      list_add_tail(granted, &waiter->fl.fl_node);
+
+      /* Granting changed the lock set; re-evaluate the remaining waiters. */
+
+      goto restart;
+    }
+}
+
+/****************************************************************************
+ * Name: file_lock_fire
+ *
+ * Description:
+ *   Run the callbacks of the waiters collected on list.  Must be called
+ *   after g_protect_lock is released.
+ *
+ ****************************************************************************/
+
+static void file_lock_fire(FAR struct list_node *list, int result)
+{
+  FAR struct file_lock_waiter_s *waiter;
+
+  while ((waiter = list_remove_head_type(list, struct file_lock_waiter_s,
+                                         fl.fl_node)) != NULL)
+    {
+      waiter->cb(waiter->arg, result);
+    }
+}
+
+/****************************************************************************
+ * Name: file_setlk_wakeup
+ ****************************************************************************/
+
+static void file_setlk_wakeup(FAR void *arg, int result)
+{
+  FAR struct file_lock_sync_s *sync = arg;
+
+  sync->result = result;
+  nxsem_post(&sync->done);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -600,14 +679,11 @@ int file_getlk(FAR struct file *filep, FAR struct flock *flock)
   bucket = file_lock_find_bucket(path);
   if (bucket != NULL)
     {
-      list_for_every_entry(&bucket->list, file_lock, struct file_lock_s,
-                           fl_node)
+      file_lock = file_lock_is_conflict(bucket, flock, filep);
+      if (file_lock != NULL)
         {
-          if (file_lock_is_conflict(flock, filep, file_lock))
-            {
-              memcpy(flock, &file_lock->fl_lock, sizeof(*flock));
-              goto out;
-            }
+          memcpy(flock, &file_lock->fl_lock, sizeof(*flock));
+          goto out;
         }
     }
 
@@ -654,11 +730,64 @@ out_free:
 int file_setlk(FAR struct file *filep, FAR struct flock *flock,
                bool nonblock)
 {
+  struct file_lock_sync_s sync;
+  int ret;
+
+  if (nonblock)
+    {
+      return file_setlk_async(filep, flock, NULL);
+    }
+
+  nxsem_init(&sync.done, 0, 0);
+  sync.waiter.cb  = file_setlk_wakeup;
+  sync.waiter.arg = &sync;
+
+  ret = file_setlk_async(filep, flock, &sync.waiter);
+  if (ret == -EINPROGRESS)
+    {
+      ret = nxsem_wait(&sync.done);
+      if (ret < 0 && file_setlk_cancel(&sync.waiter) < 0)
+        {
+          /* Already granted: sync is referenced until the callback posts. */
+
+          do
+            {
+              ret = nxsem_wait_uninterruptible(&sync.done);
+            }
+          while (ret < 0);
+        }
+
+      if (ret >= 0)
+        {
+          ret = sync.result;
+        }
+    }
+
+  nxsem_destroy(&sync.done);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: file_setlk_async
+ *
+ * Description:
+ *   Set or clear an advisory lock without blocking.  On a conflict the
+ *   request is parked in waiter and waiter->cb runs (outside any internal
+ *   lock) once a later release grants it.  A NULL waiter makes a conflict
+ *   fail with -EAGAIN.
+ *
+ ****************************************************************************/
+
+int file_setlk_async(FAR struct file *filep, FAR struct flock *flock,
+                     FAR struct file_lock_waiter_s *waiter)
+{
   FAR struct file_lock_bucket_s *bucket;
-  FAR struct file_lock_s *file_lock;
+  struct list_node granted;
   FAR char *path;
   struct flock request;
   int ret;
+
+  list_initialize(&granted);
 
   path = lib_get_pathbuffer();
   if (path == NULL)
@@ -708,38 +837,26 @@ int file_setlk(FAR struct file *filep, FAR struct flock *flock,
           goto out_lock;
         }
     }
-  else if (request.l_type != F_UNLCK)
+
+  if (request.l_type != F_UNLCK &&
+      file_lock_is_conflict(bucket, &request, filep))
     {
-retry:
-      list_for_every_entry(&bucket->list, file_lock, struct file_lock_s,
-                           fl_node)
+      if (waiter == NULL)
         {
-          if (file_lock_is_conflict(&request, filep, file_lock))
-            {
-              if (nonblock)
-                {
-                  ret = -EAGAIN;
-                  goto out;
-                }
-
-              bucket->nwaiter++;
-              nxmutex_unlock(&g_protect_lock);
-              ret = nxsem_wait(&bucket->wait);
-              nxmutex_lock(&g_protect_lock);
-              bucket->nwaiter--;
-
-              /* A signal ends the wait with -EINTR, a cancel with
-               * -ECANCELED.
-               */
-
-              if (ret < 0)
-                {
-                  goto out;
-                }
-
-              goto retry;
-            }
+          ret = -EAGAIN;
+          goto out;
         }
+
+      /* filep may hold no lock yet; f_locked makes file_closelk() drop
+       * the waiter on close.
+       */
+
+      waiter->fl.fl_lock = request;
+      waiter->fl.fl_file = filep;
+      list_add_tail(&bucket->waiters, &waiter->fl.fl_node);
+      filep->f_locked = true;
+      ret = -EINPROGRESS;
+      goto out_lock;
     }
 
   ret = file_lock_modify(filep, bucket, &request);
@@ -752,17 +869,71 @@ retry:
 
   filep->f_locked = true;
 
-  /* When there is a lock change, we need to wake up the blocking lock */
+  /* A lock change may grant waiters. */
 
-  if (bucket->nwaiter > 0)
-    {
-      nxsem_post(&bucket->wait);
-    }
+  file_lock_wake(bucket, &granted);
 
 out:
   file_lock_delete_bucket(bucket, path);
 out_lock:
   nxmutex_unlock(&g_protect_lock);
+out_free:
+  lib_put_pathbuffer(path);
+  file_lock_fire(&granted, OK);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: file_setlk_cancel
+ *
+ * Description:
+ *   Remove a pending file_setlk_async request whose callback has not run.
+ *   The callback is not invoked.
+ *
+ ****************************************************************************/
+
+int file_setlk_cancel(FAR struct file_lock_waiter_s *waiter)
+{
+  FAR struct file_lock_bucket_s *bucket;
+  FAR struct file_lock_waiter_s *entry;
+  FAR char *path;
+  int ret;
+
+  path = lib_get_pathbuffer();
+  if (path == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  ret = file_lock_get_path(waiter->fl.fl_file, path);
+  if (ret < 0)
+    {
+      goto out_free;
+    }
+
+  ret = -ENOENT;
+
+  nxmutex_lock(&g_protect_lock);
+
+  bucket = file_lock_find_bucket(path);
+  if (bucket != NULL)
+    {
+      list_for_every_entry(&bucket->waiters, entry,
+                           struct file_lock_waiter_s, fl.fl_node)
+        {
+          if (entry == waiter)
+            {
+              list_delete(&waiter->fl.fl_node);
+              ret = OK;
+              break;
+            }
+        }
+
+      file_lock_delete_bucket(bucket, path);
+    }
+
+  nxmutex_unlock(&g_protect_lock);
+
 out_free:
   lib_put_pathbuffer(path);
   return ret;
@@ -784,9 +955,16 @@ void file_closelk(FAR struct file *filep)
   FAR struct file_lock_bucket_s *bucket;
   FAR struct file_lock_s *file_lock;
   FAR struct file_lock_s *temp;
+  FAR struct file_lock_waiter_s *waiter;
+  FAR struct file_lock_waiter_s *wtmp;
+  struct list_node dropped;
+  struct list_node granted;
   FAR char *path;
   bool deleted = false;
   int ret;
+
+  list_initialize(&dropped);
+  list_initialize(&granted);
 
   if (!filep->f_locked)
     {
@@ -829,23 +1007,34 @@ void file_closelk(FAR struct file *filep)
         {
           deleted = true;
           file_lock_delete(file_lock);
-          filep->f_locked = false;
         }
     }
 
-  if (bucket->nwaiter > 0 && deleted)
+  list_for_every_entry_safe(&bucket->waiters, waiter, wtmp,
+                            struct file_lock_waiter_s, fl.fl_node)
     {
-      nxsem_post(&bucket->wait);
+      if (waiter->fl.fl_file == filep)
+        {
+          list_delete(&waiter->fl.fl_node);
+          list_add_tail(&dropped, &waiter->fl.fl_node);
+        }
     }
-  else if (deleted)
+
+  filep->f_locked = false;
+
+  if (deleted)
     {
-      file_lock_delete_bucket(bucket, path);
+      file_lock_wake(bucket, &granted);
     }
+
+  file_lock_delete_bucket(bucket, path);
 
 out:
   nxmutex_unlock(&g_protect_lock);
 out_free:
   lib_put_pathbuffer(path);
+  file_lock_fire(&dropped, -EBADF);
+  file_lock_fire(&granted, OK);
 }
 
 /****************************************************************************

@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/list.h>
 #include <fcntl.h>
 
 #ifdef CONFIG_FS_PROFILER
@@ -45,6 +46,36 @@
 #  define file_getlk(filep, flock) ((void)flock, -ENOSYS)
 #  define file_setlk(filep, flock, nonblock) ((void)flock, -ENOSYS)
 #else
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+struct file_lock_s
+{
+  struct flock     fl_lock;  /* File lock related information */
+  FAR struct file  *fl_file; /* Identifies the file descriptor information
+                              * held by the caller
+                              */
+  struct list_node fl_node;  /* Used to manage each filelock by means of a
+                              * chained list.
+                              */
+};
+
+/* Advisory lock grant callback (see file_setlk_async).  result is 0 when
+ * the lock was granted, or a negated errno when the request was dropped.
+ */
+
+typedef CODE void (*file_lock_cb_t)(FAR void *arg, int result);
+
+/* Caller owned storage for one pending file_setlk_async request. */
+
+struct file_lock_waiter_s
+{
+  struct file_lock_s fl;     /* Requested lock, parked on the bucket */
+  file_lock_cb_t     cb;     /* Set by the caller */
+  FAR void           *arg;   /* Set by the caller */
+};
 
 /****************************************************************************
  * Public Function Prototypes
@@ -109,6 +140,38 @@ int file_getlk(FAR struct file *filep, FAR struct flock *flock);
 
 int file_setlk(FAR struct file *filep, FAR struct flock *flock,
                bool nonblock);
+
+/****************************************************************************
+ * Name: file_setlk_async
+ *
+ * Description:
+ *   Set or clear an advisory lock without blocking.  On a conflict the
+ *   request is parked in waiter and waiter->cb is invoked once the lock is
+ *   granted.  A NULL waiter makes a conflict fail with -EAGAIN.
+ *
+ * Returned Value:
+ *   0 if the request completed immediately (cb will NOT be called),
+ *   -EINPROGRESS if cb will be called later, or a negated errno on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int file_setlk_async(FAR struct file *filep, FAR struct flock *flock,
+                     FAR struct file_lock_waiter_s *waiter);
+
+/****************************************************************************
+ * Name: file_setlk_cancel
+ *
+ * Description:
+ *   Cancel a pending file_setlk_async request before its callback has run;
+ *   the callback is not invoked.
+ *
+ * Returned Value:
+ *   0 if the pending request was removed, -ENOENT if it was not pending.
+ *
+ ****************************************************************************/
+
+int file_setlk_cancel(FAR struct file_lock_waiter_s *waiter);
 
 #endif /* CONFIG_FS_LOCK_BUCKET_SIZE */
 
