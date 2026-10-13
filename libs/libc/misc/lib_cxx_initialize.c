@@ -60,7 +60,6 @@
 
 void lib_cxx_initialize(void)
 {
-#ifdef CONFIG_HAVE_CXXINITIALIZE
   static int inited = 0;
 
   if (inited == 0)
@@ -74,6 +73,7 @@ void lib_cxx_initialize(void)
       for (initp = _sinit; initp < _einit; initp++)
         {
           initializer_t initializer = *initp;
+
           sinfo("initp: %p initializer: %p\n", initp, initializer);
 
           /* Make sure that the address is non-NULL. Some toolchains may put
@@ -89,5 +89,4 @@ void lib_cxx_initialize(void)
 
       inited = 1;
     }
-#endif
 }
