@@ -317,6 +317,17 @@ void work_timer_reset(FAR struct kwork_wqueue_s *wqueue)
 }
 
 /****************************************************************************
+ * Name: work_initialize
+ *
+ * Description:
+ *   Initialize the kernel work queue state.  Must run before the first
+ *   work_queue() call.
+ *
+ ****************************************************************************/
+
+void work_initialize(void);
+
+/****************************************************************************
  * Name: work_start_highpri
  *
  * Description:
