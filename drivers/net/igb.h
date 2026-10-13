@@ -309,6 +309,20 @@
 #define IGB_CTRL_VME              (1 << 30)  /* Bit 30: VLAN Mode Enable */
 #define IGB_CTRL_PHYRST           (1 << 31)  /* Bit 31: PHY Reset */
 
+/* MDI Control Register */
+
+#define IGB_MDIC_DATA_MASK        (0xffff)   /* Bits 0-15: Data */
+#define IGB_MDIC_REGADD_SHIFT     (16)       /* Bits 16-20: PHY register address */
+#define IGB_MDIC_PHYADD_SHIFT     (21)       /* Bits 21-25: PHY address */
+#define IGB_MDIC_OP_WRITE         (1 << 26)  /* Bits 26-27: 01b: MDI write */
+#define IGB_MDIC_OP_READ          (2 << 26)  /* Bits 26-27: 10b: MDI read */
+#define IGB_MDIC_READY            (1 << 28)  /* Bit 28: Ready */
+#define IGB_MDIC_ERROR            (1 << 30)  /* Bit 30: Error */
+
+/* Address of the internal copper PHY */
+
+#define IGB_PHY_ADDR              (1)
+
 /* Device Status Regiuster */
 
 #define IGB_STATUS_FD             (1 << 0)   /* Bit 0: Full Duplex */

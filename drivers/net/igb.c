@@ -36,6 +36,7 @@
 #include <nuttx/addrenv.h>
 #include <nuttx/spinlock.h>
 
+#include <nuttx/net/mii.h>
 #include <nuttx/net/netdev_lowerhalf.h>
 #include <nuttx/pci/pci.h>
 #include <nuttx/net/igb.h>
@@ -1156,6 +1157,70 @@ static void igb_phy_reset(FAR struct igb_driver_s *priv)
 }
 
 /*****************************************************************************
+ * Name: igb_mdic
+ *
+ * Description:
+ *   Run one MDI read or write cycle on the internal PHY.
+ *
+ *****************************************************************************/
+
+static int igb_mdic(FAR struct igb_driver_s *priv, uint32_t op, int reg,
+                    FAR uint16_t *data)
+{
+  uint32_t regval;
+  int      i;
+
+  igb_putreg_mem(priv, IGB_MDIC,
+                 op | (IGB_PHY_ADDR << IGB_MDIC_PHYADD_SHIFT) |
+                 (reg << IGB_MDIC_REGADD_SHIFT) | *data);
+
+  for (i = 0; i < 1000; i++)
+    {
+      regval = igb_getreg_mem(priv, IGB_MDIC);
+      if (regval & IGB_MDIC_READY)
+        {
+          if (regval & IGB_MDIC_ERROR)
+            {
+              return -EIO;
+            }
+
+          *data = regval & IGB_MDIC_DATA_MASK;
+          return OK;
+        }
+
+      up_udelay(50);
+    }
+
+  return -ETIMEDOUT;
+}
+
+/*****************************************************************************
+ * Name: igb_phy_autoneg
+ *
+ * Description:
+ *   Restart PHY auto-negotiation.
+ *
+ *****************************************************************************/
+
+static void igb_phy_autoneg(FAR struct igb_driver_s *priv)
+{
+  uint16_t bmcr = 0;
+  int      ret;
+
+  ret = igb_mdic(priv, IGB_MDIC_OP_READ, MII_MCR, &bmcr);
+  if (ret == OK)
+    {
+      bmcr |= MII_MCR_ANENABLE | MII_MCR_ANRESTART;
+      ret = igb_mdic(priv, IGB_MDIC_OP_WRITE, MII_MCR, &bmcr);
+    }
+
+  if (ret != OK)
+    {
+      nerr("PHY auto-negotiation restart failed %d\n", ret);
+    }
+}
+
+/*****************************************************************************
  * Name: igb_enable
  *
  * Description:
@@ -1241,6 +1306,12 @@ static void igb_enable(FAR struct igb_driver_s *priv)
   /* Set link up */
 
   igb_putreg_mem(priv, IGB_CTRL, IGB_CTRL_SLU);
+
+  /* Restart auto-negotiation.  The link comes up when it completes,
+   * signalled by the link status change interrupt.
+   */
+
+  igb_phy_autoneg(priv);
 
   /* Setup and enable Transmitter */
 
