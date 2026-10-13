@@ -26,12 +26,9 @@
 
 #include <nuttx/config.h>
 
-#include <assert.h>
-
-#include <nuttx/queue.h>
-
-/* Emit the out-of-line definition of nxsched_add_prioritized() from
- * sched.h.
+/* Emit the out-of-line definition of nxsched_add_prioritized().  Must
+ * precede the first inclusion of sched/sched.h, or its include guard
+ * suppresses the definition.
  */
 #define SCHED_ADDPRIORITIZED_IMPL
 #include "sched/sched.h"
