@@ -952,9 +952,11 @@ static void ctucanfd_chardev_interrupt(FAR struct ctucanfd_driver_s *priv)
           continue;
         }
 
-      /* Frame received */
+      /* Frame received.  RBNEI stays set while the RX buffer is not empty,
+       * RXI may be already cleared for frames still in the buffer.
+       */
 
-      if (stat & CTUCANFD_INT_RXI)
+      if (stat & (CTUCANFD_INT_RXI | CTUCANFD_INT_RBNEI))
         {
           ctucanfd_chardev_receive(&priv->devs[i]);
         }
