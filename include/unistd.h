@@ -392,6 +392,8 @@ ssize_t read(int fd, FAR void *buf, size_t nbytes);
 ssize_t write(int fd, FAR const void *buf, size_t nbytes);
 ssize_t pread(int fd, FAR void *buf, size_t nbytes, off_t offset);
 ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset);
+ssize_t copy_file_range(int infd, FAR off_t *inoff, int outfd,
+                        FAR off_t *outoff, size_t len, unsigned int flags);
 int     ftruncate(int fd, off_t length);
 int     fchown(int fd, uid_t owner, gid_t group);
 int     lockf(int fd, int cmd, off_t len);
