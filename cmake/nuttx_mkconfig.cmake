@@ -70,6 +70,7 @@ set(DEQUOTELIST
     "CONFIG_TTY_LAUNCH_ARGS" # Argument list of entry point from tty launch
     "CONFIG_BOARD_MEMORY_RANGE" # Memory range for board
     "CONFIG_FAKE_AUDIO_DEVICE_PARAMS" # Arguments for the fake audio device
+    "CONFIG_VIDEO_FAKE_DEVICE_PARAMS" # Arguments for the fake video device
     # NxWidgets/NxWM
     "CONFIG_NXWM_BACKGROUND_IMAGE" # Name of bitmap image class
     "CONFIG_NXWM_CALIBRATION_ICON" # Name of bitmap image class
