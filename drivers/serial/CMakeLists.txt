@@ -23,7 +23,7 @@
 # Include serial drivers
 
 if(CONFIG_SERIAL)
-  set(SRCS serial.c serial_io.c)
+  set(SRCS serial.c serial_io.c serial_termios.c)
 endif()
 
 if(CONFIG_SERIAL_GDBSTUB)
