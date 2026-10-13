@@ -23,7 +23,7 @@
 # Include serial drivers
 
 ifeq ($(CONFIG_SERIAL),y)
-  CSRCS += serial.c serial_io.c
+  CSRCS += serial.c serial_io.c serial_termios.c
 endif
 
 ifeq ($(CONFIG_SERIAL_GDBSTUB),y)
