@@ -1241,6 +1241,21 @@ static void igc_enable(FAR struct igc_driver_s *priv)
   regval = IGC_RX_DESC * sizeof(struct igc_rx_leg_s);
   igc_putreg_mem(priv, IGC_RDLEN0, regval);
 
+  /* Configure MSI-X.  Done on every enable, not once at probe, because
+   * igc_disable() resets the device.
+   */
+
+  igc_putreg_mem(priv, IGC_IVAR0, IGC_MSIX_IVAR0);
+  igc_putreg_mem(priv, IGC_IVARMSC, IGC_MSIX_IVARMSC);
+
+  /* Enable MSI-X Single Vector */
+
+  igc_putreg_mem(priv, IGC_GPIE, IGC_GPIE_MSIX_SINGLE);
+
+  /* Configure Interrupt Throttle */
+
+  igc_putreg_mem(priv, IGC_EITR0, (CONFIG_NET_IGC_INT_INTERVAL << 2));
+
   /* Enable interrupts */
 
   igc_putreg_mem(priv, IGC_EIMS, IGC_MSIX_EIMS);
@@ -1334,24 +1349,6 @@ static int igc_initialize(FAR struct igc_driver_s *priv)
 
   igc_putreg_mem(priv, IGC_EIMC, 0xffffffff);
   igc_putreg_mem(priv, IGC_IMC, 0xffffffff);
-
-  /* Configure MSI-X */
-
-  igc_putreg_mem(priv, IGC_IVAR0, IGC_MSIX_IVAR0);
-  igc_putreg_mem(priv, IGC_IVARMSC, IGC_MSIX_IVARMSC);
-
-  /* Enable MSI-X Single Vector */
-
-  igc_putreg_mem(priv, IGC_GPIE, IGC_GPIE_MSIX_SINGLE);
-  igc_putreg_mem(priv, IGC_EIMS, IGC_MSIX_EIMS);
-
-  /* Configure Other causes */
-
-  igc_putreg_mem(priv, IGC_IMS, IGC_MSIX_IMS);
-
-  /* Configure Interrupt Throttle */
-
-  igc_putreg_mem(priv, IGC_EITR0, (CONFIG_NET_IGC_INT_INTERVAL << 2));
 
   /* Get MAC if valid */
 
