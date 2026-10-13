@@ -190,6 +190,9 @@ int exec_module(FAR struct binary_s *binp,
   char name[PATH_MAX];
 #endif
   FAR void *stackaddr = NULL;
+#if defined(CONFIG_BINFMT_LOADABLE) && defined(CONFIG_BUILD_FLAT)
+  FAR struct list_node *node;
+#endif
   pid_t pid;
   int ret;
 
@@ -392,6 +395,18 @@ int exec_module(FAR struct binary_s *binp,
 
 #ifdef CONFIG_BINFMT_LOADABLE
   tcb->group->tg_bininfo = binp;
+#endif
+
+#if defined(CONFIG_BINFMT_LOADABLE) && defined(CONFIG_BUILD_FLAT)
+  /* The libraries the program needs belong to its task group, where its
+   * own dlopen() finds them.  Only in a flat build: elsewhere the program
+   * has another libc, with its own lock and heap.
+   */
+
+  while ((node = list_remove_head(&binp->libraries)) != NULL)
+    {
+      list_add_tail(&tcb->group->tg_info->ta_modules, node);
+    }
 #endif
 
   /* Then activate the task at the provided priority */

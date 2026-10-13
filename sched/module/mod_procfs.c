@@ -42,8 +42,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
 
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS) && \
-    !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
+#include "module/module.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -239,7 +238,9 @@ static ssize_t modprocfs_read(FAR struct file *filep, FAR char *buffer,
   priv->buflen    = buflen;
   priv->offset    = filep->f_pos;
 
-  ret = libelf_registry_foreach(modprocfs_callback, priv);
+  ret = libelf_registry_foreach(mod_registry_lock(),
+                                modprocfs_callback, priv);
+  mod_registry_unlock();
   if (ret >= 0)
     {
       filep->f_pos += priv->totalsize;
@@ -306,6 +307,3 @@ static int modprocfs_stat(FAR const char *relpath, FAR struct stat *buf)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-#endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS &&
-        * !CONFIG_FS_PROCFS_EXCLUDE_MODULE */

@@ -72,6 +72,7 @@ struct binary_s
 #ifdef CONFIG_LIBC_ELF
   struct module_s mod;                 /* Module context */
 #endif
+  struct list_node libraries;          /* The libraries it needs */
 
 #ifdef CONFIG_PIC
   FAR void *picbase;                   /* Position-independent */

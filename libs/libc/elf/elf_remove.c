@@ -217,32 +217,32 @@ int libelf_uninit(FAR struct module_s *modp)
  *   Remove a previously installed module from memory.
  *
  * Input Parameters:
- *   handle - The module handler previously returned by libelf_insert().
+ *   registry - The registry the module is on.
+ *   handle   - The module handler previously returned by libelf_insert().
  *
  * Returned Value:
  *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
  *   errno value is set appropriately.
  *
+ * Assumptions:
+ *   The caller holds the lock of the registry.
+ *
  ****************************************************************************/
 
-int libelf_remove(FAR void *handle)
+int libelf_remove(FAR struct list_node *registry, FAR void *handle)
 {
   FAR struct module_s *modp = (FAR struct module_s *)handle;
   int ret;
 
   DEBUGASSERT(modp != NULL);
 
-  /* Get exclusive access to the module registry */
-
-  libelf_registry_lock();
-
   /* Verify that the module is in the registry */
 
-  ret = libelf_registry_verify(modp);
+  ret = libelf_registry_verify(registry, modp);
   if (ret < 0)
     {
       berr("ERROR: Failed to verify module: %d\n", ret);
-      goto errout_with_lock;
+      goto errout;
     }
 
   /* Give back a reference.  The module goes only when the last one does,
@@ -253,7 +253,6 @@ int libelf_remove(FAR void *handle)
   if (modp->nopen > 1)
     {
       modp->nopen--;
-      libelf_registry_unlock();
       return OK;
     }
 
@@ -266,7 +265,7 @@ int libelf_remove(FAR void *handle)
     {
       berr("ERROR: Module has dependents: %d\n", modp->dependents);
       ret = -EBUSY;
-      goto errout_with_lock;
+      goto errout;
     }
 #endif
 
@@ -277,29 +276,57 @@ int libelf_remove(FAR void *handle)
     {
       berr("ERROR: Failed to uninitialize module %d\n", ret);
       modp->nopen = 1;
-      goto errout_with_lock;
+      goto errout;
     }
 
-  /* Remove the module from the registry */
+  /* Remove the module from the registry and free the registry entry */
 
-  ret = libelf_registry_del(modp);
-  if (ret < 0)
-    {
-      berr("ERROR: Failed to remove the module from the registry: %d\n",
-           ret);
-      goto errout_with_lock;
-    }
-
-  libelf_registry_unlock();
-
-  /* And free the registry entry */
-
+  libelf_registry_del(modp);
   lib_free(modp);
+  return OK;
 
-  return ret;
-
-errout_with_lock:
-  libelf_registry_unlock();
+errout:
   set_errno(-ret);
   return ERROR;
+}
+
+/****************************************************************************
+ * Name: libelf_removeall
+ *
+ * Description:
+ *   Give back every reference that dlopen() took in a registry, as at
+ *   process exit.  A module that another module still depends on stays,
+ *   and goes with its last dependent.
+ *
+ * Input Parameters:
+ *   registry - The registry.
+ *
+ * Assumptions:
+ *   The caller holds the lock of the registry.
+ *
+ ****************************************************************************/
+
+void libelf_removeall(FAR struct list_node *registry)
+{
+  FAR struct module_s *modp;
+  FAR struct module_s *next;
+
+  /* A removal can unload other modules of the list, so start again after
+   * each one.
+   */
+
+  list_for_every_entry_safe(registry, modp, next, struct module_s, node)
+    {
+      if (modp->nopen > 0)
+        {
+          modp->nopen = 0;
+#if CONFIG_LIBC_ELF_MAXDEPEND > 0
+          if (modp->dependents == 0)
+#endif
+            {
+              libelf_remove(registry, modp);
+              next = list_first_entry(registry, struct module_s, node);
+            }
+        }
+    }
 }

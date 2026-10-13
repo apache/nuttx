@@ -150,6 +150,10 @@ void task_uninit_info(FAR struct task_group_s *group)
 
   env_release(info);
 
+#if defined(CONFIG_LIBC_ELF) || defined(CONFIG_BINFMT_LOADABLE)
+  nxrmutex_destroy(&info->ta_modlock);
+#endif
+
   nxrmutex_destroy(&info->ta_lock);
 #ifdef CONFIG_MM_KERNEL_HEAP
   group_free(group, info);

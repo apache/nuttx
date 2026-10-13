@@ -141,6 +141,12 @@ static int elf_loadbinary(FAR struct binary_s *binp,
 
   if (loadinfo.ehdr.e_type == ET_REL || loadinfo.gotsize != 0)
     {
+      /* Its DT_NEEDED libraries go on binp->libraries.  The task group
+       * does not exist yet.  In a flat build, exec_module() gives them to
+       * the new task group.
+       */
+
+      loadinfo.registry = &binp->libraries;
       ret = libelf_bind(&binp->mod, &loadinfo, exports, nexports);
       if (ret != 0)
         {
@@ -301,6 +307,9 @@ static int elf_loadbinary(FAR struct binary_s *binp,
 
 errout_with_load:
   libelf_unload(&loadinfo);
+#if CONFIG_LIBC_ELF_MAXDEPEND > 0
+  libelf_undepend(&binp->mod);
+#endif
 errout_with_init:
   libelf_uninitialize(&loadinfo);
   return ret;

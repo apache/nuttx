@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <nuttx/debug.h>
 
+#include <nuttx/lib/lib.h>
 #include <nuttx/lib/elf.h>
 
 #if CONFIG_LIBC_ELF_MAXDEPEND > 0
@@ -176,12 +177,15 @@ int libelf_undepend(FAR struct module_s *importer)
           importer->dependencies[i] = NULL;
 
           /* A library loaded for a DT_NEEDED entry is held only by the
-           * modules that depend on it, so the last of them unloads it.
+           * modules that depend on it, so the last of them unloads it.  It
+           * leaves its list here, so no registry is needed.
            */
 
-          if (exporter->dependents == 0 && exporter->nopen == 0)
+          if (exporter->dependents == 0 && exporter->nopen == 0 &&
+              libelf_uninit(exporter) >= 0)
             {
-              libelf_remove(exporter);
+              libelf_registry_del(exporter);
+              lib_free(exporter);
             }
         }
     }
