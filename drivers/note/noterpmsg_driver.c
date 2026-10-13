@@ -166,7 +166,7 @@ static bool noterpmsg_transfer(FAR struct noterpmsg_driver_s *drv,
           uint8_t notelen = drv->buffer[pos];
 
           len = 0;
-          while (len + notelen <= space)
+          while (len + NOTE_ALIGN(notelen) <= space)
             {
               pos = noterpmsg_next(drv, pos, NOTE_ALIGN(notelen));
               len += NOTE_ALIGN(notelen);
