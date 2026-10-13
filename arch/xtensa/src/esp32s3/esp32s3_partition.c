@@ -30,6 +30,7 @@
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 
 #include "esp32s3_spiflash_mtd.h"
 #include "esp32s3_partition.h"

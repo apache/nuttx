@@ -31,6 +31,7 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/sensors/bmi160.h>
 #include <nuttx/sensors/bmp280.h>
 #include <nuttx/sensors/mpu60x0.h>

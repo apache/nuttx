@@ -39,6 +39,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/clock.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/spi/spi.h>

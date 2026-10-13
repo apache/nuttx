@@ -34,6 +34,7 @@
 #include <stdlib.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/mm/map.h>
 #include <nuttx/pci/pci_ivshmem.h>
 #include <nuttx/semaphore.h>

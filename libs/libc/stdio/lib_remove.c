@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <sys/stat.h>
+#include <errno.h>
 #include <unistd.h>
 #include <stdio.h>
 

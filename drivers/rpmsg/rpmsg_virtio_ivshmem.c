@@ -31,6 +31,7 @@
 #include <stdio.h>
 
 #include <nuttx/drivers/addrenv.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/pci/pci_ivshmem.h>
 #include <nuttx/rpmsg/rpmsg_virtio_ivshmem.h>
 #include <nuttx/rpmsg/rpmsg_virtio_lite.h>

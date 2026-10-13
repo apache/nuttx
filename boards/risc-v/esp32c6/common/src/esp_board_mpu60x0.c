@@ -30,6 +30,7 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/sensors/mpu60x0.h>
 #include <nuttx/i2c/i2c_master.h>
 

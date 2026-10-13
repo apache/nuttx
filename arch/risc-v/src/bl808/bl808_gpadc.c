@@ -40,6 +40,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
+#include <nuttx/kmalloc.h>
 
 #include "hardware/bl808_gpadc.h"
 #include "riscv_internal.h"

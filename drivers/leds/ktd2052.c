@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/leds/ktd2052.h>
 
 #include <stdio.h>

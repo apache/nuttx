@@ -37,6 +37,7 @@
 
 #include <nuttx/board.h>
 #include <nuttx/clock.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/input/touchscreen.h>

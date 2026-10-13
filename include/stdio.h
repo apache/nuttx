@@ -33,8 +33,17 @@
 #include <stdarg.h>
 #include <time.h>
 
-#include <nuttx/fs/fs.h>
-#include <nuttx/lib/lib.h>
+#include <nuttx/mutex.h>
+#include <nuttx/queue.h>
+
+/* Kernel code, and every program of a flat or protected build, still sees
+ * the file system types through stdio.h.  The programs of a kernel build
+ * cannot use them, and do not see them.
+ */
+
+#if !defined(CONFIG_BUILD_KERNEL) || defined(__KERNEL__)
+#  include <nuttx/fs/fs.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -58,6 +67,13 @@
 #define _IOFBF     0               /* Fully buffered */
 #define _IOLBF     1               /* Line buffered */
 #define _IONBF     2               /* Unbuffered */
+
+/* Stream flags for the fs_flags field of in struct file_struct */
+
+#define __FS_FLAG_EOF   (1 << 0) /* EOF detected by a read operation */
+#define __FS_FLAG_ERROR (1 << 1) /* Error detected by any operation */
+#define __FS_FLAG_LBF   (1 << 2) /* Line buffered */
+#define __FS_FLAG_UBF   (1 << 3) /* Buffer allocated by caller of setvbuf */
 
 /* File system error values */
 
@@ -109,6 +125,94 @@
  * Public Type Definitions
  ****************************************************************************/
 
+/* Definitions for custom stream operations with fopencookie. The
+ * implementation is as defined in Standard C library (libc). The only
+ * difference is that we use off_t instead of off64_t. This means
+ * off_t is int64_t if CONFIG_FS_LARGEFILE is defined and int32_t if not.
+ *
+ * These callbacks can either lead to custom functions if fopencookie is used
+ * or to standard file system functions if not.
+ */
+
+typedef CODE ssize_t cookie_read_function_t(FAR void *cookie, FAR char *buf,
+                                            size_t size);
+typedef CODE ssize_t cookie_write_function_t(FAR void *cookie,
+                                             FAR const char *buf,
+                                             size_t size);
+typedef CODE off_t cookie_seek_function_t(FAR void *cookie,
+                                          FAR off_t *offset,
+                                          int whence);
+typedef CODE int cookie_close_function_t(FAR void *cookie);
+
+typedef struct cookie_io_functions_t
+{
+  FAR cookie_read_function_t *read;
+  FAR cookie_write_function_t *write;
+  FAR cookie_seek_function_t *seek;
+  FAR cookie_close_function_t *close;
+} cookie_io_functions_t;
+
+/* The following structure defines the list of files used for standard C I/O.
+ * Note that NuttX can support the standard C APIs with or without buffering
+ *
+ * When buffering is used, the following describes the usage of the I/O
+ * buffer.
+ * The buffer can be used for reading or writing -- but not both at the same
+ * time.
+ * An fflush is implied between each change in direction of access.
+ *
+ * The field fs_bufread determines whether the buffer is being used for
+ * reading or for writing as follows:
+ *
+ *              BUFFER
+ *     +----------------------+ <- fs_bufstart Points to the beginning of
+ *     |                      |    the buffer.
+ *     | WR: Buffered data    |                WR: Start of buffered write
+ *     |                      |                    data.
+ *     | RD: Already read     |                RD: Start of already read
+ *     |                      |                    data.
+ *     +----------------------+
+ *     | WR: Available buffer | <- fs_bufpos   Points to next byte:
+ *     | RD: Read-ahead data  |                WR: End+1 of buffered write
+ *     |                      |                    data.
+ *     |                      |                RD: Points to next char to
+ *     |                      |                    return
+ *     +----------------------+
+ *     | WR: Available        | <- fs_bufread  Top+1 of buffered read data
+ *     | RD: Available        |                WR: bufstart buffer used for
+ *     |                      |                    writing.
+ *     |                      |                RD: Pointer to last buffered
+ *     |                      |                    read char+1
+ *     +----------------------+
+ *                              <- fs_bufend   Points to the end of the
+ *                                             buffer+1
+ */
+
+#ifdef CONFIG_FILE_STREAM
+struct file_struct
+{
+  sq_entry_t              fs_entry;     /* Entry of file stream */
+  rmutex_t                fs_lock;      /* Recursive lock */
+  cookie_io_functions_t   fs_iofunc;    /* Callbacks to user / system functions */
+  FAR void               *fs_cookie;    /* Pointer to file descriptor / cookie struct */
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
+  FAR char               *fs_bufstart;  /* Pointer to start of buffer */
+  FAR char               *fs_bufend;    /* Pointer to 1 past end of buffer */
+  FAR char               *fs_bufpos;    /* Current position in buffer */
+  FAR char               *fs_bufread;   /* Pointer to 1 past last buffered read char. */
+#  if CONFIG_STDIO_BUFFER_SIZE > 0
+  char                    fs_buffer[CONFIG_STDIO_BUFFER_SIZE];
+#  endif
+#endif
+  uint16_t                fs_oflags;    /* Open mode flags */
+  uint8_t                 fs_flags;     /* Stream flags */
+#if CONFIG_NUNGET_CHARS > 0
+  uint8_t                 fs_nungotten; /* The number of characters buffered for ungetc */
+  char                    fs_ungotten[CONFIG_NUNGET_CHARS];
+#endif
+};
+#endif /* CONFIG_FILE_STREAM */
+
 /* Streams */
 
 typedef struct file_struct FILE;
@@ -131,6 +235,10 @@ extern "C"
  ****************************************************************************/
 
 /* ANSI-like File System Interfaces */
+
+/* The standard streams, see stdin, stdout and stderr above */
+
+FAR FILE *lib_get_stream(int fd);
 
 /* Operations on streams (FILE) */
 

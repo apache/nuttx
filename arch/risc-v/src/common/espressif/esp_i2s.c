@@ -33,6 +33,7 @@
 #include <stdint.h>
 #include <math.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>

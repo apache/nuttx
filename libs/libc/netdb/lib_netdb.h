@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 
 #include <netdb.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 #ifdef CONFIG_LIBC_NETDB

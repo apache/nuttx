@@ -24,6 +24,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/rptun/rptun_bmp.h>
 #include <nuttx/sched.h>

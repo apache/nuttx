@@ -32,6 +32,7 @@
 
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/mtd/mtd.h>
 
 #include "cfi.h"

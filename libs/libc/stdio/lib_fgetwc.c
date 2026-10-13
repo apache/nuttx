@@ -33,6 +33,8 @@
 #include <errno.h>
 #include <string.h>
 
+#include "libc.h"
+
 #ifdef CONFIG_FILE_STREAM
 
 /****************************************************************************

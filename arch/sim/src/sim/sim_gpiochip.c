@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/debug.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/wdog.h>
 #include <nuttx/ioexpander/gpio.h>
 #include <nuttx/ioexpander/ioexpander.h>

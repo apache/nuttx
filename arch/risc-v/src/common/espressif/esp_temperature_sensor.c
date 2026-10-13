@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/nuttx.h>
 
 #ifdef CONFIG_ESPRESSIF_TEMP
