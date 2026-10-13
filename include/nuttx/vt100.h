@@ -109,10 +109,14 @@
 #define VT100_CURSOROFF2     {ASCII_ESC, '[', '?', '5', '0', 'l'} /* Cursor OFF */
 #define VT100_CURSORON2      {ASCII_ESC, '[', '?', '5', '0', 'h'} /* Cursor ON */
 
-#define VT100_CURSORUP(n)    {ASCII_ESC, '[', (n), 'A'}       /* Move cursor up n lines */
-#define VT100_CURSORDN(n)    {ASCII_ESC, '[', (n), 'B'}       /* Move cursor down n lines */
-#define VT100_CURSORRT(n)    {ASCII_ESC, '[', (n), 'C'}       /* Move cursor right n lines */
-#define VT100_CURSORLF(n)    {ASCII_ESC, '[', (n), 'D'}       /* Move cursor left n lines */
+#define VT100_CURSORUP(n)    {ASCII_ESC, '[', (n), 'A'}       /* Move cursor up n lines (n is char '1'..'9') */
+#define VT100_CURSORDN(n)    {ASCII_ESC, '[', (n), 'B'}       /* Move cursor down n lines (n is char '1'..'9') */
+#define VT100_CURSORRT(n)    {ASCII_ESC, '[', (n), 'C'}       /* Move cursor right n columns (n is char '1'..'9') */
+#define VT100_CURSORLF(n)    {ASCII_ESC, '[', (n), 'D'}       /* Move cursor left n columns (n is char '1'..'9') */
+#define VT100_CURSORUP_      {ASCII_ESC, '[', 'A'}            /* Move cursor up 1 line */
+#define VT100_CURSORDN_      {ASCII_ESC, '[', 'B'}            /* Move cursor down 1 line */
+#define VT100_CURSORRT_      {ASCII_ESC, '[', 'C'}            /* Move cursor right 1 column */
+#define VT100_CURSORLF_      {ASCII_ESC, '[', 'D'}            /* Move cursor left 1 column */
 #define VT100_CURSORHOME     {ASCII_ESC, '[', 'H'}            /* Move cursor to upper left corner */
 #define VT100_CURSORHOME_    {ASCII_ESC, '[', ';', 'H'}       /* Move cursor to upper left corner */
 
@@ -162,7 +166,7 @@
 
 #define VT100_GETTYPE        {ASCII_ESC, '[', '?', '1', ';', (n), '0', 'c'} /* Response: terminal type code n */
 
-#define VT100_RESET RIS      {ASCII_ESC, 'c'}                 /*  Reset terminal to initial state */
+#define VT100_RESET          {ASCII_ESC, 'c'}                 /* Reset terminal to initial state */
 
 #define VT100_ALIGN          {ASCII_ESC, '#', '8'}            /* Screen alignment display */
 
@@ -229,6 +233,10 @@
 
 #define VT100_STR_CLEARSCREEN "\033[2J"                       /* Clear entire screen */
 #define VT100_STR_CURSORHOME  "\033[1;1H"                     /* Move cursor to upper left corner */
+#define VT100_STR_CURSORUP    "\033[A"                        /* Move cursor up 1 line */
+#define VT100_STR_CURSORDN    "\033[B"                        /* Move cursor down 1 line */
+#define VT100_STR_CURSORRT    "\033[C"                        /* Move cursor right 1 column */
+#define VT100_STR_CURSORLF    "\033[D"                        /* Move cursor left 1 column */
 #define VT100_STR_CLEAREOL    "\033[K"                        /* Erase to end of current line */
 #define VT100_STR_CLEAREOS    "\033[J"                        /* Erase to end of screen */
 #define VT100_STR_BOLD        "\033[1m"                       /* Turn bold mode on */
@@ -279,7 +287,7 @@
 #define VT100_ALT_7          {ASCII_ESC, 'O', 'w'}
 #define VT100_NUMERIC_8      {'8'}
 #define VT100_ALT_8          {ASCII_ESC, 'O', 'x'}
-#define VT100_NUMERIC_9      {'9',
+#define VT100_NUMERIC_9      {'9'}
 #define VT100_ALT_9          {ASCII_ESC, 'O', 'y'}
 #define VT100_NUMERIC_MINUS  {'-'}
 #define VT100_ALT_MINUS      {ASCII_ESC, 'O', 'm'}

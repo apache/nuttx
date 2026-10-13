@@ -66,16 +66,9 @@ static enum nxterm_vt100state_e
 
 /* <esc>[K is the VT100 command erases to the end of the line. */
 
-static const char g_erasetoeol[] = VT100_CLEAREOL;
-static const char g_cursorleft[] =
-{
-  ASCII_ESC, '[', 'D'
-};
-
-static const char g_cursorright[] =
-{
-  ASCII_ESC, '[', 'C'
-};
+static const char g_erasetoeol[]  = VT100_CLEAREOL;
+static const char g_cursorleft[]  = VT100_CURSORLF_;
+static const char g_cursorright[] = VT100_CURSORRT_;
 
 /* The list of all VT100 sequences supported by the emulation */
 
