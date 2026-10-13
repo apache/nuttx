@@ -40,7 +40,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _exit
+ * Name: up_exit
  *
  * Description:
  *   This function causes the currently executing task to cease
@@ -50,7 +50,7 @@
  *
  ****************************************************************************/
 
-void _exit(int status)
+void up_exit(int status)
 {
   struct tcb_s *tcb = this_task();
 
