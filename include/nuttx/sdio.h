@@ -834,7 +834,11 @@
  *
  ****************************************************************************/
 
-#define SDIO_CALLBACKENABLE(dev,eventset) ((dev)->callbackenable(dev,eventset))
+#if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_HPWORK)
+#  define SDIO_CALLBACKENABLE(dev,eventset) ((dev)->callbackenable(dev,eventset))
+#else
+#  define SDIO_CALLBACKENABLE(dev,eventset) ((void)0)
+#endif
 
 /****************************************************************************
  * Name: SDIO_REGISTERCALLBACK
@@ -1063,10 +1067,10 @@ struct sdio_dev_s
   CODE void  (*waitenable)(FAR struct sdio_dev_s *dev,
                            sdio_eventset_t eventset, uint32_t timeout);
   CODE sdio_eventset_t (*eventwait)(FAR struct sdio_dev_s *dev);
-  CODE void  (*callbackenable)(FAR struct sdio_dev_s *dev,
-                               sdio_eventset_t eventset);
 
 #if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_HPWORK)
+  CODE void  (*callbackenable)(FAR struct sdio_dev_s *dev,
+                               sdio_eventset_t eventset);
   CODE int   (*registercallback)(FAR struct sdio_dev_s *dev,
                                  worker_t callback, FAR void *arg);
 #endif
