@@ -685,6 +685,7 @@ static void tim_modifyreg32(struct stm32_dev_s *priv, int offset,
                             uint32_t clrbits, uint32_t setbits)
 {
   uint32_t addr = priv->tbase + offset;
+
   putreg32((getreg32(addr) & ~clrbits) | setbits, addr);
 }
 
@@ -1438,7 +1439,8 @@ static void adc_sampletime_cfg(struct adc_dev_s *dev)
    * During sample cycles channel selection bits must remain unchanged.
    */
 #ifdef CONFIG_STM32_ADC_CHANGE_SAMPLETIME
-  struct adc_sample_time_s time_samples = {
+  struct adc_sample_time_s time_samples =
+  {
 #  ifdef STM32_ADC1_SMPR_SMP1
       .smp1    = STM32_ADC1_SMPR_SMP1,
 #  else
@@ -1463,8 +1465,8 @@ static void adc_sampletime_cfg(struct adc_dev_s *dev)
 #  endif
   };
 
-  adc_sampletime_set((struct stm32_adc_dev_s *)dev, &time_samples);
-  adc_sampletime_write((struct stm32_adc_dev_s *)dev);
+  adc_sampletime_set((struct stm32_adc_dev_s *)dev->ad_priv, &time_samples);
+  adc_sampletime_write((struct stm32_adc_dev_s *)dev->ad_priv);
 #else
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev->ad_priv;
   uint32_t setbits = 0;
