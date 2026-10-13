@@ -45,6 +45,7 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/ring.h>
 #include <nuttx/rpmsg/rpmsg.h>
+#include <nuttx/serial/serial.h>
 #include <nuttx/serial/tioctl.h>
 #include <nuttx/serial/uart_rpmsg.h>
 
@@ -102,9 +103,7 @@ struct uart_rpmsg_priv_s
   sem_t                 sendsem;        /* dmasend waits, ept_cb posts */
   sem_t                 recvsem;        /* read() blocks here; ept_cb posts */
 
-  tcflag_t              iflag;          /* termios input flags  (c_iflag) */
-  tcflag_t              oflag;          /* termios output flags (c_oflag) */
-  tcflag_t              lflag;          /* termios local flags  (c_lflag) */
+  struct uart_termios_s termios;        /* c_iflag/c_oflag/c_lflag */
 
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
   pid_t                 pid;            /* Foreground task PID for iob control */
@@ -225,117 +224,6 @@ static int uart_rpmsg_send_ack(FAR struct uart_rpmsg_priv_s *priv)
   return ret;
 }
 
-static inline_function
-bool uart_rpmsg_in_process(FAR char *ch, tcflag_t iflag)
-{
-  if (*ch == '\r')
-    {
-      if (iflag & IGNCR)
-        {
-          return false;
-        }
-
-      if (iflag & ICRNL)
-        {
-          *ch = '\n';
-        }
-    }
-  else if (*ch == '\n' && (iflag & INLCR))
-    {
-      *ch = '\r';
-    }
-
-  return true;
-}
-
-static inline_function
-size_t uart_rpmsg_out_process(char ch, FAR char *dst, size_t dstlen,
-                              tcflag_t oflag)
-{
-  if (ch == '\n' && (oflag & ONLCR))
-    {
-      if (dstlen < 2)
-        {
-          return 0;
-        }
-
-      dst[0] = '\r';
-      dst[1] = '\n';
-      return 2;
-    }
-
-  if (ch == '\r' && (oflag & OCRNL))
-    {
-      dst[0] = '\n';
-    }
-  else
-    {
-      dst[0] = ch;
-    }
-
-  return 1;
-}
-
-static size_t uart_rpmsg_out_copy(FAR char *dst, size_t dstlen,
-                                  FAR const char *src, size_t srclen,
-                                  tcflag_t oflag, FAR size_t *consumed)
-{
-  FAR const char *osrc = src;
-  FAR char *odst = dst;
-
-  while (srclen > 0 && dstlen > 0)
-    {
-      FAR const char *special = NULL;
-      size_t len;
-
-      if ((oflag & OCRNL) != 0)
-        {
-          special = memchr(src, '\r', srclen);
-        }
-
-      if ((oflag & ONLCR) != 0)
-        {
-          FAR const char *nl;
-
-          nl = memchr(src, '\n', srclen);
-          if (nl != NULL && (special == NULL || nl < special))
-            {
-              special = nl;
-            }
-        }
-
-      len = special != NULL ? special - src : srclen;
-      len = MIN(len, dstlen);
-      if (len != 0)
-        {
-          memcpy(dst, src, len);
-          dst    += len;
-          dstlen -= len;
-          src    += len;
-          srclen -= len;
-        }
-
-      if (special == NULL || dstlen == 0)
-        {
-          break;
-        }
-
-      len = uart_rpmsg_out_process(*src, dst, dstlen, oflag);
-      if (len == 0)
-        {
-          break;
-        }
-
-      dst    += len;
-      dstlen -= len;
-      src++;
-      srclen--;
-    }
-
-  *consumed = src - osrc;
-  return dst - odst;
-}
-
 static int uart_rpmsg_open(FAR struct file *filep)
 {
   FAR struct uart_rpmsg_priv_s *priv = filep->f_inode->i_private;
@@ -387,58 +275,6 @@ static int uart_rpmsg_close(FAR struct file *filep)
   return OK;
 }
 
-static size_t uart_rpmsg_in_copy(FAR char *dst, FAR const char *src,
-                                 size_t len, tcflag_t iflag)
-{
-  FAR char *odst = dst;
-
-  while (len > 0)
-    {
-      FAR const char *special = NULL;
-      size_t ncopy;
-      char ch;
-
-      if ((iflag & (IGNCR | ICRNL)) != 0)
-        {
-          special = memchr(src, '\r', len);
-        }
-
-      if ((iflag & INLCR) != 0)
-        {
-          FAR const char *nl;
-
-          nl = memchr(src, '\n', len);
-          if (nl != NULL && (special == NULL || nl < special))
-            {
-              special = nl;
-            }
-        }
-
-      ncopy = special != NULL ? special - src : len;
-      if (ncopy != 0)
-        {
-          memcpy(dst, src, ncopy);
-          dst += ncopy;
-          src += ncopy;
-          len -= ncopy;
-        }
-
-      if (special == NULL)
-        {
-          break;
-        }
-
-      ch = *src++;
-      len--;
-      if (uart_rpmsg_in_process(&ch, iflag))
-        {
-          *dst++ = ch;
-        }
-    }
-
-  return dst - odst;
-}
-
 static ssize_t uart_rpmsg_read(FAR struct file *filep, FAR char *buffer,
                                size_t buflen)
 {
@@ -461,14 +297,14 @@ static ssize_t uart_rpmsg_read(FAR struct file *filep, FAR char *buffer,
       ret = 0;
       if (rbuf.len1 != 0)
         {
-          ret += uart_rpmsg_in_copy(buffer, rbuf.ptr1, rbuf.len1,
-                                    priv->iflag);
+          ret += uart_termios_in_copy(&priv->termios, buffer,
+                                      rbuf.ptr1, rbuf.len1);
         }
 
       if (rbuf.len2 != 0)
         {
-          ret += uart_rpmsg_in_copy(&buffer[ret], rbuf.ptr2, rbuf.len2,
-                                    priv->iflag);
+          ret += uart_termios_in_copy(&priv->termios, &buffer[ret],
+                                      rbuf.ptr2, rbuf.len2);
         }
 
       priv->received += rbuf.cnt;
@@ -495,7 +331,7 @@ static ssize_t uart_rpmsg_read(FAR struct file *filep, FAR char *buffer,
         }
     }
 
-  if ((priv->lflag & ECHO) && ret > 0)
+  if ((priv->termios.lflag & ECHO) && ret > 0)
     {
       spin_unlock_irqrestore(&priv->lock, flags);
       uart_rpmsg_write(filep, buffer, ret);
@@ -584,16 +420,9 @@ static ssize_t uart_rpmsg_write(FAR struct file *filep,
       space -= sizeof(*msg);
       space = MIN(uart_rpmsg_get_space(priv), space);
 
-      if ((priv->oflag & OPOST) == 0)
-        {
-          len = used = MIN(buflen - nwritten, space);
-          memcpy(msg->data, &buffer[nwritten], len);
-        }
-      else
-        {
-          len = uart_rpmsg_out_copy(msg->data, space, &buffer[nwritten],
-                                    buflen - nwritten, priv->oflag, &used);
-        }
+      len = uart_termios_out_copy(&priv->termios, msg->data, space,
+                                  &buffer[nwritten], buflen - nwritten,
+                                  &used);
 
       received = priv->received;
       priv->sendpos += len;
@@ -668,9 +497,7 @@ static int uart_rpmsg_ioctl(FAR struct file *filep, int cmd,
 
           flags = spin_lock_irqsave(&priv->lock);
 
-          termiosp->c_iflag = priv->iflag;
-          termiosp->c_oflag = priv->oflag;
-          termiosp->c_lflag = priv->lflag;
+          uart_termios_getattr(&priv->termios, termiosp);
           spin_unlock_irqrestore(&priv->lock, flags);
         }
         break;
@@ -689,9 +516,7 @@ static int uart_rpmsg_ioctl(FAR struct file *filep, int cmd,
 
           flags = spin_lock_irqsave(&priv->lock);
 
-          priv->iflag = termiosp->c_iflag;
-          priv->oflag = termiosp->c_oflag;
-          priv->lflag = termiosp->c_lflag;
+          uart_termios_setattr(&priv->termios, termiosp);
           spin_unlock_irqrestore(&priv->lock, flags);
         }
         break;
@@ -885,28 +710,10 @@ static void uart_rpmsg_signal_check(FAR struct uart_rpmsg_priv_s *priv,
 
   while (len > 0)
     {
-      FAR const char *special = NULL;
-      FAR const char *tmp;
-      int signo = 0;
+      FAR const char *special;
+      int signo;
 
-#ifdef CONFIG_TTY_SIGINT
-      tmp = memchr(data, CONFIG_TTY_SIGINT_CHAR, len);
-      if (tmp != NULL)
-        {
-          special = tmp;
-          signo   = SIGINT;
-        }
-#endif
-
-#ifdef CONFIG_TTY_SIGTSTP
-      tmp = memchr(data, CONFIG_TTY_SIGTSTP_CHAR, len);
-      if (tmp != NULL && (special == NULL || tmp < special))
-        {
-          special = tmp;
-          signo   = SIGTSTP;
-        }
-#endif
-
+      special = uart_termios_isig_find(&priv->termios, data, len, &signo);
       if (special == NULL)
         {
           break;
@@ -1031,9 +838,9 @@ int uart_rpmsg_init(FAR const char *cpuname, FAR const char *devname,
 
   if (isconsole)
     {
-      priv->iflag = ICRNL;
-      priv->oflag = OPOST | ONLCR;
-      priv->lflag = ECHO;
+      priv->termios.iflag = ICRNL;
+      priv->termios.oflag = OPOST | ONLCR;
+      priv->termios.lflag = ECHO | ISIG;
     }
 
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
