@@ -42,6 +42,10 @@ if(CONFIG_MM_DEFAULT_MANAGER)
       mm_heapmember.c
       mm_memdump.c)
 
+  if(NOT CONFIG_MM_INLINE_ADDFREECHUNK)
+    list(APPEND SRCS mm_addfreechunk.c)
+  endif()
+
   if(CONFIG_DEBUG_MM)
     list(APPEND SRCS mm_checkcorruption.c)
   endif()

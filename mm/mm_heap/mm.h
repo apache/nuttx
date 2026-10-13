@@ -310,6 +310,13 @@ void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay);
 
 void mm_free_delaylist(FAR struct mm_heap_s *heap);
 
+/* Functions contained in mm_addfreechunk.c *********************************/
+
+#ifndef CONFIG_MM_INLINE_ADDFREECHUNK
+void mm_addfreechunk(FAR struct mm_heap_s *heap,
+                     FAR struct mm_freenode_s *node);
+#endif
+
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
@@ -326,8 +333,16 @@ static inline_function int mm_size2ndx(size_t size)
   return flsl(size) - 1;
 }
 
-static inline_function void mm_addfreechunk(FAR struct mm_heap_s *heap,
-                                            FAR struct mm_freenode_s *node)
+/* Single body for both forms: inline in every caller, or emitted once by
+ * mm_addfreechunk.c (which defines MM_ADDFREECHUNK_IMPL).
+ */
+
+#if defined(CONFIG_MM_INLINE_ADDFREECHUNK) || defined(MM_ADDFREECHUNK_IMPL)
+#  ifdef CONFIG_MM_INLINE_ADDFREECHUNK
+static inline_function
+#  endif
+void mm_addfreechunk(FAR struct mm_heap_s *heap,
+                     FAR struct mm_freenode_s *node)
 {
   FAR struct mm_freenode_s *next;
   FAR struct mm_freenode_s *prev;
@@ -361,5 +376,6 @@ static inline_function void mm_addfreechunk(FAR struct mm_heap_s *heap,
       next->blink = node;
     }
 }
+#endif
 
 #endif /* __MM_MM_HEAP_MM_H */

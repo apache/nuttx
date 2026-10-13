@@ -25,6 +25,14 @@ config MM_CUSTOMIZE_MANAGER
 
 endchoice
 
+config MM_INLINE_ADDFREECHUNK
+	bool "Inline mm_addfreechunk()"
+	default !DEFAULT_SMALL
+	depends on MM_DEFAULT_MANAGER
+	---help---
+		Inline mm_addfreechunk() into every heap caller for speed.  Disable
+		to emit one shared copy instead and save code space.
+
 config MM_UMM_CUSTOMIZE_MANAGER
 	bool "Customized heap manager"
 	default n
