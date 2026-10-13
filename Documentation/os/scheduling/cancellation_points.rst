@@ -43,7 +43,7 @@ These two cancellation point hooks behave in a complementary way.
 ``enter_cancellation_point()`` increments the nesting level and
 ``leave_cancellation_point()`` decrements the nesting level.
 No action is taken unless the nesting level is zero then, in that case,
-if there is a pending cancellation then the thread exists normally
+if there is a pending cancellation then the thread exits normally
 by simply calling ``pthread_exit()``.
 
 
@@ -55,8 +55,8 @@ cancellation mode is enabled for the target pthread. If so it will:
 
 1. Mark the cancellation as pending.
 2. If the thread is waiting on a semaphore or message queue (and is in
-   a cancelable state), it will wake it just in the same was as if
-   the thread received a single (except with ``ECANCELED``
+   a cancelable state), it will wake it just in the same way as if
+   the thread received a signal (except with ``ECANCELED``
    instead of ``EINTR``).
 
 If, on the other hand, the asynchronous mode is enabled (and the thread is
@@ -83,7 +83,7 @@ Let's walk through the case of ``select()`` to see how it works:
 
 So this pthread will spend almost all of its time waiting in ``sem_wait()``
 and that is the most likely state of the pthread when ``pthread_cancel()``
-is called with deferred cancellation eanbled.
+is called with deferred cancellation enabled.
 
 * When ``pthread_cancel()`` is called, it will set the pending cancellation
   state and wake up ``sem_wait()`` with the ``ECANCELED`` error.
@@ -118,7 +118,7 @@ The following pthread application interfaces are available to manage cancellatio
 
 * ``pthread_cancel()`` cancels a thread.
 * ``pthread_setcancelstate()`` can enable or disable a cancellation.
-* ``pthread_setcanceltype()`` can be used to switched between asynchronous
+* ``pthread_setcanceltype()`` can be used to switch between asynchronous
   and deferred thread cancellation.
 * ``pthread_testcancel()`` can be used to force a cancellation point.
 
@@ -132,7 +132,7 @@ is identical and the task application interfaces are very similar:
 
 * ``task_delete()`` deletes (cancels) a task.
 * ``task_setcancelstate()`` can enable or disable task cancellation.
-* ``task_setcanceltype()`` can be used to switched between asynchronous
+* ``task_setcanceltype()`` can be used to switch between asynchronous
   and deferred task cancellation.
 * ``task_testcancel()`` can be used to force a cancellation point.
 
@@ -143,7 +143,7 @@ Design Issues
 .. note:: The issue addressed in this paragraph is covered by
           `Issue 619 <https://github.com/apache/nuttx/issues/619>`_
           has been corrected in the code base through a series of changes
-          culiminating in
+          culminating in
           `PR 733 <https://github.com/apache/nuttx/pull/733>`_.
           This discussion still has value, however, as a warning
           for things that one needs to take into consideration
@@ -151,7 +151,7 @@ Design Issues
 
 There is one logical problem in many parts of the system. The following
 sequence of code appears in many places in the code base.
-It will work not work with thread/task cancellation:
+It will not work with thread/task cancellation:
 
 .. code-block:: c
 
@@ -163,7 +163,7 @@ It will work not work with thread/task cancellation:
       }
   }
 
-That logic will makes it impossible to cancel the thread.
+That logic will make it impossible to cancel the thread.
 Let me explain why:
 
 * The fact that ``-ECANCELED`` is occurring means that some other task
@@ -219,29 +219,29 @@ Issue 619 Discussion
 .. note:: The
           `Issue 619 <https://github.com/apache/nuttx/issues/619>`_
           has been corrected in the code base through a series of changes
-          culiminating in
+          culminating in
           `PR 733 <https://github.com/apache/nuttx/pull/733>`_.
 
 nxsem_wait_uninterruptible()
 ----------------------------
 
-In NuttX, thread or tasks may be canceled using ``pthread_cancle()`` or
+In NuttX, thread or tasks may be canceled using ``pthread_cancel()`` or
 ``task_delete()``. These can also be canceled via certain signals if default
 signal actions are enabled.
 
 When threads or tasks are canceled asynchronously, resources may be stranded.
 For example, if memory is allocated, it will not be deallocated when the
-task/thread is canceled in the FLAT build.  These kind on leaks can be handled
+task/thread is canceled in the FLAT build.  These kinds of leaks can be handled
 by the application with functions registered with ``pthread_cleanup()`` or
 ``on_exit()``, but others cannot.
 
 The generic solution for NuttX is through the use of cancellation points.
 Cancellation points are a mechanism that assures that all resources used
-internal by OS interface calls are cleaned-up automatically at designated
+internally by OS interface calls are cleaned-up automatically at designated
 cancellation points. An interface is normally a cancellation point if
 it has any possibility of blocking.
 
-In NuttX, when threads are blocked waiting of a semaphore when they are
+In NuttX, when threads are blocked waiting on a semaphore when they are
 canceled, ``nxsem_wait()`` will return ``-ECANCELED`` and the correct behavior
 to let the error ripple back to the cancellation point where the thread/task
 will be canceled after all resources have been cleaned up.
@@ -273,7 +273,7 @@ If the task/thread is awakened by a signal just continue waiting.
 The behavior for ``-ECANCELED`` is not correct. It should not loop.
 Looping like this will prevent the cancellation from working.
 Instead of returning through the cancellation point, the code will be stuck
-in the above loop (in defferred cancellation mode) and cannot be cancelled.
+in the above loop (in deferred cancellation mode) and cannot be cancelled.
 
 The correct behavior is to return when ``-ECANCELED`` is encountered,
 not to continue looping:
@@ -284,9 +284,9 @@ not to continue looping:
 The only complexity to this suggested change is that the callers of
 ``nxsem_wait_uninterruptible()`` must also check the return value for any
 errors and make sure that that error is returned to the caller.
-The error must propogate all the way back up to the cancellation point.
+The error must propagate all the way back up to the cancellation point.
 
-These are other related inline functions in ``include/nuttx/semaphore.h``
+There are other related inline functions in ``include/nuttx/semaphore.h``
 that behave in this same way. This issue applies to them as well.
 
 .. important:: If cancellation points are enabled, the default cancellation
@@ -295,18 +295,18 @@ that behave in this same way. This issue applies to them as well.
 .. note:: There are three interfaces affected by this issue:
           ``nxsem_wait_uninterruptible()`` as discussed above, but also
           ``nxsem_timedwait_uninterruptible()`` and
-          ``nxsem_tickwait_uninteruptible()`` which are closely related.
+          ``nxsem_tickwait_uninterruptible()`` which are closely related.
 
 Mutual Exclusion Semaphores vs. Signaling Semaphores
 ----------------------------------------------------
 
-Semaphore have two usages in NuttX:
+Semaphores have two usages in NuttX:
 
 * Mutual Exclusion Semaphores: Protect the shared data and force mutually
   exclusive use of semaphores.
-* Signling Semaphores: Used to wait for events to be signaled asynchronously.
+* Signaling Semaphores: Used to wait for events to be signaled asynchronously.
 
-Should we return ``-ECANCEL/-EINTR`` for both? Or only for ithe second?
+Should we return ``-ECANCEL/-EINTR`` for both? Or only for the second?
 I think both should work the same: For both the semaphore wait should be
 terminated and correct error should be returned.
 
@@ -316,7 +316,7 @@ Mutual Exclusion Semaphores
 If the API requires returning ``EINTR`` if a signal is received, we should
 return the error. This is required in many POSIX interfaces and don't see
 how you could avoid that. However, the mutual exclusion semaphores are
-the just there for the correctness in the design. There is seldom any real
+just there for the correctness in the design. There is seldom any real
 competitor for the exclusion semaphore so, in general, they do not block and,
 hence, would never generate any error.
 
@@ -327,7 +327,7 @@ likelihood of a signal received or of the task being canceled is very small.
 But if there is even a small possibility of that event happening,
 it WILL happen in an embedded system (Murphy's law).
 
-But if during the that brief moment while the thread is blocked,
+But if during that brief moment while the thread is blocked,
 a signal is received, I think that it is correct to return ``-EINTR``.
 This is not so critical only because such an event it is rare.
 But the specification requires it so we should do it.
@@ -354,15 +354,15 @@ wait and return the error condition.
 We should have no difference of opinion on that.
 
 There is really no difference in the actions that must be taken if a signal
-is received of if the task is canceled. Both mutual exclusion semaphores
+is received or if the task is canceled. Both mutual exclusion semaphores
 and signaling semaphores should wake up and return the error condition.
 The only real differences is that mutual exclusion semaphores either
-do not block or, if they do, the do not block as long.
+do not block or, if they do, they do not block as long.
 
 Mutual Exclusion Semaphores and Serialization
 ---------------------------------------------
 
-There are situations were the task may block for a very long time,
+There are situations where the task may block for a very long time,
 even indefinitely, on a mutual exclusion semaphore. Consider the following
 scenario:  A driver that reads data could have a sequence like this:
 
@@ -375,16 +375,16 @@ that open the driver and try to read from it. The first, Task ``A``, will get
 the mutual exclusion semaphore at ``(1)`` and then will hang waiting
 for data at (2). It may have to wait for a very long time to receive data.
 When re-entered by the second, Task ``B``, it will hang at ``(1)``
-also for very long time. Task ``B`` is effectively queued and cannot event
-begin its wait on the signaling semphore until Task ``A`` receives its data
+also for very long time. Task ``B`` is effectively queued and cannot even
+begin its wait on the signaling semaphore until Task ``A`` receives its data
 and releases the mutual exclusion semaphore. This is normal behavior
 and exactly, how this kind of driver is supposed to work:
-This use of mutual exclusion impelements serialization of I/O.
+This use of mutual exclusion implements serialization of I/O.
 
 But now suppose that Task ``B`` receives a signal interrupt or a cancellation
 event while waiting on the mutual exclusion semaphore. It MUST terminate the
 wait and return ``-EINTR`` or ``-ECANCEL`` immediately. Task ``A`` may never
-receive data and if that action is not taken, the signal interrup
+receive data and if that action is not taken, the signal interrupt
 or cancellation event is lost and the functionality has failed.
 
 When to Return EINTR
@@ -416,13 +416,13 @@ that the if the task has been canceled. That flag is tested in the
 ``leave_cancellation_point()`` function so I don't think that there is any
 corresponding issue for thread cancellation. We just need to make sure that
 all waits are aborted if ``ECANCELED`` is received and let the error
-indication ripple all they back to the ``leave_cancellation_point()``
+indication ripple all the way back to the ``leave_cancellation_point()``
 function. Then the function will exit cleanly, safely, and quickly.
 
 Interestingly, the ``ECANCELED`` error will never be seen by the application.
-It just triggers the return uwind sequence where all resources are recovered
+It just triggers the return unwind sequence where all resources are recovered
 and finally until ``leave_cancellation_point()`` is called. Then the thread
-will exit before it returns to the applicaton.
+will exit before it returns to the application.
 
 You can see all of this working in the ``board/sim/sim/sim/configs/ostest``
 configuration if you also enable::
