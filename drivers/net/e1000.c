@@ -1359,6 +1359,17 @@ static void e1000_enable(FAR struct e1000_driver_s *priv)
 
   e1000_rxclean(priv);
 
+#ifdef CONFIG_PCI_MSIX
+  /* Configure MSI-X.  Done on every enable, not once at probe, because
+   * the reset in e1000_disable() clears IVAR.
+   */
+
+  if (priv->type->flags & E1000_HAS_MSIX)
+    {
+      e1000_putreg_mem(priv, E1000_IVAR, E1000_MSIX_IVAR);
+    }
+#endif
+
   /* Enable interrupts */
 
   e1000_putreg_mem(priv, E1000_IMS, priv->irqs);
@@ -1446,11 +1457,10 @@ static int e1000_initialize(FAR struct e1000_driver_s *priv)
   irq_attach(priv->irq, e1000_interrupt, priv);
 
 #ifdef CONFIG_PCI_MSIX
-  /* Configure MSI-X */
+  /* Select the MSI-X interrupt causes, IVAR is set in e1000_enable() */
 
   if (priv->type->flags & E1000_HAS_MSIX)
     {
-      e1000_putreg_mem(priv, E1000_IVAR, E1000_MSIX_IVAR);
       priv->irqs = E1000_MSIX_INTERRUPTS;
     }
   else
