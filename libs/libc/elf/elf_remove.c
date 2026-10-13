@@ -257,12 +257,26 @@ int libelf_remove(FAR void *handle)
       return OK;
     }
 
+#if CONFIG_LIBC_ELF_MAXDEPEND > 0
+  /* The last reference stays while other modules depend on this one: a
+   * failed close must not let the module go later, under the caller.
+   */
+
+  if (modp->dependents > 0)
+    {
+      berr("ERROR: Module has dependents: %d\n", modp->dependents);
+      ret = -EBUSY;
+      goto errout_with_lock;
+    }
+#endif
+
   modp->nopen = 0;
 
   ret = libelf_uninit(modp);
   if (ret < 0)
     {
       berr("ERROR: Failed to uninitialize module %d\n", ret);
+      modp->nopen = 1;
       goto errout_with_lock;
     }
 
