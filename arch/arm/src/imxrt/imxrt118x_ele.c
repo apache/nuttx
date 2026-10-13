@@ -35,6 +35,7 @@
 #include <debug.h>
 
 #include "arm_internal.h"
+#include "imxrt_dtcm.h"
 #include "hardware/rt118x/imxrt118x_memorymap.h"
 #include "imxrt118x_ele.h"
 
@@ -61,9 +62,6 @@
 #else
 #  define DCACHE_LINESIZE ARMV7M_DCACHE_LINESIZE
 #endif
-
-#define upper_32_bits(n) ((uint32_t)(((n) >> 16) >> 16))
-#define lower_32_bits(n) ((uint32_t)(n))
 
 #define ELE_RNG_TIMEOUT_US    5000
 #define ELE_RNG_SLEEP_US      100
@@ -189,17 +187,23 @@ static void imxrt118x_ele_receivemsg(struct ele_msg *msg_ptr)
 
 static int imxrt118x_ele_get_info(void)
 {
-  uint32_t addr = (uint32_t)(uintptr_t)g_info;
+  uint32_t addr;
+
+  if (!imxrt_dma_address(g_info, sizeof(g_info), &addr))
+    {
+      return -EFAULT;
+    }
 
   g_msg.header.version = ELE_VERSION;
   g_msg.header.tag = ELE_CMD_TAG;
   g_msg.header.size = 4;
   g_msg.header.command = ELE_GET_INFO_REQ;
-  g_msg.data[0] = upper_32_bits(addr);
-  g_msg.data[1] = lower_32_bits(addr);
+  g_msg.data[0] = 0;
+  g_msg.data[1] = addr;
   g_msg.data[2] = sizeof(g_info);
 
-  up_invalidate_dcache(addr, addr + sizeof(g_info));
+  up_invalidate_dcache((uintptr_t)g_info,
+                       (uintptr_t)g_info + sizeof(g_info));
 
   imxrt118x_ele_sendmsg(&g_msg);
   imxrt118x_ele_receivemsg(&g_msg);
@@ -209,7 +213,8 @@ static int imxrt118x_ele_get_info(void)
       return -EIO;
     }
 
-  up_invalidate_dcache(addr, addr + sizeof(g_info));
+  up_invalidate_dcache((uintptr_t)g_info,
+                       (uintptr_t)g_info + sizeof(g_info));
   return 0;
 }
 
@@ -233,6 +238,8 @@ void imxrt118x_ele_init(void)
 
 int imxrt118x_ele_load_fw(uint32_t fw_addr)
 {
+  imxrt_dma_address((const void *)(uintptr_t)fw_addr, 0, &fw_addr);
+
   g_msg.header.version = ELE_VERSION;
   g_msg.header.tag = ELE_CMD_TAG;
   g_msg.header.size = 4;
@@ -295,6 +302,9 @@ uint32_t imxrt118x_ele_read_common_fuse(uint32_t fuse_id)
 int imxrt118x_ele_get_key(uint8_t *key, size_t key_size,
                           uint8_t *ctx, size_t ctx_size)
 {
+  uint32_t dma_key;
+  uint32_t dma_ctx;
+
   if (!key)
     {
       _err("Invalid key parameter\n");
@@ -325,14 +335,20 @@ int imxrt118x_ele_get_key(uint8_t *key, size_t key_size,
       return -EINVAL;
     }
 
+  if (!imxrt_dma_address(key, key_size, &dma_key) ||
+      !imxrt_dma_address(ctx, ctx_size, &dma_ctx))
+    {
+      return -EFAULT;
+    }
+
   g_msg.header.version = ELE_VERSION;
   g_msg.header.tag = ELE_CMD_TAG;
   g_msg.header.size = 7;
   g_msg.header.command = ELE_DERIVE_KEY_REQ;
-  g_msg.data[0] = upper_32_bits((uintptr_t)key);
-  g_msg.data[1] = lower_32_bits((uintptr_t)key);
-  g_msg.data[2] = upper_32_bits((uintptr_t)ctx);
-  g_msg.data[3] = lower_32_bits((uintptr_t)ctx);
+  g_msg.data[0] = 0;
+  g_msg.data[1] = dma_key;
+  g_msg.data[2] = 0;
+  g_msg.data[3] = dma_ctx;
   g_msg.data[4] = ((ctx_size << 16) | key_size);
 
   uint32_t crc = g_msg.header.data;
@@ -448,12 +464,16 @@ int imxrt118x_ele_get_soc_revision(uint8_t *revision)
 
 int imxrt118x_ele_auth_oem_ctnr(unsigned long ctnr_addr, uint32_t *response)
 {
+  uint32_t addr;
+
+  imxrt_dma_address((const void *)ctnr_addr, 0, &addr);
+
   g_msg.header.version = ELE_VERSION;
   g_msg.header.tag = ELE_CMD_TAG;
   g_msg.header.size = 3;
   g_msg.header.command = ELE_OEM_CNTN_AUTH_REQ;
-  g_msg.data[0] = upper_32_bits(ctnr_addr);
-  g_msg.data[1] = lower_32_bits(ctnr_addr);
+  g_msg.data[0] = 0;
+  g_msg.data[1] = addr;
 
   imxrt118x_ele_sendmsg(&g_msg);
   imxrt118x_ele_receivemsg(&g_msg);
@@ -572,11 +592,17 @@ int imxrt118x_ele_get_random(uint32_t paddr, size_t len)
 {
   uint16_t counter = 0;
   uint16_t max_tries = ELE_RNG_TIMEOUT_US / ELE_RNG_SLEEP_US;
+  uint32_t addr;
 
   if (paddr == 0 || len == 0)
     {
       _err("Wrong input parameters!\n");
       return -EINVAL;
+    }
+
+  if (!imxrt_dma_address((const void *)(uintptr_t)paddr, len, &addr))
+    {
+      return -EFAULT;
     }
 
   while ((imxrt118x_ele_get_trng_state() != 0))
@@ -600,7 +626,7 @@ int imxrt118x_ele_get_random(uint32_t paddr, size_t len)
   g_msg.header.size = 4;
   g_msg.header.command = ELE_GET_RNG_REQ;
   g_msg.data[0] = 0;
-  g_msg.data[1] = paddr;
+  g_msg.data[1] = addr;
   g_msg.data[2] = len;
 
   imxrt118x_ele_sendmsg(&g_msg);
