@@ -603,8 +603,15 @@ void sched_note_add(FAR const void *data, size_t len)
       size_t notelen = note->nc_length;
       FAR struct note_driver_s **driver;
 
-      DEBUGASSERT(notelen >= sizeof(struct note_common_s) &&
-                  len >= notelen);
+      /* nc_length comes from the peer, and len is unsigned: a note that
+       * claims more than is left would wrap len and walk off the packet.
+       */
+
+      if (notelen < sizeof(struct note_common_s) || notelen > len)
+        {
+          break;
+        }
+
       for (driver = g_note_drivers; *driver; driver++)
         {
           if ((*driver)->ops->add == NULL)
