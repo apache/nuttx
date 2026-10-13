@@ -245,11 +245,16 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
            * read condition.  POLLHUP will be reported when no more data will
            * be available (such as when a connection is lost).  In either
            * case, the read() can then be performed without blocking.
+           *
+           * POLLERR is a read and a write condition too: a read() or a
+           * write() then returns at once, with an error.  poll() reports
+           * POLLHUP and POLLERR even when they were not asked for, so set
+           * only the bits that the caller asked for.
            */
 
-          if (readfds)
+          if (readfds && (pollset[ndx].events & POLLIN) != 0)
             {
-              if (pollset[ndx].revents & (POLLIN | POLLHUP))
+              if (pollset[ndx].revents & (POLLIN | POLLHUP | POLLERR))
                 {
                   FD_SET(pollset[ndx].fd, readfds);
                   ret++;
@@ -258,9 +263,9 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
           /* Check for write conditions */
 
-          if (writefds)
+          if (writefds && (pollset[ndx].events & POLLOUT) != 0)
             {
-              if (pollset[ndx].revents & (POLLOUT | POLLHUP))
+              if (pollset[ndx].revents & (POLLOUT | POLLHUP | POLLERR))
                 {
                   FD_SET(pollset[ndx].fd, writefds);
                   ret++;
