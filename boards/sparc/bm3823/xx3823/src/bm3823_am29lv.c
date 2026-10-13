@@ -33,6 +33,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <nuttx/debug.h>
+#include <nuttx/kmalloc.h>
 
 #ifdef CONFIG_MTD_AM29LV
 #  include <nuttx/mtd/mtd.h>

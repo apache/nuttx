@@ -31,6 +31,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include <arch/arch.h>
 #include <arch/types.h>
@@ -39,6 +40,8 @@
 #include <nuttx/cache.h>
 #include <nuttx/atexit.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/mutex.h>
+#include <nuttx/queue.h>
 
 #ifdef CONFIG_PTHREAD_ATFORK
 #  include <nuttx/list.h>
@@ -74,6 +77,15 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+#ifdef CONFIG_FILE_STREAM
+struct streamlist
+{
+  mutex_t                 sl_lock;   /* For thread safety */
+  struct file_struct      sl_std[3];
+  sq_queue_t              sl_queue;
+};
+#endif /* CONFIG_FILE_STREAM */
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

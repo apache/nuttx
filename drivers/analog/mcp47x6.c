@@ -39,6 +39,7 @@
 #include <nuttx/i2c/i2c_master.h>
 
 #include <nuttx/analog/mcp47x6.h>
+#include <nuttx/kmalloc.h>
 
 /****************************************************************************
  * Preprocessor definitions

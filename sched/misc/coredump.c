@@ -32,6 +32,7 @@
 
 #include <nuttx/coredump.h>
 #include <nuttx/elf.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/sched.h>
 

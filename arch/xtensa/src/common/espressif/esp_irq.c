@@ -34,6 +34,7 @@
 #include <string.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <arch/irq.h>

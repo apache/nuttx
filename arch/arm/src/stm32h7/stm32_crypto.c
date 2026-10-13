@@ -33,6 +33,7 @@
 #include <crypto/cryptodev.h>
 #include <crypto/xform.h>
 #include <nuttx/crypto/crypto.h>
+#include <nuttx/kmalloc.h>
 
 #include "arm_internal.h"
 #include "hardware/stm32h7x3xx_rcc.h"

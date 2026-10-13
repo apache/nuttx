@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/kthread.h>
 #include <nuttx/video/imgsensor.h>

@@ -30,6 +30,7 @@
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/tls.h>
 
 #ifdef CONFIG_FILE_STREAM
 

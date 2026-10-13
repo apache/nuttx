@@ -39,6 +39,7 @@
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
 #include <nuttx/analog/ads7046.h>
+#include <nuttx/kmalloc.h>
 
 /****************************************************************************
  * Pre-processor Definitions

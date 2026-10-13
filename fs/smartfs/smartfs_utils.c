@@ -39,6 +39,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/lib/lib.h>
 
 #include "smartfs.h"
 #include "fs_heap.h"

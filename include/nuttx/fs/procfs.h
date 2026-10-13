@@ -29,6 +29,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/mm/mm.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -129,10 +130,6 @@ struct procfs_dir_priv_s
 };
 
 /* An entry for procfs_register_meminfo */
-
-struct mallinfo;
-struct mm_heap_s;
-struct mm_memdump_s;
 
 struct procfs_meminfo_entry_s
 {

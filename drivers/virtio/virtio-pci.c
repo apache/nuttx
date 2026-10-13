@@ -32,6 +32,7 @@
 #include <sys/param.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/virtio/virtio-pci.h>
 
 #include "virtio-pci.h"

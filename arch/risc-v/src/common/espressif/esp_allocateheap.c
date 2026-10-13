@@ -32,6 +32,7 @@
 #include <arch/board/board.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/mm/mm.h>
 
 #include "riscv_internal.h"

@@ -34,6 +34,9 @@
 #include <ctype.h>
 #include <fcntl.h>
 #include <string.h>
+#include <stdlib.h>
+
+#include "libc.h"
 
 #ifdef CONFIG_FILE_STREAM
 

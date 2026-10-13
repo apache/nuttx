@@ -34,6 +34,7 @@
 #include <nuttx/debug.h>
 
 #include <arch/board/board.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/irq.h>
 

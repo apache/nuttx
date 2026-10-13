@@ -31,6 +31,7 @@
 #include <sys/types.h>
 
 #include <nuttx/streams.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/reboot_notifier.h>
 
 /****************************************************************************

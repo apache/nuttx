@@ -30,6 +30,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/mmcsd.h>

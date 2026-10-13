@@ -35,6 +35,7 @@
 
 #include <nuttx/debug.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/kmalloc.h>
 #ifdef CONFIG_MTD_AM29LV
 #  include <nuttx/mtd/mtd.h>
 #  include <nuttx/fs/nxffs.h>

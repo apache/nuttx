@@ -38,6 +38,7 @@
 #include <stdbool.h>
 #include <sys/poll.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/net/netdev_lowerhalf.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/cdc.h>

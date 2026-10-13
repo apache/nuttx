@@ -38,6 +38,7 @@
 #  include <semaphore.h>
 
 #  include <nuttx/lib/lib.h>
+#  include <nuttx/tls.h>
 #  include <nuttx/streams.h>
 #endif
 

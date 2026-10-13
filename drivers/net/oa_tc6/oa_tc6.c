@@ -30,6 +30,7 @@
 #include <nuttx/debug.h>
 #include <sys/endian.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/net/ioctl.h>
 
 #ifdef CONFIG_NET_OA_TC6_NCV7410

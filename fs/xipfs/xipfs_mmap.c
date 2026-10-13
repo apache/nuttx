@@ -51,6 +51,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/mm/map.h>
 #include <nuttx/sched.h>
 
