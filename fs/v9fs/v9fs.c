@@ -1222,6 +1222,7 @@ static int v9fs_vfs_lstat(FAR struct inode *mountpt,
   /* Recover out private data from the struct inode instance */
 
   client = mountpt->i_private;
+  memset(buf, 0, sizeof(struct stat));
 
   /* Get the fid of the file (don't follow symlinks) */
 
