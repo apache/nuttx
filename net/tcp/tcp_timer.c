@@ -138,13 +138,13 @@ static int tcp_get_timeout(FAR struct tcp_conn_s *conn)
  *
  * Assumptions:
  *   arg is not NULL.
- *   The connection (arg) is bound to the polling device (dev).
  *
  ****************************************************************************/
 
 static void tcp_timer_expiry(FAR void *arg)
 {
   FAR struct tcp_conn_s *conn = NULL;
+  FAR struct net_driver_s *dev;
 
   tcp_conn_list_lock();
 
@@ -152,11 +152,17 @@ static void tcp_timer_expiry(FAR void *arg)
     {
       if (conn == arg)
         {
-          tcp_conn_list_unlock();
+          dev = conn->dev;
           conn->timeout = true;
-          netdev_lock(conn->dev);
-          netdev_txnotify_dev(conn->dev, TCP_POLL);
-          netdev_unlock(conn->dev);
+          tcp_conn_list_unlock();
+
+          if (dev != NULL)
+            {
+              netdev_lock(dev);
+              netdev_txnotify_dev(dev, TCP_POLL);
+              netdev_unlock(dev);
+            }
+
           return;
         }
     }
@@ -201,6 +207,7 @@ static void tcp_xmit_probe(FAR struct net_driver_s *dev,
 
   uint16_t hdrlen = tcpip_hdrsize(conn);
   uint32_t saveseq = tcp_getsequence(conn->sndseq);
+
   tcp_setsequence(conn->sndseq, saveseq - 1);
 
   tcp_send(dev, conn, TCP_ACK, hdrlen);
@@ -342,7 +349,7 @@ void tcp_update_keeptimer(FAR struct tcp_conn_s *conn, int timeout)
 
 void tcp_stop_timer(FAR struct tcp_conn_s *conn)
 {
-  work_cancel(LPWORK, &conn->work);
+  work_cancel_sync(LPWORK, &conn->work);
 }
 
 /****************************************************************************
