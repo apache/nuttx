@@ -470,7 +470,8 @@ int libelf_symvalue(FAR struct module_s *modp,
           exportinfo.modp   = modp;
           exportinfo.symbol = NULL;
 
-          ret = libelf_registry_foreach(libelf_symcallback,
+          ret = libelf_registry_foreach(loadinfo->registry,
+                                        libelf_symcallback,
                                         (FAR void *)&exportinfo);
           if (ret < 0)
             {

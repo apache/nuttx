@@ -48,9 +48,10 @@
  *   called.
  *
  * Input Parameters:
- *   handle - The opaque, non-NULL value returned by a previous successful
- *            call to libelf_insert().
- *   name   - A pointer to the symbol name string.
+ *   registry - The registry the module is on.
+ *   handle   - The opaque, non-NULL value returned by a previous successful
+ *              call to libelf_insert().
+ *   name     - A pointer to the symbol name string.
  *
  * Returned Value:
  *   The address associated with the symbol is returned on success.
@@ -62,6 +63,9 @@
  *   NOTE: This means that the address zero can never be a valid return
  *   value.
  *
+ * Assumptions:
+ *   The caller holds the lock of the registry.
+ *
  ****************************************************************************/
 
 FAR const void *libelf_getsymbol(FAR void *handle, FAR const char *name)
@@ -69,18 +73,6 @@ FAR const void *libelf_getsymbol(FAR void *handle, FAR const char *name)
   FAR struct module_s *modp = handle;
   FAR const struct symtab_s *symbol;
   int err;
-  int ret;
-
-  /* Verify that the module is in the registry */
-
-  libelf_registry_lock();
-  ret = libelf_registry_verify(modp);
-  if (ret < 0)
-    {
-      berr("ERROR: Failed to verify module: %d\n", ret);
-      err = -ret;
-      goto errout_with_lock;
-    }
 
   /* Does the module have a symbol table? */
 
@@ -88,15 +80,13 @@ FAR const void *libelf_getsymbol(FAR void *handle, FAR const char *name)
     {
       berr("ERROR: Module has no symbol table\n");
       err = ENOENT;
-      goto errout_with_lock;
+      goto errout;
     }
 
   /* Search the symbol table for the matching symbol */
 
   symbol = symtab_findbyname(modp->modinfo.exports, name,
                              modp->modinfo.nexports);
-
-  libelf_registry_unlock();
   if (symbol == NULL)
     {
       berr("ERROR: Failed to find symbol in symbol \"%s\" in table\n", name);
@@ -109,8 +99,7 @@ FAR const void *libelf_getsymbol(FAR void *handle, FAR const char *name)
   DEBUGASSERT(symbol->sym_value != NULL);
   return symbol->sym_value;
 
-errout_with_lock:
-  libelf_registry_unlock();
+errout:
   set_errno(err);
   return NULL;
 }

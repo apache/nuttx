@@ -31,6 +31,8 @@
 #include <nuttx/module.h>
 #include <nuttx/lib/elf.h>
 
+#include "module/module.h"
+
 #ifdef CONFIG_MODULE
 
 /****************************************************************************
@@ -65,18 +67,26 @@
 
 FAR void *insmod(FAR const char *filename, FAR const char *modname)
 {
+  FAR struct list_node *registry;
+  FAR void *handle;
+
+  registry = mod_registry_lock();
+
   /* A duplicate name is an error here, where it has always been.
    * libelf_insert() would take a reference instead, which is what
    * dlopen() wants and insmod() does not.
    */
 
-  if (libelf_gethandle(modname) != NULL)
+  if (libelf_gethandle(registry, modname) != NULL)
     {
+      mod_registry_unlock();
       set_errno(EEXIST);
       return NULL;
     }
 
-  return libelf_insert(filename, modname);
+  handle = libelf_insert(registry, filename, modname);
+  mod_registry_unlock();
+  return handle;
 }
 
 #endif /* CONFIG_MODULE */

@@ -24,7 +24,7 @@ ifeq ($(CONFIG_MODULE),y)
 
 # OS module interfaces
 
-CSRCS += mod_insmod.c mod_rmmod.c mod_modsym.c mod_modhandle.c
+CSRCS += mod_insmod.c mod_rmmod.c mod_modsym.c mod_modhandle.c mod_registry.c
 
 # procfs support
 

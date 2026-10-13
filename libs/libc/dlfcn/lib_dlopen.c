@@ -34,6 +34,7 @@
 #include <nuttx/envpath.h>
 #include <nuttx/lib/elf.h>
 #include <nuttx/lib/lib.h>
+#include <nuttx/tls.h>
 
 /****************************************************************************
  * Private Functions
@@ -84,7 +85,9 @@
 
 static inline FAR void *dlinsert(FAR const char *filename)
 {
+  FAR struct list_node *registry;
   FAR const char *modname;
+  FAR void *handle;
 
   DEBUGASSERT(filename != NULL);
 
@@ -93,12 +96,15 @@ static inline FAR void *dlinsert(FAR const char *filename)
   modname = strrchr(filename, '/');
   modname = modname != NULL ? modname + 1 : filename;
 
-  /* libelf_insert() returns the module already loaded under this name,
-   * with another reference taken, so a library opened twice is one
-   * instance shared by both callers.
+  /* libelf_insert() returns the module already loaded under this name in
+   * this task group, with another reference taken, so a library opened
+   * twice in a task group is one instance.
    */
 
-  return libelf_insert(filename, modname);
+  registry = task_modules_lock();
+  handle = libelf_insert(registry, filename, modname);
+  task_modules_unlock();
+  return handle;
 }
 #else /* if defined(CONFIG_BUILD_KERNEL) */
 /* The KERNEL build is considerably more complex:  In order to be shared,

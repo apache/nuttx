@@ -21,7 +21,7 @@
 # ##############################################################################
 
 if(CONFIG_MODULE)
-  set(SRCS mod_insmod.c mod_rmmod.c mod_modsym.c mod_modhandle.c)
+  set(SRCS mod_insmod.c mod_rmmod.c mod_modsym.c mod_modhandle.c mod_registry.c)
 
   if(CONFIG_FS_PROCFS AND NOT CONFIG_FS_PROCFS_EXCLUDE_MODULE)
     list(APPEND SRCS mod_procfs.c)

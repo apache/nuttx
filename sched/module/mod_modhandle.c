@@ -29,6 +29,8 @@
 #include <nuttx/module.h>
 #include <nuttx/lib/elf.h>
 
+#include "module/module.h"
+
 #ifdef CONFIG_MODULE
 
 /****************************************************************************
@@ -55,7 +57,13 @@
 
 FAR void *modhandle(FAR const char *name)
 {
-  return libelf_gethandle(name);
+  FAR struct list_node *registry;
+  FAR void *handle;
+
+  registry = mod_registry_lock();
+  handle = libelf_gethandle(registry, name);
+  mod_registry_unlock();
+  return handle;
 }
 
 #endif /* CONFIG_MODULE */

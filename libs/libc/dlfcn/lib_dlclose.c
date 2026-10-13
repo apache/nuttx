@@ -29,6 +29,7 @@
 #include <dlfcn.h>
 
 #include <nuttx/lib/elf.h>
+#include <nuttx/tls.h>
 
 /****************************************************************************
  * Private Functions
@@ -98,7 +99,13 @@ int dlclose(FAR void *handle)
    * one goes, so closing one of two handles leaves the other usable.
    */
 
-  return libelf_remove(handle);
+  FAR struct list_node *registry;
+  int ret;
+
+  registry = task_modules_lock();
+  ret = libelf_remove(registry, handle);
+  task_modules_unlock();
+  return ret;
 
 #else /* if defined(CONFIG_BUILD_KERNEL) */
   /* The KERNEL build is considerably more complex:  In order to be shared,
