@@ -170,6 +170,11 @@
 #define AN_MCP445X_FIRST  (AN_POT_FIRST + AN_POT_NCMDS)
 #define AN_MCP445X_NCMDS  2
 
+/* See arch/arm/src/rm57/rm57_adc.h */
+
+#define AN_RM57_FIRST     (AN_MCP445X_FIRST + AN_MCP445X_NCMDS)
+#define AN_RM57_NCMDS     13
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
