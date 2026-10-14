@@ -12,16 +12,14 @@ than any particular application.
 
 .. warning::
 
-   This board port is new and experimental. The serial console (SCI1),
-   the two user LEDs, the DMA controller, DCAN, and EMAC/MDIO (Ethernet)
-   are currently supported; button support and most other on-chip
-   peripherals are not yet implemented. Some of the values documented
-   below (PLL/clock configuration, LED polarity, JTAG IDCODE, and for
-   Ethernet the exact PHY ball assignments and RMII clock source) were
-   taken from TI's HALCoGen-generated reference project or from the
-   RM57L843 datasheet rather than confirmed against this specific
-   board's schematic — see the comments in
-   ``boards/arm/rm57/rm57l843-launchxl2/include/board.h`` for details.
+   This board port is new. The console, LEDs, buttons, serial DMA,
+   Ethernet, ADC, temperature sensors and start-up diagnostics are tested
+   on this board. DCAN, MibSPI and I2C are only tested in their internal
+   loopback modes, because the LaunchPad has no CAN transceiver and no
+   SPI or I2C device. Pin assignments were checked against the board
+   schematic (SPRR397). The PLL values come from TI's HALCoGen project,
+   and the CAN bit timing and the I2C transfer times measured on the
+   board confirm them.
 
 Features
 ========
@@ -31,7 +29,10 @@ Features
   PLL/GCLK) in the current clock configuration
 * 4 MB of on-chip program flash, 512 KB of on-chip SRAM
 * Onboard XDS110 debug probe (JTAG)
-* 2 user LEDs
+* 2 user LEDs and 2 user buttons
+* 10/100 Ethernet (DP83630 PHY, MII)
+* MibSPI1 and MibSPI3 on the BoosterPack headers; I2C1 and I2C2 on the
+  BoosterPack and proto headers (no pull-up resistors on the board)
 * SCI1 wired up as the serial console; SCI2-SCI4 are supported by the
   driver but not enabled by this board's default configuration (and
   SCI2-SCI4 pin-mux is not programmed by this board port - see the
@@ -46,10 +47,9 @@ Features
 
 .. note::
 
-   Peripherals that are part of the RM57L843 chip itself (N2HET, MibSPI,
-   I2C, the ESM diagnostic module, PBIST/STC self-test, etc.) but are
-   not yet wired up by this board port are tracked on the
-   :doc:`RM57 chip documentation page </platforms/arm/rm57/index>`.
+   The :doc:`RM57 chip documentation page </platforms/arm/rm57/index>`
+   lists the chip peripherals that are not implemented yet (N2HET, ePWM,
+   eCAP, eQEP and others).
 
 Buttons and LEDs
 ================
@@ -58,12 +58,19 @@ LEDs
 ----
 
 The LAUNCHXL2-RM57L has two user LEDs, labeled **B6** and **B7** on the
-board silkscreen, driven by GIOB[6] and GIOB[7] respectively.
+board silkscreen, driven by GIOB[6] and GIOB[7] respectively. They are
+active high. With ``CONFIG_ARCH_LEDS`` NuttX uses them to show the OS
+state; otherwise they are available through ``CONFIG_USERLED``.
 
 Buttons
 -------
 
-Button support is not yet implemented by this board port.
+The two user buttons, **B4** and **B5**, are on GIOB[4] and GIOB[5]. They
+are active low and use the internal pull-up. They are supported through
+``board_buttons()``, and with ``CONFIG_ARCH_IRQBUTTONS`` and
+``CONFIG_RM57_GIO_IRQ`` through ``board_button_irq()`` with an interrupt
+on both edges. The ``buttons`` configuration has a small demo: holding
+B4 lights LED B6, and holding B5 lights LED B7.
 
 Pin Mapping
 ===========
@@ -95,18 +102,42 @@ Only the pins used by the currently supported peripherals are listed.
    * - F1
      - GIOB[7]
      - User LED B7
-   * - V5 / G3
-     - MDIO_CLK / MDIO_D
-     - MDIO bus shared by the EMAC's PHY (DP83630, address 1)
-   * - D19 / E18 / R2 / J19 / J18
-     - MII_TX_CLK / MII_TXD[3:0]
-     - EMAC transmit, MII mode
-   * - H19 / F3 / B4
-     - MII_TXEN / MII_COL / MII_CRS
-     - EMAC transmit control, MII mode
-   * - K19 / H18 / G19 / A14 / P1 / B11 / N19
-     - MII_RXCLK / MII_RXD[3:0] / MII_RX_DV / MII_RX_ER
-     - EMAC receive, MII mode
+   * - (n/a)
+     - GIOB[4] / GIOB[5]
+     - User buttons B4 / B5, active low
+   * - T9 / F4
+     - MDCLK / MDIO
+     - MDIO bus to the DP83630 PHY (address 1)
+   * - U7 / U8 / R1 / T2 / G4 / E4
+     - MII_TX_CLK / MII_TXD[0:3] / MII_TXEN
+     - EMAC transmit
+   * - T4 / U4 / T3 / U3 / V3 / U6 / U5
+     - MII_RXCLK / MII_RXD[0:3] / MII_RX_DV / MII_RX_ER
+     - EMAC receive
+   * - W4 / V4
+     - MII_COL / MII_CRS
+     - EMAC collision and carrier sense
+   * - A12
+     - ECLK1
+     - 25MHz reference clock for the PHY (the PHY has no crystal)
+   * - E1 / A6
+     - GIOA[3] / GIOA[4]
+     - PHY power-down and reset, driven at bring-up
+   * - J5.7 / J6.6 / J6.7
+     - MIBSPI1CLK / SIMO / SOMI
+     - MibSPI1, BoosterPack site 2. Chip selects nCS[0:2] on J6.3, J6.8,
+       J6.9
+   * - J1.7 / J2.6 / J2.7
+     - MIBSPI3CLK / SIMO / SOMI
+     - MibSPI3, BoosterPack site 1. Chip selects nCS[0:3] on J5.5, J2.3,
+       J2.8, J2.9 (nCS[2:3] only when I2C1 is disabled)
+   * - B2 / C3
+     - I2C1 SDA / SCL
+     - J2.8 / J2.9, taken from MibSPI3 nCS[2:3] when ``CONFIG_RM57_I2C1``
+       is enabled
+   * - G17 / G16
+     - I2C2 SDA / SCL
+     - Proto header J10.9 / J10.8
    * - T19
      - AD1IN[6]
      - On-board 1k trim potentiometer U10 (wiper, with 4700pF to GND);
@@ -126,12 +157,11 @@ Only the pins used by the currently supported peripherals are listed.
 
 .. note::
 
-   The EMAC/MDIO ball assignments above are this port's default choice
-   among two alternate-ball options the RM57L843 offers for nearly every
-   MII signal (see the ``BOARD_PINMUX_EMAC`` comment in ``board.h``) and
-   are **not** independently confirmed against the LAUNCHXL2-RM57L
-   schematic. RMII mode uses a smaller subset of these balls (see
-   ``board.h``) plus K19 as the RMII 50MHz reference clock input.
+   Most MII signals can also be routed to an alternate ball. This board
+   connects the PHY to the dedicated balls listed above, which are the
+   reset defaults; the alternates go to the BoosterPack headers (see
+   the ``BOARD_PINMUX_EMAC`` comment in ``board.h``). The PHY is strapped
+   for MII, so RMII cannot be used on this board.
 
 .. note::
 
@@ -149,6 +179,11 @@ Serial Console
 SCI1 is used as the serial console. The default configuration is:
 
 * 9600 baud, 8 data bits, no parity, 2 stop bits
+
+The console goes over the XDS110's USB serial port. ``ethnsh`` uses
+38400 baud, because a slow console makes network warnings costly. Rates
+above 38400 are not recommended: the baud divider has no fractional
+part, so 115200 is off by 1.7%.
 
 The baud rate and stop bits are configurable via ``CONFIG_SCI1_BAUD`` and
 ``CONFIG_SCI1_2STOP``.
@@ -180,13 +215,30 @@ usable here). OpenOCD can be used with a Cortex-R5 (``cortex_r4`` driver)
 target configuration that routes through the ICEpick-C, followed by GDB
 to load and debug the image.
 
+On Rev B silicon, errata GCM#60 (SPNZ233B) can leave VCLK at the wrong
+rate after an external reset, and the debugger causes one each time it
+connects. If something works after a power cycle but not under the
+debugger (Ethernet is the most likely), suspect this first.
+
 Configurations
 ==============
 
 nsh
 ---
 
-Basic NuttShell configuration (console enabled on SCI1, at 9600 baud).
+Basic NuttShell configuration (console enabled on SCI1, at 9600 baud),
+with ``ostest``::
+
+    nsh> ostest
+
+buttons
+-------
+
+``nsh`` with ``CONFIG_ARCH_BUTTONS``, ``CONFIG_ARCH_IRQBUTTONS`` and
+``CONFIG_RM57_GIO_IRQ``, and with ``CONFIG_ARCH_LEDS`` disabled so that
+the board code controls the LEDs. While B4 is held, LED B6 is lit, and while B5 is
+held, LED B7 is lit. The LEDs are switched from the GIO interrupt
+handler, so this checks the whole GIO interrupt path.
 
 scitest
 -------
@@ -226,6 +278,30 @@ console input from stalling behind that threshold, RTI compare 1 calls
 console and the test ports therefore behave the same as in ``scitest``,
 only with the transfers themselves done by DMA.
 
+SCI3 is also put in internal loopback (``CONFIG_RM57_SCI3_LOOPBACK``),
+so ``/dev/ttyS1`` receives what it sends without any wiring. This is how
+the DMA receive path was tested on the board.
+
+can, candma, cansock
+--------------------
+
+NuttShell with DCAN1 in loopback test mode (``CONFIG_RM57_DCAN_LOOPBACK``),
+so the controller receives its own frames while still driving the TX
+ball (A10) for a logic analyzer. No transceiver or bus is needed.
+
+* ``can``: character driver ``/dev/can0`` with the ``can`` example::
+
+      nsh> can -n 8
+
+* ``candma``: the same, with the IF3 DMA receive path
+  (``CONFIG_RM57_DCAN1_RX_IF3DMA``, experimental).
+* ``cansock``: SocketCAN interface ``can0`` with ``candump`` and
+  ``cansend``::
+
+      nsh> ifup can0
+      nsh> candump can0 &
+      nsh> cansend can0 123#DEADBEEF
+
 eth
 ---
 
@@ -242,7 +318,22 @@ page), NSH's automatic network initialization
 
 If the network doesn't come up automatically, check ``ifconfig eth0``
 for the assigned address and bring the link up manually with
-``ifup eth0`` / ``ifdown eth0``.
+``ifup eth0`` / ``ifdown eth0``. Some routers ignore the first DHCP
+requests after the link comes up, so ``CONFIG_NETUTILS_DHCPC_RETRIES``
+is set to 10.
+
+ethnsh
+------
+
+``eth`` plus a telnet server for NSH, ``iperf`` and a small web server,
+with the console at 38400 baud. From a PC on the same network::
+
+    $ telnet <board-ip>
+    $ iperf -c <board-ip>            # board receives:   nsh> iperf -s
+    $ iperf -s                       # board transmits:  nsh> iperf -c <pc-ip>
+
+The best results measured on the board are 19.4Mbit/s transmit and
+9.2Mbit/s receive.
 
 adc
 ---
@@ -362,6 +453,31 @@ other direction.
    ``sensor_poll()`` handles the non-blocking case instead, which is why
    ``sensortest`` - it opens ``O_NONBLOCK`` - works. Use it, or open the node
    non-blocking yourself.
+
+spi, spitest
+------------
+
+NuttShell with MibSPI1 (compatibility mode with DMA) and MibSPI3
+(multi-buffer mode), registered as ``/dev/spi1`` and ``/dev/spi3``, and
+the ``spi`` tool. ``spitest`` also enables ``CONFIG_RM57_MIBSPI_LOOPBACK``,
+which runs a loopback test on both buses at boot and prints one ``ok`` or
+error line per pattern. To try a real exchange, connect SIMO to SOMI
+(J6.6 to J6.7 for MibSPI1) and run::
+
+    nsh> spi exch -b 1 -x 4 deadbeef
+
+i2c
+---
+
+NuttShell with I2C1 and I2C2, registered as ``/dev/i2c1`` and
+``/dev/i2c2``, and the ``i2c`` tool. ``CONFIG_RM57_I2C_LOOPBACK`` runs the
+digital loopback test on both buses at 100kHz and 400kHz at boot. Each
+bus ends with ``I2Cn: loopback self-test passed (0 failed)``. Enabling
+I2C1 takes
+MibSPI3 nCS[2:3] away. Real devices need external pull-up resistors::
+
+    nsh> i2c bus
+    nsh> i2c dev -b 2 0x03 0x77
 
 selftest
 --------
