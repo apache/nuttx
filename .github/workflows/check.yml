@@ -14,8 +14,6 @@ name: Check
 
 on:
   pull_request:
-    paths-ignore:
-      - 'Documentation/**'
 
 concurrency:
   group: check-${{ github.event.pull_request.number || github.ref }}
