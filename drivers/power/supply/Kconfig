@@ -78,6 +78,33 @@ config REGULATOR_PROCFS
 		consumers hold, and the ordering between them is what the
 		framework exists to arrange.
 
+config REGULATOR_MPQ8785
+	bool "MPS MPQ8785 step down converter"
+	default n
+	select I2C
+	---help---
+		The MPQ8785 is a PMBus controlled synchronous buck converter,
+		up to 40A from an input of up to 16V.
+
+		The driver describes what the part can do, a reference from
+		0.35V to 1.55V in steps of two DAC counts, and takes the
+		limits that actually apply from whoever registers it.  What a
+		rail may be told to do is a property of the board it is on,
+		not of the converter, so a board supplying a processor core
+		must pass its own bounds; they are held inside the part's, so
+		a caller can narrow the range and never widen it.
+
+		It also publishes what the part reports as sensor topics:
+		output voltage, current and power, the part's own
+		temperature, and the input voltage on a topic number of its
+		own, since input and output are both voltages and one number
+		carries one topic of each type.  A board that wants the rail
+		controlled and not watched can turn that half off.  Reading
+		is useful whether or not anything ever sets a voltage.
+
+		Nothing is applied when the driver starts: it reports the rail
+		rather than moving it.
+
 config REGULATOR_GPIO
 	bool "Regulator gpio driver support"
 	default n

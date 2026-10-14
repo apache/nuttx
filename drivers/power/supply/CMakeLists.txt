@@ -41,6 +41,10 @@ if(CONFIG_REGULATOR)
     list(APPEND SRCS regulator_gpio.c)
   endif()
 
+  if(CONFIG_REGULATOR_MPQ8785)
+    list(APPEND SRCS mpq8785.c)
+  endif()
+
   if(CONFIG_REGULATOR_RPMSG)
     list(APPEND SRCS regulator_rpmsg.c)
   endif()
