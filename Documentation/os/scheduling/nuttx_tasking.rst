@@ -62,14 +62,11 @@ so that common list handling logic can be used (only the ``g_readytorun``
 and ``g_pendingtasks`` lists, and the wait lists in each semaphore, event and
 message queue, need to be prioritized).
 
-All new tasks start in an initial, non-running state:
+All new tasks start in an initial, non-running state
+(``TSTATE_TASK_INACTIVE``):
 
-.. code-block:: c
-
-  volatile dq_queue_t g_inactivetasks;
-
-* This is the list of all tasks that have been initialized, but not yet
-  activated. NOTE: This is the only list that is not prioritized.
+* Tasks that have been initialized, but not yet activated, are not kept
+  in any task list. They are only reachable through the PID hash table.
 
 * When the task is initialized, it is moved to a ready-to-run list.
   There are two lists representing ready-to-run threads and several
