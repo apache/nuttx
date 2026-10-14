@@ -36,6 +36,7 @@
 #if defined(CONFIG_ARCH_CHIP_R7FA8M1AFECAM)
 #  define RA_NSCI_B  6   /* SCI_B0-4, SCI_B9 (not contiguous: no SCI_B5-8) */
 #  define RA_NGPT    8   /* GPT0-7 */
+#  define RA_NIIC    2   /* IIC0-1 */
 
 #  define RA_RAM_SIZE         (896*1024)   /* 896Kb RAM */
 #  define RA_FLASH_SIZE       (1024*1024)  /* 1024Kb FLASH */
@@ -54,6 +55,7 @@
 #elif defined(CONFIG_ARCH_CHIP_R7FA8M1AFECBD)
 #  define RA_NSCI_B  6   /* SCI_B0-4, SCI_B9 (not contiguous: no SCI_B5-8) */
 #  define RA_NGPT    8   /* GPT0-7 */
+#  define RA_NIIC    2   /* IIC0-1 */
 
 #  define RA_RAM_SIZE         (896*1024)   /* 896Kb RAM */
 #  define RA_FLASH_SIZE       (1024*1024)  /* 1024Kb FLASH */
@@ -72,6 +74,7 @@
 #elif defined(CONFIG_ARCH_CHIP_R7FA8M1AFECFB)
 #  define RA_NSCI_B  6   /* SCI_B0-4, SCI_B9 (not contiguous: no SCI_B5-8) */
 #  define RA_NGPT    8   /* GPT0-7 */
+#  define RA_NIIC    2   /* IIC0-1 */
 
 #  define RA_RAM_SIZE         (896*1024)   /* 896Kb RAM */
 #  define RA_FLASH_SIZE       (1024*1024)  /* 1024Kb FLASH */
@@ -90,6 +93,7 @@
 #elif defined(CONFIG_ARCH_CHIP_R7FA8M1AFECFC)
 #  define RA_NSCI_B  6   /* SCI_B0-4, SCI_B9 (not contiguous: no SCI_B5-8) */
 #  define RA_NGPT    8   /* GPT0-7 */
+#  define RA_NIIC    2   /* IIC0-1 */
 
 #  define RA_RAM_SIZE         (896*1024)   /* 896Kb RAM */
 #  define RA_FLASH_SIZE       (1024*1024)  /* 1024Kb FLASH */
@@ -108,6 +112,7 @@
 #elif defined(CONFIG_ARCH_CHIP_R7FA8M1AFECFP)
 #  define RA_NSCI_B  6  /* SCI_B0-4, SCI_B9 (not contiguous: no SCI_B5-8) */
 #  define RA_NGPT    8  /* GPT0-7 */
+#  define RA_NIIC    2  /* IIC0-1 */
 
 #  define RA_RAM_SIZE         (896*1024)   /* 896Kb RAM */
 #  define RA_FLASH_SIZE       (1024*1024)  /* 1024Kb FLASH */
@@ -126,6 +131,7 @@
 #elif defined(CONFIG_ARCH_CHIP_R7FA8M1AHECAM)
 #  define RA_NSCI_B  6   /* SCI_B0-4, SCI_B9 (not contiguous: no SCI_B5-8) */
 #  define RA_NGPT    8   /* GPT0-7 */
+#  define RA_NIIC    2   /* IIC0-1 */
 
 #  define RA_RAM_SIZE         (896*1024)   /* 896Kb RAM */
 #  define RA_FLASH_SIZE       (2016*1024)  /* 2016Kb FLASH */
@@ -144,6 +150,7 @@
 #elif defined(CONFIG_ARCH_CHIP_R7FA8M1AHECBD)
 #  define RA_NSCI_B  6   /* SCI_B0-4, SCI_B9 (not contiguous: no SCI_B5-8) */
 #  define RA_NGPT    8   /* GPT0-7 */
+#  define RA_NIIC    2   /* IIC0-1 */
 
 #  define RA_RAM_SIZE         (896*1024)   /* 896Kb RAM */
 #  define RA_FLASH_SIZE       (2016*1024)  /* 2016Kb FLASH */
@@ -162,6 +169,7 @@
 #elif defined(CONFIG_ARCH_CHIP_R7FA8M1AHECFB)
 #  define RA_NSCI_B  6   /* SCI_B0-4, SCI_B9 (not contiguous: no SCI_B5-8) */
 #  define RA_NGPT    8   /* GPT0-7 */
+#  define RA_NIIC    2   /* IIC0-1 */
 
 #  define RA_RAM_SIZE         (896*1024)   /* 896Kb RAM */
 #  define RA_FLASH_SIZE       (2016*1024)  /* 2016Kb FLASH */
@@ -180,6 +188,7 @@
 #elif defined(CONFIG_ARCH_CHIP_R7FA8M1AHECFC)
 #  define RA_NSCI_B  6   /* SCI_B0-4, SCI_B9 (not contiguous: no SCI_B5-8) */
 #  define RA_NGPT    8   /* GPT0-7 */
+#  define RA_NIIC    2   /* IIC0-1 */
 
 #  define RA_RAM_SIZE         (896*1024)   /* 896Kb RAM */
 #  define RA_FLASH_SIZE       (2016*1024)  /* 2016Kb FLASH */
@@ -198,6 +207,7 @@
 #elif defined(CONFIG_ARCH_CHIP_R7FA8M1AHECFP)
 #  define RA_NSCI_B  6  /* SCI_B0-4, SCI_B9 (not contiguous: no SCI_B5-8) */
 #  define RA_NGPT    8  /* GPT0-7 */
+#  define RA_NIIC    2  /* IIC0-1 */
 
 #  define RA_RAM_SIZE         (896*1024)   /* 896Kb RAM */
 #  define RA_FLASH_SIZE       (2016*1024)  /* 2016Kb FLASH */

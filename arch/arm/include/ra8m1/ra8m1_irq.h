@@ -170,42 +170,42 @@ enum ra_icu_event_irq_e
 {
   RA_IRQ_EVT_START = RA_IRQ_FIRST - 1,  /* Not an IRQ: first event = FIRST */
 
-#ifdef CONFIG_RA_SCI0_UART
+#if defined(CONFIG_RA_SCI0_UART) || defined(CONFIG_RA_SCI0_I2C)
   SCI0_RXI,                             /* Receive data full */
   SCI0_TXI,                             /* Transmit data empty */
   SCI0_TEI,                             /* Transmit end */
   SCI0_ERI,                             /* Receive error */
 #endif
 
-#ifdef CONFIG_RA_SCI1_UART
+#if defined(CONFIG_RA_SCI1_UART) || defined(CONFIG_RA_SCI1_I2C)
   SCI1_RXI,                             /* Receive data full */
   SCI1_TXI,                             /* Transmit data empty */
   SCI1_TEI,                             /* Transmit end */
   SCI1_ERI,                             /* Receive error */
 #endif
 
-#ifdef CONFIG_RA_SCI2_UART
+#if defined(CONFIG_RA_SCI2_UART) || defined(CONFIG_RA_SCI2_I2C)
   SCI2_RXI,                             /* Receive data full */
   SCI2_TXI,                             /* Transmit data empty */
   SCI2_TEI,                             /* Transmit end */
   SCI2_ERI,                             /* Receive error */
 #endif
 
-#ifdef CONFIG_RA_SCI3_UART
+#if defined(CONFIG_RA_SCI3_UART) || defined(CONFIG_RA_SCI3_I2C)
   SCI3_RXI,                             /* Receive data full */
   SCI3_TXI,                             /* Transmit data empty */
   SCI3_TEI,                             /* Transmit end */
   SCI3_ERI,                             /* Receive error */
 #endif
 
-#ifdef CONFIG_RA_SCI4_UART
+#if defined(CONFIG_RA_SCI4_UART) || defined(CONFIG_RA_SCI4_I2C)
   SCI4_RXI,                             /* Receive data full */
   SCI4_TXI,                             /* Transmit data empty */
   SCI4_TEI,                             /* Transmit end */
   SCI4_ERI,                             /* Receive error */
 #endif
 
-#ifdef CONFIG_RA_SCI9_UART
+#if defined(CONFIG_RA_SCI9_UART) || defined(CONFIG_RA_SCI9_I2C)
   SCI9_RXI,                             /* Receive data full */
   SCI9_TXI,                             /* Transmit data empty */
   SCI9_TEI,                             /* Transmit end */
@@ -255,6 +255,18 @@ enum ra_icu_event_irq_e
 #endif
 #ifdef CONFIG_RA_GPT13_GPT
   GPT13_COUNTER_OVERFLOW,
+#endif
+#ifdef CONFIG_RA_IIC0
+  IIC0_ERI,                             /* Transfer error or event occurrence */
+  IIC0_RXI,                             /* Receive data full */
+  IIC0_TXI,                             /* Transmit data empty */
+  IIC0_TEI,                             /* Transmit end */
+#endif
+#ifdef CONFIG_RA_IIC1
+  IIC1_ERI,                             /* Transfer error or event occurrence */
+  IIC1_RXI,                             /* Receive data full */
+  IIC1_TXI,                             /* Transmit data empty */
+  IIC1_TEI,                             /* Transmit end */
 #endif
 
   RA_IRQ_EVT_END                        /* Not an IRQ: one past the last */

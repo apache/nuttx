@@ -32,6 +32,8 @@ config ARCH_CHIP_R7FA8M1AFECAM
 	select RA_HAVE_GPT11
 	select RA_HAVE_GPT12
 	select RA_HAVE_GPT13
+	select RA_HAVE_IIC0
+	select RA_HAVE_IIC1
 	select RA8M1_FAMILY
 
 config ARCH_CHIP_R7FA8M1AFECBD
@@ -56,6 +58,8 @@ config ARCH_CHIP_R7FA8M1AFECBD
 	select RA_HAVE_GPT11
 	select RA_HAVE_GPT12
 	select RA_HAVE_GPT13
+	select RA_HAVE_IIC0
+	select RA_HAVE_IIC1
 	select RA8M1_FAMILY
 
 config ARCH_CHIP_R7FA8M1AFECFB
@@ -80,6 +84,8 @@ config ARCH_CHIP_R7FA8M1AFECFB
 	select RA_HAVE_GPT11
 	select RA_HAVE_GPT12
 	select RA_HAVE_GPT13
+	select RA_HAVE_IIC0
+	select RA_HAVE_IIC1
 	select RA8M1_FAMILY
 
 config ARCH_CHIP_R7FA8M1AFECFC
@@ -104,6 +110,8 @@ config ARCH_CHIP_R7FA8M1AFECFC
 	select RA_HAVE_GPT11
 	select RA_HAVE_GPT12
 	select RA_HAVE_GPT13
+	select RA_HAVE_IIC0
+	select RA_HAVE_IIC1
 	select RA8M1_FAMILY
 
 config ARCH_CHIP_R7FA8M1AFECFP
@@ -128,6 +136,8 @@ config ARCH_CHIP_R7FA8M1AFECFP
 	select RA_HAVE_GPT11
 	select RA_HAVE_GPT12
 	select RA_HAVE_GPT13
+	select RA_HAVE_IIC0
+	select RA_HAVE_IIC1
 	select RA8M1_FAMILY
 
 config ARCH_CHIP_R7FA8M1AHECAM
@@ -152,6 +162,8 @@ config ARCH_CHIP_R7FA8M1AHECAM
 	select RA_HAVE_GPT11
 	select RA_HAVE_GPT12
 	select RA_HAVE_GPT13
+	select RA_HAVE_IIC0
+	select RA_HAVE_IIC1
 	select RA8M1_FAMILY
 
 config ARCH_CHIP_R7FA8M1AHECBD
@@ -176,6 +188,8 @@ config ARCH_CHIP_R7FA8M1AHECBD
 	select RA_HAVE_GPT11
 	select RA_HAVE_GPT12
 	select RA_HAVE_GPT13
+	select RA_HAVE_IIC0
+	select RA_HAVE_IIC1
 	select RA8M1_FAMILY
 
 config ARCH_CHIP_R7FA8M1AHECFB
@@ -200,6 +214,8 @@ config ARCH_CHIP_R7FA8M1AHECFB
 	select RA_HAVE_GPT11
 	select RA_HAVE_GPT12
 	select RA_HAVE_GPT13
+	select RA_HAVE_IIC0
+	select RA_HAVE_IIC1
 	select RA8M1_FAMILY
 
 config ARCH_CHIP_R7FA8M1AHECFC
@@ -224,6 +240,8 @@ config ARCH_CHIP_R7FA8M1AHECFC
 	select RA_HAVE_GPT11
 	select RA_HAVE_GPT12
 	select RA_HAVE_GPT13
+	select RA_HAVE_IIC0
+	select RA_HAVE_IIC1
 	select RA8M1_FAMILY
 
 config ARCH_CHIP_R7FA8M1AHECFP
@@ -248,6 +266,8 @@ config ARCH_CHIP_R7FA8M1AHECFP
 	select RA_HAVE_GPT11
 	select RA_HAVE_GPT12
 	select RA_HAVE_GPT13
+	select RA_HAVE_IIC0
+	select RA_HAVE_IIC1
 	select RA8M1_FAMILY
 
 endchoice # RA Chip Selection
@@ -339,15 +359,60 @@ config RA_HAVE_GPT13
 	bool
 	default n
 
+config RA_HAVE_IIC0
+	bool
+	default n
+
+config RA_HAVE_IIC1
+	bool
+	default n
+
 # TODO: user-facing enable options go here, one per
 # RA_HAVE_* above (prompt, depends on RA_HAVE_*, select
 # the driver it wires up -- see README "Kconfig draft").
 
-config RA_SCI0_UART
-	bool "UART 0"
-	default n
+choice
+	prompt "SCI0 mode"
 	depends on RA_HAVE_SCI_B0
+	optional
+
+config RA_SCI0_UART
+	bool "UART"
 	select SCI0_SERIALDRIVER
+
+config RA_SCI0_I2C
+	bool "I2C bus interface (Simple IIC mode)"
+	select I2C
+	---help---
+		Uses SCI0's Simple IIC mode (RA8M1 User's Manual section
+		31.8). Exposed as /dev/i2cN, with the device number assigned
+		by board bring-up (ra8m1_bringup.c), not fixed by this
+		driver.
+
+endchoice
+
+config RA_SCI0_DTC
+	bool "Transfer SCI0 I2C message data through the DTC"
+	default n
+	depends on RA_SCI0_I2C && RA_DTC
+	---help---
+		Once a message's address byte is acknowledged, hand its data
+		bytes to the DTC instead of moving them one at a time from
+		up_scii2c_txinterrupt(): one completion interrupt per
+		message instead of one per byte.
+
+		A write's whole data phase goes through the DTC. A read's
+		does too, except its last two bytes: this mode's NACK timing
+		(ICR.IICACKT) needs software to touch it right before each
+		of those, which the DTC cannot do, so they stay CPU-driven
+		exactly as without this option. Unlike the dedicated IIC
+		peripheral's single DTC vector per direction, a read here
+		uses two at once: one on SCIn_RXI to move each received byte
+		out of RDR, one on SCIn_TXI to keep rewriting the dummy byte
+		that sustains SCL between received bytes (RA8M1 User's
+		Manual Table 31.46: this mode has no single "clock enable"
+		separate from TDR being written). Per that same table's note
+		1, ACK/NACK cannot be confirmed for any byte the DTC moves.
 
 config RA_SCI0_FIFO
 	bool "Use SCI0's 16-stage FIFO"
@@ -421,11 +486,48 @@ config RA_SCI0_RXDTC
 
 		Mutually exclusive with CONFIG_RA_SCI0_FIFO (see its help).
 
-config RA_SCI1_UART
-	bool "UART 1"
-	default n
+choice
+	prompt "SCI1 mode"
 	depends on RA_HAVE_SCI_B1
+	optional
+
+config RA_SCI1_UART
+	bool "UART"
 	select SCI1_SERIALDRIVER
+
+config RA_SCI1_I2C
+	bool "I2C bus interface (Simple IIC mode)"
+	select I2C
+	---help---
+		Uses SCI1's Simple IIC mode (RA8M1 User's Manual section
+		31.8). Exposed as /dev/i2cN, with the device number assigned
+		by board bring-up (ra8m1_bringup.c), not fixed by this
+		driver.
+
+endchoice
+
+config RA_SCI1_DTC
+	bool "Transfer SCI1 I2C message data through the DTC"
+	default n
+	depends on RA_SCI1_I2C && RA_DTC
+	---help---
+		Once a message's address byte is acknowledged, hand its data
+		bytes to the DTC instead of moving them one at a time from
+		up_scii2c_txinterrupt(): one completion interrupt per
+		message instead of one per byte.
+
+		A write's whole data phase goes through the DTC. A read's
+		does too, except its last two bytes: this mode's NACK timing
+		(ICR.IICACKT) needs software to touch it right before each
+		of those, which the DTC cannot do, so they stay CPU-driven
+		exactly as without this option. Unlike the dedicated IIC
+		peripheral's single DTC vector per direction, a read here
+		uses two at once: one on SCIn_RXI to move each received byte
+		out of RDR, one on SCIn_TXI to keep rewriting the dummy byte
+		that sustains SCL between received bytes (RA8M1 User's
+		Manual Table 31.46: this mode has no single "clock enable"
+		separate from TDR being written). Per that same table's note
+		1, ACK/NACK cannot be confirmed for any byte the DTC moves.
 
 config RA_SCI1_FIFO
 	bool "Use SCI1's 16-stage FIFO"
@@ -499,11 +601,48 @@ config RA_SCI1_RXDTC
 
 		Mutually exclusive with CONFIG_RA_SCI1_FIFO (see its help).
 
-config RA_SCI2_UART
-	bool "UART 2"
-	default n
+choice
+	prompt "SCI2 mode"
 	depends on RA_HAVE_SCI_B2
+	optional
+
+config RA_SCI2_UART
+	bool "UART"
 	select SCI2_SERIALDRIVER
+
+config RA_SCI2_I2C
+	bool "I2C bus interface (Simple IIC mode)"
+	select I2C
+	---help---
+		Uses SCI2's Simple IIC mode (RA8M1 User's Manual section
+		31.8). Exposed as /dev/i2cN, with the device number assigned
+		by board bring-up (ra8m1_bringup.c), not fixed by this
+		driver.
+
+endchoice
+
+config RA_SCI2_DTC
+	bool "Transfer SCI2 I2C message data through the DTC"
+	default n
+	depends on RA_SCI2_I2C && RA_DTC
+	---help---
+		Once a message's address byte is acknowledged, hand its data
+		bytes to the DTC instead of moving them one at a time from
+		up_scii2c_txinterrupt(): one completion interrupt per
+		message instead of one per byte.
+
+		A write's whole data phase goes through the DTC. A read's
+		does too, except its last two bytes: this mode's NACK timing
+		(ICR.IICACKT) needs software to touch it right before each
+		of those, which the DTC cannot do, so they stay CPU-driven
+		exactly as without this option. Unlike the dedicated IIC
+		peripheral's single DTC vector per direction, a read here
+		uses two at once: one on SCIn_RXI to move each received byte
+		out of RDR, one on SCIn_TXI to keep rewriting the dummy byte
+		that sustains SCL between received bytes (RA8M1 User's
+		Manual Table 31.46: this mode has no single "clock enable"
+		separate from TDR being written). Per that same table's note
+		1, ACK/NACK cannot be confirmed for any byte the DTC moves.
 
 config RA_SCI2_FIFO
 	bool "Use SCI2's 16-stage FIFO"
@@ -577,11 +716,48 @@ config RA_SCI2_RXDTC
 
 		Mutually exclusive with CONFIG_RA_SCI2_FIFO (see its help).
 
-config RA_SCI3_UART
-	bool "UART 3"
-	default n
+choice
+	prompt "SCI3 mode"
 	depends on RA_HAVE_SCI_B3
+	optional
+
+config RA_SCI3_UART
+	bool "UART"
 	select SCI3_SERIALDRIVER
+
+config RA_SCI3_I2C
+	bool "I2C bus interface (Simple IIC mode)"
+	select I2C
+	---help---
+		Uses SCI3's Simple IIC mode (RA8M1 User's Manual section
+		31.8). Exposed as /dev/i2cN, with the device number assigned
+		by board bring-up (ra8m1_bringup.c), not fixed by this
+		driver.
+
+endchoice
+
+config RA_SCI3_DTC
+	bool "Transfer SCI3 I2C message data through the DTC"
+	default n
+	depends on RA_SCI3_I2C && RA_DTC
+	---help---
+		Once a message's address byte is acknowledged, hand its data
+		bytes to the DTC instead of moving them one at a time from
+		up_scii2c_txinterrupt(): one completion interrupt per
+		message instead of one per byte.
+
+		A write's whole data phase goes through the DTC. A read's
+		does too, except its last two bytes: this mode's NACK timing
+		(ICR.IICACKT) needs software to touch it right before each
+		of those, which the DTC cannot do, so they stay CPU-driven
+		exactly as without this option. Unlike the dedicated IIC
+		peripheral's single DTC vector per direction, a read here
+		uses two at once: one on SCIn_RXI to move each received byte
+		out of RDR, one on SCIn_TXI to keep rewriting the dummy byte
+		that sustains SCL between received bytes (RA8M1 User's
+		Manual Table 31.46: this mode has no single "clock enable"
+		separate from TDR being written). Per that same table's note
+		1, ACK/NACK cannot be confirmed for any byte the DTC moves.
 
 config RA_SCI3_FIFO
 	bool "Use SCI3's 16-stage FIFO"
@@ -655,11 +831,48 @@ config RA_SCI3_RXDTC
 
 		Mutually exclusive with CONFIG_RA_SCI3_FIFO (see its help).
 
-config RA_SCI4_UART
-	bool "UART 4"
-	default n
+choice
+	prompt "SCI4 mode"
 	depends on RA_HAVE_SCI_B4
+	optional
+
+config RA_SCI4_UART
+	bool "UART"
 	select SCI4_SERIALDRIVER
+
+config RA_SCI4_I2C
+	bool "I2C bus interface (Simple IIC mode)"
+	select I2C
+	---help---
+		Uses SCI4's Simple IIC mode (RA8M1 User's Manual section
+		31.8). Exposed as /dev/i2cN, with the device number assigned
+		by board bring-up (ra8m1_bringup.c), not fixed by this
+		driver.
+
+endchoice
+
+config RA_SCI4_DTC
+	bool "Transfer SCI4 I2C message data through the DTC"
+	default n
+	depends on RA_SCI4_I2C && RA_DTC
+	---help---
+		Once a message's address byte is acknowledged, hand its data
+		bytes to the DTC instead of moving them one at a time from
+		up_scii2c_txinterrupt(): one completion interrupt per
+		message instead of one per byte.
+
+		A write's whole data phase goes through the DTC. A read's
+		does too, except its last two bytes: this mode's NACK timing
+		(ICR.IICACKT) needs software to touch it right before each
+		of those, which the DTC cannot do, so they stay CPU-driven
+		exactly as without this option. Unlike the dedicated IIC
+		peripheral's single DTC vector per direction, a read here
+		uses two at once: one on SCIn_RXI to move each received byte
+		out of RDR, one on SCIn_TXI to keep rewriting the dummy byte
+		that sustains SCL between received bytes (RA8M1 User's
+		Manual Table 31.46: this mode has no single "clock enable"
+		separate from TDR being written). Per that same table's note
+		1, ACK/NACK cannot be confirmed for any byte the DTC moves.
 
 config RA_SCI4_FIFO
 	bool "Use SCI4's 16-stage FIFO"
@@ -733,11 +946,48 @@ config RA_SCI4_RXDTC
 
 		Mutually exclusive with CONFIG_RA_SCI4_FIFO (see its help).
 
-config RA_SCI9_UART
-	bool "UART 9"
-	default n
+choice
+	prompt "SCI9 mode"
 	depends on RA_HAVE_SCI_B9
+	optional
+
+config RA_SCI9_UART
+	bool "UART"
 	select SCI9_SERIALDRIVER
+
+config RA_SCI9_I2C
+	bool "I2C bus interface (Simple IIC mode)"
+	select I2C
+	---help---
+		Uses SCI9's Simple IIC mode (RA8M1 User's Manual section
+		31.8). Exposed as /dev/i2cN, with the device number assigned
+		by board bring-up (ra8m1_bringup.c), not fixed by this
+		driver.
+
+endchoice
+
+config RA_SCI9_DTC
+	bool "Transfer SCI9 I2C message data through the DTC"
+	default n
+	depends on RA_SCI9_I2C && RA_DTC
+	---help---
+		Once a message's address byte is acknowledged, hand its data
+		bytes to the DTC instead of moving them one at a time from
+		up_scii2c_txinterrupt(): one completion interrupt per
+		message instead of one per byte.
+
+		A write's whole data phase goes through the DTC. A read's
+		does too, except its last two bytes: this mode's NACK timing
+		(ICR.IICACKT) needs software to touch it right before each
+		of those, which the DTC cannot do, so they stay CPU-driven
+		exactly as without this option. Unlike the dedicated IIC
+		peripheral's single DTC vector per direction, a read here
+		uses two at once: one on SCIn_RXI to move each received byte
+		out of RDR, one on SCIn_TXI to keep rewriting the dummy byte
+		that sustains SCL between received bytes (RA8M1 User's
+		Manual Table 31.46: this mode has no single "clock enable"
+		separate from TDR being written). Per that same table's note
+		1, ACK/NACK cannot be confirmed for any byte the DTC moves.
 
 config RA_SCI_FIFO
 	bool
@@ -830,6 +1080,43 @@ config RA_DTC
 		and, once its transfer count is exhausted, still interrupts the
 		CPU normally.  Peripheral drivers that support it expose their
 		own per-channel options (e.g. RA_SCI9_TXDTC, RA_SCI9_RXDTC).
+
+config RA_IIC0
+	bool "I2C bus interface 0 (IIC0)"
+	default n
+	depends on RA_HAVE_IIC0
+	select I2C
+
+config RA_IIC0_DTC
+	bool "Transfer IIC0 message data through the DTC"
+	default n
+	depends on RA_IIC0 && RA_DTC
+	---help---
+		Once a message's address byte is acknowledged, hand its data
+		bytes to the DTC instead of moving them one at a time from
+		up_iic_txinterrupt()/up_iic_rxinterrupt(): one completion
+		interrupt per message instead of one per byte.
+
+		A write's whole data phase goes through the DTC.  A read's
+		does too, except its last two bytes: RA8M1 User's Manual
+		section 32.3.4's WAIT/ACKBT NACK-timing needs software to
+		touch ICMR3 right before each of those, which the DTC cannot
+		do, so they stay CPU-driven exactly as without this option.
+		The benefit scales with message length -- negligible for a
+		1-2 byte register read, real for a longer burst read.
+
+config RA_IIC1
+	bool "I2C bus interface 1 (IIC1)"
+	default n
+	depends on RA_HAVE_IIC1
+	select I2C
+
+config RA_IIC1_DTC
+	bool "Transfer IIC1 message data through the DTC"
+	default n
+	depends on RA_IIC1 && RA_DTC
+	---help---
+		See RA_IIC0_DTC.
 
 config RA_GPT_TIMER
 	bool "GPT timer (/dev/timerN)"

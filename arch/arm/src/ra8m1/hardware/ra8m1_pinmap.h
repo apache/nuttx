@@ -146,6 +146,7 @@
 
 #define PFS_PSEL_SCI                 (0x04 << R_PFS_PSEL_SHIFT)
 #define PFS_PSEL_SCI1                (0x05 << R_PFS_PSEL_SHIFT)
+#define PFS_PSEL_IIC                 (0x07 << R_PFS_PSEL_SHIFT)
 
 /* GPIO ports and pins.
  *
@@ -245,6 +246,30 @@
 #define GPIO_TXD9_MOSI9_SDA9_2              (gpio_pinset_t){ PORT2,PIN9,  (PFS_PSEL_SCI1 | R_PFS_PMR)}
 #define GPIO_RXD9_MISO9_SCL9_3              (gpio_pinset_t){ PORTA,PIN15, (PFS_PSEL_SCI1 | R_PFS_PMR)}
 #define GPIO_TXD9_MOSI9_SDA9_3              (gpio_pinset_t){ PORTA,PIN14, (PFS_PSEL_SCI1 | R_PFS_PMR)}
+
+/* IIC Alternative **********************************************************
+ *
+ * RA8M1 has IIC0 and IIC1 (chapter 32).  Each channel's SCL/SDA pair can be
+ * routed to one of several alternate pin groups, same "_A"/"_B"/"_C"-style
+ * suffix idea as SCI above, numbered to match the pin group ("Group A"/
+ * "Group B"/...) each comes from.  PSEL 0x07 ("IIC/I3C") is shared with the
+ * I3C peripheral -- which block a given pin actually reaches depends on the
+ * pin, not PSEL (the manual's own pin tables label I3C's pins
+ * "I3C_SCLn"/"I3C_SDAn" explicitly; a bare "SCLn"/"SDAn" entry is this IIC
+ * peripheral instead).
+ *
+ * Source: RA8M1 User's Manual chapter 19.6, Table 19.11.
+ */
+
+#define GPIO_SDA0_1                         (gpio_pinset_t){ PORT4,PIN9,  (PFS_PSEL_IIC | R_PFS_PMR)}
+#define GPIO_SCL0_1                         (gpio_pinset_t){ PORT4,PIN10, (PFS_PSEL_IIC | R_PFS_PMR)}
+#define GPIO_SDA0_2                         (gpio_pinset_t){ PORT4,PIN7,  (PFS_PSEL_IIC | R_PFS_PMR)}
+#define GPIO_SCL0_2                         (gpio_pinset_t){ PORT4,PIN8,  (PFS_PSEL_IIC | R_PFS_PMR)}
+
+#define GPIO_SDA1_1                         (gpio_pinset_t){ PORT5,PIN11, (PFS_PSEL_IIC | R_PFS_PMR)}
+#define GPIO_SCL1_1                         (gpio_pinset_t){ PORT5,PIN12, (PFS_PSEL_IIC | R_PFS_PMR)}
+#define GPIO_SDA1_2                         (gpio_pinset_t){ PORT2,PIN6,  (PFS_PSEL_IIC | R_PFS_PMR)}
+#define GPIO_SCL1_2                         (gpio_pinset_t){ PORT2,PIN5,  (PFS_PSEL_IIC | R_PFS_PMR)}
 
 /* GPIO Configuration */
 

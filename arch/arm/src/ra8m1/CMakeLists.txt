@@ -38,4 +38,17 @@ if(CONFIG_RA_DTC)
   list(APPEND SRCS ra_dtc.c)
 endif()
 
+if(CONFIG_RA_IIC0 OR CONFIG_RA_IIC1)
+  list(APPEND SRCS ra_iic_i2c.c)
+endif()
+
+if(CONFIG_RA_SCI0_I2C
+   OR CONFIG_RA_SCI1_I2C
+   OR CONFIG_RA_SCI2_I2C
+   OR CONFIG_RA_SCI3_I2C
+   OR CONFIG_RA_SCI4_I2C
+   OR CONFIG_RA_SCI9_I2C)
+  list(APPEND SRCS ra_sci_i2c.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})
