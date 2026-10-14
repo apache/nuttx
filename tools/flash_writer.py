@@ -22,9 +22,10 @@ import argparse
 import errno
 import os
 import re
+import select
+import socket
 import subprocess
 import sys
-import telnetlib
 import time
 
 import xmodem
@@ -285,13 +286,101 @@ class ConfigArgsLoader:
             ConfigArgs.WAIT_RESET = args.wait_reset
 
 
+TELNET_PORT = 23
+TELNET_IAC = 255  # "Interpret As Command"
+TELNET_DONT = 254
+TELNET_DO = 253
+TELNET_WONT = 252
+TELNET_WILL = 251
+TELNET_SB = 250  # Subnegotiation Begin
+TELNET_SE = 240  # Subnegotiation End
+
+
+class _TelnetConn:
+    """Minimal synchronous replacement for telnetlib.Telnet.
+
+    telnetlib was removed in Python 3.13 (PEP 594). Only the calls used by
+    TelnetDev are provided, with the behavior of the Python 3.12 telnetlib:
+
+    - write() doubles IAC bytes (Telnet.write).
+    - read_eager() never blocks, returns b"" when no data is ready and
+      raises EOFError once the connection is closed and drained
+      (Telnet.read_eager).
+    - Incoming data is cooked like Telnet.process_rawq(): NUL and XON are
+      dropped, IAC IAC becomes 0xFF, SB ... SE data is discarded, other
+      IAC commands are skipped, DO/DONT are refused with WON'T and
+      WILL/WON'T with DONT.
+    """
+
+    def __init__(self, host, port, timeout):
+        self.sock = socket.create_connection((host, port or TELNET_PORT), timeout)
+        self.cookedq = bytearray()
+        self.eof = False
+        self.iac = 0  # 0: plain data, 1: after IAC, 2: after IAC DO/DONT/...
+        self.verb = 0
+        self.sb = False
+
+    def __del__(self):
+        # Also runs if create_connection() raised in __init__.
+        sock = getattr(self, "sock", None)
+        if sock is not None:
+            sock.close()
+
+    def write(self, buffer):
+        self.sock.sendall(buffer.replace(b"\xff", b"\xff\xff"))
+
+    def read_eager(self):
+        while not self.cookedq and not self.eof and self._sock_avail():
+            # Same recv size as telnetlib.
+            buf = self.sock.recv(50)
+            self.eof = not buf
+            self._process(buf)
+        buf = bytes(self.cookedq)
+        self.cookedq = bytearray()
+        if not buf and self.eof:
+            raise EOFError("telnet connection closed")
+        return buf
+
+    def _sock_avail(self):
+        return bool(select.select([self.sock], [], [], 0)[0])
+
+    def _process(self, rawq):
+        for c in rawq:
+            if self.iac == 0:
+                if c in (0x00, 0x11):  # NUL and XON are dropped
+                    continue
+                if c == TELNET_IAC:
+                    self.iac = 1
+                elif not self.sb:
+                    self.cookedq.append(c)
+            elif self.iac == 1:
+                if c in (TELNET_DO, TELNET_DONT, TELNET_WILL, TELNET_WONT):
+                    self.verb = c
+                    self.iac = 2
+                    continue
+                self.iac = 0
+                if c == TELNET_IAC:
+                    if not self.sb:
+                        self.cookedq.append(c)
+                elif c == TELNET_SB:
+                    self.sb = True
+                elif c == TELNET_SE:
+                    self.sb = False
+            else:
+                self.iac = 0
+                reply = TELNET_DONT
+                if self.verb in (TELNET_DO, TELNET_DONT):
+                    reply = TELNET_WONT
+                self.sock.sendall(bytes([TELNET_IAC, reply, c]))
+
+
 class TelnetDev:
     def __init__(self):
         srv_ipaddr = ConfigArgs.SERVER_IP
         srv_port = ConfigArgs.SERVER_PORT
         self.recvbuf = b""
         try:
-            self.telnet = telnetlib.Telnet(host=srv_ipaddr, port=srv_port, timeout=10)
+            self.telnet = _TelnetConn(host=srv_ipaddr, port=srv_port, timeout=10)
             # There is a ack to be sent after connecting to the telnet server.
             self.telnet.write(b"\xff")
         except Exception as e:
