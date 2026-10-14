@@ -165,7 +165,7 @@ libc
 * [#18449](https://github.com/apache/nuttx/pull/18449) libs/libc: add configurable skip count for mutex backtrace addresses
 * [#17853](https://github.com/apache/nuttx/pull/17853) libs/libs: fix wqueue config typo
 * [#18068](https://github.com/apache/nuttx/pull/18068) libs/crc: implement AUTOSAR-compatible CRC algorithm
-* [#18151](https://github.com/apache/nuttx/pull/18151) libstdc++: Relocate c++config.h from include/ to libstdc++ to preserv
+* [#18151](https://github.com/apache/nuttx/pull/18151) libstdc++: Relocate c++config.h from include/ to libstdc++ to preserve
 tools
 * [#17525](https://github.com/apache/nuttx/pull/17525) tools/nxtagspkgsfetch.sh: Fetch tags packages for NuttX and Apps.
 * [#17874](https://github.com/apache/nuttx/pull/17874) Tools[feat]: Add config change impact simulation tool (checkkconfig) using kconfig-lib
@@ -177,7 +177,7 @@ Various
 * [#17444](https://github.com/apache/nuttx/pull/17444) include/string.h: mark memset and memcpy as used_code
 * [#17569](https://github.com/apache/nuttx/pull/17569) include/nuttx: Introduce seqlock, a sequential count based read-write lock.
 * [#17575](https://github.com/apache/nuttx/pull/17575) include/nuttx/atomic.h: fix C++ definition conflicts
-* [#17851](https://github.com/apache/nuttx/pull/17851) include/sys: extend the IOCTL defintion that compatible with linux kernel
+* [#17851](https://github.com/apache/nuttx/pull/17851) include/sys: extend the IOCTL definition that compatible with linux kernel
 * [#18236](https://github.com/apache/nuttx/pull/18236) include/notifier: fix undefined reference to spin_lock_irqsave_nopreempt
 * [#18308](https://github.com/apache/nuttx/pull/18308) include/cxx/cmath: Fix compatibility with external toolchains
 * [#18374](https://github.com/apache/nuttx/pull/18374) include/cxx/cmath: Use toolchain <cmath> with toolchain libm
@@ -258,7 +258,7 @@ Architecture Improvements
 * [#17815](https://github.com/apache/nuttx/pull/17815) arch/arm: fix the error in obtaining  thread pointer after we use `-mtp=soft`
 * [#17832](https://github.com/apache/nuttx/pull/17832) arch/arm/samv7: fix incorrect Kconfig SAMV7_EMAC0_RMII dependency
 * [#17854](https://github.com/apache/nuttx/pull/17854) arch/arm: add -ffunction-sections and -fdata-sections compile options
-* [#17855](https://github.com/apache/nuttx/pull/17855) arch/arm: change ghs vfpv3 to vfpv5 accrding to armv7-m documentation
+* [#17855](https://github.com/apache/nuttx/pull/17855) arch/arm: change ghs vfpv3 to vfpv5 according to armv7-m documentation
 * [#17856](https://github.com/apache/nuttx/pull/17856) arch/arm: replace the "-Wall" build option with the "-ghstd=last"
 * [#17867](https://github.com/apache/nuttx/pull/17867) arch/sim: Refactor Wi-Fi simulation and add Pseudo Mode support
 * [#17880](https://github.com/apache/nuttx/pull/17880) arch/x64: Syscall support is enabled by default
@@ -432,7 +432,7 @@ Drivers With Improvements
 * [#18304](https://github.com/apache/nuttx/pull/18304) drivers/power/pm: Fix typos in comments
 * [#18361](https://github.com/apache/nuttx/pull/18361) drivers/usbdev: Fix usbmsc_unbind() function for USB composite device
 * [#18372](https://github.com/apache/nuttx/pull/18372) drivers/note: noteram ioctl FIONBIO should return -ENOTTY
-* [#18410](https://github.com/apache/nuttx/pull/18410) drivers/serial/uart: implement uart rpmsg linux conterpart
+* [#18410](https://github.com/apache/nuttx/pull/18410) drivers/serial/uart: implement uart rpmsg linux counterpart
 * [#18435](https://github.com/apache/nuttx/pull/18435) drivers/sensors: Legacy sensor warning
 * [#18446](https://github.com/apache/nuttx/pull/18446) drivers/serial: add common Xilinx UART Peripheral System (XUARTPS) support
 * [#18454](https://github.com/apache/nuttx/pull/18454) drivers/syslog: add millisecond option for syslog timestamp formatting'
@@ -440,7 +440,7 @@ Drivers With Improvements
 * [#17487](https://github.com/apache/nuttx/pull/17487) power/battery: battery gauge driver support
 * [#17557](https://github.com/apache/nuttx/pull/17557) driver/note: make SIZEOF_NOTE_START return the right size
 * [#17744](https://github.com/apache/nuttx/pull/17744) driver/cfi: fix write failed issue for unalign length with bankwidth
-* [#17774](https://github.com/apache/nuttx/pull/17774) can: fix can driver error about hdr is not initilized
+* [#17774](https://github.com/apache/nuttx/pull/17774) can: fix can driver error about hdr is not initialized
 * [#17866](https://github.com/apache/nuttx/pull/17866) driver/cfi-flash: Add a config option for the page size of CFI flash.
 * [#17979](https://github.com/apache/nuttx/pull/17979) crypto/cryptodev: support private data in driver
 * [#18029](https://github.com/apache/nuttx/pull/18029) crypto/cryptodev: optimize driver
@@ -566,7 +566,7 @@ Improvements
 * [#17691](https://github.com/apache/nuttx/pull/17691) net/tcp:  tcp header seq check
 * [#17692](https://github.com/apache/nuttx/pull/17692) net: decouple the impact of net_lock between network cards
 * [#17693](https://github.com/apache/nuttx/pull/17693) net/ethernet: fix  compilation issues for inet_sockif.c
-* [#17695](https://github.com/apache/nuttx/pull/17695) net/vlan: make a judgment before calling fuction
+* [#17695](https://github.com/apache/nuttx/pull/17695) net/vlan: make a judgment before calling function
 * [#17698](https://github.com/apache/nuttx/pull/17698) net/udp: Validate UDP length field against actual packet size
 * [#17699](https://github.com/apache/nuttx/pull/17699) net/udp: Support zero-length UDP datagrams
 * [#17700](https://github.com/apache/nuttx/pull/17700) net/ethernet: change struct ifreq to consistent with Linux
@@ -684,7 +684,7 @@ Unsorted
 * [#17909](https://github.com/apache/nuttx/pull/17909) Rpmsg rtc fixes
 * [#17916](https://github.com/apache/nuttx/pull/17916) ghs: update the compile option to recommended options
 * [#17918](https://github.com/apache/nuttx/pull/17918) Ltp linux kernel completement sys wait impl
-* [#17920](https://github.com/apache/nuttx/pull/17920) sys/resouce: add RLIM_NLIMITS definition
+* [#17920](https://github.com/apache/nuttx/pull/17920) sys/resource: add RLIM_NLIMITS definition
 * [#17924](https://github.com/apache/nuttx/pull/17924) posix_test: fix the ltp project link error
 * [#17925](https://github.com/apache/nuttx/pull/17925) Rpmsg signals: rpmsg router support get the rpmsg signals
 * [#17926](https://github.com/apache/nuttx/pull/17926) lpcxpresso-lpc54628/netnsh: enable CONFIG_NET_SOCKOPTS to adapt icmpv6 changes
@@ -695,7 +695,7 @@ Unsorted
 * [#17934](https://github.com/apache/nuttx/pull/17934) pthread: reorganized the locations of pthread-related functions and constants
 * [#17937](https://github.com/apache/nuttx/pull/17937) fpathconf: add _POSIX_PRIO_IO definition to comply with PSE52 standard
 * [#17938](https://github.com/apache/nuttx/pull/17938) Tricore trap dump register
-* [#17939](https://github.com/apache/nuttx/pull/17939) notifiy: remove critical section
+* [#17939](https://github.com/apache/nuttx/pull/17939) notify: remove critical section
 * [#17946](https://github.com/apache/nuttx/pull/17946) Arm64 backtrace
 * [#17947](https://github.com/apache/nuttx/pull/17947) arm64: add the interrupt status in the syscall
 * [#17950](https://github.com/apache/nuttx/pull/17950) ctucanfd: increase rwcnt bitfield width and fix structure alignment
@@ -712,7 +712,7 @@ Unsorted
 * [#17982](https://github.com/apache/nuttx/pull/17982) armv7-a/arm_addrenv_pgmap.c: add up_addrenv_find_page and up_addrenv_…
 * [#17983](https://github.com/apache/nuttx/pull/17983) arm64: fix stack pointer initialization when CONFIG_STACK_COLORATION …
 * [#17998](https://github.com/apache/nuttx/pull/17998) arm64: add mpu_addrenv.c empty implementation and change arm64_addren…
-* [#17999](https://github.com/apache/nuttx/pull/17999) arm64/toolchain: fix compile warnning
+* [#17999](https://github.com/apache/nuttx/pull/17999) arm64/toolchain: fix compile warning
 * [#18004](https://github.com/apache/nuttx/pull/18004) simwifi: Fix compilation warning
 * [#18017](https://github.com/apache/nuttx/pull/18017) Kconfig: Add ALLOW_CUSTOM_PERMISSIVE_COMPONENTS license option
 * [#18044](https://github.com/apache/nuttx/pull/18044) rpmsg/rpmsg_virtio: add rpmsg virtio common pm support

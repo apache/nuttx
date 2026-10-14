@@ -11,7 +11,7 @@ Naming of OS Internal Functions
 Legacy smooshed-together names
 ==============================
 
-There has been some controvery lately about the consistency of naming of OS
+There has been some controversy lately about the consistency of naming of OS
 internal functions. We should come to a consensus on the desired naming
 of conventions for internal OS functions before we start arbitrarily
 changing names.
@@ -149,7 +149,7 @@ Hence, I think the naming:
   clock_t clock_systime_ticks(void);
   int clock_systime_timespec(FAR struct timespec *ts);
 
-is perfectly accepable without the ``_get_``.
+is perfectly acceptable without the ``_get_``.
 And since ``_get_`` is the only operation on ``stackinfo``,
 the following would be a perfectly acceptable renaming:
 

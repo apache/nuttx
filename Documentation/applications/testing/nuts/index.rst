@@ -164,7 +164,7 @@ on/off the test group. You will have to add this to the NUTS Kconfig file.
 In order to reduce the amount of special switches in the
 ``Makefile``/``CMakeLists.txt`` files, all source files in each category
 directory are included with a wild card. Thus, to avoid compiling unselected
-test groups, each test group's C file should be surrounded in the gaurd:
+test groups, each test group's C file should be surrounded in the guard:
 
 .. code:: c
 

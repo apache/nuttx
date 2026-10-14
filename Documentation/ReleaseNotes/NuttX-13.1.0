@@ -296,7 +296,7 @@ TRICORE
 * [#19836](https://github.com/apache/nuttx/pull/19836) arch/tricore: drop iLLD dependency in hwdebug
 * [#19953](https://github.com/apache/nuttx/pull/19953) arch/tricore: drop illd dependence for atomic
 * [#20018](https://github.com/apache/nuttx/pull/20018) arch/tricore: fpu: drop iLLD dependency and fix Makefile
-* [#19766](https://github.com/apache/nuttx/pull/19766) arch/tricore: idle donot depend on illd
+* [#19766](https://github.com/apache/nuttx/pull/19766) arch/tricore: idle do not depend on illd
 * [#20016](https://github.com/apache/nuttx/pull/20016) arch/tricore: mpu iLLD drop and per-set flags refactor
 XTENSA
 * [#19795](https://github.com/apache/nuttx/pull/19795) arch/xtensa: Provide vfork()

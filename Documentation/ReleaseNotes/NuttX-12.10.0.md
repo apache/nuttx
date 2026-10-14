@@ -180,7 +180,7 @@ XTENSA
 * [#15962](https://github.com/apache/nuttx/pull/15962) arch/xtensa/esp32: espnow improvements
 * [#16012](https://github.com/apache/nuttx/pull/16012) arch/xtensa/esp32s3: Add esp32s3 lcd ev v1.5 support
 * [#16152](https://github.com/apache/nuttx/pull/16152) arch/xtensa/esp32s3: Fix bug regarding SPI flash operation mode
-* [#16261](https://github.com/apache/nuttx/pull/16261) arch/xtensa/esp32s3: fix tickless mode timer unexpect interrupt handle
+* [#16261](https://github.com/apache/nuttx/pull/16261) arch/xtensa/esp32s3: fix tickless mode timer unexpected interrupt handle
 * [#16085](https://github.com/apache/nuttx/pull/16085) arch/xtensa/esp32s3: The MISO and C/S pins are optional
 * [#15954](https://github.com/apache/nuttx/pull/15954) arch/xtensa/esp32[s2|s3]: Add number of IRQ status lists for PHY initialization configuration
 

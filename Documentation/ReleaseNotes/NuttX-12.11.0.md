@@ -52,8 +52,8 @@ Improvements
 * [#16922](https://github.com/apache/nuttx/pull/16922) boards/arm/imxrt: CMake added imxrt1020-evk imxrt1050-evk boards
 * [#16918](https://github.com/apache/nuttx/pull/16918) boards/arm/imxrt: CMake added imxrt1060-evk imxrt1064-evk imxrt1170-evk boards
 * [#16639](https://github.com/apache/nuttx/pull/16639) cmake/arm64:   support clang compile
-* [#16547](https://github.com/apache/nuttx/pull/16547) cmake(bugfix):fix VERSION genarator strip error in CMake build
-* [#16594](https://github.com/apache/nuttx/pull/16594) cmake(bugfix):fix VERSION genarator strip error in CMake build
+* [#16547](https://github.com/apache/nuttx/pull/16547) cmake(bugfix):fix VERSION generator strip error in CMake build
+* [#16594](https://github.com/apache/nuttx/pull/16594) cmake(bugfix):fix VERSION generator strip error in CMake build
 * [#16751](https://github.com/apache/nuttx/pull/16751) cmake(bugfix):add default c++ search path
 * [#16897](https://github.com/apache/nuttx/pull/16897) Cmake: add defconfig preprocess capability in Cmake build environment(recursively expand #include)
 * [#16721](https://github.com/apache/nuttx/pull/16721) cmake: enhance the function of cmake nuttx_wildcard_sources
@@ -163,7 +163,7 @@ XTENSA
 * [#16744](https://github.com/apache/nuttx/pull/16744) arch/xtensa/esp32: fix esp32(s3)_async_op() asynchronous operation race issue
 * [#16883](https://github.com/apache/nuttx/pull/16883) arch/xtensa/esp32: fix some compilation warnings
 * [#16882](https://github.com/apache/nuttx/pull/16882) arch/xtensa/esp32: fix the issue of erasing a wide range of flash sectors
-* [#16894](https://github.com/apache/nuttx/pull/16894) arch/xtensa/esp32,esp32s3: Start the "spiflash_op" thread with corret affinity
+* [#16894](https://github.com/apache/nuttx/pull/16894) arch/xtensa/esp32,esp32s3: Start the "spiflash_op" thread with correct affinity
 * [#16878](https://github.com/apache/nuttx/pull/16878) arch/xtensa/esp32s3: Add EXT1 wakeup support in power management
 * [#16756](https://github.com/apache/nuttx/pull/16756) arch/xtensa/esp32s3: Fix bug related to the PSRAM-allocated task stack
 * [#16566](https://github.com/apache/nuttx/pull/16566) arch/xtensa/esp32s3: Fix Esp32S3 LCD FB resolution.
@@ -189,7 +189,7 @@ Improvements
 * [#16914](https://github.com/apache/nuttx/pull/16914) drivers/i2s/i2schar: Implement ioctl commands and blocking read/write operations
 * [#16745](https://github.com/apache/nuttx/pull/16745) drivers/ioexpander/icjx.c: reconfigure icjx after undervoltage
 * [#16729](https://github.com/apache/nuttx/pull/16729) drivers/misc/optee: Cache coherency when MMU is disabled
-* [#16734](https://github.com/apache/nuttx/pull/16734) drivers/misc/optee: expand RPC suppport for IMX9
+* [#16734](https://github.com/apache/nuttx/pull/16734) drivers/misc/optee: expand RPC support for IMX9
 * [#16800](https://github.com/apache/nuttx/pull/16800) drivers/misc/optee_smc: Explicitly yield during NW interrupts
 * [#16801](https://github.com/apache/nuttx/pull/16801) drivers/misc/optee_smc: Fix sched_yield() on flat builds
 * [#16473](https://github.com/apache/nuttx/pull/16473) drivers/mtd: fix compile warning
@@ -230,7 +230,7 @@ Improvements
 * [#16707](https://github.com/apache/nuttx/pull/16707) boards/arm/stm32f401rc-rs485: Add support to HX711 ADC
 * [#16779](https://github.com/apache/nuttx/pull/16779) boards/arm/stm32f401rc-rs485: Add support to MAX31855 and MAX6675
 * [#16780](https://github.com/apache/nuttx/pull/16780) boards/arm/stm32f4discovery: Add support to HX711 ADC
-* [#16857](https://github.com/apache/nuttx/pull/16857) board/esp: Revert mtdblock registeration
+* [#16857](https://github.com/apache/nuttx/pull/16857) board/esp: Revert mtdblock registration
 * [#16866](https://github.com/apache/nuttx/pull/16866) boards/esp32s3: Add SPI slave device support
 * [#16725](https://github.com/apache/nuttx/pull/16725) boards/espressif: add support for SDMMC over SPI for ESP32-C3|C6|H2
 * [#16812](https://github.com/apache/nuttx/pull/16812) boards/imxrt: Fix issues and add USBHOST support to arcx-socket-grid
@@ -304,7 +304,7 @@ Unsorted contributions
 * [#16552](https://github.com/apache/nuttx/pull/16552) spinlock: Better recursive spinlock implementation.
 * [#16556](https://github.com/apache/nuttx/pull/16556) risc-v/mmu: Fix map_region() for incorrect page table setup when vadd…
 * [#16562](https://github.com/apache/nuttx/pull/16562) esp32s3: update config and doc for fastboot
-* [#16567](https://github.com/apache/nuttx/pull/16567) Move assemble soure files out off gnu folder
+* [#16567](https://github.com/apache/nuttx/pull/16567) Move assemble source files out off gnu folder
 * [#16569](https://github.com/apache/nuttx/pull/16569) Refine vfs source file layout
 * [#16571](https://github.com/apache/nuttx/pull/16571) remove warnings
 * [#16574](https://github.com/apache/nuttx/pull/16574) audio/comp: fix build warning caused by invalid return value

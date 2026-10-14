@@ -87,7 +87,7 @@ Configuration Options
       bool "Simulation"
       select ARCH_HAVE_TICKLESS
       ---help---
-              Linux/Cywgin user-mode simulation.
+              Linux/Cygwin user-mode simulation.
 
 * ``CONFIG_SCHED_TICKLESS``: If ``CONFIG_ARCH_HAVE_TICKLESS`` is selected,
   then you will be able to use this option to enable the Tickless OS features
@@ -154,8 +154,8 @@ comparison count at the value of the free running timer PLUS the desired
 delay. Then you could have both with a single timer:
 An alarm and a free-running counter with the same timer!
 
-Imported Intefaces
-------------------
+Imported Interfaces
+-------------------
 
 The interfaces that must be provided by the platform specified code
 are defined in ``include/nuttx/arch.h`` and summarized below.
@@ -259,7 +259,7 @@ are defined in ``include/nuttx/arch.h`` and summarized below.
   ``up_timer_start()`` and the remaining time of zero should be returned.
 * **Input Parameters:** ``*ts`` - Location to return the remaining time.
   Zero should be returned if the timer is not active. ``ts`` may be ``NULL``
-  in which case the time remainging is not returned
+  in which case the time remaining is not returned
 * **Returned Value:** Zero (``OK``) is returned on success;
   a negated ``errno`` value is returned on any failure.
 * **Assumptions:** May be called from interrupt level handling

@@ -76,7 +76,7 @@ New Architecture Support
 * [#18739](https://github.com/apache/nuttx/pull/18739) arch/arm: add STM32H755XI chip
 
 Architecture improvements
-* [#18704](https://github.com/apache/nuttx/pull/18704) arch/*/Makefile: Avoid uncessary relinking of the nuttx binary.
+* [#18704](https://github.com/apache/nuttx/pull/18704) arch/*/Makefile: Avoid unnecessary relinking of the nuttx binary.
 ARM
 * [#18734](https://github.com/apache/nuttx/pull/18734) arch/arm: Fix the compilation error
 * [#18898](https://github.com/apache/nuttx/pull/18898) arch/arm: fix infinite loop in test and clean cache operations
