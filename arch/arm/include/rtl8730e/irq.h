@@ -47,6 +47,7 @@
 #define RTL8730E_IRQ_UART0      82   /* GIC SPI 50: UART0 */
 #define RTL8730E_IRQ_UART1      83   /* GIC SPI 51: UART1 */
 #define RTL8730E_IRQ_UART2      84   /* GIC SPI 52: UART2 */
+#define RTL8730E_IRQ_WDG4       94   /* GIC SPI 62: WDG4 (CA32 watchdog) */
 
 /****************************************************************************
  * Public Types

@@ -304,6 +304,17 @@ int rtl8730e_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_AMEBA_WDG
+  /* Register the on-chip watchdog at /dev/watchdog0. */
+
+  ret = rtl8730e_wdg_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize watchdog: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }
