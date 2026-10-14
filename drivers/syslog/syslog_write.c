@@ -193,8 +193,12 @@ ssize_t syslog_write_foreach(int priority, FAR const char *buffer,
                       continue;
                     }
 
+                  /* On failure leave the '\n' to the tail write: rewinding
+                   * would duplicate the bytes already written.
+                   */
+
                   ret = write(channel, "\r\n", 2);
-                  nwritten = head + 1;
+                  nwritten = ret > 0 ? head + 1 : head;
                 }
             }
 #endif
