@@ -129,7 +129,7 @@ static const char * const g_moptions[COMPILER_NUM][2] =
   /* Tasking C/C++ Compiler */
 
   {
-    " -Em ",
+    " -Em -o - ",
     " --pass-c=--make-target="
   }
 };
