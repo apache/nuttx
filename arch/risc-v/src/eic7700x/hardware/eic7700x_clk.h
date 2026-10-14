@@ -202,6 +202,28 @@
 #define EIC7700X_LSP_CLK_EN0       0x0200   /* LSP gates bank 0   TRM p134 */
 #define EIC7700X_LSP_CLK_EN1       0x0204   /* LSP gates bank 1   TRM p135 */
 #define EIC7700X_U84_CLK_CTRL      0x0208   /* U84 cluster        TRM p135 */
+
+/* System reset and reset cause (TRM p139-140).  Writing the magic value
+ * to the software reset register resets the whole chip; it is what the
+ * firmware's own reboot driver does.  The cause register remembers why
+ * the last reset happened until software clears it, which on a board
+ * that reboots itself is worth a line in every boot log.
+ */
+
+#define EIC7700X_SYS_SWRST_VALUE   0x0300   /* Write the magic to reset    */
+#define EIC7700X_CLR_RST_STATUS    0x0304   /* Write 1 to clear the cause  */
+#define EIC7700X_DIE_STATUS        0x0308   /* Cause in the low byte       */
+
+#define EIC7700X_SWRST_MAGIC       (0x1ac0ffe6)
+
+#define RST_CAUSE_POR_INTERNAL     (1 << 0)
+#define RST_CAUSE_POR_EXTERNAL     (1 << 1)
+#define RST_CAUSE_KEY              (1 << 2)
+#define RST_CAUSE_WATCHDOG         (1 << 3)
+#define RST_CAUSE_SOFTWARE         (1 << 4)
+#define RST_CAUSE_OTHER_DIE        (1 << 5)
+#define RST_CAUSE_U84_NDRESET      (1 << 6)
+#define RST_CAUSE_SCPU_NDRESET     (1 << 7)
 #define EIC7700X_SYSCFG_CLK_CTRL   0x020c   /* APB config root    TRM p136 */
 
 /* The two always on I2C controllers get a register each rather than a bit

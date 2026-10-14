@@ -48,6 +48,52 @@ config EIC7700X_CPU_FREQ_MHZ
 		so in the log.
 
 endif
+
+config EIC7700X_WDT
+	bool "Watchdog timers"
+	default n
+	select WATCHDOG
+	select EIC7700X_CLK
+	---help---
+		Drive the four Synopsys watchdogs, whose timeout genuinely
+		resets the chip.  Timeouts are powers of two of the 200 MHz
+		peripheral clock: a third of a millisecond up to about eleven
+		seconds, always rounded up to the next power.
+
+		With WATCHDOG_AUTOMONITOR the kernel arms and feeds every
+		registered instance from boot, and a hang anywhere reboots
+		the board; an application may take one over at any time with
+		WDIOC_START, or poke it with WDIOC_KEEPALIVE.  Without the
+		auto-monitor the devices sit unarmed until an application
+		starts them.
+
+		Note the panic policy is configurable: without
+		WATCHDOG_PANIC_NOTIFIER a kernel panic starves the dog and
+		the board reboots itself; with it, the dog is stopped at
+		panic and the crash scene is preserved for a debugger.
+
+if EIC7700X_WDT
+
+config EIC7700X_WDT0
+	bool "Watchdog 0"
+	default y
+	---help---
+		The first instance, and with the auto-monitor on, the one
+		protecting the system from boot.
+
+config EIC7700X_WDT1
+	bool "Watchdog 1"
+	default y
+
+config EIC7700X_WDT2
+	bool "Watchdog 2"
+	default y
+
+config EIC7700X_WDT3
+	bool "Watchdog 3"
+	default y
+
+endif # EIC7700X_WDT
 config EIC7700X_RESET
 	bool "CRG reset provider"
 	default y
