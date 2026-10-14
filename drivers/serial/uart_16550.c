@@ -1487,7 +1487,7 @@ static void u16550_dmarxfree(FAR struct uart_dev_s *dev)
 
   if (priv->chanrx == NULL)
     {
-      priv->chanrx = priv->ops->dmachan(priv, priv->dmarx)
+      priv->chanrx = priv->ops->dmachan(priv, priv->dmarx);
       if (priv->chanrx == NULL)
         {
           return; /* Fail to get DMA channel */
