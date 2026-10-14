@@ -44,15 +44,15 @@ CLOCK       Yes      MOCO, HOCO, MOSC, PLL1, PLL2, SCICLK
 ICU         Yes
 KINT        No
 ELC         No
-DTC         Yes      Used by SCI (see SCI below); normal mode only
+DTC         Yes      Used by SCI and IIC (see each below); normal mode only
 DMAC        No
 GPT         Yes      Timer only: /dev/timerN (GPT0-7 32-bit, GPT8-13 16-bit)
 AGT         No
 RTC         No
 WDT         No
 IWDT        No
-SCI         Yes      UART only (SCI_B0-4, SCI_B9); FIFO, DTC, termios
-IIC         No
+SCI         Yes      UART (SCI_B0-4, SCI_B9) or Simple IIC master (see IIC)
+IIC         Yes      Master only (IIC0-1, or any SCI_B in Simple IIC mode)
 SPI         No
 SSIE        No
 QSPI        No
@@ -87,9 +87,11 @@ SCI
 The Serial Communications Interface, Type B (SCI_B) is configurable to
 support several serial communication modes: Asynchronous (UART), Clock
 synchronous, Simple SPI, Smart card interface, Simple IIC (master-only).
-NuttX driver support covers UART mode.  RA8M1 has SCI_B0-4 and SCI_B9 (no
+NuttX driver support covers UART mode and Simple IIC mode (see `IIC`_
+below); the rest are not implemented.  RA8M1 has SCI_B0-4 and SCI_B9 (no
 SCI_B5-8); each channel's baud rate generator runs from SCICLK.  Each
-instance is enabled with its own ``CONFIG_RA_SCIn_UART``.
+instance's mode is chosen with its own ``CONFIG_RA_SCIn_UART``/
+``RA_SCIn_I2C`` Kconfig choice.
 
 Each instance can independently use its 16-stage hardware FIFO or the
 DTC (see `DTC`_ below) to move data, but not both: ``CONFIG_RA_SCIn_FIFO``
@@ -110,6 +112,31 @@ clean up to 3 Mbps).
 through the standard ``TIOCGICOUNT`` ioctl; nothing pushes a
 notification, an application has to poll it.
 
+IIC
+---
+
+I2C is reachable through two different peripherals, both master-only (no
+slave mode, no 10-bit addressing) and both exposed through the same
+generic ``struct i2c_master_s`` interface as ``/dev/i2cN``:
+
+* The dedicated I2C Bus Interface, IIC0 and IIC1 -- ``CONFIG_RA_IIC0``/
+  ``RA_IIC1``, independent of SCI.
+* Any SCI_B channel's Simple IIC mode (RA8M1 User's Manual section 31.8)
+  instead of its UART mode -- ``CONFIG_RA_SCIn_I2C``, mutually exclusive
+  with ``CONFIG_RA_SCIn_UART`` on the same channel
+
+There is no fixed, chip-level map of bus numbers to channels: each
+board's own bring-up code calls whichever channels its build enables, in
+source order, and assigns ``/dev/i2cN`` compactly starting from 0 --
+a build with only one I2C channel enabled gets ``/dev/i2c0`` for it,
+regardless of which channel that is. See the board's own documentation
+for its specific assignment order.
+
+Both backends support optional DTC offload (``CONFIG_RA_IICn_DTC``/
+``RA_SCIn_DTC``, needs ``CONFIG_RA_DTC``): once a message's address byte
+is acknowledged, its data bytes move through the DTC instead of one byte
+per interrupt.
+
 DTC
 ---
 
@@ -120,7 +147,7 @@ and once its count is exhausted it still interrupts the CPU normally.
 Only normal mode (one activation, one transfer) is implemented; repeat
 and block modes are not.  Enabled with ``CONFIG_RA_DTC``; peripheral
 drivers that support it expose their own per-channel options (e.g.
-``CONFIG_RA_SCI9_TXDTC``).
+``CONFIG_RA_SCI9_TXDTC``, ``CONFIG_RA_IIC1_DTC``).
 
 GPIO
 ----
