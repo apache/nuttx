@@ -321,8 +321,41 @@
 #define GPIO_SCI9_RX   GPIO_RXD9_MISO9_SCL9_3  /* PA15 */
 #define GPIO_SCI9_TX   GPIO_TXD9_MOSI9_SDA9_3  /* PA14 */
 
+/* SCI9's Simple IIC mode (CONFIG_RA_SCI9_I2C) would give up the on-board
+ * debugger's console on this board -- unlikely to ever be selected here,
+ * but defined for the same reason as SCI0's below: the driver references
+ * GPIO_SCIn_SCL/SDA generically for every channel it supports.
+ */
+
+#define GPIO_SCI9_SCL  GPIO_RXD9_MISO9_SCL9_3  /* PA15 */
+#define GPIO_SCI9_SDA  GPIO_TXD9_MOSI9_SDA9_3  /* PA14 */
+
 #define GPIO_SCI0_RX   GPIO_RXD0_MISO0_SCL0_3  /* P610 */
 #define GPIO_SCI0_TX   GPIO_TXD0_MOSI0_SDA0_3  /* P609 */
+
+/* SCI0's Simple IIC mode (CONFIG_RA_SCI0_I2C) is mutually exclusive with
+ * its UART mode above, on the same physical pins -- RXD0/TXD0 reused as
+ * SCL0/SDA0, per their own alternate-function names.
+ */
+
+#define GPIO_SCI0_SCL  GPIO_RXD0_MISO0_SCL0_3  /* P610 */
+#define GPIO_SCI0_SDA  GPIO_TXD0_MOSI0_SDA0_3  /* P609 */
+
+/* SCI2's UART mode has no pins wired on this board yet; its Simple IIC
+ * mode (CONFIG_RA_SCI2_I2C) uses pin group 3 directly -- PA02/PA03,
+ * chosen for hardware testing to avoid tying up P609/P610 (SCI0, already
+ * in use for the serial-test defconfig's blaster/rx wiring).
+ */
+
+#define GPIO_SCI2_SCL  GPIO_RXD2_MISO2_SCL2_3  /* PA02 */
+#define GPIO_SCI2_SDA  GPIO_TXD2_MOSI2_SDA2_3  /* PA03 */
+
+/* The Grove2 connector carries IIC1's SDA/SCL: SDA1 on P511, SCL1 on P512
+ * (pin group 1 of IIC1, the only one wired out on this board).
+ */
+
+#define GPIO_IIC1_SDA  GPIO_SDA1_1  /* P511 */
+#define GPIO_IIC1_SCL  GPIO_SCL1_1  /* P512 */
 
 /* Arduino shield header pin selections *************************************/
 
