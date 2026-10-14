@@ -27,8 +27,8 @@ of interface functions. Those interface functions are listed here:
 http://OpenGroup.org.
 
 
-Enter and Leave Cancelation Point
-=================================
+Enter and Leave Cancellation Point
+==================================
 
 In NuttX, each of these functions ``CONFIG_CANCELLATION_POINTS=y`` will enable
 a special call to ``enter_cancellation_point()`` at the beginning
@@ -65,7 +65,7 @@ kill the thread immediately.
 
 .. note:: For pthreads, the cancelable state is controlled by the interface
           ``pthread_setcancelstate().`` This allows the pthread to disable or
-          re-enable cancelability. If the thread is not cancelable when
+          re-enable cancellation. If the thread is not cancelable when
           ``pthread_cancel()`` is called, it will never do more than just mark
           the cancellation as pending. When the cancelable state is
           re-enabled, then any pending cancellation will take effect.
