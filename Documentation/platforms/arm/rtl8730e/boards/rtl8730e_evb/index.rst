@@ -46,6 +46,7 @@ Supported in this NuttX port:
   the SDK fwlib timer layer
 * General-purpose timers exposed as ``/dev/timerN`` character devices, with
   microsecond timeouts and a periodic expiration callback
+* On-chip watchdog exposed as a ``/dev/watchdog0`` character device
 * littlefs persistent storage mounted at ``/data`` (a dedicated SPI NOR flash
   partition), backing the Wi-Fi key-value store
 * Wi-Fi station and SoftAP through the ``wapi`` tool
@@ -174,6 +175,20 @@ HAL claims TIM1 as its application and UART-timeout timer. Exercise a timer
 with the example::
 
     nsh> timer                 # 20 samples 0.1 s apart, 1 s timeout, on /dev/timer0
+
+wdg
+---
+
+Minimal NSH with the watchdog driver and the ``wdog`` example (no Wi-Fi).
+The board registers the on-chip watchdog at ``/dev/watchdog0`` (see
+``boards/arm/rtl8730e/rtl8730e_evb/src/rtl8730e_wdg.c``): WDG4, the CA32
+non-secure system watchdog. It has no board wiring (it is an internal
+timer) and, once enabled, cannot be stopped by software -- the stop()
+operation instead arms the early-interrupt and refreshes the counter from
+its handler to inhibit the reset. Exercise it with the example, which
+opens the device, sets a timeout, and pings it::
+
+    nsh> wdog                  # run the watchdog example on /dev/watchdog0
 
 Wi-Fi
 =====
