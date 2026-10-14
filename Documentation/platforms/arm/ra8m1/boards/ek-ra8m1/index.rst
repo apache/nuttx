@@ -167,6 +167,34 @@ SCI0 is also wired out on this board, for use as a second UART
 
 Tested with an external USB-serial adapter.
 
+I2C
+===
+
+IIC1 is wired to the Grove2 connector:
+
+    ==================   ============
+    Signal               R7FA8M1AHECBD
+    ==================   ============
+    SCL1                 P512
+    SDA1                 P511
+    ==================   ============
+
+IIC0 is not wired to any connector on this board yet: its pin group has
+not been verified against the schematic (see
+``hardware/ra8m1_pinmap.h``'s own comment on why that is not guessed at
+the MCU level either).
+
+SCI2 can also act as a second I2C bus, in Simple IIC mode
+(``CONFIG_RA_SCI2_I2C``, see the ``IIC`` section of the RA8M1 platform
+page), using pin group 3:
+
+    ==================   ============
+    Signal               R7FA8M1AHECBD
+    ==================   ============
+    SCL2                 PA02
+    SDA2                 PA03
+    ==================   ============
+
 Timers
 ======
 
