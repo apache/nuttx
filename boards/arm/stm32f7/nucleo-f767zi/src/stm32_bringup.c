@@ -96,12 +96,9 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_I2C
-  int i2c_bus;
-  struct i2c_master_s *i2c;
 #ifdef CONFIG_MPU60X0_I2C
+  struct i2c_master_s *i2c;
   struct mpu_config_s *mpu_config;
-#endif
 #endif
 
 #ifdef CONFIG_STM32_ROMFS
@@ -245,25 +242,14 @@ int stm32_bringup(void)
 
 #endif
 
-#if defined(CONFIG_I2C) && defined(CONFIG_STM32_I2C1)
-  i2c_bus = 1;
-  i2c = stm32_i2cbus_initialize(i2c_bus);
+#ifdef CONFIG_MPU60X0_I2C
+  i2c = stm32_i2cbus_initialize(1);
   if (i2c == NULL)
     {
-      syslog(LOG_ERR, "ERROR: Failed to get I2C%d interface\n", i2c_bus);
+      syslog(LOG_ERR, "ERROR: Failed to get I2C1 interface\n");
     }
   else
     {
-#if defined(CONFIG_SYSTEM_I2CTOOL)
-      ret = i2c_register(i2c, i2c_bus);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
-                 i2c_bus, ret);
-        }
-#endif
-
-#ifdef CONFIG_MPU60X0_I2C
       mpu_config = kmm_zalloc(sizeof(struct mpu_config_s));
       if (mpu_config == NULL)
         {
@@ -275,7 +261,6 @@ int stm32_bringup(void)
           mpu_config->addr = 0x68;
           mpu60x0_register("/dev/imu0", mpu_config);
         }
-#endif
     }
 #endif
 

@@ -51,8 +51,6 @@
 #  include "stm32l4_rtc.h"
 #endif
 
-#include "stm32l4_i2c.h"
-
 #ifdef CONFIG_SENSORS_BMP280
 #include "stm32_bmp280.h"
 #endif
@@ -84,59 +82,6 @@
 #endif
 
 /****************************************************************************
- * Name: stm32_i2c_register
- *
- * Description:
- *   Register one I2C drivers for the I2C tool.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
-static void stm32_i2c_register(int bus)
-{
-  struct i2c_master_s *i2c;
-  int ret;
-
-  i2c = stm32_i2cbus_initialize(bus);
-  if (i2c == NULL)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to get I2C%d interface\n", bus);
-    }
-  else
-    {
-      ret = i2c_register(i2c, bus);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
-                bus, ret);
-          stm32_i2cbus_uninitialize(i2c);
-        }
-    }
-}
-#endif
-
-/****************************************************************************
- * Name: stm32_i2ctool
- *
- * Description:
- *   Register I2C drivers for the I2C tool.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
-static void stm32_i2ctool(void)
-{
-  stm32_i2c_register(1);
-#if 0
-  stm32_i2c_register(1);
-  stm32_i2c_register(2);
-#endif
-}
-#else
-#  define stm32_i2ctool()
-#endif
-
-/****************************************************************************
  * Name: stm32_bringup
  *
  * Description:
@@ -151,10 +96,6 @@ int stm32_bringup(void)
 {
 #ifdef HAVE_RTC_DRIVER
   struct rtc_lowerhalf_s *rtclower;
-#endif
-
-#if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
-  stm32_i2ctool();
 #endif
 
 #ifdef CONFIG_SENSORS_QENCODER
