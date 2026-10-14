@@ -270,7 +270,7 @@ CVE-2025-47869
   * https://lists.apache.org/thread/306qcqyc3bpb2ozh015yxjo9kqs4jbvj.
 
 Improper Restriction of Operations within the Bounds of a Memory Buffer
-vulnerability was discovered in Apache NuttX RTOS apps/exapmles/xmlrpc
+vulnerability was discovered in Apache NuttX RTOS apps/examples/xmlrpc
 application. In this example application device stats structure that stored
 remotely provided parameters had hardcoded buffer size which could lead to
 buffer overflow. Structure members buffers were updated to valid size of

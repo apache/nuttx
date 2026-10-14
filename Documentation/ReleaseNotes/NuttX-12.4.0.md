@@ -72,7 +72,7 @@ libs
 * [#10993](https://github.com/apache/nuttx/pull/10993) libc: Remove the unused lib_libdtoa.c
 * [#11137](https://github.com/apache/nuttx/pull/11137) libc: Solve some problems encountered during cmake compilation
 * [#10992](https://github.com/apache/nuttx/pull/10992) libc: stdio: Change FILE buffer field from "unsigned char *" to "char *"
-* [#11063](https://github.com/apache/nuttx/pull/11063) libc: stdlib/lib_exit.c: fix multiple definition of __dso_handle and sethost.sh: add MSYS environmen for msys2
+* [#11063](https://github.com/apache/nuttx/pull/11063) libc: stdlib/lib_exit.c: fix multiple definition of __dso_handle and sethost.sh: add MSYS environment for msys2
 * [#11447](https://github.com/apache/nuttx/pull/11447) libc: stream: add stream interface
 * [#11350](https://github.com/apache/nuttx/pull/11350) libc: Support gdbstub kernel debugging
 * [#11346](https://github.com/apache/nuttx/pull/11346) libc: Supports storing coredump into block devices

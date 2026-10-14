@@ -44,7 +44,7 @@
   <path class="edge" d="M 240 268 L 298 268" marker-end="url(#a)"/>
   <text class="lbl" x="272" y="238" text-anchor="middle">highest priority</text>
   <path class="edge" d="M 304 292 L 246 292" marker-end="url(#a)"/>
-  <text class="lbl" x="272" y="332" text-anchor="middle">pre-empted</text>
+  <text class="lbl" x="272" y="332" text-anchor="middle">preempted</text>
 
   <rect class="panel" x="560" y="192" rx="10" width="304" height="254"/>
   <text class="plabel" x="576" y="213">BLOCKED</text>

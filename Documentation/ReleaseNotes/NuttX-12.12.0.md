@@ -151,7 +151,7 @@ TRICORE
 * [#17079](https://github.com/apache/nuttx/pull/17079) arch/tricore: remove tasking compiler tool specific code from common Cmake scripts
 * [#17327](https://github.com/apache/nuttx/pull/17327) arch/tricore/tc397: Add UART port pin configuration for TC397
 X86_64
-* [#17383](https://github.com/apache/nuttx/pull/17383) arch/x86_64: fix bootup problem in SMP
+* [#17383](https://github.com/apache/nuttx/pull/17383) arch/x86_64: fix boot-up problem in SMP
 XTENSA
 * [#17207](https://github.com/apache/nuttx/pull/17207) arch/xtensa: add non-iram interrupt support for ESP32-S2
 * [#16975](https://github.com/apache/nuttx/pull/16975) arch/xtensa: update E-Fuse driver on ESP32|S2|S3
@@ -190,7 +190,7 @@ Drivers With Improvements
 * [#17392](https://github.com/apache/nuttx/pull/17392) drivers/sensors: improvements for Kconfig
 * [#17076](https://github.com/apache/nuttx/pull/17076) drivers/sensors/ms56xx: Replace custom curtime with standard function
 * [#17267](https://github.com/apache/nuttx/pull/17267) drivers/syslog: Add early_syslog() for early boot or system down debugging
-* [#16982](https://github.com/apache/nuttx/pull/16982) drivers/syslog: let syslog_write() return the maximum bytes writen through a channel
+* [#16982](https://github.com/apache/nuttx/pull/16982) drivers/syslog: let syslog_write() return the maximum bytes written through a channel
 * [#17316](https://github.com/apache/nuttx/pull/17316) drivers/timers: Introduce clockcount, the time conversion API. [ClockDevice Part II]
 * [#17345](https://github.com/apache/nuttx/pull/17345) drivers/timers: Re-implemented timer drivers with the count-based oneshot API [ClockDevice Part V]
 * [#17221](https://github.com/apache/nuttx/pull/17221) drivers/timers/arch_alarm: Revert removal of ndelay_accurate

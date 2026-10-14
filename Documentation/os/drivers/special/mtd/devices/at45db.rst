@@ -9,7 +9,7 @@ The driver is enabled by option ``CONFIG_MTD_AT64DB``. It is possible
 to set communication frequency with ``CONFIG_AT64DB_FREQUENCY`` option.
 
 Option ``CONFIG_AT64DB_PREWAIT`` enables high performance write logic,
-optin ``CONFIG_AT64DB_PRWSAVE`` allows to device to enter power save mode.
+option ``CONFIG_AT64DB_PRWSAVE`` allows to device to enter power save mode.
 
 The flash memory has to be initialized before used. This is typically done
 from board support package layer during the board's bringup phase. This
