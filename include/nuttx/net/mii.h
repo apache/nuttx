@@ -410,6 +410,14 @@
 #define MII_PHYID1_DP83848C          0x2000    /* ID1 value for DP83848C */
 #define MII_PHYID2_DP83848C          0x5c90    /* ID2 value for DP83848C */
 
+/* Texas Instruments DP83630 ************************************************/
+
+/* DP83630 MII ID1/2 register bits */
+
+#define MII_PHYID1_DP83630           0x2000    /* ID1 value for DP83630 */
+#define MII_PHYID2_DP83630           0x5ce0    /* ID2 value for DP83630 (rev in bits 3-0) */
+#define MII_PHYID2_DP83630_REV_MASK  0x000f
+
 /* RMII and Bypass Register (0x17) */
 
 #define MII_RBR_ELAST_MASK           0x0003    /* Bits 0-1: Receive elasticity buffer */

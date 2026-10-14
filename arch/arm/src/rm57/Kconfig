@@ -1,0 +1,1873 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_RM57
+
+comment "RM57 Configuration Options"
+
+# Chip Selection
+
+choice
+	prompt "TI Hercules RM57 Chip Selection"
+	default ARCH_CHIP_RM57L843
+
+config ARCH_CHIP_RM57L843
+	bool "TI RM57L843"
+	select ARCH_CORTEXR5
+	select ARCH_HAVE_FPU
+
+endchoice # TI Hercules RM57 Chip Selection
+
+menu "RM57 Peripheral Support"
+
+config RM57_SCI1
+	bool "Serial Communication Interface 1 (SCI1/LIN1, SCI-compatibility mode)"
+	default n
+	select SCI1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config RM57_SCI2
+	bool "Serial Communication Interface 2 (SCI2/LIN2, SCI-compatibility mode)"
+	default n
+	select SCI2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config RM57_SCI3
+	bool "Serial Communication Interface 3 (SCI3)"
+	default n
+	select SCI3_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config RM57_SCI4
+	bool "Serial Communication Interface 4 (SCI4)"
+	default n
+	select SCI4_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config RM57_DMA
+	bool "DMA controller (32-channel, 48 request lines)"
+	default n
+	---help---
+		Enable the general-purpose DMA controller driver. Required by the
+		RM57_SCIn_RXDMA/TXDMA serial DMA options.
+
+config RM57_SCI1_RXDMA
+	bool "SCI1/LIN1 receive DMA"
+	default n
+	depends on RM57_SCI1 && RM57_DMA
+	select SERIAL_RXDMA
+
+config RM57_SCI1_TXDMA
+	bool "SCI1/LIN1 transmit DMA"
+	default n
+	depends on RM57_SCI1 && RM57_DMA
+	select SERIAL_TXDMA
+
+config RM57_SCI2_RXDMA
+	bool "SCI2/LIN2 receive DMA"
+	default n
+	depends on RM57_SCI2 && RM57_DMA
+	select SERIAL_RXDMA
+
+config RM57_SCI2_TXDMA
+	bool "SCI2/LIN2 transmit DMA"
+	default n
+	depends on RM57_SCI2 && RM57_DMA
+	select SERIAL_TXDMA
+
+config RM57_SCI3_RXDMA
+	bool "SCI3 receive DMA"
+	default n
+	depends on RM57_SCI3 && RM57_DMA
+	select SERIAL_RXDMA
+
+config RM57_SCI3_TXDMA
+	bool "SCI3 transmit DMA"
+	default n
+	depends on RM57_SCI3 && RM57_DMA
+	select SERIAL_TXDMA
+
+config RM57_SCI4_RXDMA
+	bool "SCI4 receive DMA"
+	default n
+	depends on RM57_SCI4 && RM57_DMA
+	select SERIAL_RXDMA
+
+config RM57_SCI4_TXDMA
+	bool "SCI4 transmit DMA"
+	default n
+	depends on RM57_SCI4 && RM57_DMA
+	select SERIAL_TXDMA
+
+config RM57_SCI2_LOOPBACK
+	bool "SCI2/LIN2 internal loopback (self test)"
+	default n
+	depends on RM57_SCI2 && !SCI2_SERIAL_CONSOLE
+	---help---
+		Set SCIGCR1.LOOPBACK so the transmitter is tied to the receiver
+		inside the module (TRM 29.4 "self test").  Anything written to
+		the port comes straight back on its own receiver and the RX/TX
+		balls are ignored, which exercises the full TX and RX paths -
+		DMA included - without any external wiring or knowledge of the
+		board's header pinout.  For bring-up and testing only.
+
+config RM57_SCI3_LOOPBACK
+	bool "SCI3 internal loopback (self test)"
+	default n
+	depends on RM57_SCI3 && !SCI3_SERIAL_CONSOLE
+	---help---
+		See RM57_SCI2_LOOPBACK.
+
+config RM57_SCI4_LOOPBACK
+	bool "SCI4 internal loopback (self test)"
+	default n
+	depends on RM57_SCI4 && !SCI4_SERIAL_CONSOLE
+	---help---
+		See RM57_SCI2_LOOPBACK.
+
+config RM57_LIN
+	bool "LIN 2.x driver scaffold (LIN1/LIN2 modules)"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Configuration and polled transfer foundation for LIN-mode
+		operation of the SCI1/LIN1 and SCI2/LIN2 dual-role modules (see
+		rm57_lin.h). Not integrated with the serial upper half, and not
+		a complete LIN protocol stack - see rm57_lin.h for what is and
+		is not implemented.
+
+		A LIN module cannot be used simultaneously in SCI mode
+		(RM57_SCI1/RM57_SCI2) and LIN mode; this is a runtime choice,
+		not enforced here, since e.g. SCI1 could run in SCI mode while
+		SCI2/LIN2 runs in LIN mode.
+
+config RM57_GIO_IRQ
+	bool "GIO pin interrupts"
+	default n
+	---help---
+		Build in support for a second level of interrupt decoding for
+		GIO pins. Required for CONFIG_ARCH_IRQBUTTONS on this chip.
+
+config RM57_ESM_PANIC
+	bool "Panic on ESM error"
+	default n
+	depends on ARMV7R_DECODEFIQ
+	---help---
+		Call PANIC() after reporting a latched ESM error instead of
+		clearing it and continuing.  Leave this off while debugging so
+		that the channel report reaches the console and the system keeps
+		running.
+
+config RM57_SELFTEST
+	bool "Start-up diagnostics (CCM-R5F, STC, PBIST, eFuse, L2RAMW)"
+	default n
+	select ARMV7R_DECODEFIQ
+	---help---
+		Run the device's safety diagnostics on every boot, before the OS
+		starts, and print the outcome on the console.
+
+		Several of the diagnostics deliberately raise an ESM error to
+		prove that it would be reported, which pulses the nERROR pin low
+		for the ESM low time on each boot.
+
+		This also builds in the ESM FIQ handler (ARMV7R_DECODEFIQ), so
+		that a lockstep compare error at run time - an ESM group2,
+		non-maskable error - is reported instead of leaving FIQ asserted.
+
+if RM57_SELFTEST
+
+config RM57_SELFTEST_HALT_ON_FAIL
+	bool "Halt if a diagnostic fails"
+	default y
+	---help---
+		On a failed diagnostic, report it, drive nERROR low and stop.
+		Deselect only for bring-up: the system then carries on booting on
+		a device that has just shown itself to be faulty.
+
+config RM57_SELFTEST_CCM
+	bool "CCM-R5F self-test and error forcing"
+	default y
+	---help---
+		Self-test, self-test error forcing and error forcing of the four
+		CCM-R5F diagnostics: CPU compare, VIM compare, checker CPU
+		inactivity and power domain inactivity.  Skipped while a debugger
+		has halting debug enabled, because the CCM-R5F is then off.
+
+config RM57_SELFTEST_PBIST_ROM
+	bool "PBIST and STC ROM tests"
+	default n
+	---help---
+		Apply the errata PBIST#4/STC#30 ROM initialization workaround and
+		then check the PBIST ROM and the STC ROMs with both triple-read
+		algorithms.  Should be enabled whenever RM57_SELFTEST_STC is: on
+		revision A silicon the CPU self-test can hang without it.
+
+config RM57_SELFTEST_STC
+	bool "CPU logic BIST (STC1)"
+	default n
+	---help---
+		Run the self-test controller's signature compare self-check and
+		then the CPU LBIST on both lockstep cores.  Each of the two runs
+		ends in a CPU reset, so the boot code is entered three times.
+		Skipped while a debugger is attached.
+
+config RM57_SELFTEST_STC_INTERVALS
+	int "CPU logic BIST intervals"
+	default 125
+	range 2 125
+	depends on RM57_SELFTEST_STC
+	---help---
+		Number of STC1 segment 0 test intervals to run, starting from
+		interval 0.  All 125 give 95.5% coverage in about 2 ms at
+		STCCLK = 100 MHz; 40 give 90% in about 0.65 ms.
+
+config RM57_SELFTEST_EFUSE
+	bool "eFuse controller checks"
+	default n
+	---help---
+		Check the outcome of the eFuse autoload and run the stuck-at-zero
+		test and the ECC logic self-test.  Runs after a power-on reset
+		only.
+
+config RM57_SELFTEST_EFUSE_NO_NERROR
+	bool "eFuse stuck-at-zero test without nERROR"
+	default n
+	depends on RM57_SELFTEST_EFUSE
+	---help---
+		Use the reduced stuck-at-zero test that leaves out the autoload
+		error (ESM group3) path and therefore does not pull nERROR low.
+
+config RM57_SELFTEST_L2RAM
+	bool "L2RAMW ECC and address decode diagnostics"
+	default n
+	---help---
+		Exercise the L2RAMW's read and write SECDED blocks with one-bit
+		and two-bit errors, and its redundant address decode comparator,
+		using the module's built-in test stimulus.  No RAM is modified.
+
+config RM57_SELFTEST_FORCE_FAIL
+	int "Force a diagnostic to fail (-1 = none)"
+	default -1
+	range -1 11
+	---help---
+		Treat the diagnostic with this index (see RM57_ST_* in
+		rm57_selftest.h) as failed even though it passed.  For testing
+		the failure path only.
+
+choice
+	prompt "Fault injection"
+	default RM57_SELFTEST_INJECT_NONE
+	---help---
+		Deliberately create one real fault on every boot to show that the
+		corresponding diagnostic, and the response to it, work.  Unlike
+		RM57_SELFTEST_FORCE_FAIL this exercises the detecting hardware.
+		For testing only: the board will not boot normally.
+
+config RM57_SELFTEST_INJECT_NONE
+	bool "None"
+
+config RM57_SELFTEST_INJECT_PBIST_ALGO
+	bool "PBIST: RAM algorithm on a ROM"
+	depends on RM57_SELFTEST_PBIST_ROM
+	---help---
+		Expected: "SELFTEST FAIL: PBIST ROM step 000000f1", halt.
+
+config RM57_SELFTEST_INJECT_STC_TIMEOUT
+	bool "STC: impossible timeout on the CPU LBIST run"
+	depends on RM57_SELFTEST_STC
+	---help---
+		Expected: "SELFTEST FAIL: STC CPU LBIST step 00000002" with the
+		timeout bit (bit 2) set in the second info word, halt.
+
+config RM57_SELFTEST_INJECT_EFUSE_SIGNATURE
+	bool "eFuse: wrong ECC self-test signature"
+	depends on RM57_SELFTEST_EFUSE
+	---help---
+		Expected after a power-on reset: "SELFTEST FAIL: eFuse step
+		00000003", halt.
+
+config RM57_SELFTEST_INJECT_CCM_MISMATCH
+	bool "CCM-R5F: real CPU compare mismatch, left pending"
+	depends on RM57_SELFTEST_CCM
+	---help---
+		Inverts one of CPU1's compared signals through CCMPOLCNTRL.
+		Expected: all diagnostics pass, then the run-time ESM handler
+		reports "ESM: group 2 channel 2" and nERROR stays low.
+
+config RM57_SELFTEST_INJECT_L2RAM_2BIT
+	bool "L2RAMW: two-bit ECC error, left pending"
+	depends on RM57_SELFTEST_L2RAM
+	---help---
+		Expected: all diagnostics pass, then the run-time ESM handler
+		reports "ESM: group 2 channel 7" and nERROR stays low.
+
+endchoice # Fault injection
+
+endif # RM57_SELFTEST
+
+config RM57_SERIAL_RXDMA_BUFFER_SIZE
+	int "RX DMA buffer size"
+	default 64
+	depends on RM57_SCI1_RXDMA || RM57_SCI2_RXDMA || RM57_SCI3_RXDMA || \
+		RM57_SCI4_RXDMA
+	---help---
+		The DMA buffer size when using RX DMA. This buffer is used to
+		receive data on the SCI while waiting for the application to
+		claim it. Rounded up to a multiple of the 32-byte Cortex-R5
+		D-cache line size.
+
+config RM57_SERIAL_RXDMA_POLL
+	bool "Periodic RX DMA flush"
+	default y
+	depends on RM57_SCI1_RXDMA || RM57_SCI2_RXDMA || RM57_SCI3_RXDMA || \
+		RM57_SCI4_RXDMA
+	---help---
+		RX DMA hands received bytes to the upper half only when the
+		DMA half/full interrupt fires, that is, after half of
+		RM57_SERIAL_RXDMA_BUFFER_SIZE bytes. The SCI has no idle-line
+		interrupt to signal the end of a shorter burst, so this option
+		dedicates RTI compare 1 to calling rm57_serial_dma_poll()
+		periodically, which bounds the added receive latency by the
+		poll period.
+
+		Leave this enabled unless every RX DMA port is used purely for
+		bulk transfers; without it, a short message sits in the ring
+		buffer until enough further bytes arrive, and an RX DMA console
+		is unusable interactively.
+
+config RM57_SERIAL_RXDMA_POLL_HZ
+	int "RX DMA flush frequency (Hz)"
+	default 1000
+	range 1 100000
+	depends on RM57_SERIAL_RXDMA_POLL
+	---help---
+		How often the RX DMA rings are flushed, in Hz. The worst-case
+		added receive latency is one poll period; the cost is one short
+		interrupt at this rate, which checks one pointer per enabled
+		port and returns when nothing was received.
+
+config RM57_DCAN
+	bool
+	default n
+	---help---
+		Hidden umbrella symbol selected by any RM57_DCANn instance;
+		pulls the shared DCAN core driver into the build.
+
+menuconfig RM57_DCAN1
+	bool "DCAN1 CAN controller"
+	default n
+	select RM57_DCAN
+
+if RM57_DCAN1
+
+choice
+	prompt "DCAN1 driver framework"
+	default RM57_DCAN1_CHARDRIVER
+
+config RM57_DCAN1_CHARDRIVER
+	bool "Character device driver (/dev/can<n>)"
+	select CAN
+	select CAN_TXREADY
+	select CAN_USE_RTR
+	select ARCH_HAVE_CAN_ERRORS
+
+config RM57_DCAN1_SOCKET
+	bool "SocketCAN network driver"
+	depends on NET_CAN
+	select NET_CAN_HAVE_ERRORS
+
+endchoice # DCAN1 driver framework
+
+config RM57_DCAN1_BAUD
+	int "DCAN1 initial bit rate"
+	default 500000
+	range 1000 1000000
+
+choice
+	prompt "DCAN1 RX path"
+	default RM57_DCAN1_RX_PIO
+
+config RM57_DCAN1_RX_PIO
+	bool "IF2 programmed I/O (interrupt per message)"
+
+config RM57_DCAN1_RX_IF3IRQ
+	bool "IF3 auto-update with IF3 interrupt"
+
+config RM57_DCAN1_RX_IF3DMA
+	bool "IF3 auto-update with DMA (EXPERIMENTAL)"
+	depends on RM57_DMA && EXPERIMENTAL
+
+endchoice # DCAN1 RX path
+
+endif # RM57_DCAN1
+
+menuconfig RM57_DCAN2
+	bool "DCAN2 CAN controller"
+	default n
+	select RM57_DCAN
+
+if RM57_DCAN2
+
+choice
+	prompt "DCAN2 driver framework"
+	default RM57_DCAN2_CHARDRIVER
+
+config RM57_DCAN2_CHARDRIVER
+	bool "Character device driver (/dev/can<n>)"
+	select CAN
+	select CAN_TXREADY
+	select CAN_USE_RTR
+	select ARCH_HAVE_CAN_ERRORS
+
+config RM57_DCAN2_SOCKET
+	bool "SocketCAN network driver"
+	depends on NET_CAN
+	select NET_CAN_HAVE_ERRORS
+
+endchoice # DCAN2 driver framework
+
+config RM57_DCAN2_BAUD
+	int "DCAN2 initial bit rate"
+	default 500000
+	range 1000 1000000
+
+choice
+	prompt "DCAN2 RX path"
+	default RM57_DCAN2_RX_PIO
+
+config RM57_DCAN2_RX_PIO
+	bool "IF2 programmed I/O (interrupt per message)"
+
+config RM57_DCAN2_RX_IF3IRQ
+	bool "IF3 auto-update with IF3 interrupt"
+
+config RM57_DCAN2_RX_IF3DMA
+	bool "IF3 auto-update with DMA (EXPERIMENTAL)"
+	depends on RM57_DMA && EXPERIMENTAL
+
+endchoice # DCAN2 RX path
+
+endif # RM57_DCAN2
+
+menuconfig RM57_DCAN3
+	bool "DCAN3 CAN controller"
+	default n
+	select RM57_DCAN
+
+if RM57_DCAN3
+
+choice
+	prompt "DCAN3 driver framework"
+	default RM57_DCAN3_CHARDRIVER
+
+config RM57_DCAN3_CHARDRIVER
+	bool "Character device driver (/dev/can<n>)"
+	select CAN
+	select CAN_TXREADY
+	select CAN_USE_RTR
+	select ARCH_HAVE_CAN_ERRORS
+
+config RM57_DCAN3_SOCKET
+	bool "SocketCAN network driver"
+	depends on NET_CAN
+	select NET_CAN_HAVE_ERRORS
+
+endchoice # DCAN3 driver framework
+
+config RM57_DCAN3_BAUD
+	int "DCAN3 initial bit rate"
+	default 500000
+	range 1000 1000000
+
+choice
+	prompt "DCAN3 RX path"
+	default RM57_DCAN3_RX_PIO
+
+config RM57_DCAN3_RX_PIO
+	bool "IF2 programmed I/O (interrupt per message)"
+
+config RM57_DCAN3_RX_IF3IRQ
+	bool "IF3 auto-update with IF3 interrupt"
+
+config RM57_DCAN3_RX_IF3DMA
+	bool "IF3 auto-update with DMA (EXPERIMENTAL)"
+	depends on RM57_DMA && EXPERIMENTAL
+
+endchoice # DCAN3 RX path
+
+endif # RM57_DCAN3
+
+menuconfig RM57_DCAN4
+	bool "DCAN4 CAN controller"
+	default n
+	select RM57_DCAN
+	---help---
+		DCAN4 pins are shared with GIOB[2] (ball F2, CAN4 TX) and
+		GIOB[3] (ball W10, CAN4 RX).  The board pinmux claims them for
+		CAN when this option is enabled.
+
+if RM57_DCAN4
+
+choice
+	prompt "DCAN4 driver framework"
+	default RM57_DCAN4_CHARDRIVER
+
+config RM57_DCAN4_CHARDRIVER
+	bool "Character device driver (/dev/can<n>)"
+	select CAN
+	select CAN_TXREADY
+	select CAN_USE_RTR
+	select ARCH_HAVE_CAN_ERRORS
+
+config RM57_DCAN4_SOCKET
+	bool "SocketCAN network driver"
+	depends on NET_CAN
+	select NET_CAN_HAVE_ERRORS
+
+endchoice # DCAN4 driver framework
+
+config RM57_DCAN4_BAUD
+	int "DCAN4 initial bit rate"
+	default 500000
+	range 1000 1000000
+
+choice
+	prompt "DCAN4 RX path"
+	default RM57_DCAN4_RX_PIO
+
+config RM57_DCAN4_RX_PIO
+	bool "IF2 programmed I/O (interrupt per message)"
+
+config RM57_DCAN4_RX_IF3IRQ
+	bool "IF3 auto-update with IF3 interrupt"
+
+config RM57_DCAN4_RX_IF3DMA
+	bool "IF3 auto-update with DMA (EXPERIMENTAL)"
+	depends on RM57_DMA && EXPERIMENTAL
+
+endchoice # DCAN4 RX path
+
+endif # RM57_DCAN4
+
+if RM57_DCAN
+
+config RM57_DCAN_TXFIFO_DEPTH
+	int "DCAN TX FIFO depth (mailboxes per instance)"
+	default 8
+	range 1 32
+	---help---
+		Number of message objects reserved for transmission, taken
+		from the top of the 64-mailbox range so that RX filters keep
+		the (higher priority) low mailbox numbers.
+
+config RM57_DCAN_RXFIFO_DEPTH
+	int "DCAN RX FIFO depth (mailboxes per filter)"
+	default 8
+	range 1 32
+	---help---
+		Number of message objects chained (EoB) into the receive FIFO
+		of each acceptance filter, including the default catch-all
+		filter installed when no user filter is active.
+
+config RM57_DCAN_NFILTERS_MAX
+	int "DCAN maximum concurrent acceptance filters"
+	default 4
+	range 1 8
+
+config RM57_DCAN_IF3_NFRAMES
+	int "DCAN IF3 DMA ring size (frames)"
+	default 16
+	range 2 64
+	depends on RM57_DCAN1_RX_IF3DMA || RM57_DCAN2_RX_IF3DMA || \
+		RM57_DCAN3_RX_IF3DMA || RM57_DCAN4_RX_IF3DMA
+
+config RM57_DCAN_SECDED
+	bool "DCAN message RAM SECDED (ECC)"
+	default y
+	---help---
+		Keep the message RAM single-error-correction/double-error-
+		detection logic enabled (CTL.PMD).  Disable only for
+		bring-up debugging; parity events are reported through the
+		CAN error reporting path when enabled.
+
+config RM57_DCAN_LOOPBACK
+	bool "DCAN internal loopback at setup (self-test)"
+	default n
+	---help---
+		Enter internal loopback test mode (TEST.LBack) as part of
+		controller setup so the driver can be exercised without a
+		transceiver or bus.  Frames are looped back internally; the
+		CAN_TX pin stays recessive.  Can also be controlled at
+		runtime via CANIOC_SET_CONNMODES.
+
+endif # RM57_DCAN
+
+config RM57_MIBSPI
+	bool
+	default n
+	select ARCH_HAVE_SPI_BITORDER
+	---help---
+		Hidden umbrella symbol selected by any RM57_MIBSPIn instance;
+		pulls the shared MibSPI driver into the build.
+
+config RM57_MIBSPI1
+	bool "MibSPI1 (SPI master)"
+	default n
+	select RM57_MIBSPI
+	select SPI
+	---help---
+		Multi-buffered SPI module 1 as an SPI master.  SPICLK, SIMO[0]
+		and SOMI[0] are dedicated balls (F18, F19, G18).
+
+config RM57_MIBSPI2
+	bool "MibSPI2 (SPI master)"
+	default n
+	select RM57_MIBSPI
+	select SPI
+	---help---
+		Multi-buffered SPI module 2 as an SPI master.  All of its
+		signals are alternate functions of N2HET2 balls, so the board
+		pin-mux table has to route them.  Two chip selects only.
+
+config RM57_MIBSPI3
+	bool "MibSPI3 (SPI master)"
+	default n
+	select RM57_MIBSPI
+	select SPI
+	---help---
+		Multi-buffered SPI module 3 as an SPI master.  Its balls reset
+		to their MibSPI3 function.
+
+config RM57_MIBSPI4
+	bool "MibSPI4 (SPI master)"
+	default n
+	select RM57_MIBSPI
+	select SPI
+	---help---
+		Multi-buffered SPI module 4 as an SPI master.  All of its
+		signals are alternate functions of N2HET1 balls, so the board
+		pin-mux table has to route them.
+
+config RM57_MIBSPI5
+	bool "MibSPI5 (SPI master)"
+	default n
+	select RM57_MIBSPI
+	select SPI
+	---help---
+		Multi-buffered SPI module 5 as an SPI master, on SIMO[0] and
+		SOMI[0] only; the parallel data lines are not used.  Its balls
+		reset to their MibSPI5 function.
+
+config RM57_MIBSPI_MULTIBUF
+	bool
+	default n
+	---help---
+		Hidden symbol selected by any RM57_MIBSPIn_MULTIBUF; pulls the
+		multi-buffer transfer path into the driver.
+
+config RM57_MIBSPI1_MULTIBUF
+	bool "MibSPI1 multi-buffer mode"
+	default n
+	depends on RM57_MIBSPI1
+	select RM57_MIBSPI_MULTIBUF
+	---help---
+		Run MibSPI1 in multi-buffer mode instead of compatibility mode.
+		Transfers go through the module's buffer RAM in passes of up to
+		255 words (extended 256-buffer mode), one interrupt per pass
+		instead of one register round-trip per word.  The mode is fixed
+		at initialization: switching it re-initializes the buffer RAM.
+
+config RM57_MIBSPI2_MULTIBUF
+	bool "MibSPI2 multi-buffer mode"
+	default n
+	depends on RM57_MIBSPI2
+	select RM57_MIBSPI_MULTIBUF
+	---help---
+		As RM57_MIBSPI1_MULTIBUF, in passes of up to 128 words.
+
+config RM57_MIBSPI3_MULTIBUF
+	bool "MibSPI3 multi-buffer mode"
+	default n
+	depends on RM57_MIBSPI3
+	select RM57_MIBSPI_MULTIBUF
+	---help---
+		As RM57_MIBSPI1_MULTIBUF, in passes of up to 128 words.
+
+config RM57_MIBSPI4_MULTIBUF
+	bool "MibSPI4 multi-buffer mode"
+	default n
+	depends on RM57_MIBSPI4
+	select RM57_MIBSPI_MULTIBUF
+	---help---
+		As RM57_MIBSPI1_MULTIBUF, in passes of up to 128 words.
+
+config RM57_MIBSPI5_MULTIBUF
+	bool "MibSPI5 multi-buffer mode"
+	default n
+	depends on RM57_MIBSPI5
+	select RM57_MIBSPI_MULTIBUF
+	---help---
+		As RM57_MIBSPI1_MULTIBUF, in passes of up to 128 words.
+
+config RM57_MIBSPI_DMA
+	bool
+	default n
+	select RM57_DMA
+	---help---
+		Hidden symbol selected by any RM57_MIBSPIn_DMA; pulls the
+		compatibility-mode DMA path into the driver.
+
+config RM57_MIBSPI1_DMA
+	bool "MibSPI1 DMA (compatibility mode)"
+	default n
+	depends on RM57_MIBSPI1 && !RM57_MIBSPI1_MULTIBUF
+	select RM57_MIBSPI_DMA
+	---help---
+		Move compatibility-mode transfers of RM57_MIBSPI_DMATHRESHOLD
+		words or more by DMA, on request lines 1 (TX) and 0 (RX),
+		instead of polling every word.  The caller sleeps until the
+		receive channel completes.
+
+config RM57_MIBSPI2_DMA
+	bool "MibSPI2 DMA (compatibility mode)"
+	default n
+	depends on RM57_MIBSPI2 && !RM57_MIBSPI2_MULTIBUF
+	select RM57_MIBSPI_DMA
+	---help---
+		As RM57_MIBSPI1_DMA, on request lines 3 (TX) and 2 (RX).
+
+config RM57_MIBSPI3_DMA
+	bool "MibSPI3 DMA (compatibility mode)"
+	default n
+	depends on RM57_MIBSPI3 && !RM57_MIBSPI3_MULTIBUF
+	select RM57_MIBSPI_DMA
+	---help---
+		As RM57_MIBSPI1_DMA, on request lines 15 (TX) and 14 (RX).
+		Line 14 is shared with the MibADC2 event trigger DMA request;
+		the two cannot be used together.
+
+config RM57_MIBSPI_DMATHRESHOLD
+	int "MibSPI DMA threshold (words)"
+	default 16
+	depends on RM57_MIBSPI_DMA
+	---help---
+		Shorter transfers are polled: setting up two channels and
+		sleeping costs more than the transfer itself.
+
+config RM57_MIBSPI_DMABUFSIZE
+	int "MibSPI DMA bounce buffer size (words)"
+	default 256
+	range 16 8176
+	depends on RM57_MIBSPI_DMA
+	---help---
+		DMA goes through a cache-line-aligned transmit and receive
+		buffer of this many 16-bit words per module, so that the
+		caller's buffers need no particular alignment.  Longer
+		transfers are split into blocks of this size.
+
+config RM57_MIBSPI_LOOPBACK
+	bool "MibSPI internal loopback (self-test)"
+	default n
+	depends on RM57_MIBSPI
+	---help---
+		Set SPIGCR1.LOOPBACK on every enabled MibSPI module: transmit
+		data is fed back to the receiver inside the module, SPICLK
+		stays at its idle level and nothing reaches the pins.  Lets the
+		driver be exercised with nothing connected - the
+		RM57_DCAN_LOOPBACK equivalent for SPI.
+
+config RM57_I2C
+	bool
+	default n
+	select I2C
+	select ARCH_HAVE_I2CRESET
+	---help---
+		Hidden umbrella symbol selected by any RM57_I2Cn instance;
+		pulls the shared I2C master driver into the build.
+
+config RM57_I2C1
+	bool "I2C1 (I2C master)"
+	default n
+	select RM57_I2C
+	---help---
+		I2C module 1 as an interrupt-driven master.  SDA and SCL are
+		alternate functions of balls B2 and C3, which reset to
+		MIBSPI3NCS[2] and MIBSPI3NCS[3]; the board pin-mux table has
+		to route them, and MibSPI3 loses those two chip selects.
+
+config RM57_I2C2
+	bool "I2C2 (I2C master)"
+	default n
+	select RM57_I2C
+	---help---
+		I2C module 2 as an interrupt-driven master.  SDA and SCL are
+		alternate functions of balls G17 and G16, which reset to
+		MIBSPI5SIMO[3] and MIBSPI5SOMI[3].
+
+config RM57_I2C_TIMEOUT_MS
+	int "I2C transfer timeout slack (ms)"
+	default 20
+	depends on RM57_I2C
+	---help---
+		Added to four times the nominal duration of every transfer
+		segment before it is abandoned and the module reset.  Also
+		bounds how long a transfer waits for the bus to go idle.
+		Raise it for slaves that stretch the clock for long.
+
+config RM57_I2C_LOOPBACK
+	bool "I2C digital loopback (self-test)"
+	default n
+	depends on RM57_I2C
+	---help---
+		Let the board run every enabled I2C module through its
+		digital loopback mode (I2CMDR.DLB) at start-up: the module
+		addresses itself, so master-transmit transfers complete and
+		the bytes come back through the receive register with
+		nothing connected to the bus.  Only the transmit path is
+		covered; master receive needs a real slave.
+
+config RM57_ADC
+	bool
+	default n
+	---help---
+		Hidden umbrella symbol selected by any RM57_ADCn instance;
+		pulls the shared MibADC driver into the build.
+
+config RM57_ADC_HAVE_DMA
+	bool
+	default n
+	---help---
+		Hidden symbol selected by any conversion group configured to
+		move its results with the DMA controller.
+
+menuconfig RM57_ADC1
+	bool "MibADC1 (32 channels)"
+	default n
+	select RM57_ADC
+	select ADC
+	select ANALOG
+	---help---
+		TI MibADC module 1, a 10/12-bit successive approximation
+		converter with 32 analog inputs and three independent
+		conversion groups.
+
+if RM57_ADC1
+
+choice
+	prompt "ADC1 resolution"
+	default RM57_ADC1_12BIT
+	---help---
+		Resolution of the converter core.  This is a module-wide
+		setting: all three conversion groups share it.
+
+config RM57_ADC1_12BIT
+	bool "12-bit"
+
+config RM57_ADC1_10BIT
+	bool "10-bit"
+
+endchoice # ADC1 resolution
+
+config RM57_ADC1_CLOCK
+	int "ADC1 conversion clock (Hz)"
+	default 9375000
+	range 2400000 30000000
+	---help---
+		Target ADCLK frequency.  The prescaler is computed from
+		BOARD_VCLK_FREQUENCY as ADCLK = VCLK / (PS + 1) and rounded so
+		the result never exceeds this value.  SPNS215 specifies
+		tc(ADCLK) >= 33ns, i.e. an ADCLK ceiling of 30MHz, which is
+		checked at compile time.
+
+menuconfig RM57_ADC1_EV
+	bool "ADC1 Event group"
+	default n
+	---help---
+		Expose the ADC1 Event group as its own /dev/adcN character device.
+		The group has an independent channel selection, trigger source,
+		sampling window, results FIFO and interrupt (VIM channel
+		RM57_REQ_ADC1GROUP0).
+
+if RM57_ADC1_EV
+
+config RM57_ADC1_EV_CHANMASK
+	hex "ADC1 Event group channel mask"
+	default 0x1
+	---help---
+		Bit mask of the analog inputs converted by this group; bit n
+		selects AD1IN[n].  In the default sequential mode the selected
+		channels are converted in ascending channel number.
+
+config RM57_ADC1_EV_BUFS
+	int "ADC1 Event group result buffers"
+	default 16
+	range 0 64
+	---help---
+		Words of the module's 64-word results RAM reserved for this
+		group.  The Event group and Group1 counts must be even because
+		ADBNDCR allocates the memory in pairs, and the three groups of
+		one module must not ask for more than 64 words in total.  Both
+		rules are checked at compile time.
+
+config RM57_ADC1_EV_THRESHOLD
+	int "ADC1 Event group interrupt threshold"
+	default 8
+	range 1 511
+	---help---
+		How many conversion results accumulate before the group raises
+		its threshold interrupt.  Larger values reduce the interrupt
+		rate but need a correspondingly larger result buffer count.
+
+config RM57_ADC1_EV_ACQ
+	int "ADC1 Event group acquisition time"
+	default 8
+	range 1 4095
+	---help---
+		Sampling window in ADCLK cycles minus two: SW = ACQ + 2, and the
+		hardware requires SW >= 3.  The input impedance sets the real
+		minimum - see the sample and hold timings in SPNS215.  When both
+		modules convert a shared channel their windows must either match
+		exactly or not overlap at all (TRM section 22.1).
+
+config RM57_ADC1_EV_CONTINUOUS
+	bool "ADC1 Event group continuous conversion"
+	default n
+	---help---
+		Convert the selected channels continuously instead of once per
+		trigger.  Continuous groups report results through the threshold
+		interrupt; single-shot groups use the conversion end interrupt.
+
+config RM57_ADC1_EV_FREEZE
+	bool "ADC1 Event group freeze enable"
+	default n
+	---help---
+		Allow this group's conversion sequence to be suspended while
+		another group of the same module is serviced, resuming from
+		where it stopped afterwards.
+
+config RM57_ADC1_EV_OVRWRITE
+	bool "ADC1 Event group overwrite on overrun"
+	default n
+	---help---
+		Let the ADC overwrite the oldest results when this group's
+		memory fills up.  Without it the group stalls until the
+		application has read the memory out.
+
+# The Event group has no hardware trigger enable bit - bit 3 of ADEVMODECR
+# is reserved, where Group1 and Group2 have HW_TRIG - because it is always
+# started by its trigger source.  Only the source and its edge are
+# selectable.
+
+config RM57_ADC1_EV_TRIGSRC
+	int "ADC1 Event group trigger source"
+	default 0
+	range 0 7
+	---help---
+		Hardware trigger source: 0 = AD1EVT pin, 1 = N2HET1[8],
+		2 = N2HET1[10], 3 = RTI compare 0, 4 = N2HET1[12],
+		5 = N2HET1[14], 6 = GIOB[0], 7 = GIOB[1].  A second set of
+		sources is reachable through the ALT_ADC_TRIGGER pin mux
+		control; see SPNS215.
+
+config RM57_ADC1_EV_RISING
+	bool "ADC1 Event group trigger on rising edge"
+	default y
+	---help---
+		Trigger on the low-to-high transition of the selected source
+		rather than the high-to-low transition.
+
+config RM57_ADC1_EV_DMA
+	bool "ADC1 Event group DMA result transfer"
+	default n
+	depends on RM57_DMA
+	select RM57_ADC_HAVE_DMA
+	---help---
+		Move conversion results out of the group's FIFO with the DMA
+		controller (request line DMA_REQ_MIBADC1_EVT) instead of reading
+		them in the interrupt handler, and deliver them to the upper
+		half in batches.
+
+config RM57_ADC1_EV_DMA_NSAMPLES
+	int "ADC1 Event group DMA samples per transfer"
+	default 16
+	range 1 256
+	depends on RM57_ADC1_EV_DMA
+	---help---
+		Results delivered per DMA callback.  The landing buffer holds
+		two of these so the ADC can fill one half while the other is
+		being handed to the upper half.  Two constraints are checked
+		at compile time: it must not exceed
+		RM57_ADC_DMA_MAXSAMPLES, which sizes the scratch arrays the
+		callback puts on the interrupt stack, and it must be a
+		multiple of eight so each half of the ring is a whole number
+		of D-cache lines.
+
+endif # RM57_ADC1_EV
+
+menuconfig RM57_ADC1_G1
+	bool "ADC1 Group1"
+	default n
+	---help---
+		Expose the ADC1 Group1 as its own /dev/adcN character device.
+		The group has an independent channel selection, trigger source,
+		sampling window, results FIFO and interrupt (VIM channel
+		RM57_REQ_ADC1GROUP1).
+
+if RM57_ADC1_G1
+
+config RM57_ADC1_G1_CHANMASK
+	hex "ADC1 Group1 channel mask"
+	default 0x1
+	---help---
+		Bit mask of the analog inputs converted by this group; bit n
+		selects AD1IN[n].  In the default sequential mode the selected
+		channels are converted in ascending channel number.
+
+config RM57_ADC1_G1_BUFS
+	int "ADC1 Group1 result buffers"
+	default 16
+	range 0 64
+	---help---
+		Words of the module's 64-word results RAM reserved for this
+		group.  The Event group and Group1 counts must be even because
+		ADBNDCR allocates the memory in pairs, and the three groups of
+		one module must not ask for more than 64 words in total.  Both
+		rules are checked at compile time.
+
+config RM57_ADC1_G1_THRESHOLD
+	int "ADC1 Group1 interrupt threshold"
+	default 8
+	range 1 511
+	---help---
+		How many conversion results accumulate before the group raises
+		its threshold interrupt.  Larger values reduce the interrupt
+		rate but need a correspondingly larger result buffer count.
+
+config RM57_ADC1_G1_ACQ
+	int "ADC1 Group1 acquisition time"
+	default 8
+	range 1 4095
+	---help---
+		Sampling window in ADCLK cycles minus two: SW = ACQ + 2, and the
+		hardware requires SW >= 3.  The input impedance sets the real
+		minimum - see the sample and hold timings in SPNS215.  When both
+		modules convert a shared channel their windows must either match
+		exactly or not overlap at all (TRM section 22.1).
+
+config RM57_ADC1_G1_CONTINUOUS
+	bool "ADC1 Group1 continuous conversion"
+	default n
+	---help---
+		Convert the selected channels continuously instead of once per
+		trigger.  Continuous groups report results through the threshold
+		interrupt; single-shot groups use the conversion end interrupt.
+
+config RM57_ADC1_G1_FREEZE
+	bool "ADC1 Group1 freeze enable"
+	default n
+	---help---
+		Allow this group's conversion sequence to be suspended while
+		another group of the same module is serviced, resuming from
+		where it stopped afterwards.
+
+config RM57_ADC1_G1_OVRWRITE
+	bool "ADC1 Group1 overwrite on overrun"
+	default n
+	---help---
+		Let the ADC overwrite the oldest results when this group's
+		memory fills up.  Without it the group stalls until the
+		application has read the memory out.
+
+config RM57_ADC1_G1_HWTRIG
+	bool "ADC1 Group1 hardware triggered"
+	default n
+	---help---
+		Start conversions from a hardware event rather than from a write
+		to the channel select register.
+
+config RM57_ADC1_G1_TRIGSRC
+	int "ADC1 Group1 trigger source"
+	default 0
+	range 0 7
+	depends on RM57_ADC1_G1_HWTRIG
+	---help---
+		Hardware trigger source: 0 = AD1EVT pin, 1 = N2HET1[8],
+		2 = N2HET1[10], 3 = RTI compare 0, 4 = N2HET1[12],
+		5 = N2HET1[14], 6 = GIOB[0], 7 = GIOB[1].  A second set of
+		sources is reachable through the ALT_ADC_TRIGGER pin mux
+		control; see SPNS215.
+
+config RM57_ADC1_G1_RISING
+	bool "ADC1 Group1 trigger on rising edge"
+	default y
+	depends on RM57_ADC1_G1_HWTRIG
+	---help---
+		Trigger on the low-to-high transition of the selected source
+		rather than the high-to-low transition.
+
+config RM57_ADC1_G1_DMA
+	bool "ADC1 Group1 DMA result transfer"
+	default n
+	depends on RM57_DMA
+	select RM57_ADC_HAVE_DMA
+	---help---
+		Move conversion results out of the group's FIFO with the DMA
+		controller (request line DMA_REQ_MIBADC1_G1) instead of reading
+		them in the interrupt handler, and deliver them to the upper
+		half in batches.
+
+config RM57_ADC1_G1_DMA_NSAMPLES
+	int "ADC1 Group1 DMA samples per transfer"
+	default 16
+	range 1 256
+	depends on RM57_ADC1_G1_DMA
+	---help---
+		Results delivered per DMA callback.  The landing buffer holds
+		two of these so the ADC can fill one half while the other is
+		being handed to the upper half.  Two constraints are checked
+		at compile time: it must not exceed
+		RM57_ADC_DMA_MAXSAMPLES, which sizes the scratch arrays the
+		callback puts on the interrupt stack, and it must be a
+		multiple of eight so each half of the ring is a whole number
+		of D-cache lines.
+
+endif # RM57_ADC1_G1
+
+menuconfig RM57_ADC1_G2
+	bool "ADC1 Group2"
+	default n
+	---help---
+		Expose the ADC1 Group2 as its own /dev/adcN character device.
+		The group has an independent channel selection, trigger source,
+		sampling window, results FIFO and interrupt (VIM channel
+		RM57_REQ_ADC1GROUP2).
+
+if RM57_ADC1_G2
+
+config RM57_ADC1_G2_CHANMASK
+	hex "ADC1 Group2 channel mask"
+	default 0x1
+	---help---
+		Bit mask of the analog inputs converted by this group; bit n
+		selects AD1IN[n].  In the default sequential mode the selected
+		channels are converted in ascending channel number.
+
+config RM57_ADC1_G2_BUFS
+	int "ADC1 Group2 result buffers"
+	default 16
+	range 0 64
+	---help---
+		Words of the module's 64-word results RAM reserved for this
+		group.  The Event group and Group1 counts must be even because
+		ADBNDCR allocates the memory in pairs, and the three groups of
+		one module must not ask for more than 64 words in total.  Both
+		rules are checked at compile time.
+
+config RM57_ADC1_G2_THRESHOLD
+	int "ADC1 Group2 interrupt threshold"
+	default 8
+	range 1 511
+	---help---
+		How many conversion results accumulate before the group raises
+		its threshold interrupt.  Larger values reduce the interrupt
+		rate but need a correspondingly larger result buffer count.
+
+config RM57_ADC1_G2_ACQ
+	int "ADC1 Group2 acquisition time"
+	default 8
+	range 1 4095
+	---help---
+		Sampling window in ADCLK cycles minus two: SW = ACQ + 2, and the
+		hardware requires SW >= 3.  The input impedance sets the real
+		minimum - see the sample and hold timings in SPNS215.  When both
+		modules convert a shared channel their windows must either match
+		exactly or not overlap at all (TRM section 22.1).
+
+config RM57_ADC1_G2_CONTINUOUS
+	bool "ADC1 Group2 continuous conversion"
+	default n
+	---help---
+		Convert the selected channels continuously instead of once per
+		trigger.  Continuous groups report results through the threshold
+		interrupt; single-shot groups use the conversion end interrupt.
+
+config RM57_ADC1_G2_FREEZE
+	bool "ADC1 Group2 freeze enable"
+	default n
+	---help---
+		Allow this group's conversion sequence to be suspended while
+		another group of the same module is serviced, resuming from
+		where it stopped afterwards.
+
+config RM57_ADC1_G2_OVRWRITE
+	bool "ADC1 Group2 overwrite on overrun"
+	default n
+	---help---
+		Let the ADC overwrite the oldest results when this group's
+		memory fills up.  Without it the group stalls until the
+		application has read the memory out.
+
+config RM57_ADC1_G2_HWTRIG
+	bool "ADC1 Group2 hardware triggered"
+	default n
+	---help---
+		Start conversions from a hardware event rather than from a write
+		to the channel select register.
+
+config RM57_ADC1_G2_TRIGSRC
+	int "ADC1 Group2 trigger source"
+	default 0
+	range 0 7
+	depends on RM57_ADC1_G2_HWTRIG
+	---help---
+		Hardware trigger source: 0 = AD1EVT pin, 1 = N2HET1[8],
+		2 = N2HET1[10], 3 = RTI compare 0, 4 = N2HET1[12],
+		5 = N2HET1[14], 6 = GIOB[0], 7 = GIOB[1].  A second set of
+		sources is reachable through the ALT_ADC_TRIGGER pin mux
+		control; see SPNS215.
+
+config RM57_ADC1_G2_RISING
+	bool "ADC1 Group2 trigger on rising edge"
+	default y
+	depends on RM57_ADC1_G2_HWTRIG
+	---help---
+		Trigger on the low-to-high transition of the selected source
+		rather than the high-to-low transition.
+
+config RM57_ADC1_G2_DMA
+	bool "ADC1 Group2 DMA result transfer"
+	default n
+	depends on RM57_DMA
+	select RM57_ADC_HAVE_DMA
+	---help---
+		Move conversion results out of the group's FIFO with the DMA
+		controller (request line DMA_REQ_MIBADC1_G2) instead of reading
+		them in the interrupt handler, and deliver them to the upper
+		half in batches.
+
+config RM57_ADC1_G2_DMA_NSAMPLES
+	int "ADC1 Group2 DMA samples per transfer"
+	default 16
+	range 1 256
+	depends on RM57_ADC1_G2_DMA
+	---help---
+		Results delivered per DMA callback.  The landing buffer holds
+		two of these so the ADC can fill one half while the other is
+		being handed to the upper half.  Two constraints are checked
+		at compile time: it must not exceed
+		RM57_ADC_DMA_MAXSAMPLES, which sizes the scratch arrays the
+		callback puts on the interrupt stack, and it must be a
+		multiple of eight so each half of the ring is a whole number
+		of D-cache lines.
+
+endif # RM57_ADC1_G2
+endif # RM57_ADC1
+
+menuconfig RM57_ADC2
+	bool "MibADC2 (25 channels)"
+	default n
+	select RM57_ADC
+	select ADC
+	select ANALOG
+	---help---
+		TI MibADC module 2, a 10/12-bit successive approximation
+		converter with 25 analog inputs and three independent
+		conversion groups.
+		ADC2 shares 16 of its inputs with ADC1; when both modules
+		convert a shared channel their sampling windows must either
+		match exactly or not overlap (TRM SPNU562A section 22.1).
+
+if RM57_ADC2
+
+choice
+	prompt "ADC2 resolution"
+	default RM57_ADC2_12BIT
+	---help---
+		Resolution of the converter core.  This is a module-wide
+		setting: all three conversion groups share it.
+
+config RM57_ADC2_12BIT
+	bool "12-bit"
+
+config RM57_ADC2_10BIT
+	bool "10-bit"
+
+endchoice # ADC2 resolution
+
+config RM57_ADC2_CLOCK
+	int "ADC2 conversion clock (Hz)"
+	default 9375000
+	range 2400000 30000000
+	---help---
+		Target ADCLK frequency.  The prescaler is computed from
+		BOARD_VCLK_FREQUENCY as ADCLK = VCLK / (PS + 1) and rounded so
+		the result never exceeds this value.  SPNS215 specifies
+		tc(ADCLK) >= 33ns, i.e. an ADCLK ceiling of 30MHz, which is
+		checked at compile time.
+
+menuconfig RM57_ADC2_EV
+	bool "ADC2 Event group"
+	default n
+	---help---
+		Expose the ADC2 Event group as its own /dev/adcN character device.
+		The group has an independent channel selection, trigger source,
+		sampling window, results FIFO and interrupt (VIM channel
+		RM57_REQ_ADC2GROUP0).
+
+if RM57_ADC2_EV
+
+config RM57_ADC2_EV_CHANMASK
+	hex "ADC2 Event group channel mask"
+	default 0x1
+	---help---
+		Bit mask of the analog inputs converted by this group; bit n
+		selects AD2IN[n].  In the default sequential mode the selected
+		channels are converted in ascending channel number.
+
+config RM57_ADC2_EV_BUFS
+	int "ADC2 Event group result buffers"
+	default 16
+	range 0 64
+	---help---
+		Words of the module's 64-word results RAM reserved for this
+		group.  The Event group and Group1 counts must be even because
+		ADBNDCR allocates the memory in pairs, and the three groups of
+		one module must not ask for more than 64 words in total.  Both
+		rules are checked at compile time.
+
+config RM57_ADC2_EV_THRESHOLD
+	int "ADC2 Event group interrupt threshold"
+	default 8
+	range 1 511
+	---help---
+		How many conversion results accumulate before the group raises
+		its threshold interrupt.  Larger values reduce the interrupt
+		rate but need a correspondingly larger result buffer count.
+
+config RM57_ADC2_EV_ACQ
+	int "ADC2 Event group acquisition time"
+	default 8
+	range 1 4095
+	---help---
+		Sampling window in ADCLK cycles minus two: SW = ACQ + 2, and the
+		hardware requires SW >= 3.  The input impedance sets the real
+		minimum - see the sample and hold timings in SPNS215.  When both
+		modules convert a shared channel their windows must either match
+		exactly or not overlap at all (TRM section 22.1).
+
+config RM57_ADC2_EV_CONTINUOUS
+	bool "ADC2 Event group continuous conversion"
+	default n
+	---help---
+		Convert the selected channels continuously instead of once per
+		trigger.  Continuous groups report results through the threshold
+		interrupt; single-shot groups use the conversion end interrupt.
+
+config RM57_ADC2_EV_FREEZE
+	bool "ADC2 Event group freeze enable"
+	default n
+	---help---
+		Allow this group's conversion sequence to be suspended while
+		another group of the same module is serviced, resuming from
+		where it stopped afterwards.
+
+config RM57_ADC2_EV_OVRWRITE
+	bool "ADC2 Event group overwrite on overrun"
+	default n
+	---help---
+		Let the ADC overwrite the oldest results when this group's
+		memory fills up.  Without it the group stalls until the
+		application has read the memory out.
+
+# The Event group has no hardware trigger enable bit - bit 3 of ADEVMODECR
+# is reserved, where Group1 and Group2 have HW_TRIG - because it is always
+# started by its trigger source.  Only the source and its edge are
+# selectable.
+
+config RM57_ADC2_EV_TRIGSRC
+	int "ADC2 Event group trigger source"
+	default 0
+	range 0 7
+	---help---
+		Hardware trigger source: 0 = AD2EVT pin, 1 = N2HET1[8],
+		2 = N2HET1[10], 3 = RTI compare 0, 4 = N2HET1[12],
+		5 = N2HET1[14], 6 = GIOB[0], 7 = GIOB[1].  A second set of
+		sources is reachable through the ALT_ADC_TRIGGER pin mux
+		control; see SPNS215.
+
+config RM57_ADC2_EV_RISING
+	bool "ADC2 Event group trigger on rising edge"
+	default y
+	---help---
+		Trigger on the low-to-high transition of the selected source
+		rather than the high-to-low transition.
+
+# ADC2's DMA request lines are alternate functions shared with MibSPI1 and
+# MibSPI3 (lines 14, 16 and 17), so selecting them needs the system module's
+# DMA request source mux to be reprogrammed.  That is not implemented, and
+# ADC2 therefore has no DMA option.
+
+endif # RM57_ADC2_EV
+
+menuconfig RM57_ADC2_G1
+	bool "ADC2 Group1"
+	default n
+	---help---
+		Expose the ADC2 Group1 as its own /dev/adcN character device.
+		The group has an independent channel selection, trigger source,
+		sampling window, results FIFO and interrupt (VIM channel
+		RM57_REQ_ADC2GROUP1).
+
+if RM57_ADC2_G1
+
+config RM57_ADC2_G1_CHANMASK
+	hex "ADC2 Group1 channel mask"
+	default 0x1
+	---help---
+		Bit mask of the analog inputs converted by this group; bit n
+		selects AD2IN[n].  In the default sequential mode the selected
+		channels are converted in ascending channel number.
+
+config RM57_ADC2_G1_BUFS
+	int "ADC2 Group1 result buffers"
+	default 16
+	range 0 64
+	---help---
+		Words of the module's 64-word results RAM reserved for this
+		group.  The Event group and Group1 counts must be even because
+		ADBNDCR allocates the memory in pairs, and the three groups of
+		one module must not ask for more than 64 words in total.  Both
+		rules are checked at compile time.
+
+config RM57_ADC2_G1_THRESHOLD
+	int "ADC2 Group1 interrupt threshold"
+	default 8
+	range 1 511
+	---help---
+		How many conversion results accumulate before the group raises
+		its threshold interrupt.  Larger values reduce the interrupt
+		rate but need a correspondingly larger result buffer count.
+
+config RM57_ADC2_G1_ACQ
+	int "ADC2 Group1 acquisition time"
+	default 8
+	range 1 4095
+	---help---
+		Sampling window in ADCLK cycles minus two: SW = ACQ + 2, and the
+		hardware requires SW >= 3.  The input impedance sets the real
+		minimum - see the sample and hold timings in SPNS215.  When both
+		modules convert a shared channel their windows must either match
+		exactly or not overlap at all (TRM section 22.1).
+
+config RM57_ADC2_G1_CONTINUOUS
+	bool "ADC2 Group1 continuous conversion"
+	default n
+	---help---
+		Convert the selected channels continuously instead of once per
+		trigger.  Continuous groups report results through the threshold
+		interrupt; single-shot groups use the conversion end interrupt.
+
+config RM57_ADC2_G1_FREEZE
+	bool "ADC2 Group1 freeze enable"
+	default n
+	---help---
+		Allow this group's conversion sequence to be suspended while
+		another group of the same module is serviced, resuming from
+		where it stopped afterwards.
+
+config RM57_ADC2_G1_OVRWRITE
+	bool "ADC2 Group1 overwrite on overrun"
+	default n
+	---help---
+		Let the ADC overwrite the oldest results when this group's
+		memory fills up.  Without it the group stalls until the
+		application has read the memory out.
+
+config RM57_ADC2_G1_HWTRIG
+	bool "ADC2 Group1 hardware triggered"
+	default n
+	---help---
+		Start conversions from a hardware event rather than from a write
+		to the channel select register.
+
+config RM57_ADC2_G1_TRIGSRC
+	int "ADC2 Group1 trigger source"
+	default 0
+	range 0 7
+	depends on RM57_ADC2_G1_HWTRIG
+	---help---
+		Hardware trigger source: 0 = AD2EVT pin, 1 = N2HET1[8],
+		2 = N2HET1[10], 3 = RTI compare 0, 4 = N2HET1[12],
+		5 = N2HET1[14], 6 = GIOB[0], 7 = GIOB[1].  A second set of
+		sources is reachable through the ALT_ADC_TRIGGER pin mux
+		control; see SPNS215.
+
+config RM57_ADC2_G1_RISING
+	bool "ADC2 Group1 trigger on rising edge"
+	default y
+	depends on RM57_ADC2_G1_HWTRIG
+	---help---
+		Trigger on the low-to-high transition of the selected source
+		rather than the high-to-low transition.
+
+# ADC2's DMA request lines are alternate functions shared with MibSPI1 and
+# MibSPI3 (lines 14, 16 and 17), so selecting them needs the system module's
+# DMA request source mux to be reprogrammed.  That is not implemented, and
+# ADC2 therefore has no DMA option.
+
+endif # RM57_ADC2_G1
+
+menuconfig RM57_ADC2_G2
+	bool "ADC2 Group2"
+	default n
+	---help---
+		Expose the ADC2 Group2 as its own /dev/adcN character device.
+		The group has an independent channel selection, trigger source,
+		sampling window, results FIFO and interrupt (VIM channel
+		RM57_REQ_ADC2GROUP2).
+
+if RM57_ADC2_G2
+
+config RM57_ADC2_G2_CHANMASK
+	hex "ADC2 Group2 channel mask"
+	default 0x1
+	---help---
+		Bit mask of the analog inputs converted by this group; bit n
+		selects AD2IN[n].  In the default sequential mode the selected
+		channels are converted in ascending channel number.
+
+config RM57_ADC2_G2_BUFS
+	int "ADC2 Group2 result buffers"
+	default 16
+	range 0 64
+	---help---
+		Words of the module's 64-word results RAM reserved for this
+		group.  The Event group and Group1 counts must be even because
+		ADBNDCR allocates the memory in pairs, and the three groups of
+		one module must not ask for more than 64 words in total.  Both
+		rules are checked at compile time.
+
+config RM57_ADC2_G2_THRESHOLD
+	int "ADC2 Group2 interrupt threshold"
+	default 8
+	range 1 511
+	---help---
+		How many conversion results accumulate before the group raises
+		its threshold interrupt.  Larger values reduce the interrupt
+		rate but need a correspondingly larger result buffer count.
+
+config RM57_ADC2_G2_ACQ
+	int "ADC2 Group2 acquisition time"
+	default 8
+	range 1 4095
+	---help---
+		Sampling window in ADCLK cycles minus two: SW = ACQ + 2, and the
+		hardware requires SW >= 3.  The input impedance sets the real
+		minimum - see the sample and hold timings in SPNS215.  When both
+		modules convert a shared channel their windows must either match
+		exactly or not overlap at all (TRM section 22.1).
+
+config RM57_ADC2_G2_CONTINUOUS
+	bool "ADC2 Group2 continuous conversion"
+	default n
+	---help---
+		Convert the selected channels continuously instead of once per
+		trigger.  Continuous groups report results through the threshold
+		interrupt; single-shot groups use the conversion end interrupt.
+
+config RM57_ADC2_G2_FREEZE
+	bool "ADC2 Group2 freeze enable"
+	default n
+	---help---
+		Allow this group's conversion sequence to be suspended while
+		another group of the same module is serviced, resuming from
+		where it stopped afterwards.
+
+config RM57_ADC2_G2_OVRWRITE
+	bool "ADC2 Group2 overwrite on overrun"
+	default n
+	---help---
+		Let the ADC overwrite the oldest results when this group's
+		memory fills up.  Without it the group stalls until the
+		application has read the memory out.
+
+config RM57_ADC2_G2_HWTRIG
+	bool "ADC2 Group2 hardware triggered"
+	default n
+	---help---
+		Start conversions from a hardware event rather than from a write
+		to the channel select register.
+
+config RM57_ADC2_G2_TRIGSRC
+	int "ADC2 Group2 trigger source"
+	default 0
+	range 0 7
+	depends on RM57_ADC2_G2_HWTRIG
+	---help---
+		Hardware trigger source: 0 = AD2EVT pin, 1 = N2HET1[8],
+		2 = N2HET1[10], 3 = RTI compare 0, 4 = N2HET1[12],
+		5 = N2HET1[14], 6 = GIOB[0], 7 = GIOB[1].  A second set of
+		sources is reachable through the ALT_ADC_TRIGGER pin mux
+		control; see SPNS215.
+
+config RM57_ADC2_G2_RISING
+	bool "ADC2 Group2 trigger on rising edge"
+	default y
+	depends on RM57_ADC2_G2_HWTRIG
+	---help---
+		Trigger on the low-to-high transition of the selected source
+		rather than the high-to-low transition.
+
+# ADC2's DMA request lines are alternate functions shared with MibSPI1 and
+# MibSPI3 (lines 14, 16 and 17), so selecting them needs the system module's
+# DMA request source mux to be reprogrammed.  That is not implemented, and
+# ADC2 therefore has no DMA option.
+
+endif # RM57_ADC2_G2
+endif # RM57_ADC2
+
+if RM57_ADC
+
+config RM57_ADC_CALIBRATE
+	bool "Calibrate the ADC at initialization"
+	default y
+	---help---
+		Run the offset error calibration sequence when the first group
+		of a module is registered.  Four internal reference voltages are
+		converted and the deviation of their average from mid scale is
+		loaded into ADCALR, which the hardware then adds to every
+		conversion result (TRM SPNU562A section 22.2.6.1).
+
+config RM57_ADC_MAGCOMP
+	bool "Magnitude compare interrupts"
+	default n
+	---help---
+		Build support for the three hardware magnitude comparators of
+		each module, which interrupt when a monitored channel's result
+		crosses a threshold.  This also backs the generic
+		ANIOC_WDOG_UPPER and ANIOC_WDOG_LOWER commands, which claim
+		comparators 0 and 1 of the owning module - so two groups of
+		one module cannot both use the generic watchdog without
+		overwriting each other.
+
+		The comparators have their own VIM channel, separate from the
+		conversion group interrupts, and the driver attaches a handler
+		to it.  There is no notification path for an analog watchdog
+		in the NuttX ADC upper half, though, so a crossing is
+		acknowledged and counted rather than reported to the
+		application.
+
+config RM57_ADC_ENHANCED_CHSEL
+	bool "Enhanced channel selection mode"
+	default n
+	depends on RM57_ADC1
+	---help---
+		Build support for the look-up table based conversion order,
+		which converts channels in an arbitrary user-defined sequence
+		rather than in ascending channel number.  Only ADC1 implements
+		this mode (TRM SPNU562A section 22.2.2.2).
+
+config RM57_ADC_PARITY
+	bool "Results RAM parity checking"
+	default y
+	---help---
+		Enable the parity check on the conversion results RAM.  A parity
+		error is reported to the Error Signalling Module and the failing
+		address is latched in ADPARADDR.  The RAM is auto-initialized
+		before the check is switched on so untouched buffers cannot
+		report spurious errors.
+
+config RM57_ADC_TEMPSENSOR
+	bool "On-chip temperature sensors"
+	default n
+	---help---
+		Three on-die temperature sensors, each multiplexed onto one ADC
+		channel: sensor 1 on ADC1 channel 31, sensors 2 and 3 on ADC2
+		channels 31 and 30 (TRM SPNU562A section 6.5.13).  The driver
+		releases them from power down, routes them onto their channels,
+		and applies the factory calibration recorded in TI OTP so
+		readings come out in real degrees Celsius.
+
+if RM57_ADC_TEMPSENSOR
+
+config RM57_ADC_TEMP1
+	bool "Temperature sensor 1 (ADC1 channel 31)"
+	default y
+	depends on RM57_ADC1
+	---help---
+		Sensor 1 shares its channel with the AD1IN[31] ball, so
+		enabling it makes that ball unavailable as an analog input.
+
+config RM57_ADC_TEMP2
+	bool "Temperature sensor 2 (ADC2 channel 31)"
+	default y
+	depends on RM57_ADC2
+
+config RM57_ADC_TEMP3
+	bool "Temperature sensor 3 (ADC2 channel 30)"
+	default y
+	depends on RM57_ADC2
+
+config RM57_ADC_TEMP_UORB
+	bool "Publish as UORB sensor nodes"
+	default n
+	select SENSORS
+	---help---
+		Register each enabled sensor with the UORB sensor framework as
+		/dev/uorb/sensor_tempN, readable with the sensortest
+		application.  This pulls in the whole sensor upper half, so it
+		is worth having only on a board that speaks UORB already.
+
+		Without it each sensor is a plain character device instead, and
+		one read() returns a whole struct rm57_adc_temp_s.  Either way
+		the sensors also stay reachable through the ANIOC_RM57_GET_TEMP
+		ioctl on any /dev/adcN.
+
+config RM57_ADC_TEMP_PATH
+	string "Temperature device path prefix"
+	default "/dev/temp"
+	depends on !RM57_ADC_TEMP_UORB
+	---help---
+		Prefix of the character device registered for each sensor; the
+		device number is appended, giving /dev/temp0 and upwards with
+		the default.
+
+config RM57_ADC_TEMP_DEVNO
+	int "First device number"
+	default 0
+	range 0 32
+	---help---
+		Device number given to the first enabled sensor; the others
+		follow in order.  Sensors of the same type must not share a
+		device number, so shift this if something else on the board
+		already registers a temperature sensor.
+
+endif # RM57_ADC_TEMPSENSOR
+
+config RM57_ADC_DMA_MAXSAMPLES
+	int "Maximum DMA samples per callback"
+	default 32
+	range 1 256
+	depends on RM57_ADC_HAVE_DMA
+	---help---
+		Upper bound on any group's DMA samples per transfer.  It sizes
+		the scratch arrays the DMA callback uses to hand a batch to the
+		upper half, so keep it as small as the configuration allows.
+
+endif # RM57_ADC
+
+menuconfig RM57_EMAC
+	bool "Ethernet MAC (EMAC/MDIO)"
+	default n
+	select NETDEVICES
+	select ARCH_HAVE_PHY
+	select ARCH_HAVE_NETDEV_STATISTICS
+	depends on ARCH_CHIP_RM57L843
+	---help---
+		TI CPSW-lite 10/100 Ethernet MAC, EMAC Control module and
+		MDIO module.  There is exactly one EMAC on this device.
+
+if RM57_EMAC
+
+choice
+	prompt "PHY interface mode"
+	default RM57_EMAC_MII
+	---help---
+		The LAUNCHXL2-RM57L carries a DP83630 PHY wired for MII; the
+		reset default IOMM selection is RMII, so MII must be
+		explicitly selected here to match that board.
+
+config RM57_EMAC_MII
+	bool "MII"
+
+config RM57_EMAC_RMII
+	bool "RMII"
+	---help---
+		See the BOARD_VCLKA4_* comment in the board's board.h: this
+		port does not independently verify the PLL2-derived 50MHz
+		clock RMII requires and it should be measured on real
+		hardware before relying on this mode.
+
+endchoice # PHY interface mode
+
+config RM57_EMAC_PHYADDR
+	int "PHY address"
+	default 1
+	range 0 31
+
+config RM57_EMAC_NTXDESC
+	int "Number of TX descriptors"
+	default 8
+	range 2 128
+
+config RM57_EMAC_NRXDESC
+	int "Number of RX descriptors"
+	default 16
+	range 2 128
+
+config RM57_EMAC_MDIO_FREQ
+	int "MDIO clock (Hz)"
+	default 1000000
+	range 100000 2500000
+	---help---
+		SPNU562A Section 31.2.1: typical operation is 1MHz; the MDIO
+		module is specified to run up to 2.5MHz.
+
+config RM57_EMAC_AUTONEG
+	bool "Autonegotiation"
+	default y
+
+config RM57_EMAC_ETHFD
+	bool "Full duplex"
+	default n
+	depends on !RM57_EMAC_AUTONEG
+
+config RM57_EMAC_ETH100MBPS
+	bool "100 Mbps"
+	default n
+	depends on !RM57_EMAC_AUTONEG
+
+config RM57_EMAC_PHY_INTERRUPT
+	bool "PHY link-change interrupt (MDIO LINKINT0)"
+	default y
+	select ARCH_PHY_INTERRUPT
+	---help---
+		Enables SIOCMIINOTIFY / phy_notify support.  This driver
+		always enables the underlying MDIO link-change interrupt for
+		its own netdev_carrier_on/off tracking regardless of this
+		setting; this option only gates whether a phy_notify
+		subscriber can also attach to link events.
+
+config RM57_EMAC_LOOPBACK
+	bool "MAC internal loopback at ifup (self-test)"
+	default n
+	---help---
+		Set MACCONTROL.LOOPBACK and skip the PHY link wait entirely,
+		so the descriptor ring and interrupt path can be exercised
+		standalone without a PHY or cable - the RM57_DCAN_LOOPBACK
+		equivalent for Ethernet.
+
+config RM57_EMAC_PROMISC
+	bool "Promiscuous mode (RXMBPENABLE.RXCAFEN)"
+	default n
+	---help---
+		Copy every frame the PHY delivers to RX channel 0, instead of
+		only those matching the MAC address filter plus broadcast.
+		Debug aid: if traffic is only received with this set, the
+		problem is in the address filter (MACINDEX/MACADDRHI/MACADDRLO
+		or RXUNICASTSET) rather than in the PHY, the descriptor ring or
+		the interrupt path.  Leave it off in production - it hands the
+		CPU every frame on the segment.
+
+config RM57_EMAC_REGDEBUG
+	bool "Register-level debug"
+	default n
+	depends on DEBUG_NET_INFO
+
+endif # RM57_EMAC
+
+endmenu # RM57 Peripheral Support
+
+endif # ARCH_CHIP_RM57
