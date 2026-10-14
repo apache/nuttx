@@ -287,12 +287,18 @@
 
 #define fdatasync(f)                     fsync(f)
 
-/* Accessor functions associated with getopt(). */
+/* Accessor functions associated with getopt().  getopt() keeps optarg,
+ * opterr, optind and optopt per task, so the names are macros.  A program
+ * that brings its own getopt() and its own variables of these names can
+ * define NUTTX_NO_GETOPT_MACROS to keep the names free.
+ */
 
-#define optarg                           (*(getoptargp()))
-#define opterr                           (*(getopterrp()))
-#define optind                           (*(getoptindp()))
-#define optopt                           (*(getoptoptp()))
+#ifndef NUTTX_NO_GETOPT_MACROS
+#  define optarg                         (*(getoptargp()))
+#  define opterr                         (*(getopterrp()))
+#  define optind                         (*(getoptindp()))
+#  define optopt                         (*(getoptoptp()))
+#endif
 
 #if defined(CONFIG_FS_LARGEFILE)
 #  define lseek64                        lseek
