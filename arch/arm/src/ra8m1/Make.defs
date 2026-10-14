@@ -44,3 +44,11 @@ endif
 ifeq ($(CONFIG_RA_DTC),y)
 CHIP_CSRCS += ra_dtc.c
 endif
+
+ifneq ($(filter y,$(CONFIG_RA_IIC0) $(CONFIG_RA_IIC1)),)
+CHIP_CSRCS += ra_iic_i2c.c
+endif
+
+ifneq ($(filter y,$(CONFIG_RA_SCI0_I2C) $(CONFIG_RA_SCI1_I2C) $(CONFIG_RA_SCI2_I2C) $(CONFIG_RA_SCI3_I2C) $(CONFIG_RA_SCI4_I2C) $(CONFIG_RA_SCI9_I2C)),)
+CHIP_CSRCS += ra_sci_i2c.c
+endif
