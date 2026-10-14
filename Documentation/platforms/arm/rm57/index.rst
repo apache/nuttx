@@ -11,14 +11,12 @@ NuttX currently supports the **RM57L843** part.
 
 .. warning::
 
-   Support for this chip family is new and experimental. Only the
-   SCI/LIN (serial), DMA, GIO (LED), DCAN, and EMAC/MDIO (Ethernet)
-   peripherals have been brought up so far; the PLL/clock configuration
-   values, JTAG IDCODE, LED polarity, and (for Ethernet) the exact PHY
-   pin assignments and RMII clock source have not all been independently
-   confirmed against hardware/schematics. See the
-   :doc:`board documentation <boards/rm57l843-launchxl2/index>` for
-   details.
+   Support for this chip family is new and has been tested on a single
+   LAUNCHXL2-RM57L (RM57L843 Rev B). The table below says how far each
+   peripheral was tested. Where it says *loopback only*, the
+   peripheral's internal loopback mode was used: the driver logic is
+   tested, but nothing at the pins (signal timing, a real device, a real
+   bus) has been checked.
 
 Peripheral Support
 ==================
@@ -28,11 +26,22 @@ The following list indicates RM57 peripherals currently supported in NuttX:
 ============== =====
 Peripheral     Notes
 ============== =====
+Core           Lockstep-safe start-up, PLL (300MHz GCLK, 150MHz HCLK,
+               75MHz VCLK), SRAM ECC, MPU, VIM interrupt controller and
+               RTI system tick. Tested on hardware with ``ostest``.
+ESM            Error Signalling Module. With
+               ``CONFIG_ARMV7R_DECODEFIQ`` a FIQ handler reports and
+               clears group 1/2 errors (``CONFIG_RM57_ESM_PANIC`` panics
+               instead). Tested on hardware. See `Safety diagnostics`_.
+Self test      Optional start-up diagnostics (``CONFIG_RM57_SELFTEST``):
+               PBIST, STC/LBIST, CCM-R5F, eFuse, L2RAMW. Tested on
+               hardware, including fault injection.
 SCI            SCI1-SCI4. SCI1/LIN1 and SCI2/LIN2 are dual-role SCI/LIN
                modules; the serial driver always runs them in SCI
                compatibility mode (GCR1 LIN_MODE=0). Interrupt-driven by
                default; optional RX/TX DMA (see `Serial DMA`_ below).
-               Used for the console.
+               Used for the console. Tested on hardware: console with and
+               without DMA, SCI3 in internal loopback with DMA.
 LIN            Configuration and polled-transfer scaffold only
                (``CONFIG_RM57_LIN``, requires ``CONFIG_EXPERIMENTAL``) -
                not a complete LIN protocol stack. See
@@ -45,8 +54,16 @@ DCAN           All four DCAN (Bosch D_CAN, CAN 2.0A/B) controllers
                (``CONFIG_RM57_DCANn``). Per instance either a character
                device (``/dev/can<n>``) or a SocketCAN network interface
                (``can<n>``); both frontends can coexist in one image on
-               different instances. See `DCAN`_ below.
-GIO            General purpose I/O, used for LEDs
+               different instances. See `DCAN`_ below. Loopback only (the
+               board has no CAN transceiver).
+GIO            General purpose I/O with pin interrupts
+               (``CONFIG_RM57_GIO_IRQ``). Used for the LEDs and buttons.
+               Tested on hardware.
+MibSPI         SPI master on all five MibSPI modules
+               (``CONFIG_RM57_MIBSPIn``). See `MibSPI`_ below. Loopback
+               only.
+I2C            I2C1 and I2C2 master (``CONFIG_RM57_I2Cn``). See `I2C`_
+               below. Loopback only.
 ADC            Both MibADC modules (``CONFIG_RM57_ADC1`` /
                ``CONFIG_RM57_ADC2``), 10- or 12-bit. Each of a module's
                three conversion groups is registered as its own
@@ -55,17 +72,81 @@ ADC            Both MibADC modules (``CONFIG_RM57_ADC1`` /
                enhanced channel selection mode are all supported, along with
                the three on-die temperature sensors
                (``CONFIG_RM57_ADC_TEMPSENSOR``). See `ADC (MibADC)`_ below.
+               Conversions and temperature sensors tested on hardware;
+               DMA, self test and magnitude compare are build-tested only.
 EMAC           10/100 Ethernet MAC + EMAC Control module + MDIO
                (``CONFIG_RM57_EMAC``). Single netdev interface (``eth0``),
                MII or RMII (``RM57_EMAC_MII`` / ``RM57_EMAC_RMII``). See
-               `EMAC/MDIO (Ethernet)`_ below.
+               `EMAC/MDIO (Ethernet)`_ below. MII tested on hardware.
 ============== =====
 
 .. todo::
 
-   Many peripherals available on the RM57L843 (N2HET, MibSPI, I2C,
-   the ESM diagnostic module, PBIST/STC self-test, etc.) are not yet
-   implemented. Contributions are welcome.
+   Not implemented yet: N2HET, ePWM, eCAP, eQEP, EMIF, the CRC module,
+   the RTI digital watchdog and flash programming. Contributions are
+   welcome.
+
+Safety diagnostics
+==================
+
+``CONFIG_RM57_SELFTEST`` runs the start-up diagnostics before the OS
+starts: an ESM group 3 check, the PBIST ROM tests (with the errata
+PBIST#4 workaround), the STC self-check and CPU logic BIST, the four
+CCM-R5F diagnostics in all three modes, the eFuse controller tests
+(power-on reset only), and the L2RAMW ECC and address decode tests. The
+result of each test is printed on the console. A failing test drives
+nERROR, and with ``CONFIG_RM57_SELFTEST_HALT_ON_FAIL`` stops the boot.
+
+The CCM-R5F is off while a debugger is attached, so the ROM tests, the
+STC and the CCM diagnostics report ``skipped`` in a debug session. The
+``CONFIG_RM57_SELFTEST_INJECT_*`` options inject one fault per build to
+check that the detection path works. All five injected faults were
+detected on the board. The ``selftest`` board configuration shows the
+console output.
+
+At run time, VIM channel 0 (the ESM high-level interrupt) is hard-wired
+to FIQ. With ``CONFIG_ARMV7R_DECODEFIQ`` the ESM handler decodes,
+reports and clears each pending channel. Without that option the FIQ
+vector does nothing, and a latched nonmaskable group 2 error is never
+acknowledged.
+
+MibSPI
+======
+
+All five MibSPI modules work as SPI masters through the standard
+``spi_dev_s`` interface. Each module can be set up in one of three ways:
+
+- compatibility mode with polled transfers (default);
+- compatibility mode with DMA (``CONFIG_RM57_MIBSPIn_DMA``);
+- multi-buffer mode using transfer group 0
+  (``CONFIG_RM57_MIBSPIn_MULTIBUF``).
+
+Chip selects are driven as GIO. On this board only MibSPI1 and MibSPI3
+are routed to headers, and they are registered as ``/dev/spi1`` and
+``/dev/spi3``.
+
+``CONFIG_RM57_MIBSPI_LOOPBACK`` adds a start-up test. It uses
+``SPIGCR1.LOOPBACK`` and sends patterns of 1 to 1000 words, 8 and 16 bits
+wide, at 1MHz and 37.5MHz, then reads them back. Every mode passes this
+test on both modules. Internal loopback cannot show the clock polarity
+and phase at the pins, so the CPOL/CPHA mapping and the real SPICLK rate
+are not measured yet.
+
+I2C
+===
+
+I2C1 and I2C2 work as interrupt-driven masters through ``i2c_master_s``
+(standard and fast mode, repeated START, ``I2C_M_NOSTART``,
+``CONFIG_I2C_RESET``). Slave mode and DMA are not supported. The
+LAUNCHXL2-RM57L has no I2C pull-up resistors, so a real bus needs
+external ones (2.2k to 4.7k).
+
+``CONFIG_RM57_I2C_LOOPBACK`` adds a start-up test that uses digital
+loopback (``MDR.DLB``) on each bus at 100kHz and 400kHz. On the board,
+all tests pass, and a timed 2048-byte write takes 101% of the nominal
+time. Digital loopback only works for master transmit, so master
+receive, real ACK/NACK handling and the SCL timing at the pin are not
+measured yet.
 
 DCAN
 ====
@@ -109,7 +190,10 @@ at CMOS levels, so a real bus needs an external transceiver, while the
 loopback test mode still drives the TX ball for logic-analyzer capture.
 The board configurations ``can`` (character driver,
 loopback self-test), ``cansock`` (SocketCAN with candump/cansend) and
-``candma`` (IF3 DMA receive path) are provided.
+``candma`` (IF3 DMA receive path) are provided. In loopback on the board,
+``can -n 8`` receives all 8 frames, and the bit timing the driver
+computes is the same as HALCoGen's. A real bus (ACK from another node,
+arbitration, bus-off recovery) has not been tested.
 
 Serial DMA
 ==========
@@ -214,8 +298,9 @@ or two GIOB pins. The Event group has no such choice: it is always started
 by its trigger source, so only the source and its edge are configurable.
 
 When the ADxEVT pin is not used as a trigger it can serve as a general
-purpose I/O through the ``ANIOC_RM57_EVTPIN`` ioctl. Note that AD1EVT shares
-ball N19 with the Ethernet MII_RX_ER signal, so it is unavailable when
+purpose I/O through the ``ANIOC_RM57_EVTPIN`` ioctl. AD1EVT is on ball N19,
+which can also carry MII_RX_ER. The LAUNCHXL2-RM57L takes MII_RX_ER from its
+dedicated ball U5 instead, so AD1EVT is still available when
 ``CONFIG_RM57_EMAC`` is enabled.
 
 Result transfer
@@ -369,14 +454,13 @@ channel that halted between the driver reading its tail and appending a
 new descriptor.
 
 ``CONFIG_RM57_EMAC_MII`` / ``CONFIG_RM57_EMAC_RMII`` select the PHY
-interface mode; the LAUNCHXL2-RM57L's DP83630 PHY is wired for MII, while
-the IOMM reset default is RMII, so MII must be explicitly selected to
-match that board. The EMAC's internal logic clock (``VCLKA4_DIVR_EMAC``)
+interface mode. The IOMM reset default is RMII, but the LAUNCHXL2-RM57L's
+DP83630 PHY is strapped for MII with no way to change it, so that board
+must select MII. The EMAC's internal logic clock (``VCLKA4_DIVR_EMAC``)
 must be exactly 25MHz for MII or 50MHz for RMII (SPNS215 Section 6.6.3);
-see the ``BOARD_VCLKA4_*`` comment in the board's ``board.h`` for how
-each mode's clock is derived and the caveat on the RMII (PLL2-sourced)
-path, which this port has not independently verified against real
-hardware.
+see the ``BOARD_VCLKA4_*`` comment in the board's ``board.h``. Only MII
+has been tested on hardware. The RMII path (clocked from PLL2) builds,
+but no board available to this port wires RMII.
 
 The MDIO module addresses up to 32 PHYs (``CONFIG_RM57_EMAC_PHYADDR``,
 default 1) over a single-transaction register interface
@@ -413,6 +497,14 @@ locally-administered MAC address from the device's unique die ID at
 board bring-up; without ``CONFIG_NETDEV_LATEINIT`` the interface
 self-registers via ``arm_netinitialize()`` with a fixed placeholder
 address (``02:00:00:00:00:01``) instead.
+
+Tested on the LAUNCHXL2-RM57L at 100Mbit/s full duplex: DHCP, ping (RTT
+2-7ms through a home router), DNS, NSH over telnet and HTTP all work.
+With ``iperf`` the best measured TCP throughput is 19.4Mbit/s for
+transmit (board as client) and 9.2Mbit/s for receive (board as server).
+After a 10MB transfer, every EMAC error counter reads zero. On some boots
+the DHCP server does not answer the first DISCOVERs, so the ``eth``
+configuration raises ``CONFIG_NETUTILS_DHCPC_RETRIES`` to 10.
 
 Supported Boards
 =================
