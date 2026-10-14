@@ -41,26 +41,13 @@
 
 #include <stm32_spi.h>
 
-#if defined(CONFIG_I2C)
-
-#include "stm32_i2c.h"
-struct i2c_master_s *i2c1_m;
-struct i2c_master_s *i2c2_m;
-#  ifdef CONFIG_RTC_DSXXXX
-#    include <nuttx/timers/rtc.h>
-#    include <nuttx/timers/ds3231.h>
-#  endif /* CONFIG_RTC_DSXXXX */
-
-#endif /* CONFIG_I2C */
+#ifdef CONFIG_RTC_DSXXXX
+#  include <nuttx/timers/rtc.h>
+#  include <nuttx/timers/ds3231.h>
+#  include "stm32_i2c.h"
+#endif
 
 #include "board_common.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-#define DEVNO_ZERO   0
-#define DEVNO_ONE    1
-#define DEVNO_TWO    2
 
 /****************************************************************************
  * Public Functions
@@ -90,6 +77,9 @@ int up_rtc_initialize(void)
 
 int stm32_bringup(void)
 {
+#ifdef CONFIG_RTC_DSXXXX
+  struct i2c_master_s *i2c;
+#endif
   int ret;
 
   /* Initialize the board features common to all STM32 boards */
@@ -101,57 +91,28 @@ int stm32_bringup(void)
              ret);
     }
 
-#if defined(CONFIG_I2C)
-  i2c1_m = stm32_i2cbus_initialize(1);
-  if (i2c1_m == NULL)
+#ifdef CONFIG_RTC_DSXXXX
+  i2c = stm32_i2cbus_initialize(1);
+  if (i2c == NULL)
     {
-      syslog(LOG_ERR, "ERROR: Failed to init i2c controller\n");
-      return(-1);
-    }
-
-  ret = i2c_register(i2c1_m, DEVNO_ONE);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
-            DEVNO_ONE, ret);
-      stm32_i2cbus_uninitialize(i2c1_m);
-      return -1;
-    }
-
-#if defined(STM32_I2C2)
-  i2c2_m = stm32_i2cbus_initialize(2);
-  if (i2c2_m == NULL)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to init i2c controller\n");
-      return(-1);
-    }
-
-  ret = i2c_register(i2c2_m, DEVNO_TWO);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
-            DEVNO_TWO, ret);
-      stm32_i2cbus_uninitialize(i2c1_m);
-      stm32_i2cbus_uninitialize(i2c2_m);
-      return -1;
-    }
-#endif /* STM32_I2C2 */
-#endif /* CONFIG_I2C */
-
-#if defined(CONFIG_RTC) && defined(CONFIG_RTC_EXTERNAL) && defined(CONFIG_RTC_DSXXXX)
-  ret = dsxxxx_rtc_initialize(i2c1_m);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: dsxxxx_rtc_initialize() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to get I2C1 interface\n");
     }
   else
     {
-      /* Synchronize the system time to the RTC time */
+      ret = dsxxxx_rtc_initialize(i2c);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: dsxxxx_rtc_initialize() failed: %d\n",
+                 ret);
+        }
+      else
+        {
+          /* Synchronize the system time to the RTC time */
 
-      syslog(LOG_INFO, "INFO: clock sync\n");
-      clock_synchronize(NULL);
+          clock_synchronize(NULL);
+        }
     }
-#endif /* CONFIG_RTC */
+#endif
 
   UNUSED(ret);
   return OK;

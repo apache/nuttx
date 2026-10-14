@@ -35,8 +35,6 @@
 #include <nuttx/leds/userled.h>
 #include <arch/board/board.h>
 
-#include "stm32_i2c.h"
-
 #include "nucleo-l152re.h"
 #include "board_common.h"
 
@@ -108,12 +106,6 @@ void stm32_boardinitialize(void)
 void board_late_initialize(void)
 {
   int ret;
-#ifdef CONFIG_STM32_I2C1
-  struct i2c_master_s *i2c1;
-#endif
-#ifdef CONFIG_STM32_I2C2
-  struct i2c_master_s *i2c2;
-#endif
 
   /* Initialize the board features common to all STM32 boards */
 
@@ -123,46 +115,6 @@ void board_late_initialize(void)
       syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
              ret);
     }
-
-#ifdef CONFIG_STM32_I2C1
-  /* Get the I2C lower half instance */
-
-  i2c1 = stm32_i2cbus_initialize(1);
-  if (i2c1 == NULL)
-    {
-      i2cerr("ERROR: Initialize I2C1: %d\n", ret);
-    }
-  else
-    {
-      /* Register the I2C character driver */
-
-      ret = i2c_register(i2c1, 1);
-      if (ret < 0)
-        {
-          i2cerr("ERROR: Failed to register I2C1 device: %d\n", ret);
-        }
-    }
-#endif
-
-#ifdef CONFIG_STM32_I2C2
-  /* Get the I2C lower half instance */
-
-  i2c2 = stm32_i2cbus_initialize(2);
-  if (i2c2 == NULL)
-    {
-      i2cerr("ERROR: Initialize I2C2: %d\n", ret);
-    }
-  else
-    {
-      /* Register the I2C character driver */
-
-      ret = i2c_register(i2c2, 2);
-      if (ret < 0)
-        {
-          i2cerr("ERROR: Failed to register I2C2 device: %d\n", ret);
-        }
-    }
-#endif
 
 #ifdef CONFIG_STM32_SPI
   stm32_spiinitialize();

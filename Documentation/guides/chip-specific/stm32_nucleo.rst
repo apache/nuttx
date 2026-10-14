@@ -43,6 +43,8 @@ CAN        ``CONFIG_STM32_CAN_CHARDRIVER``     ``/dev/can0``, ``/dev/can1``,
            ``CONFIG_STM32_FDCAN_CHARDRIVER``   ... in instance order
 SocketCAN  ``CONFIG_STM32_CAN_SOCKET``         interfaces for all enabled
            ``CONFIG_STM32_FDCAN_SOCKET``       instances
+I2C        ``CONFIG_I2C_DRIVER``               ``/dev/i2cN`` for every enabled
+                                               ``CONFIG_STM32_I2CN``
 =========  ==================================  ================================
 
 The file systems are not mounted when ``CONFIG_DISABLE_MOUNTPOINT`` is

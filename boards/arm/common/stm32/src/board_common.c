@@ -46,8 +46,28 @@
 #  define HAVE_CANSOCK_SETUP
 #endif
 
+#if defined(CONFIG_I2C_DRIVER) && \
+    (defined(CONFIG_STM32_I2C1) || defined(CONFIG_STM32_I2C2) || \
+     defined(CONFIG_STM32_I2C3) || defined(CONFIG_STM32_I2C4) || \
+     defined(CONFIG_STM32_I2C5) || defined(CONFIG_STM32_I2C6))
+#  define HAVE_I2C_DRIVER
+#endif
+
 #if defined(CONFIG_STM32_IWDG) || defined(CONFIG_STM32_WWDG)
 #  include "stm32_wdg.h"
+#endif
+
+/* Per-family I2C headers until all STM32 I2C drivers are unified */
+
+#ifdef HAVE_I2C_DRIVER
+#  include <nuttx/i2c/i2c_master.h>
+#  if defined(CONFIG_ARCH_CHIP_STM32L4)
+#    include "stm32l4_i2c.h"
+#  elif defined(CONFIG_ARCH_CHIP_STM32WB)
+#    include "stm32wb_i2c.h"
+#  else
+#    include "stm32_i2c.h"
+#  endif
 #endif
 
 #ifdef HAVE_CAN_SETUP
@@ -76,6 +96,41 @@
 #  define PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
 #else
 #  define PROCFS_MOUNTPOINT "/proc"
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_i2c_register
+ *
+ * Description:
+ *   Register the I2C character driver /dev/i2c[bus] for one I2C bus.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_I2C_DRIVER
+static void stm32_i2c_register(int bus)
+{
+  struct i2c_master_s *i2c;
+  int ret;
+
+  i2c = stm32_i2cbus_initialize(bus);
+  if (i2c == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to get I2C%d interface\n", bus);
+      return;
+    }
+
+  ret = i2c_register(i2c, bus);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
+             bus, ret);
+      stm32_i2cbus_uninitialize(i2c);
+    }
+}
 #endif
 
 /****************************************************************************
@@ -126,6 +181,29 @@ int stm32_common_initialize(void)
   /* Initialize the window watchdog */
 
   stm32_wwdginitialize("/dev/watchdog1");
+#endif
+
+#ifdef HAVE_I2C_DRIVER
+  /* Register the I2C character drivers */
+
+#  ifdef CONFIG_STM32_I2C1
+  stm32_i2c_register(1);
+#  endif
+#  ifdef CONFIG_STM32_I2C2
+  stm32_i2c_register(2);
+#  endif
+#  ifdef CONFIG_STM32_I2C3
+  stm32_i2c_register(3);
+#  endif
+#  ifdef CONFIG_STM32_I2C4
+  stm32_i2c_register(4);
+#  endif
+#  ifdef CONFIG_STM32_I2C5
+  stm32_i2c_register(5);
+#  endif
+#  ifdef CONFIG_STM32_I2C6
+  stm32_i2c_register(6);
+#  endif
 #endif
 
 #ifdef HAVE_CAN_SETUP
