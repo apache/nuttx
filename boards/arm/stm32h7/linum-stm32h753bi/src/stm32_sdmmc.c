@@ -28,6 +28,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <nuttx/debug.h>
 #include <errno.h>
 
