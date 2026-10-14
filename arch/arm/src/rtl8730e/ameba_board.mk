@@ -90,9 +90,10 @@ endif
 
 # The AP ROM carries only part of the RTIM API (Cmd/TimeBaseInit/INT*);
 # RTIM_PrescalerConfig/ChangePeriod/CCStructInit/CCxInit/CCRxSet/CCxCmd,
-# which the PWM driver needs, live in ram_common/ameba_tim.c, so that file
-# must be compiled into libameba_fwlib.a whenever PWM is enabled.
-ifeq ($(CONFIG_AMEBA_PWM),y)
+# which the PWM driver needs, plus the TIMx_irq/APBPeriph_TIMx tables, live
+# in ram_common/ameba_tim.c, so that file must be compiled into
+# libameba_fwlib.a whenever PWM or the general-purpose timers are enabled.
+ifneq ($(filter y,$(CONFIG_AMEBA_PWM) $(CONFIG_AMEBA_TIMER)),)
 AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_tim.c
 endif
 

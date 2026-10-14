@@ -41,6 +41,8 @@
  * Numbers taken from SDK ameba_vector_table.h (CA32 section).
  */
 
+#define RTL8730E_IRQ_TIMER2     34   /* GIC SPI 2:  TIM2 (LP basic timer) */
+#define RTL8730E_IRQ_TIMER3     35   /* GIC SPI 3:  TIM3 (LP basic timer) */
 #define RTL8730E_IRQ_IPC_AP     56   /* GIC SPI 24: CA32 AP-IPC (WHC WiFi) */
 #define RTL8730E_IRQ_UART0      82   /* GIC SPI 50: UART0 */
 #define RTL8730E_IRQ_UART1      83   /* GIC SPI 51: UART1 */

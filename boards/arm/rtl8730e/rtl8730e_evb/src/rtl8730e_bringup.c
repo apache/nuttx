@@ -293,6 +293,17 @@ int rtl8730e_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_AMEBA_TIMER
+  /* Register the board's general-purpose timers at /dev/timerN. */
+
+  ret = rtl8730e_timer_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize timers: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

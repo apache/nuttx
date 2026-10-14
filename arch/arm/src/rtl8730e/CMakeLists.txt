@@ -105,6 +105,18 @@ if(CONFIG_AMEBA_PWM)
   endif()
 endif()
 
+if(CONFIG_AMEBA_TIMER)
+  list(APPEND SRCS ${AMEBA_COMMON}/ameba_timer.c)
+  if(NOT CONFIG_RTL8730E_FLASH_FS
+     AND NOT CONFIG_AMEBA_GPIO
+     AND NOT CONFIG_AMEBA_UART
+     AND NOT CONFIG_AMEBA_I2C
+     AND NOT CONFIG_AMEBA_SPI
+     AND NOT CONFIG_AMEBA_PWM)
+    list(APPEND SRCS rtl8730e_flash_stubs.c)
+  endif()
+endif()
+
 target_include_directories(arch PRIVATE ${AMEBA_COMMON})
 target_sources(arch PRIVATE ${SRCS})
 
@@ -155,8 +167,13 @@ function(ameba_build_lib lib obj_subdir srcs_var inc_var out_target)
       COMMENT "CC (ameba ${obj_subdir}) ${_base}.o")
     list(APPEND _objs ${_obj})
   endforeach()
+  # Remove the archive before repacking it: it lives in the board source tree
+  # and is shared by every build directory, so "ar crs" alone would leave
+  # members from a previously built config behind (the make PREBUILD does the
+  # same "rm -f" for this reason).
   add_custom_command(
     OUTPUT ${lib}
+    COMMAND ${CMAKE_COMMAND} -E rm -f ${lib}
     COMMAND ${CMAKE_AR} crs ${lib} ${_objs}
     DEPENDS ${_objs}
     COMMENT "AR ${lib}")
@@ -168,20 +185,34 @@ function(ameba_build_lib lib obj_subdir srcs_var inc_var out_target)
 endfunction()
 
 # ----------------------------------------------------------------------------
-# libameba_fwlib.a -- minimal fwlib subset needed by flash MTD + IPC (and the
-# WiFi IPC path).  Built from SDK source with the amebasmart CA32 include set.
-# Linked only when FLASH_FS is enabled (mirrors ameba_board.mk).
+# libameba_fwlib.a -- minimal fwlib subset needed by the drivers whose SDK
+# support code is not in lib_rom.a.  Built from SDK source with the amebasmart
+# CA32 include set.  The set of sources and the conditions selecting them mirror
+# AMEBA_FWLIB_SRCS in ameba_board.mk one for one, and so must the conditions
+# below: a config that links the archive (see AMEBA_EXTRA_LIBS) but does not
+# build it here links a stale archive left in the board tree by a previous
+# config, and fails on undefined fwlib symbols.
 # ----------------------------------------------------------------------------
 
 set(AMEBA_FWLIB_A ${AMEBA_PREBUILT_LIBS}/libameba_fwlib.a)
 
-if(CONFIG_RTL8730E_FLASH_FS OR CONFIG_RTL8730E_WIFI)
+if(CONFIG_RTL8730E_FLASH_FS
+   OR CONFIG_RTL8730E_WIFI
+   OR CONFIG_AMEBA_UART
+   OR CONFIG_AMEBA_I2C
+   OR CONFIG_AMEBA_SPI
+   OR CONFIG_AMEBA_PWM
+   OR CONFIG_AMEBA_TIMER)
   set(AMEBA_FWLIB_SRCS
-      ${AMEBA_SOC}/fwlib/ram_common/ameba_arch.c
-      ${AMEBA_SOC}/swlib/log.c
-      ${AMEBA_SOC}/swlib/sscanf_minimal.c
-      ${AMEBA_SOC}/fwlib/ram_common/ameba_ipc_api.c
-      ${AMEBA_SOC}/fwlib/ram_common/ameba_ipc_ram.c)
+      ${AMEBA_SOC}/fwlib/ram_common/ameba_arch.c ${AMEBA_SOC}/swlib/log.c
+      ${AMEBA_SOC}/swlib/sscanf_minimal.c)
+
+  # IPC layer is needed by both WiFi (WHC) and Flash FS (write-lock protocol).
+  # Include it once regardless of which feature(s) are enabled.
+  if(CONFIG_RTL8730E_FLASH_FS OR CONFIG_RTL8730E_WIFI)
+    list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_ipc_api.c
+         ${AMEBA_SOC}/fwlib/ram_common/ameba_ipc_ram.c)
+  endif()
 
   if(CONFIG_RTL8730E_FLASH_FS)
     list(APPEND AMEBA_FWLIB_SRCS
@@ -203,7 +234,7 @@ if(CONFIG_RTL8730E_FLASH_FS OR CONFIG_RTL8730E_WIFI)
   endif()
 
   # The AP ROM carries only part of the RTIM API; the rest lives here.
-  if(CONFIG_AMEBA_PWM)
+  if(CONFIG_AMEBA_PWM OR CONFIG_AMEBA_TIMER)
     list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_tim.c)
   endif()
 
@@ -247,6 +278,7 @@ if(CONFIG_AMEBA_GPIO
    OR CONFIG_AMEBA_I2C
    OR CONFIG_AMEBA_SPI
    OR CONFIG_AMEBA_PWM
+   OR CONFIG_AMEBA_TIMER
    OR CONFIG_RTL8730E_FLASH_FS)
   list(APPEND AMEBA_EXTRA_LIBS
        ${AMEBA_SOC}/project/${AMEBA_KM_PROJ}/lib/soc/lib_rom.a)
@@ -257,7 +289,8 @@ if(CONFIG_RTL8730E_FLASH_FS
    OR CONFIG_AMEBA_UART
    OR CONFIG_AMEBA_I2C
    OR CONFIG_AMEBA_SPI
-   OR CONFIG_AMEBA_PWM)
+   OR CONFIG_AMEBA_PWM
+   OR CONFIG_AMEBA_TIMER)
   list(APPEND AMEBA_EXTRA_LIBS ${AMEBA_FWLIB_A})
 endif()
 

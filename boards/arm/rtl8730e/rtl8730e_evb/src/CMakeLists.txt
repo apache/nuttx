@@ -51,6 +51,12 @@ if(CONFIG_AMEBA_PWM)
                              PRIVATE ${NUTTX_DIR}/arch/arm/src/common/ameba)
 endif()
 
+if(CONFIG_AMEBA_TIMER)
+  list(APPEND SRCS rtl8730e_timer.c)
+  target_include_directories(board
+                             PRIVATE ${NUTTX_DIR}/arch/arm/src/common/ameba)
+endif()
+
 if(CONFIG_LIBC_FDT)
   target_include_directories(board
                              PRIVATE ${NUTTX_DIR}/libs/libc/fdt/dtc/libfdt)
