@@ -44,6 +44,8 @@ Supported in this NuttX port:
   polling mode through the SDK fwlib register layer
 * PWM output exposed as a ``/dev/pwm0`` character device, driven directly on
   the SDK fwlib timer layer
+* General-purpose timers exposed as ``/dev/timerN`` character devices, with
+  microsecond timeouts and a periodic expiration callback
 * littlefs persistent storage mounted at ``/data`` (a dedicated SPI NOR flash
   partition), backing the Wi-Fi key-value store
 * Wi-Fi station and SoftAP through the ``wapi`` tool
@@ -157,6 +159,21 @@ the debug port unless the board calls ``Pinmux_Swdoff()``. Set
 example::
 
     nsh> pwm -d 25 -f 1000     # 1 kHz, 25% duty on /dev/pwm0
+
+timer
+-----
+
+Minimal NSH with the timer driver and the ``timer`` example
+(``examples/timer``) enabled (no Wi-Fi). The board registers two timers (see
+``boards/arm/rtl8730e/rtl8730e_evb/src/rtl8730e_timer.c``): ``/dev/timer0``
+is TIM2 and ``/dev/timer1`` is TIM3, both 32-bit LP basic timers clocked at
+32.768 kHz, so a tick is ~30.5 us and a single timeout reaches ~36 hours.
+Neither has any board wiring. TIM0 and TIM1 are not exposed: the ROM claims
+TIM0 as the system timer behind ``DelayUs()``/``SYSTIMER_*``, and the vendor
+HAL claims TIM1 as its application and UART-timeout timer. Exercise a timer
+with the example::
+
+    nsh> timer                 # 20 samples 0.1 s apart, 1 s timeout, on /dev/timer0
 
 Wi-Fi
 =====
