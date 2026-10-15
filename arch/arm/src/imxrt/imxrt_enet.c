@@ -2031,7 +2031,8 @@ static int imxrt_phyintenable(struct imxrt_driver_s *priv)
 {
 #if defined(CONFIG_ETH0_PHY_KSZ8051) || defined(CONFIG_ETH0_PHY_KSZ8061) || \
     defined(CONFIG_ETH0_PHY_KSZ8081) || defined(CONFIG_ETH0_PHY_DP83825I) || \
-    defined(CONFIG_ETH0_YT8512)      || defined(CONFIG_ETH0_PHY_MULTI)
+    defined(CONFIG_ETH0_YT8512)      || defined(CONFIG_ETH0_PHY_LAN8720) || \
+    defined(CONFIG_ETH0_PHY_LAN8742A) || defined(CONFIG_ETH0_PHY_MULTI)
 
   uint16_t phyval;
   int ret;
@@ -2049,13 +2050,27 @@ static int imxrt_phyintenable(struct imxrt_driver_s *priv)
   wreg  = MII_YT8512_IMR;
 #  endif
 
-  /* Run time YT8512 defaults */
+  /* Compile time LAN8720/LAN8742A defaults */
+#  if defined(CONFIG_ETH0_PHY_LAN8720) || defined(CONFIG_ETH0_PHY_LAN8742A)
+  mask = MII_LAN8720_INT_LINKDOWN | MII_LAN8720_INT_ANCOMPLETE;
+  rreg = MII_LAN8720_ISR;
+  wreg = MII_LAN8720_IMR;
+#  endif
+
+  /* Run time YT8512 and LAN8720/LAN8742A defaults */
 #  if defined(CONFIG_ETH0_PHY_MULTI)
   if (imxrt_phy_is(priv, MII_YT8512_NAME))
     {
       mask = MII_YT8512_IMR_LD_EN | MII_YT8512_IMR_LU_EN;
       rreg  = MII_YT8512_ISR;
       wreg  = MII_YT8512_IMR;
+    }
+  else if (imxrt_phy_is(priv, MII_LAN8720_NAME) ||
+           imxrt_phy_is(priv, MII_LAN8742A_NAME))
+    {
+      mask = MII_LAN8720_INT_LINKDOWN | MII_LAN8720_INT_ANCOMPLETE;
+      rreg = MII_LAN8720_ISR;
+      wreg = MII_LAN8720_IMR;
     }
   else if (!(imxrt_phy_is(priv, MII_KSZ8051_NAME) ||
              imxrt_phy_is(priv, MII_KSZ8061_NAME) ||
@@ -2777,7 +2792,7 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv, bool renogphy)
 
 #if defined(CONFIG_ETH0_PHY_YT8512) || defined(CONFIG_ETH0_PHY_MULTI)
 #  if defined(CONFIG_ETH0_PHY_MULTI)
-      if (!imxrt_phy_is(priv, MII_YT8512_NAME))
+      if (imxrt_phy_is(priv, MII_YT8512_NAME))
         {
 #  endif
           /* Reset PHY */
