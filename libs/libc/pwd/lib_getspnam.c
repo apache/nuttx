@@ -46,6 +46,7 @@ FAR struct spwd *getspnam(FAR const char *name)
     {
       size_t nsize = sizeof(ROOT_NAME);
       size_t psize = sizeof(ROOT_PWDP);
+
       result = &g_spwd;
 
       result->sp_namp = g_passwd_buffer;

@@ -44,5 +44,6 @@
 FAR char **getoptargp(void)
 {
   FAR struct getopt_s *go = getoptvars();
+
   return &go->go_optarg;
 }

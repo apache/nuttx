@@ -40,6 +40,7 @@ no_builtin("strncmp")
 int strncmp(FAR const char *cs, FAR const char *ct, size_t nb)
 {
   register int result = 0;
+
   for (; nb > 0; nb--)
     {
       if ((result = (unsigned char)*cs - (unsigned char)*ct++) != 0 ||

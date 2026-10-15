@@ -68,6 +68,7 @@ static ssize_t fileinstream_gets(FAR struct lib_instream_s *self,
 static int fileinstream_getc(FAR struct lib_instream_s *self)
 {
   unsigned char ch;
+
   return fileinstream_gets(self, &ch, 1) == 1 ? ch : EOF;
 }
 

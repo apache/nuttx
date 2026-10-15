@@ -184,6 +184,7 @@ int libelf_findsection(FAR struct mod_loadinfo_s *loadinfo,
       /* Get the name of this section */
 
       int ret = libelf_sectname(loadinfo, shdr);
+
       if (ret < 0)
         {
           berr("ERROR: libelf_sectname failed: %d\n", ret);

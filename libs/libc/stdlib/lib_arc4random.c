@@ -46,6 +46,7 @@ static int getrandom_all(FAR void *buf, size_t size, int flags)
   while (size > 0)
     {
       ssize_t ret = getrandom(tmp, size, flags);
+
       if (ret < 0)
         {
           if (get_errno() == EINTR)

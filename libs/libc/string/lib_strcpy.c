@@ -52,6 +52,7 @@ no_builtin("strcpy")
 FAR char *strcpy(FAR char *dest, FAR const char *src)
 {
   FAR char *tmp = dest;
+
   while ((*dest++ = *src++) != '\0');
   return tmp;
 }

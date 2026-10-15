@@ -129,6 +129,7 @@ void dns_save_answer(FAR const char *hostname,
   if (next == g_dns_tail)
     {
       int tmp = g_dns_tail + 1;
+
       if (tmp >= CONFIG_NETDB_DNSCLIENT_ENTRIES)
         {
           tmp = 0;

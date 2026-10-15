@@ -68,5 +68,6 @@
 in_addr_t inet_network(FAR const char *cp)
 {
   in_addr_t t = inet_addr(cp);
+
   return NTOHL(t);
 }

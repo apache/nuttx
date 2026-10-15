@@ -40,6 +40,7 @@ no_builtin("strlen")
 size_t strlen(FAR const char *s)
 {
   FAR const char *sc;
+
   for (sc = s; *sc != '\0'; ++sc);
   return sc - s;
 }

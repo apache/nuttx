@@ -151,6 +151,7 @@ int up_relocate(const Elf_Rel *rel, const Elf_Sym *sym, uintptr_t addr,
         {
           Elf_Addr a = *p & 0x03ffffff;
           Elf_Addr val = ((a << 2) | ((Elf_Addr)p & 0xf0000000)) + s;
+
           val = (val >> 2) & 0x03ffffff;
           *p &= 0xfc000000;
           *p |= val;
@@ -177,6 +178,7 @@ int up_relocate(const Elf_Rel *rel, const Elf_Sym *sym, uintptr_t addr,
           int16_t a = *p;
           Elf_Addr ahl = (data->ahi << 16) + a;
           Elf32_Addr iword = *p & 0xffff0000;
+
           iword |= (uint16_t)(ahl + s);
           *p = iword;
 

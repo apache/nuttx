@@ -104,6 +104,7 @@ int daemon(int nochdir, int noclose)
   if (nochdir == 0)
     {
       int ret = chdir("/");
+
       if (ret < 0)
         {
           return -1;  /* chdir() will set the errno variable */
@@ -114,6 +115,7 @@ int daemon(int nochdir, int noclose)
   if (noclose == 0)
     {
       int fd = open("/dev/null", O_RDWR);
+
       if (fd < 0)
         {
           return -1;

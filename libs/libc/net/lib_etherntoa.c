@@ -67,5 +67,6 @@ FAR char *ether_ntoa_r(FAR const struct ether_addr *addr, FAR char *buf)
 FAR char *ether_ntoa(FAR const struct ether_addr *addr)
 {
   static char buffer[20];
+
   return ether_ntoa_r(addr, buffer);
 }

@@ -71,9 +71,9 @@ size_t confstr(int name, FAR char *buf, size_t len)
           break;
         }
 
-     /* Programming environment is not supported on NuttX, so all
-      * _CS_POSIX_V6 configuration variables are empty.
-      */
+      /* Programming environment is not supported on NuttX, so all
+       * _CS_POSIX_V6 configuration variables are empty.
+       */
 
       case _CS_POSIX_V6_ILP32_OFF32_CFLAGS:
       case _CS_POSIX_V6_ILP32_OFF32_LDFLAGS:

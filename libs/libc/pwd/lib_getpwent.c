@@ -99,6 +99,7 @@ void endpwent(void)
 FAR struct passwd *getpwent(void)
 {
   FAR struct passwd *pwd;
+
   getpwent_r(&g_passwd, g_passwd_buffer,
              CONFIG_LIBC_PASSWD_LINESIZE, &pwd);
   return pwd;

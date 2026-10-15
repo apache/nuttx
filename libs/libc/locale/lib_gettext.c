@@ -672,6 +672,7 @@ FAR char *dcngettext(FAR const char *domainname,
   if (msgid2 && mofile->nplurals)
     {
       unsigned long plural = eval(mofile->plural_rule, n);
+
       if (plural >= mofile->nplurals)
         {
           return notrans;

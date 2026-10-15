@@ -129,6 +129,7 @@ void dns_notify_nameserver(FAR const struct sockaddr *addr,
   for (entry = dq_peek(&g_dns_notify); entry; entry = dq_next(entry))
     {
       FAR struct dns_notify_s *notify = (FAR struct dns_notify_s *)entry;
+
       notify->callback(notify->arg, (FAR struct sockaddr *)addr, addrlen);
     }
 

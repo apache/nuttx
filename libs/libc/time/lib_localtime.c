@@ -756,12 +756,14 @@ static int tzload(FAR const char *name,
           for (i = 0; i < sp->timecnt; ++i)
             {
               int_fast64_t at = stored == 4 ? detzcode(p) : detzcode64(p);
+
               sp->types[i] = at <= TIME_T_MAX;
               if (sp->types[i])
                 {
                   time_t attime = ((TYPE_SIGNED(time_t) ?
                                   at < TIME_T_MIN : at < 0) ?
                                   TIME_T_MIN : at);
+
                   if (timecnt && attime <= sp->ats[timecnt - 1])
                     {
                       if (attime < sp->ats[timecnt - 1])
@@ -783,6 +785,7 @@ static int tzload(FAR const char *name,
           for (i = 0; i < sp->timecnt; ++i)
             {
               unsigned char typ = *p++;
+
               if (sp->typecnt <= typ)
                 {
                   goto oops;
@@ -838,6 +841,7 @@ static int tzload(FAR const char *name,
             {
               int_fast64_t tr = stored == 4 ? detzcode(p) : detzcode64(p);
               int_fast32_t corr = detzcode(p + stored);
+
               p += stored + 4;
 
               /* Leap seconds cannot occur before the Epoch,
@@ -949,6 +953,7 @@ static int tzload(FAR const char *name,
 
           int gotabbr = 0;
           int charcnt = sp->charcnt;
+
           for (i = 0; i < ts->typecnt; i++)
             {
               FAR char *tsabbr = ts->chars + ts->ttis[i].tt_desigidx;
@@ -996,6 +1001,7 @@ static int tzload(FAR const char *name,
               for (i = 0; i < ts->timecnt && sp->timecnt < TZ_MAX_TIMES; i++)
                 {
                   time_t t = ts->ats[i];
+
                   if (increment_overflow_time(&t, leapcorr(sp, t))
                       || (0 < sp->timecnt && t <= sp->ats[sp->timecnt - 1]))
                     {
@@ -1027,6 +1033,7 @@ static int tzload(FAR const char *name,
         {
           time_t repeatat = sp->ats[0] + SECSPERREPEAT;
           int repeattype = sp->types[0];
+
           for (i = 1; i < sp->timecnt; ++i)
             {
               if (sp->ats[i] == repeatat &&
@@ -1043,6 +1050,7 @@ static int tzload(FAR const char *name,
         {
           time_t repeatat = sp->ats[sp->timecnt - 1] - SECSPERREPEAT;
           int repeattype = sp->types[sp->timecnt - 1];
+
           for (i = sp->timecnt - 2; i >= 0; --i)
             {
               if (sp->ats[i] == repeatat &&
@@ -1403,80 +1411,82 @@ static int_fast32_t transtime(int year,
   leap_year = isleap(year);
   switch (rulep->r_type)
     {
-    case JULIAN_DAY:
+      case JULIAN_DAY:
 
-      /* Jn - Julian day, 1 == January 1, 60 == March 1 even in leap
-       * years.
-       * In non-leap years, or if the day number is 59 or less, just
-       * add SECSPERDAY times the day number-1 to the time of
-       * January 1, midnight, to get the day.
-       */
+        /* Jn - Julian day, 1 == January 1, 60 == March 1 even in leap
+         * years.
+         * In non-leap years, or if the day number is 59 or less, just
+         * add SECSPERDAY times the day number-1 to the time of
+         * January 1, midnight, to get the day.
+         */
 
-      value = (rulep->r_day - 1) * SECSPERDAY;
-      if (leap_year && rulep->r_day >= 60)
-        {
-          value += SECSPERDAY;
-        }
+        value = (rulep->r_day - 1) * SECSPERDAY;
+        if (leap_year && rulep->r_day >= 60)
+          {
+            value += SECSPERDAY;
+          }
 
-      break;
+        break;
 
-    case DAY_OF_YEAR:
+      case DAY_OF_YEAR:
 
-      /* n - day of year.
-       * Just add SECSPERDAY times the day number to the time of
-       * January 1, midnight, to get the day.
-       */
+        /* n - day of year.
+         * Just add SECSPERDAY times the day number to the time of
+         * January 1, midnight, to get the day.
+         */
 
-      value = rulep->r_day * SECSPERDAY;
-      break;
+        value = rulep->r_day * SECSPERDAY;
+        break;
 
-    case MONTH_NTH_DAY_OF_WEEK:
+      case MONTH_NTH_DAY_OF_WEEK:
 
-      /* Mm.n.d - nth "dth day" of month m */
+        /* Mm.n.d - nth "dth day" of month m */
 
-      /* Use Zeller's Congruence to get day-of-week of first day of
-       * month.
-       */
+        /* Use Zeller's Congruence to get day-of-week of first day of
+         * month.
+         */
 
-      m1  = (rulep->r_mon + 9) % 12 + 1;
-      yy0 = (rulep->r_mon <= 2) ? (year - 1) : year;
-      yy1 = yy0 / 100;
-      yy2 = yy0 % 100;
-      dow = ((26 * m1 - 2) / 10 + 1 + yy2 + yy2 / 4 + yy1 / 4 - 2 * yy1) % 7;
-      if (dow < 0)
-        {
-          dow += DAYSPERWEEK;
-        }
+        m1  = (rulep->r_mon + 9) % 12 + 1;
+        yy0 = (rulep->r_mon <= 2) ? (year - 1) : year;
+        yy1 = yy0 / 100;
+        yy2 = yy0 % 100;
+        dow = ((26 * m1 - 2) / 10 + 1 + yy2 + yy2 / 4 + yy1 / 4 -
+               2 * yy1) % 7;
+        if (dow < 0)
+          {
+            dow += DAYSPERWEEK;
+          }
 
-      /* "dow" is the day-of-week of the first day of the month. Get
-       * the day-of-month (zero-origin) of the first "dow" day of the
-       * month.
-       */
+        /* "dow" is the day-of-week of the first day of the month. Get
+         * the day-of-month (zero-origin) of the first "dow" day of the
+         * month.
+         */
 
-      d = rulep->r_day - dow;
-      if (d < 0)
-        {
-          d += DAYSPERWEEK;
-        }
+        d = rulep->r_day - dow;
+        if (d < 0)
+          {
+            d += DAYSPERWEEK;
+          }
 
-      for (i = 1; i < rulep->r_week; ++i)
-        {
-          if (d + DAYSPERWEEK >= g_mon_lengths[leap_year][rulep->r_mon - 1])
-            {
-              break;
-            }
+        for (i = 1; i < rulep->r_week; ++i)
+          {
+            if (d + DAYSPERWEEK >=
+                g_mon_lengths[leap_year][rulep->r_mon - 1])
+              {
+                break;
+              }
 
-          d += DAYSPERWEEK;
-        }
+            d += DAYSPERWEEK;
+          }
 
-      /* "d" is the day-of-month (zero-origin) of the day we want */
+        /* "d" is the day-of-month (zero-origin) of the day we want */
 
-      value = d * SECSPERDAY;
-      for (i = 0; i < rulep->r_mon - 1; ++i)
-        {
-          value += g_mon_lengths[leap_year][i] * SECSPERDAY;
-        }
-      break;
+        value = d * SECSPERDAY;
+        for (i = 0; i < rulep->r_mon - 1; ++i)
+          {
+            value += g_mon_lengths[leap_year][i] * SECSPERDAY;
+          }
+        break;
     }
 
   /* "value" is the year-relative time of 00:00:00 UT on the day in
@@ -1710,9 +1720,11 @@ static int tzparse(FAR const char *name, FAR struct state_s *sp,
                 yearsecs   = (g_year_lengths[isleap(year)] * SECSPERDAY);
 
               int reversed = endtime < starttime;
+
               if (reversed)
                 {
                   int_fast32_t swap = starttime;
+
                   starttime = endtime;
                   endtime = swap;
                 }
@@ -2178,6 +2190,7 @@ static FAR struct tm *timesub(FAR const time_t *timep,
   if (!TYPE_SIGNED(time_t) && y < TM_YEAR_BASE)
     {
       int signed_y = y;
+
       tmp->tm_year = signed_y - TM_YEAR_BASE;
     }
   else if ((!TYPE_SIGNED(time_t) || INT_MIN + TM_YEAR_BASE <= y)

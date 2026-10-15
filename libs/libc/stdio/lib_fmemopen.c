@@ -61,6 +61,7 @@ static ssize_t fmemopen_read(FAR void *c, FAR char *buf, size_t size)
 {
   FAR struct fmemopen_cookie_s *fmemopen_cookie =
     (FAR struct fmemopen_cookie_s *)c;
+
   if (fmemopen_cookie->pos + size > fmemopen_cookie->end)
     {
       size = fmemopen_cookie->end - fmemopen_cookie->pos;
@@ -80,6 +81,7 @@ static ssize_t fmemopen_write(FAR void *c, FAR const char *buf, size_t size)
 {
   FAR struct fmemopen_cookie_s *fmemopen_cookie =
     (FAR struct fmemopen_cookie_s *)c;
+
   if (size + fmemopen_cookie->pos > fmemopen_cookie->size)
     {
       size = fmemopen_cookie->size - fmemopen_cookie->pos;
@@ -153,6 +155,7 @@ static int fmemopen_close(FAR void *c)
 {
   FAR struct fmemopen_cookie_s *fmemopen_cookie =
     (FAR struct fmemopen_cookie_s *)c;
+
   if (fmemopen_cookie->custom)
     {
       lib_free(fmemopen_cookie->buf);

@@ -95,6 +95,7 @@ FAR void *obstack_finish(FAR struct obstack *h)
 FAR void *obstack_finish_norealloc(FAR struct obstack *h)
 {
   FAR char *res = h->object_base;
+
   h->object_base = h->next_free;
   return res;
 }

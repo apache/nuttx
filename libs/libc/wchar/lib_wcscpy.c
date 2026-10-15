@@ -53,6 +53,7 @@
 FAR wchar_t *wcscpy(FAR wchar_t *d, FAR const wchar_t *s)
 {
   FAR wchar_t *a = d;
+
   while ((*d++ = *s++));
   return a;
 }

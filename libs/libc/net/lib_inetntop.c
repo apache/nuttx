@@ -294,20 +294,20 @@ FAR const char *inet_ntop(int af, FAR const void *src, FAR char *dest,
   switch (af)
     {
 #if defined(CONFIG_NET_IPv4) || defined(CONFIG_LIBC_IPv4_ADDRCONV)
-    case AF_INET:
-      ret = inet_ipv4_ntop(src, dest, size);
-      break;
+      case AF_INET:
+        ret = inet_ipv4_ntop(src, dest, size);
+        break;
 #endif
 
 #if defined(CONFIG_NET_IPv6) || defined(CONFIG_LIBC_IPv6_ADDRCONV)
-    case AF_INET6:
-      ret = inet_ipv6_ntop(src, dest, size);
-      break;
+      case AF_INET6:
+        ret = inet_ipv6_ntop(src, dest, size);
+        break;
 #endif
 
-    default:
-      ret = -EAFNOSUPPORT;
-      break;
+      default:
+        ret = -EAFNOSUPPORT;
+        break;
     }
 
   /* Handle errors in the conversion */

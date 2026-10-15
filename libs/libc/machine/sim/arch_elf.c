@@ -105,17 +105,17 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr,
 
   switch (ELF32_R_TYPE(rel->r_info))
     {
-     case R_386_32:
-       *ptr += sym->st_value;
-       break;
+      case R_386_32:
+        *ptr += sym->st_value;
+        break;
 
-     case R_386_PC32:
-       *ptr += sym->st_value - (uint32_t)((uintptr_t)ptr);
-       break;
+      case R_386_PC32:
+        *ptr += sym->st_value - (uint32_t)((uintptr_t)ptr);
+        break;
 
-     default:
-       berr("ERROR: Unsupported type %u\n", ELF32_R_TYPE(rel->r_info));
-       return -EINVAL;
+      default:
+        berr("ERROR: Unsupported type %u\n", ELF32_R_TYPE(rel->r_info));
+        return -EINVAL;
     }
 
   return OK;

@@ -172,6 +172,7 @@ static ssize_t mtdsostream_puts(FAR struct lib_sostream_s *self,
 static void mtdsostream_putc(FAR struct lib_sostream_s *self, int ch)
 {
   char tmp = ch;
+
   mtdsostream_puts(self, &tmp, 1);
 }
 

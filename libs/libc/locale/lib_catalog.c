@@ -279,26 +279,26 @@ nl_catd catopen(FAR const char *name, int oflag)
           i += l;
         }
 
-        if (*z)
-          {
-            z++;
-          }
+      if (*z)
+        {
+          z++;
+        }
 
-        if (*p != ':' && *p != '\0')
-          {
-            continue;
-          }
+      if (*p != ':' && *p != '\0')
+        {
+          continue;
+        }
 
-        /* Leading : or :: in NLSPATH is same as %N */
+      /* Leading : or :: in NLSPATH is same as %N */
 
-        buf[i] = 0;
-        catd = catmap(i ? buf : name);
-        if (catd != MAP_FAILED)
-          {
-            lib_put_pathbuffer(buf);
-            return catd;
-          }
-      }
+      buf[i] = 0;
+      catd = catmap(i ? buf : name);
+      if (catd != MAP_FAILED)
+        {
+          lib_put_pathbuffer(buf);
+          return catd;
+        }
+    }
 
   lib_put_pathbuffer(buf);
   set_errno(ENOENT);

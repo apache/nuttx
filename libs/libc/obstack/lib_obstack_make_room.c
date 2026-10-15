@@ -93,6 +93,7 @@ void obstack_make_room(FAR struct obstack *h, size_t size)
        */
 
       FAR struct _obstack_chunk *prev = h->chunk;
+
       h->chunk = lib_obstack_malloc(size);
       h->chunk->prev = prev;
 

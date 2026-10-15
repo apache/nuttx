@@ -44,5 +44,6 @@
 FAR int *getopterrp(void)
 {
   FAR struct getopt_s *go = getoptvars();
+
   return &go->go_opterr;
 }

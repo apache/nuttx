@@ -213,6 +213,7 @@ static ssize_t blkoutstream_puts(FAR struct lib_sostream_s *self,
 static void blkoutstream_putc(FAR struct lib_sostream_s *self, int ch)
 {
   char tmp = ch;
+
   blkoutstream_puts(self, &tmp, 1);
 }
 

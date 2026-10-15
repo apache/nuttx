@@ -52,5 +52,6 @@
 FAR char *asctime(FAR const struct tm *tp)
 {
   static char buf[26];
+
   return asctime_r(tp, buf);
 }

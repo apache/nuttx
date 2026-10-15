@@ -43,6 +43,7 @@
 static int dgetc(int fd)
 {
   unsigned char c;
+
   return read(fd, &c, 1) == 1 ? c : EOF;
 }
 

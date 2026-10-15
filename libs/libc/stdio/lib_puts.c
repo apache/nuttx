@@ -62,6 +62,7 @@ int puts(FAR const IPTR char *s)
       /* Followed by a newline */
 
       char newline = '\n';
+
       ret = lib_fwrite_unlocked(&newline, 1, stream);
       if (ret > 0)
         {

@@ -49,6 +49,7 @@
 FAR char *inet_ntoa_r(struct in_addr in, FAR char *buf, size_t bufflen)
 {
   FAR unsigned char *ptr = (FAR unsigned char *)&in.s_addr;
+
   snprintf(buf, bufflen, "%u.%u.%u.%u",
            ptr[0], ptr[1], ptr[2], ptr[3]);
   return buf;
@@ -68,6 +69,7 @@ FAR char *inet_ntoa_r(struct in_addr in, FAR char *buf, size_t bufflen)
 FAR char *inet_ntoa(struct in_addr in)
 {
   static char buffer[INET_ADDRSTRLEN];
+
   return inet_ntoa_r(in, buffer, sizeof(buffer));
 }
 

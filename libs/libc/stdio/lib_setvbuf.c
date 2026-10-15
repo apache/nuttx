@@ -219,9 +219,9 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
         DEBUGPANIC();
     }
 
-   /* Do not release the previous buffer if it was allocated by the user
-    * on a previous call to setvbuf().
-    */
+  /* Do not release the previous buffer if it was allocated by the user
+   * on a previous call to setvbuf().
+   */
 
   if (stream->fs_bufstart != NULL &&
      (stream->fs_flags & __FS_FLAG_UBF) == 0)

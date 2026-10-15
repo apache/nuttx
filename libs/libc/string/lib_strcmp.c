@@ -39,6 +39,7 @@
 int strcmp(FAR const char *cs, FAR const char *ct)
 {
   register int result;
+
   for (; ; )
     {
       if ((result = (unsigned char)*cs - (unsigned char)*ct++) != 0 ||

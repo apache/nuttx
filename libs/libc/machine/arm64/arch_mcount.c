@@ -31,6 +31,7 @@
 static inline noinstrument_function void *strip_pac(void *p)
 {
   register void *ra asm ("x30") = (p);
+
   asm ("hint 7 // xpaclri" : "+r"(ra));
   return ra;
 }

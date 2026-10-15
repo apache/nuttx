@@ -37,6 +37,7 @@ int putchar(int c)
   return fputc(c, stdout);
 #else
   unsigned char tmp = c;
+
   return write(STDOUT_FILENO, &tmp, 1) == 1 ? c : EOF;
 #endif
 }
@@ -47,6 +48,7 @@ int putchar_unlocked(int c)
   return fputc_unlocked(c, stdout);
 #else
   unsigned char tmp = c;
+
   return write(STDOUT_FILENO, &tmp, 1) == 1 ? c : EOF;
 #endif
 }

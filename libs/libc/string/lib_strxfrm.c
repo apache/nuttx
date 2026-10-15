@@ -57,6 +57,7 @@
 size_t strxfrm(FAR char *s1, FAR const char *s2, size_t n)
 {
   size_t res;
+
   res = 0;
   while (n-- > 0)
     {

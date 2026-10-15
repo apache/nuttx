@@ -47,12 +47,14 @@ uint32_t crc32part(FAR const uint8_t *src, size_t len, uint32_t crc32val)
   for (; (i + 8) <= len; i += 8)
     {
       uint64_t data = *(uint64_t *)(src + i);
+
       crc32val = __crc32d(crc32val, data);
     }
 
   if (i + 4 <= len)
     {
       uint32_t data = *(uint32_t *)(src + i);
+
       crc32val = __crc32w(crc32val, data);
       i += 4;
     }
@@ -60,6 +62,7 @@ uint32_t crc32part(FAR const uint8_t *src, size_t len, uint32_t crc32val)
   if (i + 2 <= len)
     {
       uint16_t data = *(uint16_t *)(src + i);
+
       crc32val = __crc32h(crc32val, data);
       i += 2;
     }
@@ -67,6 +70,7 @@ uint32_t crc32part(FAR const uint8_t *src, size_t len, uint32_t crc32val)
   if (i < len)
     {
       uint8_t data = *(uint8_t *)(src + i);
+
       crc32val = __crc32b(crc32val, data);
     }
 
@@ -88,12 +92,14 @@ uint32_t crc32part_c(FAR const uint8_t *src, size_t len, uint32_t crc32val)
   for (; (i + 8) <= len; i += 8)
     {
       uint64_t data = *(uint64_t *)(src + i);
+
       crc32val = __crc32cd(crc32val, data);
     }
 
   if (i + 4 <= len)
     {
       uint32_t data = *(uint32_t *)(src + i);
+
       crc32val = __crc32cw(crc32val, data);
       i += 4;
     }
@@ -101,6 +107,7 @@ uint32_t crc32part_c(FAR const uint8_t *src, size_t len, uint32_t crc32val)
   if (i + 2 <= len)
     {
       uint16_t data = *(uint16_t *)(src + i);
+
       crc32val = __crc32ch(crc32val, data);
       i += 2;
     }
@@ -108,6 +115,7 @@ uint32_t crc32part_c(FAR const uint8_t *src, size_t len, uint32_t crc32val)
   if (i < len)
     {
       uint8_t data = *(uint8_t *)(src + i);
+
       crc32val = __crc32cb(crc32val, data);
     }
 

@@ -62,6 +62,7 @@
 int pthread_kill(pthread_t thread, int signo)
 {
   int ret = tkill((pid_t)thread, signo);
+
   if (ret < 0)
     {
       ret = get_errno();

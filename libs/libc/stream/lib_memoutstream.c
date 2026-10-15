@@ -69,6 +69,7 @@ static ssize_t memoutstream_puts(FAR struct lib_outstream_s *self,
 static void memoutstream_putc(FAR struct lib_outstream_s *self, int ch)
 {
   char tmp = ch;
+
   memoutstream_puts(self, &tmp, 1);
 }
 

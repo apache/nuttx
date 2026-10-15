@@ -241,6 +241,7 @@ static ssize_t mtdoutstream_puts(FAR struct lib_outstream_s *self,
 static void mtdoutstream_putc(FAR struct lib_outstream_s *self, int ch)
 {
   char tmp = ch;
+
   mtdoutstream_puts(self, &tmp, 1);
 }
 
