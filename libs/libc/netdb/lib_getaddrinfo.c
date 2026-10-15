@@ -30,10 +30,11 @@
 #include <string.h>
 
 #include <arpa/inet.h>
+#include <netdb.h>
+#include <netinet/in.h>
 #include <nuttx/net/loopback.h>
 #include <netpacket/rpmsg.h>
 #include <netpacket/vm_sockets.h>
-#include <netdb.h>
 #include <sys/un.h>
 
 #include "libc.h"
@@ -54,6 +55,13 @@ struct ai_s
     struct sockaddr_rpmsg srp;
     struct sockaddr_vm svm;
   } sa;
+};
+
+struct transport_s
+{
+  int socktype;
+  int proto;
+  int port;
 };
 
 /****************************************************************************
@@ -122,6 +130,28 @@ FAR static struct ai_s *alloc_ai(int family, int socktype, int protocol,
   return ai;
 }
 
+static FAR struct addrinfo **add_ai(FAR struct addrinfo **prev_ai,
+                                    int family, int socktype, int proto,
+                                    int port, FAR const void *addr,
+                                    FAR const char *canonname)
+{
+  FAR struct ai_s *ai;
+
+  ai = alloc_ai(family, socktype, proto, port, addr);
+  if (ai == NULL)
+    {
+      return NULL;
+    }
+
+  if (canonname != NULL)
+    {
+      ai->ai.ai_canonname = (FAR char *)canonname;
+    }
+
+  *prev_ai = (FAR struct addrinfo *)ai;
+  return &ai->ai.ai_next;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -138,10 +168,11 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
   int flags = 0;
   int proto = 0;
   int socktype = 0;
-  FAR char *hostbuffer;
+  FAR char *hostbuffer = NULL;
   struct hostent_s host;
-  FAR struct ai_s *ai;
-  FAR struct ai_s *prev_ai = NULL;
+  FAR struct addrinfo **prev_ai = res;
+  struct transport_s transports[2];
+  int ntransports = 0;
   const int valid_flags = AI_PASSIVE | AI_CANONNAME | AI_NUMERICHOST |
                           AI_NUMERICSERV | AI_V4MAPPED | AI_ALL |
                           AI_ADDRCONFIG;
@@ -174,12 +205,57 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
         {
           return EAI_FAMILY;
         }
+
+      if ((family == AF_INET || family == AF_INET6 ||
+           family == AF_UNSPEC) &&
+          socktype != 0 &&
+          socktype != SOCK_STREAM &&
+          socktype != SOCK_DGRAM &&
+          socktype != SOCK_RAW)
+        {
+          return EAI_SOCKTYPE;
+        }
+    }
+
+  if (family == AF_INET || family == AF_INET6 || family == AF_UNSPEC)
+    {
+      if (socktype == SOCK_STREAM)
+        {
+          if (proto == 0)
+            {
+              proto = IPPROTO_TCP;
+            }
+          else if (proto != IPPROTO_TCP)
+            {
+              return EAI_SOCKTYPE;
+            }
+        }
+      else if (socktype == SOCK_DGRAM)
+        {
+          if (proto == 0)
+            {
+              proto = IPPROTO_UDP;
+            }
+          else if (proto != IPPROTO_UDP)
+            {
+              return EAI_SOCKTYPE;
+            }
+        }
+      else if (socktype == 0)
+        {
+          if (proto == IPPROTO_TCP)
+            {
+              socktype = SOCK_STREAM;
+            }
+          else if (proto == IPPROTO_UDP)
+            {
+              socktype = SOCK_DGRAM;
+            }
+        }
     }
 
   if (servname != NULL)
     {
-      struct servent ent;
-      FAR struct servent *sp;
       FAR char *endp;
 
       port = strtol(servname, &endp, 10);
@@ -188,24 +264,222 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
           /* Force network byte order */
 
           port = HTONS(port);
+
+          if (socktype == SOCK_STREAM)
+            {
+              transports[0].socktype = SOCK_STREAM;
+              transports[0].proto    = IPPROTO_TCP;
+              transports[0].port     = port;
+              ntransports            = 1;
+            }
+          else if (socktype == SOCK_DGRAM)
+            {
+              transports[0].socktype = SOCK_DGRAM;
+              transports[0].proto    = IPPROTO_UDP;
+              transports[0].port     = port;
+              ntransports            = 1;
+            }
+          else if (socktype == SOCK_RAW)
+            {
+              transports[0].socktype = SOCK_RAW;
+              transports[0].proto    = proto;
+              transports[0].port     = port;
+              ntransports            = 1;
+            }
+          else if (proto == IPPROTO_TCP)
+            {
+              transports[0].socktype = SOCK_STREAM;
+              transports[0].proto    = IPPROTO_TCP;
+              transports[0].port     = port;
+              ntransports            = 1;
+            }
+          else if (proto == IPPROTO_UDP)
+            {
+              transports[0].socktype = SOCK_DGRAM;
+              transports[0].proto    = IPPROTO_UDP;
+              transports[0].port     = port;
+              ntransports            = 1;
+            }
+          else if (proto != 0)
+            {
+              transports[0].socktype = SOCK_RAW;
+              transports[0].proto    = proto;
+              transports[0].port     = port;
+              ntransports            = 1;
+            }
+          else
+            {
+              /* Both socktype and proto are unspecified: return both
+               * TCP and UDP transports per POSIX.
+               */
+
+              transports[0].socktype = SOCK_STREAM;
+              transports[0].proto    = IPPROTO_TCP;
+              transports[0].port     = port;
+
+              transports[1].socktype = SOCK_DGRAM;
+              transports[1].proto    = IPPROTO_UDP;
+              transports[1].port     = port;
+
+              ntransports            = 2;
+            }
         }
       else if ((flags & AI_NUMERICSERV) != 0)
         {
           return EAI_NONAME;
         }
-      else if (getservbyname_r(servname, NULL, &ent, NULL, 0, &sp) == OK)
+      else
         {
-          /* The s_port field of struct servent is required to
-           * be in network byte order (per OpenGroup.org)
-           */
+          struct servent ent;
+          FAR struct servent *sp;
 
-          port = sp->s_port;
+          if (socktype == SOCK_RAW)
+            {
+              return EAI_SERVICE;
+            }
+          else if (socktype == SOCK_STREAM || proto == IPPROTO_TCP)
+            {
+              if (getservbyname_r(servname, "tcp", &ent, NULL, 0, &sp) == OK)
+                {
+                  transports[0].socktype = SOCK_STREAM;
+                  transports[0].proto    = IPPROTO_TCP;
+                  transports[0].port     = sp->s_port;
+                  ntransports            = 1;
+                }
+              else
+                {
+                  return EAI_SERVICE;
+                }
+            }
+          else if (socktype == SOCK_DGRAM || proto == IPPROTO_UDP)
+            {
+              if (getservbyname_r(servname, "udp", &ent, NULL, 0, &sp) == OK)
+                {
+                  transports[0].socktype = SOCK_DGRAM;
+                  transports[0].proto    = IPPROTO_UDP;
+                  transports[0].port     = sp->s_port;
+                  ntransports            = 1;
+                }
+              else
+                {
+                  return EAI_SERVICE;
+                }
+            }
+          else if (proto != 0)
+            {
+              /* Explicit non-TCP/UDP protocol is incompatible with
+               * named TCP/UDP services. Do not infer over caller's proto.
+               */
+
+              return EAI_SERVICE;
+            }
+          else
+            {
+              /* Both socktype and proto are unspecified: check if the
+               * service is defined for TCP, UDP, or both.
+               */
+
+              if (getservbyname_r(servname, "tcp", &ent, NULL, 0, &sp) == OK)
+                {
+                  transports[ntransports].socktype = SOCK_STREAM;
+                  transports[ntransports].proto    = IPPROTO_TCP;
+                  transports[ntransports].port     = sp->s_port;
+                  ntransports++;
+                }
+
+              if (getservbyname_r(servname, "udp", &ent, NULL, 0, &sp) == OK)
+                {
+                  transports[ntransports].socktype = SOCK_DGRAM;
+                  transports[ntransports].proto    = IPPROTO_UDP;
+                  transports[ntransports].port     = sp->s_port;
+                  ntransports++;
+                }
+
+              if (ntransports == 0)
+                {
+                  return EAI_SERVICE;
+                }
+            }
+
+          port = transports[0].port;
+        }
+    }
+  else
+    {
+      /* servname is NULL */
+
+      if (socktype == SOCK_STREAM)
+        {
+          transports[0].socktype = SOCK_STREAM;
+          transports[0].proto    = IPPROTO_TCP;
+          transports[0].port     = 0;
+          ntransports            = 1;
+        }
+      else if (socktype == SOCK_DGRAM)
+        {
+          transports[0].socktype = SOCK_DGRAM;
+          transports[0].proto    = IPPROTO_UDP;
+          transports[0].port     = 0;
+          ntransports            = 1;
+        }
+      else if (socktype == SOCK_RAW)
+        {
+          transports[0].socktype = SOCK_RAW;
+          transports[0].proto    = proto;
+          transports[0].port     = 0;
+          ntransports            = 1;
+        }
+      else if (proto == IPPROTO_TCP)
+        {
+          transports[0].socktype = SOCK_STREAM;
+          transports[0].proto    = IPPROTO_TCP;
+          transports[0].port     = 0;
+          ntransports            = 1;
+        }
+      else if (proto == IPPROTO_UDP)
+        {
+          transports[0].socktype = SOCK_DGRAM;
+          transports[0].proto    = IPPROTO_UDP;
+          transports[0].port     = 0;
+          ntransports            = 1;
+        }
+      else if (proto != 0)
+        {
+          transports[0].socktype = SOCK_RAW;
+          transports[0].proto    = proto;
+          transports[0].port     = 0;
+          ntransports            = 1;
         }
       else
         {
-          return EAI_SERVICE;
+          /* Both socktype and proto are unspecified: return both
+           * TCP and UDP transports per POSIX.
+           */
+
+          transports[0].socktype = SOCK_STREAM;
+          transports[0].proto    = IPPROTO_TCP;
+          transports[0].port     = 0;
+
+          transports[1].socktype = SOCK_DGRAM;
+          transports[1].proto    = IPPROTO_UDP;
+          transports[1].port     = 0;
+
+          ntransports            = 2;
         }
     }
+
+  /* Override transports for local socket families */
+
+#if defined(CONFIG_NET_LOCAL) || defined(CONFIG_NET_RPMSG) || \
+    defined(CONFIG_NET_VSOCK)
+  if (family == AF_LOCAL || family == AF_RPMSG || family == AF_VSOCK)
+    {
+      transports[0].socktype = socktype;
+      transports[0].proto    = proto;
+      transports[0].port     = port;
+      ntransports            = 1;
+    }
+#endif
 
   *res = NULL;
 
@@ -217,12 +491,19 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
       if (family == AF_INET || family == AF_UNSPEC)
         {
           struct in_addr addr;
+          int t;
 
           memset(&addr, 0, sizeof(struct in_addr));
-          ai = alloc_ai(AF_INET, socktype, proto, port, &addr);
-          if (ai != NULL)
+          for (t = 0; t < ntransports; t++)
             {
-              *res = (FAR struct addrinfo *)ai;
+              prev_ai = add_ai(prev_ai, AF_INET,
+                               transports[t].socktype,
+                               transports[t].proto,
+                               transports[t].port, &addr, NULL);
+              if (prev_ai == NULL)
+                {
+                  goto errout_nomem;
+                }
             }
         }
 #endif
@@ -231,20 +512,18 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
       if (family == AF_INET6 || family == AF_UNSPEC)
         {
           struct in6_addr addr;
+          int t;
 
           memset(&addr, 0, sizeof(struct in6_addr));
-          ai = alloc_ai(AF_INET6, socktype, proto, port, &addr);
-          if (ai != NULL)
+          for (t = 0; t < ntransports; t++)
             {
-              /* Can return both IPv4 and IPv6 loopback. */
-
-              if (*res != NULL)
+              prev_ai = add_ai(prev_ai, AF_INET6,
+                               transports[t].socktype,
+                               transports[t].proto,
+                               transports[t].port, &addr, NULL);
+              if (prev_ai == NULL)
                 {
-                  (*res)->ai_next = (FAR struct addrinfo *)ai;
-                }
-              else
-                {
-                  *res = (FAR struct addrinfo *)ai;
+                  goto errout_nomem;
                 }
             }
         }
@@ -253,17 +532,11 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
 #if defined(CONFIG_NET_RPMSG)
       if (family == AF_RPMSG || family == AF_UNSPEC)
         {
-          ai = alloc_ai(AF_RPMSG, socktype, proto, port, "");
-          if (ai != NULL)
+          prev_ai = add_ai(prev_ai, AF_RPMSG, socktype, proto,
+                           port, "", NULL);
+          if (prev_ai == NULL)
             {
-              if (*res != NULL)
-                {
-                  (*res)->ai_next = (FAR struct addrinfo *)ai;
-                }
-              else
-                {
-                  *res = (FAR struct addrinfo *)ai;
-                }
+              goto errout_nomem;
             }
         }
 #endif
@@ -273,17 +546,11 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
         {
           /* "-1" <--> VMADDR_CID_ANY */
 
-          ai = alloc_ai(AF_VSOCK, socktype, proto, port, "-1");
-          if (ai != NULL)
+          prev_ai = add_ai(prev_ai, AF_VSOCK, socktype, proto,
+                           port, "-1", NULL);
+          if (prev_ai == NULL)
             {
-              if (*res != NULL)
-                {
-                  (*res)->ai_next = (FAR struct addrinfo *)ai;
-                }
-              else
-                {
-                  *res = (FAR struct addrinfo *)ai;
-                }
+              goto errout_nomem;
             }
         }
 #endif
@@ -299,11 +566,18 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
 #ifdef CONFIG_NET_IPv4
       if (family == AF_INET || family == AF_UNSPEC)
         {
-          ai = alloc_ai(AF_INET, socktype, proto, port,
-                        &g_lo_ipv4addr);
-          if (ai != NULL)
+          int t;
+
+          for (t = 0; t < ntransports; t++)
             {
-              *res = (FAR struct addrinfo *)ai;
+              prev_ai = add_ai(prev_ai, AF_INET,
+                               transports[t].socktype,
+                               transports[t].proto,
+                               transports[t].port, &g_lo_ipv4addr, NULL);
+              if (prev_ai == NULL)
+                {
+                  goto errout_nomem;
+                }
             }
         }
 #endif
@@ -311,19 +585,17 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
 #ifdef CONFIG_NET_IPv6
       if (family == AF_INET6 || family == AF_UNSPEC)
         {
-          ai = alloc_ai(AF_INET6, socktype, proto, port,
-                        &g_lo_ipv6addr);
-          if (ai != NULL)
-            {
-              /* Can return both IPv4 and IPv6 loopback. */
+          int t;
 
-              if (*res != NULL)
+          for (t = 0; t < ntransports; t++)
+            {
+              prev_ai = add_ai(prev_ai, AF_INET6,
+                               transports[t].socktype,
+                               transports[t].proto,
+                               transports[t].port, &g_lo_ipv6addr, NULL);
+              if (prev_ai == NULL)
                 {
-                  (*res)->ai_next = (FAR struct addrinfo *)ai;
-                }
-              else
-                {
-                  *res = (FAR struct addrinfo *)ai;
+                  goto errout_nomem;
                 }
             }
         }
@@ -335,17 +607,11 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
         {
           /* "1" <--> VMADDR_CID_LOCAL */
 
-          ai = alloc_ai(AF_VSOCK, socktype, proto, port, "1");
-          if (ai != NULL)
+          prev_ai = add_ai(prev_ai, AF_VSOCK, socktype, proto,
+                           port, "1", NULL);
+          if (prev_ai == NULL)
             {
-              if (*res != NULL)
-                {
-                  (*res)->ai_next = (FAR struct addrinfo *)ai;
-                }
-              else
-                {
-                  *res = (FAR struct addrinfo *)ai;
-                }
+              goto errout_nomem;
             }
         }
 #endif
@@ -359,20 +625,20 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
 #endif
     }
 
-#if defined(CONFIG_NET_LOCAL) || defined(CONFIG_NET_RPMSG) || defined(CONFIG_NET_VSOCK)
+#if defined(CONFIG_NET_LOCAL) || defined(CONFIG_NET_RPMSG) || \
+    defined(CONFIG_NET_VSOCK)
   if (family == AF_LOCAL || family == AF_RPMSG || family == AF_VSOCK)
     {
-      ai = alloc_ai(family, socktype, proto, port, hostname);
-      if (ai != NULL)
+      FAR const char *canon = (flags & AI_CANONNAME) ? hostname : NULL;
+
+      prev_ai = add_ai(prev_ai, family, socktype, proto,
+                       port, hostname, canon);
+      if (prev_ai == NULL)
         {
-          *res = (FAR struct addrinfo *)ai;
-          if (flags & AI_CANONNAME)
-            {
-              ai->ai.ai_canonname = (FAR char *)hostname;
-            }
+          goto errout_nomem;
         }
 
-      return (*res != NULL) ? OK : EAI_MEMORY;
+      return OK;
     }
 #endif
 
@@ -392,6 +658,8 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
 
   for (i = 0; host.h_addr_list[i]; i++)
     {
+      int t;
+
       if (family != AF_UNSPEC && host.h_addrtypes[i] != family)
         {
           /* Filter by protocol family. */
@@ -399,46 +667,36 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
           continue;
         }
 
-      /* REVISIT: filter by socktype and protocol not implemented. */
-
-      ai = alloc_ai(host.h_addrtypes[i], socktype, proto, port,
-                    host.h_addr_list[i]);
-      if (ai == NULL)
+      for (t = 0; t < ntransports; t++)
         {
-          if (*res)
+          FAR const char *canon = (flags & AI_CANONNAME) ? hostname : NULL;
+
+          prev_ai = add_ai(prev_ai, host.h_addrtypes[i],
+                           transports[t].socktype,
+                           transports[t].proto,
+                           transports[t].port, host.h_addr_list[i],
+                           canon);
+          if (prev_ai == NULL)
             {
-              freeaddrinfo(*res);
+              goto errout_nomem;
             }
-
-          lib_free(hostbuffer);
-          return EAI_MEMORY;
         }
-
-      /* REVISIT: grok canonical name.
-       *
-       * OpenGroup: "if the canonical name is not available, then
-       * ai_canonname shall refer to the hostname argument or a string
-       * with the same contents."
-       */
-
-      ai->ai.ai_canonname = (FAR char *)hostname;
-
-      /* Add result to linked list.
-       * TODO: RFC 3484/6724 destination address sort not implemented.
-       */
-
-      if (prev_ai != NULL)
-        {
-          prev_ai->ai.ai_next = (FAR struct addrinfo *)ai;
-        }
-      else
-        {
-          *res = (FAR struct addrinfo *)ai;
-        }
-
-      prev_ai = ai;
     }
 
   lib_free(hostbuffer);
   return (*res != NULL) ? OK : EAI_FAMILY;
+
+errout_nomem:
+  if (*res != NULL)
+    {
+      freeaddrinfo(*res);
+      *res = NULL;
+    }
+
+  if (hostbuffer != NULL)
+    {
+      lib_free(hostbuffer);
+    }
+
+  return EAI_MEMORY;
 }
