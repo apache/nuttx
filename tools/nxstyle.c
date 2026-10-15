@@ -3109,16 +3109,20 @@ int main(int argc, char **argv, char **envp)
                     {
                       if (n > indent)
                         {
-                          /* REVISIT: dnest is always > 0 here if bfunctions ==
-                           * false.
+                          /* A left brace must always be on its own line,
+                           * whether it opens a compound statement at file
+                           * scope or inside a function body.  dnest > 0
+                           * only means that a nested initializer brace
+                           * (e.g. "{ 1, 2 }," within an array of structs)
+                           * is in progress starting at column 'indent';
+                           * it must not excuse the opening brace of the
+                           * declaration itself from this rule just
+                           * because that declaration happens to be local
+                           * to a function.
                            */
 
-                          if (dnest == 0 || !bfunctions ||
-                              lineno == rbrace_lineno)
-                            {
-                              ERROR("Left bracket not on separate line", lineno,
-                                    n);
-                            }
+                          ERROR("Left bracket not on separate line", lineno,
+                                n);
                         }
                       else if (line[n + 1] != '\n')
                         {
