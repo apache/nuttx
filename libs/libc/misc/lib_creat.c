@@ -42,7 +42,7 @@
  *
  * Returned Value:
  *   Return a file descriptor of the file that created success,
- *   return -1 if error occurd on creat new file, and errno is setup
+ *   return -1 if error occurred on creat new file, and errno is setup
  *
  ****************************************************************************/
 
