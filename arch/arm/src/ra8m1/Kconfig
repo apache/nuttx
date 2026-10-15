@@ -371,25 +371,22 @@ config RA_HAVE_IIC1
 # RA_HAVE_* above (prompt, depends on RA_HAVE_*, select
 # the driver it wires up -- see README "Kconfig draft").
 
-choice
-	prompt "SCI0 mode"
-	depends on RA_HAVE_SCI_B0
-	optional
-
 config RA_SCI0_UART
-	bool "UART"
+	bool "UART 0"
+	default n
+	depends on RA_HAVE_SCI_B0
 	select SCI0_SERIALDRIVER
 
 config RA_SCI0_I2C
-	bool "I2C bus interface (Simple IIC mode)"
+	bool "I2C 0 (SCI0 Simple IIC mode)"
+	default n
+	depends on RA_HAVE_SCI_B0 && !RA_SCI0_UART
 	select I2C
 	---help---
 		Uses SCI0's Simple IIC mode (RA8M1 User's Manual section
 		31.8). Exposed as /dev/i2cN, with the device number assigned
 		by board bring-up (ra8m1_bringup.c), not fixed by this
 		driver.
-
-endchoice
 
 config RA_SCI0_DTC
 	bool "Transfer SCI0 I2C message data through the DTC"
@@ -486,25 +483,22 @@ config RA_SCI0_RXDTC
 
 		Mutually exclusive with CONFIG_RA_SCI0_FIFO (see its help).
 
-choice
-	prompt "SCI1 mode"
-	depends on RA_HAVE_SCI_B1
-	optional
-
 config RA_SCI1_UART
-	bool "UART"
+	bool "UART 1"
+	default n
+	depends on RA_HAVE_SCI_B1
 	select SCI1_SERIALDRIVER
 
 config RA_SCI1_I2C
-	bool "I2C bus interface (Simple IIC mode)"
+	bool "I2C 1 (SCI1 Simple IIC mode)"
+	default n
+	depends on RA_HAVE_SCI_B1 && !RA_SCI1_UART
 	select I2C
 	---help---
 		Uses SCI1's Simple IIC mode (RA8M1 User's Manual section
 		31.8). Exposed as /dev/i2cN, with the device number assigned
 		by board bring-up (ra8m1_bringup.c), not fixed by this
 		driver.
-
-endchoice
 
 config RA_SCI1_DTC
 	bool "Transfer SCI1 I2C message data through the DTC"
@@ -601,25 +595,22 @@ config RA_SCI1_RXDTC
 
 		Mutually exclusive with CONFIG_RA_SCI1_FIFO (see its help).
 
-choice
-	prompt "SCI2 mode"
-	depends on RA_HAVE_SCI_B2
-	optional
-
 config RA_SCI2_UART
-	bool "UART"
+	bool "UART 2"
+	default n
+	depends on RA_HAVE_SCI_B2
 	select SCI2_SERIALDRIVER
 
 config RA_SCI2_I2C
-	bool "I2C bus interface (Simple IIC mode)"
+	bool "I2C 2 (SCI2 Simple IIC mode)"
+	default n
+	depends on RA_HAVE_SCI_B2 && !RA_SCI2_UART
 	select I2C
 	---help---
 		Uses SCI2's Simple IIC mode (RA8M1 User's Manual section
 		31.8). Exposed as /dev/i2cN, with the device number assigned
 		by board bring-up (ra8m1_bringup.c), not fixed by this
 		driver.
-
-endchoice
 
 config RA_SCI2_DTC
 	bool "Transfer SCI2 I2C message data through the DTC"
@@ -716,25 +707,22 @@ config RA_SCI2_RXDTC
 
 		Mutually exclusive with CONFIG_RA_SCI2_FIFO (see its help).
 
-choice
-	prompt "SCI3 mode"
-	depends on RA_HAVE_SCI_B3
-	optional
-
 config RA_SCI3_UART
-	bool "UART"
+	bool "UART 3"
+	default n
+	depends on RA_HAVE_SCI_B3
 	select SCI3_SERIALDRIVER
 
 config RA_SCI3_I2C
-	bool "I2C bus interface (Simple IIC mode)"
+	bool "I2C 3 (SCI3 Simple IIC mode)"
+	default n
+	depends on RA_HAVE_SCI_B3 && !RA_SCI3_UART
 	select I2C
 	---help---
 		Uses SCI3's Simple IIC mode (RA8M1 User's Manual section
 		31.8). Exposed as /dev/i2cN, with the device number assigned
 		by board bring-up (ra8m1_bringup.c), not fixed by this
 		driver.
-
-endchoice
 
 config RA_SCI3_DTC
 	bool "Transfer SCI3 I2C message data through the DTC"
@@ -831,25 +819,22 @@ config RA_SCI3_RXDTC
 
 		Mutually exclusive with CONFIG_RA_SCI3_FIFO (see its help).
 
-choice
-	prompt "SCI4 mode"
-	depends on RA_HAVE_SCI_B4
-	optional
-
 config RA_SCI4_UART
-	bool "UART"
+	bool "UART 4"
+	default n
+	depends on RA_HAVE_SCI_B4
 	select SCI4_SERIALDRIVER
 
 config RA_SCI4_I2C
-	bool "I2C bus interface (Simple IIC mode)"
+	bool "I2C 4 (SCI4 Simple IIC mode)"
+	default n
+	depends on RA_HAVE_SCI_B4 && !RA_SCI4_UART
 	select I2C
 	---help---
 		Uses SCI4's Simple IIC mode (RA8M1 User's Manual section
 		31.8). Exposed as /dev/i2cN, with the device number assigned
 		by board bring-up (ra8m1_bringup.c), not fixed by this
 		driver.
-
-endchoice
 
 config RA_SCI4_DTC
 	bool "Transfer SCI4 I2C message data through the DTC"
@@ -946,25 +931,22 @@ config RA_SCI4_RXDTC
 
 		Mutually exclusive with CONFIG_RA_SCI4_FIFO (see its help).
 
-choice
-	prompt "SCI9 mode"
-	depends on RA_HAVE_SCI_B9
-	optional
-
 config RA_SCI9_UART
-	bool "UART"
+	bool "UART 9"
+	default n
+	depends on RA_HAVE_SCI_B9
 	select SCI9_SERIALDRIVER
 
 config RA_SCI9_I2C
-	bool "I2C bus interface (Simple IIC mode)"
+	bool "I2C 9 (SCI9 Simple IIC mode)"
+	default n
+	depends on RA_HAVE_SCI_B9 && !RA_SCI9_UART
 	select I2C
 	---help---
 		Uses SCI9's Simple IIC mode (RA8M1 User's Manual section
 		31.8). Exposed as /dev/i2cN, with the device number assigned
 		by board bring-up (ra8m1_bringup.c), not fixed by this
 		driver.
-
-endchoice
 
 config RA_SCI9_DTC
 	bool "Transfer SCI9 I2C message data through the DTC"
