@@ -1596,7 +1596,18 @@ static int sensor_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
                                FAR void *priv)
 {
   FAR struct sensor_rpmsg_advsub_s *msg = data;
-  uint32_t command = msg->command;
+  uint32_t command;
+
+  if (len < sizeof(msg->command))
+    {
+      return -EINVAL;
+    }
+
+  command = msg->command;
+  if (command > SENSOR_RPMSG_IOCTL_ACK)
+    {
+      return -EINVAL;
+    }
 
   /* For publish handler, use the original rx buffer directly to avoid
    * extra copy. For all other handlers, copy data to a temporary stack
