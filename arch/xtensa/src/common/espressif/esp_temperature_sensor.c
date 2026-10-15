@@ -772,7 +772,7 @@ static int esp_temperature_sensor_activate(
     {
       /* Set suspend mode to sensors. */
 
-        esp_temperature_sensor_disable(priv);
+      esp_temperature_sensor_disable(priv);
     }
 
 #ifdef CONFIG_ESPRESSIF_TEMP_UORB_POLL
