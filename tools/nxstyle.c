@@ -342,6 +342,12 @@ static const char *g_white_prefix[] =
    */
 
   "DRV_PIC32MZW_",
+
+  /* Ref:  include/nuttx/net/bluetooth/cs.h, Bluetooth Core specification
+   * SNR values are conventionally expressed in dB.
+   */
+
+  "BT_LE_CS_SNR_CONTROL_",
   NULL
 };
 
@@ -361,6 +367,12 @@ static const char *g_white_suffix[] =
 
   "bm",
   "bp",
+
+  /* Ref:  include/nuttx/net/bluetooth/cs.h */
+
+  "dB",
+  "dBm",
+
   NULL
 };
 
@@ -811,6 +823,28 @@ static const char *g_white_content_list[] =
   "buildSrcCommit",
   "buildVersion",
   "logSystem",
+
+  /* Ref:  net/bt, Bluetooth protocol/API identifiers imported from the
+   * Bluetooth specifications and codec vendor APIs.
+   */
+
+  "ccm_calculate_X0",
+  "Xn",
+  "RTP_version",
+  "CSRC_count",
+  "test_send_Search_invalid_sci_len",
+  "s16ChannelMode",
+  "s16NumOfSubBands",
+  "s16NumOfBlocks",
+  "s16AllocationMethod",
+  "s16NumOfChannels",
+  "s16SamplingFreq",
+  "u16BitRate",
+  "s16BitPool",
+  "SBC_Encoder_Init",
+  "SBC_Encode",
+  "OI_CODEC_SBC_DecoderReset",
+  "OI_CODEC_SBC_DecodeFrame",
 
   NULL
 };

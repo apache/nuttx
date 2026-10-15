@@ -277,6 +277,9 @@ endif
 ifeq ($(CONFIG_SIM_HCISOCKET),y)
   HOSTSRCS += sim_hosthcisocket.c
   CSRCS += sim_hcisocket.c
+  ifeq ($(CONFIG_BT),y)
+    STDLIBS += -lmbedcrypto
+  endif
 endif
 
 ifeq ($(CONFIG_SIM_I2CBUS_LINUX),y)

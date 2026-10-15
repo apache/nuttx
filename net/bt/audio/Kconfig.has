@@ -1,0 +1,90 @@
+############################################################################
+# net/bt/audio/Kconfig.has
+#
+# Copyright (c) ByteDance Ltd. and/or its affiliates.
+#
+# Author: chao an <anchao.archer@bytedance.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# Bluetooth Audio - Hearing Access Service options
+#
+# Copyright (c) 2022 Codecoup
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: Apache-2.0
+
+menuconfig BT_HAS
+	bool "Hearing Access Service support"
+	depends on BT_GATT_DYNAMIC_DB
+	depends on BT_BAP_UNICAST_SERVER
+	help
+	  This option enables support for Hearing Access Service.
+
+if BT_HAS
+
+config BT_HAS_FEATURES_NOTIFIABLE
+	bool "Hearing Aid Features Notifiable Support"
+	help
+	  This option enables support for clients to subscribe for notifications
+	  on the Hearing Aid Features characteristic.
+
+config BT_HAS_PRESET_COUNT
+	int "Preset record list size"
+	default 2
+	range 0 255
+	help
+	  This option sets the number of Hearing Access Service Presets
+	  that can be registered. Setting this value to 0 disables Presets support.
+
+config BT_HAS_PRESET_SUPPORT
+	def_bool BT_HAS_PRESET_COUNT > 0
+
+if BT_HAS_PRESET_SUPPORT
+
+config BT_HAS_PRESET_NAME_DYNAMIC
+	bool "Allow to set preset name on runtime"
+	help
+	  Enabling this option allows for runtime configuration of preset name.
+
+config BT_HAS_PRESET_CONTROL_POINT_NOTIFIABLE
+	bool "Preset Control Point Notifiable support"
+	depends on BT_EATT
+	help
+	  This option enables support for clients to subscribe for notifications
+	  on the Hearing Aid Preset Control Point characteristic.
+
+config BT_HAS_ACTIVE_PRESET_INDEX
+	def_bool BT_HAS_PRESET_SUPPORT
+	help
+	  This option enables the Hearing Aid Active Preset Index characteristic.
+
+endif # BT_HAS_PRESET_SUPPORT
+
+endif # BT_HAS
+
+config BT_HAS_CLIENT
+	bool "Hearing Access Service Client support"
+	depends on BT_GATT_CLIENT
+	depends on BT_GATT_AUTO_DISCOVER_CCC
+	depends on BT_GATT_AUTO_UPDATE_MTU
+	depends on BT_SMP
+	help
+	  This option enables support for Hearing Access Service Client.

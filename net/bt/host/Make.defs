@@ -1,0 +1,287 @@
+############################################################################
+# net/bt/host/Make.defs
+#
+# Copyright (c) ByteDance Ltd. and/or its affiliates.
+#
+# Author: chao an <anchao.archer@bytedance.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+############################################################################
+# net/bt/host/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# NuttX Bluetooth Host Stack
+
+ifeq ($(CONFIG_BT_HOST),y)
+
+# === Core sources (compiled unconditionally for BT_HCI_HOST) ===
+BT_CSRCS += bt/host/uuid.c
+BT_CSRCS += bt/host/addr.c
+BT_CSRCS += bt/host/buf.c
+BT_CSRCS += bt/host/hci_core.c
+BT_CSRCS += bt/host/hci_common.c
+BT_CSRCS += bt/host/id.c
+BT_CSRCS += bt/host/data.c
+
+# === Conditional sources ===
+ifeq ($(CONFIG_BT_BROADCASTER),y)
+BT_CSRCS += bt/host/adv.c
+endif
+
+ifeq ($(CONFIG_BT_OBSERVER),y)
+BT_CSRCS += bt/host/scan.c
+endif
+
+ifeq ($(CONFIG_BT_HOST_CRYPTO),y)
+BT_CSRCS += bt/host/crypto_psa.c
+endif
+
+ifeq ($(CONFIG_BT_ECC),y)
+BT_CSRCS += bt/host/ecc.c
+endif
+
+ifeq ($(CONFIG_BT_HOST_CCM),y)
+BT_CSRCS += bt/host/aes_ccm.c
+endif
+
+ifeq ($(CONFIG_BT_LONG_WQ),y)
+BT_CSRCS += bt/host/long_wq.c
+endif
+
+ifeq ($(CONFIG_BT_SETTINGS),y)
+BT_CSRCS += bt/host/settings.c
+endif
+
+ifeq ($(CONFIG_BT_MONITOR),y)
+BT_CSRCS += bt/host/monitor.c
+endif
+
+ifeq ($(CONFIG_BT_HCI_RAW),y)
+BT_CSRCS += bt/host/hci_raw.c
+endif
+
+# Connection-related sources (CONFIG_BT_CONN or CONFIG_BT_ISO)
+ifneq ($(CONFIG_BT_CONN)$(CONFIG_BT_ISO),)
+BT_CSRCS += bt/host/conn.c
+
+ifeq ($(CONFIG_BT_CONN),y)
+BT_CSRCS += bt/host/l2cap.c
+BT_CSRCS += bt/host/att.c
+BT_CSRCS += bt/host/gatt.c
+
+ifeq ($(CONFIG_BT_GATT_GAP_SVC_VALIDATE),y)
+BT_CSRCS += bt/host/gatt_gap_svc_validate.c
+endif
+
+ifeq ($(CONFIG_BT_SMP),y)
+BT_CSRCS += bt/host/smp.c
+BT_CSRCS += bt/host/keys.c
+else
+BT_CSRCS += bt/host/smp_null.c
+endif
+endif
+
+ifeq ($(CONFIG_BT_ISO),y)
+BT_CSRCS += bt/host/iso.c
+endif
+
+ifeq ($(CONFIG_BT_CHANNEL_SOUNDING),y)
+BT_CSRCS += bt/host/cs.c
+endif
+
+ifeq ($(CONFIG_BT_DF),y)
+BT_CSRCS += bt/host/direction.c
+endif
+endif # CONFIG_BT_CONN or CONFIG_BT_ISO
+
+# === Classic BR/EDR sources ===
+ifeq ($(CONFIG_BT_CLASSIC),y)
+BT_CSRCS += bt/host/classic/br.c
+BT_CSRCS += bt/host/classic/conn_br.c
+BT_CSRCS += bt/host/classic/keys_br.c
+BT_CSRCS += bt/host/classic/l2cap_br.c
+BT_CSRCS += bt/host/classic/sdp.c
+BT_CSRCS += bt/host/classic/ssp.c
+BT_CSRCS += bt/host/classic/sco.c
+
+ifeq ($(CONFIG_BT_A2DP),y)
+BT_CSRCS += bt/host/classic/a2dp.c
+BT_CSRCS += bt/host/classic/a2dp_codec_sbc.c
+endif
+
+ifeq ($(CONFIG_BT_AVDTP),y)
+BT_CSRCS += bt/host/classic/avdtp.c
+endif
+
+ifeq ($(CONFIG_BT_AVRCP),y)
+BT_CSRCS += bt/host/classic/avrcp.c
+endif
+
+ifeq ($(CONFIG_BT_AVCTP),y)
+BT_CSRCS += bt/host/classic/avctp.c
+endif
+
+ifeq ($(CONFIG_BT_RFCOMM),y)
+BT_CSRCS += bt/host/classic/rfcomm.c
+endif
+
+ifeq ($(CONFIG_BT_BIP),y)
+BT_CSRCS += bt/host/classic/bip.c
+endif
+
+ifeq ($(CONFIG_BT_MAP),y)
+BT_CSRCS += bt/host/classic/map.c
+endif
+
+ifeq ($(CONFIG_BT_HFP_HF),y)
+BT_CSRCS += bt/host/classic/hfp_hf.c
+BT_CSRCS += bt/host/classic/at.c
+endif
+
+ifeq ($(CONFIG_BT_HFP_AG),y)
+BT_CSRCS += bt/host/classic/hfp_ag.c
+endif
+
+ifeq ($(CONFIG_BT_GOEP),y)
+BT_CSRCS += bt/host/classic/obex.c
+BT_CSRCS += bt/host/classic/goep.c
+endif
+
+ifeq ($(CONFIG_BT_DID),y)
+BT_CSRCS += bt/host/classic/did.c
+endif
+
+ifeq ($(CONFIG_BT_HID_DEVICE),y)
+BT_CSRCS += bt/host/classic/hid_device.c
+endif
+
+ifeq ($(CONFIG_BT_HID_HOST),y)
+BT_CSRCS += bt/host/classic/hid_host.c
+endif
+
+ifneq ($(CONFIG_BT_AVRCP_CT_COVER_ART)$(CONFIG_BT_AVRCP_TG_COVER_ART),)
+BT_CSRCS += bt/host/classic/avrcp_cover_art.c
+endif
+
+ifeq ($(CONFIG_BT_PBAP),y)
+BT_CSRCS += bt/host/classic/pbap.c
+endif
+endif # CONFIG_BT_CLASSIC
+
+# === Shell sources ===
+ifeq ($(CONFIG_BT_SHELL),y)
+BT_CSRCS += bt/host/shell/bt.c
+ifeq ($(CONFIG_BT_CONN),y)
+BT_CSRCS += bt/host/shell/gatt.c
+endif
+ifeq ($(CONFIG_BT_L2CAP_DYNAMIC_CHANNEL),y)
+BT_CSRCS += bt/host/shell/l2cap.c
+endif
+ifeq ($(CONFIG_BT_ISO),y)
+BT_CSRCS += bt/host/shell/iso.c
+endif
+ifeq ($(CONFIG_BT_CHANNEL_SOUNDING),y)
+BT_CSRCS += bt/host/shell/cs.c
+endif
+
+# Classic shell
+BT_CSRCS += bt/host/classic/shell/bredr.c
+
+ifeq ($(CONFIG_BT_RFCOMM),y)
+BT_CSRCS += bt/host/classic/shell/spp.c
+endif
+
+ifeq ($(CONFIG_BT_A2DP),y)
+BT_CSRCS += bt/host/classic/shell/a2dp.c
+endif
+
+ifeq ($(CONFIG_BT_AVRCP),y)
+BT_CSRCS += bt/host/classic/shell/avrcp.c
+endif
+
+ifneq ($(CONFIG_BT_HFP_HF)$(CONFIG_BT_HFP_AG),)
+BT_CSRCS += bt/host/classic/shell/hfp.c
+endif
+
+ifeq ($(CONFIG_BT_GOEP),y)
+BT_CSRCS += bt/host/classic/shell/goep.c
+endif
+
+ifeq ($(CONFIG_BT_BIP),y)
+BT_CSRCS += bt/host/classic/shell/bip.c
+endif
+
+ifeq ($(CONFIG_BT_HID_DEVICE),y)
+BT_CSRCS += bt/host/classic/shell/hid_device.c
+endif
+
+ifeq ($(CONFIG_BT_HID_HOST),y)
+BT_CSRCS += bt/host/classic/shell/hid_host.c
+endif
+
+ifneq ($(CONFIG_BT_AVRCP_TG_COVER_ART)$(CONFIG_BT_AVRCP_CT_COVER_ART),)
+BT_CSRCS += bt/host/classic/shell/avrcp_cover_art.c
+endif
+
+ifeq ($(CONFIG_BT_PBAP),y)
+BT_CSRCS += bt/host/classic/shell/pbap.c
+endif
+
+ifeq ($(CONFIG_BT_MAP),y)
+BT_CSRCS += bt/host/classic/shell/map.c
+endif
+endif # CONFIG_BT_SHELL
+
+# === VPATH and DEPPATH for all subdirectories ===
+VPATH += bt/host
+VPATH += bt/host/classic
+VPATH += bt/host/shell
+VPATH += bt/host/classic/shell
+
+DEPPATH += --dep-path bt/host
+DEPPATH += --dep-path bt/host/classic
+DEPPATH += --dep-path bt/host/shell
+DEPPATH += --dep-path bt/host/classic/shell
+
+# === Include paths ===
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)/net/bt/host
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)/net/bt/host/classic
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)/net/bt
+
+endif # CONFIG_BT_HOST

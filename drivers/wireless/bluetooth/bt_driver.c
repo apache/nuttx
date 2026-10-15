@@ -27,6 +27,10 @@
 #include <nuttx/config.h>
 #include <nuttx/wireless/bluetooth/bt_driver.h>
 
+#ifdef CONFIG_BT
+#  include <nuttx/net/bluetooth/hci_driver_nuttx.h>
+#endif
+
 #ifdef CONFIG_UART_BTH4
 #  include <nuttx/serial/uart_bth4.h>
 #endif
@@ -94,6 +98,10 @@ int bt_driver_register_with_id(FAR struct bt_driver_s *driver, int id)
     {
       return -ENOMEM;
     }
+#endif
+
+#ifdef CONFIG_BT
+  return bt_hci_driver_register_btdev(driver);
 #endif
 
 #ifdef CONFIG_BLUETOOTH_BRIDGE

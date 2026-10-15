@@ -18,6 +18,41 @@ Linix 45ZWN24-40           2  0.5 Ohm    0.400 mH  2.34A   24V
 * [#4526](https://github.com/apache/nuttx/pull/4526) Rearch video
 * [#6447](https://github.com/apache/nuttx/pull/6447) bcm43xxx: Remove bcmf_txavail_work and resue bcmf_tx_poll_work
    ans init
+ * include/nuttx/net/bluetooth/services/ans.h
+ * @brief Alert Notification Service (ANS)
+ * @defgroup bt_ans Alert Notification Service (ANS)
+ * @brief ANS max text string size in octets
+ * @brief ANS Category ID Enum
+ * an immediate replay is requested via the ANS control point.
+ * net/bt/services/ans.c
+  LOG_INF("ANS initialization complete");
+# net/bt/services/Kconfig.ans
+module-str = Alert Notification Service (ANS)
+  bt_shell_print("%*sLanguage: %c%c%c",
+#include <nuttx/net/bluetooth/services/ans.h>
+/* Build time ANS supported category bit mask */
+#define BT_ANS_NALRT_CAT_MASK                                                                      \
+#define BT_ANS_UNALRT_CAT_MASK                                                                     \
+             "At least one ANS New Alert category must be enabled in "
+    list(APPEND BT_SERVICE_SRCS ${CMAKE_CURRENT_LIST_DIR}/ans.c)
+BT_CSRCS += bt/services/ans.c
+rsource "../mesh/Kconfig"
+rsource "Kconfig.l2cap"
+rsource "Kconfig.gatt"
+rsource "../services/Kconfig"
+rsource "./classic/Kconfig"
+rsource "shell/Kconfig"
+rsource "Kconfig.ans"
+rsource "Kconfig.dis"
+rsource "Kconfig.gap_svc"
+rsource "Kconfig.cts"
+rsource "Kconfig.ets"
+rsource "Kconfig.hrs"
+rsource "Kconfig.tps"
+rsource "nus/Kconfig.nus"
+rsource "ias/Kconfig.ias"
+rsource "ots/Kconfig"
+rsource "bas/Kconfig.bas"
    *   CAF        : Depends on CONFIG_NET_PROMISCUOUS
            * been lost).  If ORE is set along with RXNE then it tells you
   /* GIR bits must be masked! */

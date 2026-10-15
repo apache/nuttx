@@ -47,6 +47,7 @@ include tcp/Make.defs
 include udp/Make.defs
 include sixlowpan/Make.defs
 include bluetooth/Make.defs
+include bt/Make.defs
 include ieee802154/Make.defs
 include devif/Make.defs
 include ipfilter/Make.defs
@@ -64,7 +65,7 @@ CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)net
 ASRCS = $(SOCK_ASRCS) $(NETDEV_ASRCS) $(NET_ASRCS)
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS = $(SOCK_CSRCS) $(NETDEV_CSRCS) $(NET_CSRCS)
+CSRCS = $(SOCK_CSRCS) $(NETDEV_CSRCS) $(NET_CSRCS) $(BT_CSRCS)
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)
