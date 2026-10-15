@@ -979,6 +979,17 @@ config ARCH_BOARD_IMXRT1050_EVK
 		This is the board configuration for the port of NuttX to the NXP i.MXRT
 		evaluation kit, MIMXRT1050-EVKB.  This board features the MIMXRT1052DVL6A MCU.
 
+config ARCH_BOARD_DDCNC_EC300
+	bool "Digital Dream EC300 CNC motion controller"
+	depends on ARCH_CHIP_MIMXRT1052CVL5A
+	select ARCH_HAVE_LEDS
+	select ARCH_PHY_INTERRUPT
+	---help---
+		This is the board configuration for the port of NuttX to the
+		Digital Dream EC300 Ethernet CNC motion controller.  This board
+		features the MIMXRT1052CVL5B MCU, 4MiB of QSPI NOR flash and a
+		LAN8720A Ethernet PHY.
+
 config ARCH_BOARD_ARCX_SOCKET_GRID
 	bool "ARCX Socket Grid board"
 	depends on ARCH_CHIP_MIMXRT1052DVL6A
@@ -4156,6 +4167,7 @@ config ARCH_BOARD
 	default "hymini-stm32v"                if ARCH_BOARD_HYMINI_STM32V
 	default "imxrt1020-evk"                if ARCH_BOARD_IMXRT1020_EVK
 	default "imxrt1050-evk"                if ARCH_BOARD_IMXRT1050_EVK
+	default "ddcnc-ec300"                  if ARCH_BOARD_DDCNC_EC300
 	default "arcx-socket-grid"             if ARCH_BOARD_ARCX_SOCKET_GRID
 	default "imxrt1060-evk"                if ARCH_BOARD_IMXRT1060_EVK
 	default "imxrt1064-evk"                if ARCH_BOARD_IMXRT1064_EVK
@@ -4656,6 +4668,9 @@ source "boards/arm/imxrt/imxrt1020-evk/Kconfig"
 endif
 if ARCH_BOARD_IMXRT1050_EVK
 source "boards/arm/imxrt/imxrt1050-evk/Kconfig"
+endif
+if ARCH_BOARD_DDCNC_EC300
+source "boards/arm/imxrt/ddcnc-ec300/Kconfig"
 endif
 if ARCH_BOARD_ARCX_SOCKET_GRID
 source "boards/arm/imxrt/arcx-socket-grid/Kconfig"

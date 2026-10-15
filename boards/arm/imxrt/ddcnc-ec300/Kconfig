@@ -1,0 +1,19 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_DDCNC_EC300
+
+config DDCNC_EC300_PHY_POLL_MSEC
+	int "PHY link poll interval (ms)"
+	default 1000
+	depends on IMXRT_ENET && ARCH_PHY_INTERRUPT
+	---help---
+		The LAN8720A interrupt output is not connected to the MCU.  The PHY
+		interrupt used by PHY notifications (SIOCMIINOTIFY, for example by
+		the NETINIT link monitor) is emulated by calling the handler at
+		this interval, so link up/down events are detected by polling the
+		PHY.
+
+endif # ARCH_BOARD_DDCNC_EC300
