@@ -184,6 +184,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
   int socktype = 0;
   int port = 0;
   int ret = OK;
+  int herrno = 0;
   int i;
 
   if (hostname == NULL && servname == NULL)
@@ -475,12 +476,27 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
       return EAI_MEMORY;
     }
 
-  gethostentbyname_r(hostname, &host,
-                     hostbuffer, CONFIG_NETDB_BUFSIZE, &ret, flags);
+  ret = gethostentbyname_r(hostname, &host,
+                           hostbuffer, CONFIG_NETDB_BUFSIZE,
+                           &herrno, flags);
   if (ret != OK)
     {
       lib_free(hostbuffer);
-      return ret;
+      switch (herrno)
+        {
+          case HOST_NOT_FOUND:
+          case NO_DATA:
+            return EAI_NONAME;
+
+          case TRY_AGAIN:
+            return EAI_AGAIN;
+
+          case NO_RECOVERY:
+            return EAI_FAIL;
+
+          default:
+            return EAI_NONAME;
+        }
     }
 
   for (i = 0; host.h_addr_list[i]; i++)
