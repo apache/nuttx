@@ -2031,7 +2031,7 @@ static int imxrt_phyintenable(struct imxrt_driver_s *priv)
 {
 #if defined(CONFIG_ETH0_PHY_KSZ8051) || defined(CONFIG_ETH0_PHY_KSZ8061) || \
     defined(CONFIG_ETH0_PHY_KSZ8081) || defined(CONFIG_ETH0_PHY_DP83825I) || \
-    defined(CONFIG_ETH0_YT8512)      || defined(CONFIG_ETH0_PHY_LAN8720) || \
+    defined(CONFIG_ETH0_PHY_YT8512)  || defined(CONFIG_ETH0_PHY_LAN8720) || \
     defined(CONFIG_ETH0_PHY_LAN8742A) || defined(CONFIG_ETH0_PHY_MULTI)
 
   uint16_t phyval;
@@ -2044,7 +2044,7 @@ static int imxrt_phyintenable(struct imxrt_driver_s *priv)
   uint8_t  wreg = rreg;
 
   /* Compile time YT8512 defaults */
-#  if defined(CONFIG_ETH0_YT8512)
+#  if defined(CONFIG_ETH0_PHY_YT8512)
   mask = MII_YT8512_IMR_LD_EN | MII_YT8512_IMR_LU_EN;
   rreg  = MII_YT8512_ISR;
   wreg  = MII_YT8512_IMR;
@@ -2312,6 +2312,7 @@ static int imxrt_determine_phy(struct imxrt_driver_s *priv)
                   (phydata & 0xfff0) ==
                   (g_board_phys[priv->current_phy].id2 & 0xfff0))
                 {
+                  priv->current_phy_address = phyaddr;
                   return OK;
                 }
             }
