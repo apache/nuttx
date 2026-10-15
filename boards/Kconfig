@@ -110,6 +110,7 @@ config ARCH_BOARD_AVRDX_BREADXAVR
 config ARCH_BOARD_AXOLOTI
 	bool "Axoloti board"
 	depends on ARCH_CHIP_STM32F427I
+	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
