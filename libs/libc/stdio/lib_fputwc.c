@@ -104,6 +104,7 @@ wint_t fputwc(wchar_t c, FAR FILE *f)
 {
   flockfile(f);
   wint_t wc = fputwc_unlocked(c, f);
+
   funlockfile(f);
   return wc;
 }

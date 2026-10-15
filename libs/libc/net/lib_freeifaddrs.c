@@ -52,6 +52,7 @@ void freeifaddrs(FAR struct ifaddrs *addrs)
   while (addrs != NULL)
     {
       FAR struct ifaddrs *tmp = addrs;
+
       addrs = addrs->ifa_next;
       lib_free(tmp);
     }

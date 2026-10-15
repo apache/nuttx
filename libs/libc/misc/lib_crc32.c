@@ -143,6 +143,7 @@ uint32_t crc32part(FAR const uint8_t *src, size_t len, uint32_t crc32val)
   for (i = 0; i < len; i++)
     {
       size_t j;
+
       crc32val ^= src[i];
       for (j = 0; j < 8; j++)
         {

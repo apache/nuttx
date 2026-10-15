@@ -93,6 +93,7 @@ FAR char *lib_get_tempbuffer(size_t nbytes)
           int32_t update;
           int32_t free_bitmap = atomic_read(&g_tempbuffer.free_bitmap);
           int index = ffsl(free_bitmap) - 1;
+
           if (index < 0 || index >= CONFIG_LIBC_MAX_TEMPBUFFER)
             {
               break;
@@ -136,6 +137,7 @@ FAR char *lib_get_tempbuffer(size_t nbytes)
 void lib_put_tempbuffer(FAR char *buffer)
 {
   int index = (buffer - &g_tempbuffer.buffer[0][0]) / TEMP_MAX_SIZE;
+
   if (index >= 0 && index < CONFIG_LIBC_MAX_TEMPBUFFER)
     {
       DEBUGASSERT((atomic_read(&g_tempbuffer.free_bitmap) &

@@ -83,38 +83,38 @@ void posix_spawn_file_actions_dump(
     {
       switch (entry->action)
         {
-        case SPAWN_FILE_ACTION_CLOSE:
-          {
-            FAR struct spawn_close_file_action_s *action =
-              (FAR struct spawn_close_file_action_s *)entry;
+          case SPAWN_FILE_ACTION_CLOSE:
+            {
+              FAR struct spawn_close_file_action_s *action =
+                (FAR struct spawn_close_file_action_s *)entry;
 
-            _err("  CLOSE: fd=%d\n", action->fd);
-          }
-          break;
+              _err("  CLOSE: fd=%d\n", action->fd);
+            }
+            break;
 
-        case SPAWN_FILE_ACTION_DUP2:
-          {
-            FAR struct spawn_dup2_file_action_s *action =
-              (FAR struct spawn_dup2_file_action_s *)entry;
+          case SPAWN_FILE_ACTION_DUP2:
+            {
+              FAR struct spawn_dup2_file_action_s *action =
+                (FAR struct spawn_dup2_file_action_s *)entry;
 
-            _err("  DUP2: %d->%d\n", action->fd1, action->fd2);
-          }
-          break;
+              _err("  DUP2: %d->%d\n", action->fd1, action->fd2);
+            }
+            break;
 
-        case SPAWN_FILE_ACTION_OPEN:
-          {
-            FAR struct spawn_open_file_action_s *action =
-              (FAR struct spawn_open_file_action_s *)entry;
+          case SPAWN_FILE_ACTION_OPEN:
+            {
+              FAR struct spawn_open_file_action_s *action =
+                (FAR struct spawn_open_file_action_s *)entry;
 
-            _err("  OPEN: path=%s oflags=%04x mode=%04x fd=%d\n",
-                action->path, action->oflags, action->mode, action->fd);
-          }
-          break;
+              _err("  OPEN: path=%s oflags=%04x mode=%04x fd=%d\n",
+                  action->path, action->oflags, action->mode, action->fd);
+            }
+            break;
 
-        case SPAWN_FILE_ACTION_NONE:
-        default:
-          _err("  ERROR: Unknown action: %d\n", entry->action);
-          break;
+          case SPAWN_FILE_ACTION_NONE:
+          default:
+            _err("  ERROR: Unknown action: %d\n", entry->action);
+            break;
         }
     }
 }

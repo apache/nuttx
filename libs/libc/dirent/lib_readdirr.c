@@ -81,6 +81,7 @@ int readdir_r(FAR DIR *dirp, FAR struct dirent *entry,
   if (!tmp)
     {
       int error = get_errno();
+
       if (!error)
         {
           if (result)

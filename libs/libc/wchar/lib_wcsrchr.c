@@ -53,6 +53,7 @@
 FAR wchar_t *wcsrchr(FAR const wchar_t *s, wchar_t c)
 {
   FAR const wchar_t *p;
+
   for (p = s + wcslen(s); p >= s && *p != c; p--);
 
   return p >= s ? (FAR wchar_t *)p : 0;

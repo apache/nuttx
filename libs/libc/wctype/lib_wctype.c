@@ -48,93 +48,93 @@ wctype_t wctype(FAR const char *c)
 {
   switch (*c)
     {
-    case 'a':
-      if (!strcmp(c, "alnum"))
-        {
-          return WC_ALNUM;
-        }
-      else if (!strcmp(c, "alpha"))
-        {
-          return WC_ALPHA;
-        }
+      case 'a':
+        if (!strcmp(c, "alnum"))
+          {
+            return WC_ALNUM;
+          }
+        else if (!strcmp(c, "alpha"))
+          {
+            return WC_ALPHA;
+          }
 
-      break;
+        break;
 
-    case 'b':
-      if (!strcmp(c, "blank"))
-        {
-          return WC_BLANK;
-        }
+      case 'b':
+        if (!strcmp(c, "blank"))
+          {
+            return WC_BLANK;
+          }
 
-      break;
+        break;
 
-    case 'c':
-      if (!strcmp(c, "cntrl"))
-        {
-          return WC_CNTRL;
-        }
+      case 'c':
+        if (!strcmp(c, "cntrl"))
+          {
+            return WC_CNTRL;
+          }
 
-      break;
+        break;
 
-    case 'd':
-      if (!strcmp(c, "digit"))
-        {
-          return WC_DIGIT;
-        }
+      case 'd':
+        if (!strcmp(c, "digit"))
+          {
+            return WC_DIGIT;
+          }
 
-      break;
+        break;
 
-    case 'g':
-      if (!strcmp(c, "graph"))
-        {
-          return WC_GRAPH;
-        }
+      case 'g':
+        if (!strcmp(c, "graph"))
+          {
+            return WC_GRAPH;
+          }
 
-      break;
+        break;
 
-    case 'l':
-      if (!strcmp(c, "lower"))
-        {
-          return WC_LOWER;
-        }
+      case 'l':
+        if (!strcmp(c, "lower"))
+          {
+            return WC_LOWER;
+          }
 
-      break;
+        break;
 
-    case 'p':
-      if (!strcmp(c, "print"))
-        {
-          return WC_PRINT;
-        }
-      else if (!strcmp(c, "punct"))
-        {
-          return WC_PUNCT;
-        }
+      case 'p':
+        if (!strcmp(c, "print"))
+          {
+            return WC_PRINT;
+          }
+        else if (!strcmp(c, "punct"))
+          {
+            return WC_PUNCT;
+          }
 
-      break;
+        break;
 
-    case 's':
-      if (!strcmp(c, "space"))
-        {
-          return WC_SPACE;
-        }
+      case 's':
+        if (!strcmp(c, "space"))
+          {
+            return WC_SPACE;
+          }
 
-      break;
+        break;
 
-    case 'u':
-      if (!strcmp(c, "upper"))
-        {
-          return WC_UPPER;
-        }
+      case 'u':
+        if (!strcmp(c, "upper"))
+          {
+            return WC_UPPER;
+          }
 
-      break;
+        break;
 
-    case 'x':
-      if (!strcmp(c, "xdigit"))
-        {
-          return WC_XDIGIT;
-        }
+      case 'x':
+        if (!strcmp(c, "xdigit"))
+          {
+            return WC_XDIGIT;
+          }
 
-      break;
+        break;
     }
 
   return 0;

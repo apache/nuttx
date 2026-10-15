@@ -54,5 +54,6 @@
 int isatty(int fd)
 {
   struct termios ts;
+
   return (tcgetattr(fd, &ts) >= 0);
 }

@@ -52,5 +52,6 @@
 pid_t gettid(void)
 {
   FAR struct tls_info_s *tls = tls_get_info();
+
   return tls->tl_tid;
 }

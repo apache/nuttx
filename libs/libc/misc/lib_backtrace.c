@@ -107,6 +107,7 @@ static FAR char **backtrace_malloc(FAR void *const *buffer, int size)
   while (size-- > 0)
     {
       int ret = snprintf(NULL, 0, "%pS", *buffer++);
+
       if (ret < 0)
         {
           return NULL;
@@ -223,6 +224,7 @@ static int backtrace_alloc(FAR struct backtrace_pool_s *bp)
 static void backtrace_free(FAR struct backtrace_pool_s *bp, int index)
 {
   FAR struct backtrace_entry_s *entry = &bp->pool[index];
+
   sq_addlast(&entry->freenode, &bp->freelist);
   entry->depth = 0;
 }
@@ -345,6 +347,7 @@ int backtrace_remove(int index)
        */
 
       FAR struct backtrace_entry_s *next = &bp->pool[entry->next];
+
       index = entry->next;
       memcpy(entry, next, sizeof(struct backtrace_entry_s));
     }
@@ -355,6 +358,7 @@ int backtrace_remove(int index)
        */
 
       int prev = bp->bucket[slot];
+
       while (prev >= 0)
         {
           if (bp->pool[prev].next == index)

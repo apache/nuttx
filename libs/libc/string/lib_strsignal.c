@@ -74,49 +74,49 @@ FAR char *strsignal(int signum)
 #ifdef CONFIG_LIBC_STRSIGNAL
       /* Standard signals */
 
-      CASE_SIG_STR(SIGHUP,    "Hangup");
-      CASE_SIG_STR(SIGINT,    "Interrupt");
-      CASE_SIG_STR(SIGQUIT,   "Quit");
-      CASE_SIG_STR(SIGILL,    "Illegal instruction");
-      CASE_SIG_STR(SIGTRAP,   "Trace/breakpoint trap");
-      CASE_SIG_STR(SIGABRT,   "Aborted");
-      CASE_SIG_STR(SIGBUS,    "Bus error");
-      CASE_SIG_STR(SIGFPE,    "Arithmetic exception");
-      CASE_SIG_STR(SIGKILL,   "Killed");
-      CASE_SIG_STR(SIGUSR1,   "User defined signal 1");
-      CASE_SIG_STR(SIGSEGV,   "Invalid memory reference");
-      CASE_SIG_STR(SIGUSR2,   "User defined signal 2");
-      CASE_SIG_STR(SIGPIPE,   "Broken pipe");
-      CASE_SIG_STR(SIGALRM,   "Alarm clock");
-      CASE_SIG_STR(SIGTERM,   "Terminated");
-      CASE_SIG_STR(SIGCHLD,   "Child status changed");
-      CASE_SIG_STR(SIGCONT,   "Continued");
-      CASE_SIG_STR(SIGSTOP,   "Stopped (signal)");
-      CASE_SIG_STR(SIGTSTP,   "Stopped");
-      CASE_SIG_STR(SIGTTIN,   "Stopped (tty input)");
-      CASE_SIG_STR(SIGTTOU,   "Stopped (tty output)");
-      CASE_SIG_STR(SIGURG,    "Urgent I/O condition");
-      CASE_SIG_STR(SIGXCPU,   "CPU time limit exceeded");
-      CASE_SIG_STR(SIGXFSZ,   "File size limit exceeded");
-      CASE_SIG_STR(SIGVTALRM, "Virtual timer expired");
-      CASE_SIG_STR(SIGPROF,   "Profiling timer expired");
-      CASE_SIG_STR(SIGWINCH,  "Window resize signal");
-      CASE_SIG_STR(SIGPOLL,   "Pollable event occurred");
-      CASE_SIG_STR(SIGSYS,    "Bad system call");
+        CASE_SIG_STR(SIGHUP,    "Hangup");
+        CASE_SIG_STR(SIGINT,    "Interrupt");
+        CASE_SIG_STR(SIGQUIT,   "Quit");
+        CASE_SIG_STR(SIGILL,    "Illegal instruction");
+        CASE_SIG_STR(SIGTRAP,   "Trace/breakpoint trap");
+        CASE_SIG_STR(SIGABRT,   "Aborted");
+        CASE_SIG_STR(SIGBUS,    "Bus error");
+        CASE_SIG_STR(SIGFPE,    "Arithmetic exception");
+        CASE_SIG_STR(SIGKILL,   "Killed");
+        CASE_SIG_STR(SIGUSR1,   "User defined signal 1");
+        CASE_SIG_STR(SIGSEGV,   "Invalid memory reference");
+        CASE_SIG_STR(SIGUSR2,   "User defined signal 2");
+        CASE_SIG_STR(SIGPIPE,   "Broken pipe");
+        CASE_SIG_STR(SIGALRM,   "Alarm clock");
+        CASE_SIG_STR(SIGTERM,   "Terminated");
+        CASE_SIG_STR(SIGCHLD,   "Child status changed");
+        CASE_SIG_STR(SIGCONT,   "Continued");
+        CASE_SIG_STR(SIGSTOP,   "Stopped (signal)");
+        CASE_SIG_STR(SIGTSTP,   "Stopped");
+        CASE_SIG_STR(SIGTTIN,   "Stopped (tty input)");
+        CASE_SIG_STR(SIGTTOU,   "Stopped (tty output)");
+        CASE_SIG_STR(SIGURG,    "Urgent I/O condition");
+        CASE_SIG_STR(SIGXCPU,   "CPU time limit exceeded");
+        CASE_SIG_STR(SIGXFSZ,   "File size limit exceeded");
+        CASE_SIG_STR(SIGVTALRM, "Virtual timer expired");
+        CASE_SIG_STR(SIGPROF,   "Profiling timer expired");
+        CASE_SIG_STR(SIGWINCH,  "Window resize signal");
+        CASE_SIG_STR(SIGPOLL,   "Pollable event occurred");
+        CASE_SIG_STR(SIGSYS,    "Bad system call");
 
 #endif /* CONFIG_LIBC_STRSIGNAL */
 
-    default:
-      if (signum >= SIGRTMIN && signum <= SIGRTMAX)
-        {
-          snprintf(sigstr, sizeof(sigstr), "Real-time Signal %d",
-                   signum - SIGRTMIN);
-        }
-      else
-        {
-          snprintf(sigstr, sizeof(sigstr), "Signal %d", signum);
-        }
-      break;
+      default:
+        if (signum >= SIGRTMIN && signum <= SIGRTMAX)
+          {
+            snprintf(sigstr, sizeof(sigstr), "Real-time Signal %d",
+                     signum - SIGRTMIN);
+          }
+        else
+          {
+            snprintf(sigstr, sizeof(sigstr), "Signal %d", signum);
+          }
+        break;
     }
 
   /* Return a string devoid is meaning */

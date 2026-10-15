@@ -169,84 +169,84 @@ int up_relocateadd(const Elf32_Rela *rel, const Elf32_Sym *sym,
 
   switch (relotype)
     {
-    case R_SPARC_NONE:
-      break;
-    case R_SPARC_8:
+      case R_SPARC_NONE:
+        break;
+      case R_SPARC_8:
         (*(uint8_t *)addr) = (uint8_t)value;
         break;
 
-    case R_SPARC_16:
+      case R_SPARC_16:
         (*(uint16_t *)addr) = (uint16_t)value;
         break;
 
-    case R_SPARC_32:
+      case R_SPARC_32:
         (*(uint32_t *)addr) = value;
         break;
 
-    case R_SPARC_DISP8:
-    case R_SPARC_DISP16:
-    case R_SPARC_DISP32:
+      case R_SPARC_DISP8:
+      case R_SPARC_DISP16:
+      case R_SPARC_DISP32:
         (*(uint32_t *)addr) = value - addr;
         break;
 
-    case R_SPARC_WDISP30:
+      case R_SPARC_WDISP30:
         value  -= addr;
         (*(uint32_t *)addr) &= (~0x3fffffff);
         (*(uint32_t *)addr) |= (value >> 2) & 0x3fffffff;
         break;
 
-    case R_SPARC_WDISP22:
+      case R_SPARC_WDISP22:
         value  -= addr;
         (*(uint32_t *)addr) &= (~0x3fffff);
         (*(uint32_t *)addr) |= (value >> 2) & 0x3fffff;
         break;
 
-    case R_SPARC_HI22:
+      case R_SPARC_HI22:
         (*(uint32_t *)addr) &= (~0x3fffff);
         (*(uint32_t *)addr) |= (value >> 10) & 0x3fffff;
         break;
 
-    case R_SPARC_22:
+      case R_SPARC_22:
         (*(uint32_t *)addr) &= (~0x3fffff);
         (*(uint32_t *)addr) |= value & 0x3fffff;
         break;
 
-    case R_SPARC_13:
+      case R_SPARC_13:
         (*(uint32_t *)addr) &= (~0x1ffff);
         (*(uint32_t *)addr) |= value & 0x1ffff;
         break;
 
-    case R_SPARC_LO10:
+      case R_SPARC_LO10:
         (*(uint32_t *)addr) &= (~0x3ff);
         (*(uint32_t *)addr) |= value & 0x3ff;
         break;
 
-    case R_SPARC_PC10:
+      case R_SPARC_PC10:
         value  -= addr;
         (*(uint32_t *)addr) &= (~0x3ff);
         (*(uint32_t *)addr) |= value & 0x3ff;
         break;
 
-    case R_SPARC_PC22:
+      case R_SPARC_PC22:
         value  -= addr;
         (*(uint32_t *)addr) &= (~0x3fffff);
         (*(uint32_t *)addr) |= (value >> 10) & 0x3fffff;
         break;
 
-    case R_SPARC_UA32:
-    case R_SPARC_GLOB_DAT:
+      case R_SPARC_UA32:
+      case R_SPARC_GLOB_DAT:
         (*(uint32_t *)addr) = value;
         break;
 
-    case R_SPARC_JMP_SLOT:
+      case R_SPARC_JMP_SLOT:
         (*(uint32_t *)(addr + 1)) = OPCODE_SETHI_G1 | ((value >> 10) &
                                         0x3fffff);
         (*(uint32_t *)(addr + 2)) = OPCODE_JMP_G1 | (value & 0x3ff);
         break;
 
-    default:
-      berr("ERROR: RELA relocation %u not supported\n", relotype);
-      return -EINVAL;
+      default:
+        berr("ERROR: RELA relocation %u not supported\n", relotype);
+        return -EINVAL;
     }
 
   return OK;

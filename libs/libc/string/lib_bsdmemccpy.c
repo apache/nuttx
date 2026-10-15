@@ -100,6 +100,7 @@ FAR void *memccpy(FAR void *s1, FAR const void *s2, int c, size_t n)
       while (n >= LITTLEBLOCKSIZE)
         {
           libc_data_t buffer = (libc_data_t)(*paligned_in);
+
           buffer ^= mask;
           if (DETECTNULL(buffer))
             {
@@ -128,6 +129,7 @@ FAR void *memccpy(FAR void *s1, FAR const void *s2, int c, size_t n)
       while (n >= LITTLEBLOCKSIZE4)
         {
           uint32_t buffer = *paligned_in;
+
           buffer ^= mask;
           if (DETECTNULL32(buffer))
             {

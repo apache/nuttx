@@ -177,7 +177,7 @@ int b64_pton(FAR const char *src,
           default:
             return -1;
         }
-      }
+    }
 
   if (ch == g_pad64)
     {
@@ -215,18 +215,18 @@ int b64_pton(FAR const char *src,
                   }
               }
 
-           if (target && *target != 0)
-             {
-               return -1;
-             }
+            if (target && *target != 0)
+              {
+                return -1;
+              }
         }
     }
   else
     {
-       if (state != 0)
-         {
-           return -1;
-         }
+      if (state != 0)
+        {
+          return -1;
+        }
     }
 
   return datalen;

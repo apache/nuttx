@@ -284,8 +284,8 @@ int lib_mode2oflags(FAR const char *mode)
                     /* Open for read/write access */
 
                     oflags |= O_RDWR;
-                 }
-                 break;
+                  }
+                  break;
 
                 case MODE_W:
                   {

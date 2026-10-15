@@ -78,6 +78,7 @@ static ssize_t rawoutstream_puts(FAR struct lib_outstream_s *self,
 static void rawoutstream_putc(FAR struct lib_outstream_s *self, int ch)
 {
   char tmp = ch;
+
   rawoutstream_puts(self, &tmp, 1);
 }
 

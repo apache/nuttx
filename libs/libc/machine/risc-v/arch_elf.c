@@ -119,6 +119,7 @@ static const char *_get_rname(int type)
 static uint32_t _get_val(uint16_t *addr)
 {
   uint32_t ret;
+
   ret = *addr | (*(addr + 1)) << 16;
   return ret;
 }
@@ -136,6 +137,7 @@ static void _set_val(uint16_t *addr, uint32_t val)
 static void _add_val(uint16_t *addr, uint32_t val)
 {
   uint32_t cur = _get_val(addr);
+
   _set_val(addr, cur + val);
 }
 
@@ -282,6 +284,7 @@ static inline bool _valid_hi20_imm(long imm_hi)
 
   long hi   = imm_hi & ((1 << 20) - 1);        /* 32-bit signed value */
   long sign = -((imm_hi >> 19) & 1);           /* 32-bit sign value */
+
   hi        = ((hi << 12) | sign << 32) >> 12; /* 32-bit sign extend */
 
   /* If the values do not match, the immediate is invalid */
@@ -613,6 +616,7 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
 
           long imm_hi;
           long imm_lo;
+
           _calc_imm(offset, &imm_hi, &imm_lo);
 
           if (!_valid_hi20_imm(imm_hi))
@@ -644,6 +648,7 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
 
           long imm_hi;
           long imm_lo;
+
           _calc_imm(offset, &imm_hi, &imm_lo);
           insn = (insn & 0x000fffff) | (imm_lo << 20);
 
@@ -668,6 +673,7 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
 
           long imm_hi;
           long imm_lo;
+
           _calc_imm(offset, &imm_hi, &imm_lo);
 
           uint32_t val =

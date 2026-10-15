@@ -64,6 +64,7 @@ static const uint16_t g_daysbeforemonth[13] =
 int clock_daysbeforemonth(int month, bool leap_year)
 {
   int retval = g_daysbeforemonth[month];
+
   if (month >= 2 && leap_year)
     {
       retval++;

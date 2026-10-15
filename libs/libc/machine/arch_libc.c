@@ -141,8 +141,8 @@ int memcmp(FAR const void *s1, FAR const void *s2, size_t n)
 {
 #  ifdef CONFIG_MM_KASAN_INSTRUMENT
 #    ifndef CONFIG_MM_KASAN_DISABLE_READS_CHECK
-    __asan_loadN((FAR void *)s1, n);
-    __asan_loadN((FAR void *)s2, n);
+  __asan_loadN((FAR void *)s1, n);
+  __asan_loadN((FAR void *)s2, n);
 #   endif
 #  endif
   return ARCH_LIBCFUN(memcmp)(s1, s2, n);

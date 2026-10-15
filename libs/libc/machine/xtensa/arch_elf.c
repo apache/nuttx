@@ -148,15 +148,15 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr,
 
   switch (relotype)
     {
-    case R_XTENSA_NONE:
-      {
-        /* No relocation */
-      }
-      break;
+      case R_XTENSA_NONE:
+        {
+          /* No relocation */
+        }
+        break;
 
-    default:
-      berr("ERROR: Unsupported relocation: %u\n", relotype);
-      return -EINVAL;
+      default:
+        berr("ERROR: Unsupported relocation: %u\n", relotype);
+        return -EINVAL;
     }
 
   return OK;
@@ -190,49 +190,50 @@ int up_relocateadd(const Elf32_Rela *rel, const Elf32_Sym *sym,
 
   switch (relotype)
     {
-    case R_XTENSA_NONE:
-      break;
+      case R_XTENSA_NONE:
+        break;
 
-    case R_XTENSA_32:
-      (*(uint32_t *)(up_textheap_data_address((void *)addr))) += value;
-      break;
+      case R_XTENSA_32:
+        (*(uint32_t *)(up_textheap_data_address((void *)addr))) += value;
+        break;
 
-    case R_XTENSA_ASM_EXPAND:
-      bwarn("WARNING: Ignoring RELA relocation R_XTENSA_ASM_EXPAND %u\n",
-          relotype);
-      break;
-
-    case R_XTENSA_SLOT0_OP:
-      p = (unsigned char *)up_textheap_data_address((void *)addr);
-      if (is_l32r(p))
-        {
-          /* Xtensa ISA:
-           * L32R forms a virtual address by adding the 16-bit one-extended
-           * constant value encoded in the instruction word shifted left by
-           * two to the address of the L32R plus three with the two least
-           * significant bits cleared.
-           */
-
-          uintptr_t base = (addr + 3) & ~3;
-          uint16_t imm = (value - base) >> 2;
-          if (base + (0xfffc0000 | ((uint32_t)imm << 2)) != value)
-            {
-              berr("ERROR: Out of range rellocation at %p\n", p);
-              return -EINVAL;
-            }
-
-          p[1] = imm & 0xff;
-          p[2] = (imm >> 8) & 0xff;
-          break;
-        }
-
-      bwarn("WARNING: Ignoring RELA relocation R_XTENSA_SLOT0_OP %u\n",
+      case R_XTENSA_ASM_EXPAND:
+        bwarn("WARNING: Ignoring RELA relocation R_XTENSA_ASM_EXPAND %u\n",
             relotype);
-      break;
+        break;
 
-    default:
-      berr("ERROR: RELA relocation %u not supported\n", relotype);
-      return -EINVAL;
+      case R_XTENSA_SLOT0_OP:
+        p = (unsigned char *)up_textheap_data_address((void *)addr);
+        if (is_l32r(p))
+          {
+            /* Xtensa ISA:
+             * L32R forms a virtual address by adding the 16-bit one-extended
+             * constant value encoded in the instruction word shifted left by
+             * two to the address of the L32R plus three with the two least
+             * significant bits cleared.
+             */
+
+            uintptr_t base = (addr + 3) & ~3;
+            uint16_t imm = (value - base) >> 2;
+
+            if (base + (0xfffc0000 | ((uint32_t)imm << 2)) != value)
+              {
+                berr("ERROR: Out of range rellocation at %p\n", p);
+                return -EINVAL;
+              }
+
+            p[1] = imm & 0xff;
+            p[2] = (imm >> 8) & 0xff;
+            break;
+          }
+
+        bwarn("WARNING: Ignoring RELA relocation R_XTENSA_SLOT0_OP %u\n",
+              relotype);
+        break;
+
+      default:
+        berr("ERROR: RELA relocation %u not supported\n", relotype);
+        return -EINVAL;
     }
 
   return OK;

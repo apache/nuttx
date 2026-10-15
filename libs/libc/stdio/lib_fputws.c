@@ -93,6 +93,7 @@ int fputws_unlocked(FAR const wchar_t *ws, FAR FILE *f)
 int fputws(FAR const wchar_t *ws, FAR FILE *f)
 {
   int l;
+
   flockfile(f);
   l = fputws_unlocked(ws, f);
   funlockfile(f);

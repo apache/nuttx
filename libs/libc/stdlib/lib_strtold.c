@@ -674,14 +674,14 @@ static long_double strtox(FAR const char *str, FAR char **endptr, int flag)
 
   switch (*s)
     {
-  case '-':
-      negative = 1;  /* Fall through to increment position */
+      case '-':
+        negative = 1;  /* Fall through to increment position */
 
-  case '+':
-      s++;
+      case '+':
+        s++;
 
-  default:
-      break;
+      default:
+        break;
     }
 
   for (i = 0; i < 8 && (*s | 32) == "infinity"[i]; i++)

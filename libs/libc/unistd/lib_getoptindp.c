@@ -44,5 +44,6 @@
 int *getoptindp(void)
 {
   FAR struct getopt_s *go = getoptvars();
+
   return &go->go_optind;
 }

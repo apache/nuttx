@@ -498,179 +498,187 @@ int hex2bin(FAR struct lib_instream_s *instream,
 
       switch (bin[RECTYPE_BINNDX])
         {
-        case RECORD_DATA: /* Data */
-          {
-            /* Swap data in place in the binary buffer as required */
+          case RECORD_DATA: /* Data */
+            {
+              /* Swap data in place in the binary buffer as required */
 
-            switch (swap)
-              {
-              case HEX2BIN_NOSWAP: /* No swap, stream is the correct byte order */
-                break;
-
-              case HEX2BIN_SWAP16: /* Swap bytes in 16-bit values */
+              switch (swap)
                 {
-                  if ((bytecount & 1) != 0)
+                  case HEX2BIN_NOSWAP:
+
+                    /* No swap, stream is the correct byte order */
+
+                    break;
+
+                  case HEX2BIN_SWAP16: /* Swap bytes in 16-bit values */
                     {
-                      lerr("Line %d ERROR: Byte count %d is not a multiple "
-                           "of 2\n",
-                           lineno, bytecount);
-                       goto errout_with_einval;
+                      if ((bytecount & 1) != 0)
+                        {
+                          lerr(
+                            "Line %d ERROR: Byte count %d is not a multiple "
+                            "of 2\n",
+                            lineno, bytecount);
+                          goto errout_with_einval;
+                        }
+
+                      /* Do the byte swap */
+
+                      hex2bin_swap16(&bin[DATA_BINNDX], bytecount);
                     }
+                    break;
 
-                  /* Do the byte swap */
-
-                  hex2bin_swap16(&bin[DATA_BINNDX], bytecount);
-                }
-                break;
-
-              case HEX2BIN_SWAP32: /* Swap bytes in 32-bit values */
-                {
-                  if ((bytecount & 3) != 0)
+                  case HEX2BIN_SWAP32: /* Swap bytes in 32-bit values */
                     {
-                      lerr("Line %d ERROR: Byte count %d is not a multiple "
-                           "of 4\n",
-                           lineno, bytecount);
-                       goto errout_with_einval;
+                      if ((bytecount & 3) != 0)
+                        {
+                          lerr(
+                            "Line %d ERROR: Byte count %d is not a multiple "
+                            "of 4\n",
+                            lineno, bytecount);
+                          goto errout_with_einval;
+                        }
+
+                      /* Do the byte swap */
+
+                      hex2bin_swap32(&bin[DATA_BINNDX], bytecount);
                     }
+                    break;
 
-                  /* Do the byte swap */
-
-                  hex2bin_swap32(&bin[DATA_BINNDX], bytecount);
+                  default:
+                    {
+                      lerr("ERROR: Invalid swap argument: %d\n", swap);
+                      goto errout_with_einval;
+                    }
                 }
-                break;
 
-              default:
+              /* Get and verify the full 32-bit address */
+
+              address = extension + (unsigned long)address16;
+              endaddr = address + bytecount;
+
+              if (address < baseaddr ||
+                  (endpaddr != 0 && endaddr >= endpaddr))
                 {
-                  lerr("ERROR: Invalid swap argument: %d\n", swap);
+                  lerr("Line %d ERROR: Extended address %08lx is out of "
+                       "range\n",
+                       lineno, (unsigned long)address);
                   goto errout_with_einval;
                 }
+
+              /* Seek to the correct position in the OUT stream if we have
+               * made an unexpected jump in the data address.
+               */
+
+              if (address != expected)
+                {
+                  off_t pos = lib_stream_seek(outstream,
+                                              address - baseaddr, SEEK_SET);
+
+                  if (pos == (off_t)-1)
+                    {
+                      lerr("Line %u ERROR: Seek to address %08lu failed\n",
+                           lineno, (unsigned long)address);
+                      ret = -ESPIPE;
+                      goto errout_with_buffers;
+                    }
+                }
+
+              /* Transfer data to the OUT stream */
+
+              writedata(outstream, &bin[DATA_BINNDX], bytecount);
+
+              /* This is the next data address that we expect to see */
+
+              expected = address + bytecount;
+            }
+            break;
+
+          case RECORD_EOF: /* End of file */
+
+            /*  End Of File record.  Must occur exactly once per file in the
+             * last line of the file. The byte count is 00 and the data field
+             * is empty. Usually the address field is also 0000.
+             */
+
+            if (bytecount == 0)
+              {
+                ret = OK;
+                goto exit_with_buffers;
               }
 
-            /* Get and verify the full 32-bit address */
+            lerr("Line %u ERROR: Nonzero bytecount %d in EOF\n",
+                 lineno, bytecount);
+            goto errout_with_einval;
 
-            address = extension + (unsigned long)address16;
-            endaddr = address + bytecount;
+          case RECORD_EXT_SEGADDR: /* Extended segment address record */
 
-            if (address < baseaddr || (endpaddr != 0 && endaddr >= endpaddr))
+            /* The address specified by the data field is multiplied by 16
+             * (shifted 4 bits left) and added to the subsequent data record
+             * addresses. This allows addressing of up to a megabyte of
+             * address space. The address field of this record has to be
+             * 0000, the byte count is 02 (the segment is 16-bit). The
+             * least significant hex digit of the segment address is always
+             * 0.
+             */
+
+            if (bytecount != 2 || address16 != 0 ||
+                bin[DATA_BINNDX + 1] != 0)
               {
-                lerr("Line %d ERROR: Extended address %08lx is out of "
-                     "range\n",
-                     lineno, (unsigned long)address);
+                lerr("Line %u ERROR: Invalid segment address\n", lineno);
+                lerr("  bytecount=%d address=%04x segment=%02x%02x\n",
+                     bytecount, address16, bin[DATA_BINNDX],
+                     bin[DATA_BINNDX + 1]);
                 goto errout_with_einval;
               }
 
-            /* Seek to the correct position in the OUT stream if we have
-             * made an unexpected jump in the data address.
+            extension = (unsigned long)bin[DATA_BINNDX] << 12;
+            break;
+
+          case RECORD_START_SEGADDR: /* Start segment address record */
+
+            /* For 80x86 processors, it specifies the initial content of
+             * the CS:IP registers. The address field is 0000, the byte
+             * count is 04, the first two bytes are the CS value, the
+             * latter two are the IP value.
              */
 
-            if (address != expected)
+            break;
+
+          case RECORD_EXT_LINADDR: /* Extended linear address record */
+
+            /* The address field is 0000, the byte count is 02. The two
+             * data bytes (two hex digit pairs in big endian order)
+             * represent the upper 16 bits of the 32 bit address for
+             * all subsequent 00 type records until the next 04 type
+             * record comes. If there is not a 04 type record, the
+             * upper 16 bits default to 0000. To get the absolute
+             * address for subsequent 00 type records, the address
+             * specified by the data field of the most recent 04 record
+             * is added to the 00 record addresses.
+             */
+
+            if (bytecount != 2 || address16 != 0)
               {
-                off_t pos = lib_stream_seek(outstream,
-                                            address - baseaddr, SEEK_SET);
-                if (pos == (off_t)-1)
-                  {
-                    lerr("Line %u ERROR: Seek to address %08lu failed\n",
-                         lineno, (unsigned long)address);
-                    ret = -ESPIPE;
-                    goto errout_with_buffers;
-                  }
+                lerr("Line %u ERROR: Invalid linear address\n", lineno);
+                lerr("  bytecount=%d address=%04x\n", bytecount, address16);
+                goto errout_with_einval;
               }
 
-            /* Transfer data to the OUT stream */
+            extension = (unsigned long)bin[DATA_BINNDX] << 24 |
+                        (unsigned long)bin[DATA_BINNDX + 1] << 16;
+            break;
 
-            writedata(outstream, &bin[DATA_BINNDX], bytecount);
+          case RECORD_START_LINADDR: /* Start linear address record */
 
-            /* This is the next data address that we expect to see */
+            /* The address field is 0000, the byte count is 04. The 4
+             * data bytes represent the 32-bit value loaded into the EIP
+             * register of the 80386 and higher CPU.
+             */
 
-            expected = address + bytecount;
-          }
-          break;
+            break;
 
-        case RECORD_EOF: /* End of file */
-
-          /*  End Of File record.  Must occur exactly once per file in the
-           * last line of the file. The byte count is 00 and the data field
-           * is empty. Usually the address field is also 0000.
-           */
-
-          if (bytecount == 0)
-            {
-              ret = OK;
-              goto exit_with_buffers;
-            }
-
-          lerr("Line %u ERROR: Nonzero bytecount %d in EOF\n",
-               lineno, bytecount);
-          goto errout_with_einval;
-
-        case RECORD_EXT_SEGADDR: /* Extended segment address record */
-
-          /* The address specified by the data field is multiplied by 16
-           * (shifted 4 bits left) and added to the subsequent data record
-           * addresses. This allows addressing of up to a megabyte of
-           * address space. The address field of this record has to be
-           * 0000, the byte count is 02 (the segment is 16-bit). The
-           * least significant hex digit of the segment address is always
-           * 0.
-           */
-
-          if (bytecount != 2 || address16 != 0 || bin[DATA_BINNDX + 1] != 0)
-            {
-              lerr("Line %u ERROR: Invalid segment address\n", lineno);
-              lerr("  bytecount=%d address=%04x segment=%02x%02x\n",
-                   bytecount, address16, bin[DATA_BINNDX],
-                   bin[DATA_BINNDX + 1]);
-              goto errout_with_einval;
-            }
-
-          extension = (unsigned long)bin[DATA_BINNDX] << 12;
-          break;
-
-        case RECORD_START_SEGADDR: /* Start segment address record */
-
-          /* For 80x86 processors, it specifies the initial content of
-           * the CS:IP registers. The address field is 0000, the byte
-           * count is 04, the first two bytes are the CS value, the
-           * latter two are the IP value.
-           */
-
-          break;
-
-        case RECORD_EXT_LINADDR: /* Extended linear address record */
-
-          /* The address field is 0000, the byte count is 02. The two
-           * data bytes (two hex digit pairs in big endian order)
-           * represent the upper 16 bits of the 32 bit address for
-           * all subsequent 00 type records until the next 04 type
-           * record comes. If there is not a 04 type record, the
-           * upper 16 bits default to 0000. To get the absolute
-           * address for subsequent 00 type records, the address
-           * specified by the data field of the most recent 04 record
-           * is added to the 00 record addresses.
-           */
-
-          if (bytecount != 2 || address16 != 0)
-            {
-              lerr("Line %u ERROR: Invalid linear address\n", lineno);
-              lerr("  bytecount=%d address=%04x\n", bytecount, address16);
-              goto errout_with_einval;
-            }
-
-          extension = (unsigned long)bin[DATA_BINNDX] << 24 |
-                      (unsigned long)bin[DATA_BINNDX + 1] << 16;
-          break;
-
-        case RECORD_START_LINADDR: /* Start linear address record */
-
-          /* The address field is 0000, the byte count is 04. The 4
-           * data bytes represent the 32-bit value loaded into the EIP
-           * register of the 80386 and higher CPU.
-           */
-
-          break;
-
-        default:
-          break;
+          default:
+            break;
         }
     }
 

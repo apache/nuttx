@@ -55,9 +55,11 @@
 unsigned int if_nametoindex(FAR const char *ifname)
 {
   int sockfd = socket(NET_SOCK_FAMILY, NET_SOCK_TYPE, NET_SOCK_PROTOCOL);
+
   if (sockfd >= 0)
     {
       struct ifreq req;
+
       strlcpy(req.ifr_name, ifname, IF_NAMESIZE);
       if (ioctl(sockfd, SIOCGIFINDEX, (unsigned long)&req) >= 0)
         {

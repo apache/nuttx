@@ -50,6 +50,7 @@ FAR void *obstack_copy(FAR struct obstack *h,
                        FAR const void *address, size_t size)
 {
   FAR void *res = obstack_alloc(h, size);
+
   memcpy(res, address, size);
   return res;
 }
@@ -74,6 +75,7 @@ FAR void *obstack_copy0(FAR struct obstack *h,
                         FAR const void *address, size_t size)
 {
   FAR char *res = obstack_alloc(h, size + 1);
+
   memcpy(res, address, size);
   res[size] = '\0';
   return res;

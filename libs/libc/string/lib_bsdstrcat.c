@@ -50,6 +50,7 @@ FAR char *strcat(FAR char *dest, FAR const char *src)
   if (ALIGNED(dest))
     {
       FAR libc_data_t *aligned_s1 = (FAR libc_data_t *)dest;
+
       while (!DETECTNULL(*aligned_s1))
         {
           aligned_s1++;

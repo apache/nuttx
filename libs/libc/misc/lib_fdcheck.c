@@ -78,6 +78,7 @@ int fdcheck_restore(int val)
   if (ret >= 0)
     {
       uint8_t tag_expect = (val >> TAG_SHIFT) & TAG_MASK;
+
       if (tag_expect != tag_store)
         {
           ferr("tag_expect 0x%x tag_store 0x%x\n",
@@ -114,6 +115,7 @@ int fdcheck_protect(int fd)
       uint8_t fdcheck_tag;
 
       irqstate_t flags = spin_lock_irqsave(&g_fdcheck_lock);
+
       if ((++g_fdcheck_tag & TAG_MASK) == 0)
         {
           ++g_fdcheck_tag;

@@ -74,22 +74,22 @@ FAR void *memmem(FAR const void *haystack, size_t haystacklen,
     {
       case (0):
 
-          /* empty needle */
+        /* empty needle */
 
-          return (FAR void *)haystack;
-          break;
+        return (FAR void *)haystack;
+        break;
       case (1):
 
-          /* special case for single-character needles */
+        /* special case for single-character needles */
 
-          return memchr(haystack,
-                        *((FAR unsigned char *)needle), haystacklen);
-          break;
+        return memchr(haystack,
+                      *((FAR unsigned char *)needle), haystacklen);
+        break;
     }
 
   /* start searching through haystack only from the first occurrence of
-    * the first character of needle.
-    */
+   * the first character of needle.
+   */
 
   haystack_ptr = (FAR const unsigned char *)memchr(haystack,
                   *((FAR const unsigned char *)needle), haystacklen);
@@ -133,18 +133,18 @@ FAR void *memmem(FAR const void *haystack, size_t haystacklen,
         }
 
       /* we will call memcmp() only once we know that the sums are equal
-        * and that LONG_INT_N_BYTES last chars are equal, so it will be
-        * enough to compare all but the last LONG_INT_N_BYTES + 1
-        * characters.
-        */
+       * and that LONG_INT_N_BYTES last chars are equal, so it will be
+       * enough to compare all but the last LONG_INT_N_BYTES + 1
+       * characters.
+       */
 
       compare_len = needlelen - (LONG_INT_N_BYTES + 1);
 
       /* At this point:
-        * needle is at least two characters long
-        * haystack is at least needlelen characters long (also at least two)
-        * the first characters of needle and haystack are identical
-        */
+       * needle is at least two characters long
+       * haystack is at least needlelen characters long (also at least two)
+       * the first characters of needle and haystack are identical
+       */
 
       if (sums_diff == 0
           && last_haystack_chars == last_needle_chars
@@ -154,9 +154,9 @@ FAR void *memmem(FAR const void *haystack, size_t haystacklen,
         }
 
       /* iterate through the remainder of haystack, updating the sums'
-        * differenceand checking for identity whenever the difference
-        * is zero.
-        */
+       * differenceand checking for identity whenever the difference
+       * is zero.
+       */
 
       for (i = haystacklen - needlelen; i > 0; --i)
         {
@@ -165,8 +165,8 @@ FAR void *memmem(FAR const void *haystack, size_t haystacklen,
           sums_diff -= *(FAR const unsigned char *)haystack++;
           sums_diff += *haystack_ptr++;
           /* if sums_diff == 0, we know that the sums are equal, so it is
-            * enough to compare all but the last characters.
-            */
+           * enough to compare all but the last characters.
+           */
 
           if (sums_diff == 0
               && last_haystack_chars == last_needle_chars
@@ -187,16 +187,16 @@ FAR void *memmem(FAR const void *haystack, size_t haystacklen,
         }
 
       /* we will call memcmp() only once we know that the sums are equal,
-        * so it will be enough to compare all but the last characters.
-        */
+       * so it will be enough to compare all but the last characters.
+       */
 
       compare_len = needlelen - 1;
 
       /* At this point:
-        * needle is at least two characters long
-        * haystack is at least needlelen characters long (also at least two)
-        * the first characters of needle and haystack are identical
-        */
+       * needle is at least two characters long
+       * haystack is at least needlelen characters long (also at least two)
+       * the first characters of needle and haystack are identical
+       */
 
       if (sums_diff == 0
           && memcmp(haystack, needle, compare_len) == 0)
@@ -205,17 +205,17 @@ FAR void *memmem(FAR const void *haystack, size_t haystacklen,
         }
 
       /* iterate through the remainder of haystack, updating the sums'
-        * difference and checking for identity whenever the difference
-        * is zero.
-        */
+       * difference and checking for identity whenever the difference
+       * is zero.
+       */
 
       for (i = haystacklen - needlelen; i > 0; --i)
         {
           sums_diff -= *(FAR const unsigned char *)haystack++;
           sums_diff += *haystack_ptr++;
           /* if sums_diff == 0, we know that the sums are equal, so it is
-            * enough to compare all but the last characters.
-            */
+           * enough to compare all but the last characters.
+           */
 
           if (sums_diff == 0
               && memcmp(haystack, needle, compare_len) == 0)
@@ -243,8 +243,8 @@ FAR void *memmem(FAR const void *haystack, size_t haystacklen,
         }
 
       /* iterate through the remainder of haystack, updating the last char
-        * data and checking for equality.
-        */
+       * data and checking for equality.
+       */
 
       for (i = haystacklen - needlelen; i > 0; --i)
         {
@@ -279,8 +279,8 @@ FAR void *memmem(FAR const void *haystack, size_t haystacklen,
         }
 
       /* iterate through the remainder of haystack, updating the last char
-        * data and checking for equality.
-        */
+       * data and checking for equality.
+       */
 
       for (i = haystacklen - needlelen; i > 0; --i)
         {

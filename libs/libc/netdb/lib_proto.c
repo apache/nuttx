@@ -53,6 +53,7 @@ FAR struct protoent *getprotoent(void)
 {
   FAR struct protoent *result;
   int ret = getprotoent_r(&result_buf, NULL, 0, &result);
+
   return ret == OK ? &result_buf : NULL;
 }
 
@@ -60,6 +61,7 @@ FAR struct protoent *getprotobyname(FAR const char *name)
 {
   FAR struct protoent *result;
   int ret = getprotobyname_r(name, &result_buf, NULL, 0, &result);
+
   return ret == OK ? &result_buf : NULL;
 }
 
@@ -67,5 +69,6 @@ FAR struct protoent *getprotobynumber(int proto)
 {
   FAR struct protoent *result;
   int ret = getprotobynumber_r(proto, &result_buf, NULL, 0, &result);
+
   return ret == OK ? &result_buf : NULL;
 }

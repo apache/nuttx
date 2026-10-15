@@ -300,6 +300,7 @@ int lib_hostfile_lookup(FAR const void *addr, socklen_t len, int type,
            */
 
           FAR char *hostaddr = host->h_addr_list[0];
+
           if (hostaddr != NULL)
             {
               ninfo("Comparing addresses...\n");

@@ -41,6 +41,7 @@
 int strncasecmp(FAR const char *cs, FAR const char *ct, size_t nb)
 {
   register int result = 0;
+
   for (; nb > 0; nb--)
     {
       if ((result = toupper(*cs) - toupper(*ct)) != 0 ||

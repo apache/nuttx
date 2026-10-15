@@ -217,6 +217,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
       if (family == AF_INET || family == AF_UNSPEC)
         {
           struct in_addr addr;
+
           memset(&addr, 0, sizeof(struct in_addr));
           ai = alloc_ai(AF_INET, socktype, proto, port, &addr);
           if (ai != NULL)
@@ -230,6 +231,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
       if (family == AF_INET6 || family == AF_UNSPEC)
         {
           struct in6_addr addr;
+
           memset(&addr, 0, sizeof(struct in6_addr));
           ai = alloc_ai(AF_INET6, socktype, proto, port, &addr);
           if (ai != NULL)

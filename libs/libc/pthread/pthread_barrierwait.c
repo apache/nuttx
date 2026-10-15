@@ -117,6 +117,7 @@ int pthread_barrier_wait(FAR pthread_barrier_t *barrier)
       /* If the thread is awakened by a signal, just continue to wait */
 
       int errornumber = get_errno();
+
       if (errornumber != EINTR)
         {
           return errornumber;

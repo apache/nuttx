@@ -855,6 +855,7 @@ static inline int userfs_destroy_dispatch(FAR struct userfs_info_s *info,
   if (nsent < 0)
     {
       int ret = -get_errno();
+
       ferr("ERROR: sendto failed: %d\n", ret);
       return ret;
     }

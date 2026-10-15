@@ -55,6 +55,7 @@
 static off_t lib_getoffset(FAR FILE *stream)
 {
   off_t offset = 0;
+
   flockfile(stream);
 
   if (stream->fs_bufstart !=

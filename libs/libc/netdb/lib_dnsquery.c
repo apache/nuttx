@@ -131,6 +131,7 @@ static ssize_t stream_send(int fd, FAR const void *buf, size_t len)
   while (len > 0)
     {
       ssize_t ret = send(fd, buf, len, 0);
+
       if (ret == -1)
         {
           if (total == 0)
@@ -169,6 +170,7 @@ static ssize_t stream_recv(int fd, FAR void *buf, size_t len)
   while (len > 0)
     {
       ssize_t ret = recv(fd, buf, len, 0);
+
       if (ret == 0)
         {
           /* the peer closed the connection */

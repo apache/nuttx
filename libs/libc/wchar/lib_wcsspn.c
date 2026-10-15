@@ -54,6 +54,7 @@
 size_t wcsspn(FAR const wchar_t *s, FAR const wchar_t *c)
 {
   FAR const wchar_t *a;
+
   for (a = s; *s && wcschr(c, *s); s++);
   return s - a;
 }

@@ -2,7 +2,8 @@
  * libs/libc/lzf/lzf.h
  *
  * SPDX-License-Identifier: BSD-2-Clause
- * SPDX-FileCopyrightText: 2000-2007 Marc Alexander Lehmann <schmorp@schmorp.de>
+ * SPDX-FileCopyrightText: 2000-2007 Marc Alexander Lehmann
+ *   <schmorp@schmorp.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are

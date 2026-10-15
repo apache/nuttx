@@ -105,6 +105,7 @@ static int md5_update(FAR cryptodev_context_t *ctx,
                       FAR const void *input, size_t ilen)
 {
   int ret;
+
   ctx->crypt.op = COP_ENCRYPT;
   ctx->crypt.flags |= COP_FLAG_UPDATE;
   ctx->crypt.src = (caddr_t)input;

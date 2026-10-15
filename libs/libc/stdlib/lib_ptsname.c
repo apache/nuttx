@@ -54,6 +54,7 @@ FAR char *ptsname(int fd)
 {
   static char devname[16];
   int ret = ptsname_r(fd, devname, 16);
+
   return ret < 0 ? NULL : devname;
 }
 

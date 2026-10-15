@@ -40,6 +40,7 @@
 int strcasecmp(FAR const char *cs, FAR const char *ct)
 {
   register int result;
+
   for (; ; )
     {
       if ((result = toupper(*cs) - toupper(*ct)) != 0 ||

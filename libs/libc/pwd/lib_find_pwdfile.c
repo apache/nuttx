@@ -70,6 +70,7 @@ static int pwd_match_name(FAR const struct passwd *entry,
   UNUSED(index);
 
   FAR const char *uname = (FAR const char *)arg;
+
   return strcmp(entry->pw_name, uname) == 0 ? 1 : 0;
 }
 
@@ -98,6 +99,7 @@ static int pwd_match_uid(FAR const struct passwd *entry,
   UNUSED(index);
 
   int match_uid = (int)arg;
+
   return match_uid == entry->pw_uid ? 1 : 0;
 }
 
@@ -161,6 +163,7 @@ static int pwd_foreach(pwd_foreach_match_t match, uintptr_t arg,
   if (stream == NULL)
     {
       int errcode = get_errno();
+
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }

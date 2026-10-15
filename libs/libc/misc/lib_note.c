@@ -40,6 +40,7 @@ void sched_note_printf_ip(uint32_t tag, uintptr_t ip,
                           uint32_t type, ...)
 {
   va_list va;
+
   va_start(va, type);
   sched_note_vprintf_ip(tag, ip, fmt, type, &va);
   va_end(va);

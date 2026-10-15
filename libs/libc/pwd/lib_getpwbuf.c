@@ -62,5 +62,6 @@ FAR struct passwd *getpwbuf(uid_t uid, gid_t gid, FAR const char *name,
   FAR struct passwd *pwd = NULL;
   int ret = getpwbuf_r(uid, gid, name, gecos, dir, shell, passwd, &g_passwd,
                        g_passwd_buffer, sizeof(g_passwd_buffer), &pwd);
+
   return ret == 0 ? pwd : NULL;
 }

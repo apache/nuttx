@@ -131,5 +131,6 @@ FAR struct ether_addr *ether_aton_r(FAR const char *asc,
 FAR struct ether_addr *ether_aton(FAR const char *asc)
 {
   static struct ether_addr addr;
+
   return ether_aton_r(asc, &addr);
 }

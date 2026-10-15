@@ -236,7 +236,7 @@ FAR char *envpath_next(ENVPATH_HANDLE handle, FAR const char *relpath)
        * continue to try the next path.
        */
 
-       lib_free(fullpath);
+      lib_free(fullpath);
     }
 
   /* We will not get here */

@@ -55,6 +55,7 @@ const char *android_fdsan_get_tag_type(uint64_t tag)
 {
   uint64_t high_bits;
   uint64_t type = tag >> 56;
+
   switch (type)
     {
       case ANDROID_FDSAN_OWNER_TYPE_FILE:

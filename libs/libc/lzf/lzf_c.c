@@ -192,6 +192,7 @@ size_t lzf_compress(FAR const void *const in_data,
 
           unsigned int len = 2;
           unsigned int maxlen = in_end - ip - len;
+
           maxlen = maxlen > MAX_REF ? MAX_REF : maxlen;
 
           /* First a faster conservative test */

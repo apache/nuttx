@@ -74,6 +74,7 @@ static int append(FAR struct match_s **tail, FAR const char *name,
                   size_t len, int mark)
 {
   FAR struct match_s *new = lib_malloc(sizeof(struct match_s) + len + 1);
+
   if (new == NULL)
     {
       return -1;
@@ -234,6 +235,7 @@ static int do_glob(FAR char *buf, size_t pos, int type, FAR char *pat,
        */
 
       struct stat st;
+
       if ((flags & GLOB_MARK) && (!type || type == DT_LNK)
            && !stat(buf, &st))
         {
@@ -276,6 +278,7 @@ static int do_glob(FAR char *buf, size_t pos, int type, FAR char *pat,
     {
       FAR char *p;
       const int prev_index = -1;
+
       for (p = p2; p > pat && p[prev_index] == '\\'; p--)
         {
         }
@@ -383,6 +386,7 @@ static void freelist(FAR struct match_s *head)
 {
   FAR struct match_s *match;
   FAR struct match_s *next;
+
   for (match = head->next; match; match = next)
     {
       next = match->next;
@@ -493,6 +497,7 @@ int glob(FAR const char *pat, int flags,
     {
       FAR char **pathv = lib_realloc(g->gl_pathv,
                         (offs + g->gl_pathc + cnt + 1) * sizeof(FAR char *));
+
       if (!pathv)
         {
           freelist(&head);
@@ -540,6 +545,7 @@ int glob(FAR const char *pat, int flags,
 void globfree(FAR glob_t *g)
 {
   size_t i;
+
   for (i = 0; i < g->gl_pathc; i++)
     {
       lib_free(g->gl_pathv[g->gl_offs + i] - offsetof(struct match_s, name));
