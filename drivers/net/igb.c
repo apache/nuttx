@@ -685,7 +685,8 @@ static FAR netpkt_t *igb_receive(FAR struct netdev_lowerhalf_s *dev)
 
           desc = priv->rx_now;
           rx   = &priv->rx[desc];
-          if (!(rx->status & IGB_RDESC_STATUS_DD))
+          if (!(rx->status & IGB_RDESC_STATUS_DD) ||
+              i == IGB_RX_DESC - 1)
             {
               break;
             }
