@@ -35,10 +35,10 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
-#include <assert.h>
-#include <stdint.h>
+#include <endian.h>
 #include <float.h>
 #include <math.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Public Functions
@@ -54,7 +54,7 @@ long double truncl(long double x)
   return trunc(x);
 }
 
-#elif LDBL_MANT_DIG == 64
+#elif LDBL_MANT_DIG == 64 || LDBL_MANT_DIG == 113
 
 static const long double toint = 1 / LDBL_EPSILON;
 
@@ -63,8 +63,21 @@ union ldshape
   long double f;
   struct
     {
+#if LDBL_MANT_DIG == 64
       uint64_t m;
       uint16_t se;
+#elif defined(CONFIG_ENDIAN_BIG) || \
+      (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+      uint16_t se;
+      uint16_t top;
+      uint32_t mid;
+      uint64_t lo;
+#else
+      uint64_t lo;
+      uint32_t mid;
+      uint16_t top;
+      uint16_t se;
+#endif
     } i;
 };
 
@@ -113,9 +126,16 @@ long double truncl(long double x)
 
 #else
 
+/* Universal fallback for any other long double representation */
+
 long double truncl(long double x)
 {
-  PANIC();  /* FIX ME */
+  if (isnan(x))
+    {
+      return x;
+    }
+
+  return copysignl((x >= 0.0) ? floorl(x) : ceill(x), x);
 }
 
 #endif
