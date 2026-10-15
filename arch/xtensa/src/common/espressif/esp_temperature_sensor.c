@@ -37,6 +37,7 @@
 #include <errno.h>
 #include <math.h>
 #include <nuttx/debug.h>
+#include <nuttx/kmalloc.h>
 
 #include <arch/board/board.h>
 #include <nuttx/irq.h>
