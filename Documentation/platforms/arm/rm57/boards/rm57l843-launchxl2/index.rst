@@ -62,8 +62,8 @@ board silkscreen, driven by GIOB[6] and GIOB[7] respectively. They are
 active high. With ``CONFIG_ARCH_LEDS`` NuttX uses them to show the OS
 state; otherwise they are available through ``CONFIG_USERLED``.
 
-Buttons
--------
+User Buttons
+------------
 
 The two user buttons, **B4** and **B5**, are on GIOB[4] and GIOB[5]. They
 are active low and use the internal pull-up. They are supported through
