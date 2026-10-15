@@ -28,9 +28,13 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <string.h>
+
+#include <sys/socket.h>
 
 #include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 
 #include "socket/socket.h"
@@ -145,10 +149,128 @@ ssize_t sendmsg(int sockfd, FAR const struct msghdr *msg, int flags)
   FAR struct socket *psock;
   FAR struct file *filep;
   ssize_t ret;
+#ifdef CONFIG_BUILD_KERNEL
+  struct msghdr kmsg;
+  struct msghdr umsg;
+  FAR struct iovec *uiov = NULL;
+  FAR uint8_t *kdata = NULL;
+  FAR void *kname = NULL;
+  FAR void *kcontrol = NULL;
+  FAR const struct msghdr *send_msg = msg;
+  size_t total_len;
+  size_t i;
+  FAR uint8_t *ptr;
+#endif
 
   /* sendmsg() is a cancellation point */
 
   enter_cancellation_point();
+
+#ifdef CONFIG_BUILD_KERNEL
+  /* Copy user msghdr, iovec array, and payload into kernel memory so the
+   * network stack can safely memcpy from iov bases (see sendto()).
+   */
+
+  memcpy(&umsg, msg, sizeof(struct msghdr));
+
+  if (umsg.msg_iov == NULL)
+    {
+      ret = -EINVAL;
+      goto errout_with_cleanup;
+    }
+
+  if (umsg.msg_iovlen > 0)
+    {
+      uiov = kmm_malloc(umsg.msg_iovlen * sizeof(struct iovec));
+      if (uiov == NULL)
+        {
+          ret = -ENOMEM;
+          goto errout_with_cleanup;
+        }
+
+      memcpy(uiov, msg->msg_iov, umsg.msg_iovlen * sizeof(struct iovec));
+
+      total_len = 0;
+      for (i = 0; i < umsg.msg_iovlen; i++)
+        {
+          total_len += uiov[i].iov_len;
+        }
+
+      if (total_len > 0)
+        {
+          kdata = kmm_malloc(total_len);
+          if (kdata == NULL)
+            {
+              ret = -ENOMEM;
+              goto errout_with_cleanup;
+            }
+
+          ptr = kdata;
+          for (i = 0; i < umsg.msg_iovlen; i++)
+            {
+              if (uiov[i].iov_len > 0)
+                {
+                  memcpy(ptr, uiov[i].iov_base, uiov[i].iov_len);
+                  uiov[i].iov_base = ptr;
+                  ptr += uiov[i].iov_len;
+                }
+              else
+                {
+                  uiov[i].iov_base = NULL;
+                }
+            }
+        }
+      else
+        {
+          for (i = 0; i < umsg.msg_iovlen; i++)
+            {
+              uiov[i].iov_base = NULL;
+            }
+        }
+    }
+
+  memcpy(&kmsg, &umsg, sizeof(kmsg));
+  kmsg.msg_iov = uiov;
+  kmsg.msg_iovlen = umsg.msg_iovlen;
+
+  if (umsg.msg_name != NULL && umsg.msg_namelen > 0)
+    {
+      kname = kmm_malloc(umsg.msg_namelen);
+      if (kname == NULL)
+        {
+          ret = -ENOMEM;
+          goto errout_with_cleanup;
+        }
+
+      memcpy(kname, umsg.msg_name, umsg.msg_namelen);
+      kmsg.msg_name = (FAR struct sockaddr *)kname;
+    }
+  else
+    {
+      kmsg.msg_name = NULL;
+      kmsg.msg_namelen = 0;
+    }
+
+  if (umsg.msg_control != NULL && umsg.msg_controllen > 0)
+    {
+      kcontrol = kmm_malloc(umsg.msg_controllen);
+      if (kcontrol == NULL)
+        {
+          ret = -ENOMEM;
+          goto errout_with_cleanup;
+        }
+
+      memcpy(kcontrol, umsg.msg_control, umsg.msg_controllen);
+      kmsg.msg_control = kcontrol;
+    }
+  else
+    {
+      kmsg.msg_control = NULL;
+      kmsg.msg_controllen = 0;
+    }
+
+  send_msg = &kmsg;
+#endif
 
   /* Get the underlying socket structure */
 
@@ -158,9 +280,21 @@ ssize_t sendmsg(int sockfd, FAR const struct msghdr *msg, int flags)
 
   if (ret == OK)
     {
+#ifdef CONFIG_BUILD_KERNEL
+      ret = psock_sendmsg(psock, send_msg, flags);
+#else
       ret = psock_sendmsg(psock, msg, flags);
+#endif
       file_put(filep);
     }
+
+#ifdef CONFIG_BUILD_KERNEL
+errout_with_cleanup:
+  kmm_free(kcontrol);
+  kmm_free(kname);
+  kmm_free(kdata);
+  kmm_free(uiov);
+#endif
 
   if (ret < 0)
     {
