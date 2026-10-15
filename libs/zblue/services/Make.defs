@@ -1,0 +1,106 @@
+############################################################################
+# libs/zblue/services/Make.defs
+#
+# Author: chao an <anchao.archer@bytedance.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+ifeq ($(CONFIG_BT),y)
+
+ifeq ($(CONFIG_BT_ANS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/ans.c
+endif
+ifeq ($(CONFIG_BT_DIS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/dis.c
+endif
+ifeq ($(CONFIG_BT_GAP_SVC),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/gap_svc.c
+endif
+ifeq ($(CONFIG_BT_CTS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/cts.c
+endif
+ifeq ($(CONFIG_BT_ETS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/ets.c
+endif
+ifeq ($(CONFIG_BT_HRS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/hrs.c
+endif
+ifeq ($(CONFIG_BT_TPS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/tps.c
+endif
+
+ifeq ($(CONFIG_BT_BAS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/bas/bas.c
+endif
+ifeq ($(CONFIG_BT_BAS_BLS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/bas/bas_bls.c
+endif
+ifeq ($(CONFIG_BT_BAS_BCS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/bas/bas_bcs.c
+endif
+
+ifeq ($(CONFIG_BT_IAS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/ias/ias.c
+endif
+ifeq ($(CONFIG_BT_IAS_CLIENT),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/ias/ias_client.c
+endif
+ifeq ($(CONFIG_BT_ZEPHYR_NUS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/nus/nus.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/nus/nus_inst.c
+ifeq ($(CONFIG_BT_ZEPHYR_NUS_AUTO_START_BLUETOOTH),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/nus/bt_nus_auto_start_bt.c
+endif
+endif
+
+ifeq ($(CONFIG_BT_OTS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/ots/ots.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/ots/ots_l2cap.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/ots/ots_obj_manager.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/ots/ots_oacp.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/ots/ots_olcp.c
+ifeq ($(CONFIG_BT_OTS_DIR_LIST_OBJ),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/ots/ots_dir_list.c
+endif
+endif
+
+ifeq ($(CONFIG_BT_OTS_CLIENT),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/ots/ots_client.c
+ifneq ($(CONFIG_BT_OTS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/services/ots/ots_l2cap.c
+endif
+endif
+
+VPATH += $(TOPDIR)/libs/zblue/services $(TOPDIR)/libs/zblue/services/bas
+VPATH += $(TOPDIR)/libs/zblue/services/ias $(TOPDIR)/libs/zblue/services/nus
+VPATH += $(TOPDIR)/libs/zblue/services/ots
+DEPPATH += --dep-path $(TOPDIR)/libs/zblue/services
+DEPPATH += --dep-path $(TOPDIR)/libs/zblue/services/bas
+DEPPATH += --dep-path $(TOPDIR)/libs/zblue/services/ias
+DEPPATH += --dep-path $(TOPDIR)/libs/zblue/services/nus
+DEPPATH += --dep-path $(TOPDIR)/libs/zblue/services/ots
+
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)/libs/zblue/services
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)/libs/zblue/services/bas
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)/libs/zblue/services/ias
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)/libs/zblue/services/nus
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)/libs/zblue/services/ots
+
+endif

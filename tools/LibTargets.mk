@@ -240,6 +240,12 @@ libs$(DELIM)libdsp$(DELIM)libdsp$(LIBEXT): pass2dep
 staging$(DELIM)libdsp$(LIBEXT): libs$(DELIM)libdsp$(DELIM)libdsp$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
+libs$(DELIM)zblue$(DELIM)libzblue$(LIBEXT): pass2dep
+	$(Q) $(MAKE) -C libs$(DELIM)zblue libzblue$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+
+staging$(DELIM)libzblue$(LIBEXT): libs$(DELIM)zblue$(DELIM)libzblue$(LIBEXT)
+	$(Q) $(call INSTALL_LIB,$<,$@)
+
 ifeq ($(CONFIG_BUILD_FLAT),y)
 $(APPDIR)$(DELIM)libapps$(LIBEXT): pass2dep
 else

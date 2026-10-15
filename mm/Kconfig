@@ -408,3 +408,4 @@ config MM_UBSAN_DUMMY
 endif # MM_UBSAN
 
 source "mm/iob/Kconfig"
+source "mm/net_buf/Kconfig"

@@ -1,0 +1,75 @@
+############################################################################
+# libs/zblue/audio/Kconfig
+#
+# Ported to Apache NuttX by chao an
+# <anchao.archer@bytedance.com>.
+#
+############################################################################
+
+# Bluetooth Audio configuration options
+
+#
+# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022-2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+menuconfig BT_AUDIO
+	bool "Bluetooth Audio support"
+	help
+	  This option enables Bluetooth Audio support. The specific
+	  features that are available may depend on other features
+	  that have been enabled in the stack, such as Periodic
+	  Advertisement for Broadcast and L2CAP Dynamic Channel
+	  for Unicast.
+
+if BT_AUDIO
+
+config BT_AUDIO_RX
+	def_bool BT_ASCS_ASE_SNK || BT_BAP_UNICAST_CLIENT_ASE_SRC || BT_BAP_BROADCAST_SINK
+	help
+	  Indicates that the stack is configured with support for receiving
+	  audio (for example as a unicast Audio Stream sink or a Broadcast
+	  Sink). This internal option is derived automatically and is not meant
+	  to be set directly.
+
+config BT_AUDIO_TX
+	def_bool BT_ASCS_ASE_SRC || BT_BAP_UNICAST_CLIENT_ASE_SNK || BT_BAP_BROADCAST_SOURCE
+	help
+	  Indicates that the stack is configured with support for transmitting
+	  audio (for example as a unicast Audio Stream source or a Broadcast
+	  Source). This internal option is derived automatically and is not
+	  meant to be set directly.
+
+config BT_AUDIO_NOTIFY_RETRY_DELAY
+	int "Delay for notification sending retried attempt in 1.25 ms units"
+	range 6 3200
+	default 20
+	help
+	  This option sets the time in 1.25 ms units before the stack will
+	  retry to send notification that failed due to lack of TX buffers
+	  available.
+
+source "libs/zblue/audio/Kconfig.bap"
+source "libs/zblue/audio/Kconfig.ccp"
+source "libs/zblue/audio/Kconfig.vocs"
+source "libs/zblue/audio/Kconfig.aics"
+source "libs/zblue/audio/Kconfig.vcp"
+source "libs/zblue/audio/Kconfig.micp"
+source "libs/zblue/audio/Kconfig.csip"
+source "libs/zblue/audio/Kconfig.tbs"
+source "libs/zblue/audio/Kconfig.mcs"
+source "libs/zblue/audio/Kconfig.has"
+source "libs/zblue/audio/Kconfig.mpl"
+source "libs/zblue/audio/Kconfig.mctl"
+source "libs/zblue/audio/Kconfig.cap"
+source "libs/zblue/audio/Kconfig.tmap"
+source "libs/zblue/audio/Kconfig.gmap"
+source "libs/zblue/audio/Kconfig.pbp"
+
+module = BT_AUDIO
+module-str = "Bluetooth Audio"
+# source "subsys/logging/Kconfig.template.log_config"
+
+endif # BT_AUDIO

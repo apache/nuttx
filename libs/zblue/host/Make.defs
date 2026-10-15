@@ -1,0 +1,195 @@
+############################################################################
+# libs/zblue/host/Make.defs
+#
+# Author: chao an <anchao.archer@bytedance.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# NuttX Bluetooth Host Stack
+
+ifeq ($(CONFIG_BT_HOST),y)
+
+# === Core sources (compiled unconditionally for BT_HCI_HOST) ===
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/uuid.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/addr.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/buf.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/hci_core.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/hci_common.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/id.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/data.c
+
+# === Conditional sources ===
+ifeq ($(CONFIG_BT_BROADCASTER),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/adv.c
+endif
+
+ifeq ($(CONFIG_BT_OBSERVER),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/scan.c
+endif
+
+ifeq ($(CONFIG_BT_HOST_CRYPTO),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/crypto_psa.c
+endif
+
+ifeq ($(CONFIG_BT_ECC),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/ecc.c
+endif
+
+ifeq ($(CONFIG_BT_HOST_CCM),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/aes_ccm.c
+endif
+
+ifeq ($(CONFIG_BT_LONG_WQ),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/long_wq.c
+endif
+
+ifeq ($(CONFIG_BT_SETTINGS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/settings.c
+endif
+
+ifeq ($(CONFIG_BT_MONITOR),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/monitor.c
+endif
+
+ifeq ($(CONFIG_BT_HCI_RAW),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/hci_raw.c
+endif
+
+# Connection-related sources (CONFIG_BT_CONN or CONFIG_BT_ISO)
+ifneq ($(CONFIG_BT_CONN)$(CONFIG_BT_ISO),)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/conn.c
+
+ifeq ($(CONFIG_BT_CONN),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/l2cap.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/att.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/gatt.c
+
+ifeq ($(CONFIG_BT_GATT_GAP_SVC_VALIDATE),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/gatt_gap_svc_validate.c
+endif
+
+ifeq ($(CONFIG_BT_SMP),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/smp.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/keys.c
+else
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/smp_null.c
+endif
+endif
+
+ifeq ($(CONFIG_BT_ISO),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/iso.c
+endif
+
+ifeq ($(CONFIG_BT_CHANNEL_SOUNDING),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/cs.c
+endif
+
+ifeq ($(CONFIG_BT_DF),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/direction.c
+endif
+endif # CONFIG_BT_CONN or CONFIG_BT_ISO
+
+# === Classic BR/EDR sources ===
+ifeq ($(CONFIG_BT_CLASSIC),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/br.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/conn_br.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/keys_br.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/l2cap_br.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/sdp.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/ssp.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/sco.c
+
+ifeq ($(CONFIG_BT_A2DP),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/a2dp.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/a2dp_codec_sbc.c
+endif
+
+ifeq ($(CONFIG_BT_AVDTP),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/avdtp.c
+endif
+
+ifeq ($(CONFIG_BT_AVRCP),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/avrcp.c
+endif
+
+ifeq ($(CONFIG_BT_AVCTP),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/avctp.c
+endif
+
+ifeq ($(CONFIG_BT_RFCOMM),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/rfcomm.c
+endif
+
+ifeq ($(CONFIG_BT_BIP),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/bip.c
+endif
+
+ifeq ($(CONFIG_BT_MAP),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/map.c
+endif
+
+ifeq ($(CONFIG_BT_HFP_HF),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/hfp_hf.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/at.c
+endif
+
+ifeq ($(CONFIG_BT_HFP_AG),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/hfp_ag.c
+endif
+
+ifeq ($(CONFIG_BT_GOEP),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/obex.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/goep.c
+endif
+
+ifeq ($(CONFIG_BT_DID),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/did.c
+endif
+
+ifeq ($(CONFIG_BT_HID_DEVICE),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/hid_device.c
+endif
+
+ifeq ($(CONFIG_BT_HID_HOST),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/hid_host.c
+endif
+
+ifneq ($(CONFIG_BT_AVRCP_CT_COVER_ART)$(CONFIG_BT_AVRCP_TG_COVER_ART),)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/avrcp_cover_art.c
+endif
+
+ifeq ($(CONFIG_BT_PBAP),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/host/classic/pbap.c
+endif
+endif # CONFIG_BT_CLASSIC
+
+# === VPATH and DEPPATH for all subdirectories ===
+VPATH += $(TOPDIR)/libs/zblue/host
+VPATH += $(TOPDIR)/libs/zblue/host/classic
+
+DEPPATH += --dep-path $(TOPDIR)/libs/zblue/host
+DEPPATH += --dep-path $(TOPDIR)/libs/zblue/host/classic
+
+# === Include paths ===
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)/libs/zblue/host
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)/libs/zblue/host/classic
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)/libs/zblue
+
+endif # CONFIG_BT_HOST

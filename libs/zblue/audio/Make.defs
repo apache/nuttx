@@ -1,0 +1,167 @@
+############################################################################
+# libs/zblue/audio/Make.defs
+#
+# Author: chao an <anchao.archer@bytedance.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+ifeq ($(CONFIG_BT_AUDIO),y)
+
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/audio.c
+
+ifneq ($(CONFIG_BT_VOCS)$(CONFIG_BT_VOCS_CLIENT),)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/vocs.c
+endif
+ifeq ($(CONFIG_BT_VOCS_CLIENT),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/vocs_client.c
+endif
+
+ifneq ($(CONFIG_BT_AICS)$(CONFIG_BT_AICS_CLIENT),)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/aics.c
+endif
+ifeq ($(CONFIG_BT_AICS_CLIENT),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/aics_client.c
+endif
+
+ifeq ($(CONFIG_BT_VCP_VOL_REND),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/vcp_vol_rend.c
+endif
+ifeq ($(CONFIG_BT_VCP_VOL_CTLR),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/vcp_vol_ctlr.c
+endif
+
+ifeq ($(CONFIG_BT_MICP_MIC_DEV),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/micp_mic_dev.c
+endif
+ifeq ($(CONFIG_BT_MICP_MIC_CTLR),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/micp_mic_ctlr.c
+endif
+
+ifeq ($(CONFIG_BT_CONN),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/ccid.c
+endif
+
+ifeq ($(CONFIG_BT_CSIP_SET_MEMBER),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/csip_set_member.c
+endif
+ifeq ($(CONFIG_BT_CSIP_SET_COORDINATOR),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/csip_set_coordinator.c
+endif
+ifneq ($(CONFIG_BT_CSIP_SET_MEMBER)$(CONFIG_BT_CSIP_SET_COORDINATOR),)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/csip_crypto.c
+endif
+
+ifeq ($(CONFIG_BT_TBS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/tbs.c
+endif
+ifeq ($(CONFIG_BT_TBS_CLIENT),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/tbs_client.c
+endif
+ifeq ($(CONFIG_BT_MCC),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/mcc.c
+endif
+ifeq ($(CONFIG_BT_MCS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/mcs.c
+endif
+ifeq ($(CONFIG_BT_MPL),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/mpl.c
+endif
+ifeq ($(CONFIG_MCTL),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/media_proxy.c
+endif
+
+ifeq ($(CONFIG_BT_ASCS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/ascs.c
+endif
+ifeq ($(CONFIG_BT_PACS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/pacs.c
+endif
+ifeq ($(CONFIG_BT_BAP_STREAM),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/bap_stream.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/codec.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/bap_iso.c
+endif
+ifeq ($(CONFIG_BT_BAP_BASE),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/bap_base.c
+endif
+ifeq ($(CONFIG_BT_BAP_UNICAST_SERVER),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/bap_unicast_server.c
+endif
+ifeq ($(CONFIG_BT_BAP_UNICAST_CLIENT),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/bap_unicast_client.c
+endif
+ifeq ($(CONFIG_BT_BAP_BROADCAST_SOURCE),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/bap_broadcast_source.c
+endif
+ifeq ($(CONFIG_BT_BAP_BROADCAST_SINK),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/bap_broadcast_sink.c
+endif
+ifeq ($(CONFIG_BT_BAP_SCAN_DELEGATOR),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/bap_scan_delegator.c
+endif
+ifeq ($(CONFIG_BT_BAP_BROADCAST_ASSISTANT),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/bap_broadcast_assistant.c
+endif
+ifeq ($(CONFIG_BT_CCP_CALL_CONTROL_CLIENT),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/ccp_call_control_client.c
+endif
+ifeq ($(CONFIG_BT_CCP_CALL_CONTROL_SERVER),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/ccp_call_control_server.c
+endif
+ifeq ($(CONFIG_BT_HAS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/has.c
+endif
+ifeq ($(CONFIG_BT_HAS_CLIENT),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/has_client.c
+endif
+ifeq ($(CONFIG_BT_CAP),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/cap_stream.c
+endif
+ifeq ($(CONFIG_BT_CAP_ACCEPTOR),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/cap_acceptor.c
+endif
+ifeq ($(CONFIG_BT_CAP_INITIATOR),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/cap_initiator.c
+endif
+ifeq ($(CONFIG_BT_CAP_COMMANDER),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/cap_commander.c
+endif
+ifeq ($(CONFIG_BT_CAP_HANDOVER),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/cap_handover.c
+endif
+ifneq ($(CONFIG_BT_CAP_INITIATOR_UNICAST)$(CONFIG_BT_CAP_COMMANDER),)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/cap_common.c
+endif
+ifeq ($(CONFIG_BT_TMAP),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/tmap.c
+endif
+ifeq ($(CONFIG_BT_GMAP),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/gmap_client.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/gmap_server.c
+endif
+ifeq ($(CONFIG_BT_PBP),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/audio/pbp.c
+endif
+
+VPATH += $(TOPDIR)/libs/zblue/audio
+DEPPATH += --dep-path $(TOPDIR)/libs/zblue/audio
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)/libs/zblue/audio
+
+endif
