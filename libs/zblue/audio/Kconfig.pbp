@@ -1,0 +1,19 @@
+############################################################################
+# libs/zblue/audio/Kconfig.pbp
+#
+# Ported to Apache NuttX by chao an
+# <magicdcps@hotmail.com>.
+#
+############################################################################
+
+# Bluetooth Audio - Public Broadcast Profile (PBP) options
+#
+# Copyright 2023 NXP
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+config BT_PBP
+	bool "Public Broadcast Profile"
+	help
+	  Enabling this will enable PBP.

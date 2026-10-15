@@ -1,0 +1,22 @@
+############################################################################
+# libs/zblue/lib/Kconfig
+#
+# Ported to Apache NuttX by chao an
+# <magicdcps@hotmail.com>.
+#
+############################################################################
+
+# Copyright (c) 2023 Nordic Semiconductor ASA
+# SPDX-License-Identifier: Apache-2.0
+
+config BT_EAD
+	bool "Encrypted Advertising Data"
+	select BT_HOST_CCM
+	help
+	  Enable the Encrypted Advertising Data library
+
+config LIBSBC
+	bool "SBC codec support"
+	default n
+	help
+	  Enable the SBC codec helper used by Bluetooth Classic A2DP.

@@ -13,4 +13,5 @@
 # Boards build by CMake
 CMake,sim:alsa
 CMake,sim:bluetooth
+CMake,sim:bt
 CMake,sim:bthcisock

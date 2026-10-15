@@ -1,0 +1,13 @@
+/****************************************************************************
+ * libs/zblue/mesh/priv_beacon.h
+ *
+ * Ported to Apache NuttX by chao an <magicdcps@hotmail.com>.
+ *
+ ****************************************************************************/
+
+/* Copyright (c) 2023 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+void bt_mesh_priv_beacon_srv_store_schedule(void);
