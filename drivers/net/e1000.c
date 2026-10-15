@@ -709,7 +709,8 @@ static FAR netpkt_t *e1000_receive(FAR struct netdev_lowerhalf_s *dev)
 
           desc = priv->rx_now;
           rx   = &priv->rx[desc];
-          if (!(rx->status & E1000_RDESC_STATUS_DD))
+          if (!(rx->status & E1000_RDESC_STATUS_DD) ||
+              i == E1000_RX_DESC - 1)
             {
               break;
             }
