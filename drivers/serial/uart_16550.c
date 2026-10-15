@@ -625,6 +625,7 @@ static uart_datawidth_t u16550_mmio_getreg(FAR struct u16550_s *priv,
                                            unsigned int offset)
 {
   uintptr_t addr = priv->uartbase + offset;
+
   return *((FAR volatile uart_datawidth_t *)addr);
 }
 
@@ -637,6 +638,7 @@ static void u16550_mmio_putreg(FAR struct u16550_s *priv,
                                uart_datawidth_t value)
 {
   uintptr_t addr = priv->uartbase + offset;
+
   *((FAR volatile uart_datawidth_t *)addr) = value;
 }
 #endif
@@ -945,6 +947,7 @@ static int u16550_setup(FAR struct uart_dev_s *dev)
 static void u16550_shutdown(struct uart_dev_s *dev)
 {
   FAR struct u16550_s *priv = (FAR struct u16550_s *)dev->priv;
+
   u16550_disableuartint(priv, NULL);
 }
 
@@ -1068,151 +1071,154 @@ static int u16550_ioctl(struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
-    case TIOCSERGSTRUCT:
-      {
-        FAR struct u16550_s *user = (FAR struct u16550_s *)arg;
-        if (!user)
-          {
-            ret = -EINVAL;
-          }
-        else
-          {
-            memcpy(user, dev, sizeof(struct u16550_s));
-          }
-      }
-      break;
+      case TIOCSERGSTRUCT:
+        {
+          FAR struct u16550_s *user = (FAR struct u16550_s *)arg;
+
+          if (!user)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              memcpy(user, dev, sizeof(struct u16550_s));
+            }
+        }
+        break;
 #endif
 
-    case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
-      {
-        irqstate_t flags = enter_critical_section();
-        u16550_enablebreaks(priv, true);
-        leave_critical_section(flags);
-      }
-      break;
+      case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
+        {
+          irqstate_t flags = enter_critical_section();
 
-    case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
-      {
-        irqstate_t flags;
-        flags = enter_critical_section();
-        u16550_enablebreaks(priv, false);
-        leave_critical_section(flags);
-      }
-      break;
+          u16550_enablebreaks(priv, true);
+          leave_critical_section(flags);
+        }
+        break;
+
+      case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
+        {
+          irqstate_t flags;
+
+          flags = enter_critical_section();
+          u16550_enablebreaks(priv, false);
+          leave_critical_section(flags);
+        }
+        break;
 
 #if defined(CONFIG_SERIAL_TERMIOS) && !defined(CONFIG_16550_SUPRESS_CONFIG)
-    case TCGETS:
-      {
-        FAR struct termios *termiosp = (FAR struct termios *)arg;
-        irqstate_t flags;
+      case TCGETS:
+        {
+          FAR struct termios *termiosp = (FAR struct termios *)arg;
+          irqstate_t flags;
 
-        if (!termiosp)
-          {
-            ret = -EINVAL;
-            break;
-          }
+          if (!termiosp)
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        flags = enter_critical_section();
+          flags = enter_critical_section();
 
-        cfsetispeed(termiosp, priv->baud);
-        termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
-                            ((priv->parity == 1) ? PARODD : 0);
-        termiosp->c_cflag |= (priv->stopbits2) ? CSTOPB : 0;
+          cfsetispeed(termiosp, priv->baud);
+          termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
+                              ((priv->parity == 1) ? PARODD : 0);
+          termiosp->c_cflag |= (priv->stopbits2) ? CSTOPB : 0;
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-        termiosp->c_cflag |= priv->flow ? CRTSCTS : 0;
+          termiosp->c_cflag |= priv->flow ? CRTSCTS : 0;
 #endif
 
-        switch (priv->bits)
-          {
-          case 5:
-            termiosp->c_cflag |= CS5;
-            break;
+          switch (priv->bits)
+            {
+              case 5:
+                termiosp->c_cflag |= CS5;
+                break;
 
-          case 6:
-            termiosp->c_cflag |= CS6;
-            break;
+              case 6:
+                termiosp->c_cflag |= CS6;
+                break;
 
-          case 7:
-            termiosp->c_cflag |= CS7;
-            break;
+              case 7:
+                termiosp->c_cflag |= CS7;
+                break;
 
-          case 8:
-          default:
-            termiosp->c_cflag |= CS8;
-            break;
-          }
+              case 8:
+              default:
+                termiosp->c_cflag |= CS8;
+                break;
+            }
 
-        leave_critical_section(flags);
-      }
-      break;
+          leave_critical_section(flags);
+        }
+        break;
 
-    case TCSETS:
-      {
-        FAR struct termios *termiosp = (FAR struct termios *)arg;
-        irqstate_t flags;
+      case TCSETS:
+        {
+          FAR struct termios *termiosp = (FAR struct termios *)arg;
+          irqstate_t flags;
 
-        if (!termiosp)
-          {
-            ret = -EINVAL;
-            break;
-          }
+          if (!termiosp)
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        flags = enter_critical_section();
+          flags = enter_critical_section();
 
-        switch (termiosp->c_cflag & CSIZE)
-          {
-          case CS5:
-            priv->bits = 5;
-            break;
+          switch (termiosp->c_cflag & CSIZE)
+            {
+              case CS5:
+                priv->bits = 5;
+                break;
 
-          case CS6:
-            priv->bits = 6;
-            break;
+              case CS6:
+                priv->bits = 6;
+                break;
 
-          case CS7:
-            priv->bits = 7;
-            break;
+              case CS7:
+                priv->bits = 7;
+                break;
 
-          case CS8:
-          default:
-            priv->bits = 8;
-            break;
-          }
+              case CS8:
+              default:
+                priv->bits = 8;
+                break;
+            }
 
-        if ((termiosp->c_cflag & PARENB) != 0)
-          {
-            priv->parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
-          }
-        else
-          {
-            priv->parity = 0;
-          }
+          if ((termiosp->c_cflag & PARENB) != 0)
+            {
+              priv->parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
+            }
+          else
+            {
+              priv->parity = 0;
+            }
 
-        priv->baud      = cfgetispeed(termiosp);
-        priv->stopbits2 = (termiosp->c_cflag & CSTOPB) != 0;
+          priv->baud      = cfgetispeed(termiosp);
+          priv->stopbits2 = (termiosp->c_cflag & CSTOPB) != 0;
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-        priv->flow      = (termiosp->c_cflag & CRTSCTS) != 0;
+          priv->flow      = (termiosp->c_cflag & CRTSCTS) != 0;
 #endif
 
-        u16550_setup(dev);
-        leave_critical_section(flags);
+          u16550_setup(dev);
+          leave_critical_section(flags);
 
 #ifdef CONFIG_CLK
-        /* Clk enable */
+          /* Clk enable */
 
-        priv->mclk = clk_get(priv->clk_name);
-        if (priv->mclk)
-          {
-            clk_set_rate(priv->mclk, priv->uartclk);
-          }
+          priv->mclk = clk_get(priv->clk_name);
+          if (priv->mclk)
+            {
+              clk_set_rate(priv->mclk, priv->uartclk);
+            }
 #endif
-      }
-      break;
+        }
+        break;
 #endif
 
-    default:
-      ret = -ENOTTY;
-      break;
+      default:
+        ret = -ENOTTY;
+        break;
     }
 
   return ret;
@@ -1280,6 +1286,7 @@ static void u16550_rxint(struct uart_dev_s *dev, bool enable)
 static bool u16550_rxavailable(struct uart_dev_s *dev)
 {
   FAR struct u16550_s *priv = (FAR struct u16550_s *)dev->priv;
+
   return ((u16550_serialin(priv, UART_LSR_OFFSET) & UART_LSR_DR) != 0);
 }
 
@@ -1569,6 +1576,7 @@ static void u16550_dmatxavail(FAR struct uart_dev_s *dev)
 static void u16550_send(struct uart_dev_s *dev, int ch)
 {
   FAR struct u16550_s *priv = (FAR struct u16550_s *)dev->priv;
+
   u16550_serialout(priv, UART_THR_OFFSET, (uart_datawidth_t)ch);
 }
 
@@ -1584,6 +1592,7 @@ static ssize_t u16550_sendbuf(struct uart_dev_s *dev,
                               const void *buffer, size_t size)
 {
   size_t i;
+
   for (i = 0; i < size; i++)
     {
       while (!u16550_txready(dev));
@@ -1659,6 +1668,7 @@ static void u16550_txint(struct uart_dev_s *dev, bool enable)
 static bool u16550_txready(struct uart_dev_s *dev)
 {
   FAR struct u16550_s *priv = (FAR struct u16550_s *)dev->priv;
+
   return ((u16550_serialin(priv, UART_LSR_OFFSET) & UART_LSR_THRE) != 0);
 }
 
@@ -1673,6 +1683,7 @@ static bool u16550_txready(struct uart_dev_s *dev)
 static bool u16550_txempty(struct uart_dev_s *dev)
 {
   FAR struct u16550_s *priv = (FAR struct u16550_s *)dev->priv;
+
   return ((u16550_serialin(priv, UART_LSR_OFFSET) & UART_LSR_TEMT) != 0);
 }
 
