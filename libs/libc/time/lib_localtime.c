@@ -1613,6 +1613,21 @@ static int tzparse(FAR const char *name, FAR struct state_s *sp,
       if (load_ok != 0)
         {
           sp->leapcnt = 0; /* so, we're off a little */
+
+          /* No zoneinfo base rules were available (common on embedded
+           * builds without CONFIG_LIBC_ZONEINFO). The POSIX-rule
+           * transition generator below starts two transitions per year
+           * from the lower bound "atlo" and stops once the table reaches
+           * TZ_MAX_TIMES.  With atlo == TIME_T_MIN the backward scan walks
+           * yearbeg down to EPOCH_YEAR - YEARSPERREPEAT / 2 and the table
+           * then fills with ancient years, overflowing TZ_MAX_TIMES long
+           * before reaching the current era, so modern DST transitions are
+           * never recorded and localtime()/mktime() silently ignore DST.
+           * Clamp atlo to the Unix epoch so generation covers EPOCH_YEAR
+           * forward, giving ~TZ_MAX_TIMES / 2 years of correct DST rules.
+           */
+
+          atlo = 0;
         }
     }
 
