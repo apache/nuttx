@@ -41,7 +41,8 @@ jobs:
           source .venv/bin/activate
           pip install codespell cmake-format black isort flake8 cvt2utf
           cd nuttx
-          commits="${{ github.event.pull_request.base.sha }}..HEAD"
+          git fetch origin ${{ github.base_ref }}
+          commits="$(git merge-base origin/${{ github.base_ref }} HEAD)..HEAD"
           git log --oneline $commits
           breaking_opts=""
           if echo '${{ toJSON(github.event.pull_request.labels) }}' | jq -e 'any(.[].name; test("breaking change"; "i"))' >/dev/null 2>&1; then
