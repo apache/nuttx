@@ -219,7 +219,7 @@ static int nrf52_radioi8_seteaddr(struct nrf52_radioi8_dev_s *dev,
 static int nrf52_radioi8_setcoordsaddr(struct nrf52_radioi8_dev_s *dev,
                                        const uint8_t *saddr)
 {
-  IEEE802154_SADDRCOPY(dev->state.addr.saddr, saddr);
+  IEEE802154_SADDRCOPY(dev->state.coordaddr.saddr, saddr);
 
   wlinfo("setcoordsaddr: %02X:%02X\n", saddr[0], saddr[1]);
   return OK;
@@ -247,7 +247,7 @@ static int nrf52_radioi8_setcoordeaddr(struct nrf52_radioi8_dev_s *dev,
 
   for (i = 0; i < 8; i++)
     {
-      dev->state.addr.eaddr[i] = eaddr[i];
+      dev->state.coordaddr.eaddr[i] = eaddr[i];
     }
 
   return OK;
