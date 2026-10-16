@@ -75,6 +75,24 @@ if(CONFIG_NRF53_I2C_MASTER)
   list(APPEND SRCS nrf53_i2c.c)
 endif()
 
+if(CONFIG_NRF53_RADIO)
+  list(APPEND SRCS nrf53_radio.c)
+
+  if(CONFIG_NRF53_RADIO_IEEE802154)
+    list(APPEND SRCS nrf53_ieee802154_radio.c)
+    list(APPEND SRCS nrf53_ieee802154_tim.c)
+    list(APPEND SRCS nrf53_ieee802154.c)
+
+    if(CONFIG_NRF53_RADIO_IEEE802154_SUPERFRAME)
+      list(APPEND SRCS nrf53_ieee802154_rtc.c)
+    endif()
+
+    if(CONFIG_NRF53_RADIO_IEEE802154_TRACE)
+      list(APPEND SRCS nrf53_ieee802154_trace.c)
+    endif()
+  endif()
+endif()
+
 if(CONFIG_NRF53_TIMER)
   list(APPEND SRCS nrf53_tim.c)
 

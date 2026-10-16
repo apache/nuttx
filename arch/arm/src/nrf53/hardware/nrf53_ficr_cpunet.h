@@ -58,6 +58,10 @@
 #define NRF53_FICR_DEVICEADDRTYPE_OFFSET    0x2a0  /* Device address type */
 #define NRF53_FICR_DEVICEADDR0_OFFSET       0x2a4  /* Device address 0 */
 #define NRF53_FICR_DEVICEADDR1_OFFSET       0x2a8  /* Device address 1 */
+#define NRF53_FICR_TRIMCNF_ADDR_OFFSET(n)   (0x300 + ((n) * 0x8))
+#define NRF53_FICR_TRIMCNF_DATA_OFFSET(n)   (0x304 + ((n) * 0x8))
+
+#define NRF53_FICR_TRIMCNF_NUM              32
 
 /* FICR Register Addresses *************************************************/
 
@@ -82,6 +86,8 @@
 #define NRF53_FICR_DEVICEADDRTYPE           (NRF53_FICR_BASE + NRF53_FICR_DEVICEADDRTYPE_OFFSET)
 #define NRF53_FICR_DEVICEADDR0              (NRF53_FICR_BASE + NRF53_FICR_DEVICEADDR0_OFFSET)
 #define NRF53_FICR_DEVICEADDR1              (NRF53_FICR_BASE + NRF53_FICR_DEVICEADDR1_OFFSET)
+#define NRF53_FICR_TRIMCNF_ADDR(n)          (NRF53_FICR_BASE + NRF53_FICR_TRIMCNF_ADDR_OFFSET(n))
+#define NRF53_FICR_TRIMCNF_DATA(n)          (NRF53_FICR_BASE + NRF53_FICR_TRIMCNF_DATA_OFFSET(n))
 
 /* TODO */
 
