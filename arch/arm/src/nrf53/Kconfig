@@ -38,6 +38,8 @@ config NRF53_APPCORE
 config NRF53_NETCORE
 	bool
 	default n
+	select NRF53_HAVE_IEEE802154
+	select NRF53_HAVE_BLELR
 
 choice
 	prompt "nRF5340 Core Selection"
@@ -145,6 +147,14 @@ config NRF53_HAVE_SPI1234
 	default n
 
 config NRF53_HAVE_HFCLK192M
+	bool
+	default n
+
+config NRF53_HAVE_IEEE802154
+	bool
+	default n
+
+config NRF53_HAVE_BLELR
 	bool
 	default n
 
@@ -305,6 +315,13 @@ config NRF53_RTC0
 config NRF53_RTC1
 	bool "RTC1"
 	select NRF53_RTC
+	default n
+
+config NRF53_RADIO
+	bool "RADIO"
+	depends on EXPERIMENTAL
+	depends on NRF53_NETCORE
+	depends on !NRF53_SOFTDEVICE_CONTROLLER
 	default n
 
 config NRF53_USBDEV
@@ -676,6 +693,51 @@ config NRF53_SAADC_LIMITS
 endif # NRF53_SAADC
 
 endmenu # SAADC Configuration
+
+menu "RADIO Configuration"
+
+if NRF53_RADIO
+
+config NRF53_RADIO_CUSTOM
+	bool "RADIO uses custom IRQ handlers"
+	default n
+
+config NRF53_RADIO_IEEE802154
+	bool "RADIO IEEE802.15.4 protocol"
+	default n
+	depends on NRF53_HAVE_IEEE802154
+	select ARCH_RAMVECTORS
+	select ARCH_IRQPRIO
+	select NRF53_RADIO_CUSTOM
+	select NRF53_TIMER0
+
+if NRF53_RADIO_IEEE802154
+
+config NRF53_RADIO_IEEE802154_SUPERFRAME
+	bool "RADIO IEEE802.15.4 superframe support"
+	default n
+	select NRF53_RTC0
+	select NRF53_USE_LFCLK
+
+config NRF53_RADIO_IEEE802154_GTS_SLOTS
+	int "RADIO IEEE802.15.4 GTS slots"
+	default 2
+	depends on NRF53_RADIO_IEEE802154_SUPERFRAME
+
+config NRF53_RADIO_IEEE802154_TRACE
+	bool "RADIO IEEE802.15.4 trace support"
+	default n
+
+config NRF53_RADIO_IEEE802154_TRACE_BUFSIZE
+	int "RADIO IEEE802.15.4 trace buffer size"
+	depends on NRF53_RADIO_IEEE802154_TRACE
+	default 1024
+
+endif # NRF53_RADIO_IEEE802154
+
+endif # NRF53_RADIO
+
+endmenu # RADIO Configuration
 
 menu "SPI Configuration"
 
