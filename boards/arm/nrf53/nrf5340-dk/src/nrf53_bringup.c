@@ -232,7 +232,7 @@ int nrf53_bringup(void)
 #endif
 #endif
 
-#if defined(CONFIG_TIMER) && defined(CONFIG_NRF53_TIMER)
+#if defined(CONFIG_TIMER) && defined(CONFIG_NRF53_TIMER0)
   /* Configure TIMER driver */
 
   ret = nrf53_timer_driver_setup("/dev/timer0", NRF53_TIMER);
