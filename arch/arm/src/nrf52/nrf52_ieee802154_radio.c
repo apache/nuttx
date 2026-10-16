@@ -1455,10 +1455,15 @@ static void nrf52_radioi8_work_rx(void *arg)
 
   prim->type = IEEE802154_PRIMITIVE_IND_DATA;
 
-  /* Allocate an IOB to put the frame into */
+  /* Allocate an IOB to put the frame into, never block the work queue */
 
-  ind->frame = iob_alloc(false);
-  DEBUGASSERT(ind->frame != NULL);
+  ind->frame = iob_tryalloc(false);
+  if (ind->frame == NULL)
+    {
+      wlerr("ERROR: Unable to allocate IOB. Discarding frame\n");
+      ieee802154_primitive_free(prim);
+      goto out;
+    }
 
   /* First byte is the PHR */
 
