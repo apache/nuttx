@@ -114,9 +114,17 @@ int mipi_dsi_host_register(FAR struct mipi_dsi_host *host)
     }
   else
     {
-      g_hosts = kmm_realloc(g_hosts, sizeof(struct mipi_dsi_hosts_s) +
-                                     sizeof(FAR struct mipi_dsi_host *) *
-                                     g_hosts->count);
+      FAR struct mipi_dsi_hosts_s *hosts;
+
+      hosts = kmm_realloc(g_hosts, sizeof(struct mipi_dsi_hosts_s) +
+                                    sizeof(FAR struct mipi_dsi_host *) *
+                                    g_hosts->count);
+      if (hosts == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      g_hosts = hosts;
     }
 
   if (g_hosts == NULL)
