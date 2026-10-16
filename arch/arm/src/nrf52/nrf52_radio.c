@@ -340,11 +340,12 @@ static int nrf52_radio_rssi_get(struct nrf52_radio_dev_s *dev,
 
   /* Start the RSSI measurement */
 
+  nrf52_radio_putreg(dev, NRF52_RADIO_EVENTS_RSSIEND_OFFSET, 0);
   nrf52_radio_putreg(dev, NRF52_RADIO_TASKS_RSSISTART_OFFSET, 1);
 
   /* Wait for the RSSI sample */
 
-  while (nrf52_radio_getreg(dev, NRF52_RADIO_EVENTS_RSSIEND_OFFSET));
+  while (!nrf52_radio_getreg(dev, NRF52_RADIO_EVENTS_RSSIEND_OFFSET));
 
   /* Get the RSSI sample */
 
