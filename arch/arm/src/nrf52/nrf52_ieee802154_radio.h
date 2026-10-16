@@ -88,6 +88,7 @@ struct nrf52_radioi8_radio_data_s
 
   bool     rxenabled;           /* RX enabled now */
   bool     rxrestore;           /* RX needs to be restored */
+  bool     edrestore;           /* RX needs to be restored after ED */
   bool     rxlong;              /* Last RX frame was long */
 
   /* TX state */

@@ -51,6 +51,10 @@
 
 #define NRF52_ED_RSSISCALE            (4)
 
+/* One ED iteration lasts 8 symbols (128 us) */
+
+#define NRF52_ED_ITER_SYMBOLS         (8)
+
 /* ED configuration:
  *   - IRQ on EDEND event (sampling of energy detection complete)
  *   - shortcut between READY and EDSTART
@@ -725,9 +729,34 @@ static int nrf52_radioi8_energydetect(struct nrf52_radioi8_dev_s *dev,
                                       uint32_t nsymbols)
 {
   struct nrf52_radio_dev_s *lower = NULL;
+  uint32_t                  edcnt = 0;
 
   DEBUGASSERT(dev);
   lower = dev->radio->lower;
+
+  /* ED lasts (EDCNT + 1) iterations */
+
+  edcnt = nsymbols / NRF52_ED_ITER_SYMBOLS;
+  if (edcnt > 0)
+    {
+      edcnt -= 1;
+    }
+
+  if (edcnt > RADIO_EDCNT_MASK)
+    {
+      edcnt = RADIO_EDCNT_MASK;
+    }
+
+  /* ED starts on the READY event, RXEN has no effect if RX is active */
+
+  if (dev->radio->state.rxenabled)
+    {
+      dev->radio->state.edrestore = true;
+      dev->radio->ops->rxenable(dev, false);
+    }
+
+  while (NRF52_RADIO_GETREG(lower, NRF52_RADIO_STATE_OFFSET) !=
+         RADIO_STATE_DISABLED);
 
   /* Clear events */
 
@@ -742,7 +771,7 @@ static int nrf52_radioi8_energydetect(struct nrf52_radioi8_dev_s *dev,
 
   /* Configure ED symbols */
 
-  NRF52_RADIO_PUTREG(lower, NRF52_RADIO_EDCNT_OFFSET, nsymbols);
+  NRF52_RADIO_PUTREG(lower, NRF52_RADIO_EDCNT_OFFSET, edcnt);
 
   /* Set state to ENERGY_DETECT (ED) */
 
@@ -1616,6 +1645,15 @@ static void nrf52_radioi8_work_ed(void *arg)
   /* Callback the receiver in the next highest layer */
 
   dev->radiocb->edresult(dev->radiocb, ed);
+
+  /* Restore RX if it was enabled and no next ED was started */
+
+  if (dev->radio->state.edrestore &&
+      dev->radio->state.state != NRF52_RADIO_STATE_ED)
+    {
+      dev->radio->state.edrestore = false;
+      dev->radio->ops->rxenable(dev, true);
+    }
 }
 
 /****************************************************************************
