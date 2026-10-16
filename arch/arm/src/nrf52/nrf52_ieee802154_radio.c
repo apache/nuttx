@@ -1748,9 +1748,12 @@ static void nrf52_radioi8_state_rx(struct nrf52_radioi8_dev_s *dev)
     }
 #endif
 
-  /* Start ACK handling now - this must be done in isr */
+  /* Start ACK handling now - this must be done in isr.  Frames are not
+   * filtered while we wait for our ACK, so they are not acknowledged.
+   */
 
-  if (dev->state.rxmode == NRF52_RXMODE_NORMAL &&
+  if (dev->radio->state.waitack == false &&
+      dev->state.rxmode == NRF52_RXMODE_NORMAL &&
       rxbuf[1] & IEEE802154_FRAMECTRL_ACKREQ &&
       rxbuf[0] != IEEE802154_ACK_FRAME_SIZE)
     {
@@ -1776,10 +1779,21 @@ static void nrf52_radioi8_state_rx(struct nrf52_radioi8_dev_s *dev)
         }
     }
 
-  /* We wait for TX ACK and this frame is ACK - confirm TX to MAC */
+  /* We wait for TX ACK and this is not a valid ACK frame - ignore it and
+   * keep waiting for the ACK (IEEE 802.15.4-2011 5.1.6.2, 5.1.6.4.3).
+   */
 
-  else if (rxbuf[0] == IEEE802154_ACK_FRAME_SIZE &&
-           dev->radio->state.waitack == true)
+  else if (rxbuf[0] != IEEE802154_ACK_FRAME_SIZE ||
+           (rxbuf[1] & IEEE802154_FRAMECTRL_FTYPE) != IEEE802154_FRAME_ACK ||
+           !NRF52_RADIO_GETREG(dev->radio->lower,
+                               NRF52_RADIO_CRCSTATUS_OFFSET))
+    {
+      dev->macops.rxenable((struct ieee802154_radio_s *)dev, true);
+    }
+
+  /* We wait for TX ACK and this is our ACK - confirm TX to MAC */
+
+  else if (rxbuf[3] == dev->radio->txbuf[3])
     {
       nrf52_radioi8_trace_put(RADIO_TRACE_IRQ_RXACKDONE, 0);
 
@@ -1804,13 +1818,16 @@ static void nrf52_radioi8_state_rx(struct nrf52_radioi8_dev_s *dev)
         }
     }
 
-  /* We wait for TX ACK and this is not ACK - notify TX failure */
+  /* We wait for TX ACK and the ACK has another sequence number - notify TX
+   * failure
+   */
 
   else
     {
-      /* Clear flag */
+      /* Clear flag and stop the ACK wait timer */
 
       dev->radio->state.waitack = false;
+      dev->tim->ops->stop(dev);
 
       /* And notify MAC */
 

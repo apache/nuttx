@@ -47,11 +47,14 @@
 #define IEEE802154_MAX_BE             (5)
 #define IEEE802154_CW0                (2)
 
-/* ACK_SYM + turnaround symbols + backoff */
+/* macAckWaitDuration: aUnitBackoffPeriod + aTurnaroundTime +
+ * phySHRDuration (10) + ceiling(6 * phySymbolsPerOctet (2)), in symbols
+ * (IEEE 802.15.4-2011 6.4.3)
+ */
 
-#define IEEE802154_ACK_WAIT           (12+                              \
-                                       IEEE802154_TURN_AROUND_TIME+     \
-                                       IEEE802154_UNIT_BACKOFF_PERIOD)
+#define IEEE802154_ACK_WAIT           (IEEE802154_UNIT_BACKOFF_PERIOD + \
+                                       IEEE802154_TURN_AROUND_TIME +    \
+                                       10 + 12)
 
 /****************************************************************************
  * Public Types
