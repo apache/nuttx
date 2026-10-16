@@ -128,11 +128,11 @@ forwards ``setprop`` to the action manager.
 Built-in Properties
 ====================
 
-NXInit sets one built-in property on its own, before the ``boot`` event
-fires:
+NXInit sets the following built-in properties on its own:
 
-- ``sys.boot.reason``: the cause of the last board reset. It is queried
-  once at startup via ``boardctl(BOARDIOC_RESET_CAUSE, ...)``; applications
+- ``sys.boot.reason``: the cause of the last board reset, set before the
+  ``boot`` event fires. It is queried once at startup via
+  ``boardctl(BOARDIOC_RESET_CAUSE, ...)``; applications
   do not need to set it themselves. This requires
   ``CONFIG_BOARDCTL_RESET_CAUSE`` and a board-provided
   ``board_reset_cause()`` implementation.
@@ -167,6 +167,34 @@ fires:
 
       on init && property:sys.boot.reason=bootloader|recovery|thermal
           ...
+
+- ``init.trigger[.<core>]``: the key that ``trigger <event>`` writes, with
+  ``<event>`` as the value; ``on <event>`` matches it. Each init instance
+  uses its own key, so instances that share a property backend do not run
+  each other's actions:
+
+  - ``init.trigger.core<N>`` with ``CONFIG_BMP``, where ``<N>`` is the CPU
+    the instance runs on;
+  - ``init.trigger.<cpuname>`` with ``CONFIG_RPMSG_LOCAL_CPUNAME``;
+  - ``init.trigger`` otherwise.
+
+  With a shared backend, an instance can wait for another instance's event
+  through that instance's key, or trigger an event on it by setting the key.
+  For example, audio waits for ap's ``appinit``:
+
+  .. code-block::
+     :caption: init.audio.rc
+
+     on property:init.trigger.ap=appinit
+         ...
+
+  and ap triggers audio's ``appinit``:
+
+  .. code-block::
+     :caption: init.ap.rc
+
+     on boot
+         setprop init.trigger.audio appinit
 
 Commands
 ========
