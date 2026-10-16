@@ -80,6 +80,17 @@ The host advertises its GAP service at startup. To scan::
 Stop advertising with ``bt bnep0 advertise stop`` before restarting it with
 ``bt bnep0 advertise start``.
 
+ieee802154_6lowpan
+------------------
+
+6LoWPAN over the IEEE 802.15.4 MAC (``wpan0``), with the ``udp`` and
+``nettest`` examples.
+
+ieee802154_mac
+--------------
+
+IEEE 802.15.4 MAC with the ``i8sak`` tool on ``/dev/ieee0``.
+
 Flash & Debug
 =============
 
