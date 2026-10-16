@@ -654,13 +654,14 @@ static int rpmsgmtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
   msg->arg     = arg;
   msg->arglen  = arglen;
 
-  if (arglen > 0)
+  if (arg != 0 && arglen > 0)
     {
       memcpy(msg->buf, (FAR void *)(uintptr_t)arg, arglen);
     }
 
   return rpmsgmtd_send_recv(priv, RPMSGMTD_IOCTL, false, &msg->header,
-                            msglen, arglen > 0 ? (FAR void *)arg : NULL);
+                            msglen, arglen > 0 && arg != 0 ?
+                            (FAR void *)arg : NULL);
 }
 
 /****************************************************************************
