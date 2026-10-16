@@ -35,6 +35,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Size of the buffer ether_ntoa_r() writes: "xx:xx:xx:xx:xx:xx" + NUL */
+
+#define MAC_ADDR_STR_LEN                 (3 * ETHER_ADDR_LEN)
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

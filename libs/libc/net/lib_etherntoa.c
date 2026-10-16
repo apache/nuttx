@@ -46,7 +46,7 @@
 
 FAR char *ether_ntoa_r(FAR const struct ether_addr *addr, FAR char *buf)
 {
-  sprintf(buf, "%02x:%02x:%02x:%02x:%02x:%02x",
+  snprintf(buf, MAC_ADDR_STR_LEN, "%02x:%02x:%02x:%02x:%02x:%02x",
           addr->ether_addr_octet[0], addr->ether_addr_octet[1],
           addr->ether_addr_octet[2], addr->ether_addr_octet[3],
           addr->ether_addr_octet[4], addr->ether_addr_octet[5]);
