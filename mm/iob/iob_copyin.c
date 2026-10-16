@@ -27,9 +27,11 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <limits.h>
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
+#include <sys/uio.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/mm/iob.h>
@@ -244,4 +246,92 @@ int iob_trycopyin(FAR struct iob_s *iob, FAR const uint8_t *src,
                   unsigned int len, int offset, bool throttled)
 {
   return iob_copyin_internal(iob, src, len, offset, throttled, false);
+}
+
+/****************************************************************************
+ * Name: iob_copyin_iov_internal
+ *
+ * Description:
+ *  Iterate through an array of 'iov' buffers and copy each into the I/O
+ *  buffer chain, updating the offset for each segment.
+ *
+ ****************************************************************************/
+
+static int iob_copyin_iov_internal(FAR struct iob_s *iob,
+                                   FAR const struct iovec *iov,
+                                   unsigned int iovlen, int offset,
+                                   bool throttled, bool block)
+{
+  int total_copied = 0;
+  int ret;
+  unsigned int i;
+
+  if (iob == NULL || iov == NULL || iovlen == 0)
+    {
+      return 0;
+    }
+
+  for (i = 0; i < iovlen; i++)
+    {
+      if (iov[i].iov_len == 0)
+        {
+          continue;
+        }
+
+      if (iov[i].iov_base == NULL)
+        {
+          return -EINVAL;
+        }
+
+      if (iov[i].iov_len > (size_t)(INT_MAX - total_copied) ||
+          (offset >= 0 && iov[i].iov_len > (size_t)(INT_MAX - offset)))
+        {
+          return -EINVAL;
+        }
+
+      ret = iob_copyin_internal(iob, (FAR const uint8_t *)iov[i].iov_base,
+                                iov[i].iov_len, offset, throttled, block);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      offset       += iov[i].iov_len;
+      total_copied += iov[i].iov_len;
+    }
+
+  return total_copied;
+}
+
+/****************************************************************************
+ * Name: iob_copyin_iov
+ *
+ * Description:
+ *  Copy data from an 'iov' array of user buffers into the I/O buffer chain,
+ *  starting at 'offset', extending the chain as necessary.
+ *
+ ****************************************************************************/
+
+int iob_copyin_iov(FAR struct iob_s *iob,
+                   FAR const struct iovec *iov, unsigned int iovlen,
+                   int offset, bool throttled)
+{
+  return iob_copyin_iov_internal(iob, iov, iovlen, offset, throttled, true);
+}
+
+/****************************************************************************
+ * Name: iob_trycopyin_iov
+ *
+ * Description:
+ *  Copy data from an 'iov' array of user buffers into the I/O buffer chain,
+ *  starting at 'offset', extending the chain as necessary BUT without
+ *  waiting if buffers are not available.
+ *
+ ****************************************************************************/
+
+int iob_trycopyin_iov(FAR struct iob_s *iob,
+                      FAR const struct iovec *iov, unsigned int iovlen,
+                      int offset, bool throttled)
+{
+  return iob_copyin_iov_internal(iob, iov, iovlen, offset, throttled, false);
 }

@@ -28,6 +28,7 @@
 
 #include <stdint.h>
 #include <sys/param.h>
+#include <sys/uio.h>
 #include <string.h>
 #include <assert.h>
 
@@ -110,4 +111,47 @@ int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
     }
 
   return len - remaining;
+}
+
+/****************************************************************************
+ * Name: iob_copyout_iov
+ *
+ * Description:
+ *  Copy data 'len' bytes of data from the I/O buffer chain starting at
+ *  'offset' into the user 'iov' array of buffers.
+ *
+ ****************************************************************************/
+
+int iob_copyout_iov(FAR const struct iovec *iov, unsigned int iovlen,
+                    FAR const struct iob_s *iob, unsigned int len,
+                    int offset)
+{
+  unsigned int total_copied = 0;
+  unsigned int datalen = len;
+  int copied;
+  unsigned int i;
+
+  if (iov == NULL || iovlen == 0 || iob == NULL || len == 0)
+    {
+      return 0;
+    }
+
+  for (i = 0; i < iovlen && datalen > 0; i++)
+    {
+      size_t chunk = MIN((size_t)iov[i].iov_len, (size_t)datalen);
+
+      if (chunk > 0 && iov[i].iov_base != NULL)
+        {
+          copied = iob_copyout((FAR uint8_t *)iov[i].iov_base, iob,
+                               chunk, offset);
+          if (copied > 0)
+            {
+              offset       += copied;
+              datalen      -= copied;
+              total_copied += copied;
+            }
+        }
+    }
+
+  return total_copied;
 }
