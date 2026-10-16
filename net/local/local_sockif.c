@@ -149,6 +149,22 @@ static int local_sockif_alloc(FAR struct socket *psock)
   /* Save the pre-allocated connection in the socket structure */
 
   conn->lc_proto = psock->s_type;
+
+#ifdef CONFIG_NET_LOCAL_DGRAM
+  /* Match the SO_RCVBUF accounting below: the configured size is the usable
+   * payload, so a DGRAM FIFO additionally carries the largest possible
+   * preamble.  Without the headroom a payload of exactly
+   * CONFIG_DEV_FIFO_SIZE could never be written atomically.
+   */
+
+  if (psock->s_type == SOCK_DGRAM)
+    {
+      conn->lc_rcvsize = MIN(CONFIG_DEV_FIFO_SIZE +
+                             sizeof(lc_size_t) * 2 + UNIX_PATH_MAX,
+                             CONFIG_DEV_PIPE_MAXSIZE);
+    }
+#endif
+
   psock->s_conn = conn;
   return OK;
 }
