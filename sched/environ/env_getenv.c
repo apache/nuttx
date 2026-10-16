@@ -95,8 +95,8 @@ FAR char *getenv(FAR const char *name)
 
   /* It does!  Get the value sub-string from the name=value string */
 
-  pvalue = strchr(group->tg_envp[ret], '=');
-  if (pvalue == NULL)
+  pvalue = group->tg_envp[ret];
+  if (!env_uaccess(group, pvalue) || (pvalue = strchr(pvalue, '=')) == NULL)
     {
       nxrmutex_unlock(&group->tg_mutex);
 
