@@ -1840,16 +1840,24 @@ static ssize_t inet_sendto(FAR struct socket *psock, FAR const void *buf,
 static ssize_t inet_sendmsg(FAR struct socket *psock,
                             FAR const struct msghdr *msg, int flags)
 {
-  FAR void *buf = msg->msg_iov->iov_base;
-  size_t len = msg->msg_iov->iov_len;
   FAR const struct sockaddr *to = msg->msg_name;
   socklen_t tolen = msg->msg_namelen;
   FAR const struct iovec *iov;
   FAR const struct iovec *end;
+  FAR void *buf;
+  size_t len;
   int ret;
+
+  if (msg->msg_iovlen == 0)
+    {
+      return -EMSGSIZE;
+    }
 
   if (msg->msg_iovlen == 1)
     {
+      buf = msg->msg_iov->iov_base;
+      len = msg->msg_iov->iov_len;
+
       return to ? inet_sendto(psock, buf, len, flags, to, tolen) :
                   inet_send(psock, buf, len, flags);
     }
@@ -2175,6 +2183,11 @@ static ssize_t inet_recvmsg(FAR struct socket *psock,
                             FAR struct msghdr *msg, int flags)
 {
   ssize_t ret;
+
+  if (msg->msg_iovlen == 0)
+    {
+      return -EMSGSIZE;
+    }
 
   /* If a 'from' address has been provided, verify that it is large
    * enough to hold this address family.

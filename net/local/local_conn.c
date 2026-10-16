@@ -175,6 +175,7 @@ FAR struct local_conn_s *local_alloc(void)
        */
 
       nxmutex_init(&conn->lc_sendlock);
+      nxmutex_init(&conn->lc_recvlock);
       nxmutex_init(&conn->lc_polllock);
       nxrmutex_init(&conn->lc_conn.s_lock);
 
@@ -354,6 +355,7 @@ void local_free(FAR struct local_conn_s *conn)
   /* Destroy sem associated with the connection */
 
   nxmutex_destroy(&conn->lc_sendlock);
+  nxmutex_destroy(&conn->lc_recvlock);
   nxmutex_destroy(&conn->lc_polllock);
   nxrmutex_destroy(&conn->lc_conn.s_lock);
 

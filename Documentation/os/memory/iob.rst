@@ -167,8 +167,11 @@ Public Function Prototypes
   - :c:func:`iob_free_queue_qentry()`
   - :c:func:`iob_get_queue_size()`
   - :c:func:`iob_copyin()`
+  - :c:func:`iob_copyin_iov()`
   - :c:func:`iob_trycopyin()`
+  - :c:func:`iob_trycopyin_iov()`
   - :c:func:`iob_copyout()`
+  - :c:func:`iob_copyout_iov()`
   - :c:func:`iob_clone()`
   - :c:func:`iob_clone_partial()`
   - :c:func:`iob_concat()`
@@ -255,6 +258,14 @@ Public Function Prototypes
   the I/O buffer chain, starting at ``offset``, extending the chain
   as necessary.
 
+.. c:function:: int iob_copyin_iov(FAR struct iob_s *iob, \
+                      FAR const struct iovec *iov, unsigned int iovlen, \
+                      int offset, bool throttled);
+
+  Copy data from an ``iov`` array of user buffers into the I/O
+  buffer chain, starting at ``offset``, extending the chain as
+  necessary.
+
 .. c:function:: int iob_trycopyin(FAR struct iob_s *iob, FAR const uint8_t *src, \
                      unsigned int len, unsigned int offset, bool throttled);
 
@@ -262,12 +273,27 @@ Public Function Prototypes
   the I/O buffer chain, starting at ``offset``, extending the chain
   as necessary BUT without waiting if buffers are not available.
 
+.. c:function:: int iob_trycopyin_iov(FAR struct iob_s *iob, \
+                         FAR const struct iovec *iov, unsigned int iovlen, \
+                         int offset, bool throttled);
+
+  Copy data from an ``iov`` array of user buffers into the I/O
+  buffer chain, starting at ``offset``, extending the chain as
+  necessary BUT without waiting if buffers are not available.
+
 .. c:function:: int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob, \
                    unsigned int len, unsigned int offset);
 
   Copy data ``len`` bytes of data into the user
   buffer starting at ``offset`` in the I/O buffer, returning that
   actual number of bytes copied out.
+
+.. c:function:: int iob_copyout_iov(FAR const struct iovec *iov, unsigned int iovlen, \
+                       FAR const struct iob_s *iob, unsigned int len, \
+                       int offset);
+
+  Copy data ``len`` bytes of data from the I/O buffer chain
+  starting at ``offset`` into the user ``iov`` array of buffers.
 
 .. c:function:: int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, \
                    bool throttled, bool block);

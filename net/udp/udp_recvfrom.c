@@ -130,23 +130,15 @@ static inline size_t udp_recvfrom_newdata(FAR struct net_driver_s *dev,
                                           FAR struct udp_recvfrom_s *pstate)
 {
   size_t recvlen;
-
-  /* Get the length of the data to return */
-
-  if (dev->d_len > pstate->ir_msg->msg_iov->iov_len)
-    {
-      recvlen = pstate->ir_msg->msg_iov->iov_len;
-    }
-  else
-    {
-      recvlen = dev->d_len;
-    }
+  int offset;
 
   /* Copy the new appdata into the user buffer */
 
-  recvlen = iob_copyout(pstate->ir_msg->msg_iov->iov_base, dev->d_iob,
-                        recvlen, dev->d_appdata - dev->d_iob->io_data -
-                                 dev->d_iob->io_offset);
+  offset = dev->d_appdata - dev->d_iob->io_data - dev->d_iob->io_offset;
+
+  recvlen = iob_copyout_iov(pstate->ir_msg->msg_iov,
+                            pstate->ir_msg->msg_iovlen,
+                            dev->d_iob, dev->d_len, offset);
 
   /* Update the size of the data read */
 
@@ -211,11 +203,11 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
                            conn->sconn.s_options);
 #endif
 
-      /* Copy to user */
+      /* Copy to user buffer(s) */
 
-      recvlen = iob_copyout(pstate->ir_msg->msg_iov->iov_base, iob,
-                            MIN(pstate->ir_msg->msg_iov->iov_len, datalen),
-                            offset);
+      recvlen = iob_copyout_iov(pstate->ir_msg->msg_iov,
+                                pstate->ir_msg->msg_iovlen,
+                                iob, datalen, offset);
 
       /* Update the accumulated size of the data read */
 
@@ -659,9 +651,9 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
 
   /* Perform the UDP recvfrom() operation */
 
-  if (msg->msg_iovlen != 1)
+  if (msg->msg_iovlen == 0)
     {
-      return -ENOTSUP;
+      return -EMSGSIZE;
     }
 
   /* Initialize the state structure.  This is done with the network locked

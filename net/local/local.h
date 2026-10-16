@@ -141,6 +141,7 @@ struct local_conn_s
 #endif /* CONFIG_NET_LOCAL_SCM */
 
   mutex_t lc_sendlock;           /* Make sending multi-thread safe */
+  mutex_t lc_recvlock;           /* Make receiving multi-thread safe */
   mutex_t lc_polllock;           /* Lock for net poll */
 
 #ifdef CONFIG_NET_LOCAL_STREAM
