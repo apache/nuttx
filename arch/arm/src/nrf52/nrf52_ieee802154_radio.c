@@ -841,7 +841,7 @@ static int nrf52_radioi8_setcca(struct nrf52_radioi8_dev_s *dev,
     {
       c.mode = NRF52_RADIO_CCA_ED;
     }
-  else if (~cca->use_ed && cca->use_cs)
+  else if (!cca->use_ed && cca->use_cs)
     {
       c.mode = NRF52_RADIO_CCA_CARRIER;
     }
