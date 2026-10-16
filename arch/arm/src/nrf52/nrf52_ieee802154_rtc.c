@@ -344,7 +344,7 @@ static int nrf52_radioi8_isr_rtc(int irq, void *context, void *arg)
       NRF52_RTC_ACKINT(rtc->rtc, NRF52_RTC_TIMESLOT);
     }
 
-    leave_critical_section(flags);
+  leave_critical_section(flags);
 
   return OK;
 }
