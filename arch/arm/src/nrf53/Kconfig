@@ -72,7 +72,7 @@ config NRF53_CPUNET_MEM_RAM_64
 
 config NRF53_CPUNET_MEM_RAM_SIZE
 	hex
-	default 0x008000 if NRF53_CPUNET_MEM_RAM_64
+	default 0x010000 if NRF53_CPUNET_MEM_RAM_64
 
 # FLASH size for the app core
 
