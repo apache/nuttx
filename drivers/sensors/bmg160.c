@@ -332,6 +332,7 @@ static int bmg160_interrupt_handler(int irq, FAR void *context)
 static void bmg160_worker(FAR void *arg)
 {
   FAR struct bmg160_dev_s *priv = (FAR struct bmg160_dev_s *)(arg);
+
   DEBUGASSERT(priv != NULL);
 
   /* Read out the latest sensor data */

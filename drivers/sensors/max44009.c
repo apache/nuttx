@@ -351,6 +351,7 @@ static ssize_t max44009_write(FAR struct file *filep, FAR const char *buffer,
                               size_t buflen)
 {
   ssize_t length = 0;
+
   return length;
 }
 
@@ -732,27 +733,27 @@ static int max44009_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-    case SNIOC_INIT:
-      ret = max44009_init_device(priv, (FAR struct max44009_init_s *)arg);
-      break;
+      case SNIOC_INIT:
+        ret = max44009_init_device(priv, (FAR struct max44009_init_s *)arg);
+        break;
 
-    case SNIOC_THRESHOLD:
-      ret = max44009_set_threshold(priv,
-                                   (FAR struct max44009_threshold_s *)arg);
-      break;
+      case SNIOC_THRESHOLD:
+        ret = max44009_set_threshold(priv,
+                                     (FAR struct max44009_threshold_s *)arg);
+        break;
 
-    case SNIOC_READ_RAW_DATA:
-    case SNIOC_READ_CONVERT_DATA:
-      ret = max44009_read_data(priv, (FAR struct max44009_data_s *)arg);
-      break;
+      case SNIOC_READ_RAW_DATA:
+      case SNIOC_READ_CONVERT_DATA:
+        ret = max44009_read_data(priv, (FAR struct max44009_data_s *)arg);
+        break;
 
-    case SNIOC_START_SELFTEST:
-      ret = max44009_selftest(priv, (FAR struct max44009_data_s *)arg);
-      break;
+      case SNIOC_START_SELFTEST:
+        ret = max44009_selftest(priv, (FAR struct max44009_data_s *)arg);
+        break;
 
-    default:
-      ret = -ENOTTY;
-      break;
+      default:
+        ret = -ENOTTY;
+        break;
     }
 
   nxmutex_unlock(&priv->dev_lock);
@@ -774,6 +775,7 @@ static void max44009_notify(FAR struct max44009_dev_s *priv)
   for (i = 0; i < CONFIG_MAX44009_NPOLLWAITERS; i++)
     {
       FAR struct pollfd *fds = priv->fds[i];
+
       if (fds)
         {
           poll_notify(&fds, 1, POLLIN);
@@ -848,6 +850,7 @@ static int max44009_poll(FAR struct file *filep, FAR struct pollfd *fds,
       /* This is a request to tear down the poll. */
 
       FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+
       DEBUGASSERT(slot != NULL);
 
       /* Remove all memory of the poll setup */

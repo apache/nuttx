@@ -204,6 +204,7 @@ static int sht3x_do_transfer(FAR struct i2c_master_s *i2c,
                              size_t nmsg)
 {
   int ret = ret = I2C_TRANSFER(i2c, msgv, nmsg);
+
   if (ret >= 0)
     {
       return OK;

@@ -317,6 +317,7 @@ static int bh1750fvi_ioctl(FAR struct file *filep, int cmd,
         {
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
           uint8_t reg;
+
           DEBUGASSERT(ptr != NULL);
 
           reg = BH1750FVI_MEASURE_TIMEH | ((*ptr & 0xe0) >> 5);

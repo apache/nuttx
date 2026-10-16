@@ -525,8 +525,10 @@ static int scd41_read_values(FAR struct scd41_dev_s *priv, FAR float *temp,
 
       priv->co2 = (float)scd41_data_word2uint16(data + 0);
       uint16_t tval = scd41_data_word2uint16(data + 1);
+
       priv->temperature = (float)((tval * 175.0) / 65536.0 - 45.0);
       uint16_t hval = scd41_data_word2uint16(data + 2);
+
       priv->humidity = (float)(hval * 100.0 / 65536.0);
       priv->last_update = ts;
       priv->valid = true;

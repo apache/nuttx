@@ -454,6 +454,7 @@ static int adt7320_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READSTAT:
         {
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           *ptr = adt7320_read_reg8(priv, ADT7320_STAT_REG);
         }
@@ -464,6 +465,7 @@ static int adt7320_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READCONF:
         {
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           *ptr = adt7320_read_reg8(priv, ADT7320_CONF_REG);
         }
@@ -495,6 +497,7 @@ static int adt7320_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
           int16_t temp_raw;
+
           DEBUGASSERT(ptr != NULL);
           temp_raw = adt7320_read_reg16(priv, ADT7320_TCRIT_REG);
           *ptr = b8tob16(temp_raw << 1);
@@ -514,6 +517,7 @@ static int adt7320_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
           uint8_t tmp;
+
           DEBUGASSERT(ptr != NULL);
           tmp = adt7320_read_reg8(priv, ADT7320_THYST_REG);
           *ptr = uitoub16(tmp);
@@ -532,6 +536,7 @@ static int adt7320_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
           int16_t temp_raw;
+
           DEBUGASSERT(ptr != NULL);
           temp_raw = adt7320_read_reg16(priv, ADT7320_TLOW_REG);
           *ptr = b8tob16(temp_raw << 1);
@@ -551,6 +556,7 @@ static int adt7320_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
           int16_t temp_raw;
+
           DEBUGASSERT(ptr != NULL);
           temp_raw = adt7320_read_reg16(priv, ADT7320_THIGH_REG);
           *ptr = b8tob16(temp_raw << 1);

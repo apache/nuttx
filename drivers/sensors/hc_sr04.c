@@ -236,6 +236,7 @@ static ssize_t hcsr04_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen)
 {
   ssize_t length = 0;
+
   return length;
 }
 
@@ -255,22 +256,22 @@ static int hcsr04_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-    case SNIOC_START_CONVERSION:
-      ret = hcsr04_start_measuring(priv);
-      break;
+      case SNIOC_START_CONVERSION:
+        ret = hcsr04_start_measuring(priv);
+        break;
 
-    case SNIOC_READ_RAW_DATA:
-      break;
+      case SNIOC_READ_RAW_DATA:
+        break;
 
 #ifdef CONFIG_HCSR04_DEBUG
-    case SNIOC_DUMP_REGS:
-      ret = hcsr04_dump_registers(priv);
-      break;
+      case SNIOC_DUMP_REGS:
+        ret = hcsr04_dump_registers(priv);
+        break;
 #endif
 
-    default:
-      ret = -ENOTTY;
-      break;
+      default:
+        ret = -ENOTTY;
+        break;
     }
 
   nxmutex_unlock(&priv->devlock);
@@ -357,6 +358,7 @@ static int hcsr04_poll(FAR struct file *filep, FAR struct pollfd *fds,
       /* This is a request to tear down the poll. */
 
       FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+
       DEBUGASSERT(slot != NULL);
 
       /* Remove all memory of the poll setup */

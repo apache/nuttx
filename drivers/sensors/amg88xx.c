@@ -469,103 +469,105 @@ static int amg88xx_ioctl(FAR struct file *filep, int cmd,
 
   switch (cmd)
     {
-    case SNIOC_SET_OPERATIONAL_MODE:
-      switch (*(amg88xx_operation_mode_e *)arg)
-        {
-        case op_mode_normal:
-          ret = amg88xx_i2c_write_addr(
-                priv,
-                (uint8_t)AMG88XX_POWER_CONTROL_REGISTER,
-                (uint8_t)AMG88XX_NORMAL_MODE_CMD);
-          break;
-        case op_mode_sleep:
-          ret = amg88xx_i2c_write_addr(
-                priv,
-                (uint8_t)AMG88XX_POWER_CONTROL_REGISTER,
-                (uint8_t)AMG88XX_SLEEP_MODE_CMD);
-          break;
-        default:
-          ret = -EINVAL;
-          break;
-        }
-    break;
+      case SNIOC_SET_OPERATIONAL_MODE:
+        switch (*(amg88xx_operation_mode_e *)arg)
+          {
+            case op_mode_normal:
+              ret = amg88xx_i2c_write_addr(
+                    priv,
+                    (uint8_t)AMG88XX_POWER_CONTROL_REGISTER,
+                    (uint8_t)AMG88XX_NORMAL_MODE_CMD);
+              break;
+            case op_mode_sleep:
+              ret = amg88xx_i2c_write_addr(
+                    priv,
+                    (uint8_t)AMG88XX_POWER_CONTROL_REGISTER,
+                    (uint8_t)AMG88XX_SLEEP_MODE_CMD);
+              break;
+            default:
+              ret = -EINVAL;
+              break;
+          }
+        break;
 
-    case SNIOC_SET_FRAMERATE:
-      switch (*(amg88xx_fps_e *)arg)
-        {
-        case fps_one:
-          regval = (AMG88XX_1FPS << AMG88XX_FPS_BIT);
-          ret = amg88xx_i2c_write_addr(priv,
-                                       (uint8_t)AMG88XX_FRAME_RATE_REGISTER,
-                                       regval);
-          break;
-        case fps_ten:
-          regval = (AMG88XX_10FPS << AMG88XX_FPS_BIT);
-          ret = amg88xx_i2c_write_addr(priv,
-                                       (uint8_t)AMG88XX_FRAME_RATE_REGISTER,
-                                       regval);
-          break;
-        default:
-          ret = -EINVAL;
-          break;
-        }
-    break;
+      case SNIOC_SET_FRAMERATE:
+        switch (*(amg88xx_fps_e *)arg)
+          {
+            case fps_one:
+              regval = (AMG88XX_1FPS << AMG88XX_FPS_BIT);
+              ret = amg88xx_i2c_write_addr(
+                    priv,
+                    (uint8_t)AMG88XX_FRAME_RATE_REGISTER,
+                    regval);
+              break;
+            case fps_ten:
+              regval = (AMG88XX_10FPS << AMG88XX_FPS_BIT);
+              ret = amg88xx_i2c_write_addr(
+                    priv,
+                    (uint8_t)AMG88XX_FRAME_RATE_REGISTER,
+                    regval);
+              break;
+            default:
+              ret = -EINVAL;
+              break;
+          }
+        break;
 
-    /* Enabling and disabling the moving average requires following
-     * a procedure described in the i2c communication interface manual.
-     */
+      /* Enabling and disabling the moving average requires following
+       * a procedure described in the i2c communication interface manual.
+       */
 
-    case SNIOC_SET_MOVING_AVG:
-      ret = amg88xx_i2c_write_addr(
-            priv,
-            (uint8_t)AMG88XX_AVERAGE_MODE_REGISTER,
-            (uint8_t)AMG88XX_AVEAGE_MODE_CMD_1);
-      if (ret < 0)
-        {
-          return ret;
-        }
+      case SNIOC_SET_MOVING_AVG:
+        ret = amg88xx_i2c_write_addr(
+              priv,
+              (uint8_t)AMG88XX_AVERAGE_MODE_REGISTER,
+              (uint8_t)AMG88XX_AVEAGE_MODE_CMD_1);
+        if (ret < 0)
+          {
+            return ret;
+          }
 
-      ret = amg88xx_i2c_write_addr(
-            priv,
-            (uint8_t)AMG88XX_AVERAGE_MODE_REGISTER,
-            (uint8_t)AMG88XX_AVEAGE_MODE_CMD_2);
-      if (ret < 0)
-        {
-          return ret;
-        }
+        ret = amg88xx_i2c_write_addr(
+              priv,
+              (uint8_t)AMG88XX_AVERAGE_MODE_REGISTER,
+              (uint8_t)AMG88XX_AVEAGE_MODE_CMD_2);
+        if (ret < 0)
+          {
+            return ret;
+          }
 
-      ret = amg88xx_i2c_write_addr(
-            priv,
-            (uint8_t)AMG88XX_AVERAGE_MODE_REGISTER,
-            (uint8_t)AMG88XX_AVEAGE_MODE_CMD_3);
-      if (ret < 0)
-        {
-          return ret;
-        }
+        ret = amg88xx_i2c_write_addr(
+              priv,
+              (uint8_t)AMG88XX_AVERAGE_MODE_REGISTER,
+              (uint8_t)AMG88XX_AVEAGE_MODE_CMD_3);
+        if (ret < 0)
+          {
+            return ret;
+          }
 
-      regval = (bool)arg                                    ?
-               (AMG88XX_MAMOD_ENABLE << AMG88XX_MAMOD_BIT)  :
-               (AMG88XX_MAMOD_DISABLE << AMG88XX_MAMOD_BIT) ;
+        regval = (bool)arg                                    ?
+                 (AMG88XX_MAMOD_ENABLE << AMG88XX_MAMOD_BIT)  :
+                 (AMG88XX_MAMOD_DISABLE << AMG88XX_MAMOD_BIT) ;
 
-      ret = amg88xx_i2c_write_addr(
-            priv,
-            (uint8_t)AMG88XX_AVERAGE_REGISTER,
-            regval);
+        ret = amg88xx_i2c_write_addr(
+              priv,
+              (uint8_t)AMG88XX_AVERAGE_REGISTER,
+              regval);
 
-      if (ret < 0)
-        {
-          return ret;
-        }
+        if (ret < 0)
+          {
+            return ret;
+          }
 
-      ret = amg88xx_i2c_write_addr(
-            priv,
-            (uint8_t)AMG88XX_AVERAGE_MODE_REGISTER,
-            (uint8_t)AMG88XX_AVEAGE_MODE_CMD_4);
-      break;
+        ret = amg88xx_i2c_write_addr(
+              priv,
+              (uint8_t)AMG88XX_AVERAGE_MODE_REGISTER,
+              (uint8_t)AMG88XX_AVEAGE_MODE_CMD_4);
+        break;
 
-    default:
-      ret = -ENOTTY;
-      break;
+      default:
+        ret = -ENOTTY;
+        break;
     }
 
   nxmutex_unlock(&priv->devlock);

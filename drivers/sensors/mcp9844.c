@@ -226,6 +226,7 @@ static int mcp9844_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           /* Read the ambient temperature value from the device */
 
           uint16_t raw_temperature = 0;
+
           ret = mcp9844_read_u16(priv, MCP9844_TEMP_REG, &raw_temperature);
 
           /* Convert from the proprietary sensor temperature data
@@ -383,6 +384,7 @@ int mcp9844_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   /* Register the character driver */
 
   int ret = register_driver(devpath, &g_mcp9844_fops, 0600, priv);
+
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);

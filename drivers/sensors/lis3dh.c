@@ -267,6 +267,7 @@ static void lis3dh_reset(FAR struct lis3dh_dev_s *dev)
 static int lis3dh_ident(FAR struct lis3dh_dev_s *dev)
 {
   uint8_t reg;
+
   lis3dh_read_register(dev, LIS3DH_WHO_AM_I, &reg);
 
   if (reg == LIS3DH_DEVICE_ID)
@@ -679,6 +680,7 @@ static int lis3dh_irq_enable(FAR struct lis3dh_dev_s *dev, bool enable)
 static int lis3dh_fifo_enable(FAR struct lis3dh_dev_s *dev)
 {
   uint8_t reg;
+
   lis3dh_write_register(dev, LIS3DH_FIFO_CTRL_REG,
                         LIS3DH_FIFO_CTRL_REG_MODE_STREAM | 28);
 

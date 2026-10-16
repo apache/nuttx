@@ -216,21 +216,22 @@ static const enum mcp9600_alert_e g_alert_configs[] =
 static int mcp9600_read_reg(FAR struct mcp9600_dev_s *priv, uint8_t reg,
                             FAR void *buf, size_t nbytes)
 {
-  struct i2c_msg_s read_cmd[] = {
-      {
-          .frequency = CONFIG_MCP9600_I2C_FREQUENCY,
-          .addr = priv->addr,
-          .flags = 0,
-          .buffer = &reg,
-          .length = sizeof(reg),
-      },
-      {
-          .frequency = CONFIG_MCP9600_I2C_FREQUENCY,
-          .addr = priv->addr,
-          .flags = I2C_M_READ,
-          .buffer = buf,
-          .length = nbytes,
-      },
+  struct i2c_msg_s read_cmd[] =
+  {
+    {
+      .frequency = CONFIG_MCP9600_I2C_FREQUENCY,
+      .addr = priv->addr,
+      .flags = 0,
+      .buffer = &reg,
+      .length = sizeof(reg),
+    },
+    {
+      .frequency = CONFIG_MCP9600_I2C_FREQUENCY,
+      .addr = priv->addr,
+      .flags = I2C_M_READ,
+      .buffer = buf,
+      .length = nbytes,
+    },
   };
 
   return I2C_TRANSFER(priv->i2c, read_cmd,
@@ -249,21 +250,22 @@ static int mcp9600_read_reg(FAR struct mcp9600_dev_s *priv, uint8_t reg,
 static int mcp9600_write_reg(FAR struct mcp9600_dev_s *priv, uint8_t reg,
                              FAR void *buf, size_t nbytes)
 {
-  struct i2c_msg_s read_cmd[] = {
-      {
-          .frequency = CONFIG_MCP9600_I2C_FREQUENCY,
-          .addr = priv->addr,
-          .flags = 0,
-          .buffer = &reg,
-          .length = sizeof(reg),
-      },
-      {
-          .frequency = CONFIG_MCP9600_I2C_FREQUENCY,
-          .addr = priv->addr,
-          .flags = 0,
-          .buffer = buf,
-          .length = nbytes,
-      },
+  struct i2c_msg_s read_cmd[] =
+  {
+    {
+      .frequency = CONFIG_MCP9600_I2C_FREQUENCY,
+      .addr = priv->addr,
+      .flags = 0,
+      .buffer = &reg,
+      .length = sizeof(reg),
+    },
+    {
+      .frequency = CONFIG_MCP9600_I2C_FREQUENCY,
+      .addr = priv->addr,
+      .flags = 0,
+      .buffer = buf,
+      .length = nbytes,
+    },
   };
 
   return I2C_TRANSFER(priv->i2c, read_cmd,

@@ -598,6 +598,7 @@ static int sgp30_open(FAR struct file *filep)
         {
           struct timespec start;
           struct timespec curr;
+
           sgp30_dbg("serial id: %04x-%04x-%04x\n",
                     sgp30_data_word_to_uint16(serial + 0),
                     sgp30_data_word_to_uint16(serial + 1),
@@ -618,6 +619,7 @@ static int sgp30_open(FAR struct file *filep)
           else
             {
               uint32_t repeat = SGP30_INIT_RETRIES;
+
               clock_systime_timespec(&curr);
               sgp30_dbg("sgp30_write_cmd(SGP30_CMD_INIT_AIR_QUALITY)\n");
               while (repeat-- &&

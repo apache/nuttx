@@ -831,24 +831,24 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv,
 
   switch (mode)
     {
-    case 0:
-      {
-        sninfo("SELFTEST ACCELERO DISABLED\n");
-        lsm303agr_writereg8(priv, LSM303AGR_CTRL_REG1_A, 0x00);
-        lsm303agr_writereg8(priv, LSM303AGR_CTRL_REG4_A, 0x01);
-      }
-      break;
+      case 0:
+        {
+          sninfo("SELFTEST ACCELERO DISABLED\n");
+          lsm303agr_writereg8(priv, LSM303AGR_CTRL_REG1_A, 0x00);
+          lsm303agr_writereg8(priv, LSM303AGR_CTRL_REG4_A, 0x01);
+        }
+        break;
 
-    case 1:
-      {
-        sninfo("SELFTEST MAGNETO DISABLED\n");
-        lsm303agr_writereg8(priv, LSM303AGR_CFG_REG_C_M, 0x10);
-        lsm303agr_writereg8(priv, LSM303AGR_CFG_REG_A_M, 0x83);
-      }
-      break;
+      case 1:
+        {
+          sninfo("SELFTEST MAGNETO DISABLED\n");
+          lsm303agr_writereg8(priv, LSM303AGR_CFG_REG_C_M, 0x10);
+          lsm303agr_writereg8(priv, LSM303AGR_CFG_REG_A_M, 0x83);
+        }
+        break;
 
-    default:
-      break;
+      default:
+        break;
     }
 
   return OK;

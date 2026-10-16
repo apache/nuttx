@@ -659,16 +659,18 @@ static int hyt271_fetch(FAR struct sensor_lowerhalf_s *lower,
     {
       case SENSOR_TYPE_AMBIENT_TEMPERATURE:
         {
-            struct sensor_temp temp;
-            hyt271_temp_from_rawdata(&data, &temp);
-            memcpy(buffer, &temp, sizeof(temp));
+          struct sensor_temp temp;
+
+          hyt271_temp_from_rawdata(&data, &temp);
+          memcpy(buffer, &temp, sizeof(temp));
         }
         break;
       case SENSOR_TYPE_RELATIVE_HUMIDITY:
         {
-            struct sensor_humi humi;
-            hyt271_humi_from_rawdata(&data, &humi);
-            memcpy(buffer, &humi, sizeof(humi));
+          struct sensor_humi humi;
+
+          hyt271_humi_from_rawdata(&data, &humi);
+          memcpy(buffer, &humi, sizeof(humi));
         }
         break;
       default:
@@ -702,6 +704,7 @@ static int hyt271_control(FAR struct sensor_lowerhalf_s *lower,
       case SNIOC_READADDR:
         {
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           *ptr = priv->dev->addr;
           sninfo("readaddr: %02x\n", *ptr);
@@ -714,6 +717,7 @@ static int hyt271_control(FAR struct sensor_lowerhalf_s *lower,
       case SNIOC_CHANGEADDR:
         {
           uint8_t addr = arg;
+
           ret = hyt271_change_addr(priv->dev, addr);
           sninfo("changeaddr: %02x\n", addr);
         }
@@ -783,6 +787,7 @@ static int hyt271_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                FAR uint32_t *period_us)
 {
   FAR struct hyt271_sensor_s *priv = (FAR struct hyt271_sensor_s *)lower;
+
   priv->dev->interval = *period_us;
   return OK;
 }
@@ -838,6 +843,7 @@ static int hyt271_thread(int argc, char** argv)
               !HYT271_HUMIRAWEQUAL(orawdata, data.data)))
             {
               struct sensor_humi humi;
+
               hyt271_humi_from_rawdata(&data, &humi);
               hsensor->lower.push_event(hsensor->lower.priv, &humi,
                                         sizeof(struct sensor_humi));
@@ -847,6 +853,7 @@ static int hyt271_thread(int argc, char** argv)
               !HYT271_TEMPRAWEQUAL(orawdata, data.data)))
             {
               struct sensor_temp temp;
+
               hyt271_temp_from_rawdata(&data, &temp);
               tsensor->lower.push_event(tsensor->lower.priv, &temp,
                                         sizeof(struct sensor_temp));

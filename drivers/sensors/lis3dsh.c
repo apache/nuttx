@@ -347,6 +347,7 @@ static int lis3dsh_interrupt_handler(int irq, FAR void *context,
 static void lis3dsh_worker(FAR void *arg)
 {
   FAR struct lis3dsh_dev_s *priv = (FAR struct lis3dsh_dev_s *)(arg);
+
   DEBUGASSERT(priv != NULL);
 
   /* Read out the latest sensor data */
@@ -405,24 +406,24 @@ static int lis3dsh_open(FAR struct file *filep)
   /* Read back the content of all control registers for debug purposes */
 
 #ifdef CONFIG_DEBUG_SENSORS_INFO
-    {
-      uint8_t reg_content = 0;
+  {
+    uint8_t reg_content = 0;
 
-      lis3dsh_read_register(priv, LIS3DSH_CTRL_REG_1, &reg_content);
-      sninfo("LIS3DSH_CTRL_REG_1 = %04x\n", reg_content);
-      lis3dsh_read_register(priv, LIS3DSH_CTRL_REG_2, &reg_content);
-      sninfo("LIS3DSH_CTRL_REG_2 = %04x\n", reg_content);
-      lis3dsh_read_register(priv, LIS3DSH_CTRL_REG_3, &reg_content);
-      sninfo("LIS3DSH_CTRL_REG_3 = %04x\n", reg_content);
-      lis3dsh_read_register(priv, LIS3DSH_CTRL_REG_4, &reg_content);
-      sninfo("LIS3DSH_CTRL_REG_4 = %04x\n", reg_content);
-      lis3dsh_read_register(priv, LIS3DSH_CTRL_REG_5, &reg_content);
-      sninfo("LIS3DSH_CTRL_REG_5 = %04x\n", reg_content);
-      lis3dsh_read_register(priv, LIS3DSH_CTRL_REG_6, &reg_content);
-      sninfo("LIS3DSH_CTRL_REG_6 = %04x\n", reg_content);
-      lis3dsh_read_register(priv, LIS3DSH_STATUS_REG, &reg_content);
-      sninfo("STATUS_REG = %04x\n", reg_content);
-    }
+    lis3dsh_read_register(priv, LIS3DSH_CTRL_REG_1, &reg_content);
+    sninfo("LIS3DSH_CTRL_REG_1 = %04x\n", reg_content);
+    lis3dsh_read_register(priv, LIS3DSH_CTRL_REG_2, &reg_content);
+    sninfo("LIS3DSH_CTRL_REG_2 = %04x\n", reg_content);
+    lis3dsh_read_register(priv, LIS3DSH_CTRL_REG_3, &reg_content);
+    sninfo("LIS3DSH_CTRL_REG_3 = %04x\n", reg_content);
+    lis3dsh_read_register(priv, LIS3DSH_CTRL_REG_4, &reg_content);
+    sninfo("LIS3DSH_CTRL_REG_4 = %04x\n", reg_content);
+    lis3dsh_read_register(priv, LIS3DSH_CTRL_REG_5, &reg_content);
+    sninfo("LIS3DSH_CTRL_REG_5 = %04x\n", reg_content);
+    lis3dsh_read_register(priv, LIS3DSH_CTRL_REG_6, &reg_content);
+    sninfo("LIS3DSH_CTRL_REG_6 = %04x\n", reg_content);
+    lis3dsh_read_register(priv, LIS3DSH_STATUS_REG, &reg_content);
+    sninfo("STATUS_REG = %04x\n", reg_content);
+  }
 #endif
 
   return OK;

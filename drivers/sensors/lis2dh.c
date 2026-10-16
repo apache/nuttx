@@ -563,99 +563,101 @@ static int lis2dh_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     }
 
   switch (cmd)
-  {
-  case SNIOC_WRITESETUP:
     {
-      /* Write to the configuration registers. */
-
-      ret = lis2dh_setup(priv, (struct lis2dh_setup *)arg);
-      lis2dh_dbg("lis2dh: conf: %p ret: %d\n",
-                 (struct lis2dh_setup *)arg, ret);
-
-      /* Make sure interrupt will get cleared in
-       * case of latched configuration.
-       */
-
-      lis2dh_clear_interrupts(priv, LIS2DH_INT1 | LIS2DH_INT2);
-    }
-    break;
-
-  case SNIOC_WRITE_INT1THRESHOLD:
-    {
-      buf = (uint8_t)arg;
-
-      if (lis2dh_access(priv, ST_LIS2DH_INT1_THS_REG, &buf, -1) != 1)
+      case SNIOC_WRITESETUP:
         {
-          lis2dh_dbg("lis2dh: Failed to write INT1_THS_REG\n");
-          ret = -EIO;
+          /* Write to the configuration registers. */
+
+          ret = lis2dh_setup(priv, (struct lis2dh_setup *)arg);
+          lis2dh_dbg("lis2dh: conf: %p ret: %d\n",
+                     (struct lis2dh_setup *)arg, ret);
+
+          /* Make sure interrupt will get cleared in
+           * case of latched configuration.
+           */
+
+          lis2dh_clear_interrupts(priv, LIS2DH_INT1 | LIS2DH_INT2);
         }
+        break;
 
-      lis2dh_clear_interrupts(priv, LIS2DH_INT1);
-    }
-    break;
-
-  case SNIOC_WRITE_INT2THRESHOLD:
-    {
-      buf = (uint8_t)arg;
-
-      if (lis2dh_access(priv, ST_LIS2DH_INT2_THS_REG, &buf, -1) != 1)
+      case SNIOC_WRITE_INT1THRESHOLD:
         {
-          lis2dh_dbg("lis2dh: Failed to write INT2_THS_REG\n");
-          ret = -EIO;
+          buf = (uint8_t)arg;
+
+          if (lis2dh_access(priv, ST_LIS2DH_INT1_THS_REG, &buf, -1) != 1)
+            {
+              lis2dh_dbg("lis2dh: Failed to write INT1_THS_REG\n");
+              ret = -EIO;
+            }
+
+          lis2dh_clear_interrupts(priv, LIS2DH_INT1);
         }
+        break;
 
-      lis2dh_clear_interrupts(priv, LIS2DH_INT2);
-    }
-    break;
-
-  case SNIOC_RESET_HPFILTER:
-    {
-      /* Read reference register to reset/recalib DC offset for HP filter */
-
-      if (lis2dh_access(priv, ST_LIS2DH_REFERENCE_REG, &buf, 1) != 1)
+      case SNIOC_WRITE_INT2THRESHOLD:
         {
-          lis2dh_dbg("lis2dh: Failed to write reference register\n");
-          ret = -EIO;
+          buf = (uint8_t)arg;
+
+          if (lis2dh_access(priv, ST_LIS2DH_INT2_THS_REG, &buf, -1) != 1)
+            {
+              lis2dh_dbg("lis2dh: Failed to write INT2_THS_REG\n");
+              ret = -EIO;
+            }
+
+          lis2dh_clear_interrupts(priv, LIS2DH_INT2);
         }
+        break;
 
-      lis2dh_clear_interrupts(priv, LIS2DH_INT2);
-    }
-    break;
+      case SNIOC_RESET_HPFILTER:
+        {
+          /* Read reference register to reset/recalib DC offset for HP
+           * filter
+           */
 
-  case SNIOC_START_SELFTEST:
+          if (lis2dh_access(priv, ST_LIS2DH_REFERENCE_REG, &buf, 1) != 1)
+            {
+              lis2dh_dbg("lis2dh: Failed to write reference register\n");
+              ret = -EIO;
+            }
+
+          lis2dh_clear_interrupts(priv, LIS2DH_INT2);
+        }
+        break;
+
+      case SNIOC_START_SELFTEST:
 #ifdef CONFIG_LIS2DH_DRIVER_SELFTEST
-    {
-      priv->config->irq_enable(priv->config, false);
-      lis2dh_clear_interrupts(priv, LIS2DH_INT1 | LIS2DH_INT2);
-      ret = lis2dh_handle_selftest(priv);
-      priv->config->irq_enable(priv->config, true);
-    }
+        {
+          priv->config->irq_enable(priv->config, false);
+          lis2dh_clear_interrupts(priv, LIS2DH_INT1 | LIS2DH_INT2);
+          ret = lis2dh_handle_selftest(priv);
+          priv->config->irq_enable(priv->config, true);
+        }
 #else
-    {
-      ret = -EINVAL;
-    }
+        {
+          ret = -EINVAL;
+        }
 #endif
-    break;
+        break;
 
-  case SNIOC_READ_TEMP:
-    {
-      ret = lis2dh_read_temp(priv, (FAR int16_t *)arg);
-    }
-    break;
+      case SNIOC_READ_TEMP:
+        {
+          ret = lis2dh_read_temp(priv, (FAR int16_t *)arg);
+        }
+        break;
 
-  case SNIOC_WHO_AM_I:
-    {
-      ret = lis2dh_who_am_i(priv, (FAR uint8_t *)arg);
-    }
-    break;
+      case SNIOC_WHO_AM_I:
+        {
+          ret = lis2dh_who_am_i(priv, (FAR uint8_t *)arg);
+        }
+        break;
 
-  default:
-    {
-      lis2dh_dbg("lis2dh: Unrecognized cmd: %d\n", cmd);
-      ret = -ENOTTY;
+      default:
+        {
+          lis2dh_dbg("lis2dh: Unrecognized cmd: %d\n", cmd);
+          ret = -ENOTTY;
+        }
+        break;
     }
-    break;
-  }
 
   nxmutex_unlock(&dev->devlock);
   return ret;
@@ -734,6 +736,7 @@ static int lis2dh_poll(FAR struct file *filep, FAR struct pollfd *fds,
       /* This is a request to tear down the poll. */
 
       FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+
       DEBUGASSERT(slot != NULL);
 
       /* Remove all memory of the poll setup */
@@ -1387,7 +1390,7 @@ static unsigned int lis2dh_get_fifo_readings(FAR struct lis2dh_dev_s *priv,
       struct lis2dh_vector_s sample;
     }
 
-    *buf = (FAR void *)&res->measurements[res->header.meas_count];
+  *buf = (FAR void *)&res->measurements[res->header.meas_count];
 
   bool xy_axis_fixup = priv->setup->xy_axis_fixup;
   size_t buflen = readcount * 6;
@@ -1619,6 +1622,7 @@ static int lis2dh_access(FAR struct lis2dh_dev_s *dev, uint8_t subaddr,
 
 #ifdef CONFIG_I2C_RESET
           int ret = I2C_RESET(dev->i2c);
+
           if (ret < 0)
             {
               lis2dh_dbg("I2C_RESET failed: %d\n", ret);
@@ -1689,7 +1693,7 @@ static int lis2dh_reboot(FAR struct lis2dh_dev_s *dev)
           return -ETIMEDOUT;
         }
 
-       nxsched_usleep(1);
+      nxsched_usleep(1);
     }
   while (true);
 
@@ -1947,22 +1951,22 @@ static int lis2dh_setup(FAR struct lis2dh_dev_s * dev,
 
   switch (dev->setup->fullscale & 0x30)
     {
-    default:
-    case ST_LIS2DH_CR4_FULL_SCALE_2G:
-      dev->scale = 2000;
-      break;
+      default:
+      case ST_LIS2DH_CR4_FULL_SCALE_2G:
+        dev->scale = 2000;
+        break;
 
-    case ST_LIS2DH_CR4_FULL_SCALE_4G:
-      dev->scale = 4000;
-      break;
+      case ST_LIS2DH_CR4_FULL_SCALE_4G:
+        dev->scale = 4000;
+        break;
 
-    case ST_LIS2DH_CR4_FULL_SCALE_8G:
-      dev->scale = 8000;
-      break;
+      case ST_LIS2DH_CR4_FULL_SCALE_8G:
+        dev->scale = 8000;
+        break;
 
-    case ST_LIS2DH_CR4_FULL_SCALE_16G:
-      dev->scale = 16000;
-      break;
+      case ST_LIS2DH_CR4_FULL_SCALE_16G:
+        dev->scale = 16000;
+        break;
     }
 
   if (dev->setup->fifo_enable)

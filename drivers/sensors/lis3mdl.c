@@ -237,6 +237,7 @@ static void lis3mdl_read_measurement_data(FAR struct lis3mdl_dev_s *dev)
   /* Acquire the mutex before the data is copied */
 
   int ret = nxmutex_lock(&dev->datalock);
+
   if (ret != OK)
     {
       snerr("ERROR: Could not acquire dev->datalock: %d\n", ret);
@@ -384,6 +385,7 @@ static int lis3mdl_interrupt_handler(int irq, FAR void *context)
 static void lis3mdl_worker(FAR void *arg)
 {
   FAR struct lis3mdl_dev_s *priv = (FAR struct lis3mdl_dev_s *)(arg);
+
   DEBUGASSERT(priv != NULL);
 
   /* Read out the latest sensor data */

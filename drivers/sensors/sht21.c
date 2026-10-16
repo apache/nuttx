@@ -578,6 +578,7 @@ static int sht21_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_DUMP_REGS:
         {
           uint8_t userreg = 0;
+
           ret = sht21_read8(priv, SHT21_READ_USERREG, &userreg);
           sht21_dbg("read8 ret = %d, userreg = %d\n", ret, userreg);
         }

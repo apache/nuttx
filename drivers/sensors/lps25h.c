@@ -692,6 +692,7 @@ static int lps25h_who_am_i(FAR struct lps25h_dev_s *dev,
                            lps25h_who_am_i_data * who_am_i_data)
 {
   uint8_t who_addr = LPS25H_WHO_AM_I;
+
   return lps25h_read_reg8(dev, &who_addr, &who_am_i_data->who_am_i);
 }
 
@@ -711,33 +712,33 @@ static int lps25h_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-    case SNIOC_CFGR:
-      ret = lps25h_configure_dev(dev);
-      break;
+      case SNIOC_CFGR:
+        ret = lps25h_configure_dev(dev);
+        break;
 
-    case SNIOC_PRESSURE_OUT:
-      ret = lps25h_read_pressure(dev, (FAR lps25h_pressure_data_t *)arg);
-      break;
+      case SNIOC_PRESSURE_OUT:
+        ret = lps25h_read_pressure(dev, (FAR lps25h_pressure_data_t *)arg);
+        break;
 
-    case SNIOC_TEMPERATURE_OUT:
-      /* NOTE: call SNIOC_PRESSURE_OUT before this one,
-       * or results are bogus.
-       */
+      case SNIOC_TEMPERATURE_OUT:
+        /* NOTE: call SNIOC_PRESSURE_OUT before this one,
+         * or results are bogus.
+         */
 
-      ret = lps25h_read_temper(dev, (FAR lps25h_temper_data_t *)arg);
-      break;
+        ret = lps25h_read_temper(dev, (FAR lps25h_temper_data_t *)arg);
+        break;
 
-    case SNIOC_SENSOR_OFF:
-      ret = lps25h_power_on_off(dev, false);
-      break;
+      case SNIOC_SENSOR_OFF:
+        ret = lps25h_power_on_off(dev, false);
+        break;
 
-    case SNIOC_GET_DEV_ID:
-      ret = lps25h_who_am_i(dev, (FAR lps25h_who_am_i_data *)arg);
-      break;
+      case SNIOC_GET_DEV_ID:
+        ret = lps25h_who_am_i(dev, (FAR lps25h_who_am_i_data *)arg);
+        break;
 
-    default:
-      ret = -ENOTTY;
-      break;
+      default:
+        ret = -ENOTTY;
+        break;
     }
 
   nxmutex_unlock(&dev->devlock);

@@ -453,6 +453,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READCONF:
         {
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           ret = lm92_readconf(priv, ptr);
           sninfo("conf: %02x ret: %d\n", *ptr, ret);
@@ -471,6 +472,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_SHUTDOWN:
         {
           uint8_t conf;
+
           ret = lm92_readconf(priv, &conf);
           if (ret == OK)
             {
@@ -486,6 +488,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_POWERUP:
         {
           uint8_t conf;
+
           ret = lm92_readconf(priv, &conf);
           if (ret == OK)
             {
@@ -515,6 +518,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READTHYS:
         {
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           ret = lm92_readb16(priv, LM92_THYS_REG, ptr);
           sninfo("THYS: %08x ret: %d\n", *ptr, ret);
@@ -533,6 +537,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READTCRIT:
         {
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           ret = lm92_readb16(priv, LM92_TCRIT_REG, ptr);
           sninfo("TCRIT: %08x ret: %d\n", *ptr, ret);
@@ -551,6 +556,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READTLOW:
         {
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           ret = lm92_readb16(priv, LM92_TLOW_REG, ptr);
           sninfo("TLOW: %08x ret: %d\n", *ptr, ret);
@@ -569,6 +575,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READTHIGH:
         {
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           ret = lm92_readb16(priv, LM92_THIGH_REG, ptr);
           sninfo("THIGH: %08x ret: %d\n", *ptr, ret);
@@ -587,6 +594,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READID:
         {
           FAR uint16_t *ptr = (FAR uint16_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           ret = lm92_readid(priv, ptr);
           sninfo("id: %04x ret: %d\n", *ptr, ret);

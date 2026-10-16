@@ -1040,9 +1040,9 @@ static int apds9960_readgesture(FAR struct apds9960_dev_s *priv)
               sninfo("\nFIFO Dump:\n");
               for (i = 0; i < fifo_level; i++)
                 {
-                   sninfo("U: %03d | D: %03d | L: %03d | R: %03d\n",
-                          fifo_data[i], fifo_data[i + 1],
-                          fifo_data[i + 2], fifo_data[i + 3]);
+                  sninfo("U: %03d | D: %03d | L: %03d | R: %03d\n",
+                         fifo_data[i], fifo_data[i + 1],
+                         fifo_data[i + 2], fifo_data[i + 3]);
                 }
 
               sninfo("\n");

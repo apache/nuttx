@@ -124,21 +124,22 @@ typedef struct
 static int nau7802_read_reg(FAR nau7802_dev_s *dev, uint8_t addr, void *buf,
                             uint8_t nbytes)
 {
-  struct i2c_msg_s readcmd[2] = {
-      {
-          .frequency = CONFIG_SENSORS_NAU7802_I2C_FREQUENCY,
-          .addr = dev->addr,
-          .flags = I2C_M_NOSTOP,
-          .buffer = &addr,
-          .length = sizeof(addr),
-      },
-      {
-          .frequency = CONFIG_SENSORS_NAU7802_I2C_FREQUENCY,
-          .addr = dev->addr,
-          .flags = I2C_M_READ,
-          .buffer = buf,
-          .length = nbytes,
-      },
+  struct i2c_msg_s readcmd[2] =
+  {
+    {
+      .frequency = CONFIG_SENSORS_NAU7802_I2C_FREQUENCY,
+      .addr = dev->addr,
+      .flags = I2C_M_NOSTOP,
+      .buffer = &addr,
+      .length = sizeof(addr),
+    },
+    {
+      .frequency = CONFIG_SENSORS_NAU7802_I2C_FREQUENCY,
+      .addr = dev->addr,
+      .flags = I2C_M_READ,
+      .buffer = buf,
+      .length = nbytes,
+    },
   };
 
   return I2C_TRANSFER(dev->i2c, readcmd, 2);
@@ -155,21 +156,22 @@ static int nau7802_read_reg(FAR nau7802_dev_s *dev, uint8_t addr, void *buf,
 static int nau7802_write_reg(FAR nau7802_dev_s *dev, uint8_t addr, void *buf,
                              uint8_t nbytes)
 {
-  struct i2c_msg_s writecmd[2] = {
-      {
-          .frequency = CONFIG_SENSORS_NAU7802_I2C_FREQUENCY,
-          .addr = dev->addr,
-          .flags = I2C_M_NOSTOP,
-          .buffer = &addr,
-          .length = sizeof(addr),
-      },
-      {
-          .frequency = CONFIG_SENSORS_NAU7802_I2C_FREQUENCY,
-          .addr = dev->addr,
-          .flags = I2C_M_NOSTART,
-          .buffer = buf,
-          .length = nbytes,
-      },
+  struct i2c_msg_s writecmd[2] =
+  {
+    {
+      .frequency = CONFIG_SENSORS_NAU7802_I2C_FREQUENCY,
+      .addr = dev->addr,
+      .flags = I2C_M_NOSTOP,
+      .buffer = &addr,
+      .length = sizeof(addr),
+    },
+    {
+      .frequency = CONFIG_SENSORS_NAU7802_I2C_FREQUENCY,
+      .addr = dev->addr,
+      .flags = I2C_M_NOSTART,
+      .buffer = buf,
+      .length = nbytes,
+    },
   };
 
   return I2C_TRANSFER(dev->i2c, writecmd, 2);

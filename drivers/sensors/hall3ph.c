@@ -284,9 +284,10 @@ static int hall3_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
        *   Argument: uint8_t pointer to the location to return the position.
        */
 
-    case SNIOC_GET_POSITION:
+      case SNIOC_GET_POSITION:
         {
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
+
           DEBUGASSERT(lower->ops->position != NULL && ptr);
           ret = lower->ops->position(lower, ptr);
         }

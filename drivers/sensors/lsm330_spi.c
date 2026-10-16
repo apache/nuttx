@@ -1004,7 +1004,7 @@ static off_t lsm330acl_dvr_seek(FAR void *instance_handle,
         priv->seek_address = offset;
         break;
 
-    default:  /* Invalid whence */
+      default:  /* Invalid whence */
         return -EINVAL;
     }
 
@@ -1068,10 +1068,10 @@ static int lsm330_dvr_ioctl(FAR void *instance_handle, int cmd,
     {
       /* Command was not recognized */
 
-    default:
-      snerr("ERROR: Unrecognized cmd: %d\n", cmd);
-      ret = -ENOTTY;
-      break;
+      default:
+        snerr("ERROR: Unrecognized cmd: %d\n", cmd);
+        ret = -ENOTTY;
+        break;
     }
 
   return ret;
