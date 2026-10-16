@@ -127,7 +127,7 @@ int nrf52_bringup(void)
     }
 #endif
 
-#if defined(CONFIG_TIMER) && defined(CONFIG_NRF52_TIMER)
+#if defined(CONFIG_TIMER) && defined(CONFIG_NRF52_TIMER1)
   /* Configure TIMER driver */
 
   ret = nrf52_timer_driver_setup("/dev/timer0", NRF52_TIMER);
