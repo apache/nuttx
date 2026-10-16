@@ -91,6 +91,7 @@ static inline int goldfish_gnss_write_pipe(FAR struct file *pipe,
   while (size > 0)
     {
       int n = file_write(pipe, p, size);
+
       if (n < 0)
         {
           return n;
@@ -147,6 +148,7 @@ static int goldfish_gnss_activate(FAR struct gnss_lowerhalf_s *gnss,
 {
   FAR struct goldfish_gnss_s *priv =
     container_of(gnss, struct goldfish_gnss_s, gnss);
+
   priv->running = enabled;
 
   return OK;

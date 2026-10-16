@@ -192,15 +192,19 @@ static void mlx90393_read_measurement_data(FAR struct mlx90393_dev_s *dev)
    */
 
   uint16_t temperature = ((uint16_t) (SPI_SEND(dev->spi, 0)) << 8); /* MSB */
+
   temperature |= ((uint16_t) (SPI_SEND(dev->spi, 0)) << 0);         /* LSB */
 
   uint16_t x_mag = ((uint16_t) (SPI_SEND(dev->spi, 0)) << 8);       /* MSB */
+
   x_mag |= ((uint16_t) (SPI_SEND(dev->spi, 0)) << 0);               /* LSB */
 
   uint16_t y_mag = ((uint16_t) (SPI_SEND(dev->spi, 0)) << 8);       /* MSB */
+
   y_mag |= ((uint16_t) (SPI_SEND(dev->spi, 0)) << 0);               /* LSB */
 
   uint16_t z_mag = ((uint16_t) (SPI_SEND(dev->spi, 0)) << 8);       /* MSB */
+
   z_mag |= ((uint16_t) (SPI_SEND(dev->spi, 0)) << 0);               /* LSB */
 
   /* Set CS to high which deselects the MLX90393 */
@@ -407,6 +411,7 @@ static int mlx90393_interrupt_handler(int irq, FAR void *context)
 static void mlx90393_worker(FAR void *arg)
 {
   FAR struct mlx90393_dev_s *priv = (FAR struct mlx90393_dev_s *)(arg);
+
   DEBUGASSERT(priv != NULL);
 
   /* Read out the latest sensor data */
@@ -437,6 +442,7 @@ static int mlx90393_open(FAR struct file *filep)
   for (reg_addr = 0; reg_addr < NUM_REGS; reg_addr++)
     {
       uint16_t reg_content = 0;
+
       mlx90393_read_register(priv, reg_addr, &reg_content);
       sninfo("R%d = %x\n", reg_addr, reg_content);
     }

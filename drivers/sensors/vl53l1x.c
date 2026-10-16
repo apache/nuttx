@@ -407,43 +407,43 @@ static void vl53l1x_gettimingbudget(FAR struct vl53l1x_dev_s *priv,
 
   switch (temp)
     {
-    case 0x001d:
-      *ms_value = 15;
-      break;
+      case 0x001d:
+        *ms_value = 15;
+        break;
 
-    case 0x0051:
-    case 0x001e:
-      *ms_value = 20;
-      break;
+      case 0x0051:
+      case 0x001e:
+        *ms_value = 20;
+        break;
 
-    case 0x00d6:
-    case 0x0060:
-      *ms_value = 33;
-      break;
+      case 0x00d6:
+      case 0x0060:
+        *ms_value = 33;
+        break;
 
-    case 0x1ae:
-    case 0x00ad:
-      *ms_value = 50;
-      break;
+      case 0x1ae:
+      case 0x00ad:
+        *ms_value = 50;
+        break;
 
-    case 0x02e1:
-    case 0x01cc:
-      *ms_value = 100;
-      break;
+      case 0x02e1:
+      case 0x01cc:
+        *ms_value = 100;
+        break;
 
-    case 0x03e1:
-    case 0x02d9:
-      *ms_value = 200;
-      break;
+      case 0x03e1:
+      case 0x02d9:
+        *ms_value = 200;
+        break;
 
-    case 0x0591:
-    case 0x048f:
-      *ms_value = 500;
-      break;
+      case 0x0591:
+      case 0x048f:
+        *ms_value = 500;
+        break;
 
-    default:
-      *ms_value = 0;
-      break;
+      default:
+        *ms_value = 0;
+        break;
     }
 }
 
@@ -459,6 +459,7 @@ static void vl53l1x_settimingbudget(FAR struct vl53l1x_dev_s *priv,
                                     uint16_t ms_value)
 {
   uint16_t dm;
+
   vl53l1x_getdistancemode(priv, &dm);
 
   /* Short Distance */
@@ -467,107 +468,107 @@ static void vl53l1x_settimingbudget(FAR struct vl53l1x_dev_s *priv,
     {
       switch (ms_value)
         {
-        case 15:
-          {
-            vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x01d);
-            vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x0027);
-          }
-          break;
+          case 15:
+            {
+              vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x01d);
+              vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x0027);
+            }
+            break;
 
-        case 20:
-          {
-            vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x0051);
-            vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x006e);
-          }
-          break;
+          case 20:
+            {
+              vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x0051);
+              vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x006e);
+            }
+            break;
 
-        case 33:
-          {
-            vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x00d6);
-            vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x006e);
-          }
-          break;
+          case 33:
+            {
+              vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x00d6);
+              vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x006e);
+            }
+            break;
 
-        case 50:
-          {
-            vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x1ae);
-            vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x01e8);
-          }
-          break;
+          case 50:
+            {
+              vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x1ae);
+              vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x01e8);
+            }
+            break;
 
-        case 100:
-          {
-            vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x02e1);
-            vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x0388);
-          }
-          break;
+          case 100:
+            {
+              vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x02e1);
+              vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x0388);
+            }
+            break;
 
-        case 200:
-          {
-            vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x03e1);
-            vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x0496);
-          }
-          break;
+          case 200:
+            {
+              vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x03e1);
+              vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x0496);
+            }
+            break;
 
-        case 500:
-          {
-            vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x0591);
-            vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x05c1);
-          }
-          break;
+          case 500:
+            {
+              vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x0591);
+              vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x05c1);
+            }
+            break;
 
-        default:
-          break;
+          default:
+            break;
         }
     }
   else
     {
       switch (ms_value)
         {
-        case 20:
-          {
-            vl53l1x_putreg16(priv, PHASECAL_TIMEOUT_MACRO, 0x001e);
-            vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x0022);
-          }
-          break;
+          case 20:
+            {
+              vl53l1x_putreg16(priv, PHASECAL_TIMEOUT_MACRO, 0x001e);
+              vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x0022);
+            }
+            break;
 
-        case 33:
-          {
-            vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x0060);
-            vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x006e);
-          }
-          break;
+          case 33:
+            {
+              vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x0060);
+              vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x006e);
+            }
+            break;
 
-        case 50:
-          {
-            vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x00ad);
-            vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x00c6);
-          }
-          break;
+          case 50:
+            {
+              vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x00ad);
+              vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x00c6);
+            }
+            break;
 
-        case 100:
-          {
-            vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x01cc);
-            vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x01ea);
-          }
-          break;
+          case 100:
+            {
+              vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x01cc);
+              vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x01ea);
+            }
+            break;
 
-        case 200:
-          {
-            vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x02d9);
-            vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x02f8);
-          }
-          break;
+          case 200:
+            {
+              vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x02d9);
+              vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x02f8);
+            }
+            break;
 
-        case 500:
-          {
-            vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x048f);
-            vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x04a4);
-          }
-          break;
+          case 500:
+            {
+              vl53l1x_putreg16(priv, RANGE_CFG_TIMEOUT_MACRO_HI, 0x048f);
+              vl53l1x_putreg16(priv, RANGE_TIMEOUT_MACRO_HI, 0x04a4);
+            }
+            break;
 
-        default:
-          break;
+          default:
+            break;
         }
     }
 }
@@ -590,30 +591,30 @@ static void vl53l1x_setdistancemode(FAR struct vl53l1x_dev_s *priv,
   vl53l1x_gettimingbudget(priv, &tb);
   switch (dm)
     {
-    case 1:
-      {
-        vl53l1x_putreg8(priv, PHASECAL_TIMEOUT_MACRO, 0x14);
-        vl53l1x_putreg8(priv, RANGE_VCSEL_PERIOD_A, 0x07);
-        vl53l1x_putreg8(priv, RANGE_VCSEL_PERIOD_B, 0x05);
-        vl53l1x_putreg8(priv, RANGE_CFG_VALID_PHASE, 0x38);
-        vl53l1x_putreg16(priv, SD_CFG_WOI_SD0, 0x0705);
-        vl53l1x_putreg16(priv, SD_CFG_INIT_PHASE, 0x0606);
-      }
-      break;
+      case 1:
+        {
+          vl53l1x_putreg8(priv, PHASECAL_TIMEOUT_MACRO, 0x14);
+          vl53l1x_putreg8(priv, RANGE_VCSEL_PERIOD_A, 0x07);
+          vl53l1x_putreg8(priv, RANGE_VCSEL_PERIOD_B, 0x05);
+          vl53l1x_putreg8(priv, RANGE_CFG_VALID_PHASE, 0x38);
+          vl53l1x_putreg16(priv, SD_CFG_WOI_SD0, 0x0705);
+          vl53l1x_putreg16(priv, SD_CFG_INIT_PHASE, 0x0606);
+        }
+        break;
 
-    case 2:
-      {
-        vl53l1x_putreg8(priv, PHASECAL_TIMEOUT_MACRO, 0x0a);
-        vl53l1x_putreg8(priv, RANGE_VCSEL_PERIOD_A, 0x0f);
-        vl53l1x_putreg8(priv, RANGE_VCSEL_PERIOD_B, 0x0d);
-        vl53l1x_putreg8(priv, RANGE_CFG_VALID_PHASE, 0xb8);
-        vl53l1x_putreg16(priv, SD_CFG_WOI_SD0, 0x0f0d);
-        vl53l1x_putreg16(priv, SD_CFG_INIT_PHASE, 0x0e0e);
-      }
-      break;
+      case 2:
+        {
+          vl53l1x_putreg8(priv, PHASECAL_TIMEOUT_MACRO, 0x0a);
+          vl53l1x_putreg8(priv, RANGE_VCSEL_PERIOD_A, 0x0f);
+          vl53l1x_putreg8(priv, RANGE_VCSEL_PERIOD_B, 0x0d);
+          vl53l1x_putreg8(priv, RANGE_CFG_VALID_PHASE, 0xb8);
+          vl53l1x_putreg16(priv, SD_CFG_WOI_SD0, 0x0f0d);
+          vl53l1x_putreg16(priv, SD_CFG_INIT_PHASE, 0x0e0e);
+        }
+        break;
 
-    default:
-      break;
+      default:
+        break;
     }
 
   vl53l1x_settimingbudget(priv, tb);
@@ -1075,35 +1076,36 @@ static void vl53l1x_ioctl(FAR struct file *filep, int cmd, uint16_t arg)
 
   switch (cmd)
     {
-    case SNIOC_DISTANCESHORT:
-      {
-        sninfo("Set distance up to 1.3M\n");
-        vl53l1x_setdistancemode(priv, 1);
-      }
-      break;
+      case SNIOC_DISTANCESHORT:
+        {
+          sninfo("Set distance up to 1.3M\n");
+          vl53l1x_setdistancemode(priv, 1);
+        }
+        break;
 
-    case SNIOC_DISTANCELONG:
-      {
-        sninfo("Set distance up to 4M\n");
-        vl53l1x_setdistancemode(priv, 2);
-      }
-      break;
+      case SNIOC_DISTANCELONG:
+        {
+          sninfo("Set distance up to 4M\n");
+          vl53l1x_setdistancemode(priv, 2);
+        }
+        break;
 
-    case SNIOC_CALIBRATE:
-      {
-        sninfo("Calibrating distance\n");
-        int16_t offset;
-        vl53l1x_getoffset(priv, (FAR int16_t *)&offset);
-        vl53l1x_calibrateoffset(priv, arg, (FAR int16_t *)&offset);
-      }
-      break;
+      case SNIOC_CALIBRATE:
+        {
+          sninfo("Calibrating distance\n");
+          int16_t offset;
 
-    case SNIOC_TEMPUPDATE:
-      {
-        sninfo("Recalculating due to temperature change\n");
-        vl53l1x_tempupdate(priv);
-      }
-      break;
+          vl53l1x_getoffset(priv, (FAR int16_t *)&offset);
+          vl53l1x_calibrateoffset(priv, arg, (FAR int16_t *)&offset);
+        }
+        break;
+
+      case SNIOC_TEMPUPDATE:
+        {
+          sninfo("Recalculating due to temperature change\n");
+          vl53l1x_tempupdate(priv);
+        }
+        break;
     }
 }
 

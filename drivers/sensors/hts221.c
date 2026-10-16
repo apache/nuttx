@@ -989,6 +989,7 @@ static ssize_t hts221_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen)
 {
   ssize_t length = 0;
+
   return length;
 }
 
@@ -1008,39 +1009,39 @@ static int hts221_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-    case SNIOC_GET_DEV_ID:
-      ret = hts221_get_id(priv, (FAR uint8_t *) arg);
-      break;
+      case SNIOC_GET_DEV_ID:
+        ret = hts221_get_id(priv, (FAR uint8_t *) arg);
+        break;
 
-    case SNIOC_CFGR:
-      ret = hts221_config(priv, (FAR hts221_settings_t *) arg);
-      break;
+      case SNIOC_CFGR:
+        ret = hts221_config(priv, (FAR hts221_settings_t *) arg);
+        break;
 
-    case SNIOC_START_CONVERSION:
-      ret = hts221_start_conversion(priv);
-      break;
+      case SNIOC_START_CONVERSION:
+        ret = hts221_start_conversion(priv);
+        break;
 
-    case SNIOC_CHECK_STATUS_REG:
-      ret = hts221_check_status(priv, (FAR hts221_status_t *) arg);
-      break;
+      case SNIOC_CHECK_STATUS_REG:
+        ret = hts221_check_status(priv, (FAR hts221_status_t *) arg);
+        break;
 
-    case SNIOC_READ_RAW_DATA:
-      ret = hts221_read_raw_data(priv, (FAR hts221_raw_data_t *) arg);
-      break;
+      case SNIOC_READ_RAW_DATA:
+        ret = hts221_read_raw_data(priv, (FAR hts221_raw_data_t *) arg);
+        break;
 
 #ifdef CONFIG_HTS221_DEBUG
-    case SNIOC_DUMP_REGS:
-      ret = hts221_dump_registers(priv);
-      break;
+      case SNIOC_DUMP_REGS:
+        ret = hts221_dump_registers(priv);
+        break;
 #endif
 
-    case SNIOC_READ_CONVERT_DATA:
-      ret = hts221_read_convert_data(priv, (FAR hts221_conv_data_t *) arg);
-      break;
+      case SNIOC_READ_CONVERT_DATA:
+        ret = hts221_read_convert_data(priv, (FAR hts221_conv_data_t *) arg);
+        break;
 
-    default:
-      ret = -ENOTTY;
-      break;
+      default:
+        ret = -ENOTTY;
+        break;
     }
 
   nxmutex_unlock(&priv->devlock);
@@ -1136,6 +1137,7 @@ static int hts221_poll(FAR struct file *filep, FAR struct pollfd *fds,
       /* This is a request to tear down the poll. */
 
       FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+
       DEBUGASSERT(slot != NULL);
 
       /* Remove all memory of the poll setup */

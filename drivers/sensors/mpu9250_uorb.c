@@ -1011,6 +1011,7 @@ static inline int mpu9250_write_gyro_range(FAR struct mpu9250_dev_s *dev,
                                            uint8_t fs_sel)
 {
   uint8_t val = TO_BITFIELD(GYRO_CONFIG_FS_SEL, fs_sel);
+
   return mpu9250_write_reg(dev, GYRO_CONFIG, &val, sizeof(val));
 }
 
@@ -1037,6 +1038,7 @@ static inline int mpu9250_write_accel_range(FAR struct mpu9250_dev_s *dev,
                                             uint8_t afs_sel)
 {
   uint8_t val = TO_BITFIELD(ACCEL_CONFIG_AFS_SEL, afs_sel);
+
   return mpu9250_write_reg(dev, ACCEL_CONFIG, &val, sizeof(val));
 }
 
@@ -1053,6 +1055,7 @@ static inline int mpu9250_write_config(FAR struct mpu9250_dev_s *dev,
 {
   uint8_t val = TO_BITFIELD(CONFIG_EXT_SYNC_SET, ext_sync_set) |
                 TO_BITFIELD(CONFIG_DLPF_CFG, dlpf_cfg);
+
   return mpu9250_write_reg(dev, MPU9250_CONFIG, &val, sizeof(val));
 }
 
@@ -1069,6 +1072,7 @@ static inline int mpu9250_write_config2(FAR struct mpu9250_dev_s *dev,
                                         uint8_t a_dlpf_cfg)
 {
   uint8_t val = acce_fchoice_b | TO_BITFIELD(CONFIG2_A_DLPF_CFG, a_dlpf_cfg);
+
   return mpu9250_write_reg(dev, ACCEL_CONFIG2, &val, sizeof(val));
 }
 

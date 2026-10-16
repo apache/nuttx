@@ -347,6 +347,7 @@ static inline int goldfish_sensor_read_pipe(FAR struct file *pipe,
   while (size > 0)
     {
       ssize_t n = file_read(pipe, p, size);
+
       if (n < 0)
         {
           return n;
@@ -368,6 +369,7 @@ static inline int goldfish_sensor_write_pipe(FAR struct file *pipe,
   while (size > 0)
     {
       ssize_t n = file_write(pipe, p, size);
+
       if (n < 0)
         {
           return n;
@@ -477,6 +479,7 @@ static FAR const char *
 goldfish_sensor_match(FAR const char *s, FAR const char *p)
 {
   size_t l = strlen(p);
+
   return strncmp(s, p, l) ? NULL : s + l;
 }
 
@@ -507,6 +510,7 @@ static void goldfish_sensor_parse_event(FAR struct goldfish_sensor_s *sensor)
   if ((value = goldfish_sensor_match(buf, "acceleration:")) != NULL)
     {
       struct sensor_accel accel;
+
       if (sscanf(value, "%f:%f:%f",
                  &accel.x, &accel.y, &accel.z) == 3)
         {
@@ -520,6 +524,7 @@ static void goldfish_sensor_parse_event(FAR struct goldfish_sensor_s *sensor)
   else if ((value = goldfish_sensor_match(buf, "gyroscope:")) != NULL)
     {
       struct sensor_gyro gyro;
+
       if (sscanf(value, "%f:%f:%f",
                  &gyro.x, &gyro.y, &gyro.z) == 3)
         {
@@ -533,6 +538,7 @@ static void goldfish_sensor_parse_event(FAR struct goldfish_sensor_s *sensor)
   else if ((value = goldfish_sensor_match(buf, "magnetic:")) != NULL)
     {
       struct sensor_mag mag;
+
       if (sscanf(value, "%f:%f:%f",
                  &mag.x, &mag.y, &mag.z) == 3)
         {
@@ -546,6 +552,7 @@ static void goldfish_sensor_parse_event(FAR struct goldfish_sensor_s *sensor)
   else if ((value = goldfish_sensor_match(buf, "orientation:")) != NULL)
     {
       struct sensor_orientation orient;
+
       if (sscanf(value, "%f:%f:%f",
                  &orient.x, &orient.y, &orient.z) == 3)
         {
@@ -558,6 +565,7 @@ static void goldfish_sensor_parse_event(FAR struct goldfish_sensor_s *sensor)
   else if ((value = goldfish_sensor_match(buf, "temperature:")) != NULL)
     {
       struct sensor_temp temp;
+
       if (sscanf(value, "%f", &temp.temperature) == 1)
         {
           temp.timestamp = now_ns + sensor->time_bias_ns;
@@ -569,6 +577,7 @@ static void goldfish_sensor_parse_event(FAR struct goldfish_sensor_s *sensor)
   else if ((value = goldfish_sensor_match(buf, "proximity:")) != NULL)
     {
       struct sensor_prox prox;
+
       if (sscanf(value, "%f", &prox.proximity) == 1)
         {
           prox.timestamp = now_ns + sensor->time_bias_ns;
@@ -580,6 +589,7 @@ static void goldfish_sensor_parse_event(FAR struct goldfish_sensor_s *sensor)
   else if ((value = goldfish_sensor_match(buf, "light:")) != NULL)
     {
       struct sensor_light light;
+
       if (sscanf(value, "%f", &light.light) == 1)
         {
           light.timestamp = now_ns + sensor->time_bias_ns;
@@ -592,6 +602,7 @@ static void goldfish_sensor_parse_event(FAR struct goldfish_sensor_s *sensor)
   else if ((value = goldfish_sensor_match(buf, "pressure:")) != NULL)
     {
       struct sensor_baro baro;
+
       if (sscanf(value, "%f", &baro.pressure) == 1)
         {
           baro.timestamp = now_ns + sensor->time_bias_ns;
@@ -604,6 +615,7 @@ static void goldfish_sensor_parse_event(FAR struct goldfish_sensor_s *sensor)
   else if ((value = goldfish_sensor_match(buf, "humidity:")) != NULL)
     {
       struct sensor_humi humi;
+
       if (sscanf(value, "%f", &humi.humidity) == 1)
         {
           humi.timestamp = now_ns + sensor->time_bias_ns;
@@ -616,6 +628,7 @@ static void goldfish_sensor_parse_event(FAR struct goldfish_sensor_s *sensor)
                     buf, "magnetic-uncalibrated:")) != NULL)
     {
       struct sensor_mag_uncal mag;
+
       if (sscanf(value, "%f:%f:%f",
                  &mag.x, &mag.y, &mag.z) == 3)
         {
@@ -630,6 +643,7 @@ static void goldfish_sensor_parse_event(FAR struct goldfish_sensor_s *sensor)
                     buf, "gyroscope-uncalibrated:")) != NULL)
     {
       struct sensor_gyro_uncal gyro;
+
       if (sscanf(value, "%f:%f:%f",
                  &gyro.x, &gyro.y, &gyro.z) == 3)
         {
@@ -643,6 +657,7 @@ static void goldfish_sensor_parse_event(FAR struct goldfish_sensor_s *sensor)
   else if ((value = goldfish_sensor_match(buf, "hinge-angle0")) != NULL)
     {
       struct sensor_angle angle;
+
       if (sscanf(value, "%f:", &angle.angle) == 1)
         {
           angle.timestamp = now_ns + sensor->time_bias_ns;
@@ -654,6 +669,7 @@ static void goldfish_sensor_parse_event(FAR struct goldfish_sensor_s *sensor)
   else if ((value = goldfish_sensor_match(buf, "hinge-angle1")) != NULL)
     {
       struct sensor_angle angle;
+
       if (sscanf(value, "%f:", &angle.angle) == 1)
         {
           angle.timestamp = now_ns + sensor->time_bias_ns;
@@ -665,6 +681,7 @@ static void goldfish_sensor_parse_event(FAR struct goldfish_sensor_s *sensor)
   else if ((value = goldfish_sensor_match(buf, "hinge-angle2")) != NULL)
     {
       struct sensor_angle angle;
+
       if (sscanf(value, "%f:", &angle.angle) == 1)
         {
           angle.timestamp = now_ns + sensor->time_bias_ns;
@@ -676,6 +693,7 @@ static void goldfish_sensor_parse_event(FAR struct goldfish_sensor_s *sensor)
   else if ((value = goldfish_sensor_match(buf, "heart-rate:")) != NULL)
     {
       struct sensor_hrate hrate;
+
       if (sscanf(value, "%f", &hrate.bpm) == 1)
         {
           hrate.timestamp = now_ns + sensor->time_bias_ns;
@@ -687,6 +705,7 @@ static void goldfish_sensor_parse_event(FAR struct goldfish_sensor_s *sensor)
   else if ((value = goldfish_sensor_match(buf, "wrist-tilt")) != NULL)
     {
       struct sensor_event wrist;
+
       if (sscanf(value, "%" PRIu32, &wrist.event) == 1)
         {
           wrist.timestamp = now_ns + sensor->time_bias_ns;
@@ -699,6 +718,7 @@ static void goldfish_sensor_parse_event(FAR struct goldfish_sensor_s *sensor)
                     buf, "acceleration-uncalibrated:")) != NULL)
     {
       struct sensor_accel_uncal accel;
+
       if (sscanf(value, "%f:%f:%f",
                  &accel.x, &accel.y, &accel.z) == 3)
         {
@@ -712,9 +732,11 @@ static void goldfish_sensor_parse_event(FAR struct goldfish_sensor_s *sensor)
   else if ((value = goldfish_sensor_match(buf, "guest-sync:")) != NULL)
     {
       int64_t guest_ms;
+
       if ((sscanf(value, "%" PRId64, &guest_ms) == 1) && (guest_ms >= 0))
         {
           int64_t time_bias_ns = 1000 * guest_ms - now_ns;
+
           sensor->time_bias_ns =
             MIN(0, goldfish_sensor_weigthed_average(sensor->time_bias_ns,
                                                     3, time_bias_ns, 1));
@@ -783,6 +805,7 @@ static int goldfish_sensor_get_info(FAR struct sensor_lowerhalf_s *lower_,
 {
   FAR struct goldfish_lowerhalf_s *lower =
     container_of(lower_, struct goldfish_lowerhalf_s, lower);
+
   memcpy(info, lower->info, sizeof(struct sensor_device_info_s));
   return OK;
 }

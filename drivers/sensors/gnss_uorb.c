@@ -604,8 +604,8 @@ static void gnss_parse_nmea(FAR struct gnss_upperhalf_s *upper,
           break;
         }
 
-       default:
-         break;
+      default:
+        break;
     }
 
   if (GNSS_FLAG_MARK == upper->flags)

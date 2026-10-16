@@ -292,6 +292,7 @@ static int isl29023_read_lux(FAR struct isl29023_dev_s *dev,
   add_sensor_randomness(data->raw);
 
   uint32_t tmp = (data->raw * dev->range) / dev->resolution;
+
   data->lux = (uint16_t)tmp;
 
   sninfo("raw value %8x, lux: %5u\n", data->raw, data->lux);

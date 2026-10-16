@@ -145,6 +145,7 @@ static float as726x_getcalibrated(FAR struct as726x_dev_s *priv,
   uint8_t byte3 = as726x_read8(priv, regaddr + 3);
 
   uint32_t colourdata = ((uint32_t) byte0 << (8 * 3));
+
   colourdata |= ((uint32_t) byte1 << (8 * 2));
   colourdata |= ((uint32_t) byte2 << (8 * 1));
   colourdata |= ((uint32_t) byte3 << (8 * 0));
@@ -164,6 +165,7 @@ static int16_t as726x_getchannel(FAR struct as726x_dev_s *priv,
                                  uint8_t regaddr)
 {
   int16_t colourdata = as726x_read8(priv, regaddr) << 8;
+
   colourdata |= as726x_read8(priv, regaddr + 1);
   return colourdata;
 }
@@ -250,6 +252,7 @@ static uint8_t as726x_read8(FAR struct as726x_dev_s *priv, uint8_t regaddr)
     }
 
   uint8_t incoming = read_register(priv, AS72XX_SLAVE_READ_REG);
+
   return incoming;
 }
 

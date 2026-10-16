@@ -414,6 +414,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READCONF:
         {
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           ret = lm75_readconf(priv, ptr);
           sninfo("conf: %02x ret: %d\n", *ptr, ret);
@@ -432,6 +433,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_SHUTDOWN:
         {
           uint8_t conf;
+
           ret = lm75_readconf(priv, &conf);
           if (ret == OK)
             {
@@ -447,6 +449,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_POWERUP:
         {
           uint8_t conf;
+
           ret = lm75_readconf(priv, &conf);
           if (ret == OK)
             {
@@ -476,6 +479,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READTHYS:
         {
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           ret = lm75_readb16(priv, LM75_THYS_REG, ptr);
           sninfo("THYS: %08" PRIx32 " ret: %d\n", *ptr, ret);
@@ -496,6 +500,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READTOS:
         {
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           ret = lm75_readb16(priv, LM75_TOS_REG, ptr);
           sninfo("TOS: %08" PRIx32 " ret: %d\n", *ptr, ret);

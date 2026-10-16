@@ -335,6 +335,7 @@ static int ak09912_set_power_mode(FAR struct ak09912_dev_s *priv,
                                   uint32_t mode)
 {
   int ret = 0;
+
   ret = ak09912_putreg8(priv, POWER_MODE_ADDR, (uint8_t)mode);
   ak09912_delay_msek(1);
   return ret;
@@ -398,6 +399,7 @@ static void ak09912_wd_timeout(wdparm_t arg)
 {
   struct ak09912_dev_s *priv = (struct ak09912_dev_s *)arg;
   irqstate_t flags = enter_critical_section();
+
   nxsem_post(&priv->wait);
   leave_critical_section(flags);
 }
@@ -591,12 +593,14 @@ static ssize_t ak09912_read(FAR struct file *filep, FAR char *buffer,
   if (priv->compensated)
     {
       irqstate_t flags = enter_critical_section();
+
       ret = ak09912_read_mag_data(priv, mag_data);
       leave_critical_section(flags);
     }
   else
     {
       irqstate_t flags = enter_critical_section();
+
       ret = ak09912_read_mag_uncomp_data(priv, mag_data);
       leave_critical_section(flags);
     }

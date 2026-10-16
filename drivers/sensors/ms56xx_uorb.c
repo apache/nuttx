@@ -383,10 +383,10 @@ static int ms56xx_thread(int argc, char **argv)
             }
         }
 
-       baro_measure_read(priv, &baro_data);
+      baro_measure_read(priv, &baro_data);
 
-       priv->sensor_lower.push_event(priv->sensor_lower.priv, &baro_data,
-                                     sizeof(struct sensor_baro));
+      priv->sensor_lower.push_event(priv->sensor_lower.priv, &baro_data,
+                                    sizeof(struct sensor_baro));
 
       /* Sleeping thread before fetching the next sensor data */
 

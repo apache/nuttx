@@ -275,6 +275,7 @@ static int mb7040_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR int32_t *ptr   = (FAR int32_t *)((uintptr_t)arg);
           uint16_t     range = 0;
+
           DEBUGASSERT(ptr != NULL);
           ret = mb7040_readrange(priv, &range);
           if (ret == OK)

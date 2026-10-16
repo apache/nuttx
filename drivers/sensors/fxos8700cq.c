@@ -249,6 +249,7 @@ static int fxos8700cq_open(FAR struct file *filep)
 
   uint8_t regval;
   int ret = 0;
+
   ret = fxos8700cq_getreg8(priv, FXOS8700CQ_WHOAMI);
   if (ret != FXOS8700CQ_WHOAMI_VAL)
     {
@@ -333,6 +334,7 @@ static int fxos8700cq_close(FAR struct file *filep)
 
   uint8_t regval = 0b0; /* active */
   int ret = fxos8700cq_putreg8(priv, FXOS8700CQ_CTRL_REG1, regval);
+
   if (ret < 0)
     {
       return ret;
@@ -356,6 +358,7 @@ static ssize_t fxos8700cq_read(FAR struct file *filep, FAR char *buffer,
   FAR struct fxos8700cq_dev_s *priv = inode->i_private;
 
   FAR fxos8700cq_data * p = (FAR fxos8700cq_data *) buffer;
+
   if (len < sizeof(fxos8700cq_data))
     {
       snerr("Expected buffer size is %d\n", sizeof(fxos8700cq_data));
@@ -365,6 +368,7 @@ static ssize_t fxos8700cq_read(FAR struct file *filep, FAR char *buffer,
   uint8_t data[FXOS8700CQ_READ_LEN];
   int status = fxos8700cq_getregs(priv, FXOS8700CQ_STATUS,
                                   (FAR uint8_t *)data, FXOS8700CQ_READ_LEN);
+
   if (status < 0)
     {
       snerr("Error: read status=%d", status);
@@ -397,6 +401,7 @@ static ssize_t fxos8700cq_read(FAR struct file *filep, FAR char *buffer,
 static int fxos8700cq_checkid(FAR struct fxos8700cq_dev_s *priv)
 {
   uint8_t devid = 0;
+
   devid = fxos8700cq_getreg8(priv, FXOS8700CQ_WHOAMI);
   sninfo("devid: %04x\n", devid);
   if (devid != (uint16_t) FXOS8700CQ_WHOAMI_VAL)

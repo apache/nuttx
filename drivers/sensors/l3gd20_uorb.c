@@ -373,6 +373,7 @@ static void l3gd20_worker(FAR void *arg)
   struct sensor_gyro_uncal temp;
 
   FAR struct l3gd20_dev_s *priv = (FAR struct l3gd20_dev_s *)(arg);
+
   DEBUGASSERT(priv != NULL);
 
   /* Read out the latest sensor data */

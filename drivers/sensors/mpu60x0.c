@@ -571,6 +571,7 @@ static inline int __mpu_read_imu(FAR struct mpu_dev_s *dev,
 static inline uint8_t __mpu_read_pwr_mgmt_1(FAR struct mpu_dev_s *dev)
 {
   uint8_t buf = 0xff;
+
   __mpu_read_reg(dev, PWR_MGMT_1, &buf, sizeof(buf));
   return buf;
 }
@@ -628,6 +629,7 @@ static inline int __mpu_write_gyro_config(FAR struct mpu_dev_s *dev,
                                           uint8_t fs_sel)
 {
   uint8_t val = TO_BITFIELD(GYRO_CONFIG__FS_SEL, fs_sel);
+
   return __mpu_write_reg(dev, GYRO_CONFIG, &val, sizeof(val));
 }
 
@@ -652,6 +654,7 @@ static inline int __mpu_write_accel_config(FAR struct mpu_dev_s *dev,
                                            uint8_t afs_sel)
 {
   uint8_t val;
+
   if (afs_sel > 3)
     {
       snerr("ERROR: Invalid AFS_SEL value\n");
@@ -674,6 +677,7 @@ static inline int __mpu_write_config(FAR struct mpu_dev_s *dev,
 {
   uint8_t val = TO_BITFIELD(CONFIG__EXT_SYNC_SET, ext_sync_set) |
                 TO_BITFIELD(CONFIG__DLPF_CFG, dlpf_cfg);
+
   return __mpu_write_reg(dev, CONFIG, &val, sizeof(val));
 }
 
@@ -727,6 +731,7 @@ static inline int __mpu_read_fifo_count(FAR struct mpu_dev_s *dev,
 {
   int ret;
   uint8_t fifo_counter[2];
+
   ret = __mpu_read_reg(dev, FIFO_COUNTH, fifo_counter, sizeof(fifo_counter));
   if (ret < 0)
     {
@@ -1059,6 +1064,7 @@ static int mpu_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READ_SAMPLE_RATE:
         {
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
+
           ret = __mpu_read_sample_rate(priv);
           sninfo("SNIOC_READ_SAMPLE_RATE: Returns: %d. Read: %f\n",
                  ret, priv->sample_rate);
@@ -1069,15 +1075,16 @@ static int mpu_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       /* Read current number of bytes in FIFO buffer. Arg: uin16_t* */
 
       case SNIOC_READ_FIFO_COUNT:
-       {
+        {
           FAR uint16_t *ptr = (FAR uint16_t *)((uintptr_t)arg);
           uint16_t fifo_count = 0;
+
           ret = __mpu_read_fifo_count(priv, &fifo_count);
           *ptr = fifo_count;
           sninfo("SNIOC_READ_FIFO_COUNT: Returns: %d. Read: 0x%x\n",
                  ret, fifo_count);
           break;
-       }
+        }
 
       /* Enable or disable the use of FIFO buffer. Arg: bool* */
 

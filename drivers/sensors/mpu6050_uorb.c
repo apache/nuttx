@@ -475,6 +475,7 @@ static int mpu6050_control(FAR struct sensor_lowerhalf_s *lower,
           if (lower->type == SENSOR_TYPE_ACCELEROMETER)
             {
               uint8_t fs = (uint8_t)arg;
+
               ret = mpu6050_write_reg(dev, MPU6050_ACCEL_CONFIG, fs << 3);
               if (ret >= 0)
                 {
@@ -500,6 +501,7 @@ static int mpu6050_control(FAR struct sensor_lowerhalf_s *lower,
           else if (lower->type == SENSOR_TYPE_GYROSCOPE)
             {
               uint8_t fs = (uint8_t)arg;
+
               ret = mpu6050_write_reg(dev, MPU6050_GYRO_CONFIG, fs << 3);
               if (ret >= 0)
                 {

@@ -295,6 +295,7 @@ static int ds18b20_isalarm(FAR struct onewire_master_s *master,
 {
   int ret;
   struct ds18b20_cb_alarm_s alarm;
+
   alarm.romcode = config->romcode;
   alarm.isalarm = false;
 
@@ -529,7 +530,7 @@ static int ds18b20_set_alarm(FAR struct ds18b20_dev_s *dev,
     }
 
 #ifdef CONFIG_SENSORS_DS18B20_POLL
-    dev->reg.alarm.wakeup = alarm->wakeup;
+  dev->reg.alarm.wakeup = alarm->wakeup;
 #endif
 
   /* Read current scratchpad again and verify that alarm is set */
@@ -673,6 +674,7 @@ static int ds18b20_fetch(FAR struct sensor_lowerhalf_s *lower,
     {
       FAR struct sensor_temp *temp =
         (FAR struct sensor_temp *)buffer;
+
       temp->temperature = ds18b20_temp(data.spad);
       temp->timestamp   = data.timestamp;
     }
@@ -708,6 +710,7 @@ static int ds18b20_control(FAR struct sensor_lowerhalf_s *lower,
       case SNIOC_READROMCODE:
         {
           FAR uint64_t *ptr = (FAR uint64_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           *ptr = priv->config.romcode;
           sninfo("read romcode: %16llx\n", *ptr);
@@ -721,6 +724,7 @@ static int ds18b20_control(FAR struct sensor_lowerhalf_s *lower,
         {
           FAR struct ds18b20_alarm_s *ptr =
             (FAR struct ds18b20_alarm_s *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           sninfo("set alarm: [TH/TL] = %d/%d °C\n", ptr->thigh, ptr->tlow);
           ret = ds18b20_set_alarm(priv, ptr);
@@ -732,6 +736,7 @@ static int ds18b20_control(FAR struct sensor_lowerhalf_s *lower,
       case SNIOC_SETRESOLUTION:
         {
           uint8_t res = arg - 9;
+
           sninfo("set resolution: %ld\n", arg);
           if (res >= DS18B20_RESMIN && res <= DS18B20_RESMAX)
             {
@@ -808,6 +813,7 @@ static int ds18b20_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                 FAR uint32_t *period_us)
 {
   FAR struct ds18b20_dev_s *priv = (FAR struct ds18b20_dev_s *)lower;
+
   priv->interval = *period_us;
   return OK;
 }

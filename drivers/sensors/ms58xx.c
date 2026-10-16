@@ -325,41 +325,42 @@ static int ms58xx_readadc(FAR struct ms58xx_dev_s *priv, FAR uint32_t *adc)
 static int ms58xx_setosr_1(FAR struct ms58xx_dev_s *priv, uint16_t osr)
 {
   int ret = OK;
+
   switch (osr)
     {
       case 256:
-          priv->delay = 600;
-          priv->osr   = 0x0;
-          break;
+        priv->delay = 600;
+        priv->osr   = 0x0;
+        break;
 
       case 512:
-          priv->delay = 1170;
-          priv->osr   = 0x2;
-          break;
+        priv->delay = 1170;
+        priv->osr   = 0x2;
+        break;
 
       case 1024:
-          priv->delay = 2280;
-          priv->osr   = 0x4;
-          break;
+        priv->delay = 2280;
+        priv->osr   = 0x4;
+        break;
 
       case 2048:
-          priv->delay = 4540;
-          priv->osr   = 0x6;
-          break;
+        priv->delay = 4540;
+        priv->osr   = 0x6;
+        break;
 
       case 4096:
-          priv->delay = 9040;
-          priv->osr   = 0x8;
-          break;
+        priv->delay = 9040;
+        priv->osr   = 0x8;
+        break;
 
       case 8192:
-          priv->delay = 18080;
-          priv->osr   = 0xa;
-          break;
+        priv->delay = 18080;
+        priv->osr   = 0xa;
+        break;
 
       default:
-          ret = -EINVAL;
-          break;
+        ret = -EINVAL;
+        break;
     }
 
   return ret;
@@ -376,6 +377,7 @@ static int ms58xx_setosr_1(FAR struct ms58xx_dev_s *priv, uint16_t osr)
 static int ms58xx_setosr_2(FAR struct ms58xx_dev_s *priv, uint16_t osr)
 {
   int ret = OK;
+
   switch (osr)
     {
       case 256:
@@ -429,8 +431,8 @@ static int ms58xx_setosr(FAR struct ms58xx_dev_s *priv, uint16_t osr)
     {
       case MS58XX_MODEL_MS5805_02:
       case MS58XX_MODEL_MS5837_30:
-          ret = ms58xx_setosr_1(priv, osr);
-          break;
+        ret = ms58xx_setosr_1(priv, osr);
+        break;
 
       case MS58XX_MODEL_MS5803_02:
       case MS58XX_MODEL_MS5803_05:
@@ -438,12 +440,12 @@ static int ms58xx_setosr(FAR struct ms58xx_dev_s *priv, uint16_t osr)
       case MS58XX_MODEL_MS5803_14:
       case MS58XX_MODEL_MS5803_30:
       case MS58XX_MODEL_MS5806_02:
-          ret = ms58xx_setosr_2(priv, osr);
-          break;
+        ret = ms58xx_setosr_2(priv, osr);
+        break;
 
       default:
-         ret = -EINVAL;
-         break;
+        ret = -EINVAL;
+        break;
     }
 
   return ret;
@@ -837,6 +839,7 @@ static int ms58xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_TEMPERATURE:
         {
           FAR int32_t *ptr = (FAR int32_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           *ptr = priv->temp;
           sninfo("temp: %08x\n", *ptr);
@@ -848,6 +851,7 @@ static int ms58xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_PRESSURE:
         {
           FAR int32_t *ptr = (FAR int32_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           *ptr = priv->press;
           sninfo("press: %08x\n", *ptr);

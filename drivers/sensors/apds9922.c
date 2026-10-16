@@ -259,7 +259,7 @@ struct apds9922_dev_s
   struct apds9922_ps_data  ps_data;       /* PS data                    */
   uint8_t                      devid;     /* Device ID read at startup  */
   int                          crefs;     /* Number of opens, als or ps */
-  };
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -421,7 +421,7 @@ static void apds9922_worker(FAR void *arg)
       ret = apds9922_i2c_read(priv, APDS9922_ALS_DATA0, data, 3);
       if (ret < 0)
         {
-        snerr("Failed to read als data: %d\n", ret);
+          snerr("Failed to read als data: %d\n", ret);
           goto err_out;
         }
 
@@ -988,7 +988,7 @@ static int apds9922_als_variance(FAR struct apds9922_dev_s *priv,
       return ret;
     }
 
-    priv->als_setup.thresh_var = variance;
+  priv->als_setup.thresh_var = variance;
 
   return OK;
 }
@@ -1946,10 +1946,10 @@ static int apds9922_close(FAR struct file *filep)
 
   if (priv->crefs == 0)
     {
-     apds9922_reset(priv);
-     apds9922_als_int_mode(priv, ALS_INT_MODE_DISABLED);
-     apds9922_ps_int_mode(priv, PS_INT_MODE_DISABLED);
-     priv->config->irq_detach(priv->config);
+      apds9922_reset(priv);
+      apds9922_als_int_mode(priv, ALS_INT_MODE_DISABLED);
+      apds9922_ps_int_mode(priv, PS_INT_MODE_DISABLED);
+      priv->config->irq_detach(priv->config);
     }
 
   nxmutex_unlock(&priv->devlock);
@@ -2178,6 +2178,7 @@ static int apds9922_als_poll(FAR struct file *filep,
       /* This is a request to tear down the poll. */
 
       struct pollfd **slot = (struct pollfd **)fds->priv;
+
       DEBUGASSERT(slot != NULL);
 
       /* Remove all memory of the poll setup */
@@ -2403,6 +2404,7 @@ static int apds9922_ps_poll(FAR struct file *filep,
       /* This is a request to tear down the poll. */
 
       struct pollfd **slot = (struct pollfd **)fds->priv;
+
       DEBUGASSERT(slot != NULL);
 
       /* Remove all memory of the poll setup */

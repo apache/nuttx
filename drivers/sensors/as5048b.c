@@ -512,6 +512,7 @@ static int as5048b_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
         {
           FAR int32_t *ptr = (FAR int32_t *)((uintptr_t)arg);
           uint16_t zero;
+
           DEBUGASSERT(ptr != NULL);
           ret = as5048b_readzero(priv, &zero);
           if (ret == OK)
@@ -530,6 +531,7 @@ static int as5048b_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
       case QEIOC_AUTOGAINCTL:
         {
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           ret = as5048b_readagc(priv, ptr);
           sninfo("agc: %02x ret: %d\n", *ptr, ret);
@@ -541,6 +543,7 @@ static int as5048b_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
       case QEIOC_DIAGNOSTICS:
         {
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           ret = as5048b_readdiag(priv, ptr);
           sninfo("diag: %02x ret: %d\n", *ptr, ret);
@@ -553,6 +556,7 @@ static int as5048b_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
         {
           FAR int32_t *ptr = (FAR int32_t *)((uintptr_t)arg);
           uint16_t mag;
+
           DEBUGASSERT(ptr != NULL);
           ret = as5048b_readmag(priv, &mag);
           if (ret == OK)

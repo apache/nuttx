@@ -154,7 +154,7 @@ static const struct adxl372_dvr_entry_vector_s g_adxl372_dops =
     .driver_ioctl   = adxl372_dvr_ioctl,
     .driver_suspend = 0,
     .driver_resume  = 0,
-    },
+  },
 
   /* adxl372 extensions follow */
 
@@ -681,10 +681,10 @@ static int adxl372_dvr_ioctl(FAR void *instance, int cmd,
     {
       /* Command was not recognized */
 
-    default:
-      snerr("ERROR: Unrecognized cmd: %d\n", cmd);
-      ret = -ENOTTY;
-      break;
+      default:
+        snerr("ERROR: Unrecognized cmd: %d\n", cmd);
+        ret = -ENOTTY;
+        break;
     }
 
   return ret;

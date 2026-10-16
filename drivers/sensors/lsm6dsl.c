@@ -813,23 +813,23 @@ static int lsm6dsl_selftest(FAR struct lsm6dsl_dev_s *priv, uint32_t mode)
 
   switch (mode)
     {
-    case 0:
-      {
-        sninfo("SELFTEST ACCELERO DISABLED\n");
-        lsm6dsl_writereg8(priv, LSM6DSL_CTRL1_XL, 0x00);
-        lsm6dsl_writereg8(priv, LSM6DSL_CTRL5_C, 0x00);
-      }
-      break;
-    case 1:
-      {
-        sninfo("SELFTEST GYRO DISABLED\n");
-        lsm6dsl_writereg8(priv, LSM6DSL_CTRL2_G, 0x00);
-        lsm6dsl_writereg8(priv, LSM6DSL_CTRL5_C, 0x00);
-      }
-      break;
+      case 0:
+        {
+          sninfo("SELFTEST ACCELERO DISABLED\n");
+          lsm6dsl_writereg8(priv, LSM6DSL_CTRL1_XL, 0x00);
+          lsm6dsl_writereg8(priv, LSM6DSL_CTRL5_C, 0x00);
+        }
+        break;
+      case 1:
+        {
+          sninfo("SELFTEST GYRO DISABLED\n");
+          lsm6dsl_writereg8(priv, LSM6DSL_CTRL2_G, 0x00);
+          lsm6dsl_writereg8(priv, LSM6DSL_CTRL5_C, 0x00);
+        }
+        break;
 
-    default:
-      break;
+      default:
+        break;
     }
 
   return OK;
@@ -1114,33 +1114,33 @@ static int lsm6dsl_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       /* Start converting. Arg: None. */
 
-    case SNIOC_START:
-      ret = priv->ops->start(priv);
-      break;
+      case SNIOC_START:
+        ret = priv->ops->start(priv);
+        break;
 
       /* Stop converting. Arg: None. */
 
-    case SNIOC_STOP:
-      ret = priv->ops->stop(priv);
-      break;
+      case SNIOC_STOP:
+        ret = priv->ops->stop(priv);
+        break;
 
-    case SNIOC_LSM6DSLSENSORREAD:
-      ret = priv->ops->sensor_read(priv,
-                                   (FAR struct lsm6dsl_sensor_data_s *) arg);
-      break;
+      case SNIOC_LSM6DSLSENSORREAD:
+        ret = priv->ops->sensor_read(priv,
+                (FAR struct lsm6dsl_sensor_data_s *) arg);
+        break;
 
-    case SNIOC_START_SELFTEST:
-      ret = priv->ops->selftest(priv, (uint32_t) arg);
-      break;
+      case SNIOC_START_SELFTEST:
+        ret = priv->ops->selftest(priv, (uint32_t) arg);
+        break;
 
       /* Unrecognized commands */
 
-    default:
-      {
-        snerr("ERROR: Unrecognized cmd: %d arg: %lu\n", cmd, arg);
-        ret = -ENOTTY;
-      }
-      break;
+      default:
+        {
+          snerr("ERROR: Unrecognized cmd: %d arg: %lu\n", cmd, arg);
+          ret = -ENOTTY;
+        }
+        break;
     }
 
   return ret;

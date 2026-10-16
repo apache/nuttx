@@ -289,6 +289,7 @@ static int qe_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case QEIOC_POSITION:
         {
           FAR int32_t *ptr = (FAR int32_t *)((uintptr_t)arg);
+
           DEBUGASSERT(lower->ops->position != NULL && ptr);
           ret = lower->ops->position(lower, ptr);
         }
@@ -312,6 +313,7 @@ static int qe_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case QEIOC_SETPOSMAX:
         {
           uint32_t maxpos = (uint32_t)arg;
+
           if (lower->ops->setposmax != NULL)
             {
               ret = lower->ops->setposmax(lower, maxpos);
@@ -330,6 +332,7 @@ static int qe_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case QEIOC_SETINDEX:
         {
           uint32_t indexpos = (uint32_t)arg;
+
           if (lower->ops->setindex != NULL)
             {
               ret = lower->ops->setindex(lower, indexpos);

@@ -347,61 +347,61 @@ static int dht_parse_data(FAR struct dhtxx_dev_s *priv,
   int ret = OK;
 
   switch (priv->config->type)
-  {
-    case DHTXX_DHT11:
-      data->hum  = priv->raw_data[0];
-      data->temp = priv->raw_data[2];
+    {
+      case DHTXX_DHT11:
+        data->hum  = priv->raw_data[0];
+        data->temp = priv->raw_data[2];
 
-      /* if data is not within sensor's measurement range,
-       * an error must have occurred.
-       */
+        /* if data is not within sensor's measurement range,
+         * an error must have occurred.
+         */
 
-      if (!dht_check_data(data, DHT11_MIN_HUM, DHT11_MAX_HUM,
-                          DHT11_MIN_TEMP, DHT11_MAX_TEMP))
-        {
-          ret = -1;
-        }
+        if (!dht_check_data(data, DHT11_MIN_HUM, DHT11_MAX_HUM,
+                            DHT11_MIN_TEMP, DHT11_MAX_TEMP))
+          {
+            ret = -1;
+          }
 
-    break;
+        break;
 
-    case DHTXX_DHT12:
-      data->hum  = priv->raw_data[0] + priv->raw_data[1] * 0.1F;
+      case DHTXX_DHT12:
+        data->hum  = priv->raw_data[0] + priv->raw_data[1] * 0.1F;
 
-      data->temp = priv->raw_data[2] + (priv->raw_data[3] & 0x7fu) * 0.1F;
-      if (priv->raw_data[3] & 0x80u)
-        {
-          data->temp *= -1;
-        }
+        data->temp = priv->raw_data[2] + (priv->raw_data[3] & 0x7fu) * 0.1F;
+        if (priv->raw_data[3] & 0x80u)
+          {
+            data->temp *= -1;
+          }
 
-      if (!dht_check_data(data, DHT12_MIN_HUM, DHT12_MAX_HUM,
-                          DHT12_MIN_TEMP, DHT12_MAX_TEMP))
-        {
-          ret = -1;
-        }
+        if (!dht_check_data(data, DHT12_MIN_HUM, DHT12_MAX_HUM,
+                            DHT12_MIN_TEMP, DHT12_MAX_TEMP))
+          {
+            ret = -1;
+          }
 
-    break;
+        break;
 
-    case DHTXX_DHT21:
-    case DHTXX_DHT22:
-    case DHTXX_DHT33:
-    case DHTXX_DHT44:
-      data->hum  = (priv->raw_data[0] << 8u | priv->raw_data[1]) * 0.1F;
+      case DHTXX_DHT21:
+      case DHTXX_DHT22:
+      case DHTXX_DHT33:
+      case DHTXX_DHT44:
+        data->hum  = (priv->raw_data[0] << 8u | priv->raw_data[1]) * 0.1F;
 
-      data->temp = (((priv->raw_data[2] & 0x7fu) << 8u) |
-                    priv->raw_data[3]) * 0.1F;
-      if (priv->raw_data[2] & 0x80u)
-        {
-          data->temp *= -1;
-        }
+        data->temp = (((priv->raw_data[2] & 0x7fu) << 8u) |
+                      priv->raw_data[3]) * 0.1F;
+        if (priv->raw_data[2] & 0x80u)
+          {
+            data->temp *= -1;
+          }
 
-      if (!dht_check_data(data, DHT22_MIN_HUM, DHT22_MAX_HUM,
-                          DHT22_MIN_TEMP, DHT22_MAX_TEMP))
-        {
-          ret = -1;
-        }
+        if (!dht_check_data(data, DHT22_MIN_HUM, DHT22_MAX_HUM,
+                            DHT22_MIN_TEMP, DHT22_MAX_TEMP))
+          {
+            ret = -1;
+          }
 
-    break;
-  }
+        break;
+    }
 
   return ret;
 }

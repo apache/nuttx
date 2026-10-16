@@ -251,21 +251,22 @@ static const struct sensor_ops_s g_sensor_ops =
 static int lis2mdl_read_reg(FAR struct lis2mdl_dev_s *dev, uint8_t addr,
                             void *buf, uint8_t nbytes)
 {
-  struct i2c_msg_s readcmd[2] = {
-      {
-          .frequency = CONFIG_SENSORS_LIS2MDL_I2C_FREQUENCY,
-          .addr = dev->addr,
-          .flags = I2C_M_NOSTOP,
-          .buffer = &addr,
-          .length = sizeof(addr),
-      },
-      {
-          .frequency = CONFIG_SENSORS_LIS2MDL_I2C_FREQUENCY,
-          .addr = dev->addr,
-          .flags = I2C_M_READ,
-          .buffer = buf,
-          .length = nbytes,
-      },
+  struct i2c_msg_s readcmd[2] =
+  {
+    {
+      .frequency = CONFIG_SENSORS_LIS2MDL_I2C_FREQUENCY,
+      .addr = dev->addr,
+      .flags = I2C_M_NOSTOP,
+      .buffer = &addr,
+      .length = sizeof(addr),
+    },
+    {
+      .frequency = CONFIG_SENSORS_LIS2MDL_I2C_FREQUENCY,
+      .addr = dev->addr,
+      .flags = I2C_M_READ,
+      .buffer = buf,
+      .length = nbytes,
+    },
   };
 
   return I2C_TRANSFER(dev->i2c, readcmd, 2);
@@ -281,21 +282,22 @@ static int lis2mdl_read_reg(FAR struct lis2mdl_dev_s *dev, uint8_t addr,
 static int lis2mdl_write_reg(FAR struct lis2mdl_dev_s *dev, uint8_t addr,
                              void *buf, uint8_t nbytes)
 {
-  struct i2c_msg_s writecmd[2] = {
-      {
-          .frequency = CONFIG_SENSORS_LIS2MDL_I2C_FREQUENCY,
-          .addr = dev->addr,
-          .flags = I2C_M_NOSTOP,
-          .buffer = &addr,
-          .length = sizeof(addr),
-      },
-      {
-          .frequency = CONFIG_SENSORS_LIS2MDL_I2C_FREQUENCY,
-          .addr = dev->addr,
-          .flags = I2C_M_NOSTART,
-          .buffer = buf,
-          .length = nbytes,
-      },
+  struct i2c_msg_s writecmd[2] =
+  {
+    {
+      .frequency = CONFIG_SENSORS_LIS2MDL_I2C_FREQUENCY,
+      .addr = dev->addr,
+      .flags = I2C_M_NOSTOP,
+      .buffer = &addr,
+      .length = sizeof(addr),
+    },
+    {
+      .frequency = CONFIG_SENSORS_LIS2MDL_I2C_FREQUENCY,
+      .addr = dev->addr,
+      .flags = I2C_M_NOSTART,
+      .buffer = buf,
+      .length = nbytes,
+    },
   };
 
   return I2C_TRANSFER(dev->i2c, writecmd, 2);

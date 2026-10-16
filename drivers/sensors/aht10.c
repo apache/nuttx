@@ -528,7 +528,7 @@ static int aht10_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 
       default:
-          sninfo("Unrecognized cmd: %d\n", cmd);
+        sninfo("Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
         break;
     }

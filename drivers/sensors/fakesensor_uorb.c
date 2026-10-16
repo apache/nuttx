@@ -180,6 +180,7 @@ static inline void fakesensor_read_accel(FAR struct fakesensor_s *sensor,
 {
   struct sensor_accel accel;
   char raw[50];
+
   fakesensor_read_csv_line(
           &sensor->data, raw, sizeof(raw), sensor->raw_start);
   sscanf(raw, "%f,%f,%f\n", &accel.x, &accel.y, &accel.z);
@@ -194,6 +195,7 @@ static inline void fakesensor_read_mag(FAR struct fakesensor_s *sensor,
 {
   struct sensor_mag mag;
   char raw[50];
+
   fakesensor_read_csv_line(
           &sensor->data, raw, sizeof(raw), sensor->raw_start);
   sscanf(raw, "%f,%f,%f\n", &mag.x, &mag.y, &mag.z);
@@ -208,6 +210,7 @@ static inline void fakesensor_read_gyro(FAR struct fakesensor_s *sensor,
 {
   struct sensor_gyro gyro;
   char raw[50];
+
   fakesensor_read_csv_line(
           &sensor->data, raw, sizeof(raw), sensor->raw_start);
   sscanf(raw, "%f,%f,%f\n", &gyro.x, &gyro.y, &gyro.z);
@@ -255,6 +258,7 @@ static int fakesensor_activate(FAR struct sensor_lowerhalf_s *lower,
 {
   FAR struct fakesensor_s *sensor = container_of(lower,
                                                  struct fakesensor_s, lower);
+
   if (enable)
     {
       sensor->running = true;
@@ -285,6 +289,7 @@ static int fakesensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
 {
   FAR struct fakesensor_s *sensor = container_of(lower,
                                                  struct fakesensor_s, lower);
+
   sensor->interval = *period_us;
   return OK;
 }
@@ -305,6 +310,7 @@ static int fakesensor_batch(FAR struct sensor_lowerhalf_s *lower,
   FAR struct fakesensor_s *sensor = container_of(lower,
                                                  struct fakesensor_s, lower);
   uint32_t max_latency = sensor->lower.nbuffer * sensor->interval;
+
   if (*latency_us > max_latency)
     {
       *latency_us = max_latency;
@@ -322,34 +328,34 @@ void fakesensor_push_event(FAR struct fakesensor_s *sensor,
                            uint64_t event_timestamp)
 {
   switch (sensor->type)
-  {
-    case SENSOR_TYPE_ACCELEROMETER:
-      fakesensor_read_accel(sensor, event_timestamp);
-      break;
+    {
+      case SENSOR_TYPE_ACCELEROMETER:
+        fakesensor_read_accel(sensor, event_timestamp);
+        break;
 
-    case SENSOR_TYPE_MAGNETIC_FIELD:
-      fakesensor_read_mag(sensor, event_timestamp);
-      break;
+      case SENSOR_TYPE_MAGNETIC_FIELD:
+        fakesensor_read_mag(sensor, event_timestamp);
+        break;
 
-    case SENSOR_TYPE_GYROSCOPE:
-      fakesensor_read_gyro(sensor, event_timestamp);
-      break;
+      case SENSOR_TYPE_GYROSCOPE:
+        fakesensor_read_gyro(sensor, event_timestamp);
+        break;
 
-    case SENSOR_TYPE_BAROMETER:
-      fakesensor_read_baro(sensor, event_timestamp);
-      break;
+      case SENSOR_TYPE_BAROMETER:
+        fakesensor_read_baro(sensor, event_timestamp);
+        break;
 
 #ifdef CONFIG_SENSORS_GNSS
-    case SENSOR_TYPE_GNSS:
-    case SENSOR_TYPE_GNSS_SATELLITE:
-      fakesensor_read_gnss(sensor);
-      break;
+      case SENSOR_TYPE_GNSS:
+      case SENSOR_TYPE_GNSS_SATELLITE:
+        fakesensor_read_gnss(sensor);
+        break;
 #endif
 
-    default:
-      snerr("fakesensor: unsupported type sensor type\n");
-      break;
-  }
+      default:
+        snerr("fakesensor: unsupported type sensor type\n");
+        break;
+    }
 }
 
 static int fakesensor_thread(int argc, char** argv)
@@ -449,7 +455,8 @@ int fakesensor_init(int type, FAR const char *file_name,
   FAR char *argv[2];
   char arg1[32];
 #ifdef CONFIG_SENSORS_GNSS
-  uint32_t nbuffer[] = {
+  uint32_t nbuffer[] =
+  {
     [SENSOR_GNSS_IDX_GNSS] = batch_number,
     [SENSOR_GNSS_IDX_GNSS_SATELLITE] = batch_number,
     [SENSOR_GNSS_IDX_GNSS_MEASUREMENT] = batch_number,
