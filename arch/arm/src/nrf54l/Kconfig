@@ -23,6 +23,14 @@ config ARCH_CHIP_NRF54LM20B
 
 endchoice # nRF54L Chip Selection
 
+config NRF54L_HAVE_IEEE802154
+	bool
+	default y
+
+config NRF54L_HAVE_BLELR
+	bool
+	default y
+
 # Peripheral Selection
 
 config NRF54L_I2C_MASTER
@@ -258,6 +266,12 @@ config NRF54L_SAADC
 
 config NRF54L_GRTC
 	bool "GRTC"
+	default n
+
+config NRF54L_RADIO
+	bool "RADIO"
+	depends on EXPERIMENTAL
+	depends on !NRF54L_SOFTDEVICE_CONTROLLER
 	default n
 
 config NRF54L_USBDEV
@@ -531,6 +545,40 @@ config NRF54L_SAADC_LIMITS
 endif # NRF54L_SAADC
 
 endmenu # SAADC Configuration
+
+menu "RADIO Configuration"
+
+if NRF54L_RADIO
+
+config NRF54L_RADIO_CUSTOM
+	bool "RADIO uses custom IRQ handlers"
+	default n
+
+config NRF54L_RADIO_IEEE802154
+	bool "RADIO IEEE802.15.4 protocol"
+	default n
+	depends on NRF54L_HAVE_IEEE802154
+	select ARCH_RAMVECTORS
+	select ARCH_IRQPRIO
+	select NRF54L_RADIO_CUSTOM
+	select NRF54L_TIMER0
+
+if NRF54L_RADIO_IEEE802154
+
+config NRF54L_RADIO_IEEE802154_TRACE
+	bool "RADIO IEEE802.15.4 trace support"
+	default n
+
+config NRF54L_RADIO_IEEE802154_TRACE_BUFSIZE
+	int "RADIO IEEE802.15.4 trace buffer size"
+	depends on NRF54L_RADIO_IEEE802154_TRACE
+	default 1024
+
+endif # NRF54L_RADIO_IEEE802154
+
+endif # NRF54L_RADIO
+
+endmenu # RADIO Configuration
 
 menu "SPI Configuration"
 
