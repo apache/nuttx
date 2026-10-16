@@ -57,6 +57,7 @@
  ****************************************************************************/
 
 extern const struct procfs_operations g_clk_operations;
+extern const struct procfs_operations g_coredump_operations;
 extern const struct procfs_operations g_cpuinfo_operations;
 extern const struct procfs_operations g_cpuload_operations;
 extern const struct procfs_operations g_critmon_operations;
@@ -113,6 +114,10 @@ static const struct procfs_entry_s g_procfs_entries[] =
 
 #if defined(CONFIG_ARCH_HAVE_CPUINFO) && !defined(CONFIG_FS_PROCFS_EXCLUDE_CPUINFO)
   { "cpuinfo",      &g_cpuinfo_operations,  PROCFS_FILE_TYPE   },
+#endif
+
+#if defined(CONFIG_COREDUMP) && !defined(CONFIG_FS_PROCFS_EXCLUDE_COREDUMP)
+  { "coredump",     &g_coredump_operations, PROCFS_FILE_TYPE   },
 #endif
 
 #if !defined(CONFIG_SCHED_CPULOAD_NONE) && \
@@ -949,6 +954,7 @@ static int procfs_readdir(FAR struct inode *mountpt,
 
           pid_t pid = level0->pid[index];
           FAR struct tcb_s *tcb = nxsched_get_tcb(pid);
+
           if (!tcb)
             {
               ferr("ERROR: PID %d is no longer valid\n", pid);
