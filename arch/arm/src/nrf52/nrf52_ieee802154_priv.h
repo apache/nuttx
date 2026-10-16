@@ -78,8 +78,9 @@ struct nrf52_radioi8_state_s
 {
   /* MAC Attributes */
 
-  struct ieee802154_addr_s addr; /* Address */
-  struct ieee802154_cca_s  cca;  /* Clear channel assessement method */
+  struct ieee802154_addr_s addr;      /* Address */
+  struct ieee802154_addr_s coordaddr; /* Coordinator address */
+  struct ieee802154_cca_s  cca;       /* Clear channel assessement method */
 
   /* TX CSMA */
 
