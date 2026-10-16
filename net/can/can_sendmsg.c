@@ -111,9 +111,10 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
         {
           /* Copy the packet data into the device packet buffer and send it */
 
-          int ret = devif_send(dev, pstate->snd_buffer,
-                               pstate->snd_buflen + pstate->pr_msglen, 0);
+          int ret;
 
+          ret = devif_send(dev, pstate->snd_buffer,
+                           pstate->snd_buflen + pstate->pr_msglen, 0);
           dev->d_len = dev->d_sndlen - pstate->pr_msglen;
           if (ret <= 0)
             {
@@ -176,7 +177,14 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
   FAR struct net_driver_s *dev;
   FAR struct can_conn_s *conn;
   struct send_s state;
+  size_t total_len = 0;
+  size_t i;
   int ret = OK;
+#if defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)
+  uint8_t buf[CANFD_MTU];
+#else
+  uint8_t buf[CAN_MTU];
+#endif
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
@@ -206,11 +214,30 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
       return -ENODEV;
     }
 
+  if (msg->msg_iovlen == 0)
+    {
+      return -EMSGSIZE;
+    }
+
+  for (i = 0; i < msg->msg_iovlen; i++)
+    {
+      if (msg->msg_iov[i].iov_len > sizeof(buf) - total_len)
+        {
+          return -EINVAL;
+        }
+
+      if (msg->msg_iov[i].iov_len > 0 && msg->msg_iov[i].iov_base == NULL)
+        {
+          return -EINVAL;
+        }
+
+      total_len += msg->msg_iov[i].iov_len;
+    }
+
 #if defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)
   if (_SO_GETOPT(conn->sconn.s_options, CAN_RAW_FD_FRAMES))
     {
-      if (msg->msg_iov->iov_len != CANFD_MTU &&
-          msg->msg_iov->iov_len != CAN_MTU)
+      if (total_len != CANFD_MTU && total_len != CAN_MTU)
         {
           return -EINVAL;
         }
@@ -218,9 +245,24 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
   else
 #endif
     {
-      if (msg->msg_iov->iov_len != CAN_MTU)
+      if (total_len != CAN_MTU)
         {
           return -EINVAL;
+        }
+    }
+
+  if (msg->msg_iovlen > 1)
+    {
+      size_t offset = 0;
+
+      for (i = 0; i < msg->msg_iovlen; i++)
+        {
+          if (msg->msg_iov[i].iov_len > 0)
+            {
+              memcpy(buf + offset, msg->msg_iov[i].iov_base,
+                     msg->msg_iov[i].iov_len);
+              offset += msg->msg_iov[i].iov_len;
+            }
         }
     }
 
@@ -234,8 +276,8 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
   memset(&state, 0, sizeof(struct send_s));
   nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
 
-  state.snd_buflen = msg->msg_iov->iov_len;  /* bytes to send */
-  state.snd_buffer = msg->msg_iov->iov_base; /* Buffer to send from */
+  state.snd_buflen = total_len;
+  state.snd_buffer = (msg->msg_iovlen == 1) ? msg->msg_iov[0].iov_base : buf;
   state.snd_conn   = conn;
 
 #ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE

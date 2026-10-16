@@ -43,6 +43,8 @@
 
 #ifdef CONFIG_MM_IOB
 
+struct iovec; /* Forward declaration for scatter-gather I/O */
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -542,6 +544,46 @@ int iob_trycopyin(FAR struct iob_s *iob, FAR const uint8_t *src,
 
 int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
                 unsigned int len, int offset);
+
+/****************************************************************************
+ * Name: iob_copyin_iov
+ *
+ * Description:
+ *  Copy data from an 'iov' array of user buffers into the I/O buffer chain,
+ *  starting at 'offset', extending the chain as necessary.
+ *
+ ****************************************************************************/
+
+int iob_copyin_iov(FAR struct iob_s *iob,
+                   FAR const struct iovec *iov, unsigned int iovlen,
+                   int offset, bool throttled);
+
+/****************************************************************************
+ * Name: iob_trycopyin_iov
+ *
+ * Description:
+ *  Copy data from an 'iov' array of user buffers into the I/O buffer chain,
+ *  starting at 'offset', extending the chain as necessary BUT without
+ *  waiting if buffers are not available.
+ *
+ ****************************************************************************/
+
+int iob_trycopyin_iov(FAR struct iob_s *iob,
+                      FAR const struct iovec *iov, unsigned int iovlen,
+                      int offset, bool throttled);
+
+/****************************************************************************
+ * Name: iob_copyout_iov
+ *
+ * Description:
+ *  Copy data 'len' bytes of data from the I/O buffer chain starting at
+ *  'offset' into the user 'iov' array of buffers.
+ *
+ ****************************************************************************/
+
+int iob_copyout_iov(FAR const struct iovec *iov, unsigned int iovlen,
+                    FAR const struct iob_s *iob, unsigned int len,
+                    int offset);
 
 /****************************************************************************
  * Name: iob_tailroom

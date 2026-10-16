@@ -156,24 +156,23 @@ static size_t can_recvfrom_newdata(FAR struct net_driver_s *dev,
   unsigned int offset;
   ssize_t recvlen;
 
-#ifdef CONFIG_NET_TIMESTAMP
-  cmsg_store_timestamp(pstate->pr_msg, &dev->d_iob->io_time,
-                       pstate->pr_conn->sconn.s_options);
-#endif
-
   if (dev->d_iob->io_conn == &pstate->pr_conn->sconn)
     {
       pstate->pr_msg->msg_flags |= MSG_CONFIRM;
     }
 
-  recvlen = MIN(pstate->pr_msg->msg_iov->iov_len, dev->d_len);
+#ifdef CONFIG_NET_TIMESTAMP
+  cmsg_store_timestamp(pstate->pr_msg, &dev->d_iob->io_time,
+                       pstate->pr_conn->sconn.s_options);
+#endif
 
   /* Copy the new packet data into the user buffer */
 
-  offset = (dev->d_appdata - dev->d_iob->io_data) - dev->d_iob->io_offset;
-
-  recvlen = iob_copyout(pstate->pr_msg->msg_iov->iov_base,
-                        dev->d_iob, recvlen, offset);
+  offset  = (dev->d_appdata - dev->d_iob->io_data) -
+            dev->d_iob->io_offset;
+  recvlen = iob_copyout_iov(pstate->pr_msg->msg_iov,
+                            pstate->pr_msg->msg_iovlen,
+                            dev->d_iob, dev->d_len, offset);
   if (recvlen <= 0)
     {
       return 0;
@@ -256,7 +255,9 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
 {
   FAR struct can_conn_s *conn = pstate->pr_conn;
   FAR struct iob_s *iob;
-  int recvlen;
+  size_t total_recv = 0;
+  size_t i;
+  bool has_buf = false;
 
   /* Check there is any CAN data already buffered in a read-ahead
    * buffer.
@@ -264,7 +265,16 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
 
   pstate->pr_recvlen = -ENODATA;
 
-  if (pstate->pr_msg->msg_iov->iov_len > 0 &&
+  for (i = 0; i < pstate->pr_msg->msg_iovlen; i++)
+    {
+      if (pstate->pr_msg->msg_iov[i].iov_len > 0)
+        {
+          has_buf = true;
+          break;
+        }
+    }
+
+  if (has_buf &&
       (iob = iob_remove_queue(&conn->readahead)) != NULL)
     {
       DEBUGASSERT(iob->io_pktlen > 0);
@@ -283,16 +293,17 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
        * the user buffer.
        */
 
-      recvlen = iob_copyout(pstate->pr_msg->msg_iov->iov_base,
-                            iob, pstate->pr_msg->msg_iov->iov_len, 0);
+      total_recv = iob_copyout_iov(pstate->pr_msg->msg_iov,
+                                   pstate->pr_msg->msg_iovlen,
+                                   iob, iob->io_pktlen, 0);
 
       /* Update the accumulated size of the data read */
 
-      pstate->pr_recvlen = recvlen;
+      pstate->pr_recvlen = total_recv;
 
       /* The rest of a frame larger than the user buffer is discarded */
 
-      if (iob->io_pktlen > pstate->pr_msg->msg_iov->iov_len)
+      if (iob->io_pktlen > total_recv)
         {
           pstate->pr_msg->msg_flags |= MSG_TRUNC;
         }
@@ -308,7 +319,7 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
 
       iob_free_chain(iob);
 
-      return recvlen;
+      return total_recv;
     }
 
   return 0;
@@ -434,9 +445,9 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       return -ENOSYS;
     }
 
-  if (msg->msg_iovlen != 1)
+  if (msg->msg_iovlen == 0)
     {
-      return -ENOTSUP;
+      return -EMSGSIZE;
     }
 
   conn_lock(&conn->sconn);
