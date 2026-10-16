@@ -1003,7 +1003,7 @@ static void nrf52_radioi8_trg_csma(struct nrf52_radioi8_dev_s *dev)
 
       /* Get random unit backoff period delay */
 
-      delay = rand() % ((1 << dev->radio->state.BE) - 1);
+      delay = rand() % (1 << dev->radio->state.BE);
 
       /* TODO:
        *  - locate backoff period boundary
@@ -1030,7 +1030,7 @@ static void nrf52_radioi8_trg_csma(struct nrf52_radioi8_dev_s *dev)
 
       /* Get random unit backoff period delay */
 
-      delay = rand() % ((1 << dev->radio->state.BE) - 1);
+      delay = rand() % (1 << dev->radio->state.BE);
     }
 
   /* CSMA is in use */
@@ -1385,10 +1385,12 @@ static void nrf52_radioi8_work_noack(void *arg)
 
       NRF52_RADIO_PUTREG(lower, NRF52_RADIO_TASKS_DISABLE_OFFSET, 1);
 
-      /* Try again */
+      /* Try again, CSMA-CA starts again for each attempt */
 
       tx->retrycount -= 1;
       nrf52_radioi8_trace_put(RADIO_TRACE_TXRETRY, tx->retrycount);
+      dev->radio->state.NB = 0;
+      dev->radio->state.BE = dev->radio->state.min_be;
       nrf52_radioi8_norm_setup(dev, tx->frame, csma);
       nrf52_radioi8_norm_trigger(dev);
     }
@@ -1871,7 +1873,7 @@ static void nrf52_radioi8_state_tx(struct nrf52_radioi8_dev_s *dev)
         {
           /* Update backoff */
 
-          dev->radio->state.NB -= 1;
+          dev->radio->state.NB += 1;
           dev->radio->state.BE = MIN(dev->radio->state.BE + 1,
                                      dev->radio->state.max_be);
 
