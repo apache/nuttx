@@ -30,9 +30,15 @@
 #include <string.h>
 
 #include <arpa/inet.h>
-#include <nuttx/net/loopback.h>
-#include <netpacket/rpmsg.h>
-#include <netpacket/vm_sockets.h>
+#ifdef CONFIG_NET_LOOPBACK
+#  include <nuttx/net/loopback.h>
+#endif
+#ifdef CONFIG_NET_RPMSG
+#  include <netpacket/rpmsg.h>
+#endif
+#ifdef CONFIG_NET_VSOCK
+#  include <netpacket/vm_sockets.h>
+#endif
 #include <netdb.h>
 #include <sys/un.h>
 
@@ -51,8 +57,12 @@ struct ai_s
     struct sockaddr_un sun;
     struct sockaddr_in sin;
     struct sockaddr_in6 sin6;
+#ifdef CONFIG_NET_RPMSG
     struct sockaddr_rpmsg srp;
+#endif
+#ifdef CONFIG_NET_VSOCK
     struct sockaddr_vm svm;
+#endif
   } sa;
 };
 
@@ -65,12 +75,13 @@ FAR static struct ai_s *alloc_ai(int family, int socktype, int protocol,
 {
   FAR struct ai_s *ai;
 
-  ai = lib_zalloc(sizeof(struct ai_s));
+  ai = lib_malloc(sizeof(struct ai_s));
   if (ai == NULL)
     {
       return ai;
     }
 
+  memset(ai, 0, sizeof(*ai));
   ai->ai.ai_addr     = (FAR struct sockaddr *)&ai->sa;
   ai->ai.ai_family   = family;
   ai->ai.ai_socktype = socktype;
@@ -187,12 +198,13 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
         {
           /* Force network byte order */
 
-          port = HTONS(port);
+          port = htons(port);
         }
       else if ((flags & AI_NUMERICSERV) != 0)
         {
           return EAI_NONAME;
         }
+#if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6)
       else if (getservbyname_r(servname, NULL, &ent, NULL, 0, &sp) == OK)
         {
           /* The s_port field of struct servent is required to
@@ -201,6 +213,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
 
           port = sp->s_port;
         }
+#endif
       else
         {
           return EAI_SERVICE;
