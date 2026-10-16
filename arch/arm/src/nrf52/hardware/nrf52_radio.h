@@ -112,7 +112,7 @@
 #define NRF52_RADIO_CRCCNF_OFFSET            0x0534                 /* CRC configuration */
 #define NRF52_RADIO_CRCPOLY_OFFSET           0x0538                 /* CRC polynomial */
 #define NRF52_RADIO_CRCINIT_OFFSET           0x053c                 /* CRC initial value */
-#define NRF52_RADIO_TIFS_OFFSET              0x0544                 /* Interframe spacing in μs */
+#define NRF52_RADIO_TIFS_OFFSET              0x0544                 /* Interframe spacing in us */
 #define NRF52_RADIO_RSSISAMPLE_OFFSET        0x0548                 /* RSSI sample */
 #define NRF52_RADIO_STATE_OFFSET             0x0550                 /* Current radio state */
 #define NRF52_RADIO_DATAWHITEIV_OFFSET       0x0554                 /* Data whitening initial value */
@@ -410,7 +410,7 @@
 
 /* TIFS Register */
 
-#define RADIO_TIFS_SHIFT                  (0)      /* Bits 0-9: Interframe spacing in μs */
+#define RADIO_TIFS_SHIFT                  (0)      /* Bits 0-9: Interframe spacing in us */
 #define RADIO_TIFS_MASK                   (0x3ff << RADIO_TIFS_SHIFT)
 #define RADIO_TIFS_MAX                    (0x3ff)
 
