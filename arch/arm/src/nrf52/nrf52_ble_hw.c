@@ -60,21 +60,6 @@
 #define NRF52_BLE_RESOLV_LIST_SIZE 16
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static uint8_t g_ble_hw_whitelist_mask;
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifdef CONFIG_BLE_LL_CFG_FEAT_LL_PRIVACY
-uint32_t g_nrf52_ble_irk_list[NRF52_BLE_IRK_ENTRIES * 4];
-uint8_t g_nrf52_ble_num_irks;
-#endif
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -166,8 +151,10 @@ int nrf52_ble_hw_get_static_addr(FAR struct ble_ll_lower_s *lower,
 
 void nrf52_ble_hw_whitelist_clear(FAR struct ble_ll_lower_s *lower)
 {
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
   putreg32(0, NRF52_RADIO_DACNF);
-  g_ble_hw_whitelist_mask = 0;
+  dev->whitelist_mask = 0;
 }
 
 /****************************************************************************
@@ -181,13 +168,14 @@ void nrf52_ble_hw_whitelist_clear(FAR struct ble_ll_lower_s *lower)
 int nrf52_ble_hw_whitelist_add(FAR struct ble_ll_lower_s *lower,
                                FAR const uint8_t *addr, uint8_t addr_type)
 {
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
   uint32_t mask;
   int i;
 
   mask = 0x01;
   for (i = 0; i < NRF52_BLE_WHITELIST_SIZE; ++i)
     {
-      if ((mask & g_ble_hw_whitelist_mask) == 0)
+      if ((mask & dev->whitelist_mask) == 0)
         {
           putreg32(get_le32(addr), NRF52_RADIO_DAB(i));
           putreg32(get_le16(addr + 4), NRF52_RADIO_DAP(i));
@@ -196,7 +184,7 @@ int nrf52_ble_hw_whitelist_add(FAR struct ble_ll_lower_s *lower,
               modifyreg32(NRF52_RADIO_DACNF, 0, mask << 8);
             }
 
-          g_ble_hw_whitelist_mask |= mask;
+          dev->whitelist_mask |= mask;
           return BLE_ERR_SUCCESS;
         }
 
@@ -217,6 +205,7 @@ int nrf52_ble_hw_whitelist_add(FAR struct ble_ll_lower_s *lower,
 void nrf52_ble_hw_whitelist_rmv(FAR struct ble_ll_lower_s *lower,
                                 FAR const uint8_t *addr, uint8_t addr_type)
 {
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
   uint8_t cfg_addr;
   uint16_t txadd;
   uint16_t dap;
@@ -231,7 +220,7 @@ void nrf52_ble_hw_whitelist_rmv(FAR struct ble_ll_lower_s *lower,
 
   for (i = 0; i < NRF52_BLE_WHITELIST_SIZE; ++i)
     {
-      if ((mask & g_ble_hw_whitelist_mask) &&
+      if ((mask & dev->whitelist_mask) &&
           dab == getreg32(NRF52_RADIO_DAB(i)) &&
           dap == getreg32(NRF52_RADIO_DAP(i)))
         {
@@ -248,7 +237,7 @@ void nrf52_ble_hw_whitelist_rmv(FAR struct ble_ll_lower_s *lower,
 
   if (i < NRF52_BLE_WHITELIST_SIZE)
     {
-      g_ble_hw_whitelist_mask &= ~mask;
+      dev->whitelist_mask &= ~mask;
       modifyreg32(NRF52_RADIO_DACNF, mask, 0);
     }
 }
@@ -268,7 +257,9 @@ uint8_t nrf52_ble_hw_whitelist_size(FAR struct ble_ll_lower_s *lower)
 
 void nrf52_ble_hw_whitelist_enable(FAR struct ble_ll_lower_s *lower)
 {
-  modifyreg32(NRF52_RADIO_DACNF, 0, g_ble_hw_whitelist_mask);
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
+  modifyreg32(NRF52_RADIO_DACNF, 0, dev->whitelist_mask);
 }
 
 /****************************************************************************
@@ -326,13 +317,14 @@ int nrf52_ble_hw_encrypt_block(FAR struct ble_ll_lower_s *lower,
 
 int nrf52_ble_hw_rng_isr(int irq, FAR void *context, FAR void *arg)
 {
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)arg;
   uint8_t rnum;
 
   if (getreg32(NRF52_RNG_EVENTS_RDY))
     {
       putreg32(0, NRF52_RNG_EVENTS_RDY);
       rnum = (uint8_t)getreg32(NRF52_RNG_VALUE);
-      g_nrf52_ble_cb->rng_sample(rnum);
+      dev->cb->rng_sample(dev->cb, rnum);
     }
 
   return OK;
@@ -379,7 +371,9 @@ int nrf52_ble_hw_rng_stop(FAR struct ble_ll_lower_s *lower)
 
 void nrf52_ble_hw_resolv_list_clear(FAR struct ble_ll_lower_s *lower)
 {
-  g_nrf52_ble_num_irks = 0;
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
+  dev->num_irks = 0;
 }
 
 /****************************************************************************
@@ -393,13 +387,15 @@ void nrf52_ble_hw_resolv_list_clear(FAR struct ble_ll_lower_s *lower)
 int nrf52_ble_hw_resolv_list_add(FAR struct ble_ll_lower_s *lower,
                                  FAR const uint8_t *irk)
 {
-  if (g_nrf52_ble_num_irks == NRF52_BLE_IRK_ENTRIES)
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
+  if (dev->num_irks == NRF52_BLE_IRK_ENTRIES)
     {
       return BLE_ERR_MEM_CAPACITY;
     }
 
-  memcpy(&g_nrf52_ble_irk_list[4 * g_nrf52_ble_num_irks], irk, 16);
-  ++g_nrf52_ble_num_irks;
+  memcpy(&dev->irk_list[4 * dev->num_irks], irk, 16);
+  ++dev->num_irks;
 
   return BLE_ERR_SUCCESS;
 }
@@ -411,16 +407,17 @@ int nrf52_ble_hw_resolv_list_add(FAR struct ble_ll_lower_s *lower,
 void nrf52_ble_hw_resolv_list_rmv(FAR struct ble_ll_lower_s *lower,
                                   int index)
 {
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
   FAR uint32_t *irk_entry;
 
-  if (index < g_nrf52_ble_num_irks)
+  if (index < dev->num_irks)
     {
-      --g_nrf52_ble_num_irks;
-      irk_entry = &g_nrf52_ble_irk_list[4 * index];
-      if (g_nrf52_ble_num_irks > index)
+      --dev->num_irks;
+      irk_entry = &dev->irk_list[4 * index];
+      if (dev->num_irks > index)
         {
           memmove(irk_entry, irk_entry + 4,
-                  16 * (g_nrf52_ble_num_irks - index));
+                  16 * (dev->num_irks - index));
         }
     }
 }

@@ -69,6 +69,17 @@ struct ble_ll_hci_pool_s
   sq_queue_t   free;     /* Free buffers */
 };
 
+/* Upper-half callback wrapper.  Carries the Link Layer instance the
+ * callbacks are bound to; unused until converted in a later task.
+ */
+
+struct ble_ll_s;
+struct ble_ll_lowercb_priv_s
+{
+  struct ble_ll_lowercb_s cb;
+  FAR struct ble_ll_s *ll;
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -78,11 +89,18 @@ static int ble_ll_drv_send(FAR struct bt_driver_s *btdev,
                            enum bt_buf_type_e type,
                            FAR void *data, size_t len);
 
-static int ble_ll_lower_rx_start(FAR uint8_t *rxbuf, uint8_t chan,
+static int ble_ll_lower_rx_start(FAR const struct ble_ll_lowercb_s *cb,
+                                 FAR uint8_t *rxbuf, uint8_t chan,
                                  FAR struct ble_mbuf_hdr *hdr);
-static int ble_ll_lower_rx_end(FAR uint8_t *rxbuf,
+static int ble_ll_lower_rx_end(FAR const struct ble_ll_lowercb_s *cb,
+                               FAR uint8_t *rxbuf,
                                FAR struct ble_mbuf_hdr *hdr);
-static void ble_ll_lower_wfr_exp(void);
+static void ble_ll_lower_wfr_exp(FAR const struct ble_ll_lowercb_s *cb);
+static void ble_ll_lower_tmr_exp(FAR const struct ble_ll_lowercb_s *cb);
+static void ble_ll_lower_rng_sample(FAR const struct ble_ll_lowercb_s *cb,
+                                    uint8_t rnum);
+static uint8_t
+ble_ll_lower_state_get(FAR const struct ble_ll_lowercb_s *cb);
 
 /****************************************************************************
  * Private Data
@@ -94,14 +112,17 @@ static struct bt_driver_s g_ble_ll_btdev =
   .send = ble_ll_drv_send,
 };
 
-static const struct ble_ll_lowercb_s g_ble_ll_lowercb =
+static struct ble_ll_lowercb_priv_s g_ble_ll_lowercb_priv =
 {
-  .rx_start   = ble_ll_lower_rx_start,
-  .rx_end     = ble_ll_lower_rx_end,
-  .wfr_exp    = ble_ll_lower_wfr_exp,
-  .tmr_exp    = ble_ll_tmr_isr,
-  .rng_sample = ble_ll_rand_sample,
-  .state_get  = ble_ll_state_get,
+  .cb =
+  {
+    .rx_start   = ble_ll_lower_rx_start,
+    .rx_end     = ble_ll_lower_rx_end,
+    .wfr_exp    = ble_ll_lower_wfr_exp,
+    .tmr_exp    = ble_ll_lower_tmr_exp,
+    .rng_sample = ble_ll_lower_rng_sample,
+    .state_get  = ble_ll_lower_state_get,
+  },
 };
 
 static uint32_t g_ble_ll_cmd_buf[BLE_LL_CMD_COUNT]
@@ -283,7 +304,8 @@ static int ble_ll_drv_send(FAR struct bt_driver_s *btdev,
  * Name: ble_ll_lower_rx_start
  ****************************************************************************/
 
-static int ble_ll_lower_rx_start(FAR uint8_t *rxbuf, uint8_t chan,
+static int ble_ll_lower_rx_start(FAR const struct ble_ll_lowercb_s *cb,
+                                 FAR uint8_t *rxbuf, uint8_t chan,
                                  FAR struct ble_mbuf_hdr *hdr)
 {
   g_ble_ll_phy_rxhdr = hdr;
@@ -294,7 +316,8 @@ static int ble_ll_lower_rx_start(FAR uint8_t *rxbuf, uint8_t chan,
  * Name: ble_ll_lower_rx_end
  ****************************************************************************/
 
-static int ble_ll_lower_rx_end(FAR uint8_t *rxbuf,
+static int ble_ll_lower_rx_end(FAR const struct ble_ll_lowercb_s *cb,
+                               FAR uint8_t *rxbuf,
                                FAR struct ble_mbuf_hdr *hdr)
 {
   g_ble_ll_phy_rxhdr = hdr;
@@ -305,9 +328,38 @@ static int ble_ll_lower_rx_end(FAR uint8_t *rxbuf,
  * Name: ble_ll_lower_wfr_exp
  ****************************************************************************/
 
-static void ble_ll_lower_wfr_exp(void)
+static void ble_ll_lower_wfr_exp(FAR const struct ble_ll_lowercb_s *cb)
 {
   ble_ll_wfr_timer_exp(NULL);
+}
+
+/****************************************************************************
+ * Name: ble_ll_lower_tmr_exp
+ ****************************************************************************/
+
+static void ble_ll_lower_tmr_exp(FAR const struct ble_ll_lowercb_s *cb)
+{
+  ble_ll_tmr_isr();
+}
+
+/****************************************************************************
+ * Name: ble_ll_lower_rng_sample
+ ****************************************************************************/
+
+static void ble_ll_lower_rng_sample(FAR const struct ble_ll_lowercb_s *cb,
+                                    uint8_t rnum)
+{
+  ble_ll_rand_sample(rnum);
+}
+
+/****************************************************************************
+ * Name: ble_ll_lower_state_get
+ ****************************************************************************/
+
+static uint8_t
+ble_ll_lower_state_get(FAR const struct ble_ll_lowercb_s *cb)
+{
+  return ble_ll_state_get();
 }
 
 /****************************************************************************
@@ -418,13 +470,15 @@ int ble_ll_hci_acl_send(FAR struct iob_s *iob)
  *
  * Input Parameters:
  *   lower - Radio lower half
+ *   devid - HCI device id (/dev/ttyHCI<devid> with CONFIG_UART_BTH4,
+ *           ignored for bt_netdev)
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int ble_ll_register(FAR struct ble_ll_lower_s *lower)
+int ble_ll_register(FAR struct ble_ll_lower_s *lower, int devid)
 {
   int ret;
 
@@ -444,11 +498,15 @@ int ble_ll_register(FAR struct ble_ll_lower_s *lower)
   ble_ll_pool_init(&g_ble_ll_evt_lo_pool);
 
   g_ble_ll_lower = lower;
-  lower->ops->bind(lower, &g_ble_ll_lowercb);
+  lower->ops->bind(lower, &g_ble_ll_lowercb_priv.cb);
 
   ble_ll_init();
 
-  ret = bt_driver_register(&g_ble_ll_btdev);
+#ifdef CONFIG_DRIVERS_BLUETOOTH
+  ret = bt_driver_register_with_id(&g_ble_ll_btdev, devid);
+#else
+  ret = bt_netdev_register(&g_ble_ll_btdev);
+#endif
   if (ret < 0)
     {
       wlerr("ERROR: bt_driver_register failed: %d\n", ret);

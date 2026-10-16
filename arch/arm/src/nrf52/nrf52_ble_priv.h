@@ -104,14 +104,18 @@
 #  endif
 #endif
 
+/* Scratch area for CCM: 16 bytes plus the maximum packet size */
+
+#define NRF_ENC_SCRATCH_WORDS   (67)
+
 /* Statistics */
 
 #ifdef CONFIG_BLE_LL_STATS
-#  define NRF52_BLE_STATS_INC(f)     (g_nrf52_ble_stats.f++)
-#  define NRF52_BLE_STATS_INCN(f, n) (g_nrf52_ble_stats.f += (n))
+#  define NRF52_BLE_STATS_INC(dev, f)     ((dev)->stats.f++)
+#  define NRF52_BLE_STATS_INCN(dev, f, n) ((dev)->stats.f += (n))
 #else
-#  define NRF52_BLE_STATS_INC(f)
-#  define NRF52_BLE_STATS_INCN(f, n)
+#  define NRF52_BLE_STATS_INC(dev, f)
+#  define NRF52_BLE_STATS_INCN(dev, f, n)
 #endif
 
 /****************************************************************************
@@ -137,24 +141,69 @@ struct nrf52_ble_stats_s
   uint32_t tx_hw_err;
 };
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+/* PHY state */
 
-/* Upper-half callbacks */
+struct nrf52_ble_phy_s
+{
+  int8_t   phy_txpwr_dbm;
+  uint8_t  phy_chan;
+  uint8_t  phy_state;
+  uint8_t  phy_transition;
+  uint8_t  phy_transition_late;
+  uint8_t  phy_rx_started;
+  uint8_t  phy_encrypted;
+  uint8_t  phy_privacy;
+  uint8_t  phy_tx_pyld_len;
+  uint8_t  phy_cur_phy_mode;
+  uint8_t  phy_tx_phy_mode;
+  uint8_t  phy_rx_phy_mode;
+  uint8_t  phy_bcc_offset;
+  uint32_t phy_aar_scratch;
+  uint32_t phy_access_address;
+  struct ble_mbuf_hdr rxhdr;
+  FAR void *txend_arg;
+  ble_phy_tx_end_func txend_cb;
+  uint32_t phy_start_cputime;
+  uint16_t txtx_time_us;
+  uint8_t  txtx_time_anchor;
+};
 
-extern FAR const struct ble_ll_lowercb_s *g_nrf52_ble_cb;
+#ifdef CONFIG_BLE_LL_CFG_FEAT_LE_ENCRYPTION
+/* CCM configuration data */
 
+begin_packed_struct struct nrf_ccm_data_s
+{
+  uint8_t  key[16];
+  uint64_t pkt_counter;
+  uint8_t  dir_bit;
+  uint8_t  iv[8];
+} end_packed_struct;
+#endif
+
+/* nRF52 BLE radio device.  One RADIO peripheral per chip. */
+
+struct nrf52_ble_dev_s
+{
+  struct ble_ll_lower_s lower;              /* Must be first */
+  FAR const struct ble_ll_lowercb_s *cb;    /* Bound upper half */
+  uint32_t rtc_cntr;                        /* Upper 8 bits of RTC0 */
+  struct nrf52_ble_phy_s phy;
+#ifdef CONFIG_BLE_LL_CFG_FEAT_LE_ENCRYPTION
+  struct nrf_ccm_data_s ccm;
+  uint32_t enc_scratch[NRF_ENC_SCRATCH_WORDS];
+  uint32_t enc_buf[(BLE_PHY_MAX_PDU_LEN + 3) / 4];
+#endif
+  uint32_t tx_buf[(BLE_PHY_MAX_PDU_LEN + 3) / 4];
+  uint32_t rx_buf[(BLE_PHY_MAX_PDU_LEN + 3) / 4];
 #ifdef CONFIG_BLE_LL_CFG_FEAT_LL_PRIVACY
-/* IRKs used by AAR */
-
-extern uint32_t g_nrf52_ble_irk_list[NRF52_BLE_IRK_ENTRIES * 4];
-extern uint8_t g_nrf52_ble_num_irks;
+  uint32_t irk_list[NRF52_BLE_IRK_ENTRIES * 4];  /* IRKs used by AAR */
+  uint8_t  num_irks;
 #endif
-
+  uint8_t  whitelist_mask;
 #ifdef CONFIG_BLE_LL_STATS
-extern struct nrf52_ble_stats_s g_nrf52_ble_stats;
+  struct nrf52_ble_stats_s stats;
 #endif
+};
 
 /****************************************************************************
  * Inline Functions

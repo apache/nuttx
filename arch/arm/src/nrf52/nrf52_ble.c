@@ -129,21 +129,16 @@ static const struct ble_ll_lower_ops_s g_nrf52_ble_ops =
   .tmr_stop                = nrf52_ble_tmr_stop,
 };
 
-static struct ble_ll_lower_s g_nrf52_ble_lower =
+/* One RADIO peripheral per chip */
+
+static struct nrf52_ble_dev_s g_nrf52_ble_dev =
 {
-  .ops            = &g_nrf52_ble_ops,
-  .sched_delay_us = NRF52_BLE_SCHED_DELAY_US,
+  .lower =
+  {
+    .ops            = &g_nrf52_ble_ops,
+    .sched_delay_us = NRF52_BLE_SCHED_DELAY_US,
+  },
 };
-
-/* Upper 8 bits of the 32-bit RTC0 counter */
-
-static uint32_t g_nrf52_ble_rtc_cntr;
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-FAR const struct ble_ll_lowercb_s *g_nrf52_ble_cb;
 
 /****************************************************************************
  * Private Functions
@@ -156,7 +151,9 @@ FAR const struct ble_ll_lowercb_s *g_nrf52_ble_cb;
 static void nrf52_ble_bind(FAR struct ble_ll_lower_s *lower,
                            FAR const struct ble_ll_lowercb_s *cb)
 {
-  g_nrf52_ble_cb = cb;
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
+  dev->cb = cb;
 }
 
 /****************************************************************************
@@ -172,6 +169,7 @@ static void nrf52_ble_bind(FAR struct ble_ll_lower_s *lower,
 static void nrf52_ble_tmr_start(FAR struct ble_ll_lower_s *lower,
                                 uint32_t target)
 {
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
   irqstate_t flags;
   uintptr_t ccreg;
   int32_t delta_t;
@@ -185,7 +183,7 @@ static void nrf52_ble_tmr_start(FAR struct ble_ll_lower_s *lower,
   putreg32(RTC_INT_COMPARE(NRF52_BLE_RTC_CC_TMR),
            NRF52_BLE_RTC0(NRF52_RTC_INTENCLR_OFFSET));
 
-  temp = g_nrf52_ble_rtc_cntr;
+  temp = dev->rtc_cntr;
   cntr = getreg32(NRF52_BLE_RTC0(NRF52_RTC_COUNTER_OFFSET));
   if (getreg32(NRF52_BLE_RTC0(NRF52_RTC_EVENTS_OVRFLW_OFFSET)))
     {
@@ -251,6 +249,7 @@ static void nrf52_ble_tmr_stop(FAR struct ble_ll_lower_s *lower)
 
 static int nrf52_ble_rtc0_isr(int irq, FAR void *context, FAR void *arg)
 {
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)arg;
   uintptr_t evt_compare;
 
   evt_compare = NRF52_BLE_RTC0(NRF52_RTC_EVENTS_COMPARE_OFFSET(
@@ -269,16 +268,16 @@ static int nrf52_ble_rtc0_isr(int irq, FAR void *context, FAR void *arg)
   if (getreg32(NRF52_BLE_RTC0(NRF52_RTC_EVENTS_OVRFLW_OFFSET)))
     {
       putreg32(0, NRF52_BLE_RTC0(NRF52_RTC_EVENTS_OVRFLW_OFFSET));
-      g_nrf52_ble_rtc_cntr += (1ul << 24);
+      dev->rtc_cntr += (1ul << 24);
     }
 
   /* There is no way to force a COMPARE event so a late timer is handled
    * with a pending interrupt.  Always check the timer queue.
    */
 
-  if (g_nrf52_ble_cb != NULL)
+  if (dev->cb != NULL)
     {
-      g_nrf52_ble_cb->tmr_exp();
+      dev->cb->tmr_exp(dev->cb);
     }
 
   /* Make sure the event is cleared before returning */
@@ -301,18 +300,19 @@ static int nrf52_ble_rtc0_isr(int irq, FAR void *context, FAR void *arg)
 
 uint32_t nrf52_ble_tmr_get(FAR struct ble_ll_lower_s *lower)
 {
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
   irqstate_t flags;
   uint32_t tcntr;
   uint32_t low32;
 
   flags = enter_critical_section();
 
-  tcntr = g_nrf52_ble_rtc_cntr;
+  tcntr = dev->rtc_cntr;
   low32 = getreg32(NRF52_BLE_RTC0(NRF52_RTC_COUNTER_OFFSET));
   if (getreg32(NRF52_BLE_RTC0(NRF52_RTC_EVENTS_OVRFLW_OFFSET)))
     {
       tcntr += (1ul << 24);
-      g_nrf52_ble_rtc_cntr = tcntr;
+      dev->rtc_cntr = tcntr;
       low32 = getreg32(NRF52_BLE_RTC0(NRF52_RTC_COUNTER_OFFSET));
       putreg32(0, NRF52_BLE_RTC0(NRF52_RTC_EVENTS_OVRFLW_OFFSET));
       up_trigger_irq(NRF52_IRQ_RTC0, 0);
@@ -357,14 +357,14 @@ int nrf52_ble_initialize(void)
    * the Link Layer mask them.
    */
 
-  irq_attach(NRF52_IRQ_RADIO, nrf52_ble_phy_isr, NULL);
-  irq_attach(NRF52_IRQ_RTC0, nrf52_ble_rtc0_isr, NULL);
-  irq_attach(NRF52_IRQ_RNG, nrf52_ble_hw_rng_isr, NULL);
+  irq_attach(NRF52_IRQ_RADIO, nrf52_ble_phy_isr, &g_nrf52_ble_dev);
+  irq_attach(NRF52_IRQ_RTC0, nrf52_ble_rtc0_isr, &g_nrf52_ble_dev);
+  irq_attach(NRF52_IRQ_RNG, nrf52_ble_hw_rng_isr, &g_nrf52_ble_dev);
 
   up_enable_irq(NRF52_IRQ_RTC0);
   up_enable_irq(NRF52_IRQ_RNG);
 
-  ret = ble_ll_register(&g_nrf52_ble_lower);
+  ret = ble_ll_register(&g_nrf52_ble_dev.lower, 0);
   if (ret < 0)
     {
       wlerr("ERROR: ble_ll_register failed: %d\n", ret);

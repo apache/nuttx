@@ -86,10 +86,6 @@
                                  (NRF_CILEN_BITS << RADIO_PCNF0_CILEN_SHIFT) | \
                                  (NRF_TERMLEN_BITS << RADIO_PCNF0_TERMLEN_SHIFT))
 
-/* Scratch area for CCM: 16 bytes plus the maximum packet size */
-
-#define NRF_ENC_SCRATCH_WORDS   (67)
-
 /* Radio TX power settings */
 
 #define NRF_TXPOWER_POS4DBM     (4)
@@ -114,64 +110,8 @@
 #define NRF52_RADIO_ERRATA191   (NRF52_RADIO_BASE + 0x740)
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/* PHY state */
-
-struct nrf52_ble_phy_s
-{
-  int8_t   phy_txpwr_dbm;
-  uint8_t  phy_chan;
-  uint8_t  phy_state;
-  uint8_t  phy_transition;
-  uint8_t  phy_transition_late;
-  uint8_t  phy_rx_started;
-  uint8_t  phy_encrypted;
-  uint8_t  phy_privacy;
-  uint8_t  phy_tx_pyld_len;
-  uint8_t  phy_cur_phy_mode;
-  uint8_t  phy_tx_phy_mode;
-  uint8_t  phy_rx_phy_mode;
-  uint8_t  phy_bcc_offset;
-  uint32_t phy_aar_scratch;
-  uint32_t phy_access_address;
-  struct ble_mbuf_hdr rxhdr;
-  FAR void *txend_arg;
-  ble_phy_tx_end_func txend_cb;
-  uint32_t phy_start_cputime;
-  uint16_t txtx_time_us;
-  uint8_t  txtx_time_anchor;
-};
-
-#ifdef CONFIG_BLE_LL_CFG_FEAT_LE_ENCRYPTION
-/* CCM configuration data */
-
-begin_packed_struct struct nrf_ccm_data_s
-{
-  uint8_t  key[16];
-  uint64_t pkt_counter;
-  uint8_t  dir_bit;
-  uint8_t  iv[8];
-} end_packed_struct;
-#endif
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
-
-static struct nrf52_ble_phy_s g_ble_phy_data;
-
-/* Global transmit/receive buffers */
-
-static uint32_t g_ble_phy_tx_buf[(BLE_PHY_MAX_PDU_LEN + 3) / 4];
-static uint32_t g_ble_phy_rx_buf[(BLE_PHY_MAX_PDU_LEN + 3) / 4];
-
-#ifdef CONFIG_BLE_LL_CFG_FEAT_LE_ENCRYPTION
-static uint32_t g_ble_phy_enc_buf[(BLE_PHY_MAX_PDU_LEN + 3) / 4];
-static uint32_t g_nrf_encrypt_scratchpad[NRF_ENC_SCRATCH_WORDS];
-static struct nrf_ccm_data_s g_nrf_ccm_data;
-#endif
 
 /* RF center frequency for each channel index (offset from 2400 MHz) */
 
@@ -246,14 +186,6 @@ static const uint8_t g_ble_phy_t_rxenddelay[BLE_PHY_NUM_MODE] =
 };
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifdef CONFIG_BLE_LL_STATS
-struct nrf52_ble_stats_s g_nrf52_ble_stats;
-#endif
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -311,9 +243,10 @@ static bool ble_phy_mode_is_coded(uint8_t phy_mode)
          phy_mode == BLE_PHY_MODE_CODED_500KBPS;
 }
 
-static void nrf52_ble_errata_191_apply(uint8_t new_phy_mode)
+static void nrf52_ble_errata_191_apply(FAR struct nrf52_ble_dev_s *dev,
+                                       uint8_t new_phy_mode)
 {
-  bool from_coded = ble_phy_mode_is_coded(g_ble_phy_data.phy_cur_phy_mode);
+  bool from_coded = ble_phy_mode_is_coded(dev->phy.phy_cur_phy_mode);
   bool to_coded = ble_phy_mode_is_coded(new_phy_mode);
 
   /* Apply only when switching to or from LE Coded */
@@ -489,9 +422,10 @@ static uint32_t ble_phy_mode_pdu_start_off(int phy_mode)
  * Name: ble_phy_mode_apply
  ****************************************************************************/
 
-static void ble_phy_mode_apply(uint8_t phy_mode)
+static void ble_phy_mode_apply(FAR struct nrf52_ble_dev_s *dev,
+                               uint8_t phy_mode)
 {
-  if (phy_mode == g_ble_phy_data.phy_cur_phy_mode)
+  if (phy_mode == dev->phy.phy_cur_phy_mode)
     {
       return;
     }
@@ -500,7 +434,7 @@ static void ble_phy_mode_apply(uint8_t phy_mode)
     defined(CONFIG_ARCH_CHIP_NRF52840)
   if (nrf52_ble_errata_191())
     {
-      nrf52_ble_errata_191_apply(phy_mode);
+      nrf52_ble_errata_191_apply(dev, phy_mode);
     }
 #endif
 
@@ -534,7 +468,7 @@ static void ble_phy_mode_apply(uint8_t phy_mode)
         DEBUGPANIC();
     }
 
-  g_ble_phy_data.phy_cur_phy_mode = phy_mode;
+  dev->phy.phy_cur_phy_mode = phy_mode;
 }
 #else
 /****************************************************************************
@@ -551,10 +485,10 @@ static uint32_t ble_phy_mode_pdu_start_off(int phy_mode)
  * Name: ble_phy_get_cur_phy
  ****************************************************************************/
 
-static int ble_phy_get_cur_phy(void)
+static int ble_phy_get_cur_phy(FAR struct nrf52_ble_dev_s *dev)
 {
 #ifdef CONFIG_BLE_LL_PHY
-  switch (g_ble_phy_data.phy_cur_phy_mode)
+  switch (dev->phy.phy_cur_phy_mode)
     {
       case BLE_PHY_MODE_1M:
         return BLE_PHY_1M;
@@ -609,7 +543,8 @@ static void nrf_wait_disabled(void)
  *
  ****************************************************************************/
 
-static int ble_phy_set_start_time(uint32_t cputime, uint8_t rem_us, bool tx)
+static int ble_phy_set_start_time(FAR struct nrf52_ble_dev_s *dev,
+                                  uint32_t cputime, uint8_t rem_us, bool tx)
 {
   uint32_t next_cc;
   uint32_t cur_cc;
@@ -625,7 +560,7 @@ static int ble_phy_set_start_time(uint32_t cputime, uint8_t rem_us, bool tx)
   if (tx)
     {
       radio_rem_us = rem_us - BLE_PHY_T_TXENFAST -
-                     g_ble_phy_t_txdelay[g_ble_phy_data.phy_cur_phy_mode];
+                     g_ble_phy_t_txdelay[dev->phy.phy_cur_phy_mode];
     }
   else
     {
@@ -697,7 +632,7 @@ static int ble_phy_set_start_time(uint32_t cputime, uint8_t rem_us, bool tx)
 
   /* Store the cputime at which we set the RTC */
 
-  g_ble_phy_data.phy_start_cputime = cputime;
+  dev->phy.phy_start_cputime = cputime;
 
   return 0;
 }
@@ -710,7 +645,7 @@ static int ble_phy_set_start_time(uint32_t cputime, uint8_t rem_us, bool tx)
  *
  ****************************************************************************/
 
-static int ble_phy_set_start_now(void)
+static int ble_phy_set_start_now(FAR struct nrf52_ble_dev_s *dev)
 {
   irqstate_t flags;
   uint32_t now;
@@ -730,7 +665,7 @@ static int ble_phy_set_start_now(void)
    * operations.
    */
 
-  now = nrf52_ble_tmr_get(NULL);
+  now = nrf52_ble_tmr_get(&dev->lower);
   putreg32(0, NRF52_BLE_RTC0(NRF52_RTC_EVENTS_COMPARE_OFFSET(
               NRF52_BLE_RTC_CC_START)));
   putreg32((now + 3) & 0xffffff, NRF52_BLE_RTC0(NRF52_RTC_CC_OFFSET(
@@ -746,7 +681,7 @@ static int ble_phy_set_start_now(void)
    * cases the actual start time may be up to 2 ticks earlier.
    */
 
-  g_ble_phy_data.phy_start_cputime = now + 3;
+  dev->phy.phy_start_cputime = now + 3;
 
   leave_critical_section(flags);
 
@@ -758,10 +693,10 @@ static int ble_phy_set_start_now(void)
  * Name: ble_phy_get_ccm_datarate
  ****************************************************************************/
 
-static uint32_t ble_phy_get_ccm_datarate(void)
+static uint32_t ble_phy_get_ccm_datarate(FAR struct nrf52_ble_dev_s *dev)
 {
 #ifdef CONFIG_BLE_LL_PHY
-  switch (g_ble_phy_data.phy_cur_phy_mode)
+  switch (dev->phy.phy_cur_phy_mode)
     {
       case BLE_PHY_MODE_1M:
         return CCM_MODE_DATARATE_1MBIT;
@@ -794,23 +729,23 @@ static uint32_t ble_phy_get_ccm_datarate(void)
  *
  ****************************************************************************/
 
-static void ble_phy_rx_xcvr_setup(void)
+static void ble_phy_rx_xcvr_setup(FAR struct nrf52_ble_dev_s *dev)
 {
   FAR uint8_t *dptr;
 
-  dptr  = (FAR uint8_t *)&g_ble_phy_rx_buf[0];
+  dptr  = (FAR uint8_t *)&dev->rx_buf[0];
   dptr += 3;
 
 #ifdef CONFIG_BLE_LL_CFG_FEAT_LE_ENCRYPTION
-  if (g_ble_phy_data.phy_encrypted)
+  if (dev->phy.phy_encrypted)
     {
-      putreg32((uint32_t)&g_ble_phy_enc_buf[0], NRF52_RADIO_PACKETPTR);
-      putreg32((uint32_t)&g_ble_phy_enc_buf[0], NRF52_CCM_INPTR);
+      putreg32((uint32_t)&dev->enc_buf[0], NRF52_RADIO_PACKETPTR);
+      putreg32((uint32_t)&dev->enc_buf[0], NRF52_CCM_INPTR);
       putreg32((uint32_t)dptr, NRF52_CCM_OUTPTR);
-      putreg32((uint32_t)&g_nrf_encrypt_scratchpad[0], NRF52_CCM_SCRATCHPTR);
+      putreg32((uint32_t)&dev->enc_scratch[0], NRF52_CCM_SCRATCHPTR);
       putreg32(CCM_MODE_LENGTH_EXTENDED | CCM_MODE_DECRYPTION |
-               ble_phy_get_ccm_datarate(), NRF52_CCM_MODE);
-      putreg32((uint32_t)&g_nrf_ccm_data, NRF52_CCM_CNFPTR);
+               ble_phy_get_ccm_datarate(dev), NRF52_CCM_MODE);
+      putreg32((uint32_t)&dev->ccm, NRF52_CCM_CNFPTR);
       putreg32(0, NRF52_CCM_SHORTS);
       putreg32(0, NRF52_CCM_EVENTS_ERROR);
       putreg32(0, NRF52_CCM_EVENTS_ENDCRYPT);
@@ -824,17 +759,17 @@ static void ble_phy_rx_xcvr_setup(void)
     }
 
 #ifdef CONFIG_BLE_LL_CFG_FEAT_LL_PRIVACY
-  if (g_ble_phy_data.phy_privacy)
+  if (dev->phy.phy_privacy)
     {
       putreg32(AAR_ENABLE_ENABLED, NRF52_AAR_ENABLE);
-      putreg32((uint32_t)&g_nrf52_ble_irk_list[0], NRF52_AAR_IRKPTR);
-      putreg32((uint32_t)&g_ble_phy_data.phy_aar_scratch,
+      putreg32((uint32_t)&dev->irk_list[0], NRF52_AAR_IRKPTR);
+      putreg32((uint32_t)&dev->phy.phy_aar_scratch,
                NRF52_AAR_SCRATCHPTR);
       putreg32(0, NRF52_AAR_EVENTS_END);
       putreg32(0, NRF52_AAR_EVENTS_RESOLVED);
       putreg32(0, NRF52_AAR_EVENTS_NOTRESOLVED);
     }
-  else if (g_ble_phy_data.phy_encrypted == 0)
+  else if (dev->phy.phy_encrypted == 0)
     {
       putreg32(AAR_ENABLE_DISABLED, NRF52_AAR_ENABLE);
     }
@@ -847,26 +782,26 @@ static void ble_phy_rx_xcvr_setup(void)
 
   /* Reset the rx started flag.  Used for the wait for response */
 
-  g_ble_phy_data.phy_rx_started = 0;
-  g_ble_phy_data.phy_state      = BLE_PHY_STATE_RX;
+  dev->phy.phy_rx_started = 0;
+  dev->phy.phy_state      = BLE_PHY_STATE_RX;
 
 #ifdef CONFIG_BLE_LL_PHY
   /* On Coded PHY there are CI and TERM1 fields before the PDU */
 
-  if (g_ble_phy_data.phy_cur_phy_mode == BLE_PHY_MODE_CODED_125KBPS ||
-      g_ble_phy_data.phy_cur_phy_mode == BLE_PHY_MODE_CODED_500KBPS)
+  if (dev->phy.phy_cur_phy_mode == BLE_PHY_MODE_CODED_125KBPS ||
+      dev->phy.phy_cur_phy_mode == BLE_PHY_MODE_CODED_500KBPS)
     {
-      g_ble_phy_data.phy_bcc_offset = 5;
+      dev->phy.phy_bcc_offset = 5;
     }
   else
 #endif
     {
-      g_ble_phy_data.phy_bcc_offset = 0;
+      dev->phy.phy_bcc_offset = 0;
     }
 
   /* We want to know when the 1st byte is received (after address) */
 
-  putreg32(8 + g_ble_phy_data.phy_bcc_offset, NRF52_RADIO_BCC);
+  putreg32(8 + dev->phy.phy_bcc_offset, NRF52_RADIO_BCC);
   putreg32(0, NRF52_RADIO_EVENTS_ADDRESS);
   putreg32(0, NRF52_RADIO_EVENTS_DEVMATCH);
   putreg32(0, NRF52_RADIO_EVENTS_BCMATCH);
@@ -887,7 +822,7 @@ static void ble_phy_rx_xcvr_setup(void)
  *
  ****************************************************************************/
 
-static void ble_phy_tx_end_isr(void)
+static void ble_phy_tx_end_isr(FAR struct nrf52_ble_dev_s *dev)
 {
   uint8_t tx_phy_mode;
   uint8_t transition;
@@ -898,40 +833,40 @@ static void ble_phy_tx_end_isr(void)
 
   /* Store PHY on which we've just transmitted */
 
-  tx_phy_mode = g_ble_phy_data.phy_cur_phy_mode;
+  tx_phy_mode = dev->phy.phy_cur_phy_mode;
 
-  DEBUGASSERT(g_ble_phy_data.phy_state == BLE_PHY_STATE_TX);
+  DEBUGASSERT(dev->phy.phy_state == BLE_PHY_STATE_TX);
 
 #ifdef CONFIG_BLE_LL_CFG_FEAT_LE_ENCRYPTION
   /* HW error during an encrypted transmission is only counted */
 
-  if (g_ble_phy_data.phy_encrypted && getreg32(NRF52_CCM_EVENTS_ERROR))
+  if (dev->phy.phy_encrypted && getreg32(NRF52_CCM_EVENTS_ERROR))
     {
-      NRF52_BLE_STATS_INC(tx_hw_err);
+      NRF52_BLE_STATS_INC(dev, tx_hw_err);
       putreg32(0, NRF52_CCM_EVENTS_ERROR);
     }
 #endif
 
   tifs       = BLE_LL_IFS;
-  transition = g_ble_phy_data.phy_transition;
+  transition = dev->phy.phy_transition;
 
-  if (g_ble_phy_data.txend_cb)
+  if (dev->phy.txend_cb)
     {
-      g_ble_phy_data.txend_cb(g_ble_phy_data.txend_arg);
+      dev->phy.txend_cb(dev->phy.txend_arg);
     }
 
   if (transition == BLE_PHY_TRANSITION_TX_RX)
     {
 #ifdef CONFIG_BLE_LL_PHY
-      ble_phy_mode_apply(g_ble_phy_data.phy_rx_phy_mode);
+      ble_phy_mode_apply(dev, dev->phy.phy_rx_phy_mode);
 #endif
 
       /* Packet pointer needs to be reset */
 
-      ble_phy_rx_xcvr_setup();
+      ble_phy_rx_xcvr_setup(dev);
 
-      nrf52_ble_phy_wfr_enable(NULL, BLE_PHY_WFR_ENABLE_TXRX, tx_phy_mode,
-                               0);
+      nrf52_ble_phy_wfr_enable(&dev->lower, BLE_PHY_WFR_ENABLE_TXRX,
+                               tx_phy_mode, 0);
 
       /* Schedule RX exactly T_IFS after TX end captured in CC[2], adjusted
        * for the delay between EVENT_END and actual TX end and started a bit
@@ -953,7 +888,7 @@ static void ble_phy_tx_end_isr(void)
     }
   else if (transition == BLE_PHY_TRANSITION_TX_TX)
     {
-      if (g_ble_phy_data.txtx_time_anchor)
+      if (dev->phy.txtx_time_anchor)
         {
           /* TX anchor relative to current TX end captured in CC[2] */
 
@@ -971,11 +906,11 @@ static void ble_phy_tx_end_isr(void)
           tx_time -= ble_ll_pdu_syncword_us(tx_phy_mode);
         }
 
-      tx_time += g_ble_phy_data.txtx_time_us;
+      tx_time += dev->phy.txtx_time_us;
 
       /* Adjust for delay between EVENT_READY and actual TX start time */
 
-      tx_time -= g_ble_phy_t_txdelay[g_ble_phy_data.phy_cur_phy_mode];
+      tx_time -= g_ble_phy_t_txdelay[dev->phy.phy_cur_phy_mode];
 
       radio_time = tx_time - BLE_PHY_T_TXENFAST;
       timer0_event_clear(0);
@@ -985,7 +920,7 @@ static void ble_phy_tx_end_isr(void)
       if (timer0_did_miss(0, 3))
         {
           nrf52_ble_ppi_disable(PPI_CHEN_CH(NRF52_BLE_PPI_TIMER0_TXEN));
-          g_ble_phy_data.phy_transition_late = 1;
+          dev->phy.phy_transition_late = 1;
         }
     }
   else
@@ -1003,11 +938,12 @@ static void ble_phy_tx_end_isr(void)
  * Name: ble_phy_get_cur_rx_phy_mode
  ****************************************************************************/
 
-static inline uint8_t ble_phy_get_cur_rx_phy_mode(void)
+static inline uint8_t
+ble_phy_get_cur_rx_phy_mode(FAR struct nrf52_ble_dev_s *dev)
 {
   uint8_t phy;
 
-  phy = g_ble_phy_data.phy_cur_phy_mode;
+  phy = dev->phy.phy_cur_phy_mode;
 
 #if defined(CONFIG_BLE_LL_CFG_FEAT_LE_CODED_PHY) && defined(HAVE_RADIO_BLELR)
   /* For Coded PHY the actual coding of the received packet is given by
@@ -1029,7 +965,7 @@ static inline uint8_t ble_phy_get_cur_rx_phy_mode(void)
  * Name: ble_phy_rx_end_isr
  ****************************************************************************/
 
-static void ble_phy_rx_end_isr(void)
+static void ble_phy_rx_end_isr(FAR struct nrf52_ble_dev_s *dev)
 {
   FAR struct ble_mbuf_hdr *ble_hdr;
   FAR uint8_t *dptr;
@@ -1045,11 +981,11 @@ static void ble_phy_rx_end_isr(void)
 
   /* Set RSSI and CRC status flag in header */
 
-  ble_hdr = &g_ble_phy_data.rxhdr;
+  ble_hdr = &dev->phy.rxhdr;
   DEBUGASSERT(getreg32(NRF52_RADIO_EVENTS_RSSIEND) != 0);
   ble_hdr->rxinfo.rssi = -1 * (int)getreg32(NRF52_RADIO_RSSISAMPLE);
 
-  dptr  = (FAR uint8_t *)&g_ble_phy_rx_buf[0];
+  dptr  = (FAR uint8_t *)&dev->rx_buf[0];
   dptr += 3;
 
   /* Count PHY crc errors and valid packets */
@@ -1057,15 +993,15 @@ static void ble_phy_rx_end_isr(void)
   crcok = getreg32(NRF52_RADIO_EVENTS_CRCOK);
   if (!crcok)
     {
-      NRF52_BLE_STATS_INC(rx_crc_err);
+      NRF52_BLE_STATS_INC(dev, rx_crc_err);
     }
   else
     {
-      NRF52_BLE_STATS_INC(rx_valid);
+      NRF52_BLE_STATS_INC(dev, rx_valid);
       ble_hdr->rxinfo.flags |= BLE_MBUF_HDR_F_CRC_OK;
 
 #ifdef CONFIG_BLE_LL_CFG_FEAT_LE_ENCRYPTION
-      if (g_ble_phy_data.phy_encrypted)
+      if (dev->phy.phy_encrypted)
         {
           /* Make sure CCM finished */
 
@@ -1084,7 +1020,7 @@ static void ble_phy_rx_end_isr(void)
 
           if (getreg32(NRF52_CCM_EVENTS_ERROR))
             {
-              NRF52_BLE_STATS_INC(rx_hw_err);
+              NRF52_BLE_STATS_INC(dev, rx_hw_err);
               ble_hdr->rxinfo.flags &= ~BLE_MBUF_HDR_F_CRC_OK;
             }
         }
@@ -1092,7 +1028,7 @@ static void ble_phy_rx_end_isr(void)
     }
 
 #ifdef CONFIG_BLE_LL_PHY
-  ble_phy_mode_apply(g_ble_phy_data.phy_tx_phy_mode);
+  ble_phy_mode_apply(dev, dev->phy.phy_tx_phy_mode);
 #endif
 
   /* Schedule TX now; it is cancelled after the PDU is processed if not
@@ -1108,7 +1044,7 @@ static void ble_phy_rx_end_isr(void)
 
   /* Adjust for delay between EVENT_READY and actual TX start time */
 
-  tx_time -= g_ble_phy_t_txdelay[g_ble_phy_data.phy_cur_phy_mode];
+  tx_time -= g_ble_phy_t_txdelay[dev->phy.phy_cur_phy_mode];
 
   radio_time = tx_time - BLE_PHY_T_TXENFAST;
   timer0_event_clear(0);
@@ -1120,7 +1056,7 @@ static void ble_phy_rx_end_isr(void)
   if (timer0_did_miss(0, 3))
     {
       nrf52_ble_ppi_disable(PPI_CHEN_CH(NRF52_BLE_PPI_TIMER0_TXEN));
-      g_ble_phy_data.phy_transition_late = 1;
+      dev->phy.phy_transition_late = 1;
     }
 
   /* The RAM S1 byte is not sent over the air but is present in the
@@ -1129,10 +1065,10 @@ static void ble_phy_rx_end_isr(void)
 
   dptr[2] = dptr[1];
   dptr[1] = dptr[0];
-  rc = g_nrf52_ble_cb->rx_end(dptr + 1, ble_hdr);
+  rc = dev->cb->rx_end(dev->cb, dptr + 1, ble_hdr);
   if (rc < 0)
     {
-      nrf52_ble_phy_disable(NULL);
+      nrf52_ble_phy_disable(&dev->lower);
     }
 }
 
@@ -1140,7 +1076,7 @@ static void ble_phy_rx_end_isr(void)
  * Name: ble_phy_rx_start_isr
  ****************************************************************************/
 
-static bool ble_phy_rx_start_isr(void)
+static bool ble_phy_rx_start_isr(FAR struct nrf52_ble_dev_s *dev)
 {
   FAR struct ble_mbuf_hdr *ble_hdr;
   FAR uint8_t *dptr;
@@ -1153,7 +1089,7 @@ static bool ble_phy_rx_start_isr(void)
 #endif
   int rc;
 
-  dptr = (FAR uint8_t *)&g_ble_phy_rx_buf[0];
+  dptr = (FAR uint8_t *)&dev->rx_buf[0];
 
   /* Clear events and clear interrupt */
 
@@ -1166,12 +1102,12 @@ static bool ble_phy_rx_start_isr(void)
 
   /* Initialize the PDU metadata */
 
-  ble_hdr                   = &g_ble_phy_data.rxhdr;
-  ble_hdr->rxinfo.flags     = g_nrf52_ble_cb->state_get();
-  ble_hdr->rxinfo.channel   = g_ble_phy_data.phy_chan;
+  ble_hdr                   = &dev->phy.rxhdr;
+  ble_hdr->rxinfo.flags     = dev->cb->state_get(dev->cb);
+  ble_hdr->rxinfo.channel   = dev->phy.phy_chan;
   ble_hdr->rxinfo.handle    = 0;
-  ble_hdr->rxinfo.phy       = ble_phy_get_cur_phy();
-  ble_hdr->rxinfo.phy_mode  = ble_phy_get_cur_rx_phy_mode();
+  ble_hdr->rxinfo.phy       = ble_phy_get_cur_phy(dev);
+  ble_hdr->rxinfo.phy_mode  = ble_phy_get_cur_rx_phy_mode(dev);
 #ifdef CONFIG_BLE_LL_CFG_FEAT_LL_EXT_ADV
   ble_hdr->rxinfo.user_data = NULL;
 #endif
@@ -1180,14 +1116,14 @@ static bool ble_phy_rx_start_isr(void)
    * may start during the preamble, before TIMER0 was running.
    */
 
-  ble_hdr->beg_cputime = g_ble_phy_data.phy_start_cputime;
+  ble_hdr->beg_cputime = dev->phy.phy_start_cputime;
 
   usecs     = timer0_cc_get(1);
   pdu_usecs = ble_phy_mode_pdu_start_off(ble_hdr->rxinfo.phy_mode) +
               g_ble_phy_t_rxaddrdelay[ble_hdr->rxinfo.phy_mode];
   if (usecs < pdu_usecs)
     {
-      g_ble_phy_data.phy_start_cputime--;
+      dev->phy.phy_start_cputime--;
       usecs += 30;
     }
 
@@ -1229,7 +1165,7 @@ static bool ble_phy_rx_start_isr(void)
    * address) resolve the address using AAR.
    */
 
-  if (g_ble_phy_data.phy_privacy && (dptr[3] & 0x40))
+  if (dev->phy.phy_privacy && (dptr[3] & 0x40))
     {
       /* AdvA is located at 4th octet in RX buffer (after S0, length and S1
        * fields).  Extended advertising PDUs have 2 more octets.
@@ -1243,27 +1179,27 @@ static bool ble_phy_rx_start_isr(void)
       putreg32(0, NRF52_RADIO_EVENTS_BCMATCH);
       nrf52_ble_ppi_enable(PPI_CHEN_CH(NRF52_BLE_PPI_AAR_START));
       putreg32((BLE_LL_PDU_HDR_LEN + adva_offset + 6) * 8 +
-               g_ble_phy_data.phy_bcc_offset, NRF52_RADIO_BCC);
+               dev->phy.phy_bcc_offset, NRF52_RADIO_BCC);
     }
 #endif
 
   /* Call Link Layer receive start function */
 
-  rc = g_nrf52_ble_cb->rx_start(dptr + 3, g_ble_phy_data.phy_chan,
-                                &g_ble_phy_data.rxhdr);
+  rc = dev->cb->rx_start(dev->cb, dptr + 3, dev->phy.phy_chan,
+                         &dev->phy.rxhdr);
   if (rc >= 0)
     {
       /* Set rx started flag and enable rx end ISR */
 
-      g_ble_phy_data.phy_rx_started = 1;
+      dev->phy.phy_rx_started = 1;
     }
   else
     {
-      nrf52_ble_phy_disable(NULL);
-      NRF52_BLE_STATS_INC(rx_aborts);
+      nrf52_ble_phy_disable(&dev->lower);
+      NRF52_BLE_STATS_INC(dev, rx_aborts);
     }
 
-  NRF52_BLE_STATS_INC(rx_starts);
+  NRF52_BLE_STATS_INC(dev, rx_starts);
 
   return true;
 }
@@ -1272,13 +1208,14 @@ static bool ble_phy_rx_start_isr(void)
  * Name: ble_phy_set_access_addr
  ****************************************************************************/
 
-static int ble_phy_set_access_addr(uint32_t access_addr)
+static int ble_phy_set_access_addr(FAR struct nrf52_ble_dev_s *dev,
+                                   uint32_t access_addr)
 {
   putreg32(access_addr << 8, NRF52_RADIO_BASE0);
   putreg32((getreg32(NRF52_RADIO_PREFIX0) & 0xffffff00) |
            (access_addr >> 24), NRF52_RADIO_PREFIX0);
 
-  g_ble_phy_data.phy_access_address = access_addr;
+  dev->phy.phy_access_address = access_addr;
 
 #ifdef CONFIG_ARCH_CHIP_NRF52832
   if (nrf52_ble_errata_102_106_107())
@@ -1315,7 +1252,7 @@ static void ble_phy_stop_usec_timer(void)
  *
  ****************************************************************************/
 
-static void ble_phy_disable_irq_and_ppi(void)
+static void ble_phy_disable_irq_and_ppi(FAR struct nrf52_ble_dev_s *dev)
 {
   int irq = NRF52_IRQ_RADIO - NRF52_IRQ_EXTINT;
 
@@ -1324,7 +1261,7 @@ static void ble_phy_disable_irq_and_ppi(void)
   putreg32(1, NRF52_RADIO_TASKS_DISABLE);
   nrf52_ble_ppi_disable(NRF52_BLE_PPI_MASK_ALL);
   putreg32(1 << (irq & 0x1f), NVIC_IRQ_CLRPEND(irq));
-  g_ble_phy_data.phy_state = BLE_PHY_STATE_IDLE;
+  dev->phy.phy_state = BLE_PHY_STATE_IDLE;
 }
 
 /****************************************************************************
@@ -1335,7 +1272,7 @@ static void ble_phy_disable_irq_and_ppi(void)
  *
  ****************************************************************************/
 
-static int ble_phy_rx(void)
+static int ble_phy_rx(FAR struct nrf52_ble_dev_s *dev)
 {
   uint32_t state;
 
@@ -1349,8 +1286,8 @@ static int ble_phy_rx(void)
   if ((state != RADIO_STATE_DISABLED) &&
       ((state & 0x07) != RADIO_STATE_RXIDLE))
     {
-      nrf52_ble_phy_disable(NULL);
-      NRF52_BLE_STATS_INC(radio_state_errs);
+      nrf52_ble_phy_disable(&dev->lower);
+      NRF52_BLE_STATS_INC(dev, radio_state_errs);
       return BLE_PHY_ERR_RADIO_STATE;
     }
 
@@ -1363,7 +1300,7 @@ static int ble_phy_rx(void)
   putreg32(0, NRF52_RADIO_EVENTS_END);
   putreg32(0, NRF52_RADIO_EVENTS_DISABLED);
 
-  ble_phy_rx_xcvr_setup();
+  ble_phy_rx_xcvr_setup(dev);
 
   return 0;
 }
@@ -1378,6 +1315,7 @@ static int ble_phy_rx(void)
 
 int nrf52_ble_phy_isr(int irq, FAR void *context, FAR void *arg)
 {
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)arg;
   uint32_t irq_en;
 
   /* Read irq register to determine which interrupts are enabled */
@@ -1396,7 +1334,7 @@ int nrf52_ble_phy_isr(int irq, FAR void *context, FAR void *arg)
        * fails, so keep the DISABLED irq to handle it below.
        */
 
-      if (ble_phy_rx_start_isr())
+      if (ble_phy_rx_start_isr(dev))
         {
           irq_en &= ~RADIO_INT_DISABLED;
         }
@@ -1409,28 +1347,28 @@ int nrf52_ble_phy_isr(int irq, FAR void *context, FAR void *arg)
   if ((irq_en & RADIO_INT_DISABLED) && getreg32(NRF52_RADIO_EVENTS_DISABLED))
     {
       DEBUGASSERT(getreg32(NRF52_RADIO_EVENTS_END) ||
-                  ((g_ble_phy_data.phy_state == BLE_PHY_STATE_RX) &&
-                   !g_ble_phy_data.phy_rx_started));
+                  ((dev->phy.phy_state == BLE_PHY_STATE_RX) &&
+                   !dev->phy.phy_rx_started));
 
       putreg32(0, NRF52_RADIO_EVENTS_END);
       putreg32(0, NRF52_RADIO_EVENTS_DISABLED);
       putreg32(RADIO_INT_DISABLED, NRF52_RADIO_INTENCLR);
 
-      switch (g_ble_phy_data.phy_state)
+      switch (dev->phy.phy_state)
         {
           case BLE_PHY_STATE_RX:
-            if (g_ble_phy_data.phy_rx_started)
+            if (dev->phy.phy_rx_started)
               {
-                ble_phy_rx_end_isr();
+                ble_phy_rx_end_isr(dev);
               }
             else
               {
-                g_nrf52_ble_cb->wfr_exp();
+                dev->cb->wfr_exp(dev->cb);
               }
             break;
 
           case BLE_PHY_STATE_TX:
-            ble_phy_tx_end_isr();
+            ble_phy_tx_end_isr(dev);
             break;
 
           default:
@@ -1438,9 +1376,9 @@ int nrf52_ble_phy_isr(int irq, FAR void *context, FAR void *arg)
         }
     }
 
-  g_ble_phy_data.phy_transition_late = 0;
+  dev->phy.phy_transition_late = 0;
 
-  NRF52_BLE_STATS_INC(phy_isrs);
+  NRF52_BLE_STATS_INC(dev, phy_isrs);
 
   return OK;
 }
@@ -1455,15 +1393,17 @@ int nrf52_ble_phy_isr(int irq, FAR void *context, FAR void *arg)
 
 int nrf52_ble_phy_init(FAR struct ble_ll_lower_s *lower)
 {
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
   /* Default phy to use is 1M */
 
-  g_ble_phy_data.phy_cur_phy_mode = BLE_PHY_MODE_1M;
-  g_ble_phy_data.phy_tx_phy_mode  = BLE_PHY_MODE_1M;
-  g_ble_phy_data.phy_rx_phy_mode  = BLE_PHY_MODE_1M;
+  dev->phy.phy_cur_phy_mode = BLE_PHY_MODE_1M;
+  dev->phy.phy_tx_phy_mode  = BLE_PHY_MODE_1M;
+  dev->phy.phy_rx_phy_mode  = BLE_PHY_MODE_1M;
 
   /* Set phy channel to an invalid channel so first set channel works */
 
-  g_ble_phy_data.phy_chan = BLE_PHY_NUM_CHANS;
+  dev->phy.phy_chan = BLE_PHY_NUM_CHANS;
 
   /* Toggle peripheral power to reset */
 
@@ -1505,12 +1445,12 @@ int nrf52_ble_phy_init(FAR struct ble_ll_lower_s *lower)
   putreg32(0xffffffff, NRF52_CCM_INTENCLR);
   putreg32(CCM_SHORTS_ENDKSGEN_CRYPT, NRF52_CCM_SHORTS);
   putreg32(0, NRF52_CCM_EVENTS_ERROR);
-  memset(g_nrf_encrypt_scratchpad, 0, sizeof(g_nrf_encrypt_scratchpad));
+  memset(dev->enc_scratch, 0, sizeof(dev->enc_scratch));
 #endif
 
 #ifdef CONFIG_BLE_LL_CFG_FEAT_LL_PRIVACY
-  g_ble_phy_data.phy_aar_scratch = 0;
-  putreg32((uint32_t)&g_nrf52_ble_irk_list[0], NRF52_AAR_IRKPTR);
+  dev->phy.phy_aar_scratch = 0;
+  putreg32((uint32_t)&dev->irk_list[0], NRF52_AAR_IRKPTR);
   putreg32(0xffffffff, NRF52_AAR_INTENCLR);
   putreg32(0, NRF52_AAR_EVENTS_END);
   putreg32(0, NRF52_AAR_EVENTS_RESOLVED);
@@ -1550,10 +1490,11 @@ int nrf52_ble_phy_init(FAR struct ble_ll_lower_s *lower)
 void nrf52_ble_phy_wfr_enable(FAR struct ble_ll_lower_s *lower, int txrx,
                               uint8_t tx_phy_mode, uint32_t wfr_usecs)
 {
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
   uint32_t end_time;
   uint8_t phy;
 
-  phy = g_ble_phy_data.phy_cur_phy_mode;
+  phy = dev->phy.phy_cur_phy_mode;
 
   if (txrx == BLE_PHY_WFR_ENABLE_TXRX)
     {
@@ -1609,8 +1550,10 @@ void nrf52_ble_phy_wfr_enable(FAR struct ble_ll_lower_s *lower, int txrx,
 void nrf52_ble_phy_mode_set(FAR struct ble_ll_lower_s *lower,
                             uint8_t tx_phy_mode, uint8_t rx_phy_mode)
 {
-  g_ble_phy_data.phy_tx_phy_mode = tx_phy_mode;
-  g_ble_phy_data.phy_rx_phy_mode = rx_phy_mode;
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
+  dev->phy.phy_tx_phy_mode = tx_phy_mode;
+  dev->phy.phy_rx_phy_mode = rx_phy_mode;
 }
 #endif
 
@@ -1622,8 +1565,10 @@ void nrf52_ble_phy_mode_set(FAR struct ble_ll_lower_s *lower,
 void nrf52_ble_phy_encrypt_enable(FAR struct ble_ll_lower_s *lower,
                                   FAR const uint8_t *key)
 {
-  memcpy(g_nrf_ccm_data.key, key, 16);
-  g_ble_phy_data.phy_encrypted = 1;
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
+  memcpy(dev->ccm.key, key, 16);
+  dev->phy.phy_encrypted = 1;
   putreg32(AAR_ENABLE_DISABLED, NRF52_AAR_ENABLE);
   putreg32(CCM_ENABLE_ENABLED, NRF52_CCM_ENABLE);
 }
@@ -1649,7 +1594,9 @@ void nrf52_ble_phy_encrypt_header_mask_set(FAR struct ble_ll_lower_s *lower,
 void nrf52_ble_phy_encrypt_iv_set(FAR struct ble_ll_lower_s *lower,
                                   FAR const uint8_t *iv)
 {
-  memcpy(g_nrf_ccm_data.iv, iv, 8);
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
+  memcpy(dev->ccm.iv, iv, 8);
 }
 
 /****************************************************************************
@@ -1659,8 +1606,10 @@ void nrf52_ble_phy_encrypt_iv_set(FAR struct ble_ll_lower_s *lower,
 void nrf52_ble_phy_encrypt_counter_set(FAR struct ble_ll_lower_s *lower,
                                        uint64_t counter, uint8_t dir_bit)
 {
-  g_nrf_ccm_data.pkt_counter = counter;
-  g_nrf_ccm_data.dir_bit     = dir_bit;
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
+  dev->ccm.pkt_counter = counter;
+  dev->ccm.dir_bit     = dir_bit;
 }
 
 /****************************************************************************
@@ -1669,12 +1618,14 @@ void nrf52_ble_phy_encrypt_counter_set(FAR struct ble_ll_lower_s *lower,
 
 void nrf52_ble_phy_encrypt_disable(FAR struct ble_ll_lower_s *lower)
 {
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
   nrf52_ble_ppi_disable(PPI_CHEN_CH(NRF52_BLE_PPI_CCM_CRYPT));
   putreg32(1, NRF52_CCM_TASKS_STOP);
   putreg32(0, NRF52_CCM_EVENTS_ERROR);
   putreg32(CCM_ENABLE_DISABLED, NRF52_CCM_ENABLE);
 
-  g_ble_phy_data.phy_encrypted = 0;
+  dev->phy.phy_encrypted = 0;
 }
 #endif
 
@@ -1685,8 +1636,10 @@ void nrf52_ble_phy_encrypt_disable(FAR struct ble_ll_lower_s *lower)
 void nrf52_ble_phy_set_txend_cb(FAR struct ble_ll_lower_s *lower,
                                 ble_phy_tx_end_func txend_cb, FAR void *arg)
 {
-  g_ble_phy_data.txend_cb  = txend_cb;
-  g_ble_phy_data.txend_arg = arg;
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
+  dev->phy.txend_cb  = txend_cb;
+  dev->phy.txend_arg = arg;
 }
 
 /****************************************************************************
@@ -1705,19 +1658,20 @@ void nrf52_ble_phy_set_txend_cb(FAR struct ble_ll_lower_s *lower,
 int nrf52_ble_phy_tx_set_start_time(FAR struct ble_ll_lower_s *lower,
                                     uint32_t cputime, uint8_t rem_usecs)
 {
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
   int rc;
 
 #ifdef CONFIG_BLE_LL_PHY
-  ble_phy_mode_apply(g_ble_phy_data.phy_tx_phy_mode);
+  ble_phy_mode_apply(dev, dev->phy.phy_tx_phy_mode);
 #endif
 
   /* Clear timer0 compare to RXEN since we are transmitting */
 
   nrf52_ble_ppi_disable(PPI_CHEN_CH(NRF52_BLE_PPI_TIMER0_RXEN));
 
-  if (ble_phy_set_start_time(cputime, rem_usecs, true) != 0)
+  if (ble_phy_set_start_time(dev, cputime, rem_usecs, true) != 0)
     {
-      NRF52_BLE_STATS_INC(tx_late);
+      NRF52_BLE_STATS_INC(dev, tx_late);
       nrf52_ble_phy_disable(lower);
       rc = BLE_PHY_ERR_TX_LATE;
     }
@@ -1744,24 +1698,25 @@ int nrf52_ble_phy_tx_set_start_time(FAR struct ble_ll_lower_s *lower,
 int nrf52_ble_phy_rx_set_start_time(FAR struct ble_ll_lower_s *lower,
                                     uint32_t cputime, uint8_t rem_usecs)
 {
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
   bool late = false;
   int rc;
 
 #ifdef CONFIG_BLE_LL_PHY
-  ble_phy_mode_apply(g_ble_phy_data.phy_rx_phy_mode);
+  ble_phy_mode_apply(dev, dev->phy.phy_rx_phy_mode);
 #endif
 
   /* Clear timer0 compare to TXEN since we are receiving */
 
   nrf52_ble_ppi_disable(PPI_CHEN_CH(NRF52_BLE_PPI_TIMER0_TXEN));
 
-  if (ble_phy_set_start_time(cputime, rem_usecs, false) != 0)
+  if (ble_phy_set_start_time(dev, cputime, rem_usecs, false) != 0)
     {
-      NRF52_BLE_STATS_INC(rx_late);
+      NRF52_BLE_STATS_INC(dev, rx_late);
 
       /* We're late so let's just try to start RX as soon as possible */
 
-      ble_phy_set_start_now();
+      ble_phy_set_start_now(dev);
       late = true;
     }
 
@@ -1769,7 +1724,7 @@ int nrf52_ble_phy_rx_set_start_time(FAR struct ble_ll_lower_s *lower,
 
   nrf52_ble_ppi_enable(PPI_CHEN_CH(NRF52_BLE_PPI_TIMER0_RXEN));
 
-  rc = ble_phy_rx();
+  rc = ble_phy_rx(dev);
 
   /* If we enabled the receiver but were late, return a proper error code
    * so the caller can handle this.
@@ -1791,6 +1746,7 @@ int nrf52_ble_phy_tx(FAR struct ble_ll_lower_s *lower,
                      ble_phy_tx_pducb_t pducb, FAR void *pducb_arg,
                      uint8_t end_trans)
 {
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
   FAR uint8_t *pktptr;
   FAR uint8_t *dptr;
   uint8_t payload_len;
@@ -1798,10 +1754,10 @@ int nrf52_ble_phy_tx(FAR struct ble_ll_lower_s *lower,
   uint32_t state;
   int rc;
 
-  if (g_ble_phy_data.phy_transition_late)
+  if (dev->phy.phy_transition_late)
     {
       nrf52_ble_phy_disable(lower);
-      NRF52_BLE_STATS_INC(tx_late);
+      NRF52_BLE_STATS_INC(dev, tx_late);
       return BLE_PHY_ERR_TX_LATE;
     }
 
@@ -1816,26 +1772,26 @@ int nrf52_ble_phy_tx(FAR struct ble_ll_lower_s *lower,
                         PPI_CHEN_CH(NRF52_BLE_PPI_CCM_CRYPT));
 
 #ifdef CONFIG_BLE_LL_CFG_FEAT_LE_ENCRYPTION
-  if (g_ble_phy_data.phy_encrypted)
+  if (dev->phy.phy_encrypted)
     {
-      dptr   = (FAR uint8_t *)&g_ble_phy_enc_buf[0];
-      pktptr = (FAR uint8_t *)&g_ble_phy_tx_buf[0];
+      dptr   = (FAR uint8_t *)&dev->enc_buf[0];
+      pktptr = (FAR uint8_t *)&dev->tx_buf[0];
       putreg32(CCM_SHORTS_ENDKSGEN_CRYPT, NRF52_CCM_SHORTS);
       putreg32((uint32_t)dptr, NRF52_CCM_INPTR);
       putreg32((uint32_t)pktptr, NRF52_CCM_OUTPTR);
-      putreg32((uint32_t)&g_nrf_encrypt_scratchpad[0], NRF52_CCM_SCRATCHPTR);
+      putreg32((uint32_t)&dev->enc_scratch[0], NRF52_CCM_SCRATCHPTR);
       putreg32(0, NRF52_CCM_EVENTS_ERROR);
-      putreg32(CCM_MODE_LENGTH_EXTENDED | ble_phy_get_ccm_datarate(),
+      putreg32(CCM_MODE_LENGTH_EXTENDED | ble_phy_get_ccm_datarate(dev),
                NRF52_CCM_MODE);
-      putreg32((uint32_t)&g_nrf_ccm_data, NRF52_CCM_CNFPTR);
+      putreg32((uint32_t)&dev->ccm, NRF52_CCM_CNFPTR);
     }
   else
 #endif
     {
 #ifdef CONFIG_BLE_LL_CFG_FEAT_LL_PRIVACY
-      putreg32((uint32_t)&g_nrf52_ble_irk_list[0], NRF52_AAR_IRKPTR);
+      putreg32((uint32_t)&dev->irk_list[0], NRF52_AAR_IRKPTR);
 #endif
-      dptr   = (FAR uint8_t *)&g_ble_phy_tx_buf[0];
+      dptr   = (FAR uint8_t *)&dev->tx_buf[0];
       pktptr = dptr;
     }
 
@@ -1852,7 +1808,7 @@ int nrf52_ble_phy_tx(FAR struct ble_ll_lower_s *lower,
 #ifdef CONFIG_BLE_LL_CFG_FEAT_LE_ENCRYPTION
   /* Start key-stream generation and encryption (via short) */
 
-  if (g_ble_phy_data.phy_encrypted)
+  if (dev->phy.phy_encrypted)
     {
       putreg32(1, NRF52_CCM_TASKS_KSGEN);
     }
@@ -1874,23 +1830,23 @@ int nrf52_ble_phy_tx(FAR struct ble_ll_lower_s *lower,
 
   /* Set the PHY transition and transmitted payload length */
 
-  g_ble_phy_data.phy_transition  = end_trans;
-  g_ble_phy_data.phy_tx_pyld_len = payload_len;
+  dev->phy.phy_transition  = end_trans;
+  dev->phy.phy_tx_pyld_len = payload_len;
 
   /* If we already started transmitting, abort it! */
 
   state = getreg32(NRF52_RADIO_STATE);
   if (state != RADIO_STATE_TX)
     {
-      g_ble_phy_data.phy_state = BLE_PHY_STATE_TX;
-      NRF52_BLE_STATS_INC(tx_good);
-      NRF52_BLE_STATS_INCN(tx_bytes, payload_len + BLE_LL_PDU_HDR_LEN);
+      dev->phy.phy_state = BLE_PHY_STATE_TX;
+      NRF52_BLE_STATS_INC(dev, tx_good);
+      NRF52_BLE_STATS_INCN(dev, tx_bytes, payload_len + BLE_LL_PDU_HDR_LEN);
       rc = 0;
     }
   else
     {
       nrf52_ble_phy_disable(lower);
-      NRF52_BLE_STATS_INC(tx_late);
+      NRF52_BLE_STATS_INC(dev, tx_late);
       rc = BLE_PHY_ERR_RADIO_STATE;
     }
 
@@ -1903,12 +1859,14 @@ int nrf52_ble_phy_tx(FAR struct ble_ll_lower_s *lower,
 
 int nrf52_ble_phy_tx_power_set(FAR struct ble_ll_lower_s *lower, int dbm)
 {
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
   /* Get actual TX power supported by radio */
 
   dbm = phy_txpower_round(dbm);
 
   putreg32((uint32_t)dbm & RADIO_TXPOWER_MASK, NRF52_RADIO_TXPOWER);
-  g_ble_phy_data.phy_txpwr_dbm = dbm;
+  dev->phy.phy_txpwr_dbm = dbm;
 
   return 0;
 }
@@ -1928,7 +1886,9 @@ int nrf52_ble_phy_tx_power_round(FAR struct ble_ll_lower_s *lower, int dbm)
 
 int nrf52_ble_phy_tx_power_get(FAR struct ble_ll_lower_s *lower)
 {
-  return g_ble_phy_data.phy_txpwr_dbm;
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
+  return dev->phy.phy_txpwr_dbm;
 }
 
 /****************************************************************************
@@ -1946,6 +1906,8 @@ int nrf52_ble_phy_tx_power_get(FAR struct ble_ll_lower_s *lower)
 int nrf52_ble_phy_setchan(FAR struct ble_ll_lower_s *lower, uint8_t chan,
                           uint32_t access_addr, uint32_t crcinit)
 {
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
   DEBUGASSERT(chan < BLE_PHY_NUM_CHANS);
 
   if (chan >= BLE_PHY_NUM_CHANS)
@@ -1955,7 +1917,7 @@ int nrf52_ble_phy_setchan(FAR struct ble_ll_lower_s *lower, uint8_t chan,
 
   /* Set current access address */
 
-  ble_phy_set_access_addr(access_addr);
+  ble_phy_set_access_addr(dev, access_addr);
 
   /* Configure crcinit */
 
@@ -1963,7 +1925,7 @@ int nrf52_ble_phy_setchan(FAR struct ble_ll_lower_s *lower, uint8_t chan,
 
   /* Set the frequency and the data whitening initial value */
 
-  g_ble_phy_data.phy_chan = chan;
+  dev->phy.phy_chan = chan;
   putreg32(g_ble_phy_chan_freq[chan], NRF52_RADIO_FREQUENCY);
   putreg32(chan, NRF52_RADIO_DATAWHITEIV);
 
@@ -1976,7 +1938,9 @@ int nrf52_ble_phy_setchan(FAR struct ble_ll_lower_s *lower, uint8_t chan,
 
 uint8_t nrf52_ble_phy_chan_get(FAR struct ble_ll_lower_s *lower)
 {
-  return g_ble_phy_data.phy_chan;
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
+  return dev->phy.phy_chan;
 }
 
 /****************************************************************************
@@ -1985,16 +1949,18 @@ uint8_t nrf52_ble_phy_chan_get(FAR struct ble_ll_lower_s *lower)
 
 void nrf52_ble_phy_restart_rx(FAR struct ble_ll_lower_s *lower)
 {
-  ble_phy_stop_usec_timer();
-  ble_phy_disable_irq_and_ppi();
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
 
-  ble_phy_set_start_now();
+  ble_phy_stop_usec_timer();
+  ble_phy_disable_irq_and_ppi(dev);
+
+  ble_phy_set_start_now(dev);
 
   /* Enable PPI to automatically start RXEN */
 
   nrf52_ble_ppi_enable(PPI_CHEN_CH(NRF52_BLE_PPI_TIMER0_RXEN));
 
-  ble_phy_rx();
+  ble_phy_rx(dev);
 }
 
 /****************************************************************************
@@ -2008,10 +1974,12 @@ void nrf52_ble_phy_restart_rx(FAR struct ble_ll_lower_s *lower)
 
 void nrf52_ble_phy_disable(FAR struct ble_ll_lower_s *lower)
 {
-  ble_phy_stop_usec_timer();
-  ble_phy_disable_irq_and_ppi();
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
 
-  g_ble_phy_data.phy_transition_late = 0;
+  ble_phy_stop_usec_timer();
+  ble_phy_disable_irq_and_ppi(dev);
+
+  dev->phy.phy_transition_late = 0;
 }
 
 /****************************************************************************
@@ -2020,7 +1988,9 @@ void nrf52_ble_phy_disable(FAR struct ble_ll_lower_s *lower)
 
 uint32_t nrf52_ble_phy_access_addr_get(FAR struct ble_ll_lower_s *lower)
 {
-  return g_ble_phy_data.phy_access_address;
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
+  return dev->phy.phy_access_address;
 }
 
 /****************************************************************************
@@ -2029,7 +1999,9 @@ uint32_t nrf52_ble_phy_access_addr_get(FAR struct ble_ll_lower_s *lower)
 
 int nrf52_ble_phy_state_get(FAR struct ble_ll_lower_s *lower)
 {
-  return g_ble_phy_data.phy_state;
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
+  return dev->phy.phy_state;
 }
 
 /****************************************************************************
@@ -2038,7 +2010,9 @@ int nrf52_ble_phy_state_get(FAR struct ble_ll_lower_s *lower)
 
 int nrf52_ble_phy_rx_started(FAR struct ble_ll_lower_s *lower)
 {
-  return g_ble_phy_data.phy_rx_started;
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
+  return dev->phy.phy_rx_started;
 }
 
 /****************************************************************************
@@ -2066,8 +2040,10 @@ uint8_t nrf52_ble_phy_max_data_pdu_pyld(FAR struct ble_ll_lower_s *lower)
 
 void nrf52_ble_phy_resolv_list_enable(FAR struct ble_ll_lower_s *lower)
 {
-  putreg32(g_nrf52_ble_num_irks, NRF52_AAR_NIRK);
-  g_ble_phy_data.phy_privacy = 1;
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
+  putreg32(dev->num_irks, NRF52_AAR_NIRK);
+  dev->phy.phy_privacy = 1;
 }
 
 /****************************************************************************
@@ -2076,7 +2052,9 @@ void nrf52_ble_phy_resolv_list_enable(FAR struct ble_ll_lower_s *lower)
 
 void nrf52_ble_phy_resolv_list_disable(FAR struct ble_ll_lower_s *lower)
 {
-  g_ble_phy_data.phy_privacy = 0;
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
+  dev->phy.phy_privacy = 0;
 }
 #endif
 
@@ -2105,6 +2083,8 @@ void nrf52_ble_phy_rfclk_disable(FAR struct ble_ll_lower_s *lower)
 void nrf52_ble_phy_tifs_txtx_set(FAR struct ble_ll_lower_s *lower,
                                  uint16_t usecs, uint8_t anchor)
 {
-  g_ble_phy_data.txtx_time_us     = usecs;
-  g_ble_phy_data.txtx_time_anchor = anchor;
+  FAR struct nrf52_ble_dev_s *dev = (FAR struct nrf52_ble_dev_s *)lower;
+
+  dev->phy.txtx_time_us     = usecs;
+  dev->phy.txtx_time_anchor = anchor;
 }

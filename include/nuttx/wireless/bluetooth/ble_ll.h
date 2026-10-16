@@ -200,34 +200,39 @@ typedef CODE uint8_t (*ble_phy_tx_pducb_t)(FAR uint8_t *dptr,
                                            FAR void *pducb_arg,
                                            FAR uint8_t *hdr_byte);
 
-/* Upper-half callbacks.  All are called from interrupt context. */
+/* Upper-half callbacks.  All are called from interrupt context.
+ * cb - Callbacks passed to bind()
+ */
 
 struct ble_ll_lowercb_s
 {
   /* A PDU reception started.  rxbuf contains the PDU header. */
 
-  CODE int (*rx_start)(FAR uint8_t *rxbuf, uint8_t chan,
+  CODE int (*rx_start)(FAR const struct ble_ll_lowercb_s *cb,
+                       FAR uint8_t *rxbuf, uint8_t chan,
                        FAR struct ble_mbuf_hdr *hdr);
 
   /* A PDU reception ended */
 
-  CODE int (*rx_end)(FAR uint8_t *rxbuf, FAR struct ble_mbuf_hdr *hdr);
+  CODE int (*rx_end)(FAR const struct ble_ll_lowercb_s *cb,
+                     FAR uint8_t *rxbuf, FAR struct ble_mbuf_hdr *hdr);
 
   /* Wait for response timer expired */
 
-  CODE void (*wfr_exp)(void);
+  CODE void (*wfr_exp)(FAR const struct ble_ll_lowercb_s *cb);
 
   /* Timer compare event */
 
-  CODE void (*tmr_exp)(void);
+  CODE void (*tmr_exp)(FAR const struct ble_ll_lowercb_s *cb);
 
   /* New random byte available */
 
-  CODE void (*rng_sample)(uint8_t rnum);
+  CODE void (*rng_sample)(FAR const struct ble_ll_lowercb_s *cb,
+                          uint8_t rnum);
 
   /* Current Link Layer state, stored in rxinfo.flags by the PHY */
 
-  CODE uint8_t (*state_get)(void);
+  CODE uint8_t (*state_get)(FAR const struct ble_ll_lowercb_s *cb);
 };
 
 /* Lower-half operations.  Optional operations are marked; NULL selects
@@ -376,13 +381,15 @@ extern "C"
  *
  * Input Parameters:
  *   lower - Radio lower half
+ *   devid - HCI device id (/dev/ttyHCI<devid> with CONFIG_UART_BTH4,
+ *           ignored for bt_netdev)
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int ble_ll_register(FAR struct ble_ll_lower_s *lower);
+int ble_ll_register(FAR struct ble_ll_lower_s *lower, int devid);
 
 /****************************************************************************
  * Name: ble_ll_pdu_syncword_us
