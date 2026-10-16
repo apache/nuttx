@@ -90,6 +90,20 @@ composite_cpuapp
 NuttShell configuration for the application core with support for CDC/ACM with
 RNDIS composite driver.
 
+ieee802154_6lowpan_cpunet
+-------------------------
+
+6LoWPAN over the IEEE 802.15.4 MAC on the network core (``wpan0``), with
+the ``udp`` and ``nettest`` examples. The application core must run a
+configuration that boots the network core, for example ``nsh_cpuapp``.
+
+ieee802154_mac_cpunet
+---------------------
+
+IEEE 802.15.4 MAC on the network core with the ``i8sak`` tool on
+``/dev/ieee0`` (console on J-Link VCOM1). The application core must run a
+configuration that boots the network core, for example ``nsh_cpuapp``.
+
 nsh_cpuapp
 ----------
 

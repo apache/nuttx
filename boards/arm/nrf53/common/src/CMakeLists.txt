@@ -26,6 +26,10 @@ if(CONFIG_ARCH_BOARD_COMMON)
     list(APPEND SRCS nrf53_timer.c)
   endif()
 
+  if(CONFIG_NRF53_RADIO_IEEE802154)
+    list(APPEND SRCS nrf53_ieee802154.c)
+  endif()
+
   if(CONFIG_BOARDCTL_BOOT_IMAGE)
     list(APPEND SRCS nrf53_boot_image.c)
   endif()

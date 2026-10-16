@@ -71,6 +71,10 @@
 #  include "nrf53_timer.h"
 #endif
 
+#ifdef CONFIG_NRF53_RADIO_IEEE802154
+#  include "nrf53_ieee802154.h"
+#endif
+
 #include "nrf5340-dk.h"
 
 /****************************************************************************
@@ -232,7 +236,8 @@ int nrf53_bringup(void)
 #endif
 #endif
 
-#if defined(CONFIG_TIMER) && defined(CONFIG_NRF53_TIMER0)
+#if defined(CONFIG_TIMER) && defined(CONFIG_NRF53_TIMER0) && \
+    !defined(CONFIG_NRF53_RADIO_IEEE802154)
   /* Configure TIMER driver */
 
   ret = nrf53_timer_driver_setup("/dev/timer0", NRF53_TIMER);
@@ -321,6 +326,15 @@ int nrf53_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: nrf53_netcore_bleinit failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_NRF53_RADIO_IEEE802154
+  ret = nrf53_ieee802154_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: IEEE 802.15.4 initialization failed: %d\n",
+             ret);
     }
 #endif
 
