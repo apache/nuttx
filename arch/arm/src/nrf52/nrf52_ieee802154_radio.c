@@ -330,7 +330,9 @@ static void nrf52_radioi8_rx_parse(struct nrf52_radioi8_dev_s *dev,
 
   if (smode != IEEE802154_ADDRMODE_NONE)
     {
-      if (!panid_comp)
+      /* PAN ID compression applies only when both addresses are present */
+
+      if (!panid_comp || dmode == IEEE802154_ADDRMODE_NONE)
         {
           i += IEEE802154_PANIDSIZE;
         }
@@ -448,6 +450,7 @@ static bool nrf52_radioi8_filter(struct nrf52_radioi8_dev_s *dev)
   struct ieee802154_addr_s  addr;
   uint8_t                  *rx = &dev->radio->rxbuf[1];
   uint16_t                 *fc = (uint16_t *)&rx[0];
+  int                       i;
 
   /* Promiscuous mode */
 
@@ -475,7 +478,14 @@ static bool nrf52_radioi8_filter(struct nrf52_radioi8_dev_s *dev)
     }
   else if (addr.mode == IEEE802154_ADDRMODE_EXTENDED)
     {
-      IEEE802154_EADDRCOPY(addr.eaddr, &rx[5]);
+      /* Sent least significant octet first, eaddr[0] is the most
+       * significant octet
+       */
+
+      for (i = 0; i < IEEE802154_EADDRSIZE; i++)
+        {
+          addr.eaddr[i] = rx[5 + IEEE802154_EADDRSIZE - 1 - i];
+        }
     }
 
   /* PAN ID match */
