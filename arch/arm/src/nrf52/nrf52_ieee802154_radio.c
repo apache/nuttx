@@ -29,8 +29,10 @@
 #include <nuttx/debug.h>
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/param.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/mm/iob.h>
 
