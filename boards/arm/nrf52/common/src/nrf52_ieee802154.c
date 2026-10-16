@@ -55,7 +55,7 @@ int nrf52_ieee802154_initialize(void)
   MACHANDLE                  mac;
   int                        ret;
 
-  /* Initialize and register the SPI MRF24J40 device */
+  /* Initialize and register the radio */
 
   radio = nrf52_radioi8_register(NULL);
   if (radio == NULL)
