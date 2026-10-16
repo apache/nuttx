@@ -144,6 +144,10 @@ config NRF52_HAVE_IEEE802154
 	bool
 	default n
 
+config NRF52_HAVE_BLELR
+	bool
+	default n
+
 # Peripheral Selection
 
 config NRF52_I2C_MASTER
