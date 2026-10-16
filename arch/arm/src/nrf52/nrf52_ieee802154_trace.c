@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -143,8 +144,8 @@ void nrf52_radioi8_trace_dump(void)
 
   for (i = 0; i < g_radio_trace_cntr; i += 1)
     {
-      printf("[%lu]: %s %lu\n\n",
-             g_radio_trace[i].time,
+      printf("[%" PRIu64 "]: %s %" PRIu32 "\n\n",
+             (uint64_t)g_radio_trace[i].time,
              g_radio_trace[i].str,
              g_radio_trace[i].arg);
     }
