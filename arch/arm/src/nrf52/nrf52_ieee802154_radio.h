@@ -42,7 +42,7 @@
 /* IEEE 802.15.4 constants */
 
 #define IEEE802154_MAX_FRAME_WAITTIME (16 + 32 + 4064)
-#define IEEE802154_MAX_CSMA_BACKOFFS  (1)
+#define IEEE802154_MAX_CSMA_BACKOFFS  (4)
 #define IEEE802154_MIN_BE             (3)
 #define IEEE802154_MAX_BE             (5)
 #define IEEE802154_CW0                (2)
