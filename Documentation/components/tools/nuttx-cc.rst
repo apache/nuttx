@@ -45,6 +45,9 @@ What the wrapper does
 - When it links, it adds ``startup/crt0.o``, ``scripts/gnu-elf.ld`` and, in a
   kernel build (``CONFIG_BUILD_KERNEL``), the user-space libraries of the
   package.
+- In a kernel build, the package also has an empty ``libpthread.a``,
+  ``librt.a`` and ``libdl.a``, so that ``-lpthread``, ``-lrt`` and ``-ldl``
+  link: libc has these functions.
 - In a kernel build, a link with an undefined symbol fails. A kernel-build
   program is a relocatable (``-r``) ELF, and a relocatable link does not
   report undefined symbols by itself. Without this check, every configure

@@ -594,6 +594,16 @@ if [ "${NUTTX_BUILD}" = "kernel" ]; then
     CCLIBS="${CCLIBS} m"
   fi
   CCLIBS="${CCLIBS} gcc"
+
+  # libc has the POSIX threads, real-time and dynamic loading functions.
+  # Empty libraries let programs link with -lpthread, -lrt and -ldl, as
+  # they do on other systems.
+
+  for lib in pthread rt dl; do
+    if [ ! -f "${EXPORTDIR}/libs/lib${lib}${LIBEXT}" ]; then
+      printf '!<arch>\n' >"${EXPORTDIR}/libs/lib${lib}${LIBEXT}"
+    fi
+  done
 fi
 
 CCLDSCRIPT=
