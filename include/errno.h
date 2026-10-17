@@ -45,25 +45,30 @@
  */
 
 #define errno *__errno()
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-#define set_errno(e) \
-  do \
-    { \
-      if (!up_interrupt_context()) \
-        { \
-          errno = (int)(e); \
-        } \
-    } \
-  while (0)
-#else
-#define set_errno(e) \
-  do \
-    { \
-      errno = (int)(e); \
-    } \
-  while (0)
-#endif
-#define get_errno() errno
+
+/* Not with NUTTX_NO_EXTENSIONS, see nuttx/compiler.h */
+
+#ifndef NUTTX_NO_EXTENSIONS
+#  if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#    define set_errno(e) \
+       do \
+         { \
+           if (!up_interrupt_context()) \
+             { \
+               errno = (int)(e); \
+             } \
+         } \
+       while (0)
+#  else
+#    define set_errno(e) \
+       do \
+         { \
+           errno = (int)(e); \
+         } \
+       while (0)
+#  endif
+#  define get_errno() errno
+#endif /* NUTTX_NO_EXTENSIONS */
 
 /* Definitions of error numbers and the string that would be
  * returned by strerror().

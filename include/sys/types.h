@@ -305,17 +305,21 @@ struct fsid_s
 
 typedef CODE int (*main_t)(int argc, FAR char *argv[]);
 
-/* POSIX-like OS return values: */
+/* POSIX-like OS return values (not with NUTTX_NO_EXTENSIONS, see
+ * nuttx/compiler.h):
+ */
 
-#ifdef OK
-#  undef OK
-#endif
+#ifndef NUTTX_NO_EXTENSIONS
+#  ifdef OK
+#    undef OK
+#  endif
 
 enum
 {
   ERROR = -1,
   OK = 0
 };
+#endif
 
 #ifndef __PTHREAD_ATTR_T_DEFINED
 struct pthread_attr_s;

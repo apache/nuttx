@@ -98,7 +98,9 @@ namespace std
   using ::free;
   using ::realloc;
   using ::memalign;
+#ifndef NUTTX_NO_EXTENSIONS
   using ::zalloc;
+#endif
   using ::calloc;
 
 #ifdef CONFIG_PSEUDOTERM
