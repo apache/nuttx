@@ -56,7 +56,7 @@
 
 #ifdef CONFIG_SCHED_CHILD_STATUS
 static inline void nxtask_exitstatus(FAR struct task_group_s *group,
-                                     pid_t pid, int status)
+                                     FAR struct tcb_s *ctcb, int status)
 {
   FAR struct child_status_s *child;
 
@@ -68,7 +68,7 @@ static inline void nxtask_exitstatus(FAR struct task_group_s *group,
     {
       /* No.. Find the exit status entry for this task in the parent TCB */
 
-      child = group_find_child(group, pid);
+      child = group_find_child(group, ctcb->pid);
       if (child)
         {
           /* Save the exit status..  For the case of HAVE_GROUP_MEMBERS,
@@ -77,6 +77,9 @@ static inline void nxtask_exitstatus(FAR struct task_group_s *group,
            */
 
           child->ch_status = status;
+#ifdef CONFIG_SCHED_USER_IDENTITY
+          child->ch_uid    = ctcb->group->tg_uid;
+#endif
         }
     }
 
@@ -84,7 +87,7 @@ static inline void nxtask_exitstatus(FAR struct task_group_s *group,
 }
 #else
 
-#  define nxtask_exitstatus(group,pid,status) (group)->tg_exitcode = (status);
+#  define nxtask_exitstatus(group,ctcb,status) (group)->tg_exitcode = (status);
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */
 
@@ -170,7 +173,7 @@ static inline void nxtask_sigchild(pid_t ppid, FAR struct tcb_s *ctcb,
   if ((ctcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
 #endif
     {
-      nxtask_exitstatus(pgrp, ctcb->pid, status);
+      nxtask_exitstatus(pgrp, ctcb, status);
     }
 
   /* But only the final exiting thread in a task group, whatever it is,
@@ -193,6 +196,11 @@ static inline void nxtask_sigchild(pid_t ppid, FAR struct tcb_s *ctcb,
       info.si_errno           = OK;
       info.si_value.sival_ptr = NULL;
       info.si_pid             = chgrp->tg_pid;
+#ifdef CONFIG_SCHED_USER_IDENTITY
+      info.si_uid             = chgrp->tg_uid;
+#else
+      info.si_uid             = 0;
+#endif
       info.si_status          = pgrp->tg_exitcode;
 
       /* Send the signal to one thread in the group */
@@ -220,7 +228,7 @@ static inline void nxtask_sigchild(FAR struct tcb_s *ptcb,
 #ifdef CONFIG_SCHED_CHILD_STATUS
       /* Save the exit status now of the main thread */
 
-      nxtask_exitstatus(ptcb->group, ctcb->pid, status);
+      nxtask_exitstatus(ptcb->group, ctcb, status);
 
 #else /* CONFIG_SCHED_CHILD_STATUS */
       /* Exit status is not retained.  Just decrement the number of
@@ -242,6 +250,11 @@ static inline void nxtask_sigchild(FAR struct tcb_s *ptcb,
       info.si_errno           = OK;
       info.si_value.sival_ptr = NULL;
       info.si_pid             = ctcb->group->tg_pid;
+#ifdef CONFIG_SCHED_USER_IDENTITY
+      info.si_uid             = ctcb->group->tg_uid;
+#else
+      info.si_uid             = 0;
+#endif
       info.si_status          = status;
 
       /* Send the signal.  We need to use this internal interface so that we

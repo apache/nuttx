@@ -122,6 +122,7 @@ void nxsig_wait_irq(FAR struct tcb_s *wtcb, uint8_t signo,
       wtcb->sigunbinfo->si_value.sival_int = 0;
 #  ifdef CONFIG_SCHED_HAVE_PARENT
       wtcb->sigunbinfo->si_pid             = 0;  /* Not applicable */
+      wtcb->sigunbinfo->si_uid             = 0;  /* Not applicable */
       wtcb->sigunbinfo->si_status          = OK;
 #  endif
     }

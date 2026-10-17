@@ -30,6 +30,7 @@
 #include <string.h>
 #include <signal.h>
 #include <assert.h>
+#include <unistd.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/signal.h>
@@ -179,6 +180,7 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
       info.si_errno  = OK;
 #ifdef CONFIG_SCHED_HAVE_PARENT
       info.si_pid    = this_task()->pid;
+      info.si_uid    = getuid();
       info.si_status = OK;
 #endif
       info.si_user   = NULL;

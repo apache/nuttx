@@ -366,6 +366,9 @@ struct child_status_s
   uint8_t ch_flags;                 /* Child status:  See CHILD_FLAG_* defines */
   pid_t   ch_pid;                   /* Child task ID                           */
   int     ch_status;                /* Child exit status                       */
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  uid_t   ch_uid;                   /* Child real user ID at exit              */
+#endif
 };
 #endif
 

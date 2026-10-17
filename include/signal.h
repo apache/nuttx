@@ -383,6 +383,7 @@ struct siginfo
   union sigval si_value;     /* Data passed with signal */
 #ifdef CONFIG_SCHED_HAVE_PARENT
   pid_t        si_pid;       /* Sending task ID */
+  uid_t        si_uid;       /* Real user ID of sending task */
   int          si_status;    /* Exit value or signal (SIGCHLD only). */
 #endif
 #if 0                        /* Not implemented */

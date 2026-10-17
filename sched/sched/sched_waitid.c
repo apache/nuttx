@@ -69,6 +69,11 @@ static void exited_child(FAR struct tcb_s *rtcb,
       info->si_errno           = OK;
       info->si_value.sival_ptr = NULL;
       info->si_pid             = child->ch_pid;
+#ifdef CONFIG_SCHED_USER_IDENTITY
+      info->si_uid             = child->ch_uid;
+#else
+      info->si_uid             = 0;
+#endif
       info->si_status          = child->ch_status;
     }
 
