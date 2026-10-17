@@ -41,7 +41,10 @@ porting guide and is prototyped in the header file ``include/sys/mount.h``:
   :param filesystemtype: A string identifying the type of file system to
      use.
   :param mountflags: Various flags that can be used to qualify how the
-     file system is mounted.
+     file system is mounted.  ``MS_RDONLY`` allows a block driver without
+     a write method.  With ``MS_NOEXEC``, ``stat()`` reports the regular
+     files of the mount without execute permission.  The other flags are
+     ignored.
   :param data: Opaque data that is passed to the file system with the
      mount occurs.
 
