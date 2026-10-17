@@ -249,6 +249,14 @@ if(CONFIG_BUILD_PIC)
   add_link_options(-Wl,--emit-relocs)
 endif()
 
+if(CONFIG_PIC)
+  # Reserve r9 across the base firmware so callbacks into module code arrive
+  # with the module's data base intact. ELF applications are excluded because
+  # they receive r9 via -mpic-register=r9.
+  add_compile_options(
+    $<$<NOT:$<BOOL:$<TARGET_PROPERTY:ELF_BINARY>>>:-ffixed-r9>)
+endif()
+
 add_compile_options(-Wno-attributes -Wno-unknown-pragmas
                     $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>)
 
