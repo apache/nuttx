@@ -24,6 +24,29 @@
 # and assembly source files and to insert the resulting object files into an
 # archive.  These replace the default definitions at tools/Config.mk
 
+# PREBUILD -- Perform pre build operations
+
+# Flash builds need the second stage bootloader (boot2) from the pico-sdk.
+# Without it the BOOTROM rejects the image and stays in BOOTSEL mode, so
+# stop before anything is compiled instead of producing an image that does
+# not boot.
+
+ifeq ($(CONFIG_RP2040_FLASH_BOOT),y)
+  BOOT2_FLASH_CHIP := $(patsubst "%",%,$(strip $(CONFIG_RP2040_FLASH_CHIP)))
+  BOOT2_SRC := $(PICO_SDK_PATH)/src/rp2040/boot_stage2/boot2_$(BOOT2_FLASH_CHIP).S
+  BOOT2_WHY := it is needed to build the boot2 stage, the image will not boot without it
+
+  ifeq ($(PICO_SDK_PATH),)
+    define PREBUILD
+      $(error "PICO_SDK_PATH is not set, $(BOOT2_WHY). Run: export PICO_SDK_PATH=<path to pico-sdk>")
+    endef
+  else ifeq ($(wildcard $(BOOT2_SRC)),)
+    define PREBUILD
+      $(error "$(BOOT2_SRC) not found. PICO_SDK_PATH must point to a pico-sdk checkout, $(BOOT2_WHY)")
+    endef
+  endif
+endif
+
 # POSTBUILD -- Perform post build operations
 
 PICOTOOL_FOUND := $(shell command -v picotool 2> /dev/null)

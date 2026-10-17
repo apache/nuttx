@@ -31,7 +31,7 @@ IRQs
 DMA
 Clock Output
 ws2812         Smart pixels (e.g. Neopixel)
-Flash ROM Boot
+Flash ROM Boot Requires the Pico SDK (``PICO_SDK_PATH``) to build the boot2 stage.
 SRAM Boot      If Pico SDK is available a nuttx.uf2 file will be created
 BMP180         Requires I2C0
 INA219         Requires I2C0
@@ -83,6 +83,12 @@ Installation
    .. code:: console
 
       $ export PICO_SDK_PATH=<absolute_path_to_pico-sdk_directory>
+
+   ``PICO_SDK_PATH`` is required for flash builds (``CONFIG_RP2040_FLASH_BOOT=y``,
+   the default): the second stage bootloader (boot2) at the start of flash is
+   built from the SDK sources, and an image without it does not boot. The build
+   stops with an error if ``PICO_SDK_PATH`` is not set or does not point to a
+   pico-sdk checkout. SRAM boot configurations do not need it.
 
    You will have to do this every time you restart the terminal where you are
    building NuttX, so it might be best to include this command in your
