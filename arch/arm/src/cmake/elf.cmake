@@ -84,7 +84,7 @@ elseif(CONFIG_PIC)
   # register".  This mirrors CELFFLAGS in common/Toolchain.defs, which filters
   # --fixed-r9 back out of the inherited CFLAGS for the same reason.
 
-  nuttx_elf_compile_options(-mpic-register=r9)
+  nuttx_elf_compile_options(${PICFLAGS} -mpic-register=r9)
 
   nuttx_elf_link_options(--unresolved-symbols=ignore-in-object-files
                          --emit-relocs)
