@@ -35,6 +35,13 @@ function(pico_define_boot_stage2 NAME path_chip)
   set(PICO_BOOT_STAGE2_DIR "${PICO_SDK_PATH}/src/rp2040/boot_stage2")
   set(BOOT2SRC "${PICO_BOOT_STAGE2_DIR}/boot2_${CONFIG_RP2040_FLASH_CHIP}.S")
 
+  if(NOT EXISTS ${BOOT2SRC})
+    message(
+      FATAL_ERROR
+        "${BOOT2SRC} not found. PICO_SDK_PATH must point to a pico-sdk checkout, it is needed to build the boot2 stage, the image will not boot without it."
+    )
+  endif()
+
   string(REPLACE "." "-" NUTTX_BOARD_NAME "${NUTTX_BOARD}")
 
   set(BOOT2CFLAGSLIST
