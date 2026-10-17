@@ -664,9 +664,13 @@ endef
 #            if it is not provided or is empty.
 # Example: $(call DOWNLOAD,$(FOO_URL_BASE),$(FOO_TARBALL),foo.out,foo-)
 
+DOWNLOAD_RETRY ?= 5
+DOWNLOAD_DELAY ?= 5
+DOWNLOAD_TIMEOUT ?= 30
+
 define DOWNLOAD
 	$(ECHO_BEGIN)"Downloading: $(if $3,$3,$2) "
-	$(Q) curl -L $(if $(V),,-Ss) $(1)/$(2) -o $(if $(3),$(3),$(2))
+	$(Q) curl -L $(if $(V),,-Ss) --connect-timeout $(DOWNLOAD_TIMEOUT) --retry $(DOWNLOAD_RETRY) --retry-delay $(DOWNLOAD_DELAY) $(1)/$(2) -o $(if $(3),$(3),$(2))
 	$(ECHO_END)
 endef
 
@@ -680,10 +684,20 @@ endef
 define CLONE
 	$(ECHO_BEGIN)"Clone: $(if $3,$3,$2) "
 	if [ -z $3 ]; then \
-		git clone --quiet $1 $2; \
+		for i in 1 2 3 4 5; do \
+			git clone --quiet $1 $2 && break; \
+			if [ $$i -eq 5 ]; then exit 1; fi; \
+			rm -rf $2; \
+			sleep 5; \
+		done; \
 	else \
 		if [ ! -d $3 ]; then \
-			git clone --quiet $1 $3; \
+			for i in 1 2 3 4 5; do \
+				git clone --quiet $1 $3 && break; \
+				if [ $$i -eq 5 ]; then exit 1; fi; \
+				rm -rf $3; \
+				sleep 5; \
+			done; \
 		fi; \
 		$(DIRLINK) $3 $2; \
 	fi
