@@ -28,8 +28,14 @@ The behavior of the ``ostest`` can be modified with the following settings in th
     configurable range, doing that configurable number of times. This value
     specifies the end of search range and together with number of runs allows to
     configure the length of this test – it should last at least a few tens of
-    seconds. Allowed values ``[1; 32767]``, default ``10000``.
+    seconds. Allowed values ``[1; 32767]``, default ``30000``.
 
 - ``CONFIG_TESTING_OSTEST_RR_RUNS`` – During round-robin scheduling test two
     threads are created. Each of the threads searches for prime numbers in the
-    configurable range, doing that configurable number of times.
+    configurable range, doing that configurable number of times. This value
+    specifies the number of runs. Allowed values ``[1; 32767]``, default
+    ``10``. A slow board can set this value and
+    ``CONFIG_TESTING_OSTEST_RR_RANGE`` lower in its defconfig. The test fails
+    if one thread finishes the first ``CONFIG_TESTING_OSTEST_RR_RUNS`` runs
+    before the other thread finishes one, for example when all its runs fit
+    in one time slice (``CONFIG_RR_INTERVAL``).
