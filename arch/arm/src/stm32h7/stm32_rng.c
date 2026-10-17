@@ -65,6 +65,7 @@ struct rng_dev_s
   char *rd_buf;
   size_t rd_buflen;
   uint32_t rd_lastval;
+  int rd_error;         /* Error reported by the interrupt handler */
   bool rd_first;
 };
 
@@ -157,10 +158,39 @@ static int stm32_rng_interrupt(int irq, void *context, void *arg)
 
   rngsr = getreg32(STM32_RNG_SR);
 
-  if ((rngsr & (RNG_SR_SEIS | RNG_SR_CEIS)) /* Check for error bits */
-      || !(rngsr & RNG_SR_DRDY))            /* Data ready must be set */
+  if (rngsr & (RNG_SR_SEIS | RNG_SR_CEIS))
     {
-      /* This random value is not valid, we will try again. */
+      /* The error interrupt flags are cleared by writing zero, otherwise
+       * the interrupt is asserted forever.
+       */
+
+      putreg32(rngsr & ~(RNG_SR_SEIS | RNG_SR_CEIS), STM32_RNG_SR);
+      stm32_rng_disable();
+
+      if (rngsr & RNG_SR_CEIS)
+        {
+          /* The RNG kernel clock is missing or too slow (e.g. HSI48 not
+           * enabled): abort the read.
+           */
+
+          g_rngdev.rd_error = -EIO;
+          nxsem_post(&g_rngdev.rd_readsem);
+        }
+      else
+        {
+          /* Seed error: restart the generator (RM0433 RNG error
+           * management).
+           */
+
+          stm32_rng_enable();
+        }
+
+      return OK;
+    }
+
+  if (!(rngsr & RNG_SR_DRDY))
+    {
+      /* Data ready must be set, we will try again. */
 
       return OK;
     }
@@ -244,6 +274,7 @@ static ssize_t stm32_rng_read(struct file *filep, char *buffer,
 
   g_rngdev.rd_buflen = buflen;
   g_rngdev.rd_buf = buffer;
+  g_rngdev.rd_error = 0;
 
   /* Enable RNG with interrupts */
 
@@ -252,6 +283,11 @@ static ssize_t stm32_rng_read(struct file *filep, char *buffer,
   /* Wait until the buffer is filled */
 
   ret = nxsem_wait(&g_rngdev.rd_readsem);
+  if (ret >= 0 && g_rngdev.rd_error < 0)
+    {
+      _err("ERROR: RNG clock error, check the RNG kernel clock\n");
+      ret = g_rngdev.rd_error;
+    }
 
   /* Free RNG for next use */
 
