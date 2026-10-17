@@ -714,7 +714,7 @@ static int smartfs_stat(const char *relpath, struct stat *buf)
     {
       if (level1.base.level < 3)
         {
-          buf->st_mode |= S_IFDIR;
+          buf->st_mode |= S_IFDIR | S_IXOTH | S_IXGRP | S_IXUSR;
         }
       else
         {
@@ -722,7 +722,7 @@ static int smartfs_stat(const char *relpath, struct stat *buf)
 
           if (g_direntry[level1.direntry].type == DTYPE_DIRECTORY)
             {
-              buf->st_mode |= S_IFDIR;
+              buf->st_mode |= S_IFDIR | S_IXOTH | S_IXGRP | S_IXUSR;
             }
           else
             {
