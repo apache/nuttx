@@ -130,6 +130,7 @@ static void map_spgtables(arch_addrenv_t *addrenv, uintptr_t vaddr)
   for (i = 0; i < (ARCH_SPGTS - 1); i++)
     {
       uintptr_t next = addrenv->spgtables[i + 1];
+
       mmu_ln_setentry(i, prev, next, vaddr, MMU_UPGT_FLAGS);
       prev = x86_64_pgvaddr(next);
     }
@@ -992,4 +993,59 @@ int up_addrenv_detach(struct tcb_s *tcb)
   /* There is nothing that needs to be done */
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: up_addrenv_user_vaddr
+ *
+ * Description:
+ *   Check if a virtual address is in user virtual address space.
+ *
+ ****************************************************************************/
+
+bool up_addrenv_user_vaddr(uintptr_t vaddr)
+{
+  return (vaddr >= ARCH_ADDRENV_VBASE && vaddr < ARCH_ADDRENV_VEND)
+#ifdef CONFIG_ARCH_VMA_MAPPING
+         || (vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr < ARCH_SHM_VEND)
+#endif
+         ;
+}
+
+/****************************************************************************
+ * Name: up_addrenv_va_to_pa
+ *
+ * Description:
+ *   Translate a virtual address through the active page tables; 0 when it
+ *   is not mapped.
+ *
+ ****************************************************************************/
+
+uintptr_t up_addrenv_va_to_pa(FAR void *va)
+{
+  uintptr_t vaddr   = (uintptr_t)va;
+  uintptr_t lnvaddr = x86_64_pgvaddr(get_pml4());
+  uintptr_t mask;
+  uintptr_t pte;
+  uint32_t  ptlevel;
+
+  for (ptlevel = 0; ptlevel < X86_MMU_PT_LEVELS && lnvaddr; ptlevel++)
+    {
+      pte = mmu_ln_getentry(ptlevel, lnvaddr, vaddr);
+      if ((pte & X86_PAGE_PRESENT) == 0)
+        {
+          break;
+        }
+
+      if (ptlevel == X86_MMU_PT_LEVELS - 1 ||
+          (ptlevel > 0 && (pte & X86_PAGE_HUGE) != 0))
+        {
+          mask = ((uintptr_t)1 << X86_MMU_VADDR_SHIFT(ptlevel)) - 1;
+          return (mmu_pte_to_paddr(pte) & ~mask) | (vaddr & mask);
+        }
+
+      lnvaddr = x86_64_pgvaddr(mmu_pte_to_paddr(pte));
+    }
+
+  return 0;
 }

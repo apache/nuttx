@@ -29,6 +29,8 @@
 #include <assert.h>
 #include <errno.h>
 #include <nuttx/debug.h>
+#include <signal.h>
+#include <unistd.h>
 
 #include <nuttx/addrenv.h>
 #include <nuttx/atomic.h>
@@ -414,6 +416,7 @@ int addrenv_select(FAR struct addrenv_s *addrenv,
                    FAR struct addrenv_s **oldenv)
 {
   FAR struct tcb_s *tcb = this_task();
+
   addrenv_take(addrenv);
   *oldenv = tcb->addrenv_curr;
   tcb->addrenv_curr = addrenv;
@@ -439,6 +442,7 @@ int addrenv_select(FAR struct addrenv_s *addrenv,
 int addrenv_restore(FAR struct addrenv_s *addrenv)
 {
   FAR struct tcb_s *tcb = this_task();
+
   addrenv_give(tcb->addrenv_curr);
   tcb->addrenv_curr = addrenv;
   return addrenv_switch(tcb);
@@ -541,3 +545,28 @@ void addrenv_drop(FAR struct addrenv_s *addrenv, bool deferred)
         }
     }
 }
+
+#ifdef CONFIG_BUILD_KERNEL
+bool uaccess_ok(FAR const void *ptr, size_t len)
+{
+  uintptr_t start = (uintptr_t)ptr;
+  uintptr_t end = start + len - 1;
+
+  return up_addrenv_user_vaddr(start) &&
+         (len == 0 || (end >= start && up_addrenv_user_vaddr(end)));
+}
+
+void uaccess_check(FAR const void *ptr, size_t len)
+{
+  if (!uaccess_ok(ptr, len))
+    {
+      uaccess_fault(ptr);
+    }
+}
+
+void uaccess_fault(FAR const void *ptr)
+{
+  _alert("%s: %p is not user memory\n", get_task_name(this_task()), ptr);
+  _exit(SIGSEGV);
+}
+#endif
