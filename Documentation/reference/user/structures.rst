@@ -137,10 +137,21 @@ The following types is used to pass parameters to/from signal handlers:
 
   typedef struct siginfo
   {
-   int          si_signo;
-   int          si_code;
+   uint8_t      si_signo;
+   uint8_t      si_code;
+   uint8_t      si_errno;
    union sigval si_value;
+  #ifdef CONFIG_SCHED_HAVE_PARENT
+   pid_t        si_pid;
+   uid_t        si_uid;
+   int          si_status;
+  #endif
+   void        *si_user;
   } siginfo_t;
+
+``si_pid`` and ``si_uid`` are the process ID and the real user ID of the
+sender. For ``SIGCHLD`` and ``waitid()``, they are those of the child.
+Without ``CONFIG_SCHED_USER_IDENTITY``, ``si_uid`` is always 0.
 
 .. c:union:: sigval
 
