@@ -1838,18 +1838,58 @@ static ssize_t inet_sendto(FAR struct socket *psock, FAR const void *buf,
 static ssize_t inet_sendmsg(FAR struct socket *psock,
                             FAR const struct msghdr *msg, int flags)
 {
-  FAR void *buf = msg->msg_iov->iov_base;
-  size_t len = msg->msg_iov->iov_len;
+  FAR void *buf;
+  size_t len;
   FAR const struct sockaddr *to = msg->msg_name;
   socklen_t tolen = msg->msg_namelen;
   FAR const struct iovec *iov;
   FAR const struct iovec *end;
   int ret;
 
+  if (msg->msg_iovlen == 0)
+    {
+      return -EINVAL;
+    }
+
+  buf = msg->msg_iov->iov_base;
+  len = msg->msg_iov->iov_len;
+
   if (msg->msg_iovlen == 1)
     {
       return to ? inet_sendto(psock, buf, len, flags, to, tolen) :
                   inet_send(psock, buf, len, flags);
+    }
+
+  /* If this is a connected stream socket (TCP), we can send each iov chunk
+   * sequentially without allocating a temporary memory buffer.
+   */
+
+  if (psock->s_type == SOCK_STREAM && to == NULL)
+    {
+      ssize_t total = 0;
+
+      end = &msg->msg_iov[msg->msg_iovlen];
+      for (iov = msg->msg_iov; iov != end; iov++)
+        {
+          if (iov->iov_len == 0 || iov->iov_base == NULL)
+            {
+              continue;
+            }
+
+          ret = inet_send(psock, iov->iov_base, iov->iov_len, flags);
+          if (ret < 0)
+            {
+              return total > 0 ? total : ret;
+            }
+
+          total += ret;
+          if (ret < iov->iov_len)
+            {
+              break;
+            }
+        }
+
+      return total;
     }
 
   end = &msg->msg_iov[msg->msg_iovlen];
@@ -2165,6 +2205,11 @@ static ssize_t inet_recvmsg(FAR struct socket *psock,
                             FAR struct msghdr *msg, int flags)
 {
   ssize_t ret;
+
+  if (msg->msg_iovlen == 0)
+    {
+      return -EINVAL;
+    }
 
   /* If a 'from' address has been provided, verify that it is large
    * enough to hold this address family.
