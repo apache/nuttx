@@ -67,7 +67,7 @@ MEMORY
   ROM (RX) :             org = ORIGIN(metadata) + LENGTH(metadata),
                          len = FLASH_SIZE - ORIGIN(ROM)
 
-#elif defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
+#else
   /* The 0x20 offset is a convenience for the app binary image generation.
    * Flash cache has 64KB pages. The .bin file which is flashed to the chip
    * has a 0x18 byte file header, and each segment has a 0x08 byte segment
