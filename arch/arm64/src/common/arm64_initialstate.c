@@ -105,6 +105,10 @@ void arm64_new_task(struct tcb_s * tcb)
 #endif
   xcp->regs[REG_EXE_DEPTH] = 0;
 
+  /* TPIDR_EL0 points to the TLS info of the thread, see up_tls_info() */
+
+  xcp->regs[REG_TPIDR_EL0] = (uint64_t)tcb->stack_alloc_ptr;
+
 #ifndef CONFIG_BUILD_FLAT
   tcb->xcp.initregs        = tcb->xcp.regs;
 #endif
@@ -153,6 +157,7 @@ void up_initial_state(struct tcb_s *tcb)
        */
 
       write_sysreg(0, tpidrro_el0);
+      write_sysreg(tcb->stack_alloc_ptr, tpidr_el0);
 
 #ifdef CONFIG_STACK_COLORATION
 

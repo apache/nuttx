@@ -28,6 +28,9 @@ endif
 
 ifneq ($(CONFIG_TLS_NELEM),0)
 CSRCS += tls_destruct.c
+ifneq ($(CONFIG_DISABLE_PTHREAD),y)
+CSRCS += tls_emutls.c
+endif
 endif
 
 ifneq ($(CONFIG_TLS_NCLEANUP),0)

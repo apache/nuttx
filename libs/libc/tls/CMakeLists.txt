@@ -28,6 +28,9 @@ endif()
 
 if(NOT CONFIG_TLS_NELEM EQUAL 0)
   list(APPEND SRCS tls_destruct.c)
+  if(NOT CONFIG_DISABLE_PTHREAD)
+    list(APPEND SRCS tls_emutls.c)
+  endif()
 endif()
 
 if(NOT CONFIG_TLS_NCLEANUP EQUAL 0)

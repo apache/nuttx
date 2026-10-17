@@ -43,3 +43,5 @@ To confirm that your compiler supports TLS, you can try this command:
 Then you can see ``--disable-tls`` in the output, which means that your compiler does not support TLS.
 
 In this case, you can still use the thread local relative keyword, but it would be implemented by libgcc's emutls.
+
+NuttX's libc provides ``__emutls_get_address()`` itself when pthreads are enabled (and ``CONFIG_TLS_NELEM`` is not 0). A libgcc built with the single thread model (``Thread model: single`` above) keeps one copy of each variable for the whole program; with the libc version, each thread gets its own copy, made on the first use and freed when the thread exits.
