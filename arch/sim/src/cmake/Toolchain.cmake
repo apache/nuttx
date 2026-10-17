@@ -279,4 +279,7 @@ endif()
 
 if(SIM_HOST_LINUX)
   add_link_options(-Wl,-z,noexecstack)
+  # Resolve PLT entries at load time so early host calls made with simulated
+  # interrupts masked do not fault inside the lazy binder.
+  add_link_options(-Wl,-z,now)
 endif()
