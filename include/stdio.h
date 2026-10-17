@@ -101,6 +101,10 @@
 
 #define L_tmpnam   CONFIG_LIBC_MAX_TMPFILE
 
+/* Size of character array to hold ctermid() output: "/dev/console" */
+
+#define L_ctermid  13
+
 /* The maximum number of unique temporary file names that can be generated */
 
 #define TMP_MAX 308915776
@@ -366,6 +370,10 @@ FAR FILE *tmpfile(void) fopen_like;
 FAR char *tmpnam(FAR char *s);
 FAR char *tempnam(FAR const char *dir, FAR const char *pfx) malloc_like;
 int       remove(FAR const char *path);
+
+/* Controlling terminal */
+
+FAR char *ctermid(FAR char *s);
 
 /* Shell operations.  These are not actually implemented in the OS.  See
  * apps/system/popen for implementation.

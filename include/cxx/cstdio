@@ -95,6 +95,10 @@ namespace std
   using ::tmpnam;
   using ::tempnam;
   using ::remove;
+
+  // Controlling terminal
+
+  using ::ctermid;
 }
 
 #endif // __INCLUDE_CXX_CSTDIO

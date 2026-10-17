@@ -47,7 +47,8 @@ set(SRCS
     lib_tempnam.c
     lib_tmpnam.c
     lib_renameat.c
-    lib_putwchar.c)
+    lib_putwchar.c
+    lib_ctermid.c)
 
 # The remaining sources files depend upon C streams
 

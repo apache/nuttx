@@ -29,7 +29,7 @@ CSRCS += lib_vsnprintf.c lib_dprintf.c lib_vdprintf.c lib_vprintf.c
 CSRCS += lib_perror.c lib_putchar.c lib_getchar.c lib_puts.c
 CSRCS += lib_gets_s.c lib_gets.c lib_libdgets.c lib_sscanf.c
 CSRCS += lib_vsscanf.c lib_remove.c lib_tempnam.c lib_tmpnam.c
-CSRCS += lib_renameat.c lib_putwchar.c
+CSRCS += lib_renameat.c lib_putwchar.c lib_ctermid.c
 
 # The remaining sources files depend upon C streams
 
