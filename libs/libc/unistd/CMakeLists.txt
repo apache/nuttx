@@ -22,6 +22,7 @@
 
 set(SRCS
     lib_access.c
+    lib_copy_file_range.c
     lib_daemon.c
     lib_swab.c
     lib_pathconf.c
