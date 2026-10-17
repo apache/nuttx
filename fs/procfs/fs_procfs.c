@@ -1147,7 +1147,8 @@ static int procfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
        * It's a read-only directory.
        */
 
-      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
+      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR |
+                     S_IXOTH | S_IXGRP | S_IXUSR;
       ret = OK;
     }
   else
@@ -1179,7 +1180,8 @@ static int procfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
             {
               /* It's an internal subdirectory */
 
-              buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
+              buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR |
+                             S_IXOTH | S_IXGRP | S_IXUSR;
               ret = OK;
               break;
             }
