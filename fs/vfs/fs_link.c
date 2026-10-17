@@ -30,6 +30,7 @@
 #include <sys/stat.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <limits.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -106,7 +107,7 @@ int link(FAR const char *path1, FAR const char *path2)
       goto errout_with_search_path1;
     }
 
-  if (INODE_GET_NLINK(target) >= _POSIX_LINK_MAX)
+  if (INODE_GET_NLINK(target) >= LINK_MAX)
     {
       /* Too many links to the target inode */
 
