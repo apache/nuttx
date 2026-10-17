@@ -394,7 +394,7 @@ create a new file of the specified size filled with zero::
   nsh> dd if=/dev/zero of=/tmp/zeros bs=64 count=16
   nsh> ls -l /tmp
   /tmp:
-   -rw-rw-rw-    1024 ZEROS
+   -rwxrwxrwx    1024 ZEROS
 
 Read from character device, write to block device. This will fill
 the entire block device with zeros::
@@ -1046,7 +1046,7 @@ on the loop-mounted file::
   nsh> dd if=/dev/zero of=/tmp/image bs=512 count=512
   nsh> ls -l /tmp
   /tmp:
-   -rw-rw-rw-   262144 IMAGE
+   -rwxrwxrwx   262144 IMAGE
   nsh> losetup /dev/loop0 /tmp/image
   nsh> ls -l /dev
   /dev:
@@ -1056,11 +1056,11 @@ on the loop-mounted file::
   nsh> ls -l /mnt
   ls -l /mnt
   /mnt:
-   drw-rw-rw-       0 example/
+   drwxrwxrwx       0 example/
   nsh> echo "This is a test" >/mnt/example/atest.txt
   nsh> ls -l /mnt/example
   /mnt/example:
-   -rw-rw-rw-      16 ATEST.TXT
+   -rwxrwxrwx      16 ATEST.TXT
   nsh> cat /mnt/example/atest.txt
   This is a test
   nsh>
@@ -1249,8 +1249,8 @@ directories in the *pseudo* file system.
   nsh> mkdir /mnt/fs/tmp
   nsh> ls -l /mnt/fs
   /mnt/fs:
-   drw-rw-rw-       0 TESTDIR/
-   drw-rw-rw-       0 TMP/
+   drwxrwxrwx       0 TESTDIR/
+   drwxrwxrwx       0 TMP/
   nsh>
 
 .. _cmdmkfatfs:
@@ -1426,12 +1426,12 @@ Using ``mount`` to mount a file system::
   nsh> mount -t vfat /dev/ram0 /mnt/fs
   nsh> ls -l /mnt/fs/testdir
   /mnt/fs/testdir:
-   -rw-rw-rw-      15 TESTFILE.TXT
+   -rwxrwxrwx      15 TESTFILE.TXT
   nsh> echo "This is a test" >/mnt/fs/testdir/example.txt
   nsh> ls -l /mnt/fs/testdir
   /mnt/fs/testdir:
-  -rw-rw-rw-      15 TESTFILE.TXT
-   -rw-rw-rw-      16 EXAMPLE.TXT
+  -rwxrwxrwx      15 TESTFILE.TXT
+   -rwxrwxrwx      16 EXAMPLE.TXT
   nsh> cat /mnt/fs/testdir/example.txt
   This is a test
   nsh>
@@ -1644,12 +1644,12 @@ file system.
   nsh> mkdir /mnt/fs/tmp
   nsh> ls -l /mnt/fs
   /mnt/fs:
-   drw-rw-rw-       0 TESTDIR/
-   drw-rw-rw-       0 TMP/
+   drwxrwxrwx       0 TESTDIR/
+   drwxrwxrwx       0 TMP/
   nsh> rmdir /mnt/fs/tmp
   nsh> ls -l /mnt/fs
   /mnt/fs:
-   drw-rw-rw-       0 TESTDIR/
+   drwxrwxrwx       0 TESTDIR/
   nsh>
 
 .. _cmdrmmod:
