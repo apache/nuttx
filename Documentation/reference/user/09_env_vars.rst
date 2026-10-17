@@ -41,6 +41,40 @@ All support for environment
 variables can be disabled by setting ``CONFIG_DISABLE_ENVIRON`` in the
 board configuration file.
 
+The ``environ`` Variable
+========================
+
+``environ`` points to the environment of the calling task group: an array
+of ``name=value`` strings that ends with a ``NULL`` pointer. Each task
+group has its own environment, so ``<stdlib.h>`` defines ``environ`` as a
+macro, ``(*get_environ_ptr())``. NuttX has no ``environ`` symbol: include
+``<stdlib.h>`` to use ``environ``. A program can read the array, change an
+entry in place, or assign its own array to ``environ``. The functions
+below then work on that array. With ``CONFIG_DISABLE_ENVIRON``,
+``environ`` is ``NULL``.
+
+An ELF program can also get the environment as the third argument of
+``main()``:
+
+.. code-block:: c
+
+  int main(int argc, FAR char *argv[], FAR char *envp[]);
+
+The ``crt0`` of NuttX passes ``environ`` there on arm, arm64, risc-v,
+x86_64 and xtensa (``NULL`` with ``CONFIG_DISABLE_ENVIRON``). A program
+that is not started through ``crt0``, for example a builtin application,
+gets only ``argc`` and ``argv``.
+
+The environment functions are in the C library, not system calls. Each
+environment is in the heap that holds the task information of its task
+group: the user heap for a user task, the kernel heap for a kernel thread.
+
+The C library frees no environment string that it allocated until the
+task group exits. So a pointer that :c:func:`getenv` returned stays valid
+after :c:func:`setenv`, :c:func:`putenv`, :c:func:`unsetenv` or
+:c:func:`clearenv` changes the environment. A program that sets one
+variable many times keeps the old values until it exits.
+
 Functions
 =========
 

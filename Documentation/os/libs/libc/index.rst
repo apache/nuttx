@@ -33,6 +33,7 @@ functions.  So we have::
   builtin   - Support for builtin applications.  Used by nuttx/binfmt and NSH.
   dlfcn     - dlfcn.h
   endian    - endian.h
+  environ   - Environment variables: getenv(), setenv() and others (stdlib.h)
   errno     - errno.h
   hex2bin   - hex2bin.h
   libgen    - libgen.h
