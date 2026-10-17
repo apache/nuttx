@@ -949,6 +949,7 @@ static int procfs_readdir(FAR struct inode *mountpt,
 
           pid_t pid = level0->pid[index];
           FAR struct tcb_s *tcb = nxsched_get_tcb(pid);
+
           if (!tcb)
             {
               ferr("ERROR: PID %d is no longer valid\n", pid);
