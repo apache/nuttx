@@ -56,6 +56,10 @@
 
 void stm32_spidev_initialize(void)
 {
+#ifdef CONFIG_STM32_SPI1
+  stm32_configgpio(GPIO_HALOW_CS);  /* HaLow module chip select */
+#endif
+
 #ifdef CONFIG_LCD_ST7735
   stm32_configgpio(GPIO_LCD_CS);    /* ST7735 chip select */
 #endif
@@ -86,6 +90,25 @@ void stm32_spidev_initialize(void)
  *      the SPI MMC/SD driver).
  *
  ****************************************************************************/
+
+#ifdef CONFIG_STM32_SPI1
+void stm32_spi1select(struct spi_dev_s *dev,
+                      uint32_t devid, bool selected)
+{
+  spiinfo("devid: %d CS: %s\n",
+          (int)devid, selected ? "assert" : "de-assert");
+
+  if (devid == SPIDEV_WIRELESS(0))
+    {
+      stm32_gpiowrite(GPIO_HALOW_CS, !selected);
+    }
+}
+
+uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid)
+{
+  return 0;
+}
+#endif
 
 #ifdef CONFIG_STM32_SPI4
 void stm32_spi4select(struct spi_dev_s *dev,

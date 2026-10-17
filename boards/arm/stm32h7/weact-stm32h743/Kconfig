@@ -5,4 +5,16 @@
 
 if ARCH_BOARD_WEACT_STM32H743
 
+config WEACT_STM32H743_HALOW_POWERSAVE
+	bool "HaLow module WAKE and BUSY lines connected"
+	default n
+	depends on IEEE80211_MORSE
+	---help---
+		Select this if the WAKE (PA3) and BUSY (PA0) lines of the Morse
+		Micro HaLow module are connected, which enables the chip power
+		save.  On the Seeed Studio XIAO Wi-Fi HaLow module (Quectel
+		FGH100M-H) these signals are not connected by default (the series
+		resistors are not populated), in which case the chip is kept
+		always awake.
+
 endif # ARCH_BOARD_WEACT_STM32H743

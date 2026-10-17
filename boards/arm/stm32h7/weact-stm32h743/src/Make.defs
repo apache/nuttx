@@ -36,6 +36,10 @@ ifeq ($(CONFIG_STM32_SDMMC),y)
 CSRCS += stm32_sdmmc.c
 endif
 
+ifeq ($(CONFIG_IEEE80211_MORSE),y)
+CSRCS += stm32_morse.c
+endif
+
 ifeq ($(CONFIG_FAT_DMAMEMORY),y)
 CSRCS += stm32_dma_alloc.c
 endif

@@ -126,6 +126,26 @@
 #define GPIO_LCD_LED     (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
                           GPIO_OUTPUT_CLEAR | GPIO_PORTE | GPIO_PIN10)
 
+/* Morse Micro HaLow module (Quectel FGH100M) on SPI1
+ *
+ *   PA4 - CS       GPIO output, idle high
+ *   PA2 - RESET_N  GPIO output, held low (in reset) at boot
+ *   PA3 - WAKE     GPIO output, active high
+ *   PA1 - SPI_IRQ  GPIO input, active low, EXTI1
+ *   PA0 - BUSY     GPIO input, active high, EXTI0
+ */
+
+#define GPIO_HALOW_CS    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_100MHz | \
+                          GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN4)
+#define GPIO_HALOW_RESET (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                          GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN2)
+#define GPIO_HALOW_WAKE  (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                          GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN3)
+#define GPIO_HALOW_IRQ   (GPIO_INPUT | GPIO_PULLUP | GPIO_EXTI | \
+                          GPIO_PORTA | GPIO_PIN1)
+#define GPIO_HALOW_BUSY  (GPIO_INPUT | GPIO_PULLDOWN | GPIO_EXTI | \
+                          GPIO_PORTA | GPIO_PIN0)
+
 /* SD Card
  *
  * PD4  Card detected pin
@@ -171,6 +191,10 @@ void weak_function stm32_spidev_initialize(void);
  ****************************************************************************/
 
 int stm32_bringup(void);
+
+#ifdef CONFIG_IEEE80211_MORSE
+int stm32_morse_initialize(void);
+#endif
 
 /****************************************************************************
  * Name: stm32_dma_alloc_init
