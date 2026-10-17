@@ -289,7 +289,7 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
 
       /* do not pass frames with DLC > 8 to a legacy socket */
 #if defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)
-      if (!_SO_GETOPT(conn->sconn.s_options, CAN_RAW_FD_FRAMES))
+      if (!_SO_GETOPT(conn->raw_options, CAN_RAW_FD_FRAMES))
 #endif
         {
           if (recvlen > sizeof(struct can_frame))
@@ -321,7 +321,7 @@ static uint32_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
         {
           /* do not pass frames with DLC > 8 to a legacy socket */
 #if defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)
-          if (!_SO_GETOPT(conn->sconn.s_options, CAN_RAW_FD_FRAMES))
+          if (!_SO_GETOPT(conn->raw_options, CAN_RAW_FD_FRAMES))
 #endif
             {
               if (dev->d_len > sizeof(struct can_frame))

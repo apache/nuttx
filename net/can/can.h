@@ -129,6 +129,7 @@ struct can_conn_s
 #ifdef CONFIG_NET_CANPROTO_OPTIONS
   struct can_filter filters[CONFIG_NET_CAN_RAW_FILTER_MAX];
   int32_t filter_count;
+  sockopt_t raw_options;             /* CAN_RAW_* boolean options */
 #  ifdef CONFIG_NET_CAN_ERRORS
   can_err_mask_t err_mask;
 #  endif
