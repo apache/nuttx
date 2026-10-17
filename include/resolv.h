@@ -29,6 +29,8 @@
 
 #include <stddef.h>
 
+#include <arpa/nameser.h>
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -51,6 +53,22 @@ int dn_comp(FAR const char *src, FAR unsigned char *dst, int space,
 
 int dn_expand(FAR const unsigned char *base, FAR const unsigned char *end,
               FAR const unsigned char *src, FAR char *dest, int space);
+
+/* DNS queries */
+
+int res_mkquery(int op, FAR const char *dname, int rclass, int type,
+                FAR const unsigned char *data, int datalen,
+                FAR const unsigned char *newrr,
+                FAR unsigned char *buf, int buflen);
+
+int res_send(FAR const unsigned char *msg, int msglen,
+             FAR unsigned char *answer, int anslen);
+
+int res_query(FAR const char *dname, int rclass, int type,
+              FAR unsigned char *answer, int anslen);
+
+int res_search(FAR const char *dname, int rclass, int type,
+               FAR unsigned char *answer, int anslen);
 
 #if defined(__cplusplus)
 }
