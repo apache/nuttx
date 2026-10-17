@@ -724,8 +724,12 @@ int up_relocateadd(const Elf64_Rela *rel, const Elf64_Sym *sym,
                 }
               else
                 {
-                  berr("Out of range for ADR\n");
-                  return -EINVAL;
+                  /* The erratum 843419 workaround needs the target within
+                   * 1 MB.  Otherwise keep the ADRP: it reaches 4 GB.
+                   */
+
+                  ret = reloc_insn_imm(RELOC_OP_PAGE, addr, val, 12, 21,
+                                       INSN_IMM_ADR);
                 }
             }
         }
