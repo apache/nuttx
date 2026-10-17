@@ -165,19 +165,38 @@ code comments. Some are quite vulgar.
 Optimizations
 ^^^^^^^^^^^^^
 
-DOOM uses 32-bit wide, signed fixed-point numbers for calculations. This should
-be entirely compatible with the NuttX fixed-point library. However, in my
-attempt to switch to the NuttX-native library, the textures began to render
-strangely and I experienced periodic crashes. This would be one good
-optimization.
+Optimizations for NXDoom can be found under the "Optimizations" sub-menu. This
+can be tuned depending on the system you are running on and what features you'd
+like to maintain.
 
-Another useful optimization would be to eliminate the lookup tables used for
-sine, cosine and tangent. These make the game logic fast, but they also take up
-the most amount of memory in the binary. Removing them could save several
-hundred KB. CPUs have come a long way since DOOM was written and the compute hit
-might be worth it for the memory reduction on embedded.
+Optimizations can also be made for the WAD file being used. A smaller WAD file
+is easier to get on your target device (if it does not have some kind of bulk
+media, for instance) and will also use less RAM. The ``DOOM1.wad`` has a
+**squashware edition** which reduces its size significantly (and even more
+reductions can be had if you include only 1 level or disable sound). You can
+find the squashware version in `this repository by 'fragglet'
+<https://github.com/fragglet/squashware>`_.
 
-Another good optimization would be to examine the use of 32-bit natural ``int``
-variables and decided if smaller sizes could be used. I imagine this was
-originally done for the native word-size optimizations on the computers of the
-era, but it results in extra memory use on large internal arrays especially.
+.. todo::
+
+   DOOM uses 32-bit wide, signed fixed-point numbers for calculations. This
+   should be entirely compatible with the NuttX fixed-point library. However, in
+   my attempt to switch to the NuttX-native library, the textures began to
+   render strangely and I experienced periodic crashes. This would be one good
+   optimization.
+
+.. todo::
+
+   Another useful optimization would be to eliminate the lookup tables used for
+   sine, cosine and tangent. These make the game logic fast, but they also take
+   up the most amount of memory in the binary. Removing them could save several
+   hundred KB. CPUs have come a long way since DOOM was written and the compute
+   hit might be worth it for the memory reduction on embedded.
+
+.. todo::
+
+   Another good optimization would be to examine the use of 32-bit natural
+   ``int`` variables and decided if smaller sizes could be used. I imagine this
+   was originally done for the native word-size optimizations on the computers
+   of the era, but it results in extra memory use on large internal arrays
+   especially.
