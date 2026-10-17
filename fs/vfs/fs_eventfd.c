@@ -32,6 +32,7 @@
 #include <fcntl.h>
 
 #include <nuttx/debug.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/mutex.h>
 #include <sys/ioctl.h>
 #include <sys/eventfd.h>

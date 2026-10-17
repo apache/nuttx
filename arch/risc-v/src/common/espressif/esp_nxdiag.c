@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <nuttx/drivers/drivers.h>
+#include <nuttx/fs/fs.h>
 #include <syslog.h>
 
 #include "bootloader_flash.h"

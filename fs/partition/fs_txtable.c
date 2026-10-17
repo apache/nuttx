@@ -29,6 +29,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/macro.h>
 

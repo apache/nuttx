@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/sensors/wtgahrs2.h>
 #include <nuttx/kthread.h>
 #include <nuttx/kmalloc.h>
