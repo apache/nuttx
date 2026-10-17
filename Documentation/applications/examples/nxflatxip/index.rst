@@ -61,16 +61,14 @@ Building the module
 ===================
 
 The module is built from ``module/xipmod.c`` at build time, exactly the way
-:doc:`../nxflat/index` builds its test programs, so it needs the same host
-tools: ``mknxflat``, which NuttX builds itself, and ``ldnxflat``, which has
-to come from the buildroot toolchain.  See :doc:`/os/binfmt/nxflat`.
+:doc:`../nxflat/index` builds its test programs, with the host tools
+``mknxflat`` and ``ldnxflat`` that NuttX builds itself.  See
+:doc:`/os/binfmt/nxflat`.
 
-The module has no static data and no string constants, and reports through a
-callback into the firmware rather than formatting its own output. The comment
-at the top of ``module/xipmod.c`` records why: the ``ldnxflat`` in
-circulation miscomputes both of those cases. The callback also exercises the
-other direction of the interface, firmware code entered with the module's
-data base still live in its PIC register.
+The module reports through a callback into the firmware rather than
+formatting its own output. The callback exercises the other direction of
+the interface: firmware code entered with the module's data base still live
+in its PIC register.
 
 Configuration
 =============
