@@ -629,13 +629,10 @@ Functions
     ``argv[]`` is an array of pointers to null-terminated strings. The
     list is terminated with a null pointer.
 
-  :param envp: The ``envp[]`` argument is not used by NuttX and may be
-    ``NULL``. In standard implementations, ``envp[]`` is an array of
-    character pointers to null-terminated strings that provide the
-    environment for the new process image. The environment array is
-    terminated by a null pointer. In NuttX, the ``envp[]`` argument is
-    ignored and the new task will inherit the environment of the parent
-    task unconditionally.
+  :param envp: ``envp[]`` is an array of pointers to null-terminated
+    ``name=value`` strings that is the environment of the new task. The
+    array is terminated by a null pointer. If ``envp`` is ``NULL``, the new
+    task gets a copy of the environment of the caller (``environ``).
 
   :return: Zero on success. Otherwise, an error number will be returned as the
     function return value to indicate the error:
@@ -652,8 +649,6 @@ Functions
      ``CONFIG_LIBC_ENVPATH`` is defined, then only ``posix_spawnp()``
      behavior is supported; otherwise, only ``posix_spawn()`` behavior is
      supported.
-  -  The ``envp`` argument is not used and the ``environ`` variable is not
-     altered (NuttX does not support the ``environ`` variable).
   -  Process groups are not supported (See ``POSIX_SPAWN_SETPGROUP``
      above).
   -  Effective user IDs are not supported (See ``POSIX_SPAWN_RESETIDS``
@@ -924,8 +919,9 @@ Functions
      ``argv[]`` is an array of pointers to null-terminated strings. The
      list is terminated with a null pointer.
 
-  :param envp: The ``envp[]`` argument is not used by NuttX and may be
-     ``NULL``.
+  :param envp: The environment of the new task, as for
+     :c:func:`posix_spawn`. If ``envp`` is ``NULL``, the new task gets a
+     copy of the environment of the caller.
 
   :return: ``task_spawn()`` will return process ID of new task on success.
     Otherwise, a negative number will be returned as the function return
