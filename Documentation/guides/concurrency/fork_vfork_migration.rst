@@ -58,8 +58,9 @@ Two things break, and they break loudly rather than quietly:
 environment no longer builds.**  ``fork()`` is not declared in ``unistd.h``
 there, so you get a compile error naming the function.  That is the intended
 outcome:  a build error is strictly better than the silent wrongness it
-replaces.  Today that is every in-tree architecture, so every caller of
-``fork()`` has to be looked at.
+replaces.  Today that is every target except a kernel build on arm64,
+x86_64 or Xtensa (ESP32-S3), so every caller of ``fork()`` has to be
+looked at.
 
 **Code calling** ``fork()`` **on a target that does have real** ``fork()``
 **changes behaviour** -- from sharing to copying.  Code that (perhaps
@@ -153,7 +154,7 @@ exception frame when it traps -- ``xcp.sregs`` is the field that exists for
 this -- and build the child from that instead, while a kernel thread that calls
 the entry point directly still takes the ordinary path.
 
-Four architectures do it, and they are worth copying:
+Five architectures do it, and they are worth copying:
 
 * RISC-V: ``riscv_swint.c`` stores the frame in ``xcp.sregs``, and
   ``riscv_fork.c`` rebuilds the child from it.
@@ -192,6 +193,19 @@ Four architectures do it, and they are worth copying:
   saved frame is not copied wholesale:  only the extended state and the
   general registers are inherited, and the segment registers and thread
   pointer come from the frame ``up_initial_state()`` built for the child.
+* Xtensa (ESP32-S3): ``xtensa_swint.c`` stores the frame in ``xcp.sregs``,
+  and ``xtensa_fork.c`` builds the child from it.  ``up_fork()`` selects
+  ``xtensa_fork_syscall()`` or ``xtensa_fork_direct()`` at build time, with
+  ``CONFIG_LIB_SYSCALL``.  Each exception entry spills all register windows
+  to the stack, so the frame and the stack together hold the complete
+  context of the caller.  The windowed ABI keeps absolute stack pointers in
+  the register-window save areas on the stack.  A ``fork()`` child runs at
+  the parent's stack addresses in its own address environment, so these
+  pointers stay correct.  A ``vfork()`` child runs on a copy of the stack at
+  a different address, so ``xtensa_fork_rebase()`` adds the offset to each
+  saved stack pointer of the frame chain in the copy.  Without this, the
+  child reloads a pointer into the *parent's* stack at its first window
+  underflow.  Another architecture with a windowed ABI must do the same.
 
 Nothing else is required:  the ``up_fork()`` entry point and the libc wrapper
 are already there and become live automatically.
@@ -211,15 +225,8 @@ Known gaps
 complete -- ``addrenv_fork()``, the ``up_addrenv_fork()`` hook, the syscall, the
 libc wrapper and the ``ostest`` case -- so an architecture provides ``fork()``
 by implementing ``up_addrenv_fork()`` and selecting ``CONFIG_ARCH_HAVE_FORK``,
-with no further generic work.  x86_64 and arm64 select it today.
-
-**A windowed ABI needs its stack rebased, not just copied.**  On Xtensa,
-giving a child a relocated copy of the parent's stack takes more than the copy:
-the register-window save areas embedded in the stack hold absolute stack
-pointers, so each one has to be rebased along with the copy, or the child
-reloads a pointer into the *parent's* stack on its very first window underflow.
-That rebasing is architecture-specific and belongs with the Xtensa entry points
-rather than here.
+with no further generic work.  x86_64, arm64 and Xtensa (the ESP32-S3
+kernel build) select it today.
 
 Note also on ``waitpid()`` after ``vfork()``
 ============================================
