@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <stdio.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/lib/lib.h>
 
 #include "driver/driver.h"

@@ -32,6 +32,7 @@
 #include <nuttx/debug.h>
 #include <stdio.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/random.h>

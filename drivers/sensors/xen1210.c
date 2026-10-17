@@ -48,6 +48,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/sensors/xen1210.h>
