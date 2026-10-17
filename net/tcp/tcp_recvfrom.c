@@ -752,6 +752,11 @@ static ssize_t tcp_recv_oob(FAR struct tcp_conn_s *conn, FAR void *buf,
       return 0;
     }
 
+  if (_SO_GETOPT(conn->sconn.s_options, SO_OOBINLINE))
+    {
+      return -EINVAL;
+    }
+
   if (conn->urg_state == TCP_URG_VALID)
     {
       *(FAR uint8_t *)buf = conn->urg_data;

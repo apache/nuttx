@@ -1453,6 +1453,25 @@ uint16_t tcp_datahandler(FAR struct net_driver_s *dev,
                          FAR struct tcp_conn_s *conn,
                          uint16_t offset);
 
+#ifdef CONFIG_NET_TCPURGDATA
+/****************************************************************************
+ * Name: tcp_remove_urgbyte
+ *
+ * Description:
+ *   Remove one byte at the specified offset from the IOB chain.
+ *
+ * Input Parameters:
+ *   head   - Pointer to head of the IOB chain
+ *   offset - Offset of the byte to remove
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void tcp_remove_urgbyte(FAR struct iob_s **head, unsigned int offset);
+#endif
+
 /****************************************************************************
  * Name: tcp_backlogcreate
  *

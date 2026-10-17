@@ -38,6 +38,7 @@
 
 #include "devif/devif.h"
 #include "tcp/tcp.h"
+#include "socket/socket.h"
 #include "utils/utils.h"
 
 #ifdef NET_TCP_HAVE_STACK
@@ -109,6 +110,42 @@ tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP_OUT_OF_ORDER
+#ifdef CONFIG_NET_TCPURGDATA
+/****************************************************************************
+ * Name: tcp_ofoseg_urg
+ *
+ * Description:
+ *   Check and extract urgent data from an out-of-order segment being
+ *   committed to the receive stream.
+ *
+ ****************************************************************************/
+
+static uint32_t tcp_ofoseg_urg(FAR struct net_driver_s *dev,
+                               FAR struct tcp_conn_s *conn,
+                               FAR struct tcp_ofoseg_s *seg,
+                               uint32_t flags)
+{
+  if (conn->urg_state == TCP_URG_AWAITING &&
+      TCP_SEQ_GTE(conn->urg_seq, seg->left) &&
+      TCP_SEQ_LT(conn->urg_seq, seg->right))
+    {
+      uint32_t urg_offset = TCP_SEQ_SUB(conn->urg_seq, seg->left);
+
+      iob_copyout(&conn->urg_data, seg->data, 1, urg_offset);
+      conn->urg_state = TCP_URG_VALID;
+      flags |= TCP_URGDATA;
+      devif_conn_event(dev, TCP_URGDATA, conn->sconn.list);
+
+      if (!_SO_GETOPT(conn->sconn.s_options, SO_OOBINLINE))
+        {
+          tcp_remove_urgbyte(&seg->data, urg_offset);
+        }
+    }
+
+  return flags;
+}
+#endif
+
 static uint32_t tcp_ofoseg_data_event(FAR struct net_driver_s *dev,
                                       FAR struct tcp_conn_s *conn,
                                       uint32_t flags)
@@ -143,10 +180,17 @@ static uint32_t tcp_ofoseg_data_event(FAR struct net_driver_s *dev,
         {
           ninfo("TCP OFOSEG input [%" PRIu32 " : %" PRIu32 " : %u]\n",
                  seg->left, seg->right, seg->data->io_pktlen);
-          rcvseq = TCP_SEQ_ADD(rcvseq,
-                               seg->data->io_pktlen);
-          net_incr32(conn->rcvseq, seg->data->io_pktlen);
-          net_iob_concat(&conn->readahead, &seg->data);
+
+#ifdef CONFIG_NET_TCPURGDATA
+          flags = tcp_ofoseg_urg(dev, conn, seg, flags);
+#endif
+
+          rcvseq = seg->right;
+          net_setsequence(conn->rcvseq, rcvseq);
+          if (seg->data != NULL)
+            {
+              net_iob_concat(&conn->readahead, &seg->data);
+            }
         }
       else if (TCP_SEQ_GT(rcvseq, seg->left))
         {
@@ -177,10 +221,17 @@ static uint32_t tcp_ofoseg_data_event(FAR struct net_driver_s *dev,
                   ninfo("TCP OFOSEG input "
                         "[%" PRIu32 " : %" PRIu32 " : %u]\n",
                         seg->left, seg->right, seg->data->io_pktlen);
-                  rcvseq = TCP_SEQ_ADD(rcvseq,
-                                       seg->data->io_pktlen);
-                  net_incr32(conn->rcvseq, seg->data->io_pktlen);
-                  net_iob_concat(&conn->readahead, &seg->data);
+
+#ifdef CONFIG_NET_TCPURGDATA
+                  flags = tcp_ofoseg_urg(dev, conn, seg, flags);
+#endif
+
+                  rcvseq = seg->right;
+                  net_setsequence(conn->rcvseq, rcvseq);
+                  if (seg->data != NULL)
+                    {
+                      net_iob_concat(&conn->readahead, &seg->data);
+                    }
                 }
             }
         }
