@@ -375,8 +375,8 @@ int       remove(FAR const char *path);
 
 FAR char *ctermid(FAR char *s);
 
-/* Shell operations.  These are not actually implemented in the OS.  See
- * apps/system/popen for implementation.
+/* Shell operations.  libc has them when pipes, posix_spawn() and
+ * waitpid() are enabled.
  */
 
 #ifndef __KERNEL__

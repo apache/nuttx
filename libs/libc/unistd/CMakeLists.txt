@@ -129,4 +129,14 @@ if(CONFIG_PIPES)
   list(APPEND SRCS lib_pipe.c)
 endif()
 
+# dpopen() needs pipes, posix_spawn() and waitpid().  CONFIG_SYSTEM_POPEN
+# selects the copy in apps/system/popen instead.
+
+if(CONFIG_PIPES
+   AND CONFIG_LIBC_EXECFUNCS
+   AND CONFIG_SCHED_WAITPID
+   AND NOT CONFIG_SYSTEM_POPEN)
+  list(APPEND SRCS lib_dpopen.c)
+endif()
+
 target_sources(c PRIVATE ${SRCS})

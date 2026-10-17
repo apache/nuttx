@@ -78,6 +78,15 @@ ifeq ($(CONFIG_PIPES),y)
 CSRCS += lib_pipe.c
 endif
 
+# dpopen() needs pipes, posix_spawn() and waitpid().  CONFIG_SYSTEM_POPEN
+# selects the copy in apps/system/popen instead.
+
+ifeq ($(CONFIG_PIPES)$(CONFIG_LIBC_EXECFUNCS)$(CONFIG_SCHED_WAITPID),yyy)
+ifneq ($(CONFIG_SYSTEM_POPEN),y)
+CSRCS += lib_dpopen.c
+endif
+endif
+
 # Add the unistd directory to the build
 
 DEPPATH += --dep-path unistd

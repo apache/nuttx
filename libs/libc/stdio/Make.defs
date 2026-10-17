@@ -47,6 +47,15 @@ CSRCS += lib_setbuf.c lib_setvbuf.c lib_libfilelock.c lib_libgetstreams.c
 CSRCS += lib_setbuffer.c lib_fputwc.c lib_putwc.c lib_fputws.c
 CSRCS += lib_fopencookie.c lib_fmemopen.c lib_open_memstream.c lib_fgetwc.c
 CSRCS += lib_getwc.c lib_ungetwc.c lib_stdio_ext.c
+
+# popen() needs dpopen().  CONFIG_SYSTEM_POPEN selects the copy in
+# apps/system/popen instead.
+
+ifeq ($(CONFIG_PIPES)$(CONFIG_LIBC_EXECFUNCS)$(CONFIG_SCHED_WAITPID),yyy)
+ifneq ($(CONFIG_SYSTEM_POPEN),y)
+CSRCS += lib_popen.c
+endif
+endif
 endif
 
 # Add the stdio directory to the build
