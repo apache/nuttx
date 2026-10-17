@@ -220,9 +220,10 @@ a library be named rather than spelled out as an absolute path::
 
 ``dlopen()`` needs ``CONFIG_LIBC_DLFCN`` too.
 
-Only the make build generates the table of
-``CONFIG_EXECFUNCS_SYSTEM_SYMTAB``.  A CMake configuration needs a symbol
-table from elsewhere.
+The make build and the CMake build both generate the table of
+``CONFIG_EXECFUNCS_SYSTEM_SYMTAB`` (and that of
+``CONFIG_LIBC_ELF_SYSTEM_SYMTAB``) from ``libc.csv``, ``libm.csv`` and
+``syscall.csv`` with the host tool ``mksymtab``.
 
 ``CONFIG_ELF_STACKSIZE`` gives the stack a module runs with.  A module
 that needs a different one can export an ``nx_stacksize`` symbol, which
