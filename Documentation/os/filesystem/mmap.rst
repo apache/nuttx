@@ -58,8 +58,10 @@ conditions where mmap() can be supported:
       in the size of files that may be memory mapped (especially on MCUs
       with no significant RAM resources).
 
-   c. All mapped files are read-only.  You can write to the in-memory image,
-      but the file contents will not change.
+   c. Writes to a private mapping (MAP_PRIVATE) change only the in-memory
+      image, never the file.  Writes to a shared, writable mapping
+      (MAP_SHARED with PROT_WRITE) reach the file when msync() is called
+      and when munmap() removes the mapping.
 
    d. There are no access privileges.
 
