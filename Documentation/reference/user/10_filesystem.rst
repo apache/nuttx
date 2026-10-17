@@ -439,6 +439,10 @@ Pipes and FIFOs
   If all threads that write to the FIFO have closed, subsequent calls to
   read() on the FIFO will return 0 (end-of-file).
 
+  A FIFO can exist only in the pseudo file system. If ``pathname`` is inside
+  a mounted file system and no file exists at that path, mkfifo() fails with
+  ``EPERM``. If a file exists at that path, it fails with ``EEXIST``.
+
   :param pathname: The full path to the FIFO instance to attach to or to
     create (if not already created).
   :param mode: Ignored for now
