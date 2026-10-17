@@ -330,7 +330,9 @@ indication only if the files differ.
 
 **Synopsis**. Copy of the contents of the file at
 ``<source-path>`` to the location in the file system indicated by
-``<dest-path>``.
+``<dest-path>``.  A new file gets the mode ``0666`` plus the execute bits
+of the source file, so a copied program stays executable.  An existing
+destination file keeps its mode.
 
 .. _cmddate:
 
@@ -1399,6 +1401,12 @@ way association, binding:
      The mount command will create whatever pseudo directories that
      may be needed to complete the full path but the full path must
      not already exist.
+
+The '-o ``<options>``' argument is a comma-separated list.  The generic
+options ``ro``, ``rw``, ``noexec``, ``exec``, ``nosuid``, ``suid``,
+``nodev``, ``dev``, ``sync``, ``async``, ``noatime`` and ``atime`` become
+mount flags (for example ``MS_RDONLY`` or ``MS_NOEXEC``).  The other options
+go to the file system, for example ``trans=virtio,tag=system`` for v9fs.
 
 After the volume has been mounted in the NuttX
 :ref:`pseudo file system <file_system_overview>`, it may be
