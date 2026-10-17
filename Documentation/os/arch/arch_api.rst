@@ -81,6 +81,10 @@ APIs Exported by Architecture-Specific Logic to NuttX
      and threads must come from memory that is accessible to user
      code.
 
+  :return:
+    Zero (``OK``) on success; ``-ENOMEM`` if the stack cannot be
+    allocated.
+
 .. c:function:: STATUS up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
 
   Setup up stack-related information in the TCB
