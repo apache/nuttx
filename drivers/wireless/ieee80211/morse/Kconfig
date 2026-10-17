@@ -1,0 +1,157 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config IEEE80211_MORSE
+	bool "Morse Micro Wi-Fi HaLow (IEEE 802.11ah) support"
+	default n
+	depends on SPI && NET && NETDEV_WIRELESS_HANDLER
+	depends on ARCH_CORTEXM4 || ARCH_CORTEXM7 || ARCH_CORTEXM33
+	depends on ARCH_FPU
+	depends on !LIBC_LOCALTIME
+	depends on ARCH_HAVE_SETJMP
+	depends on DEV_RANDOM || DEV_URANDOM
+	select ARCH_SETJMP_H
+	select LIBC_CTYPE_TABLE
+	select SCHED_WORKQUEUE
+	select SCHED_HPWORK
+	---help---
+		Driver for the Morse Micro MM6108/MM8108 Wi-Fi HaLow transceivers
+		(e.g. the Quectel FGH100M module) connected through SPI.
+
+		The 802.11ah MAC, the WPA3-SAE/OWE supplicant and the transceiver
+		transport are provided by the Morse Micro host library (libmorse,
+		part of the MM-IoT-SDK).  The needed SDK files (about 3 MB) are
+		downloaded at build time and libmorse is linked as a pre-built
+		library distributed under the Morse Micro Binary Distribution
+		License.  The chip firmware and the board configuration file (BCF)
+		are embedded in the NuttX image.
+
+		See Documentation/os/drivers/special/wireless/morse.rst.
+
+		libmorse is built against newlib: it needs setjmp() and the
+		newlib compatible _ctype_ table.  The NuttX localtime support
+		(LIBC_LOCALTIME) is not compatible because its mktime() writes the
+		NuttX specific tm_gmtoff/tm_zone fields of struct tm.
+
+		WPA3-SAE needs a good entropy source: a random device
+		(DEV_RANDOM, ideally backed by a hardware RNG, or DEV_URANDOM) is
+		required.
+
+if IEEE80211_MORSE
+
+choice
+	prompt "Transceiver"
+	default IEEE80211_MORSE_MM6108
+
+config IEEE80211_MORSE_MM6108
+	bool "MM6108"
+
+config IEEE80211_MORSE_MM8108
+	bool "MM8108"
+
+endchoice # Transceiver
+
+config IEEE80211_MORSE_SDK_VERSION
+	string "MM-IoT-SDK version"
+	default "2.13.1"
+	---help---
+		Version (git tag) of the Morse Micro MM-IoT-SDK the files are
+		downloaded from (https://github.com/MorseMicro/mm-iot-sdk).  The
+		driver is tested with the default version.
+
+choice
+	prompt "Board configuration file (BCF)"
+	default IEEE80211_MORSE_BCF_QUECTEL_FGH100MH
+
+config IEEE80211_MORSE_BCF_QUECTEL_FGH100MH
+	bool "Quectel FGH100M-H (FGH100MHAAMD)"
+	depends on IEEE80211_MORSE_MM6108
+	---help---
+		BCF of the Quectel FGH100M-H module (used e.g. on the Seeed Studio
+		Wi-Fi HaLow module for XIAO).  It is downloaded from the
+		MorseMicro/morse-firmware repository and converted to the mbin
+		format with the SDK tool (requires python3 with pyelftools).
+
+config IEEE80211_MORSE_BCF_SDK
+	bool "BCF from the SDK"
+	---help---
+		Use one of the BCF files distributed with the SDK, in
+		framework/morsefirmware/<chip>/bcfs.
+
+config IEEE80211_MORSE_BCF_CUSTOM
+	bool "Custom BCF file"
+
+endchoice # BCF
+
+config IEEE80211_MORSE_BCF_NAME
+	string "SDK BCF file name"
+	default "bcf_mf16858.mbin"
+	depends on IEEE80211_MORSE_BCF_SDK
+
+config IEEE80211_MORSE_BCF_PATH
+	string "Custom BCF file path"
+	default ""
+	depends on IEEE80211_MORSE_BCF_CUSTOM
+	---help---
+		Absolute path of the BCF file, in mbin format.
+
+config IEEE80211_MORSE_COUNTRY
+	string "Default country code"
+	default "US"
+	---help---
+		Two letter country code selecting the regulatory domain (channel
+		list and transmit power limits).  It can be changed at run time
+		while disconnected, e.g. "wapi country wlan0 AU".
+
+config IEEE80211_MORSE_SPI_FREQUENCY
+	int "SPI frequency (Hz)"
+	default 20000000
+	---help---
+		Default SPI clock frequency, used when the board lower half does
+		not provide one.  The SPI driver selects the closest frequency
+		that is not higher.
+
+config IEEE80211_MORSE_TASK_PRIORITY
+	int "Driver task priority"
+	default 110
+	---help---
+		Priority of the libmorse "normal" priority tasks and of the network
+		RX thread.  The other libmorse task priorities are spread around
+		this value.
+
+config IEEE80211_MORSE_CONNECT_TIMEOUT
+	int "Connection timeout (s)"
+	default 30
+	---help---
+		Maximum time the connect request (e.g. "wapi essid") waits for the
+		link to come up.  On timeout the driver keeps on trying in the
+		background.
+
+config IEEE80211_MORSE_TX_TIMEOUT
+	int "TX flow control timeout (ms)"
+	default 100
+	---help---
+		Maximum time to wait for the transceiver TX queues before dropping
+		a packet.
+
+config IEEE80211_MORSE_TX_QUOTA
+	int "TX packet quota"
+	default 8
+
+config IEEE80211_MORSE_RX_QUOTA
+	int "RX packet quota"
+	default 8
+
+config IEEE80211_MORSE_SCAN_BUFSIZE
+	int "Scan result buffer size"
+	default 4096
+
+config IEEE80211_MORSE_LIBLOG
+	bool "Enable libmorse log output"
+	default n
+	---help---
+		Route the libmorse log messages to the syslog.
+
+endif # IEEE80211_MORSE
