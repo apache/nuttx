@@ -50,190 +50,492 @@
 
 #if defined(CONFIG_ARCH_CHIP_AVR128DA28)
 	HANDLER avrdx_nmi, AVRDX_IRQ_NMI, excpt_common
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_BOD_VLM
 	HANDLER avrdx_bod_vlm, AVRDX_IRQ_BOD_VLM, excpt_common
+#  endif
 	HANDLER avrdx_rtc_cnt, AVRDX_IRQ_RTC_CNT, excpt_common
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_RTC_PIT
 	HANDLER avrdx_rtc_pit, AVRDX_IRQ_RTC_PIT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_CCL_CCL
 	HANDLER avrdx_ccl_ccl, AVRDX_IRQ_CCL_CCL, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_PORTA_PORT
 	HANDLER avrdx_porta_port, AVRDX_IRQ_PORTA_PORT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA0_OVF
 	HANDLER avrdx_tca0_ovf, AVRDX_IRQ_TCA0_OVF, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA0_HUNF
 	HANDLER avrdx_tca0_hunf, AVRDX_IRQ_TCA0_HUNF, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA0_CMP0
 	HANDLER avrdx_tca0_cmp0, AVRDX_IRQ_TCA0_CMP0, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA0_CMP1
 	HANDLER avrdx_tca0_cmp1, AVRDX_IRQ_TCA0_CMP1, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA0_CMP2
 	HANDLER avrdx_tca0_cmp2, AVRDX_IRQ_TCA0_CMP2, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCB0_INT
 	HANDLER avrdx_tcb0_int, AVRDX_IRQ_TCB0_INT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCB1_INT
 	HANDLER avrdx_tcb1_int, AVRDX_IRQ_TCB1_INT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCD0_OVF
 	HANDLER avrdx_tcd0_ovf, AVRDX_IRQ_TCD0_OVF, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCD0_TRIG
 	HANDLER avrdx_tcd0_trig, AVRDX_IRQ_TCD0_TRIG, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TWI0_TWIS
 	HANDLER avrdx_twi0_twis, AVRDX_IRQ_TWI0_TWIS, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TWI0_TWIM
 	HANDLER avrdx_twi0_twim, AVRDX_IRQ_TWI0_TWIM, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_SPI0_INT
 	HANDLER avrdx_spi0_int, AVRDX_IRQ_SPI0_INT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART0_RXC
 	HANDLER avrdx_usart0_rxc, AVRDX_IRQ_USART0_RXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART0_DRE
 	HANDLER avrdx_usart0_dre, AVRDX_IRQ_USART0_DRE, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART0_TXC
 	HANDLER avrdx_usart0_txc, AVRDX_IRQ_USART0_TXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_PORTD_PORT
 	HANDLER avrdx_portd_port, AVRDX_IRQ_PORTD_PORT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_AC0_AC
 	HANDLER avrdx_ac0_ac, AVRDX_IRQ_AC0_AC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_ADC0_RESRDY
 	HANDLER avrdx_adc0_resrdy, AVRDX_IRQ_ADC0_RESRDY, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_ADC0_WCMP
 	HANDLER avrdx_adc0_wcmp, AVRDX_IRQ_ADC0_WCMP, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_ZCD0_ZCD
 	HANDLER avrdx_zcd0_zcd, AVRDX_IRQ_ZCD0_ZCD, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_PTC_PTC
 	HANDLER avrdx_ptc_ptc, AVRDX_IRQ_PTC_PTC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_AC1_AC
 	HANDLER avrdx_ac1_ac, AVRDX_IRQ_AC1_AC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_PORTC_PORT
 	HANDLER avrdx_portc_port, AVRDX_IRQ_PORTC_PORT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCB2_INT
 	HANDLER avrdx_tcb2_int, AVRDX_IRQ_TCB2_INT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART1_RXC
 	HANDLER avrdx_usart1_rxc, AVRDX_IRQ_USART1_RXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART1_DRE
 	HANDLER avrdx_usart1_dre, AVRDX_IRQ_USART1_DRE, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART1_TXC
 	HANDLER avrdx_usart1_txc, AVRDX_IRQ_USART1_TXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_PORTF_PORT
 	HANDLER avrdx_portf_port, AVRDX_IRQ_PORTF_PORT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_NVMCTRL_EE
 	HANDLER avrdx_nvmctrl_ee, AVRDX_IRQ_NVMCTRL_EE, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_SPI1_INT
 	HANDLER avrdx_spi1_int, AVRDX_IRQ_SPI1_INT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART2_RXC
 	HANDLER avrdx_usart2_rxc, AVRDX_IRQ_USART2_RXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART2_DRE
 	HANDLER avrdx_usart2_dre, AVRDX_IRQ_USART2_DRE, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART2_TXC
 	HANDLER avrdx_usart2_txc, AVRDX_IRQ_USART2_TXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_AC2_AC
 	HANDLER avrdx_ac2_ac, AVRDX_IRQ_AC2_AC, excpt_common
+#  endif
 #elif defined(CONFIG_ARCH_CHIP_AVR128DA64)
 	HANDLER avrdx_nmi, AVRDX_IRQ_NMI, excpt_common
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_BOD_VLM
 	HANDLER avrdx_bod_vlm, AVRDX_IRQ_BOD_VLM, excpt_common
+#  endif
 	HANDLER avrdx_rtc_cnt, AVRDX_IRQ_RTC_CNT, excpt_common
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_RTC_PIT
 	HANDLER avrdx_rtc_pit, AVRDX_IRQ_RTC_PIT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_CCL_CCL
 	HANDLER avrdx_ccl_ccl, AVRDX_IRQ_CCL_CCL, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_PORTA_PORT
 	HANDLER avrdx_porta_port, AVRDX_IRQ_PORTA_PORT, excpt_common
-	HANDLER avrdx_tca0_lunf, AVRDX_IRQ_TCA0_LUNF, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA0_OVF
 	HANDLER avrdx_tca0_ovf, AVRDX_IRQ_TCA0_OVF, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA0_HUNF
 	HANDLER avrdx_tca0_hunf, AVRDX_IRQ_TCA0_HUNF, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA0_CMP0
 	HANDLER avrdx_tca0_cmp0, AVRDX_IRQ_TCA0_CMP0, excpt_common
-	HANDLER avrdx_tca0_lcmp0, AVRDX_IRQ_TCA0_LCMP0, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA0_CMP1
 	HANDLER avrdx_tca0_cmp1, AVRDX_IRQ_TCA0_CMP1, excpt_common
-	HANDLER avrdx_tca0_lcmp1, AVRDX_IRQ_TCA0_LCMP1, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA0_CMP2
 	HANDLER avrdx_tca0_cmp2, AVRDX_IRQ_TCA0_CMP2, excpt_common
-	HANDLER avrdx_tca0_lcmp2, AVRDX_IRQ_TCA0_LCMP2, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCB0_INT
 	HANDLER avrdx_tcb0_int, AVRDX_IRQ_TCB0_INT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCB1_INT
 	HANDLER avrdx_tcb1_int, AVRDX_IRQ_TCB1_INT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCD0_OVF
 	HANDLER avrdx_tcd0_ovf, AVRDX_IRQ_TCD0_OVF, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCD0_TRIG
 	HANDLER avrdx_tcd0_trig, AVRDX_IRQ_TCD0_TRIG, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TWI0_TWIS
 	HANDLER avrdx_twi0_twis, AVRDX_IRQ_TWI0_TWIS, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TWI0_TWIM
 	HANDLER avrdx_twi0_twim, AVRDX_IRQ_TWI0_TWIM, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_SPI0_INT
 	HANDLER avrdx_spi0_int, AVRDX_IRQ_SPI0_INT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART0_RXC
 	HANDLER avrdx_usart0_rxc, AVRDX_IRQ_USART0_RXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART0_DRE
 	HANDLER avrdx_usart0_dre, AVRDX_IRQ_USART0_DRE, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART0_TXC
 	HANDLER avrdx_usart0_txc, AVRDX_IRQ_USART0_TXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_PORTD_PORT
 	HANDLER avrdx_portd_port, AVRDX_IRQ_PORTD_PORT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_AC0_AC
 	HANDLER avrdx_ac0_ac, AVRDX_IRQ_AC0_AC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_ADC0_RESRDY
 	HANDLER avrdx_adc0_resrdy, AVRDX_IRQ_ADC0_RESRDY, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_ADC0_WCMP
 	HANDLER avrdx_adc0_wcmp, AVRDX_IRQ_ADC0_WCMP, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_ZCD0_ZCD
 	HANDLER avrdx_zcd0_zcd, AVRDX_IRQ_ZCD0_ZCD, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_PTC_PTC
 	HANDLER avrdx_ptc_ptc, AVRDX_IRQ_PTC_PTC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_AC1_AC
 	HANDLER avrdx_ac1_ac, AVRDX_IRQ_AC1_AC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_PORTC_PORT
 	HANDLER avrdx_portc_port, AVRDX_IRQ_PORTC_PORT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCB2_INT
 	HANDLER avrdx_tcb2_int, AVRDX_IRQ_TCB2_INT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART1_RXC
 	HANDLER avrdx_usart1_rxc, AVRDX_IRQ_USART1_RXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART1_DRE
 	HANDLER avrdx_usart1_dre, AVRDX_IRQ_USART1_DRE, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART1_TXC
 	HANDLER avrdx_usart1_txc, AVRDX_IRQ_USART1_TXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_PORTF_PORT
 	HANDLER avrdx_portf_port, AVRDX_IRQ_PORTF_PORT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_NVMCTRL_EE
 	HANDLER avrdx_nvmctrl_ee, AVRDX_IRQ_NVMCTRL_EE, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_SPI1_INT
 	HANDLER avrdx_spi1_int, AVRDX_IRQ_SPI1_INT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART2_RXC
 	HANDLER avrdx_usart2_rxc, AVRDX_IRQ_USART2_RXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART2_DRE
 	HANDLER avrdx_usart2_dre, AVRDX_IRQ_USART2_DRE, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART2_TXC
 	HANDLER avrdx_usart2_txc, AVRDX_IRQ_USART2_TXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_AC2_AC
 	HANDLER avrdx_ac2_ac, AVRDX_IRQ_AC2_AC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCB3_INT
 	HANDLER avrdx_tcb3_int, AVRDX_IRQ_TCB3_INT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TWI1_TWIS
 	HANDLER avrdx_twi1_twis, AVRDX_IRQ_TWI1_TWIS, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TWI1_TWIM
 	HANDLER avrdx_twi1_twim, AVRDX_IRQ_TWI1_TWIM, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_PORTB_PORT
 	HANDLER avrdx_portb_port, AVRDX_IRQ_PORTB_PORT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_PORTE_PORT
 	HANDLER avrdx_porte_port, AVRDX_IRQ_PORTE_PORT, excpt_common
-	HANDLER avrdx_tca1_lunf, AVRDX_IRQ_TCA1_LUNF, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA1_OVF
 	HANDLER avrdx_tca1_ovf, AVRDX_IRQ_TCA1_OVF, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA1_HUNF
 	HANDLER avrdx_tca1_hunf, AVRDX_IRQ_TCA1_HUNF, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA1_CMP0
 	HANDLER avrdx_tca1_cmp0, AVRDX_IRQ_TCA1_CMP0, excpt_common
-	HANDLER avrdx_tca1_lcmp0, AVRDX_IRQ_TCA1_LCMP0, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA1_CMP1
 	HANDLER avrdx_tca1_cmp1, AVRDX_IRQ_TCA1_CMP1, excpt_common
-	HANDLER avrdx_tca1_lcmp1, AVRDX_IRQ_TCA1_LCMP1, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA1_CMP2
 	HANDLER avrdx_tca1_cmp2, AVRDX_IRQ_TCA1_CMP2, excpt_common
-	HANDLER avrdx_tca1_lcmp2, AVRDX_IRQ_TCA1_LCMP2, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_ZCD1_ZCD
 	HANDLER avrdx_zcd1_zcd, AVRDX_IRQ_ZCD1_ZCD, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART3_RXC
 	HANDLER avrdx_usart3_rxc, AVRDX_IRQ_USART3_RXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART3_DRE
 	HANDLER avrdx_usart3_dre, AVRDX_IRQ_USART3_DRE, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART3_TXC
 	HANDLER avrdx_usart3_txc, AVRDX_IRQ_USART3_TXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART4_RXC
 	HANDLER avrdx_usart4_rxc, AVRDX_IRQ_USART4_RXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART4_DRE
 	HANDLER avrdx_usart4_dre, AVRDX_IRQ_USART4_DRE, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART4_TXC
 	HANDLER avrdx_usart4_txc, AVRDX_IRQ_USART4_TXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_PORTG_PORT
 	HANDLER avrdx_portg_port, AVRDX_IRQ_PORTG_PORT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_ZCD2_ZCD
 	HANDLER avrdx_zcd2_zcd, AVRDX_IRQ_ZCD2_ZCD, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCB4_INT
 	HANDLER avrdx_tcb4_int, AVRDX_IRQ_TCB4_INT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART5_RXC
 	HANDLER avrdx_usart5_rxc, AVRDX_IRQ_USART5_RXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART5_DRE
 	HANDLER avrdx_usart5_dre, AVRDX_IRQ_USART5_DRE, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART5_TXC
 	HANDLER avrdx_usart5_txc, AVRDX_IRQ_USART5_TXC, excpt_common
+#  endif
 #elif defined(CONFIG_ARCH_CHIP_AVR128DB64)
 	HANDLER avrdx_nmi, AVRDX_IRQ_NMI, excpt_common
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_BOD_VLM
 	HANDLER avrdx_bod_vlm, AVRDX_IRQ_BOD_VLM, excpt_common
+#  endif
 	HANDLER avrdx_clkctrl_cfd, AVRDX_IRQ_CLKCTRL_CFD, excpt_common
 	HANDLER avrdx_mvio_mvio, AVRDX_IRQ_MVIO_MVIO, excpt_common
 	HANDLER avrdx_rtc_cnt, AVRDX_IRQ_RTC_CNT, excpt_common
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_RTC_PIT
 	HANDLER avrdx_rtc_pit, AVRDX_IRQ_RTC_PIT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_CCL_CCL
 	HANDLER avrdx_ccl_ccl, AVRDX_IRQ_CCL_CCL, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_PORTA_PORT
 	HANDLER avrdx_porta_port, AVRDX_IRQ_PORTA_PORT, excpt_common
-	HANDLER avrdx_tca0_lunf, AVRDX_IRQ_TCA0_LUNF, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA0_OVF
 	HANDLER avrdx_tca0_ovf, AVRDX_IRQ_TCA0_OVF, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA0_HUNF
 	HANDLER avrdx_tca0_hunf, AVRDX_IRQ_TCA0_HUNF, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA0_CMP0
 	HANDLER avrdx_tca0_cmp0, AVRDX_IRQ_TCA0_CMP0, excpt_common
-	HANDLER avrdx_tca0_lcmp0, AVRDX_IRQ_TCA0_LCMP0, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA0_CMP1
 	HANDLER avrdx_tca0_cmp1, AVRDX_IRQ_TCA0_CMP1, excpt_common
-	HANDLER avrdx_tca0_lcmp1, AVRDX_IRQ_TCA0_LCMP1, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA0_CMP2
 	HANDLER avrdx_tca0_cmp2, AVRDX_IRQ_TCA0_CMP2, excpt_common
-	HANDLER avrdx_tca0_lcmp2, AVRDX_IRQ_TCA0_LCMP2, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCB0_INT
 	HANDLER avrdx_tcb0_int, AVRDX_IRQ_TCB0_INT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCB1_INT
 	HANDLER avrdx_tcb1_int, AVRDX_IRQ_TCB1_INT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCD0_OVF
 	HANDLER avrdx_tcd0_ovf, AVRDX_IRQ_TCD0_OVF, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCD0_TRIG
 	HANDLER avrdx_tcd0_trig, AVRDX_IRQ_TCD0_TRIG, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TWI0_TWIS
 	HANDLER avrdx_twi0_twis, AVRDX_IRQ_TWI0_TWIS, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TWI0_TWIM
 	HANDLER avrdx_twi0_twim, AVRDX_IRQ_TWI0_TWIM, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_SPI0_INT
 	HANDLER avrdx_spi0_int, AVRDX_IRQ_SPI0_INT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART0_RXC
 	HANDLER avrdx_usart0_rxc, AVRDX_IRQ_USART0_RXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART0_DRE
 	HANDLER avrdx_usart0_dre, AVRDX_IRQ_USART0_DRE, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART0_TXC
 	HANDLER avrdx_usart0_txc, AVRDX_IRQ_USART0_TXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_PORTD_PORT
 	HANDLER avrdx_portd_port, AVRDX_IRQ_PORTD_PORT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_AC0_AC
 	HANDLER avrdx_ac0_ac, AVRDX_IRQ_AC0_AC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_ADC0_RESRDY
 	HANDLER avrdx_adc0_resrdy, AVRDX_IRQ_ADC0_RESRDY, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_ADC0_WCMP
 	HANDLER avrdx_adc0_wcmp, AVRDX_IRQ_ADC0_WCMP, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_ZCD0_ZCD
 	HANDLER avrdx_zcd0_zcd, AVRDX_IRQ_ZCD0_ZCD, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_AC1_AC
 	HANDLER avrdx_ac1_ac, AVRDX_IRQ_AC1_AC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_PORTC_PORT
 	HANDLER avrdx_portc_port, AVRDX_IRQ_PORTC_PORT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCB2_INT
 	HANDLER avrdx_tcb2_int, AVRDX_IRQ_TCB2_INT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART1_RXC
 	HANDLER avrdx_usart1_rxc, AVRDX_IRQ_USART1_RXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART1_DRE
 	HANDLER avrdx_usart1_dre, AVRDX_IRQ_USART1_DRE, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART1_TXC
 	HANDLER avrdx_usart1_txc, AVRDX_IRQ_USART1_TXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_PORTF_PORT
 	HANDLER avrdx_portf_port, AVRDX_IRQ_PORTF_PORT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_NVMCTRL_EE
 	HANDLER avrdx_nvmctrl_ee, AVRDX_IRQ_NVMCTRL_EE, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_SPI1_INT
 	HANDLER avrdx_spi1_int, AVRDX_IRQ_SPI1_INT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART2_RXC
 	HANDLER avrdx_usart2_rxc, AVRDX_IRQ_USART2_RXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART2_DRE
 	HANDLER avrdx_usart2_dre, AVRDX_IRQ_USART2_DRE, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART2_TXC
 	HANDLER avrdx_usart2_txc, AVRDX_IRQ_USART2_TXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_AC2_AC
 	HANDLER avrdx_ac2_ac, AVRDX_IRQ_AC2_AC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TWI1_TWIS
 	HANDLER avrdx_twi1_twis, AVRDX_IRQ_TWI1_TWIS, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TWI1_TWIM
 	HANDLER avrdx_twi1_twim, AVRDX_IRQ_TWI1_TWIM, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCB3_INT
 	HANDLER avrdx_tcb3_int, AVRDX_IRQ_TCB3_INT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_PORTB_PORT
 	HANDLER avrdx_portb_port, AVRDX_IRQ_PORTB_PORT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_PORTE_PORT
 	HANDLER avrdx_porte_port, AVRDX_IRQ_PORTE_PORT, excpt_common
-	HANDLER avrdx_tca1_lunf, AVRDX_IRQ_TCA1_LUNF, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA1_OVF
 	HANDLER avrdx_tca1_ovf, AVRDX_IRQ_TCA1_OVF, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA1_HUNF
 	HANDLER avrdx_tca1_hunf, AVRDX_IRQ_TCA1_HUNF, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA1_CMP0
 	HANDLER avrdx_tca1_cmp0, AVRDX_IRQ_TCA1_CMP0, excpt_common
-	HANDLER avrdx_tca1_lcmp0, AVRDX_IRQ_TCA1_LCMP0, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA1_CMP1
 	HANDLER avrdx_tca1_cmp1, AVRDX_IRQ_TCA1_CMP1, excpt_common
-	HANDLER avrdx_tca1_lcmp1, AVRDX_IRQ_TCA1_LCMP1, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCA1_CMP2
 	HANDLER avrdx_tca1_cmp2, AVRDX_IRQ_TCA1_CMP2, excpt_common
-	HANDLER avrdx_tca1_lcmp2, AVRDX_IRQ_TCA1_LCMP2, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_ZCD1_ZCD
 	HANDLER avrdx_zcd1_zcd, AVRDX_IRQ_ZCD1_ZCD, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART3_RXC
 	HANDLER avrdx_usart3_rxc, AVRDX_IRQ_USART3_RXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART3_DRE
 	HANDLER avrdx_usart3_dre, AVRDX_IRQ_USART3_DRE, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART3_TXC
 	HANDLER avrdx_usart3_txc, AVRDX_IRQ_USART3_TXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART4_RXC
 	HANDLER avrdx_usart4_rxc, AVRDX_IRQ_USART4_RXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART4_DRE
 	HANDLER avrdx_usart4_dre, AVRDX_IRQ_USART4_DRE, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART4_TXC
 	HANDLER avrdx_usart4_txc, AVRDX_IRQ_USART4_TXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_PORTG_PORT
 	HANDLER avrdx_portg_port, AVRDX_IRQ_PORTG_PORT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_ZCD2_ZCD
 	HANDLER avrdx_zcd2_zcd, AVRDX_IRQ_ZCD2_ZCD, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_TCB4_INT
 	HANDLER avrdx_tcb4_int, AVRDX_IRQ_TCB4_INT, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART5_RXC
 	HANDLER avrdx_usart5_rxc, AVRDX_IRQ_USART5_RXC, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART5_DRE
 	HANDLER avrdx_usart5_dre, AVRDX_IRQ_USART5_DRE, excpt_common
+#  endif
+#  ifndef CONFIG_AVRDX_HIGH_PRIO_USART5_TXC
 	HANDLER avrdx_usart5_txc, AVRDX_IRQ_USART5_TXC, excpt_common
+#  endif
 #else
 #  error "Unrecognized chip"
 #endif

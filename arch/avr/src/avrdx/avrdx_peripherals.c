@@ -152,7 +152,7 @@ const IOBJ uint8_t avrdx_gpio_irq_vectors[] =
 {
   AVRDX_IRQ_PORTA_PORT,
 
-#ifdef CONFIG_AVR_HAS_PORTB
+#ifdef CONFIG_AVR_HAVE_PORTB
   AVRDX_IRQ_PORTB_PORT,
 #else
   0,
@@ -160,7 +160,7 @@ const IOBJ uint8_t avrdx_gpio_irq_vectors[] =
 
   AVRDX_IRQ_PORTC_PORT,
   AVRDX_IRQ_PORTD_PORT,
-#ifdef CONFIG_AVR_HAS_PORTE
+#ifdef CONFIG_AVR_HAVE_PORTE
   AVRDX_IRQ_PORTE_PORT,
 #else
   0,
@@ -168,7 +168,7 @@ const IOBJ uint8_t avrdx_gpio_irq_vectors[] =
 
   AVRDX_IRQ_PORTF_PORT
 
-#ifdef CONFIG_AVR_HAS_PORTG
+#ifdef CONFIG_AVR_HAVE_PORTG
   , AVRDX_IRQ_PORTG_PORT
 #else
   , 0

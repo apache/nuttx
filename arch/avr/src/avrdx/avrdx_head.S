@@ -65,191 +65,175 @@
 
 	.global	vectortab
 #if defined(CONFIG_ARCH_CHIP_AVR128DA28)
-	.global avrdx_nmi
-	.global avrdx_bod_vlm
-	.global avrdx_rtc_cnt
-	.global avrdx_rtc_pit
-	.global avrdx_ccl_ccl
-	.global avrdx_porta_port
-	.global avrdx_tca0_ovf
-	.global avrdx_tca0_hunf
-	.global avrdx_tca0_cmp0
-	.global avrdx_tca0_cmp1
-	.global avrdx_tca0_cmp2
-	.global avrdx_tcb0_int
-	.global avrdx_tcb1_int
-	.global avrdx_tcd0_ovf
-	.global avrdx_tcd0_trig
-	.global avrdx_twi0_twis
-	.global avrdx_twi0_twim
-	.global avrdx_spi0_int
-	.global avrdx_usart0_rxc
-	.global avrdx_usart0_dre
-	.global avrdx_usart0_txc
-	.global avrdx_portd_port
-	.global avrdx_ac0_ac
-	.global avrdx_adc0_resrdy
-	.global avrdx_adc0_wcmp
-	.global avrdx_zcd0_zcd
-	.global avrdx_ptc_ptc
-	.global avrdx_ac1_ac
-	.global avrdx_portc_port
-	.global avrdx_tcb2_int
-	.global avrdx_usart1_rxc
-	.global avrdx_usart1_dre
-	.global avrdx_usart1_txc
-	.global avrdx_portf_port
-	.global avrdx_nvmctrl_ee
-	.global avrdx_spi1_int
-	.global avrdx_usart2_rxc
-	.global avrdx_usart2_dre
-	.global avrdx_usart2_txc
-	.global avrdx_ac2_ac
+	.global __vector_avrdx_nmi
+	.global __vector_avrdx_bod_vlm
+	.global __vector_avrdx_rtc_cnt
+	.global __vector_avrdx_rtc_pit
+	.global __vector_avrdx_ccl_ccl
+	.global __vector_avrdx_porta_port
+	.global __vector_avrdx_tca0_ovf
+	.global __vector_avrdx_tca0_hunf
+	.global __vector_avrdx_tca0_cmp0
+	.global __vector_avrdx_tca0_cmp1
+	.global __vector_avrdx_tca0_cmp2
+	.global __vector_avrdx_tcb0_int
+	.global __vector_avrdx_tcb1_int
+	.global __vector_avrdx_tcd0_ovf
+	.global __vector_avrdx_tcd0_trig
+	.global __vector_avrdx_twi0_twis
+	.global __vector_avrdx_twi0_twim
+	.global __vector_avrdx_spi0_int
+	.global __vector_avrdx_usart0_rxc
+	.global __vector_avrdx_usart0_dre
+	.global __vector_avrdx_usart0_txc
+	.global __vector_avrdx_portd_port
+	.global __vector_avrdx_ac0_ac
+	.global __vector_avrdx_adc0_resrdy
+	.global __vector_avrdx_adc0_wcmp
+	.global __vector_avrdx_zcd0_zcd
+	.global __vector_avrdx_ptc_ptc
+	.global __vector_avrdx_ac1_ac
+	.global __vector_avrdx_portc_port
+	.global __vector_avrdx_tcb2_int
+	.global __vector_avrdx_usart1_rxc
+	.global __vector_avrdx_usart1_dre
+	.global __vector_avrdx_usart1_txc
+	.global __vector_avrdx_portf_port
+	.global __vector_avrdx_nvmctrl_ee
+	.global __vector_avrdx_spi1_int
+	.global __vector_avrdx_usart2_rxc
+	.global __vector_avrdx_usart2_dre
+	.global __vector_avrdx_usart2_txc
+	.global __vector_avrdx_ac2_ac
 #elif defined(CONFIG_ARCH_CHIP_AVR128DA64)
-	.global avrdx_nmi
-	.global avrdx_bod_vlm
-	.global avrdx_rtc_cnt
-	.global avrdx_rtc_pit
-	.global avrdx_ccl_ccl
-	.global avrdx_porta_port
-	.global avrdx_tca0_lunf
-	.global avrdx_tca0_ovf
-	.global avrdx_tca0_hunf
-	.global avrdx_tca0_cmp0
-	.global avrdx_tca0_lcmp0
-	.global avrdx_tca0_cmp1
-	.global avrdx_tca0_lcmp1
-	.global avrdx_tca0_cmp2
-	.global avrdx_tca0_lcmp2
-	.global avrdx_tcb0_int
-	.global avrdx_tcb1_int
-	.global avrdx_tcd0_ovf
-	.global avrdx_tcd0_trig
-	.global avrdx_twi0_twis
-	.global avrdx_twi0_twim
-	.global avrdx_spi0_int
-	.global avrdx_usart0_rxc
-	.global avrdx_usart0_dre
-	.global avrdx_usart0_txc
-	.global avrdx_portd_port
-	.global avrdx_ac0_ac
-	.global avrdx_adc0_resrdy
-	.global avrdx_adc0_wcmp
-	.global avrdx_zcd0_zcd
-	.global avrdx_ptc_ptc
-	.global avrdx_ac1_ac
-	.global avrdx_portc_port
-	.global avrdx_tcb2_int
-	.global avrdx_usart1_rxc
-	.global avrdx_usart1_dre
-	.global avrdx_usart1_txc
-	.global avrdx_portf_port
-	.global avrdx_nvmctrl_ee
-	.global avrdx_spi1_int
-	.global avrdx_usart2_rxc
-	.global avrdx_usart2_dre
-	.global avrdx_usart2_txc
-	.global avrdx_ac2_ac
-	.global avrdx_tcb3_int
-	.global avrdx_twi1_twis
-	.global avrdx_twi1_twim
-	.global avrdx_portb_port
-	.global avrdx_porte_port
-	.global avrdx_tca1_lunf
-	.global avrdx_tca1_ovf
-	.global avrdx_tca1_hunf
-	.global avrdx_tca1_cmp0
-	.global avrdx_tca1_lcmp0
-	.global avrdx_tca1_cmp1
-	.global avrdx_tca1_lcmp1
-	.global avrdx_tca1_cmp2
-	.global avrdx_tca1_lcmp2
-	.global avrdx_zcd1_zcd
-	.global avrdx_usart3_rxc
-	.global avrdx_usart3_dre
-	.global avrdx_usart3_txc
-	.global avrdx_usart4_rxc
-	.global avrdx_usart4_dre
-	.global avrdx_usart4_txc
-	.global avrdx_portg_port
-	.global avrdx_zcd2_zcd
-	.global avrdx_tcb4_int
-	.global avrdx_usart5_rxc
-	.global avrdx_usart5_dre
-	.global avrdx_usart5_txc
+	.global __vector_avrdx_nmi
+	.global __vector_avrdx_bod_vlm
+	.global __vector_avrdx_rtc_cnt
+	.global __vector_avrdx_rtc_pit
+	.global __vector_avrdx_ccl_ccl
+	.global __vector_avrdx_porta_port
+	.global __vector_avrdx_tca0_ovf
+	.global __vector_avrdx_tca0_hunf
+	.global __vector_avrdx_tca0_cmp0
+	.global __vector_avrdx_tca0_cmp1
+	.global __vector_avrdx_tca0_cmp2
+	.global __vector_avrdx_tcb0_int
+	.global __vector_avrdx_tcb1_int
+	.global __vector_avrdx_tcd0_ovf
+	.global __vector_avrdx_tcd0_trig
+	.global __vector_avrdx_twi0_twis
+	.global __vector_avrdx_twi0_twim
+	.global __vector_avrdx_spi0_int
+	.global __vector_avrdx_usart0_rxc
+	.global __vector_avrdx_usart0_dre
+	.global __vector_avrdx_usart0_txc
+	.global __vector_avrdx_portd_port
+	.global __vector_avrdx_ac0_ac
+	.global __vector_avrdx_adc0_resrdy
+	.global __vector_avrdx_adc0_wcmp
+	.global __vector_avrdx_zcd0_zcd
+	.global __vector_avrdx_ptc_ptc
+	.global __vector_avrdx_ac1_ac
+	.global __vector_avrdx_portc_port
+	.global __vector_avrdx_tcb2_int
+	.global __vector_avrdx_usart1_rxc
+	.global __vector_avrdx_usart1_dre
+	.global __vector_avrdx_usart1_txc
+	.global __vector_avrdx_portf_port
+	.global __vector_avrdx_nvmctrl_ee
+	.global __vector_avrdx_spi1_int
+	.global __vector_avrdx_usart2_rxc
+	.global __vector_avrdx_usart2_dre
+	.global __vector_avrdx_usart2_txc
+	.global __vector_avrdx_ac2_ac
+	.global __vector_avrdx_tcb3_int
+	.global __vector_avrdx_twi1_twis
+	.global __vector_avrdx_twi1_twim
+	.global __vector_avrdx_portb_port
+	.global __vector_avrdx_porte_port
+	.global __vector_avrdx_tca1_ovf
+	.global __vector_avrdx_tca1_hunf
+	.global __vector_avrdx_tca1_cmp0
+	.global __vector_avrdx_tca1_cmp1
+	.global __vector_avrdx_tca1_cmp2
+	.global __vector_avrdx_zcd1_zcd
+	.global __vector_avrdx_usart3_rxc
+	.global __vector_avrdx_usart3_dre
+	.global __vector_avrdx_usart3_txc
+	.global __vector_avrdx_usart4_rxc
+	.global __vector_avrdx_usart4_dre
+	.global __vector_avrdx_usart4_txc
+	.global __vector_avrdx_portg_port
+	.global __vector_avrdx_zcd2_zcd
+	.global __vector_avrdx_tcb4_int
+	.global __vector_avrdx_usart5_rxc
+	.global __vector_avrdx_usart5_dre
+	.global __vector_avrdx_usart5_txc
 #elif defined(CONFIG_ARCH_CHIP_AVR128DB64)
-	.global avrdx_nmi
-	.global avrdx_bod_vlm
-	.global avrdx_clkctrl_cfd
-	.global avrdx_mvio_mvio
-	.global avrdx_rtc_cnt
-	.global avrdx_rtc_pit
-	.global avrdx_ccl_ccl
-	.global avrdx_porta_port
-	.global avrdx_tca0_lunf
-	.global avrdx_tca0_ovf
-	.global avrdx_tca0_hunf
-	.global avrdx_tca0_cmp0
-	.global avrdx_tca0_lcmp0
-	.global avrdx_tca0_cmp1
-	.global avrdx_tca0_lcmp1
-	.global avrdx_tca0_cmp2
-	.global avrdx_tca0_lcmp2
-	.global avrdx_tcb0_int
-	.global avrdx_tcb1_int
-	.global avrdx_tcd0_ovf
-	.global avrdx_tcd0_trig
-	.global avrdx_twi0_twis
-	.global avrdx_twi0_twim
-	.global avrdx_spi0_int
-	.global avrdx_usart0_rxc
-	.global avrdx_usart0_dre
-	.global avrdx_usart0_txc
-	.global avrdx_portd_port
-	.global avrdx_ac0_ac
-	.global avrdx_adc0_resrdy
-	.global avrdx_adc0_wcmp
-	.global avrdx_zcd0_zcd
-	.global avrdx_ac1_ac
-	.global avrdx_portc_port
-	.global avrdx_tcb2_int
-	.global avrdx_usart1_rxc
-	.global avrdx_usart1_dre
-	.global avrdx_usart1_txc
-	.global avrdx_portf_port
-	.global avrdx_nvmctrl_ee
-	.global avrdx_spi1_int
-	.global avrdx_usart2_rxc
-	.global avrdx_usart2_dre
-	.global avrdx_usart2_txc
-	.global avrdx_ac2_ac
-	.global avrdx_twi1_twis
-	.global avrdx_twi1_twim
-	.global avrdx_tcb3_int
-	.global avrdx_portb_port
-	.global avrdx_porte_port
-	.global avrdx_tca1_lunf
-	.global avrdx_tca1_ovf
-	.global avrdx_tca1_hunf
-	.global avrdx_tca1_cmp0
-	.global avrdx_tca1_lcmp0
-	.global avrdx_tca1_cmp1
-	.global avrdx_tca1_lcmp1
-	.global avrdx_tca1_cmp2
-	.global avrdx_tca1_lcmp2
-	.global avrdx_zcd1_zcd
-	.global avrdx_usart3_rxc
-	.global avrdx_usart3_dre
-	.global avrdx_usart3_txc
-	.global avrdx_usart4_rxc
-	.global avrdx_usart4_dre
-	.global avrdx_usart4_txc
-	.global avrdx_portg_port
-	.global avrdx_zcd2_zcd
-	.global avrdx_tcb4_int
-	.global avrdx_usart5_rxc
-	.global avrdx_usart5_dre
-	.global avrdx_usart5_txc
+	.global __vector_avrdx_nmi
+	.global __vector_avrdx_bod_vlm
+	.global __vector_avrdx_clkctrl_cfd
+	.global __vector_avrdx_mvio_mvio
+	.global __vector_avrdx_rtc_cnt
+	.global __vector_avrdx_rtc_pit
+	.global __vector_avrdx_ccl_ccl
+	.global __vector_avrdx_porta_port
+	.global __vector_avrdx_tca0_ovf
+	.global __vector_avrdx_tca0_hunf
+	.global __vector_avrdx_tca0_cmp0
+	.global __vector_avrdx_tca0_cmp1
+	.global __vector_avrdx_tca0_cmp2
+	.global __vector_avrdx_tcb0_int
+	.global __vector_avrdx_tcb1_int
+	.global __vector_avrdx_tcd0_ovf
+	.global __vector_avrdx_tcd0_trig
+	.global __vector_avrdx_twi0_twis
+	.global __vector_avrdx_twi0_twim
+	.global __vector_avrdx_spi0_int
+	.global __vector_avrdx_usart0_rxc
+	.global __vector_avrdx_usart0_dre
+	.global __vector_avrdx_usart0_txc
+	.global __vector_avrdx_portd_port
+	.global __vector_avrdx_ac0_ac
+	.global __vector_avrdx_adc0_resrdy
+	.global __vector_avrdx_adc0_wcmp
+	.global __vector_avrdx_zcd0_zcd
+	.global __vector_avrdx_ac1_ac
+	.global __vector_avrdx_portc_port
+	.global __vector_avrdx_tcb2_int
+	.global __vector_avrdx_usart1_rxc
+	.global __vector_avrdx_usart1_dre
+	.global __vector_avrdx_usart1_txc
+	.global __vector_avrdx_portf_port
+	.global __vector_avrdx_nvmctrl_ee
+	.global __vector_avrdx_spi1_int
+	.global __vector_avrdx_usart2_rxc
+	.global __vector_avrdx_usart2_dre
+	.global __vector_avrdx_usart2_txc
+	.global __vector_avrdx_ac2_ac
+	.global __vector_avrdx_twi1_twis
+	.global __vector_avrdx_twi1_twim
+	.global __vector_avrdx_tcb3_int
+	.global __vector_avrdx_portb_port
+	.global __vector_avrdx_porte_port
+	.global __vector_avrdx_tca1_ovf
+	.global __vector_avrdx_tca1_hunf
+	.global __vector_avrdx_tca1_cmp0
+	.global __vector_avrdx_tca1_cmp1
+	.global __vector_avrdx_tca1_cmp2
+	.global __vector_avrdx_zcd1_zcd
+	.global __vector_avrdx_usart3_rxc
+	.global __vector_avrdx_usart3_dre
+	.global __vector_avrdx_usart3_txc
+	.global __vector_avrdx_usart4_rxc
+	.global __vector_avrdx_usart4_dre
+	.global __vector_avrdx_usart4_txc
+	.global __vector_avrdx_portg_port
+	.global __vector_avrdx_zcd2_zcd
+	.global __vector_avrdx_tcb4_int
+	.global __vector_avrdx_usart5_rxc
+	.global __vector_avrdx_usart5_dre
+	.global __vector_avrdx_usart5_txc
 #else
 #error "Unrecognized chip"
 #endif
@@ -259,7 +243,7 @@
  ****************************************************************************/
 
 	.macro	vector name
-	jmp		\name
+	jmp		__vector_\name
 	.endm
 
 /****************************************************************************
@@ -322,15 +306,11 @@ vectortab:
 	vector avrdx_rtc_pit
 	vector avrdx_ccl_ccl
 	vector avrdx_porta_port
-	vector avrdx_tca0_lunf
 	vector avrdx_tca0_ovf
 	vector avrdx_tca0_hunf
 	vector avrdx_tca0_cmp0
-	vector avrdx_tca0_lcmp0
 	vector avrdx_tca0_cmp1
-	vector avrdx_tca0_lcmp1
 	vector avrdx_tca0_cmp2
-	vector avrdx_tca0_lcmp2
 	vector avrdx_tcb0_int
 	vector avrdx_tcb1_int
 	vector avrdx_tcd0_ovf
@@ -365,15 +345,11 @@ vectortab:
 	vector avrdx_twi1_twim
 	vector avrdx_portb_port
 	vector avrdx_porte_port
-	vector avrdx_tca1_lunf
 	vector avrdx_tca1_ovf
 	vector avrdx_tca1_hunf
 	vector avrdx_tca1_cmp0
-	vector avrdx_tca1_lcmp0
 	vector avrdx_tca1_cmp1
-	vector avrdx_tca1_lcmp1
 	vector avrdx_tca1_cmp2
-	vector avrdx_tca1_lcmp2
 	vector avrdx_zcd1_zcd
 	vector avrdx_usart3_rxc
 	vector avrdx_usart3_dre
@@ -396,15 +372,11 @@ vectortab:
 	vector avrdx_rtc_pit
 	vector avrdx_ccl_ccl
 	vector avrdx_porta_port
-	vector avrdx_tca0_lunf
 	vector avrdx_tca0_ovf
 	vector avrdx_tca0_hunf
 	vector avrdx_tca0_cmp0
-	vector avrdx_tca0_lcmp0
 	vector avrdx_tca0_cmp1
-	vector avrdx_tca0_lcmp1
 	vector avrdx_tca0_cmp2
-	vector avrdx_tca0_lcmp2
 	vector avrdx_tcb0_int
 	vector avrdx_tcb1_int
 	vector avrdx_tcd0_ovf
@@ -438,15 +410,11 @@ vectortab:
 	vector avrdx_tcb3_int
 	vector avrdx_portb_port
 	vector avrdx_porte_port
-	vector avrdx_tca1_lunf
 	vector avrdx_tca1_ovf
 	vector avrdx_tca1_hunf
 	vector avrdx_tca1_cmp0
-	vector avrdx_tca1_lcmp0
 	vector avrdx_tca1_cmp1
-	vector avrdx_tca1_lcmp1
 	vector avrdx_tca1_cmp2
-	vector avrdx_tca1_lcmp2
 	vector avrdx_zcd1_zcd
 	vector avrdx_usart3_rxc
 	vector avrdx_usart3_dre
