@@ -143,6 +143,13 @@ static int stat_recursive(FAR const char *path,
         {
           ret = -ENOSYS;
         }
+
+      /* No file on a mount with MS_NOEXEC can be executed */
+
+      if (ret >= 0 && INODE_IS_NOEXEC(inode) && S_ISREG(buf->st_mode))
+        {
+          buf->st_mode &= ~(S_IXUSR | S_IXGRP | S_IXOTH);
+        }
     }
   else
 #endif
