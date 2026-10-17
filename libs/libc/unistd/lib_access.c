@@ -99,6 +99,7 @@ int access(FAR const char *path, int amode)
           return 0;
         }
 
+      set_errno(EACCES);
       return -1;
     }
 
