@@ -337,6 +337,7 @@
 "tcsetattr","termios.h","","int","int","int","FAR const struct termios *"
 "telldir","dirent.h","","off_t","FAR DIR *"
 "textdomain","libintl.h","defined(CONFIG_LIBC_LOCALE_GETTEXT)","FAR char *","FAR const char *"
+"thrd_exit","threads.h","!defined(CONFIG_DISABLE_PTHREAD)","noreturn","int"
 "time","time.h","","time_t","FAR time_t *"
 "tolower","ctype.h","","int","int"
 "toupper","ctype.h","","int","int"
