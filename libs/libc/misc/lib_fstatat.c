@@ -52,11 +52,15 @@
  *
  *   If pathname is absolute, then dirfd is ignored.
  *
+ *   If pathname is an empty string and flags contains AT_EMPTY_PATH, then
+ *   the call operates on the file referred to by dirfd (like fstat()).  If
+ *   dirfd is AT_FDCWD, the call operates on the current working directory.
+ *
  * Input Parameters:
  *   dirfd - The file descriptor of directory.
  *   path  - A pointer to the path.
  *   buf   - The buf to get file status.
- *   flags - Ignored.
+ *   flags - AT_SYMLINK_NOFOLLOW and AT_EMPTY_PATH are supported.
  *
  * Returned Value:
  *   Return zero on success, or -1 if an error occurred (in which case,
@@ -69,6 +73,16 @@ int fstatat(int dirfd, FAR const char *path, FAR struct stat *buf,
 {
   FAR char *fullpath;
   int ret;
+
+  if (path != NULL && path[0] == '\0' && (flags & AT_EMPTY_PATH) != 0)
+    {
+      if (dirfd != AT_FDCWD)
+        {
+          return fstat(dirfd, buf);
+        }
+
+      path = ".";
+    }
 
   fullpath = lib_get_pathbuffer();
   if (fullpath == NULL)
