@@ -10,6 +10,7 @@ hardware platform and provides support for these devices:
 * GICv2 and GICv3 interrupt controllers
 * ARM Generic Timer
 * PL011 UART controller
+* PL031 RTC (optional)
 
 Getting Started
 ===============
@@ -731,11 +732,29 @@ Interface      Controller   Driver/Component
 GIC            on-chip      interrupt controller
 PL011 UART     on-chip      serial port
 ARM TIMER      on-chip      system clock
+PL031 RTC      on-chip      RTC (optional)
 ============== ============ ======================
 
 
 The kernel currently does not support other hardware features on this
 QEMU platform.
+
+RTC
+===
+
+The QEMU ``virt`` machine has a PL031 RTC at ``0x09010000`` (SPI 2), which
+QEMU sets from the host clock. Without it, the system time starts at
+``CONFIG_START_YEAR``, and the files on a host share (v9fs, hostfs) seem to
+be from the future. Enable ``CONFIG_RTC``, ``CONFIG_RTC_DATETIME``,
+``CONFIG_RTC_DRIVER``, ``CONFIG_RTC_ARCH`` and ``CONFIG_RTC_PL031``. Then
+``up_rtc_initialize()`` registers the PL031 as the RTC of the system and as
+``/dev/rtc0``, and the system time starts at the host time.
+``CONFIG_QEMU_RTC_PL031_BASE`` and ``CONFIG_QEMU_RTC_PL031_IRQ`` give the
+address and the interrupt.
+
+The PL031 counts whole seconds, so the system time can start up to one
+second behind the host. With ``CONFIG_QEMU_RTC_PL031_SYNC``, the boot waits
+(up to one second) for the RTC second to change.
 
 Debugging with QEMU
 ===================
