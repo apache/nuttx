@@ -2462,7 +2462,8 @@ static int unionfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
       /* Claim that this is a read-only directory */
 
-      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
+      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR | S_IXOTH |
+                     S_IXGRP | S_IXUSR;
 
       /* Check if the user is stat'ing some "fake" node between the unionfs
        * root and the file system 1 root directory.
