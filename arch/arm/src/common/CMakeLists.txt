@@ -91,6 +91,8 @@ target_sources(arch PRIVATE ${SRCS})
 
 nuttx_add_aux_library(STARTUP_OBJS crt0.c)
 
+set_property(TARGET STARTUP_OBJS PROPERTY ELF_BINARY TRUE)
+
 target_compile_options(
   STARTUP_OBJS
   PRIVATE

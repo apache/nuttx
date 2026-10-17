@@ -240,11 +240,21 @@ if(CONFIG_DEBUG_SYMBOLS)
   add_compile_options(${CONFIG_DEBUG_SYMBOLS_LEVEL})
 endif()
 
-set(PICFLAGS -fpic -fPIE -mno-pic-data-is-text-relative -msingle-pic-base)
+set(PICFLAGS
+    -fpic -fPIE -mno-pic-data-is-text-relative -msingle-pic-base
+    CACHE INTERNAL "PIC flags")
 
 if(CONFIG_BUILD_PIC)
   add_compile_options(${PICFLAGS} -mpic-register=r9)
   add_link_options(-Wl,--emit-relocs)
+endif()
+
+if(CONFIG_PIC)
+  # Reserve r9 across the base firmware so callbacks into module code arrive
+  # with the module's data base intact. ELF modules are excluded because they
+  # receive r9 via -mpic-register=r9.
+  add_compile_options(
+    $<$<NOT:$<BOOL:$<TARGET_PROPERTY:ELF_BINARY>>>:-ffixed-r9>)
 endif()
 
 add_compile_options(-Wno-attributes -Wno-unknown-pragmas
