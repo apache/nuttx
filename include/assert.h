@@ -103,22 +103,6 @@
 #  define DEBUGVERIFY(f) ((void)(f))
 #endif
 
-/* The C standard states that if NDEBUG is defined, assert will do nothing.
- * Users can define and undefine NDEBUG as they see fit to choose when assert
- * does something or does not do anything.
- *
- * #define assert(ignore) ((void)0)
- *
- * Reference link:
- * https://pubs.opengroup.org/onlinepubs/009695399/basedefs/assert.h.html
- */
-
-#ifdef NDEBUG
-#  define assert(f) ((void)0)
-#else
-#  define assert(f) _ASSERT(f, __ASSERT_FILE__, __ASSERT_LINE__)
-#endif
-
 /* ASSERT/VERIFY are NuttX-specific APIs.
  * They are always enabled, regardless of NDEBUG/CONFIG_DEBUG_ASSERTIONS.
  * The argument is evaluated exactly once.
@@ -204,3 +188,26 @@ void __assert(FAR const char *filename, int linenum,
 
 #endif /* __ASSEMBLY__ */
 #endif /* __INCLUDE_ASSERT_H */
+
+/* The C standard states that if NDEBUG is defined, assert will do nothing.
+ * Users can define and undefine NDEBUG as they see fit to choose when assert
+ * does something or does not do anything.
+ *
+ * #define assert(ignore) ((void)0)
+ *
+ * The header may be included more than once, and each inclusion defines
+ * assert again according to the current state of NDEBUG.  So this part is
+ * outside of the include guard.
+ *
+ * Reference link:
+ * https://pubs.opengroup.org/onlinepubs/009695399/basedefs/assert.h.html
+ */
+
+#ifndef __ASSEMBLY__
+#  undef assert
+#  ifdef NDEBUG
+#    define assert(f) ((void)0)
+#  else
+#    define assert(f) _ASSERT(f, __ASSERT_FILE__, __ASSERT_LINE__)
+#  endif
+#endif
