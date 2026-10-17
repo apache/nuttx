@@ -31,7 +31,7 @@ if(CONFIG_LIB_SYSCALL)
   add_subdirectory(proxies)
   add_subdirectory(stubs)
 
-  target_sources(stubs PRIVATE syscall_stublookup.c)
+  target_sources(stubs PRIVATE syscall_stublookup.c syscall_uaccess.c)
 endif()
 
 # TODO: should CONFIG_SCHED_INSTRUMENTATION_SYSCALL depend on

@@ -53,15 +53,22 @@
  *
  ****************************************************************************/
 
+#if !defined(CONFIG_BUILD_KERNEL) || defined(__KERNEL__)
 int nxsem_getprioceiling(FAR const sem_t *sem, FAR int *prioceiling)
 {
+  FAR sem_t *resolved;
+  int ret = -EINVAL;
+
   DEBUGASSERT(sem != NULL);
 
-  if ((sem->flags & SEM_PRIO_MASK) == SEM_PRIO_PROTECT)
+  resolved = nxsem_resolve((FAR sem_t *)sem);
+  if ((resolved->flags & SEM_PRIO_MASK) == SEM_PRIO_PROTECT)
     {
-      *prioceiling = sem->ceiling;
-      return OK;
+      *prioceiling = resolved->ceiling;
+      ret = OK;
     }
 
-  return -EINVAL;
+  nxsem_unresolve((FAR sem_t *)sem, resolved);
+  return ret;
 }
+#endif

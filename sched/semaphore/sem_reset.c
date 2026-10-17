@@ -129,7 +129,7 @@ static inline_function void reset_sem(FAR sem_t *sem, int16_t count)
  *
  ****************************************************************************/
 
-int nxsem_reset(FAR sem_t *sem, int16_t count)
+static int nxsem_reset_resolved(FAR sem_t *sem, int16_t count)
 {
   irqstate_t flags;
 
@@ -161,4 +161,13 @@ int nxsem_reset(FAR sem_t *sem, int16_t count)
   leave_critical_section(flags);
   sched_unlock();
   return OK;
+}
+
+int nxsem_reset(FAR sem_t *sem, int16_t count)
+{
+  FAR sem_t *resolved = nxsem_resolve(sem);
+  int ret = nxsem_reset_resolved(resolved, count);
+
+  nxsem_unresolve(sem, resolved);
+  return ret;
 }

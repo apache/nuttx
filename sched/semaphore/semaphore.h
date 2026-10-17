@@ -51,6 +51,10 @@ extern "C"
 #define EXTERN extern
 #endif
 
+#ifdef CONFIG_BUILD_KERNEL
+void nxsem_drop(FAR sem_t *sem);
+#endif
+
 /* Common semaphore logic */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE

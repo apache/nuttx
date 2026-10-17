@@ -89,6 +89,7 @@ FAR void *up_addrenv_pa_to_va(uintptr_t pa)
   return (FAR void *)pa;
 }
 
+#ifndef CONFIG_BUILD_KERNEL
 uintptr_t up_addrenv_va_to_pa(FAR void *va_)
 {
   FAR struct simple_addrenv_node_s *node;
@@ -112,3 +113,4 @@ uintptr_t up_addrenv_va_to_pa(FAR void *va_)
 
   return va;
 }
+#endif
