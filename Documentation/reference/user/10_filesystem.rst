@@ -326,6 +326,10 @@ Standard I/O
   FAR char *tempnam(FAR const char *dir, FAR const char *pfx);
   int       remove(FAR const char *path);
 
+  /* Controlling terminal */
+
+  FAR char *ctermid(FAR char *s);
+
   #include <sys/stat.h>
 
   int mkdir(FAR const char *pathname, mode_t mode);
