@@ -213,24 +213,25 @@ void binfmt_freeactions(FAR const posix_spawn_file_actions_t *copy);
 #  define binfmt_freeactions(copy)
 #endif
 
-#ifdef CONFIG_SCHED_USER_IDENTITY
+#ifdef CONFIG_BINFMT_CHECKEXEC
 /****************************************************************************
  * Name: binfmt_checkexecperm
  *
  * Description:
- *   Verify that the calling task has execute permission on the file
- *   described by 'bin'.  The file owner, group, and mode must already be
- *   populated in the binary_s structure.
+ *   Verify that the calling task has execute permission on a file with
+ *   the given mode, owner and group.
  *
  * Input Parameters:
- *   bin - Load structure with uid, gid, and mode populated
+ *   mode - The mode of the file
+ *   uid  - The owner of the file
+ *   gid  - The group of the file
  *
  * Returned Value:
  *   Zero (OK) on success; -EACCES if execute permission is denied.
  *
  ****************************************************************************/
 
-int binfmt_checkexecperm(FAR struct binary_s *bin);
+int binfmt_checkexecperm(mode_t mode, uid_t uid, gid_t gid);
 #endif
 
 #ifdef CONFIG_BUILTIN

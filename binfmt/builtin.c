@@ -77,10 +77,7 @@ static int builtin_loadbinary(FAR struct binary_s *binp,
 {
   FAR const struct builtin_s *builtin;
   FAR char *name;
-  int index;
-#ifdef CONFIG_SCHED_USER_IDENTITY
-  int chk;
-#endif
+  int ret;
 
   binfo("Loading file: %s\n", filename);
 
@@ -92,18 +89,18 @@ static int builtin_loadbinary(FAR struct binary_s *binp,
 
   /* Looking up the index to this name in g_builtins[] */
 
-  index = builtin_isavail(filename);
-  if (index < 0)
+  ret = builtin_isavail(filename);
+  if (ret < 0)
     {
       berr("ERROR: %s is not a builtin application\n", filename);
-      return index;
+      return ret;
     }
 
   /* Return the load information.  NOTE: that there is no way to configure
    * the priority.  That is a bug and needs to be fixed.
    */
 
-  builtin = builtin_for_index(index);
+  builtin = builtin_for_index(ret);
   if (builtin == NULL)
     {
       berr("ERROR: %s is not a builtin application\n", filename);
@@ -115,11 +112,13 @@ static int builtin_loadbinary(FAR struct binary_s *binp,
   binp->gid  = builtin->gid;
   binp->mode = builtin->mode;
 
-  chk = binfmt_checkexecperm(binp);
-  if (chk < 0)
+#  ifdef CONFIG_BINFMT_CHECKEXEC
+  ret = binfmt_checkexecperm(binp->mode, binp->uid, binp->gid);
+  if (ret < 0)
     {
-      return chk;
+      return ret;
     }
+#  endif
 #endif
 
   binp->entrypt   = builtin->main;
