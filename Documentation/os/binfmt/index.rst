@@ -181,11 +181,12 @@ Basic module management
   :param bin:
     The ``filename`` field will be used
     in order to locate the module to be loaded from the file system.
-    The filename must be the full, absolute path to the file to be executed
-    unless ``CONFIG_LIBC_ENVPATH`` is defined. In that case, filename may be
-    a relative path; a set of candidate absolute paths will be generated using
-    the ``PATH`` environment variable and ``load_module()`` will attempt to load each
-    file that is found at those absolute paths.
+    With ``CONFIG_LIBC_ENVPATH``, a filename that contains no ``/`` is
+    searched for in the directories of the ``PATH`` environment variable,
+    and ``load_module()`` tries to load each file that it finds there. Any
+    other filename is a path and is used as it is: an absolute path, or a
+    path relative to the current working directory. Without
+    ``CONFIG_LIBC_ENVPATH``, each filename is used as a path.
 
   :return:
     This is a NuttX internal function so it follows the convention that 0 (``OK``)
