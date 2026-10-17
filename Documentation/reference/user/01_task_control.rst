@@ -454,10 +454,13 @@ Functions
   those features there is then no mechanism to unload the module once it
   exits.
 
-  :param filename: The path to the program to be executed. If
-     ``CONFIG_LIBC_ENVPATH`` is defined in the configuration, then this may
-     be a relative path from the current working directory. Otherwise,
-     ``path`` must be the absolute path to the program.
+  :param filename: The program to be executed. With
+     ``CONFIG_LIBC_ENVPATH``, a name that contains no ``/`` is searched for
+     in the directories of the ``PATH`` environment variable. Any other name
+     is a path and is used as it is: an absolute path, or a path relative to
+     the current working directory, such as ``./hello`` or ``bin/hello``.
+     Without ``CONFIG_LIBC_ENVPATH``, no ``PATH`` search is done, and each
+     name is used as a path.
   :param argv: A pointer to an array of string arguments. The end of the
      array is indicated with a NULL entry.
   :param exports: The address of the start of the caller-provided symbol
@@ -526,10 +529,12 @@ Functions
   function. So the parent function cannot know the ID of the ``exec``'ed
   task.
 
-  :param path: The path to the program to be executed. If
-     ``CONFIG_LIBC_ENVPATH`` is defined in the configuration, then this may
-     be a relative path from the current working directory. Otherwise,
-  :param path: must be the absolute path to the program.
+  :param path: The program to be executed. With ``CONFIG_LIBC_ENVPATH``, a
+     name that contains no ``/`` is searched for in the directories of the
+     ``PATH`` environment variable. Any other name is a path and is used as
+     it is: an absolute path, or a path relative to the current working
+     directory. Without ``CONFIG_LIBC_ENVPATH``, no ``PATH`` search is done,
+     and each name is used as a path.
 
   :return: This function does not return on success. On
     failure, it will return -1 (``ERROR``) and will set the ``errno`` value
@@ -546,10 +551,12 @@ Functions
   parameters. See the description of `execv() <#execv>`__ for additional
   information.
 
-  :param path: The path to the program to be executed. If
-     ``CONFIG_LIBC_ENVPATH`` is defined in the configuration, then this may
-     be a relative path from the current working directory. Otherwise,
-  :param path: must be the absolute path to the program.
+  :param path: The program to be executed. With ``CONFIG_LIBC_ENVPATH``, a
+     name that contains no ``/`` is searched for in the directories of the
+     ``PATH`` environment variable. Any other name is a path and is used as
+     it is: an absolute path, or a path relative to the current working
+     directory. Without ``CONFIG_LIBC_ENVPATH``, no ``PATH`` search is done,
+     and each name is used as a path.
 
   :return: This function does not return on success. On
     failure, it will return -1 (``ERROR``) and will set the ``errno`` value
@@ -579,13 +586,12 @@ Functions
     argument. If the ``pid`` argument is a null pointer, the process ID
     of the child is not returned to the caller.
 
-  :param path: The ``path`` argument to ``posix_spawn()`` is
-    the absolute path that identifies the file to execute. The ``file``
-    argument to ``posix_spawnp()`` may also be a relative path and will
-    be used to construct a pathname that identifies the file to execute.
-    In the case of a relative path, the path prefix for the file will be
-    obtained by a search of the directories passed as the environment
-    variable PATH.
+  :param path: The ``path`` argument to ``posix_spawn()`` and the ``file``
+    argument to ``posix_spawnp()`` identify the file to execute. With
+    ``CONFIG_LIBC_ENVPATH``, a name that contains no ``/`` is searched for
+    in the directories of the ``PATH`` environment variable. Any other name
+    is a path and is used as it is: an absolute path, or a path relative to
+    the current working directory, such as ``./hello`` or ``bin/hello``.
 
     NOTE: NuttX provides only one implementation: If
     ``CONFIG_LIBC_ENVPATH`` is defined, then only ``posix_spawnp()``
