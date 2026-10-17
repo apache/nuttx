@@ -78,7 +78,10 @@ static int getlens(FAR unsigned char *lens, FAR const char *s, int l)
   for (; ; )
     {
       for (; j < l && s[j] != '.'; j++);
-      if (j - k - 1 > 62)
+
+      /* A label has 1 to 63 bytes */
+
+      if (j == k || j - k > 63)
         {
           return 0;
         }
