@@ -135,7 +135,7 @@
 
 /* Thread return value when a pthread is canceled */
 
-#define PTHREAD_CANCELED              ((FAR void*)ERROR)
+#define PTHREAD_CANCELED              ((FAR void *)-1)
 
 /* Used to initialize a pthread_once_t */
 

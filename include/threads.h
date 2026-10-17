@@ -41,11 +41,11 @@
 
 /* Indicates thread error status */
 
-#define thrd_success  (OK)
+#define thrd_success  (0)
 #define thrd_timedout (ETIMEDOUT)
 #define thrd_busy     (EBUSY)
 #define thrd_nomem    (ENOMEM)
-#define thrd_error    (ERROR)
+#define thrd_error    (-1)
 
 /* Defines the type of a mutex */
 
