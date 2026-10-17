@@ -629,6 +629,13 @@ Functions
     ``argv[]`` is an array of pointers to null-terminated strings. The
     list is terminated with a null pointer.
 
+    A new task can get at most ``CONFIG_TASK_MAX_ARGS`` arguments (default
+    256). A longer list fails with ``E2BIG``. ``CONFIG_TASK_ARG_MAX`` sets
+    ``ARG_MAX`` and ``sysconf(_SC_ARG_MAX)`` (default 4096 bytes): the size
+    of the arguments and the environment that a program may pass. NuttX
+    does not check this size. The arguments are copied to the stack of the
+    new task, so its stack must be large enough for them.
+
   :param envp: ``envp[]`` is an array of pointers to null-terminated
     ``name=value`` strings that is the environment of the new task. The
     array is terminated by a null pointer. If ``envp`` is ``NULL``, the new
@@ -917,7 +924,8 @@ Functions
 
   :param argv: ``argv[]`` is the argument list for the new task.
      ``argv[]`` is an array of pointers to null-terminated strings. The
-     list is terminated with a null pointer.
+     list is terminated with a null pointer. The limits of
+     :c:func:`posix_spawn` apply.
 
   :param envp: The environment of the new task, as for
      :c:func:`posix_spawn`. If ``envp`` is ``NULL``, the new task gets a
