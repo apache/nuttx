@@ -30,6 +30,7 @@
 #include <stdint.h>
 #include <debug.h>
 #include <signal.h>
+#include <string.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/sched.h>
@@ -103,6 +104,7 @@ uint32_t *esp32s3_userfault_abort(int exccause, uint32_t *regs)
   up_set_interrupt_context(true);
   tcb->xcp.regs = regs;
 
+  memset(&info, 0, sizeof(info));
   info.si_signo           = SIGSEGV;
   info.si_code            = SI_USER;
   info.si_errno           = 0;
