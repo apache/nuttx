@@ -1,0 +1,93 @@
+############################################################################
+# net/bt/audio/Kconfig
+#
+# Copyright (c) ByteDance Ltd. and/or its affiliates.
+#
+# Author: chao an <anchao.archer@bytedance.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# Bluetooth Audio configuration options
+
+#
+# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2022-2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+menuconfig BT_AUDIO
+	bool "Bluetooth Audio support"
+	help
+	  This option enables Bluetooth Audio support. The specific
+	  features that are available may depend on other features
+	  that have been enabled in the stack, such as Periodic
+	  Advertisement for Broadcast and L2CAP Dynamic Channel
+	  for Unicast.
+
+if BT_AUDIO
+
+config BT_AUDIO_RX
+	def_bool BT_ASCS_ASE_SNK || BT_BAP_UNICAST_CLIENT_ASE_SRC || BT_BAP_BROADCAST_SINK
+	help
+	  Indicates that the stack is configured with support for receiving
+	  audio (for example as a unicast Audio Stream sink or a Broadcast
+	  Sink). This internal option is derived automatically and is not meant
+	  to be set directly.
+
+config BT_AUDIO_TX
+	def_bool BT_ASCS_ASE_SRC || BT_BAP_UNICAST_CLIENT_ASE_SNK || BT_BAP_BROADCAST_SOURCE
+	help
+	  Indicates that the stack is configured with support for transmitting
+	  audio (for example as a unicast Audio Stream source or a Broadcast
+	  Source). This internal option is derived automatically and is not
+	  meant to be set directly.
+
+config BT_AUDIO_NOTIFY_RETRY_DELAY
+	int "Delay for notification sending retried attempt in 1.25 ms units"
+	range 6 3200
+	default 20
+	help
+	  This option sets the time in 1.25 ms units before the stack will
+	  retry to send notification that failed due to lack of TX buffers
+	  available.
+
+source "net/bt/audio/Kconfig.bap"
+source "net/bt/audio/Kconfig.ccp"
+source "net/bt/audio/Kconfig.vocs"
+source "net/bt/audio/Kconfig.aics"
+source "net/bt/audio/Kconfig.vcp"
+source "net/bt/audio/Kconfig.micp"
+source "net/bt/audio/Kconfig.csip"
+source "net/bt/audio/Kconfig.tbs"
+source "net/bt/audio/Kconfig.mcs"
+source "net/bt/audio/Kconfig.has"
+source "net/bt/audio/Kconfig.mpl"
+source "net/bt/audio/Kconfig.mctl"
+source "net/bt/audio/Kconfig.cap"
+source "net/bt/audio/Kconfig.tmap"
+source "net/bt/audio/Kconfig.gmap"
+source "net/bt/audio/Kconfig.pbp"
+
+module = BT_AUDIO
+module-str = "Bluetooth Audio"
+# source "subsys/logging/Kconfig.template.log_config"
+
+endif # BT_AUDIO

@@ -58,6 +58,10 @@
 #include <nuttx/usb/mtp.h>
 #include <nuttx/usb/rndis.h>
 
+#ifdef CONFIG_BT
+#include <nuttx/net/bluetooth/compat/init.h>
+#endif
+
 #ifdef CONFIG_LCD_DEV
 #include <nuttx/lcd/lcd_dev.h>
 #endif
@@ -427,6 +431,19 @@ int sim_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: sim_bthcisock_register() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_BT
+  /* Run NuttX Bluetooth compatibility initializers after the simulated
+   * board-level Bluetooth HCI drivers have had a chance to register
+   * themselves.
+   */
+
+  ret = bt_sys_init_run();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: bt_sys_init_run() failed: %d\n", ret);
     }
 #endif
 

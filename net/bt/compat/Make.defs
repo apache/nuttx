@@ -1,0 +1,51 @@
+############################################################################
+# net/bt/compat/Make.defs
+#
+# Copyright (c) ByteDance Ltd. and/or its affiliates.
+#
+# Author: chao an <anchao.archer@bytedance.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+ifeq ($(CONFIG_BT),y)
+
+# Kernel compat layer
+BT_CSRCS += queue.c timeout.c mem_slab.c
+
+# Support modules
+BT_CSRCS += fs.c
+
+# Iterable section definitions
+BT_CSRCS += defines.c
+
+# HCI driver
+BT_CSRCS += hci_driver.c
+
+VPATH += bt/compat/src/kernel
+VPATH += bt/compat/src/sections
+VPATH += bt/compat/src/subsys/fs
+VPATH += bt/compat/src/drivers/bluetooth/hci
+
+DEPPATH += --dep-path bt/compat/src/kernel
+DEPPATH += --dep-path bt/compat/src/sections
+DEPPATH += --dep-path bt/compat/src/subsys/fs
+DEPPATH += --dep-path bt/compat/src/drivers/bluetooth/hci
+
+endif

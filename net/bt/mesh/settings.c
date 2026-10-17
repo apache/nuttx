@@ -1,0 +1,402 @@
+/****************************************************************************
+ * net/bt/mesh/settings.c
+ *
+ * Copyright (c) ByteDance Ltd. and/or its affiliates.
+ *
+ * Author: chao an <anchao.archer@bytedance.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* Copyright (c) 2018 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/net/bluetooth/compat/kernel.h>
+#include <errno.h>
+#include <stdint.h>
+#include <sys/types.h>
+#include <nuttx/net/bluetooth/compat/sys/util.h>
+
+#include <nuttx/net/bluetooth/hci.h>
+
+#include <nuttx/net/bluetooth/compat/settings/settings.h>
+#include <common/bt_settings_commit.h>
+#include <nuttx/net/bluetooth/mesh.h>
+
+#include "mesh.h"
+#include "subnet.h"
+#include "app_keys.h"
+#include "net.h"
+#include "cdb.h"
+#include "crypto.h"
+#include "rpl.h"
+#include "transport.h"
+#include "heartbeat.h"
+#include "access.h"
+#include "proxy.h"
+#include "pb_gatt_srv.h"
+#include "settings.h"
+#include "cfg.h"
+#include "brg_cfg.h"
+#include "solicitation.h"
+#include "va.h"
+
+#define LOG_LEVEL CONFIG_BT_MESH_SETTINGS_LOG_LEVEL
+#include <nuttx/net/bluetooth/compat/logging/log.h>
+LOG_MODULE_REGISTER(bt_mesh_settings);
+
+#ifdef CONFIG_BT_MESH_RPL_STORE_TIMEOUT
+#define RPL_STORE_TIMEOUT CONFIG_BT_MESH_RPL_STORE_TIMEOUT
+#else
+#define RPL_STORE_TIMEOUT (-1)
+#endif
+
+#ifdef CONFIG_BT_MESH_SETTINGS_WORKQ_PRIO
+#define SETTINGS_WORKQ_PRIO CONFIG_BT_MESH_SETTINGS_WORKQ_PRIO
+#else
+#define SETTINGS_WORKQ_PRIO 1
+#endif
+
+#ifdef CONFIG_BT_MESH_SETTINGS_WORKQ_STACK_SIZE
+#define SETTINGS_WORKQ_STACK_SIZE CONFIG_BT_MESH_SETTINGS_WORKQ_STACK_SIZE
+#else
+#define SETTINGS_WORKQ_STACK_SIZE 0
+#endif
+
+/* When true, the replay lists are stored on a deadline of their own.
+ * Otherwise they are stored together with the generic pending flags.
+ */
+#define RPL_OWN_TIMEOUT                                                                            \
+  (IS_ENABLED(CONFIG_BT_MESH_RPL_STORAGE_MODE_SETTINGS) && RPL_STORE_TIMEOUT >= 0)
+
+static struct k_work_q settings_work_q;
+static uint64_t settings_work_stack[SETTINGS_WORKQ_STACK_SIZE /
+                                    sizeof(uint64_t)];
+
+static struct k_work_delayable pending_store;
+static struct k_work_delayable rpl_pending_store;
+static atomic_define(pending_flags, BT_MESH_SETTINGS_FLAG_COUNT);
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+int bt_mesh_settings_set(settings_read_cb read_cb,
+                         void *cb_arg, void *out, size_t read_len)
+{
+  ssize_t len;
+
+  len = read_cb(cb_arg, out, read_len);
+  if (len < 0)
+    {
+      LOG_ERR("Failed to read value (err %zd)", len);
+      return len;
+    }
+
+  LOG_HEXDUMP_DBG(out, len, "val");
+
+  if (len != read_len)
+    {
+      LOG_ERR("Unexpected value length (%zd != %zu)", len, read_len);
+      return -EINVAL;
+    }
+
+  return 0;
+}
+
+static int mesh_commit(void)
+{
+  if (!atomic_test_bit(bt_mesh.flags, BT_MESH_INIT))
+    {
+      return 0;
+    }
+
+  if (!bt_is_ready())
+    {
+      /* The Bluetooth Mesh settings loader calls bt_mesh_start() immediately
+       * after loading the settings. This is not intended to work before
+       * bt_enable(). The doc on @ref bt_enable requires the "bt/" settings
+       * tree to be loaded after @ref bt_enable is completed, so this handler
+       * will be called again later.
+       */
+
+      return 0;
+    }
+
+  if (!bt_mesh_subnet_next(NULL))
+    {
+      /* Nothing to do since we're not yet provisioned */
+
+      return 0;
+    }
+
+  bt_mesh_net_settings_commit();
+  bt_mesh_model_settings_commit();
+
+  atomic_set_bit(bt_mesh.flags, BT_MESH_VALID);
+
+  bt_mesh_start();
+
+  return 0;
+}
+
+SETTINGS_STATIC_HANDLER_DEFINE_WITH_CPRIO(bt_mesh,
+    "bt/mesh",
+    NULL,
+    NULL,
+    mesh_commit,
+    NULL,
+
+                                          BT_SETTINGS_CPRIO_2);
+
+/* Pending flags that use 0 as the storage timeout */
+#define NO_WAIT_PENDING_BITS                                                                       \
+  (BIT(BT_MESH_SETTINGS_NET_PENDING) | BIT(BT_MESH_SETTINGS_IV_PENDING) |                          \
+   BIT(BT_MESH_SETTINGS_SEQ_PENDING) | BIT(BT_MESH_SETTINGS_CDB_PENDING))
+
+/* Pending flags that use CONFIG_BT_MESH_RPL_STORE_TIMEOUT. Both replay lists
+ * share the deadline, and each is stored only if its own flag is set.
+ */
+#define RPL_PENDING_BITS (BIT(BT_MESH_SETTINGS_RPL_PENDING) | BIT(BT_MESH_SETTINGS_SRPL_PENDING))
+
+static void schedule_store(struct k_work_delayable *dwork,
+                           uint32_t timeout_ms)
+{
+  uint32_t remaining_ms;
+
+  remaining_ms = TICK2MSEC(k_work_delayable_remaining_get(dwork));
+  LOG_DBG("Waiting %u ms vs rem %u ms", timeout_ms, remaining_ms);
+
+  /* If the new deadline is sooner, override any existing
+   * deadline; otherwise schedule without changing any existing deadline.
+   */
+
+  if (timeout_ms < remaining_ms)
+    {
+      if (IS_ENABLED(CONFIG_BT_MESH_SETTINGS_WORKQ))
+        {
+          k_work_reschedule_for_queue(&settings_work_q, dwork,
+                  MSEC2TICK(timeout_ms));
+        }
+      else
+        {
+          k_work_reschedule(dwork, MSEC2TICK(timeout_ms));
+        }
+    }
+  else
+    {
+      if (IS_ENABLED(CONFIG_BT_MESH_SETTINGS_WORKQ))
+        {
+          k_work_schedule_for_queue(&settings_work_q, dwork,
+                  MSEC2TICK(timeout_ms));
+        }
+      else
+        {
+          k_work_schedule(dwork, MSEC2TICK(timeout_ms));
+        }
+    }
+}
+
+void bt_mesh_settings_store_schedule(enum bt_mesh_settings_flag flag)
+{
+  atomic_set_bit(pending_flags, flag);
+
+  if (RPL_OWN_TIMEOUT && (BIT(flag) & RPL_PENDING_BITS) != 0)
+    {
+      schedule_store(&rpl_pending_store, RPL_STORE_TIMEOUT * MSEC_PER_SEC);
+      return;
+    }
+
+  if ((atomic_read(pending_flags) & NO_WAIT_PENDING_BITS) != 0)
+    {
+      schedule_store(&pending_store, 0);
+    }
+  else
+    {
+      schedule_store(&pending_store,
+              CONFIG_BT_MESH_STORE_TIMEOUT * MSEC_PER_SEC);
+    }
+}
+
+void bt_mesh_settings_store_cancel(enum bt_mesh_settings_flag flag)
+{
+  atomic_clear_bit(pending_flags, flag);
+}
+
+static void store_pending_flags(uint32_t mask)
+{
+  LOG_DBG("");
+
+  static const struct
+  {
+    void (*handler)(void);
+  }
+
+  handlers[BT_MESH_SETTINGS_FLAG_COUNT] =
+{
+  [BT_MESH_SETTINGS_RPL_PENDING] =
+{
+  bt_mesh_rpl_pending_store_all_nodes
+},
+
+  [BT_MESH_SETTINGS_RPL_RESET_PENDING] =
+{
+  bt_mesh_rpl_pending_store_all_nodes
+},
+
+  [BT_MESH_SETTINGS_NET_KEYS_PENDING] =
+{
+  bt_mesh_subnet_pending_store
+},
+
+  [BT_MESH_SETTINGS_APP_KEYS_PENDING] =
+{
+  bt_mesh_app_key_pending_store
+},
+
+  [BT_MESH_SETTINGS_NET_PENDING] =
+{
+  bt_mesh_net_pending_net_store
+},
+
+  [BT_MESH_SETTINGS_IV_PENDING] =
+{
+  bt_mesh_net_pending_iv_store
+},
+
+  [BT_MESH_SETTINGS_SEQ_PENDING] =
+{
+  bt_mesh_net_pending_seq_store
+},
+
+  [BT_MESH_SETTINGS_DEV_KEY_CAND_PENDING] =
+{
+  bt_mesh_net_pending_dev_key_cand_store
+},
+
+  [BT_MESH_SETTINGS_HB_PUB_PENDING] =
+{
+  bt_mesh_hb_pub_pending_store
+},
+
+  [BT_MESH_SETTINGS_CFG_PENDING] =
+{
+  bt_mesh_cfg_pending_store
+},
+
+  [BT_MESH_SETTINGS_COMP_PENDING] =
+{
+  bt_mesh_comp_data_pending_clear
+},
+
+  [BT_MESH_SETTINGS_MOD_PENDING] =
+{
+  bt_mesh_model_pending_store
+},
+
+  [BT_MESH_SETTINGS_VA_PENDING] =
+{
+  bt_mesh_va_pending_store
+},
+
+  [BT_MESH_SETTINGS_CDB_PENDING] =
+{
+  IS_ENABLED(CONFIG_BT_MESH_CDB) ? bt_mesh_cdb_pending_store : NULL
+},
+
+  [BT_MESH_SETTINGS_SRPL_PENDING] =
+{
+  IS_ENABLED(CONFIG_BT_MESH_OD_PRIV_PROXY_SRV) ?
+  bt_mesh_srpl_pending_store : NULL
+},
+
+  [BT_MESH_SETTINGS_SSEQ_PENDING] =
+{
+  IS_ENABLED(CONFIG_BT_MESH_PROXY_SOLICITATION) ?
+  bt_mesh_sseq_pending_store : NULL
+},
+
+  [BT_MESH_SETTINGS_BRG_PENDING] =
+{
+  IS_ENABLED(CONFIG_BT_MESH_BRG_CFG_SRV) ?
+  bt_mesh_brg_cfg_pending_store : NULL
+},
+};
+
+  for (int i = 0; i < ARRAY_SIZE(handlers); i++)
+    {
+      if (handlers[i].handler == NULL)
+        {
+          continue;
+        }
+
+      if ((mask & BIT(i)) == 0)
+        {
+          continue;
+        }
+
+      if (atomic_test_and_clear_bit(pending_flags, i))
+        {
+          handlers[i].handler();
+        }
+    }
+}
+
+static void store_pending(struct k_work *work)
+{
+  store_pending_flags(RPL_OWN_TIMEOUT ? ~RPL_PENDING_BITS : ~0U);
+}
+
+static void rpl_store_pending(struct k_work *work)
+{
+  store_pending_flags(RPL_PENDING_BITS);
+}
+
+void bt_mesh_settings_init(void)
+{
+  if (IS_ENABLED(CONFIG_BT_MESH_SETTINGS_WORKQ))
+    {
+      k_work_queue_start(&settings_work_q, settings_work_stack,
+              sizeof(settings_work_stack),
+                         K_PRIO_COOP(SETTINGS_WORKQ_PRIO), NULL);
+    }
+
+  k_work_init_delayable(&pending_store, store_pending);
+  if (RPL_OWN_TIMEOUT)
+    {
+      k_work_init_delayable(&rpl_pending_store, rpl_store_pending);
+    }
+}
+
+void bt_mesh_settings_store_pending(void)
+{
+  (void)k_work_cancel_delayable(&pending_store);
+  if (RPL_OWN_TIMEOUT)
+    {
+      (void)k_work_cancel_delayable(&rpl_pending_store);
+    }
+
+  store_pending_flags(~0U);
+}

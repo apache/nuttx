@@ -1,0 +1,78 @@
+############################################################################
+# net/bt/audio/Kconfig.vocs
+#
+# Copyright (c) ByteDance Ltd. and/or its affiliates.
+#
+# Author: chao an <anchao.archer@bytedance.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# Bluetooth Audio - Volume Offset Control Service options
+#
+# Copyright (c) 2020 Bose Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+##################### Volume Offset Control Service #####################
+
+config BT_VOCS_MAX_INSTANCE_COUNT
+	int "Volume Offset Control Service max instance count"
+	depends on BT_SMP
+	default 0
+	range 0 15
+	help
+	  This option sets the maximum number of instances of Volume Offset
+	  Control Services.
+
+config BT_VOCS
+	bool # hidden
+	default y if BT_VOCS_MAX_INSTANCE_COUNT > 0
+	help
+	  This hidden option enables support for Volume Control Service.
+
+if BT_VOCS
+
+config BT_VOCS_MAX_OUTPUT_DESCRIPTION_SIZE
+	int "Volume Offset Control Service max output description size"
+	default 32
+	range 0 512
+	help
+	  This option sets the maximum output description size in octets.
+
+endif # BT_VOCS
+
+##################### Volume Offset Control Service Client #####################
+
+config BT_VOCS_CLIENT_MAX_INSTANCE_COUNT
+	int "Volume Offset Control Service client max instance count"
+	depends on BT_SMP
+	default 0
+	range 0 15
+	help
+	  This option sets the maximum number of instances of Volume Offset
+	  Control Service clients.
+
+config BT_VOCS_CLIENT
+	bool # hidden
+	default y if BT_VOCS_CLIENT_MAX_INSTANCE_COUNT > 0
+	depends on BT_GATT_AUTO_DISCOVER_CCC
+	help
+	  This hidden option enables support for Volume Offset Control Service.
