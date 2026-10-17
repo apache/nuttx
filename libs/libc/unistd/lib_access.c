@@ -27,6 +27,8 @@
 #include <nuttx/config.h>
 
 #include <errno.h>
+#include <limits.h>
+#include <stdbool.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -49,8 +51,64 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
+ * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: access_xok
+ *
+ * Description:
+ *   Return true if the caller may execute the file described by s, with
+ *   the real user and group IDs.  Root needs any execute bit; another user
+ *   needs the owner, group or other execute bit that applies to it.
+ *   Without CONFIG_SCHED_USER_IDENTITY, any execute bit is enough.
+ *
+ ****************************************************************************/
+
+static bool access_xok(FAR const struct stat *s)
+{
+  mode_t xbits = S_IXUSR | S_IXGRP | S_IXOTH;
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  uid_t uid = getuid();
+
+  /* Root can execute any file that has at least one execute bit set */
+
+  if (uid != 0)
+    {
+      if (s->st_uid == uid)
+        {
+          xbits = S_IXUSR;
+        }
+      else if (s->st_gid == getgid())
+        {
+          xbits = S_IXGRP;
+        }
+      else
+        {
+#  if NGROUPS_MAX > 0
+          gid_t groups[NGROUPS_MAX];
+          int ngroups;
+          int i;
+
+          xbits   = S_IXOTH;
+          ngroups = getgroups(NGROUPS_MAX, groups);
+          for (i = 0; i < ngroups; i++)
+            {
+              if (groups[i] == s->st_gid)
+                {
+                  xbits = S_IXGRP;
+                  break;
+                }
+            }
+#  else
+          xbits = S_IXOTH;
+#  endif
+        }
+    }
+#endif
+
+  return (s->st_mode & xbits) != 0;
+}
 
 /****************************************************************************
  * Public Functions
@@ -64,7 +122,8 @@
  *   to by the path argument for accessibility according to the bit pattern
  *   contained in amode, using the real user ID in place of the effective
  *   user ID and the real group ID in place of the effective group ID.
- *   As there are no users in NuttX, the function always succeeds.
+ *   W_OK needs the owner write bit, and X_OK an execute bit for the
+ *   caller.  A directory is always accessible.
  *
  * Input Parameters:
  *   path - a pointer to the path
@@ -92,13 +151,14 @@ int access(FAR const char *path, int amode)
       return 0;
     }
 
-  if (amode & W_OK)
+  if ((amode & W_OK) != 0 && (s.st_mode & S_IWUSR) == 0)
     {
-      if (s.st_mode & S_IWUSR)
-        {
-          return 0;
-        }
+      set_errno(EACCES);
+      return -1;
+    }
 
+  if ((amode & X_OK) != 0 && !access_xok(&s))
+    {
       set_errno(EACCES);
       return -1;
     }
