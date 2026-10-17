@@ -174,6 +174,7 @@ SYSCALL_LOOKUP(sigqueue,                   3)
 SYSCALL_LOOKUP(sigsuspend,                 1)
 SYSCALL_LOOKUP(sigtimedwait,               3)
 SYSCALL_LOOKUP(sigwaitinfo,                2)
+SYSCALL_LOOKUP(pause,                      0)
 #endif
 SYSCALL_LOOKUP(clock_nanosleep,            4)
 
