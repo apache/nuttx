@@ -82,6 +82,10 @@ if(CONFIG_ARCH_SETJMP_H)
   list(APPEND SRCS arch_setjmp.S)
 endif()
 
+if(CONFIG_ARCH_HAVE_UCONTEXT)
+  list(APPEND SRCS arch_ucontext.S arch_makecontext.c)
+endif()
+
 if(NOT CONFIG_PROFILE_NONE)
   list(APPEND SRCS arch_mcount.c)
 endif()
