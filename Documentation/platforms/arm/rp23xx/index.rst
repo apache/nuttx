@@ -45,7 +45,7 @@ TRNG             Working       Hardware RNG at /dev/random and /dev/urandom
 Flash MTD        Working       Unused flash tail as an MTD device, answers BIOC_XIPBASE
 Timer            Working       /dev/timerN on TIMER0/TIMER1, 1 us resolution
 Tickless         Working       Optional, RP2350 TIMER via the alarm/oneshot
-RTC              Working       POWMAN always-on timer, backs the system clock
+RTC              Working       POWMAN always-on timer, system clock and /dev/rtc0 with alarm
 OTP              Working       Reads via /dev/efuse; programming is opt-in
 ==============   ============  =====
 
@@ -257,6 +257,14 @@ library (`powman_timer_start_lposc()`, `powman_timer_set_ms()` and
 `pico_aon_timer
 <https://github.com/raspberrypi/pico-sdk/tree/master/src/rp2_common/pico_aon_timer>`_
 wrapper.
+
+The always-on timer also has one alarm comparator. With ``RTC_DRIVER``, the
+common board bring-up registers the timer as ``/dev/rtc0``. With
+``RTC_ALARM`` too, ``/dev/rtc0`` supports ``RTC_SET_ALARM``,
+``RTC_SET_RELATIVE``, ``RTC_RD_ALARM`` and ``RTC_CANCEL_ALARM``, for example
+through ``apps/examples/alarm``. The comparator stays asserted while the
+time is past the alarm time, so the interrupt handler disables the alarm
+first. An alarm fires once.
 
 Programming
 ============
