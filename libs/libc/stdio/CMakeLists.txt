@@ -109,6 +109,16 @@ if(CONFIG_FILE_STREAM)
     lib_getwc.c
     lib_ungetwc.c
     lib_stdio_ext.c)
+
+  # popen() needs dpopen().  CONFIG_SYSTEM_POPEN selects the copy in
+  # apps/system/popen instead.
+
+  if(CONFIG_PIPES
+     AND CONFIG_LIBC_EXECFUNCS
+     AND CONFIG_SCHED_WAITPID
+     AND NOT CONFIG_SYSTEM_POPEN)
+    list(APPEND SRCS lib_popen.c)
+  endif()
 endif()
 
 target_sources(c PRIVATE ${SRCS})

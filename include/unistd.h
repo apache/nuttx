@@ -425,8 +425,8 @@ FAR void *sbrk(intptr_t incr);
 int     pipe(int pipefd[2]);
 int     pipe2(int pipefd[2], int flags);
 
-/* Pipe-based process I/O.  These are not actually implemented in the OS.
- * See apps/system/popen for implementation.
+/* Pipe-based process I/O.  libc has them when pipes, posix_spawn() and
+ * waitpid() are enabled.
  */
 
 #ifndef __KERNEL__
