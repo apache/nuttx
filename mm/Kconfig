@@ -276,6 +276,7 @@ if GRAN
 
 config GRAN_INTR
 	bool "Interrupt level support"
+	default y if MM_PGALLOC && SMP
 	default n
 	---help---
 		Normally mutual exclusive access to granule allocator data is assured
@@ -283,6 +284,11 @@ config GRAN_INTR
 		exclusion logic will disable interrupts.  While this options is more
 		invasive to system performance, it will also support use of the granule
 		allocator from interrupt level logic.
+
+		The page allocator takes the lock once for each page.  With SMP, a
+		semaphore can be given to a thread that waits for a CPU, and all
+		page allocations then wait for that thread.  This option is the
+		default for MM_PGALLOC with SMP.
 
 config DEBUG_GRAN
 	bool "Granule Allocator Debug"
