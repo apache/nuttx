@@ -62,7 +62,17 @@ int gran_enter_critical(FAR struct gran_s *priv)
   priv->irqstate = spin_lock_irqsave(&priv->lock);
   return OK;
 #else
-  return nxmutex_lock(&priv->lock);
+  int ret;
+
+  /* A signal must not make the allocation fail */
+
+  do
+    {
+      ret = nxmutex_lock(&priv->lock);
+    }
+  while (ret == -EINTR);
+
+  return ret;
 #endif
 }
 

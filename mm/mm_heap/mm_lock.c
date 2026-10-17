@@ -104,13 +104,22 @@ int mm_lock(FAR struct mm_heap_s *heap)
     }
   else
     {
-      int ret = nxmutex_lock(&heap->mm_lock);
+      int ret;
+
+      /* A signal must not make the caller run without the lock */
+
+      do
+        {
+          ret = nxmutex_lock(&heap->mm_lock);
+        }
+      while (ret == -EINTR);
+
       if (ret >= 0)
         {
           kasan_bypass(true);
         }
 
-      return 0;
+      return ret;
     }
 }
 
