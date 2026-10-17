@@ -45,7 +45,7 @@
 
 #undef HAVE_BUTTON_LED_DEMO
 #if defined(CONFIG_ARCH_BUTTONS) && defined(CONFIG_ARCH_IRQBUTTONS) && \
-    defined(CONFIG_RM57_GIO_IRQ)
+    defined(CONFIG_RM57_GIO_IRQ) && !defined(CONFIG_ARCH_LEDS)
 #  define HAVE_BUTTON_LED_DEMO 1
 #endif
 
