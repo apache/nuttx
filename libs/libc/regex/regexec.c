@@ -197,7 +197,8 @@ static reg_errcode_t tre_tnfa_run_parallel(const tre_tnfa_t *tnfa,
 {
   /* State variables required by GET_NEXT_WCHAR. */
 
-  tre_char_t    prev_c = 0, next_c = 0;
+  tre_char_t    prev_c          = 0;
+  tre_char_t    next_c          = 0;
   const char    *str_byte       = string;
   int           pos             = -1;
   int           pos_add_next    = 1;
@@ -212,7 +213,10 @@ static reg_errcode_t tre_tnfa_run_parallel(const tre_tnfa_t *tnfa,
 
   char                  *buf;
   tre_tnfa_transition_t *trans_i;
-  tre_tnfa_reach_t      *reach, *reach_next, *reach_i, *reach_next_i;
+  tre_tnfa_reach_t      *reach;
+  tre_tnfa_reach_t      *reach_next;
+  tre_tnfa_reach_t      *reach_i;
+  tre_tnfa_reach_t      *reach_next_i;
   tre_reach_pos_t       *reach_pos;
   int                   *tag_i;
   int                   num_tags;
@@ -243,56 +247,56 @@ static reg_errcode_t tre_tnfa_run_parallel(const tre_tnfa_t *tnfa,
    *  or with malloc() if alloca is unavailable.
    */
 
-    {
-      int     tbytes;
-      int     rbytes;
-      int     pbytes;
-      int     xbytes;
-      int     total_bytes;
-      char    *tmp_buf;
+  {
+    int     tbytes;
+    int     rbytes;
+    int     pbytes;
+    int     xbytes;
+    int     total_bytes;
+    char    *tmp_buf;
 
-      /* Compute the length of the block we need. */
+    /* Compute the length of the block we need. */
 
-      tbytes      = sizeof(*tmp_tags) * num_tags;
-      rbytes      = sizeof(*reach_next) * (tnfa->num_states + 1);
-      pbytes      = sizeof(*reach_pos) * tnfa->num_states;
-      xbytes      = sizeof(int) * num_tags;
-      total_bytes = (sizeof(long) - 1) * 4 /* for alignment paddings */
-                  + (rbytes + xbytes * tnfa->num_states) * 2 + tbytes +
-                  pbytes;
+    tbytes      = sizeof(*tmp_tags) * num_tags;
+    rbytes      = sizeof(*reach_next) * (tnfa->num_states + 1);
+    pbytes      = sizeof(*reach_pos) * tnfa->num_states;
+    xbytes      = sizeof(int) * num_tags;
+    total_bytes = (sizeof(long) - 1) * 4 /* for alignment paddings */
+                + (rbytes + xbytes * tnfa->num_states) * 2 + tbytes +
+                pbytes;
 
-      /* Allocate the memory. */
+    /* Allocate the memory. */
 
-      buf = xmalloc((unsigned)total_bytes);
-      if (buf == NULL)
-        {
-          return REG_ESPACE;
-        }
+    buf = xmalloc((unsigned)total_bytes);
+    if (buf == NULL)
+      {
+        return REG_ESPACE;
+      }
 
-      memset(buf, 0, (size_t)total_bytes);
+    memset(buf, 0, (size_t)total_bytes);
 
-      /* Get the various pointers within tmp_buf (properly aligned). */
+    /* Get the various pointers within tmp_buf (properly aligned). */
 
-      tmp_tags    = (void *)buf;
-      tmp_buf     = buf + tbytes;
-      tmp_buf     += ALIGN(tmp_buf, long);
-      reach_next  = (void *)tmp_buf;
-      tmp_buf     += rbytes;
-      tmp_buf     += ALIGN(tmp_buf, long);
-      reach       = (void *)tmp_buf;
-      tmp_buf     += rbytes;
-      tmp_buf     += ALIGN(tmp_buf, long);
-      reach_pos   = (void *)tmp_buf;
-      tmp_buf     += pbytes;
-      tmp_buf     += ALIGN(tmp_buf, long);
-      for (i = 0; i < tnfa->num_states; i++)
-        {
-          reach[i].tags       = (void *)tmp_buf;
-          tmp_buf             += xbytes;
-          reach_next[i].tags  = (void *)tmp_buf;
-          tmp_buf             += xbytes;
-        }
-    }
+    tmp_tags    = (void *)buf;
+    tmp_buf     = buf + tbytes;
+    tmp_buf     += ALIGN(tmp_buf, long);
+    reach_next  = (void *)tmp_buf;
+    tmp_buf     += rbytes;
+    tmp_buf     += ALIGN(tmp_buf, long);
+    reach       = (void *)tmp_buf;
+    tmp_buf     += rbytes;
+    tmp_buf     += ALIGN(tmp_buf, long);
+    reach_pos   = (void *)tmp_buf;
+    tmp_buf     += pbytes;
+    tmp_buf     += ALIGN(tmp_buf, long);
+    for (i = 0; i < tnfa->num_states; i++)
+      {
+        reach[i].tags       = (void *)tmp_buf;
+        tmp_buf             += xbytes;
+        reach_next[i].tags  = (void *)tmp_buf;
+        tmp_buf             += xbytes;
+      }
+  }
 
   for (i = 0; i < tnfa->num_states; i++)
     {
@@ -397,10 +401,12 @@ static reg_errcode_t tre_tnfa_run_parallel(const tre_tnfa_t *tnfa,
           for (reach_i = reach; reach_i->state; reach_i++)
             {
               int skip = 0;
+
               for (i = 0; tnfa->minimal_tags[i] >= 0; i += 2)
                 {
                   int   end     = tnfa->minimal_tags[i];
                   int   start   = tnfa->minimal_tags[i + 1];
+
                   if (end >= num_tags)
                     {
                       skip = 1;
@@ -703,7 +709,8 @@ static reg_errcode_t tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa,
 {
   /* State variables required by GET_NEXT_WCHAR. */
 
-  tre_char_t    prev_c = 0, next_c = 0;
+  tre_char_t    prev_c          = 0;
+  tre_char_t    next_c          = 0;
   const char    *str_byte       = string;
   int           pos             = 0;
   int           pos_add_next    = 1;
@@ -803,22 +810,23 @@ static reg_errcode_t tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa,
     }
 
 retry:
-    {
-      int i;
-      for (i = 0; i < tnfa->num_tags; i++)
-        {
-          tags[i] = -1;
-          if (match_tags)
-            {
-              match_tags[i] = -1;
-            }
-        }
+  {
+    int i;
 
-      for (i = 0; i < tnfa->num_states; i++)
-        {
-          states_seen[i] = 0;
-        }
-    }
+    for (i = 0; i < tnfa->num_tags; i++)
+      {
+        tags[i] = -1;
+        if (match_tags)
+          {
+            match_tags[i] = -1;
+          }
+      }
+
+    for (i = 0; i < tnfa->num_states; i++)
+      {
+        states_seen[i] = 0;
+      }
+  }
 
   state = NULL;
   pos   = pos_start;
@@ -853,16 +861,17 @@ retry:
 
           BT_STACK_PUSH(pos, str_byte, 0, trans_i->state, trans_i->state_id,
                         next_c, tags, mbstate);
-            {
-              int *tmp = trans_i->tags;
-              if (tmp)
-                {
-                  while (*tmp >= 0)
-                    {
-                      stack->item.tags[*tmp++] = pos;
-                    }
-                }
-            }
+          {
+            int *tmp = trans_i->tags;
+
+            if (tmp)
+              {
+                while (*tmp >= 0)
+                  {
+                    stack->item.tags[*tmp++] = pos;
+                  }
+              }
+          }
         }
     }
 
@@ -1016,19 +1025,20 @@ retry:
 
                   BT_STACK_PUSH(pos, str_byte, 0, trans_i->state,
                                 trans_i->state_id, next_c, tags, mbstate);
-                    {
-                      int *tmp;
-                      for (tmp = trans_i->tags; tmp && *tmp >= 0; tmp++)
-                        {
-                          stack->item.tags[*tmp] = pos;
-                        }
-                    }
+                  {
+                    int *tmp;
+
+                    for (tmp = trans_i->tags; tmp && *tmp >= 0; tmp++)
+                      {
+                        stack->item.tags[*tmp] = pos;
+                      }
+                  }
 
 #if 0
 
-      /* XXX - it's important not to look at all transitions here to keep
-       *  the stack small!
-       */
+                  /* XXX - it's important not to look at all transitions here
+                   *  to keep the stack small!
+                   */
 
                   break;
 #endif
