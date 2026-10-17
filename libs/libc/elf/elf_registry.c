@@ -28,68 +28,14 @@
 
 #include <string.h>
 #include <assert.h>
-#include <nuttx/debug.h>
 #include <errno.h>
 
-#include <nuttx/mutex.h>
+#include <nuttx/list.h>
 #include <nuttx/lib/elf.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static rmutex_t g_modlock = NXRMUTEX_INITIALIZER;
-static FAR struct module_s *g_mod_registry;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: libelf_registry_lock
- *
- * Description:
- *   Get exclusive access to the module registry.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void libelf_registry_lock(void)
-{
-  nxrmutex_lock(&g_modlock);
-}
-
-/****************************************************************************
- * Name: libelf_registry_unlock
- *
- * Description:
- *   Relinquish the lock on the module registry
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void libelf_registry_unlock(void)
-{
-  nxrmutex_unlock(&g_modlock);
-}
 
 /****************************************************************************
  * Name: libelf_registry_add
@@ -98,67 +44,45 @@ void libelf_registry_unlock(void)
  *   Add a new entry to the module registry.
  *
  * Input Parameters:
- *   modp - The module data structure to be registered.
+ *   registry - The registry.
+ *   modp     - The module data structure to be registered.
  *
  * Returned Value:
  *   None
  *
  * Assumptions:
- *   The caller holds the lock on the module registry.
+ *   The caller holds the lock of the registry.
  *
  ****************************************************************************/
 
-void libelf_registry_add(FAR struct module_s *modp)
+void libelf_registry_add(FAR struct list_node *registry,
+                         FAR struct module_s *modp)
 {
-  DEBUGASSERT(modp);
-  modp->flink = g_mod_registry;
-  g_mod_registry = modp;
+  DEBUGASSERT(registry != NULL && modp != NULL);
+  list_add_head(registry, &modp->node);
 }
 
 /****************************************************************************
  * Name: libelf_registry_del
  *
  * Description:
- *   Remove a module entry from the registry
+ *   Remove a module entry from its registry.
  *
  * Input Parameters:
  *   modp - The registry entry to be removed.
  *
  * Returned Value:
- *   Zero (OK) is returned if the registry entry was deleted.  Otherwise,
- *   a negated errno value is returned.
+ *   None
  *
  * Assumptions:
- *   The caller holds the lock on the module registry.
+ *   The caller holds the lock of the registry.
  *
  ****************************************************************************/
 
-int libelf_registry_del(FAR struct module_s *modp)
+void libelf_registry_del(FAR struct module_s *modp)
 {
-  FAR struct module_s *prev;
-  FAR struct module_s *curr;
-
-  for (prev = NULL, curr = g_mod_registry;
-       curr != NULL && curr != modp;
-       prev = curr, curr = curr->flink);
-
-  if (curr == NULL)
-    {
-      berr("ERROR: Could not find module entry\n");
-      return -ENOENT;
-    }
-
-  if (prev == NULL)
-    {
-      g_mod_registry = modp->flink;
-    }
-  else
-    {
-      prev->flink = modp->flink;
-    }
-
-  modp->flink = NULL;
-  return OK;
+  DEBUGASSERT(modp != NULL);
+  list_delete_init(&modp->node);
 }
 
 /****************************************************************************
@@ -168,28 +92,33 @@ int libelf_registry_del(FAR struct module_s *modp)
  *   Find an entry in the module registry using the name of the module.
  *
  * Input Parameters:
- *   modname - The name of the module to be found
+ *   registry - The registry.
+ *   modname  - The name of the module to be found
  *
  * Returned Value:
  *   If the registry entry is found, a pointer to the module entry is
  *   returned.  NULL is returned if the entry is not found.
  *
  * Assumptions:
- *   The caller holds the lock on the module registry.
+ *   The caller holds the lock of the registry.
  *
  ****************************************************************************/
 
 #ifdef HAVE_LIBC_ELF_NAMES
-FAR struct module_s *libelf_registry_find(FAR const char *modname)
+FAR struct module_s *libelf_registry_find(FAR struct list_node *registry,
+                                          FAR const char *modname)
 {
   FAR struct module_s *modp;
 
-  for (modp = g_mod_registry;
-       modp != NULL &&
-       strncmp(modp->modname, modname, LIBC_ELF_NAMEMAX) != 0;
-       modp = modp->flink);
+  list_for_every_entry(registry, modp, struct module_s, node)
+    {
+      if (strncmp(modp->modname, modname, LIBC_ELF_NAMEMAX) == 0)
+        {
+          return modp;
+        }
+    }
 
-  return modp;
+  return NULL;
 }
 #endif
 
@@ -202,21 +131,23 @@ FAR struct module_s *libelf_registry_find(FAR const char *modname)
  *   the handle is probably a stale pointer.
  *
  * Input Parameters:
- *   modp - The registry entry to be verified.
+ *   registry - The registry.
+ *   modp     - The registry entry to be verified.
  *
  * Returned Value:
  *   Returns OK is the module is valid; -ENOENT otherwise.
  *
  * Assumptions:
- *   The caller holds the lock on the module registry.
+ *   The caller holds the lock of the registry.
  *
  ****************************************************************************/
 
-int libelf_registry_verify(FAR struct module_s *modp)
+int libelf_registry_verify(FAR struct list_node *registry,
+                           FAR struct module_s *modp)
 {
   FAR struct module_s *node;
 
-  for (node = g_mod_registry; node != NULL; node = node->flink)
+  list_for_every_entry(registry, node, struct module_s, node)
     {
       if (node == modp)
         {
@@ -234,6 +165,7 @@ int libelf_registry_verify(FAR struct module_s *modp)
  *   Visit each module in the registry
  *
  * Input Parameters:
+ *   registry - The registry, or NULL for none.
  *   callback - This callback function was be called for each entry in the
  *     registry.
  *   arg - This opaque argument will be passed to the callback function.
@@ -243,23 +175,24 @@ int libelf_registry_verify(FAR struct module_s *modp)
  *   function returns a non-zero value, the traversal will be terminated and
  *   that non-zero value will be returned.
  *
+ * Assumptions:
+ *   The caller holds the lock of the registry.
+ *
  ****************************************************************************/
 
-int libelf_registry_foreach(mod_callback_t callback, FAR void *arg)
+int libelf_registry_foreach(FAR struct list_node *registry,
+                            mod_callback_t callback, FAR void *arg)
 {
   FAR struct module_s *modp;
   int ret = OK;
 
-  /* Get exclusive access to the module registry */
-
-  libelf_registry_lock();
-
-  /* Visit each installed module */
-
-  for (modp = g_mod_registry; modp != NULL; modp = modp->flink)
+  if (registry == NULL)
     {
-      /* Perform the callback */
+      return OK;
+    }
 
+  list_for_every_entry(registry, modp, struct module_s, node)
+    {
       ret = callback(modp, arg);
       if (ret != 0)
         {
@@ -267,6 +200,5 @@ int libelf_registry_foreach(mod_callback_t callback, FAR void *arg)
         }
     }
 
-  libelf_registry_unlock();
   return ret;
 }

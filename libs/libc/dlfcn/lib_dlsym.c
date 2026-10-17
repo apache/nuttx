@@ -33,6 +33,7 @@
 
 #include <nuttx/lib/elf.h>
 #include <nuttx/symtab.h>
+#include <nuttx/tls.h>
 
 /****************************************************************************
  * Private Functions
@@ -87,7 +88,12 @@ FAR void *dlsym(FAR void *handle, FAR const char *name)
    * dlgetsem() is essentially a clone of modsym().
    */
 
-  return (FAR void *)libelf_getsymbol(handle, name);
+  FAR const void *symbol;
+
+  task_modules_lock();
+  symbol = libelf_getsymbol(handle, name);
+  task_modules_unlock();
+  return (FAR void *)symbol;
 
 #else /* if defined(CONFIG_BUILD_KERNEL) */
   /* The KERNEL build is considerably more complex:  In order to be shared,

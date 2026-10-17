@@ -28,6 +28,7 @@
 
 #include <assert.h>
 
+#include <nuttx/mutex.h>
 #include <nuttx/symtab.h>
 #include <nuttx/lib/elf.h>
 
@@ -62,6 +63,7 @@ extern int CONFIG_LIBC_ELF_NSYMBOLS_VAR;
  * Private Data
  ****************************************************************************/
 
+static mutex_t g_libelf_symlock = NXMUTEX_INITIALIZER;
 static FAR const struct symtab_s *g_libelf_symtab;
 static int g_libelf_nsymbols;
 
@@ -89,9 +91,7 @@ void libelf_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols)
 {
   DEBUGASSERT(symtab != NULL && nsymbols != NULL);
 
-  /* Borrow the registry lock to assure atomic access */
-
-  libelf_registry_lock();
+  nxmutex_lock(&g_libelf_symlock);
 #ifdef CONFIG_LIBC_ELF_HAVE_SYMTAB
   if (g_libelf_symtab == NULL)
     {
@@ -102,7 +102,7 @@ void libelf_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols)
 
   *symtab   = g_libelf_symtab;
   *nsymbols = g_libelf_nsymbols;
-  libelf_registry_unlock();
+  nxmutex_unlock(&g_libelf_symlock);
 }
 
 /****************************************************************************
@@ -122,10 +122,8 @@ void libelf_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols)
 
 void libelf_setsymtab(FAR const struct symtab_s *symtab, int nsymbols)
 {
-  /* Borrow the registry lock to assure atomic access */
-
-  libelf_registry_lock();
+  nxmutex_lock(&g_libelf_symlock);
   g_libelf_symtab   = symtab;
   g_libelf_nsymbols = nsymbols;
-  libelf_registry_unlock();
+  nxmutex_unlock(&g_libelf_symlock);
 }
