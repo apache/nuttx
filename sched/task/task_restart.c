@@ -158,9 +158,6 @@ static void nxtask_reset_task(FAR struct tcb_s *tcb, bool remove)
 
   up_initial_state(tcb);
 
-  /* Add the task to the inactive task list */
-
-  dq_addfirst((FAR dq_entry_t *)tcb, list_inactivetasks());
   tcb->task_state = TSTATE_TASK_INACTIVE;
 }
 
