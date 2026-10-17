@@ -119,8 +119,11 @@ static int elf_loadbinary(FAR struct binary_s *binp,
   binp->uid  = loadinfo.fileuid;
   binp->gid  = loadinfo.filegid;
   binp->mode = loadinfo.filemode;
+#endif
 
-  ret = binfmt_checkexecperm(binp);
+#ifdef CONFIG_BINFMT_CHECKEXEC
+  ret = binfmt_checkexecperm(loadinfo.filemode, loadinfo.fileuid,
+                             loadinfo.filegid);
   if (ret < 0)
     {
       goto errout_with_init;

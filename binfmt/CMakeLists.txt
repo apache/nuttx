@@ -41,7 +41,7 @@ list(
   binfmt_copyactions.c
   binfmt_dumpmodule.c)
 
-if(CONFIG_SCHED_USER_IDENTITY)
+if(CONFIG_BINFMT_CHECKEXEC)
   list(APPEND SRCS binfmt_checkexec.c)
 endif()
 

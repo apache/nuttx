@@ -42,59 +42,61 @@
  * Name: binfmt_checkexecperm
  *
  * Description:
- *   Verify that the calling task has execute permission on the file
- *   described by 'bin'.  The file owner, group, and mode must already be
- *   populated in the binary_s structure before calling this function.
+ *   Verify that the calling task has execute permission on a file with
+ *   the given mode, owner and group.
  *
  * Input Parameters:
- *   bin - Pointer to the binary descriptor with uid, gid, and mode set.
+ *   mode - The mode of the file
+ *   uid  - The owner of the file
+ *   gid  - The group of the file
  *
  * Returned Value:
  *   Zero (OK) on success; -EACCES if execute permission is denied.
  *
  ****************************************************************************/
 
-int binfmt_checkexecperm(FAR struct binary_s *bin)
+int binfmt_checkexecperm(mode_t mode, uid_t uid, gid_t gid)
 {
+#ifdef CONFIG_SCHED_USER_IDENTITY
   FAR struct tcb_s *rtcb;
   FAR struct task_group_s *rgroup;
-  mode_t xbits;
+#endif
+  mode_t xbits = S_IXUSR | S_IXGRP | S_IXOTH;
 
+#ifdef CONFIG_SCHED_USER_IDENTITY
   rtcb = nxsched_self();
-
-  if (bin == NULL || rtcb == NULL || rtcb->group == NULL)
+  if (rtcb == NULL || rtcb->group == NULL)
     {
       return OK;
     }
 
   rgroup = rtcb->group;
 
-  if (rgroup->tg_euid == 0)
-    {
-      /* Root can execute any file that has at least one execute bit set */
+  /* Root can execute any file that has at least one execute bit set */
 
-      if ((bin->mode & (S_IXUSR | S_IXGRP | S_IXOTH)) == 0)
+  if (rgroup->tg_euid != 0)
+    {
+      if (rgroup->tg_euid == uid)
         {
-          return -EACCES;
+          xbits = S_IXUSR;
         }
+      else if (nxsched_has_gid(rtcb, gid))
+        {
+          xbits = S_IXGRP;
+        }
+      else
+        {
+          xbits = S_IXOTH;
+        }
+    }
+#else
+  /* Without user identities, any execute bit is enough */
 
-      return OK;
-    }
+  UNUSED(uid);
+  UNUSED(gid);
+#endif
 
-  if (rgroup->tg_euid == bin->uid)
-    {
-      xbits = S_IXUSR;
-    }
-  else if (nxsched_has_gid(rtcb, bin->gid))
-    {
-      xbits = S_IXGRP;
-    }
-  else
-    {
-      xbits = S_IXOTH;
-    }
-
-  if ((bin->mode & xbits) == 0)
+  if ((mode & xbits) == 0)
     {
       return -EACCES;
     }
