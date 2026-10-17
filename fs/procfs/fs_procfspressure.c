@@ -394,7 +394,8 @@ static int pressure_stat(const char *relpath, struct stat *buf)
 
   if (strcmp(relpath, "pressure") == 0 || strcmp(relpath, "pressure/") == 0)
     {
-      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
+      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR |
+                     S_IXOTH | S_IXGRP | S_IXUSR;
     }
   else if (strcmp(relpath, "pressure/memory") == 0)
     {

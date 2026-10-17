@@ -484,7 +484,8 @@ static int skel_stat(FAR const char *relpath, FAR struct stat *buf)
    */
 
   memset(buf, 0, sizeof(struct stat));
-  buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
+  buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR |
+                 S_IXOTH | S_IXGRP | S_IXUSR;
 
   /* TODO:  Set S_IFREG if the relpath refers to a file.
    * TODO:  If the skel_write() method is supported, then stat must also
