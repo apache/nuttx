@@ -275,3 +275,70 @@ This config enables the ST7735 0.96" Display (80*160) on weact-stm32h743 board::
      nsh> 
 
 
+
+halow
+-----
+
+This config enables a Wi-Fi HaLow (IEEE 802.11ah) network interface using
+a Morse Micro MM6108 based module (tested with the Seeed Studio XIAO Wi-Fi
+HaLow module, Quectel FGH100M-H) connected to SPI1. See
+:doc:`/os/drivers/special/wireless/morse` for the driver documentation.
+
+The module is wired as below:
+
+============= ============ ==========================================
+Module        WeAct H743   Notes
+============= ============ ==========================================
+5V            5V           RF power amplifier, required to transmit
+3V3           3V3          Module digital logic
+GND           GND          Keep a ground wire next to the SPI wires
+D8 (SCK)      PA5          SPI1_SCK
+D9 (MISO)     PA6          SPI1_MISO
+D10 (MOSI)    PA7          SPI1_MOSI
+D3 (CS)       PA4          GPIO chip select
+D2 (IRQ)      PA1          EXTI1, active low
+D0 (RESET_N)  PA2          GPIO, held low until the driver boots the chip
+D1 (WAKE)     PA3          Optional, see below
+D4 (BUSY)     PA0          Optional, EXTI0, see below
+============= ============ ==========================================
+
+SCK and MOSI use the lowest GPIO slew rate: with jumper wires the ringing
+of faster edges double clocks the module SPI interface. The SPI clock is
+20 MHz (18.75 MHz actual).
+
+On the Seeed Studio XIAO HaLow module the WAKE (D1) and BUSY (D4) pads are
+not connected to the FGH100M-H: the series resistors are not populated
+(DNP). Without BUSY the chip cannot wake up the host from power save, so by
+default the board does not declare these lines and the driver keeps the
+chip always awake. If the two resistors are populated, enable
+``CONFIG_WEACT_STM32H743_HALOW_POWERSAVE`` to use the power save.
+
+The build downloads the needed files of the Morse Micro MM-IoT-SDK (about
+3 MB: the pre-built ``libmorse`` host library and the chip firmware, under
+the Morse Micro Binary Distribution License) and the FGH100M-H board
+configuration file (BCF), which is converted with ``python3`` and
+``pyelftools``. The STM32H7 RNG (clocked by HSI48) provides the entropy
+needed by WPA3-SAE.
+The image is bigger than 1 MiB, so both flash banks must be programmed,
+e.g. with OpenOCD::
+
+    $ openocd -f interface/stlink.cfg -c "set DUAL_BANK 1" \
+        -f target/stm32h7x.cfg -c "program nuttx.bin 0x08000000 verify reset exit"
+
+Wi-Fi HaLow only supports open, OWE and WPA3-SAE networks. Connect to a
+WPA3-SAE access point and get an address with DHCP::
+
+    nsh> ifconfig wlan0 up
+    nsh> wapi scan wlan0
+    bssid / frequency / signal level / encode / ssid
+    1c:bc:ec:30:f7:fb	9.035e+08	-14	0800	silex-ap
+    nsh> wapi psk wlan0 mypassphrase 3 3
+    nsh> wapi essid wlan0 silex-ap 1
+    nsh> renew wlan0
+    nsh> ifconfig
+    wlan0	Link encap:Ethernet HWaddr 68:24:99:44:6b:6b at RUNNING mtu 1500
+    	inet addr:10.0.3.245 DRaddr:10.0.0.1 Mask:255.255.240.0
+    nsh> ping -c 3 10.0.0.1
+
+The default regulatory domain is US (``CONFIG_IEEE80211_MORSE_COUNTRY``). It
+can be changed while disconnected with ``wapi country wlan0 AU``.
