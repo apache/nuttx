@@ -809,11 +809,31 @@ static int nrf52_radioi8_setchannel(struct nrf52_radioi8_dev_s *dev,
 {
   struct nrf52_radio_dev_s *lower = NULL;
   uint32_t                  freq  = 2405 + 5 * (chan - 11);
+  int                       ret;
 
   DEBUGASSERT(dev);
   lower = dev->radio->lower;
 
-  return NRF52_RADIO_FREQSET(lower, freq);
+  ret = NRF52_RADIO_FREQSET(lower, freq);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Restart an active receiver on the new channel */
+
+  if (dev->radio->state.state == NRF52_RADIO_STATE_RX &&
+      dev->radio->state.rxenabled)
+    {
+      dev->radio->ops->rxenable(dev, false);
+
+      while (NRF52_RADIO_GETREG(lower, NRF52_RADIO_STATE_OFFSET) !=
+             RADIO_STATE_DISABLED);
+
+      dev->radio->ops->rxenable(dev, true);
+    }
+
+  return OK;
 }
 
 /****************************************************************************
