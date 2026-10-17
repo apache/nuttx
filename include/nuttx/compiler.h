@@ -1534,6 +1534,20 @@
 #  define __has_include(x) 0
 #endif
 
+/* A program can define NUTTX_NO_EXTENSIONS before the first #include to
+ * keep some non-standard names free for its own use.  Then the headers do
+ * not define ERROR and OK (sys/types.h), set_errno() and get_errno()
+ * (errno.h), zalloc() (stdlib.h), O_TEXT (fcntl.h) and the helper macros
+ * below.  The other headers do not use these names.
+ */
+
+#ifdef NUTTX_NO_EXTENSIONS
+#  undef weak_alias
+#  undef visibility_hidden
+#  undef visibility_default
+#  undef unused_data
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

@@ -49,7 +49,9 @@
 #define O_WRONLY     (1U << 0)       /* Open for write access (only) */
 #define O_RDWR       (2U << 0)       /* Open for both read & write access */
 #define O_ACCMODE    (3U << 0)       /* Mask for access mode */
+#ifndef NUTTX_NO_EXTENSIONS          /* See nuttx/compiler.h */
 #define O_TEXT       (1U << 5)       /* Open the file in text (translated) mode. */
+#endif
 #define O_CREAT      (1U << 6)       /* Create file/sem/mq object */
 #define O_EXCL       (1U << 7)       /* Name must not exist when opened  */
 #define O_NOCTTY     (1U << 8)       /* Don't assign a controlling terminal */
