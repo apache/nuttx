@@ -2128,8 +2128,7 @@ static void smartfs_stat_common(FAR struct smartfs_mountpt_s *fs,
     {
       /* It's directory name of the mount point */
 
-      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR | S_IWOTH |
-                     S_IWGRP | S_IWUSR;
+      buf->st_mode = S_IFDIR | S_IRWXO | S_IRWXG | S_IRWXU;
     }
   else
     {
