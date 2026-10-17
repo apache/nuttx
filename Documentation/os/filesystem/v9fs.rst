@@ -26,8 +26,8 @@ last component of the path. ``rm`` of a link removes the link, not its
 target. A link with an absolute target is not followed and fails with
 ``ENOTSUP``, because the target is a path on the server.
 
-NFS Mount Command
-=================
+V9FS Mount Command
+==================
 
 In V9FS, we have some special parameters
 
