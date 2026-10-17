@@ -255,7 +255,7 @@ elseif(NOT APPLE AND NOT SIM_HOST_ARM64)
   # static archive; skipping it lets gcc use the default PIE link path which
   # works correctly on aarch64 hosts.
   add_compile_options(-no-pie)
-  add_link_options(-Wl,-no-pie)
+  add_link_options(-no-pie)
 endif()
 
 if(CONFIG_LIBCXX)
