@@ -248,7 +248,7 @@ static inline void nxtask_sigchild(FAR struct tcb_s *ptcb,
        * can provide the correct si_code value with the signal.
        */
 
-      nxsig_tcbdispatch(ptcb, &info);
+      nxsig_tcbdispatch(ptcb, &info, true);
     }
 }
 
