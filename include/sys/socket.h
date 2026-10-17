@@ -146,8 +146,7 @@
 
 /* Socket-level options */
 
-#define SO_ACCEPTCONN    0 /* Reports whether socket listening is enabled
-                            * (get only).
+#define SO_REUSEADDR     0 /* Allow reuse of local addresses (get/set)
                             * arg: pointer to integer containing a boolean
                             * value
                             */
@@ -165,8 +164,8 @@
                             * arg: pointer to integer containing a boolean
                             * value
                             */
-#define SO_ERROR         4 /* Reports and clears error status (get only).
-                            * arg: returns an integer value
+#define SO_TIMESTAMP     4 /* Generates a timestamp in us for each incoming packet
+                            * arg: integer value
                             */
 #define SO_KEEPALIVE     5 /* Keeps connections active by enabling the periodic
                             * transmission of messages (get/set).
@@ -181,54 +180,69 @@
                             * (get/set) arg: pointer to integer containing a
                             * boolean value
                             */
-#define SO_RCVBUF        8 /* Sets receive buffer size.
-                            * arg: integer value (get/set).
-                            */
-#define SO_RCVLOWAT      9 /* Sets the minimum number of bytes to process for
-                            * socket input (get/set).
+#define SO_TIMESTAMPNS   8 /* Generates a timestamp in ns for each incoming packet
                             * arg: integer value
+                            */
+#define SO_TIMESTAMPING  9 /* Generates timestamp for each output packet
                             */
 #define SO_RCVTIMEO     10 /* Sets the timeout value that specifies the maximum
                             * amount of time an input function waits until it
                             * completes (get/set).
                             * arg: struct timeval
                             */
-#define SO_REUSEADDR    11 /* Allow reuse of local addresses (get/set)
-                            * arg: pointer to integer containing a boolean
-                            * value
-                            */
-#define SO_SNDBUF       12 /* Sets send buffer size (get/set).
-                            * arg: integer value
-                            */
-#define SO_SNDLOWAT     13 /* Sets the minimum number of bytes to process for
-                            * socket output (get/set).
-                            * arg: integer value
-                            */
-#define SO_SNDTIMEO     14 /* Sets the timeout value specifying the amount of
+#define SO_SNDTIMEO     11 /* Sets the timeout value specifying the amount of
                             * time that an output function blocks because flow
                             * control prevents data from being sent(get/set).
                             * arg: struct timeval
                             */
-#define SO_TYPE         15 /* Reports the socket type (get only).
+
+#define __SO_PROTOCOL   11 /* Protocol-level socket options may begin with this
+                            * value. The current value is determined by the option
+                            * in SOL_SOCKET that uses the highest bit, which
+                            * is SO_TIMESTAMPNS
+                            */
+
+/* Start from 64 to avoid redefinition with other protocol options. */
+
+#define SO_RCVBUF       64 /* Sets receive buffer size.
+                            * arg: integer value (get/set).
+                            */
+#define SO_RCVLOWAT     65 /* Sets the minimum number of bytes to process for
+                            * socket input (get/set).
+                            * arg: integer value
+                            */
+#define SO_SNDBUF       66 /* Sets send buffer size (get/set).
+                            * arg: integer value
+                            */
+#define SO_SNDLOWAT     67 /* Sets the minimum number of bytes to process for
+                            * socket output (get/set).
+                            * arg: integer value
+                            */
+#define SO_TYPE         68 /* Reports the socket type (get only).
                             * return: int
                             */
-#define SO_TIMESTAMP    16 /* Generates a timestamp in us for each incoming packet
-                            * arg: integer value
+#define SO_ERROR        69 /* Reports and clears error status (get only).
+                            * arg: returns an integer value
                             */
-#define SO_BINDTODEVICE 17 /* Bind this socket to a specific network device.
+#define SO_BINDTODEVICE 70 /* Bind this socket to a specific network device.
                             */
-#define SO_PEERCRED     18 /* Return the credentials of the peer process
+#define SO_PEERCRED     71 /* Return the credentials of the peer process
                             * connected to this socket.
                             */
-#define SO_TIMESTAMPNS  20 /* Generates a timestamp in ns for each incoming packet
-                            * arg: integer value
+#define SO_PRIORITY     72 /* Set the priority for all packets to be sent on this
+                            * socket.  Nuttx uses this value to order the
+                            * networking queues: packets with a higher priority
+                            * may be processed first depending on the selected
+                            * device queueing discipline.
                             */
-#define SO_TIMESTAMPING 21 /* Generates timestamp for each output packet
+#define SO_ACCEPTCONN   73 /* Reports whether socket listening is enabled
+                            * (get only).
+                            * arg: pointer to integer containing a boolean
+                            * value
                             */
-
-/* Protocol-level socket options may begin with this value */
-
-#define __SO_PROTOCOL   16
+#define SO_SNDBUFFORCE  74
+#define SO_RCVBUFFORCE  75
+#define SO_RXQ_OVFL     76
 
 /* SO_TIMESTAMPING flags, with the same values as Linux so that they can
  * also describe the capabilities of an interface (ETHTOOL_GET_TS_INFO).
@@ -248,13 +262,6 @@
 #define SOF_TIMESTAMPING_SOFTWARE     (1 << 4)
 #define SOF_TIMESTAMPING_SYS_HARDWARE (1 << 5)
 #define SOF_TIMESTAMPING_RAW_HARDWARE (1 << 6)
-
-/* The options are unsupported but included for compatibility
- * and portability
- */
-#define SO_SNDBUFFORCE  32
-#define SO_RCVBUFFORCE  33
-#define SO_RXQ_OVFL     40
 
 /* Protocol-level socket operations. */
 

@@ -40,6 +40,7 @@
 #include <syslog.h>
 
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <sys/un.h>
 
 #include "sim_internal.h"
@@ -261,6 +262,34 @@ static int optname_to_native(int optname)
     }
 }
 
+static int tcp_optname_to_native(int optname)
+{
+  switch (optname)
+    {
+      case NUTTX_TCP_NODELAY:
+        return TCP_NODELAY;
+
+      case NUTTX_TCP_KEEPIDLE:
+        return TCP_KEEPIDLE;
+
+      case NUTTX_TCP_KEEPINTVL:
+        return TCP_KEEPINTVL;
+
+      case NUTTX_TCP_KEEPCNT:
+        return TCP_KEEPCNT;
+
+      case NUTTX_TCP_MAXSEG:
+        return TCP_MAXSEG;
+
+      case NUTTX_TCP_CORK:
+        return TCP_CORK;
+
+      default:
+        syslog(LOG_ERR, "Invalid TCP optname: %x\n", optname);
+        return -ENOPROTOOPT;
+    }
+}
+
 static int host_usrsock_sockopt(int sockfd, int level, int optname,
                                 const void *optval, nuttx_socklen_t *optlen,
                                 bool set)
@@ -274,25 +303,18 @@ static int host_usrsock_sockopt(int sockfd, int level, int optname,
   if (level == NUTTX_SOL_SOCKET)
     {
       level = SOL_SOCKET;
+      optname = optname_to_native(optname);
     }
   else if (level == NUTTX_IPPROTO_TCP)
     {
       level = IPPROTO_TCP;
-    }
-  else if (level == NUTTX_IPPROTO_UDP)
-    {
-      level = IPPROTO_UDP;
-    }
-  else if (level == NUTTX_IPPROTO_IP)
-    {
-      level = IPPROTO_IP;
+      optname = tcp_optname_to_native(optname);
     }
   else
     {
       return -ENOPROTOOPT;
     }
 
-  optname = optname_to_native(optname);
   if (optname < 0)
     {
       return optname;
