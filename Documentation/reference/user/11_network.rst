@@ -555,3 +555,46 @@ applications to add, remove, and query DNS nameservers.
 
     -  ``EINVAL``. Unsupported address family.
 
+
+DNS Query Functions (``resolv.h``)
+----------------------------------
+
+These functions send DNS queries for any record type and return the raw
+answer message. ``arpa/nameser.h`` gives the constants and the macros that
+parse the answer. ``res_mkquery()`` is always available with
+``CONFIG_LIBC_NETDB``. The other three need ``CONFIG_NETDB_DNSCLIENT`` and use
+the same name servers, timeouts and retries as the DNS client.
+
+  - :c:func:`res_mkquery`
+  - :c:func:`res_send`
+  - :c:func:`res_query`
+  - :c:func:`res_search`
+
+.. c:function:: int res_mkquery(int op, const char *dname, int rclass, int type, const unsigned char *data, int datalen, const unsigned char *newrr, unsigned char *buf, int buflen);
+
+  Build a message with one question for ``dname`` in ``buf``, with the
+  opcode ``op`` (normally ``QUERY``), a random ID and recursion desired.
+  ``data``, ``datalen`` and ``newrr`` are not used.
+
+  :return: The size of the message on success; -1 on error.
+
+.. c:function:: int res_send(const unsigned char *msg, int msglen, unsigned char *answer, int anslen);
+
+  Send the query message ``msg`` to the name servers over UDP, and copy the
+  first valid answer into ``answer``. A server that answers ``SERVFAIL`` or
+  ``REFUSED`` is skipped. There is no TCP fallback: a truncated answer is
+  returned with the ``TC`` bit set.
+
+  :return: The size of the answer on success; -1 on error.
+
+.. c:function:: int res_query(const char *dname, int rclass, int type, unsigned char *answer, int anslen);
+
+  Query the name servers for the records of class ``rclass`` and type
+  ``type`` for ``dname``, and copy the answer message into ``answer``.
+
+  :return: The size of the answer on success; -1 on error with ``h_errno``
+    set to ``HOST_NOT_FOUND``, ``NO_DATA``, ``NO_RECOVERY`` or ``TRY_AGAIN``.
+
+.. c:function:: int res_search(const char *dname, int rclass, int type, unsigned char *answer, int anslen);
+
+  The same as :c:func:`res_query`. NuttX has no search list.
