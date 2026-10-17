@@ -207,6 +207,7 @@ static ssize_t signalfd_file_read(FAR struct file *filep,
       siginfo->ssi_code   = info.si_code;
 #ifdef CONFIG_SCHED_HAVE_PARENT
       siginfo->ssi_pid    = info.si_pid;
+      siginfo->ssi_uid    = info.si_uid;
       siginfo->ssi_status = info.si_status;
 #endif
       siginfo->ssi_int    = info.si_value.sival_int;

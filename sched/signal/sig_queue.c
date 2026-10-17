@@ -31,6 +31,7 @@
 #include <nuttx/debug.h>
 #include <sched.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include <nuttx/signal.h>
 
@@ -100,6 +101,7 @@ int nxsig_queue(int pid, int signo, union sigval value)
   info.si_value           = value;
 #ifdef CONFIG_SCHED_HAVE_PARENT
   info.si_pid             = rtcb->pid;
+  info.si_uid             = getuid();
   info.si_status          = OK;
 #endif
   info.si_user            = NULL; /* Will be set in sig_dispatch.c */
