@@ -194,6 +194,10 @@ int nxsig_clockwait(int clockid, int flags,
   irqstate_t        iflags;
   clock_t expect = 0u;
   clock_t stop   = 0u;
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
+  siginfo_t unbinfo;
+  bool own_unbinfo = false;
+#endif
 
   if (rqtp && (rqtp->tv_nsec < 0 || rqtp->tv_nsec >= 1000000000))
     {
@@ -236,6 +240,19 @@ int nxsig_clockwait(int clockid, int flags,
 
   iflags = enter_critical_section();
   rtcb = this_task();
+
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
+  /* If the caller did not install its own sigunbinfo (only nxsig_timedwait()
+   * does), install ours so that we can tell how we were awakened: a real
+   * signal writes its siginfo here and requires -EINTR.
+   */
+
+  if (rtcb->sigunbinfo == NULL)
+    {
+      rtcb->sigunbinfo = &unbinfo;
+      own_unbinfo = true;
+    }
+#endif
 
   if (rqtp)
     {
@@ -285,6 +302,15 @@ int nxsig_clockwait(int clockid, int flags,
       stop = clock_systime_ticks();
     }
 
+  /* Retrieve the wake reason before dropping the critical section */
+
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
+  if (own_unbinfo)
+    {
+      rtcb->sigunbinfo = NULL;
+    }
+#endif
+
   leave_critical_section(iflags);
 
   if (rqtp && rmtp && expect)
@@ -292,6 +318,26 @@ int nxsig_clockwait(int clockid, int flags,
       clock_ticks2time(rmtp,
                        clock_compare(stop, expect) ? expect - stop : 0);
     }
+
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
+  if (own_unbinfo)
+    {
+      /* Awakened by a real signal?  Then the wait must fail with EINTR
+       * (POSIX: nanosleep/clock_nanosleep).  A pending cancellation is
+       * reported through the siginfo errno instead.
+       */
+
+      if (GOOD_SIGNO(unbinfo.si_signo))
+        {
+          return -EINTR;
+        }
+
+      if (unbinfo.si_signo == SIG_CANCEL_TIMEOUT)
+        {
+          return -unbinfo.si_errno;
+        }
+    }
+#endif
 
   return 0;
 }
