@@ -37,6 +37,7 @@
 #include <errno.h>
 #include <sys/poll.h>
 #include <nuttx/crc8.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/mtd/configdata.h>

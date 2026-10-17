@@ -35,6 +35,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 

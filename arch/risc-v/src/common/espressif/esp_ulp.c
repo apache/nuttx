@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/debug.h>
+#include <nuttx/fs/fs.h>
 #include <sys/param.h>
 #include <errno.h>
 #include <stdio.h>

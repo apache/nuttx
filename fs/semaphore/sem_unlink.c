@@ -32,6 +32,7 @@
 #include <errno.h>
 #include <assert.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
 
