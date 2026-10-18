@@ -61,7 +61,8 @@
  * Input Parameters:
  *   pathname - The full path to the FIFO instance to attach to or to create
  *     (if not already created).
- *   mode - Ignored for now
+ *   mode - The permissions of the FIFO.  The file mode creation mask
+ *     (umask) clears bits in it.
  *
  * Returned Value:
  *   0 is returned on success; otherwise, -1 is returned with errno set
@@ -73,7 +74,7 @@ int mkfifo(FAR const char *pathname, mode_t mode)
 {
   int ret;
 
-  ret = nx_mkfifo(pathname, mode, CONFIG_DEV_FIFO_SIZE);
+  ret = nx_mkfifo(pathname, mode & ~getumask(), CONFIG_DEV_FIFO_SIZE);
   if (ret < 0)
     {
       set_errno(-ret);
