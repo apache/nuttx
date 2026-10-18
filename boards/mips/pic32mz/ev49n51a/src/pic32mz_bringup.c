@@ -31,8 +31,11 @@
 
 #include <nuttx/fs/fs.h>
 
-#ifdef CONFIG_MTD_SST26
+#if defined(CONFIG_MTD_SST26) || defined(CONFIG_MTD_PROGMEM)
 #  include <nuttx/mtd/mtd.h>
+#endif
+
+#ifdef CONFIG_MTD_SST26
 #  include "pic32mz_spi.h"
 #endif
 
@@ -108,6 +111,26 @@ int pic32mz_bringup(void)
             {
               syslog(LOG_ERR, "ERROR: ftl_initialize() failed: %d\n", ret);
             }
+        }
+    }
+#endif
+
+#ifdef CONFIG_MTD_PROGMEM
+  struct mtd_dev_s *progmem;
+
+  /* Pages at the end of the program flash, reserved by PIC32MZ_PROGMEM */
+
+  progmem = progmem_initialize();
+  if (progmem == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize the program flash MTD\n");
+    }
+  else
+    {
+      ret = ftl_initialize(PROGMEM_MTD_MINOR, progmem);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: ftl_initialize() failed: %d\n", ret);
         }
     }
 #endif

@@ -69,6 +69,12 @@
 
 #define SST26_MTD_MINOR 0
 
+/* The program flash pages of PIC32MZ_PROGMEM are exported as
+ * /dev/mtdblock<PROGMEM_MTD_MINOR>
+ */
+
+#define PROGMEM_MTD_MINOR 1
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
