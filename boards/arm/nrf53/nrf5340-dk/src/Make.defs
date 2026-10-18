@@ -20,8 +20,6 @@
 #
 ############################################################################
 
-include $(TOPDIR)/Make.defs
-
 CSRCS = nrf53_boot.c nrf53_bringup.c
 
 ifeq ($(CONFIG_NRF53_APPCORE),y)
