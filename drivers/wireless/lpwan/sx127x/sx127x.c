@@ -1024,6 +1024,7 @@ static int sx127x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case WLIOC_SETRADIOFREQ:
         {
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
 
           sx127x_frequency_set(dev, *ptr);
@@ -1037,6 +1038,7 @@ static int sx127x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case WLIOC_GETRADIOFREQ:
         {
           FAR int8_t *ptr = (FAR int8_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
 
           *ptr = sx127x_frequency_get(dev);
@@ -1048,6 +1050,7 @@ static int sx127x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case WLIOC_SETTXPOWER:
         {
           FAR int8_t *ptr = (FAR int8_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
 
           sx127x_power_set(dev, *ptr);
@@ -1059,6 +1062,7 @@ static int sx127x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case WLIOC_GETTXPOWER:
         {
           FAR int8_t *ptr = (FAR int8_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
 
           *ptr = sx127x_power_get(dev);
@@ -1070,6 +1074,7 @@ static int sx127x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SX127XIOC_RSSIGET:
         {
           FAR int16_t *ptr = (FAR int16_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
 
           *ptr = sx127x_rssi_get(dev);
@@ -1081,6 +1086,7 @@ static int sx127x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SX127XIOC_MODULATIONSET:
         {
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
 
           ret = sx127x_modulation_set(dev, *ptr);
@@ -1092,6 +1098,7 @@ static int sx127x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SX127XIOC_MODULATIONGET:
         {
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
 
           *ptr = sx127x_modulation_get(dev);
@@ -1103,6 +1110,7 @@ static int sx127x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SX127XIOC_OPMODESET:
         {
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
 
           ret = sx127x_opmode_set(dev, *ptr);
@@ -1114,6 +1122,7 @@ static int sx127x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SX127XIOC_OPMODEGET:
         {
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
 
           *ptr = sx127x_opmode_get(dev);
@@ -1137,6 +1146,7 @@ static int sx127x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SX127XIOC_PREAMBLESET:
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
 
           sx127x_preamble_set(dev, *ptr);
@@ -1148,6 +1158,7 @@ static int sx127x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SX127XIOC_PREAMBLEGET:
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
 
           *ptr = sx127x_preamble_get(dev);
@@ -1177,6 +1188,7 @@ static int sx127x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SX127XIOC_RANDOMGET:
         {
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
 
           *ptr = sx127x_random_get(dev);
