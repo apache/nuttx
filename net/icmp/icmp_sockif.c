@@ -126,6 +126,7 @@ static int icmp_setup(FAR struct socket *psock)
        */
 
       FAR struct icmp_conn_s *conn = icmp_alloc();
+
       if (conn == NULL)
         {
           /* Failed to reserve a connection structure */
@@ -379,26 +380,26 @@ static int icmp_getsockopt(FAR struct socket *psock, int level, int option,
                            FAR void *value, FAR socklen_t *value_len)
 {
   switch (level)
-  {
-    case SOL_SOCKET:
+    {
+      case SOL_SOCKET:
 
-      /* Socket-level options are handled by psock_getsockopt()/inet layer.
-       * Return -ENOPROTOOPT so upper layer will fallback to socket-level
-       * handler without emitting misleading ICMP error logs.
-       */
+        /* Socket-level options are handled by psock_getsockopt()/inet layer.
+         * Return -ENOPROTOOPT so upper layer will fallback to socket-level
+         * handler without emitting misleading ICMP error logs.
+         */
 
-      return -ENOPROTOOPT;
+        return -ENOPROTOOPT;
 
-    case SOL_IP:
-      return ipv4_getsockopt(psock, option, value, value_len);
+      case SOL_IP:
+        return ipv4_getsockopt(psock, option, value, value_len);
 
-    case SOL_RAW:
-      return icmp_getsockopt_internal(psock, option, value, value_len);
+      case SOL_RAW:
+        return icmp_getsockopt_internal(psock, option, value, value_len);
 
-    default:
-      nerr("ERROR: Unrecognized ICMP option: %d\n", option);
-      return -ENOPROTOOPT;
-  }
+      default:
+        nerr("ERROR: Unrecognized ICMP option: %d\n", option);
+        return -ENOPROTOOPT;
+    }
 }
 
 /****************************************************************************
@@ -491,26 +492,26 @@ static int icmp_setsockopt(FAR struct socket *psock, int level, int option,
                            FAR const void *value, socklen_t value_len)
 {
   switch (level)
-  {
-    case SOL_SOCKET:
+    {
+      case SOL_SOCKET:
 
-      /* Socket-level options are handled by psock_setsockopt()/inet layer.
-       * Return -ENOPROTOOPT so upper layer will fallback to socket-level
-       * handler without emitting misleading ICMP error logs.
-       */
+        /* Socket-level options are handled by psock_setsockopt()/inet layer.
+         * Return -ENOPROTOOPT so upper layer will fallback to socket-level
+         * handler without emitting misleading ICMP error logs.
+         */
 
-      return -ENOPROTOOPT;
+        return -ENOPROTOOPT;
 
-    case SOL_IP:
-      return ipv4_setsockopt(psock, option, value, value_len);
+      case SOL_IP:
+        return ipv4_setsockopt(psock, option, value, value_len);
 
-    case SOL_RAW:
-      return icmp_setsockopt_internal(psock, option, value, value_len);
+      case SOL_RAW:
+        return icmp_setsockopt_internal(psock, option, value, value_len);
 
-    default:
-      nerr("ERROR: Unrecognized ICMP option: %d\n", option);
-      return -ENOPROTOOPT;
-  }
+      default:
+        nerr("ERROR: Unrecognized ICMP option: %d\n", option);
+        return -ENOPROTOOPT;
+    }
 }
 #endif
 
