@@ -3494,6 +3494,25 @@ static inline int pic32mz_ethinitialize(int intf)
       return -EAGAIN;
     }
 
+#if CONFIG_PIC32MZ_ETH_MACADDR != 0
+  /* The chip has no factory station address (PIC32MZ-W1): use the
+   * configured one.
+   */
+
+  priv->pd_dev.netdev.d_mac.ether.ether_addr_octet[0] =
+    (CONFIG_PIC32MZ_ETH_MACADDR >> (8 * 5)) & 0xff;
+  priv->pd_dev.netdev.d_mac.ether.ether_addr_octet[1] =
+    (CONFIG_PIC32MZ_ETH_MACADDR >> (8 * 4)) & 0xff;
+  priv->pd_dev.netdev.d_mac.ether.ether_addr_octet[2] =
+    (CONFIG_PIC32MZ_ETH_MACADDR >> (8 * 3)) & 0xff;
+  priv->pd_dev.netdev.d_mac.ether.ether_addr_octet[3] =
+    (CONFIG_PIC32MZ_ETH_MACADDR >> (8 * 2)) & 0xff;
+  priv->pd_dev.netdev.d_mac.ether.ether_addr_octet[4] =
+    (CONFIG_PIC32MZ_ETH_MACADDR >> (8 * 1)) & 0xff;
+  priv->pd_dev.netdev.d_mac.ether.ether_addr_octet[5] =
+    (CONFIG_PIC32MZ_ETH_MACADDR >> (8 * 0)) & 0xff;
+#endif
+
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
   ret = netdev_lower_register(&priv->pd_dev, NET_LL_ETHERNET);
