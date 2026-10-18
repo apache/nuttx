@@ -601,12 +601,15 @@ executed in background via ``exec <hex-address> &``.
 
 **Command Syntax**::
 
-  exit
+  exit [<status>]
 
 **Synopsis**. Exit NSH. Only useful for the serial front end if
 you have started some other tasks (perhaps using the ``exec``
 command) and you would like to have NSH out of the way. For the
 telnet front-end, ``exit`` terminates the telnet session.
+
+``<status>`` is the exit status of NSH, from 0 to 255. The default is
+0. A script or ``sh -c`` can use it to report a failure.
 
 .. _cmdexport:
 
