@@ -134,6 +134,7 @@ Command                Depends on Configuration                    Can Be Disabl
 :ref:`cmdtest`         !  ``CONFIG_NSH_DISABLESCRIPT``             ``CONFIG_NSH_DISABLE_TEST``
 :ref:`cmdtime`         .                                           ``CONFIG_NSH_DISABLE_TIME``
 :ref:`cmdtruncate`     ! ``CONFIG_DISABLE_MOUNTPOINT``             ``CONFIG_NSH_DISABLE_TRUNCATE``
+:ref:`cmdulimit`       .                                           ``CONFIG_NSH_DISABLE_ULIMIT``
 :ref:`cmdumount`       !  ``CONFIG_DISABLE_MOUNTPOINT``            ``CONFIG_NSH_DISABLE_UMOUNT``
 :ref:`cmduname`        .                                           ``CONFIG_NSH_DISABLE_UNAME``
 :ref:`cmdunset`        ``CONFIG_NSH_VARS`` \|\|                    ``CONFIG_NSH_DISABLE_UNSET``

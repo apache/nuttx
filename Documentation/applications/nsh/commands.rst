@@ -2096,6 +2096,48 @@ If a <file-path> is larger than the specified size, the extra data is
 lost. If a <file-path> is shorter, it is extended and the extended part
 reads as zero bytes.
 
+.. _cmdulimit:
+
+``ulimit`` Show or Set Resource Limits
+======================================
+
+**Command Syntax**::
+
+  ulimit [-H|-S] [-a|-c|-d|-f|-l|-n|-s|-t|-v] [<limit>|unlimited]
+
+**Synopsis**. Show or set a resource limit of NSH. The programs that NSH
+starts get the same limits. Without ``<limit>``, ``ulimit`` shows the soft
+limit, or the hard limit with ``-H``. With ``<limit>``, it sets the soft
+limit with ``-S``, the hard limit with ``-H``, and both without these
+options. Sizes are in KiB, ``-n`` is a number of files and ``-t`` is in
+seconds. Without a resource option, ``ulimit`` uses ``-f``, as POSIX says.
+NuttX enforces ``-n`` and ``-s`` only; setting another limit fails.
+
+**Options**
+
+======  ======================================================
+``-H``  The hard limit.
+``-S``  The soft limit.
+``-a``  Show all limits.
+``-c``  Core file size.
+``-d``  Data segment size.
+``-f``  File size.
+``-l``  Locked memory size.
+``-n``  Number of open files.
+``-s``  Stack size: the default stack size of new threads and
+        programs.
+``-t``  CPU time.
+``-v``  Virtual memory size.
+======  ======================================================
+
+**Example**::
+
+  nsh> ulimit -S -s 64
+  nsh> ulimit -s
+  64
+  nsh> ulimit -H -s
+  unlimited
+
 .. _cmdumount:
 
 ``umount`` Unmount a File System
