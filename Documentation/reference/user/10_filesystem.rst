@@ -88,6 +88,13 @@ Driver Operations
   error) has occurred for any of the file descriptors, then ``poll()``
   blocks until one of the events occurs.
 
+  Each entry of ``fds`` is a ``struct pollfd`` with the POSIX fields
+  ``int fd``, ``short events`` and ``short revents``, as in
+  `<poll.h> <https://pubs.opengroup.org/onlinepubs/9699919799.2018edition/basedefs/poll.h.html>`_
+  of IEEE Std 1003.1-2017 (Revision of IEEE Std 1003.1-2008) / The Open
+  Group Base Specifications Issue 7, 2018 edition. The kernel does not
+  keep any state in the array, so several threads can poll the same array.
+
   **Configuration Settings**. In order to use the select with TCP/IP
   sockets test, you must have the following things selected in your NuttX
   configuration file:
