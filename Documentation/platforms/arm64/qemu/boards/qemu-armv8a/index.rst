@@ -227,6 +227,11 @@ Running with QEMU:
     mnt/
     proc/
 
+With ``security_model=none``, ``stat()`` shows the owner of the host file.
+To keep the owner, the group and the mode that NuttX gives to its files, use
+``security_model=mapped-xattr``. QEMU then keeps them in extended
+attributes of the host files. See :doc:`/os/filesystem/v9fs`.
+
 --------------------------------------
 Single Core with MTE Expansion (GICv3)
 --------------------------------------
