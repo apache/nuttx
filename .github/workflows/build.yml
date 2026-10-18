@@ -302,6 +302,7 @@ jobs:
       NUTTX_ROMFS_PASSWD_PASSWORD: NuttXSim1!
 
     strategy:
+      fail-fast: false
       max-parallel: 12
       matrix:
         boards: ${{ fromJSON(needs.Linux-Arch.outputs.selected_builds) }}
@@ -334,6 +335,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ matrix.boards }}-ccache-
 
+      - name: Configure Docker MTU
+        run: |
+          if [ -f /etc/docker/daemon.json ]; then
+            sudo jq '. + {"mtu": 1400}' /etc/docker/daemon.json > /tmp/daemon.json
+            sudo mv /tmp/daemon.json /etc/docker/daemon.json
+          else
+            sudo bash -c 'echo "{\"mtu\": 1400}" > /etc/docker/daemon.json'
+          fi
+          sudo systemctl restart docker
+
       - name: Docker Login
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f  # v4.6.0
         with:
@@ -354,6 +365,9 @@ jobs:
         with:
           run: |
             export ARTIFACTDIR=`pwd`/buildartifacts
+
+            # Configure curl defaults to handle CI network timeouts & flakiness
+            printf 'connect-timeout = 30\nretry = 5\nretry-delay = 5\n' > ~/.curlrc
 
             for i in 1 2 3; do
               if python -m pip install \
@@ -378,7 +392,7 @@ jobs:
             # get NTFC test cases
             cd external
             for i in 1 2 3 4 5; do
-              git clone -b release-0.0.2 https://github.com/apache/nuttx-ntfc-testing && break
+              git clone --depth 1 -b release-0.0.2 https://github.com/apache/nuttx-ntfc-testing && break
               if [ "$i" -eq 5 ]; then
                 echo "Failed to clone nuttx-ntfc-testing after $i attempts"
                 exit 1
@@ -492,6 +506,7 @@ jobs:
     env:
       NUTTX_ROMFS_PASSWD_PASSWORD: NuttXSim1!
     strategy:
+      fail-fast: false
       max-parallel: 2
       matrix:
         boards: ${{ fromJSON(needs.macOS-Arch.outputs.selected_builds) }}
