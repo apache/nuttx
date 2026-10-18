@@ -54,16 +54,34 @@
 
 int remove(FAR const char *path)
 {
-  /* First try to unlink since this is
-   * more frequently the necessary action.
+  int errcode;
+
+  if (unlink(path) == 0)
+    {
+      return 0;
+    }
+
+  /* unlink() of a directory fails with EISDIR, or with EPERM (POSIX
+   * allows both).  Then try rmdir().
    */
 
-  if (unlink(path) != 0 && (get_errno() != EISDIR || rmdir(path) != 0))
+  errcode = get_errno();
+  if (errcode != EISDIR && errcode != EPERM)
     {
-      /* Cannot remove the object for whatever reason. */
-
       return -1;
     }
 
-  return 0;
+  if (rmdir(path) == 0)
+    {
+      return 0;
+    }
+
+  /* Not a directory: keep the error of unlink() */
+
+  if (get_errno() == ENOTDIR)
+    {
+      set_errno(errcode);
+    }
+
+  return -1;
 }
