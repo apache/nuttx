@@ -99,9 +99,18 @@
 #  endif
 #endif
 
+/* I2C1 uses PB15 (SCL) / PA8 (SDA) on AF6, on the J1/J2 headers.  The
+ * QFN32 package has no PB12/PB13, and the other I2C1 options are the
+ * console or JTAG pins.  PB15/PA8 are also the I2C0 fallback (SPI on) and
+ * the UART1/USART0 pins, so only one of them can be enabled.
+ */
+
 #ifdef CONFIG_GD32VW55X_I2C1
-#  define GPIO_I2C1_SCL  GPIO_I2C1_SCL_4   /* PB12, AF6 */
-#  define GPIO_I2C1_SDA  GPIO_I2C1_SDA_4   /* PB13, AF6 */
+#  if defined(CONFIG_GD32VW55X_I2C0) && defined(CONFIG_GD32VW55X_SPI)
+#    error "I2C1 and the I2C0 fallback (SPI on) both need PB15/PA8"
+#  endif
+#  define GPIO_I2C1_SCL  GPIO_I2C1_SCL_5   /* PB15, AF6 (J1) */
+#  define GPIO_I2C1_SDA  GPIO_I2C1_SDA_2   /* PA8, AF6 (J2) */
 #endif
 
 /* PWM.  The board bringup registers /dev/pwm0 on TIMER1.  Route its channel

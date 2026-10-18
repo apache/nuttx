@@ -22,14 +22,17 @@ Features
 - On-board GD-Link probe: SWD/JTAG plus a USB CDC virtual COM port, both
   over the single USB Type-C connector
 - Two test pin headers (J1, J2) breaking out the GPIOs
-- BOOT0/BOOT1 jumpers, a power jumper and a reset button (NRST)
+- BOOT0/BOOT1 jumpers, a power jumper, the J5 jumpers that route the console
+  UART to the GD-Link virtual COM port, and a reset button (NRST); there is no
+  user button
 - Three user LEDs (red, green, blue)
 
 Serial Console
 ==============
 
 The console is UART2 (PA6 TX / PA7 RX), wired to the GD-Link virtual COM port.
-It shows up on the host as ``/dev/ttyACM0`` at 115200 8N1.
+It shows up on the host as ``/dev/ttyACM0`` at 115200 8N1.  The J5 jumpers must
+be in place for the UART to reach the probe.
 
 LEDs
 ====
@@ -98,19 +101,30 @@ is a plain GPIO.  The silkscreen abbreviates the port letter (``A0`` is PA0,
    ======== =================== ======== ===================
 
 .. note::
-   PA13/PA14/PA15/PB3/PB4 on J2 are the chip's JTAG pins, wired to the on-board
-   GD-Link through the J4 shorting caps.  Use them as plain GPIO only after
-   removing those caps, or the debug probe and the application will fight over
-   the lines.
+   PA13/PA14/PA15/PB3 on J2 are the chip's JTAG pins (JTMS, JTCK, JTDI, JTDO),
+   wired to the on-board GD-Link through the J4 shorting caps.  Keep the J4
+   caps closed to flash and debug through the GD-Link.  To use an external
+   probe such as a SEGGER J-Link, or to use those pins as plain GPIO, remove
+   the caps first, or the GD-Link and the other user will fight over the
+   lines.  PB4 (JNTRST) drives LED3.
 
 Flashing
 ========
 
-The board is programmed with OpenOCD through the GD-Link probe.  The GigaDevice
-OpenOCD fork (shipped with the vendor SDK) is required::
+The board is programmed with OpenOCD through the on-board GD-Link probe, with
+the J4 caps closed.  The GigaDevice OpenOCD fork (shipped with the vendor SDK)
+is required::
 
   $ openocd -f openocd_gdlink.cfg \
             -c "program nuttx.bin 0x08000000 verify reset exit"
+
+To use an external programmer instead, a SEGGER J-Link works: remove the J4
+caps and wire it to J2 (VTref to +3V3, TMS to PA13, TCK to PA14, TDI to PA15,
+TDO to PB3, and GND).  With a command file holding
+``loadbin nuttx.bin, 0x08000000``, ``r`` and ``g``::
+
+  $ JLinkExe -nogui 1 -device GD32VW553KMQ7 -if JTAG -JTAGConf -1,-1 \
+             -speed 4000 -autoconnect 1 -CommandFile flash.jlink
 
 NuttX is linked at 0x08000000, bypassing the vendor MBL bootloader.
 
@@ -210,7 +224,8 @@ driver -- a small example to validate the I2C master port against a real
 device. Because SPI is *off* here, I2C0 is routed to the J1 header on
 **PA2 (SCL)** and **PA3 (SDA)** (adjacent pins on the second row of J1, both
 AF4); with SPI on (the ``periph`` case) it falls back to PB15 (SCL, J1) and
-PA8 (SDA, J2). See the pin-header tables above.
+PA8 (SDA, J2). I2C1, when enabled, uses the same PB15/PA8 pair (AF6), so it
+cannot be combined with that fallback. See the pin-header tables above.
 
 Wire the sensor to J1: SCL -> PA2, SDA -> PA3, VCC -> +3V3 (J2) or the module
 3.3 V, GND -> GND. A breakout with its own pull-ups is assumed; the pins are

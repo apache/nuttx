@@ -94,7 +94,7 @@ int gd32_ble_initialize(void);
 
 int gd32_bringup(void)
 {
-#ifdef CONFIG_GD32VW55X_I2C0
+#if defined(CONFIG_GD32VW55X_I2C0) || defined(CONFIG_GD32VW55X_I2C1)
   struct i2c_master_s *i2c;
 #endif
 #ifdef CONFIG_GD32VW55X_SPI
@@ -172,6 +172,25 @@ int gd32_bringup(void)
       if (sht3x_register("/dev/temp0", i2c, 0x44) < 0)
         {
           ferr("ERROR: failed to register SHT3x at 0x44 on I2C0\n");
+        }
+#endif
+    }
+#endif
+
+#ifdef CONFIG_GD32VW55X_I2C1
+  i2c = gd32_i2cbus_initialize(1);
+  if (i2c == NULL)
+    {
+      ferr("ERROR: failed to initialize I2C1\n");
+    }
+  else
+    {
+#ifdef CONFIG_I2C_DRIVER
+      /* Expose the bus as /dev/i2c1 for the i2ctool */
+
+      if (i2c_register(i2c, 1) < 0)
+        {
+          ferr("ERROR: failed to register /dev/i2c1\n");
         }
 #endif
     }
