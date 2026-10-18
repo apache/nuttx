@@ -32,6 +32,7 @@ config LIBCXXNONE
 config LIBCXXTOOLCHAIN
 	bool "Toolchain C++ support"
 	select HAVE_CXXINITIALIZE
+	select LIBC_CTYPE_TABLE
 	---help---
 		Use Standard C++ library from toolchain.
 
