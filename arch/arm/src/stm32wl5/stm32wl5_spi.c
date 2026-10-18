@@ -101,21 +101,11 @@
 
 #ifdef CONFIG_STM32_SPI_DMA
 
-#  if defined(CONFIG_SPI_DMAPRIO)
-#    define SPI_DMA_PRIO  CONFIG_SPI_DMAPRIO
-#  elif defined(CONFIG_STM32_STM32WL5XXX_CPU1
-#warning "Verify, read doc and Implement"
+#  if defined(CONFIG_STM32_STM32WL5XXX_CPU1)
+#    warning "Verify, read doc and Implement"
 #    define SPI_DMA_PRIO  DMA_CCR_PRIMED
 #  else
 #    error "Unknown STM32WL5 DMA"
-#  endif
-
-#  if defined(CONFIG_STM32_STM32WL5XXX_CPU1)
-#    if (SPI_DMA_PRIO & ~DMA_CCR_PL_MASK) != 0
-#      error "Illegal value for CONFIG_SPI_DMAPRIO"
-#    endif
-#  else
-#    error "Unknown STM32 DMA"
 #  endif
 
 /* DMA channel configuration */
@@ -875,6 +865,7 @@ static void spi_modifycr1(struct stm32_spidev_s *priv,
                           uint16_t clrbits)
 {
   uint16_t cr1;
+
   cr1 = spi_getreg(priv, STM32_SPI_CR1_OFFSET);
   cr1 &= ~clrbits;
   cr1 |= setbits;
@@ -904,6 +895,7 @@ static void spi_modifycr2(struct stm32_spidev_s *priv, uint16_t setbits,
                           uint16_t clrbits)
 {
   uint16_t cr2;
+
   cr2  = spi_getreg(priv, STM32_SPI_CR2_OFFSET);
   cr2 &= ~clrbits;
   cr2 |= setbits;
@@ -1083,40 +1075,40 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
-          setbits = 0;
-          clrbits = SPI_CR1_CPOL | SPI_CR1_CPHA;
-          break;
+          case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
+            setbits = 0;
+            clrbits = SPI_CR1_CPOL | SPI_CR1_CPHA;
+            break;
 
-        case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
-          setbits = SPI_CR1_CPHA;
-          clrbits = SPI_CR1_CPOL;
-          break;
+          case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
+            setbits = SPI_CR1_CPHA;
+            clrbits = SPI_CR1_CPOL;
+            break;
 
-        case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
-          setbits = SPI_CR1_CPOL;
-          clrbits = SPI_CR1_CPHA;
-          break;
+          case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
+            setbits = SPI_CR1_CPOL;
+            clrbits = SPI_CR1_CPHA;
+            break;
 
-        case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
-          setbits = SPI_CR1_CPOL | SPI_CR1_CPHA;
-          clrbits = 0;
-          break;
+          case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
+            setbits = SPI_CR1_CPOL | SPI_CR1_CPHA;
+            clrbits = 0;
+            break;
 
 #ifdef SPI_CR2_FRF    /* If MCU supports TI Synchronous Serial Frame Format */
-        case SPIDEV_MODETI:
-          setbits = 0;
-          clrbits = SPI_CR1_CPOL | SPI_CR1_CPHA;
-          break;
+          case SPIDEV_MODETI:
+            setbits = 0;
+            clrbits = SPI_CR1_CPOL | SPI_CR1_CPHA;
+            break;
 #endif
 
-        default:
-          return;
+          default:
+            return;
         }
 
-        spi_modifycr1(priv, 0, SPI_CR1_SPE);
-        spi_modifycr1(priv, setbits, clrbits);
-        spi_modifycr1(priv, SPI_CR1_SPE, 0);
+      spi_modifycr1(priv, 0, SPI_CR1_SPE);
+      spi_modifycr1(priv, setbits, clrbits);
+      spi_modifycr1(priv, SPI_CR1_SPE, 0);
 
 #ifdef SPI_CR2_FRF    /* If MCU supports TI Synchronous Serial Frame Format */
       switch (mode)
@@ -1360,6 +1352,7 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
 #endif
 {
   struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
+
   DEBUGASSERT(priv && priv->spibase);
 
   spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);

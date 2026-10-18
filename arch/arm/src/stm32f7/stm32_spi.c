@@ -99,16 +99,10 @@
 
 #ifdef CONFIG_STM32_SPI_DMA
 
-#  if defined(CONFIG_SPI_DMAPRIO)
-#    define SPI_DMA_PRIO  CONFIG_SPI_DMAPRIO
-#  elif defined(DMA_SCR_PRIMED)
+#  if defined(DMA_SCR_PRIMED)
 #    define SPI_DMA_PRIO  DMA_SCR_PRILO
 #  else
 #    error "Unknown STM32 DMA"
-#  endif
-
-#  if (SPI_DMA_PRIO & ~DMA_SCR_PL_MASK) != 0
-#    error "Illegal value for CONFIG_SPI_DMAPRIO"
 #  endif
 
 /* DMA channel configuration */
@@ -1198,6 +1192,7 @@ static void spi_modifycr1(struct stm32_spidev_s *priv, uint16_t setbits,
                           uint16_t clrbits)
 {
   uint16_t cr1;
+
   cr1 = spi_getreg(priv, STM32_SPI_CR1_OFFSET);
   cr1 &= ~clrbits;
   cr1 |= setbits;
@@ -1224,6 +1219,7 @@ static void spi_modifycr2(struct stm32_spidev_s *priv, uint16_t setbits,
                           uint16_t clrbits)
 {
   uint16_t cr2;
+
   cr2 = spi_getreg(priv, STM32_SPI_CR2_OFFSET);
   cr2 &= ~clrbits;
   cr2 |= setbits;
@@ -1411,28 +1407,28 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
-          setbits = 0;
-          clrbits = SPI_CR1_CPOL | SPI_CR1_CPHA;
-          break;
+          case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
+            setbits = 0;
+            clrbits = SPI_CR1_CPOL | SPI_CR1_CPHA;
+            break;
 
-        case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
-          setbits = SPI_CR1_CPHA;
-          clrbits = SPI_CR1_CPOL;
-          break;
+          case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
+            setbits = SPI_CR1_CPHA;
+            clrbits = SPI_CR1_CPOL;
+            break;
 
-        case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
-          setbits = SPI_CR1_CPOL;
-          clrbits = SPI_CR1_CPHA;
-          break;
+          case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
+            setbits = SPI_CR1_CPOL;
+            clrbits = SPI_CR1_CPHA;
+            break;
 
-        case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
-          setbits = SPI_CR1_CPOL | SPI_CR1_CPHA;
-          clrbits = 0;
-          break;
+          case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
+            setbits = SPI_CR1_CPOL | SPI_CR1_CPHA;
+            clrbits = 0;
+            break;
 
-        default:
-          return;
+          default:
+            return;
         }
 
       /* Disable SPI then change mode */
@@ -1703,6 +1699,7 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
 #endif
 {
   struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
+
   DEBUGASSERT(priv && priv->spibase);
 
   spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
@@ -1714,8 +1711,8 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
       /* 16-bit mode */
 
       const uint16_t *src  = (const uint16_t *)txbuffer;
-            uint16_t *dest = (uint16_t *)rxbuffer;
-            uint16_t  word;
+      uint16_t       *dest = (uint16_t *)rxbuffer;
+      uint16_t        word;
 
       while (nwords-- > 0)
         {
@@ -1747,8 +1744,8 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
       /* 8-bit mode */
 
       const uint8_t *src  = (const uint8_t *)txbuffer;
-            uint8_t *dest = (uint8_t *)rxbuffer;
-            uint8_t  word;
+      uint8_t       *dest = (uint8_t *)rxbuffer;
+      uint8_t        word;
 
       while (nwords-- > 0)
         {
@@ -2086,31 +2083,31 @@ static int spi_pm_prepare(struct pm_callback_s *cb, int domain,
 
   switch (pmstate)
     {
-    case PM_NORMAL:
-    case PM_IDLE:
-      break;
+      case PM_NORMAL:
+      case PM_IDLE:
+        break;
 
-    case PM_STANDBY:
-    case PM_SLEEP:
+      case PM_STANDBY:
+      case PM_SLEEP:
 
-      /* Check if exclusive lock for SPI bus is held. */
+        /* Check if exclusive lock for SPI bus is held. */
 
-      if (nxmutex_is_locked(&priv->lock))
-        {
-          /* Exclusive lock is held, do not allow entry to deeper
-           * PM states.
-           */
+        if (nxmutex_is_locked(&priv->lock))
+          {
+            /* Exclusive lock is held, do not allow entry to deeper
+             * PM states.
+             */
 
-          return -EBUSY;
-        }
+            return -EBUSY;
+          }
 
-      break;
+        break;
 
-    default:
+      default:
 
-      /* Should not get here */
+        /* Should not get here */
 
-      break;
+        break;
     }
 
   return OK;

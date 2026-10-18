@@ -141,24 +141,10 @@
 
 #ifdef CONFIG_STM32_SPI_DMA
 
-#  if defined(CONFIG_SPI_DMAPRIO)
-#    define SPI_DMA_PRIO  CONFIG_SPI_DMAPRIO
-#  elif defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32L15XX)
+#  if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32L15XX)
 #    define SPI_DMA_PRIO  DMA_CCR_PRIMED
 #  elif defined(CONFIG_STM32_HAVE_IP_DMA_V2)
 #    define SPI_DMA_PRIO  DMA_SCR_PRIMED
-#  else
-#    error "Unknown STM32 DMA"
-#  endif
-
-#  if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32L15XX)
-#    if (SPI_DMA_PRIO & ~DMA_CCR_PL_MASK) != 0
-#      error "Illegal value for CONFIG_SPI_DMAPRIO"
-#    endif
-#  elif defined(CONFIG_STM32_HAVE_IP_DMA_V2)
-#    if (SPI_DMA_PRIO & ~DMA_SCR_PL_MASK) != 0
-#      error "Illegal value for CONFIG_SPI_DMAPRIO"
-#    endif
 #  else
 #    error "Unknown STM32 DMA"
 #  endif
@@ -897,6 +883,7 @@ static void i2s_txdma_sampledone(struct stm32_i2s_s *priv, int result)
 static void i2s_rxdma_timeout(wdparm_t arg)
 {
   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)arg;
+
   DEBUGASSERT(priv != NULL);
 
   /* Sample DMA registers at the time of the timeout */
@@ -1253,6 +1240,7 @@ static void i2s_rx_schedule(struct stm32_i2s_s *priv, int result)
 static void i2s_rxdma_callback(DMA_HANDLE handle, uint8_t result, void *arg)
 {
   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)arg;
+
   DEBUGASSERT(priv != NULL);
 
   /* Cancel the watchdog timeout */
@@ -1296,6 +1284,7 @@ static void i2s_rxdma_callback(DMA_HANDLE handle, uint8_t result, void *arg)
 static void i2s_txdma_timeout(wdparm_t arg)
 {
   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)arg;
+
   DEBUGASSERT(priv != NULL);
 
   /* Sample DMA registers at the time of the timeout */
@@ -1639,6 +1628,7 @@ static void i2s_tx_schedule(struct stm32_i2s_s *priv, int result)
 static void i2s_txdma_callback(DMA_HANDLE handle, uint8_t result, void *arg)
 {
   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)arg;
+
   DEBUGASSERT(priv != NULL);
 
   /* Cancel the watchdog timeout */
@@ -1686,17 +1676,17 @@ static int i2s_checkwidth(struct stm32_i2s_s *priv, int bits)
 
   switch (bits)
     {
-    case 8:
-      priv->align = 0;
-      break;
+      case 8:
+        priv->align = 0;
+        break;
 
-    case 16:
-      priv->align = 1;
-      break;
+      case 16:
+        priv->align = 1;
+        break;
 
-    default:
-      i2serr("ERROR: Unsupported or invalid data width: %d\n", bits);
-      return (bits < 8 || bits > 16) ? -EINVAL : -ENOSYS;
+      default:
+        i2serr("ERROR: Unsupported or invalid data width: %d\n", bits);
+        return (bits < 8 || bits > 16) ? -EINVAL : -ENOSYS;
     }
 
   /* Save the new data width */
@@ -1727,6 +1717,7 @@ static int32_t stm32_i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
 #if defined(I2S_HAVE_RX) && defined(I2S_HAVE_MCK)
   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)dev;
+
   DEBUGASSERT(priv && priv->samplerate >= 0 && rate > 0);
 
   /* Check if the receiver is driven by the MCK */
@@ -2247,22 +2238,22 @@ static int i2s_dma_flags(struct stm32_i2s_s *priv)
 {
   switch (priv->datalen)
     {
-    case 8:
+      case 8:
 
-      /* Reconfigure the RX DMA (and TX DMA if applicable) */
+        /* Reconfigure the RX DMA (and TX DMA if applicable) */
 
-      priv->rxccr = SPI_RXDMA8_CONFIG;
-      priv->txccr = SPI_TXDMA8_CONFIG;
-      break;
+        priv->rxccr = SPI_RXDMA8_CONFIG;
+        priv->txccr = SPI_TXDMA8_CONFIG;
+        break;
 
-    case 16:
-      priv->rxccr = SPI_RXDMA16_CONFIG;
-      priv->txccr = SPI_TXDMA16_CONFIG;
-      break;
+      case 16:
+        priv->rxccr = SPI_RXDMA16_CONFIG;
+        priv->txccr = SPI_TXDMA16_CONFIG;
+        break;
 
-    default:
-      i2serr("ERROR: Unsupported data width: %d\n", priv->datalen);
-      return -ENOSYS;
+      default:
+        i2serr("ERROR: Unsupported data width: %d\n", priv->datalen);
+        return -ENOSYS;
     }
 
   return OK;
