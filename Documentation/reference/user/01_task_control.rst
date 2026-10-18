@@ -33,6 +33,21 @@ reside in a file system. These internal interfaces are, however,
 non-standard and are documented with the NuttX binary
 loader and NXFLAT documentation.
 
+**Resource Limits**. A task keeps its resource limits, and the tasks that
+it creates get the same limits. NuttX enforces two of them:
+
+- ``RLIMIT_NOFILE``: a new file descriptor must be below the soft limit.
+  The default and the largest value is ``OPEN_MAX``.
+- ``RLIMIT_STACK``: when the soft limit is set, it is the default stack
+  size of a new thread and the stack size of a new ELF program that does
+  not set ``nx_stacksize``. The value is kept between
+  ``PTHREAD_STACK_MIN`` and the largest stack that a task can have. By
+  default there is no limit, and the stack sizes are
+  ``CONFIG_PTHREAD_STACK_DEFAULT`` and ``CONFIG_ELF_STACKSIZE``.
+
+``getrlimit()`` reports the other resources as ``RLIM_INFINITY``, and
+``setrlimit()`` fails with ``EINVAL`` for them.
+
 **Task Control Interfaces**. The following task control interfaces are
 provided by NuttX:
 
@@ -58,6 +73,8 @@ Standard interfaces
 
   - :c:func:`exit`
   - :c:func:`getpid`
+  - :c:func:`getrlimit`
+  - :c:func:`setrlimit`
 
 Standard ``fork``/``vfork`` and ``exec[v|l]`` interfaces:
 
@@ -960,3 +977,36 @@ Functions
   :param policy: The new value of the *spawn-stacksize* attribute.
   :return: On success, this function returns 0; on failure it
     will return an error number from ``<errno.h>``
+
+.. c:function:: int getrlimit(int resource, FAR struct rlimit *rlp)
+
+  The ``getrlimit()`` function returns the soft and the hard limit of a
+  resource of the calling task.
+
+  :param resource: The resource, ``RLIMIT_*``.
+  :param rlp: The location that receives the limits.
+  :return: 0 on success. On failure, -1 is returned and ``errno`` is set
+    to ``EINVAL``: ``rlp`` is ``NULL`` or ``resource`` is not valid.
+
+  **POSIX Compatibility:** Comparable to the POSIX interface of the same
+  name. Only ``RLIMIT_NOFILE`` and ``RLIMIT_STACK`` are limits of the
+  task.
+
+.. c:function:: int setrlimit(int resource, FAR const struct rlimit *rlp)
+
+  The ``setrlimit()`` function sets the soft and the hard limit of a
+  resource of the calling task. The tasks that it creates later get the
+  same limits.
+
+  :param resource: ``RLIMIT_NOFILE`` or ``RLIMIT_STACK``.
+  :param rlp: The new limits.
+  :return: 0 on success. On failure, -1 is returned and ``errno`` is set:
+
+    - ``EINVAL``: ``rlp`` is ``NULL``, the soft limit is above the hard
+      limit, or NuttX does not enforce the resource.
+    - ``EPERM``: an unprivileged task raises a hard limit, or the limit
+      of open files is above ``OPEN_MAX``.
+
+  **POSIX Compatibility:** Comparable to the POSIX interface of the same
+  name. As on Linux, ``RLIMIT_STACK`` is also the default stack size of
+  new threads.
