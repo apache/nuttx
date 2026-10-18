@@ -99,6 +99,118 @@ jobs:
             echo 'board_contains_xtensa=1' | tee -a $GITHUB_OUTPUT
           fi
 
+          # Identify ARM Chip Family if PR is isolated to a single family
+          if [[ "$labels" == *"Arch: arm"* || "$labels" == *"Board: arm"* ]]; then
+            num_changed=$(gh pr view $pr --repo $GITHUB_REPOSITORY --json changedFiles --jq '.changedFiles' 2>/dev/null || echo "0")
+            pr_files=$(gh pr diff $pr --repo $GITHUB_REPOSITORY --name-only 2>/dev/null || gh pr view $pr --repo $GITHUB_REPOSITORY --json files --jq '.files[].path' 2>/dev/null || echo "")
+            if [[ "$pr_files" != "" ]]; then
+          arm_family=$(echo "$pr_files" | TOTAL_CHANGED="$num_changed" python3 -c '
+          import sys, re, os
+
+          try:
+              total_changed = int(os.environ.get("TOTAL_CHANGED", "0") or "0")
+          except ValueError:
+              sys.exit(0)
+          files = [l.strip() for l in sys.stdin if l.strip()]
+
+          # If file list is incomplete or PR is large (>100 files), leave arm_family unset
+          if total_changed <= 0 or len(files) < total_changed:
+              sys.exit(0)
+          if total_changed > 100:
+              sys.exit(0)
+
+          code_files = [f for f in files if not (f.startswith("Documentation/") or f.startswith(".github/") or f.endswith(".md") or f.endswith(".rst"))]
+          if not code_files:
+              sys.exit(0)
+
+          common_dirs = {"common", "arm", "armv6-m", "armv7-a", "armv7-m", "armv7-r", "armv8-m", "armv8-r", "cmake"}
+          chip_to_family = {
+              "stm32f4": "arm-stm32f4",
+              "stm32f0": "arm-stm32f0-f3",
+              "stm32f1": "arm-stm32f0-f3",
+              "stm32f2": "arm-stm32f0-f3",
+              "stm32f3": "arm-stm32f0-f3",
+              "stm32h7": "arm-stm32h7",
+              "stm32f7": "arm-stm32-other",
+              "stm32h5": "arm-stm32-other",
+              "stm32c0": "arm-stm32-other",
+              "stm32c5": "arm-stm32-other",
+              "stm32n6": "arm-stm32-other",
+              "stm32l0": "arm-stm32l-u-g",
+              "stm32l1": "arm-stm32l-u-g",
+              "stm32l4": "arm-stm32l-u-g",
+              "stm32l5": "arm-stm32l-u-g",
+              "stm32u0": "arm-stm32l-u-g",
+              "stm32u3": "arm-stm32l-u-g",
+              "stm32u5": "arm-stm32l-u-g",
+              "stm32g0": "arm-stm32l-u-g",
+              "stm32g4": "arm-stm32l-u-g",
+              "stm32wb": "arm-stm32l-u-g",
+              "stm32wl5": "arm-stm32l-u-g",
+              "rp2040": "arm-rp2xxx",
+              "rp23xx": "arm-rp2xxx",
+              "imxrt": "arm-imx",
+              "imx6": "arm-imx",
+              "imx9": "arm-imx",
+              "mx8mp": "arm-imx",
+              "lpc17xx_40xx": "arm-nxp",
+              "lpc214x": "arm-nxp",
+              "lpc2378": "arm-nxp",
+              "lpc31xx": "arm-nxp",
+              "lpc43xx": "arm-nxp",
+              "lpc54xx": "arm-nxp",
+              "kinetis": "arm-nxp",
+              "kl": "arm-nxp",
+              "s32k1xx": "arm-nxp",
+              "s32k3xx": "arm-nxp",
+              "lc823450": "arm-nxp",
+              "nrf52": "arm-nrf",
+              "nrf53": "arm-nrf",
+              "nrf54l": "arm-nrf",
+              "nrf91": "arm-nrf",
+              "sam34": "arm-sam",
+              "sama5": "arm-sam",
+              "samd2l2": "arm-sam",
+              "samd5e5": "arm-sam",
+              "samv7": "arm-sam",
+              "tiva": "arm-ti",
+              "cxd56xx": "arm-ti",
+              "rm57": "arm-ti",
+              "tms570": "arm-ti"
+          }
+
+          families = set()
+          for f in code_files:
+              if f.startswith("arch/arm/src/common/stm32/") or f.startswith("boards/arm/common/stm32/"):
+                  families.add("arm-stm32")
+                  continue
+              m_arch = re.match(r"^arch/arm/src/([^/]+)/", f)
+              m_board = re.match(r"^boards/arm/([^/]+)/", f)
+              chip = None
+              if m_arch:
+                  chip = m_arch.group(1)
+              elif m_board:
+                  chip = m_board.group(1)
+              else:
+                  sys.exit(0)
+              if chip in common_dirs or chip not in chip_to_family:
+                  sys.exit(0)
+              fam = chip_to_family[chip]
+              families.add(fam)
+              if len(families) > 1 and not all(f_item.startswith("arm-stm32") for f_item in families):
+                  sys.exit(0)
+
+          if len(families) == 1:
+              print(list(families)[0])
+          elif len(families) > 1 and all(f_item.startswith("arm-stm32") for f_item in families):
+              print("arm-stm32")
+          ' || echo "")
+              if [[ "$arm_family" != "" ]]; then
+                echo "arm_family=$arm_family" | tee -a $GITHUB_OUTPUT
+              fi
+            fi
+          fi
+
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -133,6 +245,7 @@ jobs:
           board_contains_x86=${{ steps.get-arch.outputs.board_contains_x86 }}
           board_contains_x86_64=${{ steps.get-arch.outputs.board_contains_x86_64 }}
           board_contains_xtensa=${{ steps.get-arch.outputs.board_contains_xtensa }}
+          arm_family=${{ steps.get-arch.outputs.arm_family }}
 
           # inputs.boards is a JSON Array: ["arm-01", "risc-v-01", "xtensa-01", ...]
           # We compact and remove the newlines
@@ -194,9 +307,13 @@ jobs:
             board=$( echo "$boards" | jq ".[$i]" )
             skip_build=0
 
-            # For "Arch / Board: arm": Build arm-01, arm-02, ...
+            # For "Arch / Board: arm": Build arm-* or targeted family
             if [[ "$arch_contains_arm" == "1" || "$board_contains_arm" == "1" ]]; then
-              if [[ "$board" != *"arm-"* ]]; then
+              if [[ "$arm_family" != "" ]]; then
+                if [[ "$board" != *"$arm_family"* ]]; then
+                  skip_build=1
+                fi
+              elif [[ "$board" != *"arm-"* ]]; then
                 skip_build=1
               fi
 
@@ -220,7 +337,7 @@ jobs:
 
             # For "Arch / Board: x86": Build other
             elif [[ "$arch_contains_x86" == "1" || "$board_contains_x86" == "1" ]]; then
-              if [[ "$board" != *"other"* ]]; then
+              if [[ "$board" != '"other"' ]]; then
                 skip_build=1
               fi
 

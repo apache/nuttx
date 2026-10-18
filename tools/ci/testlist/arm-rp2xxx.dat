@@ -1,0 +1,8 @@
+/arm/rp2040,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/rp23xx,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+
+-pimoroni-pico-2-plus:xipfs-nxflat
+
+# Boards build by CMake
+
+CMake,raspberrypi-pico:bmp280
