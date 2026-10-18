@@ -46,6 +46,7 @@
 #define SEM_PRIO_MASK             3
 
 #define SEM_TYPE_MUTEX            4
+#define SEM_TYPE_UNINTERRUPTIBLE  8 /* The kernel waits without EINTR */
 
 /* Value returned by sem_open() in the event of a failure. */
 

@@ -222,6 +222,8 @@ int nxsem_wait_uninterruptible(FAR sem_t *sem)
 {
   int ret;
 
+  nxsem_set_uninterruptible(sem);
+
   do
     {
       /* Take the semaphore (perhaps waiting) */
@@ -261,6 +263,8 @@ int nxsem_clockwait_uninterruptible(FAR sem_t *sem, clockid_t clockid,
                                     FAR const struct timespec *abstime)
 {
   int ret;
+
+  nxsem_set_uninterruptible(sem);
 
   do
     {
