@@ -485,6 +485,21 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 
 errout_with_tcb:
 
+#ifdef CONFIG_SCHED_SPORADIC
+  /* Stop sporadic scheduling before releasing the TCB referenced by its
+   * replenishment timers.
+   */
+
+  if (ptcb->sporadic != NULL)
+    {
+      irqstate_t flags = enter_critical_section();
+
+      DEBUGVERIFY(nxsched_stop_sporadic(ptcb));
+
+      leave_critical_section(flags);
+    }
+#endif
+
   /* Since we do not join the group, assign group to NULL to clear binding */
 
   ptcb->group = NULL;
