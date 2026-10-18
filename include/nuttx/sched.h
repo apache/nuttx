@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/resource.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <sched.h>
@@ -461,6 +462,11 @@ struct task_group_s
   pid_t tg_ppid;                    /* This is the ID of the parent thread      */
   uint8_t tg_flags;                 /* See GROUP_FLAG_* definitions             */
   uint8_t tg_caps;                  /* See PR_CAP_* definitions                 */
+
+  /* Resource limits (getrlimit() and setrlimit()) **************************/
+
+  struct rlimit tg_rlimit_stack;    /* RLIMIT_STACK                             */
+  struct rlimit tg_rlimit_nofile;   /* RLIMIT_NOFILE                            */
 
   /* User identity (POSIX real, effective, and saved-set IDs) ***************/
 

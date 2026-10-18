@@ -49,8 +49,6 @@ set(SRCS
     lib_getrusage.c
     lib_utime.c
     lib_utimes.c
-    lib_setrlimit.c
-    lib_getrlimit.c
     lib_setpriority.c
     lib_getpriority.c
     lib_futimes.c
