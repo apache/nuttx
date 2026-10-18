@@ -142,9 +142,10 @@ ifeq ($(CONFIG_LTO_THIN),y)
     LDFLAGS += --lto
   endif
 else ifeq ($(CONFIG_LTO_FULL),y)
-  ARCHOPTIMIZATION += -flto
   ifeq ($(CONFIG_ARM_TOOLCHAIN_GNU_EABI),y)
-    ARCHOPTIMIZATION += -fuse-linker-plugin
+    ARCHOPTIMIZATION += -flto=auto -fuse-linker-plugin
+  else
+    ARCHOPTIMIZATION += -flto
   endif
   ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
     LDFLAGS += --lto
