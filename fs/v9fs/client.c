@@ -691,7 +691,8 @@ static int v9fs_client_clunk(FAR struct v9fs_client_s *client,
  ****************************************************************************/
 
 static int v9fs_client_attach(FAR struct v9fs_client_s *client, uint32_t fid,
-                              FAR const char *uname, FAR const char *aname)
+                              FAR const char *uname, FAR const char *aname,
+                              uint32_t uid)
 {
   struct v9fs_attach_s request;
   struct v9fs_rattach_s response;
@@ -699,7 +700,6 @@ static int v9fs_client_attach(FAR struct v9fs_client_s *client, uint32_t fid,
   struct iovec riov[1];
   uint16_t uname_len = strlen(uname);
   uint16_t aname_len = strlen(aname);
-  uint32_t uid = getuid();
   off_t offset = 0;
   uint32_t newfid;
   int ret;
@@ -796,6 +796,86 @@ static int v9fs_client_version(FAR struct v9fs_client_s *client)
     }
 
   return 0;
+}
+
+/****************************************************************************
+ * v9fs_client_root
+ *
+ * Description:
+ *   Return the root fid of the effective user of the caller.  The server
+ *   gives new files the user of the fid that creates them, so each user
+ *   attaches with its own uid when it first uses the mount.
+ *
+ ****************************************************************************/
+
+static int v9fs_client_root(FAR struct v9fs_client_s *client)
+{
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  FAR struct v9fs_root_s *root;
+  FAR struct v9fs_root_s *entry;
+  uid_t uid = geteuid();
+  int ret;
+
+  if (uid == client->root_uid)
+    {
+      return client->root_fid;
+    }
+
+  nxmutex_lock(&client->lock);
+  for (root = client->roots; root != NULL; root = root->next)
+    {
+      if (root->uid == uid)
+        {
+          nxmutex_unlock(&client->lock);
+          return root->fid;
+        }
+    }
+
+  nxmutex_unlock(&client->lock);
+
+  entry = fs_heap_malloc(sizeof(struct v9fs_root_s));
+  if (entry == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  ret = v9fs_client_attach(client, V9FS_NOFID, client->uname,
+                           client->aname, uid);
+  if (ret < 0)
+    {
+      fs_heap_free(entry);
+      return ret;
+    }
+
+  entry->uid = uid;
+  entry->fid = ret;
+
+  /* Another thread of the same user can attach at the same time */
+
+  nxmutex_lock(&client->lock);
+  for (root = client->roots; root != NULL; root = root->next)
+    {
+      if (root->uid == uid)
+        {
+          break;
+        }
+    }
+
+  if (root == NULL)
+    {
+      entry->next = client->roots;
+      client->roots = entry;
+      nxmutex_unlock(&client->lock);
+      return entry->fid;
+    }
+
+  nxmutex_unlock(&client->lock);
+  v9fs_client_clunk(client, entry->fid);
+  fs_heap_free(entry);
+  return root->fid;
+#else
+  return client->root_fid;
+#endif
 }
 
 /****************************************************************************
@@ -1382,7 +1462,7 @@ int v9fs_client_mkdir(FAR struct v9fs_client_s *client, uint32_t fid,
   struct v9fs_rmkdir_s response;
   struct iovec wiov[1];
   struct iovec riov[1];
-  uint32_t gid = getgid();
+  uint32_t gid = getegid();
   off_t offset = 0;
 
   /* size[4] Tmkdir tag[2] dfid[4] name[s] mode[4] gid[4]
@@ -1424,7 +1504,7 @@ int v9fs_client_create(FAR struct v9fs_client_s *client, uint32_t fid,
   struct iovec wiov[1];
   struct iovec riov[1];
   uint32_t flags = v9fs_map_open_flags(oflags);
-  uint32_t gid = getgid();
+  uint32_t gid = getegid();
   off_t offset = 0;
   int ret;
 
@@ -1644,7 +1724,7 @@ static int v9fs_build_path_to_component(FAR const char *path,
  ****************************************************************************/
 
 static int v9fs_client_walk_impl(FAR struct v9fs_client_s *client,
-                                 FAR const char *path,
+                                 uint32_t root, FAR const char *path,
                                  FAR const char **childname,
                                  FAR struct v9fs_rwalk_s *response,
                                  FAR char *response_payload,
@@ -1727,7 +1807,7 @@ static int v9fs_client_walk_impl(FAR struct v9fs_client_s *client,
                         total_len;
   request.header.type = V9FS_TWALK;
   request.header.tag = v9fs_get_tagid(client);
-  request.fid = client->root_fid;
+  request.fid = root;
   request.newfid = newfid;
   request.nwname = nwname;
   start = path;
@@ -1814,7 +1894,7 @@ err:
  ****************************************************************************/
 
 static int v9fs_client_walk_internal(FAR struct v9fs_client_s *client,
-                                     FAR const char *path,
+                                     uint32_t root, FAR const char *path,
                                      FAR const char **childname,
                                      bool nofollow,
                                      int symloop_count)
@@ -1842,7 +1922,7 @@ static int v9fs_client_walk_internal(FAR struct v9fs_client_s *client,
       return -ENOMEM;
     }
 
-  ret = fid = v9fs_client_walk_impl(client, path, childname,
+  ret = fid = v9fs_client_walk_impl(client, root, path, childname,
                                     &response, response_payload, &nwname);
 
 #ifdef CONFIG_FS_LINKS
@@ -1869,7 +1949,7 @@ static int v9fs_client_walk_internal(FAR struct v9fs_client_s *client,
               goto errout_with_symlink;
             }
 
-          fid = v9fs_client_walk_impl(client, symlink_path, NULL,
+          fid = v9fs_client_walk_impl(client, root, symlink_path, NULL,
                                       &response, response_payload,
                                       NULL);
           if (fid < 0)
@@ -1933,9 +2013,9 @@ static int v9fs_client_walk_internal(FAR struct v9fs_client_s *client,
                   goto errout_with_symlink;
                 }
 
-              fid = v9fs_client_walk_impl(client, symlink_path, NULL,
-                                          &response, response_payload,
-                                          NULL);
+              fid = v9fs_client_walk_impl(client, root, symlink_path,
+                                          NULL, &response,
+                                          response_payload, NULL);
               if (fid < 0)
                 {
                   /* Walk failed, no point trying longer paths */
@@ -2049,7 +2129,7 @@ static int v9fs_client_walk_internal(FAR struct v9fs_client_s *client,
 
       snprintf(new_path, PATH_MAX, "%.*s%s%s",
                (int)(start - path), path, readlink_buf, end);
-      ret = v9fs_client_walk_internal(client, new_path, childname,
+      ret = v9fs_client_walk_internal(client, root, new_path, childname,
                                       nofollow, symloop_count + 1);
       goto errout_with_newpath;
     }
@@ -2086,7 +2166,16 @@ errout_with_response:
 int v9fs_client_walk(FAR struct v9fs_client_s *client, FAR const char *path,
                      FAR const char **childname, bool nofollow)
 {
-  return v9fs_client_walk_internal(client, path, childname, nofollow, 0);
+  int root;
+
+  root = v9fs_client_root(client);
+  if (root < 0)
+    {
+      return root;
+    }
+
+  return v9fs_client_walk_internal(client, root, path, childname,
+                                   nofollow, 0);
 }
 
 /****************************************************************************
@@ -2186,7 +2275,7 @@ int v9fs_client_init(FAR struct v9fs_client_s *client,
 
   /* Do Attach */
 
-  ret = v9fs_client_attach(client, V9FS_NOFID, uname, aname);
+  ret = v9fs_client_attach(client, V9FS_NOFID, uname, aname, geteuid());
   if (ret < 0)
     {
       goto out;
@@ -2194,6 +2283,23 @@ int v9fs_client_init(FAR struct v9fs_client_s *client,
 
   client->root_fid = ret;
   client->tag_id = 1;
+
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  /* Keep the names for the attach of other users */
+
+  client->root_uid = geteuid();
+  client->uname = fs_heap_strdup(uname);
+  client->aname = fs_heap_strdup(aname);
+  if (client->uname == NULL || client->aname == NULL)
+    {
+      fs_heap_free(client->uname);
+      fs_heap_free(client->aname);
+      v9fs_client_clunk(client, client->root_fid);
+      ret = -ENOMEM;
+      goto out;
+    }
+#endif
+
   lib_put_pathbuffer(aname);
   return 0;
 
@@ -2211,6 +2317,9 @@ out:
 
 int v9fs_client_uninit(FAR struct v9fs_client_s *client)
 {
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  FAR struct v9fs_root_s *root;
+#endif
   int ret;
 
   ret = v9fs_client_clunk(client, client->root_fid);
@@ -2218,6 +2327,18 @@ int v9fs_client_uninit(FAR struct v9fs_client_s *client)
     {
       return ret;
     }
+
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  while ((root = client->roots) != NULL)
+    {
+      client->roots = root->next;
+      v9fs_client_clunk(client, root->fid);
+      fs_heap_free(root);
+    }
+
+  fs_heap_free(client->uname);
+  fs_heap_free(client->aname);
+#endif
 
   v9fs_transport_destroy(client->transport);
   nxmutex_destroy(&client->lock);
@@ -2327,7 +2448,7 @@ int v9fs_client_symlink(FAR struct v9fs_client_s *client, uint32_t fid,
   struct v9fs_rsymlink_s response;
   struct iovec wiov[1];
   struct iovec riov[1];
-  uint32_t gid = getgid();
+  uint32_t gid = getegid();
   off_t offset = 0;
   uint16_t symtgt_len;
   size_t name_len;
