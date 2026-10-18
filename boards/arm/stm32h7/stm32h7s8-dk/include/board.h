@@ -226,4 +226,38 @@
 #define GPIO_XSPI2_IO6          (GPIO_XSPI2_IO6_1 | GPIO_SPEED_100MHz)
 #define GPIO_XSPI2_IO7          (GPIO_XSPI2_IO7_1 | GPIO_SPEED_100MHz)
 
+/* Ethernet: LAN8742A PHY on RMII, RJ45 at CN10. */
+
+/* SMA clause-22 communication with PHY can be handled in two ways:
+ * - SMA hardware internal to ETHMAC
+ * - emulated via GPIO pins
+ * On STM32H7S8-DK JP6 in its default setting connects MDC to PB2
+ * requiring SMA emulation via GPIO pins.
+ * JP6 in alternate setting connects MDC to PC1 which can be muxed
+ * as ETH_MDC signal allowing either SMA hardware or GPIO emulation.
+ * For GPIO SMA emilation, note two definitions for MDIO pin,
+ * one for input(PHY->STM32), and other for output(STM32->PHY).
+ */
+
+#ifdef CONFIG_STM32_ETH_MDIO_GPIO
+#define GPIO_ETH_MDC_GPIO       (GPIO_OUTPUT | GPIO_PUSHPULL \
+                    | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR \
+                    | GPIO_PORTB | GPIO_PIN2)                                 /* PB2 */
+#define GPIO_ETH_MDIO_GPIO_OUT  (GPIO_OUTPUT | GPIO_OPENDRAIN \
+                                 | GPIO_SPEED_50MHz | GPIO_PORTA | GPIO_PIN2) /* PA2 */
+#define GPIO_ETH_MDIO_GPIO_IN   (GPIO_INPUT | GPIO_FLOAT \
+                                 | GPIO_PORTA | GPIO_PIN2)                    /* PA2 */
+#else
+#define GPIO_ETH_MDC            (GPIO_ETH_MDC_1 | GPIO_SPEED_100MHz)          /* PC1  */
+#define GPIO_ETH_MDIO           (GPIO_ETH_MDIO_1 | GPIO_SPEED_100MHz)         /* PA2  */
+#endif
+
+#define GPIO_ETH_RMII_REF_CLK   (GPIO_ETH_RMII_REF_CLK_3 | GPIO_SPEED_100MHz) /* PD7  */
+#define GPIO_ETH_RMII_CRS_DV    (GPIO_ETH_RMII_CRS_DV_1 | GPIO_SPEED_100MHz)  /* PA7  */
+#define GPIO_ETH_RMII_RXD0      (GPIO_ETH_RMII_RXD0_1 | GPIO_SPEED_100MHz)    /* PC4  */
+#define GPIO_ETH_RMII_RXD1      (GPIO_ETH_RMII_RXD1_1 | GPIO_SPEED_100MHz)    /* PC5  */
+#define GPIO_ETH_RMII_TX_EN     (GPIO_ETH_RMII_TX_EN_3 | GPIO_SPEED_100MHz)   /* PG11 */
+#define GPIO_ETH_RMII_TXD0      (GPIO_ETH_RMII_TXD0_1 | GPIO_SPEED_100MHz)    /* PB0 */
+#define GPIO_ETH_RMII_TXD1      (GPIO_ETH_RMII_TXD1_1 | GPIO_SPEED_100MHz)    /* PB1 */
+
 #endif /* __BOARDS_ARM_STM32H7_STM32H7S8_DK_INCLUDE_BOARD_H */
