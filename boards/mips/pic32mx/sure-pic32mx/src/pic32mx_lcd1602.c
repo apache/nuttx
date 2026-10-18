@@ -537,22 +537,22 @@ static void lcd_action(enum slcdcode_e code, uint8_t count)
               break;
             }
 
-           /* Otherwise, BACKDEL is like moving the cursor back N characters
-            * then doing a forward deletion.
-            * Decrement the cursor position and fall through.
-            */
+          /* Otherwise, BACKDEL is like moving the cursor back N characters
+           * then doing a forward deletion.
+           * Decrement the cursor position and fall through.
+           */
 
-           tmp = (int)g_lcd1602.curcol - count;
-           if (tmp < 0)
-             {
-               tmp   = 0;
-               count = g_lcd1602.curcol;
-             }
+          tmp = (int)g_lcd1602.curcol - count;
+          if (tmp < 0)
+            {
+              tmp   = 0;
+              count = g_lcd1602.curcol;
+            }
 
-           /* Save the updated cursor positions */
+          /* Save the updated cursor positions */
 
-           g_lcd1602.curcol = tmp;
-         }
+          g_lcd1602.curcol = tmp;
+        }
 
       case SLCDCODE_FWDDEL:          /* DELete (forward delete) N characters moving text */
         if (count > 0)
@@ -576,6 +576,7 @@ static void lcd_action(enum slcdcode_e code, uint8_t count)
             for (i = g_lcd1602.curcol + nmove; i < LCD_NCOLUMNS - 1; i++)
               {
                 uint8_t ch = lcd_readch(g_lcd1602.currow, i);
+
                 lcd_writech(ch, g_lcd1602.currow, i - nmove);
               }
 
@@ -930,6 +931,7 @@ static int lcd_ioctl(struct file *filep, int cmd, unsigned long arg)
       case SLCDIOC_GETBRIGHTNESS:
         {
           int *brightness = (int *)((uintptr_t)arg);
+
           if (!brightness)
             {
               return -EINVAL;

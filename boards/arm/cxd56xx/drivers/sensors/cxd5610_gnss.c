@@ -1211,6 +1211,7 @@ static int cxd5610_gnss_get_ope_mode(struct cxd5610_gnss_dev_s *priv,
   if (ret == OK)
     {
       uint8_t *res = priv->rcvbuf;
+
       ope_mode->mode = 1;
       cxd5610_store32(&ope_mode->cycle, &res[1]);
     }
@@ -1395,7 +1396,8 @@ static int cxd5610_gnss_reset(struct cxd5610_gnss_dev_s *priv,
 static int cxd5610_gnss_set_notify(struct cxd5610_gnss_dev_s *priv)
 {
   int ret;
-  uint8_t param[] = {
+  uint8_t param[] =
+  {
     OPC_TIME_NOTIFY,
     OPC_RECEIVER_POS_NOTIFY,
     OPC_RECEIVER_VEL_NOTIFY,
@@ -1834,6 +1836,7 @@ static ssize_t cxd5610_gnss_read_compat(struct cxd5610_gnss_dev_s *priv,
   for (i = 0; i < svnum; i++)
     {
       uint8_t type = priv->posdat2->sv[i].type;
+
       posdat->sv[i].type = cxd5610_gnss_signal2type(type);
       posdat->sv[i].svid = priv->posdat2->sv[i].svid;
       posdat->sv[i].stat = priv->posdat2->sv[i].stat;
@@ -2087,6 +2090,7 @@ static void cxd5610_gnss_signalhandler(struct cxd5610_gnss_dev_s *priv,
   for (i = 0; i < CONFIG_SENSORS_CXD5610_GNSS_NSIGNALRECEIVERS; i++)
     {
       struct gnss_sig_s *sig = &priv->sigs[i];
+
       if (sig->enable && sig->info.gnsssig == sigtype)
         {
           union sigval value;
