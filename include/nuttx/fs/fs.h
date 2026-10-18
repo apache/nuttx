@@ -352,6 +352,11 @@ struct mountpt_operations
   CODE int     (*mkdir)(FAR struct inode *mountpt, FAR const char *relpath,
                         mode_t mode);
   CODE int     (*rmdir)(FAR struct inode *mountpt, FAR const char *relpath);
+
+  /* rename() replaces an existing newrelpath in one step, or fails (for
+   * example with -EEXIST).  The VFS then removes newrelpath and retries.
+   */
+
   CODE int     (*rename)(FAR struct inode *mountpt,
                          FAR const char *oldrelpath,
                          FAR const char *newrelpath);

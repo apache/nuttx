@@ -286,6 +286,7 @@ static int mountptrename(FAR const char *oldpath, FAR struct inode *oldinode,
   FAR struct inode *newinode;
   FAR const char *newrelpath;
   FAR char *subdir = NULL;
+  bool newexists = false;
   bool newisdir = false;
   bool oldisdir = false;
   int ret;
@@ -347,14 +348,8 @@ static int mountptrename(FAR const char *oldpath, FAR struct inode *oldinode,
   /* Does a directory entry already exist at the 'newrelpath'?  And is it
    * not the same directory entry that we are moving?
    *
-   * If the directory entry at the newrelpath is a regular file, then that
-   * file should be removed first.
-   *
-   * If the directory entry at the newrelpath is an empty directory, then it
-   * can be removed without issue.
-   *
-   * If the directory entry at the newrelpath is a non-empty directory,
-   * then the rename should fail with the error ENOTEMPTY.
+   * The rename replaces a regular file or an empty directory at the
+   * newrelpath.  It fails with ENOTEMPTY for a non-empty directory.
    */
 
 #ifdef CONFIG_FS_LINKS
@@ -447,19 +442,6 @@ static int mountptrename(FAR const char *oldpath, FAR struct inode *oldinode,
                   ret = -EINVAL;
                   goto errout_with_newinode;
                 }
-
-              /* Remove the newrelpath which already exists.
-               * rmdir will handle the error cases.
-               */
-
-              if (oldinode->u.i_mops->rmdir)
-                {
-                  ret = oldinode->u.i_mops->rmdir(oldinode, newrelpath);
-                  if (ret < 0)
-                    {
-                      goto errout_with_newinode;
-                    }
-                }
             }
           else
             {
@@ -472,30 +454,47 @@ static int mountptrename(FAR const char *oldpath, FAR struct inode *oldinode,
                   ret = -ENOTDIR;
                   goto errout_with_newinode;
                 }
-
-              if (oldinode->u.i_mops->unlink)
-                {
-                  /* Attempt to remove the file before doing the rename.
-                   *
-                   * NOTE that errors are not handled here.  If we failed
-                   * to remove the file, then the file system 'rename'
-                   * method should check that.
-                   */
-
-                  oldinode->u.i_mops->unlink(oldinode, newrelpath);
-#ifdef CONFIG_FS_NOTIFY
-                  notify_unlink(newrelpath);
-#endif
-                }
             }
+
+          newexists = true;
         }
     }
 
   /* Perform the rename operation using the relative paths at the common
-   * mountpoint.
+   * mountpoint.  The file system replaces an existing newrelpath in one
+   * step if it can.
    */
 
   ret = oldinode->u.i_mops->rename(oldinode, oldrelpath, newrelpath);
+  if (ret < 0 && newexists)
+    {
+      int ret2 = ret;
+
+      /* It cannot.  Remove newrelpath first, then rename again.  If the
+       * removal fails, return the error of the rename.
+       */
+
+      if (newisdir && oldinode->u.i_mops->rmdir)
+        {
+          ret2 = oldinode->u.i_mops->rmdir(oldinode, newrelpath);
+        }
+      else if (!newisdir && oldinode->u.i_mops->unlink)
+        {
+          ret2 = oldinode->u.i_mops->unlink(oldinode, newrelpath);
+#ifdef CONFIG_FS_NOTIFY
+          if (ret2 >= 0)
+            {
+              notify_unlink(newrelpath);
+            }
+#endif
+        }
+
+      if (ret2 >= 0)
+        {
+          ret = oldinode->u.i_mops->rename(oldinode, oldrelpath,
+                                           newrelpath);
+        }
+    }
 
 #ifdef CONFIG_FS_NOTIFY
   if (ret >= 0)
