@@ -1256,6 +1256,7 @@ int cc1101_setgdo(FAR struct cc1101_dev_s *dev, uint8_t pin,
       /* Force XOSC to stay active even in sleep mode */
 
       int value = CC1101_MCSM0_VALUE | CC1101_MCSM0_XOSC_FORCE_ON;
+
       cc1101_access(dev, CC1101_MCSM0, (FAR uint8_t *)&value, -1);
 
       dev->flags |= FLAGS_XOSCENABLED;
@@ -1265,6 +1266,7 @@ int cc1101_setgdo(FAR struct cc1101_dev_s *dev, uint8_t pin,
       /* Disable XOSC in sleep mode */
 
       int value = CC1101_MCSM0_VALUE;
+
       cc1101_access(dev, CC1101_MCSM0, (FAR uint8_t *)&value, -1);
 
       dev->flags &= ~FLAGS_XOSCENABLED;
@@ -1430,10 +1432,22 @@ static int cc1101_ioctl_apply_power(FAR struct cc1101_dev_s *dev,
       return -EIO;
     }
 
-  if (freq2 < 0x10)       band_idx = 0; /* 315 MHz */
-  else if (freq2 < 0x20)  band_idx = 1; /* 433 MHz */
-  else if (freq2 < 0x22)  band_idx = 2; /* 868 MHz */
-  else                    band_idx = 3; /* 915 MHz */
+  if (freq2 < 0x10)
+    {
+      band_idx = 0; /* 315 MHz */
+    }
+  else if (freq2 < 0x20)
+    {
+      band_idx = 1; /* 433 MHz */
+    }
+  else if (freq2 < 0x22)
+    {
+      band_idx = 2; /* 868 MHz */
+    }
+  else
+    {
+      band_idx = 3; /* 915 MHz */
+    }
 
   /* Fact detection 2: Read modulation format to decide whether to
    * keep ramp-up curve.
@@ -1455,7 +1469,10 @@ static int cc1101_ioctl_apply_power(FAR struct cc1101_dev_s *dev,
       patable[0] = 0x00;
       patable[1] = g_cc1101_pa_calibration[band_idx][pwr_idx];
 
-      for (i = 2; i < 8; i++) patable[i] = 0x00; /* Eliminate memory residue */
+      for (i = 2; i < 8; i++)
+        {
+          patable[i] = 0x00; /* Eliminate memory residue */
+        }
 
       /* Apply 8-byte burst write to cover the entire PATABLE space */
 
@@ -1470,19 +1487,29 @@ static int cc1101_ioctl_apply_power(FAR struct cc1101_dev_s *dev,
       for (i = 0; i < 8; i++)
         {
           if (i <= pwr_idx)
-            patable[i] = g_cc1101_pa_calibration[band_idx][i];
+            {
+              patable[i] = g_cc1101_pa_calibration[band_idx][i];
+            }
           else
-            patable[i] = g_cc1101_pa_calibration[band_idx][pwr_idx]; /* Stay flat (Plateau) after reaching target power */
+            {
+              patable[i] = g_cc1101_pa_calibration[band_idx][pwr_idx]; /* Stay flat (Plateau) after reaching target power */
+            }
         }
 
       ret = cc1101_access(dev, CC1101_PATABLE, patable, -8);
     }
 
-  if (ret < 0) return -EIO;
+  if (ret < 0)
+    {
+      return -EIO;
+    }
 
   /* Update FREND0.PA_POWER index, but must keep TX filter high bits */
 
-  if (cc1101_access(dev, CC1101_FREND0, &frend0, 1) < 0) return -EIO;
+  if (cc1101_access(dev, CC1101_FREND0, &frend0, 1) < 0)
+    {
+      return -EIO;
+    }
 
   frend0 &= 0xf8; /* Clear bottom 3 control bits */
   frend0 |= (mod_format == 0x03) ? 1 : 7;
@@ -1754,6 +1781,7 @@ void cc1101_isr_process(FAR void *arg)
 {
   DEBUGASSERT(arg);
   FAR struct cc1101_dev_s *dev = (struct cc1101_dev_s *)arg;
+
   switch (dev->status)
     {
       case CC1101_SEND:
@@ -1964,7 +1992,10 @@ static int cc1101_file_ioctl(FAR struct file *filep, int cmd,
           for (i = 0; i < 8; i++)
             {
               diff = req_dbm - g_cc1101_dbm_table[i];
-              if (diff < 0) diff = -diff;
+              if (diff < 0)
+                {
+                  diff = -diff;
+                }
 
               if (diff < min_diff)
                 {
