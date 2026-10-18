@@ -30,12 +30,12 @@
  *               DECISION OF THIS BOARD, not a property of the chip -- another
  *               board may size it differently, or not carve it out at all.
  *               It must match CONFIG_GD32VW55X_PROGMEM_START_ADDR/_SIZE.
- *   0x083fb000  Wi-Fi NVDS (20K): RF calibration data and the MAC address.
- *               This one IS fixed by the chip's radio firmware.
+ *   0x083fb000  NVDS (20K): the BLE bonding data of the vendor stack.
+ *               This one IS fixed by the vendor Wi-Fi/BLE stack.
  *
  * That leaves 3948K (0x3db000) for the firmware.  Overflowing it is a link
  * error, which is the point: a firmware that grew over these regions would
- * take the filesystem, or the radio calibration, with it at the next flash.
+ * take the filesystem, or the BLE bonds, with it at the next flash.
  *
  * SRAM: the first 0x200 bytes belong to the boot ROM runtime data (the
  * ROM mbedtls/IBL state) and must stay untouched - the vendor SDK links

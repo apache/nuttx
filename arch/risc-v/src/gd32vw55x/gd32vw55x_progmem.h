@@ -47,10 +47,10 @@
  *
  * WARNING:  The internal flash of the GD32VW55x holds the running firmware
  * itself (NuttX is linked at 0x08000000) as well as vendor data used by the
- * Wi-Fi/BLE stacks (the NVDS area and the RF/Wi-Fi trim values).  The board
+ * Wi-Fi/BLE stacks (the NVDS area, with the BLE bonding data).  The board
  * must therefore carve out a region that is known to be unused.  There is
  * no default; erasing or programming the wrong region will brick the image
- * or destroy the calibration data.
+ * or lose the BLE bonds.
  */
 
 #ifndef CONFIG_GD32VW55X_PROGMEM_START_ADDR

@@ -259,7 +259,7 @@ int gd32_bringup(void)
 
 #ifdef CONFIG_MTD_PROGMEM
   /* The progmem region of the internal flash as an MTD device.  It sits
-   * below the Wi-Fi NVDS -- see CONFIG_GD32VW55X_PROGMEM_START_ADDR.
+   * below the NVDS -- see CONFIG_GD32VW55X_PROGMEM_START_ADDR.
    */
 
   mtd = progmem_initialize();
