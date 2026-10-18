@@ -1,0 +1,24 @@
+/arm/stm32f4/omnibusf4,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32f4/stm3240g-eval,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/stm32f4/stm32f411-minimum,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32f4/stm32f411e-disco,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32f4/stm32f429i-disco,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32f4/stm32f4discovery,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+
+-stm3240g-eval:knxwm
+-stm32f4discovery:cxxtest
+-stm32f4discovery:winbuild
+
+# Boards build by CMake
+
+CMake,stm32f411-minimum:composite
+CMake,stm32f411-minimum:nsh
+CMake,stm32f411-minimum:spifsnsh
+CMake,stm32f411-minimum:usbmsc
+CMake,stm32f411e-disco:nsh
+CMake,stm32f429i-disco:adc
+CMake,stm32f429i-disco:extflash
+CMake,stm32f429i-disco:highpri
+CMake,stm32f429i-disco:nsh
+CMake,stm32f429i-disco:usbmsc
+CMake,stm32f429i-disco:usbnsh

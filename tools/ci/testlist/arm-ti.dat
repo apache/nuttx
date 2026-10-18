@@ -1,0 +1,8 @@
+/arm/cxd56xx,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/rm57,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/tiva,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/tms570,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+
+-eagle100:thttpd
+-launchxl-cc1310:nsh
+-tms570ls31x-usb-kit:nsh

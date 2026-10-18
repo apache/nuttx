@@ -1,0 +1,24 @@
+/arm/stm32f4/[a-m]*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/stm32f4/nucleo-f4*,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32f4/olimex-*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+
+# Boards build by CMake
+
+CMake,nucleo-f401re:fb
+CMake,nucleo-f401re:nsh
+CMake,nucleo-f410rb:nsh
+CMake,nucleo-f411re:mcp2515-extid
+CMake,nucleo-f411re:nsh
+CMake,nucleo-f412zg:nsh
+CMake,nucleo-f429zi:netnsh
+CMake,nucleo-f429zi:nsh
+CMake,nucleo-f446re:adc
+CMake,nucleo-f446re:cansock
+CMake,nucleo-f446re:dac
+CMake,nucleo-f446re:gpio
+CMake,nucleo-f446re:ihm08m1_b16
+CMake,nucleo-f446re:ihm08m1_f32
+CMake,nucleo-f446re:nsh
+CMake,nucleo-f446re:pwm
+CMake,nucleo-f446re:qenco
+CMake,nucleo-f446re:systemview

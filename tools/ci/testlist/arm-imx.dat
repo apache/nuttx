@@ -1,0 +1,10 @@
+/arm/imx6,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/imx9,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/imxrt,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/mx8mp/*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+
+# Boards build by CMake
+
+CMake,sabre-6quad:coredump
+CMake,sabre-6quad:nsh
+CMake,sabre-6quad:smp
