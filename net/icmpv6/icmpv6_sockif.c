@@ -125,6 +125,7 @@ static int icmpv6_setup(FAR struct socket *psock)
        */
 
       FAR struct icmpv6_conn_s *conn = icmpv6_alloc();
+
       if (conn == NULL)
         {
           /* Failed to reserve a connection structure */

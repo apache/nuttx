@@ -799,6 +799,7 @@ retry:
   else /* ret >= 0 or ret == -ETIMEDOUT */
     {
       int num = epoll_teardown(eph, evs, maxevents);
+
       if (num == 0 && ret >= 0)
         {
           goto retry;
@@ -881,6 +882,7 @@ retry:
   else /* ret >= 0 or ret == -ETIMEDOUT */
     {
       int num = epoll_teardown(eph, evs, maxevents);
+
       if (num == 0 && ret >= 0)
         {
           goto retry;

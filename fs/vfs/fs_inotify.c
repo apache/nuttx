@@ -319,6 +319,7 @@ inotify_remove_watch_no_event(FAR struct inotify_watch_s *watch)
   if (list_is_empty(&list->watches))
     {
       ENTRY item;
+
       item.key = list->path;
       hsearch_r(item, DELETE, NULL, &g_inotify.hash);
     }
@@ -419,6 +420,7 @@ static int inotify_poll(FAR struct file *filep, FAR struct pollfd *fds,
   if (!setup)
     {
       FAR struct pollfd **slot = fds->priv;
+
       *slot = NULL;
       fds->priv = NULL;
       goto out;
@@ -469,6 +471,7 @@ static int inotify_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case FIONREAD:
         {
           FAR int *nbytes = (FAR int *)((uintptr_t)arg);
+
           if (nbytes)
             {
               *nbytes = dev->event_size;
@@ -525,6 +528,7 @@ static ssize_t inotify_read(FAR struct file *filp, FAR char *buffer,
             list_first_entry(&dev->events, struct inotify_event_s, node);
 
           size_t eventlen = sizeof(struct inotify_event) + event->event.len;
+
           if (len < eventlen)
             {
               break;
@@ -572,6 +576,7 @@ static int inotify_close(FAR struct file *filep)
   while (!list_is_empty(&dev->watches))
     {
       FAR struct inotify_watch_s *watch;
+
       watch = list_first_entry(&dev->watches, struct inotify_watch_s,
                                d_node);
       inotify_remove_watch_no_event(watch);
@@ -582,6 +587,7 @@ static int inotify_close(FAR struct file *filep)
   while (!list_is_empty(&dev->events))
     {
       FAR struct inotify_event_s *event;
+
       event = list_first_entry(&dev->events, struct inotify_event_s, node);
       inotify_remove_event(dev, event);
     }
@@ -1116,6 +1122,7 @@ int inotify_add_watch(int fd, FAR const char *pathname, uint32_t mask)
   if (old != NULL)
     {
       uint32_t tmpmask = old->mask;
+
       if (mask & IN_MASK_CREATE)
         {
           ret = -EEXIST;
@@ -1139,6 +1146,7 @@ int inotify_add_watch(int fd, FAR const char *pathname, uint32_t mask)
       if (watch == NULL && list_is_empty(&list->watches))
         {
           ENTRY item;
+
           item.key = list->path;
           hsearch_r(item, DELETE, NULL, &g_inotify.hash);
           ret = -ENOMEM;

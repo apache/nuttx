@@ -150,6 +150,7 @@ static int netlink_setup(FAR struct socket *psock)
        */
 
       FAR struct netlink_conn_s *conn = netlink_alloc();
+
       if (conn == NULL)
         {
           /* Failed to reserve a connection structure */
@@ -638,8 +639,8 @@ static ssize_t netlink_sendmsg(FAR struct socket *psock,
 #endif
 
       default:
-       ret = -EOPNOTSUPP;
-       break;
+        ret = -EOPNOTSUPP;
+        break;
     }
 
   return ret;
