@@ -1851,6 +1851,7 @@ static int mnemofs_rename(FAR struct inode *mountpt,
                           FAR const char *newrelpath)
 {
   FAR struct mfs_sb_s *sb;
+  struct stat buf;
   int ret;
 
   sb = mnemofs_mountpt_to_sb(mountpt);
@@ -1859,6 +1860,16 @@ static int mnemofs_rename(FAR struct inode *mountpt,
     {
       ferr("mnemofs_lock failed: %d\n", ret);
       return ret;
+    }
+
+  /* mfs_dir_rename() cannot replace an existing newrelpath.  EEXIST makes
+   * the VFS remove it first.
+   */
+
+  if (mfs_dir_stat(sb, newrelpath, &buf) == OK)
+    {
+      mnemofs_unlock(sb);
+      return -EEXIST;
     }
 
   ret = mfs_dir_rename(sb, oldrelpath, newrelpath);
