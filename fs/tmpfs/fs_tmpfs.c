@@ -105,6 +105,8 @@ static int  tmpfs_remove_dirent(FAR struct tmpfs_directory_s *tdo,
               FAR const char *name);
 static int  tmpfs_add_dirent(FAR struct tmpfs_directory_s *tdo,
               FAR struct tmpfs_object_s *to, FAR const char *name);
+static int  tmpfs_replace_dirent(FAR struct tmpfs_directory_s *tdo,
+              int index, FAR struct tmpfs_object_s *to);
 static FAR struct tmpfs_file_s *
 tmpfs_alloc_file(FAR struct tmpfs_directory_s *parent, mode_t mode);
 static int  tmpfs_create_file(FAR struct tmpfs_s *fs,
@@ -568,6 +570,96 @@ static int tmpfs_add_dirent(FAR struct tmpfs_directory_s *tdo,
   tde             = &tdo->tdo_entry[index];
   tde->tde_object = to;
   tde->tde_name   = newname;
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: tmpfs_replace_dirent
+ *
+ * Description:
+ *   Make the entry at 'index' refer to 'to' and free the object that it
+ *   referred to.  An open file stays until its last close.  Return 1 if
+ *   the entry already refers to 'to'.
+ *
+ ****************************************************************************/
+
+static int tmpfs_replace_dirent(FAR struct tmpfs_directory_s *tdo,
+                                int index, FAR struct tmpfs_object_s *to)
+{
+  FAR struct tmpfs_object_s *old = tdo->tdo_entry[index].tde_object;
+  int ret;
+
+  if (old == to)
+    {
+      return 1;
+    }
+
+  ret = tmpfs_lock_object(old);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (old->to_type == TMPFS_DIRECTORY)
+    {
+      FAR struct tmpfs_directory_s *olddir =
+        (FAR struct tmpfs_directory_s *)old;
+
+      if (to->to_type != TMPFS_DIRECTORY)
+        {
+          ret = -EISDIR;
+        }
+      else if (olddir->tdo_nentries > 0)
+        {
+          ret = -ENOTEMPTY;
+        }
+      else if (olddir->tdo_refs > 0)
+        {
+          ret = -EBUSY;
+        }
+    }
+  else if (to->to_type == TMPFS_DIRECTORY)
+    {
+      ret = -ENOTDIR;
+    }
+
+  if (ret < 0)
+    {
+      tmpfs_unlock_object(old);
+      return ret;
+    }
+
+  tdo->tdo_entry[index].tde_object = to;
+  to->to_parent = tdo;
+
+  if (old->to_type == TMPFS_DIRECTORY)
+    {
+      FAR struct tmpfs_directory_s *olddir =
+        (FAR struct tmpfs_directory_s *)old;
+
+      tmpfs_unlock_directory(olddir);
+      nxrmutex_destroy(&olddir->tdo_lock);
+      fs_heap_free(olddir->tdo_entry);
+      fs_heap_free(olddir);
+    }
+  else
+    {
+      FAR struct tmpfs_file_s *oldfile = (FAR struct tmpfs_file_s *)old;
+
+      if (oldfile->tfo_refs > 0)
+        {
+          oldfile->tfo_flags |= TFO_FLAG_UNLINKED;
+          tmpfs_unlock_file(oldfile);
+        }
+      else
+        {
+          tmpfs_unlock_file(oldfile);
+          nxrmutex_destroy(&oldfile->tfo_lock);
+          fs_heap_free(oldfile->tfo_data);
+          fs_heap_free(oldfile);
+        }
+    }
 
   return OK;
 }
@@ -2848,6 +2940,7 @@ static int tmpfs_rename(FAR struct inode *mountpt,
   FAR struct tmpfs_s *fs;
   FAR const char *oldname;
   FAR const char *newname;
+  int index;
   int ret;
 
   finfo("mountpt: %p oldrelpath: %s newrelpath: %s\n",
@@ -2908,25 +3001,6 @@ static int tmpfs_rename(FAR struct inode *mountpt,
       newname++;
     }
 
-  /* Verify that no object of this name already exists in the destination
-   * directory.
-   */
-
-  ret = tmpfs_find_dirent(newparent, newname, strlen(newname));
-  if (ret != -ENOENT)
-    {
-      /* Something with this name already exists in the directory.
-       * OR perhaps some fatal error occurred.
-       */
-
-      if (ret >= 0)
-        {
-          ret = -EEXIST;
-        }
-
-      goto errout_with_newparent;
-    }
-
   /* Find the old object at oldpath.  If successful, tmpfs_find_object()
    * will lock both the object and the parent directory and will increment
    * the reference count on both.
@@ -2960,6 +3034,31 @@ static int tmpfs_rename(FAR struct inode *mountpt,
       /* The name must lie in the root directory */
 
       oldname = oldrelpath;
+    }
+
+  /* Is there an object of this name in the destination directory? */
+
+  index = tmpfs_find_dirent(newparent, newname, strlen(newname));
+  if (index >= 0)
+    {
+      /* Yes.. replace it in one step, then remove the old entry */
+
+      ret = tmpfs_replace_dirent(newparent, index, to);
+      if (ret > 0)
+        {
+          ret = OK;
+        }
+      else if (ret == OK)
+        {
+          ret = tmpfs_remove_dirent(oldparent, oldname);
+        }
+
+      goto errout_with_oldparent;
+    }
+  else if (index != -ENOENT)
+    {
+      ret = index;
+      goto errout_with_oldparent;
     }
 
   /* Remove the entry from the parent directory */
