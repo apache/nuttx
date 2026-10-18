@@ -480,8 +480,8 @@ static void sam_tsd_setaverage(struct sam_tsd_s *priv, uint32_t tsav)
           tsfreq = minfreq;
         }
 
-        regval &= ~ADC_TSMR_TSFREQ_MASK;
-        regval |=  ADC_TSMR_TSFREQ(minfreq);
+      regval &= ~ADC_TSMR_TSFREQ_MASK;
+      regval |=  ADC_TSMR_TSFREQ(minfreq);
     }
 
   /* Save the new filter value */
@@ -587,7 +587,7 @@ static void sam_tsd_bottomhalf(void *arg)
        * after the loss of contact is sampled.
        */
 
-       priv->sample.contact = CONTACT_UP;
+      priv->sample.contact = CONTACT_UP;
 
       /* Stop periodic trigger & enable pen */
 
@@ -1148,13 +1148,14 @@ static int sam_tsd_ioctl(struct file *filep, int cmd, unsigned long arg)
           regval = ADC_CR_TSCALIB | ADC_CR_START;
           sam_adc_putreg(priv->adc, SAM_ADC_CR, regval);
         }
-      break;
+        break;
       case TSIOC_CALDATA:
         {
           /* Receive calibration data for the touchscreen */
 
           struct g_tscaldata_s *ptr =
                                (struct g_tscaldata_s *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           priv->caldata = *ptr;
         }
@@ -1244,6 +1245,7 @@ static int sam_tsd_poll(struct file *filep, struct pollfd *fds, bool setup)
       /* This is a request to tear down the poll. */
 
       struct pollfd **slot = (struct pollfd **)fds->priv;
+
       DEBUGASSERT(slot != NULL);
 
       /* Remove all memory of the poll setup */
