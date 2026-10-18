@@ -98,17 +98,18 @@ Range                    Size           Purpose
                                         what the linker script gives out;
                                         overflowing it is a link error
 0x083db000 -- 0x083fb000 128 KiB        progmem / LittleFS
-0x083fb000 -- 0x08400000 20 KiB         **Wi-Fi NVDS** -- do not erase
+0x083fb000 -- 0x08400000 20 KiB         NVDS (BLE bonding data)
 ======================== ============== ====================================
 
 For reference, the configurations use a small part of that budget: ``nsh``
 135 KiB (3%), ``wifi`` 610 KiB (15%) and ``sta_softap`` 613 KiB (16%).
 The ``ble`` config (BLE on top of ``wifi``) brings the image to about 971 KiB (25%).
 
-.. warning::
-   The **last** pages of the flash are not free: the Wi-Fi NVDS holds the RF
-   calibration data and the MAC address, and erasing it breaks the radio.  The
-   progmem region ends exactly where the NVDS begins.
+.. note::
+   The last 20 KiB of the flash hold the NVDS of the vendor stack, where the
+   BLE stack keeps its bonding data.  The progmem region ends where the NVDS
+   begins.  Erasing the NVDS only loses the BLE bonds: the RF calibration and
+   the MAC address come from the chip EFUSE.
 
 The region handed to progmem is set with
 ``CONFIG_GD32VW55X_PROGMEM_START_ADDR`` and ``CONFIG_GD32VW55X_PROGMEM_SIZE``;

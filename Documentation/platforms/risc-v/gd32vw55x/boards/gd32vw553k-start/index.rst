@@ -131,7 +131,7 @@ Range                    Size           Purpose
                                         what the linker script gives out;
                                         overflowing it is a link error
 0x083db000 -- 0x083fb000 128 KiB        progmem / LittleFS
-0x083fb000 -- 0x08400000 20 KiB         **Wi-Fi NVDS** -- do not erase
+0x083fb000 -- 0x08400000 20 KiB         NVDS (BLE bonding data)
 ======================== ============== ====================================
 
 For reference, the configurations use a small part of that budget: ``nsh``
@@ -139,10 +139,11 @@ For reference, the configurations use a small part of that budget: ``nsh``
 610 KiB (15%) and ``sta_softap`` 613 KiB (16%).  The ``ble`` config (BLE on top
 of ``wapi``) brings the image to about 971 KiB (25%).
 
-.. warning::
-   The **last** pages of the flash are not free: the Wi-Fi NVDS holds the RF
-   calibration data and the MAC address, and erasing it breaks the radio.  The
-   progmem region ends exactly where the NVDS begins.
+.. note::
+   The last 20 KiB of the flash hold the NVDS of the vendor stack, where the
+   BLE stack keeps its bonding data.  The progmem region ends where the NVDS
+   begins.  Erasing the NVDS only loses the BLE bonds: the RF calibration and
+   the MAC address come from the chip EFUSE.
 
 The region handed to progmem is set with
 ``CONFIG_GD32VW55X_PROGMEM_START_ADDR`` and ``CONFIG_GD32VW55X_PROGMEM_SIZE``;
@@ -339,7 +340,7 @@ The reported ``value`` is the 12-bit conversion (0..4095) spanning 0..3.3 V; a
 littlefs
 --------
 
-NSH with the last 128 KiB of usable flash (below the Wi-Fi NVDS) exposed as an
+NSH with the last 128 KiB of usable flash (below the NVDS) exposed as an
 MTD device, ``/dev/gd32flash``, and mounted as LittleFS on ``/data``.
 
 .. note::
@@ -404,11 +405,9 @@ the next boot format it again::
   $ openocd -f openocd_gdlink.cfg \
             -c "init; halt; flash erase_address 0x083db000 0x20000; reset; exit"
 
-.. warning::
-   Erase only the progmem region.  The Wi-Fi NVDS lives immediately above it,
-   at 0x083fb000; wiping it takes the RF calibration and the MAC address with
-   it.  After using the filesystem, ``wapi scan wlan0`` in the ``wapi``
-   configuration is a quick way to confirm the radio is still healthy.
+.. note::
+   Erase only the progmem region.  The NVDS lives immediately above it, at
+   0x083fb000, and holds the BLE bonding data.
 
 sta_softap
 ----------

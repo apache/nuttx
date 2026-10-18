@@ -89,11 +89,12 @@ Region       Range                       Size      Purpose
 ============ =========================== ========= =============================
 Flash        0x08000000 -- 0x08400000    4 MiB     In-package NOR, XIP.  Holds
                                                    the firmware and, at the very
-                                                   top, the Wi-Fi NVDS
+                                                   top, the vendor stack NVDS
 Mask ROM     0x0bf40000 -- 0x0bf80000    256 KiB   Boot ROM (IBL) and the ROM
                                                    API used to program the flash
 EFUSE        0x0ffc0000 -- 0x0ffc0100    256 B     Chip data; the radio reads
-                                                   the MAC address from here
+                                                   the MAC address and the RF
+                                                   calibration from here
 SRAM         0x20000000 -- 0x20050000    320 KiB   See the split below
 BLE RAM      0x21000000 -- 0x21010000    64 KiB    Exchange memory of the BLE
                                                    controller
@@ -111,7 +112,7 @@ Flash
 The NuttX image is linked at the start of the flash: the vendor MBL bootloader
 is bypassed, so none of its partitions (system status, image slots) apply.
 
-Only one region of the flash is fixed by the silicon and its radio firmware:
+Only one region of the flash is fixed, by the vendor Wi-Fi/BLE stack:
 
 ======================== ========= ==========================================
 Range                    Size      Purpose
@@ -120,13 +121,16 @@ Range                    Size      Purpose
                                    whatever else the board decides to carve
                                    out of it (progmem, a filesystem, an OTA
                                    slot...)
-0x083fb000 -- 0x08400000 20 KiB    **Wi-Fi NVDS**: RF calibration data and the
-                                   MAC address.  Erasing it breaks the radio
+0x083fb000 -- 0x08400000 20 KiB    **NVDS** of the vendor stack: the BLE
+                                   bonding data.  Erasing it only loses the
+                                   bonds
 ======================== ========= ==========================================
 
-.. warning::
-   Never erase past 0x083fb000.  ``wapi scan wlan0`` is the quickest way to
-   confirm the radio is still healthy after touching the flash.
+.. note::
+   The RF calibration and the MAC address are not in the flash: the radio
+   reads them from the EFUSE, so erasing the whole flash does not break it.
+   Keep the firmware and progmem below 0x083fb000 anyway, or the BLE stack
+   and the application will overwrite each other.
 
 How the 4076 KiB below the NVDS are split is a **board decision**, made in the
 board's linker script and in ``CONFIG_GD32VW55X_PROGMEM_START_ADDR`` /

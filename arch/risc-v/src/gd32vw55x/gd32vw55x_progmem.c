@@ -65,13 +65,13 @@
  * NOR flash that is executed in place.  It holds:
  *
  *   - The running firmware image (NuttX is linked at 0x08000000),
- *   - The vendor NVDS area used by the Wi-Fi/BLE stacks, and
- *   - The RF/Wi-Fi trim (calibration) values programmed in the factory.
+ *   - The vendor NVDS area, where the BLE stack keeps its bonding data.
  *
  * Only the region delimited by CONFIG_GD32VW55X_PROGMEM_START_ADDR and
  * CONFIG_GD32VW55X_PROGMEM_SIZE is exposed here, and the board is
  * responsible for making sure that this region does not overlap any of the
  * above.  Erasing or programming the wrong region is destructive.
+ * The RF calibration and the MAC address live in the EFUSE, not here.
  *
  * NOTE also that the CPU fetches instructions from the very same flash
  * array.  The FMC stalls the AHB bus while an erase or a program operation

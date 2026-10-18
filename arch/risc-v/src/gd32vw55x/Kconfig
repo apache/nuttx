@@ -186,7 +186,8 @@ config GD32VW55X_PROGMEM
 		interface.
 
 		Take care: the internal flash also holds the firmware itself and
-		the Wi-Fi NVDS.  Only the region configured below is touched.
+		the NVDS of the vendor stack.  Only the region configured below
+		is touched.
 
 config GD32VW55X_RNG
 	bool "True random number generator (TRNG)"
@@ -328,8 +329,7 @@ config GD32VW55X_PROGMEM_START_ADDR
 		written.  Mind the two neighbours on a 4 MiB part:
 
 		  0x08000000  the firmware itself
-		  0x083fb000  the Wi-Fi NVDS (16 KiB): RF calibration and the
-		              MAC address.  Erasing it breaks the radio.
+		  0x083fb000  the NVDS of the vendor stack (BLE bonding data).
 
 		The split of the flash below the NVDS is a board decision.  The
 		default here is the one the GD32VW553K-START board uses: 128 KiB
@@ -498,15 +498,6 @@ config GD32VW55X_WIFI_MGMT_PRIORITY
 		created by the blob through sys_task_create() runs 2 levels
 		above this; keep both below the BLE stack task when
 		coexistence is enabled.
-
-config GD32VW55X_WIFI_NVDS_PATH
-	string "NVDS storage path"
-	default "/data/wifi_nvds.bin"
-	---help---
-		File backing the Non-Volatile Data Storage used by the RF
-		calibration and MAC firmware (nvds_data_get/put/del).  The
-		vendor layout reserves 20 KB of flash; on NuttX it maps to a
-		file on a mounted filesystem (e.g. littlefs over FMC progmem).
 
 config GD32VW55X_WIFI_TX_HEADROOM
 	int
