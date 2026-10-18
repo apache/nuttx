@@ -1115,7 +1115,7 @@ static int tmpfs_find_object(FAR struct tmpfs_s *fs,
             {
               /* Then we can break out of the loop now */
 
-               break;
+              break;
             }
 
           /* No, this was not the final segment of the relpath.
@@ -1301,6 +1301,7 @@ static int tmpfs_getpath(FAR struct tmpfs_object_s *to,
     {
       int ret = tmpfs_getpath((FAR struct tmpfs_object_s *)to->to_parent,
                                path, len);
+
       if (ret < 0)
         {
           return ret;
@@ -1509,29 +1510,29 @@ static int tmpfs_foreach(FAR struct tmpfs_directory_s *tdo,
       ret = callout(tdo, index, arg);
       switch (ret)
         {
-         case TMPFS_CONTINUE:    /* Continue enumeration */
+          case TMPFS_CONTINUE:    /* Continue enumeration */
 
-           /* Release the object and index to the next entry */
+            /* Release the object and index to the next entry */
 
-           tmpfs_release_lockedobject(to);
-           index++;
-           break;
+            tmpfs_release_lockedobject(to);
+            index++;
+            break;
 
-         case TMPFS_HALT:        /* Stop enumeration */
+          case TMPFS_HALT:        /* Stop enumeration */
 
-           /* Release the object and cancel the traversal */
+            /* Release the object and cancel the traversal */
 
-           tmpfs_release_lockedobject(to);
-           return -ECANCELED;
+            tmpfs_release_lockedobject(to);
+            return -ECANCELED;
 
-         case TMPFS_UNLINKED:    /* Only the directory entry was deleted */
+          case TMPFS_UNLINKED:    /* Only the directory entry was deleted */
 
-           /* Release the object and continue with the same index */
+            /* Release the object and continue with the same index */
 
-           tmpfs_release_lockedobject(to);
+            tmpfs_release_lockedobject(to);
 
-         case TMPFS_DELETED:     /* Object and directory entry deleted */
-           break;                /* Continue with the same index */
+          case TMPFS_DELETED:     /* Object and directory entry deleted */
+            break;                /* Continue with the same index */
         }
     }
 
@@ -1900,21 +1901,21 @@ static off_t tmpfs_seek(FAR struct file *filep, off_t offset, int whence)
   switch (whence)
     {
       case SEEK_SET: /* The offset is set to offset bytes. */
-          position = offset;
-          break;
+        position = offset;
+        break;
 
       case SEEK_CUR: /* The offset is set to its current location plus
                       * offset bytes. */
-          position = offset + filep->f_pos;
-          break;
+        position = offset + filep->f_pos;
+        break;
 
       case SEEK_END: /* The offset is set to the size of the file plus
                       * offset bytes. */
-          position = offset + tfo->tfo_size;
-          break;
+        position = offset + tfo->tfo_size;
+        break;
 
       default:
-          return -EINVAL;
+        return -EINVAL;
     }
 
   /* Save the new file position */
@@ -2026,6 +2027,7 @@ static int tmpfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   if (cmd == FIOC_FILEPATH)
     {
       FAR char *ptr = (FAR char *)((uintptr_t)arg);
+
       ret = inode_getpath(filep->f_inode, ptr, PATH_MAX);
       if (ret < 0)
         {
@@ -2376,13 +2378,13 @@ static int tmpfs_readdir(FAR struct inode *mountpt,
         {
           /* A directory */
 
-           entry->d_type = DTYPE_DIRECTORY;
+          entry->d_type = DTYPE_DIRECTORY;
         }
       else /* to->to_type == TMPFS_REGULAR) */
         {
           /* A regular file */
 
-           entry->d_type = DTYPE_FILE;
+          entry->d_type = DTYPE_FILE;
         }
 
       /* Copy the entry name */
