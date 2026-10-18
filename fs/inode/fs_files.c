@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <string.h>
 #include <assert.h>
@@ -45,6 +46,7 @@
 #include <nuttx/spawn.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/lib/lib.h>
+#include <nuttx/nuttx.h>
 
 #ifdef CONFIG_FDCHECK
 #  include <nuttx/fdcheck.h>
@@ -57,6 +59,23 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: fdlist_limit
+ *
+ * Description:
+ *   Return the RLIMIT_NOFILE soft limit of the task group that owns the
+ *   list: a new file descriptor must be below it.
+ *
+ ****************************************************************************/
+
+static inline int fdlist_limit(FAR struct fdlist *list)
+{
+  FAR struct task_group_s *group =
+    container_of(list, struct task_group_s, tg_fdlist);
+
+  return MIN(group->tg_rlimit_nofile.rlim_cur, OPEN_MAX);
+}
 
 /****************************************************************************
  * Name: fdlist_get_by_index
@@ -319,7 +338,7 @@ int fdlist_dup3(FAR struct fdlist *list, int fd1, int fd2, int flags)
 
   /* Get the file descriptor list.  It should not be NULL in this context. */
 
-  if (fd2 < 0)
+  if (fd2 < 0 || fd2 >= fdlist_limit(list))
     {
       return -EBADF;
     }
@@ -568,6 +587,7 @@ int fdlist_dupfile(FAR struct fdlist *list, int oflags, int minfd,
 {
   FAR struct fd *fdp;
   irqstate_t flags;
+  int limit;
   int ret;
   int i;
   int j;
@@ -577,6 +597,12 @@ int fdlist_dupfile(FAR struct fdlist *list, int oflags, int minfd,
 #ifdef CONFIG_FDCHECK
   minfd = fdcheck_restore(minfd);
 #endif
+
+  limit = fdlist_limit(list);
+  if (minfd >= limit)
+    {
+      return -EINVAL;
+    }
 
   i = minfd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
   j = minfd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
@@ -605,6 +631,14 @@ int fdlist_dupfile(FAR struct fdlist *list, int oflags, int minfd,
           fdp = &list->fl_fds[i][j];
           if (fdp->f_file == NULL)
             {
+              /* The lowest free descriptor is beyond RLIMIT_NOFILE */
+
+              if (i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j >= limit)
+                {
+                  spin_unlock_irqrestore_notrace(&list->fl_lock, flags);
+                  return -EMFILE;
+                }
+
               atomic_add(&filep->f_refs, 1);
               fdp->f_file        = filep;
               fdp->f_cloexec     = !!(oflags & O_CLOEXEC);
