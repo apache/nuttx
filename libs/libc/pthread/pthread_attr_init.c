@@ -31,6 +31,7 @@
 #include <nuttx/debug.h>
 #include <errno.h>
 
+#include <nuttx/lib/lib.h>
 #include <nuttx/pthread.h>
 
 /****************************************************************************
@@ -86,6 +87,10 @@ int pthread_attr_init(FAR pthread_attr_t *attr)
        */
 
       memcpy(attr, &g_default_pthread_attr, sizeof(pthread_attr_t));
+
+      /* The RLIMIT_STACK soft limit gives the default stack size */
+
+      attr->stacksize = lib_get_stacksize(attr->stacksize);
     }
 
   linfo("Returning %d\n", ret);

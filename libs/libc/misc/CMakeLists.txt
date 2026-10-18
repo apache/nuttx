@@ -48,6 +48,7 @@ list(
   lib_utimensat.c
   lib_mallopt.c
   lib_getnprocs.c
+  lib_getstacksize.c
   lib_mntent.c)
 
 if(CONFIG_HAVE_CXXINITIALIZE)
