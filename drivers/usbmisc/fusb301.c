@@ -586,56 +586,56 @@ static int fusb301_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   fusb301_info("cmd: 0x%02X, arg:%lu\n", cmd, arg);
 
   switch (cmd)
-  {
-  case USBCIOC_READ_DEVID:
     {
-      ret = fusb301_read_device_id(priv, (FAR uint8_t *)arg);
-    }
-    break;
+      case USBCIOC_READ_DEVID:
+        {
+          ret = fusb301_read_device_id(priv, (FAR uint8_t *)arg);
+        }
+        break;
 
-  case USBCIOC_SETUP:
-    {
-      ret = fusb301_setup(priv, (struct fusb301_setup_s *)arg);
-    }
-    break;
+      case USBCIOC_SETUP:
+        {
+          ret = fusb301_setup(priv, (struct fusb301_setup_s *)arg);
+        }
+        break;
 
-  case USBCIOC_SET_MODE:
-    {
-      ret = fusb301_set_mode(priv, (uint8_t)arg);
-    }
-    break;
+      case USBCIOC_SET_MODE:
+        {
+          ret = fusb301_set_mode(priv, (uint8_t)arg);
+        }
+        break;
 
-  case USBCIOC_SET_STATE:
-    {
-      ret = fusb301_set_state(priv, (uint8_t)arg);
-    }
-    break;
+      case USBCIOC_SET_STATE:
+        {
+          ret = fusb301_set_state(priv, (uint8_t)arg);
+        }
+        break;
 
-  case USBCIOC_READ_STATUS:
-    {
-      ret = fusb301_read_status(priv, (FAR uint8_t *)arg);
-    }
-    break;
+      case USBCIOC_READ_STATUS:
+        {
+          ret = fusb301_read_status(priv, (FAR uint8_t *)arg);
+        }
+        break;
 
-  case USBCIOC_READ_DEVTYPE:
-    {
-      ret = fusb301_read_devtype(priv, (FAR uint8_t *)arg);
-    }
-    break;
+      case USBCIOC_READ_DEVTYPE:
+        {
+          ret = fusb301_read_devtype(priv, (FAR uint8_t *)arg);
+        }
+        break;
 
-  case USBCIOC_RESET:
-    {
-      ret = fusb301_reset(priv);
-    }
-    break;
+      case USBCIOC_RESET:
+        {
+          ret = fusb301_reset(priv);
+        }
+        break;
 
-  default:
-    {
-      fusb301_err("ERROR: Unrecognized cmd: %d\n", cmd);
-      ret = -ENOTTY;
+      default:
+        {
+          fusb301_err("ERROR: Unrecognized cmd: %d\n", cmd);
+          ret = -ENOTTY;
+        }
+        break;
     }
-    break;
-  }
 
   nxmutex_unlock(&priv->devlock);
   return ret;
@@ -717,6 +717,7 @@ static int fusb301_poll(FAR struct file *filep,
       /* This is a request to tear down the poll. */
 
       FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+
       DEBUGASSERT(slot != NULL);
 
       /* Remove all memory of the poll setup */
