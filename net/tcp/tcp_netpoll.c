@@ -33,6 +33,7 @@
 
 #include <nuttx/net/net.h>
 #include <nuttx/net/tcp.h>
+#include <nuttx/poll.h>
 #include <nuttx/semaphore.h>
 
 #include "devif/devif.h"
@@ -195,7 +196,7 @@ static uint32_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
+int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
 {
   FAR struct tcp_conn_s *conn;
   FAR struct tcp_poll_s *info;
@@ -415,7 +416,7 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
+int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd_s *fds)
 {
   FAR struct tcp_conn_s *conn;
   FAR struct tcp_poll_s *info;

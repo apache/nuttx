@@ -31,6 +31,7 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 
+#include <nuttx/poll.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 
@@ -137,7 +138,7 @@ static uint32_t icmpv6_poll_eventhandler(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int icmpv6_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
+int icmpv6_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
 {
   FAR struct icmpv6_conn_s *conn;
   FAR struct icmpv6_poll_s *info;
@@ -245,7 +246,7 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-int icmpv6_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
+int icmpv6_pollteardown(FAR struct socket *psock, FAR struct pollfd_s *fds)
 {
   FAR struct icmpv6_conn_s *conn;
   FAR struct icmpv6_poll_s *info;

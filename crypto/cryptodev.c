@@ -97,7 +97,7 @@ struct fcrypt
   TAILQ_HEAD(csessionlist, csession) csessions;
   TAILQ_HEAD(cryptkoplist, cryptkop) crpk_ret;
   int sesn;
-  FAR struct pollfd *fds;
+  FAR struct pollfd_s *fds;
 };
 
 /****************************************************************************
@@ -113,7 +113,7 @@ static ssize_t cryptof_write(FAR struct file *filep,
 static int cryptof_ioctl(FAR struct file *filep,
                          int cmd, unsigned long arg);
 static int cryptof_poll(FAR struct file *filep,
-                        FAR struct pollfd *fds, bool setup);
+                        FAR struct pollfd_s *fds, bool setup);
 static int cryptof_open(FAR struct file *filep);
 static int cryptof_close(FAR struct file *filep);
 
@@ -856,7 +856,7 @@ static int cryptodev_getkeystatus(struct fcrypt *fcr, struct crypt_kop *ret)
 /* ARGSUSED */
 
 static int cryptof_poll(FAR struct file *filep,
-                        FAR struct pollfd *fds, bool setup)
+                        FAR struct pollfd_s *fds, bool setup)
 {
   FAR struct fcrypt *fcr = filep->f_priv;
 

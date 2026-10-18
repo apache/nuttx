@@ -36,6 +36,7 @@
 #include <errno.h>
 #include <nuttx/debug.h>
 
+#include <nuttx/poll.h>
 #include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
@@ -64,7 +65,7 @@ static int  netlink_getpeername(FAR struct socket *psock,
 static int  netlink_connect(FAR struct socket *psock,
                             FAR const struct sockaddr *addr,
                             socklen_t addrlen);
-static int  netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
+static int  netlink_poll(FAR struct socket *psock, FAR struct pollfd_s *fds,
                          bool setup);
 static ssize_t netlink_sendmsg(FAR struct socket *psock,
                                FAR const struct msghdr *msg, int flags);
@@ -472,7 +473,7 @@ static void netlink_response_available(FAR void *arg)
  *
  ****************************************************************************/
 
-static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
+static int netlink_poll(FAR struct socket *psock, FAR struct pollfd_s *fds,
                         bool setup)
 {
   FAR struct netlink_conn_s *conn;

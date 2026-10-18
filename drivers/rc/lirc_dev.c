@@ -39,6 +39,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/circbuf.h>
+#include <nuttx/poll.h>
 #include <nuttx/rc/lirc_dev.h>
 
 /****************************************************************************
@@ -71,7 +72,7 @@ struct lirc_fh_s
   struct list_node             node;         /* list of open file handles */
   FAR struct lirc_lowerhalf_s *lower;        /* the pointer to lirc_lowerhalf_s */
   struct circbuf_s             buffer;       /* buffer for incoming IR */
-  FAR struct pollfd           *fds;          /* poll structures of threads waiting for driver events */
+  FAR struct pollfd_s         *fds;          /* poll structures of threads waiting for driver events */
   sem_t                        waitsem;      /* sem of wait buffer for ready */
   int                          carrier_low;  /* when setting the carrier range, first the low end must be
                                               * set with an ioctl and then the high end with another ioctl
@@ -88,7 +89,7 @@ struct lirc_fh_s
 static int lirc_open(FAR struct file *filep);
 static int lirc_close(FAR struct file *filep);
 static int lirc_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int lirc_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int lirc_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                      bool setup);
 static ssize_t lirc_write(FAR struct file *filep, FAR const char *buffer,
                           size_t buflen);
@@ -210,7 +211,7 @@ static int lirc_close(FAR struct file *filep)
 }
 
 static int lirc_poll(FAR struct file *filep,
-                     FAR struct pollfd *fds, bool setup)
+                     FAR struct pollfd_s *fds, bool setup)
 {
   FAR struct lirc_fh_s *fh = filep->f_priv;
   pollevent_t eventset = 0;
@@ -238,7 +239,7 @@ static int lirc_poll(FAR struct file *filep,
     }
   else if (fds->priv != NULL)
     {
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       if (!slot)
         {

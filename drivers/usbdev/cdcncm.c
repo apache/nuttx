@@ -39,6 +39,7 @@
 #include <sys/poll.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/poll.h>
 #include <nuttx/net/netdev_lowerhalf.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/cdc.h>
@@ -348,7 +349,7 @@ struct cdcmbim_driver_s
   struct cdcncm_driver_s ncmdriver; /* CDC/NCM driver structure, must keep first */
   mutex_t                lock;      /* Used to maintain mutual exclusive access */
   sem_t                  read_sem;  /* Used to wait for data to be readable */
-  FAR struct pollfd     *fds[CDC_MBIM_NPOLLWAITERS];
+  FAR struct pollfd_s   *fds[CDC_MBIM_NPOLLWAITERS];
   struct iob_queue_s     rx_queue;  /* RX control message queue */
   struct iob_queue_s     tx_queue;  /* TX control message queue */
 };
@@ -364,7 +365,7 @@ static ssize_t cdcmbim_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen);
 static ssize_t cdcmbim_write(FAR struct file *filep, FAR const char *buffer,
                              size_t buflen);
-static int     cdcmbim_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int     cdcmbim_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                             bool setup);
 #endif
 
@@ -750,7 +751,7 @@ errout:
  *
  ****************************************************************************/
 
-static int cdcmbim_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int cdcmbim_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                         bool setup)
 {
   FAR struct inode *inode;
@@ -806,7 +807,7 @@ static int cdcmbim_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       DEBUGASSERT(slot);
 

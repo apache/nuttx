@@ -32,6 +32,7 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/net/net.h>
+#include <nuttx/poll.h>
 #include <nuttx/semaphore.h>
 
 #include "devif/devif.h"
@@ -128,7 +129,7 @@ static uint32_t udp_poll_eventhandler(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
+int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
 {
   FAR struct udp_conn_s *conn;
   FAR struct udp_poll_s *info;
@@ -253,7 +254,7 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
+int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd_s *fds)
 {
   FAR struct udp_conn_s *conn;
   FAR struct udp_poll_s *info;

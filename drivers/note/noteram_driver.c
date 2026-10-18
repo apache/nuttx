@@ -94,7 +94,7 @@ struct noteram_driver_s
   volatile unsigned int ni_tail;
   volatile unsigned int ni_read;
   spinlock_t lock;
-  FAR struct pollfd *pfd;
+  FAR struct pollfd_s *pfd;
   struct notifier_block nb;
 };
 
@@ -126,7 +126,7 @@ static int noteram_close(FAR struct file *filep);
 static ssize_t noteram_read(FAR struct file *filep,
                             FAR char *buffer, size_t buflen);
 static int noteram_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int noteram_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int noteram_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                         bool setup);
 static void noteram_add(FAR struct note_driver_s *drv,
                         FAR const void *note, size_t len);
@@ -645,7 +645,7 @@ static int noteram_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: noteram_poll
  ****************************************************************************/
 
-static int noteram_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int noteram_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                         bool setup)
 {
   int ret = 0;

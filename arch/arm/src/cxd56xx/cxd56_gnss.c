@@ -167,7 +167,7 @@ struct cxd56_gnss_dev_s
   uint8_t                         notify_data;
   struct file                     cepfp;
   void                           *cepbuf;
-  struct pollfd                  *fds[CONFIG_CXD56_GNSS_NPOLLWAITERS];
+  struct pollfd_s                *fds[CONFIG_CXD56_GNSS_NPOLLWAITERS];
 #if CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0
   struct cxd56_gnss_sig_s         sigs[CONFIG_CXD56_GNSS_NSIGNALRECEIVERS];
 #endif
@@ -303,7 +303,7 @@ static ssize_t cxd56_gnss_write(struct file *filep,
                                 const char *buffer, size_t buflen);
 static int cxd56_gnss_ioctl(struct file *filep, int cmd,
                             unsigned long arg);
-static int cxd56_gnss_poll(struct file *filep, struct pollfd *fds,
+static int cxd56_gnss_poll(struct file *filep, struct pollfd_s *fds,
                            bool setup);
 static int8_t cxd56_gnss_select_notifytype(off_t fpos, uint32_t *offset);
 
@@ -3051,7 +3051,7 @@ static int cxd56_gnss_ioctl(struct file *filep, int cmd,
  *
  ****************************************************************************/
 
-static int cxd56_gnss_poll(struct file *filep, struct pollfd *fds,
+static int cxd56_gnss_poll(struct file *filep, struct pollfd_s *fds,
                            bool setup)
 {
   struct inode            *inode;
@@ -3111,7 +3111,7 @@ static int cxd56_gnss_poll(struct file *filep, struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      struct pollfd_s **slot = (struct pollfd_s **)fds->priv;
 
       /* Remove all memory of the poll setup */
 

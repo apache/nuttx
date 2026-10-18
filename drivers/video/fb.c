@@ -90,7 +90,7 @@ struct fb_priv_s
 
   /* Polling fds of waiting threads */
 
-  FAR struct pollfd *fds[CONFIG_VIDEO_FB_NPOLLWAITERS];
+  FAR struct pollfd_s *fds[CONFIG_VIDEO_FB_NPOLLWAITERS];
 
 #ifdef CONFIG_FB_SYNC
   sem_t wait;
@@ -150,7 +150,7 @@ static off_t   fb_seek(FAR struct file *filep, off_t offset, int whence);
 static int     fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 static int     fb_mmap(FAR struct file *filep,
                        FAR struct mm_map_entry_s *map);
-static int     fb_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int     fb_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                        bool setup);
 static int     fb_get_panelinfo(FAR struct fb_chardev_s *fb,
                                 FAR struct fb_panelinfo_s *panelinfo,
@@ -1434,13 +1434,13 @@ static int fb_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
  *
  ****************************************************************************/
 
-static int fb_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
+static int fb_poll(FAR struct file *filep, struct pollfd_s *fds, bool setup)
 {
   FAR struct inode        *inode;
   FAR struct fb_chardev_s *fb;
   FAR struct fb_priv_s    *priv;
   FAR struct circbuf_s    *panbuf;
-  FAR struct pollfd      **pollfds = NULL;
+  FAR struct pollfd_s    **pollfds = NULL;
   irqstate_t               flags;
   int                      ret = OK;
   int                      i;
@@ -1485,7 +1485,7 @@ static int fb_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       *slot = NULL;
       fds->priv = NULL;

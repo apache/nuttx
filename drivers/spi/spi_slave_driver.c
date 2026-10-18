@@ -70,7 +70,7 @@ struct spi_slave_driver_s
 
   /* The poll waiter */
 
-  FAR struct pollfd *fds;
+  FAR struct pollfd_s *fds;
 
   /* The semaphore reader */
 
@@ -106,8 +106,8 @@ static ssize_t spi_slave_read(FAR struct file *filep, FAR char *buffer,
                               size_t buflen);
 static ssize_t spi_slave_write(FAR struct file *filep,
                                FAR const char *buffer, size_t buflen);
-static int     spi_slave_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                              bool setup);
+static int spi_slave_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
+                          bool setup);
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     spi_slave_unlink(FAR struct inode *inode);
@@ -452,7 +452,7 @@ static ssize_t spi_slave_write(FAR struct file *filep,
  * Name: spi_slave_poll
  ****************************************************************************/
 
-static int spi_slave_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int spi_slave_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                           bool setup)
 {
   FAR struct spi_slave_driver_s *priv;

@@ -37,6 +37,7 @@
 #include <poll.h>
 #include <spawn.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/poll.h>
 #include <nuttx/signal.h>
 #include <nuttx/mutex.h>
 #include <nuttx/sensors/cxd5610_gnss.h>
@@ -167,7 +168,7 @@ struct cxd5610_gnss_dev_s
   sem_t         cmd_sync;
   sem_t         boot_sync;
 #if CONFIG_SENSORS_CXD5610_GNSS_NPOLLWAITERS != 0
-  struct pollfd *fds[CONFIG_SENSORS_CXD5610_GNSS_NPOLLWAITERS];
+  struct pollfd_s *fds[CONFIG_SENSORS_CXD5610_GNSS_NPOLLWAITERS];
   bool          has_event;
 #endif
 #if CONFIG_SENSORS_CXD5610_GNSS_NSIGNALRECEIVERS != 0
@@ -304,7 +305,7 @@ static ssize_t cxd5610_gnss_write(struct file *filep,
 static int cxd5610_gnss_ioctl(struct file *filep,
                               int cmd,
                               unsigned long arg);
-static int cxd5610_gnss_poll(struct file *filep, struct pollfd *fds,
+static int cxd5610_gnss_poll(struct file *filep, struct pollfd_s *fds,
                              bool setup);
 
 /* Semaphore controls */
@@ -2009,7 +2010,7 @@ static int cxd5610_gnss_ioctl(struct file *filep, int cmd, unsigned long arg)
  * Name: cxd5610_gnss_poll
  ****************************************************************************/
 
-static int cxd5610_gnss_poll(struct file *filep, struct pollfd *fds,
+static int cxd5610_gnss_poll(struct file *filep, struct pollfd_s *fds,
                              bool setup)
 {
   int                      ret = OK;
@@ -2062,7 +2063,7 @@ static int cxd5610_gnss_poll(struct file *filep, struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      struct pollfd_s **slot = (struct pollfd_s **)fds->priv;
 
       /* Remove all memory of the poll setup */
 

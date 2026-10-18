@@ -43,6 +43,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/poll.h>
 #include <nuttx/signal.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
@@ -124,7 +125,7 @@ struct slip_driver_s
   struct work_s    irqwork;   /* For deferring interrupt work */
   struct work_s    pollwork;  /* For deferring poll work to the work queue */
   struct file      tty;       /* TTY file */
-  struct pollfd    pollfd;    /* Polling TTY for read- or writeable */
+  struct pollfd_s  pollfd;    /* Polling TTY for read- or writeable */
 
   uint8_t          rxbuf[2 * CONFIG_NET_SLIP_PKTSIZE + 2];
   size_t           rxlen;
@@ -162,7 +163,7 @@ static void slip_receive(FAR struct slip_driver_s *self);
 static void slip_txdone(FAR struct slip_driver_s *self);
 
 static void slip_interrupt_work(FAR void *arg);
-static void slip_pollfd_cb(FAR struct pollfd *pollfd);
+static void slip_pollfd_cb(FAR struct pollfd_s *pollfd);
 static void slip_set_pollfd_events(FAR struct slip_driver_s *self,
                                    short events);
 
@@ -192,7 +193,7 @@ static int  slip_txavail(FAR struct net_driver_s *dev);
  *
  ****************************************************************************/
 
-static void slip_pollfd_cb(FAR struct pollfd *pollfd)
+static void slip_pollfd_cb(FAR struct pollfd_s *pollfd)
 {
   FAR struct slip_driver_s *self = (FAR struct slip_driver_s *)pollfd->arg;
 

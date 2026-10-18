@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 #include <nuttx/ipcc.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/poll.h>
 #include <nuttx/semaphore.h>
 
 #include <assert.h>
@@ -63,11 +64,11 @@
  *
  ****************************************************************************/
 
-int ipcc_poll(FAR struct file *filep, FAR struct pollfd *fds,
+int ipcc_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
               bool setup)
 {
   FAR struct ipcc_driver_s *priv;
-  FAR struct pollfd **slot;
+  FAR struct pollfd_s **slot;
   pollevent_t eventset;
   int ret;
   int i;
@@ -93,7 +94,7 @@ int ipcc_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* We are tearing down the poll */
 
-      slot = (FAR struct pollfd **)fds->priv;
+      slot = (FAR struct pollfd_s **)fds->priv;
 
       /* remove all memory of the poll setup */
 

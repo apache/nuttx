@@ -51,7 +51,7 @@ static ssize_t comp_read(FAR struct file *filep, FAR char *buffer,
                          size_t buflen);
 static int     comp_ioctl(FAR struct file *filep, int cmd,
                           unsigned long arg);
-static int     comp_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int     comp_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                          bool setup);
 static int     comp_notify(FAR struct comp_dev_s *dev, uint8_t val);
 
@@ -85,7 +85,7 @@ static const struct comp_callback_s g_comp_callback =
  * Name: comp_poll
  ****************************************************************************/
 
-static int comp_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int comp_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                      bool setup)
 {
   FAR struct inode      *inode = filep->f_inode;
@@ -134,7 +134,7 @@ static int comp_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
 #ifdef CONFIG_DEBUG_FEATURES
       if (!slot)

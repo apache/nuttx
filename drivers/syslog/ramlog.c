@@ -91,11 +91,11 @@ struct ramlog_user_s
 #endif
 
   /* The following the poll structures of threads waiting for driver events.
-   * The 'struct pollfd' reference for each open is also  retained in the
+   * The 'struct pollfd_s' reference for each open is also  retained in the
    * f_priv field of the 'struct file'.
    */
 
-  FAR struct pollfd *rl_fds;
+  FAR struct pollfd_s *rl_fds;
 };
 
 struct ramlog_dev_s
@@ -134,7 +134,7 @@ static ssize_t ramlog_file_write(FAR struct file *filep,
 static int     ramlog_file_ioctl(FAR struct file *filep, int cmd,
                                  unsigned long arg);
 static int     ramlog_file_poll(FAR struct file *filep,
-                                FAR struct pollfd *fds, bool setup);
+                                FAR struct pollfd_s *fds, bool setup);
 
 /****************************************************************************
  * Private Data
@@ -676,7 +676,7 @@ static int ramlog_file_ioctl(FAR struct file *filep, int cmd,
  * Name: ramlog_file_poll
  ****************************************************************************/
 
-static int ramlog_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int ramlog_file_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                             bool setup)
 {
   FAR struct inode *inode = filep->f_inode;
@@ -718,7 +718,7 @@ static int ramlog_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       /* Remove all memory of the poll setup */
 

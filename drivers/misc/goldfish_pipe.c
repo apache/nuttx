@@ -173,7 +173,7 @@ struct goldfish_pipe_s
   sem_t wait_for_write;
   sem_t wait_for_read;
   FAR struct goldfish_pipe_dev_s *dev;
-  FAR struct pollfd *fds[GOLDFISH_PIPE_MAX_POLL_WAITERS];
+  FAR struct pollfd_s *fds[GOLDFISH_PIPE_MAX_POLL_WAITERS];
 };
 
 struct goldfish_pipe_dev_s
@@ -195,7 +195,7 @@ static ssize_t goldfish_pipe_read(FAR struct file *filp, FAR char *buffer,
 static ssize_t goldfish_pipe_write(FAR struct file *filp,
                                    FAR const char *buffer, size_t bufflen);
 static int goldfish_pipe_poll(FAR struct file *filp,
-                              FAR struct pollfd *fds, bool setup);
+                              FAR struct pollfd_s *fds, bool setup);
 static int goldfish_pipe_open(FAR struct file *filep);
 static int goldfish_pipe_close(FAR struct file *filep);
 
@@ -356,7 +356,7 @@ static ssize_t goldfish_pipe_write(FAR struct file *filp,
 }
 
 static int goldfish_pipe_poll(FAR struct file *filp,
-                              FAR struct pollfd *fds, bool setup)
+                              FAR struct pollfd_s *fds, bool setup)
 {
   if (setup)
     {
@@ -432,7 +432,7 @@ static int goldfish_pipe_poll(FAR struct file *filp,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       if (slot == NULL)
         {

@@ -63,7 +63,7 @@ static ssize_t bch_write(FAR struct file *filep, FAR const char *buffer,
                          size_t buflen);
 static int     bch_ioctl(FAR struct file *filep, int cmd,
                          unsigned long arg);
-static int     bch_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int     bch_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                         bool setup);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     bch_unlink(FAR struct inode *inode);
@@ -99,7 +99,7 @@ const struct file_operations g_bch_fops =
  * Name: bch_poll
  ****************************************************************************/
 
-static int bch_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int bch_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                     bool setup)
 {
   if (setup)

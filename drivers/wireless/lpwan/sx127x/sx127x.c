@@ -39,6 +39,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/poll.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/signal.h>
 #include <nuttx/wqueue.h>
@@ -332,7 +333,7 @@ struct sx127x_dev_s
 
   uint8_t nopens;                 /* Number of times the device has been opened */
   mutex_t dev_lock;               /* Ensures exclusive access to this structure */
-  FAR struct pollfd *pfd;         /* Polled file descr  (or NULL if any) */
+  FAR struct pollfd_s *pfd;       /* Polled file descr  (or NULL if any) */
 };
 
 /****************************************************************************
@@ -472,7 +473,7 @@ static ssize_t sx127x_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t sx127x_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen);
 static int sx127x_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int sx127x_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int sx127x_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                        bool setup);
 
 /****************************************************************************
@@ -1214,7 +1215,7 @@ static int sx127x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int sx127x_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int sx127x_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                        bool setup)
 {
 #ifndef CONFIG_LPWAN_SX127X_RXSUPPORT

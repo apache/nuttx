@@ -67,7 +67,7 @@ enum usrsock_conn_state_e
 struct usrsock_poll_s
 {
   FAR struct usrsock_conn_s *conn; /* Needed to handle loss of connection */
-  FAR struct pollfd *fds;          /* Needed to handle poll events */
+  FAR struct pollfd_s *fds;        /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
 };
 
@@ -472,7 +472,7 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  *
  ****************************************************************************/
 
-int usrsock_poll(FAR struct socket *psock, FAR struct pollfd *fds,
+int usrsock_poll(FAR struct socket *psock, FAR struct pollfd_s *fds,
                  bool setup);
 
 /****************************************************************************

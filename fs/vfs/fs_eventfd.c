@@ -34,6 +34,7 @@
 #include <nuttx/debug.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/mutex.h>
+#include <nuttx/poll.h>
 #include <sys/ioctl.h>
 #include <sys/eventfd.h>
 
@@ -65,7 +66,7 @@ struct eventfd_priv_s
    */
 
 #ifdef CONFIG_EVENT_FD_POLL
-  FAR struct pollfd *fds[CONFIG_EVENT_FD_NPOLLWAITERS];
+  FAR struct pollfd_s *fds[CONFIG_EVENT_FD_NPOLLWAITERS];
 #endif
 };
 
@@ -81,7 +82,7 @@ static ssize_t eventfd_do_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t eventfd_do_write(FAR struct file *filep,
                                 FAR const char *buffer, size_t len);
 #ifdef CONFIG_EVENT_FD_POLL
-static int eventfd_do_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int eventfd_do_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                            bool setup);
 #endif
 
@@ -424,7 +425,7 @@ static ssize_t eventfd_do_write(FAR struct file *filep,
 }
 
 #ifdef CONFIG_EVENT_FD_POLL
-static int eventfd_do_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int eventfd_do_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                            bool setup)
 {
   FAR struct eventfd_priv_s *dev = filep->f_priv;
@@ -444,7 +445,7 @@ static int eventfd_do_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       /* Remove all memory of the poll setup */
 

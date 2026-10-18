@@ -170,7 +170,7 @@ static ssize_t telnet_write(FAR struct file *filep, FAR const char *buffer,
                             size_t len);
 static int     telnet_ioctl(FAR struct file *filep, int cmd,
                             unsigned long arg);
-static int     telnet_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int     telnet_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                            bool setup);
 
 /* Telnet session creation */
@@ -1198,7 +1198,7 @@ static int telnet_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int telnet_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int telnet_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                        bool setup)
 {
   FAR struct inode *inode = filep->f_inode;

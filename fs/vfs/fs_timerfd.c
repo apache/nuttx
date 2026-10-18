@@ -35,6 +35,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
+#include <nuttx/poll.h>
 #include <nuttx/wdog.h>
 #include <nuttx/mutex.h>
 #include <nuttx/nuttx.h>
@@ -81,7 +82,7 @@ struct timerfd_priv_s
    */
 
 #ifdef CONFIG_TIMER_FD_POLL
-  FAR struct pollfd *fds[CONFIG_TIMER_FD_NPOLLWAITERS];
+  FAR struct pollfd_s *fds[CONFIG_TIMER_FD_NPOLLWAITERS];
 #endif
 };
 
@@ -95,7 +96,7 @@ static int timerfd_close(FAR struct file *filep);
 static ssize_t timerfd_read(FAR struct file *filep, FAR char *buffer,
                             size_t len);
 #ifdef CONFIG_TIMER_FD_POLL
-static int timerfd_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int timerfd_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                         bool setup);
 #endif
 
@@ -354,7 +355,7 @@ static ssize_t timerfd_read(FAR struct file *filep, FAR char *buffer,
 }
 
 #ifdef CONFIG_TIMER_FD_POLL
-static int timerfd_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int timerfd_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                         bool setup)
 {
   FAR struct timerfd_priv_s *dev = filep->f_priv;
@@ -367,7 +368,7 @@ static int timerfd_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       /* Remove all memory of the poll setup */
 

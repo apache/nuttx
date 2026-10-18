@@ -152,8 +152,8 @@ struct local_conn_s
    * socket events.
    */
 
-  FAR struct pollfd *lc_event_fds[LOCAL_NPOLLWAITERS];
-  struct pollfd lc_inout_fds[2*LOCAL_NPOLLWAITERS];
+  FAR struct pollfd_s *lc_event_fds[LOCAL_NPOLLWAITERS];
+  struct pollfd_s lc_inout_fds[2*LOCAL_NPOLLWAITERS];
 
   /* Union of fields unique to SOCK_STREAM client, server, and connected
    * peers.
@@ -728,7 +728,7 @@ void local_event_pollnotify(FAR struct local_conn_s *conn,
  *
  ****************************************************************************/
 
-int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
+int local_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds);
 
 /****************************************************************************
  * Name: local_pollteardown
@@ -746,7 +746,7 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
  *
  ****************************************************************************/
 
-int local_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
+int local_pollteardown(FAR struct socket *psock, FAR struct pollfd_s *fds);
 
 /****************************************************************************
  * Name: local_generate_instance_id

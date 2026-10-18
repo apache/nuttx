@@ -181,7 +181,7 @@ struct cxd5602pwbimu_dev_s
   FAR cxd5602pwbimu_config_t *config;    /* Board control interface */
 
   mutex_t            devlock;            /* Device exclusion control */
-  FAR struct pollfd *fds[CONFIG_SENSORS_CXD5602PWBIMU_NPOLLWAITERS];
+  FAR struct pollfd_s *fds[CONFIG_SENSORS_CXD5602PWBIMU_NPOLLWAITERS];
 
   sem_t            dataready;            /* for notify data ready */
   sem_t            bufsem;               /* lock for buffer is in use */
@@ -251,7 +251,7 @@ static ssize_t cxd5602pwbimu_read(FAR struct file *filep, FAR char *buffer,
 static int cxd5602pwbimu_ioctl(FAR struct file *filep, int cmd,
                                unsigned long arg);
 static int cxd5602pwbimu_poll(FAR struct file *filep,
-                              FAR struct pollfd *fds, bool setup);
+                              FAR struct pollfd_s *fds, bool setup);
 
 #ifdef CONFIG_SENSORS_CXD5602PWBIMU_I2C_ADDRS_AUTO
 static int cxd5602pwbimu_detectaddrs(FAR struct cxd5602pwbimu_dev_s *priv);
@@ -1570,7 +1570,8 @@ static int cxd5602pwbimu_ioctl(FAR struct file *filep, int cmd,
  *
  ****************************************************************************/
 
-static int cxd5602pwbimu_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int cxd5602pwbimu_poll(FAR struct file *filep,
+                              FAR struct pollfd_s *fds,
                               bool setup)
 {
   FAR struct inode *inode;
@@ -1641,7 +1642,7 @@ static int cxd5602pwbimu_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      struct pollfd_s **slot = (struct pollfd_s **)fds->priv;
 
       DEBUGASSERT(slot != NULL);
 

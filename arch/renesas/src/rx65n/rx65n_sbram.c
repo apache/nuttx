@@ -112,7 +112,7 @@ static ssize_t rx65n_sbram_read(struct file *filep, char *buffer,
 static ssize_t rx65n_sbram_write(struct file *filep, const char *buffer,
                                  size_t len);
 static int rx65n_sbram_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int     rx65n_sbram_poll(struct file *filep, struct pollfd *fds,
+static int     rx65n_sbram_poll(struct file *filep, struct pollfd_s *fds,
                                 bool setup);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     rx65n_sbram_unlink(struct inode *inode);
@@ -446,7 +446,7 @@ static ssize_t rx65n_sbram_write(struct file *filep, const char *buffer,
  * Name: rx65n_sbram_poll
  ****************************************************************************/
 
-static int rx65n_sbram_poll(struct file *filep, struct pollfd *fds,
+static int rx65n_sbram_poll(struct file *filep, struct pollfd_s *fds,
                             bool setup)
 {
   if (setup)

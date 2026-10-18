@@ -86,7 +86,7 @@ static ssize_t devurand_read(FAR struct file *filep, FAR char *buffer,
                              size_t buflen);
 static ssize_t devurand_write(FAR struct file *filep, FAR const char *buffer,
                               size_t buflen);
-static int devurand_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int devurand_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                          bool setup);
 
 /****************************************************************************
@@ -286,7 +286,7 @@ static ssize_t devurand_write(FAR struct file *filep, FAR const char *buffer,
  * Name: devurand_poll
  ****************************************************************************/
 
-static int devurand_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int devurand_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                          bool setup)
 {
   if (setup)

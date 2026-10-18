@@ -45,7 +45,7 @@
 
 #ifdef CONFIG_NET_LOCAL_STREAM
 static int local_event_pollsetup(FAR struct local_conn_s *conn,
-                                 FAR struct pollfd *fds,
+                                 FAR struct pollfd_s *fds,
                                  bool setup)
 {
   int i;
@@ -90,7 +90,7 @@ static int local_event_pollsetup(FAR struct local_conn_s *conn,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       nxmutex_lock(&conn->lc_polllock);
 
@@ -112,9 +112,9 @@ static int local_event_pollsetup(FAR struct local_conn_s *conn,
  * Name: local_inout_poll_cb
  ****************************************************************************/
 
-static void local_inout_poll_cb(FAR struct pollfd *fds)
+static void local_inout_poll_cb(FAR struct pollfd_s *fds)
 {
-  FAR struct pollfd *originfds = fds->arg;
+  FAR struct pollfd_s *originfds = fds->arg;
 
   poll_notify(&originfds, 1, fds->revents);
 }
@@ -154,7 +154,7 @@ void local_event_pollnotify(FAR struct local_conn_s *conn,
  *
  ****************************************************************************/
 
-int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
+int local_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
 {
   FAR struct local_conn_s *conn = psock->s_conn;
   int ret = OK;
@@ -180,7 +180,7 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
     {
       case (POLLIN | POLLOUT):
         {
-          FAR struct pollfd *shadowfds;
+          FAR struct pollfd_s *shadowfds;
 
           /* Poll wants to check state for both input and output. */
 
@@ -303,7 +303,7 @@ pollerr:
  *
  ****************************************************************************/
 
-int local_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
+int local_pollteardown(FAR struct socket *psock, FAR struct pollfd_s *fds)
 {
   FAR struct local_conn_s *conn = psock->s_conn;
   int ret = OK;
@@ -328,7 +328,7 @@ int local_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
     {
       case (POLLIN | POLLOUT):
         {
-          FAR struct pollfd *shadowfds = fds->priv;
+          FAR struct pollfd_s *shadowfds = fds->priv;
           int ret2;
 
           if (shadowfds == NULL)

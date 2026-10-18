@@ -77,7 +77,7 @@ struct audio_openpriv_s
 {
   unsigned long               head;
   int                         state;
-  FAR struct pollfd           *fd;
+  FAR struct pollfd_s         *fd;
   FAR struct audio_openpriv_s *flink;
   struct file                 *usermq; /* User mode app's message queue */
 };
@@ -115,7 +115,7 @@ static int      audio_ioctl(FAR struct file *filep,
 static int      audio_mmap(FAR struct file *filep,
                            FAR struct mm_map_entry_s *map);
 static int      audio_poll(FAR struct file *filep,
-                           FAR struct pollfd *fds, bool setup);
+                           FAR struct pollfd_s *fds, bool setup);
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static void     audio_callback(FAR void *priv,
                                uint16_t reason,
@@ -1318,7 +1318,7 @@ static int audio_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
  ****************************************************************************/
 
 static int audio_poll(FAR struct file *filep,
-                      FAR struct pollfd *fds, bool setup)
+                      FAR struct pollfd_s *fds, bool setup)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct audio_upperhalf_s *upper = inode->i_private;
@@ -1350,7 +1350,7 @@ static int audio_poll(FAR struct file *filep,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       *slot = NULL;
       fds->priv = NULL;

@@ -44,7 +44,7 @@ static ssize_t devzero_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen);
 static ssize_t devzero_write(FAR struct file *filep, FAR const char *buffer,
                              size_t buflen);
-static int     devzero_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int     devzero_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                             bool setup);
 
 /****************************************************************************
@@ -100,7 +100,7 @@ static ssize_t devzero_write(FAR struct file *filep, FAR const char *buffer,
  * Name: devzero_poll
  ****************************************************************************/
 
-static int devzero_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int devzero_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                         bool setup)
 {
   UNUSED(filep);

@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/poll.h>
 
 #include <assert.h>
 #include <errno.h>
@@ -55,7 +56,8 @@
  *
  ****************************************************************************/
 
-int psock_poll(FAR struct socket *psock, FAR struct pollfd *fds, bool setup)
+int psock_poll(FAR struct socket *psock, FAR struct pollfd_s *fds,
+               bool setup)
 {
   DEBUGASSERT(psock != NULL && fds != NULL);
 

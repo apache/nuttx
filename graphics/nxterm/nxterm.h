@@ -156,11 +156,11 @@ struct nxterm_state_s
   uint8_t rxbuffer[CONFIG_NXTERM_KBDBUFSIZE];
 
   /* The following is a list if poll structures of threads waiting for
-   * driver events. The 'struct pollfd' reference for each open is also
+   * driver events. The 'struct pollfd_s' reference for each open is also
    * retained in the f_priv field of the 'struct file'.
    */
 
-  FAR struct pollfd *fds[CONFIG_NXTERM_NPOLLWAITERS];
+  FAR struct pollfd_s *fds[CONFIG_NXTERM_NPOLLWAITERS];
 #endif /* CONFIG_NXTERM_NXKBDIN */
 
   /* Spinlock */
@@ -195,7 +195,8 @@ void nxterm_unregister(FAR struct nxterm_state_s *priv);
 
 #ifdef CONFIG_NXTERM_NXKBDIN
 ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len);
-int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
+int nxterm_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
+                bool setup);
 #endif
 
 /* IOCTL handlers */

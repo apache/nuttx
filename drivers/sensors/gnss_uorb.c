@@ -36,6 +36,7 @@
 #include <fcntl.h>
 #include <poll.h>
 #include <nuttx/debug.h>
+#include <nuttx/poll.h>
 #include <minmea/minmea.h>
 #include <sys/param.h>
 
@@ -77,7 +78,7 @@ struct gnss_sensor_s
 struct gnss_user_s
 {
   struct list_node node;
-  FAR struct pollfd *fds;
+  FAR struct pollfd_s *fds;
   size_t pos;
 };
 
@@ -128,7 +129,7 @@ static ssize_t gnss_write(FAR struct file *filep,
                           FAR const char *buffer, size_t buflen);
 static int     gnss_ioctl(FAR struct file *filep, int cmd,
                           unsigned long arg);
-static int     gnss_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int     gnss_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                          bool setup);
 
 /****************************************************************************
@@ -424,7 +425,7 @@ static int gnss_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   return ret;
 }
 
-static int gnss_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int gnss_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                      bool setup)
 {
   FAR struct gnss_upperhalf_s *upper;

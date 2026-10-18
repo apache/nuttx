@@ -110,7 +110,7 @@ struct comp_dev_s
 
   /* pollfd's for output transition events */
 
-  FAR struct pollfd *d_fds[CONFIG_DEV_COMP_NPOLLWAITERS];
+  FAR struct pollfd_s *d_fds[CONFIG_DEV_COMP_NPOLLWAITERS];
 #endif
 
   /* Fields provided by lower half COMP logic */

@@ -33,6 +33,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/poll.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/video/v4l2_cap.h>
 #include <nuttx/video/video.h>
@@ -111,7 +112,7 @@ struct capture_type_inf_s
   struct v4l2_fract      frame_interval;
   video_framebuff_t      bufinf;
   FAR uint8_t            *bufheap;   /* for V4L2_MEMORY_MMAP buffers */
-  FAR struct pollfd      *fds;
+  FAR struct pollfd_s    *fds;
   uint32_t               seqnum;
 };
 
@@ -298,7 +299,7 @@ static int capture_close(FAR struct file *filep);
 static int capture_mmap(FAR struct file *filep,
                         FAR struct mm_map_entry_s *map);
 static int capture_poll(FAR struct file *filep,
-                        FAR struct pollfd *fds, bool setup);
+                        FAR struct pollfd_s *fds, bool setup);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int capture_unlink(FAR struct inode *inode);
 #endif
@@ -3691,7 +3692,7 @@ static int capture_mmap(FAR struct file *filep,
 }
 
 static int capture_poll(FAR struct file *filep,
-                        FAR struct pollfd *fds, bool setup)
+                        FAR struct pollfd_s *fds, bool setup)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR capture_mng_t *cmng = inode->i_private;

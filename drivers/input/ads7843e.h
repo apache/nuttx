@@ -147,11 +147,11 @@ struct ads7843e_dev_s
   struct wdog_s wdog;                   /* Poll the position while the pen is down */
 
   /* The following is a list if poll structures of threads waiting for
-   * driver events. The 'struct pollfd' reference for each open is also
+   * driver events. The 'struct pollfd_s' reference for each open is also
    * retained in the f_priv field of the 'struct file'.
    */
 
-  FAR struct pollfd *fds[CONFIG_ADS7843E_NPOLLWAITERS];
+  FAR struct pollfd_s *fds[CONFIG_ADS7843E_NPOLLWAITERS];
 };
 
 /****************************************************************************
