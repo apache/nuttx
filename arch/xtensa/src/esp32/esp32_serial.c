@@ -1123,6 +1123,7 @@ static inline void dma_enable_int(uint8_t dma_chan)
 
   uint32_t int_mask = UHCI_OUT_TOTAL_EOF_INT_ENA_M |
                       UHCI_OUT_DSCR_ERR_INT_ENA_M;
+
   putreg32(int_mask, UHCI_INT_ENA_REG(dma_chan));
 }
 
@@ -1232,23 +1233,24 @@ static int esp32_interrupt_dma(int irq, void *context, void *arg)
 #  ifdef CONFIG_ESP32_UART0_TXDMA
       case UHCI_UART0_CE_M:
         dev = &g_uart0port;
-      break;
+        break;
 #  endif
 
 #  ifdef CONFIG_ESP32_UART1_TXDMA
       case UHCI_UART1_CE_M:
         dev = &g_uart1port;
-      break;
+        break;
 #  endif
 
 #  ifdef CONFIG_ESP32_UART2_TXDMA
       case UHCI_UART2_CE_M:
         dev = &g_uart2port;
-      break;
+        break;
 #  endif
 
       default:
         dmaerr("No UART selected\n");
+        break;
     }
 
   if (dev != NULL)
@@ -1451,195 +1453,192 @@ static int esp32_ioctl(struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
-    case TIOCSERGSTRUCT:
-      {
-         struct esp32_dev_s *user = (struct esp32_dev_s *)arg;
-         if (!user)
-           {
-             ret = -EINVAL;
-           }
-         else
-           {
-             memcpy(user, dev, sizeof(struct esp32_dev_s));
-           }
-       }
-       break;
+      case TIOCSERGSTRUCT:
+        {
+          struct esp32_dev_s *user = (struct esp32_dev_s *)arg;
+
+          if (!user)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              memcpy(user, dev, sizeof(struct esp32_dev_s));
+            }
+        }
+        break;
 #endif
 
 #ifdef CONFIG_SERIAL_TERMIOS
-    case TCGETS:
-      {
-        struct termios *termiosp = (struct termios *)arg;
-        struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
+      case TCGETS:
+        {
+          struct termios *termiosp = (struct termios *)arg;
+          struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
 
-        if (!termiosp)
-          {
-            ret = -EINVAL;
-            break;
-          }
+          if (!termiosp)
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        /* Return parity */
+          /* Return parity */
 
-        termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
-                            ((priv->parity == 1) ? PARODD : 0);
+          termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
+                              ((priv->parity == 1) ? PARODD : 0);
 
-        /* Return stop bits */
+          /* Return stop bits */
 
-        termiosp->c_cflag |= (priv->stopbits2) ? CSTOPB : 0;
+          termiosp->c_cflag |= (priv->stopbits2) ? CSTOPB : 0;
 
-        /* Return flow control */
+          /* Return flow control */
 
 #  ifdef CONFIG_SERIAL_OFLOWCONTROL
-        termiosp->c_cflag |= (priv->oflow) ? CCTS_OFLOW : 0;
+          termiosp->c_cflag |= (priv->oflow) ? CCTS_OFLOW : 0;
 #  endif
 #  ifdef CONFIG_SERIAL_IFLOWCONTROL
-        termiosp->c_cflag |= (priv->iflow) ? CRTS_IFLOW : 0;
+          termiosp->c_cflag |= (priv->iflow) ? CRTS_IFLOW : 0;
 #  endif
-        /* Return baud */
+          /* Return baud */
 
-        cfsetispeed(termiosp, priv->baud);
+          cfsetispeed(termiosp, priv->baud);
 
-        /* Return number of bits */
+          /* Return number of bits */
 
-        switch (priv->bits)
-          {
-          case 5:
-            termiosp->c_cflag |= CS5;
-            break;
+          switch (priv->bits)
+            {
+              case 5:
+                termiosp->c_cflag |= CS5;
+                break;
 
-          case 6:
-            termiosp->c_cflag |= CS6;
-            break;
+              case 6:
+                termiosp->c_cflag |= CS6;
+                break;
 
-          case 7:
-            termiosp->c_cflag |= CS7;
-            break;
+              case 7:
+                termiosp->c_cflag |= CS7;
+                break;
 
-          default:
-          case 8:
-            termiosp->c_cflag |= CS8;
-            break;
+              default:
+              case 8:
+                termiosp->c_cflag |= CS8;
+                break;
 
-          case 9:
-            termiosp->c_cflag |= CS8 /* CS9 */ ;
-            break;
-          }
-      }
-      break;
+              case 9:
+                termiosp->c_cflag |= CS8 /* CS9 */ ;
+                break;
+            }
+        }
+        break;
 
-    case TCSETS:
-      {
-        struct termios *termiosp = (struct termios *)arg;
-        struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
-        uint32_t baud;
-        uint32_t intena;
-        uint8_t parity;
-        uint8_t nbits;
-        bool stop2;
+      case TCSETS:
+        {
+          struct termios *termiosp = (struct termios *)arg;
+          struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
+          uint32_t baud;
+          uint32_t intena;
+          uint8_t parity;
+          uint8_t nbits;
+          bool stop2;
 #  ifdef CONFIG_SERIAL_IFLOWCONTROL
-        bool iflow;
+          bool iflow;
 #  endif
 #  ifdef CONFIG_SERIAL_OFLOWCONTROL
-        bool oflow;
+          bool oflow;
 #  endif
 
-        if (!termiosp)
-          {
-            ret = -EINVAL;
-            break;
-          }
+          if (!termiosp)
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        /* Decode baud. */
+          /* Decode baud. */
 
-        ret = OK;
-        baud = cfgetispeed(termiosp);
+          ret = OK;
+          baud = cfgetispeed(termiosp);
 
-        /* Decode number of bits */
+          /* Decode number of bits */
 
-        switch (termiosp->c_cflag & CSIZE)
-          {
-          case CS5:
-            nbits = 5;
-            break;
+          switch (termiosp->c_cflag & CSIZE)
+            {
+              case CS5:
+                nbits = 5;
+                break;
 
-          case CS6:
-            nbits = 6;
-            break;
+              case CS6:
+                nbits = 6;
+                break;
 
-          case CS7:
-            nbits = 7;
-            break;
+              case CS7:
+                nbits = 7;
+                break;
 
-          case CS8:
-            nbits = 8;
-            break;
-#  if 0
-          case CS9:
-            nbits = 9;
-            break;
-#  endif
-          default:
-            ret = -EINVAL;
-            break;
-          }
+              case CS8:
+                nbits = 8;
+                break;
 
-        /* Decode parity */
+              default:
+                ret = -EINVAL;
+                break;
+            }
 
-        if ((termiosp->c_cflag & PARENB) != 0)
-          {
-            parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
-          }
-        else
-          {
-            parity = 0;
-          }
+          /* Decode parity */
 
-        /* Decode stop bits */
+          if ((termiosp->c_cflag & PARENB) != 0)
+            {
+              parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
+            }
+          else
+            {
+              parity = 0;
+            }
 
-        stop2 = (termiosp->c_cflag & CSTOPB) != 0;
+          /* Decode stop bits */
 
-        /* Decode flow control */
+          stop2 = (termiosp->c_cflag & CSTOPB) != 0;
+
+          /* Decode flow control */
 
 #  ifdef CONFIG_SERIAL_IFLOWCONTROL
-        iflow = (termiosp->c_cflag &  CRTS_IFLOW) != 0;
+          iflow = (termiosp->c_cflag &  CRTS_IFLOW) != 0;
 #  endif
 #  ifdef CONFIG_SERIAL_OFLOWCONTROL
-        oflow = (termiosp->c_cflag & CCTS_OFLOW) != 0;
+          oflow = (termiosp->c_cflag & CCTS_OFLOW) != 0;
 #  endif
-        /* Verify that all settings are valid before committing */
+          /* Verify that all settings are valid before committing */
 
-        if (ret == OK)
-          {
-            /* Commit */
+          if (ret == OK)
+            {
+              /* Commit */
 
-            priv->baud      = baud;
-            priv->parity    = parity;
-            priv->bits      = nbits;
-            priv->stopbits2 = stop2;
+              priv->baud      = baud;
+              priv->parity    = parity;
+              priv->bits      = nbits;
+              priv->stopbits2 = stop2;
 #  ifdef CONFIG_SERIAL_IFLOWCONTROL
-            priv->iflow = iflow;
+              priv->iflow = iflow;
 #  endif
 #  ifdef CONFIG_SERIAL_OFLOWCONTROL
-            priv->oflow = oflow;
+              priv->oflow = oflow;
 #  endif
-            /* effect the changes immediately - note that we do not
-             * implement TCSADRAIN / TCSAFLUSH
-             */
+              /* effect the changes immediately - note that we do not
+               * implement TCSADRAIN / TCSAFLUSH
+               */
 
-            esp32_disableallints(priv, &intena);
-            ret = esp32_setup(dev);
+              esp32_disableallints(priv, &intena);
+              ret = esp32_setup(dev);
 
-            /* Restore the interrupt state */
+              /* Restore the interrupt state */
 
-            esp32_restoreuartint(priv, intena);
-          }
-      }
-      break;
+              esp32_restoreuartint(priv, intena);
+            }
+        }
+        break;
 #endif /* CONFIG_SERIAL_TERMIOS */
 
-    default:
-      ret = -ENOTTY;
-      break;
+      default:
+        ret = -ENOTTY;
+        break;
     }
 
   return ret;
@@ -1725,6 +1724,7 @@ static void esp32_rxint(struct uart_dev_s *dev, bool enable)
 static bool esp32_rxavailable(struct uart_dev_s *dev)
 {
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
+
   return esp32_get_rx_fifo_len(priv) > 0;
 }
 
@@ -1790,14 +1790,6 @@ static void esp32_txint(struct uart_dev_s *dev, bool enable)
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
           modifyreg32(UART_INT_ENA_REG(priv->config->id),
                       0, (UART_TX_DONE_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA));
-
-#else
-          /* Fake a TX interrupt here by just calling uart_xmitchars() with
-           * interrupts disabled (note this may recurse).
-           */
-
-          spin_unlock_irqrestore(&priv->lock, flags);
-          uart_xmitchars(dev);
 #endif
         }
       else
@@ -1809,6 +1801,17 @@ static void esp32_txint(struct uart_dev_s *dev, bool enable)
         }
 
       spin_unlock_irqrestore(&priv->lock, flags);
+
+#ifdef CONFIG_SUPPRESS_SERIAL_INTS
+      if (enable)
+        {
+          /* Fake a TX interrupt here by just calling uart_xmitchars()
+           * after the spinlock is released (note this may recurse).
+           */
+
+          uart_xmitchars(dev);
+        }
+#endif
 #ifdef CONFIG_SERIAL_TXDMA
     }
 #endif
@@ -1981,8 +1984,8 @@ static bool esp32_rxflowcontrol(struct uart_dev_s *dev,
            * SW RX FIFO.
            */
 
-           esp32_rxint(dev, false);
-           ret = true;
+          esp32_rxint(dev, false);
+          ret = true;
         }
     }
 
