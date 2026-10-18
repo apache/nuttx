@@ -76,6 +76,7 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
 #ifdef CONFIG_FS_NOTIFY
   bool isdir = INODE_IS_PSEUDODIR(oldinode);
 #endif
+  size_t oldlen;
   int ret;
 
   /* Hold the inode tree lock across resolve / permission checks / mutate
@@ -99,6 +100,15 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
   ret = inode_checkperm(oldparent, W_OK);
   if (ret < 0)
     {
+      goto errout_with_newsearch;
+    }
+
+  /* It is an error to rename an inode to a path below itself */
+
+  oldlen = strlen(oldpath);
+  if (strncmp(newpath, oldpath, oldlen) == 0 && newpath[oldlen] == '/')
+    {
+      ret = -EINVAL;
       goto errout_with_newsearch;
     }
 
@@ -381,6 +391,22 @@ static int mountptrename(FAR const char *oldpath, FAR struct inode *oldinode,
 
       oldisdir = S_ISDIR(oldbuf.st_mode);
 
+      /* It is an error to rename a directory into one of its own
+       * subdirectories (new is below old), whether new exists or not.
+       */
+
+      if (oldisdir)
+        {
+          size_t oldlen = strlen(oldrelpath);
+
+          if (strncmp(newrelpath, oldrelpath, oldlen) == 0 &&
+              newrelpath[oldlen] == '/')
+            {
+              ret = -EINVAL;
+              goto errout_with_newinode;
+            }
+        }
+
 #ifdef CONFIG_FS_LINKS
       /* Use lstat if available to avoid dereferencing symlinks */
 
@@ -421,25 +447,11 @@ static int mountptrename(FAR const char *oldpath, FAR struct inode *oldinode,
 
           if (newisdir)
             {
-              size_t oldlen;
-
               /* It is an error to rename a file to a directory */
 
               if (!oldisdir)
                 {
                   ret = -EISDIR;
-                  goto errout_with_newinode;
-                }
-
-              /* It is an error to rename a directory into one of its
-               * own subdirectories (new is below old).
-               */
-
-              oldlen = strlen(oldrelpath);
-              if (strncmp(newrelpath, oldrelpath, oldlen) == 0 &&
-                  newrelpath[oldlen] == '/')
-                {
-                  ret = -EINVAL;
                   goto errout_with_newinode;
                 }
             }
