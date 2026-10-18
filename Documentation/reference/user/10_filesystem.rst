@@ -432,7 +432,9 @@ Pipes and FIFOs
 
   mkfifo() makes a FIFO device driver file with name pathname. Unlike Linux,
   a NuttX FIFO is not a special file type but simply a device driver instance.
-  mode specifies the FIFO's permissions (but is ignored in the current implementation).
+  mode specifies the FIFO's permissions. The file mode creation mask
+  (``umask()``) clears bits in it. NuttX keeps the permissions only with
+  ``CONFIG_PSEUDOFS_ATTRIBUTES``.
 
   Once the FIFO has been created by mkfifo(), any thread can open it for reading
   or writing, in the same way as an ordinary file. However, it must have been
@@ -449,7 +451,8 @@ Pipes and FIFOs
 
   :param pathname: The full path to the FIFO instance to attach to or to
     create (if not already created).
-  :param mode: Ignored for now
+  :param mode: The permissions of the FIFO, less the bits in the file mode
+    creation mask.
 
   :return: 0 is returned on success; otherwise, -1 is returned with errno set appropriately.
 
