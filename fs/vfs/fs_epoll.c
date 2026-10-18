@@ -56,7 +56,7 @@ struct epoll_node_s
   struct list_node         node;
   epoll_data_t             data;
   bool                     notified;
-  struct pollfd            pfd;
+  struct pollfd_s          pfd;
   FAR struct file         *filep;
   FAR struct epoll_head_s *eph;
 };
@@ -101,7 +101,7 @@ typedef struct epoll_head_s epoll_head_t;
 static int epoll_do_open(FAR struct file *filep);
 static int epoll_do_close(FAR struct file *filep);
 static int epoll_do_poll(FAR struct file *filep,
-                         FAR struct pollfd *fds, bool setup);
+                         FAR struct pollfd_s *fds, bool setup);
 static int epoll_setup(FAR epoll_head_t *eph);
 static int epoll_teardown(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
                           int maxevents);
@@ -227,7 +227,7 @@ static int epoll_do_close(FAR struct file *filep)
 }
 
 static int epoll_do_poll(FAR struct file *filep,
-                         FAR struct pollfd *fds, bool setup)
+                         FAR struct pollfd_s *fds, bool setup)
 {
   return OK;
 }
@@ -423,7 +423,7 @@ static void epoll_cleanup(FAR void *arg)
  *
  ****************************************************************************/
 
-static void epoll_default_cb(FAR struct pollfd *fds)
+static void epoll_default_cb(FAR struct pollfd_s *fds)
 {
   FAR epoll_node_t *epn = fds->arg;
   int semcount = 0;

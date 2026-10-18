@@ -164,11 +164,11 @@ struct tsc2007_dev_s
   struct tsc2007_sample_s sample;      /* Last sampled touch point data */
 
   /* The following is a list if poll structures of threads waiting for
-   * driver events. The 'struct pollfd' reference for each open is also
+   * driver events. The 'struct pollfd_s' reference for each open is also
    * retained in the f_priv field of the 'struct file'.
    */
 
-  FAR struct pollfd *fds[CONFIG_TSC2007_NPOLLWAITERS];
+  FAR struct pollfd_s *fds[CONFIG_TSC2007_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -194,7 +194,7 @@ static int tsc2007_close(FAR struct file *filep);
 static ssize_t tsc2007_read(FAR struct file *filep, FAR char *buffer,
                             size_t len);
 static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                         bool setup);
 
 /****************************************************************************
@@ -1069,7 +1069,7 @@ static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: tsc2007_poll
  ****************************************************************************/
 
-static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                         bool setup)
 {
   FAR struct inode         *inode;
@@ -1142,7 +1142,7 @@ static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       DEBUGASSERT(slot != NULL);
 

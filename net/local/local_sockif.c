@@ -34,6 +34,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <nuttx/debug.h>
+#include <nuttx/poll.h>
 
 #include <netinet/in.h>
 #include <sys/param.h>
@@ -64,7 +65,7 @@ static int        local_connect(FAR struct socket *psock,
                                 FAR const struct sockaddr *addr,
                                 socklen_t addrlen);
 static int        local_poll(FAR struct socket *psock,
-                             FAR struct pollfd *fds, bool setup);
+                             FAR struct pollfd_s *fds, bool setup);
 static int        local_close(FAR struct socket *psock);
 static int        local_ioctl(FAR struct socket *psock,
                               int cmd, unsigned long arg);
@@ -851,7 +852,7 @@ static int local_connect(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-static int local_poll(FAR struct socket *psock, FAR struct pollfd *fds,
+static int local_poll(FAR struct socket *psock, FAR struct pollfd_s *fds,
                       bool setup)
 {
   /* Check if we are setting up or tearing down the poll */

@@ -136,7 +136,7 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t pty_write(FAR struct file *filep, FAR const char *buffer,
                          size_t buflen);
 static int     pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int     pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int     pty_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                         bool setup);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     pty_unlink(FAR struct inode *inode);
@@ -964,7 +964,7 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: pty_poll
  ****************************************************************************/
 
-static int pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int pty_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                     bool setup)
 {
   FAR struct inode *inode;

@@ -37,6 +37,7 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/poll.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/net.h>
@@ -56,8 +57,8 @@ static sockcaps_t can_sockcaps(FAR struct socket *psock);
 static void can_addref(FAR struct socket *psock);
 static int  can_bind(FAR struct socket *psock,
                      FAR const struct sockaddr *addr, socklen_t addrlen);
-static int  can_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
-                           bool setup);
+static int can_poll_local(FAR struct socket *psock, FAR struct pollfd_s *fds,
+                          bool setup);
 static int can_close(FAR struct socket *psock);
 
 /****************************************************************************
@@ -374,7 +375,7 @@ static int can_bind(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-static int can_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
+static int can_poll_local(FAR struct socket *psock, FAR struct pollfd_s *fds,
                           bool setup)
 {
   FAR struct can_conn_s *conn;

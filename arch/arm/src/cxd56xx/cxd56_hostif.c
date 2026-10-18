@@ -37,6 +37,7 @@
 #include <fcntl.h>
 #include <assert.h>
 #include <nuttx/debug.h>
+#include <nuttx/poll.h>
 #include <errno.h>
 
 #include <arch/chip/hostif.h>
@@ -122,7 +123,7 @@ static ssize_t hif_write(struct file *filep,
                          const char *buffer, size_t len);
 static int     hif_ioctl(struct file *filep, int cmd,
                          unsigned long arg);
-static int     hif_poll(struct file *filep, struct pollfd *fds,
+static int     hif_poll(struct file *filep, struct pollfd_s *fds,
                         bool setup);
 static int     hif_unlink(struct inode *inode);
 
@@ -343,7 +344,7 @@ static int hif_ioctl(struct file *filep, int cmd, unsigned long arg)
 }
 
 static int hif_poll(struct file *filep,
-                    struct pollfd *fds, bool setup)
+                    struct pollfd_s *fds, bool setup)
 {
   return OK;
 }

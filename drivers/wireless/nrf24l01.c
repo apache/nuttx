@@ -49,6 +49,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/poll.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/signal.h>
 
@@ -161,7 +162,7 @@ struct nrf24l01_dev_s
 
   uint8_t nopens;           /* Number of times the device has been opened */
   mutex_t devlock;          /* Ensures exclusive access to this structure */
-  FAR struct pollfd *pfd;   /* Polled file descr  (or NULL if any) */
+  FAR struct pollfd_s *pfd; /* Polled file descr  (or NULL if any) */
 };
 
 /****************************************************************************
@@ -226,7 +227,7 @@ static ssize_t nrf24l01_write(FAR struct file *filep,
                               FAR const char *buffer, size_t buflen);
 static int nrf24l01_ioctl(FAR struct file *filep, int cmd,
                           unsigned long arg);
-static int nrf24l01_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int nrf24l01_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                          bool setup);
 
 /****************************************************************************
@@ -1447,7 +1448,7 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: nrf24l01_poll
  ****************************************************************************/
 
-static int nrf24l01_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int nrf24l01_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                          bool setup)
 {
 #ifndef CONFIG_WL_NRF24L01_RXSUPPORT

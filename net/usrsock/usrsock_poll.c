@@ -37,6 +37,7 @@
 #include <arch/irq.h>
 
 #include <sys/socket.h>
+#include <nuttx/poll.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/usrsock.h>
@@ -131,7 +132,7 @@ static uint32_t poll_event(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 static int usrsock_pollsetup(FAR struct socket *psock,
-                             FAR struct pollfd *fds)
+                             FAR struct pollfd_s *fds)
 {
   FAR struct usrsock_conn_s *conn = psock->s_conn;
   FAR struct usrsock_poll_s *info;
@@ -276,7 +277,7 @@ errout_unlock:
  ****************************************************************************/
 
 static int usrsock_pollteardown(FAR struct socket *psock,
-                                FAR struct pollfd *fds)
+                                FAR struct pollfd_s *fds)
 {
   FAR struct usrsock_conn_s *conn = psock->s_conn;
   FAR struct usrsock_poll_s *info;
@@ -341,7 +342,7 @@ static int usrsock_pollteardown(FAR struct socket *psock,
  ****************************************************************************/
 
 int usrsock_poll(FAR struct socket *psock,
-                 FAR struct pollfd *fds, bool setup)
+                 FAR struct pollfd_s *fds, bool setup)
 {
   if (setup)
     {

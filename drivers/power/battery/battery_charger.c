@@ -63,7 +63,7 @@ struct battery_charger_priv_s
   sem_t             wait;
   uint32_t          mask;
   clock_t           interval; /* tick unit */
-  FAR struct pollfd *fds;
+  FAR struct pollfd_s *fds;
   struct work_s     work;
 };
 
@@ -82,7 +82,7 @@ static ssize_t bat_charger_write(FAR struct file *filep,
 static int     bat_charger_ioctl(FAR struct file *filep, int cmd,
                                  unsigned long arg);
 static int     bat_charger_poll(FAR struct file *filep,
-                                FAR struct pollfd *fds, bool setup);
+                                FAR struct pollfd_s *fds, bool setup);
 
 /****************************************************************************
  * Private Data
@@ -109,7 +109,7 @@ static void battery_charger_work(FAR void *arg)
 {
   FAR struct battery_charger_priv_s *priv =
     (FAR struct battery_charger_priv_s *)arg;
-  FAR struct pollfd *fds = priv->fds;
+  FAR struct pollfd_s *fds = priv->fds;
   int semcnt;
 
   if (priv->mask != 0)
@@ -462,7 +462,7 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
  ****************************************************************************/
 
 static int bat_charger_poll(FAR struct file *filep,
-                            FAR struct pollfd *fds, bool setup)
+                            FAR struct pollfd_s *fds, bool setup)
 {
   FAR struct battery_charger_priv_s *priv = filep->f_priv;
   int ret;

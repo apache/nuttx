@@ -279,11 +279,11 @@ struct usbhost_state_s
   size_t                  packet_len;
 
   /* The following is a list if poll structures of threads waiting for
-   * driver events. The 'struct pollfd' reference for each open is also
+   * driver events. The 'struct pollfd_s' reference for each open is also
    * retained in the f_priv field of the 'struct file'.
    */
 
-  FAR struct pollfd      *fds[CONFIG_HIDMOUSE_NPOLLWAITERS];
+  FAR struct pollfd_s    *fds[CONFIG_HIDMOUSE_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -355,7 +355,7 @@ static ssize_t usbhost_read(FAR struct file *filep,
                             FAR char *buffer, size_t len);
 static ssize_t usbhost_write(FAR struct file *filep,
                              FAR const char *buffer, size_t len);
-static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int usbhost_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                         bool setup);
 
 /****************************************************************************
@@ -2317,7 +2317,7 @@ static ssize_t usbhost_write(FAR struct file *filep, FAR const char *buffer,
  *
  ****************************************************************************/
 
-static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int usbhost_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                         bool setup)
 {
   FAR struct inode           *inode;
@@ -2392,7 +2392,7 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       DEBUGASSERT(slot);
 

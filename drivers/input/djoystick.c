@@ -99,7 +99,7 @@ struct djoy_open_s
    */
 
   bool do_pollpending;
-  FAR struct pollfd *do_fds[CONFIG_INPUT_DJOYSTICK_NPOLLWAITERS];
+  FAR struct pollfd_s *do_fds[CONFIG_INPUT_DJOYSTICK_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -124,7 +124,7 @@ static ssize_t djoy_read(FAR struct file *filep, FAR char *buffer,
                          size_t buflen);
 static int     djoy_ioctl(FAR struct file *filep, int cmd,
                           unsigned long arg);
-static int     djoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int     djoy_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                          bool setup);
 
 /****************************************************************************
@@ -585,7 +585,7 @@ static int djoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: djoy_poll
  ****************************************************************************/
 
-static int djoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int djoy_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                      bool setup)
 {
   FAR struct inode *inode;
@@ -643,7 +643,7 @@ static int djoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
 #ifdef CONFIG_DEBUG_FEATURES
       if (!slot)

@@ -100,7 +100,7 @@ static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer,
                              size_t len);
 static int max11802_ioctl(FAR struct file *filep, int cmd,
                           unsigned long arg);
-static int max11802_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int max11802_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                          bool setup);
 
 /****************************************************************************
@@ -979,7 +979,7 @@ static int max11802_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: max11802_poll
  ****************************************************************************/
 
-static int max11802_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int max11802_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                         bool setup)
 {
   FAR struct inode *inode;
@@ -1048,7 +1048,7 @@ static int max11802_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       DEBUGASSERT(slot != NULL);
 

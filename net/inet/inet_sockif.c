@@ -37,6 +37,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/tcp.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/poll.h>
 
 #include "tcp/tcp.h"
 #include "udp/udp.h"
@@ -92,7 +93,7 @@ static int        inet_accept(FAR struct socket *psock,
                               FAR struct socket *newsock, int flags);
 
 static int        inet_poll(FAR struct socket *psock,
-                            FAR struct pollfd *fds, bool setup);
+                            FAR struct pollfd_s *fds, bool setup);
 
 static ssize_t    inet_send(FAR struct socket *psock, FAR const void *buf,
                             size_t len, int flags);
@@ -1515,7 +1516,7 @@ static int inet_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
 #if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
 static inline int inet_pollsetup(FAR struct socket *psock,
-                                 FAR struct pollfd *fds)
+                                 FAR struct pollfd_s *fds)
 {
 #ifdef NET_TCP_HAVE_STACK
   if (psock->s_type == SOCK_STREAM)
@@ -1555,7 +1556,7 @@ static inline int inet_pollsetup(FAR struct socket *psock,
 
 #if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
 static inline int inet_pollteardown(FAR struct socket *psock,
-                                    FAR struct pollfd *fds)
+                                    FAR struct pollfd_s *fds)
 {
 #ifdef NET_TCP_HAVE_STACK
   if (psock->s_type == SOCK_STREAM)
@@ -1595,7 +1596,7 @@ static inline int inet_pollteardown(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-static int inet_poll(FAR struct socket *psock, FAR struct pollfd *fds,
+static int inet_poll(FAR struct socket *psock, FAR struct pollfd_s *fds,
                      bool setup)
 {
 #if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)

@@ -248,8 +248,8 @@ static const struct als_data als_data[] =
 
 struct apds9922_dev_s
 {
-  FAR struct pollfd            *fds_als[CONFIG_APDS9922_ALS_NPOLLWAITERS];
-  FAR struct pollfd            *fds_ps[CONFIG_APDS9922_PS_NPOLLWAITERS];
+  FAR struct pollfd_s          *fds_als[CONFIG_APDS9922_ALS_NPOLLWAITERS];
+  FAR struct pollfd_s          *fds_ps[CONFIG_APDS9922_PS_NPOLLWAITERS];
   struct work_s                work;      /* Handles  interrupt         */
   mutex_t                      devlock;   /* Manages exclusive access   */
   FAR struct apds9922_config_s *config;   /* Platform specific config   */
@@ -341,7 +341,7 @@ static ssize_t apds9922_als_write(FAR struct file *filep,
 static int     apds9922_als_ioctl(FAR struct file *filep, int cmd,
                                   unsigned long arg);
 static int     apds9922_als_poll(FAR struct file *filep,
-                                 FAR struct pollfd *fds, bool setup);
+                                 FAR struct pollfd_s *fds, bool setup);
 static ssize_t apds9922_ps_read(FAR struct file *filep,
                                 FAR char *, size_t buflen);
 static ssize_t apds9922_ps_write(FAR struct file *filep,
@@ -349,7 +349,7 @@ static ssize_t apds9922_ps_write(FAR struct file *filep,
 static int     apds9922_ps_ioctl(FAR struct file *filep, int cmd,
                                  unsigned long arg);
 static int     apds9922_ps_poll(FAR struct file *filep,
-                                FAR struct pollfd *fds, bool setup);
+                                FAR struct pollfd_s *fds, bool setup);
 
 /****************************************************************************
  * Private Data
@@ -2119,7 +2119,7 @@ static int apds9922_als_ioctl(FAR struct file *filep, int cmd,
  ****************************************************************************/
 
 static int apds9922_als_poll(FAR struct file *filep,
-                             FAR struct pollfd *fds, bool setup)
+                             FAR struct pollfd_s *fds, bool setup)
 {
   FAR struct inode *inode;
   FAR struct apds9922_dev_s *priv;
@@ -2177,7 +2177,7 @@ static int apds9922_als_poll(FAR struct file *filep,
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      struct pollfd_s **slot = (struct pollfd_s **)fds->priv;
 
       DEBUGASSERT(slot != NULL);
 
@@ -2345,7 +2345,7 @@ static int apds9922_ps_ioctl(FAR struct file *filep, int cmd,
  ****************************************************************************/
 
 static int apds9922_ps_poll(FAR struct file *filep,
-                             FAR struct pollfd *fds, bool setup)
+                             FAR struct pollfd_s *fds, bool setup)
 {
   FAR struct inode *inode;
   FAR struct apds9922_dev_s *priv;
@@ -2403,7 +2403,7 @@ static int apds9922_ps_poll(FAR struct file *filep,
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      struct pollfd_s **slot = (struct pollfd_s **)fds->priv;
 
       DEBUGASSERT(slot != NULL);
 

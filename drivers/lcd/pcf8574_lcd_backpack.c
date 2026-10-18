@@ -102,7 +102,7 @@ static off_t pcf8574_lcd_seek(FAR struct file *filep, off_t offset,
                               int whence);
 static int pcf8574_lcd_ioctl(FAR struct file *filep, int cmd,
                              unsigned long arg);
-static int pcf8574_lcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int pcf8574_lcd_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                             bool setup);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int pcf8574_lcd_unlink(FAR struct inode *inode);
@@ -1529,7 +1529,7 @@ static int pcf8574_lcd_ioctl(FAR struct file *filep, int cmd,
  * Name: pcf8574_lcd_poll
  ****************************************************************************/
 
-static int pcf8574_lcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int pcf8574_lcd_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                             bool setup)
 {
   if (setup)

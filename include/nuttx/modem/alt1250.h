@@ -347,7 +347,7 @@ struct alt1250_dev_s
   uint64_t evtbitmap;
   mutex_t evtmaplock;
   mutex_t pfdlock;
-  FAR struct pollfd *pfd;
+  FAR struct pollfd_s *pfd;
   int rxthread_pid;
   sem_t rxthread_sem;
   FAR struct alt_evtbuffer_s *evtbuff;

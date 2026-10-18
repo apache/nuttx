@@ -36,6 +36,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/poll.h>
 #include <nuttx/signal.h>
 #include <nuttx/i2c/i2c_master.h>
 
@@ -198,7 +199,7 @@ struct mbr3108_dev_s
   struct mbr3108_debug_conf_s debug_conf;
   bool int_pending;
 
-  FAR struct pollfd *fds[CONFIG_INPUT_CYPRESS_MBR3108_NPOLLWAITERS];
+  FAR struct pollfd_s *fds[CONFIG_INPUT_CYPRESS_MBR3108_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -211,7 +212,7 @@ static ssize_t mbr3108_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen);
 static ssize_t mbr3108_write(FAR struct file *filep, FAR const char *buffer,
                              size_t buflen);
-static int mbr3108_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int mbr3108_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                         bool setup);
 
 /****************************************************************************
@@ -977,7 +978,7 @@ static int mbr3108_close(FAR struct file *filep)
   return 0;
 }
 
-static int mbr3108_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int mbr3108_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                         bool setup)
 {
   FAR struct mbr3108_dev_s *priv;
@@ -1044,7 +1045,7 @@ static int mbr3108_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       DEBUGASSERT(slot != NULL);
 

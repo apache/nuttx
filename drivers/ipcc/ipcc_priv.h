@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 #include <nuttx/ipcc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/poll.h>
 #include <stdio.h>
 
 /****************************************************************************
@@ -37,7 +38,7 @@
 
 struct ipcc_driver_s
 {
-  FAR struct pollfd       *fds[CONFIG_IPCC_NPOLLWAITERS];
+  FAR struct pollfd_s     *fds[CONFIG_IPCC_NPOLLWAITERS];
   FAR struct ipcc_lower_s *ipcc;     /* Lower half driver state */
   int                      crefs;    /* Count number of open references */
   int                      unlinked; /* 1 - driver has been unlinked */
@@ -56,7 +57,7 @@ int ipcc_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 ssize_t ipcc_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
 ssize_t ipcc_write(FAR struct file *filep, FAR const char *buffer,
                    size_t buflen);
-int ipcc_poll(FAR struct file *filep, FAR struct pollfd *fds,
+int ipcc_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
               bool setup);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 int ipcc_unlink(FAR struct inode *inode);

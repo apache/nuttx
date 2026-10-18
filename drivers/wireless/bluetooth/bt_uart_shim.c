@@ -39,6 +39,7 @@
 #include <unistd.h>
 
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/poll.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/serial/tioctl.h>
@@ -58,7 +59,7 @@ struct hciuart_state_s
   FAR void *arg;                /* Rx callback argument */
 
   struct file f;                /* File structure */
-  struct pollfd p;              /* Poll structure */
+  struct pollfd_s p;            /* Poll structure */
   spinlock_t lock;              /* Spinlock */
 };
 
@@ -78,7 +79,7 @@ struct hciuart_config_s
 
 static void hciuart_rxattach(FAR const struct btuart_lowerhalf_s *lower,
                              btuart_rxcallback_t callback, FAR void *arg);
-static void hciuart_rxpollcb(FAR struct pollfd *fds);
+static void hciuart_rxpollcb(FAR struct pollfd_s *fds);
 static void hciuart_rxenable(FAR const struct btuart_lowerhalf_s *lower,
                              bool enable);
 static int hciuart_setbaud(FAR const struct btuart_lowerhalf_s *lower,
@@ -149,7 +150,7 @@ hciuart_rxattach(FAR const struct btuart_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static void hciuart_rxpollcb(FAR struct pollfd *fds)
+static void hciuart_rxpollcb(FAR struct pollfd_s *fds)
 {
   FAR struct hciuart_config_s *n = (FAR struct hciuart_config_s *)fds->arg;
   FAR struct hciuart_state_s *s = &n->state;

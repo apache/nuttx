@@ -67,6 +67,7 @@
     !defined(CONFIG_SAMA5_ADC_CONTINUOUS_TRIG)
 #  include <nuttx/wdog.h>
 #endif
+#include <nuttx/poll.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
@@ -211,11 +212,11 @@ struct sam_tsd_s
   uint32_t             pending;   /* saved ISR status from the ADC driver   */
 
   /* The following is a list if poll structures of threads waiting for
-   * driver events. The 'struct pollfd' reference for each open is also
+   * driver events. The 'struct pollfd_s' reference for each open is also
    * retained in the f_priv field of the 'struct file'.
    */
 
-  struct pollfd *fds[CONFIG_SAMA5_TSD_NPOLLWAITERS];
+  struct pollfd_s *fds[CONFIG_SAMA5_TSD_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -241,7 +242,8 @@ static int  sam_tsd_open(struct file *filep);
 static int  sam_tsd_close(struct file *filep);
 static ssize_t sam_tsd_read(struct file *filep, char *buffer, size_t len);
 static int  sam_tsd_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  sam_tsd_poll(struct file *filep, struct pollfd *fds, bool setup);
+static int  sam_tsd_poll(struct file *filep, struct pollfd_s *fds,
+                         bool setup);
 
 /* Initialization and configuration */
 
@@ -1178,7 +1180,7 @@ static int sam_tsd_ioctl(struct file *filep, int cmd, unsigned long arg)
  * Name: sam_tsd_poll
  ****************************************************************************/
 
-static int sam_tsd_poll(struct file *filep, struct pollfd *fds, bool setup)
+static int sam_tsd_poll(struct file *filep, struct pollfd_s *fds, bool setup)
 {
   struct inode *inode;
   struct sam_tsd_s *priv;
@@ -1244,7 +1246,7 @@ static int sam_tsd_poll(struct file *filep, struct pollfd *fds, bool setup)
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      struct pollfd_s **slot = (struct pollfd_s **)fds->priv;
 
       DEBUGASSERT(slot != NULL);
 

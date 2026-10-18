@@ -39,6 +39,7 @@
 #include <nuttx/crc32.h>
 #include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/mutex.h>
+#include <nuttx/poll.h>
 #include <nuttx/sched.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/ioctl.h>
@@ -103,7 +104,7 @@ struct rpmsg_socket_conn_s
   uint16_t                       crefs;
   uint32_t                       how;
 
-  FAR struct pollfd              *fds[CONFIG_NET_RPMSG_NPOLLWAITERS];
+  FAR struct pollfd_s            *fds[CONFIG_NET_RPMSG_NPOLLWAITERS];
   mutex_t                        polllock;
 
   sem_t                          sendsem;
@@ -169,7 +170,7 @@ static int        rpmsg_socket_accept(FAR struct socket *psock,
                                       FAR socklen_t *addrlen,
                                       FAR struct socket *newsock, int flags);
 static int        rpmsg_socket_poll(FAR struct socket *psock,
-                                    FAR struct pollfd *fds, bool setup);
+                                    FAR struct pollfd_s *fds, bool setup);
 static ssize_t    rpmsg_socket_sendmsg(FAR struct socket *psock,
                                        FAR const struct msghdr *msg,
                                        int flags);
@@ -890,7 +891,7 @@ static int rpmsg_socket_accept(FAR struct socket *psock,
 }
 
 static int rpmsg_socket_poll(FAR struct socket *psock,
-                             FAR struct pollfd *fds, bool setup)
+                             FAR struct pollfd_s *fds, bool setup)
 {
   FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
   pollevent_t eventset = 0;

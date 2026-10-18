@@ -45,7 +45,7 @@ struct mouse_openpriv_s
 {
   struct circbuf_s   circbuf; /* Store mouse point data in circle buffer */
   struct list_node   node;    /* Opened file buffer linked list node */
-  FAR struct pollfd *fds;     /* Polling structure of waiting thread */
+  FAR struct pollfd_s *fds;   /* Polling structure of waiting thread */
   sem_t              waitsem; /* Used to wait for the availability of data */
   mutex_t            lock;    /* Manages exclusive access to this structure */
 };
@@ -70,7 +70,7 @@ static ssize_t mouse_read(FAR struct file *filep, FAR char *buffer,
                           size_t buflen);
 static int     mouse_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
-static int     mouse_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int     mouse_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                           bool setup);
 
 /****************************************************************************
@@ -266,7 +266,7 @@ static int mouse_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 static int mouse_poll(FAR struct file *filep,
-                      FAR struct pollfd *fds, bool setup)
+                      FAR struct pollfd_s *fds, bool setup)
 {
   FAR struct mouse_openpriv_s *openpriv = filep->f_priv;
   pollevent_t eventset = 0;

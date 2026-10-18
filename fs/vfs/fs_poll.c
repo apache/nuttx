@@ -48,9 +48,9 @@
  * Private Types
  ****************************************************************************/
 
-struct pollfd_s
+struct pollinfo_s
 {
-  FAR struct pollfd *fds;
+  FAR struct pollfd_s *fds;
   nfds_t nfds;
 };
 
@@ -67,7 +67,7 @@ struct pollfd_s
  *
  ****************************************************************************/
 
-static inline void poll_teardown(FAR struct pollfd *fds, nfds_t nfds,
+static inline void poll_teardown(FAR struct pollfd_s *fds, nfds_t nfds,
                                  FAR int *count)
 {
   unsigned int i;
@@ -124,7 +124,7 @@ static inline void poll_teardown(FAR struct pollfd *fds, nfds_t nfds,
  *
  ****************************************************************************/
 
-static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds,
+static inline int poll_setup(FAR struct pollfd_s *fds, nfds_t nfds,
                              FAR sem_t *sem)
 {
   unsigned int i;
@@ -209,7 +209,7 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds,
 
 static void poll_cleanup(FAR void *arg)
 {
-  FAR struct pollfd_s *fdsinfo = (FAR struct pollfd_s *)arg;
+  FAR struct pollinfo_s *fdsinfo = (FAR struct pollinfo_s *)arg;
   int count;
 
   poll_teardown(fdsinfo->fds, fdsinfo->nfds, &count);
@@ -234,7 +234,7 @@ static void poll_cleanup(FAR void *arg)
  *
  ****************************************************************************/
 
-void poll_default_cb(FAR struct pollfd *fds)
+void poll_default_cb(FAR struct pollfd_s *fds)
 {
   int semcount = 0;
   FAR sem_t *pollsem;
@@ -268,10 +268,10 @@ void poll_default_cb(FAR struct pollfd *fds)
  ****************************************************************************/
 
 noinstrument_function
-void poll_notify(FAR struct pollfd **afds, int nfds, pollevent_t eventset)
+void poll_notify(FAR struct pollfd_s **afds, int nfds, pollevent_t eventset)
 {
   int i;
-  FAR struct pollfd *fds;
+  FAR struct pollfd_s *fds;
 
   DEBUGASSERT(afds != NULL && nfds >= 1);
 
@@ -318,7 +318,7 @@ void poll_notify(FAR struct pollfd **afds, int nfds, pollevent_t eventset)
  *
  ****************************************************************************/
 
-int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
+int file_poll(FAR struct file *filep, FAR struct pollfd_s *fds, bool setup)
 {
   FAR struct inode *inode;
   int ret = -ENOSYS;
@@ -416,7 +416,7 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
 int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 {
-  FAR struct pollfd *kfds;
+  FAR struct pollfd_s *kfds;
   sem_t sem;
   int count = 0;
   int ret = OK;
@@ -430,7 +430,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 #ifdef CONFIG_BUILD_KERNEL
   /* Allocate kernel memory for the fds */
 
-  kfds = fs_heap_malloc(nfds * sizeof(struct pollfd));
+  kfds = fs_heap_malloc(nfds * sizeof(struct pollfd_s));
   if (!kfds)
     {
       /* Out of memory */
@@ -443,9 +443,11 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 
   memcpy(kfds, fds, nfds * sizeof(struct pollfd));
 #else
-  /* Can use the user fds directly */
+  /* Can use the user fds directly: struct pollfd has the layout of struct
+   * pollfd_s.
+   */
 
-  kfds = fds;
+  kfds = (FAR struct pollfd_s *)fds;
 #endif
 
   /* Set up the poll structure */
@@ -459,7 +461,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
   count = poll_setup(kfds, nfds, &sem);
   if (count == 0)
     {
-      struct pollfd_s fdsinfo;
+      struct pollinfo_s fdsinfo;
 
       /* Push a cancellation point onto the stack.  This will be called if
        * the thread is canceled.
@@ -529,6 +531,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
   if (ret == OK)
     {
       int i;
+
       for (i = 0; i < nfds; i++)
         {
           fds[i].revents = kfds[i].revents;

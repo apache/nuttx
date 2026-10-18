@@ -137,10 +137,10 @@ typedef uint8_t sockcaps_t;
  * a given address family.
  */
 
-struct file;    /* Forward reference */
-struct stat;    /* Forward reference */
-struct socket;  /* Forward reference */
-struct pollfd;  /* Forward reference */
+struct file;     /* Forward reference */
+struct stat;     /* Forward reference */
+struct socket;   /* Forward reference */
+struct pollfd_s; /* Forward reference */
 
 struct sock_intf_s
 {
@@ -160,7 +160,7 @@ struct sock_intf_s
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen,
                     FAR struct socket *newsock, int flags);
   CODE int        (*si_poll)(FAR struct socket *psock,
-                    FAR struct pollfd *fds, bool setup);
+                    FAR struct pollfd_s *fds, bool setup);
   CODE ssize_t    (*si_sendmsg)(FAR struct socket *psock,
                     FAR const struct msghdr *msg, int flags);
   CODE ssize_t    (*si_recvmsg)(FAR struct socket *psock,
@@ -1313,8 +1313,8 @@ int psock_shutdown(FAR struct socket *psock, int how);
  *
  ****************************************************************************/
 
-struct pollfd; /* Forward reference -- see poll.h */
-int psock_poll(FAR struct socket *psock, struct pollfd *fds, bool setup);
+struct pollfd_s; /* Forward reference -- see poll.h */
+int psock_poll(FAR struct socket *psock, struct pollfd_s *fds, bool setup);
 
 /****************************************************************************
  * Name: psock_dup2

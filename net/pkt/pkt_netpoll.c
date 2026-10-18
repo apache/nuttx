@@ -33,6 +33,7 @@
 
 #include <nuttx/net/net.h>
 #include <nuttx/net/pkt.h>
+#include <nuttx/poll.h>
 #include <nuttx/semaphore.h>
 
 #include "devif/devif.h"
@@ -171,7 +172,7 @@ static uint32_t pkt_poll_eventhandler(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int pkt_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
+int pkt_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
 {
   FAR struct pkt_conn_s *conn;
   FAR struct pkt_poll_s *info;
@@ -311,7 +312,7 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-int pkt_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
+int pkt_pollteardown(FAR struct socket *psock, FAR struct pollfd_s *fds)
 {
   FAR struct pkt_conn_s   *conn;
   FAR struct pkt_poll_s   *info;

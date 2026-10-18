@@ -659,7 +659,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
  * Name: pipecommon_poll
  ****************************************************************************/
 
-int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
+int pipecommon_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                     bool setup)
 {
   FAR struct inode      *inode = filep->f_inode;
@@ -758,7 +758,7 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
 #ifdef CONFIG_DEBUG_FEATURES
       if (!slot)

@@ -229,7 +229,7 @@ struct usbhost_cdcmbim_s
   uint16_t                bulkmxpacket; /* Max packet size for Bulk OUT endpoint */
   uint16_t                ntbseq;       /* NTB sequence number */
 
-  FAR struct pollfd      *fds[CONFIG_USBHOST_CDCMBIM_NPOLLWAITERS];
+  FAR struct pollfd_s    *fds[CONFIG_USBHOST_CDCMBIM_NPOLLWAITERS];
 
   /* Network device members */
 
@@ -300,7 +300,7 @@ static ssize_t cdcwdm_read(FAR struct file *filep, FAR char *buffer,
                            size_t buflen);
 static ssize_t cdcwdm_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen);
-static int     cdcwdm_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int     cdcwdm_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                            bool setup);
 
 /* NuttX network callback functions */
@@ -537,7 +537,7 @@ static ssize_t cdcwdm_write(FAR struct file *filep, FAR const char *buffer,
  *
  ****************************************************************************/
 
-static int cdcwdm_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int cdcwdm_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                        bool setup)
 {
   FAR struct inode             *inode;
@@ -598,7 +598,7 @@ static int cdcwdm_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       DEBUGASSERT(slot);
 

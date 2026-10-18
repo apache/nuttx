@@ -240,7 +240,7 @@ static ssize_t procfs_read(FAR struct file *filep, FAR char *buffer,
                  size_t buflen);
 static ssize_t procfs_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
-static int     procfs_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int     procfs_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                  bool setup);
 static int     procfs_ioctl(FAR struct file *filep, int cmd,
                  unsigned long arg);
@@ -533,7 +533,7 @@ static ssize_t procfs_write(FAR struct file *filep, FAR const char *buffer,
   return 0;
 }
 
-static int procfs_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int procfs_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                        bool setup)
 {
   FAR struct procfs_file_s *handler;

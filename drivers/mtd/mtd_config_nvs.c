@@ -38,6 +38,7 @@
 #include <sys/poll.h>
 #include <nuttx/crc8.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/poll.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/mtd/configdata.h>
 
@@ -90,7 +91,7 @@ struct nvs_fs
   uint32_t              data_wra;      /* Next data write address */
   uint32_t              step_addr;     /* For traverse */
   mutex_t               nvs_lock;
-  FAR struct pollfd     *fds;
+  FAR struct pollfd_s   *fds;
   pollevent_t           events;
 #if CONFIG_MTD_CONFIG_CACHE_SIZE > 0
   uint32_t              cache[CONFIG_MTD_CONFIG_CACHE_SIZE];
@@ -122,8 +123,8 @@ static ssize_t mtdconfig_read(FAR struct file *filep, FAR char *buffer,
                               size_t buflen);
 static int     mtdconfig_ioctl(FAR struct file *filep, int cmd,
                                unsigned long arg);
-static int     mtdconfig_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                              bool setup);
+static int mtdconfig_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
+                          bool setup);
 
 /****************************************************************************
  * Private Data
@@ -2433,7 +2434,7 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
  * Name: mtdconfig_poll
  ****************************************************************************/
 
-static int mtdconfig_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int mtdconfig_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                        bool setup)
 {
   FAR struct inode *inode = filep->f_inode;

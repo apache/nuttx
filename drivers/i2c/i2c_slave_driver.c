@@ -56,7 +56,7 @@ static ssize_t i2c_slave_read(FAR struct file *filep, FAR char *buffer,
                               size_t buflen);
 static ssize_t i2c_slave_write(FAR struct file *filep,
                                FAR const char *buffer, size_t buflen);
-static int i2c_slave_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int i2c_slave_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                           bool setup);
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
@@ -103,7 +103,7 @@ struct i2c_slave_driver_s
 
   /* The poll waiter */
 
-  FAR struct pollfd *fds[CONFIG_I2C_SLAVE_NPOLLWAITERS];
+  FAR struct pollfd_s *fds[CONFIG_I2C_SLAVE_NPOLLWAITERS];
 
   /* Number of open references */
 
@@ -380,7 +380,7 @@ static ssize_t i2c_slave_write(FAR struct file *filep,
  * Name: i2c_slave_poll
  ****************************************************************************/
 
-static int i2c_slave_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int i2c_slave_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                           bool setup)
 {
   FAR struct i2c_slave_driver_s *priv;
@@ -430,7 +430,7 @@ static int i2c_slave_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
   else if (fds->priv != NULL)
     {
-      FAR struct pollfd **slot = fds->priv;
+      FAR struct pollfd_s **slot = fds->priv;
 
       *slot     = NULL;
       fds->priv = NULL;

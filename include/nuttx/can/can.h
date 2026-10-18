@@ -835,7 +835,7 @@ struct can_reader_s
   struct list_node     list;
   struct can_rxfifo_s  fifo;             /* Describes receive FIFO */
   unsigned int         msgalign;
-  FAR struct pollfd   *cd_fds;
+  FAR struct pollfd_s *cd_fds;
 };
 
 struct can_transv_s

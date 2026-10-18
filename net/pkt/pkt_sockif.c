@@ -33,6 +33,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <nuttx/debug.h>
+#include <nuttx/poll.h>
 
 #include <netpacket/packet.h>
 
@@ -58,7 +59,7 @@ static int        pkt_bind(FAR struct socket *psock,
                            FAR const struct sockaddr *addr,
                            socklen_t addrlen);
 static int        pkt_netpoll(FAR struct socket *psock,
-                              FAR struct pollfd *fds, bool setup);
+                              FAR struct pollfd_s *fds, bool setup);
 static int        pkt_close(FAR struct socket *psock);
 
 /****************************************************************************
@@ -310,7 +311,7 @@ static int pkt_bind(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-static int pkt_netpoll(FAR struct socket *psock, FAR struct pollfd *fds,
+static int pkt_netpoll(FAR struct socket *psock, FAR struct pollfd_s *fds,
                        bool setup)
 {
   /* Check if we are setting up or tearing down the poll */

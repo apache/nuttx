@@ -65,7 +65,7 @@ struct uart_bth4_s
   mutex_t                 openlock;
   uint8_t                 refcnt;
 
-  FAR struct pollfd      *fds[CONFIG_UART_BTH4_NPOLLWAITERS];
+  FAR struct pollfd_s    *fds[CONFIG_UART_BTH4_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -81,7 +81,7 @@ static ssize_t uart_bth4_write(FAR struct file *filep,
 static int     uart_bth4_ioctl(FAR struct file *filep,
                                int cmd, unsigned long arg);
 static int     uart_bth4_poll(FAR struct file *filep,
-                              FAR struct pollfd *fds, bool setup);
+                              FAR struct pollfd_s *fds, bool setup);
 
 /****************************************************************************
  * Private Data
@@ -383,7 +383,7 @@ static int uart_bth4_ioctl(FAR struct file *filep, int cmd,
   return dev->drv->ioctl(dev->drv, cmd, arg);
 }
 
-static int uart_bth4_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int uart_bth4_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                           bool setup)
 {
   FAR struct inode *inode = filep->f_inode;

@@ -50,6 +50,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/poll.h>
 #include <nuttx/signal.h>
 #include <nuttx/random.h>
 #include <nuttx/sensors/hc_sr04.h>
@@ -75,7 +76,7 @@ static ssize_t hcsr04_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t hcsr04_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen);
 static int hcsr04_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int hcsr04_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int hcsr04_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                        bool setup);
 
 /****************************************************************************
@@ -90,7 +91,7 @@ struct hcsr04_dev_s
   int time_start_pulse;
   int time_finish_pulse;
   volatile bool rising;
-  FAR struct pollfd *fds[CONFIG_HCSR04_NPOLLWAITERS];
+  FAR struct pollfd_s *fds[CONFIG_HCSR04_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -287,7 +288,7 @@ static bool hcsr04_sample(FAR struct hcsr04_dev_s *priv)
   return (done == 0);
 }
 
-static int hcsr04_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int hcsr04_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                        bool setup)
 {
   FAR struct inode *inode;
@@ -357,7 +358,7 @@ static int hcsr04_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       DEBUGASSERT(slot != NULL);
 

@@ -33,6 +33,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <nuttx/debug.h>
+#include <nuttx/poll.h>
 
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
@@ -53,7 +54,7 @@ static int        icmp_setup(FAR struct socket *psock);
 static sockcaps_t icmp_sockcaps(FAR struct socket *psock);
 static void       icmp_addref(FAR struct socket *psock);
 static int        icmp_netpoll(FAR struct socket *psock,
-                               FAR struct pollfd *fds, bool setup);
+                               FAR struct pollfd_s *fds, bool setup);
 static int        icmp_close(FAR struct socket *psock);
 #ifdef CONFIG_NET_SOCKOPTS
 static int        icmp_getsockopt(FAR struct socket *psock, int level,
@@ -221,7 +222,7 @@ static void icmp_addref(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-static int icmp_netpoll(FAR struct socket *psock, FAR struct pollfd *fds,
+static int icmp_netpoll(FAR struct socket *psock, FAR struct pollfd_s *fds,
                         bool setup)
 {
   /* Check if we are setting up or tearing down the poll */

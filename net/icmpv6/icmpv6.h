@@ -62,7 +62,7 @@
 struct net_driver_s; /* Forward reference */
 struct socket;       /* Forward reference */
 struct sockaddr;     /* Forward reference */
-struct pollfd;       /* Forward reference */
+struct pollfd_s;     /* Forward reference */
 
 #ifdef CONFIG_NET_ICMPv6_SOCKET
 /* Representation of a IPPROTO_ICMP socket connection */
@@ -74,7 +74,7 @@ struct devif_callback_s; /* Forward reference */
 struct icmpv6_poll_s
 {
   FAR struct socket *psock;        /* IPPROTO_ICMP6 socket structure */
-  FAR struct pollfd *fds;          /* Needed to handle poll events */
+  FAR struct pollfd_s *fds;        /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
 };
 
@@ -716,7 +716,7 @@ ssize_t icmpv6_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_SOCKET
-int icmpv6_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
+int icmpv6_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds);
 #endif
 
 /****************************************************************************
@@ -736,7 +736,7 @@ int icmpv6_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_SOCKET
-int icmpv6_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
+int icmpv6_pollteardown(FAR struct socket *psock, FAR struct pollfd_s *fds);
 #endif
 
 /****************************************************************************

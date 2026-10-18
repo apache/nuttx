@@ -48,7 +48,7 @@ struct pressure_file_s
 {
   struct procfs_file_s base;        /* Base open file structure */
   dq_entry_t entry;                 /* Supports a linked list */
-  FAR struct pollfd *fds;           /* Polling structure of waiting thread */
+  FAR struct pollfd_s *fds;         /* Polling structure of waiting thread */
   size_t threshold;                 /* Memory notification threshold */
   clock_t lasttick;                 /* Last time notified */
   clock_t interval;                 /* Notification interval in us */
@@ -74,8 +74,8 @@ static ssize_t pressure_read(FAR struct file *filep, FAR char *buffer,
                              size_t buflen);
 static ssize_t pressure_write(FAR struct file *filep, FAR const char *buffer,
                               size_t buflen);
-static int     pressure_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                             bool setup);
+static int pressure_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
+                         bool setup);
 static int     pressure_dup(FAR const struct file *oldp,
                             FAR struct file *newp);
 static int     pressure_opendir(FAR const char *relpath,
@@ -241,7 +241,7 @@ static ssize_t pressure_write(FAR struct file *filep, FAR const char *buffer,
  * Name: pressure_poll
  ****************************************************************************/
 
-static int pressure_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int pressure_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                          bool setup)
 {
   FAR struct pressure_file_s *priv = filep->f_priv;

@@ -134,7 +134,7 @@
 struct file;      /* Forward reference */
 struct sockaddr;  /* Forward reference */
 struct socket;    /* Forward reference */
-struct pollfd;    /* Forward reference */
+struct pollfd_s;  /* Forward reference */
 
 /* Representation of a TCP connection.
  *
@@ -155,7 +155,7 @@ struct tcp_hdr_s;         /* Forward reference */
 struct tcp_poll_s
 {
   FAR struct tcp_conn_s *conn;     /* Needed to handle loss of connection */
-  FAR struct pollfd *fds;          /* Needed to handle poll events */
+  FAR struct pollfd_s *fds;        /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
 };
 
@@ -1976,7 +1976,7 @@ void tcp_wrbuffer_dump(FAR const char *msg, FAR struct tcp_wrbuffer_s *wrb,
  *
  ****************************************************************************/
 
-int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
+int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds);
 
 /****************************************************************************
  * Name: tcp_pollteardown
@@ -1994,7 +1994,7 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
  *
  ****************************************************************************/
 
-int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
+int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd_s *fds);
 
 /****************************************************************************
  * Name: tcp_readahead_notifier_setup

@@ -146,8 +146,8 @@ static off_t   tda19988_seek(FAR struct file *filep, off_t offset,
                              int whence);
 static int     tda19988_ioctl(FAR struct file *filep, int cmd,
                               unsigned long arg);
-static int     tda19988_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                             bool setup);
+static int tda19988_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
+                         bool setup);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     tda19988_unlink(FAR struct inode *inode);
 #endif
@@ -1157,7 +1157,7 @@ static int tda19988_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int tda19988_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int tda19988_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                          bool setup)
 {
   FAR struct inode *inode;

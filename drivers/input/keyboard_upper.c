@@ -33,6 +33,7 @@
 
 #include <nuttx/input/keyboard.h>
 #include <nuttx/input/kbd_codec.h>
+#include <nuttx/poll.h>
 #include <nuttx/streams.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/list.h>
@@ -63,7 +64,7 @@ struct keyboard_opriv_s
   mutex_t            lock;
   struct circbuf_s   circ;
   struct list_node   node;
-  FAR struct pollfd *fds;
+  FAR struct pollfd_s *fds;
 };
 
 /* This structure is for keyboard upper half driver */
@@ -87,8 +88,8 @@ static ssize_t keyboard_read(FAR struct file *filep, FAR char *buffer,
                              size_t len);
 static ssize_t keyboard_write(FAR struct file *filep, FAR const char *buffer,
                               size_t len);
-static int     keyboard_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                             bool setup);
+static int keyboard_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
+                         bool setup);
 
 /****************************************************************************
  * Private Data
@@ -264,7 +265,7 @@ out:
  ****************************************************************************/
 
 static int keyboard_poll(FAR struct file *filep,
-                         FAR struct pollfd *fds, bool setup)
+                         FAR struct pollfd_s *fds, bool setup)
 {
   FAR struct keyboard_opriv_s *opriv = filep->f_priv;
   int ret;

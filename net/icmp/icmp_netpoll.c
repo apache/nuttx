@@ -31,6 +31,7 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 
+#include <nuttx/poll.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 
@@ -137,7 +138,7 @@ static uint32_t icmp_poll_eventhandler(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int icmp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
+int icmp_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
 {
   FAR struct icmp_conn_s *conn;
   FAR struct icmp_poll_s *info;
@@ -246,7 +247,7 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-int icmp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
+int icmp_pollteardown(FAR struct socket *psock, FAR struct pollfd_s *fds)
 {
   FAR struct icmp_conn_s *conn;
   FAR struct icmp_poll_s *info;

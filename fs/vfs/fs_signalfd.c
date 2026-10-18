@@ -34,6 +34,7 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/mutex.h>
+#include <nuttx/poll.h>
 #include <nuttx/signal.h>
 
 #include <sys/signalfd.h>
@@ -56,7 +57,7 @@ struct signalfd_priv_s
   sigset_t      sigmask; /* The set of signals caller wishes */
   mutex_t       mutex;   /* Enforces device exclusive access */
   uint8_t       crefs;   /* References counts on signalfd (max: 255) */
-  FAR struct pollfd *fds[CONFIG_SIGNAL_FD_NPOLLWAITERS];
+  FAR struct pollfd_s *fds[CONFIG_SIGNAL_FD_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -68,7 +69,7 @@ static int signalfd_file_close(FAR struct file *filep);
 static ssize_t signalfd_file_read(FAR struct file *filep,
                                   FAR char *buffer, size_t len);
 static int signalfd_file_poll(FAR struct file *filep,
-                              FAR struct pollfd *fds, bool setup);
+                              FAR struct pollfd_s *fds, bool setup);
 
 /****************************************************************************
  * Private Data
@@ -224,7 +225,7 @@ errout:
 }
 
 static int signalfd_file_poll(FAR struct file *filep,
-                              FAR struct pollfd *fds, bool setup)
+                              FAR struct pollfd_s *fds, bool setup)
 {
   FAR struct signalfd_priv_s *dev = filep->f_priv;
   sigset_t mask;
@@ -236,7 +237,7 @@ static int signalfd_file_poll(FAR struct file *filep,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       /* Remove all memory of the poll setup */
 

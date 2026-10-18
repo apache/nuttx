@@ -64,7 +64,7 @@ struct inotify_device_s
   int                count;       /* Reference count */
   uint32_t           event_size;  /* Size of the queue (bytes) */
   uint32_t           event_count; /* Number of pending events */
-  FAR struct pollfd *fds[CONFIG_FS_NOTIFY_FD_POLLWAITERS];
+  FAR struct pollfd_s *fds[CONFIG_FS_NOTIFY_FD_POLLWAITERS];
 };
 
 struct inotify_event_s
@@ -107,7 +107,7 @@ static int     inotify_open(FAR struct file *filep);
 static int     inotify_close(FAR struct file *filep);
 static ssize_t inotify_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen);
-static int     inotify_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int     inotify_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                             bool setup);
 static int     inotify_ioctl(FAR struct file *filep, int cmd,
                              unsigned long arg);
@@ -409,7 +409,7 @@ static int inotify_open(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static int inotify_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int inotify_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                         bool setup)
 {
   FAR struct inotify_device_s *dev = filep->f_priv;
@@ -419,7 +419,7 @@ static int inotify_poll(FAR struct file *filep, FAR struct pollfd *fds,
   nxmutex_lock(&dev->lock);
   if (!setup)
     {
-      FAR struct pollfd **slot = fds->priv;
+      FAR struct pollfd_s **slot = fds->priv;
 
       *slot = NULL;
       fds->priv = NULL;

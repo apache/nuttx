@@ -197,7 +197,7 @@ struct netlink_conn_s
   /* poll() support */
 
   int key;                           /* used to cancel notifications */
-  FAR struct pollfd *fds;            /* Used to wakeup poll() */
+  FAR struct pollfd_s *fds;          /* Used to wakeup poll() */
 
   /* Queued response data */
 

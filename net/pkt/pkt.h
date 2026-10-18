@@ -53,14 +53,14 @@
 /* Representation of a packet socket connection */
 
 struct devif_callback_s; /* Forward reference */
-struct pollfd;           /* Forward reference */
+struct pollfd_s;         /* Forward reference */
 
 /* This is a container that holds the poll-related information */
 
 struct pkt_poll_s
 {
   FAR struct pkt_conn_s       *conn; /* Needed to handle loss of connection */
-  FAR struct pollfd           *fds;  /* Needed to handle poll events */
+  FAR struct pollfd_s         *fds;  /* Needed to handle poll events */
   FAR struct devif_callback_s *cb;   /* Needed to teardown the poll */
 };
 
@@ -362,7 +362,7 @@ void pkt_poll(FAR struct net_driver_s *dev, FAR struct pkt_conn_s *conn);
  *
  ****************************************************************************/
 
-int pkt_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
+int pkt_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds);
 
 /****************************************************************************
  * Name: pkt_pollteardown
@@ -380,7 +380,7 @@ int pkt_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
  *
  ****************************************************************************/
 
-int pkt_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
+int pkt_pollteardown(FAR struct socket *psock, FAR struct pollfd_s *fds);
 
 /****************************************************************************
  * Name: pkt_sendmsg

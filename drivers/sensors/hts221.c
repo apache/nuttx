@@ -52,6 +52,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/poll.h>
 #include <nuttx/signal.h>
 #include <nuttx/random.h>
 
@@ -128,7 +129,7 @@ static ssize_t hts221_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t hts221_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen);
 static int hts221_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int hts221_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int hts221_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                        bool setup);
 
 /****************************************************************************
@@ -142,7 +143,7 @@ struct hts221_dev_s
   FAR hts221_config_t *config;
   mutex_t devlock;
   volatile bool int_pending;
-  FAR struct pollfd *fds[CONFIG_HTS221_NPOLLWAITERS];
+  FAR struct pollfd_s *fds[CONFIG_HTS221_NPOLLWAITERS];
   struct
   {
     int16_t t0_out;
@@ -1066,7 +1067,7 @@ static bool hts221_sample(FAR struct hts221_dev_s *priv)
   return status.is_humid_ready || status.is_temp_ready;
 }
 
-static int hts221_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int hts221_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                        bool setup)
 {
   FAR struct inode *inode;
@@ -1136,7 +1137,7 @@ static int hts221_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       DEBUGASSERT(slot != NULL);
 

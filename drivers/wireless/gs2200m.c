@@ -52,6 +52,7 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/lib/lib.h>
+#include <nuttx/poll.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/mutex.h>
 #include <nuttx/signal.h>
@@ -176,7 +177,7 @@ struct notif_q_s
 struct gs2200m_dev_s
 {
   FAR char             *path;
-  FAR struct pollfd    *pfd;
+  FAR struct pollfd_s  *pfd;
   struct notif_q_s     notif_q;
   FAR struct spi_dev_s *spi;
   struct work_s        irq_work;
@@ -207,7 +208,7 @@ static ssize_t gs2200m_write(FAR struct file *filep, FAR const char *buff,
                              size_t len);
 static int     gs2200m_ioctl(FAR struct file *filep, int cmd,
                              unsigned long arg);
-static int     gs2200m_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int     gs2200m_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                             bool setup);
 
 /* Interrupt handler and work queue handler */
@@ -3101,7 +3102,7 @@ static int gs2200m_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: gs2200m_poll
  ****************************************************************************/
 
-static int gs2200m_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int gs2200m_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                         bool setup)
 {
   FAR struct inode *inode;

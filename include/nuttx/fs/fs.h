@@ -44,6 +44,7 @@
 
 #include <nuttx/atomic.h>
 #include <nuttx/mutex.h>
+#include <nuttx/poll.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/mm/map.h>
 #include <nuttx/spawn.h>
@@ -186,7 +187,7 @@ struct file;
 struct inode;
 struct stat;
 struct statfs;
-struct pollfd;
+struct pollfd_s;
 struct mtd_dev_s;
 struct uio;
 
@@ -237,7 +238,7 @@ struct file_operations
                        FAR struct mm_map_entry_s *map);
   CODE int     (*truncate)(FAR struct file *filep, off_t length);
 
-  CODE int     (*poll)(FAR struct file *filep, FAR struct pollfd *fds,
+  CODE int     (*poll)(FAR struct file *filep, FAR struct pollfd_s *fds,
                        bool setup);
   CODE ssize_t (*readv)(FAR struct file *filep, FAR struct uio *uio);
   CODE ssize_t (*writev)(FAR struct file *filep, FAR struct uio *uio);
@@ -308,7 +309,7 @@ struct mountpt_operations
   CODE int     (*mmap)(FAR struct file *filep,
                        FAR struct mm_map_entry_s *map);
   CODE int     (*truncate)(FAR struct file *filep, off_t length);
-  CODE int     (*poll)(FAR struct file *filep, FAR struct pollfd *fds,
+  CODE int     (*poll)(FAR struct file *filep, FAR struct pollfd_s *fds,
                        bool setup);
   CODE ssize_t (*readv)(FAR struct file *filep, FAR struct uio *uio);
   CODE ssize_t (*writev)(FAR struct file *filep, FAR struct uio *uio);
@@ -1746,7 +1747,7 @@ int file_fcntl(FAR struct file *filep, int cmd, ...);
  *
  ****************************************************************************/
 
-int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
+int file_poll(FAR struct file *filep, FAR struct pollfd_s *fds, bool setup);
 
 /****************************************************************************
  * Name: file_fstat
