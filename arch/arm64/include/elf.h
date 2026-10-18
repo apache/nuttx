@@ -216,6 +216,14 @@
 
 #define EF_FLAG             0
 
+/* The GOT relocations.  For a relocatable object, the module loader gives
+ * each symbol that they name a slot of a GOT that it makes, and relocates
+ * them with the address of the slot as the value of the symbol.
+ */
+
+#define ARCH_ELF_RELOC_GOT(t) ((t) == R_AARCH64_ADR_GOT_PAGE || \
+                               (t) == R_AARCH64_LD64_GOT_LO12_NC)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
