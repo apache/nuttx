@@ -392,6 +392,7 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
   for (devno = 0; devno < 26; devno++)
     {
       uint32_t bitno = 1 << devno;
+
       if ((g_devinuse & bitno) == 0)
         {
           g_devinuse |= bitno;
@@ -412,6 +413,7 @@ static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
   if (devno >= 0 && devno < 26)
     {
       irqstate_t flags = enter_critical_section();
+
       g_devinuse &= ~(1 << devno);
       leave_critical_section(flags);
     }
@@ -623,206 +625,207 @@ static int usbhost_xboxcontroller_poll(int argc, FAR char *argv[])
 
           switch (priv->tbuffer[0])
             {
-            case USBHOST_WAITING_CONNECTION:
-              /* Send the initialization message when we received the
-               * the first waiting connection message.
-               */
+              case USBHOST_WAITING_CONNECTION:
+                /* Send the initialization message when we received the
+                 * the first waiting connection message.
+                 */
 
-              if (!priv->initialized)
-                {
-                  /* Get exclusive access to the controller state data */
-
-                  ret = nxmutex_lock(&priv->lock);
-                  if (ret < 0)
-                    {
-                      goto exitloop;
-                    }
-
-                  priv->tbuffer[0] = 0x05;
-                  priv->tbuffer[1] = 0x20;
-                  priv->tbuffer[2] = priv->out_seq_num++;
-                  priv->tbuffer[3] = 0x01;
-                  priv->tbuffer[4] = 0x00;
-                  nbytes = DRVR_TRANSFER(hport->drvr, priv->epout,
-                                         priv->tbuffer, 5);
-                  priv->initialized = true;
-
-                  /* Release our lock on the state structure */
-
-                  nxmutex_unlock(&priv->lock);
-                }
-
-              break;
-
-            case USBHOST_GUIDE_BUTTON_STATUS:
-
-              /* Get exclusive access to the controller state data */
-
-              ret = nxmutex_lock(&priv->lock);
-              if (ret < 0)
-                {
-                  goto exitloop;
-                }
-
-              /* Read the data out of the controller report. */
-
-              priv->rpt.guide =
-                (priv->tbuffer[XBOX_BUTTON_GUIDE_INDEX] != 0) ? true : false;
-              priv->valid = true;
-
-              /* The One X controller requires an ACK of the guide button
-               * status message.
-               */
-
-              if (priv->tbuffer[1] == 0x30)
-                {
-                  static const uint8_t guide_button_report_ack[] =
+                if (!priv->initialized)
                   {
-                    0x01, 0x20, 0x00, 0x09, 0x00, 0x07, 0x20, 0x02,
-                    0x00, 0x00, 0x00, 0x00, 0x00
-                  };
+                    /* Get exclusive access to the controller state data */
 
-                  /* Remember the input packet sequence number. */
+                    ret = nxmutex_lock(&priv->lock);
+                    if (ret < 0)
+                      {
+                        goto exitloop;
+                      }
 
-                  uint8_t seq_num = priv->tbuffer[2];
+                    priv->tbuffer[0] = 0x05;
+                    priv->tbuffer[1] = 0x20;
+                    priv->tbuffer[2] = priv->out_seq_num++;
+                    priv->tbuffer[3] = 0x01;
+                    priv->tbuffer[4] = 0x00;
+                    nbytes = DRVR_TRANSFER(hport->drvr, priv->epout,
+                                           priv->tbuffer, 5);
+                    priv->initialized = true;
 
-                  /* Copy the ACK packet into the transfer buffer. */
+                    /* Release our lock on the state structure */
 
-                  memcpy(priv->tbuffer, guide_button_report_ack,
-                         sizeof(guide_button_report_ack));
+                    nxmutex_unlock(&priv->lock);
+                  }
 
-                  /* Ensure the sequence number is the same as the input
-                   * packet.
-                   */
+                break;
 
-                  priv->tbuffer[2] = seq_num;
+              case USBHOST_GUIDE_BUTTON_STATUS:
 
-                  /* Perform the transfer. */
+                /* Get exclusive access to the controller state data */
 
-                  nbytes =
-                    DRVR_TRANSFER(hport->drvr, priv->epout, priv->tbuffer,
-                                  sizeof(guide_button_report_ack));
-                }
+                ret = nxmutex_lock(&priv->lock);
+                if (ret < 0)
+                  {
+                    goto exitloop;
+                  }
 
-              /* Notify any waiters that new controller data is available */
+                /* Read the data out of the controller report. */
 
-              usbhost_pollnotify(priv);
+                priv->rpt.guide =
+                  (priv->tbuffer[XBOX_BUTTON_GUIDE_INDEX] != 0) ?
+                  true : false;
+                priv->valid = true;
 
-              /* Release our lock on the state structure */
+                /* The One X controller requires an ACK of the guide button
+                 * status message.
+                 */
 
-              nxmutex_unlock(&priv->lock);
-
-              break;
-
-            case USBHOST_BUTTON_DATA:
-
-              /* Ignore the controller data if no task has opened the
-               * driver.
-               */
-
-              if (priv->open)
-                {
-                  /* Get exclusive access to the controller state data */
-
-                  ret = nxmutex_lock(&priv->lock);
-                  if (ret < 0)
+                if (priv->tbuffer[1] == 0x30)
+                  {
+                    static const uint8_t guide_button_report_ack[] =
                     {
-                      goto exitloop;
-                    }
+                      0x01, 0x20, 0x00, 0x09, 0x00, 0x07, 0x20, 0x02,
+                      0x00, 0x00, 0x00, 0x00, 0x00
+                    };
 
-                  /* Read the data out of the controller report. */
+                    /* Remember the input packet sequence number. */
 
-                  priv->rpt.sync =
-                    XBOX_BUTTON_SET(priv->tbuffer,
-                                    XBOX_BUTTON_SYNC_INDEX,
-                                    XBOX_BUTTON_SYNC_MASK);
-                  priv->rpt.start =
-                    XBOX_BUTTON_SET(priv->tbuffer,
-                                    XBOX_BUTTON_START_INDEX,
-                                    XBOX_BUTTON_START_MASK);
-                  priv->rpt.back =
-                    XBOX_BUTTON_SET(priv->tbuffer,
-                                    XBOX_BUTTON_BACK_INDEX,
-                                    XBOX_BUTTON_BACK_MASK);
-                  priv->rpt.a =
-                    XBOX_BUTTON_SET(priv->tbuffer,
-                                    XBOX_BUTTON_A_INDEX,
-                                    XBOX_BUTTON_A_MASK);
-                  priv->rpt.b =
-                    XBOX_BUTTON_SET(priv->tbuffer,
-                                    XBOX_BUTTON_B_INDEX,
-                                    XBOX_BUTTON_B_MASK);
-                  priv->rpt.x =
-                    XBOX_BUTTON_SET(priv->tbuffer,
-                                    XBOX_BUTTON_X_INDEX,
-                                    XBOX_BUTTON_X_MASK);
-                  priv->rpt.y =
-                    XBOX_BUTTON_SET(priv->tbuffer,
-                                    XBOX_BUTTON_Y_INDEX,
-                                    XBOX_BUTTON_Y_MASK);
-                  priv->rpt.dpad_up =
-                    XBOX_BUTTON_SET(priv->tbuffer,
-                                    XBOX_BUTTON_DPAD_UP_INDEX,
-                                    XBOX_BUTTON_DPAD_UP_MASK);
-                  priv->rpt.dpad_down =
-                    XBOX_BUTTON_SET(priv->tbuffer,
-                                    XBOX_BUTTON_DPAD_DOWN_INDEX,
-                                    XBOX_BUTTON_DPAD_DOWN_MASK);
-                  priv->rpt.dpad_left =
-                    XBOX_BUTTON_SET(priv->tbuffer,
-                                    XBOX_BUTTON_DPAD_LEFT_INDEX,
-                                    XBOX_BUTTON_DPAD_LEFT_MASK);
-                  priv->rpt.dpad_right =
-                    XBOX_BUTTON_SET(priv->tbuffer,
-                                    XBOX_BUTTON_DPAD_RIGHT_INDEX,
-                                    XBOX_BUTTON_DPAD_RIGHT_MASK);
-                  priv->rpt.bumper_left =
-                    XBOX_BUTTON_SET(priv->tbuffer,
-                                    XBOX_BUTTON_BUMPER_LEFT_INDEX,
-                                    XBOX_BUTTON_BUMPER_LEFT_MASK);
-                  priv->rpt.bumper_right =
-                    XBOX_BUTTON_SET(priv->tbuffer,
-                                    XBOX_BUTTON_BUMPER_RIGHT_INDEX,
-                                    XBOX_BUTTON_BUMPER_RIGHT_MASK);
-                  priv->rpt.stick_click_left =
-                    XBOX_BUTTON_SET(priv->tbuffer,
-                                    XBOX_BUTTON_STICK_LEFT_INDEX,
-                                    XBOX_BUTTON_STICK_LEFT_MASK);
-                  priv->rpt.stick_click_right =
-                    XBOX_BUTTON_SET(priv->tbuffer,
-                                    XBOX_BUTTON_STICK_RIGHT_INDEX,
-                                    XBOX_BUTTON_STICK_RIGHT_MASK);
+                    uint8_t seq_num = priv->tbuffer[2];
 
-                  priv->rpt.trigger_left = ((FAR int16_t *)
-                      (priv->tbuffer))[XBOX_BUTTON_TRIGGER_LEFT];
-                  priv->rpt.trigger_right = ((FAR int16_t *)
-                      (priv->tbuffer))[XBOX_BUTTON_TRIGGER_RIGHT];
-                  priv->rpt.stick_left_x = ((FAR int16_t *)
-                      (priv->tbuffer))[XBOX_BUTTON_STICK_LEFT_X];
-                  priv->rpt.stick_left_y = ((FAR int16_t *)
-                      (priv->tbuffer))[XBOX_BUTTON_STICK_LEFT_Y];
-                  priv->rpt.stick_right_x = ((FAR int16_t *)
-                      (priv->tbuffer))[XBOX_BUTTON_STICK_RIGHT_X];
-                  priv->rpt.stick_right_y = ((FAR int16_t *)
-                      (priv->tbuffer))[XBOX_BUTTON_STICK_RIGHT_Y];
+                    /* Copy the ACK packet into the transfer buffer. */
 
-                  priv->valid = true;
+                    memcpy(priv->tbuffer, guide_button_report_ack,
+                           sizeof(guide_button_report_ack));
 
-                  /* Notify any waiters that new controller data is
-                   * available.
-                   */
+                    /* Ensure the sequence number is the same as the input
+                     * packet.
+                     */
 
-                  usbhost_pollnotify(priv);
+                    priv->tbuffer[2] = seq_num;
 
-                  /* Release our lock on the state structure */
+                    /* Perform the transfer. */
 
-                  nxmutex_unlock(&priv->lock);
-                }
+                    nbytes =
+                      DRVR_TRANSFER(hport->drvr, priv->epout, priv->tbuffer,
+                                    sizeof(guide_button_report_ack));
+                  }
 
-              break;
+                /* Notify any waiters that new controller data is available */
 
-            default:
-              uinfo("Received message type: %x\n", priv->tbuffer[0]);
+                usbhost_pollnotify(priv);
+
+                /* Release our lock on the state structure */
+
+                nxmutex_unlock(&priv->lock);
+
+                break;
+
+              case USBHOST_BUTTON_DATA:
+
+                /* Ignore the controller data if no task has opened the
+                 * driver.
+                 */
+
+                if (priv->open)
+                  {
+                    /* Get exclusive access to the controller state data */
+
+                    ret = nxmutex_lock(&priv->lock);
+                    if (ret < 0)
+                      {
+                        goto exitloop;
+                      }
+
+                    /* Read the data out of the controller report. */
+
+                    priv->rpt.sync =
+                      XBOX_BUTTON_SET(priv->tbuffer,
+                                      XBOX_BUTTON_SYNC_INDEX,
+                                      XBOX_BUTTON_SYNC_MASK);
+                    priv->rpt.start =
+                      XBOX_BUTTON_SET(priv->tbuffer,
+                                      XBOX_BUTTON_START_INDEX,
+                                      XBOX_BUTTON_START_MASK);
+                    priv->rpt.back =
+                      XBOX_BUTTON_SET(priv->tbuffer,
+                                      XBOX_BUTTON_BACK_INDEX,
+                                      XBOX_BUTTON_BACK_MASK);
+                    priv->rpt.a =
+                      XBOX_BUTTON_SET(priv->tbuffer,
+                                      XBOX_BUTTON_A_INDEX,
+                                      XBOX_BUTTON_A_MASK);
+                    priv->rpt.b =
+                      XBOX_BUTTON_SET(priv->tbuffer,
+                                      XBOX_BUTTON_B_INDEX,
+                                      XBOX_BUTTON_B_MASK);
+                    priv->rpt.x =
+                      XBOX_BUTTON_SET(priv->tbuffer,
+                                      XBOX_BUTTON_X_INDEX,
+                                      XBOX_BUTTON_X_MASK);
+                    priv->rpt.y =
+                      XBOX_BUTTON_SET(priv->tbuffer,
+                                      XBOX_BUTTON_Y_INDEX,
+                                      XBOX_BUTTON_Y_MASK);
+                    priv->rpt.dpad_up =
+                      XBOX_BUTTON_SET(priv->tbuffer,
+                                      XBOX_BUTTON_DPAD_UP_INDEX,
+                                      XBOX_BUTTON_DPAD_UP_MASK);
+                    priv->rpt.dpad_down =
+                      XBOX_BUTTON_SET(priv->tbuffer,
+                                      XBOX_BUTTON_DPAD_DOWN_INDEX,
+                                      XBOX_BUTTON_DPAD_DOWN_MASK);
+                    priv->rpt.dpad_left =
+                      XBOX_BUTTON_SET(priv->tbuffer,
+                                      XBOX_BUTTON_DPAD_LEFT_INDEX,
+                                      XBOX_BUTTON_DPAD_LEFT_MASK);
+                    priv->rpt.dpad_right =
+                      XBOX_BUTTON_SET(priv->tbuffer,
+                                      XBOX_BUTTON_DPAD_RIGHT_INDEX,
+                                      XBOX_BUTTON_DPAD_RIGHT_MASK);
+                    priv->rpt.bumper_left =
+                      XBOX_BUTTON_SET(priv->tbuffer,
+                                      XBOX_BUTTON_BUMPER_LEFT_INDEX,
+                                      XBOX_BUTTON_BUMPER_LEFT_MASK);
+                    priv->rpt.bumper_right =
+                      XBOX_BUTTON_SET(priv->tbuffer,
+                                      XBOX_BUTTON_BUMPER_RIGHT_INDEX,
+                                      XBOX_BUTTON_BUMPER_RIGHT_MASK);
+                    priv->rpt.stick_click_left =
+                      XBOX_BUTTON_SET(priv->tbuffer,
+                                      XBOX_BUTTON_STICK_LEFT_INDEX,
+                                      XBOX_BUTTON_STICK_LEFT_MASK);
+                    priv->rpt.stick_click_right =
+                      XBOX_BUTTON_SET(priv->tbuffer,
+                                      XBOX_BUTTON_STICK_RIGHT_INDEX,
+                                      XBOX_BUTTON_STICK_RIGHT_MASK);
+
+                    priv->rpt.trigger_left = ((FAR int16_t *)
+                        (priv->tbuffer))[XBOX_BUTTON_TRIGGER_LEFT];
+                    priv->rpt.trigger_right = ((FAR int16_t *)
+                        (priv->tbuffer))[XBOX_BUTTON_TRIGGER_RIGHT];
+                    priv->rpt.stick_left_x = ((FAR int16_t *)
+                        (priv->tbuffer))[XBOX_BUTTON_STICK_LEFT_X];
+                    priv->rpt.stick_left_y = ((FAR int16_t *)
+                        (priv->tbuffer))[XBOX_BUTTON_STICK_LEFT_Y];
+                    priv->rpt.stick_right_x = ((FAR int16_t *)
+                        (priv->tbuffer))[XBOX_BUTTON_STICK_RIGHT_X];
+                    priv->rpt.stick_right_y = ((FAR int16_t *)
+                        (priv->tbuffer))[XBOX_BUTTON_STICK_RIGHT_Y];
+
+                    priv->valid = true;
+
+                    /* Notify any waiters that new controller data is
+                     * available.
+                     */
+
+                    usbhost_pollnotify(priv);
+
+                    /* Release our lock on the state structure */
+
+                    nxmutex_unlock(&priv->lock);
+                  }
+
+                break;
+
+              default:
+                uinfo("Received message type: %x\n", priv->tbuffer[0]);
             }
         }
 
@@ -1094,125 +1097,125 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
       desc = (FAR struct usb_desc_s *)configdesc;
       switch (desc->type)
         {
-        /* Interface descriptor. We really should get the number of endpoints
-         * from this descriptor too.
-         */
+          /* Interface descriptor. We really should get the number of
+           * endpoints from this descriptor too.
+           */
 
-        case USB_DESC_TYPE_INTERFACE:
-          {
-            uinfo("Interface descriptor\n");
-            DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
+          case USB_DESC_TYPE_INTERFACE:
+            {
+              uinfo("Interface descriptor\n");
+              DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
 
-            /* Did we already find what we needed from a preceding
-             * interface?
-             */
+              /* Did we already find what we needed from a preceding
+               * interface?
+               */
 
-            if ((found & USBHOST_ALLFOUND) == USBHOST_ALLFOUND)
-              {
-                /* Yes.. then break out of the loop and use the preceding
-                 * interface.
-                 */
+              if ((found & USBHOST_ALLFOUND) == USBHOST_ALLFOUND)
+                {
+                  /* Yes.. then break out of the loop and use the preceding
+                   * interface.
+                   */
 
-                done = true;
-              }
-            else
-              {
-                /* Otherwise, discard any endpoints previously found */
+                  done = true;
+                }
+              else
+                {
+                  /* Otherwise, discard any endpoints previously found */
 
-                found = USBHOST_IFFOUND;
-              }
-          }
-          break;
+                  found = USBHOST_IFFOUND;
+                }
+            }
+            break;
 
-        /* Endpoint descriptor.  Here, we expect two bulk endpoints, an IN
-         * and an OUT.
-         */
+          /* Endpoint descriptor.  Here, we expect two bulk endpoints, an IN
+           * and an OUT.
+           */
 
-        case USB_DESC_TYPE_ENDPOINT:
-          {
-            FAR struct usb_epdesc_s *epdesc =
-              (FAR struct usb_epdesc_s *)configdesc;
+          case USB_DESC_TYPE_ENDPOINT:
+            {
+              FAR struct usb_epdesc_s *epdesc =
+                (FAR struct usb_epdesc_s *)configdesc;
 
-            uinfo("Endpoint descriptor\n");
-            DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
+              uinfo("Endpoint descriptor\n");
+              DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
 
-            /* Check for a interrupt endpoint. */
+              /* Check for a interrupt endpoint. */
 
-            if ((epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) ==
-                USB_EP_ATTR_XFER_INT)
-              {
-                /* Yes.. it is a interrupt endpoint.  IN or OUT? */
+              if ((epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) ==
+                  USB_EP_ATTR_XFER_INT)
+                {
+                  /* Yes.. it is a interrupt endpoint.  IN or OUT? */
 
-                if (USB_ISEPOUT(epdesc->addr))
-                  {
-                    /* It is an OUT interrupt endpoint.  There should be only
-                     * one interrupt OUT endpoint.
-                     */
+                  if (USB_ISEPOUT(epdesc->addr))
+                    {
+                      /* It is an OUT interrupt endpoint.  There should be
+                       * only one interrupt OUT endpoint.
+                       */
 
-                    if ((found & USBHOST_EPOUTFOUND) != 0)
-                      {
-                        /* Oops.. more than one endpoint.  We don't know
-                         * what to do with this.
-                         */
+                      if ((found & USBHOST_EPOUTFOUND) != 0)
+                        {
+                          /* Oops.. more than one endpoint.  We don't know
+                           * what to do with this.
+                           */
 
-                        return -EINVAL;
-                      }
+                          return -EINVAL;
+                        }
 
-                    found |= USBHOST_EPOUTFOUND;
+                      found |= USBHOST_EPOUTFOUND;
 
-                    /* Save the bulk OUT endpoint information */
+                      /* Save the bulk OUT endpoint information */
 
-                    epoutdesc.hport        = hport;
-                    epoutdesc.addr         = epdesc->addr &
-                                             USB_EP_ADDR_NUMBER_MASK;
-                    epoutdesc.in           = false;
-                    epoutdesc.xfrtype      = USB_EP_ATTR_XFER_INT;
-                    epoutdesc.interval     = epdesc->interval;
-                    epoutdesc.mxpacketsize =
-                      usbhost_getle16(epdesc->mxpacketsize);
+                      epoutdesc.hport        = hport;
+                      epoutdesc.addr         = epdesc->addr &
+                                               USB_EP_ADDR_NUMBER_MASK;
+                      epoutdesc.in           = false;
+                      epoutdesc.xfrtype      = USB_EP_ATTR_XFER_INT;
+                      epoutdesc.interval     = epdesc->interval;
+                      epoutdesc.mxpacketsize =
+                        usbhost_getle16(epdesc->mxpacketsize);
 
-                    uerr("Interrupt OUT EP addr:%d mxpacketsize:%d\n",
-                          epoutdesc.addr, epoutdesc.mxpacketsize);
-                  }
-                else
-                  {
-                    /* It is an IN interrupt endpoint.  There should be only
-                     * one interrupt IN endpoint.
-                     */
+                      uerr("Interrupt OUT EP addr:%d mxpacketsize:%d\n",
+                            epoutdesc.addr, epoutdesc.mxpacketsize);
+                    }
+                  else
+                    {
+                      /* It is an IN interrupt endpoint.  There should be
+                       * only one interrupt IN endpoint.
+                       */
 
-                    if ((found & USBHOST_EPINFOUND) != 0)
-                      {
-                        /* Oops.. more than one endpoint.  We don't know
-                         * what to do with this.
-                         */
+                      if ((found & USBHOST_EPINFOUND) != 0)
+                        {
+                          /* Oops.. more than one endpoint.  We don't know
+                           * what to do with this.
+                           */
 
-                        return -EINVAL;
-                      }
+                          return -EINVAL;
+                        }
 
-                    found |= USBHOST_EPINFOUND;
+                      found |= USBHOST_EPINFOUND;
 
-                    /* Save the bulk IN endpoint information */
+                      /* Save the bulk IN endpoint information */
 
-                    epindesc.hport        = hport;
-                    epindesc.addr         = epdesc->addr &
-                                            USB_EP_ADDR_NUMBER_MASK;
-                    epindesc.in           = true;
-                    epindesc.xfrtype      = USB_EP_ATTR_XFER_INT;
-                    epindesc.interval     = epdesc->interval;
-                    epindesc.mxpacketsize =
-                      usbhost_getle16(epdesc->mxpacketsize);
+                      epindesc.hport        = hport;
+                      epindesc.addr         = epdesc->addr &
+                                              USB_EP_ADDR_NUMBER_MASK;
+                      epindesc.in           = true;
+                      epindesc.xfrtype      = USB_EP_ATTR_XFER_INT;
+                      epindesc.interval     = epdesc->interval;
+                      epindesc.mxpacketsize =
+                        usbhost_getle16(epdesc->mxpacketsize);
 
-                    uerr("Interrupt IN EP addr:%d mxpacketsize:%d\n",
-                          epindesc.addr, epindesc.mxpacketsize);
-                  }
-              }
-          }
-          break;
+                      uerr("Interrupt IN EP addr:%d mxpacketsize:%d\n",
+                            epindesc.addr, epindesc.mxpacketsize);
+                    }
+                }
+            }
+            break;
 
-        /* Other descriptors are just ignored for now */
+          /* Other descriptors are just ignored for now */
 
-        default:
-          break;
+          default:
+            break;
         }
 
       /* If we found everything we need with this interface, then break out
@@ -2028,35 +2031,35 @@ static int usbhost_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-    case XBOX_CONTROLLER_IOCTL_RUMBLE:
+      case XBOX_CONTROLLER_IOCTL_RUMBLE:
 
-      /* The least significant byte is the weak actuator strength.
-       * The second byte is the strong actuator strength.
-       */
+        /* The least significant byte is the weak actuator strength.
+         * The second byte is the strong actuator strength.
+         */
 
-      memcpy(priv->obuffer, rumble_cmd, sizeof(rumble_cmd));
-      priv->obuffer[2] = priv->out_seq_num++;
-      priv->obuffer[8] = (arg >> 1) & 0xff; /* Strong (left actuator) */
-      priv->obuffer[9] = arg & 0xff;        /* Weak (right actuator)  */
+        memcpy(priv->obuffer, rumble_cmd, sizeof(rumble_cmd));
+        priv->obuffer[2] = priv->out_seq_num++;
+        priv->obuffer[8] = (arg >> 1) & 0xff; /* Strong (left actuator) */
+        priv->obuffer[9] = arg & 0xff;        /* Weak (right actuator)  */
 
-      /* Perform the transfer. */
+        /* Perform the transfer. */
 
-      nbytes = DRVR_TRANSFER(hport->drvr, priv->epout,
-                 priv->obuffer, sizeof(rumble_cmd));
+        nbytes = DRVR_TRANSFER(hport->drvr, priv->epout,
+                   priv->obuffer, sizeof(rumble_cmd));
 
-      /* Did we encounter an error? */
+        /* Did we encounter an error? */
 
-      if (nbytes < 0)
-        {
-          ret = nbytes;
-        }
+        if (nbytes < 0)
+          {
+            ret = nbytes;
+          }
 
-      break;
+        break;
 
-    default:
+      default:
 
-      ret = -ENOTTY;
-      goto errout;
+        ret = -ENOTTY;
+        goto errout;
     }
 
 errout:
@@ -2148,6 +2151,7 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
       /* This is a request to tear down the poll. */
 
       struct pollfd **slot = (struct pollfd **)fds->priv;
+
       DEBUGASSERT(slot);
 
       /* Remove all memory of the poll setup */

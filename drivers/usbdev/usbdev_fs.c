@@ -193,6 +193,7 @@ static void usbdev_fs_notify(FAR struct usbdev_fs_ep_s *fs_ep,
   /* Notify all of the waiting readers */
 
   FAR usbdev_fs_waiter_sem_t *cur_sem = fs_ep->sems;
+
   while (cur_sem != NULL)
     {
       nxsem_post(&cur_sem->sem);
@@ -279,37 +280,37 @@ static void usbdev_fs_rdcomplete(FAR struct usbdev_ep_s *ep,
     {
       case 0: /* Normal completion */
 
-      usbtrace(TRACE_CLASSRDCOMPLETE, sq_count(&fs_ep->reqq));
+        usbtrace(TRACE_CLASSRDCOMPLETE, sq_count(&fs_ep->reqq));
 
-      /* Restart request due to empty frame received */
+        /* Restart request due to empty frame received */
 
-      if (req->xfrd <= 0)
-        {
-          goto restart_req;
-        }
+        if (req->xfrd <= 0)
+          {
+            goto restart_req;
+          }
 
-      /* Queue request and notify readers */
+        /* Queue request and notify readers */
 
-      flags = spin_lock_irqsave_nopreempt(&fs_ep->spinlock);
+        flags = spin_lock_irqsave_nopreempt(&fs_ep->spinlock);
 
-      /* Put request on RX pending queue */
+        /* Put request on RX pending queue */
 
-      container->offset = 0;
-      sq_addlast(&container->node, &fs_ep->reqq);
+        container->offset = 0;
+        sq_addlast(&container->node, &fs_ep->reqq);
 
-      usbdev_fs_notify(fs_ep, POLLIN);
+        usbdev_fs_notify(fs_ep, POLLIN);
 
-      spin_unlock_irqrestore_nopreempt(&fs_ep->spinlock, flags);
-      return;
+        spin_unlock_irqrestore_nopreempt(&fs_ep->spinlock, flags);
+        return;
 
       case -ESHUTDOWN: /* Disconnection */
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSHUTDOWN), 0);
-      return;
+        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSHUTDOWN), 0);
+        return;
 
       default: /* Some other error occurred */
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDUNEXPECTED),
-               (uint16_t)-req->result);
-      break;
+        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDUNEXPECTED),
+                 (uint16_t)-req->result);
+        break;
     };
 
 restart_req:
@@ -1145,6 +1146,7 @@ static void usbdev_fs_ep_unbind(FAR const char *devname,
         {
           FAR struct usbdev_fs_req_s *container =
             &fs_ep->reqbuffer[i];
+
           if (container->req)
             {
               usbdev_freereq(fs_ep->ep, container->req);
@@ -1311,6 +1313,7 @@ static int usbdev_fs_classsetconfig(FAR struct usbdev_fs_dev_s *fs,
           for (j = 0; j < devinfo->epinfos[i]->reqnum; j++)
             {
               FAR struct usbdev_fs_req_s *container;
+
               container = &fs_ep->reqbuffer[j];
               container->req->callback = usbdev_fs_rdcomplete;
               usbdev_fs_submit_rdreq(fs_ep->ep, container);

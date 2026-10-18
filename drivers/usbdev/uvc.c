@@ -836,12 +836,12 @@ static int uvc_class_setup(FAR struct uvc_dev_s *priv,
 
       switch (req)
         {
-          case UVC_SET_CUR:
-            /* Host sends probe/commit data — we accept it.
-             * The data arrives in dataout phase, handled below.
-             * For now just return 0 to ACK the setup.
-             */
+          /* Host sends probe/commit data — we accept it.
+           * The data arrives in dataout phase, handled below.
+           * For now just return 0 to ACK the setup.
+           */
 
+          case UVC_SET_CUR:
             if (len >= UVC_PROBE_COMMIT_SIZE)
               {
                 len = UVC_PROBE_COMMIT_SIZE;
