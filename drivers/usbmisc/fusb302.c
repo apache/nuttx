@@ -759,15 +759,15 @@ void set_switches(FAR struct fusb302_dev_s *priv,
         }
         break;
       case TOGGS_AUDIO_ACCESSORY:
-          enableccpd(priv, CC1_PULLDOWN, false);
-          enableccpd(priv, CC2_PULLDOWN, false);
-          enableccpu(priv, CC1_PULLUP, true);
-          enableccpu(priv, CC2_PULLUP, false);
-          enablevconn(priv, CC1_VCONN, false);
-          enablevconn(priv, CC2_VCONN, true);
-          enableccmeas(priv, CC1_MEASURE, true);
-          enableccmeas(priv, CC2_MEASURE, false);
-          setmdac(priv, SRC_CURRENT_DEFAULT);
+        enableccpd(priv, CC1_PULLDOWN, false);
+        enableccpd(priv, CC2_PULLDOWN, false);
+        enableccpu(priv, CC1_PULLUP, true);
+        enableccpu(priv, CC2_PULLUP, false);
+        enablevconn(priv, CC1_VCONN, false);
+        enablevconn(priv, CC2_VCONN, true);
+        enableccmeas(priv, CC1_MEASURE, true);
+        enableccmeas(priv, CC2_MEASURE, false);
+        setmdac(priv, SRC_CURRENT_DEFAULT);
         break;
       default:
         fusb302_err("ERROR: invalid TOGGS VAL read:%d\n", toggsval);
@@ -820,283 +820,286 @@ static void fusb302_worker(FAR void *arg)
       interrupta = fusb302_getreg(priv, FUSB302_INTERRUPTA_REG);
 
       switch (priv->state)
-      {
-        case WAITING_FOR_DRP_TOGG_I:
-          if (interrupta & INTERRUPTA_M_TOGDONE)
-            {
-              /* What has connected? */
+        {
+          case WAITING_FOR_DRP_TOGG_I:
+            if (interrupta & INTERRUPTA_M_TOGDONE)
+              {
+                /* What has connected? */
 
-              regval = fusb302_getreg(priv, FUSB302_STATUS1A_REG);
-              toggsval = DECODE_TOGGS(regval & STATUS1A_TOGGS_MASK);
-              regval = fusb302_getreg(priv, FUSB302_STATUS0_REG);
-              fusb302_info("INFO: toggs val=%x\n", toggsval);
+                regval = fusb302_getreg(priv, FUSB302_STATUS1A_REG);
+                toggsval = DECODE_TOGGS(regval & STATUS1A_TOGGS_MASK);
+                regval = fusb302_getreg(priv, FUSB302_STATUS0_REG);
+                fusb302_info("INFO: toggs val=%x\n", toggsval);
 
-              /* set everything up depending on what's been detected */
+                /* set everything up depending on what's been detected */
 
-              set_switches(priv, toggsval);
+                set_switches(priv, toggsval);
 
-              /* Power up Internal Oscillator as well now */
+                /* Power up Internal Oscillator as well now */
 
-              fusb302_putreg(priv, FUSB302_POWER_REG,
-                             POWER_MODE_ALL);
+                fusb302_putreg(priv, FUSB302_POWER_REG,
+                               POWER_MODE_ALL);
 
-              fusb302_dump_registers(priv,
-                                     "After DRP toggle detect handling");
+                fusb302_dump_registers(priv,
+                                       "After DRP toggle detect handling");
 
-              switch (toggsval)
-                {
-                  case TOGGS_RUNNING:
-                    break;
-                  case TOGGS_SNK_CC1:
-                  case TOGGS_SNK_CC2:
-                    regval = fusb302_getreg(priv, FUSB302_STATUS0_REG);
-                    if ((interrupt & INTERRUPT_VBUS_OK) ||
-                        (regval & STATUS0_VBUS_OK)      ||
-                        (regval & STATUS0_BC_LVL_MASK))
-                      {
-                        priv->state = WAITING_FOR_SNK_DISCONNECT;
-                        priv->connect_status = SNK_DEVICE_CONNECTED;
-                      }
-                    else
-                      {
-                        priv->state = WAITING_FOR_VBUS;
-                      }
-                    break;
-                  case TOGGS_SRC_CC1:
-                  case TOGGS_SRC_CC2:
-                  case TOGGS_AUDIO_ACCESSORY:
-                    regval = fusb302_getreg(priv, FUSB302_STATUS0_REG);
+                switch (toggsval)
+                  {
+                    case TOGGS_RUNNING:
+                      break;
+                    case TOGGS_SNK_CC1:
+                    case TOGGS_SNK_CC2:
+                      regval = fusb302_getreg(priv, FUSB302_STATUS0_REG);
+                      if ((interrupt & INTERRUPT_VBUS_OK) ||
+                          (regval & STATUS0_VBUS_OK)      ||
+                          (regval & STATUS0_BC_LVL_MASK))
+                        {
+                          priv->state = WAITING_FOR_SNK_DISCONNECT;
+                          priv->connect_status = SNK_DEVICE_CONNECTED;
+                        }
+                      else
+                        {
+                          priv->state = WAITING_FOR_VBUS;
+                        }
+                      break;
+                    case TOGGS_SRC_CC1:
+                    case TOGGS_SRC_CC2:
+                    case TOGGS_AUDIO_ACCESSORY:
+                      regval = fusb302_getreg(priv, FUSB302_STATUS0_REG);
+                      priv->state = WAITING_FOR_SRC_DISCONNECT;
+                      priv->connect_status = SRC_DEVICE_CONNECTED;
+                      break;
+                    default:
+                      priv->connect_status = UNKNOWN_CONNECTED;
+                      goto error_exit;
+                      break;
+                  }
+
+                /* turn off toggling */
+
+                regval = fusb302_getreg(priv, FUSB302_CONTROL2_REG);
+                regval &= ~CONTROL2_TOGGLE;
+                fusb302_putreg(priv, FUSB302_CONTROL2_REG, regval);
+
+                /* Send new interrupt mask */
+
+                set_int_mask(priv);
+              }
+            break;
+          case WAITING_FOR_VBUS:
+            if (interrupt & INTERRUPT_VBUS_OK)
+              {
+                if (priv->connect_status == NOTHING_CONNECTED)
+                  {
+                    priv->state = WAITING_FOR_SNK_DISCONNECT;
+                    priv->connect_status = SNK_DEVICE_CONNECTED;
+                  }
+                else if (priv->connect_status == SNK_DEVICE_CONNECTED)
+                  {
+                    priv->state = WAITING_FOR_HOST_INTERVENTION;
+                    priv->connect_status = SNK_DETACH_DETECTED;
+                  }
+              }
+            else
+              {
+                priv->state = NOT_DEFINED;
+                goto error_exit;
+              }
+
+            /* Send new interrupt mask */
+
+            set_int_mask(priv);
+            break;
+          case WAITING_FOR_COMP_CHNG:
+            if (interrupt & INTERRUPT_COMP_CHNG)
+              {
+                if (priv->connect_status == NOTHING_CONNECTED)
+                  {
                     priv->state = WAITING_FOR_SRC_DISCONNECT;
                     priv->connect_status = SRC_DEVICE_CONNECTED;
-                    break;
-                  default:
-                    priv->connect_status = UNKNOWN_CONNECTED;
-                    goto error_exit;
-                    break;
-                }
+                  }
+                else if (priv->connect_status == SRC_DEVICE_CONNECTED)
+                  {
+                    priv->state = WAITING_FOR_HOST_INTERVENTION;
+                    priv->connect_status = SRC_DETACH_DETECTED;
+                  }
+              }
+            else
+              {
+                priv->state = NOT_DEFINED;
+                goto error_exit;
+              }
+            break;
+          case WAITING_FOR_SNK_TOGG_I:
+            if (interrupta & INTERRUPTA_M_TOGDONE)
+              {
+                /* Check what has connected? */
 
-              /* turn off toggling */
+                regval = fusb302_getreg(priv, FUSB302_STATUS1A_REG);
+                toggsval = DECODE_TOGGS(regval & STATUS1A_TOGGS_MASK);
+                regval = fusb302_getreg(priv, FUSB302_STATUS0_REG);
+                fusb302_info("INFO: toggs val=%x\n", toggsval);
 
-              regval = fusb302_getreg(priv, FUSB302_CONTROL2_REG);
-              regval &= ~CONTROL2_TOGGLE;
-              fusb302_putreg(priv, FUSB302_CONTROL2_REG, regval);
+                /* set everything up depending on what's been detected */
 
-              /* Send new interrupt mask */
+                set_switches(priv, toggsval);
 
-              set_int_mask(priv);
-            }
-          break;
-        case WAITING_FOR_VBUS:
-          if (interrupt & INTERRUPT_VBUS_OK)
-            {
-              if (priv->connect_status == NOTHING_CONNECTED)
-                {
-                  priv->state = WAITING_FOR_SNK_DISCONNECT;
-                  priv->connect_status = SNK_DEVICE_CONNECTED;
-                }
-              else if (priv->connect_status == SNK_DEVICE_CONNECTED)
-                {
-                  priv->state = WAITING_FOR_HOST_INTERVENTION;
-                  priv->connect_status = SNK_DETACH_DETECTED;
-                }
-            }
-          else
-            {
-              priv->state = NOT_DEFINED;
-              goto error_exit;
-            }
+                /* Power up Internal Oscillator as well now */
 
-          /* Send new interrupt mask */
+                fusb302_putreg(priv, FUSB302_POWER_REG,
+                               POWER_MODE_ALL);
 
-          set_int_mask(priv);
-          break;
-        case WAITING_FOR_COMP_CHNG:
-          if (interrupt & INTERRUPT_COMP_CHNG)
-            {
-              if (priv->connect_status == NOTHING_CONNECTED)
-                {
-                  priv->state = WAITING_FOR_SRC_DISCONNECT;
-                  priv->connect_status = SRC_DEVICE_CONNECTED;
-                }
-              else if (priv->connect_status == SRC_DEVICE_CONNECTED)
-                {
-                  priv->state = WAITING_FOR_HOST_INTERVENTION;
-                  priv->connect_status = SRC_DETACH_DETECTED;
-                }
-            }
-          else
-            {
-              priv->state = NOT_DEFINED;
-              goto error_exit;
-            }
-          break;
-        case WAITING_FOR_SNK_TOGG_I:
-          if (interrupta & INTERRUPTA_M_TOGDONE)
-            {
-              /* Check what has connected? */
+                fusb302_dump_registers(priv,
+                                       "After SNK toggle detect handling");
 
-              regval = fusb302_getreg(priv, FUSB302_STATUS1A_REG);
-              toggsval = DECODE_TOGGS(regval & STATUS1A_TOGGS_MASK);
-              regval = fusb302_getreg(priv, FUSB302_STATUS0_REG);
-              fusb302_info("INFO: toggs val=%x\n", toggsval);
+                switch (toggsval)
+                  {
+                    case TOGGS_RUNNING:
+                      break;
+                    case TOGGS_SNK_CC1:
+                    case TOGGS_SNK_CC2:
+                      regval = fusb302_getreg(priv, FUSB302_STATUS0_REG);
+                      if ((interrupt & INTERRUPT_VBUS_OK) ||
+                          (regval & STATUS0_VBUS_OK)      ||
+                          (regval & STATUS0_BC_LVL_MASK))
+                        {
+                          priv->state = WAITING_FOR_SNK_DISCONNECT;
+                          priv->connect_status = SNK_DEVICE_CONNECTED;
+                        }
+                      else
+                        {
+                          priv->state = WAITING_FOR_VBUS;
+                        }
+                      break;
+                    case TOGGS_SRC_CC1:
+                    case TOGGS_SRC_CC2:
+                    case TOGGS_AUDIO_ACCESSORY:
+                    default:
+                      priv->connect_status = UNKNOWN_CONNECTED;
+                      goto error_exit;
+                      break;
+                  }
 
-              /* set everything up depending on what's been detected */
+                /* turn off toggling */
 
-              set_switches(priv, toggsval);
+                regval = fusb302_getreg(priv, FUSB302_CONTROL2_REG);
+                regval &= ~CONTROL2_TOGGLE;
+                fusb302_putreg(priv, FUSB302_CONTROL2_REG, regval);
 
-              /* Power up Internal Oscillator as well now */
+                /* Send new interrupt mask */
 
-              fusb302_putreg(priv, FUSB302_POWER_REG,
-                             POWER_MODE_ALL);
+                set_int_mask(priv);
+              }
+            break;
+          case WAITING_FOR_SRC_TOGG_I:
+            if (interrupta & INTERRUPTA_M_TOGDONE)
+              {
+                /* Check what has connected? */
 
-              fusb302_dump_registers(priv,
-                                     "After SNK toggle detect handling");
+                regval = fusb302_getreg(priv, FUSB302_STATUS1A_REG);
+                toggsval = DECODE_TOGGS(regval & STATUS1A_TOGGS_MASK);
+                regval = fusb302_getreg(priv, FUSB302_STATUS0_REG);
+                fusb302_info("INFO: toggs val=%x\n", toggsval);
 
-              switch (toggsval)
-                {
-                  case TOGGS_RUNNING:
-                    break;
-                  case TOGGS_SNK_CC1:
-                  case TOGGS_SNK_CC2:
-                    regval = fusb302_getreg(priv, FUSB302_STATUS0_REG);
-                    if ((interrupt & INTERRUPT_VBUS_OK) ||
-                        (regval & STATUS0_VBUS_OK)      ||
-                        (regval & STATUS0_BC_LVL_MASK))
-                      {
-                        priv->state = WAITING_FOR_SNK_DISCONNECT;
-                        priv->connect_status = SNK_DEVICE_CONNECTED;
-                      }
-                    else
-                      {
-                        priv->state = WAITING_FOR_VBUS;
-                      }
-                    break;
-                  case TOGGS_SRC_CC1:
-                  case TOGGS_SRC_CC2:
-                  case TOGGS_AUDIO_ACCESSORY:
-                  default:
-                    priv->connect_status = UNKNOWN_CONNECTED;
-                    goto error_exit;
-                    break;
-                }
+                /* set everything up depending on what's been detected */
 
-              /* turn off toggling */
+                set_switches(priv, toggsval);
 
-              regval = fusb302_getreg(priv, FUSB302_CONTROL2_REG);
-              regval &= ~CONTROL2_TOGGLE;
-              fusb302_putreg(priv, FUSB302_CONTROL2_REG, regval);
+                /* Power up Internal Oscillator as well now */
 
-              /* Send new interrupt mask */
+                fusb302_putreg(priv, FUSB302_POWER_REG,
+                               POWER_MODE_ALL);
 
-              set_int_mask(priv);
-            }
-          break;
-        case WAITING_FOR_SRC_TOGG_I:
-          if (interrupta & INTERRUPTA_M_TOGDONE)
-            {
-              /* Check what has connected? */
+                fusb302_dump_registers(priv,
+                                       "After SRC toggle detect handling");
 
-              regval = fusb302_getreg(priv, FUSB302_STATUS1A_REG);
-              toggsval = DECODE_TOGGS(regval & STATUS1A_TOGGS_MASK);
-              regval = fusb302_getreg(priv, FUSB302_STATUS0_REG);
-              fusb302_info("INFO: toggs val=%x\n", toggsval);
+                switch (toggsval)
+                  {
+                    case TOGGS_RUNNING:
+                      break;
+                    case TOGGS_SRC_CC1:
+                    case TOGGS_SRC_CC2:
+                    case TOGGS_AUDIO_ACCESSORY:
+                      regval = fusb302_getreg(priv, FUSB302_STATUS0_REG);
+                      priv->state = WAITING_FOR_SRC_DISCONNECT;
+                      priv->connect_status = SRC_DEVICE_CONNECTED;
+                      break;
+                    case TOGGS_SNK_CC1:
+                    case TOGGS_SNK_CC2:
+                    default:
+                      priv->connect_status = UNKNOWN_CONNECTED;
+                      goto error_exit;
+                      break;
+                  }
 
-              /* set everything up depending on what's been detected */
+                /* turn off toggling */
 
-              set_switches(priv, toggsval);
+                regval = fusb302_getreg(priv, FUSB302_CONTROL2_REG);
+                regval &= ~CONTROL2_TOGGLE;
+                fusb302_putreg(priv, FUSB302_CONTROL2_REG, regval);
 
-              /* Power up Internal Oscillator as well now */
+                /* Send new interrupt mask */
 
-              fusb302_putreg(priv, FUSB302_POWER_REG,
-                             POWER_MODE_ALL);
+                set_int_mask(priv);
+              }
+            break;
+          case WAITING_FOR_SRC_DISCONNECT:
+            if ((priv->connect_status != SRC_DEVICE_CONNECTED) &&
+                (priv->connect_status != AUDIO_ACCESSORY_CONNECTED))
+              {
+                priv->connect_status = CONNECT_ERROR;
+                priv->state = WAITING_FOR_HOST_INTERVENTION;
+              }
+            else if (interrupt & INTERRUPT_COMP_CHNG)
+              {
+                priv->connect_status = SRC_DETACH_DETECTED;
+                priv->state = WAITING_FOR_HOST_INTERVENTION;
+              }
+            else if (interrupt & INTERRUPT_BC_LVL)
+              {
+                priv->connect_status = BC_LEVEL_CHANGE_REQUSTED;
+              }
+            break;
+          case WAITING_FOR_SNK_DISCONNECT:
+            regval = fusb302_getreg(priv, FUSB302_STATUS0_REG);
+            if (regval & STATUS0_VBUS_OK)
+              {
+                /* A USB3 device can cause a spurious VBUS OK here.
+                 * A USB2 device doesn't.
+                 */
 
-              fusb302_dump_registers(priv,
-                                     "After SRC toggle detect handling");
+                break;
+              }
 
-              switch (toggsval)
-                {
-                  case TOGGS_RUNNING:
-                    break;
-                  case TOGGS_SRC_CC1:
-                  case TOGGS_SRC_CC2:
-                  case TOGGS_AUDIO_ACCESSORY:
-                    regval = fusb302_getreg(priv, FUSB302_STATUS0_REG);
-                    priv->state = WAITING_FOR_SRC_DISCONNECT;
-                    priv->connect_status = SRC_DEVICE_CONNECTED;
-                    break;
-                  case TOGGS_SNK_CC1:
-                  case TOGGS_SNK_CC2:
-                  default:
-                    priv->connect_status = UNKNOWN_CONNECTED;
-                    goto error_exit;
-                    break;
-                }
-
-              /* turn off toggling */
-
-              regval = fusb302_getreg(priv, FUSB302_CONTROL2_REG);
-              regval &= ~CONTROL2_TOGGLE;
-              fusb302_putreg(priv, FUSB302_CONTROL2_REG, regval);
-
-              /* Send new interrupt mask */
-
-              set_int_mask(priv);
-            }
-          break;
-        case WAITING_FOR_SRC_DISCONNECT:
-          if ((priv->connect_status != SRC_DEVICE_CONNECTED) &&
-              (priv->connect_status != AUDIO_ACCESSORY_CONNECTED))
-            {
-              priv->connect_status = CONNECT_ERROR;
-              priv->state = WAITING_FOR_HOST_INTERVENTION;
-            }
-          else if (interrupt & INTERRUPT_COMP_CHNG)
-            {
-              priv->connect_status = SRC_DETACH_DETECTED;
-              priv->state = WAITING_FOR_HOST_INTERVENTION;
-            }
-          else if (interrupt & INTERRUPT_BC_LVL)
-            {
-              priv->connect_status = BC_LEVEL_CHANGE_REQUSTED;
-            }
-          break;
-        case WAITING_FOR_SNK_DISCONNECT:
-          regval = fusb302_getreg(priv, FUSB302_STATUS0_REG);
-          if (regval & STATUS0_VBUS_OK)
-            /* A USB3 device can cause a spurious VBUS OK here.
-             * A USB2 device doesn't.
+            if (priv->connect_status != SNK_DEVICE_CONNECTED)
+              {
+                priv->connect_status = CONNECT_ERROR;
+                priv->state = WAITING_FOR_HOST_INTERVENTION;
+              }
+            else if (interrupt & INTERRUPT_VBUS_OK)
+              {
+                priv->connect_status = SNK_DETACH_DETECTED;
+                priv->state = WAITING_FOR_HOST_INTERVENTION;
+              }
+            else if (interrupt & INTERRUPT_BC_LVL)
+              {
+                priv->connect_status = BC_LEVEL_CHANGE_REQUSTED;
+              }
+            break;
+          case WAITING_FOR_HOST_INTERVENTION:
+            /* the higher level software has not dealt with the previous
+             * response yet so we notify this as an error
              */
 
+            priv->connect_status = CONNECT_ERROR;
             break;
-          if (priv->connect_status != SNK_DEVICE_CONNECTED)
-            {
-              priv->connect_status = CONNECT_ERROR;
-              priv->state = WAITING_FOR_HOST_INTERVENTION;
-            }
-          else if (interrupt & INTERRUPT_VBUS_OK)
-            {
-              priv->connect_status = SNK_DETACH_DETECTED;
-              priv->state = WAITING_FOR_HOST_INTERVENTION;
-            }
-          else if (interrupt & INTERRUPT_BC_LVL)
-            {
-              priv->connect_status = BC_LEVEL_CHANGE_REQUSTED;
-            }
-          break;
-        case WAITING_FOR_HOST_INTERVENTION:
-          /* the higher level software has not dealt with the previous
-           * response yet so we notify this as an error
-           */
+          default:
+            fusb302_info("state not defined yet\n");
+            fusb302_reset(priv);
+            break;
+        }
 
-          priv->connect_status = CONNECT_ERROR;
-          break;
-        default:
-          fusb302_info("state not defined yet\n");
-          fusb302_reset(priv);
-          break;
-      }
-
-     /* notify any waiters that there's a new state */
+      /* notify any waiters that there's a new state */
 
       fusb302_info("INFO: connection or state change: %d\n",
                     priv->connect_status);
@@ -1704,45 +1707,45 @@ static int fusb302_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   fusb302_info("cmd: 0x%02X, arg:%lu\n", cmd, arg);
 
   switch (cmd)
-  {
-  case USBCIOC_READ_DEVID:
     {
-      ret = fusb302_read_device_id(priv, (FAR uint8_t *)arg);
-    }
-    break;
+      case USBCIOC_READ_DEVID:
+        {
+          ret = fusb302_read_device_id(priv, (FAR uint8_t *)arg);
+        }
+        break;
 
-  case USBCIOC_SETUP:
-    {
-      ret = fusb302_setup(priv, (struct fusb302_setup_s *)arg);
-    }
-    break;
+      case USBCIOC_SETUP:
+        {
+          ret = fusb302_setup(priv, (struct fusb302_setup_s *)arg);
+        }
+        break;
 
-  case USBCIOC_SET_POLL_MODE:
-    {
-      ret = fusb302_set_mode(priv, (uint8_t)arg);
-    }
-    break;
-  case USBCIOC_READ_STATUS:
-    {
-      ret = fusb302_read_status(priv, (FAR uint8_t *)arg);
-    }
-    break;
+      case USBCIOC_SET_POLL_MODE:
+        {
+          ret = fusb302_set_mode(priv, (uint8_t)arg);
+        }
+        break;
+      case USBCIOC_READ_STATUS:
+        {
+          ret = fusb302_read_status(priv, (FAR uint8_t *)arg);
+        }
+        break;
 
-  case USBCIOC_RESET:
-    {
-      fusb302_dump_registers(priv, "Before reset");
-      ret = fusb302_reset(priv);
-      fusb302_dump_registers(priv, "After reset");
-    }
-    break;
+      case USBCIOC_RESET:
+        {
+          fusb302_dump_registers(priv, "Before reset");
+          ret = fusb302_reset(priv);
+          fusb302_dump_registers(priv, "After reset");
+        }
+        break;
 
-  default:
-    {
-      fusb302_err("ERROR: Unrecognized cmd: %d\n", cmd);
-      ret = -ENOTTY;
+      default:
+        {
+          fusb302_err("ERROR: Unrecognized cmd: %d\n", cmd);
+          ret = -ENOTTY;
+        }
+        break;
     }
-    break;
-  }
 
   fusb302_dump_registers(priv, "After ioctl");
   nxmutex_unlock(&priv->devlock);
@@ -1816,6 +1819,7 @@ static int fusb302_poll(FAR struct file *filep,
       /* This is a request to tear down the poll. */
 
       FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+
       DEBUGASSERT(slot != NULL);
 
       /* Remove all memory of the poll setup */
