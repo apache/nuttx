@@ -97,13 +97,13 @@ int nxsem_wait_slow(FAR sem_t *sem)
    * sem_wait_irq(). If sem_wait then blocks without re-checking unmasked
    * pending signals, it can sleep indefinitely and miss the interrupt.
    *
-   * Not for a mutex: a mutex wait is not interrupted by a signal, and the
-   * kernel retries it until it gets the mutex (mm_lock(), for example).
-   * During a system call an unmasked signal stays pending until the call
-   * returns, so the check would make every retry fail at once.
+   * Not for a mutex or an uninterruptible semaphore: the kernel retries
+   * them until it gets the semaphore (mm_lock(), for example).  During a
+   * system call an unmasked signal stays pending until the call returns,
+   * so the check would make every retry fail at once.
    */
 
-  if (!mutex)
+  if (!mutex && (sem->flags & SEM_TYPE_UNINTERRUPTIBLE) == 0)
     {
       pendingset = nxsig_pendingset(rtcb);
       nxsig_nandset(&pendingset, &pendingset, &rtcb->sigprocmask);
