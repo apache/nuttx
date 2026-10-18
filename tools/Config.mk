@@ -507,6 +507,26 @@ define ARCHIVE_REBUILD
 	$(AR) $1  $2
 endef
 
+# ARCHIVE_ADDLIB - Add all the members of a static library to an archive
+# Example: $(call ARCHIVE_ADDLIB, archive-file, library-file)
+#
+# Used to merge a pre-built library (e.g. the binary host library of a
+# wireless chip vendor) into a NuttX library, so that it is linked like the
+# rest of the code without architecture or board specific link rules. Only
+# the library members that are referenced are pulled in by the linker.
+#
+# The members are copied as they are with an ar MRI script, which keeps the
+# members that share the same name (extracting them with 'ar x' would not).
+#
+# Depends on these settings defined in board-specific Make.defs file
+# installed at $(TOPDIR)/Make.defs:
+#
+#   AR - The command to invoke the archiver (includes any options)
+
+define ARCHIVE_ADDLIB
+	$(Q) printf "OPEN %s\nADDLIB %s\nSAVE\nEND\n" $1 $2 | $(firstword $(AR)) -M
+endef
+
 # PRELINK - Prelink a list of files
 # This is useful when files were compiled with fvisibility=hidden.
 # Any symbol which was not explicitly made global is invisible outside the
