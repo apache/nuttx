@@ -20,8 +20,6 @@
 #
 #############################################################################
 
-include $(TOPDIR)/Make.defs
-
 CSRCS = esp32p4_boot.c esp32p4_bringup.c
 
 ifeq ($(CONFIG_ESP32P4_TAB5_IOEXPANDER),y)

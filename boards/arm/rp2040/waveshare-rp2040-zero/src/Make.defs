@@ -18,8 +18,6 @@
 #
 ############################################################################
 
-include $(TOPDIR)/Make.defs
-
 CSRCS = rp2040_boardinitialize.c
 CSRCS += rp2040_bringup.c
 

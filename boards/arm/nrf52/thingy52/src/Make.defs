@@ -20,8 +20,6 @@
 #
 ############################################################################
 
-include $(TOPDIR)/Make.defs
-
 CSRCS = nrf52_boot.c nrf52_bringup.c
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
