@@ -374,24 +374,24 @@ static off_t stm32_bbsram_seek(struct file *filep, off_t offset,
 
   switch (whence)
     {
-    case SEEK_CUR:
-      newpos = filep->f_pos + offset;
-      break;
+      case SEEK_CUR:
+        newpos = filep->f_pos + offset;
+        break;
 
-    case SEEK_SET:
-      newpos = offset;
-      break;
+      case SEEK_SET:
+        newpos = offset;
+        break;
 
-    case SEEK_END:
-      newpos = bbr->bbf->len + offset;
-      break;
+      case SEEK_END:
+        newpos = bbr->bbf->len + offset;
+        break;
 
-    default:
+      default:
 
-      /* Return EINVAL if the whence argument is invalid */
+        /* Return EINVAL if the whence argument is invalid */
 
-      nxmutex_unlock(&bbr->lock);
-      return -EINVAL;
+        nxmutex_unlock(&bbr->lock);
+        return -EINVAL;
     }
 
   /* Opengroup.org:
