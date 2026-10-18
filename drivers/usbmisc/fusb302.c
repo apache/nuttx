@@ -151,7 +151,7 @@
 #define WAIT_40MS                     (0b01)
 #define WAIT_80MS                     (0b10)
 #define WAIT_160MS                    (0b11)
-#define SET_WAIT_MODE(n)              (((uint8_t)(n) << CONTROL2_TOG_SAVE_PWR_SHIFT)
+#define SET_WAIT_MODE(n)              ((uint8_t)(n) << CONTROL2_TOG_SAVE_PWR_SHIFT)
 
 /* Control3 - 0x09 */
 
@@ -1333,7 +1333,7 @@ static int fusb302_putreg(FAR struct fusb302_dev_s *priv, uint8_t regaddr,
               break;
             }
 
-          ret = I2C_RESET(priv->config->i2c;
+          ret = I2C_RESET(priv->config->i2c);
           if (ret < 0)
             {
               fusb302_err("ERROR: I2C_RESET failed: %d\n", ret);
@@ -1463,7 +1463,7 @@ static int fusb302_set_mode(FAR struct fusb302_dev_s *priv,
           ret = fusb302_putreg(priv, FUSB302_CONTROL2_REG,
                                (SET_POLL_MODE(DRP_POLLING) |
                                 CONTROL2_TOGGLE |
-                                SET_WAIT_MODE(WAIT_80MS))));
+                                SET_WAIT_MODE(WAIT_80MS)));
           priv->state = WAITING_FOR_DRP_TOGG_I;
           priv->connect_status = TOGGLING;
           set_int_mask(priv);
