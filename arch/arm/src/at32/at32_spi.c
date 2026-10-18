@@ -72,18 +72,8 @@
 
 #ifdef CONFIG_AT32_SPI_DMA
 
-#  if defined(CONFIG_SPI_DMAPRIO)
-#    define SPI_DMA_PRIO  CONFIG_SPI_DMAPRIO
-#  elif defined(CONFIG_AT32_AT32F43XX)
-#    define SPI_DMA_PRIO  DMA_CCR_PRIMED
-#  else
-#    error "Unknown AT32 DMA"
-#  endif
-
 #  if defined(CONFIG_AT32_AT32F43XX)
-#    if (SPI_DMA_PRIO & ~DMA_CCR_PL_MASK) != 0
-#      error "Illegal value for CONFIG_SPI_DMAPRIO"
-#    endif
+#    define SPI_DMA_PRIO  DMA_CCR_PRIMED
 #  else
 #    error "Unknown AT32 DMA"
 #  endif
@@ -914,10 +904,11 @@ static inline void spi_dmatxstart(struct at32_spidev_s *priv)
  ****************************************************************************/
 
 static void spi_modifycr1(struct at32_spidev_s *priv,
-  uint16_t setbits,
-  uint16_t clrbits)
+                          uint16_t setbits,
+                          uint16_t clrbits)
 {
   uint16_t cr1;
+
   cr1 = spi_getreg(priv, AT32_SPI_CTRL1_OFFSET);
   cr1 &= ~clrbits;
   cr1 |= setbits;
@@ -942,9 +933,10 @@ static void spi_modifycr1(struct at32_spidev_s *priv,
 
 #if defined(CONFIG_AT32_AT32F43XX) || defined(CONFIG_AT32_SPI_DMA)
 static void spi_modifycr2(struct at32_spidev_s *priv, uint16_t setbits,
-  uint16_t clrbits)
+                          uint16_t clrbits)
 {
   uint16_t cr2;
+
   cr2 = spi_getreg(priv, AT32_SPI_CTRL2_OFFSET);
   cr2 &= ~clrbits;
   cr2 |= setbits;
@@ -1138,70 +1130,70 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
       /* Yes... Set CR1 appropriately */
 
       switch (mode)
-      {
-      case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
-        setbits = 0;
-        clrbits = SPI_CTRL1_CLKPOL | SPI_CTRL1_CLKPHA;
-        break;
+        {
+          case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
+            setbits = 0;
+            clrbits = SPI_CTRL1_CLKPOL | SPI_CTRL1_CLKPHA;
+            break;
 
-      case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
-        setbits = SPI_CTRL1_CLKPHA;
-        clrbits = SPI_CTRL1_CLKPOL;
-        break;
+          case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
+            setbits = SPI_CTRL1_CLKPHA;
+            clrbits = SPI_CTRL1_CLKPOL;
+            break;
 
-      case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
-        setbits = SPI_CTRL1_CLKPOL;
-        clrbits = SPI_CTRL1_CLKPHA;
-        break;
+          case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
+            setbits = SPI_CTRL1_CLKPOL;
+            clrbits = SPI_CTRL1_CLKPHA;
+            break;
 
-      case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
-        setbits = SPI_CTRL1_CLKPOL | SPI_CTRL1_CLKPHA;
-        clrbits = 0;
-        break;
+          case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
+            setbits = SPI_CTRL1_CLKPOL | SPI_CTRL1_CLKPHA;
+            clrbits = 0;
+            break;
 
-  #ifdef SPI_CTRL2_TIEN    /* If MCU supports TI Synchronous Serial Frame Format */
-      case SPIDEV_MODETI:
-        setbits = 0;
-        clrbits = SPI_CTRL1_CLKPOL | SPI_CTRL1_CLKPHA;
-        break;
-  #endif
+#ifdef SPI_CTRL2_TIEN    /* If MCU supports TI Synchronous Serial Frame Format */
+          case SPIDEV_MODETI:
+            setbits = 0;
+            clrbits = SPI_CTRL1_CLKPOL | SPI_CTRL1_CLKPHA;
+            break;
+#endif
 
-      default:
-        return;
-      }
+          default:
+            return;
+        }
 
       spi_modifycr1(priv, 0, SPI_CTRL1_SPIEN);
       spi_modifycr1(priv, setbits, clrbits);
       spi_modifycr1(priv, SPI_CTRL1_SPIEN, 0);
 
-  #ifdef SPI_CTRL2_TIEN    /* If MCU supports TI Synchronous Serial Frame Format */
+#ifdef SPI_CTRL2_TIEN    /* If MCU supports TI Synchronous Serial Frame Format */
       switch (mode)
-      {
-      case SPIDEV_MODE0:
-      case SPIDEV_MODE1:
-      case SPIDEV_MODE2:
-      case SPIDEV_MODE3:
-        setbits = 0;
-        clrbits = SPI_CTRL2_TIEN;
-        break;
+        {
+          case SPIDEV_MODE0:
+          case SPIDEV_MODE1:
+          case SPIDEV_MODE2:
+          case SPIDEV_MODE3:
+            setbits = 0;
+            clrbits = SPI_CTRL2_TIEN;
+            break;
 
-      case SPIDEV_MODETI:
-        setbits = SPI_CTRL2_TIEN;
-        clrbits = 0;
-        break;
+          case SPIDEV_MODETI:
+            setbits = SPI_CTRL2_TIEN;
+            clrbits = 0;
+            break;
 
-      default:
-        return;
-      }
+          default:
+            return;
+        }
 
       spi_modifycr1(priv, 0, SPI_CTRL1_SPIEN);
       spi_modifycr2(priv, setbits, clrbits);
       spi_modifycr1(priv, SPI_CTRL1_SPIEN, 0);
-  #endif
+#endif
 
       /* Save the mode so that subsequent re-configurations will be
-      * faster
-      */
+       * faster
+       */
 
       priv->mode = mode;
     }
@@ -1237,28 +1229,28 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
       /* Yes... Set CR1 appropriately */
 
       switch (nbits)
-      {
-      case 8:
-        setbits = 0;
-        clrbits = SPI_CTRL1_FBN;
-        break;
+        {
+          case 8:
+            setbits = 0;
+            clrbits = SPI_CTRL1_FBN;
+            break;
 
-      case 16:
-        setbits = SPI_CTRL1_FBN;
-        clrbits = 0;
-        break;
+          case 16:
+            setbits = SPI_CTRL1_FBN;
+            clrbits = 0;
+            break;
 
-      default:
-        return;
-      }
+          default:
+            return;
+        }
 
       spi_modifycr1(priv, 0, SPI_CTRL1_SPIEN);
       spi_modifycr1(priv, setbits, clrbits);
       spi_modifycr1(priv, SPI_CTRL1_SPIEN, 0);
 
       /* Save the selection so that subsequent re-configurations will be
-      * faster.
-      */
+       * faster.
+       */
 
       priv->nbits = nbits;
     }
@@ -1413,6 +1405,7 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
 #endif
 {
   struct at32_spidev_s *priv = (struct at32_spidev_s *)dev;
+
   DEBUGASSERT(priv && priv->spibase);
 
   spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
@@ -1912,7 +1905,7 @@ struct spi_dev_s *at32_spibus_initialize(int bus)
           priv->initialized = true;
         }
     }
-    else
+  else
 #endif
 #ifdef CONFIG_AT32_SPI4
   if (bus == 4)
@@ -1937,7 +1930,7 @@ struct spi_dev_s *at32_spibus_initialize(int bus)
           priv->initialized = true;
         }
     }
-    else
+  else
 #endif
     {
       spierr("ERROR: Unsupported SPI bus: %d\n", bus);
