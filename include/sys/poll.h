@@ -88,32 +88,16 @@
 
 typedef unsigned int nfds_t;
 
-/* This is the NuttX variant of the standard pollfd structure.  The poll()
- * interfaces receive a variable length array of such structures.
- *
- * REVISIT: In a multi-threaded environment, one use case might be to share
- * a single, array of struct pollfd in poll calls on different threads.
- * That use case is not supportable with this variant due way in which the
- * non-standard internal fields are used in the implementation of poll().
+/* The standard pollfd structure.  The poll() interfaces receive a variable
+ * length array of such structures.  The kernel copies each entry into its
+ * own struct pollfd_s (see nuttx/poll.h).
  */
-
-struct pollfd_s;
 
 struct pollfd
 {
-  /* Standard fields */
-
-  int          fd;      /* The descriptor being polled */
-  uint32_t     events;  /* The input event flags */
-  uint32_t     revents; /* The output event flags */
-
-  /* Non-standard fields used internally by NuttX.  They have the layout of
-   * struct pollfd_s in nuttx/poll.h.
-   */
-
-  FAR void    *arg;     /* The poll callback function argument */
-  CODE void  (*cb)(FAR struct pollfd_s *fds);
-  FAR void    *priv;    /* For use by drivers */
+  int   fd;      /* The descriptor being polled */
+  short events;  /* The input event flags */
+  short revents; /* The output event flags */
 };
 
 /****************************************************************************
