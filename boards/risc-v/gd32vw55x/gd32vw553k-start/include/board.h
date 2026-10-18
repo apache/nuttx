@@ -85,14 +85,14 @@
 /* I2C0 uses PA2 (SCL) / PA3 (SDA) on AF4, the pins broken out on the J1
  * header (datasheet Table 2-5), so a sensor such as the SHT3x can be wired
  * there directly.  When SPI is enabled it claims PA2 (SPI SCK), so I2C0
- * falls back to PB0/PB1 (AF6); PB1 (SDA) is not broken out on J1/J2, so that
- * pairing only registers the bus (the periph case).
+ * falls back to PB15 (SCL, AF4, J1) / PA8 (SDA, AF5, J2).  PB0/PB1 are not
+ * used for that: PB0 drives LED1.
  */
 
 #ifdef CONFIG_GD32VW55X_I2C0
 #  ifdef CONFIG_GD32VW55X_SPI
-#    define GPIO_I2C0_SCL  GPIO_I2C0_SCL_3   /* PB0, AF6 */
-#    define GPIO_I2C0_SDA  GPIO_I2C0_SDA_3   /* PB1, AF6 (not on a header) */
+#    define GPIO_I2C0_SCL  GPIO_I2C0_SCL_4   /* PB15, AF4 (J1) */
+#    define GPIO_I2C0_SDA  GPIO_I2C0_SDA_2   /* PA8, AF5 (J2) */
 #  else
 #    define GPIO_I2C0_SCL  GPIO_I2C0_SCL_1   /* PA2, AF4 (J1) */
 #    define GPIO_I2C0_SDA  GPIO_I2C0_SDA_1   /* PA3, AF4 (J1) */
@@ -116,38 +116,41 @@
 #endif
 
 /* ADC.  Route ADC channel 8 (ADC_IN8) to PB0 on the J1 header (datasheet
- * Table 2-5) so an analog signal can be applied there.  When SPI is enabled
- * PB0 is instead claimed by the I2C0 fallback (see above), so the analog pin
- * is only routed when SPI is off.  The board bringup samples this channel
- * when the macro is defined.
+ * Table 2-5) so an analog signal can be applied there.  PB0 also drives
+ * LED1 (see below), so the analog pin is only routed when the LEDs are not
+ * in use; the red LED still loads the signal.  The board bringup samples
+ * this channel when the macro is defined.
  */
 
-#if defined(CONFIG_GD32VW55X_ADC) && !defined(CONFIG_GD32VW55X_SPI)
+#if defined(CONFIG_GD32VW55X_ADC) && !defined(CONFIG_ARCH_LEDS) && \
+    !defined(CONFIG_USERLED)
 #  define GPIO_ADC_IN8 (GPIO_CFG_MODE_ANALOG | GPIO_CFG_PUPD_NONE | \
                         GPIO_CFG_PORT_B | GPIO_CFG_PIN_0)
 #endif
 
 /* LEDs *********************************************************************/
 
-/* The GD32VW553K-START has three LEDs on GPIOC, driven push-pull and
- * active HIGH (the vendor demo turns them on with gpio_bit_set(); see
- * MSDK/plf/src/gd32vw55x_platform.h, where they are named LED_RUN,
- * LED_SLEEP and LED_RX).
+/* The GD32VW553K-START has three LEDs, driven push-pull and active HIGH.
+ * The pins are also broken out on the J1 (PB0) and J2 (PA12, PB4) headers.
  *
- *   LED1  PC0
- *   LED2  PC1
- *   LED3  PC2
+ *   LED1  PB0   red
+ *   LED2  PA12  green
+ *   LED3  PB4   blue
+ *
+ * PB4 comes out of reset as JNTRST with its pull-up enabled, so the blue LED
+ * is lit until the pin is configured as an output.  PB0 is shared with
+ * ADC_IN8, which is only routed when the LEDs are not in use (see above).
  */
 
 #define GPIO_LED1 (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PUPD_NONE | GPIO_CFG_PP | \
                    GPIO_CFG_SPEED_MAX | GPIO_CFG_OUTPUT_RESET | \
-                   GPIO_CFG_PORT_C | GPIO_CFG_PIN_0)
+                   GPIO_CFG_PORT_B | GPIO_CFG_PIN_0)
 #define GPIO_LED2 (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PUPD_NONE | GPIO_CFG_PP | \
                    GPIO_CFG_SPEED_MAX | GPIO_CFG_OUTPUT_RESET | \
-                   GPIO_CFG_PORT_C | GPIO_CFG_PIN_1)
+                   GPIO_CFG_PORT_A | GPIO_CFG_PIN_12)
 #define GPIO_LED3 (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PUPD_NONE | GPIO_CFG_PP | \
                    GPIO_CFG_SPEED_MAX | GPIO_CFG_OUTPUT_RESET | \
-                   GPIO_CFG_PORT_C | GPIO_CFG_PIN_2)
+                   GPIO_CFG_PORT_B | GPIO_CFG_PIN_4)
 
 /* LED index values for use with board_userled() */
 

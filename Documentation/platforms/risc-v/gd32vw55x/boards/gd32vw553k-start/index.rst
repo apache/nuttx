@@ -23,7 +23,7 @@ Features
   over the single USB Type-C connector
 - Two test pin headers (J1, J2) breaking out the GPIOs
 - BOOT0/BOOT1 jumpers, a power jumper and a reset button (NRST)
-- Three user LEDs on GPIOC
+- Three user LEDs (red, green, blue)
 
 Serial Console
 ==============
@@ -34,16 +34,21 @@ It shows up on the host as ``/dev/ttyACM0`` at 115200 8N1.
 LEDs
 ====
 
-Three LEDs sit on GPIOC and are driven push-pull, active HIGH.  In the vendor
-SDK they are named LED_RUN, LED_SLEEP and LED_RX.
+The three LEDs are driven push-pull, active HIGH:
 
-====== ==== =========================================
-LED    Pin  Meaning in the vendor SDK
-====== ==== =========================================
-LED1   PC0  CPU running
-LED2   PC1  CPU sleeping
-LED3   PC2  Reception
-====== ==== =========================================
+====== ===== ======
+LED    Pin   Color
+====== ===== ======
+LED1   PB0   red
+LED2   PA12  green
+LED3   PB4   blue
+====== ===== ======
+
+The three pins are also broken out on the J1 and J2 headers.  PB4 comes out of
+reset as JNTRST with its pull-up enabled, so the blue LED is lit until the pin
+is configured as an output.  PB0 is also ADC_IN8: the ADC channel is only
+routed there when the LEDs are not in use, and the red LED still loads an
+analog signal applied to it.
 
 With ``CONFIG_USERLED`` they belong to the application and are exposed as
 ``/dev/userleds``.  With ``CONFIG_ARCH_LEDS`` the OS takes them over instead
@@ -71,9 +76,9 @@ is a plain GPIO.  The silkscreen abbreviates the port letter (``A0`` is PA0,
    PA2      GPIO                PA3      GPIO
    PA4      GPIO                PA5      GPIO
    PA6      UART2_TX (console)  PA7      UART2_RX (console)
-   PB0      GPIO                NC       --
+   PB0      LED1 / ADC_IN8      NC       --
    NC       --                  NC       --
-   NC       --                  PB15     GPIO
+   NC       --                  PB15     I2C0_SCL (SPI on)
    GND      ground              +5V      power in/out
    ======== =================== ======== ===================
 
@@ -85,10 +90,10 @@ is a plain GPIO.  The silkscreen abbreviates the port letter (``A0`` is PA0,
    PC15     GPIO                PC14     GPIO
    NC       --                  PA15     JTDI
    PA14     JTCK                PA13     JTMS
-   PB4      JNTRST              PB3      JTDO
-   PA12     GPIO                NC       --
+   PB4      JNTRST / LED3       PB3      JTDO
+   PA12     LED2                NC       --
    NC       --                  NC       --
-   PA8      GPIO                GND      ground
+   PA8      I2C0_SDA (SPI on)   GND      ground
    +3V3     3.3V power test     GND      ground
    ======== =================== ======== ===================
 
@@ -203,8 +208,8 @@ NSH plus I2C0, the i2ctool and the Sensirion SHT3x temperature/humidity
 driver -- a small example to validate the I2C master port against a real
 device. Because SPI is *off* here, I2C0 is routed to the J1 header on
 **PA2 (SCL)** and **PA3 (SDA)** (adjacent pins on the second row of J1, both
-AF4); with SPI on (the ``periph`` case) it falls back to PB0/PB1, whose SDA
-pin is not broken out. See the pin-header tables above.
+AF4); with SPI on (the ``periph`` case) it falls back to PB15 (SCL, J1) and
+PA8 (SDA, J2). See the pin-header tables above.
 
 Wire the sensor to J1: SCL -> PA2, SDA -> PA3, VCC -> +3V3 (J2) or the module
 3.3 V, GND -> GND. A breakout with its own pull-ups is assumed; the pins are
@@ -307,7 +312,9 @@ adc
 
 NSH plus the ADC driver, registered as ``/dev/adc0`` and read by the ``adc``
 example. Channel 8 (ADC_IN8) is routed to **PB0** on the J1 header, so an
-analog voltage applied there is sampled.
+analog voltage applied there is sampled.  PB0 also drives the red LED, which
+loads the input; with ``CONFIG_USERLED`` or ``CONFIG_ARCH_LEDS`` the pin stays
+an LED output and the ADC is registered without an analog pin.
 
 The ADC converts on demand rather than continuously, so the example is built
 with ``CONFIG_EXAMPLES_ADC_SWTRIG``: it issues a software trigger and then
@@ -478,7 +485,8 @@ All seven configurations were validated on hardware:
 - ``periph``: every driver registers (``/dev/i2c0``, ``/dev/spi0``,
   ``/dev/adc0``, ``/dev/pwm0``, ``/dev/capture0``, ``/dev/watchdog0``,
   ``/dev/watchdog1``, ``/dev/userleds``, ``/dev/random``).  The TRNG returns
-  fresh entropy on each read, and the three LEDs work.
+  fresh entropy on each read, and the three LEDs (PB0, PA12, PB4) light in
+  sequence under the ``leds`` example.
 - ``wapi``: full station path over a live AP -- ``wapi scan`` lists the nearby
   networks, WPA2 associates through the four-way handshake, DHCP obtains an
   address, and ``ping`` reaches the internet.
