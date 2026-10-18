@@ -104,5 +104,11 @@ int libelf_freebuffers(FAR struct mod_loadinfo_s *loadinfo)
       loadinfo->buflen   = 0;
     }
 
+  if (loadinfo->gotslot != NULL)
+    {
+      lib_free(loadinfo->gotslot);
+      loadinfo->gotslot = NULL;
+    }
+
   return OK;
 }

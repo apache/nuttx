@@ -308,6 +308,17 @@ struct mod_loadinfo_s
   uint16_t      ndesc;       /* Capacity */
   uint16_t      usedesc;     /* Next free slot */
 
+  /* GOT that the loader makes for a relocatable object whose code uses the
+   * GOT relocations of ARCH_ELF_RELOC_GOT: one slot for each symbol that
+   * they name, behind the data.  gotslot[] gives the slot of a symbol
+   * index, plus one, or 0.
+   */
+
+  FAR uint32_t *gotslot;     /* Slot of each symbol */
+  size_t        gotnsyms;    /* Entries in gotslot[] */
+  size_t        gotslots;    /* Number of slots */
+  size_t        gotoffset;   /* Offset of the slots in the data */
+
   /* The registry that the object goes on.  Its DT_NEEDED libraries go on
    * it too, and its undefined symbols are also looked for in the modules on
    * it.  NULL for none.
