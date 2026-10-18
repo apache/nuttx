@@ -1726,11 +1726,9 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
         {
           wrb->wb_urg = TCP_WBPKTLEN(wrb);
         }
+#endif
 
       sq_addlast(&wrb->wb_node, &conn->write_q);
-#else
-      sq_addlast(&wrb->wb_node, &conn->write_q);
-#endif
       ninfo("Queued WRB=%p pktlen=%u write_q(%p,%p)\n",
             wrb, TCP_WBPKTLEN(wrb),
             conn->write_q.head, conn->write_q.tail);

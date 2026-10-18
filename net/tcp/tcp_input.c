@@ -297,6 +297,8 @@ static uint32_t tcp_urg_input(FAR struct net_driver_s *dev,
 {
   uint32_t urg_seq = tcp_getsequence(tcp->seqno);
   uint32_t urg_rcvseq = tcp_getsequence(conn->rcvseq);
+  uint32_t urg_offset = 0;
+  bool has_urg = false;
 
   /* Check the URG flag. If this is set, or if we are awaiting
    * urgent data announced earlier that falls into this segment,
@@ -326,49 +328,8 @@ static uint32_t tcp_urg_input(FAR struct net_driver_s *dev,
 
               if (urgp <= dev->d_len)
                 {
-                  int app_offset;
-
-                  /* Payload is stored in an IOB chain starting at
-                   * dev->d_iob. Calculate the offset of d_appdata
-                   * within dev->d_iob.
-                   */
-
-                  app_offset = (dev->d_appdata - dev->d_iob->io_data) -
-                               dev->d_iob->io_offset;
-
-                  /* Copy the urgent byte safely from the IOB chain */
-
-                  iob_copyout(&conn->urg_data, dev->d_iob, 1,
-                              app_offset + urgp - 1);
-                  conn->urg_state = TCP_URG_VALID;
-
-                  /* Signal urgent data availability to poll/select */
-
-                  flags |= TCP_URGDATA;
-
-                  /* The urgent byte is out-of-band and must not be
-                   * received in the normal data stream unless SO_OOBINLINE
-                   * is enabled.
-                   */
-
-                  if (!_SO_GETOPT(conn->sconn.s_options, SO_OOBINLINE))
-                    {
-                      tcp_remove_urgbyte(&dev->d_iob, app_offset + urgp - 1);
-                      dev->d_len--;
-
-                      /* If this was a pure urgent byte segment (d_len
-                       * is now 0), advance rcvseq immediately.
-                       */
-
-                      if (dev->d_len == 0)
-                        {
-                          net_incr32(conn->rcvseq, 1);
-                        }
-                      else
-                        {
-                          *urg_removed = true;
-                        }
-                    }
+                  urg_offset = urgp - 1;
+                  has_urg    = true;
                 }
               else
                 {
@@ -377,22 +338,35 @@ static uint32_t tcp_urg_input(FAR struct net_driver_s *dev,
                 }
             }
         }
-
-      dev->d_urglen = 0;
     }
   else if (conn->urg_state == TCP_URG_AWAITING &&
            TCP_SEQ_GTE(conn->urg_seq, urg_seq) &&
            TCP_SEQ_LT(conn->urg_seq, urg_seq + dev->d_len))
     {
-      uint32_t urg_offset = TCP_SEQ_SUB(conn->urg_seq, urg_seq);
+      urg_offset = TCP_SEQ_SUB(conn->urg_seq, urg_seq);
+      has_urg    = true;
+    }
+
+  if (has_urg)
+    {
       int app_offset;
+
+      /* Payload is stored in an IOB chain starting at
+       * dev->d_iob. Calculate the offset of d_appdata
+       * within dev->d_iob.
+       */
 
       app_offset = (dev->d_appdata - dev->d_iob->io_data) -
                    dev->d_iob->io_offset;
 
+      /* Copy the urgent byte safely from the IOB chain */
+
       iob_copyout(&conn->urg_data, dev->d_iob, 1,
                   app_offset + urg_offset);
       conn->urg_state = TCP_URG_VALID;
+
+      /* Signal urgent data availability to poll/select */
+
       flags |= TCP_URGDATA;
 
       /* The urgent byte is out-of-band and must not be
@@ -405,6 +379,10 @@ static uint32_t tcp_urg_input(FAR struct net_driver_s *dev,
           tcp_remove_urgbyte(&dev->d_iob, app_offset + urg_offset);
           dev->d_len--;
 
+          /* If this was a pure urgent byte segment (d_len
+           * is now 0), advance rcvseq immediately.
+           */
+
           if (dev->d_len == 0)
             {
               net_incr32(conn->rcvseq, 1);
@@ -414,12 +392,6 @@ static uint32_t tcp_urg_input(FAR struct net_driver_s *dev,
               *urg_removed = true;
             }
         }
-
-      dev->d_urglen = 0;
-    }
-  else
-    {
-      dev->d_urglen = 0;
     }
 
   return flags;
@@ -1962,41 +1934,7 @@ skip_rtt:
             ninfo("TCP state: TCP_FIN_WAIT_2\n");
           }
 
-#ifdef CONFIG_NET_TCPURGDATA
-        flags = tcp_urg_input(dev, conn, tcp, flags, &urg_removed);
-        if (dev->d_len > 0)
-          {
-            flags |= TCP_NEWDATA;
-          }
-
-        if ((flags & (TCP_NEWDATA | TCP_ACKDATA | TCP_URGDATA)) != 0)
-          {
-            dev->d_sndlen = 0;
-            result = tcp_callback(dev, conn, flags);
-
-            if (urg_removed && dev->d_len == 0)
-              {
-                net_incr32(conn->rcvseq, 1);
-              }
-
-            if ((flags & TCP_URGDATA) != 0)
-              {
-                result |= TCP_SNDACK;
-              }
-
-            tcp_appsend(dev, conn, result);
-            return;
-          }
-#else
-        if (dev->d_len > 0)
-          {
-            result = tcp_callback(dev, conn, TCP_NEWDATA);
-            tcp_appsend(dev, conn, result);
-            return;
-          }
-#endif
-
-        goto drop;
+        /* Fall through */
 
       case TCP_FIN_WAIT_2:
 
