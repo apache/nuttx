@@ -28,6 +28,7 @@
 
 #include <nuttx/atexit.h>
 
+#include <sys/resource.h>
 #include <unistd.h>
 #include <limits.h>
 #include <sched.h>
@@ -245,7 +246,18 @@ long sysconf(int name)
         return ARG_MAX;
 
       case _SC_OPEN_MAX:
-        return OPEN_MAX;
+        {
+          struct rlimit rlim;
+
+          /* The soft limit of the process, which setrlimit() can change */
+
+          if (getrlimit(RLIMIT_NOFILE, &rlim) == 0)
+            {
+              return rlim.rlim_cur;
+            }
+
+          return OPEN_MAX;
+        }
 
       case _SC_NGROUPS_MAX:
         return NGROUPS_MAX;

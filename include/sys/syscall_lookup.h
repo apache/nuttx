@@ -56,6 +56,8 @@ SYSCALL_LOOKUP(nxsched_get_stackinfo,      2)
 #endif
 
 SYSCALL_LOOKUP(sysinfo,                    1)
+SYSCALL_LOOKUP(getrlimit,                  2)
+SYSCALL_LOOKUP(setrlimit,                  2)
 
 SYSCALL_LOOKUP(gethostname,                2)
 SYSCALL_LOOKUP(sethostname,                2)

@@ -254,6 +254,10 @@ int group_allocate(FAR struct tcb_s *tcb, uint8_t ttype)
   group->tg_caps = this_task()->group != NULL ?
                    this_task()->group->tg_caps : PR_CAP_ALL;
 
+  /* Inherit the resource limits from the parent task group */
+
+  group_init_rlimit(group, this_task()->group);
+
   /* Initialize file descriptors for the TCB */
 
   fdlist_init(&group->tg_fdlist);
