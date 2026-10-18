@@ -1255,6 +1255,19 @@ config PIC32MZ_ETH_NTXDESC
 	---help---
 		Configured number of Tx descriptors. Default: 2
 
+config PIC32MZ_ETH_MACADDR
+	hex "Ethernet MAC address"
+	default 0x000000000000
+	depends on PIC32MZ_ETHERNET
+	---help---
+		MAC address of the Ethernet interface, for chips without a factory
+		programmed station address (the PIC32MZ-W1 has none).  Use a
+		locally administered address (second least significant bit of the
+		first octet set), e.g. 0x02e0deadbeef.
+
+		Zero keeps the address programmed at reset, or one assigned later
+		with SIOCSIFHWADDR.
+
 config PIC32MZ_ETH_NRXDESC
 	int "Number Rx descriptors"
 	default 4
