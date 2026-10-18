@@ -1,6 +1,6 @@
-=======
-mcb1700
-=======
+============
+Keil MCB1700
+============
 
 .. tags:: arch:arm, chip:lpc17xx_40xx, vendor:nxp
 

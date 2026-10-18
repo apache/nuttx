@@ -1,6 +1,6 @@
-===
-SIM
-===
+======================
+NuttX Simulation (SIM)
+======================
 
 .. tags:: arch:sim, chip:sim
 

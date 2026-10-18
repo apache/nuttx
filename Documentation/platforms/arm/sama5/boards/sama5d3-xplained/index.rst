@@ -1,6 +1,6 @@
-================
-sama5d3-xplained
-================
+==========================
+Microchip SAMA5D3-Xplained
+==========================
 
 .. tags:: arch:arm, chip:sama5, vendor:microchip
 

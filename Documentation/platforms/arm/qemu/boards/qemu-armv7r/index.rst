@@ -1,6 +1,6 @@
-===========
-qemu-armv7r
-===========
+============
+QEMU ARMv7-R
+============
 
 .. tags:: arch:arm, chip:qemu
 

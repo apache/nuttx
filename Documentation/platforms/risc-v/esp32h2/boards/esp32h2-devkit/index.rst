@@ -1,6 +1,6 @@
-==================
-ESP32-H2-DevKitM-1
-==================
+============================
+Espressif ESP32-H2-DevKitM-1
+============================
 
 .. tags:: arch:risc-v, chip:esp32h2, vendor:espressif
 

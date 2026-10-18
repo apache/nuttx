@@ -1,6 +1,6 @@
-=========
-ne64badge
-=========
+=================================
+Future Electronics NE64 PoE Badge
+=================================
 
 .. tags:: arch:hc, chip:m9s12, vendor:nxp
 

@@ -1,6 +1,6 @@
-=============
-lpc4370-link2
-=============
+=================
+NXP LPC4370-Link2
+=================
 
 .. tags:: arch:arm, chip:lpc43xx, vendor:nxp
 

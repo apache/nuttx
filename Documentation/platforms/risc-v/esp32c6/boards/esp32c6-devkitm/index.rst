@@ -1,6 +1,6 @@
-==================
-ESP32-C6-DevKitM-1
-==================
+============================
+Espressif ESP32-C6-DevKitM-1
+============================
 
 .. tags:: arch:risc-v, chip:esp32c6, vendor:espressif
 

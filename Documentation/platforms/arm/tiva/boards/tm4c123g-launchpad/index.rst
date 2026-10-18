@@ -1,6 +1,6 @@
-=========================
-TM4C123G Tiva C LaunchPad
-=========================
+============================
+TI TM4C123G Tiva C LaunchPad
+============================
 
 .. tags:: arch:arm, chip:tiva, part:tm4c123, vendor:ti
 

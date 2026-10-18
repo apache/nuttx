@@ -1,6 +1,6 @@
-=============
-at32f437-mini
-=============
+====================
+Artery AT32F437-MINI
+====================
 
 .. tags:: arch:arm, chip:at32, vendor:artery
 

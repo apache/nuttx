@@ -1,6 +1,6 @@
-============
-RX65N GRROSE
-============
+=====================
+Renesas RX65N GR-ROSE
+=====================
 
 .. tags:: arch:renesas, chip:rx65n, vendor:renesas
 

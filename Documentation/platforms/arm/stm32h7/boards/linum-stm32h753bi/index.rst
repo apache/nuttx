@@ -1,5 +1,5 @@
 =================
-linum-stm32h753bi
+Linum STM32H753BI
 =================
 
 .. tags:: arch:arm, chip:stm32h7, part:stm32h753, vendor:st

@@ -1,6 +1,6 @@
-===========
-lm3s6965-ek
-===========
+========================
+TI Stellaris LM3S6965-EK
+========================
 
 .. tags:: arch:arm, chip:tiva, vendor:ti
 

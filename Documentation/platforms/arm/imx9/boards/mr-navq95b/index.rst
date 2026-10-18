@@ -1,6 +1,6 @@
-=========
-MR-NAVQ95
-=========
+==============
+NXP MR-NAVQ95B
+==============
 
 .. tags:: arch:arm, chip:imx9, part:imx95, vendor:nxp
 

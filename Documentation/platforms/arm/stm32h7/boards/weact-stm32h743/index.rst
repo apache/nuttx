@@ -1,6 +1,6 @@
-===============
-weact-stm32h743
-===============
+======================
+WeAct Studio STM32H743
+======================
 
 .. tags:: arch:arm, chip:stm32h7, part:stm32h743, vendor:st
 

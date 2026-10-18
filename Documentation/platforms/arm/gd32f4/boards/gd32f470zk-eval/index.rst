@@ -1,6 +1,6 @@
-===============
-gd32f470zk-eval
-===============
+==========================
+GigaDevice GD32F470ZK-EVAL
+==========================
 
 .. tags:: arch:arm, chip:gd32f4, vendor:gigadevice
 

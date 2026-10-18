@@ -1,6 +1,6 @@
-==========
-hpm6360evk
-==========
+==================
+HPMicro HPM6360EVK
+==================
 
 .. tags:: arch:risc-v, chip:hpm6000, vendor:hpmicro
 

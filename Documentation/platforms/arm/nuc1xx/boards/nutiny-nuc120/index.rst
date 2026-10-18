@@ -1,6 +1,6 @@
-=============
-nutiny-nuc120
-=============
+=====================
+Nuvoton NuTiny NUC120
+=====================
 
 .. tags:: arch:arm, chip:nuc1xx, vendor:nuvoton
 

@@ -1,6 +1,6 @@
-===============
-ESP32-S3-LCD-EV
-===============
+=========================
+Espressif ESP32-S3-LCD-EV
+=========================
 
 .. tags:: arch:xtensa, chip:esp32s3, vendor:espressif
 

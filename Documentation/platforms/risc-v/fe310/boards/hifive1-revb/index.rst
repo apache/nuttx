@@ -1,6 +1,6 @@
-=============
-HiFive1 Rev B
-=============
+====================
+SiFive HiFive1 Rev B
+====================
 
 .. tags:: arch:risc-v, chip:fe310, vendor:sifive
 

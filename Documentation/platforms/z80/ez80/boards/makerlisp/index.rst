@@ -1,6 +1,6 @@
-=========
-makerlisp
-=========
+==============
+MakerLisp eZ80
+==============
 
 .. tags:: arch:z80, chip:ez80, vendor:zilog
 

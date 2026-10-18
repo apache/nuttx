@@ -1,6 +1,6 @@
-===============
-ESP32-AUDIO-KIT
-===============
+==========================
+Ai-Thinker ESP32-Audio-Kit
+==========================
 
 .. tags:: arch:xtensa, chip:esp32, part:esp32a1s, vendor:espressif
 

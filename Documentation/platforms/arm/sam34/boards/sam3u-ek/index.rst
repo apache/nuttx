@@ -1,6 +1,6 @@
-========
-SAM3U-EK
-========
+==================
+Microchip SAM3U-EK
+==================
 
 .. tags:: arch:arm, chip:sam34, vendor:microchip
 

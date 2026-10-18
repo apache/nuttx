@@ -1,6 +1,6 @@
-=========
-teensy-lc
-=========
+==============
+PJRC Teensy LC
+==============
 
 .. tags:: arch:arm, chip:kl, vendor:nxp
 

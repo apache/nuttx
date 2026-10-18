@@ -1,6 +1,6 @@
-=================
-ESP32S3-WS-LCD128
-=================
+=================================
+Waveshare ESP32-S3-Touch-LCD-1.28
+=================================
 
 .. tags:: arch:xtensa, chip:esp32s3, vendor:espressif
 

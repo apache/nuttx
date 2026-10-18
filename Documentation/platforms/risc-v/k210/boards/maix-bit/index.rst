@@ -1,6 +1,6 @@
-========
-Maix Bit
-========
+===============
+Sipeed Maix Bit
+===============
 
 .. tags:: arch:risc-v, chip:k210, vendor:canaan
 

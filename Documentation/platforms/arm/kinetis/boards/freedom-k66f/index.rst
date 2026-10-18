@@ -1,6 +1,6 @@
-============
-freedom-k66f
-============
+=====================
+NXP Freedom FRDM-K66F
+=====================
 
 .. tags:: arch:arm, chip:kinetis, vendor:nxp
 

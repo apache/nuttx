@@ -1,6 +1,6 @@
-==========
-sam4cmp-db
-==========
+====================
+Microchip SAM4CMP-DB
+====================
 
 .. tags:: arch:arm, chip:sam34, vendor:microchip
 

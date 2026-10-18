@@ -1,6 +1,6 @@
-=================
-stm32f103-minimum
-=================
+===============================
+ST STM32F103 Minimum (BluePill)
+===============================
 
 .. tags:: arch:arm, chip:stm32f1, part:stm32f103, vendor:st
 

@@ -1,6 +1,6 @@
-========
-SAM4E-EK
-========
+==================
+Microchip SAM4E-EK
+==================
 
 .. tags:: arch:arm, chip:sam34, vendor:microchip
 

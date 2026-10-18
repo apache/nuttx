@@ -1,6 +1,6 @@
-==========
-US7032EVB1
-==========
+=======================
+Hitachi SH-1 US7032EVB1
+=======================
 
 .. tags:: arch:renesas, chip:sh1, vendor:renesas
 

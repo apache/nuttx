@@ -1,6 +1,6 @@
-======
-EA3152
-======
+=======================
+Embedded Artists EA3152
+=======================
 
 .. tags:: arch:arm, chip:lpc31xx, vendor:nxp
 

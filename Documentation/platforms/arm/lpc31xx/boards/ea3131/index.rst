@@ -1,6 +1,6 @@
-======
-EA3131
-======
+=======================
+Embedded Artists EA3131
+=======================
 
 .. tags:: arch:arm, chip:lpc31xx, vendor:nxp
 

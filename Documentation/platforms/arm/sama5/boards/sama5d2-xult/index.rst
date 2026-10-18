@@ -1,6 +1,6 @@
-============
-sama5d2-xult
-============
+======================
+Microchip SAMA5D2-XULT
+======================
 
 .. tags:: arch:arm, chip:sama5, vendor:microchip
 

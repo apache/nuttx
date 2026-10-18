@@ -1,6 +1,6 @@
-=====
-Amber
-=====
+==================
+SoC Robotics Amber
+==================
 
 .. tags:: arch:avr, chip:atmega, part:atmega128, vendor:microchip
 

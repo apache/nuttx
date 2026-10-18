@@ -1,6 +1,6 @@
-=======
-Arty A7
-=======
+================
+Digilent Arty A7
+================
 
 .. tags:: arch:risc-v, chip:litex
 

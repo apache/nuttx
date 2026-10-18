@@ -1,6 +1,6 @@
-========
-SKP16C26
-========
+===========================
+Renesas SKP16C26 StarterKit
+===========================
 
 .. tags:: arch:renesas, chip:m16c, vendor:renesas
 

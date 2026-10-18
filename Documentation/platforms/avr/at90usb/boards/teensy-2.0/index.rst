@@ -1,6 +1,6 @@
-==========
-Teensy 2.0
-==========
+===============
+PJRC Teensy 2.0
+===============
 
 .. tags:: arch:avr, chip:at90usb, vendor:microchip
 

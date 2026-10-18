@@ -1,6 +1,6 @@
-===========
-sabre-6quad
-===========
+=====================
+NXP i.MX6 Sabre-6Quad
+=====================
 
 .. tags:: arch:arm, chip:imx6, vendor:nxp
 

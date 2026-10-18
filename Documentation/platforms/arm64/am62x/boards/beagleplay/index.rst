@@ -1,6 +1,6 @@
-==========
-BeaglePlay
-==========
+==========================
+BeagleBoard.org BeaglePlay
+==========================
 
 .. tags:: arch:arm64, chip:am62x, vendor:ti
 

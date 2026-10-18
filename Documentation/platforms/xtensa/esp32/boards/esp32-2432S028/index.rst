@@ -1,6 +1,6 @@
-==============
-ESP32-2432S028
-==============
+=====================
+Sunton ESP32-2432S028
+=====================
 
 .. tags:: arch:xtensa, chip:esp32, part:esp32wrover32, vendor:espressif
 

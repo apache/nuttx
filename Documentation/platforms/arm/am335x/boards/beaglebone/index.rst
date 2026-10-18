@@ -1,6 +1,6 @@
-==========
-BeagleBone
-==========
+=============
+TI BeagleBone
+=============
 
 .. tags:: arch:arm, chip:am335x, vendor:ti
 

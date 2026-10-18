@@ -220,7 +220,7 @@ The quickest and most convenient way to start with JTAG debugging is through a U
 connected to the D+/D- USB pins of ESP32-S3. No need for an external JTAG adapter and
 extra wiring/cable to connect JTAG to ESP32-S3. Most of the ESP32-S3 boards have a
 USB connector that can be used for JTAG debugging.
-This is the case for the :ref:`ESP32-S3-DevKit <platforms/xtensa/esp32s3/boards/esp32s3-devkit/index:ESP32S3-DevKit>` board.
+This is the case for the :ref:`ESP32-S3-DevKit <platforms/xtensa/esp32s3/boards/esp32s3-devkit/index:Espressif ESP32-S3-DevKitC-1>` board.
 
 .. note:: One must configure the USB drivers to enable JTAG communication. Please check
   `Configure USB Drivers <https://docs.espressif.com/projects/esp-idf/en/release-v5.1/esp32s3/api-guides/jtag-debugging/configure-builtin-jtag.html?highlight=udev#configure-usb-drivers>`_
