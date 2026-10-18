@@ -1,6 +1,6 @@
-==============
-T3 Gemstone O1
-==============
+=================
+TI T3 Gemstone O1
+=================
 
 .. tags:: arch:arm, chip:am67, vendor:ti
 

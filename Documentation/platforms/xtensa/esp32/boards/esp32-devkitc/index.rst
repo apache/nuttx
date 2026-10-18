@@ -1,6 +1,6 @@
-=============
-ESP32 DevKitC
-=============
+=======================
+Espressif ESP32-DevKitC
+=======================
 
 .. tags:: arch:xtensa, chip:esp32, part:esp32wroom32, vendor:espressif
 

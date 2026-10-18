@@ -1,6 +1,6 @@
-============
-RTL8730E_EVB
-============
+====================
+Realtek RTL8730E-EVB
+====================
 
 .. tags:: chip:rtl8730e, arch:arm, vendor:realtek
 

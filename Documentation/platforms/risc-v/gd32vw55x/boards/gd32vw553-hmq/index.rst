@@ -1,6 +1,6 @@
-=============
-GD32VW553-HMQ
-=============
+========================
+GigaDevice GD32VW553-HMQ
+========================
 
 .. tags:: arch:risc-v, chip:gd32vw55x, vendor:gigadevice
 

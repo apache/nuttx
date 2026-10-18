@@ -1,6 +1,6 @@
-====
-moxa
-====
+==========
+Moxa Board
+==========
 
 .. tags:: arch:arm, chip:moxart, vendor:moxa
 

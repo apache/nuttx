@@ -1,6 +1,6 @@
-============
-Flipper Zero
-============
+============================
+Flipper Devices Flipper Zero
+============================
 
 .. tags:: arch:arm, chip:stm32wb, part:stm32wb55, vendor:st
 

@@ -1,6 +1,6 @@
-============
-IMX93QSB-M33
-============
+===============
+NXP i.MX 93 QSB
+===============
 
 .. tags:: arch:arm, chip:imx9, part:imx93, vendor:nxp
 

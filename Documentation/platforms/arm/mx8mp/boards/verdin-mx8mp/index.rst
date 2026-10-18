@@ -1,6 +1,6 @@
-=============
-verdin-mx8mp
-=============
+==========================
+Toradex Verdin i.MX8M Plus
+==========================
 
 .. tags:: arch:arm, chip:mx8mp, vendor:nxp
 

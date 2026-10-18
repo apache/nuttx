@@ -1,6 +1,6 @@
-================
-ESP32-S2-Saola-1
-================
+==========================
+Espressif ESP32-S2-Saola-1
+==========================
 
 .. tags:: arch:xtensa, chip:esp32s2, vendor:espressif
 

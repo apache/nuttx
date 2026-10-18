@@ -1,6 +1,6 @@
-============
-Moteino-Mega
-============
+=======================
+LowPowerLab MoteinoMEGA
+=======================
 
 .. tags:: arch:avr, chip:atmega, part:atmega1284p, vendor:microchip
 

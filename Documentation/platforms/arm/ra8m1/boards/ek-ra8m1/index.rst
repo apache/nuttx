@@ -1,6 +1,8 @@
-========
-EK-RA8M1
-========
+================
+Renesas EK-RA8M1
+================
+
+.. tags:: arch:arm, chip:ra8m1, vendor:renesas
 
 This is a port of NuttX to the Renesas EK-RA8M1 evaluation kit, featuring
 the R7FA8M1AHECBD (BGA224) MCU: an Arm Cortex-M85 running at up to

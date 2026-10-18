@@ -1,6 +1,6 @@
-==================
-gd32f470zk-aiotbox
-==================
+=============================
+GigaDevice GD32F470ZK-AIOTBOX
+=============================
 
 .. tags:: arch:arm, chip:gd32f4, vendor:gigadevice
 

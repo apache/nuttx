@@ -1,6 +1,6 @@
-==============
-ESP32S3-DevKit
-==============
+============================
+Espressif ESP32-S3-DevKitC-1
+============================
 
 .. tags:: arch:xtensa, chip:esp32s3, vendor:espressif
 

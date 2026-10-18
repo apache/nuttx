@@ -1,6 +1,6 @@
-==============
-mikroe-stm32f4
-==============
+===================================
+MikroElektronika Mikromedia STM32F4
+===================================
 
 .. tags:: arch:arm, chip:stm32f4, part:stm32f407, vendor:st
 

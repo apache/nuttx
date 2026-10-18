@@ -1,6 +1,6 @@
-=========
-OMNIBUSF4
-=========
+=================
+Airbot Omnibus F4
+=================
 
 .. tags:: arch:arm, chip:stm32f4, part:stm32f405, vendor:st
 

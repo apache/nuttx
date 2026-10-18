@@ -1,6 +1,6 @@
-=======
-Axoloti
-=======
+============
+Axoloti Core
+============
 
 .. tags:: arch:arm, chip:stm32f4, part:stm32f427, vendor:st
 

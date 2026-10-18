@@ -1,6 +1,6 @@
-=========
-AVR32DEV1
-=========
+===============
+Atmel AVR32DEV1
+===============
 
 .. tags:: arch:avr, chip:at32uc3, vendor:microchip
 

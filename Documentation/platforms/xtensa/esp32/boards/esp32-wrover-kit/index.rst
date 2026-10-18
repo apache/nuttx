@@ -1,6 +1,6 @@
-==============
-ESP-WROVER-KIT
-==============
+========================
+Espressif ESP-WROVER-KIT
+========================
 
 .. tags:: arch:xtensa, chip:esp32, part:esp32wrover32, vendor:espressif
 

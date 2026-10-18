@@ -1,6 +1,6 @@
-============
-kwikstik-k40
-============
+================
+NXP KwikStik-K40
+================
 
 .. tags:: arch:arm, chip:kinetis, vendor:nxp
 

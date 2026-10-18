@@ -1,6 +1,6 @@
-===============
-weact-stm32h750
-===============
+======================
+WeAct Studio STM32H750
+======================
 
 .. tags:: arch:arm, chip:stm32h7, part:stm32h750, vendor:st
 

@@ -1,6 +1,6 @@
-================
-GD32VW553K-START
-================
+===========================
+GigaDevice GD32VW553K-START
+===========================
 
 .. tags:: arch:risc-v, chip:gd32vw55x, vendor:gigadevice
 

@@ -1,6 +1,6 @@
-===============
-chipKIT Wi-FIRE
-===============
+========================
+Digilent chipKIT Wi-FIRE
+========================
 
 .. tags:: arch:mips, chip:pic32mz, vendor:microchip
 

@@ -1,6 +1,6 @@
-====
-z20x
-====
+==========
+Zilog z20x
+==========
 
 .. tags:: arch:z80, chip:ez80, vendor:zilog
 

@@ -1,6 +1,6 @@
-====================
-Flip & Click PIC32MZ
-====================
+=====================================
+MikroElektronika Flip & Click PIC32MZ
+=====================================
 
 .. tags:: arch:mips, chip:pic32mz, vendor:microchip
 

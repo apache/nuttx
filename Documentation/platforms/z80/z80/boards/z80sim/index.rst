@@ -1,6 +1,6 @@
-======
-z80sim
-======
+======================================
+Z80 Instruction Set Simulator (z80sim)
+======================================
 
 .. tags:: arch:z80, chip:z80, vendor:zilog
 

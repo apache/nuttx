@@ -1,6 +1,6 @@
-==============
- XMC4700 Relax
-==============
+======================
+Infineon XMC4700 Relax
+======================
 
 .. tags:: arch:arm, chip:xmc4, vendor:infineon
 

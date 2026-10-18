@@ -1,6 +1,6 @@
-===========
-nRF52832-DK
-===========
+==================
+Nordic nRF52832-DK
+==================
 
 .. tags:: arch:arm, chip:nrf52, part:nrf52832, vendor:nordic
 

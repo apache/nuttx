@@ -1,6 +1,6 @@
-===========
-twr-k60n512
-===========
+===============
+NXP TWR-K60N512
+===============
 
 .. tags:: arch:arm, chip:kinetis, vendor:nxp
 

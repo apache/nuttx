@@ -1,6 +1,6 @@
-==============
-z8encore000zco
-==============
+====================
+Zilog Z8ENCORE000ZCO
+====================
 
 .. tags:: arch:z80, chip:z8, vendor:zilog
 

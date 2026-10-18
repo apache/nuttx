@@ -1,6 +1,6 @@
-=======
-rv-virt
-=======
+===================
+QEMU RISC-V RV-Virt
+===================
 
 .. tags:: arch:risc-v, chip:qemu-rv
 

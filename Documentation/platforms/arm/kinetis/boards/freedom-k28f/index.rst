@@ -1,6 +1,6 @@
-============
-freedom-k28f
-============
+=====================
+NXP Freedom FRDM-K28F
+=====================
 
 .. tags:: arch:arm, chip:kinetis, vendor:nxp
 

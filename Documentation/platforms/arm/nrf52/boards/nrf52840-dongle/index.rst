@@ -1,6 +1,6 @@
-===============
-nRF52840-dongle
-===============
+======================
+Nordic nRF52840 Dongle
+======================
 
 .. tags:: arch:arm, chip:nrf52, part:nrf52840, vendor:nordic
 

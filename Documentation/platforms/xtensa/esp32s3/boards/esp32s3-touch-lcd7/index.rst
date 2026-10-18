@@ -1,6 +1,6 @@
-==================
-esp32s3-touch-lcd7
-==================
+==============================
+Waveshare ESP32-S3-Touch-LCD-7
+==============================
 
 .. tags:: arch:xtensa, chip:esp32s3, vendor:espressif
 

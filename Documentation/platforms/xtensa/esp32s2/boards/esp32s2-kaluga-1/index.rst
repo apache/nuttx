@@ -1,6 +1,6 @@
-==========================
-ESP32-S2-Kaluga-1 Kit v1.3
-==========================
+===========================
+Espressif ESP32-S2-Kaluga-1
+===========================
 
 .. tags:: arch:xtensa, chip:esp32s2, vendor:espressif
 

@@ -1,6 +1,6 @@
-=====================
-ESP32-S3-Korvo-2 V3.0
-=====================
+==========================
+Espressif ESP32-S3-Korvo-2
+==========================
 
 .. tags:: arch:xtensa, chip:esp32s3, vendor:espressif
 

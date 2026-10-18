@@ -228,7 +228,7 @@ MTMS / GPIO14 TMS
 ============= ===========
 
 Some boards, like :ref:`ESP32-Ethernet-Kit V1.2 <platforms/xtensa/esp32/boards/esp32-ethernet-kit/index:ESP32-Ethernet-Kit V1.2>` and
-:ref:`ESP-WROVER-KIT <platforms/xtensa/esp32/boards/esp32-wrover-kit/index:ESP-WROVER-KIT>`, have a built-in JTAG debugger.
+:ref:`ESP-WROVER-KIT <platforms/xtensa/esp32/boards/esp32-wrover-kit/index:Espressif ESP-WROVER-KIT>`, have a built-in JTAG debugger.
 
 Other boards that don't have any built-in JTAG debugger can be debugged using an external JTAG debugger, like the one
 described for the :ref:`ESP32-DevKitC <platforms/xtensa/esp32/boards/esp32-devkitc/index:Debugging with OpenOCD>`.
@@ -236,7 +236,7 @@ described for the :ref:`ESP32-DevKitC <platforms/xtensa/esp32/boards/esp32-devki
 .. note:: One must configure the USB drivers to enable JTAG communication. Please check
   `Configure USB Drivers <https://docs.espressif.com/projects/esp-idf/en/release-v5.1/esp32/api-guides/jtag-debugging/configure-ft2232h-jtag.html#configure-usb-drivers>`_
   for configuring the JTAG adapter of the :ref:`ESP32-Ethernet-Kit V1.2 <platforms/xtensa/esp32/boards/esp32-ethernet-kit/index:ESP32-Ethernet-Kit V1.2>` and
-  :ref:`ESP-WROVER-KIT <platforms/xtensa/esp32/boards/esp32-wrover-kit/index:ESP-WROVER-KIT>` boards and other FT2232-based JTAG adapters.
+  :ref:`ESP-WROVER-KIT <platforms/xtensa/esp32/boards/esp32-wrover-kit/index:Espressif ESP-WROVER-KIT>` boards and other FT2232-based JTAG adapters.
 
 OpenOCD can then be used::
 

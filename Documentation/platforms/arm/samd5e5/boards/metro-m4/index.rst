@@ -1,6 +1,6 @@
-========
-metro-m4
-========
+=================
+Adafruit Metro M4
+=================
 
 .. tags:: arch:arm, chip:samd5e5, vendor:microchip
 

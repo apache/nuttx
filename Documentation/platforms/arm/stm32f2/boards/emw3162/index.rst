@@ -1,6 +1,6 @@
-=======
-emw3162
-=======
+==============
+MXCHIP EMW3162
+==============
 
 .. tags:: arch:arm, chip:stm32f2, part:stm32f205, vendor:st
 

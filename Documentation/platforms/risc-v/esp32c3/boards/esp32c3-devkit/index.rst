@@ -1,6 +1,6 @@
-================
-ESP32-C3 DevKit
-================
+=========================
+Espressif ESP32-C3-DevKit
+=========================
 
 .. tags:: arch:risc-v, chip:esp32c3, vendor:espressif
 
