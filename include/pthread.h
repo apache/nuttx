@@ -36,6 +36,7 @@
 #include <stdbool.h>         /* C99 boolean types */
 #include <unistd.h>          /* For getpid */
 #include <signal.h>          /* Needed for sigset_t, includes this file */
+#include <sched.h>           /* POSIX: pthread.h makes sched.h visible */
 #include <time.h>            /* Needed for struct timespec */
 
 #ifdef CONFIG_PTHREAD_SPINLOCKS
