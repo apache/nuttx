@@ -240,6 +240,16 @@ SECTIONS
         _edata = ABSOLUTE(.);
     } >kseg0_datamem AT>kseg0_progmem
 
+    /* End of the program image in the program flash.  The last pages of the
+     * flash belong to PIC32MZ_PROGMEM when it is enabled (the symbol is
+     * then defined by the build, at the start of the pages).
+     */
+
+    _eimage = LOADADDR(.lit4) + SIZEOF(.lit4);
+    PROVIDE(PIC32MZ_PROGMEM_START = ORIGIN(kseg0_progmem) + LENGTH(kseg0_progmem));
+    ASSERT(_eimage <= PIC32MZ_PROGMEM_START,
+           "The program image overlaps the PIC32MZ_PROGMEM pages")
+
     .sbss :
     {
         . = ALIGN(16);
