@@ -270,7 +270,10 @@ long sysconf(int name)
         return CONFIG_SMP_NCPUS;
 
       case _SC_MONOTONIC_CLOCK:
-        return 1;
+        return _POSIX_MONOTONIC_CLOCK;
+
+      case _SC_CLOCK_SELECTION:
+        return _POSIX_CLOCK_SELECTION;
 
       case _SC_PAGESIZE:
         return DEFAULT_MM_PGSIZE;
