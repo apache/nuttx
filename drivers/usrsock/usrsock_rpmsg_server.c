@@ -595,6 +595,7 @@ static int usrsock_rpmsg_recvfrom_handler(FAR struct rpmsg_endpoint *ept,
                       SOCK_STREAM)
         {
           FAR struct socket_conn_s *conn = priv->socks[req->usockid].s_conn;
+
           if (outaddrlen < inaddrlen)
             {
               memcpy((FAR void *)(ack + 1) + outaddrlen,
