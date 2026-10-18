@@ -773,6 +773,7 @@ static void mxt_touch_event(FAR struct mxt_dev_s *priv,
   if (priv->lower->swapxy)
     {
       uint16_t tmp = x;
+
       y = x;
       x = tmp;
     }
@@ -850,7 +851,7 @@ static void mxt_touch_event(FAR struct mxt_dev_s *priv,
 
       if (sample->contact == CONTACT_LOST)
         {
-           priv->id++;
+          priv->id++;
         }
 
       /* Save the measurements */
@@ -1362,6 +1363,7 @@ static ssize_t mxt_read(FAR struct file *filep, FAR char *buffer, size_t len)
               /* Yes.. transfer the sample data */
 
               FAR struct touch_point_s *point = &report->point[j];
+
               j++;
 
               /* REVISIT:  height and width are not set, area is
@@ -1484,6 +1486,7 @@ static int mxt_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case TSIOC_SETFREQUENCY:  /* arg: Pointer to uint32_t frequency value */
         {
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
+
           DEBUGASSERT(priv->lower != NULL && ptr != NULL);
 
           priv->frequency = *ptr;
@@ -1493,6 +1496,7 @@ static int mxt_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case TSIOC_GETFREQUENCY:  /* arg: Pointer to uint32_t frequency value */
         {
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
+
           DEBUGASSERT(priv->lower != NULL && ptr != NULL);
           *ptr = priv->frequency;
         }
@@ -1584,6 +1588,7 @@ static int mxt_poll(FAR struct file *filep, FAR struct pollfd *fds,
       /* This is a request to tear down the poll. */
 
       FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+
       DEBUGASSERT(slot != NULL);
 
       /* Remove all memory of the poll setup */
@@ -1669,23 +1674,23 @@ static int mxt_getobjtab(FAR struct mxt_dev_s *priv)
       switch (object->type)
         {
 #ifdef MXT_SUPPORT_T6
-        case MXT_GEN_COMMAND_T6:
-          priv->t6id = idmin;
-          break;
+          case MXT_GEN_COMMAND_T6:
+            priv->t6id = idmin;
+            break;
 #endif
 
-        case MXT_TOUCH_MULTI_T9:
-          priv->t9idmin = idmin;
-          priv->t9idmax = idmax;
-          break;
+          case MXT_TOUCH_MULTI_T9:
+            priv->t9idmin = idmin;
+            priv->t9idmax = idmax;
+            break;
 
 #ifdef CONFIG_MXT_BUTTONS
-        case MXT_SPT_GPIOPWM_T19:
-          priv->t19id = idmin;
-          break;
+          case MXT_SPT_GPIOPWM_T19:
+            priv->t19id = idmin;
+            break;
 #endif
-        default:
-          break;
+          default:
+            break;
         }
     }
 

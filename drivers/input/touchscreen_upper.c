@@ -290,6 +290,7 @@ static int touch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case TSIOC_GRAB:
         {
           int enable = (int)arg;
+
           ret = OK;
           if (enable)
             {
@@ -398,6 +399,7 @@ static void touch_event_notify(FAR struct touch_upperhalf_s *upper,
       if (lower->flags & TOUCH_FLAG_SWAPXY)
         {
           int16_t p = point[n].x;
+
           point[n].x = point[n].y;
           point[n].y = p;
         }

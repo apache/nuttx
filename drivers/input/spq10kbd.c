@@ -296,6 +296,7 @@ static djoy_buttonset_t djoy_sample(
 {
   FAR struct spq10kbd_dev_s *priv =
     (FAR struct spq10kbd_dev_s *)(lower->config);
+
   return priv->djoystate;
 }
 
@@ -314,6 +315,7 @@ static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
 {
   FAR struct spq10kbd_dev_s *priv =
     (FAR struct spq10kbd_dev_s *)(lower->config);
+
   priv->djoypressmask    = press;
   priv->djoyreleasemask  = release;
   priv->djoyhandle       = handler;
@@ -661,6 +663,7 @@ static int spq10kbd_poll(FAR struct file *filep, FAR struct pollfd *fds,
       /* This is a request to tear down the poll. */
 
       FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+
       DEBUGASSERT(slot);
 
       /* Remove all memory of the poll setup */
