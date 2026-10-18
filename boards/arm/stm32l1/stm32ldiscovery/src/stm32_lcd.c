@@ -713,93 +713,93 @@ static inline void slcd_writemem(uint16_t segset, int curpos)
 
   switch (curpos)
     {
-    case 0:
-      ram0 &= SLCD_CHAR1_MASK0;
-      ram0 |= SLCD_CHAR1_UPDATE0(segments[0]);
+      case 0:
+        ram0 &= SLCD_CHAR1_MASK0;
+        ram0 |= SLCD_CHAR1_UPDATE0(segments[0]);
 
-      ram1 &= SLCD_CHAR1_MASK1;
-      ram1 |= SLCD_CHAR1_UPDATE1(segments[1]);
+        ram1 &= SLCD_CHAR1_MASK1;
+        ram1 |= SLCD_CHAR1_UPDATE1(segments[1]);
 
-      ram2 &= SLCD_CHAR1_MASK2;
-      ram2 |= SLCD_CHAR1_UPDATE2(segments[2]);
+        ram2 &= SLCD_CHAR1_MASK2;
+        ram2 |= SLCD_CHAR1_UPDATE2(segments[2]);
 
-      ram3 &= SLCD_CHAR1_MASK3;
-      ram3 |= SLCD_CHAR1_UPDATE3(segments[3]);
-      break;
+        ram3 &= SLCD_CHAR1_MASK3;
+        ram3 |= SLCD_CHAR1_UPDATE3(segments[3]);
+        break;
 
-    case 1:
-      ram0 &= SLCD_CHAR2_MASK0;
-      ram0 |= SLCD_CHAR2_UPDATE0(segments[0]);
+      case 1:
+        ram0 &= SLCD_CHAR2_MASK0;
+        ram0 |= SLCD_CHAR2_UPDATE0(segments[0]);
 
-      ram1 &= SLCD_CHAR2_MASK1;
-      ram1 |= SLCD_CHAR2_UPDATE1(segments[1]);
+        ram1 &= SLCD_CHAR2_MASK1;
+        ram1 |= SLCD_CHAR2_UPDATE1(segments[1]);
 
-      ram2 &= SLCD_CHAR2_MASK2;
-      ram2 |= SLCD_CHAR2_UPDATE2(segments[2]);
+        ram2 &= SLCD_CHAR2_MASK2;
+        ram2 |= SLCD_CHAR2_UPDATE2(segments[2]);
 
-      ram3 &= SLCD_CHAR2_MASK3;
-      ram3 |= SLCD_CHAR2_UPDATE3(segments[3]);
-      break;
+        ram3 &= SLCD_CHAR2_MASK3;
+        ram3 |= SLCD_CHAR2_UPDATE3(segments[3]);
+        break;
 
-    case 2:
-      ram0 &= SLCD_CHAR3_MASK0;
-      ram0 |= SLCD_CHAR3_UPDATE0(segments[0]);
+      case 2:
+        ram0 &= SLCD_CHAR3_MASK0;
+        ram0 |= SLCD_CHAR3_UPDATE0(segments[0]);
 
-      ram1 &= SLCD_CHAR3_MASK1;
-      ram1 |= SLCD_CHAR3_UPDATE1(segments[1]);
+        ram1 &= SLCD_CHAR3_MASK1;
+        ram1 |= SLCD_CHAR3_UPDATE1(segments[1]);
 
-      ram2 &= SLCD_CHAR3_MASK2;
-      ram2 |= SLCD_CHAR3_UPDATE2(segments[2]);
+        ram2 &= SLCD_CHAR3_MASK2;
+        ram2 |= SLCD_CHAR3_UPDATE2(segments[2]);
 
-      ram3 &= SLCD_CHAR3_MASK3;
-      ram3 |= SLCD_CHAR3_UPDATE3(segments[3]);
-      break;
+        ram3 &= SLCD_CHAR3_MASK3;
+        ram3 |= SLCD_CHAR3_UPDATE3(segments[3]);
+        break;
 
-    case 3:
-      ram0 &= SLCD_CHAR4_MASK0;
-      ram0 |= SLCD_CHAR4_UPDATE0(segments[0]);
+      case 3:
+        ram0 &= SLCD_CHAR4_MASK0;
+        ram0 |= SLCD_CHAR4_UPDATE0(segments[0]);
 
-      ram1 &= SLCD_CHAR4_MASK1;
-      ram1 |= SLCD_CHAR4_UPDATE1(segments[1]);
+        ram1 &= SLCD_CHAR4_MASK1;
+        ram1 |= SLCD_CHAR4_UPDATE1(segments[1]);
 
-      ram2 &= SLCD_CHAR4_MASK2;
-      ram2 |= SLCD_CHAR4_UPDATE2(segments[2]);
+        ram2 &= SLCD_CHAR4_MASK2;
+        ram2 |= SLCD_CHAR4_UPDATE2(segments[2]);
 
-      ram3 &= SLCD_CHAR4_MASK3;
-      ram3 |= SLCD_CHAR4_UPDATE3(segments[3]);
-      break;
+        ram3 &= SLCD_CHAR4_MASK3;
+        ram3 |= SLCD_CHAR4_UPDATE3(segments[3]);
+        break;
 
-    case 4:
-      ram0 &= SLCD_CHAR5_MASK0;
-      ram0 |= SLCD_CHAR5_UPDATE0(segments[0]);
+      case 4:
+        ram0 &= SLCD_CHAR5_MASK0;
+        ram0 |= SLCD_CHAR5_UPDATE0(segments[0]);
 
-      ram1 &= SLCD_CHAR5_MASK1;
-      ram1 |= SLCD_CHAR5_UPDATE1(segments[1]);
+        ram1 &= SLCD_CHAR5_MASK1;
+        ram1 |= SLCD_CHAR5_UPDATE1(segments[1]);
 
-      ram2 &= SLCD_CHAR5_MASK2;
-      ram2 |= SLCD_CHAR5_UPDATE2(segments[2]);
+        ram2 &= SLCD_CHAR5_MASK2;
+        ram2 |= SLCD_CHAR5_UPDATE2(segments[2]);
 
-      ram3 &= SLCD_CHAR5_MASK3;
-      ram3 |= SLCD_CHAR5_UPDATE3(segments[3]);
-      break;
+        ram3 &= SLCD_CHAR5_MASK3;
+        ram3 |= SLCD_CHAR5_UPDATE3(segments[3]);
+        break;
 
-    case 5:
-      ram0 &= SLCD_CHAR6_MASK0;
-      ram0 |= SLCD_CHAR6_UPDATE0(segments[0]);
+      case 5:
+        ram0 &= SLCD_CHAR6_MASK0;
+        ram0 |= SLCD_CHAR6_UPDATE0(segments[0]);
 
-      ram1 &= SLCD_CHAR6_MASK1;
-      ram1 |= SLCD_CHAR6_UPDATE1(segments[1]);
+        ram1 &= SLCD_CHAR6_MASK1;
+        ram1 |= SLCD_CHAR6_UPDATE1(segments[1]);
 
-      ram2 &= SLCD_CHAR6_MASK2;
-      ram2 |= SLCD_CHAR6_UPDATE2(segments[2]);
+        ram2 &= SLCD_CHAR6_MASK2;
+        ram2 |= SLCD_CHAR6_UPDATE2(segments[2]);
 
-      ram3 &= SLCD_CHAR6_MASK3;
-      ram3 |= SLCD_CHAR6_UPDATE3(segments[3]);
-      break;
+        ram3 &= SLCD_CHAR6_MASK3;
+        ram3 |= SLCD_CHAR6_UPDATE3(segments[3]);
+        break;
 
-    default:
-      return;
-  }
+      default:
+        return;
+    }
 
   putreg32(ram0, STM32_LCD_RAM0L);
   putreg32(ram1, STM32_LCD_RAM1L);
@@ -903,17 +903,17 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
            * and fall through.
            */
 
-           tmp = (int)g_slcdstate.curpos - count;
-           if (tmp < 0)
-             {
-               tmp   = 0;
-               count = g_slcdstate.curpos;
-             }
+          tmp = (int)g_slcdstate.curpos - count;
+          if (tmp < 0)
+            {
+              tmp   = 0;
+              count = g_slcdstate.curpos;
+            }
 
-           /* Save the updated cursor positions */
+          /* Save the updated cursor positions */
 
-           g_slcdstate.curpos = tmp;
-         }
+          g_slcdstate.curpos = tmp;
+        }
 
       case SLCDCODE_FWDDEL:          /* DELete (forward delete) N characters moving text */
         if (count > 0)
@@ -1409,6 +1409,7 @@ static int slcd_ioctl(struct file *filep, int cmd, unsigned long arg)
       case SLCDIOC_GETCONTRAST:
         {
           int *contrast = (int *)((uintptr_t)arg);
+
           if (!contrast)
             {
               return -EINVAL;
