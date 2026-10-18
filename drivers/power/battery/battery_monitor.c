@@ -309,6 +309,7 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
       case BATIOC_STATE:
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->state(dev, ptr);
@@ -319,6 +320,7 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
       case BATIOC_HEALTH:
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->health(dev, ptr);
@@ -329,6 +331,7 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
       case BATIOC_ONLINE:
         {
           FAR bool *ptr = (FAR bool *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->online(dev, ptr);
@@ -339,6 +342,7 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
       case BATIOC_VOLTAGE:
         {
           FAR int *voltsp = (FAR int *)((uintptr_t)arg);
+
           if (voltsp)
             {
               ret = dev->ops->voltage(dev, voltsp);
@@ -350,6 +354,7 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
         {
           FAR struct battery_monitor_current_s *current =
               (FAR struct battery_monitor_current_s *)((uintptr_t)arg);
+
           if (current)
             {
               ret = dev->ops->current(dev, current);
@@ -360,6 +365,7 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
       case BATIOC_OPERATE:
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->operate(dev, (uintptr_t)arg);
@@ -371,6 +377,7 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
         {
           FAR struct battery_monitor_voltage_s *ptr =
               (FAR struct battery_monitor_voltage_s *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->cell_voltage(dev, ptr);
@@ -382,6 +389,7 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
         {
           FAR struct battery_monitor_balance_s *ptr =
               (FAR struct battery_monitor_balance_s *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->balance(dev, ptr);
@@ -401,6 +409,7 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
         {
           FAR struct battery_monitor_limits_s *ptr =
               (FAR struct battery_monitor_limits_s *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->setlimits(dev, ptr);
@@ -412,6 +421,7 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
         {
           FAR struct battery_monitor_switches_s *ptr =
               (FAR struct battery_monitor_switches_s *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->chgdsg(dev, ptr);
@@ -431,6 +441,7 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
         {
           FAR struct battery_monitor_temperature_s *ptr =
               (FAR struct battery_monitor_temperature_s *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->temperature(dev, ptr);
@@ -441,6 +452,7 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
       case BATIOC_COULOMBS:
         {
           FAR int *coulombp = (FAR int *)((uintptr_t)arg);
+
           if (coulombp)
             {
               ret = dev->ops->coulombs(dev, coulombp);
@@ -451,6 +463,7 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
       case BATIOC_CHIPID:
         {
           FAR unsigned int *ptr = (FAR unsigned int *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->chipid(dev, ptr);

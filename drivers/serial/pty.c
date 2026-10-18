@@ -757,6 +757,7 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case TIOCGPTN:    /* Get Pty Number (of pty-mux device): FAR int* */
         {
           FAR int *ptyno = (FAR int *)((uintptr_t)arg);
+
           if (ptyno == NULL)
             {
               ret = -EINVAL;
@@ -800,6 +801,7 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case TIOCGPTLCK:  /* Get Pty lock state: FAR int* */
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
+
           if (ptr == NULL)
             {
               ret = -EINVAL;

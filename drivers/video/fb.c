@@ -695,33 +695,33 @@ static off_t fb_seek(FAR struct file *filep, off_t offset, int whence)
 
   switch (whence)
     {
-    case SEEK_CUR:
-      newpos = filep->f_pos + offset;
-      break;
+      case SEEK_CUR:
+        newpos = filep->f_pos + offset;
+        break;
 
-    case SEEK_SET:
-      newpos = offset;
-      break;
+      case SEEK_SET:
+        newpos = offset;
+        break;
 
-    case SEEK_END:
+      case SEEK_END:
 
-      /* Get panel info */
+        /* Get panel info */
 
-      ret = fb_get_panelinfo(fb, &panelinfo, priv->overlay);
+        ret = fb_get_panelinfo(fb, &panelinfo, priv->overlay);
 
-      if (ret < 0)
-        {
-          return ret;
-        }
+        if (ret < 0)
+          {
+            return ret;
+          }
 
-      newpos = panelinfo.fblen + offset;
-      break;
+        newpos = panelinfo.fblen + offset;
+        break;
 
-    default:
+      default:
 
-      /* Return EINVAL if the whence argument is invalid */
+        /* Return EINVAL if the whence argument is invalid */
 
-      return -EINVAL;
+        return -EINVAL;
     }
 
   /* Opengroup.org:
@@ -1285,7 +1285,7 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                 varinfo->blue.length   = 8;
                 varinfo->transp.length = 8;
                 break;
-          }
+            }
 
           nxmutex_unlock(&fb->lock);
         }
@@ -1486,6 +1486,7 @@ static int fb_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
       /* This is a request to tear down the poll. */
 
       FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+
       *slot = NULL;
       fds->priv = NULL;
     }
@@ -1511,6 +1512,7 @@ static int fb_get_panelinfo(FAR struct fb_chardev_s *fb,
   if (overlay != FB_NO_OVERLAY)
     {
       struct fb_overlayinfo_s oinfo;
+
       DEBUGASSERT(fb->vtable->getoverlayinfo != NULL);
       memset(&oinfo, 0, sizeof(oinfo));
       ret = fb->vtable->getoverlayinfo(fb->vtable, overlay, &oinfo);

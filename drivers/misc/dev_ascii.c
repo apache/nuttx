@@ -77,6 +77,7 @@ static ssize_t devascii_read(FAR struct file *filep, FAR char *buffer,
                              size_t len)
 {
   size_t i;
+
   for (i = 0; i < len; i++)
     {
       buffer[i] = PRINTABLE_FIRST + (filep->f_pos + i) % PRINTABLE_COUNT;

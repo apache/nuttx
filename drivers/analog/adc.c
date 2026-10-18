@@ -141,6 +141,7 @@ static int adc_open(FAR struct file *filep)
               /* Yes.. perform one time hardware initialization. */
 
               irqstate_t flags = enter_critical_section();
+
               ret = dev->ad_ops->ao_setup(dev);
               if (ret == OK)
                 {
@@ -378,6 +379,7 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer,
                    */
 
                   int16_t data16 = data >> 16;
+
                   memcpy(&buffer[nread], &data16, 2);
                 }
               else if (msglen == 3)
@@ -808,12 +810,12 @@ int adc_register(FAR const char *path, FAR struct adc_dev_s *dev)
     {
       if (alloc_channel)
         {
-           kmm_free(fifo->af_channel);
+          kmm_free(fifo->af_channel);
         }
 
       if (alloc_data)
         {
-           kmm_free(fifo->af_data);
+          kmm_free(fifo->af_data);
         }
 
       nxsem_destroy(&dev->ad_recv.af_sem);

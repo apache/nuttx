@@ -250,6 +250,7 @@ static uint32_t ramlog_bufferused(FAR struct ramlog_dev_s *priv,
                                   FAR struct ramlog_user_s *upriv)
 {
   uint32_t used = priv->rl_header->rl_head - upriv->rl_tail;
+
   return used > priv->rl_bufsize ? priv->rl_bufsize : used;
 }
 

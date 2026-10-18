@@ -855,6 +855,7 @@ static void change_capture_state(FAR capture_mng_t *cmng,
     {
       FAR vbuf_container_t *container =
         video_framebuff_get_vacant_container(&cmng->capture_inf.bufinf);
+
       if (container != NULL)
         {
           cmng->capture_inf.seqnum = 0;
@@ -875,7 +876,7 @@ static void change_capture_state(FAR capture_mng_t *cmng,
   else if (current_state == CAPTURE_STATE_CAPTURE &&
            next_state    != CAPTURE_STATE_CAPTURE)
     {
-          stop_capture(cmng, V4L2_BUF_TYPE_VIDEO_CAPTURE);
+      stop_capture(cmng, V4L2_BUF_TYPE_VIDEO_CAPTURE);
     }
 
   cmng->capture_inf.state = updated_next_state;
@@ -1226,6 +1227,7 @@ static void cleanup_streamresources(FAR capture_type_inf_t *type_inf,
 static void cleanup_scene_parameter(FAR capture_scene_params_t **vsp)
 {
   FAR capture_scene_params_t *sp = *vsp;
+
   ASSERT(sp);
 
   if (sp->gamma_curve != NULL)
@@ -2225,7 +2227,7 @@ static int capture_reqbufs(FAR struct file *filep,
             {
               if (imgdata->ops->free)
                 {
-                    imgdata->ops->free(imgdata, type_inf->bufheap);
+                  imgdata->ops->free(imgdata, type_inf->bufheap);
                 }
               else
                 {
