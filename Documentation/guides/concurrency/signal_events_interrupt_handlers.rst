@@ -210,7 +210,9 @@ Signals
 Signals would work fine too. Signals have a side-effect that is sometimes 
 helpful and sometimes a pain in the butt: They cause almost all kinds of 
 waits (``read()``, ``sem_wait()``, etc.) to wake up and return an error with 
-``errno=EINTR``.
+``errno=EINTR``.  A signal that is ignored (that has no action, as
+``SIGCHLD`` by default) is discarded and does not wake a wait, as POSIX
+requires: a program must install a handler for a signal that should wake it.
 
 That is sometimes helpful because you can wake up a ``recv()`` or a ``read()`` 
 etc., detect the event that generated the signal, and do something 
