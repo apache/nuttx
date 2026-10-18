@@ -598,7 +598,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
        */
 
       if (stcb->task_state == TSTATE_WAIT_SIG &&
-          (masked == 0 ||
+          ((masked == 0 && !ignored) ||
            (nxsig_ismember(&stcb->sigwaitmask, info->si_signo) == 1)))
         {
           if (stcb->sigunbinfo != NULL)
@@ -662,10 +662,14 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
 
       /* Check if the task is waiting for an unmasked signal. If so, then
        * unblock it. This must be performed in a critical section because
-       * signals can be queued from the interrupt level.
+       * signals can be queued from the interrupt level.  An ignored signal
+       * does not end nanosleep(), pause() or sigsuspend(): it wakes only
+       * sigwaitinfo() and sigtimedwait() when they wait for it.
        */
 
-      if (stcb->task_state == TSTATE_WAIT_SIG)
+      if (stcb->task_state == TSTATE_WAIT_SIG &&
+          (!ignored ||
+           nxsig_ismember(&stcb->sigwaitmask, info->si_signo) == 1))
         {
           if (stcb->sigunbinfo != NULL)
             {
