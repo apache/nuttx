@@ -239,14 +239,19 @@ belonging to a unified interface:
   :retval OK (0): Success.
   :retval < 0: Error.
 
-.. c:function:: int poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
+.. c:function:: int poll(FAR struct file *filep, FAR struct pollfd_s *fds, bool setup)
 
   Underlying implementation of ``poll()``. The ``poll()`` function provides
   applications with a mechanism for multiplexing input/output over a set of
   file descriptors.
 
+  ``struct pollfd_s`` (``include/nuttx/poll.h``) is the kernel copy of one
+  ``struct pollfd`` entry. It has 32-bit ``events`` and ``revents`` and the
+  fields ``arg``, ``cb`` and ``priv`` that the kernel and the driver use.
+  The driver reports events with ``poll_notify()``.
+
   :param FAR struct file * filep: Open file's pointer.
-  :param FAR struct pollfd * fds: The structure describing the events to be
+  :param FAR struct pollfd_s * fds: The structure describing the events to be
     monitored, OR NULL if this is a request to stop monitoring events.
   :param bool setup: true: Setup up the poll; false: Teardown the poll
   :returns: Status of poll operation.
