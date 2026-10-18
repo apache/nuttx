@@ -248,6 +248,31 @@ config PIC32MZ_WDT_BASE_US
 
 endif # PIC32MZ_WDT
 
+config PIC32MZ_PROGMEM
+	bool "Program flash storage (NVM)"
+	default n
+	depends on ARCH_CHIP_PIC32MZW1
+	select ARCH_HAVE_PROGMEM
+	select ARCH_HAVE_PROGMEM_READ
+	---help---
+		Use the last pages of the program flash to store data, through the
+		progmem interface (MTD_PROGMEM makes an MTD device of it).  The
+		pages are erased and programmed by the flash controller (NVM), so
+		the program image must not reach them: the linker script of the
+		board has to stop the program flash PIC32MZ_PROGMEM_NPAGES pages
+		before its end.
+
+if PIC32MZ_PROGMEM
+
+config PIC32MZ_PROGMEM_NPAGES
+	int "Number of 4 KB pages"
+	default 2
+	range 1 64
+	---help---
+		Pages reserved at the end of the 1 MB program flash.
+
+endif # PIC32MZ_PROGMEM
+
 config PIC32MZ_T2
 	bool "Timer 2 (T2)"
 	default n

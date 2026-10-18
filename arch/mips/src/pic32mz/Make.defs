@@ -171,6 +171,15 @@ ifeq ($(CONFIG_PIC32MZ_WDT),y)
 CHIP_CSRCS += pic32mz_wdt.c
 endif
 
+ifeq ($(CONFIG_PIC32MZ_PROGMEM),y)
+CHIP_CSRCS += pic32mz_progmem.c
+
+# The pages at the end of the 1 MB program flash (0x90000000) are not
+# part of the program image: tell the linker script where they start.
+
+LDFLAGS += --defsym=PIC32MZ_PROGMEM_START=$(shell printf '0x%x' $$((0x90100000 - $(CONFIG_PIC32MZ_PROGMEM_NPAGES) * 4096)))
+endif
+
 ifeq ($(CONFIG_PIC32MZ_FREERUN),y)
 CHIP_CSRCS += pic32mz_freerun.c
 endif

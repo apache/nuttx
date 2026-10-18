@@ -102,6 +102,7 @@
  */
 
 #define PIC32MZ_CONFIG_K1BASE       (PIC32MZ_SFR_K1BASE + 0x00000000) /* CFGCONx, SYSKEY, PMDx */
+#define PIC32MZ_NVM_K1BASE          (PIC32MZ_SFR_K1BASE + 0x00000600) /* Flash controller (NVM) */
 #define PIC32MZ_WDT_K1BASE          (PIC32MZ_SFR_K1BASE + 0x00000800) /* Watchdog Timer */
 #define PIC32MZ_DMT_K1BASE          (PIC32MZ_SFR_K1BASE + 0x00000a00) /* Deadman Timer */
 #define PIC32MZ_OSC_K1BASE          (PIC32MZ_SFR_K1BASE + 0x00001200) /* Oscillator, RCON, RSWRST */
