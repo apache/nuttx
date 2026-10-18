@@ -2061,6 +2061,7 @@ static int userfs_rename(FAR struct inode *mountpt,
   FAR struct userfs_state_s *priv;
   FAR struct userfs_rename_request_s *req;
   FAR struct userfs_rename_response_s *resp;
+  struct stat buf;
   int oldpathlen;
   int newpathlen;
   ssize_t nsent;
@@ -2070,6 +2071,15 @@ static int userfs_rename(FAR struct inode *mountpt,
   DEBUGASSERT(mountpt != NULL &&
               mountpt->i_private != NULL);
   priv = mountpt->i_private;
+
+  /* The server may not replace an existing newrelpath.  EEXIST makes the
+   * VFS remove it first.
+   */
+
+  if (userfs_stat(mountpt, newrelpath, &buf) >= 0)
+    {
+      return -EEXIST;
+    }
 
   /* Check the path lengths */
 
