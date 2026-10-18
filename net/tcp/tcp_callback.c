@@ -186,7 +186,7 @@ static uint32_t tcp_ofoseg_data_event(FAR struct net_driver_s *dev,
 #endif
 
           rcvseq = seg->right;
-          net_setsequence(conn->rcvseq, rcvseq);
+          tcp_setsequence(conn->rcvseq, rcvseq);
           if (seg->data != NULL)
             {
               net_iob_concat(&conn->readahead, &seg->data);
@@ -227,7 +227,7 @@ static uint32_t tcp_ofoseg_data_event(FAR struct net_driver_s *dev,
 #endif
 
                   rcvseq = seg->right;
-                  net_setsequence(conn->rcvseq, rcvseq);
+                  tcp_setsequence(conn->rcvseq, rcvseq);
                   if (seg->data != NULL)
                     {
                       net_iob_concat(&conn->readahead, &seg->data);
