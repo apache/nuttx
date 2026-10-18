@@ -221,6 +221,7 @@ static int comp_open(FAR struct file *filep)
               /* Yes.. perform one time hardware initialization. */
 
               irqstate_t flags = enter_critical_section();
+
               ret = dev->ad_ops->ao_setup(dev);
               if (ret == OK)
                 {

@@ -824,6 +824,7 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case PIPEIOC_POLLINTHRD:
         {
           pipe_ndx_t threshold = (pipe_ndx_t)arg;
+
           if (threshold >= dev->d_bufsize)
             {
               ret = -EINVAL;
@@ -838,6 +839,7 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case PIPEIOC_POLLOUTTHRD:
         {
           pipe_ndx_t threshold = (pipe_ndx_t)arg;
+
           if (threshold >= dev->d_bufsize)
             {
               ret = -EINVAL;
@@ -864,6 +866,7 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case PIPEIOC_SETSIZE:
         {
           size_t size = (size_t)arg;
+
           if (size == 0)
             {
               ret = -EINVAL;
