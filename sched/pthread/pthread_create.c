@@ -40,6 +40,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/pthread.h>
 
 #include "task/task.h"
@@ -207,6 +208,9 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
           default_attr.priority = parent->sched_priority;
         }
 
+      /* The RLIMIT_STACK soft limit gives the default stack size */
+
+      default_attr.stacksize = lib_get_stacksize(default_attr.stacksize);
       attr = &default_attr;
     }
 

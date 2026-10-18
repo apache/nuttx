@@ -36,6 +36,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/binfmt/binfmt.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 
 #include "binfmt.h"
 
@@ -187,7 +188,9 @@ static int elf_loadbinary(FAR struct binary_s *binp,
     }
   else
     {
-      binp->stacksize = CONFIG_ELF_STACKSIZE;
+      /* The RLIMIT_STACK soft limit of the caller, if it set one */
+
+      binp->stacksize = lib_get_stacksize(CONFIG_ELF_STACKSIZE);
     }
 
   ret = libelf_findsymbol(&loadinfo, "nx_priority", &sym);

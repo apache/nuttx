@@ -120,6 +120,10 @@ FAR struct file_struct *lib_get_stream(int fd);
 
 unsigned long nrand(unsigned long limit);
 
+/* Functions defined in lib_getstacksize.c **********************************/
+
+size_t lib_get_stacksize(size_t size);
+
 /* Functions defined in lib_tempbuffer.c ************************************/
 
 #ifdef CONFIG_LIBC_TEMPBUFFER
