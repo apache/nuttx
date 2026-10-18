@@ -48,6 +48,8 @@ I2C1/I2C2                 Build   Not tested; no I2C device on board
 Ethernet                  Yes     LAN8720A, RMII, 10/100 Mbps
 Wi-Fi                     Yes     Station or Soft-AP, WPA2/WPA3-Personal;
                                   XC32 only, see `Wi-Fi`_
+Watchdog                  Yes     Fixed time-out of about 8.2 s, see
+                                  `Watchdog`_
 ========================= ======= ====================================
 
 Pin mapping
@@ -330,6 +332,38 @@ disabled and the MAC uses the oscillator clock on the same pin.
 The PIC32MZ-W1 has no factory-programmed Ethernet MAC address. Assign one
 with ``CONFIG_NETINIT_NOMAC`` or with the ``SIOCSIFHWADDR`` ioctl before the
 interface is brought up.
+
+Watchdog
+========
+
+``CONFIG_PIC32MZ_WDT`` registers the watchdog timer as ``/dev/watchdog0``.
+It is off in all the configurations. The watchdog is clocked by the 32.768
+kHz LPRC oscillator and its time-out is fixed by the device configuration
+(``DEVCFG2.WDTPS``), which follows ``BOARD_WD_PRESCALER`` in
+``boards/mips/pic32mz/ev49n51a/include/board.h``. The board sets it to
+8192, and each count lasts ``CONFIG_PIC32MZ_WDT_BASE_US`` (1000 us), so the
+watchdog expires 8.2 s after the last keep alive. The time-out cannot be
+changed at run time: ``WDIOC_SETTIMEOUT`` accepts a value up to the hardware
+one and fails with ``ERANGE`` beyond it.
+
+By default the watchdog is stopped at reset and the application starts it
+with ``WDIOC_START``. If ``CONFIG_PIC32MZ_WDTENABLE`` is selected, the
+``DEVCFG2.WDTEN`` fuse starts it at reset and it cannot be stopped
+(``WDIOC_STOP`` fails with ``ENOTSUP``). The driver then kicks it once when
+it registers the device, so the application, or
+``CONFIG_WATCHDOG_AUTOMONITOR``, must take over within the time-out or the
+board resets.
+
+The ``wdog`` example (``CONFIG_EXAMPLES_WATCHDOG``) can be used to try it.
+The command below keeps the watchdog alive for one second and then stops, so
+the board resets about 8 s later:
+
+.. code:: console
+
+   nsh> wdog -d 1000 -p 200 -t 2000
+
+After a reset caused by the watchdog (``RCON.WDTO``), the next boot logs
+``Last reset was caused by the watchdog`` and clears the flag.
 
 Wi-Fi
 =====
