@@ -839,12 +839,14 @@ static int rpmsgfs_chstat_handler(FAR struct rpmsg_endpoint *ept,
                                   uint32_t src, FAR void *priv)
 {
   FAR struct rpmsgfs_chstat_s *msg = data;
+  bool nofollow = (msg->flags & CH_STAT_NOFOLLOW) != 0;
   struct timespec times[2];
   int ret = 0;
 
   if (msg->flags & CH_STAT_MODE)
     {
-      ret = chmod(msg->pathname, msg->buf.mode);
+      ret = nofollow ? lchmod(msg->pathname, msg->buf.mode) :
+                       chmod(msg->pathname, msg->buf.mode);
       if (ret < 0)
         {
           ret = -get_errno();
@@ -854,7 +856,8 @@ static int rpmsgfs_chstat_handler(FAR struct rpmsg_endpoint *ept,
 
   if (msg->flags & (CH_STAT_UID | CH_STAT_GID))
     {
-      ret = chown(msg->pathname, msg->buf.uid, msg->buf.gid);
+      ret = nofollow ? lchown(msg->pathname, msg->buf.uid, msg->buf.gid) :
+                       chown(msg->pathname, msg->buf.uid, msg->buf.gid);
       if (ret < 0)
         {
           ret = -get_errno();
@@ -886,7 +889,8 @@ static int rpmsgfs_chstat_handler(FAR struct rpmsg_endpoint *ept,
           times[1].tv_nsec = UTIME_OMIT;
         }
 
-      ret = utimens(msg->pathname, times);
+      ret = nofollow ? lutimens(msg->pathname, times) :
+                       utimens(msg->pathname, times);
       if (ret < 0)
         {
           ret = -get_errno();
