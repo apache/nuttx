@@ -49,9 +49,11 @@ if(CONFIG_LTO_FULL)
 endif()
 
 add_link_options(--entry=__start)
-# override the ARCHIVE command
-set(CMAKE_ARCHIVE_COMMAND "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
-set(CMAKE_RANLIB_COMMAND "<CMAKE_RANLIB> <TARGET>")
+# override the ARCHIVE command.  CMake keeps CMAKE_AR and CMAKE_RANLIB of the
+# first configure, so put the tools selected above in the rules: they follow a
+# later change of the LTO options.
+set(CMAKE_ARCHIVE_COMMAND "${CMAKE_AR} rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
+set(CMAKE_RANLIB_COMMAND "${CMAKE_RANLIB} <TARGET>")
 set(CMAKE_C_ARCHIVE_CREATE ${CMAKE_ARCHIVE_COMMAND})
 set(CMAKE_CXX_ARCHIVE_CREATE ${CMAKE_ARCHIVE_COMMAND})
 set(CMAKE_ASM_ARCHIVE_CREATE ${CMAKE_ARCHIVE_COMMAND})
