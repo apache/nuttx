@@ -38,6 +38,6 @@
 #ifndef CONFIG_LIBM_ARCH_FABSF
 float fabsf(float x)
 {
-  return ((x < 0) ? -x : x);
+  return signbit(x) ? -x : x;
 }
 #endif
