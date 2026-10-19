@@ -165,7 +165,24 @@ static int nx_vioctl(int fd, int req, va_list ap)
 {
   FAR struct file *filep;
   FAR struct fd *fdp;
+  FAR int *nonblockp = NULL;
+  int nonblock;
   int ret;
+
+  /* FIONBIO passes a pointer to an int.  Read the int before file_get2(),
+   * so that a bad pointer faults with no file reference held, and give the
+   * driver a pointer to the copy.
+   */
+
+  if (req == FIONBIO)
+    {
+      nonblockp = va_arg(ap, FAR int *);
+      if (nonblockp != NULL)
+        {
+          nonblock  = *nonblockp;
+          nonblockp = &nonblock;
+        }
+    }
 
   ret = file_get2(fd, &filep, &fdp);
   if (ret < 0)
@@ -206,6 +223,10 @@ static int nx_vioctl(int fd, int req, va_list ap)
         *va_arg(ap, FAR uint8_t *) = fdp->f_tag_fdcheck;
         break;
 #endif
+
+      case FIONBIO:
+        ret = file_ioctl(filep, req, (unsigned long)(uintptr_t)nonblockp);
+        break;
 
       default:
         ret = file_vioctl(filep, req, ap);
