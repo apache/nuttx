@@ -112,6 +112,16 @@
 */
 
 def_fn ARCH_LIBCFUN(memcpy) p2align=6
+
+#ifdef __KERNEL__
+	/* The start and the end of the code, for the arm64 fault handler: a
+	 * system call that faults here on a user address can finish.
+	 */
+
+	.global	arm64_memcpy_start
+arm64_memcpy_start:
+#endif
+
 	.cfi_sections .debug_frame
 	.cfi_startproc
 	prfm	PLDL1KEEP, [src]
@@ -235,6 +245,10 @@ L(copy_long):
 	stp	C_l, C_h, [dstend, -16]
 	ret
 
+#ifdef __KERNEL__
+	.global	arm64_memcpy_end
+arm64_memcpy_end:
+#endif
 	.cfi_endproc
 	.size	ARCH_LIBCFUN(memcpy), . - ARCH_LIBCFUN(memcpy)
 
