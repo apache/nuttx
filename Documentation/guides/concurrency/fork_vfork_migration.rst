@@ -234,10 +234,11 @@ Note also on ``waitpid()`` after ``vfork()``
 The ``vfork()`` parent is now resumed when the child's TCB is torn down, so by
 the time it runs the child is completely gone.  Where the child called
 ``exec()`` this makes no difference -- ``exec_swap()`` has already given the
-loaded program the child's pid, and that program is still running, so
-``waitpid()`` behaves normally.  Where the child called ``_exit()``,
-``waitpid()`` can only return its status if ``CONFIG_SCHED_CHILD_STATUS`` is
-enabled; otherwise it returns ``ECHILD``, because NuttX does not retain the
+loaded program the child's pid, so ``waitpid()`` behaves normally.  Where the
+child called ``_exit()``, or the loaded program exits before the parent calls
+``waitpid()``, ``waitpid()`` can only return its status if
+``CONFIG_SCHED_CHILD_STATUS`` is enabled (the default in a kernel build);
+otherwise it returns ``ECHILD``, because NuttX does not retain the
 status of a task that no longer exists.  That is a pre-existing property of
 that configuration, not a change:  the previous implementation blocked in a
 libc ``waitpid(WNOWAIT)`` and an application's own ``waitpid()`` afterwards hit
