@@ -82,7 +82,7 @@ finish()   # $1 module name: convert and report
            grep -oE 'R_ARM_[A-Z0-9_]+' | sort | uniq -c | tr -s ' ' | tr '\n' ' ')
 
   if ! "$LDNXFLAT" -e main -o "$d/m.nxf" "$d/m.r2" > "$d/ld.log" 2>&1; then
-    report "$name" LDNXFLAT "$(grep -m1 -iE 'error' "$d/ld.log")"
+    report "$name" LDNXFLAT "$(head -1 "$d/ld.log")"
     return 1
   fi
 
