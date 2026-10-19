@@ -3535,6 +3535,17 @@ config ARCH_BOARD_NUCLEO_G474RE
 		STMicro Nucleo-G474RE board based on the STMicro STM32G474RET6
 		MCU, a Cortex-M4 with FPU, 170 MHz, 128 KB SRAM, 512 KB code.
 
+config ARCH_BOARD_NUCLEO_G491RE
+	bool "ST Micro Nucleo G491RE"
+	depends on ARCH_CHIP_STM32G491R
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_BOARD_COMMON
+	---help---
+		STMicro Nucleo-G491RE board based on the STMicro STM32G491RET6
+		MCU, a Cortex-M4 with FPU, 170 MHz, 112 KB SRAM, 512 KB code.
+
 config ARCH_BOARD_B_L072Z_LRWAN1
 	bool "B-L072Z-LRWAN1"
 	depends on ARCH_CHIP_STM32L072CZ
@@ -4492,6 +4503,7 @@ config ARCH_BOARD
 	default "nucleo-g431kb"                if ARCH_BOARD_NUCLEO_G431KB
 	default "nucleo-g431rb"                if ARCH_BOARD_NUCLEO_G431RB
 	default "nucleo-g474re"                if ARCH_BOARD_NUCLEO_G474RE
+	default "nucleo-g491re"                if ARCH_BOARD_NUCLEO_G491RE
 	default "b-l072z-lrwan1"               if ARCH_BOARD_B_L072Z_LRWAN1
 	default "b-l475e-iot01a"               if ARCH_BOARD_B_L475E_IOT01A
 	default "b-u585i-iot02a"               if ARCH_BOARD_B_U585I_IOT02A
