@@ -60,7 +60,7 @@ $(addsuffix .tmp,$(USER_LDSCRIPT)): $(USER_LDSCRIPT)
 # Create the nuttx_user file containing all of the user-mode code
 
 nuttx_user: $(OBJS) $(addsuffix .tmp,$(USER_LDSCRIPT))
-	$(Q) $(LD) -o $@ $(USER_LDFLAGS) $(USER_LIBPATHS) $(OBJS) --start-group $(USER_LDLIBS) $(USER_LIBGCC) --end-group
+	$(Q) $(LD) -o $@ $(USER_LDFLAGS) $(USER_LIBPATHS) $(OBJS) --start-group $(USER_LDLIBS) --end-group $(USER_LIBGCC)
 
 $(TOPDIR)$(DELIM)nuttx_user: nuttx_user
 	@echo "LD: nuttx_user"
