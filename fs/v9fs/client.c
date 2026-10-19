@@ -482,8 +482,8 @@ static uint32_t v9fs_map_setattr_flags(int flags)
       { CH_STAT_UID,   V9FS_SETATTR_UID },
       { CH_STAT_GID,   V9FS_SETATTR_GID },
       { CH_STAT_SIZE,  V9FS_SETATTR_SIZE },
-      { CH_STAT_ATIME, V9FS_SETATTR_ATIMESET },
-      { CH_STAT_MTIME, V9FS_SETATTR_MTIMESET },
+      { CH_STAT_ATIME, V9FS_SETATTR_ATIME | V9FS_SETATTR_ATIMESET },
+      { CH_STAT_MTIME, V9FS_SETATTR_MTIME | V9FS_SETATTR_MTIMESET },
     };
 
   for (i = 0; i < nitems(flags_map); i++)
