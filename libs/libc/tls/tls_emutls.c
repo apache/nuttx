@@ -31,6 +31,7 @@
 #include <string.h>
 
 #include <nuttx/atomic.h>
+#include <nuttx/list.h>
 #include <nuttx/mutex.h>
 #include <nuttx/tls.h>
 
@@ -76,6 +77,7 @@ struct __emutls_object
 
 struct emutls_array_s
 {
+  struct list_node node;  /* In g_emutls_arrays */
   uintptr_t size;
   FAR void *data[1];
 };
@@ -85,15 +87,56 @@ struct emutls_array_s
  ****************************************************************************/
 
 /* The index of a variable is global: in a flat build all task groups share
- * this data, but each variable has its own index.
+ * this data, but each variable has its own index.  g_emutls_objs[] gives
+ * the variable of each index (NULL if free), and g_emutls_arrays lists the
+ * arrays of all threads, so that the variables of an unloaded module can
+ * be freed in every thread.
  */
 
 static mutex_t g_emutls_lock = NXMUTEX_INITIALIZER;
+static struct list_node g_emutls_arrays =
+  LIST_INITIAL_VALUE(g_emutls_arrays);
+static FAR struct __emutls_object **g_emutls_objs;
 static uintptr_t g_emutls_count;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: emutls_newindex
+ *
+ * Description:
+ *   Give a variable the first free index.  The caller holds the lock.
+ *
+ ****************************************************************************/
+
+static uintptr_t emutls_newindex(FAR struct __emutls_object *obj)
+{
+  FAR struct __emutls_object **objs;
+  uintptr_t i;
+
+  for (i = 0; i < g_emutls_count && g_emutls_objs[i] != NULL; i++)
+    {
+    }
+
+  if (i == g_emutls_count)
+    {
+      objs = lib_realloc(g_emutls_objs, (i + 16) * sizeof(*objs));
+      if (objs == NULL)
+        {
+          abort();
+        }
+
+      memset(&objs[i], 0, 16 * sizeof(*objs));
+      g_emutls_objs = objs;
+      g_emutls_count = i + 16;
+    }
+
+  g_emutls_objs[i] = obj;
+  g_tls_emutls_release = lib_emutls_release;
+  return i;
+}
 
 /****************************************************************************
  * Name: emutls_alloc
@@ -132,7 +175,8 @@ static FAR void *emutls_alloc(FAR struct __emutls_object *obj)
  * Name: emutls_getarray
  *
  * Description:
- *   Return the array of the calling thread, with an entry for index.
+ *   Return the array of the calling thread, with an entry for index.  The
+ *   caller holds the lock.
  *
  ****************************************************************************/
 
@@ -149,6 +193,11 @@ emutls_getarray(FAR struct tls_info_s *tls, uintptr_t index)
       return array;
     }
 
+  if (array != NULL)
+    {
+      list_delete(&array->node);
+    }
+
   newsize = index + 16;
   newarray = lib_realloc(array, sizeof(struct emutls_array_s) +
                          (newsize - 1) * sizeof(FAR void *));
@@ -160,6 +209,7 @@ emutls_getarray(FAR struct tls_info_s *tls, uintptr_t index)
   memset(&newarray->data[oldsize], 0,
          (newsize - oldsize) * sizeof(FAR void *));
   newarray->size = newsize;
+  list_add_tail(&g_emutls_arrays, &newarray->node);
   tls->tl_emutls = newarray;
   g_tls_emutls_destruct = tls_emutls_destruct;
   return newarray;
@@ -182,33 +232,39 @@ emutls_getarray(FAR struct tls_info_s *tls, uintptr_t index)
 FAR void *__wrap___emutls_get_address(FAR void *arg)
 {
   FAR struct __emutls_object *obj = arg;
-  FAR struct emutls_array_s *array;
+  FAR struct tls_info_s *tls = tls_get_info();
+  FAR struct emutls_array_s *array = tls->tl_emutls;
   uintptr_t index;
+  FAR void *ptr;
 
-  /* loc.offset is the index plus one, or 0 before the first use */
+  /* loc.offset is the index plus one, or 0 before the first use.  Only the
+   * thread changes its array: no lock for a copy that exists.
+   */
 
-  index = emutls_load(&obj->loc.offset);
+  index = emutls_load(&obj->loc.offset) - 1;
+  if (array != NULL && index < array->size && array->data[index] != NULL)
+    {
+      return array->data[index];
+    }
+
+  nxmutex_lock(&g_emutls_lock);
+  index = obj->loc.offset;
   if (index == 0)
     {
-      nxmutex_lock(&g_emutls_lock);
-      index = obj->loc.offset;
-      if (index == 0)
-        {
-          index = ++g_emutls_count;
-          emutls_store(&obj->loc.offset, index);
-        }
-
-      nxmutex_unlock(&g_emutls_lock);
+      index = emutls_newindex(obj) + 1;
+      emutls_store(&obj->loc.offset, index);
     }
 
   index--;
-  array = emutls_getarray(tls_get_info(), index);
+  array = emutls_getarray(tls, index);
   if (array->data[index] == NULL)
     {
       array->data[index] = emutls_alloc(obj);
     }
 
-  return array->data[index];
+  ptr = array->data[index];
+  nxmutex_unlock(&g_emutls_lock);
+  return ptr;
 }
 
 /****************************************************************************
@@ -269,11 +325,55 @@ void tls_emutls_destruct(void)
       return;
     }
 
+  nxmutex_lock(&g_emutls_lock);
+  list_delete(&array->node);
   tls->tl_emutls = NULL;
+  nxmutex_unlock(&g_emutls_lock);
+
   for (i = 0; i < array->size; i++)
     {
       lib_free(array->data[i]);
     }
 
   lib_free(array);
+}
+
+/****************************************************************************
+ * Name: lib_emutls_release
+ *
+ * Description:
+ *   Free the copies, in every thread, of the variables whose control
+ *   objects are in [start, start + size), and free their indexes.  The
+ *   loader calls it before it frees the data of a module.
+ *
+ ****************************************************************************/
+
+void lib_emutls_release(FAR const void *start, size_t size)
+{
+  FAR struct emutls_array_s *array;
+  uintptr_t i;
+
+  nxmutex_lock(&g_emutls_lock);
+  for (i = 0; i < g_emutls_count; i++)
+    {
+      if (g_emutls_objs[i] == NULL ||
+          (uintptr_t)g_emutls_objs[i] - (uintptr_t)start >= size)
+        {
+          continue;
+        }
+
+      list_for_every_entry(&g_emutls_arrays, array, struct emutls_array_s,
+                           node)
+        {
+          if (i < array->size)
+            {
+              lib_free(array->data[i]);
+              array->data[i] = NULL;
+            }
+        }
+
+      g_emutls_objs[i] = NULL;
+    }
+
+  nxmutex_unlock(&g_emutls_lock);
 }
