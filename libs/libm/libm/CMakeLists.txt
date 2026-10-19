@@ -151,6 +151,10 @@ if(CONFIG_LIBM)
       __sin.c
       lib_gamma.c
       lib_lgamma.c
+      lib_lgammaf.c
+      lib_lgammal.c
+      lib_tgammaf.c
+      lib_tgammal.c
       lib_exp2.c
       lib_exp2f.c
       lib_exp2l.c
