@@ -34,6 +34,25 @@ ifneq ($(CONFIG_TLS_NCLEANUP),0)
 CSRCS += tls_cleanup.c
 endif
 
+# A GCC toolchain configured with --disable-tls compiles a thread_local
+# variable into a call to __emutls_get_address(), and the libgcc of such a
+# toolchain keeps one copy of the variable for the whole program.  Replace it
+# with the implementation of tls_emutls.c, which keeps one copy per thread.
+# The --wrap options that redirect the calls are in tools/Config.mk because
+# the link runs from arch/<arch>/src, which does not include this file.  The
+# conditions must stay the same in both places.
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU)$(CONFIG_ARCH_TOOLCHAIN_CLANG)$(CONFIG_ARCH_TOOLCHAIN_ARMCLANG)$(CONFIG_ARCH_TOOLCHAIN_GHS),y)
+ifneq ($(CONFIG_SCHED_THREAD_LOCAL),y)
+ifneq ($(CONFIG_DISABLE_PTHREAD),y)
+ifneq ($(CONFIG_TLS_NELEM),0)
+ifneq ($(CONFIG_TLS_TASK_NELEM),0)
+CSRCS += tls_emutls.c
+endif
+endif
+endif
+endif
+endif
+
 # Include tls build support
 
 DEPPATH += --dep-path tls

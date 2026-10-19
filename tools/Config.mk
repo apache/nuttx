@@ -895,3 +895,21 @@ LOWER_CASE = $(call ULMAP,$(LOWERMAP),$(1))
 ifeq ($(CONFIG_ITERABLE_SECTIONS_LINKER_INSERT),y)
   ARCHSCRIPT += $(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)linker$(DELIM)common-insert.ld
 endif
+
+# Like the fragment above, the --wrap options that redirect the thread_local
+# accessor to libs/libc/tls/tls_emutls.c have to be here rather than next to
+# the source, because the link runs from arch/<arch>/src, which includes this
+# file but not the Make.defs of libs/.  The conditions must stay the same as
+# in libs/libc/tls/Make.defs.
+
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU)$(CONFIG_ARCH_TOOLCHAIN_CLANG)$(CONFIG_ARCH_TOOLCHAIN_ARMCLANG)$(CONFIG_ARCH_TOOLCHAIN_GHS),y)
+ifneq ($(CONFIG_SCHED_THREAD_LOCAL),y)
+ifneq ($(CONFIG_DISABLE_PTHREAD),y)
+ifneq ($(CONFIG_TLS_NELEM),0)
+ifneq ($(CONFIG_TLS_TASK_NELEM),0)
+  LDFLAGS += --wrap=__emutls_get_address --wrap=__emutls_register_common
+endif
+endif
+endif
+endif
+endif
