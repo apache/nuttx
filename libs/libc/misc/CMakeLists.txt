@@ -30,7 +30,6 @@ list(
   lib_circbuf.c
   lib_creat.c
   lib_mknod.c
-  lib_umask.c
   lib_utsname.c
   lib_getrandom.c
   lib_xorshift128.c

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/misc/lib_umask.c
+ * sched/group/group_umask.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,15 +25,8 @@
  ****************************************************************************/
 
 #include <sys/stat.h>
-#include <nuttx/tls.h>
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-#ifdef CONFIG_BUILD_KERNEL
-static mode_t g_umask;
-#endif
+#include <nuttx/sched.h>
 
 /****************************************************************************
  * Public Functions
@@ -43,10 +36,11 @@ static mode_t g_umask;
  * Name: umask
  *
  * Description:
- *    Set and get the file mode creation mask
+ *   Set the file mode creation mask of the calling process.  Only the file
+ *   permission bits of the mask are used.
  *
  * Input Parameters:
- *   mask - The process' file mode creation mask
+ *   mask - The new file mode creation mask.
  *
  * Returned Value:
  *   The previous value of the mask.
@@ -55,33 +49,25 @@ static mode_t g_umask;
 
 mode_t umask(mode_t mask)
 {
+  FAR struct task_group_s *group = nxsched_self()->group;
   mode_t prev;
-#ifndef CONFIG_BUILD_KERNEL
-  FAR struct task_info_s *info;
 
-  info = task_get_info();
-  prev = info->ta_umask;
-  info->ta_umask = mask;
-#else
-  prev = g_umask;
-  g_umask = mask;
-#endif
-
+  prev = group->tg_umask;
+  group->tg_umask = mask & (S_IRWXU | S_IRWXG | S_IRWXO);
   return prev;
 }
 
 /****************************************************************************
  * Name: getumask
+ *
+ * Description:
+ *   Return the file mode creation mask of the calling process.
+ *
  ****************************************************************************/
 
 mode_t getumask(void)
 {
-#ifndef CONFIG_BUILD_KERNEL
-  FAR struct task_info_s *info;
+  FAR struct task_group_s *group = nxsched_self()->group;
 
-  info = task_get_info();
-  return info->ta_umask;
-#else
-  return g_umask;
-#endif
+  return group != NULL ? group->tg_umask : 0;
 }

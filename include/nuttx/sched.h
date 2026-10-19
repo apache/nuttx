@@ -462,6 +462,7 @@ struct task_group_s
   pid_t tg_ppid;                    /* This is the ID of the parent thread      */
   uint8_t tg_flags;                 /* See GROUP_FLAG_* definitions             */
   uint8_t tg_caps;                  /* See PR_CAP_* definitions                 */
+  mode_t  tg_umask;                 /* File mode creation mask (umask())        */
 
   /* Resource limits (getrlimit() and setrlimit()) **************************/
 

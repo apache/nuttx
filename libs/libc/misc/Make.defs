@@ -22,7 +22,7 @@
 
 # Add the internal C files to the build
 
-CSRCS += lib_bitmap.c lib_circbuf.c lib_creat.c lib_mknod.c lib_umask.c
+CSRCS += lib_bitmap.c lib_circbuf.c lib_creat.c lib_mknod.c
 CSRCS += lib_utsname.c lib_getrandom.c lib_xorshift128.c lib_tea_encrypt.c
 CSRCS += lib_tea_decrypt.c lib_impure.c lib_memfd.c
 CSRCS += lib_mutex.c lib_fchmodat.c lib_fstatat.c lib_getfullpath.c

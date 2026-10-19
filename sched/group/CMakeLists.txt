@@ -23,6 +23,7 @@
 set(SRCS
     group_create.c
     group_rlimit.c
+    group_umask.c
     group_join.c
     group_leave.c
     group_setupidlefiles.c
