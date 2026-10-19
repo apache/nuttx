@@ -38,10 +38,13 @@
  * Public Data
  ****************************************************************************/
 
-/* tls_emutls.c sets it on its first use, so exit() does not link it */
+/* tls_emutls.c sets them on its first use, so exit() and the loader do not
+ * link it.
+ */
 
 #ifdef CONFIG_TLS_EMUTLS
 CODE void (*g_tls_emutls_destruct)(void);
+CODE void (*g_tls_emutls_release)(FAR const void *start, size_t size);
 #endif
 
 /****************************************************************************
