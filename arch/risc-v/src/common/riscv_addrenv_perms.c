@@ -32,6 +32,7 @@
 #include <nuttx/addrenv.h>
 #include <nuttx/arch.h>
 #include <nuttx/pgalloc.h>
+#include <nuttx/sched.h>
 
 #include <arch/barriers.h>
 
@@ -49,6 +50,16 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifdef CONFIG_SMP
+static int flush_hart(FAR void *arg)
+{
+  UNUSED(arg);
+  mmu_invalidate_tlbs();
+  UP_ISB();
+  return OK;
+}
+#endif
 
 static uintptr_t get_pgtable(uintptr_t l1vaddr, uintptr_t vaddr)
 {
@@ -131,10 +142,27 @@ static int modify_region(uintptr_t vstart, uintptr_t vend, uintptr_t setmask)
       mmu_ln_restore(RV_MMU_PT_LEVELS, lnvaddr, vaddr, entry);
     }
 
-  /* When all is set and done, flush the data caches */
+  /* Make the new entries and the code in the pages visible to instruction
+   * fetch: sfence.vma and fence.i act on one hart only.
+   */
 
-  UP_ISB();
   UP_DMB();
+#ifdef CONFIG_SMP
+  {
+    cpu_set_t cpus;
+    int cpu;
+
+    CPU_ZERO(&cpus);
+    for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+      {
+        CPU_SET(cpu, &cpus);
+      }
+
+    nxsched_smp_call(cpus, flush_hart, NULL);
+  }
+#else
+  UP_ISB();
+#endif
 
   return OK;
 }
