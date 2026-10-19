@@ -20,7 +20,7 @@
 #
 ############################################################################
 
-CSRCS += group_create.c group_join.c group_leave.c group_rlimit.c
+CSRCS += group_create.c group_join.c group_leave.c group_rlimit.c group_umask.c
 CSRCS += group_setupidlefiles.c group_setuptaskfiles.c
 CSRCS += group_foreachchild.c group_killchildren.c
 

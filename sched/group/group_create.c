@@ -258,6 +258,15 @@ int group_allocate(FAR struct tcb_s *tcb, uint8_t ttype)
 
   group_init_rlimit(group, this_task()->group);
 
+  /* Inherit the file mode creation mask.  Kernel threads share one group
+   * and keep the mask 0.
+   */
+
+  if (ttype != TCB_FLAG_TTYPE_KERNEL && this_task()->group != NULL)
+    {
+      group->tg_umask = this_task()->group->tg_umask;
+    }
+
   /* Initialize file descriptors for the TCB */
 
   fdlist_init(&group->tg_fdlist);
