@@ -316,6 +316,28 @@ jobs:
             fi
 
             DEP_SHA=$(git -C "$REPO_PATH" rev-parse "dep-${DEP_NUM}")
+
+            # Skip a merged dependency and reject a closed one, as build.yml
+            # does.
+            if ! DEP_INFO=$(gh api "repos/${DEP_REPO}/pulls/${DEP_NUM}" \
+                --jq 'if .merged then "merged \(.merge_commit_sha)" else .state end'); then
+              echo "::warning::Could not read the state of ${DEP}; applying it."
+              DEP_INFO=""
+            fi
+            read -r DEP_STATE MERGE_SHA <<< "$DEP_INFO"
+            if [ "$DEP_STATE" = "merged" ] && \
+               git -C "$REPO_PATH" merge-base --is-ancestor "$MERGE_SHA" HEAD 2>/dev/null; then
+              echo "Dependency ${DEP} is merged as ${MERGE_SHA}; skipping it."
+              echo "- \`${DEP}\` @ \`${DEP_SHA}\` (already merged, skipped)" \
+                >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+              continue
+            fi
+
+            if [ "$DEP_STATE" = "closed" ]; then
+              echo "::error::Dependency ${DEP} is closed without merge; remove it from depends-on or reopen it."
+              exit 1
+            fi
+
             if [ -z "$COMMITS" ]; then
               echo "Dependency ${DEP} is already included."
               echo "- \`${DEP}\` @ \`${DEP_SHA}\` (already in the checkout)" \
