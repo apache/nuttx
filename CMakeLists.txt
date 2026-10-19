@@ -904,6 +904,7 @@ else()
   # renamed. The final nuttx binary is built by linking the host-specific
   # objects with the relocatable binary.
   include(nuttx_redefine_symbols)
+  get_property(nuttx_sim_rel_options GLOBAL PROPERTY NUTTX_SIM_REL_LINK_OPTIONS)
 
   # TODO: do with single function call?
   set(nuttx_libs_paths)
@@ -926,9 +927,10 @@ else()
       OUTPUT nuttx.rel
       COMMAND
         ${CMAKE_C_COMPILER} ARGS -r $<$<BOOL:${CONFIG_SIM_M32}>:-m32>
-        $<$<BOOL:${LINUX}>:-Wl,-z,noexecstack> $<TARGET_OBJECTS:sim_head>
-        $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--start-group> ${nuttx_libs_paths}
-        $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--end-group> -o nuttx.rel
+        $<$<BOOL:${LINUX}>:-Wl,-z,noexecstack> ${nuttx_sim_rel_options}
+        $<TARGET_OBJECTS:sim_head> $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--start-group>
+        ${nuttx_libs_paths} $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--end-group> -o
+        nuttx.rel
       COMMAND ${CMAKE_OBJCOPY} --redefine-syms=nuttx-names.dat nuttx.rel
       DEPENDS ${nuttx_libs} sim_head sim_redefine_symbols
       COMMAND_EXPAND_LISTS)
