@@ -175,6 +175,7 @@
 #define CH_STAT_ATIME      (1 << 3)
 #define CH_STAT_MTIME      (1 << 4)
 #define CH_STAT_SIZE       (1 << 7)
+#define CH_STAT_NOFOLLOW   (1 << 8)  /* Do not follow a final symbolic link */
 
 /****************************************************************************
  * Public Type Definitions

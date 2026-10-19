@@ -961,7 +961,8 @@ static int v9fs_vfs_chstat(FAR struct inode *mountpt,
 
   client = mountpt->i_private;
 
-  ret = v9fs_client_walk(client, relpath, NULL, false);
+  ret = v9fs_client_walk(client, relpath, NULL,
+                         (flags & CH_STAT_NOFOLLOW) != 0);
   if (ret < 0)
     {
       ferr("ERROR: Can't find the fid of the relpath %d\n", ret);
