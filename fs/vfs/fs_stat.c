@@ -188,6 +188,9 @@ errout_with_search:
 
 int nx_stat(FAR const char *path, FAR struct stat *buf, int resolve)
 {
+  struct stat kbuf;
+  int ret;
+
   /* Sanity checks */
 
   if (path == NULL  || buf == NULL)
@@ -202,9 +205,24 @@ int nx_stat(FAR const char *path, FAR struct stat *buf, int resolve)
 
   /* The perform the stat() operation on the path.  This is potentially
    * recursive if soft link support is enabled.
+   *
+   * Fill a local buffer and copy it to the caller's buffer at the end, when
+   * the inode and the path buffer are released.  A bad buffer then faults
+   * with nothing held.
    */
 
-  return stat_recursive(path, buf, resolve);
+  /* Clear it first: a file system fills only some of the fields, and the
+   * others must not give the caller what the kernel stack held.
+   */
+
+  memset(&kbuf, 0, sizeof(kbuf));
+  ret = stat_recursive(path, &kbuf, resolve);
+  if (ret >= 0)
+    {
+      memcpy(buf, &kbuf, sizeof(kbuf));
+    }
+
+  return ret;
 }
 
 /****************************************************************************
