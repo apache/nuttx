@@ -40,6 +40,6 @@
 #ifdef CONFIG_HAVE_LONG_DOUBLE
 long double fabsl(long double x)
 {
-  return ((x < 0) ? -x : x);
+  return signbit(x) ? -x : x;
 }
 #endif
