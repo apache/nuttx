@@ -150,7 +150,14 @@ if(CONFIG_LIBM)
       __cos.c
       __sin.c
       lib_gamma.c
-      lib_lgamma.c)
+      lib_lgamma.c
+      lib_lrint.c
+      lib_lrintf.c
+      lib_lrintl.c
+      lib_llrint.c
+      lib_llrintf.c
+      lib_llrintl.c
+      lib_nearbyintl.c)
 
   # Use the C versions of some functions only if architecture specific optimized
   # versions are not provided.
@@ -161,6 +168,10 @@ if(CONFIG_LIBM)
 
   if(NOT CONFIG_LIBM_ARCH_FLOOR)
     list(APPEND SRCS lib_floor.c)
+  endif()
+
+  if(NOT CONFIG_LIBM_ARCH_NEARBYINT)
+    list(APPEND SRCS lib_nearbyint.c)
   endif()
 
   if(NOT CONFIG_LIBM_ARCH_RINT)
@@ -181,6 +192,10 @@ if(CONFIG_LIBM)
 
   if(NOT CONFIG_LIBM_ARCH_FLOORF)
     list(APPEND SRCS lib_floorf.c)
+  endif()
+
+  if(NOT CONFIG_LIBM_ARCH_NEARBYINTF)
+    list(APPEND SRCS lib_nearbyintf.c)
   endif()
 
   if(NOT CONFIG_LIBM_ARCH_RINTF)
