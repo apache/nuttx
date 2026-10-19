@@ -213,6 +213,57 @@ nsh_trace
 
 NSH with the system trace subsystem enabled for scheduler/syscall tracing.
 
+nxdoom
+------
+
+NXDoom (``apps/games/NXDoom``) on an ILI9340 display attached to the
+Spresense extension board, with the keys read from the serial console.
+
+The display is used as a frame buffer through ``CONFIG_LCD_FRAMEBUFFER``
+and runs 320x240 in landscape. The keys are read from the serial console,
+and the WAD file is kept in the on-board SPI flash, which is mounted at
+``/mnt/spif``.
+
+To play:
+
+#. Get a WAD file and name it ``doom1.wad``. It has to fit in the 4 MB of
+   flash. See :doc:`/applications/games/nxdoom/index` for what NXDoom can use.
+   The one-level `Squashware <https://github.com/fragglet/squashware/releases>`_
+   IWAD is known to work.
+
+#. Build and flash the configuration as described above, then open the NSH
+   console with a terminal program. Some terminal programs reset the board
+   when they open the serial port, so connect first and only then continue.
+
+#. Receive the WAD file into the flash. ``rz`` waits for the sender for
+   120 seconds, so start the transfer from the terminal program right after::
+
+      nsh> rz -p /mnt/spif
+
+   In Tera Term, for example, use :menuselection:`File --> Transfer -->
+   ZMODEM --> Send` and pick ``doom1.wad``. The file stays in the flash, so
+   this is needed only once.
+
+#. Check that the whole file arrived. The size must match the file on the
+   host::
+
+      nsh> ls -l /mnt/spif
+
+#. Start the game::
+
+      nsh> nxdoom -iwad /mnt/spif/doom1.wad
+
+While the game runs, everything typed in the terminal is read as a game key,
+including what is meant for NSH. Move with the W, A, S and D keys (or the
+arrow keys), fire with J, run with K, strafe with L, use with E and open the
+menu with Q.
+
+The board has 1.5 MB of RAM, so the screen wipe is disabled
+(``CONFIG_GAMES_NXDOOM_NOWIPE``) and the render buffer is placed in
+``.bss``. The flash area that holds the WAD is 4 MB, so the shareware
+``DOOM1.WAD`` (about 4.2 MB) does not fit in it. Only the one-level Squashware
+IWAD has been tried.
+
 ostest
 ------
 
