@@ -176,6 +176,7 @@ Implementation Details
    :maxdepth: 1
    :caption: Contents:
    
+   popen.rst
    search.rst
    stdbit.rst
    stream.rst
