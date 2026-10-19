@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <sys/stat.h>
+#include <string.h>
 #include <unistd.h>
 #include <sched.h>
 #include <assert.h>
@@ -243,6 +244,7 @@ int file_fstat(FAR struct file *filep, FAR struct stat *buf)
 int nx_fstat(int fd, FAR struct stat *buf)
 {
   FAR struct file *filep;
+  struct stat kbuf;
   int ret;
 
   /* First, get the file structure.  Note that on failure,
@@ -252,10 +254,20 @@ int nx_fstat(int fd, FAR struct stat *buf)
   ret = file_get(fd, &filep);
   if (ret >= 0)
     {
-      /* Perform the fstat operation */
+      /* Perform the fstat operation on a local buffer.  Copy it to the
+       * caller's buffer after file_put(), so that a bad buffer faults with
+       * no file reference held.
+       */
 
-      ret = file_fstat(filep, buf);
+      /* Clear it first: a file system fills only some of the fields */
+
+      memset(&kbuf, 0, sizeof(kbuf));
+      ret = file_fstat(filep, &kbuf);
       file_put(filep);
+      if (ret >= 0)
+        {
+          memcpy(buf, &kbuf, sizeof(kbuf));
+        }
     }
 
   return ret;
