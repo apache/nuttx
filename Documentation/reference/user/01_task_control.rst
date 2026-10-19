@@ -48,6 +48,10 @@ it creates get the same limits. NuttX enforces two of them:
 ``getrlimit()`` reports the other resources as ``RLIM_INFINITY``, and
 ``setrlimit()`` fails with ``EINVAL`` for them.
 
+**File Mode Creation Mask**. A task keeps its file mode creation mask
+(``umask()``), and the tasks that it creates get the same mask. All the
+threads of a task use one mask. Kernel threads use the mask 0.
+
 **Task Control Interfaces**. The following task control interfaces are
 provided by NuttX:
 
