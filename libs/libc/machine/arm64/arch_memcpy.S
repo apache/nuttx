@@ -118,6 +118,16 @@
    bytes from the end.  */
 
 def_fn ARCH_LIBCFUN(memcpy) p2align=6
+
+#ifdef __KERNEL__
+	/* The start and the end of the code, for the arm64 fault handler: a
+	 * system call that faults here on a user address can finish.
+	 */
+
+	.global	arm64_memcpy_start
+arm64_memcpy_start:
+#endif
+
 	.cfi_sections .debug_frame
 	.cfi_startproc
 	add	srcend, src, count
@@ -227,6 +237,10 @@ L(copy64_from_end):
 	stp	A_q, B_q, [dstend, -32]
 	ret
 
+#ifdef __KERNEL__
+	.global	arm64_memcpy_end
+arm64_memcpy_end:
+#endif
 	.cfi_endproc
 	.size	ARCH_LIBCFUN(memcpy), . - ARCH_LIBCFUN(memcpy)
 
