@@ -76,6 +76,7 @@ static int file_vioctl(FAR struct file *filep, int req, va_list ap)
         if (ret == OK || ret == -ENOTTY)
           {
             FAR int *nonblock = (FAR int *)(uintptr_t)arg;
+
             if (nonblock && *nonblock)
               {
                 filep->f_oflags |= O_NONBLOCK;
@@ -125,6 +126,7 @@ static int file_vioctl(FAR struct file *filep, int req, va_list ap)
             inode->u.i_ops->ioctl != NULL)
           {
             struct geometry geo;
+
             ret = inode->u.i_ops->ioctl(filep, BIOC_GEOMETRY,
                                         (unsigned long)(uintptr_t)&geo);
             if (ret >= 0)
@@ -139,6 +141,7 @@ static int file_vioctl(FAR struct file *filep, int req, va_list ap)
             inode->u.i_ops->ioctl != NULL)
           {
             struct geometry geo;
+
             ret = inode->u.i_ops->ioctl(filep, BIOC_GEOMETRY,
                                         (unsigned long)(uintptr_t)&geo);
             if (ret >= 0)
