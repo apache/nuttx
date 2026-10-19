@@ -202,6 +202,7 @@ int up_cpu_start(int cpu)
 
 #ifdef CONFIG_SMP
   uint32_t *address = &g_smp_busy_wait_flag;
+
   *address = 1;
   up_flush_dcache((uintptr_t)address, (uintptr_t)address + sizeof(address));
 #endif
@@ -215,6 +216,8 @@ int up_cpu_start(int cpu)
 
 void arm64_boot_secondary_c_routine(void)
 {
+  arm64_tp_boot(this_cpu());
+
 #ifdef CONFIG_ARCH_HAVE_MPU
   arm64_mpu_init(false);
 #endif

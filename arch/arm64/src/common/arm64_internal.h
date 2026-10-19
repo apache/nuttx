@@ -392,6 +392,19 @@ void arm64_stack_color(void *stackbase, size_t nbytes);
 void arm64_enable_dbgmonitor(void);
 #endif
 
+static inline_function void arm64_tp_boot(int cpu)
+{
+  uintptr_t val;
+
+#ifdef CONFIG_SMP
+  val = (uintptr_t)(g_cpu_idlestackalloc[cpu]);
+#else
+  val = (uintptr_t)(g_idle_stack);
+#endif
+
+  write_sysreg(val, tpidr_el0);
+}
+
 #undef EXTERN
 #ifdef __cplusplus
 }
