@@ -57,6 +57,7 @@
 #define SHF_WRITE               0x1
 #define SHF_ALLOC               0x2
 #define SHF_EXECINSTR           0x4
+#define SHF_TLS                 0x400
 
 #define SHN_UNDEF               0
 #define SHN_COMMON              0xfff2
