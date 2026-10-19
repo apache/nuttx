@@ -184,6 +184,34 @@
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
+#elif defined (CONFIG_ARCH_CHIP_STM32G491R)
+#  define STM32_NFSMC                    0   /* No FSMC */
+#  define STM32_NATIM                    3   /* (3) Advanced motor control timers TIM1, 8, and 20 with DMA */
+#  define STM32_NGTIM                    6   /* (2) 16-bit general timers TIM3 and 4 with DMA
+                                              * (1) 32-bit general timer TIM2 with DMA
+                                              * (3) 16-bit general timers count-up timers with DMA: TIM15-17 */
+#  define STM32_NGTIMNDMA                0   /* (0) 16-bit general timers TIM9-14 without DMA */
+#  define STM32_NBTIM                    2   /* (2) Basic timers, TIM6-7 */
+#  define STM32_NDMA                     2   /* DMA1-2 */
+#  define STM32_NSPI                     3   /* SPI1-3 */
+#  define STM32_NI2S                     2   /* I2S2-3 (multiplexed with SPI2-3) */
+#  define STM32_NUSART                   5   /* USART1-3 and UART 4-5 */
+#  define STM32_NLPUART                  1   /* LPUART1 */
+#  define STM32_NI2C                     3   /* I2C1-3 */
+#  define STM32_NCAN                     2   /* FDCAN1-2 */
+#  define STM32_NSDIO                    0   /* No SDIO */
+#  define STM32_NLCD                     0   /* No LCD */
+#  define STM32_NUSBOTG                  0   /* No USB OTG FS/HS (but there is USB 2.0 full-speed
+                                              * with LPM and BCD support) */
+#  define STM32_NGPIO                    52  /* GPIOA-D, F-G */
+#  define STM32_NADC                     3   /* 12-bit ADC1-3 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1 and DAC3 */
+#  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
+#  define STM32_NCRC                     1   /* CRC */
+#  define STM32_NETHERNET                0   /* No Ethernet MAC */
+#  define STM32_NRNG                     1   /* Random number generator (RNG) */
+#  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
+
 #elif defined (CONFIG_ARCH_CHIP_STM32G474C)
 #  define STM32_NFSMC                    0   /* FSMC */
 #  define STM32_NATIM                    3   /* (3) Advanced motor control timers TIM1, 8, and 20 with DMA */

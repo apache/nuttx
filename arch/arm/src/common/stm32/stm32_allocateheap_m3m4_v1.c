@@ -522,6 +522,8 @@
 
 #if defined(CONFIG_STM32_STM32G47XX)
 #  define SRAM1_END                    0x20020000
+#elif defined(CONFIG_STM32_STM32G49XX)
+#  define SRAM1_END                    0x20018000
 #elif defined(CONFIG_STM32_STM32G43XX)
 #  define SRAM1_END                    0x20005800
 #else
@@ -534,6 +536,8 @@
 
 #if defined(CONFIG_STM32_STM32G47XX)
 #    define SRAM2_END                  0x10008000
+#elif defined(CONFIG_STM32_STM32G49XX)
+#    define SRAM2_END                  0x10004000
 #elif defined(CONFIG_STM32_STM32G43XX)
 #    define SRAM2_END                  0x10002700
 #else
