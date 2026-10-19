@@ -360,10 +360,5 @@ uint64_t *arm64_syscall(uint64_t *regs)
   /* Clear irq flag */
 
   write_sysreg((uintptr_t)tcb & ~1ul, tpidr_el1);
-
-  /* Update the TLS pointer */
-
-  write_sysreg(tcb->stack_alloc_ptr, tpidr_el0);
-
   return regs;
 }
