@@ -494,7 +494,9 @@ belonging to a unified interface:
     only the ones that are required according to the flags.
   :param int flags: A bit field that can have values including ``CH_STAT_MODE``
     , ``CH_STAT_UID``, ``CH_STAT_GID``, ``CH_STAT_ATIME`` or ``CH_STAT_MTIME``
-    which are or-ed together.
+    which are or-ed together. ``lchown()``, ``lchmod()`` and ``lutimens()``
+    also set ``CH_STAT_NOFOLLOW``: if ``relpath`` names a symbolic link, the
+    file system must change the link itself, not the file that it points to.
 
 .. c:function:: int syncfs(FAR struct inode *mountpt)
 
