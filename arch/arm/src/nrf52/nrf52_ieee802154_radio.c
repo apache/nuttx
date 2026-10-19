@@ -1768,11 +1768,14 @@ static void nrf52_radioi8_state_rx(struct nrf52_radioi8_dev_s *dev)
 {
   uint8_t *rxbuf = dev->radio->rxbuf;
 
-  /* Frame filter */
+  /* Frame filter, a frame with a CRC error is not acknowledged */
 
   if (dev->radio->state.waitack == false)
     {
-      if (!nrf52_radioi8_filter(dev))
+      if ((dev->state.rxmode != NRF52_RXMODE_NOCRC &&
+           !NRF52_RADIO_GETREG(dev->radio->lower,
+                               NRF52_RADIO_CRCSTATUS_OFFSET)) ||
+          !nrf52_radioi8_filter(dev))
         {
           nrf52_radioi8_trace_put(RADIO_TRACE_DROPFRAME, 0);
 
