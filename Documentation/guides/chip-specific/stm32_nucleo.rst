@@ -9,6 +9,18 @@ This page collects the rules that all STM32 Nucleo boards in NuttX follow.
 It starts with the common board initialization and grows as more of the
 board logic becomes shared.
 
+Serial console
+==============
+
+The default console of every Nucleo board is the USART wired to the
+ST-LINK virtual COM port, so a board works over its USB cable without
+any extra wiring. The pins of that USART are always defined in the
+board ``board.h``, not only when a board Kconfig console choice selects
+them, so a configuration that bypasses the board Kconfig (for example a
+custom board build pointing at the board directory) only needs to
+enable the USART and select it as the console. Other console wirings
+(Arduino or Morpho headers) stay optional choices.
+
 Common board initialization
 ===========================
 
