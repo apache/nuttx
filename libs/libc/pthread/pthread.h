@@ -32,6 +32,9 @@
 #include <pthread.h>
 #include <sched.h>
 
+#include <nuttx/atomic.h>
+#include <nuttx/semaphore.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -74,6 +77,12 @@
 
 #define COND_WAIT_COUNT(cond) ((FAR atomic_t *)&(cond)->wait_count)
 
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
+#  define PTHREAD_MUTEX_SEM(m) (&(m)->mutex.mutex.sem)
+#else
+#  define PTHREAD_MUTEX_SEM(m) (&(m)->mutex.sem)
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -95,5 +104,21 @@ int pthread_mutex_restorelock(FAR struct pthread_mutex_s *mutex,
 #  define pthread_mutex_breaklock(m,v)      -mutex_breaklock(&(m)->mutex,v)
 #  define pthread_mutex_restorelock(m,v)    -mutex_restorelock(&(m)->mutex,v)
 #endif
+
+void pthread_mutex_lazyinit(FAR pthread_mutex_t *mutex);
+
+/* An initialized mutex never has a zero holder field (only TID 0 could
+ * make it zero), so zero means the mutex was zero-filled instead of set to
+ * PTHREAD_MUTEX_INITIALIZER.  Treat it as statically initialized, like
+ * other libcs do.
+ */
+
+static inline void pthread_mutex_checkinit(FAR pthread_mutex_t *mutex)
+{
+  if (atomic_read_acquire(NXSEM_MHOLDER(PTHREAD_MUTEX_SEM(mutex))) == 0)
+    {
+      pthread_mutex_lazyinit(mutex);
+    }
+}
 
 #endif /* __INCLUDE_LIBS_LIBC_PTHREAD_H */
