@@ -28,8 +28,15 @@ nuttx_elf_link_options_ifdef(CONFIG_BINFMT_ELF_RELOCATABLE -r)
 
 nuttx_mod_link_options(-r)
 
-nuttx_elf_link_options_ifdef(CONFIG_BUILD_KERNEL -Bstatic)
+# With LTO the compiler driver links the module: a linker option needs -Wl,
 
-nuttx_elf_link_options_ifdef(CONFIG_DEBUG_OPT_UNUSED_SECTIONS --gc-sections)
+if("${CMAKE_LD}" MATCHES "gcc$")
+  set(ELF_LD_OPTION -Wl,)
+endif()
+
+nuttx_elf_link_options_ifdef(CONFIG_BUILD_KERNEL ${ELF_LD_OPTION}-Bstatic)
+
+nuttx_elf_link_options_ifdef(CONFIG_DEBUG_OPT_UNUSED_SECTIONS
+                             ${ELF_LD_OPTION}--gc-sections)
 
 nuttx_elf_link_options(-e _start)
