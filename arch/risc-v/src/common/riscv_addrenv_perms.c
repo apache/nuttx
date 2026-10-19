@@ -50,14 +50,44 @@
  * Private Functions
  ****************************************************************************/
 
+static uintptr_t get_pgtable(uintptr_t l1vaddr, uintptr_t vaddr)
+{
+  uintptr_t lnvaddr;
+  uint32_t  ptlevel;
+
+  for (ptlevel = 1, lnvaddr = l1vaddr;
+       ptlevel < RV_MMU_PT_LEVELS && lnvaddr != 0;
+       ptlevel++)
+    {
+      lnvaddr = riscv_pgvaddr(mmu_pte_to_paddr(
+                  mmu_ln_getentry(ptlevel, lnvaddr, vaddr)));
+    }
+
+  return lnvaddr;
+}
+
+/* With on-demand paging the page fault handler maps a page of .text, .data
+ * or the heap at its first access.
+ */
+
+static bool paged_vaddr(uintptr_t vaddr)
+{
+#ifdef CONFIG_PAGING
+  return (vaddr >= CONFIG_ARCH_TEXT_VBASE && vaddr < ARCH_TEXT_VEND) ||
+         (vaddr >= CONFIG_ARCH_DATA_VBASE && vaddr < ARCH_DATA_VEND) ||
+         (vaddr >= CONFIG_ARCH_HEAP_VBASE && vaddr < ARCH_HEAP_VEND);
+#else
+  UNUSED(vaddr);
+  return false;
+#endif
+}
+
 static int modify_region(uintptr_t vstart, uintptr_t vend, uintptr_t setmask)
 {
   uintptr_t l1vaddr;
   uintptr_t lnvaddr;
   uintptr_t entry;
-  uintptr_t paddr;
   uintptr_t vaddr;
-  uint32_t  ptlevel;
 
   /* Must perform a reverse table walk */
 
@@ -70,29 +100,35 @@ static int modify_region(uintptr_t vstart, uintptr_t vend, uintptr_t setmask)
       return -EINVAL;
     }
 
+  /* Change nothing unless each page is mapped user memory */
+
   for (vaddr = vstart; vaddr < vend; vaddr += MM_PGSIZE)
     {
-      for (ptlevel = 1, lnvaddr = l1vaddr;
-           ptlevel < RV_MMU_PT_LEVELS;
-           ptlevel++)
+      lnvaddr = get_pgtable(l1vaddr, vaddr);
+      if (!riscv_uservaddr(vaddr) || lnvaddr == 0)
         {
-          paddr = mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, lnvaddr, vaddr));
-          lnvaddr = riscv_pgvaddr(paddr);
-          if (!lnvaddr)
-            {
-              return -EINVAL;
-            }
+          return -ENOMEM;
         }
 
+      if ((mmu_ln_getentry(RV_MMU_PT_LEVELS, lnvaddr, vaddr) &
+           PTE_VALID) == 0 && !paged_vaddr(vaddr))
+        {
+          return -ENOMEM;
+        }
+    }
+
+  for (vaddr = vstart; vaddr < vend; vaddr += MM_PGSIZE)
+    {
       /* Get entry and modify the flags */
 
-      entry  = mmu_ln_getentry(ptlevel, lnvaddr, vaddr);
-      entry &= ~CLR_MASK;
-      entry |= setmask;
+      lnvaddr = get_pgtable(l1vaddr, vaddr);
+      entry   = mmu_ln_getentry(RV_MMU_PT_LEVELS, lnvaddr, vaddr);
+      entry  &= ~CLR_MASK;
+      entry  |= setmask;
 
       /* Restore the entry */
 
-      mmu_ln_restore(ptlevel, lnvaddr, vaddr, entry);
+      mmu_ln_restore(RV_MMU_PT_LEVELS, lnvaddr, vaddr, entry);
     }
 
   /* When all is set and done, flush the data caches */
@@ -142,9 +178,11 @@ int up_addrenv_mprot(arch_addrenv_t *addrenv, uintptr_t addr, size_t len,
       setmask |= PTE_R;
     }
 
+  /* A writable page must be readable: W without R is reserved */
+
   if (prot & PROT_WRITE)
     {
-      setmask |= PTE_W;
+      setmask |= PTE_R | PTE_W;
     }
 
   if (prot & PROT_EXEC)
