@@ -117,6 +117,20 @@ Limitations
     and watchdog timer callbacks. But other callbacks (like those
     used with qsort() must be avoided in an NXFLAT module.
 
+  - **Emulated Thread-Local Storage Only**:
+    A module can use ``__thread`` and C++ ``thread_local`` variables only
+    when the toolchain emulates TLS (GCC configured with ``--disable-tls``).
+    The compiler then calls ``__emutls_get_address()``, which the module
+    imports from the base code like any other function. ``ldnxflat``
+    refuses a module that holds native TLS sections (``.tdata``,
+    ``.tbss``).
+
+  - **No Static Constructors**:
+    Nothing runs the static constructors and destructors of a module
+    (``.init_array``, ``.fini_array``), so ``ldnxflat`` refuses a module
+    that has them. A C++ ``thread_local`` object needs no static
+    constructor: each thread constructs it at its first use.
+
 Supported Processors
 --------------------
 
@@ -215,6 +229,11 @@ binary module. See below for usage::
 ``-e`` and ``-o`` are required.  The in-tree ``ldnxflat`` has no ``-d``
 option, which the older, out-of-tree tool had.  It converts ARM objects
 only, and refuses an object for another machine.
+
+``ldnxflat`` places the sections of each segment itself, in the order of
+the section headers, and does not use the addresses that the linker script
+gives.  So a section that the script does not name, such as a member of a
+C++ COMDAT group that ``ld -r`` keeps apart, does not overlap another one.
 
 mksymtab
 --------
