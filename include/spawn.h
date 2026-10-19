@@ -176,41 +176,95 @@ int posix_spawn_file_actions_addopen(
 
 int posix_spawnattr_init(FAR posix_spawnattr_t *attr);
 
-int posix_spawnattr_destroy(FAR posix_spawnattr_t *attr);
+static inline
+int posix_spawnattr_destroy(FAR posix_spawnattr_t *attr)
+{
+  (void)attr;
+  return 0;
+}
 
 /* Get spawn attributes interfaces */
 
+static inline
 int posix_spawnattr_getflags(FAR const posix_spawnattr_t *attr,
-                             FAR short *flags);
+                             FAR short *flags)
+{
+  *flags = (short)attr->flags;
+  return 0;
+}
 #define posix_spawnattr_getpgroup(attr,group) (ENOSYS)
 int posix_spawnattr_getschedparam(FAR const posix_spawnattr_t *attr,
                                   FAR struct sched_param *param);
+static inline
 int posix_spawnattr_getschedpolicy(FAR const posix_spawnattr_t *attr,
-                                   FAR int *policy);
+                                   FAR int *policy)
+{
+  *policy = (int)attr->policy;
+  return 0;
+}
 #define posix_spawnattr_getsigdefault(attr,sigdefault) (ENOSYS)
+static inline
 int posix_spawnattr_getsigmask(FAR const posix_spawnattr_t *attr,
-                               FAR sigset_t *sigmask);
+                               FAR sigset_t *sigmask)
+{
+  *sigmask = attr->sigmask;
+  return 0;
+}
 
 /* Set spawn attributes interfaces */
 
-int posix_spawnattr_setflags(FAR posix_spawnattr_t *attr, short flags);
+static inline
+int posix_spawnattr_setflags(FAR posix_spawnattr_t *attr, short flags)
+{
+  attr->flags = (uint8_t)flags;
+  return 0;
+}
 #define posix_spawnattr_setpgroup(attr,group) (ENOSYS)
 int posix_spawnattr_setschedparam(FAR posix_spawnattr_t *attr,
                                   FAR const struct sched_param *param);
-int posix_spawnattr_setschedpolicy(FAR posix_spawnattr_t *attr, int policy);
+static inline
+int posix_spawnattr_setschedpolicy(FAR posix_spawnattr_t *attr, int policy)
+{
+  attr->policy = (uint8_t)policy;
+  return 0;
+}
 #define posix_spawnattr_setsigdefault(attr,sigdefault) (ENOSYS)
+static inline
 int posix_spawnattr_setsigmask(FAR posix_spawnattr_t *attr,
-                               FAR const sigset_t *sigmask);
+                               FAR const sigset_t *sigmask)
+{
+  attr->sigmask = *sigmask;
+  return 0;
+}
 
 /* Non-standard get/set spawn attributes interfaces */
 
+static inline
 int posix_spawnattr_getstacksize(FAR const posix_spawnattr_t *attr,
-                                 FAR size_t *stacksize);
+                                 FAR size_t *stacksize)
+{
+  *stacksize = attr->stacksize;
+  return 0;
+}
+static inline
 int posix_spawnattr_setstacksize(FAR posix_spawnattr_t *attr,
-                                 size_t stacksize);
+                                 size_t stacksize)
+{
+  attr->stacksize = stacksize;
+  return 0;
+}
+static inline
 int posix_spawnattr_setpriority(FAR posix_spawnattr_t *attr,
-                                uint8_t priority);
-uint8_t posix_spawnattr_getpriority(FAR posix_spawnattr_t *attr);
+                                uint8_t priority)
+{
+  attr->priority = priority;
+  return 0;
+}
+static inline
+uint8_t posix_spawnattr_getpriority(FAR posix_spawnattr_t *attr)
+{
+  return attr->priority;
+}
 #ifndef CONFIG_BUILD_KERNEL
 int posix_spawnattr_getstackaddr(FAR const posix_spawnattr_t *attr,
                                  FAR void **stackaddr);
