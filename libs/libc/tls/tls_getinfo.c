@@ -32,6 +32,18 @@
 #include <nuttx/tls.h>
 #include <nuttx/sched.h>
 
+#include "libc.h"
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* tls_emutls.c sets it on its first use, so exit() does not link it */
+
+#ifdef CONFIG_TLS_EMUTLS
+CODE void (*g_tls_emutls_destruct)(void);
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
