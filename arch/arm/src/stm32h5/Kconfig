@@ -269,6 +269,7 @@ comment "STM32H5 OTP Options"
 config STM32H5_OTP_WORD
 	bool "OTP word read/write"
 	default n
+	select STM32_SBS
 	---help---
 		Build stm32_otp_word_read16()/read32() (and, with
 		STM32H5_OTP_WRITE below, write16()/write32()) in
