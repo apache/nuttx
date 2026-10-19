@@ -758,6 +758,11 @@ endif
 
 LDELFFLAGS += -e _start -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)elf$(DELIM)gnu-elf.ld)
 
+# The --wrap options of CONFIG_TLS_EMUTLS (tools/Config.mk)
+
+LDMODULEFLAGS += $(EMUTLS_LDFLAGS)
+LDELFFLAGS += $(EMUTLS_LDFLAGS)
+
 # Zig toolchain
 
 include $(TOPDIR)/tools/Zig.defs

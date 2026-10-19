@@ -53,6 +53,7 @@ $(EXPORTDIR)/makeinfo.sh: $(TOPDIR)/.config $(EXPORTDIR)/Make.defs
 	@echo "CPP=\"$(CPP)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "CROSSDEV=\"$(CROSSDEV)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "CXX=\"$(CXX)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "EMUTLS_LDFLAGS=\"$(EMUTLS_LDFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "EXEEXT=\"$(EXEEXT)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "EXTRA_LIBPATHS=\"$(EXTRA_LIBPATHS)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "EXTRA_LIBS=\"$(EXTRA_LIBS)\"" >> $(EXPORTDIR)/makeinfo.sh
