@@ -105,6 +105,32 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Internal channels of the STM32G4 ADCs
+ *
+ * The temperature sensor, the VBAT/3 divider and the VREFINT are connected
+ * to fixed channels of some of the ADCs and have to be enabled in the common
+ * control register (ADC_CCR) of the block before they can be converted:
+ *
+ *          VTS (TSEN)   VBAT/3 (VBATEN)   VREFINT (VREFEN)
+ *   ADC1   16           17                18
+ *   ADC2   -            -                 -
+ *   ADC3   -            17                18
+ *   ADC4   -            -                 18
+ *
+ * The other internal channels are OPAMP outputs and need no ADC_CCR bit.
+ * Start-up time after enabling: 12 us for VREFINT, 120 us for the
+ * temperature sensor.
+ */
+
+#if defined(HAVE_IP_ADC_V2) && defined(CONFIG_STM32_STM32G4XXX)
+#  define HAVE_ADC_INTERNAL_CH
+#  define ADC_INTERNAL_CHAN_VTS       16
+#  define ADC_INTERNAL_CHAN_VBAT      17
+#  define ADC_INTERNAL_CHAN_VREFINT   18
+#  define ADC_VREFINT_STARTUP_US      12
+#  define ADC_VTS_STARTUP_US          120
+#endif
+
 /* RCC reset ****************************************************************/
 
 #if defined(HAVE_IP_ADC_V1)
@@ -2638,20 +2664,106 @@ static void adc_sampletime_cfg(struct adc_dev_s *dev)
  ****************************************************************************/
 
 #if defined(HAVE_IP_ADC_V2)
+#  ifdef HAVE_ADC_INTERNAL_CH
+
+/****************************************************************************
+ * Name: adc_internal_chan
+ *
+ * Description:
+ *   Return the ADC_CCR enable bit of an internal channel of the ADC, or
+ *   zero if the channel is not an internal channel of this ADC.
+ *
+ ****************************************************************************/
+
+static uint32_t adc_internal_chan(struct stm32_dev_s *priv, uint8_t chan)
+{
+  switch (chan)
+    {
+      case ADC_INTERNAL_CHAN_VTS:
+        return priv->intf == 1 ? ADC_CCR_TSEN : 0;
+
+      case ADC_INTERNAL_CHAN_VBAT:
+        return (priv->intf == 1 || priv->intf == 3) ? ADC_CCR_VBATEN : 0;
+
+      case ADC_INTERNAL_CHAN_VREFINT:
+        return priv->intf != 2 ? ADC_CCR_VREFEN : 0;
+
+      default:
+        return 0;
+    }
+}
+
+/****************************************************************************
+ * Name: adc_internal
+ *
+ * Description:
+ *   Return the ADC_CCR enable bits that the channels converted by this ADC
+ *   need.
+ *
+ ****************************************************************************/
+
+static uint32_t adc_internal(struct stm32_dev_s *priv)
+{
+  uint32_t ccr = 0;
+  int i;
+
+  for (i = 0; i < priv->cr_channels; i++)
+    {
+      ccr |= adc_internal_chan(priv, priv->r_chanlist[i]);
+    }
+
+#    ifdef ADC_HAVE_INJECTED
+  for (i = 0; i < priv->cj_channels; i++)
+    {
+      ccr |= adc_internal_chan(priv, priv->j_chanlist[i]);
+    }
+#    endif
+
+  return ccr;
+}
+#  endif /* HAVE_ADC_INTERNAL_CH */
+
 static void adc_common_cfg(struct stm32_dev_s *priv)
 {
   uint32_t clrbits = 0;
   uint32_t setbits = 0;
+#  ifdef HAVE_ADC_INTERNAL_CH
+  uint32_t internal;
+#  endif
 
   /* REVISIT: */
 
   clrbits = ADC_CCR_DUAL_MASK | ADC_CCR_DELAY_MASK | ADC_CCR_DMACFG |
-            ADC_CCR_MDMA_MASK | ADC_CCR_CKMODE_MASK | ADC_CCR_VREFEN |
-            ADC_CCR_TSEN | ADC_CCR_VBATEN;
+            ADC_CCR_MDMA_MASK | ADC_CCR_CKMODE_MASK;
   setbits = ADC_CCR_DUAL_IND | ADC_CCR_DELAY(1) | ADC_CCR_MDMA_DISABLED |
             ADC_CCR_CKMODE_ASYNCH;
 
+#  ifdef HAVE_ADC_INTERNAL_CH
+  /* Enable the internal channels in the channel list.  The bits are shared
+   * by the ADCs of the block, so they are not cleared here (the block is
+   * reset on the first open and the last close).
+   */
+
+  internal = adc_internal(priv);
+  setbits |= internal;
+#  else
+  clrbits |= ADC_CCR_VREFEN | ADC_CCR_TSEN | ADC_CCR_VBATEN;
+#  endif
+
   adccmn_modifyreg(priv, STM32_ADC_CCR_OFFSET, clrbits, setbits);
+
+#  ifdef HAVE_ADC_INTERNAL_CH
+  /* Wait for the sensors to start up */
+
+  if ((internal & ADC_CCR_TSEN) != 0)
+    {
+      up_udelay(ADC_VTS_STARTUP_US);
+    }
+  else if ((internal & ADC_CCR_VREFEN) != 0)
+    {
+      up_udelay(ADC_VREFINT_STARTUP_US);
+    }
+#  endif
 }
 #elif defined(HAVE_IP_ADC_V1) && !defined(HAVE_BASIC_ADC)
 static void adc_common_cfg(struct stm32_dev_s *priv)
