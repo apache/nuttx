@@ -27,31 +27,48 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
-#include <sys/types.h>
 #include <math.h>
-#include <float.h>
-
-#ifdef CONFIG_HAVE_DOUBLE
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
+#ifdef CONFIG_HAVE_DOUBLE
 double cbrt(double x)
 {
-  if (fabs(x) < DBL_EPSILON)
+  double m;
+  double y;
+  int e;
+  int r;
+  int i;
+
+  if (x == 0.0 || isnan(x) || isinf(x))
     {
-      return 0.0;
+      return x;
     }
 
-  if (x > 0.0)
+  /* |x| = m * 2^e: move e % 3 into m, then cbrt(|x|) = cbrt(m) * 2^(e / 3)
+   * with m in [0.5, 4).
+   */
+
+  m = frexp(fabs(x), &e);
+  r = e % 3;
+  if (r < 0)
     {
-      return pow(x, 1.0 / 3.0);
+      r += 3;
     }
-  else
+
+  m = scalbn(m, r);
+  e = (e - r) / 3;
+
+  /* Newton iterations from a linear first guess (error < 12%) */
+
+  y = 0.68 + 0.227 * m;
+  for (i = 0; i < 6; i++)
     {
-      return -pow(-x, 1.0 / 3.0);
+      y -= (y - m / (y * y)) / 3.0;
     }
+
+  return copysign(scalbn(y, e), x);
 }
-
 #endif
