@@ -151,6 +151,30 @@ if(CONFIG_LIBM)
       __sin.c
       lib_gamma.c
       lib_lgamma.c
+      lib_fdim.c
+      lib_fdimf.c
+      lib_fdiml.c
+      lib_ilogb.c
+      lib_ilogbf.c
+      lib_ilogbl.c
+      lib_logb.c
+      lib_logbf.c
+      lib_logbl.c
+      lib_scalbln.c
+      lib_scalblnf.c
+      lib_scalblnl.c
+      lib_nextafter.c
+      lib_nextafterf.c
+      lib_nextafterl.c
+      lib_nexttoward.c
+      lib_nexttowardf.c
+      lib_nexttowardl.c
+      lib_remainder.c
+      lib_remainderf.c
+      lib_remainderl.c
+      lib_remquo.c
+      lib_remquof.c
+      lib_remquol.c
       lib_lrint.c
       lib_lrintf.c
       lib_lrintl.c
