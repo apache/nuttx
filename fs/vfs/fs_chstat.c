@@ -94,6 +94,13 @@ static int chstat_recursive(FAR const char *path,
 
       if (inode->u.i_mops && inode->u.i_mops->chstat)
         {
+          /* lchown(), lchmod() and lutimens() change the link itself */
+
+          if (resolve == 0)
+            {
+              flags |= CH_STAT_NOFOLLOW;
+            }
+
           /* Perform the chstat() operation */
 
           ret = inode->u.i_mops->chstat(inode, desc.relpath, buf, flags);
