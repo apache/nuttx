@@ -21,6 +21,12 @@
 # ##############################################################################
 
 function(nuttx_create_symlink old new)
+  # Remove an old link itself.  With CMP0205 NEW, CMake 4.3.0 and 4.3.1 remove
+  # the content of the directory that the old link points to.
+  if(IS_SYMLINK ${new})
+    file(REMOVE ${new})
+  endif()
+
   if(IS_DIRECTORY ${old} AND CMAKE_HOST_SYSTEM_NAME MATCHES
                              "MSYS|CYGWIN|Windows")
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${old} ${new})
