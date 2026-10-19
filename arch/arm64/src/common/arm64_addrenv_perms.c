@@ -51,14 +51,28 @@
  * Private Functions
  ****************************************************************************/
 
+static uintptr_t get_pgtable(uintptr_t l1vaddr, uintptr_t vaddr)
+{
+  uintptr_t lnvaddr;
+  uint32_t  ptlevel;
+
+  for (ptlevel = mmu_get_base_pgt_level(), lnvaddr = l1vaddr;
+       ptlevel < MMU_PGT_LEVEL_MAX && lnvaddr != 0;
+       ptlevel++)
+    {
+      lnvaddr = arm64_pgvaddr(mmu_pte_to_paddr(
+                  mmu_ln_getentry(ptlevel, lnvaddr, vaddr)));
+    }
+
+  return lnvaddr;
+}
+
 static int modify_region(uintptr_t vstart, uintptr_t vend, uintptr_t setmask)
 {
   uintptr_t l1vaddr;
   uintptr_t lnvaddr;
   uintptr_t entry;
-  uintptr_t paddr;
   uintptr_t vaddr;
-  uint32_t  ptlevel;
 
   /* Must perform a reverse table walk */
 
@@ -71,29 +85,31 @@ static int modify_region(uintptr_t vstart, uintptr_t vend, uintptr_t setmask)
       return -EINVAL;
     }
 
+  /* Change nothing unless each page is mapped user memory */
+
   for (vaddr = vstart; vaddr < vend; vaddr += MM_PGSIZE)
     {
-      for (ptlevel = mmu_get_base_pgt_level(), lnvaddr = l1vaddr;
-           ptlevel < MMU_PGT_LEVEL_MAX;
-           ptlevel++)
+      lnvaddr = get_pgtable(l1vaddr, vaddr);
+      if (!arm64_uservaddr(vaddr) || lnvaddr == 0 ||
+          (mmu_ln_getentry(MMU_PGT_LEVEL_MAX, lnvaddr, vaddr) &
+           PTE_DESC_TYPE_MASK) != PTE_PAGE_DESC)
         {
-          paddr = mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, lnvaddr, vaddr));
-          lnvaddr = arm64_pgvaddr(paddr);
-          if (!lnvaddr)
-            {
-              return -EINVAL;
-            }
+          return -ENOMEM;
         }
+    }
 
+  for (vaddr = vstart; vaddr < vend; vaddr += MM_PGSIZE)
+    {
       /* Get entry and modify the flags */
 
-      entry  = mmu_ln_getentry(ptlevel, lnvaddr, vaddr);
-      entry &= ~CLR_MASK;
-      entry |= setmask | PTE_BLOCK_DESC_AP_USER;
+      lnvaddr = get_pgtable(l1vaddr, vaddr);
+      entry   = mmu_ln_getentry(MMU_PGT_LEVEL_MAX, lnvaddr, vaddr);
+      entry  &= ~CLR_MASK;
+      entry  |= setmask;
 
       /* Restore the entry */
 
-      mmu_ln_restore(ptlevel, lnvaddr, vaddr, entry);
+      mmu_ln_restore(MMU_PGT_LEVEL_MAX, lnvaddr, vaddr, entry);
     }
 
   return OK;
@@ -129,15 +145,21 @@ int up_addrenv_mprot(arch_addrenv_t *addrenv, uintptr_t addr, size_t len,
 
   UNUSED(addrenv);
 
-  /* The access is either RO or RW, read access cannot be revoked */
+  /* PROT_NONE removes all user access.  Else the access is RO or RW, and
+   * PROT_WRITE or PROT_EXEC also give read access.
+   */
 
-  if ((prot & PROT_WRITE) == 0)
+  if (prot == PROT_NONE)
     {
       setmask = PTE_BLOCK_DESC_AP_RO;
     }
+  else if ((prot & PROT_WRITE) == 0)
+    {
+      setmask = PTE_BLOCK_DESC_AP_RO | PTE_BLOCK_DESC_AP_USER;
+    }
   else
     {
-      setmask = PTE_BLOCK_DESC_AP_RW;
+      setmask = PTE_BLOCK_DESC_AP_RW | PTE_BLOCK_DESC_AP_USER;
     }
 
   /* Execute access is explicitly revoked, implicitly granted */
