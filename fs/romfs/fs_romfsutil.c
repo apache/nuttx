@@ -967,7 +967,10 @@ int romfs_finddirentry(FAR struct romfs_mountpt_s *rm,
     {
       /* Find the start of the next path component */
 
-      while (*entryname == '/') entryname++;
+      while (*entryname == '/')
+        {
+          entryname++;
+        }
 
       /* Find the end of the next path component */
 
