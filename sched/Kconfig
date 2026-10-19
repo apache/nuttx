@@ -707,7 +707,7 @@ config SCHED_HAVE_PARENT
 
 config SCHED_CHILD_STATUS
 	bool "Retain child exit status"
-	default n
+	default BUILD_KERNEL
 	depends on SCHED_HAVE_PARENT
 	---help---
 		If this option is selected, then the exit status of the child task
@@ -731,6 +731,11 @@ config SCHED_CHILD_STATUS
 		this case the exit status of the child task is retained after the
 		child exits and the wait will successful obtain the child task's
 		exit status whether it is called before the child task exits or not.
+
+		This option is on by default in a kernel build (BUILD_KERNEL).
+		There, programs start other programs with posix_spawn(), vfork()
+		and exec(), and POSIX requires that a parent can get the exit
+		status of a child that exited before the parent waits for it.
 
 		Warning:  If you enable this feature, then your application must
 		either (1) take responsibility for reaping the child status with wait(),
