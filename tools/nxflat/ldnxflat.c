@@ -343,6 +343,15 @@ static void place_sections(void)
           continue;
         }
 
+      /* No start-up code runs these arrays in a module */
+
+      if (s->sh_type == SHT_INIT_ARRAY || s->sh_type == SHT_FINI_ARRAY ||
+          s->sh_type == SHT_PREINIT_ARRAY)
+        {
+          fail("%s holds static constructors or destructors, which an "
+               "NXFLAT module cannot run", g_shstrtab + s->sh_name);
+        }
+
       if ((s->sh_flags & SHF_EXECINSTR) != 0)
         {
           g_segof[i] = SEG_TEXT;
