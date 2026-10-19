@@ -81,7 +81,13 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
   if (mutex != NULL)
     {
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-      pid_t pid = mutex_get_holder(&mutex->mutex);
+      pid_t pid;
+#endif
+
+      pthread_mutex_checkinit(mutex);
+
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+      pid = mutex_get_holder(&mutex->mutex);
 #endif
 
       /* Try to get the semaphore. */

@@ -80,6 +80,8 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
       return EINVAL;
     }
 
+  pthread_mutex_checkinit(mutex);
+
   /* The unlock operation is only performed if the mutex is actually locked.
    * EPERM *must* be returned if the mutex type is PTHREAD_MUTEX_ERRORCHECK
    * or PTHREAD_MUTEX_RECURSIVE, or the mutex is a robust mutex, and the

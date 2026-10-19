@@ -70,6 +70,7 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
     {
       pid_t pid;
 
+      pthread_mutex_checkinit(mutex);
       pid = mutex_get_holder(&mutex->mutex);
 
       /* Is the mutex available? */

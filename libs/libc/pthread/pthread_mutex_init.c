@@ -27,14 +27,23 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <string.h>
 #include <pthread.h>
 #include <errno.h>
 #include <nuttx/debug.h>
 
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/pthread.h>
 
 #include "pthread.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static mutex_t g_lazyinit_lock = NXMUTEX_INITIALIZER;
+static const pthread_mutex_t g_mutex_initializer = PTHREAD_MUTEX_INITIALIZER;
 
 /****************************************************************************
  * Public Functions
@@ -125,4 +134,45 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
 #endif
 
   return 0;
+}
+
+/****************************************************************************
+ * Name: pthread_mutex_lazyinit
+ *
+ * Description:
+ *   Initialize a zero-filled mutex as if it had been set to
+ *   PTHREAD_MUTEX_INITIALIZER.  The holder field is stored last, so other
+ *   threads keep coming here until the rest of the mutex is set up.  This
+ *   may sleep briefly on g_lazyinit_lock, even from trylock, but only on
+ *   the first use of each mutex.
+ *
+ * Input Parameters:
+ *   mutex - A reference to the zero-filled mutex
+ *
+ ****************************************************************************/
+
+void pthread_mutex_lazyinit(FAR pthread_mutex_t *mutex)
+{
+  FAR const sem_t *isem = PTHREAD_MUTEX_SEM(&g_mutex_initializer);
+  FAR sem_t *sem = PTHREAD_MUTEX_SEM(mutex);
+  FAR uint8_t *dst = (FAR uint8_t *)mutex;
+  FAR const uint8_t *src = (FAR const uint8_t *)&g_mutex_initializer;
+  size_t start = (FAR uint8_t *)&sem->val - dst;
+  size_t end = start + sizeof(sem->val);
+
+  nxmutex_lock(&g_lazyinit_lock);
+
+  /* Zero flags tells a zero-filled mutex apart from one held by TID 0.
+   * Other threads read the holder word without the lock, so copy around
+   * it and store it atomically at the end.
+   */
+
+  if (sem->flags == 0)
+    {
+      memcpy(dst, src, start);
+      memcpy(dst + end, src + end, sizeof(*mutex) - end);
+      atomic_set_release(NXSEM_MHOLDER(sem), isem->val.mholder);
+    }
+
+  nxmutex_unlock(&g_lazyinit_lock);
 }
