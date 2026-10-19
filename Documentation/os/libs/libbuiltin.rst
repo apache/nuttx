@@ -44,6 +44,15 @@ to the one module you care about.  Data is written under
 ``CONFIG_COVERAGE_GCOV_DUMP_REBOOT`` dumps it on reboot.  From a shell it is
 ``gcov dump -d <path>``.
 
+A loadable module of a flat or protected build (an ELF program or a shared
+library) can use the coverage of ``CONFIG_COVERAGE_ALL`` with
+``CONFIG_COVERAGE_MINI`` and GCC.  The system symbol table exports the
+coverage functions to the module, and the loader removes the data of the
+module when it unloads the module.  The unload does not dump this data: dump
+it while the module is loaded, with ``gcov -d <path>`` or with a call to
+``__gcov_dump()`` in the module.  The other runtimes do not export their
+coverage functions, so build a module for them without the coverage options.
+
 Profiling
 =========
 
