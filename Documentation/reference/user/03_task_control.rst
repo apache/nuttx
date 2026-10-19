@@ -82,6 +82,12 @@ there are three important configuration options that can change that.
      successful obtain the child task's exit status whether it is called
      before the child task exits or not.
 
+     This option is on by default in a kernel build
+     (``CONFIG_BUILD_KERNEL``). There, programs start other programs with
+     ``posix_spawn()``, ``vfork()`` and ``exec()``, and POSIX requires
+     that a parent can get the exit status of a child that exited before
+     the parent waits for it.
+
   -  ``CONFIG_PREALLOC_CHILDSTATUS``. To prevent runaway child status
      allocations and to improve allocation performance, child task exit
      status structures are pre-allocated when the system boots. This
