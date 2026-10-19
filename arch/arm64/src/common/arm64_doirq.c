@@ -135,10 +135,6 @@ uint64_t *arm64_doirq(int irq, uint64_t * regs)
 
       nxsched_switch_context(*running_task, tcb);
 
-      /* Update the TLS pointer */
-
-      write_sysreg(tcb->stack_alloc_ptr, tpidr_el0);
-
       /* Record the new "running" task when context switch occurred.
        * g_running_tasks[] is only used by assertion logic for reporting
        * crashes.
