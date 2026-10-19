@@ -382,33 +382,6 @@ static inline bool vaddr_is_shm(uintptr_t vaddr)
 #endif
 }
 
-#ifdef CONFIG_ARCH_HAVE_FORK
-/****************************************************************************
- * Name: vaddr_is_text
- *
- * Description:
- *   Check if a vaddr is part of the .text area, which is mapped read/execute
- *   while everything else is mapped read/write.  The two arms mirror exactly
- *   the two layouts up_addrenv_create() builds.
- *
- ****************************************************************************/
-
-static inline bool vaddr_is_text(const arch_addrenv_t *addrenv,
-                                 uintptr_t vaddr)
-{
-#if (CONFIG_ARCH_TEXT_VBASE != 0x0) && (CONFIG_ARCH_HEAP_VBASE != 0x0)
-  UNUSED(addrenv);
-  return vaddr >= CONFIG_ARCH_TEXT_VBASE && vaddr < ARCH_TEXT_VEND;
-#else
-  /* Contiguous layout:  the reserve sits below .text, and .data begins where
-   * .text ends.
-   */
-
-  return vaddr >= addrenv->textvbase && vaddr < addrenv->datavbase;
-#endif
-}
-#endif /* CONFIG_ARCH_HAVE_FORK */
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -707,10 +680,10 @@ int up_addrenv_fork(const arch_addrenv_t *src, arch_addrenv_t *dest)
           memcpy((void *)arm64_pgvaddr(destpage),
                  (const void *)arm64_pgvaddr(srcpage), MM_PGSIZE);
 
+          /* Keep the permissions, which mprotect() may have changed */
+
           mmu_ln_setentry(MMU_PGT_LEVEL_MAX, (uintptr_t)dptlast, destpage,
-                          pgvaddr,
-                          vaddr_is_text(src, pgvaddr) ? MMU_UTEXT_FLAGS
-                                                      : MMU_UDATA_FLAGS);
+                          pgvaddr, sptlast[j] & ~PTE_PADDR_MASK);
         }
     }
 
