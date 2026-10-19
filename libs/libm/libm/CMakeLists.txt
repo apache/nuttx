@@ -151,6 +151,17 @@ if(CONFIG_LIBM)
       __sin.c
       lib_gamma.c
       lib_lgamma.c
+      lib_exp2.c
+      lib_exp2f.c
+      lib_exp2l.c
+      lib_log1p.c
+      lib_log1pf.c
+      lib_log1pl.c
+      lib_cbrtf.c
+      lib_cbrtl.c
+      lib_hypot.c
+      lib_hypotf.c
+      lib_hypotl.c
       lib_fma.c
       lib_fmal.c
       lib_fdim.c
