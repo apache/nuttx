@@ -283,9 +283,21 @@ static inline void gd25_unlock(FAR struct spi_dev_s *spi)
 
 static inline void gd25_purdid(FAR struct gd25_dev_s *priv)
 {
+#ifdef CONFIG_GD25_QSPI
+  struct qspi_cmdinfo_s cmdinfo;
+
+  cmdinfo.flags   = 0;
+  cmdinfo.addrlen = 0;
+  cmdinfo.cmd     = GD25_PURDID;
+  cmdinfo.buflen  = 0;
+  cmdinfo.addr    = 0;
+  cmdinfo.buffer  = NULL;
+  QSPI_COMMAND(priv->qspi, &cmdinfo);
+#else
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), true);
   SPI_SEND(priv->spi, GD25_PURDID);
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), false);
+#endif
   nxsched_usleep(20);
 }
 

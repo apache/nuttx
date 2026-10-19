@@ -124,6 +124,18 @@ config ARCH_BOARD_BL602EVB
 		This is the board configuration for the port of NuttX to the BouffaloLab BL602EVB
 		board.  This board features the RISC-V rv32imfc core
 
+config ARCH_BOARD_GD_XD_W515_EVAL
+	bool "GigaDevice GD-xD-W515-EVAL Board"
+	depends on ARCH_CHIP_GD32W515PI
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This is the board configuration for the port of NuttX to the
+		GigaDevice GD-xD-W515-EVAL all-in-one evaluation kit
+		(GD32W515PIQ6, Cortex-M33, 2 MB flash, 448 KB SRAM, Wi-Fi, LCD,
+		fingerprint sensor and touch key).
+
 config ARCH_BOARD_GD32VW553K_START
 	bool "GigaDevice GD32VW553K-START Board"
 	depends on ARCH_CHIP_GD32VW55X
@@ -4161,6 +4173,7 @@ config ARCH_BOARD
 	default "gd32f470zk-eval"              if ARCH_BOARD_GD32F470ZK_EVAL
 	default "gd32f470zk-aiotbox"           if ARCH_BOARD_GD32F470ZK_AIOTBOX
 	default "gd32f470ik-eval"              if ARCH_BOARD_GD32F470IK_EVAL
+	default "gd-xd-w515-eval"              if ARCH_BOARD_GD_XD_W515_EVAL
 	default "gd32vw553k-start"             if ARCH_BOARD_GD32VW553K_START
 	default "gd32vw553-hmq"                if ARCH_BOARD_GD32VW553_HMQ
 	default "hifive1-revb"                 if ARCH_BOARD_HIFIVE1_REVB
@@ -5701,6 +5714,9 @@ source "boards/risc-v/bl602/bl602evb/Kconfig"
 endif
 if ARCH_BOARD_GD32VW553K_START
 source "boards/risc-v/gd32vw55x/gd32vw553k-start/Kconfig"
+endif
+if ARCH_BOARD_GD_XD_W515_EVAL
+source "boards/arm/gd32w51x/gd-xd-w515-eval/Kconfig"
 endif
 if ARCH_BOARD_GD32VW553_HMQ
 source "boards/risc-v/gd32vw55x/gd32vw553-hmq/Kconfig"
