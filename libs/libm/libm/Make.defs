@@ -57,6 +57,14 @@ CSRCS += lib_fmax.c lib_fmaxf.c lib_fmaxl.c
 CSRCS += lib_fmin.c lib_fminf.c lib_fminl.c
 
 CSRCS += __cos.c __sin.c lib_gamma.c lib_lgamma.c
+CSRCS += lib_fdim.c lib_fdimf.c lib_fdiml.c
+CSRCS += lib_ilogb.c lib_ilogbf.c lib_ilogbl.c
+CSRCS += lib_logb.c lib_logbf.c lib_logbl.c
+CSRCS += lib_scalbln.c lib_scalblnf.c lib_scalblnl.c
+CSRCS += lib_nextafter.c lib_nextafterf.c lib_nextafterl.c
+CSRCS += lib_nexttoward.c lib_nexttowardf.c lib_nexttowardl.c
+CSRCS += lib_remainder.c lib_remainderf.c lib_remainderl.c
+CSRCS += lib_remquo.c lib_remquof.c lib_remquol.c
 CSRCS += lib_lrint.c lib_lrintf.c lib_lrintl.c
 CSRCS += lib_llrint.c lib_llrintf.c lib_llrintl.c lib_nearbyintl.c
 
