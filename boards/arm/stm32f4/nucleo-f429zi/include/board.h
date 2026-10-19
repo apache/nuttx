@@ -238,7 +238,10 @@
 #define GPIO_TIM3_CH1OUT (GPIO_TIM3_CH1OUT_1|GPIO_SPEED_50MHz)
 #define GPIO_TIM4_CH1OUT (GPIO_TIM4_CH1OUT_1|GPIO_SPEED_50MHz)
 
-#if defined(CONFIG_NUCLEO_F429ZI_CONSOLE_ARDUINO)
+/* USART3: ST-LINK virtual COM port (PD8 TX, PD9 RX), the default console */
+
+#define GPIO_USART3_RX (GPIO_USART3_RX_3|GPIO_SPEED_100MHz)
+#define GPIO_USART3_TX (GPIO_USART3_TX_3|GPIO_SPEED_100MHz)
 
 /* USART6:
  *
@@ -254,18 +257,8 @@
  *   -- ----- --------- -----
  */
 
- #  define GPIO_USART6_RX (GPIO_USART6_RX_2|GPIO_SPEED_100MHz)
- #  define GPIO_USART6_TX (GPIO_USART6_TX_2|GPIO_SPEED_100MHz)
-#endif
-
-/* USART3:
- * Use  USART3 and the USB virtual COM port
- */
-
-#if defined(CONFIG_NUCLEO_F429ZI_CONSOLE_VIRTUAL)
- #  define GPIO_USART3_RX (GPIO_USART3_RX_3|GPIO_SPEED_100MHz)
- #  define GPIO_USART3_TX (GPIO_USART3_TX_3|GPIO_SPEED_100MHz)
-#endif
+#define GPIO_USART6_RX (GPIO_USART6_RX_2|GPIO_SPEED_100MHz)
+#define GPIO_USART6_TX (GPIO_USART6_TX_2|GPIO_SPEED_100MHz)
 
 /* DMA channels *************************************************************/
 
