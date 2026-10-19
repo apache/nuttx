@@ -40,14 +40,18 @@ the above mentioned graphic may be helpful in identifying a serial port.
 
 There are 5 choices that can be made from the menuconfig::
 
-  CONFIG_NUCLEO_CONSOLE_ARDUINO or CONFIG_NUCLEO_CONSOLE_MORPHO or
-  CONFIG_NUCLEO_CONSOLE_MORPHO_UART4 or CONFIG_NUCLEO_CONSOLE_VIRTUAL or
-  CONFIG_NUCLEO_CONSOLE_NONE
+  CONFIG_NUCLEO_F722ZE_CONSOLE_VIRTUAL (default) or
+  CONFIG_NUCLEO_F722ZE_CONSOLE_ARDUINO or CONFIG_NUCLEO_F722ZE_CONSOLE_MORPHO or
+  CONFIG_NUCLEO_F722ZE_CONSOLE_MORPHO_UART4 or CONFIG_NUCLEO_F722ZE_CONSOLE_NONE
 
-The CONFIG_NUCLEO_CONSOLE_NONE makes no preset for the console. You should still
+The USART3 (virtual COM port) and USART6 (Arduino) pins are always defined
+in board.h, so a configuration that does not use this choice (for example a
+custom board build) only needs to enable the U[S]ART and select the console.
+
+The CONFIG_NUCLEO_F722ZE_CONSOLE_NONE makes no preset for the console. You should still
 visit the U[S]ART selection and Device Drivers to disable any U[S]ART remaining.
 
-The CONFIG_NUCLEO_CONSOLE_ARDUINO configurations assume that you are using a
+The CONFIG_NUCLEO_F722ZE_CONSOLE_ARDUINO configurations assume that you are using a
 standard Arduino RS-232 shield with the serial interface with RX on pin D0 and
 TX on pin D1 from USART6::
 
@@ -59,7 +63,7 @@ TX on pin D1 from USART6::
             D1 TX    USART6_TX PG14
             -- ----- --------- -----
 
-The CONFIG_NUCLEO_CONSOLE_MORPHO configurations uses Serial Port 8 (USART8)
+The CONFIG_NUCLEO_F722ZE_CONSOLE_MORPHO configurations uses Serial Port 8 (USART8)
 with TX on PE1 and RX on PE0.::
 
             Serial
@@ -67,7 +71,7 @@ with TX on PE1 and RX on PE0.::
             SERIAL_RX         PE_0
             SERIAL_TX         PE_1
 
-The CONFIG_NUCLEO_CONSOLE_MORPHO_UART4 configurations uses Serial Port 4 (UART4)
+The CONFIG_NUCLEO_F722ZE_CONSOLE_MORPHO_UART4 configurations uses Serial Port 4 (UART4)
 with TX on PA1 and RX on PA0. Zero Ohm resistor / solder short at
 SB13 must be removed/open. (Disables Ethernet MII clocking.)::
 
@@ -76,7 +80,7 @@ SB13 must be removed/open. (Disables Ethernet MII clocking.)::
             SERIAL_RX         PA_1  CN11 30
             SERIAL_TX         PA_0  CN11 28
 
-The CONFIG_NUCLEO_CONSOLE_VIRTUAL configurations uses Serial Port 3 (USART3)
+The CONFIG_NUCLEO_F722ZE_CONSOLE_VIRTUAL configurations (the default) uses Serial Port 3 (USART3)
 with TX on PD8 and RX on PD9.::
 
             Serial
@@ -152,8 +156,8 @@ Flashing RED - In the event of a fatal crash, all other LEDs will be
 Serial Consoles
 ===============
 
-USART6 (CONFIG_NUCLEO_CONSOLE_ARDUINO)
---------------------------------------
+USART6 (CONFIG_NUCLEO_F722ZE_CONSOLE_ARDUINO)
+---------------------------------------------
 
     ======= ========== =====
     ARDUINO FUNCTION   GPIO

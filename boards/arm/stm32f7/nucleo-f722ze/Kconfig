@@ -7,7 +7,7 @@ if ARCH_BOARD_NUCLEO_F722ZE
 
 choice
 	prompt "Select Console wiring."
-	default NUCLEO_F722ZE_CONSOLE_ARDUINO
+	default NUCLEO_F722ZE_CONSOLE_VIRTUAL
 	---help---
 		Select where you will connect the console.
 
