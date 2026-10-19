@@ -121,10 +121,8 @@ void libelf_dumpmodule(FAR struct module_s *modp)
   binfo("  modname:      %s\n", modp->modname);
 #endif
   binfo("  textalloc:    %08lx\n", (long)modp->textalloc);
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
   binfo("  dataalloc:    %08lx\n", (long)modp->dataalloc);
   binfo("  textsize:     %ld\n",   (long)modp->textsize);
-#endif
 
 #ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
   binfo("  sectalloc:    %p\n", modp->sectalloc);
@@ -418,10 +416,8 @@ FAR void *libelf_insert(FAR struct list_node *registry,
   modp->nsect = loadinfo.ehdr.e_shnum;
 #endif
 
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
   modp->textsize  = loadinfo.textsize;
   modp->datasize  = loadinfo.datasize;
-#endif
 
   /* Call the module initializer.  An FDPIC object's constructors reach its
    * globals through its own data base, which the loading thread does not

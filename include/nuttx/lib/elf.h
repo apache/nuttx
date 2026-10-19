@@ -204,10 +204,8 @@ struct module_s
                                         * the module is unloaded
                                         */
 #endif
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
   size_t textsize;                     /* Size of the kernel .text memory allocation */
   size_t datasize;                     /* Size of the kernel .bss/.data memory allocation */
-#endif
 
   uint8_t nopen;                       /* Outstanding references: insmod()
                                         * and dlopen() each take one, rmmod()

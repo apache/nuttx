@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 #include <errno.h>
+#include <gcov.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/fdpic.h>
@@ -115,6 +116,11 @@ int libelf_uninit(FAR struct module_s *modp)
 
   if (modp->textalloc != NULL || modp->dataalloc != NULL)
     {
+      /* The coverage data of the module must not outlive it */
+
+      __gcov_unload(modp->textalloc, modp->textsize);
+      __gcov_unload(modp->dataalloc, modp->datasize);
+
       /* Free the module memory and nullify so that the memory cannot
        * be freed again
        *
@@ -143,6 +149,8 @@ int libelf_uninit(FAR struct module_s *modp)
                 }
 #  endif
 
+              __gcov_unload(modp->sectalloc[i],
+                            lib_malloc_size(modp->sectalloc[i]));
               lib_free(modp->sectalloc[i]);
             }
 
@@ -195,10 +203,8 @@ int libelf_uninit(FAR struct module_s *modp)
 
       modp->textalloc = NULL;
       modp->dataalloc = NULL;
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
       modp->textsize  = 0;
       modp->datasize  = 0;
-#endif
     }
 
 #if CONFIG_LIBC_ELF_MAXDEPEND > 0
