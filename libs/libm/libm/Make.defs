@@ -57,6 +57,8 @@ CSRCS += lib_fmax.c lib_fmaxf.c lib_fmaxl.c
 CSRCS += lib_fmin.c lib_fminf.c lib_fminl.c
 
 CSRCS += __cos.c __sin.c lib_gamma.c lib_lgamma.c
+CSRCS += lib_lrint.c lib_lrintf.c lib_lrintl.c
+CSRCS += lib_llrint.c lib_llrintf.c lib_llrintl.c lib_nearbyintl.c
 
 # Use the C versions of some functions only if architecture specific
 # optimized versions are not provided.
@@ -67,6 +69,10 @@ endif
 
 ifneq ($(CONFIG_LIBM_ARCH_FLOOR),y)
 CSRCS += lib_floor.c
+endif
+
+ifneq ($(CONFIG_LIBM_ARCH_NEARBYINT),y)
+CSRCS += lib_nearbyint.c
 endif
 
 ifneq ($(CONFIG_LIBM_ARCH_RINT),y)
@@ -87,6 +93,10 @@ endif
 
 ifneq ($(CONFIG_LIBM_ARCH_FLOORF),y)
 CSRCS += lib_floorf.c
+endif
+
+ifneq ($(CONFIG_LIBM_ARCH_NEARBYINTF),y)
+CSRCS += lib_nearbyintf.c
 endif
 
 ifneq ($(CONFIG_LIBM_ARCH_RINTF),y)
