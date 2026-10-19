@@ -97,6 +97,7 @@ struct nrf52_radioi8_state_s
 
   bool     txdelayed_busy;      /* No CSMA transfer */
   bool     txdelayed_pending;   /* No CSMA transfer waits for CSMA */
+  bool     csma_pending;        /* CSMA transfer waits for ACK TX */
   uint32_t txdelayed_delay;     /* Delay of the pending no CSMA transfer */
 
 #ifdef CONFIG_NRF52_RADIO_IEEE802154_SUPERFRAME

@@ -1290,12 +1290,24 @@ static void nrf52_radioi8_rxrestore(struct nrf52_radioi8_dev_s *dev)
 
 static void nrf52_radioi8_txpending(struct nrf52_radioi8_dev_s *dev)
 {
+  irqstate_t flags;
+
   /* Start the no CSMA transaction that waited for the CSMA transaction */
 
   if (dev->state.txdelayed_pending)
     {
+      flags = enter_critical_section();
+
       dev->state.txdelayed_pending = false;
       dev->state.txdelayed_busy    = true;
+
+      /* An ACK TX in progress starts it when done */
+
+      if (dev->radio->state.state == NRF52_RADIO_STATE_ACKTX)
+        {
+          leave_critical_section(flags);
+          return;
+        }
 
       nrf52_radioi8_norm_setup(dev, dev->state.txdelayed_desc->frame,
                                false);
@@ -1309,12 +1321,15 @@ static void nrf52_radioi8_txpending(struct nrf52_radioi8_dev_s *dev)
           dev->tim->ops->setup(dev, NRF52_TIMER_CHAN_TXDELAY,
                                dev->state.txdelayed_delay);
         }
+
+      leave_critical_section(flags);
     }
 }
 
 void nrf52_radioi8_dopoll_csma(void *arg)
 {
   struct nrf52_radioi8_dev_s *dev = (struct nrf52_radioi8_dev_s *)arg;
+  irqstate_t                  flags;
   int                         len = 0;
 
   /* Get exclusive access to the driver */
@@ -1325,8 +1340,8 @@ void nrf52_radioi8_dopoll_csma(void *arg)
 
   /* If this a CSMA transaction and we have room in the CSMA */
 
-  if (!dev->radio->state.csma_busy && !dev->state.txdelayed_busy &&
-      !dev->state.txdelayed_pending)
+  if (!dev->radio->state.csma_busy && !dev->state.csma_pending &&
+      !dev->state.txdelayed_busy && !dev->state.txdelayed_pending)
     {
       wlinfo("Polling for frame\n");
       len = dev->radiocb->poll(dev->radiocb, false, &dev->state.csma_desc);
@@ -1335,11 +1350,24 @@ void nrf52_radioi8_dopoll_csma(void *arg)
         {
           wlinfo("Frame received. Frame length: %d\n", len);
 
-          /* Setup the CSMA transaction */
+          flags = enter_critical_section();
 
-          dev->radio->ops->norm_setup(dev, dev->state.csma_desc->frame,
-                                      true);
-          dev->radio->ops->norm_trigger(dev);
+          /* An ACK TX in progress starts the transaction when done */
+
+          if (dev->radio->state.state == NRF52_RADIO_STATE_ACKTX)
+            {
+              dev->state.csma_pending = true;
+            }
+          else
+            {
+              /* Setup the CSMA transaction */
+
+              dev->radio->ops->norm_setup(dev, dev->state.csma_desc->frame,
+                                          true);
+              dev->radio->ops->norm_trigger(dev);
+            }
+
+          leave_critical_section(flags);
         }
     }
 
@@ -2076,6 +2104,15 @@ static void nrf52_radioi8_state_acktx(struct nrf52_radioi8_dev_s *dev)
           dev->tim->ops->setup(dev, NRF52_TIMER_CHAN_TXDELAY,
                                IEEE802154_SIFS_SYMBOLS);
         }
+    }
+
+  /* Start the CSMA transaction that waited for the ACK TX */
+
+  else if (dev->state.csma_pending)
+    {
+      dev->state.csma_pending = false;
+      nrf52_radioi8_norm_setup(dev, dev->state.csma_desc->frame, true);
+      nrf52_radioi8_norm_trigger(dev);
     }
 
   /* Restore RX */
