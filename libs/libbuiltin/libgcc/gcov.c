@@ -30,6 +30,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <nuttx/mutex.h>
 #include <nuttx/streams.h>
 #include <nuttx/lib/lib.h>
 #include <nuttx/reboot_notifier.h>
@@ -155,6 +156,14 @@ typedef CODE int (*dump_fn_t)(FAR struct dump_args *,
 
 FAR struct gcov_info *__gcov_info_start;
 FAR struct gcov_info *__gcov_info_end;
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Protects the list: a module can add to it or leave it at any time */
+
+static rmutex_t g_gcov_lock = NXRMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Functions
@@ -341,6 +350,7 @@ static int gcov_dump_foreach(dump_fn_t handler, FAR struct dump_args *args)
   int size;
   int i;
 
+  nxrmutex_lock(&g_gcov_lock);
   for (info = __gcov_info_start; info; info = info->next)
     {
       memset(args->path_buffer, 0x00, PATH_MAX);
@@ -350,6 +360,7 @@ static int gcov_dump_foreach(dump_fn_t handler, FAR struct dump_args *args)
       if (data == NULL)
         {
           syslog(LOG_ERR, "gcov alloc failed!");
+          nxrmutex_unlock(&g_gcov_lock);
           return -ERROR;
         }
 
@@ -360,6 +371,7 @@ static int gcov_dump_foreach(dump_fn_t handler, FAR struct dump_args *args)
         {
           syslog(LOG_ERR, "gcov alloc failed! skip %s", info->filename);
           lib_free(data);
+          nxrmutex_unlock(&g_gcov_lock);
           return -ERROR;
         }
 
@@ -397,12 +409,14 @@ static int gcov_dump_foreach(dump_fn_t handler, FAR struct dump_args *args)
       lib_free(data);
     }
 
+  nxrmutex_unlock(&g_gcov_lock);
   return OK;
 
 exit:
   lib_free(filename);
   lib_free(data);
 
+  nxrmutex_unlock(&g_gcov_lock);
   return -ERROR;
 }
 
@@ -441,8 +455,10 @@ void __gcov_init(FAR struct gcov_info *info)
       inited++;
     }
 
+  nxrmutex_lock(&g_gcov_lock);
   info->next = __gcov_info_start;
   __gcov_info_start = info;
+  nxrmutex_unlock(&g_gcov_lock);
 }
 
 void __gcov_merge_add(FAR gcov_type *counters, unsigned int n_counters)
@@ -558,6 +574,7 @@ void __gcov_reset(void)
   uint32_t functions;
   uint32_t counts;
 
+  nxrmutex_lock(&g_gcov_lock);
   for (info = __gcov_info_start; info; info = info->next)
     {
       for (functions = 0; functions < info->n_functions; functions++)
@@ -576,4 +593,29 @@ void __gcov_reset(void)
             }
         }
     }
+
+  nxrmutex_unlock(&g_gcov_lock);
+}
+
+void __gcov_unload(FAR const void *addr, size_t size)
+{
+  FAR const char *start = addr;
+  FAR struct gcov_info **prev;
+  FAR const char *info;
+
+  nxrmutex_lock(&g_gcov_lock);
+  for (prev = &__gcov_info_start; *prev != NULL; )
+    {
+      info = (FAR const char *)*prev;
+      if (info >= start && info < start + size)
+        {
+          *prev = (*prev)->next;
+        }
+      else
+        {
+          prev = &(*prev)->next;
+        }
+    }
+
+  nxrmutex_unlock(&g_gcov_lock);
 }

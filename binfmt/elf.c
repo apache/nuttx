@@ -264,6 +264,8 @@ static int elf_loadbinary(FAR struct binary_s *binp,
 
   binp->mod.textalloc = (FAR void *)loadinfo.textalloc;
   binp->mod.dataalloc = (FAR void *)loadinfo.datastart;
+  binp->mod.textsize  = loadinfo.textsize;
+  binp->mod.datasize  = loadinfo.datasize;
   binp->mod.gotbase   = loadinfo.fdpic ? loadinfo.gotbase : 0;
 #  ifdef CONFIG_BINFMT_CONSTRUCTORS
   binp->mod.initarr = loadinfo.initarr;
