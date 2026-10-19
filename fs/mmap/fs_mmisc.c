@@ -24,7 +24,18 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <sys/mman.h>
+#include <errno.h>
+#include <unistd.h>
+
+#include <nuttx/addrenv.h>
+#include <nuttx/arch.h>
+#include <nuttx/cache.h>
+#include <nuttx/mm/map.h>
+#include <nuttx/pgalloc.h>
+#include <nuttx/sched.h>
 
 /****************************************************************************
  * Public Functions
@@ -52,11 +63,65 @@ int munlockall(void)
   return 0;
 }
 
-/* The empty implementation is enough since MMU/MPU mayn't exist. */
+/* Without an address environment the arguments are checked, but there are
+ * no page permissions to change.
+ */
 
 int mprotect(FAR void *addr, size_t len, int prot)
 {
-  return 0;
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_MM_PGALLOC)
+  FAR struct addrenv_s *addrenv = nxsched_self()->addrenv_own;
+#endif
+  uintptr_t start = (uintptr_t)addr;
+  long pagesize = sysconf(_SC_PAGESIZE);
+  int ret;
+
+  if ((prot & ~(PROT_READ | PROT_WRITE | PROT_EXEC)) != 0 ||
+      (pagesize > 0 && start % pagesize != 0))
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
+
+  if (len == 0)
+    {
+      return OK;
+    }
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_MM_PGALLOC)
+  len = MM_PGALIGNUP(len);
+  if (len == 0 || start + len < start || addrenv == NULL)
+    {
+      ret = -ENOMEM;
+      goto errout;
+    }
+
+  /* Hold the mapping list so that munmap() cannot remove pages meanwhile */
+
+  ret = mm_map_lock();
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  ret = up_addrenv_mprot(&addrenv->addrenv, start, len, prot);
+  mm_map_unlock();
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  if ((prot & PROT_EXEC) != 0)
+    {
+      up_coherent_dcache(start, len);
+    }
+#endif
+
+  return OK;
+
+errout:
+  set_errno(-ret);
+  return ERROR;
 }
 
 /* Ignore the advice since there is no alternative strategy to select. */
