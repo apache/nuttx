@@ -936,6 +936,22 @@ int v9fs_client_chstat(FAR struct v9fs_client_s *client, uint32_t fid,
   struct v9fs_lerror_s response;
   struct iovec wiov[1];
   struct iovec riov[1];
+  struct stat st;
+  int ret;
+
+  /* A server can store the mode as it is (QEMU security_model=mapped-xattr),
+   * so keep the file type in it.
+   */
+
+  st.st_mode = 0;
+  if ((flags & CH_STAT_MODE) != 0)
+    {
+      ret = v9fs_client_stat(client, fid, &st);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
 
   /* size[4] Tsetattr tag[2] fid[4] valid[4] mode[4] uid[4] gid[4] size[8]
    *                  atime_sec[8] atime_nsec[8] mtime_sec[8] mtime_nsec[8]
@@ -948,7 +964,7 @@ int v9fs_client_chstat(FAR struct v9fs_client_s *client, uint32_t fid,
 
   request.fid = fid;
   request.valid = v9fs_map_setattr_flags(flags);
-  request.mode = buf->st_mode & 07777;
+  request.mode = (st.st_mode & S_IFMT) | (buf->st_mode & 07777);
   request.uid = buf->st_uid;
   request.gid = buf->st_gid;
   request.size = buf->st_size;
