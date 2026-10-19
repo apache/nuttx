@@ -365,6 +365,17 @@ static void place_sections(void)
                "NXFLAT module cannot run", g_shstrtab + s->sh_name);
         }
 
+      /* A __thread variable compiled for native TLS needs a thread pointer
+       * and TLS relocations, which NXFLAT does not have.
+       */
+
+      if ((s->sh_flags & SHF_TLS) != 0)
+        {
+          fail("%s holds native TLS, which an NXFLAT module cannot use; "
+               "build it with a toolchain that emulates TLS",
+               g_shstrtab + s->sh_name);
+        }
+
       if ((s->sh_flags & SHF_EXECINSTR) != 0)
         {
           g_segof[i]  = SEG_TEXT;
