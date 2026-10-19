@@ -162,6 +162,21 @@ config ARCH_CHIP_GD32F4
 	---help---
 		GD32MCU GD32 architectures (ARM Cortex-M4).
 
+config ARCH_CHIP_GD32W51X
+	bool "GigaDevice GD32W51x"
+	select ARCH_CORTEXM33
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_PROGMEM
+	select ARCH_HAVE_PWM_MULTICHAN
+	select ARCH_HAVE_RESET
+	select ARM_HAVE_DSP
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV8M_HAVE_STACKCHECK
+	---help---
+		GigaDevice GD32W51x Wi-Fi MCUs (ARM Cortex-M33).
+
 config ARCH_CHIP_IMX1
 	bool "NXP/Freescale iMX.1"
 	select ARCH_ARM920T
@@ -1364,6 +1379,7 @@ config ARCH_CHIP
 	default "efm32"		if ARCH_CHIP_EFM32
 	default "eoss3"		if ARCH_CHIP_EOSS3
 	default "gd32f4"	if ARCH_CHIP_GD32F4
+	default "gd32w51x"	if ARCH_CHIP_GD32W51X
 	default "imx1"		if ARCH_CHIP_IMX1
 	default "imx6"		if ARCH_CHIP_IMX6
 	default "imx9"		if ARCH_CHIP_IMX9_CORTEX_M
@@ -1824,6 +1840,9 @@ source "arch/arm/src/eoss3/Kconfig"
 endif
 if ARCH_CHIP_GD32F4
 source "arch/arm/src/gd32f4/Kconfig"
+endif
+if ARCH_CHIP_GD32W51X
+source "arch/arm/src/gd32w51x/Kconfig"
 endif
 if ARCH_CHIP_IMX1
 source "arch/arm/src/imx1/Kconfig"

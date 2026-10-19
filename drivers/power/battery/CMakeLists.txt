@@ -48,6 +48,12 @@ if(CONFIG_BATTERY_CHARGER)
     list(APPEND SRCS bq2429x.c)
   endif()
 
+  # Add the GD30BC2416 I2C-based battery charger driver
+
+  if(CONFIG_I2C_GD30BC2416)
+    list(APPEND SRCS gd30bc2416.c)
+  endif()
+
   # Add the axp202 I2C-based battery charger driver
 
   if(CONFIG_I2C_AXP202)

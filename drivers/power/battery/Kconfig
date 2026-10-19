@@ -93,6 +93,30 @@ config AXP202_LDO4_VOLTAGE
 			1250 1300 1400 1500 1600 1700 1800 1900
 			2000 2500 2700 2800 3000 3100 3200 3300 mV.
 
+config GD30BC2416
+	bool "GD30BC2416 Battery charger support"
+	default n
+	select I2C
+	select I2C_GD30BC2416
+	select SCHED_HPWORK
+	depends on BATTERY_CHARGER
+	---help---
+		The GigaDevice GD30BC2416 is a single-cell switching battery
+		charger with a 5 V boost converter, an I2C interface and an ADC
+		for the battery voltage.
+
+config I2C_GD30BC2416
+	bool
+
+config GD30BC2416_CHARGE
+	bool "Enable the charge at initialization"
+	default n
+	depends on GD30BC2416
+	---help---
+		The charge is disabled when the GD30BC2416 powers up.  Enable it
+		when the driver is initialized.  Otherwise it can be enabled
+		later with the BATIO_OPRTN_CHARGE operation.
+
 config MCP73871
 	bool "Microchip MCP73871 Battery charger support"
 	default n

@@ -1,0 +1,365 @@
+# ##############################################################################
+# arch/arm/src/gd32w51x/Kconfig
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# ##############################################################################
+
+comment "GD32W51x Configuration Options"
+
+choice
+	prompt "GD32W51x Chip Selection"
+	default ARCH_CHIP_GD32W515PI
+	depends on ARCH_CHIP_GD32W51X
+
+config ARCH_CHIP_GD32W515PI
+	bool "GD32W515PIQ6"
+	---help---
+		QFN56 package, 2048 KB SIP flash, 448 KB SRAM.
+		Chip used on the GD-xD-W515-EVAL board.
+
+config ARCH_CHIP_GD32W515TI
+	bool "GD32W515TIQ6"
+	---help---
+		QFN36 package, 2048 KB SIP flash, 448 KB SRAM.
+
+config ARCH_CHIP_GD32W515TG
+	bool "GD32W515TGQ6"
+	---help---
+		QFN36 package, 1024 KB SIP flash, 384 KB SRAM.
+
+endchoice # GD32W51x Chip Selection
+
+menu "GD32W51x Peripheral Support"
+
+config GD32W51X_USART0
+	bool "USART0"
+	default n
+	select USART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		USART0 on APB1 (45 MHz at 180 MHz SYSCLK).  Supports hardware flow
+		control.  The pins are chosen by the board (board.h).
+
+config GD32W51X_UART1
+	bool "UART1"
+	default n
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		USART1 on APB1 (45 MHz at 180 MHz SYSCLK).  The UART1 name is
+		shared with the GD32VW55x driver.  The pins are chosen by the
+		board (board.h).
+
+config GD32W51X_UART2
+	bool "UART2"
+	default n
+	select UART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		USART2 on APB2 (90 MHz at 180 MHz SYSCLK).  The UART2 name is
+		shared with the GD32VW55x driver.  The pins are chosen by the
+		board (board.h).
+
+config GD32W51X_DMA
+	bool "DMA"
+	default n
+	select ARCH_DMA
+	---help---
+		DMA0 and DMA1 controllers, 8 channels each.  Each channel selects
+		one of 8 peripheral request lines and supports circular mode,
+		burst transfers, a FIFO and memory-to-memory transfers.  SPI0
+		is served by DMA1.
+
+		The Wi-Fi data path uses DMA inside the prebuilt vendor
+		libraries; this driver is for the peripherals.
+
+config GD32W51X_GPIO_IRQ
+	bool "GPIO interrupts (EXTI)"
+	default n
+	---help---
+		Enable interrupt support on GPIO pins through the EXTI block
+		(16 lines; 5..9 and 10..15 are shared vectors).
+
+config GD32W51X_SPI
+	bool
+	select SPI
+
+config GD32W51X_SPI0
+	bool "SPI0"
+	default n
+	select GD32W51X_SPI
+	---help---
+		SPI0, on APB2.
+
+config GD32W51X_SPI1
+	bool "SPI1"
+	default n
+	select GD32W51X_SPI
+	---help---
+		SPI1, on APB1.  Its I2S mode (I2S1) is not supported.
+
+config GD32W51X_QSPI
+	bool "QSPI"
+	default n
+	---help---
+		Quad-SPI controller in indirect mode (polled), for an external
+		NOR flash (e.g. with the GD25 MTD driver in QSPI mode).  The QSPI
+		is a secure peripheral: its pins are marked secure when it is
+		initialized.
+
+config GD32W51X_TSI
+	bool "TSI"
+	default n
+	---help---
+		Touch sensing interface (capacitive keys), polled in software
+		trigger mode.
+
+config GD32W51X_I2C0
+	bool "I2C0"
+	default n
+	select GD32W51X_I2C
+	select I2C
+
+config GD32W51X_I2C1
+	bool "I2C1"
+	default n
+	select GD32W51X_I2C
+	select I2C
+
+config GD32W51X_I2C
+	bool
+	default n
+
+config GD32W51X_ADC
+	bool "ADC"
+	default n
+	select ANALOG
+	select ADC
+	---help---
+		Single ADC, 6/8/10/12-bit resolution.  9 external channels on
+		the QFN56 parts, 5 on the QFN36 parts.
+
+config GD32W51X_TIMER0
+	bool "TIMER0 (advanced)"
+	default n
+	select GD32W51X_TIMER
+	---help---
+		Advanced-control timer: 4 channels, complementary outputs with
+		dead-time insertion and a break input.
+
+config GD32W51X_TIMER1
+	bool "TIMER1"
+	default n
+	select GD32W51X_TIMER
+
+config GD32W51X_TIMER2
+	bool "TIMER2"
+	default n
+	select GD32W51X_TIMER
+
+config GD32W51X_TIMER15
+	bool "TIMER15"
+	default n
+	select GD32W51X_TIMER
+
+config GD32W51X_TIMER16
+	bool "TIMER16"
+	default n
+	select GD32W51X_TIMER
+
+config GD32W51X_TIMER
+	bool
+	default n
+
+config GD32W51X_FWDGT
+	bool "Independent watchdog (FWDGT)"
+	default n
+	select WATCHDOG
+	---help---
+		Free watchdog timer, clocked from the IRC32K.  It keeps running
+		in the low-power modes.
+
+config GD32W51X_WWDGT
+	bool "Window watchdog (WWDGT)"
+	default n
+	select WATCHDOG
+	---help---
+		Window watchdog, clocked from APB1.
+
+config GD32W51X_PROGMEM
+	bool "Program memory (internal flash)"
+	default n
+	select ARCH_HAVE_PROGMEM
+	select ARCH_HAVE_PROGMEM_READ
+	---help---
+		Expose part of the internal flash through the up_progmem
+		interface.
+
+		Take care: the internal flash also holds the firmware itself.
+		Only the region configured below is touched.
+
+config GD32W51X_RNG
+	bool "True random number generator (TRNG)"
+	default n
+	select ARCH_HAVE_RNG
+	---help---
+		Hardware TRNG, registered as /dev/random.  Note that its
+		interrupt is shared with the hash accelerator (HAU).
+
+config GD32W51X_CRC
+	bool "Hardware CRC unit"
+	default n
+	---help---
+		CRC-32 calculation unit.
+
+endmenu # GD32W51x Peripheral Support
+
+menu "SPI Configuration"
+	depends on GD32W51X_SPI
+
+config GD32W51X_SPI_DMA
+	bool "SPI DMA"
+	default n
+	depends on GD32W51X_DMA
+	---help---
+		Use DMA for SPI transfers instead of interrupt-driven
+		byte-by-byte exchanges.
+
+config GD32W51X_SPI_DMATHRESHOLD
+	int "SPI DMA threshold (bytes)"
+	default 4
+	depends on GD32W51X_SPI_DMA
+	---help---
+		Transfers shorter than this are done by polling: setting up DMA
+		costs more than moving a few bytes.
+
+endmenu # SPI Configuration
+
+menu "I2C Configuration"
+	depends on GD32W51X_I2C
+
+config GD32W51X_I2C_TIMEOSEC
+	int "Transfer timeout, seconds"
+	default 0
+
+config GD32W51X_I2C_TIMEOMS
+	int "Transfer timeout, milliseconds"
+	default 500
+
+config GD32W51X_I2C_TIMEOTICKS
+	int "Transfer timeout, system ticks"
+	default 0
+	---help---
+		Overrides the seconds/milliseconds pair when non-zero.
+
+endmenu # I2C Configuration
+
+menu "ADC Configuration"
+	depends on GD32W51X_ADC
+
+config GD32W51X_ADC_RESOLUTION
+	int "ADC resolution (bits)"
+	default 12
+	range 6 12
+	---help---
+		Valid values are 6, 8, 10 and 12.
+
+config GD32W51X_ADC_CLOCK
+	int "ADC clock (Hz)"
+	default 11250000
+	---help---
+		Derived from PCLK2 (90 MHz) by a prescaler of 2/4/6/8.  The
+		default is PCLK2/8 = 11.25 MHz, a conservative choice: the maximum
+		ADC clock is not stated in the vendor documentation.
+
+config GD32W51X_ADC_SAMPLETIME
+	int "ADC sample time selector"
+	default 4
+	range 0 7
+	---help---
+		Sample time per channel, as the ADC_SAMPTx field encoding:
+		0=3, 1=15, 2=28, 3=56, 4=84, 5=112, 6=144, 7=480 cycles.
+
+		Note: a routine sequence takes at most 9 channels on this chip,
+		not 16.
+
+endmenu # ADC Configuration
+
+menu "Timer Configuration"
+	depends on GD32W51X_TIMER
+
+config GD32W51X_PWM
+	bool "PWM output"
+	default n
+	select PWM
+	---help---
+		Drive PWM through the timer output channels.  TIMER5 has no
+		output channel and cannot be used.
+
+config GD32W51X_CAPTURE
+	bool "Input capture"
+	default n
+	select CAPTURE
+	---help---
+		Measure frequency and duty cycle on a timer input channel.
+
+endmenu # Timer Configuration
+
+menu "Watchdog Configuration"
+	depends on GD32W51X_FWDGT || GD32W51X_WWDGT
+
+config GD32W51X_FWDGT_DEFTIMOUT
+	int "FWDGT default timeout (ms)"
+	default 32760
+	depends on GD32W51X_FWDGT
+	---help---
+		Clocked from the IRC32K; the longest timeout is about 32760 ms.
+
+config GD32W51X_WWDGT_DEFTIMOUT
+	int "WWDGT default timeout (ms)"
+	default 26
+	depends on GD32W51X_WWDGT
+	---help---
+		Clocked from APB1 (45 MHz); the longest timeout is about 46 ms.
+
+endmenu # Watchdog Configuration
+
+menu "Program memory Configuration"
+	depends on GD32W51X_PROGMEM
+
+config GD32W51X_PROGMEM_START_ADDR
+	hex "Start address of the progmem region"
+	default 0x081e0000
+	---help---
+		Absolute address of the first flash page handed to progmem.  It
+		must be 4 KiB aligned (the erase page size).
+
+		Nothing outside the region configured here is ever erased or
+		written.  The default is the last 128 KiB of a 2 MiB part; the
+		board linker script must not hand the same pages to the
+		firmware.
+
+config GD32W51X_PROGMEM_SIZE
+	int "Size of the progmem region (bytes)"
+	default 131072
+	---help---
+		Must be a multiple of 4096 (the erase page size).
+
+endmenu # Program memory Configuration
+
