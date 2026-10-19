@@ -784,7 +784,7 @@ static int virtio_snd_configure(FAR struct audio_lowerhalf_s *dev,
         vrtinfo("Number of channels: %"PRIu8"\n", caps->ac_channels);
         vrtinfo("Sample rate:        %"PRIu16"\n", caps->ac_controls.hw[0]);
         vrtinfo("Sample width:       %"PRIu8"\n", caps->ac_controls.b[2]);
-        vrtinfo("channel map: 0x%x\n", caps->ac_chmap);
+        vrtinfo("channel map: 0x%" PRIx32 "\n", caps->ac_chmap);
         rate = caps->ac_controls.hw[0] | (caps->ac_controls.b[3] << 16);
         bps = caps->ac_controls.b[2];
         ch = caps->ac_channels;
