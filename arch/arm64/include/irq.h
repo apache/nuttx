@@ -478,6 +478,7 @@ static inline_function void up_irq_restore(irqstate_t flags)
 #define up_this_task()         ((struct tcb_s *)(read_sysreg(tpidr_el1) & ~1ul))
 #define up_update_task(t)      modify_sysreg(t, ~1ul, tpidr_el1)
 #define up_interrupt_context() (read_sysreg(tpidr_el1) & 1)
+#define up_tls_info()          ((struct tls_info_s *)read_sysreg(tpidr_el0))
 
 #define up_switch_context(tcb, rtcb)                                      \
   do                                                                      \
