@@ -112,6 +112,7 @@
 #define NUTTX_CH_STAT_GID       (1 << 2)
 #define NUTTX_CH_STAT_ATIME     (1 << 3)
 #define NUTTX_CH_STAT_MTIME     (1 << 4)
+#define NUTTX_CH_STAT_NOFOLLOW  (1 << 8)
 
 /* These must exactly match the definitions from include/nuttx/fs/ioctl.h: */
 
