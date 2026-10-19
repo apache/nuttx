@@ -438,8 +438,8 @@ static int stm32_getstatus(struct watchdog_lowerhalf_s *lower,
                            struct watchdog_status_s *status)
 {
   struct stm32_lowerhalf_s *priv = (struct stm32_lowerhalf_s *)lower;
-  uint32_t elapsed;
-  uint16_t reload;
+  uint32_t remaining;
+  uint32_t counter;
 
   wdinfo("Entry\n");
   DEBUGASSERT(priv);
@@ -461,16 +461,28 @@ static int stm32_getstatus(struct watchdog_lowerhalf_s *lower,
 
   status->timeout = priv->timeout;
 
-  /* Get the time remaining until the watchdog expires (in milliseconds) */
+  /* Get the time remaining until the watchdog expires (in milliseconds).
+   * The counter runs from T_RESET | reload down to T_MAX, where T6 clears
+   * and the reset is generated, so the ticks left are T[6:0] - T_MAX.
+   */
 
-  reload = (stm32_getreg(STM32_WWDG_CR) >> WWDG_CR_T_SHIFT) & 0x7f;
-  elapsed = (WWDG_CR_T_RESET | priv->reload) - reload;
-  status->timeleft = (priv->timeout * elapsed) / (priv->reload + 1);
+  counter  = stm32_getreg(STM32_WWDG_CR) & WWDG_CR_T_MASK;
+  counter >>= WWDG_CR_T_SHIFT;
+  if (counter > WWDG_CR_T_MAX)
+    {
+      remaining = counter - WWDG_CR_T_MAX;
+    }
+  else
+    {
+      remaining = 0;
+    }
+
+  status->timeleft = (priv->timeout * remaining) / (priv->reload + 1);
 
   wdinfo("Status     :\n");
   wdinfo("  flags    : %08x\n", (unsigned)status->flags);
   wdinfo("  timeout  : %u\n", (unsigned)status->timeout);
-  wdinfo("  timeleft : %u\n", (unsigned)status->flags);
+  wdinfo("  timeleft : %u\n", (unsigned)status->timeleft);
   return OK;
 }
 
