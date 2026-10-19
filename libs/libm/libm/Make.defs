@@ -57,6 +57,7 @@ CSRCS += lib_fmax.c lib_fmaxf.c lib_fmaxl.c
 CSRCS += lib_fmin.c lib_fminf.c lib_fminl.c
 
 CSRCS += __cos.c __sin.c lib_gamma.c lib_lgamma.c
+CSRCS += lib_fma.c lib_fmal.c
 CSRCS += lib_fdim.c lib_fdimf.c lib_fdiml.c
 CSRCS += lib_ilogb.c lib_ilogbf.c lib_ilogbl.c
 CSRCS += lib_logb.c lib_logbf.c lib_logbl.c

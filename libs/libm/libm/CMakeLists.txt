@@ -151,6 +151,8 @@ if(CONFIG_LIBM)
       __sin.c
       lib_gamma.c
       lib_lgamma.c
+      lib_fma.c
+      lib_fmal.c
       lib_fdim.c
       lib_fdimf.c
       lib_fdiml.c
