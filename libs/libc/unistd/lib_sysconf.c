@@ -240,7 +240,7 @@ long sysconf(int name)
       case _SC_REALTIME_SIGNALS:
         return _POSIX_REALTIME_SIGNALS;
       case _SC_CLK_TCK:
-        return CLOCKS_PER_SEC;
+        return CLK_TCK;
 
       case _SC_ARG_MAX:
         return ARG_MAX;

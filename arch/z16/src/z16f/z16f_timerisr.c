@@ -42,7 +42,7 @@
  ****************************************************************************/
 
 /* The desired timer interrupt frequency is provided by the definition
- * CLOCKS_PER_SEC (see include/time.h).  CLOCKS_PER_SEC defines the desired
+ * CLK_TCK (see include/time.h).  CLK_TCK defines the desired
  * number of system clock ticks per second.  That value is a user
  * configurable setting that defaults to 100 (100 ticks per second = 10 MS
  * interval).
@@ -143,9 +143,9 @@ void up_timer_initialize(void)
    */
 
 #if 0 /* Does not work ??? */
-  scaledfreq = _DEFCLK / CLOCKS_PER_SEC;
+  scaledfreq = _DEFCLK / CLK_TCK;
 #else
-  scaledfreq = (BOARD_SYSTEM_FREQUENCY / CLOCKS_PER_SEC);
+  scaledfreq = (BOARD_SYSTEM_FREQUENCY / CLK_TCK);
 #endif
 
   rawdiv = (scaledfreq >> 16) + 1;

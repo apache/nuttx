@@ -46,18 +46,18 @@
  * ideal match is given by:
  *
  *   CLOCK = CPU_CLOCK / DIVISOR                      # CPU clocks/sec
- *   MATCH = CLOCK / CLOCKS_PER_SEC                   # CPU clocks/timer tick
- *   MATCH = CPU_CLOCK / DIVISOR / CLOCKS_PER_SEC     # CPU clocks/timer tick
+ *   MATCH = CLOCK / CLK_TCK                          # CPU clocks/timer tick
+ *   MATCH = CPU_CLOCK / DIVISOR / CLK_TCK            # CPU clocks/timer tick
  *
  * But we only have 16-bits of accuracy so we need to pick the smallest
  * divisor using the following brute force calculation:
  */
 
-#define MATCH1      (( BOARD_CPU_CLOCK                + CLOCKS_PER_SEC/2) / CLOCKS_PER_SEC)
-#define MATCH8     ((((BOARD_CPU_CLOCK + 4) / 8)      + CLOCKS_PER_SEC/2) / CLOCKS_PER_SEC)
-#define MATCH64    ((((BOARD_CPU_CLOCK + 8) / 64)     + CLOCKS_PER_SEC/2) / CLOCKS_PER_SEC)
-#define MATCH256   ((((BOARD_CPU_CLOCK + 128) / 256)  + CLOCKS_PER_SEC/2) / CLOCKS_PER_SEC)
-#define MATCH1024  ((((BOARD_CPU_CLOCK + 512) / 1024) + CLOCKS_PER_SEC/2) / CLOCKS_PER_SEC)
+#define MATCH1      (( BOARD_CPU_CLOCK                + CLK_TCK/2) / CLK_TCK)
+#define MATCH8     ((((BOARD_CPU_CLOCK + 4) / 8)      + CLK_TCK/2) / CLK_TCK)
+#define MATCH64    ((((BOARD_CPU_CLOCK + 8) / 64)     + CLK_TCK/2) / CLK_TCK)
+#define MATCH256   ((((BOARD_CPU_CLOCK + 128) / 256)  + CLK_TCK/2) / CLK_TCK)
+#define MATCH1024  ((((BOARD_CPU_CLOCK + 512) / 1024) + CLK_TCK/2) / CLK_TCK)
 
 #if MATCH1 <= 65536
 #  define MATCH   (MATCH1-1)
@@ -78,7 +78,7 @@
 #  error "Cannot represent this timer frequency"
 #endif
 
-/* Eg. CPU_CLOCK = 8MHz, CLOCKS_PER_SEC = 100
+/* Eg. CPU_CLOCK = 8MHz, CLK_TCK        = 100
  *
  *   MATCH1      ((8000000 + 50) / 100) = 80,000  FREQ=100.0Hz
  *   MATCH8      ((1000000 + 50) / 100) = 10,000  FREQ=100.0Hz <-- this one

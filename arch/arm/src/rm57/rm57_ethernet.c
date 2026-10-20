@@ -140,7 +140,7 @@
  * only the last-resort backstop.
  */
 
-#define RM57_EMAC_TXTIMEOUT   (60 * CLOCKS_PER_SEC)
+#define RM57_EMAC_TXTIMEOUT   (60 * CLK_TCK)
 
 /* Bounded loops guard against a wedged descriptor chain hanging a
  * worker forever, matching the RM57_DCAN_ISR_BOUND idiom in

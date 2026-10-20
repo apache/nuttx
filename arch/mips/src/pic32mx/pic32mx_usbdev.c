@@ -166,7 +166,7 @@
 #define pic32mx_rqhead(q)     ((q)->head)
 #define pic32mx_rqtail(q)     ((q)->tail)
 
-#define RESTART_DELAY         (150 * CLOCKS_PER_SEC / 1000)
+#define RESTART_DELAY         (150 * CLK_TCK / 1000)
 
 /* USB trace ****************************************************************/
 

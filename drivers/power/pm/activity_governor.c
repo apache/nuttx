@@ -47,13 +47,13 @@
 /* Convert the time slice interval into system clock ticks.
  *
  * CONFIG_PM_SLICEMS provides the duration of one time slice in milliseconds.
- * CLOCKS_PER_SEC provides the number of timer ticks in one second.
+ * CLK_TCK provides the number of timer ticks in one second.
  *
  * slice ticks = (CONFIG_PM_SLICEMS msec / 1000 msec/sec) /
- *               (CLOCKS_PER_SEC ticks/sec)
+ *               (CLK_TCK ticks/sec)
  */
 
-#define TIME_SLICE_TICKS ((CONFIG_PM_GOVERNOR_SLICEMS * CLOCKS_PER_SEC) /  1000)
+#define TIME_SLICE_TICKS ((CONFIG_PM_GOVERNOR_SLICEMS * CLK_TCK) /  1000)
 
 /****************************************************************************
  * Private Types

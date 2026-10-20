@@ -36,8 +36,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define AMEBAZ_SCAN_TIMEOUT_TICK    (10 * CLOCKS_PER_SEC)
-#define AMEBAZ_CONNECT_TIMEOUT_TICK (10 * CLOCKS_PER_SEC)
+#define AMEBAZ_SCAN_TIMEOUT_TICK    (10 * CLK_TCK)
+#define AMEBAZ_CONNECT_TIMEOUT_TICK (10 * CLK_TCK)
 #define AMEBAZ_DEVICE_COUNT         (2)
 #define AMEBAZ_SCAN_ENTRY_COUNT     (5)
 #define AMEBAZ_DEFAULT_COUNTRY      "CN"

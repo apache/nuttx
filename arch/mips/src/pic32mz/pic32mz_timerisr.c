@@ -66,12 +66,12 @@
  * register value given the timer 1 input clock frequency and the desired
  * system timer frequency:
  *
- *   TIMER1_MATCH = TIMER1_SRC_FREQ / TIMER1_PRESCALE / CLOCKS_PER_SEC
+ *   TIMER1_MATCH = TIMER1_SRC_FREQ / TIMER1_PRESCALE / CLK_TCK
  *
  * We want the largest possible value for MATCH that is less than 65,535, the
  * maximum value for the 16-bit timer register:
  *
- *   TIMER1_PRESCALE >= TIMER1_SRC_FREQ / CLOCKS_PER_SEC / 65535
+ *   TIMER1_PRESCALE >= TIMER1_SRC_FREQ / CLK_TCK / 65535
  *
  * Timer 1 does not have very many options for the prescaler value.  So we
  * can pick the best by brute force.  Example:
@@ -79,7 +79,7 @@
  * Example 1. Given:
  *   BOARD_TIMER1_SOSC      = Defined
  *   BOARD_SOSC_FREQ        = 32768
- *   CLOCKS_PER_SEC         = 100
+ *   CLK_TCK                = 100
  * Then:
  *   OPTIMAL_PRESCALE       = 1
  *   TIMER1_PRESCALE        = 1
@@ -88,14 +88,14 @@
  * Example 2. Given:
  *   BOARD_TIMER1_SOSC      = Not defined
  *   BOARD_PBCLK3           = 60000000
- *   CLOCKS_PER_SEC         = 100
+ *   CLK_TCK                = 100
  * Then:
  *   OPTIMAL_PRESCALE       = 9.2
  *   TIMER1_PRESCALE        = 64
  *   TIMER1_MATCH           = 9375 -> 100.0 ticks/sec
  */
 
-#define OPTIMAL_PRESCALE (TIMER1_SRC_FREQ / CLOCKS_PER_SEC / 65535)
+#define OPTIMAL_PRESCALE (TIMER1_SRC_FREQ / CLK_TCK / 65535)
 #if OPTIMAL_PRESCALE <= 1
 #  define TIMER1_CON_TCKPS    TIMER1_CON_TCKPS_1
 #  define TIMER1_PRESCALE     1
@@ -112,7 +112,7 @@
 #  error "This timer frequency cannot be represented"
 #endif
 
-#define TIMER1_MATCH (TIMER1_SRC_FREQ / TIMER1_PRESCALE / CLOCKS_PER_SEC)
+#define TIMER1_MATCH (TIMER1_SRC_FREQ / TIMER1_PRESCALE / CLK_TCK)
 
 /****************************************************************************
  * Private Functions
