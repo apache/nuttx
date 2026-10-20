@@ -201,8 +201,8 @@
 #define _PC_SYNC_IO                      0x0012
 #define _PC_VDISABLE                     0x0013
 
-/* Constants used with POSIX sysconf().  sysconf() will return -1 and set
- * errno to ENOSYS for most of these.
+/* Constants used with POSIX sysconf().  sysconf() returns -1 for the
+ * options and limits that NuttX does not have.
  */
 
 #define _SC_2_C_BIND                     0x0001
