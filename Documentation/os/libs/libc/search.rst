@@ -289,3 +289,41 @@ Standards Compliance
 **Non-POSIX Extensions:**
 
 - ``hforeach_r()`` - NuttX-specific extension for iterating over hash table entries
+
+Binary Search Tree Functions
+============================
+
+``search.h`` also declares the POSIX (XSI) binary search tree functions.
+The tree is an AVL tree, so its height stays below 1.44 log2(n + 2) for
+any order of keys.  The caller keeps the root pointer, which is ``NULL``
+for an empty tree.  The first member of a node is the pointer to its key.
+
+.. code-block:: c
+
+   FAR void *tsearch(FAR const void *key, FAR void **rootp,
+                     CODE int (*compar)(FAR const void *, FAR const void *));
+   FAR void *tfind(FAR const void *key, FAR void * const *rootp,
+                   CODE int (*compar)(FAR const void *, FAR const void *));
+   FAR void *tdelete(FAR const void *key, FAR void **rootp,
+                     CODE int (*compar)(FAR const void *, FAR const void *));
+   void twalk(FAR const void *root,
+              CODE void (*action)(FAR const void *node, VISIT visit,
+                                  int depth));
+   void tdestroy(FAR void *root, CODE void (*free_node)(FAR void *key));
+
+- ``tsearch()`` finds the node of ``key`` or adds one.  It returns the
+  node, or ``NULL`` if there is no memory.
+- ``tfind()`` finds the node of ``key``.  It returns ``NULL`` if the tree
+  has no such key.
+- ``tdelete()`` removes the node of ``key``.  It returns the parent of the
+  removed node, ``rootp`` if the root was removed, or ``NULL`` if the tree
+  has no such key.  The other nodes do not move in memory.
+- ``twalk()`` calls ``action`` for each node, depth first and left to
+  right: with ``preorder``, ``postorder`` and ``endorder`` for a node with
+  children, and with ``leaf`` for a node without.  The depth of the root
+  is 0.
+- ``tdestroy()`` frees all nodes and calls ``free_node`` for the key of
+  each node.  It is a GNU extension.
+
+Insertion and deletion do not recurse.  ``twalk()`` and ``tdestroy()``
+recurse to the height of the tree.
