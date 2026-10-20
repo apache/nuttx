@@ -29,10 +29,19 @@
 #include <stdlib.h>
 
 #include <nuttx/atexit.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/mutex.h>
 #include <nuttx/tls.h>
 
 #if CONFIG_LIBC_MAX_EXITFUNS > 0
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Number of entries that each heap allocation adds */
+
+#define ATEXIT_GROW 8
 
 /****************************************************************************
  * Private Functions
@@ -61,6 +70,25 @@ static FAR struct atexit_list_s *get_exitfuncs(void)
 }
 
 /****************************************************************************
+ * Name: get_entry
+ *
+ * Description:
+ *    Return entry 'idx' of the list: in funcs[] or in the heap part.
+ *
+ ****************************************************************************/
+
+static inline FAR struct atexit_s *
+get_entry(FAR struct atexit_list_s *aehead, int idx)
+{
+  if (idx < CONFIG_LIBC_MAX_EXITFUNS)
+    {
+      return &aehead->funcs[idx];
+    }
+
+  return &aehead->extra[idx - CONFIG_LIBC_MAX_EXITFUNS];
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -69,51 +97,59 @@ int atexit_register(int type, CODE void (*func)(void), FAR void *arg,
 {
   FAR struct task_info_s   *info = task_get_info();
   FAR struct atexit_list_s *aehead;
-  int                       idx;
-  int                       ret = ERROR;
+  FAR struct atexit_s      *entry;
+  int                       ret;
 
   /* REVISIT: Missing logic */
 
   UNUSED(dso);
 
-  /* The following must be atomic */
+  if (func == NULL)
+    {
+      return ERROR;
+    }
 
   aehead = get_exitfuncs();
 
-  if (func)
+  ret = nxrmutex_lock(&info->ta_lock);
+  if (ret < 0)
     {
-      ret = nxrmutex_lock(&info->ta_lock);
-      if (ret < 0)
-        {
-          return -ret;
-        }
-
-      if ((idx = aehead->nfuncs) < ATEXIT_MAX)
-        {
-          aehead->funcs[idx].type = type;
-          aehead->funcs[idx].func = func;
-          aehead->funcs[idx].arg  = arg;
-          aehead->nfuncs++;
-          ret = OK;
-        }
-      else
-        {
-          ret = ERROR;
-        }
-
-      nxrmutex_unlock(&info->ta_lock);
+      return ERROR;
     }
 
-  return ret;
+  /* Grow the heap part when the list is full */
+
+  if (aehead->nfuncs >= CONFIG_LIBC_MAX_EXITFUNS + aehead->nextra)
+    {
+      entry = lib_realloc(aehead->extra, (aehead->nextra + ATEXIT_GROW) *
+                                         sizeof(struct atexit_s));
+      if (entry == NULL)
+        {
+          nxrmutex_unlock(&info->ta_lock);
+          return ERROR;
+        }
+
+      aehead->extra   = entry;
+      aehead->nextra += ATEXIT_GROW;
+    }
+
+  entry       = get_entry(aehead, aehead->nfuncs);
+  entry->type = type;
+  entry->func = func;
+  entry->arg  = arg;
+  aehead->nfuncs++;
+
+  nxrmutex_unlock(&info->ta_lock);
+  return OK;
 }
 
 void atexit_call_exitfuncs(int status, bool quick)
 {
   FAR struct atexit_list_s *aehead;
   FAR struct task_info_s   *info = task_get_info();
+  FAR struct atexit_s      *entry;
   CODE void               (*func)(void);
   FAR void                 *arg;
-  int                       idx;
   int                       type;
 
   /* Call exit functions in reverse order */
@@ -133,16 +169,16 @@ void atexit_call_exitfuncs(int status, bool quick)
           break;
         }
 
-      idx = aehead->nfuncs - 1;
+      entry = get_entry(aehead, aehead->nfuncs - 1);
 
-      type = aehead->funcs[idx].type;
-      func = aehead->funcs[idx].func;
-      arg  = aehead->funcs[idx].arg;
+      type = entry->type;
+      func = entry->func;
+      arg  = entry->arg;
 
       /* Remove the function to prevent recursive call to it */
 
-      aehead->funcs[idx].func = NULL;
-      aehead->funcs[idx].arg  = NULL;
+      entry->func = NULL;
+      entry->arg  = NULL;
       aehead->nfuncs--;
 
       nxrmutex_unlock(&info->ta_lock);
@@ -172,9 +208,21 @@ void atexit_call_exitfuncs(int status, bool quick)
           (*((CODE void (*)(FAR void *))func))(arg);
         }
     }
-}
 
-#endif
+  /* Release the heap part */
+
+  if (nxrmutex_lock(&info->ta_lock) >= 0)
+    {
+      if (aehead->nfuncs == 0)
+        {
+          lib_free(aehead->extra);
+          aehead->extra  = NULL;
+          aehead->nextra = 0;
+        }
+
+      nxrmutex_unlock(&info->ta_lock);
+    }
+}
 
 /****************************************************************************
  * Name: atexit
@@ -187,9 +235,7 @@ void atexit_call_exitfuncs(int status, bool quick)
  *
  *    Limitations in the current implementation:
  *
- *      1. Only a single atexit function can be registered unless
- *         CONFIG_LIBC_MAX_EXITFUNS defines a larger number.
- *      2. atexit functions are not inherited when a new task is
+ *      1. atexit functions are not inherited when a new task is
  *         created.
  *
  * Input Parameters:
@@ -241,9 +287,7 @@ int at_quick_exit(CODE void (*func)(void))
  *
  *    Limitations in the current implementation:
  *
- *      1. Only a single on_exit function can be registered unless
- *         CONFIG_LIBC_MAX_EXITFUNS defines a larger number.
- *      2. on_exit functions are not inherited when a new task is
+ *      1. on_exit functions are not inherited when a new task is
  *         created.
  *
  * Input Parameters:
@@ -261,6 +305,8 @@ int on_exit(CODE void (*func)(int, FAR void *), FAR void *arg)
   return atexit_register(ATTYPE_ONEXIT, (CODE void (*)(void))func, arg,
                          NULL);
 }
+
+#endif /* CONFIG_LIBC_MAX_EXITFUNS > 0 */
 
 /****************************************************************************
  * Name: __cxa_atexit

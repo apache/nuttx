@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -35,9 +36,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Amount of exit functions */
+/* The number of exit functions is limited only by memory: the first
+ * CONFIG_LIBC_MAX_EXITFUNS entries are in the task information, the next
+ * ones come from the heap.  With CONFIG_LIBC_MAX_EXITFUNS 0 there are no
+ * exit functions: atexit(), at_quick_exit() and on_exit() are not built.
+ */
 
-#define ATEXIT_MAX (CONFIG_LIBC_MAX_EXITFUNS)
+#if CONFIG_LIBC_MAX_EXITFUNS > 0
+#  define ATEXIT_MAX INT_MAX
+#else
+#  define ATEXIT_MAX 0
+#endif
 
 /****************************************************************************
  * Public Types
@@ -59,11 +68,15 @@ struct atexit_s
   FAR void   *arg;
 };
 
+#if CONFIG_LIBC_MAX_EXITFUNS > 0
 struct atexit_list_s
 {
-  int             nfuncs;
-  struct atexit_s funcs[ATEXIT_MAX];
+  int                 nfuncs; /* Number of registered functions */
+  int                 nextra; /* Number of entries in extra */
+  FAR struct atexit_s *extra; /* Entries after funcs[] (heap) */
+  struct atexit_s     funcs[CONFIG_LIBC_MAX_EXITFUNS];
 };
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
