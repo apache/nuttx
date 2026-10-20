@@ -19,8 +19,11 @@ It is lightweight, supports command execution triggered by events, supports
 service/daemon management and many more.
 
 The ``init.rc`` consists of five categories of statements, all line-oriented with
-parameters separated by spaces. The content is processed by a preprocessor,
-following C language specifications for escape rules and comment formats.
+parameters separated by spaces. A line whose first character that is not
+whitespace is ``#`` is a comment. A board ``init.rc`` in ``RCSRCS`` goes
+through the C preprocessor when the board ROMFS image is built: there it can
+use ``#include``, ``#ifdef`` and C comments, and a line that starts with ``#``
+is a preprocessor directive.
 
 File path configured by ``CONFIG_SYSTEM_NXINIT_RC_FILE_PATH``.
 
