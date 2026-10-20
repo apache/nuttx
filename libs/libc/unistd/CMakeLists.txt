@@ -75,7 +75,7 @@ set(SRCS
     lib_ulimit.c)
 
 if(CONFIG_SCHED_WAITPID)
-  list(APPEND SRCS lib_wait4.c)
+  list(APPEND SRCS lib_wait.c)
 endif()
 
 if(NOT CONFIG_SCHED_USER_IDENTITY)
