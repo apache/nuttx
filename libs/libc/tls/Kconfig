@@ -40,7 +40,8 @@ config TLS_LOG2_MAXSTACK
 		except that (1) a very large value can cause you to run out of
 		alignable memory (and fail memory allocations), and (2) smaller
 		values will limit the maximum size of the stack (hence the naming
-		of this configuration value).
+		of this configuration value).  A request for a larger stack fails
+		with EINVAL.
 
 config TLS_NELEM
 	int "Number of TLS elements"
