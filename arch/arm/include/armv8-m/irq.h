@@ -153,7 +153,7 @@
 #  define REG_S14           (SW_XCPT_REGS + 22) /* S14 */
 #  define REG_S15           (SW_XCPT_REGS + 23) /* S15 */
 #  define REG_FPSCR         (SW_XCPT_REGS + 24) /* FPSCR */
-#  define REG_FP_RESERVED   (SW_XCPT_REGS + 25) /* Reserved */
+#  define REG_VPR           (SW_XCPT_REGS + 25) /* VPR */
 #  define HW_FPU_REGS       (18)
 #else
 #  define HW_FPU_REGS       (0)

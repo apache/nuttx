@@ -77,6 +77,10 @@ up_saveusercontext:
 	vstmia		r1!, {s0-s15}
 	vmrs		r2, fpscr
 	str		r2, [r1]
+#ifdef CONFIG_ARM_HAVE_MVE
+	vmrs		r2, vpr
+	str		r2, [r1, #4]
+#endif
 #endif
 
 	/* Save r13, primask, r4~r11 */
