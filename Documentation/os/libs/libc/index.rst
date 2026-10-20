@@ -194,6 +194,7 @@ Implementation Details
    :maxdepth: 1
    :caption: Contents:
    
+   fnmatch.rst
    popen.rst
    search.rst
    stdbit.rst
