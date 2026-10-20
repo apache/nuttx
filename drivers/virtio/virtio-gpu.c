@@ -26,6 +26,7 @@
 
 #include <nuttx/debug.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/video/fb.h>
@@ -55,7 +56,7 @@
 #define VIRTIO_GPU_MAX_NENTS    4
 
 #define VIRTIO_GPU_FB_NUMS      2
-#define VIRTIO_GPU_VSYNC_PERIOD 16
+#define VIRTIO_GPU_VSYNC_PERIOD_MS 16
 
 #define VIRTIO_GPU_MAP_ERR(e)   ((e) == VIRTIO_GPU_RESP_ERR_OUT_OF_MEMORY ? \
                                 -ENOMEM : -EINVAL)
@@ -597,7 +598,7 @@ static void virtio_gpu_vsync_interrupt(FAR void *arg)
 
   virtio_gpu_vsync_loop(arg);
   work_queue(HPWORK, &priv->work, virtio_gpu_vsync_interrupt,
-             arg, VIRTIO_GPU_VSYNC_PERIOD);
+             arg, MSEC2TICK(VIRTIO_GPU_VSYNC_PERIOD_MS));
 }
 
 /****************************************************************************
@@ -746,7 +747,7 @@ static int virtio_gpu_probe(FAR struct virtio_device *vdev)
     }
 
   work_queue(HPWORK, &priv->work, virtio_gpu_vsync_interrupt,
-             priv, VIRTIO_GPU_VSYNC_PERIOD);
+             priv, MSEC2TICK(VIRTIO_GPU_VSYNC_PERIOD_MS));
 
   return ret;
 
