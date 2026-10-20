@@ -86,6 +86,16 @@ config LIBC_TZDIR
 		This is the full path to the location where the TZ database is expected
 		to be found.
 
+config LIBC_TZDEFAULT
+	string "Local time zone file"
+	default ""
+	---help---
+		The time zone file that localtime() and tzset() use when the
+		environment variable TZ is not set: an absolute path, or a name in
+		LIBC_TZDIR.  With the IANA layout of most systems this is
+		"/etc/localtime", a link to a file in LIBC_TZDIR.  Empty: without
+		TZ the local time is UTC.
+
 config LIBC_ZONEINFO
 	bool "TZ database"
 	default n
