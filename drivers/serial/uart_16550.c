@@ -987,6 +987,12 @@ static int u16550_attach(struct uart_dev_s *dev)
     {
       ret = priv->ops->attach(priv, dev);
     }
+  else if (priv->irq < 0)
+    {
+      /* No interrupt: the board polls the UART */
+
+      ret = OK;
+    }
   else
     {
       ret = irq_attach(priv->irq, priv->ops->isr, dev);
@@ -1037,7 +1043,7 @@ static void u16550_detach(FAR struct uart_dev_s *dev)
     {
       priv->ops->detach(priv, dev);
     }
-  else
+  else if (priv->irq >= 0)
     {
       up_disable_irq(priv->irq);
       irqchain_detach(priv->irq, priv->ops->isr, dev);
@@ -1636,7 +1642,23 @@ static void u16550_txint(struct uart_dev_s *dev, bool enable)
 
   if (enable)
     {
-#ifdef CONFIG_16550_POLLING
+#ifndef CONFIG_16550_POLLING
+      if (priv->irq >= 0)
+        {
+          flags = enter_critical_section();
+          priv->ier |= UART_IER_ETBEI;
+          u16550_serialout(priv, UART_IER_OFFSET, priv->ier);
+
+          /* Fake a TX interrupt here by just calling uart_xmitchars() with
+           * interrupts disabled (note this may recurse).
+           */
+
+          uart_xmitchars(dev);
+          leave_critical_section(flags);
+          return;
+        }
+#endif
+
       /* In polling mode, we loop until the buffer is empty */
 
       while (dev->xmit.head != dev->xmit.tail)
@@ -1647,18 +1669,6 @@ static void u16550_txint(struct uart_dev_s *dev, bool enable)
 
           uart_xmitchars(dev);
         }
-#else
-      flags = enter_critical_section();
-      priv->ier |= UART_IER_ETBEI;
-      u16550_serialout(priv, UART_IER_OFFSET, priv->ier);
-
-      /* Fake a TX interrupt here by just calling uart_xmitchars() with
-       * interrupts disabled (note this may recurse).
-       */
-
-      uart_xmitchars(dev);
-      leave_critical_section(flags);
-#endif
     }
   else
     {

@@ -376,7 +376,7 @@ struct u16550_s
   FAR struct clk_s      *mclk;      /* UART clock descriptor */
 #endif
   uart_datawidth_t       ier;       /* Saved IER value */
-  int                    irq;       /* IRQ associated with this UART */
+  int                    irq;       /* IRQ associated with this UART, <0: none (polled) */
 #ifndef CONFIG_16550_SUPRESS_CONFIG
   uint8_t                parity;    /* 0=none, 1=odd, 2=even */
   uint8_t                bits;      /* Number of bits (7 or 8) */
