@@ -214,6 +214,16 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
       attr = &default_attr;
     }
 
+#ifdef CONFIG_TLS_ALIGNED
+  /* The TLS alignment limits the size of the stack */
+
+  if (attr->stacksize + (attr->stackaddr ? 0 : attr->guardsize) >
+      TLS_MAXSTACK)
+    {
+      return EINVAL;
+    }
+#endif
+
   /* Allocate a TCB for the new task. */
 
   ptcb = kmm_zalloc(sizeof(struct tcb_s) + sizeof(struct pthread_entry_s));
