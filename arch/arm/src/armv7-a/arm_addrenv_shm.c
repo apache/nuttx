@@ -77,7 +77,7 @@ int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
   /* Sanity checks */
 
   DEBUGASSERT(pages && npages > 0 && tcb && tcb->addrenv_own);
-  DEBUGASSERT(vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr < ARCH_SHM_VEND);
+  DEBUGASSERT(vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr <= ARCH_SHM_VEND);
   DEBUGASSERT(MM_ISALIGNED(vaddr));
 
   /* Loop until all pages have been mapped into the caller's address space. */
@@ -183,7 +183,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages)
   /* Sanity checks */
 
   DEBUGASSERT(npages > 0 && tcb && tcb->addrenv_own);
-  DEBUGASSERT(vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr < ARCH_SHM_VEND);
+  DEBUGASSERT(vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr <= ARCH_SHM_VEND);
   DEBUGASSERT(MM_ISALIGNED(vaddr));
 
   /* Loop until all pages have been unmapped from the caller's address

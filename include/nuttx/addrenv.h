@@ -200,10 +200,12 @@
 #      define CONFIG_ARCH_SHM_NPAGES 1
 #    endif
 
+/* ARCH_SHM_VEND and ARCH_KMAP_VEND are the last address of the region */
+
 #    define ARCH_SHM_SIZE       (CONFIG_ARCH_SHM_NPAGES * CONFIG_MM_PGSIZE)
 #    define ARCH_SHM_VEND       (CONFIG_ARCH_SHM_VBASE + ARCH_SHM_SIZE - 1)
 
-#    define ARCH_SCRATCH_VBASE   ARCH_SHM_VEND
+#    define ARCH_SCRATCH_VBASE   (ARCH_SHM_VEND + 1)
 #  else
 #    define ARCH_SCRATCH_VBASE   __ARCH_SHM_VBASE
 #  endif

@@ -52,7 +52,7 @@
 
 #define ARCH_ADDRENV_MAX_SIZE   (0x40000000)
 
-/* User address environment end */
+/* User address environment end (the last address) */
 
 #define ARCH_ADDRENV_VEND       (ARCH_ADDRENV_VBASE + ARCH_ADDRENV_MAX_SIZE - 1)
 
