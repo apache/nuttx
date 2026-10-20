@@ -35,12 +35,63 @@
  * Included Files
  ****************************************************************************/
 
+#include <ctype.h>
 #include <fnmatch.h>
 #include <string.h>
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: fnmatch_eq
+ *
+ * Description:
+ *   Compare one character of the pattern with one of the string.  With
+ *   FNM_CASEFOLD, upper and lower case are the same.
+ *
+ ****************************************************************************/
+
+static inline int fnmatch_eq(char p, char c, int flags)
+{
+  if (p == c)
+    {
+      return 1;
+    }
+
+  return (flags & FNM_CASEFOLD) != 0 &&
+         tolower((unsigned char)p) == tolower((unsigned char)c);
+}
+
+/****************************************************************************
+ * Name: fnmatch_range
+ *
+ * Description:
+ *   Return non-zero if c is in the range first-last.  With FNM_CASEFOLD,
+ *   the other case of c also matches.
+ *
+ ****************************************************************************/
+
+static inline int fnmatch_range(char first, char last, char c,
+                                int flags)
+{
+  char lc;
+  char uc;
+
+  if (c >= first && c <= last)
+    {
+      return 1;
+    }
+
+  if ((flags & FNM_CASEFOLD) == 0)
+    {
+      return 0;
+    }
+
+  lc = tolower((unsigned char)c);
+  uc = toupper((unsigned char)c);
+  return (lc >= first && lc <= last) || (uc >= first && uc <= last);
+}
 
 /****************************************************************************
  * Name: fnmatch_one
@@ -81,14 +132,14 @@ static int fnmatch_one(FAR const char *pattern, int patlen,
               first = *p++;
               if (*p == '-' && p[1] != ']' && p[1] != '\0')
                 {
-                  if (*string >= first && *string <= p[1])
+                  if (fnmatch_range(first, p[1], *string, flags))
                     {
                       i = 1;
                     }
 
                   p += 2;
                 }
-              else if (*string == first)
+              else if (fnmatch_eq(first, *string, flags))
                 {
                   i = 1;
                 }
@@ -131,13 +182,16 @@ static int fnmatch_one(FAR const char *pattern, int patlen,
           return FNM_NOMATCH;
         }
 
-      if (*p != *string)
+      if (!fnmatch_eq(*p, *string, flags))
         {
           return FNM_NOMATCH;
         }
     }
 
-  if (*string == '\0')
+  /* With FNM_LEADING_DIR, the pattern can match the string up to a '/' */
+
+  if (*string == '\0' ||
+      ((flags & FNM_LEADING_DIR) != 0 && *string == '/'))
     {
       return 0;
     }
@@ -157,6 +211,10 @@ static int fnmatch_one(FAR const char *pattern, int patlen,
  *   Jef Poskanzer and extended by Ken Pettit.  This pattern matcher handles
  *   '?', '*', '**', sets like [a-zA-z], and multiple  patterns separated
  *   by '|'.
+ *
+ *   Of the flags, it handles FNM_CASEFOLD (upper and lower case are the
+ *   same) and FNM_LEADING_DIR (the pattern can match the string up to a
+ *   '/').
  *
  * Returned Value:
  *   Returns 0 (match) or 1 (no-match).
