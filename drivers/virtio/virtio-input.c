@@ -131,6 +131,7 @@ virtio_input_send_keyboard_event(FAR struct virtio_input_priv *priv,
     {
       uint32_t trans_key;
       bool is_special;
+
       trans_key = keyboard_translate_virtio_code(event->code, &is_special);
       priv->keyboardsample.code = trans_key;
       priv->keyboardsample.type = types[is_special][event->value & 1];
@@ -329,6 +330,7 @@ static uint8_t virtio_input_select_cfg(FAR struct virtio_input_priv *priv,
                                        uint8_t select, uint8_t subsel)
 {
   uint8_t cfg_size = 0;
+
   virtio_write_config(priv->vdev, offsetof(struct virtio_input_config,
                       select), &select, sizeof(uint8_t));
   virtio_write_config(priv->vdev, offsetof(struct virtio_input_config,
