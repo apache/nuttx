@@ -54,11 +54,14 @@
  *   None
  *
  * Returned Value:
- *   The system time in units of clock ticks is returned.
+ *   The system time in microseconds (CLOCKS_PER_SEC units) is returned.
  *
  ****************************************************************************/
 
 clock_t clock(void)
 {
-  return clock_systime_ticks();
+  struct timespec ts;
+
+  clock_systime_timespec(&ts);
+  return (clock_t)ts.tv_sec * CLOCKS_PER_SEC + ts.tv_nsec / NSEC_PER_USEC;
 }
