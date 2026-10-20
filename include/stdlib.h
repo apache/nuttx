@@ -280,6 +280,9 @@ lldiv_t   lldiv(long long number, long long denom);
 
 FAR char *mktemp(FAR char *path_template);
 int       mkstemp(FAR char *path_template);
+int       mkostemp(FAR char *path_template, int flags);
+int       mkstemps(FAR char *path_template, int suffixlen);
+int       mkostemps(FAR char *path_template, int suffixlen, int flags);
 FAR char *mkdtemp(FAR char *path_template);
 
 /* Sorting */
