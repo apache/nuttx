@@ -1085,7 +1085,8 @@ static void nrf54l_txint(struct uart_dev_s *dev, bool enable)
  * Name: nrf54l_txready
  *
  * Description:
- *   Report whether the transmitter can accept another character.
+ *   Report whether the transmitter can accept another character. The
+ *   event is read, the upper half also polls with interrupts disabled.
  *
  ****************************************************************************/
 
@@ -1093,7 +1094,13 @@ static bool nrf54l_txready(struct uart_dev_s *dev)
 {
   struct nrf54l_dev_s *priv = dev->priv;
 
-  return !priv->txbusy;
+  if (priv->txbusy)
+    {
+      return nrf54l_uart_getreg(priv,
+                                NRF54L_UARTE_EVENTS_TXSTOPPED_OFFSET) != 0;
+    }
+
+  return true;
 }
 
 /****************************************************************************
@@ -1106,9 +1113,7 @@ static bool nrf54l_txready(struct uart_dev_s *dev)
 
 static bool nrf54l_txempty(struct uart_dev_s *dev)
 {
-  struct nrf54l_dev_s *priv = dev->priv;
-
-  return !priv->txbusy;
+  return nrf54l_txready(dev);
 }
 
 /****************************************************************************
