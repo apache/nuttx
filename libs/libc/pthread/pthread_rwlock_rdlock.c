@@ -35,12 +35,14 @@
  * Private Functions
  ****************************************************************************/
 
+#if CONFIG_TLS_NCLEANUP > 0
 static void rdlock_cleanup(FAR void *arg)
 {
   FAR pthread_rwlock_t *rw_lock = (FAR pthread_rwlock_t *)arg;
 
   pthread_mutex_unlock(&rw_lock->lock);
 }
+#endif
 
 static int tryrdlock(FAR pthread_rwlock_t *rw_lock)
 {
@@ -109,7 +111,9 @@ int pthread_rwlock_clockrdlock(FAR pthread_rwlock_t *rw_lock,
       return err;
     }
 
+#if CONFIG_TLS_NCLEANUP > 0
   pthread_cleanup_push(&rdlock_cleanup, rw_lock);
+#endif
   while ((err = tryrdlock(rw_lock)) == EBUSY)
     {
       if (ts != NULL)
@@ -128,7 +132,9 @@ int pthread_rwlock_clockrdlock(FAR pthread_rwlock_t *rw_lock,
         }
     }
 
+#if CONFIG_TLS_NCLEANUP > 0
   pthread_cleanup_pop(0);
+#endif
 
   pthread_mutex_unlock(&rw_lock->lock);
   return err;
