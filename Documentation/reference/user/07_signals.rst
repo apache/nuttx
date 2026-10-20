@@ -278,7 +278,9 @@ provided by NuttX:
     -  All ``sa_flags`` in struct sigaction of act input are ignored (all
        treated like ``SA_SIGINFO``). The one exception is if
        ``CONFIG_SCHED_CHILD_STATUS`` is defined; then ``SA_NOCLDWAIT`` is
-       supported but only for ``SIGCHLD``.
+       supported but only for ``SIGCHLD``.  ``SIGCHLD`` set to ``SIG_IGN``
+       has the same effect if ``CONFIG_SIG_DEFAULT`` is defined.  Any
+       other action for ``SIGCHLD`` keeps the child status again.
 
 .. c:function:: int sigignore(int signo);
 

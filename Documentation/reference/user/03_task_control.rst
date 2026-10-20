@@ -115,6 +115,13 @@ like:
   sa.sa_flags = SA_NOCLDWAIT;
   int ret = sigaction(SIGCHLD, &sa, NULL);
 
+A later ``sigaction()`` for ``SIGCHLD`` without ``SA_NOCLDWAIT`` (and
+not ``SIG_IGN``) keeps the child status again.  While the status is not
+kept, ``wait()``, ``waitpid()`` and ``waitid()`` block until all
+children exit and then fail with ``ECHILD``.  NuttX decides when a child
+is created if its status is kept: a child created while the status is
+not kept does not become waitable later.
+
 Functions
 =========
 
