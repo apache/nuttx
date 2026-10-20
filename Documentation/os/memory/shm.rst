@@ -23,16 +23,18 @@ And then finally:
 - ``CONFIG_MM_SHM=y`` - Enables shared memory support
 - ``CONFIG_ARCH_SHM_VBASE`` - The virtual address of the beginning of the
   shared memory region.
-- ``CONFIG_ARCH_SHM_MAXREGIONS`` - The maximum number of regions that can
-  allocated for the shared memory space.  This hard-coded value permits
-  static allocation of the shared memory data structures and serves no
-  other purpose. Default is 1.
-- ``CONFIG_ARCH_SHM_NPAGES`` - The maximum number of pages that can allocated
-  for the shared memory region.  Default is 1.
+- ``CONFIG_ARCH_SHM_MAXREGIONS`` - The maximum number of shared memory
+  regions in the system.  Each region has a small static table entry; the
+  list of its physical pages comes from the kernel heap.  Default is 1.
+- ``CONFIG_ARCH_SHM_NPAGES`` - The size, in pages, of the virtual address
+  area of each process for shared memory and other mappings.  It is also
+  the largest size of one region.  Default is 1.
 
-The size of the virtual shared memory address space is then determined by
-the product of the maximum number of regions, the maximum number of pages
-per region, and the configured size of each page.
+The size of the virtual shared memory address space of a process is
+``CONFIG_ARCH_SHM_NPAGES`` times the configured size of each page.
+
+The shared memory functions are kernel code.  In a kernel build, user
+programs call them through system calls.
 
 Concepts
 --------
