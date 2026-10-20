@@ -592,7 +592,14 @@ legacy_irq:
 
   /* Get legacy IRQ if MSI not supported */
 
-  priv->common.irq = pci_get_irq(dev);
+  ret = pci_get_irq(dev);
+  if (ret < 0)
+    {
+      pcierr("Failed to get legacy IRQ %d\n", ret);
+      return ret;
+    }
+
+  priv->common.irq = ret;
 
   return OK;
 }
