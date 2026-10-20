@@ -65,6 +65,10 @@ int waittcb(FAR struct tcb_s *rtcb, pid_t pid, int options,
   while (ret >= 0)
     {
 #ifdef CONFIG_SCHED_CHILD_STATUS
+      /* Another thread can change the action for SIGCHLD while we wait */
+
+      retains = ((rtcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0);
+
       /* Check if the task has already died. Signals are not queued in
        * NuttX.  So a possibility is that the child has died and we
        * missed the death of child signal (we got some other signal
@@ -77,7 +81,6 @@ int waittcb(FAR struct tcb_s *rtcb, pid_t pid, int options,
            * children.
            */
 
-          DEBUGASSERT(!retains || rtcb->group->tg_children);
           if (retains && (child = group_exit_child(rtcb->group)) != NULL)
             {
               /* A child has exited.  Apparently we missed the signal.
@@ -103,19 +106,26 @@ int waittcb(FAR struct tcb_s *rtcb, pid_t pid, int options,
 
               break;
             }
+
+          /* Without an exit status to wait for (XSI), wait until all
+           * children exit
+           */
+
+          if ((!retains || rtcb->group->tg_children == NULL) &&
+              !group_has_child(rtcb->group, pid))
+            {
+              ret = -ECHILD;
+              break;
+            }
         }
 
       /* We are waiting for a specific PID. Does this task retain child
        * status?
        */
 
-      else if (retains)
+      else if (retains &&
+               (child = group_find_child(rtcb->group, pid)) != NULL)
         {
-          /* Get the current status of the child task. */
-
-          child = group_find_child(rtcb->group, pid);
-          DEBUGASSERT(child);
-
           /* Did the child exit? */
 
           if ((child->ch_flags & CHILD_FLAG_EXITED) != 0)
@@ -139,22 +149,14 @@ int waittcb(FAR struct tcb_s *rtcb, pid_t pid, int options,
               break;
             }
         }
-      else
+      else if (!group_has_child(rtcb->group, pid))
         {
-          /* Is that task still alive? */
+          /* It is no longer running and there is no exit status (XSI, or
+           * another thread took it)
+           */
 
-          if (nxsched_get_tcb(pid) == NULL)
-            {
-              /* It is no longer running.  We know that the child task
-               * was running okay when we started, so we must have lost
-               * the signal.  In this case, we know that the task exit'ed,
-               * but we do not know its exit status.  It would be better
-               * to reported ECHILD than bogus status.
-               */
-
-              ret = -ECHILD;
-              break;
-            }
+          ret = -ECHILD;
+          break;
         }
 
 #else  /* CONFIG_SCHED_CHILD_STATUS */
@@ -201,6 +203,15 @@ int waittcb(FAR struct tcb_s *rtcb, pid_t pid, int options,
       if (info.si_signo == SIGCHLD &&
          (pid == INVALID_PROCESS_ID || info.si_pid == pid))
         {
+#ifdef CONFIG_SCHED_CHILD_STATUS
+          if (!retains)
+            {
+              /* No exit status (XSI): check the children again */
+
+              continue;
+            }
+#endif
+
           /* Yes... return the status and PID (in the event it was -1) */
 
           if (stat_loc != NULL)

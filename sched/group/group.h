@@ -108,6 +108,7 @@ FAR struct child_status_s *group_find_child(FAR struct task_group_s *group,
 FAR struct child_status_s *group_remove_child(FAR struct task_group_s *group,
                                               pid_t pid);
 void group_remove_children(FAR struct task_group_s *group);
+bool group_has_child(FAR struct task_group_s *group, pid_t pid);
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */
 #endif /* CONFIG_SCHED_HAVE_PARENT */
