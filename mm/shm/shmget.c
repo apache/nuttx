@@ -33,6 +33,7 @@
 #include <nuttx/debug.h>
 #include <errno.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/pgalloc.h>
 #include <nuttx/sched.h>
 
@@ -156,28 +157,49 @@ static int shm_reserve(key_t key, int shmflg)
  *   size - The new size of the region.
  *
  * Returned Value:
- *   Zero is returned on success; -ENOMEM is returned on failure.
- *   (Should a different error be returned if the region is just too big?)
+ *   Zero is returned on success; -EINVAL is returned if the region would
+ *   be larger than CONFIG_ARCH_SHM_NPAGES pages; -ENOMEM is returned if
+ *   memory runs out.
  *
  ****************************************************************************/
 
 static int shm_extend(int shmid, size_t size)
 {
   FAR struct shm_region_s *region = &g_shminfo.si_region[shmid];
+  FAR uintptr_t *pages;
   unsigned int pgalloc;
   unsigned int pgneeded;
 
   /* This is the number of pages that are needed to satisfy the allocation */
 
   pgneeded = MM_NPAGES(size);
+  if (pgneeded > CONFIG_ARCH_SHM_NPAGES)
+    {
+      return -EINVAL;
+    }
 
   /* This is the number of pages that have already been allocated */
 
   pgalloc = MM_NPAGES(region->sr_ds.shm_segsz);
+  if (pgneeded <= pgalloc)
+    {
+      region->sr_ds.shm_segsz = size;
+      return OK;
+    }
+
+  /* Make the page list big enough */
+
+  pages = kmm_realloc(region->sr_pages, pgneeded * sizeof(uintptr_t));
+  if (pages == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  region->sr_pages = pages;
 
   /* Loop until all pages have been allocated (or something bad happens) */
 
-  while (pgalloc < pgneeded && pgalloc < CONFIG_ARCH_SHM_NPAGES)
+  while (pgalloc < pgneeded)
     {
       /* Allocate one more physical page */
 
@@ -197,9 +219,8 @@ static int shm_extend(int shmid, size_t size)
       pgalloc++;
     }
 
-  /* We get here (1) because all of the pages were successfully, (2) because
-   * mm_pgalloc() failed, or (3) because any additional pages allocated
-   * would exceed CONFIG_ARCH_SHM_NPAGES.
+  /* We get here because all of the pages were allocated or because
+   * mm_pgalloc() failed.
    */
 
   if (pgalloc < pgneeded)

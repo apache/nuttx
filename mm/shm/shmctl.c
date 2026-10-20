@@ -35,6 +35,7 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>
 #include <nuttx/pgalloc.h>
 
@@ -232,14 +233,17 @@ errout_with_ret:
 void shm_destroy(int shmid)
 {
   FAR struct shm_region_s *region =  &g_shminfo.si_region[shmid];
-  int i;
+  unsigned int npages = MM_NPAGES(region->sr_ds.shm_segsz);
+  unsigned int i;
 
-  /* Free all of the allocated physical pages */
+  /* Free all of the allocated physical pages and the page list */
 
-  for (i = 0; i < CONFIG_ARCH_SHM_NPAGES && region->sr_pages[i] != 0; i++)
+  for (i = 0; i < npages; i++)
     {
       mm_pgfree(region->sr_pages[i], 1);
     }
+
+  kmm_free(region->sr_pages);
 
   /* Reset the region entry to its initial state */
 
