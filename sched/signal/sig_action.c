@@ -204,7 +204,8 @@ static FAR sigactq_t *nxsig_alloc_action(void)
  * - All sa_flags in struct sigaction of act input are ignored (all
  *   treated like SA_SIGINFO). The one exception is if
  *   CONFIG_SCHED_CHILD_STATUS is defined; then SA_NOCLDWAIT is supported but
- *   only for SIGCHLD
+ *   only for SIGCHLD.  SIGCHLD set to SIG_IGN has the same effect if
+ *   CONFIG_SIG_DEFAULT is defined.
  *
  ****************************************************************************/
 
@@ -287,6 +288,15 @@ int nxsig_action(int signo, FAR const struct sigaction *act,
           oact->sa_flags   = 0;
           sigemptyset(&oact->sa_mask);
         }
+
+#if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
+      /* Report SA_NOCLDWAIT, so that a restore of oact keeps it */
+
+      if (signo == SIGCHLD && (group->tg_flags & GROUP_FLAG_NOCLDWAIT) != 0)
+        {
+          oact->sa_flags |= SA_NOCLDWAIT;
+        }
+#endif
     }
 
   /* If the argument act is a null pointer, signal handling is unchanged;
@@ -298,35 +308,6 @@ int nxsig_action(int signo, FAR const struct sigaction *act,
     {
       return OK;
     }
-
-#if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
-  /* Handle a special case.  Retention of child status can be suppressed
-   * if signo == SIGCHLD and sa_flags == SA_NOCLDWAIT.
-   *
-   * POSIX.1 leaves it unspecified whether a SIGCHLD signal is generated
-   * when a child process terminates.  In NuttX, a SIGCHLD signal is
-   * generated in this case; but in some other implementations, it may not
-   * be.
-   */
-
-  if (signo == SIGCHLD && (act->sa_flags & SA_NOCLDWAIT) != 0)
-    {
-      /* We do require a critical section to muck with the TCB values that
-       * can be modified by the child thread.
-       */
-
-      flags = enter_critical_section();
-
-      /* Mark that status should be not be retained */
-
-      rtcb->group->tg_flags |= GROUP_FLAG_NOCLDWAIT;
-
-      /* Free all pending exit status */
-
-      group_remove_children(rtcb->group);
-      leave_critical_section(flags);
-    }
-#endif
 
   handler = act->sa_handler;
 
@@ -422,6 +403,55 @@ int nxsig_action(int signo, FAR const struct sigaction *act,
       sigact->act.sa_user    = act->sa_user;
     }
 
+#if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
+  /* Handle a special case.  Retention of child status is suppressed if
+   * signo == SIGCHLD and sa_flags has SA_NOCLDWAIT, or if the action is
+   * SIG_IGN (XSI).  Any other action for SIGCHLD retains it again.
+   *
+   * POSIX.1 leaves it unspecified whether a SIGCHLD signal is generated
+   * when a child process terminates.  In NuttX, a SIGCHLD signal is
+   * generated in this case; but in some other implementations, it may not
+   * be.
+   */
+
+  if (signo == SIGCHLD)
+    {
+      bool nocldwait = (act->sa_flags & SA_NOCLDWAIT) != 0;
+
+#ifdef CONFIG_SIG_DEFAULT
+      /* Without CONFIG_SIG_DEFAULT, SIG_IGN is also SIG_DFL */
+
+      if (act->sa_handler == SIG_IGN)
+        {
+          nocldwait = true;
+        }
+#endif
+
+      /* We do require a critical section to muck with the TCB values that
+       * can be modified by the child thread.
+       */
+
+      flags = enter_critical_section();
+
+      if (nocldwait)
+        {
+          /* Mark that status should be not be retained */
+
+          group->tg_flags |= GROUP_FLAG_NOCLDWAIT;
+
+          /* Free all pending exit status */
+
+          group_remove_children(group);
+        }
+      else
+        {
+          group->tg_flags &= ~GROUP_FLAG_NOCLDWAIT;
+        }
+
+      leave_critical_section(flags);
+    }
+#endif
+
   return OK;
 }
 
@@ -503,6 +533,16 @@ void nxsig_dupactions(FAR struct task_group_s *group,
   flags = spin_lock_irqsave(&parent->tg_lock);
   group->tg_sigdefault = parent->tg_sigdefault;
   spin_unlock_irqrestore(&parent->tg_lock, flags);
+#endif
+
+#if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
+  /* SA_NOCLDWAIT (or SIGCHLD set to SIG_IGN) is part of the action of
+   * SIGCHLD: the child does not keep the status of its children either.
+   */
+
+  flags = enter_critical_section();
+  group->tg_flags |= parent->tg_flags & GROUP_FLAG_NOCLDWAIT;
+  leave_critical_section(flags);
 #endif
 }
 
