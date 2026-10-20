@@ -82,6 +82,12 @@ int        strncmp(FAR const char *, FAR const char *, size_t);
 int        strcasecmp(FAR const char *, FAR const char *);
 int        strncasecmp(FAR const char *, FAR const char *, size_t);
 
+/* The parentheses keep the function-like macros of <strings.h> out */
+
+int        (ffs)(int j);
+int        (ffsl)(long j);
+int        (ffsll)(long long j);
+
 int        strcoll(FAR const char *, FAR const char *s2);
 FAR char  *strcpy(FAR char *dest, FAR const char *src);
 FAR char  *stpcpy(FAR char *dest, FAR const char *src);
