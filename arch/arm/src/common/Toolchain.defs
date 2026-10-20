@@ -317,6 +317,12 @@ else
       UNAR := $(CROSSDEV)gcc-ar x
       NM   := $(CROSSDEV)gcc-nm
       ARCHOPTIMIZATION += -fno-builtin
+
+      # gcc links a module.  The loader cannot use LTO data, so a partial link
+      # (-r) compiles the module to machine code with the module options.
+
+      LDMODULELTOFLAGS = -flinker-output=nolto-rel $(CMODULEFLAGS)
+      LDELFLTOFLAGS = -flinker-output=nolto-rel $(CELFFLAGS)
     endif
   endif
 
@@ -634,7 +640,8 @@ endif
 
 CMODULEFLAGS = $(CFLAGS) -fvisibility=hidden -mlong-calls # --target1-abs
 CXXMODULEFLAGS = $(CXXFLAGS) -fvisibility=hidden -mlong-calls
-LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
+LDMODULEFLAGS = -r $(LDMODULELTOFLAGS) \
+                -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 
 # ELF module definitions
 
@@ -723,7 +730,7 @@ endif
 
 else
   ifneq ($(CONFIG_BINFMT_ELF_EXECUTABLE),y)
-    LDELFFLAGS += -r
+    LDELFFLAGS += -r $(LDELFLTOFLAGS)
   endif
 endif
 

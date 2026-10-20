@@ -143,7 +143,7 @@ $(sort $(COBJS) $(UCOBJS)): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
 $(STARTUP_OBJS): %$(OBJEXT): %.c
-	$(Q) $(CC) $(CELFFLAGS) -c common$(DELIM)crt0.c -o crt0$(OBJEXT)
+	$(Q) $(CC) $(filter-out -flto%,$(CELFFLAGS)) -c common$(DELIM)crt0.c -o crt0$(OBJEXT)
 
 ifeq ($(CONFIG_BUILD_FLAT),y)
 $(BIN): $(OBJS) $(STARTUP_OBJS)
