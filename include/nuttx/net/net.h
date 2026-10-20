@@ -881,6 +881,24 @@ ssize_t psock_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
                       int flags);
 
 /****************************************************************************
+ * Name: psock_sigpipe
+ *
+ * Description:
+ *   Raise SIGPIPE in the calling thread when a send on a stream socket
+ *   failed with -EPIPE, unless 'flags' has MSG_NOSIGNAL.  The user
+ *   interfaces (send(), sendto(), sendmsg() and write() on a socket) call
+ *   it.  The psock_send*() interfaces do not raise SIGPIPE.
+ *
+ * Input Parameters:
+ *   psock    The socket of the send
+ *   ret      The result of the send
+ *   flags    The send flags
+ *
+ ****************************************************************************/
+
+void psock_sigpipe(FAR struct socket *psock, ssize_t ret, int flags);
+
+/****************************************************************************
  * Name: psock_recvmsg
  *
  * Description:

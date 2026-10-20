@@ -26,12 +26,16 @@
 
 #include <nuttx/config.h>
 
+#include <sys/socket.h>
 #include <assert.h>
 #include <errno.h>
+#include <signal.h>
 
 #include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
+#include <nuttx/sched.h>
+#include <nuttx/signal.h>
 
 #include "socket/socket.h"
 
@@ -98,6 +102,34 @@ ssize_t psock_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
 }
 
 /****************************************************************************
+ * Name: psock_sigpipe
+ *
+ * Description:
+ *   Raise SIGPIPE in the calling thread when a send on a stream socket
+ *   failed with -EPIPE, unless 'flags' has MSG_NOSIGNAL.  Kernel threads do
+ *   not get the signal.
+ *
+ * Input Parameters:
+ *   psock    The socket of the send
+ *   ret      The result of the send
+ *   flags    The send flags
+ *
+ ****************************************************************************/
+
+void psock_sigpipe(FAR struct socket *psock, ssize_t ret, int flags)
+{
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
+  if (ret == -EPIPE && (flags & MSG_NOSIGNAL) == 0 &&
+      (psock->s_type == SOCK_STREAM || psock->s_type == SOCK_SEQPACKET) &&
+      (nxsched_self()->flags & TCB_FLAG_TTYPE_MASK) !=
+      TCB_FLAG_TTYPE_KERNEL)
+    {
+      nxsig_tgkill(nxsched_getpid(), nxsched_gettid(), SIGPIPE);
+    }
+#endif
+}
+
+/****************************************************************************
  * Function: sendmsg
  *
  * Description:
@@ -159,6 +191,7 @@ ssize_t sendmsg(int sockfd, FAR const struct msghdr *msg, int flags)
   if (ret == OK)
     {
       ret = psock_sendmsg(psock, msg, flags);
+      psock_sigpipe(psock, ret, flags);
       file_put(filep);
     }
 

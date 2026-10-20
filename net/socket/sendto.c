@@ -245,6 +245,7 @@ ssize_t sendto(int sockfd, FAR const void *buf, size_t len, int flags,
   if (ret == OK)
     {
       ret = psock_sendto(psock, buf, len, flags, to, tolen);
+      psock_sigpipe(psock, ret, flags);
       file_put(filep);
     }
 

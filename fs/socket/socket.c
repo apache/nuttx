@@ -129,7 +129,11 @@ static ssize_t sock_file_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t sock_file_write(FAR struct file *filep,
                                FAR const char *buffer, size_t buflen)
 {
-  return psock_send(filep->f_priv, buffer, buflen, 0);
+  ssize_t ret;
+
+  ret = psock_send(filep->f_priv, buffer, buflen, 0);
+  psock_sigpipe(filep->f_priv, ret, 0);
+  return ret;
 }
 
 static int sock_file_ioctl(FAR struct file *filep, int cmd,
