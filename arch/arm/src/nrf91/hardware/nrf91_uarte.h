@@ -262,6 +262,8 @@
 
 #define NRF91_UART_ENABLE_DISABLE           (0)
 #define NRF91_UART_ENABLE_ENABLE            (8)
+#define NRF91_UARTE_ENABLE_DISABLE          (0)
+#define NRF91_UARTE_ENABLE_ENABLE           (8)
 
 /* INTEN/INTENSET/INTENCLR Register */
 

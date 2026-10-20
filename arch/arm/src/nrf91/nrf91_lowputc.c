@@ -79,6 +79,10 @@ static const struct uart_config_s g_console_config =
   .txpin     = CONSOLE_TX_PIN,
   .rxpin     = CONSOLE_RX_PIN,
 };
+
+/* Console byte transmitted by EasyDMA */
+
+static uint8_t g_console_tx;
 #endif /* HAVE_UART_CONSOLE */
 
 /****************************************************************************
@@ -219,7 +223,7 @@ static void nrf91_setbaud(uintptr_t base, const struct uart_config_s *config)
         }
     }
 
-  putreg32(br, base + NRF91_UART_BAUDRATE_OFFSET);
+  putreg32(br, base + NRF91_UARTE_BAUDRATE_OFFSET);
 }
 
 /****************************************************************************
@@ -231,7 +235,7 @@ static void nrf91_setparity(uintptr_t base,
 {
   uint32_t regval = 0;
 
-  regval = getreg32(base + NRF91_UART_CONFIG_OFFSET);
+  regval = getreg32(base + NRF91_UARTE_CONFIG_OFFSET);
 
   if (config->parity == 2)
     {
@@ -246,7 +250,7 @@ static void nrf91_setparity(uintptr_t base,
       regval &= ~UART_CONFIG_PARITY;
     }
 
-  putreg32(regval, base + NRF91_UART_CONFIG_OFFSET);
+  putreg32(regval, base + NRF91_UARTE_CONFIG_OFFSET);
 }
 
 /****************************************************************************
@@ -259,7 +263,7 @@ static void nrf91_setstops(uintptr_t base,
 {
   uint32_t regval = 0;
 
-  regval = getreg32(base + NRF91_UART_CONFIG_OFFSET);
+  regval = getreg32(base + NRF91_UARTE_CONFIG_OFFSET);
 
   if (config->stopbits2 == true)
     {
@@ -270,7 +274,7 @@ static void nrf91_setstops(uintptr_t base,
       regval &= ~UART_CONFIG_STOP;
     }
 
-  putreg32(regval, base + NRF91_UART_CONFIG_OFFSET);
+  putreg32(regval, base + NRF91_UARTE_CONFIG_OFFSET);
 }
 #endif
 
@@ -328,9 +332,10 @@ void nrf91_usart_configure(uintptr_t base,
   uint32_t port   = 0;
   uint32_t regval = 0;
 
-  putreg32(1, base + NRF91_UART_TASKS_STOPRX_OFFSET);
-  putreg32(1, base + NRF91_UART_TASKS_STOPTX_OFFSET);
-  putreg32(NRF91_UART_ENABLE_DISABLE, base + NRF91_UART_ENABLE_OFFSET);
+  putreg32(0xffffffff, base + NRF91_UARTE_INTENCLR_OFFSET);
+  putreg32(1, base + NRF91_UARTE_TASKS_STOPRX_OFFSET);
+  putreg32(1, base + NRF91_UARTE_TASKS_STOPTX_OFFSET);
+  putreg32(NRF91_UARTE_ENABLE_DISABLE, base + NRF91_UARTE_ENABLE_OFFSET);
 
   /* Set UART format */
 
@@ -348,7 +353,7 @@ void nrf91_usart_configure(uintptr_t base,
 
   regval = (pin << UART_PSELTXD_PIN_SHIFT);
   regval |= (port << UART_PSELTXD_PORT_SHIFT);
-  putreg32(regval, base + NRF91_UART_PSELTXD_OFFSET);
+  putreg32(regval, base + NRF91_UARTE_PSEL_TXD_OFFSET);
 
   /* Setect RX pins for UART */
 
@@ -357,11 +362,14 @@ void nrf91_usart_configure(uintptr_t base,
 
   regval = (pin << UART_PSELRXD_PIN_SHIFT);
   regval |= (port << UART_PSELRXD_PORT_SHIFT);
-  putreg32(regval, base + NRF91_UART_PSELRXD_OFFSET);
+  putreg32(regval, base + NRF91_UARTE_PSEL_RXD_OFFSET);
+  putreg32(UART_PSELCTS_RESET, base + NRF91_UARTE_PSEL_CTS_OFFSET);
+  putreg32(UART_PSELRTS_RESET, base + NRF91_UARTE_PSEL_RTS_OFFSET);
+  putreg32(0, base + NRF91_UARTE_SHORTS_OFFSET);
 
   /* Enable UART */
 
-  putreg32(NRF91_UART_ENABLE_ENABLE, base + NRF91_UART_ENABLE_OFFSET);
+  putreg32(NRF91_UARTE_ENABLE_ENABLE, base + NRF91_UARTE_ENABLE_OFFSET);
 }
 
 /****************************************************************************
@@ -379,12 +387,12 @@ void nrf91_usart_disable(uintptr_t base, const struct uart_config_s *config)
 
   /* Disable the UART */
 
-  putreg32(1, base + NRF91_UART_TASKS_STOPRX_OFFSET);
-  putreg32(1, base + NRF91_UART_TASKS_STOPTX_OFFSET);
-  putreg32(NRF91_UART_ENABLE_DISABLE, base + NRF91_UART_ENABLE_OFFSET);
+  putreg32(1, base + NRF91_UARTE_TASKS_STOPRX_OFFSET);
+  putreg32(1, base + NRF91_UARTE_TASKS_STOPTX_OFFSET);
+  putreg32(NRF91_UARTE_ENABLE_DISABLE, base + NRF91_UARTE_ENABLE_OFFSET);
 
-  putreg32(0xffffffff, base + NRF91_UART_PSELTXD_OFFSET);
-  putreg32(0xffffffff, base + NRF91_UART_PSELRXD_OFFSET);
+  putreg32(0xffffffff, base + NRF91_UARTE_PSEL_TXD_OFFSET);
+  putreg32(0xffffffff, base + NRF91_UARTE_PSEL_RXD_OFFSET);
 
   /* Unconfigure GPIO */
 
@@ -393,8 +401,8 @@ void nrf91_usart_disable(uintptr_t base, const struct uart_config_s *config)
 
   /* Deatach TWI from GPIO */
 
-  putreg32(UART_PSELTXD_RESET, base + NRF91_UART_PSELTXD_OFFSET);
-  putreg32(UART_PSELRXD_RESET, base + NRF91_UART_PSELRXD_OFFSET);
+  putreg32(UART_PSELTXD_RESET, base + NRF91_UARTE_PSEL_TXD_OFFSET);
+  putreg32(UART_PSELRXD_RESET, base + NRF91_UARTE_PSEL_RXD_OFFSET);
 }
 
 /****************************************************************************
@@ -439,13 +447,24 @@ void nrf91_usart_setformat(uintptr_t base,
 void arm_lowputc(char ch)
 {
 #ifdef HAVE_UART_CONSOLE
-  putreg32(1, CONSOLE_BASE + NRF91_UART_TASKS_STARTTX_OFFSET);
-  putreg32(0, CONSOLE_BASE + NRF91_UART_EVENTS_TXDRDY_OFFSET);
-  putreg32(ch, CONSOLE_BASE + NRF91_UART_TXD_OFFSET);
-  while (getreg32(CONSOLE_BASE + NRF91_UART_EVENTS_TXDRDY_OFFSET) == 0)
+  g_console_tx = ch;
+
+  putreg32(0, CONSOLE_BASE + NRF91_UARTE_EVENTS_ENDTX_OFFSET);
+  putreg32(0, CONSOLE_BASE + NRF91_UARTE_EVENTS_TXSTOPPED_OFFSET);
+  putreg32((uintptr_t)&g_console_tx,
+           CONSOLE_BASE + NRF91_UARTE_TXD_PTR_OFFSET);
+  putreg32(1, CONSOLE_BASE + NRF91_UARTE_TXD_MAXCNT_OFFSET);
+
+  UP_DMB();
+
+  putreg32(1, CONSOLE_BASE + NRF91_UARTE_TASKS_STARTTX_OFFSET);
+  while (getreg32(CONSOLE_BASE + NRF91_UARTE_EVENTS_ENDTX_OFFSET) == 0)
     {
     }
 
-  putreg32(1, CONSOLE_BASE + NRF91_UART_TASKS_STOPTX_OFFSET);
+  putreg32(1, CONSOLE_BASE + NRF91_UARTE_TASKS_STOPTX_OFFSET);
+  while (getreg32(CONSOLE_BASE + NRF91_UARTE_EVENTS_TXSTOPPED_OFFSET) == 0)
+    {
+    }
 #endif
 }
