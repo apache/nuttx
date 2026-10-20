@@ -217,9 +217,14 @@ FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
 
   /* Get the region associated with the shmid */
 
-  DEBUGASSERT(shmid >= 0 && shmid < CONFIG_ARCH_SHM_MAXREGIONS);
-  region =  &g_shminfo.si_region[shmid];
-  DEBUGASSERT((region->sr_flags & SRFLAG_INUSE) != 0);
+  if (shmid < 0 || shmid >= CONFIG_ARCH_SHM_MAXREGIONS ||
+      (g_shminfo.si_region[shmid].sr_flags & SRFLAG_INUSE) == 0)
+    {
+      ret = -EINVAL;
+      goto errout_with_ret;
+    }
+
+  region = &g_shminfo.si_region[shmid];
 
   /* Get the TCB and group containing our virtual memory allocator */
 

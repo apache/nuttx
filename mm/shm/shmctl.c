@@ -111,9 +111,14 @@ int shmctl(int shmid, int cmd, struct shmid_ds *buf)
   FAR struct shm_region_s *region;
   int ret;
 
-  DEBUGASSERT(shmid >= 0 && shmid < CONFIG_ARCH_SHM_MAXREGIONS);
-  region =  &g_shminfo.si_region[shmid];
-  DEBUGASSERT((region->sr_flags & SRFLAG_INUSE) != 0);
+  if (shmid < 0 || shmid >= CONFIG_ARCH_SHM_MAXREGIONS ||
+      (g_shminfo.si_region[shmid].sr_flags & SRFLAG_INUSE) == 0)
+    {
+      ret = -EINVAL;
+      goto errout_with_ret;
+    }
+
+  region = &g_shminfo.si_region[shmid];
 
   /* Get exclusive access to the region data structure */
 
