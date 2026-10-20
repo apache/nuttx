@@ -161,7 +161,7 @@ int shmctl(int shmid, int cmd, struct shmid_ds *buf)
                * it.
                */
 
-               region->sr_flags |= SRFLAG_UNLINKED;
+              region->sr_flags |= SRFLAG_UNLINKED;
             }
           else
             {
