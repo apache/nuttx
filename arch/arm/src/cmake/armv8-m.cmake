@@ -51,6 +51,11 @@ if(CONFIG_ARM_DSP)
   set(EXTCPUFLAGS +dsp)
 endif()
 
+if(CONFIG_ARM_PACBTI)
+  string(APPEND EXTCPUFLAGS +pacbti)
+  list(APPEND PLATFORM_FLAGS -mbranch-protection=standard)
+endif()
+
 if(CONFIG_ARCH_CORTEXM23)
   list(APPEND PLATFORM_FLAGS -mtune=cortex-m23 -march=armv8-m.main
        -mfloat-abi=soft)
