@@ -217,6 +217,26 @@ config WS2812_HAS_WHITE
 		enables support for such chips.  Note that the driver does
 		not support chains with a mix of RGB and RGBW pixels.
 
+config WS2812_COMPONENT_TRANSFORM
+	bool "Add byte order transformation functions"
+	default n
+	depends on WS2812
+	---help---
+		Some WS2812 variants expect pixel data in different on-wire
+		byte order than the usual GRB. Enable this option to compile
+		transformation functions that will optionally (based on device
+		configuration) swap bytes in read/write buffers to compensate.
+
+if WS2812_COMPONENT_TRANSFORM
+
+config WS2812_COMPONENT_TRANSFORM_RGB
+	bool "Transformation for RGB LED"
+	default n
+	---help---
+		Add transformation function for RGB byte order LED.
+
+endif # WS2812_COMPONENT_TRANSFORM
+
 config WS2812_FREQUENCY
 	int "WS2812 Bit Frequency (Hz)"
 	default 800000

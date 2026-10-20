@@ -30,3 +30,58 @@ Files supporting ws2812 can be found in the following locations:
    in ``arch/<architecture>/src/<hardware>``
    directory for the specific processor ``<architecture>`` and for
    the specific ``<chip>`` ws2812 peripheral devices.
+
+Configuration
+=============
+
+Upper half configuration resides in :menuselection:`Device Drivers --> LED support --> WS2812 LED driver` .
+Some of the configuration options are described here - mostly for the purpose of helping
+with implementation of lower half drivers and board code.
+
+WS2812 driver variant
+---------------------
+
+Allows user to choose between old-style SPI driver and driver split into upper and
+lower-half. The old style SPI driver could only drive the LEDs using a SPI interface,
+the new style can use any hardware supported by the lower half (including SPI,
+despite the naming.)
+
+When implementing lower half driver for new architecture, make the appropriate
+Kconfig option depend on :menuselection:`WS2812_NON_SPI_DRIVER`
+
+The old-style driver and its associated options are not described in this document.
+
+Number of ws2812s connected
+---------------------------
+
+These LEDs are designed to be chained and this configuration option allows the user
+to specify how many LEDs are in the chain.
+
+Do note though that this is only a suggestion for other code - for example for default
+board configuration. The value set here may be ignored by the lower half and it is
+not used by the upper half either. The upper half reads the LED count from ``nleds``
+element of ``struct ws2812_dev_s``
+
+ws2812s have white LED
+----------------------
+
+Some variants of these LEDs have a white component byte. Lower half can disable support
+for such devices if this configuration option is not set.
+
+Add byte order transformation functions
+---------------------------------------
+
+According to datasheets, these LEDs expect RGB data in green-red-blue order on the wire.
+Data provided by the user space are formatted as 32bit pixels in RGB order
+(ie. ``0x00RRGGBB``.) The lower half driver therefore needs to reorder bytes received
+from the user space through the upper half to transmit them in the order the LED expects.
+
+However, there are variants of these LEDs available on the market which expect the RGB
+data in red-green-blue order. This configuration option adds byte order transformation
+functions (currently one) to the upper half driver. If requested by ``struct ws2812_dev_s``
+member ``byte_order_transformation``, chosen transformation function is called on data
+received from user space before passing them to the lower half when writing. For reads,
+reverse transformation is applied.
+
+Do note that choosing - and making use - of this option requires a buffer allocated
+by lower half for every driver instance that needs this feature.

@@ -71,6 +71,30 @@ extern "C"
 
 #ifdef CONFIG_WS2812_NON_SPI_DRIVER
 
+#  ifdef CONFIG_WS2812_COMPONENT_TRANSFORM
+
+enum ws2812_component_transform_e
+{
+  /* Supposedly, the LED expects color bytes in GRB order. However,
+   * variant that expect RGB order exists as well. Upper-half can
+   * transform the data from userspace (coming in RGB order)
+   * so the lower-half (which expects GRB) does the correct thing.
+   *
+   * NONE transformation is always available and default
+   * if the configuration struct is allocated with zalloc.
+   */
+
+  WS2812_COMPONENT_TRANSFORM_NONE = 0
+
+#    ifdef CONFIG_WS2812_COMPONENT_TRANSFORM_RGB
+
+  , WS2812_COMPONENT_TRANSFORM_RGB /* LED expects bytes in RGB order */
+
+#    endif
+};
+
+#  endif /* CONFIG_WS2812_COMPONENT_TRANSFORM */
+
 struct ws2812_dev_s
 {
   /* --------------------------------------------------------
@@ -100,6 +124,30 @@ struct ws2812_dev_s
   uint16_t               nleds;      /* Count of WS2812s in the chain */
   bool                   has_white;  /* Set true if chain has LED with
                                       * white component */
+
+#  ifdef CONFIG_WS2812_COMPONENT_TRANSFORM
+
+  /* This is the byte order transformation the LED needs */
+
+  enum ws2812_component_transform_e byte_order_transformation;
+
+  /* This is a buffer used for the byte order transformation.
+   * Must be allocated by the caller of ws2812_register and must have
+   * enough room for WS2812_RW_PIXEL_SIZE * nleds bytes.
+   *
+   */
+
+  FAR char *byte_order_buffer;
+
+  /* Using single buffer per driver instance. Must prevent concurrent
+   * access but without using the "lock" mutex above. Lower half
+   * drivers are using that one. Must be initialized by caller
+   * of ws2812_register as well.
+   */
+
+  mutex_t byte_order_lock;
+
+#  endif
 };
 
 #endif

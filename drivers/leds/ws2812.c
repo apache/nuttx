@@ -233,6 +233,54 @@ static const uint8_t ws2812_gamma[256] =
 
 #ifdef CONFIG_WS2812_NON_SPI_DRIVER
 
+#  ifdef CONFIG_WS2812_COMPONENT_TRANSFORM_RGB
+
+/****************************************************************************
+ * Name: ws2812_byte_order_transform_rgb
+ *
+ * Description:
+ *   Transform provided buffer of pixel data (presumably coming
+ *   from userspace) to reorder bytes for LED that expects color
+ *   component bytes in RGB order.
+ *
+ *   Considering it only swaps red and green component, it is used
+ *   for reverse transformation as well.
+ *
+ * Input Parameters:
+ *   src - source buffer
+ *   dst - destination buffer
+ *   cnt - number of PIXELS to transform
+ *
+ * Returned Value: void
+ *
+ ****************************************************************************/
+
+static void ws2812_byte_order_transform_rgb(FAR const char *src,
+                                            FAR char *dst,
+                                            size_t cnt)
+{
+  /* Note - userspace is providing the data as an array of uint32_t,
+   * this array is pushed through a write() interface as a uint8_t
+   * buffer. We need to keep that in mind because endianness may
+   * force us to do different things here.
+   *
+   * Not in this case though, we are only swapping the middle two bytes
+   * and therefore don't care which is which.
+   */
+
+  for (; cnt; cnt--)
+    {
+      *(dst) = *(src);
+      *(dst + 1) = *(src + 2);
+      *(dst + 2) = *(src + 1);
+      *(dst + 3) = *(src + 3);
+      dst += 4;
+      src += 4;
+    }
+}
+
+#  endif
+
 /****************************************************************************
  * Name: ws2812_open
  *
@@ -319,7 +367,63 @@ ssize_t ws2812_write(FAR struct file *filep,
       return -EINVAL;
     }
 
-  res = priv->write(filep, data, len);
+#  ifdef CONFIG_WS2812_COMPONENT_TRANSFORM
+
+  /* Byte order transformation enabled but is it in use for this device? */
+
+  if (priv->byte_order_transformation == WS2812_COMPONENT_TRANSFORM_NONE)
+    {
+      /* It is not. The ifdef block is terminated here, taking the same
+       * action regardless of if byte order transformation is enabled
+       * or not.
+       *
+       * NOTE - with transformation set to NONE, neither byte_order_buffer
+       * nor byte_order_lock are required to be initialized. Neither
+       * may be used with this setting.
+       */
+
+#  endif /* CONFIG_WS2812_COMPONENT_TRANSFORM */
+
+      res = priv->write(filep, data, len);
+
+#  ifdef CONFIG_WS2812_COMPONENT_TRANSFORM
+      /* Back to the ifdef block and continue the if statement */
+    }
+  else
+    {
+      /* Byte order transformation enabled, which one is in use?
+       * Note - must lock, single buffer per driver instance.
+       */
+
+      nxmutex_lock(&priv->byte_order_lock);
+
+      switch (priv->byte_order_transformation)
+        {
+#    ifdef CONFIG_WS2812_COMPONENT_TRANSFORM_RGB
+          case WS2812_COMPONENT_TRANSFORM_RGB:
+            {
+              ws2812_byte_order_transform_rgb(
+                  data,
+                  priv->byte_order_buffer,
+                  len >> 2
+              );
+              res = priv->write(filep, priv->byte_order_buffer, len);
+            }
+            break;
+#    endif /* CONFIG_WS2812_COMPONENT_TRANSFORM_RGB */
+          default:
+            /* Should not ever happen with enums but the compiler tends
+             * to complain about unhandled values.
+             */
+
+            res = priv->write(filep, data, len);
+            break;
+        }
+
+      nxmutex_unlock(&priv->byte_order_lock);
+    }
+
+#  endif /* CONFIG_WS2812_COMPONENT_TRANSFORM */
 
   return res;
 }
@@ -358,7 +462,63 @@ ssize_t ws2812_read(FAR struct file *filep,
       return -EINVAL;
     }
 
-  res = priv->read(filep, data, len);
+#  ifdef CONFIG_WS2812_COMPONENT_TRANSFORM
+
+  /* Byte order transformation enabled but is it in use for this device? */
+
+  if (priv->byte_order_transformation == WS2812_COMPONENT_TRANSFORM_NONE)
+    {
+      /* It is not. The ifdef block is terminated here, taking the same
+       * action regardless of if byte order transformation is enabled
+       * or not.
+       *
+       * NOTE - with transformation set to NONE, neither byte_order_buffer
+       * nor byte_order_lock are required to be initialized. Neither
+       * may be used with this setting.
+       */
+
+#  endif /* CONFIG_WS2812_COMPONENT_TRANSFORM */
+
+      res = priv->read(filep, data, len);
+
+#  ifdef CONFIG_WS2812_COMPONENT_TRANSFORM
+      /* Back to the ifdef block and continue the if statement */
+    }
+  else
+    {
+      /* Byte order transformation enabled, which one is in use?
+       * Note - must lock, single buffer per driver instance.
+       */
+
+      nxmutex_lock(&priv->byte_order_lock);
+
+      switch (priv->byte_order_transformation)
+        {
+#    ifdef CONFIG_WS2812_COMPONENT_TRANSFORM_RGB
+          case WS2812_COMPONENT_TRANSFORM_RGB:
+            {
+              res = priv->read(filep, priv->byte_order_buffer, len);
+              ws2812_byte_order_transform_rgb(
+                  priv->byte_order_buffer,
+                  data,
+                  len >> 2
+              );
+            }
+            break;
+#    endif /* CONFIG_WS2812_COMPONENT_TRANSFORM_RGB */
+          default:
+            /* Should not ever happen with enums but the compiler tends
+             * to complain about unhandled values.
+             */
+
+            res = priv->read(filep, data, len);
+            break;
+        }
+
+      nxmutex_unlock(&priv->byte_order_lock);
+    }
+
+#  endif /* CONFIG_WS2812_COMPONENT_TRANSFORM */
 
   return res;
 }
