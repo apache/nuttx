@@ -122,6 +122,8 @@
 "getloadavg","stdlib.h","defined(CONFIG_HAVE_DOUBLE)","int","FAR double []|FAR double *","int"
 "getnameinfo","netdb.h","defined(CONFIG_LIBC_NETDB)","int","FAR const struct sockaddr *","socklen_t","FAR char *","socklen_t","FAR char *","socklen_t","int"
 "getopt","unistd.h","","int","int","FAR char * const []|FAR char * const *","FAR const char *"
+"getopt_long","getopt.h","","int","int","FAR char * const []|FAR char * const *","FAR const char *","FAR const struct option *","FAR int *"
+"getopt_long_only","getopt.h","","int","int","FAR char * const []|FAR char * const *","FAR const char *","FAR const struct option *","FAR int *"
 "getoptargp","unistd.h","","FAR char **"
 "getopterrp","unistd.h","","FAR int *"
 "getoptindp","unistd.h","","FAR int *"
