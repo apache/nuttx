@@ -471,6 +471,15 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
 
   heapsize = heapsize + MM_PGALIGNUP(4*CONFIG_DEFAULT_TASK_STACKSIZE);
 
+#if (CONFIG_ARCH_TEXT_VBASE != 0x0) && (CONFIG_ARCH_HEAP_VBASE != 0x0)
+  /* The heap must not pass the end of its region */
+
+  if (heapsize > ARCH_HEAP_SIZE)
+    {
+      heapsize = ARCH_HEAP_SIZE;
+    }
+#endif
+
   /* Map the reserved area */
 
   ret = create_region(addrenv, resvbase, resvsize, MMU_UDATA_FLAGS);
