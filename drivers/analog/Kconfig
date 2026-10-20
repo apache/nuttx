@@ -507,6 +507,20 @@ config POT_MCP445X_I2C_FREQUENCY
 	default 400000
 	depends on POT_MCP445X
 
+config POT_MCP45XX
+	bool "MCP45XX support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Microchip MCP454X, MCP456X, MCP464X
+		and MCP466X 7/8-bit single/dual digital potentiometers with
+		nonvolatile wiper memory.
+
+config POT_MCP45XX_I2C_FREQUENCY
+	int "MCP45XX I2C frequency"
+	default 400000
+	depends on POT_MCP45XX
+
 endif # POT
 
 config OPAMP

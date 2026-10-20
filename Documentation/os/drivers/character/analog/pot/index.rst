@@ -60,4 +60,11 @@ Chip       Bus   Notes
 MCP445X    I2C   Quad wiper, 257 taps. Terminal control via the
                  ``ANIOC_MCP445X_*`` ioctls, see
                  ``include/nuttx/analog/mcp445x.h``.
+MCP45XX    I2C   MCP4541, MCP4561, MCP4641 and MCP4661: 7/8-bit
+                 (129/257 taps), one or two wipers, with a nonvolatile
+                 wiper register. ``POTIOC_STORE_WIPER`` and
+                 ``POTIOC_RECALL_WIPER`` use slot 0, the register that
+                 is loaded at power-up. A store returns ``-EROFS`` when
+                 the EEPROM is write protected or the wiper is locked.
+                 Tested on the MCP4561 only.
 ========== ===== ====================================================
