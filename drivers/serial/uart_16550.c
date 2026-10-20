@@ -53,14 +53,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Are any UARTs enabled? */
-
-#undef HAVE_16550_UART
-#if defined(CONFIG_16550_UART0) || defined(CONFIG_16550_UART1)  \
-  || defined(CONFIG_16550_UART2) || defined(CONFIG_16550_UART3)
-#  define HAVE_16550_UART 1
-#endif
-
 /* Timeout for UART Busy Wait, in milliseconds */
 
 #define UART_TIMEOUT_MS 100
@@ -115,23 +107,29 @@ static bool u16550_txready(FAR struct uart_dev_s *dev);
 static bool u16550_txempty(FAR struct uart_dev_s *dev);
 
 /****************************************************************************
- * Private Data
+ * Public Data
  ****************************************************************************/
 
-#ifdef HAVE_16550_UART
-static const struct u16550_ops_s g_u16550_ops =
+/* Default UART 16550 ops.  These are built even when no static UART is
+ * enabled so that a board which defines its own ports can reuse them.
+ */
+
+const struct u16550_ops_s g_u16550_ops =
 {
   .isr        = u16550_interrupt,
   .getreg     = u16550_getreg,
   .putreg     = u16550_putreg,
-#  ifdef CONFIG_SERIAL_UART_ARCH_IOCTL
+#ifdef CONFIG_SERIAL_UART_ARCH_IOCTL
   .ioctl      = uart_ioctl,
-#  endif
-#  ifdef HAVE_16550_UART_DMA
-  .dmachan    = uart_dmachan,
-#  endif
-};
 #endif
+#ifdef HAVE_16550_UART_DMA
+  .dmachan    = uart_dmachan,
+#endif
+};
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
 static const struct uart_ops_s g_uart_ops =
 {
