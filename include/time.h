@@ -37,23 +37,20 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clock tick of the system (frequency Hz).
- *
- * NOTE: This symbolic name CLK_TCK has been removed from the standard.
- *       It is replaced with CLOCKS_PER_SEC.  Both are defined here.
- *
- * The default value is 100Hz, but this default setting can be overridden by
- * defining the clock interval in microseconds as CONFIG_USEC_PER_TICK in the
- * board configuration file.
+/* Clock tick of the system (frequency Hz): the unit of times() and
+ * sysconf(_SC_CLK_TCK).  The default value is 100Hz; CONFIG_USEC_PER_TICK
+ * sets the clock interval in microseconds.
  */
 
 #ifdef CONFIG_USEC_PER_TICK
 #  define CLK_TCK                 (1000000/CONFIG_USEC_PER_TICK)
-#  define CLOCKS_PER_SEC          (1000000/CONFIG_USEC_PER_TICK)
 #else
 #  define CLK_TCK                 (100)
-#  define CLOCKS_PER_SEC          (100)
 #endif
+
+/* The unit of clock(): XSI requires one microsecond */
+
+#define CLOCKS_PER_SEC            (1000000)
 
 /* CLOCK_REALTIME refers to the standard time source.  For most
  * implementations, the standard time source is the system timer interrupt.
