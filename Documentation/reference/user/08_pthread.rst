@@ -520,6 +520,11 @@ No support for the following pthread interfaces is provided by NuttX:
   The cancellability state and type of any newly created threads are
   ``PTHREAD_CANCEL_ENABLE`` and ``PTHREAD_CANCEL_DEFERRED respectively``.
 
+  Deferred cancellation needs ``CONFIG_CANCELLATION_POINTS``.  Without it,
+  ``pthread_cancel()`` acts at once, the type is always
+  ``PTHREAD_CANCEL_ASYNCHRONOUS`` (``oldtype`` reports it), and
+  ``PTHREAD_CANCEL_DEFERRED`` fails with ``EINVAL``.
+
   **Input Parameters:**
 
   :param type: New cancellation state. One of ``PTHREAD_CANCEL_DEFERRED``
@@ -580,6 +585,10 @@ No support for the following pthread interfaces is provided by NuttX:
   -  The thread acts upon a cancellation request.
   -  The thread calls ``pthread_cleanup_pop()`` with a non-zero execute
      argument.
+
+  The stack has ``CONFIG_TLS_NCLEANUP`` entries.  With
+  ``CONFIG_TLS_NCLEANUP=0`` the function does not exist and a program that
+  calls it does not link.
 
   **Input Parameters:**
 
