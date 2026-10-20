@@ -548,30 +548,17 @@ int nxtask_setup_stackargs(FAR struct tcb_s *tcb,
 
       while (argv[argc])
         {
-          /* Add the size of this argument (with NUL terminator).
-           * Check each time if the accumulated size exceeds the
-           * size of the allocated stack.
+          /* Add the size of this argument (with NUL terminator).  The
+           * arguments must fit in the stack, and there may be at most
+           * CONFIG_TASK_MAX_ARGS of them.
            */
 
           strtablen += (strlen(argv[argc]) + 1);
-          DEBUGASSERT(strtablen < tcb->adj_stack_size);
-          if (strtablen >= tcb->adj_stack_size)
+          if (strtablen >= tcb->adj_stack_size ||
+              ++argc > CONFIG_TASK_MAX_ARGS)
             {
-              ret = -ENAMETOOLONG;
-            }
-          else
-            {
-              /* Increment the number of args.  Here is a sanity check to
-               * prevent running away with an unterminated argv[] list.
-               * CONFIG_TASK_MAX_ARGS should be sufficiently large that this
-               * never happens in normal usage.
-               */
-
-              DEBUGASSERT(argc <= CONFIG_TASK_MAX_ARGS);
-              if (++argc > CONFIG_TASK_MAX_ARGS)
-                {
-                  ret = -E2BIG;
-                }
+              ret = -E2BIG;
+              break;
             }
         }
     }
@@ -586,10 +573,11 @@ int nxtask_setup_stackargs(FAR struct tcb_s *tcb,
       argvlen   = (argc + 2) * sizeof(FAR char *);
       stackargv = (FAR char **)up_stack_frame(tcb, argvlen + strtablen);
 
-      DEBUGASSERT(stackargv != NULL);
+      /* It fails when the argv[] array and the strings do not fit */
+
       if (stackargv == NULL)
         {
-          ret = -ENOMEM;
+          ret = -E2BIG;
         }
       else
         {
