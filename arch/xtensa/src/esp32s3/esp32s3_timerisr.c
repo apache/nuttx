@@ -129,7 +129,7 @@ void up_timer_initialize(void)
   /* Configure alarm 0 (Comparator 0) */
 
   regval = SYSTIMER_TARGET0_PERIOD_MODE |
-           ((ESP32S3_SYSTIMER_TICKS_PER_SEC / CLOCKS_PER_SEC) <<
+           ((ESP32S3_SYSTIMER_TICKS_PER_SEC / CLK_TCK) <<
             SYSTIMER_TARGET0_PERIOD_S);
   putreg32(regval, SYSTIMER_TARGET0_CONF_REG);
   putreg32(SYSTIMER_TIMER_COMP0_LOAD, SYSTIMER_COMP0_LOAD_REG);

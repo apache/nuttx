@@ -43,7 +43,7 @@
  ****************************************************************************/
 
 /* The desired timer interrupt frequency is provided by the definition
- * CLOCKS_PER_SEC (see include/time.h).  CLOCKS_PER_SEC defines the desired
+ * CLK_TCK (see include/time.h).  CLK_TCK defines the desired
  * number of system clock ticks per second.  That value is a user
  * configurable setting based on CONFIG_USEC_PER_TICK.  It defaults to 100
  * (100 ticks per second = 10 MS interval).
@@ -51,10 +51,10 @@
  * Given the timer input frequency (Finput).  The timer correct reload
  * value is:
  *
- *   reload = Finput / CLOCKS_PER_SEC
+ *   reload = Finput / CLK_TCK
  */
 
-#define SYSTICK_RELOAD ((SYSTEM_CLOCK_FREQUENCY / CLOCKS_PER_SEC) - 1)
+#define SYSTICK_RELOAD ((SYSTEM_CLOCK_FREQUENCY / CLK_TCK) - 1)
 
 /* The size of the reload field is 30 bits.  Verify that the reload value
  * will fit in the reload register.
@@ -109,7 +109,7 @@ void up_timer_initialize(void)
   timer0_en_write(0);
 
   /* Setup the timer reload register to generate interrupts at the rate of
-   * CLOCKS_PER_SEC.
+   * CLK_TCK.
    */
 
   timer0_reload_write(SYSTICK_RELOAD * 20);

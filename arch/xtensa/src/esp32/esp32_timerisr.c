@@ -118,7 +118,7 @@ void up_timer_initialize(void)
    *   divisor = BOARD_CLOCK_FREQUENCY / ticks_per_sec
    */
 
-  divisor = BOARD_CLOCK_FREQUENCY / CLOCKS_PER_SEC;
+  divisor = BOARD_CLOCK_FREQUENCY / CLK_TCK;
   g_tick_divisor = divisor;
 
   /* Set up periodic timer */

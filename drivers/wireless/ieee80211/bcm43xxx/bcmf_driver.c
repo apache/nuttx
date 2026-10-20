@@ -56,7 +56,7 @@
  ****************************************************************************/
 
 #define DOT11_BSSTYPE_ANY         2
-#define BCMF_SCAN_TIMEOUT_TICK    (5*CLOCKS_PER_SEC)
+#define BCMF_SCAN_TIMEOUT_TICK    (5*CLK_TCK)
 #define BCMF_AUTH_TIMEOUT_MS      15000  /* was 10000 */
 #define BCMF_SCAN_RESULT_ENTRIES  CONFIG_IEEE80211_BROADCOM_SCAN_RESULT_ENTRIES
 

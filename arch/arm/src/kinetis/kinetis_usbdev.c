@@ -187,7 +187,7 @@
 #define khci_rqhead(q)    ((q)->head)
 #define khci_rqtail(q)    ((q)->tail)
 
-#define RESTART_DELAY     (150 * CLOCKS_PER_SEC / 1000)
+#define RESTART_DELAY     (150 * CLK_TCK / 1000)
 
 #define USB0_USBTRC0_BIT6 0x40 /* Undocumented bit that is set in the
                                 * Kinetis lib

@@ -45,14 +45,14 @@
  * ideal match is given by:
  *
  *   CLOCK = CPU_CLOCK / DIVISOR                      # CPU clocks/sec
- *   MATCH = CLOCK / CLOCKS_PER_SEC                   # CPU clocks/timer tick
- *   MATCH = CPU_CLOCK / DIVISOR / CLOCKS_PER_SEC     # CPU clocks/timer tick
+ *   MATCH = CLOCK / CLK_TCK                          # CPU clocks/timer tick
+ *   MATCH = CPU_CLOCK / DIVISOR / CLK_TCK            # CPU clocks/timer tick
  *
  * But we only have 16-bits of accuracy so we need to pick the smallest
  * divisor using the following brute force calculation:
  */
 #define BM3823_TIMER_CLOCK        1000000
-#define MATCH1                    (( 1000000 / CLOCKS_PER_SEC) - 1)
+#define MATCH1                    (( 1000000 / CLK_TCK) - 1)
 
 #define TIMCTR_ENABLE_COUNTER     (1 << 0)  /* Bit 0: enables the
                                              * timer when set

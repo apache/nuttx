@@ -223,16 +223,16 @@ static ssize_t uptime_read(FAR struct file *filep, FAR char *buffer,
 #if defined(CONFIG_HAVE_DOUBLE) && defined(CONFIG_LIBC_FLOATINGPOINT)
       /* Convert the up time to a seconds + hundredths of seconds string */
 
-      now       = (double)ticktime / (double)CLOCKS_PER_SEC;
+      now       = (double)ticktime / (double)CLK_TCK;
       linesize  = procfs_snprintf(attr->line, UPTIME_LINELEN,
                                   "%10.2f\n", now);
 
 #else
       /* Convert the system up time to seconds + hundredths of seconds */
 
-      sec       = ticktime / CLOCKS_PER_SEC;
-      remainder = (unsigned int)(ticktime % CLOCKS_PER_SEC);
-      csec      = (100 * remainder + (CLOCKS_PER_SEC / 2)) / CLOCKS_PER_SEC;
+      sec       = ticktime / CLK_TCK;
+      remainder = (unsigned int)(ticktime % CLK_TCK);
+      csec      = (100 * remainder + (CLK_TCK / 2)) / CLK_TCK;
 
       /* Make sure that rounding did not force the hundredths of
        * a second above 99

@@ -374,7 +374,7 @@ void nxsched_switch_critmon(FAR struct tcb_s *from, FAR struct tcb_s *to)
   clock_t elapsed = current - from->run_start;
 
 #ifdef CONFIG_SCHED_CPULOAD_CRITMONITOR
-  clock_t tick = elapsed * CLOCKS_PER_SEC / perf_getfreq();
+  clock_t tick = elapsed * CLK_TCK / perf_getfreq();
 
   nxsched_critmon_cpuload(from, current, tick);
 #endif
@@ -465,7 +465,7 @@ void nxsched_update_critmon(FAR struct tcb_s *tcb)
   if (tcb->task_state == TSTATE_TASK_RUNNING)
     {
 #ifdef CONFIG_SCHED_CPULOAD_CRITMONITOR
-      clock_t tick = elapsed * CLOCKS_PER_SEC / perf_getfreq();
+      clock_t tick = elapsed * CLK_TCK / perf_getfreq();
 
       nxsched_process_taskload_ticks(tcb, tick);
 #endif

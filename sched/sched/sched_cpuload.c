@@ -49,7 +49,7 @@
 #  endif
 #  define CPULOAD_TICKSPERSEC CONFIG_SCHED_CPULOAD_TICKSPERSEC
 #else
-#  define CPULOAD_TICKSPERSEC CLOCKS_PER_SEC
+#  define CPULOAD_TICKSPERSEC CLK_TCK
 #endif
 
 /* When g_cpuload_total exceeds the following time constant, the load and
