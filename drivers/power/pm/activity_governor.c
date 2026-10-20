@@ -223,7 +223,8 @@ static void governor_initialize(void)
 static void governor_activity(int domain, int count)
 {
   FAR struct pm_domain_state_s *pdomstate;
-  clock_t now, elapsed;
+  clock_t now;
+  clock_t elapsed;
   uint32_t accum;
   irqstate_t flags;
 
@@ -467,7 +468,8 @@ static enum pm_state_e governor_checkstate(int domain)
 {
   FAR struct pm_domain_state_s *pdomstate;
   FAR struct pm_domain_s *pdom;
-  clock_t now, elapsed;
+  clock_t now;
+  clock_t elapsed;
   irqstate_t flags;
   int index;
 

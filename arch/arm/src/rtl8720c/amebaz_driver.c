@@ -62,6 +62,7 @@ static struct amebaz_dev_s *gp_wlan_dev[AMEBAZ_DEVICE_COUNT + 1];
 static void amebaz_state_timeout(wdparm_t arg)
 {
   struct amebaz_state_s *state = (struct amebaz_state_s *)arg;
+
   if (state->status < AMEBAZ_STATUS_RUN)
     {
       return;
@@ -86,6 +87,7 @@ static int amebaz_state_run(struct amebaz_state_s *state, int32_t delay)
 static int amebaz_state_wait(struct amebaz_state_s *state)
 {
   int ret = 0;
+
   while (state->status == AMEBAZ_STATUS_RUN)
     {
       ret = nxsem_wait_uninterruptible(&state->sem);
@@ -101,6 +103,7 @@ static int amebaz_state_wait(struct amebaz_state_s *state)
 static void amebaz_state_post(struct amebaz_state_s *state, int status)
 {
   int _status = state->status;
+
   state->status = status;
   if (_status == AMEBAZ_STATUS_RUN)
     {
@@ -124,12 +127,15 @@ void amebaz_wl_scan_handler(int index, union iwreq_data *wrqu, char *extra)
 {
   struct amebaz_dev_s *priv = gp_wlan_dev[index];
   struct amebaz_state_s *state = &priv->scan;
-  rtw_scan_result_t *res, *cache, *tmp;
+  rtw_scan_result_t *res;
+  rtw_scan_result_t *cache;
+  rtw_scan_result_t *tmp;
   rtw_scan_result_t ap_res;
   rtw_scan_ap_result_t *ap;
   struct iwreq iwr;
   int i;
   int j;
+
   if (state->status != AMEBAZ_STATUS_RUN)
     {
       return;
@@ -215,6 +221,7 @@ static void amebaz_wl_post_connection_event(struct amebaz_dev_s *priv,
     int status)
 {
   struct amebaz_state_s *state = &priv->conn;
+
   if (status == AMEBAZ_STATUS_DONE)
     {
       netdev_carrier_on(&priv->dev);
@@ -241,6 +248,7 @@ void amebaz_wl_connection_handler(int index,
   };
 
   bool mac_avalid;
+
   if (gp_wlan_dev[1]->conn.status == AMEBAZ_STATUS_RUN)
     {
       priv = gp_wlan_dev[1];
@@ -284,6 +292,7 @@ void amebaz_wl_connection_handler(int index,
 void amebaz_wl_netif_info_handler(int index, void *dev, unsigned char *addr)
 {
   struct amebaz_dev_s *priv = gp_wlan_dev[index];
+
   if (!priv || index != priv->devnum)
     {
       return;
@@ -295,6 +304,7 @@ void amebaz_wl_netif_info_handler(int index, void *dev, unsigned char *addr)
 void amebaz_wl_notify_rx_handler(int index, unsigned int len)
 {
   struct amebaz_dev_s *priv = gp_wlan_dev[index];
+
   if (!priv || index != priv->devnum || !len)
     {
       return;
@@ -317,6 +327,7 @@ static int amebaz_wl_set_channels(struct amebaz_dev_s *priv,
   };
 
   int i;
+
   if (!freqs || num_channels == 0)
     {
       return OK;
@@ -343,9 +354,9 @@ static int amebaz_wl_set_channels(struct amebaz_dev_s *priv,
 int amebaz_wl_start_scan(struct amebaz_dev_s *priv, struct iwreq *iwr)
 {
   enum
-    {
-      RTW_SCAN_COMMAMD = 0x01
-    };
+  {
+    RTW_SCAN_COMMAMD = 0x01
+  };
 
   struct amebaz_state_s *state = &priv->scan;
   int scan_type = IW_SCAN_TYPE_ACTIVE;
@@ -355,6 +366,7 @@ int amebaz_wl_start_scan(struct amebaz_dev_s *priv, struct iwreq *iwr)
   uint16_t length;
   int essid_len;
   int ret;
+
   iwr->u.data.flags = scan_type | (bss_type << 8);
   if (iwr->u.data.pointer != NULL &&
       iwr->u.data.length == sizeof(*req))
@@ -424,6 +436,7 @@ static int amebaz_wl_format_scan_results(struct amebaz_dev_s *priv,
   char *start;
   char *stop;
   int i;
+
   start = iwr->u.data.pointer;
   stop = (char *)iwr->u.data.pointer + iwr->u.data.length;
   for (i = 0; i < priv->scan_count; i++)
@@ -470,6 +483,7 @@ int amebaz_wl_get_scan_results(struct amebaz_dev_s *priv, struct iwreq *iwr)
   struct amebaz_state_s *state = &priv->scan;
   int request_size;
   int ret = OK;
+
   if (state->status == AMEBAZ_STATUS_RUN)
     {
       ret = -EAGAIN;
@@ -531,6 +545,7 @@ int amebaz_wl_set_encode_ext(struct amebaz_dev_s *priv, struct iwreq *iwr)
   };
 
   int ret;
+
   iwr->u.encoding.flags = IW_ENCODE_INDEX & 1;
   iwr->u.encoding.flags |= IW_ENCODE_TEMP;
   ret = rltk_wlan_control(SIOCSIWENCODEEXT, iwr);
@@ -563,6 +578,7 @@ int amebaz_wl_get_encode_ext(struct amebaz_dev_s *priv, struct iwreq *iwr)
   };
 
   int ret;
+
   ret = rltk_wlan_control(SIOCGIWENCODEEXT, iwr);
   if (ret < 0)
     {
@@ -593,12 +609,12 @@ static int amebaz_wl_add_custom_ie(struct amebaz_dev_s *priv,
   };
 
   enum
-    {
-      PROBE_REQ = 0x0001,
-      PROBE_RSP = 0x0002,
-      BEACON    = 0x0004,
-      ASSOC_REQ = 0x0008,
-    };
+  {
+    PROBE_REQ = 0x0001,
+    PROBE_RSP = 0x0002,
+    BEACON    = 0x0004,
+    ASSOC_REQ = 0x0008,
+  };
 
   uint8_t ie[8] =
   {
@@ -645,6 +661,7 @@ int amebaz_wl_associate(struct amebaz_dev_s *priv, struct iwreq *iwr)
 
   char *data;
   int ret;
+
   if (priv->mode == RTW_MODE_STA)
     {
       if (priv->assoc.mask !=
@@ -677,15 +694,15 @@ int amebaz_wl_associate(struct amebaz_dev_s *priv, struct iwreq *iwr)
       memcpy(info.bssid.octet, priv->assoc.mac.octet, IFHWADDRLEN);
       switch (priv->assoc.alg)
         {
-        case IW_ENCODE_ALG_NONE:
-          info.security_type = RTW_SECURITY_OPEN;
-          break;
-        case IW_ENCODE_ALG_WEP:
-          info.security_type = RTW_SECURITY_WEP_PSK;
-          break;
-        case IW_ENCODE_ALG_CCMP:
-        default:
-          info.security_type = RTW_SECURITY_WPA2_MIXED_PSK;
+          case IW_ENCODE_ALG_NONE:
+            info.security_type = RTW_SECURITY_OPEN;
+            break;
+          case IW_ENCODE_ALG_WEP:
+            info.security_type = RTW_SECURITY_WEP_PSK;
+            break;
+          case IW_ENCODE_ALG_CCMP:
+          default:
+            info.security_type = RTW_SECURITY_WPA2_MIXED_PSK;
         }
 
       pinfo = &info;
@@ -789,6 +806,7 @@ int amebaz_wl_set_bssid(struct amebaz_dev_s *priv, struct iwreq *iwr)
   };
 
   char *data;
+
   addr->sa_family = ARPHRD_ETHER;
   data = addr->sa_data;
   if (!memcmp(data, null_mac, sizeof(null_mac)))
@@ -826,17 +844,17 @@ static int amebaz_wl_disable_powersave(int devnum)
    */
 
   enum
-    {
-      AMEBA_PMSET_MODE_IPS,
-      AMEBA_PMSET_MODE_LPS,
-      AMEBA_PMSET_MODE_TDMA,
-      AMEBA_PMSET_MODE_DTIM,
-      AMEBA_PMSET_MODE_BEACON,
-      AMEBA_PMSET_MODE_LPS_LEVEL,
-      AMEBA_PMSET_MODE_LPS_THRESHOLD,
-      AMEBA_PMSET_MODE_LPS_RF,
-      AMEBA_PMSET_MODE_RESUME,
-    };
+  {
+    AMEBA_PMSET_MODE_IPS,
+    AMEBA_PMSET_MODE_LPS,
+    AMEBA_PMSET_MODE_TDMA,
+    AMEBA_PMSET_MODE_DTIM,
+    AMEBA_PMSET_MODE_BEACON,
+    AMEBA_PMSET_MODE_LPS_LEVEL,
+    AMEBA_PMSET_MODE_LPS_THRESHOLD,
+    AMEBA_PMSET_MODE_LPS_RF,
+    AMEBA_PMSET_MODE_RESUME,
+  };
 
   control[7]  = AMEBA_PMSET_MODE_IPS;
   control[8]  = 1;
@@ -855,6 +873,7 @@ int amebaz_wl_set_mode(struct amebaz_dev_s *priv, struct iwreq *iwr)
   int ret;
   int count;
   int i;
+
   if (priv->devnum == 1)
     {
       if (iwr->u.mode == IW_MODE_MASTER)
@@ -947,6 +966,7 @@ int amebaz_wl_set_mode(struct amebaz_dev_s *priv, struct iwreq *iwr)
                 }
 
               extern void up_irq_attach_workaround(void);
+
               up_irq_attach_workaround();
             }
 
@@ -989,6 +1009,7 @@ int amebaz_wl_set_country(struct amebaz_dev_s *priv, struct iwreq *iwr)
   const char *country = iwr->u.essid.pointer;
   int32_t cc = RTW_COUNTRY_WORLD1;
   int ret;
+
   if (!strncmp(country, "CN", 2))
     {
     }
@@ -1070,6 +1091,7 @@ int amebaz_wl_set_freq(struct amebaz_dev_s *priv, struct iwreq *iwr)
 int amebaz_wl_get_freq(struct amebaz_dev_s *priv, struct iwreq *iwr)
 {
   int ret;
+
   ret = rltk_wlan_control(SIOCGIWFREQ, iwr);
   if (ret == 0)
     {
@@ -1107,6 +1129,7 @@ static void amebaz_free_device(struct amebaz_dev_s *priv)
 static int amebaz_wl_on(int mode)
 {
   int ret = -1;
+
   for (int i = 0; i < 2; i++)
     {
       ret = rltk_wlan_init(i, mode);
@@ -1117,6 +1140,7 @@ static int amebaz_wl_on(int mode)
     }
 
   extern void up_irq_attach_workaround(void);
+
   up_irq_attach_workaround();
   for (int i = 0; i < 2; i++)
     {
@@ -1145,6 +1169,7 @@ int amebaz_wl_initialize(unsigned char mode)
 
   int ret;
   int i;
+
   for (i = 0; i < 2; i++)
     {
       priv = amebaz_allocate_device(i);
