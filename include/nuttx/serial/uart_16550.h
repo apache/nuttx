@@ -335,6 +335,15 @@ struct u16550_ops_s
   CODE int (*ioctl)(FAR struct u16550_s *priv, int cmd, unsigned long arg);
   CODE FAR struct dma_chan_s *(*dmachan)(FAR struct u16550_s *priv,
                                          unsigned int ident);
+
+  /* Optional interrupt registration hooks.  If attach is NULL the driver
+   * calls irq_attach() with the isr above and up_enable_irq().  If detach
+   * is NULL it calls up_disable_irq() and irqchain_detach().  RX and TX
+   * interrupts are not enabled in the UART by either hook.
+   */
+
+  CODE int (*attach)(FAR struct u16550_s *priv, FAR uart_dev_t *dev);
+  CODE void (*detach)(FAR struct u16550_s *priv, FAR uart_dev_t *dev);
 };
 
 /* UART 16550 private data */
