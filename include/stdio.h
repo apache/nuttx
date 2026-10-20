@@ -218,8 +218,13 @@ struct file_struct
 };
 #endif /* CONFIG_FILE_STREAM */
 
-/* Streams */
+/* Streams.  __FILE_defined and __DEFINED_FILE say that FILE is declared,
+ * as in glibc and musl: headers such as gmp.h test them before they
+ * declare their functions with FILE parameters.
+ */
 
+#define __FILE_defined 1
+#define __DEFINED_FILE 1
 typedef struct file_struct FILE;
 
 /****************************************************************************
