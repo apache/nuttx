@@ -474,23 +474,9 @@ void up_timer_initialize(void)
 
         break;
 #endif
-#ifdef CONFIG_STM32_TIM10
-      case 10:
-        g_tickless.base = STM32_TIM10_BASE;
 
-        /* A freeze bit for TIM10 doesn't seem to exist */
+      /* Note: TIM10 and TIM11 do not exist on STM32H7 */
 
-        break;
-#endif
-
-#ifdef CONFIG_STM32_TIM11
-      case 11:
-        g_tickless.base = STM32_TIM11_BASE;
-
-        /* A freeze bit for TIM11 doesn't seem to exist */
-
-        break;
-#endif
 #ifdef CONFIG_STM32_TIM12
       case 12:
         g_tickless.base = STM32_TIM12_BASE;
