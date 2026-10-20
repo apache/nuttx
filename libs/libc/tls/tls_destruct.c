@@ -27,6 +27,8 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <limits.h>
+#include <stdbool.h>
 
 #include <nuttx/tls.h>
 
@@ -54,23 +56,37 @@ void tls_destruct(void)
 {
   FAR struct task_info_s *info = task_get_info();
   FAR struct tls_info_s *tls = tls_get_info();
-  FAR void *tls_elem_ptr = NULL;
+  FAR void *tls_elem_ptr;
   tls_dtor_t destructor;
+  bool again = true;
+  int iteration;
   int candidate;
 
   DEBUGASSERT(info != NULL);
 
-  for (candidate = CONFIG_TLS_NELEM - 1; candidate >= 0; candidate--)
+  /* A destructor may set a value again: repeat, as POSIX requires */
+
+  for (iteration = 0; again && iteration < PTHREAD_DESTRUCTOR_ITERATIONS;
+       iteration++)
     {
-      /* Is this candidate index available? */
-
-      tls_elem_ptr = (FAR void *)tls->tl_elem[candidate];
-      destructor = info->ta_tlsdtor[candidate];
-      if (tls_elem_ptr && destructor)
+      again = false;
+      for (candidate = CONFIG_TLS_NELEM - 1; candidate >= 0; candidate--)
         {
-          destructor(tls_elem_ptr);
+          tls_elem_ptr = (FAR void *)tls->tl_elem[candidate];
+          destructor = info->ta_tlsdtor[candidate];
+          tls->tl_elem[candidate] = 0;
+          if (tls_elem_ptr && destructor)
+            {
+              destructor(tls_elem_ptr);
+              again = true;
+            }
         }
+    }
 
+  /* Clear the values that the last destructors set */
+
+  for (candidate = 0; candidate < CONFIG_TLS_NELEM; candidate++)
+    {
       tls->tl_elem[candidate] = 0;
     }
 }

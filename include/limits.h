@@ -276,6 +276,8 @@
 #  define PTHREAD_KEYS_MAX                      CONFIG_TLS_NELEM
 #endif
 
+#define PTHREAD_DESTRUCTOR_ITERATIONS _POSIX_THREAD_DESTRUCTOR_ITERATIONS
+
 /* Required for readv() and writev() */
 
 /* There really is no upper limit on the number of vectors */
