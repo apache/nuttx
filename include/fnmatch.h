@@ -37,6 +37,11 @@
 #define FNM_PATHNAME            0x01
 #define FNM_PERIOD              0x02
 #define FNM_NOESCAPE            0x04
+#define FNM_LEADING_DIR         0x08  /* Match up to a '/' in the string */
+#define FNM_CASEFOLD            0x10  /* Ignore the case */
+
+#define FNM_FILE_NAME           FNM_PATHNAME
+#define FNM_IGNORECASE          FNM_CASEFOLD
 
 #define FNM_NOMATCH             1
 #define FNM_NOSYS               -1
@@ -90,6 +95,11 @@ extern "C"
  *
  *   If FNM_PERIOD is not set, then no special restrictions are placed on
  *   matching a period.
+ *
+ *   Two flags are extensions, as in other C libraries.  With FNM_CASEFOLD
+ *   (or FNM_IGNORECASE), upper and lower case letters are the same.  With
+ *   FNM_LEADING_DIR, the pattern can match the string up to a slash, so
+ *   that "usr/lib" matches "usr/lib/x".
  *
  * Returned Value:
  *   If string matches the pattern specified by pattern, then fnmatch()
