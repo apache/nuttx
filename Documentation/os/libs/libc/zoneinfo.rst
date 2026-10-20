@@ -17,6 +17,23 @@ CONFIG_LIBC_LOCALTIME.  This logic in this directory does the following:
 - It will then, optionally, build a ROMFS filesystem image containing
   the data base.
 
+The Local Time Zone
+===================
+
+localtime() and tzset() take the local time zone from the environment
+variable TZ: a file name in CONFIG_LIBC_TZDIR (for example
+``TZ=Europe/Rome``), an absolute path, or a POSIX rule such as
+``TZ=CET-1CEST,M3.5.0,M10.5.0/3``.  When TZ is not set, they read the file
+CONFIG_LIBC_TZDEFAULT, an absolute path or a name in CONFIG_LIBC_TZDIR.  A
+system with the IANA layout of the TZ database uses::
+
+  CONFIG_LIBC_TZDIR="/usr/share/zoneinfo"
+  CONFIG_LIBC_TZDEFAULT="/etc/localtime"
+
+where ``/etc/localtime`` is a link to the file of the local zone.  When
+CONFIG_LIBC_TZDEFAULT is empty (the default), or the file cannot be read,
+the local time without TZ is UTC.
+
 Creating and Mounting a ROMFS TZ Database
 =========================================
 
