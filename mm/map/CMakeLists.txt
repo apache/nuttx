@@ -19,9 +19,10 @@
 # the License.
 #
 # ##############################################################################
-set(SRCS mm_map.c)
+target_sources(mm PRIVATE mm_map.c)
+
+# vm_region.c is kernel code: not in the user-space library
 
 if(CONFIG_ARCH_VMA_MAPPING)
-  list(APPEND SRCS vm_region.c)
+  target_sources(${MM_KERNEL_TARGET} PRIVATE vm_region.c)
 endif()
-target_sources(mm PRIVATE ${SRCS})

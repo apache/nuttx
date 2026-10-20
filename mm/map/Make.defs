@@ -24,8 +24,15 @@
 
 CSRCS += mm_map.c
 
+# vm_region.c is kernel code: build it in a flat build and in the kernel
+# pass (BINDIR=kbin), not into the user-space library.
+
 ifeq ($(CONFIG_ARCH_VMA_MAPPING),y)
+ifeq ($(CONFIG_BUILD_FLAT),y)
 CSRCS += vm_region.c
+else ifeq ($(BINDIR),kbin)
+CSRCS += vm_region.c
+endif
 endif
 
 # Add the map directory to the build
