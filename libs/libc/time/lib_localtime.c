@@ -80,7 +80,11 @@
 /* Time zone files */
 
 #define TZ_MAGIC            "TZif"
-#define TZDEFAULT           "localtime"
+#ifdef CONFIG_LIBC_TZDEFAULT
+#  define TZDEFAULT         CONFIG_LIBC_TZDEFAULT
+#else
+#  define TZDEFAULT         ""
+#endif
 #define TZDEFRULES          "posixrules"
 
 /* In the current implementation, "tzset()" refuses to deal with files that
@@ -2786,16 +2790,30 @@ static int zoneinit(FAR const char *name)
 void tzset(void)
 {
   FAR const char *name;
+  int lcl;
+
+  /* Without TZ the local time zone is the file TZDEFAULT, if there is one
+   * (g_lcl_isset is -1 then), else UTC.
+   */
 
   name = getenv("TZ");
   if (name == NULL)
     {
-      return;
-    }
+      if (TZDEFAULT[0] == '\0' || g_lcl_isset < 0)
+        {
+          return;
+        }
 
-  if (g_lcl_isset > 0 && strcmp(g_lcl_tzname, name) == 0)
+      lcl = -1;
+    }
+  else
     {
-      return;
+      if (g_lcl_isset > 0 && strcmp(g_lcl_tzname, name) == 0)
+        {
+          return;
+        }
+
+      lcl = 1;
     }
 
   if (nxrmutex_is_hold(&g_lcl_lock))
@@ -2819,11 +2837,14 @@ void tzset(void)
       zoneinit("");
     }
 
-  strlcpy(g_lcl_tzname, name, sizeof(g_lcl_tzname));
+  if (lcl > 0)
+    {
+      strlcpy(g_lcl_tzname, name, sizeof(g_lcl_tzname));
+    }
 
 tzname:
   settzname();
-  g_lcl_isset = 1;
+  g_lcl_isset = lcl;
   tz_unlock(&g_lcl_lock);
 }
 
