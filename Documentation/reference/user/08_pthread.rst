@@ -299,7 +299,10 @@ No support for the following pthread interfaces is provided by NuttX:
   zero (``OK``). Otherwise, an error number will be returned to indicate
   the error:
 
-  -  ``To be provided``.
+  -  ``EINVAL``. ``stacksize`` is less than ``PTHREAD_STACK_MIN``, or,
+     with ``CONFIG_TLS_ALIGNED``, more than
+     ``2^CONFIG_TLS_LOG2_MAXSTACK`` bytes.  ``pthread_attr_setstack()``
+     and ``pthread_create()`` give the same error for such a size.
 
   **Assumptions/Limitations:**
 
