@@ -205,15 +205,50 @@ The commands supported by an action fall into three types: the built-in
 commands of NXInit, the built-in commands of NSH (if NSH is enabled), and
 Builtin Apps.
 
-The following is an explanation of some of NXInit's built-in commands.
+These are the built-in commands of NXInit:
 
-- System Operations: mount/umount (mount/unmount file systems), setprop
-  (set system properties), chmod/chown (modify file permissions/owner).
-- Service Management: start/stop/restart (start/stop/restart services),
-  class_start/class_stop (batch start/stop service categories).
-- File Operations: mkdir (create directories with configurable permissions,
-  owner, and encryption settings), copy/write (copy files/write file content).
-- Others: trigger (trigger events).
+- System operations: ``mount``/``umount`` (mount/unmount file systems, see
+  below), ``set`` (set an environment variable), ``setprop`` (set a system
+  property), ``unlink`` (remove a file).
+- Service management: ``start``/``stop`` (start/stop a service),
+  ``exec_start`` (start a service and wait until it exits),
+  ``class_start``/``class_stop`` (start/stop all services of a class).
+- Programs: ``exec -- <program> [<argument>]*`` (run a program and wait until
+  it exits).
+- Others: ``trigger`` (trigger an event), and ``netinit``, ``boot``,
+  ``start_cpu``, ``board_finalinit`` and ``rptun`` when their configuration
+  options are on (``CONFIG_NETUTILS_NETINIT``, ``CONFIG_BOARDCTL_BOOT_IMAGE``,
+  ``CONFIG_BOARDCTL_START_CPU``, ``CONFIG_BOARDCTL_FINALINIT``,
+  ``CONFIG_RPTUN``).
+
+Mounting File Systems
+---------------------
+
+.. code-block::
+
+    mount <type> <device> <dir> [<flag>]* [<options>]
+    mount -t <type> [-o <options>] [<device>] <dir>
+    umount <dir>
+
+``<flag>`` is ``defaults``, ``rw``, ``ro``, ``nosuid``, ``nodev``, ``noexec``,
+``sync``, ``remount``, ``dirsync`` or ``noatime``. In the first form, a last
+argument that is not a flag is the option string of the file system. For a
+file system without a device, ``<device>`` is any name that is not a device,
+for example ``none``. The second form is the one of the NSH command:
+``<options>`` is a comma-separated list of flags and file system options.
+In the pseudo file system, ``<dir>`` does not need to exist: NuttX makes the
+mount point. For example:
+
+.. code-block::
+
+    on boot
+        mount tmpfs none /run
+        mount v9fs none /mnt trans=virtio,tag=host
+        mount -t hostfs -o fs=. /data
+
+``mount`` without arguments runs the NSH command. With
+``CONFIG_DISABLE_MOUNTPOINT``, NXInit has no ``mount`` and ``umount``
+commands.
 
 Compound Commands
 ------------------
