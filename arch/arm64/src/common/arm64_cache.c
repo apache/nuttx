@@ -389,6 +389,11 @@ size_t up_get_icache_size(void)
 void up_invalidate_icache_all(void)
 {
   __ic_ialluis();
+
+  /* Wait until the invalidation is done before the next fetch */
+
+  UP_DSB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -423,6 +428,7 @@ void up_invalidate_icache(uintptr_t start, uintptr_t end)
       start += line_size;
     }
 
+  UP_DSB();
   UP_ISB();
 }
 
