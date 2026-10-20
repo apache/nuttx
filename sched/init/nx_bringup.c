@@ -86,6 +86,10 @@
 #      error CONFIG_INIT_ENTRYPOINT must be defined
 #    endif
 
+#    ifndef CONFIG_BUILD_PROTECTED
+int CONFIG_INIT_ENTRYPOINT(int argc, FAR char *argv[]);
+#    endif
+
 #  elif defined(CONFIG_INIT_FILE)
   /* Initialize by running an initialization program in the file system.
    * Presumably the user has configured a board initialization function

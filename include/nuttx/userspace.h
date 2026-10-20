@@ -139,6 +139,12 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+/* This entry point must be supplied by the application */
+
+#ifdef CONFIG_INIT_ENTRYPOINT
+int CONFIG_INIT_ENTRYPOINT(int argc, FAR char *argv[]);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

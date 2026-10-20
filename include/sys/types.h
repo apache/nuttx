@@ -366,29 +366,6 @@ typedef struct pthread_once_s pthread_once_t;
 #  define __PTHREAD_ONCE_T_DEFINED 1
 #endif
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/* This entry point must be supplied by the application */
-
-#ifdef CONFIG_INIT_ENTRYPOINT
-int CONFIG_INIT_ENTRYPOINT(int argc, FAR char *argv[]);
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-
 #endif /* __ASSEMBLY__ */
 
 #endif /* __INCLUDE_SYS_TYPES_H */
