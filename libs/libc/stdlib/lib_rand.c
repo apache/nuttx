@@ -63,3 +63,17 @@ long random(void)
 {
   return (long)nrand(LONG_MAX);
 }
+
+/****************************************************************************
+ * Name:  srandom
+ *
+ * Description:
+ *   Set the seed of random().  random() and rand() share one generator, so
+ *   this is srand().
+ *
+ ****************************************************************************/
+
+void srandom(unsigned int seed)
+{
+  srand(seed);
+}

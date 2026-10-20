@@ -296,6 +296,7 @@
 "sq_remfirst","nuttx/queue.h","","FAR sq_entry_t *","FAR sq_queue_t *"
 "sq_remlast","nuttx/queue.h","","FAR sq_entry_t *","FAR sq_queue_t *"
 "srand","stdlib.h","","void","unsigned int"
+"srandom","stdlib.h","","void","unsigned int"
 "sscanf","stdio.h","","int","FAR const IPTR char *","FAR const char *","..."
 "sscanf","stdio.h","","int","FAR const char *","FAR const char *","..."
 "statvfs","sys/statvfs.h","","int","FAR const char *","FAR struct statvfs *"
