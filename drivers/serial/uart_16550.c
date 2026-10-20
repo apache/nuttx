@@ -1925,4 +1925,27 @@ void u16550_putc(FAR struct u16550_s *priv, int ch)
   u16550_serialout(priv, UART_THR_OFFSET, (uart_datawidth_t)ch);
 }
 
+/****************************************************************************
+ * Name: u16550_rxpoll
+ *
+ * Description:
+ *   Poll the UART for received data.  If the Data Ready bit is set in the
+ *   Line Status Register, pass the received characters to the upper half
+ *   with uart_recvchars(), exactly as the RX interrupt would do.
+ *
+ ****************************************************************************/
+
+void u16550_rxpoll(FAR uart_dev_t *dev)
+{
+  FAR struct u16550_s *priv;
+
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
+  priv = (FAR struct u16550_s *)dev->priv;
+
+  if ((u16550_serialin(priv, UART_LSR_OFFSET) & UART_LSR_DR) != 0)
+    {
+      uart_recvchars(dev);
+    }
+}
+
 #endif /* CONFIG_16550_UART */
