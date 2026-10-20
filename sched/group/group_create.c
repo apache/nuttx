@@ -196,7 +196,9 @@ int group_allocate(FAR struct tcb_s *tcb, uint8_t ttype)
     {
       group = &g_kthread_group;
       tcb->group = group;
+#ifdef CONFIG_SCHED_CAPABILITIES
       group->tg_caps = PR_CAP_ALL;
+#endif
       if (group->tg_info)
         {
           return OK;
@@ -251,8 +253,10 @@ int group_allocate(FAR struct tcb_s *tcb, uint8_t ttype)
       goto errout_with_group;
     }
 
+#ifdef CONFIG_SCHED_CAPABILITIES
   group->tg_caps = this_task()->group != NULL ?
                    this_task()->group->tg_caps : PR_CAP_ALL;
+#endif
 
   /* Inherit the resource limits from the parent task group */
 
