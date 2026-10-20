@@ -99,7 +99,7 @@ int getlogin_r(FAR char *buf, size_t bufsize)
 
 FAR char *getlogin(void)
 {
-  static char name[NAME_MAX + 1];
+  static char name[LOGIN_NAME_MAX];
   int ret;
 
   ret = getlogin_r(name, sizeof(name));

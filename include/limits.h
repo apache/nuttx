@@ -146,6 +146,7 @@
 #define MAX_INPUT                               _POSIX_MAX_INPUT
 #define NAME_MAX                                CONFIG_NAME_MAX
 #define TTY_NAME_MAX                            NAME_MAX
+#define LOGIN_NAME_MAX                          (NAME_MAX + 1)
 
 #if defined(CONFIG_SCHED_NGROUPS) && CONFIG_SCHED_NGROUPS > 0
 #  define NGROUPS_MAX                           CONFIG_SCHED_NGROUPS
