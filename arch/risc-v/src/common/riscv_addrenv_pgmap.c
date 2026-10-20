@@ -205,6 +205,7 @@ int up_addrenv_kmap_init(void)
       /* Connect the static page tables */
 
       uintptr_t lnvaddr = riscv_pgvaddr(next);
+
       addrenv->spgtables[i] = next;
       next = mmu_pte_to_paddr(mmu_ln_getentry(i + 1, lnvaddr, vaddr));
     }
