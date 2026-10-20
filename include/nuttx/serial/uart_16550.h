@@ -458,6 +458,18 @@ int u16550_interrupt(int irq, FAR void *context, FAR void *arg);
 void u16550_putc(FAR struct u16550_s *priv, int ch);
 
 /****************************************************************************
+ * Name: u16550_rxpoll
+ *
+ * Description:
+ *   Poll the UART for received data and pass it to the upper half, like the
+ *   RX interrupt does.  Intended for a UART without an interrupt (see
+ *   struct u16550_s::irq).  Call it periodically from a thread or a timer.
+ *
+ ****************************************************************************/
+
+void u16550_rxpoll(FAR uart_dev_t *dev);
+
+/****************************************************************************
  * Name: uart_getreg(), uart_putreg(), uart_ioctl()
  *
  * Description:
