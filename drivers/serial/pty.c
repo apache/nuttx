@@ -717,6 +717,13 @@ static ssize_t pty_write(FAR struct file *filep,
       ntotal = file_write(&dev->pd_sink, buffer, len);
     }
 
+  /* The master is closed: POSIX wants EIO after a hang-up, not EPIPE */
+
+  if (ntotal == -EPIPE && !dev->pd_master)
+    {
+      ntotal = -EIO;
+    }
+
   return ntotal;
 }
 
