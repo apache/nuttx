@@ -44,6 +44,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/compiler.h>
+
 #include <stddef.h>
 #include <stdarg.h>
 
