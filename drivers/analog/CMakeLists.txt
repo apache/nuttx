@@ -76,6 +76,10 @@ if(CONFIG_POT)
     list(APPEND SRCS mcp445x.c)
   endif()
 
+  if(CONFIG_POT_MCP45XX)
+    list(APPEND SRCS mcp45xx.c)
+  endif()
+
 endif()
 
 # Check for ADC devices
