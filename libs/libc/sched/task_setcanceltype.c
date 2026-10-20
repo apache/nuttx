@@ -50,7 +50,9 @@
  *   TASK_CANCEL_ASYNCHRONOUS.
  *
  *   The cancellability state and type of any newly created tasks are
- *   TASK_CANCEL_ENABLE and TASK_CANCEL_DEFERRED respectively.
+ *   TASK_CANCEL_ENABLE and TASK_CANCEL_DEFERRED respectively.  Without
+ *   CONFIG_CANCELLATION_POINTS, the type is always TASK_CANCEL_ASYNCHRONOUS
+ *   and TASK_CANCEL_DEFERRED fails with EINVAL.
  *
  ****************************************************************************/
 
@@ -63,6 +65,7 @@ int task_setcanceltype(int type, FAR int *oldtype)
 
   if (oldtype != NULL)
     {
+#ifdef CONFIG_CANCELLATION_POINTS
       if ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_ASYNC) != 0u)
         {
           *oldtype = TASK_CANCEL_ASYNCHRONOUS;
@@ -71,6 +74,11 @@ int task_setcanceltype(int type, FAR int *oldtype)
         {
           *oldtype = TASK_CANCEL_DEFERRED;
         }
+#else
+      /* Without cancellation points, every cancellation acts at once */
+
+      *oldtype = TASK_CANCEL_ASYNCHRONOUS;
+#endif
     }
 
   /* Set the new cancellation type */
