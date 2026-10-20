@@ -461,7 +461,9 @@ struct task_group_s
   pid_t tg_pid;                     /* The ID of the task within the group      */
   pid_t tg_ppid;                    /* This is the ID of the parent thread      */
   uint8_t tg_flags;                 /* See GROUP_FLAG_* definitions             */
+#ifdef CONFIG_SCHED_CAPABILITIES
   uint8_t tg_caps;                  /* See PR_CAP_* definitions                 */
+#endif
 
   /* Resource limits (getrlimit() and setrlimit()) **************************/
 
