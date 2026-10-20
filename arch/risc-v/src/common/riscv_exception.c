@@ -222,7 +222,7 @@ int riscv_fillpage(int mcause, void *regs, void *args)
         mcause > RISCV_MAX_EXCEPTION ? "Unknown" : g_reasons_str[cause],
         cause, READ_CSR(CSR_EPC), READ_CSR(CSR_TVAL));
   vaddr = MM_PGALIGNDOWN(READ_CSR(CSR_TVAL));
-  if (vaddr >= CONFIG_ARCH_TEXT_VBASE && vaddr <= ARCH_TEXT_VEND)
+  if (vaddr >= CONFIG_ARCH_TEXT_VBASE && vaddr < ARCH_TEXT_VEND)
     {
       mmuflags = MMU_UTEXT_FLAGS;
 
@@ -232,11 +232,11 @@ int riscv_fillpage(int mcause, void *regs, void *args)
 
       mmuflags |= PTE_W;
     }
-  else if (vaddr >= CONFIG_ARCH_DATA_VBASE && vaddr <= ARCH_DATA_VEND)
+  else if (vaddr >= CONFIG_ARCH_DATA_VBASE && vaddr < ARCH_DATA_VEND)
     {
       mmuflags = MMU_UDATA_FLAGS;
     }
-  else if (vaddr >= CONFIG_ARCH_HEAP_VBASE && vaddr <= ARCH_HEAP_VEND)
+  else if (vaddr >= CONFIG_ARCH_HEAP_VBASE && vaddr < ARCH_HEAP_VEND)
     {
       mmuflags = MMU_UDATA_FLAGS;
     }
