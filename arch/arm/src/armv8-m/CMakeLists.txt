@@ -66,6 +66,10 @@ if(CONFIG_ARCH_FPU)
   list(APPEND SRCS arm_fpuconfig.c arm_fpucmp.c)
 endif()
 
+if(CONFIG_ARM_PACBTI)
+  list(APPEND SRCS arm_pacbticonfig.c)
+endif()
+
 if(CONFIG_ARCH_RAMVECTORS)
   list(APPEND SRCS arm_ramvec_initialize.c arm_ramvec_attach.c)
 endif()

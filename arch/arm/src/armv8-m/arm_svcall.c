@@ -177,7 +177,8 @@ int arm_svcall(int irq, void *context, void *arg)
 
           /* Return unprivileged mode */
 
-          regs[REG_CONTROL]    = getcontrol() | CONTROL_NPRIV;
+          regs[REG_CONTROL]    = getcontrol() | CONTROL_NPRIV |
+                                 CONTROL_PACBTI_MASK;
 
           /* Change the parameter ordering to match the expectation of struct
            * userpace_s task_startup:
@@ -215,7 +216,8 @@ int arm_svcall(int irq, void *context, void *arg)
 
           /* Return unprivileged mode */
 
-          regs[REG_CONTROL]    = getcontrol() | CONTROL_NPRIV;
+          regs[REG_CONTROL]    = getcontrol() | CONTROL_NPRIV |
+                                 CONTROL_PACBTI_MASK;
 
           /* Change the parameter ordering to match the expectation of the
            * user space pthread_startup:
@@ -260,7 +262,8 @@ int arm_svcall(int irq, void *context, void *arg)
 
           /* Return unprivileged mode */
 
-          regs[REG_CONTROL]    = getcontrol() | CONTROL_NPRIV;
+          regs[REG_CONTROL]    = getcontrol() | CONTROL_NPRIV |
+                                 CONTROL_PACBTI_MASK;
 
           /* Change the parameter ordering to match the expectation of struct
            * userpace_s signal_handler.
@@ -297,7 +300,8 @@ int arm_svcall(int irq, void *context, void *arg)
 
           /* Return privileged mode */
 
-          regs[REG_CONTROL]    = getcontrol() & ~CONTROL_NPRIV;
+          regs[REG_CONTROL]    = (getcontrol() & ~CONTROL_NPRIV) |
+                                 CONTROL_PACBTI_MASK;
           rtcb->xcp.sigreturn  = 0;
         }
         break;
@@ -339,7 +343,8 @@ int arm_svcall(int irq, void *context, void *arg)
 
           /* Return privileged mode */
 
-          regs[REG_CONTROL]    = getcontrol() & ~CONTROL_NPRIV;
+          regs[REG_CONTROL]    = (getcontrol() & ~CONTROL_NPRIV) |
+                                 CONTROL_PACBTI_MASK;
 
           /* Offset R0 to account for the reserved values */
 
