@@ -193,6 +193,18 @@ void task_uninit_info(FAR struct task_group_s *group)
     }
 #endif
 
+#if CONFIG_LIBC_MAX_EXITFUNS > 0
+  /* Free the heap part of the exit function list (the task did not call
+   * exit())
+   */
+
+  if (info->ta_exit.extra != NULL)
+    {
+      group_free(group, info->ta_exit.extra);
+      info->ta_exit.extra = NULL;
+    }
+#endif
+
   /* Release all environment variables */
 
   env_release(info);
