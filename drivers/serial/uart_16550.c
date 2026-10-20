@@ -983,22 +983,29 @@ static int u16550_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, priv->ops->isr, dev);
-#ifndef CONFIG_ARCH_NOINTC
-  if (ret == OK)
+  if (priv->ops->attach != NULL)
     {
-      /* Enable the interrupt (RX and TX interrupts are still disabled
-       * in the UART
-       */
-
-      up_enable_irq(priv->irq);
-
-#ifdef HAVE_16550_UART_DMA
-      if (priv->chanrx)
+      ret = priv->ops->attach(priv, dev);
+    }
+  else
+    {
+      ret = irq_attach(priv->irq, priv->ops->isr, dev);
+#ifndef CONFIG_ARCH_NOINTC
+      if (ret == OK)
         {
-          DMA_RESUME(priv->chanrx);
+          /* Enable the interrupt (RX and TX interrupts are still disabled
+           * in the UART
+           */
+
+          up_enable_irq(priv->irq);
         }
 #endif
+    }
+
+#ifdef HAVE_16550_UART_DMA
+  if (ret == OK && priv->chanrx)
+    {
+      DMA_RESUME(priv->chanrx);
     }
 #endif
 
@@ -1026,8 +1033,15 @@ static void u16550_detach(FAR struct uart_dev_s *dev)
     }
 #endif
 
-  up_disable_irq(priv->irq);
-  irqchain_detach(priv->irq, priv->ops->isr, dev);
+  if (priv->ops->detach != NULL)
+    {
+      priv->ops->detach(priv, dev);
+    }
+  else
+    {
+      up_disable_irq(priv->irq);
+      irqchain_detach(priv->irq, priv->ops->isr, dev);
+    }
 
 #ifdef CONFIG_CLK
   /* Clk disaable */
