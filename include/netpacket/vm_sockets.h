@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include <sys/types.h>
+#include <sys/socket.h>
 
 #include <nuttx/fs/ioctl.h>
 
