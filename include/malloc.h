@@ -99,7 +99,7 @@ extern "C"
 {
 #endif
 
-int mallopt(int param, int value);
+int mallopt(int, int);
 struct mallinfo mallinfo(void);
 size_t malloc_size(FAR void *ptr);
 struct mallinfo_task mallinfo_task(FAR const struct malltask *task);

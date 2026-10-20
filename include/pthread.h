@@ -486,9 +486,9 @@ int pthread_attr_setschedpolicy(FAR pthread_attr_t *attr, int policy);
 int pthread_attr_getschedpolicy(FAR const pthread_attr_t *attr,
                                 FAR int *policy);
 int pthread_attr_setschedparam(FAR pthread_attr_t *attr,
-                               FAR const struct sched_param *param);
+                               FAR const struct sched_param *);
 int pthread_attr_getschedparam(FAR const pthread_attr_t *attr,
-                               FAR struct sched_param *param);
+                               FAR struct sched_param *);
 int pthread_attr_setinheritsched(FAR pthread_attr_t *attr,
                                  int inheritsched);
 int pthread_attr_getinheritsched(FAR const pthread_attr_t *attr,
@@ -606,9 +606,9 @@ int pthread_equal(pthread_t t1, pthread_t t2);
 /* Thread scheduling parameters */
 
 int pthread_getschedparam(pthread_t thread, FAR int *policy,
-                          FAR struct sched_param *param);
+                          FAR struct sched_param *);
 int pthread_setschedparam(pthread_t thread, int policy,
-                          FAR const struct sched_param *param);
+                          FAR const struct sched_param *);
 int pthread_setschedprio(pthread_t thread, int prio);
 
 #ifdef CONFIG_SMP

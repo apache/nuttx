@@ -151,7 +151,7 @@ extern "C"
 void      srand(unsigned int seed);
 int       rand(void);
 int       rand_r(FAR unsigned int *seedp);
-void      lcong48(FAR unsigned short int param[7]);
+void      lcong48(FAR unsigned short int [7]);
 FAR unsigned short int *seed48(FAR unsigned short int seed16v[3]);
 void      srand48(long int seedval);
 long int  jrand48(FAR unsigned short int xsubi[3]);
