@@ -163,7 +163,7 @@ double    drand48(void);
 double    erand48(FAR unsigned short int xsubi[3]);
 #  endif
 
-#define   srandom(s) srand(s)
+void      srandom(unsigned int seed);
 long      random(void);
 
 void      arc4random_buf(FAR void *bytes, size_t nbytes);
