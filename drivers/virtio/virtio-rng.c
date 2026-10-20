@@ -53,7 +53,7 @@ struct virtio_rng_priv_s
 {
   FAR struct virtio_device *vdev;
   char                      name[NAME_MAX];
-#ifdef CONFIG_DEV_URANDOM
+#ifdef CONFIG_DEV_URANDOM_ARCH
   char                      uname[NAME_MAX];
 #endif
   spinlock_t                lock;
@@ -237,14 +237,14 @@ static int virtio_rng_probe(FAR struct virtio_device *vdev)
   if (g_virtio_rng_idx == 0)
     {
       strlcpy(priv->name, "/dev/random", NAME_MAX);
-#ifdef CONFIG_DEV_URANDOM
+#ifdef CONFIG_DEV_URANDOM_ARCH
       strlcpy(priv->uname, "/dev/urandom", NAME_MAX);
 #endif
     }
   else
     {
       snprintf(priv->name, NAME_MAX, "/dev/random%d", g_virtio_rng_idx);
-#ifdef CONFIG_DEV_URANDOM
+#ifdef CONFIG_DEV_URANDOM_ARCH
       snprintf(priv->uname, NAME_MAX, "/dev/urandom%d", g_virtio_rng_idx);
 #endif
     }
@@ -256,11 +256,12 @@ static int virtio_rng_probe(FAR struct virtio_device *vdev)
       goto err_with_virtqueue;
     }
 
-#ifdef CONFIG_DEV_URANDOM
+#ifdef CONFIG_DEV_URANDOM_ARCH
   ret = register_driver(priv->uname, &g_virtio_rng_ops, 0400, priv);
   if (ret < 0)
     {
       vrterr("Register NuttX driver failed, ret=%d\n", ret);
+      unregister_driver(priv->name);
       goto err_with_virtqueue;
     }
 #endif
@@ -285,6 +286,9 @@ static void virtio_rng_remove(FAR struct virtio_device *vdev)
   FAR struct virtio_rng_priv_s *priv = vdev->priv;
 
   unregister_driver(priv->name);
+#ifdef CONFIG_DEV_URANDOM_ARCH
+  unregister_driver(priv->uname);
+#endif
   virtio_reset_device(vdev);
   virtio_delete_virtqueues(vdev);
   kmm_free(priv);
@@ -319,7 +323,7 @@ void weak_function devrandom_register(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEV_URANDOM
+#ifdef CONFIG_DEV_URANDOM_ARCH
 void weak_function devurandom_register(void)
 {
   /* Nothing, implement it here just avoid the compile error, the driver
