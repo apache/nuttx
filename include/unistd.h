@@ -46,12 +46,18 @@
 #define W_OK        2  /* Test write permission */
 #define R_OK        4  /* Test read permission */
 
-/* POSIX feature set macros */
+/* POSIX feature set macros.  A value greater than zero means that the
+ * option is supported; -1 means that this configuration does not have it.
+ */
 
 #define POSIX_VERSION
 #undef  _POSIX_SAVED_IDS
 #undef  _POSIX_JOB_CONTROL
-#define _POSIX_MESSAGE_PASSING 1
+#ifdef CONFIG_DISABLE_MQUEUE
+#  define _POSIX_MESSAGE_PASSING -1
+#else
+#  define _POSIX_MESSAGE_PASSING 1
+#endif
 #define _POSIX_PRIORITY_SCHEDULING 1
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
 #  define _POSIX_TIMERS 1
@@ -67,17 +73,77 @@
 
 #define _POSIX_VERSION 201712L
 #define _POSIX_PRIORITIZED_IO _POSIX_VERSION
-#define _POSIX_CPUTIME _POSIX_VERSION
-#define _POSIX_THREAD_CPUTIME _POSIX_VERSION
+
+/* CPU-time clocks need the run-time accounting of the critical section
+ * monitor.
+ */
+
+#if defined(CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD) && \
+    CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
+#  define _POSIX_CPUTIME _POSIX_VERSION
+#  define _POSIX_THREAD_CPUTIME _POSIX_VERSION
+#else
+#  define _POSIX_CPUTIME -1
+#  define _POSIX_THREAD_CPUTIME -1
+#endif
+
 #define _POSIX_REALTIME_SIGNALS _POSIX_VERSION
-#define _POSIX_THREAD_PRIORITY_SCHEDULING _POSIX_VERSION
-#define _POSIX_SEMAPHORES _POSIX_VERSION
-#define _POSIX_SHARED_MEMORY_OBJECTS _POSIX_VERSION
-#define _POSIX_THREAD_PROCESS_SHARED _POSIX_VERSION
-#define _POSIX_MAPPED_FILES _POSIX_VERSION
-#define _POSIX_THREADS _POSIX_VERSION
 #define _POSIX_MONOTONIC_CLOCK _POSIX_VERSION
 #define _POSIX_CLOCK_SELECTION _POSIX_VERSION
+
+/* sem_open() needs the named semaphores */
+
+#ifdef CONFIG_FS_NAMED_SEMAPHORES
+#  define _POSIX_SEMAPHORES _POSIX_VERSION
+#else
+#  define _POSIX_SEMAPHORES -1
+#endif
+
+#ifdef CONFIG_FS_SHMFS
+#  define _POSIX_SHARED_MEMORY_OBJECTS _POSIX_VERSION
+#else
+#  define _POSIX_SHARED_MEMORY_OBJECTS -1
+#endif
+
+/* mmap() of a regular file needs the file mapping emulation */
+
+#ifdef CONFIG_FS_RAMMAP
+#  define _POSIX_MAPPED_FILES _POSIX_VERSION
+#else
+#  define _POSIX_MAPPED_FILES -1
+#endif
+
+#ifdef CONFIG_DISABLE_PTHREAD
+#  define _POSIX_THREADS -1
+#  define _POSIX_THREAD_PRIORITY_SCHEDULING -1
+#  define _POSIX_THREAD_ATTR_STACKADDR -1
+#  define _POSIX_THREAD_ATTR_STACKSIZE -1
+#  define _POSIX_THREAD_PROCESS_SHARED -1
+#  define _POSIX_BARRIERS -1
+#  define _POSIX_READER_WRITER_LOCKS -1
+#else
+#  define _POSIX_THREADS _POSIX_VERSION
+#  define _POSIX_THREAD_PRIORITY_SCHEDULING _POSIX_VERSION
+#  define _POSIX_THREAD_ATTR_STACKADDR _POSIX_VERSION
+#  define _POSIX_THREAD_ATTR_STACKSIZE _POSIX_VERSION
+#  define _POSIX_BARRIERS _POSIX_VERSION
+#  define _POSIX_READER_WRITER_LOCKS _POSIX_VERSION
+
+/* Process-shared objects need memory that two processes can share */
+
+#  if !defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_FS_SHMFS) || \
+      defined(CONFIG_MM_SHM)
+#    define _POSIX_THREAD_PROCESS_SHARED _POSIX_VERSION
+#  else
+#    define _POSIX_THREAD_PROCESS_SHARED -1
+#  endif
+#endif
+
+#ifdef CONFIG_PTHREAD_SPINLOCKS
+#  define _POSIX_SPIN_LOCKS _POSIX_VERSION
+#else
+#  define _POSIX_SPIN_LOCKS -1
+#endif
 
 #ifdef CONFIG_FS_AIO
 #  define _POSIX_ASYNCHRONOUS_IO _POSIX_VERSION
