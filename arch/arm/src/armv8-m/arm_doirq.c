@@ -48,7 +48,7 @@ void exception_direct(void)
 {
   int irq = getipsr();
 
-#ifdef CONFIG_ARCH_FPU
+#if defined(CONFIG_ARCH_FPU) && defined(CONFIG_ARM_HAVE_MVE)
   __asm__ __volatile__
     (
       "mov r0, %0\n"
