@@ -45,6 +45,16 @@ struct hsearch_data
   CODE void (*free_entry)(FAR ENTRY *entry);
 };
 
+/* The order in which twalk() visits a node */
+
+typedef enum
+{
+  preorder,
+  postorder,
+  endorder,
+  leaf
+} VISIT;
+
 /* This is the callback type used by hforeach() */
 
 typedef CODE void (*hforeach_t)(FAR ENTRY *entry, FAR void *data);
@@ -199,5 +209,27 @@ int hsearch_r(ENTRY, ACTION, FAR ENTRY **, FAR struct hsearch_data *);
  ****************************************************************************/
 
 void hforeach_r(hforeach_t, FAR void *, FAR struct hsearch_data *);
+
+/****************************************************************************
+ * Name: tsearch, tfind, tdelete, twalk, tdestroy
+ *
+ * Description:
+ *   Binary search trees (an AVL tree).  tsearch() finds or adds a key,
+ *   tfind() finds it, tdelete() removes it, twalk() visits all nodes and
+ *   tdestroy() (a GNU extension) frees the tree.  The first member of a
+ *   node is the pointer to its key.
+ *
+ ****************************************************************************/
+
+FAR void *tsearch(FAR const void *key, FAR void **rootp,
+                  CODE int (*compar)(FAR const void *, FAR const void *));
+FAR void *tfind(FAR const void *key, FAR void * const *rootp,
+                CODE int (*compar)(FAR const void *, FAR const void *));
+FAR void *tdelete(FAR const void *key, FAR void **rootp,
+                  CODE int (*compar)(FAR const void *, FAR const void *));
+void twalk(FAR const void *root,
+           CODE void (*action)(FAR const void *node, VISIT visit,
+                               int depth));
+void tdestroy(FAR void *root, CODE void (*free_node)(FAR void *key));
 
 #endif /* __INCLUDE_SEARCH_H */
