@@ -380,6 +380,14 @@ struct u16550_s
   spinlock_t             lock;      /* Spinlock */
 };
 
+/* Default UART 16550 ops: getreg/putreg access the registers either through
+ * the memory mapping (CONFIG_SERIAL_UART_ARCH_MMIO) or through the
+ * uart_getreg()/uart_putreg() provided by the arch.  A board that registers
+ * its own ports can point struct u16550_s::ops at this table.
+ */
+
+extern const struct u16550_ops_s g_u16550_ops;
+
 /****************************************************************************
  * Public Functions Definitions
  ****************************************************************************/
