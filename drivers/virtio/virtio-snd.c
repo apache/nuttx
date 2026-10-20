@@ -324,7 +324,9 @@ virtio_snd_get_support_formats(FAR const struct virtio_snd_pcm_info *info,
         {
           caps->ac_controls.b[subformats++] = g_format_map[i].nformat;
           if (subformats >= nitems(caps->ac_controls.b))
-            break;
+            {
+              break;
+            }
         }
     }
 }
@@ -692,7 +694,7 @@ static int virtio_snd_getcaps(FAR struct audio_lowerhalf_s *dev,
               caps->ac_controls.b[0] = AUDIO_SUBFMT_END;
               break;
           }
-         break;
+        break;
 
       case AUDIO_TYPE_OUTPUT:
       case AUDIO_TYPE_INPUT:
