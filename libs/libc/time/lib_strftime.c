@@ -270,7 +270,8 @@ static int get_week_year(FAR const struct tm *time)
  *   %X     The locale's appropriate time representation, but without date.
  *   %y     The year as a decimal number without a century (range 00 to 99).
  *   %Y     The year as a decimal number including the century.
- *   %z     The timezone name or abbreviation, or by no bytes if no timezone
+ *   %z     The offset from UTC as +hhmm or -hhmm.
+ *   %Z     The timezone name or abbreviation, or by no bytes if no timezone
  *          information exists.
  *   %%     A literal '%' character.
  *
@@ -560,6 +561,19 @@ process_next:
               len = snprintf(dest, chleft, "%02d", tm->tm_year % 100);
             }
             break;
+
+          /* %Z: The time zone abbreviation, or no characters if there is
+           * none.
+           */
+
+          case 'Z':
+            {
+              if (tm->tm_zone != NULL)
+                {
+                  len = snprintf(dest, chleft, "%s", tm->tm_zone);
+                }
+            }
+            break;
 #endif
 
 #ifdef CONFIG_LIBC_STRFTIME_POSIX_FORMATS
@@ -694,11 +708,11 @@ process_next:
 
           case 'z':
             {
-              int hour = tm->tm_gmtoff / 3600;
-              int min = tm->tm_gmtoff % 3600 / 60;
-              int utc_val = hour  * 100 + min;
+              long off = tm->tm_gmtoff < 0 ? -tm->tm_gmtoff : tm->tm_gmtoff;
 
-              len = snprintf(dest, chleft, "+%04d", utc_val);
+              len = snprintf(dest, chleft, "%c%02ld%02ld",
+                             tm->tm_gmtoff < 0 ? '-' : '+',
+                             off / 3600, off % 3600 / 60);
             }
             break;
 #endif
