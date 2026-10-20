@@ -290,7 +290,9 @@
 /* Accessor functions associated with getopt().  getopt() keeps optarg,
  * opterr, optind and optopt per task, so the names are macros.  A program
  * that brings its own getopt() and its own variables of these names can
- * define NUTTX_NO_GETOPT_MACROS to keep the names free.
+ * define NUTTX_NO_GETOPT_MACROS: then the names are declared as the
+ * variables that POSIX specifies (see below), and the program or another
+ * library defines them.
  */
 
 #ifndef NUTTX_NO_GETOPT_MACROS
@@ -496,6 +498,13 @@ FAR char **getoptargp(void);  /* Optional argument following option */
 FAR int   *getopterrp(void);  /* Print error message */
 FAR int   *getoptindp(void);  /* Index into argv */
 FAR int   *getoptoptp(void);  /* Unrecognized option character */
+
+#ifdef NUTTX_NO_GETOPT_MACROS
+EXTERN FAR char *optarg;      /* Optional argument following option */
+EXTERN int       opterr;      /* Print error message */
+EXTERN int       optind;      /* Index into argv */
+EXTERN int       optopt;      /* Unrecognized option character */
+#endif
 
 int     gethostname(FAR char *name, size_t namelen);
 int     sethostname(FAR const char *name, size_t namelen);
