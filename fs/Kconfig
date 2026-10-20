@@ -135,14 +135,16 @@ config FS_PERMISSION
 
 	---help---
 		Enable filesystem ownership and permission metadata
-		support for pseudoFS inodes.
+		support for pseudoFS inodes, and the POSIX permission
+		checks at run time: the VFS, tmpfs, littlefs (with
+		FS_LITTLEFS_ATTR_UPDATE), named semaphores, message
+		queues and shared memory objects fail with EACCES when
+		the mode bits do not allow the access.  See
+		Documentation/os/filesystem/file_permission.rst.
 
 		Requires SCHED_USER_IDENTITY and
 		PSEUDOFS_ATTRIBUTES for task credential tracking
 		and inode ownership/mode metadata support.
-
-		This option alone does not enforce runtime
-		permission checks.
 
 	comment "UNIX filesystem permission support requires SCHED_USER_IDENTITY=y, PSEUDOFS_ATTRIBUTES=y and DISABLE_PSEUDOFS_OPERATIONS=n"
 		depends on !SCHED_USER_IDENTITY || !PSEUDOFS_ATTRIBUTES || DISABLE_PSEUDOFS_OPERATIONS
