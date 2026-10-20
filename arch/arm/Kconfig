@@ -1309,6 +1309,8 @@ config ARCH_CORTEXM55
 config ARCH_CORTEXM85
 	bool
 	default n
+	select ARM_HAVE_MVE
+	select ARM_HAVE_PACBTI
 	select ARM_THUMB
 	select ARCH_ARMV8M
 	select ARCH_HAVE_IRQPRIO
