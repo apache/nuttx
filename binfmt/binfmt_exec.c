@@ -26,6 +26,8 @@
 
 #include <nuttx/config.h>
 
+#include <limits.h>
+#include <stdlib.h>
 #include <string.h>
 #include <nuttx/debug.h>
 #include <errno.h>
@@ -41,6 +43,35 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: exec_argsize
+ *
+ * Description:
+ *   Return the size of a list of strings: the bytes of the strings, with
+ *   their NUL terminators, and of the pointers to them.
+ *
+ ****************************************************************************/
+
+static size_t exec_argsize(FAR char * const *list1, FAR char * const *list2)
+{
+  FAR char * const *lists[2];
+  size_t size = 0;
+  int i;
+  int j;
+
+  lists[0] = list1;
+  lists[1] = list2;
+  for (i = 0; i < 2; i++)
+    {
+      for (j = 0; lists[i] != NULL && lists[i][j] != NULL; j++)
+        {
+          size += strlen(lists[i][j]) + 1 + sizeof(FAR char *);
+        }
+    }
+
+  return size;
+}
 
 /****************************************************************************
  * Name: exec_internal
@@ -90,6 +121,13 @@ static int exec_internal(FAR const char *filename,
   if (!nxsched_capable(PR_CAP_SPAWN))
     {
       return -EPERM;
+    }
+
+  /* The arguments and the environment may have at most ARG_MAX bytes */
+
+  if (exec_argsize(argv, envp != NULL ? envp : environ) > ARG_MAX)
+    {
+      return -E2BIG;
     }
 
 #ifndef CONFIG_BINFMT_LOADABLE
