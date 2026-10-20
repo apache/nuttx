@@ -72,56 +72,34 @@ static int fnmatch_one(FAR const char *pattern, int patlen,
 
       if (*p == '[' && *string != '\0')
         {
+          /* 'i' tells if a character or a range of the set matches */
+
           i = 0;
+          p++;
           while (*p != ']' && *p != '\0')
             {
-              p++;
-
-              if (*string == *p)
+              first = *p++;
+              if (*p == '-' && p[1] != ']' && p[1] != '\0')
                 {
-                  /* Match found.  Advance to the ']' */
+                  if (*string >= first && *string <= p[1])
+                    {
+                      i = 1;
+                    }
 
+                  p += 2;
+                }
+              else if (*string == first)
+                {
                   i = 1;
-                  while (*p != ']' && *p != '\0')
-                    {
-                      p++;
-                    }
-
-                  break;
-                }
-
-              /* Prepare to test for range */
-
-              if (*p != '\0')
-                {
-                  first = *p++;
-                  if (*p == '-')
-                    {
-                      p++;
-                      if (*string >= first && *string <= *p)
-                        {
-                          /* Match found.  Advance to the ']' */
-
-                          i = 1;
-                          while (*p != ']' && *p != '\0')
-                            {
-                              p++;
-                            }
-
-                          break;
-                        }
-                    }
                 }
             }
 
-          /* We reuse 'i' above to indicate match found */
-
-          if (i)
+          if (i == 0 || *p == '\0')
             {
-              continue;
+              return FNM_NOMATCH;
             }
 
-          return FNM_NOMATCH;
+          continue;
         }
 
       if (*p == '*')
