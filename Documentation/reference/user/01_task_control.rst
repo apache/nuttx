@@ -653,9 +653,11 @@ Functions
     A new task can get at most ``CONFIG_TASK_MAX_ARGS`` arguments (default
     256). A longer list fails with ``E2BIG``. ``CONFIG_TASK_ARG_MAX`` sets
     ``ARG_MAX`` and ``sysconf(_SC_ARG_MAX)`` (default 4096 bytes): the size
-    of the arguments and the environment that a program may pass. NuttX
-    does not check this size. The arguments are copied to the stack of the
-    new task, so its stack must be large enough for them.
+    of the arguments and the environment that a program may pass, counted
+    as the bytes of the strings with their terminators and of the pointers
+    to them. A larger list fails with ``E2BIG``. The arguments are copied
+    to the stack of the new task; if they do not fit there, the call also
+    fails with ``E2BIG``.
 
   :param envp: ``envp[]`` is an array of pointers to null-terminated
     ``name=value`` strings that is the environment of the new task. The
