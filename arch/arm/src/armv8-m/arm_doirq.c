@@ -115,20 +115,24 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
     }
 #endif
 
-  /* Update scheduler parameters.
-   * The arm-m architecture svc call will trigger an interrupt,
-   * and the actual context switch is executed after doirq is completed,
-   * so only the scheduling information needs to be updated in doirq.
-   */
+  if (*running_task != tcb)
+    {
+      /* Update scheduler parameters.
+       * The arm-m architecture svc call will trigger an interrupt,
+       * and the actual context switch is executed after doirq is completed,
+       * so only the scheduling information needs to be updated in doirq.
+       */
 
-  nxsched_switch_context(*running_task, tcb);
+      nxsched_switch_context(*running_task, tcb);
 
-  /* Record the new "running" task when context switch occurred.
-   * g_running_tasks[] is only used by assertion logic for reporting
-   * crashes.
-   */
+      /* Record the new "running" task when context switch occurred.
+       * g_running_tasks[] is only used by assertion logic for reporting
+       * crashes.
+       */
 
-  *running_task = tcb;
+      *running_task = tcb;
+    }
+
   regs = tcb->xcp.regs;
 #endif
 
