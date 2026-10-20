@@ -443,6 +443,7 @@ void up_invalidate_icache(uintptr_t start, uintptr_t end)
 void up_enable_icache(void)
 {
   uint64_t value = read_sysreg(sctlr_el1);
+
   write_sysreg((value | SCTLR_I_BIT), sctlr_el1);
   UP_ISB();
 }
@@ -464,6 +465,7 @@ void up_enable_icache(void)
 void up_disable_icache(void)
 {
   uint64_t value = read_sysreg(sctlr_el1);
+
   write_sysreg((value & ~SCTLR_I_BIT), sctlr_el1);
   UP_ISB();
 }
@@ -676,6 +678,7 @@ void up_enable_dcache(void)
 void up_disable_dcache(void)
 {
   uint64_t value = read_sysreg(sctlr_el1);
+
   write_sysreg((value & ~SCTLR_C_BIT), sctlr_el1);
   UP_ISB();
 }
