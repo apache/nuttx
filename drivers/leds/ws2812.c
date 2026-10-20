@@ -600,9 +600,7 @@ static off_t ws2812_seek(FAR struct file *filep, off_t offset, int whence)
  *
  * Input Parameters:
  *   dev_path  - The full path to the driver to register. E.g., "/dev/leds0"
- *   count     - The number of ws2812s in the chain
- *   has_white - Set true if the ws2812s in the chain have while LEDs
- *   slow_leds - Set true to support older 400 kHz leds.
+ *   dev_data  - Configuration of the LED chain
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.

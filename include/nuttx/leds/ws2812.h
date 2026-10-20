@@ -97,8 +97,9 @@ struct ws2812_dev_s
   uint32_t               clock;
   mutex_t                lock;
   int                    port;
-  uint16_t               nleds;
-  bool                   has_white;
+  uint16_t               nleds;      /* Count of WS2812s in the chain */
+  bool                   has_white;  /* Set true if chain has LED with
+                                      * white component */
 };
 
 #endif
