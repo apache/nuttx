@@ -262,6 +262,8 @@
 
 #define NRF53_UART_ENABLE_DISABLE           (0)
 #define NRF53_UART_ENABLE_ENABLE            (4)
+#define NRF53_UARTE_ENABLE_DISABLE          (0)
+#define NRF53_UARTE_ENABLE_ENABLE           (8)
 
 /* INTEN/INTENSET/INTENCLR Register */
 

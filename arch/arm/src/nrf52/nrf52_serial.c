@@ -93,6 +93,9 @@
 #  define TTYS0_DEV           g_uart1port /* UART1 is ttyS0 */
 #endif
 
+#define RX_INTERRUPTS (UART_INT_ENDRX | UART_INT_ERROR | UART_INT_RXTO)
+#define TX_INTERRUPTS (UART_INT_ENDTX | UART_INT_TXSTOPPED)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -101,9 +104,17 @@
 
 struct nrf52_dev_s
 {
-  uintptr_t uartbase;     /* Base address of UART registers */
-  uint8_t   irq;          /* IRQ associated with this UART */
-  bool      rx_available; /* rx byte available */
+  uintptr_t     uartbase;       /* Base address of UART registers */
+  uint8_t       irq;            /* IRQ associated with this UART */
+  uint8_t       rxdma;          /* Receive DMA buffer */
+  uint8_t       txdma;          /* Transmit DMA buffer */
+  uint8_t       rxchar;         /* Completed receive byte */
+  uint32_t      rxstatus;       /* Receive error status */
+  bool          rxvalid;        /* Receive byte available */
+  bool          rxenabled;      /* Upper-half reception enabled */
+  bool          rxactive;       /* Receiver started */
+  bool          txenabled;      /* Upper-half transmission enabled */
+  volatile bool txbusy;         /* DMA transmitter owns txdma */
 
   /* UART configuration */
 
@@ -169,7 +180,6 @@ static struct nrf52_dev_s g_uart0priv =
 {
   .uartbase       = NRF52_UART0_BASE,
   .irq            = NRF52_IRQ_UART0,
-  .rx_available   = false,
   .config         =
   {
     .baud         = CONFIG_UART0_BAUD,
@@ -211,7 +221,6 @@ static struct nrf52_dev_s g_uart1priv =
 {
   .uartbase       = NRF52_UART1_BASE,
   .irq            = NRF52_IRQ_UART1,
-  .rx_available   = false,
   .config         =
   {
     .baud         = CONFIG_UART1_BAUD,
@@ -261,6 +270,192 @@ static struct uart_dev_s * const g_uart_devs[NRF52_NUART] =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nrf52_uart_putreg
+ *
+ * Description:
+ *   Write a UART register.
+ *
+ ****************************************************************************/
+
+static inline void nrf52_uart_putreg(struct nrf52_dev_s *priv,
+                                     uint32_t offset, uint32_t value)
+{
+  putreg32(value, priv->uartbase + offset);
+}
+
+/****************************************************************************
+ * Name: nrf52_uart_getreg
+ *
+ * Description:
+ *   Read a UART register.
+ *
+ ****************************************************************************/
+
+static inline uint32_t nrf52_uart_getreg(struct nrf52_dev_s *priv,
+                                         uint32_t offset)
+{
+  return getreg32(priv->uartbase + offset);
+}
+
+/****************************************************************************
+ * Name: nrf52_uart_clrevent
+ *
+ * Description:
+ *   Clear a UARTE event and read it back before returning.
+ *
+ ****************************************************************************/
+
+static void nrf52_uart_clrevent(struct nrf52_dev_s *priv, uint32_t event)
+{
+  nrf52_uart_putreg(priv, event, 0);
+  (void)nrf52_uart_getreg(priv, event);
+}
+
+/****************************************************************************
+ * Name: nrf52_rxstart
+ *
+ * Description:
+ *   Start reception and queue the first one-byte DMA buffer.
+ *
+ ****************************************************************************/
+
+static void nrf52_rxstart(struct nrf52_dev_s *priv)
+{
+  priv->rxactive = true;
+  priv->rxvalid = false;
+  nrf52_uart_clrevent(priv, NRF52_UARTE_EVENTS_ENDRX_OFFSET);
+  nrf52_uart_clrevent(priv, NRF52_UARTE_EVENTS_RXTO_OFFSET);
+  nrf52_uart_putreg(priv, NRF52_UARTE_RXD_PTR_OFFSET,
+                    (uintptr_t)&priv->rxdma);
+  nrf52_uart_putreg(priv, NRF52_UARTE_RXD_MAXCNT_OFFSET, 1);
+  UP_DMB();
+  nrf52_uart_putreg(priv, NRF52_UARTE_TASKS_STARTRX_OFFSET, 1);
+}
+
+/****************************************************************************
+ * Name: nrf52_rxdeliver
+ *
+ * Description:
+ *   Deliver the completed byte and restart the one-byte DMA. A byte
+ *   received with the delivery disabled is kept, the UART FIFO holds the
+ *   next bytes until rxint() enables the delivery.
+ *
+ ****************************************************************************/
+
+static void nrf52_rxdeliver(struct uart_dev_s *dev)
+{
+  struct nrf52_dev_s *priv = dev->priv;
+
+  if (priv->rxvalid && priv->rxenabled)
+    {
+      uart_recvchars(dev);
+      if (!priv->rxvalid)
+        {
+          UP_DMB();
+          nrf52_uart_putreg(priv, NRF52_UARTE_TASKS_STARTRX_OFFSET, 1);
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: nrf52_rxstop
+ *
+ * Description:
+ *   Stop reception and deliver a completed byte. Interrupts must be
+ *   disabled.
+ *
+ ****************************************************************************/
+
+static void nrf52_rxstop(struct uart_dev_s *dev)
+{
+  struct nrf52_dev_s *priv = dev->priv;
+
+  nrf52_uart_clrevent(priv, NRF52_UARTE_EVENTS_RXTO_OFFSET);
+  nrf52_uart_putreg(priv, NRF52_UARTE_TASKS_STOPRX_OFFSET, 1);
+  while (!nrf52_uart_getreg(priv, NRF52_UARTE_EVENTS_RXTO_OFFSET))
+    {
+    }
+
+  if (nrf52_uart_getreg(priv, NRF52_UARTE_EVENTS_ERROR_OFFSET))
+    {
+      nrf52_uart_clrevent(priv, NRF52_UARTE_EVENTS_ERROR_OFFSET);
+      priv->rxstatus |=
+        nrf52_uart_getreg(priv, NRF52_UARTE_ERRORSRC_OFFSET);
+      nrf52_uart_putreg(priv, NRF52_UARTE_ERRORSRC_OFFSET, priv->rxstatus);
+    }
+
+  /* STOP also generates ENDRX for an empty buffer. Deliver a completed
+   * byte, but never deliver an empty buffer.
+   */
+
+  if (nrf52_uart_getreg(priv, NRF52_UARTE_RXD_AMOUNT_OFFSET) != 0)
+    {
+      UP_DMB();
+      priv->rxchar = priv->rxdma;
+      priv->rxvalid = true;
+      if (priv->rxenabled)
+        {
+          uart_recvchars(dev);
+        }
+
+      priv->rxvalid = false;
+    }
+
+  nrf52_uart_clrevent(priv, NRF52_UARTE_EVENTS_ENDRX_OFFSET);
+}
+
+/****************************************************************************
+ * Name: nrf52_txstart
+ *
+ * Description:
+ *   Start a one-byte DMA transfer. The caller must serialize access.
+ *
+ ****************************************************************************/
+
+static void nrf52_txstart(struct nrf52_dev_s *priv, int ch)
+{
+  priv->txdma = ch;
+  priv->txbusy = true;
+  nrf52_uart_clrevent(priv, NRF52_UARTE_EVENTS_ENDTX_OFFSET);
+  nrf52_uart_clrevent(priv, NRF52_UARTE_EVENTS_TXSTOPPED_OFFSET);
+  nrf52_uart_putreg(priv, NRF52_UARTE_TXD_PTR_OFFSET,
+                    (uintptr_t)&priv->txdma);
+  nrf52_uart_putreg(priv, NRF52_UARTE_TXD_MAXCNT_OFFSET, 1);
+  UP_DMB();
+  nrf52_uart_putreg(priv, NRF52_UARTE_TASKS_STARTTX_OFFSET, 1);
+}
+
+/****************************************************************************
+ * Name: nrf52_txstop
+ *
+ * Description:
+ *   Wait for the transmitter to stop. Interrupts must be disabled.
+ *
+ ****************************************************************************/
+
+static void nrf52_txstop(struct nrf52_dev_s *priv)
+{
+  if (priv->txbusy)
+    {
+      while (!nrf52_uart_getreg(priv, NRF52_UARTE_EVENTS_ENDTX_OFFSET) &&
+             !nrf52_uart_getreg(priv, NRF52_UARTE_EVENTS_TXSTOPPED_OFFSET))
+        {
+        }
+
+      if (!nrf52_uart_getreg(priv, NRF52_UARTE_EVENTS_TXSTOPPED_OFFSET))
+        {
+          nrf52_uart_putreg(priv, NRF52_UARTE_TASKS_STOPTX_OFFSET, 1);
+          while (!nrf52_uart_getreg(priv,
+                                    NRF52_UARTE_EVENTS_TXSTOPPED_OFFSET))
+            {
+            }
+        }
+
+      priv->txbusy = false;
+    }
+}
 
 /****************************************************************************
  * Name: nrf52_setup
@@ -318,15 +513,10 @@ static void nrf52_shutdown(struct uart_dev_s *dev)
  * Name: nrf52_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method
- *   is called when the serial port is opened.  Normally, this is just after
- *   the setup() method is called, however, the serial console may
- *   operate in a non-interrupt driven mode during the boot phase.
- *
- *   RX and TX interrupts are not enabled when by the attach method (unless
- *   the hardware supports multiple levels of interrupt enabling).
- *   The RX and TX interrupts are not enabled until the txint() and rxint()
- *   methods are called.
+ *   Configure the UART to operate in interrupt driven mode. This method
+ *   is called when the serial port is opened, normally just after setup.
+ *   DMA completion interrupts release buffers even when delivery to the
+ *   upper half is disabled by the rxint() and txint() methods.
  *
  ****************************************************************************/
 
@@ -335,14 +525,17 @@ static int nrf52_attach(struct uart_dev_s *dev)
   struct nrf52_dev_s *priv = (struct nrf52_dev_s *)dev->priv;
   int ret;
 
-  /* Attach and enable the IRQ(s).  The interrupts are (probably) still
-   * disabled in the C2 register.
-   */
+  /* Attach and enable the IRQ */
 
   ret = irq_attach(priv->irq, nrf52_interrupt, dev);
   if (ret == OK)
     {
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
+      nrf52_uart_putreg(priv, NRF52_UARTE_INTENSET_OFFSET,
+                        RX_INTERRUPTS | TX_INTERRUPTS);
       up_enable_irq(priv->irq);
+      nrf52_rxstart(priv);
+#endif
     }
 
   return ret;
@@ -352,7 +545,7 @@ static int nrf52_attach(struct uart_dev_s *dev)
  * Name: nrf52_detach
  *
  * Description:
- *   Detach UART interrupts.  This method is called when the serial port is
+ *   Detach UART interrupts. This method is called when the serial port is
  *   closed normally just before the shutdown method is called.
  *   The exception is the serial console which is never shutdown.
  *
@@ -361,14 +554,23 @@ static int nrf52_attach(struct uart_dev_s *dev)
 static void nrf52_detach(struct uart_dev_s *dev)
 {
   struct nrf52_dev_s *priv = (struct nrf52_dev_s *)dev->priv;
+  irqstate_t flags;
 
-  /* Disable interrupts */
+  /* Stop DMA before detaching the interrupt handler */
 
-  putreg32(UART_INT_RXDRDY, priv->uartbase + NRF52_UART_INTENCLR_OFFSET);
+  flags = enter_critical_section();
+  nrf52_uart_putreg(priv, NRF52_UARTE_INTENCLR_OFFSET, UINT32_MAX);
+
+  if (priv->rxactive)
+    {
+      nrf52_rxstop(dev);
+      priv->rxactive = false;
+    }
+
+  nrf52_txstop(priv);
+  leave_critical_section(flags);
+
   up_disable_irq(priv->irq);
-
-  /* Detach from the interrupt(s) */
-
   irq_detach(priv->irq);
 }
 
@@ -376,37 +578,56 @@ static void nrf52_detach(struct uart_dev_s *dev)
  * Name: nrf52_interrupt
  *
  * Description:
- *   This is the UART interrupt handler.  It will be invoked when an
- *   interrupt is received on the 'irq'.  It should call uart_xmitchars or
- *   uart_recvchars to perform the appropriate data transfers.  The
- *   interrupt handling logic must be able to map the 'arg' to the
- *   appropriate uart_dev_s structure in order to call these functions.
+ *   Handle receive buffers and transfer completion.
  *
  ****************************************************************************/
 
 static int nrf52_interrupt(int irq, void *context, void *arg)
 {
-  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
-  struct nrf52_dev_s *priv;
-  uint32_t regval;
+  struct uart_dev_s *dev = arg;
+  struct nrf52_dev_s *priv = dev->priv;
 
-  DEBUGASSERT(dev != NULL && dev->priv != NULL);
-  priv = (struct nrf52_dev_s *)dev->priv;
-
-  /* Check RX event */
-
-  regval = getreg32(priv->uartbase + NRF52_UART_EVENTS_RXDRDY_OFFSET);
-
-  if (regval != 0)
+  if (nrf52_uart_getreg(priv, NRF52_UARTE_EVENTS_ERROR_OFFSET))
     {
-      putreg32(0, priv->uartbase + NRF52_UART_EVENTS_RXDRDY_OFFSET);
-      priv->rx_available = true;
-      uart_recvchars(dev);
+      nrf52_uart_clrevent(priv, NRF52_UARTE_EVENTS_ERROR_OFFSET);
+      priv->rxstatus |=
+        nrf52_uart_getreg(priv, NRF52_UARTE_ERRORSRC_OFFSET);
+      nrf52_uart_putreg(priv, NRF52_UARTE_ERRORSRC_OFFSET, priv->rxstatus);
     }
 
-  /* Clear errors */
+  /* Copy the completed byte before restarting DMA. Automatic ENDRX-to-
+   * STARTRX would let DMA overwrite a buffer before the upper half
+   * consumes it. The UART FIFO holds incoming bytes between transfers.
+   */
 
-  putreg32(0, priv->uartbase + NRF52_UART_ERRORSRC_OFFSET);
+  if (nrf52_uart_getreg(priv, NRF52_UARTE_EVENTS_ENDRX_OFFSET))
+    {
+      nrf52_uart_clrevent(priv, NRF52_UARTE_EVENTS_ENDRX_OFFSET);
+      UP_DMB();
+      priv->rxchar = priv->rxdma;
+      priv->rxvalid = true;
+    }
+
+  nrf52_rxdeliver(dev);
+  nrf52_uart_clrevent(priv, NRF52_UARTE_EVENTS_RXTO_OFFSET);
+
+  /* There is no ENDTX-to-STOPTX shortcut */
+
+  if (nrf52_uart_getreg(priv, NRF52_UARTE_EVENTS_ENDTX_OFFSET))
+    {
+      nrf52_uart_clrevent(priv, NRF52_UARTE_EVENTS_ENDTX_OFFSET);
+      nrf52_uart_putreg(priv, NRF52_UARTE_TASKS_STOPTX_OFFSET, 1);
+    }
+
+  if (nrf52_uart_getreg(priv, NRF52_UARTE_EVENTS_TXSTOPPED_OFFSET))
+    {
+      nrf52_uart_clrevent(priv, NRF52_UARTE_EVENTS_TXSTOPPED_OFFSET);
+      priv->txbusy = false;
+      if (priv->txenabled)
+        {
+          uart_xmitchars(dev);
+        }
+    }
 
   return OK;
 }
@@ -415,7 +636,7 @@ static int nrf52_interrupt(int irq, void *context, void *arg)
  * Name: nrf52_set_format
  *
  * Description:
- *   Set the serial line format and speed.
+ *   Set the serial line format and speed with DMA stopped.
  *
  ****************************************************************************/
 
@@ -423,8 +644,29 @@ static int nrf52_interrupt(int irq, void *context, void *arg)
 void nrf52_set_format(struct uart_dev_s *dev)
 {
   struct nrf52_dev_s *priv = (struct nrf52_dev_s *)dev->priv;
+  irqstate_t flags;
 
+  flags = enter_critical_section();
+
+  if (priv->rxactive)
+    {
+      nrf52_rxstop(dev);
+    }
+
+  nrf52_txstop(priv);
+
+  nrf52_uart_putreg(priv, NRF52_UARTE_ENABLE_OFFSET,
+                    NRF52_UARTE_ENABLE_DISABLE);
   nrf52_usart_setformat(priv->uartbase, &priv->config);
+  nrf52_uart_putreg(priv, NRF52_UARTE_ENABLE_OFFSET,
+                    NRF52_UARTE_ENABLE_ENABLE);
+
+  if (priv->rxactive)
+    {
+      nrf52_rxstart(priv);
+    }
+
+  leave_critical_section(flags);
 }
 #endif
 
@@ -563,61 +805,48 @@ static int nrf52_ioctl(struct file *filep, int cmd, unsigned long arg)
 static int nrf52_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct nrf52_dev_s *priv = (struct nrf52_dev_s *)dev->priv;
-  uint32_t data;
-
-  /* Get input data along with receiver control information */
-
-  data = getreg32(priv->uartbase + NRF52_UART_RXD_OFFSET);
-  priv->rx_available = false;
-
-  /* Return receiver control information */
 
   if (status)
     {
-      *status = 0x00;
+      *status = priv->rxstatus;
     }
 
-  /* Then return the actual received data. */
-
-  return data;
+  priv->rxstatus = 0;
+  priv->rxvalid = false;
+  return priv->rxchar;
 }
 
 /****************************************************************************
  * Name: nrf52_rxint
  *
  * Description:
- *   Call to enable or disable RX interrupts
+ *   Enable or disable delivery of received characters to the upper half.
  *
  ****************************************************************************/
 
 static void nrf52_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct nrf52_dev_s *priv = (struct nrf52_dev_s *)dev->priv;
+  irqstate_t flags = enter_critical_section();
 
+#ifdef CONFIG_SUPPRESS_SERIAL_INTS
+  enable = false;
+#endif
+
+  priv->rxenabled = enable;
   if (enable)
     {
-#ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      /* Receive an interrupt when their is anything in the Rx data register
-       * (or an Rx timeout occurs).
-       */
-
-      putreg32(UART_INT_RXDRDY, priv->uartbase + NRF52_UART_INTENSET_OFFSET);
-      putreg32(1, priv->uartbase + NRF52_UART_TASKS_STARTRX_OFFSET);
-
-#endif
+      nrf52_rxdeliver(dev);
     }
-  else
-    {
-      putreg32(UART_INT_RXDRDY, priv->uartbase + NRF52_UART_INTENCLR_OFFSET);
-      putreg32(1, priv->uartbase + NRF52_UART_TASKS_STOPRX_OFFSET);
-    }
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
  * Name: nrf52_rxavailable
  *
  * Description:
- *   Return true if the receive register is not empty
+ *   Report whether a received character is waiting for the upper half.
  *
  ****************************************************************************/
 
@@ -625,82 +854,71 @@ static bool nrf52_rxavailable(struct uart_dev_s *dev)
 {
   struct nrf52_dev_s *priv = (struct nrf52_dev_s *)dev->priv;
 
-  /* Return true if the receive buffer/fifo is not "empty." */
-
-  return priv->rx_available;
+  return priv->rxvalid;
 }
 
 /****************************************************************************
  * Name: nrf52_send
  *
  * Description:
- *   This method will send one byte on the UART.
+ *   Start transmitting the character supplied by the upper half.
  *
  ****************************************************************************/
 
 static void nrf52_send(struct uart_dev_s *dev, int ch)
 {
   struct nrf52_dev_s *priv = (struct nrf52_dev_s *)dev->priv;
+  irqstate_t flags = enter_critical_section();
 
-  putreg32(0, priv->uartbase + NRF52_UART_EVENTS_TXDRDY_OFFSET);
-  putreg32(1, priv->uartbase + NRF52_UART_TASKS_STARTTX_OFFSET);
-
-  putreg32(ch, priv->uartbase + NRF52_UART_TXD_OFFSET);
-  while (getreg32(priv->uartbase + NRF52_UART_EVENTS_TXDRDY_OFFSET) == 0)
-    {
-    }
-
-  putreg32(1, priv->uartbase + NRF52_UART_TASKS_STOPTX_OFFSET);
+  nrf52_txstart(priv, ch);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
  * Name: nrf52_txint
  *
  * Description:
- *   Call to enable or disable TX interrupts
+ *   Enable or disable transmission from the upper-half transmit buffer.
  *
  ****************************************************************************/
 
 static void nrf52_txint(struct uart_dev_s *dev, bool enable)
 {
-  /* struct nrf52_dev_s *priv = (struct nrf52_dev_s *)dev->priv; */
+  struct nrf52_dev_s *priv = (struct nrf52_dev_s *)dev->priv;
+  irqstate_t flags = enter_critical_section();
 
+#ifdef CONFIG_SUPPRESS_SERIAL_INTS
+  enable = false;
+#endif
+
+  priv->txenabled = enable;
   if (enable)
     {
-#ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      irqstate_t flags;
-
-      /* Enable the TX interrupt */
-
-      flags = enter_critical_section();
-
-      /* Fake a TX interrupt here by just calling uart_xmitchars() with
-       * interrupts disabled (note this may recurse).
-       */
-
       uart_xmitchars(dev);
-      leave_critical_section(flags);
-#endif
     }
-  else
-    {
-      /* Disable the TX interrupt */
-    }
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
  * Name: nrf52_txready
  *
  * Description:
- *   Return true if the tranmsit data register is empty
+ *   Report whether the transmitter can accept another character. The
+ *   events are read, the upper half also polls with interrupts disabled.
+ *   A transfer ended without STOPTX can be restarted.
  *
  ****************************************************************************/
 
 static bool nrf52_txready(struct uart_dev_s *dev)
 {
-  /* struct nrf52_dev_s *priv = (struct nrf52_dev_s *)dev->priv; */
+  struct nrf52_dev_s *priv = (struct nrf52_dev_s *)dev->priv;
 
-  /* Return true if the transmit FIFO is "not full." */
+  if (priv->txbusy)
+    {
+      return nrf52_uart_getreg(priv, NRF52_UARTE_EVENTS_ENDTX_OFFSET) ||
+             nrf52_uart_getreg(priv, NRF52_UARTE_EVENTS_TXSTOPPED_OFFSET);
+    }
 
   return true;
 }
@@ -715,11 +933,7 @@ static bool nrf52_txready(struct uart_dev_s *dev)
 
 static bool nrf52_txempty(struct uart_dev_s *dev)
 {
-  /* struct nrf52_dev_s *priv = (struct nrf52_dev_s *)dev->priv; */
-
-  /* Return true if the transmit FIFO is "empty." */
-
-  return true;
+  return nrf52_txready(dev);
 }
 
 /****************************************************************************
@@ -817,9 +1031,14 @@ void arm_serialinit(void)
 void up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
-  /* struct nrf52_dev_s *priv = (struct nrf52_dev_s *)CONSOLE_DEV.priv; */
+  struct nrf52_dev_s *priv = CONSOLE_DEV.priv;
+  irqstate_t flags = enter_critical_section();
 
+  /* Serialize polled debug output with the interrupt-driven transmitter */
+
+  nrf52_txstop(priv);
   arm_lowputc(ch);
+  leave_critical_section(flags);
 #endif
 }
 
