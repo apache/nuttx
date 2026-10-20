@@ -979,7 +979,6 @@ endchoice
 config STM32_ONESHOT
 	bool "TIM one-shot wrapper"
 	depends on STM32_TIM
-	default y if STM32_COMMON_L4_L5_U5 && SCHED_TICKLESS
 	---help---
 		Enable a wrapper around the low level timer/counter functions to
 		support one-shot timer.
@@ -987,7 +986,6 @@ config STM32_ONESHOT
 config STM32_FREERUN
 	bool "TIM free-running wrapper"
 	depends on STM32_TIM
-	default y if STM32_COMMON_L4_L5_U5 && SCHED_TICKLESS
 	---help---
 		Enable a wrapper around the low level timer/counter functions to
 		support a free-running timer.
@@ -4050,24 +4048,6 @@ config STM32_LPTIM5_CLOCK
 	default 100000
 	---help---
 		This clock frequency determines the timer's counting rate.
-
-config STM32_TICKLESS_ONESHOT
-	int "Tickless one-shot timer channel"
-	depends on STM32_COMMON_L4_L5_U5 && SCHED_TICKLESS && STM32_ONESHOT
-	default 2
-	range 1 8
-	---help---
-		If the Tickless OS feature is enabled, then one clock must be
-		assigned to provide the one-shot timer needed by the OS.
-
-config STM32_TICKLESS_FREERUN
-	int "Tickless free-running timer channel"
-	depends on STM32_COMMON_L4_L5_U5 && SCHED_TICKLESS && STM32_FREERUN
-	default 5
-	range 1 8
-	---help---
-		If the Tickless OS feature is enabled, then one clock must be
-		assigned to provide the free-running timer needed by the OS.
 
 config STM32_LPTIM1_PWM
 	bool "LPTIM1 PWM"
