@@ -20,8 +20,9 @@
 #
 # ##############################################################################
 
-# Shared memory allocator
+# Shared memory allocator: kernel code only, user space calls it through system
+# calls
 
 if(CONFIG_MM_SHM)
-  target_sources(mm PRIVATE shmat.c shmctl.c shmdt.c shmget.c)
+  target_sources(${MM_KERNEL_TARGET} PRIVATE shmat.c shmctl.c shmdt.c shmget.c)
 endif()

@@ -110,7 +110,7 @@ makekdepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
 .depend: Makefile $(SRCS) $(TOPDIR)$(DELIM).config
 	$(Q) $(MAKE) makedepfile OBJPATH="bin"
 ifneq ($(CONFIG_BUILD_FLAT),y)
-	$(Q) $(MAKE) makekdepfile CFLAGS="$(CFLAGS) $(KDEFINE)" OBJPATH="kbin"
+	$(Q) $(MAKE) makekdepfile CFLAGS="$(CFLAGS) $(KDEFINE)" OBJPATH="kbin" BINDIR="kbin"
 endif
 	$(Q) touch $@
 

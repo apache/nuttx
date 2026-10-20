@@ -20,6 +20,16 @@
 #
 # ##############################################################################
 nuttx_add_kernel_library(mm SPLIT)
+
+# The library for code that only the kernel uses: kmm in a protected or kernel
+# build (mm is then the user-space library), mm in a flat build
+
+if(CONFIG_BUILD_FLAT)
+  set(MM_KERNEL_TARGET mm)
+else()
+  set(MM_KERNEL_TARGET kmm)
+endif()
+
 nuttx_add_subdirectory()
 target_include_directories(mm PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
                                       ${NUTTX_DIR}/sched)

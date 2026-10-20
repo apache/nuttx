@@ -20,10 +20,13 @@
 #
 ############################################################################
 
-# Shared memory allocator
+# Shared memory allocator: kernel code only, user space calls it through
+# system calls.  Build it only in the kernel pass (BINDIR=kbin).
 
 ifeq ($(CONFIG_MM_SHM),y)
+ifeq ($(BINDIR),kbin)
 CSRCS += shmat.c shmctl.c shmdt.c shmget.c
+endif
 
 # Add the shared memory directory to the build
 
