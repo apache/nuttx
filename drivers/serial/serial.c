@@ -2095,6 +2095,46 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
             break;
 
+          case TIOCGWINSZ:
+            {
+              FAR struct winsize *ws = (FAR struct winsize *)arg;
+
+              if (ws == NULL)
+                {
+                  ret = -EINVAL;
+                  break;
+                }
+
+              *ws = dev->winsize;
+              ret = 0;
+            }
+            break;
+
+          case TIOCSWINSZ:
+            {
+              FAR const struct winsize *ws =
+                (FAR const struct winsize *)arg;
+
+              if (ws == NULL)
+                {
+                  ret = -EINVAL;
+                  break;
+                }
+
+              ret = 0;
+              if (memcmp(&dev->winsize, ws, sizeof(*ws)) != 0)
+                {
+                  dev->winsize = *ws;
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
+                  if (dev->pid > 0)
+                    {
+                      nxsig_kill(dev->pid, SIGWINCH);
+                    }
+#endif
+                }
+            }
+            break;
+
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
           /* Make the controlling terminal of the calling process */
 

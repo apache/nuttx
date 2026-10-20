@@ -361,6 +361,10 @@ struct uart_dev_s
   cc_t                 tc_vsusp;     /* c_cc[VSUSP] */
 #endif
 
+  /* Terminal window size (TIOCGWINSZ, TIOCSWINSZ) */
+
+  struct winsize       winsize;
+
   /* Semaphores & mutex */
 
   sem_t                xmitsem;      /* Wakeup user waiting for space in xmit.buffer */
