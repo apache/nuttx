@@ -69,6 +69,8 @@
 #define NRF53_UARTE_TXD_PTR_OFFSET          0x0544  /* Data pointer */
 #define NRF53_UARTE_TXD_MAXCNT_OFFSET       0x0548  /* Maximum number of bytes in transmit buffer */
 #define NRF53_UARTE_TXD_AMOUNT_OFFSET       0x054c  /* Number of bytes transferred in the last transaction */
+#define NRF53_UARTE_RXSTATE_OFFSET          0x0564  /* Undocumented RX state, anomaly 44 */
+#define NRF53_UARTE_TXSTATE_OFFSET          0x0568  /* Undocumented TX state, anomaly 44 */
 #define NRF53_UARTE_CONFIG_OFFSET           0x056c  /* Configuration of parity and hardware flow control */
 
 #define NRF53_UART_TASKS_STARTRX_OFFSET     0x0000 /* Start UART receiver */
