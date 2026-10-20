@@ -80,9 +80,10 @@ one of these macros before its first ``#include``:
 
 ``NUTTX_NO_GETOPT_MACROS``
   ``unistd.h`` does not define ``optarg``, ``opterr``, ``optind`` and
-  ``optopt`` as macros.  getopt() keeps these values per task, so use
-  this only in a program that brings its own getopt() and its own
-  variables of these names.
+  ``optopt`` as macros; it declares them as ``extern`` variables, which
+  the program or another library defines.  getopt() keeps these values
+  per task, so use this only in a program that brings its own getopt()
+  and its own variables of these names.
 
 ``NUTTX_NO_EXTENSIONS``
   The headers do not define ``ERROR`` and ``OK`` (``sys/types.h``),

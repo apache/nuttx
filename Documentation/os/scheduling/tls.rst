@@ -142,12 +142,13 @@ program does not read.
 
 Such a program can define ``NUTTX_NO_GETOPT_MACROS``, for example with
 ``-DNUTTX_NO_GETOPT_MACROS`` in its ``CFLAGS``. ``<unistd.h>`` then does
-not define the four macros, and the program source does not change. Do not
-define it in a program that calls the ``getopt()`` of the C library: that
-``getopt()`` sets the per-task copies, not variables of the program. The
-C library has no variables with these names, so such a program does not
-compile or does not link unless it defines them, and then it reads values
-that ``getopt()`` did not set.
+not define the four macros; it declares them as the ``extern`` variables
+that POSIX specifies, in every build mode, and the program source does not
+change. Do not define it in a program that calls the ``getopt()`` of the C
+library: that ``getopt()`` sets the per-task copies, not variables of the
+program. The C library has no variables with these names, so such a
+program does not link unless it or another library defines them, and then
+it reads values that ``getopt()`` did not set.
 
 
 Unaligned TLS
