@@ -338,6 +338,9 @@ FAR char *tzname[2] =
   (FAR char *)g_wildabbr
 };
 
+int daylight;
+long int timezone;
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -367,6 +370,8 @@ static int  normalize_overflow32(FAR int_fast32_t *tensptr,
               FAR int *unitsptr, int base);
 static int  normalize_overflow(FAR int *tensptr, FAR int *unitsptr,
               int base);
+static void update_tzname(FAR struct state_s *sp,
+                          FAR const struct ttinfo_s *ttisp);
 static void settzname(void);
 static time_t time1(FAR struct tm *tmp,
               FAR struct tm *(*funcp)(FAR const time_t *, int_fast32_t,
@@ -526,6 +531,20 @@ static void scrub_abbrs(struct state_s *sp)
     }
 }
 
+static void update_tzname(FAR struct state_s *sp,
+                          FAR const struct ttinfo_s *ttisp)
+{
+  tzname[ttisp->tt_isdst] = &sp->chars[ttisp->tt_desigidx];
+  if (ttisp->tt_isdst)
+    {
+      daylight = 1;
+    }
+  else
+    {
+      timezone = -ttisp->tt_utoff;
+    }
+}
+
 static void settzname(void)
 {
   FAR struct state_s * const sp = g_lcl_ptr;
@@ -538,20 +557,26 @@ static void settzname(void)
       return;
     }
 
-  /* And to get the latest zone names into tzname */
+  daylight = 0;
+  timezone = 0;
+
+  /* And to get the latest zone names into tzname, the offset of standard
+   * time into timezone, and whether there is daylight saving time into
+   * daylight (the last transition wins, as for the names)
+   */
 
   for (i = 0; i < sp->typecnt; ++i)
     {
       FAR const struct ttinfo_s * const ttisp = &sp->ttis[i];
 
-      tzname[ttisp->tt_isdst] = &sp->chars[ttisp->tt_desigidx];
+      update_tzname(sp, ttisp);
     }
 
   for (i = 0; i < sp->timecnt; ++i)
     {
       FAR const struct ttinfo_s * const ttisp = &sp->ttis[sp->types[i]];
 
-      tzname[ttisp->tt_isdst] = &sp->chars[ttisp->tt_desigidx];
+      update_tzname(sp, ttisp);
     }
 }
 
@@ -2054,7 +2079,7 @@ static FAR struct tm *localsub(FAR const time_t *timep,
   if (result != NULL)
     {
       result->tm_isdst = ttisp->tt_isdst;
-      tzname[result->tm_isdst] = &sp->chars[ttisp->tt_desigidx];
+      update_tzname(sp, ttisp);
       result->tm_zone = tzname[result->tm_isdst];
     }
 

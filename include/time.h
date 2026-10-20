@@ -160,15 +160,15 @@ extern "C"
 {
 #endif
 
+/* daylight - Nonzero if the time zone has daylight saving time.
+ * timezone - Seconds west of UTC of the local standard time.
+ * Set up by tzset(); 0 without CONFIG_LIBC_LOCALTIME (local time is UTC).
+ */
+
+extern int daylight;
+extern long int timezone;
+
 #ifdef CONFIG_LIBC_LOCALTIME
-
-/* daylight - Daylight savings time flag */
-
-/* extern int daylight; not supported */
-
-/* timezone - Difference from UTC and local standard time */
-
-/* extern long int timezone; not supported */
 
 /* tzname[] - Timezone strings
  * Setup by tzset()
