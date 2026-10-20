@@ -61,6 +61,15 @@ struct child_pool_s
   FAR struct child_status_s *freelist;
 };
 
+/* The search state of group_has_child() */
+
+struct child_search_s
+{
+  FAR struct task_group_s *group;
+  pid_t pid;
+  bool found;
+};
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -106,6 +115,28 @@ static void group_dump_children(FAR struct task_group_s *group,
 #else
 #  define group_dump_children(t,m)
 #endif
+
+/****************************************************************************
+ * Name: group_child_handler
+ *
+ * Description:
+ *   The nxsched_foreach() handler of group_has_child().
+ *
+ ****************************************************************************/
+
+static void group_child_handler(FAR struct tcb_s *tcb, FAR void *arg)
+{
+  FAR struct child_search_s *search = arg;
+  FAR struct task_group_s *group = tcb->group;
+
+  if (group != NULL && group != search->group &&
+      group->tg_ppid == search->group->tg_pid &&
+      (search->pid == INVALID_PROCESS_ID || group->tg_pid == search->pid) &&
+      (tcb->flags & TCB_FLAG_EXIT_PROCESSING) == 0)
+    {
+      search->found = true;
+    }
+}
 
 /****************************************************************************
  * Public Functions
@@ -448,6 +479,36 @@ void group_remove_children(FAR struct task_group_s *group)
   spin_unlock_irqrestore(&group->tg_lock, flags);
 
   group_dump_children(group, "group_remove_children");
+}
+
+/****************************************************************************
+ * Name: group_has_child
+ *
+ * Description:
+ *   Check if a child of the task group is still running.  This also finds
+ *   the children that have no child status structure.
+ *
+ * Input Parameters:
+ *   group - The parent task group.
+ *   pid   - The PID of the child, or INVALID_PROCESS_ID for any child.
+ *
+ * Returned Value:
+ *   True if the child (or any child) has a thread that is not exiting.
+ *
+ * Assumptions:
+ *   Called from a critical section.
+ *
+ ****************************************************************************/
+
+bool group_has_child(FAR struct task_group_s *group, pid_t pid)
+{
+  struct child_search_s search;
+
+  search.group = group;
+  search.pid   = pid;
+  search.found = false;
+  nxsched_foreach(group_child_handler, &search);
+  return search.found;
 }
 
 #endif /* CONFIG_SCHED_HAVE_PARENT && CONFIG_SCHED_CHILD_STATUS */
