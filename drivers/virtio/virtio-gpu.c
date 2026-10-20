@@ -164,6 +164,7 @@ static FAR void *virtio_gpu_zalloc_cmd(FAR struct virtio_gpu_priv_s *priv)
 {
   irqstate_t flags = spin_lock_irqsave(&priv->lock);
   FAR union virtio_gpu_cmd_u *cmd = priv->freecmd;
+
   if (cmd != NULL)
     {
       priv->freecmd = cmd->next;
@@ -192,6 +193,7 @@ static void virtio_gpu_free_cmd(FAR struct virtio_gpu_priv_s *priv,
 {
   FAR union virtio_gpu_cmd_u *node = cmd;
   irqstate_t flags = spin_lock_irqsave(&priv->lock);
+
   node->next = priv->freecmd;
   priv->freecmd = node;
   spin_unlock_irqrestore(&priv->lock, flags);
@@ -586,6 +588,7 @@ static void virtio_gpu_vsync_loop(FAR void *arg)
 static void virtio_gpu_vsync_interrupt(FAR void *arg)
 {
   FAR struct virtio_gpu_priv_s *priv = (FAR struct virtio_gpu_priv_s *)arg;
+
   virtio_gpu_vsync_loop(arg);
   work_queue(HPWORK, &priv->work, virtio_gpu_vsync_interrupt,
              arg, VIRTIO_GPU_VSYNC_PERIOD);
