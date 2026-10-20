@@ -87,9 +87,11 @@ struct shm_region_s
   key_t   sr_key;          /* Lookup key */
   mutex_t sr_lock;         /* Manages exclusive access to this region */
 
-  /* List of physical pages allocated for this memory region */
+  /* Physical pages of the region, from the kernel heap.  The number of
+   * entries is MM_NPAGES(sr_ds.shm_segsz).
+   */
 
-  uintptr_t sr_pages[CONFIG_ARCH_SHM_NPAGES];
+  FAR uintptr_t *sr_pages;
 };
 
 /* This structure represents the set of all shared memory regions.
