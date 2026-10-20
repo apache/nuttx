@@ -20,6 +20,14 @@
 #
 # ##############################################################################
 
-set(SRCS hash_func.c hcreate.c hcreate_r.c)
+set(SRCS
+    hash_func.c
+    hcreate.c
+    hcreate_r.c
+    lib_tsearch.c
+    lib_tfind.c
+    lib_tdelete.c
+    lib_twalk.c
+    lib_tdestroy.c)
 
 target_sources(c PRIVATE ${SRCS})
