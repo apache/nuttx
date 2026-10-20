@@ -296,6 +296,10 @@ SYSCALL_LOOKUP(munlockall,                 0)
   SYSCALL_LOOKUP(readlink,                 3)
 #endif
 
+#ifdef CONFIG_FS_CHROOT
+  SYSCALL_LOOKUP(chroot,                   1)
+#endif
+
 #if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
   SYSCALL_LOOKUP(pipe2,                    2)
 #endif
