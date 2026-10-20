@@ -38,7 +38,7 @@ CSRCS += lib_lockf.c lib_flock.c lib_getpass.c
 CSRCS += lib_chdir.c lib_fchdir.c lib_confstr.c lib_ulimit.c
 
 ifeq ($(CONFIG_SCHED_WAITPID),y)
-CSRCS += lib_wait4.c
+CSRCS += lib_wait.c
 endif
 
 ifneq ($(CONFIG_SCHED_USER_IDENTITY),y)

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_wait4.c
+ * libs/libc/unistd/lib_wait.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -61,4 +61,17 @@ pid_t wait4(pid_t pid, FAR int *stat_loc, int options,
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: wait3
+ *
+ * Description:
+ *   Wait for any child, as wait4(-1, ...).
+ *
+ ****************************************************************************/
+
+pid_t wait3(FAR int *stat_loc, int options, FAR struct rusage *rusage)
+{
+  return wait4(-1, stat_loc, options, rusage);
 }
