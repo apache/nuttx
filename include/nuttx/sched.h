@@ -1293,7 +1293,7 @@ size_t nxtask_argvstr(FAR struct tcb_s *tcb, FAR char *args, size_t size);
  *
  ****************************************************************************/
 
-int nxsched_get_param(pid_t pid, FAR struct sched_param *param);
+int nxsched_get_param(pid_t pid, FAR struct sched_param *);
 
 /****************************************************************************
  * Name:  nxsched_set_param
@@ -1329,7 +1329,7 @@ int nxsched_get_param(pid_t pid, FAR struct sched_param *param);
  *
  ****************************************************************************/
 
-int nxsched_set_param(pid_t pid, FAR const struct sched_param *param);
+int nxsched_set_param(pid_t pid, FAR const struct sched_param *);
 
 /****************************************************************************
  * Name: nxsched_get_scheduler
@@ -1397,7 +1397,7 @@ int nxsched_get_scheduler(pid_t pid);
  ****************************************************************************/
 
 int nxsched_set_scheduler(pid_t pid, int policy,
-                          FAR const struct sched_param *param);
+                          FAR const struct sched_param *);
 
 /****************************************************************************
  * Name: nxsched_get_affinity

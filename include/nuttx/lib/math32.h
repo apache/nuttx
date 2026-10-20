@@ -373,22 +373,22 @@ extern "C"
  *   d - The divisor (unsigned integer). d != 0 and d != 1 is required.
  *
  * Output Parameters:
- *   param - The invariant division parameter to be cached.
+ *   ip    - The invariant division parameter to be cached.
  *
  ****************************************************************************/
 
 static inline_function
-void invdiv_init_param32(uint32_t d, FAR invdiv_param32_t *param)
+void invdiv_init_param32(uint32_t d, FAR invdiv_param32_t *ip)
 {
   int      l  = log2ceil(d);
   uint64_t t1 = (uint64_t)1 << 32;
   uint64_t t2 = (uint64_t)1 << l;
 
-  param->mult  = (t1 * (t2 - d)) / d + 1;
+  ip->mult  = (t1 * (t2 - d)) / d + 1;
 #if ULONG_MAX == 4294967295UL
-  param->shift = l - 1;
+  ip->shift = l - 1;
 #else
-  param->shift = l;
+  ip->shift = l;
 #endif
 }
 
@@ -402,7 +402,7 @@ void invdiv_init_param32(uint32_t d, FAR invdiv_param32_t *param)
  *
  * Input Parameters:
  *   n - The dividend (uint32_t).
- *   param - The invariant division parameter already cached.
+ *   ip    - The invariant division parameter already cached.
  *
  * Returned Value:
  *  The result of `n / d`
@@ -410,17 +410,17 @@ void invdiv_init_param32(uint32_t d, FAR invdiv_param32_t *param)
  ****************************************************************************/
 
 static inline_function
-uint64_t invdiv_u32(uint32_t n, FAR const invdiv_param32_t *param)
+uint64_t invdiv_u32(uint32_t n, FAR const invdiv_param32_t *ip)
 {
-  uint8_t  sh = param->shift;
+  uint8_t  sh = ip->shift;
 #if ULONG_MAX == 4294967295UL
-  uint32_t m  = param->mult;
+  uint32_t m  = ip->mult;
   uint32_t t1 = ((uint64_t)m * n) >> 32; /* UMULH if supported */
   uint32_t t2 = (n - t1) >> 1;
 #else
   /* This division can be 25% faster using 64-bit register. */
 
-  uint64_t m  = param->mult;
+  uint64_t m  = ip->mult;
   uint64_t t1 = (m * n) >> 32;
   uint32_t t2 = n;
 #endif
@@ -512,12 +512,12 @@ static inline_function uint64_t invdiv_umulh64(uint64_t a, uint64_t b)
  *   d - The divisor (unsigned integer), d != 0 and d != 1 is required.
  *
  * Output Parameters:
- *   param - The invariant division parameter to be cached.
+ *   ip    - The invariant division parameter to be cached.
  *
  ****************************************************************************/
 
 static inline_function
-void invdiv_init_param64(uint64_t d, FAR invdiv_param64_t *param)
+void invdiv_init_param64(uint64_t d, FAR invdiv_param64_t *ip)
 {
   int      l = log2ceil(d);
   uint64_t t = ((uint64_t)1 << l) - d;
@@ -541,12 +541,12 @@ void invdiv_init_param64(uint64_t d, FAR invdiv_param64_t *param)
 
   invdiv_udiv_soft(mres, 2, q, d);
 
-  param->mult = q[0] + 1;
+  ip->mult = q[0] + 1;
 #else
   __uint128_t one128 = 1;
-  param->mult = (one128 << 64) * t / d + 1;
+  ip->mult = (one128 << 64) * t / d + 1;
 #endif
-  param->shift = l - 1;
+  ip->shift = l - 1;
 }
 
 /****************************************************************************
@@ -559,7 +559,7 @@ void invdiv_init_param64(uint64_t d, FAR invdiv_param64_t *param)
  *
  * Input Parameters:
  *   n - The dividend (uint64_t).
- *   param - The invariant division parameter already cached.
+ *   ip    - The invariant division parameter already cached.
  *
  * Returned Value:
  *  The result of `n / d`
@@ -567,13 +567,13 @@ void invdiv_init_param64(uint64_t d, FAR invdiv_param64_t *param)
  ****************************************************************************/
 
 static inline_function
-uint64_t invdiv_u64(uint64_t n, FAR const invdiv_param64_t *param)
+uint64_t invdiv_u64(uint64_t n, FAR const invdiv_param64_t *ip)
 {
   uint64_t t1;
   uint64_t t2;
-  uint64_t m   = param->mult;
+  uint64_t m   = ip->mult;
   uint8_t  sh1 = 1;
-  uint8_t  sh2 = param->shift;
+  uint8_t  sh2 = ip->shift;
 
   /* Calculate the 128-bit mres = 64-bit n * 64-bit m, where t1 = mres >> 64.
    * Please do not use `umul64_const` or `umul64` here.

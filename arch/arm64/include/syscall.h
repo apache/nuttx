@@ -344,10 +344,10 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
 
 /* semihosting(SMH) call with call number and one parameter */
 
-static inline long smh_call(unsigned int nbr, void *param)
+static inline long smh_call(unsigned int nbr, void *parm)
 {
   register uint64_t reg0 __asm__("x0") = (uint64_t)(nbr);
-  register uint64_t reg1 __asm__("x1") = (uint64_t)(param);
+  register uint64_t reg1 __asm__("x1") = (uint64_t)(parm);
 
   __asm__ __volatile__
   (

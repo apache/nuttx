@@ -184,7 +184,7 @@ int posix_spawnattr_getflags(FAR const posix_spawnattr_t *attr,
                              FAR short *flags);
 #define posix_spawnattr_getpgroup(attr,group) (ENOSYS)
 int posix_spawnattr_getschedparam(FAR const posix_spawnattr_t *attr,
-                                  FAR struct sched_param *param);
+                                  FAR struct sched_param *);
 int posix_spawnattr_getschedpolicy(FAR const posix_spawnattr_t *attr,
                                    FAR int *policy);
 #define posix_spawnattr_getsigdefault(attr,sigdefault) (ENOSYS)
@@ -196,7 +196,7 @@ int posix_spawnattr_getsigmask(FAR const posix_spawnattr_t *attr,
 int posix_spawnattr_setflags(FAR posix_spawnattr_t *attr, short flags);
 #define posix_spawnattr_setpgroup(attr,group) (ENOSYS)
 int posix_spawnattr_setschedparam(FAR posix_spawnattr_t *attr,
-                                  FAR const struct sched_param *param);
+                                  FAR const struct sched_param *);
 int posix_spawnattr_setschedpolicy(FAR posix_spawnattr_t *attr, int policy);
 #define posix_spawnattr_setsigdefault(attr,sigdefault) (ENOSYS)
 int posix_spawnattr_setsigmask(FAR posix_spawnattr_t *attr,
