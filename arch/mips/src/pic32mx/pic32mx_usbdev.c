@@ -765,6 +765,7 @@ static void pic32mx_reqreturn(struct pic32mx_ep_s *privep,
    */
 
   bool stalled = privep->stalled;
+
   if (USB_EPNO(privep->ep.eplog) == EP0)
     {
       privep->stalled = (privep->dev->ctrlstate == CTRLSTATE_STALLED);
@@ -1090,6 +1091,7 @@ static int pic32mx_wrstart(struct pic32mx_usbdev_s *priv,
       /* The current BDT is not available, check the other BDT */
 
       volatile struct usbotg_bdtentry_s *otherbdt;
+
       otherbdt = &g_bdt[EP(epno, EP_DIR_IN, EP_PP_EVEN)];
       if (otherbdt == bdt)
         {
@@ -1925,452 +1927,458 @@ static void pic32mx_ep0setup(struct pic32mx_usbdev_s *priv)
 
   switch (priv->ctrl.req)
     {
-    case USB_REQ_GETSTATUS:
-      {
-        /* type:  device-to-host; recipient = device, interface, endpoint
-         * value: 0
-         * index: zero interface endpoint
-         * len:   2; data = status
-         */
+      case USB_REQ_GETSTATUS:
+        {
+          /* type:  device-to-host; recipient = device, interface, endpoint
+           * value: 0
+           * index: zero interface endpoint
+           * len:   2; data = status
+           */
 
-        usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_GETSTATUS),
-                 priv->ctrl.type);
-        if (len.w != 2 || (priv->ctrl.type & USB_REQ_DIR_IN) == 0 ||
-            index.b[MSB] != 0 || value.w != 0)
-          {
-            usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_BADEPGETSTATUS), 0);
-            priv->ctrlstate = CTRLSTATE_STALL;
-          }
-        else
-          {
-            switch (priv->ctrl.type & USB_REQ_RECIPIENT_MASK)
-              {
-               case USB_REQ_RECIPIENT_ENDPOINT:
+          usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_GETSTATUS),
+                   priv->ctrl.type);
+          if (len.w != 2 || (priv->ctrl.type & USB_REQ_DIR_IN) == 0 ||
+              index.b[MSB] != 0 || value.w != 0)
+            {
+              usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_BADEPGETSTATUS), 0);
+              priv->ctrlstate = CTRLSTATE_STALL;
+            }
+          else
+            {
+              switch (priv->ctrl.type & USB_REQ_RECIPIENT_MASK)
                 {
-                  epno = USB_EPNO(index.b[LSB]);
-                  usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_EPGETSTATUS),
-                           epno);
-                  if (epno >= PIC32MX_NENDPOINTS)
+                  case USB_REQ_RECIPIENT_ENDPOINT:
                     {
+                      epno = USB_EPNO(index.b[LSB]);
                       usbtrace(
-                        TRACE_DEVERROR(PIC32MX_TRACEERR_BADEPGETSTATUS),
+                        TRACE_INTDECODE(PIC32MX_TRACEINTID_EPGETSTATUS),
                         epno);
-                      priv->ctrlstate = CTRLSTATE_STALL;
-                    }
-                  else
-                    {
-                      privep            = &priv->eplist[epno];
-                      response.w        = 0; /* Not stalled */
-                      nbytes            = 2; /* Response size: 2 bytes */
-
-                      if (USB_ISEPIN(index.b[LSB]))
+                      if (epno >= PIC32MX_NENDPOINTS)
                         {
-                          /* IN endpoint */
-
-                          bdt = privep->bdtin;
+                          usbtrace(
+                            TRACE_DEVERROR(PIC32MX_TRACEERR_BADEPGETSTATUS),
+                            epno);
+                          priv->ctrlstate = CTRLSTATE_STALL;
                         }
                       else
                         {
-                          /* OUT endpoint */
+                          privep            = &priv->eplist[epno];
+                          response.w        = 0; /* Not stalled */
+                          nbytes            = 2; /* Response size: 2 bytes */
 
-                          bdt = privep->bdtout;
+                          if (USB_ISEPIN(index.b[LSB]))
+                            {
+                              /* IN endpoint */
+
+                              bdt = privep->bdtin;
+                            }
+                          else
+                            {
+                              /* OUT endpoint */
+
+                              bdt = privep->bdtout;
+                            }
+
+                          /* BSTALL set if stalled */
+
+                          if ((bdt->status & USB_BDT_BSTALL) != 0)
+                            {
+                              response.b[LSB] = 1; /* Stalled, set bit 0 */
+                            }
                         }
+                    }
+                    break;
 
-                      /* BSTALL set if stalled */
-
-                      if ((bdt->status & USB_BDT_BSTALL) != 0)
+                  case USB_REQ_RECIPIENT_DEVICE:
+                    {
+                      if (index.w == 0)
                         {
-                          response.b[LSB] = 1; /* Stalled, set bit 0 */
+                          usbtrace(
+                            TRACE_INTDECODE(PIC32MX_TRACEINTID_DEVGETSTATUS),
+                            0);
+
+                          /* Features:  Remote Wakeup=YES; selfpowered=? */
+
+                          response.w      = 0;
+                          response.b[LSB] =
+                            (priv->selfpowered << USB_FEATURE_SELFPOWERED) |
+                            (priv->rwakeup << USB_FEATURE_REMOTEWAKEUP);
+                          nbytes          = 2; /* Response size: 2 bytes */
+                        }
+                      else
+                        {
+                          usbtrace(
+                            TRACE_DEVERROR(PIC32MX_TRACEERR_BADDEVGETSTATUS),
+                            0);
+                          priv->ctrlstate = CTRLSTATE_STALL;
                         }
                     }
-                }
-                break;
+                    break;
 
-              case USB_REQ_RECIPIENT_DEVICE:
-                {
-                  if (index.w == 0)
+                  case USB_REQ_RECIPIENT_INTERFACE:
                     {
                       usbtrace(
-                        TRACE_INTDECODE(PIC32MX_TRACEINTID_DEVGETSTATUS), 0);
-
-                      /* Features:  Remote Wakeup=YES; selfpowered=? */
-
-                      response.w      = 0;
-                      response.b[LSB] =
-                        (priv->selfpowered << USB_FEATURE_SELFPOWERED) |
-                        (priv->rwakeup << USB_FEATURE_REMOTEWAKEUP);
-                      nbytes          = 2; /* Response size: 2 bytes */
+                        TRACE_INTDECODE(PIC32MX_TRACEINTID_IFGETSTATUS), 0);
+                      response.w        = 0;
+                      nbytes            = 2; /* Response size: 2 bytes */
                     }
-                  else
+                    break;
+
+                  default:
                     {
-                      usbtrace(
-                        TRACE_DEVERROR(PIC32MX_TRACEERR_BADDEVGETSTATUS), 0);
+                      usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_BADGETSTATUS),
+                               0);
                       priv->ctrlstate = CTRLSTATE_STALL;
                     }
+                    break;
                 }
-                break;
+            }
+        }
+        break;
 
-              case USB_REQ_RECIPIENT_INTERFACE:
+      case USB_REQ_CLEARFEATURE:
+        {
+          /* type:  host-to-device; recipient = device, interface or endpoint
+           * value: feature selector
+           * index: zero interface endpoint;
+           * len:   zero, data = none
+           */
+
+          usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_CLEARFEATURE),
+                   priv->ctrl.type);
+          if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) ==
+              USB_REQ_RECIPIENT_DEVICE)
+            {
+              /* Disable B device from performing HNP */
+
+#ifdef CONFIG_USBOTG
+              if (value.w == USBOTG_FEATURE_B_HNP_ENABLE)
+                {
+                  /* Disable HNP */
+#warning Missing Logic
+                }
+
+              /* Disable A device HNP support */
+
+              else if (value.w == USBOTG_FEATURE_A_HNP_SUPPORT)
+                {
+                  /* Disable HNP support */
+#warning Missing Logic
+                }
+
+              /* Disable alternate HNP support */
+
+              else if (value.w == USBOTG_FEATURE_A_ALT_HNP_SUPPORT)
+                {
+                  /* Disable alternate HNP */
+#warning Missing Logic
+                }
+              else
+#endif
+              /* Disable remote wakeup */
+
+              if (value.w == USB_FEATURE_REMOTEWAKEUP)
+                {
+                  priv->rwakeup     = 0;
+                }
+              else
+                {
+                  /* Let the class implementation handle
+                   * all other device features
+                   */
+
+                  pic32mx_dispatchrequest(priv);
+                  dispatched = true;
+                }
+            }
+          else if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) ==
+                   USB_REQ_RECIPIENT_ENDPOINT)
+            {
+              epno = USB_EPNO(index.b[LSB]);
+              if (epno > 0 && epno < PIC32MX_NENDPOINTS &&
+                  index.b[MSB] == 0 &&
+                  value.w == USB_FEATURE_ENDPOINTHALT && len.w == 0)
+                {
+                  privep            = &priv->eplist[epno];
+                  privep->halted    = false;
+                  ret               = pic32mx_epstall(&privep->ep, true);
+                  UNUSED(ret);
+                }
+              else
                 {
                   usbtrace(
-                    TRACE_INTDECODE(PIC32MX_TRACEINTID_IFGETSTATUS), 0);
-                  response.w        = 0;
-                  nbytes            = 2; /* Response size: 2 bytes */
-                }
-                break;
-
-              default:
-                {
-                  usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_BADGETSTATUS), 0);
+                    TRACE_DEVERROR(PIC32MX_TRACEERR_BADCLEARFEATURE), 0);
                   priv->ctrlstate = CTRLSTATE_STALL;
                 }
-                break;
-              }
-          }
-      }
-      break;
+            }
+          else
+            {
+              /* Let the class implementation handle all other recipients. */
 
-    case USB_REQ_CLEARFEATURE:
-      {
-        /* type:  host-to-device; recipient = device, interface or endpoint
-         * value: feature selector
-         * index: zero interface endpoint;
-         * len:   zero, data = none
-         */
+              pic32mx_dispatchrequest(priv);
+              dispatched = true;
+            }
+        }
+        break;
 
-        usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_CLEARFEATURE),
-                 priv->ctrl.type);
-        if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) ==
-            USB_REQ_RECIPIENT_DEVICE)
-          {
-            /* Disable B device from performing HNP */
+      case USB_REQ_SETFEATURE:
+        {
+          /* type:  host-to-device; recipient = device, interface, endpoint
+           * value: feature selector
+           * index: zero interface endpoint;
+           * len:   0; data = none
+           */
 
-#ifdef CONFIG_USBOTG
-            if (value.w == USBOTG_FEATURE_B_HNP_ENABLE)
-              {
-                /* Disable HNP */
-#warning Missing Logic
-              }
+          usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_SETFEATURE),
+                   priv->ctrl.type);
 
-            /* Disable A device HNP support */
-
-            else if (value.w == USBOTG_FEATURE_A_HNP_SUPPORT)
-              {
-                /* Disable HNP support */
-#warning Missing Logic
-              }
-
-            /* Disable alternate HNP support */
-
-            else if (value.w == USBOTG_FEATURE_A_ALT_HNP_SUPPORT)
-              {
-                /* Disable alternate HNP */
-#warning Missing Logic
-              }
-            else
-#endif
-            /* Disable remote wakeup */
-
-            if (value.w == USB_FEATURE_REMOTEWAKEUP)
-              {
-                priv->rwakeup     = 0;
-              }
-            else
-              {
-                /* Let the class implementation handle
-                 * all other device features
-                 */
-
-                pic32mx_dispatchrequest(priv);
-                dispatched = true;
-              }
-          }
-        else if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) ==
-                 USB_REQ_RECIPIENT_ENDPOINT)
-          {
-            epno = USB_EPNO(index.b[LSB]);
-            if (epno > 0 && epno < PIC32MX_NENDPOINTS && index.b[MSB] == 0 &&
-                value.w == USB_FEATURE_ENDPOINTHALT && len.w == 0)
-              {
-                privep            = &priv->eplist[epno];
-                privep->halted    = false;
-                ret               = pic32mx_epstall(&privep->ep, true);
-                UNUSED(ret);
-              }
-            else
-              {
-                usbtrace(
-                  TRACE_DEVERROR(PIC32MX_TRACEERR_BADCLEARFEATURE), 0);
-                priv->ctrlstate = CTRLSTATE_STALL;
-              }
-          }
-        else
-          {
-            /* Let the class implementation handle all other recipients. */
-
-            pic32mx_dispatchrequest(priv);
-            dispatched = true;
-          }
-      }
-      break;
-
-    case USB_REQ_SETFEATURE:
-      {
-        /* type:  host-to-device; recipient = device, interface, endpoint
-         * value: feature selector
-         * index: zero interface endpoint;
-         * len:   0; data = none
-         */
-
-        usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_SETFEATURE),
-                 priv->ctrl.type);
-
-        if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) ==
-            USB_REQ_RECIPIENT_DEVICE)
-          {
-            /* Enable B device to perform HNP */
+          if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) ==
+              USB_REQ_RECIPIENT_DEVICE)
+            {
+              /* Enable B device to perform HNP */
 
 #ifdef CONFIG_USBOTG
-            if (value.w == USBOTG_FEATURE_B_HNP_ENABLE)
-              {
-                /* Enable HNP */
+              if (value.w == USBOTG_FEATURE_B_HNP_ENABLE)
+                {
+                  /* Enable HNP */
 #warning "Missing logic"
-              }
+                }
 
-            /* Enable A device HNP supports */
+              /* Enable A device HNP supports */
 
-            else if (value.w == USBOTG_FEATURE_A_HNP_SUPPORT)
-              {
-                /* Enable HNP support */
+              else if (value.w == USBOTG_FEATURE_A_HNP_SUPPORT)
+                {
+                  /* Enable HNP support */
 #warning "Missing logic"
-              }
+                }
 
-            /* Another port on the A device supports HNP */
+              /* Another port on the A device supports HNP */
 
-            else if (value.w == USBOTG_FEATURE_A_ALT_HNP_SUPPORT)
-              {
-                /* Enable alternate HNP */
+              else if (value.w == USBOTG_FEATURE_A_ALT_HNP_SUPPORT)
+                {
+                  /* Enable alternate HNP */
 #warning "Missing logic"
-              }
-            else
+                }
+              else
 #endif
 
-            if (value.w == USB_FEATURE_REMOTEWAKEUP)
-              {
-                priv->rwakeup     = 0;
-              }
-            else if (value.w == USB_FEATURE_TESTMODE)
-              {
-                /* Special case recipient=device test mode */
+              if (value.w == USB_FEATURE_REMOTEWAKEUP)
+                {
+                  priv->rwakeup     = 0;
+                }
+              else if (value.w == USB_FEATURE_TESTMODE)
+                {
+                  /* Special case recipient=device test mode */
 
-                uinfo("test mode: %d\n", index.w);
-              }
-            else
-              {
-                /* Let the class implementation handle
-                 * all other device features
-                 */
+                  uinfo("test mode: %d\n", index.w);
+                }
+              else
+                {
+                  /* Let the class implementation handle
+                   * all other device features
+                   */
 
-                pic32mx_dispatchrequest(priv);
-                dispatched = true;
-              }
-          }
-        else if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) ==
-                 USB_REQ_RECIPIENT_ENDPOINT)
-          {
-            /* Handler recipient=endpoint */
+                  pic32mx_dispatchrequest(priv);
+                  dispatched = true;
+                }
+            }
+          else if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) ==
+                   USB_REQ_RECIPIENT_ENDPOINT)
+            {
+              /* Handler recipient=endpoint */
 
-            epno = USB_EPNO(index.b[LSB]);
-            if (epno < PIC32MX_NENDPOINTS && index.b[MSB] == 0 &&
-                value.w == USB_FEATURE_ENDPOINTHALT && len.w == 0)
-              {
-                privep            = &priv->eplist[epno];
-                privep->halted    = true;
-                ret               = pic32mx_epstall(&privep->ep, false);
-                UNUSED(ret);
-              }
-            else
-              {
-                usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_BADSETFEATURE), 0);
-                priv->ctrlstate = CTRLSTATE_STALL;
-              }
-          }
-        else
-          {
-            /* The class driver handles all recipients
-             * except recipient=endpoint
-             */
+              epno = USB_EPNO(index.b[LSB]);
+              if (epno < PIC32MX_NENDPOINTS && index.b[MSB] == 0 &&
+                  value.w == USB_FEATURE_ENDPOINTHALT && len.w == 0)
+                {
+                  privep            = &priv->eplist[epno];
+                  privep->halted    = true;
+                  ret               = pic32mx_epstall(&privep->ep, false);
+                  UNUSED(ret);
+                }
+              else
+                {
+                  usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_BADSETFEATURE),
+                           0);
+                  priv->ctrlstate = CTRLSTATE_STALL;
+                }
+            }
+          else
+            {
+              /* The class driver handles all recipients
+               * except recipient=endpoint
+               */
 
-            pic32mx_dispatchrequest(priv);
-            dispatched = true;
-          }
-      }
-      break;
+              pic32mx_dispatchrequest(priv);
+              dispatched = true;
+            }
+        }
+        break;
 
-    case USB_REQ_SETADDRESS:
-      {
+      case USB_REQ_SETADDRESS:
+        {
+          /* type:  host-to-device; recipient = device
+           * value: device address
+           * index: 0
+           * len:   0; data = none
+           */
+
+          usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_EP0SETUPSETADDRESS),
+                   value.w);
+          if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) !=
+               USB_REQ_RECIPIENT_DEVICE || index.w != 0 ||
+               len.w != 0 || value.w > 127)
+            {
+              usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_BADSETADDRESS), 0);
+              priv->ctrlstate = CTRLSTATE_STALL;
+            }
+          else
+            {
+              /* Note that setting of the device address will be deferred.
+               * A zero-length packet will be sent and the device address
+               * will be set when the zero- length packet transfer completes.
+               */
+
+              priv->devstate = DEVSTATE_ADDRPENDING;
+            }
+        }
+        break;
+
+      case USB_REQ_GETDESCRIPTOR:
+        /* type:  device-to-host; recipient = device
+         * value: descriptor type and index
+         * index: 0 or language ID;
+         * len:   descriptor len; data = descriptor
+         */
+
+      case USB_REQ_SETDESCRIPTOR:
         /* type:  host-to-device; recipient = device
-         * value: device address
-         * index: 0
+         * value: descriptor type and index
+         * index: 0 or language ID;
+         * len:   descriptor len; data = descriptor
+         */
+
+        {
+          usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_GETSETDESC),
+                   priv->ctrl.type);
+          if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) ==
+              USB_REQ_RECIPIENT_DEVICE)
+            {
+              /* The request seems valid...
+               * let the class implementation handle it
+               */
+
+              pic32mx_dispatchrequest(priv);
+              dispatched = true;
+            }
+          else
+            {
+              usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_BADGETSETDESC), 0);
+              priv->ctrlstate = CTRLSTATE_STALL;
+            }
+        }
+        break;
+
+      case USB_REQ_GETCONFIGURATION:
+        /* type:  device-to-host; recipient = device
+         * value: 0;
+         * index: 0;
+         * len:   1; data = configuration value
+         */
+
+        {
+          usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_GETCONFIG),
+                   priv->ctrl.type);
+          if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) ==
+               USB_REQ_RECIPIENT_DEVICE && value.w == 0 &&
+               index.w == 0 && len.w == 1)
+            {
+              /* The request seems valid...
+               * let the class implementation handle it
+               */
+
+              pic32mx_dispatchrequest(priv);
+              dispatched = true;
+            }
+          else
+            {
+              usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_BADGETCONFIG), 0);
+              priv->ctrlstate = CTRLSTATE_STALL;
+            }
+        }
+        break;
+
+      case USB_REQ_SETCONFIGURATION:
+        /* type:  host-to-device; recipient = device
+         * value: configuration value
+         * index: 0;
          * len:   0; data = none
          */
 
-        usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_EP0SETUPSETADDRESS),
-                 value.w);
-        if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) !=
-             USB_REQ_RECIPIENT_DEVICE || index.w != 0 ||
-             len.w != 0 || value.w > 127)
-          {
-            usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_BADSETADDRESS), 0);
-            priv->ctrlstate = CTRLSTATE_STALL;
-          }
-        else
-          {
-            /* Note that setting of the device address will be deferred.
-             * A zero-length packet will be sent and the device address
-             * will be set when the zero- length packet transfer completes.
-             */
+        {
+          usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_SETCONFIG),
+                   priv->ctrl.type);
+          if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) ==
+               USB_REQ_RECIPIENT_DEVICE && index.w == 0 && len.w == 0)
+            {
+              /* The request seems valid...
+               * let the class implementation handle it
+               */
 
-            priv->devstate = DEVSTATE_ADDRPENDING;
-          }
-      }
-      break;
+              pic32mx_dispatchrequest(priv);
+              dispatched = true;
+            }
+          else
+            {
+              usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_BADSETCONFIG), 0);
+              priv->ctrlstate = CTRLSTATE_STALL;
+            }
+        }
+        break;
 
-    case USB_REQ_GETDESCRIPTOR:
-      /* type:  device-to-host; recipient = device
-       * value: descriptor type and index
-       * index: 0 or language ID;
-       * len:   descriptor len; data = descriptor
-       */
+      case USB_REQ_GETINTERFACE:
+        /* type:  device-to-host; recipient = interface
+         * value: 0
+         * index: interface;
+         * len:   1; data = alt interface
+         */
 
-    case USB_REQ_SETDESCRIPTOR:
-      /* type:  host-to-device; recipient = device
-       * value: descriptor type and index
-       * index: 0 or language ID;
-       * len:   descriptor len; data = descriptor
-       */
+      case USB_REQ_SETINTERFACE:
+        /* type:  host-to-device; recipient = interface
+         * value: alternate setting
+         * index: interface;
+         * len:   0; data = none
+         */
 
-      {
-        usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_GETSETDESC),
-                 priv->ctrl.type);
-        if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) ==
-            USB_REQ_RECIPIENT_DEVICE)
-          {
-            /* The request seems valid...
-             * let the class implementation handle it
-             */
+        {
+          /* Let the class implementation handle the request */
 
-            pic32mx_dispatchrequest(priv);
-            dispatched = true;
-          }
-        else
-          {
-            usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_BADGETSETDESC), 0);
-            priv->ctrlstate = CTRLSTATE_STALL;
-          }
-      }
-      break;
+          usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_GETSETIF),
+                   priv->ctrl.type);
+          pic32mx_dispatchrequest(priv);
+          dispatched = true;
+        }
+        break;
 
-    case USB_REQ_GETCONFIGURATION:
-      /* type:  device-to-host; recipient = device
-       * value: 0;
-       * index: 0;
-       * len:   1; data = configuration value
-       */
+      case USB_REQ_SYNCHFRAME:
+        /* type:  device-to-host; recipient = endpoint
+         * value: 0
+         * index: endpoint;
+         * len:   2; data = frame number
+         */
 
-      {
-        usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_GETCONFIG),
-                 priv->ctrl.type);
-        if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) ==
-             USB_REQ_RECIPIENT_DEVICE && value.w == 0 &&
-             index.w == 0 && len.w == 1)
-          {
-            /* The request seems valid...
-             * let the class implementation handle it
-             */
+        {
+          usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_SYNCHFRAME), 0);
+        }
+        break;
 
-            pic32mx_dispatchrequest(priv);
-            dispatched = true;
-          }
-        else
-          {
-            usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_BADGETCONFIG), 0);
-            priv->ctrlstate = CTRLSTATE_STALL;
-          }
-      }
-      break;
-
-    case USB_REQ_SETCONFIGURATION:
-      /* type:  host-to-device; recipient = device
-       * value: configuration value
-       * index: 0;
-       * len:   0; data = none
-       */
-
-      {
-        usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_SETCONFIG),
-                 priv->ctrl.type);
-        if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) ==
-             USB_REQ_RECIPIENT_DEVICE && index.w == 0 && len.w == 0)
-          {
-             /* The request seems valid...
-              * let the class implementation handle it
-              */
-
-             pic32mx_dispatchrequest(priv);
-             dispatched = true;
-          }
-        else
-          {
-            usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_BADSETCONFIG), 0);
-            priv->ctrlstate = CTRLSTATE_STALL;
-          }
-      }
-      break;
-
-    case USB_REQ_GETINTERFACE:
-      /* type:  device-to-host; recipient = interface
-       * value: 0
-       * index: interface;
-       * len:   1; data = alt interface
-       */
-
-    case USB_REQ_SETINTERFACE:
-      /* type:  host-to-device; recipient = interface
-       * value: alternate setting
-       * index: interface;
-       * len:   0; data = none
-       */
-
-      {
-        /* Let the class implementation handle the request */
-
-        usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_GETSETIF),
-                 priv->ctrl.type);
-        pic32mx_dispatchrequest(priv);
-        dispatched = true;
-      }
-      break;
-
-    case USB_REQ_SYNCHFRAME:
-      /* type:  device-to-host; recipient = endpoint
-       * value: 0
-       * index: endpoint;
-       * len:   2; data = frame number
-       */
-
-      {
-        usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_SYNCHFRAME), 0);
-      }
-      break;
-
-    default:
-      {
-        usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDCTRLREQ),
-                 priv->ctrl.req);
-        priv->ctrlstate = CTRLSTATE_STALL;
-      }
-      break;
+      default:
+        {
+          usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDCTRLREQ),
+                   priv->ctrl.req);
+          priv->ctrlstate = CTRLSTATE_STALL;
+        }
+        break;
     }
 
   /* PKTDIS bit is set when a Setup Transaction is received. Clear to resume
@@ -2510,6 +2518,7 @@ static void pic32mx_ep0incomplete(struct pic32mx_usbdev_s *priv)
       if (priv->devstate == DEVSTATE_ADDRPENDING)
         {
           uint16_t addr = GETUINT16(priv->ctrl.value);
+
           usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_EP0ADDRESSSET), addr);
 
           /* This should be the equivalent state */
@@ -2579,7 +2588,7 @@ static void pic32mx_ep0outcomplete(struct pic32mx_usbdev_s *priv)
            * SETUP transaction.
            */
 
-           pic32mx_ep0nextsetup(priv);
+          pic32mx_ep0nextsetup(priv);
         }
         break;
 
@@ -2715,25 +2724,25 @@ static int pic32mx_interrupt(int irq, void *context, void *arg)
 
   /* if USB OTG SRP is ready */
 #  warning "Missing logic"
-    {
-      /* Check if the 1 millisecond timer has expired */
+  {
+    /* Check if the 1 millisecond timer has expired */
 
-      if ((otgir & OTG_INT_T1MSEC) != 0)
+    if ((otgir & OTG_INT_T1MSEC) != 0)
+      {
+        usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_T1MSEC), otgir);
+
+        /* Check for the USB OTG SRP timeout */
+#  warning "Missing logic"
         {
-          usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_T1MSEC), otgir);
-
-          /* Check for the USB OTG SRP timeout */
+          /* Handle OTG events of the SRP timeout has expired */
 #  warning "Missing logic"
-            {
-              /* Handle OTG events of the SRP timeout has expired */
-#  warning "Missing logic"
-            }
-
-          /* Clear Interrupt 1 msec timer Flag */
-
-          pic32mx_putreg(USBOTG_INT_T1MSEC, PIC32MX_USBOTG_IR);
         }
-    }
+
+        /* Clear Interrupt 1 msec timer Flag */
+
+        pic32mx_putreg(USBOTG_INT_T1MSEC, PIC32MX_USBOTG_IR);
+      }
+  }
 #endif
 
   /* Handle events while we are in the attached state */
@@ -2921,7 +2930,7 @@ static int pic32mx_interrupt(int irq, void *context, void *arg)
               epno = (regval & USB_STAT_ENDPT_MASK) >> USB_STAT_ENDPT_SHIFT;
               if (epno == 0)
                 {
-                   pic32mx_ep0transfer(priv, regval);
+                  pic32mx_ep0transfer(priv, regval);
                 }
               else
                 {
@@ -3080,6 +3089,7 @@ pic32mx_epreserve(struct pic32mx_usbdev_s *priv, uint8_t epset)
       for (epndx = 1; epndx < PIC32MX_NENDPOINTS; epndx++)
         {
           uint8_t bit = PIC32MX_ENDP_BIT(epndx);
+
           if ((epset & bit) != 0)
             {
               /* Mark the endpoint no longer available */
@@ -3107,6 +3117,7 @@ pic32mx_epunreserve(struct pic32mx_usbdev_s *priv,
                     struct pic32mx_ep_s *privep)
 {
   irqstate_t flags = enter_critical_section();
+
   priv->epavail   |= PIC32MX_ENDP_BIT(USB_EPNO(privep->ep.eplog));
   leave_critical_section(flags);
 }
@@ -3202,27 +3213,27 @@ static int pic32mx_epconfigure(struct usbdev_ep_s *ep,
   /* Set the requested type */
 
   switch (desc->attr & USB_EP_ATTR_XFERTYPE_MASK)
-   {
-    case USB_EP_ATTR_XFER_INT: /* Interrupt endpoint */
-      regval = epin ? PIC32MX_EP_INTIN : PIC32MX_EP_INTOUT;
-      break;
+    {
+      case USB_EP_ATTR_XFER_INT: /* Interrupt endpoint */
+        regval = epin ? PIC32MX_EP_INTIN : PIC32MX_EP_INTOUT;
+        break;
 
-    case USB_EP_ATTR_XFER_BULK: /* Bulk endpoint */
-      regval = epin ? PIC32MX_EP_BULKIN : PIC32MX_EP_BULKOUT;
-      break;
+      case USB_EP_ATTR_XFER_BULK: /* Bulk endpoint */
+        regval = epin ? PIC32MX_EP_BULKIN : PIC32MX_EP_BULKOUT;
+        break;
 
-    case USB_EP_ATTR_XFER_ISOC: /* Isochronous endpoint */
-      regval = epin ? PIC32MX_EP_ISOCIN : PIC32MX_EP_ISOCOUT;
-      break;
+      case USB_EP_ATTR_XFER_ISOC: /* Isochronous endpoint */
+        regval = epin ? PIC32MX_EP_ISOCIN : PIC32MX_EP_ISOCOUT;
+        break;
 
-    case USB_EP_ATTR_XFER_CONTROL: /* Control endpoint */
-      regval = PIC32MX_EP_CONTROL;
-      bidi   = true;
-      break;
+      case USB_EP_ATTR_XFER_CONTROL: /* Control endpoint */
+        regval = PIC32MX_EP_CONTROL;
+        bidi   = true;
+        break;
 
-    default:
-      usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_BADEPTYPE), desc->type);
-      return -EINVAL;
+      default:
+        usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_BADEPTYPE), desc->type);
+        return -EINVAL;
     }
 
   /* Enable the endpoint */

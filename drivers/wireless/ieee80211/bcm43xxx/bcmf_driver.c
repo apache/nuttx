@@ -835,6 +835,7 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
                         {
                           uint32_t suite = ntohl
                                    (*(FAR uint32_t *)&akm->suite[j]);
+
                           if (suite == WLAN_AKM_SUITE_PSK)
                             {
                               goto vaild_bss;
