@@ -144,7 +144,8 @@ void up_schedule_sigaction(struct tcb_s *tcb)
 #ifdef CONFIG_BUILD_PROTECTED
       tcb->xcp.regs[REG_LR]         = EXC_RETURN_THREAD;
       tcb->xcp.regs[REG_EXC_RETURN] = EXC_RETURN_THREAD;
-      tcb->xcp.regs[REG_CONTROL]    = getcontrol() & ~CONTROL_NPRIV;
+      tcb->xcp.regs[REG_CONTROL]    = (getcontrol() & ~CONTROL_NPRIV) |
+                                       CONTROL_PACBTI_MASK;
 #endif
     }
 }

@@ -203,6 +203,13 @@
 #define CONTROL_SPSEL       (1 << 1) /* Bit 1: Stack-pointer select */
 #define CONTROL_NPRIV       (1 << 0) /* Bit 0: Not privileged */
 
+#ifdef CONFIG_ARM_PACBTI
+#  define CONTROL_PACBTI_MASK \
+    (CONTROL_UPAC_EN | CONTROL_PAC_EN | CONTROL_UBTI_EN | CONTROL_BTI_EN)
+#else
+#  define CONTROL_PACBTI_MASK 0
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

@@ -59,6 +59,10 @@ ifeq ($(CONFIG_ARCH_FPU),y)
   CMN_CSRCS += arm_fpucmp.c
 endif
 
+ifeq ($(CONFIG_ARM_PACBTI),y)
+  CMN_CSRCS += arm_pacbticonfig.c
+endif
+
 ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
   CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
 endif

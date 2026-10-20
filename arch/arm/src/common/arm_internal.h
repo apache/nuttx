@@ -404,6 +404,14 @@ void arm_fpuconfig(void);
 #  define arm_fpuconfig()
 #endif
 
+/* Pointer Authentication and Branch Target Identification ******************/
+
+#ifdef CONFIG_ARM_PACBTI
+void arm_pacbticonfig(void);
+#else
+#  define arm_pacbticonfig()
+#endif
+
 /* Low level serial output **************************************************/
 
 void arm_lowputc(char ch);
