@@ -250,7 +250,7 @@ int up_addrenv_kmap_pages(void **pages, unsigned int npages, uintptr_t vaddr,
   /* Sanity checks */
 
   DEBUGASSERT(pages != NULL && npages > 0);
-  DEBUGASSERT(vaddr >= CONFIG_ARCH_KMAP_VBASE && vaddr < ARCH_KMAP_VEND);
+  DEBUGASSERT(vaddr >= CONFIG_ARCH_KMAP_VBASE && vaddr <= ARCH_KMAP_VEND);
   DEBUGASSERT(MM_ISALIGNED(vaddr));
 
   /* Convert access right flags to MMU flags */
@@ -303,7 +303,7 @@ int up_addrenv_kunmap_pages(uintptr_t vaddr, unsigned int npages)
   /* Sanity checks */
 
   DEBUGASSERT(npages > 0);
-  DEBUGASSERT(vaddr >= CONFIG_ARCH_KMAP_VBASE && vaddr < ARCH_KMAP_VEND);
+  DEBUGASSERT(vaddr >= CONFIG_ARCH_KMAP_VBASE && vaddr <= ARCH_KMAP_VEND);
   DEBUGASSERT(MM_ISALIGNED(vaddr));
 
   /* Let riscv_unmap_pages do the work */

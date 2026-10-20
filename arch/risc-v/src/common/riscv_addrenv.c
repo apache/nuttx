@@ -335,7 +335,7 @@ static int create_region(arch_addrenv_t *addrenv, uintptr_t vaddr,
 static inline bool vaddr_is_shm(uintptr_t vaddr)
 {
 #if defined (CONFIG_ARCH_SHM_VBASE) && defined(ARCH_SHM_VEND)
-  return vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr < ARCH_SHM_VEND;
+  return vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr <= ARCH_SHM_VEND;
 #else
   UNUSED(vaddr);
   return false;

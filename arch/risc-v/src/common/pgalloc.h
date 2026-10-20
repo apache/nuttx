@@ -101,9 +101,9 @@ static inline bool riscv_uservaddr(uintptr_t vaddr)
    * heap, or stack regions.
    */
 
-  return ((vaddr >= ARCH_ADDRENV_VBASE && vaddr < ARCH_ADDRENV_VEND)
+  return ((vaddr >= ARCH_ADDRENV_VBASE && vaddr <= ARCH_ADDRENV_VEND)
 #ifdef CONFIG_ARCH_VMA_MAPPING
-       || (vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr < ARCH_SHM_VEND)
+       || (vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr <= ARCH_SHM_VEND)
 #endif
       );
 }
