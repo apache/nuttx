@@ -44,10 +44,6 @@ if(NOT CONFIG_ARCH_IDLE_CUSTOM)
   list(APPEND SRCS stm32l4_idle.c)
 endif()
 
-if(CONFIG_SCHED_TICKLESS)
-  list(APPEND SRCS stm32l4_tickless.c)
-endif()
-
 if(CONFIG_BUILD_PROTECTED)
   list(APPEND SRCS stm32l4_userspace.c stm32l4_mpuinit.c)
 endif()

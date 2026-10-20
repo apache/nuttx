@@ -4419,7 +4419,6 @@ arch/arm/src/stm32l4/stm32l4_spi.c sebastien@lorquet.fr petro.karashchenko@gmail
 arch/arm/src/stm32l4/stm32l4_spi.h sebastien@lorquet.fr alin.jerpelea@sony.com xiaoxiang@xiaomi.com juha.niskanen@haltian.com
 arch/arm/src/stm32l4/stm32l4_start.c sebastien@lorquet.fr xiaoxiang@xiaomi.com alin.jerpelea@sony.com dev@ziggurat29.com
 arch/arm/src/stm32l4/stm32l4_start.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-arch/arm/src/stm32l4/stm32l4_tickless.c dev@ziggurat29.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com sebastien@lorquet.fr
 arch/arm/src/stm32l4/stm32l4_uart.h sebastien@lorquet.fr juha.niskanen@haltian.com alin.jerpelea@sony.com harri.luhtala@haltian.com jussi.kivilinna@haltian.com
 arch/arm/src/stm32l4/stm32l4_uid.c dev@ziggurat29.com alin.jerpelea@sony.com
 arch/arm/src/stm32l4/stm32l4_uid.h dev@ziggurat29.com alin.jerpelea@sony.com
