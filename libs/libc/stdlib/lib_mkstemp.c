@@ -27,13 +27,122 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
-#include <unistd.h>
-#include <stdlib.h>
+#include <errno.h>
 #include <fcntl.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* mktemp() replaces at most six X's */
+
+#define MKSTEMP_MAXXS    6
+
+/* The number of names that are tried when the file exists */
+
+#define MKSTEMP_RETRIES  238328  /* 62**3 */
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: mkostemps
+ *
+ * Description:
+ *   Replace the X's (up to six) before the last suffixlen characters of
+ *   path_template with characters that make the name unique, then create
+ *   and open the file for reading and writing.  If another process created
+ *   a file of that name in the meantime, try a new name.
+ *
+ * Input Parameters:
+ *   path_template - The name of the file to create, with the X's.
+ *   suffixlen     - The number of characters after the X's.
+ *   flags         - More flags for open(), such as O_CLOEXEC or O_APPEND.
+ *
+ * Returned Value:
+ *   An open file descriptor on success.  Otherwise -1 is returned and
+ *   errno is set.
+ *
+ ****************************************************************************/
+
+int mkostemps(FAR char *path_template, int suffixlen, int flags)
+{
+  char suffix0;
+  size_t len = strlen(path_template);
+  size_t end;
+  size_t xlen;
+  int retries;
+  int fd;
+
+  if (suffixlen < 0 || (size_t)suffixlen > len)
+    {
+      set_errno(EINVAL);
+      return -1;
+    }
+
+  /* Count the X's before the suffix */
+
+  end = len - suffixlen;
+  for (xlen = 0; xlen < MKSTEMP_MAXXS && xlen < end &&
+       path_template[end - xlen - 1] == 'X'; xlen++);
+
+  for (retries = 0; retries < MKSTEMP_RETRIES; retries++)
+    {
+      /* mktemp() replaces the X's at the end of the string: cut the suffix
+       * off while it runs.
+       */
+
+      memset(&path_template[end - xlen], 'X', xlen);
+      suffix0 = path_template[end];
+      path_template[end] = '\0';
+      if (mktemp(path_template) == NULL)
+        {
+          path_template[end] = suffix0;
+          return -1;
+        }
+
+      path_template[end] = suffix0;
+
+      fd = open(path_template, O_RDWR | O_CREAT | O_EXCL |
+                (flags & ~O_ACCMODE), 0600);
+      if (fd >= 0 || get_errno() != EEXIST || xlen == 0)
+        {
+          return fd;
+        }
+    }
+
+  return -1;
+}
+
+/****************************************************************************
+ * Name: mkostemp
+ *
+ * Description:
+ *   As mkstemp(), with more flags for open().
+ *
+ ****************************************************************************/
+
+int mkostemp(FAR char *path_template, int flags)
+{
+  return mkostemps(path_template, 0, flags);
+}
+
+/****************************************************************************
+ * Name: mkstemps
+ *
+ * Description:
+ *   As mkstemp(), with suffixlen characters after the X's.
+ *
+ ****************************************************************************/
+
+int mkstemps(FAR char *path_template, int suffixlen)
+{
+  return mkostemps(path_template, suffixlen, 0);
+}
 
 /****************************************************************************
  * Name: mkstemp
@@ -63,13 +172,5 @@
 
 int mkstemp(FAR char *path_template)
 {
-  FAR char *path = mktemp(path_template);
-  int ret = ERROR;
-
-  if (path)
-    {
-      ret = open(path, O_RDWR | O_CREAT | O_EXCL, 0600);
-    }
-
-  return ret;
+  return mkostemps(path_template, 0, 0);
 }
