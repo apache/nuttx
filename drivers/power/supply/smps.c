@@ -116,6 +116,7 @@ static int smps_open(FAR struct file *filep)
               /* Yes.. perform one time hardware initialization. */
 
               irqstate_t flags = enter_critical_section();
+
               ret = dev->ops->setup(dev);
               if (ret == OK)
                 {
@@ -126,12 +127,16 @@ static int smps_open(FAR struct file *filep)
 
               leave_critical_section(flags);
             }
+          else
+            {
+              dev->ocount = tmp;
+            }
         }
 
       nxmutex_unlock(&dev->closelock);
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
