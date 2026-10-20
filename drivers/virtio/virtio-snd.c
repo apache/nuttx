@@ -343,23 +343,32 @@ virtio_snd_get_support_formats(FAR const struct virtio_snd_pcm_info *info,
 static void virtio_snd_pcm_notify_cb(FAR struct virtqueue *vq)
 {
   FAR struct virtio_snd_s *priv = vq->vq_dev->priv;
+  FAR struct virtio_snd_buffer_s *buf;
+  FAR struct virtio_snd_dev_s *sdev;
   irqstate_t flags;
+  bool underrun;
 
-  flags = spin_lock_irqsave(&priv->lock);
   for (; ; )
     {
-      FAR struct virtio_snd_buffer_s *buf;
-      FAR struct virtio_snd_dev_s *sdev;
+      flags = spin_lock_irqsave(&priv->lock);
       buf = virtqueue_get_buffer(vq, NULL, NULL);
       if (buf == NULL)
         {
+          spin_unlock_irqrestore(&priv->lock, flags);
           break;
         }
 
       sdev = (FAR struct virtio_snd_dev_s *)buf->dev;
       sdev->cache_buffers--;
-      if (sdev->running &&
-          buf->status->latency_bytes < sdev->period_bytes)
+      underrun = sdev->running &&
+                 buf->status->latency_bytes < sdev->period_bytes;
+      spin_unlock_irqrestore(&priv->lock, flags);
+
+      /* The upper half may call back into this driver (enqueue), which
+       * takes priv->lock again.
+       */
+
+      if (underrun)
         {
           buf->dev->upper(buf->dev->priv, AUDIO_CALLBACK_UNDERRUN,
                           NULL, OK);
@@ -373,8 +382,6 @@ static void virtio_snd_pcm_notify_cb(FAR struct virtqueue *vq)
                       &buf->apb, OK);
 #endif
     }
-
-  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
