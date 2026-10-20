@@ -540,6 +540,31 @@ static void nrf54l_rxstart(struct nrf54l_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: nrf54l_rxdeliver
+ *
+ * Description:
+ *   Deliver the completed byte and restart the one-byte DMA. A byte
+ *   received with the delivery disabled is kept, the UART FIFO holds the
+ *   next bytes until rxint() enables the delivery.
+ *
+ ****************************************************************************/
+
+static void nrf54l_rxdeliver(struct uart_dev_s *dev)
+{
+  struct nrf54l_dev_s *priv = dev->priv;
+
+  if (priv->rxvalid && priv->rxenabled)
+    {
+      uart_recvchars(dev);
+      if (!priv->rxvalid)
+        {
+          UP_DMB();
+          nrf54l_uart_putreg(priv, NRF54L_UARTE_TASKS_STARTRX_OFFSET, 1);
+        }
+    }
+}
+
+/****************************************************************************
  * Name: nrf54l_rxstop
  *
  * Description:
@@ -770,7 +795,7 @@ static int nrf54l_interrupt(int irq, void *context, void *arg)
   else
     {
       /* Copy the completed byte before restarting DMA. Automatic END-to-
-       * START would let DMA overwrite a buffer before the interrupt handler
+       * START would let DMA overwrite a buffer before the upper half
        * consumes it. The UART FIFO holds incoming bytes between transfers.
        */
 
@@ -780,16 +805,9 @@ static int nrf54l_interrupt(int irq, void *context, void *arg)
           UP_DMB();
           priv->rxchar = priv->rxdma;
           priv->rxvalid = true;
-          UP_DMB();
-          nrf54l_uart_putreg(priv, NRF54L_UARTE_TASKS_STARTRX_OFFSET, 1);
         }
 
-      if (priv->rxvalid && priv->rxenabled)
-        {
-          uart_recvchars(dev);
-        }
-
-      priv->rxvalid = false;
+      nrf54l_rxdeliver(dev);
       nrf54l_uart_clrevent(priv, NRF54L_UARTE_EVENTS_RXTO_OFFSET);
     }
 
@@ -1045,12 +1063,19 @@ static int nrf54l_receive(struct uart_dev_s *dev, unsigned int *status)
 static void nrf54l_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct nrf54l_dev_s *priv = dev->priv;
+  irqstate_t flags = enter_critical_section();
 
 #ifdef CONFIG_SUPPRESS_SERIAL_INTS
-  priv->rxenabled = false;
-#else
-  priv->rxenabled = enable;
+  enable = false;
 #endif
+
+  priv->rxenabled = enable;
+  if (enable)
+    {
+      nrf54l_rxdeliver(dev);
+    }
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
