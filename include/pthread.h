@@ -575,16 +575,12 @@ int  pthread_setcanceltype(int type, FAR int *oldtype);
 void pthread_testcancel(void);
 
 /* A thread may set up cleanup functions to execute when the thread exits or
- * is canceled.
+ * is canceled.  They need CONFIG_TLS_NCLEANUP > 0: without it, a program
+ * that calls them does not link.
  */
 
-#if CONFIG_TLS_NCLEANUP > 0
 void pthread_cleanup_pop(int execute);
 void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg);
-#else
-#  define pthread_cleanup_pop(execute) ((void)(execute))
-#  define pthread_cleanup_push(routine,arg) ((void)(routine), (void)(arg))
-#endif
 
 /* A thread can await termination of another thread and retrieve the return
  * value of the thread.

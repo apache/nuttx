@@ -76,5 +76,8 @@ config TLS_NCLEANUP
 		POSIX pthread cancellation.  The number of cleanup stack levels
 		is the maximum number of pthread_cleanup_push() calls that can
 		be made without a corresponding pthread_cleanup_pop() call.
+		With 0, pthread_cleanup_push() and pthread_cleanup_pop() do not
+		exist and a program that calls them does not link.  Each level
+		costs two pointers in every thread.
 
 endmenu # Thread Local Storage (TLS)
