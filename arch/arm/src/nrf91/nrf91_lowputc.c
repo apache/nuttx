@@ -333,8 +333,28 @@ void nrf91_usart_configure(uintptr_t base,
   uint32_t regval = 0;
 
   putreg32(0xffffffff, base + NRF91_UARTE_INTENCLR_OFFSET);
-  putreg32(1, base + NRF91_UARTE_TASKS_STOPRX_OFFSET);
-  putreg32(1, base + NRF91_UARTE_TASKS_STOPTX_OFFSET);
+
+  /* Anomaly 23: a transfer left running survives disabling the UARTE.
+   * Stop it with the UARTE enabled and wait for the receiver to stop.
+   */
+
+  if (getreg32(base + NRF91_UARTE_TXSTATE_OFFSET) != 0)
+    {
+      putreg32(1, base + NRF91_UARTE_TASKS_STOPTX_OFFSET);
+    }
+
+  if (getreg32(base + NRF91_UARTE_RXSTATE_OFFSET) != 0)
+    {
+      putreg32(NRF91_UARTE_ENABLE_ENABLE, base + NRF91_UARTE_ENABLE_OFFSET);
+      putreg32(1, base + NRF91_UARTE_TASKS_STOPRX_OFFSET);
+      while (getreg32(base + NRF91_UARTE_RXSTATE_OFFSET) != 0)
+        {
+        }
+
+      putreg32(getreg32(base + NRF91_UARTE_ERRORSRC_OFFSET),
+               base + NRF91_UARTE_ERRORSRC_OFFSET);
+    }
+
   putreg32(NRF91_UARTE_ENABLE_DISABLE, base + NRF91_UARTE_ENABLE_OFFSET);
 
   /* Set UART format */
