@@ -613,6 +613,7 @@ int ws2812_register(FAR const char          *dev_path,
   /* Register the character driver */
 
   int ret = register_driver(dev_path, &g_ws2812fops, 0600, dev_data);
+
   if (ret < 0)
     {
       lederr("ERROR: Failed to register ws2812 driver: %d\n", ret);
