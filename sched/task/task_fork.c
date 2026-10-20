@@ -503,6 +503,14 @@ pid_t nxtask_start_fork(FAR struct tcb_s *child, bool vfork)
       (child->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
       fork_restore_parent_env();
+
+#ifdef CONFIG_MM_KERNEL_HEAP
+      /* group_allocate() put the child's task_info in the parent's heap
+       * before the copy.  The child uses its own copy: free this one.
+       */
+
+      group_free(child->group, child->group->tg_info);
+#endif
     }
 #endif
 
