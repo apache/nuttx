@@ -65,6 +65,15 @@ Serial Device Drivers
    the signal to the process ``pgrp``, and TTY signals go to the single
    foreground PID.
 
+-  **Window size**. ``TIOCGWINSZ`` returns the terminal size in a
+   ``struct winsize`` and ``TIOCSWINSZ`` sets it.  The size is 0 rows
+   and 0 columns until a program sets it (for example ``openpty()`` or
+   a remote login server).  A change of the size sends ``SIGWINCH`` to
+   the foreground PID when ``CONFIG_TTY_SIGINT`` or
+   ``CONFIG_TTY_SIGTSTP`` is enabled.  A pseudo-terminal keeps one size
+   for the master and the slave; the signal goes to the foreground PID
+   of the slave.
+
 -  **User Access**. Serial drivers are, ultimately, normal
    `character drivers <#chardrivers>`__ and are accessed as other
    character drivers.
