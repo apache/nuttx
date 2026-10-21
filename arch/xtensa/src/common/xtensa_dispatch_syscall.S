@@ -26,10 +26,22 @@
 
 #include <nuttx/config.h>
 
+#include <arch/irq.h>
 #include <arch/syscall.h>
 #include <arch/xtensa/xtensa_abi.h>
 
 #ifdef CONFIG_LIB_SYSCALL
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* The stack that the dispatch uses below SP: the register frame of the
+ * system call and 16 bytes for parm5, rounded up to the 16-byte alignment
+ * of SP.
+ */
+
+#define DISPATCH_STACK ((XCPTCONTEXT_SIZE + 31) & ~15)
 
 /****************************************************************************
  * File info
@@ -68,8 +80,14 @@
   .align  4
 
 xtensa_dispatch_syscall:
-  /* Allocate parm5 in stack */
+  /* Allocate parm5 in stack.  The word at SP belongs to the frame of the
+   * caller (or lies above the kernel stack), and the register frame of
+   * this system call is just below SP, where fork() reads it while the
+   * stub runs.  So move SP below both first.
+   */
 
+  movi   a9, DISPATCH_STACK
+  sub    sp, sp, a9
   s32i   a8, sp, LOCAL_OFFSET(0)
 
   mov    a11, a7 /* Move parm4 into callee's a7 */
@@ -89,6 +107,11 @@ xtensa_dispatch_syscall:
   /* Call the stub */
 
   callx4 a3
+
+  /* Restore SP */
+
+  movi   a4, DISPATCH_STACK
+  add    sp, sp, a4
 
   /* Move into A3 the return value from the stub */
 
