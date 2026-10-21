@@ -135,22 +135,27 @@
 
 #ifndef __ASSEMBLY__
 
+/* A system call returns with R1-R3 and R12 changed (dispatch_syscall() calls
+ * the stub function), so the macros give these registers to the compiler
+ * as outputs or as clobbered.
+ */
+
 /* SVC with SYS_ call number and no parameters */
 
 #ifdef __ghs__
-#  define sys_call0(nbr)                    \
-({                                          \
-  uintptr_t ret;                            \
-  __asm__ __volatile__                      \
-  (                                         \
-    "mov r0, %2\n\t"                        \
-    "svc %1\n\t"                            \
-    "mov %0, r0"                            \
-    : "=r"(ret)                             \
-    : "i"(SYS_syscall), "r"((uintptr_t)nbr) \
-    : "memory", "r0"                        \
-  );                                        \
-  ret;                                      \
+#  define sys_call0(nbr)                      \
+({                                            \
+  uintptr_t ret;                              \
+  __asm__ __volatile__                        \
+  (                                           \
+    "mov r0, %2\n\t"                          \
+    "svc %1\n\t"                              \
+    "mov %0, r0"                              \
+    : "=r"(ret)                               \
+    : "i"(SYS_syscall), "r"((uintptr_t)nbr)   \
+    : "memory", "r0", "r1", "r2", "r3", "r12" \
+  );                                          \
+  ret;                                        \
 })
 #else
 #  define sys_call0(nbr)                                    \
@@ -159,9 +164,9 @@
   __asm__ __volatile__                                      \
   (                                                         \
     "svc %1"                                                \
-    : "=r"(reg0)                                            \
-    : "i"(SYS_syscall), "r"(reg0)                           \
-    : "memory"                                              \
+    : "+r"(reg0)                                            \
+    : "i"(SYS_syscall)                                      \
+    : "memory", "r1", "r2", "r3", "r12"                     \
   );                                                        \
   reg0;                                                     \
 })
@@ -170,21 +175,21 @@
 /* SVC with SYS_ call number and one parameter */
 
 #ifdef __ghs__
-#  define sys_call1(nbr, parm1)              \
-({                                           \
-  uintptr_t ret;                             \
-  __asm__ __volatile__                       \
-  (                                          \
-    "mov r0, %2\n\t"                         \
-    "mov r1, %3\n\t"                         \
-    "svc %1\n\t"                             \
-    "mov %0, r0"                             \
-    : "=r"(ret)                              \
-    : "i"(SYS_syscall), "r"((uintptr_t)nbr), \
-      "r"((uintptr_t)parm1)                  \
-    : "memory", "r0", "r1"                   \
-  );                                         \
-  ret;                                       \
+#  define sys_call1(nbr, parm1)               \
+({                                            \
+  uintptr_t ret;                              \
+  __asm__ __volatile__                        \
+  (                                           \
+    "mov r0, %2\n\t"                          \
+    "mov r1, %3\n\t"                          \
+    "svc %1\n\t"                              \
+    "mov %0, r0"                              \
+    : "=r"(ret)                               \
+    : "i"(SYS_syscall), "r"((uintptr_t)nbr),  \
+      "r"((uintptr_t)parm1)                   \
+    : "memory", "r0", "r1", "r2", "r3", "r12" \
+  );                                          \
+  ret;                                        \
 })
 #else
 #  define sys_call1(nbr, parm1)                               \
@@ -193,10 +198,10 @@
   register uintptr_t reg0 __asm__("r0") = (uintptr_t)(nbr);   \
   __asm__ __volatile__                                        \
   (                                                           \
-    "svc %1"                                                  \
-    : "=r"(reg0)                                              \
-    : "i"(SYS_syscall), "r"(reg0), "r"(reg1)                  \
-    : "memory"                                                \
+    "svc %2"                                                  \
+    : "+r"(reg0), "+r"(reg1)                                  \
+    : "i"(SYS_syscall)                                        \
+    : "memory", "r2", "r3", "r12"                             \
   );                                                          \
   reg0;                                                       \
 })
@@ -218,7 +223,7 @@
     : "=r"(ret)                                    \
     : "i"(SYS_syscall), "r"((uintptr_t)nbr),       \
       "r"((uintptr_t)parm1), "r"((uintptr_t)parm2) \
-    : "memory", "r0", "r1", "r2"                   \
+    : "memory", "r0", "r1", "r2", "r3", "r12"      \
   );                                               \
   ret;                                             \
 })
@@ -230,10 +235,10 @@
   register uintptr_t reg0 __asm__("r0") = (uintptr_t)(nbr);   \
   __asm__ __volatile__                                        \
   (                                                           \
-    "svc %1"                                                  \
-    : "=r"(reg0)                                              \
-    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2)       \
-    : "memory"                                                \
+    "svc %3"                                                  \
+    : "+r"(reg0), "+r"(reg1), "+r"(reg2)                      \
+    : "i"(SYS_syscall)                                        \
+    : "memory", "r3", "r12"                                   \
   );                                                          \
   reg0;                                                       \
 })
@@ -256,7 +261,7 @@
     : "=r"(ret)                                                     \
     : "i"(SYS_syscall), "r"((uintptr_t)nbr), "r"((uintptr_t)parm1), \
       "r"((uintptr_t)parm2), "r"((uintptr_t)parm3)                  \
-    : "memory", "r0", "r1", "r2", "r3"                              \
+    : "memory", "r0", "r1", "r2", "r3", "r12"                       \
   );                                                                \
   ret;                                                              \
 })
@@ -269,10 +274,10 @@
   register uintptr_t reg0 __asm__("r0") = (uintptr_t)(nbr);        \
   __asm__ __volatile__                                             \
   (                                                                \
-    "svc %1"                                                       \
-    : "=r"(reg0)                                                   \
-    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2), "r"(reg3) \
-    : "memory"                                                     \
+    "svc %4"                                                       \
+    : "+r"(reg0), "+r"(reg1), "+r"(reg2), "+r"(reg3)               \
+    : "i"(SYS_syscall)                                             \
+    : "memory", "r12"                                              \
   );                                                               \
   reg0;                                                            \
 })
@@ -298,7 +303,7 @@
     : "=r"(ret)                                                           \
     : "i"(SYS_syscall), "r"((uintptr_t)nbr), "r"((uintptr_t)parm1),       \
       "r"((uintptr_t)parm2), "r"((uintptr_t)parm3), "r"((uintptr_t)parm4) \
-    : "memory", "r0", "r1", "r2", "r3"                                    \
+    : "memory", "r0", "r1", "r2", "r3", "r12"                             \
   );                                                                      \
   ret;                                                                    \
 })
@@ -312,11 +317,10 @@
   register uintptr_t reg0 __asm__("r0") = (uintptr_t)(nbr);   \
   __asm__ __volatile__                                        \
   (                                                           \
-    "svc %1"                                                  \
-    : "=r"(reg0)                                              \
-    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2),      \
-      "r"(reg3), "r"(reg4)                                    \
-    : "memory"                                                \
+    "svc %4"                                                  \
+    : "+r"(reg0), "+r"(reg1), "+r"(reg2), "+r"(reg3)          \
+    : "i"(SYS_syscall), "r"(reg4)                             \
+    : "memory", "r12"                                         \
   );                                                          \
   reg0;                                                       \
 })
@@ -345,7 +349,7 @@
     : "i"(SYS_syscall), "r"((uintptr_t)nbr), "r"((uintptr_t)parm1),        \
       "r"((uintptr_t)parm2), "r"((uintptr_t)parm3), "r"((uintptr_t)parm4), \
       "r"((uintptr_t)parm5)                                                \
-    : "memory", "r0", "r1", "r2"                                           \
+    : "memory", "r0", "r1", "r2", "r12"                                    \
   );                                                                       \
   ret;                                                                     \
 })
@@ -360,11 +364,10 @@
   register uintptr_t reg0 __asm__("r0") = (uintptr_t)(nbr);   \
   __asm__ __volatile__                                        \
   (                                                           \
-    "svc %1"                                                  \
-    : "=r"(reg0)                                              \
-    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2),      \
-      "r"(reg3), "r"(reg4), "r"(reg5)                         \
-    : "memory"                                                \
+    "svc %4"                                                  \
+    : "+r"(reg0), "+r"(reg1), "+r"(reg2), "+r"(reg3)          \
+    : "i"(SYS_syscall), "r"(reg4), "r"(reg5)                  \
+    : "memory", "r12"                                         \
   );                                                          \
   reg0;                                                       \
 })
@@ -394,7 +397,7 @@
     : "i"(SYS_syscall), "r"((uintptr_t)nbr), "r"((uintptr_t)parm1),        \
       "r"((uintptr_t)parm2), "r"((uintptr_t)parm3), "r"((uintptr_t)parm4), \
       "r"((uintptr_t)parm5), "r"((uintptr_t)parm6)                         \
-    : "memory", "r0", "r1"                                                 \
+    : "memory", "r0", "r1", "r12"                                          \
   );                                                                       \
   ret;                                                                     \
 })
@@ -410,11 +413,10 @@
   register uintptr_t reg0 __asm__("r0") = (uintptr_t)(nbr);        \
   __asm__ __volatile__                                             \
   (                                                                \
-    "svc %1"                                                       \
-    : "=r"(reg0)                                                   \
-    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2),           \
-      "r"(reg3), "r"(reg4), "r"(reg5), "r"(reg6)                   \
-    : "memory"                                                     \
+    "svc %4"                                                       \
+    : "+r"(reg0), "+r"(reg1), "+r"(reg2), "+r"(reg3)               \
+    : "i"(SYS_syscall), "r"(reg4), "r"(reg5), "r"(reg6)            \
+    : "memory", "r12"                                              \
   );                                                               \
   reg0;                                                            \
 })
