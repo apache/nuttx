@@ -366,6 +366,10 @@ ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
 
   ARCHOPTIMIZATION += -fshort-enums
 
+  # LD is the compiler driver: give it the options of the linker with -Xlinker
+
+  LDXLINKER = -Xlinker
+
 # Default toolchain
 
 else
@@ -395,6 +399,7 @@ else
 
       LDMODULELTOFLAGS = -flinker-output=nolto-rel $(CMODULEFLAGS)
       LDELFLTOFLAGS = -flinker-output=nolto-rel $(CELFFLAGS)
+      LDXLINKER = -Xlinker
     endif
   endif
 
@@ -467,9 +472,9 @@ ifeq ($(CONFIG_BINFMT_ELF_RELOCATABLE),y)
 endif
 
 ifeq ($(CONFIG_ARCH_RV32),y)
-  LDELFFLAGS += --oformat elf32-littleriscv
+  LDELFFLAGS += $(LDXLINKER) --oformat=elf32-littleriscv
 else
-  LDELFFLAGS += --oformat elf64-littleriscv
+  LDELFFLAGS += $(LDXLINKER) --oformat=elf64-littleriscv
 endif
 
 ifneq ($(CONFIG_BUILD_KERNEL),y)
