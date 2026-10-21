@@ -44,34 +44,20 @@
  ****************************************************************************/
 
 nosanitize_address
-static int backtrace(uintptr_t pcxi, void **buffer,
-                     int size, int *skip)
+static int backtrace(uintptr_t pcxi, void **buffer, int size, int *skip)
 {
+  uintptr_t return_addr;
   uintptr_t *csa;
   int i = 0;
 
-  for (; i < size && (pcxi & FCX_FREE) != 0; )
+  for (; pcxi != 0 && i < size; pcxi = csa[REG_UPCXI])
     {
       csa = tricore_csa2addr(pcxi);
-      if (csa == NULL)
+      return_addr = (pcxi & PCXI_UL) ? csa[REG_UA11] : csa[REG_LA11];
+      if (return_addr && (*skip)-- <= 0)
         {
-          break;
+          buffer[i++] = (void *)return_addr;
         }
-
-      if ((pcxi & PCXI_UL) != 0)
-        {
-          if (csa[REG_UA11] == 0)
-            {
-              break;
-            }
-
-          if ((*skip)-- <= 0)
-            {
-              buffer[i++] = (void *)csa[REG_UA11];
-            }
-        }
-
-      pcxi = csa[REG_UPCXI];
     }
 
   return i;
@@ -131,8 +117,7 @@ int up_backtrace(struct tcb_s *tcb,
     }
   else
     {
-      uintptr_t *regs = tcb->xcp.regs;
-      ret = backtrace(regs[REG_LPCXI], buffer, size, &skip);
+      ret = backtrace(tricore_addr2csa(tcb->xcp.regs), buffer, size, &skip);
     }
 
   return ret;
