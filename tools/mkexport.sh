@@ -234,9 +234,10 @@ if [ "X${USRONLY}" != "Xy" ]; then
   done
 fi
 
-# Drop kernel folder elf/gnu-elf.ld as the exported script shall suffice
+# Drop kernel folder elf/gnu-elf.ld as the exported script shall suffice.
+# Remove only the -T options, not the options after them.
 
-LDELFFLAGS=$(echo "$LDELFFLAGS" | sed -e 's:-T.*ld::')
+LDELFFLAGS=$(echo "$LDELFFLAGS" | sed -e 's:-T *[^ ]*\.ld::g')
 
 # Set LDMODULEFLAGS so that kernel modules can build in kernel mode
 
