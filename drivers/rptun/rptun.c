@@ -1022,6 +1022,7 @@ static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
+
   return rptun_do_ioctl(inode->i_private, cmd, arg);
 }
 
