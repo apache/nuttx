@@ -370,6 +370,11 @@ ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
 
   LDXLINKER = -Xlinker
 
+  # The export gives the group options to the program link of a kernel build
+
+  LDSTARTGROUP = -Wl,--start-group
+  LDENDGROUP = -Wl,--end-group
+
 # Default toolchain
 
 else
@@ -400,6 +405,11 @@ else
       LDMODULELTOFLAGS = -flinker-output=nolto-rel $(CMODULEFLAGS)
       LDELFLTOFLAGS = -flinker-output=nolto-rel $(CELFFLAGS)
       LDXLINKER = -Xlinker
+
+      # The export gives the group options to the program link of a kernel build
+
+      LDSTARTGROUP = -Wl,--start-group
+      LDENDGROUP = -Wl,--end-group
     endif
   endif
 

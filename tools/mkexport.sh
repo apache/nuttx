@@ -325,22 +325,25 @@ echo "set(LLVM_CPUTYPE        \"${LLVM_CPUTYPE}\")"     >>"${EXPORTDIR}/scripts/
 echo "set(LLVM_ABITYPE        \"${LLVM_ABITYPE}\")"     >>"${EXPORTDIR}/scripts/target.cmake"
 
 
+# The library group options of the linker, for the program links too
+
+echo "LDENDGROUP       = ${LDENDGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "LDSTARTGROUP     = ${LDSTARTGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "set(LDENDGROUP       \"${LDENDGROUP}\")"   >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(LDSTARTGROUP     \"${LDSTARTGROUP}\")" >>"${EXPORTDIR}/scripts/target.cmake"
+
 # Additional compilation options when the kernel is built
 
 if [ "X${USRONLY}" != "Xy" ]; then
   echo "EXTRA_LIBS       = ${EXTRA_LIBS}" >>"${EXPORTDIR}/scripts/Make.defs"
   echo "EXTRA_OBJS       = ${EXTRA_OBJS}" >>"${EXPORTDIR}/scripts/Make.defs"
   echo "HEAD_OBJ         = ${HEAD_OBJ}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "LDENDGROUP       = ${LDENDGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
   echo "LDFLAGS          = ${LDFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "LDSTARTGROUP     = ${LDSTARTGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
 
   echo "set(EXTRA_LIBS       \"${EXTRA_LIBS}\")"   >>"${EXPORTDIR}/scripts/target.cmake"
   echo "set(EXTRA_OBJS       \"${EXTRA_OBJS}\")"   >>"${EXPORTDIR}/scripts/target.cmake"
   echo "set(HEAD_OBJ         \"${HEAD_OBJ}\")"     >>"${EXPORTDIR}/scripts/target.cmake"
-  echo "set(LDENDGROUP       \"${LDENDGROUP}\")"   >>"${EXPORTDIR}/scripts/target.cmake"
   echo "set(LDFLAGS          \"${LDFLAGS}\")"      >>"${EXPORTDIR}/scripts/target.cmake"
-  echo "set(LDSTARTGROUP     \"${LDSTARTGROUP}\")" >>"${EXPORTDIR}/scripts/target.cmake"
 fi
 
 # Copy the CMake toolchain file

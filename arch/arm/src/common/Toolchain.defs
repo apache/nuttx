@@ -323,6 +323,11 @@ else
 
       LDMODULELTOFLAGS = -flinker-output=nolto-rel $(CMODULEFLAGS)
       LDELFLTOFLAGS = -flinker-output=nolto-rel $(CELFFLAGS)
+
+      # The export gives the group options to the program link of a kernel build
+
+      LDSTARTGROUP = -Wl,--start-group
+      LDENDGROUP = -Wl,--end-group
     endif
   endif
 
