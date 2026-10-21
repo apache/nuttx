@@ -443,6 +443,70 @@ int sigaction(int signo, FAR const struct sigaction *act,
 }
 
 /****************************************************************************
+ * Name: nxsig_dupactions
+ *
+ * Description:
+ *   Give a new task group (the child of fork() or vfork()) a copy of the
+ *   signal actions of the group of its parent: the signal handlers, and
+ *   the signals that have the default action.  The signals that the
+ *   parent ignores have no action, so the child ignores them too.
+ *
+ * Input Parameters:
+ *   group  - The new task group.  It has no signal actions yet.
+ *   parent - The task group of the parent.
+ *
+ ****************************************************************************/
+
+void nxsig_dupactions(FAR struct task_group_s *group,
+                      FAR struct task_group_s *parent)
+{
+  FAR sigactq_t *sigact;
+  FAR sigactq_t *copy;
+  irqstate_t flags;
+  int i;
+  int n;
+
+  /* Copy one action at a time: an allocation cannot be made while the
+   * list of the parent is locked, and another thread of the parent can
+   * change the list meanwhile.
+   */
+
+  for (i = 0; ; i++)
+    {
+      copy = nxsig_alloc_action();
+
+      flags = spin_lock_irqsave(&parent->tg_lock);
+      for (sigact = (FAR sigactq_t *)parent->tg_sigactionq.head, n = 0;
+           sigact != NULL && n < i;
+           sigact = sigact->flink, n++);
+
+      if (sigact != NULL)
+        {
+          copy->signo = sigact->signo;
+          copy->act   = sigact->act;
+        }
+
+      spin_unlock_irqrestore(&parent->tg_lock, flags);
+
+      if (sigact == NULL)
+        {
+          nxsig_release_action(copy);
+          break;
+        }
+
+      flags = spin_lock_irqsave(&group->tg_lock);
+      sq_addlast((FAR sq_entry_t *)copy, &group->tg_sigactionq);
+      spin_unlock_irqrestore(&group->tg_lock, flags);
+    }
+
+#ifdef CONFIG_SIG_DEFAULT
+  flags = spin_lock_irqsave(&parent->tg_lock);
+  group->tg_sigdefault = parent->tg_sigdefault;
+  spin_unlock_irqrestore(&parent->tg_lock, flags);
+#endif
+}
+
+/****************************************************************************
  * Name: nxsig_release_action
  *
  * Description:

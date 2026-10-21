@@ -170,6 +170,8 @@ void               nxsig_initialize(void);
 
 /* sig_action.c */
 
+void               nxsig_dupactions(FAR struct task_group_s *group,
+                                    FAR struct task_group_s *parent);
 void               nxsig_release_action(FAR sigactq_t *sigact);
 
 /* sig_default.c */

@@ -41,6 +41,7 @@
 
 #include "sched/sched.h"
 #include "group/group.h"
+#include "signal/signal.h"
 #include "task/task.h"
 #include "tls/tls.h"
 
@@ -423,6 +424,14 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr, bool vfork)
           goto errout_with_tcb;
         }
     }
+
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
+  /* POSIX: the child has the signal actions of the parent, but no pending
+   * signals.  nxtask_setup_scheduler() copied the signal mask already.
+   */
+
+  nxsig_dupactions(child->group, ptcb->group);
+#endif
 
   /* Now we have enough in place that we can join the group */
 
