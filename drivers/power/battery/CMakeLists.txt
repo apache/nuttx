@@ -36,6 +36,12 @@ if(CONFIG_BATTERY_CHARGER)
     list(APPEND SRCS mcp73871.c)
   endif()
 
+  # Add the LTC4013 battery charger driver
+
+  if(CONFIG_LTC4013)
+    list(APPEND SRCS ltc4013.c)
+  endif()
+
   # Add the BQ2425x I2C-based battery charger driver
 
   if(CONFIG_I2C_BQ2425X)
