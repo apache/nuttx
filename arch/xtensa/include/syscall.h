@@ -173,9 +173,10 @@ static inline uintptr_t sys_call0(unsigned int nbr)
   __asm__ __volatile__
   (
     "syscall\n"
-    : "=r"(reg0)
-    : "r"(reg0)
-    : "memory"
+    : "+r"(reg0)
+    :
+    : "memory", "a3", "a4", "a5", "a6", "a8", "a9", "a10", "a11",
+      "a12", "a13", "a14", "a15"
   );
 
   return reg0;
@@ -197,9 +198,10 @@ static inline uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1)
   __asm__ __volatile__
   (
     "syscall\n"
-    : "=r"(reg0)
-    : "r"(reg0), "r"(reg1)
-    : "memory"
+    : "+r"(reg0), "+r"(reg1)
+    :
+    : "memory", "a4", "a5", "a6", "a8", "a9", "a10", "a11", "a12",
+      "a13", "a14", "a15"
   );
 
   return reg0;
@@ -223,9 +225,10 @@ static inline uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1,
   __asm__ __volatile__
   (
     "syscall\n"
-    : "=r"(reg0)
-    : "r"(reg0), "r"(reg1), "r"(reg2)
-    : "memory"
+    : "+r"(reg0), "+r"(reg1), "+r"(reg2)
+    :
+    : "memory", "a5", "a6", "a8", "a9", "a10", "a11", "a12", "a13",
+      "a14", "a15"
   );
 
   return reg0;
@@ -250,10 +253,10 @@ static inline uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1,
   __asm__ __volatile__
   (
     "syscall\n"
-    : "=r"(reg0)
-    : "r"(reg0), "r"(reg1), "r"(reg2),
-      "r"(reg3)
-    : "memory"
+    : "+r"(reg0), "+r"(reg1), "+r"(reg2), "+r"(reg3)
+    :
+    : "memory", "a6", "a8", "a9", "a10", "a11", "a12", "a13", "a14",
+      "a15"
   );
 
   return reg0;
@@ -280,10 +283,9 @@ static inline uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1,
   __asm__ __volatile__
   (
     "syscall\n"
-    : "=r"(reg0)
-    : "r"(reg0), "r"(reg1), "r"(reg2),
-      "r"(reg3), "r"(reg4)
-    : "memory"
+    : "+r"(reg0), "+r"(reg1), "+r"(reg2), "+r"(reg3), "+r"(reg4)
+    :
+    : "memory", "a8", "a9", "a10", "a11", "a12", "a13", "a14", "a15"
   );
 
   return reg0;
@@ -311,10 +313,9 @@ static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
   __asm__ __volatile__
   (
     "syscall\n"
-    : "=r"(reg0)
-    : "r"(reg0), "r"(reg1), "r"(reg2),
-      "r"(reg3), "r"(reg4), "r"(reg5)
-    : "memory"
+    : "+r"(reg0), "+r"(reg1), "+r"(reg2), "+r"(reg3), "+r"(reg4), "+r"(reg5)
+    :
+    : "memory", "a8", "a9", "a10", "a11", "a12", "a13", "a14", "a15"
   );
 
   return reg0;
@@ -344,10 +345,10 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
   __asm__ __volatile__
   (
     "syscall\n"
-    : "=r"(reg0)
-    : "r"(reg0), "r"(reg1), "r"(reg2),
-      "r"(reg3), "r"(reg4), "r"(reg5), "r"(reg6)
-    : "memory"
+    : "+r"(reg0), "+r"(reg1), "+r"(reg2), "+r"(reg3), "+r"(reg4), "+r"(reg5),
+      "+r"(reg6)
+    :
+    : "memory", "a9", "a10", "a11", "a12", "a13", "a14", "a15"
   );
 
   return reg0;
