@@ -54,7 +54,12 @@ int dn_comp(FAR const char *src, FAR unsigned char *dst, int space,
 int dn_expand(FAR const unsigned char *base, FAR const unsigned char *end,
               FAR const unsigned char *src, FAR char *dest, int space);
 
+int dn_skipname(FAR const unsigned char *src,
+                FAR const unsigned char *end);
+
 /* DNS queries */
+
+int res_init(void);
 
 int res_mkquery(int op, FAR const char *dname, int rclass, int type,
                 FAR const unsigned char *data, int datalen,
