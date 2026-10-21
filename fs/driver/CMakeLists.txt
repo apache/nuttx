@@ -21,7 +21,7 @@
 # ##############################################################################
 
 set(SRCS fs_registerdriver.c fs_unregisterdriver.c fs_registerpipedriver.c
-         fs_unregisterpipedriver.c)
+         fs_unregisterpipedriver.c fs_registerpseudodir.c)
 
 # Don't built-in block driver support if there are no mountpoints
 

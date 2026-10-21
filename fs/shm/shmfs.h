@@ -69,4 +69,14 @@ FAR struct shmfs_object_s *shmfs_alloc_object(size_t length);
 
 void shmfs_free_object(FAR struct shmfs_object_s *object);
 
+/****************************************************************************
+ * Name: shmfs_initialize
+ *
+ * Description:
+ *   Create the directory of the shared memory objects at boot.
+ *
+ ****************************************************************************/
+
+void shmfs_initialize(void);
+
 #endif
