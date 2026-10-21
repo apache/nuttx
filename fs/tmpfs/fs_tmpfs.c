@@ -2650,6 +2650,7 @@ static int tmpfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   ret = tmpfs_foreach(tdo, tmpfs_statfs_callout, (FAR void *)&tmpbuf);
   if (ret < 0)
     {
+      tmpfs_unlock(fs);
       return -ECANCELED;
     }
 
