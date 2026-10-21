@@ -124,6 +124,17 @@ config MCP73871
 	---help---
 		A simple driver to report MCP73871 status.
 
+config LTC4013
+	bool "Analog Devices LTC4013 Battery charger support"
+	default n
+	depends on BATTERY_CHARGER
+	---help---
+		Lower half driver for the LTC4013 multi-chemistry battery charger
+		controller.  The chip has no digital interface: the driver enables
+		it, sets its charge algorithm and reads its status through board
+		callbacks.  The charge voltage is set by a board callback that
+		programs the feedback network, or it is fixed by the hardware.
+
 config BATTERY_GAUGE
 	bool "Battery Fuel Gauge support"
 	default n
