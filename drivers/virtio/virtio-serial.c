@@ -662,6 +662,7 @@ int virtio_register_serial_driver(void)
 {
   int ret1 = virtio_register_driver(&g_virtio_serial_driver);
   int ret2 = virtio_register_driver(&g_virtio_rprocserial_driver);
+
   return ret1 < 0 ? ret1 : ret2;
 }
 
