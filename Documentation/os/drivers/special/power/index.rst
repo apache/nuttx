@@ -8,6 +8,8 @@ Power-related Drivers
   pm/index.rst
   regulator.rst
   battery/fakegauge.rst
+  smps.rst
+  lm51772.rst
 
 .. toctree::
    :maxdepth: 1
