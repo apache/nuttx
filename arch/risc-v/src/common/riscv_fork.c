@@ -310,6 +310,7 @@ pid_t riscv_fork(bool vfork, const struct fork_s *context)
       if (context->fp >= context->sp && context->fp < stacktop)
         {
           uintptr_t frameutil = stacktop - context->fp;
+
           newfp = newtop - frameutil;
         }
       else
