@@ -265,6 +265,18 @@ static ssize_t ptmx_write(FAR struct file *filep,
 
 int ptmx_register(void)
 {
+  int ret;
+
+  /* The slave devices are /dev/pts/N: create the directory now, so that it
+   * exists before the first pseudo-terminal does.
+   */
+
+  ret = register_pseudodir("/dev/pts", 0755);
+  if (ret < 0 && ret != -EEXIST)
+    {
+      return ret;
+    }
+
   /* Register the PTMX driver */
 
   return register_driver("/dev/ptmx", &g_ptmx_fops, 0600, NULL);

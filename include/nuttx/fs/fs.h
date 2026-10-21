@@ -589,6 +589,25 @@ int register_driver(FAR const char *path,
                     FAR void *priv);
 
 /****************************************************************************
+ * Name: register_pseudodir
+ *
+ * Description:
+ *   Create an empty directory in the pseudo file system, for a driver or a
+ *   file system that creates its nodes below it later.
+ *
+ * Input Parameters:
+ *   path - The path of the directory
+ *   mode - The permissions of the directory
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure, e.g. -EEXIST if
+ *   'path' exists already.
+ *
+ ****************************************************************************/
+
+int register_pseudodir(FAR const char *path, mode_t mode);
+
+/****************************************************************************
  * Name: register_driver_with_size
  *
  * Description:

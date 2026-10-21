@@ -33,6 +33,7 @@
 #include "aio/aio.h"
 #include "vfs/vfs.h"
 #include "fs_heap.h"
+#include "shm/shmfs.h"
 
 /****************************************************************************
  * Private Functions
@@ -104,6 +105,12 @@ void fs_initialize(void)
 
 #ifdef CONFIG_FS_NOTIFY
   notify_initialize();
+#endif
+
+#ifdef CONFIG_FS_SHMFS
+  /* The directory of the shared memory objects */
+
+  shmfs_initialize();
 #endif
 
   register_reboot_notifier(&g_sync_nb);

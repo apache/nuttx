@@ -25,6 +25,8 @@
  ****************************************************************************/
 
 #include <assert.h>
+#include <debug.h>
+#include <errno.h>
 #include <stdbool.h>
 #include <string.h>
 #include <sys/param.h>
@@ -508,4 +510,30 @@ static int shmfs_munmap(FAR struct task_group_s *group,
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: shmfs_initialize
+ *
+ * Description:
+ *   Create the directory of the shared memory objects
+ *   (CONFIG_FS_SHMFS_VFS_PATH) at boot, so that it exists before the first
+ *   object does.  Anyone can create an object in it (mode 1777).
+ *
+ ****************************************************************************/
+
+void shmfs_initialize(void)
+{
+  int ret;
+
+  ret = register_pseudodir(CONFIG_FS_SHMFS_VFS_PATH, 01777);
+  if (ret < 0 && ret != -EEXIST)
+    {
+      ferr("ERROR: Failed to create %s: %d\n", CONFIG_FS_SHMFS_VFS_PATH,
+           ret);
+    }
 }
