@@ -100,6 +100,10 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
     LDENDGROUP   ?= -Wl,--end-group
     LDFLAGS      := $(addprefix -Xlinker ,$(LDFLAGS))
     LDFLAGS      += $(filter-out $(STRIPCFLAGS),$(CFLAGS))
+
+    # The driver must not add its start files and libraries
+
+    LDFLAGS      += -nostdlib
   else
     LDSTARTGROUP ?= --start-group
     LDENDGROUP   ?= --end-group
