@@ -121,12 +121,14 @@
 #  error Basic timers not supported by the tickless driver
 #endif
 
+#if (CONFIG_STM32_TICKLESS_TIMER == 1) || \
+    (CONFIG_STM32_TICKLESS_TIMER == 8)
+#  error Advanced timers not supported by the tickless driver
+#endif
+
 /* Debug MCU freeze bit of the tickless timer */
 
-#if CONFIG_STM32_TICKLESS_TIMER == 1 && defined(DBGMCU_TIM1_STOP)
-#  define TICKLESS_DBGMCU_FZ   STM32_DBGMCU_TIM1_FZ
-#  define TICKLESS_DBGMCU_STOP DBGMCU_TIM1_STOP
-#elif CONFIG_STM32_TICKLESS_TIMER == 2 && defined(DBGMCU_TIM2_STOP)
+#if CONFIG_STM32_TICKLESS_TIMER == 2 && defined(DBGMCU_TIM2_STOP)
 #  define TICKLESS_DBGMCU_FZ   STM32_DBGMCU_TIM2_FZ
 #  define TICKLESS_DBGMCU_STOP DBGMCU_TIM2_STOP
 #elif CONFIG_STM32_TICKLESS_TIMER == 3 && defined(DBGMCU_TIM3_STOP)
@@ -138,9 +140,6 @@
 #elif CONFIG_STM32_TICKLESS_TIMER == 5 && defined(DBGMCU_TIM5_STOP)
 #  define TICKLESS_DBGMCU_FZ   STM32_DBGMCU_TIM5_FZ
 #  define TICKLESS_DBGMCU_STOP DBGMCU_TIM5_STOP
-#elif CONFIG_STM32_TICKLESS_TIMER == 8 && defined(DBGMCU_TIM8_STOP)
-#  define TICKLESS_DBGMCU_FZ   STM32_DBGMCU_TIM8_FZ
-#  define TICKLESS_DBGMCU_STOP DBGMCU_TIM8_STOP
 #elif CONFIG_STM32_TICKLESS_TIMER == 9 && defined(DBGMCU_TIM9_STOP)
 #  define TICKLESS_DBGMCU_FZ   STM32_DBGMCU_TIM9_FZ
 #  define TICKLESS_DBGMCU_STOP DBGMCU_TIM9_STOP
@@ -486,12 +485,6 @@ void up_timer_initialize(void)
 {
   switch (CONFIG_STM32_TICKLESS_TIMER)
     {
-#ifdef CONFIG_STM32_TIM1
-      case 1:
-        g_tickless.base = STM32_TIM1_BASE;
-        break;
-#endif
-
 #ifdef CONFIG_STM32_TIM2
       case 2:
         g_tickless.base = STM32_TIM2_BASE;
@@ -512,12 +505,6 @@ void up_timer_initialize(void)
 #ifdef CONFIG_STM32_TIM5
       case 5:
         g_tickless.base = STM32_TIM5_BASE;
-        break;
-#endif
-
-#ifdef CONFIG_STM32_TIM8
-      case 8:
-        g_tickless.base = STM32_TIM8_BASE;
         break;
 #endif
 
