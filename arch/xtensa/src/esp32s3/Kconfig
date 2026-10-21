@@ -361,7 +361,11 @@ config ESP32S3_PGPOOL_SCRATCH
 
 		The pool itself is described by ARCH_PGPOOL_PBASE and
 		ARCH_PGPOOL_SIZE as usual.  Only ARCH_PGPOOL_VBASE does not apply,
-		because there is no permanent virtual mapping to name.
+		because there is no permanent virtual mapping to name.  The kernel
+		keeps to the internal SRAM: after the boot it has no mapping of the
+		PSRAM at all, so the pool should hold all of the PSRAM.  The first
+		page cannot be in it, because to the page allocator the physical
+		address 0 means "no page": the pool starts at 0x10000.
 
 menu "ESP32-S3 Peripheral Selection"
 
