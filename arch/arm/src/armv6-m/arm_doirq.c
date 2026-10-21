@@ -62,10 +62,12 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
   struct tcb_s *tcb           = *running_task;
 
   /* This judgment proves that (*running_task)->xcp.regs
-   * is invalid, and we can safely overwrite it.
+   * is invalid, and we can safely overwrite it.  SYS_restore_context
+   * issued with PRIMASK set arrives as an escalated HardFault.
    */
 
-  if (*running_task != NULL)
+  if (!((irq == NVIC_IRQ_SVCALL || irq == NVIC_IRQ_HARDFAULT) &&
+        regs[REG_R0] == SYS_restore_context))
     {
       tcb->xcp.regs = regs;
     }

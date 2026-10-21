@@ -163,7 +163,6 @@ retry:
   leave_critical_section(up_irq_save());
 #endif
 
-  g_running_tasks[this_cpu()] = NULL;
   rtcb->xcp.regs = rtcb->xcp.saved_regs;
   rtcb->xcp.saved_regs = NULL;
   arm_fullcontextrestore();
