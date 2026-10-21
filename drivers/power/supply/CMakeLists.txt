@@ -34,6 +34,10 @@ if(CONFIG_DRIVERS_SMPS)
   list(APPEND SRCS smps.c)
 endif()
 
+if(CONFIG_SMPS_LM51772)
+  list(APPEND SRCS lm51772.c)
+endif()
+
 if(CONFIG_REGULATOR)
   list(APPEND SRCS regulator.c)
 
