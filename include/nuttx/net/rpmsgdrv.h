@@ -28,7 +28,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/net/netdev_lowerhalf.h>
+
+#ifdef CONFIG_NET_RPMSG_DRV
+#  include <nuttx/net/netdev_lowerhalf.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
