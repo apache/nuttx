@@ -105,8 +105,6 @@ static inline void group_release(FAR struct task_group_s *group)
 #  endif
 #endif
 
-  task_uninit_info(group);
-
 #if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
   /* Free all un-reaped child exit status */
 
@@ -132,6 +130,14 @@ static inline void group_release(FAR struct task_group_s *group)
   /* Free resources held by the file descriptor list */
 
   fdlist_free(&group->tg_fdlist);
+
+  /* Then the task information (environment, streams).  A file that closes
+   * above can still use it: with CONFIG_FS_NOTIFY, the close queues a
+   * notification with the path of the file, and a relative path needs the
+   * current directory from the environment (getcwd()).
+   */
+
+  task_uninit_info(group);
 
 #ifdef CONFIG_FS_CHROOT
   /* Drop the chroot jail path */
