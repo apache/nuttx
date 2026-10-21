@@ -324,6 +324,13 @@ else
       LDMODULELTOFLAGS = -flinker-output=nolto-rel $(CMODULEFLAGS)
       LDELFLTOFLAGS = -flinker-output=nolto-rel $(CELFFLAGS)
 
+      # A program that is not relocatable is linked to an executable, also
+      # with the ELF options and without the start files and libraries of
+      # gcc, and gets the options of ld with -Xlinker
+
+      LDELFEXEFLAGS = $(CELFFLAGS) -nostdlib
+      LDXLINKER = -Xlinker
+
       # The export gives the group options to the program link of a kernel build
 
       LDSTARTGROUP = -Wl,--start-group
@@ -730,12 +737,15 @@ else
   CXXELFFLAGS += $(PICFLAGS) -mpic-register=r9
 
   # Generate an executable elf, need to ignore undefined symbols
-  LDELFFLAGS += --unresolved-symbols=ignore-in-object-files --emit-relocs
+  LDELFFLAGS += $(LDXLINKER) --unresolved-symbols=ignore-in-object-files
+  LDELFFLAGS += $(LDXLINKER) --emit-relocs $(LDELFEXEFLAGS)
 endif
 
 else
   ifneq ($(CONFIG_BINFMT_ELF_EXECUTABLE),y)
     LDELFFLAGS += -r $(LDELFLTOFLAGS)
+  else
+    LDELFFLAGS += $(LDELFEXEFLAGS)
   endif
 endif
 
