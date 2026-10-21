@@ -1,0 +1,140 @@
+======================================
+Analog Devices LTC4013 battery charger
+======================================
+
+The LTC4013 driver (``drivers/power/battery/ltc4013.c``) is a lower half of
+the battery charger driver (``include/nuttx/power/battery_charger.h``) for the
+Analog Devices LTC4013, a synchronous buck multi-chemistry battery charger
+controller for lead-acid and Li-Ion batteries. It is enabled with
+``CONFIG_LTC4013``, which needs ``CONFIG_BATTERY_CHARGER``.
+
+The chip has no digital interface. The driver controls it through four kinds
+of pins, which the board provides:
+
+========================= ==================================================
+Pin                       Use
+========================= ==================================================
+``ENAB``                  Enable. It may also be an input UVLO, depending on
+                          the divider of the board.
+``MODE1``, ``MODE2``      Three-state pins (low, high or floating) that
+                          select the charge algorithm.
+``STAT0``, ``STAT1``      Open drain status outputs.
+``FB``                    Feedback of the battery voltage. The divider from
+                          the battery to this pin sets the charge voltage.
+========================= ==================================================
+
+Board interface
+===============
+
+The board registers the charger with::
+
+  int ltc4013_register(const char *devpath,
+                       const struct ltc4013_config_s *config);
+
+and describes the hardware in ``struct ltc4013_config_s``:
+
+===================== ====================================================
+Field                 Description
+===================== ====================================================
+``voltage``           Programs the feedback network. Optional. See below.
+``r_top``,            Resistors of a fixed divider, in ohms. Optional, only
+``r_bottom``          used without ``voltage``. See below.
+``v_min``, ``v_max``  Limits of the charge voltage that the application may
+                      request, in mV, 0 for none. They apply to the
+                      ``voltage`` callback. Set them from the battery of the
+                      board.
+``algo``              Algorithm selected at registration.
+``enable``            Drives ``ENAB``: true enables the charger.
+``mode``              Sets ``MODE1`` and ``MODE2`` to low, high or floating.
+``stat``              Reads ``STAT0`` and ``STAT1``, true when the pin is
+                      pulled low.
+``arg``               Argument of the callbacks.
+===================== ====================================================
+
+``enable``, ``mode`` and ``stat`` are required. The callbacks are called from
+the context of the caller of the upper half, never from an interrupt. They
+must be provided by the board because the pins are the ones of its GPIO.
+
+The charger is left disabled when it is registered. A board that must not
+charge before the driver starts has to hold ``ENAB`` low by itself: the
+default level of the pin depends on the board.
+
+Charge voltage
+--------------
+
+The charge voltage is set by the divider from the battery to the ``FB`` pin
+and by ``Vfb``, the regulation voltage of that pin, which depends on the
+algorithm (Table 1 of the datasheet). How the divider is changed is up to the
+board, so the driver does not assume a topology::
+
+  int voltage(void *arg, int mv, int vfb_mv);
+
+The driver calls it with the battery voltage that the application asked for
+and the ``Vfb`` of the selected algorithm, and the board programs its network
+(a digital potentiometer, a DAC, ...) for them. For example, with a divider
+of ``r_top`` from the battery to ``FB`` and ``r_bottom`` from ``FB`` to
+ground, the voltage is::
+
+  Vbat = Vfb * (r_top + r_bottom) / r_bottom
+
+The callback returns a negated errno value if the network cannot reach the
+voltage, for example ``-EINVAL``, and then it must leave the hardware as it
+was. It is called again with the same voltage and the new ``Vfb`` when the
+algorithm changes, so the battery voltage does not move.
+
+If the board has no ``voltage`` callback the divider is fixed by the hardware.
+``BATIOC_VOLTAGE`` returns ``-ENOSYS`` and the charger may be enabled at any
+time. If the board gives ``r_top`` and ``r_bottom``, ``BATIOC_GET_VOLTAGE``
+reports the voltage that the divider programs with the selected algorithm (the
+computation is done in 32 bits, so the sum of the two must stay below
+1.7 Mohm); otherwise it returns ``-ENODATA``.
+
+A digital potentiometer has a wide tolerance of its end-to-end resistance, so
+a voltage computed from its nominal value is not an absolute one. An
+application that needs a precise voltage measures the battery and adjusts
+``BATIOC_VOLTAGE``.
+
+The ``LB`` pin (low battery) compares a voltage set by a resistor with the
+``FB`` pin, so the battery voltage it detects moves with the divider and
+with the algorithm, like the charge voltage does.
+
+Usage
+=====
+
+The application chooses the charge profile, the driver provides the
+mechanisms:
+
+* ``BATIOC_OPERATE`` with ``operate_type`` ``LTC4013_OPRTN_ALGO`` and the
+  algorithm (``enum ltc4013_algo_e``) in ``u8[0]``. The algorithms are the
+  rows of Table 1 of the datasheet: Li-Ion, 2, 3 and 4 stages, with the
+  normal or the wide voltage spread. Changing the algorithm changes the
+  regulation voltage of the ``FB`` pin, so the driver programs the voltage
+  again, and it is refused with ``-EBUSY`` while the charger is enabled.
+* ``BATIOC_VOLTAGE`` with the charge voltage in mV. It is the voltage of the
+  ``VFLOAT`` column of Table 1, the one of the last stage of the algorithm
+  (for the Li-Ion algorithms, the charge voltage). The absorption and
+  equalization voltages follow from the same divider, in the proportions of
+  the datasheet. It is checked against ``v_min`` and ``v_max`` and refused
+  with ``-EINVAL`` outside of them, and also when the board cannot reach it.
+  It may be changed while the charger is enabled.
+* ``BATIOC_OPERATE`` with ``BATIO_OPRTN_CHARGE`` and ``u8[0]`` nonzero to
+  enable the charger, zero to disable it. When the voltage is set by the
+  board, enabling is refused with ``-EINVAL`` until a voltage has been set,
+  because the network may hold any value after a reset.
+* ``BATIOC_GET_VOLTAGE`` returns the voltage that was last requested (or the
+  one of a fixed divider, see above). It is the setpoint, not a measurement
+  of the battery.
+* ``BATIOC_STATE`` reads ``STAT0`` and ``STAT1`` (Table 2 of the datasheet):
+  both off is ``BATTERY_IDLE``, ``STAT0`` alone ``BATTERY_CHARGING`` and
+  ``STAT1`` alone ``BATTERY_FAULT``. Both on is constant voltage for the
+  Li-Ion and 2-stage algorithms (``BATTERY_CHARGING``) and float charging for
+  the 3 and 4-stage ones (``BATTERY_FULL``).
+* ``BATIOC_HEALTH`` returns ``BATTERY_HEALTH_UNSPEC_FAIL`` for the fault
+  pattern of the status pins, which the chip uses both for a low battery and
+  for a thermal shutdown, and ``BATTERY_HEALTH_GOOD`` otherwise.
+* ``BATIOC_ONLINE`` reports if the charger is enabled: the chip cannot tell if
+  a battery is connected.
+
+The charge current is set by the sense resistor of the board and the input
+current by its input stage, so ``BATIOC_CURRENT`` and
+``BATIOC_INPUT_CURRENT`` return ``-ENOSYS``, like ``BATIOC_CHIPID``.

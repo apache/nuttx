@@ -10,6 +10,7 @@ Power-related Drivers
   battery/fakegauge.rst
   smps.rst
   lm51772.rst
+  battery/ltc4013.rst
 
 .. toctree::
    :maxdepth: 1
