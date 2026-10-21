@@ -135,6 +135,7 @@ static void map_spgtables(arch_addrenv_t *addrenv, uintptr_t vaddr)
   for (i = 0; i < (ARCH_SPGTS - 1); i++)
     {
       uintptr_t next = addrenv->spgtables[i + 1];
+
       mmu_ln_setentry(i + 1, prev, next, vaddr, MMU_UPGT_FLAGS);
       prev = riscv_pgvaddr(next);
     }
