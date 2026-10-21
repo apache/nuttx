@@ -75,6 +75,7 @@ struct elf_dumpinfo_s
   FAR const struct memory_region_s *regions;
   FAR struct lib_outstream_s *stream;
   pid_t                       pid;
+  FAR struct tcb_s           *tcb;
 };
 
 /****************************************************************************
@@ -140,6 +141,7 @@ static int elf_flush(FAR struct elf_dumpinfo_s *cinfo)
  *
  ****************************************************************************/
 
+noinline_function
 static int elf_emit(FAR struct elf_dumpinfo_s *cinfo,
                     FAR const void *buf, size_t len)
 {
@@ -170,6 +172,7 @@ static int elf_emit(FAR struct elf_dumpinfo_s *cinfo,
  *
  ****************************************************************************/
 
+noinline_function
 static int elf_emit_align(FAR struct elf_dumpinfo_s *cinfo)
 {
   off_t align = ALIGN_UP(cinfo->stream->nput,
@@ -397,7 +400,7 @@ static void elf_emit_note(FAR struct elf_dumpinfo_s *cinfo)
     }
   else
     {
-      elf_emit_tcb_note(cinfo, nxsched_get_tcb(cinfo->pid));
+      elf_emit_tcb_note(cinfo, cinfo->tcb);
     }
 }
 
@@ -493,7 +496,7 @@ static void elf_emit_stack(FAR struct elf_dumpinfo_s *cinfo)
     }
   else
     {
-      elf_emit_tcb_stack(cinfo, nxsched_get_tcb(cinfo->pid));
+      elf_emit_tcb_stack(cinfo, cinfo->tcb);
     }
 }
 
@@ -683,8 +686,7 @@ static void elf_emit_phdr(FAR struct elf_dumpinfo_s *cinfo,
     }
   else
     {
-      elf_emit_tcb_phdr(cinfo, nxsched_get_tcb(cinfo->pid),
-                        &phdr, &offset);
+      elf_emit_tcb_phdr(cinfo, cinfo->tcb, &phdr, &offset);
     }
 
   /* Write program headers for segments dump */
@@ -999,12 +1001,14 @@ int coredump(FAR const struct memory_region_s *regions,
   cinfo.regions = regions;
   cinfo.stream  = stream;
   cinfo.pid     = pid;
+  cinfo.tcb     = NULL;
 
   flags = enter_critical_section();
 
   if (cinfo.pid != INVALID_PROCESS_ID)
     {
-      if (nxsched_get_tcb(cinfo.pid) == NULL)
+      cinfo.tcb = nxsched_get_tcb(cinfo.pid);
+      if (cinfo.tcb == NULL)
         {
           leave_critical_section(flags);
           return -EINVAL;
