@@ -562,13 +562,28 @@ DNS Query Functions (``resolv.h``)
 These functions send DNS queries for any record type and return the raw
 answer message. ``arpa/nameser.h`` gives the constants and the macros that
 parse the answer. ``res_mkquery()`` is always available with
-``CONFIG_LIBC_NETDB``. The other three need ``CONFIG_NETDB_DNSCLIENT`` and use
-the same name servers, timeouts and retries as the DNS client.
+``CONFIG_LIBC_NETDB``. ``res_init()``, ``res_send()``, ``res_query()`` and
+``res_search()`` need ``CONFIG_NETDB_DNSCLIENT``; the last three use the same
+name servers, timeouts and retries as the DNS client. ``dn_comp()``,
+``dn_expand()`` and ``dn_skipname()`` are always available with
+``CONFIG_LIBC_NETDB``.
 
+  - :c:func:`res_init`
   - :c:func:`res_mkquery`
   - :c:func:`res_send`
   - :c:func:`res_query`
   - :c:func:`res_search`
+  - :c:func:`dn_skipname`
+
+.. c:function:: int res_init(void);
+
+  Initialize the resolver. The DNS client gets the name servers at each
+  query: from ``CONFIG_NETDB_RESOLVCONF_PATH`` with
+  ``CONFIG_NETDB_RESOLVCONF``, otherwise from the list that
+  ``dns_add_nameserver()`` changes. Thus a change of the name servers is
+  used at the next query, and ``res_init()`` has nothing to do.
+
+  :return: Always 0.
 
 .. c:function:: int res_mkquery(int op, const char *dname, int rclass, int type, const unsigned char *data, int datalen, const unsigned char *newrr, unsigned char *buf, int buflen);
 
@@ -598,3 +613,12 @@ the same name servers, timeouts and retries as the DNS client.
 .. c:function:: int res_search(const char *dname, int rclass, int type, unsigned char *answer, int anslen);
 
   The same as :c:func:`res_query`. NuttX has no search list.
+
+.. c:function:: int dn_skipname(const unsigned char *src, const unsigned char *end);
+
+  Find the size of the compressed domain name at ``src`` in a DNS message
+  that ends at ``end``, without expanding it. The name ends at the root
+  label or at a compression pointer.
+
+  :return: The size of the name in bytes on success; -1 if the name is not
+    valid or does not end before ``end``.
