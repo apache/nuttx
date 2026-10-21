@@ -43,7 +43,7 @@ else() # ARM9, ARM7TDMI, etc.
   set(ARCH_SUBDIR arm)
 endif()
 
-include(${ARCH_SUBDIR})
+include(${CMAKE_CURRENT_LIST_DIR}/${ARCH_SUBDIR}.cmake)
 
 # include the toolchain specific cmake file
 
@@ -59,4 +59,4 @@ else() # gcc
   set(TOOLCHAIN_FILE gcc)
 endif()
 
-include(${TOOLCHAIN_FILE})
+include(${CMAKE_CURRENT_LIST_DIR}/${TOOLCHAIN_FILE}.cmake)
