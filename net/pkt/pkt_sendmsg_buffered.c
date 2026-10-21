@@ -342,22 +342,9 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
       ethhdr->type = addr->sll_protocol;
     }
 
-  if (nonblock)
-    {
-      ret = iob_tryadd_queue(iob, &conn->write_q);
-    }
-  else
-    {
-      ret = iob_add_queue(iob, &conn->write_q);
-    }
-
-  if (ret < 0)
-    {
-      nerr("ERROR: Failed to add buffer to w_queue\n");
-      goto errout_with_iob;
-    }
-
-  /* Allocate resource to receive a callback */
+  /* Allocate resource to receive a callback before enqueueing the IOB.
+   * Once the IOB is queued, ownership has moved to conn->write_q.
+   */
 
   if (conn->sndcb == NULL)
     {
@@ -374,19 +361,32 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
       ret = -ENOMEM;
       goto errout_with_iob;
     }
+
+  if (nonblock)
+    {
+      ret = iob_tryadd_queue(iob, &conn->write_q);
+    }
   else
     {
-      /* Set up the callback in the connection */
-
-      conn->sndcb->flags = PKT_POLL;
-      conn->sndcb->priv  = conn;
-      conn->sndcb->event = psock_send_eventhandler;
-
-      /* Notify the device driver that new TX data is available. */
-
-      netdev_txnotify_dev(dev, PKT_POLL);
-      conn_dev_unlock(&conn->sconn, dev);
+      ret = iob_add_queue(iob, &conn->write_q);
     }
+
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to add buffer to w_queue\n");
+      goto errout_with_iob;
+    }
+
+  /* Set up the callback in the connection */
+
+  conn->sndcb->flags = PKT_POLL;
+  conn->sndcb->priv  = conn;
+  conn->sndcb->event = psock_send_eventhandler;
+
+  /* Notify the device driver that new TX data is available. */
+
+  netdev_txnotify_dev(dev, PKT_POLL);
+  conn_dev_unlock(&conn->sconn, dev);
 
   return len;
 
