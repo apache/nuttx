@@ -166,6 +166,7 @@ static pid_t arm_fork_direct(bool vfork, struct tcb_s *parent,
       if (context->fp >= oldsp && context->fp < stacktop)
         {
           uint32_t frameutil = stacktop - context->fp;
+
           newfp = newtop - frameutil;
         }
       else
@@ -205,6 +206,7 @@ static pid_t arm_fork_direct(bool vfork, struct tcb_s *parent,
   if (parent->xcp.nsyscalls > 0)
     {
       int index;
+
       for (index = 0; index < parent->xcp.nsyscalls; index++)
         {
           child->xcp.syscall[index].sysreturn =
@@ -360,6 +362,7 @@ static pid_t arm_fork_syscall(bool vfork, struct tcb_s *parent)
       if (sregs[REG_FP] >= oldsp && sregs[REG_FP] < stacktop)
         {
           uint32_t frameutil = stacktop - sregs[REG_FP];
+
           newfp = newtop - frameutil;
         }
       else
