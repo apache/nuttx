@@ -45,7 +45,8 @@ config STM32_TICKLESS_TIMER
 	range 1 17
 	---help---
 		If the Tickless OS feature is enabled, then one clock must be
-		assigned to provided the timer needed by the OS.
+		assigned to provided the timer needed by the OS.  The basic timers
+		TIM6/TIM7 and the advanced timers TIM1/TIM8 are not supported.
 
 config STM32_TICKLESS_CHANNEL
 	int "Tickless timer channel"
