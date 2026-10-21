@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <assert.h>
 
@@ -33,12 +34,12 @@
 #include <nuttx/irq.h>
 
 #include "mmu.h"
+#include "arm.h"
 #include "sched/sched.h"
 #include "arm_internal.h"
 
 #ifdef CONFIG_LEGACY_PAGING
 #  include <nuttx/page.h>
-#  include "arm.h"
 #endif
 
 /****************************************************************************
@@ -169,7 +170,7 @@ uint32_t *arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
     {
       arm_dbgmonitor(0, (void *)dfar, regs);
     }
-  else
+  else if (!arm_fault_kill(regs))
     {
       PANIC_WITH_REGS("panic", regs);
     }

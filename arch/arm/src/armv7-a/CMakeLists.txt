@@ -46,6 +46,7 @@ list(
   arm_syscall.c
   arm_tcbinfo.c
   arm_undefinedinsn.c
+  arm_userfault.c
   arm_perf.c
   cp15_cacheops.c)
 
