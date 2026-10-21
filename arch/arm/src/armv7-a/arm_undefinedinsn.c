@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <assert.h>
 #include <nuttx/debug.h>
@@ -33,6 +34,7 @@
 #include <nuttx/arch.h>
 #include <sched/sched.h>
 
+#include "arm.h"
 #include "arm_internal.h"
 
 /****************************************************************************
@@ -60,6 +62,11 @@ uint32_t *arm_undefinedinsn(uint32_t *regs)
       _alert("Undefined instruction at 0x%" PRIx32 "\n", regs[REG_PC]);
     }
 
-  PANIC_WITH_REGS("panic", regs);
-  return regs; /* To keep the compiler happy */
+  if (!arm_fault_kill(regs))
+    {
+      PANIC_WITH_REGS("panic", regs);
+    }
+
+  up_set_interrupt_context(false);
+  return regs;
 }

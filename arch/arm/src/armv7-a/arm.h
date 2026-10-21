@@ -111,6 +111,17 @@ extern "C"
 
 void arm_data_initialize(void);
 
+/****************************************************************************
+ * Name: arm_fault_kill
+ *
+ * Description:
+ *   End the task of a fault of user code with SIGSEGV.  Return false if
+ *   the fault is fatal.  See arm_userfault.c.
+ *
+ ****************************************************************************/
+
+bool arm_fault_kill(uint32_t *regs);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
