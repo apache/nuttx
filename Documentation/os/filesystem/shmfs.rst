@@ -11,6 +11,11 @@ from NSH command line.
 
 This file system doesn't support mount operations though.
 
+The objects are files in the directory ``CONFIG_FS_SHMFS_VFS_PATH``
+(default ``/var/shm``; ``/dev/shm`` as on Linux is a common choice).  The
+directory exists from boot, also before the first object, and anyone can
+create an object in it (mode 1777).
+
 If comment the line using ``shm_unlink()`` in the example app, we can see
 a file under ``/var/shm/`` from NSH command line after running the example.
 We can also remove that file from command line.
