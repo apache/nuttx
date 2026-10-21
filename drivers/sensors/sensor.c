@@ -901,7 +901,8 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
     {
       if (buffer == NULL)
         {
-          return -EINVAL;
+          ret = -EINVAL;
+          goto out;
         }
 
       /* Read the device directly, there is nothing to wait for */
