@@ -165,6 +165,7 @@ static bool ipfilter_match_proto(FAR const struct ipfilter_entry_s *entry,
             /* Ports in TCP & UDP headers have same offset. */
 
             FAR const struct udp_hdr_s *udp = l4hdr;
+
             return SPORT_MATCH(entry, NTOHS(udp->srcport)) &&
                    DPORT_MATCH(entry, NTOHS(udp->destport));
           }
@@ -173,6 +174,7 @@ static bool ipfilter_match_proto(FAR const struct ipfilter_entry_s *entry,
         if (entry->match_icmp)
           {
             FAR const struct icmp_hdr_s *icmp = l4hdr;
+
             return ICMP_MATCH(entry, icmp);
           }
 
@@ -180,6 +182,7 @@ static bool ipfilter_match_proto(FAR const struct ipfilter_entry_s *entry,
         if (entry->match_icmp)
           {
             FAR const struct icmpv6_hdr_s *icmpv6 = l4hdr;
+
             return ICMP_MATCH(entry, icmpv6);
           }
 
@@ -217,7 +220,8 @@ static int ipv4_filter_match(FAR const struct net_driver_s *indev,
   FAR const sq_queue_t *queue = &g_ipv4_filters[chain];
   FAR const sq_entry_t *entry;
   FAR const void *l4hdr;
-  in_addr_t ipaddr;
+  in_addr_t srcip;
+  in_addr_t dstip;
   bool matched;
 
   /* Handle unexpected status, return ACCEPT to indicate doing nothing. */
@@ -228,6 +232,8 @@ static int ipv4_filter_match(FAR const struct net_driver_s *indev,
     }
 
   l4hdr = IPv4_L4HDR(ipv4);
+  srcip = net_ip4addr_conv32(ipv4->srcipaddr);
+  dstip = net_ip4addr_conv32(ipv4->destipaddr);
 
   sq_for_every(queue, entry)
     {
@@ -242,16 +248,14 @@ static int ipv4_filter_match(FAR const struct net_driver_s *indev,
 
       /* Match addresses */
 
-      ipaddr  = net_ip4addr_conv32(ipv4->srcipaddr);
-      matched = net_ipv4addr_maskcmp(filter->sip, ipaddr, filter->smsk)
+      matched = net_ipv4addr_maskcmp(filter->sip, srcip, filter->smsk)
                 ^ filter->common.inv_srcip;
       if (!matched)
         {
           continue;
         }
 
-      ipaddr  = net_ip4addr_conv32(ipv4->destipaddr);
-      matched = net_ipv4addr_maskcmp(filter->dip, ipaddr, filter->dmsk)
+      matched = net_ipv4addr_maskcmp(filter->dip, dstip, filter->dmsk)
                 ^ filter->common.inv_dstip;
       if (!matched)
         {
@@ -444,6 +448,7 @@ void ipfilter_cfg_clear(sa_family_t family, enum ipfilter_chain_e chain)
   if (family == PF_INET)
     {
       FAR sq_queue_t *queue = &g_ipv4_filters[chain];
+
       while (!sq_empty(queue))
         {
           kmm_free(sq_remfirst(queue));
@@ -455,6 +460,7 @@ void ipfilter_cfg_clear(sa_family_t family, enum ipfilter_chain_e chain)
   if (family == PF_INET6)
     {
       FAR sq_queue_t *queue = &g_ipv6_filters[chain];
+
       while (!sq_empty(queue))
         {
           kmm_free(sq_remfirst(queue));
