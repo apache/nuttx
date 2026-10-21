@@ -1,0 +1,178 @@
+==========================================
+TI LM51772 buck-boost controller
+==========================================
+
+The LM51772 driver (``drivers/power/supply/lm51772.c``) is a lower half
+of the :doc:`SMPS driver <smps>` for the Texas Instruments LM51772 buck-boost
+controller, controlled over I2C. It is enabled with
+``CONFIG_SMPS_LM51772``, which needs ``CONFIG_DRIVERS_SMPS`` and
+``CONFIG_I2C``. The register map and the bit fields, with the names of the
+datasheet, are in ``include/nuttx/power/lm51772.h``.
+
+The converter regulates a constant output voltage (``SMPS_OPMODE_CV``, the
+only mode) with an output current limit. The driver reports the state and
+the faults, but it has no output feedback.
+
+Board interface
+===============
+
+The board registers the device with::
+
+  int lm51772_register(const char *path, const struct lm51772_config_s *config);
+
+and describes the hardware in ``struct lm51772_config_s``:
+
+===================== ====================================================
+Field                 Description
+===================== ====================================================
+``i2c``               I2C bus
+``frequency``         I2C frequency
+``addr``              7-bit address, 0x6a if 0
+``r_isns_mohm``       Output sense resistor, in milliohms, which sets the
+                      scale of the current limit
+``v_out_min``,        Absolute maximum ratings of the board, 0 for none.
+``v_out_max``,        See below.
+``i_out_max``,
+``p_out_max``
+``enable``, ``arg``   Callback that drives the EN/UVLO pin. It is called
+                      with interrupts disabled when switching off, so it
+                      must not sleep.
+``init``, ``ninit``   Registers written at start, in order. See below.
+===================== ====================================================
+
+Start and stop
+--------------
+
+The controller is enabled and configured by ``PWRIOC_START``, not when the
+device is opened, because the upper half calls the lower half ``setup`` with
+interrupts disabled and the configuration needs I2C:
+
+#. The ``enable`` callback is called and the driver waits 15 ms for the
+   supplies of the controller.
+#. The driver reads ``STATUS_BYTE`` to check that the controller answers.
+   Otherwise the ``enable`` callback is called again to disable it and the
+   error is returned by ``PWRIOC_START``.
+#. The registers of ``init`` are written in order, and the step of the output
+   voltage is read back from ``MFR_SPECIFIC_D8`` (``SEL_FB_DIV20``).
+#. The output voltage target and the current limit are written, and the
+   latched faults are cleared.
+#. ``CONV_EN`` and ``CONV_EN2`` are set, and ``FORCE_DISCH`` is cleared.
+
+``PWRIOC_STOP`` clears ``CONV_EN`` and ``CONV_EN2`` and sets ``FORCE_DISCH``,
+which discharges the output. When the device is closed for the last time the
+``enable`` callback disables the controller and the converter stops, so a
+program that starts it has to keep the device open while it runs.
+
+Register list
+-------------
+
+``init`` lists the registers that the board needs to change from the values
+loaded by the controller. ``MFR_SPECIFIC_D0`` is written with ``CONV_EN``
+cleared, since the power stage starts only with ``PWRIOC_START``. If the
+output voltage step is not the default one (``MFR_SPECIFIC_D8``), the entry
+must be in the list. An ``ILIM_THRESHOLD`` entry sets the current limit at
+start, when the parameters keep it, and
+``LM51772_ILIM_THRESHOLD(ma, mohm)`` computes its value.
+
+Absolute maximum ratings
+------------------------
+
+The limits (``PWRIOC_SET_LIMITS``) and the parameters (``PWRIOC_SET_PARAMS``)
+set by the application are refused with ``-EINVAL`` when they exceed the
+ratings of the board: an output voltage outside of ``v_out_min`` to
+``v_out_max``, a current above ``i_out_max``, or a power ``v_out * i_out``
+above ``p_out_max``. A current or power limit left at 0 becomes the rating.
+When the parameters keep the current limit, the current of the ``init``
+``ILIM_THRESHOLD`` entry is used for the power check.
+
+The ``ILIM_THRESHOLD`` register saturates at 70 mV across the sense resistor
+(0x8c), and a current limit that needs a higher value is refused with
+``-EINVAL``.
+
+Faults
+======
+
+The faults come from ``STATUS_BYTE``:
+
+======================= ================================
+``STATUS_BYTE``         ``smps_fault_e``
+======================= ================================
+``VOUT`` (VOUT_OV)      ``SMPS_FAULT_OVERVOLTAGE``
+``IOUT`` (IOUT_OC)      ``SMPS_FAULT_OVERCURRENT``
+``TEMPERATURE``         ``SMPS_FAULT_OVERTEMP``
+``INPUT`` (VIN_UV),     ``SMPS_FAULT_OTHER``
+``CML``, ``OTHER``
+======================= ================================
+
+``OFF`` and ``BUSY`` are not faults. A fault state is reported by
+``PWRIOC_GET_STATE`` as ``SMPS_STATE_FAULT``. The faults are latched by the
+controller: after a fault disappears, for example when the input voltage
+returns above the ``VDET`` rising threshold and the converter restarts, they
+stay set until ``PWRIOC_CLEAN_FAULT``.
+
+Hardware notes
+==============
+
+These points depend on how the board connects the controller:
+
+- The EN/UVLO pin only enables the power stage. If the ``nRST`` pin is tied to
+  the input, the logic and the I2C interface are always on while the input is
+  present, and the controller keeps its registers across an ``enable``
+  callback with false and a reset of the processor. Only removing the input
+  returns the registers to their defaults.
+- The ``MODE`` pin selects forced PWM (high) or the power save mode (low). In
+  forced PWM the current can reverse and return to the input, so a source
+  that does not sink current needs the input overvoltage protection
+  (``EN_IVP`` in ``MFR_SPECIFIC_D3`` and the threshold in ``IVP_VOLTAGE``).
+- With no external UVLO divider on the EN/UVLO pin, the ``VDET`` thresholds
+  (``VDET_FALL`` in ``MFR_SPECIFIC_D3`` and ``VDET_RISE`` in
+  ``MFR_SPECIFIC_D4``) set the input undervoltage lockout.
+- ``EN_DTRK_STARTOVER`` (``MFR_SPECIFIC_D1``) starts the converter without
+  waiting for the PWM signal of the ``DTRK`` pin. It is set at reset, and a
+  board with the pin tied low should keep it set: on such a board the converter
+  did not start again after a stop with the bit cleared.
+- ``SEL_ISET_PIN`` (``MFR_SPECIFIC_D9``, set at reset) disables the internal
+  current limit DAC, and the limit would come from a resistor on the
+  ``ILIMCOMP/ISET`` pin. A board without that resistor needs it cleared, or
+  ``ILIM_THRESHOLD`` has no effect.
+- The ``nFLT/nINT`` pin is an open drain output that is low while a fault
+  condition is active, ``OFF`` included, and high impedance when the
+  condition goes away, even if the bit stays latched in ``STATUS_BYTE``.
+
+Example
+=======
+
+A board that describes a 8 milliohm sense resistor, a 9 to 24 V output, 8 A
+and 120 W, and writes one register::
+
+  static const struct lm51772_reg_s g_init[] =
+  {
+    { LM51772_REG_MFR_SPECIFIC_D1,
+      LM51772_D1_EN_THER_WARN | LM51772_D1_EN_DTRK_STARTOVER },
+    { LM51772_REG_ILIM_THRESHOLD, LM51772_ILIM_THRESHOLD(5000, 8) }
+  };
+
+  static void board_smps_enable(void *arg, bool enable)
+  {
+    /* Drive the EN/UVLO pin */
+  }
+
+  int board_smps_init(struct i2c_master_s *i2c)
+  {
+    struct lm51772_config_s config;
+
+    config.i2c         = i2c;
+    config.frequency   = 400000;
+    config.addr        = 0;
+    config.r_isns_mohm = 8;
+    config.v_out_min   = 9.0f;
+    config.v_out_max   = 24.0f;
+    config.i_out_max   = 8.0f;
+    config.p_out_max   = 120.0f;
+    config.enable      = board_smps_enable;
+    config.arg         = NULL;
+    config.init        = g_init;
+    config.ninit       = nitems(g_init);
+
+    return lm51772_register("/dev/smps0", &config);
+  }
