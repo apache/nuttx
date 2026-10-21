@@ -209,6 +209,7 @@ FAR const char *rpmsg_get_local_cpuname(FAR struct rpmsg_device *rdev)
 FAR const char *rpmsg_get_cpuname(FAR struct rpmsg_device *rdev)
 {
   FAR struct rpmsg_s *rpmsg = rpmsg_get_by_rdev(rdev);
+
   return rpmsg ? rpmsg->cpuname : NULL;
 }
 
@@ -298,7 +299,7 @@ again:
             }
         }
 
-       nxrmutex_unlock(&rpmsg->lock);
+      nxrmutex_unlock(&rpmsg->lock);
     }
 
   up_read(&g_rpmsg_lock);
