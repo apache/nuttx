@@ -104,6 +104,18 @@ The ``path`` argument determines where in the pseudo-file system the
 device file should be placed. ``mode`` provides device file privileges. 
 The ``fops`` and ``priv`` provide the internal information for the ``registry``.
 
+A driver that creates its device files below a directory later, as the
+pseudo-terminal driver does with ``/dev/pts/N``, creates the empty
+directory when it initializes:
+
+.. code-block:: c
+
+    int register_pseudodir(FAR const char *path, mode_t mode);
+
+Then the directory exists before the first device file does.  User code
+cannot do this with ``mkdir()`` once a file system is mounted at ``/``:
+``mkdir()`` creates the directory in that file system.
+
 So the when you open a device driver in NuttX, many fewer steps are 
 involved: The system must still open the device file, but then 
 since the pseudo-file system `is` the device registry, all of the 
