@@ -145,6 +145,7 @@ static ssize_t mtd_reload(FAR void *dev,
                           size_t nblocks)
 {
   FAR struct mtd_rwbuffer_s *priv = (FAR struct mtd_rwbuffer_s *)dev;
+
   DEBUGASSERT(priv && priv->dev);
 
   /* This is just a pass-through to the contained MTD */
@@ -166,6 +167,7 @@ static ssize_t mtd_flush(FAR void *dev,
                          size_t nblocks)
 {
   FAR struct mtd_rwbuffer_s *priv = (FAR struct mtd_rwbuffer_s *)dev;
+
   DEBUGASSERT(priv && priv->dev);
 
   /* This is just a pass-through to the contained MTD */
@@ -276,6 +278,7 @@ static int mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         {
           FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)
                                            ((uintptr_t)arg);
+
           if (geo)
             {
               memset(geo, 0, sizeof(*geo));
@@ -306,6 +309,7 @@ static int mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         {
           FAR struct partition_info_s *info =
             (FAR struct partition_info_s *)arg;
+
           if (info != NULL)
             {
               info->numsectors  = priv->rwb.nblocks;
@@ -322,7 +326,7 @@ static int mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
           /* Erase the entire device */
 
           ret = priv->dev->ioctl(priv->dev, MTDIOC_BULKERASE, 0);
-          if (ret >= 0)
+          if (ret < 0)
             {
               ferr("ERROR: Device ioctl failed: %d\n", ret);
               break;
@@ -330,11 +334,11 @@ static int mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
           /* Then invalidate in cached data */
 
-         ret = rwb_invalidate(&priv->rwb, 0, priv->rwb.nblocks);
-         if (ret < 0)
-           {
+          ret = rwb_invalidate(&priv->rwb, 0, priv->rwb.nblocks);
+          if (ret < 0)
+            {
               ferr("ERROR: rwb_invalidate failed: %d\n", ret);
-           }
+            }
         }
         break;
 
