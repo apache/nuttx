@@ -352,6 +352,7 @@ out:
   ret = mm_map_add(get_current_mm(), entry);
   if (ret < 0)
     {
+      file_put(filep);
       goto errout_with_region;
     }
 
