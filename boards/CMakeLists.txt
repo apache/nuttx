@@ -49,8 +49,8 @@ target_include_directories(board
 # if found at each arch and soc level
 
 if(EXISTS ${NUTTX_BOARD_ABS_DIR}/../common/CMakeLists.txt)
-  add_subdirectory("${NUTTX_BOARD_ABS_DIR}/../common" EXCLUDE_FROM_ALL
-                   exclude_common)
+  add_subdirectory("${NUTTX_BOARD_ABS_DIR}/../common" exclude_common
+                   EXCLUDE_FROM_ALL)
 
   # Create link ARCH_SRC_BOARD_BOARD_SYMLINK
 
@@ -60,8 +60,8 @@ if(EXISTS ${NUTTX_BOARD_ABS_DIR}/../common/CMakeLists.txt)
 endif()
 
 if(EXISTS ${NUTTX_BOARD_ABS_DIR}/../drivers/CMakeLists.txt)
-  add_subdirectory("${NUTTX_BOARD_ABS_DIR}/../drivers" EXCLUDE_FROM_ALL
-                   exclude_drivers)
+  add_subdirectory("${NUTTX_BOARD_ABS_DIR}/../drivers" exclude_drivers
+                   EXCLUDE_FROM_ALL)
 endif()
 
-add_subdirectory(${NUTTX_BOARD_ABS_DIR} EXCLUDE_FROM_ALL exclude_board)
+add_subdirectory(${NUTTX_BOARD_ABS_DIR} exclude_board EXCLUDE_FROM_ALL)
