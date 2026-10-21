@@ -889,9 +889,10 @@ The ESP32-S3 supports the three NuttX build modes:
   See :ref:`esp32s3-devkit:knsh <platforms/xtensa/esp32s3/boards/esp32s3-devkit/index:knsh>` and :ref:`esp32s3-devkit:ksta_softap <platforms/xtensa/esp32s3/boards/esp32s3-devkit/index:ksta_softap>`.
 * **KERNEL**: every program is a separate ELF file with its own address
   environment, protected by WC and PMS in the same way.  The MMU maps flash
-  and PSRAM in pages of 64 KiB.  The pages of every process come from a page
-  pool in PSRAM, and the kernel switches the mappings with the process.  This
-  is the only build mode with ``fork()``.
+  and PSRAM in pages of 64 KiB.  The kernel uses the internal SRAM, and the
+  PSRAM is the page pool: the pages of every process come from it, and the
+  kernel switches the mappings with the process.  This is the only build mode
+  with ``fork()``.
   See :ref:`esp32s3-devkit:kernel_oct <platforms/xtensa/esp32s3/boards/esp32s3-devkit/index:kernel_oct>` and :ref:`esp32s3-devkit:kernel_n8r2 <platforms/xtensa/esp32s3/boards/esp32s3-devkit/index:kernel_n8r2>`.
 
 Faults in User Code
