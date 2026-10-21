@@ -206,15 +206,16 @@ void esp32s3_pgwipe(uintptr_t paddr);
  * Name: esp32s3_pgpool_unmap
  *
  * Description:
- *   Tear down the boot-time cache-MMU mapping of the page pool, leaving the
- *   pool reachable only a page at a time through esp32s3_pgmap().  Called
- *   once, from up_allocate_pgheap(), after its consistency checks -- which
- *   have to run first, since they ask the cache MMU where the pool actually
- *   is rather than deriving it.
+ *   Tear down the boot-time cache-MMU mapping of the PSRAM, leaving the
+ *   pool reachable only a page at a time through esp32s3_pgmap() and the
+ *   rest of the PSRAM not reachable at all.  Called once, from
+ *   up_allocate_pgheap(), after its consistency checks -- which have to run
+ *   first, since they ask the cache MMU where the pool actually is rather
+ *   than deriving it.
  *
  * Input Parameters:
- *   vbase - Virtual base the boot-time mapping put the pool at.
- *   size  - Size of the pool in bytes.
+ *   vbase - Virtual base of the boot-time mapping of the PSRAM.
+ *   size  - Size of that mapping in bytes.
  *
  ****************************************************************************/
 

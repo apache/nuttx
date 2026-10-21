@@ -247,14 +247,21 @@ void up_allocate_pgheap(void **heap_start, size_t *heap_size)
 
     check_windows_clear(MMU_ENTRY_OF(ramstart), MMU_ENTRY_OF(ramend - 1));
 
-    /* Everything above has been established while the pool was still
-     * mapped, which is the only time it can be.  Now take that mapping
-     * away: from here the kernel reaches a pool page only through
-     * esp32s3_pgmap(), and an unprivileged task reaches one only if it is
-     * its own.
+    if (ESP32S3_PGPOOL_SIZE < ramend - ramstart)
+      {
+        _info("PSRAM: %zu bytes are not in the page pool and stay "
+              "unused\n", (size_t)(ramend - ramstart) - ESP32S3_PGPOOL_SIZE);
+      }
+
+    /* Everything above has been established while the PSRAM was still
+     * mapped, which is the only time it can be.  Now take the whole mapping
+     * away, not only the pool's share: the internal SRAM is the kernel's
+     * memory and the PSRAM is the memory of the processes.  From here the
+     * kernel reaches a pool page only through esp32s3_pgmap(), and an
+     * unprivileged task reaches one only if it is its own.
      */
 
-    esp32s3_pgpool_unmap(poolvbase, ESP32S3_PGPOOL_SIZE);
+    esp32s3_pgpool_unmap(ramstart, ramend - ramstart);
   }
 #endif
 

@@ -180,11 +180,11 @@ void esp32s3_pgpool_unmap(uintptr_t vbase, size_t size)
 {
   uint32_t cache_state;
 
-  /* Take away the boot-time mapping of the pool in one go.  esp32s3_spiram.c
-   * mapped the whole PSRAM device; only the pool's share of that window is
-   * withdrawn, because the rest maps no page a process will ever own and is
-   * the aperture a kernel-side PSRAM allocation (a loaded library's text
-   * heap, say) would have to come from.
+  /* Take away the boot-time mapping of the PSRAM in one go.
+   * esp32s3_spiram.c mapped the whole PSRAM device; up_allocate_pgheap()
+   * withdraws all of that window, the pool and what the pool does not use:
+   * in the kernel build the PSRAM is the memory of the processes, and the
+   * kernel keeps to the internal SRAM.
    *
    * Write back before invalidating the entries: this runs after the PSRAM
    * memory test, which leaves the window's lines dirty.
