@@ -378,8 +378,9 @@ kernel_n8r2
 A KERNEL build for a module with 2 MB of PSRAM, such as the
 ESP32-S3-WROOM-1-N8R2.  The flash is quad and runs in DIO mode.
 
-The page pool is smaller than in ``kernel_oct``, and each of the text, data
-and heap regions of a process is 2 pages of 64 KiB.  A process therefore takes
+The page pool is smaller than in ``kernel_oct`` (all of the PSRAM but its
+first page: 31 pages of 64 KiB), and each of the text, data and heap regions
+of a process is 2 pages of 64 KiB.  A process therefore takes
 384 KiB, and a ``fork()`` needs 768 KiB while the parent and the child both
 exist.
 
@@ -398,10 +399,12 @@ only build mode in which ``fork()`` is available on this chip:  the child
 receives its own copy of the memory of the parent, at the same virtual
 addresses.  ``vfork()`` is available in every build mode.
 
-The page pool holds the pages of every process.  It is carved out of the
-PSRAM, and it is not kept mapped into the kernel address space.  The kernel
-reaches a page of the pool through a small scratch region, mapped for one
-operation and invalidated afterwards.
+The page pool holds the pages of every process.  It is all of the PSRAM but
+its first page (to the page allocator the physical address 0 means "no
+page"): 127 pages of 64 KiB.  The kernel runs in the internal SRAM and keeps
+no mapping of the PSRAM after the boot.  It reaches a page of the pool
+through a small scratch region, mapped for one operation and invalidated
+afterwards.
 
 Build the kernel first, then the applications, then the boot ROMFS, and then
 link the kernel again.  The ROMFS is linked into the kernel image, so a change
