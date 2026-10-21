@@ -241,18 +241,28 @@ static void rpmsgfs_mkpath(FAR struct rpmsgfs_mountpt_s *fs,
   strlcpy(path, fs->fs_root, pathlen);
   strlcat(path, relpath, pathlen);
 
+  /* The remote root check can block and sleep while waiting for the remote
+   * endpoint to become ready.  Do not hold the mount lock across that slow
+   * path; callers only need the lock for local state updates.
+   */
+
   while (fs->timeout > 0)
     {
       struct stat buf;
       int ret;
 
+      nxmutex_unlock(&fs->fs_lock);
+
       ret = rpmsgfs_client_stat(fs->handle, fs->fs_root, &buf);
+      nxmutex_lock(&fs->fs_lock);
       if (ret == 0)
         {
           break;
         }
 
+      nxmutex_unlock(&fs->fs_lock);
       nxsched_usleep(RPMSGFS_RETRY_DELAY_MS * USEC_PER_MSEC);
+      nxmutex_lock(&fs->fs_lock);
       fs->timeout -= RPMSGFS_RETRY_DELAY_MS;
     }
 }
@@ -335,7 +345,7 @@ static int rpmsgfs_open(FAR struct file *filep, FAR const char *relpath,
         }
       else
         {
-          goto errout_with_buffer;
+          goto errout_with_fd;
         }
     }
 
@@ -356,6 +366,9 @@ static int rpmsgfs_open(FAR struct file *filep, FAR const char *relpath,
 
   ret = OK;
   goto errout_with_lock;
+
+errout_with_fd:
+  rpmsgfs_client_close(fs->handle, hf->fd);
 
 errout_with_buffer:
   fs_heap_free(hf);
