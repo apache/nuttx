@@ -726,10 +726,10 @@
 
 /* GPIO port output speed register */
 
-#define GPIO_OSPEED_2MHZ              (0)
-#define GPIO_OSPEED_25MHZ             (1)
-#define GPIO_OSPEED_50MHZ             (2)
-#define GPIO_OSPEED_100MHZ            (3)
+#define GPIO_OSPEED_2MHz              (0)
+#define GPIO_OSPEED_25MHz             (1)
+#define GPIO_OSPEED_50MHz             (2)
+#define GPIO_OSPEED_100MHz            (3)
 #define GPIO_OSPEED_SHIFT(n)          ((n) << 1)
 #define GPIO_OSPEED_MASK(n)           (3 << GPIO_OSPEED_SHIFT(n))
 #define GPIO_OSPEED0_SHIFT             GPIO_OSPEEDR_OSPEED0_SHIFT

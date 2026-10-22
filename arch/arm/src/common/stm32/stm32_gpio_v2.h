@@ -158,10 +158,10 @@
 
 #define GPIO_SPEED_SHIFT              (10)                       /* Bits 10-11: GPIO frequency selection */
 #define GPIO_SPEED_MASK               (3 << GPIO_SPEED_SHIFT)
-#  define GPIO_SPEED_2MHZ             (0 << GPIO_SPEED_SHIFT)     /* 2 MHz Low speed output */
-#  define GPIO_SPEED_25MHZ            (1 << GPIO_SPEED_SHIFT)     /* 25 MHz Medium speed output */
-#  define GPIO_SPEED_50MHZ            (2 << GPIO_SPEED_SHIFT)     /* 50 MHz High speed output  */
-#  define GPIO_SPEED_100MHZ           (3 << GPIO_SPEED_SHIFT)     /* 100 MHz Very High speed output */
+#  define GPIO_SPEED_2MHz             (0 << GPIO_SPEED_SHIFT)     /* 2 MHz Low speed output */
+#  define GPIO_SPEED_25MHz            (1 << GPIO_SPEED_SHIFT)     /* 25 MHz Medium speed output */
+#  define GPIO_SPEED_50MHz            (2 << GPIO_SPEED_SHIFT)     /* 50 MHz High speed output  */
+#  define GPIO_SPEED_100MHz           (3 << GPIO_SPEED_SHIFT)     /* 100 MHz Very High speed output */
 
 /* Output/Alt function type selection:
  *

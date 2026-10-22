@@ -116,13 +116,13 @@
 /* User LEDs */
 
 #define GPIO_LED_GREEN               (GPIO_OUTPUT | GPIO_PUSHPULL | \
-                                      GPIO_SPEED_2MHZ | GPIO_OUTPUT_CLEAR | \
+                                      GPIO_SPEED_2MHz | GPIO_OUTPUT_CLEAR | \
                                       GPIO_PORTA | GPIO_PIN5)
 #define GPIO_LED_RED                 (GPIO_OUTPUT | GPIO_PUSHPULL | \
-                                      GPIO_SPEED_2MHZ | GPIO_OUTPUT_CLEAR | \
+                                      GPIO_SPEED_2MHz | GPIO_OUTPUT_CLEAR | \
                                       GPIO_PORTE | GPIO_PIN14)
 #define GPIO_LED_BLUE                (GPIO_OUTPUT | GPIO_PUSHPULL | \
-                                      GPIO_SPEED_2MHZ | GPIO_OUTPUT_CLEAR | \
+                                      GPIO_SPEED_2MHz | GPIO_OUTPUT_CLEAR | \
                                       GPIO_PORTF | GPIO_PIN8)
 
 #define BOARD_LED_GREEN              0

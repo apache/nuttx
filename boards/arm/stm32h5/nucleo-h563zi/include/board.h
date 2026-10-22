@@ -264,15 +264,15 @@
 
 /* Ethernet definitions *****************************************************/
 
-#define GPIO_ETH_MDC          (GPIO_ETH_MDC_0 | GPIO_SPEED_100MHZ)          /* PC1 */
-#define GPIO_ETH_MDIO         (GPIO_ETH_MDIO_0 | GPIO_SPEED_100MHZ)         /* PA2 */
-#define GPIO_ETH_RMII_RXD0    (GPIO_ETH_RMII_RXD0_0 | GPIO_SPEED_100MHZ)    /* PC4 */
-#define GPIO_ETH_RMII_RXD1    (GPIO_ETH_RMII_RXD1_0 | GPIO_SPEED_100MHZ)    /* PC5 */
-#define GPIO_ETH_RMII_TXD0    (GPIO_ETH_RMII_TXD0_3 | GPIO_SPEED_100MHZ)    /* PG13 */
-#define GPIO_ETH_RMII_TXD1    (GPIO_ETH_RMII_TXD1_1 | GPIO_SPEED_100MHZ)    /* PB15 */
-#define GPIO_ETH_RMII_TX_EN   (GPIO_ETH_RMII_TX_EN_3 | GPIO_SPEED_100MHZ)   /* PG11 */
-#define GPIO_ETH_RMII_CRS_DV  (GPIO_ETH_RMII_CRS_DV_0 | GPIO_SPEED_100MHZ)  /* PA7 */
-#define GPIO_ETH_RMII_REF_CLK (GPIO_ETH_RMII_REF_CLK_0 | GPIO_SPEED_100MHZ) /* PA1 */
+#define GPIO_ETH_MDC          (GPIO_ETH_MDC_0 | GPIO_SPEED_100MHz)          /* PC1 */
+#define GPIO_ETH_MDIO         (GPIO_ETH_MDIO_0 | GPIO_SPEED_100MHz)         /* PA2 */
+#define GPIO_ETH_RMII_RXD0    (GPIO_ETH_RMII_RXD0_0 | GPIO_SPEED_100MHz)    /* PC4 */
+#define GPIO_ETH_RMII_RXD1    (GPIO_ETH_RMII_RXD1_0 | GPIO_SPEED_100MHz)    /* PC5 */
+#define GPIO_ETH_RMII_TXD0    (GPIO_ETH_RMII_TXD0_3 | GPIO_SPEED_100MHz)    /* PG13 */
+#define GPIO_ETH_RMII_TXD1    (GPIO_ETH_RMII_TXD1_1 | GPIO_SPEED_100MHz)    /* PB15 */
+#define GPIO_ETH_RMII_TX_EN   (GPIO_ETH_RMII_TX_EN_3 | GPIO_SPEED_100MHz)   /* PG11 */
+#define GPIO_ETH_RMII_CRS_DV  (GPIO_ETH_RMII_CRS_DV_0 | GPIO_SPEED_100MHz)  /* PA7 */
+#define GPIO_ETH_RMII_REF_CLK (GPIO_ETH_RMII_REF_CLK_0 | GPIO_SPEED_100MHz) /* PA1 */
 
 /* ADC/DAC Clock Source *****************************************************/
 
@@ -361,12 +361,12 @@
 
 /* SPI1: Arduino Connector CN7 */
 
-#define GPIO_SPI1_NSS   (GPIO_OUTPUT|GPIO_SPEED_2MHZ| \
+#define GPIO_SPI1_NSS   (GPIO_OUTPUT|GPIO_SPEED_2MHz| \
                          GPIO_PUSHPULL|GPIO_OUTPUT_SET| \
                          GPIO_PORTD|GPIO_PIN14)             /* PD14 */
-#define GPIO_SPI1_SCK   (GPIO_SPI1_SCK_1|GPIO_SPEED_50MHZ)  /* PA5  */
+#define GPIO_SPI1_SCK   (GPIO_SPI1_SCK_1|GPIO_SPEED_50MHz)  /* PA5  */
 #define GPIO_SPI1_MISO  (GPIO_SPI1_MISO_3)                  /* PG9  */
-#define GPIO_SPI1_MOSI  (GPIO_SPI1_MOSI_2|GPIO_SPEED_50MHZ) /* PB5  */
+#define GPIO_SPI1_MOSI  (GPIO_SPI1_MOSI_2|GPIO_SPEED_50MHz) /* PB5  */
 
 /* ADC GPIOs ****************************************************************/
 

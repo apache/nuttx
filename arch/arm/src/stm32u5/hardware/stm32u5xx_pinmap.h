@@ -50,7 +50,7 @@
  *
  * Note that this header file does not specify pull-up or -down resistors
  * (GPIO_FLOAT, GPIO_PULLUP, GPIO_PULLDOWN), output frequency
- * (GPIO_SPEED_2MHZ, GPIO_SPEED_25MHZ, GPIO_SPEED_50MHZ, GPIO_SPEED_100MHZ),
+ * (GPIO_SPEED_2MHz, GPIO_SPEED_25MHz, GPIO_SPEED_50MHz, GPIO_SPEED_100MHz),
  * or whether the pin is to be operated in push-pull or open-drain mode
  * (GPIO_PUSHPULL, GPIO_OPENDRAIN).  As all of this is application specific,
  * it should be specified in corresponding board.h file.

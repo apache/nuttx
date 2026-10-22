@@ -41,9 +41,9 @@
 
 /* LD1 is active high; LD2 is active low.  Start with both LEDs off. */
 
-#define GPIO_LD1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHZ | \
+#define GPIO_LD1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
                         GPIO_OUTPUT_CLEAR | GPIO_PORTO | GPIO_PIN1)
-#define GPIO_LD2       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHZ | \
+#define GPIO_LD2       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
                         GPIO_OUTPUT_SET | GPIO_PORTG | GPIO_PIN10)
 
 /****************************************************************************
@@ -63,7 +63,7 @@
 
 /* SPI5 chip select on PA3 (Arduino D10), active low */
 
-#define GPIO_SPI5_CS   (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHZ | \
+#define GPIO_SPI5_CS   (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
                         GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN3)
 
 /* LCD control: LCD_ON/OFF (PQ3) and backlight (PQ6) are active high,
@@ -71,11 +71,11 @@
  * starts asserted.
  */
 
-#define GPIO_LCD_DISP  (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHZ | \
+#define GPIO_LCD_DISP  (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
                         GPIO_OUTPUT_CLEAR | GPIO_PORTQ | GPIO_PIN3)
-#define GPIO_LCD_BL    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHZ | \
+#define GPIO_LCD_BL    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
                         GPIO_OUTPUT_CLEAR | GPIO_PORTQ | GPIO_PIN6)
-#define GPIO_LCD_NRST  (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHZ | \
+#define GPIO_LCD_NRST  (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
                         GPIO_OUTPUT_CLEAR | GPIO_PORTE | GPIO_PIN1)
 
 /* GT911 touch controller on I2C2 (0x5d): interrupt on PQ4, rising edge.
@@ -90,9 +90,9 @@
  * module enable on PD2 (active high).  The module devices are on I2C1.
  */
 
-#define GPIO_CAM_NRST  (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHZ | \
+#define GPIO_CAM_NRST  (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
                         GPIO_OUTPUT_CLEAR | GPIO_PORTC | GPIO_PIN8)
-#define GPIO_CAM_EN    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHZ | \
+#define GPIO_CAM_EN    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
                         GPIO_OUTPUT_CLEAR | GPIO_PORTD | GPIO_PIN2)
 
 /* VL53L5CX time-of-flight sensor on the camera module, I2C1 (0x29):
@@ -102,7 +102,7 @@
 
 #define GPIO_TOF_INT   (GPIO_INPUT | GPIO_PULLUP | GPIO_EXTI | \
                         GPIO_PORTQ | GPIO_PIN0)
-#define GPIO_TOF_LPN   (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHZ | \
+#define GPIO_TOF_LPN   (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
                         GPIO_OUTPUT_CLEAR | GPIO_PORTQ | GPIO_PIN5)
 
 #define TOF_I2C_BUS    1
@@ -115,7 +115,7 @@
 
 #define GPIO_SDMMC2_NCD    (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | \
                             GPIO_PORTN | GPIO_PIN12)
-#define GPIO_SDMMC2_PWR_EN (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHZ | \
+#define GPIO_SDMMC2_PWR_EN (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
                             GPIO_OUTPUT_CLEAR | GPIO_PORTQ | GPIO_PIN7)
 
 #define SDIO_SLOTNO    0

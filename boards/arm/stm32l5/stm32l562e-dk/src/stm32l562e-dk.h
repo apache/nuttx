@@ -67,9 +67,9 @@
  * - When the I/O is HIGH value, the LED is off
  */
 
-#define GPIO_LD9        (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHZ | \
+#define GPIO_LD9        (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
                          GPIO_OUTPUT_SET | GPIO_PORTD | GPIO_PIN3)
-#define GPIO_LD10       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHZ | \
+#define GPIO_LD10       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
                          GPIO_OUTPUT_SET | GPIO_PORTG | GPIO_PIN12)
 
 /* Button definitions *******************************************************/
