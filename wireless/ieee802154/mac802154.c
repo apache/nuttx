@@ -109,6 +109,7 @@ static void mac802154_sfevent(FAR const struct ieee802154_radiocb_s *radiocb,
                               enum ieee802154_sfevent_e sfevent);
 
 static void mac802154_purge_worker(FAR void *arg);
+static int mac802154_fcmhrlen(uint16_t fc);
 
 static void mac802154_rxdatareq(FAR struct ieee802154_privmac_s *priv,
                                 FAR struct ieee802154_data_ind_s *ind);
@@ -1062,6 +1063,57 @@ static void mac802154_rxframe(FAR const struct ieee802154_radiocb_s *radiocb,
 }
 
 /****************************************************************************
+ * Name: mac802154_fcmhrlen
+ *
+ * Description:
+ *   MAC header length described by a frame control field.
+ *
+ ****************************************************************************/
+
+static int mac802154_fcmhrlen(uint16_t fc)
+{
+  return mac802154_mhrlen((fc & IEEE802154_FRAMECTRL_DADDR) >>
+                          IEEE802154_FRAMECTRL_SHIFT_DADDR,
+                          (fc & IEEE802154_FRAMECTRL_SADDR) >>
+                          IEEE802154_FRAMECTRL_SHIFT_SADDR,
+                          (fc & IEEE802154_FRAMECTRL_PANIDCOMP) != 0);
+}
+
+/****************************************************************************
+ * Name: mac802154_mhrvalid
+ *
+ * Description:
+ *   Check that a received frame holds the whole MAC header described by its
+ *   frame control field, and the command identifier of a command frame.
+ *
+ ****************************************************************************/
+
+static bool mac802154_mhrvalid(FAR struct iob_s *iob)
+{
+  uint16_t fc;
+  int      len;
+  int      mhrlen;
+
+  len = iob->io_len - iob->io_offset;
+  if (len < 3)
+    {
+      return false;
+    }
+
+  fc     = iob->io_data[iob->io_offset] |
+           (iob->io_data[iob->io_offset + 1] << 8);
+  mhrlen = mac802154_fcmhrlen(fc);
+
+  if (((fc & IEEE802154_FRAMECTRL_FTYPE) >>
+       IEEE802154_FRAMECTRL_SHIFT_FTYPE) == IEEE802154_FRAME_COMMAND)
+    {
+      mhrlen++;
+    }
+
+  return len >= mhrlen;
+}
+
+/****************************************************************************
  * Name: mac802154_rxframe_worker
  *
  * Description:
@@ -1111,6 +1163,16 @@ static void mac802154_rxframe_worker(FAR void *arg)
       /* Get a local copy of the frame to make it easier to access */
 
       iob = ind->frame;
+
+      /* Drop a frame shorter than its MAC header */
+
+      if (!mac802154_mhrvalid(iob))
+        {
+          wlwarn("WARNING: dropping malformed frame\n");
+          ieee802154_primitive_free((FAR struct ieee802154_primitive_s *)
+                                    ind);
+          continue;
+        }
 
       /* Set a local pointer to the frame control then move the offset past
        * the frame control field
@@ -1276,6 +1338,14 @@ static void mac802154_rxframe_worker(FAR void *arg)
                */
 
               wlinfo("ACK received\n");
+              ieee802154_primitive_free((FAR struct ieee802154_primitive_s *)
+                                        ind);
+            }
+            break;
+
+          default:
+            {
+              wlinfo("Reserved frame type %u dropped\n", ftype);
               ieee802154_primitive_free((FAR struct ieee802154_primitive_s *)
                                         ind);
             }
