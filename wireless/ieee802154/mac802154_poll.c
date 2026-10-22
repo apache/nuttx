@@ -96,7 +96,6 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
     }
 
   priv->curr_op = MAC802154_OP_POLL;
-  priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
 
   /* Allocate the txdesc, waiting if necessary */
 

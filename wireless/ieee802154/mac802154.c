@@ -110,6 +110,8 @@ static void mac802154_sfevent(FAR const struct ieee802154_radiocb_s *radiocb,
 
 static void mac802154_purge_worker(FAR void *arg);
 static int mac802154_fcmhrlen(uint16_t fc);
+static uint8_t
+mac802154_txcmdid(FAR const struct ieee802154_txdesc_s *txdesc);
 
 static void mac802154_rxdatareq(FAR struct ieee802154_privmac_s *priv,
                                 FAR struct ieee802154_data_ind_s *ind);
@@ -892,6 +894,22 @@ static void mac802154_txdone(FAR const struct ieee802154_radiocb_s *radiocb,
 }
 
 /****************************************************************************
+ * Name: mac802154_txcmdid
+ *
+ * Description:
+ *   Command identifier of a command frame built by the MAC.
+ *
+ ****************************************************************************/
+
+static uint8_t
+mac802154_txcmdid(FAR const struct ieee802154_txdesc_s *txdesc)
+{
+  FAR const uint8_t *frame = txdesc->frame->io_data;
+
+  return frame[mac802154_fcmhrlen(frame[0] | (frame[1] << 8))];
+}
+
+/****************************************************************************
  * Name: mac802154_txdone_worker
  *
  * Description:
@@ -941,7 +959,9 @@ static void mac802154_txdone_worker(FAR void *arg)
 
           case IEEE802154_FRAME_COMMAND:
             {
-              switch (priv->curr_cmd)
+              /* Route by the command that was sent */
+
+              switch (mac802154_txcmdid(txdesc))
                 {
                   case IEEE802154_CMD_ASSOC_REQ:
                     mac802154_txdone_assocreq(priv, txdesc);
@@ -2060,7 +2080,6 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
 
       if (priv->curr_op == MAC802154_OP_ASSOC && pending_eaddr)
         {
-          priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
           mac802154_txdesc_alloc(priv, &respdesc);
           mac802154_createdatareq(priv, &priv->pandesc.coordaddr,
                                  IEEE802154_ADDRMODE_EXTENDED, respdesc);
@@ -2098,15 +2117,7 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
                 {
                   mac802154_txdesc_alloc(priv, &respdesc);
 
-                  if (priv->curr_op == MAC802154_OP_POLL)
-                    {
-                      priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
-                    }
-                  else if (priv->curr_op == MAC802154_OP_ASSOC)
-                    {
-                      priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
-                    }
-                  else if (priv->curr_op == MAC802154_OP_NONE)
+                  if (priv->curr_op == MAC802154_OP_NONE)
                     {
                       int sval;
 
@@ -2114,7 +2125,6 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
                                   && sval == 1);
                       nxsem_wait_uninterruptible(&priv->opsem);
                       priv->curr_op = MAC802154_OP_AUTOEXTRACT;
-                      priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
                     }
 
                   if (pending_saddr)
