@@ -35,6 +35,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/wireless/ieee802154/ieee802154_radio.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
+#include <nuttx/wireless/ieee802154/mrf24j40.h>
 
 #include "mrf24j40.h"
 #include "mrf24j40_reg.h"
@@ -420,6 +421,7 @@ int mrf24j40_reset(FAR struct ieee802154_radio_s *radio)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
   struct ieee802154_cca_s   cca;
+  uint8_t eaddr[8];
   int reg;
 
   /* Software reset */
@@ -491,7 +493,18 @@ int mrf24j40_reset(FAR struct ieee802154_radio_s *radio)
   mrf24j40_setchannel(dev, 11);
   mrf24j40_setpanid(dev, g_allones);
   mrf24j40_setsaddr(dev, g_allones);
-  mrf24j40_seteaddr(dev, g_allones);
+
+  /* Use the extended address of the board, if it has one */
+
+  if (dev->lower->geteaddr != NULL)
+    {
+      dev->lower->geteaddr(dev->lower, eaddr);
+      mrf24j40_seteaddr(dev, eaddr);
+    }
+  else
+    {
+      mrf24j40_seteaddr(dev, g_allones);
+    }
 
   dev->max_frame_waittime = MRF24J40_DEFAULT_MAX_FRAME_WAITTIME;
   dev->bsn = 0;
