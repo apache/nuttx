@@ -118,8 +118,16 @@ void uart_xmitchars_dma(FAR uart_dev_t *dev)
     {
       xfer->buffer  = &dev->xmit.buffer[dev->xmit.tail];
       xfer->length  = dev->xmit.size - dev->xmit.tail;
-      xfer->nbuffer = dev->xmit.buffer;
-      xfer->nlength = dev->xmit.head;
+      if (dev->xmit.head > 0)
+        {
+          xfer->nbuffer = dev->xmit.buffer;
+          xfer->nlength = dev->xmit.head;
+        }
+      else
+        {
+          xfer->nbuffer = NULL;
+          xfer->nlength = 0;
+        }
     }
 
   uart_dmasend(dev);
