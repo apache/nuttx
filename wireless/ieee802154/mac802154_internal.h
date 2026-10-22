@@ -121,7 +121,10 @@ struct ieee802154_privmac_s
   /******************* Fields related to MAC operations *********************/
 
   enum mac802154_operation_e     curr_op;   /* The current overall operation */
-  FAR struct ieee802154_txdesc_s *cmd_desc; /* TX descriptor for current cmd */
+
+  /* Destination of the current command */
+
+  struct ieee802154_addr_s       cmd_destaddr;
   uint8_t                        nrxusers;
   struct work_s                  macop_work;
 

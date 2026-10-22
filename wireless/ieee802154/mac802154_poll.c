@@ -137,10 +137,6 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
          &req->coordaddr,
          sizeof(struct ieee802154_addr_s));
 
-  /* Save a reference of the tx descriptor */
-
-  priv->cmd_desc = txdesc;
-
   wlinfo("Queuing POLL.request in CSMA queue\n");
 
   /* Link the transaction into the CSMA transaction list */
@@ -208,7 +204,6 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
       /* We are now done the operation, and can release the command */
 
       priv->curr_op = MAC802154_OP_NONE;
-      priv->cmd_desc = NULL;
       nxsem_post(&priv->opsem);
 
       mac802154_notify(priv, mac802154_txdesc_takeconf(txdesc));
@@ -270,7 +265,6 @@ void mac802154_polltimeout(FAR void *arg)
   /* We are no longer performing the association operation */
 
   priv->curr_op = MAC802154_OP_NONE;
-  priv->cmd_desc = NULL;
   nxsem_post(&priv->opsem);
 
   mac802154_notify(priv, primitive);

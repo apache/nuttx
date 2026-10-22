@@ -362,9 +362,9 @@ void mac802154_createdatareq(FAR struct ieee802154_privmac_s *priv,
 
   memcpy(&txdesc->destaddr, coordaddr, sizeof(struct ieee802154_addr_s));
 
-  /* Save a reference of the tx descriptor */
+  /* The tx descriptor is freed on tx done, keep the address */
 
-  priv->cmd_desc = txdesc;
+  memcpy(&priv->cmd_destaddr, coordaddr, sizeof(struct ieee802154_addr_s));
 }
 
 /****************************************************************************
@@ -1433,7 +1433,7 @@ static void mac802154_rxdataframe(FAR struct ieee802154_privmac_s *priv,
        * to NONE, we process it as our extracted frame
        */
 
-      if (ind->src.mode != priv->cmd_desc->destaddr.mode)
+      if (ind->src.mode != priv->cmd_destaddr.mode)
         {
           mac802154_notify(priv, (FAR struct ieee802154_primitive_s *)
                                  ind);
@@ -1441,14 +1441,14 @@ static void mac802154_rxdataframe(FAR struct ieee802154_privmac_s *priv,
 
       if (ind->src.mode == IEEE802154_ADDRMODE_SHORT &&
           !IEEE802154_SADDRCMP(ind->src.saddr,
-                               priv->cmd_desc->destaddr.saddr))
+                               priv->cmd_destaddr.saddr))
         {
           mac802154_notify(priv, (FAR struct ieee802154_primitive_s *)
                                   ind);
         }
       else if (ind->src.mode == IEEE802154_ADDRMODE_EXTENDED &&
                !IEEE802154_EADDRCMP(ind->src.eaddr,
-                                    priv->cmd_desc->destaddr.eaddr))
+                                    priv->cmd_destaddr.eaddr))
         {
           mac802154_notify(priv, (FAR struct ieee802154_primitive_s *)
                                  ind);
@@ -1494,7 +1494,6 @@ static void mac802154_rxdataframe(FAR struct ieee802154_privmac_s *priv,
       /* We are no longer performing the association operation */
 
       priv->curr_op = MAC802154_OP_NONE;
-      priv->cmd_desc = NULL;
       nxsem_post(&priv->opsem);
 
       /* Release the MAC and notify the next highest layer */

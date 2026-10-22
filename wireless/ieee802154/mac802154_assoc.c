@@ -232,9 +232,10 @@ int mac802154_req_associate(MACHANDLE mac,
   memcpy(&txdesc->destaddr, &req->coordaddr,
          sizeof(struct ieee802154_addr_s));
 
-  /* Save a reference of the tx descriptor */
+  /* Responses are matched against the coordinator address */
 
-  priv->cmd_desc = txdesc;
+  memcpy(&priv->cmd_destaddr, &req->coordaddr,
+         sizeof(struct ieee802154_addr_s));
 
   /* Search the list of PAN descriptors, that would have been populated by
    * the latest scan procedure. If we have seen a beacon from the
@@ -474,7 +475,6 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
       /* We are now done the operation, unlock the semaphore */
 
       priv->curr_op = MAC802154_OP_NONE;
-      priv->cmd_desc = NULL;
       nxsem_post(&priv->opsem);
 
       /* Release the MAC, call the callback, get exclusive access again */
@@ -609,7 +609,6 @@ void mac802154_txdone_datareq_assoc(FAR struct ieee802154_privmac_s *priv,
       /* We are now done the operation, and can release the command */
 
       priv->curr_op = MAC802154_OP_NONE;
-      priv->cmd_desc = NULL;
       nxsem_post(&priv->opsem);
 
       mac802154_notify(priv, mac802154_txdesc_takeconf(txdesc));
@@ -800,7 +799,6 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
   /* We are no longer performing the association operation */
 
   priv->curr_op = MAC802154_OP_NONE;
-  priv->cmd_desc = NULL;
   nxsem_post(&priv->opsem);
   mac802154_rxdisable(priv);
 
@@ -864,7 +862,6 @@ static void mac802154_assoctimeout(FAR void *arg)
   /* We are no longer performing the association operation */
 
   priv->curr_op = MAC802154_OP_NONE;
-  priv->cmd_desc = NULL;
   nxsem_post(&priv->opsem);
   mac802154_rxdisable(priv);
 
