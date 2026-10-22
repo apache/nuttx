@@ -168,6 +168,9 @@ static void nrf53_radioi8_rx_parse(struct nrf53_radioi8_dev_s *dev,
                                    uint8_t *ftype, uint8_t *cmdtype);
 static void nrf53_radioi8_ack_transmit(struct nrf53_radioi8_dev_s *dev);
 static bool nrf53_radioi8_filter(struct nrf53_radioi8_dev_s *dev);
+#ifdef CONFIG_NRF53_RADIO_IEEE802154_SUPERFRAME
+static bool nrf53_radioi8_coordbeacon(struct nrf53_radioi8_dev_s *dev);
+#endif
 #if NRF53_GTS_SLOTS > 0
 static void nrf53_radioi8_gts_setup(struct nrf53_radioi8_dev_s *dev,
                                     uint8_t fifo, struct iob_s *frame);
@@ -558,6 +561,52 @@ static bool nrf53_radioi8_filter(struct nrf53_radioi8_dev_s *dev)
 
   return false;
 }
+
+#ifdef CONFIG_NRF53_RADIO_IEEE802154_SUPERFRAME
+/****************************************************************************
+ * Name: nrf53_radioi8_coordbeacon
+ *
+ * Description:
+ *   The received frame is a beacon of our coordinator (IEEE 802.15.4-2003
+ *   7.5.4.1).
+ *
+ ****************************************************************************/
+
+static bool nrf53_radioi8_coordbeacon(struct nrf53_radioi8_dev_s *dev)
+{
+  uint8_t *rx = &dev->radio->rxbuf[1];
+  uint8_t  eaddr[IEEE802154_EADDRSIZE];
+  uint8_t  mode;
+  int      i;
+
+  if ((rx[0] & IEEE802154_FRAMECTRL_FTYPE) != IEEE802154_FRAME_BEACON ||
+      !IEEE802154_PANIDCMP(&rx[3], dev->state.addr.panid))
+    {
+      return false;
+    }
+
+  mode = ((rx[1] << 8) & IEEE802154_FRAMECTRL_SADDR) >>
+         IEEE802154_FRAMECTRL_SHIFT_SADDR;
+
+  if (mode == IEEE802154_ADDRMODE_SHORT)
+    {
+      return IEEE802154_SADDRCMP(&rx[5], dev->state.coordaddr.saddr);
+    }
+  else if (mode == IEEE802154_ADDRMODE_EXTENDED)
+    {
+      /* Sent least significant octet first */
+
+      for (i = 0; i < IEEE802154_EADDRSIZE; i++)
+        {
+          eaddr[i] = rx[5 + IEEE802154_EADDRSIZE - 1 - i];
+        }
+
+      return IEEE802154_EADDRCMP(eaddr, dev->state.coordaddr.eaddr);
+    }
+
+  return false;
+}
+#endif
 
 #if NRF53_GTS_SLOTS > 0
 /****************************************************************************
@@ -1892,24 +1941,12 @@ static void nrf53_radioi8_state_rx(struct nrf53_radioi8_dev_s *dev)
     }
 
 #ifdef CONFIG_NRF53_RADIO_IEEE802154_SUPERFRAME
-  /* TODO: resync with beacon ? */
+  /* The superframe started with the SHR of the coordinator beacon */
 
-  if (dev->radio->state.wait_for_beacon == true)
+  if (dev->radio->state.sftrack && dev->radio->state.waitack == false &&
+      nrf53_radioi8_coordbeacon(dev))
     {
-      uint16_t *fc = (uint16_t *)&rxbuf[0];
-
-      /* TODO: NOT TESTES, should we check panid here ? */
-
-      if (((*fc & IEEE802154_FRAMECTRL_FTYPE) == IEEE802154_FRAME_BEACON) &&
-          IEEE802154_PANIDCMP(IEEE802154_PANID_UNSPEC,
-                              &dev->state.addr.panid))
-        {
-          /* Start RTC */
-
-          dev->rtc->ops->start(dev);
-
-          dev->radio->state.wait_for_beacon = false;
-        }
+      dev->rtc->ops->sync(dev, rxbuf[0]);
     }
 #endif
 

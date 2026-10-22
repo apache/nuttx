@@ -68,8 +68,6 @@ enum radio_trace_type_e
   RADIO_TRACE_IRQ_TIMWAITACK,
   RADIO_TRACE_IRQ_TIMCSMADELAY,
   RADIO_TRACE_IRQ_RTCSD,
-  RADIO_TRACE_IRQ_RTCCAP,
-  RADIO_TRACE_IRQ_RTCTIMESLOT,
   RADIO_TRACE_IRQ_RTCBI,
 
   /* Works */
@@ -93,6 +91,7 @@ enum radio_trace_type_e
   RADIO_TRACE_NOACK,
   RADIO_TRACE_DROPFRAME,
   RADIO_TRACE_TXRETRY,
+  RADIO_TRACE_SFSYNC,
 };
 
 /****************************************************************************

@@ -44,10 +44,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_NRF52_RADIO_IEEE802154_SUPERFRAME
-#  warning Beacon and superframe support work in progress
-#endif
-
 #ifndef CONFIG_NRF52_RTC0
 #  error CONFIG_NRF52_RTC0 is needed to handle radio timings
 #endif
@@ -56,16 +52,27 @@
 
 #define NRF52_IEEE802154_RTC0   (0)
 
-/* RTC prescaler set to 0, freq = 32.768kHz, resolution = 30.517 us */
+/* RTC prescaler set to 0, freq = 32.768kHz, 1 tick = 15625 / 512 us */
 
 #define NRF52_RTC_PRESCALER     (0)
-#define NRF52_RTC_FREQUENCY     (32768)
+#define NRF52_RTC_TICK_NUM      (15625)
+#define NRF52_RTC_TICK_DEN      (512)
 
-#define NRF52_RTC_RESOLUTION_NS (30517)
+/* 24-bit counter */
 
-/* 31 * 30.517us = 946.027us */
+#define NRF52_RTC_COUNTER_BITS  (24)
+#define NRF52_RTC_COUNTER_MASK  ((1 << NRF52_RTC_COUNTER_BITS) - 1)
 
-#define NRF52_RTC_TIMESLOT_CC   (31)
+/* A compare value closer than 2 ticks to the counter may not match */
+
+#define NRF52_RTC_CC_MARGIN     (2)
+#define NRF52_RTC_CC_MARGIN_US  ((NRF52_RTC_CC_MARGIN * NRF52_RTC_TICK_NUM + \
+                                  NRF52_RTC_TICK_DEN - 1) / NRF52_RTC_TICK_DEN)
+
+/* Superframe events compare channel */
+
+#define NRF52_RTC_CC            (NRF52_RTC_CC0)
+#define NRF52_RTC_EVT           (NRF52_RTC_EVT_COMPARE0)
 
 /****************************************************************************
  * Private Function Prototypes
@@ -76,8 +83,12 @@
 static int nrf52_radioi8_rtc(struct nrf52_radioi8_dev_s *dev,
                              struct ieee802154_superframespec_s *sfspec);
 static int nrf52_radioi8_rtc_start(struct nrf52_radioi8_dev_s *dev);
+static int nrf52_radioi8_rtc_sync(struct nrf52_radioi8_dev_s *dev,
+                                  uint8_t phr);
 static int nrf52_radioi8_rtc_stop(struct nrf52_radioi8_dev_s *dev);
 static void nrf52_radioi8_rtc_reset(struct nrf52_radioi8_dev_s *dev);
+static bool nrf52_radioi8_rtc_elapsed(struct nrf52_radioi8_dev_s *dev,
+                                      uint32_t *us);
 
 /* Interrupts logic */
 
@@ -92,10 +103,12 @@ static int nrf52_radioi8_isr_rtc(int irq, void *context, void *arg);
 
 static struct nrf52_radioi8_rtc_ops_s g_radioi8_rtc_ops =
 {
-  .setup = nrf52_radioi8_rtc,
-  .start = nrf52_radioi8_rtc_start,
-  .stop  = nrf52_radioi8_rtc_stop,
-  .reset = nrf52_radioi8_rtc_reset
+  .setup   = nrf52_radioi8_rtc,
+  .start   = nrf52_radioi8_rtc_start,
+  .sync    = nrf52_radioi8_rtc_sync,
+  .stop    = nrf52_radioi8_rtc_stop,
+  .reset   = nrf52_radioi8_rtc_reset,
+  .elapsed = nrf52_radioi8_rtc_elapsed
 };
 
 /* RTC instance */
@@ -107,69 +120,171 @@ static struct nrf52_radioi8_rtc_s g_radioi8_rtc;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nrf52_radioi8_rtc_ticks
+ *
+ * Description:
+ *   Get the 64-bit RTC counter.  Must be called with the radio locked.
+ *
+ ****************************************************************************/
+
+static uint64_t nrf52_radioi8_rtc_ticks(struct nrf52_radioi8_rtc_s *rtc)
+{
+  uint32_t ovf = rtc->ovf;
+  uint32_t cnt = 0;
+
+  NRF52_RTC_GETCOUNTER(rtc->rtc, &cnt);
+
+  /* Overflow not handled yet */
+
+  if (NRF52_RTC_CHECKINT(rtc->rtc, NRF52_RTC_EVT_OVRFLW))
+    {
+      NRF52_RTC_GETCOUNTER(rtc->rtc, &cnt);
+      ovf += 1;
+    }
+
+  return ((uint64_t)ovf << NRF52_RTC_COUNTER_BITS) | cnt;
+}
+
+/****************************************************************************
+ * Name: nrf52_radioi8_rtc_now
+ *
+ * Description:
+ *   Get the current time in us.  Must be called with the radio locked.
+ *
+ ****************************************************************************/
+
+static uint64_t nrf52_radioi8_rtc_now(struct nrf52_radioi8_rtc_s *rtc)
+{
+  return nrf52_radioi8_rtc_ticks(rtc) * NRF52_RTC_TICK_NUM /
+         NRF52_RTC_TICK_DEN;
+}
+
+/****************************************************************************
+ * Name: nrf52_radioi8_rtc_alarm
+ *
+ * Description:
+ *   Schedule a superframe event.  The compare value matches on every
+ *   counter wrap, the interrupt handler ignores the matches before the
+ *   event time.  Must be called with the radio locked.
+ *
+ ****************************************************************************/
+
+static void nrf52_radioi8_rtc_alarm(struct nrf52_radioi8_rtc_s *rtc,
+                                    uint8_t evt, uint64_t time)
+{
+  uint64_t ticks = time * NRF52_RTC_TICK_DEN / NRF52_RTC_TICK_NUM;
+  uint64_t now   = nrf52_radioi8_rtc_ticks(rtc);
+
+  if (ticks < now + NRF52_RTC_CC_MARGIN)
+    {
+      ticks = now + NRF52_RTC_CC_MARGIN;
+    }
+
+  rtc->evt      = evt;
+  rtc->evt_time = time;
+
+  NRF52_RTC_ACKINT(rtc->rtc, NRF52_RTC_EVT);
+  NRF52_RTC_SETCC(rtc->rtc, NRF52_RTC_CC, ticks & NRF52_RTC_COUNTER_MASK);
+  NRF52_RTC_ENABLEEVT(rtc->rtc, NRF52_RTC_EVT);
+  NRF52_RTC_ENABLEINT(rtc->rtc, NRF52_RTC_EVT);
+}
+
+/****************************************************************************
+ * Name: nrf52_radioi8_rtc_cancel
+ *
+ * Description:
+ *   Cancel the scheduled superframe event.  Must be called with the radio
+ *   locked.
+ *
+ ****************************************************************************/
+
+static void nrf52_radioi8_rtc_cancel(struct nrf52_radioi8_rtc_s *rtc)
+{
+  NRF52_RTC_DISABLEINT(rtc->rtc, NRF52_RTC_EVT);
+  NRF52_RTC_DISABLEEVT(rtc->rtc, NRF52_RTC_EVT);
+  NRF52_RTC_ACKINT(rtc->rtc, NRF52_RTC_EVT);
+
+  rtc->evt = NRF52_SFEVT_NONE;
+}
+
+/****************************************************************************
+ * Name: nrf52_radioi8_rtc_next
+ *
+ * Description:
+ *   Schedule the next superframe event after the superframe start.  Must
+ *   be called with the radio locked.
+ *
+ ****************************************************************************/
+
+static void nrf52_radioi8_rtc_next(struct nrf52_radioi8_dev_s *dev)
+{
+  struct nrf52_radioi8_rtc_s *rtc = dev->rtc;
+
+  if (rtc->sd < rtc->bi)
+    {
+      nrf52_radioi8_rtc_alarm(rtc, NRF52_SFEVT_SDEND,
+                              rtc->sf_start + rtc->sd);
+    }
+  else
+    {
+      /* No inactive portion, the MAC updates the beacon from now */
+
+      if (work_available(&dev->rtc->inactive_work))
+        {
+          work_queue(HPWORK, &dev->rtc->inactive_work,
+                     nrf52_radioi8_work_inactive, dev, 0);
+        }
+
+      nrf52_radioi8_rtc_alarm(rtc, NRF52_SFEVT_START,
+                              rtc->sf_start + rtc->bi -
+                              NRF52_RADIOI8_RAMPUP_US);
+    }
+}
+
+/****************************************************************************
  * Name: nrf52_radioi8_rtc
  *
  * Description:
- *   Configure RTC events according to superframe spec.
+ *   Configure the superframe timings according to superframe spec.
  *
  ****************************************************************************/
 
 static int nrf52_radioi8_rtc(struct nrf52_radioi8_dev_s *dev,
                              struct ieee802154_superframespec_s *sfspec)
 {
-  uint32_t   bi     = 0;
-  uint32_t   sd     = 0;
-  uint32_t   cap    = 0;
-  irqstate_t flags;
+  struct nrf52_radioi8_rtc_s *rtc = dev->rtc;
+  uint32_t                    slot;
+  irqstate_t                  flags;
+
+  if (sfspec->beaconorder > 14 ||
+      (sfspec->sforder > sfspec->beaconorder && sfspec->sforder != 15))
+    {
+      return -EINVAL;
+    }
 
   flags = enter_critical_section();
 
-  /* Stop RTC and clear the counter */
+  /* BI = aBaseSuperframeDuration * 2^BO, SD = aBaseSuperframeDuration *
+   * 2^SO, the CAP ends with the final CAP slot (IEEE 802.15.4-2003 7.5.1.1)
+   */
 
-  NRF52_RTC_STOP(dev->rtc->rtc);
-  NRF52_RTC_CLEAR(dev->rtc->rtc);
+  rtc->bi = (IEEE802154_BASE_SUPERFRAME_DURATION * IEEE802154_SYMBOL_US) <<
+            sfspec->beaconorder;
 
-  /* Initialize BI counter */
+  if (sfspec->sforder == 15)
+    {
+      /* The superframe is not active after the beacon */
 
-  bi = ((IEEE802154_BASE_SUPERFRAME_DURATION *
-        (2 << sfspec->beaconorder) *
-         IEEE802154_SYMBOL_US * 1000)  /
-        NRF52_RTC_RESOLUTION_NS);
-  NRF52_RTC_SETCC(dev->rtc->rtc, NRF52_RTC_BI, bi);
-
-  /* Initialize SD counter */
-
-  sd = ((IEEE802154_BASE_SUPERFRAME_DURATION *
-         (2 << sfspec->sforder) *
-         IEEE802154_SYMBOL_US * 1000) /
-        NRF52_RTC_RESOLUTION_NS);
-  NRF52_RTC_SETCC(dev->rtc->rtc, NRF52_RTC_SD, sd);
-
-  /* Initialize CAP counter */
-
-  cap = ((sfspec->final_capslot *
-          IEEE802154_TIMESLOT_US * 1000) /
-         NRF52_RTC_RESOLUTION_NS);
-  NRF52_RTC_SETCC(dev->rtc->rtc, NRF52_RTC_CAP, cap);
-
-  /* Initialize timeslot counter */
-
-  dev->rtc->rtc_timeslot = NRF52_RTC_TIMESLOT_CC;
-  NRF52_RTC_SETCC(dev->rtc->rtc, NRF52_RTC_TIMESLOT, dev->rtc->rtc_timeslot);
-
-  /* Configure interrupts */
-
-  NRF52_RTC_ENABLEINT(dev->rtc->rtc, NRF52_RTC_BI);
-  NRF52_RTC_ENABLEINT(dev->rtc->rtc, NRF52_RTC_SD);
-  NRF52_RTC_ENABLEINT(dev->rtc->rtc, NRF52_RTC_CAP);
-  NRF52_RTC_ENABLEINT(dev->rtc->rtc, NRF52_RTC_TIMESLOT);
-
-  /* Configure events */
-
-  NRF52_RTC_ENABLEEVT(dev->rtc->rtc, NRF52_RTC_BI);
-  NRF52_RTC_ENABLEEVT(dev->rtc->rtc, NRF52_RTC_SD);
-  NRF52_RTC_ENABLEEVT(dev->rtc->rtc, NRF52_RTC_CAP);
-  NRF52_RTC_ENABLEEVT(dev->rtc->rtc, NRF52_RTC_TIMESLOT);
+      rtc->sd  = 0;
+      rtc->cap = 0;
+    }
+  else
+    {
+      slot     = (IEEE802154_BASE_SLOT_DURATION * IEEE802154_SYMBOL_US) <<
+                 sfspec->sforder;
+      rtc->sd  = slot * IEEE802154_NUM_SUPERFRAME_SLOTS;
+      rtc->cap = slot * (sfspec->final_capslot + 1);
+    }
 
   leave_critical_section(flags);
 
@@ -180,13 +295,54 @@ static int nrf52_radioi8_rtc(struct nrf52_radioi8_dev_s *dev,
  * Name: nrf52_radioi8_rtc_start
  *
  * Description:
- *   Start RTC.
+ *   Start transmitting beacons.
  *
  ****************************************************************************/
 
 static int nrf52_radioi8_rtc_start(struct nrf52_radioi8_dev_s *dev)
 {
-  NRF52_RTC_START(dev->rtc->rtc);
+  struct nrf52_radioi8_rtc_s *rtc = dev->rtc;
+  irqstate_t                  flags;
+
+  flags = enter_critical_section();
+
+  rtc->sf_start = nrf52_radioi8_rtc_now(rtc) + NRF52_RTC_CC_MARGIN_US +
+                  NRF52_RADIOI8_RAMPUP_US;
+  rtc->running  = false;
+
+  nrf52_radioi8_rtc_alarm(rtc, NRF52_SFEVT_START,
+                          rtc->sf_start - NRF52_RADIOI8_RAMPUP_US);
+
+  leave_critical_section(flags);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: nrf52_radioi8_rtc_sync
+ *
+ * Description:
+ *   Synchronize with the beacon just received, the superframe started
+ *   with its SHR.
+ *
+ ****************************************************************************/
+
+static int nrf52_radioi8_rtc_sync(struct nrf52_radioi8_dev_s *dev,
+                                  uint8_t phr)
+{
+  struct nrf52_radioi8_rtc_s *rtc = dev->rtc;
+  irqstate_t                  flags;
+
+  flags = enter_critical_section();
+
+  nrf52_radioi8_trace_put(RADIO_TRACE_SFSYNC, phr);
+
+  rtc->sf_start = nrf52_radioi8_rtc_now(rtc) - NRF52_RADIOI8_FRAME_US(phr);
+  rtc->capstart = NRF52_RADIOI8_FRAME_US(phr) + NRF52_RADIOI8_IFS_US(phr);
+  rtc->running  = true;
+
+  leave_critical_section(flags);
+
   return OK;
 }
 
@@ -194,13 +350,21 @@ static int nrf52_radioi8_rtc_start(struct nrf52_radioi8_dev_s *dev)
  * Name: nrf52_radioi8_rtc_stop
  *
  * Description:
- *   Stop RTC.
+ *   Stop the superframe.
  *
  ****************************************************************************/
 
 static int nrf52_radioi8_rtc_stop(struct nrf52_radioi8_dev_s *dev)
 {
-  NRF52_RTC_STOP(dev->rtc->rtc);
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  nrf52_radioi8_rtc_cancel(dev->rtc);
+  dev->rtc->running = false;
+
+  leave_critical_section(flags);
+
   return OK;
 }
 
@@ -208,20 +372,81 @@ static int nrf52_radioi8_rtc_stop(struct nrf52_radioi8_dev_s *dev)
  * Name: nrf52_radioi8_rtc_reset
  *
  * Description:
- *   Reset RTC.
+ *   Reset RTC, the counter runs from now on.
  *
  ****************************************************************************/
 
 static void nrf52_radioi8_rtc_reset(struct nrf52_radioi8_dev_s *dev)
 {
+  struct nrf52_radioi8_rtc_s *rtc = dev->rtc;
+  irqstate_t                  flags;
+
+  flags = enter_critical_section();
+
   /* Configure RTC - freq = 32.768 kHz */
 
-  NRF52_RTC_STOP(dev->rtc->rtc);
-  NRF52_RTC_SETPRE(dev->rtc->rtc, NRF52_RTC_PRESCALER);
+  nrf52_radioi8_rtc_cancel(rtc);
+  NRF52_RTC_STOP(rtc->rtc);
+  NRF52_RTC_CLEAR(rtc->rtc);
+  NRF52_RTC_SETPRE(rtc->rtc, NRF52_RTC_PRESCALER);
+
+  /* Count overflows */
+
+  NRF52_RTC_ACKINT(rtc->rtc, NRF52_RTC_EVT_OVRFLW);
+  NRF52_RTC_ENABLEEVT(rtc->rtc, NRF52_RTC_EVT_OVRFLW);
+  NRF52_RTC_ENABLEINT(rtc->rtc, NRF52_RTC_EVT_OVRFLW);
 
   /* Reset data */
 
-  dev->rtc->rtc_timeslot = 0;
+  rtc->ovf      = 0;
+  rtc->sf_start = 0;
+  rtc->running  = false;
+
+  NRF52_RTC_START(rtc->rtc);
+
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
+ * Name: nrf52_radioi8_rtc_elapsed
+ *
+ * Description:
+ *   Time in us since the superframe start.
+ *
+ ****************************************************************************/
+
+static bool nrf52_radioi8_rtc_elapsed(struct nrf52_radioi8_dev_s *dev,
+                                      uint32_t *us)
+{
+  struct nrf52_radioi8_rtc_s *rtc = dev->rtc;
+  uint64_t                    now;
+  irqstate_t                  flags;
+  bool                        ret = false;
+
+  flags = enter_critical_section();
+
+  if (rtc->running)
+    {
+      now = nrf52_radioi8_rtc_now(rtc);
+      if (now < rtc->sf_start)
+        {
+          *us = 0;
+        }
+      else if (now - rtc->sf_start > UINT32_MAX)
+        {
+          *us = UINT32_MAX;
+        }
+      else
+        {
+          *us = now - rtc->sf_start;
+        }
+
+      ret = true;
+    }
+
+  leave_critical_section(flags);
+
+  return ret;
 }
 
 /****************************************************************************
@@ -256,94 +481,72 @@ static int nrf52_radioi8_isr_rtc(int irq, void *context, void *arg)
   struct nrf52_radioi8_dev_s *dev = (struct nrf52_radioi8_dev_s *)arg;
   struct nrf52_radioi8_rtc_s *rtc = NULL;
   irqstate_t                  flags;
+  uint8_t                     evt;
 
   DEBUGASSERT(dev != NULL);
   rtc = dev->rtc;
 
   flags = enter_critical_section();
 
-  /* End of CAP */
-
-  if (NRF52_RTC_CHECKINT(rtc->rtc, NRF52_RTC_CAP))
+  if (NRF52_RTC_CHECKINT(rtc->rtc, NRF52_RTC_EVT_OVRFLW))
     {
-      nrf52_radioi8_trace_put(RADIO_TRACE_IRQ_RTCCAP, 0);
-
-      /* TODO */
-
-      /* Clear event */
-
-      NRF52_RTC_ACKINT(rtc->rtc, NRF52_RTC_CAP);
+      NRF52_RTC_ACKINT(rtc->rtc, NRF52_RTC_EVT_OVRFLW);
+      rtc->ovf += 1;
     }
 
-  /* End of active portion */
-
-  else if (NRF52_RTC_CHECKINT(rtc->rtc, NRF52_RTC_SD))
+  if (NRF52_RTC_CHECKINT(rtc->rtc, NRF52_RTC_EVT))
     {
-      nrf52_radioi8_trace_put(RADIO_TRACE_IRQ_RTCSD, 0);
+      NRF52_RTC_ACKINT(rtc->rtc, NRF52_RTC_EVT);
 
-      /* Schedule work */
+      /* A match before the event time is a counter wrap */
 
-      DEBUGASSERT(work_available(&dev->rtc->inactive_work));
-      work_queue(HPWORK, &dev->rtc->inactive_work,
-                 nrf52_radioi8_work_inactive, dev, 0);
-
-      /* Reset timeslot */
-
-      rtc->rtc_timeslot = NRF52_RTC_TIMESLOT_CC;
-
-      /* Clear event */
-
-      NRF52_RTC_ACKINT(rtc->rtc, NRF52_RTC_SD);
-    }
-
-  /* Beacon interval */
-
-  else if (NRF52_RTC_CHECKINT(rtc->rtc, NRF52_RTC_BI))
-    {
-      nrf52_radioi8_trace_put(RADIO_TRACE_IRQ_RTCBI, 0);
-
-      /* Transmit beacon if we are not endpoint */
-
-      if (dev->state.devmode != NRF52_DEVMODE_ENDPOINT)
+      evt = rtc->evt;
+      if (evt == NRF52_SFEVT_NONE ||
+          nrf52_radioi8_rtc_ticks(rtc) <
+          rtc->evt_time * NRF52_RTC_TICK_DEN / NRF52_RTC_TICK_NUM)
         {
+          goto out;
+        }
+
+      rtc->evt = NRF52_SFEVT_NONE;
+
+      /* Superframe start */
+
+      if (evt == NRF52_SFEVT_START)
+        {
+          nrf52_radioi8_trace_put(RADIO_TRACE_IRQ_RTCBI, 0);
+
+          rtc->sf_start = rtc->evt_time + NRF52_RADIOI8_RAMPUP_US;
+          rtc->capstart = NRF52_RADIOI8_FRAME_US(dev->radio->beaconbuf[0]) +
+                          NRF52_RADIOI8_IFS_US(dev->radio->beaconbuf[0]);
+          rtc->running  = true;
+
           /* Transmit data from beaconbuf */
 
           dev->radio->ops->beacon_tx(dev);
+
+          nrf52_radioi8_rtc_next(dev);
         }
 
-      /* Clear event */
+      /* End of active portion */
 
-      NRF52_RTC_ACKINT(rtc->rtc, NRF52_RTC_BI);
+      else if (evt == NRF52_SFEVT_SDEND)
+        {
+          nrf52_radioi8_trace_put(RADIO_TRACE_IRQ_RTCSD, 0);
 
-      /* Next cycle */
+          if (work_available(&dev->rtc->inactive_work))
+            {
+              work_queue(HPWORK, &dev->rtc->inactive_work,
+                         nrf52_radioi8_work_inactive, dev, 0);
+            }
 
-      NRF52_RTC_TRGOVRFLW(rtc->rtc);
-
-      /* TODO: resync with beacon ? */
+          nrf52_radioi8_rtc_alarm(rtc, NRF52_SFEVT_START,
+                                  rtc->sf_start + rtc->bi -
+                                  NRF52_RADIOI8_RAMPUP_US);
+        }
     }
 
-  /* Timeslot in active portion */
-
-  if (NRF52_RTC_CHECKINT(rtc->rtc, NRF52_RTC_TIMESLOT))
-    {
-      nrf52_radioi8_trace_put(RADIO_TRACE_IRQ_RTCTIMESLOT, 0);
-
-      /* TODO: how to sync transmission with timeslot ?
-       *       do we need count every timeslot here ?
-       *       or wait for the timeslot we are interested in ?
-       *       or just use txdelay ?
-       */
-
-      /* Update timeslot */
-
-      rtc->rtc_timeslot += NRF52_RTC_TIMESLOT_CC;
-      NRF52_RTC_SETCC(rtc->rtc, NRF52_RTC_TIMESLOT, rtc->rtc_timeslot);
-
-      /* Clear event */
-
-      NRF52_RTC_ACKINT(rtc->rtc, NRF52_RTC_TIMESLOT);
-    }
-
+out:
   leave_critical_section(flags);
 
   return OK;

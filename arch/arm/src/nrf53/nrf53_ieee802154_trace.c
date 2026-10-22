@@ -57,8 +57,6 @@ static const char *g_radio_trace_str[] =
   "TIM IRQ: TIM WAIT ACK",
   "TIM IRQ: TIM CSMA DELAY",
   "RTC IRQ: RTC SD",
-  "RTC IRQ: RTC CAP",
-  "RTC IRQ: RTC TIMESLOT",
   "RTC IRQ: RTC BI",
 
   "WORK: RX",
@@ -78,6 +76,7 @@ static const char *g_radio_trace_str[] =
   "NOACK",
   "DROPFRAME",
   "TXTRYAGAIN",
+  "SFSYNC",
 };
 
 /* Trace data */
