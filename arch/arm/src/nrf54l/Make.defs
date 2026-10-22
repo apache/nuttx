@@ -72,6 +72,9 @@ ifeq ($(CONFIG_NRF54L_RADIO_IEEE802154),y)
 CHIP_CSRCS += nrf54l_ieee802154_radio.c
 CHIP_CSRCS += nrf54l_ieee802154_tim.c
 CHIP_CSRCS += nrf54l_ieee802154.c
+ifeq ($(CONFIG_NRF54L_RADIO_IEEE802154_SUPERFRAME),y)
+CHIP_CSRCS += nrf54l_ieee802154_rtc.c
+endif
 ifeq ($(CONFIG_NRF54L_RADIO_IEEE802154_TRACE),y)
 CHIP_CSRCS += nrf54l_ieee802154_trace.c
 endif
