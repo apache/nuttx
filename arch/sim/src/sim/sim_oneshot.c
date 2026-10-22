@@ -276,16 +276,15 @@ void up_timer_initialize(void)
    */
 
   struct oneshot_lowerhalf_s *priv = oneshot_initialize(1, 0);
+  int timer_irq = host_timerirq();
 
   VERIFY(host_inittimer());
   up_alarm_set_lowerhalf(priv);
 
-#ifdef CONFIG_SIM_WALLTIME_SIGNAL
-  int timer_irq = host_timerirq();
-
-  /* Attach the interrupt to the NuttX logic and enable the alarm handler. */
+  /* Register the handler for both signal and idle-driven timer interrupts. */
 
   irq_attach(timer_irq, sim_timer_handler, NULL);
+#ifdef CONFIG_SIM_WALLTIME_SIGNAL
   up_enable_irq(timer_irq);
 #endif
 }
@@ -314,6 +313,8 @@ void sim_timer_update(void)
   host_sleepuntil(until);
 
 #ifdef CONFIG_SIM_WALLTIME_SLEEP
-  sim_timer_handler(0, NULL, NULL);
+  /* Timer callbacks must run in interrupt context, including idle ticks. */
+
+  sim_doirq(host_timerirq(), NULL);
 #endif
 }
