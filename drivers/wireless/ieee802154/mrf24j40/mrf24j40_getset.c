@@ -241,8 +241,6 @@ int mrf24j40_setcoordsaddr(FAR struct mrf24j40_radio_s *dev,
   mrf24j40_setreg(dev->spi, MRF24J40_ASSOSADR0, saddr[0]);
   mrf24j40_setreg(dev->spi, MRF24J40_ASSOSADR1, saddr[1]);
 
-  IEEE802154_SADDRCOPY(dev->addr.saddr, saddr);
-
   wlinfo("%02X:%02X\n", saddr[0], saddr[1]);
   return OK;
 }
@@ -266,7 +264,6 @@ int mrf24j40_setcoordeaddr(FAR struct mrf24j40_radio_s *dev,
   for (i = 0; i < 8; i++)
     {
       mrf24j40_setreg(dev->spi, MRF24J40_ASSOEADR0 + i, eaddr[i]);
-      dev->addr.eaddr[i] = eaddr[i];
     }
 
   wlinfo("%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\n", eaddr[0], eaddr[1],
