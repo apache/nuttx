@@ -51,6 +51,20 @@
 
 #define GPIO_INDEX(p)  ((p) >> GPIO_PORT_SHIFT)
 
+/* EXTI line port selection and I/O compensation cell */
+
+#if defined(STM32_SYSCFG_EXTICR)
+#  define GPIO_EXTICR(p)         STM32_SYSCFG_EXTICR(p)
+#  define GPIO_EXTICR_SHIFT(p)   SYSCFG_EXTICR_EXTI_SHIFT(p)
+#  define GPIO_EXTICR_PORT_MASK  SYSCFG_EXTICR_PORT_MASK
+#endif
+
+#if defined(STM32_SYSCFG_CMPCR)
+#  define GPIO_CCCSR             STM32_SYSCFG_CMPCR
+#  define GPIO_CCCSR_EN          SYSCFG_CMPCR_CMPPD
+#  define GPIO_CCCSR_READY       SYSCFG_CMPCR_READY
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -384,7 +398,7 @@ int stm32_configgpio(uint32_t cfgset)
       stm32_gpio_setmode(base, pin, pinmode);
     }
 
-#ifdef STM32_SYSCFG_EXTICR
+#ifdef GPIO_EXTICR
   /* Select the port of the EXTI line */
 
   if (pinmode != GPIO_MODER_OUTPUT && (cfgset & GPIO_EXTI) != 0)
@@ -392,10 +406,10 @@ int stm32_configgpio(uint32_t cfgset)
       uint32_t regaddr;
       int shift;
 
-      regaddr = STM32_SYSCFG_EXTICR(pin);
+      regaddr = GPIO_EXTICR(pin);
       regval  = getreg32(regaddr);
-      shift   = SYSCFG_EXTICR_EXTI_SHIFT(pin);
-      regval &= ~(SYSCFG_EXTICR_PORT_MASK << shift);
+      shift   = GPIO_EXTICR_SHIFT(pin);
+      regval &= ~(GPIO_EXTICR_PORT_MASK << shift);
       regval |= (((uint32_t)port) << shift);
       putreg32(regval, regaddr);
     }
@@ -521,3 +535,41 @@ bool stm32_gpioread(uint32_t pinset)
 
   return 0;
 }
+
+#ifdef GPIO_CCCSR
+/****************************************************************************
+ * Name: stm32_iocompensation
+ *
+ * Description:
+ *   Enable I/O compensation.
+ *
+ *   By default the I/O compensation cell is not used. However when the I/O
+ *   output buffer speed is configured in 50 MHz or 100 MHz mode, it is
+ *   recommended to use the compensation cell for slew rate control on I/O
+ *   tf(IO)out)/tr(IO)out commutation to reduce the I/O noise on power
+ *   supply.
+ *
+ *   The I/O compensation cell can be used only when the supply voltage
+ *   ranges from 2.4 to 3.6 V.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void stm32_iocompensation(void)
+{
+  /* Enable I/O Compensation */
+
+  putreg32(GPIO_CCCSR_EN, GPIO_CCCSR);
+
+  /* Wait for compensation cell to become ready */
+
+  while ((getreg32(GPIO_CCCSR) & GPIO_CCCSR_READY) == 0)
+    {
+    }
+}
+#endif
