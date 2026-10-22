@@ -461,6 +461,14 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
 
   sched_unlock();
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
+  /* Release the signals that wait for this thread in the pending list of
+   * the group.  No new ones come: the thread is in exit processing.
+   */
+
+  nxsig_discard_threadsignals(tcb);
+#endif
+
   /* Leave the task group.  Perhaps discarding any un-reaped child
    * status (no zombies here!)
    */

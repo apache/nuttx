@@ -542,6 +542,17 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
       return ret;
     }
 
+  /* Check the exit again, in the critical section that queues the signal:
+   * the exit sets the flag in a critical section and then discards the
+   * signals pending for the thread.
+   */
+
+  if ((stcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      leave_critical_section(flags);
+      return -ESRCH;
+    }
+
   masked = nxsig_ismember(&stcb->sigprocmask, info->si_signo);
 
 #ifdef CONFIG_ENABLE_ALL_SIGNALS
