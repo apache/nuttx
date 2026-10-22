@@ -751,6 +751,11 @@ nrf53_radioi8_beaconstart(struct ieee802154_radio_s *radio,
                                         beacon->bf_len);
           dev->radio->state.bsn = rand();
 
+          /* Slotted CSMA-CA in the CAP */
+
+          dev->radio->state.slotted = true;
+          dev->radio->state.ble     = sfspec->ble;
+
           /* The PAN coordinator defines the superframe */
 
           dev->radio->state.sftrack = false;
@@ -809,6 +814,31 @@ nrf53_radioi8_beaconupdate(struct ieee802154_radio_s *radio,
 #endif
 }
 
+#ifdef CONFIG_NRF53_RADIO_IEEE802154_SUPERFRAME
+/****************************************************************************
+ * Name: nrf53_radioi8_unslotted
+ *
+ * Description:
+ *   Switch to un-slotted CSMA-CA, a transaction paused for the next CAP
+ *   starts again un-slotted.  Must be called with the radio locked.
+ *
+ ****************************************************************************/
+
+static void nrf53_radioi8_unslotted(struct nrf53_radioi8_dev_s *dev)
+{
+  dev->radio->state.slotted = false;
+  dev->radio->state.sftrack = false;
+
+  if (dev->radio->state.csma_paused)
+    {
+      dev->radio->state.csma_paused = false;
+      dev->radio->state.csma_busy   = false;
+      dev->state.csma_pending       = true;
+      dev->radio->ops->txnext(dev, 0);
+    }
+}
+#endif
+
 /****************************************************************************
  * Name: nrf53_radioi8_beaconstop
  *
@@ -828,6 +858,7 @@ static int nrf53_radioi8_beaconstop(struct ieee802154_radio_s *radio)
   /* Stop RTC */
 
   dev->rtc->ops->stop(dev);
+  nrf53_radioi8_unslotted(dev);
 
   leave_critical_section(flags);
 
@@ -873,6 +904,7 @@ nrf53_radioi8_sfupdate(struct ieee802154_radio_s *radio,
           /* Need slotted CSMA-CA */
 
           dev->radio->state.slotted = true;
+          dev->radio->state.ble     = sfspec->ble;
 
           /* Sync with the beacons */
 
@@ -884,8 +916,7 @@ nrf53_radioi8_sfupdate(struct ieee802154_radio_s *radio,
       /* Need un-slotted CSMA-CA */
 
       dev->rtc->ops->stop(dev);
-      dev->radio->state.slotted = false;
-      dev->radio->state.sftrack = false;
+      nrf53_radioi8_unslotted(dev);
     }
 
   leave_critical_section(flags);

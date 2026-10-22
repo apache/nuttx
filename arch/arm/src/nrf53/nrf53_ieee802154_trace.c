@@ -77,6 +77,7 @@ static const char *g_radio_trace_str[] =
   "DROPFRAME",
   "TXTRYAGAIN",
   "SFSYNC",
+  "CSMAPAUSE",
 };
 
 /* Trace data */

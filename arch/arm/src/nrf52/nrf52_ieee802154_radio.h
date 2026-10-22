@@ -114,7 +114,8 @@ struct nrf52_radioi8_radio_data_s
 
   bool     waitack;             /* TX needs ACK */
   bool     framepending;        /* Frame pending from the last TX ACK */
-  bool     csma_busy;           /* Un-slotted CSMA busy */
+  bool     csma_busy;           /* CSMA-CA transaction in progress */
+  bool     csma_paused;         /* Slotted CSMA-CA waits for the next CAP */
   bool     slotted;             /* Slotted CSMA-CA */
 
   /* Radio configuration */
@@ -127,10 +128,12 @@ struct nrf52_radioi8_radio_data_s
 #ifdef CONFIG_NRF52_RADIO_IEEE802154_SUPERFRAME
   /* Superframe data */
 
-  bool    sftrack;              /* Device tracks the beacons */
-  bool    ble;                  /* Batter life extension */
-  bool    beacon_pending;       /* A beacon waits for the radio */
-  uint8_t bsn;                  /* macBSN, the beacon sequence number */
+  bool     sftrack;             /* Device tracks the beacons */
+  bool     ble;                 /* Battery life extension */
+  bool     beacon_pending;      /* A beacon waits for the radio */
+  uint8_t  bsn;                 /* macBSN, the beacon sequence number */
+  uint8_t  backoffs;            /* Backoff periods before the next CCA */
+  uint32_t boundary;            /* Backoff period boundary of the next step */
 #endif
 };
 

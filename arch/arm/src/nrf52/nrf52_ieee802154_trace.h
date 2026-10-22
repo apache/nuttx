@@ -92,6 +92,7 @@ enum radio_trace_type_e
   RADIO_TRACE_DROPFRAME,
   RADIO_TRACE_TXRETRY,
   RADIO_TRACE_SFSYNC,
+  RADIO_TRACE_CSMAPAUSE,
 };
 
 /****************************************************************************
