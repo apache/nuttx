@@ -33,10 +33,7 @@
 
 # ADC capabilities
 
-# Cortex-M33 GPIO and EXTI capabilities
-
-config STM32_HAVE_IP_GPIO_M33M55_V1
-	bool
+# Cortex-M33 EXTI capabilities
 
 config STM32_HAVE_GPIO_DELAY
 	bool
@@ -1079,6 +1076,9 @@ config STM32_HAVE_IP_GPIO_M0_V1
 	bool
 
 config STM32_HAVE_IP_GPIO_M3M4_V1
+	bool
+
+config STM32_HAVE_IP_GPIO_V2
 	bool
 
 config STM32_HAVE_SYSCFG

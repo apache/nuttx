@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/hardware/stm32_gpio_m33m55_v1.h
+ * arch/arm/src/common/stm32/hardware/stm32_gpio_v2.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_GPIO_M33M55_V1_H
-#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_GPIO_M33M55_V1_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_GPIO_V2_H
+#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_GPIO_V2_H
 
 /****************************************************************************
  * Included Files
@@ -880,4 +880,4 @@
 #define GPIO_ADVCFGR_MASK(n)          (0xf << GPIO_ADVCFGR_SHIFT(n))
 #define GPIO_ADVCFGR_DLYPATH(n)       (1 << GPIO_ADVCFGR_SHIFT(n)) /* Delay on the input path */
 
-#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_GPIO_M33M55_V1_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_GPIO_V2_H */

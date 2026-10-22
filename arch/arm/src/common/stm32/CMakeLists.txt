@@ -64,8 +64,8 @@ if(CONFIG_STM32_HAVE_IP_USART_M33M55_V3)
   list(APPEND SRCS stm32_lowputc_usart_m33m55_v3.c stm32_serial_m33m55_v3.c)
 endif()
 
-if(CONFIG_STM32_HAVE_IP_GPIO_M33M55_V1)
-  list(APPEND SRCS stm32_gpio_m33m55_v1.c)
+if(CONFIG_STM32_HAVE_IP_GPIO_V2)
+  list(APPEND SRCS stm32_gpio_v2.c)
 endif()
 
 if(CONFIG_STM32_HAVE_IP_DMA_GPDMA AND CONFIG_STM32_DMA)

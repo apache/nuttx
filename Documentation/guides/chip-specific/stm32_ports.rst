@@ -286,7 +286,7 @@ DBGMCU        v5            not supported
 EXTI          M33M55 v1     arch/arm/src/common/stm32/stm32_exti_gpio_m33m55_v1.c
 FDCAN         FDCAN         not supported
 FLASH         to be done    not supported
-GPIO          M33M55 v1     arch/arm/src/common/stm32/stm32_gpio_m33m55_v1.c
+GPIO          v2            arch/arm/src/common/stm32/stm32_gpio_v2.c
 HASH          to be done    not supported
 I2C           to be done    not supported
 I3C           to be done    not supported
@@ -614,7 +614,7 @@ DTS           to be done    arch/arm/src/stm32h5/stm32_dts.c
 ETH           v2            arch/arm/src/common/stm32/stm32_eth_v2.c
 EXTI          to be done    arch/arm/src/stm32h5/stm32_exti_gpio.c 
 FLASH         to be done    arch/arm/src/stm32h5/stm32_flash.c     
-GPIO          to be done    arch/arm/src/stm32h5/stm32_gpio.c      
+GPIO          v2            arch/arm/src/common/stm32/stm32_gpio_v2.c
 GPDMA         GPDMA         arch/arm/src/common/stm32/stm32_dma_gpdma.c
 I2C           v2            arch/arm/src/common/stm32/stm32_i2c_v2.c
 IWDG          v3            arch/arm/src/common/stm32/stm32_iwdg.c
@@ -745,7 +745,7 @@ DAC           to be done    not supported
 DMA/DMAMUX    to be done    not supported                           
 EXTI          to be done    arch/arm/src/stm32l5/stm32l5_exti_gpio.c
 FLASH         to be done    arch/arm/src/stm32l5/stm32l5_flash.c    
-GPIO          to be done    arch/arm/src/stm32l5/stm32l5_gpio.c     
+GPIO          v2            arch/arm/src/common/stm32/stm32_gpio_v2.c
 GTZC          to be done    not supported                           
 HASH          to be done    not supported                           
 I2C           to be done    not supported                           
@@ -775,7 +775,7 @@ CAN/FDCAN     to be done    not supported
 DAC           to be done    not supported
 ETH           v2            arch/arm/src/common/stm32/stm32_eth_v2.c
 EXTI          M33M55 v1     arch/arm/src/common/stm32/stm32_exti_gpio_m33m55_v1.c
-GPIO          M33M55 v1     arch/arm/src/common/stm32/stm32_gpio_m33m55_v1.c
+GPIO          v2            arch/arm/src/common/stm32/stm32_gpio_v2.c
 GPDMA         v1            arch/arm/src/common/stm32/stm32_dma_gpdma.c
 I2C           v2            arch/arm/src/common/stm32/stm32_i2c_v2.c
 IWDG          v3            arch/arm/src/common/stm32/stm32_iwdg.c
@@ -847,7 +847,7 @@ EXTI          M33M55 v1     arch/arm/src/common/stm32/stm32_exti_gpio_m33m55_v1.
 FDCAN         to be done    not supported
 FLASH         to be done    not supported
 GPDMA         GPDMA         arch/arm/src/common/stm32/stm32_dma_gpdma.c
-GPIO          M33M55 v1     arch/arm/src/common/stm32/stm32_gpio_m33m55_v1.c
+GPIO          v2            arch/arm/src/common/stm32/stm32_gpio_v2.c
 GTZC          to be done    not supported
 HASH          to be done    not supported
 HSP           to be done    not supported
@@ -890,7 +890,7 @@ DAC           to be done    not supported
 DCACHE        to be done    not supported                         
 EXTI          to be done    arch/arm/src/stm32u5/stm32_exti_gpio.c
 FLASH         to be done    arch/arm/src/stm32u5/stm32_flash.c    
-GPIO          to be done    arch/arm/src/stm32u5/stm32_gpio.c     
+GPIO          v2            arch/arm/src/common/stm32/stm32_gpio_v2.c
 GPDMA         GPDMA         arch/arm/src/common/stm32/stm32_dma_gpdma.c
 HASH          to be done    not supported                         
 I2C           to be done    arch/arm/src/stm32u5/stm32_i2c.c      
@@ -1054,22 +1054,20 @@ of a peripheral on a given core is ``V1``.
 **Source file naming** (``.c`` files):
 
 - Follow the same convention as headers: ``stm32_gpio_m3m4_v1v2.c``,
-  ``stm32_adc_m0_v1.c``, ``stm32_gpio_m33m55_v1.c``,
-  ``stm32_serial_m33m55_v3.c``, ``stm32_spi_m0_v1.c``, and
-  ``stm32_pwm_m3m4_v1v2v3.c``
+  ``stm32_adc_m0_v1.c``, ``stm32_serial_m33m55_v3.c``,
+  ``stm32_spi_m0_v1.c``, and ``stm32_pwm_m3m4_v1v2v3.c``
 
 **Kconfig symbol naming** (``CONFIG_STM32_HAVE_IP_<PERIPH>_<CORE>_<VERSION>``):
 
 - M0: ``CONFIG_STM32_HAVE_IP_GPIO_M0_V1``, ``CONFIG_STM32_HAVE_IP_ADC_M0_V1``
 - M3/M4: ``CONFIG_STM32_HAVE_IP_GPIO_M3M4_V1``,
   ``CONFIG_STM32_HAVE_IP_ADC_M3M4_V1``, ``CONFIG_STM32_HAVE_IP_ADC_M3M4_V2``
-- M33 and M55: ``CONFIG_STM32_HAVE_IP_GPIO_M33M55_V1``,
-  ``CONFIG_STM32_HAVE_IP_EXTI_M33M55_V1``,
+- M33 and M55: ``CONFIG_STM32_HAVE_IP_EXTI_M33M55_V1``,
   ``CONFIG_STM32_HAVE_IP_USART_M33M55_V3``, and
   ``CONFIG_STM32_HAVE_IP_DMA_GPDMA``
 - No core prefix (used by several core classes):
   ``CONFIG_STM32_HAVE_IP_TIMERS_V1``, ``CONFIG_STM32_HAVE_IP_TIMERS_V2``,
-  ``CONFIG_STM32_HAVE_IP_TIMERS_V3``
+  ``CONFIG_STM32_HAVE_IP_TIMERS_V3``, ``CONFIG_STM32_HAVE_IP_GPIO_V2``
 
 The core prefix is dropped once an IP is used by more than one core
 class.  Until then it is kept to make migration of families into common

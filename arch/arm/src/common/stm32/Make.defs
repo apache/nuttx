@@ -75,8 +75,8 @@ CHIP_CSRCS += stm32_lowputc_usart_m33m55_v3.c
 CHIP_CSRCS += stm32_serial_m33m55_v3.c
 endif
 
-ifeq ($(CONFIG_STM32_HAVE_IP_GPIO_M33M55_V1),y)
-CHIP_CSRCS += stm32_gpio_m33m55_v1.c
+ifeq ($(CONFIG_STM32_HAVE_IP_GPIO_V2),y)
+CHIP_CSRCS += stm32_gpio_v2.c
 endif
 
 ifeq ($(CONFIG_STM32_HAVE_IP_DMA_GPDMA)$(CONFIG_STM32_DMA),yy)
