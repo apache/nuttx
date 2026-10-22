@@ -70,6 +70,7 @@
 /* RX configuration:
  *   - IRQ on END event (packet recveived)
  *   - shortcut between RXREADY and START
+ *   - shortcut between ADDRESS and RSSISTART
  *
  * Set in nrf54l_radioi8_rxenable() reset in nrf54l_radioi8_rxenable().
  *
@@ -80,7 +81,8 @@
 #define IEEE802154_RX_INT              (RADIO_INT_END)
 /* There is no END to DISABLE shortcut, RADIO is disabled in the ISR */
 
-#define IEEE802154_RX_SHORTS           (RADIO_SHORTS_RXREADY_START)
+#define IEEE802154_RX_SHORTS           (RADIO_SHORTS_RXREADY_START |  \
+                                        RADIO_SHORTS_ADDRESS_RSSISTART)
 
 /* NOTE: for TX we trigger interrupts on PHYEND event, not END! */
 
@@ -1446,15 +1448,14 @@ static void nrf54l_radioi8_work_rx(void *arg)
   ind->frame->io_data[index + 1] = 0;
   ind->frame->io_data[index + 2] = 0;
 
-  /* LQI is the last byte in RAM */
+  /* LQI is the last byte in RAM, scaled to 0-255 like the ED result */
 
-  ind->lqi = dev->radio->rxbuf[index + 1];
+  ind->lqi = MIN(dev->radio->rxbuf[index + 1] * NRF54L_ED_RSSISCALE, 255);
 
-  /* RSSI is non-standard field and is not supported here.
-   * TODO: get RSSI from LQI ?
-   */
+  /* RSSI sampled after the SFD, the signal strength is -rssi dBm */
 
-  ind->rssi = 0;
+  ind->rssi = NRF54L_RADIO_GETREG(lower, NRF54L_RADIO_RSSISAMPLE_OFFSET) &
+              RADIO_RSSISAMPLE_MASK;
 
   /* Callback the receiver in the next highest layer */
 
