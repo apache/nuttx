@@ -1491,7 +1491,9 @@ static void mac802154_rxdataframe(FAR struct ieee802154_privmac_s *priv,
           primitive->u.assocconf.status = IEEE802154_STATUS_NO_DATA;
         }
 
-      /* We are no longer performing the association operation */
+      mac802154_oprxdisable(priv);
+
+      /* We are no longer performing the operation */
 
       priv->curr_op = MAC802154_OP_NONE;
       nxsem_post(&priv->opsem);

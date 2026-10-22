@@ -216,7 +216,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
        * the corresponding data frame from the coordinator. [1] pg.43
        */
 
-      mac802154_rxenable(priv);
+      mac802154_oprxenable(priv);
 
       /* Start a timer, if we receive the data frame, we will cancel
        * the timer, otherwise it will expire and we will notify the
@@ -262,10 +262,11 @@ void mac802154_polltimeout(FAR void *arg)
 
   nxmutex_lock(&priv->lock);
 
-  /* We are no longer performing the association operation */
+  /* We are no longer performing the poll operation */
 
   priv->curr_op = MAC802154_OP_NONE;
   nxsem_post(&priv->opsem);
+  mac802154_oprxdisable(priv);
 
   mac802154_notify(priv, primitive);
   nxmutex_unlock(&priv->lock);
