@@ -471,6 +471,7 @@ void tcp_reset(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
   else
     {
       uint32_t ackno;
+
       tcp->flags = TCP_RST | TCP_ACK;
       tcp_setsequence(tcp->seqno, 0);
       ackno = tcp_addsequence(tcp->ackno, acklen);
