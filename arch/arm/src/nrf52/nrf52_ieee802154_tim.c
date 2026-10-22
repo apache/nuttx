@@ -367,10 +367,6 @@ nrf52_radioi8_tim_init(struct nrf52_radioi8_dev_s *dev)
 
   NRF52_TIM_SETISR(tim, nrf52_radioi8_isr_tim, dev);
 
-  /* Set interrupts priority */
-
-  up_prioritize_irq(NRF52_IRQ_TIMER0, 0);
-
   /* Connect timer */
 
   memset(&g_radioi8_tim, 0, sizeof(struct nrf52_radioi8_tim_s));
