@@ -131,6 +131,7 @@
 #define BT_HCI_OP_HOST_NUM_COMPLETED_PACKETS  BT_OP(BT_OGF_BASEBAND, 0x0035)
 #define BT_HCI_OP_LE_WRITE_LE_HOST_SUPP       BT_OP(BT_OGF_BASEBAND, 0x006d)
 #define BT_HCI_OP_READ_LOCAL_VERSION_INFO     BT_OP(BT_OGF_INFO, 0x0001)
+#define BT_HCI_OP_READ_LOCAL_COMMANDS         BT_OP(BT_OGF_INFO, 0x0002)
 #define BT_HCI_OP_READ_LOCAL_FEATURES         BT_OP(BT_OGF_INFO, 0x0003)
 #define BT_HCI_OP_READ_BUFFER_SIZE            BT_OP(BT_OGF_INFO, 0x0005)
 #define BT_HCI_OP_READ_BD_ADDR                BT_OP(BT_OGF_INFO, 0x0009)
@@ -363,6 +364,12 @@ begin_packed_struct struct bt_hci_rp_read_local_version_info_s
   uint8_t lmp_version;
   uint16_t manufacturer;
   uint16_t lmp_subversion;
+} end_packed_struct;
+
+begin_packed_struct struct bt_hci_rp_read_local_commands_s
+{
+  uint8_t status;
+  uint8_t commands[64];
 } end_packed_struct;
 
 begin_packed_struct struct bt_hci_rp_read_local_features_s

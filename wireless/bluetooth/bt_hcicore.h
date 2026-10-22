@@ -97,6 +97,7 @@ struct bt_dev_s
 
   /* Controller buffer information */
 
+  bool flow_control_enable;
   uint8_t le_pkts;
   uint16_t le_mtu;
   sem_t le_pkts_sem;
