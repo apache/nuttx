@@ -322,6 +322,12 @@ static int ipv6_in(FAR struct net_driver_s *dev)
       FAR struct ipv6_extension_s *exthdr;
       uint16_t extlen;
 
+      if (sizeof(struct ipv6_extension_s) > dev->d_len - iphdrlen)
+        {
+          nwarn("WARNING: Extension header truncated\n");
+          goto drop;
+        }
+
       /* Just skip over the extension header */
 
       exthdr    = (FAR struct ipv6_extension_s *)payload;
@@ -335,6 +341,12 @@ static int ipv6_in(FAR struct net_driver_s *dev)
       else
         {
           extlen = EXTHDR_LEN((unsigned int)exthdr->len);
+        }
+
+      if (extlen > dev->d_len - iphdrlen)
+        {
+          nwarn("WARNING: Extension header exceeds packet length\n");
+          goto drop;
         }
 
       payload  += extlen;
