@@ -248,7 +248,7 @@ int mac802154_req_data(MACHANDLE mac,
        */
 
       wlwarn("WARNING: mac802154_txdesc_alloc failed: %d\n", ret);
-      goto errout_with_lock;
+      return ret;
     }
 
   /* Set the offset to 0 to include the header ( we do not want to
