@@ -56,6 +56,21 @@
                                        IEEE802154_TURN_AROUND_TIME +    \
                                        10 + 12)
 
+/* RADIO ramp-up time in fast ramp-up mode */
+
+#define NRF52_RADIOI8_RAMPUP_US       (40)
+
+/* Air time of a frame with the given PHR: SHR, PHR and PSDU, 32 us/octet */
+
+#define NRF52_RADIOI8_FRAME_US(phr)   (((phr) + 6) * 2 * IEEE802154_SYMBOL_US)
+
+/* IFS after a frame with the given PHR */
+
+#define NRF52_RADIOI8_IFS_US(phr)                       \
+  (((phr) > IEEE802154_MAX_SIFS_FRAME_SIZE ?            \
+    IEEE802154_LIFS_SYMBOLS : IEEE802154_SIFS_SYMBOLS) * \
+   IEEE802154_SYMBOL_US)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -112,7 +127,7 @@ struct nrf52_radioi8_radio_data_s
 #ifdef CONFIG_NRF52_RADIO_IEEE802154_SUPERFRAME
   /* Superframe data */
 
-  bool    wait_for_beacon;      /* Device wait for beacon */
+  bool    sftrack;              /* Device tracks the beacons */
   bool    ble;                  /* Batter life extension */
   bool    beacon_pending;       /* A beacon waits for the radio */
   uint8_t bsn;                  /* macBSN, the beacon sequence number */

@@ -752,6 +752,7 @@ nrf53_radioi8_beaconstart(struct ieee802154_radio_s *radio,
 #ifdef CONFIG_NRF53_RADIO_IEEE802154_SUPERFRAME
   struct nrf53_radioi8_dev_s *dev = (struct nrf53_radioi8_dev_s *)radio;
   irqstate_t                  flags;
+  int                         ret;
 
   if (sfspec->pancoord)
     {
@@ -762,18 +763,22 @@ nrf53_radioi8_beaconstart(struct ieee802154_radio_s *radio,
       memcpy(&dev->state.sf, (void *)sfspec,
              sizeof(struct ieee802154_superframespec_s));
 
-      /* Setup beacon transmission, macBSN starts from a random value */
+      /* Configure the superframe timings */
 
-      dev->radio->ops->beacon_setup(dev, beacon->bf_data, beacon->bf_len);
-      dev->radio->state.bsn = rand();
+      ret = dev->rtc->ops->setup(dev, &dev->state.sf);
+      if (ret == OK)
+        {
+          /* Setup beacon transmission, macBSN starts from a random value */
 
-      /* Configure RTC events */
+          dev->radio->ops->beacon_setup(dev, beacon->bf_data,
+                                        beacon->bf_len);
+          dev->radio->state.bsn = rand();
 
-      dev->rtc->ops->setup(dev, &dev->state.sf);
+          /* The PAN coordinator defines the superframe */
 
-      /* Start RTC */
-
-      dev->rtc->ops->start(dev);
+          dev->radio->state.sftrack = false;
+          dev->rtc->ops->start(dev);
+        }
 
       leave_critical_section(flags);
     }
@@ -781,10 +786,10 @@ nrf53_radioi8_beaconstart(struct ieee802154_radio_s *radio,
     {
       /* TODO: missing logic for non-PAN coord */
 
-      return -ENOTTY;
+      ret = -ENOTTY;
     }
 
-  return OK;
+  return ret;
 #else
   return -ENOTSUP;
 #endif
@@ -870,6 +875,7 @@ nrf53_radioi8_sfupdate(struct ieee802154_radio_s *radio,
 #ifdef CONFIG_NRF53_RADIO_IEEE802154_SUPERFRAME
   struct nrf53_radioi8_dev_s *dev = (struct nrf53_radioi8_dev_s *)radio;
   irqstate_t                  flags;
+  int                         ret = OK;
 
   flags = enter_critical_section();
 
@@ -882,28 +888,32 @@ nrf53_radioi8_sfupdate(struct ieee802154_radio_s *radio,
 
   if (sfspec->beaconorder < 15)
     {
-      /* Need slotted CSMA-CA */
+      /* Configure the superframe timings */
 
-      dev->radio->state.slotted = true;
+      ret = dev->rtc->ops->setup(dev, &dev->state.sf);
+      if (ret == OK)
+        {
+          /* Need slotted CSMA-CA */
 
-      /* Configure RTC */
+          dev->radio->state.slotted = true;
 
-      dev->rtc->ops->setup(dev, &dev->state.sf);
+          /* Sync with the beacons */
 
-      /* Wait for beacon to sync */
-
-      dev->radio->state.wait_for_beacon = true;
+          dev->radio->state.sftrack = true;
+        }
     }
   else
     {
       /* Need un-slotted CSMA-CA */
 
+      dev->rtc->ops->stop(dev);
       dev->radio->state.slotted = false;
+      dev->radio->state.sftrack = false;
     }
 
   leave_critical_section(flags);
 
-  return OK;
+  return ret;
 #else
   return -ENOTSUP;
 #endif
@@ -985,8 +995,10 @@ nrf53_radioi8_register(struct nrf53_radio_board_s *board)
 
   DEBUGASSERT(dev->rtc->ops->setup);
   DEBUGASSERT(dev->rtc->ops->start);
+  DEBUGASSERT(dev->rtc->ops->sync);
   DEBUGASSERT(dev->rtc->ops->stop);
   DEBUGASSERT(dev->rtc->ops->reset);
+  DEBUGASSERT(dev->rtc->ops->elapsed);
 #endif
 
   /* Connect MAC ops */

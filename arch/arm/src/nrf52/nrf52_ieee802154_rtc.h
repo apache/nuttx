@@ -29,6 +29,11 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+#include <stdint.h>
+
+#include <nuttx/wqueue.h>
+
 #include "nrf52_rtc.h"
 
 /****************************************************************************
@@ -39,18 +44,18 @@
  * Public Types
  ****************************************************************************/
 
-/* RTC events */
+/* Superframe events */
 
-enum nrf52_ieee802154_rtc_e
+enum nrf52_ieee802154_sfevt_e
 {
-  NRF52_RTC_BI       = 0,       /* Beacon Interval interval (BI) */
-  NRF52_RTC_TIMESLOT = 1,       /* Time slot */
-  NRF52_RTC_CAP      = 2,       /* Contention Access Period (CAP) */
-  NRF52_RTC_SD       = 3        /* Super Frame Duration (SD) */
+  NRF52_SFEVT_NONE  = 0,        /* No event scheduled */
+  NRF52_SFEVT_START = 1,        /* Superframe start, beacon TX */
+  NRF52_SFEVT_SDEND = 2         /* End of the active portion */
 };
 
 /* Forward reference */
 
+struct ieee802154_superframespec_s;
 struct nrf52_radioi8_rtc_s;
 struct nrf52_radioi8_dev_s;
 
@@ -58,22 +63,30 @@ struct nrf52_radioi8_dev_s;
 
 struct nrf52_radioi8_rtc_ops_s
 {
-  /* Configure RTC events according to superframe spec */
+  /* Configure the superframe timings according to superframe spec */
 
   int (*setup)(struct nrf52_radioi8_dev_s *dev,
                struct ieee802154_superframespec_s *sfspec);
 
-  /* Start RTC */
+  /* Start transmitting beacons */
 
   int (*start)(struct nrf52_radioi8_dev_s *dev);
 
-  /* Stop RTC */
+  /* A beacon with the given PHR was just received */
+
+  int (*sync)(struct nrf52_radioi8_dev_s *dev, uint8_t phr);
+
+  /* Stop the superframe */
 
   int (*stop)(struct nrf52_radioi8_dev_s *dev);
 
   /* Reset RTC */
 
   void (*reset)(struct nrf52_radioi8_dev_s *dev);
+
+  /* Time in us since the superframe start, false if not synchronized */
+
+  bool (*elapsed)(struct nrf52_radioi8_dev_s *dev, uint32_t *us);
 };
 
 /* RTC interface */
@@ -88,15 +101,24 @@ struct nrf52_radioi8_rtc_s
 
   struct nrf52_radioi8_rtc_ops_s *ops;
 
-#ifdef CONFIG_NRF52_RADIO_IEEE802154_SUPERFRAME
   /* For deferring inactive state work to the work queue */
 
   struct work_s inactive_work;
 
+  /* Superframe timings in us */
+
+  uint64_t sf_start;            /* Start of the current superframe */
+  uint64_t evt_time;            /* Time of the scheduled event */
+  uint32_t bi;                  /* Beacon interval */
+  uint32_t sd;                  /* Superframe duration */
+  uint32_t cap;                 /* End of the CAP */
+  uint32_t capstart;            /* Start of the CAP, after the beacon IFS */
+
   /* RTC state */
 
-  uint32_t rtc_timeslot;
-#endif
+  uint32_t ovf;                 /* Counter overflows */
+  uint8_t  evt;                 /* Scheduled event */
+  bool     running;             /* Superframe timing valid */
 };
 
 /****************************************************************************

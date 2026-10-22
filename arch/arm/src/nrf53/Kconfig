@@ -718,6 +718,11 @@ config NRF53_RADIO_IEEE802154_SUPERFRAME
 	default n
 	select NRF53_RTC0
 	select NRF53_USE_LFCLK
+	---help---
+		The superframe timing runs from the LFCLK.  With the LFXO source
+		(NRF53_LFCLK_XTAL) the application core must configure the
+		oscillator (NRF53_OSCILLATOR_LFXO), otherwise the network core
+		waits for the LFCLK forever at boot.
 
 config NRF53_RADIO_IEEE802154_GTS_SLOTS
 	int "RADIO IEEE802.15.4 GTS slots"
