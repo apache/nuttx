@@ -445,7 +445,6 @@ static void mac802154_notify_worker(FAR void *arg)
 
           if (dispose)
             {
-              iob_free(primitive->u.dataind.frame);
               ieee802154_primitive_free(primitive);
             }
         }

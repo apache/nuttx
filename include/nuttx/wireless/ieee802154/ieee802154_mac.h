@@ -1849,7 +1849,8 @@ FAR struct ieee802154_primitive_s *ieee802154_primitive_allocate(void);
  *   The ieee802154_primitive_free function will return a primitive
  *   structure to the free pool if it was a pre-allocated primitive
  *   structure. If the primitive was allocated dynamically it will be
- *   deallocated.
+ *   deallocated.  The frame IOB of a data indication is freed with it, a
+ *   caller that keeps the frame sets the frame field to NULL first.
  *
  * Input Parameters:
  *   prim - primitive structure to free
