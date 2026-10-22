@@ -158,6 +158,10 @@ struct nrf54l_radioi8_radio_ops_s
 
   void (*norm_trigger)(struct nrf54l_radioi8_dev_s *dev);
 
+  /* Start the next frame that waits for the radio, after mindelay */
+
+  void (*txnext)(struct nrf54l_radioi8_dev_s *dev, uint32_t mindelay);
+
   /* Reset radio state to work with IEEE 802.15.4 */
 
   int (*reset)(struct nrf54l_radioi8_radio_s *dev);

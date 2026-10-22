@@ -165,6 +165,10 @@ struct nrf52_radioi8_radio_ops_s
 
   void (*norm_trigger)(struct nrf52_radioi8_dev_s *dev);
 
+  /* Start the next frame that waits for the radio, after mindelay */
+
+  void (*txnext)(struct nrf52_radioi8_dev_s *dev, uint32_t mindelay);
+
 #ifdef CONFIG_NRF52_RADIO_IEEE802154_SUPERFRAME
   /* Setup a beacon frame transfe */
 
