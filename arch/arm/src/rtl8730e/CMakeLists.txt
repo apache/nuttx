@@ -130,6 +130,20 @@ if(CONFIG_AMEBA_WDG)
   endif()
 endif()
 
+if(CONFIG_AMEBA_ADC)
+  list(APPEND SRCS ${AMEBA_COMMON}/ameba_adc.c)
+  if(NOT CONFIG_RTL8730E_FLASH_FS
+     AND NOT CONFIG_AMEBA_GPIO
+     AND NOT CONFIG_AMEBA_UART
+     AND NOT CONFIG_AMEBA_I2C
+     AND NOT CONFIG_AMEBA_SPI
+     AND NOT CONFIG_AMEBA_PWM
+     AND NOT CONFIG_AMEBA_TIMER
+     AND NOT CONFIG_AMEBA_WDG)
+    list(APPEND SRCS rtl8730e_flash_stubs.c)
+  endif()
+endif()
+
 target_include_directories(arch PRIVATE ${AMEBA_COMMON})
 target_sources(arch PRIVATE ${SRCS})
 
@@ -215,14 +229,18 @@ if(CONFIG_RTL8730E_FLASH_FS
    OR CONFIG_AMEBA_I2C
    OR CONFIG_AMEBA_SPI
    OR CONFIG_AMEBA_PWM
-   OR CONFIG_AMEBA_TIMER)
+   OR CONFIG_AMEBA_TIMER
+   OR CONFIG_AMEBA_ADC)
   set(AMEBA_FWLIB_SRCS
       ${AMEBA_SOC}/fwlib/ram_common/ameba_arch.c ${AMEBA_SOC}/swlib/log.c
       ${AMEBA_SOC}/swlib/sscanf_minimal.c)
 
-  # IPC layer is needed by both WiFi (WHC) and Flash FS (write-lock protocol).
-  # Include it once regardless of which feature(s) are enabled.
-  if(CONFIG_RTL8730E_FLASH_FS OR CONFIG_RTL8730E_WIFI)
+  # IPC layer is needed by WiFi (WHC), Flash FS (write-lock protocol) and the
+  # ADC (OTP reads take the cross-core IPC_SEM_OTP semaphore).  Include it once
+  # regardless of which feature(s) are enabled.
+  if(CONFIG_RTL8730E_FLASH_FS
+     OR CONFIG_RTL8730E_WIFI
+     OR CONFIG_AMEBA_ADC)
     list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_ipc_api.c
          ${AMEBA_SOC}/fwlib/ram_common/ameba_ipc_ram.c)
   endif()
@@ -249,6 +267,13 @@ if(CONFIG_RTL8730E_FLASH_FS
   # The AP ROM carries only part of the RTIM API; the rest lives here.
   if(CONFIG_AMEBA_PWM OR CONFIG_AMEBA_TIMER)
     list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_tim.c)
+  endif()
+
+  # The AP ROM has no ADC; the whole fwlib ADC layer is RAM-side, and it reads
+  # its calibration data through OTP_Read8() from ameba_otp.c.
+  if(CONFIG_AMEBA_ADC)
+    list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_adc.c
+         ${AMEBA_SOC}/fwlib/ram_common/ameba_otp.c)
   endif()
 
   # Silence SDK warnings, activate CA32 code paths.  No -mcmse (ARMv7-A).
@@ -293,6 +318,7 @@ if(CONFIG_AMEBA_GPIO
    OR CONFIG_AMEBA_PWM
    OR CONFIG_AMEBA_TIMER
    OR CONFIG_AMEBA_WDG
+   OR CONFIG_AMEBA_ADC
    OR CONFIG_RTL8730E_FLASH_FS)
   list(APPEND AMEBA_EXTRA_LIBS
        ${AMEBA_SOC}/project/${AMEBA_KM_PROJ}/lib/soc/lib_rom.a)
@@ -304,7 +330,8 @@ if(CONFIG_RTL8730E_FLASH_FS
    OR CONFIG_AMEBA_I2C
    OR CONFIG_AMEBA_SPI
    OR CONFIG_AMEBA_PWM
-   OR CONFIG_AMEBA_TIMER)
+   OR CONFIG_AMEBA_TIMER
+   OR CONFIG_AMEBA_ADC)
   list(APPEND AMEBA_EXTRA_LIBS ${AMEBA_FWLIB_A})
 endif()
 

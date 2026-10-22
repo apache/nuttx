@@ -54,9 +54,10 @@ AMEBA_FWLIB_SRCS = $(AMEBA_SOC)/fwlib/ram_common/ameba_arch.c \
                    $(AMEBA_SOC)/swlib/log.c \
                    $(AMEBA_SOC)/swlib/sscanf_minimal.c
 
-# IPC layer is needed by both WiFi (WHC) and Flash FS (write-lock protocol).
-# Include it once regardless of which feature(s) are enabled.
-ifneq ($(filter y,$(CONFIG_RTL8730E_WIFI) $(CONFIG_RTL8730E_FLASH_FS)),)
+# IPC layer is needed by WiFi (WHC), Flash FS (write-lock protocol) and the
+# ADC (OTP reads take the cross-core IPC_SEM_OTP semaphore).  Include it
+# once regardless of which feature(s) are enabled.
+ifneq ($(filter y,$(CONFIG_RTL8730E_WIFI) $(CONFIG_RTL8730E_FLASH_FS) $(CONFIG_AMEBA_ADC)),)
 AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_ipc_api.c \
                     $(AMEBA_SOC)/fwlib/ram_common/ameba_ipc_ram.c
 endif
@@ -95,6 +96,13 @@ endif
 # libameba_fwlib.a whenever PWM or the general-purpose timers are enabled.
 ifneq ($(filter y,$(CONFIG_AMEBA_PWM) $(CONFIG_AMEBA_TIMER)),)
 AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_tim.c
+endif
+
+# The AP ROM has no ADC; the whole fwlib ADC layer is RAM-side, and it
+# reads its calibration data through OTP_Read8() from ameba_otp.c.
+ifeq ($(CONFIG_AMEBA_ADC),y)
+AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_adc.c
+AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_otp.c
 endif
 
 # Include paths scoped to the fwlib compile only (never leaked to NuttX core).

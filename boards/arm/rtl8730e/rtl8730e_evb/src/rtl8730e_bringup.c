@@ -315,6 +315,17 @@ int rtl8730e_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_AMEBA_ADC
+  /* Register the board's ADC channels at /dev/adc0. */
+
+  ret = rtl8730e_adc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize ADC: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }
