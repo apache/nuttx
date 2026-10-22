@@ -3050,7 +3050,12 @@ Depends on ``CONFIG_BUILD_KERNEL``.
 _POSIX_SPIN_LOCKS
 -----------------
 
-Depends on ``CONFIG_PTHREAD_SPINLOCKS``.
+Depends on ``CONFIG_PTHREAD_SPINLOCKS``.  A spin lock is an atomic
+variable in the memory of the program: the functions need no system call,
+also in protected and kernel builds.  Outside a flat build, the option
+needs atomic operations that work in user mode
+(``CONFIG_LIBC_ATOMIC_TOOLCHAIN`` or ``CONFIG_LIBC_ATOMIC_ARCH``).  Prefer
+a mutex: a spin lock only helps on SMP, with very short critical sections.
 
 +--------------------------------+---------+
 | API                            | Support |
