@@ -599,7 +599,10 @@ static int macnet_coord_saddr(FAR struct radio_driver_s *radio,
       return ret;
     }
 
-  IEEE802154_SADDRCOPY(saddr, arg.getreq.attrval.mac.saddr);
+  /* Network layers expect address in Network Order (Big Endian) */
+
+  saddr[0] = arg.getreq.attrval.mac.coordsaddr[1];
+  saddr[1] = arg.getreq.attrval.mac.coordsaddr[0];
   return OK;
 }
 #endif
