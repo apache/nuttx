@@ -117,6 +117,7 @@ struct nrf53_radioi8_radio_data_s
   bool     csma_busy;           /* CSMA-CA transaction in progress */
   bool     csma_paused;         /* Slotted CSMA-CA waits for the next CAP */
   bool     slotted;             /* Slotted CSMA-CA */
+  uint8_t  bsn;                 /* macBSN, the beacon sequence number */
 
   /* Radio configuration */
 
@@ -131,7 +132,6 @@ struct nrf53_radioi8_radio_data_s
   bool     sftrack;             /* Device tracks the beacons */
   bool     ble;                 /* Battery life extension */
   bool     beacon_pending;      /* A beacon waits for the radio */
-  uint8_t  bsn;                 /* macBSN, the beacon sequence number */
   uint8_t  backoffs;            /* Backoff periods before the next CCA */
   uint32_t boundary;            /* Backoff period boundary of the next step */
 #endif
