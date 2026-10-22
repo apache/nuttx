@@ -19,6 +19,7 @@ config ARCH_HAVE_8BIT_SERIAL_BUFSIZE
 menuconfig SERIAL
 	bool "Serial Driver Support"
 	default y
+	select FS_UIO
 	---help---
 		Front-end character drivers for chip-specific UARTs.  This provide
 		some TTY-like functionality and are commonly used (but not required
