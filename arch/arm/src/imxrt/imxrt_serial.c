@@ -3604,7 +3604,7 @@ static void imxrt_dma_send(struct uart_dev_s *dev)
 #if CONFIG_IMXRT_EDMA_NTCD > 1
   /* Is this a split transfer? */
 
-  if (dev->dmatx.nbuffer)
+  if (dev->dmatx.nbuffer && dev->dmatx.nlength > 0)
     {
       config.iter   = priv->dev.dmatx.nlength;
       config.saddr  = (uint32_t) priv->dev.dmatx.nbuffer;
