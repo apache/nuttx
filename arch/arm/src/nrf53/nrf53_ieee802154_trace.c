@@ -50,6 +50,7 @@ static const char *g_radio_trace_str[] =
   "RADIO IRQ: WAIT ACK",
   "RADIO IRQ: RX ACK DONE",
   "RADIO IRQ: TX CCA BUSY",
+  "RADIO IRQ: BEACON TX",
 
   "TIM IRQ: TIM ACK TX",
   "TIM IRQ; TIM TX DELAY",
@@ -73,6 +74,7 @@ static const char *g_radio_trace_str[] =
   "CSMASETUP",
   "CSMATRIGGER",
   "NOCSMATRIGGER",
+  "BEACONTX",
   "NOACK",
   "DROPFRAME",
   "TXTRYAGAIN",

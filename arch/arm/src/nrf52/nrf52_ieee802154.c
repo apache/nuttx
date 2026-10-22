@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/debug.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <nuttx/kmalloc.h>
@@ -761,9 +762,10 @@ nrf52_radioi8_beaconstart(struct ieee802154_radio_s *radio,
       memcpy(&dev->state.sf, (void *)sfspec,
              sizeof(struct ieee802154_superframespec_s));
 
-      /* Setup beacon transmission */
+      /* Setup beacon transmission, macBSN starts from a random value */
 
       dev->radio->ops->beacon_setup(dev, beacon->bf_data, beacon->bf_len);
+      dev->radio->state.bsn = rand();
 
       /* Configure RTC events */
 
@@ -806,13 +808,16 @@ nrf52_radioi8_beaconupdate(struct ieee802154_radio_s *radio,
 
   flags = enter_critical_section();
 
-  /* Arm the beacon TX buffer */
+  /* The beacon on the air is replaced when it is sent */
 
-  memcpy(&dev->radio->beaconbuf[1], beacon->bf_data, beacon->bf_len);
-
-  /* Length = Frame data + CRC */
-
-  dev->radio->beaconbuf[0] = beacon->bf_len + 2;
+  if (dev->radio->state.state == NRF52_RADIO_STATE_BEACONTX)
+    {
+      dev->state.beacon_next = beacon;
+    }
+  else
+    {
+      dev->radio->ops->beacon_setup(dev, beacon->bf_data, beacon->bf_len);
+    }
 
   leave_critical_section(flags);
 

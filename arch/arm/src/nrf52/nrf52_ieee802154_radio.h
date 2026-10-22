@@ -71,6 +71,7 @@ enum nrf52_radioi8_state_e
   NRF52_RADIO_STATE_RX,            /* RX active */
   NRF52_RADIO_STATE_ACKTX,         /* Transmitting ACK now */
   NRF52_RADIO_STATE_ED,            /* Energy detection now */
+  NRF52_RADIO_STATE_BEACONTX,      /* Transmitting beacon now */
 };
 
 /* Radio data */
@@ -113,6 +114,8 @@ struct nrf52_radioi8_radio_data_s
 
   bool    wait_for_beacon;      /* Device wait for beacon */
   bool    ble;                  /* Batter life extension */
+  bool    beacon_pending;       /* A beacon waits for the radio */
+  uint8_t bsn;                  /* macBSN, the beacon sequence number */
 #endif
 };
 
