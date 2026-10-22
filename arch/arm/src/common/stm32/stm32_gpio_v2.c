@@ -127,6 +127,21 @@ const uint32_t g_gpiobase[STM32_NPORTS] =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: stm32_gpio_setmode
+ ****************************************************************************/
+
+static void stm32_gpio_setmode(uintptr_t base, unsigned int pin,
+                               unsigned int pinmode)
+{
+  uint32_t regval;
+
+  regval  = getreg32(base + STM32_GPIO_MODER_OFFSET);
+  regval &= ~GPIO_MODER_MASK(pin);
+  regval |= ((uint32_t)pinmode << GPIO_MODER_SHIFT(pin));
+  putreg32(regval, base + STM32_GPIO_MODER_OFFSET);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -228,13 +243,6 @@ int stm32_configgpio(uint32_t cfgset)
 
   flags = spin_lock_irqsave(&g_configgpio_lock);
 
-  /* Now apply the configuration to the mode register */
-
-  regval  = getreg32(base + STM32_GPIO_MODER_OFFSET);
-  regval &= ~GPIO_MODER_MASK(pin);
-  regval |= ((uint32_t)pinmode << GPIO_MODER_SHIFT(pin));
-  putreg32(regval, base + STM32_GPIO_MODER_OFFSET);
-
   /* Set up the pull-up/pull-down configuration (all but analog pins) */
 
   setting = GPIO_PUPDR_NONE;
@@ -260,33 +268,6 @@ int stm32_configgpio(uint32_t cfgset)
   regval &= ~GPIO_PUPDR_MASK(pin);
   regval |= (setting << GPIO_PUPDR_SHIFT(pin));
   putreg32(regval, base + STM32_GPIO_PUPDR_OFFSET);
-
-  /* Set the alternate function (Only alternate function pins) */
-
-  if (pinmode == GPIO_MODER_ALT)
-    {
-      setting = (cfgset & GPIO_AF_MASK) >> GPIO_AF_SHIFT;
-    }
-  else
-    {
-      setting = 0;
-    }
-
-  if (pin < 8)
-    {
-      regoffset = STM32_GPIO_AFRL_OFFSET;
-      pos       = pin;
-    }
-  else
-    {
-      regoffset = STM32_GPIO_AFRH_OFFSET;
-      pos       = pin - 8;
-    }
-
-  regval  = getreg32(base + regoffset);
-  regval &= ~GPIO_AFR_MASK(pos);
-  regval |= (setting << GPIO_AFR_SHIFT(pos));
-  putreg32(regval, base + regoffset);
 
   /* Set speed (Only outputs and alternate function pins) */
 
@@ -363,6 +344,41 @@ int stm32_configgpio(uint32_t cfgset)
 
   putreg32(regval, base + regoffset);
 #endif
+
+  /* Set the mode last.  The alternate function is selected before the pin
+   * enters alternate function mode and cleared after it leaves it.
+   */
+
+  if (pinmode == GPIO_MODER_ALT)
+    {
+      setting = (cfgset & GPIO_AF_MASK) >> GPIO_AF_SHIFT;
+    }
+  else
+    {
+      setting = 0;
+      stm32_gpio_setmode(base, pin, pinmode);
+    }
+
+  if (pin < 8)
+    {
+      regoffset = STM32_GPIO_AFRL_OFFSET;
+      pos       = pin;
+    }
+  else
+    {
+      regoffset = STM32_GPIO_AFRH_OFFSET;
+      pos       = pin - 8;
+    }
+
+  regval  = getreg32(base + regoffset);
+  regval &= ~GPIO_AFR_MASK(pos);
+  regval |= (setting << GPIO_AFR_SHIFT(pos));
+  putreg32(regval, base + regoffset);
+
+  if (pinmode == GPIO_MODER_ALT)
+    {
+      stm32_gpio_setmode(base, pin, pinmode);
+    }
 
   spin_unlock_irqrestore(&g_configgpio_lock, flags);
   return OK;
