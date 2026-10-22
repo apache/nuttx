@@ -107,6 +107,7 @@ struct mac802154_chardevice_s
   bool readpending;                     /* Is there a read using the semaphore? */
   sem_t readsem;                        /* Signaling semaphore for waiting read */
   sq_queue_t dataind_queue;
+  uint8_t ndataind;                     /* Frames in dataind_queue */
 
   /* MAC Service notification information */
 
@@ -309,6 +310,8 @@ static int mac802154dev_close(FAR struct file *filep)
           ind = (FAR struct ieee802154_data_ind_s *)
                 sq_remfirst(&dev->dataind_queue);
         }
+
+      dev->ndataind = 0;
     }
 
   /* If there are now no open instances of the driver, purge the list of
@@ -400,6 +403,7 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
 
       if (ind != NULL)
         {
+          dev->ndataind--;
           nxmutex_unlock(&dev->md_lock);
           break;
         }
@@ -792,9 +796,19 @@ static int mac802154dev_rxframe(FAR struct mac802154_chardevice_s *dev,
       return -ENODEV;
     }
 
+  /* Drop the frame if the reader does not keep up */
+
+  if (dev->ndataind >= CONFIG_IEEE802154_MACDEV_RXQUEUE)
+    {
+      nxmutex_unlock(&dev->md_lock);
+      wlwarn("WARNING: RX queue full, dropping frame\n");
+      return -ENOBUFS;
+    }
+
   /* Push the indication onto the list */
 
   sq_addlast((FAR sq_entry_t *)ind, &dev->dataind_queue);
+  dev->ndataind++;
 
   /* Check if there is a read waiting for data */
 
