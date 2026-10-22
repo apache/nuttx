@@ -95,7 +95,6 @@ int mac802154_req_associate(MACHANDLE mac,
     }
 
   priv->curr_op = MAC802154_OP_ASSOC;
-  priv->curr_cmd = IEEE802154_CMD_ASSOC_REQ;
 
   /* Get exclusive access to the MAC */
 
@@ -900,8 +899,6 @@ static void mac802154_extract_assocresp(FAR void *arg)
                           IEEE802154_ADDRMODE_EXTENDED, respdesc);
 
   nxmutex_unlock(&priv->lock);
-
-  priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
 
   priv->radio->txdelayed(priv->radio, respdesc,
     (priv->resp_waittime*IEEE802154_BASE_SUPERFRAME_DURATION));
