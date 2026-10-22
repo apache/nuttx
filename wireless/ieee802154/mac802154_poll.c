@@ -199,7 +199,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
         }
 
       primitive->type = IEEE802154_PRIMITIVE_CONF_POLL;
-      txdesc->conf->status = status;
+      primitive->u.pollconf.status = status;
 
       /* We are now done the operation, and can release the command */
 
