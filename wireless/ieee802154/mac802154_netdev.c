@@ -684,6 +684,7 @@ static int macnet_ifup(FAR struct net_driver_s *dev)
              dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1]);
 #endif
 
+      netdev_carrier_on(dev);
       ret = OK;
     }
 
@@ -722,6 +723,7 @@ static int macnet_ifdown(FAR struct net_driver_s *dev)
   /* Mark the device "down" */
 
   priv->md_bifup = false;
+  netdev_carrier_off(dev);
 
   return OK;
 }
