@@ -96,6 +96,10 @@ void stm32_spidev_initialize(void)
 #ifdef CONFIG_MMCSD_SPI
   stm32_configgpio(GPIO_SDCARD_CS);           /* SD/MMC Card chip select */
 #endif
+
+#ifdef CONFIG_USBHOST_MAX3421E
+  stm32_configgpio(GPIO_MAX3421E_CS);         /* MAX3421E chip select */
+#endif
 }
 
 /****************************************************************************
@@ -184,6 +188,13 @@ void stm32_spi1select(struct spi_dev_s *dev, uint32_t devid,
     }
 #endif
 
+#ifdef CONFIG_USBHOST_MAX3421E
+  if (devid == SPIDEV_USBHOST(0))
+    {
+      stm32_gpiowrite(GPIO_MAX3421E_CS, !selected);
+    }
+#endif
+
 #ifdef CONFIG_MTD_W25
   stm32_gpiowrite(FLASH_SPI1_CS, !selected);
 #endif
@@ -196,14 +207,14 @@ uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid)
 #ifdef CONFIG_WL_NRF24L01
   if (devid == SPIDEV_WIRELESS(0))
     {
-       status |= SPI_STATUS_PRESENT;
+      status |= SPI_STATUS_PRESENT;
     }
 #endif
 
 #ifdef CONFIG_MMCSD_SPI
   if (devid == SPIDEV_MMCSD(0))
     {
-       status |= SPI_STATUS_PRESENT;
+      status |= SPI_STATUS_PRESENT;
     }
 #endif
 

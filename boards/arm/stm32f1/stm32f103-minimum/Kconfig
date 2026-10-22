@@ -110,4 +110,33 @@ config STM32F103MINIMUM_QETIMER
 	default 4
 	depends on SENSORS_QENCODER
 
+if USBHOST_MAX3421E
+
+config STM32F103MINIMUM_MAX3421E_FREQUENCY
+	int "MAX3421E SPI frequency"
+	default 4500000
+	range 400000 26000000
+	---help---
+		SPI1 clock used to talk to the MAX3421E.  The STM32 SPI1 divides
+		PCLK2 (72MHz) by a power of two, so the real clock is the nearest
+		lower value (e.g. 4.5MHz, 9MHz, 18MHz).
+
+config STM32F103MINIMUM_MAX3421E_RST
+	bool "MAX3421E reset pin driven by PB9"
+	default y
+	---help---
+		Drive the MAX3421E RES# pin from PB9.  Disable this if RES# is tied
+		to 3.3V; PB9 is then left untouched.
+
+config STM32F103MINIMUM_MAX3421E_CONNMON_STACKSIZE
+	int "MAX3421E USB connection monitor stack size"
+	default DEFAULT_TASK_STACKSIZE
+
+config STM32F103MINIMUM_MAX3421E_CONNMON_PRIORITY
+	int "MAX3421E USB connection monitor priority"
+	default 100
+	range 1 255
+
+endif # USBHOST_MAX3421E
+
 endif
