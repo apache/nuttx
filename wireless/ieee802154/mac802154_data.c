@@ -71,7 +71,7 @@ int mac802154_req_data(MACHANDLE mac,
 
   /* Check the required frame size */
 
-  if (frame->io_len > IEEE802154_MAX_PHY_PACKET_SIZE)
+  if (frame->io_len > IEEE802154_MAX_FRAME_SIZE)
     {
       return -E2BIG;
     }
