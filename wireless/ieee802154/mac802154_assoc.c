@@ -280,9 +280,13 @@ int mac802154_req_associate(MACHANDLE mac,
     {
       wlinfo("Transmitting assoc request\n");
 
-      /* Association Request command gets sent out immediately */
+      /* Association Request command gets sent out immediately.  The radio
+       * calls the MAC with its lock held, so release the MAC lock first.
+       */
 
+      nxmutex_unlock(&priv->lock);
       priv->radio->txdelayed(priv->radio, txdesc, 0);
+      return OK;
     }
   else
     {

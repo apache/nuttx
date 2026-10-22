@@ -159,7 +159,14 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
 
           mac802154_setchpage(priv, req->chpage);
           mac802154_setchannel(priv, req->channels[priv->scanindex]);
+
+          /* The radio calls the MAC with its lock held, so the energy
+           * detect starts after the MAC is released
+           */
+
+          nxmutex_unlock(&priv->lock);
           priv->radio->energydetect(priv->radio, priv->scansymdur);
+          return OK;
         }
         break;
       case IEEE802154_SCANTYPE_ORPHAN:
@@ -268,12 +275,16 @@ void mac802154_scanfinish(FAR struct ieee802154_privmac_s *priv,
  *   Function indirectly called from the radio layer via the radiocb
  *   edresult() call.
  *
+ * Returned Value:
+ *   true if the energy detect of the next channel must be started, the
+ *   caller starts it after releasing the MAC.
+ *
  * Assumptions:
  *   Called with the priv mac struct locked
  *
  ****************************************************************************/
 
-void mac802154_edscan_onresult(FAR struct ieee802154_privmac_s *priv,
+bool mac802154_edscan_onresult(FAR struct ieee802154_privmac_s *priv,
                                uint8_t edval)
 {
   DEBUGASSERT(priv->curr_op == MAC802154_OP_SCAN &&
@@ -292,7 +303,7 @@ void mac802154_edscan_onresult(FAR struct ieee802154_privmac_s *priv,
   if (priv->scanindex == priv->currscan.numchan)
     {
       mac802154_scanfinish(priv, IEEE802154_STATUS_SUCCESS);
-      return;
+      return false;
     }
 
   /* Continue on with the next channel in the list */
@@ -305,7 +316,7 @@ void mac802154_edscan_onresult(FAR struct ieee802154_privmac_s *priv,
    * where n is the value of the ScanDuration parameter. [1] pg. 25
    */
 
-  priv->radio->energydetect(priv->radio, priv->scansymdur);
+  return true;
 }
 
 /****************************************************************************
