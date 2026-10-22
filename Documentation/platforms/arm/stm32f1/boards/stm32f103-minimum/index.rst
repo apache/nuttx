@@ -637,6 +637,65 @@ typically adds short-circuit and ESD protection so the chip can safely connect
 to a real vehicle or bench network. Common parts include SN65HVD230, MCP2551,
 and TJA1050.
 
+MAX3421E USB Host
+=================
+
+The STM32F103C8 only has a USB device controller.  USB host support can be
+added with an external MAX3421E USB host controller on SPI1, for example
+the low cost "USB Host Mini" (HW-244) module.  See
+:doc:`/os/drivers/special/usbhost/max3421e` for the driver and for the
+VBUS modification that the module needs (the USB-A socket must get 5V
+while the MAX3421E itself runs at 3.3V).
+
+Connect the module this way:
+
+=================  ===================  =====================================
+MAX3421E module    STM32F103 Minimum    Notes
+=================  ===================  =====================================
+SCK                PA5                  SPI1 SCK
+MISO               PA6                  SPI1 MISO
+MOSI               PA7                  SPI1 MOSI
+SS                 PA4                  SPI1 chip select (shared with the
+                                        other SPI1 devices of this board)
+INT                PB8                  Falling edge interrupt (EXTI8)
+Reset              PB9                  Active low, pulsed at boot
+VCC                3.3V
+GND                GND
+VBUS pad           5V                   Only after cutting the VBUS trace
+=================  ===================  =====================================
+
+PB8 and PB9 are not used by any other function of this board.  PA4 is the
+common SPI1 chip select of this board, so do not enable another SPI1 device
+in the same configuration.
+
+Board options (``Board Selection`` menu, visible when
+``CONFIG_USBHOST_MAX3421E`` is enabled):
+
+``CONFIG_STM32F103MINIMUM_MAX3421E_FREQUENCY``
+   SPI clock (default 4.5MHz).  SPI1 divides PCLK2 (72MHz) by a power of
+   two, so the real clock is the nearest lower value.
+
+``CONFIG_STM32F103MINIMUM_MAX3421E_RST``
+   Drive the MAX3421E ``RES#`` pin from PB9 (default y).  Disable it if
+   ``RES#`` is tied to 3.3V; PB9 is then left untouched.
+
+``CONFIG_STM32F103MINIMUM_MAX3421E_CONNMON_STACKSIZE``
+   Stack size of the thread that waits for USB devices to be connected and
+   enumerates them.
+
+``CONFIG_STM32F103MINIMUM_MAX3421E_CONNMON_PRIORITY``
+   Priority of that thread.
+
+At boot the board checks that the MAX3421E answers before starting the
+driver (revision register, a register write/read-back test and the 12MHz
+oscillator).  The result is printed on the console::
+
+  MAX3421E: REVISION=0x13 GPINPOL rd=0x55/0xaa USBIRQ=0x01
+  MAX3421E: USB host initialized
+
+If the chip does not answer, the driver is not started and an error is
+printed instead.
+
 STM32F103 Minimum - specific Configuration Options
 ==================================================
 
@@ -933,3 +992,21 @@ See the 'CAN support' section above for pins, transceivers, and limitations.
 
 A UART adapter on USART1 (PA9/PA10) is required for the NSH console on a
 host PC.
+
+usbhost
+-------
+
+USB host on a MAX3421E module (see the `MAX3421E USB Host`_ section for the
+wiring) with the HID mouse class driver.  When a mouse is connected it is
+registered as ``/dev/mouse0`` and can be tested with the ``tc`` (touchscreen
+example) application, which prints the mouse reports::
+
+    nsh> ls /dev
+    /dev:
+     console
+     mouse0
+     ttyS0
+    nsh> tc 10
+
+The image is larger than 64KiB, so it relies on the 128KiB of flash that
+most STM32F103C8 chips have (see `Using 128KiB of Flash instead of 64KiB`_).

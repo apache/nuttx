@@ -265,15 +265,16 @@ int stm32_bringup(void)
 
 #ifdef CONFIG_I2C_DRIVER
   /* Register I2C drivers on behalf of the I2C tool */
-  #ifdef CONFIG_STM32_I2C1
-    stm32_i2c_register(1);
-  #endif
-  #ifdef CONFIG_STM32_I2C2
-    stm32_i2c_register(2);
-  #endif
-  #ifdef CONFIG_STM32_I2C3
-    stm32_i2c_register(3);
-  #endif
+
+#  ifdef CONFIG_STM32_I2C1
+  stm32_i2c_register(1);
+#  endif
+#  ifdef CONFIG_STM32_I2C2
+  stm32_i2c_register(2);
+#  endif
+#  ifdef CONFIG_STM32_I2C3
+  stm32_i2c_register(3);
+#  endif
 #endif
 
 #ifdef CONFIG_LCD_BACKPACK
@@ -465,6 +466,16 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_mcp2515initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_USBHOST_MAX3421E
+  /* Initialize the MAX3421E USB host controller */
+
+  ret = stm32_max3421e_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_max3421e_setup() failed: %d\n", ret);
     }
 #endif
 

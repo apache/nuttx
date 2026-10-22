@@ -167,6 +167,22 @@
 
 #define GPIO_MCP2515_IRQ (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTB|GPIO_PIN0)
 
+/* MAX3421E USB Host (SPI1):
+ *
+ *   SS   -> PA4 (shared SPI1 chip select)
+ *   INT  -> PB8 (falling edge, push-pull)
+ *   RES# -> PB9 (active low)
+ */
+
+#define GPIO_MAX3421E_CS  (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
+
+#define GPIO_MAX3421E_INT (GPIO_INPUT|GPIO_CNF_INPULLUP|GPIO_MODE_INPUT|\
+                           GPIO_EXTI|GPIO_PORTB|GPIO_PIN8)
+
+#define GPIO_MAX3421E_RST (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN9)
+
 /* USB Soft Connect Pullup: PC.13 */
 
 #define GPIO_USB_PULLUP   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
@@ -331,6 +347,19 @@ void stm32_usbinitialize(void);
 
 #ifdef CONFIG_PWM
 int stm32_pwm_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_max3421e_setup
+ *
+ * Description:
+ *   Initialize the MAX3421E USB host controller on SPI1 and start the
+ *   USB connection monitor thread.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_USBHOST_MAX3421E
+int stm32_max3421e_setup(void);
 #endif
 
 /****************************************************************************
