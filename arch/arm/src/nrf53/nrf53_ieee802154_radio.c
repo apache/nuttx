@@ -1090,6 +1090,14 @@ static void nrf53_radioi8_norm_setup(struct nrf53_radioi8_dev_s *dev,
 
   memcpy(&dev->radio->txbuf[1], &frame->io_data[0], frame->io_len);
 
+  /* The radio numbers the beacons (macBSN) */
+
+  if ((frame->io_data[0] & IEEE802154_FRAMECTRL_FTYPE) ==
+      IEEE802154_FRAME_BEACON)
+    {
+      dev->radio->txbuf[3] = dev->radio->state.bsn++;
+    }
+
   /* Setup buffer */
 
   nrf53_radioi8_norm_setup_buf(dev, dev->radio->txbuf, csma);

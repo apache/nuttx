@@ -357,6 +357,10 @@ static int nrf52_radioi8_reset(struct ieee802154_radio_s *radio)
       goto errout;
     }
 
+  /* macBSN starts from a random value */
+
+  dev->radio->state.bsn = rand();
+
   /* Reset TIMER */
 
   dev->tim->ops->reset(dev);
@@ -768,11 +772,10 @@ nrf52_radioi8_beaconstart(struct ieee802154_radio_s *radio,
       ret = dev->rtc->ops->setup(dev, &dev->state.sf);
       if (ret == OK)
         {
-          /* Setup beacon transmission, macBSN starts from a random value */
+          /* Setup beacon transmission */
 
           dev->radio->ops->beacon_setup(dev, beacon->bf_data,
                                         beacon->bf_len);
-          dev->radio->state.bsn = rand();
 
           /* Slotted CSMA-CA in the CAP */
 
