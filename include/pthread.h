@@ -40,17 +40,7 @@
 #include <time.h>            /* Needed for struct timespec */
 
 #ifdef CONFIG_PTHREAD_SPINLOCKS
-/* The architecture specific spinlock.h header file must provide the
- * following:
- *
- *   SP_LOCKED   - A definition of the locked state value (usually 1)
- *   SP_UNLOCKED - A definition of the unlocked state value (usually 0)
- *   spinlock_t  - The type of a spinlock memory object.
- *
- * SP_LOCKED and SP_UNLOCKED must constants of type spinlock_t.
- */
-
-#  include <nuttx/spinlock_type.h>
+#  include <nuttx/atomic.h>  /* atomic_t, the lock word of a spin lock */
 #endif
 
 /****************************************************************************
@@ -435,9 +425,7 @@ typedef struct pthread_rwlock_s pthread_rwlock_t;
 
 struct pthread_spinlock_s
 {
-  volatile spinlock_t sp_lock;  /* Indicates if the spinlock is locked or
-                                 * not.  See the values SP_LOCKED and
-                                 * SP_UNLOCKED. */
+  atomic_t sp_lock;             /* 1 if locked, 0 if not */
   pthread_t sp_holder;          /* ID of the thread that holds the spinlock */
 };
 #  ifndef __PTHREAD_SPINLOCK_T_DEFINED
