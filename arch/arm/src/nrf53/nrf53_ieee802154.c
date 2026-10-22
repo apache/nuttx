@@ -593,7 +593,6 @@ static int nrf53_radioi8_txdelayed(struct ieee802154_radio_s *radio,
                                    uint32_t symboldelay)
 {
   struct nrf53_radioi8_dev_s *dev = (struct nrf53_radioi8_dev_s *)radio;
-  irqstate_t                  flags;
   int                         ret = OK;
 
   /* Get exclusive access to the radio device */
@@ -606,57 +605,17 @@ static int nrf53_radioi8_txdelayed(struct ieee802154_radio_s *radio,
 
   /* There should never be more than one of these transactions at once. */
 
-  DEBUGASSERT(!dev->state.txdelayed_busy && !dev->state.txdelayed_pending);
+  DEBUGASSERT(!dev->state.txdelayed_busy);
 
-  dev->state.txdelayed_desc = txdesc;
+  dev->state.txdelayed_desc    = txdesc;
+  dev->state.txdelayed_delay   = symboldelay;
+  dev->state.txdelayed_busy    = true;
+  dev->state.txdelayed_pending = true;
 
-  /* The radio sends one frame at a time, start this transaction when the
-   * CSMA transaction is done.
-   */
+  /* Sent once the radio is free */
 
-  if (dev->radio->state.csma_busy)
-    {
-      dev->state.txdelayed_pending = true;
-      dev->state.txdelayed_delay   = symboldelay;
-      goto out;
-    }
+  dev->radio->ops->txnext(dev, 0);
 
-  /* Not interrupted by the ACK TX interrupt that starts a busy transaction */
-
-  flags = enter_critical_section();
-
-  dev->state.txdelayed_busy = true;
-
-  /* Wait for ACKTX done - we start transmission in
-   * nrf53_radioi8_state_acktx()
-   */
-
-  if (dev->radio->state.state == NRF53_RADIO_STATE_ACKTX)
-    {
-      leave_critical_section(flags);
-      goto out;
-    }
-
-  /* Setup TX */
-
-  dev->radio->ops->norm_setup(dev, txdesc->frame, false);
-
-  if (symboldelay == 0)
-    {
-      /* Send now */
-
-      dev->radio->ops->norm_trigger(dev);
-    }
-  else
-    {
-      /* Run TIMER - TX is handled in timer isr */
-
-      dev->tim->ops->setup(dev, NRF53_TIMER_CHAN_TXDELAY, symboldelay);
-    }
-
-  leave_critical_section(flags);
-
-out:
   nxmutex_unlock(&dev->lock);
   return OK;
 }
