@@ -141,9 +141,9 @@ int mac802154_ioctl(MACHANDLE mac, int cmd, unsigned long arg)
             }
             break;
           default:
-              wlerr("ERROR: Unrecognized cmd: %d\n", cmd);
-              ret = -ENOTTY;
-              break;
+            wlerr("ERROR: Unrecognized cmd: %d\n", cmd);
+            ret = -ENOTTY;
+            break;
         }
     }
 
