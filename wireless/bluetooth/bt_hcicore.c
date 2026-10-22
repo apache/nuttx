@@ -312,6 +312,7 @@ static void hci_reset_complete(FAR struct bt_buf_s *buf)
     }
 
   g_scan_dev_found_cb = NULL;
+  g_btdev.flow_control_enable = false;
   g_btdev.scan_enable = BT_LE_SCAN_DISABLE;
   g_btdev.scan_filter = BT_LE_SCAN_FILTER_DUP_ENABLE;
 }
@@ -1427,11 +1428,15 @@ static void le_read_buffer_size_complete(FAR struct bt_buf_s *buf)
 
 static int hci_initialize(void)
 {
+#ifndef CONFIG_BLUETOOTH_CNTRL_HOST_FLOW_DISABLE
+  FAR struct bt_hci_rp_read_local_commands_s *commands;
   FAR struct bt_hci_cp_host_buffer_size_s *hbs;
+  FAR uint8_t *enable;
+  bool flow_control;
+#endif
   FAR struct bt_hci_cp_set_event_mask_s *ev;
   FAR struct bt_buf_s *buf;
   FAR struct bt_buf_s *rsp;
-  FAR uint8_t *enable;
   int ret;
 
   /* Send HCI_RESET */
@@ -1561,47 +1566,76 @@ static int hci_initialize(void)
       return ret;
     }
 
-  buf = bt_hci_cmd_create(BT_HCI_OP_HOST_BUFFER_SIZE, sizeof(*hbs));
-  if (buf == NULL)
-    {
-      wlerr("ERROR:  Failed to create buffer\n");
-      return -ENOBUFS;
-    }
+#ifndef CONFIG_BLUETOOTH_CNTRL_HOST_FLOW_DISABLE
+  /* Supported Commands octet 10, bits 5..7 describe Set Controller To Host
+   * Flow Control, Host Buffer Size and Host Number Of Completed Packets.
+   */
 
-  hbs = bt_buf_extend(buf, sizeof(*hbs));
-  memset(hbs, 0, sizeof(*hbs));
-  hbs->acl_mtu = BT_HOST2LE16(BLUETOOTH_MAX_FRAMELEN -
-                              sizeof(struct bt_hci_acl_hdr_s) -
-                              g_btdev.btdev->head_reserve);
-  hbs->acl_pkts = BT_HOST2LE16(CONFIG_BLUETOOTH_BUFFER_PREALLOC);
-
-  ret = bt_hci_cmd_send(BT_HCI_OP_HOST_BUFFER_SIZE, buf);
+  ret = bt_hci_cmd_send_sync(BT_HCI_OP_READ_LOCAL_COMMANDS, NULL, &rsp);
   if (ret < 0)
     {
-      wlerr("ERROR:  bt_hci_cmd_send failed: %d\n", ret);
       return ret;
     }
 
-  buf = bt_hci_cmd_create(BT_HCI_OP_SET_CTL_TO_HOST_FLOW, 1);
-  if (buf == NULL)
+  if (rsp->len < sizeof(*commands))
     {
-      wlerr("ERROR:  Failed to create buffer\n");
-      return -ENOBUFS;
+      bt_buf_release(rsp);
+      return -EINVAL;
     }
 
-  enable  = bt_buf_extend(buf, sizeof(*enable));
-#ifdef CONFIG_BLUETOOTH_CNTRL_HOST_FLOW_DISABLE
-  *enable = 0;
-#else
-  *enable = 1;
+  commands = (FAR void *)rsp->data;
+  flow_control = (commands->commands[10] & 0xe0) == 0xe0;
+  bt_buf_release(rsp);
+
+  if (flow_control)
+    {
+      buf = bt_hci_cmd_create(BT_HCI_OP_HOST_BUFFER_SIZE, sizeof(*hbs));
+      if (buf == NULL)
+        {
+          wlerr("ERROR:  Failed to create buffer\n");
+          return -ENOBUFS;
+        }
+
+      hbs = bt_buf_extend(buf, sizeof(*hbs));
+      memset(hbs, 0, sizeof(*hbs));
+      hbs->acl_mtu = BT_HOST2LE16(BLUETOOTH_MAX_FRAMELEN -
+                                  sizeof(struct bt_hci_acl_hdr_s) -
+                                  g_btdev.btdev->head_reserve);
+      hbs->acl_pkts = BT_HOST2LE16(CONFIG_BLUETOOTH_BUFFER_PREALLOC);
+
+      ret = bt_hci_cmd_send_sync(BT_HCI_OP_HOST_BUFFER_SIZE, buf, NULL);
+      if (ret < 0)
+        {
+          wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
+          return ret;
+        }
+
+      buf = bt_hci_cmd_create(BT_HCI_OP_SET_CTL_TO_HOST_FLOW, 1);
+      if (buf == NULL)
+        {
+          wlerr("ERROR:  Failed to create buffer\n");
+          return -ENOBUFS;
+        }
+
+      enable  = bt_buf_extend(buf, sizeof(*enable));
+      *enable = 1;
+
+      ret = bt_hci_cmd_send_sync(BT_HCI_OP_SET_CTL_TO_HOST_FLOW, buf, NULL);
+      if (ret < 0)
+        {
+          wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Report completed packets only after flow control is enabled. */
+
+      g_btdev.flow_control_enable = true;
+    }
+  else
+    {
+      wlwarn("WARNING: Controller to Host flow control is not supported\n");
+    }
 #endif
-
-  ret = bt_hci_cmd_send_sync(BT_HCI_OP_SET_CTL_TO_HOST_FLOW, buf, NULL);
-  if (ret < 0)
-    {
-      wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
-      return ret;
-    }
 
   if (lmp_bredr_capable(g_btdev))
     {
@@ -1806,6 +1840,7 @@ int bt_initialize(void)
 #ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
   g_callback_list = NULL;
   g_scan_dev_found_cb = NULL;
+  g_btdev.flow_control_enable = false;
 #endif
 
   memset(&g_lp_rxlist, 0, sizeof(g_lp_rxlist));
