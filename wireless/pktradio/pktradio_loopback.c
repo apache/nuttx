@@ -698,7 +698,7 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
               ret = -EINVAL;
             }
           else
-           {
+            {
               FAR struct netdev_varaddr_s *devaddr = &dev->d_mac.radio;
 
               devaddr->nv_addrlen = 1;
