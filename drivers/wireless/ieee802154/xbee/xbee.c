@@ -265,7 +265,7 @@ static void xbee_attnworker(FAR void *arg)
                           iob->io_flink = iob_tryalloc(false);
 
                           iob = iob->io_flink;
-                       }
+                        }
                       else
                         {
                           wlwarn("invalid checksum on incoming API frame. "
@@ -338,7 +338,7 @@ static void xbee_attnworker(FAR void *arg)
               iob = iob->io_flink;
             }
 
-           iob->io_flink = iobhead;
+          iob->io_flink = iobhead;
         }
     }
 
@@ -1143,6 +1143,7 @@ static void xbee_lockupcheck_timeout(wdparm_t arg)
 static void xbee_lockupcheck_worker(FAR void *arg)
 {
   FAR struct xbee_priv_s *priv = (FAR struct xbee_priv_s *)arg;
+
   DEBUGASSERT(priv != NULL);
   wlinfo("Issuing query to detect lockup\n");
   xbee_query_chan(priv);
@@ -1168,6 +1169,7 @@ static void xbee_lockupcheck_worker(FAR void *arg)
 static void xbee_backup_worker(FAR void *arg)
 {
   FAR struct xbee_priv_s *priv = (FAR struct xbee_priv_s *)arg;
+
   DEBUGASSERT(priv != NULL);
   xbee_save_params(priv);
 }
@@ -1409,7 +1411,7 @@ void xbee_send_apiframe(FAR struct xbee_priv_s *priv,
 
                           iob->io_flink = iob_tryalloc(false);
                           iob = iob->io_flink;
-                       }
+                        }
                       else
                         {
                           wlwarn("invalid checksum on incoming API frame. "
@@ -1477,7 +1479,7 @@ void xbee_send_apiframe(FAR struct xbee_priv_s *priv,
               iob = iob->io_flink;
             }
 
-           iob->io_flink = iobhead;
+          iob->io_flink = iobhead;
         }
     }
 
@@ -1731,7 +1733,10 @@ void xbee_set_boostmode(FAR struct xbee_priv_s *priv, uint8_t mode)
 {
   uint8_t frame[9];
 
-  if (mode > 1) return;
+  if (mode > 1)
+    {
+      return;
+    }
 
   priv->boostmode = mode;
 
