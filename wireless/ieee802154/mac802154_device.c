@@ -456,11 +456,7 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
   rx->meta.flink = NULL;
   rx->meta.frame = NULL;
 
-  /* Free the IOB */
-
-  iob_free(ind->frame);
-
-  /* Deallocate the data indication */
+  /* Deallocate the data indication and its IOB */
 
   ieee802154_primitive_free((FAR struct ieee802154_primitive_s *)ind);
 
