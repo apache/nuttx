@@ -34,7 +34,7 @@
 
 #include <arch/board/board.h>
 
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 #include "nucleo-144.h"
 
 #ifdef CONFIG_ARCH_BUTTONS

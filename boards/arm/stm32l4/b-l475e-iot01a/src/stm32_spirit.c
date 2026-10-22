@@ -39,7 +39,7 @@
 #include <nuttx/wireless/spirit.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l4_exti.h"
 #include "stm32l4_spi.h"
 

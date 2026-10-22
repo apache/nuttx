@@ -27,7 +27,6 @@ list(
   SRCS
   stm32l4_allocateheap.c
   stm32l4_exti_gpio.c
-  stm32l4_gpio.c
   stm32l4_irq.c
   stm32l4_lowputc.c
   stm32l4_rcc.c

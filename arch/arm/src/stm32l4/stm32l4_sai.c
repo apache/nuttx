@@ -60,7 +60,7 @@
 #include <nuttx/semaphore.h>
 
 #include "stm32l4_dma.h"
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l4_sai.h"
 
 #ifdef CONFIG_STM32_SAI

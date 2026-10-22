@@ -36,7 +36,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/input/ajoystick.h>
 
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l4_adc.h"
 #include "hardware/stm32l4_adc.h"
 #include "nucleo-l476rg.h"

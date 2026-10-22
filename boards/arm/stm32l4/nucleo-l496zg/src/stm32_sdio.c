@@ -36,7 +36,7 @@
 
 #include "chip.h"
 #include "nucleo-144.h"
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l4_sdmmc.h"
 
 #ifdef CONFIG_MMCSD

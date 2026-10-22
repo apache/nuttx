@@ -36,7 +36,7 @@
 
 #include <arch/board/board.h>
 
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 #include "nucleo-l432kc.h"
 
 #if defined(CONFIG_DEV_GPIO) && !defined(CONFIG_GPIO_LOWER_HALF)

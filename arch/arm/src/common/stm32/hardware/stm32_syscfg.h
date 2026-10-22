@@ -34,6 +34,8 @@
 #  include "hardware/stm32u3xx_syscfg.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32U5)
 #  include "hardware/stm32_syscfg_m33_u5.h"
+#elif defined(CONFIG_ARCH_CHIP_STM32L4)
+#  include "hardware/stm32l4_syscfg.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32F0)
 #  include "hardware/stm32f0_syscfg.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32L0)

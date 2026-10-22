@@ -31,7 +31,7 @@
 #include <nuttx/board.h>
 #include <nuttx/analog/dac.h>
 
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l4_dac.h"
 #include "nucleo-l452re.h"
 

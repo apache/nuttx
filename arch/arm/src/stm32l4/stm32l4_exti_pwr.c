@@ -36,7 +36,7 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l4_exti.h"
 #include "stm32l4_exti_pwr.h"
 

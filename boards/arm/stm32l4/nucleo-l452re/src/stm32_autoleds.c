@@ -34,7 +34,7 @@
 
 #include "chip.h"
 #include "arm_internal.h"
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 #include "nucleo-l452re.h"
 
 #include <arch/board/board.h>

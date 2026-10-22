@@ -31,7 +31,7 @@
 #include <nuttx/board.h>
 #include <nuttx/analog/adc.h>
 #include <arch/board/board.h>
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l4_dfsdm.h"
 #include "nucleo-144.h"
 

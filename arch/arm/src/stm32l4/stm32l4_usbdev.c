@@ -46,7 +46,7 @@
 
 #include "arm_internal.h"
 #include "stm32.h"
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l4_usbdev.h"
 
 #if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USBFS)

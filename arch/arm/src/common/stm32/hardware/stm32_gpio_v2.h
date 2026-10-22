@@ -56,6 +56,13 @@
 #define STM32_GPIO_ADVCFGRL_OFFSET  0x0048 /* GPIO advanced configuration register, pins 0-7 (STM32N6) */
 #define STM32_GPIO_ADVCFGRH_OFFSET  0x004c /* GPIO advanced configuration register, pins 8-15 (STM32N6) */
 
+#if defined(CONFIG_STM32_STM32L471XX) || \
+    defined(CONFIG_STM32_STM32L475XX) || \
+    defined(CONFIG_STM32_STM32L476XX) || \
+    defined(CONFIG_STM32_STM32L486XX)
+#  define STM32_GPIO_ASCR_OFFSET   0x002c /* GPIO analog switch control */
+#endif
+
 /* Register Addresses *******************************************************/
 
 #if STM32_NPORTS > 0
@@ -879,5 +886,9 @@
 #define GPIO_ADVCFGR_SHIFT(n)         ((n) << 2)
 #define GPIO_ADVCFGR_MASK(n)          (0xf << GPIO_ADVCFGR_SHIFT(n))
 #define GPIO_ADVCFGR_DLYPATH(n)       (1 << GPIO_ADVCFGR_SHIFT(n)) /* Delay on the input path */
+
+/* GPIO port analog switch control register */
+
+#define GPIO_ASCR(n)                  (1 << (n))
 
 #endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_GPIO_V2_H */

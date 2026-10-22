@@ -39,7 +39,7 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l4_rcc.h"
 
 #ifdef CONFIG_DEBUG_FEATURES

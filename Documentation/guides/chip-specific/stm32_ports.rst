@@ -507,7 +507,7 @@ DFSDM         to be done    arch/arm/src/stm32l4/stm32l4_dfsdm.c
 DMA           v1+DMAMUX     arch/arm/src/stm32l4/stm32l4_dma.c       
 EXTI          to be done    arch/arm/src/stm32l4/stm32l4_exti_gpio.c 
 FLASH         to be done    arch/arm/src/stm32l4/stm32l4_flash.c     
-GPIO          to be done    arch/arm/src/stm32l4/stm32l4_gpio.c      
+GPIO          v2            arch/arm/src/common/stm32/stm32_gpio_v2.c
 I2C           to be done    arch/arm/src/stm32l4/stm32l4_i2c.c       
 IWDG          v1            arch/arm/src/common/stm32/stm32_iwdg.c
 LPTIM         v1            arch/arm/src/common/stm32/stm32_lptim.c

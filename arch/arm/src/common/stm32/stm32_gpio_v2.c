@@ -40,6 +40,11 @@
 #include "chip.h"
 #include "stm32_gpio.h"
 
+#if defined(CONFIG_STM32_HAVE_SYSCFG) && \
+    !defined(CONFIG_STM32_HAVE_IP_EXTI_M33M55_V1)
+#  include "hardware/stm32_syscfg.h"
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -379,6 +384,36 @@ int stm32_configgpio(uint32_t cfgset)
     {
       stm32_gpio_setmode(base, pin, pinmode);
     }
+
+#ifdef STM32_SYSCFG_EXTICR
+  /* Select the port of the EXTI line */
+
+  if (pinmode != GPIO_MODER_OUTPUT && (cfgset & GPIO_EXTI) != 0)
+    {
+      uint32_t regaddr;
+      int shift;
+
+      regaddr = STM32_SYSCFG_EXTICR(pin);
+      regval  = getreg32(regaddr);
+      shift   = SYSCFG_EXTICR_EXTI_SHIFT(pin);
+      regval &= ~(SYSCFG_EXTICR_PORT_MASK << shift);
+      regval |= (((uint32_t)port) << shift);
+      putreg32(regval, regaddr);
+    }
+#endif
+
+#ifdef STM32_GPIO_ASCR_OFFSET
+  /* Connect the analog switch of analog pins */
+
+  if (pinmode == GPIO_MODER_ANALOG)
+    {
+      modifyreg32(base + STM32_GPIO_ASCR_OFFSET, 0, GPIO_ASCR(pin));
+    }
+  else
+    {
+      modifyreg32(base + STM32_GPIO_ASCR_OFFSET, GPIO_ASCR(pin), 0);
+    }
+#endif
 
   spin_unlock_irqrestore(&g_configgpio_lock, flags);
   return OK;
