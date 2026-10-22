@@ -152,6 +152,10 @@ struct radio_driver_s
 
   /* Radio network driver-specific definitions follow. */
 
+  /* Datagram tag of the next fragmented packet sent (RFC 4944 5.3) */
+
+  uint16_t r_dgramtag;
+
 #ifdef CONFIG_WIRELESS_IEEE802154
   /* The msdu_handle is basically an id for the frame.  The standard just
    * says that the next highest layer should determine it.  It is used in

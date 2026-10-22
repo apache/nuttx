@@ -389,24 +389,8 @@ struct sixlowpan_reassbuf_s
    * information follows the externally visible packet buffer.
    */
 
-  /* rb_dgramtag.  Datagram tag to be put in the header of the set of
-   * fragments.  It is used by the recipient to match fragments of the
-   * same payload.
-   *
-   * This is the sender's copy of the tag.  It is incremented after each
-   * fragmented packet is sent so that it will be unique to that
-   * sequence fragmentation.  Its value is then persistent, the values of
-   * other fragmentation variables are valid on during a single
-   * fragmentation sequence (while rb_accumlen > 0)
-   */
-
-  uint16_t rb_dgramtag;
-
   /* rb_reasstag.  Each frame in the reassembly has a tag.  That tag must
    * match the reassembly tag in the fragments being merged.
-   *
-   * This is the same tag as rb_dgramtag but is saved on the receiving
-   * side to match all of the fragments of the packet.
    */
 
   uint16_t rb_reasstag;
