@@ -650,12 +650,12 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
                * and pop an event off the queue
                */
 
-                ret = nxmutex_lock(&dev->md_lock);
-                if (ret < 0)
-                  {
-                    wlerr("ERROR: nxsem_wait failed: %d\n", ret);
-                    return ret;
-                  }
+              ret = nxmutex_lock(&dev->md_lock);
+              if (ret < 0)
+                {
+                  wlerr("ERROR: nxsem_wait failed: %d\n", ret);
+                  return ret;
+                }
             }
         }
         break;

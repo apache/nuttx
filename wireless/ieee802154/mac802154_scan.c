@@ -325,6 +325,7 @@ static void mac802154_scantimeout(FAR void *arg)
 {
   FAR struct ieee802154_privmac_s *priv =
              (FAR struct ieee802154_privmac_s *)arg;
+
   DEBUGASSERT(priv->curr_op == MAC802154_OP_SCAN);
 
   nxmutex_lock(&priv->lock);
