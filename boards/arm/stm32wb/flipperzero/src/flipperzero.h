@@ -31,7 +31,7 @@
 #include <nuttx/compiler.h>
 #include <stdint.h>
 
-#include <stm32wb_gpio.h>
+#include <stm32_gpio.h>
 
 /****************************************************************************
  * Pre-processor Definitions

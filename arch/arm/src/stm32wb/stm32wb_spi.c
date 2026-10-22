@@ -74,7 +74,7 @@
 #include "arm_internal.h"
 #include "chip.h"
 #include "stm32.h"
-#include "stm32wb_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32wb_dma.h"
 #include "stm32wb_spi.h"
 

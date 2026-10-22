@@ -25,7 +25,6 @@
 set(SRCS
     stm32wb_allocateheap.c
     stm32wb_exti_gpio.c
-    stm32wb_gpio.c
     stm32wb_irq.c
     stm32wb_lowputc.c
     stm32wb_rcc.c

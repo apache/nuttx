@@ -33,7 +33,7 @@
 #include <nuttx/spi/spi.h>
 #include <arch/board/board.h>
 
-#include "stm32wb_gpio.h"
+#include "stm32_gpio.h"
 
 /****************************************************************************
  * Public Functions

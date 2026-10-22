@@ -46,6 +46,12 @@
 #endif
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define GPIO_INDEX(p)  ((p) >> GPIO_PORT_SHIFT)
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -55,75 +61,68 @@ static spinlock_t g_configgpio_lock = SP_UNLOCKED;
  * Public Data
  ****************************************************************************/
 
-/* Base addresses for each GPIO block */
+/* Base addresses for each GPIO block, indexed by the port number */
 
 const uint32_t g_gpiobase[STM32_NPORTS] =
 {
-#if STM32_NPORTS > 0
-  STM32_GPIOA_BASE,
+  [GPIO_INDEX(GPIO_PORTA)] = STM32_GPIOA_BASE,
+  [GPIO_INDEX(GPIO_PORTB)] = STM32_GPIOB_BASE,
+  [GPIO_INDEX(GPIO_PORTC)] = STM32_GPIOC_BASE,
+#if defined(GPIO_PORTD) && defined(STM32_GPIOD_BASE) && \
+    GPIO_INDEX(GPIO_PORTD) < STM32_NPORTS
+  [GPIO_INDEX(GPIO_PORTD)] = STM32_GPIOD_BASE,
 #endif
-#if STM32_NPORTS > 1
-  STM32_GPIOB_BASE,
+#if defined(GPIO_PORTE) && defined(STM32_GPIOE_BASE) && \
+    GPIO_INDEX(GPIO_PORTE) < STM32_NPORTS
+  [GPIO_INDEX(GPIO_PORTE)] = STM32_GPIOE_BASE,
 #endif
-#if STM32_NPORTS > 2
-  STM32_GPIOC_BASE,
+#if defined(GPIO_PORTF) && defined(STM32_GPIOF_BASE) && \
+    GPIO_INDEX(GPIO_PORTF) < STM32_NPORTS
+  [GPIO_INDEX(GPIO_PORTF)] = STM32_GPIOF_BASE,
 #endif
-#if STM32_NPORTS > 3
-  STM32_GPIOD_BASE,
+#if defined(GPIO_PORTG) && defined(STM32_GPIOG_BASE) && \
+    GPIO_INDEX(GPIO_PORTG) < STM32_NPORTS
+  [GPIO_INDEX(GPIO_PORTG)] = STM32_GPIOG_BASE,
 #endif
-#if STM32_NPORTS > 4
-  STM32_GPIOE_BASE,
+#if defined(GPIO_PORTH) && defined(STM32_GPIOH_BASE) && \
+    GPIO_INDEX(GPIO_PORTH) < STM32_NPORTS
+  [GPIO_INDEX(GPIO_PORTH)] = STM32_GPIOH_BASE,
 #endif
-#if STM32_NPORTS > 5
-#  ifdef STM32_GPIOF_BASE
-  STM32_GPIOF_BASE,
-#  else
-  0,
-#  endif
+#if defined(GPIO_PORTI) && defined(STM32_GPIOI_BASE) && \
+    GPIO_INDEX(GPIO_PORTI) < STM32_NPORTS
+  [GPIO_INDEX(GPIO_PORTI)] = STM32_GPIOI_BASE,
 #endif
-#if STM32_NPORTS > 6
-#  ifdef STM32_GPIOG_BASE
-  STM32_GPIOG_BASE,
-#  else
-  0,
-#  endif
+#if defined(GPIO_PORTJ) && defined(STM32_GPIOJ_BASE) && \
+    GPIO_INDEX(GPIO_PORTJ) < STM32_NPORTS
+  [GPIO_INDEX(GPIO_PORTJ)] = STM32_GPIOJ_BASE,
 #endif
-#if STM32_NPORTS > 7
-  STM32_GPIOH_BASE,
+#if defined(GPIO_PORTK) && defined(STM32_GPIOK_BASE) && \
+    GPIO_INDEX(GPIO_PORTK) < STM32_NPORTS
+  [GPIO_INDEX(GPIO_PORTK)] = STM32_GPIOK_BASE,
 #endif
-#if STM32_NPORTS > 8
-#  if defined(STM32_GPIOI_BASE)
-  STM32_GPIOI_BASE,
-#  elif defined(STM32_GPION_BASE)
-  STM32_GPION_BASE,
-#  else
-  0,
-#  endif
+#if defined(GPIO_PORTL) && defined(STM32_GPIOL_BASE) && \
+    GPIO_INDEX(GPIO_PORTL) < STM32_NPORTS
+  [GPIO_INDEX(GPIO_PORTL)] = STM32_GPIOL_BASE,
 #endif
-#if STM32_NPORTS > 9
-#  if defined(STM32_GPIOJ_BASE)
-  STM32_GPIOJ_BASE,
-#  elif defined(STM32_GPIOO_BASE)
-  STM32_GPIOO_BASE,
-#  else
-  0,
-#  endif
+#if defined(GPIO_PORTM) && defined(STM32_GPIOM_BASE) && \
+    GPIO_INDEX(GPIO_PORTM) < STM32_NPORTS
+  [GPIO_INDEX(GPIO_PORTM)] = STM32_GPIOM_BASE,
 #endif
-#if STM32_NPORTS > 10
-#  if defined(STM32_GPIOK_BASE)
-  STM32_GPIOK_BASE,
-#  elif defined(STM32_GPIOP_BASE)
-  STM32_GPIOP_BASE,
-#  else
-  0,
-#  endif
+#if defined(GPIO_PORTN) && defined(STM32_GPION_BASE) && \
+    GPIO_INDEX(GPIO_PORTN) < STM32_NPORTS
+  [GPIO_INDEX(GPIO_PORTN)] = STM32_GPION_BASE,
 #endif
-#if STM32_NPORTS > 11
-#  if defined(STM32_GPIOQ_BASE)
-  STM32_GPIOQ_BASE,
-#  else
-  0,
-#  endif
+#if defined(GPIO_PORTO) && defined(STM32_GPIOO_BASE) && \
+    GPIO_INDEX(GPIO_PORTO) < STM32_NPORTS
+  [GPIO_INDEX(GPIO_PORTO)] = STM32_GPIOO_BASE,
+#endif
+#if defined(GPIO_PORTP) && defined(STM32_GPIOP_BASE) && \
+    GPIO_INDEX(GPIO_PORTP) < STM32_NPORTS
+  [GPIO_INDEX(GPIO_PORTP)] = STM32_GPIOP_BASE,
+#endif
+#if defined(GPIO_PORTQ) && defined(STM32_GPIOQ_BASE) && \
+    GPIO_INDEX(GPIO_PORTQ) < STM32_NPORTS
+  [GPIO_INDEX(GPIO_PORTQ)] = STM32_GPIOQ_BASE,
 #endif
 };
 

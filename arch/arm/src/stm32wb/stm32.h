@@ -38,7 +38,7 @@
 
 #include "chip.h"
 #include "stm32wb_rcc.h"
-#include "stm32wb_gpio.h"
+#include "stm32_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions

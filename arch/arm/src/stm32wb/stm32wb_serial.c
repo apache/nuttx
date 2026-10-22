@@ -47,7 +47,7 @@
 #endif
 
 #include "arm_internal.h"
-#include "stm32wb_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32wb_uart.h"
 #include "stm32wb_dma.h"
 #include "stm32wb_rcc.h"

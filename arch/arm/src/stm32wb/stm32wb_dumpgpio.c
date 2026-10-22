@@ -38,7 +38,7 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "stm32wb_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32wb_rcc.h"
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -51,14 +51,7 @@
 
 static const char g_portchar[STM32_NPORTS] =
 {
-  'A', 'B', 'C',
-#if defined(CONFIG_STM32_GPIO_HAVE_PORTD)
-  'D',
-#endif
-#if defined(CONFIG_STM32_GPIO_HAVE_PORTE)
-  'E',
-#endif
-  'H'
+  'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'
 };
 
 /****************************************************************************
