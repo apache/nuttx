@@ -55,7 +55,7 @@
  * Private Functions
  ****************************************************************************/
 
-#if defined(CONFIG_NRF53_HFCLK_XTAL) && defined(BOARD_OSC_XOSC32MCAPS_CAP)
+#ifdef BOARD_OSC_XOSC32MCAPS_CAP
 static void nrf53_hfxo_intcap(void)
 {
   uint32_t slope_field;
@@ -109,8 +109,10 @@ void nrf53_oscconfig(void)
   putreg32(BOARD_OSC_XOSC32KI_INTCAP, NRF53_OSC_XOSC32KI_INTCAP);
 #endif
 
-#if defined(CONFIG_NRF53_HFCLK_XTAL) && defined(BOARD_OSC_XOSC32MCAPS_CAP)
-  /* Configure internal capacitors for HFXO */
+#ifdef BOARD_OSC_XOSC32MCAPS_CAP
+  /* Configure internal capacitors for HFXO, the network core radio uses
+   * it even when the application core does not
+   */
 
   nrf53_hfxo_intcap();
 #endif
