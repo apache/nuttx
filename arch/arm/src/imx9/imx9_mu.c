@@ -213,13 +213,18 @@ struct imx9_mudev_s *imx9_mu_init(int index)
       return NULL;
     }
 
-  irq_attach(priv->irq, imx9_mu_interrupt, priv);
-  up_enable_irq(priv->irq);
+  imx9_mu_enable_irq(priv);
 
   priv->gpi_callback = NULL;
   priv->msg_callback = NULL;
 
   return priv;
+}
+
+void imx9_mu_enable_irq(struct imx9_mudev_s *priv)
+{
+  irq_attach(priv->irq, imx9_mu_interrupt, priv);
+  up_enable_irq(priv->irq);
 }
 
 void imx9_mu_subscribe_msg(struct imx9_mudev_s *priv,
