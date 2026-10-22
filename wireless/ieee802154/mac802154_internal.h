@@ -39,6 +39,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/mm/iob.h>
 
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 #include <nuttx/wireless/ieee802154/ieee802154_radio.h>
@@ -515,10 +516,35 @@ void mac802154_notify(FAR struct ieee802154_privmac_s *priv,
 
 /* General helpers **********************************************************/
 
+/* A tx descriptor owns its frame and its confirm primitive.  A user that
+ * hands the confirm to the next layer takes it out of the descriptor first.
+ */
+
+static inline FAR struct ieee802154_primitive_s *
+mac802154_txdesc_takeconf(FAR struct ieee802154_txdesc_s *txdesc)
+{
+  FAR struct ieee802154_primitive_s *primitive =
+    (FAR struct ieee802154_primitive_s *)txdesc->conf;
+
+  txdesc->conf = NULL;
+  return primitive;
+}
+
 static inline void
 mac802154_txdesc_free(FAR struct ieee802154_privmac_s *priv,
                       FAR struct ieee802154_txdesc_s *txdesc)
 {
+  if (txdesc->frame != NULL)
+    {
+      iob_free(txdesc->frame);
+      txdesc->frame = NULL;
+    }
+
+  if (txdesc->conf != NULL)
+    {
+      ieee802154_primitive_free(mac802154_txdesc_takeconf(txdesc));
+    }
+
   sq_addlast((FAR sq_entry_t *)txdesc, &priv->txdesc_queue);
   nxsem_post(&priv->txdesc_sem);
 }

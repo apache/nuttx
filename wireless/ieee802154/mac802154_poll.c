@@ -212,7 +212,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
       priv->cmd_desc = NULL;
       nxsem_post(&priv->opsem);
 
-      mac802154_notify(priv, primitive);
+      mac802154_notify(priv, mac802154_txdesc_takeconf(txdesc));
     }
   else
     {
@@ -231,10 +231,6 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
 
       mac802154_timerstart(priv, priv->max_frame_waittime,
                            mac802154_polltimeout);
-
-      /* Deallocate the data conf primitive as it is no longer needed. */
-
-      ieee802154_primitive_free(primitive);
     }
 }
 
