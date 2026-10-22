@@ -29,6 +29,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/uio.h>
 #include <nuttx/mm/mm.h>
 
 #include <sys/socket.h>

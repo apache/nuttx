@@ -30,6 +30,7 @@
 #include <sys/types.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/uio.h>
 
 #include <assert.h>
 #include <errno.h>
