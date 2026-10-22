@@ -444,12 +444,15 @@ static bool nrf54l_radioi8_filter(struct nrf54l_radioi8_dev_s *dev)
       return true;
     }
 
-  /* Beacon frame */
+  /* Beacon frame, the source PAN ID must match macPANId unless macPANId
+   * is the broadcast PAN ID (IEEE 802.15.4-2003 7.5.6.2)
+   */
 
-  if (((*fc & IEEE802154_FRAMECTRL_FTYPE) == IEEE802154_FRAME_BEACON) &&
-      IEEE802154_PANIDCMP(IEEE802154_PANID_UNSPEC, &dev->state.addr.panid))
+  if ((*fc & IEEE802154_FRAMECTRL_FTYPE) == IEEE802154_FRAME_BEACON)
     {
-      return true;
+      return IEEE802154_PANIDCMP(IEEE802154_PANID_UNSPEC,
+                                 dev->state.addr.panid) ||
+             IEEE802154_PANIDCMP(&rx[3], dev->state.addr.panid);
     }
 
   /* Get destination address */
@@ -473,12 +476,28 @@ static bool nrf54l_radioi8_filter(struct nrf54l_radioi8_dev_s *dev)
         }
     }
 
-  /* PAN ID match */
+  /* The destination PAN ID must match macPANId or be the broadcast PAN
+   * ID
+   */
 
   if (!IEEE802154_PANIDCMP(IEEE802154_PANID_UNSPEC, dev->state.addr.panid) &&
+      !IEEE802154_PANIDCMP(IEEE802154_PANID_UNSPEC, addr.panid) &&
       !IEEE802154_PANIDCMP(addr.panid, &dev->state.addr.panid))
     {
       return false;
+    }
+
+  /* Only source addressing fields in a data or MAC command frame, for
+   * the PAN coordinator of the source PAN
+   */
+
+  if (addr.mode == IEEE802154_ADDRMODE_NONE)
+    {
+      return ((*fc & IEEE802154_FRAMECTRL_FTYPE) == IEEE802154_FRAME_DATA ||
+              (*fc & IEEE802154_FRAMECTRL_FTYPE) ==
+              IEEE802154_FRAME_COMMAND) &&
+             dev->state.devmode == NRF54L_DEVMODE_PANCOORD &&
+             IEEE802154_PANIDCMP(&rx[3], dev->state.addr.panid);
     }
 
   /* Destination address match */
