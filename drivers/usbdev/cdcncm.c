@@ -1029,9 +1029,16 @@ static void cdcncm_receive(FAR struct cdcncm_driver_s *self)
   FAR uint8_t *tmp = self->rdreq->buf;
   uint32_t ntbmax = g_ntbparameters.ntboutmaxsize;
   uint32_t blocklen;
+  uint32_t ndpcount;
+  uint32_t ndpindex;
   uint32_t ndplen;
-  int ndpindex;
   int dgramcounter;
+
+  if (self->rdreq->xfrd < opts->nthsize)
+    {
+      uerr("Short NTB header: %zu\n", self->rdreq->xfrd);
+      return;
+    }
 
   /* Get signature */
 
@@ -1057,13 +1064,16 @@ static void cdcncm_receive(FAR struct cdcncm_driver_s *self)
 
   /* Get block len */
 
-  if (blocklen > ntbmax)
+  if (blocklen < opts->nthsize || blocklen > ntbmax ||
+      blocklen > self->rdreq->xfrd)
     {
-      uerr("OUT size exceeded\n");
+      uerr("Bad NTB length: %" PRIu32 " / %zu\n",
+           blocklen, self->rdreq->xfrd);
       return;
     }
 
   ndpindex = cdcncm_get(&tmp, opts->ndpindex);
+  ndpcount = 0;
 
   do
     {
@@ -1071,9 +1081,10 @@ static void cdcncm_receive(FAR struct cdcncm_driver_s *self)
       uint32_t dglen;
 
       if (((ndpindex % 4) != 0) || (ndpindex < opts->nthsize) ||
-          (ndpindex > (blocklen - opts->ndpsize)))
+          (ndpindex > blocklen) || (opts->ndpsize > blocklen - ndpindex) ||
+          (++ndpcount > blocklen / opts->ndpsize))
         {
-          uerr("Bad index: %#X\n", ndpindex);
+          uerr("Bad index: %#" PRIx32 "\n", ndpindex);
           return;
         }
 
@@ -1089,7 +1100,8 @@ static void cdcncm_receive(FAR struct cdcncm_driver_s *self)
       ndplen = cdcncm_get(&tmp, 2);
 
       if ((ndplen < opts->ndpsize + 2 * (opts->dgramitemlen * 2)) ||
-          (ndplen % opts->ndpalign != 0))
+          (ndplen % opts->ndpalign != 0) ||
+          (ndplen > blocklen - ndpindex))
         {
           uerr("Bad NDP length: %04" PRIx32 " \n", ndplen);
           return;
@@ -1115,6 +1127,13 @@ static void cdcncm_receive(FAR struct cdcncm_driver_s *self)
           if (index == 0 || dglen == 0)
             {
               break;
+            }
+
+          if (index > blocklen || dglen > blocklen - index)
+            {
+              uerr("Bad datagram: %" PRIu32 "+%" PRIu32 "\n",
+                   index, dglen);
+              return;
             }
 
           dgramcounter++;
