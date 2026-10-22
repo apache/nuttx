@@ -775,11 +775,8 @@ static void mac802154_purge_worker(FAR void *arg)
 
           sq_remfirst(&priv->indirect_queue);
 
-          /* Free the IOB, the notification, and the tx descriptor */
+          /* Free the tx descriptor with the frame and the confirm */
 
-          iob_free(txdesc->frame);
-          ieee802154_primitive_free((FAR struct ieee802154_primitive_s *)
-                                    txdesc->conf);
           mac802154_txdesc_free(priv, txdesc);
           priv->beaconupdate = true;
 
@@ -926,12 +923,6 @@ static void mac802154_txdone_worker(FAR void *arg)
           break;
         }
 
-      /* Cast the data_conf to a notification. We get both the private and
-       * public notification structure to make it easier to use.
-       */
-
-      primitive = (FAR struct ieee802154_primitive_s *)txdesc->conf;
-
       wlinfo("Tx status: %s\n",
              g_ieee802154_status_string[txdesc->conf->status]);
 
@@ -939,6 +930,9 @@ static void mac802154_txdone_worker(FAR void *arg)
         {
           case IEEE802154_FRAME_DATA:
             {
+              /* The data confirm goes to the next layer */
+
+              primitive = mac802154_txdesc_takeconf(txdesc);
               primitive->type = IEEE802154_PRIMITIVE_CONF_DATA;
               mac802154_notify(priv, primitive);
             }
@@ -1003,22 +997,17 @@ static void mac802154_txdone_worker(FAR void *arg)
                     break;
 
                   default:
-                    ieee802154_primitive_free(primitive);
                     break;
                 }
             }
             break;
 
           default:
-            {
-              ieee802154_primitive_free(primitive);
-            }
             break;
         }
 
-      /* Free the IOB and the tx descriptor */
+      /* Free the tx descriptor with the frame and an unused confirm */
 
-      iob_free(txdesc->frame);
       mac802154_txdesc_free(priv, txdesc);
     }
 
