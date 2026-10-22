@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <nuttx/debug.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -597,7 +598,10 @@ int mrf24j40_reset(FAR struct ieee802154_radio_s *radio)
     }
 
   dev->max_frame_waittime = MRF24J40_DEFAULT_MAX_FRAME_WAITTIME;
-  dev->bsn = 0;
+
+  /* macBSN starts from a random value */
+
+  dev->bsn = rand();
 
   /* Default device params */
 
@@ -776,7 +780,6 @@ int mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
 
       /* The radio layer is responsible for setting the BSN. */
 
-      dev->bsn = 0;
       mrf24j40_setreg(dev->spi, MRF24J40_BEACON_FIFO + 4, dev->bsn++);
 
       /* Set the TXBMSK (TXBCON1 0x25<7>) bit = 1 to mask the beacon
