@@ -342,7 +342,8 @@ static uint32_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
        * to the number of bytes that have been ACKed.
        */
 
-      sinfo->s_sent = sinfo->s_acked;
+      sinfo->s_sent    = sinfo->s_acked;
+      conn->tx_unacked = 0;
 
       /* Fall through to re-send data from the last that was ACKed */
     }
