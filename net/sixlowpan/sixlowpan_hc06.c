@@ -438,11 +438,15 @@ static uint8_t compress_laddr(FAR const net_ipv6addr_t srcipaddr,
  *   prefpost takes a byte where the first nibble specify prefix count
  *   and the second postfix count (NOTE: 15/0xf ipaddr=16 bytes copy).
  *
+ * Returned Value:
+ *   OK, or -EINVAL if the inline address bytes pass endofframe.
+ *
  ****************************************************************************/
 
-static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
-                            FAR const uint8_t *prefix, uint16_t prefpost,
-                            FAR net_ipv6addr_t ipaddr)
+static int uncompress_addr(FAR const struct netdev_varaddr_s *addr,
+                           FAR const uint8_t *prefix, uint16_t prefpost,
+                           FAR net_ipv6addr_t ipaddr,
+                           FAR const uint8_t *endofframe)
 {
   FAR const uint8_t *srcptr;
   bool usemac       = (prefpost & UNCOMPRESS_MACBASED) != 0;
@@ -473,6 +477,10 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
         {
           postcount = addr->nv_addrlen;
         }
+    }
+  else
+    {
+      HC06_CHECK(g_hc06ptr, postcount, endofframe);
     }
 
   /* Copy any prefix */
@@ -577,6 +585,8 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
         NTOHS(ipaddr[2]), NTOHS(ipaddr[3]),
         NTOHS(ipaddr[4]), NTOHS(ipaddr[5]),
         NTOHS(ipaddr[6]), NTOHS(ipaddr[7]));
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1234,9 +1244,9 @@ int sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
         {
           /* Traffic class is carried inline */
 
+          HC06_CHECK(g_hc06ptr, 4, endofframe);
           memcpy(&ipv6->tcf, g_hc06ptr + 1, 3);
           tmp        = *g_hc06ptr;
-          HC06_CHECK(g_hc06ptr, 4, endofframe);
           g_hc06ptr += 4;
 
           /* hc06 format of tc is ECN | DSCP , original is DSCP | ECN
@@ -1257,9 +1267,9 @@ int sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
 
           /* Highest flow label bits + ECN bits */
 
+          HC06_CHECK(g_hc06ptr, 3, endofframe);
           ipv6->tcf = (*g_hc06ptr & 0x0f) | ((*g_hc06ptr >> 2) & 0x30);
           memcpy(&ipv6->flow, g_hc06ptr + 1, 2);
-          HC06_CHECK(g_hc06ptr, 3, endofframe);
           g_hc06ptr  += 3;
         }
     }
@@ -1274,11 +1284,11 @@ int sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
         {
           /* Traffic class is inline */
 
+          HC06_CHECK(g_hc06ptr, 1, endofframe);
           ipv6->vtc   = 0x60 | ((*g_hc06ptr >> 2) & 0x0f);
           ipv6->tcf   = ((*g_hc06ptr << 6) & 0xc0) |
                         ((*g_hc06ptr >> 2) & 0x30);
           ipv6->flow  = 0;
-          HC06_CHECK(g_hc06ptr, 1, endofframe);
           g_hc06ptr  += 1;
         }
       else
@@ -1297,9 +1307,9 @@ int sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
     {
       /* Next header is carried inline */
 
+      HC06_CHECK(g_hc06ptr, 1, endofframe);
       ipv6->proto = *g_hc06ptr;
       ninfo("Next header inline: %d\n", ipv6->proto);
-      HC06_CHECK(g_hc06ptr, 1, endofframe);
       g_hc06ptr += 1;
     }
 
@@ -1311,8 +1321,8 @@ int sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
     }
   else
     {
-      ipv6->ttl  = *g_hc06ptr;
       HC06_CHECK(g_hc06ptr, 1, endofframe);
+      ipv6->ttl  = *g_hc06ptr;
       g_hc06ptr += 1;
     }
 
@@ -1355,13 +1365,10 @@ int sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
        * address.
        */
 
-      /* Source address: worst case 16 bytes inline */
-
-      HC06_CHECK(g_hc06ptr, 16, endofframe);
-
-      uncompress_addr(&addr,
-                      tmp != 0 ? addrcontext->prefix : NULL,
-                      g_unc_ctxconf[tmp], ipv6->srcipaddr);
+      ret = uncompress_addr(&addr,
+                            tmp != 0 ? addrcontext->prefix : NULL,
+                            g_unc_ctxconf[tmp], ipv6->srcipaddr,
+                            endofframe);
     }
   else
     {
@@ -1371,12 +1378,13 @@ int sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
        * address.
        */
 
-      /* Destination address: worst case 16 bytes inline */
+      ret = uncompress_addr(&addr, g_llprefix, g_unc_llconf[tmp],
+                            ipv6->srcipaddr, endofframe);
+    }
 
-      HC06_CHECK(g_hc06ptr, 16, endofframe);
-
-      uncompress_addr(&addr, g_llprefix, g_unc_llconf[tmp],
-                      ipv6->srcipaddr);
+  if (ret < 0)
+    {
+      return ret;
     }
 
   /* Destination address.
@@ -1401,7 +1409,8 @@ int sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
 
       if ((iphc1 & SIXLOWPAN_IPHC_DAC) != 0)
         {
-          /* TODO: implement this */
+          nwarn("WARNING: Context based multicast compression\n");
+          return -ENOSYS;
         }
       else
         {
@@ -1420,13 +1429,13 @@ int sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
 
           if (tmp > 0 && tmp < 3)
             {
-              prefix[1] = *g_hc06ptr;
               HC06_CHECK(g_hc06ptr, 1, endofframe);
+              prefix[1] = *g_hc06ptr;
               g_hc06ptr++;
             }
 
-          uncompress_addr(&addr, prefix, g_unc_mxconf[tmp],
-                          ipv6->destipaddr);
+          ret = uncompress_addr(&addr, prefix, g_unc_mxconf[tmp],
+                                ipv6->destipaddr, endofframe);
         }
     }
   else
@@ -1452,8 +1461,9 @@ int sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
               return -ENOENT;
             }
 
-          uncompress_addr(&addr, addrcontext->prefix, g_unc_ctxconf[tmp],
-                          ipv6->destipaddr);
+          ret = uncompress_addr(&addr, addrcontext->prefix,
+                                g_unc_ctxconf[tmp], ipv6->destipaddr,
+                                endofframe);
         }
       else
         {
@@ -1461,9 +1471,14 @@ int sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
            * DAC = 0 - same as SAC.
            */
 
-          uncompress_addr(&addr, g_llprefix, g_unc_llconf[tmp],
-                          ipv6->destipaddr);
+          ret = uncompress_addr(&addr, g_llprefix, g_unc_llconf[tmp],
+                                ipv6->destipaddr, endofframe);
         }
+    }
+
+  if (ret < 0)
+    {
+      return ret;
     }
 
   g_uncomp_hdrlen += IPv6_HDRLEN;
