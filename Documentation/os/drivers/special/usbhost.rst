@@ -137,3 +137,11 @@ enumerating devices.
 
 **Examples**: ``drivers/usbhost/usbhost_cdcecm.c``,
 ``boards/arm/stm32h5/nucleo-h563zi/configs/nshusbnet/defconfig``.
+
+USB Host Controller Drivers
+===========================
+
+.. toctree::
+   :maxdepth: 1
+
+   usbhost/max3421e.rst
