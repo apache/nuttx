@@ -51,3 +51,27 @@ void nrf53_get_uniqueid(uint8_t uniqueid[8])
   uniqueid[6] = (uint8_t)((uid1 >> 16) & 0xff);
   uniqueid[7] = (uint8_t)((uid1 >> 24) & 0xff);
 }
+
+/****************************************************************************
+ * Name: nrf53_eui64
+ *
+ * Description:
+ *   EUI-64 from the Nordic OUI and the device identifier.
+ *
+ ****************************************************************************/
+
+void nrf53_eui64(uint8_t eaddr[8])
+{
+  uint8_t uid[8];
+
+  nrf53_get_uniqueid(uid);
+
+  eaddr[0] = 0xf4;
+  eaddr[1] = 0xce;
+  eaddr[2] = 0x36;
+  eaddr[3] = uid[4];
+  eaddr[4] = uid[5];
+  eaddr[5] = uid[6];
+  eaddr[6] = uid[7];
+  eaddr[7] = uid[0];
+}
