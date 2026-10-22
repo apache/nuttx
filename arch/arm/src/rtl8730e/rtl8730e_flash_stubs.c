@@ -349,6 +349,49 @@ void Pinmux_Config(uint32_t pinname, uint32_t pinfunc)
   _Pinmux_Config(pinname, pinfunc);
 }
 
+/* DelayUs: the ROM version busy-waits with DelayNop() and only knows the LP
+ * (CPUID 0) and NP (CPUID 1) cores.  On the CA32 (CPUID 2) the
+ * RBSS_UDELAY_FLAG == 0 fallback indexes its Clk[]/Div[] tables out of
+ * bounds, so the divisor is stack garbage and a DelayUs(5) can spin for
+ * ~38 billion iterations.  OTP_Read8() polls with DelayUs(5), so the first
+ * ADC_Init() (vref calibration read) stalled boot for ~33 seconds.  Use the
+ * NuttX delay instead, which is bounded by CONFIG_BOARD_LOOPSPERMSEC.
+ */
+
+void DelayUs(uint32_t us)
+{
+  up_udelay(us);
+}
+
+/* SYSCFG_RLVersion: silicon cut (A=0, B=1, C=2, D=3).  The SDK only ships
+ * it inside lib_chipinfo.a's ameba_rom_patch.o, which also carries dozens of
+ * unrelated functions and cannot be linked in alone, so mirror its logic: a
+ * select code 0xa written to [31:28] of LSYS REG_LSYS_SCAN_CTRL (0x274)
+ * exposes the cut in [19:16] on readback; the register is then restored.
+ * The result is cached, as in the original.  IPC_SEMTake()/IPC_SEMFree()
+ * (OTP reads) pick their semaphore register layout from this value.
+ */
+
+uint32_t SYSCFG_RLVersion(void)
+{
+  static uint8_t cut = 0xff;
+
+  if (cut == 0xff)
+    {
+      volatile uint32_t *reg = (volatile uint32_t *)0x42008274u;
+      uint32_t base = *reg & ~0xf0000000u;
+      uint32_t val;
+
+      *reg = base | 0xa0000000u;
+      val  = *reg;
+      *reg = base;
+
+      cut = (val >> 16) & 0xf;
+    }
+
+  return cut;
+}
+
 /****************************************************************************
  * Name: rtl8730e_flash_init_para
  *
