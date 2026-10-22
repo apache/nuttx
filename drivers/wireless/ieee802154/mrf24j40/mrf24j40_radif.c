@@ -528,7 +528,7 @@ int mrf24j40_getattr(FAR struct ieee802154_radio_s *radio,
         }
         break;
 
-     case IEEE802154_ATTR_MAC_MAX_FRAME_WAITTIME:
+      case IEEE802154_ATTR_MAC_MAX_FRAME_WAITTIME:
         {
           attrval->mac.max_frame_waittime = dev->max_frame_waittime;
           ret = IEEE802154_STATUS_SUCCESS;
