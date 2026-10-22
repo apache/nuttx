@@ -477,15 +477,21 @@ static uint32_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
             }
 
           /* Increment the count of bytes sent and the total count of TCP
-           * packets sent.
+           * packets sent, and advance the send sequence past the segment
+           * like tcp_appsend() does, so that an ACK of it is not one of
+           * data not yet sent.
            */
 
           sinfo->s_sent += sndlen;
+          tcp_setsequence(conn->sndseq, seqno + sndlen);
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
           /* For compatibility with buffered send logic */
 
-          conn->sndseq_max = tcp_addsequence(conn->sndseq, conn->tx_unacked);
+          if (TCP_SEQ_GT(seqno + sndlen, conn->sndseq_max))
+            {
+              conn->sndseq_max = seqno + sndlen;
+            }
 #endif
 
 #ifdef CONFIG_NET_STATISTICS
