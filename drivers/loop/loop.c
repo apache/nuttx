@@ -32,6 +32,7 @@
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/uio.h>
 #include <nuttx/fs/loop.h>
 
 #ifdef CONFIG_DEV_LOOP

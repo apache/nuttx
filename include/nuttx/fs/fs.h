@@ -31,7 +31,6 @@
 
 #include <nuttx/compiler.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/fs/uio.h>
 
 #include <sys/uio.h>
 #include <sys/types.h>
