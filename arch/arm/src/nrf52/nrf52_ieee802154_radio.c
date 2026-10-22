@@ -212,6 +212,9 @@ static void nrf52_radioi8_work_ed(void *arg);
 static void nrf52_radioi8_state_rx(struct nrf52_radioi8_dev_s *dev);
 static void nrf52_radioi8_state_tx(struct nrf52_radioi8_dev_s *dev);
 static void nrf52_radioi8_state_acktx(struct nrf52_radioi8_dev_s *dev);
+#ifdef CONFIG_NRF52_RADIO_IEEE802154_SUPERFRAME
+static void nrf52_radioi8_state_beacontx(struct nrf52_radioi8_dev_s *dev);
+#endif
 static void nrf52_radioi8_state_ed(struct nrf52_radioi8_dev_s *dev);
 static int nrf52_radioi8_isr_radio(int irq, void *context, void *arg);
 
@@ -1132,6 +1135,19 @@ static void nrf52_radioi8_trg_nocsma(struct nrf52_radioi8_dev_s *dev)
 
 static void nrf52_radioi8_norm_trigger(struct nrf52_radioi8_dev_s *dev)
 {
+#ifdef CONFIG_NRF52_RADIO_IEEE802154_SUPERFRAME
+  /* The beacon is not acknowledged and keeps its state */
+
+  if (dev->radio->state.state == NRF52_RADIO_STATE_BEACONTX)
+    {
+      nrf52_radioi8_trace_put(RADIO_TRACE_BEACONTX,
+                              dev->radio->beaconbuf[3]);
+      NRF52_RADIO_PUTREG(dev->radio->lower, NRF52_RADIO_TASKS_TXEN_OFFSET,
+                         1);
+      return;
+    }
+#endif
+
   /* Wait for ACK */
 
   if (dev->radio->txbuf[1] & IEEE802154_FRAMECTRL_ACKREQ)
@@ -1194,13 +1210,12 @@ static void nrf52_radioi8_beacon_setup(struct nrf52_radioi8_dev_s *dev,
 
 static void nrf52_radioi8_beacon_tx(struct nrf52_radioi8_dev_s *dev)
 {
-  /* Beacon buffer is ready to send - transmit as non CSMA-CA */
+  /* The beacon has priority over all other operations (IEEE 802.15.4-2003
+   * 7.5.2.4), only a frame on the air completes first
+   */
 
-  nrf52_radioi8_norm_setup_buf(dev, dev->radio->beaconbuf, false);
-
-  /* Send now */
-
-  nrf52_radioi8_norm_trigger(dev);
+  dev->radio->state.beacon_pending = true;
+  nrf52_radioi8_txnext(dev, 0);
 }
 #endif
 
@@ -1316,9 +1331,9 @@ static void nrf52_radioi8_rxrestore(struct nrf52_radioi8_dev_s *dev)
  * Name: nrf52_radioi8_txnext
  *
  * Description:
- *   Start the next frame if the radio is free: the delayed TX that waits,
- *   else the CSMA TX that waits, else restore RX.  mindelay is the IFS a
- *   delayed TX keeps after the ACK TX that deferred it.
+ *   Start the next frame if the radio is free: the beacon that waits, else
+ *   the delayed TX that waits, else the CSMA TX that waits, else restore
+ *   RX.  mindelay is the IFS a frame keeps after the TX that deferred it.
  *
  ****************************************************************************/
 
@@ -1330,14 +1345,46 @@ static void nrf52_radioi8_txnext(struct nrf52_radioi8_dev_s *dev,
 
   flags = enter_critical_section();
 
-  /* A frame on the air, an armed frame, an ACK TX, an energy detection
-   * or a CSMA transaction between its backoffs owns the radio.
+  /* A frame on the air, an ACK TX or an energy detection owns the radio */
+
+  if (dev->radio->state.state != NRF52_RADIO_STATE_DISABLED &&
+      dev->radio->state.state != NRF52_RADIO_STATE_RX)
+    {
+      leave_critical_section(flags);
+      return;
+    }
+
+#ifdef CONFIG_NRF52_RADIO_IEEE802154_SUPERFRAME
+  /* The beacon first, it preempts the receiver */
+
+  if (dev->radio->state.beacon_pending)
+    {
+      dev->radio->state.beacon_pending = false;
+      dev->radio->beaconbuf[3]         = dev->radio->state.bsn++;
+
+      nrf52_radioi8_norm_setup_buf(dev, dev->radio->beaconbuf, false);
+      dev->radio->state.state = NRF52_RADIO_STATE_BEACONTX;
+
+      if (mindelay == 0)
+        {
+          nrf52_radioi8_norm_trigger(dev);
+        }
+      else
+        {
+          dev->tim->ops->setup(dev, NRF52_TIMER_CHAN_TXDELAY, mindelay);
+        }
+
+      leave_critical_section(flags);
+      return;
+    }
+#endif
+
+  /* An armed frame or a CSMA transaction between its backoffs owns the
+   * radio.
    */
 
   if (dev->radio->state.csma_busy ||
-      (dev->state.txdelayed_busy && !dev->state.txdelayed_pending) ||
-      (dev->radio->state.state != NRF52_RADIO_STATE_DISABLED &&
-       dev->radio->state.state != NRF52_RADIO_STATE_RX))
+      (dev->state.txdelayed_busy && !dev->state.txdelayed_pending))
     {
       leave_critical_section(flags);
       return;
@@ -2151,6 +2198,37 @@ static void nrf52_radioi8_state_acktx(struct nrf52_radioi8_dev_s *dev)
                             IEEE802154_SIFS_SYMBOLS);
 }
 
+#ifdef CONFIG_NRF52_RADIO_IEEE802154_SUPERFRAME
+/****************************************************************************
+ * Name: nrf52_radioi8_state_beacontx
+ *
+ * Description:
+ *   Handle radio interrupt for BEACONTX state.
+ *
+ ****************************************************************************/
+
+static void nrf52_radioi8_state_beacontx(struct nrf52_radioi8_dev_s *dev)
+{
+  nrf52_radioi8_trace_put(RADIO_TRACE_IRQ_BEACONTX, 0);
+
+  /* Arm the beacon updated during the TX */
+
+  if (dev->state.beacon_next != NULL)
+    {
+      nrf52_radioi8_beacon_setup(dev, dev->state.beacon_next->bf_data,
+                                 dev->state.beacon_next->bf_len);
+      dev->state.beacon_next = NULL;
+    }
+
+  /* Start the TX that waited for the beacon, after the IFS */
+
+  nrf52_radioi8_txnext(dev, dev->radio->beaconbuf[0] >
+                            IEEE802154_MAX_SIFS_FRAME_SIZE ?
+                            IEEE802154_LIFS_SYMBOLS :
+                            IEEE802154_SIFS_SYMBOLS);
+}
+#endif
+
 /****************************************************************************
  * Name: nrf52_radioi8_state_ed
  *
@@ -2245,6 +2323,15 @@ static int nrf52_radioi8_isr_radio(int irq, void *context, void *arg)
           break;
         }
 
+#ifdef CONFIG_NRF52_RADIO_IEEE802154_SUPERFRAME
+      case NRF52_RADIO_STATE_BEACONTX:
+        {
+          nrf52_radioi8_state_beacontx(dev);
+
+          break;
+        }
+#endif
+
       case NRF52_RADIO_STATE_ED:
         {
           /* Clear event */
@@ -2262,6 +2349,15 @@ static int nrf52_radioi8_isr_radio(int irq, void *context, void *arg)
           break;
         }
     }
+
+#ifdef CONFIG_NRF52_RADIO_IEEE802154_SUPERFRAME
+  /* The beacon that waited for the frame on the air */
+
+  if (dev->radio->state.beacon_pending)
+    {
+      nrf52_radioi8_txnext(dev, 0);
+    }
+#endif
 
   leave_critical_section(flags);
 

@@ -105,6 +105,10 @@ struct nrf52_radioi8_state_s
 
   struct ieee802154_superframespec_s sf;
 
+  /* Beacon updated during its TX */
+
+  struct ieee802154_beaconframe_s *beacon_next;
+
   /* TX GTS */
 
   struct ieee802154_txdesc_s *gts_desc[NRF52_GTS_SLOTS];
