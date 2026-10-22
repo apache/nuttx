@@ -621,7 +621,7 @@ void mac802154_txdone_datareq_assoc(FAR struct ieee802154_privmac_s *priv,
        * the corresponding data frame from the coordinator. [1] pg.43
        */
 
-      mac802154_rxenable(priv);
+      mac802154_oprxenable(priv);
 
       /* If we are on a beacon-enabled network, we already have the
        * association timeout timer scheduled. So we only need to start the
@@ -800,7 +800,7 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
 
   priv->curr_op = MAC802154_OP_NONE;
   nxsem_post(&priv->opsem);
-  mac802154_rxdisable(priv);
+  mac802154_oprxdisable(priv);
 
   /* Notify the next highest layer of the association status */
 
@@ -863,7 +863,7 @@ static void mac802154_assoctimeout(FAR void *arg)
 
   priv->curr_op = MAC802154_OP_NONE;
   nxsem_post(&priv->opsem);
-  mac802154_rxdisable(priv);
+  mac802154_oprxdisable(priv);
 
   nxmutex_lock(&priv->lock);
   mac802154_notify(priv, primitive);
