@@ -902,8 +902,9 @@ static void stm32_dumpsamples(struct stm32_dev_s *priv)
 static void stm32_dmacallback(DMA_HANDLE handle, uint8_t status, void *arg)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)arg;
-  DEBUGASSERT(priv->dmamode);
   sdio_eventset_t result;
+
+  DEBUGASSERT(priv->dmamode);
 
   /* In the normal case, SDIO appears to handle the End-Of-Transfer interrupt
    * first with the End-Of-DMA event occurring significantly later.  On
@@ -1157,7 +1158,7 @@ static void stm32_recvfifo(struct stm32_dev_s *priv)
 
           for (i = 0; i < (int)priv->remaining; i++)
             {
-               *ptr++ = data.b[i];
+              *ptr++ = data.b[i];
             }
 
           /* Now the transfer is finished */
@@ -1713,6 +1714,7 @@ static sdio_capset_t stm32_capabilities(struct sdio_dev_s *dev)
 static sdio_statset_t stm32_status(struct sdio_dev_s *dev)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+
   return priv->cdstatus;
 }
 
@@ -1885,23 +1887,23 @@ static int stm32_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
 
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
-    case MMCSD_NO_RESPONSE:
-      regval |= SDIO_CMD_NORESPONSE;
-      break;
+      case MMCSD_NO_RESPONSE:
+        regval |= SDIO_CMD_NORESPONSE;
+        break;
 
-    case MMCSD_R1_RESPONSE:
-    case MMCSD_R1B_RESPONSE:
-    case MMCSD_R3_RESPONSE:
-    case MMCSD_R4_RESPONSE:
-    case MMCSD_R5_RESPONSE:
-    case MMCSD_R6_RESPONSE:
-    case MMCSD_R7_RESPONSE:
-      regval |= SDIO_CMD_SHORTRESPONSE;
-      break;
+      case MMCSD_R1_RESPONSE:
+      case MMCSD_R1B_RESPONSE:
+      case MMCSD_R3_RESPONSE:
+      case MMCSD_R4_RESPONSE:
+      case MMCSD_R5_RESPONSE:
+      case MMCSD_R6_RESPONSE:
+      case MMCSD_R7_RESPONSE:
+        regval |= SDIO_CMD_SHORTRESPONSE;
+        break;
 
-    case MMCSD_R2_RESPONSE:
-      regval |= SDIO_CMD_LONGRESPONSE;
-      break;
+      case MMCSD_R2_RESPONSE:
+        regval |= SDIO_CMD_LONGRESPONSE;
+        break;
     }
 
   /* Set CPSMEN and the command index */
@@ -2161,29 +2163,29 @@ static int stm32_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
 
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
-    case MMCSD_NO_RESPONSE:
-      events  = SDIO_CMDDONE_STA;
-      timeout = MSEC2TICK(SDIO_CMDTIMEOUT_MS);
-      break;
+      case MMCSD_NO_RESPONSE:
+        events  = SDIO_CMDDONE_STA;
+        timeout = MSEC2TICK(SDIO_CMDTIMEOUT_MS);
+        break;
 
-    case MMCSD_R1_RESPONSE:
-    case MMCSD_R1B_RESPONSE:
-    case MMCSD_R2_RESPONSE:
-    case MMCSD_R4_RESPONSE:
-    case MMCSD_R5_RESPONSE:
-    case MMCSD_R6_RESPONSE:
-      events  = SDIO_RESPDONE_STA;
-      timeout = MSEC2TICK(SDIO_LONGTIMEOUT_MS);
-      break;
+      case MMCSD_R1_RESPONSE:
+      case MMCSD_R1B_RESPONSE:
+      case MMCSD_R2_RESPONSE:
+      case MMCSD_R4_RESPONSE:
+      case MMCSD_R5_RESPONSE:
+      case MMCSD_R6_RESPONSE:
+        events  = SDIO_RESPDONE_STA;
+        timeout = MSEC2TICK(SDIO_LONGTIMEOUT_MS);
+        break;
 
-    case MMCSD_R3_RESPONSE:
-    case MMCSD_R7_RESPONSE:
-      events  = SDIO_RESPDONE_STA;
-      timeout = MSEC2TICK(SDIO_CMDTIMEOUT_MS);
-      break;
+      case MMCSD_R3_RESPONSE:
+      case MMCSD_R7_RESPONSE:
+        events  = SDIO_RESPDONE_STA;
+        timeout = MSEC2TICK(SDIO_CMDTIMEOUT_MS);
+        break;
 
-    default:
-      return -EINVAL;
+      default:
+        return -EINVAL;
     }
 
   /* Then wait for the response (or timeout) */
@@ -2988,10 +2990,10 @@ static void stm32_callback(void *arg)
         {
           /* Yes.. queue it */
 
-           mcinfo("Queuing callback to %p(%p)\n",
-                  priv->callback, priv->cbarg);
-           work_queue(HPWORK, &priv->cbwork, priv->callback,
-                      priv->cbarg, 0);
+          mcinfo("Queuing callback to %p(%p)\n",
+                 priv->callback, priv->cbarg);
+          work_queue(HPWORK, &priv->cbwork, priv->callback,
+                     priv->cbarg, 0);
         }
       else
         {
