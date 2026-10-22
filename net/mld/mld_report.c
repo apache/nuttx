@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <stddef.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/wdog.h>
@@ -177,7 +178,12 @@ int mld_report_v1(FAR struct net_driver_s *dev,
 int mld_report_v2(FAR struct net_driver_s *dev,
                   FAR const struct mld_mcast_listen_report_v2_s *report)
 {
+  FAR const uint8_t *end;
+  FAR const uint8_t *ipbuf;
+  FAR const uint8_t *ptr;
+  FAR const uint8_t *start;
   uint16_t naddrec;
+  size_t len;
   int ret = -ENOENT;
   int i;
 
@@ -186,12 +192,56 @@ int mld_report_v2(FAR struct net_driver_s *dev,
 
   MLD_STATINCR(g_netstats.mld.v2report_received);
 
+  ipbuf = (FAR const uint8_t *)IPBUF(0);
+  start = (FAR const uint8_t *)report;
+
+  if (start < ipbuf || start >= ipbuf + dev->d_len)
+    {
+      return -EINVAL;
+    }
+
+  len = dev->d_len - (start - ipbuf);
+
+  if (len < offsetof(struct mld_mcast_listen_report_v2_s, addrec))
+    {
+      return -EINVAL;
+    }
+
   naddrec = NTOHS(report->naddrec);
+  ptr     = (FAR const uint8_t *)report +
+            offsetof(struct mld_mcast_listen_report_v2_s, addrec);
+  end     = (FAR const uint8_t *)report + len;
+
   for (i = 0; i < naddrec; i++)
     {
+      FAR const struct mld_mcast_addrec_v2_s *addrec;
+      size_t offset;
+      size_t addreclen;
+      uint16_t nsources;
+      int status;
+
+      offset = ptr - (FAR const uint8_t *)report;
+      if (len - offset < offsetof(struct mld_mcast_addrec_v2_s, srcaddr))
+        {
+          ret = -EINVAL;
+          break;
+        }
+
+      addrec    = (FAR const struct mld_mcast_addrec_v2_s *)ptr;
+      nsources  = NTOHS(addrec->nsources);
+      addreclen = offsetof(struct mld_mcast_addrec_v2_s, srcaddr) +
+                  (size_t)nsources * sizeof(net_ipv6addr_t) +
+                  (size_t)addrec->auxdatlen * sizeof(uint32_t);
+
+      if (addreclen > len - offset)
+        {
+          ret = -EINVAL;
+          break;
+        }
+
       /* Handle this mcast address in the list */
 
-      int status = mld_report(dev, report->addrec[i].mcast);
+      status = mld_report(dev, addrec->mcast);
       if (status == OK)
         {
           /* Return success if any address in the listed was processed */
@@ -205,6 +255,13 @@ int mld_report_v2(FAR struct net_driver_s *dev,
           ret = status;
           break;
         }
+
+      ptr += addreclen;
+    }
+
+  if (i == naddrec && ptr != end)
+    {
+      ret = -EINVAL;
     }
 
   return ret;
