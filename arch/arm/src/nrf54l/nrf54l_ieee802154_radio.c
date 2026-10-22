@@ -2030,10 +2030,6 @@ nrf54l_radioi8_radio_init(struct nrf54l_radioi8_dev_s *dev,
   irq_attach(radio->irq, nrf54l_radioi8_isr_radio, dev);
   up_enable_irq(radio->irq);
 
-  /* Set interrupts priority */
-
-  up_prioritize_irq(radio->irq, 0);
-
   /* Connect radioer */
 
   memset(&g_radioi8_radio, 0, sizeof(struct nrf54l_radioi8_radio_s));

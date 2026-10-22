@@ -380,10 +380,6 @@ nrf52_radioi8_rtc_init(struct nrf52_radioi8_dev_s *dev)
 
   NRF52_RTC_SETISR(rtc, nrf52_radioi8_isr_rtc, dev);
 
-  /* Set interrupts priority */
-
-  up_prioritize_irq(NRF52_IRQ_RTC0, 0);
-
   /* Connect RTC */
 
   memset(&g_radioi8_rtc, 0, sizeof(struct nrf52_radioi8_rtc_s));
