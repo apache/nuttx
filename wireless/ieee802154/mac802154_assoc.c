@@ -865,13 +865,14 @@ static void mac802154_assoctimeout(FAR void *arg)
   IEEE802154_SADDRCOPY(primitive->u.assocconf.saddr,
                        &IEEE802154_SADDR_UNSPEC);
 
+  nxmutex_lock(&priv->lock);
+
   /* We are no longer performing the association operation */
 
   priv->curr_op = MAC802154_OP_NONE;
   nxsem_post(&priv->opsem);
   mac802154_oprxdisable(priv);
 
-  nxmutex_lock(&priv->lock);
   mac802154_notify(priv, primitive);
   nxmutex_unlock(&priv->lock);
 }
