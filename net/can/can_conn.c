@@ -288,6 +288,7 @@ FAR struct can_conn_s *can_active(FAR struct net_driver_s *dev,
 {
 #ifdef CONFIG_NET_CANPROTO_OPTIONS
   canid_t can_id;
+
   memcpy(&can_id, NETLLBUF, sizeof(canid_t));
 #endif
 
