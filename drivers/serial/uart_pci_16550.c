@@ -669,6 +669,7 @@ static int pci_u16550_probe(FAR struct pci_device_s *dev)
   size_t                              i;
   uint8_t                             port;
   uint8_t                             ports;
+  unsigned int                        registered = 0;
   bool                                mmio = false;
   int                                 ret;
 
@@ -736,11 +737,11 @@ static int pci_u16550_probe(FAR struct pci_device_s *dev)
           priv = NULL;
         }
 
-      /* Not found */
+      /* Not configured: skip this port, others may still be configured */
 
       if (udev == NULL)
         {
-          return -ENODEV;
+          continue;
         }
 
       /* Device already registered */
@@ -765,9 +766,13 @@ static int pci_u16550_probe(FAR struct pci_device_s *dev)
         {
           return ret;
         }
+
+      registered++;
     }
 
-  return OK;
+  /* Fail only if no port of this device is configured */
+
+  return registered > 0 ? OK : -ENODEV;
 }
 
 /*****************************************************************************
