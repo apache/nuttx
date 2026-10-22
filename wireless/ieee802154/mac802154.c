@@ -1578,9 +1578,9 @@ static void mac802154_rxdatareq(FAR struct ieee802154_privmac_s *priv,
 
                   /* The addresses match, send the transaction immediately */
 
-                  priv->radio->txdelayed(priv->radio, txdesc, 0);
                   priv->beaconupdate = true;
                   nxmutex_unlock(&priv->lock);
+                  priv->radio->txdelayed(priv->radio, txdesc, 0);
                   return;
                 }
             }
@@ -1595,9 +1595,9 @@ static void mac802154_rxdatareq(FAR struct ieee802154_privmac_s *priv,
 
                   /* The addresses match, send the transaction immediately */
 
-                  priv->radio->txdelayed(priv->radio, txdesc, 0);
                   priv->beaconupdate = true;
                   nxmutex_unlock(&priv->lock);
+                  priv->radio->txdelayed(priv->radio, txdesc, 0);
                   return;
                 }
             }
@@ -1726,6 +1726,7 @@ mac802154_edresult(FAR const struct ieee802154_radiocb_s *radiocb,
   FAR struct mac802154_radiocb_s *cb =
     (FAR struct mac802154_radiocb_s *)radiocb;
   FAR struct ieee802154_privmac_s *priv;
+  bool next = false;
 
   DEBUGASSERT(cb != NULL && cb->priv != NULL);
   priv = cb->priv;
@@ -1740,12 +1741,21 @@ mac802154_edresult(FAR const struct ieee802154_radiocb_s *radiocb,
 
   if (priv->curr_op == MAC802154_OP_SCAN)
     {
-      mac802154_edscan_onresult(priv, edval);
+      next = mac802154_edscan_onresult(priv, edval);
     }
 
   /* Relinquish control of the private structure */
 
   nxmutex_unlock(&priv->lock);
+
+  /* The radio calls the MAC with its lock held, the energy detect of the
+   * next channel starts after the MAC is released
+   */
+
+  if (next)
+    {
+      priv->radio->energydetect(priv->radio, priv->scansymdur);
+    }
 }
 
 static void mac802154_sfevent(FAR const struct ieee802154_radiocb_s *radiocb,
