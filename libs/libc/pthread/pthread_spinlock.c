@@ -26,23 +26,27 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <sys/boardctl.h>
-#include <nuttx/spinlock.h>
-
-#include <assert.h>
 #include <errno.h>
-#include <nuttx/debug.h>
 #include <pthread.h>
 #include <sched.h>
 
-#ifdef CONFIG_PTHREAD_SPINLOCKS
+#include <nuttx/atomic.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #define IMPOSSIBLE_THREAD ((pthread_t)-1)
+
+/* Number of tests of a busy lock before the thread yields the CPU.  With
+ * one CPU the holder cannot run while this thread spins: yield at once.
+ */
+
+#ifdef CONFIG_SMP
+#  define SPIN_TRIES      100
+#else
+#  define SPIN_TRIES      1
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -52,85 +56,81 @@
  * Name: pthread_spin_init
  *
  * Description:
- *   The pthread_spin_init() function will allocate any resources required
- *   to use the spin lock referenced by lock and initialize the lock to an
- *   unlocked state.
- *
- *   The results are undefined if pthread_spin_init() is called specifying
- *   an already initialized spin lock. The results are undefined if a spin
- *   lock is used without first being initialized.
- *
- *   If the pthread_spin_init() function fails, the lock is not initialized
- *   and the contents of lock are undefined.
- *
- *   Only the object referenced by lock may be used for performing
- *   synchronization.  The result of referring to copies of that object in
- *   calls to pthread_spin_destroy(), pthread_spin_lock(),
- *   pthread_spin_trylock(), or pthread_spin_unlock() is undefined.
+ *   Initialize the spin lock to the unlocked state.  The lock is an atomic
+ *   variable, so it also works in memory that processes share
+ *   (PTHREAD_PROCESS_SHARED).
  *
  * Input Parameters:
- *   lock - A reference to the spinlock object to be initialized.
- *   pshared - Unused
+ *   lock    - A reference to the spinlock object to be initialized.
+ *   pshared - PTHREAD_PROCESS_PRIVATE or PTHREAD_PROCESS_SHARED
  *
  * Returned Value:
- *   Zero (OK) is returned if a valid lock value is provided.
- *
- * POSIX Compatibility:
- *   Not supported: "If the Thread Process-Shared Synchronization option is
- *   supported and the value of pshared is PTHREAD_PROCESS_SHARED, the
- *   implementation shall permit the spin lock to be operated upon by any
- *   thread that has access to the memory where the spin lock is allocated,
- *   even if it is allocated in memory that is shared by multiple
- *   processes."
+ *   Zero (OK) on success, EINVAL if an argument is not valid.
  *
  ****************************************************************************/
 
 int pthread_spin_init(FAR pthread_spinlock_t *lock, int pshared)
 {
-  int ret = EINVAL;
-
-  DEBUGASSERT(lock != NULL);
-  if (lock != NULL)
+  if (lock == NULL || (pshared != PTHREAD_PROCESS_PRIVATE &&
+                       pshared != PTHREAD_PROCESS_SHARED))
     {
-      spin_lock_init(&lock->sp_lock);
-      lock->sp_holder = IMPOSSIBLE_THREAD;
-      ret             = OK;
+      return EINVAL;
     }
 
-  return ret;
+  atomic_set(&lock->sp_lock, 0);
+  lock->sp_holder = IMPOSSIBLE_THREAD;
+  return OK;
 }
 
 /****************************************************************************
  * Name: pthread_spin_destroy
  *
  * Description:
- *   The pthread_spin_destroy() function will destroy the spin lock
- *   referenced by lock and release any resources used by the lock.  The
- *   effect of subsequent use of the lock is undefined until the lock is
- *   reinitialized by another call to pthread_spin_init(). The results are
- *   undefined if pthread_spin_destroy() is called when a thread holds the
- *   lock, or if this function is called with an uninitialized thread spin
- *   lock.
+ *   Destroy the spin lock.  A spin lock has no resources to release.
  *
  * Input Parameters:
- *   lock    - A reference to the spinlock object to be initialized.
- *   pshared - Unused
+ *   lock - A reference to the spinlock object.
  *
  * Returned Value:
  *   Zero (OK) is always returned.
  *
- * POSIX Compatibility:
- *   Not supported: "If the Thread Process-Shared Synchronization option is
- *   supported and the value of pshared is PTHREAD_PROCESS_SHARED, the
- *   implementation shall permit the spin lock to be operated upon by any
- *   thread that has access to the memory where the spin lock is allocated,
- *   even if it is allocated in memory that is shared by multiple
- *   processes."
+ ****************************************************************************/
+
+int pthread_spin_destroy(FAR pthread_spinlock_t *lock)
+{
+  return OK;
+}
+
+/****************************************************************************
+ * Name: pthread_spin_trylock
+ *
+ * Description:
+ *   Lock the spin lock if no thread holds it.
+ *
+ * Input Parameters:
+ *   lock - A reference to the spinlock object to lock.
+ *
+ * Returned Value:
+ *   Zero if the lock was acquired; EINVAL if 'lock' is not valid; EBUSY if
+ *   a thread (also the caller) holds the lock.
  *
  ****************************************************************************/
 
-int pthread_spin_destroy(pthread_spinlock_t *lock)
+int pthread_spin_trylock(FAR pthread_spinlock_t *lock)
 {
+  int32_t expected = 0;
+
+  if (lock == NULL)
+    {
+      return EINVAL;
+    }
+
+  if (!atomic_cmpxchg_acquire(&lock->sp_lock, &expected, 1))
+    {
+      return EBUSY;
+    }
+
+  lock->sp_holder = pthread_self();
   return OK;
 }
 
@@ -138,181 +138,79 @@ int pthread_spin_destroy(pthread_spinlock_t *lock)
  * Name: pthread_spin_lock
  *
  * Description:
- *   The pthread_spin_lock() function will lock the spin lock referenced by
- *   lock. The calling thread will acquire the lock if it is not held by
- *   another thread. Otherwise, the thread will spin (that is, will not
- *   return from the pthread_spin_lock() call) until the lock becomes
- *   available.
- *
- *   If it is determined the value specified by the lock argument to
- *   pthread_spin_lock() refers to a spin lock object for which the calling
- *   thread already holds the lock, it is recommended that the function will
- *   fail and report an EDEADLK error.
+ *   Lock the spin lock.  The thread spins while another thread holds the
+ *   lock, and yields the CPU after SPIN_TRIES tests, so that a holder that
+ *   was preempted can run.
  *
  * Input Parameters:
  *   lock - A reference to the spinlock object to lock.
  *
  * Returned Value:
- *   Zero is returned if the lock was successfully acquired.  Otherwise one
- *   of the following errno values are returned:
- *
- *   EINVAL    - 'lock' does not refer to a valid spinlock object
- *   EDEADLOCK - The caller already holds the spinlock
+ *   Zero if the lock was acquired; EINVAL if 'lock' is not valid; EDEADLK
+ *   if the caller already holds the lock.
  *
  ****************************************************************************/
 
-int pthread_spin_lock(pthread_spinlock_t *lock)
+int pthread_spin_lock(FAR pthread_spinlock_t *lock)
 {
-  struct boardioc_spinlock_s spinlock;
-  pthread_t me = pthread_self();
-  int ret;
+  int tries = 0;
 
-  DEBUGASSERT(lock != NULL);
   if (lock == NULL)
     {
       return EINVAL;
     }
-  else if (lock->sp_holder == me)
+
+  if (lock->sp_holder == pthread_self())
     {
-      return EDEADLOCK;
+      return EDEADLK;
     }
 
-  spinlock.action = BOARDIOC_SPINLOCK_LOCK;
-  spinlock.lock = &lock->sp_lock;
-  spinlock.flags = NULL;
-  ret = boardctl(BOARDIOC_SPINLOCK, (uintptr_t)&spinlock);
-
-  /* Check for success (previous state was SP_UNLOCKED) */
-
-  if (ret == 0)
+  while (pthread_spin_trylock(lock) != OK)
     {
-      lock->sp_holder = me;
-    }
-  else
-    {
-      /* An error of some kind is the only other possibility */
+      /* Wait with plain reads, not with atomic writes */
 
-      DEBUGASSERT(ret < 0);
-      ret = get_errno();
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: pthread_spin_trylock
- *
- * Description:
- *   The pthread_spin_trylock() function will lock the spin lock referenced
- *   by lock. The calling thread will acquire the lock if it is not held by
- *   another thread. Otherwise, The pthread_spin_trylock() will return a
- *   failure.
- *
- * Input Parameters:
- *   lock - A reference to the spinlock object to lock.
- *
- * Returned Value:
- *   Zero is returned if the lock was successfully acquired.  Otherwise one
- *   of the following errno values are returned:
- *
- *   EINVAL - 'lock' does not refer to a valid spinlock object
- *   EBUSY  - The spinlock is held by a thread, also by the caller
- *
- ****************************************************************************/
-
-int pthread_spin_trylock(pthread_spinlock_t *lock)
-{
-  struct boardioc_spinlock_s spinlock;
-  pthread_t me = pthread_self();
-  int ret;
-
-  DEBUGASSERT(lock != NULL);
-  if (lock == NULL)
-    {
-      ret = EINVAL;
-    }
-  else if (lock->sp_holder == me)
-    {
-      ret = EBUSY;
-    }
-  else
-    {
-      /* Perform the test/set operation via boardctl() */
-
-      spinlock.action = BOARDIOC_SPINLOCK_TRYLOCK;
-      spinlock.lock = &lock->sp_lock;
-      spinlock.flags = NULL;
-      ret = boardctl(BOARDIOC_SPINLOCK, (uintptr_t)&spinlock);
-      if (ret == 0) /* Previously unlocked.  We hold the spinlock */
+      while (atomic_read(&lock->sp_lock) != 0)
         {
-          lock->sp_holder = me;
-        }
-      else /* Previously locked.  We did not get the spinlock  */
-        {
-          DEBUGASSERT(ret < 0);
-          ret = get_errno();
+          if (++tries >= SPIN_TRIES)
+            {
+              sched_yield();
+              tries = 0;
+            }
         }
     }
 
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
  * Name: pthread_spin_unlock
  *
  * Description:
- *   The pthread_spin_unlock() function will release the spin lock
- *   referenced by lock which was locked via the pthread_spin_lock() or
- *   pthread_spin_trylock() functions.
- *
- *   The results are undefined if the lock is not held by the calling thread.
- *
- *   If there are threads spinning on the lock when pthread_spin_unlock() is
- *   called, the lock becomes available and an unspecified spinning thread
- *   will acquire the lock.
- *
- *   The results are undefined if this function is called with an
- *   uninitialized thread spin lock.
+ *   Release the spin lock that the caller holds.
  *
  * Input Parameters:
  *   lock - A reference to the spinlock object to unlock.
  *
  * Returned Value:
- *   Zero is returned if the lock was successfully released.  Otherwise one
- *   of the following errno values are returned:
- *
- *   EINVAL    - 'lock' does not refer to a valid spinlock object
- *   EPERM     - The caller does not hold the spinlock or it is not locked
+ *   Zero if the lock was released; EINVAL if 'lock' is not valid; EPERM if
+ *   the caller does not hold the lock.
  *
  ****************************************************************************/
 
-int pthread_spin_unlock(pthread_spinlock_t *lock)
+int pthread_spin_unlock(FAR pthread_spinlock_t *lock)
 {
-  struct boardioc_spinlock_s spinlock;
-  pthread_t me = pthread_self();
-
-  DEBUGASSERT(lock != NULL &&
-              spin_is_locked(&lock->sp_lock) &&
-              lock->sp_holder == me);
-
   if (lock == NULL)
     {
       return EINVAL;
     }
-  else if (!spin_is_locked(&lock->sp_lock) || lock->sp_holder != me)
+
+  if (atomic_read(&lock->sp_lock) == 0 ||
+      lock->sp_holder != pthread_self())
     {
       return EPERM;
     }
 
-  /* Release the lock */
-
   lock->sp_holder = IMPOSSIBLE_THREAD;
-  spinlock.action = BOARDIOC_SPINLOCK_UNLOCK;
-  spinlock.lock = &lock->sp_lock;
-  spinlock.flags = NULL;
-  boardctl(BOARDIOC_SPINLOCK, (uintptr_t)&spinlock);
-
+  atomic_set_release(&lock->sp_lock, 0);
   return OK;
 }
-
-#endif /* CONFIG_PTHREAD_SPINLOCKS */

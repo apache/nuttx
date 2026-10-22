@@ -9,10 +9,19 @@ menu "pthread support"
 config PTHREAD_SPINLOCKS
 	bool "pthread spinlock support"
 	default n
-	depends on SPINLOCK && (BUILD_FLAT || BOARDCTL)
-	select BOARDCTL_SPINLOCK
+	depends on BUILD_FLAT || LIBC_ATOMIC_TOOLCHAIN || LIBC_ATOMIC_ARCH
 	---help---
-		Enable support for pthread spinlocks.
+		Enable support for pthread spinlocks (pthread_spin_init() and
+		the other pthread_spin_*() functions).  A spin lock is an atomic
+		variable in the memory of the program: lock and unlock need no
+		system call, also in protected and kernel builds.
+
+		Outside a flat build, the atomic operations must work in user
+		mode.  LIBC_ATOMIC_IRQ and LIBC_ATOMIC_HWSPINLOCK disable the
+		interrupts, which user mode cannot do.
+
+		Prefer a mutex: a spin lock only helps on SMP, with very short
+		critical sections.
 
 config PTHREAD_ATFORK
 	bool "pthread_atfork support"
