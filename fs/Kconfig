@@ -17,6 +17,9 @@ config DISABLE_MOUNTPOINT
 	bool "Disable support for mount points"
 	default n
 
+config FS_UIO
+	bool
+
 config FS_LARGEFILE
 	bool "Large File Support"
 	default n
