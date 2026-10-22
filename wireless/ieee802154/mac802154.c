@@ -967,12 +967,6 @@ static void mac802154_txdone_worker(FAR void *arg)
                     mac802154_txdone_assocreq(priv, txdesc);
                     break;
 
-                  case IEEE802154_CMD_ASSOC_RESP:
-                    break;
-
-                  case IEEE802154_CMD_DISASSOC_NOT:
-                    break;
-
                   case IEEE802154_CMD_DATA_REQ:
                     /* Data requests can be sent for 3 different reasons.
                      *
@@ -1002,20 +996,7 @@ static void mac802154_txdone_worker(FAR void *arg)
                       }
                     break;
 
-                  case IEEE802154_CMD_PANID_CONF_NOT:
-                    break;
-
-                  case IEEE802154_CMD_ORPHAN_NOT:
-                    break;
-
-                  case IEEE802154_CMD_BEACON_REQ:
-                    break;
-
-                  case IEEE802154_CMD_COORD_REALIGN:
-                    break;
-
-                  case IEEE802154_CMD_GTS_REQ:
-                    break;
+                  /* No operation waits for the other commands */
 
                   default:
                     break;
