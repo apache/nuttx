@@ -105,16 +105,17 @@ static inline FAR struct tcp_hdr_s *tcp_header(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Name: tcp_sendcommon
+ * Name: tcp_fill_header
  *
  * Description:
- *   We're done with the input processing. We are now ready to send a reply
- *   Our job is to fill in all the fields of the TCP and IP headers before
- *   calculating the checksum and finally send the packet.
+ *   Fill in the sequence and acknowledgment numbers, the ports, the receive
+ *   window and the urgent pointer of an outgoing TCP header, and start the
+ *   retransmission timer if there is unacknowledged data.
  *
  * Input Parameters:
  *   dev  - The device driver structure to use in the send operation
  *   conn - The TCP connection structure holding connection information
+ *   tcp  - The TCP header to fill in
  *
  * Returned Value:
  *   None
@@ -124,9 +125,9 @@ static inline FAR struct tcp_hdr_s *tcp_header(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void tcp_sendcommon(FAR struct net_driver_s *dev,
-                           FAR struct tcp_conn_s *conn,
-                           FAR struct tcp_hdr_s *tcp)
+void tcp_fill_header(FAR struct net_driver_s *dev,
+                     FAR struct tcp_conn_s *conn,
+                     FAR struct tcp_hdr_s *tcp)
 {
   /* Set TCP sequence numbers and port numbers */
 
@@ -176,6 +177,33 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
 
   tcp->urgp[0] = 0;
   tcp->urgp[1] = 0;
+}
+
+/****************************************************************************
+ * Name: tcp_sendcommon
+ *
+ * Description:
+ *   We're done with the input processing. We are now ready to send a reply
+ *   Our job is to fill in all the fields of the TCP and IP headers before
+ *   calculating the checksum and finally send the packet.
+ *
+ * Input Parameters:
+ *   dev  - The device driver structure to use in the send operation
+ *   conn - The TCP connection structure holding connection information
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+static void tcp_sendcommon(FAR struct net_driver_s *dev,
+                           FAR struct tcp_conn_s *conn,
+                           FAR struct tcp_hdr_s *tcp)
+{
+  tcp_fill_header(dev, conn, tcp);
 
   /* Update device buffer length before setup the IP header */
 

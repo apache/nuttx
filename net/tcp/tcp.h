@@ -1173,6 +1173,31 @@ int tcp_accept_connection(FAR struct net_driver_s *dev,
                           FAR struct tcp_conn_s *conn, uint16_t portno);
 
 /****************************************************************************
+ * Name: tcp_fill_header
+ *
+ * Description:
+ *   Fill in the sequence and acknowledgment numbers, the ports, the receive
+ *   window and the urgent pointer of an outgoing TCP header, and start the
+ *   retransmission timer if there is unacknowledged data.
+ *
+ * Input Parameters:
+ *   dev  - The device driver structure to use in the send operation
+ *   conn - The TCP connection structure holding connection information
+ *   tcp  - The TCP header to fill in
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+void tcp_fill_header(FAR struct net_driver_s *dev,
+                     FAR struct tcp_conn_s *conn,
+                     FAR struct tcp_hdr_s *tcp);
+
+/****************************************************************************
  * Name: tcp_send
  *
  * Description:
