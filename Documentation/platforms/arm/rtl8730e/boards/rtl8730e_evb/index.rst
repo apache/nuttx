@@ -47,6 +47,8 @@ Supported in this NuttX port:
 * General-purpose timers exposed as ``/dev/timerN`` character devices, with
   microsecond timeouts and a periodic expiration callback
 * On-chip watchdog exposed as a ``/dev/watchdog0`` character device
+* 12-bit ADC exposed as a ``/dev/adc0`` character device, sampled in polling
+  mode through the SDK fwlib register layer
 * littlefs persistent storage mounted at ``/data`` (a dedicated SPI NOR flash
   partition), backing the Wi-Fi key-value store
 * Wi-Fi station and SoftAP through the ``wapi`` tool
@@ -189,6 +191,26 @@ its handler to inhibit the reset. Exercise it with the example, which
 opens the device, sets a timeout, and pings it::
 
     nsh> wdog                  # run the watchdog example on /dev/watchdog0
+
+adc
+---
+
+Minimal NSH with the ADC driver and the ``adc`` example (``examples/adc``)
+enabled (no Wi-Fi). The board registers one converter at ``/dev/adc0`` (see
+``boards/arm/rtl8730e/rtl8730e_evb/src/rtl8730e_adc.c``) listing CH2-CH5,
+which each ``ANIOC_TRIGGER`` samples in list order. The chip has ten
+channels; CH0-CH5 are external and bound to the fixed pads PA0-PA5 (the
+pin-mux table names them ``TOUCHn_ADCn``), while the rest are internal and
+have no pad. PA0 and PA1 are not bonded out on the RTL8730EAM/EAH packages,
+so the table leaves CH0 and CH1 out. The pads reach the converter through
+the cap-touch function (``PINMUX_FUNCTION_CAPTOUCH``, function 18), shared
+with the cap-touch controller and, on PA2-PA5, the DMIC, so those functions
+cannot be used on the same pad. PA3/PA4 are also I2C1 pads and PA4/PA5 are
+UART1 or PWM pads: a config that registers one of those too must drop the
+clashing channel from the table. The input range is 0 to 3.3 V with 12-bit
+samples, reported as raw codes. Exercise it with the example::
+
+    nsh> adc -n 1     # sample CH2-CH5 once on /dev/adc0
 
 Wi-Fi
 =====
