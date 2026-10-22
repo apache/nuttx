@@ -752,9 +752,11 @@ static void usbhost_bulkin_work(FAR void *arg)
   FAR struct usbhost_hubport_s *hport;
   FAR struct usb_cdc_ncm_nth16_s *nth;
   uint16_t ndpoffset;
+  uint16_t ndpcount;
   uint16_t dgram_len;
   uint16_t dgram_off;
   uint16_t block_len;
+  uint16_t rxlen;
 
   priv = (FAR struct usbhost_cdcmbim_s *)arg;
   DEBUGASSERT(priv);
@@ -775,6 +777,8 @@ static void usbhost_bulkin_work(FAR void *arg)
       goto out;
     }
 
+  rxlen = priv->bulkinbytes;
+
   /* Parse the NTB header */
 
   nth = (FAR struct usb_cdc_ncm_nth16_s *)priv->rxnetbuf;
@@ -785,18 +789,34 @@ static void usbhost_bulkin_work(FAR void *arg)
       goto out;
     }
 
+  if (usbhost_getle16(nth->length) != sizeof(struct usb_cdc_ncm_nth16_s))
+    {
+      uerr("Invalid NTH length\n");
+      goto out;
+    }
+
   block_len = usbhost_getle16(nth->block_length);
 
-  if (block_len > priv->bulkinbytes)
+  if (block_len < sizeof(struct usb_cdc_ncm_nth16_s) || block_len > rxlen)
     {
-      uerr("Block length larger than rx buffer\n");
+      uerr("Invalid block length: %u\n", block_len);
       goto out;
     }
 
   ndpoffset = usbhost_getle16(nth->ndp_index);
-  if (ndpoffset > priv->bulkinbytes)
+  if (ndpoffset == 0)
     {
-      uerr("NDP offset too far %u > %u\n", ndpoffset, priv->bulkinbytes);
+      goto out;
+    }
+
+  ndpcount = 0;
+
+  if (((ndpoffset % 4) != 0) ||
+      (ndpoffset < sizeof(struct usb_cdc_ncm_nth16_s)) ||
+      (ndpoffset > block_len) ||
+      (sizeof(struct usb_cdc_ncm_ndp16_s) > block_len - ndpoffset))
+    {
+      uerr("Invalid NDP offset: %u\n", ndpoffset);
       goto out;
     }
 
@@ -805,22 +825,60 @@ static void usbhost_bulkin_work(FAR void *arg)
   do
     {
       FAR struct usb_cdc_ncm_dpe16_s *dpe;
+      FAR struct usb_cdc_ncm_dpe16_s *dpe_end;
       FAR struct usb_cdc_ncm_ndp16_s *ndp
         = (FAR struct usb_cdc_ncm_ndp16_s *)(priv->rxnetbuf + ndpoffset);
+      uint16_t curroffset;
+      uint16_t ndplen;
+
+      curroffset = ndpoffset;
+      ndplen = usbhost_getle16(ndp->length);
+
+      if (++ndpcount > block_len / sizeof(struct usb_cdc_ncm_ndp16_s))
+        {
+          uerr("Too many NDPs\n");
+          goto out;
+        }
+
+      if (ndplen < sizeof(struct usb_cdc_ncm_ndp16_s) +
+                   sizeof(struct usb_cdc_ncm_dpe16_s) ||
+          ndplen > block_len - ndpoffset ||
+          (ndplen - sizeof(struct usb_cdc_ncm_ndp16_s)) %
+                   sizeof(struct usb_cdc_ncm_dpe16_s) != 0)
+        {
+          uerr("Invalid NDP length: %u\n", ndplen);
+          goto out;
+        }
 
       ndpoffset = usbhost_getle16(ndp->next_ndp_index);
+      if (ndpoffset != 0 &&
+          (((ndpoffset % 4) != 0) ||
+           (ndpoffset < sizeof(struct usb_cdc_ncm_nth16_s)) ||
+           (ndpoffset > block_len) ||
+           (sizeof(struct usb_cdc_ncm_ndp16_s) > block_len - ndpoffset)))
+        {
+          uerr("Invalid next NDP offset: %u\n", ndpoffset);
+          goto out;
+        }
 
       /* Parse each DPE */
 
-      for (dpe = ndp->dpe16; usbhost_getle16(dpe->index); dpe++)
+      dpe_end = (FAR struct usb_cdc_ncm_dpe16_s *)
+                (priv->rxnetbuf + curroffset + ndplen);
+      for (dpe = ndp->dpe16; dpe < dpe_end && usbhost_getle16(dpe->index);
+           dpe++)
         {
           dgram_off = usbhost_getle16(dpe->index);
           dgram_len = usbhost_getle16(dpe->length);
 
-          if (dgram_off + dgram_len <= priv->bulkinbytes)
+          if (dgram_len == 0 || dgram_off > block_len ||
+              dgram_len > block_len - dgram_off)
             {
-              cdcmbim_receive(priv, priv->rxnetbuf + dgram_off, dgram_len);
+              uerr("Invalid datagram: %u+%u\n", dgram_off, dgram_len);
+              goto out;
             }
+
+          cdcmbim_receive(priv, priv->rxnetbuf + dgram_off, dgram_len);
         }
     }
   while (ndpoffset);
