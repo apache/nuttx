@@ -149,8 +149,8 @@
 
 /* Timing */
 
-#define SDIO_CMDTIMEOUT          (100000)
-#define SDIO_LONGTIMEOUT         (0x7fffffff)
+#define SDIO_CMDTIMEOUT_MS       (10)
+#define SDIO_LONGTIMEOUT_MS      (250)
 
 /* DTIMER setting */
 
@@ -506,18 +506,20 @@ static void gd32_sdio_clock_set(periph_enum type)
 
   switch (type)
     {
-    default:
-      return;
-    case ENABLE:
-      rcu_en = RCU_APB2EN_SDIOEN;
-      regaddr = GD32_RCU_APB2EN;
-      modifyreg32(regaddr, 0, rcu_en);
-      break;
-    case DISABLE:
-      rcu_en = RCU_APB2EN_SDIOEN;
-      regaddr = GD32_RCU_APB2EN;
-      modifyreg32(regaddr, rcu_en, 0);
-      break;
+      case ENABLE:
+        rcu_en = RCU_APB2EN_SDIOEN;
+        regaddr = GD32_RCU_APB2EN;
+        modifyreg32(regaddr, 0, rcu_en);
+        break;
+
+      case DISABLE:
+        rcu_en = RCU_APB2EN_SDIOEN;
+        regaddr = GD32_RCU_APB2EN;
+        modifyreg32(regaddr, rcu_en, 0);
+        break;
+
+      default:
+        return;
     }
 }
 
@@ -889,8 +891,9 @@ static void gd32_dumpsamples(struct gd32_dev_s *priv)
 static void gd32_dmacallback(DMA_HANDLE handle, uint16_t status, void *arg)
 {
   struct gd32_dev_s *priv = (struct gd32_dev_s *)arg;
-  DEBUGASSERT(priv->dmamode);
   sdio_eventset_t result;
+
+  DEBUGASSERT(priv->dmamode);
 
   /* In the normal case, SDIO appears to handle the End-Of-Transfer interrupt
    * first with the End-Of-DMA event occurring significantly later.  On
@@ -1159,7 +1162,7 @@ static void gd32_recv_fifo(struct gd32_dev_s *priv)
 
           for (i = 0; i < (int)priv->remaining; i++)
             {
-               *ptr++ = data.b[i];
+              *ptr++ = data.b[i];
             }
 
           /* Now the transfer is finished */
@@ -1206,7 +1209,7 @@ static void gd32_event_timeout(wdparm_t arg)
     {
       /* Yes.. wake up any waiting threads */
 
-    gd32_end_wait(priv, SDIOWAIT_TIMEOUT);
+      gd32_end_wait(priv, SDIOWAIT_TIMEOUT);
 
       mcerr("Timeout: remaining: %d\n", priv->remaining);
     }
@@ -1659,6 +1662,7 @@ static sdio_capset_t gd32_capabilities(struct sdio_dev_s *dev)
 static sdio_statset_t gd32_status(struct sdio_dev_s *dev)
 {
   struct gd32_dev_s *priv = (struct gd32_dev_s *)dev;
+
   return priv->cdstatus;
 }
 
@@ -1682,6 +1686,7 @@ static sdio_statset_t gd32_status(struct sdio_dev_s *dev)
 static void gd32_widebus(struct sdio_dev_s *dev, bool wide)
 {
   struct gd32_dev_s *priv = (struct gd32_dev_s *)dev;
+
   priv->widebus = wide;
 }
 
@@ -1704,45 +1709,45 @@ static void gd32_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
 {
   uint32_t clkctl;
 
-    switch (rate)
-      {
-        /* Disable clocking (with default ID mode divisor) */
+  switch (rate)
+    {
+      /* Disable clocking (with default ID mode divisor) */
 
-        default:
-        case CLOCK_SDIO_DISABLED:
-          clkctl = GD32_CLCKCTL_INIT;
-          break;
+      default:
+      case CLOCK_SDIO_DISABLED:
+        clkctl = GD32_CLCKCTL_INIT;
+        break;
 
-        /* Enable in initial ID mode clocking (<400KHz) */
+      /* Enable in initial ID mode clocking (<400KHz) */
 
-        case CLOCK_IDMODE:
-          clkctl = (GD32_CLCKCTL_INIT | SDIO_CLKCTL_CLKEN);
-          break;
+      case CLOCK_IDMODE:
+        clkctl = (GD32_CLCKCTL_INIT | SDIO_CLKCTL_CLKEN);
+        break;
 
-        /* Enable in MMC normal operation clocking */
+      /* Enable in MMC normal operation clocking */
 
-        case CLOCK_MMC_TRANSFER:
-          clkctl = (SDIO_CLKCTL_MMCXFR | SDIO_CLKCTL_CLKEN);
-          break;
+      case CLOCK_MMC_TRANSFER:
+        clkctl = (SDIO_CLKCTL_MMCXFR | SDIO_CLKCTL_CLKEN);
+        break;
 
-        /* SD normal operation clocking (wide 4-bit mode) */
+      /* SD normal operation clocking (wide 4-bit mode) */
 
-        case CLOCK_SD_TRANSFER_4BIT:
+      case CLOCK_SD_TRANSFER_4BIT:
 #ifndef CONFIG_GD32_SDIO_WIDTH_D1_ONLY
-          clkctl = (SDIO_CLKCTL_SDWIDEXFR | SDIO_CLKCTL_CLKEN);
-          break;
+        clkctl = (SDIO_CLKCTL_SDWIDEXFR | SDIO_CLKCTL_CLKEN);
+        break;
 #endif
 
-        /* SD normal operation clocking (narrow 1-bit mode) */
+      /* SD normal operation clocking (narrow 1-bit mode) */
 
-        case CLOCK_SD_TRANSFER_1BIT:
-          clkctl = (SDIO_CLKCTL_SDXFR | SDIO_CLKCTL_CLKEN);
-          break;
-      }
+      case CLOCK_SD_TRANSFER_1BIT:
+        clkctl = (SDIO_CLKCTL_SDXFR | SDIO_CLKCTL_CLKEN);
+        break;
+    }
 
-    /* Set the new clock frequency along with the clock enable/disable bit */
+  /* Set the new clock frequency along with the clock enable/disable bit */
 
-    gd32_set_clkctl(clkctl);
+  gd32_set_clkctl(clkctl);
 }
 
 /****************************************************************************
@@ -1821,23 +1826,23 @@ static int gd32_send_cmd(struct sdio_dev_s *dev, uint32_t cmd,
 
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
-    case MMCSD_NO_RESPONSE:
-      regval |= SDIO_CMDCTL_NORESPONSE;
-      break;
+      case MMCSD_NO_RESPONSE:
+        regval |= SDIO_CMDCTL_NORESPONSE;
+        break;
 
-    case MMCSD_R1_RESPONSE:
-    case MMCSD_R1B_RESPONSE:
-    case MMCSD_R3_RESPONSE:
-    case MMCSD_R4_RESPONSE:
-    case MMCSD_R5_RESPONSE:
-    case MMCSD_R6_RESPONSE:
-    case MMCSD_R7_RESPONSE:
-      regval |= SDIO_CMDCTL_SHORTRESPONSE;
-      break;
+      case MMCSD_R1_RESPONSE:
+      case MMCSD_R1B_RESPONSE:
+      case MMCSD_R3_RESPONSE:
+      case MMCSD_R4_RESPONSE:
+      case MMCSD_R5_RESPONSE:
+      case MMCSD_R6_RESPONSE:
+      case MMCSD_R7_RESPONSE:
+        regval |= SDIO_CMDCTL_SHORTRESPONSE;
+        break;
 
-    case MMCSD_R2_RESPONSE:
-      regval |= SDIO_CMDCTL_LONGRESPONSE;
-      break;
+      case MMCSD_R2_RESPONSE:
+        regval |= SDIO_CMDCTL_LONGRESPONSE;
+        break;
     }
 
   /* Set CPSMEN and the command index */
@@ -2091,41 +2096,44 @@ static int gd32_cancel(struct sdio_dev_s *dev)
 
 static int gd32_wait_response(struct sdio_dev_s *dev, uint32_t cmd)
 {
-  int32_t timeout;
+  clock_t timeout;
+  clock_t start;
   uint32_t events;
 
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
-    case MMCSD_NO_RESPONSE:
-      events  = SDIO_CMDDONE_STAT;
-      timeout = SDIO_CMDTIMEOUT;
-      break;
+      case MMCSD_NO_RESPONSE:
+        events  = SDIO_CMDDONE_STAT;
+        timeout = MSEC2TICK(SDIO_CMDTIMEOUT_MS);
+        break;
 
-    case MMCSD_R1_RESPONSE:
-    case MMCSD_R1B_RESPONSE:
-    case MMCSD_R2_RESPONSE:
-    case MMCSD_R4_RESPONSE:
-    case MMCSD_R5_RESPONSE:
-    case MMCSD_R6_RESPONSE:
-      events  = SDIO_RESPDONE_STAT;
-      timeout = SDIO_LONGTIMEOUT;
-      break;
+      case MMCSD_R1_RESPONSE:
+      case MMCSD_R1B_RESPONSE:
+      case MMCSD_R2_RESPONSE:
+      case MMCSD_R4_RESPONSE:
+      case MMCSD_R5_RESPONSE:
+      case MMCSD_R6_RESPONSE:
+        events  = SDIO_RESPDONE_STAT;
+        timeout = MSEC2TICK(SDIO_LONGTIMEOUT_MS);
+        break;
 
-    case MMCSD_R3_RESPONSE:
-    case MMCSD_R7_RESPONSE:
-      events  = SDIO_RESPDONE_STAT;
-      timeout = SDIO_CMDTIMEOUT;
-      break;
+      case MMCSD_R3_RESPONSE:
+      case MMCSD_R7_RESPONSE:
+        events  = SDIO_RESPDONE_STAT;
+        timeout = MSEC2TICK(SDIO_CMDTIMEOUT_MS);
+        break;
 
-    default:
-      return -EINVAL;
+      default:
+        return -EINVAL;
     }
 
   /* Then wait for the response (or timeout) */
 
+  start = clock_systime_ticks();
+
   while ((getreg32(GD32_SDIO_STAT) & events) == 0)
     {
-      if (--timeout <= 0)
+      if (clock_systime_ticks() - start > timeout)
         {
           mcerr("ERROR: Timeout cmd: %08" PRIx32 " events: %08" PRIx32
                 " STAT: %08" PRIx32 "\n",
@@ -2399,27 +2407,25 @@ static void gd32_wait_enable(struct sdio_dev_s *dev,
    * interrupts.
    */
 
+  waitmask = 0;
+  if ((eventset & SDIOWAIT_CMDDONE) != 0)
     {
-      waitmask = 0;
-      if ((eventset & SDIOWAIT_CMDDONE) != 0)
-        {
-          waitmask |= SDIO_CMDDONE_INTEN;
-        }
-
-      if ((eventset & SDIOWAIT_RESPONSEDONE) != 0)
-        {
-          waitmask |= SDIO_RESPDONE_INTEN;
-        }
-
-      if ((eventset & SDIOWAIT_TRANSFERDONE) != 0)
-        {
-          waitmask |= SDIO_XFRDONE_INTEN;
-        }
-
-      /* Enable event-related interrupts */
-
-      putreg32(SDIO_WAITALL_INTC, GD32_SDIO_INTC);
+      waitmask |= SDIO_CMDDONE_INTEN;
     }
+
+  if ((eventset & SDIOWAIT_RESPONSEDONE) != 0)
+    {
+      waitmask |= SDIO_RESPDONE_INTEN;
+    }
+
+  if ((eventset & SDIOWAIT_TRANSFERDONE) != 0)
+    {
+      waitmask |= SDIO_XFRDONE_INTEN;
+    }
+
+  /* Enable event-related interrupts */
+
+  putreg32(SDIO_WAITALL_INTC, GD32_SDIO_INTC);
 
   gd32_config_waitints(priv, waitmask, eventset, 0);
 
@@ -2915,10 +2921,10 @@ static void gd32_callback(void *arg)
         {
           /* Yes.. queue it */
 
-           mcinfo("Queuing callback to %p(%p)\n",
-                  priv->callback, priv->cbarg);
-           work_queue(HPWORK, &priv->cbwork, priv->callback,
-                      priv->cbarg, 0);
+          mcinfo("Queuing callback to %p(%p)\n",
+                 priv->callback, priv->cbarg);
+          work_queue(HPWORK, &priv->cbwork, priv->callback,
+                     priv->cbarg, 0);
         }
       else
         {
