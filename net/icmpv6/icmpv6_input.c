@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <stddef.h>
 #include <stdint.h>
 #include <string.h>
 #include <nuttx/debug.h>
@@ -425,8 +426,15 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
 
         for (ndx = 0; ndx < optlen; )
           {
-           FAR struct icmpv6_generic_s *opt =
-                                (FAR struct icmpv6_generic_s *)&options[ndx];
+            FAR struct icmpv6_generic_s *opt;
+            uint16_t optbytes;
+
+            if (optlen - ndx < 2)
+              {
+                goto icmpv6_drop_packet;
+              }
+
+            opt = (FAR struct icmpv6_generic_s *)&options[ndx];
 
             /* RFC 4861 4.6: "The value 0 is invalid. Nodes MUST silently
              * discard a packet that contains an option with length zero."
@@ -437,12 +445,24 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
                 goto icmpv6_drop_packet;
               }
 
+            optbytes = opt->optlen << 3;
+            if (optbytes > optlen - ndx)
+              {
+                goto icmpv6_drop_packet;
+              }
+
             switch (opt->opttype)
               {
                 case ICMPv6_OPT_SRCLLADDR:
                   {
                     FAR struct icmpv6_srclladdr_s *sllopt =
                                       (FAR struct icmpv6_srclladdr_s *)opt;
+
+                    if (optbytes < sizeof(*sllopt))
+                      {
+                        goto icmpv6_drop_packet;
+                      }
+
                     neighbor_add(dev, ipv6->srcipaddr, sllopt->srclladdr);
                   }
                   break;
@@ -452,7 +472,12 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
                     FAR struct icmpv6_prefixinfo_s *prefixopt =
                                       (FAR struct icmpv6_prefixinfo_s *)opt;
 
-                   /* Is the "A" flag set? */
+                    if (optbytes < sizeof(*prefixopt))
+                      {
+                        goto icmpv6_drop_packet;
+                      }
+
+                    /* Is the "A" flag set? */
 
                     if ((prefixopt->flags & ICMPv6_PRFX_FLAG_A) != 0)
                       {
@@ -469,11 +494,11 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
                                           ipv6->srcipaddr);
                       }
 
-                      /* Notify any waiting threads */
+                    /* Notify any waiting threads */
 
-                      icmpv6_rnotify(dev, (adv->flags & ICMPv6_RADV_FLAG_M) ?
-                                          -EADDRNOTAVAIL : OK);
-                      prefix = true;
+                    icmpv6_rnotify(dev, (adv->flags & ICMPv6_RADV_FLAG_M) ?
+                                        -EADDRNOTAVAIL : OK);
+                    prefix = true;
                   }
                   break;
 
@@ -481,6 +506,12 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
                   {
                     FAR struct icmpv6_mtu_s *mtuopt =
                                         (FAR struct icmpv6_mtu_s *)opt;
+
+                    if (optbytes < sizeof(*mtuopt))
+                      {
+                        goto icmpv6_drop_packet;
+                      }
+
                     dev->d_pktsize = MIN(dev->d_pktsize,
                         NTOHS(mtuopt->mtu[1]) + dev->d_llhdrlen);
                   }
@@ -496,7 +527,10 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
                     int nservers;
                     int ret;
 
-                    if (rdnss->optlen < 3)
+                    if (rdnss->optlen < 3 ||
+                        optbytes < offsetof(struct icmpv6_rdnss_s,
+                                            servers) +
+                                   sizeof(struct in6_addr))
                       {
                         nerr("rdnss error length %d\n", rdnss->optlen);
                         break;
@@ -536,7 +570,7 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
 
             /* Skip to the next option (units of octets) */
 
-            ndx += (opt->optlen << 3);
+            ndx += optbytes;
           }
 
         if (prefix)
