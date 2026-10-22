@@ -39,6 +39,7 @@ typedef void (*imx9_mu_gpi_callback_t)(int id, void *arg);
  ****************************************************************************/
 
 struct imx9_mudev_s *imx9_mu_init(int index);
+void imx9_mu_enable_irq(struct imx9_mudev_s *priv);
 void imx9_mu_subscribe_msg(struct imx9_mudev_s *priv,
                            uint32_t msg_int_bitfield,
                            imx9_mu_msg_callback_t callback);

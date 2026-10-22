@@ -38,6 +38,31 @@
 #define SM_PLATFORM_NOTIFY   1 /* SCMI Platform -> SCMI Agent */
 #define SM_PLATFORM_PRIORITY 2
 
+/* SCMI protocol IDs */
+
+#define SCMI_PROTOCOL_BASE    0x10u /* Base protocol */
+#define SCMI_PROTOCOL_POWER   0x11u /* Power domain management protocol */
+#define SCMI_PROTOCOL_SYS     0x12u /* System power management protocol */
+#define SCMI_PROTOCOL_PERF    0x13u /* Performance domain management protocol */
+#define SCMI_PROTOCOL_CLOCK   0x14u /* Clock management protocol */
+#define SCMI_PROTOCOL_SENSOR  0x15u /* Sensor management protocol */
+#define SCMI_PROTOCOL_RESET   0x16u /* Reset domain management protocol */
+#define SCMI_PROTOCOL_VOLTAGE 0x17u /* Voltage domain management protocol */
+#define SCMI_PROTOCOL_PINCTRL 0x19u /* Pin control protocol */
+#define SCMI_PROTOCOL_LMM     0x80u /* LM management protocol */
+#define SCMI_PROTOCOL_BBM     0x81u /* BBM management protocol */
+#define SCMI_PROTOCOL_CPU     0x82u /* CPU management protocol */
+#define SCMI_PROTOCOL_FUSA    0x83u /* FuSa protocol */
+#define SCMI_PROTOCOL_MISC    0x84u /* Misc protocol */
+
+/* SCMI LMM notification message ID and event flags */
+
+#define SCMI_MSG_LMM_EVENT      0x0u
+#define SCMI_LMM_EVENT_BOOT     (1u << 0u)
+#define SCMI_LMM_EVENT_SHUTDOWN (1u << 1u)
+#define SCMI_LMM_EVENT_SUSPEND  (1u << 2u)
+#define SCMI_LMM_EVENT_WAKE     (1u << 3u)
+
 #define SM_CLOCK_RATE_MASK 0xFFFFFFFFU
 
 /* SCMI clock round options */
@@ -142,6 +167,11 @@ typedef struct
     uint8_t  siname[SCMI_MISC_MAX_SINAME]; /* Silicon name/revision string */
 } scmi_si_info_t;
 
+/* SCMI notification callback, see imx9_scmi_notify_register() */
+
+typedef void (*imx9_scmi_notify_cb_t)(uint32_t protocol, uint32_t msgid,
+                                      void *arg);
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -185,5 +215,74 @@ int32_t imx9_scmi_pinctrlconfigset(uint32_t channel, uint32_t identifier,
  ****************************************************************************/
 
 int32_t imx9_scmi_siinfoget(uint32_t channel, scmi_si_info_t *info);
+
+/****************************************************************************
+ * Name: imx9_scmi_notify_register
+ *
+ * Description:
+ *   Register the callback for SCMI notifications from the System Manager
+ *   and enable their reception. The callback is called from interrupt
+ *   context with the protocol and message ID of the notification and must
+ *   not block, so it must not call the SCMI request functions (they lock
+ *   the A2P channel); defer such work, e.g. with work_queue(). It may read
+ *   the message with the matching event function
+ *   (e.g. imx9_scmi_lmmevent()); this is only valid inside the callback.
+ *   The channel is handed back to the System Manager when it returns.
+ *   Must be called after the OS is initialized.
+ *
+ * Input Parameters:
+ *   cb  - Notification callback
+ *   arg - Argument passed to the callback
+ *
+ * Returned Value:
+ *   OK on success, -EBUSY if a callback is already registered, a negated
+ *   errno value on other failures.
+ *
+ ****************************************************************************/
+
+int32_t imx9_scmi_notify_register(imx9_scmi_notify_cb_t cb, void *arg);
+
+/****************************************************************************
+ * Name: imx9_scmi_lmmnotify
+ *
+ * Description:
+ *   Subscribe to boot/shutdown notifications of a logical machine via the
+ *   SCMI LMM protocol. Register the notification callback first, the
+ *   System Manager may send an event right away.
+ *
+ * Input Parameters:
+ *   channel - SCMI channel to use for the request
+ *   lmid    - Logical machine to receive events from
+ *   flags   - Events to enable (SCMI_LMM_EVENT_*)
+ *
+ * Returned Value:
+ *   OK on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int32_t imx9_scmi_lmmnotify(uint32_t channel, uint32_t lmid, uint32_t flags);
+
+/****************************************************************************
+ * Name: imx9_scmi_lmmevent
+ *
+ * Description:
+ *   Read the pending LMM event notification. Only valid in the
+ *   notification callback for SCMI_PROTOCOL_LMM / SCMI_MSG_LMM_EVENT.
+ *
+ * Input Parameters:
+ *   lmid    - Returned ID of the logical machine that caused the
+ *             transition, may be NULL
+ *   eventlm - Returned ID of the logical machine the event is for, may be
+ *             NULL
+ *   flags   - Returned events (SCMI_LMM_EVENT_*), may be NULL
+ *
+ * Returned Value:
+ *   OK on success, -ENODATA if no notification is pending, -EIO on a CRC
+ *   error, -EPROTO if the message is not an LMM event.
+ *
+ ****************************************************************************/
+
+int32_t imx9_scmi_lmmevent(uint32_t *lmid, uint32_t *eventlm,
+                           uint32_t *flags);
 
 #endif /* __ARCH_ARM_SRC_IMX9_IMX9_SCMI_H */

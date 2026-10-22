@@ -74,23 +74,6 @@
 #define SMT_CRC_J1850      2u /* J1850 standard CRC */
 #define SMT_CRC_CRC32      3u /* CRC32 standard CRC */
 
-/* SCMI protocol message IDs */
-
-#define SCMI_PROTOCOL_BASE    0x10u /* Base protocol */
-#define SCMI_PROTOCOL_POWER   0x11u /* Power domain management protocol */
-#define SCMI_PROTOCOL_SYS     0x12u /* System power management protocol */
-#define SCMI_PROTOCOL_PERF    0x13u /* Performance domain management protocol */
-#define SCMI_PROTOCOL_CLOCK   0x14u /* Clock management protocol */
-#define SCMI_PROTOCOL_SENSOR  0x15u /* Sensor management protocol */
-#define SCMI_PROTOCOL_RESET   0x16u /* Reset domain management protocol */
-#define SCMI_PROTOCOL_VOLTAGE 0x17u /* Voltage domain management protocol */
-#define SCMI_PROTOCOL_PINCTRL 0x19u /* Pin control protocol */
-#define SCMI_PROTOCOL_LMM     0x80u /* LM management protocol */
-#define SCMI_PROTOCOL_BBM     0x81u /* BBM management protocol */
-#define SCMI_PROTOCOL_CPU     0x82u /* CPU management protocol */
-#define SCMI_PROTOCOL_FUSA    0x83u /* FuSa protocol */
-#define SCMI_PROTOCOL_MISC    0x84u /* Misc protocol */
-
 /* SCMI clock protocol message IDs */
 
 #define SCMI_MSG_CLOCK_ATTRIBUTES           0x3u /* Get clock attributes */
@@ -117,6 +100,14 @@
 /* SCMI misc protocol message IDs */
 
 #define SCMI_MSG_MISC_SI_INFO 0xbu /* Get silicon info */
+
+/* SCMI LMM protocol message IDs (SCMI_MSG_LMM_EVENT is in imx9_scmi.h) */
+
+#define SCMI_MSG_LMM_NOTIFY 0x9u /* Configure LM notifications */
+
+/* SCMI message type of a P2A notification */
+
+#define SCMI_MSG_TYPE_NOTIFY 3u
 
 /* SCMI header creation */
 
@@ -189,6 +180,8 @@ typedef struct
 static smt_chn_config_t s_smtconfig[SMT_MAX_CHN];
 static struct imx9_mudev_s *g_mudev;
 static mutex_t mutex = NXMUTEX_INITIALIZER;
+static imx9_scmi_notify_cb_t g_notify_cb;
+static void *g_notify_arg;
 
 /****************************************************************************
  * Private Functions
@@ -510,6 +503,36 @@ static int32_t imx9_smt_rx(uint32_t smtchannel, uint32_t *len, bool callee)
   /* Return status */
 
   return status;
+}
+
+/* SCMI P2A notifications, called from the MU interrupt */
+
+static void imx9_scmi_gpi_callback(int id, void *arg)
+{
+  smt_buf_t *buf = imx9_smt_smaget(SM_PLATFORM_NOTIFY);
+  uint32_t header;
+
+  if (id != SM_PLATFORM_NOTIFY || buf == NULL ||
+      imx9_smt_channelfree(SM_PLATFORM_NOTIFY))
+    {
+      return;
+    }
+
+  header = buf->header;
+
+  if (g_notify_cb != NULL)
+    {
+      g_notify_cb(SCMI_HEADER_PROTOCOL_EX(header),
+                  SCMI_HEADER_MSG_EX(header), g_notify_arg);
+    }
+
+  /* Hand the channel back; the doorbell makes the SM send the next queued
+   * notification. This must come after the callback, which reads the
+   * message from the channel buffer.
+   */
+
+  buf->channel_status |= SMT_FREE;
+  imx9_mu_trigger_interrupts(g_mudev, 1 << SM_PLATFORM_NOTIFY);
 }
 
 /* SCMI generics */
@@ -1117,10 +1140,167 @@ void imx9_scmi_initialize()
   /* Configure SMT */
 
   imx9_smt_channelconfig(SM_PLATFORM_A2P, SM_PLATFORM_MU_INST);
+  imx9_smt_channelconfig(SM_PLATFORM_NOTIFY, SM_PLATFORM_MU_INST);
 
   /* Configure MU */
 
   g_mudev = imx9_mu_init(5);
+}
+
+int32_t imx9_scmi_notify_register(imx9_scmi_notify_cb_t cb, void *arg)
+{
+  smt_buf_t *buf = imx9_smt_smaget(SM_PLATFORM_NOTIFY);
+
+  if (cb == NULL || buf == NULL)
+    {
+      return -EINVAL;
+    }
+
+  if (g_notify_cb != NULL)
+    {
+      return -EBUSY;
+    }
+
+  g_notify_cb  = cb;
+  g_notify_arg = arg;
+
+  /* imx9_scmi_initialize() runs from __start(), before irq_initialize()
+   * and up_irqinitialize() reset the vector table and the NVIC, so the MU
+   * interrupt set up there is lost. Attach and enable it now.
+   */
+
+  imx9_mu_enable_irq(g_mudev);
+
+  /* The SM only sends a notification once the channel is marked free */
+
+  buf->channel_status = SMT_FREE;
+
+  imx9_mu_subscribe_gpi(g_mudev, 1 << SM_PLATFORM_NOTIFY,
+                        imx9_scmi_gpi_callback);
+
+  return OK;
+}
+
+int32_t imx9_scmi_lmmnotify(uint32_t channel, uint32_t lmid, uint32_t flags)
+{
+  int32_t status;
+  uint32_t header;
+  void *msg;
+
+  /* Acquire lock */
+
+  SCMI_A2P_LOCK(channel);
+
+  /* Init buffer */
+
+  status = imx9_scmi_bufinit(channel, &msg);
+
+  /* Send request */
+
+  if (status == OK)
+    {
+      /* Request message structure */
+
+      typedef struct
+      {
+        uint32_t header;
+        uint32_t lmid;
+        uint32_t flags;
+      } msg_tlmm9_t;
+
+      msg_tlmm9_t *msgtx = (msg_tlmm9_t *)msg;
+
+      /* Fill in parameters */
+
+      msgtx->lmid  = lmid;
+      msgtx->flags = flags;
+
+      /* Send message */
+
+      status = imx9_scmi_a2ptx(channel, SCMI_PROTOCOL_LMM,
+                               SCMI_MSG_LMM_NOTIFY, sizeof(msg_tlmm9_t),
+                               &header);
+    }
+
+  /* Receive response */
+
+  if (status == OK)
+    {
+      status = imx9_scmi_a2prx(channel, sizeof(msg_status_t), header);
+    }
+
+  /* Release lock */
+
+  SCMI_A2P_UNLOCK(channel);
+
+  /* Return status */
+
+  return status;
+}
+
+int32_t imx9_scmi_lmmevent(uint32_t *lmid, uint32_t *eventlm,
+                           uint32_t *flags)
+{
+  /* Notification message structure */
+
+  typedef struct
+  {
+    uint32_t header;
+    uint32_t lmid;
+    uint32_t eventlm;
+    uint32_t flags;
+  } msg_rlmm0_t;
+
+  const msg_rlmm0_t *msgrx = imx9_smt_hdraddrget(SM_PLATFORM_NOTIFY);
+  int32_t status;
+  uint32_t len;
+
+  if (msgrx == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* Nothing pending; imx9_smt_rx() would wait for a message */
+
+  if (imx9_smt_channelfree(SM_PLATFORM_NOTIFY))
+    {
+      return -ENODATA;
+    }
+
+  /* Receive message, checks the CRC */
+
+  status = imx9_smt_rx(SM_PLATFORM_NOTIFY, &len, true);
+
+  if (status == OK &&
+      (len < sizeof(msg_rlmm0_t) ||
+       SCMI_HEADER_TYPE_EX(msgrx->header) != SCMI_MSG_TYPE_NOTIFY ||
+       SCMI_HEADER_PROTOCOL_EX(msgrx->header) != SCMI_PROTOCOL_LMM ||
+       SCMI_HEADER_MSG_EX(msgrx->header) != SCMI_MSG_LMM_EVENT))
+    {
+      status = -EPROTO;
+    }
+
+  /* Copy out if no error */
+
+  if (status == OK)
+    {
+      if (lmid != NULL)
+        {
+          *lmid = msgrx->lmid;
+        }
+
+      if (eventlm != NULL)
+        {
+          *eventlm = msgrx->eventlm;
+        }
+
+      if (flags != NULL)
+        {
+          *flags = msgrx->flags;
+        }
+    }
+
+  return status;
 }
 
 #endif /* CONFIG_IMX9_SCMI */
