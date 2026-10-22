@@ -36,7 +36,7 @@
 
 #include "stm32.h"
 #include "stm32wl5_rcc.h"
-#include "stm32wl5_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32wl5_uart.h"
 
 /****************************************************************************

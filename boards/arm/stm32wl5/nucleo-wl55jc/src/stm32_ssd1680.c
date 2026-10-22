@@ -35,7 +35,7 @@
 
 #include "stm32.h"
 #include "nucleo-wl55jc.h"
-#include "stm32wl5_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32wl5_ssd1680.h"
 
 #if defined(CONFIG_VIDEO_FB) && defined(CONFIG_LCD_FRAMEBUFFER)

@@ -38,6 +38,8 @@
 #  include "hardware/stm32l4_syscfg.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32WB)
 #  include "hardware/stm32wb_syscfg.h"
+#elif defined(CONFIG_ARCH_CHIP_STM32WL5)
+#  include "hardware/stm32wl5_syscfg.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32F0)
 #  include "hardware/stm32f0_syscfg.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32L0)

@@ -951,7 +951,7 @@ DAC           to be done    not supported
 DMA           to be done    not supported                             
 EXTI          to be done    arch/arm/src/stm32wl5/stm32wl5_exti_gpio.c
 FLASH         to be done    arch/arm/src/stm32wl5/stm32wl5_flash.c    
-GPIO          to be done    arch/arm/src/stm32wl5/stm32wl5_gpio.c     
+GPIO          v2            arch/arm/src/common/stm32/stm32_gpio_v2.c
 I2C           to be done    not supported                             
 IPCC          to be done    arch/arm/src/stm32wl5/stm32wl5_ipcc.c     
 IWDG          v2            arch/arm/src/common/stm32/stm32_iwdg.c
