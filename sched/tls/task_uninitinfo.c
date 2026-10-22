@@ -136,7 +136,21 @@ void task_uninit_info(FAR struct task_group_s *group)
       entry = list_first_entry(list,
                                struct pthread_atfork_s, node);
       list_delete_init(&entry->node);
-      lib_free(entry);
+
+      /* pthread_atfork() allocated the entry in the heap of the process:
+       * the user heap, unless the process is privileged.
+       */
+
+#ifdef CONFIG_BUILD_KERNEL
+      /* The user heap of an unprivileged group goes away with its address
+       * environment.
+       */
+
+      if ((group->tg_flags & GROUP_FLAG_PRIVILEGED) != 0)
+#endif
+        {
+          group_free(group, entry);
+        }
     }
 #endif
 
