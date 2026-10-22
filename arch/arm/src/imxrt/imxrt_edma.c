@@ -472,6 +472,14 @@ static void imxrt_dmaterminate(struct imxrt_dmach_s *dmach, int result)
   regaddr         = IMXRT_EDMA_TCD_DLASTSGA(chan);
   putreg32(0, regaddr);
 
+  /* Clear CITER and BITER to remove error source */
+
+  regaddr         = IMXRT_EDMA_TCD_CITER_ELINK(chan);
+  putreg16(0, regaddr);
+
+  regaddr         = IMXRT_EDMA_TCD_BITER_ELINK(chan);
+  putreg16(0, regaddr);
+
 #if CONFIG_IMXRT_EDMA_NTCD > 0
   /* Return all allocated TCDs to the free list */
 
@@ -481,10 +489,10 @@ static void imxrt_dmaterminate(struct imxrt_dmach_s *dmach, int result)
        * if not continue to free tcds in chain
        */
 
-       next = dmach->flags & EDMA_CONFIG_LOOPDEST ?
-              NULL : (struct imxrt_edmatcd_s *)tcd->dlastsga;
+      next = dmach->flags & EDMA_CONFIG_LOOPDEST ?
+             NULL : (struct imxrt_edmatcd_s *)tcd->dlastsga;
 
-       imxrt_tcd_free_nolock(tcd);
+      imxrt_tcd_free_nolock(tcd);
     }
 
   dmach->head = NULL;
@@ -992,6 +1000,11 @@ int imxrt_dmach_xfrsetup(DMACH_HANDLE handle,
   DEBUGASSERT(dmach != NULL);
   dmainfo("dmach%u: %p config: %p\n", dmach->chan, dmach, config);
 
+  if (config->iter == 0)
+    {
+      return -EINVAL;
+    }
+
   dmach->flags = config->flags;
 
 #if CONFIG_IMXRT_EDMA_NTCD > 0
@@ -1299,6 +1312,7 @@ unsigned int imxrt_dmach_getcount(DMACH_HANDLE handle)
 unsigned int imxrt_dmach_idle(DMACH_HANDLE handle)
 {
   struct imxrt_dmach_s *dmach = (struct imxrt_dmach_s *)handle;
+
   return dmach->state == IMXRT_DMA_IDLE ? 0 : -1;
 }
 
