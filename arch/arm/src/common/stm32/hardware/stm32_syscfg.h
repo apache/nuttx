@@ -46,6 +46,10 @@
 #  include "hardware/stm32f74xx75xx_syscfg.h"
 #elif defined(CONFIG_STM32_STM32F76XX) || defined(CONFIG_STM32_STM32F77XX)
 #  include "hardware/stm32f76xx77xx_syscfg.h"
+#elif defined(CONFIG_STM32_STM32H7RSXX)
+#  include "hardware/stm32h7rsxx_sbs.h"
+#elif defined(CONFIG_ARCH_CHIP_STM32H7)
+#  include "hardware/stm32h7x3xx_syscfg.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32F0)
 #  include "hardware/stm32f0_syscfg.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32L0)

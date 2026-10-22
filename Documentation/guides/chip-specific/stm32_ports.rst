@@ -651,7 +651,7 @@ ETH           v2            arch/arm/src/common/stm32/stm32_eth_v2.c
 EXTI          to be done    arch/arm/src/stm32h7/stm32_exti_gpio.c 
 FLASH         to be done    arch/arm/src/stm32h7/stm32_flash.c     
 FMC/FSMC      to be done    arch/arm/src/stm32h7/stm32_fmc.c       
-GPIO          to be done    arch/arm/src/stm32h7/stm32_gpio.c      
+GPIO          v2            arch/arm/src/common/stm32/stm32_gpio_v2.c
 HSEM          to be done    not supported                          
 I2C           v2            arch/arm/src/common/stm32/stm32_i2c_v2.c
 IWDG          v2, H7RS v3   arch/arm/src/common/stm32/stm32_iwdg.c

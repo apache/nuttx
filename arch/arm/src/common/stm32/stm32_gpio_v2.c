@@ -57,12 +57,24 @@
 #  define GPIO_EXTICR(p)         STM32_SYSCFG_EXTICR(p)
 #  define GPIO_EXTICR_SHIFT(p)   SYSCFG_EXTICR_EXTI_SHIFT(p)
 #  define GPIO_EXTICR_PORT_MASK  SYSCFG_EXTICR_PORT_MASK
+#elif defined(STM32_SBS_EXTICR)
+#  define GPIO_EXTICR(p)         STM32_SBS_EXTICR(p)
+#  define GPIO_EXTICR_SHIFT(p)   SBS_EXTICR_EXTI_SHIFT(p)
+#  define GPIO_EXTICR_PORT_MASK  SBS_EXTICR_PORT_MASK
 #endif
 
 #if defined(STM32_SYSCFG_CMPCR)
 #  define GPIO_CCCSR             STM32_SYSCFG_CMPCR
 #  define GPIO_CCCSR_EN          SYSCFG_CMPCR_CMPPD
 #  define GPIO_CCCSR_READY       SYSCFG_CMPCR_READY
+#elif defined(STM32_SYSCFG_CCCSR)
+#  define GPIO_CCCSR             STM32_SYSCFG_CCCSR
+#  define GPIO_CCCSR_EN          SYSCFG_CCCSR_EN
+#  define GPIO_CCCSR_READY       SYSCFG_CCCSR_READY
+#elif defined(STM32_SBS_CCCSR)
+#  define GPIO_CCCSR             STM32_SBS_CCCSR
+#  define GPIO_CCCSR_EN          SBS_CCCSR_COMP_EN
+#  define GPIO_CCCSR_READY       SBS_CCCSR_COMP_RDY
 #endif
 
 /****************************************************************************
