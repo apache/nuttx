@@ -571,6 +571,7 @@ static void ioe_rpmsg_client_created(FAR struct rpmsg_device *rdev,
       snprintf(eptname, RPMSG_NAME_SIZE, IOE_RPMSG_EPT_FORMAT, priv->name);
 
       priv->ept.priv = priv;
+      rpmsg_set_priority(&priv->ept, RPMSG_PRIO_RT);
       rpmsg_create_ept(&priv->ept, rdev, eptname, RPMSG_ADDR_ANY,
                        RPMSG_ADDR_ANY, ioe_rpmsg_client_ept_cb, NULL);
 
