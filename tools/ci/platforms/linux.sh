@@ -149,13 +149,8 @@ python_tools() {
     esptool==5.3.1 \
     imgtool \
     kconfiglib \
-    pexpect==4.8.0 \
     pyelftools \
-    pyserial==3.5 \
-    pytest==6.2.5 \
-    pytest-json==0.4.0 \
-    pytest-ordering==0.6 \
-    pytest-repeat==0.9.1
+    pyserial==3.5
 }
 
 riscv_gcc_toolchain() {
