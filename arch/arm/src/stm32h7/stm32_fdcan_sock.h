@@ -48,7 +48,7 @@ extern "C"
 {
 #endif
 
-#ifndef CONFIG_NETDEV_LATEINIT
+#if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
 
 /****************************************************************************
  * Function: arm_netinitialize
