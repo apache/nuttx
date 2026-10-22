@@ -35,4 +35,8 @@
 
 void nrf53_get_uniqueid(uint8_t uniqueid[8]);
 
+/* EUI-64 from the Nordic OUI and the device identifier */
+
+void nrf53_eui64(uint8_t eaddr[8]);
+
 #endif /* __ARCH_ARM_SRC_NRF53_NRF53_UID_H */

@@ -36,7 +36,7 @@
 #include <nuttx/mm/iob.h>
 
 #include "arm_internal.h"
-#include "hardware/nrf53_ficr.h"
+#include "nrf53_uid.h"
 
 #include "nrf53_ieee802154_trace.h"
 
@@ -298,29 +298,6 @@ static int nrf53_radioi8_bind(struct ieee802154_radio_s *radio,
 }
 
 /****************************************************************************
- * Name: nrf53_radioi8_eui64
- *
- * Description:
- *   EUI-64 from the Nordic OUI and the FICR device identifier.
- *
- ****************************************************************************/
-
-static void nrf53_radioi8_eui64(uint8_t *eaddr)
-{
-  uint32_t id0 = getreg32(NRF53_FICR_INFO_DEVICEID0);
-  uint32_t id1 = getreg32(NRF53_FICR_INFO_DEVICEID1);
-
-  eaddr[0] = 0xf4;
-  eaddr[1] = 0xce;
-  eaddr[2] = 0x36;
-  eaddr[3] = id1 & 0xff;
-  eaddr[4] = (id1 >> 8) & 0xff;
-  eaddr[5] = (id1 >> 16) & 0xff;
-  eaddr[6] = (id1 >> 24) & 0xff;
-  eaddr[7] = id0 & 0xff;
-}
-
-/****************************************************************************
  * Name: nrf53_radioi8_reset
  *
  * Description:
@@ -346,7 +323,7 @@ static int nrf53_radioi8_reset(struct ieee802154_radio_s *radio)
 
   /* Unique default extended address */
 
-  nrf53_radioi8_eui64(dev->state.addr.eaddr);
+  nrf53_eui64(dev->state.addr.eaddr);
 
   /* Initialize radio in IEEE 802.15.4 mode */
 
