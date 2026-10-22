@@ -67,6 +67,9 @@ struct virtio_pci_ops_s
   CODE int (*create_virtqueue)(FAR struct virtio_pci_device_s *vpdev,
                                FAR struct virtqueue *vq);
   CODE void (*delete_virtqueue)(FAR struct virtio_device *vdev, int index);
+  CODE int (*get_shm_region)(FAR struct virtio_pci_device_s *vpdev,
+                             uint8_t id,
+                             FAR struct virtio_shm_region *region);
 };
 
 struct virtio_pci_device_s

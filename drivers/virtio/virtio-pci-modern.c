@@ -166,6 +166,10 @@ virtio_pci_modern_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
 static void
 virtio_pci_modern_delete_virtqueue(FAR struct virtio_device *vdev,
                                    int index);
+static int
+virtio_pci_modern_get_shm_region(FAR struct virtio_pci_device_s *vpdev,
+                                 uint8_t id,
+                                 FAR struct virtio_shm_region *region);
 static void virtio_pci_modern_set_status(FAR struct virtio_device *vdev,
                                          uint8_t status);
 static uint8_t virtio_pci_modern_get_status(FAR struct virtio_device *vdev);
@@ -205,6 +209,7 @@ static const struct virtio_pci_ops_s g_virtio_pci_modern_ops =
   virtio_pci_modern_get_queue_len,      /* get_queue_len */
   virtio_pci_modern_create_virtqueue,   /* create_virtqueue */
   virtio_pci_modern_delete_virtqueue,   /* delete_virtqueue */
+  virtio_pci_modern_get_shm_region,     /* get_shm_region */
 };
 
 /****************************************************************************
@@ -292,6 +297,93 @@ virtio_pci_map_capability(FAR struct virtio_pci_device_s *vpdev, uint8_t pos,
     }
 
   return ptr;
+}
+
+/****************************************************************************
+ * Name: virtio_pci_modern_get_shm_region
+ ****************************************************************************/
+
+static int
+virtio_pci_modern_get_shm_region(FAR struct virtio_pci_device_s *vpdev,
+                                 uint8_t id,
+                                 FAR struct virtio_shm_region *region)
+{
+  FAR struct pci_device_s *dev = vpdev->dev;
+  uint64_t offset;
+  uint64_t length;
+  uint32_t tmp;
+  uint8_t type;
+  uint8_t capid;
+  uint8_t bar;
+  uint8_t pos;
+
+  /* Several shared memory capabilities may exist, so match on the id too,
+   * which virtio_pci_find_capability() does not do.
+   */
+
+  for (pos = pci_find_capability(dev, PCI_CAP_ID_VNDR); pos > 0;
+       pos = pci_find_next_capability(dev, pos, PCI_CAP_ID_VNDR))
+    {
+      pci_read_config_byte(dev,
+                           pos + offsetof(struct virtio_pci_cap_s, cfg_type),
+                           &type);
+      pci_read_config_byte(dev, pos + offsetof(struct virtio_pci_cap_s, id),
+                           &capid);
+      if (type != VIRTIO_PCI_CAP_SHARED_MEMORY_CFG || capid != id)
+        {
+          continue;
+        }
+
+      pci_read_config_byte(dev, pos + offsetof(struct virtio_pci_cap_s, bar),
+                           &bar);
+      if (bar >= PCI_STD_NUM_BARS)
+        {
+          continue;
+        }
+
+      pci_read_config_dword(dev,
+                            pos + offsetof(struct virtio_pci_cap_s, offset),
+                            &tmp);
+      offset = tmp;
+      pci_read_config_dword(dev,
+                            pos + offsetof(struct virtio_pci_cap64_s,
+                                           offset_hi), &tmp);
+      offset |= (uint64_t)tmp << 32;
+
+      pci_read_config_dword(dev,
+                            pos + offsetof(struct virtio_pci_cap_s, length),
+                            &tmp);
+      length = tmp;
+      pci_read_config_dword(dev,
+                            pos + offsetof(struct virtio_pci_cap64_s,
+                                           length_hi), &tmp);
+      length |= (uint64_t)tmp << 32;
+
+      if (offset + length < offset ||
+          offset + length > pci_resource_len(dev, bar))
+        {
+          vrterr("Shm region %u exceeds bar %u\n", id, bar);
+          return -EINVAL;
+        }
+
+      /* The BAR resource is a bus address, so let the PCI layer map it
+       * and derive the physical address from the CPU mapping.
+       */
+
+      region->va = pci_map_bar_region(dev, bar, offset, length);
+      if (region->va == NULL)
+        {
+          vrterr("Shm region %u map failed\n", id);
+          return -ENOMEM;
+        }
+
+      region->addr = metal_io_virt_to_phys(metal_io_get_region(),
+                                           region->va);
+      region->len  = (size_t)length;
+      return OK;
+    }
+
+  return -ENOENT;
 }
 
 /****************************************************************************
