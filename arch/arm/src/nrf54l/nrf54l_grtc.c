@@ -50,6 +50,7 @@ struct nrf54l_grtc_priv_s
   struct nrf54l_grtc_ops_s *ops;
   uint32_t                  base;
   uint32_t                  irq;
+  uint8_t                   group;      /* Interrupt group of this device */
   uint8_t                   chan;
   bool                      inuse;
 };
@@ -115,19 +116,32 @@ struct nrf54l_grtc_ops_s nrf54l_grtc_ops =
   .getbase    = nrf54l_grtc_getbase,
 };
 
-/* GRTC */
+/* One GRTC device per interrupt group, the counter and the compare
+ * channels are shared
+ */
 
-struct nrf54l_grtc_priv_s g_nrf54l_grtc_priv =
-{
-  .ops   = &nrf54l_grtc_ops,
-  .base  = NRF54L_GRTC_BASE,
-  .irq   = NRF54L_IRQ_GRTC_0,
 #ifdef CONFIG_NRF54L_SOFTDEVICE_CONTROLLER
-  .chan  = 7,
+#  define NRF54L_GRTC_CHAN 7
 #else
-  .chan  = 12,
+#  define NRF54L_GRTC_CHAN 12
 #endif
-  .inuse = false,
+
+#define NRF54L_GRTC_DEV(n)                      \
+  {                                             \
+    .ops   = &nrf54l_grtc_ops,                  \
+    .base  = NRF54L_GRTC_BASE,                  \
+    .irq   = NRF54L_IRQ_GRTC_##n,               \
+    .group = (n),                               \
+    .chan  = NRF54L_GRTC_CHAN,                  \
+    .inuse = false,                             \
+  }
+
+struct nrf54l_grtc_priv_s g_nrf54l_grtc_priv[NRF54L_GRTC_NGROUPS] =
+{
+  NRF54L_GRTC_DEV(0),
+  NRF54L_GRTC_DEV(1),
+  NRF54L_GRTC_DEV(2),
+  NRF54L_GRTC_DEV(3),
 };
 
 /****************************************************************************
@@ -436,8 +450,9 @@ errout:
 
 static int nrf54l_grtc_enableint(struct nrf54l_grtc_dev_s *dev, uint8_t s)
 {
-  uint32_t regval = 0;
-  int      ret    = OK;
+  struct nrf54l_grtc_priv_s *grtc   = (struct nrf54l_grtc_priv_s *)dev;
+  uint32_t                   regval = 0;
+  int                        ret    = OK;
 
   DEBUGASSERT(dev);
 
@@ -450,7 +465,7 @@ static int nrf54l_grtc_enableint(struct nrf54l_grtc_dev_s *dev, uint8_t s)
       goto errout;
     }
 
-  nrf54l_grtc_putreg(dev, NRF54L_GRTC_INTENSET_OFFSET(0), regval);
+  nrf54l_grtc_putreg(dev, NRF54L_GRTC_INTENSET_OFFSET(grtc->group), regval);
 
 errout:
   return ret;
@@ -462,8 +477,9 @@ errout:
 
 static int nrf54l_grtc_disableint(struct nrf54l_grtc_dev_s *dev, uint8_t s)
 {
-  uint32_t regval = 0;
-  int      ret    = OK;
+  struct nrf54l_grtc_priv_s *grtc   = (struct nrf54l_grtc_priv_s *)dev;
+  uint32_t                   regval = 0;
+  int                        ret    = OK;
 
   DEBUGASSERT(dev);
 
@@ -476,7 +492,7 @@ static int nrf54l_grtc_disableint(struct nrf54l_grtc_dev_s *dev, uint8_t s)
       goto errout;
     }
 
-  nrf54l_grtc_putreg(dev, NRF54L_GRTC_INTENCLR_OFFSET(0), regval);
+  nrf54l_grtc_putreg(dev, NRF54L_GRTC_INTENCLR_OFFSET(grtc->group), regval);
 
 errout:
   return ret;
@@ -551,7 +567,7 @@ static uint32_t nrf54l_grtc_getbase(struct nrf54l_grtc_dev_s *dev)
  * Name: nrf54l_grtc_init
  *
  * Description:
- *   Initialize GRTC device
+ *   Initialize the GRTC device of the given interrupt group
  *
  ****************************************************************************/
 
@@ -562,20 +578,13 @@ struct nrf54l_grtc_dev_s *nrf54l_grtc_init(int grtc)
 
   /* Get GRTC instance */
 
-  switch (grtc)
+  if (grtc < 0 || grtc >= NRF54L_GRTC_NGROUPS)
     {
-      case 0:
-        {
-          priv = &g_nrf54l_grtc_priv;
-          break;
-        }
-
-      default:
-        {
-          rtcerr("ERROR: unsupported GRTC %d\n", grtc);
-          goto errout;
-        }
+      rtcerr("ERROR: unsupported GRTC %d\n", grtc);
+      goto errout;
     }
+
+  priv = &g_nrf54l_grtc_priv[grtc];
 
   if (priv->inuse != false)
     {

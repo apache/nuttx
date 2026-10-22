@@ -53,6 +53,10 @@
 #define NRF54L_GRTC_ACKINT(d, s)            ((d)->ops->ackint(d, s))
 #define NRF54L_GRTC_GETBASE(d)              ((d)->ops->getbase(d))
 
+/* Interrupt groups, each with its own interrupt line and enable mask */
+
+#define NRF54L_GRTC_NGROUPS   (4)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -133,6 +137,8 @@ struct nrf54l_grtc_ops_s
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/* grtc is the interrupt group, 0 to NRF54L_GRTC_NGROUPS - 1 */
 
 struct nrf54l_grtc_dev_s *nrf54l_grtc_init(int grtc);
 int nrf54l_grtc_deinit(struct nrf54l_grtc_dev_s *dev);
