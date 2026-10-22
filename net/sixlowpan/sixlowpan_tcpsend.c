@@ -464,7 +464,12 @@ static uint32_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
                                        &ipv6tcp.ipv6,
                                        &sinfo->s_buf[sinfo->s_sent], sndlen,
                                        sinfo->s_destmac);
-          if (ret < 0)
+
+          /* Without IOBs the segment is lost like on the air, the
+           * retransmission timer sends it again.
+           */
+
+          if (ret < 0 && ret != -ENOMEM)
             {
               nerr("ERROR: sixlowpan_queue_frames failed: %d\n", ret);
               sinfo->s_result = ret;
