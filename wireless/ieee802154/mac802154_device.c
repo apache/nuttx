@@ -293,6 +293,24 @@ static int mac802154dev_close(FAR struct file *filep)
 
   kmm_free(opriv);
 
+  /* Nobody can read the received frames once the last instance is closed */
+
+  if (dev->md_open == NULL)
+    {
+      FAR struct ieee802154_data_ind_s *ind;
+
+      ind = (FAR struct ieee802154_data_ind_s *)
+            sq_remfirst(&dev->dataind_queue);
+
+      while (ind)
+        {
+          ieee802154_primitive_free(
+            (FAR struct ieee802154_primitive_s *)ind);
+          ind = (FAR struct ieee802154_data_ind_s *)
+                sq_remfirst(&dev->dataind_queue);
+        }
+    }
+
   /* If there are now no open instances of the driver, purge the list of
    * events.  A registered notification is of no use without an instance to
    * read the events, drop it.
@@ -765,6 +783,14 @@ static int mac802154dev_rxframe(FAR struct mac802154_chardevice_s *dev,
    */
 
   while (nxmutex_lock(&dev->md_lock) != 0);
+
+  /* Nobody can read the frame if the device is not open */
+
+  if (dev->md_open == NULL)
+    {
+      nxmutex_unlock(&dev->md_lock);
+      return -ENODEV;
+    }
 
   /* Push the indication onto the list */
 
