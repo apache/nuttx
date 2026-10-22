@@ -293,13 +293,18 @@ static int mac802154dev_close(FAR struct file *filep)
 
   kmm_free(opriv);
 
-  /* If there are now no open instances of the driver and a signal handler is
-   * not registered, purge the list of events.
+  /* If there are now no open instances of the driver, purge the list of
+   * events.  A registered notification is of no use without an instance to
+   * read the events, drop it.
    */
 
-  if (dev->md_open)
+  if (dev->md_open == NULL)
     {
       FAR struct ieee802154_primitive_s *primitive;
+
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
+      dev->md_notify_registered = false;
+#endif
 
       primitive =
         (FAR struct ieee802154_primitive_s *)
@@ -699,8 +704,7 @@ static int mac802154dev_notify(FAR struct mac802154_maccb_s *maccb,
    * to allocate new notifications.
    */
 
-  if (dev->enableevents &&
-      (dev->md_open != NULL || dev->md_notify_registered))
+  if (dev->enableevents && dev->md_open != NULL)
     {
       /* Get exclusive access to the driver structure.  We don't care about
        * any signals so if we see one, just go back to trying to get access
