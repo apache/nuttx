@@ -1,0 +1,214 @@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+---
+name: Bluetooth
+
+on:
+  pull_request:
+    paths-ignore:
+      - "**/*.md"
+      - "Documentation/**"
+      - "**/CODEOWNERS"
+  push:
+    branches:
+      - master
+      - "releases/*"
+  workflow_dispatch:
+    inputs:
+      companion_ref:
+        description: >-
+          Branch, tag, SHA or refs/pull/N/head in the companion repository
+        default: master
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: bluetooth-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  BSWORLD_REVISION: bf94e2fcc0c876e244dafcea4fb0ea5ed3a1c157
+  NUTTX_REPOSITORY: ${{ github.repository }}
+  APPS_REPOSITORY: apache/nuttx-apps
+  BUILD_JOBS: 4
+  PYTHONDONTWRITEBYTECODE: 1
+
+jobs:
+  bluetooth:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout NuttX
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ env.NUTTX_REPOSITORY }}
+          ref: >-
+            ${{ env.NUTTX_REPOSITORY == github.repository && github.sha
+              || inputs.companion_ref || github.base_ref
+              || (startsWith(github.ref, 'refs/heads/releases/')
+                && github.ref_name)
+              || 'master' }}
+          path: nuttx
+          persist-credentials: false
+
+      - name: Checkout applications
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ env.APPS_REPOSITORY }}
+          ref: >-
+            ${{ env.APPS_REPOSITORY == github.repository && github.sha
+              || inputs.companion_ref || github.base_ref
+              || (startsWith(github.ref, 'refs/heads/releases/')
+                && github.ref_name)
+              || 'master' }}
+          path: apps
+          persist-credentials: false
+
+      - name: Apply Depends-On changes
+        if: github.event_name == 'pull_request' && github.base_ref == 'master'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        shell: bash
+        run: |
+          # Reuse the parser used by the main build workflow.
+          if body=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" \
+              --jq '.body // ""'); then
+            export PR_BODY="$body"
+          else
+            echo "::warning::Could not re-read the PR description;" \
+              "using the event payload."
+          fi
+          python3 nuttx/.github/scripts/depends_on.py --print-state \
+            > "$RUNNER_TEMP/bluetooth-dependencies"
+          read -r state < "$RUNNER_TEMP/bluetooth-dependencies"
+          if [ "$state" = invalid ]; then
+            echo "::warning::Invalid Depends-On declaration;" \
+              "using the normal source selection."
+            exit 0
+          fi
+          git config --global user.name github-actions
+          git config --global user.email github-actions@github.com
+          while read -r dependency; do
+            repo=${dependency%/pull/*}
+            number=${dependency##*/}
+            case "$repo" in
+              apache/nuttx) tree=nuttx ;;
+              apache/nuttx-apps) tree=apps ;;
+              *) exit 1 ;;
+            esac
+            query='[.state, .merged, (.merge_commit_sha // "-")] | @tsv'
+            if info=$(gh api "repos/$repo/pulls/$number" --jq "$query"); then
+              read -r status merged merge_sha <<< "$info"
+            else
+              echo "::warning::Could not read the state of $dependency;" \
+                "applying it."
+              status=unknown
+              merged=false
+              merge_sha=-
+            fi
+            if [ "$status" = closed ] && [ "$merged" != true ]; then
+              echo "::error::Dependency $dependency is closed without merging"
+              exit 1
+            fi
+            if [ -f "$tree/.git/shallow" ]; then
+              git -C "$tree" fetch --unshallow origin
+            fi
+            git -C "$tree" fetch "https://github.com/$repo.git" \
+              "pull/$number/head"
+            dependency_sha=$(git -C "$tree" rev-parse FETCH_HEAD)
+            if [ "$merged" = true ] &&
+                git -C "$tree" merge-base --is-ancestor "$merge_sha" HEAD; then
+              continue
+            fi
+            git -C "$tree" merge-base HEAD "$dependency_sha" > /dev/null
+            if ! commit_list=$(git -C "$tree" rev-list \
+                --reverse "HEAD..$dependency_sha"); then
+              echo "::error::Could not list commits for $dependency"
+              exit 1
+            fi
+            if [ -n "$commit_list" ]; then
+              mapfile -t commits <<< "$commit_list"
+              git -C "$tree" cherry-pick "${commits[@]}"
+            fi
+          done < <(tail -n +2 "$RUNNER_TEMP/bluetooth-dependencies")
+
+      - name: Checkout the validated BSWorld revision
+        uses: actions/checkout@v7
+        with:
+          repository: XiaoMi/bsworld
+          ref: ${{ env.BSWORLD_REVISION }}
+          path: bsworld
+          persist-credentials: false
+
+      - name: Install native build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential gcc-multilib g++-multilib lib32z1-dev \
+            python3.12-dev python3.12-venv repo rsync \
+            autoconf automake bison flex gettext texinfo gperf \
+            libtool pkg-config \
+            libncurses-dev xxd genromfs kconfig-frontends \
+            wget unzip xz-utils
+
+      - name: Cache the fixed simulation infrastructure
+        uses: actions/cache@v6
+        with:
+          path: .bluetooth-ci/dependencies
+          key: >-
+            bluetooth-v1-ubuntu24.04-python3.12-${{ runner.arch }}-${{
+            env.BSWORLD_REVISION }}-${{
+            hashFiles('apps/testing/bluetooth/bsworld/prepare.sh') }}
+
+      - name: Prepare BabbleSim and the Python Controller
+        run: |
+          mkdir -p bluetooth-results
+          bash apps/testing/bluetooth/bsworld/prepare.sh \
+            "$PWD/bsworld" "$PWD/.bluetooth-ci/dependencies" \
+            2>&1 | tee bluetooth-results/prepare.log
+
+      - name: Build the current NuttX and applications sources
+        run: |
+          bash apps/testing/bluetooth/bsworld/build.sh \
+            "$PWD/nuttx" "$PWD/apps" "$PWD/.bluetooth-ci/dependencies" \
+            "$RUNNER_TEMP/bluetooth-build" "$PWD/bluetooth-results"
+
+      - name: Run Bluetooth integration tests
+        run: |
+          source .bluetooth-ci/dependencies/env.sh
+          firmware="$PWD/bluetooth-results/firmware"
+          export BSWORLD_NUTTX_BTSAK_BIN="$firmware/btsak"
+          export BSWORLD_NUTTX_NIMBLE_BIN="$firmware/nimble"
+          python -m pytest -c apps/testing/bluetooth/bsworld/pytest.ini \
+            apps/testing/bluetooth/bsworld -v -n 2 -p no:cacheprovider \
+            --out-dir "$PWD/bluetooth-results/runtime" \
+            --junitxml="$PWD/bluetooth-results/bluetooth.xml" \
+            2>&1 | tee bluetooth-results/bluetooth.log
+
+      - name: Upload Bluetooth results
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: bluetooth-results
+          path: bluetooth-results/
