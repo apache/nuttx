@@ -204,6 +204,9 @@ static FAR void *virtio_mmio_alloc_buf(FAR struct virtio_device *vdev,
                                        size_t size, size_t align);
 static void virtio_mmio_free_buf(FAR struct virtio_device *vdev,
                                  FAR void *buf);
+static int virtio_mmio_get_shm_region(FAR struct virtio_device *vdev,
+                                      uint8_t id,
+                                      FAR struct virtio_shm_region *region);
 static int virtio_mmio_init_device(FAR struct virtio_mmio_device_s *vmdev,
                                    FAR void *regs, int irq);
 
@@ -262,8 +265,8 @@ static const struct virtio_dispatch g_virtio_mmio_dispatch =
 
 static const struct virtio_memory_ops g_virtio_mmio_mmops =
 {
-  .alloc        = virtio_mmio_alloc_buf,
-  .free         = virtio_mmio_free_buf,
+  .alloc          = virtio_mmio_alloc_buf,
+  .free           = virtio_mmio_free_buf,
 
   /* The host (QEMU) can access arbitrary guest memory, so buffers are used
    * as is (zero copy), except user buffers of a per-process address
@@ -271,14 +274,15 @@ static const struct virtio_memory_ops g_virtio_mmio_mmops =
    */
 
 #ifdef CONFIG_ARCH_ADDRENV
-  .free_largest = virtio_addrenv_free_largest,
-  .map          = virtio_addrenv_map,
-  .unmap        = virtio_addrenv_unmap,
+  .free_largest   = virtio_addrenv_free_largest,
+  .map            = virtio_addrenv_map,
+  .unmap          = virtio_addrenv_unmap,
 #else
-  .free_largest = NULL,
-  .map          = NULL,
-  .unmap        = NULL,
+  .free_largest   = NULL,
+  .map            = NULL,
+  .unmap          = NULL,
 #endif
+  .get_shm_region = virtio_mmio_get_shm_region,
 };
 
 /****************************************************************************
@@ -806,6 +810,49 @@ static void virtio_mmio_free_buf(FAR struct virtio_device *vdev,
                                  FAR void *buf)
 {
   kmm_free(buf);
+}
+
+/****************************************************************************
+ * Name: virtio_mmio_get_shm_region
+ ****************************************************************************/
+
+static int virtio_mmio_get_shm_region(FAR struct virtio_device *vdev,
+                                      uint8_t id,
+                                      FAR struct virtio_shm_region *region)
+{
+  FAR struct virtio_mmio_device_s *vmdev =
+    (FAR struct virtio_mmio_device_s *)vdev;
+  uint64_t len;
+  uint64_t base;
+
+  /* The shared memory registers only exist since version 2 */
+
+  if (vdev->id.version == VIRTIO_MMIO_VERSION_1)
+    {
+      return -ENOENT;
+    }
+
+  metal_io_write32(&vmdev->cfg_io, VIRTIO_MMIO_SHM_SEL, id);
+
+  len = metal_io_read32(&vmdev->cfg_io, VIRTIO_MMIO_SHM_LEN_LOW);
+  len |= (uint64_t)metal_io_read32(&vmdev->cfg_io,
+                                   VIRTIO_MMIO_SHM_LEN_HIGH) << 32;
+
+  /* A length of all ones marks a region that does not exist */
+
+  if (len == UINT64_MAX)
+    {
+      return -ENOENT;
+    }
+
+  base = metal_io_read32(&vmdev->cfg_io, VIRTIO_MMIO_SHM_BASE_LOW);
+  base |= (uint64_t)metal_io_read32(&vmdev->cfg_io,
+                                    VIRTIO_MMIO_SHM_BASE_HIGH) << 32;
+
+  region->addr = (metal_phys_addr_t)base;
+  region->va   = metal_io_phys_to_virt(metal_io_get_region(), region->addr);
+  region->len  = (size_t)len;
+  return region->va != NULL ? OK : -ENOMEM;
 }
 
 /****************************************************************************

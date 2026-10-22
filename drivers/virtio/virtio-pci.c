@@ -53,6 +53,9 @@ static FAR void *virtio_pci_alloc_buf(FAR struct virtio_device *vdev,
                                       size_t size, size_t align);
 static void virtio_pci_free_buf(FAR struct virtio_device *vdev,
                                 FAR void *buf);
+static int virtio_pci_get_shm_region(FAR struct virtio_device *vdev,
+                                     uint8_t id,
+                                     FAR struct virtio_shm_region *region);
 
 static int virtio_pci_probe(FAR struct pci_device_s *dev);
 static void virtio_pci_remove(FAR struct pci_device_s *dev);
@@ -81,8 +84,8 @@ static DEFINE_PER_CPU_BMP(struct pci_driver_s, g_virtio_pci_drv) =
 
 static const struct virtio_memory_ops g_virtio_pci_mmops =
 {
-  .alloc        = virtio_pci_alloc_buf,
-  .free         = virtio_pci_free_buf,
+  .alloc          = virtio_pci_alloc_buf,
+  .free           = virtio_pci_free_buf,
 
   /* The host (QEMU) can access arbitrary guest memory, so buffers are used
    * as is (zero copy), except user buffers of a per-process address
@@ -90,14 +93,15 @@ static const struct virtio_memory_ops g_virtio_pci_mmops =
    */
 
 #ifdef CONFIG_ARCH_ADDRENV
-  .free_largest = virtio_addrenv_free_largest,
-  .map          = virtio_addrenv_map,
-  .unmap        = virtio_addrenv_unmap,
+  .free_largest   = virtio_addrenv_free_largest,
+  .map            = virtio_addrenv_map,
+  .unmap          = virtio_addrenv_unmap,
 #else
-  .free_largest = NULL,
-  .map          = NULL,
-  .unmap        = NULL,
+  .free_largest   = NULL,
+  .map            = NULL,
+  .unmap          = NULL,
 #endif
+  .get_shm_region = virtio_pci_get_shm_region,
 };
 
 /****************************************************************************
@@ -181,6 +185,25 @@ static void virtio_pci_free_buf(FAR struct virtio_device *vdev,
                                 FAR void *buf)
 {
   return kmm_free(buf);
+}
+
+/****************************************************************************
+ * Name: virtio_pci_get_shm_region
+ ****************************************************************************/
+
+static int virtio_pci_get_shm_region(FAR struct virtio_device *vdev,
+                                     uint8_t id,
+                                     FAR struct virtio_shm_region *region)
+{
+  FAR struct virtio_pci_device_s *vpdev =
+    (FAR struct virtio_pci_device_s *)vdev;
+
+  if (vpdev->ops->get_shm_region == NULL)
+    {
+      return -ENOENT;
+    }
+
+  return vpdev->ops->get_shm_region(vpdev, id, region);
 }
 
 /****************************************************************************
