@@ -248,6 +248,14 @@ void mrf24j40_norm_setup(FAR struct mrf24j40_radio_s *dev,
 
   mrf24j40_setreg(dev->spi, MRF24J40_TXMCR, reg);
 
+  /* The radio numbers the beacons (macBSN) */
+
+  if ((frame->io_data[0] & IEEE802154_FRAMECTRL_FTYPE) ==
+      IEEE802154_FRAME_BEACON)
+    {
+      frame->io_data[2] = dev->bsn++;
+    }
+
   /* Setup the FIFO */
 
   mrf24j40_setup_fifo(dev, frame->io_data, frame->io_len,
