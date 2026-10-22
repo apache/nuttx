@@ -31,6 +31,7 @@
 #include "nrf52_gpio.h"
 #include "nrf52_gpiote.h"
 #include "nrf52_spi.h"
+#include "nrf52_uid.h"
 
 #include "nrf52_mrf24j40.h"
 
@@ -63,6 +64,8 @@ static int  nrf52_attach_irq(const struct mrf24j40_lower_s *lower,
                              xcpt_t handler, void *arg);
 static void nrf52_enable_irq(const struct mrf24j40_lower_s *lower,
                              bool state);
+static void nrf52_geteaddr(const struct mrf24j40_lower_s *lower,
+                           uint8_t *eaddr);
 
 /****************************************************************************
  * Private Data
@@ -80,12 +83,13 @@ static void nrf52_enable_irq(const struct mrf24j40_lower_s *lower,
 
 static struct nrf52_mrf24j40_s g_mrf24j40_priv =
 {
-  .dev.attach  = nrf52_attach_irq,
-  .dev.enable  = nrf52_enable_irq,
-  .handler     = NULL,
-  .arg         = NULL,
-  .intcfg      = GPIO_MRF24J40_INT,
-  .spidev      = NRF52_MRF24J40_SPI,
+  .dev.attach   = nrf52_attach_irq,
+  .dev.enable   = nrf52_enable_irq,
+  .dev.geteaddr = nrf52_geteaddr,
+  .handler      = NULL,
+  .arg          = NULL,
+  .intcfg       = GPIO_MRF24J40_INT,
+  .spidev       = NRF52_MRF24J40_SPI,
 };
 
 /****************************************************************************
@@ -152,6 +156,22 @@ static void nrf52_enable_irq(const struct mrf24j40_lower_s *lower,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nrf52_geteaddr
+ *
+ * Description:
+ *   The MRF24J40 has no extended address, build a locally administered
+ *   one from the MCU device identifier.
+ *
+ ****************************************************************************/
+
+static void nrf52_geteaddr(const struct mrf24j40_lower_s *lower,
+                           uint8_t *eaddr)
+{
+  nrf52_get_uniqueid(eaddr);
+  eaddr[0] = (eaddr[0] | 0x02) & ~0x01;
+}
 
 /****************************************************************************
  * Name: nrf52_mrf24j40_initialize
