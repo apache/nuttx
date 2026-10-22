@@ -141,8 +141,9 @@ int mac802154_req_associate(MACHANDLE mac,
   ret = mac802154_txdesc_alloc(priv, &txdesc);
   if (ret < 0)
     {
+      /* The MAC is unlocked on failure */
+
       iob_free(iob);
-      nxmutex_unlock(&priv->lock);
       nxsem_post(&priv->opsem);
       return ret;
     }
@@ -407,8 +408,9 @@ int mac802154_resp_associate(MACHANDLE mac,
   ret = mac802154_txdesc_alloc(priv, &txdesc);
   if (ret < 0)
     {
+      /* The MAC is unlocked on failure */
+
       iob_free(iob);
-      nxmutex_unlock(&priv->lock);
       return ret;
     }
 
@@ -894,7 +896,15 @@ static void mac802154_extract_assocresp(FAR void *arg)
 
   nxmutex_lock(&priv->lock);
 
-  mac802154_txdesc_alloc(priv, &respdesc);
+  /* The MAC is unlocked on failure, the association ends as when no
+   * response was extracted
+   */
+
+  if (mac802154_txdesc_alloc(priv, &respdesc) < 0)
+    {
+      mac802154_assoctimeout(priv);
+      return;
+    }
 
   mac802154_createdatareq(priv, &priv->pandesc.coordaddr,
                           IEEE802154_ADDRMODE_EXTENDED, respdesc);
