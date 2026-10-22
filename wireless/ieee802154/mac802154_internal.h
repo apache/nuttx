@@ -321,6 +321,9 @@ void mac802154_createdatareq(FAR struct ieee802154_privmac_s *priv,
 
 void mac802154_updatebeacon(FAR struct ieee802154_privmac_s *priv);
 
+int  mac802154_mhrlen(enum ieee802154_addrmode_e dmode,
+                      enum ieee802154_addrmode_e smode, bool panidcomp);
+
 void mac802154_notify(FAR struct ieee802154_privmac_s *priv,
                       FAR struct ieee802154_primitive_s *primitive);
 
