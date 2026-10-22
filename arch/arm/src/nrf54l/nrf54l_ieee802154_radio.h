@@ -56,6 +56,21 @@
                                        IEEE802154_TURN_AROUND_TIME +    \
                                        10 + 12)
 
+/* RADIO ramp-up time in fast ramp-up mode */
+
+#define NRF54L_RADIOI8_RAMPUP_US       (40)
+
+/* Air time of a frame with the given PHR: SHR, PHR and PSDU, 32 us/octet */
+
+#define NRF54L_RADIOI8_FRAME_US(phr)   (((phr) + 6) * 2 * IEEE802154_SYMBOL_US)
+
+/* IFS after a frame with the given PHR */
+
+#define NRF54L_RADIOI8_IFS_US(phr)                       \
+  (((phr) > IEEE802154_MAX_SIFS_FRAME_SIZE ?            \
+    IEEE802154_LIFS_SYMBOLS : IEEE802154_SIFS_SYMBOLS) * \
+   IEEE802154_SYMBOL_US)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -71,6 +86,7 @@ enum nrf54l_radioi8_state_e
   NRF54L_RADIO_STATE_RX,            /* RX active */
   NRF54L_RADIO_STATE_ACKTX,         /* Transmitting ACK now */
   NRF54L_RADIO_STATE_ED,            /* Energy detection now */
+  NRF54L_RADIO_STATE_BEACONTX,      /* Transmitting beacon now */
 };
 
 /* Radio data */
@@ -98,7 +114,8 @@ struct nrf54l_radioi8_radio_data_s
 
   bool     waitack;             /* TX needs ACK */
   bool     framepending;        /* Frame pending from the last TX ACK */
-  bool     csma_busy;           /* Un-slotted CSMA busy */
+  bool     csma_busy;           /* CSMA-CA transaction in progress */
+  bool     csma_paused;         /* Slotted CSMA-CA waits for the next CAP */
   bool     slotted;             /* Slotted CSMA-CA */
 
   /* Radio configuration */
@@ -107,6 +124,17 @@ struct nrf54l_radioi8_radio_data_s
   uint8_t  max_csma_backoffs;   /* Max CSMA backoffs */
   uint8_t  min_be;              /* Min backoff exponent (BE) */
   uint8_t  max_be;              /* Max backoff exponent (BE) */
+
+#ifdef CONFIG_NRF54L_RADIO_IEEE802154_SUPERFRAME
+  /* Superframe data */
+
+  bool     sftrack;             /* Device tracks the beacons */
+  bool     ble;                 /* Battery life extension */
+  bool     beacon_pending;      /* A beacon waits for the radio */
+  uint8_t  bsn;                 /* macBSN, the beacon sequence number */
+  uint8_t  backoffs;            /* Backoff periods before the next CCA */
+  uint32_t boundary;            /* Backoff period boundary of the next step */
+#endif
 };
 
 /* Forward reference */
@@ -162,6 +190,17 @@ struct nrf54l_radioi8_radio_ops_s
 
   void (*txnext)(struct nrf54l_radioi8_dev_s *dev, uint32_t mindelay);
 
+#ifdef CONFIG_NRF54L_RADIO_IEEE802154_SUPERFRAME
+  /* Setup a beacon frame transfe */
+
+  void (*beacon_setup)(struct nrf54l_radioi8_dev_s *dev,
+                       uint8_t *data, uint8_t len);
+
+  /* Transmit a beacon frame (non CSMA-CA transfer) */
+
+  void (*beacon_tx)(struct nrf54l_radioi8_dev_s *dev);
+#endif
+
   /* Reset radio state to work with IEEE 802.15.4 */
 
   int (*reset)(struct nrf54l_radioi8_radio_s *dev);
@@ -192,6 +231,9 @@ struct nrf54l_radioi8_radio_s
   uint8_t *rxbuf;
   uint8_t *txbuf;
   uint8_t *ackbuf;
+#ifdef CONFIG_NRF54L_RADIO_IEEE802154_SUPERFRAME
+  uint8_t *beaconbuf;
+#endif
 
   /* For deferring interrupts work */
 
@@ -204,6 +246,12 @@ struct nrf54l_radioi8_radio_s
   /* For deferring poll work to the work queue */
 
   struct work_s csma_pollwork;
+
+#ifdef CONFIG_NRF54L_RADIO_IEEE802154_SUPERFRAME
+  /* For deferring poll work to the work queue */
+
+  struct work_s gts_pollwork;
+#endif
 
   /* Radio data */
 
@@ -224,6 +272,6 @@ struct nrf54l_radioi8_radio_s
 
 struct nrf54l_radioi8_radio_s *
 nrf54l_radioi8_radio_init(struct nrf54l_radioi8_dev_s *dev,
-                         struct nrf54l_radio_board_s *board);
+                          struct nrf54l_radio_board_s *board);
 
 #endif  /* __ARCH_ARM_SRC_NRF54L_NRF54L_IEEE802154_RADIO_H */

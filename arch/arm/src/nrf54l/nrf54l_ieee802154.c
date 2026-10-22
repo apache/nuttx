@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/debug.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <nuttx/kmalloc.h>
@@ -69,54 +70,54 @@ static struct nrf54l_radioi8_dev_s g_nrf54l_radioi8;
 /* Set/get radio attributes */
 
 static int nrf54l_radioi8_setrxmode(struct nrf54l_radioi8_dev_s *dev,
-                                   int mode);
+                                    int mode);
 static int nrf54l_radioi8_setpanid(struct nrf54l_radioi8_dev_s *dev,
-                                  const uint8_t *panid);
+                                   const uint8_t *panid);
 static int nrf54l_radioi8_setsaddr(struct nrf54l_radioi8_dev_s *dev,
-                                  const uint8_t *saddr);
+                                   const uint8_t *saddr);
 static int nrf54l_radioi8_seteaddr(struct nrf54l_radioi8_dev_s *dev,
-                                  const uint8_t *eaddr);
+                                   const uint8_t *eaddr);
 static int nrf54l_radioi8_setcoordsaddr(struct nrf54l_radioi8_dev_s *dev,
                                         const uint8_t *saddr);
 static int nrf54l_radioi8_setdevmode(struct nrf54l_radioi8_dev_s *dev,
-                                    uint8_t mode);
+                                     uint8_t mode);
 
 /* Radio ops */
 
 static int nrf54l_radioi8_bind(struct ieee802154_radio_s *radio,
-                              struct ieee802154_radiocb_s *radiocb);
+                               struct ieee802154_radiocb_s *radiocb);
 static int nrf54l_radioi8_reset(struct ieee802154_radio_s *radio);
 static int nrf54l_radioi8_getattr(struct ieee802154_radio_s *radio,
-                                 enum ieee802154_attr_e attr,
-                                 union ieee802154_attr_u *attrval);
+                                  enum ieee802154_attr_e attr,
+                                  union ieee802154_attr_u *attrval);
 static int nrf54l_radioi8_setattr(struct ieee802154_radio_s *radio,
-                                 enum ieee802154_attr_e attr,
-                                 const union ieee802154_attr_u *attrval);
+                                  enum ieee802154_attr_e attr,
+                                  const union ieee802154_attr_u *attrval);
 static int nrf54l_radioi8_txnotify(struct ieee802154_radio_s *radio,
-                                  bool gts);
+                                   bool gts);
 static int nrf54l_radioi8_txdelayed(struct ieee802154_radio_s *radio,
-                                   struct ieee802154_txdesc_s *txdesc,
-                                   uint32_t symboldelay);
+                                    struct ieee802154_txdesc_s *txdesc,
+                                    uint32_t symboldelay);
 static int nrf54l_radioi8_rxenable(struct ieee802154_radio_s *radio,
-                                  bool enable);
+                                   bool enable);
 static int nrf54l_radioi8_setchannel(struct nrf54l_radioi8_dev_s *dev,
-                                    uint8_t chan);
+                                     uint8_t chan);
 static int nrf54l_radioi8_setcca(struct nrf54l_radioi8_dev_s *dev,
-                                struct ieee802154_cca_s *cca);
+                                 struct ieee802154_cca_s *cca);
 static int nrf54l_radioi8_energydetect(struct ieee802154_radio_s *radio,
-                                      uint32_t nsymbols);
+                                       uint32_t nsymbols);
 
 static int
 nrf54l_radioi8_beaconstart(struct ieee802154_radio_s *radio,
-                          const struct ieee802154_superframespec_s *sfspec,
-                          struct ieee802154_beaconframe_s *beacon);
+                           const struct ieee802154_superframespec_s *sfspec,
+                           struct ieee802154_beaconframe_s *beacon);
 static int
 nrf54l_radioi8_beaconupdate(struct ieee802154_radio_s *radio,
-                           struct ieee802154_beaconframe_s *beacon);
+                            struct ieee802154_beaconframe_s *beacon);
 static int nrf54l_radioi8_beaconstop(struct ieee802154_radio_s *radio);
 static int
 nrf54l_radioi8_sfupdate(struct ieee802154_radio_s *radio,
-                       const struct ieee802154_superframespec_s *sfspec);
+                        const struct ieee802154_superframespec_s *sfspec);
 
 /****************************************************************************
  * Private Functions
@@ -131,7 +132,7 @@ nrf54l_radioi8_sfupdate(struct ieee802154_radio_s *radio,
  ****************************************************************************/
 
 static int nrf54l_radioi8_setrxmode(struct nrf54l_radioi8_dev_s *dev,
-                                   int mode)
+                                    int mode)
 {
   wlinfo("setrxmode %d\n", mode);
 
@@ -154,7 +155,7 @@ static int nrf54l_radioi8_setrxmode(struct nrf54l_radioi8_dev_s *dev,
  ****************************************************************************/
 
 static int nrf54l_radioi8_setpanid(struct nrf54l_radioi8_dev_s *dev,
-                                  const uint8_t *panid)
+                                   const uint8_t *panid)
 {
   wlinfo("setpanid: %02X:%02X\n", panid[0], panid[1]);
   IEEE802154_PANIDCOPY(dev->state.addr.panid, panid);
@@ -173,7 +174,7 @@ static int nrf54l_radioi8_setpanid(struct nrf54l_radioi8_dev_s *dev,
  ****************************************************************************/
 
 static int nrf54l_radioi8_setsaddr(struct nrf54l_radioi8_dev_s *dev,
-                                  const uint8_t *saddr)
+                                   const uint8_t *saddr)
 {
   wlinfo("setsaddr: %02X:%02X\n", saddr[0], saddr[1]);
   IEEE802154_SADDRCOPY(dev->state.addr.saddr, saddr);
@@ -191,7 +192,7 @@ static int nrf54l_radioi8_setsaddr(struct nrf54l_radioi8_dev_s *dev,
  ****************************************************************************/
 
 static int nrf54l_radioi8_seteaddr(struct nrf54l_radioi8_dev_s *dev,
-                                  const uint8_t *eaddr)
+                                   const uint8_t *eaddr)
 {
   int i = 0;
 
@@ -265,7 +266,7 @@ static int nrf54l_radioi8_setcoordeaddr(struct nrf54l_radioi8_dev_s *dev,
  ****************************************************************************/
 
 static int nrf54l_radioi8_setdevmode(struct nrf54l_radioi8_dev_s *dev,
-                                    uint8_t mode)
+                                     uint8_t mode)
 {
   wlinfo("setdevmode %d\n", mode);
 
@@ -288,7 +289,7 @@ static int nrf54l_radioi8_setdevmode(struct nrf54l_radioi8_dev_s *dev,
  ****************************************************************************/
 
 static int nrf54l_radioi8_bind(struct ieee802154_radio_s *radio,
-                              struct ieee802154_radiocb_s *radiocb)
+                               struct ieee802154_radiocb_s *radiocb)
 {
   struct nrf54l_radioi8_dev_s *dev = (struct nrf54l_radioi8_dev_s *)radio;
 
@@ -360,6 +361,12 @@ static int nrf54l_radioi8_reset(struct ieee802154_radio_s *radio)
 
   dev->tim->ops->reset(dev);
 
+#ifdef CONFIG_NRF54L_RADIO_IEEE802154_SUPERFRAME
+  /* Reset RTC */
+
+  dev->rtc->ops->reset(dev);
+#endif
+
   /* Set channel */
 
   nrf54l_radioi8_setchannel(dev, 11);
@@ -393,8 +400,8 @@ errout:
  ****************************************************************************/
 
 static int nrf54l_radioi8_getattr(struct ieee802154_radio_s *radio,
-                                 enum ieee802154_attr_e attr,
-                                 union ieee802154_attr_u *attrval)
+                                  enum ieee802154_attr_e attr,
+                                  union ieee802154_attr_u *attrval)
 {
   struct nrf54l_radioi8_dev_s *dev = (struct nrf54l_radioi8_dev_s *)radio;
   int                         ret = OK;
@@ -470,8 +477,8 @@ static int nrf54l_radioi8_getattr(struct ieee802154_radio_s *radio,
  ****************************************************************************/
 
 static int nrf54l_radioi8_setattr(struct ieee802154_radio_s *radio,
-                                 enum ieee802154_attr_e attr,
-                                 const union ieee802154_attr_u *attrval)
+                                  enum ieee802154_attr_e attr,
+                                  const union ieee802154_attr_u *attrval)
 {
   struct nrf54l_radioi8_dev_s *dev = (struct nrf54l_radioi8_dev_s *)radio;
   int                         ret = IEEE802154_STATUS_SUCCESS;
@@ -554,7 +561,7 @@ static int nrf54l_radioi8_setattr(struct ieee802154_radio_s *radio,
  ****************************************************************************/
 
 static int nrf54l_radioi8_txnotify(struct ieee802154_radio_s *radio,
-                                  bool gts)
+                                   bool gts)
 {
   struct nrf54l_radioi8_dev_s *dev = (struct nrf54l_radioi8_dev_s *)radio;
   int                         ret = OK;
@@ -583,8 +590,8 @@ static int nrf54l_radioi8_txnotify(struct ieee802154_radio_s *radio,
  ****************************************************************************/
 
 static int nrf54l_radioi8_txdelayed(struct ieee802154_radio_s *radio,
-                                   struct ieee802154_txdesc_s *txdesc,
-                                   uint32_t symboldelay)
+                                    struct ieee802154_txdesc_s *txdesc,
+                                    uint32_t symboldelay)
 {
   struct nrf54l_radioi8_dev_s *dev = (struct nrf54l_radioi8_dev_s *)radio;
   int                         ret = OK;
@@ -623,7 +630,7 @@ static int nrf54l_radioi8_txdelayed(struct ieee802154_radio_s *radio,
  ****************************************************************************/
 
 static int nrf54l_radioi8_rxenable(struct ieee802154_radio_s *radio,
-                                  bool enable)
+                                   bool enable)
 {
   struct nrf54l_radioi8_dev_s *dev = (struct nrf54l_radioi8_dev_s *)radio;
 
@@ -640,7 +647,7 @@ static int nrf54l_radioi8_rxenable(struct ieee802154_radio_s *radio,
  ****************************************************************************/
 
 static int nrf54l_radioi8_energydetect(struct ieee802154_radio_s *radio,
-                                      uint32_t nsymbols)
+                                       uint32_t nsymbols)
 {
   struct nrf54l_radioi8_dev_s *dev = (struct nrf54l_radioi8_dev_s *)radio;
 
@@ -663,7 +670,7 @@ static int nrf54l_radioi8_energydetect(struct ieee802154_radio_s *radio,
  ****************************************************************************/
 
 static int nrf54l_radioi8_setchannel(struct nrf54l_radioi8_dev_s *dev,
-                                    uint8_t chan)
+                                     uint8_t chan)
 {
   int ret = OK;
 
@@ -701,7 +708,7 @@ static int nrf54l_radioi8_setchannel(struct nrf54l_radioi8_dev_s *dev,
  ****************************************************************************/
 
 static int nrf54l_radioi8_setcca(struct nrf54l_radioi8_dev_s *dev,
-                                struct ieee802154_cca_s *cca)
+                                 struct ieee802154_cca_s *cca)
 {
   int ret = OK;
 
@@ -739,10 +746,58 @@ static int nrf54l_radioi8_setcca(struct nrf54l_radioi8_dev_s *dev,
 
 static int
 nrf54l_radioi8_beaconstart(struct ieee802154_radio_s *radio,
-                          const struct ieee802154_superframespec_s *sfspec,
-                          struct ieee802154_beaconframe_s *beacon)
+                           const struct ieee802154_superframespec_s *sfspec,
+                           struct ieee802154_beaconframe_s *beacon)
 {
+#ifdef CONFIG_NRF54L_RADIO_IEEE802154_SUPERFRAME
+  struct nrf54l_radioi8_dev_s *dev = (struct nrf54l_radioi8_dev_s *)radio;
+  irqstate_t                  flags;
+  int                         ret;
+
+  if (sfspec->pancoord)
+    {
+      flags = enter_critical_section();
+
+      /* Local copy */
+
+      memcpy(&dev->state.sf, (void *)sfspec,
+             sizeof(struct ieee802154_superframespec_s));
+
+      /* Configure the superframe timings */
+
+      ret = dev->rtc->ops->setup(dev, &dev->state.sf);
+      if (ret == OK)
+        {
+          /* Setup beacon transmission, macBSN starts from a random value */
+
+          dev->radio->ops->beacon_setup(dev, beacon->bf_data,
+                                        beacon->bf_len);
+          dev->radio->state.bsn = rand();
+
+          /* Slotted CSMA-CA in the CAP */
+
+          dev->radio->state.slotted = true;
+          dev->radio->state.ble     = sfspec->ble;
+
+          /* The PAN coordinator defines the superframe */
+
+          dev->radio->state.sftrack = false;
+          dev->rtc->ops->start(dev);
+        }
+
+      leave_critical_section(flags);
+    }
+  else
+    {
+      /* TODO: missing logic for non-PAN coord */
+
+      ret = -ENOTTY;
+    }
+
+  return ret;
+#else
   return -ENOTSUP;
+#endif
 }
 
 /****************************************************************************
@@ -755,10 +810,57 @@ nrf54l_radioi8_beaconstart(struct ieee802154_radio_s *radio,
 
 static int
 nrf54l_radioi8_beaconupdate(struct ieee802154_radio_s *radio,
-                           struct ieee802154_beaconframe_s *beacon)
+                            struct ieee802154_beaconframe_s *beacon)
 {
+#ifdef CONFIG_NRF54L_RADIO_IEEE802154_SUPERFRAME
+  struct nrf54l_radioi8_dev_s *dev = (struct nrf54l_radioi8_dev_s *)radio;
+  irqstate_t                  flags;
+
+  flags = enter_critical_section();
+
+  /* The beacon on the air is replaced when it is sent */
+
+  if (dev->radio->state.state == NRF54L_RADIO_STATE_BEACONTX)
+    {
+      dev->state.beacon_next = beacon;
+    }
+  else
+    {
+      dev->radio->ops->beacon_setup(dev, beacon->bf_data, beacon->bf_len);
+    }
+
+  leave_critical_section(flags);
+
+  return OK;
+#else
   return -ENOTSUP;
+#endif
 }
+
+#ifdef CONFIG_NRF54L_RADIO_IEEE802154_SUPERFRAME
+/****************************************************************************
+ * Name: nrf54l_radioi8_unslotted
+ *
+ * Description:
+ *   Switch to un-slotted CSMA-CA, a transaction paused for the next CAP
+ *   starts again un-slotted.  Must be called with the radio locked.
+ *
+ ****************************************************************************/
+
+static void nrf54l_radioi8_unslotted(struct nrf54l_radioi8_dev_s *dev)
+{
+  dev->radio->state.slotted = false;
+  dev->radio->state.sftrack = false;
+
+  if (dev->radio->state.csma_paused)
+    {
+      dev->radio->state.csma_paused = false;
+      dev->radio->state.csma_busy   = false;
+      dev->state.csma_pending       = true;
+      dev->radio->ops->txnext(dev, 0);
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: nrf54l_radioi8_beaconstop
@@ -770,7 +872,23 @@ nrf54l_radioi8_beaconupdate(struct ieee802154_radio_s *radio,
 
 static int nrf54l_radioi8_beaconstop(struct ieee802154_radio_s *radio)
 {
+#ifdef CONFIG_NRF54L_RADIO_IEEE802154_SUPERFRAME
+  struct nrf54l_radioi8_dev_s *dev = (struct nrf54l_radioi8_dev_s *)radio;
+  irqstate_t                  flags;
+
+  flags = enter_critical_section();
+
+  /* Stop RTC */
+
+  dev->rtc->ops->stop(dev);
+  nrf54l_radioi8_unslotted(dev);
+
+  leave_critical_section(flags);
+
+  return OK;
+#else
   return -ENOTSUP;
+#endif
 }
 
 /****************************************************************************
@@ -783,9 +901,53 @@ static int nrf54l_radioi8_beaconstop(struct ieee802154_radio_s *radio)
 
 static int
 nrf54l_radioi8_sfupdate(struct ieee802154_radio_s *radio,
-                       const struct ieee802154_superframespec_s *sfspec)
+                        const struct ieee802154_superframespec_s *sfspec)
 {
+#ifdef CONFIG_NRF54L_RADIO_IEEE802154_SUPERFRAME
+  struct nrf54l_radioi8_dev_s *dev = (struct nrf54l_radioi8_dev_s *)radio;
+  irqstate_t                  flags;
+  int                         ret = OK;
+
+  flags = enter_critical_section();
+
+  /* Local copy */
+
+  memcpy(&dev->state.sf, (void *)sfspec,
+         sizeof(struct ieee802154_superframespec_s));
+
+  /* If we are operating on a beacon-enabled network, use slotted CSMA */
+
+  if (sfspec->beaconorder < 15)
+    {
+      /* Configure the superframe timings */
+
+      ret = dev->rtc->ops->setup(dev, &dev->state.sf);
+      if (ret == OK)
+        {
+          /* Need slotted CSMA-CA */
+
+          dev->radio->state.slotted = true;
+          dev->radio->state.ble     = sfspec->ble;
+
+          /* Sync with the beacons */
+
+          dev->radio->state.sftrack = true;
+        }
+    }
+  else
+    {
+      /* Need un-slotted CSMA-CA */
+
+      dev->rtc->ops->stop(dev);
+      nrf54l_radioi8_unslotted(dev);
+    }
+
+  leave_critical_section(flags);
+
+  return ret;
+#else
   return -ENOTSUP;
+#endif
 }
 
 /****************************************************************************
@@ -831,6 +993,10 @@ nrf54l_radioi8_register(struct nrf54l_radio_board_s *board)
   DEBUGASSERT(dev->radio->ops->setcca);
   DEBUGASSERT(dev->radio->ops->norm_setup);
   DEBUGASSERT(dev->radio->ops->norm_trigger);
+#ifdef CONFIG_NRF54L_RADIO_IEEE802154_SUPERFRAME
+  DEBUGASSERT(dev->radio->ops->beacon_setup);
+  DEBUGASSERT(dev->radio->ops->beacon_tx);
+#endif
   DEBUGASSERT(dev->radio->ops->reset);
   DEBUGASSERT(dev->radio->ops->csma_poll);
   DEBUGASSERT(dev->radio->ops->gts_poll);
@@ -847,6 +1013,24 @@ nrf54l_radioi8_register(struct nrf54l_radio_board_s *board)
   DEBUGASSERT(dev->tim->ops->setup);
   DEBUGASSERT(dev->tim->ops->stop);
   DEBUGASSERT(dev->tim->ops->reset);
+
+#ifdef CONFIG_NRF54L_RADIO_IEEE802154_SUPERFRAME
+  /* Initialize RTC */
+
+  dev->rtc = nrf54l_radioi8_rtc_init(dev);
+  if (dev->rtc == NULL)
+    {
+      wlerr("nrf54l_radioi8_rtc_init failed %d\n", -errno);
+      return NULL;
+    }
+
+  DEBUGASSERT(dev->rtc->ops->setup);
+  DEBUGASSERT(dev->rtc->ops->start);
+  DEBUGASSERT(dev->rtc->ops->sync);
+  DEBUGASSERT(dev->rtc->ops->stop);
+  DEBUGASSERT(dev->rtc->ops->reset);
+  DEBUGASSERT(dev->rtc->ops->elapsed);
+#endif
 
   /* Connect MAC ops */
 

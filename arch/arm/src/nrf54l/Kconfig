@@ -565,6 +565,20 @@ config NRF54L_RADIO_IEEE802154
 
 if NRF54L_RADIO_IEEE802154
 
+config NRF54L_RADIO_IEEE802154_SUPERFRAME
+	bool "RADIO IEEE802.15.4 superframe support"
+	default n
+	select NRF54L_GRTC
+	select NRF54L_USE_LFCLK
+	---help---
+		The superframe timing uses GRTC interrupt group 1 and compare
+		channel 1, the system timer keeps group 0 and channel 0.
+
+config NRF54L_RADIO_IEEE802154_GTS_SLOTS
+	int "RADIO IEEE802.15.4 GTS slots"
+	default 2
+	depends on NRF54L_RADIO_IEEE802154_SUPERFRAME
+
 config NRF54L_RADIO_IEEE802154_TRACE
 	bool "RADIO IEEE802.15.4 trace support"
 	default n

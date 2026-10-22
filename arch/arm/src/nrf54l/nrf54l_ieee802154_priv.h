@@ -35,11 +35,20 @@
 #include <nuttx/wireless/ieee802154/ieee802154_radio.h>
 
 #include "nrf54l_ieee802154_radio.h"
+#include "nrf54l_ieee802154_rtc.h"
 #include "nrf54l_ieee802154_tim.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* GTS slots */
+
+#ifndef CONFIG_NRF54L_RADIO_IEEE802154_GTS_SLOTS
+#  define NRF54L_GTS_SLOTS 0
+#else
+#  define NRF54L_GTS_SLOTS CONFIG_NRF54L_RADIO_IEEE802154_GTS_SLOTS
+#endif
 
 /****************************************************************************
  * Public Types
@@ -90,6 +99,21 @@ struct nrf54l_radioi8_state_s
   bool     txdelayed_pending;   /* No CSMA transfer not started yet */
   bool     csma_pending;        /* CSMA transfer not started yet */
   uint32_t txdelayed_delay;     /* Delay of the pending no CSMA transfer */
+
+#ifdef CONFIG_NRF54L_RADIO_IEEE802154_SUPERFRAME
+  /* Superframe data */
+
+  struct ieee802154_superframespec_s sf;
+
+  /* Beacon updated during its TX */
+
+  struct ieee802154_beaconframe_s *beacon_next;
+
+  /* TX GTS */
+
+  struct ieee802154_txdesc_s *gts_desc[NRF54L_GTS_SLOTS];
+  bool                        gts_busy[NRF54L_GTS_SLOTS];
+#endif
 };
 
 /* IEEE 802.15.4 radio device */
@@ -113,6 +137,10 @@ struct nrf54l_radioi8_dev_s
   struct nrf54l_radioi8_tim_s *tim;
 
   /* Low resolution, low power timer */
+
+#ifdef CONFIG_NRF54L_RADIO_IEEE802154_SUPERFRAME
+  struct nrf54l_radioi8_rtc_s *rtc;
+#endif
 
   /* Radio state */
 

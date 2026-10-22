@@ -50,14 +50,13 @@ static const char *g_radio_trace_str[] =
   "RADIO IRQ: WAIT ACK",
   "RADIO IRQ: RX ACK DONE",
   "RADIO IRQ: TX CCA BUSY",
+  "RADIO IRQ: BEACON TX",
 
   "TIM IRQ: TIM ACK TX",
   "TIM IRQ; TIM TX DELAY",
   "TIM IRQ: TIM WAIT ACK",
   "TIM IRQ: TIM CSMA DELAY",
   "RTC IRQ: RTC SD",
-  "RTC IRQ: RTC CAP",
-  "RTC IRQ: RTC TIMESLOT",
   "RTC IRQ: RTC BI",
 
   "WORK: RX",
@@ -73,9 +72,12 @@ static const char *g_radio_trace_str[] =
   "CSMASETUP",
   "CSMATRIGGER",
   "NOCSMATRIGGER",
+  "BEACONTX",
   "NOACK",
   "DROPFRAME",
   "TXTRYAGAIN",
+  "SFSYNC",
+  "CSMAPAUSE",
 };
 
 /* Trace data */
