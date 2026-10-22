@@ -253,6 +253,7 @@ struct usbhost_state_s
   volatile bool           open;         /* TRUE: The mouse device is open */
   volatile bool           valid;        /* TRUE: New sample data is available */
   uint8_t                 devno;        /* Minor number in the /dev/mouse[n] device */
+  uint8_t                 ifno;         /* Mouse interface number */
   uint8_t                 nwaiters;     /* Number of threads waiting for mouse data */
 #ifdef CONFIG_HIDMOUSE_TSCIF
   uint8_t                 id;           /* Current "touch" point ID */
@@ -1359,6 +1360,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
   FAR struct usbhost_epdesc_s epindesc;
   int remaining;
   uint8_t found = 0;
+  bool ifmatch = false;
   bool done = false;
   int ret;
 
@@ -1404,6 +1406,9 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
           case USB_DESC_TYPE_INTERFACE:
             {
+              FAR struct usb_ifdesc_s *ifdesc =
+                (FAR struct usb_ifdesc_s *)configdesc;
+
               uinfo("Interface descriptor\n");
               DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
 
@@ -1421,9 +1426,16 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                 }
               else
                 {
-                  /* Otherwise, discard any endpoints previously found */
+                  /* Otherwise, discard any endpoints previously found.  The
+                   * whole configuration is passed to us, so in a composite
+                   * device (e.g. a keyboard + mouse receiver) only use the
+                   * endpoints of the HID mouse interface.
+                   */
 
-                  found = USBHOST_IFFOUND;
+                  ifmatch = ifdesc->classid == USB_CLASS_HID &&
+                            ifdesc->protocol == USBHID_PROTOCOL_MOUSE;
+                  found = ifmatch ? USBHOST_IFFOUND : 0;
+                  priv->ifno = ifdesc->ifno;
                 }
             }
             break;
@@ -1446,9 +1458,10 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
               uinfo("Endpoint descriptor\n");
               DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
 
-              /* Check for an interrupt endpoint. */
+              /* Check for an interrupt endpoint of the mouse interface */
 
-              if ((epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) ==
+              if (ifmatch &&
+                  (epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) ==
                   USB_EP_ATTR_XFER_INT)
                 {
                   /* Yes.. it is a interrupt endpoint.  IN or OUT? */
@@ -1558,6 +1571,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
 static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 {
+  FAR struct usb_ctrlreq_s *ctrlreq;
   char devname[DEV_NAMELEN];
   int ret;
 
@@ -1570,6 +1584,30 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
     {
       uerr("ERROR: Failed to allocate transfer buffer\n");
       return ret;
+    }
+
+  /* The reports are decoded using the fixed boot protocol format, but a HID
+   * device starts in report protocol after configuration.  Select the boot
+   * protocol (the transfer buffer is not in use yet, so it holds the
+   * request).
+   */
+
+  ctrlreq           = (FAR struct usb_ctrlreq_s *)priv->tbuffer;
+  ctrlreq->type     = USB_REQ_DIR_OUT | USB_REQ_TYPE_CLASS |
+                      USB_REQ_RECIPIENT_INTERFACE;
+  ctrlreq->req      = USBHID_REQUEST_SETPROTOCOL;
+  ctrlreq->value[0] = 0;               /* 0 = Boot protocol */
+  ctrlreq->value[1] = 0;
+  ctrlreq->index[0] = priv->ifno;
+  ctrlreq->index[1] = 0;
+  ctrlreq->len[0]   = 0;
+  ctrlreq->len[1]   = 0;
+
+  ret = DRVR_CTRLOUT(priv->usbclass.hport->drvr, priv->usbclass.hport->ep0,
+                     ctrlreq, NULL);
+  if (ret < 0)
+    {
+      uwarn("WARNING: SET_PROTOCOL(boot) failed: %d\n", ret);
     }
 
   /* Increment the reference count.  This will prevent usbhost_destroy() from
