@@ -36,7 +36,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* struct statfs file system types. */
+/* The file system types of struct statfs.  POSIX does not define them:
+ * NUTTX_NO_EXTENSIONS (see nuttx/compiler.h) hides them, so that a
+ * program can use these names for its own constants.
+ */
+
+#ifndef NUTTX_NO_EXTENSIONS
 
 #define ADFS_SUPER_MAGIC      0xadf5
 #define AFFS_SUPER_MAGIC      0xadff
@@ -100,6 +105,8 @@
 #define ZIPFS_MAGIC           0x504b
 #define XIPFS_MAGIC           0x58495046
 #define V9FS_MAGIC            0x01021997
+
+#endif /* NUTTX_NO_EXTENSIONS */
 
 #if defined(CONFIG_FS_LARGEFILE)
 #  define statfs64            statfs
