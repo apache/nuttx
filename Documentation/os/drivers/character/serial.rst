@@ -61,10 +61,10 @@ Serial Device Drivers
       a ``NULL`` pointer or a PID that is not positive gives ``EINVAL``.
 
    The C library exposes these through ``tcgetpgrp()``, ``tcsetpgrp()``,
-   ``tcgetsid()``, ``setsid()``, ``getsid()`` and ``setpgid()``.  Because
-   sending a signal to a process group (``kill(-pgrp, signo)``) is not
-   supported, TTY signals always target the single foreground PID rather
-   than an entire group.
+   ``tcgetsid()``, ``setsid()``, ``getsid()`` and ``setpgid()``.  A process
+   group is one process, so ``kill(-pgrp, signo)`` and ``killpg()`` send
+   the signal to the process ``pgrp``, and TTY signals go to the single
+   foreground PID.
 
 -  **User Access**. Serial drivers are, ultimately, normal
    `character drivers <#chardrivers>`__ and are accessed as other
