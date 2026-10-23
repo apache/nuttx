@@ -42,6 +42,7 @@ set(SRCS
     lib_getoptoptp.c
     lib_times.c
     lib_alarm.c
+    lib_fdatasync.c
     lib_fstatvfs.c
     lib_statvfs.c
     lib_sleep.c

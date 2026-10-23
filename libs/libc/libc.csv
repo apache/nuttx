@@ -64,6 +64,7 @@
 "exit","stdlib.h","","noreturn","int"
 "fchdir","unistd.h","!defined(CONFIG_DISABLE_ENVIRON)","int","int"
 "fclose","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR FILE *"
+"fdatasync","unistd.h","","int","int"
 "fdopen","stdio.h","defined(CONFIG_FILE_STREAM)","FAR FILE *","int","FAR const char *"
 "feof","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR FILE *"
 "ferror","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR FILE *"
