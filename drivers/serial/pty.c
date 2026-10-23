@@ -894,7 +894,6 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       /* Make the controlling terminal of the calling process */
 
       case TIOCSCTTY:
-      case TIOCSPGRP:
         {
           /* Save the PID of the foreground process group that is to receive
            * tty-generated signals.  A zero 'arg' selects the calling task
@@ -909,6 +908,26 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           else
             {
               dev->pd_pid = arg > 0 ? (pid_t)arg : nxsched_getpid();
+              ret = 0;
+            }
+        }
+        break;
+
+      /* Set the foreground process group: as tcsetpgrp() passes it, 'arg'
+       * points to the process group ID.
+       */
+
+      case TIOCSPGRP:
+        {
+          FAR const pid_t *pgrp = (FAR const pid_t *)((uintptr_t)arg);
+
+          if (pgrp == NULL || *pgrp <= 0)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              dev->pd_pid = *pgrp;
               ret = 0;
             }
         }
