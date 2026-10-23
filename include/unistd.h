@@ -287,10 +287,6 @@
 #define STDIN_FILENO                     0       /* File number of stdin */
 #define STDOUT_FILENO                    1       /* File number of stdout */
 
-/* Helpers and legacy compatibility definitions */
-
-#define fdatasync(f)                     fsync(f)
-
 /* Accessor functions associated with getopt().  getopt() keeps optarg,
  * opterr, optind and optopt per task, so the names are macros.  A program
  * that brings its own getopt() and its own variables of these names can
@@ -388,6 +384,7 @@ int     close(int fd);
 int     dup(int fd);
 int     dup2(int fd1, int fd2);
 int     dup3(int fd1, int fd2, int flags);
+int     fdatasync(int fd);
 int     fsync(int fd);
 off_t   lseek(int fd, off_t offset, int whence);
 ssize_t read(int fd, FAR void *buf, size_t nbytes);
