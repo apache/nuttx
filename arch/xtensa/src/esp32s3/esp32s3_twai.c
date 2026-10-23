@@ -1226,6 +1226,11 @@ struct can_dev_s *esp32s3_twaiinitialize(void)
 
   flags = spin_lock_irqsave(&g_twaipriv.lock);
 
+  /* Enable the TWAI peripheral clock and release it from reset */
+
+  modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, 0, SYSTEM_TWAI_CLK_EN);
+  modifyreg32(SYSTEM_PERIP_RST_EN0_REG, SYSTEM_TWAI_RST, 0);
+
   /* Configure CAN GPIO pins */
 
   esp_configgpio(CONFIG_ESP32S3_TWAI_TXPIN, OUTPUT_FUNCTION_2);
