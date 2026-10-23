@@ -1118,6 +1118,19 @@ static void stm32l4serial_setformat(struct uart_dev_s *dev)
   struct stm32_serial_s *priv =
       (struct stm32_serial_s *)dev->priv;
   uint32_t regval;
+  uint32_t cr1_ue;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  /* Disable UE: the baud rate, parity and word length bits can not be
+   * written while UE = 1.
+   */
+
+  regval = stm32l4serial_getreg(priv, STM32_USART_CR1_OFFSET);
+  cr1_ue = regval & USART_CR1_UE;
+  stm32l4serial_putreg(priv, STM32_USART_CR1_OFFSET,
+                       regval & ~USART_CR1_UE);
 
   /* Set baud rate */
 
@@ -1206,6 +1219,13 @@ static void stm32l4serial_setformat(struct uart_dev_s *dev)
 #endif
 
   stm32l4serial_putreg(priv, STM32_USART_CR3_OFFSET, regval);
+
+  /* Restore UE */
+
+  regval = stm32l4serial_getreg(priv, STM32_USART_CR1_OFFSET);
+  stm32l4serial_putreg(priv, STM32_USART_CR1_OFFSET, regval | cr1_ue);
+
+  leave_critical_section(flags);
 }
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 
