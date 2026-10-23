@@ -117,11 +117,11 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
     }
   else if (delay > 0)
     {
-      work->qtime = clock() + delay + 1;
+      work->qtime = CLOCK2TICK(clock()) + delay + 1;
     }
   else
     {
-      work->qtime = clock();
+      work->qtime = CLOCK2TICK(clock());
     }
 
   /* Insert the work into the wait queue sorted by the expired time. */
