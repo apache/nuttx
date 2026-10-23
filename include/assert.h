@@ -36,14 +36,23 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Macro Name: PANIC, ASSERT, VERIFY, et al. */
+/* Macro Name: PANIC, ASSERT, VERIFY, et al.
+ *
+ * NUTTX_NO_EXTENSIONS (see nuttx/compiler.h) hides PANIC, PANIC_WITH_REGS,
+ * ASSERT, VERIFY, COMPILE_TIME_ASSERT and BUILD_BUG_ON_ZERO and keeps a
+ * definition of the program.  The DEBUG* macros stay, because the NuttX
+ * port of libmetal uses DEBUGASSERT in its headers, but a definition of
+ * the program stays too.
+ */
 
+#ifndef NUTTX_NO_EXTENSIONS
 #undef PANIC        /* Unconditional abort */
 #undef ASSERT       /* Assert if the condition is not true */
 #undef VERIFY       /* Assert if a function returns a negative value */
 #undef DEBUGPANIC   /* Like PANIC, but only if CONFIG_DEBUG_ASSERTIONS is defined */
 #undef DEBUGASSERT  /* Like ASSERT, but only if CONFIG_DEBUG_ASSERTIONS is defined */
 #undef DEBUGVERIFY  /* Like VERIFY, but only if CONFIG_DEBUG_ASSERTIONS is defined */
+#endif
 
 /* Macro to define the assertions file name and file line
  * | Function         |CONFIG                            | Show name/line |
@@ -75,9 +84,11 @@
 #  define __ASSERT_LINE__ 0
 #endif
 
+#ifndef NUTTX_NO_EXTENSIONS
 #define PANIC() __assert(__ASSERT_FILE__, __ASSERT_LINE__, "panic")
 #define PANIC_WITH_REGS(msg, regs) _assert(__ASSERT_FILE__, \
                                            __ASSERT_LINE__, msg, regs)
+#endif
 
 #define __ASSERT__(f, file, line, _f) \
   (predict_false(!(f))) ? __assert(file, line, _f) : ((void)0)
@@ -93,14 +104,31 @@
 #  define _VERIFY(f,file,line) __VERIFY__(f, file, line, NULL)
 #endif
 
-#ifdef CONFIG_DEBUG_ASSERTIONS
-#  define DEBUGPANIC()   __assert(__DEBUG_ASSERT_FILE__, __DEBUG_ASSERT_LINE__, "panic")
-#  define DEBUGASSERT(f) _ASSERT(f, __DEBUG_ASSERT_FILE__, __DEBUG_ASSERT_LINE__)
-#  define DEBUGVERIFY(f) _VERIFY(f, __DEBUG_ASSERT_FILE__, __DEBUG_ASSERT_LINE__)
-#else
-#  define DEBUGPANIC()
-#  define DEBUGASSERT(f) ((void)(1 || (f)))
-#  define DEBUGVERIFY(f) ((void)(f))
+#ifndef DEBUGPANIC
+#  ifdef CONFIG_DEBUG_ASSERTIONS
+#    define DEBUGPANIC() __assert(__DEBUG_ASSERT_FILE__, \
+                                  __DEBUG_ASSERT_LINE__, "panic")
+#  else
+#    define DEBUGPANIC()
+#  endif
+#endif
+
+#ifndef DEBUGASSERT
+#  ifdef CONFIG_DEBUG_ASSERTIONS
+#    define DEBUGASSERT(f) _ASSERT(f, __DEBUG_ASSERT_FILE__, \
+                                   __DEBUG_ASSERT_LINE__)
+#  else
+#    define DEBUGASSERT(f) ((void)(1 || (f)))
+#  endif
+#endif
+
+#ifndef DEBUGVERIFY
+#  ifdef CONFIG_DEBUG_ASSERTIONS
+#    define DEBUGVERIFY(f) _VERIFY(f, __DEBUG_ASSERT_FILE__, \
+                                   __DEBUG_ASSERT_LINE__)
+#  else
+#    define DEBUGVERIFY(f) ((void)(f))
+#  endif
 #endif
 
 /* ASSERT/VERIFY are NuttX-specific APIs.
@@ -108,8 +136,10 @@
  * The argument is evaluated exactly once.
  */
 
+#ifndef NUTTX_NO_EXTENSIONS
 #define ASSERT(f) _ASSERT(f, __ASSERT_FILE__, __ASSERT_LINE__)
 #define VERIFY(f) _VERIFY(f, __ASSERT_FILE__, __ASSERT_LINE__)
+#endif
 
 /* Suppress 3rd party library redefine _assert/__assert */
 
@@ -130,7 +160,7 @@
 #  endif
 #endif
 
-#ifndef COMPILE_TIME_ASSERT
+#if !defined(COMPILE_TIME_ASSERT) && !defined(NUTTX_NO_EXTENSIONS)
 #  define COMPILE_TIME_ASSERT(x) static_assert(x, "compile time assert failed")
 #endif
 
@@ -140,7 +170,9 @@
  * aren't permitted).
  */
 
+#ifndef NUTTX_NO_EXTENSIONS
 #define BUILD_BUG_ON_ZERO(e) ((int)(sizeof(struct { int:(-!!(e)); })))
+#endif
 
 /****************************************************************************
  * Public Data
