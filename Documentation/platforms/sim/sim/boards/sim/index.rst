@@ -41,6 +41,8 @@ Timing Fidelity
    Another option is to use ``CONFIG_SIM_WALLTIME_SLEEP`` which will enable the
    tick events to be delayed from the Idle task by using a host sleep call.
 
+.. _sim_babblesim_time:
+
 BabbleSim Discrete Time
 -----------------------
 
@@ -77,6 +79,9 @@ launching the NuttX simulator.
 
 The runtime options override ``CONFIG_SIM_BSIM_SIM_ID``,
 ``CONFIG_SIM_BSIM_PHY_ID``, and ``CONFIG_SIM_BSIM_DEVICE_NBR``.
+
+For a complete two-device Bluetooth example using virtual Controllers,
+see :ref:`simulator_bluetooth_testing`.
 
 Debugging
 =========
@@ -732,6 +737,9 @@ bridged into a Unix socket with a tool such as ``socat``:
 The process listening on the socket must be started before NuttX. If that
 process opens a real UART device, it still needs permission to access that UART
 device.
+
+For advertising, scanning, and connection tests without Bluetooth hardware,
+see :ref:`simulator_bluetooth_testing`.
 
 bridge
 ------

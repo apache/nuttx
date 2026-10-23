@@ -2,6 +2,9 @@
 ``btsak`` Bluetooth Swiss Army Knife
 ====================================
 
+For a two-device advertising and scanning example using virtual Controllers
+on Linux, see :ref:`simulator_bluetooth_testing`.
+
 Commands
 --------
 
