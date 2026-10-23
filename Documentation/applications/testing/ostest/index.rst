@@ -24,12 +24,14 @@ The behavior of the ``ostest`` can be modified with the following settings in th
     needed on systems without sufficient memory to start so many threads.
 
 - ``CONFIG_TESTING_OSTEST_RR_RANGE`` – During round-robin scheduling test two
-    threads are created. Each of the threads searches for prime numbers in the
-    configurable range, doing that configurable number of times. This value
-    specifies the end of search range and together with number of runs allows to
-    configure the length of this test – it should last at least a few tens of
-    seconds. Allowed values ``[1; 32767]``, default ``10000``.
+    threads are created. Each of the threads searches for prime numbers below
+    this value, one number at a time, and starts again at 1 at the end of the
+    range. The time for one number must be much shorter than
+    ``CONFIG_RR_INTERVAL``. Allowed values ``[1; 32767]``, default ``30000``.
+    A slow board can set this value lower in its defconfig.
 
-- ``CONFIG_TESTING_OSTEST_RR_RUNS`` – During round-robin scheduling test two
-    threads are created. Each of the threads searches for prime numbers in the
-    configurable range, doing that configurable number of times.
+- ``CONFIG_TESTING_OSTEST_RR_RUNS`` – The number of time slices of each thread
+    in the round-robin scheduling test. The test takes about
+    ``2 * CONFIG_TESTING_OSTEST_RR_RUNS * CONFIG_RR_INTERVAL`` milliseconds. It
+    passes when the two threads had the same number of time slices, plus or
+    minus one. Allowed values ``[1; 32767]``, default ``10``.

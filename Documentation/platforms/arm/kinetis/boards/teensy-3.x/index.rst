@@ -1,6 +1,6 @@
-==========
-teensy-3.x
-==========
+===============
+PJRC Teensy 3.x
+===============
 
 .. tags:: arch:arm, chip:kinetis, vendor:nxp
 

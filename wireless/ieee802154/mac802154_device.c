@@ -107,6 +107,7 @@ struct mac802154_chardevice_s
   bool readpending;                     /* Is there a read using the semaphore? */
   sem_t readsem;                        /* Signaling semaphore for waiting read */
   sq_queue_t dataind_queue;
+  uint8_t ndataind;                     /* Frames in dataind_queue */
 
   /* MAC Service notification information */
 
@@ -293,13 +294,38 @@ static int mac802154dev_close(FAR struct file *filep)
 
   kmm_free(opriv);
 
-  /* If there are now no open instances of the driver and a signal handler is
-   * not registered, purge the list of events.
+  /* Nobody can read the received frames once the last instance is closed */
+
+  if (dev->md_open == NULL)
+    {
+      FAR struct ieee802154_data_ind_s *ind;
+
+      ind = (FAR struct ieee802154_data_ind_s *)
+            sq_remfirst(&dev->dataind_queue);
+
+      while (ind)
+        {
+          ieee802154_primitive_free(
+            (FAR struct ieee802154_primitive_s *)ind);
+          ind = (FAR struct ieee802154_data_ind_s *)
+                sq_remfirst(&dev->dataind_queue);
+        }
+
+      dev->ndataind = 0;
+    }
+
+  /* If there are now no open instances of the driver, purge the list of
+   * events.  A registered notification is of no use without an instance to
+   * read the events, drop it.
    */
 
-  if (dev->md_open)
+  if (dev->md_open == NULL)
     {
       FAR struct ieee802154_primitive_s *primitive;
+
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
+      dev->md_notify_registered = false;
+#endif
 
       primitive =
         (FAR struct ieee802154_primitive_s *)
@@ -377,6 +403,7 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
 
       if (ind != NULL)
         {
+          dev->ndataind--;
           nxmutex_unlock(&dev->md_lock);
           break;
         }
@@ -456,11 +483,7 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
   rx->meta.flink = NULL;
   rx->meta.frame = NULL;
 
-  /* Free the IOB */
-
-  iob_free(ind->frame);
-
-  /* Deallocate the data indication */
+  /* Deallocate the data indication and its IOB */
 
   ieee802154_primitive_free((FAR struct ieee802154_primitive_s *)ind);
 
@@ -650,12 +673,12 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
                * and pop an event off the queue
                */
 
-                ret = nxmutex_lock(&dev->md_lock);
-                if (ret < 0)
-                  {
-                    wlerr("ERROR: nxsem_wait failed: %d\n", ret);
-                    return ret;
-                  }
+              ret = nxmutex_lock(&dev->md_lock);
+              if (ret < 0)
+                {
+                  wlerr("ERROR: nxsem_wait failed: %d\n", ret);
+                  return ret;
+                }
             }
         }
         break;
@@ -703,8 +726,7 @@ static int mac802154dev_notify(FAR struct mac802154_maccb_s *maccb,
    * to allocate new notifications.
    */
 
-  if (dev->enableevents &&
-      (dev->md_open != NULL || dev->md_notify_registered))
+  if (dev->enableevents && dev->md_open != NULL)
     {
       /* Get exclusive access to the driver structure.  We don't care about
        * any signals so if we see one, just go back to trying to get access
@@ -766,9 +788,27 @@ static int mac802154dev_rxframe(FAR struct mac802154_chardevice_s *dev,
 
   while (nxmutex_lock(&dev->md_lock) != 0);
 
+  /* Nobody can read the frame if the device is not open */
+
+  if (dev->md_open == NULL)
+    {
+      nxmutex_unlock(&dev->md_lock);
+      return -ENODEV;
+    }
+
+  /* Drop the frame if the reader does not keep up */
+
+  if (dev->ndataind >= CONFIG_IEEE802154_MACDEV_RXQUEUE)
+    {
+      nxmutex_unlock(&dev->md_lock);
+      wlwarn("WARNING: RX queue full, dropping frame\n");
+      return -ENOBUFS;
+    }
+
   /* Push the indication onto the list */
 
   sq_addlast((FAR sq_entry_t *)ind, &dev->dataind_queue);
+  dev->ndataind++;
 
   /* Check if there is a read waiting for data */
 

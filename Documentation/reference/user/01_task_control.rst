@@ -33,6 +33,25 @@ reside in a file system. These internal interfaces are, however,
 non-standard and are documented with the NuttX binary
 loader and NXFLAT documentation.
 
+**Resource Limits**. A task keeps its resource limits, and the tasks that
+it creates get the same limits. NuttX enforces two of them:
+
+- ``RLIMIT_NOFILE``: a new file descriptor must be below the soft limit.
+  The default and the largest value is ``OPEN_MAX``.
+- ``RLIMIT_STACK``: when the soft limit is set, it is the default stack
+  size of a new thread and the stack size of a new ELF program that does
+  not set ``nx_stacksize``. The value is kept between
+  ``PTHREAD_STACK_MIN`` and the largest stack that a task can have. By
+  default there is no limit, and the stack sizes are
+  ``CONFIG_PTHREAD_STACK_DEFAULT`` and ``CONFIG_ELF_STACKSIZE``.
+
+``getrlimit()`` reports the other resources as ``RLIM_INFINITY``, and
+``setrlimit()`` fails with ``EINVAL`` for them.
+
+**File Mode Creation Mask**. A task keeps its file mode creation mask
+(``umask()``), and the tasks that it creates get the same mask. All the
+threads of a task use one mask. Kernel threads use the mask 0.
+
 **Task Control Interfaces**. The following task control interfaces are
 provided by NuttX:
 
@@ -58,6 +77,8 @@ Standard interfaces
 
   - :c:func:`exit`
   - :c:func:`getpid`
+  - :c:func:`getrlimit`
+  - :c:func:`setrlimit`
 
 Standard ``fork``/``vfork`` and ``exec[v|l]`` interfaces:
 
@@ -454,10 +475,13 @@ Functions
   those features there is then no mechanism to unload the module once it
   exits.
 
-  :param filename: The path to the program to be executed. If
-     ``CONFIG_LIBC_ENVPATH`` is defined in the configuration, then this may
-     be a relative path from the current working directory. Otherwise,
-     ``path`` must be the absolute path to the program.
+  :param filename: The program to be executed. With
+     ``CONFIG_LIBC_ENVPATH``, a name that contains no ``/`` is searched for
+     in the directories of the ``PATH`` environment variable. Any other name
+     is a path and is used as it is: an absolute path, or a path relative to
+     the current working directory, such as ``./hello`` or ``bin/hello``.
+     Without ``CONFIG_LIBC_ENVPATH``, no ``PATH`` search is done, and each
+     name is used as a path.
   :param argv: A pointer to an array of string arguments. The end of the
      array is indicated with a NULL entry.
   :param exports: The address of the start of the caller-provided symbol
@@ -526,10 +550,12 @@ Functions
   function. So the parent function cannot know the ID of the ``exec``'ed
   task.
 
-  :param path: The path to the program to be executed. If
-     ``CONFIG_LIBC_ENVPATH`` is defined in the configuration, then this may
-     be a relative path from the current working directory. Otherwise,
-  :param path: must be the absolute path to the program.
+  :param path: The program to be executed. With ``CONFIG_LIBC_ENVPATH``, a
+     name that contains no ``/`` is searched for in the directories of the
+     ``PATH`` environment variable. Any other name is a path and is used as
+     it is: an absolute path, or a path relative to the current working
+     directory. Without ``CONFIG_LIBC_ENVPATH``, no ``PATH`` search is done,
+     and each name is used as a path.
 
   :return: This function does not return on success. On
     failure, it will return -1 (``ERROR``) and will set the ``errno`` value
@@ -546,10 +572,12 @@ Functions
   parameters. See the description of `execv() <#execv>`__ for additional
   information.
 
-  :param path: The path to the program to be executed. If
-     ``CONFIG_LIBC_ENVPATH`` is defined in the configuration, then this may
-     be a relative path from the current working directory. Otherwise,
-  :param path: must be the absolute path to the program.
+  :param path: The program to be executed. With ``CONFIG_LIBC_ENVPATH``, a
+     name that contains no ``/`` is searched for in the directories of the
+     ``PATH`` environment variable. Any other name is a path and is used as
+     it is: an absolute path, or a path relative to the current working
+     directory. Without ``CONFIG_LIBC_ENVPATH``, no ``PATH`` search is done,
+     and each name is used as a path.
 
   :return: This function does not return on success. On
     failure, it will return -1 (``ERROR``) and will set the ``errno`` value
@@ -579,13 +607,12 @@ Functions
     argument. If the ``pid`` argument is a null pointer, the process ID
     of the child is not returned to the caller.
 
-  :param path: The ``path`` argument to ``posix_spawn()`` is
-    the absolute path that identifies the file to execute. The ``file``
-    argument to ``posix_spawnp()`` may also be a relative path and will
-    be used to construct a pathname that identifies the file to execute.
-    In the case of a relative path, the path prefix for the file will be
-    obtained by a search of the directories passed as the environment
-    variable PATH.
+  :param path: The ``path`` argument to ``posix_spawn()`` and the ``file``
+    argument to ``posix_spawnp()`` identify the file to execute. With
+    ``CONFIG_LIBC_ENVPATH``, a name that contains no ``/`` is searched for
+    in the directories of the ``PATH`` environment variable. Any other name
+    is a path and is used as it is: an absolute path, or a path relative to
+    the current working directory, such as ``./hello`` or ``bin/hello``.
 
     NOTE: NuttX provides only one implementation: If
     ``CONFIG_LIBC_ENVPATH`` is defined, then only ``posix_spawnp()``
@@ -623,13 +650,17 @@ Functions
     ``argv[]`` is an array of pointers to null-terminated strings. The
     list is terminated with a null pointer.
 
-  :param envp: The ``envp[]`` argument is not used by NuttX and may be
-    ``NULL``. In standard implementations, ``envp[]`` is an array of
-    character pointers to null-terminated strings that provide the
-    environment for the new process image. The environment array is
-    terminated by a null pointer. In NuttX, the ``envp[]`` argument is
-    ignored and the new task will inherit the environment of the parent
-    task unconditionally.
+    A new task can get at most ``CONFIG_TASK_MAX_ARGS`` arguments (default
+    256). A longer list fails with ``E2BIG``. ``CONFIG_TASK_ARG_MAX`` sets
+    ``ARG_MAX`` and ``sysconf(_SC_ARG_MAX)`` (default 4096 bytes): the size
+    of the arguments and the environment that a program may pass. NuttX
+    does not check this size. The arguments are copied to the stack of the
+    new task, so its stack must be large enough for them.
+
+  :param envp: ``envp[]`` is an array of pointers to null-terminated
+    ``name=value`` strings that is the environment of the new task. The
+    array is terminated by a null pointer. If ``envp`` is ``NULL``, the new
+    task gets a copy of the environment of the caller (``environ``).
 
   :return: Zero on success. Otherwise, an error number will be returned as the
     function return value to indicate the error:
@@ -646,8 +677,6 @@ Functions
      ``CONFIG_LIBC_ENVPATH`` is defined, then only ``posix_spawnp()``
      behavior is supported; otherwise, only ``posix_spawn()`` behavior is
      supported.
-  -  The ``envp`` argument is not used and the ``environ`` variable is not
-     altered (NuttX does not support the ``environ`` variable).
   -  Process groups are not supported (See ``POSIX_SPAWN_SETPGROUP``
      above).
   -  Effective user IDs are not supported (See ``POSIX_SPAWN_RESETIDS``
@@ -916,10 +945,12 @@ Functions
 
   :param argv: ``argv[]`` is the argument list for the new task.
      ``argv[]`` is an array of pointers to null-terminated strings. The
-     list is terminated with a null pointer.
+     list is terminated with a null pointer. The limits of
+     :c:func:`posix_spawn` apply.
 
-  :param envp: The ``envp[]`` argument is not used by NuttX and may be
-     ``NULL``.
+  :param envp: The environment of the new task, as for
+     :c:func:`posix_spawn`. If ``envp`` is ``NULL``, the new task gets a
+     copy of the environment of the caller.
 
   :return: ``task_spawn()`` will return process ID of new task on success.
     Otherwise, a negative number will be returned as the function return
@@ -950,3 +981,36 @@ Functions
   :param policy: The new value of the *spawn-stacksize* attribute.
   :return: On success, this function returns 0; on failure it
     will return an error number from ``<errno.h>``
+
+.. c:function:: int getrlimit(int resource, FAR struct rlimit *rlp)
+
+  The ``getrlimit()`` function returns the soft and the hard limit of a
+  resource of the calling task.
+
+  :param resource: The resource, ``RLIMIT_*``.
+  :param rlp: The location that receives the limits.
+  :return: 0 on success. On failure, -1 is returned and ``errno`` is set
+    to ``EINVAL``: ``rlp`` is ``NULL`` or ``resource`` is not valid.
+
+  **POSIX Compatibility:** Comparable to the POSIX interface of the same
+  name. Only ``RLIMIT_NOFILE`` and ``RLIMIT_STACK`` are limits of the
+  task.
+
+.. c:function:: int setrlimit(int resource, FAR const struct rlimit *rlp)
+
+  The ``setrlimit()`` function sets the soft and the hard limit of a
+  resource of the calling task. The tasks that it creates later get the
+  same limits.
+
+  :param resource: ``RLIMIT_NOFILE`` or ``RLIMIT_STACK``.
+  :param rlp: The new limits.
+  :return: 0 on success. On failure, -1 is returned and ``errno`` is set:
+
+    - ``EINVAL``: ``rlp`` is ``NULL``, the soft limit is above the hard
+      limit, or NuttX does not enforce the resource.
+    - ``EPERM``: an unprivileged task raises a hard limit, or the limit
+      of open files is above ``OPEN_MAX``.
+
+  **POSIX Compatibility:** Comparable to the POSIX interface of the same
+  name. As on Linux, ``RLIMIT_STACK`` is also the default stack size of
+  new threads.

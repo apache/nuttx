@@ -1,6 +1,6 @@
-==========
-sama5d4-ek
-==========
+====================
+Microchip SAMA5D4-EK
+====================
 
 .. tags:: arch:arm, chip:sama5, vendor:microchip
 

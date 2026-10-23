@@ -39,6 +39,7 @@
 
 #ifdef CONFIG_ESP32S3_USERFAULT_ABORT
 #include <signal.h>
+#include <string.h>
 #include <arch/irq.h>
 #include <arch/xtensa/xtensa_corebits.h>
 #endif
@@ -213,6 +214,7 @@ static int IRAM_ATTR pms_violation_isr(int cpuint, void *context, void *arg)
       _alert("SIGSEGV (%s) task %s: PC=%08x\n",
              cause, get_task_name(tcb), (unsigned)regs[REG_PC]);
 
+      memset(&info, 0, sizeof(info));
       info.si_signo           = SIGSEGV;
       info.si_code            = SI_USER;
       info.si_errno           = 0;

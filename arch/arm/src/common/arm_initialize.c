@@ -67,6 +67,12 @@ void up_initialize(void)
   arm_initialize_stack();
 #endif
 
+  /* Enable pointer authentication and branch target identification if the
+   * architecture configuration requested it.
+   */
+
+  arm_pacbticonfig();
+
   /* Add any extra memory fragments to the memory manager */
 
   arm_addregion();

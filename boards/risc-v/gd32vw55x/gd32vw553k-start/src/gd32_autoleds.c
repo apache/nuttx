@@ -41,7 +41,7 @@
  * Private Data
  ****************************************************************************/
 
-/* The three LEDs are on GPIOC and are active HIGH.  When CONFIG_ARCH_LEDS is
+/* The three LEDs (PB0, PA12, PB4) are active HIGH.  When CONFIG_ARCH_LEDS is
  * selected they show the OS state and are not available to the application;
  * the meaning of each state is tabulated in board.h.
  */

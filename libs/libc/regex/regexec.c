@@ -50,14 +50,29 @@
  ****************************************************************************/
 
 static void tre_fill_pmatch(size_t nmatch, regmatch_t pmatch[], int cflags,
-                            const tre_tnfa_t *tnfa, int *tags, int match_eo);
+                            const tre_tnfa_t *tnfa, int *tags, int match_eo,
+                            int offset);
 
 /* from tre-match-utils.h
  */
 
+/* The input ends at the first NUL byte when len is negative, or after
+ * len bytes otherwise (REG_STARTEND).  A NUL byte before the end of the
+ * input is an ordinary character.
+ */
+
+#define AT_EOS()            (len < 0 ? next_c == L'\0' : pos >= len)
+
 #define GET_NEXT_WCHAR()    do {                                        \
       prev_c = next_c;pos += pos_add_next;                              \
-      if ((pos_add_next = mbtowc(&next_c, str_byte, MB_LEN_MAX)) <= 0){ \
+      if (len >= 0 && pos >= len)                                       \
+        {                                                               \
+          next_c = L'\0';                                               \
+          pos_add_next = 1;                                             \
+        }                                                               \
+      else if ((pos_add_next = mbtowc(&next_c, str_byte,                \
+                len < 0 ? MB_LEN_MAX : len - pos)) <= 0)                \
+        {                                                               \
           if (pos_add_next < 0){ ret = REG_NOMATCH;goto error_exit; }   \
           else pos_add_next++;                                          \
         }                                                               \
@@ -71,17 +86,17 @@ static void tre_fill_pmatch(size_t nmatch, regmatch_t pmatch[], int cflags,
     && (pos > 0 || reg_notbol)                               \
     && (prev_c != L'\n' || !reg_newline))                    \
    || ((assertions & ASSERT_AT_EOL)                          \
-       && (next_c != L'\0' || reg_noteol)                    \
+       && (!AT_EOS() || reg_noteol)                         \
        && (next_c != L'\n' || !reg_newline))                 \
    || ((assertions & ASSERT_AT_BOW)                          \
        && (IS_WORD_CHAR(prev_c) || !IS_WORD_CHAR(next_c)))   \
    || ((assertions & ASSERT_AT_EOW)                          \
        && (!IS_WORD_CHAR(prev_c) || IS_WORD_CHAR(next_c)))   \
    || ((assertions & ASSERT_AT_WB)                           \
-       && (pos != 0 && next_c != L'\0'                       \
+       && (pos != 0 && !AT_EOS()                            \
            && IS_WORD_CHAR(prev_c) == IS_WORD_CHAR(next_c))) \
    || ((assertions & ASSERT_AT_WB_NEG)                       \
-       && (pos == 0 || next_c == L'\0'                       \
+       && (pos == 0 || AT_EOS()                             \
            || IS_WORD_CHAR(prev_c) != IS_WORD_CHAR(next_c))))
 
 #define CHECK_CHAR_CLASSES(trans_i, tnfa, eflags)                              \
@@ -191,13 +206,14 @@ typedef struct
 } tre_reach_pos_t;
 
 static reg_errcode_t tre_tnfa_run_parallel(const tre_tnfa_t *tnfa,
-                                           const void *string,
+                                           const void *string, int len,
                                            int *match_tags, int eflags,
                                            int *match_end_ofs)
 {
   /* State variables required by GET_NEXT_WCHAR. */
 
-  tre_char_t    prev_c = 0, next_c = 0;
+  tre_char_t    prev_c          = 0;
+  tre_char_t    next_c          = 0;
   const char    *str_byte       = string;
   int           pos             = -1;
   int           pos_add_next    = 1;
@@ -212,7 +228,10 @@ static reg_errcode_t tre_tnfa_run_parallel(const tre_tnfa_t *tnfa,
 
   char                  *buf;
   tre_tnfa_transition_t *trans_i;
-  tre_tnfa_reach_t      *reach, *reach_next, *reach_i, *reach_next_i;
+  tre_tnfa_reach_t      *reach;
+  tre_tnfa_reach_t      *reach_next;
+  tre_tnfa_reach_t      *reach_i;
+  tre_tnfa_reach_t      *reach_next_i;
   tre_reach_pos_t       *reach_pos;
   int                   *tag_i;
   int                   num_tags;
@@ -243,56 +262,56 @@ static reg_errcode_t tre_tnfa_run_parallel(const tre_tnfa_t *tnfa,
    *  or with malloc() if alloca is unavailable.
    */
 
-    {
-      int     tbytes;
-      int     rbytes;
-      int     pbytes;
-      int     xbytes;
-      int     total_bytes;
-      char    *tmp_buf;
+  {
+    int     tbytes;
+    int     rbytes;
+    int     pbytes;
+    int     xbytes;
+    int     total_bytes;
+    char    *tmp_buf;
 
-      /* Compute the length of the block we need. */
+    /* Compute the length of the block we need. */
 
-      tbytes      = sizeof(*tmp_tags) * num_tags;
-      rbytes      = sizeof(*reach_next) * (tnfa->num_states + 1);
-      pbytes      = sizeof(*reach_pos) * tnfa->num_states;
-      xbytes      = sizeof(int) * num_tags;
-      total_bytes = (sizeof(long) - 1) * 4 /* for alignment paddings */
-                  + (rbytes + xbytes * tnfa->num_states) * 2 + tbytes +
-                  pbytes;
+    tbytes      = sizeof(*tmp_tags) * num_tags;
+    rbytes      = sizeof(*reach_next) * (tnfa->num_states + 1);
+    pbytes      = sizeof(*reach_pos) * tnfa->num_states;
+    xbytes      = sizeof(int) * num_tags;
+    total_bytes = (sizeof(long) - 1) * 4 /* for alignment paddings */
+                + (rbytes + xbytes * tnfa->num_states) * 2 + tbytes +
+                pbytes;
 
-      /* Allocate the memory. */
+    /* Allocate the memory. */
 
-      buf = xmalloc((unsigned)total_bytes);
-      if (buf == NULL)
-        {
-          return REG_ESPACE;
-        }
+    buf = xmalloc((unsigned)total_bytes);
+    if (buf == NULL)
+      {
+        return REG_ESPACE;
+      }
 
-      memset(buf, 0, (size_t)total_bytes);
+    memset(buf, 0, (size_t)total_bytes);
 
-      /* Get the various pointers within tmp_buf (properly aligned). */
+    /* Get the various pointers within tmp_buf (properly aligned). */
 
-      tmp_tags    = (void *)buf;
-      tmp_buf     = buf + tbytes;
-      tmp_buf     += ALIGN(tmp_buf, long);
-      reach_next  = (void *)tmp_buf;
-      tmp_buf     += rbytes;
-      tmp_buf     += ALIGN(tmp_buf, long);
-      reach       = (void *)tmp_buf;
-      tmp_buf     += rbytes;
-      tmp_buf     += ALIGN(tmp_buf, long);
-      reach_pos   = (void *)tmp_buf;
-      tmp_buf     += pbytes;
-      tmp_buf     += ALIGN(tmp_buf, long);
-      for (i = 0; i < tnfa->num_states; i++)
-        {
-          reach[i].tags       = (void *)tmp_buf;
-          tmp_buf             += xbytes;
-          reach_next[i].tags  = (void *)tmp_buf;
-          tmp_buf             += xbytes;
-        }
-    }
+    tmp_tags    = (void *)buf;
+    tmp_buf     = buf + tbytes;
+    tmp_buf     += ALIGN(tmp_buf, long);
+    reach_next  = (void *)tmp_buf;
+    tmp_buf     += rbytes;
+    tmp_buf     += ALIGN(tmp_buf, long);
+    reach       = (void *)tmp_buf;
+    tmp_buf     += rbytes;
+    tmp_buf     += ALIGN(tmp_buf, long);
+    reach_pos   = (void *)tmp_buf;
+    tmp_buf     += pbytes;
+    tmp_buf     += ALIGN(tmp_buf, long);
+    for (i = 0; i < tnfa->num_states; i++)
+      {
+        reach[i].tags       = (void *)tmp_buf;
+        tmp_buf             += xbytes;
+        reach_next[i].tags  = (void *)tmp_buf;
+        tmp_buf             += xbytes;
+      }
+  }
 
   for (i = 0; i < tnfa->num_states; i++)
     {
@@ -373,7 +392,7 @@ static reg_errcode_t tre_tnfa_run_parallel(const tre_tnfa_t *tnfa,
 
       /* Check for end of string. */
 
-      if (!next_c)
+      if (AT_EOS())
         {
           break;
         }
@@ -397,10 +416,12 @@ static reg_errcode_t tre_tnfa_run_parallel(const tre_tnfa_t *tnfa,
           for (reach_i = reach; reach_i->state; reach_i++)
             {
               int skip = 0;
+
               for (i = 0; tnfa->minimal_tags[i] >= 0; i += 2)
                 {
                   int   end     = tnfa->minimal_tags[i];
                   int   start   = tnfa->minimal_tags[i + 1];
+
                   if (end >= num_tags)
                     {
                       skip = 1;
@@ -697,13 +718,14 @@ typedef struct tre_backtrack_struct *tre_backtrack_t;
 #define MIN(a, b)  ((a) <= (b) ? (a) : (b))
 
 static reg_errcode_t tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa,
-                                            const void *string,
+                                            const void *string, int len,
                                             int *match_tags, int eflags,
                                             int *match_end_ofs)
 {
   /* State variables required by GET_NEXT_WCHAR. */
 
-  tre_char_t    prev_c = 0, next_c = 0;
+  tre_char_t    prev_c          = 0;
+  tre_char_t    next_c          = 0;
   const char    *str_byte       = string;
   int           pos             = 0;
   int           pos_add_next    = 1;
@@ -803,22 +825,23 @@ static reg_errcode_t tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa,
     }
 
 retry:
-    {
-      int i;
-      for (i = 0; i < tnfa->num_tags; i++)
-        {
-          tags[i] = -1;
-          if (match_tags)
-            {
-              match_tags[i] = -1;
-            }
-        }
+  {
+    int i;
 
-      for (i = 0; i < tnfa->num_states; i++)
-        {
-          states_seen[i] = 0;
-        }
-    }
+    for (i = 0; i < tnfa->num_tags; i++)
+      {
+        tags[i] = -1;
+        if (match_tags)
+          {
+            match_tags[i] = -1;
+          }
+      }
+
+    for (i = 0; i < tnfa->num_states; i++)
+      {
+        states_seen[i] = 0;
+      }
+  }
 
   state = NULL;
   pos   = pos_start;
@@ -853,16 +876,17 @@ retry:
 
           BT_STACK_PUSH(pos, str_byte, 0, trans_i->state, trans_i->state_id,
                         next_c, tags, mbstate);
-            {
-              int *tmp = trans_i->tags;
-              if (tmp)
-                {
-                  while (*tmp >= 0)
-                    {
-                      stack->item.tags[*tmp++] = pos;
-                    }
-                }
-            }
+          {
+            int *tmp = trans_i->tags;
+
+            if (tmp)
+              {
+                while (*tmp >= 0)
+                  {
+                    stack->item.tags[*tmp++] = pos;
+                  }
+              }
+          }
         }
     }
 
@@ -934,13 +958,25 @@ retry:
            */
 
           tre_fill_pmatch(bt + 1, pmatch, tnfa->cflags & ~REG_NOSUB, tnfa,
-                          tags, pos);
+                          tags, pos, 0);
           so        = pmatch[bt].rm_so;
           eo        = pmatch[bt].rm_eo;
           bt_len    = eo - so;
 
-          result = strncmp((const char *) string + so, str_byte - 1,
-                           (size_t) bt_len);
+          if (len < 0)
+            {
+              result = strncmp((const char *) string + so, str_byte - 1,
+                               (size_t) bt_len);
+            }
+          else if (len - pos < bt_len)
+            {
+              result = 1;
+            }
+          else
+            {
+              result = memcmp((const char *) string + so, str_byte - 1,
+                              (size_t) bt_len);
+            }
 
           if (result == 0)
             {
@@ -975,7 +1011,7 @@ retry:
         {
           /* Check for end of string. */
 
-          if (next_c == L'\0')
+          if (AT_EOS())
             {
               goto backtrack;
             }
@@ -1016,19 +1052,20 @@ retry:
 
                   BT_STACK_PUSH(pos, str_byte, 0, trans_i->state,
                                 trans_i->state_id, next_c, tags, mbstate);
-                    {
-                      int *tmp;
-                      for (tmp = trans_i->tags; tmp && *tmp >= 0; tmp++)
-                        {
-                          stack->item.tags[*tmp] = pos;
-                        }
-                    }
+                  {
+                    int *tmp;
+
+                    for (tmp = trans_i->tags; tmp && *tmp >= 0; tmp++)
+                      {
+                        stack->item.tags[*tmp] = pos;
+                      }
+                  }
 
 #if 0
 
-      /* XXX - it's important not to look at all transitions here to keep
-       *  the stack small!
-       */
+                  /* XXX - it's important not to look at all transitions here
+                   *  to keep the stack small!
+                   */
 
                   break;
 #endif
@@ -1073,7 +1110,7 @@ backtrack:
                * Check for end of string.
                */
 
-              if (next_c == L'\0')
+              if (AT_EOS())
                 {
                   break;
                 }
@@ -1121,11 +1158,12 @@ error_exit:
  */
 
 /* Fills the POSIX.2 regmatch_t array according to the TNFA tag and match
- * endpoint values.
+ * endpoint values.  The offset is added to each offset that is set.
  */
 
 static void tre_fill_pmatch(size_t nmatch, regmatch_t pmatch[], int cflags,
-                            const tre_tnfa_t *tnfa, int *tags, int match_eo)
+                            const tre_tnfa_t *tnfa, int *tags, int match_eo,
+                            int offset)
 {
   tre_submatch_data_t   *submatch_data;
   unsigned int          i;
@@ -1165,6 +1203,11 @@ static void tre_fill_pmatch(size_t nmatch, regmatch_t pmatch[], int cflags,
           if (pmatch[i].rm_so == -1 || pmatch[i].rm_eo == -1)
             {
               pmatch[i].rm_so = pmatch[i].rm_eo = -1;
+            }
+          else
+            {
+              pmatch[i].rm_so += offset;
+              pmatch[i].rm_eo += offset;
             }
 
           i++;
@@ -1219,6 +1262,26 @@ int regexec(const regex_t *restrict preg, const char *restrict string,
   reg_errcode_t status;
   int           *tags = NULL;
   int           eo;
+  int           so = 0;
+  int           len = -1;
+
+  /* With REG_STARTEND, pmatch[0] gives the range of the string to search.
+   * The range can contain NUL bytes.  The start of the range is the start
+   * of a line unless REG_NOTBOL is set.  The match offsets stay relative
+   * to the string.
+   */
+
+  if (eflags & REG_STARTEND)
+    {
+      if (pmatch[0].rm_so < 0 || pmatch[0].rm_eo < pmatch[0].rm_so)
+        {
+          return REG_NOMATCH;
+        }
+
+      so      = pmatch[0].rm_so;
+      len     = pmatch[0].rm_eo - so;
+      string += so;
+    }
 
   if (tnfa->cflags & REG_NOSUB)
     {
@@ -1240,20 +1303,22 @@ int regexec(const regex_t *restrict preg, const char *restrict string,
     {
       /* The regex has back references, use the backtracking matcher. */
 
-      status = tre_tnfa_run_backtrack(tnfa, string, tags, eflags, &eo);
+      status = tre_tnfa_run_backtrack(tnfa, string, len, tags, eflags,
+                                      &eo);
     }
   else
     {
       /* Exact matching, no back references, use the parallel matcher. */
 
-      status = tre_tnfa_run_parallel(tnfa, string, tags, eflags, &eo);
+      status = tre_tnfa_run_parallel(tnfa, string, len, tags, eflags,
+                                     &eo);
     }
 
   if (status == REG_OK)
     {
       /* A match was found, so fill the submatch registers. */
 
-      tre_fill_pmatch(nmatch, pmatch, tnfa->cflags, tnfa, tags, eo);
+      tre_fill_pmatch(nmatch, pmatch, tnfa->cflags, tnfa, tags, eo, so);
     }
 
   if (tags)

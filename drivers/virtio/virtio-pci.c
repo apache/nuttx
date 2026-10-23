@@ -174,6 +174,7 @@ static int virtio_pci_probe(FAR struct pci_device_s *dev)
 {
   FAR struct virtio_pci_device_s *vpdev;
   FAR struct virtio_device *vdev;
+  uint8_t status;
   int ret;
 
   /* We only own devices >= 0x1000 and <= 0x107f: leave the rest. */
@@ -254,6 +255,16 @@ static int virtio_pci_probe(FAR struct pci_device_s *dev)
 #else
   vrtinfo("Polling mode\n");
 #endif
+
+  /* Only reset a device that is not already in its power-on state, see
+   * virtio_mmio_init_device().
+   */
+
+  if (virtio_get_status(vdev, &status) != 0 ||
+      status != VIRTIO_CONFIG_STATUS_RESET)
+    {
+      virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_RESET);
+    }
 
   virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_ACK);
 

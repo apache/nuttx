@@ -103,17 +103,7 @@
 /* SPI DMA priority */
 
 #ifdef CONFIG_STM32_SPI_DMA
-
-#  if defined(CONFIG_SPI_DMAPRIO)
-#    define SPI_DMA_PRIO  CONFIG_SPI_DMAPRIO
-#  else
-#    define SPI_DMA_PRIO  DMA_CCR_PRIMED
-#  endif
-
-#  if (SPI_DMA_PRIO & ~DMA_CCR_PL_MASK) != 0
-#    error "Illegal value for CONFIG_SPI_DMAPRIO"
-#  endif
-
+#  define SPI_DMA_PRIO  DMA_CCR_PRIMED
 #endif
 
 /* DMA channel configuration */
@@ -1064,15 +1054,15 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
             return;
         }
 
-        spi_modifycr(STM32_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
-        spi_modifycr(STM32_SPI_CR1_OFFSET, priv, setbits, clrbits);
-        spi_modifycr(STM32_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
+      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
+      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, setbits, clrbits);
+      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
 
-        /* Save the mode so that subsequent re-configurations will be
-         * faster.
-         */
+      /* Save the mode so that subsequent re-configurations will be
+       * faster.
+       */
 
-        priv->mode = mode;
+      priv->mode = mode;
     }
 }
 
@@ -1301,6 +1291,7 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
 #endif
 {
   struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
+
   DEBUGASSERT(priv && priv->spibase);
 
   spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);

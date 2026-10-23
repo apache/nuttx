@@ -82,7 +82,7 @@ Working on NuttX
 How this documentation is organised
 ===================================
 
-Four ideas decide where anything goes.  They are written down here because
+Two ideas decide where anything goes.  They are written down here because
 knowing them turns "where do I look?" into a question with an answer -- and,
 for anyone writing documentation, "where do I put this?" as well.
 
@@ -112,19 +112,6 @@ search:
    * - :doc:`API Reference <reference/index>`
      - *What may I call?*
      - What ``sched_setscheduler()`` takes and returns
-
-**OS Design follows the source tree.**  Each top level directory of NuttX --
-``sched/``, ``fs/``, ``net/``, ``mm/``, ``drivers/`` -- is a section, and
-each subsystem is described once, going from what it is, to how it works, to
-the interfaces it offers.  That is why there is one page about SMP rather
-than three, and why a contributor knows which page to add to.
-
-**What can be derived is derived, and checked.**  Board pages, the
-architecture and chip each one is filed under, and the tags that let you
-search for them all come from the source tree rather than being typed by
-hand, and the build fails when the two disagree.  A page describing a board
-that no longer exists, or a board with no page, does not survive the next
-pull request.
 
 .. note::
    Something wrong on a page, or missing?  The documentation lives in the

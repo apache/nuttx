@@ -53,7 +53,7 @@ AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 
 # Loadable module definitions
 
-LDMODULEFLAGS = -melf32lriscv
+LDMODULEFLAGS += -melf32lriscv
 
 # ELF module definitions
 

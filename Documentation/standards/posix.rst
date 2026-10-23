@@ -193,9 +193,10 @@ POSIX.1 Option Requirements
 | `_POSIX_THREAD_PROCESS_SHARED`_ | 201712L     |                           |
 +---------------------------------+-------------+---------------------------+
 
-.. [#fn9] NuttX provides dummy implementations for ``_POSIX_MEMORY_PROTECTION``
-          which is sufficient for devices without MMU, but doesn't meet the
-          requirement for devices with MMU.
+.. [#fn9] ``mprotect()`` changes the page permissions only with
+          ``CONFIG_ARCH_ADDRENV`` on arm64 and RISC-V.  On other targets it
+          checks the arguments and changes nothing, which is sufficient for
+          devices without MMU.
 
 POSIX PSE54 - Multipurpose
 --------------------------
@@ -639,7 +640,7 @@ Single Process:
 +--------------------------------+---------+
 | :c:func:`getenv`               | Yes     |
 +--------------------------------+---------+
-| secure_getenv()                | No      |
+| secure_getenv()                | Yes     |
 +--------------------------------+---------+
 | :c:func:`setenv`               | Yes     |
 +--------------------------------+---------+
@@ -1783,7 +1784,7 @@ General Terminal:
 +--------------------------------+---------+
 | :c:func:`cfsetospeed`          | Yes     |
 +--------------------------------+---------+
-| ctermid()                      | No      |
+| ctermid()                      | Yes     |
 +--------------------------------+---------+
 | :c:func:`isatty`               | Yes     |
 +--------------------------------+---------+
@@ -1981,7 +1982,7 @@ User and Group:
 +--------------------------------+---------+
 | :c:func:`getgroups`            | Yes     |
 +--------------------------------+---------+
-| getlogin()                     | No      |
+| getlogin()                     | Yes     |
 +--------------------------------+---------+
 | :c:func:`getuid`               | Yes     |
 +--------------------------------+---------+
@@ -2490,11 +2491,11 @@ XSI User and Group:
 +--------------------------------+---------+
 | API                            | Support |
 +================================+=========+
-| endgrent()                     | No      |
+| endgrent()                     | Yes     |
 +--------------------------------+---------+
 | endutxent()                    | No      |
 +--------------------------------+---------+
-| getgrent()                     | No      |
+| getgrent()                     | Yes     |
 +--------------------------------+---------+
 | getutxent()                    | No      |
 +--------------------------------+---------+
@@ -2504,7 +2505,7 @@ XSI User and Group:
 +--------------------------------+---------+
 | pututxline()                   | No      |
 +--------------------------------+---------+
-| setgrent()                     | No      |
+| setgrent()                     | Yes     |
 +--------------------------------+---------+
 | :c:func:`setregid`             | Yes     |
 +--------------------------------+---------+
@@ -2923,11 +2924,16 @@ _POSIX_MEMORY_PROTECTION
 +--------------------------------+----------------+
 | API                            | Support        |
 +================================+================+
-| :c:func:`mprotect`             | Dummy [#fn17]_ |
+| :c:func:`mprotect`             | Yes [#fn17]_   |
 +--------------------------------+----------------+
 
-.. [#fn17] The function returns a success value but doesn't implement
-           the required functionality.
+.. [#fn17] All builds return ``EINVAL`` when ``addr`` is not a multiple of
+           ``sysconf(_SC_PAGESIZE)`` or ``prot`` has an unknown bit.  With
+           ``CONFIG_ARCH_ADDRENV`` on arm64 and RISC-V the function changes
+           the page permissions, and returns ``ENOMEM`` when a page of the
+           range is not mapped.  Other configurations return a success value
+           for a valid request and change nothing: without an MMU the
+           permissions cannot be enforced.
 
 _POSIX_PRIORITIZED_IO
 ---------------------

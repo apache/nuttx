@@ -57,6 +57,22 @@ CSRCS += lib_fmax.c lib_fmaxf.c lib_fmaxl.c
 CSRCS += lib_fmin.c lib_fminf.c lib_fminl.c
 
 CSRCS += __cos.c __sin.c lib_gamma.c lib_lgamma.c
+CSRCS += lib_lgammaf.c lib_lgammal.c lib_tgammaf.c lib_tgammal.c
+CSRCS += lib_exp2.c lib_exp2f.c lib_exp2l.c
+CSRCS += lib_log1p.c lib_log1pf.c lib_log1pl.c
+CSRCS += lib_cbrtf.c lib_cbrtl.c
+CSRCS += lib_hypot.c lib_hypotf.c lib_hypotl.c
+CSRCS += lib_fma.c lib_fmal.c
+CSRCS += lib_fdim.c lib_fdimf.c lib_fdiml.c
+CSRCS += lib_ilogb.c lib_ilogbf.c lib_ilogbl.c
+CSRCS += lib_logb.c lib_logbf.c lib_logbl.c
+CSRCS += lib_scalbln.c lib_scalblnf.c lib_scalblnl.c
+CSRCS += lib_nextafter.c lib_nextafterf.c lib_nextafterl.c
+CSRCS += lib_nexttoward.c lib_nexttowardf.c lib_nexttowardl.c
+CSRCS += lib_remainder.c lib_remainderf.c lib_remainderl.c
+CSRCS += lib_remquo.c lib_remquof.c lib_remquol.c
+CSRCS += lib_lrint.c lib_lrintf.c lib_lrintl.c
+CSRCS += lib_llrint.c lib_llrintf.c lib_llrintl.c lib_nearbyintl.c
 
 # Use the C versions of some functions only if architecture specific
 # optimized versions are not provided.
@@ -67,6 +83,10 @@ endif
 
 ifneq ($(CONFIG_LIBM_ARCH_FLOOR),y)
 CSRCS += lib_floor.c
+endif
+
+ifneq ($(CONFIG_LIBM_ARCH_NEARBYINT),y)
+CSRCS += lib_nearbyint.c
 endif
 
 ifneq ($(CONFIG_LIBM_ARCH_RINT),y)
@@ -87,6 +107,10 @@ endif
 
 ifneq ($(CONFIG_LIBM_ARCH_FLOORF),y)
 CSRCS += lib_floorf.c
+endif
+
+ifneq ($(CONFIG_LIBM_ARCH_NEARBYINTF),y)
+CSRCS += lib_nearbyintf.c
 endif
 
 ifneq ($(CONFIG_LIBM_ARCH_RINTF),y)

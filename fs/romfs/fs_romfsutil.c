@@ -173,6 +173,17 @@ static int16_t romfs_devcacheread(FAR struct romfs_mountpt_s *rm,
   uint32_t sector;
   int      ret;
 
+  /* The offset comes from the image.  Do not read a 16-byte chunk outside
+   * of the volume.  rm_volsize is zero only while the header is read.
+   */
+
+  if (rm->rm_volsize != 0 &&
+      (offset >= rm->rm_volsize ||
+       rm->rm_volsize - offset < ROMFS_ALIGNMENT))
+    {
+      return -EIO;
+    }
+
   /* rm->rm_cachesector holds the current sector that is buffer in or
    * referenced by rm->rm_buffer. If the requested sector is the same as this
    * this then we do nothing.
@@ -967,7 +978,10 @@ int romfs_finddirentry(FAR struct romfs_mountpt_s *rm,
     {
       /* Find the start of the next path component */
 
-      while (*entryname == '/') entryname++;
+      while (*entryname == '/')
+        {
+          entryname++;
+        }
 
       /* Find the end of the next path component */
 

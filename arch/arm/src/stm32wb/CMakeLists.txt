@@ -41,12 +41,6 @@ if(NOT CONFIG_ARCH_IDLE_CUSTOM)
   list(APPEND SRCS stm32wb_idle.c)
 endif()
 
-if(NOT CONFIG_SCHED_TICKLESS)
-  list(APPEND SRCS stm32wb_timerisr.c)
-else()
-  list(APPEND SRCS stm32wb_tickless.c)
-endif()
-
 if(CONFIG_BUILD_PROTECTED)
   list(APPEND SRCS stm32wb_userspace.c stm32wb_mpuinit.c)
 endif()

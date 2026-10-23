@@ -228,50 +228,9 @@ static int sixlowpan_tcp_header(FAR struct tcp_conn_s *conn,
 
   /* Initialize the TCP header */
 
-  ipv6tcp->tcp.srcport   = conn->lport;           /* Local port */
-  ipv6tcp->tcp.destport  = conn->rport;           /* Connected remote port */
-
   ipv6tcp->tcp.tcpoffset = (TCP_HDRLEN / 4) << 4; /* No optdata */
   ipv6tcp->tcp.flags     = TCP_ACK | TCP_PSH;     /* No urgent data */
-  ipv6tcp->tcp.urgp[0]   = 0;                     /* No urgent data */
-  ipv6tcp->tcp.urgp[1]   = 0;
-
-  /* Set the sequency number information.
-   *
-   * REVISIT:  There is currently no wait for the data to be ACKed and,
-   * hence, no mechanism to retransmit the packet.
-   */
-
-  memcpy(ipv6tcp->tcp.ackno, conn->rcvseq, 4);    /* ACK number */
-  memcpy(ipv6tcp->tcp.seqno, conn->sndseq, 4);    /* Sequence number */
-
-  /* Set the TCP window */
-
-  if (conn->tcpstateflags & TCP_STOPPED)
-    {
-      /* If the connection has issued TCP_STOPPED, we advertise a zero
-       * window so that the remote host will stop sending data.
-       */
-
-      ipv6tcp->tcp.wnd[0] = 0;
-      ipv6tcp->tcp.wnd[1] = 0;
-    }
-  else
-    {
-      /* Update the TCP received window based on I/O buffer availability */
-
-      uint32_t rcvseq = tcp_getsequence(conn->rcvseq);
-      uint32_t recvwndo = tcp_get_recvwindow(dev, conn);
-
-      /* Set the TCP Window */
-
-      ipv6tcp->tcp.wnd[0] = recvwndo >> 8;
-      ipv6tcp->tcp.wnd[1] = recvwndo & 0xff;
-
-      /* Update the Receiver Window */
-
-      conn->rcv_adv = rcvseq + recvwndo;
-    }
+  tcp_fill_header(dev, conn, &ipv6tcp->tcp);
 
   /* Calculate TCP checksum. */
 
@@ -383,7 +342,8 @@ static uint32_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
        * to the number of bytes that have been ACKed.
        */
 
-      sinfo->s_sent = sinfo->s_acked;
+      sinfo->s_sent    = sinfo->s_acked;
+      conn->tx_unacked = 0;
 
       /* Fall through to re-send data from the last that was ACKed */
     }
@@ -475,6 +435,18 @@ static uint32_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
 
           tcp_setsequence(conn->sndseq, seqno);
 
+          /* Count the segment as unacknowledged before the header is
+           * built, which starts the retransmission timer for it.
+           *
+           * NOTE: tcp_appsend() normally increments conn->tx_unacked based
+           * on the value of dev->d_sndlen.  However, dev->d_len is always
+           * zero for 6LoWPAN since it does not send via the dev->d_buf
+           * but, rather, uses a backdoor frame interface with the IEEE
+           * 802.15.4 MAC.
+           */
+
+          conn->tx_unacked += sndlen;
+
           /* Create the IPv6 + TCP header */
 
           ret = sixlowpan_tcp_header(conn, dev, &sinfo->s_buf[sinfo->s_sent],
@@ -492,30 +464,34 @@ static uint32_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
                                        &ipv6tcp.ipv6,
                                        &sinfo->s_buf[sinfo->s_sent], sndlen,
                                        sinfo->s_destmac);
-          if (ret < 0)
+
+          /* Without IOBs the segment is lost like on the air, the
+           * retransmission timer sends it again.
+           */
+
+          if (ret < 0 && ret != -ENOMEM)
             {
               nerr("ERROR: sixlowpan_queue_frames failed: %d\n", ret);
               sinfo->s_result = ret;
               goto end_wait;
             }
 
-          /* Increment the count of bytes sent, the number of unacked bytes,
-           * and the total count of TCP packets sent.
-           *
-           * NOTE: tcp_appsend() normally increments conn->tx_unacked based
-           * on the value of dev->d_sndlen.  However, dev->d_len is always
-           * zero for 6LoWPAN since it does not send via the dev->d_buf
-           * but, rather, uses a backdoor frame interface with the IEEE
-           * 802.15.4 MAC.
+          /* Increment the count of bytes sent and the total count of TCP
+           * packets sent, and advance the send sequence past the segment
+           * like tcp_appsend() does, so that an ACK of it is not one of
+           * data not yet sent.
            */
 
-          sinfo->s_sent    += sndlen;
-          conn->tx_unacked += sndlen;
+          sinfo->s_sent += sndlen;
+          tcp_setsequence(conn->sndseq, seqno + sndlen);
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
           /* For compatibility with buffered send logic */
 
-          conn->sndseq_max = tcp_addsequence(conn->sndseq, conn->tx_unacked);
+          if (TCP_SEQ_GT(seqno + sndlen, conn->sndseq_max))
+            {
+              conn->sndseq_max = seqno + sndlen;
+            }
 #endif
 
 #ifdef CONFIG_NET_STATISTICS

@@ -62,8 +62,8 @@ struct virtio_snd_format_map_s
 struct virtio_snd_buffer_s
 {
   struct ap_buffer_s apb;
-  struct virtio_snd_pcm_xfer xfer;
-  struct virtio_snd_pcm_status status;
+  struct virtio_snd_pcm_xfer *xfer;
+  struct virtio_snd_pcm_status *status;
   FAR struct audio_lowerhalf_s *dev;
 };
 
@@ -74,6 +74,7 @@ struct virtio_snd_dev_s
   struct audio_lowerhalf_s dev;
   uint32_t cache_buffers;
   uint32_t period_bytes;
+  uint32_t period_count;
   uint32_t frame_size;
   uint32_t index;
   bool running;
@@ -228,6 +229,10 @@ static const struct virtio_snd_format_map_s g_format_map[] =
     {
       AUDIO_SUBFMT_PCM_S8, 8
     },
+  [VIRTIO_SND_PCM_FMT_U8] =
+    {
+      AUDIO_SUBFMT_PCM_U8, 8
+    },
   [VIRTIO_SND_PCM_FMT_S16] =
     {
       AUDIO_SUBFMT_PCM_S16_LE, 16
@@ -320,11 +325,13 @@ virtio_snd_get_support_formats(FAR const struct virtio_snd_pcm_info *info,
 
   for (i = 0; i < nitems(g_format_map); i++)
     {
-      if (info->formats & (1 << i))
+      if (info->formats & (1 << i) && g_format_map[i].nformat)
         {
           caps->ac_controls.b[subformats++] = g_format_map[i].nformat;
           if (subformats >= nitems(caps->ac_controls.b))
-            break;
+            {
+              break;
+            }
         }
     }
 }
@@ -336,15 +343,35 @@ virtio_snd_get_support_formats(FAR const struct virtio_snd_pcm_info *info,
 static void virtio_snd_pcm_notify_cb(FAR struct virtqueue *vq)
 {
   FAR struct virtio_snd_s *priv = vq->vq_dev->priv;
+  FAR struct virtio_snd_buffer_s *buf;
+  FAR struct virtio_snd_dev_s *sdev;
+  irqstate_t flags;
+  bool underrun;
 
   for (; ; )
     {
-      FAR struct virtio_snd_buffer_s *buf;
-      FAR struct virtio_snd_dev_s *sdev;
-      buf = virtqueue_get_buffer_lock(vq, NULL, NULL, &priv->lock);
+      flags = spin_lock_irqsave(&priv->lock);
+      buf = virtqueue_get_buffer(vq, NULL, NULL);
       if (buf == NULL)
         {
+          spin_unlock_irqrestore(&priv->lock, flags);
           break;
+        }
+
+      sdev = (FAR struct virtio_snd_dev_s *)buf->dev;
+      sdev->cache_buffers--;
+      underrun = sdev->running &&
+                 buf->status->latency_bytes < sdev->period_bytes;
+      spin_unlock_irqrestore(&priv->lock, flags);
+
+      /* The upper half may call back into this driver (enqueue), which
+       * takes priv->lock again.
+       */
+
+      if (underrun)
+        {
+          buf->dev->upper(buf->dev->priv, AUDIO_CALLBACK_UNDERRUN,
+                          NULL, OK);
         }
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
@@ -354,8 +381,6 @@ static void virtio_snd_pcm_notify_cb(FAR struct virtqueue *vq)
       buf->dev->upper(buf->dev->priv, AUDIO_CALLBACK_DEQUEUE,
                       &buf->apb, OK);
 #endif
-      sdev = (FAR struct virtio_snd_dev_s *)buf->dev;
-      sdev->cache_buffers--;
     }
 }
 
@@ -393,29 +418,35 @@ static int virtio_snd_send_pcm(FAR struct virtio_snd_dev_s *sdev,
   int idx = info->direction == VIRTIO_SND_D_INPUT ?
                                VIRTIO_SND_VQ_RX : VIRTIO_SND_VQ_TX;
   FAR struct virtqueue *vq = priv->vdev->vrings_info[idx].vq;
-  struct virtqueue_buf vb[3];
+  struct virtqueue_buf vb[2];
   irqstate_t flags;
 
-  vb[0].buf = &buf->xfer;
-  vb[0].len = sizeof(buf->xfer);
-  vb[1].buf = buf->apb.samp;
-  vb[1].len = sdev->period_bytes;
-  vb[2].buf = &buf->status;
-  vb[2].len = sizeof(buf->status);
-
-  flags = spin_lock_irqsave(&priv->lock);
   if (idx == VIRTIO_SND_VQ_RX)
     {
-      virtqueue_add_buffer(vq, vb, 1, 2, buf);
+      vb[0].buf = buf->xfer;
+      vb[0].len = sizeof(*(buf->xfer));
+      vb[1].buf = buf->apb.samp;
+      vb[1].len = sdev->period_bytes + sizeof(*(buf->status));
     }
   else
     {
-      virtqueue_add_buffer(vq, vb, 2, 1, buf);
+      vb[0].buf = buf->xfer;
+      vb[0].len = sizeof(*(buf->xfer)) + sdev->period_bytes;
+      vb[1].buf = buf->status;
+      vb[1].len = sizeof(*(buf->status));
     }
 
+  flags = spin_lock_irqsave(&priv->lock);
+  virtqueue_add_buffer(vq, vb, 1, 1, buf);
   virtqueue_kick(vq);
-  spin_unlock_irqrestore(&priv->lock, flags);
   sdev->cache_buffers++;
+  if (sdev->cache_buffers > sdev->period_count)
+    {
+      vrterr("cache_buffers:%"PRIu32" > period_count:%"PRIu32"\n",
+        sdev->cache_buffers, sdev->period_count);
+    }
+
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return OK;
 }
@@ -559,8 +590,7 @@ static int virtio_snd_set_params(FAR struct virtio_snd_dev_s *sdev,
     }
 
   req->period_bytes = sdev->period_bytes;
-  req->buffer_bytes = req->period_bytes *
-                      CONFIG_DRIVERS_VIRTIO_SND_BUFFER_COUNT;
+  req->buffer_bytes = req->period_bytes * sdev->period_count;
 
   resp = virtio_malloc_buf(priv->vdev, sizeof(*resp), 16);
   if (resp == NULL)
@@ -692,7 +722,7 @@ static int virtio_snd_getcaps(FAR struct audio_lowerhalf_s *dev,
               caps->ac_controls.b[0] = AUDIO_SUBFMT_END;
               break;
           }
-         break;
+        break;
 
       case AUDIO_TYPE_OUTPUT:
       case AUDIO_TYPE_INPUT:
@@ -738,6 +768,11 @@ static int virtio_snd_configure(FAR struct audio_lowerhalf_s *dev,
 #endif
 {
   FAR struct virtio_snd_dev_s *sdev = (FAR struct virtio_snd_dev_s *)dev;
+  FAR struct virtio_snd_s *priv = sdev->priv;
+  FAR struct virtio_snd_pcm_info *info = &priv->info[sdev->index];
+  int idx = info->direction == VIRTIO_SND_D_INPUT ?
+                               VIRTIO_SND_VQ_RX : VIRTIO_SND_VQ_TX;
+  FAR struct virtqueue *vq = priv->vdev->vrings_info[idx].vq;
   int ret = -ENOTTY;
   uint32_t rate;
   uint8_t bps;
@@ -755,9 +790,13 @@ static int virtio_snd_configure(FAR struct audio_lowerhalf_s *dev,
         bps = caps->ac_controls.b[2];
         ch = caps->ac_channels;
         sdev->frame_size = ch * bps / 8;
+        sdev->period_count = MIN(CONFIG_DRIVERS_VIRTIO_SND_BUFFER_COUNT,
+                                 vq->vq_nentries / 2);
         sdev->period_bytes =
         virtio_snd_get_period_bytes(rate, ch, bps,
-                                    CONFIG_DRIVERS_VIRTIO_SOUND_PERIOD_TIME);
+                                    CONFIG_DRIVERS_VIRTIO_SOUND_PERIOD_TIME *
+                                    CONFIG_DRIVERS_VIRTIO_SND_BUFFER_COUNT /
+                                    sdev->period_count);
         vrtinfo("period_bytes:%"PRIu32"\n", sdev->period_bytes);
         ret = virtio_snd_set_params(sdev, ch, rate, bps);
         if (ret < 0)
@@ -920,28 +959,41 @@ static int virtio_snd_allocbuffer(FAR struct audio_lowerhalf_s *dev,
                                   FAR struct audio_buf_desc_s *desc)
 {
   FAR struct virtio_snd_dev_s *sdev = (FAR struct virtio_snd_dev_s *)dev;
-  FAR struct virtio_snd_s *priv = sdev->priv;
   FAR struct virtio_snd_buffer_s *buf;
+#ifndef CONFIG_BUILD_PROTECTED
+  FAR struct virtio_snd_s *priv = sdev->priv;
 
-  DEBUGASSERT(desc->u.pbuffer != NULL);
-
-  buf = virtio_zalloc_buf(priv->vdev, sizeof(*buf) + desc->numbytes, 16);
+  buf = virtio_zalloc_buf(priv->vdev,
+                          sizeof(*buf) +
+                          sizeof(struct virtio_snd_pcm_xfer) +
+                          desc->numbytes +
+                          sizeof(struct virtio_snd_pcm_status), 16);
+#else
+  buf = kumm_calloc(sizeof(*buf) +
+                    sizeof(struct virtio_snd_pcm_xfer) +
+                    desc->numbytes +
+                    sizeof(struct virtio_snd_pcm_status), 16);
+#endif
   if (buf == NULL)
     {
       vrterr("failed to allocate apb buffer\n");
       return -ENOMEM;
     }
 
+  DEBUGASSERT(desc->u.pbuffer != NULL);
   *desc->u.pbuffer = &buf->apb;
 
   buf->apb.crefs = 1;
   buf->apb.nmaxbytes = desc->numbytes;
-  buf->apb.samp = (FAR uint8_t *)(buf + 1);
+  buf->xfer = (FAR struct virtio_snd_pcm_xfer *)(buf + 1);
+  buf->apb.samp = (FAR uint8_t *)(buf->xfer + 1);
+  buf->status = (FAR struct virtio_snd_pcm_status *)
+                (buf->apb.samp + desc->numbytes);
 #ifdef CONFIG_AUDIO_MULTI_SESSION
   buf->apb.session = desc->session;
 #endif
-  buf->xfer.stream_id = sdev->index;
-  buf->status.status = VIRTIO_SND_S_IO_ERR;
+  buf->xfer->stream_id = sdev->index;
+  buf->status->status = VIRTIO_SND_S_IO_ERR;
   buf->dev = dev;
   nxmutex_init(&buf->apb.lock);
 
@@ -951,9 +1003,11 @@ static int virtio_snd_allocbuffer(FAR struct audio_lowerhalf_s *dev,
 static int virtio_snd_freebuffer(FAR struct audio_lowerhalf_s *dev,
                                  FAR struct audio_buf_desc_s *desc)
 {
+#ifndef CONFIG_BUILD_PROTECTED
   FAR struct virtio_snd_dev_s *sdev = (FAR struct virtio_snd_dev_s *)dev;
   FAR struct virtio_snd_s *priv = sdev->priv;
   FAR struct virtio_device *vdev = priv->vdev;
+#endif
   FAR struct ap_buffer_s *apb = desc->u.buffer;
   int refcount;
 
@@ -963,7 +1017,11 @@ static int virtio_snd_freebuffer(FAR struct audio_lowerhalf_s *dev,
   if (refcount <= 1)
     {
       nxmutex_destroy(&apb->lock);
+#ifdef CONFIG_BUILD_PROTECTED
+      kumm_free(apb);
+#else
       virtio_free_buf(vdev, apb);
+#endif
     }
 
   return sizeof(struct audio_buf_desc_s);
@@ -998,20 +1056,24 @@ static int virtio_snd_ioctl(FAR struct audio_lowerhalf_s *dev,
                             unsigned long arg)
 {
   FAR struct virtio_snd_dev_s *sdev = (FAR struct virtio_snd_dev_s *)dev;
+  FAR struct virtio_snd_s *priv = sdev->priv;
   FAR struct ap_buffer_info_s *bufinfo;
   FAR long *latency = (FAR long *)arg;
+  irqstate_t flags;
 
   switch (cmd)
     {
       case AUDIOIOC_GETBUFFERINFO:
         bufinfo = (FAR struct ap_buffer_info_s *)arg;
-        bufinfo->nbuffers = CONFIG_DRIVERS_VIRTIO_SND_BUFFER_COUNT;
+        bufinfo->nbuffers = sdev->period_count;
         bufinfo->buffer_size = sdev->period_bytes;
         break;
 
       case AUDIOIOC_GETLATENCY:
+        flags = spin_lock_irqsave(&priv->lock);
         *latency = sdev->cache_buffers * sdev->period_bytes /
                    sdev->frame_size;
+        spin_unlock_irqrestore(&priv->lock, flags);
         break;
 
       default:
@@ -1211,7 +1273,7 @@ static int virtio_snd_probe(FAR struct virtio_device *vdev)
   priv = kmm_zalloc(sizeof(*priv));
   if (priv == NULL)
     {
-      vrterr("virtio net driver priv alloc failed\n");
+      vrterr("virtio audio driver priv alloc failed\n");
       return -ENOMEM;
     }
 

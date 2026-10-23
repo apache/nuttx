@@ -623,9 +623,20 @@
 
 /* DEVCFG2.  CKSWEN is required: pic32mz_wfi32_pwrclk.c switches SYSCLK in
  * software.  DMT stays off; POSC in HS mode (40 MHz crystal).
+ *
+ * The WDT postscaler always follows BOARD_WD_PRESCALER: with WDTEN clear the
+ * watchdog is started by software (PIC32MZ_WDT) but its time-out still comes
+ * from this field.
  */
 
-#ifdef CONFIG_PIC32MZ_WDTENABLE
+#ifndef BOARD_WD_PRESCALER
+#  ifdef CONFIG_PIC32MZ_WDT
+#    error "BOARD_WD_PRESCALER must be defined to use the watchdog"
+#  else
+#    define BOARD_WD_PRESCALER   1048576
+#  endif
+#endif
+
 #if BOARD_WD_PRESCALER == 1
 #  define W1CFG_WDTPS            0
 #elif BOARD_WD_PRESCALER == 2
@@ -671,9 +682,10 @@
 #else
 #  error "Unsupported BOARD_WD_PRESCALER"
 #endif
+
+#ifdef CONFIG_PIC32MZ_WDTENABLE
 #  define W1CFG_WDTEN           DEVCFG2_WDTEN
 #else
-#  define W1CFG_WDTPS           0
 #  define W1CFG_WDTEN           0
 #endif
 

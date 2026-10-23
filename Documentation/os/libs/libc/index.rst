@@ -33,6 +33,7 @@ functions.  So we have::
   builtin   - Support for builtin applications.  Used by nuttx/binfmt and NSH.
   dlfcn     - dlfcn.h
   endian    - endian.h
+  environ   - Environment variables: getenv(), setenv() and others (stdlib.h)
   errno     - errno.h
   hex2bin   - hex2bin.h
   libgen    - libgen.h
@@ -69,6 +70,26 @@ and interfaces from header files that are too few to warrant their own sub-
 directory::
 
   misc      - Nonstandard "glue" logic, nuttx/debug.h, crc32.h, dirent.h
+
+Non-standard Names in the Headers
+=================================
+
+Some headers define names for the OS that C and POSIX do not reserve.
+A portable program that uses such a name for its own purpose can define
+one of these macros before its first ``#include``:
+
+``NUTTX_NO_GETOPT_MACROS``
+  ``unistd.h`` does not define ``optarg``, ``opterr``, ``optind`` and
+  ``optopt`` as macros.  getopt() keeps these values per task, so use
+  this only in a program that brings its own getopt() and its own
+  variables of these names.
+
+``NUTTX_NO_EXTENSIONS``
+  The headers do not define ``ERROR`` and ``OK`` (``sys/types.h``),
+  ``set_errno()`` and ``get_errno()`` (``errno.h``), ``zalloc()``
+  (``stdlib.h``), ``O_TEXT`` (``fcntl.h``), ``weak_alias``,
+  ``visibility_hidden``, ``visibility_default`` and ``unused_data``
+  (``nuttx/compiler.h``).
 
 Library Database
 ================
@@ -155,6 +176,7 @@ Implementation Details
    :maxdepth: 1
    :caption: Contents:
    
+   popen.rst
    search.rst
    stdbit.rst
    stream.rst

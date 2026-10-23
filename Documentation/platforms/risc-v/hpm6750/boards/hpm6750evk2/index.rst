@@ -1,6 +1,6 @@
-===========
-HPM6750EVK2
-===========
+===================
+HPMicro HPM6750EVK2
+===================
 
 .. tags:: arch:risc-v, chip:hpm6750, vendor:hpmicro
 

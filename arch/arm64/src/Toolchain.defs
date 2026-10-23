@@ -250,6 +250,17 @@ ifeq ($(CONFIG_LTO_FULL),y)
     NM := $(CROSSDEV)gcc-nm
     ARCHOPTIMIZATION += -fuse-linker-plugin
     ARCHOPTIMIZATION += -fno-builtin
+
+    # gcc links a module.  The loader cannot use LTO data, so a partial link
+    # (-r) compiles the module to machine code with the module options.
+
+    LDMODULELTOFLAGS = -flinker-output=nolto-rel $(CMODULEFLAGS)
+    LDELFLTOFLAGS = -flinker-output=nolto-rel $(CELFFLAGS)
+
+    # The export gives the group options to the program link of a kernel build
+
+    LDSTARTGROUP = -Wl,--start-group
+    LDENDGROUP = -Wl,--end-group
   endif
 endif
 
@@ -285,7 +296,8 @@ endif
 # Loadable module definitions
 
 CMODULEFLAGS = $(CFLAGS) -fvisibility=hidden # --target1-abs
-LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
+LDMODULEFLAGS = -r $(LDMODULELTOFLAGS) \
+                -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 
 # ELF module definitions
 
@@ -296,11 +308,12 @@ CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden # --target1-abs
 
 CXXELFFLAGS += -fno-use-cxa-atexit
 
-LDELFFLAGS = -r -e _start
+LDELFFLAGS = -r $(LDELFLTOFLAGS) -e _start
 ifneq ($(CONFIG_BUILD_KERNEL),y)
   # Flat build and protected elf entry point use crt0,
   # Kernel build will use apps/import/scripts/crt0
 
   LDELFFLAGS += $(TOPDIR)$(DELIM)arch$(DELIM)arm64$(DELIM)src$(DELIM)crt0.o
 endif
+
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)elf$(DELIM)gnu-elf.ld)

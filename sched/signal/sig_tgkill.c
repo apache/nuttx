@@ -28,6 +28,7 @@
 
 #include <signal.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include <nuttx/sched.h>
 #include <nuttx/signal.h>
@@ -107,6 +108,7 @@ int nxsig_tgkill(pid_t pid, pid_t tid, int signo)
   info.si_value.sival_ptr = NULL;
 #ifdef CONFIG_SCHED_HAVE_PARENT
   info.si_pid             = rtcb->pid;
+  info.si_uid             = getuid();
   info.si_status          = OK;
 #endif
 

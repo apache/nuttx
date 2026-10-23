@@ -59,6 +59,8 @@ void task_initialize(void);
 /* Task group data structure management */
 
 int  group_allocate(FAR struct tcb_s *tcb, uint8_t ttype);
+void group_init_rlimit(FAR struct task_group_s *group,
+                       FAR struct task_group_s *parent);
 void group_initialize(FAR struct tcb_s *tcb);
 #ifndef CONFIG_DISABLE_PTHREAD
 void group_bind(FAR struct tcb_s *tcb);

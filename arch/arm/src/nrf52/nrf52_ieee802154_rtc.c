@@ -344,7 +344,7 @@ static int nrf52_radioi8_isr_rtc(int irq, void *context, void *arg)
       NRF52_RTC_ACKINT(rtc->rtc, NRF52_RTC_TIMESLOT);
     }
 
-    leave_critical_section(flags);
+  leave_critical_section(flags);
 
   return OK;
 }
@@ -379,10 +379,6 @@ nrf52_radioi8_rtc_init(struct nrf52_radioi8_dev_s *dev)
   /* Attach RTC interrupt */
 
   NRF52_RTC_SETISR(rtc, nrf52_radioi8_isr_rtc, dev);
-
-  /* Set interrupts priority */
-
-  up_prioritize_irq(NRF52_IRQ_RTC0, 0);
 
   /* Connect RTC */
 

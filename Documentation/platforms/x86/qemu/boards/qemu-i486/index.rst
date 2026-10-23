@@ -1,5 +1,5 @@
 =========
-qemu-i486
+QEMU i486
 =========
 
 .. tags:: arch:x86, chip:qemu

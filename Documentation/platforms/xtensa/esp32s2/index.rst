@@ -218,14 +218,14 @@ MTCK / GPIO39 TCK
 MTMS / GPIO42 TMS
 ============= ===========
 
-Some boards, like :ref:`ESP32-S2-Kaluga-1 Kit v1.3 <platforms/xtensa/esp32s2/boards/esp32s2-kaluga-1/index:ESP32-S2-Kaluga-1 Kit v1.3>` have a built-in JTAG debugger.
+Some boards, like :ref:`ESP32-S2-Kaluga-1 Kit v1.3 <platforms/xtensa/esp32s2/boards/esp32s2-kaluga-1/index:Espressif ESP32-S2-Kaluga-1>` have a built-in JTAG debugger.
 
 Other boards that don't have any built-in JTAG debugger can be debugged using an external JTAG debugger being connected
 directly to the ESP32-S2 JTAG pins.
 
 .. note:: One must configure the USB drivers to enable JTAG communication. Please check
   `Configure USB Drivers <https://docs.espressif.com/projects/esp-idf/en/release-v5.1/esp32s2/api-guides/jtag-debugging/configure-ft2232h-jtag.html?highlight=udev#configure-usb-drivers>`_
-  for configuring the JTAG adapter of the :ref:`ESP32-S2-Kaluga-1 <platforms/xtensa/esp32s2/boards/esp32s2-kaluga-1/index:ESP32-S2-Kaluga-1 Kit v1.3>` board
+  for configuring the JTAG adapter of the :ref:`ESP32-S2-Kaluga-1 <platforms/xtensa/esp32s2/boards/esp32s2-kaluga-1/index:Espressif ESP32-S2-Kaluga-1>` board
   and other FT2232-based JTAG adapters.
 
 OpenOCD can then be used::

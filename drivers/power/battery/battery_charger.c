@@ -308,6 +308,7 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
       case BATIOC_STATE:
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->state(dev, ptr);
@@ -318,6 +319,7 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
       case BATIOC_HEALTH:
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->health(dev, ptr);
@@ -328,6 +330,7 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
       case BATIOC_ONLINE:
         {
           FAR bool *ptr = (FAR bool *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->online(dev, ptr);
@@ -339,6 +342,7 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
         {
           int volts;
           FAR int *voltsp = (FAR int *)((uintptr_t)arg);
+
           if (voltsp)
             {
               volts = *voltsp;
@@ -351,6 +355,7 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
         {
           int amps;
           FAR int *ampsp = (FAR int *)((uintptr_t)arg);
+
           if (ampsp)
             {
               amps = *ampsp;
@@ -363,6 +368,7 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
         {
           int amps;
           FAR int *ampsp = (FAR int *)((uintptr_t)arg);
+
           if (ampsp)
             {
               amps = *ampsp;
@@ -374,6 +380,7 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
       case BATIOC_OPERATE:
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->operate(dev, (uintptr_t)arg);
@@ -384,6 +391,7 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
       case BATIOC_CHIPID:
         {
           FAR unsigned int *ptr = (FAR unsigned int *)((uintptr_t)arg);
+
           if (ptr)
             {
               ret = dev->ops->chipid(dev, ptr);
@@ -394,6 +402,7 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
       case BATIOC_GET_VOLTAGE:
         {
           FAR int *outvoltsp = (FAR int *)((uintptr_t)arg);
+
           if (outvoltsp)
             {
               ret = dev->ops->get_voltage(dev, outvoltsp);
@@ -404,6 +413,7 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
       case BATIOC_VOLTAGE_INFO:
         {
           FAR int *outvoltsp = (FAR int *)((uintptr_t)arg);
+
           if (outvoltsp)
             {
               ret = dev->ops->voltage_info(dev, outvoltsp);
@@ -414,6 +424,7 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
       case BATIOC_GET_PROTOCOL:
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
+
           if (ptr)
             {
               if (dev->ops->get_protocol)

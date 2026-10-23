@@ -24,6 +24,10 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = nrf54l_boot.c nrf54l_bringup.c
 
+ifeq ($(CONFIG_NRF54L_RADIO_IEEE802154),y)
+CSRCS += nrf54l_ieee802154.c
+endif
+
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += nrf54l_autoleds.c
 else

@@ -1,6 +1,6 @@
-=====
-Misoc
-=====
+===============
+QEMU LM32 Misoc
+===============
 
 .. tags:: arch:misoc, chip:lm32
 

@@ -56,6 +56,10 @@ SYSCALL_LOOKUP(nxsched_get_stackinfo,      2)
 #endif
 
 SYSCALL_LOOKUP(sysinfo,                    1)
+SYSCALL_LOOKUP(getrlimit,                  2)
+SYSCALL_LOOKUP(setrlimit,                  2)
+SYSCALL_LOOKUP(umask,                      1)
+SYSCALL_LOOKUP(getumask,                   0)
 
 SYSCALL_LOOKUP(gethostname,                2)
 SYSCALL_LOOKUP(sethostname,                2)
@@ -174,6 +178,7 @@ SYSCALL_LOOKUP(sigqueue,                   3)
 SYSCALL_LOOKUP(sigsuspend,                 1)
 SYSCALL_LOOKUP(sigtimedwait,               3)
 SYSCALL_LOOKUP(sigwaitinfo,                2)
+SYSCALL_LOOKUP(pause,                      0)
 #endif
 SYSCALL_LOOKUP(clock_nanosleep,            4)
 

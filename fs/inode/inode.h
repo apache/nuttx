@@ -33,6 +33,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <errno.h>
 #include <dirent.h>
 #include <sched.h>
 
@@ -522,7 +523,15 @@ int foreach_inode(foreach_inode_t handler, FAR void *arg);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_DISABLE_DIRECTORY_OPERATIONS
+static inline int dir_allocate(FAR struct file *filep,
+                               FAR const char *relpath)
+{
+  return -ENOSYS;
+}
+#else
 int dir_allocate(FAR struct file *filep, FAR const char *relpath);
+#endif
 
 /****************************************************************************
  * Name: dir_fstat
@@ -533,7 +542,14 @@ int dir_allocate(FAR struct file *filep, FAR const char *relpath);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_DISABLE_DIRECTORY_OPERATIONS
+static inline int dir_fstat(FAR struct file *filep, FAR struct stat *buf)
+{
+  return -ENOTTY;
+}
+#else
 int dir_fstat(FAR struct file *filep, FAR struct stat *buf);
+#endif
 
 /****************************************************************************
  * Name: pseudofile_create

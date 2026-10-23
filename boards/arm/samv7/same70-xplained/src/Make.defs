@@ -20,8 +20,6 @@
 #
 ############################################################################
 
-include $(TOPDIR)/Make.defs
-
 CSRCS = sam_boot.c sam_bringup.c
 
 ifeq ($(CONFIG_SAMV7_SDRAMC),y)

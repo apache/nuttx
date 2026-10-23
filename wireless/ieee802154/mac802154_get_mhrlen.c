@@ -53,6 +53,38 @@ static const uint8_t mac802154_addr_length[4] =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: mac802154_mhrlen
+ *
+ * Description:
+ *   Calculate the MAC header length given the addressing modes and the PAN
+ *   ID compression field.
+ *
+ ****************************************************************************/
+
+int mac802154_mhrlen(enum ieee802154_addrmode_e dmode,
+                     enum ieee802154_addrmode_e smode, bool panidcomp)
+{
+  int ret = 3; /* Always frame control (2 bytes) and seq. num (1 byte) */
+
+  ret += mac802154_addr_length[dmode];
+  ret += mac802154_addr_length[smode];
+
+  if (dmode != IEEE802154_ADDRMODE_NONE)
+    {
+      ret += 2; /* 2 bytes for destination PAN ID */
+    }
+
+  /* The source PAN ID is omitted when PAN ID compression is set */
+
+  if (smode != IEEE802154_ADDRMODE_NONE && !panidcomp)
+    {
+      ret += 2; /* 2 bytes for source PAN ID */
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: mac802154_get_mhrlen
  *
  * Description:
@@ -65,7 +97,6 @@ int mac802154_get_mhrlen(MACHANDLE mac,
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
-  int ret = 3; /* Always frame control (2 bytes) and seq. num (1 byte) */
 
   /* Check to make sure both the dest address and the source address are not
    * set to NONE
@@ -87,47 +118,16 @@ int mac802154_get_mhrlen(MACHANDLE mac,
       return -EINVAL;
     }
 
-  /* Add the destination address length */
-
-  ret += mac802154_addr_length[meta->destaddr.mode];
-
-  /* Add the source address length */
-
-  ret += mac802154_addr_length[meta->srcmode];
-
   /* If both destination and source addressing information is present, the
    * MAC sublayer shall compare the destination and source PAN identifiers.
-   * [1] pg. 41.
+   * If the PAN identifiers are identical, the PAN ID Compression field
+   * shall be set to one, and the source PAN identifier shall be omitted
+   * from the transmitted frame. [1] pg. 41.
    */
 
-  if (meta->srcmode  != IEEE802154_ADDRMODE_NONE &&
-      meta->destaddr.mode != IEEE802154_ADDRMODE_NONE)
-    {
-      /* If the PAN identifiers are identical, the PAN ID Compression field
-       * shall be set to one, and the source PAN identifier shall be omitted
-       * from the transmitted frame. [1] pg. 41.
-       */
-
-      if (IEEE802154_PANIDCMP(meta->destaddr.panid, priv->addr.panid))
-        {
-          ret += 2; /* 2 bytes for destination PAN ID */
-          return ret;
-        }
-    }
-
-  /* If we are here, PAN ID compression is off, so include the dest and
-   * source PAN ID if the respective address is included
-   */
-
-  if (meta->srcmode != IEEE802154_ADDRMODE_NONE)
-    {
-      ret += 2; /* 2 bytes for source PAN ID */
-    }
-
-  if (meta->destaddr.mode != IEEE802154_ADDRMODE_NONE)
-    {
-      ret += 2; /* 2 bytes for destination PAN ID */
-    }
-
-  return ret;
+  return mac802154_mhrlen(meta->destaddr.mode, meta->srcmode,
+                          meta->srcmode != IEEE802154_ADDRMODE_NONE &&
+                          meta->destaddr.mode != IEEE802154_ADDRMODE_NONE &&
+                          IEEE802154_PANIDCMP(meta->destaddr.panid,
+                                              priv->addr.panid));
 }

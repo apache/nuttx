@@ -27,14 +27,19 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <errno.h>
 #include <nuttx/debug.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/clock.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/wireless/ieee802154/ieee802154_radio.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
+#include <nuttx/wireless/ieee802154/mrf24j40.h>
 
 #include "mrf24j40.h"
 #include "mrf24j40_reg.h"
@@ -44,6 +49,10 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* RSSI samples taken by one energy detect work before it yields */
+
+#define MRF24J40_ED_SAMPLES 8
 
 /****************************************************************************
  * Private Types
@@ -410,17 +419,95 @@ int mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio, bool enable)
   return OK;
 }
 
+/****************************************************************************
+ * Name: mrf24j40_edworker
+ *
+ * Description:
+ *   Sample the RSSI until the end of the energy detect.
+ *
+ ****************************************************************************/
+
+static void mrf24j40_edworker(FAR void *arg)
+{
+  FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)arg;
+  uint8_t rssi;
+  int ret = OK;
+  int i;
+
+  nxmutex_lock(&dev->lock);
+
+  for (i = 0; i < MRF24J40_ED_SAMPLES && ret == OK; i++)
+    {
+      ret = mrf24j40_rssi(dev, &rssi);
+      if (ret == OK && rssi > dev->edmax)
+        {
+          dev->edmax = rssi;
+        }
+    }
+
+  if (ret == OK && !clock_compare(dev->ed_end, clock_systime_ticks()))
+    {
+      nxmutex_unlock(&dev->lock);
+      work_queue(HPWORK, &dev->edwork, mrf24j40_edworker, dev, 1);
+      return;
+    }
+
+  /* Done, or the RSSI did not get ready: the LNA is back under automatic
+   * control and the highest value so far is reported
+   */
+
+  mrf24j40_setpamode(dev, MRF24J40_PA_AUTO);
+  nxmutex_unlock(&dev->lock);
+
+  if (ret < 0)
+    {
+      wlerr("ERROR: RSSI not ready: %d\n", ret);
+    }
+
+  dev->radiocb->edresult(dev->radiocb, dev->edmax);
+}
+
 int mrf24j40_energydetect(FAR struct ieee802154_radio_s *radio,
                           uint32_t nsymbols)
 {
-  return -ENOTTY;
+  FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
+  int ret;
+
+  ret = nxmutex_lock(&dev->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (!work_available(&dev->edwork))
+    {
+      nxmutex_unlock(&dev->lock);
+      return -EBUSY;
+    }
+
+  /* The LNA is enabled for the whole energy detect */
+
+  mrf24j40_setpamode(dev, MRF24J40_PA_ED);
+
+  dev->edmax  = 0;
+  dev->ed_end = clock_systime_ticks() +
+                USEC2TICK(nsymbols * IEEE802154_SYMBOL_US);
+
+  nxmutex_unlock(&dev->lock);
+
+  return work_queue(HPWORK, &dev->edwork, mrf24j40_edworker, dev, 0);
 }
 
 int mrf24j40_reset(FAR struct ieee802154_radio_s *radio)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
   struct ieee802154_cca_s   cca;
+  uint8_t eaddr[8];
   int reg;
+
+  /* An energy detect in progress ends here */
+
+  work_cancel_sync(HPWORK, &dev->edwork);
 
   /* Software reset */
 
@@ -486,15 +573,35 @@ int mrf24j40_reset(FAR struct ieee802154_radio_s *radio)
 
   mrf24j40_setorder(dev, 15, 15);
 
+  /* The RSSI is averaged over MRF24J40_RSSI_SYMBOLS (TXBCON1 RSSINUM) */
+
+  reg  = mrf24j40_getreg(dev->spi, MRF24J40_TXBCON1);
+  reg |= MRF24J40_TXBCON1_RSSINUM;
+  mrf24j40_setreg(dev->spi, MRF24J40_TXBCON1, reg);
+
   dev->rxenabled = false;
 
   mrf24j40_setchannel(dev, 11);
   mrf24j40_setpanid(dev, g_allones);
   mrf24j40_setsaddr(dev, g_allones);
-  mrf24j40_seteaddr(dev, g_allones);
+
+  /* Use the extended address of the board, if it has one */
+
+  if (dev->lower->geteaddr != NULL)
+    {
+      dev->lower->geteaddr(dev->lower, eaddr);
+      mrf24j40_seteaddr(dev, eaddr);
+    }
+  else
+    {
+      mrf24j40_seteaddr(dev, g_allones);
+    }
 
   dev->max_frame_waittime = MRF24J40_DEFAULT_MAX_FRAME_WAITTIME;
-  dev->bsn = 0;
+
+  /* macBSN starts from a random value */
+
+  dev->bsn = rand();
 
   /* Default device params */
 
@@ -528,7 +635,7 @@ int mrf24j40_getattr(FAR struct ieee802154_radio_s *radio,
         }
         break;
 
-     case IEEE802154_ATTR_MAC_MAX_FRAME_WAITTIME:
+      case IEEE802154_ATTR_MAC_MAX_FRAME_WAITTIME:
         {
           attrval->mac.max_frame_waittime = dev->max_frame_waittime;
           ret = IEEE802154_STATUS_SUCCESS;
@@ -673,7 +780,6 @@ int mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
 
       /* The radio layer is responsible for setting the BSN. */
 
-      dev->bsn = 0;
       mrf24j40_setreg(dev->spi, MRF24J40_BEACON_FIFO + 4, dev->bsn++);
 
       /* Set the TXBMSK (TXBCON1 0x25<7>) bit = 1 to mask the beacon

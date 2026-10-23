@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
+#include <sys/mman.h>
 
 #include <assert.h>
 #include <nuttx/debug.h>
@@ -159,6 +160,17 @@ static int unmap_rammap(FAR struct task_group_s *group,
    */
 
   length = entry->length - offset;
+
+  /* The changes to a shared mapping go to the file */
+
+  if ((entry->flags & MAP_SHARED) != 0 && (entry->prot & PROT_WRITE) != 0)
+    {
+      ret = msync_rammap(entry, start, length, MS_SYNC);
+      if (ret < 0)
+        {
+          ferr("ERROR: Write back failed: %d\n", ret);
+        }
+    }
 
   /* Are we unmapping the entire region (offset == 0)? */
 
@@ -340,6 +352,7 @@ out:
   ret = mm_map_add(get_current_mm(), entry);
   if (ret < 0)
     {
+      file_put(filep);
       goto errout_with_region;
     }
 

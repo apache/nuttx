@@ -579,12 +579,12 @@ double      remainder(double x, double y);
 long double remainderl(long double x, long double y);
 #endif
 
-float       remquof(float x, float y, int *quo);
+float       remquof(float x, float y, FAR int *quo);
 #ifdef CONFIG_HAVE_DOUBLE
-double      remquo(double x, double y, int *quo);
+double      remquo(double x, double y, FAR int *quo);
 #endif
 #ifdef CONFIG_HAVE_LONG_DOUBLE
-long double remquol(long double x, long double y, int *quo);
+long double remquol(long double x, long double y, FAR int *quo);
 #endif
 
 float       scalblnf(float x, long int n);
@@ -602,6 +602,11 @@ double      scalbn(double x, int n);
 #ifdef CONFIG_HAVE_LONG_DOUBLE
 long double scalbnl(long double x, int n);
 #endif
+
+/* Values of ilogb() for zero and NaN */
+
+#define FP_ILOGBNAN     ((int)(~0u >> 1))
+#define FP_ILOGB0       (-FP_ILOGBNAN)
 
 #define FP_INFINITE     0
 #define FP_NAN          1

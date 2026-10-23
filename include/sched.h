@@ -69,7 +69,9 @@
 
 /* Pthread definitions ******************************************************/
 
-#define PTHREAD_KEYS_MAX          CONFIG_TLS_NELEM
+#ifndef PTHREAD_KEYS_MAX
+#  define PTHREAD_KEYS_MAX        CONFIG_TLS_NELEM
+#endif
 
 /* CPU affinity mask helpers ************************************************/
 

@@ -146,6 +146,8 @@ jobs:
       - name: Apply depends-on PRs
         if: ${{ steps.gittargets.outputs.depends_on != '' }}
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -uo pipefail
 
@@ -153,9 +155,10 @@ jobs:
           git config --global user.name "github-actions"
 
           # Pass only fixed error codes to the trusted comment workflow.
+          # $3 and $4 name a dependency that is closed without merge.
           mark_failed() {
           echo "::error::could not apply $1 ($2)"
-          python3 - "$2" <<'PY'
+          python3 - "$2" "${3:-}" "${4:-}" <<'PY'
           import json, sys
           p = "depends-on-report/result.json"
           try:
@@ -164,6 +167,9 @@ jobs:
               d = {"version": 1, "pr_number": None, "head_sha": None, "dependencies": [], "warnings": []}
           d["status"] = "failed"
           d["error_code"] = sys.argv[1]
+          for dep in d.get("dependencies", []):
+              if [dep.get("repo"), str(dep.get("number"))] == sys.argv[2:4]:
+                  dep["closed"] = True
           open(p, "w").write(json.dumps(d))
           PY
           }
@@ -205,7 +211,29 @@ jobs:
             fi
 
             DEP_SHA=$(git -C "$REPO_PATH" rev-parse "dep-${DEP_PR_NUM}")
+
+            # Skip a dependency whose merge commit is already in the checkout.
+            # Its commits are in the target branch and cannot be applied again.
+            # A dependency that is closed without merge is an error.
+            if ! DEP_INFO=$(gh api "repos/${DEP_REPO}/pulls/${DEP_PR_NUM}" \
+                --jq 'if .merged then "merged \(.merge_commit_sha)" else .state end'); then
+              echo "::warning::Could not read the state of ${DEP}; applying it."
+              DEP_INFO=""
+            fi
+            read -r DEP_STATE MERGE_SHA <<< "$DEP_INFO"
+            if [ "$DEP_STATE" = "merged" ] && \
+               git -C "$REPO_PATH" merge-base --is-ancestor "$MERGE_SHA" HEAD 2>/dev/null; then
+              echo "Dependency ${DEP} is merged as ${MERGE_SHA}; skipping it"
+              printf '%s\t%s\t%s\tmerged\n' "$DEP_REPO" "$DEP_PR_NUM" "$DEP_SHA" >> depends-on-report/applied.tsv
+              continue
+            fi
+
             printf '%s\t%s\t%s\n' "$DEP_REPO" "$DEP_PR_NUM" "$DEP_SHA" >> depends-on-report/applied.tsv
+
+            if [ "$DEP_STATE" = "closed" ]; then
+              echo "::error::Dependency ${DEP} is closed without merge; remove it from depends-on or reopen it."
+              mark_failed "$DEP" "dependency_closed" "$DEP_REPO" "$DEP_PR_NUM"; exit 1
+            fi
 
             # Stop on unrelated histories; HEAD..dep would otherwise include
             # every dependency commit and could cherry-pick unrelated changes.
@@ -237,12 +265,15 @@ jobs:
           python3 - <<'PY'
           import json
           shas = {}
+          merged = set()
           try:
               with open("depends-on-report/applied.tsv", encoding="utf-8") as f:
                   for line in f:
                       p = line.rstrip("\n").split("\t")
-                      if len(p) == 3:
+                      if len(p) in (3, 4):
                           shas[(p[0], p[1])] = p[2]
+                      if len(p) == 4 and p[3] == "merged":
+                          merged.add((p[0], p[1]))
           except FileNotFoundError:
               pass
           with open("depends-on-report/result.json", encoding="utf-8") as f:
@@ -251,6 +282,8 @@ jobs:
               key = (dep.get("repo"), str(dep.get("number")))
               if key in shas:
                   dep["head_sha"] = shas[key]
+              if key in merged:
+                  dep["merged"] = True
           with open("depends-on-report/result.json", "w", encoding="utf-8") as f:
               json.dump(d, f)
           PY

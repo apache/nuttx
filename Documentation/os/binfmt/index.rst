@@ -30,6 +30,8 @@ At present, the following binary formats are support by NuttX:
   - **NXFLAT**. NuttX NXFLAT formatted files. More information about the
     NXFLAT binary format can be found in the :ref:`NXFLAT
     documentation <nxflat>`.
+  - **Scripts**. A file that starts with ``#!`` is run by the interpreter
+    that its first line names. See `Scripts`_ below.
 
 **Executables and Libraries** The generic binary loader logic does not
 care what it is that it being loaded. It could load an executable
@@ -47,6 +49,30 @@ The name ``binfmt`` is the same name used by the Linux binary loader.
 However, the NuttX binary loader is an independent development and
 shares nothing with the Linux binary loader other the same name and the
 same basic functionality.
+
+Scripts
+=======
+
+With ``CONFIG_BINFMT_SCRIPT`` (default ``n``), ``exec()`` and
+``posix_spawn()`` can run a file whose first line has this form::
+
+  #!<interpreter> [<argument>]
+
+The loader starts the interpreter with the argument list that Linux uses::
+
+  <interpreter> [<argument>] <script> <argv[1]> ...
+
+``<script>`` is the path of the script that was loaded, also when it was
+found through ``PATH``. The interpreter ends at the first white space. The
+rest of the line, without the white space around it, is one optional
+argument. The loader reads at most 127 bytes of the first line.
+
+The interpreter must be a file that another binary format can load, for
+example an ELF program or a builtin application. The interpreter can be a
+script too, up to four levels. A deeper chain fails with ``ELOOP``. A
+missing interpreter fails with ``ENOENT``. The script format is tried after
+all other formats, so a file that no format accepts fails with
+``ENOEXEC``.
 
 Binary Loader Interface
 =======================
@@ -181,11 +207,12 @@ Basic module management
   :param bin:
     The ``filename`` field will be used
     in order to locate the module to be loaded from the file system.
-    The filename must be the full, absolute path to the file to be executed
-    unless ``CONFIG_LIBC_ENVPATH`` is defined. In that case, filename may be
-    a relative path; a set of candidate absolute paths will be generated using
-    the ``PATH`` environment variable and ``load_module()`` will attempt to load each
-    file that is found at those absolute paths.
+    With ``CONFIG_LIBC_ENVPATH``, a filename that contains no ``/`` is
+    searched for in the directories of the ``PATH`` environment variable,
+    and ``load_module()`` tries to load each file that it finds there. Any
+    other filename is a path and is used as it is: an absolute path, or a
+    path relative to the current working directory. Without
+    ``CONFIG_LIBC_ENVPATH``, each filename is used as a path.
 
   :return:
     This is a NuttX internal function so it follows the convention that 0 (``OK``)
@@ -355,6 +382,8 @@ Configuration Variables
   - ``CONFIG_BINFMT_DISABLE``: By default, support for loadable binary formats is built.
     This logic may be suppressed be defining this setting.
   - ``CONFIG_BINFMT_CONSTRUCTORS``: Build in support for C++ constructors in loaded modules.
+  - ``CONFIG_BINFMT_SCRIPT``: Run files that start with ``#!`` through the
+    interpreter that they name. Default: ``n``.
   - ``CONFIG_SYMTAB_ORDEREDBYNAME``: Symbol tables are order by name (rather than value).
   - ``CONFIG_SYMTAB_DECORATED``: Symbols will have a leading underscore in object files.
 

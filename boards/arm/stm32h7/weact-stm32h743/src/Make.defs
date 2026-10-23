@@ -20,8 +20,6 @@
 #
 ############################################################################
 
-include $(TOPDIR)/Make.defs
-
 CSRCS = stm32_boot.c stm32_bringup.c stm32_usb.c stm32_ioctl.c stm32_spi.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
@@ -36,6 +34,10 @@ endif
 
 ifeq ($(CONFIG_STM32_SDMMC),y)
 CSRCS += stm32_sdmmc.c
+endif
+
+ifeq ($(CONFIG_IEEE80211_MORSE),y)
+CSRCS += stm32_morse.c
 endif
 
 ifeq ($(CONFIG_FAT_DMAMEMORY),y)

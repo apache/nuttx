@@ -31,10 +31,16 @@ nuttx_mod_link_options(-r)
 
 nuttx_elf_link_options_ifdef(CONFIG_BINFMT_ELF_RELOCATABLE -r)
 
+# With LTO the compiler driver links the module: a linker option needs -Wl,
+
+if("${CMAKE_LD}" MATCHES "gcc$")
+  set(ELF_LD_OPTION -Wl,)
+endif()
+
 if(CONFIG_ARCH_RV32)
-  nuttx_elf_link_options(--oformat elf32-littleriscv)
+  nuttx_elf_link_options(${ELF_LD_OPTION}--oformat=elf32-littleriscv)
 else()
-  nuttx_elf_link_options(--oformat elf64-littleriscv)
+  nuttx_elf_link_options(${ELF_LD_OPTION}--oformat=elf64-littleriscv)
 endif()
 
 nuttx_elf_link_options(-e _start)

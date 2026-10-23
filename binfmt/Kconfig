@@ -135,6 +135,22 @@ config BINFMT_ELF_EXECUTABLE
 
 endchoice
 
+config BINFMT_CHECKEXEC
+	bool "Check the execute permission of programs"
+	default SCHED_USER_IDENTITY
+	---help---
+		Refuse to start a program from a file that has no execute
+		permission, with EACCES.  Each binary format checks the mode of
+		the file that it opens, also for scripts and their interpreters.  With
+		SCHED_USER_IDENTITY, the owner, group or other execute bit is
+		checked for the effective user and group IDs.  Without it, any
+		execute bit is enough.
+
+		File systems without a stored mode (for example FAT) report
+		execute permission for all files, unless they are mounted with
+		MS_NOEXEC.  On a file system that stores the mode, a program that
+		was created with a mode without execute bits needs chmod first.
+
 config BINFMT_STORE_FILENAME
 	bool "Store the binary filename"
 	default n

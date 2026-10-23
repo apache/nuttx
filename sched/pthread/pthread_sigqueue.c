@@ -30,6 +30,7 @@
 #include <nuttx/debug.h>
 #include <pthread.h>
 #include <signal.h>
+#include <unistd.h>
 
 #include <nuttx/signal.h>
 
@@ -65,6 +66,7 @@ int pthread_sigqueue(pthread_t thread, int sig, const union sigval value)
   info.si_value = value;
 #ifdef CONFIG_SCHED_HAVE_PARENT
   info.si_pid = rtcb->pid;
+  info.si_uid = getuid();
   info.si_status = OK;
 #endif
   info.si_user = NULL; /* Will be set in sig_dispatch.c */

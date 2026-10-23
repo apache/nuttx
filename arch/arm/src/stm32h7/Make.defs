@@ -49,12 +49,6 @@ endif
 CHIP_CSRCS += stm32_allocateheap.c stm32_exti_gpio.c stm32_gpio.c stm32_irq.c
 CHIP_CSRCS += stm32_start.c stm32_rcc.c stm32_lowputc.c stm32_serial.c
 
-ifeq ($(CONFIG_SCHED_TICKLESS),y)
-CHIP_CSRCS += stm32_tickless.c
-else
-CHIP_CSRCS += stm32_timerisr.c
-endif
-
 ifeq ($(CONFIG_ARM_MPU),y)
 CHIP_CSRCS += stm32_mpuinit.c
 endif
@@ -184,7 +178,11 @@ CHIP_CSRCS += stm32_ethernet.c
 endif
 
 ifeq ($(CONFIG_MDIO_BUS),y)
-CHIP_CSRCS += stm32_mdio.c
+  ifeq ($(CONFIG_STM32_ETH_MDIO_GPIO),y)
+    CHIP_CSRCS += stm32_mdio_gpio.c
+  else
+    CHIP_CSRCS += stm32_mdio.c
+  endif
 endif 
 
 
@@ -193,14 +191,6 @@ CHIP_CSRCS += stm32_pmsleep.c stm32_pmstandby.c stm32_pmstop.c
 ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
 CHIP_CSRCS += stm32_pminitialize.c
 endif
-endif
-
-ifeq ($(CONFIG_STM32_IWDG),y)
-CHIP_CSRCS += stm32_iwdg.c
-endif
-
-ifeq ($(CONFIG_STM32_WWDG),y)
-CHIP_CSRCS += stm32_wwdg.c
 endif
 
 ifeq ($(CONFIG_STM32_CRYP),y)

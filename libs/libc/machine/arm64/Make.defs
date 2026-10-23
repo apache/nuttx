@@ -80,6 +80,11 @@ ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 ASRCS += arch_setjmp.S
 endif
 
+ifeq ($(CONFIG_ARCH_HAVE_UCONTEXT),y)
+ASRCS += arch_ucontext.S
+CSRCS += arch_makecontext.c
+endif
+
 ifeq ($(CONFIG_PROFILE_NONE),)
 CSRCS += arch_mcount.c
 endif

@@ -1,0 +1,13 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config LIBC_CTYPE_TABLE
+	bool
+	default n
+	---help---
+		Provide the newlib compatible character class table (_ctype_).
+		It is needed by the toolchain C++ library (GNU libstdc++) and by
+		pre-built libraries compiled against the newlib headers, whose
+		ctype.h macros reference it.

@@ -89,6 +89,9 @@ SECTION_FUNC(text, up_saveusercontext)
     str    x4,  [x0, #8 * REG_SCTLR_EL1]
 #endif
 
+    mrs    x4,  tpidr_el0
+    str    x4,  [x0, #8 * REG_TPIDR_EL0]
+
     ret
 
 /****************************************************************************
@@ -134,6 +137,13 @@ SECTION_FUNC(text, arm64_jump_to_user)
     str x0,  [sp, #8 * REG_SCTLR_EL1]
 #endif
 
+    /* The thread has used this area as stack since its initial context
+     * was set: keep its TLS info address.
+     */
+
+    mrs x0,  tpidr_el0
+    str x0,  [sp, #8 * REG_TPIDR_EL0]
+
     b arm64_exit_exception
 #endif
 
@@ -147,6 +157,11 @@ SECTION_FUNC(text, arm64_jump_to_user)
 
 GTEXT(arm64_sync_exc)
 SECTION_FUNC(text, arm64_sync_exc)
+    /* Save TPIDR_EL0 here: the vector table entries have no room left */
+
+    mrs    x9,  tpidr_el0
+    str    x9,  [sp, #8 * REG_TPIDR_EL0]
+
     /* checking the EC value to see which exception need to be handle */
 
 #if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
@@ -235,6 +250,11 @@ reserved_syscall:
 
 GTEXT(arm64_irq_handler)
 SECTION_FUNC(text, arm64_irq_handler)
+    /* Save TPIDR_EL0 here: the vector table entries have no room left */
+
+    mrs    x9,  tpidr_el0
+    str    x9,  [sp, #8 * REG_TPIDR_EL0]
+
     /* Switch to IRQ stack and save current sp on it. */
 #ifdef CONFIG_SMP
     get_cpu_id x0
@@ -314,6 +334,11 @@ SECTION_FUNC(text, arm64_fiq_handler)
 
     b      arm64_exit_exception
 #else
+    /* Save TPIDR_EL0 here: the vector table entries have no room left */
+
+    mrs    x9,  tpidr_el0
+    str    x9,  [sp, #8 * REG_TPIDR_EL0]
+
    /* Switch to FIQ stack and save current sp on it. */
 #ifdef CONFIG_SMP
     get_cpu_id x0

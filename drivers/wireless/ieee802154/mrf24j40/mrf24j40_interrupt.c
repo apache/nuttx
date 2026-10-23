@@ -230,10 +230,17 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
 
   primitive->type = IEEE802154_PRIMITIVE_IND_DATA;
 
-  /* Allocate an IOB to put the frame into */
+  /* Allocate an IOB to put the frame into, do not wait with the reception
+   * disabled
+   */
 
-  ind->frame = iob_alloc(false);
-  DEBUGASSERT(ind->frame != NULL);
+  ind->frame = iob_tryalloc(false);
+  if (ind->frame == NULL)
+    {
+      wlerr("ERROR: Unable to allocate IOB. Discarding frame\n");
+      ieee802154_primitive_free(primitive);
+      goto done;
+    }
 
   /* Read packet */
 

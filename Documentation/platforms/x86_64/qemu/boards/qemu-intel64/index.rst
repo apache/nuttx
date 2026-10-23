@@ -1,5 +1,5 @@
 ============
-qemu-intel64
+QEMU Intel64
 ============
 
 .. tags:: arch:x86_64, chip:qemu

@@ -1471,13 +1471,15 @@ int sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
 
   if ((iphc0 & SIXLOWPAN_IPHC_NH) != 0)
     {
-      FAR struct udp_hdr_s *udp =
-                            (FAR struct udp_hdr_s *)(bptr + IPv6_HDRLEN);
-
       /* The next header is compressed, NHC is following */
 
+      HC06_CHECK(g_hc06ptr, 1, endofframe);
+
+#ifdef CONFIG_NET_UDP
       if ((*g_hc06ptr & SIXLOWPAN_NHC_UDP_MASK) == SIXLOWPAN_NHC_UDP_ID)
         {
+          FAR struct udp_hdr_s *udp =
+                            (FAR struct udp_hdr_s *)(bptr + IPv6_HDRLEN);
           uint8_t checksum_compressed;
 
           ipv6->proto         = IP_PROTO_UDP;
@@ -1570,6 +1572,7 @@ int sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
             {
               /* Has_checksum, default */
 
+              HC06_CHECK(g_hc06ptr, 2, endofframe);
               memcpy(&udp->udpchksum, g_hc06ptr, 2);
               g_hc06ptr += 2;
 
@@ -1582,6 +1585,15 @@ int sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
 
           g_uncomp_hdrlen += UDP_HDRLEN;
         }
+      else
+        {
+          nwarn("WARNING: Unsupported next header compression\n");
+          return -EPROTONOSUPPORT;
+        }
+#else
+      nwarn("WARNING: Next header compression unsupported\n");
+      return -EPROTONOSUPPORT;
+#endif /* CONFIG_NET_UDP */
     }
 
   g_frame_hdrlen = g_hc06ptr - fptr;
@@ -1604,14 +1616,17 @@ int sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
       ipv6->len[1] = (iplen - IPv6_HDRLEN) & 0x00ff;
     }
 
+#ifdef CONFIG_NET_UDP
   /* Length field in UDP header */
 
   if (ipv6->proto == IP_PROTO_UDP)
     {
       FAR struct udp_hdr_s *udp =
                           (FAR struct udp_hdr_s *)(bptr + IPv6_HDRLEN);
+
       memcpy(&udp->udplen, &ipv6->len[0], 2);
     }
+#endif /* CONFIG_NET_UDP */
 
   return OK;
 }

@@ -40,6 +40,6 @@
 #ifdef CONFIG_HAVE_DOUBLE
 double fabs(double x)
 {
-  return ((x < 0) ? -x : x);
+  return signbit(x) ? -x : x;
 }
 #endif

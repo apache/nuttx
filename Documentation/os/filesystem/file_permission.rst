@@ -126,6 +126,30 @@ Who enforces what
 * **FAT / ROMFS** — No Unix ownership on disk; entry still gated by the
   mountpoint ``i_mode``
 
+Execute permission
+==================
+
+With ``CONFIG_BINFMT_CHECKEXEC`` (the default with
+``CONFIG_SCHED_USER_IDENTITY``), ``exec()``, ``posix_spawn()`` and the other
+functions that start a program from a file refuse a file that has no execute
+permission, with ``EACCES``.  Each binary format checks the mode of the file
+that it opens, also for scripts and for their interpreters.  With
+``CONFIG_SCHED_USER_IDENTITY``, the owner, group or other execute bit is
+checked for the effective user and group IDs, and root needs any execute bit.
+Without it, any execute bit is enough.
+
+The mode is the one that ``stat()`` reports:
+
+* File systems without a stored mode (FAT, xipfs, zipfs, spiffs, nxffs, and
+  tmpfs without ``CONFIG_FS_PERMISSION``) report execute permission for all
+  files.
+* File systems that store the mode (littlefs, smartfs, mnemofs, tmpfs with
+  ``CONFIG_FS_PERMISSION``, romfs, cromfs, hostfs, NFS, v9fs) report it.  A
+  program that was created with a mode without execute bits needs ``chmod``
+  before it can run.
+* A file system mounted with ``MS_NOEXEC`` reports its regular files without
+  execute permission.
+
 References
 ==========
 

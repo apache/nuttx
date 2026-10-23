@@ -96,6 +96,17 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_IEEE80211_MORSE
+  /* Initialize the Morse Micro HaLow network driver */
+
+  ret = stm32_morse_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_morse_initialize() failed: %d\n",
+             ret);
+    }
+#endif
+
 #ifdef CONFIG_VIDEO_FB
   /* Initialize and register the framebuffer driver */
 

@@ -99,16 +99,10 @@
 
 #ifdef CONFIG_STM32_SPI_DMA
 
-#  if defined(CONFIG_SPI_DMAPRIO)
-#    define SPI_DMA_PRIO  CONFIG_SPI_DMAPRIO
-#  elif defined(DMA_SCR_PRIMED)
+#  if defined(DMA_SCR_PRIMED)
 #    define SPI_DMA_PRIO  DMA_SCR_PRILO
 #  else
 #    error "Unknown STM32 DMA"
-#  endif
-
-#  if (SPI_DMA_PRIO & ~DMA_SCR_PL_MASK) != 0
-#    error "Illegal value for CONFIG_SPI_DMAPRIO"
 #  endif
 
 /* DMA channel configuration */
@@ -1393,28 +1387,28 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
-          setbits = 0;
-          clrbits = SPI_CFG2_CPOL | SPI_CFG2_CPHA;
-          break;
+          case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
+            setbits = 0;
+            clrbits = SPI_CFG2_CPOL | SPI_CFG2_CPHA;
+            break;
 
-        case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
-          setbits = SPI_CFG2_CPHA;
-          clrbits = SPI_CFG2_CPOL;
-          break;
+          case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
+            setbits = SPI_CFG2_CPHA;
+            clrbits = SPI_CFG2_CPOL;
+            break;
 
-        case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
-          setbits = SPI_CFG2_CPOL;
-          clrbits = SPI_CFG2_CPHA;
-          break;
+          case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
+            setbits = SPI_CFG2_CPOL;
+            clrbits = SPI_CFG2_CPHA;
+            break;
 
-        case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
-          setbits = SPI_CFG2_CPOL | SPI_CFG2_CPHA;
-          clrbits = 0;
-          break;
+          case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
+            setbits = SPI_CFG2_CPOL | SPI_CFG2_CPHA;
+            clrbits = 0;
+            break;
 
-        default:
-          return;
+          default:
+            return;
         }
 
       spi_enable(priv, false);
@@ -1674,6 +1668,7 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
 #endif
 {
   struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
+
   DEBUGASSERT(priv && priv->spibase);
 
   spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
@@ -1690,8 +1685,8 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
       /* 16-bit mode */
 
       const uint16_t *src  = (const uint16_t *)txbuffer;
-            uint16_t *dest = (uint16_t *)rxbuffer;
-            uint16_t  word;
+      uint16_t       *dest = (uint16_t *)rxbuffer;
+      uint16_t        word;
 
       while (nwords-- > 0)
         {
@@ -1723,8 +1718,8 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
       /* 8-bit mode */
 
       const uint8_t *src  = (const uint8_t *)txbuffer;
-            uint8_t *dest = (uint8_t *)rxbuffer;
-            uint8_t  word;
+      uint8_t       *dest = (uint8_t *)rxbuffer;
+      uint8_t        word;
 
       while (nwords-- > 0)
         {
@@ -1992,7 +1987,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     }
 
 #ifdef CONFIG_SPI_TRIGGER
-      priv->trigarmed = false;
+  priv->trigarmed = false;
 #endif
 }
 #endif /* CONFIG_STM32_SPI_DMA */
@@ -2136,31 +2131,31 @@ static int spi_pm_prepare(struct pm_callback_s *cb, int domain,
 
   switch (pmstate)
     {
-    case PM_NORMAL:
-    case PM_IDLE:
-      break;
+      case PM_NORMAL:
+      case PM_IDLE:
+        break;
 
-    case PM_STANDBY:
-    case PM_SLEEP:
+      case PM_STANDBY:
+      case PM_SLEEP:
 
-      /* Check if exclusive lock for SPI bus is held. */
+        /* Check if exclusive lock for SPI bus is held. */
 
-      if (nxmutex_is_locked(&priv->lock))
-        {
-          /* Exclusive lock is held, do not allow entry to deeper PM
-           * states.
-           */
+        if (nxmutex_is_locked(&priv->lock))
+          {
+            /* Exclusive lock is held, do not allow entry to deeper PM
+             * states.
+             */
 
-          return -EBUSY;
-        }
+            return -EBUSY;
+          }
 
-      break;
+        break;
 
-    default:
+      default:
 
-      /* Should not get here */
+        /* Should not get here */
 
-      break;
+        break;
     }
 
   return OK;
@@ -2221,19 +2216,22 @@ static void spi_bus_initialize(struct stm32_spidev_s *priv)
 
   switch (priv->config)
     {
-    default:
-    case FULL_DUPLEX:
-      setbits |= SPI_CFG2_COMM_FULL;
-      break;
-    case SIMPLEX_TX:
-      setbits |= SPI_CFG2_COMM_STX;
-      break;
-    case SIMPLEX_RX:
-      setbits |= SPI_CFG2_COMM_SRX;
-      break;
-    case HALF_DUPLEX:
-      setbits |= SPI_CFG2_COMM_HALF;
-      break;
+      default:
+      case FULL_DUPLEX:
+        setbits |= SPI_CFG2_COMM_FULL;
+        break;
+
+      case SIMPLEX_TX:
+        setbits |= SPI_CFG2_COMM_STX;
+        break;
+
+      case SIMPLEX_RX:
+        setbits |= SPI_CFG2_COMM_SRX;
+        break;
+
+      case HALF_DUPLEX:
+        setbits |= SPI_CFG2_COMM_HALF;
+        break;
     }
 
   spi_modifyreg(priv, STM32_SPI_CFG2_OFFSET, clrbits, setbits);

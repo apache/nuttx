@@ -1,6 +1,6 @@
-=============
-CanMV K230
-=============
+=================
+Canaan CanMV K230
+=================
 
 .. tags:: arch:risc-v, chip:k230, vendor:canaan
 

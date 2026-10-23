@@ -45,7 +45,8 @@ TRNG             Working       Hardware RNG at /dev/random and /dev/urandom
 Flash MTD        Working       Unused flash tail as an MTD device, answers BIOC_XIPBASE
 Timer            Working       /dev/timerN on TIMER0/TIMER1, 1 us resolution
 Tickless         Working       Optional, RP2350 TIMER via the alarm/oneshot
-RTC              Working       POWMAN always-on timer, backs the system clock
+RTC              Working       POWMAN always-on timer, system clock and /dev/rtc0 with alarm
+PM               Working       Standby, dormant and suspend to RAM, see Power Management
 OTP              Working       Reads via /dev/efuse; programming is opt-in
 ==============   ============  =====
 
@@ -257,6 +258,61 @@ library (`powman_timer_start_lposc()`, `powman_timer_set_ms()` and
 `pico_aon_timer
 <https://github.com/raspberrypi/pico-sdk/tree/master/src/rp2_common/pico_aon_timer>`_
 wrapper.
+
+The always-on timer also has one alarm comparator. With ``RTC_DRIVER``, the
+common board bring-up registers the timer as ``/dev/rtc0``. With
+``RTC_ALARM`` too, ``/dev/rtc0`` supports ``RTC_SET_ALARM``,
+``RTC_SET_RELATIVE``, ``RTC_RD_ALARM`` and ``RTC_CANCEL_ALARM``, for example
+through ``apps/examples/alarm``. The comparator stays asserted while the
+time is past the alarm time, so the interrupt handler disables the alarm
+first. An alarm fires once.
+
+Power Management
+================
+
+Enable ``PM`` and ``RP23XX_PM``. The driver maps the NuttX PM states onto
+the RP2350 low-power modes:
+
+* ``PM_STANDBY`` is the RP2350 SLEEP state: a WFI with the clocks of the
+  blocks that have no driver gated.
+* ``PM_SLEEP`` is the DORMANT state: the PLLs and the crystal oscillator
+  stop. Only a GPIO can end it. Set the wake pin with
+  ``RP23XX_PM_WAKEUP_GPIO`` (-1, the default, means never dormant: then
+  ``PM_SLEEP`` gives standby), and its polarity and edge with
+  ``RP23XX_PM_WAKEUP_GPIO_HIGH`` and ``RP23XX_PM_WAKEUP_GPIO_EDGE``. The
+  console receive pin can be the wake pin.
+* Suspend to RAM (POWMAN P1.0, ``RP23XX_PM_SUSPEND``): the switched core is
+  powered off, and SRAM and the XIP cache keep their contents. Every
+  peripheral loses its registers, and the chip comes back through the boot
+  path. The idle governor never selects this state. An application asks
+  for it with the ``BOARDIOC_RP23XX_SUSPEND`` boardctl() command
+  (``arch/chip/pm.h``, needs ``BOARDCTL_IOCTL``). The wake is the wake GPIO,
+  an RTC alarm that the application set, or the ``wake_ms`` timer of the
+  command, whichever comes first. ``wake_source`` returns the POWMAN
+  ``LAST_SWCORE_PWRUP`` register, which tells the cause.
+
+After a dormant wake, and after each character that a UART receives, the
+driver holds a ``PM_STANDBY`` wakelock for ``RP23XX_PM_WAKE_HOLD_MS``
+(default 3000). ``RP23XX_PM_QUIESCE_PADS`` (default ``y``) isolates the
+unused pads and holds the blocks with no driver in reset, against the
+input leakage of erratum RP2350-E9.
+
+Limits:
+
+* In the dormant state the system tick stops. Timers, ``sleep()`` and RTC
+  alarms wait for the next GPIO wake. An application that needs them holds
+  a PM state with ``boardctl(BOARDIOC_PM_CONTROL)``.
+* A dormant chip does not answer SWD. The ``pm`` configurations set
+  ``PM_GOVERNOR_EXPLICIT_RELAX`` to stay out of the dormant state for 30 s
+  after boot.
+* With the console receive pin as the wake pin, the input of the first 4 to
+  10 ms after a dormant wake is lost, while the crystal oscillator and the
+  PLLs start.
+
+The ``pm`` configurations of :doc:`boards/raspberrypi-pico-2/index` and
+:doc:`boards/pimoroni-pico-2-plus/index` use these options.
+:doc:`/applications/examples/pmstress/index` walks the states in a timed
+sequence for current measurement.
 
 Programming
 ============

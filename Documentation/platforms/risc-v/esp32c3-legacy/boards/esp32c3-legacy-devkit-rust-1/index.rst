@@ -1,6 +1,6 @@
-==============================
-ESP32C3 DevKit RUST-1 (Legacy)
-==============================
+=========================================
+Espressif ESP32-C3 DevKit RUST-1 (Legacy)
+=========================================
 
 .. tags:: arch:risc-v, chip:esp32c3-legacy, vendor:espressif
 

@@ -306,9 +306,15 @@ static void read_elf(void)
  * Name: place_sections
  *
  * Description:
- *   Sort the allocated sections into the two segments and size them.  The
- *   linker script has placed each one within its segment already, both
- *   segments starting at zero -- hence -no-check-sections on the link.
+ *   Sort the allocated sections into the two segments and place them, in
+ *   the order of the section headers.  D-Space holds its data, then its
+ *   .bss.
+ *
+ *   The addresses that the linker script gave are not used.  ld -r keeps
+ *   each member of a section group (C++ puts inline functions and template
+ *   instances in COMDAT groups) as a section of its own, which the script
+ *   does not place:  it stays at address zero, on top of another section,
+ *   and moves the sections that follow it.
  *
  *   Executable is I-Space; everything else allocated is D-Space, read-only
  *   data included, because the model reaches that through the GOT.
@@ -319,10 +325,18 @@ static void read_elf(void)
  *
  ****************************************************************************/
 
+static uint32_t place_at(struct elf32_shdr_s *s, uint32_t addr)
+{
+  uint32_t align = s->sh_addralign > 1 ? s->sh_addralign : 1;
+
+  s->sh_addr = (addr + align - 1) & ~(align - 1);
+  return s->sh_addr + s->sh_size;
+}
+
 static void place_sections(void)
 {
   uint32_t dataend = 0;
-  uint32_t bssend  = 0;
+  uint32_t bssend;
   size_t i;
 
   g_segof = calloc(g_ehdr->e_shnum, sizeof(*g_segof));
@@ -334,7 +348,6 @@ static void place_sections(void)
   for (i = 1; i < g_ehdr->e_shnum; i++)
     {
       struct elf32_shdr_s *s = &g_shdr[i];
-      uint32_t end = s->sh_addr + s->sh_size;
 
       if ((s->sh_flags & SHF_ALLOC) == 0 ||
           strncmp(g_shstrtab + s->sh_name, ".ARM.exidx", 10) == 0 ||
@@ -343,35 +356,48 @@ static void place_sections(void)
           continue;
         }
 
+      /* No start-up code runs these arrays in a module */
+
+      if (s->sh_type == SHT_INIT_ARRAY || s->sh_type == SHT_FINI_ARRAY ||
+          s->sh_type == SHT_PREINIT_ARRAY)
+        {
+          fail("%s holds static constructors or destructors, which an "
+               "NXFLAT module cannot run", g_shstrtab + s->sh_name);
+        }
+
+      /* A __thread variable compiled for native TLS needs a thread pointer
+       * and TLS relocations, which NXFLAT does not have.
+       */
+
+      if ((s->sh_flags & SHF_TLS) != 0)
+        {
+          fail("%s holds native TLS, which an NXFLAT module cannot use; "
+               "build it with a toolchain that emulates TLS",
+               g_shstrtab + s->sh_name);
+        }
+
       if ((s->sh_flags & SHF_EXECINSTR) != 0)
         {
-          g_segof[i] = SEG_TEXT;
-          if (end > g_text.size)
-            {
-              g_text.size = end;
-            }
+          g_segof[i]  = SEG_TEXT;
+          g_text.size = place_at(s, g_text.size);
         }
       else
         {
           g_segof[i] = SEG_DATA;
-
-          if (s->sh_type == SHT_NOBITS)
+          if (s->sh_type != SHT_NOBITS)
             {
-              if (end > bssend)
-                {
-                  bssend = end;
-                }
-            }
-          else if (end > dataend)
-            {
-              dataend = end;
+              dataend = place_at(s, dataend);
             }
         }
     }
 
-  if (bssend < dataend)
+  bssend = dataend;
+  for (i = 1; i < g_ehdr->e_shnum; i++)
     {
-      bssend = dataend;
+      if (g_segof[i] == SEG_DATA && g_shdr[i].sh_type == SHT_NOBITS)
+        {
+          bssend = place_at(&g_shdr[i], bssend);
+        }
     }
 
   g_data.size = dataend;

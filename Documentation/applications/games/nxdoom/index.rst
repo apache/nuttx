@@ -63,6 +63,16 @@ apply).
    leaves those three actions on keys the game cannot see, and they have to
    be rebound to play.
 
+.. note::
+
+   A board without a keyboard driver can read the keys from a serial
+   terminal instead by enabling ``CONFIG_GAMES_NXDOOM_UARTKBD`` and
+   pointing ``CONFIG_GAMES_NXDOOM_KBDPATH`` at the tty, for example
+   ``/dev/console``. A terminal reports a key press but never its
+   release, so each key is released again 250 ms after its last byte.
+   W, A, S, D and the arrow keys move, J fires, K runs, L strafes, E or
+   space uses and Q or Esc opens the menu.
+
 Minimum requirements
 --------------------
 

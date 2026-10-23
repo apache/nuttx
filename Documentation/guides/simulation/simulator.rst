@@ -224,6 +224,36 @@ Testing / capturing TCP network traffic
 
 #. Observe TCP network traffic in Wireshark / tcpdump on Linux.
 
+.. _simulator_bluetooth_testing:
+
+Testing Bluetooth without hardware
+==================================
+
+The Linux simulator can run the NuttX Bluetooth Host or NimBLE with virtual
+Controllers to test advertising, scanning, connections, and GATT communication
+without Bluetooth hardware.
+
+Each Host connects to its Controller through an HCI H:4 Unix domain socket
+and must support discrete-time scheduling synchronized with the simulation.
+See :ref:`sim_babblesim_time` for NuttX's simulation time support.
+
+.. code-block:: text
+
+       NuttX Host A                    NuttX Host B
+     (BTSak or NimBLE)               (BTSak or NimBLE)
+             |                              |
+       H:4 Unix socket                H:4 Unix socket
+             |                              |
+     Python Controller A             Python Controller B
+             |                              |
+             +--------- BabbleSim PHY ------+
+
+`BSWorld <https://github.com/XiaoMi/bsworld>`_ provides build instructions
+and automated tests for
+:doc:`BTSak </applications/wireless/btsak/index>` advertising and scanning,
+and :doc:`NimBLE </applications/wireless/nimble/index>` connections, service
+discovery, and subscriptions.
+
 Testing NxModbus RTU on simulator
 =================================
 

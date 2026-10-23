@@ -463,7 +463,7 @@ void bt_buf_release(FAR struct bt_buf_s *buf)
   wlinfo("Buffer freed: %p\n", buf);
 
 #ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
-  if (type == BT_ACL_IN)
+  if (type == BT_ACL_IN && g_btdev.flow_control_enable)
     {
       FAR struct bt_hci_cp_host_num_completed_packets_s *cp;
       FAR struct bt_hci_handle_count_s *hc;

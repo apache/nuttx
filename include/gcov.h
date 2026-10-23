@@ -27,7 +27,16 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#include <stdint.h>
 #include <sys/types.h>
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+struct gcov_info;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -60,6 +69,38 @@ extern void __gcov_reset(void);
  ****************************************************************************/
 
 extern void __gcov_dump(void);
+
+#if defined(CONFIG_COVERAGE_MINI) && defined(CONFIG_ARCH_TOOLCHAIN_GCC)
+
+/****************************************************************************
+ * Name: __gcov_init, __gcov_merge_add, __gcov_exit, __gcov_fork
+ *
+ * Description:
+ *   The functions that instrumented code calls.  The symbol table of the
+ *   loadable modules takes them from here.
+ *
+ ****************************************************************************/
+
+void __gcov_init(FAR struct gcov_info *info);
+void __gcov_merge_add(FAR uint64_t *counters, unsigned int n_counters);
+void __gcov_exit(void);
+#ifdef CONFIG_ARCH_HAVE_FORK
+pid_t __gcov_fork(void);
+#endif
+
+/****************************************************************************
+ * Name: __gcov_unload
+ *
+ * Description:
+ *   Forget the coverage data in the memory from addr to addr + size.  The
+ *   loader calls it before it frees a module.
+ *
+ ****************************************************************************/
+
+void __gcov_unload(FAR const void *addr, size_t size);
+#else
+#  define __gcov_unload(addr, size)
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -1,6 +1,6 @@
-=========
-lincoln60
-=========
+====================
+Micromint Lincoln 60
+====================
 
 .. tags:: arch:arm, chip:lpc17xx_40xx, vendor:nxp
 

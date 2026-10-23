@@ -29,10 +29,6 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V1) || \
-    defined(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V2) || \
-    defined(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V3)
-
 #include "chip.h"
 #include "hardware/stm32_dbgmcu.h"
 
@@ -51,7 +47,5 @@
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-#endif /* CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V1 || ... */
 
 #endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_DBGMCU_H */

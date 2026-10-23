@@ -70,6 +70,15 @@ struct v9fs_transport_ops_s
   CODE void (*destroy)(FAR struct v9fs_transport_s *transport);
 };
 
+#ifdef CONFIG_SCHED_USER_IDENTITY
+struct v9fs_root_s
+{
+  FAR struct v9fs_root_s      *next;
+  uid_t                        uid;
+  uint32_t                     fid;
+};
+#endif
+
 struct v9fs_client_s
 {
   FAR struct v9fs_transport_s *transport;
@@ -78,6 +87,12 @@ struct v9fs_client_s
   uint32_t                     root_fid;
   uint32_t                     tag_id;
   mutex_t                      lock;
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  uid_t                        root_uid; /* The user of root_fid */
+  FAR struct v9fs_root_s      *roots;    /* The root fids of other users */
+  FAR char                    *uname;
+  FAR char                    *aname;
+#endif
 };
 
 /****************************************************************************

@@ -1187,10 +1187,9 @@ static void i3c_master_handle_ibi(FAR void *arg)
     }
 
   master->ops->recycle_ibi_slot(dev, slot);
-  atomic_sub(&dev->ibi->pending_ibis, 1);
-  if (!atomic_read(&dev->ibi->pending_ibis))
+  if (atomic_sub(&dev->ibi->pending_ibis, 1) == 1)
     {
-      sem_post(&dev->ibi->all_ibis_handled);
+      nxsem_post(&dev->ibi->all_ibis_handled);
     }
 }
 
@@ -2035,13 +2034,21 @@ int i3c_dev_disable_ibi_locked(FAR struct i3c_dev_desc *dev)
       return ret;
     }
 
-  if (atomic_read(&dev->ibi->pending_ibis))
+  /* Pair the pending check with the worker's completion notification so
+   * that the IBI state cannot be freed before the final post finishes.
+   * Recheck after each wait because earlier IBIs may have left a token.
+   */
+
+  while (atomic_read(&dev->ibi->pending_ibis))
     {
-      sem_wait(&dev->ibi->all_ibis_handled);
+      ret = nxsem_wait_uninterruptible(&dev->ibi->all_ibis_handled);
+      if (ret < 0)
+        {
+          return ret;
+        }
     }
 
   dev->ibi->enabled = false;
-  sem_destroy(&dev->ibi->all_ibis_handled);
 
   return 0;
 }
@@ -2089,7 +2096,7 @@ int i3c_dev_request_ibi_locked(FAR struct i3c_dev_desc *dev,
     }
 
   atomic_set(&ibi->pending_ibis, 0);
-  sem_init(&ibi->all_ibis_handled, 0, 1);
+  nxsem_init(&ibi->all_ibis_handled, 0, 0);
   ibi->handler = req->handler;
   ibi->max_payload_len = req->max_payload_len;
   ibi->num_slots = req->num_slots;
@@ -2098,6 +2105,7 @@ int i3c_dev_request_ibi_locked(FAR struct i3c_dev_desc *dev,
   ret = master->ops->request_ibi(dev, req);
   if (ret)
     {
+      nxsem_destroy(&ibi->all_ibis_handled);
       kmm_free(ibi);
       dev->ibi = NULL;
     }
@@ -2115,6 +2123,7 @@ void i3c_dev_free_ibi_locked(FAR struct i3c_dev_desc *dev)
     }
 
   master->ops->free_ibi(dev);
+  nxsem_destroy(&dev->ibi->all_ibis_handled);
   kmm_free(dev->ibi);
   dev->ibi = NULL;
 }

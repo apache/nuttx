@@ -98,26 +98,13 @@
 
 #ifdef CONFIG_STM32_SPI_DMA
 
-#  if defined(CONFIG_SPI_DMAPRIO)
-#    define SPI_DMA_PRIO  CONFIG_SPI_DMAPRIO
-#  elif defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32L15XX) || \
-        defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32G4XXX)
+#  if defined(CONFIG_STM32_STM32F10XX) || \
+      defined(CONFIG_STM32_STM32L15XX) || \
+      defined(CONFIG_STM32_STM32F30XX) || \
+      defined(CONFIG_STM32_STM32G4XXX)
 #    define SPI_DMA_PRIO  DMA_CCR_PRIMED
 #  elif defined(CONFIG_STM32_HAVE_IP_DMA_V2)
 #    define SPI_DMA_PRIO  DMA_SCR_PRIMED
-#  else
-#    error "Unknown STM32 DMA"
-#  endif
-
-#  if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32L15XX) || \
-      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32G4XXX)
-#    if (SPI_DMA_PRIO & ~DMA_CCR_PL_MASK) != 0
-#      error "Illegal value for CONFIG_SPI_DMAPRIO"
-#    endif
-#  elif defined(CONFIG_STM32_HAVE_IP_DMA_V2)
-#    if (SPI_DMA_PRIO & ~DMA_SCR_PL_MASK) != 0
-#      error "Illegal value for CONFIG_SPI_DMAPRIO"
-#    endif
 #  else
 #    error "Unknown STM32 DMA"
 #  endif
@@ -1228,6 +1215,7 @@ static void spi_modifycr1(struct stm32_spidev_s *priv,
                           uint16_t clrbits)
 {
   uint16_t cr1;
+
   cr1 = spi_getreg(priv, STM32_SPI_CR1_OFFSET);
   cr1 &= ~clrbits;
   cr1 |= setbits;
@@ -1257,7 +1245,8 @@ static void spi_modifycr2(struct stm32_spidev_s *priv, uint16_t setbits,
                           uint16_t clrbits)
 {
   uint16_t cr2;
-  cr2  = spi_getreg(priv, STM32_SPI_CR2_OFFSET);
+
+  cr2 = spi_getreg(priv, STM32_SPI_CR2_OFFSET);
   cr2 &= ~clrbits;
   cr2 |= setbits;
   spi_putreg(priv, STM32_SPI_CR2_OFFSET, cr2);
@@ -1435,40 +1424,40 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
-          setbits = 0;
-          clrbits = SPI_CR1_CPOL | SPI_CR1_CPHA;
-          break;
+          case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
+            setbits = 0;
+            clrbits = SPI_CR1_CPOL | SPI_CR1_CPHA;
+            break;
 
-        case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
-          setbits = SPI_CR1_CPHA;
-          clrbits = SPI_CR1_CPOL;
-          break;
+          case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
+            setbits = SPI_CR1_CPHA;
+            clrbits = SPI_CR1_CPOL;
+            break;
 
-        case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
-          setbits = SPI_CR1_CPOL;
-          clrbits = SPI_CR1_CPHA;
-          break;
+          case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
+            setbits = SPI_CR1_CPOL;
+            clrbits = SPI_CR1_CPHA;
+            break;
 
-        case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
-          setbits = SPI_CR1_CPOL | SPI_CR1_CPHA;
-          clrbits = 0;
-          break;
+          case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
+            setbits = SPI_CR1_CPOL | SPI_CR1_CPHA;
+            clrbits = 0;
+            break;
 
 #ifdef SPI_CR2_FRF    /* If MCU supports TI Synchronous Serial Frame Format */
-        case SPIDEV_MODETI:
-          setbits = 0;
-          clrbits = SPI_CR1_CPOL | SPI_CR1_CPHA;
-          break;
+          case SPIDEV_MODETI:
+            setbits = 0;
+            clrbits = SPI_CR1_CPOL | SPI_CR1_CPHA;
+            break;
 #endif
 
-        default:
-          return;
+          default:
+            return;
         }
 
-        spi_modifycr1(priv, 0, SPI_CR1_SPE);
-        spi_modifycr1(priv, setbits, clrbits);
-        spi_modifycr1(priv, SPI_CR1_SPE, 0);
+      spi_modifycr1(priv, 0, SPI_CR1_SPE);
+      spi_modifycr1(priv, setbits, clrbits);
+      spi_modifycr1(priv, SPI_CR1_SPE, 0);
 
 #ifdef SPI_CR2_FRF    /* If MCU supports TI Synchronous Serial Frame Format */
       switch (mode)
@@ -1495,11 +1484,11 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
       spi_modifycr1(priv, SPI_CR1_SPE, 0);
 #endif
 
-        /* Save the mode so that subsequent re-configurations will be
-         * faster
-         */
+      /* Save the mode so that subsequent re-configurations will be
+       * faster
+       */
 
-        priv->mode = mode;
+      priv->mode = mode;
     }
 }
 
@@ -1566,18 +1555,18 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
 
       switch (nbits)
         {
-        case 8:
-          setbits = 0;
-          clrbits = SPI_CR1_DFF;
-          break;
+          case 8:
+            setbits = 0;
+            clrbits = SPI_CR1_DFF;
+            break;
 
-        case 16:
-          setbits = SPI_CR1_DFF;
-          clrbits = 0;
-          break;
+          case 16:
+            setbits = SPI_CR1_DFF;
+            clrbits = 0;
+            break;
 
-        default:
-          return;
+          default:
+            return;
         }
 
       spi_modifycr1(priv, 0, SPI_CR1_SPE);
@@ -1736,6 +1725,7 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
 #endif
 {
   struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
+
   DEBUGASSERT(priv && priv->spibase);
 
   spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
@@ -1747,8 +1737,8 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
       /* 16-bit mode */
 
       const uint16_t *src  = (const uint16_t *)txbuffer;
-            uint16_t *dest = (uint16_t *)rxbuffer;
-            uint16_t  word;
+      uint16_t *dest = (uint16_t *)rxbuffer;
+      uint16_t word;
 
       while (nwords-- > 0)
         {
@@ -1780,8 +1770,8 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
       /* 8-bit mode */
 
       const uint8_t *src  = (const uint8_t *)txbuffer;
-            uint8_t *dest = (uint8_t *)rxbuffer;
-            uint8_t  word;
+      uint8_t *dest = (uint8_t *)rxbuffer;
+      uint8_t word;
 
       while (nwords-- > 0)
         {

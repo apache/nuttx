@@ -40,19 +40,17 @@ config STM32_DFU
 
 config STM32_TICKLESS_TIMER
 	int "Tickless hardware timer"
-	depends on SCHED_TICKLESS
-	depends on (STM32_COMMON_LEGACY && STM32_TIM) || STM32_COMMON_F7_H7_H5 || ARCH_CHIP_STM32WB
+	depends on SCHED_TICKLESS && STM32_TIM
 	default 2
-	range 1 14 if STM32_COMMON_LEGACY || ARCH_CHIP_STM32F7
-	range 1 17 if STM32_COMMON_H7_H5 || ARCH_CHIP_STM32WB
+	range 1 17
 	---help---
 		If the Tickless OS feature is enabled, then one clock must be
-		assigned to provided the timer needed by the OS.
+		assigned to provided the timer needed by the OS.  The basic timers
+		TIM6/TIM7 and the advanced timers TIM1/TIM8 are not supported.
 
 config STM32_TICKLESS_CHANNEL
 	int "Tickless timer channel"
-	depends on SCHED_TICKLESS
-	depends on (STM32_COMMON_LEGACY && STM32_TIM) || STM32_COMMON_F7_H7_H5 || ARCH_CHIP_STM32WB
+	depends on SCHED_TICKLESS && STM32_TIM
 	default 1
 	range 1 4
 	---help---
@@ -82,6 +80,24 @@ config STM32_SYSTICK_CORECLK_DIV16
 
 endchoice
 
+choice
+	prompt "SysTick clock source"
+	depends on ARCH_ARMV7M || ARCH_ARMV8M
+	default STM32_SYSTICK_CPUCLK
+
+config STM32_SYSTICK_CPUCLK
+	bool "CPU clock"
+
+config STM32_SYSTICK_HCLK_DIV8
+	bool "HCLK divided by 8"
+	depends on !ARCH_CHIP_STM32H7 && !ARCH_CHIP_STM32N6
+	---help---
+		SysTick external reference clock.  Not offered on STM32H7, where
+		on silicon revision Y the external clock is not divided by 8
+		(ES0392 erratum 2.2.3), and on STM32N6, where it is not verified.
+
+endchoice
+
 config ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
 	bool "Custom clock configuration"
 	default n
@@ -98,10 +114,3 @@ config STM32_FORCEPOWER
 		unconditionally at power up.  (Otherwise, the device is powered when it is
 		initialized).
 
-# Debug MCU options
-
-config STM32_DBGMCU_HAVE_TIM_FZ_IN_CR
-	bool
-
-config STM32_DBGMCU_HAVE_TIM_FZ_IN_APB2_FZ
-	bool

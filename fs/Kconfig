@@ -86,6 +86,15 @@ config DISABLE_PSEUDOFS_OPERATIONS
 		However, in practical embedded system, they are seldom needed and
 		you can save a little FLASH space by disabling the capability.
 
+config DISABLE_DIRECTORY_OPERATIONS
+	bool "Disable directory operations"
+	default DEFAULT_SMALL
+	---help---
+		Disable opening directories: opendir() and open() with O_DIRECTORY
+		fail with ENOSYS, so readdir(), seekdir() and friends are not
+		available either.  Useful for small systems that never list a
+		directory; the directory file layer is not built at all.
+
 config PSEUDOFS_ATTRIBUTES
 	bool "Pseudo-filesystem attributes"
 	default n

@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/resource.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <sched.h>
@@ -111,6 +112,7 @@
 #define TCB_FLAG_JOIN_COMPLETED    (1 << 14)                     /* Bit 14: Pthread join completed */
 #define TCB_FLAG_FREE_TCB          (1 << 15)                     /* Bit 15: Free tcb after exit */
 #define TCB_FLAG_PREEMPT_SCHED     (1 << 16)                     /* Bit 16: tcb is PREEMPT_SCHED */
+#define TCB_FLAG_SIGMASK_SAVED     (1 << 17)                     /* Bit 17: sigsavedmask to restore */
 
 /* Values for struct task_group tg_flags */
 
@@ -366,6 +368,9 @@ struct child_status_s
   uint8_t ch_flags;                 /* Child status:  See CHILD_FLAG_* defines */
   pid_t   ch_pid;                   /* Child task ID                           */
   int     ch_status;                /* Child exit status                       */
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  uid_t   ch_uid;                   /* Child real user ID at exit              */
+#endif
 };
 #endif
 
@@ -458,6 +463,12 @@ struct task_group_s
   pid_t tg_ppid;                    /* This is the ID of the parent thread      */
   uint8_t tg_flags;                 /* See GROUP_FLAG_* definitions             */
   uint8_t tg_caps;                  /* See PR_CAP_* definitions                 */
+  mode_t  tg_umask;                 /* File mode creation mask (umask())        */
+
+  /* Resource limits (getrlimit() and setrlimit()) **************************/
+
+  struct rlimit tg_rlimit_stack;    /* RLIMIT_STACK                             */
+  struct rlimit tg_rlimit_nofile;   /* RLIMIT_NOFILE                            */
 
   /* User identity (POSIX real, effective, and saved-set IDs) ***************/
 
@@ -693,6 +704,7 @@ struct tcb_s
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
   sigset_t   sigprocmask;                /* Signals that are blocked        */
   sigset_t   sigwaitmask;                /* Waiting for pending signals     */
+  sigset_t   sigsavedmask;               /* Mask to restore at syscall exit */
   siginfo_t  *sigunbinfo;                /* Signal info when task unblocked */
 #endif /* !CONFIG_DISABLE_ALL_SIGNALS */
 

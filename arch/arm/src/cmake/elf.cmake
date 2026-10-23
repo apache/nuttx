@@ -27,6 +27,13 @@ nuttx_mod_compile_options(-fvisibility=hidden -mlong-calls)
 nuttx_elf_compile_options_ifdef(CONFIG_UNWINDER_ARM -fno-unwind-tables
                                 -fno-asynchronous-unwind-tables)
 
+# With LTO the compiler driver links the module: a linker option needs the -Wl,
+# prefix.  The FDPIC linker links an FDPIC module.
+
+if(NOT CONFIG_FDPIC AND "${CMAKE_LD}" MATCHES "gcc$")
+  set(ELF_LD_OPTION -Wl,)
+endif()
+
 if(CONFIG_FDPIC)
 
   # An FDPIC module is a shared object whose two segments the loader places
@@ -86,8 +93,9 @@ elseif(CONFIG_PIC)
 
   nuttx_elf_compile_options(-mpic-register=r9)
 
-  nuttx_elf_link_options(--unresolved-symbols=ignore-in-object-files
-                         --emit-relocs)
+  nuttx_elf_link_options(
+    ${ELF_LD_OPTION}--unresolved-symbols=ignore-in-object-files
+    ${ELF_LD_OPTION}--emit-relocs)
 
 endif()
 
@@ -102,14 +110,9 @@ if(NOT CONFIG_FDPIC)
   nuttx_mod_link_options(-r)
 endif()
 
-nuttx_elf_link_options_ifdef(CONFIG_BUILD_KERNEL -Bstatic)
+nuttx_elf_link_options_ifdef(CONFIG_BUILD_KERNEL ${ELF_LD_OPTION}-Bstatic)
 
-if(CONFIG_DEBUG_OPT_UNUSED_SECTIONS)
-  if("${CMAKE_LD}" MATCHES "gcc$")
-    nuttx_elf_link_options(-Wl,--gc-sections)
-  else()
-    nuttx_elf_link_options(--gc-sections)
-  endif()
-endif()
+nuttx_elf_link_options_ifdef(CONFIG_DEBUG_OPT_UNUSED_SECTIONS
+                             ${ELF_LD_OPTION}--gc-sections)
 
 nuttx_elf_link_options(-e _start)

@@ -614,6 +614,7 @@ static void goldfish_pipe_write_addr(FAR void *addr,
                                      FAR void *portl, FAR void *porth)
 {
   uintptr_t paddr = up_addrenv_va_to_pa(addr);
+
   goldfish_pipe_putreg32((paddr >> 16) >> 16, porth);
   goldfish_pipe_putreg32(paddr, portl);
 }

@@ -64,6 +64,19 @@
 #define NXSEM_COUNT(s)        ((FAR atomic_t *)&((s)->val.semcount))
 #define NXSEM_IS_MUTEX(s)     (((s)->flags & SEM_TYPE_MUTEX) != 0)
 
+/* The uninterruptible waits set SEM_TYPE_UNINTERRUPTIBLE: then a pending
+ * signal does not make nxsem_wait_slow() fail at once.  Not in user space:
+ * there, the flag would also stop a signal from ending sem_wait(), and the
+ * retry gets the signal when the system call returns.
+ */
+
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#  define nxsem_set_uninterruptible(s) \
+     ((s)->flags |= SEM_TYPE_UNINTERRUPTIBLE)
+#else
+#  define nxsem_set_uninterruptible(s)
+#endif
+
 /* Mutex related helper macros */
 
 #define NXSEM_MBLOCKING_BIT   ((uint32_t)0x80000000)

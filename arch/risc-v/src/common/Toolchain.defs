@@ -366,6 +366,15 @@ ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
 
   ARCHOPTIMIZATION += -fshort-enums
 
+  # LD is the compiler driver: give it the options of the linker with -Xlinker
+
+  LDXLINKER = -Xlinker
+
+  # The export gives the group options to the program link of a kernel build
+
+  LDSTARTGROUP = -Wl,--start-group
+  LDENDGROUP = -Wl,--end-group
+
 # Default toolchain
 
 else
@@ -389,6 +398,23 @@ else
       AR := $(CROSSDEV)gcc-ar rcs
       NM := $(CROSSDEV)gcc-nm
       ARCHOPTIMIZATION += -fno-builtin
+
+      # gcc links a module.  The loader cannot use LTO data, so a partial link
+      # (-r) compiles the module to machine code with the module options.
+
+      LDMODULELTOFLAGS = -flinker-output=nolto-rel $(CMODULEFLAGS)
+      LDELFLTOFLAGS = -flinker-output=nolto-rel $(CELFFLAGS)
+
+      # A program that is not relocatable is linked to an executable, also
+      # with the ELF options (-nostdlib, the ABI)
+
+      LDELFEXEFLAGS = $(CELFFLAGS)
+      LDXLINKER = -Xlinker
+
+      # The export gives the group options to the program link of a kernel build
+
+      LDSTARTGROUP = -Wl,--start-group
+      LDENDGROUP = -Wl,--end-group
     endif
   endif
 
@@ -442,7 +468,8 @@ endif
 # Loadable module definitions
 
 CMODULEFLAGS = $(CFLAGS) -fvisibility=hidden
-LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
+LDMODULEFLAGS = -r $(LDMODULELTOFLAGS) \
+                -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 
 # ELF module definitions
 
@@ -456,13 +483,15 @@ CXXELFFLAGS += -fno-use-cxa-atexit
 LDELFFLAGS = -e _start
 
 ifeq ($(CONFIG_BINFMT_ELF_RELOCATABLE),y)
-  LDELFFLAGS += -r
+  LDELFFLAGS += -r $(LDELFLTOFLAGS)
+else
+  LDELFFLAGS += $(LDELFEXEFLAGS)
 endif
 
 ifeq ($(CONFIG_ARCH_RV32),y)
-  LDELFFLAGS += --oformat elf32-littleriscv
+  LDELFFLAGS += $(LDXLINKER) --oformat=elf32-littleriscv
 else
-  LDELFFLAGS += --oformat elf64-littleriscv
+  LDELFFLAGS += $(LDXLINKER) --oformat=elf64-littleriscv
 endif
 
 ifneq ($(CONFIG_BUILD_KERNEL),y)

@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
@@ -60,6 +61,8 @@
  *   EINVAL - 'path' is invalid for this operation
  *   EEXIST - An inode already exists at 'path'
  *   ENOMEM - Failed to allocate in-memory resources for the operation
+ *   EPERM  - 'path' lies inside a mounted file system.  Pipes and FIFOs
+ *            can exist only in the pseudo file system.
  *
  ****************************************************************************/
 
@@ -68,6 +71,7 @@ int register_pipedriver(FAR const char *path,
                         mode_t mode, FAR void *priv)
 {
   FAR struct inode *node;
+  struct stat buf;
   int ret;
 
   /* Insert a dummy node -- we need to hold the inode semaphore because we
@@ -94,6 +98,17 @@ int register_pipedriver(FAR const char *path,
     }
 
   inode_unlock();
+
+  /* inode_reserve() also returns -EEXIST if 'path' lies inside a mounted
+   * file system.  The mounted file system cannot hold a pipe node.  If no
+   * file exists at 'path', report that the node type is not supported.
+   */
+
+  if (ret == -EEXIST && nx_stat(path, &buf, 0) == -ENOENT)
+    {
+      ret = -EPERM;
+    }
+
   return ret;
 }
 

@@ -35,7 +35,6 @@ set(SRCS
     stm32wl5_idle.c
     stm32wl5_pwr.c
     stm32wl5_flash.c
-    stm32wl5_timerisr.c
     stm32wl5_spi.c)
 
 if(CONFIG_STM32_IPCC)

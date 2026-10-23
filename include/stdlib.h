@@ -246,7 +246,9 @@ void      free(FAR void *);
 FAR void *realloc(FAR void *, size_t) realloc_like(2);
 FAR void *reallocarray(FAR void *, size_t, size_t) realloc_like2(2, 3);
 FAR void *memalign(size_t, size_t) malloc_like1(2);
+#ifndef NUTTX_NO_EXTENSIONS /* See nuttx/compiler.h */
 FAR void *zalloc(size_t) malloc_like1(1);
+#endif
 FAR void *calloc(size_t, size_t) malloc_like2(1, 2);
 FAR void *aligned_alloc(size_t, size_t) malloc_like1(2);
 int       posix_memalign(FAR void **, size_t, size_t);

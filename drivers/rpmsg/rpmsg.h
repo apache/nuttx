@@ -29,6 +29,51 @@
 
 #include <nuttx/rpmsg/rpmsg.h>
 
+#include "rpmsg_ping.h"
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+struct rpmsg_s
+{
+  bool                         init;
+  struct metal_list            bind;
+  rmutex_t                     lock;
+  struct metal_list            node;
+  char                         local_cpuname[RPMSG_NAME_SIZE];
+  char                         cpuname[RPMSG_NAME_SIZE];
+  FAR const struct rpmsg_ops_s *ops;
+#ifdef CONFIG_RPMSG_PING
+  struct rpmsg_endpoint        ping;
+#endif
+#ifdef CONFIG_RPMSG_TEST
+  struct rpmsg_endpoint        test;
+#endif
+  atomic_t                     signals;
+};
+
+/**
+ * struct rpmsg_ops_s - Rpmsg device operations
+ * wait: wait sem.
+ * post: post sem.
+ * get_cpuname: get cpu name.
+ */
+
+struct rpmsg_ops_s
+{
+  CODE int (*wait)(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
+  CODE int (*post)(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
+  CODE int (*ioctl)(FAR struct rpmsg_s *rpmsg, int cmd, unsigned long arg);
+  CODE void (*panic)(FAR struct rpmsg_s *rpmsg);
+  CODE void (*dump)(FAR struct rpmsg_s *rpmsg);
+  CODE int (*get_timestamp)(FAR struct rpmsg_s *rpmsg, FAR const void *data,
+                            FAR struct rpmsg_timestamp_s *ts);
+};
+
+CODE typedef int (*rpmsg_foreach_t)(FAR struct rpmsg_s *rpmsg,
+                                    FAR void *args);
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -58,6 +103,8 @@ void rpmsg_device_destroy(FAR struct rpmsg_s *rpmsg);
 int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
                    FAR const struct rpmsg_ops_s *ops);
 void rpmsg_unregister(FAR const char *path, FAR struct rpmsg_s *rpmsg);
+
+int rpmsg_foreach(rpmsg_foreach_t handler, FAR void *args);
 
 #endif /* CONFIG_RPMSG */
 #endif /* __DRIVERS_RPMSG_RPMSG_H */

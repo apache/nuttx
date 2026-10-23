@@ -78,8 +78,9 @@ struct nrf52_radioi8_state_s
 {
   /* MAC Attributes */
 
-  struct ieee802154_addr_s addr; /* Address */
-  struct ieee802154_cca_s  cca;  /* Clear channel assessement method */
+  struct ieee802154_addr_s addr;      /* Address */
+  struct ieee802154_addr_s coordaddr; /* Coordinator address */
+  struct ieee802154_cca_s  cca;       /* Clear channel assessement method */
 
   /* TX CSMA */
 
@@ -94,7 +95,10 @@ struct nrf52_radioi8_state_s
 
   /* TX state */
 
-  bool     txdelayed_busy;      /* No CSMA transfer */
+  bool     txdelayed_busy;      /* No CSMA transfer owned by the radio */
+  bool     txdelayed_pending;   /* No CSMA transfer not started yet */
+  bool     csma_pending;        /* CSMA transfer not started yet */
+  uint32_t txdelayed_delay;     /* Delay of the pending no CSMA transfer */
 
 #ifdef CONFIG_NRF52_RADIO_IEEE802154_SUPERFRAME
   /* Superframe data */

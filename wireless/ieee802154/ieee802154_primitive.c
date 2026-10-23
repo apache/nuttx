@@ -33,6 +33,7 @@
 
 #include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/mm/iob.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 #include "mac802154.h"
@@ -355,6 +356,15 @@ void ieee802154_primitive_free(FAR struct ieee802154_primitive_s *prim)
     {
       wlinfo("Remaining Clients: %d\n", prim->nclients);
       return;
+    }
+
+  /* A data indication owns its frame */
+
+  if (prim->type == IEEE802154_PRIMITIVE_IND_DATA &&
+      prim->u.dataind.frame != NULL)
+    {
+      iob_free(prim->u.dataind.frame);
+      prim->u.dataind.frame = NULL;
     }
 
 #if CONFIG_IEEE802154_PRIMITIVE_PREALLOC > 0

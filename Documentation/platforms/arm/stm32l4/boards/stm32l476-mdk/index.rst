@@ -1,6 +1,6 @@
-=============
-STM32L476-mdk
-=============
+===================================
+Motorola Mods Development Kit (MDK)
+===================================
 
 .. tags:: arch:arm, chip:stm32l4, part:stm32l476, vendor:st
 

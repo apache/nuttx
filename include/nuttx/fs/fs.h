@@ -106,6 +106,7 @@
  *
  *   Bit 0-3: Inode type (Bit 3 indicates internal OS types)
  *   Bit 4:   Set if inode has been unlinked and is pending removal.
+ *   Bit 5:   Set if a mount point was mounted with MS_NOEXEC.
  */
 
 #define FSNODEFLAG_TYPE_MASK         0x0000000f /* Isolates type field      */
@@ -122,6 +123,7 @@
 #define   FSNODEFLAG_TYPE_PIPE       0x0000000a /*   Pipe                   */
 #define   FSNODEFLAG_TYPE_NAMEDEVENT 0x0000000b /*   Named event group      */
 #define   FSNODEFLAG_TYPE_HARDLINK   0x0000000c /*   Hard link              */
+#define FSNODEFLAG_NOEXEC            0x00000020 /* Mounted with MS_NOEXEC   */
 
 #define INODE_IS_TYPE(i,t) \
   (((i)->i_flags & FSNODEFLAG_TYPE_MASK) == (t))
@@ -161,6 +163,8 @@
 #define INODE_SET_NAMEDEVENT(i) INODE_SET_TYPE(i,FSNODEFLAG_TYPE_NAMEDEVENT)
 #define INODE_SET_HARDLINK(i)   INODE_SET_TYPE(i,FSNODEFLAG_TYPE_HARDLINK)
 
+#define INODE_IS_NOEXEC(i)      (((i)->i_flags & FSNODEFLAG_NOEXEC) != 0)
+
 /* The status change flags.
  * These should be or-ed together to figure out what want to change.
  */
@@ -171,6 +175,7 @@
 #define CH_STAT_ATIME      (1 << 3)
 #define CH_STAT_MTIME      (1 << 4)
 #define CH_STAT_SIZE       (1 << 7)
+#define CH_STAT_NOFOLLOW   (1 << 8)  /* Do not follow a final symbolic link */
 
 /****************************************************************************
  * Public Type Definitions
@@ -348,6 +353,11 @@ struct mountpt_operations
   CODE int     (*mkdir)(FAR struct inode *mountpt, FAR const char *relpath,
                         mode_t mode);
   CODE int     (*rmdir)(FAR struct inode *mountpt, FAR const char *relpath);
+
+  /* rename() replaces an existing newrelpath in one step, or fails (for
+   * example with -EEXIST).  The VFS then removes newrelpath and retries.
+   */
+
   CODE int     (*rename)(FAR struct inode *mountpt,
                          FAR const char *oldrelpath,
                          FAR const char *newrelpath);

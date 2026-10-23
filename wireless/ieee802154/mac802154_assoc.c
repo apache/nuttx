@@ -442,8 +442,7 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
                                FAR struct ieee802154_txdesc_s *txdesc)
 {
   enum ieee802154_status_e status;
-  FAR struct ieee802154_primitive_s *primitive =
-    (FAR struct ieee802154_primitive_s *)txdesc->conf;
+  FAR struct ieee802154_primitive_s *primitive;
 
   if (txdesc->conf->status != IEEE802154_STATUS_SUCCESS)
     {
@@ -459,7 +458,8 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
        * why the tx failed from the radio layer.
        */
 
-      status = txdesc->conf->status;
+      status    = txdesc->conf->status;
+      primitive = mac802154_txdesc_takeconf(txdesc);
       primitive->type = IEEE802154_PRIMITIVE_CONF_ASSOC;
 
       primitive->u.assocconf.status = status;
@@ -546,10 +546,6 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
           work_queue(LPWORK, &priv->macop_work, mac802154_extract_assocresp,
                      priv, 0);
         }
-
-      /* Deallocate the data conf notification as it is no longer needed. */
-
-      ieee802154_primitive_free(primitive);
     }
 }
 
@@ -617,7 +613,7 @@ void mac802154_txdone_datareq_assoc(FAR struct ieee802154_privmac_s *priv,
       priv->cmd_desc = NULL;
       nxsem_post(&priv->opsem);
 
-      mac802154_notify(priv, primitive);
+      mac802154_notify(priv, mac802154_txdesc_takeconf(txdesc));
     }
   else
     {
@@ -649,10 +645,6 @@ void mac802154_txdone_datareq_assoc(FAR struct ieee802154_privmac_s *priv,
           mac802154_timerstart(priv, priv->max_frame_waittime,
                                mac802154_assoctimeout);
         }
-
-      /* Deallocate the data conf notification as it is no longer needed. */
-
-      ieee802154_primitive_free(primitive);
     }
 }
 

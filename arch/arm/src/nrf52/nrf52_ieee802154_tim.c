@@ -71,6 +71,7 @@ static void nrf52_radioi8_tim_reset(struct nrf52_radioi8_dev_s *dev);
 
 /* Interrupts logic */
 
+static void nrf52_radioi8_tim_expire(struct nrf52_radioi8_dev_s *dev);
 static int nrf52_radioi8_isr_tim(int irq, void *context, void *arg);
 
 /****************************************************************************
@@ -154,7 +155,7 @@ static int nrf52_radioi8_tim(struct nrf52_radioi8_dev_s *dev, uint8_t chan,
     {
       /* Call handler now */
 
-      nrf52_radioi8_isr_tim(0, NULL, dev);
+      nrf52_radioi8_tim_expire(dev);
     }
 
   leave_critical_section(flags);
@@ -173,7 +174,14 @@ static int nrf52_radioi8_tim(struct nrf52_radioi8_dev_s *dev, uint8_t chan,
 static void nrf52_radioi8_tim_stop(struct nrf52_radioi8_dev_s *dev)
 {
   NRF52_TIM_STOP(dev->tim->tim);
-  NRF52_TIM_DISABLEINT(dev->tim->tim, dev->tim->tim_now);
+
+  /* Clear the event, it may have already been latched */
+
+  if (dev->tim->tim_pending)
+    {
+      NRF52_TIM_DISABLEINT(dev->tim->tim, dev->tim->tim_now);
+      NRF52_TIM_ACKINT(dev->tim->tim, dev->tim->tim_now);
+    }
 
   /* Reset state */
 
@@ -205,21 +213,17 @@ static void nrf52_radioi8_tim_reset(struct nrf52_radioi8_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: nrf52_radioi8_isr_tim
+ * Name: nrf52_radioi8_tim_expire
  *
  * Description:
- *   Helper tim interrupt handler.
+ *   Handle the expired timer channel.
  *
  ****************************************************************************/
 
-static int nrf52_radioi8_isr_tim(int irq, void *context, void *arg)
+static void nrf52_radioi8_tim_expire(struct nrf52_radioi8_dev_s *dev)
 {
-  struct nrf52_radioi8_dev_s *dev = (struct nrf52_radioi8_dev_s *)arg;
-  struct nrf52_radioi8_tim_s *tim = NULL;
+  struct nrf52_radioi8_tim_s *tim = dev->tim;
   irqstate_t                  flags;
-
-  DEBUGASSERT(dev != NULL);
-  tim = dev->tim;
 
   flags = enter_critical_section();
 
@@ -299,7 +303,35 @@ static int nrf52_radioi8_isr_tim(int irq, void *context, void *arg)
   tim->tim_now     = -1;
 
   leave_critical_section(flags);
+}
 
+/****************************************************************************
+ * Name: nrf52_radioi8_isr_tim
+ *
+ * Description:
+ *   Helper tim interrupt handler.
+ *
+ ****************************************************************************/
+
+static int nrf52_radioi8_isr_tim(int irq, void *context, void *arg)
+{
+  struct nrf52_radioi8_dev_s *dev = (struct nrf52_radioi8_dev_s *)arg;
+  struct nrf52_radioi8_tim_s *tim = NULL;
+  irqstate_t                  flags;
+
+  DEBUGASSERT(dev != NULL);
+  tim = dev->tim;
+
+  flags = enter_critical_section();
+
+  /* Ignore an interrupt raised before the timer was stopped or set again */
+
+  if (tim->tim_pending && NRF52_TIM_CHECKINT(tim->tim, tim->tim_now))
+    {
+      nrf52_radioi8_tim_expire(dev);
+    }
+
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -334,10 +366,6 @@ nrf52_radioi8_tim_init(struct nrf52_radioi8_dev_s *dev)
   /* Attach TIMER interrupt */
 
   NRF52_TIM_SETISR(tim, nrf52_radioi8_isr_tim, dev);
-
-  /* Set interrupts priority */
-
-  up_prioritize_irq(NRF52_IRQ_TIMER0, 0);
 
   /* Connect timer */
 

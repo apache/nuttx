@@ -1,6 +1,6 @@
-==================
-TRIBOARD_TC4X9_COM
-==================
+=========================================
+Infineon AURIX TC4DA (TRIBOARD_TC4X9_COM)
+=========================================
 
 .. tags:: arch:tricore, chip:tc4da, vendor:infineon
 

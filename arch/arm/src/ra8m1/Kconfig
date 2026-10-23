@@ -276,6 +276,8 @@ config RA8M1_FAMILY
 	bool
 	default n
 	select ARCH_CORTEXM85
+	select ARMV8M_HAVE_DCACHE
+	select ARMV8M_HAVE_ICACHE
 
 menu "RA8M1 Peripheral Support"
 

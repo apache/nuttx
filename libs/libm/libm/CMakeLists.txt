@@ -150,7 +150,55 @@ if(CONFIG_LIBM)
       __cos.c
       __sin.c
       lib_gamma.c
-      lib_lgamma.c)
+      lib_lgamma.c
+      lib_lgammaf.c
+      lib_lgammal.c
+      lib_tgammaf.c
+      lib_tgammal.c
+      lib_exp2.c
+      lib_exp2f.c
+      lib_exp2l.c
+      lib_log1p.c
+      lib_log1pf.c
+      lib_log1pl.c
+      lib_cbrtf.c
+      lib_cbrtl.c
+      lib_hypot.c
+      lib_hypotf.c
+      lib_hypotl.c
+      lib_fma.c
+      lib_fmal.c
+      lib_fdim.c
+      lib_fdimf.c
+      lib_fdiml.c
+      lib_ilogb.c
+      lib_ilogbf.c
+      lib_ilogbl.c
+      lib_logb.c
+      lib_logbf.c
+      lib_logbl.c
+      lib_scalbln.c
+      lib_scalblnf.c
+      lib_scalblnl.c
+      lib_nextafter.c
+      lib_nextafterf.c
+      lib_nextafterl.c
+      lib_nexttoward.c
+      lib_nexttowardf.c
+      lib_nexttowardl.c
+      lib_remainder.c
+      lib_remainderf.c
+      lib_remainderl.c
+      lib_remquo.c
+      lib_remquof.c
+      lib_remquol.c
+      lib_lrint.c
+      lib_lrintf.c
+      lib_lrintl.c
+      lib_llrint.c
+      lib_llrintf.c
+      lib_llrintl.c
+      lib_nearbyintl.c)
 
   # Use the C versions of some functions only if architecture specific optimized
   # versions are not provided.
@@ -161,6 +209,10 @@ if(CONFIG_LIBM)
 
   if(NOT CONFIG_LIBM_ARCH_FLOOR)
     list(APPEND SRCS lib_floor.c)
+  endif()
+
+  if(NOT CONFIG_LIBM_ARCH_NEARBYINT)
+    list(APPEND SRCS lib_nearbyint.c)
   endif()
 
   if(NOT CONFIG_LIBM_ARCH_RINT)
@@ -181,6 +233,10 @@ if(CONFIG_LIBM)
 
   if(NOT CONFIG_LIBM_ARCH_FLOORF)
     list(APPEND SRCS lib_floorf.c)
+  endif()
+
+  if(NOT CONFIG_LIBM_ARCH_NEARBYINTF)
+    list(APPEND SRCS lib_nearbyintf.c)
   endif()
 
   if(NOT CONFIG_LIBM_ARCH_RINTF)

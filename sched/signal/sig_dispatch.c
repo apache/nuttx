@@ -502,6 +502,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
   FAR sigactq_t *sigact;
   bool deliver = false;
 #endif
+  bool ignored = false;
 
   sinfo("TCB=%p pid=%d signo=%d code=%d value=%d masked=%s\n",
         stcb, stcb->pid, info->si_signo, info->si_code,
@@ -543,6 +544,20 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
 
   masked = nxsig_ismember(&stcb->sigprocmask, info->si_signo);
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
+  /* An unmasked signal without an action is ignored.  It is discarded: it
+   * is not added to the pending signals, and it does not interrupt a wait.
+   * Kernel threads keep the old behaviour: the OS wakes them with signals
+   * that have no action.
+   */
+
+  if (masked == 0 &&
+      (stcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+    {
+      ignored = nxsig_find_action(stcb->group, info->si_signo) == NULL;
+    }
+#endif
+
 #ifdef CONFIG_LIB_SYSCALL
   /* Check if the signal is masked OR if the signal is received while we are
    * processing a system call -- in either case, it will be added to the
@@ -583,7 +598,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
        */
 
       if (stcb->task_state == TSTATE_WAIT_SIG &&
-          (masked == 0 ||
+          ((masked == 0 && !ignored) ||
            (nxsig_ismember(&stcb->sigwaitmask, info->si_signo) == 1)))
         {
           if (stcb->sigunbinfo != NULL)
@@ -613,7 +628,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
 #if defined(CONFIG_LIB_SYSCALL) && defined(CONFIG_ENABLE_ALL_SIGNALS)
           /* Must also add signal action if in system call */
 
-          if (masked == 0)
+          if (masked == 0 && !ignored)
             {
               sigpend = nxsig_add_pendingsignal(stcb, info, group_dispatch);
             }
@@ -621,10 +636,10 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
         }
 
       /* Its not one we are waiting for... Add it to the list of pending
-       * signals.
+       * signals, unless it is ignored.
        */
 
-      else
+      else if (!ignored)
         {
           sigpend = nxsig_add_pendingsignal(stcb, info, group_dispatch);
         }
@@ -647,10 +662,14 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
 
       /* Check if the task is waiting for an unmasked signal. If so, then
        * unblock it. This must be performed in a critical section because
-       * signals can be queued from the interrupt level.
+       * signals can be queued from the interrupt level.  An ignored signal
+       * does not end nanosleep(), pause() or sigsuspend(): it wakes only
+       * sigwaitinfo() and sigtimedwait() when they wait for it.
        */
 
-      if (stcb->task_state == TSTATE_WAIT_SIG)
+      if (stcb->task_state == TSTATE_WAIT_SIG &&
+          (!ignored ||
+           nxsig_ismember(&stcb->sigwaitmask, info->si_signo) == 1))
         {
           if (stcb->sigunbinfo != NULL)
             {
@@ -695,9 +714,20 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
        * be unblocked when a signal is received.
        */
 
-      if (stcb->task_state == TSTATE_WAIT_SEM)
+      if (stcb->task_state == TSTATE_WAIT_SEM && !ignored)
         {
-          nxsem_wait_irq(stcb, EINTR);
+          FAR sem_t *sem = stcb->waitobj;
+
+          /* Not for an uninterruptible semaphore in a system call: the
+           * handler runs only when the call returns, and the wait would
+           * block again.
+           */
+
+          if ((stcb->flags & TCB_FLAG_SYSCALL) == 0 ||
+              (sem->flags & SEM_TYPE_UNINTERRUPTIBLE) == 0)
+            {
+              nxsem_wait_irq(stcb, EINTR);
+            }
         }
 
 #if !defined(CONFIG_DISABLE_MQUEUE) || !defined(CONFIG_DISABLE_MQUEUE_SYSV)
@@ -705,8 +735,8 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
        * must be unblocked when a signal is received.
        */
 
-      else if (stcb->task_state == TSTATE_WAIT_MQNOTEMPTY ||
-          stcb->task_state == TSTATE_WAIT_MQNOTFULL)
+      else if ((stcb->task_state == TSTATE_WAIT_MQNOTEMPTY ||
+                stcb->task_state == TSTATE_WAIT_MQNOTFULL) && !ignored)
         {
           nxmq_wait_irq(stcb, EINTR);
         }

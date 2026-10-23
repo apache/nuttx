@@ -1,5 +1,5 @@
 ==============
-olimex-lpc2378
+Olimex LPC2378
 ==============
 
 .. tags:: arch:arm, chip:lpc2378, vendor:nxp

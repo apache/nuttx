@@ -1,6 +1,6 @@
-========================
-ESP32-C3 DevKit (Legacy)
-========================
+==================================
+Espressif ESP32-C3 DevKit (Legacy)
+==================================
 
 .. tags:: arch:risc-v, chip:esp32c3-legacy, vendor:espressif
 

@@ -1009,8 +1009,9 @@ static void stm32_dumpsamples(struct stm32_dev_s *priv)
 static void stm32_dmacallback(DMA_HANDLE handle, uint8_t status, void *arg)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)arg;
-  DEBUGASSERT(priv->dmamode);
   sdio_eventset_t result;
+
+  DEBUGASSERT(priv->dmamode);
 
   /* In the normal case, SDIO appears to handle the End-Of-Transfer interrupt
    * first with the End-Of-DMA event occurring significantly later.  On
@@ -1196,7 +1197,7 @@ static void stm32_sendfifo(struct stm32_dev_s *priv)
 
       /* Put the word in the FIFO */
 
-     sdmmc_putreg32(priv, data.w, STM32_SDMMC_FIFO_OFFSET);
+      sdmmc_putreg32(priv, data.w, STM32_SDMMC_FIFO_OFFSET);
     }
 }
 
@@ -1249,7 +1250,7 @@ static void stm32_recvfifo(struct stm32_dev_s *priv)
 
           for (i = 0; i < (int)priv->remaining; i++)
             {
-               *ptr++ = data.b[i];
+              *ptr++ = data.b[i];
             }
 
           /* Now the transfer is finished */
@@ -1594,9 +1595,9 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
                 {
                   /* Yes.. wake the thread up */
 
-                 sdmmc_putreg32(priv, STM32_SDMMC_RESPDONE_ICR |
-                                STM32_SDMMC_CMDDONE_ICR,
-                                STM32_SDMMC_ICR_OFFSET);
+                  sdmmc_putreg32(priv, STM32_SDMMC_RESPDONE_ICR |
+                                 STM32_SDMMC_CMDDONE_ICR,
+                                 STM32_SDMMC_ICR_OFFSET);
                   stm32_endwait(priv, SDIOWAIT_RESPONSEDONE);
                 }
             }
@@ -1611,8 +1612,8 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
                 {
                   /* Yes.. wake the thread up */
 
-                 sdmmc_putreg32(priv, STM32_SDMMC_CMDDONE_ICR,
-                                STM32_SDMMC_ICR_OFFSET);
+                  sdmmc_putreg32(priv, STM32_SDMMC_CMDDONE_ICR,
+                                 STM32_SDMMC_ICR_OFFSET);
                   stm32_endwait(priv, SDIOWAIT_CMDDONE);
                 }
             }
@@ -1741,6 +1742,10 @@ static sdio_capset_t stm32_capabilities(struct sdio_dev_s *dev)
     {
       caps |= SDIO_CAPS_1BIT_ONLY;
     }
+  else
+    {
+      caps |= SDIO_CAPS_4BIT;
+    }
 
 #ifdef CONFIG_STM32_SDMMC_DMA
   caps |= SDIO_CAPS_DMASUPPORTED;
@@ -1766,6 +1771,7 @@ static sdio_capset_t stm32_capabilities(struct sdio_dev_s *dev)
 static sdio_statset_t stm32_status(struct sdio_dev_s *dev)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+
   return priv->cdstatus;
 }
 
@@ -1894,10 +1900,10 @@ static int stm32_attach(struct sdio_dev_s *dev)
        * interrupt flags
        */
 
-     sdmmc_putreg32(priv, STM32_SDMMC_MASK_RESET,
-                    STM32_SDMMC_MASK_OFFSET);
-     sdmmc_putreg32(priv, STM32_SDMMC_ICR_STATICFLAGS,
-                    STM32_SDMMC_ICR_OFFSET);
+      sdmmc_putreg32(priv, STM32_SDMMC_MASK_RESET,
+                     STM32_SDMMC_MASK_OFFSET);
+      sdmmc_putreg32(priv, STM32_SDMMC_ICR_STATICFLAGS,
+                     STM32_SDMMC_ICR_OFFSET);
 
       /* Enable SDIO interrupts at the NVIC.  They can now be enabled at
        * the SDIO controller as needed.
@@ -1947,23 +1953,23 @@ static int stm32_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
 
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
-    case MMCSD_NO_RESPONSE:
-      regval |= STM32_SDMMC_CMD_NORESPONSE;
-      break;
+      case MMCSD_NO_RESPONSE:
+        regval |= STM32_SDMMC_CMD_NORESPONSE;
+        break;
 
-    case MMCSD_R1_RESPONSE:
-    case MMCSD_R1B_RESPONSE:
-    case MMCSD_R3_RESPONSE:
-    case MMCSD_R4_RESPONSE:
-    case MMCSD_R5_RESPONSE:
-    case MMCSD_R6_RESPONSE:
-    case MMCSD_R7_RESPONSE:
-      regval |= STM32_SDMMC_CMD_SHORTRESPONSE;
-      break;
+      case MMCSD_R1_RESPONSE:
+      case MMCSD_R1B_RESPONSE:
+      case MMCSD_R3_RESPONSE:
+      case MMCSD_R4_RESPONSE:
+      case MMCSD_R5_RESPONSE:
+      case MMCSD_R6_RESPONSE:
+      case MMCSD_R7_RESPONSE:
+        regval |= STM32_SDMMC_CMD_SHORTRESPONSE;
+        break;
 
-    case MMCSD_R2_RESPONSE:
-      regval |= STM32_SDMMC_CMD_LONGRESPONSE;
-      break;
+      case MMCSD_R2_RESPONSE:
+        regval |= STM32_SDMMC_CMD_LONGRESPONSE;
+        break;
     }
 
   /* Set CPSMEN and the command index */
@@ -2175,31 +2181,31 @@ static int stm32_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
 
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
-    case MMCSD_NO_RESPONSE:
-      events  = STM32_SDMMC_CMDDONE_STA;
-      timeout = SDMMC_CMDTIMEOUT;
-      break;
+      case MMCSD_NO_RESPONSE:
+        events  = STM32_SDMMC_CMDDONE_STA;
+        timeout = SDMMC_CMDTIMEOUT;
+        break;
 
-    case MMCSD_R1_RESPONSE:
-    case MMCSD_R1B_RESPONSE:
-    case MMCSD_R2_RESPONSE:
-    case MMCSD_R6_RESPONSE:
-      events  = STM32_SDMMC_RESPDONE_STA;
-      timeout = SDMMC_LONGTIMEOUT;
-      break;
+      case MMCSD_R1_RESPONSE:
+      case MMCSD_R1B_RESPONSE:
+      case MMCSD_R2_RESPONSE:
+      case MMCSD_R6_RESPONSE:
+        events  = STM32_SDMMC_RESPDONE_STA;
+        timeout = SDMMC_LONGTIMEOUT;
+        break;
 
-    case MMCSD_R4_RESPONSE:
-    case MMCSD_R5_RESPONSE:
-      return -ENOSYS;
+      case MMCSD_R4_RESPONSE:
+      case MMCSD_R5_RESPONSE:
+        return -ENOSYS;
 
-    case MMCSD_R3_RESPONSE:
-    case MMCSD_R7_RESPONSE:
-      events  = STM32_SDMMC_RESPDONE_STA;
-      timeout = SDMMC_CMDTIMEOUT;
-      break;
+      case MMCSD_R3_RESPONSE:
+      case MMCSD_R7_RESPONSE:
+        events  = STM32_SDMMC_RESPDONE_STA;
+        timeout = SDMMC_CMDTIMEOUT;
+        break;
 
-    default:
-      return -EINVAL;
+      default:
+        return -EINVAL;
     }
 
   /* Then wait for the response (or timeout) */
@@ -2208,9 +2214,9 @@ static int stm32_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
     {
       if (--timeout <= 0)
         {
-           mcerr("ERROR: Timeout cmd: %08" PRIx32
-                 " events: %08" PRIx32 " STA: %08" PRIx32 "\n",
-               cmd, events, sdmmc_getreg32(priv, STM32_SDMMC_STA_OFFSET));
+          mcerr("ERROR: Timeout cmd: %08" PRIx32
+                " events: %08" PRIx32 " STA: %08" PRIx32 "\n",
+                cmd, events, sdmmc_getreg32(priv, STM32_SDMMC_STA_OFFSET));
 
           return -ETIMEDOUT;
         }
@@ -2445,6 +2451,7 @@ static int stm32_recvnotimpl(struct sdio_dev_s *dev, uint32_t cmd,
                              uint32_t *rnotimpl)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+
   sdmmc_putreg32(priv, STM32_SDMMC_RESPDONE_ICR | STM32_SDMMC_CMDDONE_ICR,
                  STM32_SDMMC_ICR_OFFSET);
   return -ENOSYS;
@@ -2516,7 +2523,7 @@ static void stm32_waitenable(struct sdio_dev_s *dev,
 
       /* Enable event-related interrupts */
 
-     sdmmc_putreg32(priv, STM32_SDMMC_WAITALL_ICR, STM32_SDMMC_ICR_OFFSET);
+      sdmmc_putreg32(priv, STM32_SDMMC_WAITALL_ICR, STM32_SDMMC_ICR_OFFSET);
     }
 
   stm32_configwaitints(priv, waitmask, eventset, 0);
@@ -2984,10 +2991,10 @@ static void stm32_callback(void *arg)
         {
           /* Yes.. queue it */
 
-           mcinfo("Queuing callback to %p(%p)\n",
-                  priv->callback, priv->cbarg);
-           work_queue(HPWORK, &priv->cbwork, priv->callback,
-                      priv->cbarg, 0);
+          mcinfo("Queuing callback to %p(%p)\n",
+                 priv->callback, priv->cbarg);
+          work_queue(HPWORK, &priv->cbwork, priv->callback,
+                     priv->cbarg, 0);
         }
       else
         {

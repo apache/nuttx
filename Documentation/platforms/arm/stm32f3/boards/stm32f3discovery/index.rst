@@ -1,6 +1,6 @@
-================
-STM32F3Discovery
-================
+===================
+ST STM32F3Discovery
+===================
 
 .. tags:: arch:arm, chip:stm32f3, part:stm32f303, vendor:st
 

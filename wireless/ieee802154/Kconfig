@@ -101,6 +101,15 @@ config IEEE802154_MACDEV
 
 if IEEE802154_MACDEV
 
+config IEEE802154_MACDEV_RXQUEUE
+	int "Received frames kept for read"
+	default 4
+	range 1 255
+	---help---
+		Number of received data frames the character driver keeps until
+		they are read.  Each one holds an IOB, a frame received while the
+		queue is full is dropped.
+
 config IEEE802154_MACDEV_RECVRPRIO
 	int "Priority of frame receiver registered with the MAC layer"
 	default 0

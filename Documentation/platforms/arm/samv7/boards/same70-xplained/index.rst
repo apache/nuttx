@@ -1,6 +1,6 @@
-===============
-same70-xplained
-===============
+=========================
+Microchip SAME70-Xplained
+=========================
 
 .. tags:: arch:arm, chip:samv7, vendor:microchip
 

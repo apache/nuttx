@@ -35,6 +35,7 @@
 
 #include <sys/types.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/mm/iob.h>
@@ -54,70 +55,50 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-#if 0
-static int mrf24j40_energydetect(FAR struct mrf24j40_radio_s *dev,
-                                 FAR uint8_t *energy);
-#endif
-
-/****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mrf24j40_energydetect
+ * Name: mrf24j40_rssi
  *
  * Description:
- *   Measure the RSSI level for the current channel.
+ *   Measure the averaged RSSI level for the current channel (datasheet
+ *   3.6.1), the LNA is enabled by the caller.
  *
  ****************************************************************************/
 
-#if 0
-static int mrf24j40_energydetect(FAR struct mrf24j40_radio_s *dev,
-                                 FAR uint8_t *energy)
+int mrf24j40_rssi(FAR struct mrf24j40_radio_s *dev, FAR uint8_t *rssi)
 {
-  uint8_t reg;
-
-  /* Manually enable the LNA */
-
-  mrf24j40_setpamode(dev, MRF24J40_PA_ED);
-
-  /* Set RSSI average duration to 8 symbols */
-
-  reg  = mrf24j40_getreg(dev->spi, MRF24J40_TXBCON1);
-  reg |= 0x30;
-  mrf24j40_setreg(dev->spi, MRF24J40_TXBCON1, reg);
+  int wait;
 
   /* 1. Set RSSIMODE1 0x3E<7> - Initiate RSSI calculation. */
 
   mrf24j40_setreg(dev->spi, MRF24J40_BBREG6, 0x80);
 
   /* 2. Wait until RSSIRDY 0x3E<0> is set to '1' - RSSI calculation is
-   *    complete.
+   *    complete.  The RSSI is averaged over MRF24J40_RSSI_SYMBOLS, wait
+   *    at most twice as long.
    */
 
-  while (!(mrf24j40_getreg(dev->spi, MRF24J40_BBREG6) & 0x01));
+  for (wait = 0; wait < 2 * MRF24J40_RSSI_SYMBOLS; wait++)
+    {
+      if (mrf24j40_getreg(dev->spi, MRF24J40_BBREG6) & 0x01)
+        {
+          break;
+        }
+
+      up_udelay(IEEE802154_SYMBOL_US);
+    }
 
   /* 3. Read RSSI 0x210<7:0> - The RSSI register contains the averaged RSSI
-   *    received power level for 8 symbol periods.
+   *    received power level.
    */
 
-  *energy = mrf24j40_getreg(dev->spi, MRF24J40_RSSI);
+  *rssi = mrf24j40_getreg(dev->spi, MRF24J40_RSSI);
   mrf24j40_setreg(dev->spi, MRF24J40_BBREG6, 0x40);
 
-  /* Back to automatic control */
-
-  mrf24j40_setpamode(dev, MRF24J40_PA_AUTO);
-
-  return OK;
+  return wait < 2 * MRF24J40_RSSI_SYMBOLS ? OK : -ETIMEDOUT;
 }
-#endif
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Function: mrf24j40_dopoll_csma
@@ -267,6 +248,14 @@ void mrf24j40_norm_setup(FAR struct mrf24j40_radio_s *dev,
 
   mrf24j40_setreg(dev->spi, MRF24J40_TXMCR, reg);
 
+  /* The radio numbers the beacons (macBSN) */
+
+  if ((frame->io_data[0] & IEEE802154_FRAMECTRL_FTYPE) ==
+      IEEE802154_FRAME_BEACON)
+    {
+      frame->io_data[2] = dev->bsn++;
+    }
+
   /* Setup the FIFO */
 
   mrf24j40_setup_fifo(dev, frame->io_data, frame->io_len,
@@ -351,7 +340,8 @@ void mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
                          uint32_t fifo_addr)
 {
   uint16_t frame_ctrl;
-  uint16_t addrmode;
+  uint16_t daddrmode;
+  uint16_t saddrmode;
   int hlen = 3; /* Include frame control and seq number */
   int i;
 
@@ -360,31 +350,33 @@ void mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
   frame_ctrl = buf[0];
   frame_ctrl |= (buf[1] << 8);
 
-  addrmode = (frame_ctrl & IEEE802154_FRAMECTRL_DADDR) >>
-             IEEE802154_FRAMECTRL_SHIFT_DADDR;
+  daddrmode = (frame_ctrl & IEEE802154_FRAMECTRL_DADDR) >>
+              IEEE802154_FRAMECTRL_SHIFT_DADDR;
 
-  if (addrmode == IEEE802154_ADDRMODE_SHORT)
+  if (daddrmode == IEEE802154_ADDRMODE_SHORT)
     {
       hlen += 2 + 2; /* Destination PAN + shortaddr */
     }
-  else if (addrmode == IEEE802154_ADDRMODE_EXTENDED)
+  else if (daddrmode == IEEE802154_ADDRMODE_EXTENDED)
     {
       hlen += 2 + 8; /* Destination PAN + extaddr */
     }
 
-  if (!(frame_ctrl & IEEE802154_FRAMECTRL_PANIDCOMP))
+  saddrmode = (frame_ctrl & IEEE802154_FRAMECTRL_SADDR) >>
+              IEEE802154_FRAMECTRL_SHIFT_SADDR;
+
+  if (saddrmode != IEEE802154_ADDRMODE_NONE &&
+      (daddrmode == IEEE802154_ADDRMODE_NONE ||
+       !(frame_ctrl & IEEE802154_FRAMECTRL_PANIDCOMP)))
     {
-      hlen += 2; /* No PAN compression, source PAN is different from dest PAN */
+      hlen += 2; /* Source PAN, compressed only with both addresses */
     }
 
-  addrmode = (frame_ctrl & IEEE802154_FRAMECTRL_SADDR) >>
-             IEEE802154_FRAMECTRL_SHIFT_SADDR;
-
-  if (addrmode == IEEE802154_ADDRMODE_SHORT)
+  if (saddrmode == IEEE802154_ADDRMODE_SHORT)
     {
       hlen += 2; /* Source saddr */
     }
-  else if (addrmode == IEEE802154_ADDRMODE_EXTENDED)
+  else if (saddrmode == IEEE802154_ADDRMODE_EXTENDED)
     {
       hlen += 8; /* Ext saddr */
     }

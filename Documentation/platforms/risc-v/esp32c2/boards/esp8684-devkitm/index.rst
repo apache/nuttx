@@ -1,6 +1,6 @@
-=================
-ESP8684-DevKitM-1
-=================
+===========================
+Espressif ESP8684-DevKitM-1
+===========================
 
 .. tags:: chip:esp32c2, chip:esp8684, arch:risc-v, vendor:espressif
 

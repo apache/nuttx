@@ -47,7 +47,8 @@ set(SRCS
     lib_tempnam.c
     lib_tmpnam.c
     lib_renameat.c
-    lib_putwchar.c)
+    lib_putwchar.c
+    lib_ctermid.c)
 
 # The remaining sources files depend upon C streams
 
@@ -108,6 +109,14 @@ if(CONFIG_FILE_STREAM)
     lib_getwc.c
     lib_ungetwc.c
     lib_stdio_ext.c)
+
+  # popen() needs dpopen()
+
+  if(CONFIG_PIPES
+     AND CONFIG_LIBC_EXECFUNCS
+     AND CONFIG_SCHED_WAITPID)
+    list(APPEND SRCS lib_popen.c)
+  endif()
 endif()
 
 target_sources(c PRIVATE ${SRCS})

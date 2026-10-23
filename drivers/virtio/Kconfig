@@ -49,6 +49,19 @@ config DRIVERS_VIRTIO_GPU
 	select FB_UPDATE
 	select DRIVERS_VIRTIO
 
+choice
+	prompt "Select virtio-gpu framebuffer format"
+	default DRIVERS_VIRTIO_GPU_XRGB8888
+	depends on DRIVERS_VIRTIO_GPU
+
+config DRIVERS_VIRTIO_GPU_XRGB8888
+	bool "XRGB8888"
+
+config DRIVERS_VIRTIO_GPU_RGB565
+	bool "RGB565 (Supported by virtio-gpu-gl)"
+
+endchoice
+
 config DRIVERS_VIRTIO_INPUT
 	bool "Virtio input support"
 	depends on INPUT
@@ -103,7 +116,7 @@ config DRIVERS_VIRTIO_SERIAL
 if DRIVERS_VIRTIO_SERIAL
 config DRIVERS_VIRTIO_SERIAL_BUFSIZE
 	int "Virtio serial driver buffer size"
-	default 256
+	default 1024
 
 config DRIVERS_VIRTIO_SERIAL_CONSOLE
 	bool "Virtio serial console"

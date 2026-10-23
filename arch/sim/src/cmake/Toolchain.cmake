@@ -255,7 +255,7 @@ elseif(NOT APPLE AND NOT SIM_HOST_ARM64)
   # static archive; skipping it lets gcc use the default PIE link path which
   # works correctly on aarch64 hosts.
   add_compile_options(-no-pie)
-  add_link_options(-Wl,-no-pie)
+  add_link_options(-no-pie)
 endif()
 
 if(CONFIG_LIBCXX)
@@ -279,4 +279,7 @@ endif()
 
 if(SIM_HOST_LINUX)
   add_link_options(-Wl,-z,noexecstack)
+  # Resolve PLT entries at load time so early host calls made with simulated
+  # interrupts masked do not fault inside the lazy binder.
+  add_link_options(-Wl,-z,now)
 endif()

@@ -1,6 +1,6 @@
-===================
-PIC32MZ Starter Kit
-===================
+=============================
+Microchip PIC32MZ Starter Kit
+=============================
 
 .. tags:: arch:mips, chip:pic32mz, vendor:microchip
 

@@ -1,6 +1,6 @@
-==============
-max32660-evsys
-==============
+===============================
+Maxim Integrated MAX32660-EVSYS
+===============================
 
 .. tags:: arch:arm, chip:max326xx, vendor:maxim
 

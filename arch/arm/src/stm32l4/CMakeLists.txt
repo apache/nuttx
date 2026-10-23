@@ -44,12 +44,6 @@ if(NOT CONFIG_ARCH_IDLE_CUSTOM)
   list(APPEND SRCS stm32l4_idle.c)
 endif()
 
-if(NOT CONFIG_SCHED_TICKLESS)
-  list(APPEND SRCS stm32l4_timerisr.c)
-else()
-  list(APPEND SRCS stm32l4_tickless.c)
-endif()
-
 if(CONFIG_BUILD_PROTECTED)
   list(APPEND SRCS stm32l4_userspace.c stm32l4_mpuinit.c)
 endif()
@@ -158,10 +152,6 @@ endif()
 
 if(CONFIG_STM32_FIREWALL)
   list(APPEND SRCS stm32l4_firewall.c)
-endif()
-
-if(CONFIG_STM32_IWDG)
-  list(APPEND SRCS stm32l4_iwdg.c)
 endif()
 
 if(CONFIG_STM32_SDMMC1)

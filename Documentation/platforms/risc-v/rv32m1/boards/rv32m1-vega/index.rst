@@ -1,6 +1,6 @@
-===========
-RV32M1-VEGA
-===========
+====================
+OPEN-ISA RV32M1-VEGA
+====================
 
 .. tags:: arch:risc-v, chip:rv32m1, vendor:nxp
 

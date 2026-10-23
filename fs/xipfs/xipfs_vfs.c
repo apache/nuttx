@@ -1339,7 +1339,7 @@ static int xipfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
     }
 
   memset(buf, 0, sizeof(struct stat));
-  buf->st_mode    = S_IFREG | 0444;
+  buf->st_mode    = S_IFREG | 0555;
   buf->st_size    = xf->ext->size;
   buf->st_blksize = fs->geo.erasesize;
   buf->st_blocks  = xf->ext->nblocks;
@@ -1883,7 +1883,7 @@ static int xipfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
       return OK;
     }
 
-  buf->st_mode    = S_IFREG | 0444;
+  buf->st_mode    = S_IFREG | 0555;
   buf->st_size    = ext->size;
   buf->st_blksize = fs->geo.erasesize;
   buf->st_blocks  = ext->nblocks;

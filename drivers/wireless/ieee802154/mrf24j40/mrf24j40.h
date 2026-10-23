@@ -61,6 +61,10 @@
 #define MRF24J40_PA_ED     2
 #define MRF24J40_PA_SLEEP  3
 
+/* Symbols the RSSI is averaged over, TXBCON1 RSSINUM = 11 */
+
+#define MRF24J40_RSSI_SYMBOLS 8
+
 /* Formula for calculating default macMaxFrameWaitTime is on pg. 130
  *
  * For PHYs other than CSS and UWB, the attribute phyMaxFrameDuration
@@ -121,6 +125,10 @@ struct mrf24j40_radio_s
   struct work_s irqwork;       /* For deferring interrupt work to work queue */
   struct work_s csma_pollwork; /* For deferring poll work to the work queue */
   struct work_s gts_pollwork;  /* For deferring poll work to the work queue */
+  struct work_s edwork;        /* Energy detect sampling */
+
+  clock_t ed_end;              /* End of the energy detect, in ticks */
+  uint8_t edmax;               /* Highest RSSI of the energy detect */
 
   mutex_t       lock;          /* Exclusive access to this struct */
 
@@ -209,6 +217,7 @@ void mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
               FAR const uint8_t *buf, uint8_t length, uint32_t fifo_addr);
 
 void mrf24j40_norm_trigger(FAR struct mrf24j40_radio_s *dev);
+int mrf24j40_rssi(FAR struct mrf24j40_radio_s *dev, FAR uint8_t *rssi);
 void mrf24j40_beacon_trigger(FAR struct mrf24j40_radio_s *dev);
 
 #endif /* __DRIVERS_WIRELESS_IEEE802154_MRF24J40_MRF24J40_H */

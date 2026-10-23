@@ -41,11 +41,11 @@
 
 /* Indicates thread error status */
 
-#define thrd_success  (OK)
+#define thrd_success  (0)
 #define thrd_timedout (ETIMEDOUT)
 #define thrd_busy     (EBUSY)
 #define thrd_nomem    (ENOMEM)
-#define thrd_error    (ERROR)
+#define thrd_error    (-1)
 
 /* Defines the type of a mutex */
 
@@ -100,6 +100,11 @@ typedef CODE void (*tss_dtor_t)(FAR void *);
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 /* Threads ******************************************************************/
 
@@ -166,10 +171,7 @@ static inline void thrd_yield(void)
  * _Noreturn void thrd_exit(int res);
  */
 
-static inline noreturn void thrd_exit(int res)
-{
-  pthread_exit((pthread_addr_t)res);
-}
+void thrd_exit(int res) noreturn_function;
 
 /* thrd_detach: detaches a thread
  *
@@ -338,5 +340,9 @@ static inline int mtx_init(FAR mtx_t *mutex, int type)
  */
 
 #define tss_delete(tss_id) pthread_key_delete(tss_id)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __INCLUDE_THREADS_H */

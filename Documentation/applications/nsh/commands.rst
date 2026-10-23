@@ -330,7 +330,9 @@ indication only if the files differ.
 
 **Synopsis**. Copy of the contents of the file at
 ``<source-path>`` to the location in the file system indicated by
-``<dest-path>``.
+``<dest-path>``.  A new file gets the mode ``0666`` plus the execute bits
+of the source file, so a copied program stays executable.  An existing
+destination file keeps its mode.
 
 .. _cmddate:
 
@@ -392,7 +394,7 @@ create a new file of the specified size filled with zero::
   nsh> dd if=/dev/zero of=/tmp/zeros bs=64 count=16
   nsh> ls -l /tmp
   /tmp:
-   -rw-rw-rw-    1024 ZEROS
+   -rwxrwxrwx    1024 ZEROS
 
 Read from character device, write to block device. This will fill
 the entire block device with zeros::
@@ -599,12 +601,15 @@ executed in background via ``exec <hex-address> &``.
 
 **Command Syntax**::
 
-  exit
+  exit [<status>]
 
 **Synopsis**. Exit NSH. Only useful for the serial front end if
 you have started some other tasks (perhaps using the ``exec``
 command) and you would like to have NSH out of the way. For the
 telnet front-end, ``exit`` terminates the telnet session.
+
+``<status>`` is the exit status of NSH, from 0 to 255. The default is
+0. A script or ``sh -c`` can use it to report a failure.
 
 .. _cmdexport:
 
@@ -1044,7 +1049,7 @@ on the loop-mounted file::
   nsh> dd if=/dev/zero of=/tmp/image bs=512 count=512
   nsh> ls -l /tmp
   /tmp:
-   -rw-rw-rw-   262144 IMAGE
+   -rwxrwxrwx   262144 IMAGE
   nsh> losetup /dev/loop0 /tmp/image
   nsh> ls -l /dev
   /dev:
@@ -1054,11 +1059,11 @@ on the loop-mounted file::
   nsh> ls -l /mnt
   ls -l /mnt
   /mnt:
-   drw-rw-rw-       0 example/
+   drwxrwxrwx       0 example/
   nsh> echo "This is a test" >/mnt/example/atest.txt
   nsh> ls -l /mnt/example
   /mnt/example:
-   -rw-rw-rw-      16 ATEST.TXT
+   -rwxrwxrwx      16 ATEST.TXT
   nsh> cat /mnt/example/atest.txt
   This is a test
   nsh>
@@ -1247,8 +1252,8 @@ directories in the *pseudo* file system.
   nsh> mkdir /mnt/fs/tmp
   nsh> ls -l /mnt/fs
   /mnt/fs:
-   drw-rw-rw-       0 TESTDIR/
-   drw-rw-rw-       0 TMP/
+   drwxrwxrwx       0 TESTDIR/
+   drwxrwxrwx       0 TMP/
   nsh>
 
 .. _cmdmkfatfs:
@@ -1400,6 +1405,12 @@ way association, binding:
      may be needed to complete the full path but the full path must
      not already exist.
 
+The '-o ``<options>``' argument is a comma-separated list.  The generic
+options ``ro``, ``rw``, ``noexec``, ``exec``, ``nosuid``, ``suid``,
+``nodev``, ``dev``, ``sync``, ``async``, ``noatime`` and ``atime`` become
+mount flags (for example ``MS_RDONLY`` or ``MS_NOEXEC``).  The other options
+go to the file system, for example ``trans=virtio,tag=system`` for v9fs.
+
 After the volume has been mounted in the NuttX
 :ref:`pseudo file system <file_system_overview>`, it may be
 access in the same way as other objects in the file system.
@@ -1418,12 +1429,12 @@ Using ``mount`` to mount a file system::
   nsh> mount -t vfat /dev/ram0 /mnt/fs
   nsh> ls -l /mnt/fs/testdir
   /mnt/fs/testdir:
-   -rw-rw-rw-      15 TESTFILE.TXT
+   -rwxrwxrwx      15 TESTFILE.TXT
   nsh> echo "This is a test" >/mnt/fs/testdir/example.txt
   nsh> ls -l /mnt/fs/testdir
   /mnt/fs/testdir:
-  -rw-rw-rw-      15 TESTFILE.TXT
-   -rw-rw-rw-      16 EXAMPLE.TXT
+  -rwxrwxrwx      15 TESTFILE.TXT
+   -rwxrwxrwx      16 EXAMPLE.TXT
   nsh> cat /mnt/fs/testdir/example.txt
   This is a test
   nsh>
@@ -1636,12 +1647,12 @@ file system.
   nsh> mkdir /mnt/fs/tmp
   nsh> ls -l /mnt/fs
   /mnt/fs:
-   drw-rw-rw-       0 TESTDIR/
-   drw-rw-rw-       0 TMP/
+   drwxrwxrwx       0 TESTDIR/
+   drwxrwxrwx       0 TMP/
   nsh> rmdir /mnt/fs/tmp
   nsh> ls -l /mnt/fs
   /mnt/fs:
-   drw-rw-rw-       0 TESTDIR/
+   drwxrwxrwx       0 TESTDIR/
   nsh>
 
 .. _cmdrmmod:
@@ -2084,6 +2095,48 @@ option is NOT optional.
 If a <file-path> is larger than the specified size, the extra data is
 lost. If a <file-path> is shorter, it is extended and the extended part
 reads as zero bytes.
+
+.. _cmdulimit:
+
+``ulimit`` Show or Set Resource Limits
+======================================
+
+**Command Syntax**::
+
+  ulimit [-H|-S] [-a|-c|-d|-f|-l|-n|-s|-t|-v] [<limit>|unlimited]
+
+**Synopsis**. Show or set a resource limit of NSH. The programs that NSH
+starts get the same limits. Without ``<limit>``, ``ulimit`` shows the soft
+limit, or the hard limit with ``-H``. With ``<limit>``, it sets the soft
+limit with ``-S``, the hard limit with ``-H``, and both without these
+options. Sizes are in KiB, ``-n`` is a number of files and ``-t`` is in
+seconds. Without a resource option, ``ulimit`` uses ``-f``, as POSIX says.
+NuttX enforces ``-n`` and ``-s`` only; setting another limit fails.
+
+**Options**
+
+======  ======================================================
+``-H``  The hard limit.
+``-S``  The soft limit.
+``-a``  Show all limits.
+``-c``  Core file size.
+``-d``  Data segment size.
+``-f``  File size.
+``-l``  Locked memory size.
+``-n``  Number of open files.
+``-s``  Stack size: the default stack size of new threads and
+        programs.
+``-t``  CPU time.
+``-v``  Virtual memory size.
+======  ======================================================
+
+**Example**::
+
+  nsh> ulimit -S -s 64
+  nsh> ulimit -s
+  64
+  nsh> ulimit -H -s
+  unlimited
 
 .. _cmdumount:
 

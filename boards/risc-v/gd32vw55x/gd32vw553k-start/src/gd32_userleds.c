@@ -41,7 +41,7 @@
  * Private Data
  ****************************************************************************/
 
-/* The three LEDs are on GPIOC and are active HIGH: driving the pin high
+/* The three LEDs (PB0, PA12, PB4) are active HIGH: driving the pin high
  * lights the LED.
  */
 

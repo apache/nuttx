@@ -226,6 +226,9 @@ void stm32_rcc_enableperipherals(void)
 #ifdef CONFIG_STM32_UART5
   regval |= RCC_APB1ENR1_UART5EN;
 #endif
+#ifdef CONFIG_STM32_WWDG
+  regval |= RCC_APB1ENR1_WWDGEN;
+#endif
   modifyreg32(STM32_RCC_APB1ENR1, 0, regval);
 
   regval = 0;

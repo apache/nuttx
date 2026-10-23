@@ -55,6 +55,11 @@ struct mrf24j40_lower_s
   int  (*attach)(FAR const struct mrf24j40_lower_s *lower, xcpt_t handler,
                  FAR void *arg);
   void (*enable)(FAR const struct mrf24j40_lower_s *lower, bool state);
+
+  /* Get the extended address of the board, NULL if it has none */
+
+  void (*geteaddr)(FAR const struct mrf24j40_lower_s *lower,
+                   FAR uint8_t *eaddr);
 };
 
 #ifdef __cplusplus

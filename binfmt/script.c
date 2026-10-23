@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/stat.h>
 #include <ctype.h>
 #include <fcntl.h>
 #include <string.h>
@@ -167,6 +168,9 @@ static int script_loadbinary(FAR struct binary_s *binp,
   FAR char *arg = NULL;
   FAR char *end;
   struct file file;
+#ifdef CONFIG_BINFMT_CHECKEXEC
+  struct stat st;
+#endif
   int ret;
 
   binfo("Attempting script load: %s\n", filename);
@@ -176,6 +180,22 @@ static int script_loadbinary(FAR struct binary_s *binp,
     {
       return ret;
     }
+
+#ifdef CONFIG_BINFMT_CHECKEXEC
+  /* The script needs execute permission, as its interpreter does */
+
+  ret = file_fstat(&file, &st);
+  if (ret >= 0)
+    {
+      ret = binfmt_checkexecperm(st.st_mode, st.st_uid, st.st_gid);
+    }
+
+  if (ret < 0)
+    {
+      file_close(&file);
+      return ret;
+    }
+#endif
 
   ret = file_read(&file, header, sizeof(header) - 1);
   file_close(&file);

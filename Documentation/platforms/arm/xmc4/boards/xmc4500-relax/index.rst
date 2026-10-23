@@ -1,6 +1,6 @@
-=============
-XMC4500 Relax
-=============
+======================
+Infineon XMC4500 Relax
+======================
 
 .. tags:: arch:arm, chip:xmc4, vendor:infineon
 

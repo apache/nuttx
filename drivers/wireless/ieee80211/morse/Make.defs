@@ -1,0 +1,160 @@
+############################################################################
+# drivers/wireless/ieee80211/morse/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+ifeq ($(CONFIG_IEEE80211_MORSE),y)
+
+CSRCS += morse_mmosal.c morse_mmhal.c morse_netdev.c
+
+# Location of the MM-IoT-SDK files, downloaded in the driver directory.
+# MORSE_SDK_REL is the same location relative to the drivers/ directory,
+# used to build the SDK sources (VPATH).
+
+MORSE_SDK_VERSION := $(patsubst "%",%,$(strip $(CONFIG_IEEE80211_MORSE_SDK_VERSION)))
+
+MORSE_DIR       = $(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)ieee80211$(DELIM)morse
+MORSE_SDK       = $(MORSE_DIR)$(DELIM)mm-iot-sdk-$(MORSE_SDK_VERSION)
+MORSE_SDK_REL   = wireless$(DELIM)ieee80211$(DELIM)morse$(DELIM)mm-iot-sdk-$(MORSE_SDK_VERSION)
+MORSE_FRAMEWORK = $(MORSE_SDK)$(DELIM)framework
+
+ifeq ($(CONFIG_ARCH_CORTEXM7),y)
+  MORSE_CORE = arm-cortex-m7f
+else ifeq ($(CONFIG_ARCH_CORTEXM33),y)
+  MORSE_CORE = arm-cortex-m33f
+else
+  MORSE_CORE = arm-cortex-m4f
+endif
+
+# Apache-2.0 helpers from the SDK: regulatory database and packet memory
+
+CSRCS += mmregdb.c mmpktmem_heap.c
+
+DEPPATH += --dep-path $(MORSE_SDK_REL)$(DELIM)framework$(DELIM)src$(DELIM)mmregdb
+DEPPATH += --dep-path $(MORSE_SDK_REL)$(DELIM)framework$(DELIM)src$(DELIM)mmpktmem
+VPATH += :$(MORSE_SDK_REL)$(DELIM)framework$(DELIM)src$(DELIM)mmregdb
+VPATH += :$(MORSE_SDK_REL)$(DELIM)framework$(DELIM)src$(DELIM)mmpktmem
+
+# The pre-built libmorse is merged into libdrivers.a
+
+PREBUILT_LIBS += $(MORSE_FRAMEWORK)$(DELIM)morselib$(DELIM)lib$(DELIM)$(MORSE_CORE)$(DELIM)libmorse.a
+
+# MM-IoT-SDK files
+#
+# Only the files used by the driver are downloaded from the SDK repository
+# (about 3 MB): the libmorse headers and pre-built library, the chip
+# firmware, two Apache-2.0 helper sources and the license texts.
+
+MORSE_SDK_URL = https://raw.githubusercontent.com/MorseMicro/mm-iot-sdk/$(MORSE_SDK_VERSION)
+
+MORSE_SDK_HEADERS  = emmet.h mbin.h mm_mbedtls_config.h mmhal.h mmhal_app.h
+MORSE_SDK_HEADERS += mmhal_core.h mmhal_flash.h mmhal_os.h mmhal_uart.h
+MORSE_SDK_HEADERS += mmhal_wlan.h mmlog.h mmosal.h mmpkt.h mmpkt_list.h
+MORSE_SDK_HEADERS += mmtrace.h mmversion.h mmwlan.h mmwlan_stats.h
+
+MORSE_SDK_FILES  = $(addprefix framework/morselib/include/,$(MORSE_SDK_HEADERS))
+MORSE_SDK_FILES += framework/morselib/lib/$(MORSE_CORE)/libmorse.a
+MORSE_SDK_FILES += framework/src/mmregdb/mmregdb.c
+MORSE_SDK_FILES += framework/src/mmregdb/mmregdb.h
+MORSE_SDK_FILES += framework/src/mmpktmem/mmpktmem_heap.c
+MORSE_SDK_FILES += framework/src/mmutils/mmutils.h
+MORSE_SDK_FILES += LICENSES/Apache-2.0.txt
+MORSE_SDK_FILES += LICENSES/LicenseRef-MorseMicroBDL.txt
+
+# Chip firmware
+
+ifeq ($(CONFIG_IEEE80211_MORSE_MM8108),y)
+  MORSE_CHIP    = mm8108
+  MORSE_FW_NAME = mm8108b2-rl.mbin
+else
+  MORSE_CHIP    = mm6108
+  MORSE_FW_NAME = mm6108.mbin
+endif
+
+MORSE_FW = $(MORSE_FRAMEWORK)$(DELIM)morsefirmware$(DELIM)$(MORSE_FW_NAME)
+MORSE_SDK_FILES += framework/morsefirmware/$(MORSE_FW_NAME)
+
+# Board configuration file
+
+ifeq ($(CONFIG_IEEE80211_MORSE_BCF_QUECTEL_FGH100MH),y)
+
+MORSE_BCF_COMMIT = 919f27a6dc2d46a988682d6ff64dd3fdb9ffc465
+MORSE_BCF_URL    = https://raw.githubusercontent.com/MorseMicro/morse-firmware/$(MORSE_BCF_COMMIT)/bcf/quectel
+MORSE_BCF_ELF    = $(MORSE_DIR)$(DELIM)bcf_fgh100mhaamd.bin
+MORSE_BCF        = $(MORSE_DIR)$(DELIM)bcf_fgh100mhaamd.mbin
+
+$(MORSE_BCF_ELF):
+	@echo "Downloading: Quectel FGH100M-H BCF"
+	$(Q) curl -L -f -s -S -o $@ $(MORSE_BCF_URL)/bcf_fgh100mhaamd.bin
+
+# The BCF is distributed in ELF format: convert it to mbin with the SDK
+# tool (requires python3 with pyelftools)
+
+MORSE_BCF_TOOL   = $(MORSE_FRAMEWORK)$(DELIM)tools$(DELIM)buildsystem$(DELIM)convert-bin-to-mbin.py
+MORSE_SDK_FILES += framework/tools/buildsystem/convert-bin-to-mbin.py
+
+$(MORSE_BCF): $(MORSE_BCF_ELF) $(MORSE_BCF_TOOL)
+	@echo "Converting: $(notdir $(MORSE_BCF_ELF)) -> $(notdir $@)"
+	$(Q) python3 -c "import elftools" 2>/dev/null || \
+	     { echo "ERROR: python3 pyelftools is required (pip install pyelftools)"; exit 1; }
+	$(Q) python3 -I $(MORSE_BCF_TOOL) -o $@ $(MORSE_BCF_ELF)
+
+else ifeq ($(CONFIG_IEEE80211_MORSE_BCF_SDK),y)
+  MORSE_BCF_NAME   = $(patsubst "%",%,$(CONFIG_IEEE80211_MORSE_BCF_NAME))
+  MORSE_BCF        = $(MORSE_FRAMEWORK)$(DELIM)morsefirmware$(DELIM)$(MORSE_CHIP)$(DELIM)bcfs$(DELIM)$(MORSE_BCF_NAME)
+  MORSE_SDK_FILES += framework/morsefirmware/$(MORSE_CHIP)/bcfs/$(MORSE_BCF_NAME)
+else
+  MORSE_BCF = $(patsubst "%",%,$(CONFIG_IEEE80211_MORSE_BCF_PATH))
+endif
+
+# Files already present are not downloaded again: to build without network
+# access copy them in $(MORSE_SDK) beforehand.
+
+$(MORSE_SDK)$(DELIM)%:
+	@echo "Downloading: MM-IoT-SDK $(MORSE_SDK_VERSION) $*"
+	$(Q) curl -L -f -s -S --create-dirs -o $@.tmp $(MORSE_SDK_URL)/$*
+	$(Q) mv $@.tmp $@
+
+context:: $(addprefix $(MORSE_SDK)$(DELIM),$(MORSE_SDK_FILES))
+
+ifeq ($(CONFIG_IEEE80211_MORSE_BCF_QUECTEL_FGH100MH),y)
+context:: $(MORSE_BCF)
+endif
+
+# The firmware and the BCF are embedded with .incbin
+
+morse_mmhal$(OBJEXT): $(MORSE_FW) $(MORSE_BCF)
+
+CFLAGS += -DMORSE_FW_FILE=$(MORSE_FW) -DMORSE_BCF_FILE=$(MORSE_BCF)
+
+CFLAGS += ${INCDIR_PREFIX}$(MORSE_DIR)
+CFLAGS += ${INCDIR_PREFIX}$(MORSE_FRAMEWORK)$(DELIM)morselib$(DELIM)include
+CFLAGS += ${INCDIR_PREFIX}$(MORSE_FRAMEWORK)$(DELIM)src$(DELIM)mmregdb
+CFLAGS += ${INCDIR_PREFIX}$(MORSE_FRAMEWORK)$(DELIM)src$(DELIM)mmutils
+
+DEPPATH += --dep-path wireless$(DELIM)ieee80211$(DELIM)morse
+VPATH += :wireless$(DELIM)ieee80211$(DELIM)morse
+
+distclean::
+	$(call DELDIR, $(MORSE_DIR)$(DELIM)mm-iot-sdk-$(MORSE_SDK_VERSION))
+	$(call DELFILE, $(MORSE_DIR)$(DELIM)bcf_fgh100mhaamd.bin)
+	$(call DELFILE, $(MORSE_DIR)$(DELIM)bcf_fgh100mhaamd.mbin)
+
+endif # CONFIG_IEEE80211_MORSE

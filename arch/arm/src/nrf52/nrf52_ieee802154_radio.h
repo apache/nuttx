@@ -42,16 +42,19 @@
 /* IEEE 802.15.4 constants */
 
 #define IEEE802154_MAX_FRAME_WAITTIME (16 + 32 + 4064)
-#define IEEE802154_MAX_CSMA_BACKOFFS  (1)
+#define IEEE802154_MAX_CSMA_BACKOFFS  (4)
 #define IEEE802154_MIN_BE             (3)
 #define IEEE802154_MAX_BE             (5)
 #define IEEE802154_CW0                (2)
 
-/* ACK_SYM + turnaround symbols + backoff */
+/* macAckWaitDuration: aUnitBackoffPeriod + aTurnaroundTime +
+ * phySHRDuration (10) + ceiling(6 * phySymbolsPerOctet (2)), in symbols
+ * (IEEE 802.15.4-2011 6.4.3)
+ */
 
-#define IEEE802154_ACK_WAIT           (12+                              \
-                                       IEEE802154_TURN_AROUND_TIME+     \
-                                       IEEE802154_UNIT_BACKOFF_PERIOD)
+#define IEEE802154_ACK_WAIT           (IEEE802154_UNIT_BACKOFF_PERIOD + \
+                                       IEEE802154_TURN_AROUND_TIME +    \
+                                       10 + 12)
 
 /****************************************************************************
  * Public Types
@@ -88,6 +91,7 @@ struct nrf52_radioi8_radio_data_s
 
   bool     rxenabled;           /* RX enabled now */
   bool     rxrestore;           /* RX needs to be restored */
+  bool     edrestore;           /* RX needs to be restored after ED */
   bool     rxlong;              /* Last RX frame was long */
 
   /* TX state */
@@ -160,6 +164,10 @@ struct nrf52_radioi8_radio_ops_s
   /* Trigger normal transaction (non GTS) */
 
   void (*norm_trigger)(struct nrf52_radioi8_dev_s *dev);
+
+  /* Start the next frame that waits for the radio, after mindelay */
+
+  void (*txnext)(struct nrf52_radioi8_dev_s *dev, uint32_t mindelay);
 
 #ifdef CONFIG_NRF52_RADIO_IEEE802154_SUPERFRAME
   /* Setup a beacon frame transfe */

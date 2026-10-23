@@ -509,6 +509,19 @@ int nx_mount(FAR const char *source, FAR const char *target,
 
   INODE_SET_MOUNTPT(mountpt_inode);
 
+  /* Remember MS_NOEXEC: stat() then reports no execute permission for
+   * the files of this mount.
+   */
+
+  if ((mountflags & MS_NOEXEC) != 0)
+    {
+      mountpt_inode->i_flags |= FSNODEFLAG_NOEXEC;
+    }
+  else
+    {
+      mountpt_inode->i_flags &= ~FSNODEFLAG_NOEXEC;
+    }
+
   mountpt_inode->u.i_mops  = mops;
   mountpt_inode->i_private = fshandle;
   inode_unlock();

@@ -109,6 +109,7 @@ static void mac802154_sfevent(FAR const struct ieee802154_radiocb_s *radiocb,
                               enum ieee802154_sfevent_e sfevent);
 
 static void mac802154_purge_worker(FAR void *arg);
+static int mac802154_fcmhrlen(uint16_t fc);
 
 static void mac802154_rxdatareq(FAR struct ieee802154_privmac_s *priv,
                                 FAR struct ieee802154_data_ind_s *ind);
@@ -445,7 +446,6 @@ static void mac802154_notify_worker(FAR void *arg)
 
           if (dispose)
             {
-              iob_free(primitive->u.dataind.frame);
               ieee802154_primitive_free(primitive);
             }
         }
@@ -776,11 +776,8 @@ static void mac802154_purge_worker(FAR void *arg)
 
           sq_remfirst(&priv->indirect_queue);
 
-          /* Free the IOB, the notification, and the tx descriptor */
+          /* Free the tx descriptor with the frame and the confirm */
 
-          iob_free(txdesc->frame);
-          ieee802154_primitive_free((FAR struct ieee802154_primitive_s *)
-                                    txdesc->conf);
           mac802154_txdesc_free(priv, txdesc);
           priv->beaconupdate = true;
 
@@ -927,12 +924,6 @@ static void mac802154_txdone_worker(FAR void *arg)
           break;
         }
 
-      /* Cast the data_conf to a notification. We get both the private and
-       * public notification structure to make it easier to use.
-       */
-
-      primitive = (FAR struct ieee802154_primitive_s *)txdesc->conf;
-
       wlinfo("Tx status: %s\n",
              g_ieee802154_status_string[txdesc->conf->status]);
 
@@ -940,6 +931,9 @@ static void mac802154_txdone_worker(FAR void *arg)
         {
           case IEEE802154_FRAME_DATA:
             {
+              /* The data confirm goes to the next layer */
+
+              primitive = mac802154_txdesc_takeconf(txdesc);
               primitive->type = IEEE802154_PRIMITIVE_CONF_DATA;
               mac802154_notify(priv, primitive);
             }
@@ -1004,22 +998,17 @@ static void mac802154_txdone_worker(FAR void *arg)
                     break;
 
                   default:
-                    ieee802154_primitive_free(primitive);
                     break;
                 }
             }
             break;
 
           default:
-            {
-              ieee802154_primitive_free(primitive);
-            }
             break;
         }
 
-      /* Free the IOB and the tx descriptor */
+      /* Free the tx descriptor with the frame and an unused confirm */
 
-      iob_free(txdesc->frame);
       mac802154_txdesc_free(priv, txdesc);
     }
 
@@ -1074,6 +1063,57 @@ static void mac802154_rxframe(FAR const struct ieee802154_radiocb_s *radiocb,
 }
 
 /****************************************************************************
+ * Name: mac802154_fcmhrlen
+ *
+ * Description:
+ *   MAC header length described by a frame control field.
+ *
+ ****************************************************************************/
+
+static int mac802154_fcmhrlen(uint16_t fc)
+{
+  return mac802154_mhrlen((fc & IEEE802154_FRAMECTRL_DADDR) >>
+                          IEEE802154_FRAMECTRL_SHIFT_DADDR,
+                          (fc & IEEE802154_FRAMECTRL_SADDR) >>
+                          IEEE802154_FRAMECTRL_SHIFT_SADDR,
+                          (fc & IEEE802154_FRAMECTRL_PANIDCOMP) != 0);
+}
+
+/****************************************************************************
+ * Name: mac802154_mhrvalid
+ *
+ * Description:
+ *   Check that a received frame holds the whole MAC header described by its
+ *   frame control field, and the command identifier of a command frame.
+ *
+ ****************************************************************************/
+
+static bool mac802154_mhrvalid(FAR struct iob_s *iob)
+{
+  uint16_t fc;
+  int      len;
+  int      mhrlen;
+
+  len = iob->io_len - iob->io_offset;
+  if (len < 3)
+    {
+      return false;
+    }
+
+  fc     = iob->io_data[iob->io_offset] |
+           (iob->io_data[iob->io_offset + 1] << 8);
+  mhrlen = mac802154_fcmhrlen(fc);
+
+  if (((fc & IEEE802154_FRAMECTRL_FTYPE) >>
+       IEEE802154_FRAMECTRL_SHIFT_FTYPE) == IEEE802154_FRAME_COMMAND)
+    {
+      mhrlen++;
+    }
+
+  return len >= mhrlen;
+}
+
+/****************************************************************************
  * Name: mac802154_rxframe_worker
  *
  * Description:
@@ -1123,6 +1163,16 @@ static void mac802154_rxframe_worker(FAR void *arg)
       /* Get a local copy of the frame to make it easier to access */
 
       iob = ind->frame;
+
+      /* Drop a frame shorter than its MAC header */
+
+      if (!mac802154_mhrvalid(iob))
+        {
+          wlwarn("WARNING: dropping malformed frame\n");
+          ieee802154_primitive_free((FAR struct ieee802154_primitive_s *)
+                                    ind);
+          continue;
+        }
 
       /* Set a local pointer to the frame control then move the offset past
        * the frame control field
@@ -1288,6 +1338,14 @@ static void mac802154_rxframe_worker(FAR void *arg)
                */
 
               wlinfo("ACK received\n");
+              ieee802154_primitive_free((FAR struct ieee802154_primitive_s *)
+                                        ind);
+            }
+            break;
+
+          default:
+            {
+              wlinfo("Reserved frame type %u dropped\n", ftype);
               ieee802154_primitive_free((FAR struct ieee802154_primitive_s *)
                                         ind);
             }
@@ -2051,6 +2109,7 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
                   else if (priv->curr_op == MAC802154_OP_NONE)
                     {
                       int sval;
+
                       DEBUGASSERT(nxsem_get_value(&priv->opsem, &sval) == 0
                                   && sval == 1);
                       nxsem_wait_uninterruptible(&priv->opsem);

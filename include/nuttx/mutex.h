@@ -608,7 +608,7 @@ static inline_function void nxmutex_reset(FAR mutex_t *mutex)
 static inline_function int nxmutex_breaklock(FAR mutex_t *mutex,
                                              FAR unsigned int *locked)
 {
-  int ret = OK;
+  int ret;
 
   *locked = false;
   ret = nxmutex_unlock(mutex);
@@ -640,7 +640,7 @@ static inline_function int nxmutex_breaklock(FAR mutex_t *mutex,
 static inline_function int nxmutex_restorelock(FAR mutex_t *mutex,
                                                unsigned int locked)
 {
-  return locked ? nxmutex_lock(mutex) : OK;
+  return locked ? nxmutex_lock(mutex) : 0;
 }
 
 /****************************************************************************

@@ -922,9 +922,9 @@ static int noteram_dump_printf(FAR struct lib_outstream_s *s,
             }
         }
 
-        ret += lib_bsprintf(s, fmt, note->npt_data);
-        lib_stream_putc(s, '\n');
-        ret++;
+      ret += lib_bsprintf(s, fmt, note->npt_data);
+      lib_stream_putc(s, '\n');
+      ret++;
     }
 
   return ret;
@@ -964,315 +964,320 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
   switch (note->nc_type)
     {
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
-    case NOTE_START:
-      {
-        ret += noteram_dump_header(s, note, ctx);
-        ret += lib_sprintf(s, "sched_wakeup_new: comm=%s pid=%d "
-                           "target_cpu=%d\n",
-                           note_get_taskname(pid, buf, TASK_NAME_SIZE),
-                           get_pid(pid), cpu);
-      }
-      break;
+      case NOTE_START:
+        {
+          ret += noteram_dump_header(s, note, ctx);
+          ret += lib_sprintf(s, "sched_wakeup_new: comm=%s pid=%d "
+                             "target_cpu=%d\n",
+                             note_get_taskname(pid, buf, TASK_NAME_SIZE),
+                             get_pid(pid), cpu);
+        }
+        break;
 
-    case NOTE_STOP:
-      {
-        /* This note informs the task to be stopped.
-         * Change current task state for the succeeding NOTE_RESUME.
-         */
+      case NOTE_STOP:
+        {
+          /* This note informs the task to be stopped.
+           * Change current task state for the succeeding NOTE_RESUME.
+           */
 
-        cctx->current_state = 0;
-      }
-      break;
+          cctx->current_state = 0;
+        }
+        break;
 
-    case NOTE_SUSPEND:
-      {
-        FAR struct note_suspend_s *nsu = (FAR struct note_suspend_s *)p;
+      case NOTE_SUSPEND:
+        {
+          FAR struct note_suspend_s *nsu = (FAR struct note_suspend_s *)p;
 
-        /* This note informs the task to be suspended.
-         * Preserve the information for the succeeding NOTE_RESUME.
-         */
+          /* This note informs the task to be suspended.
+           * Preserve the information for the succeeding NOTE_RESUME.
+           */
 
-        cctx->current_state = nsu->nsu_state;
-      }
-      break;
+          cctx->current_state = nsu->nsu_state;
+        }
+        break;
 
-    case NOTE_RESUME:
-      {
-        /* This note informs the task to be resumed.
-         * The task switch timing depends on the running context.
-         */
+      case NOTE_RESUME:
+        {
+          /* This note informs the task to be resumed.
+           * The task switch timing depends on the running context.
+           */
 
-        cctx->next_pid = pid;
-        cctx->next_priority = note->nc_priority;
+          cctx->next_pid = pid;
+          cctx->next_priority = note->nc_priority;
 
-        if (cctx->intr_nest == 0)
-          {
-            /* If not in the interrupt context, the task switch is
-             * executed immediately.
-             */
+          if (cctx->intr_nest == 0)
+            {
+              /* If not in the interrupt context, the task switch is
+               * executed immediately.
+               */
 
-            ret += noteram_dump_header(s, note, ctx);
-            ret += noteram_dump_sched_switch(s, note, ctx);
-          }
-        else
-          {
-            /* If in the interrupt context, the task switch is postponed
-             * until leaving the interrupt handler.
-             */
+              ret += noteram_dump_header(s, note, ctx);
+              ret += noteram_dump_sched_switch(s, note, ctx);
+            }
+          else
+            {
+              /* If in the interrupt context, the task switch is postponed
+               * until leaving the interrupt handler.
+               */
 
-            ret += noteram_dump_header(s, note, ctx);
-            ret += lib_sprintf(s, "sched_waking: comm=%s "
-                               "pid=%d target_cpu=%d\n",
-                               note_get_taskname(cctx->next_pid, buf,
-                                                 TASK_NAME_SIZE),
-                               get_pid(cctx->next_pid), cpu);
-            cctx->pendingswitch = true;
-          }
-      }
-      break;
+              ret += noteram_dump_header(s, note, ctx);
+              ret += lib_sprintf(s, "sched_waking: comm=%s "
+                                 "pid=%d target_cpu=%d\n",
+                                 note_get_taskname(cctx->next_pid, buf,
+                                                   TASK_NAME_SIZE),
+                                 get_pid(cctx->next_pid), cpu);
+              cctx->pendingswitch = true;
+            }
+        }
+        break;
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
-    case NOTE_SYSCALL_ENTER:
-      {
-        FAR struct note_syscall_enter_s *nsc;
-        int i;
-        uintptr_t arg;
+      case NOTE_SYSCALL_ENTER:
+        {
+          FAR struct note_syscall_enter_s *nsc;
+          int i;
+          uintptr_t arg;
 
-        nsc = (FAR struct note_syscall_enter_s *)p;
-        if (nsc->nsc_nr < CONFIG_SYS_RESERVED ||
-            nsc->nsc_nr >= SYS_maxsyscall)
-          {
-            break;
-          }
+          nsc = (FAR struct note_syscall_enter_s *)p;
+          if (nsc->nsc_nr < CONFIG_SYS_RESERVED ||
+              nsc->nsc_nr >= SYS_maxsyscall)
+            {
+              break;
+            }
 
-        ret += noteram_dump_header(s, note, ctx);
-        ret += lib_sprintf(s, "sys_%s(",
-                           g_funcnames[nsc->nsc_nr - CONFIG_SYS_RESERVED]);
+          ret += noteram_dump_header(s, note, ctx);
+          ret += lib_sprintf(s, "sys_%s(",
+                             g_funcnames[nsc->nsc_nr - CONFIG_SYS_RESERVED]);
 
-        for (i = 0; i < nsc->nsc_argc; i++)
-          {
-            arg = nsc->nsc_args[i];
-            if (i == 0)
-              {
-                ret += lib_sprintf(s, "arg%d: 0x%" PRIxPTR, i, arg);
-              }
-            else
-              {
-                ret += lib_sprintf(s, ", arg%d: 0x%" PRIxPTR, i, arg);
-              }
-          }
+          for (i = 0; i < nsc->nsc_argc; i++)
+            {
+              arg = nsc->nsc_args[i];
+              if (i == 0)
+                {
+                  ret += lib_sprintf(s, "arg%d: 0x%" PRIxPTR, i, arg);
+                }
+              else
+                {
+                  ret += lib_sprintf(s, ", arg%d: 0x%" PRIxPTR, i, arg);
+                }
+            }
 
-        ret += lib_sprintf(s, ")\n");
-      }
-      break;
+          ret += lib_sprintf(s, ")\n");
+        }
+        break;
 
-    case NOTE_SYSCALL_LEAVE:
-      {
-        FAR struct note_syscall_leave_s *nsc;
-        uintptr_t result;
+      case NOTE_SYSCALL_LEAVE:
+        {
+          FAR struct note_syscall_leave_s *nsc;
+          uintptr_t result;
 
-        nsc = (FAR struct note_syscall_leave_s *)p;
-        if (nsc->nsc_nr < CONFIG_SYS_RESERVED ||
-            nsc->nsc_nr >= SYS_maxsyscall)
-          {
-            break;
-          }
+          nsc = (FAR struct note_syscall_leave_s *)p;
+          if (nsc->nsc_nr < CONFIG_SYS_RESERVED ||
+              nsc->nsc_nr >= SYS_maxsyscall)
+            {
+              break;
+            }
 
-        ret += noteram_dump_header(s, note, ctx);
-        result = nsc->nsc_result;
-        ret += lib_sprintf(s, "sys_%s -> 0x%" PRIxPTR "\n",
-                          g_funcnames[nsc->nsc_nr - CONFIG_SYS_RESERVED],
-                          result);
-      }
-      break;
+          ret += noteram_dump_header(s, note, ctx);
+          result = nsc->nsc_result;
+          ret += lib_sprintf(s, "sys_%s -> 0x%" PRIxPTR "\n",
+                            g_funcnames[nsc->nsc_nr - CONFIG_SYS_RESERVED],
+                            result);
+        }
+        break;
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
-    case NOTE_IRQ_ENTER:
-      {
-        FAR struct note_irqhandler_s *nih;
+      case NOTE_IRQ_ENTER:
+        {
+          FAR struct note_irqhandler_s *nih;
 
-        nih = (FAR struct note_irqhandler_s *)p;
-        ret += noteram_dump_header(s, note, ctx);
-        ret += lib_sprintf(s, "irq_handler_entry: irq=%u name=%pS\n",
-                           nih->nih_irq, (FAR void *)nih->nih_handler);
-        cctx->intr_nest++;
-      }
-      break;
+          nih = (FAR struct note_irqhandler_s *)p;
+          ret += noteram_dump_header(s, note, ctx);
+          ret += lib_sprintf(s, "irq_handler_entry: irq=%u name=%pS\n",
+                             nih->nih_irq, (FAR void *)nih->nih_handler);
+          cctx->intr_nest++;
+        }
+        break;
 
-    case NOTE_IRQ_LEAVE:
-      {
-        FAR struct note_irqhandler_s *nih;
+      case NOTE_IRQ_LEAVE:
+        {
+          FAR struct note_irqhandler_s *nih;
 
-        nih = (FAR struct note_irqhandler_s *)p;
-        ret += noteram_dump_header(s, note, ctx);
-        ret += lib_sprintf(s, "irq_handler_exit: irq=%u ret=handled\n",
-                           nih->nih_irq);
-        cctx->intr_nest--;
+          nih = (FAR struct note_irqhandler_s *)p;
+          ret += noteram_dump_header(s, note, ctx);
+          ret += lib_sprintf(s, "irq_handler_exit: irq=%u ret=handled\n",
+                             nih->nih_irq);
+          cctx->intr_nest--;
 
-        if (cctx->intr_nest <= 0)
-          {
-            cctx->intr_nest = 0;
-            if (cctx->pendingswitch)
-              {
-                /* If the pending task switch exists, it is executed here */
+          if (cctx->intr_nest <= 0)
+            {
+              cctx->intr_nest = 0;
+              if (cctx->pendingswitch)
+                {
+                  /* If the pending task switch exists, it is executed here */
 
-                ret += noteram_dump_header(s, note, ctx);
-                ret += noteram_dump_sched_switch(s, note, ctx);
-              }
-          }
-      }
-      break;
+                  ret += noteram_dump_header(s, note, ctx);
+                  ret += noteram_dump_sched_switch(s, note, ctx);
+                }
+            }
+        }
+        break;
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_WDOG
-    case NOTE_WDOG_START:
-    case NOTE_WDOG_CANCEL:
-    case NOTE_WDOG_ENTER:
-    case NOTE_WDOG_LEAVE:
-      {
-        FAR struct note_wdog_s *nw;
-        FAR const char *name[] =
-          {
-            "start", "cancel", "enter", "leave",
-          };
+      case NOTE_WDOG_START:
+      case NOTE_WDOG_CANCEL:
+      case NOTE_WDOG_ENTER:
+      case NOTE_WDOG_LEAVE:
+        {
+          FAR struct note_wdog_s *nw;
+          FAR const char *name[] =
+            {
+              "start", "cancel", "enter", "leave",
+            };
 
-        nw = (FAR struct note_wdog_s *)p;
-        ret += noteram_dump_header(s, note, ctx);
-        ret += lib_sprintf(s, "tracing_mark_write: I|%d|wdog: %s-%pS %p\n",
-                           pid, name[note->nc_type - NOTE_WDOG_START],
-                           (FAR void *)nw->handler, (FAR void *)nw->arg);
-      }
-      break;
+          nw = (FAR struct note_wdog_s *)p;
+          ret += noteram_dump_header(s, note, ctx);
+          ret += lib_sprintf(s, "tracing_mark_write: I|%d|wdog: %s-%pS %p\n",
+                             pid, name[note->nc_type - NOTE_WDOG_START],
+                             (FAR void *)nw->handler, (FAR void *)nw->arg);
+        }
+        break;
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
-    case NOTE_CSECTION_ENTER:
-    case NOTE_CSECTION_LEAVE:
-      {
-        struct note_csection_s *ncs;
-        ncs = (FAR struct note_csection_s *)p;
-        ret += noteram_dump_header(s, &ncs->ncs_cmn, ctx);
-        ret += lib_sprintf(s, "tracing_mark_write: %c|%d|critical_section\n",
-                           note->nc_type == NOTE_CSECTION_ENTER ?
-                           'B' : 'E', pid);
-      }
-      break;
+      case NOTE_CSECTION_ENTER:
+      case NOTE_CSECTION_LEAVE:
+        {
+          struct note_csection_s *ncs;
+
+          ncs = (FAR struct note_csection_s *)p;
+          ret += noteram_dump_header(s, &ncs->ncs_cmn, ctx);
+          ret += lib_sprintf(s,
+                             "tracing_mark_write: %c|%d|critical_section\n",
+                             note->nc_type == NOTE_CSECTION_ENTER ?
+                             'B' : 'E', pid);
+        }
+        break;
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-    case NOTE_PREEMPT_LOCK:
-    case NOTE_PREEMPT_UNLOCK:
-      {
-        struct note_preempt_s *npr;
-        int16_t count;
-        npr = (FAR struct note_preempt_s *)p;
-        count = npr->npr_count;
-        ret += noteram_dump_header(s, &npr->npr_cmn, ctx);
-        ret += lib_sprintf(s,  "tracing_mark_write: "
-                          "%c|%d|sched_lock:%d\n",
-                          note->nc_type == NOTE_PREEMPT_LOCK ?
-                          'B' : 'E', pid, count);
-      }
-      break;
+      case NOTE_PREEMPT_LOCK:
+      case NOTE_PREEMPT_UNLOCK:
+        {
+          struct note_preempt_s *npr;
+          int16_t count;
+
+          npr = (FAR struct note_preempt_s *)p;
+          count = npr->npr_count;
+          ret += noteram_dump_header(s, &npr->npr_cmn, ctx);
+          ret += lib_sprintf(s,  "tracing_mark_write: "
+                            "%c|%d|sched_lock:%d\n",
+                            note->nc_type == NOTE_PREEMPT_LOCK ?
+                            'B' : 'E', pid, count);
+        }
+        break;
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
-    case NOTE_DUMP_PRINTF:
-      {
-        FAR struct note_printf_s *npt;
+      case NOTE_DUMP_PRINTF:
+        {
+          FAR struct note_printf_s *npt;
 
-        npt = (FAR struct note_printf_s *)p;
-        ret += noteram_dump_header(s, &npt->npt_cmn, ctx);
-        ret += lib_sprintf(s, "tracing_mark_write: ");
-        ret += noteram_dump_printf(s, npt);
-      }
-      break;
-    case NOTE_DUMP_BEGIN:
-    case NOTE_DUMP_END:
-      {
-        FAR struct note_event_s *nbi = (FAR struct note_event_s *)p;
-        char c = note->nc_type == NOTE_DUMP_BEGIN ? 'B' : 'E';
-        int len = note->nc_length - SIZEOF_NOTE_EVENT(0);
-        uintptr_t ip;
+          npt = (FAR struct note_printf_s *)p;
+          ret += noteram_dump_header(s, &npt->npt_cmn, ctx);
+          ret += lib_sprintf(s, "tracing_mark_write: ");
+          ret += noteram_dump_printf(s, npt);
+        }
+        break;
+      case NOTE_DUMP_BEGIN:
+      case NOTE_DUMP_END:
+        {
+          FAR struct note_event_s *nbi = (FAR struct note_event_s *)p;
+          char c = note->nc_type == NOTE_DUMP_BEGIN ? 'B' : 'E';
+          int len = note->nc_length - SIZEOF_NOTE_EVENT(0);
+          uintptr_t ip;
 
-        ip = nbi->nev_ip;
-        ret += noteram_dump_header(s, &nbi->nev_cmn, ctx);
-        if (len > 0)
-          {
-            ret += lib_sprintf(s, "tracing_mark_write: %c|%d|%.*s\n",
-                               c, pid, len, (FAR const char *)nbi->nev_data);
-          }
-        else
-          {
-            ret += lib_sprintf(s, "tracing_mark_write: %c|%d|%pS\n",
-                               c, pid, (FAR void *)ip);
-          }
-      }
-      break;
-    case NOTE_DUMP_MARK:
-      {
-        FAR struct note_event_s *nbi = (FAR struct note_event_s *)p;
-        int len = note->nc_length - SIZEOF_NOTE_EVENT(0);
+          ip = nbi->nev_ip;
+          ret += noteram_dump_header(s, &nbi->nev_cmn, ctx);
+          if (len > 0)
+            {
+              ret += lib_sprintf(s, "tracing_mark_write: %c|%d|%.*s\n",
+                                 c, pid, len,
+                                 (FAR const char *)nbi->nev_data);
+            }
+          else
+            {
+              ret += lib_sprintf(s, "tracing_mark_write: %c|%d|%pS\n",
+                                 c, pid, (FAR void *)ip);
+            }
+        }
+        break;
+      case NOTE_DUMP_MARK:
+        {
+          FAR struct note_event_s *nbi = (FAR struct note_event_s *)p;
+          int len = note->nc_length - SIZEOF_NOTE_EVENT(0);
 
-        ret += noteram_dump_header(s, &nbi->nev_cmn, ctx);
-        ret += lib_sprintf(s, "tracing_mark_write: I|%d|%.*s\n",
-                           pid, len, (FAR const char *)nbi->nev_data);
-      }
-      break;
+          ret += noteram_dump_header(s, &nbi->nev_cmn, ctx);
+          ret += lib_sprintf(s, "tracing_mark_write: I|%d|%.*s\n",
+                             pid, len, (FAR const char *)nbi->nev_data);
+        }
+        break;
       case NOTE_DUMP_BINARY:
-      {
-        FAR struct note_event_s *nbi = (FAR struct note_event_s *)p;
-        int len = note->nc_length - SIZEOF_NOTE_EVENT(0);
-        int i;
+        {
+          FAR struct note_event_s *nbi = (FAR struct note_event_s *)p;
+          int len = note->nc_length - SIZEOF_NOTE_EVENT(0);
+          int i;
 
-        ret += noteram_dump_header(s, &nbi->nev_cmn, ctx);
-        ret += lib_sprintf(s, "tracing_mark_write: I|%d|", pid);
+          ret += noteram_dump_header(s, &nbi->nev_cmn, ctx);
+          ret += lib_sprintf(s, "tracing_mark_write: I|%d|", pid);
 
-        for (i = 0; i < len; i++)
-          {
-            ret += lib_sprintf(s, "%02x ", nbi->nev_data[i]);
-          }
+          for (i = 0; i < len; i++)
+            {
+              ret += lib_sprintf(s, "%02x ", nbi->nev_data[i]);
+            }
 
-        lib_stream_putc(s, '\n');
-        ret++;
-      }
-      break;
-    case NOTE_DUMP_COUNTER:
-      {
-        FAR struct note_event_s *nbi = (FAR struct note_event_s *)p;
-        FAR struct note_counter_s *counter;
-        counter = (FAR struct note_counter_s *)nbi->nev_data;
-        ret += noteram_dump_header(s, &nbi->nev_cmn, ctx);
-        ret += lib_sprintf(s, "tracing_mark_write: C|%d|%s|%ld\n",
-                           pid, counter->name, counter->value);
-      }
-      break;
+          lib_stream_putc(s, '\n');
+          ret++;
+        }
+        break;
+      case NOTE_DUMP_COUNTER:
+        {
+          FAR struct note_event_s *nbi = (FAR struct note_event_s *)p;
+          FAR struct note_counter_s *counter;
+
+          counter = (FAR struct note_counter_s *)nbi->nev_data;
+          ret += noteram_dump_header(s, &nbi->nev_cmn, ctx);
+          ret += lib_sprintf(s, "tracing_mark_write: C|%d|%s|%ld\n",
+                             pid, counter->name, counter->value);
+        }
+        break;
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_HEAP
-    case NOTE_HEAP_ADD:
-    case NOTE_HEAP_REMOVE:
-    case NOTE_HEAP_ALLOC:
-    case NOTE_HEAP_FREE:
-      {
-        FAR struct note_heap_s *nmm = (FAR struct note_heap_s *)p;
-        FAR const char *name[] =
-          {
-            "add", "remove", "malloc", "free"
-          };
+      case NOTE_HEAP_ADD:
+      case NOTE_HEAP_REMOVE:
+      case NOTE_HEAP_ALLOC:
+      case NOTE_HEAP_FREE:
+        {
+          FAR struct note_heap_s *nmm = (FAR struct note_heap_s *)p;
+          FAR const char *name[] =
+            {
+              "add", "remove", "malloc", "free"
+            };
 
-        ret += noteram_dump_header(s, &nmm->nhp_cmn, ctx);
-        ret += lib_sprintf(s, "tracing_mark_write: C|%d|Heap Usage|%d|%s"
-                           ": heap: %p size:%" PRIiPTR ", address: %p\n",
-                           pid, nmm->used,
-                           name[note->nc_type - NOTE_HEAP_ADD],
-                           nmm->heap, nmm->size, nmm->mem);
-      }
-      break;
+          ret += noteram_dump_header(s, &nmm->nhp_cmn, ctx);
+          ret += lib_sprintf(s, "tracing_mark_write: C|%d|Heap Usage|%d|%s"
+                             ": heap: %p size:%" PRIiPTR ", address: %p\n",
+                             pid, nmm->used,
+                             name[note->nc_type - NOTE_HEAP_ADD],
+                             nmm->heap, nmm->size, nmm->mem);
+        }
+        break;
 #endif
-    default:
-      break;
+      default:
+        break;
     }
 
   /* Return the length of the processed note */
@@ -1320,6 +1325,7 @@ static int noteram_crash_dump(FAR struct notifier_block *nb,
 {
   FAR struct noteram_driver_s *drv =
       container_of(nb, struct noteram_driver_s, nb);
+
   if (action == PANIC_KERNEL)
     {
       noteram_dump(drv);

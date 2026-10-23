@@ -44,6 +44,10 @@ if(CONFIG_ADC)
   list(APPEND SRCS stm32_adc.c)
 endif()
 
+if(CONFIG_STM32_DAC)
+  list(APPEND SRCS stm32_dac.c)
+endif()
+
 if(CONFIG_STM32_FDCAN_CHARDRIVER)
   list(APPEND SRCS stm32_fdcan.c)
 endif()
@@ -98,10 +102,6 @@ endif()
 
 if(CONFIG_STM32_PWM)
   list(APPEND SRCS stm32_pwm.c)
-endif()
-
-if(CONFIG_STM32_IWDG)
-  list(APPEND SRCS stm32_iwdg.c)
 endif()
 
 # Required chip type specific files

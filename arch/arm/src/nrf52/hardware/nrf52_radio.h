@@ -112,7 +112,7 @@
 #define NRF52_RADIO_CRCCNF_OFFSET            0x0534                 /* CRC configuration */
 #define NRF52_RADIO_CRCPOLY_OFFSET           0x0538                 /* CRC polynomial */
 #define NRF52_RADIO_CRCINIT_OFFSET           0x053c                 /* CRC initial value */
-#define NRF52_RADIO_TIFS_OFFSET              0x0544                 /* Interframe spacing in μs */
+#define NRF52_RADIO_TIFS_OFFSET              0x0544                 /* Interframe spacing in us */
 #define NRF52_RADIO_RSSISAMPLE_OFFSET        0x0548                 /* RSSI sample */
 #define NRF52_RADIO_STATE_OFFSET             0x0550                 /* Current radio state */
 #define NRF52_RADIO_DATAWHITEIV_OFFSET       0x0554                 /* Data whitening initial value */
@@ -195,7 +195,7 @@
 #define NRF52_RADIO_DATAWHITEIV       (NRF52_RADIO_BASE + NRF52_RADIO_DATAWHITEIV_OFFSET)
 #define NRF52_RADIO_BCC               (NRF52_RADIO_BASE + NRF52_RADIO_BCC_OFFSET)
 #define NRF52_RADIO_DAB(p)            (NRF52_RADIO_BASE + NRF52_RADIO_DAB_OFFSET(p))
-#define NRF52_RADIO_DAP(p)            (NRF52_RADIO_BASE + NRF52_RADIO_PAP_OFFSET(p))
+#define NRF52_RADIO_DAP(p)            (NRF52_RADIO_BASE + NRF52_RADIO_DAP_OFFSET(p))
 #define NRF52_RADIO_DACNF             (NRF52_RADIO_BASE + NRF52_RADIO_DACNF_OFFSET)
 #define NRF52_RADIO_MHRMATCHCONF      (NRF52_RADIO_BASE + NRF52_RADIO_MHRMATCHCONF_OFFSET)
 #define NRF52_RADIO_MHRMATCHMAS       (NRF52_RADIO_BASE + NRF52_RADIO_MHRMATCHMAS_OFFSET)
@@ -383,7 +383,7 @@
 #define RADIO_CRCCNF_LEN_SHIFT            (0)       /* Bit 0-1: CRC length in number of bytes */
 #define RADIO_CRCCNF_LEN_MASK             (0x3 << RADIO_CRCCNF_LEN_SHIFT)
 #  define RADIO_CRCCNF_LEN_DIS            (0 << RADIO_CRCCNF_LEN_SHIFT)
-#  define RADIO_CRCCNF_LEN_1              (1 << RADIO_CRCCNF_LEN_SHIFTb)
+#  define RADIO_CRCCNF_LEN_1              (1 << RADIO_CRCCNF_LEN_SHIFT)
 #  define RADIO_CRCCNF_LEN_2              (2 << RADIO_CRCCNF_LEN_SHIFT)
 #  define RADIO_CRCCNF_LEN_3              (3 << RADIO_CRCCNF_LEN_SHIFT)
 #define RADIO_CRCCNF_SKIPADDR_SHIFT       (8)       /* Bit 8-9: Include or exclude packet address field out of CRC calculation */
@@ -391,7 +391,7 @@
 #  define RADIO_CRCCNF_SKIPADDR_MASK      (0x3 << RADIO_CRCCNF_SKIPADDR_SHIFT)
 #  define RADIO_CRCCNF_SKIPADDR_INCL      (0 << RADIO_CRCCNF_SKIPADDR_SHIFT)
 #  define RADIO_CRCCNF_SKIPADDR_SKIP      (1 << RADIO_CRCCNF_SKIPADDR_SHIFT)
-#  define RADIO_CRCCNF_SKIPADDR_IEEE      (3 << RADIO_CRCCNF_SKIPADDR_SHIFT)
+#  define RADIO_CRCCNF_SKIPADDR_IEEE      (2 << RADIO_CRCCNF_SKIPADDR_SHIFT)
 #else
 #  define RADIO_CRCCNF_SKIPADDR_MASK      (0x1 << RADIO_CRCCNF_SKIPADDR_SHIFT)
 #  define RADIO_CRCCNF_SKIPADDR_INCL      (0 << RADIO_CRCCNF_SKIPADDR_SHIFT)
@@ -410,7 +410,7 @@
 
 /* TIFS Register */
 
-#define RADIO_TIFS_SHIFT                  (0)      /* Bits 0-9: Interframe spacing in μs */
+#define RADIO_TIFS_SHIFT                  (0)      /* Bits 0-9: Interframe spacing in us */
 #define RADIO_TIFS_MASK                   (0x3ff << RADIO_TIFS_SHIFT)
 #define RADIO_TIFS_MAX                    (0x3ff)
 
@@ -436,8 +436,8 @@
 /* DATAWHITEIV Register */
 
 #define RADIO_DATAWHITEIV_SHIFT           (0)     /* Bits 0-6: Data whitening initial value */
-#define RADIO_DATAWHITEIV_MASK            (0x3f << RADIO_DATAWHITEIV_SHIFT)
-#define RADIO_DATAWHITEIV_MAX             (0x3f)
+#define RADIO_DATAWHITEIV_MASK            (0x7f << RADIO_DATAWHITEIV_SHIFT)
+#define RADIO_DATAWHITEIV_MAX             (0x7f)
 
 /* DAP Register */
 

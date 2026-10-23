@@ -1,6 +1,6 @@
-================
-GD32VW553K-START
-================
+===========================
+GigaDevice GD32VW553K-START
+===========================
 
 .. tags:: arch:risc-v, chip:gd32vw55x, vendor:gigadevice
 
@@ -22,28 +22,36 @@ Features
 - On-board GD-Link probe: SWD/JTAG plus a USB CDC virtual COM port, both
   over the single USB Type-C connector
 - Two test pin headers (J1, J2) breaking out the GPIOs
-- BOOT0/BOOT1 jumpers, a power jumper and a reset button (NRST)
-- Three user LEDs on GPIOC
+- BOOT0/BOOT1 jumpers, a power jumper, the J5 jumpers that route the console
+  UART to the GD-Link virtual COM port, and a reset button (NRST); there is no
+  user button
+- Three user LEDs (red, green, blue)
 
 Serial Console
 ==============
 
 The console is UART2 (PA6 TX / PA7 RX), wired to the GD-Link virtual COM port.
-It shows up on the host as ``/dev/ttyACM0`` at 115200 8N1.
+It shows up on the host as ``/dev/ttyACM0`` at 115200 8N1.  The J5 jumpers must
+be in place for the UART to reach the probe.
 
 LEDs
 ====
 
-Three LEDs sit on GPIOC and are driven push-pull, active HIGH.  In the vendor
-SDK they are named LED_RUN, LED_SLEEP and LED_RX.
+The three LEDs are driven push-pull, active HIGH:
 
-====== ==== =========================================
-LED    Pin  Meaning in the vendor SDK
-====== ==== =========================================
-LED1   PC0  CPU running
-LED2   PC1  CPU sleeping
-LED3   PC2  Reception
-====== ==== =========================================
+====== ===== ======
+LED    Pin   Color
+====== ===== ======
+LED1   PB0   red
+LED2   PA12  green
+LED3   PB4   blue
+====== ===== ======
+
+The three pins are also broken out on the J1 and J2 headers.  PB4 comes out of
+reset as JNTRST with its pull-up enabled, so the blue LED is lit until the pin
+is configured as an output.  PB0 is also ADC_IN8: the ADC channel is only
+routed there when the LEDs are not in use, and the red LED still loads an
+analog signal applied to it.
 
 With ``CONFIG_USERLED`` they belong to the application and are exposed as
 ``/dev/userleds``.  With ``CONFIG_ARCH_LEDS`` the OS takes them over instead
@@ -71,9 +79,9 @@ is a plain GPIO.  The silkscreen abbreviates the port letter (``A0`` is PA0,
    PA2      GPIO                PA3      GPIO
    PA4      GPIO                PA5      GPIO
    PA6      UART2_TX (console)  PA7      UART2_RX (console)
-   PB0      GPIO                NC       --
+   PB0      LED1 / ADC_IN8      NC       --
    NC       --                  NC       --
-   NC       --                  PB15     GPIO
+   NC       --                  PB15     I2C0_SCL (SPI on)
    GND      ground              +5V      power in/out
    ======== =================== ======== ===================
 
@@ -85,27 +93,38 @@ is a plain GPIO.  The silkscreen abbreviates the port letter (``A0`` is PA0,
    PC15     GPIO                PC14     GPIO
    NC       --                  PA15     JTDI
    PA14     JTCK                PA13     JTMS
-   PB4      JNTRST              PB3      JTDO
-   PA12     GPIO                NC       --
+   PB4      JNTRST / LED3       PB3      JTDO
+   PA12     LED2                NC       --
    NC       --                  NC       --
-   PA8      GPIO                GND      ground
+   PA8      I2C0_SDA (SPI on)   GND      ground
    +3V3     3.3V power test     GND      ground
    ======== =================== ======== ===================
 
 .. note::
-   PA13/PA14/PA15/PB3/PB4 on J2 are the chip's JTAG pins, wired to the on-board
-   GD-Link through the J4 shorting caps.  Use them as plain GPIO only after
-   removing those caps, or the debug probe and the application will fight over
-   the lines.
+   PA13/PA14/PA15/PB3 on J2 are the chip's JTAG pins (JTMS, JTCK, JTDI, JTDO),
+   wired to the on-board GD-Link through the J4 shorting caps.  Keep the J4
+   caps closed to flash and debug through the GD-Link.  To use an external
+   probe such as a SEGGER J-Link, or to use those pins as plain GPIO, remove
+   the caps first, or the GD-Link and the other user will fight over the
+   lines.  PB4 (JNTRST) drives LED3.
 
 Flashing
 ========
 
-The board is programmed with OpenOCD through the GD-Link probe.  The GigaDevice
-OpenOCD fork (shipped with the vendor SDK) is required::
+The board is programmed with OpenOCD through the on-board GD-Link probe, with
+the J4 caps closed.  The GigaDevice OpenOCD fork (shipped with the vendor SDK)
+is required::
 
   $ openocd -f openocd_gdlink.cfg \
             -c "program nuttx.bin 0x08000000 verify reset exit"
+
+To use an external programmer instead, a SEGGER J-Link works: remove the J4
+caps and wire it to J2 (VTref to +3V3, TMS to PA13, TCK to PA14, TDI to PA15,
+TDO to PB3, and GND).  With a command file holding
+``loadbin nuttx.bin, 0x08000000``, ``r`` and ``g``::
+
+  $ JLinkExe -nogui 1 -device GD32VW553KMQ7 -if JTAG -JTAGConf -1,-1 \
+             -speed 4000 -autoconnect 1 -CommandFile flash.jlink
 
 NuttX is linked at 0x08000000, bypassing the vendor MBL bootloader.
 
@@ -126,7 +145,7 @@ Range                    Size           Purpose
                                         what the linker script gives out;
                                         overflowing it is a link error
 0x083db000 -- 0x083fb000 128 KiB        progmem / LittleFS
-0x083fb000 -- 0x08400000 20 KiB         **Wi-Fi NVDS** -- do not erase
+0x083fb000 -- 0x08400000 20 KiB         NVDS (BLE bonding data)
 ======================== ============== ====================================
 
 For reference, the configurations use a small part of that budget: ``nsh``
@@ -134,10 +153,11 @@ For reference, the configurations use a small part of that budget: ``nsh``
 610 KiB (15%) and ``sta_softap`` 613 KiB (16%).  The ``ble`` config (BLE on top
 of ``wapi``) brings the image to about 971 KiB (25%).
 
-.. warning::
-   The **last** pages of the flash are not free: the Wi-Fi NVDS holds the RF
-   calibration data and the MAC address, and erasing it breaks the radio.  The
-   progmem region ends exactly where the NVDS begins.
+.. note::
+   The last 20 KiB of the flash hold the NVDS of the vendor stack, where the
+   BLE stack keeps its bonding data.  The progmem region ends where the NVDS
+   begins.  Erasing the NVDS only loses the BLE bonds: the RF calibration and
+   the MAC address come from the chip EFUSE.
 
 The region handed to progmem is set with
 ``CONFIG_GD32VW55X_PROGMEM_START_ADDR`` and ``CONFIG_GD32VW55X_PROGMEM_SIZE``;
@@ -203,8 +223,9 @@ NSH plus I2C0, the i2ctool and the Sensirion SHT3x temperature/humidity
 driver -- a small example to validate the I2C master port against a real
 device. Because SPI is *off* here, I2C0 is routed to the J1 header on
 **PA2 (SCL)** and **PA3 (SDA)** (adjacent pins on the second row of J1, both
-AF4); with SPI on (the ``periph`` case) it falls back to PB0/PB1, whose SDA
-pin is not broken out. See the pin-header tables above.
+AF4); with SPI on (the ``periph`` case) it falls back to PB15 (SCL, J1) and
+PA8 (SDA, J2). I2C1, when enabled, uses the same PB15/PA8 pair (AF6), so it
+cannot be combined with that fallback. See the pin-header tables above.
 
 Wire the sensor to J1: SCL -> PA2, SDA -> PA3, VCC -> +3V3 (J2) or the module
 3.3 V, GND -> GND. A breakout with its own pull-ups is assumed; the pins are
@@ -307,7 +328,9 @@ adc
 
 NSH plus the ADC driver, registered as ``/dev/adc0`` and read by the ``adc``
 example. Channel 8 (ADC_IN8) is routed to **PB0** on the J1 header, so an
-analog voltage applied there is sampled.
+analog voltage applied there is sampled.  PB0 also drives the red LED, which
+loads the input; with ``CONFIG_USERLED`` or ``CONFIG_ARCH_LEDS`` the pin stays
+an LED output and the ADC is registered without an analog pin.
 
 The ADC converts on demand rather than continuously, so the example is built
 with ``CONFIG_EXAMPLES_ADC_SWTRIG``: it issues a software trigger and then
@@ -332,7 +355,7 @@ The reported ``value`` is the 12-bit conversion (0..4095) spanning 0..3.3 V; a
 littlefs
 --------
 
-NSH with the last 128 KiB of usable flash (below the Wi-Fi NVDS) exposed as an
+NSH with the last 128 KiB of usable flash (below the NVDS) exposed as an
 MTD device, ``/dev/gd32flash``, and mounted as LittleFS on ``/data``.
 
 .. note::
@@ -397,11 +420,9 @@ the next boot format it again::
   $ openocd -f openocd_gdlink.cfg \
             -c "init; halt; flash erase_address 0x083db000 0x20000; reset; exit"
 
-.. warning::
-   Erase only the progmem region.  The Wi-Fi NVDS lives immediately above it,
-   at 0x083fb000; wiping it takes the RF calibration and the MAC address with
-   it.  After using the filesystem, ``wapi scan wlan0`` in the ``wapi``
-   configuration is a quick way to confirm the radio is still healthy.
+.. note::
+   Erase only the progmem region.  The NVDS lives immediately above it, at
+   0x083fb000, and holds the BLE bonding data.
 
 sta_softap
 ----------
@@ -478,7 +499,8 @@ All seven configurations were validated on hardware:
 - ``periph``: every driver registers (``/dev/i2c0``, ``/dev/spi0``,
   ``/dev/adc0``, ``/dev/pwm0``, ``/dev/capture0``, ``/dev/watchdog0``,
   ``/dev/watchdog1``, ``/dev/userleds``, ``/dev/random``).  The TRNG returns
-  fresh entropy on each read, and the three LEDs work.
+  fresh entropy on each read, and the three LEDs (PB0, PA12, PB4) light in
+  sequence under the ``leds`` example.
 - ``wapi``: full station path over a live AP -- ``wapi scan`` lists the nearby
   networks, WPA2 associates through the four-way handshake, DHCP obtains an
   address, and ``ping`` reaches the internet.

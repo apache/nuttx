@@ -43,6 +43,26 @@ CHIP_CSRCS += stm32_waste.c
 CHIP_CSRCS += stm32_uid.c
 CHIP_CSRCS += stm32_lsi.c
 
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+ifeq ($(CONFIG_ARCH_ARMV6M),y)
+CHIP_CSRCS += stm32_timerisr_armv6m.c
+else
+CHIP_CSRCS += stm32_timerisr.c
+endif
+endif
+
+ifdef CONFIG_STM32_TICKLESS_TIMER
+CHIP_CSRCS += stm32_tickless.c
+endif
+
+ifeq ($(CONFIG_STM32_IWDG),y)
+CHIP_CSRCS += stm32_iwdg.c
+endif
+
+ifeq ($(CONFIG_STM32_WWDG),y)
+CHIP_CSRCS += stm32_wwdg.c
+endif
+
 ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
 ifneq ($(filter y,$(CONFIG_STM32_COMMON_LEGACY) \
             $(CONFIG_ARCH_CORTEXM33)),)
@@ -71,7 +91,6 @@ ifeq ($(CONFIG_STM32_COMMON_M33),y)
 CHIP_CSRCS += stm32_allocateheap_m33_v1.c
 CHIP_CSRCS += stm32_irq_m33_v1.c
 CHIP_CSRCS += stm32_start_m33_v1.c
-CHIP_CSRCS += stm32_timerisr_m33_v1.c
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += stm32_idle_m33_v1.c
 endif
@@ -153,16 +172,6 @@ endif
 CHIP_CSRCS += stm32_capture_m3m4_v1.c
 ifeq ($(CONFIG_STM32_HAVE_IP_DFUMODE_M3M4_V1),y)
 CHIP_CSRCS += stm32_dfumode_m3m4_v1.c
-endif
-
-ifdef CONFIG_STM32_TICKLESS_TIMER
-CHIP_CSRCS += stm32_tickless_m3m4_v1.c
-else
-ifeq ($(CONFIG_ARCH_ARMV6M),y)
-CHIP_CSRCS += stm32_timerisr_armv6m.c
-else
-CHIP_CSRCS += stm32_timerisr_armv7m.c
-endif
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
@@ -381,18 +390,8 @@ endif
 endif
 endif
 
-ifeq ($(CONFIG_STM32_IWDG)$(CONFIG_STM32_HAVE_IP_WDG_M3M4_V1),yy)
-CHIP_CSRCS += stm32_iwdg_m3m4_v1.c
-endif
-
-ifeq ($(CONFIG_STM32_WWDG)$(CONFIG_STM32_HAVE_IP_WDG_M3M4_V1),yy)
-CHIP_CSRCS += stm32_wwdg_m3m4_v1.c
-endif
-
 ifeq ($(CONFIG_DEBUG_FEATURES),y)
-ifneq ($(filter y,$(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V1) \
-            $(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V2) \
-            $(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V3)),)
+ifeq ($(CONFIG_STM32_HAVE_IP_GPIO_M3M4_V1),y)
 CHIP_CSRCS += stm32_dumpgpio_m3m4_v1.c
 endif
 endif
@@ -461,14 +460,6 @@ endif
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += stm32_idle_m0_v1.c
-endif
-
-ifneq ($(CONFIG_SCHED_TICKLESS),y)
-ifeq ($(CONFIG_ARCH_ARMV6M),y)
-CHIP_CSRCS += stm32_timerisr_armv6m.c
-else
-CHIP_CSRCS += stm32_timerisr_armv7m.c
-endif
 endif
 
 ifeq ($(CONFIG_STM32_PWR),y)
@@ -547,13 +538,6 @@ CHIP_CSRCS += stm32_rng_m0_v1.c
 endif
 
 
-ifeq ($(CONFIG_STM32_IWDG)$(CONFIG_STM32_HAVE_IP_WDG_M0_V1),yy)
-CHIP_CSRCS += stm32_iwdg_m0_v1.c
-endif
-
-ifeq ($(CONFIG_STM32_WWDG)$(CONFIG_STM32_HAVE_IP_WDG_M0_V1),yy)
-CHIP_CSRCS += stm32_wwdg_m0_v1.c
-endif
 
 ifeq ($(CONFIG_STM32_FDCAN),y)
 ifeq ($(CONFIG_STM32_HAVE_IP_FDCAN_MCAN_M0_V1),y)

@@ -32,6 +32,7 @@
 #include <sys/types.h>
 #include <stdarg.h>
 #include <time.h>
+#include <limits.h>
 
 #include <nuttx/mutex.h>
 #include <nuttx/queue.h>
@@ -51,8 +52,8 @@
 
 /* File System Definitions **************************************************/
 
-#define FILENAME_MAX _POSIX_NAME_MAX
-#define FOPEN_MAX    _POSIX_STREAM_MAX
+#define FILENAME_MAX PATH_MAX
+#define FOPEN_MAX    STREAM_MAX
 
 /* The (default) size of the I/O buffers */
 
@@ -100,6 +101,10 @@
 #endif
 
 #define L_tmpnam   CONFIG_LIBC_MAX_TMPFILE
+
+/* Size of character array to hold ctermid() output: "/dev/console" */
+
+#define L_ctermid  13
 
 /* The maximum number of unique temporary file names that can be generated */
 
@@ -367,8 +372,12 @@ FAR char *tmpnam(FAR char *s);
 FAR char *tempnam(FAR const char *dir, FAR const char *pfx) malloc_like;
 int       remove(FAR const char *path);
 
-/* Shell operations.  These are not actually implemented in the OS.  See
- * apps/system/popen for implementation.
+/* Controlling terminal */
+
+FAR char *ctermid(FAR char *s);
+
+/* Shell operations.  libc has them when pipes, posix_spawn() and
+ * waitpid() are enabled.
  */
 
 #ifndef __KERNEL__

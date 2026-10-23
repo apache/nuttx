@@ -14,6 +14,7 @@ config STM32_H5_PERIPHERALS
 	select STM32_HAVE_IP_EXTI_M33_V1
 	select STM32_HAVE_IP_GPIO_M33_V1
 	select STM32_HAVE_IP_TIMERS_V3
+	select STM32_HAVE_IP_DBGMCU_V5
 	select STM32_HAVE_IP_USART_M33_V3
 	select STM32_HAVE_DMA1
 	select STM32_HAVE_DMA2
@@ -33,11 +34,12 @@ config STM32_H5_PERIPHERALS
 	select STM32_HAVE_USBFS_MODE
 	select STM32_HAVE_USBDRD_HOST
 	select STM32_HAVE_ADC_H5
+	select STM32_HAVE_DAC1
 	select STM32_HAVE_USART_H5
 	select STM32_HAVE_USART_WUS
 	select STM32_HAVE_I2C_H5
 	select STM32_HAVE_CRC
-	select STM32_HAVE_IP_WDG_M3M4_V1
+	select STM32_HAVE_IP_WDG_V3
 
 choice
 	prompt "STM32 H5 Chip Selection"
@@ -268,6 +270,7 @@ comment "STM32H5 OTP Options"
 config STM32H5_OTP_WORD
 	bool "OTP word read/write"
 	default n
+	select STM32_SBS
 	---help---
 		Build stm32_otp_word_read16()/read32() (and, with
 		STM32H5_OTP_WRITE below, write16()/write32()) in

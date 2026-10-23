@@ -1,6 +1,6 @@
-==============
-ESP32S3-DevKit
-==============
+============================
+Espressif ESP32-S3-DevKitC-1
+============================
 
 .. tags:: arch:xtensa, chip:esp32s3, vendor:espressif
 
@@ -1403,14 +1403,14 @@ Then check the partition::
 
   nsh> ls -l /dev/
   /dev:
-   dr--r--r--           0 adb0/
+   dr-xr-xr-x           0 adb0/
    crw-rw-rw-           0 console
    frw-rw-rw-     1044480 data
    frw-rw-rw-     1048576 esp32s3flash
    c-w--w--w-           0 log
    crw-rw-rw-           0 null
    crw-rw-rw-           0 ptmx
-   dr--r--r--           0 pts/
+   dr-xr-xr-x           0 pts/
    brw-rw-rw-        1024 ram0
    crw-rw-rw-           0 ttyS0
    frw-rw-rw-        4096 txtable

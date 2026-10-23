@@ -59,9 +59,7 @@
 #undef  _POSIX_MEMLOCK_RANGE
 #undef  _POSIX_FSYNC
 #define _POSIX_SYNCHRONIZED_IO 1
-#ifdef CONFIG_LIBC_PASSWD_LINESIZE
-#  define _POSIX_GETPW_R_SIZE_MAX CONFIG_LIBC_PASSWD_LINESIZE
-#endif
+#define _POSIX_GETPW_R_SIZE_MAX 1024
 
 #define _POSIX_VERSION 201712L
 #define _POSIX_PRIORITIZED_IO _POSIX_VERSION
@@ -74,6 +72,8 @@
 #define _POSIX_THREAD_PROCESS_SHARED _POSIX_VERSION
 #define _POSIX_MAPPED_FILES _POSIX_VERSION
 #define _POSIX_THREADS _POSIX_VERSION
+#define _POSIX_MONOTONIC_CLOCK _POSIX_VERSION
+#define _POSIX_CLOCK_SELECTION _POSIX_VERSION
 
 #ifdef CONFIG_FS_AIO
 #  define _POSIX_ASYNCHRONOUS_IO _POSIX_VERSION
@@ -392,6 +392,8 @@ ssize_t read(int fd, FAR void *buf, size_t nbytes);
 ssize_t write(int fd, FAR const void *buf, size_t nbytes);
 ssize_t pread(int fd, FAR void *buf, size_t nbytes, off_t offset);
 ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset);
+ssize_t copy_file_range(int infd, FAR off_t *inoff, int outfd,
+                        FAR off_t *outoff, size_t len, unsigned int flags);
 int     ftruncate(int fd, off_t length);
 int     fchown(int fd, uid_t owner, gid_t group);
 int     lockf(int fd, int cmd, off_t len);
@@ -425,8 +427,8 @@ FAR void *sbrk(intptr_t incr);
 int     pipe(int pipefd[2]);
 int     pipe2(int pipefd[2], int flags);
 
-/* Pipe-based process I/O.  These are not actually implemented in the OS.
- * See apps/system/popen for implementation.
+/* Pipe-based process I/O.  libc has them when pipes, posix_spawn() and
+ * waitpid() are enabled.
  */
 
 #ifndef __KERNEL__

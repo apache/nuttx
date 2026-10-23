@@ -20,8 +20,6 @@
 #
 ############################################################################
 
-include $(TOPDIR)/Make.defs
-
 CSRCS = nrf91_boot.c nrf91_bringup.c nrf91_sensors.c
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)

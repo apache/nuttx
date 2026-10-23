@@ -1,6 +1,6 @@
-=================
-esp32s3-lhcbit
-=================
+===================
+LHC LHCBit ESP32-S3
+===================
 
 .. tags:: arch:xtensa, chip:esp32s3, vendor:espressif
 

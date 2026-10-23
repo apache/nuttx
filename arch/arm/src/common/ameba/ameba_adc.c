@@ -92,10 +92,19 @@
 #define AMEBA_ADC_CLKDIV_24         0x3  /* ADC_CLK_DIV_24      */
 #define AMEBA_PAD_NOPULL            0x0  /* GPIO_PuPd_NOPULL    */
 
-/* 16-bit conversion word layout: channel id in [19:16], data in [15:0]. */
+/* Conversion word layout as returned by ADC_Read(): channel id in [19:16],
+ * data in [15:0] on most chips.  A chip whose ADC_ID_AND_DATA() keeps fewer
+ * bits (amebasmart: id in [15:12], data in [11:0]) overrides both macros in
+ * its ameba_adc_chip.h.
+ */
 
-#define AMEBA_ADC_GET_CHNO(x)       (((x) >> 16) & 0x0f)
-#define AMEBA_ADC_GET_DATA(x)       ((x) & 0xffff)
+#ifndef AMEBA_ADC_GET_CHNO
+#  define AMEBA_ADC_GET_CHNO(x)     (((x) >> 16) & 0x0f)
+#endif
+
+#ifndef AMEBA_ADC_GET_DATA
+#  define AMEBA_ADC_GET_DATA(x)     ((x) & 0xffff)
+#endif
 
 /****************************************************************************
  * Private Types
@@ -188,7 +197,17 @@ extern void RCC_PeriphClockCmd(uint32_t periph, uint32_t clock,
 extern void Pinmux_Config(uint8_t pin, uint32_t func);
 extern void PAD_PullCtrl(uint8_t pin, uint8_t pulltype);
 extern void PAD_SleepPullCtrl(uint8_t pin, uint8_t pulltype);
+
+/* PAD_InputCtrl() is a ROM function on some chips and a header-only inline
+ * on others (amebasmart), so a chip that has no linkable symbol defines
+ * AMEBA_ADC_PAD_INPUTCTRL in its ameba_adc_chip.h to supply its own.
+ */
+
+#ifndef AMEBA_ADC_PAD_INPUTCTRL
 extern void PAD_InputCtrl(uint8_t pin, uint32_t newstate);
+#  define AMEBA_ADC_PAD_INPUTCTRL(pin, state) PAD_InputCtrl(pin, state)
+#endif
+
 extern void ADC_StructInit(struct ameba_adc_init_s *init);
 extern void ADC_Init(struct ameba_adc_init_s *init);
 extern void ADC_Cmd(uint32_t newstate);
@@ -477,7 +496,7 @@ int ameba_adc_register(const char *path, const uint8_t *channels,
           Pinmux_Config(pins[i], AMEBA_ADC_PINMUX_FID);
           PAD_PullCtrl(pins[i], AMEBA_PAD_NOPULL);
           PAD_SleepPullCtrl(pins[i], AMEBA_PAD_NOPULL);
-          PAD_InputCtrl(pins[i], AMEBA_DISABLE);
+          AMEBA_ADC_PAD_INPUTCTRL(pins[i], AMEBA_DISABLE);
         }
     }
 

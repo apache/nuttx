@@ -128,6 +128,13 @@ void up_timer_initialize(void)
 
   putreg32(SYSTICK_RELOAD, ARMV6M_SYSTICK_RVR);
 
+  /* The current value register is not reset to zero by a system reset.
+   * Any write clears it so the first period is a full reload and not the
+   * leftover count (up to 350 ms at 48 MHz).
+   */
+
+  putreg32(0, ARMV6M_SYSTICK_CVR);
+
   /* Attach the timer interrupt vector */
 
   irq_attach(STM32_IRQ_SYSTICK, (xcpt_t)stm32_timerisr, NULL);

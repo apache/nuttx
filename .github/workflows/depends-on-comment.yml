@@ -135,6 +135,10 @@ jobs:
             const runUrl = context.payload.workflow_run.html_url;
             const shortSha = (s) =>
               (typeof s === 'string' && /^[0-9a-f]{7,40}$/i.test(s)) ? ` @ ${s.slice(0, 10)}` : '';
+            const depLine = (d) =>
+              `- https://github.com/${d.repo}/pull/${d.number}${shortSha(d.head_sha)}` +
+              (d.merged === true ? ' (already merged, skipped)' : '') +
+              (d.closed === true ? ' ❌ **closed without merge**' : '');
 
             let body;
             if (status === 'ok') {
@@ -142,9 +146,7 @@ jobs:
                 core.info('status=ok but no valid dependencies after validation; skipping.');
                 return;
               }
-              const list = deps
-                .map((d) => `- https://github.com/${d.repo}/pull/${d.number}${shortSha(d.head_sha)}`)
-                .join('\n');
+              const list = deps.map(depLine).join('\n');
               body =
                 `${marker}\n` +
                 `### 🔗 Cross-repo PR dependencies\n\n` +
@@ -157,9 +159,7 @@ jobs:
                 core.info('status=failed but no valid dependencies after validation; skipping.');
                 return;
               }
-              const list = deps
-                .map((d) => `- https://github.com/${d.repo}/pull/${d.number}${shortSha(d.head_sha)}`)
-                .join('\n');
+              const list = deps.map(depLine).join('\n');
               // Render only fixed text selected by an allowed error code.
               const REASONS = {
                 fetch_failed: 'the dependency PR could not be fetched (it may not exist)',
@@ -168,6 +168,8 @@ jobs:
                 cherry_pick_conflict: 'cherry-pick failed (if your PR has merge commits, rebase instead)',
                 unsupported_repo: 'the dependency repository is not supported',
                 report_parse_failed: 'the dependency report could not be read',
+                dependency_closed: 'a dependency PR is closed without merge; ' +
+                  'remove it from depends-on or reopen it',
               };
               const code = typeof report.error_code === 'string' ? report.error_code : '';
               const reason = REASONS[code] ? `\n\nReason: ${REASONS[code]}` : '';

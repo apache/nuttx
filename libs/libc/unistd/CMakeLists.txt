@@ -22,6 +22,7 @@
 
 set(SRCS
     lib_access.c
+    lib_copy_file_range.c
     lib_daemon.c
     lib_swab.c
     lib_pathconf.c
@@ -48,8 +49,6 @@ set(SRCS
     lib_getrusage.c
     lib_utime.c
     lib_utimes.c
-    lib_setrlimit.c
-    lib_getrlimit.c
     lib_setpriority.c
     lib_getpriority.c
     lib_futimes.c
@@ -126,6 +125,14 @@ endif()
 
 if(CONFIG_PIPES)
   list(APPEND SRCS lib_pipe.c)
+endif()
+
+# dpopen() needs pipes, posix_spawn() and waitpid()
+
+if(CONFIG_PIPES
+   AND CONFIG_LIBC_EXECFUNCS
+   AND CONFIG_SCHED_WAITPID)
+  list(APPEND SRCS lib_dpopen.c)
 endif()
 
 target_sources(c PRIVATE ${SRCS})

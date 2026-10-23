@@ -1,6 +1,6 @@
-==========
-Teensy-4.x
-==========
+===============
+PJRC Teensy 4.x
+===============
 
 .. tags:: arch:arm, chip:imxrt, vendor:nxp
 

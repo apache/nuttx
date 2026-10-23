@@ -189,6 +189,18 @@ struct pot_dev_s
                                             * logic */
 };
 
+/* MCP454X/MCP456X/MCP464X/MCP466X device types */
+
+#ifdef CONFIG_POT_MCP45XX
+enum mcp45xx_chip_e
+{
+  MCP45XX_MCP4541,  /* 1 wiper, 7-bit, nonvolatile */
+  MCP45XX_MCP4561,  /* 1 wiper, 8-bit, nonvolatile */
+  MCP45XX_MCP4641,  /* 2 wipers, 7-bit, nonvolatile */
+  MCP45XX_MCP4661   /* 2 wipers, 8-bit, nonvolatile */
+};
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -235,6 +247,33 @@ int pot_register(FAR const char *path, FAR struct pot_dev_s *dev);
 struct i2c_master_s;
 FAR struct pot_dev_s *mcp445x_initialize(FAR struct i2c_master_s *i2c,
                                          uint8_t addr, uint32_t rab);
+#endif
+
+#ifdef CONFIG_POT_MCP45XX
+/****************************************************************************
+ * Name: mcp45xx_initialize
+ *
+ * Description:
+ *   Initialize a MCP454X/MCP456X/MCP464X/MCP466X potentiometer.  The
+ *   potentiometer and rheostat versions of a device share the same
+ *   registers.
+ *
+ * Input Parameters:
+ *   i2c  - An instance of the I2C interface to communicate with the device
+ *   addr - The 7-bit I2C address of the device
+ *   chip - The device type
+ *   rab  - Terminal A-B resistance in ohms, 0 if unknown
+ *
+ * Returned Value:
+ *   Valid device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+struct i2c_master_s;
+FAR struct pot_dev_s *mcp45xx_initialize(FAR struct i2c_master_s *i2c,
+                                         uint8_t addr,
+                                         enum mcp45xx_chip_e chip,
+                                         uint32_t rab);
 #endif
 
 #if defined(__cplusplus)

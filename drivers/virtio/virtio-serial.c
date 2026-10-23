@@ -33,16 +33,13 @@
 #include <nuttx/serial/serial.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/virtio/virtio.h>
+#include <nuttx/virtio/virtio-serial.h>
 
 #include "virtio-serial.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define VIRTIO_SERIAL_RX           0
-#define VIRTIO_SERIAL_TX           1
-#define VIRTIO_SERIAL_NUM          2
 
 /****************************************************************************
  * Private Types
@@ -480,7 +477,7 @@ static int virtio_serial_init(FAR struct virtio_serial_priv_s *priv,
   udev->priv        = priv;
   udev->ops         = &g_virtio_serial_ops;
   udev->recv.size   = CONFIG_DRIVERS_VIRTIO_SERIAL_BUFSIZE;
-  udev->recv.buffer = virtio_zalloc_buf(vdev, udev->recv.size, 16);
+  udev->recv.buffer = virtio_malloc_buf(vdev, udev->recv.size, 16);
   if (udev->recv.buffer == NULL)
     {
       vrterr("No enough memory\n");
@@ -488,7 +485,7 @@ static int virtio_serial_init(FAR struct virtio_serial_priv_s *priv,
     }
 
   udev->xmit.size   = CONFIG_DRIVERS_VIRTIO_SERIAL_BUFSIZE;
-  udev->xmit.buffer = virtio_zalloc_buf(vdev, udev->xmit.size, 16);
+  udev->xmit.buffer = virtio_malloc_buf(vdev, udev->xmit.size, 16);
   if (udev->xmit.buffer == NULL)
     {
       vrterr("No enough memory\n");
@@ -662,6 +659,7 @@ int virtio_register_serial_driver(void)
 {
   int ret1 = virtio_register_driver(&g_virtio_serial_driver);
   int ret2 = virtio_register_driver(&g_virtio_rprocserial_driver);
+
   return ret1 < 0 ? ret1 : ret2;
 }
 

@@ -40,6 +40,13 @@
 
 #define LDBL_MAX_EXP_X  700.0
 
+/* Like log(): relax the error criteria by LOGL_RELAX_MULTIPLIER after every
+ * LOGL_MAX_ITER iterations, to avoid looping forever.
+ */
+
+#define LOGL_MAX_ITER         400
+#define LOGL_RELAX_MULTIPLIER 2.0L
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -51,10 +58,15 @@ long double logl(long double x)
   long double y_old;
   long double ey;
   long double epsilon;
+  long double rf;
+  int iter;
 
   y = 0.0;
   y_old = 1.0;
   epsilon = LDBL_EPSILON;
+
+  iter = 0;
+  rf = 1.0L;
 
   while (y > y_old + epsilon || y < y_old - epsilon)
     {
@@ -72,7 +84,13 @@ long double logl(long double x)
           y = -LDBL_MAX_EXP_X;
         }
 
-      epsilon = (fabsl(y) > 1.0) ? fabsl(y) * LDBL_EPSILON : LDBL_EPSILON;
+      epsilon = ((fabsl(y) > rf) ? fabsl(y) : rf) * LDBL_EPSILON;
+
+      if (++iter >= LOGL_MAX_ITER)
+        {
+          rf *= LOGL_RELAX_MULTIPLIER;
+          iter = 0;
+        }
     }
 
   if (y == LDBL_MAX_EXP_X)

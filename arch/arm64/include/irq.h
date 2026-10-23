@@ -154,7 +154,7 @@
 #define REG_SP_EL0          (34)
 #define REG_EXE_DEPTH       (35)
 #define REG_SCTLR_EL1       (36)
-#define REG_RESERVED        (37)
+#define REG_TPIDR_EL0       (37)
 
 /* In Armv8-A Architecture, the stack must align with 16 byte */
 
@@ -339,6 +339,21 @@ struct xcptcontext
 #  endif
 #endif
 };
+
+/* The machine context of getcontext() and makecontext().  The assembly code
+ * in libs/libc/machine/arm64/arch_ucontext.S knows this layout.
+ */
+
+typedef struct mcontext_s
+{
+  uint64_t args[8];    /* x0-x7, the arguments of makecontext() */
+  uint64_t regs[12];   /* x19-x30, the callee-saved registers */
+  uint64_t sp;
+  uint64_t pc;
+#ifdef CONFIG_ARCH_FPU
+  uint64_t fpregs[8];  /* d8-d15, the callee-saved FP registers */
+#endif
+} mcontext_t;
 
 /* Name: up_irq_save, up_irq_restore, and friends.
  *

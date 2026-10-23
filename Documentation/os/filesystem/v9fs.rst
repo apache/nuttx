@@ -15,8 +15,42 @@ driver. The two currently available are:
   - **VIRTIO** -> ``CONFIG_V9FS_VIRTIO_9P=y``
   - **SOCKET** -> ``CONFIG_V9FS_SOCKET_9P=y``
 
-NFS Mount Command
-=================
+Symbolic Links
+==============
+
+With ``CONFIG_FS_LINKS``, V9FS follows the symbolic links on the server,
+and supports ``readlink()``, ``lstat()``, ``symlink()`` and ``link()``. A
+path follows at most ``SYMLOOP_MAX`` links, and a loop fails with
+``ELOOP``. ``open()`` with ``O_NOFOLLOW`` does not follow a link in the
+last component of the path. ``rm`` of a link removes the link, not its
+target. A link with an absolute target is not followed and fails with
+``ENOTSUP``, because the target is a path on the server.
+
+Owner and Group
+===============
+
+With ``CONFIG_SCHED_USER_IDENTITY``, V9FS attaches to the server once for
+each effective user ID that uses the mount. A new file, directory or
+symbolic link gets the effective user ID and the effective group ID of the
+caller. ``chown()`` and ``fchown()`` send ``Tsetattr``, and ``stat()``
+shows the owner and the group that the server returns.
+
+The server decides what it does with the owner. In QEMU, the
+``security_model`` option of ``-fsdev`` or ``-virtfs`` selects it:
+
+  - ``mapped-xattr``: QEMU keeps the owner, the group and the mode of a
+    file in extended attributes of the host file (``user.virtfs.uid``,
+    ``user.virtfs.gid``, ``user.virtfs.mode``). Use this model when
+    NuttX needs the owner and the group of its files.
+  - ``mapped-file``: the same, in hidden ``.virtfs_metadata`` files.
+  - ``passthrough``: QEMU changes the owner of the host file. QEMU must
+    run as root, else the creation of a file fails with ``EPERM``.
+  - ``none``: QEMU ignores the owner of a new file. ``stat()`` shows the
+    owner of the host file, and ``chown()`` fails with ``EPERM`` unless
+    QEMU runs as root.
+
+V9FS Mount Command
+==================
 
 In V9FS, we have some special parameters
 
@@ -42,6 +76,9 @@ Similarly, we need to bring the corresponding parameters in qemu
 
   -fsdev local,security_model=none,id=fsdev1,path=<share-path> \
   -device virtio-9p-device,id=fs1,fsdev=fsdev1,mount_tag=<mount_tag>
+
+Use ``security_model=mapped-xattr`` to keep the owner and the group of the
+files (see `Owner and Group`_).
 
 For how to start virtio-9p in QEMU, please refer to the document:
 

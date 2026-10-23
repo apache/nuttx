@@ -1,6 +1,6 @@
-===========
-fire-stm2v2
-===========
+================
+Wildfire STM32v2
+================
 
 .. tags:: arch:arm, chip:stm32f1, part:stm32f103, vendor:st
 

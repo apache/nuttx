@@ -30,7 +30,6 @@ list(
   lib_circbuf.c
   lib_creat.c
   lib_mknod.c
-  lib_umask.c
   lib_utsname.c
   lib_getrandom.c
   lib_xorshift128.c
@@ -48,6 +47,7 @@ list(
   lib_utimensat.c
   lib_mallopt.c
   lib_getnprocs.c
+  lib_getstacksize.c
   lib_mntent.c)
 
 if(CONFIG_HAVE_CXXINITIALIZE)

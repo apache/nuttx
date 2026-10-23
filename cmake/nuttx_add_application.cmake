@@ -254,6 +254,19 @@ function(nuttx_add_application)
         )
       endif()
 
+      # A partial link (-r) of LTO objects keeps only LTO data, which the loader
+      # cannot use: compile the module and its crt0 to machine code.
+
+      if(NO_LTO
+         AND (CONFIG_LTO_FULL
+              OR CONFIG_LTO_THIN
+              OR CONFIG_LTO_FAT))
+        target_compile_options(${TARGET} PRIVATE ${NO_LTO})
+        if(TARGET STARTUP_OBJS)
+          target_compile_options(STARTUP_OBJS PRIVATE ${NO_LTO})
+        endif()
+      endif()
+
       install(TARGETS ${TARGET})
       set_property(
         TARGET nuttx

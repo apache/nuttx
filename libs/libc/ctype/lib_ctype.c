@@ -32,11 +32,14 @@
  * Macro Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_LIBCXXTOOLCHAIN
+#ifdef CONFIG_LIBC_CTYPE_TABLE
 
-/* MSVC seems to conflict with these macros if defined in the public area.
- * As such, they are defined in the private section to let NuttX build
+/* These macros may already be defined by ctype.h (e.g. for the toolchain
+ * C++ library).  Otherwise they are defined here: MSVC seems to conflict
+ * with them if defined in the public area.
  */
+
+#ifndef _U
 
 #define _U  01
 #define _L  02
@@ -47,15 +50,16 @@
 #define _X  0100
 #define _B  0200
 
-#else
+#endif
 
 /****************************************************************************
- * Private Types
+ * Public Data
  ****************************************************************************/
 
-/* GNU libstdc++ is expecting an array _ctype_ to be defined. This array
- * is usually defined in GNU libc or newlib.
- * Here the system support only basic ASCII locale.
+/* The newlib compatible character class table.  GNU libstdc++ and the
+ * pre-built libraries compiled against newlib (whose ctype.h macros use
+ * it) expect this array to be defined.  It is usually defined in GNU libc
+ * or newlib.  Here the system support only basic ASCII locale.
  */
 
 const char _ctype_[] =
@@ -96,8 +100,8 @@ const char _ctype_[] =
 };
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
-#endif
+#endif /* CONFIG_LIBC_CTYPE_TABLE */
 

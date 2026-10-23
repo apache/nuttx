@@ -265,10 +265,20 @@
 #define GPIO_ETH_RMII_CRS_DV  (GPIO_ETH_RMII_CRS_DV_0 | GPIO_SPEED_100MHZ)  /* PA7 */
 #define GPIO_ETH_RMII_REF_CLK (GPIO_ETH_RMII_REF_CLK_0 | GPIO_SPEED_100MHZ) /* PA1 */
 
-/* ADC Clock Source *********************************************************/
+/* ADC/DAC Clock Source *****************************************************/
 
-#define STM32_RCC_CCIPR5_ADCDACSEL RCC_CCIPR5_ADCDACSEL_PLL2RCK
-#define STM32_ADC_CLK_FREQUENCY    STM32_PLL2R_FREQUENCY
+/* The ADC and the DAC share a kernel clock.  Erratum "Invalid DAC output
+ * voltage for several DAC kernel clocks" requires that the kernel clock is
+ * HCLK or SYSCLK whenever the DAC is used.
+ */
+
+#ifdef CONFIG_STM32_DAC1
+#  define STM32_RCC_CCIPR5_ADCDACSEL RCC_CCIPR5_ADCDACSEL_RCCHCLK
+#  define STM32_ADC_CLK_FREQUENCY    STM32_HCLK_FREQUENCY
+#else
+#  define STM32_RCC_CCIPR5_ADCDACSEL RCC_CCIPR5_ADCDACSEL_PLL2RCK
+#  define STM32_ADC_CLK_FREQUENCY    STM32_PLL2R_FREQUENCY
+#endif
 
 /* LED definitions **********************************************************/
 

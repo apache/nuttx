@@ -146,7 +146,7 @@ static int nxflat_loadbinary(FAR struct binary_s *binp,
                              int nexports)
 {
   struct nxflat_loadinfo_s loadinfo;  /* Contains globals for libnxflat */
-#ifdef CONFIG_SCHED_USER_IDENTITY
+#if defined(CONFIG_SCHED_USER_IDENTITY) || defined(CONFIG_BINFMT_CHECKEXEC)
   struct stat              st;
 #endif
   int                      ret;
@@ -163,19 +163,23 @@ static int nxflat_loadbinary(FAR struct binary_s *binp,
       goto errout;
     }
 
-#ifdef CONFIG_SCHED_USER_IDENTITY
+#if defined(CONFIG_SCHED_USER_IDENTITY) || defined(CONFIG_BINFMT_CHECKEXEC)
   ret = file_fstat(&loadinfo.file, &st);
   if (ret < 0)
     {
       berr("Failed to stat NXFLAT program binary: %d\n", ret);
       goto errout_with_init;
     }
+#endif
 
+#ifdef CONFIG_SCHED_USER_IDENTITY
   binp->uid  = st.st_uid;
   binp->gid  = st.st_gid;
   binp->mode = st.st_mode;
+#endif
 
-  ret = binfmt_checkexecperm(binp);
+#ifdef CONFIG_BINFMT_CHECKEXEC
+  ret = binfmt_checkexecperm(st.st_mode, st.st_uid, st.st_gid);
   if (ret < 0)
     {
       goto errout_with_init;

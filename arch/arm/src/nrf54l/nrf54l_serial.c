@@ -540,6 +540,79 @@ static void nrf54l_rxstart(struct nrf54l_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: nrf54l_rxdeliver
+ *
+ * Description:
+ *   Deliver the completed byte and restart the one-byte DMA. A byte
+ *   received with the delivery disabled is kept, the UART FIFO holds the
+ *   next bytes until rxint() enables the delivery.
+ *
+ ****************************************************************************/
+
+static void nrf54l_rxdeliver(struct uart_dev_s *dev)
+{
+  struct nrf54l_dev_s *priv = dev->priv;
+
+  if (priv->rxvalid && priv->rxenabled)
+    {
+      uart_recvchars(dev);
+      if (!priv->rxvalid)
+        {
+          UP_DMB();
+          nrf54l_uart_putreg(priv, NRF54L_UARTE_TASKS_STARTRX_OFFSET, 1);
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: nrf54l_rxstop
+ *
+ * Description:
+ *   Stop reception and deliver a completed byte. Interrupts must be
+ *   disabled.
+ *
+ ****************************************************************************/
+
+static void nrf54l_rxstop(struct uart_dev_s *dev)
+{
+  struct nrf54l_dev_s *priv = dev->priv;
+
+  nrf54l_uart_clrevent(priv, NRF54L_UARTE_EVENTS_RXTO_OFFSET);
+  nrf54l_uart_putreg(priv, NRF54L_UARTE_TASKS_STOPRX_OFFSET, 1);
+  while (!nrf54l_uart_getreg(priv, NRF54L_UARTE_EVENTS_RXTO_OFFSET))
+    {
+    }
+
+  if (nrf54l_uart_getreg(priv, NRF54L_UARTE_EVENTS_ERROR_OFFSET))
+    {
+      nrf54l_uart_clrevent(priv, NRF54L_UARTE_EVENTS_ERROR_OFFSET);
+      priv->rxstatus |=
+        nrf54l_uart_getreg(priv, NRF54L_UARTE_ERRORSRC_OFFSET);
+      nrf54l_uart_putreg(priv, NRF54L_UARTE_ERRORSRC_OFFSET, priv->rxstatus);
+    }
+
+  /* STOP also generates END for an empty buffer. Deliver a completed
+   * byte, but never deliver an empty buffer.
+   */
+
+  if (nrf54l_uart_getreg(priv, NRF54L_UARTE_DMA_RX_AMOUNT_OFFSET) != 0 &&
+      !nrf54l_uart_getreg(priv, NRF54L_UARTE_EVENTS_DMA_RX_BUSERROR_OFFSET))
+    {
+      UP_DMB();
+      priv->rxchar = priv->rxdma;
+      priv->rxvalid = true;
+      if (priv->rxenabled)
+        {
+          uart_recvchars(dev);
+        }
+
+      priv->rxvalid = false;
+    }
+
+  nrf54l_uart_clrevent(priv, NRF54L_UARTE_EVENTS_DMA_RX_END_OFFSET);
+}
+
+/****************************************************************************
  * Name: nrf54l_txstart
  *
  * Description:
@@ -558,6 +631,28 @@ static void nrf54l_txstart(struct nrf54l_dev_s *priv, int ch)
   nrf54l_uart_putreg(priv, NRF54L_UARTE_DMA_TX_MAXCNT_OFFSET, 1);
   UP_DMB();
   nrf54l_uart_putreg(priv, NRF54L_UARTE_TASKS_STARTTX_OFFSET, 1);
+}
+
+/****************************************************************************
+ * Name: nrf54l_txstop
+ *
+ * Description:
+ *   Wait for the transmitter to stop. Interrupts must be disabled.
+ *
+ ****************************************************************************/
+
+static void nrf54l_txstop(struct nrf54l_dev_s *priv)
+{
+  /* TXSTOPPED, rather than DMA END, guarantees the pin is idle */
+
+  if (priv->txbusy)
+    {
+      while (!nrf54l_uart_getreg(priv, NRF54L_UARTE_EVENTS_TXSTOPPED_OFFSET))
+        {
+        }
+
+      priv->txbusy = false;
+    }
 }
 
 /****************************************************************************
@@ -636,34 +731,24 @@ static int nrf54l_attach(struct uart_dev_s *dev)
 static void nrf54l_detach(struct uart_dev_s *dev)
 {
   struct nrf54l_dev_s *priv = (struct nrf54l_dev_s *)dev->priv;
+  irqstate_t flags;
 
   /* Stop DMA before detaching the interrupt handler */
 
+  flags = enter_critical_section();
   nrf54l_uart_putreg(priv, NRF54L_UARTE_INTENCLR_OFFSET, UINT32_MAX);
   nrf54l_uart_putreg(priv, NRF54L_UARTE_SHORTS_OFFSET,
                      UARTE_SHORTS_DMA_TX_END_STOP);
+
   if (priv->rxactive)
     {
-      /* Wait until the DMA buffer is released before a subsequent attach. */
-
-      nrf54l_uart_clrevent(priv, NRF54L_UARTE_EVENTS_RXTO_OFFSET);
-      nrf54l_uart_putreg(priv, NRF54L_UARTE_TASKS_STOPRX_OFFSET, 1);
-      while (!nrf54l_uart_getreg(priv, NRF54L_UARTE_EVENTS_RXTO_OFFSET))
-        {
-        }
-
+      nrf54l_rxstop(dev);
       priv->rxactive = false;
       priv->rxrecover = false;
     }
 
-  if (priv->txbusy)
-    {
-      while (!nrf54l_uart_getreg(priv, NRF54L_UARTE_EVENTS_TXSTOPPED_OFFSET))
-        {
-        }
-
-      priv->txbusy = false;
-    }
+  nrf54l_txstop(priv);
+  leave_critical_section(flags);
 
   up_disable_irq(priv->irq);
   irq_detach(priv->irq);
@@ -710,7 +795,7 @@ static int nrf54l_interrupt(int irq, void *context, void *arg)
   else
     {
       /* Copy the completed byte before restarting DMA. Automatic END-to-
-       * START would let DMA overwrite a buffer before the interrupt handler
+       * START would let DMA overwrite a buffer before the upper half
        * consumes it. The UART FIFO holds incoming bytes between transfers.
        */
 
@@ -720,16 +805,9 @@ static int nrf54l_interrupt(int irq, void *context, void *arg)
           UP_DMB();
           priv->rxchar = priv->rxdma;
           priv->rxvalid = true;
-          UP_DMB();
-          nrf54l_uart_putreg(priv, NRF54L_UARTE_TASKS_STARTRX_OFFSET, 1);
         }
 
-      if (priv->rxvalid && priv->rxenabled)
-        {
-          uart_recvchars(dev);
-        }
-
-      priv->rxvalid = false;
+      nrf54l_rxdeliver(dev);
       nrf54l_uart_clrevent(priv, NRF54L_UARTE_EVENTS_RXTO_OFFSET);
     }
 
@@ -771,11 +849,9 @@ static int nrf54l_set_format(struct uart_dev_s *dev,
 
   flags = enter_critical_section();
 
-  /* Do not change the format of a byte still being transmitted or
-   * interrupt DMA error recovery.
-   */
+  /* Do not interrupt DMA error recovery */
 
-  if (priv->txbusy || priv->rxrecover)
+  if (priv->rxrecover)
     {
       leave_critical_section(flags);
       return -EBUSY;
@@ -783,38 +859,10 @@ static int nrf54l_set_format(struct uart_dev_s *dev,
 
   if (priv->rxactive)
     {
-      nrf54l_uart_clrevent(priv, NRF54L_UARTE_EVENTS_RXTO_OFFSET);
-      nrf54l_uart_putreg(priv, NRF54L_UARTE_TASKS_STOPRX_OFFSET, 1);
-      while (!nrf54l_uart_getreg(priv, NRF54L_UARTE_EVENTS_RXTO_OFFSET))
-        {
-        }
-
-      /* STOP also generates END for an empty buffer. Deliver a completed
-       * byte before restarting DMA, but never deliver an empty buffer.
-       */
-
-      if (nrf54l_uart_getreg(priv, NRF54L_UARTE_EVENTS_ERROR_OFFSET))
-        {
-          nrf54l_uart_clrevent(priv, NRF54L_UARTE_EVENTS_ERROR_OFFSET);
-          priv->rxstatus |=
-            nrf54l_uart_getreg(priv, NRF54L_UARTE_ERRORSRC_OFFSET);
-          nrf54l_uart_putreg(priv, NRF54L_UARTE_ERRORSRC_OFFSET,
-                             priv->rxstatus);
-        }
-
-      if (nrf54l_uart_getreg(priv, NRF54L_UARTE_DMA_RX_AMOUNT_OFFSET) != 0 &&
-          !nrf54l_uart_getreg(priv,
-                              NRF54L_UARTE_EVENTS_DMA_RX_BUSERROR_OFFSET))
-        {
-          UP_DMB();
-          priv->rxchar = priv->rxdma;
-          priv->rxvalid = true;
-          if (priv->rxenabled)
-            {
-              uart_recvchars(dev);
-            }
-        }
+      nrf54l_rxstop(dev);
     }
+
+  nrf54l_txstop(priv);
 
   enabled = nrf54l_uart_getreg(priv, NRF54L_UARTE_ENABLE_OFFSET);
   nrf54l_uart_putreg(priv, NRF54L_UARTE_ENABLE_OFFSET, 0);
@@ -1015,12 +1063,19 @@ static int nrf54l_receive(struct uart_dev_s *dev, unsigned int *status)
 static void nrf54l_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct nrf54l_dev_s *priv = dev->priv;
+  irqstate_t flags = enter_critical_section();
 
 #ifdef CONFIG_SUPPRESS_SERIAL_INTS
-  priv->rxenabled = false;
-#else
-  priv->rxenabled = enable;
+  enable = false;
 #endif
+
+  priv->rxenabled = enable;
+  if (enable)
+    {
+      nrf54l_rxdeliver(dev);
+    }
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1085,7 +1140,8 @@ static void nrf54l_txint(struct uart_dev_s *dev, bool enable)
  * Name: nrf54l_txready
  *
  * Description:
- *   Report whether the transmitter can accept another character.
+ *   Report whether the transmitter can accept another character. The
+ *   event is read, the upper half also polls with interrupts disabled.
  *
  ****************************************************************************/
 
@@ -1093,7 +1149,13 @@ static bool nrf54l_txready(struct uart_dev_s *dev)
 {
   struct nrf54l_dev_s *priv = dev->priv;
 
-  return !priv->txbusy;
+  if (priv->txbusy)
+    {
+      return nrf54l_uart_getreg(priv,
+                                NRF54L_UARTE_EVENTS_TXSTOPPED_OFFSET) != 0;
+    }
+
+  return true;
 }
 
 /****************************************************************************
@@ -1106,9 +1168,7 @@ static bool nrf54l_txready(struct uart_dev_s *dev)
 
 static bool nrf54l_txempty(struct uart_dev_s *dev)
 {
-  struct nrf54l_dev_s *priv = dev->priv;
-
-  return !priv->txbusy;
+  return nrf54l_txready(dev);
 }
 
 /****************************************************************************
@@ -1210,19 +1270,10 @@ void up_putc(int ch)
   struct nrf54l_dev_s *priv = CONSOLE_DEV.priv;
   irqstate_t flags = enter_critical_section();
 
-  /* Serialize polled debug output with the interrupt-driven transmitter.
-   * TXSTOPPED, rather than DMA END, guarantees the pin is idle before reuse.
-   */
+  /* Serialize polled debug output with the interrupt-driven transmitter */
 
-  if (priv->txbusy)
-    {
-      while (!nrf54l_uart_getreg(priv, NRF54L_UARTE_EVENTS_TXSTOPPED_OFFSET))
-        {
-        }
-    }
-
+  nrf54l_txstop(priv);
   arm_lowputc(ch);
-  priv->txbusy = false;
   leave_critical_section(flags);
 #endif
 }

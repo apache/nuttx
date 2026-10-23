@@ -1,6 +1,6 @@
-==================
-Lichee RV 86 Panel
-==================
+=========================
+Sipeed Lichee RV 86 Panel
+=========================
 
 .. tags:: arch:risc-v, chip:allwinner-d1, vendor:allwinner
 

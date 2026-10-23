@@ -326,6 +326,10 @@ Standard I/O
   FAR char *tempnam(FAR const char *dir, FAR const char *pfx);
   int       remove(FAR const char *path);
 
+  /* Controlling terminal */
+
+  FAR char *ctermid(FAR char *s);
+
   #include <sys/stat.h>
 
   int mkdir(FAR const char *pathname, mode_t mode);
@@ -428,7 +432,9 @@ Pipes and FIFOs
 
   mkfifo() makes a FIFO device driver file with name pathname. Unlike Linux,
   a NuttX FIFO is not a special file type but simply a device driver instance.
-  mode specifies the FIFO's permissions (but is ignored in the current implementation).
+  mode specifies the FIFO's permissions. The file mode creation mask
+  (``umask()``) clears bits in it. NuttX keeps the permissions only with
+  ``CONFIG_PSEUDOFS_ATTRIBUTES``.
 
   Once the FIFO has been created by mkfifo(), any thread can open it for reading
   or writing, in the same way as an ordinary file. However, it must have been
@@ -439,9 +445,14 @@ Pipes and FIFOs
   If all threads that write to the FIFO have closed, subsequent calls to
   read() on the FIFO will return 0 (end-of-file).
 
+  A FIFO can exist only in the pseudo file system. If ``pathname`` is inside
+  a mounted file system and no file exists at that path, mkfifo() fails with
+  ``EPERM``. If a file exists at that path, it fails with ``EEXIST``.
+
   :param pathname: The full path to the FIFO instance to attach to or to
     create (if not already created).
-  :param mode: Ignored for now
+  :param mode: The permissions of the FIFO, less the bits in the file mode
+    creation mask.
 
   :return: 0 is returned on success; otherwise, -1 is returned with errno set appropriately.
 
@@ -506,8 +517,10 @@ are two conditions where ``mmap()`` can be supported:
       there are limitations in the size of files that may be memory
       mapped (especially on MCUs with no significant RAM resources).
 
-   c. All mapped files are read-only. You can write to the in-memory
-      image, but the file contents will not change.
+   c. Writes to a private mapping (``MAP_PRIVATE``) change only the
+      in-memory image, never the file. Writes to a shared, writable
+      mapping (``MAP_SHARED`` with ``PROT_WRITE``) reach the file when
+      ``msync()`` is called and when ``munmap()`` removes the mapping.
 
    d. There are no access privileges.
 

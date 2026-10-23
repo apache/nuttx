@@ -143,6 +143,13 @@ static int stat_recursive(FAR const char *path,
         {
           ret = -ENOSYS;
         }
+
+      /* No file on a mount with MS_NOEXEC can be executed */
+
+      if (ret >= 0 && INODE_IS_NOEXEC(inode) && S_ISREG(buf->st_mode))
+        {
+          buf->st_mode &= ~(S_IXUSR | S_IXGRP | S_IXOTH);
+        }
     }
   else
 #endif
@@ -422,7 +429,7 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
 
       if (INODE_IS_MOUNTPT(inode) || INODE_IS_PSEUDODIR(inode))
         {
-          buf->st_mode |= S_IFDIR;
+          buf->st_mode |= S_IFDIR | S_IXOTH | S_IXGRP | S_IXUSR;
         }
 
       /* Check for a block driver */
@@ -459,7 +466,9 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
 #ifdef CONFIG_PSEUDOFS_FILE
           if (inode_is_pseudofile(inode))
             {
-              buf->st_mode |= S_IFREG;
+              /* A file in the pseudo file system can be a program */
+
+              buf->st_mode |= S_IFREG | S_IXOTH | S_IXGRP | S_IXUSR;
             }
           else
 #endif
@@ -472,11 +481,12 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
     {
       /* If it has no operations, then it must just be a intermediate
        * node in the inode tree.  It is something like a directory.
-       * We'll say that all pseudo-directories are read-able but not
-       * write-able.
+       * We'll say that all pseudo-directories are read-able and
+       * searchable but not write-able.
        */
 
-      buf->st_mode |= S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
+      buf->st_mode |= S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR | S_IXOTH |
+                      S_IXGRP | S_IXUSR;
     }
 
 #ifdef CONFIG_PSEUDOFS_ATTRIBUTES

@@ -1,6 +1,6 @@
-=============
-ESP32-S3-EYE
-=============
+======================
+Espressif ESP32-S3-EYE
+======================
 
 .. tags:: arch:xtensa, chip:esp32s3, vendor:espressif
 

@@ -28,6 +28,10 @@ ifeq ($(CONFIG_DRIVERS_SMPS),y)
 CSRCS += smps.c
 endif
 
+ifeq ($(CONFIG_SMPS_LM51772),y)
+CSRCS += lm51772.c
+endif
+
 ifeq ($(CONFIG_REGULATOR),y)
 CSRCS += regulator.c
 

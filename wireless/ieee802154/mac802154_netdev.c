@@ -1032,9 +1032,9 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
    */
 
   else
-   {
-     ret = mac802154_ioctl(priv->md_mac, cmd, arg);
-   }
+    {
+      ret = mac802154_ioctl(priv->md_mac, cmd, arg);
+    }
 
   nxmutex_unlock(&priv->md_lock);
   return ret;

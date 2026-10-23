@@ -108,8 +108,12 @@ $(AOBJS): %$(OBJEXT): %.S
 $(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-$(BIN): $(OBJS)
+# Pre-built static libraries needed by some drivers (PREBUILT_LIBS) are
+# merged into libdrivers.a
+
+$(BIN): $(OBJS) $(PREBUILT_LIBS)
 	$(call ARCHIVE_REBUILD, $@, $(OBJS))
+	$(foreach lib,$(PREBUILT_LIBS),$(call ARCHIVE_ADDLIB, $@, $(lib))$(NEWLINE))
 
 context::
 

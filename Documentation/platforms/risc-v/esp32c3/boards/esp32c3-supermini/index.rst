@@ -1,6 +1,6 @@
-==================
-ESP32-C3 SuperMini
-==================
+================================
+Tenstar Robot ESP32-C3 SuperMini
+================================
 
 .. tags:: arch:risc-v, chip:esp32c3, vendor:espressif
 

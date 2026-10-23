@@ -47,6 +47,15 @@ config SMPS_HAVE_EFFICIENCY
 	bool "Have Power Efficiency"
 	default n
 
+config SMPS_LM51772
+	bool "TI LM51772 buck-boost controller"
+	default n
+	depends on I2C
+	---help---
+		Lower half driver for the Texas Instruments LM51772 buck-boost
+		controller, controlled over I2C.  It regulates the output voltage
+		(constant voltage mode) with an output current limit.
+
 endif
 
 config REGULATOR

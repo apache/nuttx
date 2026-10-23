@@ -386,7 +386,9 @@ provided by NuttX:
   If the effect of the set argument is to unblock a pending signal, then
   no wait is performed.
 
-  The original signal mask is restored when sigsuspend() returns.
+  The original signal mask is restored when sigsuspend() returns.  The
+  handlers of the signals that ``set`` unblocks run first, with ``set``
+  still installed, also when sigsuspend() is a system call.
 
   Waiting for an empty signal set stops a task without freeing any
   resources (a very bad idea).
@@ -398,7 +400,6 @@ provided by NuttX:
   **POSIX Compatibility:** Comparable to the POSIX interface of the same
   name. Differences from the POSIX specification include:
 
-  -  POSIX does not indicate that the original signal mask is restored.
   -  POSIX states that sigsuspend() "suspends the task until delivery of a
      signal whose action is either to execute a signal-catching function
      or to terminate the task." Only delivery of the signal is required in

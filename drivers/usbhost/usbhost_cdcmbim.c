@@ -599,6 +599,7 @@ static int cdcwdm_poll(FAR struct file *filep, FAR struct pollfd *fds,
       /* This is a request to tear down the poll. */
 
       FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+
       DEBUGASSERT(slot);
 
       /* Remove all memory of the poll setup */
@@ -684,6 +685,7 @@ static int usbhost_allocdevno(FAR struct usbhost_cdcmbim_s *priv)
   for (devno = 0; devno < 32; devno++)
     {
       uint32_t bitno = 1 << devno;
+
       if ((g_devinuse & bitno) == 0)
         {
           g_devinuse |= bitno;
@@ -704,6 +706,7 @@ static void usbhost_freedevno(FAR struct usbhost_cdcmbim_s *priv)
   if (devno >= 0 && devno < 26)
     {
       irqstate_t flags = spin_lock_irqsave(&g_lock);
+
       g_devinuse &= ~(1 << devno);
       spin_unlock_irqrestore(&g_lock, flags);
     }
@@ -752,9 +755,11 @@ static void usbhost_bulkin_work(FAR void *arg)
   FAR struct usbhost_hubport_s *hport;
   FAR struct usb_cdc_ncm_nth16_s *nth;
   uint16_t ndpoffset;
+  uint16_t ndpcount;
   uint16_t dgram_len;
   uint16_t dgram_off;
   uint16_t block_len;
+  uint16_t rxlen;
 
   priv = (FAR struct usbhost_cdcmbim_s *)arg;
   DEBUGASSERT(priv);
@@ -775,6 +780,8 @@ static void usbhost_bulkin_work(FAR void *arg)
       goto out;
     }
 
+  rxlen = priv->bulkinbytes;
+
   /* Parse the NTB header */
 
   nth = (FAR struct usb_cdc_ncm_nth16_s *)priv->rxnetbuf;
@@ -785,18 +792,34 @@ static void usbhost_bulkin_work(FAR void *arg)
       goto out;
     }
 
+  if (usbhost_getle16(nth->length) != sizeof(struct usb_cdc_ncm_nth16_s))
+    {
+      uerr("Invalid NTH length\n");
+      goto out;
+    }
+
   block_len = usbhost_getle16(nth->block_length);
 
-  if (block_len > priv->bulkinbytes)
+  if (block_len < sizeof(struct usb_cdc_ncm_nth16_s) || block_len > rxlen)
     {
-      uerr("Block length larger than rx buffer\n");
+      uerr("Invalid block length: %u\n", block_len);
       goto out;
     }
 
   ndpoffset = usbhost_getle16(nth->ndp_index);
-  if (ndpoffset > priv->bulkinbytes)
+  if (ndpoffset == 0)
     {
-      uerr("NDP offset too far %u > %u\n", ndpoffset, priv->bulkinbytes);
+      goto out;
+    }
+
+  ndpcount = 0;
+
+  if (((ndpoffset % 4) != 0) ||
+      (ndpoffset < sizeof(struct usb_cdc_ncm_nth16_s)) ||
+      (ndpoffset > block_len) ||
+      (sizeof(struct usb_cdc_ncm_ndp16_s) > block_len - ndpoffset))
+    {
+      uerr("Invalid NDP offset: %u\n", ndpoffset);
       goto out;
     }
 
@@ -805,31 +828,69 @@ static void usbhost_bulkin_work(FAR void *arg)
   do
     {
       FAR struct usb_cdc_ncm_dpe16_s *dpe;
+      FAR struct usb_cdc_ncm_dpe16_s *dpe_end;
       FAR struct usb_cdc_ncm_ndp16_s *ndp
         = (FAR struct usb_cdc_ncm_ndp16_s *)(priv->rxnetbuf + ndpoffset);
+      uint16_t curroffset;
+      uint16_t ndplen;
+
+      curroffset = ndpoffset;
+      ndplen = usbhost_getle16(ndp->length);
+
+      if (++ndpcount > block_len / sizeof(struct usb_cdc_ncm_ndp16_s))
+        {
+          uerr("Too many NDPs\n");
+          goto out;
+        }
+
+      if (ndplen < sizeof(struct usb_cdc_ncm_ndp16_s) +
+                   sizeof(struct usb_cdc_ncm_dpe16_s) ||
+          ndplen > block_len - ndpoffset ||
+          (ndplen - sizeof(struct usb_cdc_ncm_ndp16_s)) %
+                   sizeof(struct usb_cdc_ncm_dpe16_s) != 0)
+        {
+          uerr("Invalid NDP length: %u\n", ndplen);
+          goto out;
+        }
 
       ndpoffset = usbhost_getle16(ndp->next_ndp_index);
+      if (ndpoffset != 0 &&
+          (((ndpoffset % 4) != 0) ||
+           (ndpoffset < sizeof(struct usb_cdc_ncm_nth16_s)) ||
+           (ndpoffset > block_len) ||
+           (sizeof(struct usb_cdc_ncm_ndp16_s) > block_len - ndpoffset)))
+        {
+          uerr("Invalid next NDP offset: %u\n", ndpoffset);
+          goto out;
+        }
 
       /* Parse each DPE */
 
-      for (dpe = ndp->dpe16; usbhost_getle16(dpe->index); dpe++)
+      dpe_end = (FAR struct usb_cdc_ncm_dpe16_s *)
+                (priv->rxnetbuf + curroffset + ndplen);
+      for (dpe = ndp->dpe16; dpe < dpe_end && usbhost_getle16(dpe->index);
+           dpe++)
         {
           dgram_off = usbhost_getle16(dpe->index);
           dgram_len = usbhost_getle16(dpe->length);
 
-          if (dgram_off + dgram_len <= priv->bulkinbytes)
+          if (dgram_len == 0 || dgram_off > block_len ||
+              dgram_len > block_len - dgram_off)
             {
-              cdcmbim_receive(priv, priv->rxnetbuf + dgram_off, dgram_len);
+              uerr("Invalid datagram: %u+%u\n", dgram_off, dgram_len);
+              goto out;
             }
+
+          cdcmbim_receive(priv, priv->rxnetbuf + dgram_off, dgram_len);
         }
     }
   while (ndpoffset);
 
 out:
-    DRVR_ASYNCH(hport->drvr, priv->bulkin,
-                (FAR uint8_t *)priv->rxnetbuf, CDCMBIM_NETBUF_SIZE,
-                usbhost_bulkin_callback, priv);
-    nxmutex_unlock(&priv->lock);
+  DRVR_ASYNCH(hport->drvr, priv->bulkin,
+              (FAR uint8_t *)priv->rxnetbuf, CDCMBIM_NETBUF_SIZE,
+              usbhost_bulkin_callback, priv);
+  nxmutex_unlock(&priv->lock);
 }
 
 /****************************************************************************
@@ -1214,172 +1275,173 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcmbim_s *priv,
       desc = (FAR struct usb_desc_s *)configdesc;
       switch (desc->type)
         {
-        case USB_DESC_TYPE_CSINTERFACE:
-          {
-            FAR struct usb_csifdesc_s *csdesc =
-                (FAR struct usb_csifdesc_s *)desc;
+          case USB_DESC_TYPE_CSINTERFACE:
+            {
+              FAR struct usb_csifdesc_s *csdesc =
+                  (FAR struct usb_csifdesc_s *)desc;
 
-            /* MBIM functional descriptor */
+              /* MBIM functional descriptor */
 
-            if (csdesc->subtype == CDC_DSUBTYPE_MBIM)
-              {
-                FAR struct usb_mbim_desc_s *mbim =
-                    (FAR struct usb_mbim_desc_s *)desc;
+              if (csdesc->subtype == CDC_DSUBTYPE_MBIM)
+                {
+                  FAR struct usb_mbim_desc_s *mbim =
+                      (FAR struct usb_mbim_desc_s *)desc;
 
-                priv->maxctrlsize = usbhost_getle16(mbim->max_ctrl_message);
-                uinfo("MBIM max control size: %u\n", priv->maxctrlsize);
-                uinfo("MBIM max segment size: %u\n",
-                      usbhost_getle16(mbim->max_segment_size));
-              }
-          }
-          break;
+                  priv->maxctrlsize =
+                    usbhost_getle16(mbim->max_ctrl_message);
+                  uinfo("MBIM max control size: %u\n", priv->maxctrlsize);
+                  uinfo("MBIM max segment size: %u\n",
+                        usbhost_getle16(mbim->max_segment_size));
+                }
+            }
+            break;
 
-        /* Interface descriptor. We really should get the number of endpoints
-         * from this descriptor too.
-         */
+          /* Interface descriptor. We really should get the number of
+           * endpoints from this descriptor too.
+           */
 
-        case USB_DESC_TYPE_INTERFACE:
-          {
-            FAR struct usb_ifdesc_s *ifdesc =
-                (FAR struct usb_ifdesc_s *)configdesc;
+          case USB_DESC_TYPE_INTERFACE:
+            {
+              FAR struct usb_ifdesc_s *ifdesc =
+                  (FAR struct usb_ifdesc_s *)configdesc;
 
-            uinfo("Interface descriptor\n");
-            DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
+              uinfo("Interface descriptor\n");
+              DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
 
-            /* Is this the control interface? */
+              /* Is this the control interface? */
 
-            if (ifdesc->classid  == CDC_CLASS_COMM &&
-                ifdesc->subclass == CDC_SUBCLASS_MBIM &&
-                ifdesc->protocol == CDC_PROTO_NONE)
-              {
-                priv->ctrlif  = ifdesc->ifno;
-                found        |= USBHOST_CTRLIFFOUND;
-              }
+              if (ifdesc->classid  == CDC_CLASS_COMM &&
+                  ifdesc->subclass == CDC_SUBCLASS_MBIM &&
+                  ifdesc->protocol == CDC_PROTO_NONE)
+                {
+                  priv->ctrlif  = ifdesc->ifno;
+                  found        |= USBHOST_CTRLIFFOUND;
+                }
 
-            /* Is this the data interface? */
+              /* Is this the data interface? */
 
-            else if (ifdesc->classid  == USB_CLASS_CDC_DATA &&
-                     ifdesc->subclass == CDC_SUBCLASS_NONE &&
-                     ifdesc->protocol == CDC_DATA_PROTO_MBIMNTB)
-              {
-                priv->dataif  = ifdesc->ifno;
-                found        |= USBHOST_DATAIFFOUND;
-              }
-          }
-          break;
+              else if (ifdesc->classid  == USB_CLASS_CDC_DATA &&
+                       ifdesc->subclass == CDC_SUBCLASS_NONE &&
+                       ifdesc->protocol == CDC_DATA_PROTO_MBIMNTB)
+                {
+                  priv->dataif  = ifdesc->ifno;
+                  found        |= USBHOST_DATAIFFOUND;
+                }
+            }
+            break;
 
-        /* Endpoint descriptor.  Here, we expect two bulk endpoints, an IN
-         * and an OUT.
-         */
+          /* Endpoint descriptor.  Here, we expect two bulk endpoints, an IN
+           * and an OUT.
+           */
 
-        case USB_DESC_TYPE_ENDPOINT:
-          {
-            FAR struct usb_epdesc_s *epdesc =
-                (FAR struct usb_epdesc_s *)configdesc;
+          case USB_DESC_TYPE_ENDPOINT:
+            {
+              FAR struct usb_epdesc_s *epdesc =
+                  (FAR struct usb_epdesc_s *)configdesc;
 
-            uinfo("Endpoint descriptor\n");
-            DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
+              uinfo("Endpoint descriptor\n");
+              DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
 
-            /* Check for interrupt endpoint */
+              /* Check for interrupt endpoint */
 
-            if ((epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) ==
-                USB_EP_ATTR_XFER_INT)
-              {
-                if (USB_ISEPIN(epdesc->addr))
-                  {
-                    found |= USBHOST_INTRIFFOUND;
-                    iindesc.hport        = hport;
-                    iindesc.addr         = epdesc->addr &
-                                           USB_EP_ADDR_NUMBER_MASK;
-                    iindesc.in           = true;
-                    iindesc.xfrtype      = USB_EP_ATTR_XFER_INT;
-                    iindesc.interval     = epdesc->interval;
-                    iindesc.mxpacketsize =
-                                usbhost_getle16(epdesc->mxpacketsize);
-                    uinfo("Interrupt IN EP addr:%d mxpacketsize:%d\n",
-                          iindesc.addr, iindesc.mxpacketsize);
+              if ((epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) ==
+                  USB_EP_ATTR_XFER_INT)
+                {
+                  if (USB_ISEPIN(epdesc->addr))
+                    {
+                      found |= USBHOST_INTRIFFOUND;
+                      iindesc.hport        = hport;
+                      iindesc.addr         = epdesc->addr &
+                                             USB_EP_ADDR_NUMBER_MASK;
+                      iindesc.in           = true;
+                      iindesc.xfrtype      = USB_EP_ATTR_XFER_INT;
+                      iindesc.interval     = epdesc->interval;
+                      iindesc.mxpacketsize =
+                                  usbhost_getle16(epdesc->mxpacketsize);
+                      uinfo("Interrupt IN EP addr:%d mxpacketsize:%d\n",
+                            iindesc.addr, iindesc.mxpacketsize);
 
-                    priv->maxintsize = iindesc.mxpacketsize;
-                  }
-              }
+                      priv->maxintsize = iindesc.mxpacketsize;
+                    }
+                }
 
-            /* Check for a bulk endpoint. */
+              /* Check for a bulk endpoint. */
 
-            else if ((epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) ==
-                     USB_EP_ATTR_XFER_BULK)
-              {
-                /* Yes.. it is a bulk endpoint.  IN or OUT? */
+              else if ((epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) ==
+                       USB_EP_ATTR_XFER_BULK)
+                {
+                  /* Yes.. it is a bulk endpoint.  IN or OUT? */
 
-                if (USB_ISEPOUT(epdesc->addr))
-                  {
-                    /* It is an OUT bulk endpoint.  There should be only one
-                     * bulk OUT endpoint.
-                     */
+                  if (USB_ISEPOUT(epdesc->addr))
+                    {
+                      /* It is an OUT bulk endpoint.  There should be only
+                       * one bulk OUT endpoint.
+                       */
 
-                    if ((found & USBHOST_BOUTFOUND) != 0)
-                      {
-                        /* Oops.. more than one endpoint.  We don't know
-                         * what to do with this.
-                         */
+                      if ((found & USBHOST_BOUTFOUND) != 0)
+                        {
+                          /* Oops.. more than one endpoint.  We don't know
+                           * what to do with this.
+                           */
 
-                        return -EINVAL;
-                      }
+                          return -EINVAL;
+                        }
 
-                    found |= USBHOST_BOUTFOUND;
+                      found |= USBHOST_BOUTFOUND;
 
-                    /* Save the bulk OUT endpoint information */
+                      /* Save the bulk OUT endpoint information */
 
-                    boutdesc.hport        = hport;
-                    boutdesc.addr         = epdesc->addr &
-                                            USB_EP_ADDR_NUMBER_MASK;
-                    boutdesc.in           = false;
-                    boutdesc.xfrtype      = USB_EP_ATTR_XFER_BULK;
-                    boutdesc.interval     = epdesc->interval;
-                    boutdesc.mxpacketsize =
-                                usbhost_getle16(epdesc->mxpacketsize);
-                    uinfo("Bulk OUT EP addr:%d mxpacketsize:%d\n",
-                          boutdesc.addr, boutdesc.mxpacketsize);
+                      boutdesc.hport        = hport;
+                      boutdesc.addr         = epdesc->addr &
+                                              USB_EP_ADDR_NUMBER_MASK;
+                      boutdesc.in           = false;
+                      boutdesc.xfrtype      = USB_EP_ATTR_XFER_BULK;
+                      boutdesc.interval     = epdesc->interval;
+                      boutdesc.mxpacketsize =
+                                  usbhost_getle16(epdesc->mxpacketsize);
+                      uinfo("Bulk OUT EP addr:%d mxpacketsize:%d\n",
+                            boutdesc.addr, boutdesc.mxpacketsize);
 
-                    priv->bulkmxpacket = boutdesc.mxpacketsize;
-                  }
-                else
-                  {
-                    /* It is an IN bulk endpoint.  There should be only one
-                     * bulk IN endpoint.
-                     */
+                      priv->bulkmxpacket = boutdesc.mxpacketsize;
+                    }
+                  else
+                    {
+                      /* It is an IN bulk endpoint.  There should be only one
+                       * bulk IN endpoint.
+                       */
 
-                    if ((found & USBHOST_BINFOUND) != 0)
-                      {
-                        /* Oops.. more than one endpoint.  We don't know
-                         * what to do with this.
-                         */
+                      if ((found & USBHOST_BINFOUND) != 0)
+                        {
+                          /* Oops.. more than one endpoint.  We don't know
+                           * what to do with this.
+                           */
 
-                        return -EINVAL;
-                      }
+                          return -EINVAL;
+                        }
 
-                    found |= USBHOST_BINFOUND;
+                      found |= USBHOST_BINFOUND;
 
-                    /* Save the bulk IN endpoint information */
+                      /* Save the bulk IN endpoint information */
 
-                    bindesc.hport        = hport;
-                    bindesc.addr         = epdesc->addr &
-                                           USB_EP_ADDR_NUMBER_MASK;
-                    bindesc.in           = 1;
-                    bindesc.xfrtype      = USB_EP_ATTR_XFER_BULK;
-                    bindesc.interval     = epdesc->interval;
-                    bindesc.mxpacketsize =
-                                usbhost_getle16(epdesc->mxpacketsize);
-                    uinfo("Bulk IN EP addr:%d mxpacketsize:%d\n",
-                          bindesc.addr, bindesc.mxpacketsize);
-                  }
-              }
-          }
-          break;
+                      bindesc.hport        = hport;
+                      bindesc.addr         = epdesc->addr &
+                                             USB_EP_ADDR_NUMBER_MASK;
+                      bindesc.in           = 1;
+                      bindesc.xfrtype      = USB_EP_ATTR_XFER_BULK;
+                      bindesc.interval     = epdesc->interval;
+                      bindesc.mxpacketsize =
+                                  usbhost_getle16(epdesc->mxpacketsize);
+                      uinfo("Bulk IN EP addr:%d mxpacketsize:%d\n",
+                            bindesc.addr, bindesc.mxpacketsize);
+                    }
+                }
+            }
+            break;
 
-        /* Other descriptors are just ignored for now */
+          /* Other descriptors are just ignored for now */
 
-        default:
-          break;
+          default:
+            break;
         }
 
       /* If we found everything we need with this interface, then break out
@@ -2224,29 +2286,29 @@ static void cdcmbim_receive(FAR struct usbhost_cdcmbim_s *priv,
   switch (((FAR struct ipv4_hdr_s *)buf)->vhl & IP_VERSION_MASK)
     {
 #ifdef CONFIG_NET_IPv4
-    case IPv4_VERSION:
-      NETDEV_RXIPV4(&priv->netdev);
-      ipv4_input(&priv->netdev);
+      case IPv4_VERSION:
+        NETDEV_RXIPV4(&priv->netdev);
+        ipv4_input(&priv->netdev);
 
-      if (priv->netdev.d_len > 0)
-        {
-          cdcmbim_transmit(priv);
-        }
-      break;
+        if (priv->netdev.d_len > 0)
+          {
+            cdcmbim_transmit(priv);
+          }
+        break;
 #endif
 #ifdef CONFIG_NET_IPv6
-    case IPv6_VERSION:
-      NETDEV_RXIPV6(&priv->netdev);
-      ipv6_input(&priv->netdev);
+      case IPv6_VERSION:
+        NETDEV_RXIPV6(&priv->netdev);
+        ipv6_input(&priv->netdev);
 
-      if (priv->dev.d_len > 0)
-        {
-          cdcmbim_transmit(priv);
-        }
-      break;
+        if (priv->dev.d_len > 0)
+          {
+            cdcmbim_transmit(priv);
+          }
+        break;
 #endif
-    default:
-      NETDEV_RXERRORS(dev);
+      default:
+        NETDEV_RXERRORS(dev);
     }
 
   netdev_unlock(&priv->netdev);

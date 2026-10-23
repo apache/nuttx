@@ -290,7 +290,7 @@ static int hostfs_open(FAR struct file *filep, FAR const char *relpath,
         }
       else
         {
-          goto errout_with_buffer;
+          goto errout_with_fd;
         }
     }
 
@@ -312,6 +312,9 @@ static int hostfs_open(FAR struct file *filep, FAR const char *relpath,
 
   ret = OK;
   goto errout_with_lock;
+
+errout_with_fd:
+  host_close(hf->fd);
 
 errout_with_buffer:
   fs_heap_free(hf);
@@ -1391,10 +1394,8 @@ int hostfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
 
   /* Append to the host's root directory */
 
-  strlcpy(oldpath, fs->fs_root, sizeof(oldpath));
-  strlcat(oldpath, oldrelpath, sizeof(oldpath));
-  strlcpy(newpath, fs->fs_root, sizeof(newpath));
-  strlcat(newpath, newrelpath, sizeof(newpath));
+  hostfs_mkpath(fs, oldrelpath, oldpath, HOSTFS_MAX_PATH);
+  hostfs_mkpath(fs, newrelpath, newpath, HOSTFS_MAX_PATH);
 
   /* Call the host FS to do the mkdir */
 

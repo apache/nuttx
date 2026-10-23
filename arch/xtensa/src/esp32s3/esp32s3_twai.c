@@ -395,8 +395,8 @@ static void esp32s3twai_reset(struct can_dev_s *dev)
 
   /* Disable the TWAI and stop ongoing transmissions */
 
-  uint32_t mode_value = TWAI_RESET_MODE_M | TWAI_LISTEN_ONLY_MODE_M;
-  twai_putreg(TWAI_MODE_REG, mode_value);                 /* Enter Reset Mode */
+  twai_putreg(TWAI_MODE_REG,
+              TWAI_RESET_MODE_M | TWAI_LISTEN_ONLY_MODE_M); /* Enter Reset Mode */
 
   twai_putreg(TWAI_INT_ENA_REG, 0);                       /* Disable interrupts */
   twai_getreg(TWAI_STATUS_REG);                           /* Clear status bits */
@@ -759,7 +759,10 @@ static int esp32s3twai_send(struct can_dev_s *dev,
           (uint32_t)msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
 
   len = (uint32_t)msg->cm_hdr.ch_dlc;
-  if (len > CAN_MAXDATALEN) len = CAN_MAXDATALEN;
+  if (len > CAN_MAXDATALEN)
+    {
+      len = CAN_MAXDATALEN;
+    }
 
   frame_info = len;
 
@@ -958,7 +961,11 @@ static int esp32s3twai_interrupt(int irq, void *context, void *arg)
         }
 
       len = frame_info & 0xf;
-      if (len > CAN_MAXDATALEN) len = CAN_MAXDATALEN;
+      if (len > CAN_MAXDATALEN)
+        {
+          len = CAN_MAXDATALEN;
+        }
+
       hdr.ch_dlc = len;
 
       for (i = 0; i < len; i++)
@@ -1225,6 +1232,11 @@ struct can_dev_s *esp32s3_twaiinitialize(void)
   twaidev = &g_twaidev;
 
   flags = spin_lock_irqsave(&g_twaipriv.lock);
+
+  /* Enable the TWAI peripheral clock and release it from reset */
+
+  modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, 0, SYSTEM_TWAI_CLK_EN);
+  modifyreg32(SYSTEM_PERIP_RST_EN0_REG, SYSTEM_TWAI_RST, 0);
 
   /* Configure CAN GPIO pins */
 

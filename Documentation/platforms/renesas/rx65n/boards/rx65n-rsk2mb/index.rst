@@ -1,6 +1,6 @@
-============
-RX65N RSK2MB
-============
+====================
+Renesas RX65N RSK2MB
+====================
 
 .. tags:: arch:renesas, chip:rx65n, vendor:renesas
 

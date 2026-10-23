@@ -304,6 +304,9 @@ static inline void nxtask_save_parent(FAR struct tcb_s *tcb, uint8_t ttype)
               child->ch_flags  = ttype;
               child->ch_pid    = tcb->pid;
               child->ch_status = 0;
+#ifdef CONFIG_SCHED_USER_IDENTITY
+              child->ch_uid    = 0;
+#endif
 
               /* Add the entry into the group's list of children */
 

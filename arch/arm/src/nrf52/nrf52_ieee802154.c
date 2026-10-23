@@ -35,6 +35,9 @@
 
 #include <nuttx/mm/iob.h>
 
+#include "arm_internal.h"
+#include "hardware/nrf52_ficr.h"
+
 #include "nrf52_ieee802154_trace.h"
 
 #include "nrf52_ieee802154_priv.h"
@@ -219,7 +222,7 @@ static int nrf52_radioi8_seteaddr(struct nrf52_radioi8_dev_s *dev,
 static int nrf52_radioi8_setcoordsaddr(struct nrf52_radioi8_dev_s *dev,
                                        const uint8_t *saddr)
 {
-  IEEE802154_SADDRCOPY(dev->state.addr.saddr, saddr);
+  IEEE802154_SADDRCOPY(dev->state.coordaddr.saddr, saddr);
 
   wlinfo("setcoordsaddr: %02X:%02X\n", saddr[0], saddr[1]);
   return OK;
@@ -247,7 +250,7 @@ static int nrf52_radioi8_setcoordeaddr(struct nrf52_radioi8_dev_s *dev,
 
   for (i = 0; i < 8; i++)
     {
-      dev->state.addr.eaddr[i] = eaddr[i];
+      dev->state.coordaddr.eaddr[i] = eaddr[i];
     }
 
   return OK;
@@ -295,6 +298,29 @@ static int nrf52_radioi8_bind(struct ieee802154_radio_s *radio,
 }
 
 /****************************************************************************
+ * Name: nrf52_radioi8_eui64
+ *
+ * Description:
+ *   EUI-64 from the Nordic OUI and the FICR device identifier.
+ *
+ ****************************************************************************/
+
+static void nrf52_radioi8_eui64(uint8_t *eaddr)
+{
+  uint32_t id0 = getreg32(NRF52_FICR_DEVICEID0);
+  uint32_t id1 = getreg32(NRF52_FICR_DEVICEID1);
+
+  eaddr[0] = 0xf4;
+  eaddr[1] = 0xce;
+  eaddr[2] = 0x36;
+  eaddr[3] = id1 & 0xff;
+  eaddr[4] = (id1 >> 8) & 0xff;
+  eaddr[5] = (id1 >> 16) & 0xff;
+  eaddr[6] = (id1 >> 24) & 0xff;
+  eaddr[7] = id0 & 0xff;
+}
+
+/****************************************************************************
  * Name: nrf52_radioi8_reset
  *
  * Description:
@@ -317,6 +343,10 @@ static int nrf52_radioi8_reset(struct ieee802154_radio_s *radio)
   /* Reset radio state */
 
   memset(&dev->state, 0, sizeof(struct nrf52_radioi8_state_s));
+
+  /* Unique default extended address */
+
+  nrf52_radioi8_eui64(dev->state.addr.eaddr);
 
   /* Initialize radio in IEEE 802.15.4 mode */
 
@@ -577,43 +607,15 @@ static int nrf52_radioi8_txdelayed(struct ieee802154_radio_s *radio,
 
   DEBUGASSERT(!dev->state.txdelayed_busy);
 
-  dev->state.txdelayed_desc = txdesc;
-  dev->state.txdelayed_busy = true;
+  dev->state.txdelayed_desc    = txdesc;
+  dev->state.txdelayed_delay   = symboldelay;
+  dev->state.txdelayed_busy    = true;
+  dev->state.txdelayed_pending = true;
 
-  /* TODO: should we add txdelayed to queue ? */
+  /* Sent once the radio is free */
 
-  if (dev->radio->state.csma_busy)
-    {
-      return -EBUSY;
-    }
+  dev->radio->ops->txnext(dev, 0);
 
-  /* Wait for ACKTX done - we start transmission in
-   * nrf52_radioi8_state_acktx()
-   */
-
-  if (dev->radio->state.state == NRF52_RADIO_STATE_ACKTX)
-    {
-      goto out;
-    }
-
-  /* Setup TX */
-
-  dev->radio->ops->norm_setup(dev, txdesc->frame, false);
-
-  if (symboldelay == 0)
-    {
-      /* Send now */
-
-      dev->radio->ops->norm_trigger(dev);
-    }
-  else
-    {
-      /* Run TIMER - TX is handled in timer isr */
-
-      dev->tim->ops->setup(dev, NRF52_TIMER_CHAN_TXDELAY, symboldelay);
-    }
-
-out:
   nxmutex_unlock(&dev->lock);
   return OK;
 }

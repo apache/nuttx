@@ -153,6 +153,8 @@ int nxsem_tickwait_uninterruptible(FAR sem_t *sem, uint32_t delay)
   clock_t end = clock_delay2abstick(delay);
   int ret;
 
+  nxsem_set_uninterruptible(sem);
+
   for (; ; )
     {
       /* Take the semaphore (perhaps waiting) */

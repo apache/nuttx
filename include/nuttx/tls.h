@@ -29,6 +29,7 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -40,12 +41,9 @@
 #include <nuttx/cache.h>
 #include <nuttx/atexit.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/list.h>
 #include <nuttx/mutex.h>
 #include <nuttx/queue.h>
-
-#ifdef CONFIG_PTHREAD_ATFORK
-#  include <nuttx/list.h>
-#endif
 
 #include <sys/types.h>
 
@@ -146,7 +144,6 @@ struct task_info_s
 #endif
 #ifndef CONFIG_BUILD_KERNEL
   struct getopt_s ta_getopt; /* Globals used by getopt() */
-  mode_t          ta_umask;  /* File mode creation mask */
 #  ifdef CONFIG_LIBC_LOCALE
   char            ta_domain[NAME_MAX]; /* Current domain for gettext */
 #  endif
@@ -172,6 +169,10 @@ struct task_info_s
                                      */
   size_t                ta_envpc;   /* Maximum entries of environment array */
   size_t                ta_envc;    /* Number of environment strings        */
+#endif
+#if defined(CONFIG_LIBC_ELF) || defined(CONFIG_BINFMT_LOADABLE)
+  rmutex_t         ta_modlock; /* Protects ta_modules */
+  struct list_node ta_modules; /* Objects this task group loaded */
 #endif
 };
 
@@ -395,6 +396,48 @@ void tls_destruct(void);
  ****************************************************************************/
 
 FAR struct task_info_s *task_get_info(void);
+
+#if defined(CONFIG_LIBC_ELF) || defined(CONFIG_BINFMT_LOADABLE)
+/****************************************************************************
+ * Name: task_modules_lock
+ *
+ * Description:
+ *   Lock the list of the objects that the calling task group loaded
+ *   (dlopen() and the libraries its program needs) and return it.  The
+ *   lock is recursive: the constructors of a library run with it held, and
+ *   they can call dlopen().
+ *
+ ****************************************************************************/
+
+static inline FAR struct list_node *task_modules_lock(void)
+{
+  FAR struct task_info_s *info = task_get_info();
+  int ret;
+
+  /* A signal must not make the caller run without the lock */
+
+  do
+    {
+      ret = nxrmutex_lock(&info->ta_modlock);
+    }
+  while (ret == -EINTR);
+
+  return &info->ta_modules;
+}
+
+/****************************************************************************
+ * Name: task_modules_unlock
+ *
+ * Description:
+ *   Unlock the list of the objects that the calling task group loaded.
+ *
+ ****************************************************************************/
+
+static inline void task_modules_unlock(void)
+{
+  nxrmutex_unlock(&task_get_info()->ta_modlock);
+}
+#endif
 
 #if CONFIG_TLS_NCLEANUP > 0
 /****************************************************************************

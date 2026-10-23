@@ -100,11 +100,13 @@ used as given, and a bare name is searched for along ``LD_LIBRARY_PATH``,
 which needs ``CONFIG_LIBC_ENVPATH`` and is seeded from
 ``CONFIG_LDPATH_INITIAL``.
 
-A library lands in the module registry, which holds one instance per
-name, so its data is shared by everything that opens it.  A module
-started with ``exec()`` is different: that path loads a fresh copy each
-time, so two running instances of one module have separate data while
-sharing one copy of the text in flash.
+A library lands in the registry of the task group that loads it, which
+holds one instance per name, so its data is shared by everything in that
+task group that opens it.  Another task group gets an instance of its
+own, with its own data.  A module started with ``exec()`` loads a fresh
+copy each time, so two running instances of one module have separate
+data.  Executed in place, all instances share one copy of the text in
+flash.
 
 Comparison with NXFLAT and PIC ELF
 ==================================
@@ -220,9 +222,10 @@ a library be named rather than spelled out as an absolute path::
 
 ``dlopen()`` needs ``CONFIG_LIBC_DLFCN`` too.
 
-Only the make build generates the table of
-``CONFIG_EXECFUNCS_SYSTEM_SYMTAB``.  A CMake configuration needs a symbol
-table from elsewhere.
+The make build and the CMake build both generate the table of
+``CONFIG_EXECFUNCS_SYSTEM_SYMTAB`` (and that of
+``CONFIG_LIBC_ELF_SYSTEM_SYMTAB``) from ``libc.csv``, ``libm.csv`` and
+``syscall.csv`` with the host tool ``mksymtab``.
 
 ``CONFIG_ELF_STACKSIZE`` gives the stack a module runs with.  A module
 that needs a different one can export an ``nx_stacksize`` symbol, which
@@ -426,8 +429,10 @@ storage.
 
 A library named in ``DT_NEEDED`` is constructed before the module that
 needs it, because the module's own relocation is what opens it, and
-destroyed after, at the last ``dlclose()``.  Since the library is one
-instance, its constructors run once however many modules name it.
+destroyed after, at its last ``dlclose()`` in the task group or when the
+task group exits.  The library is one instance per task group, so its
+constructors run once in each task group, however many of its modules
+name it.
 
 Destructors are walked from ``DT_FINI_ARRAY`` at unload, in
 ``libelf_uninit()``, and not from ``crt0``, so they run once whichever way

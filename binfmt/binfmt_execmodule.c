@@ -40,6 +40,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>
 #include <nuttx/tls.h>
+#include <group/group.h>
 #include <sched/sched.h>
 #include <task/spawn.h>
 #include <nuttx/spawn.h>
@@ -85,9 +86,9 @@ static void exec_swap(FAR struct tcb_s *ptcb, FAR struct tcb_s *chtcb)
 #endif
 #ifdef CONFIG_SCHED_HAVE_PARENT
 #  ifdef CONFIG_SCHED_CHILD_STATUS
-  FAR struct child_status_s *tg_children;
+  FAR struct child_status_s *child;
 #  else
-  uint16_t   tg_nchildren;
+  uint16_t   nchildren;
 #  endif
 #endif
 
@@ -125,17 +126,36 @@ static void exec_swap(FAR struct tcb_s *ptcb, FAR struct tcb_s *chtcb)
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
 #  ifdef CONFIG_SCHED_CHILD_STATUS
-  tg_children = chtcb->group->tg_children;
+  child = chtcb->group->tg_children;
   chtcb->group->tg_children = ptcb->group->tg_children;
-  ptcb->group->tg_children = tg_children;
+  ptcb->group->tg_children = child;
 #  else
-  tg_nchildren = chtcb->group->tg_nchildren;
+  nchildren = chtcb->group->tg_nchildren;
   chtcb->group->tg_nchildren = ptcb->group->tg_nchildren;
-  ptcb->group->tg_nchildren = tg_nchildren;
+  ptcb->group->tg_nchildren = nchildren;
 #  endif
 #endif
 
+  /* The caller exits when the new image starts: it is not a child of the
+   * new image.  Without a parent, its exit sends no SIGCHLD to the new
+   * image and leaves no status that wait() in the new image returns.
+   */
+
+  ptcb->group->tg_ppid = INVALID_PROCESS_ID;
+
+#if defined(CONFIG_SCHED_HAVE_PARENT) && !defined(CONFIG_SCHED_CHILD_STATUS)
+  if (chtcb->group->tg_nchildren > 0)
+    {
+      chtcb->group->tg_nchildren--;
+    }
+#endif
+
   leave_critical_section(flags);
+
+#if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
+  child = group_remove_child(chtcb->group, ptcb->pid);
+  group_free_child(child);
+#endif
 
   /* getpid() and gettid() read copies of the pids in TLS.  The address
    * environment of the child is current here, and the TLS of the caller
@@ -190,6 +210,9 @@ int exec_module(FAR struct binary_s *binp,
   char name[PATH_MAX];
 #endif
   FAR void *stackaddr = NULL;
+#if defined(CONFIG_BINFMT_LOADABLE) && defined(CONFIG_BUILD_FLAT)
+  FAR struct list_node *node;
+#endif
   pid_t pid;
   int ret;
 
@@ -392,6 +415,18 @@ int exec_module(FAR struct binary_s *binp,
 
 #ifdef CONFIG_BINFMT_LOADABLE
   tcb->group->tg_bininfo = binp;
+#endif
+
+#if defined(CONFIG_BINFMT_LOADABLE) && defined(CONFIG_BUILD_FLAT)
+  /* The libraries the program needs belong to its task group, where its
+   * own dlopen() finds them.  Only in a flat build: elsewhere the program
+   * has another libc, with its own lock and heap.
+   */
+
+  while ((node = list_remove_head(&binp->libraries)) != NULL)
+    {
+      list_add_tail(&tcb->group->tg_info->ta_modules, node);
+    }
 #endif
 
   /* Then activate the task at the provided priority */

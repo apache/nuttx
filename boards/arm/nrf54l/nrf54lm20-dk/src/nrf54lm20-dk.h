@@ -74,5 +74,17 @@
 
 int nrf54l_bringup(void);
 
+/****************************************************************************
+ * Name: nrf54l_ieee802154_initialize
+ *
+ * Description:
+ *   Initialize IEEE802154 network.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NRF54L_RADIO_IEEE802154
+int nrf54l_ieee802154_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_NRF54L_NRF54LM20_DK_SRC_NRF54LM20_DK_H */

@@ -76,6 +76,15 @@ int nrf54l_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_NRF54L_RADIO_IEEE802154
+  ret = nrf54l_ieee802154_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: IEEE 802.15.4 initialization failed: %d\n",
+             ret);
+    }
+#endif
+
 #ifdef CONFIG_NRF54L_SOFTDEVICE_CONTROLLER
   /* Register the Bluetooth controller */
 

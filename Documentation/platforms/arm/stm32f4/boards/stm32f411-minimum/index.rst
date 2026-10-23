@@ -1,6 +1,6 @@
-=================
-stm32f411-minimum
-=================
+===================================
+WeAct STM32F411 Minimum (BlackPill)
+===================================
 
 .. tags:: arch:arm, chip:stm32f4, part:stm32f411, vendor:st
 

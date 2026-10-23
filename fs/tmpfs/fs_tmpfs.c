@@ -105,6 +105,8 @@ static int  tmpfs_remove_dirent(FAR struct tmpfs_directory_s *tdo,
               FAR const char *name);
 static int  tmpfs_add_dirent(FAR struct tmpfs_directory_s *tdo,
               FAR struct tmpfs_object_s *to, FAR const char *name);
+static int  tmpfs_replace_dirent(FAR struct tmpfs_directory_s *tdo,
+              int index, FAR struct tmpfs_object_s *to);
 static FAR struct tmpfs_file_s *
 tmpfs_alloc_file(FAR struct tmpfs_directory_s *parent, mode_t mode);
 static int  tmpfs_create_file(FAR struct tmpfs_s *fs,
@@ -568,6 +570,96 @@ static int tmpfs_add_dirent(FAR struct tmpfs_directory_s *tdo,
   tde             = &tdo->tdo_entry[index];
   tde->tde_object = to;
   tde->tde_name   = newname;
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: tmpfs_replace_dirent
+ *
+ * Description:
+ *   Make the entry at 'index' refer to 'to' and free the object that it
+ *   referred to.  An open file stays until its last close.  Return 1 if
+ *   the entry already refers to 'to'.
+ *
+ ****************************************************************************/
+
+static int tmpfs_replace_dirent(FAR struct tmpfs_directory_s *tdo,
+                                int index, FAR struct tmpfs_object_s *to)
+{
+  FAR struct tmpfs_object_s *old = tdo->tdo_entry[index].tde_object;
+  int ret;
+
+  if (old == to)
+    {
+      return 1;
+    }
+
+  ret = tmpfs_lock_object(old);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (old->to_type == TMPFS_DIRECTORY)
+    {
+      FAR struct tmpfs_directory_s *olddir =
+        (FAR struct tmpfs_directory_s *)old;
+
+      if (to->to_type != TMPFS_DIRECTORY)
+        {
+          ret = -EISDIR;
+        }
+      else if (olddir->tdo_nentries > 0)
+        {
+          ret = -ENOTEMPTY;
+        }
+      else if (olddir->tdo_refs > 0)
+        {
+          ret = -EBUSY;
+        }
+    }
+  else if (to->to_type == TMPFS_DIRECTORY)
+    {
+      ret = -ENOTDIR;
+    }
+
+  if (ret < 0)
+    {
+      tmpfs_unlock_object(old);
+      return ret;
+    }
+
+  tdo->tdo_entry[index].tde_object = to;
+  to->to_parent = tdo;
+
+  if (old->to_type == TMPFS_DIRECTORY)
+    {
+      FAR struct tmpfs_directory_s *olddir =
+        (FAR struct tmpfs_directory_s *)old;
+
+      tmpfs_unlock_directory(olddir);
+      nxrmutex_destroy(&olddir->tdo_lock);
+      fs_heap_free(olddir->tdo_entry);
+      fs_heap_free(olddir);
+    }
+  else
+    {
+      FAR struct tmpfs_file_s *oldfile = (FAR struct tmpfs_file_s *)old;
+
+      if (oldfile->tfo_refs > 0)
+        {
+          oldfile->tfo_flags |= TFO_FLAG_UNLINKED;
+          tmpfs_unlock_file(oldfile);
+        }
+      else
+        {
+          tmpfs_unlock_file(oldfile);
+          nxrmutex_destroy(&oldfile->tfo_lock);
+          fs_heap_free(oldfile->tfo_data);
+          fs_heap_free(oldfile);
+        }
+    }
 
   return OK;
 }
@@ -1115,7 +1207,7 @@ static int tmpfs_find_object(FAR struct tmpfs_s *fs,
             {
               /* Then we can break out of the loop now */
 
-               break;
+              break;
             }
 
           /* No, this was not the final segment of the relpath.
@@ -1301,6 +1393,7 @@ static int tmpfs_getpath(FAR struct tmpfs_object_s *to,
     {
       int ret = tmpfs_getpath((FAR struct tmpfs_object_s *)to->to_parent,
                                path, len);
+
       if (ret < 0)
         {
           return ret;
@@ -1509,29 +1602,29 @@ static int tmpfs_foreach(FAR struct tmpfs_directory_s *tdo,
       ret = callout(tdo, index, arg);
       switch (ret)
         {
-         case TMPFS_CONTINUE:    /* Continue enumeration */
+          case TMPFS_CONTINUE:    /* Continue enumeration */
 
-           /* Release the object and index to the next entry */
+            /* Release the object and index to the next entry */
 
-           tmpfs_release_lockedobject(to);
-           index++;
-           break;
+            tmpfs_release_lockedobject(to);
+            index++;
+            break;
 
-         case TMPFS_HALT:        /* Stop enumeration */
+          case TMPFS_HALT:        /* Stop enumeration */
 
-           /* Release the object and cancel the traversal */
+            /* Release the object and cancel the traversal */
 
-           tmpfs_release_lockedobject(to);
-           return -ECANCELED;
+            tmpfs_release_lockedobject(to);
+            return -ECANCELED;
 
-         case TMPFS_UNLINKED:    /* Only the directory entry was deleted */
+          case TMPFS_UNLINKED:    /* Only the directory entry was deleted */
 
-           /* Release the object and continue with the same index */
+            /* Release the object and continue with the same index */
 
-           tmpfs_release_lockedobject(to);
+            tmpfs_release_lockedobject(to);
 
-         case TMPFS_DELETED:     /* Object and directory entry deleted */
-           break;                /* Continue with the same index */
+          case TMPFS_DELETED:     /* Object and directory entry deleted */
+            break;                /* Continue with the same index */
         }
     }
 
@@ -1900,21 +1993,21 @@ static off_t tmpfs_seek(FAR struct file *filep, off_t offset, int whence)
   switch (whence)
     {
       case SEEK_SET: /* The offset is set to offset bytes. */
-          position = offset;
-          break;
+        position = offset;
+        break;
 
       case SEEK_CUR: /* The offset is set to its current location plus
                       * offset bytes. */
-          position = offset + filep->f_pos;
-          break;
+        position = offset + filep->f_pos;
+        break;
 
       case SEEK_END: /* The offset is set to the size of the file plus
                       * offset bytes. */
-          position = offset + tfo->tfo_size;
-          break;
+        position = offset + tfo->tfo_size;
+        break;
 
       default:
-          return -EINVAL;
+        return -EINVAL;
     }
 
   /* Save the new file position */
@@ -2026,6 +2119,7 @@ static int tmpfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   if (cmd == FIOC_FILEPATH)
     {
       FAR char *ptr = (FAR char *)((uintptr_t)arg);
+
       ret = inode_getpath(filep->f_inode, ptr, PATH_MAX);
       if (ret < 0)
         {
@@ -2376,13 +2470,13 @@ static int tmpfs_readdir(FAR struct inode *mountpt,
         {
           /* A directory */
 
-           entry->d_type = DTYPE_DIRECTORY;
+          entry->d_type = DTYPE_DIRECTORY;
         }
       else /* to->to_type == TMPFS_REGULAR) */
         {
           /* A regular file */
 
-           entry->d_type = DTYPE_FILE;
+          entry->d_type = DTYPE_FILE;
         }
 
       /* Copy the entry name */
@@ -2556,6 +2650,7 @@ static int tmpfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   ret = tmpfs_foreach(tdo, tmpfs_statfs_callout, (FAR void *)&tmpbuf);
   if (ret < 0)
     {
+      tmpfs_unlock(fs);
       return -ECANCELED;
     }
 
@@ -2846,6 +2941,7 @@ static int tmpfs_rename(FAR struct inode *mountpt,
   FAR struct tmpfs_s *fs;
   FAR const char *oldname;
   FAR const char *newname;
+  int index;
   int ret;
 
   finfo("mountpt: %p oldrelpath: %s newrelpath: %s\n",
@@ -2906,25 +3002,6 @@ static int tmpfs_rename(FAR struct inode *mountpt,
       newname++;
     }
 
-  /* Verify that no object of this name already exists in the destination
-   * directory.
-   */
-
-  ret = tmpfs_find_dirent(newparent, newname, strlen(newname));
-  if (ret != -ENOENT)
-    {
-      /* Something with this name already exists in the directory.
-       * OR perhaps some fatal error occurred.
-       */
-
-      if (ret >= 0)
-        {
-          ret = -EEXIST;
-        }
-
-      goto errout_with_newparent;
-    }
-
   /* Find the old object at oldpath.  If successful, tmpfs_find_object()
    * will lock both the object and the parent directory and will increment
    * the reference count on both.
@@ -2958,6 +3035,31 @@ static int tmpfs_rename(FAR struct inode *mountpt,
       /* The name must lie in the root directory */
 
       oldname = oldrelpath;
+    }
+
+  /* Is there an object of this name in the destination directory? */
+
+  index = tmpfs_find_dirent(newparent, newname, strlen(newname));
+  if (index >= 0)
+    {
+      /* Yes.. replace it in one step, then remove the old entry */
+
+      ret = tmpfs_replace_dirent(newparent, index, to);
+      if (ret > 0)
+        {
+          ret = OK;
+        }
+      else if (ret == OK)
+        {
+          ret = tmpfs_remove_dirent(oldparent, oldname);
+        }
+
+      goto errout_with_oldparent;
+    }
+  else if (index != -ENOENT)
+    {
+      ret = index;
+      goto errout_with_oldparent;
     }
 
   /* Remove the entry from the parent directory */

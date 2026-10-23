@@ -1,6 +1,6 @@
-===============
-samd20-xplained
-===============
+=============================
+Microchip SAMD20-Xplained Pro
+=============================
 
 .. tags:: arch:arm, chip:samd2l2, vendor:microchip
 

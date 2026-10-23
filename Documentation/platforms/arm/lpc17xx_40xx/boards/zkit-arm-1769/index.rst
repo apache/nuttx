@@ -1,6 +1,6 @@
-=============
-zkit-arm-1769
-=============
+=====================
+Zilogic ZKit-ARM-1769
+=====================
 
 .. tags:: arch:arm, chip:lpc17xx_40xx, vendor:nxp
 

@@ -149,7 +149,7 @@ int nx_umount2(FAR const char *target, unsigned int flags)
    * pseudo-file inode.
    */
 
-  mountpt_inode->i_flags  &= ~FSNODEFLAG_TYPE_MASK;
+  mountpt_inode->i_flags  &= ~(FSNODEFLAG_TYPE_MASK | FSNODEFLAG_NOEXEC);
   mountpt_inode->i_private = NULL;
   mountpt_inode->u.i_mops  = NULL;
 

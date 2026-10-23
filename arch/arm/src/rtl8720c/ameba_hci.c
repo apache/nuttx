@@ -64,6 +64,7 @@ static int hci_recv(struct file *filep, uint8_t *buf, size_t count)
 {
   ssize_t ret;
   ssize_t nread = 0;
+
   while (count != nread)
     {
       ret = file_read(filep, buf + nread, count - nread);
@@ -89,6 +90,7 @@ static int hci_send(struct file *filep, uint8_t *buf, size_t count)
 {
   ssize_t ret;
   ssize_t nwritten = 0;
+
   while (nwritten != count)
     {
       ret = file_write(filep, buf + nwritten, count - nwritten);
@@ -181,6 +183,7 @@ static int hci_check_local_ver(struct file *filep)
   /* OpCode: 0x1001, h4 buf_len: Cmd(1+3=4), Event(1+14=15) */
 
   unsigned char command[15];
+
   command[0] = H4_CMD;
   command[1] = 0x01;
   command[2] = 0x10;
@@ -210,6 +213,7 @@ static int hci_check_local_ver(struct file *filep)
 
   uint16_t lmp_sbuver =
     ((uint16_t)command[13]) | (((uint16_t)command[14]) << 8);
+
   if (BT_DEFAUT_LMP_SUBVER != lmp_sbuver)
     {
       return -EALREADY;
@@ -223,6 +227,7 @@ static int hci_check_local_rom_ver(struct file *filep)
   /* OpCode: 0xfc6d, h4 buf_len: Cmd(1+3=4), Event(1+7=8) */
 
   unsigned char command[8];
+
   command[0] = H4_CMD;
   command[1] = 0x6d;
   command[2] = 0xfc;
@@ -266,6 +271,7 @@ static int hci_update_baudrate(struct file *filep)
   struct termios toptions;
   uint32_t bt_baudrate;
   uint32_t uart_baudrate;
+
   command[0] = H4_CMD;
   command[1] = 0x17;
   command[2] = 0xfc;
@@ -312,6 +318,7 @@ static int hci_load_firmware(struct file *filep)
   uint8_t *addr;
   int i;
   int ret;
+
   drv = netdev_findbyname(AMEBAZ_WIRELESS_NAME);
   if (drv == NULL)
     {
@@ -362,6 +369,7 @@ static int hci_update_efuse_iqk(struct file *filep)
   /* OpCode: 0xfd91, h4 buf_len: Cmd(1+15=16), Event(1+6=7) */
 
   unsigned char command[16];
+
   command[0] = H4_CMD;
   command[1] = 0x91;
   command[2] = 0xfd;
@@ -391,6 +399,7 @@ static int hci_open(struct file *filep)
   struct inode *inode = filep->f_inode;
   hci_dev_t *dev = inode->i_private;
   int ret;
+
   ret = file_open(&dev->filep,
                   CONFIG_AMEBA_HCI_DEV_NAME, O_RDWR | O_CLOEXEC);
   if (ret < 0)
@@ -466,6 +475,7 @@ static ssize_t hci_read(struct file *filep,
 {
   struct inode *inode = filep->f_inode;
   hci_dev_t *dev = inode->i_private;
+
   return file_read(&dev->filep, buffer, buflen);
 }
 
@@ -474,6 +484,7 @@ static ssize_t hci_write(struct file *filep, const char *buffer,
 {
   struct inode *inode = filep->f_inode;
   hci_dev_t *dev = inode->i_private;
+
   return file_write(&dev->filep, buffer, buflen);
 }
 
@@ -481,6 +492,7 @@ static int hci_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
   struct inode *inode = filep->f_inode;
   hci_dev_t *dev = inode->i_private;
+
   return file_ioctl(&dev->filep, cmd, arg);
 }
 
@@ -489,6 +501,7 @@ static int hci_poll(struct file *filep,
 {
   struct inode *inode = filep->f_inode;
   hci_dev_t *dev = inode->i_private;
+
   return file_poll(&dev->filep, fds, setup);
 }
 

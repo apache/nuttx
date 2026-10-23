@@ -285,7 +285,9 @@
                                               /* Bits 2-3: Reserved */
 #define RCC_APB1ENR_TIM6EN          (1 << 4)  /* Bit 4:  Timer 6 enable */
 #define RCC_APB1ENR_TIM7EN          (1 << 5)  /* Bit 5:  Timer 7 enable */
-                                              /* Bits 6-12: Reserved */
+                                              /* Bits 6-10: Reserved */
+#define RCC_APB1ENR_WWDGEN          (1 << 11) /* Bit 11: Window watchdog enable */
+                                              /* Bit 12: Reserved */
 #define RCC_APB1ENR_USBEN           (1 << 13) /* Bit 13: USB enable */
 #define RCC_APB1ENR_SPI2EN          (1 << 14) /* Bit 14: SPI 2 enable */
                                               /* Bit 15: Reserved */

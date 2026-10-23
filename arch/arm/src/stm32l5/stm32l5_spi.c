@@ -107,17 +107,7 @@
 /* SPI DMA priority */
 
 #ifdef CONFIG_STM32_SPI_DMA
-
-#  if defined(CONFIG_SPI_DMAPRIO)
-#    define SPI_DMA_PRIO  CONFIG_SPI_DMAPRIO
-#  else
-#    define SPI_DMA_PRIO  DMA_CCR_PRIMED
-#  endif
-
-#  if (SPI_DMA_PRIO & ~DMA_CCR_PL_MASK) != 0
-#    error "Illegal value for CONFIG_SPI_DMAPRIO"
-#  endif
-
+#  define SPI_DMA_PRIO  DMA_CCR_PRIMED
 #endif
 
 /* DMA channel configuration */

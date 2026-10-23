@@ -464,7 +464,7 @@ static int zipfs_stat_common(unzFile uf, FAR struct stat *buf)
   if (ret >= 0)
     {
       buf->st_size = file_info.uncompressed_size;
-      buf->st_mode = S_IFREG | 0444;
+      buf->st_mode = S_IFREG | 0555;
     }
 
   return ret;
@@ -626,7 +626,7 @@ static int zipfs_stat(FAR struct inode *mountpt,
 
   if (relpath[0] == 0)
     {
-      buf->st_mode = S_IFDIR;
+      buf->st_mode = S_IFDIR | 0555;
       return OK;
     }
 

@@ -21,6 +21,9 @@
 # ##############################################################################
 
 set(SRCS nrf54l_boot.c nrf54l_bringup.c)
+if(CONFIG_NRF54L_RADIO_IEEE802154)
+  list(APPEND SRCS nrf54l_ieee802154.c)
+endif()
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS nrf54l_autoleds.c)
 else()

@@ -2624,7 +2624,8 @@ static int fat_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
       memset(buf, 0, sizeof(struct stat));
 
-      buf->st_mode = S_IROTH | S_IRGRP | S_IRUSR | S_IFREG;
+      buf->st_mode = S_IROTH | S_IRGRP | S_IRUSR | S_IXOTH | S_IXGRP |
+                     S_IXUSR | S_IFREG;
       if ((fstatshared->s_attr & FATATTR_READONLY) == 0)
         {
           buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
@@ -3900,11 +3901,12 @@ static int fat_stat_file(FAR struct fat_mountpt_s *fs,
       return -ENOENT;
     }
 
-  /* Set the access permissions.  The file/directory is always readable
-   * by everyone but may be writeable by no-one.
+  /* Set the access permissions.  FAT has no execute permission.  The
+   * file/directory is always readable and executable by everyone, as on
+   * other systems, but may be writeable by no-one.
    */
 
-  buf->st_mode = S_IROTH | S_IRGRP | S_IRUSR;
+  buf->st_mode = S_IROTH | S_IRGRP | S_IRUSR | S_IXOTH | S_IXGRP | S_IXUSR;
   if ((attribute & FATATTR_READONLY) == 0)
     {
       buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
@@ -3940,8 +3942,7 @@ static int fat_stat_root(FAR struct fat_mountpt_s *fs, FAR struct stat *buf)
 
   /* It's directory name of the mount point */
 
-  buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR | S_IWOTH |
-                 S_IWGRP | S_IWUSR;
+  buf->st_mode = S_IFDIR | S_IRWXO | S_IRWXG | S_IRWXU;
 
   return OK;
 }
