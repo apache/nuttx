@@ -176,7 +176,11 @@ static inline_function void wd_timer_start(clock_t tick, bool in_expiration)
 #ifdef CONFIG_SCHED_TICKLESS_ALARM
   up_alarm_tick_start(next_tick);
 #else
-  up_timer_tick_start(next_tick - clock_systime_ticks());
+  clock_t now = clock_systime_ticks();
+
+  /* A passed deadline must fire now: timers may read the delay unsigned */
+
+  up_timer_tick_start(clock_compare(next_tick, now) ? 0 : next_tick - now);
 #endif
 }
 
