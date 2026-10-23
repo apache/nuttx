@@ -318,6 +318,15 @@ double      tgamma(double x);
 long double tgammal(long double x);
 #endif
 
+#ifdef CONFIG_HAVE_DOUBLE
+double      j0(double x);
+double      j1(double x);
+double      jn(int n, double x);
+double      y0(double x);
+double      y1(double x);
+double      yn(int n, double x);
+#endif
+
 float       logf  (float x);
 #ifdef CONFIG_HAVE_DOUBLE
 double      log   (double x);

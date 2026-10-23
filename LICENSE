@@ -5824,6 +5824,9 @@ libs/libm/libm/__cos.c
 libs/libm/libm/__sin.c
 libs/libm/libm/lib_lgamma.c
 libs/libm/libm/lib_copysignf.c
+libs/libm/libm/lib_j0.c
+libs/libm/libm/lib_j1.c
+libs/libm/libm/lib_jn.c
 ======================
 
    Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
