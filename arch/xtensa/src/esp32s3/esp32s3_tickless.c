@@ -194,6 +194,13 @@ static void IRAM_ATTR tickless_setcounter(uint64_t ticks)
 {
   uint64_t alarm_ticks = tickless_getcounter() + ticks;
 
+  /* Disable the alarm while the new target is loaded.  The comparator is
+   * still enabled after the previous alarm fired, so a target that is
+   * already due would fire on load, before the stale interrupt is cleared.
+   */
+
+  modifyreg32(SYSTIMER_CONF_REG, SYSTIMER_TARGET0_WORK_EN, 0);
+
   /* Select unit0 to comp0 */
 
   modifyreg32(SYSTIMER_TARGET0_CONF_REG, SYSTIMER_TARGET0_TIMER_UNIT_SEL, 0);
@@ -211,14 +218,17 @@ static void IRAM_ATTR tickless_setcounter(uint64_t ticks)
 
   putreg32(SYSTIMER_TIMER_COMP0_LOAD, SYSTIMER_COMP0_LOAD_REG);
 
-  /* Enable alarm */
-
-  modifyreg32(SYSTIMER_CONF_REG, 0, SYSTIMER_TARGET0_WORK_EN);
-
-  /* Enable interrupt */
+  /* Clear and enable the interrupt before enabling the alarm.  A target
+   * that has already passed fires as soon as the alarm is enabled, and
+   * clearing the interrupt after that would lose it.
+   */
 
   modifyreg32(SYSTIMER_INT_CLR_REG, 0, SYSTIMER_TARGET0_INT_CLR);
   modifyreg32(SYSTIMER_INT_ENA_REG, 0, SYSTIMER_TARGET0_INT_ENA);
+
+  /* Enable alarm */
+
+  modifyreg32(SYSTIMER_CONF_REG, 0, SYSTIMER_TARGET0_WORK_EN);
 }
 
 /****************************************************************************
