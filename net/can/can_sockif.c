@@ -187,12 +187,7 @@ static int can_setup(FAR struct socket *psock)
     {
       case 0:            /* INET subsystem for netlib_ifup */
       case CAN_RAW:      /* RAW sockets */
-      case CAN_BCM:      /* Broadcast Manager */
-      case CAN_TP16:     /* VAG Transport Protocol v1.6 */
-      case CAN_TP20:     /* VAG Transport Protocol v2.0 */
-      case CAN_MCNET:    /* Bosch MCNet */
       case CAN_ISOTP:    /* ISO 15765-2 Transport Protocol */
-      case CAN_J1939:    /* SAE J1939 */
         break;
 
       default:
