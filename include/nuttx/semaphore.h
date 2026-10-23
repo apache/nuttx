@@ -31,8 +31,17 @@
 
 #include <errno.h>
 #include <semaphore.h>
+#include <stdint.h>
+#include <time.h>
 
-#include <nuttx/clock.h>
+/* The OS and its libraries get the clock helpers here.  A program that
+ * defines NUTTX_NO_EXTENSIONS does not: <stdio.h> and <pthread.h> include
+ * this file, and nuttx/clock.h defines names such as TM_YEAR_BASE.
+ */
+
+#ifndef NUTTX_NO_EXTENSIONS
+#  include <nuttx/clock.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
