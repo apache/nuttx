@@ -1417,7 +1417,10 @@ void IRAM_ATTR esp32s3_spi_timing_set_mspi_high_speed(bool spi1)
       set_flash_clock(1, flash_div);
     }
 
-  set_psram_clock(0, psram_div);
+  if (psram_div != 0)
+    {
+      set_psram_clock(0, psram_div);
+    }
 
 #if ESP32S3_SPI_TIMING_FLASH_TUNING || ESP32S3_SPI_TIMING_PSRAM_TUNING
   set_timing_tuning_regs(true);
@@ -1566,6 +1569,11 @@ void IRAM_ATTR esp32s3_spi_timing_set_mspi_flash_tuning(void)
                          sizeof(reference_data));
   get_flash_tuning_configs(&timing_configs);
   do_tuning(reference_data, &timing_configs, true);
-  esp32s3_spi_timing_set_mspi_high_speed(true);
 #endif
+
+  /* Without tuning, SPI0 would otherwise keep the clock the bootloader
+   * left, not CONFIG_ESP32S3_FLASH_FREQ.
+   */
+
+  esp32s3_spi_timing_set_mspi_high_speed(true);
 }
