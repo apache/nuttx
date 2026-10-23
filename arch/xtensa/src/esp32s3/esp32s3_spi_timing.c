@@ -417,6 +417,7 @@ static void init_spi1_for_tuning(bool is_flash)
 static uint32_t get_dummy(void)
 {
   uint32_t ctrl_reg = READ_PERI_REG(SPI_MEM_CTRL_REG(0));
+
   if (ctrl_reg & MSPI_TIMING_LL_FLASH_OCT_MASK)
     {
       DEBUGPANIC();
@@ -582,6 +583,7 @@ static void set_flash_din_mode_num(uint8_t spi_num, uint8_t din_mode,
       (din_mode << SPI_MEM_DIN4_MODE_S) | (din_mode << SPI_MEM_DIN5_MODE_S) |
       (din_mode << SPI_MEM_DIN6_MODE_S) | (din_mode << SPI_MEM_DIN7_MODE_S) |
       (din_mode << SPI_MEM_DINS_MODE_S);
+
   putreg32(reg_val, SPI_MEM_DIN_MODE_REG(spi_num));
 
   /* Set MSPI Flash din num */
@@ -634,6 +636,7 @@ static void set_psram_din_mode_num(uint8_t spi_num, uint8_t din_mode,
          (din_mode << SPI_MEM_SPI_SMEM_DIN6_MODE_S) |
          (din_mode << SPI_MEM_SPI_SMEM_DIN7_MODE_S) |
          (din_mode << SPI_MEM_SPI_SMEM_DINS_MODE_S);
+
   putreg32(reg_val, SPI_MEM_SPI_SMEM_DIN_MODE_REG(spi_num));
 
   /* Set MSPI PSRAM din num */
@@ -738,17 +741,17 @@ static void get_flash_tuning_configs(tuning_config_s *config)
 #endif
 
 #if CONFIG_ESP32S3_FLASH_FREQ_20M
-    *config = MSPI_TIMING_FLASH_GET_TUNING_CONFIG(
-                ESP32S3_SPI_TIMING_CORE_CLK, 20, FLASH_MODE);
+  *config = MSPI_TIMING_FLASH_GET_TUNING_CONFIG(
+              ESP32S3_SPI_TIMING_CORE_CLK, 20, FLASH_MODE);
 #elif CONFIG_ESP32S3_FLASH_FREQ_40M
-    *config = MSPI_TIMING_FLASH_GET_TUNING_CONFIG(
-                ESP32S3_SPI_TIMING_CORE_CLK, 40, FLASH_MODE);
+  *config = MSPI_TIMING_FLASH_GET_TUNING_CONFIG(
+              ESP32S3_SPI_TIMING_CORE_CLK, 40, FLASH_MODE);
 #elif CONFIG_ESP32S3_FLASH_FREQ_80M
-    *config = MSPI_TIMING_FLASH_GET_TUNING_CONFIG(
-                ESP32S3_SPI_TIMING_CORE_CLK, 80, FLASH_MODE);
+  *config = MSPI_TIMING_FLASH_GET_TUNING_CONFIG(
+              ESP32S3_SPI_TIMING_CORE_CLK, 80, FLASH_MODE);
 #elif CONFIG_ESP32S3_FLASH_FREQ_120M
-    *config = MSPI_TIMING_FLASH_GET_TUNING_CONFIG(
-                ESP32S3_SPI_TIMING_CORE_CLK, 120, FLASH_MODE);
+  *config = MSPI_TIMING_FLASH_GET_TUNING_CONFIG(
+              ESP32S3_SPI_TIMING_CORE_CLK, 120, FLASH_MODE);
 #endif
 
 #undef FLASH_MODE
@@ -866,6 +869,7 @@ static void config_psram_read_write_data(uint8_t *buf, uint32_t addr,
   while (len > 0)
     {
       uint32_t length = MIN(len, 32);
+
       if (is_read)
         {
           psram_read_data(buf, addr, length);
@@ -904,14 +908,14 @@ static void get_psram_tuning_configs(tuning_config_s *config)
 #endif
 
 #if CONFIG_ESP32S3_SPIRAM_SPEED_40M
-    *config = MSPI_TIMING_PSRAM_GET_TUNING_CONFIG(
-                ESP32S3_SPI_TIMING_CORE_CLK, 40, PSRAM_MODE);
+  *config = MSPI_TIMING_PSRAM_GET_TUNING_CONFIG(
+              ESP32S3_SPI_TIMING_CORE_CLK, 40, PSRAM_MODE);
 #elif CONFIG_ESP32S3_SPIRAM_SPEED_80M
-    *config = MSPI_TIMING_PSRAM_GET_TUNING_CONFIG(
-                ESP32S3_SPI_TIMING_CORE_CLK, 80, PSRAM_MODE);
+  *config = MSPI_TIMING_PSRAM_GET_TUNING_CONFIG(
+              ESP32S3_SPI_TIMING_CORE_CLK, 80, PSRAM_MODE);
 #elif CONFIG_ESP32S3_SPIRAM_SPEED_120M
-    *config = MSPI_TIMING_PSRAM_GET_TUNING_CONFIG(
-                ESP32S3_SPI_TIMING_CORE_CLK, 120, PSRAM_MODE);
+  *config = MSPI_TIMING_PSRAM_GET_TUNING_CONFIG(
+              ESP32S3_SPI_TIMING_CORE_CLK, 120, PSRAM_MODE);
 #endif
 
 #undef PSRAM_MODE
@@ -1045,6 +1049,7 @@ static void find_max_consecutive_success_points(uint8_t *array,
   uint32_t match_num = 0;
   uint32_t i = 0;
   uint32_t end = 0;
+
   while (i < size)
     {
       if (array[i])
@@ -1095,6 +1100,7 @@ static uint32_t select_best_tuning_config_str(tuning_config_s *config,
   /* STR best point scheme */
 
   uint32_t best_point;
+
   if (consecutive_length <= 2 || consecutive_length >= 5)
     {
       /* tuning is FAIL, select default point, and generate a warning */
@@ -1205,6 +1211,7 @@ static void select_best_tuning_config(tuning_config_s *config,
                     const uint8_t *reference_data, bool is_flash)
 {
   uint32_t best_point = 0;
+
   if (is_flash)
     {
 #if MSPI_TIMING_FLASH_DTR_MODE
@@ -1495,9 +1502,9 @@ void IRAM_ATTR esp32s3_spi_timing_set_mspi_psram_tuning(void)
 {
 #if ESP32S3_SPI_TIMING_PSRAM_TUNING
   tuning_config_s timing_configs =
-    {
-      0
-    };
+  {
+    0
+  };
 
   /* set SPI01 related regs to 20mhz configuration, to write reference data
    * to PSRAM.
@@ -1508,6 +1515,7 @@ void IRAM_ATTR esp32s3_spi_timing_set_mspi_psram_tuning(void)
   /* write data into psram, used to do timing tuning test. */
 
   uint8_t reference_data[MSPI_TIMING_TEST_DATA_LEN];
+
   for (int i = 0; i < MSPI_TIMING_TEST_DATA_LEN / 4; i++)
     {
       ((uint32_t *)reference_data)[i] = 0xa5ff005a;
@@ -1547,9 +1555,9 @@ void IRAM_ATTR esp32s3_spi_timing_set_mspi_flash_tuning(void)
 {
 #if ESP32S3_SPI_TIMING_FLASH_TUNING
   tuning_config_s timing_configs =
-    {
-      0
-    };
+  {
+    0
+  };
 
   /* set SPI01 related regs to 20mhz configuration, to get reference data
    * from FLASH.
