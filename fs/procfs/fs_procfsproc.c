@@ -465,6 +465,10 @@ static FAR const struct proc_node_s *proc_findnode(FAR const char *relpath)
  *   Type:       xxxxxxx            {Task, pthread, Kthread, Invalid}
  *   PPID:       xxxxx              Parent thread ID
  *   Group:      xxxxx              Group ID
+ *   Uid:        xxxxx xxxxx        Real, effective user ID
+ *                                  (CONFIG_SCHED_USER_IDENTITY only)
+ *   Gid:        xxxxx xxxxx        Real, effective group ID
+ *                                  (CONFIG_SCHED_USER_IDENTITY only)
  *   CPU:        xxx                CPU (CONFIG_SMP only)
  *   State:      xxxxxxxx,xxxxxxxxx {Invalid, Waiting, Ready, Running,
  *                                   Inactive},
@@ -541,6 +545,31 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
     {
       return totalsize;
     }
+
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  /* Show the real and the effective user and group IDs */
+
+  if (tcb->group != NULL)
+    {
+      linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                                   "%-12s%u %u\n%-12s%u %u\n",
+                                   "Uid:", tcb->group->tg_uid,
+                                   tcb->group->tg_euid,
+                                   "Gid:", tcb->group->tg_gid,
+                                   tcb->group->tg_egid);
+      copysize   = procfs_memcpy(procfile->line, linesize, buffer,
+                                 remaining, &offset);
+
+      totalsize += copysize;
+      buffer    += copysize;
+      remaining -= copysize;
+
+      if (totalsize >= buflen)
+        {
+          return totalsize;
+        }
+    }
+#endif
 
 #ifdef CONFIG_SMP
   if (tcb->task_state >= FIRST_ASSIGNED_STATE &&
@@ -2196,6 +2225,19 @@ static int proc_stat(const char *relpath, struct stat *buf)
   /* Was the <pid> the final element of the path? */
 
   memset(buf, 0, sizeof(struct stat));
+
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  /* The directory and its files belong to the effective user and group of
+   * the task group.
+   */
+
+  if (tcb->group != NULL)
+    {
+      buf->st_uid = tcb->group->tg_euid;
+      buf->st_gid = tcb->group->tg_egid;
+    }
+#endif
+
   if (*ptr == '\0' || strcmp(ptr, "/") == 0)
     {
       /* Yes ... It's a read-only directory */
