@@ -66,11 +66,11 @@
 
 struct utsname
 {
-  char sysname[SYS_NAMELEN];      /* Name of OS */
-  char nodename[HOST_NAME_MAX];   /* Name of this network node */
-  char release[SYS_NAMELEN];      /* Release level */
-  char version[VERSION_NAMELEN];  /* Version level */
-  char machine[SYS_NAMELEN];      /* Machine hardware */
+  char sysname[SYS_NAMELEN];        /* Name of OS */
+  char nodename[HOST_NAME_MAX + 1]; /* Name of this network node */
+  char release[SYS_NAMELEN];        /* Release level */
+  char version[VERSION_NAMELEN];    /* Version level */
+  char machine[SYS_NAMELEN];        /* Machine hardware */
 };
 
 /****************************************************************************
