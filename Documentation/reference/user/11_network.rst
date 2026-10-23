@@ -622,3 +622,26 @@ name servers, timeouts and retries as the DNS client. ``dn_comp()``,
 
   :return: The size of the name in bytes on success; -1 if the name is not
     valid or does not end before ``end``.
+
+Resolver Error Messages (``netdb.h``)
+-------------------------------------
+
+``gethostbyname()``, ``gethostbyaddr()`` and :c:func:`res_query` give their
+errors in ``h_errno``. These functions give the message for an ``h_errno``
+value. They are available with ``CONFIG_LIBC_NETDB``.
+
+  - :c:func:`hstrerror`
+  - :c:func:`herror`
+
+.. c:function:: const char *hstrerror(int errnum);
+
+  Give the message for ``errnum``: ``HOST_NOT_FOUND``, ``NO_DATA``,
+  ``NO_RECOVERY`` or ``TRY_AGAIN``. Other values give "Unknown resolver
+  error".
+
+  :return: A constant string, never ``NULL``.
+
+.. c:function:: void herror(const char *s);
+
+  Write the message for the current ``h_errno`` to ``stderr``. When ``s`` is
+  not ``NULL`` and not empty, the line starts with ``s`` and ``": "``.
