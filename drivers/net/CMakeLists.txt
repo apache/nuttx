@@ -100,6 +100,14 @@ if(CONFIG_NET)
     endif()
   endif()
 
+  if(CONFIG_NET_PHY_RTL8201F)
+    list(APPEND SRCS phy/rtl8201f.c)
+  endif()
+
+  if(CONFIG_NET_PHY_RTL8211F)
+    list(APPEND SRCS phy/rtl8211f.c)
+  endif()
+
   if(CONFIG_NET_E1000)
     list(APPEND SRCS e1000.c)
   endif()
