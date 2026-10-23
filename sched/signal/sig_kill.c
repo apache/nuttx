@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <sched.h>
 #include <errno.h>
+#include <limits.h>
 #include <unistd.h>
 #include <nuttx/debug.h>
 
@@ -52,14 +53,14 @@
  *   the POSIX standard kill() function but does not modify the application
  *   errno variable.
  *
- *   Limitation: Sending of signals to 'process groups' is not
- *   supported in NuttX
+ *   A process group is one process in NuttX: a process group ID is the
+ *   ID of its only process.  A signal to all processes (pid -1) is not
+ *   supported.
  *
  * Input Parameters:
  *   pid - The id of the task to receive the signal.  The POSIX nxsig_kill
  *     specification encodes process group information as zero and
- *     negative pid values.  Only positive, non-zero values of pid are
- *     supported by this implementation.
+ *     negative pid values: 0 is the caller and -pid is the process pid.
  *   signo - The signal number to send.  If signo is zero, no signal is
  *     sent, but all error checking is performed.
  *
@@ -72,7 +73,7 @@
  *    EPERM  The process does not have permission to send the
  *           signal to any of the target processes.
  *    ESRCH  The pid or process group does not exist.
- *    ENOSYS Do not support sending signals to process groups.
+ *    ENOSYS pid is -1: a signal to all processes is not supported.
  *
  ****************************************************************************/
 
@@ -85,11 +86,28 @@ int nxsig_kill(pid_t pid, int signo)
   siginfo_t info;
 #endif
 
-  /* We do not support sending signals to process groups */
+  /* NuttX has no process group with more than one process: the process
+   * group of a process is the process itself (getpgid(), setpgid() and
+   * killpg() say so).  So pid 0 (the process group of the caller) is the
+   * caller, and -pid (the process group pid) is the process pid.  All the
+   * processes of the system (-1) are not supported.
+   */
 
-  if (pid < 0)
+  if (pid == 0)
+    {
+      pid = nxsched_getpid();
+    }
+  else if (pid == -1)
     {
       return -ENOSYS;
+    }
+  else if (pid < 0 && pid != INT_MIN)
+    {
+      /* The process pid.  INT_MIN stays as it is (-INT_MIN does not
+       * fit): no process has it, so the signal fails with ESRCH.
+       */
+
+      pid = -pid;
     }
 
   if (signo == 0)
@@ -132,14 +150,14 @@ int nxsig_kill(pid_t pid, int signo)
  *   The kill() system call can be used to send any signal to any task
  *   group.
  *
- *   Limitation: Sending of signals to 'process groups' is not
- *   supported in NuttX
+ *   A process group is one process in NuttX: a process group ID is the
+ *   ID of its only process.  A signal to all processes (pid -1) is not
+ *   supported.
  *
  * Input Parameters:
  *   pid - The id of the task to receive the signal.  The POSIX kill
  *     specification encodes process group information as zero and
- *     negative pid values.  Only positive, non-zero values of pid are
- *     supported by this implementation.
+ *     negative pid values: 0 is the caller and -pid is the process pid.
  *   signo - The signal number to send.  If signo is zero, no signal is
  *     sent, but all error checking is performed.
  *
@@ -152,7 +170,7 @@ int nxsig_kill(pid_t pid, int signo)
  *      EPERM  The process does not have permission to send the
  *             signal to any of the target processes.
  *      ESRCH  The pid or process group does not exist.
- *      ENOSYS Do not support sending signals to process groups.
+ *      ENOSYS pid is -1: a signal to all processes is not supported.
  *
  ****************************************************************************/
 

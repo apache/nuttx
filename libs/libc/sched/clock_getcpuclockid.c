@@ -60,7 +60,7 @@ int clock_getcpuclockid(pid_t pid, FAR clockid_t *clockid)
     {
       pid = _SCHED_GETPID();
     }
-  else if (_SIG_KILL(pid, 0) < 0)
+  else if (pid < 0 || _SIG_KILL(pid, 0) < 0)
     {
       return ERROR;
     }
