@@ -46,6 +46,16 @@
 #include "task/task.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if CONFIG_TASK_MAX_ARGS < 4
+#  define NXTASK_ARG_LEN_CACHE_SIZE CONFIG_TASK_MAX_ARGS
+#else
+#  define NXTASK_ARG_LEN_CACHE_SIZE 4
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -520,7 +530,9 @@ int nxtask_setup_stackargs(FAR struct tcb_s *tcb,
   FAR char *str;
   size_t strtablen;
   size_t argvlen;
-  int nbytes;
+  size_t arglen[NXTASK_ARG_LEN_CACHE_SIZE];
+  size_t namelen;
+  size_t nbytes;
   int argc;
   int i;
   int ret = OK;
@@ -534,7 +546,8 @@ int nxtask_setup_stackargs(FAR struct tcb_s *tcb,
 
   /* Get the size of the task name (including the NUL terminator) */
 
-  strtablen = (strlen(name) + 1);
+  namelen = strlen(name) + 1;
+  strtablen = namelen;
 
   /* Count the number of arguments and get the accumulated size of the
    * argument strings (including the null terminators).  The argument count
@@ -553,26 +566,34 @@ int nxtask_setup_stackargs(FAR struct tcb_s *tcb,
            * size of the allocated stack.
            */
 
-          strtablen += (strlen(argv[argc]) + 1);
+          nbytes = strlen(argv[argc]) + 1;
+          strtablen += nbytes;
           DEBUGASSERT(strtablen < tcb->adj_stack_size);
           if (strtablen >= tcb->adj_stack_size)
             {
               ret = -ENAMETOOLONG;
+              break;
             }
-          else
-            {
-              /* Increment the number of args.  Here is a sanity check to
-               * prevent running away with an unterminated argv[] list.
-               * CONFIG_TASK_MAX_ARGS should be sufficiently large that this
-               * never happens in normal usage.
-               */
 
-              DEBUGASSERT(argc <= CONFIG_TASK_MAX_ARGS);
-              if (++argc > CONFIG_TASK_MAX_ARGS)
-                {
-                  ret = -E2BIG;
-                }
+          /* Increment the number of args.  Here is a sanity check to
+           * prevent running away with an unterminated argv[] list.
+           * CONFIG_TASK_MAX_ARGS should be sufficiently large that this
+           * never happens in normal usage.
+           */
+
+          DEBUGASSERT(argc < CONFIG_TASK_MAX_ARGS);
+          if (argc >= CONFIG_TASK_MAX_ARGS)
+            {
+              ret = -E2BIG;
+              break;
             }
+
+          if (argc < NXTASK_ARG_LEN_CACHE_SIZE)
+            {
+              arglen[argc] = nbytes;
+            }
+
+          argc++;
         }
     }
 
@@ -604,8 +625,8 @@ int nxtask_setup_stackargs(FAR struct tcb_s *tcb,
            */
 
           stackargv[0] = str;
-          nbytes       = strlen(name) + 1;
-          strlcpy(str, name, strtablen);
+          nbytes       = namelen;
+          memcpy(str, name, nbytes);
           str         += nbytes;
           strtablen   -= nbytes;
 
@@ -614,16 +635,23 @@ int nxtask_setup_stackargs(FAR struct tcb_s *tcb,
           for (i = 0; i < argc; i++)
             {
               /* Save the pointer to the location in the string buffer and
-               * copy the argument into the buffer. Increment str to skip
-               * over the argument and its NUL terminator in the string
-               * buffer.
+               * copy the argument into the buffer.  Use cached lengths for
+               * the common short argv case.  For larger argv lists, stpcpy()
+               * still avoids the separate strlen() before copying and
+               * returns the address of the terminating NUL.
                */
 
               stackargv[i + 1] = str;
-              nbytes           = strlen(argv[i]) + 1;
-              strlcpy(str, argv[i], strtablen);
-              str             += nbytes;
-              strtablen       -= nbytes;
+              if (i < NXTASK_ARG_LEN_CACHE_SIZE)
+                {
+                  nbytes = arglen[i];
+                  memcpy(str, argv[i], nbytes);
+                  str += nbytes;
+                }
+              else
+                {
+                  str = stpcpy(str, argv[i]) + 1;
+                }
             }
 
           /* Put a terminator entry at the end of the argv[] array. Then
