@@ -58,6 +58,7 @@ static int do_glob(FAR char *buf, size_t pos, int type, FAR char *pat,
                    int flags,
                    CODE int (*errfunc)(FAR const char *path, int err),
                    FAR struct match_s **tail);
+static int glob_home(FAR const char *user, FAR char *home);
 static int ignore_err(FAR const char *path, int err);
 static void freelist(FAR struct match_s *head);
 static int sort(FAR const void *a, FAR const void *b);
@@ -404,6 +405,73 @@ static int sort(FAR const void *a, FAR const void *b)
 }
 
 /****************************************************************************
+ * Name: glob_home
+ *
+ * Description:
+ *   Copy the home directory of a user to home (PATH_MAX bytes).  An empty
+ *   user name is the calling user: then HOME is used when it is set, else
+ *   the password database.
+ *
+ * Returned Value:
+ *   Zero on success, GLOB_NOMATCH when the home directory is not known,
+ *   GLOB_NOSPACE when there is no memory.
+ *
+ ****************************************************************************/
+
+static int glob_home(FAR const char *user, FAR char *home)
+{
+  FAR const char *dir = NULL;
+  FAR struct passwd *entry = NULL;
+  FAR char *pwbuf = NULL;
+  struct passwd pwd;
+  int ret = 0;
+
+  if (user[0] == '\0')
+    {
+      dir = getenv("HOME");
+    }
+
+  if (dir == NULL)
+    {
+      pwbuf = lib_get_tempbuffer(NSS_BUFLEN_PASSWD);
+      if (pwbuf == NULL)
+        {
+          return GLOB_NOSPACE;
+        }
+
+      if (user[0] == '\0')
+        {
+          ret = getpwuid_r(getuid(), &pwd, pwbuf, NSS_BUFLEN_PASSWD, &entry);
+        }
+      else
+        {
+          ret = getpwnam_r(user, &pwd, pwbuf, NSS_BUFLEN_PASSWD, &entry);
+        }
+
+      if (ret == 0 && entry != NULL)
+        {
+          dir = entry->pw_dir;
+        }
+    }
+
+  if (dir == NULL)
+    {
+      ret = ret == ENOMEM ? GLOB_NOSPACE : GLOB_NOMATCH;
+    }
+  else if (strlcpy(home, dir, PATH_MAX) >= PATH_MAX - 1)
+    {
+      ret = GLOB_NOMATCH;
+    }
+
+  if (pwbuf != NULL)
+    {
+      lib_put_tempbuffer(pwbuf);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -459,7 +527,58 @@ int glob(FAR const char *pat, int flags,
       buf[0] = 0;
       s = p;
 
-      error = do_glob(buf, pos, 0, s, flags, errfunc, &tail);
+      /* "~" or "~user" at the start of the pattern: the home directory
+       * goes to buf, and the rest of the pattern after the "/" is matched
+       * in it.
+       */
+
+      if ((flags & (GLOB_TILDE | GLOB_TILDE_CHECK)) != 0 && s[0] == '~')
+        {
+          FAR char *slash = strchr(s, '/');
+
+          if (slash != NULL)
+            {
+              *slash = '\0';
+            }
+
+          error = glob_home(s + 1, buf);
+          if (error == 0)
+            {
+              pos = strlen(buf);
+              if (slash != NULL)
+                {
+                  buf[pos++] = '/';
+                  buf[pos] = '\0';
+                  s = slash + 1;
+                }
+              else
+                {
+                  s += strlen(s);
+                }
+            }
+          else
+            {
+              /* Without GLOB_TILDE_CHECK an unknown home directory is not
+               * an error: the pattern is used as it is.
+               */
+
+              if (slash != NULL)
+                {
+                  *slash = '/';
+                }
+
+              buf[0] = '\0';
+              if (error == GLOB_NOMATCH && (flags & GLOB_TILDE_CHECK) == 0)
+                {
+                  error = 0;
+                }
+            }
+        }
+
+      if (error == 0)
+        {
+          error = do_glob(buf, pos, 0, s, flags, errfunc, &tail);
+        }
 
       lib_free(p);
     }

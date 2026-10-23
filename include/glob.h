@@ -50,6 +50,14 @@
 #define GLOB_NOESCAPE 0x20 /* Disable backslash escaping. */
 #define GLOB_NOSORT   0x40 /* Do not sort the pathnames returned. */
 
+/* Extensions, with the values of other C libraries: */
+
+#define GLOB_TILDE       0x1000 /* Expand a "~" or "~name" at the start
+                                 * of the pattern to a home directory. */
+#define GLOB_TILDE_CHECK 0x4000 /* As GLOB_TILDE, but fail with
+                                 * GLOB_NOMATCH if the home directory is
+                                 * not known. */
+
 /* The following constants shall be defined as error return values:
  */
 
