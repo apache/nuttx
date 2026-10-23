@@ -115,6 +115,10 @@
 #define MAX3421E_DATANAK_DELAY       SEC2TICK(5) /* 5 seconds in system ticks */
 #define MAX3421E_RETRY_COUNT         5           /* Number of tries before giving up */
 
+/* Maximum time to wait for a MAX3421E event (in system ticks) */
+
+#define MAX3421E_INT_TIMEOUT         MSEC2TICK(500)
+
 /* Debug ********************************************************************/
 
 #define TR_FMT1 false
@@ -511,7 +515,7 @@ static inline uint8_t max3421e_int_status(
               FAR struct max3421e_usbhost_s *priv);
 static inline void max3421e_int_clear(FAR struct max3421e_usbhost_s *priv,
               uint8_t irqset);
-static void max3421e_int_wait(FAR struct max3421e_usbhost_s *priv,
+static int max3421e_int_wait(FAR struct max3421e_usbhost_s *priv,
               uint8_t irqset, unsigned int usec);
 
 /* USB host controller operations *******************************************/
@@ -564,7 +568,7 @@ static void max3421e_disconnect(FAR struct usbhost_driver_s *drvr,
 
 /* Initialization ***********************************************************/
 
-static void max3421e_busreset(FAR struct max3421e_usbhost_s *priv);
+static int max3421e_busreset(FAR struct max3421e_usbhost_s *priv);
 static int  max3421e_startsof(FAR struct max3421e_usbhost_s *priv);
 
 static inline int max3421e_sw_initialize(FAR struct max3421e_usbhost_s *priv,
@@ -2689,6 +2693,13 @@ static ssize_t max3421e_in_transfer(FAR struct max3421e_usbhost_s *priv,
 
       ret = max3421e_chan_wait(priv, chan);
 
+      /* Account for the data received before the transfer ended.  A full
+       * packet is followed by another IN token, so the data of a transfer
+       * that ends with a NAK is valid too.
+       */
+
+      xfrd += priv->xfrd;
+
       /* EAGAIN indicates that the device NAKed the transfer. */
 
       if (ret < 0)
@@ -2789,7 +2800,30 @@ static ssize_t max3421e_in_transfer(FAR struct max3421e_usbhost_s *priv,
                    * amount and destroy system throughput?
                    */
 
-                  if (delay > CONFIG_USEC_PER_TICK)
+                  if (chan->eptype == USB_EP_ATTR_XFER_INT)
+                    {
+                      /* Release the host while waiting for the next
+                       * polling interval.  Otherwise an idle interrupt
+                       * endpoint would block the transfers of the other
+                       * endpoints (e.g. the keyboard and the mouse of a
+                       * composite device) until the NAK timeout.
+                       */
+
+                      nxrmutex_unlock(&priv->lock);
+                      nxsched_usleep(delay);
+                      ret = nxrmutex_lock(&priv->lock);
+                      if (ret < 0)
+                        {
+                          return (ssize_t)ret;
+                        }
+
+                      /* Other transfers may have used the shared state */
+
+                      priv->buffer = buffer;
+                      priv->buflen = buflen;
+                      priv->xfrd   = 0;
+                    }
+                  else if (delay > CONFIG_USEC_PER_TICK)
                     {
                       nxsched_usleep(delay - CONFIG_USEC_PER_TICK);
                     }
@@ -2808,13 +2842,11 @@ static ssize_t max3421e_in_transfer(FAR struct max3421e_usbhost_s *priv,
         }
       else
         {
-          /* Successfully received another chunk of data... add that to the
-           * running total.  Then continue reading until we read 'buflen'
-           * bytes of data or until the devices NAKs (implying a short
-           * packet).
+          /* The transfer completed:  either all of the requested data was
+           * received or a short packet ended the transfer.
            */
 
-          xfrd += priv->xfrd;
+          break;
         }
     }
 
@@ -3031,7 +3063,13 @@ static int max3421e_connected(FAR struct max3421e_usbhost_s *priv)
 
   /* Stop SOF generation and reset the bus */
 
-  max3421e_busreset(priv);
+  ret = max3421e_busreset(priv);
+  if (ret < 0)
+    {
+      usbhost_trace1(MAX3421E_TRACE1_DEVDISCONN7, -ret);
+      return ret;
+    }
+
   nxsched_sleep(1);
 
   /* Check for low- or full-speed and restart SOF generation. */
@@ -3073,6 +3111,42 @@ static void max3421e_disconnected(FAR struct max3421e_usbhost_s *priv)
 }
 
 /****************************************************************************
+ * Name: max3421e_bussample
+ *
+ * Description:
+ *   Sample the J/K state of the bus into the HRSL register.
+ *
+ * Returned Value:
+ *   OK on success; -ETIMEDOUT if the sample was not taken.
+ *
+ * Assumptions:
+ *   The SPI bus is locked.
+ *
+ ****************************************************************************/
+
+static int max3421e_bussample(FAR struct max3421e_usbhost_s *priv)
+{
+  clock_t start;
+
+  max3421e_modifyreg(priv, MAX3421E_USBHOST_HCTL, 0,
+                     USBHOST_HCTL_BUSSAMPLE);
+
+  start = clock_systime_ticks();
+  while ((max3421e_getreg(priv, MAX3421E_USBHOST_HCTL) &
+          USBHOST_HCTL_BUSSAMPLE) == 0)
+    {
+      if (clock_systime_ticks() - start > MAX3421E_INT_TIMEOUT)
+        {
+          return -ETIMEDOUT;
+        }
+
+      nxsched_usleep(5);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: max3421e_device_present
  *
  * Description:
@@ -3088,13 +3162,9 @@ static bool max3421e_device_present(FAR struct max3421e_usbhost_s *priv)
 {
   uint8_t regval;
 
-  max3421e_modifyreg(priv, MAX3421E_USBHOST_HCTL, 0,
-                     USBHOST_HCTL_BUSSAMPLE);
-
-  while ((max3421e_getreg(priv, MAX3421E_USBHOST_HCTL) &
-          USBHOST_HCTL_BUSSAMPLE) == 0)
+  if (max3421e_bussample(priv) < 0)
     {
-      nxsched_usleep(5);
+      return false;
     }
 
   regval = max3421e_getreg(priv, MAX3421E_USBHOST_HRSL);
@@ -3349,24 +3419,30 @@ static inline void max3421e_int_clear(FAR struct max3421e_usbhost_s *priv,
   max3421e_putreg(priv, MAX3421E_USBHOST_HIRQ, irqset);
 }
 
-/* Wait until any interrupt from a set of interrupts occurs */
+/* Wait until any interrupt from a set of interrupts occurs.  These events
+ * never come if the MAX3421E oscillator is not running, so give up after
+ * MAX3421E_INT_TIMEOUT.
+ */
 
-static void max3421e_int_wait(FAR struct max3421e_usbhost_s *priv,
-                              uint8_t irqset, unsigned int usec)
+static int max3421e_int_wait(FAR struct max3421e_usbhost_s *priv,
+                             uint8_t irqset, unsigned int usec)
 {
-  uint8_t regval;
+  clock_t start = clock_systime_ticks();
 
-  do
+  while ((max3421e_getreg(priv, MAX3421E_USBHOST_HIRQ) & irqset) == 0)
     {
-      regval  =  max3421e_getreg(priv, MAX3421E_USBHOST_HIRQ);
-      regval &= irqset;
+      if (clock_systime_ticks() - start > MAX3421E_INT_TIMEOUT)
+        {
+          return -ETIMEDOUT;
+        }
 
-      if (regval == 0 && usec > 0)
+      if (usec > 0)
         {
           nxsched_usleep(usec);
         }
     }
-  while (regval == 0);
+
+  return OK;
 }
 
 /****************************************************************************
@@ -3535,7 +3611,13 @@ static int max3421e_getspeed(FAR struct max3421e_usbhost_s *priv,
 
   /* Stop SOF generation and reset the host port */
 
-  max3421e_busreset(priv);
+  ret = max3421e_busreset(priv);
+  if (ret < 0)
+    {
+      usbhost_trace1(MAX3421E_TRACE1_DEVDISCONN8, -ret);
+      return ret;
+    }
+
   nxsched_sleep(1);
 
   /* Get the current device speed */
@@ -4135,6 +4217,14 @@ static int max3421e_ctrlin(FAR struct usbhost_driver_s *drvr,
               usbhost_trace1(MAX3421E_TRACE1_SENDSTATUS_FAIL, -ret);
             }
 
+          /* A STALL is the final answer of the device, do not retry */
+
+          if (ret == -EPERM)
+            {
+              nxrmutex_unlock(&priv->lock);
+              return ret;
+            }
+
           /* Get the elapsed time (in frames) */
 
           elapsed = clock_systime_ticks() - start;
@@ -4235,6 +4325,14 @@ static int max3421e_ctrlout(FAR struct usbhost_driver_s *drvr,
                 }
 
               usbhost_trace1(MAX3421E_TRACE1_RECVSTATUS_FAIL, -ret);
+            }
+
+          /* A STALL is the final answer of the device, do not retry */
+
+          if (ret == -EPERM)
+            {
+              nxrmutex_unlock(&priv->lock);
+              return ret;
             }
 
           /* Get the elapsed time (in frames) */
@@ -4594,12 +4692,14 @@ static void max3421e_disconnect(FAR struct usbhost_driver_s *drvr,
  *   priv -- USB host driver private data structure.
  *
  * Returned Value:
- *   None
+ *   OK on success; -ETIMEDOUT if the reset did not complete.
  *
  ****************************************************************************/
 
-static void max3421e_busreset(FAR struct max3421e_usbhost_s *priv)
+static int max3421e_busreset(FAR struct max3421e_usbhost_s *priv)
 {
+  int ret;
+
   /* Disable the SOF generator */
 
   max3421e_modifyreg(priv, MAX3421E_USBHOST_MODE, USBHOST_MODE_SOFKAENAB, 0);
@@ -4611,11 +4711,12 @@ static void max3421e_busreset(FAR struct max3421e_usbhost_s *priv)
   /* Perform the reset */
 
   max3421e_modifyreg(priv, MAX3421E_USBHOST_HCTL, 0, USBHOST_HCTL_BUSRST);
-  max3421e_int_wait(priv, USBHOST_HIRQ_BUSEVENTIRQ, 250);
+  ret = max3421e_int_wait(priv, USBHOST_HIRQ_BUSEVENTIRQ, 250);
 
   /* The reset (SE0) is seen as a connection change; discard it */
 
   max3421e_int_clear(priv, USBHOST_HIRQ_CONNIRQ);
+  return ret;
 }
 
 /****************************************************************************
@@ -4628,7 +4729,8 @@ static void max3421e_busreset(FAR struct max3421e_usbhost_s *priv)
  *   priv -- USB host driver private data structure.
  *
  * Returned Value:
- *   OK if successfully connect; -ENODEV if not connected.
+ *   OK if successfully connect; -ENODEV if not connected; -ETIMEDOUT if
+ *   the MAX3421E did not respond.
  *
  ****************************************************************************/
 
@@ -4638,6 +4740,7 @@ static int max3421e_startsof(FAR struct max3421e_usbhost_s *priv)
   uint8_t setbits;
   uint8_t regval;
   bool lowspeed;
+  int ret;
 
   /* Check if we are already in low- or full-speed mode */
 
@@ -4646,13 +4749,10 @@ static int max3421e_startsof(FAR struct max3421e_usbhost_s *priv)
 
   /* Enable SAMPLEBUS */
 
-  max3421e_modifyreg(priv, MAX3421E_USBHOST_HCTL, 0,
-                     USBHOST_HCTL_BUSSAMPLE);
-
-  while ((max3421e_getreg(priv, MAX3421E_USBHOST_HCTL) &
-          USBHOST_HCTL_BUSSAMPLE) == 0)
+  ret = max3421e_bussample(priv);
+  if (ret < 0)
     {
-      nxsched_usleep(5);
+      return ret;
     }
 
   /* Check for low- or full-speed and start SOF (actually already started
@@ -4725,7 +4825,12 @@ static int max3421e_startsof(FAR struct max3421e_usbhost_s *priv)
 
   /* Wait for the first SOF received and 20ms has passed */
 
-  max3421e_int_wait(priv, USBHOST_HIRQ_FRAMEIRQ, 0);
+  ret = max3421e_int_wait(priv, USBHOST_HIRQ_FRAMEIRQ, 0);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   nxsched_usleep(20 * 1000);
   return OK;
 }
@@ -4906,8 +5011,11 @@ static inline int max3421e_hw_initialize(FAR struct max3421e_usbhost_s *priv)
     {
       if (i >= 100)
         {
-          uwarn("WARNING: Timeout waiting for OSCOKIRQ\n");
-          break;
+          /* Without the oscillator the USB engine does not run */
+
+          uerr("ERROR: Timeout waiting for OSCOKIRQ\n");
+          max3421e_unlock(priv);
+          return -ENODEV;
         }
 
       nxsched_usleep(1000);

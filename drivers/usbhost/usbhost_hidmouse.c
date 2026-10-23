@@ -254,6 +254,7 @@ struct usbhost_state_s
   volatile bool           valid;        /* TRUE: New sample data is available */
   uint8_t                 devno;        /* Minor number in the /dev/mouse[n] device */
   uint8_t                 ifno;         /* Mouse interface number */
+  uint8_t                 reportid;     /* Mouse report ID (0: boot protocol) */
   uint8_t                 nwaiters;     /* Number of threads waiting for mouse data */
 #ifdef CONFIG_HIDMOUSE_TSCIF
   uint8_t                 id;           /* Current "touch" point ID */
@@ -315,6 +316,8 @@ static bool usbhost_touchscreen(FAR struct usbhost_state_s *priv,
 #endif
 static bool usbhost_threshold(FAR struct usbhost_state_s *priv);
 static int usbhost_mouse_poll(int argc, FAR char *argv[]);
+static void usbhost_reportdesc(FAR struct usbhost_state_s *priv,
+                               FAR const uint8_t *desc, int len);
 static int usbhost_sample(FAR struct usbhost_state_s *priv,
                           FAR struct mouse_sample_s *sample);
 static int usbhost_waitsample(FAR struct usbhost_state_s *priv,
@@ -932,6 +935,138 @@ static bool usbhost_threshold(FAR struct usbhost_state_s *priv)
 }
 
 /****************************************************************************
+ * Name: usbhost_reportdesc
+ *
+ * Description:
+ *   Parse the HID report descriptor and find the report ID of the mouse
+ *   application collection.  The report ID is used only if the X and Y
+ *   fields are 8 bits wide, i.e. the report has the boot protocol layout
+ *   after the report ID.
+ *
+ ****************************************************************************/
+
+static void usbhost_reportdesc(FAR struct usbhost_state_s *priv,
+                               FAR const uint8_t *desc, int len)
+{
+  uint32_t value;
+  uint8_t usagepage = 0;
+  uint8_t usage = 0;
+  uint8_t rptsize = 0;
+  uint8_t xsize = 0;
+  uint8_t reportid = 0;
+  bool inmouse = false;
+  bool hasx = false;
+  int depth = 0;
+  int mousedepth = 0;
+  int size;
+  int i;
+  int j;
+
+  for (i = 0; i < len; i += 1 + size)
+    {
+      /* Long items are not used by mice, just skip them */
+
+      if (desc[i] == 0xfe)
+        {
+          size = i + 1 < len ? desc[i + 1] + 2 : len;
+          continue;
+        }
+
+      size = desc[i] & 0x03;
+      if (size == 3)
+        {
+          size = 4;
+        }
+
+      if (i + size >= len)
+        {
+          break;
+        }
+
+      for (value = 0, j = 0; j < size; j++)
+        {
+          value |= (uint32_t)desc[i + 1 + j] << (8 * j);
+        }
+
+      switch (desc[i] & 0xfc)
+        {
+          case 0x04: /* Usage Page */
+            usagepage = value;
+            break;
+
+          case 0x74: /* Report Size */
+            rptsize = value;
+            break;
+
+          case 0x84: /* Report ID */
+            if (inmouse && reportid == 0)
+              {
+                reportid = value;
+              }
+            break;
+
+          case 0x08: /* Usage */
+            usage = value;
+            if (usagepage == 0x01 && value == 0x30) /* X */
+              {
+                hasx = true;
+              }
+            break;
+
+          case 0xa0: /* Collection */
+            depth++;
+            if (!inmouse && value == 0x01 && usagepage == 0x01 &&
+                usage == 0x02) /* Application, Mouse */
+              {
+                inmouse    = true;
+                mousedepth = depth;
+              }
+
+            usage = 0;
+            break;
+
+          case 0xc0: /* End Collection */
+            if (inmouse && depth == mousedepth)
+              {
+                inmouse = false;
+              }
+
+            depth--;
+            break;
+
+          case 0x80: /* Input */
+            if (inmouse && hasx && xsize == 0)
+              {
+                xsize = rptsize;
+              }
+
+            hasx  = false;
+            usage = 0;
+            break;
+
+          case 0x90: /* Output */
+          case 0xb0: /* Feature */
+            hasx  = false;
+            usage = 0;
+            break;
+
+          default:
+            break;
+        }
+    }
+
+  if (reportid != 0 && xsize != 8)
+    {
+      uwarn("WARNING: Mouse report %d has %d bit X/Y, using boot protocol\n",
+            reportid, xsize);
+      reportid = 0;
+    }
+
+  uinfo("Mouse report ID: %d\n", reportid);
+  priv->reportid = reportid;
+}
+
+/****************************************************************************
  * Name: usbhost_mouse_poll
  *
  * Description:
@@ -1006,11 +1141,11 @@ static int usbhost_mouse_poll(int argc, FAR char *argv[])
            * long time).
            */
 
-          uerr("ERROR: DRVR_TRANSFER returned: %d/%u\n",
-               (int)nbytes, nerrors);
-
           if (nbytes != -EAGAIN)
             {
+              uerr("ERROR: DRVR_TRANSFER returned: %d/%u\n",
+                   (int)nbytes, nerrors);
+
               if (++nerrors > 200)
                 {
                   uerr("  Too many errors... aborting: %d\n", nerrors);
@@ -1028,9 +1163,27 @@ static int usbhost_mouse_poll(int argc, FAR char *argv[])
 
           nerrors = 0;
 
+          /* In report protocol the report starts with the report ID:  skip
+           * it and ignore the other reports of the interface.
+           */
+
+          rpt = (FAR struct usbhid_mousereport_s *)priv->tbuffer;
+          if (priv->reportid != 0)
+            {
+              if (nbytes < 4 || priv->tbuffer[0] != priv->reportid)
+                {
+                  rpt = NULL;
+                }
+              else
+                {
+                  rpt = (FAR struct usbhid_mousereport_s *)
+                        &priv->tbuffer[1];
+                }
+            }
+
           /* Ignore the mouse data if no task has opened the driver. */
 
-          if (priv->open)
+          if (priv->open && rpt != NULL)
             {
               /* Get exclusive access to the mouse state data */
 
@@ -1041,10 +1194,6 @@ static int usbhost_mouse_poll(int argc, FAR char *argv[])
 
                   break;
                 }
-
-              /* Get the HID mouse report */
-
-              rpt = (FAR struct usbhid_mousereport_s *)priv->tbuffer;
 
               /* Get the updated mouse position */
 
@@ -1586,17 +1735,41 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
       return ret;
     }
 
+  /* Some devices ignore SET_PROTOCOL(boot) and keep sending report
+   * protocol reports, which start with a report ID.  Read the report
+   * descriptor to find the report ID of the mouse (the transfer buffer is
+   * not in use yet, so it holds the request and the descriptor).
+   */
+
+  ctrlreq           = (FAR struct usb_ctrlreq_s *)priv->tbuffer;
+  ctrlreq->type     = USB_REQ_DIR_IN | USB_REQ_RECIPIENT_INTERFACE;
+  ctrlreq->req      = USB_REQ_GETDESCRIPTOR;
+  ctrlreq->value[0] = 0;
+  ctrlreq->value[1] = USBHID_DESCTYPE_REPORT;
+  ctrlreq->index[0] = priv->ifno;
+  ctrlreq->index[1] = 0;
+  ctrlreq->len[0]   = priv->tbuflen - USB_SIZEOF_CTRLREQ;
+  ctrlreq->len[1]   = 0;
+
+  ret = DRVR_CTRLIN(priv->usbclass.hport->drvr, priv->usbclass.hport->ep0,
+                    ctrlreq, priv->tbuffer + USB_SIZEOF_CTRLREQ);
+  if (ret >= 0)
+    {
+      usbhost_reportdesc(priv, priv->tbuffer + USB_SIZEOF_CTRLREQ,
+                         priv->tbuflen - USB_SIZEOF_CTRLREQ);
+    }
+
   /* The reports are decoded using the fixed boot protocol format, but a HID
    * device starts in report protocol after configuration.  Select the boot
-   * protocol (the transfer buffer is not in use yet, so it holds the
-   * request).
+   * protocol, or the report protocol if the mouse report has a report ID
+   * and the boot protocol layout.
    */
 
   ctrlreq           = (FAR struct usb_ctrlreq_s *)priv->tbuffer;
   ctrlreq->type     = USB_REQ_DIR_OUT | USB_REQ_TYPE_CLASS |
                       USB_REQ_RECIPIENT_INTERFACE;
   ctrlreq->req      = USBHID_REQUEST_SETPROTOCOL;
-  ctrlreq->value[0] = 0;               /* 0 = Boot protocol */
+  ctrlreq->value[0] = priv->reportid != 0 ;  /* 1 = Report */
   ctrlreq->value[1] = 0;
   ctrlreq->index[0] = priv->ifno;
   ctrlreq->index[1] = 0;
@@ -1607,7 +1780,8 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
                      ctrlreq, NULL);
   if (ret < 0)
     {
-      uwarn("WARNING: SET_PROTOCOL(boot) failed: %d\n", ret);
+      uwarn("WARNING: SET_PROTOCOL(%d) failed: %d\n",
+            ctrlreq->value[0], ret);
     }
 
   /* Increment the reference count.  This will prevent usbhost_destroy() from
