@@ -111,6 +111,14 @@ config LIBC_HOSTNAME
 	---help---
 		A unique name to identify device on the network
 
+config HOST_NAME_MAX
+	int "Maximum size of a host name"
+	default 32
+	---help---
+		The maximum size of a host name, not including the terminating
+		null (HOST_NAME_MAX in limits.h).  POSIX requires at least 255
+		(_POSIX_HOST_NAME_MAX).
+
 config LIBC_OPEN_MAX
 	int "OPEN_MAX for this device"
 	default 256
