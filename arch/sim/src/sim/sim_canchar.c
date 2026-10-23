@@ -26,6 +26,7 @@
 
 #include <nuttx/debug.h>
 #include <stdio.h>
+#include <sys/param.h>
 #include <time.h>
 
 #include <nuttx/clock.h>
@@ -226,8 +227,10 @@ static int sim_can_send(struct can_dev_s *dev, struct can_msg_s *msg)
     {
       struct can_frame frame;
 
+      /* DLC 9..15 of a classic frame means 8 data bytes */
+
       frame.can_id  = msg->cm_hdr.ch_id;
-      frame.can_dlc = msg->cm_hdr.ch_dlc;
+      frame.can_dlc = MIN(msg->cm_hdr.ch_dlc, CAN_MAX_DLEN);
 
       if (msg->cm_hdr.ch_rtr)
         {
