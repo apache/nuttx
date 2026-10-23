@@ -1117,12 +1117,15 @@ static void esp32s3_spi_poll_exchange(struct esp32s3_spi_priv_s *priv,
       for (int i = 0 ; i < transfer_size; i += sizeof(uintptr_t))
         {
           uint32_t w_wd = UINT32_MAX;
+          size_t chunk = MIN(sizeof(uint32_t), transfer_size - i);
 
           if (tp != NULL)
             {
-              memcpy(&w_wd, tp, sizeof(uintptr_t));
+              /* The last word may be partial: never read past txbuffer */
 
-              tp += sizeof(uintptr_t);
+              memcpy(&w_wd, tp, chunk);
+
+              tp += chunk;
             }
 
           putreg32(w_wd, data_buf_reg);
@@ -1184,13 +1187,16 @@ static void esp32s3_spi_poll_exchange(struct esp32s3_spi_priv_s *priv,
           for (int i = 0 ; i < transfer_size; i += sizeof(uintptr_t))
             {
               uint32_t r_wd = getreg32(data_buf_reg);
+              size_t chunk = MIN(sizeof(uint32_t), transfer_size - i);
 
               spiinfo("recv=0x%" PRIx32 " data_reg=0x%" PRIxPTR "\n",
                       r_wd, data_buf_reg);
 
-              memcpy(rp, &r_wd, sizeof(uintptr_t));
+              /* The last word may be partial: never write past rxbuffer */
 
-              rp += sizeof(uintptr_t);
+              memcpy(rp, &r_wd, chunk);
+
+              rp += chunk;
 
               /* Update data_buf_reg to point to the next data buffer
                * register.
