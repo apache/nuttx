@@ -1815,6 +1815,18 @@ since there are some compatibility issues. By default SIM will be blocked at
 startup to wait client connection, if a client connected, then the fb example
 will launch.
 
+watchdog
+--------
+
+This configuration enables ``CONFIG_WATCHDOG_WDOG``, a watchdog timer
+registered at ``CONFIG_WATCHDOG_DEVPATH``. The simulator cannot reset itself,
+so the watchdog powers it off when it expires, with status 77
+(``CONFIG_WATCHDOG_WDOG_STATUS``). It enables the ``wdog`` example: it feeds
+the watchdog for a while, stops, and the simulator exits with that status when
+the timeout expires::
+
+    nsh> wdog
+
 vpnkit
 ------
 

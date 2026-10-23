@@ -24,6 +24,9 @@
 
 ifeq ($(CONFIG_WATCHDOG),y)
   CSRCS += watchdog.c
+  ifeq ($(CONFIG_WATCHDOG_WDOG),y)
+    CSRCS += watchdog_wdog.c
+  endif
   TMRDEPPATH = --dep-path timers
   TMRVPATH = :timers
 endif

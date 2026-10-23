@@ -480,6 +480,49 @@ menuconfig WATCHDOG
 
 if WATCHDOG
 
+config WATCHDOG_WDOG
+	bool "Watchdog implemented by wdog timer"
+	default n
+	depends on !WATCHDOG_AUTOMONITOR_BY_ONESHOT && !WATCHDOG_AUTOMONITOR_BY_TIMER
+	---help---
+		Build a watchdog timer on top of the wdog timers, for the platforms
+		that have no watchdog hardware, e.g. the simulator. It cannot detect
+		a system where the tick stopped. Not to be confused with
+		WATCHDOG_AUTOMONITOR_BY_WDOG, where a wdog feeds a real watchdog. It
+		is not available with the oneshot and timer auto-monitors, which
+		change the watchdog_register() prototype. Call
+		watchdog_wdog_initialize() from the board to register it.
+
+if WATCHDOG_WDOG
+
+config WATCHDOG_WDOG_TIMEOUT
+	int "Initial timeout (millisecond)"
+	default 5000
+
+choice WATCHDOG_WDOG_ACTION
+	prompt "Action when the watchdog expires"
+	default WATCHDOG_WDOG_PANIC
+
+config WATCHDOG_WDOG_PANIC
+	bool "Panic"
+
+config WATCHDOG_WDOG_REBOOT
+	bool "Reboot"
+	depends on BOARDCTL_RESET
+
+config WATCHDOG_WDOG_POWEROFF
+	bool "Power off"
+	depends on BOARDCTL_POWEROFF
+
+endchoice # WATCHDOG_WDOG_ACTION
+
+config WATCHDOG_WDOG_STATUS
+	int "Status passed to the board when it reboots or powers off"
+	default 0
+	depends on WATCHDOG_WDOG_REBOOT || WATCHDOG_WDOG_POWEROFF
+
+endif # WATCHDOG_WDOG
+
 config WATCHDOG_DEVPATH
 	string "Watchdog Device Path"
 	default "/dev/watchdog0"
