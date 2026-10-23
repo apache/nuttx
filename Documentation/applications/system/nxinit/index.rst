@@ -76,6 +76,16 @@ never set up at all (there is no ``/dev/console`` unless
 default, if omitted) and duplicating it onto the service's stdin, stdout
 and stderr before it is spawned.
 
+After the start, the device is also the controlling terminal of the
+service (``TIOCSCTTY`` with the PID of the service), as init and getty do
+on other systems: Ctrl-C and Ctrl-Z send ``SIGINT`` and ``SIGTSTP`` to it
+(with ``CONFIG_TTY_SIGINT`` and ``CONFIG_TTY_SIGTSTP``), and a shell finds
+its foreground process group with ``tcgetpgrp()``, so it can use job
+control. A device without these signals keeps working as before. The NSH
+``sh`` program gives up the terminal at its prompt and makes each
+foreground command the foreground process, so Ctrl-C at its prompt does
+not end it.
+
 This is required for a plain shell service (e.g. ``service console sh``)
 to actually be usable as an interactive console. It is not needed for
 ``nsh`` (the full NSH application, as opposed to plain ``sh``), which
