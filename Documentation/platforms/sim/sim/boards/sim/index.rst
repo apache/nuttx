@@ -1827,6 +1827,16 @@ the timeout expires::
 
     nsh> wdog
 
+taskmonitor
+-----------
+
+This configuration enables the task supervision of the watchdog auto-monitor
+(``CONFIG_WATCHDOG_AUTOMONITOR_TASKS``) on top of ``CONFIG_WATCHDOG_WDOG``, which
+powers the simulator off with status 77 when it expires, because the simulator
+cannot reset. It enables the ``taskwdt_test`` application; run it without
+arguments for the list of test cases. The cases that end in a system reset make
+the simulator exit with that status.
+
 vpnkit
 ------
 
