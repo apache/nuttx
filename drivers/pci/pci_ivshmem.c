@@ -31,9 +31,8 @@
 #include <errno.h>
 #include <nuttx/debug.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/mutex.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/pci/pci.h>
 #include <nuttx/pci/pci_ivshmem.h>
 
@@ -45,75 +44,40 @@
 #define IVSHMEM_MSIX_BAR        1
 #define IVSHMEM_SHMEM_BAR       2
 
-#define IVSHMEM_REG_INT_MASK    0
-#define IVSHMEM_REG_INT_STATUS  4
-#define IVSHMEM_REG_IVPOSITION  8
-#define IVSHMEM_REG_DOORBELL    12
-
-#define IVSHMEM_INVALID_VMID    UINT32_MAX
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-struct ivshmem_bus_s
+struct pci_ivshmem_s
 {
-  mutex_t          lock; /* Lock for the queue */
-  dq_queue_t       dev;  /* Wait match ivshmem device queue */
-  dq_queue_t       drv;  /* Ivshmem driver queue */
-};
-
-struct ivshmem_device_s
-{
+  struct ivshmem_device_s      ivdev;
   FAR struct pci_device_s     *dev;
-
-  FAR struct ivshmem_driver_s *drv;
-  dq_entry_t                   node;
-
-  int                          id;
-
-  FAR void                    *shmem;
-  size_t                       shmem_size;
-
-  FAR void                    *reg;
-  int                          irq;
-  uint32_t                     vmid;
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int ivshmem_probe(FAR struct pci_device_s *dev);
-static void ivshmem_remove(FAR struct pci_device_s *dev);
-
-static int ivshmem_register_device(FAR struct ivshmem_device_s *dev);
-static int ivshmem_unregister_device(FAR struct ivshmem_device_s *dev);
+static int pci_ivshmem_probe(FAR struct pci_device_s *dev);
+static void pci_ivshmem_remove(FAR struct pci_device_s *dev);
+static int pci_ivshmem_kick_peer(FAR struct ivshmem_device_s *ivdev,
+                                 uint32_t peer_id);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static DEFINE_PER_CPU_BSS_BMP(int, g_ivshmem_next_id);
-#define g_ivshmem_next_id this_cpu_var_bmp(g_ivshmem_next_id)
-
-static DEFINE_PER_CPU_BMP(struct ivshmem_bus_s, g_ivshmem_bus) =
-{
-  NXMUTEX_INITIALIZER,
-};
-#define g_ivshmem_bus this_cpu_var_bmp(g_ivshmem_bus)
-
-static const struct pci_device_id_s g_ivshmem_id_table[] =
+static const struct pci_device_id_s g_pci_ivshmem_id_table[] =
 {
   { PCI_DEVICE(0x1af4, 0x1110) },
   { 0, }
 };
 
-static struct pci_driver_s g_ivshmem_drv =
+static struct pci_driver_s g_pci_ivshmem_drv =
 {
-  g_ivshmem_id_table, /* PCI id table */
-  ivshmem_probe,      /* Probe function */
-  ivshmem_remove      /* Remove function */
+  g_pci_ivshmem_id_table, /* PCI id table */
+  pci_ivshmem_probe,      /* Probe function */
+  pci_ivshmem_remove      /* Remove function */
 };
 
 /****************************************************************************
@@ -121,99 +85,45 @@ static struct pci_driver_s g_ivshmem_drv =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ivshmem_register_device
+ * Name: pci_ivshmem_kick_peer
  ****************************************************************************/
 
-static int ivshmem_register_device(FAR struct ivshmem_device_s *dev)
+static int pci_ivshmem_kick_peer(FAR struct ivshmem_device_s *ivdev,
+                                 uint32_t peer_id)
 {
-  FAR struct ivshmem_driver_s *drv;
-  int ret;
+  FAR struct pci_ivshmem_s *priv =
+    container_of(ivdev, struct pci_ivshmem_s, ivdev);
 
-  ret = nxmutex_lock(&g_ivshmem_bus.lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Add the device to the ivshmem_bus device queue */
-
-  dq_addlast(&dev->node, &g_ivshmem_bus.dev);
-
-  /* Match the driver has registered in the ivshmem_bus */
-
-  dq_for_every_entry(&g_ivshmem_bus.drv, drv, struct ivshmem_driver_s, node)
-    {
-      if (drv->id == dev->id)
-        {
-          /* If found the driver in the driver queue, call driver probe,
-           * if probe success, assign item->driver to indicate the device
-           * matched.
-           */
-
-          dev->drv = drv;
-          if (drv->probe(dev) < 0)
-            {
-              dev->drv = NULL;
-            }
-
-          break;
-        }
-    }
-
-  nxmutex_unlock(&g_ivshmem_bus.lock);
-  return ret;
-}
-
-/****************************************************************************
- * Name: ivshmem_unregister_device
- ****************************************************************************/
-
-static int ivshmem_unregister_device(FAR struct ivshmem_device_s *dev)
-{
-  int ret;
-
-  ret = nxmutex_lock(&g_ivshmem_bus.lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Remove the device from the device queue */
-
-  dq_rem(&dev->node, &g_ivshmem_bus.dev);
-
-  nxmutex_unlock(&g_ivshmem_bus.lock);
-
-  /* Call driver remove and mark tmp->driver NULL to indicate
-   * the device unmatched
+  /* We only use one vector, so vector is 0, peer_id must be 0 or 1
+   * bit 0..15: vector
+   * bit 16..31: peer ID
    */
 
-  if (dev->drv)
-    {
-      dev->drv->remove(dev);
-    }
-
-  return ret;
+  pci_write_mmio_dword(priv->dev,
+                       (FAR char *)ivdev->reg + IVSHMEM_REG_DOORBELL,
+                       peer_id << 16);
+  return 0;
 }
 
 /****************************************************************************
- * Name: ivshmem_probe
+ * Name: pci_ivshmem_probe
  ****************************************************************************/
 
-static int ivshmem_probe(FAR struct pci_device_s *dev)
+static int pci_ivshmem_probe(FAR struct pci_device_s *dev)
 {
+  FAR struct pci_ivshmem_s *priv;
   FAR struct ivshmem_device_s *ivdev;
   int ret;
 
-  ivdev = kmm_zalloc(sizeof(*ivdev));
-  if (ivdev == NULL)
+  priv = kmm_zalloc(sizeof(*priv));
+  if (priv == NULL)
     {
       return -ENOMEM;
     }
 
-  dev->priv  = ivdev;
-  ivdev->dev = dev;
-  ivdev->id  = g_ivshmem_next_id;
+  dev->priv  = priv;
+  priv->dev  = dev;
+  ivdev      = &priv->ivdev;
 
   ret = pci_enable_device(dev);
   if (ret < 0)
@@ -283,30 +193,37 @@ static int ivshmem_probe(FAR struct pci_device_s *dev)
     }
 
 out:
-  ret = ivshmem_register_device(ivdev);
+  ret = ivshmem_register_device(ivdev, pci_ivshmem_kick_peer);
   if (ret < 0)
     {
       goto err_master;
     }
 
-  g_ivshmem_next_id++;
+#ifdef CONFIG_PCI_RTT_IVSHMEM
+  if (CONFIG_PCI_RTT_IVSHMEM_IDX == ivdev->id)
+    {
+      g_segger_offset = (uintptr_t)ivdev->shmem - (uintptr_t)&_SEGGER_RTT;
+    }
+#endif
+
   return ret;
 
 err_master:
   pci_clear_master(dev);
   pci_disable_device(dev);
 err:
-  kmm_free(ivdev);
+  kmm_free(priv);
   return ret;
 }
 
 /****************************************************************************
- * Name: ivshmem_remove
+ * Name: pci_ivshmem_remove
  ****************************************************************************/
 
-static void ivshmem_remove(FAR struct pci_device_s *dev)
+static void pci_ivshmem_remove(FAR struct pci_device_s *dev)
 {
-  FAR struct ivshmem_device_s *ivdev = dev->priv;
+  FAR struct pci_ivshmem_s *priv = dev->priv;
+  FAR struct ivshmem_device_s *ivdev = &priv->ivdev;
 
   ivshmem_unregister_device(ivdev);
   if (ivdev->vmid != IVSHMEM_INVALID_VMID)
@@ -314,9 +231,9 @@ static void ivshmem_remove(FAR struct pci_device_s *dev)
       pci_release_irq(dev, &ivdev->irq, 1);
     }
 
-  pci_clear_master(ivdev->dev);
-  pci_disable_device(ivdev->dev);
-  kmm_free(ivdev);
+  pci_clear_master(priv->dev);
+  pci_disable_device(priv->dev);
+  kmm_free(priv);
 }
 
 /****************************************************************************
@@ -324,237 +241,10 @@ static void ivshmem_remove(FAR struct pci_device_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ivshmem_get_driver
- *
- * Description:
- *   Get the ivshmem device corresponding driver.
- *
- ****************************************************************************/
-
-FAR struct ivshmem_driver_s *
-ivshmem_get_driver(FAR struct ivshmem_device_s *dev)
-{
-  return dev->drv;
-}
-
-/****************************************************************************
- * Name: ivshmem_get_shmem
- *
- * Description:
- *   Get the ivshmem device share memory address and size.
- *
- ****************************************************************************/
-
-FAR void *ivshmem_get_shmem(FAR struct ivshmem_device_s *dev,
-                            FAR size_t *size)
-{
-  *size = dev->shmem_size;
-  return dev->shmem;
-}
-
-/****************************************************************************
- * Name: ivshmem_attach_irq
- *
- * Description:
- *   Attach/detach the interrupt handler to the ivshmem interrupt
- *
- ****************************************************************************/
-
-int ivshmem_attach_irq(FAR struct ivshmem_device_s *dev, xcpt_t isr,
-                       FAR void *arg)
-{
-  if (dev->vmid == IVSHMEM_INVALID_VMID)
-    {
-      return -ENOTSUP;
-    }
-
-  return irq_attach(dev->irq, isr, arg);
-}
-
-/****************************************************************************
- * Name: ivshmem_detach_irq
- *
- * Description:
- *   Detach the interrupt handler to the ivshmem interrupt
- *
- ****************************************************************************/
-
-int ivshmem_detach_irq(FAR struct ivshmem_device_s *dev)
-{
-  if (dev->vmid == IVSHMEM_INVALID_VMID)
-    {
-      return -ENOTSUP;
-    }
-
-  return irq_detach(dev->irq);
-}
-
-/****************************************************************************
- * Name: ivshmem_control_irq
- *
- * Description:
- *   Enable/Disable the ivshmem interrupt
- *
- ****************************************************************************/
-
-int ivshmem_control_irq(FAR struct ivshmem_device_s *dev, bool on)
-{
-  if (dev->vmid == IVSHMEM_INVALID_VMID)
-    {
-      return -ENOTSUP;
-    }
-
-  if (on)
-    {
-      up_enable_irq(dev->irq);
-    }
-  else
-    {
-      up_disable_irq(dev->irq);
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: ivshmem_support_irq
- *
- * Description:
- *   Judge if support ivshmem interrupt
- *
- ****************************************************************************/
-
-bool ivshmem_support_irq(FAR struct ivshmem_device_s *dev)
-{
-  return dev->vmid != IVSHMEM_INVALID_VMID;
-}
-
-/****************************************************************************
- * Name: ivshmem_kick_peer
- *
- * Description:
- *   Send interrupt to peer
- *
- ****************************************************************************/
-
-int ivshmem_kick_peer(FAR struct ivshmem_device_s *dev)
-{
-  uint32_t peer_id;
-
-  if (dev->vmid == IVSHMEM_INVALID_VMID)
-    {
-      return -ENOTSUP;
-    }
-
-  if (dev->vmid == 0)
-    {
-      peer_id = 1;
-    }
-  else
-    {
-      peer_id = 0;
-    }
-
-  /* We only use one vector, so vector is 0, peer_id must be 0 or 1
-   * bit 0..15: vector
-   * bit 16..31: peer ID
-   */
-
-  pci_write_mmio_dword(dev->dev, dev->reg + IVSHMEM_REG_DOORBELL,
-                       peer_id << 16);
-  return 0;
-}
-
-/****************************************************************************
- * Name: ivshmem_register_driver
- ****************************************************************************/
-
-int ivshmem_register_driver(FAR struct ivshmem_driver_s *drv)
-{
-  FAR struct ivshmem_device_s *dev;
-  int ret;
-
-  DEBUGASSERT(drv != NULL && drv->probe != NULL &&
-              drv->remove != NULL);
-
-  ret = nxmutex_lock(&g_ivshmem_bus.lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Add the driver to the ivshmem_bus driver queue */
-
-  dq_addlast(&drv->node, &g_ivshmem_bus.drv);
-
-  /* Match all the devices has registered in the ivshmem_bus */
-
-  dq_for_every_entry(&g_ivshmem_bus.dev, dev, struct ivshmem_device_s, node)
-    {
-      if (drv->id == dev->id)
-        {
-          /* If found the device in the device queue, call driver probe,
-           * if probe success, assign item->driver to indicate the device
-           * matched.
-           */
-
-          dev->drv = drv;
-          if (drv->probe(dev) < 0)
-            {
-              dev->drv = NULL;
-            }
-        }
-    }
-
-  nxmutex_unlock(&g_ivshmem_bus.lock);
-  return ret;
-}
-
-/****************************************************************************
- * Name: ivshmem_unregister_driver
- ****************************************************************************/
-
-int ivshmem_unregister_driver(FAR struct ivshmem_driver_s *drv)
-{
-  FAR struct ivshmem_device_s *dev;
-  int ret;
-
-  DEBUGASSERT(drv != NULL);
-
-  ret = nxmutex_lock(&g_ivshmem_bus.lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Find all the devices matched with driver in device queue */
-
-  dq_for_every_entry(&g_ivshmem_bus.dev, dev, struct ivshmem_device_s, node)
-    {
-      if (dev->drv == drv)
-        {
-          /* 1. Call driver remove function;
-           * 2. Mark dev->drv NULL to indicate the device unmatched;
-           */
-
-          drv->remove(dev);
-          dev->drv = NULL;
-        }
-    }
-
-  /* Remove the driver from the driver queue */
-
-  dq_rem(&drv->node, &g_ivshmem_bus.drv);
-
-  nxmutex_unlock(&g_ivshmem_bus.lock);
-  return ret;
-}
-
-/****************************************************************************
  * Name: pci_ivshmem_register
  ****************************************************************************/
 
 int pci_ivshmem_register(void)
 {
-  return pci_register_driver(&g_ivshmem_drv);
+  return pci_register_driver(&g_pci_ivshmem_drv);
 }

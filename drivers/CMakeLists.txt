@@ -22,8 +22,8 @@
 
 nuttx_add_kernel_library(drivers)
 
-# Subdirectories that provide their own CMakeLists.txt (for example dma-buf) are
-# included automatically.
+# Subdirectories that provide their own CMakeLists.txt (for example dma-buf and
+# ivshmem) are included automatically.
 nuttx_add_subdirectory()
 
 # The TEE, SENT and Trace32 drivers are discovered through their own

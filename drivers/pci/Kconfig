@@ -70,6 +70,7 @@ config PCI_QEMU_EDU
 config PCI_IVSHMEM
 	bool "PCI ivshmem driver"
 	default n
+	select IVSHMEM
 	---help---
 		Enable Inter-VM share memory device driver.
 
