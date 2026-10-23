@@ -355,8 +355,11 @@ Standard Library (``stdlib.h``)
 Generally addresses other operating system interfaces.
 However, the following may also be considered as file system interfaces:
 
-.. c:function:: int mktemp(FAR char *template);
+.. c:function:: FAR char *mktemp(FAR char *template);
 .. c:function:: int mkstemp(FAR char *template);
+.. c:function:: int mkostemp(FAR char *template, int flags);
+.. c:function:: int mkstemps(FAR char *template, int suffixlen);
+.. c:function:: int mkostemps(FAR char *template, int suffixlen, int flags);
 
 Pathname Pattern Matching (``glob.h``)
 --------------------------------------
