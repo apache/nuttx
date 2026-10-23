@@ -100,8 +100,7 @@ int uname(FAR struct utsname *name)
 
   /* Get the hostname */
 
-  ret = gethostname(name->nodename, HOST_NAME_MAX);
-  name->nodename[HOST_NAME_MAX - 1] = '\0';
+  ret = gethostname(name->nodename, sizeof(name->nodename));
 
   strlcpy(name->release,  CONFIG_VERSION_STRING, sizeof(name->release));
 
