@@ -29,6 +29,88 @@
 
 #include <nuttx/config.h>
 
+/* NUTTX_NO_EXTENSIONS (see the end of this file) needs "#pragma
+ * push_macro": clang, or GCC 4.4 or later (not Green Hills).  Save the
+ * program's own definitions of the helper names that this file defines
+ * and removes at its end, so that they are restored there.
+ */
+
+#ifdef NUTTX_NO_EXTENSIONS
+#  if !defined(__clang__) && \
+      (!defined(__GNUC__) || defined(__ghs__) || __GNUC__ < 4 || \
+       (__GNUC__ == 4 && __GNUC_MINOR__ < 4))
+#    error "NUTTX_NO_EXTENSIONS needs clang, or GCC 4.4 or later"
+#  endif
+#  pragma push_macro("weak_alias")
+#  undef weak_alias
+#  pragma push_macro("visibility_hidden")
+#  undef visibility_hidden
+#  pragma push_macro("visibility_default")
+#  undef visibility_default
+#  pragma push_macro("unused_data")
+#  undef unused_data
+#  pragma push_macro("PRAGMA")
+#  undef PRAGMA
+#  pragma push_macro("unroll_loop")
+#  undef unroll_loop
+#  pragma push_macro("weak_data")
+#  undef weak_data
+#  pragma push_macro("weak_function")
+#  undef weak_function
+#  pragma push_macro("weak_const_function")
+#  undef weak_const_function
+#  pragma push_macro("pure_function")
+#  undef pure_function
+#  pragma push_macro("const_function")
+#  undef const_function
+#  pragma push_macro("farcall_function")
+#  undef farcall_function
+#  pragma push_macro("compiler_assume")
+#  undef compiler_assume
+#  pragma push_macro("locate_code")
+#  undef locate_code
+#  pragma push_macro("reentrant_function")
+#  undef reentrant_function
+#  pragma push_macro("naked_function")
+#  undef naked_function
+#  pragma push_macro("always_inline_function")
+#  undef always_inline_function
+#  pragma push_macro("noinline_function")
+#  undef noinline_function
+#  pragma push_macro("noprofile_function")
+#  undef noprofile_function
+#  pragma push_macro("nooptimiziation_function")
+#  undef nooptimiziation_function
+#  pragma push_macro("nosanitize_address")
+#  undef nosanitize_address
+#  pragma push_macro("nosanitize_undefined")
+#  undef nosanitize_undefined
+#  pragma push_macro("nostackprotect_function")
+#  undef nostackprotect_function
+#  pragma push_macro("constructor_fuction")
+#  undef constructor_fuction
+#  pragma push_macro("destructor_function")
+#  undef destructor_function
+#  pragma push_macro("tz_nonsecure_entry")
+#  undef tz_nonsecure_entry
+#  pragma push_macro("tz_nonsecure_call")
+#  undef tz_nonsecure_call
+#  pragma push_macro("deprecated_function")
+#  undef deprecated_function
+#  pragma push_macro("osentry_function")
+#  undef osentry_function
+#  pragma push_macro("memory_barrier")
+#  undef memory_barrier
+#  pragma push_macro("UNUSED")
+#  undef UNUSED
+#  pragma push_macro("predict_true")
+#  undef predict_true
+#  pragma push_macro("is_constexpr")
+#  undef is_constexpr
+#  pragma push_macro("used_data")
+#  undef used_data
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -1538,7 +1620,9 @@
  * keep some non-standard names free for its own use.  Then the headers do
  * not define ERROR and OK (sys/types.h), set_errno() and get_errno()
  * (errno.h), zalloc() (stdlib.h), O_TEXT (fcntl.h) and the helper macros
- * below.  The other headers do not use these names.
+ * of this file below, such as memory_barrier() and UNUSED().  The headers
+ * that a program includes do not use these names.  A definition that the
+ * program made before is restored (saved at the start of this file).
  */
 
 #ifdef NUTTX_NO_EXTENSIONS
@@ -1546,6 +1630,70 @@
 #  undef visibility_hidden
 #  undef visibility_default
 #  undef unused_data
+#  undef PRAGMA
+#  undef unroll_loop
+#  undef weak_data
+#  undef weak_function
+#  undef weak_const_function
+#  undef pure_function
+#  undef const_function
+#  undef farcall_function
+#  undef compiler_assume
+#  undef locate_code
+#  undef reentrant_function
+#  undef naked_function
+#  undef always_inline_function
+#  undef noinline_function
+#  undef noprofile_function
+#  undef nooptimiziation_function
+#  undef nosanitize_address
+#  undef nosanitize_undefined
+#  undef nostackprotect_function
+#  undef constructor_fuction
+#  undef destructor_function
+#  undef tz_nonsecure_entry
+#  undef tz_nonsecure_call
+#  undef deprecated_function
+#  undef osentry_function
+#  undef memory_barrier
+#  undef UNUSED
+#  undef predict_true
+#  undef is_constexpr
+#  undef used_data
+#  pragma pop_macro("weak_alias")
+#  pragma pop_macro("visibility_hidden")
+#  pragma pop_macro("visibility_default")
+#  pragma pop_macro("unused_data")
+#  pragma pop_macro("PRAGMA")
+#  pragma pop_macro("unroll_loop")
+#  pragma pop_macro("weak_data")
+#  pragma pop_macro("weak_function")
+#  pragma pop_macro("weak_const_function")
+#  pragma pop_macro("pure_function")
+#  pragma pop_macro("const_function")
+#  pragma pop_macro("farcall_function")
+#  pragma pop_macro("compiler_assume")
+#  pragma pop_macro("locate_code")
+#  pragma pop_macro("reentrant_function")
+#  pragma pop_macro("naked_function")
+#  pragma pop_macro("always_inline_function")
+#  pragma pop_macro("noinline_function")
+#  pragma pop_macro("noprofile_function")
+#  pragma pop_macro("nooptimiziation_function")
+#  pragma pop_macro("nosanitize_address")
+#  pragma pop_macro("nosanitize_undefined")
+#  pragma pop_macro("nostackprotect_function")
+#  pragma pop_macro("constructor_fuction")
+#  pragma pop_macro("destructor_function")
+#  pragma pop_macro("tz_nonsecure_entry")
+#  pragma pop_macro("tz_nonsecure_call")
+#  pragma pop_macro("deprecated_function")
+#  pragma pop_macro("osentry_function")
+#  pragma pop_macro("memory_barrier")
+#  pragma pop_macro("UNUSED")
+#  pragma pop_macro("predict_true")
+#  pragma pop_macro("is_constexpr")
+#  pragma pop_macro("used_data")
 #endif
 
 /****************************************************************************
