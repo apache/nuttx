@@ -329,7 +329,7 @@ static ssize_t critmon_read_cpu(FAR struct critmon_file_s *attr,
       all_time.tv_nsec = 0;
     }
 
-  elapsed = clock() * CONFIG_USEC_PER_TICK;
+  elapsed = clock_systime_ticks() * CONFIG_USEC_PER_TICK;
   rate = (all_time.tv_sec * 1000000 + all_time.tv_nsec / 1000) *
          1000000 / elapsed;
 
