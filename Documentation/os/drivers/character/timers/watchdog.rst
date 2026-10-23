@@ -265,3 +265,38 @@ To enable it, follow the next instructions:
 
      After selecting one of these choices, the chip will keep itself alive by one of
      these options.
+
+Software Watchdog Implementation (watchdog_wdog)
+------------------------------------------------
+
+The ``CONFIG_WATCHDOG_WDOG`` option provides a watchdog "lower half" built on
+the NuttX internal wdog timers, for the platforms that have no watchdog
+hardware, such as the simulator. It is the watchdog counterpart of
+``timer_wdog``. Like any watchdog it expires if it is not fed within its
+timeout, but since there is no hardware to reset the system, it does what
+``CONFIG_WATCHDOG_WDOG_ACTION`` selects: panic, reboot (``board_reset()``) or
+power off (``board_power_off()``). With the last two, ``CONFIG_WATCHDOG_WDOG_STATUS``
+is the status given to the board.
+
+Because it relies on the system tick, it can not detect a system where the tick
+stopped. It is not the same as ``CONFIG_WATCHDOG_AUTOMONITOR_BY_WDOG``, where a
+wdog feeds a real watchdog, and it is not available with the oneshot and timer
+auto-monitors.
+
+Call ``watchdog_wdog_initialize()`` from the board initialization code to
+register it. The initial timeout is ``CONFIG_WATCHDOG_WDOG_TIMEOUT``:
+
+.. code-block:: c
+
+   #include <nuttx/timers/watchdog_wdog.h>
+
+   #ifdef CONFIG_WATCHDOG_WDOG
+     ret = watchdog_wdog_initialize(CONFIG_WATCHDOG_DEVPATH);
+     if (ret < 0)
+       {
+         syslog(LOG_ERR, "ERROR: watchdog_wdog_initialize failed: %d\n", ret);
+       }
+   #endif
+
+The simulator uses it, see the ``watchdog`` configuration of the
+:doc:`sim </platforms/sim/sim/boards/sim/index>`.
