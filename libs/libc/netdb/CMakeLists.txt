@@ -41,6 +41,7 @@ if(CONFIG_LIBC_NETDB)
     lib_getservbyport.c
     lib_getservbyportr.c
     lib_gaistrerror.c
+    lib_herror.c
     lib_freeaddrinfo.c
     lib_getaddrinfo.c
     lib_getnameinfo.c

@@ -126,6 +126,8 @@
 "getwc","wchar.h","defined(CONFIG_FILE_STREAM)","wint_t","FAR FILE *"
 "gmtime","time.h","","FAR struct tm *","FAR const time_t *"
 "gmtime_r","time.h","","FAR struct tm *","FAR const time_t *","FAR struct tm *"
+"herror","netdb.h","defined(CONFIG_LIBC_NETDB)","void","FAR const char *"
+"hstrerror","netdb.h","defined(CONFIG_LIBC_NETDB)","FAR const char *","int"
 "htonl","arpa/inet.h","","uint32_t","uint32_t"
 "htonq","arpa/inet.h","","uint64_t","uint64_t"
 "htons","arpa/inet.h","","uint16_t","uint16_t"
