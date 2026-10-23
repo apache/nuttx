@@ -300,3 +300,86 @@ register it. The initial timeout is ``CONFIG_WATCHDOG_WDOG_TIMEOUT``:
 
 The simulator uses it, see the ``watchdog`` configuration of the
 :doc:`sim </platforms/sim/sim/boards/sim/index>`.
+
+Task Supervision
+----------------
+
+``CONFIG_WATCHDOG_AUTOMONITOR_TASKS`` makes the auto-monitor supervise the
+tasks that use a watchdog device. The auto-monitor feeds the hardware watchdog,
+with the keepalive method selected for it, only while every task feeds the
+device in time, so a task that hangs, exits or crashes makes the system reset.
+Without it, the auto-monitor feeds the hardware watchdog unconditionally.
+
+Each ``open()`` creates a *channel*, armed with
+``CONFIG_WATCHDOG_AUTOMONITOR_TASKS_TIMEOUT``. The commands follow the Linux
+watchdog API but act on the channel, never on the hardware watchdog:
+
+=========================== ==================================================
+Operation                   Effect on the channel
+=========================== ==================================================
+``write()``                 Feeds the channel. A buffer with a ``'V'``
+                            disarms it instead, if ``CONFIG_WATCHDOG_MAGIC_V``
+                            is set.
+``WDIOC_KEEPALIVE``         Feeds the channel.
+``WDIOC_SETTIMEOUT``        Sets the time-out in milliseconds and feeds the
+                            channel. Zero fails with ``EINVAL``.
+``WDIOC_GETSTATUS``         Returns the flags, the time-out and the time left.
+``WDIOC_START``             Arms the channel again.
+``WDIOC_STOP``              Disarms the channel, same as writing a ``'V'``.
+``WDIOC_CAPTURE``, others   Fail with ``ENOSYS`` and ``ENOTTY``.
+``close()``                 Releases the channel only if it is disarmed.
+=========================== ==================================================
+
+A channel closed while armed is never fed again, so a task that exits or is
+killed without writing a ``'V'`` makes the channel time out, as on Linux.
+
+.. code-block:: c
+
+   int fd = open(CONFIG_WATCHDOG_DEVPATH, O_WRONLY);
+
+   ioctl(fd, WDIOC_SETTIMEOUT, 2000);   /* 2 s */
+
+   while (running)
+     {
+       do_work();
+       write(fd, "x", 1);               /* feed */
+     }
+
+   write(fd, "V", 1);                   /* done, stop supervising */
+   close(fd);
+
+The hardware watchdog is armed when the device is registered and fed even
+with no channel, so the system also resets if the keepalive method stops, for
+example the low priority work queue with ``CONFIG_WATCHDOG_AUTOMONITOR_BY_WORKER``.
+When a channel times out the auto-monitor logs the pid and the name of its task
+and stops feeding, or panics with ``CONFIG_WATCHDOG_AUTOMONITOR_TASKS_PANIC``.
+A time-out is detected up to one keepalive interval late
+(``CONFIG_WATCHDOG_AUTOMONITOR_PING_INTERVAL``), but a channel that timed out
+can not be recovered by feeding, disarming or arming it. The time-out of a
+channel is independent of the hardware time-out
+(``CONFIG_WATCHDOG_AUTOMONITOR_TIMEOUT``), which only limits how long the
+keepalive method can stay stopped. The keepalive methods that run in interrupt
+context are supported, the channels are protected by a spinlock. The tasks to supervise have to open the device early, because the
+auto-monitor only knows the tasks that did.
+
+The keepalive method also decides what else makes the system reset, besides a
+channel that times out:
+
+=============== ===================================================================
+Method          Also resets the system when
+=============== ===================================================================
+``BY_WORKER``   The low priority work queue stops, for example a task that locks
+                the scheduler or a priority inversion that starves it.
+``BY_WDOG``     The system tick stops. It runs in interrupt context, so a task that
+                locks the scheduler is not detected.
+``BY_TIMER``,   The timer or oneshot interrupt stops. They run in interrupt
+``BY_ONESHOT``  context like ``BY_WDOG``.
+``BY_CAPTURE``  The hardware watchdog interrupt is not served. The channels are
+                checked only when the early warning interrupt happens, which is
+                the latest possible moment.
+``BY_IDLE``     The system never goes idle, so it must not be busy all the time
+                with this method.
+=============== ===================================================================
+
+The ``taskwdt_test`` application (``CONFIG_TESTING_TASKWDT``) exercises the
+supervision: run it without arguments for the list of test cases.
