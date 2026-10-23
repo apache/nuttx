@@ -43,6 +43,7 @@
 #include <nuttx/cancelpt.h>
 #include <nuttx/pthread.h>
 #include <nuttx/atomic.h>
+#include <nuttx/sched.h>
 
 #include "pthread.h"
 
@@ -124,6 +125,8 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
 
       sinfo("Give up mutex...\n");
 
+      sched_lock();
+
       atomic_add(COND_WAIT_COUNT(cond), 1);
 
       /* Give up the mutex */
@@ -138,6 +141,8 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
               ret = -status;
             }
         }
+
+      sched_unlock();
 
       /* Reacquire the mutex (retaining the ret). */
 
