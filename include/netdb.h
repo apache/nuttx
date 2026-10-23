@@ -333,6 +333,9 @@ void                 setservent(int);
 
 /* Non-standard interfaces similar to Glibc 2 interfaces */
 
+void herror(FAR const char *s);
+FAR const char *hstrerror(int errnum);
+
 int gethostbyaddr_r(FAR const void *addr, socklen_t len, int type,
                     FAR struct hostent *host, FAR char *buf,
                     size_t buflen, FAR struct hostent **result,
