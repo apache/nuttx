@@ -94,9 +94,12 @@ int nx_umount2(FAR const char *target, unsigned int flags)
 
   DEBUGASSERT(mountpt_inode != NULL);
 
-  /* Verify that the inode is a mountpoint */
+  /* Verify that the inode is a mountpoint and that the path names the
+   * mountpoint itself, not a file or directory in the mounted volume.
+   */
 
-  if (!INODE_IS_MOUNTPT(mountpt_inode))
+  if (!INODE_IS_MOUNTPT(mountpt_inode) ||
+      (desc.relpath != NULL && *desc.relpath != '\0'))
     {
       ret = -EINVAL;
       goto errout_with_mountpt;
