@@ -35,6 +35,7 @@
 #include <nuttx/atomic.h>
 #include <nuttx/cancelpt.h>
 #include <nuttx/pthread.h>
+#include <nuttx/sched.h>
 
 #include "pthread.h"
 
@@ -90,10 +91,16 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
 
       sinfo("Give up mutex / take cond\n");
 
+      /* Unlock and block atomically, or a later waiter can steal the post */
+
+      sched_lock();
+
       atomic_add(COND_WAIT_COUNT(cond), 1);
       ret = pthread_mutex_breaklock(mutex, &nlocks);
 
       status = -nxsem_wait_uninterruptible(&cond->sem);
+      sched_unlock();
+
       if (ret == OK)
         {
           /* Report the first failure that occurs */
