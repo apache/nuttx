@@ -155,6 +155,9 @@ if(CONFIG_LIBM)
       lib_lgammal.c
       lib_tgammaf.c
       lib_tgammal.c
+      lib_j0.c
+      lib_j1.c
+      lib_jn.c
       lib_exp2.c
       lib_exp2f.c
       lib_exp2l.c
