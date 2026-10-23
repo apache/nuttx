@@ -65,20 +65,20 @@ static int uart_recvchars_check_special(FAR uart_dev_t *dev)
 
   if (xfer->nbytes <= xfer->length)
     {
-      return uart_check_special(dev, xfer->buffer, xfer->nbytes);
+      return uart_check_special(dev, xfer->buffer, xfer->nbytes, NULL);
     }
   else
     {
       /* REVISIT:  Additional signals could be in the second region. */
 
-      signo = uart_check_special(dev, xfer->buffer, xfer->length);
+      signo = uart_check_special(dev, xfer->buffer, xfer->length, NULL);
       if (signo != 0)
         {
           return signo;
         }
 
       return uart_check_special(dev, xfer->nbuffer,
-                                xfer->nbytes - xfer->length);
+                                xfer->nbytes - xfer->length, NULL);
     }
 }
 #endif
