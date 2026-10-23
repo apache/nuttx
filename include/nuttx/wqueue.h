@@ -578,7 +578,11 @@ int work_cancel_sync_wq(FAR struct kwork_wqueue_s *wqueue,
  *
  ****************************************************************************/
 
-#define work_timeleft(work) ((work)->qtime - clock())
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#  define work_timeleft(work) ((work)->qtime - clock_systime_ticks())
+#else
+#  define work_timeleft(work) ((work)->qtime - CLOCK2TICK(clock()))
+#endif
 
 /****************************************************************************
  * Name: lpwork_boostpriority

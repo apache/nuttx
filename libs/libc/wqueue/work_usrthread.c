@@ -149,7 +149,7 @@ static pthread_addr_t work_pthread(pthread_addr_t arg)
            * zero will always execute immediately.
            */
 
-          tick = clock();
+          tick = CLOCK2TICK(clock());
 
           /* Is this delay work ready? */
 

@@ -29,6 +29,8 @@
 #include <sys/times.h>
 #include <time.h>
 
+#include <nuttx/clock.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -59,5 +61,5 @@ clock_t times(FAR struct tms *buffer)
     }
 
   memset(buffer, 0, sizeof(*buffer));
-  return clock();
+  return CLOCK2TICK(clock());
 }
