@@ -300,3 +300,62 @@ register it. The initial timeout is ``CONFIG_WATCHDOG_WDOG_TIMEOUT``:
 
 The simulator uses it, see the ``watchdog`` configuration of the
 :doc:`sim </platforms/sim/sim/boards/sim/index>`.
+
+Task Monitor
+------------
+
+``CONFIG_WATCHDOG_TASKMONITOR`` supervises the tasks that use a watchdog
+device. The monitor feeds the hardware watchdog only while every task feeds the
+device in time, so a task that hangs, exits or crashes makes the system reset.
+It cannot be selected together with ``CONFIG_WATCHDOG_AUTOMONITOR``.
+
+Each ``open()`` creates a *channel*, armed with
+``CONFIG_WATCHDOG_TASKMONITOR_DEFAULT_TIMEOUT``. The commands follow the Linux
+watchdog API but act on the channel, never on the hardware watchdog:
+
+=========================== ==================================================
+Operation                   Effect on the channel
+=========================== ==================================================
+``write()``                 Feeds the channel. A buffer with a ``'V'``
+                            disarms it instead.
+``WDIOC_KEEPALIVE``         Feeds the channel.
+``WDIOC_SETTIMEOUT``        Sets the time-out in milliseconds and feeds the
+                            channel. Zero fails with ``EINVAL``.
+``WDIOC_GETSTATUS``         Returns the flags, the time-out and the time left.
+``WDIOC_START``             Arms the channel again.
+``WDIOC_STOP``              Disarms the channel, same as writing a ``'V'``.
+``WDIOC_CAPTURE``, others   Fail with ``ENOSYS`` and ``ENOTTY``.
+``close()``                 Releases the channel only if it is disarmed.
+=========================== ==================================================
+
+A channel closed while armed is never fed again, so a task that exits or is
+killed without writing a ``'V'`` makes the monitor time out, as on Linux.
+
+.. code-block:: c
+
+   int fd = open(CONFIG_WATCHDOG_DEVPATH, O_WRONLY);
+
+   ioctl(fd, WDIOC_SETTIMEOUT, 2000);   /* 2 s */
+
+   while (running)
+     {
+       do_work();
+       write(fd, "x", 1);               /* feed */
+     }
+
+   write(fd, "V", 1);                   /* done, stop supervising */
+   close(fd);
+
+With ``CONFIG_WATCHDOG_TASKMONITOR_AUTOSTART`` the hardware watchdog is armed
+when the device is registered and fed every
+``CONFIG_WATCHDOG_TASKMONITOR_INTERVAL`` milliseconds from the low priority
+work queue even with no channel, so the system also resets if that queue
+stops. When a channel times out the monitor logs the pid and the name of its
+task and stops feeding, or panics with ``CONFIG_WATCHDOG_TASKMONITOR_PANIC``. A
+time-out is detected up to one interval late, and the interval has to be
+shorter than ``CONFIG_WATCHDOG_TASKMONITOR_HWTIMEOUT``. The tasks to supervise
+have to open the device early, because the monitor only knows the tasks that
+did.
+
+The ``taskwdt_test`` application (``CONFIG_TESTING_TASKWDT``) exercises the
+monitor: run it without arguments for the list of test cases.
