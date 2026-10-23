@@ -317,6 +317,25 @@
                         (d)->ops->panic(d) : UNUSED(d))
 
 /****************************************************************************
+ * Name: RPTUN_KICK_HOST
+ *
+ * Description:
+ *   Kick the host cpu to signal that the remote cpu has started and is
+ *   waiting for the host to set up the virtio devices, e.g. to let an
+ *   already running host attach again after the remote cpu rebooted.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#define RPTUN_KICK_HOST(d) ((d)->ops->kick_host ? \
+                            (d)->ops->kick_host(d) : UNUSED(d))
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -370,6 +389,7 @@ struct rptun_ops_s
 
   CODE void (*reset)(FAR struct rptun_dev_s *dev, int value);
   CODE void (*panic)(FAR struct rptun_dev_s *dev);
+  CODE void (*kick_host)(FAR struct rptun_dev_s *dev);
 };
 
 struct rptun_dev_s
