@@ -185,11 +185,16 @@ int chmod(FAR const char *path, mode_t mode);
 int lchmod(FAR const char *path, mode_t mode);
 int fchmod(int fd, mode_t mode);
 int fchmodat(int dirfd, FAR const char *path, mode_t mode, int flags);
-int utimens(FAR const char *path, const struct timespec times[2]);
 int utimensat(int dirfd, FAR const char *path,
               const struct timespec times[2], int flags);
-int lutimens(FAR const char *path, const struct timespec times[2]);
 int futimens(int fd, const struct timespec times[2]);
+
+/* Non-standard: not with NUTTX_NO_EXTENSIONS, see nuttx/compiler.h */
+
+#ifndef NUTTX_NO_EXTENSIONS
+int utimens(FAR const char *path, const struct timespec times[2]);
+int lutimens(FAR const char *path, const struct timespec times[2]);
+#endif
 
 mode_t umask(mode_t mask);
 mode_t getumask(void);
