@@ -622,6 +622,54 @@ endif # !WATCHDOG_AUTOMONITOR_BY_CAPTURE && !WATCHDOG_AUTOMONITOR_BY_IDLE
 
 endif # WATCHDOG_AUTOMONITOR
 
+config WATCHDOG_TASKMONITOR
+	bool "Task monitor"
+	default n
+	depends on !WATCHDOG_AUTOMONITOR && WATCHDOG_MAGIC_V && SCHED_LPWORK
+	---help---
+		Supervise the tasks that use the watchdog devices. Each open() of a
+		device creates a channel with its own timeout, which the task feeds
+		with write() or WDIOC_KEEPALIVE. The hardware watchdog is fed by the
+		monitor only while all the armed channels are within their timeouts,
+		so a task that hangs, exits or crashes makes the system reset. This
+		replaces the Auto-monitor, which feeds the watchdog unconditionally.
+
+if WATCHDOG_TASKMONITOR
+
+config WATCHDOG_TASKMONITOR_AUTOSTART
+	bool "Arm the hardware watchdog when it is registered"
+	default y
+	---help---
+		Arm the hardware watchdog in watchdog_register() and feed it from the
+		low priority work queue even if no task opened the device, so that the
+		system resets if that queue stops. If not set, the first open() arms it.
+
+config WATCHDOG_TASKMONITOR_HWTIMEOUT
+	int "Hardware watchdog timeout (millisecond)"
+	default 5000
+
+config WATCHDOG_TASKMONITOR_INTERVAL
+	int "Supervision interval (millisecond)"
+	default 500
+	range 1 WATCHDOG_TASKMONITOR_HWTIMEOUT
+	---help---
+		How often the channels are checked and the hardware watchdog is fed. A
+		channel timeout is detected up to one interval late.
+
+config WATCHDOG_TASKMONITOR_DEFAULT_TIMEOUT
+	int "Default channel timeout (millisecond)"
+	default 5000
+
+config WATCHDOG_TASKMONITOR_PANIC
+	bool "Panic when a channel times out"
+	default n
+	---help---
+		Panic as soon as a channel times out, to get a crash dump, instead of
+		waiting for the hardware watchdog to reset the system. Note that
+		WATCHDOG_PANIC_NOTIFIER stops the hardware watchdog on a panic.
+
+endif # WATCHDOG_TASKMONITOR
+
 endif # WATCHDOG
 
 config TIMERS_CS2100CP

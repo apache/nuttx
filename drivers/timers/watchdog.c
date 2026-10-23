@@ -37,9 +37,11 @@
 #include <stdio.h>
 #include <nuttx/debug.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
 #include <nuttx/lib/lib.h>
+#include <nuttx/list.h>
 #include <nuttx/panic_notifier.h>
 #include <nuttx/power/pm.h>
 #include <nuttx/mutex.h>
@@ -73,6 +75,11 @@
 #  endif
 #endif
 
+#ifdef CONFIG_WATCHDOG_TASKMONITOR
+#  define WATCHDOG_TASKMONITOR_INTERVAL_TICK \
+     MSEC2TICK(CONFIG_WATCHDOG_TASKMONITOR_INTERVAL)
+#endif
+
 #if defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_ONESHOT)
 #  define WATCHDOG_NOTIFIER_ACTION WATCHDOG_KEEPALIVE_BY_ONESHOT
 #elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_TIMER)
@@ -91,14 +98,24 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure describes user info of watchdog */
+#ifdef CONFIG_WATCHDOG_TASKMONITOR
+/* The supervision state of one open() of the device, a channel.  It is
+ * allocated by open() and kept in the list of the upper half.  close()
+ * releases it only if it is disarmed: an armed channel stays in the list and
+ * is never fed again, so it times out, which is what happens when the task
+ * that owns it exits or crashes.
+ */
 
 struct watchdog_user_s
 {
-  uint32_t      timeout;
-  bool          soft;
-  struct wdog_s wdog;
+  struct list_node node;                            /* Entry in the list */
+  pid_t            pid;                             /* Task that opened it */
+  char             name[CONFIG_TASK_NAME_SIZE + 1]; /* Its name */
+  clock_t          timeout;                         /* Timeout in ticks */
+  clock_t          deadline;                        /* Tick it times out */
+  bool             armed;                           /* Is it supervised */
 };
+#endif
 
 /* This structure describes the state of the upper half driver */
 
@@ -127,8 +144,15 @@ struct watchdog_upperhalf_s
   bool                            monitor;
 #endif
 
-  FAR char *path;     /* Registration path */
+#ifdef CONFIG_WATCHDOG_TASKMONITOR
+  struct work_s    work;    /* Checks the channels, feeds the hardware */
+  struct list_node users;   /* All the channels (struct watchdog_user_s) */
+  bool             started; /* The hardware watchdog is armed */
+#endif
+
+  uint8_t   crefs;    /* The number of times the device has been opened */
   mutex_t   lock;     /* Supports mutual exclusion */
+  FAR char *path;     /* Registration path */
 
   /* The contained lower-half driver */
 
@@ -139,14 +163,25 @@ struct watchdog_upperhalf_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     wdog_open(FAR struct file *filep);
-static int     wdog_close(FAR struct file *filep);
 static ssize_t wdog_read(FAR struct file *filep, FAR char *buffer,
                          size_t buflen);
+
+#ifdef CONFIG_WATCHDOG_TASKMONITOR
+static int     watchdog_taskmonitor_open(FAR struct file *filep);
+static int     watchdog_taskmonitor_close(FAR struct file *filep);
+static ssize_t watchdog_taskmonitor_write(FAR struct file *filep,
+                                          FAR const char *buffer,
+                                          size_t buflen);
+static int     watchdog_taskmonitor_ioctl(FAR struct file *filep, int cmd,
+                                          unsigned long arg);
+#else
+static int     wdog_open(FAR struct file *filep);
+static int     wdog_close(FAR struct file *filep);
 static ssize_t wdog_write(FAR struct file *filep, FAR const char *buffer,
                           size_t buflen);
 static int     wdog_ioctl(FAR struct file *filep, int cmd,
                           unsigned long arg);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -154,12 +189,21 @@ static int     wdog_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_wdogops =
 {
+#ifdef CONFIG_WATCHDOG_TASKMONITOR
+  watchdog_taskmonitor_open,  /* open */
+  watchdog_taskmonitor_close, /* close */
+  wdog_read,                  /* read */
+  watchdog_taskmonitor_write, /* write */
+  NULL,                       /* seek */
+  watchdog_taskmonitor_ioctl, /* ioctl */
+#else
   wdog_open,  /* open */
   wdog_close, /* close */
   wdog_read,  /* read */
   wdog_write, /* write */
   NULL,       /* seek */
   wdog_ioctl, /* ioctl */
+#endif
 };
 
 #ifdef CONFIG_WATCHDOG_TIMEOUT_NOTIFIER
@@ -466,12 +510,266 @@ static int wdog_notifier(FAR struct notifier_block *nb, unsigned long action,
 }
 #endif
 
-static void wdog_callback(wdparm_t arg)
+#ifdef CONFIG_WATCHDOG_TASKMONITOR
+/* Restart the timeout of a channel, if it is armed */
+
+static void watchdog_taskmonitor_feed(FAR struct watchdog_user_s *user)
 {
-  wdinfo("Watchdog timeout,the system will PANIC ... \n");
-  PANIC();
+  if (user->armed)
+    {
+      user->deadline = clock_systime_ticks() + user->timeout;
+    }
 }
 
+/* Feed the lower half while no armed channel timed out.  Running from the
+ * low priority work queue also makes the hardware reset the system if that
+ * queue stops.
+ */
+
+static void watchdog_taskmonitor_worker(FAR void *arg)
+{
+  FAR struct watchdog_upperhalf_s *upper = arg;
+  FAR struct watchdog_lowerhalf_s *lower = upper->lower;
+  FAR struct watchdog_user_s *user;
+  bool expired = false;
+  clock_t now;
+
+  nxmutex_lock(&upper->lock);
+  now = clock_systime_ticks();
+
+  list_for_every_entry(&upper->users, user, struct watchdog_user_s, node)
+    {
+      if (user->armed && clock_compare(user->deadline, now))
+        {
+          _alert("%s: timeout of task %d (%s), %ju ms\n", upper->path,
+                 user->pid, user->name, (uintmax_t)TICK2MSEC(user->timeout));
+          expired = true;
+        }
+    }
+
+  nxmutex_unlock(&upper->lock);
+
+  if (expired)
+    {
+#ifdef CONFIG_WATCHDOG_TASKMONITOR_PANIC
+      PANIC();
+#endif
+
+      /* Stop feeding, the hardware watchdog resets the system */
+
+      return;
+    }
+
+  lower->ops->keepalive(lower);
+  work_queue(LPWORK, &upper->work, watchdog_taskmonitor_worker, upper,
+             WATCHDOG_TASKMONITOR_INTERVAL_TICK);
+}
+
+/* Arm the lower half and start feeding it.  The lock must be held. */
+
+static int watchdog_taskmonitor_start(FAR struct watchdog_upperhalf_s *upper)
+{
+  FAR struct watchdog_lowerhalf_s *lower = upper->lower;
+  int ret;
+
+  if (upper->started)
+    {
+      return OK;
+    }
+
+  if (lower->ops->settimeout != NULL) /* Optional */
+    {
+      ret = lower->ops->settimeout(lower,
+                                   CONFIG_WATCHDOG_TASKMONITOR_HWTIMEOUT);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+
+  DEBUGASSERT(lower->ops->start); /* Required */
+  ret = lower->ops->start(lower);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  upper->started = true;
+  return work_queue(LPWORK, &upper->work, watchdog_taskmonitor_worker, upper,
+                    WATCHDOG_TASKMONITOR_INTERVAL_TICK);
+}
+
+/* Each open() creates a channel */
+
+static int watchdog_taskmonitor_open(FAR struct file *filep)
+{
+  FAR struct watchdog_upperhalf_s *upper = filep->f_inode->i_private;
+  FAR struct tcb_s *tcb = nxsched_self();
+  FAR struct watchdog_user_s *user;
+  int ret;
+
+  user = kmm_zalloc(sizeof(struct watchdog_user_s));
+  if (user == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  user->pid     = tcb->pid;
+  user->timeout = MSEC2TICK(CONFIG_WATCHDOG_TASKMONITOR_DEFAULT_TIMEOUT);
+  user->armed   = true;
+  strlcpy(user->name, get_task_name(tcb), sizeof(user->name));
+  watchdog_taskmonitor_feed(user);
+
+  ret = nxmutex_lock(&upper->lock);
+  if (ret >= 0)
+    {
+      ret = watchdog_taskmonitor_start(upper);
+      if (ret >= 0)
+        {
+          list_add_tail(&upper->users, &user->node);
+          filep->f_priv = user;
+        }
+
+      nxmutex_unlock(&upper->lock);
+    }
+
+  if (ret < 0)
+    {
+      kmm_free(user);
+    }
+
+  return ret;
+}
+
+/* An armed channel stays in the list and times out, see the structure */
+
+static int watchdog_taskmonitor_close(FAR struct file *filep)
+{
+  FAR struct watchdog_upperhalf_s *upper = filep->f_inode->i_private;
+  FAR struct watchdog_user_s *user = filep->f_priv;
+  int ret;
+
+  ret = nxmutex_lock(&upper->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (!user->armed)
+    {
+      list_delete(&user->node);
+      kmm_free(user);
+    }
+
+  nxmutex_unlock(&upper->lock);
+  return OK;
+}
+
+/* Feed the channel, or disarm it with a 'V' */
+
+static ssize_t watchdog_taskmonitor_write(FAR struct file *filep,
+                                          FAR const char *buffer,
+                                          size_t buflen)
+{
+  FAR struct watchdog_upperhalf_s *upper = filep->f_inode->i_private;
+  FAR struct watchdog_user_s *user = filep->f_priv;
+  int ret;
+
+  ret = nxmutex_lock(&upper->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (memchr(buffer, 'V', buflen) != NULL)
+    {
+      user->armed = false;
+    }
+  else
+    {
+      watchdog_taskmonitor_feed(user);
+    }
+
+  nxmutex_unlock(&upper->lock);
+  return buflen;
+}
+
+/* The commands act on the channel, never on the lower half, so that no task
+ * can stop the hardware watchdog, change its timeout or replace its reset
+ * with a capture handler.
+ */
+
+static int watchdog_taskmonitor_ioctl(FAR struct file *filep, int cmd,
+                                      unsigned long arg)
+{
+  FAR struct watchdog_upperhalf_s *upper = filep->f_inode->i_private;
+  FAR struct watchdog_user_s *user = filep->f_priv;
+  FAR struct watchdog_status_s *status;
+  clock_t now;
+  int ret;
+
+  ret = nxmutex_lock(&upper->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  switch (cmd)
+    {
+      case WDIOC_START:
+        user->armed = true;
+        watchdog_taskmonitor_feed(user);
+        break;
+
+      case WDIOC_STOP:
+        user->armed = false;
+        break;
+
+      case WDIOC_KEEPALIVE:
+        watchdog_taskmonitor_feed(user);
+        break;
+
+      case WDIOC_SETTIMEOUT:
+        if (arg == 0)
+          {
+            ret = -EINVAL;
+            break;
+          }
+
+        user->timeout = MSEC2TICK(arg);
+        watchdog_taskmonitor_feed(user);
+        break;
+
+      case WDIOC_GETSTATUS:
+        status = (FAR struct watchdog_status_s *)((uintptr_t)arg);
+        if (status == NULL)
+          {
+            ret = -EINVAL;
+            break;
+          }
+
+        now = clock_systime_ticks();
+        status->flags    = user->armed ? WDFLAGS_ACTIVE | WDFLAGS_RESET : 0;
+        status->timeout  = TICK2MSEC(user->timeout);
+        status->timeleft = user->armed && !clock_compare(user->deadline, now)
+                           ? TICK2MSEC(user->deadline - now) : 0;
+        break;
+
+      case WDIOC_CAPTURE:
+        ret = -ENOSYS;
+        break;
+
+      default:
+        ret = -ENOTTY;
+        break;
+    }
+
+  nxmutex_unlock(&upper->lock);
+  return ret;
+}
+#endif
+
+#ifndef CONFIG_WATCHDOG_TASKMONITOR
 /****************************************************************************
  * Name: wdog_open
  *
@@ -482,14 +780,45 @@ static void wdog_callback(wdparm_t arg)
 
 static int wdog_open(FAR struct file *filep)
 {
-  filep->f_priv = kmm_zalloc(sizeof(struct watchdog_user_s));
-  if (!filep->f_priv)
+  FAR struct inode                *inode = filep->f_inode;
+  FAR struct watchdog_upperhalf_s *upper = inode->i_private;
+  uint8_t                          tmp;
+  int                              ret;
+
+  wdinfo("crefs: %d\n", upper->crefs);
+
+  /* Get exclusive access to the device structures */
+
+  ret = nxmutex_lock(&upper->lock);
+  if (ret < 0)
     {
-      wderr("ERROR: Allocation failed\n");
-      return -ENOMEM;
+      goto errout;
     }
 
-  return OK;
+  /* Increment the count of references to the device.  If this the first
+   * time that the driver has been opened for this device, then initialize
+   * the device.
+   */
+
+  tmp = upper->crefs + 1;
+  if (tmp == 0)
+    {
+      /* More than 255 opens; uint8_t overflows to zero */
+
+      ret = -EMFILE;
+      goto errout_with_lock;
+    }
+
+  /* Save the new open count */
+
+  upper->crefs = tmp;
+  ret = OK;
+
+errout_with_lock:
+  nxmutex_unlock(&upper->lock);
+
+errout:
+  return ret;
 }
 
 /****************************************************************************
@@ -502,10 +831,36 @@ static int wdog_open(FAR struct file *filep)
 
 static int wdog_close(FAR struct file *filep)
 {
-  kmm_free(filep->f_priv);
+  FAR struct inode                *inode = filep->f_inode;
+  FAR struct watchdog_upperhalf_s *upper = inode->i_private;
+  int                              ret;
 
-  return OK;
+  wdinfo("crefs: %d\n", upper->crefs);
+
+  /* Get exclusive access to the device structures */
+
+  ret = nxmutex_lock(&upper->lock);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  /* Decrement the references to the driver.  If the reference count will
+   * decrement to 0, then uninitialize the driver.
+   */
+
+  if (upper->crefs > 0)
+    {
+      upper->crefs--;
+    }
+
+  nxmutex_unlock(&upper->lock);
+  ret = OK;
+
+errout:
+  return ret;
 }
+#endif
 
 /****************************************************************************
  * Name: wdog_read
@@ -538,7 +893,7 @@ static ssize_t wdog_read(FAR struct file *filep, FAR char *buffer,
       return 0;
     }
 
-  ret = wdog_ioctl(filep, WDIOC_GETSTATUS, (uintptr_t)&status);
+  ret = g_wdogops.ioctl(filep, WDIOC_GETSTATUS, (uintptr_t)&status);
   if (ret < 0)
     {
       return ret;
@@ -569,6 +924,7 @@ static ssize_t wdog_read(FAR struct file *filep, FAR char *buffer,
   return ret;
 }
 
+#ifndef CONFIG_WATCHDOG_TASKMONITOR
 /****************************************************************************
  * Name: wdog_write
  *
@@ -636,7 +992,6 @@ static ssize_t wdog_write(FAR struct file *filep, FAR const char *buffer,
 static int wdog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode                *inode = filep->f_inode;
-  FAR struct watchdog_user_s      *user = filep->f_priv;
   FAR struct watchdog_upperhalf_s *upper;
   FAR struct watchdog_lowerhalf_s *lower;
   int                              ret;
@@ -674,15 +1029,8 @@ static int wdog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
          * timeout
          */
 
-        if (user->soft)
-          {
-            ret = wd_start(&user->wdog, user->timeout, wdog_callback, 0);
-          }
-        else
-          {
-            DEBUGASSERT(lower->ops->start); /* Required */
-            ret = lower->ops->start(lower);
-          }
+        DEBUGASSERT(lower->ops->start); /* Required */
+        ret = lower->ops->start(lower);
       }
       break;
 
@@ -695,15 +1043,8 @@ static int wdog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       {
         /* Stop the watchdog timer */
 
-        if (user->soft)
-          {
-            ret = wd_cancel(&user->wdog);
-          }
-        else
-          {
-            DEBUGASSERT(lower->ops->stop); /* Required */
-            ret = lower->ops->stop(lower);
-          }
+        DEBUGASSERT(lower->ops->stop); /* Required */
+        ret = lower->ops->stop(lower);
       }
       break;
 
@@ -723,16 +1064,7 @@ static int wdog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             status = (FAR struct watchdog_status_s *)((uintptr_t)arg);
             if (status)
               {
-                if (user->soft)
-                  {
-                    status->flags = WDOG_ISACTIVE(&user->wdog);
-                    status->timeout = user->timeout;
-                    status->timeleft = wd_gettime(&user->wdog);
-                  }
-                 else
-                   {
-                     ret = lower->ops->getstatus(lower, status);
-                   }
+                ret = lower->ops->getstatus(lower, status);
               }
             else
               {
@@ -757,16 +1089,7 @@ static int wdog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         if (lower->ops->settimeout) /* Optional */
           {
-            if (user->soft)
-            {
-              user->timeout = (uint32_t)arg;
-              ret =
-                wd_start(&user->wdog, user->timeout, wdog_callback, 0);
-            }
-            else
-             {
-               ret = lower->ops->settimeout(lower, (uint32_t)arg);
-             }
+            ret = lower->ops->settimeout(lower, (uint32_t)arg);
           }
         else
           {
@@ -794,15 +1117,9 @@ static int wdog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             capture = (FAR struct watchdog_capture_s *)((uintptr_t)arg);
             if (capture)
               {
-                if (user->soft)
-                  {
-                    ret = -EINVAL;
-                  }
-                else
-                  {
-                    capture->oldhandler =
-                      lower->ops->capture(lower, capture->newhandler);
-                  }
+                capture->oldhandler =
+                  lower->ops->capture(lower, capture->newhandler);
+                ret = OK;
               }
             else
               {
@@ -830,15 +1147,7 @@ static int wdog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         if (lower->ops->keepalive) /* Optional */
           {
-            if (user->soft)
-              {
-                ret =
-                  wd_start(&user->wdog, user->timeout, wdog_callback, 0);
-              }
-            else
-              {
-                ret = lower->ops->keepalive(lower);
-              }
+            ret = lower->ops->keepalive(lower);
           }
         else
           {
@@ -847,17 +1156,6 @@ static int wdog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       }
       break;
 
-    case WDIOC_SETSOFT:
-      {
-        /* The goal is to set the watchdog type, where by default the
-         * hardware watchdog (HW watchdog) is used, and the software
-         * watchdog (SW watchdog) takes effect only when explicitly set
-         * by the application.
-         */
-
-        user->soft = (bool)arg;
-      }
-      break;
     /* Any unrecognized IOCTL commands might be platform-specific ioctl
      * commands
      */
@@ -886,6 +1184,7 @@ static int wdog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   nxmutex_unlock(&upper->lock);
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -1007,6 +1306,9 @@ FAR void *watchdog_register(FAR const char *path,
 
   nxmutex_init(&upper->lock);
   upper->lower = lower;
+#ifdef CONFIG_WATCHDOG_TASKMONITOR
+  list_initialize(&upper->users);
+#endif
 
   /* Copy the registration path */
 
@@ -1025,6 +1327,20 @@ FAR void *watchdog_register(FAR const char *path,
       wderr("register_driver failed: %d\n", ret);
       goto errout_with_path;
     }
+
+#ifdef CONFIG_WATCHDOG_TASKMONITOR_AUTOSTART
+  /* Arm the hardware watchdog now, even with no channel yet */
+
+  nxmutex_lock(&upper->lock);
+  ret = watchdog_taskmonitor_start(upper);
+  nxmutex_unlock(&upper->lock);
+  if (ret < 0)
+    {
+      wderr("Failed to start the watchdog: %d\n", ret);
+      unregister_driver(path);
+      goto errout_with_path;
+    }
+#endif
 
 #if defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_ONESHOT)
   upper->oneshot->callback = watchdog_automonitor_oneshot;
@@ -1073,6 +1389,9 @@ void watchdog_unregister(FAR void *handle)
 {
   FAR struct watchdog_upperhalf_s *upper;
   FAR struct watchdog_lowerhalf_s *lower;
+#ifdef CONFIG_WATCHDOG_TASKMONITOR
+  FAR struct watchdog_user_s *user;
+#endif
 
   /* Recover the pointer to the upper-half driver state */
 
@@ -1085,6 +1404,15 @@ void watchdog_unregister(FAR void *handle)
 
 #ifdef CONFIG_WATCHDOG_AUTOMONITOR
   watchdog_automonitor_stop(upper);
+#endif
+
+#ifdef CONFIG_WATCHDOG_TASKMONITOR
+  work_cancel(LPWORK, &upper->work);
+  while ((user = list_remove_head_type(&upper->users, struct watchdog_user_s,
+                                       node)) != NULL)
+    {
+      kmm_free(user);
+    }
 #endif
 
   /* Disable the watchdog timer */
