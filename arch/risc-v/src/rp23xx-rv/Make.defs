@@ -27,6 +27,7 @@ include common/Make.defs
 HEAD_ASRC = rp23xx_head.S
 
 CFLAGS += -Wno-array-bounds
+LDFLAGS += --no-warn-rwx-segments
 
 CHIP_CSRCS += rp23xx_idle.c
 CHIP_CSRCS += rp23xx_irq.c
