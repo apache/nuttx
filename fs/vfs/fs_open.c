@@ -49,6 +49,47 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: file_checkdir
+ *
+ * Description:
+ *   Check that the path of an open with O_DIRECTORY is a directory, without
+ *   opening the directory.
+ *
+ * Returned Value:
+ *   Zero (OK) if the path is a directory, -ENOTDIR if it is not, or the
+ *   negated errno value of the stat method of the file system.
+ *
+ ****************************************************************************/
+
+static int file_checkdir(FAR struct inode *inode, FAR const char *relpath)
+{
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+  if (INODE_IS_MOUNTPT(inode))
+    {
+      struct stat buf;
+      int ret;
+
+      if (inode->u.i_mops == NULL || inode->u.i_mops->stat == NULL)
+        {
+          return -ENOSYS;
+        }
+
+      ret = inode->u.i_mops->stat(inode, relpath, &buf);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      return S_ISDIR(buf.st_mode) ? OK : -ENOTDIR;
+    }
+#else
+  UNUSED(relpath);
+#endif
+
+  return INODE_IS_PSEUDODIR(inode) ? OK : -ENOTDIR;
+}
+
+/****************************************************************************
  * Name: file_vopen
  *
  * Description:
@@ -239,7 +280,29 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
 
   if (oflags & O_DIRECTORY)
     {
-      ret = dir_allocate(filep, desc.relpath);
+      if ((oflags & O_ACCMODE) == O_RDONLY)
+        {
+          ret = dir_allocate(filep, desc.relpath);
+        }
+      else
+        {
+          /* A directory cannot be opened for writing.  O_TMPFILE (it
+           * includes O_DIRECTORY) asks for an unnamed regular file in the
+           * directory.  No file system makes one: fail as Linux does for a
+           * file system without it, so that the caller can use mkstemp()
+           * and unlink().
+           */
+
+          ret = file_checkdir(inode, desc.relpath);
+          if (ret >= 0)
+            {
+#ifdef __O_TMPFILE
+              ret = (oflags & __O_TMPFILE) != 0 ? -EOPNOTSUPP : -EISDIR;
+#else
+              ret = -EISDIR;
+#endif
+            }
+        }
     }
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   else if (INODE_IS_MOUNTPT(inode))
