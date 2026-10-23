@@ -38,6 +38,15 @@ else
   osname=${os}
 fi
 
+# Configure curl defaults to handle CI network timeouts & flakiness
+if [ -n "${HOME:-}" ] && [ ! -f "${HOME}/.curlrc" ]; then
+  cat << 'EOF' > "${HOME}/.curlrc"
+connect-timeout = 30
+retry = 5
+retry-delay = 5
+EOF
+fi
+
 function to_do {
   echo ""
   echo "NuttX TODO: $1"
