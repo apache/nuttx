@@ -29,8 +29,10 @@
 #include "arm_internal.h"
 #include "imx9_mu.h"
 #include "imx9_rsctable.h"
+#include "hardware/imx9_mu.h"
 #include "hardware/imx9_rptun.h"
 #include "hardware/imx9_rsctable.h"
+#include <arch/barriers.h>
 #include <nuttx/debug.h>
 #include <nuttx/config.h>
 #include <nuttx/kthread.h>
@@ -146,7 +148,40 @@ imx9_rptun_get_addrenv(struct rptun_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: imx9_rptun_kick_host
+ *
+ * Description:
+ *   Ring general purpose interrupt 1, the doorbell ("rxdb") of the host,
+ *   to tell it that a fresh resource table is in the shared memory and
+ *   this core waits for it to set up the virtio devices.  No-op without
+ *   CONFIG_IMX9_RPTUN_KICK_HOST.
+ *
+ ****************************************************************************/
+
+static void imx9_rptun_kick_host(struct imx9_rptun_dev_s *priv)
+{
+#ifdef CONFIG_IMX9_RPTUN_KICK_HOST
+  /* The table must be complete before the host sees the doorbell.
+   * -ECOMM only means that the previous doorbell is still pending.
+   */
+
+  UP_DSB();
+  imx9_mu_trigger_interrupts(priv->mu, IMX9_MU_GCR_GIR1_FLAG);
+#else
+  UNUSED(priv);
+#endif
+}
+
+/****************************************************************************
  * Name: imx9_rptun_get_resource
+ *
+ * Description:
+ *   Return the resource table in the shared memory, copying a fresh one
+ *   there first if needed and then ringing the doorbell of the host, see
+ *   imx9_rptun_kick_host().  This is the last driver operation before
+ *   rptun waits for the host to set DRIVER_OK, so a host that kept running
+ *   while this core restarted can attach to the fresh table again.
+ *
  ****************************************************************************/
 
 static struct resource_table *
@@ -159,11 +194,13 @@ imx9_rptun_get_resource(struct rptun_dev_s *dev)
 
 #ifdef CONFIG_IMX9_RPTUN_ALWAYS_COPY_RSC_TABLE
   imx9_rsctable_copy();
+  imx9_rptun_kick_host(priv);
 #else
   if (priv->shmem->rsc.rsc_tbl_hdr.offset
       != g_imx9_rsc_table.rsc_tbl_hdr.offset)
     {
       imx9_rsctable_copy();
+      imx9_rptun_kick_host(priv);
     }
 #endif
 
