@@ -370,7 +370,7 @@ static int virtio_blk_flush(FAR struct virtio_blk_priv_s *priv)
 
   /* Wait for the request completion */
 
-  nxsem_wait_uninterruptible(&respsem);
+  virtio_blk_wait_complete(vq, &respsem);
   if (resp.status != VIRTIO_BLK_S_OK)
     {
       vrterr("Flush Error\n");
