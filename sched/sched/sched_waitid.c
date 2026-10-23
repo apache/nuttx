@@ -157,12 +157,9 @@ int waittcb(FAR struct tcb_s *rtcb, idtype_t idtype, int options,
         }
       else
         {
-          /* We can use nxsig_kill() with signal number 0 to determine if
-           * that task is still alive.
-           */
+          /* Is that task still alive? */
 
-          ret = nxsig_kill((pid_t)id, 0);
-          if (ret < 0)
+          if (nxsched_get_tcb((pid_t)id) == NULL)
             {
               /* It is no longer running.  We know that the child task
                * was running okay when we started, so we must have lost
@@ -183,7 +180,7 @@ int waittcb(FAR struct tcb_s *rtcb, idtype_t idtype, int options,
        */
 
       if (rtcb->group->tg_nchildren == 0 ||
-          (idtype == P_PID && (ret = nxsig_kill((pid_t)id, 0)) < 0))
+          (idtype == P_PID && nxsched_get_tcb((pid_t)id) == NULL))
         {
           /* We know that the child task was running okay we started,
            * so we must have lost the signal.  What can we do?
