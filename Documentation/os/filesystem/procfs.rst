@@ -49,3 +49,16 @@ Example::
 
   nsh> cat /proc/2/cmdline
   <pthread> 0x527420
+
+Process user and group
+======================
+
+With ``CONFIG_SCHED_USER_IDENTITY=y``, ``/proc/<pid>/status`` has two more
+lines.  ``Uid:`` gives the real and the effective user ID of the task group
+of ``<pid>``.  ``Gid:`` gives the real and the effective group ID::
+
+  Uid:        1000 1000
+  Gid:        1000 1000
+
+``stat()`` of ``/proc/<pid>`` and of the files in it gives the effective
+user and group ID of the task group in ``st_uid`` and ``st_gid``.
