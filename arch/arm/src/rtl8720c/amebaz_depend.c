@@ -372,7 +372,7 @@ int rtw_deinit_xqueue(void **queue)
 
 uint32_t rtw_get_current_time(void)
 {
-  return clock();
+  return clock_systime_ticks();
 }
 
 uint32_t rtw_systime_to_ms(uint32_t systime)
