@@ -199,7 +199,7 @@ struct cap_ops_s
   CODE int (*getfreq)(FAR struct cap_lowerhalf_s *lower,
                       FAR uint32_t *freq);
 
-  /* Get the result pwm capture edges value */
+  /* Get the result pwm capture edges value (optional) */
 
   CODE int (*getedges)(FAR struct cap_lowerhalf_s *lower,
                        FAR uint32_t *edges);
