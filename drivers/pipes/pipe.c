@@ -211,7 +211,7 @@ int file_pipe(FAR struct file *filep[2], size_t bufsize, int flags)
       ret = file_ioctl(filep[1], FIONBIO, &nonblock);
       if (ret < 0)
         {
-          goto errout_with_driver;
+          goto errout_with_wrfd;
         }
     }
 
@@ -285,7 +285,7 @@ int pipe2(int fd[2], int flags)
       ret = ioctl(fd[1], FIONBIO, &nonblock);
       if (ret < 0)
         {
-          goto errout_with_driver;
+          goto errout_with_wrfd;
         }
     }
 
