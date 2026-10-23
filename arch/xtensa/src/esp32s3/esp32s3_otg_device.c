@@ -63,14 +63,18 @@
 
 /* USB hardware definition */
 
-#define ESP32S3_FIFO_SIZE       (1280)
+/* GHWCFG3 reports a 200-word data FIFO.  Sizing past it places the IN
+ * TxFIFOs beyond the FIFO RAM, where they alias the RxFIFO.
+ */
+
+#define ESP32S3_FIFO_SIZE       (800)
 #define ESP32S3_FIFO_WORDS      (ESP32S3_FIFO_SIZE >> 2)
 
 /* EP0 + additional EP */
 
 #define ESP32S3_ENDPOINT_NUM    (CONFIG_ESP32S3_OTG_ENDPOINT_NUM + 1)
 
-/* There is 1.25Kb of FIFO memory.  The default partitions this memory
+/* There are 800 bytes of FIFO memory.  The default partitions this memory
  * so that there is a TxFIFO allocated for each endpoint and with more
  * memory provided for the common RxFIFO.  A more knowledge-able
  * configuration would not allocate any TxFIFO space to OUT endpoints.
