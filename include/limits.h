@@ -286,7 +286,7 @@
 
 #define IOV_MAX        INT_MAX
 
-#define HOST_NAME_MAX  32
+#define HOST_NAME_MAX  CONFIG_HOST_NAME_MAX
 
 /* ptrdiff_t limits */
 
