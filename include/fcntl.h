@@ -89,7 +89,9 @@
 #define O_NDELAY     O_NONBLOCK                  /* Synonym for O_NONBLOCK */
 #define O_SYNC       (__O_SYNC | O_DSYNC)        /* Synchronize output on write */
 #define O_RSYNC      O_SYNC                      /* Synchronize input on read */
+#ifndef NUTTX_NO_EXTENSIONS                      /* See nuttx/compiler.h */
 #define O_BINARY     0                           /* Open the file in binary mode */
+#endif
 
 /* This is the highest bit number used in the open flags bitset.  Bits above
  * this bit number may be used within NuttX for other, internal purposes.
