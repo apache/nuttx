@@ -196,6 +196,15 @@ int load_module(FAR struct binary_s *bin, FAR const char *filename,
           return ret;
         }
 
+      /* An empty file name names no file (POSIX: ENOENT).  It is not a
+       * bare file name to search for in PATH.
+       */
+
+      if (filename[0] == '\0')
+        {
+          return -ENOENT;
+        }
+
       /* A bare file name (no '/') is searched for in PATH.  Any other path
        * is used as given: an absolute path, or a path relative to the
        * current working directory, as POSIX specifies for a name that
