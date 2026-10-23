@@ -351,6 +351,31 @@ However, the following may also be considered as file system interfaces:
 .. c:function:: int mktemp(FAR char *template);
 .. c:function:: int mkstemp(FAR char *template);
 
+Pathname Pattern Matching (``glob.h``)
+--------------------------------------
+
+.. code-block:: c
+
+  #include <glob.h>
+
+  int  glob(FAR const char *pattern, int flags,
+            CODE int (*errfunc)(FAR const char *epath, int eerrno),
+            FAR glob_t *pglob);
+  void globfree(FAR glob_t *pglob);
+
+``glob()`` finds the pathnames that match ``pattern`` (the rules of
+``fnmatch()``) and puts them in ``pglob->gl_pathv``. The POSIX flags are
+``GLOB_APPEND``, ``GLOB_DOOFFS``, ``GLOB_ERR``, ``GLOB_MARK``,
+``GLOB_NOCHECK``, ``GLOB_NOESCAPE`` and ``GLOB_NOSORT``. Two extensions of
+other C libraries are also available:
+
+- ``GLOB_TILDE``: a ``~`` at the start of the pattern is the home directory
+  (``HOME``, else the home directory of the user in the password database),
+  and ``~name`` is the home directory of the user ``name``. When the home
+  directory is not known, the pattern is used as it is.
+- ``GLOB_TILDE_CHECK``: the same, but ``glob()`` returns ``GLOB_NOMATCH`` when
+  the home directory is not known.
+
 Asynchronous I/O
 ----------------
 
