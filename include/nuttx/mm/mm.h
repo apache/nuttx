@@ -33,6 +33,7 @@
 #include <sys/types.h>
 #include <stdbool.h>
 #include <malloc.h>
+#include <string.h>
 
 /****************************************************************************
  * Pre-processor Definitions
