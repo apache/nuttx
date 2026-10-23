@@ -1,0 +1,12 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config IVSHMEM
+	bool
+	default n
+	---help---
+		Inter-VM shared memory bus. Matches ivshmem devices registered by
+		a backend (e.g. PCI) with the drivers that use them. Selected by
+		the backends, not chosen directly.

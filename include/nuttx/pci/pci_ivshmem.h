@@ -32,127 +32,16 @@
 
 #ifdef CONFIG_PCI_IVSHMEM
 
-#include <nuttx/irq.h>
-#include <nuttx/queue.h>
+#include <nuttx/ivshmem.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-struct ivshmem_device_s;
-struct ivshmem_driver_s
-{
-  int              id;
-  CODE int         (*probe)(FAR struct ivshmem_device_s *dev);
-  CODE void        (*remove)(FAR struct ivshmem_device_s *dev);
-  dq_entry_t       node;
-};
-
-/****************************************************************************
- * Public Functions Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 #if defined(__cplusplus)
 extern "C"
 {
 #endif
-
-/****************************************************************************
- * Name: ivshmem_get_driver
- *
- * Description:
- *   Get the ivshmem device corresponding driver.
- *
- ****************************************************************************/
-
-FAR struct ivshmem_driver_s *
-ivshmem_get_driver(FAR struct ivshmem_device_s *dev);
-
-/****************************************************************************
- * Name: ivshmem_get_shmem
- *
- * Description:
- *   Get the ivshmem device share memory address and size.
- *
- ****************************************************************************/
-
-FAR void *ivshmem_get_shmem(FAR struct ivshmem_device_s *dev,
-                            FAR size_t *size);
-
-/****************************************************************************
- * Name: ivshmem_attach_irq
- *
- * Description:
- *   Attach the interrupt handler to the ivshmem interrupt
- *
- ****************************************************************************/
-
-int ivshmem_attach_irq(FAR struct ivshmem_device_s *dev, xcpt_t isr,
-                       FAR void *arg);
-
-/****************************************************************************
- * Name: ivshmem_detach_irq
- *
- * Description:
- *   Detach the interrupt handler to the ivshmem interrupt
- *
- ****************************************************************************/
-
-int ivshmem_detach_irq(FAR struct ivshmem_device_s *dev);
-
-/****************************************************************************
- * Name: ivshmem_control_irq
- *
- * Description:
- *   Enable/Disable the ivshmem interrupt
- *
- ****************************************************************************/
-
-int ivshmem_control_irq(FAR struct ivshmem_device_s *dev, bool on);
-
-/****************************************************************************
- * Name: ivshmem_support_irq
- *
- * Description:
- *   judge if support ivshmem interrupt
- *
- ****************************************************************************/
-
-bool ivshmem_support_irq(FAR struct ivshmem_device_s *dev);
-
-/****************************************************************************
- * Name: ivshmem_kick_peer
- *
- * Description:
- *   Send interrupt to peer
- *
- ****************************************************************************/
-
-int ivshmem_kick_peer(FAR struct ivshmem_device_s *dev);
-
-/****************************************************************************
- * Name: ivshmem_register_driver
- *
- * Description:
- *   Register ivshmem driver to ivshmem bus
- *
- ****************************************************************************/
-
-int ivshmem_register_driver(FAR struct ivshmem_driver_s *drv);
-
-/****************************************************************************
- * Name: ivshmem_unregister_driver
- *
- * Description:
- *   Un-register ivshmem driver from ivshmem bus
- *
- ****************************************************************************/
-
-int ivshmem_unregister_driver(FAR struct ivshmem_driver_s *drv);
 
 /****************************************************************************
  * Name: pci_ivshemem_register
