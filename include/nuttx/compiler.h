@@ -1619,11 +1619,11 @@
 /* A program can define NUTTX_NO_EXTENSIONS before the first #include to
  * keep some non-standard names free for its own use.  Then the headers do
  * not define ERROR and OK (sys/types.h), set_errno() and get_errno()
- * (errno.h), zalloc() (stdlib.h), O_TEXT and O_BINARY (fcntl.h) and the
- * helper macros of this file below, such as memory_barrier() and UNUSED().
- * The headers that a program includes do not use these names.  A
- * definition that the program made before is restored (saved at the start
- * of this file).
+ * (errno.h), zalloc() (stdlib.h), O_TEXT and O_BINARY (fcntl.h), utimens()
+ * and lutimens() (sys/stat.h) and the helper macros of this file below,
+ * such as memory_barrier() and UNUSED().  The headers that a program
+ * includes do not use these names.  A definition that the program made
+ * before is restored (saved at the start of this file).
  */
 
 #ifdef NUTTX_NO_EXTENSIONS
