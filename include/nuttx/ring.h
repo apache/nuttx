@@ -1799,8 +1799,14 @@ ring_sc_skipto(FAR struct ring_s *r, uint32_t target)
 {
   FAR struct ring_blob_s *blob = r->blob;
   uint32_t cons_index = RTS_IDX(blob->cons_tail);
-  uint32_t count = ring_dist(r, target, cons_index);
+  uint32_t count;
 
+  /* Clamp a stale target: ring_dist would otherwise wrap it to a
+   * near-full-ring count and evict still-live data.
+   */
+
+  target = ring_clamp_cons(r, target, cons_index);
+  count = ring_dist(r, target, cons_index);
   if (count != 0)
     {
       return ring_sc_skip(r, count);
@@ -1845,8 +1851,14 @@ ring_mc_skipto(FAR struct ring_s *r, uint32_t target)
 {
   FAR struct ring_blob_s *blob = r->blob;
   uint32_t cons_index = RTS_IDX(atomic_read(&blob->cons_tail));
-  uint32_t count = ring_dist(r, target, cons_index);
+  uint32_t count;
 
+  /* Clamp a stale target: ring_dist would otherwise wrap it to a
+   * near-full-ring count and evict still-live data.
+   */
+
+  target = ring_clamp_cons(r, target, cons_index);
+  count = ring_dist(r, target, cons_index);
   if (count != 0)
     {
       return ring_mc_skip(r, count);
