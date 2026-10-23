@@ -238,6 +238,13 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                   case '#':
                     flags |= FL_ALT;
                     continue;
+
+                  /* XSI thousands grouping: the C locale has no
+                   * separator, so ignore the flag.
+                   */
+
+                  case '\'':
+                    continue;
                 }
             }
 
