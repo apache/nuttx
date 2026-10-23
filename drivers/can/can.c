@@ -44,6 +44,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/can.h>
 #include <nuttx/can/can.h>
 #include <nuttx/can/can_sender.h>
 #include <nuttx/kmalloc.h>
@@ -120,6 +121,7 @@ static int            can_ioctl(FAR struct file *filep, int cmd,
 static int            can_poll(FAR struct file *filep,
                                FAR struct pollfd *fds,
                                bool setup);
+static int            can_datalen(FAR const struct can_hdr_s *hdr);
 
 /****************************************************************************
  * Private Data
@@ -141,6 +143,27 @@ static const struct file_operations g_canops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: can_datalen
+ *
+ * Description:
+ *   Return the number of data bytes of a CAN message.  The DLC codes 9..15
+ *   mean 12..64 bytes in a CAN FD frame but 8 bytes in a classic frame.
+ *
+ ****************************************************************************/
+
+static int can_datalen(FAR const struct can_hdr_s *hdr)
+{
+#ifdef CONFIG_CAN_FD
+  if (hdr->ch_edl)
+    {
+      return can_dlc2bytes(hdr->ch_dlc);
+    }
+#endif
+
+  return MIN(hdr->ch_dlc, CAN_MAX_DLEN);
+}
 
 /****************************************************************************
  * Name: can_txready_work
@@ -513,7 +536,7 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
           /* Will the next message in the FIFO fit into the user buffer? */
 
           FAR struct can_msg_s *msg = &fifo->rx_buffer[fifo->rx_head];
-          int nbytes = can_dlc2bytes(msg->cm_hdr.ch_dlc);
+          int nbytes = can_datalen(&msg->cm_hdr);
           int msglen = CAN_MSGLEN(nbytes);
 
           if (ret + msglen > buflen)
@@ -806,7 +829,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
         }
       else
         {
-          nbytes = can_dlc2bytes(msg->cm_hdr.ch_dlc);
+          nbytes = can_datalen(&msg->cm_hdr);
         }
 
       msglen = CAN_MSGLEN(nbytes);
@@ -1379,7 +1402,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 
               memcpy(&waitmsg->cm_hdr, hdr, sizeof(struct can_hdr_s));
 
-              nbytes = can_dlc2bytes(hdr->ch_dlc);
+              nbytes = can_datalen(hdr);
               if (nbytes)
                 {
                   memcpy(waitmsg->cm_data, data, nbytes);
@@ -1413,20 +1436,12 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
         {
           int nbytes;
 
-          /* Add the new, decoded CAN message at the tail of the FIFO.
-           *
-           * REVISIT:  In the CAN FD format, the coding of the DLC differs
-           * from the standard CAN format. The DLC codes 0 to 8 have the
-           * same coding as in standard CAN, the codes 9 to 15, which in
-           * standard CAN all code a data field of 8 bytes, are encoded:
-           *
-           *   9->12, 10->16, 11->20, 12->24, 13->32, 14->48, 15->64
-           */
+          /* Add the new, decoded CAN message at the tail of the FIFO */
 
           memcpy(&fifo->rx_buffer[fifo->rx_tail].cm_hdr, hdr,
                  sizeof(struct can_hdr_s));
 
-          nbytes = can_dlc2bytes(hdr->ch_dlc);
+          nbytes = can_datalen(hdr);
           if (nbytes)
             {
               memcpy(fifo->rx_buffer[fifo->rx_tail].cm_data, data, nbytes);

@@ -30,12 +30,14 @@
 #include <nuttx/debug.h>
 #include <errno.h>
 #include <stdio.h>
+#include <sys/param.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/pci/pci.h>
 
 #ifdef CONFIG_CAN_KVASER_CHARDEV
+#  include <nuttx/can.h>
 #  include <nuttx/can/can.h>
 #endif
 
@@ -660,20 +662,19 @@ static int kvaser_chrdev_send(FAR struct can_dev_s *dev,
       return -EBUSY;
     }
 
-  /* Get data bytes for this frame */
-
-  bytes = can_dlc2bytes(msg->cm_hdr.ch_dlc);
-
 #ifdef CONFIG_CAN_FD
   /* Drop CAN FD frames */
 
-  if (bytes > 8 || msg->cm_hdr.ch_edl ||
-      msg->cm_hdr.ch_brs || msg->cm_hdr.ch_esi)
+  if (msg->cm_hdr.ch_edl || msg->cm_hdr.ch_brs || msg->cm_hdr.ch_esi)
     {
       canerr("ERROR: CAN FD frames not supported\n");
       return -ENOTSUP;
     }
 #endif
+
+  /* Get data bytes for this frame, DLC 9..15 means 8 bytes */
+
+  bytes = MIN(msg->cm_hdr.ch_dlc, CAN_MAX_DLEN);
 
   /* Set up the DLC */
 
@@ -853,11 +854,16 @@ static void kvaser_chardev_receive(FAR struct kvaser_sja_s *priv)
 #ifdef CONFIG_CAN_ERRORS
       hdr.ch_error = 0;
 #endif
+#ifdef CONFIG_CAN_FD
+      hdr.ch_edl   = 0;
+      hdr.ch_brs   = 0;
+      hdr.ch_esi   = 0;
+#endif
       hdr.ch_tcf   = 0;
 
-      /* Get data */
+      /* Get data, DLC 9..15 means 8 bytes */
 
-      for (i = 0; i < can_dlc2bytes(hdr.ch_dlc); i++)
+      for (i = 0; i < MIN(hdr.ch_dlc, CAN_MAX_DLEN); i++)
         {
           data[i] = kvaser_getreg_sja(priv, dreg + i);
         }

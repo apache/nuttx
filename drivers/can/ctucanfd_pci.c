@@ -37,6 +37,7 @@
 #include <nuttx/pci/pci.h>
 
 #ifdef CONFIG_CAN_CTUCANFD_CHARDEV
+#  include <nuttx/can.h>
 #  include <nuttx/can/can.h>
 #endif
 
@@ -636,7 +637,19 @@ static int ctucanfd_chrdev_send(FAR struct can_dev_s *dev,
   ctucanfd_putreg(priv, offset + CTUCANFD_TXBUF_TSL, 0);
   ctucanfd_putreg(priv, offset + CTUCANFD_TXBUF_TSU, 0);
 
-  bytes = can_dlc2bytes(msg->cm_hdr.ch_dlc);
+  /* DLC 9..15 of a classic frame carry 8 data bytes */
+
+#ifdef CONFIG_CAN_FD
+  if (msg->cm_hdr.ch_edl)
+    {
+      bytes = can_dlc2bytes(msg->cm_hdr.ch_dlc);
+    }
+  else
+#endif
+    {
+      bytes = MIN(msg->cm_hdr.ch_dlc, CAN_MAX_DLEN);
+    }
+
   for (i = 0; i < bytes; i++)
     {
       ctucanfd_putreg(priv, offset + CTUCANFD_TXBUF_DATA + i,
