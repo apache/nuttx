@@ -276,7 +276,14 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
 
       pstate->pr_recvlen = recvlen;
 
-      /* We should have taken all of the data from the I/O buffer chain,
+      /* The rest of a frame larger than the user buffer is discarded */
+
+      if (iob->io_pktlen > pstate->pr_msg->msg_iov->iov_len)
+        {
+          pstate->pr_msg->msg_flags |= MSG_TRUNC;
+        }
+
+      /* We have taken all of the data we need from the I/O buffer chain,
        * so release it. There is no trimming needed, since One CAN/CANFD
        * frame can always fit in one IOB.
        */
@@ -286,17 +293,6 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
       /* Free the I/O buffer chain */
 
       iob_free_chain(iob);
-
-      /* do not pass frames with DLC > 8 to a legacy socket */
-#if defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)
-      if (!_SO_GETOPT(conn->sconn.s_options, CAN_RAW_FD_FRAMES))
-#endif
-        {
-          if (recvlen > sizeof(struct can_frame))
-            {
-              return 0;
-            }
-        }
 
       return recvlen;
     }
@@ -313,27 +309,11 @@ static uint32_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
 
   if (pstate)
     {
-#if defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)
-      struct can_conn_s *conn = pstate->pr_conn;
-#endif
-
       if ((flags & CAN_NEWDATA) != 0)
         {
-          /* do not pass frames with DLC > 8 to a legacy socket */
-#if defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)
-          if (!_SO_GETOPT(conn->sconn.s_options, CAN_RAW_FD_FRAMES))
-#endif
-            {
-              if (dev->d_len > sizeof(struct can_frame))
-                {
-                  /* DO WE NEED TO CLEAR FLAGS?? */
-
-                  flags &= ~CAN_NEWDATA;
-                  return flags;
-                }
-            }
-
-          /* Copy the packet */
+          /* Copy the packet.  can_active() does not deliver CAN FD frames
+           * to a classic CAN socket.
+           */
 
           can_newdata(dev, pstate);
 

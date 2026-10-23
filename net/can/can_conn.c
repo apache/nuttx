@@ -304,6 +304,19 @@ FAR struct can_conn_s *can_active(FAR struct net_driver_s *dev,
               continue;
             }
 #endif
+
+          /* Do not pass CAN FD frames to a classic CAN socket */
+
+#if defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)
+          if (!_SO_GETOPT(conn->sconn.s_options, CAN_RAW_FD_FRAMES))
+#endif
+            {
+              if (dev->d_len > sizeof(struct can_frame))
+                {
+                  continue;
+                }
+            }
+
           break;
         }
     }
