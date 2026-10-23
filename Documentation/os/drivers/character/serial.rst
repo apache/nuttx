@@ -54,8 +54,9 @@ Serial Device Drivers
    -  ``TIOCNOTTY`` gives up the controlling terminal.
    -  ``TIOCGPGRP`` / ``TIOCGSID`` return the foreground process group /
       session leader PID.
-   -  ``TIOCSPGRP`` sets the foreground process group PID (a value of
-      ``0`` selects the calling task).
+   -  ``TIOCSPGRP`` sets the foreground process group PID.  As
+      ``tcsetpgrp()`` passes it, ``arg`` points to the PID (``pid_t *``);
+      a ``NULL`` pointer or a PID that is not positive gives ``EINVAL``.
 
    The C library exposes these through ``tcgetpgrp()``, ``tcsetpgrp()``,
    ``tcgetsid()``, ``setsid()``, ``getsid()`` and ``setpgid()``.  Because
