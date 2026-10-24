@@ -34,13 +34,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* GD30BC2416 battery charger on I2C0.  The charge current set by its ISET
- * resistor is not known (no schematic): the 1.5 A maximum of the charger
- * is assumed, so that BATIOC_CURRENT never selects more than requested.
+/* GD30BC2416 battery charger on I2C0.  The charge current is set by its
+ * ISET resistor, R34 = 30 kOhm: I = 10 / R(kOhm) A = 333 mA.
  */
 
 #define GD32_CHARGER_I2C_FREQUENCY  100000
-#define GD32_CHARGER_ISET_CURRENT   1500
+#define GD32_CHARGER_ISET_CURRENT   333
 
 /****************************************************************************
  * Public Function Prototypes

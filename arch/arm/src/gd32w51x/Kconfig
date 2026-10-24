@@ -273,13 +273,6 @@ endmenu # I2C Configuration
 menu "ADC Configuration"
 	depends on GD32W51X_ADC
 
-config GD32W51X_ADC_RESOLUTION
-	int "ADC resolution (bits)"
-	default 12
-	range 6 12
-	---help---
-		Valid values are 6, 8, 10 and 12.
-
 config GD32W51X_ADC_CLOCK
 	int "ADC clock (Hz)"
 	default 11250000

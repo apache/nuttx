@@ -45,12 +45,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The backlight (PB0) is switched fully on with the display */
+/* The backlight (PC14, active high) is switched fully on with the
+ * display
+ */
 
 #define GPIO_LCD_BL             (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PUPD_NONE | \
                                  GPIO_CFG_PP | GPIO_CFG_SPEED_2MHZ | \
-                                 GPIO_CFG_OUTPUT_SET | GPIO_CFG_PORT_B | \
-                                 GPIO_CFG_PIN_0)
+                                 GPIO_CFG_OUTPUT_SET | GPIO_CFG_PORT_C | \
+                                 GPIO_CFG_PIN_14)
 
 /****************************************************************************
  * Private Data

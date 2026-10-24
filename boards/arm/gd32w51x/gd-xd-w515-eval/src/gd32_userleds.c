@@ -41,7 +41,7 @@
  * Private Data
  ****************************************************************************/
 
-/* The four LEDs (PB1, PC4, PC5, PC3) are active HIGH: driving the pin high
+/* The four LEDs (PC5, PC4, PB0, PB1) are active HIGH: driving the pin high
  * lights the LED.
  */
 

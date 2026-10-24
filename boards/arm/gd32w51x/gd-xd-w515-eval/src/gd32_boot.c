@@ -30,6 +30,7 @@
 #include <arch/board/board.h>
 
 #include "gd32w51x.h"
+#include "gd32w51x_gpio.h"
 #include "gd-xd-w515-eval.h"
 
 /****************************************************************************
@@ -49,6 +50,9 @@
 
 void gd32w51x_boardinitialize(void)
 {
+  /* Keep the charger enabled (CHRG_EN high) */
+
+  gd32_gpio_config(GPIO_CHRG_EN);
 }
 
 /****************************************************************************
