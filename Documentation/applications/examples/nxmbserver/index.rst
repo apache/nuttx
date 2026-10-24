@@ -36,6 +36,15 @@ Holding Registers (read/write, FC03/FC06/FC16/FC23):
   register 10 = 1000)
 - Writable via FC06 (write single), FC16 (write multiple), FC23 (read/write)
 
+File Records (FC20/FC21, read/write):
+
+- Files 1 and 2, with 100 records each (records 0-99), kept in RAM
+- Initial values: record ``n`` of file 1 is ``n``, record ``n`` of file 2 is
+  ``0x1000 + n``
+- A file or a record out of range returns exception 2
+- Available when ``CONFIG_NXMODBUS_FUNC_READ_FILE`` and
+  ``CONFIG_NXMODBUS_FUNC_WRITE_FILE`` are enabled (both are off by default)
+
 Command-Line Options
 ====================
 
