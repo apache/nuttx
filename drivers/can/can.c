@@ -858,6 +858,47 @@ return_with_irqdisabled:
 }
 
 /****************************************************************************
+ * Name: can_rxfifo_flush
+ *
+ * Description:
+ *   Discard all messages in a reader's RX FIFO.  rx_sem counts a non-empty
+ *   FIFO, so it is reset too.  A pending internal error report is also
+ *   returned by read(), so it is discarded as well.
+ *
+ * Assumptions:
+ *   Called with interrupts disabled
+ *
+ ****************************************************************************/
+
+static void can_rxfifo_flush(FAR struct can_rxfifo_s *fifo)
+{
+  fifo->rx_head = 0;
+  fifo->rx_tail = 0;
+#ifdef CONFIG_CAN_ERRORS
+  fifo->rx_error = 0;
+#endif
+  nxsem_reset(&fifo->rx_sem, 0);
+}
+
+/****************************************************************************
+ * Name: can_flush_ioctl
+ *
+ * Description:
+ *   Pass a flush command to the lower half.  The upper half has already
+ *   flushed its own buffers, so a lower half that does not handle the
+ *   command (-ENOTTY) is not an error.
+ *
+ ****************************************************************************/
+
+static int can_flush_ioctl(FAR struct can_dev_s *dev, int cmd,
+                           unsigned long arg)
+{
+  int ret = dev_ioctl(dev, cmd, arg);
+
+  return ret == -ENOTTY ? OK : ret;
+}
+
+/****************************************************************************
  * Name: can_rtrread
  *
  * Description:
@@ -993,12 +1034,11 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case CANIOC_IFLUSH:
         {
-          reader->fifo.rx_head = 0;
-          reader->fifo.rx_tail = 0;
+          can_rxfifo_flush(&reader->fifo);
 
           /* invoke lower half ioctl */
 
-          ret = dev_ioctl(dev, cmd, arg);
+          ret = can_flush_ioctl(dev, cmd, arg);
         }
         break;
 
@@ -1010,7 +1050,7 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           /* invoke lower half ioctl */
 
-          ret = dev_ioctl(dev, cmd, arg);
+          ret = can_flush_ioctl(dev, cmd, arg);
         }
         break;
 
@@ -1021,13 +1061,11 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case CANIOC_IOFLUSH:
         {
           can_sender_init(&dev->cd_sender);
-
-          reader->fifo.rx_head = 0;
-          reader->fifo.rx_tail = 0;
+          can_rxfifo_flush(&reader->fifo);
 
           /* invoke lower half ioctl */
 
-          ret = dev_ioctl(dev, cmd, arg);
+          ret = can_flush_ioctl(dev, cmd, arg);
         }
         break;
 
