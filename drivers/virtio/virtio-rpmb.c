@@ -35,6 +35,7 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/mmcsd.h>
 #include <nuttx/virtio/virtio.h>
+#include <nuttx/virtio/virtio-rpmb.h>
 
 #include "virtio-rpmb.h"
 
