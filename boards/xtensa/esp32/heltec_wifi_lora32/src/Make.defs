@@ -30,3 +30,6 @@ DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board
 
+ifeq ($(CONFIG_USERLED),y)
+CSRCS += esp32_userleds.c
+endif
