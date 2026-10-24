@@ -74,3 +74,27 @@ config DRIVERS_VHOST_CAN
 		Enable the vhost CAN backend.  It bridges a VirtIO CAN device
 		(device ID 36) to a local SocketCAN interface, forwarding frames
 		between the peer's tx/rx/control virtqueues and the local bus.
+
+config DRIVERS_VHOST_RPMB
+	bool "Virtual Host RPMB Device Support"
+	default n
+	select DRIVERS_VHOST
+	---help---
+		Enable the vhost (device-side) RPMB backend.  It bridges a VirtIO
+		RPMB device (device ID 22) to the RPMB partition of a local eMMC,
+		forwarding the peer's RPMB frames as MMC_IOC_MULTI_CMD requests.
+		The local block device is named by a path in the device config
+		space, and the capacity and reliable-write count read from its
+		EXT_CSD are published back through the config space.
+
+if DRIVERS_VHOST_RPMB
+
+config DRIVERS_VHOST_RPMB_PRIORITY
+	int "vhost rpmb thread priority"
+	default 224
+
+config DRIVERS_VHOST_RPMB_STACKSIZE
+	int "vhost rpmb stack size"
+	default DEFAULT_TASK_STACKSIZE
+
+endif
