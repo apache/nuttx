@@ -553,7 +553,7 @@ static int djoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct djoy_notify_s *notify =
             (FAR struct djoy_notify_s *)((uintptr_t)arg);
 
-          if (notify)
+          if (notify && nxsig_event_valid(&notify->dn_event) == OK)
             {
               /* Save the notification events */
 

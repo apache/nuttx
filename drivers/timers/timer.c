@@ -391,7 +391,8 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct timer_notify_s *notify =
             (FAR struct timer_notify_s *)((uintptr_t)arg);
 
-          if (notify != NULL)
+          if (notify != NULL &&
+              nxsig_event_valid(&notify->event) == OK)
             {
               memcpy(&upper->notify, notify, sizeof(*notify));
               ret = timer_setcallback((FAR void *)upper, timer_notifier,

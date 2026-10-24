@@ -465,6 +465,12 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               break;
             }
 
+          ret = nxsig_event_valid(&new->event);
+          if (ret < 0)
+            {
+              break;
+            }
+
           pid = nxsched_getpid();
           tmp = &upper->signals[new->chan];
           if (tmp->pid != 0 && tmp->pid != pid)

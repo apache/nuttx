@@ -447,6 +447,13 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           int alarmid;
 
           DEBUGASSERT(alarminfo != NULL);
+
+          ret = nxsig_event_valid(&alarminfo->event);
+          if (ret < 0)
+            {
+              break;
+            }
+
           alarmid = alarminfo->id;
           DEBUGASSERT(alarmid >= 0 && alarmid < CONFIG_RTC_NALARMS);
 
@@ -518,6 +525,13 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           int alarmid;
 
           DEBUGASSERT(alarminfo != NULL);
+
+          ret = nxsig_event_valid(&alarminfo->event);
+          if (ret < 0)
+            {
+              break;
+            }
+
           alarmid = alarminfo->id;
           DEBUGASSERT(alarmid >= 0 && alarmid < CONFIG_RTC_NALARMS);
 
@@ -652,6 +666,13 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           int id;
 
           DEBUGASSERT(alarminfo != NULL);
+
+          ret = nxsig_event_valid(&alarminfo->event);
+          if (ret < 0)
+            {
+              break;
+            }
+
           id = alarminfo->id;
           DEBUGASSERT(id >= 0);
 

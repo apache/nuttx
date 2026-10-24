@@ -209,6 +209,12 @@ static int oneshot_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           start = (FAR struct oneshot_start_s *)((uintptr_t)arg);
           DEBUGASSERT(start != NULL);
 
+          ret = nxsig_event_valid(&start->event);
+          if (ret < 0)
+            {
+              break;
+            }
+
           /* Save signaling information */
 
           priv->od_event = start->event;

@@ -146,7 +146,7 @@ int mq_notify(mqd_t mqdes, FAR const struct sigevent *notification)
         {
           /* Yes... Was a valid signal number supplied? */
 
-          if (!GOOD_SIGNO(notification->sigev_signo))
+          if (nxsig_event_valid(notification) < 0)
             {
               /* No... Return EINVAL */
 

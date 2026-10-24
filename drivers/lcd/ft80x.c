@@ -1025,7 +1025,8 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                 {
                   /* Make sure that arguments are valid for the enable */
 
-                  if (notify->pid == 0)
+                  if (notify->pid == 0 ||
+                      nxsig_event_valid(&notify->event) < 0)
                     {
                       ret = -EINVAL;
                     }

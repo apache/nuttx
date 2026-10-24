@@ -34,6 +34,7 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/signal.h>
 
 #include "aio/aio.h"
 
@@ -201,6 +202,13 @@ int aio_fsync(int op, FAR struct aiocb *aiocbp)
 
   if (op != O_SYNC || aiocbp == NULL)
     {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
+  if (nxsig_event_valid(&aiocbp->aio_sigevent) < 0)
+    {
+      aiocbp->aio_result = -EINVAL;
       set_errno(EINVAL);
       return ERROR;
     }
