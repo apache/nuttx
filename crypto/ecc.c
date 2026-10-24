@@ -34,6 +34,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 #include <sys/types.h>
 
 #include <crypto/ecc.h>
@@ -434,6 +435,7 @@ static void vli_mult(FAR uint64_t *result, FAR uint64_t *left,
                      FAR uint64_t *right)
 {
   uint64_t r2 = 0;
+  uint l_min;
   uint i;
   uint k;
   uint128_t l_product;
@@ -446,7 +448,7 @@ static void vli_mult(FAR uint64_t *result, FAR uint64_t *left,
 
   for (k = 0; k < NUM_ECC_DIGITS * 2 - 1; ++k)
     {
-      uint l_min = (k < NUM_ECC_DIGITS ? 0 : (k + 1) - NUM_ECC_DIGITS);
+      l_min = (k < NUM_ECC_DIGITS ? 0 : (k + 1) - NUM_ECC_DIGITS);
       for (i = l_min; i <= k && i < NUM_ECC_DIGITS; ++i)
         {
           l_product = mul_64_64(left[i], right[k - i]);
@@ -1777,4 +1779,348 @@ int ecdsa_verify(const uint8_t publickey[ECC_BYTES + 1],
   /* Accept only if v == r. */
 
   return vli_cmp(rx, l_r) == 0;
+}
+
+/* Helpers for the byte-oriented public API below */
+
+static int ecc_set_infinity(uint8_t rx[ECC_BYTES], uint8_t ry[ECC_BYTES])
+{
+  memset(rx, 0, ECC_BYTES);
+  memset(ry, 0, ECC_BYTES);
+  return 1;
+}
+
+static void ecc_modmult_any(uint64_t *result, uint64_t *left,
+                            uint64_t *right, uint64_t *mod)
+{
+  if (vli_cmp(mod, g_curve_p) == 0)
+    {
+      vli_modmult_fast(result, left, right);
+    }
+  else
+    {
+      vli_modmult(result, left, right, mod);
+    }
+}
+
+int ecc_point_is_on_curve(const uint8_t px[ECC_BYTES],
+                          const uint8_t py[ECC_BYTES])
+{
+  uint64_t native_x[NUM_ECC_DIGITS];
+  uint64_t native_y[NUM_ECC_DIGITS];
+  uint64_t rhs[NUM_ECC_DIGITS];
+  uint64_t lhs[NUM_ECC_DIGITS];
+  uint64_t _3[NUM_ECC_DIGITS];
+
+  if (px == NULL || py == NULL)
+    {
+      return -EINVAL;
+    }
+
+  ecc_bytes2native(native_x, px);
+  ecc_bytes2native(native_y, py);
+
+  /* Must be < p */
+
+  if (vli_cmp(g_curve_p, native_x) <= 0 ||
+      vli_cmp(g_curve_p, native_y) <= 0)
+    {
+      return 0;
+    }
+
+  /* rhs = x^3 - 3x + b */
+
+  vli_clear(_3);
+  _3[0] = 3;
+
+  vli_modsquare_fast(rhs, native_x);
+  vli_modsub(rhs, rhs, _3, g_curve_p);
+  vli_modmult_fast(rhs, rhs, native_x);
+  vli_modadd(rhs, rhs, g_curve_b, g_curve_p);
+
+  /* lhs = y^2 */
+
+  vli_modsquare_fast(lhs, native_y);
+
+  return (vli_cmp(lhs, rhs) == 0);
+}
+
+int ecc_point_add(uint8_t rx[ECC_BYTES], uint8_t ry[ECC_BYTES],
+                  const uint8_t px[ECC_BYTES], const uint8_t py[ECC_BYTES],
+                  const uint8_t qx[ECC_BYTES], const uint8_t qy[ECC_BYTES])
+{
+  uint64_t x1[NUM_ECC_DIGITS];
+  uint64_t y1[NUM_ECC_DIGITS];
+  uint64_t x2[NUM_ECC_DIGITS];
+  uint64_t y2[NUM_ECC_DIGITS];
+  uint64_t x3[NUM_ECC_DIGITS];
+  uint64_t y3[NUM_ECC_DIGITS];
+  uint64_t t1[NUM_ECC_DIGITS];
+  uint64_t t2[NUM_ECC_DIGITS];
+  uint64_t lambda[NUM_ECC_DIGITS];
+  int p_inf;
+  int q_inf;
+
+  if (rx == NULL || ry == NULL || px == NULL ||
+      py == NULL || qx == NULL || qy == NULL)
+    {
+      return -EINVAL;
+    }
+
+  ecc_bytes2native(x1, px);
+  ecc_bytes2native(y1, py);
+  ecc_bytes2native(x2, qx);
+  ecc_bytes2native(y2, qy);
+
+  p_inf = (vli_iszero(x1) && vli_iszero(y1));
+  q_inf = (vli_iszero(x2) && vli_iszero(y2));
+
+  if (p_inf && q_inf)
+    {
+      return ecc_set_infinity(rx, ry);
+    }
+
+  if (p_inf)
+    {
+      ecc_native2bytes(rx, x2);
+      ecc_native2bytes(ry, y2);
+      return 0;
+    }
+
+  if (q_inf)
+    {
+      ecc_native2bytes(rx, x1);
+      ecc_native2bytes(ry, y1);
+      return 0;
+    }
+
+  if (vli_cmp(x1, x2) == 0)
+    {
+      if (vli_cmp(y1, y2) == 0)
+        {
+          if (vli_iszero(y1))
+            {
+              /* Tangent is vertical (y == 0), 2P = infinity */
+
+              return ecc_set_infinity(rx, ry);
+            }
+
+          /* Point doubling: lambda = (3*x1^2 + a) / (2*y1) mod p */
+
+          vli_clear(t2);
+          t2[0] = 3;
+          vli_modsquare_fast(t1, x1);
+          vli_modadd(lambda, t1, t1, g_curve_p);
+          vli_modadd(t1, lambda, t1, g_curve_p);
+          vli_modsub(t1, t1, t2, g_curve_p);
+
+          vli_modadd(t2, y1, y1, g_curve_p);
+          vli_modinv(t2, t2, g_curve_p);
+          vli_modmult_fast(lambda, t1, t2);
+        }
+      else
+        {
+          /* x1 == x2 but y1 != y2 => P + (-P) = infinity */
+
+          return ecc_set_infinity(rx, ry);
+        }
+    }
+  else
+    {
+      /* Point addition: lambda = (y2 - y1) / (x2 - x1) mod p */
+
+      vli_modsub(t1, y2, y1, g_curve_p);
+      vli_modsub(t2, x2, x1, g_curve_p);
+      vli_modinv(t2, t2, g_curve_p);
+      vli_modmult_fast(lambda, t1, t2);
+    }
+
+  /* x3 = lambda^2 - x1 - x2 mod p */
+
+  vli_modsquare_fast(x3, lambda);
+  vli_modsub(x3, x3, x1, g_curve_p);
+  vli_modsub(x3, x3, x2, g_curve_p);
+
+  /* y3 = lambda * (x1 - x3) - y1 mod p */
+
+  vli_modsub(t1, x1, x3, g_curve_p);
+  vli_modmult_fast(t1, lambda, t1);
+  vli_modsub(y3, t1, y1, g_curve_p);
+
+  ecc_native2bytes(rx, x3);
+  ecc_native2bytes(ry, y3);
+  return 0;
+}
+
+int ecc_point_mul(uint8_t rx[ECC_BYTES], uint8_t ry[ECC_BYTES],
+                  const uint8_t px[ECC_BYTES], const uint8_t py[ECC_BYTES],
+                  const uint8_t k[ECC_BYTES])
+{
+  eccpoint_t point;
+  eccpoint_t result;
+  uint64_t native_k[NUM_ECC_DIGITS];
+  uint64_t one[NUM_ECC_DIGITS];
+
+  if (rx == NULL || ry == NULL || px == NULL ||
+      py == NULL || k == NULL)
+    {
+      return -EINVAL;
+    }
+
+  ecc_bytes2native(point.x, px);
+  ecc_bytes2native(point.y, py);
+  ecc_bytes2native(native_k, k);
+
+  if (vli_cmp(g_curve_n, native_k) != 1)
+    {
+      vli_sub(native_k, native_k, g_curve_n);
+    }
+
+  if (vli_iszero(native_k) || eccpoint_iszero(&point))
+    {
+      return ecc_set_infinity(rx, ry);
+    }
+
+  /* The co-Z ladder recovers 1/Z from (X1 - X0), which is zero when the
+   * result is +/-P, so k = 1 and k = n - 1 have to be handled here.
+   */
+
+  vli_clear(one);
+  one[0] = 1;
+
+  if (vli_cmp(native_k, one) == 0)
+    {
+      ecc_native2bytes(rx, point.x);
+      ecc_native2bytes(ry, point.y);
+      return 0;
+    }
+
+  vli_add(one, native_k, one);
+  if (vli_cmp(one, g_curve_n) == 0)
+    {
+      vli_modsub(point.y, g_curve_p, point.y, g_curve_p);
+      ecc_native2bytes(rx, point.x);
+      ecc_native2bytes(ry, point.y);
+      return 0;
+    }
+
+  memset(&result, 0, sizeof(result));
+  eccpoint_mult(&result, &point, native_k, NULL);
+
+  if (eccpoint_iszero(&result))
+    {
+      return ecc_set_infinity(rx, ry);
+    }
+
+  ecc_native2bytes(rx, result.x);
+  ecc_native2bytes(ry, result.y);
+  return 0;
+}
+
+int ecc_mod_add(uint8_t res[ECC_BYTES], const uint8_t a[ECC_BYTES],
+                const uint8_t b[ECC_BYTES], const uint8_t mod[ECC_BYTES])
+{
+  uint64_t l_a[NUM_ECC_DIGITS];
+  uint64_t l_b[NUM_ECC_DIGITS];
+  uint64_t l_mod[NUM_ECC_DIGITS];
+  uint64_t l_res[NUM_ECC_DIGITS];
+
+  if (res == NULL || a == NULL || b == NULL || mod == NULL)
+    {
+      return -EINVAL;
+    }
+
+  ecc_bytes2native(l_a, a);
+  ecc_bytes2native(l_b, b);
+  ecc_bytes2native(l_mod, mod);
+
+  vli_modadd(l_res, l_a, l_b, l_mod);
+
+  ecc_native2bytes(res, l_res);
+  return 0;
+}
+
+int ecc_mod_sub(uint8_t res[ECC_BYTES], const uint8_t a[ECC_BYTES],
+                const uint8_t b[ECC_BYTES], const uint8_t mod[ECC_BYTES])
+{
+  uint64_t l_a[NUM_ECC_DIGITS];
+  uint64_t l_b[NUM_ECC_DIGITS];
+  uint64_t l_mod[NUM_ECC_DIGITS];
+  uint64_t l_res[NUM_ECC_DIGITS];
+
+  if (res == NULL || a == NULL || b == NULL || mod == NULL)
+    {
+      return -EINVAL;
+    }
+
+  ecc_bytes2native(l_a, a);
+  ecc_bytes2native(l_b, b);
+  ecc_bytes2native(l_mod, mod);
+
+  vli_modsub(l_res, l_a, l_b, l_mod);
+
+  ecc_native2bytes(res, l_res);
+  return 0;
+}
+
+int ecc_mod_mul(uint8_t res[ECC_BYTES], const uint8_t a[ECC_BYTES],
+                const uint8_t b[ECC_BYTES], const uint8_t mod[ECC_BYTES])
+{
+  uint64_t l_a[NUM_ECC_DIGITS];
+  uint64_t l_b[NUM_ECC_DIGITS];
+  uint64_t l_mod[NUM_ECC_DIGITS];
+  uint64_t l_res[NUM_ECC_DIGITS];
+
+  if (res == NULL || a == NULL || b == NULL || mod == NULL)
+    {
+      return -EINVAL;
+    }
+
+  ecc_bytes2native(l_a, a);
+  ecc_bytes2native(l_b, b);
+  ecc_bytes2native(l_mod, mod);
+
+  ecc_modmult_any(l_res, l_a, l_b, l_mod);
+
+  ecc_native2bytes(res, l_res);
+  return 0;
+}
+
+int ecc_mod_exp(uint8_t res[ECC_BYTES], const uint8_t base[ECC_BYTES],
+                const uint8_t exp[ECC_BYTES], const uint8_t mod[ECC_BYTES])
+{
+  uint64_t l_base[NUM_ECC_DIGITS];
+  uint64_t l_exp[NUM_ECC_DIGITS];
+  uint64_t l_mod[NUM_ECC_DIGITS];
+  uint64_t l_res[NUM_ECC_DIGITS];
+  int i;
+
+  if (res == NULL || base == NULL || exp == NULL || mod == NULL)
+    {
+      return -EINVAL;
+    }
+
+  ecc_bytes2native(l_base, base);
+  ecc_bytes2native(l_exp, exp);
+  ecc_bytes2native(l_mod, mod);
+
+  if (vli_iszero(l_mod))
+    {
+      return -EINVAL;
+    }
+
+  vli_clear(l_res);
+  l_res[0] = 1;
+
+  for (i = vli_numbits(l_exp) - 1; i >= 0; --i)
+    {
+      ecc_modmult_any(l_res, l_res, l_res, l_mod);
+      if (vli_testbit(l_exp, i))
+        {
+          ecc_modmult_any(l_res, l_res, l_base, l_mod);
+        }
+    }
+
+  ecc_native2bytes(res, l_res);
+  return 0;
 }
