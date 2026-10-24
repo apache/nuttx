@@ -1399,7 +1399,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
   if (ret < 0)
     {
       nerr("ERROR: Not reachable\n");
-      ret = -ENETUNREACH;
       goto errout;
     }
 #endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */

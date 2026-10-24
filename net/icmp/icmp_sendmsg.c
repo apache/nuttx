@@ -386,7 +386,6 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
   if (ret < 0)
     {
       nerr("ERROR: Not reachable\n");
-      ret = -ENETUNREACH;
       goto errout;
     }
 #endif

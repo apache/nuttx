@@ -167,8 +167,10 @@ static uint32_t arp_send_eventhandler(FAR struct net_driver_s *dev,
  *   Zero (OK) is returned on success and the IP address mapping can now be
  *   found in the ARP table.  On error a negated errno value is returned:
  *
- *     -ETIMEDOUT:    The number or retry counts has been exceed.
- *     -EHOSTUNREACH: Could not find a route to the host
+ *     -ENETUNREACH:  No device or router reaches the address, or the
+ *                    device went down
+ *     -EHOSTUNREACH: The address resolution failed
+ *     -ENOMEM:       No callback available
  *
  * Assumptions:
  *   This function is called from the normal tasking context.
@@ -216,7 +218,7 @@ int arp_send(in_addr_t ipaddr)
   if (!dev)
     {
       nerr("ERROR: Unreachable: %08lx\n", (unsigned long)ipaddr);
-      return -EHOSTUNREACH;
+      return -ENETUNREACH;
     }
 
   /* ARP support is only built if the Ethernet link layer is supported.
@@ -256,7 +258,7 @@ int arp_send(in_addr_t ipaddr)
       ipaddr = dripaddr;
       if (ipaddr == INADDR_ANY)
         {
-          return -EHOSTUNREACH;
+          return -ENETUNREACH;
         }
     }
 
@@ -312,11 +314,20 @@ int arp_send(in_addr_t ipaddr)
 
       netdev_lock(dev);
       ret = arp_find(ipaddr, NULL, dev);
-      if (ret >= 0 || ret == -ENETUNREACH)
+      if (ret >= 0)
         {
           /* We have it! Break out with ret value */
 
           netdev_unlock(dev);
+          break;
+        }
+
+      if (ret == -ENETUNREACH)
+        {
+          /* The resolution of the address failed a short time ago */
+
+          netdev_unlock(dev);
+          ret = -EHOSTUNREACH;
           break;
         }
 
@@ -432,6 +443,13 @@ timeout:
       nerr("ERROR: arp_wait failed: %d, ipaddr: %u.%u.%u.%u\n", ret,
            ip4_addr1(ipaddr), ip4_addr2(ipaddr),
            ip4_addr3(ipaddr), ip4_addr4(ipaddr));
+    }
+
+  /* No reply to any of the requests: the address resolution failed */
+
+  if (ret == -ETIMEDOUT)
+    {
+      ret = -EHOSTUNREACH;
     }
 
   nxsem_destroy(&state.snd_sem);
