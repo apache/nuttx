@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <assert.h>
 
@@ -36,6 +37,7 @@
 #endif
 
 #include "mmu.h"
+#include "arm.h"
 #include "sched/sched.h"
 #include "arm_internal.h"
 
@@ -91,6 +93,7 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
        */
 
       struct tcb_s *tcb = this_task();
+
       tcb->xcp.far  = regs[REG_R15];
 
       /* Call pg_miss() to schedule the page fill.  A consequences of this
@@ -140,7 +143,7 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
     {
       arm_dbgmonitor(0, (void *)regs[REG_PC], regs);
     }
-  else
+  else if (!arm_fault_kill(regs))
     {
       PANIC_WITH_REGS("panic", regs);
     }
