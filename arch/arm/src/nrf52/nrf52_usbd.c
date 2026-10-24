@@ -718,241 +718,246 @@ nrf52_ep0out_stdrequest(struct nrf52_usbdev_s *priv,
 
   switch (ctrlreq->req)
     {
-    case USB_REQ_GETSTATUS:
-      {
-        /* type:  device-to-host; recipient = device, interface, endpoint
-         * value: 0
-         * index: zero interface endpoint
-         * len:   2; data = status
-         */
+      case USB_REQ_GETSTATUS:
+        {
+          /* type:  device-to-host; recipient = device, interface, endpoint
+           * value: 0
+           * index: zero interface endpoint
+           * len:   2; data = status
+           */
 
-        usbtrace(TRACE_INTDECODE(NRF52_TRACEINTID_GETSTATUS), 0);
-        if (!priv->addressed || ctrlreq->len != 2 ||
-            USB_REQ_ISOUT(ctrlreq->type) || ctrlreq->value != 0)
-          {
-            priv->stalled = true;
-          }
-        else
-          {
-            switch (ctrlreq->type & USB_REQ_RECIPIENT_MASK)
-              {
-              case USB_REQ_RECIPIENT_ENDPOINT:
+          usbtrace(TRACE_INTDECODE(NRF52_TRACEINTID_GETSTATUS), 0);
+          if (!priv->addressed || ctrlreq->len != 2 ||
+              USB_REQ_ISOUT(ctrlreq->type) || ctrlreq->value != 0)
+            {
+              priv->stalled = true;
+            }
+          else
+            {
+              switch (ctrlreq->type & USB_REQ_RECIPIENT_MASK)
                 {
-                  usbtrace(TRACE_INTDECODE(NRF52_TRACEINTID_EPGETSTATUS), 0);
-                  privep = nrf52_ep_findbyaddr(priv, ctrlreq->index);
-                  if (!privep)
+                  case USB_REQ_RECIPIENT_ENDPOINT:
                     {
-                      usbtrace(
-                        TRACE_DEVERROR(NRF52_TRACEERR_BADEPGETSTATUS), 0);
+                      usbtrace(TRACE_INTDECODE(NRF52_TRACEINTID_EPGETSTATUS),
+                               0);
+                      privep = nrf52_ep_findbyaddr(priv, ctrlreq->index);
+                      if (!privep)
+                        {
+                          usbtrace(
+                            TRACE_DEVERROR(NRF52_TRACEERR_BADEPGETSTATUS),
+                            0);
+                          priv->stalled = true;
+                        }
+                      break;
+                    }
+
+                  case USB_REQ_RECIPIENT_DEVICE:
+                  case USB_REQ_RECIPIENT_INTERFACE:
+                    {
+                      if (ctrlreq->index == 0)
+                        {
+                          usbtrace(TRACE_INTDECODE(
+                                     NRF52_TRACEINTID_DEVGETSTATUS), 0);
+                        }
+                      else
+                        {
+                          usbtrace(TRACE_DEVERROR(
+                                   NRF52_TRACEERR_BADDEVGETSTATUS), 0);
+                          priv->stalled = true;
+                        }
+                      break;
+                    }
+
+                  default:
+                    {
+                      usbtrace(TRACE_DEVERROR(NRF52_TRACEERR_BADGETSTATUS),
+                               0);
                       priv->stalled = true;
+                      break;
                     }
-                  break;
                 }
+            }
+          break;
+        }
 
-              case USB_REQ_RECIPIENT_DEVICE:
-              case USB_REQ_RECIPIENT_INTERFACE:
+      case USB_REQ_CLEARFEATURE:
+        {
+          /* type:  host-to-device; recipient = device, interface or endpoint
+           * value: feature selector
+           * index: zero interface endpoint;
+           * len:   zero, data = none
+           */
+
+          usbtrace(TRACE_INTDECODE(NRF52_TRACEINTID_CLEARFEATURE), 0);
+          if (priv->addressed != 0 && ctrlreq->len == 0)
+            {
+              recipient = ctrlreq->type & USB_REQ_RECIPIENT_MASK;
+              if (recipient == USB_REQ_RECIPIENT_ENDPOINT &&
+                  ctrlreq->value == USB_FEATURE_ENDPOINTHALT &&
+                  (privep = nrf52_ep_findbyaddr(priv,
+                                                ctrlreq->index)) != NULL)
                 {
-                  if (ctrlreq->index == 0)
-                    {
-                      usbtrace(TRACE_INTDECODE(
-                                 NRF52_TRACEINTID_DEVGETSTATUS), 0);
-                    }
-                  else
-                    {
-                      usbtrace(TRACE_DEVERROR(
-                               NRF52_TRACEERR_BADDEVGETSTATUS), 0);
-                      priv->stalled = true;
-                    }
-                  break;
+                  nrf52_ep_clrstall(privep);
                 }
-
-              default:
+              else if (recipient == USB_REQ_RECIPIENT_DEVICE &&
+                       ctrlreq->value == USB_FEATURE_REMOTEWAKEUP)
                 {
-                  usbtrace(TRACE_DEVERROR(NRF52_TRACEERR_BADGETSTATUS), 0);
+                  priv->wakeup = false;
+                }
+              else
+                {
+                  nrf52_req_dispatch(priv, &priv->ctrlreq);
+                }
+            }
+          else
+            {
+              usbtrace(TRACE_DEVERROR(NRF52_TRACEERR_BADCLEARFEATURE), 0);
+              priv->stalled = true;
+            }
+          break;
+        }
+
+      case USB_REQ_SETFEATURE:
+        {
+          /* type:  host-to-device; recipient = device, interface, endpoint
+           * value: feature selector
+           * index: zero interface endpoint;
+           * len:   0; data = none
+           */
+
+          usbtrace(TRACE_INTDECODE(NRF52_TRACEINTID_SETFEATURE), 0);
+          if (priv->addressed != 0 && ctrlreq->len == 0)
+            {
+              recipient = ctrlreq->type & USB_REQ_RECIPIENT_MASK;
+              if (recipient == USB_REQ_RECIPIENT_ENDPOINT &&
+                  ctrlreq->value == USB_FEATURE_ENDPOINTHALT &&
+                  (privep = nrf52_ep_findbyaddr(priv,
+                                                ctrlreq->index)) != NULL)
+                {
+                  nrf52_ep_setstall(privep);
+                }
+              else if (recipient == USB_REQ_RECIPIENT_DEVICE &&
+                       ctrlreq->value == USB_FEATURE_REMOTEWAKEUP)
+                {
+                  priv->wakeup = true;
+                }
+              else if (recipient == USB_REQ_RECIPIENT_DEVICE &&
+                       ctrlreq->value == USB_FEATURE_TESTMODE &&
+                       ((ctrlreq->index & 0xff) == 0))
+                {
+                  usbtrace(TRACE_INTDECODE(NRF52_TRACEINTID_TESTMODE), 0);
+                }
+              else
+                {
+                  usbtrace(TRACE_DEVERROR(NRF52_TRACEERR_BADSETFEATURE), 0);
                   priv->stalled = true;
-                  break;
                 }
-              }
-          }
-        break;
-      }
+            }
+          else
+            {
+              usbtrace(TRACE_DEVERROR(NRF52_TRACEERR_BADSETFEATURE), 0);
+              priv->stalled = true;
+            }
+          break;
+        }
 
-    case USB_REQ_CLEARFEATURE:
-      {
-        /* type:  host-to-device; recipient = device, interface or endpoint
-         * value: feature selector
-         * index: zero interface endpoint;
-         * len:   zero, data = none
+      case USB_REQ_SETADDRESS:
+        {
+          /* type:  host-to-device; recipient = device
+           * value: device address
+           * index: 0
+           * len:   0; data = none
+           */
+
+          usbtrace(TRACE_INTDECODE(NRF52_TRACEINTID_SETADDRESS),
+                    ctrlreq->value);
+          nrf52_setaddress(priv, (uint16_t)priv->ctrlreq.value[0]);
+
+          /* NOTE: The USBD peripheral handles the SetAddress
+           * transfer by itself.
+           *
+           * REVISTI: Documentation states that we shall not handle this
+           *          command in the software at all, but if we don't
+           *          send EP0STATUS response then enumeration fails.
+           */
+
+          break;
+        }
+
+      case USB_REQ_GETDESCRIPTOR:
+        /* type:  device-to-host; recipient = device
+         * value: descriptor type and index
+         * index: 0 or language ID;
+         * len:   descriptor len; data = descriptor
          */
 
-        usbtrace(TRACE_INTDECODE(NRF52_TRACEINTID_CLEARFEATURE), 0);
-        if (priv->addressed != 0 && ctrlreq->len == 0)
-          {
-            recipient = ctrlreq->type & USB_REQ_RECIPIENT_MASK;
-            if (recipient == USB_REQ_RECIPIENT_ENDPOINT &&
-                ctrlreq->value == USB_FEATURE_ENDPOINTHALT &&
-                (privep = nrf52_ep_findbyaddr(priv, ctrlreq->index)) != NULL)
-              {
-                nrf52_ep_clrstall(privep);
-              }
-            else if (recipient == USB_REQ_RECIPIENT_DEVICE &&
-                     ctrlreq->value == USB_FEATURE_REMOTEWAKEUP)
-              {
-                priv->wakeup = false;
-              }
-            else
-              {
-                nrf52_req_dispatch(priv, &priv->ctrlreq);
-              }
-          }
-        else
-          {
-            usbtrace(TRACE_DEVERROR(NRF52_TRACEERR_BADCLEARFEATURE), 0);
-            priv->stalled = true;
-          }
-        break;
-      }
-
-    case USB_REQ_SETFEATURE:
-      {
-        /* type:  host-to-device; recipient = device, interface, endpoint
-         * value: feature selector
-         * index: zero interface endpoint;
-         * len:   0; data = none
-         */
-
-        usbtrace(TRACE_INTDECODE(NRF52_TRACEINTID_SETFEATURE), 0);
-        if (priv->addressed != 0 && ctrlreq->len == 0)
-          {
-            recipient = ctrlreq->type & USB_REQ_RECIPIENT_MASK;
-            if (recipient == USB_REQ_RECIPIENT_ENDPOINT &&
-                ctrlreq->value == USB_FEATURE_ENDPOINTHALT &&
-                (privep = nrf52_ep_findbyaddr(priv, ctrlreq->index)) != NULL)
-              {
-                nrf52_ep_setstall(privep);
-              }
-            else if (recipient == USB_REQ_RECIPIENT_DEVICE &&
-                     ctrlreq->value == USB_FEATURE_REMOTEWAKEUP)
-              {
-                priv->wakeup = true;
-              }
-            else if (recipient == USB_REQ_RECIPIENT_DEVICE &&
-                     ctrlreq->value == USB_FEATURE_TESTMODE &&
-                     ((ctrlreq->index & 0xff) == 0))
-              {
-                usbtrace(TRACE_INTDECODE(NRF52_TRACEINTID_TESTMODE), 0);
-              }
-            else
-              {
-                usbtrace(TRACE_DEVERROR(NRF52_TRACEERR_BADSETFEATURE), 0);
-                priv->stalled = true;
-              }
-          }
-        else
-          {
-            usbtrace(TRACE_DEVERROR(NRF52_TRACEERR_BADSETFEATURE), 0);
-            priv->stalled = true;
-          }
-        break;
-      }
-
-    case USB_REQ_SETADDRESS:
-      {
+      case USB_REQ_SETDESCRIPTOR:
         /* type:  host-to-device; recipient = device
-         * value: device address
-         * index: 0
+         * value: descriptor type and index
+         * index: 0 or language ID;
+         * len:   descriptor len; data = descriptor
+         */
+
+        {
+          usbtrace(TRACE_INTDECODE(NRF52_TRACEINTID_GETSETDESC),
+                   priv->ctrlreq.req);
+          nrf52_req_dispatch(priv, &priv->ctrlreq);
+          break;
+        }
+
+      case USB_REQ_GETCONFIGURATION:
+        /* type:  device-to-host; recipient = device
+         * value: 0;
+         * index: 0;
+         * len:   1; data = configuration value
+         */
+
+      case USB_REQ_SETCONFIGURATION:
+        /* type:  host-to-device; recipient = device
+         * value: configuration value
+         * index: 0;
          * len:   0; data = none
          */
 
-        usbtrace(TRACE_INTDECODE(NRF52_TRACEINTID_SETADDRESS),
-                  ctrlreq->value);
-        nrf52_setaddress(priv, (uint16_t)priv->ctrlreq.value[0]);
-
-        /* NOTE: The USBD peripheral handles the SetAddress
-         * transfer by itself.
-         *
-         * REVISTI: Documentation states that we shall not handle this
-         *          command in the software at all, but if we don't
-         *          send EP0STATUS response then enumeration fails.
+      case USB_REQ_GETINTERFACE:
+        /* type:  device-to-host; recipient = interface
+         * value: 0
+         * index: interface;
+         * len:   1; data = alt interface
          */
 
+      case USB_REQ_SETINTERFACE:
+        /* type:  host-to-device; recipient = interface
+         * value: alternate setting
+         * index: interface;
+         * len:   0; data = none
+         */
+
+        {
+          usbtrace(TRACE_INTDECODE(NRF52_TRACEINTID_GETSETIFCONFIG),
+                   priv->ctrlreq.req);
+          nrf52_req_dispatch(priv, &priv->ctrlreq);
+          break;
+        }
+
+      case USB_REQ_SYNCHFRAME:
+        /* type:  device-to-host; recipient = endpoint
+         * value: 0
+         * index: endpoint;
+         * len:   2; data = frame number
+         */
+
+        {
+          usbtrace(TRACE_INTDECODE(NRF52_TRACEINTID_SYNCHFRAME), 0);
+          break;
+        }
+
+      default:
+        {
+          usbtrace(TRACE_DEVERROR(NRF52_TRACEERR_INVALIDCTRLREQ), 0);
+          priv->stalled = true;
+        }
         break;
-      }
-
-    case USB_REQ_GETDESCRIPTOR:
-      /* type:  device-to-host; recipient = device
-       * value: descriptor type and index
-       * index: 0 or language ID;
-       * len:   descriptor len; data = descriptor
-       */
-
-    case USB_REQ_SETDESCRIPTOR:
-      /* type:  host-to-device; recipient = device
-       * value: descriptor type and index
-       * index: 0 or language ID;
-       * len:   descriptor len; data = descriptor
-       */
-
-      {
-        usbtrace(TRACE_INTDECODE(NRF52_TRACEINTID_GETSETDESC),
-                 priv->ctrlreq.req);
-        nrf52_req_dispatch(priv, &priv->ctrlreq);
-        break;
-      }
-
-    case USB_REQ_GETCONFIGURATION:
-      /* type:  device-to-host; recipient = device
-       * value: 0;
-       * index: 0;
-       * len:   1; data = configuration value
-       */
-
-    case USB_REQ_SETCONFIGURATION:
-      /* type:  host-to-device; recipient = device
-       * value: configuration value
-       * index: 0;
-       * len:   0; data = none
-       */
-
-    case USB_REQ_GETINTERFACE:
-      /* type:  device-to-host; recipient = interface
-       * value: 0
-       * index: interface;
-       * len:   1; data = alt interface
-       */
-
-    case USB_REQ_SETINTERFACE:
-      /* type:  host-to-device; recipient = interface
-       * value: alternate setting
-       * index: interface;
-       * len:   0; data = none
-       */
-
-      {
-        usbtrace(TRACE_INTDECODE(NRF52_TRACEINTID_GETSETIFCONFIG),
-                 priv->ctrlreq.req);
-        nrf52_req_dispatch(priv, &priv->ctrlreq);
-        break;
-      }
-
-    case USB_REQ_SYNCHFRAME:
-      /* type:  device-to-host; recipient = endpoint
-       * value: 0
-       * index: endpoint;
-       * len:   2; data = frame number
-       */
-
-      {
-        usbtrace(TRACE_INTDECODE(NRF52_TRACEINTID_SYNCHFRAME), 0);
-        break;
-      }
-
-    default:
-      {
-        usbtrace(TRACE_DEVERROR(NRF52_TRACEERR_INVALIDCTRLREQ), 0);
-        priv->stalled = true;
-      }
-      break;
     }
 }
 
