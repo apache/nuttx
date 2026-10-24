@@ -51,6 +51,8 @@ static bool nxsig_dispatch_unmasked(FAR struct tcb_s *rtcb)
 {
   sigset_t unmaskedset;
   FAR sigpendq_t *pendingsig;
+  siginfo_t info;
+  bool group;
   int signo;
 
   /* Prohibit any context switches until we are done with this.
@@ -96,19 +98,22 @@ static bool nxsig_dispatch_unmasked(FAR struct tcb_s *rtcb)
 
           if ((pendingsig = nxsig_remove_pendingsignal(rtcb, signo)) != NULL)
             {
-              /* If there is one, then process it like a normal signal.
-               * Since the signal was pending, then unblocked on this
-               * thread, we can skip the normal group signal dispatching
-               * rules; there can be no other recipient for the signal
-               * other than this thread.
+              /* Release the entry first: the action can end the process
+               * (the default action of SIGTERM, for example), and then
+               * nxsig_tcbdispatch() does not return.
                */
 
-              nxsig_tcbdispatch(rtcb, &pendingsig->info,
-                                pendingsig->tcb == NULL);
-
-              /* Then remove it from the pending signal list */
-
+              info  = pendingsig->info;
+              group = pendingsig->tcb == NULL;
               nxsig_release_pendingsignal(pendingsig);
+
+              /* Process it like a normal signal.  Since the signal was
+               * pending, then unblocked on this thread, we can skip the
+               * normal group signal dispatching rules; there can be no
+               * other recipient for the signal other than this thread.
+               */
+
+              nxsig_tcbdispatch(rtcb, &info, group);
             }
         }
     }
