@@ -33,6 +33,10 @@ if(CONFIG_DRIVERS_VHOST_I2C)
   list(APPEND SRCS vhost-i2c.c)
 endif()
 
+if(CONFIG_DRIVERS_VHOST_RPMB)
+  list(APPEND SRCS vhost-rpmb.c)
+endif()
+
 if(CONFIG_DRIVERS_VHOST_RNG)
   list(APPEND SRCS vhost-rng.c)
 endif()

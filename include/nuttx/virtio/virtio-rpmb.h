@@ -75,6 +75,18 @@
 #define VIRTIO_RPMB_RES_NO_AUTH_KEY           0x0007
 #define VIRTIO_RPMB_RES_WRITE_COUNTER_EXPIRED 0x0080
 
+/* Max length of the local RPMB block device path in the device config
+ * space (a device-side private extension; the spec defines none).
+ */
+
+#define VIRTIO_RPMB_PATH_SIZE                 32
+
+/* RPMB EXT_CSD (eMMC standard command 8) layout */
+
+#define VIRTIO_RPMB_EXT_CSD_SIZE              512
+#define VIRTIO_RPMB_EXT_CSD_RPMB_SIZE         168
+#define VIRTIO_RPMB_EXT_CSD_REL_WR_SEC_C      222
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -86,6 +98,18 @@ begin_packed_struct struct virtio_rpmb_config_s
   uint8_t capacity;
   uint8_t max_wr_cnt;
   uint8_t max_rd_cnt;
+} end_packed_struct;
+
+/* Device-side private config space: extends virtio_rpmb_config_s with the
+ * path of the local block device holding the RPMB partition.  The device
+ * side publishes capacity/max_wr_cnt back through virtio_rpmb_config_s
+ * after reading them from the eMMC EXT_CSD.
+ */
+
+begin_packed_struct struct vhost_rpmb_config_s
+{
+  struct virtio_rpmb_config_s config;
+  char                        path[VIRTIO_RPMB_PATH_SIZE];
 } end_packed_struct;
 
 /* RPMB frame (virtio spec 5.12.6.1, 512 bytes) */
