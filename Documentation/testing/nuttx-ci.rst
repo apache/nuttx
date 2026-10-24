@@ -245,6 +245,21 @@ should be able to download the artifact, flash the NuttX image(s) to your target
 device and test them that way if you'd like to avoid building all of the images
 yourself!
 
+Bluetooth Integration Tests
+===========================
+
+The separate ``Bluetooth`` workflow builds the current NuttX and apps sources
+and runs Bluetooth integration tests on a Linux/x86_64 runner. The tests use
+the ``sim:bthcisock`` and ``sim:nimble`` configurations with BabbleSim time
+enabled, connected to Python BSControllers through Unix sockets. No Bluetooth
+hardware is required.
+
+Build logs, source versions, JUnit results, device logs and HCI/radio
+captures are uploaded as the ``bluetooth-results`` artifact.
+
+For local commands and cross-repository PR testing, see
+`the Bluetooth test README <https://github.com/apache/nuttx-apps/tree/master/testing/bluetooth/bsworld>`_.
+
 Memory Footprint Tracking
 =========================
 
