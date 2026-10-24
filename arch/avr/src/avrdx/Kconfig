@@ -59,15 +59,15 @@ config AVR_HAVE_USART5_ALT1
 		Chip has alternate pin position for USART 5
 
 # Available I/O ports (only those not common for all devices)
-config AVR_HAS_PORTB
+config AVR_HAVE_PORTB
 	bool
 	default n
 
-config AVR_HAS_PORTE
+config AVR_HAVE_PORTE
 	bool
 	default n
 
-config AVR_HAS_PORTG
+config AVR_HAVE_PORTG
 	bool
 	default n
 
@@ -110,9 +110,9 @@ config ARCH_CHIP_AVR128DA64
 	select AVR_HAVE_USART4_ALT1
 	select AVR_HAVE_USART_5
 	select AVR_HAVE_USART5_ALT1
-	select AVR_HAS_PORTB
-	select AVR_HAS_PORTE
-	select AVR_HAS_PORTG
+	select AVR_HAVE_PORTB
+	select AVR_HAVE_PORTE
+	select AVR_HAVE_PORTG
 	select AVR_HAVE_TWI0_ALT1
 	select AVR_HAVE_TWI1
 	select AVR_HAVE_TWI1_ALT1
@@ -130,9 +130,9 @@ config ARCH_CHIP_AVR128DB64
 	select AVR_HAVE_USART4_ALT1
 	select AVR_HAVE_USART_5
 	select AVR_HAVE_USART5_ALT1
-	select AVR_HAS_PORTB
-	select AVR_HAS_PORTE
-	select AVR_HAS_PORTG
+	select AVR_HAVE_PORTB
+	select AVR_HAVE_PORTE
+	select AVR_HAVE_PORTG
 	select AVR_HAVE_TWI0_ALT1
 	select AVR_HAVE_TWI1
 	select AVR_HAVE_TWI1_ALT1
@@ -641,5 +641,34 @@ config AVRDX_ARCH_UDELAY_NO_OSC32K
 		will fail and wait for maximum amount of time.
 
 		Say Y if your board does not use 32.768kHz clock.
+
+menuconfig AVRDX_HIGH_PRIO_INTERRUPTS
+	bool "Enable high priority interrupts"
+	default n
+	---help---
+		Enabling this option unlocks fine grained selection of interrupt handlers
+		to be excluded from generic interrupt handling. Instead, your application/board
+		code will provide handler suited to your specific needs.
+
+		Generic interrupt handling always saves context of the process that was interrupted
+		and then calls into the operating system common code which takes care of driver
+		code invocation, scheduling etc. This takes time which may not be desirable
+		for interrupts that execute often or need to have strict response times.
+
+		However, since (if) your implementation does not do that, your interrupt handler
+		must not communicate with the operating system. It is also not possible to disable
+		generic interrupt handling for interrupt vectors used by enabled drivers.
+
+		More comprehensive information can be found in Documentation, in the guide article
+		named High Performance: Zero Latency Interrupts, Maskable Nested Interrupts.
+
+		Interrupt handlers to be excluded from generic interrupt handling are specified
+		by "Peripheral source" codes from the datasheet.
+
+if AVRDX_HIGH_PRIO_INTERRUPTS
+
+source "arch/avr/src/avrdx/Kconfig-hpintr"
+
+endif # AVRDX_HIGH_PRIO_INTERRUPTS
 
 endif # if ARCH_CHIP_AVRDX
