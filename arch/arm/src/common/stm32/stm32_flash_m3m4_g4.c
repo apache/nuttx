@@ -224,6 +224,12 @@ static inline void flash_erase(size_t page)
 }
 
 #if defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
+
+/* ES0430 erratum 2.2.2: in dual bank mode, reading one bank (data access or
+ * code execution) while writing to the other with the data cache enabled
+ * corrupts the data cache.  Keep the cache off while the flash is written.
+ */
+
 static void data_cache_disable(void)
 {
   modifyreg32(STM32_FLASH_ACR, FLASH_ACR_DCEN, 0);
@@ -231,12 +237,12 @@ static void data_cache_disable(void)
 
 static void data_cache_enable(void)
 {
-  /* Reset data cache */
+  /* Reset the data cache (it can only be written while DCEN = 0), release
+   * the reset and enable the cache again.
+   */
 
   modifyreg32(STM32_FLASH_ACR, 0, FLASH_ACR_DCRST);
-
-  /* Enable data cache */
-
+  modifyreg32(STM32_FLASH_ACR, FLASH_ACR_DCRST, 0);
   modifyreg32(STM32_FLASH_ACR, 0, FLASH_ACR_DCEN);
 }
 #endif /* defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW) */
@@ -531,13 +537,13 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
        * write back existing data read from page without erase.
        */
 
-      flash_erase(page);
-
-      /* Write the page. Must be with double-words. */
-
 #if defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
       data_cache_disable();
 #endif
+
+      flash_erase(page);
+
+      /* Write the page. Must be with double-words. */
 
       modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_PG);
       set_pg_bit = true;
