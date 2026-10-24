@@ -5,6 +5,18 @@
 
 menu "Thread Local Storage (TLS)"
 
+config TLS_EMUTLS
+	bool
+	default y if ARCH_TOOLCHAIN_GNU && !ARCH_TOOLCHAIN_ARMCLANG && !ARCH_TOOLCHAIN_GHS && !ARCH_AVR && !ARCH_SIM
+	default y if ARCH_SIM && SIM_TOOLCHAIN_GCC && !HOST_MACOS && !WINDOWS_NATIVE
+	---help---
+		GCC and clang call __emutls_get_address() for __thread variables
+		when the target has no native TLS, or with -femulated-tls.  libc
+		then gives one copy of each variable per thread, and the link
+		sends the calls to it with --wrap.  8-bit AVR has no atomic pointer
+		loads.  The sim has it only with GCC and the GNU linker (Linux,
+		MinGW): the macOS linker and the MSVC linker have no --wrap.
+
 config TLS_ALIGNED
 	bool "Require stack alignment"
 	default BUILD_KERNEL || BUILD_PROTECTED
