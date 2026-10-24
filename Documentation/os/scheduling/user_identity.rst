@@ -89,10 +89,10 @@ This implements temporary privilege drop with ``seteuid()`` /
 These functions set the real and/or effective IDs in a single call. When the
 effective ID is zero, any requested real and effective values may be assigned
 and the saved set-ID is updated accordingly. When the effective ID is
-non-zero, each requested value must equal the current effective ID, saved
-set-ID, or (for the effective argument only) the real ID; otherwise the call
-returns ``-1`` with ``errno`` set to ``EPERM``. When the real ID is changed,
-or the effective ID is changed to a value not equal to the real ID, the saved
+non-zero, each requested value must equal the current real, effective, or saved
+set-ID; otherwise the call returns ``-1`` with ``errno`` set to ``EPERM``.
+When the real ID is explicitly specified (its argument is not ``-1``), or the
+effective ID is explicitly set to a value not equal to the real ID, the saved
 set-ID is set to the new effective ID.
 
 ``getresuid()`` and ``getresgid()``
