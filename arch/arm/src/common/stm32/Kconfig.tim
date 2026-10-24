@@ -943,6 +943,7 @@ endchoice
 choice
 	prompt "LPTIM1 clock source"
 	default STM32_LPTIM1_CLK_APB1
+	depends on STM32_LPTIM1_PWM
 
 config STM32_LPTIM1_CLK_APB1
 	bool "Clock LPTIM1 from APB1"
@@ -961,6 +962,7 @@ endchoice
 choice
 	prompt "LPTIM2 clock source"
 	default STM32_LPTIM2_CLK_APB1
+	depends on STM32_LPTIM2_PWM
 
 config STM32_LPTIM2_CLK_APB1
 	bool "Clock LPTIM2 from APB1"
@@ -4059,7 +4061,7 @@ config STM32_LPTIM5_CLOCK
 
 config STM32_LPTIM1_PWM
 	bool "LPTIM1 PWM"
-	depends on STM32_COMMON_L4_L5_U5 && STM32_LPTIM1
+	depends on ARCH_CHIP_STM32L4 && STM32_LPTIM1
 	select PWM
 	---help---
 		Reserve low-power timer 1 for use by PWM
@@ -4071,7 +4073,7 @@ config STM32_LPTIM1_PWM
 
 config STM32_LPTIM2_PWM
 	bool "LPTIM2 PWM"
-	depends on STM32_COMMON_L4_L5_U5 && STM32_LPTIM2
+	depends on ARCH_CHIP_STM32L4 && STM32_LPTIM2
 	select PWM
 	---help---
 		Reserve low-power timer 2 for use by PWM
