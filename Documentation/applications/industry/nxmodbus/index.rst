@@ -55,13 +55,18 @@ Register Access:
 - **FC16** (0x10): Write Multiple Holding Registers
 - **FC23** (0x17): Read/Write Multiple Holding Registers
 
+File Access (server-side only):
+
+- **FC20** (0x14): Read File Record
+- **FC21** (0x15): Write File Record
+
 Diagnostics and Identification:
 
 - **FC08** (0x08): Diagnostics (sub-function 0x0000 Return Query Data)
 - **FC17** (0x11): Report Server ID
 
 Each server-side function code handler can be individually enabled or disabled
-via Kconfig (all enabled by default). Disabled handlers respond with
+via Kconfig (all enabled by default except FC20 and FC21, see below). Disabled handlers respond with
 Illegal Function exception. Client-side request functions are always available
 when ``CONFIG_NXMODBUS_CLIENT`` is enabled. Custom function codes can be
 registered via ``nxmb_register_custom_fc()`` when ``CONFIG_NXMODBUS_CUSTOM_FC``
@@ -121,7 +126,8 @@ Transport Selection:
 - ``CONFIG_NXMODBUS_TCP`` – Enable Modbus TCP transport (requires ``CONFIG_NET_TCP``)
 - ``CONFIG_NXMODBUS_RAW_ADU`` – Enable raw ADU transport (custom backends)
 
-Function Code Selection (server-side, all enabled by default):
+Function Code Selection (server-side, all enabled by default except FC20 and
+FC21):
 
 - ``CONFIG_NXMODBUS_FUNC_READ_COILS`` – FC01 Read Coils
 - ``CONFIG_NXMODBUS_FUNC_READ_DISCRETE`` – FC02 Read Discrete Inputs
@@ -134,6 +140,8 @@ Function Code Selection (server-side, all enabled by default):
 - ``CONFIG_NXMODBUS_FUNC_WRITE_HOLDINGS`` – FC16 Write Multiple Holding Registers
 - ``CONFIG_NXMODBUS_FUNC_REPORT_SERVER_ID`` – FC17 Report Server ID
 - ``CONFIG_NXMODBUS_FUNC_READWRITE_HOLDINGS`` – FC23 Read/Write Multiple Holding Registers
+- ``CONFIG_NXMODBUS_FUNC_READ_FILE`` – FC20 Read File Record (default: n)
+- ``CONFIG_NXMODBUS_FUNC_WRITE_FILE`` – FC21 Write File Record (default: n)
 
 Instance and Buffer Configuration:
 
@@ -174,6 +182,42 @@ Serial Configuration (RTU/ASCII):
 Extensibility:
 
 - ``CONFIG_NXMODBUS_CUSTOM_FC`` – Enable custom function code handler registration
+
+File Records (FC20 and FC21)
+============================
+
+FC20 and FC21 move whole files, such as a configuration or a firmware image,
+to a device that has only a Modbus link. Like the other function codes, they
+keep no data inside the stack: the application provides the ``file_cb``
+member of ``struct nxmb_callbacks_s``::
+
+    int file_cb(FAR uint8_t *buf, uint16_t file, uint16_t record,
+                uint16_t nregs, enum nxmb_regmode_e mode, FAR void *priv);
+
+The callback is called once for each group of ``nregs`` 16-bit records that a
+sub-request names, starting at ``record`` of ``file`` (``file`` is 1 to 0xffff
+and ``record`` is 0 to 9999, as on the wire). ``buf`` holds the registers in
+wire order, big endian, 2 bytes each: the application fills it for
+``NXMB_REG_READ`` (FC20) and consumes it for ``NXMB_REG_WRITE`` (FC21).
+Return ``-ENOENT`` for a file or record that does not exist, which becomes
+exception 2 (Illegal Data Address); any other error is reported as a device
+failure (exception 4).
+
+The sub-requests are validated in full before the first callback: the
+reference type must be 6, a group must stay inside the 10000 records of its
+file, and the response of an FC20 must fit in 0xf5 bytes and in the ADU. A
+request carries at most 35 sub-requests.
+
+An FC21 is not atomic, as the Modbus specification does not make it so: if the
+callback fails, the groups before it stay written. An application that needs
+all-or-nothing behavior has to write to a temporary area and commit it
+itself, for example with a final write that the application treats as the
+end of the transfer.
+
+Both options are off by default so that existing configurations do not change
+in size. On an Arm Cortex-M4 the handlers take about 612 bytes (FC20) and 362
+bytes (FC21) of code. The ``nxmbserver`` example serves two files from RAM and
+can be used to try them; ``nxmbclient`` has no commands for FC20 and FC21.
 
 Termios Support
 ===============
