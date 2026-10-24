@@ -863,7 +863,7 @@ static void stm32_stdclockconfig(void)
        * in place to do that, we do not configure the clock any further.
        */
 
-       return;
+      return;
     }
 #endif
 
@@ -879,7 +879,7 @@ static void stm32_stdclockconfig(void)
        * in place to do that, we do not configure the clock any further.
        */
 
-       return;
+      return;
     }
 
 #endif
@@ -888,16 +888,22 @@ static void stm32_stdclockconfig(void)
    * to go into effect and enable prefetch to reduce latency due to
    * these wait states (ART accelerator).
    *
-   * REVISIT: Should we also enable I-Cache and D-Cache? Also, the
-   * reference manual suggests that we must read the ACR register to
-   * make sure the latency setting has taken effect. Are we doing that
-   * correctly?
+   * The instruction and data caches follow CONFIG_STM32_FLASH_ICACHE and
+   * CONFIG_STM32_FLASH_DCACHE.  REVISIT: the reference manual suggests that
+   * we must read the ACR register to make sure the latency setting has taken
+   * effect. Are we doing that correctly?
    */
 
   regval  = getreg32(STM32_FLASH_ACR);
-  regval &= ~FLASH_ACR_LATENCY_MASK;
+  regval &= ~(FLASH_ACR_LATENCY_MASK | FLASH_ACR_ICEN | FLASH_ACR_DCEN);
   regval |= FLASH_ACR_LATENCY_SETTING;
   regval |= FLASH_ACR_PRFTEN;
+#ifdef CONFIG_STM32_FLASH_ICACHE
+  regval |= FLASH_ACR_ICEN;
+#endif
+#ifdef CONFIG_STM32_FLASH_DCACHE
+  regval |= FLASH_ACR_DCEN;
+#endif
   putreg32(regval, STM32_FLASH_ACR);
 
   while ((getreg32(STM32_FLASH_ACR) & FLASH_ACR_LATENCY_MASK) !=
