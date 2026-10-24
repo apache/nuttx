@@ -223,14 +223,14 @@ static int comp_open(FAR struct file *filep)
               irqstate_t flags = enter_critical_section();
 
               ret = dev->ad_ops->ao_setup(dev);
-              if (ret == OK)
-                {
-                  /* Save the new open count on success */
-
-                  dev->ad_ocount = tmp;
-                }
-
               leave_critical_section(flags);
+            }
+
+          /* Save the new open count on success */
+
+          if (ret == OK)
+            {
+              dev->ad_ocount = tmp;
             }
         }
 
