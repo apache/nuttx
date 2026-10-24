@@ -20,7 +20,7 @@
 #
 # ##############################################################################
 
-add_subdirectory(${NUTTX_CHIP_ABS_DIR} EXCLUDE_FROM_ALL exclude_chip)
+add_subdirectory(${NUTTX_CHIP_ABS_DIR} exclude_chip EXCLUDE_FROM_ALL)
 add_subdirectory(common)
 
 if(CONFIG_BUILD_KERNEL)

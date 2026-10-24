@@ -48,7 +48,7 @@ endif()
 # include the toolchain specific cmake file
 
 if(CONFIG_ARCH_TOOLCHAIN_CLANG)
-  include(clang)
+  include(${CMAKE_CURRENT_LIST_DIR}/clang.cmake)
 elseif(CONFIG_ARCH_TOOLCHAIN_GCC) # gcc
-  include(gcc)
+  include(${CMAKE_CURRENT_LIST_DIR}/gcc.cmake)
 endif()

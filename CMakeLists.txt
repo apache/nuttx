@@ -482,8 +482,28 @@ endif()
 # This needs to happen before project() when binaries are searched for
 
 list(APPEND CMAKE_MODULE_PATH ${NUTTX_DIR}/arch/${CONFIG_ARCH}/src/cmake)
-set(CMAKE_TOOLCHAIN_FILE
-    "${NUTTX_DIR}/arch/${CONFIG_ARCH}/src/cmake/Toolchain.cmake")
+
+macro(nuttx_resolve_toolchain_file)
+  if(CMAKE_TOOLCHAIN_FILE AND NOT IS_ABSOLUTE "${CMAKE_TOOLCHAIN_FILE}")
+    if(EXISTS "${CMAKE_BINARY_DIR}/${CMAKE_TOOLCHAIN_FILE}")
+      set(CMAKE_TOOLCHAIN_FILE "${CMAKE_BINARY_DIR}/${CMAKE_TOOLCHAIN_FILE}")
+    elseif(EXISTS "${CMAKE_SOURCE_DIR}/${CMAKE_TOOLCHAIN_FILE}")
+      set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/${CMAKE_TOOLCHAIN_FILE}")
+    elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_TOOLCHAIN_FILE}")
+      set(CMAKE_TOOLCHAIN_FILE
+          "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_TOOLCHAIN_FILE}")
+    endif()
+  endif()
+endmacro()
+
+# Resolve CMAKE_TOOLCHAIN_FILE if provided by parent or cache, or default to the
+# architecture toolchain file for standalone builds.
+if(CMAKE_TOOLCHAIN_FILE)
+  nuttx_resolve_toolchain_file()
+else()
+  set(CMAKE_TOOLCHAIN_FILE
+      "${NUTTX_DIR}/arch/${CONFIG_ARCH}/src/cmake/Toolchain.cmake")
+endif()
 
 # Compiler detection must not try to link a full executable.  CMake validates a
 # compiler by building and linking a test program, but a bare metal cross
@@ -502,6 +522,63 @@ endif()
 # This triggers configuration
 
 project(NuttX LANGUAGES C CXX ASM)
+
+# When NuttX is embedded as a subproject via add_subdirectory(), CMake will not
+# automatically load CMAKE_TOOLCHAIN_FILE during project() if the parent project
+# already enabled languages. Explicitly include it to ensure architecture
+# settings, compiler definitions, and ARCH_SUBDIR are populated.
+if(NOT CMAKE_SOURCE_DIR STREQUAL NUTTX_DIR)
+  # Capture the compiler selected during language initialization before
+  # including the toolchain file, as the toolchain will assign CMAKE_C_COMPILER
+  # to the cross-compiler executable.
+  if(CMAKE_C_COMPILER)
+    set(_active_c_compiler "${CMAKE_C_COMPILER}")
+  elseif(DEFINED CACHE{CMAKE_C_COMPILER})
+    set(_active_c_compiler "$CACHE{CMAKE_C_COMPILER}")
+  endif()
+
+  # Ensure CMAKE_TOOLCHAIN_FILE is resolved using lookup rules before testing
+  # existence, in case a relative path was provided.
+  if(CMAKE_TOOLCHAIN_FILE)
+    nuttx_resolve_toolchain_file()
+
+    if(EXISTS "${CMAKE_TOOLCHAIN_FILE}" AND NOT IS_DIRECTORY
+                                            "${CMAKE_TOOLCHAIN_FILE}")
+      include(${CMAKE_TOOLCHAIN_FILE})
+    endif()
+  endif()
+
+  if(NOT CONFIG_ARCH STREQUAL "sim" AND _active_c_compiler)
+    if(TOOLCHAIN_PREFIX)
+      get_filename_component(_compiler_name "${_active_c_compiler}" NAME)
+      string(FIND "${_compiler_name}" "${TOOLCHAIN_PREFIX}" _prefix_pos)
+      if(NOT _prefix_pos EQUAL 0)
+        message(
+          FATAL_ERROR
+            "Active C compiler '${_active_c_compiler}' does not match expected "
+            "toolchain prefix '${TOOLCHAIN_PREFIX}'. When embedding NuttX via "
+            "add_subdirectory(), configure CMAKE_TOOLCHAIN_FILE before the "
+            "parent project's project() call.")
+      endif()
+      unset(_compiler_name)
+      unset(_prefix_pos)
+    endif()
+  endif()
+  unset(_active_c_compiler)
+
+  set(CMAKE_TOOLCHAIN_FILE
+      "${CMAKE_TOOLCHAIN_FILE}"
+      PARENT_SCOPE)
+  set(CMAKE_MODULE_PATH
+      "${CMAKE_MODULE_PATH}"
+      PARENT_SCOPE)
+  get_property(config_keys GLOBAL PROPERTY NUTTX_CONFIG_KEYS)
+  foreach(key ${config_keys})
+    set(${key}
+        ${${key}}
+        PARENT_SCOPE)
+  endforeach()
+endif()
 
 # include common toolchain setting
 include(nuttx_toolchain)
