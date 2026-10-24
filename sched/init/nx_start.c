@@ -51,6 +51,7 @@
 
 #include "task/task.h"
 #include "sched/sched.h"
+#include "wqueue/wqueue.h"
 #include "signal/signal.h"
 #include "semaphore/semaphore.h"
 #include "mqueue/mqueue.h"
@@ -510,6 +511,10 @@ void nx_start(void)
 
   g_nx_initstate = OSINIT_BOOT;
   sched_trace_mark("BOOT");
+
+#ifdef CONFIG_SCHED_WORKQUEUE
+  work_initialize();
+#endif
 
   /* Initialize task list table *********************************************/
 
