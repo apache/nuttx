@@ -851,11 +851,15 @@ static void stm32_stdclockconfig(void)
        * and 4 wait states
        */
 
+      regval = FLASH_ACR_LATENCY_4;
+#ifdef CONFIG_STM32_FLASH_ICACHE
+      regval |= FLASH_ACR_ICEN;
+#endif
+#ifdef CONFIG_STM32_FLASH_DCACHE
+      regval |= FLASH_ACR_DCEN;
+#endif
 #ifdef CONFIG_STM32_FLASH_PREFETCH
-      regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN |
-                FLASH_ACR_PRFTEN);
-#else
-      regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN);
+      regval |= FLASH_ACR_PRFTEN;
 #endif
       putreg32(regval, STM32_FLASH_ACR);
 
