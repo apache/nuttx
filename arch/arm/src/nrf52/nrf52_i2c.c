@@ -244,25 +244,25 @@ static int nrf52_i2c_transfer(struct i2c_master_s *dev,
 
       switch (priv->msgv->frequency)
         {
-            case 100000:
+          case 100000:
             {
               regval = TWIM_FREQUENCY_100KBPS;
               break;
             }
 
-            case 250000:
+          case 250000:
             {
               regval = TWIM_FREQUENCY_250KBPS;
               break;
             }
 
-            case 400000:
+          case 400000:
             {
               regval = TWIM_FREQUENCY_400KBPS;
               break;
             }
 
-            default:
+          default:
             {
               ret = -EINVAL;
               goto errout;
