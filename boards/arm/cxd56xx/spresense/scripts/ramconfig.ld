@@ -62,7 +62,7 @@ SECTIONS
 
     } > gnssram
 
-    . = ALIGN(4);
+    . = ALIGN(8);
     _gnssramebss = ABSOLUTE(.);
 
     /* Whatever is left from the GNSS memory is used as a special heap. */
@@ -126,7 +126,7 @@ SECTIONS
         *(.bss .bss.*)
         *(.gnu.linkonce.b.*)
         *(COMMON)
-        . = ALIGN(4);
+        . = ALIGN(8);
         _ebss = ABSOLUTE(.);
     } > ram
 

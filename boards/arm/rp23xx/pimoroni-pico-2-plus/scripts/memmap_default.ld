@@ -271,7 +271,7 @@ SECTIONS
         *(COMMON)
         PROVIDE(__global_pointer$ = . + 2K);
         *(.sbss*)
-        . = ALIGN(4);
+        . = ALIGN(8);
         __bss_end__ = .;
         _ebss = ABSOLUTE(.);
     } > RAM

@@ -54,7 +54,7 @@ SECTIONS
         _sbss = ABSOLUTE(.);
         *(.bss)
         *(COMMON)
-        . = ALIGN(4);
+        . = ALIGN(8);
         _ebss = ABSOLUTE(.);
     }
 
