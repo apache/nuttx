@@ -35,8 +35,28 @@
  * Private Data
  ****************************************************************************/
 
+struct uvalue_s
+{
+  const char *name;
+  int parm;
+};
+
 static bool g_inline;
 static FILE *g_stubstream;
+
+static const char * const g_uwrapped[] =
+{
+  "boardctl", "fcntl", "ioctl", "nx_pthread_create", "nx_vsyslog", "prctl",
+  "readv", "recvmsg", "sendmsg", "writev", NULL
+};
+
+static const struct uvalue_s g_uvalues[] =
+{
+  { "mmap", 1 },
+  { "rmmod", 1 },
+  { "shmat", 2 },
+  { NULL, 0 }
+};
 
 /****************************************************************************
  * Private Functions
@@ -55,6 +75,7 @@ static bool is_union(const char *type)
 static const char *check_funcptr(const char *type)
 {
   const char *str = strstr(type, "(*)");
+
   if (str)
     {
       return str + 2;
@@ -66,6 +87,7 @@ static const char *check_funcptr(const char *type)
 static const char *check_array(const char *type)
 {
   const char *str = strchr(type, '[');
+
   if (str)
     {
       return str;
@@ -113,6 +135,7 @@ static void get_formalparmtype(const char *arg, char *formal)
 static void get_actualparmtype(const char *arg, char *actual)
 {
   const char *pstart = strchr(arg, '|');
+
   if (pstart)
     {
       /* The actual parameter type starts after the '|' */
@@ -352,7 +375,7 @@ static void generate_proxy(int nfixed, int nparms)
   fprintf(stream, ");\n");
   if (strcmp(g_parm[RETTYPE_INDEX], "noreturn") == 0)
     {
-        fprintf(stream, "  while(1);\n");
+      fprintf(stream, "  while(1);\n");
     }
 
   fprintf(stream, "}\n");
@@ -363,6 +386,36 @@ static void generate_proxy(int nfixed, int nparms)
     }
 
   fclose(stream);
+}
+
+static bool is_uwrapped(const char *name)
+{
+  int i;
+
+  for (i = 0; g_uwrapped[i] != NULL; i++)
+    {
+      if (strcmp(g_uwrapped[i], name) == 0)
+        {
+          return true;
+        }
+    }
+
+  return false;
+}
+
+static bool is_uvalue(const char *name, int parm)
+{
+  int i;
+
+  for (i = 0; g_uvalues[i].name != NULL; i++)
+    {
+      if (strcmp(g_uvalues[i].name, name) == 0 && g_uvalues[i].parm == parm)
+        {
+          return true;
+        }
+    }
+
+  return false;
 }
 
 static FILE *open_stub(void)
@@ -432,6 +485,16 @@ static void generate_stub(int nfixed, int nparms)
   fprintf(stream, "#include <string.h>\n");
   fprintf(stream, "#endif\n");
 
+  if (is_uwrapped(g_parm[NAME_INDEX]))
+    {
+      fprintf(stream, "\n#ifdef CONFIG_BUILD_KERNEL\n");
+      fprintf(stream, "#  define %s uaccess_%s\n",
+              g_parm[NAME_INDEX], g_parm[NAME_INDEX]);
+      fprintf(stream, "#endif\n\n");
+    }
+
+  fprintf(stream, "#include <nuttx/addrenv.h>\n");
+
   if (strlen(g_parm[HEADER_INDEX]) > 0)
     {
       fprintf(stream, "#include <%s>\n", g_parm[HEADER_INDEX]);
@@ -484,6 +547,17 @@ static void generate_stub(int nfixed, int nparms)
                           i + 1, formal, actual, i + 1);
           fprintf(stream, "#endif\n");
         }
+      else if (strchr(actual, '*') != NULL &&
+               !is_uvalue(g_parm[NAME_INDEX], i + 1))
+        {
+          fprintf(stream, "#ifdef CONFIG_BUILD_KERNEL\n");
+          fprintf(stream, "  if (parm%d != 0)\n", i + 1);
+          fprintf(stream, "    {\n");
+          fprintf(stream, "      uaccess_check((FAR const void *)");
+          fprintf(stream, "parm%d, 1);\n", i + 1);
+          fprintf(stream, "    }\n");
+          fprintf(stream, "#endif\n\n");
+        }
     }
 
   /* Then call the proxied function.  Functions that have no return value are
@@ -514,8 +588,8 @@ static void generate_stub(int nfixed, int nparms)
        * -- Yech.
        */
 
-     get_formalparmtype(g_parm[PARM1_INDEX + i], formal);
-     get_actualparmtype(g_parm[PARM1_INDEX + i], actual);
+      get_formalparmtype(g_parm[PARM1_INDEX + i], formal);
+      get_actualparmtype(g_parm[PARM1_INDEX + i], actual);
 
       /* Treat the first argument in the list differently from the others..
        * It does not need a comma before it.
@@ -673,7 +747,7 @@ static void generate_wrapper(int nfixed, int nparms)
 
   if (i < nparms)
     {
-       fprintf(stream, ", ...)\n{\n");
+      fprintf(stream, ", ...)\n{\n");
     }
   else
     {
@@ -940,15 +1014,15 @@ int main(int argc, char **argv, char **envp)
 
   if (optind >= argc)
     {
-       fprintf(stderr, "Missing <CSV file>\n");
-       show_usage(argv[0]);
+      fprintf(stderr, "Missing <CSV file>\n");
+      show_usage(argv[0]);
     }
 
   csvpath = argv[optind];
   if (++optind < argc)
     {
-       fprintf(stderr, "Unexpected garbage at the end of the line\n");
-       show_usage(argv[0]);
+      fprintf(stderr, "Unexpected garbage at the end of the line\n");
+      show_usage(argv[0]);
     }
 
   /* Open the CSV file */
@@ -969,6 +1043,7 @@ int main(int argc, char **argv, char **envp)
       /* Parse the line from the CVS file */
 
       int nargs = parse_csvline(ptr);
+
       if (nargs < PARM1_INDEX)
         {
           fprintf(stderr, "Only %d arguments found: %s\n", nargs, g_line);
