@@ -122,6 +122,7 @@ static int dac_open(FAR struct file *filep)
               /* Yes.. perform one time hardware initialization. */
 
               irqstate_t flags = enter_critical_section();
+
               ret = dev->ad_ops->ao_setup(dev);
               if (ret == OK)
                 {
@@ -129,13 +130,16 @@ static int dac_open(FAR struct file *filep)
 
                   dev->ad_xmit.af_head = 0;
                   dev->ad_xmit.af_tail = 0;
-
-                  /* Save the new open count on success */
-
-                  dev->ad_ocount = tmp;
                 }
 
               leave_critical_section(flags);
+            }
+
+          /* Save the new open count on success */
+
+          if (ret == OK)
+            {
+              dev->ad_ocount = tmp;
             }
         }
 
@@ -183,7 +187,7 @@ static int dac_close(FAR struct file *filep)
 
           while (dev->ad_xmit.af_head != dev->ad_xmit.af_tail)
             {
-               nxsched_usleep(HALF_SECOND_USEC);
+              nxsched_usleep(HALF_SECOND_USEC);
             }
 
           /* Free the IRQ and disable the DAC device */
