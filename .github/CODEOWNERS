@@ -14979,7 +14979,6 @@ libs/libc/builtin/lib_builtin_getmode.c fangxinyong@xiaomi.com alin.jerpelea@son
 libs/libc/builtin/lib_builtin_getname.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com gustavo.nihei@espressif.com
 libs/libc/builtin/lib_builtin_getuid.c fangxinyong@xiaomi.com alin.jerpelea@sony.com
 libs/libc/builtin/lib_builtin_isavail.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com dongjiuzhu1@xiaomi.com
-libs/libc/builtin/lib_builtin_setlist.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com gustavo.nihei@espressif.com
 libs/libc/ctype/* xiaoxiang@xiaomi.com dongjiuzhu1@xiaomi.com alin.jerpelea@sony.com
 libs/libc/dirent/lib_alphasort.c mijung@gmx.net alin.jerpelea@sony.com
 libs/libc/dirent/lib_closedir.c dongjiuzhu1@xiaomi.com hujun5@xiaomi.com alin.jerpelea@sony.com
