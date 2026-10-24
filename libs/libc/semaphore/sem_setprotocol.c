@@ -75,8 +75,11 @@
  *
  ****************************************************************************/
 
+#if !defined(CONFIG_BUILD_KERNEL) || defined(__KERNEL__)
 int nxsem_set_protocol(FAR sem_t *sem, int protocol)
 {
+  FAR sem_t *resolved;
+
   DEBUGASSERT(sem != NULL);
 
   switch (protocol & SEM_PRIO_MASK)
@@ -99,9 +102,12 @@ int nxsem_set_protocol(FAR sem_t *sem, int protocol)
         return -EINVAL;
     }
 
-  sem->flags = protocol;
+  resolved = nxsem_resolve(sem);
+  resolved->flags = protocol;
+  nxsem_unresolve(sem, resolved);
   return OK;
 }
+#endif
 
 #endif /* !CONFIG_PRIORITY_INHERITANCE */
 

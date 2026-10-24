@@ -149,6 +149,11 @@ int nxsem_wait(FAR sem_t *sem)
 
   mutex = NXSEM_IS_MUTEX(sem);
 
+  if (nxsem_shadowed(sem))
+    {
+      fastpath = false;
+    }
+
   /* Disable fast path if priority protection is enabled on the semaphore */
 
 #ifdef CONFIG_PRIORITY_PROTECT

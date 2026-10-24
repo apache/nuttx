@@ -54,23 +54,30 @@
  *
  ****************************************************************************/
 
+#if !defined(CONFIG_BUILD_KERNEL) || defined(__KERNEL__)
 int nxsem_setprioceiling(FAR sem_t *sem, int prioceiling,
                          FAR int *old_ceiling)
 {
+  FAR sem_t *resolved;
+  int ret = -EINVAL;
+
   DEBUGASSERT(sem != NULL);
 
-  if ((sem->flags & SEM_PRIO_MASK) == SEM_PRIO_PROTECT &&
+  resolved = nxsem_resolve(sem);
+  if ((resolved->flags & SEM_PRIO_MASK) == SEM_PRIO_PROTECT &&
       prioceiling >= sched_get_priority_min(SCHED_FIFO) &&
       prioceiling <= sched_get_priority_max(SCHED_FIFO))
     {
       if (old_ceiling != NULL)
         {
-          *old_ceiling = sem->ceiling;
+          *old_ceiling = resolved->ceiling;
         }
 
-      sem->ceiling = prioceiling;
-      return OK;
+      resolved->ceiling = prioceiling;
+      ret = OK;
     }
 
-  return -EINVAL;
+  nxsem_unresolve(sem, resolved);
+  return ret;
 }
+#endif

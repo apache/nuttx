@@ -66,6 +66,14 @@ int nxsem_destroy(FAR sem_t *sem)
 
   DEBUGASSERT(sem != NULL);
 
+#ifdef CONFIG_BUILD_KERNEL
+  if (nxsem_shadowed(sem))
+    {
+      nxsem_drop(sem);
+      return OK;
+    }
+#endif
+
   /* There is really no particular action that we need
    * take to destroy a semaphore.  We will just reset
    * the count to some reasonable value (0) and release

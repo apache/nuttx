@@ -52,15 +52,21 @@
  *
  ****************************************************************************/
 
+#if !defined(CONFIG_BUILD_KERNEL) || defined(__KERNEL__)
 int nxsem_setmaxvalue(FAR sem_t *sem, int32_t maxvalue)
 {
-  if (sem != NULL)
+  FAR sem_t *resolved;
+
+  if (sem == NULL)
     {
-      sem->maxvalue = maxvalue;
-      return OK;
+      return -EINVAL;
     }
 
-  return -EINVAL;
+  resolved = nxsem_resolve(sem);
+  resolved->maxvalue = maxvalue;
+  nxsem_unresolve(sem, resolved);
+  return OK;
 }
+#endif
 
 #endif /* CONFIG_PRIORITY_INHERITANCE */
