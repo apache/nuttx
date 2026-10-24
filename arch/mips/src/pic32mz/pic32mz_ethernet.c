@@ -41,6 +41,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/signal.h>
 #include <nuttx/mutex.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/netconfig.h>
@@ -206,6 +207,13 @@
 /* PHY read/write delays in loop counts */
 
 #define PIC32MZ_MIITIMEOUT     (666666)
+
+/* How long ifup waits for the auto-negotiation, and how often the PHY is
+ * polled for link changes.
+ */
+
+#define PIC32MZ_ANEGTIMEOUT    MSEC2TICK(4000)
+#define PIC32MZ_LINKPOLL       MSEC2TICK(1000)
 
 /* Busy flag polls after an MII management command */
 
@@ -384,6 +392,7 @@ struct pic32mz_driver_s
 #endif
 
   bool       pd_ifup;           /* true:ifup false:ifdown */
+  bool       pd_linkup;         /* true:link is up, carrier is on */
   uint8_t    pd_mode;           /* Speed/duplex */
 #ifdef PIC32MZ_HAVE_PHY
   uint8_t    pd_phyaddr;        /* PHY device address */
@@ -393,6 +402,7 @@ struct pic32mz_driver_s
   uint32_t   pd_inten;          /* Shadow copy of INTEN register */
   struct wdog_s pd_txtimeout;   /* TX timeout timer */
   struct work_s pd_irqwork;     /* For deferring interrupt work to the work queue */
+  struct work_s pd_linkwork;    /* Polls the PHY for link changes */
   mutex_t    pd_lock;           /* Protects the descriptor rings */
 
   /* The packet being sent by each TX descriptor, kept in the descriptor
@@ -540,7 +550,9 @@ static inline int pic32mz_phyautoneg(uint8_t phyaddr);
 #  else
 static int pic32mz_phymode(uint8_t phyaddr, uint8_t mode);
 #  endif
+static int pic32mz_phygetmode(struct pic32mz_driver_s *priv);
 static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv);
+static void pic32mz_linkwork(void *arg);
 #  if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
 static int pic32mz_phyintenable(struct pic32mz_driver_s *priv);
 #  endif
@@ -2354,7 +2366,21 @@ static int pic32mz_ifup(struct netdev_lowerhalf_s *dev)
   up_enable_irq(PIC32MZ_IRQ_ETH);
 #endif
 
-  netdev_lower_carrier_on(dev);
+  if (priv->pd_linkup)
+    {
+      netdev_lower_carrier_on(dev);
+    }
+  else
+    {
+      netdev_lower_carrier_off(dev);
+    }
+
+#ifdef PIC32MZ_HAVE_PHY
+  /* Follow the link from now on */
+
+  work_queue(ETHWORK, &priv->pd_linkwork, pic32mz_linkwork, priv,
+             PIC32MZ_LINKPOLL);
+#endif
 
   return OK;
 }
@@ -2389,9 +2415,10 @@ static int pic32mz_ifdown(struct netdev_lowerhalf_s *dev)
   up_disable_irq(PIC32MZ_IRQ_ETH);
 #endif
 
-  /* Cancel the TX timeout timers */
+  /* Cancel the TX timeout timers and stop polling the link */
 
   wd_cancel(&priv->pd_txtimeout);
+  work_cancel(ETHWORK, &priv->pd_linkwork);
 
   /* Reset the device and mark it as down. */
 
@@ -2845,16 +2872,19 @@ static inline int pic32mz_phyreset(uint8_t phyaddr)
 #if defined(PIC32MZ_HAVE_PHY) && defined(CONFIG_PIC32MZ_PHY_AUTONEG)
 static inline int pic32mz_phyautoneg(uint8_t phyaddr)
 {
-  int32_t timeout;
+  clock_t start;
   uint16_t phyreg;
 
   /* Start auto-negotiation */
 
   pic32mz_phywrite(phyaddr, MII_MCR, MII_MCR_ANENABLE | MII_MCR_ANRESTART);
 
-  /* Wait for autonegotiation to complete */
+  /* Wait for autonegotiation to complete.  It never does without a link
+   * partner, so the wait is bounded.
+   */
 
-  for (timeout = PIC32MZ_MIITIMEOUT; timeout > 0; timeout--)
+  start = clock_systime_ticks();
+  do
     {
       /* Check if auto-negotiation has completed */
 
@@ -2865,9 +2895,12 @@ static inline int pic32mz_phyautoneg(uint8_t phyaddr)
 
           return OK;
         }
-    }
 
-  nerr("ERROR: Auto-negotiation failed. MSR: %04x\n", phyreg);
+      nxsig_usleep(10000);
+    }
+  while (clock_systime_ticks() - start < PIC32MZ_ANEGTIMEOUT);
+
+  nwarn("WARNING: Auto-negotiation did not complete. MSR: %04x\n", phyreg);
   return -ETIMEDOUT;
 }
 #endif
@@ -2948,6 +2981,197 @@ static int pic32mz_phymode(uint8_t phyaddr, uint8_t mode)
 
   nerr("ERROR: Link failed. MSR: %04x\n", phyreg);
   return -ETIMEDOUT;
+}
+#endif
+
+/****************************************************************************
+ * Function: pic32mz_phygetmode
+ *
+ * Description:
+ *   Read the speed and duplex mode that the PHY settled on and save it in
+ *   priv->pd_mode.
+ *
+ * Input Parameters:
+ *   priv - Pointer to EMAC device driver structure
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef PIC32MZ_HAVE_PHY
+static int pic32mz_phygetmode(struct pic32mz_driver_s *priv)
+{
+#if defined(CONFIG_ETH0_PHY_KS8721) || defined(CONFIG_ETH0_PHY_DP83848C)
+  uint16_t phyreg;
+#endif
+  uint8_t phyaddr = priv->pd_phyaddr;
+
+#if defined(CONFIG_ETH0_PHY_KS8721)
+  phyreg = pic32mz_phyread(phyaddr, MII_KS8721_10BTCR);
+
+  switch (phyreg & KS8721_10BTCR_MODE_MASK)
+    {
+      case KS8721_10BTCR_MODE_10BTHD:  /* 10BASE-T half duplex */
+        priv->pd_mode = PIC32MZ_10BASET_HD;
+        break;
+      case KS8721_10BTCR_MODE_100BTHD: /* 100BASE-T half duplex */
+        priv->pd_mode = PIC32MZ_100BASET_HD;
+        break;
+      case KS8721_10BTCR_MODE_10BTFD: /* 10BASE-T full duplex */
+        priv->pd_mode = PIC32MZ_10BASET_FD;
+        break;
+      case KS8721_10BTCR_MODE_100BTFD: /* 100BASE-T full duplex */
+        priv->pd_mode = PIC32MZ_100BASET_FD;
+        break;
+      default:
+        nerr("ERROR: Unrecognized mode: %04x\n", phyreg);
+        return -ENODEV;
+    }
+#elif defined(CONFIG_ETH0_PHY_DP83848C)
+  phyreg = pic32mz_phyread(phyaddr, MII_DP83848C_STS);
+
+  /* Configure for full/half duplex mode and speed */
+
+  switch (phyreg & 0x0006)
+    {
+      case 0x0000:
+        priv->pd_mode = PIC32MZ_100BASET_HD;
+        break;
+      case 0x0002:
+        priv->pd_mode = PIC32MZ_10BASET_HD;
+        break;
+      case 0x0004:
+        priv->pd_mode = PIC32MZ_100BASET_FD;
+        break;
+      case 0x0006:
+        priv->pd_mode = PIC32MZ_10BASET_FD;
+        break;
+      default:
+        nerr("ERROR: Unrecognized mode: %04x\n", phyreg);
+        return -ENODEV;
+    }
+#elif defined(CONFIG_ETH0_PHY_LAN8720) || defined(CONFIG_ETH0_PHY_LAN8740) ||\
+      defined(CONFIG_ETH0_PHY_LAN8740A)
+  {
+    uint16_t advertise;
+    uint16_t lpa;
+
+    up_udelay(500);
+    advertise = pic32mz_phyread(phyaddr, MII_ADVERTISE);
+    lpa       = pic32mz_phyread(phyaddr, MII_LPA);
+
+    /* Check for 100BASETX full duplex */
+
+    if ((advertise & MII_ADVERTISE_100BASETXFULL) != 0 &&
+        (lpa & MII_LPA_100BASETXFULL) != 0)
+      {
+        priv->pd_mode = PIC32MZ_100BASET_FD;
+      }
+
+    /* Check for 100BASETX half duplex */
+
+    else if ((advertise & MII_ADVERTISE_100BASETXHALF) != 0 &&
+             (lpa & MII_LPA_100BASETXHALF) != 0)
+      {
+        priv->pd_mode = PIC32MZ_100BASET_HD;
+      }
+
+    /* Check for 10BASETX full duplex */
+
+    else if ((advertise & MII_ADVERTISE_10BASETXFULL) != 0 &&
+             (lpa & MII_LPA_10BASETXFULL) != 0)
+      {
+        priv->pd_mode = PIC32MZ_10BASET_FD;
+      }
+
+    /* Check for 10BASETX half duplex */
+
+    else if ((advertise & MII_ADVERTISE_10BASETXHALF) != 0 &&
+             (lpa & MII_LPA_10BASETXHALF) != 0)
+      {
+        priv->pd_mode = PIC32MZ_10BASET_HD;
+      }
+    else
+      {
+        nerr("ERROR: Unrecognized mode: %04x\n", lpa);
+        return -ENODEV;
+      }
+  }
+#else
+#  warning "PHY Unknown: speed and duplex are bogus"
+#endif
+
+  ninfo("%dBase-T %s duplex\n",
+        (priv->pd_mode & PIC32MZ_SPEED_MASK) ==
+          PIC32MZ_SPEED_100 ? 100 : 10,
+        (priv->pd_mode & PIC32MZ_DUPLEX_MASK) ==
+          PIC32MZ_DUPLEX_FULL ?"full" : "half");
+
+  return OK;
+}
+
+/****************************************************************************
+ * Function: pic32mz_linkwork
+ *
+ * Description:
+ *   Poll the PHY for link changes.  The PHY interrupt is not available on
+ *   every board.  When the link comes up, configure the MAC for the mode
+ *   that was negotiated and turn the carrier on; turn it off when the link
+ *   goes down.
+ *
+ * Input Parameters:
+ *   arg - The argument passed when work_queue() was called.
+ *
+ * Assumptions:
+ *   pic32mz_ifdown() does not wait for this work, which could deadlock on
+ *   the network device lock: it only cancels it and clears pd_ifup.
+ *
+ ****************************************************************************/
+
+static void pic32mz_linkwork(void *arg)
+{
+  struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)arg;
+  uint8_t phyaddr = priv->pd_phyaddr;
+  uint16_t phyreg;
+  bool up;
+
+  if (!priv->pd_ifup)
+    {
+      return;
+    }
+
+  /* The link status bit latches a link failure: read it twice to get the
+   * current state.
+   */
+
+  phyreg = pic32mz_phyread(phyaddr, MII_MSR);
+  phyreg = pic32mz_phyread(phyaddr, MII_MSR);
+  up     = (phyreg & MII_MSR_LINKSTATUS) != 0;
+
+#ifdef CONFIG_PIC32MZ_PHY_AUTONEG
+  /* The partner capabilities are only valid when the negotiation is done */
+
+  up = up && (phyreg & MII_MSR_ANEGCOMPLETE) != 0;
+#endif
+
+  if (up && !priv->pd_linkup)
+    {
+      if (pic32mz_phygetmode(priv) == OK)
+        {
+          pic32mz_macmode(priv->pd_mode);
+          priv->pd_linkup = true;
+          netdev_lower_carrier_on(&priv->pd_dev);
+        }
+    }
+  else if (!up && priv->pd_linkup)
+    {
+      priv->pd_linkup = false;
+      netdev_lower_carrier_off(&priv->pd_dev);
+    }
+
+  work_queue(ETHWORK, &priv->pd_linkwork, pic32mz_linkwork, priv,
+             PIC32MZ_LINKPOLL);
 }
 #endif
 
@@ -3115,7 +3339,18 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
   /* Then perform the auto-negotiation */
 
   ret = pic32mz_phyautoneg(phyaddr);
-  if (ret < 0)
+  if (ret == -ETIMEDOUT)
+    {
+      /* No link partner, such as an unplugged cable: not an error.  The
+       * interface comes up without a carrier and pic32mz_linkwork()
+       * configures the MAC when the link comes up.
+       */
+
+      priv->pd_mode   = PIC32MZ_MODE_DEFLT;
+      priv->pd_linkup = false;
+      return OK;
+    }
+  else if (ret < 0)
     {
       return ret;
     }
@@ -3140,106 +3375,11 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
 
   /* Check configuration */
 
-#if defined(CONFIG_ETH0_PHY_KS8721)
-  phyreg = pic32mz_phyread(phyaddr, MII_KS8721_10BTCR);
-
-  switch (phyreg & KS8721_10BTCR_MODE_MASK)
+  ret = pic32mz_phygetmode(priv);
+  if (ret < 0)
     {
-      case KS8721_10BTCR_MODE_10BTHD:  /* 10BASE-T half duplex */
-        priv->pd_mode = PIC32MZ_10BASET_HD;
-        break;
-      case KS8721_10BTCR_MODE_100BTHD: /* 100BASE-T half duplex */
-        priv->pd_mode = PIC32MZ_100BASET_HD;
-        break;
-      case KS8721_10BTCR_MODE_10BTFD: /* 10BASE-T full duplex */
-        priv->pd_mode = PIC32MZ_10BASET_FD;
-        break;
-      case KS8721_10BTCR_MODE_100BTFD: /* 100BASE-T full duplex */
-        priv->pd_mode = PIC32MZ_100BASET_FD;
-        break;
-      default:
-        nerr("ERROR: Unrecognized mode: %04x\n", phyreg);
-        return -ENODEV;
+      return ret;
     }
-#elif defined(CONFIG_ETH0_PHY_DP83848C)
-  phyreg = pic32mz_phyread(phyaddr, MII_DP83848C_STS);
-
-  /* Configure for full/half duplex mode and speed */
-
-  switch (phyreg & 0x0006)
-    {
-      case 0x0000:
-        priv->pd_mode = PIC32MZ_100BASET_HD;
-        break;
-      case 0x0002:
-        priv->pd_mode = PIC32MZ_10BASET_HD;
-        break;
-      case 0x0004:
-        priv->pd_mode = PIC32MZ_100BASET_FD;
-        break;
-      case 0x0006:
-        priv->pd_mode = PIC32MZ_10BASET_FD;
-        break;
-      default:
-        nerr("ERROR: Unrecognized mode: %04x\n", phyreg);
-        return -ENODEV;
-    }
-#elif defined(CONFIG_ETH0_PHY_LAN8720) || defined(CONFIG_ETH0_PHY_LAN8740) ||\
-      defined(CONFIG_ETH0_PHY_LAN8740A)
-  {
-    uint16_t advertise;
-    uint16_t lpa;
-
-    up_udelay(500);
-    advertise = pic32mz_phyread(phyaddr, MII_ADVERTISE);
-    lpa       = pic32mz_phyread(phyaddr, MII_LPA);
-
-    /* Check for 100BASETX full duplex */
-
-    if ((advertise & MII_ADVERTISE_100BASETXFULL) != 0 &&
-        (lpa & MII_LPA_100BASETXFULL) != 0)
-      {
-        priv->pd_mode = PIC32MZ_100BASET_FD;
-      }
-
-    /* Check for 100BASETX half duplex */
-
-    else if ((advertise & MII_ADVERTISE_100BASETXHALF) != 0 &&
-             (lpa & MII_LPA_100BASETXHALF) != 0)
-      {
-        priv->pd_mode = PIC32MZ_100BASET_HD;
-      }
-
-    /* Check for 10BASETX full duplex */
-
-    else if ((advertise & MII_ADVERTISE_10BASETXFULL) != 0 &&
-             (lpa & MII_LPA_10BASETXFULL) != 0)
-      {
-        priv->pd_mode = PIC32MZ_10BASET_FD;
-      }
-
-    /* Check for 10BASETX half duplex */
-
-    else if ((advertise & MII_ADVERTISE_10BASETXHALF) != 0 &&
-             (lpa & MII_LPA_10BASETXHALF) != 0)
-      {
-        priv->pd_mode = PIC32MZ_10BASET_HD;
-      }
-    else
-      {
-        nerr("ERROR: Unrecognized mode: %04x\n", phyreg);
-        return -ENODEV;
-      }
-  }
-#else
-#  warning "PHY Unknown: speed and duplex are bogus"
-#endif
-
-  ninfo("%dBase-T %s duplex\n",
-        (priv->pd_mode & PIC32MZ_SPEED_MASK) ==
-          PIC32MZ_SPEED_100 ? 100 : 10,
-        (priv->pd_mode & PIC32MZ_DUPLEX_MASK) ==
-          PIC32MZ_DUPLEX_FULL ?"full" : "half");
 
 #ifndef CONFIG_PIC32MZ_PHY_AUTONEG
   /* Set the fixed speed/duplex mode (again).  With auto-negotiation, the
@@ -3251,13 +3391,15 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
   ret = pic32mz_phymode(phyaddr, priv->pd_mode);
 #endif
 
+  priv->pd_linkup = true;
   pic32mz_showmii(phyaddr, "After final configuration");
   return ret;
 }
 #else
 static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
 {
-  priv->pd_mode = PIC32MZ_MODE_DEFLT;
+  priv->pd_mode   = PIC32MZ_MODE_DEFLT;
+  priv->pd_linkup = true;
   return OK;
 }
 #endif
