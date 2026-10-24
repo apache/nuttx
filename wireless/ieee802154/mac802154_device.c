@@ -538,6 +538,15 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
       return ret;
     }
 
+  /* The frame must fit the IOB before it is copied */
+
+  if (ret + tx->length > IOB_BUFSIZE(iob))
+    {
+      wlerr("ERROR: frame too long: %d\n", ret + tx->length);
+      iob_free(iob);
+      return -E2BIG;
+    }
+
   iob->io_offset = ret;
   iob->io_len = iob->io_offset;
 
