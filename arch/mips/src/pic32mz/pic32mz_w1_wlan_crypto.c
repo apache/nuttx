@@ -47,6 +47,7 @@
 #include <string.h>
 #include <syslog.h>
 
+#include <crypto/ecc.h>
 #include <crypto/md5.h>
 #include <crypto/sha1.h>
 #include <crypto/sha2.h>
@@ -368,12 +369,9 @@ int DRV_PIC32MZW_Crypto_HMAC(FAR const uint8_t *key, uint16_t keylen,
   return WLAN_CRYPTO_COMPLETE;
 }
 
-#ifdef CONFIG_PIC32MZ_W1_BA414E
-
 /* Big integer and elliptic curve operations ([EX] interface of Harmony's
  * drv_pic32mzw1_crypto.c).  Values are 'len' bytes, big or little endian
- * as requested; inputs and outputs may overlap.  The BA414E primitives
- * take little endian values.
+ * as requested; inputs and outputs may overlap.
  */
 
 static void wlan_to_le(FAR uint8_t *dst, FAR const uint8_t *src, int len,
@@ -470,6 +468,10 @@ int DRV_PIC32MZW_Crypto_BigIntMod(FAR const uint8_t *mod, FAR uint8_t *out,
   wlan_from_le(out, r, len, is_be);
   return wlan_crypto_done(OK, cb, ctx);
 }
+
+#ifdef CONFIG_PIC32MZ_W1_BA414E
+
+/* The BA414E primitives take little endian values */
 
 typedef CODE int (*wlan_modop_t)(FAR uint8_t *c, FAR const uint8_t *a,
                                  FAR const uint8_t *b, FAR const uint8_t *p,
@@ -708,11 +710,259 @@ int DRV_PIC32MZW_Crypto_ECCMultiply(int curve, FAR bool *is_infinity,
   return wlan_crypto_done(ret, cb, ctx);
 }
 
+#else /* CONFIG_PIC32MZ_W1_BA414E */
+
+/* Software operations on P-256 with crypto/ecc.h, which takes big endian
+ * values of 32 bytes.  The curve constants are little endian, like the
+ * values of the library.
+ */
+
+#define WLAN_P256_BYTES 32
+
+typedef CODE int (*wlan_softop_t)(FAR uint8_t *res, FAR const uint8_t *a,
+                                  FAR const uint8_t *b,
+                                  FAR const uint8_t *mod);
+
+static const uint8_t g_p256_p[WLAN_P256_BYTES] =
+{
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x01, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff
+};
+
+static const uint8_t g_p256_a[WLAN_P256_BYTES] =
+{
+  0xfc, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x01, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff
+};
+
+static const uint8_t g_p256_b[WLAN_P256_BYTES] =
+{
+  0x4b, 0x60, 0xd2, 0x27, 0x3e, 0x3c, 0xce, 0x3b,
+  0xf6, 0xb0, 0x53, 0xcc, 0xb0, 0x06, 0x1d, 0x65,
+  0xbc, 0x86, 0x98, 0x76, 0x55, 0xbd, 0xeb, 0xb3,
+  0xe7, 0x93, 0x3a, 0xaa, 0xd8, 0x35, 0xc6, 0x5a
+};
+
+/* Converting to and from big endian is the same reversal */
+
+#define wlan_to_be(dst, src, len, is_be) wlan_to_le(dst, src, len, !(is_be))
+#define wlan_from_be(dst, src, len, is_be) wlan_to_le(dst, src, len, !(is_be))
+
+static int wlan_softmod(wlan_softop_t op, FAR const uint8_t *mod,
+                        FAR uint8_t *out, FAR const uint8_t *ain,
+                        FAR const uint8_t *bin, uint16_t len, bool is_be,
+                        wlan_crypto_cb_t cb, uintptr_t ctx)
+{
+  uint8_t p[WLAN_P256_BYTES];
+  uint8_t a[WLAN_P256_BYTES];
+  uint8_t b[WLAN_P256_BYTES];
+  int ret;
+
+  if (mod == NULL || out == NULL || ain == NULL || bin == NULL ||
+      len != WLAN_P256_BYTES)
+    {
+      return WLAN_CRYPTO_INVALID;
+    }
+
+  wlan_to_be(p, mod, len, is_be);
+  wlan_to_be(a, ain, len, is_be);
+  wlan_to_be(b, bin, len, is_be);
+
+  ret = op(a, a, b, p);
+  if (ret >= 0)
+    {
+      wlan_from_be(out, a, len, is_be);
+    }
+
+  return wlan_crypto_done(ret, cb, ctx);
+}
+
+int DRV_PIC32MZW_Crypto_BigIntModAdd(FAR const uint8_t *mod,
+                                     FAR uint8_t *out,
+                                     FAR const uint8_t *ain,
+                                     FAR const uint8_t *bin, uint16_t len,
+                                     bool is_be, wlan_crypto_cb_t cb,
+                                     uintptr_t ctx)
+{
+  return wlan_softmod(ecc_mod_add, mod, out, ain, bin, len, is_be, cb, ctx);
+}
+
+int DRV_PIC32MZW_Crypto_BigIntModSubtract(FAR const uint8_t *mod,
+                                          FAR uint8_t *out,
+                                          FAR const uint8_t *ain,
+                                          FAR const uint8_t *bin,
+                                          uint16_t len, bool is_be,
+                                          wlan_crypto_cb_t cb,
+                                          uintptr_t ctx)
+{
+  return wlan_softmod(ecc_mod_sub, mod, out, ain, bin, len, is_be, cb, ctx);
+}
+
+int DRV_PIC32MZW_Crypto_BigIntModMultiply(FAR const uint8_t *mod,
+                                          FAR uint8_t *out,
+                                          FAR const uint8_t *ain,
+                                          FAR const uint8_t *bin,
+                                          uint16_t len, bool is_be,
+                                          wlan_crypto_cb_t cb,
+                                          uintptr_t ctx)
+{
+  return wlan_softmod(ecc_mod_mul, mod, out, ain, bin, len, is_be, cb, ctx);
+}
+
+int DRV_PIC32MZW_Crypto_BigIntModExponentiate(FAR const uint8_t *mod,
+                                              FAR uint8_t *out,
+                                              FAR const uint8_t *base,
+                                              FAR const uint8_t *exp,
+                                              uint16_t len, bool is_be,
+                                              wlan_crypto_cb_t cb,
+                                              uintptr_t ctx)
+{
+  return wlan_softmod(ecc_mod_exp, mod, out, base, exp, len, is_be, cb, ctx);
+}
+
+/* [EX] Returns the curve's field (little endian), or NULL for an unknown
+ * curve
+ */
+
+FAR const uint8_t *DRV_PIC32MZW_Crypto_ECCGetField(int curve)
+{
+  return curve == WLAN_CURVE_P256 ? g_p256_p : NULL;
+}
+
+int DRV_PIC32MZW_Crypto_ECCIsOnCurve(int curve, FAR bool *notoncurve,
+                                     FAR const uint8_t *px,
+                                     FAR const uint8_t *py, bool is_be,
+                                     wlan_crypto_cb_t cb, uintptr_t ctx)
+{
+  uint8_t x[WLAN_P256_BYTES];
+  uint8_t y[WLAN_P256_BYTES];
+  int ret;
+
+  if (curve != WLAN_CURVE_P256 || notoncurve == NULL || px == NULL ||
+      py == NULL)
+    {
+      return WLAN_CRYPTO_INVALID;
+    }
+
+  wlan_to_be(x, px, WLAN_P256_BYTES, is_be);
+  wlan_to_be(y, py, WLAN_P256_BYTES, is_be);
+
+  ret = ecc_point_is_on_curve(x, y);
+  *notoncurve = (ret == 0);
+  return wlan_crypto_done(ret, cb, ctx);
+}
+
+/* [EX] out = a * in and out = in + b (mod p), little endian */
+
+int DRV_PIC32MZW_Crypto_ECCBigIntModMultByA(int curve, FAR uint8_t *out,
+                                            FAR const uint8_t *in,
+                                            wlan_crypto_cb_t cb,
+                                            uintptr_t ctx)
+{
+  if (curve != WLAN_CURVE_P256)
+    {
+      return WLAN_CRYPTO_INVALID;
+    }
+
+  return wlan_softmod(ecc_mod_mul, g_p256_p, out, in, g_p256_a,
+                      WLAN_P256_BYTES, false, cb, ctx);
+}
+
+int DRV_PIC32MZW_Crypto_ECCBigIntModAddB(int curve, FAR uint8_t *out,
+                                         FAR const uint8_t *in,
+                                         wlan_crypto_cb_t cb, uintptr_t ctx)
+{
+  if (curve != WLAN_CURVE_P256)
+    {
+      return WLAN_CRYPTO_INVALID;
+    }
+
+  return wlan_softmod(ecc_mod_add, g_p256_p, out, in, g_p256_b,
+                      WLAN_P256_BYTES, false, cb, ctx);
+}
+
+int DRV_PIC32MZW_Crypto_ECCAdd(int curve, FAR bool *is_infinity,
+                               FAR uint8_t *outx, FAR uint8_t *outy,
+                               FAR const uint8_t *pinx,
+                               FAR const uint8_t *piny,
+                               FAR const uint8_t *qinx,
+                               FAR const uint8_t *qiny, bool is_be,
+                               wlan_crypto_cb_t cb, uintptr_t ctx)
+{
+  uint8_t px[WLAN_P256_BYTES];
+  uint8_t py[WLAN_P256_BYTES];
+  uint8_t qx[WLAN_P256_BYTES];
+  uint8_t qy[WLAN_P256_BYTES];
+  uint8_t rx[WLAN_P256_BYTES];
+  uint8_t ry[WLAN_P256_BYTES];
+  int ret;
+
+  if (curve != WLAN_CURVE_P256 || is_infinity == NULL || outx == NULL ||
+      outy == NULL || pinx == NULL || piny == NULL || qinx == NULL ||
+      qiny == NULL)
+    {
+      return WLAN_CRYPTO_INVALID;
+    }
+
+  wlan_to_be(px, pinx, WLAN_P256_BYTES, is_be);
+  wlan_to_be(py, piny, WLAN_P256_BYTES, is_be);
+  wlan_to_be(qx, qinx, WLAN_P256_BYTES, is_be);
+  wlan_to_be(qy, qiny, WLAN_P256_BYTES, is_be);
+
+  ret = ecc_point_add(rx, ry, px, py, qx, qy);
+  *is_infinity = (ret == 1);
+  if (ret == 0)
+    {
+      wlan_from_be(outx, rx, WLAN_P256_BYTES, is_be);
+      wlan_from_be(outy, ry, WLAN_P256_BYTES, is_be);
+    }
+
+  return wlan_crypto_done(ret, cb, ctx);
+}
+
+int DRV_PIC32MZW_Crypto_ECCMultiply(int curve, FAR bool *is_infinity,
+                                    FAR uint8_t *outx, FAR uint8_t *outy,
+                                    FAR const uint8_t *pinx,
+                                    FAR const uint8_t *piny,
+                                    FAR const uint8_t *kin, bool is_be,
+                                    wlan_crypto_cb_t cb, uintptr_t ctx)
+{
+  uint8_t px[WLAN_P256_BYTES];
+  uint8_t py[WLAN_P256_BYTES];
+  uint8_t k[WLAN_P256_BYTES];
+  uint8_t rx[WLAN_P256_BYTES];
+  uint8_t ry[WLAN_P256_BYTES];
+  int ret;
+
+  if (curve != WLAN_CURVE_P256 || is_infinity == NULL || outx == NULL ||
+      outy == NULL || pinx == NULL || piny == NULL || kin == NULL)
+    {
+      return WLAN_CRYPTO_INVALID;
+    }
+
+  wlan_to_be(px, pinx, WLAN_P256_BYTES, is_be);
+  wlan_to_be(py, piny, WLAN_P256_BYTES, is_be);
+  wlan_to_be(k, kin, WLAN_P256_BYTES, is_be);
+
+  ret = ecc_point_mul(rx, ry, px, py, k);
+  *is_infinity = (ret == 1);
+  if (ret == 0)
+    {
+      wlan_from_be(outx, rx, WLAN_P256_BYTES, is_be);
+      wlan_from_be(outy, ry, WLAN_P256_BYTES, is_be);
+    }
+
+  return wlan_crypto_done(ret, cb, ctx);
+}
+
 #endif /* CONFIG_PIC32MZ_W1_BA414E */
 
 /* Not implemented: every call reports an error.  The library only uses
- * them for WPA3-Personal (SAE, without the BA414E), MSCHAPv2 and
- * enterprise TLS.
+ * them for MSCHAPv2 and enterprise TLS.
  */
 
 #define WLAN_CRYPTO_STUB(name) \
@@ -723,27 +973,6 @@ int DRV_PIC32MZW_Crypto_ECCMultiply(int curve, FAR bool *is_infinity,
   }
 
 WLAN_CRYPTO_STUB(DRV_PIC32MZW_Crypto_DES_Ecb_Crypt)
-
-#ifndef CONFIG_PIC32MZ_W1_BA414E
-WLAN_CRYPTO_STUB(DRV_PIC32MZW_Crypto_BigIntMod)
-WLAN_CRYPTO_STUB(DRV_PIC32MZW_Crypto_BigIntModAdd)
-WLAN_CRYPTO_STUB(DRV_PIC32MZW_Crypto_BigIntModSubtract)
-WLAN_CRYPTO_STUB(DRV_PIC32MZW_Crypto_BigIntModMultiply)
-WLAN_CRYPTO_STUB(DRV_PIC32MZW_Crypto_BigIntModExponentiate)
-WLAN_CRYPTO_STUB(DRV_PIC32MZW_Crypto_ECCAdd)
-WLAN_CRYPTO_STUB(DRV_PIC32MZW_Crypto_ECCBigIntModAddB)
-WLAN_CRYPTO_STUB(DRV_PIC32MZW_Crypto_ECCBigIntModMultByA)
-WLAN_CRYPTO_STUB(DRV_PIC32MZW_Crypto_ECCIsOnCurve)
-WLAN_CRYPTO_STUB(DRV_PIC32MZW_Crypto_ECCMultiply)
-
-/* [EX] Returns the curve's field, or NULL for an unknown curve */
-
-FAR const uint8_t *DRV_PIC32MZW_Crypto_ECCGetField(int curve)
-{
-  syslog(LOG_ERR, "wlan: ECC not implemented\n");
-  return NULL;
-}
-#endif
 
 #define WLAN_TLS_STUB(name) \
   int name(void) \
