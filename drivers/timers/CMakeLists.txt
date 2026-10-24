@@ -24,6 +24,9 @@ set(SRCS)
 
 if(CONFIG_WATCHDOG)
   list(APPEND SRCS watchdog.c)
+  if(CONFIG_WATCHDOG_WDOG)
+    list(APPEND SRCS watchdog_wdog.c)
+  endif()
 endif()
 
 if(CONFIG_TIMER)

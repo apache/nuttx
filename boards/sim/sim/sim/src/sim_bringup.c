@@ -74,6 +74,10 @@
 #include <nuttx/timers/timer_wdog.h>
 #endif
 
+#ifdef CONFIG_WATCHDOG_WDOG
+#include <nuttx/timers/watchdog_wdog.h>
+#endif
+
 #include "sim_internal.h"
 #include "sim.h"
 
@@ -596,6 +600,14 @@ int sim_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: sim_cansock_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_WATCHDOG_WDOG
+  ret = watchdog_wdog_initialize(CONFIG_WATCHDOG_DEVPATH);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: watchdog_wdog_initialize failed: %d\n", ret);
     }
 #endif
 
