@@ -461,7 +461,7 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
   if (ret < 0)
     {
       nerr("ERROR: Not reachable\n");
-      return -ENETUNREACH;
+      return ret;
     }
 #endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
 

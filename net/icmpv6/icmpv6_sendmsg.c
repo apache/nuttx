@@ -361,7 +361,6 @@ ssize_t icmpv6_sendmsg(FAR struct socket *psock,
   if (ret < 0)
     {
       nerr("ERROR: Not reachable\n");
-      ret = -ENETUNREACH;
       goto errout;
     }
 #endif /* CONFIG_NET_ICMPv6_NEIGHBOR */

@@ -173,8 +173,9 @@ static uint32_t icmpv6_neighbor_eventhandler(FAR struct net_driver_s *dev,
  *   found in the Neighbor Table.  On error a negated errno value is
  *   returned:
  *
- *     -ETIMEDOUT:    The number or retry counts has been exceed.
- *     -EHOSTUNREACH: Could not find a route to the host
+ *     -ENETUNREACH:  No device or router reaches the address,
+ *     -EHOSTUNREACH: The address resolution failed
+ *     -ENOMEM:       No callback available
  *
  * Assumptions:
  *   This function is called from the normal tasking context.
@@ -215,7 +216,7 @@ int icmpv6_neighbor(FAR struct net_driver_s *dev,
   if (!dev)
     {
       nerr("ERROR: Unreachable: %08lx\n", (unsigned long)ipaddr);
-      ret = -EHOSTUNREACH;
+      ret = -ENETUNREACH;
       goto errout;
     }
 
@@ -261,7 +262,7 @@ int icmpv6_neighbor(FAR struct net_driver_s *dev,
 
       if (net_is_addr_unspecified(lookup))
         {
-          return -EHOSTUNREACH;
+          return -ENETUNREACH;
         }
     }
 
@@ -270,7 +271,7 @@ int icmpv6_neighbor(FAR struct net_driver_s *dev,
   if (IFF_IS_NOARP(dev->d_flags))
     {
       ninfo("ARP not supported on %s, no send!\n", dev->d_ifname);
-      return -EHOSTUNREACH;
+      return -ENETUNREACH;
     }
 
   /* Allocate resources to receive a callback.  This and the following
@@ -367,6 +368,13 @@ int icmpv6_neighbor(FAR struct net_driver_s *dev,
       /* Increment the retry count */
 
       state.snd_retries++;
+    }
+
+  /* No reply to any of the solicitations: the address resolution failed */
+
+  if (ret == -ETIMEDOUT)
+    {
+      ret = -EHOSTUNREACH;
     }
 
   nxsem_destroy(&state.snd_sem);

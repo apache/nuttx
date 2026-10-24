@@ -271,8 +271,10 @@ void arp_out(FAR struct net_driver_s *dev);
  *   Zero (OK) is returned on success and the IP address mapping can now be
  *   found in the ARP table.  On error a negated errno value is returned:
  *
- *     -ETIMEDOUT:    The number or retry counts has been exceed.
- *     -EHOSTUNREACH: Could not find a route to the host
+ *     -ENETUNREACH:  No device or router reaches the address, or the
+ *                    device went down
+ *     -EHOSTUNREACH: The address resolution failed
+ *     -ENOMEM:       No callback available
  *
  * Assumptions:
  *   This function is called from the normal tasking context.

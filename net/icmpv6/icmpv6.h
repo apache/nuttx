@@ -234,8 +234,9 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen);
  *   found in the Neighbor Table.
  *   On error a negated errno value is returned:
  *
- *     -ETIMEDOUT:    The number or retry counts has been exceed.
- *     -EHOSTUNREACH: Could not find a route to the host
+ *     -ENETUNREACH:  No device or router reaches the address,
+ *     -EHOSTUNREACH: The address resolution failed
+ *     -ENOMEM:       No callback available
  *
  * Assumptions:
  *   This function is called from the normal tasking context.
