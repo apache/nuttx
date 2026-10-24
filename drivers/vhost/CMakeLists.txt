@@ -37,5 +37,9 @@ if(CONFIG_DRIVERS_VHOST_RPMSG)
   list(APPEND SRCS vhost-rpmsg.c)
 endif()
 
+if(CONFIG_DRIVERS_VHOST_SERIAL)
+  list(APPEND SRCS vhost-serial.c)
+endif()
+
 target_sources(drivers PRIVATE ${SRCS})
 target_include_directories(drivers PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

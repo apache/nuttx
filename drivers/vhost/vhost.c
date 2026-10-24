@@ -37,6 +37,9 @@
 
 #include "vhost-rng.h"
 #include "vhost-rpmsg.h"
+#ifdef CONFIG_DRIVERS_VHOST_SERIAL
+#  include "vhost-serial.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -532,6 +535,14 @@ void vhost_register_drivers(void)
   if (ret < 0)
     {
       vhosterr("vhost_register_rpmsg_driver failed, ret=%d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DRIVERS_VHOST_SERIAL
+  ret = vhost_register_serial_driver();
+  if (ret < 0)
+    {
+      vhosterr("vhost_register_serial_driver failed, ret=%d\n", ret);
     }
 #endif
 
