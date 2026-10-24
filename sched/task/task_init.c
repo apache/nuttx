@@ -79,9 +79,9 @@
  * Returned Value:
  *   OK on success; negative error value on failure appropriately.  (See
  *   nxtask_setup_scheduler() for possible failure conditions).  On failure,
- *   the caller is responsible for freeing the stack memory and for calling
- *   nxsched_release_tcb() to free the TCB (which could be in most any
- *   state).
+ *   nxtask_init() undoes what it did (the PID, the inactive task list,
+ *   the kernel stack, the group) and the caller frees the TCB with
+ *   kmm_free(), and a pre-allocated stack.
  *
  ****************************************************************************/
 
@@ -209,6 +209,26 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
   return ret;
 
 errout_with_group:
+  if (tcb->pid != 0)
+    {
+      irqstate_t flags;
+
+      /* nxtask_setup_scheduler() gave the TCB a PID and put it on the
+       * inactive task list.  The caller frees the TCB: take it off both.
+       */
+
+      flags = enter_critical_section();
+      dq_rem((FAR dq_entry_t *)tcb, list_inactivetasks());
+      leave_critical_section(flags);
+
+      nxsched_releasepid(tcb->pid);
+      tcb->pid = 0;
+    }
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_KERNEL_STACK)
+  up_addrenv_kstackfree(tcb);
+#endif
+
   if (!stack && tcb->stack_alloc_ptr)
     {
 #ifdef CONFIG_BUILD_KERNEL
