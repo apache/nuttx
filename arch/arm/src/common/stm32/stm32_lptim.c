@@ -910,6 +910,10 @@ static void stm32_lptim_disableint(struct stm32_lptim_dev_s *dev,
 static void stm32_lptim_ackint(struct stm32_lptim_dev_s *dev, int source)
 {
   stm32_putreg32(dev, STM32_LPTIM_ICR_OFFSET, source);
+
+  /* Read back so the flag is cleared before the interrupt returns */
+
+  stm32_getreg32(dev, STM32_LPTIM_ISR_OFFSET);
 }
 
 /****************************************************************************
