@@ -104,15 +104,31 @@ struct nrf52_tickless_dev_s g_tickless_dev;
  * Private Functions
  ****************************************************************************/
 
-static inline void rtc_counter_to_ts(uint32_t counter, struct timespec *now)
+/* Read the COUNTER and the absolute time it stands for.  Called with
+ * interrupts disabled, so an overflow may not have been counted in
+ * 'periods' yet: its OVRFLW event is then still set.  A COUNTER in its
+ * lower half was read after that overflow, one in its upper half before.
+ */
+
+static uint32_t rtc_now(struct timespec *now)
 {
+  const uint32_t rtc_base = NRF52_RTC_GETBASE(g_tickless_dev.rtc);
+  uint32_t periods = g_tickless_dev.periods;
+  uint32_t counter;
   uint32_t usec;
 
+  counter = NRF52_RTC_GETCOUNTER_REG(rtc_base);
+  if (getreg32(rtc_base + NRF52_RTC_EVENTS_OVRFLW_OFFSET) != 0 &&
+      counter <= RTC_COUNTER_MASK / 2)
+    {
+      periods++;
+    }
+
   usec = COUNTER_TO_USEC(counter);
-  now->tv_sec  = usec / USEC_PER_SEC;
+  now->tv_sec  = usec / USEC_PER_SEC + periods * NRF52_RTC_PERIOD;
   now->tv_nsec = (usec % USEC_PER_SEC) * NSEC_PER_USEC;
 
-  now->tv_sec += g_tickless_dev.periods * NRF52_RTC_PERIOD;
+  return counter;
 }
 
 /* Convert a time shorter than one RTC period to counts, rounding up so
@@ -138,8 +154,7 @@ static void rtc_prepare_alarm(void)
 
   /* Time left until the alarm, zero if it has passed */
 
-  counter = NRF52_RTC_GETCOUNTER_REG(rtc_base);
-  rtc_counter_to_ts(counter, &now);
+  counter = rtc_now(&now);
   clock_timespec_subtract(&g_tickless_dev.alarm, &now, &delta);
 
   /* An alarm further away is prepared again on a later overflow */
@@ -257,20 +272,17 @@ static int rtc_handler(int irq, void *context, void *arg)
 
 int up_alarm_cancel(struct timespec *ts)
 {
-  uint32_t counter;
   irqstate_t flags;
 
   flags = enter_critical_section();
 
   NRF52_RTC_DISABLEINT(g_tickless_dev.rtc, NRF52_RTC_EVT_COMPARE0);
-  NRF52_RTC_GETCOUNTER(g_tickless_dev.rtc, &counter);
+  rtc_now(ts);
 
   NRF52_RTC_ACKINT(g_tickless_dev.rtc, NRF52_RTC_EVT_COMPARE0);
   g_tickless_dev.alarm_set = false;
 
   leave_critical_section(flags);
-
-  rtc_counter_to_ts(counter, ts);
 
   return OK;
 }
@@ -303,14 +315,10 @@ int up_alarm_start(const struct timespec *ts)
 
 int up_timer_gettime(struct timespec *ts)
 {
-  uint32_t counter;
   irqstate_t flags;
 
   flags = enter_critical_section();
-
-  NRF52_RTC_GETCOUNTER(g_tickless_dev.rtc, &counter);
-  rtc_counter_to_ts(counter, ts);
-
+  rtc_now(ts);
   leave_critical_section(flags);
 
   return OK;
