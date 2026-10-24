@@ -195,6 +195,7 @@ int virtio_register_driver(FAR struct virtio_driver *driver)
       FAR struct virtio_device_item_s *item =
         container_of(node, struct virtio_device_item_s, node);
       FAR struct virtio_device *device = item->device;
+
       if (item->driver == NULL && driver->device == device->id.device)
         {
           /* If found the device in the device list, call driver probe,
@@ -237,6 +238,7 @@ int virtio_unregister_driver(FAR struct virtio_driver *driver)
     {
       FAR struct virtio_device_item_s *item =
         container_of(node, struct virtio_device_item_s, node);
+
       if (item->driver == driver)
         {
           /* 1. Call driver remove function;
@@ -291,6 +293,7 @@ int virtio_register_device(FAR struct virtio_device *device)
     {
       FAR struct virtio_driver *driver =
         container_of(node, struct virtio_driver, node);
+
       if (driver->device == device->id.device)
         {
           /* If found the driver in the driver list, call driver probe,
@@ -332,6 +335,7 @@ int virtio_unregister_device(FAR struct virtio_device *device)
     {
       FAR struct virtio_device_item_s *item =
         container_of(node, struct virtio_device_item_s, node);
+
       if (item->device == device)
         {
           /* Call driver remove */
