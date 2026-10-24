@@ -165,6 +165,17 @@ NuttX also provides a lightweight ECC implementation and public API in
 secret computation, and ECDSA sign/verify. Public key export is available in
 compressed form (``ECC_BYTES + 1``) as well as X/Y uncompressed form.
 
+The same header exports the building blocks of protocols that need more than
+ECDH and ECDSA, such as the SAE handshake of WPA3, on the curve selected at
+build time (P-256 by default). All values are big endian with ``ECC_BYTES``
+bytes, and the input and output buffers may overlap:
+
+- ``ecc_point_add()``, ``ecc_point_mul()`` and ``ecc_point_is_on_curve()`` work
+  on affine points. The first two return 1 when the result is the point at
+  infinity, which is represented as (0, 0).
+- ``ecc_mod_add()``, ``ecc_mod_sub()``, ``ecc_mod_mul()`` and ``ecc_mod_exp()``
+  work modulo any value, and are faster when it is the prime of the curve.
+
 RSA Digital Signature Operations
 --------------------------------
 
