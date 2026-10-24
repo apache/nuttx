@@ -94,7 +94,7 @@ SECTIONS
         *(.bss)
         "*(.bss.*)"
         *(COMMON)
-        . = ALIGN(4);
+        . = ALIGN(8);
         _ebss = ABSOLUTE(.);
     } > flash
 }

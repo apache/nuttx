@@ -131,7 +131,7 @@ SECTIONS
         *(.bss.*)
     }
 
-    . = ALIGN(4);
+    . = ALIGN(8);
 
     PROVIDE(_ebss = .);
     PROVIDE(_bin_size_ = _code_size_ + _end_data_ - _start_data_ + _retention_data_end_ - _retention_data_start_ );

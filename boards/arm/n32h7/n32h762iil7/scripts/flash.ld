@@ -92,7 +92,7 @@ SECTIONS
         *(.bss .bss.*)
         *(.gnu.linkonce.b.*)
         *(COMMON)
-        . = ALIGN(4);
+        . = ALIGN(8);
         _ebss_rel = ABSOLUTE(.);
     } > DTCMRAM
 
@@ -112,7 +112,7 @@ SECTIONS
     {
         _sbss = ABSOLUTE(.);
         *(.axi_ram)
-        . = ALIGN(4);
+        . = ALIGN(8);
         _ebss = ABSOLUTE(.);
         _axiram_heap_start = ABSOLUTE(.);
     } > AXI_RAM
