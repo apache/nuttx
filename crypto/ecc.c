@@ -1516,7 +1516,7 @@ int ecc_make_key(uint8_t publickey[ECC_BYTES + 1],
           return 0;
         }
 
-      arc4random_buf(l_private, NUM_ECC_DIGITS);
+      arc4random_buf(l_private, ECC_BYTES);
 
       if (vli_iszero(l_private))
         {
@@ -1558,7 +1558,7 @@ int ecc_make_key_uncomp(uint8_t publickey_x[ECC_BYTES],
           return 0;
         }
 
-      arc4random_buf(l_private, NUM_ECC_DIGITS);
+      arc4random_buf(l_private, ECC_BYTES);
 
       if (vli_iszero(l_private))
         {
@@ -1597,7 +1597,7 @@ int ecdh_shared_secret(const uint8_t publickey[ECC_BYTES + 1],
   memset(&l_product, 0, sizeof(eccpoint_t));
   memset(&l_public, 0, sizeof(eccpoint_t));
 
-  arc4random_buf(l_random, NUM_ECC_DIGITS);
+  arc4random_buf(l_random, ECC_BYTES);
   ecc_point_decompress(&l_public, publickey);
   ecc_bytes2native(l_private, privatekey);
 
@@ -1627,7 +1627,7 @@ int ecdsa_sign(const uint8_t privatekey[ECC_BYTES],
           return 0;
         }
 
-      arc4random_buf(k, NUM_ECC_DIGITS);
+      arc4random_buf(k, ECC_BYTES);
 
       if (vli_iszero(k))
         {
