@@ -37,7 +37,7 @@
  * external/internal channels (0..11).  Channel 9 is the temperature sensor
  * and channel 10 is the internal reference voltage, both enabled with the
  * TSVREN bit of ADC_CCTL.  Channel 11 is VBAT / 4, enabled with VBATEN.
- * The conversion resolution is selectable between 12, 10, 8 and 6 bits.
+ * The conversions are always 12-bit wide (there is no DRES field).
  *
  * The routine (regular) sequence holds up to 9 conversions: ranks 0..5 in
  * ADC_RSQ2 and ranks 6..8 in ADC_RSQ1.  The inserted sequence holds up to
@@ -130,12 +130,6 @@
 #define ADC_CTL0_DISNUM_MASK         (7 << ADC_CTL0_DISNUM_SHIFT)
 #define ADC_CTL0_IWDEN               (1 << 22) /* Inserted watchdog enable */
 #define ADC_CTL0_RWDEN               (1 << 23) /* Routine watchdog enable */
-#define ADC_CTL0_DRES_SHIFT          (24)      /* Data resolution */
-#define ADC_CTL0_DRES_MASK           (3 << ADC_CTL0_DRES_SHIFT)
-#  define ADC_CTL0_DRES_12B          (0 << ADC_CTL0_DRES_SHIFT)
-#  define ADC_CTL0_DRES_10B          (1 << ADC_CTL0_DRES_SHIFT)
-#  define ADC_CTL0_DRES_8B           (2 << ADC_CTL0_DRES_SHIFT)
-#  define ADC_CTL0_DRES_6B           (3 << ADC_CTL0_DRES_SHIFT)
 #define ADC_CTL0_ROVFIE              (1 << 26) /* Overflow int enable */
 
 /* Control register 1 (CTL1) */

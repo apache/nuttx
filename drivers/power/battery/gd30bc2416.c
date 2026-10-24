@@ -47,6 +47,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/signal.h>
@@ -67,6 +68,21 @@
  */
 
 #define GD30BC2416_ADC_DELAY_US      1000
+
+/* Without a battery, powered by the USB only, the charger answers on I2C
+ * for about 300 ms every 880 ms and NACKs in between: a NACKed transfer is
+ * retried every 50 ms for up to 1 s.
+ */
+
+#define GD30BC2416_RETRY_US          50000
+#define GD30BC2416_RETRY_MAX         20
+
+/* The start of the charge is not signalled by an IRQ: after an IRQ with
+ * the USB power present, the state is polled every 200 ms for up to 2 s.
+ */
+
+#define GD30BC2416_POLL_DELAY        MSEC2TICK(200)
+#define GD30BC2416_POLL_MAX          10
 
 /* Below this voltage no battery is considered to be connected */
 
@@ -108,6 +124,9 @@ struct gd30bc2416_dev_s
   uint16_t cfg3;                    /* Requested CFG3 VCCCHT field */
 #ifdef CONFIG_SCHED_HPWORK
   struct work_s work;               /* IRQ bottom half */
+  struct work_s pollwork;           /* State polling after an IRQ */
+  int state;                        /* Last state reported */
+  int npolls;                       /* Remaining state polls */
 #endif
 };
 
@@ -124,7 +143,12 @@ static int gd30bc2416_putreg16(FAR struct gd30bc2416_dev_s *priv,
 static int gd30bc2416_modifyreg16(FAR struct gd30bc2416_dev_s *priv,
                                   uint8_t regaddr, uint16_t clearbits,
                                   uint16_t setbits);
+static int gd30bc2416_transfer(FAR struct gd30bc2416_dev_s *priv,
+                               uint8_t regaddr, FAR uint8_t *buffer,
+                               bool read);
 static int gd30bc2416_restore(FAR struct gd30bc2416_dev_s *priv);
+static int gd30bc2416_getstate(FAR struct gd30bc2416_dev_s *priv,
+                               FAR int *status, FAR bool *usb);
 static int gd30bc2416_getvbat(FAR struct gd30bc2416_dev_s *priv,
                               FAR int *millivolts);
 
@@ -175,6 +199,56 @@ static const struct battery_charger_operations_s g_gd30bc2416ops =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: gd30bc2416_transfer
+ *
+ * Description:
+ *   Read or write the two bytes of a register.  The register address is
+ *   part of the slave address, so this is a single message.  A NACK is
+ *   retried: without a battery the charger only answers in time windows.
+ *
+ ****************************************************************************/
+
+static int gd30bc2416_transfer(FAR struct gd30bc2416_dev_s *priv,
+                               uint8_t regaddr, FAR uint8_t *buffer,
+                               bool read)
+{
+  struct i2c_config_s config;
+  int retries;
+  int ret;
+
+  config.frequency = priv->config->frequency;
+  config.address   = GD30BC2416_I2C_ADDR(regaddr);
+  config.addrlen   = 7;
+
+  for (retries = 0; ; retries++)
+    {
+      if (read)
+        {
+          ret = i2c_read(priv->i2c, &config, buffer, 2);
+        }
+      else
+        {
+          ret = i2c_write(priv->i2c, &config, buffer, 2);
+        }
+
+      if (ret != -ENXIO || retries >= GD30BC2416_RETRY_MAX)
+        {
+          break;
+        }
+
+      nxsig_usleep(GD30BC2416_RETRY_US);
+    }
+
+  if (ret < 0)
+    {
+      baterr("ERROR: %s of register 0x%02x failed: %d\n",
+             read ? "read" : "write", regaddr, ret);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: gd30bc2416_getreg16
  *
  * Description:
@@ -186,19 +260,12 @@ static const struct battery_charger_operations_s g_gd30bc2416ops =
 static int gd30bc2416_getreg16(FAR struct gd30bc2416_dev_s *priv,
                                uint8_t regaddr, FAR uint16_t *regval)
 {
-  struct i2c_config_s config;
   uint8_t buffer[2];
   int ret;
 
-  config.frequency = priv->config->frequency;
-  config.address   = GD30BC2416_I2C_ADDR(regaddr);
-  config.addrlen   = 7;
-
-  ret = i2c_read(priv->i2c, &config, buffer, sizeof(buffer));
+  ret = gd30bc2416_transfer(priv, regaddr, buffer, true);
   if (ret < 0)
     {
-      baterr("ERROR: i2c_read of register 0x%02x failed: %d\n",
-             regaddr, ret);
       return ret;
     }
 
@@ -218,27 +285,14 @@ static int gd30bc2416_getreg16(FAR struct gd30bc2416_dev_s *priv,
 static int gd30bc2416_putreg16(FAR struct gd30bc2416_dev_s *priv,
                                uint8_t regaddr, uint16_t regval)
 {
-  struct i2c_config_s config;
   uint8_t buffer[2];
-  int ret;
-
-  config.frequency = priv->config->frequency;
-  config.address   = GD30BC2416_I2C_ADDR(regaddr);
-  config.addrlen   = 7;
 
   buffer[0] = regval >> 8;
   buffer[1] = regval & 0xff;
 
   batinfo("REG 0x%02x <- 0x%04x\n", regaddr, regval);
 
-  ret = i2c_write(priv->i2c, &config, buffer, sizeof(buffer));
-  if (ret < 0)
-    {
-      baterr("ERROR: i2c_write of register 0x%02x failed: %d\n",
-             regaddr, ret);
-    }
-
-  return ret;
+  return gd30bc2416_transfer(priv, regaddr, buffer, false);
 }
 
 /****************************************************************************
@@ -359,7 +413,111 @@ static int gd30bc2416_getvbat(FAR struct gd30bc2416_dev_s *priv,
   return OK;
 }
 
+/****************************************************************************
+ * Name: gd30bc2416_getstate
+ *
+ * Description:
+ *   Read the battery state from the fault and status registers, and
+ *   whether the USB power is present.
+ *
+ ****************************************************************************/
+
+static int gd30bc2416_getstate(FAR struct gd30bc2416_dev_s *priv,
+                               FAR int *status, FAR bool *usb)
+{
+  uint16_t fault;
+  uint16_t status1;
+  uint16_t status2;
+  int ret;
+
+  *status = BATTERY_UNKNOWN;
+  *usb    = false;
+
+  ret = gd30bc2416_getreg16(priv, GD30BC2416_REG_FAULT, &fault);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = gd30bc2416_getreg16(priv, GD30BC2416_REG_STATUS1, &status1);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = gd30bc2416_getreg16(priv, GD30BC2416_REG_STATUS2, &status2);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  *usb = (status1 & GD30BC2416_STATUS1_USB_PLUG) != 0;
+
+  if ((fault & ~GD30BC2416_FAULT_I2C_ACK) != 0)
+    {
+      *status = BATTERY_FAULT;
+    }
+  else if ((status1 & GD30BC2416_STATUS1_CH_END) != 0)
+    {
+      *status = BATTERY_FULL;
+    }
+  else if (*usb)
+    {
+      *status = (status2 & GD30BC2416_STATUS2_CH_EN) != 0 ?
+                BATTERY_CHARGING : BATTERY_IDLE;
+    }
+  else
+    {
+      *status = BATTERY_DISCHARGING;
+    }
+
+  return OK;
+}
+
 #ifdef CONFIG_SCHED_HPWORK
+/****************************************************************************
+ * Name: gd30bc2416_pollworker
+ *
+ * Description:
+ *   Poll the state after an IRQ until the charge starts, and notify the
+ *   upper half when the state changes.
+ *
+ ****************************************************************************/
+
+static void gd30bc2416_pollworker(FAR void *arg)
+{
+  FAR struct gd30bc2416_dev_s *priv = arg;
+  int state;
+  bool usb;
+  int ret;
+
+  ret = nxmutex_lock(&priv->dev.batlock);
+  if (ret < 0)
+    {
+      return;
+    }
+
+  ret = gd30bc2416_getstate(priv, &state, &usb);
+  nxmutex_unlock(&priv->dev.batlock);
+
+  if (ret < 0)
+    {
+      return;
+    }
+
+  if (state != priv->state)
+    {
+      priv->state = state;
+      battery_charger_changed(&priv->dev, BATTERY_STATE_CHANGED);
+    }
+
+  if (usb && state == BATTERY_IDLE && --priv->npolls > 0)
+    {
+      work_queue(HPWORK, &priv->pollwork, gd30bc2416_pollworker, priv,
+                 GD30BC2416_POLL_DELAY);
+    }
+}
+
 /****************************************************************************
  * Name: gd30bc2416_worker
  *
@@ -372,8 +530,7 @@ static int gd30bc2416_getvbat(FAR struct gd30bc2416_dev_s *priv,
 static void gd30bc2416_worker(FAR void *arg)
 {
   FAR struct gd30bc2416_dev_s *priv = arg;
-  uint16_t fault = 0;
-  uint16_t status1 = 0;
+  bool usb = false;
   int ret;
 
   ret = nxmutex_lock(&priv->dev.batlock);
@@ -382,19 +539,27 @@ static void gd30bc2416_worker(FAR void *arg)
       return;
     }
 
-  gd30bc2416_getreg16(priv, GD30BC2416_REG_FAULT, &fault);
-  gd30bc2416_getreg16(priv, GD30BC2416_REG_STATUS1, &status1);
-  batinfo("IRQ: FAULT 0x%04x STATUS1 0x%04x\n", fault, status1);
-
   ret = gd30bc2416_restore(priv);
-  nxmutex_unlock(&priv->dev.batlock);
-
   if (ret < 0)
     {
       baterr("ERROR: Failed to restore the configuration: %d\n", ret);
     }
 
+  gd30bc2416_getstate(priv, &priv->state, &usb);
+  batinfo("IRQ: state %d USB %d\n", priv->state, usb);
+  nxmutex_unlock(&priv->dev.batlock);
+
   battery_charger_changed(&priv->dev, GD30BC2416_IRQ_EVENTS);
+
+  /* The charge starts after the IRQ of the USB plug: follow the state */
+
+  if (usb && priv->state == BATTERY_IDLE &&
+      (priv->ctrl & GD30BC2416_CTRL_CH_EN) != 0)
+    {
+      priv->npolls = GD30BC2416_POLL_MAX;
+      work_queue(HPWORK, &priv->pollwork, gd30bc2416_pollworker, priv,
+                 GD30BC2416_POLL_DELAY);
+    }
 }
 
 /****************************************************************************
@@ -428,9 +593,7 @@ static int gd30bc2416_state(FAR struct battery_charger_dev_s *dev,
                             FAR int *status)
 {
   FAR struct gd30bc2416_dev_s *priv = (FAR struct gd30bc2416_dev_s *)dev;
-  uint16_t fault;
-  uint16_t status1;
-  uint16_t status2;
+  bool usb;
   int ret;
 
   *status = BATTERY_UNKNOWN;
@@ -441,43 +604,7 @@ static int gd30bc2416_state(FAR struct battery_charger_dev_s *dev,
       return ret;
     }
 
-  ret = gd30bc2416_getreg16(priv, GD30BC2416_REG_FAULT, &fault);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  ret = gd30bc2416_getreg16(priv, GD30BC2416_REG_STATUS1, &status1);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  ret = gd30bc2416_getreg16(priv, GD30BC2416_REG_STATUS2, &status2);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  if ((fault & ~GD30BC2416_FAULT_I2C_ACK) != 0)
-    {
-      *status = BATTERY_FAULT;
-    }
-  else if ((status1 & GD30BC2416_STATUS1_CH_END) != 0)
-    {
-      *status = BATTERY_FULL;
-    }
-  else if ((status1 & GD30BC2416_STATUS1_USB_PLUG) != 0)
-    {
-      *status = (status2 & GD30BC2416_STATUS2_CH_EN) != 0 ?
-                BATTERY_CHARGING : BATTERY_IDLE;
-    }
-  else
-    {
-      *status = BATTERY_DISCHARGING;
-    }
-
-  return OK;
+  return gd30bc2416_getstate(priv, status, &usb);
 }
 
 /****************************************************************************

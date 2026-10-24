@@ -107,8 +107,9 @@ static const struct gd30bc2416_config_s g_charger_config =
  * Name: gd32_charger_irq_attach
  *
  * Description:
- *   Attach the IRQ of the GD30BC2416 (PB2).  The 8 ms pulse is caught on
- *   both edges, whatever its polarity.
+ *   Attach the IRQ of the GD30BC2416 (PB2).  The 8 ms low pulse of the
+ *   charger turns the PNP Q3 on, so PB2 (pulled down by R41) goes high:
+ *   the rising edge marks the event.
  *
  ****************************************************************************/
 
@@ -116,9 +117,7 @@ static int gd32_charger_irq_attach(
              FAR const struct gd30bc2416_config_s *config,
              xcpt_t isr, FAR void *arg)
 {
-  bool enable = isr != NULL;
-
-  return gd32_gpio_setevent(GPIO_CHARGER_IRQ, enable, enable, false,
+  return gd32_gpio_setevent(GPIO_CHARGER_IRQ, isr != NULL, false, false,
                             isr, arg);
 }
 #endif
@@ -153,7 +152,9 @@ int gd32_bringup(void)
   struct battery_charger_dev_s *charger;
 #endif
 #ifdef CONFIG_GD32W51X_ADC
-  /* The analog inputs set up by the factory firmware */
+  /* The analog inputs: NTC_COIL (PA1), NTC_Battery (PA2), NTC_USB (PA3)
+   * and the battery current (PC2, ADC_I_VBAT)
+   */
 
   static const uint8_t chanlist[] =
   {

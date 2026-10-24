@@ -36,13 +36,12 @@
 #define BOARD_IRC32K_FREQUENCY  32000     /* 32 kHz RC (FWDGT, RTC) */
 #define BOARD_SYSCLK_FREQUENCY  180000000
 
-/* Pin assignments.  There is no public schematic of this board: the pins
- * below were read back from the GPIO setup calls of the factory firmware
- * and checked on the hardware where noted (see the board documentation).
+/* Pin assignments, from the board schematic (GD-xD-W515-EVAL V1.0,
+ * GigaDevice, 2023-05) and checked on the hardware.
  */
 
-/* LEDs: LED1..LED4, push-pull outputs, active high (the factory firmware
- * drives them low at boot and high to light them).
+/* LEDs: LED1..LED4 of the board schematic, push-pull outputs, active
+ * high.  LED3 (PB0) is also TIMER2_CH1.
  */
 
 #define BOARD_NLEDS             4
@@ -54,20 +53,28 @@
 
 #define GPIO_LED1               (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PUPD_NONE | \
                                  GPIO_CFG_PP | GPIO_CFG_SPEED_2MHZ | \
-                                 GPIO_CFG_OUTPUT_RESET | GPIO_CFG_PORT_B | \
-                                 GPIO_CFG_PIN_1)
+                                 GPIO_CFG_OUTPUT_RESET | GPIO_CFG_PORT_C | \
+                                 GPIO_CFG_PIN_5)
 #define GPIO_LED2               (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PUPD_NONE | \
                                  GPIO_CFG_PP | GPIO_CFG_SPEED_2MHZ | \
                                  GPIO_CFG_OUTPUT_RESET | GPIO_CFG_PORT_C | \
                                  GPIO_CFG_PIN_4)
 #define GPIO_LED3               (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PUPD_NONE | \
                                  GPIO_CFG_PP | GPIO_CFG_SPEED_2MHZ | \
-                                 GPIO_CFG_OUTPUT_RESET | GPIO_CFG_PORT_C | \
-                                 GPIO_CFG_PIN_5)
-
+                                 GPIO_CFG_OUTPUT_RESET | GPIO_CFG_PORT_B | \
+                                 GPIO_CFG_PIN_0)
 #define GPIO_LED4               (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PUPD_NONE | \
                                  GPIO_CFG_PP | GPIO_CFG_SPEED_2MHZ | \
-                                 GPIO_CFG_OUTPUT_RESET | GPIO_CFG_PORT_C | \
+                                 GPIO_CFG_OUTPUT_RESET | GPIO_CFG_PORT_B | \
+                                 GPIO_CFG_PIN_1)
+
+/* CHRG_EN of the GD30BC2416 charger (PC3, active high).  It is held high:
+ * the charge is controlled through the I2C registers of the charger.
+ */
+
+#define GPIO_CHRG_EN            (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PUPD_NONE | \
+                                 GPIO_CFG_PP | GPIO_CFG_SPEED_2MHZ | \
+                                 GPIO_CFG_OUTPUT_SET | GPIO_CFG_PORT_C | \
                                  GPIO_CFG_PIN_3)
 
 #define BOARD_LED1_BIT          (1 << BOARD_LED1)
@@ -145,23 +152,22 @@
 #define BOARD_TSI_SAMPLE_PIN    1
 #define BOARD_TSI_KEY_PIN       3
 
-/* PWM: TIMER1_CH0 on PA0 drives the vibration motor.  The LCD backlight
- * (PB0, also TIMER2_CH1) is switched on as a plain GPIO with the display.
- */
+/* PWM: TIMER1_CH0 on PA0 drives the vibration motor */
 
 #define GPIO_TIMER1_CH0OUT      GPIO_TIMER1_CH0OUT_1
 
 /* GPIOs exposed through /dev/gpioN (CONFIG_DEV_GPIO):
  *
- *   /dev/gpio0  PC14  output     "Heater" high-power port (MOSFET Q1)
+ *   /dev/gpio0  PB7   output     Heater coil (COIL_EN, P-MOSFET), active
+ *                                low on the pin: write 1 to switch it on
  *   /dev/gpio1  PC1   interrupt  USB power detection (high with USB)
  *   /dev/gpio2  PA12  interrupt  IRQ of the GSL6157 fingerprint sensor
  *   /dev/gpio3  PB2   interrupt  IRQ of the GD30BC2416 battery charger,
  *                                only without its driver (CONFIG_GD30BC2416)
  *
- * The interrupts trigger on both edges.  The charger pulses its IRQ for
- * 8 ms on each event (USB plugged or unplugged, charge end, fault); PB2
- * idles low on this board.
+ * The interrupts trigger on both edges.  The charger pulses its IRQ low
+ * for 8 ms on each event (USB plugged or unplugged, charge end, fault);
+ * through the PNP Q3, PB2 idles low and goes high during the pulse.
  */
 
 #define BOARD_NGPIOOUT          1
@@ -173,8 +179,8 @@
 
 #define GPIO_HEATER             (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PUPD_NONE | \
                                  GPIO_CFG_PP | GPIO_CFG_SPEED_2MHZ | \
-                                 GPIO_CFG_OUTPUT_RESET | GPIO_CFG_PORT_C | \
-                                 GPIO_CFG_PIN_14)
+                                 GPIO_CFG_OUTPUT_SET | GPIO_CFG_PORT_B | \
+                                 GPIO_CFG_PIN_7)
 #define GPIO_CHARGER_IRQ        (GPIO_CFG_MODE_INPUT | GPIO_CFG_PUPD_NONE | \
                                  GPIO_CFG_PORT_B | GPIO_CFG_PIN_2)
 #define GPIO_USB_DETECT         (GPIO_CFG_MODE_INPUT | GPIO_CFG_PUPD_NONE | \

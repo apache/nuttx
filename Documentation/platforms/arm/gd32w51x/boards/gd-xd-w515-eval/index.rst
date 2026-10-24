@@ -20,9 +20,10 @@ Features
 ========
 
 - GD32W515PIQ6 MCU, 25 MHz crystal, no 32 kHz crystal
-- 0.96" 160x80 IPS LCD (ST7735S, SPI) with PWM backlight
+- 0.96" 160x80 IPS LCD (ST7735S, SPI) with a switched backlight
 - GSL6157 capacitive fingerprint sensor (SPI)
-- Capacitive touch key (TSI), vibration motor, four LEDs
+- Capacitive touch key (TSI), vibration motor, heater coil, microphone,
+  four LEDs
 - GD25Q128E 16 MB QSPI NOR flash (U6)
 - GD30BC2416 battery charger, GD30LD1002 LDO, LiPo connector
 - On-board GD-Link (CMSIS-DAP) on the mini-USB connector
@@ -34,9 +35,8 @@ libraries only support 26 MHz and 40 MHz crystals.
 Pin mapping
 ===========
 
-No schematic of this board is public. The pins below were read back from
-the GPIO setup of the factory firmware and checked on the hardware where
-noted.
+The pins below follow the board schematic (GD-xD-W515-EVAL V1.0,
+GigaDevice, 2023-05).
 
 ============== ==================================== ==========================
 Function       Pins                                 Notes
@@ -44,25 +44,32 @@ Function       Pins                                 Notes
 Console        PB10 (TX), PB11 (RX), AF7            USART2, to the CH340E
 LCD (SPI0)     PA11 (SCK), PA9 (MOSI), AF0          Write only
 LCD control    PA10 (D/C), PB13 (CS), PC6 (RESET)
-LCD backlight  PB0                                  On with the display
+LCD backlight  PC14 (active high)                    On with the display
 Motor          PA0, TIMER1_CH0 (AF1)                /dev/pwm0 channel 1
-LEDs           PB1, PC4, PC5, PC3                   LED1..LED4, active high
+LEDs           PC5, PC4, PB0, PB1                   LED1..LED4, active high
 I2C0           PB15 (SCL, AF4), PA8 (SDA, AF5)      GD30BC2416 charger
 Touch key      PB12 (sampling), PB14 (channel)      TSI, AF4, /dev/buttons
-Heater         PC14                                 /dev/gpio0 (output)
+Heater coil    PB7 (COIL_EN, active low)            /dev/gpio0 (output)
 Fingerprint    PC7 (SCK), PB6 (MISO), PB9 (MOSI)    SPI1, AF5 (no driver yet)
 Fingerprint    PB8 (CS), PB5 (SHUTDOWN)             Outputs
 Fingerprint    PA12 (IRQ)                           /dev/gpio2 (interrupt)
-USB detect     PC1 (high with USB power)            /dev/gpio1 (interrupt)
+USB detect     PC1 (micro-USB VBUS / 2)             /dev/gpio1 (interrupt)
 Charger IRQ    PB2                                  GD30BC2416 driver (*)
+Charger enable PC3 (CHRG_EN, active high)           Held high
 Analog inputs  PA1, PA2, PA3, PC2                   ADC channels 1/2/3/6 (*)
+GD-Link VBUS   PC0 (mini-USB VBUS / 2)              ADC channel 4 (unused)
+Microphone     PA15 (MIC_OUT)                       Digital input
 QSPI flash     PA4 (SCK), PA5 (CS)                  GD25Q128E, AF3
 QSPI flash     PA6, PA7, PB3, PB4                   IO0..IO3, AF3
 ============== ==================================== ==========================
 
-(*) The analog inputs are configured by the factory firmware, but none of
-them follows the battery voltage: the battery is only measured by the
-charger. PB2 is ``/dev/gpio3`` when the charger driver is disabled.
+(*) The analog inputs are the NTC thermistors of the heater coil (PA1),
+of the battery (PA2) and of the USB connector (PA3), each a 10 kOhm NTC
+with a 10 kOhm pull-up to 3.3 V, and the battery current (PC2): an
+INA181A1 (gain 20) on a 20 mOhm shunt with a 1.8 V offset, so
+``I = (V - 1.8) / 0.4`` A, negative while the battery charges. The battery
+voltage is only measured by the charger. PB2 is ``/dev/gpio3`` when the
+charger driver is disabled.
 
 Fingerprint sensor
 ==================
@@ -96,17 +103,23 @@ The GD30BC2416 charger is on I2C0. It has no register address byte: each
   and fault registers.
 - ``BATIOC_GET_VOLTAGE``: the battery voltage, in mV, from the charger ADC.
 - ``BATIOC_VOLTAGE``: the charge voltage (4100, 4200, 4300, 4350 or 4400 mV).
-- ``BATIOC_CURRENT``: 100/75/50/25 % of the ISET current (unknown on this
-  board, the 1.5 A maximum of the charger is assumed).
+- ``BATIOC_CURRENT``: 100/75/50/25 % of the ISET current, 333 mA on this
+  board (R34 = 30 kOhm).
 - ``BATIOC_OPERATE``: ``BATIO_OPRTN_CHARGE`` and ``BATIO_OPRTN_BOOST``.
 
 The charger powers up with the charge disabled, and returns to its reset
 configuration when the USB power is removed. The driver keeps the requested
 charge voltage, charge current and enables, and writes them again on the
 IRQ of the charger (PB2, pulsed on each event) and before each status read;
-the IRQ also wakes up ``poll()`` on ``/dev/batt0``. Enable
-``CONFIG_GD30BC2416_CHARGE`` to start the charge at boot. PC1
-(``/dev/gpio1``) follows the USB power.
+the IRQ also wakes up ``poll()`` on ``/dev/batt0``. The start of the
+charge raises no IRQ, so after an IRQ with the USB power present the driver
+polls the state for up to 2 s. Enable ``CONFIG_GD30BC2416_CHARGE`` to start
+the charge at boot. PC1 (``/dev/gpio1``) follows the USB power, and the
+board holds CHRG_EN (PC3) high.
+
+Without a battery, powered by the USB only, the charger answers on I2C in
+time windows (about 300 ms every 880 ms): the driver retries a NACKed
+transfer for up to 1 s.
 
 .. warning:: The charger is for a single Li-ion/LiPo cell. Do not connect
    a primary cell (Li-SOCl2, for instance) with the charge enabled.
@@ -135,6 +148,10 @@ secure alias when TrustZone is enabled, so program the image there::
 
   openocd -f target/openocd_gdlink_gd32w51x.cfg -c init -c "reset halt" \
     -c "program nuttx.bin 0x0c000000 verify" -c "reset run" -c shutdown
+
+Do not use the ``load`` command of gdb: it writes the ELF image at
+0x08000000, where the flash driver has no bank, and leaves an inconsistent
+image. Program the binary as above, then attach gdb without ``load``.
 
 .. note:: With TrustZone enabled, the secure debug port reads the
    non-secure flash pages as zero. Back up the factory firmware only after
@@ -191,10 +208,16 @@ The IPS panel needs the color inversion and the BGR order of the ST7735S
 26/1 pixel offset (``CONFIG_LCD_ST7735_XOFFSET``/``YOFFSET``) for its
 80x160 window.
 
-Light the four LEDs, then switch them off::
+Blink the four LEDs (PC5, PC4, PB0, PB1) in sequence::
 
-    nsh> printf \x0000000f > /dev/userleds
-    nsh> printf \x00000000 > /dev/userleds
+    nsh> leds
+    leds_main: Starting the led_daemon
+    leds_main: led_daemon started
+    led_daemon (pid# 6): Running
+    led_daemon: Opening /dev/userleds
+    led_daemon: Supported LEDs 0x0f
+    led_daemon: LED set 0x01
+    led_daemon: LED set 0x02
 
 Run the vibration motor for 2 seconds::
 

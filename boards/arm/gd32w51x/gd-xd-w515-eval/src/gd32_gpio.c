@@ -84,7 +84,7 @@ static const struct gpio_operations_s gpint_ops =
   .go_enable = gpint_enable,
 };
 
-/* Outputs: the "Heater" high-power port */
+/* Outputs: the heater coil, switched by a P-MOSFET (active low) */
 
 static const uint32_t g_gpiooutputs[BOARD_NGPIOOUT] =
 {
@@ -119,7 +119,7 @@ static int gpout_read(struct gpio_dev_s *dev, bool *value)
 
   DEBUGASSERT(gd32gpio->id < BOARD_NGPIOOUT && value != NULL);
 
-  *value = gd32_gpio_read(g_gpiooutputs[gd32gpio->id]);
+  *value = !gd32_gpio_read(g_gpiooutputs[gd32gpio->id]);
   return OK;
 }
 
@@ -129,7 +129,7 @@ static int gpout_write(struct gpio_dev_s *dev, bool value)
 
   DEBUGASSERT(gd32gpio->id < BOARD_NGPIOOUT);
 
-  gd32_gpio_write(g_gpiooutputs[gd32gpio->id], value);
+  gd32_gpio_write(g_gpiooutputs[gd32gpio->id], !value);
   return OK;
 }
 

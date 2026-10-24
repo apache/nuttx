@@ -71,6 +71,13 @@
  *   non-secure accesses (RCU_SECP_CFG = 0); only the GPIO pins need to be
  *   released.
  *
+ *   The secure core drives secure pins normally, but the non-secure
+ *   peripherals cannot use them: the ADC reads zero on every secure input
+ *   and the alternate functions of the non-secure peripherals do not reach
+ *   them.  A reset of a GPIO port through the RCU (RCU_AHB1RST) brings its
+ *   SCFG register back to 0xffff, so a driver that resets a port must
+ *   release its pins again.
+ *
  *   The SRAM blocks stay secure (TZBMPC): the core accesses them in
  *   secure state.
  *

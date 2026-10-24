@@ -70,12 +70,6 @@
 #  define GD32_ADC_CLKDIV            ADC_CCTL_ADCCK_PCLK2_DIV8
 #endif
 
-/* Conversion resolution: 12 bits by default */
-
-#ifndef CONFIG_GD32W51X_ADC_RESOLUTION
-#  define CONFIG_GD32W51X_ADC_RESOLUTION  ADC_CTL0_DRES_12B
-#endif
-
 /* Sampling time used for every channel */
 
 #ifndef CONFIG_GD32W51X_ADC_SAMPLETIME
@@ -377,12 +371,12 @@ static void adc_reset(struct adc_dev_s *dev)
 
   modifyreg32(GD32W51X_ADC_CCTL, ADC_CCTL_ADCCK_MASK, GD32_ADC_CLKDIV);
 
-  /* Scan mode and the requested resolution.  The EOC flag is raised at the
-   * end of each conversion of the sequence, not only at the end of the
-   * sequence.
+  /* Scan mode (the conversions are always 12-bit wide).  The EOC flag is
+   * raised at the end of each conversion of the sequence, not only at the
+   * end of the sequence.
    */
 
-  regval = ADC_CTL0_SM | CONFIG_GD32W51X_ADC_RESOLUTION;
+  regval = ADC_CTL0_SM;
   putreg32(regval, GD32W51X_ADC_CTL0);
 
   /* Right aligned data, EOC set after each conversion, no external trigger
