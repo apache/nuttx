@@ -26,7 +26,8 @@
  * kernel thread, three RF interrupts and a byte-coded configuration
  * protocol ("WIDs").  The network device is a netdev_upperhalf lower half
  * with the wireless operations used by wapi (scan, essid, psk, mode, freq).
- * WPA3-Personal needs the BA414E engine (pic32mz_ba414e.c).
+ * WPA3-Personal runs its big number and elliptic curve operations on the
+ * BA414E engine (pic32mz_ba414e.c) or, without it, in software.
  *
  * Every hardware or library fact below is tagged with where it comes from:
  *
@@ -1007,11 +1008,9 @@ static int wlan_dot11i(FAR uint32_t *dot11i)
         *dot11i = DOT11I_WPA2_PERSONAL;
         break;
 
-#ifdef CONFIG_PIC32MZ_W1_BA414E
       case IW_AUTH_WPA_VERSION_WPA3:
         *dot11i = DOT11I_WPA3_PERSONAL;
         break;
-#endif
 
       default:
         wlerr("WPA version %" PRIu32 " not supported\n", g_wlan.wpaver);

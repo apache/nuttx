@@ -408,10 +408,10 @@ WPA3-Personal
 -------------
 
 WPA3-Personal (SAE) needs big number and elliptic curve (P-256)
-operations, which the driver runs on the PIC32MZ-W1's BA414E public key
-engine (``CONFIG_PIC32MZ_W1_BA414E``, enabled in the ``wlan``
-configuration). Without it, only open and WPA/WPA2-Personal networks are
-supported.
+operations. By default the driver runs them in software, with the
+functions of ``crypto/ecc.c``: a point multiplication takes about 50 ms. With
+``CONFIG_PIC32MZ_W1_BA414E`` (enabled in the ``wlan`` configuration) they run
+on the PIC32MZ-W1's BA414E public key engine instead.
 
 The BA414E runs a microcode program that is not part of NuttX either. By
 default (``CONFIG_PIC32MZ_W1_BA414E_UCODE_BUILTIN``) the build downloads

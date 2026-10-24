@@ -153,8 +153,8 @@ config PIC32MZ_W1_WLAN
 		Wi-Fi network device (wlan0) built on Microchip's closed PIC32MZ-W1
 		WLAN library (pic32mzw1.a from the MPLAB Harmony wireless_wifi
 		repository, downloaded at build time under Microchip's license).
-		Station or Soft-AP, open or WPA/WPA2-Personal (WPA3-Personal with
-		PIC32MZ_W1_BA414E), configured through wapi.  The library is built
+		Station or Soft-AP, open or WPA/WPA2/WPA3-Personal, configured
+		through wapi.  The library is built
 		with XC32 (microMIPS, soft-float), so only XC32 is supported.
 
 if PIC32MZ_W1_WLAN
@@ -173,8 +173,8 @@ config PIC32MZ_W1_BA414E
 	---help---
 		Use the BA414E public key engine for the big number and elliptic
 		curve operations of WPA3-Personal (SAE), station and Soft-AP.
-		Without it only open and WPA/WPA2-Personal networks are
-		supported.  The engine runs a microcode program from Microchip's
+		Without it they run in software (crypto/ecc.c), about 50 ms per
+		point multiplication.  The engine runs a microcode program from Microchip's
 		MPLAB Harmony driver source (drivers/ba414e/src/drv_ba414e.c in
 		https://github.com/Microchip-MPLAB-Harmony/crypto), which is
 		under Microchip's license and not part of NuttX.
