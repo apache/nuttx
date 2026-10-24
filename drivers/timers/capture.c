@@ -351,7 +351,9 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case CAPIOC_DUTYCYCLE:
         {
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr);
+
           for (i = 0; i < upper->nchan; i++)
             {
               DEBUGASSERT(lower[i]->ops->getduty != NULL);
@@ -371,7 +373,9 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case CAPIOC_FREQUENCY:
         {
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr);
+
           for (i = 0; i < upper->nchan; i++)
             {
               DEBUGASSERT(lower[i]->ops->getfreq != NULL);
@@ -391,10 +395,19 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case CAPIOC_EDGES:
         {
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr);
+
+          /* Counting edges is optional for the lower half */
+
+          if (lower[0]->ops->getedges == NULL)
+            {
+              ret = -ENOTTY;
+              break;
+            }
+
           for (i = 0; i < upper->nchan; i++)
             {
-              DEBUGASSERT(lower[i]->ops->getedges != NULL);
               ret = lower[i]->ops->getedges(lower[i], &ptr[i]);
               if (ret < 0)
                 {
@@ -413,7 +426,9 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR struct cap_all_s *ptr =
                      (FAR struct cap_all_s *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr);
+
           for (i = 0 ; i < upper->nchan ; i++)
             {
               ret = lower[i]->ops->getduty(lower[i], &ptr[i].duty);
@@ -426,6 +441,16 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               if (ret < 0)
                 {
                   break;
+                }
+
+              /* Counting edges is optional for the lower half, report zero
+               * edges if it is not supported.
+               */
+
+              if (lower[i]->ops->getedges == NULL)
+                {
+                  ptr[i].edges = 0;
+                  continue;
                 }
 
               ret = lower[i]->ops->getedges(lower[i], &ptr[i].edges);
@@ -514,6 +539,7 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           FAR unsigned long int *ptr =
                      (FAR unsigned long int *)arg;
+
           for (i = 0; i < upper->nchan; i++)
             {
               ret = lower[i]->ops->ioctl(lower[i], cmd,
