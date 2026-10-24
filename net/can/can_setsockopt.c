@@ -81,7 +81,18 @@ int can_setsockopt(FAR struct socket *psock, int level, int option,
 
   conn = psock->s_conn;
 
-  if (level != SOL_CAN_RAW)
+  /* SO_RCVBUF and SO_SNDBUF are socket-level options that are kept in
+   * the CAN connection; psock_socketlevel_option() handles the others.
+   */
+
+  if (level == SOL_SOCKET)
+    {
+      if (option != SO_RCVBUF && option != SO_SNDBUF)
+        {
+          return -ENOPROTOOPT;
+        }
+    }
+  else if (level != SOL_CAN_RAW)
     {
       return -ENOPROTOOPT;
     }

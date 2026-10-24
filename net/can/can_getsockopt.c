@@ -83,7 +83,18 @@ int can_getsockopt(FAR struct socket *psock, int level, int option,
   DEBUGASSERT(value != NULL && value_len != NULL);
   conn = psock->s_conn;
 
-  if (level != SOL_CAN_RAW)
+  /* SO_RCVBUF and SO_SNDBUF are socket-level options that are kept in
+   * the CAN connection; psock_socketlevel_option() handles the others.
+   */
+
+  if (level == SOL_SOCKET)
+    {
+      if (option != SO_RCVBUF && option != SO_SNDBUF)
+        {
+          return -ENOPROTOOPT;
+        }
+    }
+  else if (level != SOL_CAN_RAW)
     {
       return -ENOPROTOOPT;
     }
@@ -136,6 +147,7 @@ int can_getsockopt(FAR struct socket *psock, int level, int option,
         else
           {
             FAR can_err_mask_t *mask = (FAR can_err_mask_t *)value;
+
             *mask = conn->err_mask;
             *value_len = sizeof(can_err_mask_t);
           }
@@ -157,7 +169,7 @@ int can_getsockopt(FAR struct socket *psock, int level, int option,
         if (*value_len < sizeof(int))
           {
             return -EINVAL;
-         }
+          }
 
         /* Sample the current options.  This is atomic operation and so
          * should not require any special steps for thread safety. We
@@ -165,9 +177,9 @@ int can_getsockopt(FAR struct socket *psock, int level, int option,
          * a macro will do.
          */
 
-          *(FAR int *)value = _SO_GETOPT(conn->sconn.s_options, option);
-          *value_len        = sizeof(int);
-          break;
+        *(FAR int *)value = _SO_GETOPT(conn->sconn.s_options, option);
+        *value_len        = sizeof(int);
+        break;
 
 #if CONFIG_NET_RECV_BUFSIZE > 0
       case SO_RCVBUF:
@@ -188,13 +200,13 @@ int can_getsockopt(FAR struct socket *psock, int level, int option,
 #if CONFIG_NET_SEND_BUFSIZE > 0
       case SO_SNDBUF:
         /* Verify that option is the size of an 'int'.  Should also check
-          * that 'value' is properly aligned for an 'int'
-          */
+         * that 'value' is properly aligned for an 'int'
+         */
 
         if (*value_len < sizeof(int))
           {
             return -EINVAL;
-        }
+          }
 
         *(FAR int *)value = conn->sndbufs;
         break;
