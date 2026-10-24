@@ -585,6 +585,7 @@ int sixlowpan_queue_frames(FAR struct radio_driver_s *radio,
       if (protosize > 0)
         {
           FAR uint8_t *src = (FAR uint8_t *)ipv6 + IPv6_HDRLEN;
+
           memcpy(fptr + g_frame_hdrlen, src, protosize);
         }
 
@@ -737,6 +738,7 @@ int sixlowpan_queue_frames(FAR struct radio_driver_s *radio,
       if (protosize > 0)
         {
           FAR uint8_t *src = (FAR uint8_t *)ipv6 + IPv6_HDRLEN;
+
           memcpy(fptr + g_frame_hdrlen, src, protosize);
         }
 
