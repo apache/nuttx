@@ -39,7 +39,7 @@ case versions currently used by NuttX CI:
 
    $ python3 -m venv ../ntfc-venv
    $ . ../ntfc-venv/bin/activate
-   $ python -m pip install ntfc==0.0.1
+   $ python -m pip install ntfc==0.0.3
    $ git clone --branch release-0.0.2 --depth 1 \
        https://github.com/apache/nuttx-ntfc-testing ../nuttx-ntfc-testing
 

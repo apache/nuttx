@@ -108,9 +108,7 @@ To run it with QEMU, use the following command::
       -device virtio-blk-device,bus=virtio-mmio-bus.0,drive=userdata \
       -bios none -kernel nuttx -nographic
 
-To run the CI scripts, use the following command::
-
-    $ ./nuttx/boards/risc-v/qemu-rv/rv-virt/configs/citest/run
+To run the CI tests of this configuration locally, see :doc:`NTFC </testing/ntfc>`.
 
 citest64
 --------
