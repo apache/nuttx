@@ -39,7 +39,7 @@
 #include "timer/timer.h"
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -49,7 +49,7 @@
  * be called to make its process ID available for reuse.
  ****************************************************************************/
 
-static void nxsched_releasepid(pid_t pid)
+void nxsched_releasepid(pid_t pid)
 {
   irqstate_t flags = enter_critical_section();
   int hash_ndx = PIDHASH(pid);
@@ -71,10 +71,6 @@ static void nxsched_releasepid(pid_t pid)
 
   leave_critical_section(flags);
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Name: nxsched_release_tcb
