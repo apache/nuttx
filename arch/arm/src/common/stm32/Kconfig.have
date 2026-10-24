@@ -411,9 +411,11 @@ config STM32_HAVE_OTFDEC2
 
 config STM32_HAVE_FLASH_ICACHE
 	bool
+	default y if ARCH_CHIP_STM32G4 || ARCH_CHIP_STM32L4
 
 config STM32_HAVE_FLASH_DCACHE
 	bool
+	default y if ARCH_CHIP_STM32G4 || ARCH_CHIP_STM32L4
 
 # FOC capabilities
 
