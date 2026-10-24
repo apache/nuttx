@@ -28,6 +28,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <stdbool.h>
 
 #include <nuttx/debug.h>
 #include <nuttx/irq.h>
@@ -212,6 +213,7 @@ static int nrf52_i2c_transfer(struct i2c_master_s *dev,
   struct nrf52_i2c_priv_s *priv = (struct nrf52_i2c_priv_s *)dev;
   uint32_t regval = 0;
   int      ret = OK;
+  bool     rx_after = false;
 #ifndef CONFIG_NRF52_I2C_MASTER_DISABLE_NOSTART
   uint8_t *pack_buf = NULL;
 #endif
@@ -292,6 +294,8 @@ static int nrf52_i2c_transfer(struct i2c_master_s *dev,
       i2cinfo("ptr=%p dcnt=%d flags=%d addr=%d\n",
               priv->ptr, priv->dcnt, priv->flags, priv->addr);
 
+      rx_after = false;
+
       /* Write TWI address */
 
       regval = priv->addr;
@@ -371,10 +375,42 @@ static int nrf52_i2c_transfer(struct i2c_master_s *dev,
           regval = priv->dcnt;
           nrf52_i2c_putreg(priv, NRF52_TWIM_TXDMAXCNT_OFFSET, regval);
 
-          /* Shortcut from LASTTX to STOP */
+          /* A write without STOP followed by a read from the same address
+           * (a register read): repeated START into the read, then STOP.
+           * Both run as one transfer ending in one STOPPED event.  Only
+           * for data in both directions, as the shortcuts need the LASTTX
+           * and LASTRX events.
+           */
 
-          nrf52_i2c_putreg(priv, NRF52_TWIM_SHORTS_OFFSET,
-                           TWIM_SHORTS_LASTTX_STOP);
+          rx_after = (priv->flags & I2C_M_NOSTOP) != 0 &&
+                     priv->dcnt > 0 &&
+                     priv->msgc > 1 &&
+                     priv->msgv[1].length > 0 &&
+                     (priv->msgv[1].flags & I2C_M_READ) != 0 &&
+                     (priv->msgv[1].flags & I2C_M_NOSTART) == 0 &&
+                     priv->msgv[1].addr == priv->addr;
+
+          if (rx_after)
+            {
+              regval = (uint32_t)priv->msgv[1].buffer;
+              DEBUGASSERT(nrf52_easydma_valid(regval));
+              nrf52_i2c_putreg(priv, NRF52_TWIM_RXDPTR_OFFSET, regval);
+              nrf52_i2c_putreg(priv, NRF52_TWIM_RXDMAXCNT_OFFSET,
+                               priv->msgv[1].length);
+
+              /* Shortcuts from LASTTX to STARTRX, LASTRX to STOP */
+
+              nrf52_i2c_putreg(priv, NRF52_TWIM_SHORTS_OFFSET,
+                               TWIM_SHORTS_LASTTX_STARTRX |
+                               TWIM_SHORTS_LASTRX_STOP);
+            }
+          else
+            {
+              /* Shortcut from LASTTX to STOP */
+
+              nrf52_i2c_putreg(priv, NRF52_TWIM_SHORTS_OFFSET,
+                               TWIM_SHORTS_LASTTX_STOP);
+            }
 
           /* Start TX sequence */
 
@@ -441,10 +477,10 @@ static int nrf52_i2c_transfer(struct i2c_master_s *dev,
         }
 #endif
 
-      /* Next message */
+      /* Next message (two after a write with its read) */
 
-      priv->msgc -= 1;
-      priv->msgv += 1;
+      priv->msgc -= rx_after ? 2 : 1;
+      priv->msgv += rx_after ? 2 : 1;
     }
   while (priv->msgc > 0);
 
