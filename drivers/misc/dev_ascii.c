@@ -45,7 +45,7 @@ static ssize_t devascii_read(FAR struct file *filep, FAR char *buffer,
                              size_t buflen);
 static ssize_t devascii_write(FAR struct file *filep, FAR const char *buffer,
                               size_t buflen);
-static int devascii_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int devascii_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                          bool setup);
 
 /****************************************************************************
@@ -111,7 +111,7 @@ static ssize_t devascii_write(FAR struct file *filep, FAR const char *buffer,
  * Name: devascii_poll
  ****************************************************************************/
 
-static int devascii_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int devascii_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                          bool setup)
 {
   UNUSED(filep);

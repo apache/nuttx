@@ -155,11 +155,11 @@ struct stmpe811_dev_s
   struct stmpe811_sample_s sample;      /* Last sampled touch point data */
 
   /* The following is a list if poll structures of threads waiting for
-   * driver events. The 'struct pollfd' reference for each open is also
+   * driver events. The 'struct pollfd_s' reference for each open is also
    * retained in the f_priv field of the 'struct file'.
    */
 
-  FAR struct pollfd *fds[CONFIG_STMPE811_NPOLLWAITERS];
+  FAR struct pollfd_s *fds[CONFIG_STMPE811_NPOLLWAITERS];
 #endif
 
   /* Fields that may be disabled to save size of GPIO support is not used */

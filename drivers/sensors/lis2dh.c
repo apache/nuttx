@@ -48,6 +48,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/poll.h>
 #include <nuttx/signal.h>
 #include <nuttx/random.h>
 #include <nuttx/i2c/i2c_master.h>
@@ -108,7 +109,7 @@ struct lis2dh_dev_s
 #else
   volatile bool              int_pending;  /* Interrupt received but data not read, yet */
 #endif
-  FAR struct pollfd          *fds[CONFIG_LIS2DH_NPOLLWAITERS];
+  FAR struct pollfd_s        *fds[CONFIG_LIS2DH_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -131,7 +132,7 @@ static int            lis2dh_get_reading(FAR struct lis2dh_dev_s *dev,
 static int            lis2dh_powerdown(FAR struct lis2dh_dev_s *dev);
 static int            lis2dh_reboot(FAR struct lis2dh_dev_s *dev);
 static int            lis2dh_poll(FAR struct file *filep,
-                                  FAR struct pollfd *fds, bool setup);
+                                  FAR struct pollfd_s *fds, bool setup);
 static int            lis2dh_int_handler(int irq, FAR void *context,
                                          FAR void *arg);
 static int            lis2dh_setup(FAR struct lis2dh_dev_s *dev,
@@ -671,7 +672,7 @@ static int lis2dh_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int lis2dh_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int lis2dh_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                        bool setup)
 {
   FAR struct inode *inode;
@@ -735,7 +736,7 @@ static int lis2dh_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       DEBUGASSERT(slot != NULL);
 

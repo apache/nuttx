@@ -44,6 +44,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/sensors/sensor.h>
 #include <nuttx/lib/lib.h>
+#include <nuttx/poll.h>
 #include <nuttx/wdog.h>
 
 /****************************************************************************
@@ -96,7 +97,7 @@ struct sensor_user_s
   /* The common info */
 
   struct list_node node;       /* Node of users list */
-  struct pollfd   *fds;        /* The poll structure of thread waiting events */
+  struct pollfd_s *fds;        /* The poll structure of thread waiting events */
   sensor_role_t    role;       /* The is used to indicate user's role based on open flags */
   struct wdog_s    wdog;       /* Paces POLLIN at the requested interval */
   uint64_t         fetched;    /* When POLLIN was last reported, in usec */
@@ -142,7 +143,7 @@ static ssize_t sensor_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen);
 static int     sensor_ioctl(FAR struct file *filep, int cmd,
                             unsigned long arg);
-static int     sensor_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int     sensor_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                            bool setup);
 static ssize_t sensor_push_event(FAR void *priv, FAR const void *data,
                                  size_t bytes);
@@ -1184,7 +1185,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 }
 
 static int sensor_poll(FAR struct file *filep,
-                       FAR struct pollfd *fds, bool setup)
+                       FAR struct pollfd_s *fds, bool setup)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct sensor_upperhalf_s *upper = inode->i_private;

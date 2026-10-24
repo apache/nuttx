@@ -152,7 +152,7 @@ struct uvc_dev_s
   mutex_t                  lock;
   sem_t                    wrsem;     /* Signaled when wrreq available */
   bool                     streaming;
-  FAR struct pollfd        *fds[CONFIG_USBUVC_NPOLLWAITERS];
+  FAR struct pollfd_s      *fds[CONFIG_USBUVC_NPOLLWAITERS];
   uint8_t                  fid;       /* Frame ID toggle bit */
   uint8_t                  config;
 
@@ -202,7 +202,7 @@ static ssize_t uvc_write(FAR struct file *filep,
 static int     uvc_open(FAR struct file *filep);
 static int     uvc_close(FAR struct file *filep);
 static int     uvc_poll(FAR struct file *filep,
-                        FAR struct pollfd *fds, bool setup);
+                        FAR struct pollfd_s *fds, bool setup);
 
 static const struct file_operations g_uvc_fops =
 {
@@ -1250,7 +1250,7 @@ static int uvc_close(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static int uvc_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int uvc_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                     bool setup)
 {
   FAR struct uvc_dev_s *priv = g_uvc_dev;
@@ -1262,7 +1262,7 @@ static int uvc_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* Teardown — clear the slot */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
       if (slot)
         {
           *slot = NULL;

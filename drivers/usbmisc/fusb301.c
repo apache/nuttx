@@ -68,7 +68,7 @@ struct fusb301_dev_s
   volatile bool int_pending;            /* Interrupt received but handled */
   mutex_t devlock;                      /* Manages exclusive access */
   FAR struct fusb301_config_s *config;  /* Platform specific configuration */
-  FAR struct pollfd *fds[CONFIG_FUSB301_NPOLLWAITERS];
+  FAR struct pollfd_s *fds[CONFIG_FUSB301_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -81,7 +81,7 @@ static ssize_t fusb301_read(FAR struct file *, FAR char *, size_t);
 static ssize_t fusb301_write(FAR struct file *filep, FAR const char *buffer,
                              size_t buflen);
 static int fusb301_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int fusb301_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int fusb301_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                         bool setup);
 
 /****************************************************************************
@@ -648,7 +648,7 @@ static int fusb301_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 static int fusb301_poll(FAR struct file *filep,
-                        FAR struct pollfd *fds,
+                        FAR struct pollfd_s *fds,
                         bool setup)
 {
   FAR struct inode *inode;
@@ -716,7 +716,7 @@ static int fusb301_poll(FAR struct file *filep,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       DEBUGASSERT(slot != NULL);
 

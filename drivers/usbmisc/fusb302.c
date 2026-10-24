@@ -358,7 +358,7 @@ enum src_current_e
 
 struct fusb302_dev_s
 {
-  FAR struct pollfd           *fds[CONFIG_FUSB302_NPOLLWAITERS];
+  FAR struct pollfd_s         *fds[CONFIG_FUSB302_NPOLLWAITERS];
   uint8_t                     i2c_addr;       /* I2C address */
   volatile bool               int_pending;    /* Interrupt pending */
   mutex_t                     devlock;        /* Manages exclusive access */
@@ -428,7 +428,7 @@ static ssize_t fusb302_write(FAR struct file *filep, FAR const char *buffer,
                              size_t buflen);
 static int     fusb302_ioctl(FAR struct file *filep, int cmd,
                              unsigned long arg);
-static int     fusb302_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int     fusb302_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                             bool setup);
 static int     fusb302_putreg(FAR struct fusb302_dev_s *priv,
                               uint8_t regaddr, uint8_t regval);
@@ -1759,7 +1759,7 @@ static int fusb302_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 static int fusb302_poll(FAR struct file *filep,
-                        FAR struct pollfd *fds,
+                        FAR struct pollfd_s *fds,
                         bool setup)
 {
   FAR struct inode *inode;
@@ -1818,7 +1818,7 @@ static int fusb302_poll(FAR struct file *filep,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       DEBUGASSERT(slot != NULL);
 

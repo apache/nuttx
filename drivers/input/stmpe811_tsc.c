@@ -104,8 +104,8 @@ static ssize_t  stmpe811_read(FAR struct file *filep, FAR char *buffer,
                               size_t len);
 static int      stmpe811_ioctl(FAR struct file *filep, int cmd,
                                unsigned long arg);
-static int      stmpe811_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                              bool setup);
+static int stmpe811_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
+                         bool setup);
 
 /* Initialization logic */
 
@@ -625,7 +625,7 @@ static int stmpe811_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int stmpe811_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int stmpe811_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                          bool setup)
 {
   FAR struct inode          *inode;
@@ -700,7 +700,7 @@ static int stmpe811_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       DEBUGASSERT(slot != NULL);
 

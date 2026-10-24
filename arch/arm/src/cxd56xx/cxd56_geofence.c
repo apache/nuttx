@@ -62,7 +62,7 @@
 struct cxd56_geofence_dev_s
 {
   mutex_t        devlock;
-  struct pollfd *fds[CONFIG_GEOFENCE_NPOLLWAITERS];
+  struct pollfd_s *fds[CONFIG_GEOFENCE_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -78,7 +78,7 @@ static int cxd56_geofence_ioctl(struct file *filep,
                                 int cmd,
                                 unsigned long arg);
 static int cxd56_geofence_poll(struct file *filep,
-                               struct pollfd *fds,
+                               struct pollfd_s *fds,
                                bool setup);
 
 /* ioctl command functions */
@@ -548,7 +548,7 @@ static int cxd56_geofence_ioctl(struct file *filep, int cmd,
  ****************************************************************************/
 
 static int cxd56_geofence_poll(struct file *filep,
-                               struct pollfd *fds,
+                               struct pollfd_s *fds,
                                bool setup)
 {
   struct inode                *inode;
@@ -601,7 +601,7 @@ static int cxd56_geofence_poll(struct file *filep,
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      struct pollfd_s **slot = (struct pollfd_s **)fds->priv;
 
       /* Remove all memory of the poll setup */
 

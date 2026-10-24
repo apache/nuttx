@@ -107,7 +107,7 @@ static void    gpio_procfs_add(FAR struct gpio_dev_s *dev,
 static void    gpio_procfs_remove(FAR struct gpio_dev_s *dev);
 #endif
 static int     gpio_poll(FAR struct file *filep,
-                         FAR struct pollfd *fds, bool setup);
+                         FAR struct pollfd_s *fds, bool setup);
 
 /****************************************************************************
  * Private Data
@@ -1064,7 +1064,7 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 static int gpio_poll(FAR struct file *filep,
-                     FAR struct pollfd *fds, bool setup)
+                     FAR struct pollfd_s *fds, bool setup)
 {
 #if CONFIG_DEV_GPIO_NPOLLWAITERS > 0
   FAR struct inode *inode = filep->f_inode;
@@ -1118,7 +1118,7 @@ static int gpio_poll(FAR struct file *filep,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       /* Remove all memory of the poll setup */
 

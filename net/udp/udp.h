@@ -85,7 +85,7 @@
 struct sockaddr;      /* Forward reference */
 struct socket;        /* Forward reference */
 struct net_driver_s;  /* Forward reference */
-struct pollfd;        /* Forward reference */
+struct pollfd_s;      /* Forward reference */
 
 /* Representation of a UDP connection */
 
@@ -98,7 +98,7 @@ struct udp_poll_s
 {
   FAR struct udp_conn_s *conn;     /* Needed to handle loss of connection */
   FAR struct net_driver_s *dev;    /* Needed to free the callback structure */
-  FAR struct pollfd *fds;          /* Needed to handle poll events */
+  FAR struct pollfd_s *fds;        /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
 };
 
@@ -809,7 +809,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
+int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds);
 
 /****************************************************************************
  * Name: udp_pollteardown
@@ -827,7 +827,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
  *
  ****************************************************************************/
 
-int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
+int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd_s *fds);
 
 /****************************************************************************
  * Name: udp_readahead_notifier_setup

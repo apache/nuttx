@@ -30,6 +30,7 @@
 #include <poll.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/poll.h>
 #include <nuttx/sched.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/video/v4l2_m2m.h>
@@ -78,7 +79,7 @@ struct codec_file_s
   sq_queue_t        event_free;
   codec_event_t     event_pool[CODEC_EVENT_COUNT];
   spinlock_t        lock;
-  FAR struct pollfd *fds;
+  FAR struct pollfd_s *fds;
   FAR void          *priv;
 };
 
@@ -103,7 +104,7 @@ static int codec_close(FAR struct file *filep);
 static int codec_mmap(FAR struct file *filep,
                       FAR struct mm_map_entry_s *map);
 static int codec_poll(FAR struct file *filep,
-                      FAR struct pollfd *fds, bool setup);
+                      FAR struct pollfd_s *fds, bool setup);
 
 /* Common function */
 
@@ -913,7 +914,7 @@ static int codec_mmap(FAR struct file *filep,
 }
 
 static int codec_poll(FAR struct file *filep,
-                      FAR struct pollfd *fds, bool setup)
+                      FAR struct pollfd_s *fds, bool setup)
 {
   FAR codec_file_t *cfile = filep->f_priv;
   pollevent_t eventset = 0;

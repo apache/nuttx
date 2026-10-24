@@ -68,7 +68,7 @@ struct usrsockdev_s
     int                     iovcnt; /* Number of request buffers */
     size_t                  pos;    /* Reader position on request buffer */
   } req;
-  FAR struct pollfd *pollfds[CONFIG_NET_USRSOCKDEV_NPOLLWAITERS];
+  FAR struct pollfd_s *pollfds[CONFIG_NET_USRSOCKDEV_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -85,7 +85,7 @@ static off_t usrsockdev_seek(FAR struct file *filep, off_t offset,
                              int whence);
 static int usrsockdev_open(FAR struct file *filep);
 static int usrsockdev_close(FAR struct file *filep);
-static int usrsockdev_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int usrsockdev_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                            bool setup);
 
 /****************************************************************************
@@ -387,7 +387,7 @@ static int usrsockdev_close(FAR struct file *filep)
  * Name: usrsockdev_poll
  ****************************************************************************/
 
-static int usrsockdev_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int usrsockdev_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                            bool setup)
 {
   FAR struct inode *inode = filep->f_inode;
@@ -456,7 +456,7 @@ static int usrsockdev_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       if (!slot)
         {

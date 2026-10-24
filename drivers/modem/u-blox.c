@@ -100,7 +100,7 @@ static int     ubxmdm_ioctl(FAR struct file *filep,
                             unsigned long arg);
 
 static int     ubxmdm_poll(FAR struct file *filep,
-                           FAR struct pollfd *fds,
+                           FAR struct pollfd_s *fds,
                            bool setup);
 
 /****************************************************************************
@@ -255,7 +255,7 @@ static int ubxmdm_ioctl(FAR struct file *filep,
 }
 
 static int ubxmdm_poll(FAR struct file *filep,
-                       FAR struct pollfd *fds,
+                       FAR struct pollfd_s *fds,
                        bool setup)
 {
   if (setup)

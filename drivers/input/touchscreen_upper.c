@@ -41,6 +41,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/list.h>
 #include <nuttx/circbuf.h>
+#include <nuttx/poll.h>
 
 /****************************************************************************
  * Private Types
@@ -50,7 +51,7 @@ struct touch_openpriv_s
 {
   struct circbuf_s   circbuf; /* Store touch point data in circle buffer */
   struct list_node   node;    /* Opened file buffer linked list node */
-  FAR struct pollfd *fds;     /* Polling structure of waiting thread */
+  FAR struct pollfd_s *fds;   /* Polling structure of waiting thread */
   sem_t              waitsem; /* Used to wait for the availability of data */
   mutex_t            lock;    /* Manages exclusive access to this structure */
 };
@@ -78,7 +79,7 @@ static ssize_t touch_write(FAR struct file *filep, FAR const char *buffer,
                            size_t buflen);
 static int     touch_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
-static int     touch_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int     touch_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                           bool setup);
 
 static void    touch_event_notify(FAR struct touch_upperhalf_s *upper,
@@ -338,7 +339,7 @@ static int touch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: touch_poll
  ****************************************************************************/
 
-static int touch_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int touch_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                       bool setup)
 {
   FAR struct touch_openpriv_s *openpriv = filep->f_priv;

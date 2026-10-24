@@ -100,7 +100,7 @@ struct btn_open_s
    */
 
   bool bo_pending;
-  FAR struct pollfd *bo_fds[CONFIG_INPUT_BUTTONS_NPOLLWAITERS];
+  FAR struct pollfd_s *bo_fds[CONFIG_INPUT_BUTTONS_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -127,7 +127,7 @@ static ssize_t btn_write(FAR struct file *filep, FAR const char *buffer,
                          size_t buflen);
 static int     btn_ioctl(FAR struct file *filep, int cmd,
                          unsigned long arg);
-static int     btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int     btn_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                         bool setup);
 
 /****************************************************************************
@@ -672,7 +672,7 @@ static int btn_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: btn_poll
  ****************************************************************************/
 
-static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int btn_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                     bool setup)
 {
   FAR struct inode *inode;
@@ -734,7 +734,7 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
 #ifdef CONFIG_DEBUG_FEATURES
       if (!slot)

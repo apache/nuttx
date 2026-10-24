@@ -45,13 +45,22 @@
 #include "fs_heap.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* poll() keeps the kernel copy of up to this many entries on the stack */
+
+#define POLL_NSTACKFDS 4
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
-struct pollfd_s
+struct pollinfo_s
 {
-  FAR struct pollfd *fds;
+  FAR struct pollfd_s *fds;
   nfds_t nfds;
+  bool heap;
 };
 
 /****************************************************************************
@@ -67,7 +76,7 @@ struct pollfd_s
  *
  ****************************************************************************/
 
-static inline void poll_teardown(FAR struct pollfd *fds, nfds_t nfds,
+static inline void poll_teardown(FAR struct pollfd_s *fds, nfds_t nfds,
                                  FAR int *count)
 {
   unsigned int i;
@@ -124,7 +133,7 @@ static inline void poll_teardown(FAR struct pollfd *fds, nfds_t nfds,
  *
  ****************************************************************************/
 
-static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds,
+static inline int poll_setup(FAR struct pollfd_s *fds, nfds_t nfds,
                              FAR sem_t *sem)
 {
   unsigned int i;
@@ -135,14 +144,7 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds,
 
   for (i = 0; i < nfds; i++)
     {
-      /* Setup the poll descriptor
-       *
-       * REVISIT: In a multi-threaded environment, one use case might be to
-       * share a single, array of struct pollfd in poll() calls on different
-       * threads.  That use case is not supportable here because the non-
-       * standard internal fields get reset here on each call to poll()
-       * on each thread.
-       */
+      /* Setup the poll descriptor */
 
       fds[i].arg     = sem;
       fds[i].cb      = poll_default_cb;
@@ -209,10 +211,14 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds,
 
 static void poll_cleanup(FAR void *arg)
 {
-  FAR struct pollfd_s *fdsinfo = (FAR struct pollfd_s *)arg;
+  FAR struct pollinfo_s *fdsinfo = (FAR struct pollinfo_s *)arg;
   int count;
 
   poll_teardown(fdsinfo->fds, fdsinfo->nfds, &count);
+  if (fdsinfo->heap)
+    {
+      fs_heap_free(fdsinfo->fds);
+    }
 }
 
 /****************************************************************************
@@ -234,7 +240,7 @@ static void poll_cleanup(FAR void *arg)
  *
  ****************************************************************************/
 
-void poll_default_cb(FAR struct pollfd *fds)
+void poll_default_cb(FAR struct pollfd_s *fds)
 {
   int semcount = 0;
   FAR sem_t *pollsem;
@@ -268,10 +274,10 @@ void poll_default_cb(FAR struct pollfd *fds)
  ****************************************************************************/
 
 noinstrument_function
-void poll_notify(FAR struct pollfd **afds, int nfds, pollevent_t eventset)
+void poll_notify(FAR struct pollfd_s **afds, int nfds, pollevent_t eventset)
 {
   int i;
-  FAR struct pollfd *fds;
+  FAR struct pollfd_s *fds;
 
   DEBUGASSERT(afds != NULL && nfds >= 1);
 
@@ -318,7 +324,7 @@ void poll_notify(FAR struct pollfd **afds, int nfds, pollevent_t eventset)
  *
  ****************************************************************************/
 
-int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
+int file_poll(FAR struct file *filep, FAR struct pollfd_s *fds, bool setup)
 {
   FAR struct inode *inode;
   int ret = -ENOSYS;
@@ -416,10 +422,13 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
 int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 {
-  FAR struct pollfd *kfds;
+  struct pollfd_s sfds[POLL_NSTACKFDS];
+  struct pollinfo_s fdsinfo;
+  FAR struct pollfd_s *kfds;
   sem_t sem;
   int count = 0;
   int ret = OK;
+  nfds_t i;
 
   DEBUGASSERT(nfds == 0 || fds != NULL);
 
@@ -427,26 +436,29 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 
   enter_cancellation_point();
 
-#ifdef CONFIG_BUILD_KERNEL
-  /* Allocate kernel memory for the fds */
+  /* Copy the user fds to a kernel array, which also holds the internal
+   * fields of each entry.
+   */
 
-  kfds = fs_heap_malloc(nfds * sizeof(struct pollfd));
-  if (!kfds)
+  if (nfds <= POLL_NSTACKFDS)
     {
-      /* Out of memory */
-
-      ret = -ENOMEM;
-      goto out_with_cancelpt;
+      kfds = sfds;
+    }
+  else
+    {
+      kfds = fs_heap_malloc(nfds * sizeof(struct pollfd_s));
+      if (kfds == NULL)
+        {
+          ret = -ENOMEM;
+          goto out_with_cancelpt;
+        }
     }
 
-  /* Copy the user fds to neutral kernel memory */
-
-  memcpy(kfds, fds, nfds * sizeof(struct pollfd));
-#else
-  /* Can use the user fds directly */
-
-  kfds = fds;
-#endif
+  for (i = 0; i < nfds; i++)
+    {
+      kfds[i].fd     = fds[i].fd;
+      kfds[i].events = (uint16_t)fds[i].events;
+    }
 
   /* Set up the poll structure */
 
@@ -459,14 +471,13 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
   count = poll_setup(kfds, nfds, &sem);
   if (count == 0)
     {
-      struct pollfd_s fdsinfo;
-
       /* Push a cancellation point onto the stack.  This will be called if
        * the thread is canceled.
        */
 
-      fdsinfo.fds = kfds;
+      fdsinfo.fds  = kfds;
       fdsinfo.nfds = nfds;
+      fdsinfo.heap = kfds != sfds;
       tls_cleanup_push(tls_get_info(), poll_cleanup, &fdsinfo);
 
       if (timeout > 0)
@@ -523,25 +534,19 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 
   nxsem_destroy(&sem);
 
-#ifdef CONFIG_BUILD_KERNEL
-  /* Copy the events back to user */
+  /* Copy the events back to the user */
 
-  if (ret == OK)
+  for (i = 0; i < nfds; i++)
     {
-      int i;
-      for (i = 0; i < nfds; i++)
-        {
-          fds[i].revents = kfds[i].revents;
-        }
+      fds[i].revents = (short)kfds[i].revents;
     }
 
-  /* Free the temporary buffer */
-
-  fs_heap_free(kfds);
+  if (kfds != sfds)
+    {
+      fs_heap_free(kfds);
+    }
 
 out_with_cancelpt:
-#endif
-
   leave_cancellation_point();
 
   if (ret < 0)

@@ -84,7 +84,7 @@ struct usbdev_fs_ep_s
   FAR usbdev_fs_waiter_sem_t *sems;       /* List of blocking request */
   struct sq_queue_s           reqq;       /* Available request containers */
   FAR struct usbdev_fs_req_s *reqbuffer;  /* Request buffer */
-  FAR struct pollfd          *fds[CONFIG_USBDEV_FS_NPOLLWAITERS];
+  FAR struct pollfd_s        *fds[CONFIG_USBDEV_FS_NPOLLWAITERS];
   spinlock_t                  spinlock;
 
   /* These member is valid for endpoint 0 */
@@ -140,7 +140,7 @@ static ssize_t usbdev_fs_read(FAR struct file *filep, FAR char *buffer,
                               size_t len);
 static ssize_t usbdev_fs_write(FAR struct file *filep,
                                FAR const char *buffer, size_t len);
-static int usbdev_fs_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int usbdev_fs_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                           bool setup);
 
 /****************************************************************************
@@ -843,7 +843,7 @@ errout:
  *
  ****************************************************************************/
 
-static int usbdev_fs_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int usbdev_fs_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                           bool setup)
 {
   FAR struct inode *inode = filep->f_inode;
@@ -863,7 +863,7 @@ static int usbdev_fs_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       /* Remove all memory of the poll setup */
 

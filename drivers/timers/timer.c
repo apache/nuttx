@@ -57,7 +57,7 @@ struct timer_upperhalf_s
   uint8_t crefs;           /* The number of times the device has been opened */
   spinlock_t spinlock;     /* Spinlock */
   FAR char *path;          /* Registration path */
-  FAR struct pollfd *fds;
+  FAR struct pollfd_s *fds;
 
   /* The contained signal info */
 
@@ -85,7 +85,7 @@ static ssize_t timer_write(FAR struct file *filep, FAR const char *buffer,
 static int     timer_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
 static int     timer_poll(FAR struct file *filep,
-                          FAR struct pollfd *fds, bool setup);
+                          FAR struct pollfd_s *fds, bool setup);
 
 /****************************************************************************
  * Private Data
@@ -458,7 +458,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 static int timer_poll(FAR struct file *filep,
-                      FAR struct pollfd *fds, bool setup)
+                      FAR struct pollfd_s *fds, bool setup)
 {
   FAR struct inode             *inode = filep->f_inode;
   FAR struct timer_upperhalf_s *upper = inode->i_private;

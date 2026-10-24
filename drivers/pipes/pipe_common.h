@@ -132,11 +132,11 @@ struct pipe_dev_s
   struct circbuf_s d_buffer;      /* Buffer allocated when device opened */
 
   /* The following is a list if poll structures of threads waiting for
-   * driver events. The 'struct pollfd' reference for each open is also
+   * driver events. The 'struct pollfd_s' reference for each open is also
    * retained in the f_priv field of the 'struct file'.
    */
 
-  FAR struct pollfd *d_fds[CONFIG_DEV_PIPE_NPOLLWAITERS];
+  FAR struct pollfd_s *d_fds[CONFIG_DEV_PIPE_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -161,7 +161,7 @@ int     pipecommon_close(FAR struct file *filep);
 ssize_t pipecommon_read(FAR struct file *, FAR char *, size_t);
 ssize_t pipecommon_write(FAR struct file *, FAR const char *, size_t);
 int     pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-int     pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
+int     pipecommon_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                                bool setup);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 int     pipecommon_unlink(FAR struct inode *priv);

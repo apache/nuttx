@@ -60,7 +60,7 @@ struct procfs_operations
                        size_t buflen);
   CODE ssize_t (*write)(FAR struct file *filep, FAR const char *buffer,
                         size_t buflen);
-  CODE int     (*poll)(FAR struct file *filep, FAR struct pollfd *fds,
+  CODE int     (*poll)(FAR struct file *filep, FAR struct pollfd_s *fds,
                        bool setup);
 
   /* The two structures need not be common after this point. The following

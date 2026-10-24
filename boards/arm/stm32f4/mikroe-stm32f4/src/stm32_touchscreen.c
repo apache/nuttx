@@ -224,11 +224,11 @@ struct tc_dev_s
   struct work_s work;                  /* Supports the state machine delayed processing */
 
   /* The following is a list if poll structures of threads waiting for
-   * driver events. The 'struct pollfd' reference for each open is also
+   * driver events. The 'struct pollfd_s' reference for each open is also
    * retained in the f_priv field of the 'struct file'.
    */
 
-  struct pollfd *fds[CONFIG_TOUCHSCREEN_NPOLLWAITERS];
+  struct pollfd_s *fds[CONFIG_TOUCHSCREEN_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -255,7 +255,7 @@ static int tc_open(struct file *filep);
 static int tc_close(struct file *filep);
 static ssize_t tc_read(struct file *filep, char *buffer, size_t len);
 static int tc_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int tc_poll(struct file *filep, struct pollfd *fds, bool setup);
+static int tc_poll(struct file *filep, struct pollfd_s *fds, bool setup);
 
 /****************************************************************************
  * Private Data
@@ -1349,7 +1349,7 @@ static int tc_ioctl(struct file *filep, int cmd, unsigned long arg)
  * Name: tc_poll
  ****************************************************************************/
 
-static int tc_poll(struct file *filep, struct pollfd *fds, bool setup)
+static int tc_poll(struct file *filep, struct pollfd_s *fds, bool setup)
 {
   struct inode    *inode;
   struct tc_dev_s *priv;
@@ -1420,7 +1420,7 @@ static int tc_poll(struct file *filep, struct pollfd *fds, bool setup)
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      struct pollfd_s **slot = (struct pollfd_s **)fds->priv;
 
       DEBUGASSERT(slot != NULL);
 

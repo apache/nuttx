@@ -270,7 +270,7 @@ static void slcd_action(enum slcdcode_e code, uint8_t count);
 static ssize_t slcd_read(struct file *, char *, size_t);
 static ssize_t slcd_write(struct file *, const char *, size_t);
 static int slcd_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int slcd_poll(struct file *filep, struct pollfd *fds,
+static int slcd_poll(struct file *filep, struct pollfd_s *fds,
                      bool setup);
 
 /****************************************************************************
@@ -1117,7 +1117,7 @@ static int slcd_ioctl(struct file *filep, int cmd, unsigned long arg)
  * Name: slcd_poll
  ****************************************************************************/
 
-static int slcd_poll(struct file *filep, struct pollfd *fds,
+static int slcd_poll(struct file *filep, struct pollfd_s *fds,
                      bool setup)
 {
   if (setup)

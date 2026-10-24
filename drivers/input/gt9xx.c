@@ -44,6 +44,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/poll.h>
 #include <nuttx/signal.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/input/touchscreen.h>
@@ -99,7 +100,7 @@ struct gt9xx_dev_s
 
   /* Poll Waiters for device */
 
-  FAR struct pollfd *fds[CONFIG_INPUT_GT9XX_NPOLLWAITERS];
+  FAR struct pollfd_s *fds[CONFIG_INPUT_GT9XX_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -110,7 +111,7 @@ static int gt9xx_open(FAR struct file *filep);
 static int gt9xx_close(FAR struct file *filep);
 static ssize_t gt9xx_read(FAR struct file *filep, FAR char *buffer,
                           size_t buflen);
-static int gt9xx_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int gt9xx_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                       bool setup);
 
 /****************************************************************************
@@ -752,7 +753,7 @@ static int gt9xx_close(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static int gt9xx_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int gt9xx_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                       bool setup)
 {
   FAR struct gt9xx_dev_s *priv;
@@ -826,7 +827,7 @@ static int gt9xx_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* If Poll Teardown: Remove the poll setup */
 
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
       DEBUGASSERT(slot != NULL);
 

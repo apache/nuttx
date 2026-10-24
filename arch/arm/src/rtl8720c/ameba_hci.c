@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 #include <fcntl.h>
+#include <nuttx/poll.h>
 #include <nuttx/signal.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/net/netdev.h>
@@ -497,7 +498,7 @@ static int hci_ioctl(struct file *filep, int cmd, unsigned long arg)
 }
 
 static int hci_poll(struct file *filep,
-                    struct pollfd *fds, bool setup)
+                    struct pollfd_s *fds, bool setup)
 {
   struct inode *inode = filep->f_inode;
   hci_dev_t *dev = inode->i_private;

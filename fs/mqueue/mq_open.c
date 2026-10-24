@@ -49,7 +49,7 @@
 
 static int nxmq_file_close(FAR struct file *filep);
 static int nxmq_file_poll(FAR struct file *filep,
-                          FAR struct pollfd *fds, bool setup);
+                          FAR struct pollfd_s *fds, bool setup);
 
 /****************************************************************************
  * Private Data
@@ -91,7 +91,7 @@ static int nxmq_file_close(FAR struct file *filep)
 }
 
 static int nxmq_file_poll(FAR struct file *filep,
-                          FAR struct pollfd *fds, bool setup)
+                          FAR struct pollfd_s *fds, bool setup)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct mqueue_inode_s *msgq = inode->i_private;

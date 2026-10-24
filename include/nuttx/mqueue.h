@@ -127,7 +127,7 @@ struct mqueue_inode_s
   struct sigevent ntevent;    /* Notification description */
   struct sigwork_s ntwork;    /* Notification work */
 #endif
-  FAR struct pollfd *fds[CONFIG_FS_MQUEUE_NPOLLWAITERS];
+  FAR struct pollfd_s *fds[CONFIG_FS_MQUEUE_NPOLLWAITERS];
 };
 
 /****************************************************************************

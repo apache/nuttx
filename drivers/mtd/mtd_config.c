@@ -109,8 +109,8 @@ static ssize_t mtdconfig_read(FAR struct file *filep, FAR char *buffer,
                               size_t buflen);
 static int     mtdconfig_ioctl(FAR struct file *filep, int cmd,
                                unsigned long arg);
-static int     mtdconfig_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                              bool setup);
+static int mtdconfig_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
+                          bool setup);
 
 /****************************************************************************
  * Private Data
@@ -1715,7 +1715,7 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
  * Name: mtdconfig_poll
  ****************************************************************************/
 
-static int mtdconfig_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int mtdconfig_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                           bool setup)
 {
   if (setup)

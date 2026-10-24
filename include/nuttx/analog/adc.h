@@ -219,11 +219,11 @@ struct adc_dev_s
   bool                        ad_isovr;      /* Flag to indicate an ADC overrun */
 
   /* The following is a list of poll structures of threads waiting for
-   * driver events.  The 'struct pollfd' reference for each open is also
+   * driver events.  The 'struct pollfd_s' reference for each open is also
    * retained in the f_priv field of the 'struct file'.
    */
 
-  FAR struct pollfd          *fds[CONFIG_ADC_NPOLLWAITERS];
+  FAR struct pollfd_s        *fds[CONFIG_ADC_NPOLLWAITERS];
 #endif /* CONFIG_ADC */
 };
 

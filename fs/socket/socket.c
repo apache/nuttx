@@ -52,7 +52,7 @@ static ssize_t sock_file_write(FAR struct file *filep,
                                FAR const char *buffer, size_t buflen);
 static int sock_file_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
-static int sock_file_poll(FAR struct file *filep, struct pollfd *fds,
+static int sock_file_poll(FAR struct file *filep, struct pollfd_s *fds,
                           bool setup);
 static int sock_file_truncate(FAR struct file *filep, off_t length);
 
@@ -138,7 +138,7 @@ static int sock_file_ioctl(FAR struct file *filep, int cmd,
   return psock_ioctl(filep->f_priv, cmd, arg);
 }
 
-static int sock_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int sock_file_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                           bool setup)
 {
   return psock_poll(filep->f_priv, fds, setup);

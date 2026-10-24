@@ -381,7 +381,7 @@ struct uart_dev_s
   FAR void                    *priv; /* Used by the arch-specific logic */
 
   /* The following is a list if poll structures of threads waiting for
-   * driver events. The 'struct pollfd' reference for each open is also
+   * driver events. The 'struct pollfd_s' reference for each open is also
    * retained in the f_priv field of the 'struct file'.
    */
 
@@ -391,7 +391,7 @@ struct uart_dev_s
   uint8_t timeout;                   /* c_cc[VTIME] */
 #endif
 
-  FAR struct pollfd *fds[CONFIG_SERIAL_NPOLLWAITERS];
+  FAR struct pollfd_s *fds[CONFIG_SERIAL_NPOLLWAITERS];
 };
 
 typedef struct uart_dev_s uart_dev_t;

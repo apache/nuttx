@@ -38,6 +38,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/net/dns.h>
 #include <nuttx/net/net.h>
+#include <nuttx/poll.h>
 #include <nuttx/queue.h>
 #include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/usrsock/usrsock_rpmsg.h>
@@ -54,7 +55,7 @@ struct usrsock_rpmsg_s
   rmutex_t                  mutex;
   struct socket             socks[CONFIG_NET_USRSOCK_RPMSG_SERVER_NSOCKS];
   FAR struct rpmsg_endpoint *epts[CONFIG_NET_USRSOCK_RPMSG_SERVER_NSOCKS];
-  struct pollfd             pfds[CONFIG_NET_USRSOCK_RPMSG_SERVER_NSOCKS];
+  struct pollfd_s           pfds[CONFIG_NET_USRSOCK_RPMSG_SERVER_NSOCKS];
 };
 
 /* Saving rpmsg requests to keep message order. */
@@ -159,8 +160,8 @@ static int usrsock_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
                                 FAR void *data, size_t len, uint32_t src,
                                 FAR void *priv);
 
-static void usrsock_rpmsg_poll_cb(FAR struct pollfd *pfds);
-static void usrsock_rpmsg_poll_setup(FAR struct pollfd *pfds,
+static void usrsock_rpmsg_poll_cb(FAR struct pollfd_s *pfds);
+static void usrsock_rpmsg_poll_setup(FAR struct pollfd_s *pfds,
                                      pollevent_t events);
 
 /****************************************************************************
@@ -1165,7 +1166,7 @@ static int usrsock_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
   return ret;
 }
 
-static void usrsock_rpmsg_poll_setup(FAR struct pollfd *pfds,
+static void usrsock_rpmsg_poll_setup(FAR struct pollfd_s *pfds,
                                      pollevent_t events)
 {
   FAR struct usrsock_rpmsg_s *priv = (FAR struct usrsock_rpmsg_s *)pfds->arg;
@@ -1218,7 +1219,7 @@ static void usrsock_rpmsg_poll_setup(FAR struct pollfd *pfds,
   nxrmutex_unlock(&conn->s_lock);
 }
 
-static void usrsock_rpmsg_poll_cb(FAR struct pollfd *pfds)
+static void usrsock_rpmsg_poll_cb(FAR struct pollfd_s *pfds)
 {
   FAR struct usrsock_rpmsg_s *priv = (FAR struct usrsock_rpmsg_s *)pfds->arg;
   int oldevents;

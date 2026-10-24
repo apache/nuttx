@@ -120,7 +120,7 @@ static ssize_t stm32_bbsram_write(struct file *filep,
 static int stm32_bbsram_ioctl(struct file *filep, int cmd,
                               unsigned long arg);
 static int     stm32_bbsram_poll(struct file *filep,
-                                 struct pollfd *fds, bool setup);
+                                 struct pollfd_s *fds, bool setup);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     stm32_bbsram_unlink(struct inode *inode);
 #endif
@@ -516,7 +516,7 @@ static ssize_t stm32_bbsram_write(struct file *filep,
  * Name: stm32_bbsram_poll
  ****************************************************************************/
 
-static int stm32_bbsram_poll(struct file *filep, struct pollfd *fds,
+static int stm32_bbsram_poll(struct file *filep, struct pollfd_s *fds,
                              bool setup)
 {
   if (setup)

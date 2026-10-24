@@ -63,11 +63,6 @@
  *     Device has been disconnected (revents only).
  *   POLLNVAL
  *     Invalid fd member (revents only).
- *
- *   POLLALWAYS
- *     Indicate that should ALWAYS call the poll callback whether the
- *     driver notified the user expected event or not, and this value is
- *     used inside kernel only (events only).
  */
 
 #define POLLIN       (0x01)  /* NuttX does not make priority distinctions */
@@ -85,8 +80,6 @@
 #define POLLRDHUP    (0x10)  /* NuttX does not support shutdown(fd, SHUT_RD) */
 #define POLLNVAL     (0x20)
 
-#define POLLALWAYS   (0x10000) /* For not conflict with Linux */
-
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -95,40 +88,16 @@
 
 typedef unsigned int nfds_t;
 
-/* In the standard poll() definition, the size of the event set is 'short'.
- * Here we pick the uint32_t type to be consistent with the linux to support
- * EPOLLRDHUP, EPOLLWAKEUP, EPOLLONESHOT...
- */
-
-typedef uint32_t pollevent_t;
-
-/* The poll callback type */
-
-struct pollfd;
-typedef CODE void (*pollcb_t)(FAR struct pollfd *fds);
-
-/* This is the NuttX variant of the standard pollfd structure.  The poll()
- * interfaces receive a variable length array of such structures.
- *
- * REVISIT: In a multi-threaded environment, one use case might be to share
- * a single, array of struct pollfd in poll calls on different threads.
- * That use case is not supportable with this variant due way in which the
- * non-standard internal fields are used in the implementation of poll().
+/* The standard pollfd structure.  The poll() interfaces receive a variable
+ * length array of such structures.  The kernel copies each entry into its
+ * own struct pollfd_s (see nuttx/poll.h).
  */
 
 struct pollfd
 {
-  /* Standard fields */
-
-  int          fd;      /* The descriptor being polled */
-  pollevent_t  events;  /* The input event flags */
-  pollevent_t  revents; /* The output event flags */
-
-  /* Non-standard fields used internally by NuttX. */
-
-  FAR void    *arg;     /* The poll callback function argument */
-  pollcb_t     cb;      /* The poll callback function */
-  FAR void    *priv;    /* For use by drivers */
+  int   fd;      /* The descriptor being polled */
+  short events;  /* The input event flags */
+  short revents; /* The output event flags */
 };
 
 /****************************************************************************
@@ -153,9 +122,6 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout);
 int ppoll(FAR struct pollfd *fds, nfds_t nfds,
           FAR const struct timespec *timeout_ts,
           FAR const sigset_t *sigmask);
-
-void poll_default_cb(FAR struct pollfd *fds);
-void poll_notify(FAR struct pollfd **afds, int nfds, pollevent_t eventset);
 
 #if CONFIG_FORTIFY_SOURCE > 0
 fortify_function(poll) int poll(FAR struct pollfd *fds,

@@ -53,7 +53,7 @@
 struct rpmsgdev_device_s
 {
   struct file      file;  /* The open file */
-  struct pollfd    fd;    /* The poll fd */
+  struct pollfd_s  fd;    /* The poll fd */
   uint64_t         cfd;   /* The client poll fd pointer */
   struct list_node node;  /* The double-linked list node */
 };
@@ -103,7 +103,7 @@ static int  rpmsgdev_ioctl_handler(FAR struct rpmsg_endpoint *ept,
                                    FAR void *data, size_t len,
                                    uint32_t src, FAR void *priv);
 static void rpmsgdev_poll_worker(FAR void *arg);
-static void rpmsgdev_poll_cb(FAR struct pollfd *fds);
+static void rpmsgdev_poll_cb(FAR struct pollfd_s *fds);
 static int  rpmsgdev_poll_handler(FAR struct rpmsg_endpoint *ept,
                                   FAR void *data, size_t len,
                                   uint32_t src, FAR void *priv);
@@ -338,7 +338,7 @@ static int rpmsgdev_ioctl_handler(FAR struct rpmsg_endpoint *ept,
 
 static void rpmsgdev_poll_worker(FAR void *arg)
 {
-  FAR struct pollfd *fds = arg;
+  FAR struct pollfd_s *fds = arg;
   FAR struct rpmsgdev_server_s *server = fds->arg;
   FAR struct rpmsgdev_device_s *dev =
     container_of(fds, FAR struct rpmsgdev_device_s, fd);
@@ -360,7 +360,7 @@ static void rpmsgdev_poll_worker(FAR void *arg)
  * Name: rpmsgdev_poll_cb
  ****************************************************************************/
 
-static void rpmsgdev_poll_cb(FAR struct pollfd *fds)
+static void rpmsgdev_poll_cb(FAR struct pollfd_s *fds)
 {
   FAR struct rpmsgdev_server_s *server;
 

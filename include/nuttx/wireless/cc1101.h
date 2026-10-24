@@ -313,7 +313,7 @@ struct cc1101_dev_s
 
   /* Polled file descr (or NULL if any) */
 
-  FAR struct pollfd *pfd;
+  FAR struct pollfd_s *pfd;
 
   /* Record the current operation mode */
 
