@@ -35,6 +35,7 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 
+#include <nuttx/atomic.h>
 #include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
@@ -186,6 +187,14 @@ static int  tmpfs_chstat(FAR struct inode *mountpt, FAR const char *relpath,
 static int  tmpfs_permission(FAR struct inode *mountpt,
               FAR const char *relpath, int amode);
 #endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* The last file serial number given, shared by all tmpfs mounts */
+
+static atomic_t g_tmpfs_ino;
 
 /****************************************************************************
  * Public Data
@@ -815,6 +824,20 @@ static int tmpfs_chstat_object(FAR struct tmpfs_object_s *to,
 #endif /* CONFIG_FS_PERMISSION */
 
 /****************************************************************************
+ * Name: tmpfs_new_ino
+ *
+ * Description:
+ *   Return a new file serial number.  The numbers are unique in all tmpfs
+ *   mounts.
+ *
+ ****************************************************************************/
+
+static ino_t tmpfs_new_ino(void)
+{
+  return (ino_t)atomic_add(&g_tmpfs_ino, 1) + 1;
+}
+
+/****************************************************************************
  * Name: tmpfs_alloc_file
  ****************************************************************************/
 
@@ -839,6 +862,7 @@ tmpfs_alloc_file(FAR struct tmpfs_directory_s *parent, mode_t mode)
   tfo->tfo_type   = TMPFS_REGULAR;
   tfo->tfo_refs   = 1;
   tfo->tfo_parent = parent;
+  tfo->tfo_ino    = tmpfs_new_ino();
   tfo->tfo_flags  = 0;
   tfo->tfo_size   = 0;
   tfo->tfo_data   = NULL;
@@ -995,6 +1019,7 @@ tmpfs_alloc_directory(FAR struct tmpfs_directory_s *parent, mode_t mode)
   tdo->tdo_type     = TMPFS_DIRECTORY;
   tdo->tdo_refs     = 0;
   tdo->tdo_parent   = parent;
+  tdo->tdo_ino      = tmpfs_new_ino();
   tdo->tdo_nentries = 0;
   tdo->tdo_entry    = NULL;
 
@@ -2490,8 +2515,9 @@ static int tmpfs_readdir(FAR struct inode *mountpt,
           entry->d_type = DTYPE_FILE;
         }
 
-      /* Copy the entry name */
+      /* Copy the serial number and the entry name */
 
+      entry->d_ino = to->to_ino;
       strlcpy(entry->d_name, tde->tde_name, sizeof(entry->d_name));
 
       /* Save the index for next time */
@@ -3112,6 +3138,7 @@ static void tmpfs_stat_common(FAR struct tmpfs_object_s *to,
   /* Is the tmpfs object a regular file? */
 
   memset(buf, 0, sizeof(struct stat));
+  buf->st_ino = to->to_ino;
 
   if (to->to_type == TMPFS_REGULAR)
     {
