@@ -435,7 +435,6 @@ jobs:
             if [ "X${{matrix.boards}}" = "Xcodechecker" ]; then
                 ./cibuild.sh -c -A -N -R --codechecker testlist/${{matrix.boards}}.dat
             else
-                ( sleep 7200 ; echo Killing pytest after timeout... ; pkill -f pytest )&
                 ./cibuild.sh -c -A -N -R -S testlist/${{matrix.boards}}.dat
             fi
 
