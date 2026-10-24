@@ -32,6 +32,7 @@
 #include <sched.h>
 #include <assert.h>
 #include <errno.h>
+#include <limits.h>
 
 #include <nuttx/cancelpt.h>
 
@@ -219,6 +220,7 @@ ssize_t file_readv(FAR struct file *filep,
 
       FS_PROFILE_START(start_time);
 
+#ifdef CONFIG_FS_UIO
       if (inode->u.i_ops->readv)
         {
           struct uio uio;
@@ -229,7 +231,9 @@ ssize_t file_readv(FAR struct file *filep,
               ret = inode->u.i_ops->readv(filep, &uio);
             }
         }
-      else if (inode->u.i_ops->read)
+      else
+#endif
+      if (inode->u.i_ops->read)
         {
           ret = file_readv_compat(filep, iov, iovcnt);
         }
@@ -274,12 +278,82 @@ ssize_t file_readv(FAR struct file *filep,
 
 ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes)
 {
+#ifdef CONFIG_FS_UIO
   struct iovec iov;
 
   iov.iov_base = buf;
   iov.iov_len = nbytes;
 
   return file_readv(filep, &iov, 1);
+#else
+  FAR struct inode *inode = filep->f_inode;
+  ssize_t ret = -EBADF;
+
+  DEBUGASSERT(filep);
+
+  /* Was this file opened for read access? */
+
+  if ((filep->f_oflags & O_ACCMODE) == O_WRONLY)
+    {
+      /* No.. File is not read-able */
+
+      return -EACCES;
+    }
+
+  if (nbytes == 0)
+    {
+      return 0;
+    }
+
+  if (nbytes > SSIZE_MAX)
+    {
+      return -EINVAL;
+    }
+
+  /* -------------------- DO NOT REMOVE --------------------
+   * Only for kernel builds with CONFIG_ARCH_TEXT_VBASE == 0.
+   * In this case we have to allow the NULL buffer otherwise
+   * kernel builds will fail to load elf binaries found at 0.
+   */
+
+#if !defined(CONFIG_BUILD_KERNEL) || CONFIG_ARCH_TEXT_VBASE != 0
+  if (buf == NULL)
+    {
+      return -EFAULT;
+    }
+#endif
+
+  /* Is a driver or mountpoint registered? If so, does it support the read
+   * method?
+   * If yes, then let it perform the read.
+   */
+
+  if (inode != NULL && inode->u.i_ops)
+    {
+      clock_t start_time;
+
+      FS_PROFILE_START(start_time);
+
+      if (inode->u.i_ops->read)
+        {
+          ret = inode->u.i_ops->read(filep, buf, nbytes);
+        }
+
+      FS_PROFILE_STOP(start_time, g_fs_profile.total_read_time,
+                      g_fs_profile.reads);
+    }
+
+  /* Return the number of bytes read (or possibly an error code) */
+
+#ifdef CONFIG_FS_NOTIFY
+  if (ret > 0)
+    {
+      notify_read(filep);
+    }
+#endif
+
+  return ret;
+#endif
 }
 
 /****************************************************************************
@@ -348,11 +422,23 @@ ssize_t nx_readv(int fd, FAR const struct iovec *iov, int iovcnt)
 
 ssize_t nx_read(int fd, FAR void *buf, size_t nbytes)
 {
-  struct iovec iov;
+  FAR struct file *filep;
+  ssize_t ret;
 
-  iov.iov_base = buf;
-  iov.iov_len = nbytes;
-  return nx_readv(fd, &iov, 1);
+  /* First, get the file structure.  Note that on failure,
+   * file_get() will return the errno.
+   */
+
+  ret = file_get(fd, &filep);
+  if (ret >= 0)
+    {
+      /* Then let file_read do all of the work. */
+
+      ret = file_read(filep, buf, nbytes);
+      file_put(filep);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -412,9 +498,21 @@ ssize_t readv(int fd, FAR const struct iovec *iov, int iovcnt)
 
 ssize_t read(int fd, FAR void *buf, size_t nbytes)
 {
-  struct iovec iov;
+  ssize_t ret;
 
-  iov.iov_base = buf;
-  iov.iov_len = nbytes;
-  return readv(fd, &iov, 1);
+  /* read() is a cancellation point */
+
+  enter_cancellation_point();
+
+  /* Let nx_read() do the real work */
+
+  ret = nx_read(fd, buf, nbytes);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
+  leave_cancellation_point();
+  return ret;
 }
