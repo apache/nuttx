@@ -102,11 +102,14 @@ static void aio_write_worker(FAR void *arg)
    *   aio_offset   - File offset
    */
 
-  /* Check if O_APPEND is set in the file open flags */
+  /* Check if O_APPEND is set in the file open flags.  A pipe, a FIFO or a
+   * socket cannot seek: aio_offset is ignored.
+   */
 
-  if ((oflags & O_APPEND) != 0)
+  if ((oflags & O_APPEND) != 0 ||
+      INODE_IS_NOSEEK(aioc->aioc_filep->f_inode))
     {
-      /* Append to the current file position */
+      /* Write at the current file position */
 
       nwritten = file_write(aioc->aioc_filep,
                             (FAR const void *)aiocbp->aio_buf,
