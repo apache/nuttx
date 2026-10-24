@@ -36,4 +36,8 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += pic32mz_autoleds.c
 endif
 
+ifeq ($(CONFIG_ETC_ROMFS),y)
+  RCSRCS = etc/init.d/rcS
+endif
+
 include $(TOPDIR)/boards/Board.mk
