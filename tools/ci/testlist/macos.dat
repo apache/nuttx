@@ -26,8 +26,8 @@
 # RISC-V
 
 /risc-v/bl602/bl602evb/configs/wifi
-/risc-v/esp32c3-legacy/esp32c3-devkit/configs/cxx
-/risc-v/esp32c3-legacy/esp32c3-devkit/configs/wifi
+/risc-v/esp32c3-legacy/esp32c3-legacy-devkit/configs/cxx
+/risc-v/esp32c3-legacy/esp32c3-legacy-devkit/configs/wifi
 
 # x86_64-elf-gcc from homebrew doesn't seem to
 # provide __udivdi3 etc for -m32, so we do not build
@@ -35,7 +35,7 @@
 
 # x86_64
 
-/x86_64/intel64/qemu-intel64/configs/nsh
+/x86_64/qemu/qemu-intel64/configs/nsh
 
 # XTENSA
 
