@@ -25,6 +25,9 @@
  ****************************************************************************/
 
 #include <assert.h>
+#include <stdbool.h>
+#include <string.h>
+#include <sys/param.h>
 
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mm/map.h>
@@ -85,6 +88,58 @@ const struct file_operations g_shmfs_operations =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: shmfs_copy
+ *
+ * Description:
+ *   Copy data between a buffer and a memory object.  In the kernel build
+ *   the object is a list of single pages from the page pool, which are not
+ *   always contiguous: copy page by page through the kernel address of
+ *   each page.  In the other builds the object is one block of memory.
+ *
+ ****************************************************************************/
+
+static void shmfs_copy(FAR struct shmfs_object_s *sho, off_t pos,
+                       FAR char *buffer, size_t len, bool write)
+{
+#ifdef CONFIG_BUILD_KERNEL
+  FAR uintptr_t *pages = (FAR uintptr_t *)&sho->paddr;
+  FAR char *vaddr;
+  size_t offset;
+  size_t n;
+
+  while (len > 0)
+    {
+      offset = pos % MM_PGSIZE;
+      n      = MIN(len, MM_PGSIZE - offset);
+      vaddr  = (FAR char *)up_addrenv_page_vaddr(pages[pos / MM_PGSIZE]) +
+               offset;
+
+      if (write)
+        {
+          memcpy(vaddr, buffer, n);
+        }
+      else
+        {
+          memcpy(buffer, vaddr, n);
+        }
+
+      pos    += n;
+      buffer += n;
+      len    -= n;
+    }
+#else
+  if (write)
+    {
+      memcpy((FAR char *)sho->paddr + pos, buffer, len);
+    }
+  else
+    {
+      memcpy(buffer, (FAR char *)sho->paddr + pos, len);
+    }
+#endif
+}
+
+/****************************************************************************
  * Name: shmfs_read
  ****************************************************************************/
 
@@ -121,7 +176,7 @@ static ssize_t shmfs_read(FAR struct file *filep, FAR char *buffer,
 
   if (sho->paddr != NULL)
     {
-      memcpy(buffer, (FAR char *)sho->paddr + startpos, nread);
+      shmfs_copy(sho, startpos, buffer, nread, false);
       filep->f_pos += nread;
     }
   else
@@ -165,7 +220,7 @@ static ssize_t shmfs_write(FAR struct file *filep, FAR const char *buffer,
 
   if (sho->paddr != NULL)
     {
-      memcpy((FAR char *)sho->paddr + startpos, buffer, nwritten);
+      shmfs_copy(sho, startpos, (FAR char *)buffer, nwritten, true);
       filep->f_pos += nwritten;
     }
   else
