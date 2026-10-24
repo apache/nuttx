@@ -121,9 +121,12 @@ struct ieee802154_privmac_s
   /******************* Fields related to MAC operations *********************/
 
   enum mac802154_operation_e     curr_op;   /* The current overall operation */
-  enum ieee802154_cmdid_e        curr_cmd;  /* Type of the current cmd */
-  FAR struct ieee802154_txdesc_s *cmd_desc; /* TX descriptor for current cmd */
+
+  /* Destination of the current command */
+
+  struct ieee802154_addr_s       cmd_destaddr;
   uint8_t                        nrxusers;
+  bool                           oprx;      /* Receiver on for current op */
   struct work_s                  macop_work;
 
   /******************* Fields related to SCAN operation *********************/
@@ -670,6 +673,25 @@ mac802154_rxdisable(FAR struct ieee802154_privmac_s *priv)
     {
       wlinfo("Receiver disabled\n");
       priv->radio->rxenable(priv->radio, false);
+    }
+}
+
+/* Receiver enabled for the data frame of the current operation */
+
+static inline void
+mac802154_oprxenable(FAR struct ieee802154_privmac_s *priv)
+{
+  priv->oprx = true;
+  mac802154_rxenable(priv);
+}
+
+static inline void
+mac802154_oprxdisable(FAR struct ieee802154_privmac_s *priv)
+{
+  if (priv->oprx)
+    {
+      priv->oprx = false;
+      mac802154_rxdisable(priv);
     }
 }
 

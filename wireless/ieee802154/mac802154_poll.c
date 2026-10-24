@@ -96,14 +96,14 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
     }
 
   priv->curr_op = MAC802154_OP_POLL;
-  priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
 
   /* Allocate the txdesc, waiting if necessary */
 
   ret = mac802154_txdesc_alloc(priv, &txdesc);
   if (ret < 0)
     {
-      nxmutex_unlock(&priv->lock);
+      /* The MAC is unlocked on failure */
+
       nxsem_post(&priv->opsem);
       return ret;
     }
@@ -137,10 +137,6 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
   memcpy(&txdesc->destaddr,
          &req->coordaddr,
          sizeof(struct ieee802154_addr_s));
-
-  /* Save a reference of the tx descriptor */
-
-  priv->cmd_desc = txdesc;
 
   wlinfo("Queuing POLL.request in CSMA queue\n");
 
@@ -204,12 +200,11 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
         }
 
       primitive->type = IEEE802154_PRIMITIVE_CONF_POLL;
-      txdesc->conf->status = status;
+      primitive->u.pollconf.status = status;
 
       /* We are now done the operation, and can release the command */
 
       priv->curr_op = MAC802154_OP_NONE;
-      priv->cmd_desc = NULL;
       nxsem_post(&priv->opsem);
 
       mac802154_notify(priv, mac802154_txdesc_takeconf(txdesc));
@@ -222,7 +217,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
        * the corresponding data frame from the coordinator. [1] pg.43
        */
 
-      mac802154_rxenable(priv);
+      mac802154_oprxenable(priv);
 
       /* Start a timer, if we receive the data frame, we will cancel
        * the timer, otherwise it will expire and we will notify the
@@ -268,11 +263,11 @@ void mac802154_polltimeout(FAR void *arg)
 
   nxmutex_lock(&priv->lock);
 
-  /* We are no longer performing the association operation */
+  /* We are no longer performing the poll operation */
 
   priv->curr_op = MAC802154_OP_NONE;
-  priv->cmd_desc = NULL;
   nxsem_post(&priv->opsem);
+  mac802154_oprxdisable(priv);
 
   mac802154_notify(priv, primitive);
   nxmutex_unlock(&priv->lock);

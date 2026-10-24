@@ -95,7 +95,6 @@ int mac802154_req_associate(MACHANDLE mac,
     }
 
   priv->curr_op = MAC802154_OP_ASSOC;
-  priv->curr_cmd = IEEE802154_CMD_ASSOC_REQ;
 
   /* Get exclusive access to the MAC */
 
@@ -142,8 +141,9 @@ int mac802154_req_associate(MACHANDLE mac,
   ret = mac802154_txdesc_alloc(priv, &txdesc);
   if (ret < 0)
     {
+      /* The MAC is unlocked on failure */
+
       iob_free(iob);
-      nxmutex_unlock(&priv->lock);
       nxsem_post(&priv->opsem);
       return ret;
     }
@@ -233,9 +233,10 @@ int mac802154_req_associate(MACHANDLE mac,
   memcpy(&txdesc->destaddr, &req->coordaddr,
          sizeof(struct ieee802154_addr_s));
 
-  /* Save a reference of the tx descriptor */
+  /* Responses are matched against the coordinator address */
 
-  priv->cmd_desc = txdesc;
+  memcpy(&priv->cmd_destaddr, &req->coordaddr,
+         sizeof(struct ieee802154_addr_s));
 
   /* Search the list of PAN descriptors, that would have been populated by
    * the latest scan procedure. If we have seen a beacon from the
@@ -280,9 +281,13 @@ int mac802154_req_associate(MACHANDLE mac,
     {
       wlinfo("Transmitting assoc request\n");
 
-      /* Association Request command gets sent out immediately */
+      /* Association Request command gets sent out immediately.  The radio
+       * calls the MAC with its lock held, so release the MAC lock first.
+       */
 
+      nxmutex_unlock(&priv->lock);
       priv->radio->txdelayed(priv->radio, txdesc, 0);
+      return OK;
     }
   else
     {
@@ -403,8 +408,9 @@ int mac802154_resp_associate(MACHANDLE mac,
   ret = mac802154_txdesc_alloc(priv, &txdesc);
   if (ret < 0)
     {
+      /* The MAC is unlocked on failure */
+
       iob_free(iob);
-      nxmutex_unlock(&priv->lock);
       return ret;
     }
 
@@ -475,7 +481,6 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
       /* We are now done the operation, unlock the semaphore */
 
       priv->curr_op = MAC802154_OP_NONE;
-      priv->cmd_desc = NULL;
       nxsem_post(&priv->opsem);
 
       /* Release the MAC, call the callback, get exclusive access again */
@@ -610,7 +615,6 @@ void mac802154_txdone_datareq_assoc(FAR struct ieee802154_privmac_s *priv,
       /* We are now done the operation, and can release the command */
 
       priv->curr_op = MAC802154_OP_NONE;
-      priv->cmd_desc = NULL;
       nxsem_post(&priv->opsem);
 
       mac802154_notify(priv, mac802154_txdesc_takeconf(txdesc));
@@ -623,7 +627,7 @@ void mac802154_txdone_datareq_assoc(FAR struct ieee802154_privmac_s *priv,
        * the corresponding data frame from the coordinator. [1] pg.43
        */
 
-      mac802154_rxenable(priv);
+      mac802154_oprxenable(priv);
 
       /* If we are on a beacon-enabled network, we already have the
        * association timeout timer scheduled. So we only need to start the
@@ -801,9 +805,8 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
   /* We are no longer performing the association operation */
 
   priv->curr_op = MAC802154_OP_NONE;
-  priv->cmd_desc = NULL;
   nxsem_post(&priv->opsem);
-  mac802154_rxdisable(priv);
+  mac802154_oprxdisable(priv);
 
   /* Notify the next highest layer of the association status */
 
@@ -862,14 +865,14 @@ static void mac802154_assoctimeout(FAR void *arg)
   IEEE802154_SADDRCOPY(primitive->u.assocconf.saddr,
                        &IEEE802154_SADDR_UNSPEC);
 
+  nxmutex_lock(&priv->lock);
+
   /* We are no longer performing the association operation */
 
   priv->curr_op = MAC802154_OP_NONE;
-  priv->cmd_desc = NULL;
   nxsem_post(&priv->opsem);
-  mac802154_rxdisable(priv);
+  mac802154_oprxdisable(priv);
 
-  nxmutex_lock(&priv->lock);
   mac802154_notify(priv, primitive);
   nxmutex_unlock(&priv->lock);
 }
@@ -894,14 +897,20 @@ static void mac802154_extract_assocresp(FAR void *arg)
 
   nxmutex_lock(&priv->lock);
 
-  mac802154_txdesc_alloc(priv, &respdesc);
+  /* The MAC is unlocked on failure, the association ends as when no
+   * response was extracted
+   */
+
+  if (mac802154_txdesc_alloc(priv, &respdesc) < 0)
+    {
+      mac802154_assoctimeout(priv);
+      return;
+    }
 
   mac802154_createdatareq(priv, &priv->pandesc.coordaddr,
                           IEEE802154_ADDRMODE_EXTENDED, respdesc);
 
   nxmutex_unlock(&priv->lock);
-
-  priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
 
   priv->radio->txdelayed(priv->radio, respdesc,
     (priv->resp_waittime*IEEE802154_BASE_SUPERFRAME_DURATION));
