@@ -135,6 +135,7 @@ static void map_spgtables(arch_addrenv_t *addrenv, uintptr_t vaddr)
   for (i = 0; i < (ARCH_SPGTS - 1); i++)
     {
       uintptr_t next = addrenv->spgtables[i + 1];
+
       mmu_ln_setentry(i + 1, prev, next, vaddr, MMU_UPGT_FLAGS);
       prev = riscv_pgvaddr(next);
     }
@@ -334,7 +335,7 @@ static int create_region(arch_addrenv_t *addrenv, uintptr_t vaddr,
 static inline bool vaddr_is_shm(uintptr_t vaddr)
 {
 #if defined (CONFIG_ARCH_SHM_VBASE) && defined(ARCH_SHM_VEND)
-  return vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr < ARCH_SHM_VEND;
+  return vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr <= ARCH_SHM_VEND;
 #else
   UNUSED(vaddr);
   return false;
@@ -428,6 +429,15 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
   /* Allocate 1 extra page for heap, temporary fix for #5811 */
 
   heapsize = heapsize + MM_PGALIGNUP(CONFIG_DEFAULT_TASK_STACKSIZE);
+
+#if (CONFIG_ARCH_TEXT_VBASE != 0x0) && (CONFIG_ARCH_HEAP_VBASE != 0x0)
+  /* The heap must not pass the end of its region */
+
+  if (heapsize > ARCH_HEAP_SIZE)
+    {
+      heapsize = ARCH_HEAP_SIZE;
+    }
+#endif
 
   /* Map the reserved area */
 

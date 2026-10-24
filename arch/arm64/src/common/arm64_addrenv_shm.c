@@ -76,7 +76,7 @@ int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
 
   DEBUGASSERT(tcb && tcb->addrenv_own);
   DEBUGASSERT(pages != NULL && npages > 0);
-  DEBUGASSERT(vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr < ARCH_SHM_VEND);
+  DEBUGASSERT(vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr <= ARCH_SHM_VEND);
   DEBUGASSERT(MM_ISALIGNED(vaddr));
 
   /* Let arm64_map_pages do the work */
@@ -110,7 +110,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages)
 
   DEBUGASSERT(tcb && tcb->addrenv_own);
   DEBUGASSERT(npages > 0);
-  DEBUGASSERT(vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr < ARCH_SHM_VEND);
+  DEBUGASSERT(vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr <= ARCH_SHM_VEND);
   DEBUGASSERT(MM_ISALIGNED(vaddr));
 
   /* Let arm64_unmap_pages do the work */

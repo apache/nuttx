@@ -209,6 +209,7 @@ int up_addrenv_kmap_init(void)
       /* Connect the static page tables */
 
       uintptr_t lnvaddr = arm64_pgvaddr(next);
+
       addrenv->spgtables[i] = next;
       next = mmu_pte_to_paddr(mmu_ln_getentry(i, lnvaddr, vaddr));
     }
@@ -253,7 +254,7 @@ int up_addrenv_kmap_pages(void **pages, unsigned int npages, uintptr_t vaddr,
   /* Sanity checks */
 
   DEBUGASSERT(pages != NULL && npages > 0);
-  DEBUGASSERT(vaddr >= CONFIG_ARCH_KMAP_VBASE && vaddr < ARCH_KMAP_VEND);
+  DEBUGASSERT(vaddr >= CONFIG_ARCH_KMAP_VBASE && vaddr <= ARCH_KMAP_VEND);
   DEBUGASSERT(MM_ISALIGNED(vaddr));
 
   /* The access is either RO or RW, read access cannot be revoked */
@@ -315,7 +316,7 @@ int up_addrenv_kunmap_pages(uintptr_t vaddr, unsigned int npages)
   /* Sanity checks */
 
   DEBUGASSERT(npages > 0);
-  DEBUGASSERT(vaddr >= CONFIG_ARCH_KMAP_VBASE && vaddr < ARCH_KMAP_VEND);
+  DEBUGASSERT(vaddr >= CONFIG_ARCH_KMAP_VBASE && vaddr <= ARCH_KMAP_VEND);
   DEBUGASSERT(MM_ISALIGNED(vaddr));
 
   /* Let arm64_unmap_pages do the work */

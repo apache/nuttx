@@ -205,6 +205,7 @@ int up_addrenv_kmap_init(void)
       /* Connect the static page tables */
 
       uintptr_t lnvaddr = riscv_pgvaddr(next);
+
       addrenv->spgtables[i] = next;
       next = mmu_pte_to_paddr(mmu_ln_getentry(i + 1, lnvaddr, vaddr));
     }
@@ -249,7 +250,7 @@ int up_addrenv_kmap_pages(void **pages, unsigned int npages, uintptr_t vaddr,
   /* Sanity checks */
 
   DEBUGASSERT(pages != NULL && npages > 0);
-  DEBUGASSERT(vaddr >= CONFIG_ARCH_KMAP_VBASE && vaddr < ARCH_KMAP_VEND);
+  DEBUGASSERT(vaddr >= CONFIG_ARCH_KMAP_VBASE && vaddr <= ARCH_KMAP_VEND);
   DEBUGASSERT(MM_ISALIGNED(vaddr));
 
   /* Convert access right flags to MMU flags */
@@ -302,7 +303,7 @@ int up_addrenv_kunmap_pages(uintptr_t vaddr, unsigned int npages)
   /* Sanity checks */
 
   DEBUGASSERT(npages > 0);
-  DEBUGASSERT(vaddr >= CONFIG_ARCH_KMAP_VBASE && vaddr < ARCH_KMAP_VEND);
+  DEBUGASSERT(vaddr >= CONFIG_ARCH_KMAP_VBASE && vaddr <= ARCH_KMAP_VEND);
   DEBUGASSERT(MM_ISALIGNED(vaddr));
 
   /* Let riscv_unmap_pages do the work */
