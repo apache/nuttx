@@ -35,6 +35,7 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/lib/lib.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/mutex.h>

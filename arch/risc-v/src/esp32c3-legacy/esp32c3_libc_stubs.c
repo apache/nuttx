@@ -34,6 +34,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/signal.h>
 #include <nuttx/mutex.h>
 #include <nuttx/lib/lib.h>

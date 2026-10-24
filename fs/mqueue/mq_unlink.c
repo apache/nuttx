@@ -32,6 +32,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/mqueue.h>
 
 #include "inode/inode.h"

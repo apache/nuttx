@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/ipcc.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/circbuf.h>

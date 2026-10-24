@@ -30,6 +30,7 @@
 #include <nuttx/debug.h>
 #include <stdio.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mtd/mtd.h>

@@ -38,6 +38,7 @@
 
 #include <poll.h>
 #include <fcntl.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/list.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/circbuf.h>
