@@ -708,6 +708,10 @@ int gethostentbyname_r(FAR const char *name,
                        FAR struct hostent_s *host, FAR char *buf,
                        size_t buflen, FAR int *h_errnop, int flags)
 {
+#ifdef CONFIG_NETDB_DNSCLIENT
+  int ret = ERROR;
+#endif
+
   DEBUGASSERT(name != NULL && host != NULL && buf != NULL);
 
   /* Make sure that the h_errno has a non-error code */
@@ -729,7 +733,7 @@ int gethostentbyname_r(FAR const char *name,
     {
       if (h_errnop)
         {
-          *h_errnop = EAI_NONAME;
+          *h_errnop = HOST_NOT_FOUND;
         }
 
       return ERROR;
@@ -773,7 +777,8 @@ int gethostentbyname_r(FAR const char *name,
 
   /* Try to get the host address using the DNS name server */
 
-  if (lib_dns_lookup(name, host, buf, buflen) >= 0)
+  ret = lib_dns_lookup(name, host, buf, buflen);
+  if (ret >= 0)
     {
       /* Successful DNS lookup! */
 
@@ -783,7 +788,16 @@ int gethostentbyname_r(FAR const char *name,
 
   if (h_errnop)
     {
-      *h_errnop = HOST_NOT_FOUND;
+#ifdef CONFIG_NETDB_DNSCLIENT
+      if (ret == -ETIMEDOUT || ret == -EAGAIN || ret == -EBUSY)
+        {
+          *h_errnop = TRY_AGAIN;
+        }
+      else
+#endif
+        {
+          *h_errnop = HOST_NOT_FOUND;
+        }
     }
 
   return ERROR;
