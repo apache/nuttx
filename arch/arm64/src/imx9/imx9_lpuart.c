@@ -1120,6 +1120,7 @@ static inline void imx9_serialout(struct imx9_uart_s *priv,
 static int imx9_dma_nextrx(struct imx9_uart_s *priv)
 {
   int dmaresidual = imx9_dmach_getcount(priv->rxdma);
+
   DEBUGASSERT(dmaresidual <= RXDMA_BUFFER_SIZE);
 
   return (RXDMA_BUFFER_SIZE - dmaresidual) % RXDMA_BUFFER_SIZE;
@@ -1601,8 +1602,8 @@ static int imx9_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
 #if defined(CONFIG_SERIAL_TIOCSERGSTRUCT)   || \
     defined(CONFIG_SERIAL_TERMIOS)          || \
-    defined(CONFIG_IMX9_LPUART_SINGLEWIRE ) || \
-    defined(CONFIG_IMX9_LPUART_INVERT )
+    defined(CONFIG_IMX9_LPUART_SINGLEWIRE)  || \
+    defined(CONFIG_IMX9_LPUART_INVERT)
   struct inode *inode = filep->f_inode;
   struct uart_dev_s *dev = inode->i_private;
   irqstate_t flags;
@@ -1612,271 +1613,271 @@ static int imx9_ioctl(struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
-    case TIOCSERGSTRUCT:
-      {
-         struct imx9_uart_s *user = (struct imx9_uart_s *)arg;
-         if (!user)
-           {
-             ret = -EINVAL;
-           }
-         else
-           {
-             memcpy(user, dev, sizeof(struct imx9_uart_s));
-           }
-       }
-       break;
+      case TIOCSERGSTRUCT:
+        {
+          struct imx9_uart_s *user = (struct imx9_uart_s *)arg;
+
+          if (!user)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              memcpy(user, dev, sizeof(struct imx9_uart_s));
+            }
+        }
+        break;
 #endif
 
 #ifdef CONFIG_SERIAL_TERMIOS
-    case TCGETS:
-      {
-        struct termios  *termiosp = (struct termios *)arg;
-        struct imx9_uart_s *priv = (struct imx9_uart_s *)dev;
+      case TCGETS:
+        {
+          struct termios *termiosp = (struct termios *)arg;
+          struct imx9_uart_s *priv = (struct imx9_uart_s *)dev;
 
-        if (!termiosp)
-          {
-            ret = -EINVAL;
-            break;
-          }
+          if (!termiosp)
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        /* Return parity */
+          /* Return parity */
 
-        termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
-                            ((priv->parity == 1) ? PARODD : 0);
+          termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
+                              ((priv->parity == 1) ? PARODD : 0);
 
-        /* Return stop bits */
+          /* Return stop bits */
 
-        termiosp->c_cflag |= priv->stopbits2 ? CSTOPB : 0;
+          termiosp->c_cflag |= priv->stopbits2 ? CSTOPB : 0;
 
-        /* Return flow control */
+          /* Return flow control */
 
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-        termiosp->c_cflag |= (priv->oflow ? CCTS_OFLOW : 0);
-
+          termiosp->c_cflag |= (priv->oflow ? CCTS_OFLOW : 0);
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-        termiosp->c_cflag |= (priv->iflow ? CRTS_IFLOW : 0);
+          termiosp->c_cflag |= (priv->iflow ? CRTS_IFLOW : 0);
 #endif
-        /* Return baud */
+          /* Return baud */
 
-        cfsetispeed(termiosp, priv->baud);
+          cfsetispeed(termiosp, priv->baud);
 
-        /* Return number of bits */
+          /* Return number of bits */
 
-        switch (priv->bits)
-          {
-          case 5:
-            termiosp->c_cflag |= CS5;
-            break;
+          switch (priv->bits)
+            {
+              case 5:
+                termiosp->c_cflag |= CS5;
+                break;
 
-          case 6:
-            termiosp->c_cflag |= CS6;
-            break;
+              case 6:
+                termiosp->c_cflag |= CS6;
+                break;
 
-          case 7:
-            termiosp->c_cflag |= CS7;
-            break;
+              case 7:
+                termiosp->c_cflag |= CS7;
+                break;
 
-          default:
-          case 8:
-            termiosp->c_cflag |= CS8;
-            break;
+              default:
+              case 8:
+                termiosp->c_cflag |= CS8;
+                break;
 
 #if defined(CS9)
-          case 9:
-            termiosp->c_cflag |= CS9;
-            break;
+              case 9:
+                termiosp->c_cflag |= CS9;
+                break;
 #endif
-          }
-      }
-      break;
+            }
+        }
+        break;
 
-    case TCSETS:
-      {
-        struct termios  *termiosp = (struct termios *)arg;
-        struct imx9_uart_s *priv = (struct imx9_uart_s *)dev;
-        uint32_t baud;
-        uint32_t ie;
-        uint8_t parity;
-        uint8_t nbits;
-        bool stop2;
+      case TCSETS:
+        {
+          struct termios *termiosp = (struct termios *)arg;
+          struct imx9_uart_s *priv = (struct imx9_uart_s *)dev;
+          uint32_t baud;
+          uint32_t ie;
+          uint8_t parity;
+          uint8_t nbits;
+          bool stop2;
 
-        if ((!termiosp)
+          if ((!termiosp)
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-            || ((termiosp->c_cflag & CCTS_OFLOW) && !priv->usects)
+              || ((termiosp->c_cflag & CCTS_OFLOW) && !priv->usects)
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-            || ((termiosp->c_cflag & CRTS_IFLOW) && !priv->userts)
+              || ((termiosp->c_cflag & CRTS_IFLOW) && !priv->userts)
 #endif
-            )
-          {
-            ret = -EINVAL;
-            break;
-          }
+             )
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        /* Decode baud. */
+          /* Decode baud. */
 
-        ret = OK;
-        baud = cfgetispeed(termiosp);
+          ret = OK;
+          baud = cfgetispeed(termiosp);
 
-        /* Decode number of bits */
+          /* Decode number of bits */
 
-        switch (termiosp->c_cflag & CSIZE)
-          {
-          case CS5:
-            nbits = 5;
-            break;
+          switch (termiosp->c_cflag & CSIZE)
+            {
+              case CS5:
+                nbits = 5;
+                break;
 
-          case CS6:
-            nbits = 6;
-            break;
+              case CS6:
+                nbits = 6;
+                break;
 
-          case CS7:
-            nbits = 7;
-            break;
+              case CS7:
+                nbits = 7;
+                break;
 
-          case CS8:
-            nbits = 8;
-            break;
+              case CS8:
+                nbits = 8;
+                break;
 
 #if defined(CS9)
-          case CS9:
-            nbits = 9;
-            break;
+              case CS9:
+                nbits = 9;
+                break;
 #endif
-          default:
-            ret = -EINVAL;
-            break;
-          }
+              default:
+                ret = -EINVAL;
+                break;
+            }
 
-        /* Decode parity */
+          /* Decode parity */
 
-        if ((termiosp->c_cflag & PARENB) != 0)
-          {
-            parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
-          }
-        else
-          {
-            parity = 0;
-          }
+          if ((termiosp->c_cflag & PARENB) != 0)
+            {
+              parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
+            }
+          else
+            {
+              parity = 0;
+            }
 
-        /* Decode stop bits */
+          /* Decode stop bits */
 
-        stop2 = (termiosp->c_cflag & CSTOPB) != 0;
+          stop2 = (termiosp->c_cflag & CSTOPB) != 0;
 
-        /* Verify that all settings are valid before committing */
+          /* Verify that all settings are valid before committing */
 
-        if (ret == OK)
-          {
-            /* Commit */
+          if (ret == OK)
+            {
+              /* Commit */
 
-            priv->baud      = baud;
-            priv->parity    = parity;
-            priv->bits      = nbits;
-            priv->stopbits2 = stop2;
-            priv->oflow     = (termiosp->c_cflag & CCTS_OFLOW) != 0;
-            priv->iflow     = (termiosp->c_cflag & CRTS_IFLOW) != 0;
+              priv->baud      = baud;
+              priv->parity    = parity;
+              priv->bits      = nbits;
+              priv->stopbits2 = stop2;
+              priv->oflow     = (termiosp->c_cflag & CCTS_OFLOW) != 0;
+              priv->iflow     = (termiosp->c_cflag & CRTS_IFLOW) != 0;
 
-            /* effect the changes immediately - note that we do not
-             * implement TCSADRAIN / TCSAFLUSH
-             */
+              /* effect the changes immediately - note that we do not
+               * implement TCSADRAIN / TCSAFLUSH
+               */
 
-            flags = spin_lock_irqsave(&priv->lock);
-            imx9_disableuartint_nolock(priv, &ie);
-            ret = dev->ops->setup(dev);
+              flags = spin_lock_irqsave(&priv->lock);
+              imx9_disableuartint_nolock(priv, &ie);
+              ret = dev->ops->setup(dev);
 
-            /* Restore the interrupt state */
+              /* Restore the interrupt state */
 
-            imx9_restoreuartint_nolock(priv, ie);
-            priv->ie = ie;
-            spin_unlock_irqrestore(&priv->lock, flags);
-          }
-      }
-      break;
+              imx9_restoreuartint_nolock(priv, ie);
+              priv->ie = ie;
+              spin_unlock_irqrestore(&priv->lock, flags);
+            }
+        }
+        break;
 #endif /* CONFIG_SERIAL_TERMIOS */
 
 #ifdef CONFIG_IMX9_LPUART_SINGLEWIRE
-    case TIOCSSINGLEWIRE:
-      {
-        uint32_t regval;
-        struct imx9_uart_s *priv = (struct imx9_uart_s *)dev;
+      case TIOCSSINGLEWIRE:
+        {
+          uint32_t regval;
+          struct imx9_uart_s *priv = (struct imx9_uart_s *)dev;
 
-        flags  = spin_lock_irqsave(&priv->lock);
-        regval = imx9_serialin(priv, IMX9_LPUART_CTRL_OFFSET);
+          flags  = spin_lock_irqsave(&priv->lock);
+          regval = imx9_serialin(priv, IMX9_LPUART_CTRL_OFFSET);
 
-        if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
-          {
-            regval |= LPUART_CTRL_LOOPS | LPUART_CTRL_RSRC;
-          }
-        else
-          {
-            regval &= ~(LPUART_CTRL_LOOPS | LPUART_CTRL_RSRC);
-          }
+          if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
+            {
+              regval |= LPUART_CTRL_LOOPS | LPUART_CTRL_RSRC;
+            }
+          else
+            {
+              regval &= ~(LPUART_CTRL_LOOPS | LPUART_CTRL_RSRC);
+            }
 
-        imx9_serialout(priv, IMX9_LPUART_CTRL_OFFSET, regval);
+          imx9_serialout(priv, IMX9_LPUART_CTRL_OFFSET, regval);
 
-        spin_unlock_irqrestore(&priv->lock, flags);
-      }
-      break;
+          spin_unlock_irqrestore(&priv->lock, flags);
+        }
+        break;
 #endif
 
 #ifdef CONFIG_IMX9_LPUART_INVERT
-    case TIOCSINVERT:
-      {
-        uint32_t ctrl;
-        uint32_t stat;
-        uint32_t regval;
-        struct imx9_uart_s *priv = (struct imx9_uart_s *)dev;
+      case TIOCSINVERT:
+        {
+          uint32_t ctrl;
+          uint32_t stat;
+          uint32_t regval;
+          struct imx9_uart_s *priv = (struct imx9_uart_s *)dev;
 
-        flags  = spin_lock_irqsave(&priv->lock);
-        ctrl   = imx9_serialin(priv, IMX9_LPUART_CTRL_OFFSET);
-        stat   = imx9_serialin(priv, IMX9_LPUART_STAT_OFFSET);
-        regval = ctrl;
+          flags  = spin_lock_irqsave(&priv->lock);
+          ctrl   = imx9_serialin(priv, IMX9_LPUART_CTRL_OFFSET);
+          stat   = imx9_serialin(priv, IMX9_LPUART_STAT_OFFSET);
+          regval = ctrl;
 
-        /* {R|T}XINV bit field can only be written when the receiver is
-        * disabled (RE=0).
-        */
+          /* {R|T}XINV bit field can only be written when the receiver is
+           * disabled (RE=0).
+           */
 
-        regval &= ~LPUART_CTRL_RE;
+          regval &= ~LPUART_CTRL_RE;
 
-        imx9_serialout(priv, IMX9_LPUART_CTRL_OFFSET, regval);
+          imx9_serialout(priv, IMX9_LPUART_CTRL_OFFSET, regval);
 
-        /* Enable/disable signal inversion. */
+          /* Enable/disable signal inversion. */
 
-        if (arg & SER_INVERT_ENABLED_RX)
-          {
-            stat |= LPUART_STAT_RXINV;
-          }
-        else
-          {
-            stat &= ~LPUART_STAT_RXINV;
-          }
+          if (arg & SER_INVERT_ENABLED_RX)
+            {
+              stat |= LPUART_STAT_RXINV;
+            }
+          else
+            {
+              stat &= ~LPUART_STAT_RXINV;
+            }
 
-        /* Do not invert TX when in TIOCSSINGLEWIRE */
+          /* Do not invert TX when in TIOCSSINGLEWIRE */
 
-        if ((arg & SER_INVERT_ENABLED_TX) &&
-            ((ctrl & LPUART_CTRL_LOOPS) != LPUART_CTRL_LOOPS))
-          {
-            ctrl |= LPUART_CTRL_TXINV;
-          }
-        else
-          {
-            ctrl &= ~LPUART_CTRL_TXINV;
-          }
+          if ((arg & SER_INVERT_ENABLED_TX) &&
+              ((ctrl & LPUART_CTRL_LOOPS) != LPUART_CTRL_LOOPS))
+            {
+              ctrl |= LPUART_CTRL_TXINV;
+            }
+          else
+            {
+              ctrl &= ~LPUART_CTRL_TXINV;
+            }
 
-        imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET, stat);
-        imx9_serialout(priv, IMX9_LPUART_CTRL_OFFSET, ctrl);
+          imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET, stat);
+          imx9_serialout(priv, IMX9_LPUART_CTRL_OFFSET, ctrl);
 
-        spin_unlock_irqrestore(&priv->lock, flags);
-      }
-      break;
+          spin_unlock_irqrestore(&priv->lock, flags);
+        }
+        break;
 #endif
 
-    case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
-    case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
-    default:
-      ret = -ENOTTY;
-      break;
+      case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
+      case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
+      default:
+        ret = -ENOTTY;
+        break;
     }
 
   return ret;
@@ -2261,7 +2262,7 @@ static void imx9_dma_send(struct uart_dev_s *dev)
 #if CONFIG_IMX9_EDMA_NTCD > 1
   /* Is this a split transfer? */
 
-  if (dev->dmatx.nbuffer)
+  if (dev->dmatx.nbuffer != NULL && dev->dmatx.nlength > 0)
     {
       config.iter   = priv->dev.dmatx.nlength;
       config.saddr  = (uintptr_t)priv->dev.dmatx.nbuffer;
