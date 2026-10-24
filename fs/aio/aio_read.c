@@ -89,8 +89,18 @@ static void aio_read_worker(FAR void *arg)
    *   aio_offset   - File offset
    */
 
-  nread = file_pread(aioc->aioc_filep, (FAR void *)aiocbp->aio_buf,
-                     aiocbp->aio_nbytes, aiocbp->aio_offset);
+  if (INODE_IS_NOSEEK(aioc->aioc_filep->f_inode))
+    {
+      /* A pipe, a FIFO or a socket cannot seek: aio_offset is ignored */
+
+      nread = file_read(aioc->aioc_filep, (FAR void *)aiocbp->aio_buf,
+                        aiocbp->aio_nbytes);
+    }
+  else
+    {
+      nread = file_pread(aioc->aioc_filep, (FAR void *)aiocbp->aio_buf,
+                         aiocbp->aio_nbytes, aiocbp->aio_offset);
+    }
 
   /* Set the result of the read operation. */
 

@@ -166,6 +166,10 @@
 
 #define INODE_IS_NOEXEC(i)      (((i)->i_flags & FSNODEFLAG_NOEXEC) != 0)
 
+/* A pipe, a FIFO or a socket has no file position (POSIX: ESPIPE) */
+
+#define INODE_IS_NOSEEK(i)      (INODE_IS_PIPE(i) || INODE_IS_SOCKET(i))
+
 /* The status change flags.
  * These should be or-ed together to figure out what want to change.
  */
