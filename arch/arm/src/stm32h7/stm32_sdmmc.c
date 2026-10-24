@@ -250,8 +250,8 @@
 
 /* Timing */
 
-#define SDMMC_CMDTIMEOUT         (100000)
-#define SDMMC_LONGTIMEOUT        (0x7fffffff)
+#define SDMMC_CMDTIMEOUT_MS      (10)
+#define SDMMC_LONGTIMEOUT_MS     (250)
 
 /* DTIMER setting */
 
@@ -2708,14 +2708,15 @@ static int stm32_cancel(struct sdio_dev_s *dev)
 static int stm32_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
-  int32_t timeout;
+  clock_t timeout;
+  clock_t start;
   uint32_t events;
 
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
       case MMCSD_NO_RESPONSE:
         events  = STM32_SDMMC_CMDDONE_STA;
-        timeout = SDMMC_CMDTIMEOUT;
+        timeout = MSEC2TICK(SDMMC_CMDTIMEOUT_MS);
         break;
 
       case MMCSD_R1_RESPONSE:
@@ -2725,13 +2726,13 @@ static int stm32_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
       case MMCSD_R5_RESPONSE:
       case MMCSD_R6_RESPONSE:
         events  = STM32_SDMMC_RESPDONE_STA;
-        timeout = SDMMC_LONGTIMEOUT;
+        timeout = MSEC2TICK(SDMMC_LONGTIMEOUT_MS);
         break;
 
       case MMCSD_R3_RESPONSE:
       case MMCSD_R7_RESPONSE:
         events  = STM32_SDMMC_RESPDONE_STA;
-        timeout = SDMMC_CMDTIMEOUT;
+        timeout = MSEC2TICK(SDMMC_CMDTIMEOUT_MS);
         break;
 
       default:
@@ -2740,9 +2741,11 @@ static int stm32_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
 
   /* Then wait for the response (or timeout) */
 
+  start = clock_systime_ticks();
+
   while ((sdmmc_getreg32(priv, STM32_SDMMC_STA_OFFSET) & events) == 0)
     {
-      if (--timeout <= 0)
+      if (clock_systime_ticks() - start > timeout)
         {
           mcerr("ERROR: Timeout cmd: %08" PRIx32 " events: %08" PRIx32
                 " STA: %08" PRIx32 "\n",

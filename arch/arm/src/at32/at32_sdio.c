@@ -170,8 +170,8 @@
 
 /* Timing */
 
-#define SDIO_CMDTIMEOUT          (100000)
-#define SDIO_LONGTIMEOUT         (0x7fffffff)
+#define SDIO_CMDTIMEOUT_MS       (10)
+#define SDIO_LONGTIMEOUT_MS      (250)
 
 /* DTIMER setting */
 
@@ -878,8 +878,9 @@ static void at32_dumpsamples(struct at32_dev_s *priv)
 static void at32_dmacallback(DMA_HANDLE handle, uint8_t status, void *arg)
 {
   struct at32_dev_s *priv = (struct at32_dev_s *)arg;
-  DEBUGASSERT(priv->dmamode);
   sdio_eventset_t result;
+
+  DEBUGASSERT(priv->dmamode);
 
   /* In the normal case, SDIO appears to handle the End-Of-Transfer interrupt
    * first with the End-Of-DMA event occurring significantly later.  On
@@ -1142,7 +1143,7 @@ static void at32_recvfifo(struct at32_dev_s *priv)
 
           for (i = 0; i < (int)priv->remaining; i++)
             {
-               *ptr++ = data.b[i];
+              *ptr++ = data.b[i];
             }
 
           /* Now the transfer is finished */
@@ -1694,6 +1695,7 @@ static sdio_capset_t at32_capabilities(struct sdio_dev_s *dev)
 static sdio_statset_t at32_status(struct sdio_dev_s *dev)
 {
   struct at32_dev_s *priv = (struct at32_dev_s *)dev;
+
   return priv->cdstatus;
 }
 
@@ -1717,6 +1719,7 @@ static sdio_statset_t at32_status(struct sdio_dev_s *dev)
 static void at32_widebus(struct sdio_dev_s *dev, bool wide)
 {
   struct at32_dev_s *priv = (struct at32_dev_s *)dev;
+
   priv->widebus = wide;
 }
 
@@ -1856,23 +1859,23 @@ static int at32_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
 
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
-    case MMCSD_NO_RESPONSE:
-      regval |= SDIO_CMD_NORESPONSE;
-      break;
+      case MMCSD_NO_RESPONSE:
+        regval |= SDIO_CMD_NORESPONSE;
+        break;
 
-    case MMCSD_R1_RESPONSE:
-    case MMCSD_R1B_RESPONSE:
-    case MMCSD_R3_RESPONSE:
-    case MMCSD_R4_RESPONSE:
-    case MMCSD_R5_RESPONSE:
-    case MMCSD_R6_RESPONSE:
-    case MMCSD_R7_RESPONSE:
-      regval |= SDIO_CMD_SHORTRESPONSE;
-      break;
+      case MMCSD_R1_RESPONSE:
+      case MMCSD_R1B_RESPONSE:
+      case MMCSD_R3_RESPONSE:
+      case MMCSD_R4_RESPONSE:
+      case MMCSD_R5_RESPONSE:
+      case MMCSD_R6_RESPONSE:
+      case MMCSD_R7_RESPONSE:
+        regval |= SDIO_CMD_SHORTRESPONSE;
+        break;
 
-    case MMCSD_R2_RESPONSE:
-      regval |= SDIO_CMD_LONGRESPONSE;
-      break;
+      case MMCSD_R2_RESPONSE:
+        regval |= SDIO_CMD_LONGRESPONSE;
+        break;
     }
 
   /* Set CPSMEN and the command index */
@@ -2126,41 +2129,44 @@ static int at32_cancel(struct sdio_dev_s *dev)
 
 static int at32_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
 {
-  int32_t timeout;
+  clock_t timeout;
+  clock_t start;
   uint32_t events;
 
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
-    case MMCSD_NO_RESPONSE:
-      events  = SDIO_CMDDONE_STA;
-      timeout = SDIO_CMDTIMEOUT;
-      break;
+      case MMCSD_NO_RESPONSE:
+        events  = SDIO_CMDDONE_STA;
+        timeout = MSEC2TICK(SDIO_CMDTIMEOUT_MS);
+        break;
 
-    case MMCSD_R1_RESPONSE:
-    case MMCSD_R1B_RESPONSE:
-    case MMCSD_R2_RESPONSE:
-    case MMCSD_R4_RESPONSE:
-    case MMCSD_R5_RESPONSE:
-    case MMCSD_R6_RESPONSE:
-      events  = SDIO_RESPDONE_STA;
-      timeout = SDIO_LONGTIMEOUT;
-      break;
+      case MMCSD_R1_RESPONSE:
+      case MMCSD_R1B_RESPONSE:
+      case MMCSD_R2_RESPONSE:
+      case MMCSD_R4_RESPONSE:
+      case MMCSD_R5_RESPONSE:
+      case MMCSD_R6_RESPONSE:
+        events  = SDIO_RESPDONE_STA;
+        timeout = MSEC2TICK(SDIO_LONGTIMEOUT_MS);
+        break;
 
-    case MMCSD_R3_RESPONSE:
-    case MMCSD_R7_RESPONSE:
-      events  = SDIO_RESPDONE_STA;
-      timeout = SDIO_CMDTIMEOUT;
-      break;
+      case MMCSD_R3_RESPONSE:
+      case MMCSD_R7_RESPONSE:
+        events  = SDIO_RESPDONE_STA;
+        timeout = MSEC2TICK(SDIO_CMDTIMEOUT_MS);
+        break;
 
-    default:
-      return -EINVAL;
+      default:
+        return -EINVAL;
     }
 
   /* Then wait for the response (or timeout) */
 
+  start = clock_systime_ticks();
+
   while ((getreg32(AT32_SDIO_STA) & events) == 0)
     {
-      if (--timeout <= 0)
+      if (clock_systime_ticks() - start > timeout)
         {
           mcerr("ERROR: Timeout cmd: %08" PRIx32 " events: %08" PRIx32
                 " STA: %08" PRIx32 "\n",
@@ -2956,10 +2962,10 @@ static void at32_callback(void *arg)
         {
           /* Yes.. queue it */
 
-           mcinfo("Queuing callback to %p(%p)\n",
-                  priv->callback, priv->cbarg);
-           work_queue(HPWORK, &priv->cbwork, priv->callback,
-                      priv->cbarg, 0);
+          mcinfo("Queuing callback to %p(%p)\n",
+                 priv->callback, priv->cbarg);
+          work_queue(HPWORK, &priv->cbwork, priv->callback,
+                     priv->cbarg, 0);
         }
       else
         {
