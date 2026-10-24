@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2017, Gregory Nutt, all rights reserved
- * SPDX-FileCopyrightText: Copyright (c) 2008, Swedish Institute of Computer Science.
+ * SPDX-FileCopyrightText: 2008, Swedish Institute of Computer Science.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Adam Dunkels <adam@sics.se>
  * SPDX-FileContributor: Nicolas Tsiftes <nvt@sics.se>
