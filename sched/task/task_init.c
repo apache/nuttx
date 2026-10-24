@@ -102,6 +102,16 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
   DEBUGASSERT(tcb && ttype != TCB_FLAG_TTYPE_PTHREAD);
 #endif
 
+#ifdef CONFIG_TLS_ALIGNED
+  /* The TLS alignment limits the size of the stack */
+
+  if (stack_size > TLS_MAXSTACK)
+    {
+      sched_trace_end();
+      return -EINVAL;
+    }
+#endif
+
 #ifdef CONFIG_ARCH_ADDRENV
   /* Kernel threads do not own any address environment */
 
