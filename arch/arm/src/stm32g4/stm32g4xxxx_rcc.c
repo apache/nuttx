@@ -863,7 +863,7 @@ static void stm32_stdclockconfig(void)
        * in place to do that, we do not configure the clock any further.
        */
 
-       return;
+      return;
     }
 #endif
 
@@ -879,7 +879,7 @@ static void stm32_stdclockconfig(void)
        * in place to do that, we do not configure the clock any further.
        */
 
-       return;
+      return;
     }
 
 #endif
