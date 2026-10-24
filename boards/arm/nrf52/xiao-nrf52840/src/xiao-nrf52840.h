@@ -56,11 +56,13 @@
  *   RGB_RED   - P0-26
  *   RGB_GREEN - P0-30
  *   RGB_BLUE  - P0-6
+ *
+ * Active low: configured high, i.e. off.
  */
 
-#define GPIO_LED1  (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN(6))
-#define GPIO_LED2  (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN(26))
-#define GPIO_LED3  (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN(30))
+#define GPIO_LED1  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(6))
+#define GPIO_LED2  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(26))
+#define GPIO_LED3  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(30))
 
 /* Button definitions *******************************************************/
 
