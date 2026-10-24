@@ -131,7 +131,7 @@
  * Note: TIM1,8,15,16,17 are on APB2, others on APB1
  */
 
-#define STM32_LPTIM1_CLKIN      STM32_HCLK_FREQUENCY
+#define STM32_LPTIM1_CLKIN      4000000  /* MSIK */
 #define STM32_LPTIM2_CLKIN      STM32_HCLK_FREQUENCY
 
 /* DMA Channel/Stream Selections ********************************************/
