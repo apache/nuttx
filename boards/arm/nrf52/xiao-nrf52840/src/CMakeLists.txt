@@ -42,10 +42,5 @@ endif()
 
 target_sources(board PRIVATE ${SRCS})
 
-if(CONFIG_ARCH_BOARD_COMMON)
-  set_property(GLOBAL PROPERTY LD_SCRIPT
-                               "${NUTTX_COMMON_DIR}/scripts/flash_config.ld")
-else()
-  set_property(GLOBAL PROPERTY LD_SCRIPT
-                               "${NUTTX_BOARD_DIR}/scripts/flash_config.ld")
-endif()
+set_property(GLOBAL PROPERTY LD_SCRIPT
+                             "${NUTTX_BOARD_DIR}/scripts/flash_config.ld")
