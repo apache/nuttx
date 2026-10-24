@@ -78,7 +78,7 @@
 /* SocketCAN specific */
 
 #ifdef CONFIG_CAN_CTUCANFD_SOCKET
-#  define CTUCANFD_TX_QUOTA   1
+#  define CTUCANFD_TX_QUOTA   CTUCANFD_TXBUF_CNT
 #  define CTUCANFD_RX_QUOTA   1
 #  if CONFIG_IOB_NBUFFERS < (CTUCANFD_RX_QUOTA + CTUCANFD_TX_QUOTA)
 #    error CONFIG_IOB_NBUFFERS must be > (CTUCANFD_RX_QUOTA + CTUCANFD_TX_QUOTA)
@@ -112,6 +112,12 @@ struct ctucanfd_can_s
   FAR struct pci_device_s *pcidev;
   uint64_t                 base;
   uint8_t                  txbufcnt;
+
+#ifdef CONFIG_CAN_CTUCANFD_SOCKET
+  /* Packet of each TXT buffer, freed when the buffer is done */
+
+  FAR netpkt_t            *txpkt[CTUCANFD_TXBUF_CNT];
+#endif
 };
 
 /* CTUCANFD private data */
@@ -179,6 +185,7 @@ static int  ctucanfd_sock_ifdown(FAR struct netdev_lowerhalf_s *dev);
 static int  ctucanfd_sock_transmit(FAR struct netdev_lowerhalf_s *dev,
                                    FAR netpkt_t *pkt);
 static FAR netpkt_t *ctucanfd_sock_recv(FAR struct netdev_lowerhalf_s *dev);
+static void ctucanfd_sock_reclaim(FAR struct netdev_lowerhalf_s *dev);
 
 #  ifdef CONFIG_NETDEV_IOCTL
 static int  ctucanfd_sock_ioctl(FAR struct netdev_lowerhalf_s *dev, int cmd,
@@ -229,6 +236,7 @@ static const struct netdev_ops_s g_ctucanfd_net_ops =
   .ifdown   = ctucanfd_sock_ifdown,
   .transmit = ctucanfd_sock_transmit,
   .receive  = ctucanfd_sock_recv,
+  .reclaim  = ctucanfd_sock_reclaim,
 #ifdef CONFIG_NETDEV_IOCTL
   .ioctl    = ctucanfd_sock_ioctl,
 #endif
@@ -1063,6 +1071,8 @@ static int ctucanfd_sock_ifup(FAR struct netdev_lowerhalf_s *dev)
 static int ctucanfd_sock_ifdown(FAR struct netdev_lowerhalf_s *dev)
 {
   FAR struct ctucanfd_can_s *priv = (FAR struct ctucanfd_can_s *)dev;
+  uint32_t                   regval;
+  int                        i;
 
   ctucanfd_txint(priv, false);
   ctucanfd_rxint(priv, false);
@@ -1070,6 +1080,27 @@ static int ctucanfd_sock_ifdown(FAR struct netdev_lowerhalf_s *dev)
   /* Shutdown */
 
   ctucanfd_shutdown(priv);
+
+  /* Abort the frames not sent yet, mark the TXT buffers as empty and free
+   * their packets.
+   */
+
+  for (i = 0; i < priv->txbufcnt; i++)
+    {
+      if (priv->txpkt[i] != NULL)
+        {
+          regval = CTUCANFD_TXCMD_TXCA +
+                   (1 << (CTUCANFD_TXCMD_TXB_SHIFT + i));
+          ctucanfd_putreg(priv, CTUCANFD_TXINFOCMD, regval);
+
+          regval = CTUCANFD_TXCMD_TXCE +
+                   (1 << (CTUCANFD_TXCMD_TXB_SHIFT + i));
+          ctucanfd_putreg(priv, CTUCANFD_TXINFOCMD, regval);
+
+          netpkt_free(dev, priv->txpkt[i], NETPKT_TX);
+          priv->txpkt[i] = NULL;
+        }
+    }
 
   netdev_lower_carrier_off(dev);
 
@@ -1258,16 +1289,56 @@ static int ctucanfd_sock_transmit(FAR struct netdev_lowerhalf_s *dev,
     }
 #endif
 
-  /* Set TX ready */
+  /* Keep the packet until the TXT buffer is done and set TX ready */
+
+  priv->txpkt[txidx] = pkt;
 
   regval = CTUCANFD_TXCMD_TXCR + (1 << (CTUCANFD_TXCMD_TXB_SHIFT + txidx));
   ctucanfd_putreg(priv, CTUCANFD_TXINFOCMD, regval);
 
-  /* All is done - free packet */
-
-  netpkt_free(dev, pkt, NETPKT_TX);
-
   return OK;
+}
+
+/*****************************************************************************
+ * Name: ctucanfd_sock_reclaim
+ *
+ * Description:
+ *   Mark the TXT buffers that are done as empty and free their packets.
+ *
+ *****************************************************************************/
+
+static void ctucanfd_sock_reclaim(FAR struct netdev_lowerhalf_s *dev)
+{
+  FAR struct ctucanfd_can_s *priv = (FAR struct ctucanfd_can_s *)dev;
+  uint32_t                   txstat;
+  uint32_t                   regval;
+  uint8_t                    state;
+  int                        i;
+
+  txstat = ctucanfd_getreg(priv, CTUCANFD_TXSTAT);
+
+  for (i = 0; i < priv->txbufcnt; i++)
+    {
+      state = CTUCANFD_TXSTAT_GET(txstat, i);
+
+      if (priv->txpkt[i] == NULL ||
+          (state != CTUCANFD_TXSTAT_TOK && state != CTUCANFD_TXSTAT_ERR &&
+           state != CTUCANFD_TXSTAT_ABT))
+        {
+          continue;
+        }
+
+      if (state != CTUCANFD_TXSTAT_TOK)
+        {
+          NETDEV_TXERRORS(&dev->netdev);
+        }
+
+      regval = CTUCANFD_TXCMD_TXCE + (1 << (CTUCANFD_TXCMD_TXB_SHIFT + i));
+      ctucanfd_putreg(priv, CTUCANFD_TXINFOCMD, regval);
+
+      netpkt_free(dev, priv->txpkt[i], NETPKT_TX);
+      priv->txpkt[i] = NULL;
+    }
 }
 
 /*****************************************************************************
@@ -1545,11 +1616,8 @@ static FAR netpkt_t *ctucanfd_sock_error(FAR struct netdev_lowerhalf_s *dev)
 
 static void ctucanfd_sock_interrupt(FAR struct ctucanfd_driver_s *priv)
 {
-  uint32_t stat   = 0;
-  uint32_t regval = 0;
-  uint32_t setval = 0;
-  int      i      = 0;
-  int      txidx  = 0;
+  uint32_t stat = 0;
+  int      i    = 0;
 
   for (i = 0; i < priv->count; i++)
     {
@@ -1570,27 +1638,11 @@ static void ctucanfd_sock_interrupt(FAR struct ctucanfd_driver_s *priv)
           netdev_lower_rxready(&priv->devs[i].dev);
         }
 
-      /* Transmit interrupt */
+      /* Frame transmitted, the upper half reclaims the TXT buffers */
 
       if (stat & CTUCANFD_INT_TXI)
         {
-          regval = ctucanfd_getreg(&priv->devs[i], CTUCANFD_TXSTAT);
-
-          for (txidx = 0; txidx < priv->devs[i].txbufcnt; txidx++)
-            {
-              if (CTUCANFD_TXSTAT_GET(regval, txidx) ==
-                  CTUCANFD_TXSTAT_TOK)
-                {
-                  netdev_lower_txdone(&priv->devs[i].dev);
-
-                  /* Mark buffer as empty */
-
-                  setval = (CTUCANFD_TXCMD_TXCE +
-                            (1 << (CTUCANFD_TXCMD_TXB_SHIFT + txidx)));
-                  ctucanfd_putreg(&priv->devs[i],
-                                  CTUCANFD_TXINFOCMD, setval);
-                }
-            }
+          netdev_lower_txdone(&priv->devs[i].dev);
         }
 
       /* Clear interrupts */
