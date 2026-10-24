@@ -287,6 +287,7 @@ int up_alarm_cancel(struct timespec *ts)
 int up_alarm_start(const struct timespec *ts)
 {
   irqstate_t flags;
+
   flags = enter_critical_section();
 
   /* remember the alarm time */
