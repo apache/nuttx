@@ -736,17 +736,46 @@ static int gd32_i2c_isr_process(struct gd32_i2c_priv_s *priv)
     {
       gd32_i2c_putreg(priv, GD32VW55X_I2C_STATC_OFFSET, I2C_STATC_NACKC);
 
-      i2cerr("ERROR: NACK, addr=0x%02x\n", priv->msgv[priv->msgid].addr);
+      i2cinfo("NACK, addr=0x%02x\n", priv->msgv[priv->msgid].addr);
 
-      /* Request the STOP condition.  If the automatic end mode is active
-       * the hardware has already sent it, in which case this bit is
-       * ignored.
+      /* Flush the byte that may be left in TDATA, otherwise it would be
+       * sent at the start of the next transfer.
        */
 
-      gd32_i2c_modifyreg(priv, GD32VW55X_I2C_CTL1_OFFSET,
-                         I2C_CTL1_STOP, 0);
+      gd32_i2c_modifyreg(priv, GD32VW55X_I2C_STAT_OFFSET, 0, I2C_STAT_TBE);
 
-      gd32_i2c_finish(priv, -ENXIO);
+      /* Request the STOP condition and complete the transfer only once it
+       * is on the bus: starting the next transfer before that leaves the
+       * bus busy.  If the automatic end mode is active the hardware has
+       * already sent it, in which case this bit is ignored.
+       */
+
+      priv->result = -ENXIO;
+      priv->dcnt   = 0;
+
+      if ((status & I2C_STAT_STPDET) == 0)
+        {
+          gd32_i2c_modifyreg(priv, GD32VW55X_I2C_CTL1_OFFSET,
+                             I2C_CTL1_STOP, 0);
+          return OK;
+        }
+
+      gd32_i2c_putreg(priv, GD32VW55X_I2C_STATC_OFFSET, I2C_STATC_STPDETC);
+      gd32_i2c_finish(priv, priv->result);
+      return OK;
+    }
+
+  /* A NACK has been handled: only wait for the STOP condition */
+
+  if (priv->result == -ENXIO)
+    {
+      if ((status & I2C_STAT_STPDET) != 0)
+        {
+          gd32_i2c_putreg(priv, GD32VW55X_I2C_STATC_OFFSET,
+                          I2C_STATC_STPDETC);
+          gd32_i2c_finish(priv, priv->result);
+        }
+
       return OK;
     }
 
@@ -1241,18 +1270,18 @@ struct i2c_master_s *gd32_i2cbus_initialize(int port)
   switch (port)
     {
 #ifdef CONFIG_GD32VW55X_I2C0
-    case 0:
-      priv = &g_i2c0_priv;
-      break;
+      case 0:
+        priv = &g_i2c0_priv;
+        break;
 #endif
 #ifdef CONFIG_GD32VW55X_I2C1
-    case 1:
-      priv = &g_i2c1_priv;
-      break;
+      case 1:
+        priv = &g_i2c1_priv;
+        break;
 #endif
-    default:
-      i2cerr("ERROR: Unsupported I2C port: %d\n", port);
-      return NULL;
+      default:
+        i2cerr("ERROR: Unsupported I2C port: %d\n", port);
+        return NULL;
     }
 
   /* Initialize the private data of the device, if it has not been done */
