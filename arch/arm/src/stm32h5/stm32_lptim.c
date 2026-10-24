@@ -314,6 +314,7 @@ static void stm32_lptim_start(struct stm32_lptim_dev_s *dev,
 static void stm32_lptim_resetcounter(struct stm32_lptim_dev_s *dev)
 {
   uint32_t val = stm32_getreg32(dev, STM32_LPTIM_CR_OFFSET);
+
   val |= LPTIM_CR_COUNTRST;
   stm32_putreg32(dev, STM32_LPTIM_CR_OFFSET, val);
 }
@@ -403,6 +404,7 @@ static void stm32_lptim_enableint(struct stm32_lptim_dev_s *dev,
   DEBUGASSERT(dev != NULL);
 
   uint32_t val = stm32_getreg32(dev, STM32_LPTIM_IER_OFFSET);
+
   val |= source;
   stm32_putreg32(dev, STM32_LPTIM_IER_OFFSET, val);
 }
@@ -413,6 +415,7 @@ static void stm32_lptim_disableint(struct stm32_lptim_dev_s *dev,
   DEBUGASSERT(dev != NULL);
 
   uint32_t val = stm32_getreg32(dev, STM32_LPTIM_IER_OFFSET);
+
   val &= ~source;
   stm32_putreg32(dev, STM32_LPTIM_IER_OFFSET, val);
 }
