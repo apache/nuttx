@@ -444,18 +444,21 @@ static struct stm32_lptim_priv_s * const g_lptim[] =
  * Name: stm32_getreg32 / stm32_putreg32 / stm32_modifyreg32
  ****************************************************************************/
 
+noinstrument_function
 static inline uint32_t stm32_getreg32(struct stm32_lptim_dev_s *dev,
                                       uint8_t offset)
 {
   return getreg32(((struct stm32_lptim_priv_s *)dev)->base + offset);
 }
 
+noinstrument_function
 static inline void stm32_putreg32(struct stm32_lptim_dev_s *dev,
                                   uint8_t offset, uint32_t value)
 {
   putreg32(value, ((struct stm32_lptim_priv_s *)dev)->base + offset);
 }
 
+noinstrument_function
 static inline void stm32_modifyreg32(struct stm32_lptim_dev_s *dev,
                                      uint8_t offset, uint32_t clearbits,
                                      uint32_t setbits)
