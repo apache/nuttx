@@ -142,6 +142,104 @@ int ecdsa_verify(const uint8_t publickey[ECC_BYTES + 1],
                  const uint8_t hash[ECC_BYTES],
                  const uint8_t signature[ECC_BYTES * 2]);
 
+/* Point operations:
+ * Operates on affine points (x, y) with ECC_BYTES per coordinate
+ * (big endian).
+ */
+
+/* ecc_point_add() function.
+ * Add two affine points P and Q: R = P + Q.
+ *
+ * Inputs:
+ *   px, py - Coordinates of point P.
+ *   qx, qy - Coordinates of point Q.
+ *
+ * Outputs:
+ *   rx, ry - Coordinates of result point R (may overlap with inputs).
+ *
+ * Returns 0 on success, 1 if the result is the point at infinity,
+ * or a negative error code (e.g. -EINVAL).
+ */
+
+int ecc_point_add(uint8_t rx[ECC_BYTES], uint8_t ry[ECC_BYTES],
+                  const uint8_t px[ECC_BYTES], const uint8_t py[ECC_BYTES],
+                  const uint8_t qx[ECC_BYTES], const uint8_t qy[ECC_BYTES]);
+
+/* ecc_point_mul() function.
+ * Multiply an affine point P by a scalar k: R = k * P.
+ *
+ * Inputs:
+ *   px, py - Coordinates of point P.
+ *   k      - Scalar multiplier of ECC_BYTES (big endian).
+ *
+ * Outputs:
+ *   rx, ry - Coordinates of result point R (may overlap with inputs).
+ *
+ * Returns 0 on success, 1 if the result is the point at infinity,
+ * or a negative error code (e.g. -EINVAL).
+ */
+
+int ecc_point_mul(uint8_t rx[ECC_BYTES], uint8_t ry[ECC_BYTES],
+                  const uint8_t px[ECC_BYTES], const uint8_t py[ECC_BYTES],
+                  const uint8_t k[ECC_BYTES]);
+
+/* ecc_point_is_on_curve() function.
+ * Check whether the given affine point (px, py) lies on the curve.
+ *
+ * Inputs:
+ *   px, py - Coordinates of point P.
+ *
+ * Returns 1 if the point is on the curve, 0 if not,
+ * or a negative error code (e.g. -EINVAL).
+ */
+
+int ecc_point_is_on_curve(const uint8_t px[ECC_BYTES],
+                          const uint8_t py[ECC_BYTES]);
+
+/* Modular operations:
+ * Operates on big-endian integers of ECC_BYTES length.
+ */
+
+/* ecc_mod_add() function.
+ * Computes res = (a + b) mod m.
+ * Inputs and output may overlap.
+ *
+ * Returns 0 on success, or a negative error code.
+ */
+
+int ecc_mod_add(uint8_t res[ECC_BYTES], const uint8_t a[ECC_BYTES],
+                const uint8_t b[ECC_BYTES], const uint8_t mod[ECC_BYTES]);
+
+/* ecc_mod_sub() function.
+ * Computes res = (a - b) mod m.
+ * Inputs and output may overlap.
+ *
+ * Returns 0 on success, or a negative error code.
+ */
+
+int ecc_mod_sub(uint8_t res[ECC_BYTES], const uint8_t a[ECC_BYTES],
+                const uint8_t b[ECC_BYTES], const uint8_t mod[ECC_BYTES]);
+
+/* ecc_mod_mul() function.
+ * Computes res = (a * b) mod m.
+ * Inputs and output may overlap.
+ *
+ * Returns 0 on success, or a negative error code.
+ */
+
+int ecc_mod_mul(uint8_t res[ECC_BYTES], const uint8_t a[ECC_BYTES],
+                const uint8_t b[ECC_BYTES], const uint8_t mod[ECC_BYTES]);
+
+/* ecc_mod_exp() function.
+ * Computes res = (base ^ exp) mod m.
+ * Inputs and output may overlap.
+ *
+ * Returns 0 on success, or a negative error code.
+ */
+
+int ecc_mod_exp(uint8_t res[ECC_BYTES], const uint8_t base[ECC_BYTES],
+                const uint8_t exp[ECC_BYTES], const uint8_t mod[ECC_BYTES]);
+
 #ifdef __cplusplus
 }
 #endif
