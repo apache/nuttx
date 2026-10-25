@@ -22,12 +22,14 @@
 
 set(SRCS)
 
-list(APPEND SRCS riscv_exception_common.S riscv_vectors.S)
-list(APPEND SRCS riscv_saveusercontext.S)
+if(NOT CONFIG_ARCH_RV_CUSTOM_TRAP)
+  list(APPEND SRCS riscv_exception_common.S riscv_vectors.S)
+  list(APPEND SRCS riscv_saveusercontext.S riscv_getnewintctx.c)
+endif()
 list(APPEND SRCS riscv_allocateheap.c riscv_cpuidlestack.c)
 list(APPEND SRCS riscv_cpuinfo.c riscv_createstack.c riscv_doirq.c
      riscv_exception.c)
-list(APPEND SRCS riscv_exit.c riscv_getintstack.c riscv_getnewintctx.c)
+list(APPEND SRCS riscv_exit.c riscv_getintstack.c)
 list(APPEND SRCS riscv_initialize.c riscv_initialstate.c riscv_modifyreg32.c)
 list(APPEND SRCS riscv_nputs.c riscv_registerdump.c)
 list(APPEND SRCS riscv_releasestack.c)

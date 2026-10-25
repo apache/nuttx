@@ -150,6 +150,16 @@ uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
  * in; otherwise there is no fp-chain consumer to fix up for.
  */
 
+/* The instruction that enters the kernel.  Cores without the standard trap
+ * architecture (CONFIG_ARCH_RV_CUSTOM_TRAP) provide their own.
+ */
+
+#ifdef CONFIG_ARCH_RV_CUSTOM_TRAP
+#  include <arch/chip/irq.h>
+#else
+#  define RISCV_SYSCALL_INSN "ecall"
+#endif
+
 #if defined(CONFIG_FRAME_POINTER) && defined(CONFIG_SCHED_BACKTRACE)
 #  define RISCV_ECALL_CLOBBERS "memory", "ra"
 #else
@@ -170,7 +180,7 @@ static inline uintptr_t sys_call0(unsigned int nbr)
 
   asm volatile
     (
-     "ecall"
+     RISCV_SYSCALL_INSN
      :: "r"(r0)
      : RISCV_ECALL_CLOBBERS
      );
@@ -195,7 +205,7 @@ static inline uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1)
 
   asm volatile
     (
-     "ecall"
+     RISCV_SYSCALL_INSN
      :: "r"(r0), "r"(r1)
      : RISCV_ECALL_CLOBBERS
      );
@@ -222,7 +232,7 @@ static inline uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1,
 
   asm volatile
     (
-     "ecall"
+     RISCV_SYSCALL_INSN
      :: "r"(r0), "r"(r1), "r"(r2)
      : RISCV_ECALL_CLOBBERS
      );
@@ -250,7 +260,7 @@ static inline uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1,
 
   asm volatile
     (
-     "ecall"
+     RISCV_SYSCALL_INSN
      :: "r"(r0), "r"(r1), "r"(r2), "r"(r3)
      : RISCV_ECALL_CLOBBERS
      );
@@ -280,7 +290,7 @@ static inline uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1,
 
   asm volatile
     (
-     "ecall"
+     RISCV_SYSCALL_INSN
      :: "r"(r0), "r"(r1), "r"(r2), "r"(r3), "r"(r4)
      : RISCV_ECALL_CLOBBERS
      );
@@ -311,7 +321,7 @@ static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
 
   asm volatile
     (
-     "ecall"
+     RISCV_SYSCALL_INSN
      :: "r"(r0), "r"(r1), "r"(r2), "r"(r3), "r"(r4), "r"(r5)
      : RISCV_ECALL_CLOBBERS
      );
@@ -344,7 +354,7 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
 
   asm volatile
     (
-     "ecall"
+     RISCV_SYSCALL_INSN
      :: "r"(r0), "r"(r1), "r"(r2), "r"(r3), "r"(r4), "r"(r5), "r"(r6)
      : RISCV_ECALL_CLOBBERS
      );

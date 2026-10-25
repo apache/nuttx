@@ -1,0 +1,39 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "AB32VG1 Configuration Options"
+
+config AB32VG1_SYSCLK_MHZ
+	int "System clock frequency (MHz)"
+	default 48
+	range 24 120
+	---help---
+		The system clock is PLL0 (240 MHz) divided by an integer, so the
+		valid values are 24, 30, 40, 48, 60, 80 and 120.  48 MHz is the
+		frequency used by the mask ROM and by the RT-Thread BSP.
+
+menu "AB32VG1 Peripheral Support"
+
+config AB32VG1_UART0
+	bool "UART0"
+	default y
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		UART0 in single-wire mode on PA7 (TX0 group G1, RX mapped to the
+		TX pin).  On the AB32VG1 development boards this is the pin wired
+		to the USB-serial bridge and used by the mask ROM UART loader.
+
+config AB32VG1_UART0_ROMKEY
+	bool "Reboot into the ROM loader on the download key"
+	default y
+	depends on AB32VG1_UART0
+	---help---
+		Watch the UART0 receive stream for the key sent by host download
+		tools (F5 A0 A5 96 87 5A) and reset the chip when it is seen, so
+		that the mask ROM UART loader can take over without pressing the
+		reset button.
+
+endmenu

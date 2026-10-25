@@ -802,7 +802,11 @@ int up_this_cpu(void);
  * Inline Functions
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_RV_HAVE_CLIC
+#if defined(CONFIG_ARCH_RV_CUSTOM_TRAP)
+
+/* up_irq_save() and up_irq_restore() are provided by <arch/chip/irq.h> */
+
+#elif defined(CONFIG_ARCH_RV_HAVE_CLIC)
 
 /****************************************************************************
  * Name: up_irq_save
