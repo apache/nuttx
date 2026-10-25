@@ -130,7 +130,8 @@ endif()
 
 if(CONFIG_ARCH_ADDRENV)
   list(APPEND SRCS riscv_addrenv.c riscv_pgalloc.c riscv_addrenv_perms.c)
-  list(APPEND SRCS riscv_addrenv_utils.c riscv_addrenv_shm.c riscv_addrenv_pgmap.c)
+  list(APPEND SRCS riscv_addrenv_utils.c riscv_addrenv_shm.c
+       riscv_addrenv_pgmap.c)
 endif()
 
 if(CONFIG_RISCV_PERCPU_SCRATCH)
