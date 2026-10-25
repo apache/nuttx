@@ -124,13 +124,29 @@ struct rlimit
   rlim_t rlim_max;          /* The hard limit */
 };
 
-/* Minimal, compliant rusage structure */
+/* rusage structure: the fields of 4.3BSD.  POSIX requires ru_utime and
+ * ru_stime only.  getrusage() sets the fields that NuttX does not count
+ * to zero.
+ */
 
 struct rusage
 {
-  struct timeval ru_utime;  /* User time used */
-  struct timeval ru_stime;  /* System time used */
-  long           ru_maxrss; /* maximum resident set size */
+  struct timeval ru_utime;    /* User time used */
+  struct timeval ru_stime;    /* System time used */
+  long           ru_maxrss;   /* Maximum resident set size */
+  long           ru_ixrss;    /* Integral shared memory size */
+  long           ru_idrss;    /* Integral unshared data size */
+  long           ru_isrss;    /* Integral unshared stack size */
+  long           ru_minflt;   /* Page reclaims (soft page faults) */
+  long           ru_majflt;   /* Page faults (hard page faults) */
+  long           ru_nswap;    /* Swaps */
+  long           ru_inblock;  /* Block input operations */
+  long           ru_oublock;  /* Block output operations */
+  long           ru_msgsnd;   /* IPC messages sent */
+  long           ru_msgrcv;   /* IPC messages received */
+  long           ru_nsignals; /* Signals received */
+  long           ru_nvcsw;    /* Voluntary context switches */
+  long           ru_nivcsw;   /* Involuntary context switches */
 };
 
 /****************************************************************************
