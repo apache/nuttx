@@ -284,16 +284,16 @@ endmenu #STM32L4 ADCx triggering Configuration
 
 endmenu
 
-menu "ADC Configuration"
-	depends on STM32_HAVE_ADC_H5 && STM32_ADC
+menu "ADC Oversampling Configuration"
+	depends on (STM32_HAVE_ADC_H5 || STM32_HAVE_ADC_OVERSAMPLE_G4) && STM32_ADC
 
 config STM32_ADC1_OVERSAMPLE
 	bool "Enable ADC1 hardware oversampling support"
 	depends on STM32_ADC1
 	default n
 	---help---
-		Enable the on-chip ADC oversampling/accumulation block (CFGR2.OVSE).
-		Only STM32G0 and STM32L0 series include this hardware block.
+		Enable the on-chip ADC oversampling/accumulation block for the
+		regular group (CFGR2.ROVSE).
 
 if STM32_ADC1_OVERSAMPLE
 
@@ -301,8 +301,9 @@ config STM32_ADC1_TROVS
 	bool "Enable triggered oversampling (CFGR2.TROVS)"
 	default n
 	---help---
-		If set, oversampling will only occur when a trigger event occurs.
-		If not set, oversampling occurs continuously (TOVS=0).
+		If set, each trigger starts one conversion of the whole
+		oversampling ratio. If not set, a trigger starts a single
+		conversion and the remaining ones follow automatically.
 
 config STM32_ADC1_OVSR
 	int "Oversampling ratio (CFGR2.OVSR)"
@@ -310,11 +311,11 @@ config STM32_ADC1_OVSR
 	range 0 7
 	---help---
 		Sets the oversampling ratio as 2^(OVSR+1). For example:
-		0 -> 2×
-		1 -> 4×
-		2 -> 8×
+		0 -> 2x
+		1 -> 4x
+		2 -> 8x
 		...
-		7 -> 256×
+		7 -> 256x
 
 config STM32_ADC1_OVSS
 	int "Oversampling right-shift bits (CFGR2.OVSS)"
@@ -322,9 +323,179 @@ config STM32_ADC1_OVSS
 	range 0 8
 	---help---
 		Sets how many bits the accumulated result is right-shifted.
-		Max of 8-bits.
+		The data register is 16 bits wide: ratios above 16x with
+		OVSS below log2(ratio) - 4 overflow it silently.
 
 endif # STM32_ADC1_OVERSAMPLE
+
+config STM32_ADC2_OVERSAMPLE
+	bool "Enable ADC2 hardware oversampling support"
+	depends on STM32_ADC2
+	default n
+	---help---
+		Enable the on-chip ADC oversampling/accumulation block for the
+		regular group (CFGR2.ROVSE).
+
+if STM32_ADC2_OVERSAMPLE
+
+config STM32_ADC2_TROVS
+	bool "Enable triggered oversampling (CFGR2.TROVS)"
+	default n
+	---help---
+		If set, each trigger starts one conversion of the whole
+		oversampling ratio. If not set, a trigger starts a single
+		conversion and the remaining ones follow automatically.
+
+config STM32_ADC2_OVSR
+	int "Oversampling ratio (CFGR2.OVSR)"
+	default 0
+	range 0 7
+	---help---
+		Sets the oversampling ratio as 2^(OVSR+1). For example:
+		0 -> 2x
+		1 -> 4x
+		2 -> 8x
+		...
+		7 -> 256x
+
+config STM32_ADC2_OVSS
+	int "Oversampling right-shift bits (CFGR2.OVSS)"
+	default 0
+	range 0 8
+	---help---
+		Sets how many bits the accumulated result is right-shifted.
+		The data register is 16 bits wide: ratios above 16x with
+		OVSS below log2(ratio) - 4 overflow it silently.
+
+endif # STM32_ADC2_OVERSAMPLE
+
+config STM32_ADC3_OVERSAMPLE
+	bool "Enable ADC3 hardware oversampling support"
+	depends on STM32_ADC3 && STM32_HAVE_ADC_OVERSAMPLE_G4
+	default n
+	---help---
+		Enable the on-chip ADC oversampling/accumulation block for the
+		regular group (CFGR2.ROVSE).
+
+if STM32_ADC3_OVERSAMPLE
+
+config STM32_ADC3_TROVS
+	bool "Enable triggered oversampling (CFGR2.TROVS)"
+	default n
+	---help---
+		If set, each trigger starts one conversion of the whole
+		oversampling ratio. If not set, a trigger starts a single
+		conversion and the remaining ones follow automatically.
+
+config STM32_ADC3_OVSR
+	int "Oversampling ratio (CFGR2.OVSR)"
+	default 0
+	range 0 7
+	---help---
+		Sets the oversampling ratio as 2^(OVSR+1). For example:
+		0 -> 2x
+		1 -> 4x
+		2 -> 8x
+		...
+		7 -> 256x
+
+config STM32_ADC3_OVSS
+	int "Oversampling right-shift bits (CFGR2.OVSS)"
+	default 0
+	range 0 8
+	---help---
+		Sets how many bits the accumulated result is right-shifted.
+		The data register is 16 bits wide: ratios above 16x with
+		OVSS below log2(ratio) - 4 overflow it silently.
+
+endif # STM32_ADC3_OVERSAMPLE
+
+config STM32_ADC4_OVERSAMPLE
+	bool "Enable ADC4 hardware oversampling support"
+	depends on STM32_ADC4 && STM32_HAVE_ADC_OVERSAMPLE_G4
+	default n
+	---help---
+		Enable the on-chip ADC oversampling/accumulation block for the
+		regular group (CFGR2.ROVSE).
+
+if STM32_ADC4_OVERSAMPLE
+
+config STM32_ADC4_TROVS
+	bool "Enable triggered oversampling (CFGR2.TROVS)"
+	default n
+	---help---
+		If set, each trigger starts one conversion of the whole
+		oversampling ratio. If not set, a trigger starts a single
+		conversion and the remaining ones follow automatically.
+
+config STM32_ADC4_OVSR
+	int "Oversampling ratio (CFGR2.OVSR)"
+	default 0
+	range 0 7
+	---help---
+		Sets the oversampling ratio as 2^(OVSR+1). For example:
+		0 -> 2x
+		1 -> 4x
+		2 -> 8x
+		...
+		7 -> 256x
+
+config STM32_ADC4_OVSS
+	int "Oversampling right-shift bits (CFGR2.OVSS)"
+	default 0
+	range 0 8
+	---help---
+		Sets how many bits the accumulated result is right-shifted.
+		The data register is 16 bits wide: ratios above 16x with
+		OVSS below log2(ratio) - 4 overflow it silently.
+
+endif # STM32_ADC4_OVERSAMPLE
+
+config STM32_ADC5_OVERSAMPLE
+	bool "Enable ADC5 hardware oversampling support"
+	depends on STM32_ADC5 && STM32_HAVE_ADC_OVERSAMPLE_G4
+	default n
+	---help---
+		Enable the on-chip ADC oversampling/accumulation block for the
+		regular group (CFGR2.ROVSE).
+
+if STM32_ADC5_OVERSAMPLE
+
+config STM32_ADC5_TROVS
+	bool "Enable triggered oversampling (CFGR2.TROVS)"
+	default n
+	---help---
+		If set, each trigger starts one conversion of the whole
+		oversampling ratio. If not set, a trigger starts a single
+		conversion and the remaining ones follow automatically.
+
+config STM32_ADC5_OVSR
+	int "Oversampling ratio (CFGR2.OVSR)"
+	default 0
+	range 0 7
+	---help---
+		Sets the oversampling ratio as 2^(OVSR+1). For example:
+		0 -> 2x
+		1 -> 4x
+		2 -> 8x
+		...
+		7 -> 256x
+
+config STM32_ADC5_OVSS
+	int "Oversampling right-shift bits (CFGR2.OVSS)"
+	default 0
+	range 0 8
+	---help---
+		Sets how many bits the accumulated result is right-shifted.
+		The data register is 16 bits wide: ratios above 16x with
+		OVSS below log2(ratio) - 4 overflow it silently.
+
+endif # STM32_ADC5_OVERSAMPLE
+
+endmenu # ADC Oversampling Configuration
+
+menu "ADC Configuration"
+	depends on STM32_HAVE_ADC_H5 && STM32_ADC
 
 config STM32_ADC1_WDG1
 	bool "Enable STM32H5 ADC1 Watchdog 1"
@@ -375,45 +546,6 @@ config STM32_ADC1_WDG1_CHAN
 	range 0 19
 	---help---
 		Select the channel to enable for ADC1 Watchdog 1.
-
-config STM32_ADC2_OVERSAMPLE
-	bool "Enable ADC2 hardware oversampling support"
-	depends on STM32_ADC2
-	default n
-	---help---
-		Enable the on-chip ADC oversampling/accumulation block (CFGR2.OVSE).
-		Only STM32G0 and STM32L0 series include this hardware block.
-
-if STM32_ADC2_OVERSAMPLE
-
-config STM32_ADC2_TROVS
-	bool "Enable triggered oversampling (CFGR2.TROVS)"
-	default n
-	---help---
-		If set, oversampling will only occur when a trigger event occurs.
-		If not set, oversampling occurs continuously (TOVS=0).
-
-config STM32_ADC2_OVSR
-	int "Oversampling ratio (CFGR2.OVSR)"
-	default 0
-	range 0 7
-	---help---
-		Sets the oversampling ratio as 2^(OVSR+1). For example:
-		0 -> 2×
-		1 -> 4×
-		2 -> 8×
-		...
-		7 -> 256×
-
-config STM32_ADC2_OVSS
-	int "Oversampling right-shift bits (CFGR2.OVSS)"
-	default 0
-	range 0 8
-	---help---
-		Sets how many bits the accumulated result is right-shifted.
-		Max of 8-bits.
-
-endif # STM32_ADC2_OVERSAMPLE
 
 config STM32_ADC2_WDG1
 	bool "Enable STM32H5 ADC2 Watchdog 1"
