@@ -55,6 +55,7 @@
 /* CTL register */
 
 #define RCU_CTL_IRC16MEN            (1 << 0)   /* IRC16M enable */
+#define RCU_CTL_IRC16MSTB           (1 << 1)   /* IRC16M stable flag */
 #define RCU_CTL_HXTALEN             (1 << 16)  /* HXTAL enable */
 #define RCU_CTL_HXTALSTB            (1 << 17)  /* HXTAL stable flag */
 #define RCU_CTL_PLLDIGPU            (1 << 20)  /* PLLDIG power up */
@@ -78,6 +79,8 @@
 #define RCU_CFG0_SCSS_PLLDIG        (2 << 2)
 #define RCU_CFG0_AHBPSC_MASK        (15 << 4)  /* AHB prescaler */
 #define RCU_CFG0_AHBPSC_DIV1        (0 << 4)
+#define RCU_CFG0_AHBPSC_DIV2        (8 << 4)
+#define RCU_CFG0_AHBPSC_DIV4        (9 << 4)
 #define RCU_CFG0_APB1PSC_MASK       (7 << 10)  /* APB1 prescaler */
 #define RCU_CFG0_APB1PSC_DIV2       (4 << 10)
 #define RCU_CFG0_APB2PSC_MASK       (7 << 13)  /* APB2 prescaler */
