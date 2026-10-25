@@ -763,14 +763,40 @@ static void stm32wl5serial_setformat(struct uart_dev_s *dev)
   struct stm32_serial_s *priv =
     (struct stm32_serial_s *)dev->priv;
   uint32_t regval;
+  uint32_t usartdiv8;
+  uint32_t cr1;
+  uint32_t brr;
+  uint32_t cr1_ue;
+  irqstate_t flags;
+  int timeout;
+
+  /* Wait for any ongoing transmission to complete before disabling UE */
+
+  regval = stm32wl5serial_getreg(priv, STM32_USART_CR1_OFFSET);
+  if ((regval & (USART_CR1_UE | USART_CR1_TE)) ==
+      (USART_CR1_UE | USART_CR1_TE))
+    {
+      timeout = 50000;
+      while ((stm32wl5serial_getreg(priv, STM32_USART_ISR_OFFSET) &
+              USART_ISR_TC) == 0 && --timeout > 0)
+        {
+        }
+    }
+
+  flags = enter_critical_section();
+
+  /* Disable UE: the baud rate, parity and word length bits can not be
+   * written while UE = 1.
+   */
+
+  regval = stm32wl5serial_getreg(priv, STM32_USART_CR1_OFFSET);
+  cr1_ue = regval & USART_CR1_UE;
+  stm32wl5serial_putreg(priv, STM32_USART_CR1_OFFSET,
+                        regval & ~USART_CR1_UE);
 
   /* This first implementation is for U[S]ARTs that support oversampling
    * by 8 in additional to the standard oversampling by 16.
    */
-
-  uint32_t usartdiv8;
-  uint32_t cr1;
-  uint32_t brr;
 
   if (priv->usartbase == STM32_LPUART1_BASE)
     {
@@ -907,6 +933,13 @@ static void stm32wl5serial_setformat(struct uart_dev_s *dev)
 #endif
 
   stm32wl5serial_putreg(priv, STM32_USART_CR3_OFFSET, regval);
+
+  /* Restore UE */
+
+  regval = stm32wl5serial_getreg(priv, STM32_USART_CR1_OFFSET);
+  stm32wl5serial_putreg(priv, STM32_USART_CR1_OFFSET, regval | cr1_ue);
+
+  leave_critical_section(flags);
 }
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 

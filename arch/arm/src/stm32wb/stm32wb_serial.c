@@ -768,6 +768,33 @@ static void stm32_serial_setformat(struct uart_dev_s *dev)
 {
   struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
   uint32_t regval;
+  uint32_t cr1_ue;
+  irqstate_t flags;
+  int timeout;
+
+  /* Wait for any ongoing transmission to complete before disabling UE */
+
+  regval = stm32_serial_getreg(priv, STM32_USART_CR1_OFFSET);
+  if ((regval & (USART_CR1_UE | USART_CR1_TE)) ==
+      (USART_CR1_UE | USART_CR1_TE))
+    {
+      timeout = 50000;
+      while ((stm32_serial_getreg(priv, STM32_USART_ISR_OFFSET) &
+              USART_ISR_TC) == 0 && --timeout > 0)
+        {
+        }
+    }
+
+  flags = enter_critical_section();
+
+  /* Disable UE: the baud rate, parity and word length bits can not be
+   * written while UE = 1.
+   */
+
+  regval = stm32_serial_getreg(priv, STM32_USART_CR1_OFFSET);
+  cr1_ue = regval & USART_CR1_UE;
+  stm32_serial_putreg(priv, STM32_USART_CR1_OFFSET,
+                      regval & ~USART_CR1_UE);
 
   /* Set baud rate */
 
@@ -856,6 +883,13 @@ static void stm32_serial_setformat(struct uart_dev_s *dev)
 #endif
 
   stm32_serial_putreg(priv, STM32_USART_CR3_OFFSET, regval);
+
+  /* Restore UE */
+
+  regval = stm32_serial_getreg(priv, STM32_USART_CR1_OFFSET);
+  stm32_serial_putreg(priv, STM32_USART_CR1_OFFSET, regval | cr1_ue);
+
+  leave_critical_section(flags);
 }
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 

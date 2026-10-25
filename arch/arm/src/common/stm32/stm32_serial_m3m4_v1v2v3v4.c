@@ -1546,22 +1546,43 @@ static int up_dma_nextrx(struct up_dev_s *priv)
 static void up_set_format(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  uint32_t regval;
+  uint32_t brr;
+  irqstate_t flags;
 #if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
     defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
   uint32_t usartdiv8;
+  int timeout;
 #else
   uint32_t usartdiv32;
   uint32_t mantissa;
   uint32_t fraction;
 #endif
-  uint32_t regval;
-  uint32_t brr;
+
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
+  /* Wait for any ongoing transmission to complete before disabling UE */
+
+  regval = up_serialin(priv, STM32_USART_CR1_OFFSET);
+  if ((regval & (USART_CR1_UE | USART_CR1_TE)) ==
+      (USART_CR1_UE | USART_CR1_TE))
+    {
+      timeout = 50000;
+      while ((up_serialin(priv, STM32_USART_SR_OFFSET) &
+              USART_SR_TC) == 0 && --timeout > 0)
+        {
+        }
+    }
+#endif
+
+  flags = enter_critical_section();
 
   /* Load CR1 */
 
   regval = up_serialin(priv, STM32_USART_CR1_OFFSET);
 
-#if defined(CONFIG_STM32_STM32G4XXX)
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
   regval &= ~(USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
   up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
 #endif
@@ -1832,11 +1853,14 @@ static void up_set_format(struct uart_dev_s *dev)
 #endif
 
   up_serialout(priv, STM32_USART_CR3_OFFSET, regval);
-#if defined(CONFIG_STM32_STM32G4XXX)
-  regval      = up_serialin(priv, STM32_USART_CR1_OFFSET);
-  regval     |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
+  regval  = up_serialin(priv, STM32_USART_CR1_OFFSET);
+  regval |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
   up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
 #endif
+
+  leave_critical_section(flags);
 }
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 
