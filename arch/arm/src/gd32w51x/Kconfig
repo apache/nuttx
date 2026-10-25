@@ -373,3 +373,25 @@ config GD32W51X_PROGMEM_SIZE
 
 endmenu # Program memory Configuration
 
+menu "Power Management Configuration"
+	depends on PM
+
+config GD32W51X_PM_WAKEUP_MS
+	int "Wake-up period in standby (ms)"
+	default 1000
+	range 0 32000
+	depends on RTC
+	---help---
+		In the PM_STANDBY state the chip is in deep-sleep, where the
+		system timer stops.  Besides any EXTI interrupt, the RTC wake-up
+		timer ends the deep-sleep after this period, so that the timers
+		still run, late by at most this period.  0 disables it.
+
+config GD32W51X_PM_SERIAL_ACTIVITY
+	int "PM serial activity"
+	default 10
+	---help---
+		PM activity reported to the power management logic on every
+		received character.
+
+endmenu # Power Management Configuration

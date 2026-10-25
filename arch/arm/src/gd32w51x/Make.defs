@@ -24,7 +24,11 @@ include armv8-m/Make.defs
 
 CHIP_CSRCS  = gd32w51x_start.c gd32w51x_clockconfig.c gd32w51x_irq.c
 CHIP_CSRCS += gd32w51x_timerisr.c gd32w51x_lowputc.c gd32w51x_serial.c
-CHIP_CSRCS += gd32w51x_tzinit.c
+CHIP_CSRCS += gd32w51x_tzinit.c gd32w51x_idle.c
+
+ifeq ($(CONFIG_PM),y)
+CHIP_CSRCS += gd32w51x_pm.c
+endif
 
 ifeq ($(CONFIG_RTC),y)
 CHIP_CSRCS += gd32w51x_rtc.c
