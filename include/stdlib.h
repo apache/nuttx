@@ -171,6 +171,12 @@ long      random(void);
 void      arc4random_buf(FAR void *bytes, size_t nbytes);
 uint32_t  arc4random(void);
 
+/* System load */
+
+#ifdef CONFIG_HAVE_DOUBLE
+int       getloadavg(FAR double loadavg[], int nelem);
+#endif
+
 /* Environment variable support */
 
 FAR char ***get_environ_ptr(void);
