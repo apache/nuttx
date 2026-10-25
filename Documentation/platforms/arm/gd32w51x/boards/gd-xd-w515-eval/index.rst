@@ -57,7 +57,7 @@ USB detect     PC1 (micro-USB VBUS / 2)             /dev/gpio1 (interrupt)
 Charger IRQ    PB2                                  GD30BC2416 driver (*)
 Charger enable PC3 (CHRG_EN, active high)           Held high
 Analog inputs  PA1, PA2, PA3, PC2                   ADC channels 1/2/3/6 (*)
-GD-Link VBUS   PC0 (mini-USB VBUS / 2)              ADC channel 4 (unused)
+GD-Link VBUS   PC0 (mini-USB VBUS / 2)              ADC channel 4 (*)
 Microphone     PA15 (MIC_OUT)                       Digital input
 QSPI flash     PA4 (SCK), PA5 (CS)                  GD25Q128E, AF3
 QSPI flash     PA6, PA7, PB3, PB4                   IO0..IO3, AF3
@@ -67,8 +67,10 @@ QSPI flash     PA6, PA7, PB3, PB4                   IO0..IO3, AF3
 of the battery (PA2) and of the USB connector (PA3), each a 10 kOhm NTC
 with a 10 kOhm pull-up to 3.3 V, and the battery current (PC2): an
 INA181A1 (gain 20) on a 20 mOhm shunt with a 1.8 V offset, so
-``I = (V - 1.8) / 0.4`` A, negative while the battery charges. The battery
-voltage is only measured by the charger. PB2 is ``/dev/gpio3`` when the
+``I = (V - 1.8) / 0.4`` A, negative while the battery charges. PC0 is the
+GD-Link USB supply through a 10 kOhm / 10 kOhm divider: about 2.5 V with
+the GD-Link cable plugged in, near 0 V without it. The battery voltage is
+only measured by the charger. PB2 is ``/dev/gpio3`` when the
 charger driver is disabled.
 
 Fingerprint sensor
