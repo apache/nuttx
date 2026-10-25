@@ -405,6 +405,15 @@
 #  define ADC_DIFSEL_ALL_DIFF     0x7ffff
 #endif
 
+#if defined(HAVE_IP_ADC_V2) && \
+    (defined(CONFIG_STM32_ADC1_OVERSAMPLE) || \
+     defined(CONFIG_STM32_ADC2_OVERSAMPLE) || \
+     defined(CONFIG_STM32_ADC3_OVERSAMPLE) || \
+     defined(CONFIG_STM32_ADC4_OVERSAMPLE) || \
+     defined(CONFIG_STM32_ADC5_OVERSAMPLE))
+#  define ADC_HAVE_OVERSAMPLE
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -2907,6 +2916,83 @@ static void adc_dma_start(struct adc_dev_s *dev)
 }
 #endif /* ADC_HAVE_DMA */
 
+#ifdef ADC_HAVE_OVERSAMPLE
+/****************************************************************************
+ * Name: adc_oversample_set
+ *
+ * Description:
+ *   Configure the regular group hardware oversampler (CFGR2).  The fields
+ *   can only be written while ADSTART is 0, which is the case here because
+ *   the ADC is configured before the first conversion is started.
+ *
+ ****************************************************************************/
+
+static void adc_oversample_set(struct stm32_dev_s *priv)
+{
+  uint32_t regval = 0;
+
+  switch (priv->intf)
+    {
+#ifdef CONFIG_STM32_ADC1_OVERSAMPLE
+      case 1:
+        regval = ADC_CFGR2_ROVSE |
+                 (CONFIG_STM32_ADC1_OVSR << ADC_CFGR2_OVSR_SHIFT) |
+                 (CONFIG_STM32_ADC1_OVSS << ADC_CFGR2_OVSS_SHIFT);
+#  ifdef CONFIG_STM32_ADC1_TROVS
+        regval |= ADC_CFGR2_TROVS;
+#  endif
+        break;
+#endif
+#ifdef CONFIG_STM32_ADC2_OVERSAMPLE
+      case 2:
+        regval = ADC_CFGR2_ROVSE |
+                 (CONFIG_STM32_ADC2_OVSR << ADC_CFGR2_OVSR_SHIFT) |
+                 (CONFIG_STM32_ADC2_OVSS << ADC_CFGR2_OVSS_SHIFT);
+#  ifdef CONFIG_STM32_ADC2_TROVS
+        regval |= ADC_CFGR2_TROVS;
+#  endif
+        break;
+#endif
+#ifdef CONFIG_STM32_ADC3_OVERSAMPLE
+      case 3:
+        regval = ADC_CFGR2_ROVSE |
+                 (CONFIG_STM32_ADC3_OVSR << ADC_CFGR2_OVSR_SHIFT) |
+                 (CONFIG_STM32_ADC3_OVSS << ADC_CFGR2_OVSS_SHIFT);
+#  ifdef CONFIG_STM32_ADC3_TROVS
+        regval |= ADC_CFGR2_TROVS;
+#  endif
+        break;
+#endif
+#ifdef CONFIG_STM32_ADC4_OVERSAMPLE
+      case 4:
+        regval = ADC_CFGR2_ROVSE |
+                 (CONFIG_STM32_ADC4_OVSR << ADC_CFGR2_OVSR_SHIFT) |
+                 (CONFIG_STM32_ADC4_OVSS << ADC_CFGR2_OVSS_SHIFT);
+#  ifdef CONFIG_STM32_ADC4_TROVS
+        regval |= ADC_CFGR2_TROVS;
+#  endif
+        break;
+#endif
+#ifdef CONFIG_STM32_ADC5_OVERSAMPLE
+      case 5:
+        regval = ADC_CFGR2_ROVSE |
+                 (CONFIG_STM32_ADC5_OVSR << ADC_CFGR2_OVSR_SHIFT) |
+                 (CONFIG_STM32_ADC5_OVSS << ADC_CFGR2_OVSS_SHIFT);
+#  ifdef CONFIG_STM32_ADC5_TROVS
+        regval |= ADC_CFGR2_TROVS;
+#  endif
+        break;
+#endif
+      default:
+        break;
+    }
+
+  adc_modifyreg(priv, STM32_ADC_CFGR2_OFFSET,
+                ADC_CFGR2_ROVSE | ADC_CFGR2_OVSR_MASK |
+                ADC_CFGR2_OVSS_MASK | ADC_CFGR2_TROVS, regval);
+}
+#endif /* ADC_HAVE_OVERSAMPLE */
+
 /****************************************************************************
  * Name: adc_configure
  ****************************************************************************/
@@ -2990,6 +3076,12 @@ static void adc_configure(struct adc_dev_s *dev)
   /* Configure differential mode */
 
   adc_putreg(priv, STM32_ADC_DIFSEL_OFFSET, priv->difsel);
+#endif
+
+#ifdef ADC_HAVE_OVERSAMPLE
+  /* Configure hardware oversampling */
+
+  adc_oversample_set(priv);
 #endif
 
   /* Enable ADC */
