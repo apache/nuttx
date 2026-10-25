@@ -900,171 +900,171 @@ static int wdog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-    /* cmd:         WDIOC_START
-     * Description: Start the watchdog timer
-     * Argument:    Ignored
-     */
+      /* cmd:         WDIOC_START
+       * Description: Start the watchdog timer
+       * Argument:    Ignored
+       */
 
-    case WDIOC_START:
-      {
+      case WDIOC_START:
+        {
 #ifdef CONFIG_WATCHDOG_AUTOMONITOR
-        watchdog_automonitor_stop(upper);
+          watchdog_automonitor_stop(upper);
 #endif
 
-        /* Start the watchdog timer, resetting the time to the current
-         * timeout
-         */
+          /* Start the watchdog timer, resetting the time to the current
+           * timeout
+           */
 
-        DEBUGASSERT(lower->ops->start); /* Required */
-        ret = lower->ops->start(lower);
-      }
-      break;
+          DEBUGASSERT(lower->ops->start); /* Required */
+          ret = lower->ops->start(lower);
+        }
+        break;
 
-    /* cmd:         WDIOC_STOP
-     * Description: Stop the watchdog timer
-     * Argument:    Ignored
-     */
+      /* cmd:         WDIOC_STOP
+       * Description: Stop the watchdog timer
+       * Argument:    Ignored
+       */
 
-    case WDIOC_STOP:
-      {
-        /* Stop the watchdog timer */
+      case WDIOC_STOP:
+        {
+          /* Stop the watchdog timer */
 
-        DEBUGASSERT(lower->ops->stop); /* Required */
-        ret = lower->ops->stop(lower);
-      }
-      break;
+          DEBUGASSERT(lower->ops->stop); /* Required */
+          ret = lower->ops->stop(lower);
+        }
+        break;
 
-    /* cmd:         WDIOC_GETSTATUS
-     * Description: Get the status of the watchdog timer.
-     * Argument:    A writeable pointer to struct watchdog_status_s.
-     */
+      /* cmd:         WDIOC_GETSTATUS
+       * Description: Get the status of the watchdog timer.
+       * Argument:    A writeable pointer to struct watchdog_status_s.
+       */
 
-    case WDIOC_GETSTATUS:
-      {
-        FAR struct watchdog_status_s *status;
+      case WDIOC_GETSTATUS:
+        {
+          FAR struct watchdog_status_s *status;
 
-        /* Get the current watchdog timer status */
+          /* Get the current watchdog timer status */
 
-        if (lower->ops->getstatus) /* Optional */
-          {
-            status = (FAR struct watchdog_status_s *)((uintptr_t)arg);
-            if (status)
-              {
-                ret = lower->ops->getstatus(lower, status);
-              }
-            else
-              {
-                ret = -EINVAL;
-              }
-          }
-        else
-          {
-            ret = -ENOSYS;
-          }
-      }
-      break;
+          if (lower->ops->getstatus) /* Optional */
+            {
+              status = (FAR struct watchdog_status_s *)((uintptr_t)arg);
+              if (status)
+                {
+                  ret = lower->ops->getstatus(lower, status);
+                }
+              else
+                {
+                  ret = -EINVAL;
+                }
+            }
+          else
+            {
+              ret = -ENOSYS;
+            }
+        }
+        break;
 
-    /* cmd:         WDIOC_SETTIMEOUT
-     * Description: Reset the watchdog timeout to this value
-     * Argument:    A 32-bit timeout value in milliseconds.
-     */
+      /* cmd:         WDIOC_SETTIMEOUT
+       * Description: Reset the watchdog timeout to this value
+       * Argument:    A 32-bit timeout value in milliseconds.
+       */
 
-    case WDIOC_SETTIMEOUT:
-      {
-        /* Set a new timeout value (and reset the watchdog timer) */
+      case WDIOC_SETTIMEOUT:
+        {
+          /* Set a new timeout value (and reset the watchdog timer) */
 
-        if (lower->ops->settimeout) /* Optional */
-          {
-            ret = lower->ops->settimeout(lower, (uint32_t)arg);
-          }
-        else
-          {
-            ret = -ENOSYS;
-          }
-      }
-      break;
+          if (lower->ops->settimeout) /* Optional */
+            {
+              ret = lower->ops->settimeout(lower, (uint32_t)arg);
+            }
+          else
+            {
+              ret = -ENOSYS;
+            }
+        }
+        break;
 
-    /* cmd:         WDIOC_CAPTURE
-     * Description: Do not reset.  Instead, called this handler.
-     * Argument:    A pointer to struct watchdog_capture_s.
-     */
+      /* cmd:         WDIOC_CAPTURE
+       * Description: Do not reset.  Instead, called this handler.
+       * Argument:    A pointer to struct watchdog_capture_s.
+       */
 
-    case WDIOC_CAPTURE:
-      {
-        FAR struct watchdog_capture_s *capture;
+      case WDIOC_CAPTURE:
+        {
+          FAR struct watchdog_capture_s *capture;
 
-        /* Don't reset on watchdog timer timeout; instead, call this user
-         * provider timeout handler.  NOTE:  Providing handler==NULL will
-         * restore the reset behavior.
-         */
+          /* Don't reset on watchdog timer timeout; instead, call this user
+           * provider timeout handler.  NOTE:  Providing handler==NULL will
+           * restore the reset behavior.
+           */
 
-        if (lower->ops->capture) /* Optional */
-          {
-            capture = (FAR struct watchdog_capture_s *)((uintptr_t)arg);
-            if (capture)
-              {
-                capture->oldhandler =
-                  lower->ops->capture(lower, capture->newhandler);
-                ret = OK;
-              }
-            else
-              {
-                ret = -EINVAL;
-              }
-          }
-        else
-          {
-            ret = -ENOSYS;
-          }
-      }
-      break;
+          if (lower->ops->capture) /* Optional */
+            {
+              capture = (FAR struct watchdog_capture_s *)((uintptr_t)arg);
+              if (capture)
+                {
+                  capture->oldhandler =
+                    lower->ops->capture(lower, capture->newhandler);
+                  ret = OK;
+                }
+              else
+                {
+                  ret = -EINVAL;
+                }
+            }
+          else
+            {
+              ret = -ENOSYS;
+            }
+        }
+        break;
 
-    /* cmd:         WDIOC_KEEPALIVE
-     * Description: Reset the watchdog timer ("ping", "pet the dog")
-     * Argument:    Argument: Ignored
-     */
+      /* cmd:         WDIOC_KEEPALIVE
+       * Description: Reset the watchdog timer ("ping", "pet the dog")
+       * Argument:    Argument: Ignored
+       */
 
-    case WDIOC_KEEPALIVE:
-      {
-        /* Reset the watchdog timer to the current timeout value, prevent
-         * any imminent watchdog timeouts.  This is sometimes referred as
-         * "pinging" the watchdog timer or "petting the dog".
-         */
+      case WDIOC_KEEPALIVE:
+        {
+          /* Reset the watchdog timer to the current timeout value, prevent
+           * any imminent watchdog timeouts.  This is sometimes referred as
+           * "pinging" the watchdog timer or "petting the dog".
+           */
 
-        if (lower->ops->keepalive) /* Optional */
-          {
-            ret = lower->ops->keepalive(lower);
-          }
-        else
-          {
-            ret = -ENOSYS;
-          }
-      }
-      break;
+          if (lower->ops->keepalive) /* Optional */
+            {
+              ret = lower->ops->keepalive(lower);
+            }
+          else
+            {
+              ret = -ENOSYS;
+            }
+        }
+        break;
 
-    /* Any unrecognized IOCTL commands might be platform-specific ioctl
-     * commands
-     */
+      /* Any unrecognized IOCTL commands might be platform-specific ioctl
+       * commands
+       */
 
-    default:
-      {
-        wdinfo("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
+      default:
+        {
+          wdinfo("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
 
-        /* An ioctl commands that are not recognized by the "upper-half"
-         * driver are forwarded to the lower half driver through this
-         * method.
-         */
+          /* An ioctl commands that are not recognized by the "upper-half"
+           * driver are forwarded to the lower half driver through this
+           * method.
+           */
 
-        if (lower->ops->ioctl) /* Optional */
-          {
-            ret = lower->ops->ioctl(lower, cmd, arg);
-          }
-        else
-          {
-            ret = -ENOTTY;
-          }
-      }
-      break;
+          if (lower->ops->ioctl) /* Optional */
+            {
+              ret = lower->ops->ioctl(lower, cmd, arg);
+            }
+          else
+            {
+              ret = -ENOTTY;
+            }
+        }
+        break;
     }
 
   nxmutex_unlock(&upper->lock);
