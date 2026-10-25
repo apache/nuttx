@@ -36,6 +36,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/power/pm.h>
 #include <nuttx/serial/serial.h>
 
 #include <arch/board/board.h>
@@ -577,6 +578,12 @@ static int gd32vw55x_interrupt(int irq, void *context, void *arg)
   if ((status & UART_STAT_RBNE) != 0 &&
       (priv->im & UART_CTL0_RBNEIE) != 0)
     {
+#ifdef CONFIG_PM
+      /* Keep the system awake while characters are received */
+
+      pm_activity(PM_IDLE_DOMAIN, CONFIG_GD32VW55X_PM_SERIAL_ACTIVITY);
+#endif
+
       uart_recvchars(dev);
     }
 
@@ -590,6 +597,9 @@ static int gd32vw55x_interrupt(int irq, void *context, void *arg)
 
       if (priv->rxenable && gd32vw55x_dma_rxavailable(dev))
         {
+#ifdef CONFIG_PM
+          pm_activity(PM_IDLE_DOMAIN, CONFIG_GD32VW55X_PM_SERIAL_ACTIVITY);
+#endif
           uart_recvchars(dev);
         }
     }
@@ -799,6 +809,9 @@ static void gd32vw55x_dma_rxcallback(DMA_HANDLE handle, uint16_t status,
 
   if (priv->rxenable && gd32vw55x_dma_rxavailable(dev))
     {
+#ifdef CONFIG_PM
+      pm_activity(PM_IDLE_DOMAIN, CONFIG_GD32VW55X_PM_SERIAL_ACTIVITY);
+#endif
       uart_recvchars(dev);
     }
 }

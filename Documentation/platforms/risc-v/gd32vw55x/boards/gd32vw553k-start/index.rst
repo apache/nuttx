@@ -424,6 +424,38 @@ the next boot format it again::
    Erase only the progmem region.  The NVDS lives immediately above it, at
    0x083fb000, and holds the BLE bonding data.
 
+pm
+--
+
+NSH with the power management (``CONFIG_PM``, activity governor) and the
+RTC.  After a few seconds without activity the governor selects
+``PM_STANDBY``, which is the deep-sleep mode of the GD32VW55x: the core and
+bus clocks stop, the SRAM and the registers keep their contents.  The RTC
+wake-up timer ends the deep-sleep at the next system timer event, at most
+``CONFIG_GD32VW55X_PM_WAKEUP_MS`` (1 s) later, and so does any EXTI
+interrupt.  On the way out the PLL is set up again and the system timer is
+advanced by the time spent asleep, measured on the RTC calendar.  The
+system time then follows the IRC32K while the board sleeps (within about
+0.1 percent here, the board has no 32.768 kHz crystal), and the timers keep
+their time.  A character received while the board sleeps is lost: press
+Enter until NSH answers, then the console activity keeps the board awake.
+The radios are not supported in deep-sleep.
+
+::
+
+    nsh> cat /proc/pm/state0
+    DOMAIN0                   WAKE           SLEEP          TOTAL
+    normal                   18s  10%        9s   5%       27s  15%
+    idle                      9s   5%        0s   0%        9s   5%
+    standby                 134s  78%        0s   0%      134s  78%
+    sleep                     0s   0%        0s   0%        0s   0%
+
+.. note::
+   The debug module does not answer while the core is in deep-sleep, so
+   OpenOCD fails to examine a sleeping board.  Keep the board awake by
+   pressing Enter on the console (or by sending characters in a loop) while
+   it is programmed, or press RESET right before.
+
 sta_softap
 ----------
 

@@ -34,9 +34,13 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/clock.h>
+#include <nuttx/irq.h>
 
 #include "riscv_internal.h"
 #include "gd32vw55x_clockconfig.h"
+#include "gd32vw55x_pm.h"
+#include "hardware/gd32vw55x_exti.h"
 #include "hardware/gd32vw55x_rcu.h"
 #include "chip.h"
 
@@ -53,14 +57,25 @@
 #define GD32VW55X_RTC_CTL       (GD32VW55X_RTC_BASE + 0x0008)
 #define GD32VW55X_RTC_STAT      (GD32VW55X_RTC_BASE + 0x000c)
 #define GD32VW55X_RTC_PSC       (GD32VW55X_RTC_BASE + 0x0010)
+#define GD32VW55X_RTC_WUT       (GD32VW55X_RTC_BASE + 0x0014)
 #define GD32VW55X_RTC_WPK       (GD32VW55X_RTC_BASE + 0x0024)
 #define GD32VW55X_RTC_SS        (GD32VW55X_RTC_BASE + 0x0028)
 
+/* CTL bits */
+
+#define RTC_CTL_WTCS_MASK       (7 << 0)   /* Wake-up timer clock */
+#define RTC_CTL_WTCS_DIV16      (0 << 0)   /* RTC clock / 16 */
+#define RTC_CTL_BPSHAD          (1 << 5)   /* Bypass the shadow registers */
+#define RTC_CTL_WTEN            (1 << 10)  /* Wake-up timer enable */
+#define RTC_CTL_WTIE            (1 << 14)  /* Wake-up timer interrupt */
+
 /* STAT bits */
 
+#define RTC_STAT_WTWF           (1 << 2)   /* Wake-up timer writable */
 #define RTC_STAT_RSYNF          (1 << 5)   /* Registers synchronized */
 #define RTC_STAT_INITF          (1 << 6)   /* In initialization state */
 #define RTC_STAT_INITM          (1 << 7)   /* Enter initialization mode */
+#define RTC_STAT_WTF            (1 << 10)  /* Wake-up timer flag */
 
 /* Write-protection key sequence */
 
@@ -68,14 +83,16 @@
 #define RTC_UNLOCK_KEY2         0x53
 #define RTC_LOCK_KEY            0xff
 
-/* IRC32K (32 kHz): async 32, sync 1000 -> 1 Hz calendar clock.
- * Matches the vendor SDK rtc_pre_config().
+/* IRC32K (32 kHz): async 2, sync 16000 -> 1 Hz calendar clock.  The
+ * small asynchronous prescaler gives sub-second units of about 60 us, which
+ * measure the time spent in deep-sleep.
  */
 
-#define RTC_PSC_FACTOR_A        0x1f
-#define RTC_PSC_FACTOR_S        0x3e7
+#define RTC_PSC_FACTOR_A        0x01
+#define RTC_PSC_FACTOR_S        0x3e7f
 #define RTC_PSC_FACTOR_A_SHIFT  16
 #define RTC_PSC_FACTOR_A_MASK   0x7f
+#define RTC_PSC_FACTOR_S_MASK   0x7fff
 #define RTC_SS_MASK             0xffff
 
 /* The IRC32K is off by a few percent.  Its frequency is measured against
@@ -115,6 +132,14 @@
 
 #define GD32VW55X_PMU_CTL0      (GD32VW55X_PMU_BASE + 0x0000)
 #define PMU_CTL0_BKPWEN         (1 << 8)
+
+/* The wake-up timer counts the RTC clock divided by 16, with a 16-bit
+ * reload value.  Its interrupt goes through EXTI line 21.
+ */
+
+#define RTC_WUT_DIV             16
+#define RTC_WUT_MAX             0xffff
+#define RTC_WKUP_EXTI_LINE      (1 << 21)
 
 /* BCD helpers */
 
@@ -263,6 +288,23 @@ static uint32_t rtc_sync_prescaler(void)
 
   return (freq + (RTC_PSC_FACTOR_A + 1) / 2) / (RTC_PSC_FACTOR_A + 1) - 1;
 }
+
+/****************************************************************************
+ * Name: rtc_wakeup_interrupt
+ *
+ * Description:
+ *   The RTC wake-up timer interrupt: its only job is to end deep-sleep.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static int rtc_wakeup_interrupt(int irq, void *context, void *arg)
+{
+  modifyreg32(GD32VW55X_RTC_STAT, RTC_STAT_WTF, 0);
+  putreg32(RTC_WKUP_EXTI_LINE, GD32VW55X_EXTI_PD);
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -446,6 +488,151 @@ int up_rtc_settime(const struct timespec *tp)
   rtc_lock();
 
   return rtc_synchwait();
+}
+
+/****************************************************************************
+ * Name: gd32vw55x_rtc_setwakeup
+ *
+ * Description:
+ *   Start the RTC wake-up timer to raise its interrupt (EXTI line 21) in
+ *   'usec' microseconds, at most about 30 s, or stop it if 'usec' is 0.
+ *
+ ****************************************************************************/
+
+int gd32vw55x_rtc_setwakeup(uint32_t usec)
+{
+  uint32_t psc;
+  uint32_t hz;
+  uint64_t ticks;
+  int timeout;
+  int ret = OK;
+
+#ifdef CONFIG_PM
+  static bool attached;
+
+  if (!attached)
+    {
+      irq_attach(GD32VW55X_IRQ_RTC_WKUP, rtc_wakeup_interrupt, NULL);
+      up_enable_irq(GD32VW55X_IRQ_RTC_WKUP);
+      attached = true;
+    }
+#endif
+
+  rtc_unlock();
+
+  /* Stop the timer, then wait until its reload value can be written */
+
+  modifyreg32(GD32VW55X_RTC_CTL, RTC_CTL_WTEN | RTC_CTL_WTIE, 0);
+  modifyreg32(GD32VW55X_RTC_STAT, RTC_STAT_WTF, 0);
+  modifyreg32(GD32VW55X_EXTI_INTEN, RTC_WKUP_EXTI_LINE, 0);
+  putreg32(RTC_WKUP_EXTI_LINE, GD32VW55X_EXTI_PD);
+
+  if (usec > 0)
+    {
+      for (timeout = 1000000; timeout > 0; timeout--)
+        {
+          if ((getreg32(GD32VW55X_RTC_STAT) & RTC_STAT_WTWF) != 0)
+            {
+              break;
+            }
+        }
+
+      if (timeout <= 0)
+        {
+          ret = -ETIMEDOUT;
+        }
+      else
+        {
+          /* The RTC clock is the calendar clock times the prescalers, the
+           * timer counts the reload value plus one clock down to 0.
+           */
+
+          psc   = getreg32(GD32VW55X_RTC_PSC);
+          hz    = (((psc >> RTC_PSC_FACTOR_A_SHIFT) &
+                    RTC_PSC_FACTOR_A_MASK) + 1) *
+                  ((psc & RTC_PSC_FACTOR_S_MASK) + 1);
+          ticks = ((uint64_t)usec * (hz / RTC_WUT_DIV)) / USEC_PER_SEC;
+          ticks = MAX(MIN(ticks, RTC_WUT_MAX), 1);
+
+          putreg32((uint32_t)ticks - 1, GD32VW55X_RTC_WUT);
+          modifyreg32(GD32VW55X_RTC_CTL, RTC_CTL_WTCS_MASK,
+                      RTC_CTL_WTCS_DIV16);
+
+          modifyreg32(GD32VW55X_EXTI_RTEN, 0, RTC_WKUP_EXTI_LINE);
+          modifyreg32(GD32VW55X_EXTI_INTEN, 0, RTC_WKUP_EXTI_LINE);
+          modifyreg32(GD32VW55X_RTC_CTL, 0, RTC_CTL_WTIE | RTC_CTL_WTEN);
+        }
+    }
+
+  rtc_lock();
+  return ret;
+}
+
+/****************************************************************************
+ * Name: gd32vw55x_rtc_timeofday
+ *
+ * Description:
+ *   Wait for the start of the next sub-second unit of the calendar, and
+ *   return the time of day in these units, and their frequency in 'hz'.
+ *   The time is right after deep-sleep, without waiting for the shadow
+ *   registers.
+ *
+ ****************************************************************************/
+
+uint32_t gd32vw55x_rtc_timeofday(uint32_t *hz)
+{
+  uint32_t sync = getreg32(GD32VW55X_RTC_PSC) & RTC_PSC_FACTOR_S_MASK;
+  uint32_t start = getreg32(GD32VW55X_RTC_MTIME);
+  uint32_t prevss;
+  uint32_t prevtime;
+  uint32_t ss;
+  uint32_t time;
+  int i;
+
+  /* Read the calendar counters, not the shadow registers: these are only
+   * updated every two RTC clocks, and not in deep-sleep.
+   */
+
+  rtc_unlock();
+  modifyreg32(GD32VW55X_RTC_CTL, 0, RTC_CTL_BPSHAD);
+
+  /* Wait for the next sub-second unit */
+
+  prevss = getreg32(GD32VW55X_RTC_SS) & RTC_SS_MASK;
+  while ((getreg32(GD32VW55X_RTC_SS) & RTC_SS_MASK) == prevss &&
+         getreg32(GD32VW55X_RTC_MTIME) - start <= RTC_CALIB_TIMEOUT)
+    {
+    }
+
+  /* The counters may change between two reads: read them until the same
+   * values come twice.
+   */
+
+  ss   = getreg32(GD32VW55X_RTC_SS) & RTC_SS_MASK;
+  time = getreg32(GD32VW55X_RTC_TIME);
+
+  for (i = 0; i < 3; i++)
+    {
+      prevss   = ss;
+      prevtime = time;
+      ss       = getreg32(GD32VW55X_RTC_SS) & RTC_SS_MASK;
+      time     = getreg32(GD32VW55X_RTC_TIME);
+
+      if (ss == prevss && time == prevtime)
+        {
+          break;
+        }
+    }
+
+  modifyreg32(GD32VW55X_RTC_CTL, RTC_CTL_BPSHAD, 0);
+  rtc_lock();
+
+  ss   = MIN(ss, sync);
+  *hz  = sync + 1;
+
+  return (BCD2DEC((time >> 16) & 0x3f) * SEC_PER_HOUR +
+          BCD2DEC((time >> 8) & 0x7f) * SEC_PER_MIN +
+          BCD2DEC(time & 0x7f)) * (sync + 1) + (sync - ss);
 }
 
 #endif /* CONFIG_RTC */

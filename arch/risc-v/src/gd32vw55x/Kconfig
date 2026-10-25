@@ -356,6 +356,32 @@ config GD32VW55X_PROGMEM_SIZE
 
 endmenu # Program memory Configuration
 
+menu "Power Management Configuration"
+	depends on PM
+
+config GD32VW55X_PM_WAKEUP_MS
+	int "Longest deep-sleep (ms)"
+	default 1000
+	range 2 29000
+	depends on RTC
+	---help---
+		In the PM_STANDBY state the chip is in deep-sleep, where the
+		system timer stops.  The RTC wake-up timer ends the deep-sleep
+		at the next timer event, or after this period if it comes
+		later, and the time spent asleep is added to the system timer.
+		Besides, any EXTI interrupt wakes the chip up.  Without the RTC
+		the core only waits for an interrupt.  The radios are not
+		supported in deep-sleep.
+
+config GD32VW55X_PM_SERIAL_ACTIVITY
+	int "PM serial activity"
+	default 10
+	---help---
+		PM activity reported to the power management logic on every
+		received character.
+
+endmenu # Power Management Configuration
+
 menuconfig GD32VW55X_WIFI
 	bool "Wi-Fi 802.11ax support"
 	default n

@@ -33,6 +33,11 @@ CHIP_CSRCS  = gd32vw55x_allocateheap.c gd32vw55x_clockconfig.c
 CHIP_CSRCS += gd32vw55x_irq.c gd32vw55x_irq_dispatch.c
 CHIP_CSRCS += gd32vw55x_lowputc.c gd32vw55x_serial.c
 CHIP_CSRCS += gd32vw55x_start.c gd32vw55x_timerisr.c
+CHIP_CSRCS += gd32vw55x_idle.c
+
+ifeq ($(CONFIG_PM),y)
+CHIP_CSRCS += gd32vw55x_pm.c
+endif
 
 ifeq ($(CONFIG_RTC),y)
 CHIP_CSRCS += gd32vw55x_rtc.c
