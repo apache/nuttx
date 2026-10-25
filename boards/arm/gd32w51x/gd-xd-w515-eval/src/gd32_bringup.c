@@ -152,13 +152,14 @@ int gd32_bringup(void)
   struct battery_charger_dev_s *charger;
 #endif
 #ifdef CONFIG_GD32W51X_ADC
-  /* The analog inputs: NTC_COIL (PA1), NTC_Battery (PA2), NTC_USB (PA3)
-   * and the battery current (PC2, ADC_I_VBAT)
+  /* The analog inputs: NTC_COIL (PA1), NTC_Battery (PA2), NTC_USB (PA3),
+   * the GD-Link USB supply halved by a 10 kOhm / 10 kOhm divider
+   * (PC0, INT_VBUS2/2) and the battery current (PC2, ADC_I_VBAT)
    */
 
   static const uint8_t chanlist[] =
   {
-    1, 2, 3, 6
+    1, 2, 3, 4, 6
   };
 
   struct adc_dev_s *adc;
