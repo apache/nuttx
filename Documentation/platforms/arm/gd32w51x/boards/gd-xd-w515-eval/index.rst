@@ -262,3 +262,28 @@ reboot:
     nsh> echo hello > /flash/hello.txt
     nsh> cat /flash/hello.txt
     hello
+
+pm
+--
+
+NSH with the power management (``CONFIG_PM``, activity governor) and the
+RTC.  After a few seconds without activity the governor selects
+``PM_STANDBY``, which is the deep-sleep mode of the GD32W51x: the core and
+bus clocks stop, the SRAM and the registers keep their contents.  The chip
+wakes up on any EXTI interrupt and on the RTC wake-up timer every
+``CONFIG_GD32W51X_PM_WAKEUP_MS`` (1 s), sets the PLL up again and corrects
+the system time with the time spent asleep, read from the RTC with its
+sub-second counter.  Timers may run late by up to that period while the
+board sleeps, and a character received while the board sleeps is lost:
+press Enter until NSH answers, then the console activity keeps the board
+awake.  The debugger connection is kept in deep-sleep, so a sleeping board
+can still be programmed.
+
+::
+
+    nsh> cat /proc/pm/state0
+    DOMAIN0                   WAKE           SLEEP          TOTAL
+    normal                   20s  17%        1s   0%       21s  18%
+    idle                     15s  13%        0s   0%       15s  13%
+    standby                  76s  67%        0s   0%       76s  67%
+    sleep                     0s   0%        0s   0%        0s   0%

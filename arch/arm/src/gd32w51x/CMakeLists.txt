@@ -28,7 +28,12 @@ set(SRCS
     gd32w51x_lowputc.c
     gd32w51x_serial.c
     gd32w51x_tzinit.c
+    gd32w51x_idle.c
     gd32w51x_gpio.c)
+
+if(CONFIG_PM)
+  list(APPEND SRCS gd32w51x_pm.c)
+endif()
 
 if(CONFIG_RTC)
   list(APPEND SRCS gd32w51x_rtc.c)

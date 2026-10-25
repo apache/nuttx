@@ -37,6 +37,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
+#include <nuttx/power/pm.h>
 
 #include <arch/board/board.h>
 
@@ -355,6 +356,12 @@ static int gd32w51x_interrupt(int irq, void *context, void *arg)
   if ((status & UART_STAT_RBNE) != 0 &&
       (priv->im & UART_CTL0_RBNEIE) != 0)
     {
+#ifdef CONFIG_PM
+      /* Keep the system awake while characters are received */
+
+      pm_activity(PM_IDLE_DOMAIN, CONFIG_GD32W51X_PM_SERIAL_ACTIVITY);
+#endif
+
       uart_recvchars(dev);
     }
 
