@@ -98,9 +98,15 @@
 
 #ifdef CONFIG_GD32VW55X_SPI_DMA
 
-/* The DMA interrupts that are enabled while an SPI DMA is in progress */
+/* The DMA interrupts that are enabled while an SPI DMA is in progress:
+ * the end of the transfer and the access error.  The callback wakes the
+ * waiter on any interrupt, so the half transfer interrupt must stay off,
+ * or the exchange would end while the second half is still on the wire,
+ * and so must the single data mode exception, which a receive request
+ * raises when it waits for the bus and which does not stop the transfer.
+ */
 
-#  define SPI_DMA_INTEN         (DMA_INT_MASK)
+#  define SPI_DMA_INTEN         (DMA_CHXCTL_FTFIE | DMA_CHXCTL_TAEIE)
 
 /* SPI DMA priority */
 
@@ -627,24 +633,24 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
     {
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CKPL=0, CKPH=0 */
-          setbits = 0;
-          break;
+          case SPIDEV_MODE0: /* CKPL=0, CKPH=0 */
+            setbits = 0;
+            break;
 
-        case SPIDEV_MODE1: /* CKPL=0, CKPH=1 */
-          setbits = SPI_CTL0_CKPH;
-          break;
+          case SPIDEV_MODE1: /* CKPL=0, CKPH=1 */
+            setbits = SPI_CTL0_CKPH;
+            break;
 
-        case SPIDEV_MODE2: /* CKPL=1, CKPH=0 */
-          setbits = SPI_CTL0_CKPL;
-          break;
+          case SPIDEV_MODE2: /* CKPL=1, CKPH=0 */
+            setbits = SPI_CTL0_CKPL;
+            break;
 
-        case SPIDEV_MODE3: /* CKPL=1, CKPH=1 */
-          setbits = SPI_CTL0_CKPH | SPI_CTL0_CKPL;
-          break;
+          case SPIDEV_MODE3: /* CKPL=1, CKPH=1 */
+            setbits = SPI_CTL0_CKPH | SPI_CTL0_CKPL;
+            break;
 
-        default:
-          return;
+          default:
+            return;
         }
 
       /* The clock configuration can only be changed while the SPI is
