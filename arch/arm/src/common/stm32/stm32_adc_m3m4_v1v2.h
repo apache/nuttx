@@ -2296,6 +2296,14 @@ struct stm32_adc_ops_s
   /* Enable/disable ADC */
 
   void (*enable)(struct stm32_adc_dev_s *dev, bool enable);
+
+#ifdef HAVE_IP_ADC_V2
+  /* Recalibrate the ADC (ADCAL).  Returns -EBUSY while a conversion is
+   * running; the caller has to stop it first.
+   */
+
+  int  (*calibrate)(struct stm32_adc_dev_s *dev);
+#endif
 };
 
 #endif /* CONFIG_STM32_ADC_LL_OPS */
