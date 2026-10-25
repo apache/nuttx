@@ -474,18 +474,6 @@ struct net_driver_s
 
   FAR uint8_t *d_appdata;
 
-#ifdef CONFIG_NET_TCPURGDATA
-  /* This pointer points to any urgent TCP data that has been received. Only
-   * present if compiled with support for urgent data(CONFIG_NET_TCPURGDATA).
-   */
-
-  FAR uint8_t *d_urgdata;
-
-  /* Length of the (received) urgent data */
-
-  uint16_t d_urglen;
-#endif
-
 /* The length of the packet in the d_buf buffer.
  *
  * Holds the length of the packet in the d_buf buffer.

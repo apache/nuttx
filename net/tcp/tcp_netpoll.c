@@ -88,6 +88,15 @@ static uint32_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
           eventset |= POLLIN;
         }
 
+#ifdef CONFIG_NET_TCPURGDATA
+      if ((info->fds->events & POLLPRI) != 0 &&
+          ((flags & TCP_URGDATA) != 0 ||
+           info->conn->urg_state == TCP_URG_VALID))
+        {
+          eventset |= POLLPRI;
+        }
+#endif
+
       /* Non-blocking connection */
 
       if ((flags & TCP_CONNECTED) != 0)
@@ -302,6 +311,13 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
       cb->flags |= TCP_NEWDATA | TCP_BACKLOG | TCP_RXCLOSE;
     }
 
+#ifdef CONFIG_NET_TCPURGDATA
+  if ((fds->events & POLLPRI) != 0)
+    {
+      cb->flags |= TCP_URGDATA | TCP_RXCLOSE;
+    }
+#endif
+
   /* Save the reference in the poll info structure as fds private as well
    * for use during poll teardown as well.
    */
@@ -317,6 +333,13 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
       eventset |= POLLRDNORM;
     }
+
+#ifdef CONFIG_NET_TCPURGDATA
+  if ((fds->events & POLLPRI) != 0 && conn->urg_state == TCP_URG_VALID)
+    {
+      eventset |= POLLPRI;
+    }
+#endif
 
   /* Check for a loss of connection events.  We need to be careful here.
    * There are four possibilities:

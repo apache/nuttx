@@ -413,6 +413,8 @@ static uint32_t tcp_recvhandler(FAR struct net_driver_s *dev,
 
           if ((flags & TCP_ACKDATA) != 0)
             {
+              int ret;
+
               iob = iob_tryalloc(false);
               if (iob == NULL)
                 {
@@ -421,9 +423,8 @@ static uint32_t tcp_recvhandler(FAR struct net_driver_s *dev,
                 }
 
               iob_reserve(iob, CONFIG_NET_LL_GUARDSIZE);
-              int ret = iob_clone_partial(dev->d_iob, dev->d_iob->io_pktlen,
-                                          0, iob, 0, false, false);
-
+              ret = iob_clone_partial(dev->d_iob, dev->d_iob->io_pktlen,
+                                      0, iob, 0, false, false);
               if (ret < 0)
                 {
                   iob_free_chain(iob);
@@ -686,6 +687,160 @@ static void tcp_notify_recvcpu(FAR struct tcp_conn_s *conn)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_TCPURGDATA
+/****************************************************************************
+ * Name: tcp_oob_eventhandler
+ *
+ * Description:
+ *   Callback to wake up a thread waiting for urgent data arrival.
+ *
+ ****************************************************************************/
+
+static uint32_t tcp_oob_eventhandler(FAR struct net_driver_s *dev,
+                                     FAR void *pvpriv, uint32_t flags)
+{
+  FAR struct tcp_recvfrom_s *pstate = pvpriv;
+
+  if (pstate != NULL)
+    {
+      if ((flags & (TCP_URGDATA | TCP_RXCLOSE | TCP_DISCONN_EVENTS)) != 0)
+        {
+          nxsem_post(&pstate->ir_sem);
+        }
+    }
+
+  return flags;
+}
+
+/****************************************************************************
+ * Name: tcp_recv_oob
+ *
+ * Description:
+ *   Receive urgent (out-of-band) data from the connection.
+ *   POSIX/BSD semantics:
+ *   - Return -EINVAL if buf is NULL.
+ *   - Return 0 if len == 0.
+ *   - Return 1 with urgent byte if urgent data is available (TCP_URG_VALID).
+ *   - If TCP_URG_AWAITING:
+ *     - If non-blocking, return -EAGAIN.
+ *     - If blocking, wait for arrival or timeout/disconnect.
+ *   - Return -EINVAL if no urgent data has arrived or it was already read.
+ *
+ * Input Parameters:
+ *   conn    The TCP connection of interest
+ *   buf     The buffer to receive the data
+ *   len     The length of the buffer
+ *   flags   Receive flags
+ *
+ * Returned Value:
+ *   Number of bytes received or negated errno value
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static ssize_t tcp_recv_oob(FAR struct tcp_conn_s *conn, FAR void *buf,
+                            size_t len, int flags)
+{
+  struct tcp_recvfrom_s state;
+  struct tcp_callback_s info;
+  ssize_t ret;
+
+  if (buf == NULL)
+    {
+      return -EINVAL;
+    }
+
+  if (len == 0)
+    {
+      return 0;
+    }
+
+  if (_SO_GETOPT(conn->sconn.s_options, SO_OOBINLINE))
+    {
+      return -EINVAL;
+    }
+
+  if (conn->urg_state == TCP_URG_VALID)
+    {
+      *(FAR uint8_t *)buf = conn->urg_data;
+
+      if ((flags & MSG_PEEK) == 0)
+        {
+          conn->urg_state = TCP_URG_READ;
+        }
+
+      return 1;
+    }
+
+  if (conn->urg_state == TCP_URG_AWAITING)
+    {
+      if (_SS_ISNONBLOCK(conn->sconn.s_flags) ||
+          (flags & MSG_DONTWAIT) != 0)
+        {
+          return -EAGAIN;
+        }
+
+      /* Blocking wait for urgent data arrival */
+
+      memset(&state, 0, sizeof(struct tcp_recvfrom_s));
+      nxsem_init(&state.ir_sem, 0, 0);
+      state.ir_conn = conn;
+
+      state.ir_cb = tcp_callback_alloc(conn);
+      if (state.ir_cb == NULL)
+        {
+          nxsem_destroy(&state.ir_sem);
+          return -EBUSY;
+        }
+
+      state.ir_cb->flags = (TCP_URGDATA | TCP_RXCLOSE | TCP_DISCONN_EVENTS);
+      state.ir_cb->priv  = (FAR void *)&state;
+      state.ir_cb->event = tcp_oob_eventhandler;
+
+      info.tc_conn = conn;
+      info.tc_cb   = &state.ir_cb;
+      info.tc_sem  = &state.ir_sem;
+      tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
+
+      ret = conn_dev_sem_timedwait(&state.ir_sem, true,
+                                   _SO_TIMEOUT(conn->sconn.s_rcvtimeo),
+                                   &conn->sconn, conn->dev);
+      tls_cleanup_pop(tls_get_info(), 0);
+
+      tcp_callback_free(conn, state.ir_cb);
+      nxsem_destroy(&state.ir_sem);
+
+      if (ret < 0)
+        {
+          if (ret == -ETIMEDOUT)
+            {
+              return -EAGAIN;
+            }
+
+          return ret;
+        }
+
+      if (conn->urg_state == TCP_URG_VALID)
+        {
+          *(FAR uint8_t *)buf = conn->urg_data;
+
+          if ((flags & MSG_PEEK) == 0)
+            {
+              conn->urg_state = TCP_URG_READ;
+            }
+
+          return 1;
+        }
+
+      return -EINVAL;
+    }
+
+  return -EINVAL;
+}
+#endif
+
 static ssize_t tcp_recvfrom_one(FAR struct tcp_conn_s *conn, FAR void *buf,
                                 size_t len, FAR struct sockaddr *from,
                                 FAR socklen_t *fromlen, int flags)
@@ -693,6 +848,13 @@ static ssize_t tcp_recvfrom_one(FAR struct tcp_conn_s *conn, FAR void *buf,
   struct tcp_recvfrom_s state;
   struct tcp_callback_s info;
   ssize_t ret;
+
+#ifdef CONFIG_NET_TCPURGDATA
+  if ((flags & MSG_OOB) != 0)
+    {
+      return tcp_recv_oob(conn, buf, len, flags);
+    }
+#endif
 
   /* Initialize the state structure.  This is done with the network
    * locked because we don't want anything to happen until we are ready.
