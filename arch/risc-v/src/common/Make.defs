@@ -22,18 +22,26 @@
 
 STARTUP_OBJS = crt0$(OBJEXT)
 
-# Specify our general Assembly files
+# Specify our general Assembly files.  Chips without the standard trap
+# architecture provide their own trap entry and context helpers.
+
+ifneq ($(CONFIG_ARCH_RV_CUSTOM_TRAP),y)
 CMN_ASRCS += riscv_vectors.S riscv_exception_common.S
 CMN_ASRCS += riscv_saveusercontext.S
+endif
 
 # Specify C code within the common directory to be included
 CMN_CSRCS += riscv_initialize.c riscv_swint.c
 CMN_CSRCS += riscv_allocateheap.c riscv_createstack.c riscv_cpuinfo.c
 CMN_CSRCS += riscv_cpuidlestack.c riscv_doirq.c riscv_exit.c riscv_exception.c
-CMN_CSRCS += riscv_getnewintctx.c riscv_getintstack.c riscv_initialstate.c
+CMN_CSRCS += riscv_getintstack.c riscv_initialstate.c
 CMN_CSRCS += riscv_modifyreg32.c riscv_nputs.c riscv_releasestack.c
 CMN_CSRCS += riscv_registerdump.c riscv_stackframe.c riscv_switchcontext.c
 CMN_CSRCS += riscv_usestack.c riscv_tcbinfo.c
+
+ifneq ($(CONFIG_ARCH_RV_CUSTOM_TRAP),y)
+CMN_CSRCS += riscv_getnewintctx.c
+endif
 
 ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
 CMN_CSRCS += riscv_schedulesigaction.c riscv_sigdeliver.c

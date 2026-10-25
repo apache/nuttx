@@ -69,6 +69,19 @@ config ARCH_CHIP_GD32VW55X
 		GigaDevice GD32VW55x Wi-Fi/BLE SoC (Nuclei N307 rv32imafc,
 		ECLIC interrupt controller, 160 MHz, 320 KB SRAM).
 
+config ARCH_CHIP_AB32VG1
+	bool "Bluetrum AB32VG1"
+	select ARCH_RV32
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_C
+	select ARCH_RV_CUSTOM_TRAP
+	select ARCH_HAVE_RESET
+	select ARCH_IDLE_CUSTOM
+	select LIBC_ATOMIC_IRQ
+	---help---
+		Bluetrum AB32VG1 (AB5301A, "CRWN") Bluetooth audio SoC with a
+		rv32imc core, 192 KB SRAM and 1 MB SPI flash.
+
 config ARCH_CHIP_BL602
 	bool "BouffaloLab BL602"
 	select ARCH_RV32
@@ -716,6 +729,7 @@ config ARCH_CHIP
 	default "k210"                  if ARCH_CHIP_K210
 	default "litex"                 if ARCH_CHIP_LITEX
 	default "gd32vw55x"             if ARCH_CHIP_GD32VW55X
+	default "ab32vg1"               if ARCH_CHIP_AB32VG1
 	default "bl602"                 if ARCH_CHIP_BL602
 	default "esp32c3-legacy"        if ARCH_CHIP_ESP32C3_LEGACY
 	default "esp32c2"               if ARCH_CHIP_ESP32C2
@@ -828,6 +842,24 @@ config ARCH_RV_HAVE_APLIC
 		Instead of PLIC, RISC-V also defines Advanced Platform-Level Interrupt
 		Controller (APLIC) to provide flexible interrupt control. This device
 		is not backward compatible with PLIC.
+
+config ARCH_RV_CUSTOM_TRAP
+	bool
+	default n
+	---help---
+		Selected by chips whose core implements the RISC-V unprivileged ISA
+		but not the standard machine-mode trap architecture: there are no
+		mstatus/mtvec/mepc/mcause CSRs and ecall does not trap.  The chip
+		then provides:
+
+		- up_irq_save() and up_irq_restore() in <arch/chip/irq.h>.
+		- RISCV_SYSCALL_INSN in <arch/chip/irq.h>: the instruction that
+		  sys_callN() uses instead of ecall.  It must trap synchronously
+		  with interrupts masked and be dispatched as RISCV_IRQ_ECALLM.
+		- The trap entry, riscv_get_newintctx(), riscv_set_idleintctx() and
+		  up_saveusercontext(); the common versions are not built.  The
+		  saved REG_INT_CTX must use the mstatus bits (STATUS_PIE,
+		  STATUS_PPP) so that the common code can keep using them.
 
 config ARCH_RV_HAVE_CLIC
 	bool
@@ -961,6 +993,9 @@ source "arch/risc-v/src/litex/Kconfig"
 endif
 if ARCH_CHIP_GD32VW55X
 source "arch/risc-v/src/gd32vw55x/Kconfig"
+endif
+if ARCH_CHIP_AB32VG1
+source "arch/risc-v/src/ab32vg1/Kconfig"
 endif
 if ARCH_CHIP_BL602
 source "arch/risc-v/src/bl602/Kconfig"
