@@ -65,6 +65,7 @@ config ARCH_CHIP_GD32VW55X
 	select ONESHOT_COUNT
 	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
+	select ARCH_IDLE_CUSTOM
 	---help---
 		GigaDevice GD32VW55x Wi-Fi/BLE SoC (Nuclei N307 rv32imafc,
 		ECLIC interrupt controller, 160 MHz, 320 KB SRAM).
