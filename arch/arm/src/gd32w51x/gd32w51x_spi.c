@@ -99,13 +99,14 @@
 #ifdef CONFIG_GD32W51X_SPI_DMA
 
 /* The DMA interrupts that are enabled while an SPI DMA is in progress:
- * the end of the transfer and the errors.  The half transfer interrupt
- * must stay off: the callback wakes the waiter on any interrupt, which
- * would end the exchange while the second half is still on the wire.
+ * the end of the transfer and the access error.  The callback wakes the
+ * waiter on any interrupt, so the half transfer interrupt must stay off,
+ * or the exchange would end while the second half is still on the wire,
+ * and so must the single data mode exception, which a receive request
+ * raises when it waits for the bus and which does not stop the transfer.
  */
 
-#  define SPI_DMA_INTEN         (DMA_CHXCTL_FTFIE | DMA_CHXCTL_TAEIE | \
-                                 DMA_CHXCTL_SDEIE)
+#  define SPI_DMA_INTEN         (DMA_CHXCTL_FTFIE | DMA_CHXCTL_TAEIE)
 
 /* SPI DMA priority */
 
