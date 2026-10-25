@@ -26,14 +26,19 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <time.h>
 #include <errno.h>
+#include <sys/param.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <arch/board/board.h>
 
 #include "arm_internal.h"
+#include "nvic.h"
+#include "dwt.h"
 #include "hardware/gd32w51x_rcu.h"
 #include "chip.h"
 
@@ -51,6 +56,7 @@
 #define GD32W51X_RTC_ICS      (GD32W51X_RTC_BASE + 0x000c)
 #define GD32W51X_RTC_PSC       (GD32W51X_RTC_BASE + 0x0010)
 #define GD32W51X_RTC_WPK       (GD32W51X_RTC_BASE + 0x0024)
+#define GD32W51X_RTC_SS        (GD32W51X_RTC_BASE + 0x0028)
 
 /* STAT bits */
 
@@ -70,6 +76,21 @@
 
 #define RTC_PSC_FACTOR_A        0x1f
 #define RTC_PSC_FACTOR_S        0x3e7
+#define RTC_PSC_FACTOR_A_SHIFT  16
+#define RTC_PSC_FACTOR_A_MASK   0x7f
+#define RTC_SS_MASK             0xffff
+
+/* The IRC32K is off by a few percent.  Its frequency is measured against
+ * the core clock, which comes from the crystal: the CPU cycles are counted
+ * over about 100 ms of sub-second ticks of the RTC (RTC_CALIB_CLOCKS RTC
+ * clocks), each tick bounded by RTC_CALIB_TIMEOUT cycles (20 ms).  The
+ * result is used if it is within 25 percent of the nominal frequency (the
+ * datasheets give no tolerance).
+ */
+
+#define RTC_IRC32K_FREQUENCY    32000
+#define RTC_CALIB_CLOCKS        3200
+#define RTC_CALIB_TIMEOUT       (BOARD_SYSCLK_FREQUENCY / 50)
 
 /* RCU_RSTSCK register (IRC32K control) */
 
@@ -141,6 +162,112 @@ static int rtc_synchwait(void)
 }
 
 /****************************************************************************
+ * Name: rtc_ss_edge
+ *
+ * Description:
+ *   Wait for the next change of the sub-second counter, at most
+ *   RTC_CALIB_TIMEOUT core cycles.
+ *
+ ****************************************************************************/
+
+static int rtc_ss_edge(void)
+{
+  uint32_t ss    = getreg32(GD32W51X_RTC_SS) & RTC_SS_MASK;
+  uint32_t start = getreg32(DWT_CYCCNT);
+
+  while ((getreg32(GD32W51X_RTC_SS) & RTC_SS_MASK) == ss)
+    {
+      if (getreg32(DWT_CYCCNT) - start > RTC_CALIB_TIMEOUT)
+        {
+          return -ETIMEDOUT;
+        }
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: rtc_sync_prescaler
+ *
+ * Description:
+ *   Measure the IRC32K against the core clock and return the synchronous
+ *   prescaler that gives a 1 Hz calendar with RTC_PSC_FACTOR_A, or
+ *   RTC_PSC_FACTOR_S if the measure fails.
+ *
+ ****************************************************************************/
+
+static uint32_t rtc_sync_prescaler(void)
+{
+  uint32_t diva;
+  uint32_t ticks;
+  uint32_t start;
+  uint32_t cycles;
+  uint32_t freq;
+  uint32_t i;
+
+  /* Read the sub-second counter only once the shadow registers hold the
+   * calendar: reading it locks the TIME and DATE shadows until DATE is
+   * read, and leaving the initialization mode loads the calendar from the
+   * shadows.  After a system reset, they hold their reset values until the
+   * first synchronization.
+   */
+
+  if (rtc_synchwait() < 0)
+    {
+      return RTC_PSC_FACTOR_S;
+    }
+
+  /* The RTC counts with the prescalers it has now */
+
+  diva  = ((getreg32(GD32W51X_RTC_PSC) >> RTC_PSC_FACTOR_A_SHIFT) &
+           RTC_PSC_FACTOR_A_MASK) + 1;
+  ticks = MAX(RTC_CALIB_CLOCKS / diva, 1);
+
+  /* The DWT cycle counter counts the core clock */
+
+  modifyreg32(NVIC_DEMCR, 0, NVIC_DEMCR_TRCENA);
+  modifyreg32(DWT_CTRL, 0, DWT_CTRL_CYCCNTENA_MASK);
+
+  if (rtc_ss_edge() < 0)
+    {
+      getreg32(GD32W51X_RTC_TIME);
+      getreg32(GD32W51X_RTC_DATE);
+      return RTC_PSC_FACTOR_S;
+    }
+
+  start = getreg32(DWT_CYCCNT);
+
+  for (i = 0; i < ticks; i++)
+    {
+      if (rtc_ss_edge() < 0)
+        {
+          break;
+        }
+    }
+
+  cycles = getreg32(DWT_CYCCNT) - start;
+
+  /* Release the TIME and DATE shadows */
+
+  getreg32(GD32W51X_RTC_TIME);
+  getreg32(GD32W51X_RTC_DATE);
+
+  freq   = (uint32_t)(((uint64_t)ticks * diva * BOARD_SYSCLK_FREQUENCY) /
+                       cycles);
+
+  if (i < ticks ||
+      freq < RTC_IRC32K_FREQUENCY - RTC_IRC32K_FREQUENCY / 4 ||
+      freq > RTC_IRC32K_FREQUENCY + RTC_IRC32K_FREQUENCY / 4)
+    {
+      return RTC_PSC_FACTOR_S;
+    }
+
+  rtcinfo("IRC32K: %" PRIu32 " Hz\n", freq);
+
+  return (freq + (RTC_PSC_FACTOR_A + 1) / 2) / (RTC_PSC_FACTOR_A + 1) - 1;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -156,6 +283,7 @@ static int rtc_synchwait(void)
 
 int up_rtc_initialize(void)
 {
+  uint32_t sync;
   int timeout;
 
   /* PMU clock + backup-domain write enable (without this every write to
@@ -195,7 +323,13 @@ int up_rtc_initialize(void)
 
   modifyreg32(GD32W51X_RCU_BDCTL, 0, RCU_BDCTL_RTCEN);
 
-  /* Program the prescalers (init mode required) */
+  /* Measure the IRC32K, then program the prescalers (init mode required;
+   * the calendar keeps its value).  This is done at every boot, since the
+   * IRC32K drifts with the temperature.
+   */
+
+  sync = rtc_sync_prescaler();
+  rtc_synchwait();
 
   rtc_unlock();
   modifyreg32(GD32W51X_RTC_ICS, 0, RTC_ICS_INITM);
@@ -210,7 +344,7 @@ int up_rtc_initialize(void)
 
   if (timeout > 0)
     {
-      putreg32((RTC_PSC_FACTOR_A << 16) | RTC_PSC_FACTOR_S,
+      putreg32((RTC_PSC_FACTOR_A << RTC_PSC_FACTOR_A_SHIFT) | sync,
                GD32W51X_RTC_PSC);
     }
 
