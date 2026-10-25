@@ -44,6 +44,7 @@
 #include "arm_internal.h"
 #include "gd32w51x_config.h"
 #include "gd32w51x_clockconfig.h"
+#include "gd32w51x_dma.h"
 #include "gd32w51x_lowputc.h"
 #include "hardware/gd32w51x_uart.h"
 #include "chip.h"
@@ -98,6 +99,105 @@
 #  define UART2_ASSIGNED  1
 #endif
 
+/* Rx DMA: the received characters go to a circular DMA buffer */
+
+#if defined(CONFIG_USART0_RXDMA) || defined(CONFIG_UART1_RXDMA) || \
+    defined(CONFIG_UART2_RXDMA)
+#  ifndef CONFIG_GD32W51X_DMA
+#    error "UART Rx DMA requires CONFIG_GD32W51X_DMA"
+#  endif
+#  define SERIAL_HAVE_RXDMA 1
+#  define RXDMA_BUFFER_SIZE CONFIG_GD32W51X_SERIAL_RXDMA_BUFFER_SIZE
+#endif
+
+/* Tx DMA: the characters are sent from the transmit buffer by the DMA */
+
+#if defined(CONFIG_USART0_TXDMA) || defined(CONFIG_UART1_TXDMA) || \
+    defined(CONFIG_UART2_TXDMA)
+#  ifndef CONFIG_GD32W51X_DMA
+#    error "UART Tx DMA requires CONFIG_GD32W51X_DMA"
+#  endif
+#  define SERIAL_HAVE_TXDMA 1
+#endif
+
+/* The operations of each UART, depending on the DMA it uses */
+
+#if defined(CONFIG_USART0_RXDMA) && defined(CONFIG_USART0_TXDMA)
+#  define USART0_OPS g_uart_rxtxdma_ops
+#elif defined(CONFIG_USART0_RXDMA)
+#  define USART0_OPS g_uart_rxdma_ops
+#elif defined(CONFIG_USART0_TXDMA)
+#  define USART0_OPS g_uart_txdma_ops
+#else
+#  define USART0_OPS g_uart_ops
+#endif
+
+#if defined(CONFIG_UART1_RXDMA) && defined(CONFIG_UART1_TXDMA)
+#  define UART1_OPS  g_uart_rxtxdma_ops
+#elif defined(CONFIG_UART1_RXDMA)
+#  define UART1_OPS  g_uart_rxdma_ops
+#elif defined(CONFIG_UART1_TXDMA)
+#  define UART1_OPS  g_uart_txdma_ops
+#else
+#  define UART1_OPS  g_uart_ops
+#endif
+
+#if defined(CONFIG_UART2_RXDMA) && defined(CONFIG_UART2_TXDMA)
+#  define UART2_OPS  g_uart_rxtxdma_ops
+#elif defined(CONFIG_UART2_RXDMA)
+#  define UART2_OPS  g_uart_rxdma_ops
+#elif defined(CONFIG_UART2_TXDMA)
+#  define UART2_OPS  g_uart_txdma_ops
+#else
+#  define UART2_OPS  g_uart_ops
+#endif
+
+#if (defined(CONFIG_GD32W51X_USART0) && \
+     !defined(CONFIG_USART0_RXDMA) && !defined(CONFIG_USART0_TXDMA)) || \
+    (defined(CONFIG_GD32W51X_UART1) && \
+     !defined(CONFIG_UART1_RXDMA) && !defined(CONFIG_UART1_TXDMA)) || \
+    (defined(CONFIG_GD32W51X_UART2) && \
+     !defined(CONFIG_UART2_RXDMA) && !defined(CONFIG_UART2_TXDMA))
+#  define SERIAL_HAVE_NODMA 1
+#endif
+
+#if (defined(CONFIG_GD32W51X_USART0) && defined(CONFIG_USART0_RXDMA) && \
+     !defined(CONFIG_USART0_TXDMA)) || \
+    (defined(CONFIG_GD32W51X_UART1) && defined(CONFIG_UART1_RXDMA) && \
+     !defined(CONFIG_UART1_TXDMA)) || \
+    (defined(CONFIG_GD32W51X_UART2) && defined(CONFIG_UART2_RXDMA) && \
+     !defined(CONFIG_UART2_TXDMA))
+#  define SERIAL_HAVE_RXDMA_OPS 1
+#endif
+
+#if (defined(CONFIG_GD32W51X_USART0) && !defined(CONFIG_USART0_RXDMA) && \
+     defined(CONFIG_USART0_TXDMA)) || \
+    (defined(CONFIG_GD32W51X_UART1) && !defined(CONFIG_UART1_RXDMA) && \
+     defined(CONFIG_UART1_TXDMA)) || \
+    (defined(CONFIG_GD32W51X_UART2) && !defined(CONFIG_UART2_RXDMA) && \
+     defined(CONFIG_UART2_TXDMA))
+#  define SERIAL_HAVE_TXDMA_OPS 1
+#endif
+
+#if (defined(CONFIG_GD32W51X_USART0) && defined(CONFIG_USART0_RXDMA) && \
+     defined(CONFIG_USART0_TXDMA)) || \
+    (defined(CONFIG_GD32W51X_UART1) && defined(CONFIG_UART1_RXDMA) && \
+     defined(CONFIG_UART1_TXDMA)) || \
+    (defined(CONFIG_GD32W51X_UART2) && defined(CONFIG_UART2_RXDMA) && \
+     defined(CONFIG_UART2_TXDMA))
+#  define SERIAL_HAVE_RXTXDMA_OPS 1
+#endif
+
+/* Reception by interrupt, and transmission by interrupt */
+
+#if defined(SERIAL_HAVE_NODMA) || defined(SERIAL_HAVE_TXDMA_OPS)
+#  define SERIAL_HAVE_INTRX 1
+#endif
+
+#if defined(SERIAL_HAVE_NODMA) || defined(SERIAL_HAVE_RXDMA_OPS)
+#  define SERIAL_HAVE_INTTX 1
+#endif
+
 #ifdef HAVE_UART_DEVICE
 
 /****************************************************************************
@@ -111,6 +211,18 @@ struct gd32w51x_uart_s
   uint32_t baud;      /* Configured baud */
   uint8_t  irq;       /* IRQ associated with this UART */
   uint32_t im;        /* Shadow of the CTL0 interrupt enable bits */
+#ifdef SERIAL_HAVE_RXDMA
+  uint8_t  rxdmareq;  /* DMA request of the receiver, 0 without DMA */
+  bool     rxenable;  /* Reception enabled by the serial driver */
+  DMA_HANDLE rxdma;   /* DMA channel of the receiver */
+  char    *rxfifo;    /* Circular DMA buffer */
+  uint32_t rxdmanext; /* Next character to read in rxfifo */
+#endif
+#ifdef SERIAL_HAVE_TXDMA
+  uint8_t  txdmareq;  /* DMA request of the transmitter, 0 without DMA */
+  bool     txbusy;    /* A transmit DMA is in progress */
+  DMA_HANDLE txdma;   /* DMA channel of the transmitter */
+#endif
 };
 
 /****************************************************************************
@@ -123,18 +235,40 @@ static int  gd32w51x_attach(struct uart_dev_s *dev);
 static void gd32w51x_detach(struct uart_dev_s *dev);
 static int  gd32w51x_interrupt(int irq, void *context, void *arg);
 static int  gd32w51x_ioctl(struct file *filep, int cmd, unsigned long arg);
+#ifdef SERIAL_HAVE_INTRX
 static int  gd32w51x_receive(struct uart_dev_s *dev, unsigned int *status);
 static void gd32w51x_rxint(struct uart_dev_s *dev, bool enable);
 static bool gd32w51x_rxavailable(struct uart_dev_s *dev);
+#endif
 static void gd32w51x_send(struct uart_dev_s *dev, int ch);
+#ifdef SERIAL_HAVE_INTTX
 static void gd32w51x_txint(struct uart_dev_s *dev, bool enable);
+#endif
 static bool gd32w51x_txready(struct uart_dev_s *dev);
 static bool gd32w51x_txempty(struct uart_dev_s *dev);
+#if defined(SERIAL_HAVE_RXDMA) || defined(SERIAL_HAVE_TXDMA)
+static int  gd32w51x_dma_setup(struct uart_dev_s *dev);
+static void gd32w51x_dma_shutdown(struct uart_dev_s *dev);
+#endif
+#ifdef SERIAL_HAVE_RXDMA
+static int  gd32w51x_dma_receive(struct uart_dev_s *dev,
+                                 unsigned int *status);
+static void gd32w51x_dma_rxint(struct uart_dev_s *dev, bool enable);
+static bool gd32w51x_dma_rxavailable(struct uart_dev_s *dev);
+#endif
+#ifdef SERIAL_HAVE_TXDMA
+static void gd32w51x_dma_txcallback(DMA_HANDLE handle, uint16_t status,
+                                    void *arg);
+static void gd32w51x_dma_send(struct uart_dev_s *dev);
+static void gd32w51x_dma_txint(struct uart_dev_s *dev, bool enable);
+static void gd32w51x_dma_txavailable(struct uart_dev_s *dev);
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
+#ifdef SERIAL_HAVE_NODMA
 static const struct uart_ops_s g_uart_ops =
 {
   .setup       = gd32w51x_setup,
@@ -150,10 +284,72 @@ static const struct uart_ops_s g_uart_ops =
   .txready     = gd32w51x_txready,
   .txempty     = gd32w51x_txempty,
 };
+#endif
+
+#ifdef SERIAL_HAVE_RXDMA_OPS
+static const struct uart_ops_s g_uart_rxdma_ops =
+{
+  .setup       = gd32w51x_dma_setup,
+  .shutdown    = gd32w51x_dma_shutdown,
+  .attach      = gd32w51x_attach,
+  .detach      = gd32w51x_detach,
+  .ioctl       = gd32w51x_ioctl,
+  .receive     = gd32w51x_dma_receive,
+  .rxint       = gd32w51x_dma_rxint,
+  .rxavailable = gd32w51x_dma_rxavailable,
+  .send        = gd32w51x_send,
+  .txint       = gd32w51x_txint,
+  .txready     = gd32w51x_txready,
+  .txempty     = gd32w51x_txempty,
+};
+#endif
+
+#ifdef SERIAL_HAVE_TXDMA_OPS
+static const struct uart_ops_s g_uart_txdma_ops =
+{
+  .setup       = gd32w51x_dma_setup,
+  .shutdown    = gd32w51x_dma_shutdown,
+  .attach      = gd32w51x_attach,
+  .detach      = gd32w51x_detach,
+  .ioctl       = gd32w51x_ioctl,
+  .receive     = gd32w51x_receive,
+  .rxint       = gd32w51x_rxint,
+  .rxavailable = gd32w51x_rxavailable,
+  .send        = gd32w51x_send,
+  .txint       = gd32w51x_dma_txint,
+  .txready     = gd32w51x_txready,
+  .txempty     = gd32w51x_txempty,
+  .dmasend     = gd32w51x_dma_send,
+  .dmatxavail  = gd32w51x_dma_txavailable,
+};
+#endif
+
+#ifdef SERIAL_HAVE_RXTXDMA_OPS
+static const struct uart_ops_s g_uart_rxtxdma_ops =
+{
+  .setup       = gd32w51x_dma_setup,
+  .shutdown    = gd32w51x_dma_shutdown,
+  .attach      = gd32w51x_attach,
+  .detach      = gd32w51x_detach,
+  .ioctl       = gd32w51x_ioctl,
+  .receive     = gd32w51x_dma_receive,
+  .rxint       = gd32w51x_dma_rxint,
+  .rxavailable = gd32w51x_dma_rxavailable,
+  .send        = gd32w51x_send,
+  .txint       = gd32w51x_dma_txint,
+  .txready     = gd32w51x_txready,
+  .txempty     = gd32w51x_txempty,
+  .dmasend     = gd32w51x_dma_send,
+  .dmatxavail  = gd32w51x_dma_txavailable,
+};
+#endif
 
 #ifdef CONFIG_GD32W51X_USART0
 static char g_usart0rxbuffer[CONFIG_USART0_RXBUFSIZE];
 static char g_usart0txbuffer[CONFIG_USART0_TXBUFSIZE];
+#ifdef CONFIG_USART0_RXDMA
+static char g_usart0rxfifo[RXDMA_BUFFER_SIZE];
+#endif
 
 static struct gd32w51x_uart_s g_usart0priv =
 {
@@ -161,6 +357,13 @@ static struct gd32w51x_uart_s g_usart0priv =
   .uartclk  = GD32W51X_PCLK1_FREQ,
   .baud     = CONFIG_USART0_BAUD,
   .irq      = GD32W51X_IRQ_USART0,
+#ifdef CONFIG_USART0_RXDMA
+  .rxdmareq = DMA_REQ_USART0_RX,
+  .rxfifo   = g_usart0rxfifo,
+#endif
+#ifdef CONFIG_USART0_TXDMA
+  .txdmareq = DMA_REQ_USART0_TX,
+#endif
 };
 
 static uart_dev_t g_usart0port =
@@ -175,7 +378,7 @@ static uart_dev_t g_usart0port =
     .size    = CONFIG_USART0_TXBUFSIZE,
     .buffer  = g_usart0txbuffer,
   },
-  .ops  = &g_uart_ops,
+  .ops  = &USART0_OPS,
   .priv = &g_usart0priv,
 };
 #endif
@@ -183,6 +386,9 @@ static uart_dev_t g_usart0port =
 #ifdef CONFIG_GD32W51X_UART1
 static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
 static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
+#ifdef CONFIG_UART1_RXDMA
+static char g_uart1rxfifo[RXDMA_BUFFER_SIZE];
+#endif
 
 static struct gd32w51x_uart_s g_uart1priv =
 {
@@ -190,6 +396,13 @@ static struct gd32w51x_uart_s g_uart1priv =
   .uartclk  = GD32W51X_PCLK1_FREQ,
   .baud     = CONFIG_UART1_BAUD,
   .irq      = GD32W51X_IRQ_UART1,
+#ifdef CONFIG_UART1_RXDMA
+  .rxdmareq = DMA_REQ_UART1_RX,
+  .rxfifo   = g_uart1rxfifo,
+#endif
+#ifdef CONFIG_UART1_TXDMA
+  .txdmareq = DMA_REQ_UART1_TX,
+#endif
 };
 
 static uart_dev_t g_uart1port =
@@ -204,7 +417,7 @@ static uart_dev_t g_uart1port =
     .size    = CONFIG_UART1_TXBUFSIZE,
     .buffer  = g_uart1txbuffer,
   },
-  .ops  = &g_uart_ops,
+  .ops  = &UART1_OPS,
   .priv = &g_uart1priv,
 };
 #endif
@@ -212,6 +425,9 @@ static uart_dev_t g_uart1port =
 #ifdef CONFIG_GD32W51X_UART2
 static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
 static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
+#ifdef CONFIG_UART2_RXDMA
+static char g_uart2rxfifo[RXDMA_BUFFER_SIZE];
+#endif
 
 static struct gd32w51x_uart_s g_uart2priv =
 {
@@ -219,6 +435,13 @@ static struct gd32w51x_uart_s g_uart2priv =
   .uartclk  = GD32W51X_PCLK2_FREQ,
   .baud     = CONFIG_UART2_BAUD,
   .irq      = GD32W51X_IRQ_UART2,
+#ifdef CONFIG_UART2_RXDMA
+  .rxdmareq = DMA_REQ_UART2_RX,
+  .rxfifo   = g_uart2rxfifo,
+#endif
+#ifdef CONFIG_UART2_TXDMA
+  .txdmareq = DMA_REQ_UART2_TX,
+#endif
 };
 
 static uart_dev_t g_uart2port =
@@ -233,7 +456,7 @@ static uart_dev_t g_uart2port =
     .size    = CONFIG_UART2_TXBUFSIZE,
     .buffer  = g_uart2txbuffer,
   },
-  .ops  = &g_uart_ops,
+  .ops  = &UART2_OPS,
   .priv = &g_uart2priv,
 };
 #endif
@@ -249,7 +472,8 @@ static uart_dev_t g_uart2port =
 static void gd32w51x_restoreint(struct gd32w51x_uart_s *priv)
 {
   modifyreg32(priv->uartbase + GD32W51X_UART_CTL0_OFFSET,
-              UART_CTL0_RBNEIE | UART_CTL0_TBEIE, priv->im);
+              UART_CTL0_RBNEIE | UART_CTL0_TBEIE | UART_CTL0_IDLEIE,
+              priv->im);
 }
 
 /****************************************************************************
@@ -365,6 +589,24 @@ static int gd32w51x_interrupt(int irq, void *context, void *arg)
       uart_recvchars(dev);
     }
 
+#ifdef SERIAL_HAVE_RXDMA
+  /* The line went idle: hand what the DMA received to the serial driver */
+
+  if ((status & UART_STAT_IDLEF) != 0 &&
+      (priv->im & UART_CTL0_IDLEIE) != 0)
+    {
+      putreg32(UART_INTC_IDLEC, priv->uartbase + GD32W51X_UART_INTC_OFFSET);
+
+      if (priv->rxenable && gd32w51x_dma_rxavailable(dev))
+        {
+#ifdef CONFIG_PM
+          pm_activity(PM_IDLE_DOMAIN, CONFIG_GD32W51X_PM_SERIAL_ACTIVITY);
+#endif
+          uart_recvchars(dev);
+        }
+    }
+#endif
+
   /* Handle outgoing data */
 
   if ((status & UART_STAT_TBE) != 0 &&
@@ -385,6 +627,7 @@ static int gd32w51x_ioctl(struct file *filep, int cmd, unsigned long arg)
   return -ENOTTY;
 }
 
+#ifdef SERIAL_HAVE_INTRX
 /****************************************************************************
  * Name: gd32w51x_receive
  *
@@ -449,6 +692,8 @@ static bool gd32w51x_rxavailable(struct uart_dev_s *dev)
           UART_STAT_RBNE) != 0;
 }
 
+#endif /* SERIAL_HAVE_INTRX */
+
 /****************************************************************************
  * Name: gd32w51x_send
  *
@@ -472,6 +717,7 @@ static void gd32w51x_send(struct uart_dev_s *dev, int ch)
  *
  ****************************************************************************/
 
+#ifdef SERIAL_HAVE_INTTX
 static void gd32w51x_txint(struct uart_dev_s *dev, bool enable)
 {
   struct gd32w51x_uart_s *priv = (struct gd32w51x_uart_s *)dev->priv;
@@ -500,6 +746,7 @@ static void gd32w51x_txint(struct uart_dev_s *dev, bool enable)
 
   leave_critical_section(flags);
 }
+#endif
 
 /****************************************************************************
  * Name: gd32w51x_txready
@@ -532,6 +779,360 @@ static bool gd32w51x_txempty(struct uart_dev_s *dev)
   return (getreg32(priv->uartbase + GD32W51X_UART_STAT_OFFSET) &
           UART_STAT_TC) != 0;
 }
+
+#ifdef SERIAL_HAVE_RXDMA
+/****************************************************************************
+ * Name: gd32w51x_dma_nextrx
+ *
+ * Description:
+ *   Return the index of the next character that the DMA will write.
+ *
+ ****************************************************************************/
+
+static uint32_t gd32w51x_dma_nextrx(struct gd32w51x_uart_s *priv)
+{
+  return RXDMA_BUFFER_SIZE - gd32_dma_tansnum_get(priv->rxdma);
+}
+
+/****************************************************************************
+ * Name: gd32w51x_dma_rxcallback
+ *
+ * Description:
+ *   The DMA filled half or all of the buffer: hand the characters to the
+ *   serial driver before they are overwritten.
+ *
+ ****************************************************************************/
+
+static void gd32w51x_dma_rxcallback(DMA_HANDLE handle, uint16_t status,
+                                    void *arg)
+{
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+  struct gd32w51x_uart_s *priv = (struct gd32w51x_uart_s *)dev->priv;
+
+  if (priv->rxenable && gd32w51x_dma_rxavailable(dev))
+    {
+#ifdef CONFIG_PM
+      pm_activity(PM_IDLE_DOMAIN, CONFIG_GD32W51X_PM_SERIAL_ACTIVITY);
+#endif
+      uart_recvchars(dev);
+    }
+}
+#endif /* SERIAL_HAVE_RXDMA */
+
+#ifdef SERIAL_HAVE_TXDMA
+/****************************************************************************
+ * Name: gd32w51x_dma_txstart
+ *
+ * Description:
+ *   Start the transmit DMA on a part of the transmit buffer.
+ *
+ ****************************************************************************/
+
+static void gd32w51x_dma_txstart(struct uart_dev_s *dev, const char *buffer,
+                                 size_t length)
+{
+  struct gd32w51x_uart_s *priv = (struct gd32w51x_uart_s *)dev->priv;
+  struct gd32_dma_config_s cfg;
+
+  cfg.periph_addr         = priv->uartbase + GD32W51X_UART_TDATA_OFFSET;
+  cfg.memory0_addr        = (uint32_t)buffer;
+  cfg.number              = length;
+  cfg.periph_inc          = DMA_PERIPH_INCREASE_DISABLE;
+  cfg.memory_inc          = DMA_MEMORY_INCREASE_ENABLE;
+  cfg.periph_memory_width = DMA_WIDTH_8BITS_SELECT;
+  cfg.circular_mode       = DMA_CIRCULAR_MODE_DISABLE;
+  cfg.direction           = DMA_MEMORY_TO_PERIPH;
+  cfg.priority            = DMA_PRIO_MEDIUM_SELECT;
+
+  gd32_dma_stop(priv->txdma);
+  gd32_dma_setup(priv->txdma, &cfg, GD32_DMA_SINGLE_DATA_MODE);
+  gd32_dma_start(priv->txdma, gd32w51x_dma_txcallback, dev,
+                 DMA_CHXCTL_FTFIE | DMA_CHXCTL_TAEIE);
+}
+
+/****************************************************************************
+ * Name: gd32w51x_dma_txcallback
+ *
+ * Description:
+ *   The DMA sent its part of the transmit buffer: send the second part of
+ *   a buffer that wraps around, then free the space and send what was
+ *   written meanwhile.
+ *
+ ****************************************************************************/
+
+static void gd32w51x_dma_txcallback(DMA_HANDLE handle, uint16_t status,
+                                    void *arg)
+{
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+  struct gd32w51x_uart_s *priv = (struct gd32w51x_uart_s *)dev->priv;
+
+  if ((status & DMA_INTF_FTFIF) != 0)
+    {
+      dev->dmatx.nbytes += dev->dmatx.length;
+
+      if (dev->dmatx.nlength != 0)
+        {
+          dev->dmatx.length  = dev->dmatx.nlength;
+          dev->dmatx.nlength = 0;
+          gd32w51x_dma_txstart(dev, dev->dmatx.nbuffer, dev->dmatx.length);
+          return;
+        }
+    }
+
+  priv->txbusy = false;
+  uart_xmitchars_done(dev);
+  uart_xmitchars_dma(dev);
+}
+#endif /* SERIAL_HAVE_TXDMA */
+
+#if defined(SERIAL_HAVE_RXDMA) || defined(SERIAL_HAVE_TXDMA)
+/****************************************************************************
+ * Name: gd32w51x_dma_setup
+ *
+ * Description:
+ *   Configure the UART, then start the circular reception DMA and get the
+ *   transmit DMA channel.
+ *
+ ****************************************************************************/
+
+static int gd32w51x_dma_setup(struct uart_dev_s *dev)
+{
+  struct gd32w51x_uart_s *priv = (struct gd32w51x_uart_s *)dev->priv;
+#ifdef SERIAL_HAVE_RXDMA
+  struct gd32_dma_config_s cfg;
+#endif
+
+  /* The console was set up at boot */
+
+  if (!dev->isconsole)
+    {
+      gd32w51x_setup(dev);
+    }
+
+#ifdef SERIAL_HAVE_TXDMA
+  if (priv->txdmareq != 0 && priv->txdma == NULL)
+    {
+      priv->txdma = gd32_dma_channel_alloc(priv->txdmareq);
+      if (priv->txdma == NULL)
+        {
+          return -EBUSY;
+        }
+
+      priv->txbusy = false;
+      modifyreg32(priv->uartbase + GD32W51X_UART_CTL2_OFFSET, 0,
+                  UART_CTL2_DENT);
+    }
+#endif
+
+#ifdef SERIAL_HAVE_RXDMA
+  if (priv->rxdmareq == 0)
+    {
+      return OK;
+    }
+
+  if (priv->rxdma == NULL)
+    {
+      priv->rxdma = gd32_dma_channel_alloc(priv->rxdmareq);
+      if (priv->rxdma == NULL)
+        {
+          return -EBUSY;
+        }
+    }
+
+  cfg.periph_addr         = priv->uartbase + GD32W51X_UART_RDATA_OFFSET;
+  cfg.memory0_addr        = (uint32_t)priv->rxfifo;
+  cfg.number              = RXDMA_BUFFER_SIZE;
+  cfg.periph_inc          = DMA_PERIPH_INCREASE_DISABLE;
+  cfg.memory_inc          = DMA_MEMORY_INCREASE_ENABLE;
+  cfg.periph_memory_width = DMA_WIDTH_8BITS_SELECT;
+  cfg.circular_mode       = DMA_CIRCULAR_MODE_ENABLE;
+  cfg.direction           = DMA_PERIPH_TO_MEMORY;
+  cfg.priority            = DMA_PRIO_HIGH_SELECT;
+
+  gd32_dma_setup(priv->rxdma, &cfg, GD32_DMA_SINGLE_DATA_MODE);
+  priv->rxdmanext = 0;
+
+  modifyreg32(priv->uartbase + GD32W51X_UART_CTL2_OFFSET, 0,
+              UART_CTL2_DENR);
+
+  gd32_dma_start(priv->rxdma, gd32w51x_dma_rxcallback, dev,
+                 DMA_CHXCTL_HTFIE | DMA_CHXCTL_FTFIE);
+#endif
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gd32w51x_dma_shutdown
+ ****************************************************************************/
+
+static void gd32w51x_dma_shutdown(struct uart_dev_s *dev)
+{
+  struct gd32w51x_uart_s *priv = (struct gd32w51x_uart_s *)dev->priv;
+
+  gd32w51x_shutdown(dev);
+
+  modifyreg32(priv->uartbase + GD32W51X_UART_CTL2_OFFSET,
+              UART_CTL2_DENR | UART_CTL2_DENT, 0);
+
+#ifdef SERIAL_HAVE_RXDMA
+  if (priv->rxdma != NULL)
+    {
+      gd32_dma_stop(priv->rxdma);
+      gd32_dma_channel_free(priv->rxdma);
+      priv->rxdma = NULL;
+    }
+#endif
+
+#ifdef SERIAL_HAVE_TXDMA
+  if (priv->txdma != NULL)
+    {
+      gd32_dma_stop(priv->txdma);
+      gd32_dma_channel_free(priv->txdma);
+      priv->txdma  = NULL;
+      priv->txbusy = false;
+    }
+#endif
+}
+#endif /* SERIAL_HAVE_RXDMA || SERIAL_HAVE_TXDMA */
+
+#ifdef SERIAL_HAVE_RXDMA
+
+/****************************************************************************
+ * Name: gd32w51x_dma_receive
+ *
+ * Description:
+ *   Return the next character of the DMA buffer.
+ *
+ ****************************************************************************/
+
+static int gd32w51x_dma_receive(struct uart_dev_s *dev,
+                                unsigned int *status)
+{
+  struct gd32w51x_uart_s *priv = (struct gd32w51x_uart_s *)dev->priv;
+  int c = 0;
+
+  *status = 0;
+
+  if (gd32w51x_dma_nextrx(priv) != priv->rxdmanext)
+    {
+      c = priv->rxfifo[priv->rxdmanext];
+
+      if (++priv->rxdmanext == RXDMA_BUFFER_SIZE)
+        {
+          priv->rxdmanext = 0;
+        }
+    }
+
+  return c;
+}
+
+/****************************************************************************
+ * Name: gd32w51x_dma_rxint
+ *
+ * Description:
+ *   Enable or disable the delivery of the received characters.  The DMA
+ *   keeps receiving; the characters are delivered on the idle line
+ *   interrupt and the DMA half and full transfer interrupts.
+ *
+ ****************************************************************************/
+
+static void gd32w51x_dma_rxint(struct uart_dev_s *dev, bool enable)
+{
+  struct gd32w51x_uart_s *priv = (struct gd32w51x_uart_s *)dev->priv;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  priv->rxenable = enable;
+
+  if (enable)
+    {
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
+      priv->im |= UART_CTL0_IDLEIE;
+#endif
+    }
+  else
+    {
+      priv->im &= ~UART_CTL0_IDLEIE;
+    }
+
+  gd32w51x_restoreint(priv);
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
+ * Name: gd32w51x_dma_rxavailable
+ *
+ * Description:
+ *   Return true if the DMA buffer holds characters not read yet.
+ *
+ ****************************************************************************/
+
+static bool gd32w51x_dma_rxavailable(struct uart_dev_s *dev)
+{
+  struct gd32w51x_uart_s *priv = (struct gd32w51x_uart_s *)dev->priv;
+
+  return gd32w51x_dma_nextrx(priv) != priv->rxdmanext;
+}
+#endif /* SERIAL_HAVE_RXDMA */
+
+#ifdef SERIAL_HAVE_TXDMA
+/****************************************************************************
+ * Name: gd32w51x_dma_send
+ *
+ * Description:
+ *   Start sending the part of the transmit buffer set up by the serial
+ *   driver in dev->dmatx.
+ *
+ ****************************************************************************/
+
+static void gd32w51x_dma_send(struct uart_dev_s *dev)
+{
+  struct gd32w51x_uart_s *priv = (struct gd32w51x_uart_s *)dev->priv;
+
+  priv->txbusy      = true;
+  dev->dmatx.nbytes = 0;
+  gd32w51x_dma_txstart(dev, dev->dmatx.buffer, dev->dmatx.length);
+}
+
+/****************************************************************************
+ * Name: gd32w51x_dma_txint
+ *
+ * Description:
+ *   The transmitter does not use the UART interrupts: the DMA interrupt
+ *   ends each transfer.
+ *
+ ****************************************************************************/
+
+static void gd32w51x_dma_txint(struct uart_dev_s *dev, bool enable)
+{
+}
+
+/****************************************************************************
+ * Name: gd32w51x_dma_txavailable
+ *
+ * Description:
+ *   The transmit buffer holds new characters: send them unless a transfer
+ *   is in progress, which sends them when it ends.
+ *
+ ****************************************************************************/
+
+static void gd32w51x_dma_txavailable(struct uart_dev_s *dev)
+{
+  struct gd32w51x_uart_s *priv = (struct gd32w51x_uart_s *)dev->priv;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  if (priv->txdma != NULL && !priv->txbusy)
+    {
+      uart_xmitchars_dma(dev);
+    }
+
+  leave_critical_section(flags);
+}
+#endif /* SERIAL_HAVE_TXDMA */
 
 #endif /* HAVE_UART_DEVICE */
 
@@ -574,6 +1175,15 @@ void arm_serialinit(void)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   uart_register("/dev/console", &CONSOLE_DEV);
+
+#if defined(SERIAL_HAVE_RXDMA) || defined(SERIAL_HAVE_TXDMA)
+  /* The console is not set up again when it is opened: start its DMA */
+
+  if (CONSOLE_DEV.ops->setup == gd32w51x_dma_setup)
+    {
+      gd32w51x_dma_setup(&CONSOLE_DEV);
+    }
+#endif
 #endif
 
 #ifdef TTYS0_DEV

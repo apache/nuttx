@@ -76,6 +76,16 @@ config GD32W51X_UART2
 		shared with the GD32VW55x driver.  The pins are chosen by the
 		board (board.h).
 
+config GD32W51X_SERIAL_RXDMA_BUFFER_SIZE
+	int "Rx DMA buffer size"
+	default 64
+	depends on SERIAL_RXDMA
+	---help---
+		Size of the circular buffer that the DMA fills with the received
+		characters of each UART with Rx DMA (USART0_RXDMA, UART1_RXDMA,
+		UART2_RXDMA).  They are handed to the serial driver at the half
+		and the end of the buffer and when the line goes idle.
+
 config GD32W51X_DMA
 	bool "DMA"
 	default n
