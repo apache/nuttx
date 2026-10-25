@@ -672,6 +672,9 @@ static void adc_sampletime_write(struct stm32_adc_dev_s *dev);
 static void adc_llops_dumpregs(struct stm32_adc_dev_s *dev);
 static int  adc_llops_multicfg(struct stm32_adc_dev_s *dev, uint8_t mode);
 static void adc_llops_enable(struct stm32_adc_dev_s *dev, bool enable);
+#  ifdef HAVE_IP_ADC_V2
+static int  adc_llops_calibrate(struct stm32_adc_dev_s *dev);
+#  endif
 #endif
 
 /****************************************************************************
@@ -727,7 +730,10 @@ static const struct stm32_adc_ops_s g_adc_llops =
 #  endif
   .dump_regs     = adc_llops_dumpregs,
   .multi_cfg     = adc_llops_multicfg,
-  .enable        = adc_llops_enable
+  .enable        = adc_llops_enable,
+#  ifdef HAVE_IP_ADC_V2
+  .calibrate     = adc_llops_calibrate
+#  endif
 };
 #endif
 
@@ -4983,6 +4989,52 @@ static void adc_llops_enable(struct stm32_adc_dev_s *dev, bool enable)
 
   adc_enable(priv, enable);
 }
+
+/****************************************************************************
+ * Name: adc_llops_calibrate
+ *
+ * Description:
+ *   Run the calibration again, for example after a large temperature
+ *   change.  The ADC is disabled for the calibration and enabled again if
+ *   it was enabled before.
+ *
+ * Returned Value:
+ *   OK on success, -EBUSY if a conversion is in progress.
+ *
+ ****************************************************************************/
+
+#  ifdef HAVE_IP_ADC_V2
+static int adc_llops_calibrate(struct stm32_adc_dev_s *dev)
+{
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+  irqstate_t flags;
+  uint32_t regval;
+  bool enabled;
+
+  flags = enter_critical_section();
+
+  regval = adc_getreg(priv, STM32_ADC_CR_OFFSET);
+  if ((regval & (ADC_CR_ADSTART | ADC_CR_JADSTART)) != 0)
+    {
+      leave_critical_section(flags);
+      return -EBUSY;
+    }
+
+  enabled = (regval & ADC_CR_ADEN) != 0;
+
+  adc_enable(priv, false);
+  adc_voltreg_cfg(priv);
+  adc_calibrate(priv);
+
+  if (enabled)
+    {
+      adc_enable(priv, true);
+    }
+
+  leave_critical_section(flags);
+  return OK;
+}
+#  endif
 
 #endif /* CONFIG_STM32_ADC_LL_OPS */
 
