@@ -1,0 +1,151 @@
+/****************************************************************************
+ * boards/risc-v/ab32vg1/ab32vg1-generic/scripts/ld.script
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* The whole image runs from RAM.  It is written by the mask ROM UART
+ * loader (MEM_WRITE of each loadable segment, then the entry point is
+ * called as a command handler) or by the boot code of a flash image, and
+ * entered at __start (0x12000, the ROM loader's load address).
+ *
+ * Code and data that must be loaded:
+ *
+ *   SRAM    0x12000 .. 0x2e800   .start, .data, .rodata, .text
+ *   AECRAM  0x50000 .. 0x57a00   code of the C library, memory manager
+ *                                and drivers
+ *
+ * The ROM loader keeps its own data from 0x2e800 up (a MEM_WRITE readback
+ * shows 0x2e800..0x2ea2d being overwritten) and its stack just below
+ * 0x30000, hence the end of the sram region.  The AECRAM (audio echo
+ * cancellation RAM) is executable, the RT-Thread BSP runs code there too.
+ * Which archives go to AECRAM is a size trade-off: the AECRAM must hold
+ * them in every configuration and SRAM must hold everything else.
+ *
+ * Not loaded:
+ *
+ *   ICRAM   0x60000 ..           .bss, then the idle thread stack (which
+ *                                starts at _ebss)
+ *
+ * The heap uses what is left: SRAM after the image and below 0x12000,
+ * AECRAM after the code and ICRAM after the idle stack (see
+ * ab32vg1_allocateheap.c).
+ */
+
+MEMORY
+{
+  sram   (rwx) : ORIGIN = 0x00012000, LENGTH = 0x1c800
+  aecram (rwx) : ORIGIN = 0x00050000, LENGTH = 0x7a00
+  icram  (rw)  : ORIGIN = 0x00060000, LENGTH = 0x8000
+}
+
+OUTPUT_ARCH("riscv")
+
+ENTRY(__start)
+
+SECTIONS
+{
+  /* Code placed in AECRAM.  Must come before .text so that it captures
+   * these input sections first.
+   */
+
+  .text.aecram : ALIGN(4) {
+    _saecram = ABSOLUTE(.);
+    *libc.a:*(.text .text.*)
+    *libmm.a:*(.text .text.*)
+    *libdrivers.a:*(.text .text.*)
+    _eaecram = ABSOLUTE(.);
+  } > aecram
+
+  .start : {
+    _stext = ABSOLUTE(.);
+    KEEP(*(.start))
+  } > sram
+
+  .init_section : ALIGN(4) {
+    _sinit = ABSOLUTE(.);
+    KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
+    KEEP(*(.init_array EXCLUDE_FILE(*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o) .ctors))
+    _einit = ABSOLUTE(.);
+  } > sram
+
+  /* .data is linked and loaded in place: there is no copy at boot */
+
+  .data : ALIGN(4) {
+    _sdata = ABSOLUTE(.);
+    *(.data .data.*)
+    *(.sdata .sdata.* .sdata2.*)
+    *(.gnu.linkonce.d.*)
+    *(.gnu.linkonce.s.*)
+    CONSTRUCTORS
+    . = ALIGN(4);
+    _edata = ABSOLUTE(.);
+  } > sram
+
+  /* Read-only data in its own output section, so that disassembling the
+   * code sections only shows code (scripts/check-insns.sh relies on it).
+   */
+
+  .rodata : ALIGN(4) {
+    *(.rodata .rodata.* .srodata .srodata.*)
+    *(.got)
+    *(.gcc_except_table)
+    *(.gnu.linkonce.r.*)
+  } > sram
+
+  _eronly = ABSOLUTE(.);
+
+  .text : ALIGN(4) {
+    *(.text .text.*)
+    *(.fixup)
+    *(.gnu.warning)
+    *(.gnu.linkonce.t.*)
+    *(.glue_7)
+    *(.glue_7t)
+    _esram = ABSOLUTE(.);
+  } > sram
+
+  _etext = ABSOLUTE(.);
+
+  .bss (NOLOAD) : ALIGN(4) {
+    _sbss = ABSOLUTE(.);
+    *(.bss .bss.*)
+    *(.sbss .sbss.*)
+    *(.gnu.linkonce.b.*)
+    *(.gnu.linkonce.sb.*)
+    *(COMMON)
+    . = ALIGN(32);
+    _ebss = ABSOLUTE(.);
+  } > icram
+
+  /* Stabs debugging sections. */
+
+  .stab 0 : { *(.stab) }
+  .stabstr 0 : { *(.stabstr) }
+  .stab.excl 0 : { *(.stab.excl) }
+  .stab.exclstr 0 : { *(.stab.exclstr) }
+  .stab.index 0 : { *(.stab.index) }
+  .stab.indexstr 0 : { *(.stab.indexstr) }
+  .comment 0 : { *(.comment) }
+  .debug_abbrev 0 : { *(.debug_abbrev) }
+  .debug_info 0 : { *(.debug_info) }
+  .debug_line 0 : { *(.debug_line) }
+  .debug_pubnames 0 : { *(.debug_pubnames) }
+  .debug_aranges 0 : { *(.debug_aranges) }
+}
