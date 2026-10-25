@@ -117,6 +117,7 @@
 "gethostbyname","netdb.h","defined(CONFIG_LIBC_NETDB)","FAR struct hostent *","FAR const char *"
 "gethostbyname2","netdb.h","defined(CONFIG_LIBC_NETDB)","FAR struct hostent *","FAR const char *","int"
 "gethostname","unistd.h","","int","FAR char *","size_t"
+"getloadavg","stdlib.h","defined(CONFIG_HAVE_DOUBLE)","int","FAR double []|FAR double *","int"
 "getnameinfo","netdb.h","defined(CONFIG_LIBC_NETDB)","int","FAR const struct sockaddr *","socklen_t","FAR char *","socklen_t","FAR char *","socklen_t","int"
 "getopt","unistd.h","","int","int","FAR char * const []|FAR char * const *","FAR const char *"
 "getoptargp","unistd.h","","FAR char **"
