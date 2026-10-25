@@ -250,7 +250,8 @@ reboot:
 
 - ``/data``: the last 128 KB of the internal flash (``/dev/gd32flash``).
 - ``/flash``: the 16 MB QSPI NOR flash (``/dev/qspiflash``, GD25 driver in
-  QSPI mode).
+  QSPI mode).  Reads of 64 bytes or more go through DMA1 channel 0
+  (``CONFIG_GD32W51X_QSPI_DMA``): 256 KB in 60 ms instead of 80 ms.
 
 ::
 
