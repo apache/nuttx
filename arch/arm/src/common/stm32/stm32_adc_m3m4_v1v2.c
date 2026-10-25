@@ -2608,6 +2608,15 @@ static void adc_mode_cfg(struct stm32_dev_s *priv)
  ****************************************************************************/
 
 #if defined(HAVE_IP_ADC_V2)
+
+/* ADC voltage regulator start-up time (tADCVREG_STUP) */
+
+#  ifdef CONFIG_STM32_STM32G4XXX
+#    define ADC_VREG_STARTUP_US 20
+#  else
+#    define ADC_VREG_STARTUP_US 10
+#  endif
+
 static void adc_voltreg_cfg(struct stm32_dev_s *priv)
 {
   /* Set ADC voltage regulator to intermediate state */
@@ -2622,7 +2631,7 @@ static void adc_voltreg_cfg(struct stm32_dev_s *priv)
 
   /* Wait for the ADC voltage regulator to startup */
 
-  up_udelay(10);
+  up_udelay(ADC_VREG_STARTUP_US);
 }
 #else
 static void adc_voltreg_cfg(struct stm32_dev_s *priv)
