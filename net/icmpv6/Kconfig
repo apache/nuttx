@@ -70,14 +70,13 @@ config ICMPv6_NEIGHBOR_MAXTRIES
 
 config ICMPv6_NEIGHBOR_DELAYMSEC
 	int "ICMPv6 neighbor re-solicit delay"
-	default 20
+	default 1000
 	---help---
 		Wait this number of milliseconds after sending the Neighbor
 		Solicitation before checking if the IPv6 address mapping is present
-		in the Neighbor Table.  This time should be related to the maximum
-		round trip time on the network since it is basically the time from
-		when an Neighbor Solicitation is sent until the Neighbor
-		Advertisement is received.
+		in the Neighbor Table, and before the next Neighbor Solicitation.
+		RFC 4861 limits the retransmissions to one per RetransTimer, which
+		defaults to RETRANS_TIMER (1000 ms).
 
 endif # NET_ICMPv6_NEIGHBOR
 
