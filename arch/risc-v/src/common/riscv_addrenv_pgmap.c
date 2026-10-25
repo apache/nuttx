@@ -149,6 +149,34 @@ bool up_addrenv_user_vaddr(uintptr_t vaddr)
   return riscv_uservaddr(vaddr);
 }
 
+uintptr_t up_addrenv_va_to_pa(FAR void *va)
+{
+  uintptr_t vaddr   = (uintptr_t)va;
+  uintptr_t lnvaddr = riscv_pgvaddr(mmu_get_satp_pgbase());
+  uintptr_t size    = RV_MMU_L1_PAGE_SIZE;
+  uintptr_t pte;
+  uint32_t  ptlevel;
+
+  for (ptlevel = 1; ptlevel <= RV_MMU_PT_LEVELS && lnvaddr; ptlevel++)
+    {
+      pte = mmu_ln_getentry(ptlevel, lnvaddr, vaddr);
+      if ((pte & PTE_VALID) == 0)
+        {
+          break;
+        }
+
+      if ((pte & (PTE_R | PTE_X)) != 0)
+        {
+          return mmu_pte_to_paddr(pte) | (vaddr & (size - 1));
+        }
+
+      lnvaddr = riscv_pgvaddr(mmu_pte_to_paddr(pte));
+      size  >>= RV_MMU_VPN_WIDTH;
+    }
+
+  return 0;
+}
+
 /****************************************************************************
  * Name: up_addrenv_page_wipe
  *
