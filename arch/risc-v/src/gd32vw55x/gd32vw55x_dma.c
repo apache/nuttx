@@ -436,9 +436,13 @@ static int gd32_dma_interrupt(int irq, void *context, void *arg)
     {
       gd32_dma_interrupt_flag_clear(dmachan->chan_num, status);
 
-      /* Invoke the DMA callback */
+      /* Invoke the DMA callback.  The single data mode and FIFO exceptions
+       * have no effect on the transfer (user manual 10.5.2): they are only
+       * reported along with another event.
+       */
 
-      if (dmachan->callback != NULL)
+      if (dmachan->callback != NULL &&
+          (status & ~(DMA_INTF_SDEIF | DMA_INTF_FEEIF)) != 0)
         {
           dmachan->callback(dmachan, (uint16_t)status, dmachan->arg);
         }
