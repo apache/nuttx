@@ -949,6 +949,18 @@ config ARCH_BOARD_GD32F470IK_EVAL
 	---help---
 		GD32 MCU GD32F470IK-EVAL board based on the GD32F4 GD32F470IKT6 MCU.
 
+config ARCH_BOARD_AB32VG1_GENERIC
+	bool "AB32VG1 generic development board"
+	depends on ARCH_CHIP_AB32VG1
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		Compact (83 x 55 mm) AB32VG1 development board sold by several
+		vendors as "AB32VG1 Development Board", derived from Bluetrum's
+		AB32VG1-AB-PROUGEN without its Arduino Uno headers: RGB LED, user
+		buttons, TF card, audio jack, USB-A, and a USB-C USB-serial bridge
+		on the single-wire download/console pin PA7.
+
 config ARCH_BOARD_HIFIVE1_REVB
 	bool "HiFive1 Rev B board"
 	depends on ARCH_CHIP_FE310
@@ -4176,6 +4188,7 @@ config ARCH_BOARD
 	default "gd-xd-w515-eval"              if ARCH_BOARD_GD_XD_W515_EVAL
 	default "gd32vw553k-start"             if ARCH_BOARD_GD32VW553K_START
 	default "gd32vw553-hmq"                if ARCH_BOARD_GD32VW553_HMQ
+	default "ab32vg1-generic"              if ARCH_BOARD_AB32VG1_GENERIC
 	default "hifive1-revb"                 if ARCH_BOARD_HIFIVE1_REVB
 	default "hymini-stm32v"                if ARCH_BOARD_HYMINI_STM32V
 	default "imxrt1020-evk"                if ARCH_BOARD_IMXRT1020_EVK
@@ -5486,6 +5499,9 @@ source "boards/renesas/sh1/us7032evb1/Kconfig"
 endif
 if ARCH_BOARD_ARTY_A7
 source "boards/risc-v/litex/arty_a7/Kconfig"
+endif
+if ARCH_BOARD_AB32VG1_GENERIC
+source "boards/risc-v/ab32vg1/ab32vg1-generic/Kconfig"
 endif
 if ARCH_BOARD_HIFIVE_REVB
 source "boards/risc-v/fe310/hifive1-revb/Kconfig"
