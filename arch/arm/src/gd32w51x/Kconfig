@@ -123,6 +123,23 @@ config GD32W51X_QSPI
 		is a secure peripheral: its pins are marked secure when it is
 		initialized.
 
+config GD32W51X_QSPI_DMA
+	bool "QSPI DMA reads"
+	default n
+	depends on GD32W51X_QSPI && GD32W51X_DMA
+	---help---
+		Move the data of the longer reads with DMA1 channel 0 instead of
+		polling the FIFO.  The calling thread sleeps until the transfer
+		ends.
+
+config GD32W51X_QSPI_DMATHRESHOLD
+	int "QSPI DMA threshold (bytes)"
+	default 64
+	depends on GD32W51X_QSPI_DMA
+	---help---
+		Reads shorter than this are done by polling: setting up DMA costs
+		more than moving a few bytes.
+
 config GD32W51X_TSI
 	bool "TSI"
 	default n

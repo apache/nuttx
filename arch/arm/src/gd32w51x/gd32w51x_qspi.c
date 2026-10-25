@@ -35,6 +35,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/qspi.h>
 
 #include <arch/board/board.h>
@@ -43,6 +44,7 @@
 #include "chip.h"
 #include "gd32w51x.h"
 #include "gd32w51x_clockconfig.h"
+#include "gd32w51x_dma.h"
 #include "gd32w51x_gpio.h"
 #include "gd32w51x_qspi.h"
 #include "hardware/gd32w51x_qspi.h"
@@ -69,6 +71,10 @@
 
 #define QSPI_TIMEOUT        0x00ffffff
 
+/* Longest wait for a DMA read: 64 KB at the slowest useful clock */
+
+#define QSPI_DMA_TIMEOUT    MSEC2TICK(1000)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -81,6 +87,11 @@ struct gd32_qspidev_s
   uint32_t actual;              /* Actual clock frequency */
   uint8_t mode;                 /* Mode 0 or 3 */
   bool initialized;
+#ifdef CONFIG_GD32W51X_QSPI_DMA
+  DMA_HANDLE rxdma;             /* DMA channel of the reads */
+  sem_t dmawait;                /* Wait for the end of a DMA read */
+  volatile uint16_t dmaresult;  /* DMA status, non-zero when done */
+#endif
 };
 
 /****************************************************************************
@@ -122,6 +133,9 @@ static struct gd32_qspidev_s g_qspi0dev =
     .ops = &g_qspi_ops,
   },
   .lock = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_GD32W51X_QSPI_DMA
+  .dmawait = SEM_INITIALIZER(0),
+#endif
 };
 
 /****************************************************************************
@@ -183,6 +197,73 @@ static int qspi_wait_status(uint32_t flags)
   return OK;
 }
 
+#ifdef CONFIG_GD32W51X_QSPI_DMA
+/****************************************************************************
+ * Name: qspi_dmacallback
+ ****************************************************************************/
+
+static void qspi_dmacallback(DMA_HANDLE handle, uint16_t isr, void *arg)
+{
+  struct gd32_qspidev_s *priv = (struct gd32_qspidev_s *)arg;
+
+  /* The status is OR'ed with 0x0080 to assure that it is non-zero */
+
+  priv->dmaresult = isr | 0x0080;
+  nxsem_post(&priv->dmawait);
+}
+
+/****************************************************************************
+ * Name: qspi_dmaread
+ *
+ * Description:
+ *   Move the data phase of an indirect read with the DMA.  TCFG has been
+ *   written; the transfer starts when the address is written.
+ *
+ ****************************************************************************/
+
+static int qspi_dmaread(struct gd32_qspidev_s *priv, uint32_t addr,
+                        uint8_t *buffer, size_t buflen)
+{
+  struct gd32_dma_config_s cfg;
+  int ret;
+
+  cfg.periph_addr         = GD32W51X_QSPI_DATA;
+  cfg.memory0_addr        = (uint32_t)buffer;
+  cfg.number              = buflen;
+  cfg.periph_inc          = DMA_PERIPH_INCREASE_DISABLE;
+  cfg.memory_inc          = DMA_MEMORY_INCREASE_ENABLE;
+  cfg.periph_memory_width = DMA_WIDTH_8BITS_SELECT;
+  cfg.circular_mode       = DMA_CIRCULAR_MODE_DISABLE;
+  cfg.direction           = DMA_PERIPH_TO_MEMORY;
+  cfg.priority            = DMA_PRIO_HIGH_SELECT;
+
+  priv->dmaresult = 0;
+  gd32_dma_setup(priv->rxdma, &cfg, GD32_DMA_SINGLE_DATA_MODE);
+  gd32_dma_start(priv->rxdma, qspi_dmacallback, priv,
+                 DMA_CHXCTL_FTFIE | DMA_CHXCTL_TAEIE);
+
+  modifyreg32(GD32W51X_QSPI_STAT, 0, QSPI_STAT_DMAEN);
+  putreg32(addr, GD32W51X_QSPI_ADDR);
+
+  do
+    {
+      ret = nxsem_tickwait_uninterruptible(&priv->dmawait,
+                                           QSPI_DMA_TIMEOUT);
+    }
+  while (ret == OK && priv->dmaresult == 0);
+
+  modifyreg32(GD32W51X_QSPI_STAT, QSPI_STAT_DMAEN, 0);
+  gd32_dma_stop(priv->rxdma);
+
+  if (ret == OK && (priv->dmaresult & DMA_INTF_TAEIF) != 0)
+    {
+      ret = -EIO;
+    }
+
+  return ret;
+}
+#endif
+
 /****************************************************************************
  * Name: qspi_transfer
  *
@@ -193,8 +274,9 @@ static int qspi_wait_status(uint32_t flags)
  *
  ****************************************************************************/
 
-static int qspi_transfer(uint32_t tcfg, bool hasaddr, uint32_t addr,
-                         uint8_t *buffer, size_t buflen, bool read)
+static int qspi_transfer(struct gd32_qspidev_s *priv, uint32_t tcfg,
+                         bool hasaddr, uint32_t addr, uint8_t *buffer,
+                         size_t buflen, bool read)
 {
   size_t i;
   int ret;
@@ -216,6 +298,21 @@ static int qspi_transfer(uint32_t tcfg, bool hasaddr, uint32_t addr,
   tcfg |= (read ? QSPI_FMOD_INDIRECT_READ : QSPI_FMOD_INDIRECT_WRITE) <<
           QSPI_TCFG_FMOD_SHIFT;
   putreg32(tcfg, GD32W51X_QSPI_TCFG);
+
+#ifdef CONFIG_GD32W51X_QSPI_DMA
+  if (read && hasaddr && buflen >= CONFIG_GD32W51X_QSPI_DMATHRESHOLD &&
+      !up_interrupt_context())
+    {
+      ret = qspi_dmaread(priv, addr, buffer, buflen);
+      if (ret < 0)
+        {
+          goto errout;
+        }
+
+      hasaddr = false;
+      buflen  = 0;
+    }
+#endif
 
   if (hasaddr)
     {
@@ -375,7 +472,8 @@ static int qspi_command(struct qspi_dev_s *dev,
       tcfg |= lines << QSPI_TCFG_DATAMOD_SHIFT;
     }
 
-  return qspi_transfer(tcfg, QSPICMD_ISADDRESS(cmdinfo->flags),
+  return qspi_transfer((struct gd32_qspidev_s *)dev, tcfg,
+                       QSPICMD_ISADDRESS(cmdinfo->flags),
                        cmdinfo->addr, cmdinfo->buffer,
                        QSPICMD_ISDATA(cmdinfo->flags) ? cmdinfo->buflen : 0,
                        !QSPICMD_ISWRITE(cmdinfo->flags));
@@ -425,8 +523,9 @@ static int qspi_memory(struct qspi_dev_s *dev,
           QSPI_TCFG_DUMYC_MASK) |
          (dlines << QSPI_TCFG_DATAMOD_SHIFT);
 
-  return qspi_transfer(tcfg, true, meminfo->addr, meminfo->buffer,
-                       meminfo->buflen, QSPIMEM_ISREAD(meminfo->flags));
+  return qspi_transfer((struct gd32_qspidev_s *)dev, tcfg, true,
+                       meminfo->addr, meminfo->buffer, meminfo->buflen,
+                       QSPIMEM_ISREAD(meminfo->flags));
 }
 
 /****************************************************************************
@@ -504,6 +603,11 @@ struct qspi_dev_s *gd32_qspi_initialize(int intf)
       putreg32((1 << QSPI_DCFG_CSHC_SHIFT) |
                (QSPI_FMSZ << QSPI_DCFG_FMSZ_SHIFT), GD32W51X_QSPI_DCFG);
       modifyreg32(GD32W51X_QSPI_CTL, 0, QSPI_CTL_QSPIEN);
+
+#ifdef CONFIG_GD32W51X_QSPI_DMA
+      priv->rxdma = gd32_dma_channel_alloc(DMA_REQ_QSPI);
+      DEBUGASSERT(priv->rxdma != NULL);
+#endif
 
       priv->frequency   = 0;
       priv->mode        = QSPIDEV_MODE0;

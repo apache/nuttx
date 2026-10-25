@@ -86,6 +86,7 @@
 #define QSPI_STAT_SM                 (1 << 3)   /* Status match */
 #define QSPI_STAT_TMOUT              (1 << 4)   /* Timeout */
 #define QSPI_STAT_WS                 (1 << 5)   /* Wrong start sequence */
+#define QSPI_STAT_DMAEN              (1 << 16)  /* DMA enable */
 
 #define QSPI_STATC_TERRC             (1 << 0)
 #define QSPI_STATC_TCC               (1 << 1)
