@@ -1637,6 +1637,7 @@ arch/arm/src/common/stm32/hardware/stm32_i2c_v1.h alin.jerpelea@sony.com david_s
 arch/arm/src/common/stm32/hardware/stm32_i2c_v2.h alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com raiden00pl@gmail.com raiden00@railab.me xiaoxiang@xiaomi.com
 arch/arm/src/common/stm32/hardware/stm32_i2c_v2_m0.h sebastien@lorquet.fr acassis@gmail.com alin.jerpelea@sony.com raiden00@railab.me
 arch/arm/src/common/stm32/hardware/stm32_lcd.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com raiden00@railab.me
+arch/arm/src/common/stm32/hardware/stm32_lptim.h alexvasiljev@gmail.com alin.jerpelea@sony.com 101105604+simbit18@users.noreply.github.com
 arch/arm/src/common/stm32/hardware/stm32_ltdc.h 59230071+hartmannathan@users.noreply.github.com alin.jerpelea@sony.com raiden00@railab.me
 arch/arm/src/common/stm32/hardware/stm32_otghs.h alin.jerpelea@sony.com raiden00@railab.me devel@sumpfralle.de xiaoxiang@xiaomi.com miha.vrhovnik@gmail.com
 arch/arm/src/common/stm32/hardware/stm32_pwr.h alin.jerpelea@sony.com raiden00@railab.me 41312067+SPRESENSE@users.noreply.github.com 59230071+hartmannathan@users.noreply.github.com
@@ -1787,6 +1788,8 @@ arch/arm/src/common/stm32/stm32_lowputc.h alin.jerpelea@sony.com acassis@gmail.c
 arch/arm/src/common/stm32/stm32_lowputc_usart_m0_v3.c sebastien@lorquet.fr acassis@gmail.com alin.jerpelea@sony.com raiden00@railab.me raiden00pl@gmail.com
 arch/arm/src/common/stm32/stm32_lowputc_usart_m0_v4.c raiden00pl@gmail.com alin.jerpelea@sony.com paul-a.patience@polymtl.ca raiden00@railab.me xiaoxiang@xiaomi.com
 arch/arm/src/common/stm32/stm32_lowputc_usart_m3m4_v1v2v3v4.c 59230071+hartmannathan@users.noreply.github.com kwilson@2g-eng.com alin.jerpelea@sony.com raiden00pl@gmail.com raiden00@railab.me
+arch/arm/src/common/stm32/stm32_lptim.c alexvasiljev@gmail.com xiaoxiang@xiaomi.com alin.jerpelea@sony.com
+arch/arm/src/common/stm32/stm32_lptim.h alexvasiljev@gmail.com xiaoxiang@xiaomi.com alin.jerpelea@sony.com
 arch/arm/src/common/stm32/stm32_lse_m0_v1.c alin.jerpelea@sony.com macscomp@gmail.com raiden00@railab.me raiden00pl@gmail.com xiaoxiang@xiaomi.com
 arch/arm/src/common/stm32/stm32_lse_m3m4_v1.c alin.jerpelea@sony.com macscomp@gmail.com xiaoxiang@xiaomi.com raiden00@railab.me
 arch/arm/src/common/stm32/stm32_lsi.c alin.jerpelea@sony.com raiden00@railab.me 59230071+hartmannathan@users.noreply.github.com xiaoxiang@xiaomi.com
@@ -4150,7 +4153,6 @@ arch/arm/src/stm32h7/hardware/stm32_fmc.h zapparello@ya.ru yukihiratype2@gmail.c
 arch/arm/src/stm32h7/hardware/stm32_gpio.h alin.jerpelea@sony.com raiden00@railab.me javiercasas@geotab.com lwazeh@gmail.com
 arch/arm/src/stm32h7/hardware/stm32_hsem.h raiden00@railab.me alin.jerpelea@sony.com
 arch/arm/src/stm32h7/hardware/stm32_i2c.h alin.jerpelea@sony.com raiden00@railab.me javiercasas@geotab.com po@lambdaconcept.com
-arch/arm/src/stm32h7/hardware/stm32_lptim.h alexvasiljev@gmail.com alin.jerpelea@sony.com 101105604+simbit18@users.noreply.github.com
 arch/arm/src/stm32h7/hardware/stm32_ltdc.h raiden00@railab.me alin.jerpelea@sony.com
 arch/arm/src/stm32h7/hardware/stm32_mdma.h raiden00@railab.me alin.jerpelea@sony.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32h7/hardware/stm32_memorymap.h alin.jerpelea@sony.com raiden00@railab.me javiercasas@geotab.com lwazeh@gmail.com
@@ -4216,8 +4218,6 @@ arch/arm/src/stm32h7/stm32_i2c.h raiden00pl@gmail.com alin.jerpelea@sony.com pet
 arch/arm/src/stm32h7/stm32_irq.c simon@leitwert.ch xiaoxiang@xiaomi.com raiden00pl@gmail.com hujun5@xiaomi.com
 arch/arm/src/stm32h7/stm32_lowputc.c raiden00pl@gmail.com alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32h7/stm32_lowputc.h raiden00pl@gmail.com alin.jerpelea@sony.com
-arch/arm/src/stm32h7/stm32_lptim.c alexvasiljev@gmail.com xiaoxiang@xiaomi.com alin.jerpelea@sony.com
-arch/arm/src/stm32h7/stm32_lptim.h alexvasiljev@gmail.com xiaoxiang@xiaomi.com alin.jerpelea@sony.com
 arch/arm/src/stm32h7/stm32_lse.c david.sidrane@nscdg.com David.Sidrane@NscDg.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com anthony@vergeaero.com
 arch/arm/src/stm32h7/stm32_ltdc.c raiden00@railab.me xiaoxiang@xiaomi.com liujp@xiaomi.com jorge.gzm@gmail.com devel@sumpfralle.de
 arch/arm/src/stm32h7/stm32_ltdc.h raiden00@railab.me alin.jerpelea@sony.com xiaoxiang@xiaomi.com

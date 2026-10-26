@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/stm32_lptim.c
+ * arch/arm/src/common/stm32/stm32_lptim.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -40,8 +40,8 @@
 #include "chip.h"
 #include "arm_internal.h"
 #include "stm32_rcc.h"
-#include "stm32_gpio.h"
 #include "stm32_lptim.h"
+#include "stm32_lptim_clk.h"
 
 #if defined(CONFIG_STM32_LPTIM1)  || defined(CONFIG_STM32_LPTIM2)  || \
     defined(CONFIG_STM32_LPTIM3)  || defined(CONFIG_STM32_LPTIM4)  || \
@@ -170,6 +170,7 @@ static void stm32_lptim_setcfgr(struct stm32_lptim_dev_s *dev,
 static void stm32_lptim_setperiod(struct stm32_lptim_dev_s *dev,
                                   uint32_t period)
 {
+#ifdef CONFIG_STM32_HAVE_IP_LPTIM_V2
   uint32_t timeout;
 
   /* For STM32H5: Clear ARROK flag BEFORE writing ARR when timer is enabled
@@ -180,9 +181,11 @@ static void stm32_lptim_setperiod(struct stm32_lptim_dev_s *dev,
     {
       stm32_putreg32(dev, STM32_LPTIM_ICR_OFFSET, LPTIM_ISR_ARROK);
     }
+#endif
 
   stm32_putreg32(dev, STM32_LPTIM_ARR_OFFSET, period);
 
+#ifdef CONFIG_STM32_HAVE_IP_LPTIM_V2
   /* Wait for ARROK flag when timer is enabled */
 
   if (stm32_getreg32(dev, STM32_LPTIM_CR_OFFSET) & LPTIM_CR_ENABLE)
@@ -194,11 +197,13 @@ static void stm32_lptim_setperiod(struct stm32_lptim_dev_s *dev,
           timeout--;
         }
     }
+#endif
 }
 
 static void stm32_lptim_setcompare(struct stm32_lptim_dev_s *dev,
                                    uint32_t cmp)
 {
+#ifdef CONFIG_STM32_HAVE_IP_LPTIM_V2
   uint32_t timeout;
 
   /* For STM32H5: Clear CMPOK flag BEFORE writing CMP when timer is enabled */
@@ -207,9 +212,11 @@ static void stm32_lptim_setcompare(struct stm32_lptim_dev_s *dev,
     {
       stm32_putreg32(dev, STM32_LPTIM_ICR_OFFSET, LPTIM_ISR_CMPOK);
     }
+#endif
 
   stm32_putreg32(dev, STM32_LPTIM_CMP_OFFSET, cmp);
 
+#ifdef CONFIG_STM32_HAVE_IP_LPTIM_V2
   /* Wait for CMPOK flag when timer is enabled */
 
   if (stm32_getreg32(dev, STM32_LPTIM_CR_OFFSET) & LPTIM_CR_ENABLE)
@@ -221,6 +228,7 @@ static void stm32_lptim_setcompare(struct stm32_lptim_dev_s *dev,
           timeout--;
         }
     }
+#endif
 }
 
 static uint32_t stm32_lptim_getcounter(struct stm32_lptim_dev_s *dev)
@@ -251,6 +259,11 @@ static int stm32_lptim_setinput(struct stm32_lptim_dev_s *dev,
     {
 #ifdef CONFIG_STM32_LPTIM1
       case STM32_LPTIM1_BASE:
+#endif
+#ifdef CONFIG_STM32_LPTIM2
+      case STM32_LPTIM2_BASE:
+#endif
+#if defined(CONFIG_STM32_LPTIM1) || defined(CONFIG_STM32_LPTIM2)
         if (input == 0)
           {
             modifyreg32(dev->base + STM32_LPTIM_CFGR2_OFFSET,
@@ -437,34 +450,40 @@ struct stm32_lptim_dev_s *stm32_lptim_init(int lptimer)
 
   switch (lptimer)
     {
-#ifdef CONFIG_STM32_LPTIM1
+#if defined(CONFIG_STM32_LPTIM1) && defined(STM32_RCC_LPTIM1_EN_REG)
       case 1:
         dev = &stm32_lptim1_priv;
-        modifyreg32(STM32_RCC_APB3ENR, 0, RCC_APB3ENR_LPTIM1EN);
+        modifyreg32(STM32_RCC_LPTIM1_EN_REG, 0, STM32_RCC_LPTIM1_EN);
         break;
 #endif
-#ifdef CONFIG_STM32_LPTIM3
+#if defined(CONFIG_STM32_LPTIM2) && defined(STM32_RCC_LPTIM2_EN_REG)
+      case 2:
+        dev = &stm32_lptim2_priv;
+        modifyreg32(STM32_RCC_LPTIM2_EN_REG, 0, STM32_RCC_LPTIM2_EN);
+        break;
+#endif
+#if defined(CONFIG_STM32_LPTIM3) && defined(STM32_RCC_LPTIM3_EN_REG)
       case 3:
         dev = &stm32_lptim3_priv;
-        modifyreg32(STM32_RCC_APB3ENR, 0, RCC_APB3ENR_LPTIM3EN);
+        modifyreg32(STM32_RCC_LPTIM3_EN_REG, 0, STM32_RCC_LPTIM3_EN);
         break;
 #endif
-#ifdef CONFIG_STM32_LPTIM4
+#if defined(CONFIG_STM32_LPTIM4) && defined(STM32_RCC_LPTIM4_EN_REG)
       case 4:
         dev = &stm32_lptim4_priv;
-        modifyreg32(STM32_RCC_APB3ENR, 0, RCC_APB3ENR_LPTIM4EN);
+        modifyreg32(STM32_RCC_LPTIM4_EN_REG, 0, STM32_RCC_LPTIM4_EN);
         break;
 #endif
-#ifdef CONFIG_STM32_LPTIM5
+#if defined(CONFIG_STM32_LPTIM5) && defined(STM32_RCC_LPTIM5_EN_REG)
       case 5:
         dev = &stm32_lptim5_priv;
-        modifyreg32(STM32_RCC_APB3ENR, 0, RCC_APB3ENR_LPTIM5EN);
+        modifyreg32(STM32_RCC_LPTIM5_EN_REG, 0, STM32_RCC_LPTIM5_EN);
         break;
 #endif
-#ifdef CONFIG_STM32_LPTIM6
+#if defined(CONFIG_STM32_LPTIM6) && defined(STM32_RCC_LPTIM6_EN_REG)
       case 6:
         dev = &stm32_lptim6_priv;
-        modifyreg32(STM32_RCC_APB3ENR, 0, RCC_APB3ENR_LPTIM6EN);
+        modifyreg32(STM32_RCC_LPTIM6_EN_REG, 0, STM32_RCC_LPTIM6_EN);
         break;
 #endif
       default:
@@ -482,29 +501,34 @@ int stm32_lptim_deinit(struct stm32_lptim_dev_s * dev)
 
   switch (dev->base)
     {
-#ifdef CONFIG_STM32_LPTIM1
+#if defined(CONFIG_STM32_LPTIM1) && defined(STM32_RCC_LPTIM1_EN_REG)
       case STM32_LPTIM1_BASE:
-        modifyreg32(STM32_RCC_APB3ENR, RCC_APB3ENR_LPTIM1EN, 0);
+        modifyreg32(STM32_RCC_LPTIM1_EN_REG, STM32_RCC_LPTIM1_EN, 0);
         break;
 #endif
-#ifdef CONFIG_STM32_LPTIM3
+#if defined(CONFIG_STM32_LPTIM2) && defined(STM32_RCC_LPTIM2_EN_REG)
+      case STM32_LPTIM2_BASE:
+        modifyreg32(STM32_RCC_LPTIM2_EN_REG, STM32_RCC_LPTIM2_EN, 0);
+        break;
+#endif
+#if defined(CONFIG_STM32_LPTIM3) && defined(STM32_RCC_LPTIM3_EN_REG)
       case STM32_LPTIM3_BASE:
-        modifyreg32(STM32_RCC_APB3ENR, RCC_APB3ENR_LPTIM3EN, 0);
+        modifyreg32(STM32_RCC_LPTIM3_EN_REG, STM32_RCC_LPTIM3_EN, 0);
         break;
 #endif
-#ifdef CONFIG_STM32_LPTIM4
+#if defined(CONFIG_STM32_LPTIM4) && defined(STM32_RCC_LPTIM4_EN_REG)
       case STM32_LPTIM4_BASE:
-        modifyreg32(STM32_RCC_APB3ENR, RCC_APB3ENR_LPTIM4EN, 0);
+        modifyreg32(STM32_RCC_LPTIM4_EN_REG, STM32_RCC_LPTIM4_EN, 0);
         break;
 #endif
-#ifdef CONFIG_STM32_LPTIM5
+#if defined(CONFIG_STM32_LPTIM5) && defined(STM32_RCC_LPTIM5_EN_REG)
       case STM32_LPTIM5_BASE:
-        modifyreg32(STM32_RCC_APB3ENR, RCC_APB3ENR_LPTIM5EN, 0);
+        modifyreg32(STM32_RCC_LPTIM5_EN_REG, STM32_RCC_LPTIM5_EN, 0);
         break;
 #endif
-#ifdef CONFIG_STM32_LPTIM6
+#if defined(CONFIG_STM32_LPTIM6) && defined(STM32_RCC_LPTIM6_EN_REG)
       case STM32_LPTIM6_BASE:
-        modifyreg32(STM32_RCC_APB3ENR, RCC_APB3ENR_LPTIM6EN, 0);
+        modifyreg32(STM32_RCC_LPTIM6_EN_REG, STM32_RCC_LPTIM6_EN, 0);
         break;
 #endif
       default:

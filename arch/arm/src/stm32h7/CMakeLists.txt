@@ -162,10 +162,6 @@ if(CONFIG_USBHOST)
   endif()
 endif()
 
-if(CONFIG_STM32_LPTIM)
-  list(APPEND SRCS stm32_lptim.c)
-endif()
-
 if(CONFIG_STM32_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()

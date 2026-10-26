@@ -165,10 +165,6 @@ endif
 endif
 endif
 
-ifeq ($(CONFIG_STM32_LPTIM),y)
-CHIP_CSRCS += stm32_lptim.c
-endif
-
 ifeq ($(CONFIG_STM32_PWM),y)
 CHIP_CSRCS += stm32_pwm.c
 endif
