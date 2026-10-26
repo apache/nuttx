@@ -22,7 +22,7 @@
 
 SECTIONS
 {
-  . = 0x10000000;
+  . = 0x80000000;
   .text :
     {
       _stext = . ;
@@ -54,7 +54,7 @@ SECTIONS
       _erodata = . ;
     }
 
-  . = 0x10401000;
+  . = 0x80401000;
   .data :
     {
       _sdata = . ;
