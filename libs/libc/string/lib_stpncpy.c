@@ -85,10 +85,7 @@ FAR char *stpncpy(FAR char *dest, FAR const char *src, size_t n)
    * overwrites any previously copied NUL terminator.
    */
 
-  while (dest != end)
-    {
-      *dest++ = '\0';
-    }
+  memset(dest, 0, end - dest);
 
   return ret;
 }
