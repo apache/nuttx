@@ -26,7 +26,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
+
+#include <assert.h>
 #include <sys/types.h>
+
+#include <arch/barriers.h>
+#include <arch/irq.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -360,7 +366,25 @@ unsigned int mpu_get_active_set(void);
  *
  ****************************************************************************/
 
-void mpu_set_active_set(unsigned int set);
+/* PSW is part of the upper context restored by RET, so this must be inlined
+ * into the function that runs with the new set.
+ */
+
+static inline_function void mpu_set_active_set(unsigned int set)
+{
+  uint32_t psw_value;
+
+  DEBUGASSERT(set < CONFIG_ARCH_MPU_NSETS);
+
+  TRICORE_MFCR(CPU_PSW, psw_value);
+
+  psw_value &= ~((0x3 << 12) | (0x1 << 15));
+  psw_value |= (set >> 2) << 15;
+  psw_value |= (set & 0x03) << 12;
+  TRICORE_MTCR(CPU_PSW, psw_value);
+
+  UP_ISB();
+}
 
 /****************************************************************************
  * Name: mpu_initialize

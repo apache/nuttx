@@ -72,6 +72,122 @@
 #define FPU_TRAP_FZE_SHIFT    20
 #define FPU_TRAP_TCL_SHIFT    1
 
+/* MPU CSFR numbers for TRICORE_MFCR/MTCR (TC1.6.2P/TC1.8 core arch manuals).
+ * Set enables 4-7 are not contiguous with sets 0-3.
+ */
+
+#define CPU_PSW          TRICORE_CPU_PSW
+#define CPU_CORECON      0xfe14
+
+#define CPU_DPR0_L       0xc000
+#define CPU_DPR0_U       0xc004
+#define CPU_DPR1_L       0xc008
+#define CPU_DPR1_U       0xc00c
+#define CPU_DPR2_L       0xc010
+#define CPU_DPR2_U       0xc014
+#define CPU_DPR3_L       0xc018
+#define CPU_DPR3_U       0xc01c
+#define CPU_DPR4_L       0xc020
+#define CPU_DPR4_U       0xc024
+#define CPU_DPR5_L       0xc028
+#define CPU_DPR5_U       0xc02c
+#define CPU_DPR6_L       0xc030
+#define CPU_DPR6_U       0xc034
+#define CPU_DPR7_L       0xc038
+#define CPU_DPR7_U       0xc03c
+#define CPU_DPR8_L       0xc040
+#define CPU_DPR8_U       0xc044
+#define CPU_DPR9_L       0xc048
+#define CPU_DPR9_U       0xc04c
+#define CPU_DPR10_L      0xc050
+#define CPU_DPR10_U      0xc054
+#define CPU_DPR11_L      0xc058
+#define CPU_DPR11_U      0xc05c
+#define CPU_DPR12_L      0xc060
+#define CPU_DPR12_U      0xc064
+#define CPU_DPR13_L      0xc068
+#define CPU_DPR13_U      0xc06c
+#define CPU_DPR14_L      0xc070
+#define CPU_DPR14_U      0xc074
+#define CPU_DPR15_L      0xc078
+#define CPU_DPR15_U      0xc07c
+#define CPU_DPR16_L      0xc080
+#define CPU_DPR16_U      0xc084
+#define CPU_DPR17_L      0xc088
+#define CPU_DPR17_U      0xc08c
+#define CPU_DPR18_L      0xc090
+#define CPU_DPR18_U      0xc094
+#define CPU_DPR19_L      0xc098
+#define CPU_DPR19_U      0xc09c
+#define CPU_DPR20_L      0xc0a0
+#define CPU_DPR20_U      0xc0a4
+#define CPU_DPR21_L      0xc0a8
+#define CPU_DPR21_U      0xc0ac
+#define CPU_DPR22_L      0xc0b0
+#define CPU_DPR22_U      0xc0b4
+#define CPU_DPR23_L      0xc0b8
+#define CPU_DPR23_U      0xc0bc
+
+#define CPU_CPR0_L       0xd000
+#define CPU_CPR0_U       0xd004
+#define CPU_CPR1_L       0xd008
+#define CPU_CPR1_U       0xd00c
+#define CPU_CPR2_L       0xd010
+#define CPU_CPR2_U       0xd014
+#define CPU_CPR3_L       0xd018
+#define CPU_CPR3_U       0xd01c
+#define CPU_CPR4_L       0xd020
+#define CPU_CPR4_U       0xd024
+#define CPU_CPR5_L       0xd028
+#define CPU_CPR5_U       0xd02c
+#define CPU_CPR6_L       0xd030
+#define CPU_CPR6_U       0xd034
+#define CPU_CPR7_L       0xd038
+#define CPU_CPR7_U       0xd03c
+#define CPU_CPR8_L       0xd040
+#define CPU_CPR8_U       0xd044
+#define CPU_CPR9_L       0xd048
+#define CPU_CPR9_U       0xd04c
+#define CPU_CPR10_L      0xd050
+#define CPU_CPR10_U      0xd054
+#define CPU_CPR11_L      0xd058
+#define CPU_CPR11_U      0xd05c
+#define CPU_CPR12_L      0xd060
+#define CPU_CPR12_U      0xd064
+#define CPU_CPR13_L      0xd068
+#define CPU_CPR13_U      0xd06c
+#define CPU_CPR14_L      0xd070
+#define CPU_CPR14_U      0xd074
+#define CPU_CPR15_L      0xd078
+#define CPU_CPR15_U      0xd07c
+
+#define CPU_CPXE_0       0xe000
+#define CPU_CPXE_1       0xe004
+#define CPU_CPXE_2       0xe008
+#define CPU_CPXE_3       0xe00c
+#define CPU_CPXE_4       0xe040
+#define CPU_CPXE_5       0xe044
+#define CPU_CPXE_6       0xe048
+#define CPU_CPXE_7       0xe04c
+
+#define CPU_DPRE_0       0xe010
+#define CPU_DPRE_1       0xe014
+#define CPU_DPRE_2       0xe018
+#define CPU_DPRE_3       0xe01c
+#define CPU_DPRE_4       0xe050
+#define CPU_DPRE_5       0xe054
+#define CPU_DPRE_6       0xe058
+#define CPU_DPRE_7       0xe05c
+
+#define CPU_DPWE_0       0xe020
+#define CPU_DPWE_1       0xe024
+#define CPU_DPWE_2       0xe028
+#define CPU_DPWE_3       0xe02c
+#define CPU_DPWE_4       0xe060
+#define CPU_DPWE_5       0xe064
+#define CPU_DPWE_6       0xe068
+#define CPU_DPWE_7       0xe06c
+
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus

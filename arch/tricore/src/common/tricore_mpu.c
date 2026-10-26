@@ -22,10 +22,13 @@
  * Included Files
  ****************************************************************************/
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <nuttx/debug.h>
+#include <nuttx/sched.h>
 
 #include <arch/barriers.h>
+#include <arch/irq.h>
 
 #include "tricore_mpu.h"
 #include "tricore_internal.h"
@@ -44,39 +47,49 @@ static unsigned int g_mpu_set;
 
 static uint32_t get_dpre_value(unsigned int set)
 {
+  uint32_t value;
+
   switch (set)
     {
 #if CONFIG_ARCH_MPU_NSETS > 0
       case 0:
-        return tricore_mfcr(CPU_DPRE_0);
+        TRICORE_MFCR(CPU_DPRE_0, value);
+        return value;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 1
       case 1:
-        return tricore_mfcr(CPU_DPRE_1);
+        TRICORE_MFCR(CPU_DPRE_1, value);
+        return value;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 2
       case 2:
-        return tricore_mfcr(CPU_DPRE_2);
+        TRICORE_MFCR(CPU_DPRE_2, value);
+        return value;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 3
       case 3:
-        return tricore_mfcr(CPU_DPRE_3);
+        TRICORE_MFCR(CPU_DPRE_3, value);
+        return value;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 4
       case 4:
-        return tricore_mfcr(CPU_DPRE_4);
+        TRICORE_MFCR(CPU_DPRE_4, value);
+        return value;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 5
       case 5:
-        return tricore_mfcr(CPU_DPRE_5);
+        TRICORE_MFCR(CPU_DPRE_5, value);
+        return value;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 6
       case 6:
-        return tricore_mfcr(CPU_DPRE_6);
+        TRICORE_MFCR(CPU_DPRE_6, value);
+        return value;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 7
       case 7:
-        return tricore_mfcr(CPU_DPRE_7);
+        TRICORE_MFCR(CPU_DPRE_7, value);
+        return value;
 #endif
       default:
         return 0;
@@ -89,42 +102,42 @@ static void set_dpre_value(unsigned int set, uint32_t dpre_value)
     {
 #if CONFIG_ARCH_MPU_NSETS > 0
       case 0:
-        tricore_mtcr(CPU_DPRE_0, dpre_value);
+        TRICORE_MTCR(CPU_DPRE_0, dpre_value);
         break;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 1
       case 1:
-        tricore_mtcr(CPU_DPRE_1, dpre_value);
+        TRICORE_MTCR(CPU_DPRE_1, dpre_value);
         break;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 2
       case 2:
-        tricore_mtcr(CPU_DPRE_2, dpre_value);
+        TRICORE_MTCR(CPU_DPRE_2, dpre_value);
         break;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 3
       case 3:
-        tricore_mtcr(CPU_DPRE_3, dpre_value);
+        TRICORE_MTCR(CPU_DPRE_3, dpre_value);
         break;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 4
       case 4:
-        tricore_mtcr(CPU_DPRE_4, dpre_value);
+        TRICORE_MTCR(CPU_DPRE_4, dpre_value);
         break;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 5
       case 5:
-        tricore_mtcr(CPU_DPRE_5, dpre_value);
+        TRICORE_MTCR(CPU_DPRE_5, dpre_value);
         break;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 6
       case 6:
-        tricore_mtcr(CPU_DPRE_6, dpre_value);
+        TRICORE_MTCR(CPU_DPRE_6, dpre_value);
         break;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 7
       case 7:
-        tricore_mtcr(CPU_DPRE_7, dpre_value);
+        TRICORE_MTCR(CPU_DPRE_7, dpre_value);
         break;
 #endif
       default:
@@ -136,39 +149,49 @@ static void set_dpre_value(unsigned int set, uint32_t dpre_value)
 
 static uint32_t get_dpwe_value(unsigned int set)
 {
+  uint32_t value;
+
   switch (set)
     {
 #if CONFIG_ARCH_MPU_NSETS > 0
       case 0:
-        return tricore_mfcr(CPU_DPWE_0);
+        TRICORE_MFCR(CPU_DPWE_0, value);
+        return value;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 1
       case 1:
-        return tricore_mfcr(CPU_DPWE_1);
+        TRICORE_MFCR(CPU_DPWE_1, value);
+        return value;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 2
       case 2:
-        return tricore_mfcr(CPU_DPWE_2);
+        TRICORE_MFCR(CPU_DPWE_2, value);
+        return value;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 3
       case 3:
-        return tricore_mfcr(CPU_DPWE_3);
+        TRICORE_MFCR(CPU_DPWE_3, value);
+        return value;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 4
       case 4:
-        return tricore_mfcr(CPU_DPWE_4);
+        TRICORE_MFCR(CPU_DPWE_4, value);
+        return value;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 5
       case 5:
-        return tricore_mfcr(CPU_DPWE_5);
+        TRICORE_MFCR(CPU_DPWE_5, value);
+        return value;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 6
       case 6:
-        return tricore_mfcr(CPU_DPWE_6);
+        TRICORE_MFCR(CPU_DPWE_6, value);
+        return value;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 7
       case 7:
-        return tricore_mfcr(CPU_DPWE_7);
+        TRICORE_MFCR(CPU_DPWE_7, value);
+        return value;
 #endif
       default:
         return 0;
@@ -181,42 +204,42 @@ static void set_dpwe_value(unsigned int set, uint32_t dpwe_value)
     {
 #if CONFIG_ARCH_MPU_NSETS > 0
       case 0:
-        tricore_mtcr(CPU_DPWE_0, dpwe_value);
+        TRICORE_MTCR(CPU_DPWE_0, dpwe_value);
         break;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 1
       case 1:
-        tricore_mtcr(CPU_DPWE_1, dpwe_value);
+        TRICORE_MTCR(CPU_DPWE_1, dpwe_value);
         break;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 2
       case 2:
-        tricore_mtcr(CPU_DPWE_2, dpwe_value);
+        TRICORE_MTCR(CPU_DPWE_2, dpwe_value);
         break;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 3
       case 3:
-        tricore_mtcr(CPU_DPWE_3, dpwe_value);
+        TRICORE_MTCR(CPU_DPWE_3, dpwe_value);
         break;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 4
       case 4:
-        tricore_mtcr(CPU_DPWE_4, dpwe_value);
+        TRICORE_MTCR(CPU_DPWE_4, dpwe_value);
         break;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 5
       case 5:
-        tricore_mtcr(CPU_DPWE_5, dpwe_value);
+        TRICORE_MTCR(CPU_DPWE_5, dpwe_value);
         break;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 6
       case 6:
-        tricore_mtcr(CPU_DPWE_6, dpwe_value);
+        TRICORE_MTCR(CPU_DPWE_6, dpwe_value);
         break;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 7
       case 7:
-        tricore_mtcr(CPU_DPWE_7, dpwe_value);
+        TRICORE_MTCR(CPU_DPWE_7, dpwe_value);
         break;
 #endif
       default:
@@ -228,39 +251,49 @@ static void set_dpwe_value(unsigned int set, uint32_t dpwe_value)
 
 static uint32_t get_cpxe_value(unsigned int set)
 {
+  uint32_t value;
+
   switch (set)
     {
 #if CONFIG_ARCH_MPU_NSETS > 0
       case 0:
-        return tricore_mfcr(CPU_CPXE_0);
+        TRICORE_MFCR(CPU_CPXE_0, value);
+        return value;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 1
       case 1:
-        return tricore_mfcr(CPU_CPXE_1);
+        TRICORE_MFCR(CPU_CPXE_1, value);
+        return value;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 2
       case 2:
-        return tricore_mfcr(CPU_CPXE_2);
+        TRICORE_MFCR(CPU_CPXE_2, value);
+        return value;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 3
       case 3:
-        return tricore_mfcr(CPU_CPXE_3);
+        TRICORE_MFCR(CPU_CPXE_3, value);
+        return value;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 4
       case 4:
-        return tricore_mfcr(CPU_CPXE_4);
+        TRICORE_MFCR(CPU_CPXE_4, value);
+        return value;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 5
       case 5:
-        return tricore_mfcr(CPU_CPXE_5);
+        TRICORE_MFCR(CPU_CPXE_5, value);
+        return value;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 6
       case 6:
-        return tricore_mfcr(CPU_CPXE_6);
+        TRICORE_MFCR(CPU_CPXE_6, value);
+        return value;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 7
       case 7:
-        return tricore_mfcr(CPU_CPXE_7);
+        TRICORE_MFCR(CPU_CPXE_7, value);
+        return value;
 #endif
       default:
         return 0;
@@ -273,42 +306,42 @@ static void set_cpxe_value(unsigned int set, uint32_t cpxe_value)
     {
 #if CONFIG_ARCH_MPU_NSETS > 0
       case 0:
-        tricore_mtcr(CPU_CPXE_0, cpxe_value);
+        TRICORE_MTCR(CPU_CPXE_0, cpxe_value);
         break;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 1
       case 1:
-        tricore_mtcr(CPU_CPXE_1, cpxe_value);
+        TRICORE_MTCR(CPU_CPXE_1, cpxe_value);
         break;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 2
       case 2:
-        tricore_mtcr(CPU_CPXE_2, cpxe_value);
+        TRICORE_MTCR(CPU_CPXE_2, cpxe_value);
         break;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 3
       case 3:
-        tricore_mtcr(CPU_CPXE_3, cpxe_value);
+        TRICORE_MTCR(CPU_CPXE_3, cpxe_value);
         break;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 4
       case 4:
-        tricore_mtcr(CPU_CPXE_4, cpxe_value);
+        TRICORE_MTCR(CPU_CPXE_4, cpxe_value);
         break;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 5
       case 5:
-        tricore_mtcr(CPU_CPXE_5, cpxe_value);
+        TRICORE_MTCR(CPU_CPXE_5, cpxe_value);
         break;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 6
       case 6:
-        tricore_mtcr(CPU_CPXE_6, cpxe_value);
+        TRICORE_MTCR(CPU_CPXE_6, cpxe_value);
         break;
 #endif
 #if CONFIG_ARCH_MPU_NSETS > 7
       case 7:
-        tricore_mtcr(CPU_CPXE_7, cpxe_value);
+        TRICORE_MTCR(CPU_CPXE_7, cpxe_value);
         break;
 #endif
       default:
@@ -326,146 +359,146 @@ static int get_dpr_addrass_value(unsigned int region,
     {
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 0
       case 0:
-        *dpr_l = tricore_mfcr(CPU_DPR0_L);
-        *dpr_u = tricore_mfcr(CPU_DPR0_U);
+        TRICORE_MFCR(CPU_DPR0_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR0_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 1
       case 1:
-        *dpr_l = tricore_mfcr(CPU_DPR1_L);
-        *dpr_u = tricore_mfcr(CPU_DPR1_U);
+        TRICORE_MFCR(CPU_DPR1_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR1_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 2
       case 2:
-        *dpr_l = tricore_mfcr(CPU_DPR2_L);
-        *dpr_u = tricore_mfcr(CPU_DPR2_U);
+        TRICORE_MFCR(CPU_DPR2_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR2_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 3
       case 3:
-        *dpr_l = tricore_mfcr(CPU_DPR3_L);
-        *dpr_u = tricore_mfcr(CPU_DPR3_U);
+        TRICORE_MFCR(CPU_DPR3_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR3_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 4
       case 4:
-        *dpr_l = tricore_mfcr(CPU_DPR4_L);
-        *dpr_u = tricore_mfcr(CPU_DPR4_U);
+        TRICORE_MFCR(CPU_DPR4_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR4_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 5
       case 5:
-        *dpr_l = tricore_mfcr(CPU_DPR5_L);
-        *dpr_u = tricore_mfcr(CPU_DPR5_U);
+        TRICORE_MFCR(CPU_DPR5_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR5_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 6
       case 6:
-        *dpr_l = tricore_mfcr(CPU_DPR6_L);
-        *dpr_u = tricore_mfcr(CPU_DPR6_U);
+        TRICORE_MFCR(CPU_DPR6_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR6_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 7
       case 7:
-        *dpr_l = tricore_mfcr(CPU_DPR7_L);
-        *dpr_u = tricore_mfcr(CPU_DPR7_U);
+        TRICORE_MFCR(CPU_DPR7_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR7_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 8
       case 8:
-        *dpr_l = tricore_mfcr(CPU_DPR8_L);
-        *dpr_u = tricore_mfcr(CPU_DPR8_U);
+        TRICORE_MFCR(CPU_DPR8_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR8_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 9
       case 9:
-        *dpr_l = tricore_mfcr(CPU_DPR9_L);
-        *dpr_u = tricore_mfcr(CPU_DPR9_U);
+        TRICORE_MFCR(CPU_DPR9_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR9_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 10
       case 10:
-        *dpr_l = tricore_mfcr(CPU_DPR10_L);
-        *dpr_u = tricore_mfcr(CPU_DPR10_U);
+        TRICORE_MFCR(CPU_DPR10_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR10_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 11
       case 11:
-        *dpr_l = tricore_mfcr(CPU_DPR11_L);
-        *dpr_u = tricore_mfcr(CPU_DPR11_U);
+        TRICORE_MFCR(CPU_DPR11_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR11_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 12
       case 12:
-        *dpr_l = tricore_mfcr(CPU_DPR12_L);
-        *dpr_u = tricore_mfcr(CPU_DPR12_U);
+        TRICORE_MFCR(CPU_DPR12_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR12_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 13
       case 13:
-        *dpr_l = tricore_mfcr(CPU_DPR13_L);
-        *dpr_u = tricore_mfcr(CPU_DPR13_U);
+        TRICORE_MFCR(CPU_DPR13_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR13_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 14
       case 14:
-        *dpr_l = tricore_mfcr(CPU_DPR14_L);
-        *dpr_u = tricore_mfcr(CPU_DPR14_U);
+        TRICORE_MFCR(CPU_DPR14_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR14_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 15
       case 15:
-        *dpr_l = tricore_mfcr(CPU_DPR15_L);
-        *dpr_u = tricore_mfcr(CPU_DPR15_U);
+        TRICORE_MFCR(CPU_DPR15_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR15_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 16
       case 16:
-        *dpr_l = tricore_mfcr(CPU_DPR16_L);
-        *dpr_u = tricore_mfcr(CPU_DPR16_U);
+        TRICORE_MFCR(CPU_DPR16_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR16_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 17
       case 17:
-        *dpr_l = tricore_mfcr(CPU_DPR17_L);
-        *dpr_u = tricore_mfcr(CPU_DPR17_U);
+        TRICORE_MFCR(CPU_DPR17_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR17_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 18
       case 18:
-        *dpr_l = tricore_mfcr(CPU_DPR18_L);
-        *dpr_u = tricore_mfcr(CPU_DPR18_U);
+        TRICORE_MFCR(CPU_DPR18_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR18_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 19
       case 19:
-        *dpr_l = tricore_mfcr(CPU_DPR19_L);
-        *dpr_u = tricore_mfcr(CPU_DPR19_U);
+        TRICORE_MFCR(CPU_DPR19_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR19_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 20
       case 20:
-        *dpr_l = tricore_mfcr(CPU_DPR20_L);
-        *dpr_u = tricore_mfcr(CPU_DPR20_U);
+        TRICORE_MFCR(CPU_DPR20_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR20_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 21
       case 21:
-        *dpr_l = tricore_mfcr(CPU_DPR21_L);
-        *dpr_u = tricore_mfcr(CPU_DPR21_U);
+        TRICORE_MFCR(CPU_DPR21_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR21_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 22
       case 22:
-        *dpr_l = tricore_mfcr(CPU_DPR22_L);
-        *dpr_u = tricore_mfcr(CPU_DPR22_U);
+        TRICORE_MFCR(CPU_DPR22_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR22_U, *dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 23
       case 23:
-        *dpr_l = tricore_mfcr(CPU_DPR23_L);
-        *dpr_u = tricore_mfcr(CPU_DPR23_U);
+        TRICORE_MFCR(CPU_DPR23_L, *dpr_l);
+        TRICORE_MFCR(CPU_DPR23_U, *dpr_u);
         break;
 #endif
       default:
@@ -483,146 +516,146 @@ static void set_dpr_address_value(unsigned int region,
     {
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 0
       case 0:
-        tricore_mtcr(CPU_DPR0_L, dpr_l);
-        tricore_mtcr(CPU_DPR0_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR0_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR0_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 1
       case 1:
-        tricore_mtcr(CPU_DPR1_L, dpr_l);
-        tricore_mtcr(CPU_DPR1_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR1_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR1_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 2
       case 2:
-        tricore_mtcr(CPU_DPR2_L, dpr_l);
-        tricore_mtcr(CPU_DPR2_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR2_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR2_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 3
       case 3:
-        tricore_mtcr(CPU_DPR3_L, dpr_l);
-        tricore_mtcr(CPU_DPR3_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR3_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR3_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 4
       case 4:
-        tricore_mtcr(CPU_DPR4_L, dpr_l);
-        tricore_mtcr(CPU_DPR4_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR4_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR4_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 5
       case 5:
-        tricore_mtcr(CPU_DPR5_L, dpr_l);
-        tricore_mtcr(CPU_DPR5_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR5_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR5_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 6
       case 6:
-        tricore_mtcr(CPU_DPR6_L, dpr_l);
-        tricore_mtcr(CPU_DPR6_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR6_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR6_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 7
       case 7:
-        tricore_mtcr(CPU_DPR7_L, dpr_l);
-        tricore_mtcr(CPU_DPR7_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR7_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR7_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 8
       case 8:
-        tricore_mtcr(CPU_DPR8_L, dpr_l);
-        tricore_mtcr(CPU_DPR8_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR8_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR8_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 9
       case 9:
-        tricore_mtcr(CPU_DPR9_L, dpr_l);
-        tricore_mtcr(CPU_DPR9_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR9_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR9_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 10
       case 10:
-        tricore_mtcr(CPU_DPR10_L, dpr_l);
-        tricore_mtcr(CPU_DPR10_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR10_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR10_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 11
       case 11:
-        tricore_mtcr(CPU_DPR11_L, dpr_l);
-        tricore_mtcr(CPU_DPR11_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR11_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR11_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 12
       case 12:
-        tricore_mtcr(CPU_DPR12_L, dpr_l);
-        tricore_mtcr(CPU_DPR12_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR12_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR12_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 13
       case 13:
-        tricore_mtcr(CPU_DPR13_L, dpr_l);
-        tricore_mtcr(CPU_DPR13_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR13_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR13_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 14
       case 14:
-        tricore_mtcr(CPU_DPR14_L, dpr_l);
-        tricore_mtcr(CPU_DPR14_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR14_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR14_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 15
       case 15:
-        tricore_mtcr(CPU_DPR15_L, dpr_l);
-        tricore_mtcr(CPU_DPR15_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR15_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR15_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 16
       case 16:
-        tricore_mtcr(CPU_DPR16_L, dpr_l);
-        tricore_mtcr(CPU_DPR16_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR16_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR16_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 17
       case 17:
-        tricore_mtcr(CPU_DPR17_L, dpr_l);
-        tricore_mtcr(CPU_DPR17_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR17_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR17_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 18
       case 18:
-        tricore_mtcr(CPU_DPR18_L, dpr_l);
-        tricore_mtcr(CPU_DPR18_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR18_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR18_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 19
       case 19:
-        tricore_mtcr(CPU_DPR19_L, dpr_l);
-        tricore_mtcr(CPU_DPR19_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR19_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR19_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 20
       case 20:
-        tricore_mtcr(CPU_DPR20_L, dpr_l);
-        tricore_mtcr(CPU_DPR20_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR20_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR20_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 21
       case 21:
-        tricore_mtcr(CPU_DPR21_L, dpr_l);
-        tricore_mtcr(CPU_DPR21_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR21_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR21_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 22
       case 22:
-        tricore_mtcr(CPU_DPR22_L, dpr_l);
-        tricore_mtcr(CPU_DPR22_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR22_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR22_U, dpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_DATA_NREGIONS > 23
       case 23:
-        tricore_mtcr(CPU_DPR23_L, dpr_l);
-        tricore_mtcr(CPU_DPR23_U, dpr_u);
+        TRICORE_MTCR(CPU_DPR23_L, dpr_l);
+        TRICORE_MTCR(CPU_DPR23_U, dpr_u);
         break;
 #endif
       default:
@@ -640,98 +673,98 @@ static int get_cpr_address_region(unsigned int region,
     {
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 0
       case 0:
-        *cpr_l = tricore_mfcr(CPU_CPR0_L);
-        *cpr_u = tricore_mfcr(CPU_CPR0_U);
+        TRICORE_MFCR(CPU_CPR0_L, *cpr_l);
+        TRICORE_MFCR(CPU_CPR0_U, *cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 1
       case 1:
-        *cpr_l = tricore_mfcr(CPU_CPR1_L);
-        *cpr_u = tricore_mfcr(CPU_CPR1_U);
+        TRICORE_MFCR(CPU_CPR1_L, *cpr_l);
+        TRICORE_MFCR(CPU_CPR1_U, *cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 2
       case 2:
-        *cpr_l = tricore_mfcr(CPU_CPR2_L);
-        *cpr_u = tricore_mfcr(CPU_CPR2_U);
+        TRICORE_MFCR(CPU_CPR2_L, *cpr_l);
+        TRICORE_MFCR(CPU_CPR2_U, *cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 3
       case 3:
-        *cpr_l = tricore_mfcr(CPU_CPR3_L);
-        *cpr_u = tricore_mfcr(CPU_CPR3_U);
+        TRICORE_MFCR(CPU_CPR3_L, *cpr_l);
+        TRICORE_MFCR(CPU_CPR3_U, *cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 4
       case 4:
-        *cpr_l = tricore_mfcr(CPU_CPR4_L);
-        *cpr_u = tricore_mfcr(CPU_CPR4_U);
+        TRICORE_MFCR(CPU_CPR4_L, *cpr_l);
+        TRICORE_MFCR(CPU_CPR4_U, *cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 5
       case 5:
-        *cpr_l = tricore_mfcr(CPU_CPR5_L);
-        *cpr_u = tricore_mfcr(CPU_CPR5_U);
+        TRICORE_MFCR(CPU_CPR5_L, *cpr_l);
+        TRICORE_MFCR(CPU_CPR5_U, *cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 6
       case 6:
-        *cpr_l = tricore_mfcr(CPU_CPR6_L);
-        *cpr_u = tricore_mfcr(CPU_CPR6_U);
+        TRICORE_MFCR(CPU_CPR6_L, *cpr_l);
+        TRICORE_MFCR(CPU_CPR6_U, *cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 7
       case 7:
-        *cpr_l = tricore_mfcr(CPU_CPR7_L);
-        *cpr_u = tricore_mfcr(CPU_CPR7_U);
+        TRICORE_MFCR(CPU_CPR7_L, *cpr_l);
+        TRICORE_MFCR(CPU_CPR7_U, *cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 8
       case 8:
-        *cpr_l = tricore_mfcr(CPU_CPR8_L);
-        *cpr_u = tricore_mfcr(CPU_CPR8_U);
+        TRICORE_MFCR(CPU_CPR8_L, *cpr_l);
+        TRICORE_MFCR(CPU_CPR8_U, *cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 9
       case 9:
-        *cpr_l = tricore_mfcr(CPU_CPR9_L);
-        *cpr_u = tricore_mfcr(CPU_CPR9_U);
+        TRICORE_MFCR(CPU_CPR9_L, *cpr_l);
+        TRICORE_MFCR(CPU_CPR9_U, *cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 10
       case 10:
-        *cpr_l = tricore_mfcr(CPU_CPR10_L);
-        *cpr_u = tricore_mfcr(CPU_CPR10_U);
+        TRICORE_MFCR(CPU_CPR10_L, *cpr_l);
+        TRICORE_MFCR(CPU_CPR10_U, *cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 11
       case 11:
-        *cpr_l = tricore_mfcr(CPU_CPR11_L);
-        *cpr_u = tricore_mfcr(CPU_CPR11_U);
+        TRICORE_MFCR(CPU_CPR11_L, *cpr_l);
+        TRICORE_MFCR(CPU_CPR11_U, *cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 12
       case 12:
-        *cpr_l = tricore_mfcr(CPU_CPR12_L);
-        *cpr_u = tricore_mfcr(CPU_CPR12_U);
+        TRICORE_MFCR(CPU_CPR12_L, *cpr_l);
+        TRICORE_MFCR(CPU_CPR12_U, *cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 13
       case 13:
-        *cpr_l = tricore_mfcr(CPU_CPR13_L);
-        *cpr_u = tricore_mfcr(CPU_CPR13_U);
+        TRICORE_MFCR(CPU_CPR13_L, *cpr_l);
+        TRICORE_MFCR(CPU_CPR13_U, *cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 14
       case 14:
-        *cpr_l = tricore_mfcr(CPU_CPR14_L);
-        *cpr_u = tricore_mfcr(CPU_CPR14_U);
+        TRICORE_MFCR(CPU_CPR14_L, *cpr_l);
+        TRICORE_MFCR(CPU_CPR14_U, *cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 15
       case 15:
-        *cpr_l = tricore_mfcr(CPU_CPR15_L);
-        *cpr_u = tricore_mfcr(CPU_CPR15_U);
+        TRICORE_MFCR(CPU_CPR15_L, *cpr_l);
+        TRICORE_MFCR(CPU_CPR15_U, *cpr_u);
         break;
 #endif
       default:
@@ -749,98 +782,98 @@ static void set_cpr_address_value(unsigned int region,
     {
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 0
       case 0:
-        tricore_mtcr(CPU_CPR0_L, cpr_l);
-        tricore_mtcr(CPU_CPR0_U, cpr_u);
+        TRICORE_MTCR(CPU_CPR0_L, cpr_l);
+        TRICORE_MTCR(CPU_CPR0_U, cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 1
       case 1:
-        tricore_mtcr(CPU_CPR1_L, cpr_l);
-        tricore_mtcr(CPU_CPR1_U, cpr_u);
+        TRICORE_MTCR(CPU_CPR1_L, cpr_l);
+        TRICORE_MTCR(CPU_CPR1_U, cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 2
       case 2:
-        tricore_mtcr(CPU_CPR2_L, cpr_l);
-        tricore_mtcr(CPU_CPR2_U, cpr_u);
+        TRICORE_MTCR(CPU_CPR2_L, cpr_l);
+        TRICORE_MTCR(CPU_CPR2_U, cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 3
       case 3:
-        tricore_mtcr(CPU_CPR3_L, cpr_l);
-        tricore_mtcr(CPU_CPR3_U, cpr_u);
+        TRICORE_MTCR(CPU_CPR3_L, cpr_l);
+        TRICORE_MTCR(CPU_CPR3_U, cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 4
       case 4:
-        tricore_mtcr(CPU_CPR4_L, cpr_l);
-        tricore_mtcr(CPU_CPR4_U, cpr_u);
+        TRICORE_MTCR(CPU_CPR4_L, cpr_l);
+        TRICORE_MTCR(CPU_CPR4_U, cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 5
       case 5:
-        tricore_mtcr(CPU_CPR5_L, cpr_l);
-        tricore_mtcr(CPU_CPR5_U, cpr_u);
+        TRICORE_MTCR(CPU_CPR5_L, cpr_l);
+        TRICORE_MTCR(CPU_CPR5_U, cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 6
       case 6:
-        tricore_mtcr(CPU_CPR6_L, cpr_l);
-        tricore_mtcr(CPU_CPR6_U, cpr_u);
+        TRICORE_MTCR(CPU_CPR6_L, cpr_l);
+        TRICORE_MTCR(CPU_CPR6_U, cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 7
       case 7:
-        tricore_mtcr(CPU_CPR7_L, cpr_l);
-        tricore_mtcr(CPU_CPR7_U, cpr_u);
+        TRICORE_MTCR(CPU_CPR7_L, cpr_l);
+        TRICORE_MTCR(CPU_CPR7_U, cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 8
       case 8:
-        tricore_mtcr(CPU_CPR8_L, cpr_l);
-        tricore_mtcr(CPU_CPR8_U, cpr_u);
+        TRICORE_MTCR(CPU_CPR8_L, cpr_l);
+        TRICORE_MTCR(CPU_CPR8_U, cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 9
       case 9:
-        tricore_mtcr(CPU_CPR9_L, cpr_l);
-        tricore_mtcr(CPU_CPR9_U, cpr_u);
+        TRICORE_MTCR(CPU_CPR9_L, cpr_l);
+        TRICORE_MTCR(CPU_CPR9_U, cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 10
       case 10:
-        tricore_mtcr(CPU_CPR10_L, cpr_l);
-        tricore_mtcr(CPU_CPR10_U, cpr_u);
+        TRICORE_MTCR(CPU_CPR10_L, cpr_l);
+        TRICORE_MTCR(CPU_CPR10_U, cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 11
       case 11:
-        tricore_mtcr(CPU_CPR11_L, cpr_l);
-        tricore_mtcr(CPU_CPR11_U, cpr_u);
+        TRICORE_MTCR(CPU_CPR11_L, cpr_l);
+        TRICORE_MTCR(CPU_CPR11_U, cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 12
       case 12:
-        tricore_mtcr(CPU_CPR12_L, cpr_l);
-        tricore_mtcr(CPU_CPR12_U, cpr_u);
+        TRICORE_MTCR(CPU_CPR12_L, cpr_l);
+        TRICORE_MTCR(CPU_CPR12_U, cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 13
       case 13:
-        tricore_mtcr(CPU_CPR13_L, cpr_l);
-        tricore_mtcr(CPU_CPR13_U, cpr_u);
+        TRICORE_MTCR(CPU_CPR13_L, cpr_l);
+        TRICORE_MTCR(CPU_CPR13_U, cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 14
       case 14:
-        tricore_mtcr(CPU_CPR14_L, cpr_l);
-        tricore_mtcr(CPU_CPR14_U, cpr_u);
+        TRICORE_MTCR(CPU_CPR14_L, cpr_l);
+        TRICORE_MTCR(CPU_CPR14_U, cpr_u);
         break;
 #endif
 #if CONFIG_ARCH_MPU_CODE_NREGIONS > 15
       case 15:
-        tricore_mtcr(CPU_CPR15_L, cpr_l);
-        tricore_mtcr(CPU_CPR15_U, cpr_u);
+        TRICORE_MTCR(CPU_CPR15_L, cpr_l);
+        TRICORE_MTCR(CPU_CPR15_U, cpr_u);
         break;
 #endif
     }
@@ -1138,12 +1171,14 @@ void mpu_free_set(unsigned int set)
 
 void mpu_control(bool enable)
 {
-  uint32_t corecon_value = tricore_mfcr(CPU_CORECON);
+  uint32_t corecon_value;
+
+  TRICORE_MFCR(CPU_CORECON, corecon_value);
 
   corecon_value = enable ?
                   corecon_value | (1 << 1) :
                   corecon_value & ~(1 << 1);
-  tricore_mtcr(CPU_CORECON, corecon_value);
+  TRICORE_MTCR(CPU_CORECON, corecon_value);
 
   UP_ISB();
 }
@@ -1184,8 +1219,8 @@ void mpu_dump_set(unsigned int set)
       ret = get_dpr_addrass_value(i, &dprl_value, &dpru_value);
       if (ret == 0)
         {
-          _info("region: %02d, lower address: 0x%08X, \
-                upper address: 0x%08X, \
+          _info("region: %02d, lower address: 0x%08" PRIx32 ", \
+                upper address: 0x%08" PRIx32 ", \
                 read enable:%s, write enable:%s\n",
                 i, dprl_value, dpru_value,
                 dpre_value & (0x01 << i) ? "yes" : "no",
@@ -1203,8 +1238,8 @@ void mpu_dump_set(unsigned int set)
       ret = get_cpr_address_region(i, &cprl_value, &cpru_value);
       if (ret == 0)
         {
-          _info("region: %02d, lower address: 0x%08X, \
-                upper address: 0x%08X, \
+          _info("region: %02d, lower address: 0x%08" PRIx32 ", \
+                upper address: 0x%08" PRIx32 ", \
                 exec enable:%s\n",
                 i, cprl_value, cpru_value,
                 cpxe_value & (0x01 << i) ? "yes" : "no");
@@ -1342,40 +1377,12 @@ unsigned int mpu_configure_region(unsigned int set, uintptr_t base,
 
 unsigned int mpu_get_active_set(void)
 {
-  uint32_t psw_value = tricore_mfcr(CPU_PSW);
+  uint32_t psw_value;
+
+  TRICORE_MFCR(CPU_PSW, psw_value);
 
   return ((psw_value & (0x1 << 15)) >> 15) << 2 |
          ((psw_value & (0x3 << 12)) >> 12);
-}
-
-/****************************************************************************
- * Name: mpu_set_active_set
- *
- * Description:
- *   Set active protection set
- *
- * Input Parameters:
- *   Protection set .
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void mpu_set_active_set(unsigned int set)
-{
-  /* Check that the set valid */
-
-  DEBUGASSERT(set < CONFIG_ARCH_MPU_NSETS);
-
-  uint32_t psw_value = tricore_mfcr(CPU_PSW);
-
-  psw_value &= ~((0x3 << 12) | (0x1 << 15));
-  psw_value |= (set >> 2) << 15;
-  psw_value |= (set & 0x03) << 12;
-  tricore_mtcr(CPU_PSW, psw_value);
-
-  UP_ISB();
 }
 
 /****************************************************************************
