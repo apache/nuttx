@@ -35,14 +35,6 @@ ifeq ($(CONFIG_PCI_IVSHMEM),y)
 CSRCS += pci_ivshmem.c
 endif
 
-ifeq ($(CONFIG_PCI_RAMDISK_IVSHMEM),y)
-CSRCS += pci_ramdisk_ivshmem.c
-endif
-
-ifeq ($(CONFIG_PCI_UIO_IVSHMEM),y)
-CSRCS += pci_uio_ivshmem.c
-endif
-
 ifeq ($(CONFIG_PCI_EP_TEST),y)
 CSRCS += pci_ep_test.c
 endif

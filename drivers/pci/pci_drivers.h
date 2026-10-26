@@ -67,10 +67,6 @@ int pci_ivshmem_register(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_PCI_UIO_IVSHMEM
-int pci_register_uio_ivshmem_driver(void);
-#endif
-
 /****************************************************************************
  * Name: pci_register_ramdisk_ivshmem_driver
  *
@@ -78,10 +74,6 @@ int pci_register_uio_ivshmem_driver(void);
  *   Register ramdisk ivshmem device pci driver
  *
  ****************************************************************************/
-
-#ifdef CONFIG_PCI_RAMDISK_IVSHMEM
-int pci_register_ramdisk_ivshmem_driver(void);
-#endif
 
 #ifdef CONFIG_PCI_QEMU_EPC
 /****************************************************************************

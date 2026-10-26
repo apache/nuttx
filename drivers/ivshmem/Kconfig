@@ -10,3 +10,38 @@ config IVSHMEM
 		Inter-VM shared memory bus. Matches ivshmem devices registered by
 		a backend (e.g. PCI) with the drivers that use them. Selected by
 		the backends, not chosen directly.
+
+config RAMDISK_IVSHMEM
+	bool "Ramdisk ivshmem driver"
+	default n
+	depends on IVSHMEM && !DISABLE_MOUNTPOINT
+	---help---
+		Enable ramdisk device driver.
+
+config RAMDISK_IVSHMEM_IDTABLE
+	string "The id table of ramdisk ivshmem device"
+	depends on RAMDISK_IVSHMEM
+	---help---
+		"id0;id1;id2", e.g.: "0;1;2"
+
+
+config UIO_IVSHMEM
+	bool "Enable uio ivshmem driver support"
+	default n
+	depends on IVSHMEM
+	---help---
+		When this option is enabled, char ivshmem driver will register
+		char device with name: "/dev/uioX" to the VFS, then
+		application can open this device and use `mmap()` to get the
+		share memory provided by ivshmem device.
+
+config UIO_IVSHMEM_IDTABLE
+	string "The id table of uio ivshmem device"
+	depends on UIO_IVSHMEM
+	---help---
+		"id0;id1;id2", e.g.: "0;1;2"
+
+config UIO_IVSHMEM_NPOLLWAITERS
+	int "Uio ivshmem poll waiter number"
+	default 2
+	depends on UIO_IVSHMEM

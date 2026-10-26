@@ -34,6 +34,9 @@
 #include <nuttx/mutex.h>
 #include <nuttx/percpu.h>
 #include <nuttx/ivshmem.h>
+#include <nuttx/rptun/rptun_ivshmem.h>
+
+#include "ivshmem_drivers.h"
 
 /****************************************************************************
  * Private Types
@@ -369,4 +372,39 @@ int ivshmem_unregister_driver(FAR struct ivshmem_driver_s *drv)
 
   nxmutex_unlock(&g_ivshmem_bus.lock);
   return ret;
+}
+
+/****************************************************************************
+ * Name: ivshmem_register_drivers
+ ****************************************************************************/
+
+void ivshmem_register_drivers(void)
+{
+  int ret = OK;
+
+#ifdef CONFIG_RAMDISK_IVSHMEM
+  ret = ivshmem_ramdisk_register();
+  if (ret < 0)
+    {
+      _err("ivshmem_ramdisk_register failed, ret=%d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_UIO_IVSHMEM
+  ret = ivshmem_uio_register();
+  if (ret < 0)
+    {
+      _err("ivshmem_uio_register failed, ret=%d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_RPTUN_IVSHMEM
+  ret = rptun_ivshmem_register();
+  if (ret < 0)
+    {
+      _err("rptun_ivshmem_register failed, ret=%d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
 }

@@ -41,7 +41,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: pci_register_rptun_ivshmem_driver
+ * Name: rptun_ivshmem_register
  *
  * Description:
  *   Initializes the rptun ivshmem driver.
@@ -51,10 +51,10 @@ extern "C"
  *
  ****************************************************************************/
 
-int pci_register_rptun_ivshmem_driver(void);
+int rptun_ivshmem_register(void);
 
 /****************************************************************************
- * Name: pci_register_rptun_ivshmem_slave_driver
+ * Name: rptun_ivshmem_register_slave
  *
  * Description:
  *   Register the RPMsg RPTUN ivshmem driver configuration.
@@ -75,7 +75,7 @@ int pci_register_rptun_ivshmem_driver(void);
  *
  ****************************************************************************/
 
-int pci_register_rptun_ivshmem_slave_driver(
+int rptun_ivshmem_register_slave(
       FAR const char *cpuname, int drvid,
       FAR const struct resource_table *rsc_table,
       size_t rsc_size);
