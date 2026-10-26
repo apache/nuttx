@@ -37,6 +37,10 @@ if(NOT CONFIG_DISABLE_PTHREAD)
       pthread_release.c
       pthread_setschedprio.c)
 
+  if(NOT CONFIG_PTHREAD_MUTEX_UNSAFE)
+    list(APPEND SRCS pthread_mutexinconsistent.c)
+  endif()
+
   if(CONFIG_SMP)
     list(APPEND SRCS pthread_setaffinity.c pthread_getaffinity.c)
   endif()

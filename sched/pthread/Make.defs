@@ -28,6 +28,10 @@ CSRCS += pthread_sigmask.c pthread_sigqueue.c pthread_cancel.c
 CSRCS += pthread_completejoin.c pthread_findjoininfo.c
 CSRCS += pthread_release.c pthread_setschedprio.c
 
+ifneq ($(CONFIG_PTHREAD_MUTEX_UNSAFE),y)
+CSRCS += pthread_mutexinconsistent.c
+endif
+
 ifeq ($(CONFIG_SMP),y)
 CSRCS += pthread_setaffinity.c pthread_getaffinity.c
 endif

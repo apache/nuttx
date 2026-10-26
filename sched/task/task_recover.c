@@ -29,6 +29,7 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/addrenv.h>
 #include <nuttx/wdog.h>
 #include <nuttx/sched.h>
 
@@ -64,10 +65,25 @@
 
 void nxtask_recover(FAR struct tcb_s *tcb)
 {
-#if !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
-  /* Recover any mutexes still held by the canceled thread */
+#ifdef CONFIG_ARCH_ADDRENV
+  FAR struct addrenv_s *oldenv = NULL;
 
-  pthread_mutex_inconsistent(nxsched_get_tls(tcb));
+  /* A task may be deleted by a task in another address environment.  TLS
+   * and an unmapped waitobj must be accessed in the victim's environment.
+   */
+
+  if (tcb->addrenv_own != NULL &&
+      addrenv_select(tcb->addrenv_own, &oldenv) < 0)
+    {
+      addrenv_restore(oldenv);
+      return;
+    }
+#endif
+
+#if !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
+  /* Recover any mutexes still held by the canceled thread. */
+
+  pthread_mutex_inconsistent(tcb);
 #endif
 
   /* The task is being deleted.  Cancel in pending timeout events. */
@@ -92,6 +108,13 @@ void nxtask_recover(FAR struct tcb_s *tcb)
       /* Stop current sporadic scheduling */
 
       DEBUGVERIFY(nxsched_stop_sporadic(tcb));
+    }
+#endif
+
+#ifdef CONFIG_ARCH_ADDRENV
+  if (tcb->addrenv_own != NULL)
+    {
+      addrenv_restore(oldenv);
     }
 #endif
 }

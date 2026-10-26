@@ -31,6 +31,7 @@
 #include <nuttx/pgalloc.h>
 
 #include "pgalloc.h"
+#include "mmu.h"
 
 /****************************************************************************
  * Public Functions
@@ -54,7 +55,36 @@
 
 uintptr_t up_addrenv_find_page(arch_addrenv_t *addrenv, uintptr_t vaddr)
 {
-  /* Implement it later */
+  uintptr_t entry;
+  uintptr_t l2table;
+
+  if (!arm_uservaddr(vaddr) || addrenv->l1table == NULL)
+    {
+      return 0;
+    }
+
+  entry = mmu_l1table_getentry(addrenv->l1table, vaddr);
+  if ((entry & PMD_TYPE_MASK) != PMD_TYPE_PTE)
+    {
+      return 0;
+    }
+
+  l2table = arm_pgvaddr(entry & PMD_PTE_PADDR_MASK);
+  if (l2table == 0)
+    {
+      return 0;
+    }
+
+  entry = mmu_l2_getentry(l2table, vaddr);
+  if ((entry & PTE_TYPE_SMALL) != 0)
+    {
+      return entry & PTE_SMALL_PADDR_MASK;
+    }
+
+  if ((entry & PTE_TYPE_MASK) == PTE_TYPE_LARGE)
+    {
+      return (entry & PTE_LARGE_PADDR_MASK) | (vaddr & 0xf000);
+    }
 
   return 0;
 }
@@ -115,5 +145,6 @@ uintptr_t up_addrenv_page_vaddr(uintptr_t page)
 void up_addrenv_page_wipe(uintptr_t page)
 {
   uintptr_t vaddr = arm_pgvaddr(page);
+
   memset((void *)vaddr, 0, MM_PGSIZE);
 }

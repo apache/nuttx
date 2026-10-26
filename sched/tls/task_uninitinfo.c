@@ -125,6 +125,18 @@ void task_uninit_info(FAR struct task_group_s *group)
 {
   FAR struct task_info_s *info = group->tg_info;
 
+#ifdef CONFIG_BUILD_KERNEL
+  /* The user heap is reclaimed with the address environment.  Its lists
+   * may have been corrupted by the exiting task; neither traversing them
+   * nor freeing their user allocations is necessary in the kernel.
+   */
+
+  if ((group->tg_flags & GROUP_FLAG_PRIVILEGED) == 0)
+    {
+      return;
+    }
+#endif
+
 #ifdef CONFIG_PTHREAD_ATFORK
   /* Remove the functions that registered with pthread_atfork() */
 
