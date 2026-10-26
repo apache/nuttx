@@ -779,15 +779,15 @@ void decompress(int fdin, int fdout)
     {
       resetbuf:;
         {
-          int i;
           int e;
           int o;
 
           o = posbits >> 3;
           e = o <= insize ? insize - o : 0;
-
-          for (i = 0; i < e; ++i)
-            inbuf[i] = inbuf[i + o];
+          if (e > 0)
+            {
+              memmove(inbuf, inbuf + o, e);
+            }
 
           insize = e;
           posbits = 0;
