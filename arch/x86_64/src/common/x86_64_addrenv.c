@@ -996,6 +996,60 @@ int up_addrenv_detach(struct tcb_s *tcb)
 }
 
 /****************************************************************************
+ * Name: up_addrenv_find_page
+ *
+ * Description:
+ *   Find physical page mapped to user virtual address from the address
+ *   environment page directory.
+ *
+ * Input Parameters:
+ *   addrenv - The user address environment.
+ *   vaddr   - The user virtual address
+ *
+ * Returned Value:
+ *   Page physical address on success; NULL on failure.
+ *
+ ****************************************************************************/
+
+uintptr_t up_addrenv_find_page(arch_addrenv_t *addrenv, uintptr_t vaddr)
+{
+  uintptr_t lnvaddr;
+  uintptr_t paddr;
+  uint32_t  ptlevel;
+
+  /* If vaddr is not user space, get out */
+
+  if (!up_addrenv_user_vaddr(vaddr))
+    {
+      return 0;
+    }
+
+  /* Walk the tables as the MMU does, from the PML4 (level 0) to the PT
+   * (level 3).  An entry that is not used is zero.
+   */
+
+  lnvaddr = x86_64_pgvaddr(addrenv->spgtables[0]);
+  if (!lnvaddr)
+    {
+      return 0;
+    }
+
+  for (ptlevel = 0; ptlevel < X86_MMU_PT_LEVELS - 1; ptlevel++)
+    {
+      paddr = mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, lnvaddr, vaddr));
+      lnvaddr = x86_64_pgvaddr(paddr);
+      if (!lnvaddr)
+        {
+          return 0;
+        }
+    }
+
+  /* Got it, now convert it to physical page */
+
+  return mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, lnvaddr, vaddr));
+}
+
+/****************************************************************************
  * Name: up_addrenv_user_vaddr
  *
  * Description:

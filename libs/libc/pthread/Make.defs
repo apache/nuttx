@@ -76,7 +76,7 @@ CSRCS += pthread_attr_getaffinity.c pthread_attr_setaffinity.c
 endif
 
 ifneq ($(CONFIG_PTHREAD_MUTEX_UNSAFE),y)
-CSRCS += pthread_mutex_consistent.c pthread_mutex_inconsistent.c
+CSRCS += pthread_mutex_consistent.c
 endif
 
 ifeq ($(CONFIG_PTHREAD_SPINLOCKS),y)

@@ -121,7 +121,7 @@ if(NOT CONFIG_DISABLE_PTHREAD)
     thrd_exit.c)
 
   if(NOT CONFIG_PTHREAD_MUTEX_UNSAFE)
-    list(APPEND SRCS pthread_mutex_consistent.c pthread_mutex_inconsistent.c)
+    list(APPEND SRCS pthread_mutex_consistent.c)
   endif()
 
   if(CONFIG_SMP)
