@@ -217,6 +217,17 @@ int ivshmem_register_device(FAR struct ivshmem_device_s *dev,
 
 int ivshmem_unregister_device(FAR struct ivshmem_device_s *dev);
 
+/****************************************************************************
+ * Name: ivshmem_register_drivers
+ *
+ * Description:
+ *   Register the enabled ivshmem drivers (uio, ramdisk, rptun) on
+ *   the ivshmem bus. Called once from drivers_initialize().
+ *
+ ****************************************************************************/
+
+void ivshmem_register_drivers(void);
+
 #ifdef __cplusplus
 }
 #endif

@@ -27,7 +27,6 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/pci/pci.h>
-#include <nuttx/rptun/rptun_ivshmem.h>
 #include <nuttx/virtio/virtio-pci.h>
 #include <nuttx/net/e1000.h>
 #include <nuttx/net/igc.h>
@@ -59,32 +58,6 @@ int pci_register_drivers(void)
   if (ret < 0)
     {
       pcierr("pci_ivshemem_register failed ret=%d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_PCI_RAMDISK_IVSHMEM
-  ret = pci_register_ramdisk_ivshmem_driver();
-  if (ret < 0)
-    {
-      pcierr("pci_register_ramdisk_ivshmem_driver failed, ret=%d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_PCI_UIO_IVSHMEM
-  ret = pci_register_uio_ivshmem_driver();
-  if (ret < 0)
-    {
-      pcierr("pci_register_uio_ivshmem_driver failed, ret=%d\n", ret);
-    }
-#endif
-
-  /* Initialization rptun ivshmem driver */
-
-#ifdef CONFIG_RPTUN_IVSHMEM
-  ret = pci_register_rptun_ivshmem_driver();
-  if (ret < 0)
-    {
-      pcierr("pci_register_rptun_ivshmem_driver failed, ret=%d\n", ret);
     }
 #endif
 

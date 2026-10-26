@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/pci/pci_ramdisk_ivshmem.c
+ * drivers/ivshmem/ivshmem_ramdisk.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -32,7 +32,9 @@
 
 #include <nuttx/drivers/ramdisk.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/pci/pci_ivshmem.h>
+#include <nuttx/ivshmem.h>
+
+#include "ivshmem_drivers.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -73,11 +75,11 @@ static int ramdisk_ivshmem_probe(FAR struct ivshmem_device_s *dev)
   ret = ramdisk_register_with_config(&config);
   if (ret < 0)
     {
-      pcierr("ERROR: ramdisk ivshmem probe failed %d\n", ret);
+      _err("ERROR: ramdisk ivshmem probe failed %d\n", ret);
       return ret;
     }
 
-  pciinfo("Ramdisk ivshmem %s buffer: %p size: %zu sectors: %" PRIu32 "\n",
+  _info("Ramdisk ivshmem %s buffer: %p size: %zu sectors: %" PRIu32 "\n",
           name, config.buffer, buffer_size, config.nsectors);
   return ret;
 }
@@ -88,17 +90,17 @@ static int ramdisk_ivshmem_probe(FAR struct ivshmem_device_s *dev)
 
 static void ramdisk_ivshmem_remove(FAR struct ivshmem_device_s *dev)
 {
-  pcierr("ERROR: ramdisk ivshmem remove not support for now\n");
+  _err("ERROR: ramdisk ivshmem remove not support for now\n");
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-int pci_register_ramdisk_ivshmem_driver(void)
+int ivshmem_ramdisk_register(void)
 {
   FAR struct ivshmem_driver_s *drv;
-  FAR char *start = CONFIG_PCI_RAMDISK_IVSHMEM_IDTABLE;
+  FAR char *start = CONFIG_RAMDISK_IVSHMEM_IDTABLE;
 
   do
     {
@@ -116,7 +118,7 @@ int pci_register_ramdisk_ivshmem_driver(void)
           kmm_free(drv);
         }
 
-      pciinfo("Register ramdisk ivshmem driver, id=%d\n", drv->id);
+      _info("Register ramdisk ivshmem driver, id=%d\n", drv->id);
     }
   while (*start++ != '\0');
 
