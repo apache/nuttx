@@ -1547,6 +1547,18 @@ static int tzparse(FAR const char *name, FAR struct state_s *sp,
   time_t atlo = TIME_T_MIN;
   time_t leaplo = TIME_T_MIN;
 
+  /* Initialize goback/goahead unconditionally. These are only set to TRUE
+   * in the DST-rule branch below, while the standard-time-only branch and
+   * the early error returns leave them untouched. tzparse() may be called
+   * on a scratch state_s obtained from lib_malloc() (e.g. via zoneinit()
+   * when parsing a TZ environment string) that is NOT zeroed, so without
+   * this they would carry uninitialized heap garbage. localsub() later
+   * reads them to decide whether to apply a time wrap-around, so a bogus
+   * value produces intermittent wrong time values.
+   */
+
+  sp->goback = sp->goahead = FALSE;
+
   stdname = name;
   if (*name == '<')
     {
