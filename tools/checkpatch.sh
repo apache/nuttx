@@ -33,6 +33,7 @@ spell=0
 encoding=0
 message=0
 breaking_change=0
+cmake_parity=1
 
 # CMake
 cmake_warning_once=0
@@ -59,6 +60,8 @@ usage() {
   echo "-p <patch file names> (default)"
   echo "-m Check commit message (coupled with -g)"
   echo "-b Enforce breaking change format when checking commit message (requires -m -g; use when PR has breaking change label)"
+  echo "-k Check Make/CMake build parity (enabled by default with -g)"
+  echo "-K Disable Make/CMake build parity check"
   echo "-g <commit list>"
   echo "  Use --stdin as the only argument with -m -g to read commit message from stdin (message-only check, no patch/diff)."
   echo "  Use --stdin with -p to read patch content from stdin."
@@ -281,6 +284,13 @@ check_patch() {
     git apply $1
     diffs=`cat $1`
     check_ranges <<< "$diffs"
+    if [ $cmake_parity != 0 ]; then
+      files=$(git apply --numstat "$1" 2>/dev/null | awk '{print $3}')
+      if [ -z "$files" ]; then
+        files=$(sed -n 's|^+++ b/||p' "$1")
+      fi
+      check_cmake_parity_files "$files" 0 ""
+    fi
     git apply -R $1
   fi
 }
@@ -370,6 +380,100 @@ check_msg() {
   fi
 }
 
+file_exists() {
+  local target_file="$1"
+  local target_commit="$2"
+
+  if [ -n "$target_commit" ]; then
+    git cat-file -e "${target_commit}:${target_file}" 2>/dev/null
+  else
+    [ -f "$target_file" ]
+  fi
+}
+
+check_cmake_parity_files() {
+  local files="$1"
+  local bypass="$2"
+  local commit="$3"
+
+  if [ "$bypass" = "1" ]; then
+    return 0
+  fi
+
+  for file in $files; do
+    local fname
+    fname=$(basename "$file")
+
+    if [ "$fname" = "Makefile" ] || [ "$fname" = "Make.defs" ] || [[ "$fname" =~ \.mk$ ]]; then
+      local dir
+      dir=$(dirname "$file")
+      if [ "$dir" = "." ] || [[ "$dir" =~ ^tools(/|$) ]] || [[ "$dir" =~ ^Documentation(/|$) ]]; then
+        continue
+      fi
+
+      local cmake_file="$dir/CMakeLists.txt"
+      if ! file_exists "$cmake_file" "$commit"; then
+        local parent_dir
+        parent_dir=$(dirname "$dir")
+        local parent_cmake
+        if [ "$parent_dir" = "." ]; then
+          parent_cmake="CMakeLists.txt"
+        else
+          parent_cmake="$parent_dir/CMakeLists.txt"
+        fi
+
+        if file_exists "$parent_cmake" "$commit"; then
+          cmake_file="$parent_cmake"
+        fi
+      fi
+
+      # If the CMake file was also touched in this change (paired update/deletion), all good
+      if echo "$files" | grep -Fqx -- "$cmake_file"; then
+        continue
+      fi
+
+      if file_exists "$cmake_file" "$commit"; then
+        echo "$file: error: Makefile modified but $cmake_file was not updated."
+        echo "Please maintain build-system parity between Make and CMake."
+        echo "If this is a Make-only change, include '[skip-cmake-parity]' in the commit message."
+        fail=1
+      else
+        echo "$file: error: Makefile created/modified but no corresponding CMakeLists.txt exists."
+        echo "Please add CMake build support for build-system parity."
+        echo "If this is a Make-only change, include '[skip-cmake-parity]' in the commit message."
+        fail=1
+      fi
+    fi
+  done
+}
+
+check_cmake_parity_single_commit() {
+  local commit="$1"
+  local msg
+  local bypass=0
+
+  msg=$(git show -s --format=%B "$commit" 2>/dev/null)
+  if echo "$msg" | grep -qiE '\[skip-cmake-check\]|\[skip-cmake-parity\]|ci:make-only'; then
+    bypass=1
+  fi
+
+  local files
+  files=$(git diff-tree --no-commit-id --name-only -r "$commit" 2>/dev/null)
+  check_cmake_parity_files "$files" "$bypass" "$commit"
+}
+
+check_cmake_parity_commit() {
+  local range="$1"
+
+  if [[ $range =~ \.\.HEAD ]] || [[ $range =~ \.\. ]]; then
+    for commit in $(git rev-list --no-merges $range); do
+      check_cmake_parity_single_commit "$commit"
+    done
+  else
+    check_cmake_parity_single_commit "$range"
+  fi
+}
+
 check_commit() {
   if [ $message != 0 ]; then
     # check each commit format separately if this is a series of commits
@@ -385,6 +489,9 @@ check_commit() {
   fi
   diffs=`git diff $1`
   check_ranges <<< "$diffs"
+  if [ $cmake_parity != 0 ]; then
+    check_cmake_parity_commit "$1"
+  fi
 }
 
 $MAKECMD -C $TOOLDIR -f Makefile.host nxstyle 1>/dev/null
@@ -416,6 +523,12 @@ while [ ! -z "$1" ]; do
     ;;
   -b )
     breaking_change=1
+    ;;
+  -k )
+    cmake_parity=1
+    ;;
+  -K )
+    cmake_parity=0
     ;;
   -g )
     check=check_commit
