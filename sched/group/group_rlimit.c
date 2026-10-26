@@ -139,6 +139,10 @@ int getrlimit(int resource, FAR struct rlimit *rlp)
       case RLIMIT_FSIZE:
       case RLIMIT_AS:
       case RLIMIT_MEMLOCK:
+      case RLIMIT_RSS:
+      case RLIMIT_NPROC:
+      case RLIMIT_LOCKS:
+      case RLIMIT_SIGPENDING:
         rlp->rlim_cur = RLIM_INFINITY;
         rlp->rlim_max = RLIM_INFINITY;
         break;
