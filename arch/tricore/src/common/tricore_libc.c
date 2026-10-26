@@ -49,6 +49,18 @@ void __printf_llong(void)
 {
 }
 
+void __scanf_float(void)
+{
+}
+
+void __scanf_int(void)
+{
+}
+
+void __scanf_llong(void)
+{
+}
+
 void _main(void)
 {
 }
