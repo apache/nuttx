@@ -113,7 +113,11 @@ SECTIONS
   .bss : {                     /* BSS */
        _sbss = .;
        *(.bss*)
+#ifdef CONFIG_TLS_LOG2_MAXSTACK
+       . = ALIGN(1 << CONFIG_TLS_LOG2_MAXSTACK);
+#else
        . = ALIGN(4096);
+#endif
        _ebss = .;
   } > RAM
 
