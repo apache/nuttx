@@ -37,6 +37,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/lib/math32.h>
+
 #include "lib_ultoa_invert.h"
 
 /****************************************************************************
@@ -57,8 +59,27 @@ FAR char *__ultoa_invert(unsigned long long val, FAR char *str, int base)
     {
       int v;
 
+#if defined(CONFIG_HAVE_EXPRESSION_STATEMENT)
+      unsigned long long q = 0;
+
+      switch (base)
+        {
+          case 8:
+            q = div64_const(val, 8);
+            break;
+          case 10:
+            q = div64_const(val, 10);
+            break;
+          default:
+            q = div64_const(val, 16);
+        }
+
+      v = (int)(val - q * base);
+      val = q;
+#else
       v   = val % base;
       val = val / base;
+#endif
 
       if (v <= 9)
         {
