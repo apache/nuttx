@@ -409,19 +409,27 @@ static ssize_t noteram_get(FAR struct noteram_driver_s *drv,
       return -EFBIG;
     }
 
-  /* Loop until the note has been transferred to the user buffer */
+  /* Copy the note to the user buffer, splitting at the circular buffer
+   * boundary if necessary.
+   */
 
   remaining = (unsigned int)notelen;
   while (remaining > 0)
     {
-      /* Copy the next byte at the read index */
+      unsigned int ncopy = drv->ni_bufsize - read;
 
-      *buffer++ = drv->ni_buffer[read];
+      if (ncopy > remaining)
+        {
+          ncopy = remaining;
+        }
+
+      memcpy(buffer, &drv->ni_buffer[read], ncopy);
 
       /* Adjust indices and counts */
 
-      read = noteram_next(drv, read, 1);
-      remaining--;
+      buffer += ncopy;
+      read = noteram_next(drv, read, ncopy);
+      remaining -= ncopy;
     }
 
   drv->ni_read = noteram_next(drv, drv->ni_read, NOTE_ALIGN(notelen));
