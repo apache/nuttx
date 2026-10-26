@@ -974,8 +974,10 @@ static void usbhost_txdata_work(FAR void *arg)
   FAR struct uart_dev_s *uartdev;
   FAR struct uart_buffer_s *txbuf;
   ssize_t nwritten;
+  int txhead;
   int txndx;
   int txtail;
+  int ncopy;
   int ret;
 
   priv = (FAR struct usbhost_ft232r_s *)arg;
@@ -1015,16 +1017,30 @@ static void usbhost_txdata_work(FAR void *arg)
       txndx = 0;
       while (txtail != txbuf->head && txndx < priv->pktsize)
         {
-          /* Copy the next byte */
+          txhead = txbuf->head;
+          if (txtail < txhead)
+            {
+              ncopy = txhead - txtail;
+            }
+          else
+            {
+              ncopy = txbuf->size - txtail;
+            }
 
-          priv->outbuf[txndx] = txbuf->buffer[txtail];
+          if (ncopy > priv->pktsize - txndx)
+            {
+              ncopy = priv->pktsize - txndx;
+            }
+
+          memcpy(&priv->outbuf[txndx], &txbuf->buffer[txtail], ncopy);
 
           /* Increment counters and indices */
 
-          txndx++;
-          if (++txtail >= txbuf->size)
+          txndx += ncopy;
+          txtail += ncopy;
+          if (txtail >= txbuf->size)
             {
-             txtail = 0;
+              txtail = 0;
             }
         }
 
