@@ -191,6 +191,21 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
   conn = psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
+  /* Bind an unbound socket to a local port, as psock_udp_sendto() does.
+   * udp_poll() serves only connections with a local port, so without one
+   * sixlowpan_send() would wait for a poll that never comes.
+   */
+
+  if (conn->lport == 0)
+    {
+      conn->lport = HTONS(udp_select_port(conn->domain, &conn->u));
+      if (conn->lport == 0)
+        {
+          nerr("ERROR: Failed to get a local port\n");
+          return (ssize_t)-EADDRINUSE;
+        }
+    }
+
   /* Route outgoing message to the correct device */
 
   dev = netdev_findby_ripv6addr(conn->u.ipv6.laddr,
