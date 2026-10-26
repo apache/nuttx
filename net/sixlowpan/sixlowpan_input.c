@@ -68,6 +68,7 @@
 #  include "pkt/pkt.h"
 #endif
 
+#include "devif/devif.h"
 #include "sixlowpan/sixlowpan_internal.h"
 
 #ifdef CONFIG_NET_6LOWPAN
@@ -653,6 +654,124 @@ errout_with_reass:
 }
 
 /****************************************************************************
+ * Name: sixlowpan_ipv6_input
+ *
+ * Description:
+ *   Give the IPv6 packet in d_iob to the network and convert the reply to
+ *   it, if any, into frames.  Called from netdev_input().
+ *
+ * Input Parameters:
+ *   dev - The IEEE802.15.4 MAC network driver interface.
+ *
+ * Returned Value:
+ *   The result of ipv6_input(), zero if a reply was handled.
+ *
+ ****************************************************************************/
+
+static int sixlowpan_ipv6_input(FAR struct net_driver_s *dev)
+{
+  FAR struct radio_driver_s *radio = (FAR struct radio_driver_s *)dev;
+  FAR struct ipv6_hdr_s *ipv6hdr;
+  struct netdev_varaddr_s destmac;
+  size_t hdrlen;
+  int ret;
+
+  /* Give the IPv6 packet to the network layer.  NOTE:  If there is a
+   * problem with IPv6 header, it will be silently dropped and d_len will
+   * be set to zero.  Oddly, ipv6_input() will return OK in this case.
+   */
+
+  ret = ipv6_input(dev);
+
+  /* Check if this resulted in a request to send an outgoing packet. */
+
+  if (ret < 0 || dev->d_len == 0)
+    {
+      return ret;
+    }
+
+  /* The IPv6 header followed by TCP or UDP headers should lie at the
+   * beginning of d_buf since there is no link layer protocol header.
+   * ipv6_input() may have replaced d_iob.
+   */
+
+  dev->d_buf = NETLLBUF;
+  ipv6hdr    = IPv6BUF;
+
+  /* Get the IEEE 802.15.4 MAC address of the destination.  This assumes an
+   * encoding of the MAC address in the IPv6 address.
+   */
+
+  ret = sixlowpan_nexthopaddr(radio, ipv6hdr->destipaddr, &destmac);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to get dest MAC address: %d\n", ret);
+      goto drop;
+    }
+
+  /* The data payload should follow the IPv6 header plus the protocol
+   * header.
+   */
+
+  switch (ipv6hdr->proto)
+    {
+#ifdef CONFIG_NET_TCP
+      case IP_PROTO_TCP:
+        {
+          FAR struct tcp_hdr_s *tcp = TCPBUF(dev);
+          uint16_t tcplen;
+
+          /* The TCP header length is encoded in the top 4 bits of the
+           * tcpoffset field (in units of 32-bit words).
+           */
+
+          tcplen = ((uint16_t)tcp->tcpoffset >> 4) << 2;
+          hdrlen = IPv6_HDRLEN + tcplen;
+        }
+        break;
+#endif
+#ifdef CONFIG_NET_UDP
+      case IP_PROTO_UDP:
+        {
+          hdrlen = IPv6_HDRLEN + UDP_HDRLEN;
+        }
+        break;
+#endif
+#ifdef CONFIG_NET_ICMPv6
+      case IP_PROTO_ICMP6:
+        {
+          hdrlen = IPv6_HDRLEN + ICMPv6_HDRLEN;
+        }
+        break;
+#endif
+      default:
+        {
+          nwarn("WARNING: Unsupported prototype: %u\n", ipv6hdr->proto);
+          goto drop;
+        }
+    }
+
+  if (hdrlen > dev->d_len)
+    {
+      nwarn("WARNING: Packet too small: Have %u need >%zu\n",
+            dev->d_len, hdrlen);
+      goto drop;
+    }
+
+  /* Convert the outgoing packet into a frame list. */
+
+  sixlowpan_queue_frames(radio, ipv6hdr, dev->d_iob, hdrlen,
+                         dev->d_len - hdrlen, &destmac);
+
+drop:
+  dev->d_len = 0;
+
+  /* We consumed the frame, so we must return 0. */
+
+  return 0;
+}
+
+/****************************************************************************
  * Name: sixlowpan_dispatch
  *
  * Description:
@@ -692,16 +811,16 @@ static int sixlowpan_dispatch(FAR struct radio_driver_s *radio)
   ninfo("IPv6 packet dispatch\n");
   NETDEV_RXIPV6(&radio->r_dev);
 
-  /* Give the IPv6 packet to the network layer.  NOTE:  If there is a
-   * problem with IPv6 header, it will be silently dropped and d_len will
-   * be set to zero.  Oddly, ipv6_input() will return OK in this case.
-   */
+  /* Give the IPv6 packet to the network layer in an IOB chain */
 
-  ret = ipv6_input(&radio->r_dev);
+  reass = (FAR struct sixlowpan_reassbuf_s *)radio->r_dev.d_buf;
+
+  netdev_lock(&radio->r_dev);
+  ret = netdev_input(&radio->r_dev, sixlowpan_ipv6_input, false);
+  netdev_unlock(&radio->r_dev);
 
   /* Free the reassemby buffer */
 
-  reass = (FAR struct sixlowpan_reassbuf_s *)radio->r_dev.d_buf;
   DEBUGASSERT(reass != NULL);
   sixlowpan_reass_free(reass);
 
@@ -751,7 +870,7 @@ static int sixlowpan_dispatch(FAR struct radio_driver_s *radio)
  *
  *   After the network processes the packet, d_len will be set to zero.
  *   Network logic may also decide to send a response to the packet.  In
- *   that case, the outgoing network packet will be placed in d_buf and
+ *   that case, the outgoing network packet will be left in d_iob and
  *   d_len will be set to a non-zero value.  That case is handled by this
  *   function.
  *
@@ -833,107 +952,6 @@ int sixlowpan_input(FAR struct radio_driver_s *radio,
           /* Inject the uncompressed, reassembled packet into the network */
 
           ret = sixlowpan_dispatch(radio);
-          if (ret >= 0)
-            {
-              /* Check if this resulted in a request to send an outgoing
-               * packet.
-               */
-
-              if (dev->d_len > 0)
-                {
-                  FAR struct ipv6_hdr_s *ipv6hdr;
-                  FAR uint8_t *buffer;
-                  struct netdev_varaddr_s destmac;
-                  size_t hdrlen;
-                  size_t buflen;
-
-                  /* The IPv6 header followed by TCP or UDP headers should
-                   * lie at the beginning of d_buf since there is no link
-                   * layer protocol header.
-                   */
-
-                  ipv6hdr = IPv6BUF;
-
-                  /* Get the IEEE 802.15.4 MAC address of the destination.
-                   * This assumes an encoding of the MAC address in the IPv6
-                   * address.
-                   */
-
-                  ret = sixlowpan_nexthopaddr(radio, ipv6hdr->destipaddr,
-                                              &destmac);
-                  if (ret < 0)
-                    {
-                      nerr("ERROR: Failed to get dest MAC address: %d\n",
-                           ret);
-                      goto drop;
-                    }
-
-                  /* The data payload should follow the IPv6 header plus
-                   * the protocol header.
-                   */
-
-                  switch (ipv6hdr->proto)
-                    {
-#ifdef CONFIG_NET_TCP
-                      case IP_PROTO_TCP:
-                        {
-                          FAR struct tcp_hdr_s *tcp = TCPBUF(dev);
-                          uint16_t tcplen;
-
-                          /* The TCP header length is encoded in the top 4
-                           * bits of the tcpoffset field (in units of 32-bit
-                           * words).
-                           */
-
-                          tcplen = ((uint16_t)tcp->tcpoffset >> 4) << 2;
-                          hdrlen = IPv6_HDRLEN + tcplen;
-                        }
-                        break;
-#endif
-#ifdef CONFIG_NET_UDP
-                      case IP_PROTO_UDP:
-                        {
-                          hdrlen = IPv6_HDRLEN + UDP_HDRLEN;
-                        }
-                        break;
-#endif
-#ifdef CONFIG_NET_ICMPv6
-                      case IP_PROTO_ICMP6:
-                        {
-                          hdrlen = IPv6_HDRLEN + ICMPv6_HDRLEN;
-                        }
-                        break;
-#endif
-                      default:
-                        {
-                          nwarn("WARNING: Unsupported prototype: %u\n",
-                                ipv6hdr->proto);
-                          goto drop;
-                        }
-                    }
-
-                  if (hdrlen > dev->d_len)
-                    {
-                      nwarn("WARNING: Packet too small: Have %u need >%zu\n",
-                            dev->d_len, hdrlen);
-                      goto drop;
-                    }
-
-                  /* Convert the outgoing packet into a frame list. */
-
-                  buffer = dev->d_buf + hdrlen;
-                  buflen = dev->d_len - hdrlen;
-
-                  ret = sixlowpan_queue_frames(radio, ipv6hdr, buffer,
-                                               buflen, &destmac);
-drop:
-                  dev->d_len = 0;
-
-                  /* We consumed the frame, so we must return 0. */
-
-                  ret = 0;
-                }
-            }
         }
     }
 

@@ -458,12 +458,20 @@ static uint32_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
               goto end_wait;
             }
 
-          /* Transfer the frame list to the IEEE802.15.4 MAC device */
+          /* Copy the data to the device IOB and transfer the frame list
+           * to the IEEE802.15.4 MAC device.
+           */
 
-          ret = sixlowpan_queue_frames((FAR struct radio_driver_s *)dev,
-                                       &ipv6tcp.ipv6,
-                                       &sinfo->s_buf[sinfo->s_sent], sndlen,
-                                       sinfo->s_destmac);
+          ret = devif_send(dev, &sinfo->s_buf[sinfo->s_sent], sndlen,
+                           tcpip_hdrsize(conn));
+          if (ret > 0)
+            {
+              ret = sixlowpan_queue_frames((FAR struct radio_driver_s *)dev,
+                                           &ipv6tcp.ipv6, dev->d_iob,
+                                           tcpip_hdrsize(conn), sndlen,
+                                           sinfo->s_destmac);
+              dev->d_sndlen = 0;
+            }
 
           /* Without IOBs the segment is lost like on the air, the
            * retransmission timer sends it again.
@@ -832,7 +840,8 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
 
   ninfo("d_len %u\n", dev->d_len);
   sixlowpan_dumpbuffer("Outgoing TCP packet",
-                       (FAR const uint8_t *)ipv6, dev->d_len);
+                       (FAR const uint8_t *)ipv6,
+                       dev->d_iob->io_len);
 
   if (dev != NULL && dev->d_len > 0 && fwddev != NULL)
     {
@@ -857,7 +866,6 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
       else
         {
           struct netdev_varaddr_s destmac;
-          FAR uint8_t *buf;
           uint16_t hdrlen;
           uint16_t buflen;
           int ret;
@@ -891,12 +899,12 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
             {
               /* Convert the outgoing packet into a frame list. */
 
-              buf    = (FAR uint8_t *)ipv6 + hdrlen;
               buflen = dev->d_len - hdrlen;
 
               sixlowpan_queue_frames(
                       (FAR struct radio_driver_s *)fwddev,
-                      &ipv6hdr->ipv6, buf, buflen, &destmac);
+                      &ipv6hdr->ipv6, dev->d_iob, hdrlen, buflen,
+                      &destmac);
             }
         }
     }
