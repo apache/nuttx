@@ -419,7 +419,8 @@ void sixlowpan_udp_send(FAR struct net_driver_s *dev,
   if (dev != NULL && dev->d_len > 0 && fwddev != NULL)
     {
       sixlowpan_dumpbuffer("Outgoing UDP packet",
-                           (FAR const uint8_t *)ipv6udp, dev->d_len);
+                           (FAR const uint8_t *)ipv6udp,
+                           dev->d_iob->io_len);
 
       /* The UDP data payload should follow the IPv6 header plus the
        * protocol header.
@@ -433,7 +434,6 @@ void sixlowpan_udp_send(FAR struct net_driver_s *dev,
       else
         {
           struct netdev_varaddr_s destmac;
-          FAR uint8_t *buf;
           uint16_t hdrlen;
           uint16_t buflen;
           int ret;
@@ -463,12 +463,12 @@ void sixlowpan_udp_send(FAR struct net_driver_s *dev,
             {
               /* Convert the outgoing packet into a frame list. */
 
-              buf    = (FAR uint8_t *)ipv6 + hdrlen;
               buflen = dev->d_len - hdrlen;
 
               sixlowpan_queue_frames(
                       (FAR struct radio_driver_s *)fwddev,
-                      &ipv6udp->ipv6, buf, buflen, &destmac);
+                      &ipv6udp->ipv6, dev->d_iob, hdrlen, buflen,
+                      &destmac);
             }
         }
     }

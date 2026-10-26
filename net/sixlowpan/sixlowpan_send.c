@@ -138,12 +138,21 @@ static uint32_t send_eventhandler(FAR struct net_driver_s *dev,
     {
       DEBUGASSERT((flags & UDP_POLL) != 0);
 
-      /* Transfer the frame list to the IEEE802.15.4 MAC device */
+      /* Copy the data to the device IOB and transfer the frame list to
+       * the IEEE802.15.4 MAC device.
+       */
 
-      sinfo->s_result =
-        sixlowpan_queue_frames((FAR struct radio_driver_s *)dev,
-                               sinfo->s_ipv6hdr, sinfo->s_buf, sinfo->s_len,
-                               sinfo->s_destmac);
+      sinfo->s_result = devif_send(dev, sinfo->s_buf, sinfo->s_len,
+                                   IPv6_HDRLEN + UDP_HDRLEN);
+      if (sinfo->s_result > 0)
+        {
+          sinfo->s_result =
+            sixlowpan_queue_frames((FAR struct radio_driver_s *)dev,
+                                   sinfo->s_ipv6hdr, dev->d_iob,
+                                   IPv6_HDRLEN + UDP_HDRLEN, sinfo->s_len,
+                                   sinfo->s_destmac);
+          dev->d_sndlen = 0;
+        }
 
       flags &= ~UDP_POLL;
       neighbor_reachable(dev);

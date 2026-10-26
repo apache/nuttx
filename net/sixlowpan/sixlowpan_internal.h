@@ -368,7 +368,8 @@ int sixlowpan_frame_submit(FAR struct radio_driver_s *radio,
  *   the send event handler when a TX poll is received.  It formats the
  *   list of frames to be sent by the IEEE802.15.4 MAC driver.
  *
- *   The payload data is in the caller 'buf' and is of length 'buflen'.
+ *   The payload data is in the IOB chain 'pkt' at 'offset' and is of
+ *   length 'buflen'.
  *   Compressed headers will be added and if necessary the packet is
  *   fragmented. The resulting packet/fragments are submitted to the MAC
  *   via the network driver r_req_data method.
@@ -376,9 +377,9 @@ int sixlowpan_frame_submit(FAR struct radio_driver_s *radio,
  * Input Parameters:
  *   radio   - Reference to a radio network driver state instance.
  *   ipv6    - IPv6 header followed by TCP or UDP header.
- *   buf     - Beginning of the packet packet to send (with IPv6 + protocol
- *             headers)
- *   buflen  - Length of data to send (includes IPv6 and protocol headers)
+ *   pkt     - The IOB chain holding the payload
+ *   offset  - The offset of the payload in pkt
+ *   buflen  - Length of the payload
  *   destmac - The IEEE802.15.4 MAC address of the destination
  *
  * Returned Value:
@@ -394,7 +395,8 @@ int sixlowpan_frame_submit(FAR struct radio_driver_s *radio,
 
 int sixlowpan_queue_frames(FAR struct radio_driver_s *radio,
                            FAR const struct ipv6_hdr_s *ipv6,
-                           FAR const void *buf,  size_t buflen,
+                           FAR struct iob_s *pkt, unsigned int offset,
+                           size_t buflen,
                            FAR const struct netdev_varaddr_s *destmac);
 
 /****************************************************************************
