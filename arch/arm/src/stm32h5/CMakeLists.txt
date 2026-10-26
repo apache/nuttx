@@ -72,10 +72,6 @@ if(CONFIG_STM32_QSPI1)
   list(APPEND SRCS stm32_qspi.c)
 endif()
 
-if(CONFIG_STM32_LPTIM)
-  list(APPEND SRCS stm32_lptim.c)
-endif()
-
 if(CONFIG_STM32_HAVE_HSI48)
   list(APPEND SRCS stm32_hsi48.c)
 endif()

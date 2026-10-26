@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/stm32_lptim.h
+ * arch/arm/src/common/stm32/stm32_lptim.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H5_STM32_LPTIM_H
-#define __ARCH_ARM_SRC_STM32H5_STM32_LPTIM_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_LPTIM_H
+#define __ARCH_ARM_SRC_COMMON_STM32_STM32_LPTIM_H
 
 /****************************************************************************
  * Included Files
@@ -103,4 +103,4 @@ int stm32_lptim_deinit(struct stm32_lptim_dev_s *dev);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32H5_STM32_LPTIM_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_LPTIM_H */

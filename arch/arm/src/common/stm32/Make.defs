@@ -107,6 +107,11 @@ endif
 ifeq ($(CONFIG_STM32_TIM),y)
 CHIP_CSRCS += stm32_tim.c
 endif
+ifeq ($(CONFIG_STM32_LPTIM),y)
+ifneq ($(CONFIG_STM32_HAVE_IP_LPTIM_V1)$(CONFIG_STM32_HAVE_IP_LPTIM_V2),)
+CHIP_CSRCS += stm32_lptim.c
+endif
+endif
 ifeq ($(CONFIG_STM32_FREERUN),y)
 CHIP_CSRCS += stm32_freerun.c
 endif

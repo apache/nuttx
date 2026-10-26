@@ -1224,6 +1224,14 @@ config STM32_HAVE_COMMON_USBHOST_DEBUG
 config STM32_HAVE_USB
 	bool
 
+# LPTIM capabilities
+
+config STM32_HAVE_IP_LPTIM_V1
+	bool
+
+config STM32_HAVE_IP_LPTIM_V2
+	bool
+
 # WDG capabilities
 
 config STM32_HAVE_IP_WDG_V1

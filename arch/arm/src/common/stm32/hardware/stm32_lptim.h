@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/hardware/stm32_lptim.h
+ * arch/arm/src/common/stm32/hardware/stm32_lptim.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32_LPTIM_H
-#define __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32_LPTIM_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_LPTIM_H
+#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_LPTIM_H
 
 /****************************************************************************
  * Included Files
@@ -165,4 +165,4 @@
 #define LPTIM_CFGR2_IN2SEL_SHIFT    (4)       /* Input 2 selection */
 #define LPTIM_CFGR2_IN2SEL_MASK     (3 << LPTIM_CFGR2_IN2SEL_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32_LPTIM_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_LPTIM_H */
