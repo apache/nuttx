@@ -58,18 +58,13 @@
 #endif
 
 #define NRF53_RTC_PERIOD   (512)
-#define NRF53_RTC_MAX      (0x00ffffff)
-#define NRF53_RTC_MAX_TIME (NRF53_RTC_MAX * 31)
+#define NRF53_RTC_FREQ     (32768)
 
-/* Convert uS to timer count for f = 32768Hz, using more precision
- * when possible:
- * (1 / 32768) s ~ 30.51 uS ~ 31 uS
- * 512 * (1 / 32768) s = 0.015625 s = 15625 uS
- * So, instead of always dividing by 31, if t * 512 < (2**32 - 1), we can do:
- * (t * 512) / 15625 ~ t / 30.51
+/* A COMPARE event is guaranteed only for a CC value at least two counts
+ * ahead of the COUNTER (nRF52832_PS_v1.4, p. 245; the nRF5340 RTC alike).
  */
 
-#define USEC_TO_COUNTER(t) (t > 0x7fffff ? (t / 31) : ((t * 512) / 15625))
+#define NRF53_RTC_MIN_DELAY (2)
 
 /* To convert from counter to uS we split the counter into one second worth
  * of counts (32768) and a fractional part we can safely multiply first
@@ -107,81 +102,96 @@ struct nrf53_tickless_dev_s g_tickless_dev;
  * Private Functions
  ****************************************************************************/
 
-static inline void rtc_counter_to_ts(uint32_t counter, struct timespec *now)
+/* Read the COUNTER and the absolute time it stands for.  Called with
+ * interrupts disabled, so an overflow may not have been counted in
+ * 'periods' yet: its OVRFLW event is then still set.  A COUNTER in its
+ * lower half was read after that overflow, one in its upper half before.
+ */
+
+static uint32_t rtc_now(struct timespec *now)
 {
+  const uint32_t rtc_base = NRF53_RTC_GETBASE(g_tickless_dev.rtc);
+  uint32_t periods = g_tickless_dev.periods;
+  uint32_t counter;
   uint32_t usec;
 
+  counter = NRF53_RTC_GETCOUNTER_REG(rtc_base);
+  if (getreg32(rtc_base + NRF53_RTC_EVENTS_OVRFLW_OFFSET) != 0 &&
+      counter <= RTC_COUNTER_MASK / 2)
+    {
+      periods++;
+    }
+
   usec = COUNTER_TO_USEC(counter);
-  now->tv_sec  = usec / USEC_PER_SEC;
+  now->tv_sec  = usec / USEC_PER_SEC + periods * NRF53_RTC_PERIOD;
   now->tv_nsec = (usec % USEC_PER_SEC) * NSEC_PER_USEC;
 
-  now->tv_sec += g_tickless_dev.periods * NRF53_RTC_PERIOD;
+  return counter;
+}
+
+/* Convert a time shorter than one RTC period to counts, rounding up so
+ * that an alarm never fires early.  32768 / 1000000 = 512 / 15625.
+ */
+
+static inline uint32_t rtc_ts_to_counts(const struct timespec *ts)
+{
+  uint32_t usec = (ts->tv_nsec + NSEC_PER_USEC - 1) / NSEC_PER_USEC;
+
+  return (uint32_t)ts->tv_sec * NRF53_RTC_FREQ +
+         (usec * 512 + 15624) / 15625;
 }
 
 static void rtc_prepare_alarm(void)
 {
   struct timespec now;
   struct timespec delta;
-  uint32_t usec;
   uint32_t counter;
-  uint32_t target_counter;
+  uint32_t elapsed;
+  uint32_t counts;
   const uint32_t rtc_base = NRF53_RTC_GETBASE(g_tickless_dev.rtc);
 
-  /* Get current absolute time */
+  /* Time left until the alarm, zero if it has passed */
 
-  counter = NRF53_RTC_GETCOUNTER_REG(rtc_base);
-  rtc_counter_to_ts(counter, &now);
-
-  /* Obtain relative time to alarm */
-
+  counter = rtc_now(&now);
   clock_timespec_subtract(&g_tickless_dev.alarm, &now, &delta);
-  usec = delta.tv_sec * USEC_PER_SEC + delta.tv_nsec / NSEC_PER_USEC;
 
-  /* Check if the alarm is to expire within one RTC period, if so we can set
-   * the CC.
+  /* An alarm further away is prepared again on a later overflow */
+
+  if (delta.tv_sec >= NRF53_RTC_PERIOD)
+    {
+      return;
+    }
+
+  counts = rtc_ts_to_counts(&delta);
+  if (counts < NRF53_RTC_MIN_DELAY)
+    {
+      counts = NRF53_RTC_MIN_DELAY;
+    }
+
+  /* Move CC0 as far ahead as it goes before enabling its interrupt */
+
+  NRF53_RTC_SETCC_REG(rtc_base, 0, counter - 1);
+  NRF53_RTC_ENABLEINT(g_tickless_dev.rtc, NRF53_RTC_EVT_COMPARE0);
+
+  /* Set CC0 'counts' after 'counter'.  The COUNTER has kept running since
+   * it was read: if it is now less than NRF53_RTC_MIN_DELAY short of CC0,
+   * move CC0 to the earliest guaranteed match and check again.  Both
+   * distances are taken modulo the 24-bit COUNTER, so this holds across
+   * an overflow.
    */
 
-  if (usec < NRF53_RTC_PERIOD * USEC_PER_SEC)
+  for (; ; )
     {
-      /* Obtain absolute number of microseconds of alarm within current
-       * RTC period.
-       */
-
-      usec = (g_tickless_dev.alarm.tv_sec % NRF53_RTC_PERIOD) *
-             USEC_PER_SEC + g_tickless_dev.alarm.tv_nsec / NSEC_PER_USEC;
-
-      /* Compute counter value for that point in time */
-
-      target_counter = USEC_TO_COUNTER(usec);
-
-      /* Enable interrupt. First set CC to distant value to ensure
-       * no match will be generated. Doing things this way we now that
-       * once we write a CC value it should be ready to match.
-       */
-
-      NRF53_RTC_SETCC_REG(rtc_base, 0, counter - 1);
-      NRF53_RTC_ENABLEINT(g_tickless_dev.rtc, NRF53_RTC_EVT_COMPARE0);
-
-      /* Set CC to desired value */
-
-      NRF53_RTC_SETCC_REG(rtc_base, 0, target_counter);
-
-      /* Ensure counter fires: from nrf53832_PS_v1.4 (p. 245) we know that
-       * "If the COUNTER is N, writing N+2 to a CC register is
-       * guaranteed to trigger a COMPARE event at N+2.", so anything
-       * less than that is not guaranteed and it may not ever match.
-       *
-       * To ensure this, we check if CC < N + 2, and if so we set CC = N+2.
-       * We repeat this until this is satisfied (as the counter may change
-       * in between calculations).
-       */
-
-      while (NRF53_RTC_GETCC_REG(rtc_base, 0) <
-             NRF53_RTC_GETCOUNTER_REG(rtc_base) + 2)
+      NRF53_RTC_SETCC_REG(rtc_base, 0,
+                          (counter + counts) & RTC_COUNTER_MASK);
+      elapsed = (NRF53_RTC_GETCOUNTER_REG(rtc_base) - counter) &
+                RTC_COUNTER_MASK;
+      if (elapsed + NRF53_RTC_MIN_DELAY <= counts)
         {
-          NRF53_RTC_SETCC_REG(rtc_base, 0,
-                              NRF53_RTC_GETCOUNTER_REG(rtc_base) + 2);
+          break;
         }
+
+      counts = elapsed + NRF53_RTC_MIN_DELAY;
     }
 }
 
@@ -260,20 +270,17 @@ static int rtc_handler(int irq, void *context, void *arg)
 
 int up_alarm_cancel(struct timespec *ts)
 {
-  uint32_t counter;
   irqstate_t flags;
 
   flags = enter_critical_section();
 
   NRF53_RTC_DISABLEINT(g_tickless_dev.rtc, NRF53_RTC_EVT_COMPARE0);
-  NRF53_RTC_GETCOUNTER(g_tickless_dev.rtc, &counter);
+  rtc_now(ts);
 
   NRF53_RTC_ACKINT(g_tickless_dev.rtc, NRF53_RTC_EVT_COMPARE0);
   g_tickless_dev.alarm_set = false;
 
   leave_critical_section(flags);
-
-  rtc_counter_to_ts(counter, ts);
 
   return OK;
 }
@@ -285,6 +292,7 @@ int up_alarm_cancel(struct timespec *ts)
 int up_alarm_start(const struct timespec *ts)
 {
   irqstate_t flags;
+
   flags = enter_critical_section();
 
   /* remember the alarm time */
@@ -305,14 +313,10 @@ int up_alarm_start(const struct timespec *ts)
 
 int up_timer_gettime(struct timespec *ts)
 {
-  uint32_t counter;
   irqstate_t flags;
 
   flags = enter_critical_section();
-
-  NRF53_RTC_GETCOUNTER(g_tickless_dev.rtc, &counter);
-  rtc_counter_to_ts(counter, ts);
-
+  rtc_now(ts);
   leave_critical_section(flags);
 
   return OK;
