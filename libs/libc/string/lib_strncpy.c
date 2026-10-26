@@ -74,10 +74,7 @@ FAR char *strncpy(FAR char *dest, FAR const char *src, size_t n)
 
   /* Pad the remainder of the array pointer to 'dest' with NULs */
 
-  while (dest != end)
-    {
-      *dest++ = '\0';
-    }
+  memset(dest, 0, end - dest);
 
   return ret;
 }

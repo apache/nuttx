@@ -127,10 +127,7 @@ FAR char *strncpy(FAR char *dest, FAR const char *src, size_t n)
         }
     }
 
-  while (n-- > 0)
-    {
-      *dst0++ = '\0';
-    }
+  memset(dst0, 0, n);
 
   return dest;
 }
