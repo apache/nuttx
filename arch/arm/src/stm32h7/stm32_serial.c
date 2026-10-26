@@ -690,6 +690,7 @@ static void up_send(struct uart_dev_s *dev, int ch);
 static void up_txint(struct uart_dev_s *dev, bool enable);
 #endif
 static bool up_txready(struct uart_dev_s *dev);
+static bool up_txempty(struct uart_dev_s *dev);
 
 #ifdef SERIAL_HAVE_TXDMA
 static void up_dma_send(struct uart_dev_s *dev);
@@ -744,7 +745,7 @@ static const struct uart_ops_s g_uart_ops =
   .send           = up_send,
   .txint          = up_txint,
   .txready        = up_txready,
-  .txempty        = up_txready,
+  .txempty        = up_txempty,
 };
 #endif
 
@@ -765,7 +766,7 @@ static const struct uart_ops_s g_uart_rxtxdma_ops =
   .send           = up_send,
   .txint          = up_dma_txint,
   .txready        = up_txready,
-  .txempty        = up_txready,
+  .txempty        = up_txempty,
   .dmatxavail     = up_dma_txavailable,
   .dmasend        = up_dma_send,
 };
@@ -788,7 +789,7 @@ static const struct uart_ops_s g_uart_rxdma_ops =
   .send           = up_send,
   .txint          = up_txint,
   .txready        = up_txready,
-  .txempty        = up_txready,
+  .txempty        = up_txempty,
 };
 #endif
 
@@ -809,7 +810,7 @@ static const struct uart_ops_s g_uart_txdma_ops =
   .send           = up_send,
   .txint          = up_dma_txint,
   .txready        = up_txready,
-  .txempty        = up_txready,
+  .txempty        = up_txempty,
   .dmatxavail     = up_dma_txavailable,
   .dmasend        = up_dma_send,
 };
@@ -2302,15 +2303,15 @@ static void up_shutdown(struct uart_dev_s *dev)
 
   up_disableusartint(priv, NULL);
 
-  /* Disable USART APB1/2 clock */
-
-  up_set_apb_clock(dev, false);
-
-  /* Disable Rx, Tx, and the UART */
+  /* Disable Rx, Tx, and the UART, while its clock still runs */
 
   regval  = up_serialin(priv, STM32_USART_CR1_OFFSET);
   regval &= ~(USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
   up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
+
+  /* Disable USART APB1/2 clock */
+
+  up_set_apb_clock(dev, false);
 
   /* Release pins.
    * "If the serial-attached device is powered down, the TX
@@ -3600,6 +3601,22 @@ static bool up_txready(struct uart_dev_s *dev)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
   return ((up_serialin(priv, STM32_USART_ISR_OFFSET) & USART_ISR_TXE) != 0);
+}
+
+/****************************************************************************
+ * Name: up_txempty
+ *
+ * Description:
+ *   Return true if all data has been sent: the TX FIFO and the shift
+ *   register are empty (transmission complete).
+ *
+ ****************************************************************************/
+
+static bool up_txempty(struct uart_dev_s *dev)
+{
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+
+  return ((up_serialin(priv, STM32_USART_ISR_OFFSET) & USART_ISR_TC) != 0);
 }
 
 /****************************************************************************
