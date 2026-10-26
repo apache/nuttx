@@ -1037,9 +1037,9 @@ static int xbeenet_ioctl(FAR struct net_driver_s *dev, int cmd,
    */
 
   else
-   {
-     ret = xbee_ioctl(priv->xd_mac, cmd, arg);
-   }
+    {
+      ret = xbee_ioctl(priv->xd_mac, cmd, arg);
+    }
 
   nxmutex_unlock(&priv->xd_lock);
   return ret;
