@@ -790,10 +790,14 @@ struct pthread_entry_s
 /* struct tcbinfo_s *********************************************************/
 
 /* The structure save key filed offset of tcb_s while can be used by
- * debuggers to parse the tcb information
+ * debuggers to parse the tcb information.
+ *
+ * Aligned so that g_tcbinfo never lands on an odd address: GDB clears
+ * bit 0 of addresses in code sections on Thumb targets, so a debugger
+ * looking it up by symbol would read it one byte off.
  */
 
-begin_packed_struct struct tcbinfo_s
+begin_packed_struct struct aligned_data(8) tcbinfo_s
 {
   uint16_t pid_off;                      /* Offset of tcb.pid               */
   uint16_t state_off;                    /* Offset of tcb.task_state        */
