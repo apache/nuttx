@@ -21,4 +21,31 @@
 # ##############################################################################
 
 if ARCH_BOARD_GD_XD_W515_EVAL
+
+config GD_XD_W515_EVAL_QSPI_MEMMAP
+	bool "QSPI flash in memory-mapped mode"
+	default n
+	depends on GD32W51X_QSPI && MTD_GD25 && GD25_QSPI
+	---help---
+		Map the QSPI NOR flash read-only at 0x90000000 (memory-mapped
+		mode) instead of registering it as /dev/qspiflash: constant data
+		stored in the flash can then be read in place.
+
+config GD_XD_W515_EVAL_QSPI_XIP
+	bool "Code and data in place from the QSPI flash"
+	default n
+	depends on GD_XD_W515_EVAL_QSPI_MEMMAP
+	---help---
+		Link the .qspixip section (locate_code(".qspixip") and
+		locate_data(".qspixip")) in the last MiB of the QSPI flash,
+		used in place through the instruction cache remap of the QSPI
+		window at 0x10000000.  The section is stored after the image in
+		the internal flash and programmed to the QSPI flash at boot when
+		it differs; a self-test runs code from it.
+
+		Code run from the window at 0x90000000 hangs the bus as soon as
+		it also reads the window (its literals, its data), while through
+		the remap both work: nothing may access the window directly
+		while code runs from the QSPI flash.
+
 endif

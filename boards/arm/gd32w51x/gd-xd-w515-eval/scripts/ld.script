@@ -20,18 +20,29 @@
  *
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 /* The GD32W515PI has 2 MB of SIP flash and 448 KB of SRAM (SRAM0..SRAM3,
  * contiguous from 0x20000000).
  *
  * The image is linked at the non-secure alias of the flash (0x08000000).
  * With the TZEN option bit set the boot ROM starts it through the secure
  * alias (0x0c000000); see gd32w51x_start.c.
+ *
+ * With CONFIG_GD_XD_W515_EVAL_QSPI_XIP the .qspixip section holds code and
+ * constant data used in place from the last MiB of the QSPI flash, through
+ * the instruction cache remap of the QSPI window (0x90f00000) at
+ * 0x10f00000.  It is stored after the image in the internal flash, and the
+ * board programs it to the QSPI flash at boot; see gd32_qspixip.c.
  */
 
 MEMORY
 {
-  flash (rx) : ORIGIN = 0x08000000, LENGTH = 2048K
-  sram (rwx) : ORIGIN = 0x20000000, LENGTH = 448K
+  flash (rx)   : ORIGIN = 0x08000000, LENGTH = 2048K
+  sram (rwx)   : ORIGIN = 0x20000000, LENGTH = 448K
+#ifdef CONFIG_GD_XD_W515_EVAL_QSPI_XIP
+  qspixip (rx) : ORIGIN = 0x10f00000, LENGTH = 1024K
+#endif
 }
 
 OUTPUT_ARCH(arm)
@@ -88,6 +99,19 @@ SECTIONS
       . = ALIGN(4);
       _edata = ABSOLUTE(.);
     } > sram AT > flash
+
+#ifdef CONFIG_GD_XD_W515_EVAL_QSPI_XIP
+  .qspixip :
+    {
+      . = ALIGN(4);
+      _sqspixip = ABSOLUTE(.);
+      KEEP(*(.qspixip .qspixip.*))
+      . = ALIGN(4);
+      _eqspixip = ABSOLUTE(.);
+    } > qspixip AT > flash
+
+  _lqspixip = LOADADDR(.qspixip);
+#endif
 
   .bss :
     {

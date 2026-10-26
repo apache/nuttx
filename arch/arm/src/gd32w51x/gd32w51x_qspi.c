@@ -87,6 +87,7 @@ struct gd32_qspidev_s
   uint32_t actual;              /* Actual clock frequency */
   uint8_t mode;                 /* Mode 0 or 3 */
   bool initialized;
+  bool memmap;                  /* In memory-mapped mode */
 #ifdef CONFIG_GD32W51X_QSPI_DMA
   DMA_HANDLE rxdma;             /* DMA channel of the reads */
   sem_t dmawait;                /* Wait for the end of a DMA read */
@@ -385,6 +386,13 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev,
       return 0;
     }
 
+  /* The clock cannot change in the memory-mapped mode */
+
+  if (priv->memmap)
+    {
+      return priv->actual;
+    }
+
   if (frequency == priv->frequency)
     {
       return priv->actual;
@@ -425,7 +433,7 @@ static void qspi_setmode(struct qspi_dev_s *dev, enum qspi_mode_e mode)
    * level while idle is selected, the sampling edge is fixed.
    */
 
-  if (mode != priv->mode && qspi_wait_idle() == OK)
+  if (mode != priv->mode && !priv->memmap && qspi_wait_idle() == OK)
     {
       modifyreg32(GD32W51X_QSPI_DCFG, QSPI_DCFG_CKMOD,
                   mode == QSPIDEV_MODE3 ? QSPI_DCFG_CKMOD : 0);
@@ -454,6 +462,15 @@ static int qspi_command(struct qspi_dev_s *dev,
   uint32_t tcfg;
   uint32_t lines;
 
+  /* Reject commands issued while in memory-mapped mode, which they would
+   * cancel.  The memory-mapped mode must be left first.
+   */
+
+  if (((struct gd32_qspidev_s *)dev)->memmap)
+    {
+      return -EBUSY;
+    }
+
   lines = QSPICMD_ISIQUAD(cmdinfo->flags) ? QSPI_LINES_4 :
           QSPICMD_ISIDUAL(cmdinfo->flags) ? QSPI_LINES_2 : QSPI_LINES_1;
 
@@ -480,16 +497,19 @@ static int qspi_command(struct qspi_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: qspi_memory
+ * Name: qspi_memtcfg
+ *
+ * Description:
+ *   Return the transfer configuration of a memory read or write, without
+ *   the functional mode.
+ *
  ****************************************************************************/
 
-static int qspi_memory(struct qspi_dev_s *dev,
-                       struct qspi_meminfo_s *meminfo)
+static uint32_t qspi_memtcfg(const struct qspi_meminfo_s *meminfo)
 {
   uint32_t ilines;
   uint32_t alines;
   uint32_t dlines;
-  uint32_t tcfg;
 
   ilines = (meminfo->flags & QSPIMEM_IQUAD) != 0 ? QSPI_LINES_4 :
            (meminfo->flags & QSPIMEM_IDUAL) != 0 ? QSPI_LINES_2 :
@@ -513,15 +533,37 @@ static int qspi_memory(struct qspi_dev_s *dev,
     }
 
   DEBUGASSERT(meminfo->addrlen >= 1 && meminfo->addrlen <= 4);
-  DEBUGASSERT(meminfo->buffer != NULL && meminfo->buflen > 0);
 
-  tcfg = (meminfo->cmd & 0xff) |
+  return (meminfo->cmd & 0xff) |
          (ilines << QSPI_TCFG_IMOD_SHIFT) |
          (alines << QSPI_TCFG_ADDRMOD_SHIFT) |
          ((meminfo->addrlen - 1) << QSPI_TCFG_ADDRSZ_SHIFT) |
          ((meminfo->dummies << QSPI_TCFG_DUMYC_SHIFT) &
           QSPI_TCFG_DUMYC_MASK) |
          (dlines << QSPI_TCFG_DATAMOD_SHIFT);
+}
+
+/****************************************************************************
+ * Name: qspi_memory
+ ****************************************************************************/
+
+static int qspi_memory(struct qspi_dev_s *dev,
+                       struct qspi_meminfo_s *meminfo)
+{
+  uint32_t tcfg;
+
+  /* Reject transfers issued while in memory-mapped mode, which they would
+   * cancel.  The memory-mapped mode must be left first.
+   */
+
+  if (((struct gd32_qspidev_s *)dev)->memmap)
+    {
+      return -EBUSY;
+    }
+
+  DEBUGASSERT(meminfo->buffer != NULL && meminfo->buflen > 0);
+
+  tcfg = qspi_memtcfg(meminfo);
 
   return qspi_transfer((struct gd32_qspidev_s *)dev, tcfg, true,
                        meminfo->addr, meminfo->buffer, meminfo->buflen,
@@ -615,6 +657,85 @@ struct qspi_dev_s *gd32_qspi_initialize(int intf)
     }
 
   return &priv->qspi;
+}
+
+/****************************************************************************
+ * Name: gd32_qspi_enter_memorymapped
+ *
+ * Description:
+ *   Put the QSPI controller into memory-mapped mode: the memory is read in
+ *   place through the GD32W51X_QSPIMEM_BASE window.  The QSPI command and
+ *   memory operations fail with -EBUSY until gd32_qspi_exit_memorymapped().
+ *
+ * Input Parameters:
+ *   dev     - QSPI device
+ *   meminfo - The read transfer used to fetch the memory
+ *   lpto    - Number of SCK cycles without access after which CS is
+ *             released, or 0 to keep it asserted
+ *
+ ****************************************************************************/
+
+void gd32_qspi_enter_memorymapped(struct qspi_dev_s *dev,
+                                  const struct qspi_meminfo_s *meminfo,
+                                  uint32_t lpto)
+{
+  struct gd32_qspidev_s *priv = (struct gd32_qspidev_s *)dev;
+
+  qspi_lock(dev, true);
+
+  if (!priv->memmap && qspi_wait_idle() == OK)
+    {
+      putreg32(QSPI_STATC_TERRC | QSPI_STATC_TCC | QSPI_STATC_SMC |
+               QSPI_STATC_TMOUTC | QSPI_STATC_WSC, GD32W51X_QSPI_STATC);
+
+      if (lpto > 0)
+        {
+          putreg32(lpto, GD32W51X_QSPI_TMOUT);
+          modifyreg32(GD32W51X_QSPI_CTL, 0, QSPI_CTL_TMOUTEN);
+        }
+      else
+        {
+          modifyreg32(GD32W51X_QSPI_CTL, QSPI_CTL_TMOUTEN, 0);
+        }
+
+      putreg32(qspi_memtcfg(meminfo) |
+               (QSPI_FMOD_MEMORY_MAPPED << QSPI_TCFG_FMOD_SHIFT),
+               GD32W51X_QSPI_TCFG);
+      priv->memmap = true;
+    }
+
+  qspi_lock(dev, false);
+}
+
+/****************************************************************************
+ * Name: gd32_qspi_exit_memorymapped
+ *
+ * Description:
+ *   Take the QSPI controller out of memory-mapped mode.
+ *
+ * Input Parameters:
+ *   dev - QSPI device
+ *
+ ****************************************************************************/
+
+void gd32_qspi_exit_memorymapped(struct qspi_dev_s *dev)
+{
+  struct gd32_qspidev_s *priv = (struct gd32_qspidev_s *)dev;
+
+  qspi_lock(dev, true);
+
+  if (priv->memmap)
+    {
+      /* The controller keeps CS asserted to prefetch: abort it */
+
+      modifyreg32(GD32W51X_QSPI_CTL, 0, QSPI_CTL_ABORT);
+      qspi_wait_idle();
+      putreg32(QSPI_STATC_TERRC | QSPI_STATC_TCC | QSPI_STATC_SMC |
+               QSPI_STATC_TMOUTC | QSPI_STATC_WSC, GD32W51X_QSPI_STATC);
+      priv->memmap = false;
+    }
+
+  qspi_lock(dev, false);
 }
 
 #endif /* CONFIG_GD32W51X_QSPI */

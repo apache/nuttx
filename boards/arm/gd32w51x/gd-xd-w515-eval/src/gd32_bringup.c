@@ -339,7 +339,8 @@ int gd32_bringup(void)
 
 #if defined(CONFIG_GD32W51X_QSPI) && defined(CONFIG_MTD_GD25)
   /* The 16 MB QSPI NOR flash as /dev/qspiflash, mounted as LittleFS on
-   * /flash (formatted on the first boot).
+   * /flash (formatted on the first boot), or mapped at 0x90000000 with
+   * CONFIG_GD_XD_W515_EVAL_QSPI_MEMMAP.
    */
 
   qspi = gd32_qspi_initialize(0);
@@ -348,6 +349,42 @@ int gd32_bringup(void)
     {
       ferr("ERROR: failed to initialize the QSPI flash\n");
     }
+#ifdef CONFIG_GD_XD_W515_EVAL_QSPI_MEMMAP
+  else
+    {
+      /* Read the flash in place at 0x90000000 with the quad I/O read of
+       * the GD25 driver, which has set the memory up.
+       */
+
+      struct qspi_meminfo_s meminfo =
+      {
+        .flags   = QSPIMEM_READ | QSPIMEM_QUADIO,
+        .addrlen = 3,
+        .dummies = 6,
+        .cmd     = 0xeb,
+      };
+
+#ifdef CONFIG_GD_XD_W515_EVAL_QSPI_XIP
+      /* The code and data used in place, in the last MiB of the flash */
+
+      ret = gd32_qspixip_install(qmtd);
+      if (ret < 0)
+        {
+          ferr("ERROR: failed to program the QSPI XIP section: %d\n", ret);
+        }
+#endif
+
+      gd32_qspi_enter_memorymapped(qspi, &meminfo, 0);
+      finfo("QSPI flash mapped at %08x\n", GD32W51X_QSPIMEM_BASE);
+
+#ifdef CONFIG_GD_XD_W515_EVAL_QSPI_XIP
+      if (ret >= 0)
+        {
+          gd32_qspixip_initialize();
+        }
+#endif
+    }
+#else
   else
     {
       ret = register_mtddriver("/dev/qspiflash", qmtd, 0755, NULL);
@@ -367,6 +404,7 @@ int gd32_bringup(void)
         }
 #endif
     }
+#endif /* CONFIG_GD_XD_W515_EVAL_QSPI_MEMMAP */
 #endif
 
   UNUSED(ret);
