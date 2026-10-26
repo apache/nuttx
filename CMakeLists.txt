@@ -794,7 +794,11 @@ if(NOT CONFIG_ARCH_SIM)
     add_custom_target(ldscript_tmp_${LD_SCRIPT_NAME} DEPENDS ${LD_SCRIPT_TMP})
     add_dependencies(nuttx ldscript_tmp_${LD_SCRIPT_NAME})
 
-    list(APPEND ldscript_tmp_list -T ${LD_SCRIPT_TMP})
+    if(CONFIG_ARCH_TOOLCHAIN_TASKING)
+      list(APPEND ldscript_tmp_list --lsl-file=${LD_SCRIPT_TMP})
+    else()
+      list(APPEND ldscript_tmp_list -T ${LD_SCRIPT_TMP})
+    endif()
   endforeach()
   set(ldscript ${ldscript_tmp_list})
 endif()
@@ -829,7 +833,7 @@ set(nuttx_libs ${nuttx_kernel_libs} ${nuttx_system_libs} ${nuttx_apps_libs}
 if(NOT CONFIG_ARCH_SIM)
   # TODO: nostart/nodefault not applicable to nuttx toolchain
   if(CONFIG_ARCH_TOOLCHAIN_TASKING)
-    target_link_libraries(nuttx PRIVATE --lsl-file=${ldscript} ${nuttx_libs})
+    target_link_libraries(nuttx PRIVATE ${ldscript} ${nuttx_libs})
     # Remove executable suffix
     set(CMAKE_EXECUTABLE_SUFFIX "")
   else()
