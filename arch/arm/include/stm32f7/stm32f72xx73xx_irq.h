@@ -148,7 +148,7 @@
 
 #define STM32_IRQ_SAI2        (STM32_IRQ_FIRST + 91) /* 91: SAI2 global interrupt */
 #define STM32_IRQ_QUADSPI     (STM32_IRQ_FIRST + 92) /* 92: QuadSPI global interrupt */
-#define STM32_IRQ_LPTIMER1    (STM32_IRQ_FIRST + 93) /* 93: LP Timer1 global interrupt */
+#define STM32_IRQ_LPTIM1      (STM32_IRQ_FIRST + 93) /* 93: LP Timer1 global interrupt */
 
 #define STM32_IRQ_SDMMC2      (STM32_IRQ_FIRST + 103) /* 103: SDMMC2 global interrupt */
 

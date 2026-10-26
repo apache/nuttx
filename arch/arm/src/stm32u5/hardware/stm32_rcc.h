@@ -390,6 +390,12 @@
 #define RCC_APB2RSTR_SAI1RST              (1 << 21) /* Bit 21: SAI1 reset */
 #define RCC_APB2RSTR_SAI2RST              (1 << 22) /* Bit 22: SAI2 reset */
 
+/* APB3 peripheral reset register */
+
+#define RCC_APB3RSTR_LPTIM1RST            (1 << 11) /* Bit 11: LPTIM1 reset */
+#define RCC_APB3RSTR_LPTIM3RST            (1 << 12) /* Bit 12: LPTIM3 reset */
+#define RCC_APB3RSTR_LPTIM4RST            (1 << 13) /* Bit 13: LPTIM4 reset */
+
 /* AHB1 Peripheral Clock enable register */
 
 #define RCC_AHB1ENR_GPDMA1EN              (1 << 0)  /* Bit 0:  GPDMA1 clock enable */

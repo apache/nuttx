@@ -4304,7 +4304,6 @@ arch/arm/src/stm32l4/hardware/stm32l4_exti.h alin.jerpelea@sony.com xiaoxiang@xi
 arch/arm/src/stm32l4/hardware/stm32l4_flash.h alin.jerpelea@sony.com juha.niskanen@haltian.com togawa@develcb210.centurysys.co.jp s.nikitenko@me.com
 arch/arm/src/stm32l4/hardware/stm32l4_gpio.h alin.jerpelea@sony.com mnitsche@dc.uba.ar hartman.nathan@gmail.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32l4/hardware/stm32l4_i2c.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-arch/arm/src/stm32l4/hardware/stm32l4_lptim.h alin.jerpelea@sony.com mnitsche@dc.uba.ar matias@imap.cc gustavo.nihei@espressif.com
 arch/arm/src/stm32l4/hardware/stm32l4_memorymap.h alin.jerpelea@sony.com juha.niskanen@haltian.com petro.karashchenko@gmail.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32l4/hardware/stm32l4_pinmap.h alin.jerpelea@sony.com David.Sidrane@NscDg.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32l4/hardware/stm32l4_pwr.h alin.jerpelea@sony.com juha.niskanen@haltian.com
@@ -4384,8 +4383,6 @@ arch/arm/src/stm32l4/stm32l4_irq.c sebastien@lorquet.fr xiaoxiang@xiaomi.com pau
 arch/arm/src/stm32l4/stm32l4_iwdg.c juha.niskanen@haltian.com xiaoxiang@xiaomi.com alin.jerpelea@sony.com
 arch/arm/src/stm32l4/stm32l4_lowputc.c sebastien@lorquet.fr alin.jerpelea@sony.com harri.luhtala@haltian.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32l4/stm32l4_lowputc.h sebastien@lorquet.fr alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-arch/arm/src/stm32l4/stm32l4_lptim.c mnitsche@dc.uba.ar alin.jerpelea@sony.com xiaoxiang@xiaomi.com kychu@qq.com
-arch/arm/src/stm32l4/stm32l4_lptim.h alin.jerpelea@sony.com mnitsche@dc.uba.ar xiaoxiang@xiaomi.com
 arch/arm/src/stm32l4/stm32l4_lse.c dev@ziggurat29.com juha.niskanen@haltian.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32l4/stm32l4_mpuinit.c alin.jerpelea@sony.com gustavo.nihei@espressif.com petro.karashchenko@gmail.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32l4/stm32l4_mpuinit.h alin.jerpelea@sony.com sebastien@lorquet.fr

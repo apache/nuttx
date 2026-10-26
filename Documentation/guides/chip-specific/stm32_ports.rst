@@ -508,7 +508,7 @@ FLASH         to be done    arch/arm/src/stm32l4/stm32l4_flash.c
 GPIO          to be done    arch/arm/src/stm32l4/stm32l4_gpio.c      
 I2C           to be done    arch/arm/src/stm32l4/stm32l4_i2c.c       
 IWDG          v1            arch/arm/src/common/stm32/stm32_iwdg.c
-LPTIM         to be done    arch/arm/src/stm32l4/stm32l4_lptim.c     
+LPTIM         v1            arch/arm/src/common/stm32/stm32_lptim.c
 PWR           to be done    arch/arm/src/stm32l4/stm32l4_pwr.c       
 QSPI          to be done    arch/arm/src/stm32l4/stm32l4_qspi.c      
 RCC           to be done    arch/arm/src/stm32l4/stm32l4_rcc.c       
@@ -623,7 +623,7 @@ TIM           v3            arch/arm/src/common/stm32/stm32_tim.c
 USART/LPUART  v3            arch/arm/src/stm32h5/stm32_serial.c    
 USB           FS            arch/arm/src/stm32h5/stm32_usbfs.c     
 WWDG          v3            arch/arm/src/common/stm32/stm32_wwdg.c
-LPTIM         n/a           arch/arm/src/stm32h5/stm32_lptim.c     
+LPTIM         v2            arch/arm/src/common/stm32/stm32_lptim.c
 PULSECOUNT    n/a           arch/arm/src/common/stm32/stm32_pulsecount.c
 PWM           n/a           arch/arm/src/stm32h5/stm32_pwm.c       
 RNG           n/a           arch/arm/src/stm32h5/stm32_rng.c       
@@ -666,7 +666,7 @@ WWDG          v2, H7RS v3   arch/arm/src/common/stm32/stm32_wwdg.c
 AES/CRYP      n/a           arch/arm/src/stm32h7/stm32_aes.c       
 BBSRAM        n/a           arch/arm/src/stm32h7/stm32_bbsram.c    
 CAPTURE       n/a           arch/arm/src/stm32h7/stm32_capture.c   
-LPTIM         n/a           arch/arm/src/stm32h7/stm32_lptim.c     
+LPTIM         v1, H7RS v2   arch/arm/src/common/stm32/stm32_lptim.c
 PULSECOUNT    n/a           arch/arm/src/common/stm32/stm32_pulsecount.c
 PWM           n/a           arch/arm/src/stm32h7/stm32_pwm.c       
 QENCODER      n/a           arch/arm/src/common/stm32/stm32_qencoder.c  
