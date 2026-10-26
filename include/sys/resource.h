@@ -60,10 +60,14 @@
 #define RLIMIT_STACK    6           /* Limit on stack size */
 #define RLIMIT_AS       7           /* Limit on address space size */
 #define RLIMIT_MEMLOCK  8           /* Limit on memory use */
+#define RLIMIT_RSS      9           /* Limit on resident set size */
 #define RLIMIT_NICE     10          /* Limit on nice level */
 
 /* Below are not implemented yet: */
 
+#define RLIMIT_NPROC    11          /* Limit on processes of the user */
+#define RLIMIT_LOCKS    12          /* Limit on file locks */
+#define RLIMIT_SIGPENDING 13        /* Limit on queued signals */
 #define RLIMIT_RTPRIO   14          /* Limit on RT tasks priority */
 #define RLIMIT_RTTIME   15          /* Limit on timeout for RT tasks (us) */
 
