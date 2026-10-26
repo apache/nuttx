@@ -54,7 +54,7 @@ config RESET_PROCFS
 		are held is a program that knows the numbering already.
 
 config RESET_IPC
-	bool "Inter-Processor panic/reset notify support"
+	bool
 	select RESET
 	default n
 	---help---
