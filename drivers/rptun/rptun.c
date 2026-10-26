@@ -26,6 +26,8 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+#include <ctype.h>
 #include <nuttx/debug.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -171,6 +173,8 @@ static FAR void *rptun_map_buf(FAR struct virtio_device *vdev,
 static void rptun_unmap_buf(FAR struct virtio_device *vdev,
                             FAR void *buf, size_t len,
                             enum virtio_dma_map dir, FAR void *mapped);
+static int rptun_get_shm_region(FAR struct virtio_device *vdev, uint8_t id,
+                                FAR struct virtio_shm_region *region);
 
 static void rptun_set_status_notify(FAR struct rptun_priv_s *priv,
                                     unsigned long reason);
@@ -219,11 +223,12 @@ static const struct image_store_ops g_rptun_store_ops =
 
 static const struct virtio_memory_ops g_rptun_mmops =
 {
-  .alloc        = rptun_alloc_buf,
-  .free         = rptun_free_buf,
-  .free_largest = rptun_free_largest,
-  .map          = rptun_map_buf,
-  .unmap        = rptun_unmap_buf,
+  .alloc          = rptun_alloc_buf,
+  .free           = rptun_free_buf,
+  .free_largest   = rptun_free_largest,
+  .map            = rptun_map_buf,
+  .unmap          = rptun_unmap_buf,
+  .get_shm_region = rptun_get_shm_region,
 };
 
 static DEFINE_PER_CPU_BSS_BMP(dq_queue_t, g_rptun_priv);
@@ -378,6 +383,8 @@ static FAR void *rptun_alloc_buf(FAR struct virtio_device *vdev,
   FAR struct rptun_carveout_s *carveout =
     (FAR struct rptun_carveout_s *)vdev->mm_priv;
 
+  DEBUGASSERT(vdev->role == VIRTIO_DEV_DRIVER);
+
   return mm_memalign(carveout->heap, align, size);
 }
 
@@ -389,6 +396,8 @@ static void rptun_free_buf(FAR struct virtio_device *vdev, FAR void *buf)
 {
   FAR struct rptun_carveout_s *carveout =
     (FAR struct rptun_carveout_s *)vdev->mm_priv;
+
+  DEBUGASSERT(vdev->role == VIRTIO_DEV_DRIVER);
 
   mm_free(carveout->heap, buf);
 }
@@ -427,7 +436,11 @@ static size_t rptun_free_largest(FAR struct virtio_device *vdev)
   FAR struct rptun_carveout_s *carveout =
     (FAR struct rptun_carveout_s *)vdev->mm_priv;
   size_t align = rptun_map_align();
-  size_t largest = mm_heapfree_largest(carveout->heap);
+  size_t largest;
+
+  DEBUGASSERT(vdev->role == VIRTIO_DEV_DRIVER);
+
+  largest = mm_heapfree_largest(carveout->heap);
 
   /* mm_memalign over-allocates by up to 2 * align to find an aligned point,
    * and map rounds len up to align. Reserve 3 * align to stay safe.
@@ -459,6 +472,8 @@ static FAR void *rptun_map_buf(FAR struct virtio_device *vdev,
   size_t align = rptun_map_align();
   FAR void *bounce;
   size_t maplen;
+
+  DEBUGASSERT(vdev->role == VIRTIO_DEV_DRIVER);
 
   /* Already inside the carveout heap: the remote can access it directly. */
 
@@ -507,6 +522,8 @@ static void rptun_unmap_buf(FAR struct virtio_device *vdev,
 {
   FAR struct rptun_carveout_s *carveout =
     (FAR struct rptun_carveout_s *)vdev->mm_priv;
+
+  DEBUGASSERT(vdev->role == VIRTIO_DEV_DRIVER);
 
   /* Not bounced (buffer was already inside the carveout): nothing to do. */
 
@@ -566,6 +583,156 @@ rptun_find_carveout(FAR struct resource_table *rsc, FAR const char *name)
     }
 
   return carv;
+}
+
+/****************************************************************************
+ * Name: rptun_is_shm_carveout
+ *
+ * Description:
+ *   Tell whether a carveout is a shared memory region of vdev index, named
+ *   "vdev<index>buffer<id>". The bare "vdev<index>buffer" is the heap.
+ *
+ ****************************************************************************/
+
+static bool rptun_is_shm_carveout(FAR const struct fw_rsc_carveout *carv,
+                                  unsigned int index)
+{
+  FAR const char *name = (FAR const char *)carv->name;
+  char prefix[RPROC_MAX_NAME_LEN];
+  int len;
+
+  len = snprintf(prefix, sizeof(prefix), "vdev%ubuffer", index);
+  return carv->type == RSC_CARVEOUT &&
+         strncmp(name, prefix, len) == 0 && isdigit(name[len]);
+}
+
+/****************************************************************************
+ * Name: rptun_alloc_shm_regions
+ *
+ * Description:
+ *   Place the shared memory regions of vdev index the table left at
+ *   FW_RSC_U32_ADDR_ANY: cut them from the pool and write the da back, as
+ *   rptun_alloc_vrings() does, so the peer finds them once DRIVER_OK is set.
+ *
+ ****************************************************************************/
+
+static int rptun_alloc_shm_regions(FAR struct rptun_priv_s *priv,
+                                   unsigned int index)
+{
+  FAR struct resource_table *rsc = priv->rproc.rsc_table;
+  uint32_t i;
+
+  for (i = 0; i < rsc->num; i++)
+    {
+      FAR struct fw_rsc_carveout *carv =
+        (FAR struct fw_rsc_carveout *)((FAR char *)rsc + rsc->offset[i]);
+      metal_phys_addr_t pa;
+      FAR void *va = NULL;
+
+      if ((carv->da != 0u && carv->da != FW_RSC_U32_ADDR_ANY) ||
+          !rptun_is_shm_carveout(carv, index))
+        {
+          continue;
+        }
+
+      if (priv->heap != NULL)
+        {
+          va = mm_memalign(priv->heap, rptun_map_align(), carv->len);
+        }
+
+      if (va == NULL)
+        {
+          rptunerr("ERROR: %s alloc failed, len=%" PRIu32 "\n",
+                   (FAR const char *)carv->name, carv->len);
+          return -ENOMEM;
+        }
+
+      pa = metal_io_virt_to_phys(metal_io_get_region(), va);
+      carv->da = rptun_pa_to_da(priv->dev, pa);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: rptun_free_shm_regions
+ *
+ * Description:
+ *   Release the regions rptun_alloc_shm_regions() placed and hand their da
+ *   back to FW_RSC_U32_ADDR_ANY. A region with a static da lies outside the
+ *   pool and is left untouched.
+ *
+ ****************************************************************************/
+
+static void rptun_free_shm_regions(FAR struct rptun_priv_s *priv,
+                                   unsigned int index)
+{
+  FAR struct resource_table *rsc = priv->rproc.rsc_table;
+  uint32_t i;
+
+  for (i = 0; i < rsc->num; i++)
+    {
+      FAR struct fw_rsc_carveout *carv =
+        (FAR struct fw_rsc_carveout *)((FAR char *)rsc + rsc->offset[i]);
+      metal_phys_addr_t pa;
+      FAR void *va;
+
+      if (priv->heap == NULL || carv->da == 0u ||
+          carv->da == FW_RSC_U32_ADDR_ANY ||
+          !rptun_is_shm_carveout(carv, index))
+        {
+          continue;
+        }
+
+      pa = rptun_da_to_pa(priv->dev, carv->da);
+      va = metal_io_phys_to_virt(metal_io_get_region(), pa);
+      if (va != NULL && mm_heapmember(priv->heap, va))
+        {
+          mm_free(priv->heap, va);
+          carv->da = FW_RSC_U32_ADDR_ANY;
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: rptun_get_shm_region
+ *
+ * Description:
+ *   Shared memory region id of vdev N is the carveout "vdevNbufferid".
+ *   Both sides access it in place, so each maps the da through its own
+ *   address environment.
+ *
+ ****************************************************************************/
+
+static int rptun_get_shm_region(FAR struct virtio_device *vdev, uint8_t id,
+                                FAR struct virtio_shm_region *region)
+{
+  FAR struct remoteproc_virtio *rpvdev =
+    metal_container_of(vdev, struct remoteproc_virtio, vdev);
+  FAR struct remoteproc *rproc = rpvdev->priv;
+  FAR struct fw_rsc_carveout *rsc;
+  char name[RPROC_MAX_NAME_LEN];
+  metal_phys_addr_t pa = METAL_BAD_PHYS;
+  metal_phys_addr_t da;
+
+  snprintf(name, sizeof(name), "vdev%ubuffer%u", rpvdev->index, id);
+  rsc = rptun_find_carveout(rproc->rsc_table, name);
+  if (rsc == NULL || rsc->da == 0u || rsc->da == FW_RSC_U32_ADDR_ANY)
+    {
+      return -ENOENT;
+    }
+
+  da = rsc->da;
+  region->va = remoteproc_mmap(rproc, &pa, &da, rsc->len, 0, NULL);
+  if (region->va == NULL)
+    {
+      rptunerr("ERROR: %s mmap failed, da=0x%lx\n", name, da);
+      return -ENOMEM;
+    }
+
+  region->addr = pa;
+  region->len  = rsc->len;
+  return OK;
 }
 
 /****************************************************************************
@@ -900,6 +1067,10 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
           if (carv != NULL)
             {
               ret = rptun_alloc_vrings(priv, vdev_rsc, carv->heap);
+              if (ret >= 0)
+                {
+                  ret = rptun_alloc_shm_regions(priv, index);
+                }
             }
           else
             {
@@ -919,11 +1090,14 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
                 }
               else
                 {
-                  /* Bind the heap to virtio device */
+                  /* Bind the heap to virtio device, the device side only
+                   * looks up shared memory regions and never allocates or
+                   * maps buffers.
+                   */
 
+                  vdev->mmops = &g_rptun_mmops;
                   if (carv != NULL)
                     {
-                      vdev->mmops   = &g_rptun_mmops;
                       vdev->mm_priv = carv;
                     }
 
@@ -938,6 +1112,7 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
 
       if (ret < 0 && carv != NULL)
         {
+          rptun_free_shm_regions(priv, index);
           rptun_free_vrings(priv, vdev_rsc, carv->heap);
           rptun_free_carveout(priv, carv);
         }
@@ -959,12 +1134,13 @@ static void rptun_remove_device(FAR struct rptun_priv_s *priv,
 
   if (carveout != NULL)
     {
+      rptun_free_shm_regions(priv, rvdev->index);
       rptun_free_vrings(priv, rvdev->vdev_rsc, carveout->heap);
       rptun_free_carveout(priv, carveout);
       vdev->mm_priv = NULL;
-      vdev->mmops   = NULL;
     }
 
+  vdev->mmops = NULL;
   remoteproc_remove_virtio(&priv->rproc, vdev);
 }
 
