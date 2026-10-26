@@ -24,11 +24,14 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/cache.h>
 #include <nuttx/dma-buf.h>
 #include <nuttx/dma-heap.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/mm/mm.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -93,6 +96,65 @@ static const struct dma_buf_ops g_system_heap_buf_ops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#if CONFIG_DMABUF_SYSTEM_HEAP_RESERVE_SIZE > 0
+/****************************************************************************
+ * Name: system_heap_reserve_initialize
+ *
+ * Description:
+ *   Create a private mm heap over a reserved region.  The mm context
+ *   lives at the start of that region so the heap pointer is also the
+ *   free() handle.
+ *
+ ****************************************************************************/
+
+static FAR struct mm_heap_s *
+system_heap_reserve_initialize(void)
+{
+  FAR struct mm_heap_s *mm;
+  struct mm_heap_config_s config;
+  FAR void *p;
+
+  p = kumm_memalign(64, CONFIG_DMABUF_SYSTEM_HEAP_RESERVE_SIZE);
+  if (p == NULL)
+    {
+      return NULL;
+    }
+
+  memset(&config, 0, sizeof(config));
+  config.name = "dmabuf";
+  config.start = p;
+  config.size = CONFIG_DMABUF_SYSTEM_HEAP_RESERVE_SIZE;
+  config.allocheap = false;
+  mm = mm_initialize_heap(&config);
+  return mm;
+}
+
+/****************************************************************************
+ * Name: system_heap_reserve_uninitialize
+ ****************************************************************************/
+
+static void
+system_heap_reserve_uninitialize(FAR struct mm_heap_s *mm)
+{
+  mm_uninitialize(mm);
+  kumm_free(mm);
+}
+
+#else
+
+static FAR struct mm_heap_s *
+system_heap_reserve_initialize(void)
+{
+  return KNR_HEAP;
+}
+
+static void
+system_heap_reserve_uninitialize(FAR struct mm_heap_s *mm)
+{
+}
+
+#endif
 
 static int system_heap_attach(FAR struct dma_buf *dmabuf,
                               FAR struct dma_buf_attachment *attachment)
@@ -217,7 +279,7 @@ static void system_heap_dma_buf_release(FAR struct dma_buf *dmabuf)
 {
   FAR struct system_heap_buffer *buffer = dmabuf->priv;
 
-  kumm_free(buffer->buf);
+  mm_free(buffer->heap->priv, buffer->buf);
   kmm_free(buffer);
 }
 
@@ -240,7 +302,8 @@ system_heap_allocate(FAR struct dma_heap *heap, size_t len,
    * correctly when importing this dma_buf.
    */
 
-  buffer->buf = kumm_memalign(32, len);
+  buffer->buf = mm_memalign(heap->priv, 32, len);
+
   if (buffer->buf == NULL)
     {
       kmm_free(buffer);
@@ -261,7 +324,7 @@ system_heap_allocate(FAR struct dma_heap *heap, size_t len,
   dmabuf = dma_buf_export(&exp_info);
   if (dmabuf == NULL)
     {
-      kumm_free(buffer->buf);
+      mm_free(buffer->heap->priv, buffer->buf);
       kmm_free(buffer);
     }
 
@@ -287,11 +350,16 @@ int dmabuf_system_heap_create(void)
 
   exp_info.name = "system";
   exp_info.allocate = system_heap_allocate;
-  exp_info.priv = NULL;
+  exp_info.priv = system_heap_reserve_initialize();
+  if (exp_info.priv == NULL)
+    {
+      return -ENOMEM;
+    }
 
   sys_heap = dma_heap_add(&exp_info);
   if (sys_heap == NULL)
     {
+      system_heap_reserve_uninitialize(exp_info.priv);
       return -ENOMEM;
     }
 
