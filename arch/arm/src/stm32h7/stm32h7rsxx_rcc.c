@@ -571,7 +571,7 @@ void stm32_stdclockconfig(void)
   /* Configure the CPU, bus matrix and APB prescalers */
 
   putreg32(STM32_RCC_CDCFGR_CPRE, STM32_RCC_CDCFGR);
-  putreg32(STM32_RCC_BMCFGR_HPRE, STM32_RCC_BMCFGR);
+  putreg32(STM32_RCC_BMCFGR_BMPRE, STM32_RCC_BMCFGR);
   putreg32(STM32_RCC_APBCFGR_PPRE1 | STM32_RCC_APBCFGR_PPRE2 |
            STM32_RCC_APBCFGR_PPRE4 | STM32_RCC_APBCFGR_PPRE5,
            STM32_RCC_APBCFGR);
