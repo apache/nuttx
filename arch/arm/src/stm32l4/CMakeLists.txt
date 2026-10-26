@@ -134,10 +134,6 @@ if(CONFIG_STM32_SAI)
   list(APPEND SRCS stm32l4_sai.c)
 endif()
 
-if(CONFIG_STM32_LPTIM)
-  list(APPEND SRCS stm32l4_lptim.c)
-endif()
-
 if(CONFIG_STM32_PWM)
   list(APPEND SRCS stm32l4_pwm.c)
 endif()
