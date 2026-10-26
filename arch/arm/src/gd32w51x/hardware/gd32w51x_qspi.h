@@ -44,6 +44,7 @@
 #define GD32W51X_QSPI_ADDR_OFFSET    0x0018  /* Address */
 #define GD32W51X_QSPI_ALTE_OFFSET    0x001c  /* Alternate bytes */
 #define GD32W51X_QSPI_DATA_OFFSET    0x0020  /* Data */
+#define GD32W51X_QSPI_TMOUT_OFFSET   0x0030  /* Memory-mapped timeout */
 
 /* Register addresses */
 
@@ -57,11 +58,14 @@
 #define GD32W51X_QSPI_TCFG    (GD32W51X_QSPI_BASE + GD32W51X_QSPI_TCFG_OFFSET)
 #define GD32W51X_QSPI_ADDR    (GD32W51X_QSPI_BASE + GD32W51X_QSPI_ADDR_OFFSET)
 #define GD32W51X_QSPI_DATA    (GD32W51X_QSPI_BASE + GD32W51X_QSPI_DATA_OFFSET)
+#define GD32W51X_QSPI_TMOUT \
+  (GD32W51X_QSPI_BASE + GD32W51X_QSPI_TMOUT_OFFSET)
 
 /* QSPI_CTL */
 
 #define QSPI_CTL_QSPIEN              (1 << 0)   /* Enable */
 #define QSPI_CTL_ABORT               (1 << 1)   /* Abort request */
+#define QSPI_CTL_TMOUTEN             (1 << 3)   /* Memory-mapped timeout */
 #define QSPI_CTL_SSAMPLE_SHIFT       (4)        /* Sample shift */
 #define QSPI_CTL_SSAMPLE_MASK        (3 << QSPI_CTL_SSAMPLE_SHIFT)
 #define QSPI_CTL_FTL_SHIFT           (8)        /* FIFO threshold (n - 1) */

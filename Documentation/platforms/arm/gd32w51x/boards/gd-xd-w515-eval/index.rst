@@ -263,6 +263,37 @@ reboot:
     nsh> cat /flash/hello.txt
     hello
 
+With ``CONFIG_GD_XD_W515_EVAL_QSPI_MEMMAP`` the QSPI flash is not registered:
+it is mapped read-only at 0x90000000 (memory-mapped mode,
+``gd32_qspi_enter_memorymapped()``), so that constant data stored in it can
+be read in place.
+
+::
+
+    nsh> xd 0x90000000 16
+    Hex dump:
+    0000: cc 00 00 00 f0 0f ff f7 6c 69 74 74 6c 65 66 73 ........littlefs
+
+``CONFIG_GD_XD_W515_EVAL_QSPI_XIP`` adds code and constant data run in place
+from the last MiB of the QSPI flash: functions and data marked
+``locate_code(".qspixip")`` and ``locate_data(".qspixip")`` go to the
+``.qspixip`` section.  It is linked at 0x10f00000, which the instruction
+cache remaps to the window (0x90f00000), and stored after the image in the
+internal flash: the board programs it to the QSPI flash at boot when it
+differs, so ``nuttx.bin`` is still programmed as usual.  A self-test runs a
+CRC-32 function from the QSPI flash over a string read in place::
+
+    QSPI XIP section programmed (176 bytes)
+    QSPI XIP: code at 0x10f00001, data at 0x10f0002c: crc 21821ab6 OK
+
+.. note::
+   Code run from the window at 0x90000000 itself hangs the bus as soon as
+   it also reads the window (its literal pool, its data); through the
+   instruction cache remap both work.  Nothing may access the window
+   directly while code runs from the QSPI flash.  After such a hang the
+   debugger only connects under reset
+   (``reset_config srst_only srst_nogate connect_assert_srst``).
+
 pm
 --
 

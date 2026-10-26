@@ -52,4 +52,8 @@ ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += gd32_reset.c
 endif
 
+ifeq ($(CONFIG_GD_XD_W515_EVAL_QSPI_XIP),y)
+CSRCS += gd32_qspixip.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

@@ -81,5 +81,33 @@ void gd32_spidev_initialize(void);
 int gd32_gpio_initialize(void);
 #endif
 
+#ifdef CONFIG_GD_XD_W515_EVAL_QSPI_XIP
+struct mtd_dev_s;
+
+/****************************************************************************
+ * Name: gd32_qspixip_install
+ *
+ * Description:
+ *   Program the .qspixip section to the last MiB of the QSPI flash, from
+ *   its copy in the internal flash, when it differs.  Called before the
+ *   flash is mapped in memory.
+ *
+ ****************************************************************************/
+
+int gd32_qspixip_install(struct mtd_dev_s *mtd);
+
+/****************************************************************************
+ * Name: gd32_qspixip_initialize
+ *
+ * Description:
+ *   Once the flash is mapped in memory, remap the QSPI window in the
+ *   instruction cache, where the .qspixip section is linked, and check
+ *   that code runs from it.
+ *
+ ****************************************************************************/
+
+int gd32_qspixip_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_GD32W51X_GD_XD_W515_EVAL_SRC_GD_XD_W515_EVAL_H */

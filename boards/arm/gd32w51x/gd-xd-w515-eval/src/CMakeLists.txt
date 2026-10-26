@@ -50,6 +50,10 @@ if(CONFIG_BOARDCTL_RESET)
   list(APPEND SRCS gd32_reset.c)
 endif()
 
+if(CONFIG_GD_XD_W515_EVAL_QSPI_XIP)
+  list(APPEND SRCS gd32_qspixip.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/ld.script")
