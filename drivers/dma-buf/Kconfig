@@ -42,3 +42,14 @@ config DMABUF_HEAPS
 		This options creates per heap chardevs in /dev/dma_heap/ which
 		allows userspace to allocate dma-bufs that can be shared
 		between drivers.
+
+config DMABUF_SYSTEM_HEAP_RESERVE_SIZE
+	int "DMA-BUF system heap reserved region size"
+	default 0
+	depends on DMABUF_HEAPS
+	---help---
+		Reserve a private region at startup for system DMA-BUF
+		allocations.  Allocations use this region first and fall back to
+		the public heap when the region has insufficient space.
+
+		A value of zero keeps the existing public heap allocation path.
