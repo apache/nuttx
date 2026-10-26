@@ -1942,10 +1942,21 @@ static ssize_t tmpfs_write(FAR struct file *filep, FAR const char *buffer,
     {
       /* Reallocate the file to handle the write past the end of the file. */
 
+      size_t oldsize = tfo->tfo_size;
+
       ret = tmpfs_realloc_file(tfo, (size_t)endpos);
       if (ret < 0)
         {
           goto errout_with_lock;
+        }
+
+      /* A seek past EOF followed by a write leaves a hole that must read
+       * back as zeros; realloc() leaves the gap unzeroed.
+       */
+
+      if (startpos > oldsize)
+        {
+          memset(&tfo->tfo_data[oldsize], 0, startpos - oldsize);
         }
     }
 
