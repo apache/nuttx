@@ -236,28 +236,28 @@ typedef unsigned char char_type;
 #define MAXCODE(n) (1L << (n))
 
 union bytes
+{
+  long word;
+  struct
   {
-    long word;
-    struct
-      {
 #if BYTEORDER == 4321
-        char_type b1;
-        char_type b2;
-        char_type b3;
-        char_type b4;
+    char_type b1;
+    char_type b2;
+    char_type b3;
+    char_type b4;
 #else
 #  if BYTEORDER == 1234
-        char_type b4;
-        char_type b3;
-        char_type b2;
-        char_type b1;
+    char_type b4;
+    char_type b3;
+    char_type b2;
+    char_type b1;
 #  else
 #    undef BYTEORDER
-        int dummy;
+    int dummy;
 #  endif
 #endif
-      } bytes;
-  };
+  } bytes;
+};
 #if BYTEORDER == 4321 && NOALLIGN == 1
 #  define output(b,o,c,n) {             \
        *(long *)&((b)[(o)>>3]) |= ((long)(c))<<((o)&0x7);\
@@ -448,6 +448,13 @@ void compress(int fdin, int fdout)
   long hp;
   int rpos;
   long fc;
+#  ifndef FAST
+  code_int i;
+  long disp;
+#  else
+  long i;
+  long p;
+#  endif
   int outbits;
   int rlop;
   int rsize;
@@ -459,14 +466,14 @@ void compress(int fdin, int fdout)
   long checkpoint;
   code_int extcode;
   union
+  {
+    long code;
+    struct
     {
-      long code;
-      struct
-        {
-          char_type c;
-          unsigned short ent;
-        } e;
-    } fcode;
+      char_type c;
+      unsigned short ent;
+    } e;
+  } fcode;
 
   ratio = 0;
   checkpoint = CHECK_GAP;
@@ -493,7 +500,9 @@ void compress(int fdin, int fdout)
           rpos = 1;
         }
       else
-        rpos = 0;
+        {
+          rpos = 0;
+        }
 
       rlop = 0;
 
@@ -508,9 +517,13 @@ void compress(int fdin, int fdout)
                                                       (n_bits << 3)) %
                                                      (n_bits << 3)));
                   if (++n_bits < maxbits)
-                    extcode = MAXCODE(n_bits) + 1;
+                    {
+                      extcode = MAXCODE(n_bits) + 1;
+                    }
                   else
-                    extcode = MAXCODE(n_bits);
+                    {
+                      extcode = MAXCODE(n_bits);
+                    }
                 }
               else
                 {
@@ -532,18 +545,25 @@ void compress(int fdin, int fdout)
                   rat = (bytes_out + (outbits >> 3)) >> 8;
 
                   if (rat == 0) /* Don't divide by zero */
-                    rat = 0x7fffffff;
+                    {
+                      rat = 0x7fffffff;
+                    }
                   else
-                    rat = bytes_in / rat;
+                    {
+                      rat = bytes_in / rat;
+                    }
                 }
               else
-
+                {
                   /* 8 fractional bits */
 
                   rat = (bytes_in << 8) / (bytes_out + (outbits >> 3));
+                }
 
               if (rat >= ratio)
-                ratio = (int)rat;
+                {
+                  ratio = (int)rat;
+                }
               else
                 {
                   ratio = 0;
@@ -562,7 +582,9 @@ void compress(int fdin, int fdout)
           if (outbits >= (OBUFSIZ << 3))
             {
               if (write(fdout, outbuf, OBUFSIZ) != OBUFSIZ)
-                write_error();
+                {
+                  write_error();
+                }
 
               outbits -= (OBUFSIZ << 3);
               boff = -(((OBUFSIZ << 3) - boff) % (n_bits << 3));
@@ -572,108 +594,146 @@ void compress(int fdin, int fdout)
               memset(outbuf + (outbits >> 3) + 1, '\0', OBUFSIZ);
             }
 
-            {
-              int i;
+          {
+            int i;
 
-              i = rsize - rlop;
+            i = rsize - rlop;
 
-              if ((code_int) i > extcode - free_ent)
+            if ((code_int) i > extcode - free_ent)
+              {
                 i = (int)(extcode - free_ent);
-              if (i > ((sizeof(outbuf) - 32) * 8 - outbits) / n_bits)
+              }
+
+            if (i > ((sizeof(outbuf) - 32) * 8 - outbits) / n_bits)
+              {
                 i = ((sizeof(outbuf) - 32) * 8 - outbits) / n_bits;
+              }
 
-              if (!stcode && (long)i > checkpoint - bytes_in)
+            if (!stcode && (long)i > checkpoint - bytes_in)
+              {
                 i = (int)(checkpoint - bytes_in);
+              }
 
-              rlop += i;
-              bytes_in += i;
-            }
+            rlop += i;
+            bytes_in += i;
+          }
 
           goto next;
-        hfound:fcode.e.ent = codetabof(hp);
-        next:if (rpos >= rlop)
-          goto endlop;
-        next2:fcode.e.c = inbuf[rpos++];
-#  ifndef FAST
+hfound:
+          fcode.e.ent = codetabof(hp);
+
+next:
+          if (rpos >= rlop)
             {
-              code_int i;
-              fc = fcode.code;
+              goto endlop;
+            }
 
-              hp = (((long)(fcode.e.c)) << (BITS - 8)) ^ (long)(fcode.e.ent);
+next2:
+          fcode.e.c = inbuf[rpos++];
+#  ifndef FAST
+          fc = fcode.code;
 
-              if ((i = htabof(hp)) == fc)
-                  goto hfound;
+          hp = (((long)(fcode.e.c)) << (BITS - 8)) ^ (long)(fcode.e.ent);
 
-              if (i != -1)
+          if ((i = htabof(hp)) == fc)
+            {
+              goto hfound;
+            }
+
+          if (i != -1)
+            {
+              disp = (HSIZE - hp) - 1;        /* secondary hash (after G.
+                                                 * Knott) */
+
+              do
                 {
-                  long disp;
-
-                  disp = (HSIZE - hp) - 1;        /* secondary hash (after G.
-                                                   * Knott) */
-
-                  do
+                  if ((hp -= disp) < 0)
                     {
-                      if ((hp -= disp) < 0)
-                          hp += HSIZE;
-
-                      if ((i = htabof(hp)) == fc)
-                          goto hfound;
+                      hp += HSIZE;
                     }
-                  while (i != -1);
+
+                  if ((i = htabof(hp)) == fc)
+                    {
+                      goto hfound;
+                    }
                 }
+              while (i != -1);
             }
 #  else
+          fc = fcode.code;
+
+          hp = ((((long)(fcode.e.c)) << (HBITS - 8)) ^
+                (long)(fcode.e.ent));
+
+          if ((i = htabof(hp)) == fc)
             {
-              long i;
-              long p;
-              fc = fcode.code;
-
-              hp = ((((long)(fcode.e.c)) << (HBITS - 8)) ^
-                      (long)(fcode.e.ent));
-
-              if ((i = htabof(hp)) == fc)
-                  goto hfound;
-              if (i == -1)
-                  goto out;
-
-              p = primetab[fcode.e.c];
-              lookup:hp = (hp + p) & HMASK;
-              if ((i = htabof(hp)) == fc)
-                  goto hfound;
-              if (i == -1)
-                  goto out;
-              hp = (hp + p) & HMASK;
-              if ((i = htabof(hp)) == fc)
-                  goto hfound;
-              if (i == -1)
-                  goto out;
-              hp = (hp + p) & HMASK;
-              if ((i = htabof(hp)) == fc)
-                  goto hfound;
-              if (i == -1)
-                  goto out;
-              goto lookup;
+              goto hfound;
             }
 
-      out:;
+          if (i == -1)
+            {
+              goto out;
+            }
+
+          p = primetab[fcode.e.c];
+
+lookup:
+          hp = (hp + p) & HMASK;
+          if ((i = htabof(hp)) == fc)
+            {
+              goto hfound;
+            }
+
+          if (i == -1)
+            {
+              goto out;
+            }
+
+          hp = (hp + p) & HMASK;
+          if ((i = htabof(hp)) == fc)
+            {
+              goto hfound;
+            }
+
+          if (i == -1)
+            {
+              goto out;
+            }
+
+          hp = (hp + p) & HMASK;
+          if ((i = htabof(hp)) == fc)
+            {
+              goto hfound;
+            }
+
+          if (i == -1)
+            {
+              goto out;
+            }
+
+          goto lookup;
+
+out:
+          ;
 #  endif
           output(outbuf, outbits, fcode.e.ent, n_bits);
 
-            {
-              long fc = fcode.code;
-              fcode.e.ent = fcode.e.c;
+          fc = fcode.code;
+          fcode.e.ent = fcode.e.c;
 
-              if (stcode)
-                {
-                  codetabof(hp) = (unsigned short)free_ent++;
-                  htabof(hp) = fc;
-                }
+          if (stcode)
+            {
+              codetabof(hp) = (unsigned short)free_ent++;
+              htabof(hp) = fc;
             }
 
           goto next;
 
-        endlop:if (fcode.e.ent >= FIRST && rpos < rsize)
+endlop:
+          if (fcode.e.ent >= FIRST && rpos < rsize)
+            {
               goto next2;
+            }
 
           if (rpos > rlop)
             {
@@ -686,13 +746,19 @@ void compress(int fdin, int fdout)
     }
 
   if (rsize < 0)
-    read_error();
+    {
+      read_error();
+    }
 
   if (bytes_in > 0)
-    output(outbuf, outbits, fcode.e.ent, n_bits);
+    {
+      output(outbuf, outbits, fcode.e.ent, n_bits);
+    }
 
   if (write(fdout, outbuf, (outbits + 7) >> 3) != (outbits + 7) >> 3)
-    write_error();
+    {
+      write_error();
+    }
 
   bytes_out += (outbits + 7) >> 3;
 }
@@ -704,8 +770,8 @@ void compress(int fdin, int fdout)
  */
 
 void decompress(int fdin, int fdout)
-     int fdin;
-     int fdout;
+int fdin;
+int fdout;
 {
   char_type *stackp;
   code_int code;
@@ -717,6 +783,9 @@ void decompress(int fdin, int fdout)
   int outpos;
   int insize;
   int bitmask;
+  int e;
+  int o;
+  int i;
   code_int free_ent;
   code_int maxcode;
   code_int maxmaxcode;
@@ -728,12 +797,16 @@ void decompress(int fdin, int fdout)
   insize = 0;
 
   while (insize < 3 && (rsize = read(fdin, inbuf + insize, IBUFSIZ)) > 0)
-    insize += rsize;
+    {
+      insize += rsize;
+    }
 
   if (insize < 3 || inbuf[0] != MAGIC_1 || inbuf[1] != MAGIC_2)
     {
       if (rsize < 0)
-        read_error();
+        {
+          read_error();
+        }
 
       if (insize > 0)
         {
@@ -773,30 +846,29 @@ void decompress(int fdin, int fdout)
                                  * in the table. */
 
   for (code = 255; code >= 0; --code)
-    tab_suffixof(code) = (char_type) code;
+    {
+      tab_suffixof(code) = (char_type) code;
+    }
 
   do
     {
-      resetbuf:;
+resetbuf:
+      o = posbits >> 3;
+      e = o <= insize ? insize - o : 0;
+      if (e > 0)
         {
-          int e;
-          int o;
-
-          o = posbits >> 3;
-          e = o <= insize ? insize - o : 0;
-          if (e > 0)
-            {
-              memmove(inbuf, inbuf + o, e);
-            }
-
-          insize = e;
-          posbits = 0;
+          memmove(inbuf, inbuf + o, e);
         }
+
+      insize = e;
+      posbits = 0;
 
       if (insize < sizeof(inbuf) - IBUFSIZ)
         {
           if ((rsize = read(fdin, inbuf + insize, IBUFSIZ)) < 0)
-            read_error();
+            {
+              read_error();
+            }
 
           insize += rsize;
         }
@@ -814,9 +886,13 @@ void decompress(int fdin, int fdout)
 
               ++n_bits;
               if (n_bits == maxbits)
-                maxcode = maxmaxcode;
+                {
+                  maxcode = maxmaxcode;
+                }
               else
-                maxcode = MAXCODE(n_bits) - 1;
+                {
+                  maxcode = MAXCODE(n_bits) - 1;
+                }
 
               bitmask = (1 << n_bits) - 1;
               goto resetbuf;
@@ -834,7 +910,7 @@ void decompress(int fdin, int fdout)
                 }
 
               outbuf[outpos++] =
-                        (char_type)(finchar = (int)(oldcode = code));
+                (char_type)(finchar = (int)(oldcode = code));
               continue;
             }
 
@@ -865,7 +941,7 @@ void decompress(int fdin, int fdout)
                   fprintf(stderr,
                           "insize:%d posbits:%d "
                           "inbuf:%02X %02X %02X %02X %02X (%d)\n",
-                           insize, posbits, p[1], p[0], p[1], p[2], p[3],
+                          insize, posbits, p[1], p[0], p[1], p[2], p[3],
                           (posbits & 07));
                   fprintf(stderr, "uncompress: corrupt input\n");
                   abort_compress();
@@ -883,43 +959,43 @@ void decompress(int fdin, int fdout)
               code = tab_prefixof(code);
             }
 
-          *--stackp = (char_type) (finchar = tab_suffixof(code));
+          *--stackp = (char_type)(finchar = tab_suffixof(code));
 
           /* And put them out in forward order */
 
+          if (outpos + (i = (de_stack - stackp)) >= OBUFSIZ)
             {
-              int i;
-
-              if (outpos + (i = (de_stack - stackp)) >= OBUFSIZ)
+              do
                 {
-                  do
+                  if (i > OBUFSIZ - outpos)
                     {
-                      if (i > OBUFSIZ - outpos)
-                        i = OBUFSIZ - outpos;
-
-                      if (i > 0)
-                        {
-                          memcpy(outbuf + outpos, stackp, i);
-                          outpos += i;
-                        }
-
-                      if (outpos >= OBUFSIZ)
-                        {
-                          if (write(fdout, outbuf, outpos) != outpos)
-                            write_error();
-
-                          outpos = 0;
-                        }
-
-                      stackp += i;
+                      i = OBUFSIZ - outpos;
                     }
-                  while ((i = (de_stack - stackp)) > 0);
+
+                  if (i > 0)
+                    {
+                      memcpy(outbuf + outpos, stackp, i);
+                      outpos += i;
+                    }
+
+                  if (outpos >= OBUFSIZ)
+                    {
+                      if (write(fdout, outbuf, outpos) != outpos)
+                        {
+                          write_error();
+                        }
+
+                      outpos = 0;
+                    }
+
+                  stackp += i;
                 }
-              else
-                {
-                  memcpy(outbuf + outpos, stackp, i);
-                  outpos += i;
-                }
+              while ((i = (de_stack - stackp)) > 0);
+            }
+          else
+            {
+              memcpy(outbuf + outpos, stackp, i);
+              outpos += i;
             }
 
           if ((code = free_ent) < maxmaxcode)   /* Generate the new entry. */
@@ -937,7 +1013,9 @@ void decompress(int fdin, int fdout)
   while (rsize > 0);
 
   if (outpos > 0 && write(fdout, outbuf, outpos) != outpos)
-    write_error();
+    {
+      write_error();
+    }
 }
 
 void read_error()
@@ -957,27 +1035,35 @@ void write_error()
 void abort_compress()
 {
   if (remove_ofname)
-    unlink(ofname);
+    {
+      unlink(ofname);
+    }
 
   exit(1);
 }
 
 void prratio(stream, num, den)
-     FILE *stream;
-     long int num;
-     long int den;
+FILE *stream;
+long int num;
+long int den;
 {
   int q;
 
   if (den > 0)
     {
       if (num > 214748L)
-        q = (int)(num / (den / 10000L));        /* 2147483647/10000 */
+        {
+          q = (int)(num / (den / 10000L));  /* 2147483647/10000 */
+        }
       else
-        q = (int)(10000L * num / den);  /* Long calculations, though */
+        {
+          q = (int)(10000L * num / den);  /* Long calculations, though */
+        }
     }
   else
-    q = 10000;
+    {
+      q = 10000;
+    }
 
   if (q < 0)
     {
