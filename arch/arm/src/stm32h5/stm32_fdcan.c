@@ -765,6 +765,7 @@ static uint32_t fdcan_getreg(struct stm32_fdcan_s *priv, int offset)
 static uint32_t fdcan_getreg(struct stm32_fdcan_s *priv, int offset)
 {
   const struct stm32_config_s *config = priv->config;
+
   return getreg32(config->base + offset);
 }
 
@@ -807,6 +808,7 @@ static void fdcan_putreg(struct stm32_fdcan_s *priv, int offset,
                          uint32_t regval)
 {
   const struct stm32_config_s *config = priv->config;
+
   putreg32(regval, config->base + offset);
 }
 
@@ -1197,12 +1199,12 @@ static int fdcan_add_extfilter(struct stm32_fdcan_s *priv,
               regval |= (FDCAN_CCCR_INIT | FDCAN_CCCR_CCE);
               fdcan_putreg(priv, STM32_FDCAN_CCCR_OFFSET, regval);
 
-             /* Update the Global Filter Configuration so that received
-              * messages are rejected if they do not match the acceptance
-              * filter.
-              *
-              *   ANFE=2: Discard all rejected frames
-              */
+              /* Update the Global Filter Configuration so that received
+               * messages are rejected if they do not match the acceptance
+               * filter.
+               *
+               *   ANFE=2: Discard all rejected frames
+               */
 
               regval  = fdcan_getreg(priv, STM32_FDCAN_RXGFC_OFFSET);
               regval &= ~FDCAN_RXGFC_ANFE_MASK;
@@ -1447,12 +1449,12 @@ static int fdcan_add_stdfilter(struct stm32_fdcan_s *priv,
               regval |= (FDCAN_CCCR_INIT | FDCAN_CCCR_CCE);
               fdcan_putreg(priv, STM32_FDCAN_CCCR_OFFSET, regval);
 
-             /* Update the Global Filter Configuration so that received
-              * messages are rejected if they do not match the acceptance
-              * filter.
-              *
-              *   ANFS=2: Discard all rejected frames
-              */
+              /* Update the Global Filter Configuration so that received
+               * messages are rejected if they do not match the acceptance
+               * filter.
+               *
+               *   ANFS=2: Discard all rejected frames
+               */
 
               regval  = fdcan_getreg(priv, STM32_FDCAN_RXGFC_OFFSET);
               regval &= ~FDCAN_RXGFC_ANFS_MASK;
