@@ -64,6 +64,7 @@
 #define vhost_get_features      virtio_get_features
 #define vhost_read_config       virtio_read_config
 #define vhost_write_config      virtio_write_config
+#define vhost_get_shm_region    virtio_get_shm_region
 
 /* Vhost helper functions */
 
