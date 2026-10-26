@@ -50,6 +50,7 @@ config ARCH_CHIP_LITEX
 	select ARCH_HAVE_RESET
 	select LIBC_FDT
 	select DEVICE_TREE
+	select ONESHOT_COUNT if ONESHOT
 	---help---
 		Enjoy Digital LITEX VEXRISCV softcore processor (RV32IMA or RV64GC).
 
