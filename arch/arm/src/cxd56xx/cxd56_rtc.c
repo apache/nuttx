@@ -337,9 +337,10 @@ static void cxd56_rtc_initialize(wdparm_t arg)
 
 static void cxd56_update_basetime(struct timespec *tp)
 {
-  tp->tv_sec  = g_rtc_save->offset / CONFIG_RTC_FREQUENCY;
-  tp->tv_nsec = (g_rtc_save->offset % CONFIG_RTC_FREQUENCY) *
-                (NSEC_PER_SEC / CONFIG_RTC_FREQUENCY);
+  int64_t offset = g_rtc_save->offset;
+
+  tp->tv_sec  = (time_t)(offset >> 15);
+  tp->tv_nsec = (long)(((offset & 0x7fff) * NSEC_PER_SEC) >> 15);
 }
 
 /****************************************************************************
@@ -392,9 +393,8 @@ time_t up_rtc_time(void)
 
   count = cxd56_rtc_count();
   count += g_rtc_save->offset;
-  count >>= 15; /* convert to 1sec resolution */
 
-  return count / CONFIG_RTC_FREQUENCY;
+  return (time_t)(count >> 15);
 }
 #endif
 
