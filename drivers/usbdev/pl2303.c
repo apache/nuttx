@@ -559,12 +559,30 @@ static uint16_t usbclass_fillrequest(FAR struct pl2303_dev_s *priv,
 
   while (xmit->head != xmit->tail && nbytes < reqlen)
     {
-      *reqbuf++ = xmit->buffer[xmit->tail];
-      nbytes++;
+      uint16_t ncopy;
+
+      if (xmit->tail < xmit->head)
+        {
+          ncopy = xmit->head - xmit->tail;
+        }
+      else
+        {
+          ncopy = xmit->size - xmit->tail;
+        }
+
+      if (ncopy > reqlen - nbytes)
+        {
+          ncopy = reqlen - nbytes;
+        }
+
+      memcpy(reqbuf, &xmit->buffer[xmit->tail], ncopy);
+      reqbuf += ncopy;
+      nbytes += ncopy;
 
       /* Increment the tail pointer */
 
-      if (++(xmit->tail) >= xmit->size)
+      xmit->tail += ncopy;
+      if (xmit->tail >= xmit->size)
         {
           xmit->tail = 0;
         }
@@ -738,16 +756,40 @@ static inline int usbclass_recvpacket(FAR struct pl2303_dev_s *priv,
 
   while (nexthead != recv->tail && nbytes < reqlen)
     {
-      /* Copy one byte to the head of the circular RX buffer */
+      uint16_t ncopy;
 
-      recv->buffer[currhead] = *reqbuf++;
+      if (currhead < recv->tail)
+        {
+          ncopy = recv->tail - currhead - 1;
+        }
+      else
+        {
+          ncopy = recv->size - currhead;
+          if (recv->tail == 0)
+            {
+              ncopy--;
+            }
+        }
+
+      if (ncopy > reqlen - nbytes)
+        {
+          ncopy = reqlen - nbytes;
+        }
+
+      memcpy(&recv->buffer[currhead], reqbuf, ncopy);
+      reqbuf += ncopy;
 
       /* Update counts and indices */
 
-      currhead = nexthead;
-      nbytes++;
+      currhead += ncopy;
+      nbytes += ncopy;
 
       /* Increment the head index and check for wrap around */
+
+      if (currhead >= recv->size)
+        {
+          currhead = 0;
+        }
 
       nexthead = currhead + 1;
       if (nexthead >= recv->size)
