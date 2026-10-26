@@ -25,6 +25,7 @@
 #include <crypto/cryptodev.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <stdbool.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -43,6 +44,8 @@
 typedef struct cryptodev_context_s
 {
   int fd;
+  int error;                  /* The first error (negative errno), or 0 */
+  bool session_open;          /* CIOCGSESSION done (ids start at 0) */
   struct session_op session;
   struct crypt_op crypt;
 }cryptodev_context_t;
@@ -71,48 +74,60 @@ static FAR char *md5_to64(FAR char *s, unsigned long v, int n)
   return s;
 }
 
-static int md5_init(FAR cryptodev_context_t *ctx)
+/* A failed step keeps its error in ctx->error: the later steps do nothing,
+ * and md5_finish() returns the error after it closes the session.
+ */
+
+static void md5_init(FAR cryptodev_context_t *ctx)
 {
-  int ret;
   int fd;
 
   memset(ctx, 0, sizeof(cryptodev_context_t));
+  ctx->fd = -1;
   fd = open("/dev/crypto", O_RDWR, 0);
   if (fd < 0)
     {
-      return -get_errno();
+      ctx->error = -get_errno();
+      return;
     }
 
-  ret = ioctl(fd, CRIOGET, &ctx->fd);
+  if (ioctl(fd, CRIOGET, &ctx->fd) < 0)
+    {
+      ctx->error = -get_errno();
+      ctx->fd = -1;
+      close(fd);
+      return;
+    }
+
   close(fd);
-  if (ret < 0)
-    {
-      return -get_errno();
-    }
-
   ctx->session.mac = CRYPTO_MD5;
-  ret = ioctl(ctx->fd, CIOCGSESSION, &ctx->session);
-  if (ret < 0)
+  if (ioctl(ctx->fd, CIOCGSESSION, &ctx->session) < 0)
     {
-      return -get_errno();
+      ctx->error = -get_errno();
+      return;
     }
 
+  ctx->session_open = true;
   ctx->crypt.ses = ctx->session.ses;
-  return ret;
 }
 
-static int md5_update(FAR cryptodev_context_t *ctx,
-                      FAR const void *input, size_t ilen)
+static void md5_update(FAR cryptodev_context_t *ctx,
+                       FAR const void *input, size_t ilen)
 {
-  int ret;
+  if (ctx->error < 0)
+    {
+      return;
+    }
 
   ctx->crypt.op = COP_ENCRYPT;
   ctx->crypt.flags |= COP_FLAG_UPDATE;
   ctx->crypt.src = (caddr_t)input;
   ctx->crypt.len = ilen;
 
-  ret = ioctl(ctx->fd, CIOCCRYPT, &ctx->crypt);
-  return ret < 0 ? -get_errno() : ret;
+  if (ioctl(ctx->fd, CIOCCRYPT, &ctx->crypt) < 0)
+    {
+      ctx->error = -get_errno();
+    }
 }
 
 static int md5_finish(FAR cryptodev_context_t *ctx,
@@ -120,18 +135,28 @@ static int md5_finish(FAR cryptodev_context_t *ctx,
 {
   int ret;
 
-  ctx->crypt.op = COP_ENCRYPT;
-  ctx->crypt.flags = 0;
-  ctx->crypt.mac = (caddr_t)output;
-  ret = ioctl(ctx->fd, CIOCCRYPT, &ctx->crypt);
-  if (ret < 0)
+  if (ctx->error == 0)
     {
-      return -get_errno();
+      ctx->crypt.op = COP_ENCRYPT;
+      ctx->crypt.flags = 0;
+      ctx->crypt.mac = (caddr_t)output;
+      if (ioctl(ctx->fd, CIOCCRYPT, &ctx->crypt) < 0)
+        {
+          ctx->error = -get_errno();
+        }
     }
 
-  ioctl(ctx->fd, CIOCFSESSION, &ctx->session.ses);
-  ctx->crypt.ses = 0;
-  close(ctx->fd);
+  if (ctx->fd >= 0)
+    {
+      if (ctx->session_open)
+        {
+          ioctl(ctx->fd, CIOCFSESSION, &ctx->session.ses);
+        }
+
+      close(ctx->fd);
+    }
+
+  ret = ctx->error;
   memset(ctx, 0, sizeof(cryptodev_context_t));
   return ret;
 }
@@ -150,6 +175,7 @@ static FAR char *md5_crypt(FAR const char *key, FAR const char *setting,
   unsigned int slen;
   FAR const char *salt;
   FAR char *p;
+  int ret;
   static const unsigned char perm[][3] =
   {
     {
@@ -174,7 +200,8 @@ static FAR char *md5_crypt(FAR const char *key, FAR const char *setting,
   klen = strnlen(key, KEY_MAX + 1);
   if (klen > KEY_MAX)
     {
-      return 0;
+      set_errno(EINVAL);
+      return NULL;
     }
 
   /* Setting: $1$salt$ (closing $ is optional) */
@@ -189,7 +216,11 @@ static FAR char *md5_crypt(FAR const char *key, FAR const char *setting,
   md5_update(&ctx, key, klen);
   md5_update(&ctx, salt, slen);
   md5_update(&ctx, key, klen);
-  md5_finish(&ctx, md);
+  ret = md5_finish(&ctx, md);
+  if (ret < 0)
+    {
+      goto errout;
+    }
 
   /* Md5(key $1$ salt repeated-md weird-key[0]-0) */
 
@@ -215,7 +246,11 @@ static FAR char *md5_crypt(FAR const char *key, FAR const char *setting,
         }
     }
 
-  md5_finish(&ctx, md);
+  ret = md5_finish(&ctx, md);
+  if (ret < 0)
+    {
+      goto errout;
+    }
 
   for (i = 0; i < 1000; i++)
     {
@@ -248,7 +283,11 @@ static FAR char *md5_crypt(FAR const char *key, FAR const char *setting,
           md5_update(&ctx, key, klen);
         }
 
-      md5_finish(&ctx, md);
+      ret = md5_finish(&ctx, md);
+      if (ret < 0)
+        {
+          goto errout;
+        }
     }
 
   /* Output is $1$salt$hash */
@@ -267,6 +306,10 @@ static FAR char *md5_crypt(FAR const char *key, FAR const char *setting,
   *p = 0;
 
   return output;
+
+errout:
+  set_errno(-ret);
+  return NULL;
 }
 
 /****************************************************************************
@@ -284,8 +327,7 @@ FAR char *crypt_r(FAR const char *key, FAR const char *salt,
     {
       return md5_crypt(key, salt, output);
     }
-  else
-    {
-      return NULL;
-    }
+
+  set_errno(EINVAL);
+  return NULL;
 }
