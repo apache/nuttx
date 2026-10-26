@@ -278,7 +278,7 @@ static void usbhost_freeclass(FAR struct usbhost_ft232r_s *usbclass);
 static int  usbhost_devno_alloc(FAR struct usbhost_ft232r_s *priv);
 static void usbhost_devno_free(FAR struct usbhost_ft232r_s *priv);
 static inline void usbhost_mkdevname(FAR struct usbhost_ft232r_s *priv,
-              FAR char *devname);
+                                     FAR char *devname);
 
 /* UART buffer data transfer */
 
@@ -292,7 +292,7 @@ static void usbhost_destroy(FAR void *arg);
 /* Helpers for usbhost_connect() */
 
 static int  usbhost_cfgdesc(FAR struct usbhost_ft232r_s *priv,
-              FAR const uint8_t *configdesc, int desclen);
+                            FAR const uint8_t *configdesc, int desclen);
 
 /* (Little Endian) Data helpers */
 
@@ -308,13 +308,13 @@ static void usbhost_free_buffers(FAR struct usbhost_ft232r_s *priv);
 /* struct usbhost_registry_s methods */
 
 static struct usbhost_class_s *usbhost_create(
-              FAR struct usbhost_hubport_s *hport,
-              FAR const struct usbhost_id_s *id);
+  FAR struct usbhost_hubport_s *hport,
+  FAR const struct usbhost_id_s *id);
 
 /* struct usbhost_class_s methods */
 
 static int  usbhost_connect(FAR struct usbhost_class_s *usbclass,
-              FAR const uint8_t *configdesc, int desclen);
+                            FAR const uint8_t *configdesc, int desclen);
 static int  usbhost_disconnected(FAR struct usbhost_class_s *usbclass);
 
 /* Serial driver lower-half interfaces */
@@ -324,12 +324,12 @@ static void usbhost_shutdown(FAR struct uart_dev_s *uartdev);
 static int  usbhost_attach(FAR struct uart_dev_s *uartdev);
 static void usbhost_detach(FAR struct uart_dev_s *uartdev);
 static int  usbhost_ioctl(FAR struct file *filep, int cmd,
-              unsigned long arg);
+                          unsigned long arg);
 static void usbhost_rxint(FAR struct uart_dev_s *uartdev, bool enable);
 static bool usbhost_rxavailable(FAR struct uart_dev_s *uartdev);
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
 static bool usbhost_rxflowcontrol(FAR struct uart_dev_s *uartdev,
-              unsigned int nbuffered, bool upper);
+                                  unsigned int nbuffered, bool upper);
 #endif
 static void usbhost_txint(FAR struct uart_dev_s *uartdev, bool enable);
 static bool usbhost_txready(FAR struct uart_dev_s *uartdev);
@@ -338,7 +338,7 @@ static bool usbhost_txempty(FAR struct uart_dev_s *uartdev);
 /* FTDI control transfer helpers */
 
 static int ft232r_ctrlxfer(FAR struct usbhost_ft232r_s *priv, uint8_t req,
-                          uint16_t value, uint16_t index);
+                           uint16_t value, uint16_t index);
 static int ft232r_reset(FAR struct usbhost_ft232r_s *priv, bool purgerxtx);
 static int ft232r_modemctrl(FAR struct usbhost_ft232r_s *priv);
 static int ft232r_setflowctrl(FAR struct usbhost_ft232r_s *priv);
@@ -393,7 +393,7 @@ static const struct uart_ops_s g_uart_ops =
   usbhost_attach,        /* attach */
   usbhost_detach,        /* detach */
   usbhost_ioctl,         /* ioctl */
-  NULL           ,       /* receive */
+  NULL,                  /* receive */
   usbhost_rxint,         /* rxinit */
   usbhost_rxavailable,   /* rxavailable */
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
@@ -478,7 +478,7 @@ static FAR struct usbhost_ft232r_s *usbhost_allocclass(void)
 
   DEBUGASSERT(!up_interrupt_context());
   priv = (FAR struct usbhost_ft232r_s *)
-    kmm_malloc(sizeof(struct usbhost_ft232r_s));
+         kmm_malloc(sizeof(struct usbhost_ft232r_s));
 
   uinfo("Allocated: %p\n", priv);
   return priv;
@@ -505,6 +505,7 @@ static void usbhost_freeclass(FAR struct usbhost_ft232r_s *usbclass)
   FAR struct usbhost_freestate_s *entry =
     (FAR struct usbhost_freestate_s *)usbclass;
   irqstate_t flags;
+
   DEBUGASSERT(entry != NULL);
 
   uinfo("Freeing: %p\n", entry);
@@ -547,6 +548,7 @@ static int usbhost_devno_alloc(FAR struct usbhost_ft232r_s *priv)
   for (devno = 0; devno < 32; devno++)
     {
       uint32_t bitno = 1 << devno;
+
       if ((g_devinuse & bitno) == 0)
         {
           g_devinuse |= bitno;
@@ -575,6 +577,7 @@ static void usbhost_devno_free(FAR struct usbhost_ft232r_s *priv)
   if (devno >= 0 && devno < 32)
     {
       irqstate_t flags = enter_critical_section();
+
       g_devinuse &= ~(1 << devno);
       leave_critical_section(flags);
     }
@@ -663,6 +666,7 @@ static int ft232r_reset(FAR struct usbhost_ft232r_s *priv, bool purgerxtx)
 {
   int ret = ft232r_ctrlxfer(priv, USBHOST_FT232R_CTRLREQ_RESET,
                             purgerxtx, 0);
+
   if (ret < 0)
     {
       uerr("ERROR: ft232r_ctrlxfer failed: %d\n", ret);
@@ -694,6 +698,7 @@ static int ft232r_modemctrl(FAR struct usbhost_ft232r_s *priv)
 
   int ret = ft232r_ctrlxfer(priv, USBHOST_FT232R_CTRLREQ_MODEMCTRL,
                             value, 0);
+
   if (ret < 0)
     {
       uerr("ERROR: ft232r_ctrlxfer failed: %d\n", ret);
@@ -737,6 +742,7 @@ static int ft232r_setflowctrl(FAR struct usbhost_ft232r_s *priv)
 
   int ret = ft232r_ctrlxfer(priv, USBHOST_FT232R_CTRLREQ_SETFLOWCTRL,
                             value, index);
+
   if (ret < 0)
     {
       uerr("ERROR: ft232r_ctrlxfer failed: %d\n", ret);
@@ -783,9 +789,9 @@ static int ft232r_setdivisor(uint32_t *divisor, uint32_t baud)
   else
     {
       int divfrac[9] =
-        {
-          0, 500, 250, 125, 375, 625, 750, 875, 1000
-        };
+      {
+        0, 500, 250, 125, 375, 625, 750, 875, 1000
+      };
 
       double frac = (double)USBHOST_FT232R_MAX_BAUD / (double)baud;
       int rem;
@@ -825,7 +831,7 @@ static int ft232r_setdivisor(uint32_t *divisor, uint32_t baud)
            */
 
           err = (frac -
-                (double)(*divisor + (double)divfrac[j] / 1000.0)) /
+                 (double)(*divisor + (double)divfrac[j] / 1000.0)) /
                 frac;
 
           if (err < -0.03 || err > 0.03)
@@ -867,6 +873,7 @@ static int ft232r_setbaud(FAR struct usbhost_ft232r_s *priv)
 
   uint32_t divisor;
   int ret = ft232r_setdivisor(&divisor, priv->baud);
+
   if (ret < 0)
     {
       uerr("ERROR: ft232r_setdivisor failed: %d\n", ret);
@@ -874,7 +881,7 @@ static int ft232r_setbaud(FAR struct usbhost_ft232r_s *priv)
   else
     {
       ret = ft232r_ctrlxfer(priv, USBHOST_FT232R_CTRLREQ_SETBAUD,
-              divisor & 0xffff, divisor && 0x10000);
+                            divisor & 0xffff, divisor && 0x10000);
       if (ret < 0)
         {
           uerr("ERROR: ft232r_ctrlxfer failed: %d\n", ret);
@@ -906,8 +913,8 @@ static int ft232r_setdata(FAR struct usbhost_ft232r_s *priv)
   /* Build up line coding */
 
   linecoding = (priv->nbits & USBHOST_FT232R_SETDATA_NBIT_MASK) |
-      ((priv->parity & USBHOST_FT232R_SETDATA_PARITY_MASK)
-      << USBHOST_FT232R_SETDATA_PARITY_SHIFT);
+               ((priv->parity & USBHOST_FT232R_SETDATA_PARITY_MASK)
+                << USBHOST_FT232R_SETDATA_PARITY_SHIFT);
   if (priv->stop2)
     {
       linecoding |= CONFIG_USBHOST_FT232R_2STOP;
@@ -941,6 +948,7 @@ static int ft232r_setlat(FAR struct usbhost_ft232r_s *priv)
 {
   int ret = ft232r_ctrlxfer(priv, USBHOST_FT232R_CTRLREQ_SETLATTIMER,
                             CONFIG_USBHOST_FT232R_LATENCY, 0);
+
   if (ret < 0)
     {
       uerr("ERROR: ft232r_ctrlxfer failed: %d\n", ret);
@@ -1005,7 +1013,7 @@ static void usbhost_txdata_work(FAR void *arg)
 
 #ifdef CONFIG_USBHOST_FT232R_HWFLOWCTRL
   while (txtail != txbuf->head && priv->txena &&
-          !priv->disconnected && priv->cts)
+         !priv->disconnected && priv->cts)
 #else
   while (txtail != txbuf->head && priv->txena && !priv->disconnected)
 #endif
@@ -1261,7 +1269,7 @@ static void usbhost_rxdata_work(FAR void *arg)
 
       if (++nexthead >= rxbuf->size)
         {
-           nexthead = 0;
+          nexthead = 0;
         }
 
       /* Increment the index in the USB IN packet buffer.  If the
@@ -1471,137 +1479,138 @@ static int usbhost_cfgdesc(FAR struct usbhost_ft232r_s *priv,
       desc = (FAR struct usb_desc_s *)configdesc;
       switch (desc->type)
         {
-        /* Interface descriptor. The FTDI device may include two
-         * interfaces:
-         *
-         * 1) A data interface which consists of two endpoints (bulk in +
-         *    bulk out) and
-         * 2) A control interface which consists of one interrupt in
-         *    endpoint.
-         */
+          /* Interface descriptor. The FTDI device may include two
+           * interfaces:
+           *
+           * 1) A data interface which consists of two endpoints (bulk in +
+           *    bulk out) and
+           * 2) A control interface which consists of one interrupt in
+           *    endpoint.
+           */
 
-        case USB_DESC_TYPE_INTERFACE:
-          {
-            FAR struct usb_ifdesc_s *ifdesc =
-              (FAR struct usb_ifdesc_s *)configdesc;
+          case USB_DESC_TYPE_INTERFACE:
+            {
+              FAR struct usb_ifdesc_s *ifdesc =
+                (FAR struct usb_ifdesc_s *)configdesc;
 
-            uinfo("Interface descriptor: class: %d subclass: %d proto: %d\n",
-                  ifdesc->classid, ifdesc->subclass, ifdesc->protocol);
-            DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
+              uinfo("Interface descriptor: class: %d subclass: %d "
+                    "proto: %d\n", ifdesc->classid, ifdesc->subclass,
+                    ifdesc->protocol);
+              DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
 
-            /* Check for the FTDI data interface */
+              /* Check for the FTDI data interface */
 
-            if (ifdesc->classid == USB_CLASS_VENDOR_SPEC &&
-                (found & USBHOST_DATAIF_FOUND) == 0)
-              {
-                /* Save the data interface number and mark that the data
-                 * interface found has been found.
-                 */
+              if (ifdesc->classid == USB_CLASS_VENDOR_SPEC &&
+                  (found & USBHOST_DATAIF_FOUND) == 0)
+                {
+                  /* Save the data interface number and mark that the data
+                   * interface found has been found.
+                   */
 
-                priv->dataif  = ifdesc->ifno;
-                found        |= USBHOST_DATAIF_FOUND;
-                currif        = USBHOST_DATAIF_FOUND;
-              }
-            else
-              {
-                /* Its something else */
+                  priv->dataif  = ifdesc->ifno;
+                  found        |= USBHOST_DATAIF_FOUND;
+                  currif        = USBHOST_DATAIF_FOUND;
+                }
+              else
+                {
+                  /* Its something else */
 
-                currif        = 0;
-              }
-          }
-          break;
+                  currif        = 0;
+                }
+            }
+            break;
 
-        /* Endpoint descriptor.  We expect two bulk endpoints, an IN and an
-         * OUT.
-         */
+          /* Endpoint descriptor.  We expect two bulk endpoints, an IN and an
+           * OUT.
+           */
 
-        case USB_DESC_TYPE_ENDPOINT:
-          {
-            FAR struct usb_epdesc_s *epdesc =
-              (FAR struct usb_epdesc_s *)configdesc;
+          case USB_DESC_TYPE_ENDPOINT:
+            {
+              FAR struct usb_epdesc_s *epdesc =
+                (FAR struct usb_epdesc_s *)configdesc;
 
-            uinfo("Endpoint descriptor: currif: %02x attr: %02x\n",
-                  currif, epdesc->attr);
-            DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
+              uinfo("Endpoint descriptor: currif: %02x attr: %02x\n",
+                    currif, epdesc->attr);
+              DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
 
-            /* Check for a bulk endpoint. */
+              /* Check for a bulk endpoint. */
 
-            if (currif == USBHOST_DATAIF_FOUND &&
-                (epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) ==
-                USB_EP_ATTR_XFER_BULK)
-              {
-                /* Yes.. it is a bulk endpoint.  IN or OUT? */
+              if (currif == USBHOST_DATAIF_FOUND &&
+                  (epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) ==
+                  USB_EP_ATTR_XFER_BULK)
+                {
+                  /* Yes.. it is a bulk endpoint.  IN or OUT? */
 
-                if (USB_ISEPOUT(epdesc->addr))
-                  {
-                    /* It is an OUT bulk endpoint.  There should be only one
-                     * bulk OUT endpoint.
-                     */
+                  if (USB_ISEPOUT(epdesc->addr))
+                    {
+                      /* It is an OUT bulk endpoint.  There should be only
+                       * one bulk OUT endpoint.
+                       */
 
-                    if ((found & USBHOST_BULKOUT_FOUND) != 0)
-                      {
-                        /* Oops.. more than one endpoint.  We don't know
-                         * what to do with this.
-                         */
+                      if ((found & USBHOST_BULKOUT_FOUND) != 0)
+                        {
+                          /* Oops.. more than one endpoint.  We don't know
+                           * what to do with this.
+                           */
 
-                        return -EINVAL;
-                      }
+                          return -EINVAL;
+                        }
 
-                    found |= USBHOST_BULKOUT_FOUND;
+                      found |= USBHOST_BULKOUT_FOUND;
 
-                    /* Save the bulk OUT endpoint information */
+                      /* Save the bulk OUT endpoint information */
 
-                    boutdesc.hport        = hport;
-                    boutdesc.addr         = epdesc->addr &
-                                            USB_EP_ADDR_NUMBER_MASK;
-                    boutdesc.in           = false;
-                    boutdesc.xfrtype      = USB_EP_ATTR_XFER_BULK;
-                    boutdesc.interval     = epdesc->interval;
-                    boutdesc.mxpacketsize =
-                      usbhost_getle16(epdesc->mxpacketsize);
+                      boutdesc.hport        = hport;
+                      boutdesc.addr         = epdesc->addr &
+                                              USB_EP_ADDR_NUMBER_MASK;
+                      boutdesc.in           = false;
+                      boutdesc.xfrtype      = USB_EP_ATTR_XFER_BULK;
+                      boutdesc.interval     = epdesc->interval;
+                      boutdesc.mxpacketsize =
+                        usbhost_getle16(epdesc->mxpacketsize);
 
-                    uinfo("Bulk OUT EP addr:%d mxpacketsize:%d\n",
-                          boutdesc.addr, boutdesc.mxpacketsize);
-                  }
-                else
-                  {
-                    /* It is an IN bulk endpoint.  There should be only one
-                     * bulk IN endpoint.
-                     */
+                      uinfo("Bulk OUT EP addr:%d mxpacketsize:%d\n",
+                            boutdesc.addr, boutdesc.mxpacketsize);
+                    }
+                  else
+                    {
+                      /* It is an IN bulk endpoint.  There should be only one
+                       * bulk IN endpoint.
+                       */
 
-                    if ((found & USBHOST_BULKIN_FOUND) != 0)
-                      {
-                        /* Oops.. more than one endpoint.  We don't know
-                         * what to do with this.
-                         */
+                      if ((found & USBHOST_BULKIN_FOUND) != 0)
+                        {
+                          /* Oops.. more than one endpoint.  We don't know
+                           * what to do with this.
+                           */
 
-                        return -EINVAL;
-                      }
+                          return -EINVAL;
+                        }
 
-                    found |= USBHOST_BULKIN_FOUND;
+                      found |= USBHOST_BULKIN_FOUND;
 
-                    /* Save the bulk IN endpoint information */
+                      /* Save the bulk IN endpoint information */
 
-                    bindesc.hport        = hport;
-                    bindesc.addr         = epdesc->addr &
-                                           USB_EP_ADDR_NUMBER_MASK;
-                    bindesc.in           = 1;
-                    bindesc.xfrtype      = USB_EP_ATTR_XFER_BULK;
-                    bindesc.interval     = epdesc->interval;
-                    bindesc.mxpacketsize =
-                      usbhost_getle16(epdesc->mxpacketsize);
+                      bindesc.hport        = hport;
+                      bindesc.addr         = epdesc->addr &
+                                             USB_EP_ADDR_NUMBER_MASK;
+                      bindesc.in           = 1;
+                      bindesc.xfrtype      = USB_EP_ATTR_XFER_BULK;
+                      bindesc.interval     = epdesc->interval;
+                      bindesc.mxpacketsize =
+                        usbhost_getle16(epdesc->mxpacketsize);
 
-                    uinfo("Bulk IN EP addr:%d mxpacketsize:%d\n",
-                          bindesc.addr, bindesc.mxpacketsize);
-                  }
-              }
-          }
-          break;
+                      uinfo("Bulk IN EP addr:%d mxpacketsize:%d\n",
+                            bindesc.addr, bindesc.mxpacketsize);
+                    }
+                }
+            }
+            break;
 
-        /* Other descriptors are just ignored for now */
+          /* Other descriptors are just ignored for now */
 
-        default:
-          break;
+          default:
+            break;
         }
 
       /* If we found everything we need with this interface, then break out
@@ -1966,7 +1975,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
                            FAR const uint8_t *configdesc, int desclen)
 {
   FAR struct usbhost_ft232r_s *priv =
-                  (FAR struct usbhost_ft232r_s *)usbclass;
+    (FAR struct usbhost_ft232r_s *)usbclass;
   char devname[DEV_NAMELEN];
   int ret;
 
@@ -2355,145 +2364,146 @@ static int usbhost_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       switch (cmd)
         {
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
-        case TIOCSERGSTRUCT:
-          {
-            FAR struct usbhost_ft232r_s *user =
-              (FAR struct usbhost_ft232r_s *)arg;
-            if (!user)
-              {
-                ret = -EINVAL;
-              }
-            else
-              {
-                memcpy(user, uartdev, sizeof(struct usbhost_ft232r_s));
-              }
-          }
-          break;
+          case TIOCSERGSTRUCT:
+            {
+              FAR struct usbhost_ft232r_s *user =
+                (FAR struct usbhost_ft232r_s *)arg;
+
+              if (!user)
+                {
+                  ret = -EINVAL;
+                }
+              else
+                {
+                  memcpy(user, uartdev, sizeof(struct usbhost_ft232r_s));
+                }
+            }
+            break;
 #endif
 
 #ifdef CONFIG_SERIAL_TERMIOS
-        case TCGETS:
-          {
-            FAR struct termios *termiosp = (FAR struct termios *)arg;
+          case TCGETS:
+            {
+              FAR struct termios *termiosp = (FAR struct termios *)arg;
 
-            if (!termiosp)
-              {
-                ret = -EINVAL;
-                break;
-              }
+              if (!termiosp)
+                {
+                  ret = -EINVAL;
+                  break;
+                }
 
-            cfsetispeed(termiosp, priv->baud);
+              cfsetispeed(termiosp, priv->baud);
 
-            termiosp->c_cflag =
-              ((priv->parity != 0) ? PARENB : 0) |
-              ((priv->parity == 1) ? PARODD : 0) |
-              ((priv->stop2) ? CSTOPB : 0)
+              termiosp->c_cflag =
+                ((priv->parity != 0) ? PARENB : 0) |
+                ((priv->parity == 1) ? PARODD : 0) |
+                ((priv->stop2) ? CSTOPB : 0)
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-              | ((priv->oflow) ? CCTS_OFLOW : 0)
+                | ((priv->oflow) ? CCTS_OFLOW : 0)
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-              | ((priv->iflow) ? CRTS_IFLOW : 0)
+                | ((priv->iflow) ? CRTS_IFLOW : 0)
 #endif
-              ;
+                ;
 
-            switch (priv->nbits)
-              {
-              case 7:
-                termiosp->c_cflag |= CS7;
-                break;
+              switch (priv->nbits)
+                {
+                  case 7:
+                    termiosp->c_cflag |= CS7;
+                    break;
 
-              default:
-              case 8:
-                termiosp->c_cflag |= CS8;
-                break;
-              }
-          }
-          break;
+                  default:
+                  case 8:
+                    termiosp->c_cflag |= CS8;
+                    break;
+                }
+            }
+            break;
 
-        case TCSETS:
-          {
-            FAR struct termios *termiosp = (FAR struct termios *)arg;
+          case TCSETS:
+            {
+              FAR struct termios *termiosp = (FAR struct termios *)arg;
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-            bool iflow;
+              bool iflow;
 #endif
 
-            if (!termiosp)
-              {
-                ret = -EINVAL;
-                break;
-              }
+              if (!termiosp)
+                {
+                  ret = -EINVAL;
+                  break;
+                }
 
-            if (termiosp->c_cflag & PARENB)
-              {
-                priv->parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
-              }
-            else
-               {
-                priv->parity = 0;
-              }
+              if (termiosp->c_cflag & PARENB)
+                {
+                  priv->parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
+                }
+              else
+                {
+                  priv->parity = 0;
+                }
 
-            priv->stop2 = (termiosp->c_cflag & CSTOPB) != 0;
+              priv->stop2 = (termiosp->c_cflag & CSTOPB) != 0;
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-            priv->oflow = (termiosp->c_cflag & CCTS_OFLOW) != 0;
+              priv->oflow = (termiosp->c_cflag & CCTS_OFLOW) != 0;
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-            iflow       = priv->iflow;
-            priv->iflow = (termiosp->c_cflag & CRTS_IFLOW) != 0;
+              iflow       = priv->iflow;
+              priv->iflow = (termiosp->c_cflag & CRTS_IFLOW) != 0;
 #endif
 
-            switch (termiosp->c_cflag & CSIZE)
-              {
-              case CS7:
-                priv->nbits = 7;
-                break;
+              switch (termiosp->c_cflag & CSIZE)
+                {
+                  case CS7:
+                    priv->nbits = 7;
+                    break;
 
-              default:
-              case CS8:
-                priv->nbits = 8;
-                break;
-              }
+                  default:
+                  case CS8:
+                    priv->nbits = 8;
+                    break;
+                }
 
-            /* Note that only cfgetispeed is used because we have knowledge
-             * that only one speed is supported.
-             */
+              /* Note that only cfgetispeed is used because we have knowledge
+               * that only one speed is supported.
+               */
 
-            priv->baud = cfgetispeed(termiosp);
+              priv->baud = cfgetispeed(termiosp);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-            /* Set RTS if input flow control changed */
+              /* Set RTS if input flow control changed */
 
-            if (iflow != !priv->iflow)
-              {
-                 priv->rts = true;
-              }
+              if (iflow != !priv->iflow)
+                {
+                  priv->rts = true;
+                }
 #endif
 
-            ret = ft232r_setbaud(priv);
-            if (ret < 0)
-              {
-                uerr("ERROR: ft232r_setbaud failed: %d\n", ret);
-              }
+              ret = ft232r_setbaud(priv);
+              if (ret < 0)
+                {
+                  uerr("ERROR: ft232r_setbaud failed: %d\n", ret);
+                }
 
-            ret = ft232r_setdata(priv);
-            if (ret < 0)
-              {
-                uerr("ERROR: ft232r_setdata failed: %d\n", ret);
-              }
+              ret = ft232r_setdata(priv);
+              if (ret < 0)
+                {
+                  uerr("ERROR: ft232r_setdata failed: %d\n", ret);
+                }
 
-            ret = ft232r_setflowctrl(priv);
-            if (ret < 0)
-              {
-                uerr("ERROR: ft232r_setflowctrl failed: %d\n", ret);
-              }
-          }
+              ret = ft232r_setflowctrl(priv);
+              if (ret < 0)
+                {
+                  uerr("ERROR: ft232r_setflowctrl failed: %d\n", ret);
+                }
+            }
 
-          break;
+            break;
 
 #endif /* CONFIG_SERIAL_TERMIOS */
 
-        default:
-          ret = -ENOTTY;
-          break;
+          default:
+            ret = -ENOTTY;
+            break;
         }
 
       nxmutex_unlock(&priv->lock);
@@ -2636,7 +2646,7 @@ static bool usbhost_rxflowcontrol(FAR struct uart_dev_s *uartdev,
        * RTS.
        */
 
-       priv->rts = true;
+      priv->rts = true;
 
       /* Restart RX data reception work flow unless RX reception is
        * disabled.
