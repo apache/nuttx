@@ -177,6 +177,7 @@
 "mallinfo","malloc.h","","struct mallinfo","void"
 "malloc","stdlib.h","","FAR void *","size_t"
 "malloc_size","malloc.h","","size_t","FAR void *"
+"malloc_usable_size","malloc.h","","size_t","FAR void *"
 "mblen","stdlib.h","","int","FAR const char *","size_t"
 "mbrlen","wchar.h","","size_t","FAR const char *","size_t","FAR mbstate_t *"
 "mbrtowc","wchar.h","","size_t","FAR wchar_t *","FAR const char *","size_t","FAR mbstate_t *"
