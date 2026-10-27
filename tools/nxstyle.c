@@ -3925,6 +3925,14 @@ int main(int argc, char **argv, char **envp)
                 {
                   INFO("Skipping checking line 2: path file\n", 2, m);
                 }
+              else if (strstr(line, "SPDX-") != NULL)
+                {
+                  /* Ignore an SPDX tag line: a copyright notice must stay
+                   * as it is, even when it is longer than the line width.
+                   */
+
+                  INFO("Skipping checking an SPDX line\n", lineno, m);
+                }
               else
                 {
                   ERROR("Long line found", lineno, m);
