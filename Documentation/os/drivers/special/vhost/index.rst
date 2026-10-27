@@ -54,3 +54,4 @@ as the "frontend" (VirtIO Driver) and the other side acts as the "backend"
    :caption: Contents
 
    framework
+   vhost-serial
