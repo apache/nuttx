@@ -55,6 +55,7 @@ set(SRCS
     lib_aligned_alloc.c
     lib_posix_memalign.c
     lib_valloc.c
+    lib_malloc_usable_size.c
     lib_mblen.c
     lib_mbtowc.c
     lib_wctomb.c
