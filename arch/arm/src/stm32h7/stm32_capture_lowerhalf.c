@@ -96,6 +96,7 @@ struct stm32_lowerhalf_s
   uint32_t               clock;      /* Timer clock frequency */
   uint8_t                duty;       /* Result pwm frequency */
   uint32_t               freq;       /* Result pwm frequency */
+  uint32_t               edges;      /* Result pwm edges */
 };
 
 /****************************************************************************
@@ -110,6 +111,7 @@ static int stm32_start(struct cap_lowerhalf_s *lower);
 static int stm32_stop(struct cap_lowerhalf_s *lower);
 static int stm32_getduty(struct cap_lowerhalf_s *lower, uint8_t *duty);
 static int stm32_getfreq(struct cap_lowerhalf_s *lower, uint32_t *freq);
+static int stm32_getedges(struct cap_lowerhalf_s *lower, uint32_t *edges);
 
 /****************************************************************************
  * Private Data
@@ -123,6 +125,7 @@ static const struct cap_ops_s g_cap_ops =
   .stop        = stm32_stop,
   .getduty     = stm32_getduty,
   .getfreq     = stm32_getfreq,
+  .getedges    = stm32_getedges,
 };
 
 #ifdef CONFIG_STM32_TIM1_CAP
@@ -285,6 +288,7 @@ static int stm32_cap_handler(int irq, void * context, void * arg)
     }
 
   lower->freq = lower->clock / period;
+  lower->edges++;
 
   return OK;
 }
@@ -316,6 +320,8 @@ static int stm32_start(struct cap_lowerhalf_s *lower)
 
       return -EBUSY;
     }
+
+  priv->edges = 0;
 
   switch (priv->channel)
     {
@@ -471,6 +477,35 @@ static int stm32_getfreq(struct cap_lowerhalf_s *lower, uint32_t *freq)
   irqstate_t flags = enter_critical_section();
 
   *freq = priv->freq;
+
+  leave_critical_section(flags);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: stm32_getedges
+ *
+ * Description:
+ *   get result edges
+ *
+ * Input Parameters:
+ *   lower - A pointer the publicly visible representation of the
+ *             "lower-half" driver state structure.
+ *   edges - Number of edges seen.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int stm32_getedges(struct cap_lowerhalf_s *lower, uint32_t *edges)
+{
+  struct stm32_lowerhalf_s *priv = (struct stm32_lowerhalf_s *)lower;
+
+  irqstate_t flags = enter_critical_section();
+
+  *edges = priv->edges;
 
   leave_critical_section(flags);
 
