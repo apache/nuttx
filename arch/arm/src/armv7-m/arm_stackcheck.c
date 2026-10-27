@@ -2,8 +2,7 @@
  * arch/arm/src/armv7-m/arm_stackcheck.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2013, 2014 PX4 Development Team.
- * All rights reserved.
+ * SPDX-FileCopyrightText: 2013, 2014 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
