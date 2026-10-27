@@ -253,18 +253,24 @@ ssize_t file_writev(FAR struct file *filep,
 ssize_t file_write(FAR struct file *filep, FAR const void *buf,
                    size_t nbytes)
 {
-#ifdef CONFIG_FS_UIO
-  struct iovec iov;
-
-  iov.iov_base = (FAR void *)buf;
-  iov.iov_len = nbytes;
-
-  return file_writev(filep, &iov, 1);
-#else
-  FAR struct inode *inode = filep->f_inode;
+  FAR struct inode *inode;
   ssize_t ret = -EBADF;
 
   DEBUGASSERT(filep);
+  inode = filep->f_inode;
+
+#ifdef CONFIG_FS_UIO
+  if (inode == NULL || inode->u.i_ops == NULL ||
+      inode->u.i_ops->write == NULL)
+    {
+      struct iovec iov;
+
+      iov.iov_base = (FAR void *)buf;
+      iov.iov_len = nbytes;
+
+      return file_writev(filep, &iov, 1);
+    }
+#endif
 
   /* Was this file opened for write access? */
 
@@ -319,7 +325,6 @@ ssize_t file_write(FAR struct file *filep, FAR const void *buf,
 #endif
 
   return ret;
-#endif
 }
 
 /****************************************************************************

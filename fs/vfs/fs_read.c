@@ -278,18 +278,24 @@ ssize_t file_readv(FAR struct file *filep,
 
 ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes)
 {
-#ifdef CONFIG_FS_UIO
-  struct iovec iov;
-
-  iov.iov_base = buf;
-  iov.iov_len = nbytes;
-
-  return file_readv(filep, &iov, 1);
-#else
-  FAR struct inode *inode = filep->f_inode;
+  FAR struct inode *inode;
   ssize_t ret = -EBADF;
 
   DEBUGASSERT(filep);
+  inode = filep->f_inode;
+
+#ifdef CONFIG_FS_UIO
+  if (inode == NULL || inode->u.i_ops == NULL ||
+      inode->u.i_ops->read == NULL)
+    {
+      struct iovec iov;
+
+      iov.iov_base = buf;
+      iov.iov_len = nbytes;
+
+      return file_readv(filep, &iov, 1);
+    }
+#endif
 
   /* Was this file opened for read access? */
 
@@ -353,7 +359,6 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes)
 #endif
 
   return ret;
-#endif
 }
 
 /****************************************************************************
