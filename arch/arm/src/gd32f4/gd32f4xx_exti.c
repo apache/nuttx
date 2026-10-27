@@ -389,7 +389,7 @@ void gd32_exti_init(uint32_t linex, uint8_t exti_mode, uint8_t trig_type)
         break;
       default:
         break;
-  }
+    }
 
   /* set the EXTI trigger type */
 

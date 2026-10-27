@@ -34,7 +34,7 @@
 /* Kinetis parts all have a simple battery-backed 32bit counter for its RTC
  * KINETIS_RTC_GEN2 have
  *    a Tamper Time seconds - 32bibt
- *    a MONOTONC seconds  which is used is 2*32bit registers
+ *    a MONOTONIC seconds  which is used is 2*32bit registers
  *
  */
 
