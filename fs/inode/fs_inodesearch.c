@@ -325,12 +325,19 @@ static int _inode_canonicalize(FAR char *path, FAR char *dst_min)
 
 /****************************************************************************
  * Name: _inode_checkpath
+ *
+ * Description:
+ *   Check path length constraints.  Returns 1 if the path is already a
+ *   simple absolute path that needs no canonicalization.
  ****************************************************************************/
 
-static int _inode_checkpath(const char *path)
+static int _inode_checkpath(FAR const char *path)
 {
+  bool is_simple = true;
   int namelen = 0;
   int pathlen = 0;
+  bool dot = false;
+  bool dotdot = false;
 
   if (*path == '\0')
     {
@@ -339,17 +346,54 @@ static int _inode_checkpath(const char *path)
 
   /* Check each segment of the path */
 
-  while (*path != '\0' && pathlen < PATH_MAX)
+  while (pathlen < PATH_MAX)
     {
-      if (*path == '/')
+      if (*path == '/' || *path == '\0')
         {
+          if (is_simple && pathlen > 0 &&
+              !(pathlen == 1 && namelen == 0 && *path == '\0'))
+            {
+              if (namelen == 0 || dot || dotdot)
+                {
+                  is_simple = false;
+                }
+            }
+
+          if (*path == '\0')
+            {
+              break;
+            }
+
           namelen = 0;
+          dot = false;
+          dotdot = false;
         }
       else
         {
+          if (pathlen == 0)
+            {
+              is_simple = false;
+            }
+
           if (++namelen > NAME_MAX)
             {
               return -ENAMETOOLONG;
+            }
+
+          if (namelen == 1)
+            {
+              dot = *path == '.';
+              dotdot = dot;
+            }
+          else if (namelen == 2)
+            {
+              dot = false;
+              dotdot = dotdot && *path == '.';
+            }
+          else
+            {
+              dot = false;
+              dotdot = false;
             }
         }
 
@@ -357,7 +401,12 @@ static int _inode_checkpath(const char *path)
       pathlen++;
     }
 
-  return pathlen >= PATH_MAX ? -ENAMETOOLONG : OK;
+  if (pathlen >= PATH_MAX)
+    {
+      return -ENAMETOOLONG;
+    }
+
+  return is_simple;
 }
 
 #ifdef CONFIG_FS_CHROOT
@@ -432,8 +481,9 @@ void inode_search_release(FAR struct inode_search_s *desc)
  * Description:
  *   Initialize a search descriptor and make 'path' host-absolute: join
  *   $PWD if it is relative, prepend the chroot jail if one is installed,
- *   and canonicalize "." / "..".  On success desc->path points at
- *   desc->buffer.
+ *   and canonicalize "." / "..".  For simple absolute paths that already
+ *   need no expansion or canonicalization, desc->path may point directly at
+ *   the caller-provided path and desc->buffer will remain NULL.
  *
  ****************************************************************************/
 
@@ -472,6 +522,18 @@ int inode_search_setup(FAR struct inode_search_s *desc,
       rootlen = strlen(root);
     }
 #endif
+
+  /* Fast path for the common case where the caller already passes a simple
+   * absolute path.  Avoid allocating a PATH_MAX temporary buffer and copying
+   * the string only to canonicalize it back to the same value.  Keep the
+   * existing buffer path for nofollow searches so symbolic-link target
+   * handling can continue to rely on a mutable path buffer.
+   */
+
+  if (root == NULL && !nofollow && ret > 0)
+    {
+      return OK;
+    }
 
   /* For a relative path the absolute form is "<cwd>/<path>".  That
    * concatenation can exceed PATH_MAX even when the relative path
