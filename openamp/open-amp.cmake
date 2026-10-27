@@ -76,6 +76,8 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/open-amp)
       ${CMAKE_CURRENT_LIST_DIR}/0018-lib-rpmsg-add-priority-support-for-rpmsg-endpoint.patch
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
       ${CMAKE_CURRENT_LIST_DIR}/0019-rpmsg-Add-VIRTIO_RPMSG_F_BUFADDR-to-support-specify-.patch
+      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+      ${CMAKE_CURRENT_LIST_DIR}/0020-rpmsg_virtio-do-not-trust-lengths-written-by-the-remote.patch
     DOWNLOAD_NO_PROGRESS true
     TIMEOUT 30)
 
