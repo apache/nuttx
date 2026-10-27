@@ -66,13 +66,9 @@ struct stm32_oneshot_s
   uint32_t period;
 };
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int stm32_oneshot_initialize(struct stm32_oneshot_s *oneshot, int chan,
@@ -84,7 +80,6 @@ int stm32_oneshot_start(struct stm32_oneshot_s *oneshot,
 int stm32_oneshot_cancel(struct stm32_oneshot_s *oneshot,
                          struct timespec *ts);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

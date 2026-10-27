@@ -40,13 +40,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -67,7 +63,6 @@ extern "C"
 struct lpc43_sdmmc_dev_s; /* See include/nuttx/sdio.h */
 struct sdio_dev_s *lpc43_sdmmc_initialize(int slotno);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

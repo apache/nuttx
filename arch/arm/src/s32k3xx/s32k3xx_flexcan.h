@@ -43,13 +43,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -73,7 +69,6 @@ extern "C"
 int s32k3xx_caninitialize(int intf);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -167,13 +167,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /*  Trap Types for on-chip peripherals
@@ -577,7 +573,6 @@ void gpio_irqenable(int irq);
 void gpio_irqdisable(int irq);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

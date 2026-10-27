@@ -63,13 +63,9 @@
 extern const struct clock_configuration_s g_initial_clkconfig;
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -127,7 +123,6 @@ void imxrt_ocram_initialize(void);
 void imxrt_flexram_partition(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

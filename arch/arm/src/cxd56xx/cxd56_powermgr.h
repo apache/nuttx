@@ -304,11 +304,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -331,7 +328,6 @@ int cxd56_pm_bootup(void);
 uint32_t cxd56_pm_getclock(uint32_t target);
 int cxd56_pm_hotsleep(int idletime);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -104,13 +104,9 @@ typedef uint64_t imxrt_pinset_t;
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -151,7 +147,6 @@ int imxrt_iomux_configure(imxrt_pinset_t pinset);
 
 int imxrt_iomux_gpio(imxrt_pinset_t pinset, bool sion);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

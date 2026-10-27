@@ -41,13 +41,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -177,7 +173,6 @@ static inline void stm32_ipcc_unmaskrxo(uint8_t chan)
   putreg32(regval, STM32_IPCC_C1MR);
 }
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

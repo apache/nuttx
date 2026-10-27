@@ -50,13 +50,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -154,7 +150,6 @@ void sdio_mediachange(struct sdio_dev_s *dev, bool cardinslot);
 
 void sdio_wrprotect(struct sdio_dev_s *dev, bool wrprotect);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

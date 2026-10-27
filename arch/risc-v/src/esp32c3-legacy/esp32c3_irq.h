@@ -37,13 +37,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* CPU interrupt types. */
@@ -139,7 +135,6 @@ int esp32c3_setup_irq(int periphid, int priority, int type);
 
 void esp32c3_teardown_irq(int periphid, int cpuint);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -92,13 +92,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -144,7 +140,6 @@ struct can_dev_s *stm32_caninitialize(int port);
 int stm32_cansockinitialize(int port);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -39,13 +39,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -83,7 +79,6 @@ bool sam_cardinserted(int slotno);
 
 bool sam_writeprotected(int slotno);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

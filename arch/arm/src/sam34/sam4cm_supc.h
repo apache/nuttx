@@ -43,13 +43,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -60,7 +56,6 @@ uint32_t supc_get_slcd_power_mode(void);
 void supc_set_slcd_power_mode(uint32_t mode);
 void supc_set_slcd_ldo_output(uint32_t vrout);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif /* __cplusplus */

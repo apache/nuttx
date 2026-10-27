@@ -64,11 +64,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -93,7 +90,6 @@ extern "C"
 int ameba_gpio_register(int minor, uint8_t pin, enum gpio_pintype_e pintype);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -165,13 +165,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -277,7 +273,6 @@ int riscv_sbi_system_reset(uint32_t type, uint32_t reason);
 
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

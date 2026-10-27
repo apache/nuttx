@@ -39,13 +39,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -68,7 +64,6 @@ extern "C"
 
 void gd32_fwdgt_initialize(const char *devpath, uint32_t irc32kfreq);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

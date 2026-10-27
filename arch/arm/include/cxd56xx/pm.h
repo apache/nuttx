@@ -151,11 +151,8 @@ typedef void (*pmic_notify_t)(void *arg);
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -373,7 +370,6 @@ int up_pmic_set_notify(int kind, pmic_notify_t cb);
 #  define up_pmic_set_notify(kind, cb)
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

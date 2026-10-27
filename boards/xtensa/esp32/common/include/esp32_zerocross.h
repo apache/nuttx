@@ -42,11 +42,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -67,7 +64,6 @@ extern "C"
 
 int board_zerocross_initialize(int devno);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

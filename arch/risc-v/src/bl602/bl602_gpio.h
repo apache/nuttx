@@ -206,13 +206,9 @@ typedef uint16_t gpio_pinset_t;
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -333,7 +329,6 @@ int bl602_dumpgpio(gpio_pinset_t pinset, const char *msg);
 #define bl602_dumpgpio(p, m)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

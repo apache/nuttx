@@ -45,11 +45,8 @@ typedef void (*hsem_callback_t)(uint8_t id, void *arg);
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 void stm32_hsem_subscribe(uint8_t id, hsem_callback_t callback, void *args);
@@ -61,7 +58,6 @@ bool stm32_hsem_take(uint8_t id);
 void stm32_hsem_free(uint8_t id);
 void stm32_hsem_init(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

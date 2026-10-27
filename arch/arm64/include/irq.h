@@ -250,11 +250,8 @@
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -520,7 +517,6 @@ static inline_function void up_irq_restore(irqstate_t flags)
     ((uintptr_t)((uint64_t *)(regs))[REG_SP_EL0])
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

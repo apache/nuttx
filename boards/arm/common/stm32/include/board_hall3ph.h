@@ -34,11 +34,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -61,7 +58,6 @@ extern "C"
 
 int board_hall3ph_initialize(int devno, int pha, int phb, int phc);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

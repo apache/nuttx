@@ -218,11 +218,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -274,7 +271,6 @@ struct lcd_dev_s;  /* Forward reference */
 struct lcd_dev_s *pic32mz_graphics_setup(unsigned int devno);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

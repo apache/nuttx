@@ -42,11 +42,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -62,7 +59,6 @@ int nrf53_sdc_initialize(void);
 int nrf53_rpmsghci_server_initialize(const char *name);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

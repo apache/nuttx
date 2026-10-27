@@ -55,13 +55,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -119,7 +115,6 @@ void sam_eefc_initaccess(uint32_t access_mode, uint32_t wait_status);
 
 int sam_eefc_unlock(size_t page, size_t npages);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

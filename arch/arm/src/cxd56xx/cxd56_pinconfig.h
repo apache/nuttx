@@ -145,11 +145,8 @@ typedef struct cxd56_pin_status_s cxd56_pin_status_t;
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -202,7 +199,6 @@ int cxd56_pin_configs(uint32_t pinconfs[], size_t n);
 
 int cxd56_pin_status(uint32_t pin, cxd56_pin_status_t *stat);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

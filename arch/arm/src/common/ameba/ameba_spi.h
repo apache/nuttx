@@ -52,11 +52,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -84,7 +81,6 @@ struct spi_dev_s *ameba_spi_register(int bus, uint8_t clkpin,
                                      uint8_t mosipin, uint8_t misopin,
                                      uint8_t cspin);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

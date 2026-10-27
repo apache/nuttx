@@ -46,11 +46,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -77,7 +74,6 @@ extern "C"
 
 int esp32_set_backlight(uint8_t level);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

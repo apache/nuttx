@@ -52,13 +52,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -141,7 +137,6 @@ int esp32s3_qspibus_uninitialize(struct qspi_dev_s *dev);
 #ifdef __cplusplus
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_ESP32S3_SPI */

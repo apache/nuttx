@@ -55,11 +55,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -168,7 +165,6 @@ void nrf52_ppi_grp_clear(uint8_t group);
 
 void nrf52_ppi_grp_enable(uint8_t group, bool enable);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

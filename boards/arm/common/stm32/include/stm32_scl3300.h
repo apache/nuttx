@@ -42,11 +42,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -75,7 +72,6 @@ extern "C"
 
 int board_scl3300_initialize(int devno, int spi_busno);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

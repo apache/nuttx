@@ -180,18 +180,14 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
  * Public Functions Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

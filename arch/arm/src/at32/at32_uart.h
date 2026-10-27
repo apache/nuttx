@@ -545,13 +545,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -585,7 +581,6 @@ uart_dev_t *at32_serial_get_uart(int uart_num);
 void at32_serial_dma_poll(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

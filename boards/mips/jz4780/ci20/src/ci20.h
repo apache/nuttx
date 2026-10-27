@@ -55,11 +55,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -99,7 +96,6 @@ int jz4780_bringup(void);
 int jz_dma_alloc_init(void);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

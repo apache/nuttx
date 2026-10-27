@@ -62,13 +62,9 @@ enum pckid_clksrc_e
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -114,7 +110,6 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
 
 void sam_pck_enable(enum pckid_e pckid, bool enable);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

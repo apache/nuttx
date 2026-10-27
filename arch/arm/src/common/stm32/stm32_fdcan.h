@@ -53,13 +53,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 #ifdef CONFIG_STM32_FDCAN_CHARDRIVER
@@ -70,7 +66,6 @@ struct can_dev_s *stm32_fdcaninitialize(int port);
 int stm32_fdcansockinitialize(int port);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

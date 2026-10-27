@@ -31,13 +31,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -58,7 +54,6 @@ extern "C"
 
 int esp32_i2c_register(int bus);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -41,13 +41,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -212,7 +208,6 @@ void kl_dmadump(DMA_HANDLE handle, const struct kl_dmaregs_s *regs,
 #endif
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -47,13 +47,9 @@
  * Public Data
  *****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /*****************************************************************************
@@ -80,7 +76,6 @@ void jz4780_lowinit(void);
 
 void jz4780_boardinitialize(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

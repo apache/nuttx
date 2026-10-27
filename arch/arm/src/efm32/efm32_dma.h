@@ -138,13 +138,9 @@ typedef uint16_t dma_config_t;
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -300,7 +296,6 @@ void efm32_dmadump(DMA_HANDLE handle, const struct efm32_dmaregs_s *regs,
 #  define efm32_dmadump(handle,regs,msg)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

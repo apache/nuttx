@@ -67,13 +67,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -147,7 +143,6 @@ int rm57_i2c_loopback(struct i2c_master_s *dev, uint8_t *echo,
 size_t rm57_i2c_echocount(struct i2c_master_s *dev);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -56,18 +56,13 @@ struct stm32_dts_cfg_s
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int stm32_dts_register(int devno);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

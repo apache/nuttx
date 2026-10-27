@@ -109,13 +109,9 @@ typedef uint8_t pinmux_pinset_t;
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -133,7 +129,6 @@ extern "C"
 
 int am335x_pinmux_configure(uintptr_t padctl, pinmux_pinset_t muxset);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

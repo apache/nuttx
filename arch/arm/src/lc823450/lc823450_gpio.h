@@ -181,11 +181,8 @@ struct vgpio_ops_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -261,7 +258,6 @@ int lc823450_vgpio_register(unsigned int pin, struct vgpio_ops_s *ops);
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_LC823450_LC823450_GPIO_H */

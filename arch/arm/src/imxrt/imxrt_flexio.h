@@ -334,13 +334,9 @@ struct flexio_dev_s
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -359,7 +355,6 @@ extern "C"
 
 struct flexio_dev_s *imxrt_flexio_initialize(int intf);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

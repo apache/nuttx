@@ -67,13 +67,9 @@ struct alm_setalarm_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -171,7 +167,6 @@ int cxd56_rtc_cancelalarm(enum alm_id_e alarmid);
 struct rtc_lowerhalf_s *cxd56_rtc_lowerhalf(void);
 #endif /* CONFIG_RTC_DRIVER */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

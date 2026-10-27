@@ -247,13 +247,9 @@ struct imxrt_dmaregs_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -473,7 +469,6 @@ void imxrt_dmadump(const struct imxrt_dmaregs_s *regs, const char *msg);
 #  define imxrt_dmadump(handle,regs,msg)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

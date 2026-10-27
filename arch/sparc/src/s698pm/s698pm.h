@@ -129,13 +129,9 @@ extern uint32_t g_cpu3_idlestack[SMP_STACK_WORDS];
 #endif /* CONFIG_SMP_NCPUS > 1 */
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -429,7 +425,6 @@ void gpio_irqdisable(int irq);
 int s698pm_smp_call_handler(int irq, void *c, void *arg);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -61,13 +61,9 @@ struct sci_config_s
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -104,7 +100,6 @@ void rm57_lowflush(void);
 
 int rm57_sci_configure(uint32_t base, const struct sci_config_s *config);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

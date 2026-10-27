@@ -40,13 +40,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -228,7 +224,6 @@ bool gd32_exti_interrupt_flag_get(uint32_t linex);
 
 void gd32_exti_interrupt_flag_clear(uint32_t linex);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

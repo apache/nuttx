@@ -185,13 +185,9 @@ enum nrf52_gpio_detectmode_e
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************

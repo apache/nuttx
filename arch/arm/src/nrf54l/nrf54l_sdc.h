@@ -50,11 +50,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -69,7 +66,6 @@ int nrf54l_sdc_initialize(void);
 uint8_t nrf54l_sdc_reset(void);
 size_t nrf54l_sdc_command(const uint8_t *command, uint8_t *event);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

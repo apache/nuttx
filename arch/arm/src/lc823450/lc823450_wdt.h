@@ -39,13 +39,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -58,7 +54,6 @@ int lc823450_wdt_initialize(void);
 void lc823450_wdg_work_enable(int en);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

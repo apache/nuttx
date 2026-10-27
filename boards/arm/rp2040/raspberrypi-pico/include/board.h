@@ -131,13 +131,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -162,7 +158,6 @@ void rp2040_boardearlyinitialize(void);
 
 void rp2040_boardinitialize(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

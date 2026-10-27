@@ -48,11 +48,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -84,7 +81,6 @@ extern "C"
 struct i2c_master_s *esp_i2cbus_bitbang_initialize(void);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

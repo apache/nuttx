@@ -63,11 +63,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -86,7 +83,6 @@ extern "C"
 
 struct i2s_dev_s *stm32_sai_initialize(int intf);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

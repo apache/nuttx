@@ -51,11 +51,8 @@
 #ifndef __ASSEMBLY__
 
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 extern unsigned int XT1OSC_CLK;
@@ -66,7 +63,6 @@ extern unsigned int XT1OSC_CLK;
 
 void up_init_default_mux(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

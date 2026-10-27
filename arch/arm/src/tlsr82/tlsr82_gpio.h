@@ -200,13 +200,9 @@ typedef uint32_t gpio_cfg_t;
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -340,7 +336,6 @@ void tlsr82_gpioirqenable_all(void);
 #ifdef __cplusplus
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_TLSR82_TLSR82_GPIO_H */

@@ -75,13 +75,9 @@ struct sam_gclk_config_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -174,7 +170,6 @@ static inline bool sam_gclk_chan_locked(uint8_t channel)
   return (regval & GCLK_PCHCTRL_WRTLOCK) != 0;
 }
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

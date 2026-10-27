@@ -31,13 +31,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -47,7 +43,6 @@ extern "C"
 int cxd56_emmcinitialize(void);
 int cxd56_emmcuninitialize(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

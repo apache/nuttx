@@ -44,11 +44,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -62,7 +59,6 @@ extern "C"
 struct i2c_master_s *nrf52_i2c_bitbang_initialize(nrf52_pinset_t sda_pin,
                                                   nrf52_pinset_t scl_pin);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

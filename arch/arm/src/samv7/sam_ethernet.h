@@ -159,13 +159,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -249,7 +245,6 @@ int sam_emac_setmacaddr(int intf, uint8_t mac[6]);
 int sam_phy_boardinitialize(int intf);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

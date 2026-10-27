@@ -50,11 +50,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -83,7 +80,6 @@ extern "C"
 int esp_cmprinitialize(int unit);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

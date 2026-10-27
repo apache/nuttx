@@ -39,13 +39,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -254,7 +250,6 @@ void stm32_rcc_enable_hsi48(crs_syncsrc_t syncsrc);
 
 void stm32_rcc_disable_hsi48(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

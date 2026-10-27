@@ -74,13 +74,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -253,7 +249,6 @@ int cxd56_spi5register(struct spi_dev_s *dev, spi_mediachange_t callback,
 #endif
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

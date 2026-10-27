@@ -41,13 +41,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -102,7 +98,6 @@ uint8_t bl602_glb_get_bclk_div(void);
 
 void bl602_set_em_sel(int em_type);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

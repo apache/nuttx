@@ -277,11 +277,8 @@ struct xcptcontext
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Name: up_irq_save, up_irq_restore, and friends.
@@ -297,7 +294,6 @@ irqstate_t up_irq_save(void);
 void       up_irq_restore(irqstate_t flags);
 irqstate_t up_irq_enable(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -105,11 +105,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -144,7 +141,6 @@ void arm_boot(void);
 
 void arm_data_initialize(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

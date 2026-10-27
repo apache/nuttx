@@ -80,11 +80,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -99,7 +96,6 @@ void lc823450_i2cbus_changetimeout(struct i2c_master_s *dev,
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_LC823450_LC823450_I2C_H */

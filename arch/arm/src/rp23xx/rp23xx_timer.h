@@ -35,13 +35,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -65,7 +61,6 @@ extern "C"
 
 int rp23xx_timer_initialize(FAR const char *devpath, int instance);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

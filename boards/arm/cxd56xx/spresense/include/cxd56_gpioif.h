@@ -34,13 +34,9 @@
 
 #include <nuttx/irq.h>
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* gpioif GPIO Interface driver */
@@ -172,7 +168,6 @@ int board_gpio_intstatus(uint32_t pin, int *mode,
 
 int board_gpio_int(uint32_t pin, bool enable);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -43,13 +43,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -85,7 +81,6 @@ void imx9_mpu_uheap(uintptr_t start, size_t size);
 #  define imx9_mpu_uheap(start,size)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

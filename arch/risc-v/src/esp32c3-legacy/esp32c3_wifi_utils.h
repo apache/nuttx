@@ -34,13 +34,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -100,7 +96,6 @@ void esp_wifi_scan_event_parse(void);
 #ifdef __cplusplus
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_ESP32C3_LEGACY_ESP32C3_WIFI_UTILS_H */

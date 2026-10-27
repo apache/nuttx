@@ -72,13 +72,9 @@ struct esp32_oneshot_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -193,7 +189,6 @@ int esp32_oneshot_cancel(struct esp32_oneshot_s *oneshot,
 
 int esp32_oneshot_current(struct esp32_oneshot_s *oneshot, uint64_t *usec);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

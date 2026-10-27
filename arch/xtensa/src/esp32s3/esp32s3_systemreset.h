@@ -29,13 +29,9 @@
 
 #include <stdint.h>
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -99,7 +95,6 @@ void up_shutdown_handler(void);
 #ifdef __cplusplus
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_SYSTEMRESET_H */

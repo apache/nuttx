@@ -35,13 +35,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -108,7 +104,6 @@ uint32_t sam_pck_frequency(uint32_t mainclk);
 
 uint32_t sam_mck_frequency(uint32_t mainclk);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

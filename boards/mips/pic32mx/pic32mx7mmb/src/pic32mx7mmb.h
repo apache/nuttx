@@ -103,11 +103,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -182,7 +179,6 @@ void pic32mx_lcdinitialize(void);
 int pic32mx_tsc_setup(int minor);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

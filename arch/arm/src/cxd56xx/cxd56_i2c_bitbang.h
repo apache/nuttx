@@ -31,11 +31,8 @@
 #include <nuttx/i2c/i2c_master.h>
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -45,7 +42,6 @@ extern "C"
 struct i2c_master_s *cxd56_i2c_bitbang_initialize(uint32_t sda_pin,
                                                   uint32_t scl_pin);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

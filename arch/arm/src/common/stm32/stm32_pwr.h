@@ -56,13 +56,9 @@ enum stm32_pwr_wupin_e
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -281,7 +277,6 @@ void stm32_pwr_disablepvd(void);
 
 #endif /* CONFIG_STM32_ENERGYLITE */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

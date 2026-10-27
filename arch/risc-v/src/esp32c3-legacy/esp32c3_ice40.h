@@ -50,13 +50,9 @@
 #include "esp32c3_gpio.h"
 
 #ifndef __ASSEMBLY__
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -86,7 +82,6 @@ extern "C"
                                                const uint16_t cs_gpio,
                                                const uint16_t spi_port);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

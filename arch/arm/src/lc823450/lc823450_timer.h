@@ -35,13 +35,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -57,7 +53,6 @@ void lc823450_mtm_start_oneshot(int msec);
 void lc823450_mtm_stop_oneshot(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

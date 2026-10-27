@@ -39,13 +39,9 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_ARCH_MPU
@@ -138,7 +134,6 @@ void mpu_stronglyordered(void *base, size_t size);
 
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

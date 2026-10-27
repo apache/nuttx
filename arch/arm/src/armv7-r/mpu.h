@@ -130,13 +130,9 @@ struct mpu_region_s
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -722,7 +718,6 @@ static inline void mpu_control(bool enable)
                                    MPU_RACR_TEX(5) | \
                                    MPU_RACR_AP_RWRW)
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

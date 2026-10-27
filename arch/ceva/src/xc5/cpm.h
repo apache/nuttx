@@ -34,18 +34,14 @@
  ****************************************************************************/
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 uint32_t getcpm(uintptr_t addr);
 void putcpm(uintptr_t addr, uint32_t value);
 void modifycpm(uintptr_t addr, uint32_t clearbits, uint32_t setbits);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

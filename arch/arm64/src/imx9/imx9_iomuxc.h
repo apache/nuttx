@@ -91,13 +91,9 @@ typedef struct iomux_cfg_s iomux_cfg_t;
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -135,7 +131,6 @@ int imx9_iomux_configure(iomux_cfg_t cfg);
 
 int imx9_iomux_gpio(iomux_cfg_t cfg, bool sion);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -40,13 +40,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -96,7 +92,6 @@ void at32_iwdginitialize(const char *devpath, uint32_t lsifreq);
 void at32_wwdginitialize(const char *devpath);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

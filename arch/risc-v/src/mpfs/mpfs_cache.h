@@ -40,11 +40,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -72,7 +69,6 @@ void mpfs_enable_cache(void);
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_MPFS_MPFS_CACHE_H */

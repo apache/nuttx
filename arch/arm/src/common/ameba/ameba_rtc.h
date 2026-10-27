@@ -34,11 +34,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 struct rtc_lowerhalf_s;
@@ -81,7 +78,6 @@ struct rtc_lowerhalf_s *ameba_rtc_lowerhalf(void);
 
 int ameba_rtc_initialize(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

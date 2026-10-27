@@ -59,13 +59,9 @@ typedef enum
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -89,7 +85,6 @@ extern "C"
 
 struct pwm_lowerhalf_s *imx9_tpm_pwm_init(tpm_pwm_id_t pwmid);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

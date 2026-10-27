@@ -37,13 +37,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -104,7 +100,6 @@ int board_bluetooth_power_control(bool en);
 void board_bluetooth_enable_sleep(bool en);
 #endif /* CONFIG_BCM20706 */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -34,11 +34,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -126,7 +123,6 @@ int up_backuplog_region(const char *name, void **addr, size_t *size);
 
 int up_backuplog_entry(char *name, void **addr, size_t *size);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

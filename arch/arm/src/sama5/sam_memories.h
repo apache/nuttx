@@ -47,13 +47,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -93,7 +89,6 @@ uintptr_t sam_physramaddr(uintptr_t vramaddr);
 
 uintptr_t sam_virtramaddr(uintptr_t physramaddr);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

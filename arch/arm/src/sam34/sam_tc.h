@@ -40,13 +40,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -76,7 +72,6 @@ extern "C"
 void sam_tcinitialize(const char *devpath, int irq);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

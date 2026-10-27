@@ -44,11 +44,8 @@
 
 #ifndef __ASSEMBLY__
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -69,7 +66,6 @@ static inline bool xtensa_ptr_exec(const void *p)
   return esp32s3_ptr_exec(p);
 }
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

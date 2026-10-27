@@ -289,13 +289,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -351,7 +347,6 @@ void relays_powermodes(uint32_t relays_stat);
 const char *stm32_getchipid(void);
 const char *stm32_getchipid_string(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

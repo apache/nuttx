@@ -76,13 +76,9 @@ extern const uintptr_t g_spiobase[SAM_NPIO];
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -210,7 +206,6 @@ int sam_dumppio(uint32_t pinset, const char *msg);
 #  define sam_dumppio(p,m)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

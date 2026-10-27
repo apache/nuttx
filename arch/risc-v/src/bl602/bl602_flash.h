@@ -38,11 +38,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -73,7 +70,6 @@ int bl602_flash_read(uint32_t addr, uint8_t *dst, int len);
 
 int bl602_flash_getjedecid(uint8_t *data);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

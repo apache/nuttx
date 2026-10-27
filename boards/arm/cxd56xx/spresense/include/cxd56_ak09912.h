@@ -31,13 +31,9 @@
 #include <nuttx/i2c/i2c_master.h>
 
 #ifndef __ASSEMBLY__
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -98,7 +94,6 @@ int ak09912_scu_register(const char *devpath, int minor,
 
 #endif /* CONFIG_SENSORS_AK09912_SCU */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

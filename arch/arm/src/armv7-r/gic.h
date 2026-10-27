@@ -707,11 +707,8 @@ static inline void arm_cpu_sgi(int sgi, unsigned int cpuset)
  ****************************************************************************/
 
 #ifdef __cplusplus
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -831,7 +828,6 @@ void arm_gic_dump(const char *msg, bool all, int irq);
 #  define arm_gic_dump(m,a,i)
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

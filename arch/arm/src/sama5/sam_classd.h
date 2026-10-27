@@ -50,13 +50,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif /* __cplusplus */
 
 /****************************************************************************
@@ -65,7 +61,6 @@ extern "C"
 
 struct audio_lowerhalf_s;
 struct audio_lowerhalf_s *sama5_classd_initialize(void);
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif /* __cplusplus */

@@ -25,16 +25,12 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif /* ARCH_ARM_SRC_CXD56XX_CXD56_FARAPI_H */
 
 void cxd56_farapiinitialize(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

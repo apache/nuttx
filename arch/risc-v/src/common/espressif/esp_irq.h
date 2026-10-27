@@ -42,13 +42,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* CPU interrupt flags.
@@ -312,7 +308,6 @@ void esp_get_iram_interrupt_records(uint64_t *irq_count, int cpu);
 
 int esp_cpuint_to_irq(int cpuint, int cpu);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

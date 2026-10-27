@@ -52,11 +52,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -83,7 +80,6 @@ extern "C"
 
 int esp32_rgbled_initialize(const char *devname);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

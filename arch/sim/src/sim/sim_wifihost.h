@@ -37,11 +37,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -64,7 +61,6 @@ struct sim_wifihost_lowerhalf_s
 int sim_wifihost_init(struct sim_wifihost_lowerhalf_s *dev, int devidx);
 bool sim_wifihost_connected(struct sim_wifihost_lowerhalf_s *dev);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

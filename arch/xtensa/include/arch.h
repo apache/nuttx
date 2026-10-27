@@ -104,11 +104,8 @@ typedef struct arch_addrenv_s arch_addrenv_t;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
@@ -269,7 +266,6 @@ bool xtensa_imm_heapmember(void *mem);
 struct mallinfo xtensa_imm_mallinfo(void);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

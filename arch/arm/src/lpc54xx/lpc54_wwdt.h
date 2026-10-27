@@ -40,13 +40,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -74,7 +70,6 @@ extern "C"
 void lpc54_wwdt_initialize(const char *devpath);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

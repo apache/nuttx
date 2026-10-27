@@ -92,13 +92,9 @@ typedef void (*tc_handler_t)(TC_HANDLE tch, void *arg, uint32_t sr);
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -329,7 +325,6 @@ uint32_t sam_tc_divfreq(TC_HANDLE handle);
 
 int sam_tc_divisor(uint32_t frequency, uint32_t *div, uint32_t *tcclks);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

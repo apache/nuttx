@@ -58,13 +58,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -94,7 +90,6 @@ void tlsr82_flash_calibrate(uint32_t mid);
 #  define tlsr82_flash_calibrate(mid)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

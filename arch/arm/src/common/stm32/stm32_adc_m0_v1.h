@@ -411,11 +411,8 @@ struct stm32_adc_ops_s
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -447,7 +444,6 @@ const struct stm32_adc_ops_s
 *stm32_adc_llops_get(struct adc_dev_s *dev);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

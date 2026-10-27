@@ -51,13 +51,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -91,7 +87,6 @@ int up_rtc_initialize(void);
 
 bool s32k1xx_rtc_havesettime(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -35,13 +35,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -122,7 +118,6 @@ void board_alt1250_reset(void);
 
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

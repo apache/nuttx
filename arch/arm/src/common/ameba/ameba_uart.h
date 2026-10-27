@@ -51,11 +51,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -83,7 +80,6 @@ extern "C"
 int ameba_uart_register(const char *path, int uart, uint8_t txpin,
                         uint8_t rxpin, uint32_t baud);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

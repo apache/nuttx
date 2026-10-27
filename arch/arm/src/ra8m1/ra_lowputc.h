@@ -53,13 +53,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -100,7 +96,6 @@ void ra_lowsetup(void);
 
 uint32_t ra_sci_baud_ccr2(uint32_t sciclk_hz, uint32_t baud);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

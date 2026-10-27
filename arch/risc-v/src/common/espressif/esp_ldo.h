@@ -59,11 +59,8 @@ struct esp_ldo_config_t
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -107,7 +104,6 @@ int esp_ldo_channel_acquire(struct esp_ldo_config_t *config);
 
 int esp_ldo_channel_release(struct esp_ldo_config_t *config);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

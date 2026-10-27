@@ -80,13 +80,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -111,7 +107,6 @@ extern "C"
 
 struct mtd_dev_s *lpc43_spifi_initialize(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

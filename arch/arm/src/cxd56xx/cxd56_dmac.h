@@ -60,13 +60,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -187,7 +183,6 @@ void cxd56_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
 
 void cxd56_dmastop(DMA_HANDLE handle);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

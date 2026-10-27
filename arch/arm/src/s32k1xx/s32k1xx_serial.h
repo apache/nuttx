@@ -159,13 +159,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -186,7 +182,6 @@ extern "C"
 void s32k1xx_earlyserialinit(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

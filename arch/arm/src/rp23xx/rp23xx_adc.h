@@ -52,11 +52,8 @@
 
 #ifndef __ASSEMBLY__
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_RP23XX_ADC
@@ -100,7 +97,6 @@ int rp23xx_adc_setup(const char *path,
 
 #endif /* CONFIG_RP23XX_ADC */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

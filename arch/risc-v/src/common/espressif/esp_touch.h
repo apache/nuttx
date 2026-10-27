@@ -35,13 +35,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -126,7 +122,6 @@ int esp_touchirqdetach(int channel);
 #ifdef __cplusplus
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_TOUCH_H */

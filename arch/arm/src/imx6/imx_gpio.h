@@ -169,13 +169,9 @@ typedef uint32_t gpio_pinset_t;
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -284,7 +280,6 @@ int imx_dump_gpio(uint32_t pinset, const char *msg);
 #  define imx_dumpgpio(p,m)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

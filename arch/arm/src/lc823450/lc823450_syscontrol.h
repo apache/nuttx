@@ -260,11 +260,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -286,7 +283,6 @@ void lc823450_mod_stby_regs(uint32_t clearbits, uint32_t setbits);
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_LC823450_LC823450_SYSCONTROL_H */

@@ -42,13 +42,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -68,7 +64,6 @@ extern "C"
 
 struct sdio_dev_s *bcm2711_sdio_initialize(int slotno);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

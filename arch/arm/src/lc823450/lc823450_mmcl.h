@@ -34,11 +34,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -52,7 +49,6 @@ int mmcl_createpartition(int minor, int number, struct mtd_dev_s *mtd);
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_LC823450_LC823450_MMCL_H */

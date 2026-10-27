@@ -35,13 +35,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -66,7 +62,6 @@ int board_wdt_init(void);
 
 #endif /* CONFIG_WATCHDOG */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

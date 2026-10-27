@@ -55,13 +55,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -191,7 +187,6 @@ void gpio_irqenable(int irq);
 void gpio_irqdisable(int irq);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

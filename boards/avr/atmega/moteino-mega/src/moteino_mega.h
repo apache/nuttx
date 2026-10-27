@@ -50,11 +50,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -81,7 +78,6 @@ void weak_function atmega_spidev_initialize(void);
 void atmega_led_initialize(void);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

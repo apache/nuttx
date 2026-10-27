@@ -91,13 +91,9 @@ struct cxd56_udmaregs_s
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -254,7 +250,6 @@ void cxd56_udmadump(DMA_HANDLE handle, const struct cxd56_udmaregs_s *regs,
 
 void cxd56_udmainitialize(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

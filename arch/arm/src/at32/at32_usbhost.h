@@ -229,13 +229,9 @@ enum usbhost_trace1codes_e
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -272,7 +268,6 @@ extern "C"
 void at32_usbhost_vbusdrive(int iface, bool enable);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

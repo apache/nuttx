@@ -49,11 +49,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -128,7 +125,6 @@ int  bl602_net_notify(uint32_t event, uint8_t *data, int len, void *opaque);
 
 void bl602_net_event(int evt, int val);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

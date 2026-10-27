@@ -45,13 +45,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -118,7 +114,6 @@ void cxd56_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud);
 
 int cxd56_uart_initialize(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -51,13 +51,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -106,7 +102,6 @@ void sam_cmcc_invalidate(uintptr_t start, uintptr_t end);
 
 void sam_cmcc_invalidateall(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

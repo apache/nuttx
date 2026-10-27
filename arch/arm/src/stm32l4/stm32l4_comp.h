@@ -165,11 +165,8 @@ struct stm32_comp_config_s
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -194,7 +191,6 @@ extern "C"
 struct comp_dev_s *
 stm32_compinitialize(int intf, const struct stm32_comp_config_s *cfg);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

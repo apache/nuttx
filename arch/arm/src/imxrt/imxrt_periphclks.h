@@ -565,13 +565,9 @@
 #define imxrt_clockall_xbar3()            imxrt_periphclk_configure(CCM_CCGR_XBAR3, CCM_CG_ALL)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_ARCH_FAMILY_IMXRT117x
@@ -618,7 +614,6 @@ void imxrt_periphclk_configure(uintptr_t regaddr, unsigned int index,
 
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

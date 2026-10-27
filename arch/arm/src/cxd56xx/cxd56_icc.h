@@ -55,11 +55,8 @@ typedef struct cxd56_iccmsg_s iccmsg_t;
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int cxd56_iccinit(int protoid);
@@ -80,7 +77,6 @@ int cxd56_iccnotify(int cpuid, int signo, void *sigdata);
 
 void cxd56_iccinitialize(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

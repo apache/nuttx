@@ -40,13 +40,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -125,7 +121,6 @@ bool stm32_pwr_enableusv(bool set);
 
 bool stm32_pwr_vddio2_valid(bool set);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

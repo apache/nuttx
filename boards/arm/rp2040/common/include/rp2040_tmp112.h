@@ -47,11 +47,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -81,7 +78,6 @@ extern "C"
 int board_tmp112_initialize(FAR struct i2c_master_s *i2c, int devno,
                             uint8_t addr);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -53,13 +53,9 @@ struct mtd_partition_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -86,7 +82,6 @@ extern "C"
 int board_progmem_init(int minor, struct mtd_partition_s *table,
                        size_t count);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

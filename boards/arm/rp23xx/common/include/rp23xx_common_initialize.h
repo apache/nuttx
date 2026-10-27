@@ -22,11 +22,8 @@
 #define __BOARDS_ARM_RP23XX_COMMON_INCLUDE_RP23XX_COMMON_INITIALIZE_H
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -52,7 +49,6 @@ int rp23xx_common_earlyinitialize(void);
 
 void rp23xx_common_initialize(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

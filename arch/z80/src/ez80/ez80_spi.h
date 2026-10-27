@@ -80,11 +80,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif /* __cplusplus */
 
 /****************************************************************************
@@ -144,7 +141,6 @@ void ez80_spiselect(FAR struct spi_dev_s *dev, uint32_t devid,
 uint8_t ez80_spistatus(FAR struct spi_dev_s *dev, uint32_t devid);
 int ez80_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

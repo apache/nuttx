@@ -32,13 +32,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -265,7 +261,6 @@ int esp32c3_sha256_finish(struct esp32c3_sha256_context_s *ctx,
 #ifdef __cplusplus
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_ESP32C3_LEGACY_ESP32C3_SHA_H */

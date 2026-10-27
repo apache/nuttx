@@ -52,13 +52,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -197,7 +193,6 @@ int rm57_adc_tempcal_points(int sensor, uint16_t *val, uint16_t *kelvin);
 int rm57_adc_temp_register(int sensor, int devno);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

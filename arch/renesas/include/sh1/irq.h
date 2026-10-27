@@ -476,11 +476,8 @@ struct xcptcontext
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -580,7 +577,6 @@ static inline_function void up_irq_restore(irqstate_t flags)
 #define up_getusrsp(regs) \
     ((uintptr_t)((uint32_t *)(regs))[REG_SP])
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

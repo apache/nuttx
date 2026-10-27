@@ -1054,11 +1054,8 @@ struct stm32_adc_ops_s
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -1082,7 +1079,6 @@ struct adc_dev_s *stm32_adc_initialize(int intf,
                                        const uint8_t *chanlist,
                                        int nchannels);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

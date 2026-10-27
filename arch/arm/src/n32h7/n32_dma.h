@@ -93,13 +93,9 @@ typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t status, void *arg);
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -330,7 +326,6 @@ void n32_dmadump(DMA_HANDLE handle, const char *msg);
 #  define n32_dmadump(handle,msg)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

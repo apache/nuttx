@@ -47,13 +47,9 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -73,7 +69,6 @@ extern "C"
 struct adc_dev_s;
 struct adc_dev_s *sam_adcinitialize(int genclk);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -219,13 +219,9 @@ typedef uint32_t pio_pinset_t;
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -314,7 +310,6 @@ int a64_pio_irqenable(pio_pinset_t pinset);
 
 int a64_pio_irqdisable(pio_pinset_t pinset);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

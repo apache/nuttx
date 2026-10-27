@@ -60,14 +60,10 @@ extern far unsigned long far_stacktop;
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

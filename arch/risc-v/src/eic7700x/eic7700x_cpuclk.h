@@ -34,13 +34,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -119,7 +115,6 @@ int eic7700x_cpuclk_setrate(uint32_t hz);
 
 void eic7700x_cpuclk_initialize(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

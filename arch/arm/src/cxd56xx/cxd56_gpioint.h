@@ -98,11 +98,8 @@ typedef struct cxd56_gpioint_status_s cxd56_gpioint_status_t;
 
 #ifndef __ASSEMBLY__
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -211,7 +208,6 @@ void cxd56_gpioint_invert(uint32_t pin);
 
 int cxd56_gpioint_status(uint32_t pin, cxd56_gpioint_status_t *stat);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

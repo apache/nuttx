@@ -153,11 +153,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif /* __cplusplus */
 
 /****************************************************************************
@@ -220,7 +217,6 @@ uint8_t imx_spistatus(struct spi_dev_s *dev, uint32_t devid);
 int imx_spicmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

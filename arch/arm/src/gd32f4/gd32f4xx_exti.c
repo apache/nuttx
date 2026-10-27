@@ -38,13 +38,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -615,7 +611,6 @@ void gd32_exti_interrupt_flag_clear(uint32_t linex)
   putreg32(linex, GD32_EXTI_PD);
 }
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -56,11 +56,8 @@ typedef struct cxd56_gpio_status_s cxd56_gpio_status_t;
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -133,7 +130,6 @@ bool cxd56_gpio_read(uint32_t pin);
 
 int cxd56_gpio_status(uint32_t pin, cxd56_gpio_status_t *stat);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

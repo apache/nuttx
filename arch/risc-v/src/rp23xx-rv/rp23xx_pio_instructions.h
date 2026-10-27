@@ -50,13 +50,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -319,7 +315,6 @@ inline static uint32_t pio_encode_nop(void)
   return pio_encode_mov(pio_y, pio_y);
 }
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

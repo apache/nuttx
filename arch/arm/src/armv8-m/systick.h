@@ -35,11 +35,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -70,7 +67,6 @@ struct timer_lowerhalf_s *systick_initialize(bool coreclk, unsigned int freq,
 #  define systick_initialize(coreclk, freq, minor) NULL
 #endif /* CONFIG_ARMV8M_SYSTICK */
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

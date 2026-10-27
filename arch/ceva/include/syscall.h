@@ -139,11 +139,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* TRAP call with SYS_ call number and no parameters */
@@ -183,7 +180,6 @@ uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
                     uintptr_t parm4, uintptr_t parm5,
                     uintptr_t parm6);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

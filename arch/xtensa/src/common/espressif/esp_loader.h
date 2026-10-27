@@ -44,11 +44,8 @@
 
 #ifndef __ASSEMBLY__
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -73,7 +70,6 @@ int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
                      uint32_t app_drom_size, uint32_t app_irom_start,
                      uint32_t app_irom_vaddr, uint32_t app_irom_size);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

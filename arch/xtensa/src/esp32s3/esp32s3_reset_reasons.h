@@ -31,13 +31,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -104,7 +100,6 @@ soc_reset_reason_t esp32s3_reset_reasons(int cpu);
 #ifdef __cplusplus
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_RESET_REASONS_H */

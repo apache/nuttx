@@ -149,11 +149,8 @@ struct stm32_dac_ops_s
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -173,7 +170,6 @@ extern "C"
 struct dac_dev_s;
 struct dac_dev_s *stm32_dacinitialize(int intf);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

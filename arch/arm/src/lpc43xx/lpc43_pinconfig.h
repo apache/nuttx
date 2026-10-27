@@ -235,11 +235,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -277,7 +274,6 @@ int lpc43_pin_dump(uint32_t pinconf, const char *msg);
 #  define lpc43_pin_dump(p,m)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

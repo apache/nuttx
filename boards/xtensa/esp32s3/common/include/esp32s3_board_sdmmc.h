@@ -35,13 +35,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -84,7 +80,6 @@ int board_sdmmc_initialize(void);
 int board_sdmmc_spi_initialize(void);
 #endif /* CONFIG_MMCSD_SPI */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -47,13 +47,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -100,7 +96,6 @@ int s32k3xx_netinitialize(int intf);
 int s32k3xx_phy_boardinitialize(int intf);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

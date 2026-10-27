@@ -40,13 +40,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -131,7 +127,6 @@ uint32_t gd32_crc32_accumulate(const uint32_t *data, size_t len);
 uint8_t gd32_crc_fdata_read(void);
 void gd32_crc_fdata_write(uint8_t fdata);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

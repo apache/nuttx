@@ -36,13 +36,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -55,7 +51,6 @@ extern "C"
 
 int k230_rptun_init(const char *peername);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

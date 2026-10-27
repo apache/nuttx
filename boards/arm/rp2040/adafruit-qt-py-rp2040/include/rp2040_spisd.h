@@ -39,13 +39,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -76,7 +72,6 @@ int board_spisd_initialize(int minor, int bus);
 uint8_t board_spisd_status(struct spi_dev_s *dev, uint32_t devid);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

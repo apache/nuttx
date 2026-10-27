@@ -97,11 +97,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -131,7 +128,6 @@ void arm_data_initialize(void);
 
 bool arm_fault_kill(uint32_t *regs);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

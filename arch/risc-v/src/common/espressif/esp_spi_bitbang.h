@@ -35,13 +35,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_ESPRESSIF_SPI_BITBANG
@@ -112,7 +108,6 @@ void esp_spi_bitbang_uninitialize(struct spi_dev_s *dev);
 #ifdef __cplusplus
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_SPI_BITBANG_H */

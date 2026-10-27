@@ -41,13 +41,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -124,7 +120,6 @@ int board_isx019_uninitialize(struct i2c_master_s *i2c);
 
 uint32_t board_isx019_get_master_clock(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

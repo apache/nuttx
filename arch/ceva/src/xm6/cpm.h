@@ -35,11 +35,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 static inline uint32_t getcpm(uintptr_t addr)
@@ -58,7 +55,6 @@ static inline void modifycpm(uintptr_t addr, uint32_t clearbits,
   putcpm(addr, (getcpm(addr) & ~clearbits) | setbits);
 }
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

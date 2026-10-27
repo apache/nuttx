@@ -41,13 +41,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -224,7 +220,6 @@ int board_set_reset_gpo(int target);
 
 int board_unset_reset_gpo(int target);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

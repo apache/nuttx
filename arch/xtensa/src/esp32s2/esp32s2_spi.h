@@ -33,13 +33,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_ESP32S2_SPI
@@ -181,7 +177,6 @@ int esp32s2_spislave_ctrlr_uninitialize(struct spi_slave_ctrlr_s *ctrlr);
 #ifdef __cplusplus
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_XTENSA_SRC_ESP32S2_ESP32S2_SPI_H */

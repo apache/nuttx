@@ -55,13 +55,9 @@ enum mpfs_rcc_id_e
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -115,7 +111,6 @@ int mpfs_set_clock(int rcc_id, int instance, bool state);
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* ARCH_RISC_V_SRC_MPFS_MPFS_RCC_H */

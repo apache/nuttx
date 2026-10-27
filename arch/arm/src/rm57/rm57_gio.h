@@ -112,13 +112,9 @@
 
 typedef uint16_t gio_pinset_t;
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -247,7 +243,6 @@ void rm57_gioirqdisable(int irq);
 #  define rm57_gioirqdisable(irq)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

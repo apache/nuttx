@@ -49,11 +49,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Return the current value of the stack pointer */
@@ -74,7 +71,6 @@ uintptr_t up_getsp(void);
 #define up_getusrsp(regs) \
     ((uintptr_t)((FAR chipreg_t*)(regs))[XCPT_SP])
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

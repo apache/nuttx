@@ -45,13 +45,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -135,7 +131,6 @@ void lpc43_usart3_setup(void);
 
 void lpc43_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

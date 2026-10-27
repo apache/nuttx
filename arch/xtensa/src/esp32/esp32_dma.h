@@ -30,13 +30,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -118,7 +114,6 @@ uint32_t esp32_dma_init_with_padding(struct esp32_dmadesc_s *dmadesc,
 #ifdef __cplusplus
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_DMA_H */

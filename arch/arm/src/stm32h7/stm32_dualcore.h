@@ -43,11 +43,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7) && \
@@ -76,7 +73,6 @@ void stm32_start_cm4(void);
 void stm32_waitfor_cm7(void);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

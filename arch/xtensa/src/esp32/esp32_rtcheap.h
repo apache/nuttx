@@ -26,11 +26,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 struct mallinfo; /* Forward reference, see malloc.h */
@@ -141,7 +138,6 @@ bool esp32_rtcheap_heapmember(void *mem);
 
 struct mallinfo esp32_rtcheap_mallinfo(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

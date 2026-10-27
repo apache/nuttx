@@ -170,13 +170,9 @@ static inline void putreg64(uint64_t v, const volatile uintreg_t a)
  * Public Types
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -457,7 +453,6 @@ void riscv_jump_to_user(uintptr_t entry, uintreg_t a0, uintreg_t a1,
     }                                \
   while (0)
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

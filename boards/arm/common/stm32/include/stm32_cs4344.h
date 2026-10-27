@@ -42,11 +42,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -76,7 +73,6 @@ extern "C"
 
 int board_cs4344_initialize(int devno, int port);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

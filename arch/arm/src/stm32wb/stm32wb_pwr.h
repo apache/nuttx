@@ -40,13 +40,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -109,7 +105,6 @@ bool stm32_pwr_enableusv(bool set);
 
 void stm32_pwr_setvos(int vos);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

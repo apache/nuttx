@@ -43,13 +43,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -96,7 +92,6 @@ struct usbhost_connection_s *at32_otgfshost_initialize(int controller);
 
 void at32_usbsuspend(struct usbdev_s *dev, bool resume);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

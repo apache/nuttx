@@ -146,11 +146,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 struct spi_dev_s *lc823450_spibus_initialize(int bus);
@@ -163,7 +160,6 @@ uint8_t lc823450_spistatus(struct spi_dev_s *dev, uint32_t devid);
 int lc823450_spicmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

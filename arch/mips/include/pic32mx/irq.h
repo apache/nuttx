@@ -185,14 +185,10 @@ static inline_function void cp0_putebase(uint32_t ebase)
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

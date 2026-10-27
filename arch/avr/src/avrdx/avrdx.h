@@ -63,13 +63,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -169,7 +165,6 @@ void avrdx_boardinitialize(void);
 
 void avrdx_up_initialize(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

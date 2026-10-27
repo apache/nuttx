@@ -247,13 +247,9 @@ struct s32k3xx_dmaregs_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -473,7 +469,6 @@ void s32k3xx_dmadump(const struct s32k3xx_dmaregs_s *regs, const char *msg);
 #  define s32k3xx_dmadump(handle,regs,msg)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

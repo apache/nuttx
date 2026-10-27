@@ -261,18 +261,14 @@ struct ez80emac_desc_s
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif /* __cplusplus */
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

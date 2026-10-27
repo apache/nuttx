@@ -242,18 +242,14 @@ void system_call3(unsigned int nbr, uintptr_t parm1,
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
  * Public Functions Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

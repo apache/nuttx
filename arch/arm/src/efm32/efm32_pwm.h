@@ -101,13 +101,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -133,7 +129,6 @@ extern "C"
 
 struct pwm_lowerhalf_s *efm32_pwminitialize(int timer);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

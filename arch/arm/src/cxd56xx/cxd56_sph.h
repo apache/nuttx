@@ -42,11 +42,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -55,7 +52,6 @@ extern "C"
 
 int cxd56_sphinitialize(const char *devname);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

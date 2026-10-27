@@ -436,13 +436,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -587,7 +583,6 @@ void s32k3xx_pindump(uint32_t pinset, const char *msg);
 #  define s32k3xx_pindump(p,m)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

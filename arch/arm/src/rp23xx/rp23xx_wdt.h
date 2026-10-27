@@ -32,11 +32,8 @@
 #ifndef __ASSEMBLY__
 
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -48,8 +45,6 @@ extern "C"
  ****************************************************************************/
 
 int rp23xx_wdt_init(void);
-
-#undef EXTERN
 
 #if defined(__cplusplus)
 }

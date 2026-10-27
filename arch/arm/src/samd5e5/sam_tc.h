@@ -71,13 +71,9 @@ typedef void (*tc_handler_t)(TC_HANDLE tch, void *arg, uint32_t sr);
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 struct tc_attr_s
@@ -358,7 +354,6 @@ int sam_tc_divisor(struct sam_tc_dev_s *tc, uint32_t frequency,
 
 uint32_t sam_tc_getctrla(TC_HANDLE handle);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

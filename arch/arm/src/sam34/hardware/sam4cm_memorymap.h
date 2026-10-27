@@ -132,13 +132,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 static inline unsigned long SAM_PION_BASE(int n)
@@ -160,7 +156,6 @@ static inline unsigned long SAM_PION_BASE(int n)
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

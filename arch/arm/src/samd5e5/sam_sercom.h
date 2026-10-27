@@ -49,13 +49,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -110,7 +106,6 @@ void sercom_coreclk_configure(int sercom, int gclkgen, bool wrlock);
 
 void sercom_slowclk_configure(int sercom, int gclkgen);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

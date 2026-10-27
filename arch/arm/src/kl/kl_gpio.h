@@ -301,13 +301,9 @@ typedef uint32_t gpio_cfgset_t;
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -399,7 +395,6 @@ void kl_gpioirqdisable(uint32_t pinset);
 #  define kl_gpioirqdisable(pinset)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

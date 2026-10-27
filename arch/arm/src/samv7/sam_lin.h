@@ -43,13 +43,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -74,7 +70,6 @@ extern "C"
 int sam_linsockinitialize(int port);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

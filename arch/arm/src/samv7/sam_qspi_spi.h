@@ -55,13 +55,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -157,7 +153,6 @@ uint8_t sam_qspi_status(struct spi_dev_s *dev, uint32_t devid);
 int sam_qspi_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif /* CONFIG_SPI_CMDDATA */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

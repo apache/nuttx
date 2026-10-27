@@ -61,13 +61,9 @@ enum sam_srctype_e
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -85,7 +81,6 @@ extern "C"
 
 void sam_irq_srctype(int irq, enum sam_srctype_e srctype);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

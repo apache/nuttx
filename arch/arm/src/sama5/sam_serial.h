@@ -50,13 +50,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -131,7 +127,6 @@ void uart_serialinit(void);
 void flexus_serialinit(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

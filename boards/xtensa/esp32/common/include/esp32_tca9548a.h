@@ -34,11 +34,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -82,7 +79,6 @@ int board_tca9548a_initialize(int devno, int busno);
 
 struct i2c_master_s *esp32_i2cmux_getmaster(int devno, uint8_t channel);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

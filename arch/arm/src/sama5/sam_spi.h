@@ -78,13 +78,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -232,7 +228,6 @@ int sam_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

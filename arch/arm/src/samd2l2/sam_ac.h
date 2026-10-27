@@ -51,16 +51,11 @@ int sam_ac_initialize(uint8_t gclkgen);
 int sam_ac_config(uint8_t channel, uint32_t compctrl);
 int sam_ac_enable(uint8_t channel, bool enable);
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

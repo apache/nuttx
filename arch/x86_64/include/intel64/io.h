@@ -192,14 +192,10 @@ static inline void up_invalid_tlb(uintptr_t start, uintptr_t end)
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

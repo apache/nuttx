@@ -58,13 +58,9 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* register information... */
@@ -147,7 +143,6 @@ int phyplus_tim_setisr(struct phyplus_tim_dev_s *dev, xcpt_t handler,
 
 void phyplus_tim_ackint(struct phyplus_tim_dev_s *dev);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

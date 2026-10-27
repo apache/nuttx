@@ -101,13 +101,9 @@ struct pll_setup_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -127,7 +123,6 @@ extern "C"
 
 void lpc54_clockconfig(const struct pll_setup_s *pllsetup);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

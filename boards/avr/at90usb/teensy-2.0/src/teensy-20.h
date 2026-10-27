@@ -36,11 +36,8 @@
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -68,7 +65,6 @@ void weak_function at90usb_spidev_initialize(void);
 void at90usb_led_initialize(void);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

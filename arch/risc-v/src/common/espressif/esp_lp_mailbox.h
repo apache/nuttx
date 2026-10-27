@@ -29,13 +29,9 @@
 
 #include <stdint.h>
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -61,6 +57,5 @@ int esp_lp_mailbox_init(void);
 #ifdef __cplusplus
 }
 #endif
-#undef EXTERN
 
 #endif /* __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_LP_MAILBOX_H */

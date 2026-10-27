@@ -228,13 +228,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -357,7 +353,6 @@ void sam_usbc_enableclk(void);
 void sam_usbc_disableclk(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

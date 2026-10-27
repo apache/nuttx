@@ -35,13 +35,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -179,7 +175,6 @@ void bl_os_log_write(uint32_t level,
                      const char *format,
                      ...) printf_like(5, 6);
 
-  #undef EXTERN
   #if defined(__cplusplus)
 }
 #endif

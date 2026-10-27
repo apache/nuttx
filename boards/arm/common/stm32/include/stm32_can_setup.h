@@ -42,11 +42,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -67,7 +64,6 @@ extern "C"
 int stm32_can_setup(void);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

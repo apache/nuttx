@@ -320,13 +320,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -733,7 +729,6 @@ void sdhc_mediachange(struct sdio_dev_s *dev, bool cardinslot);
 #ifdef CONFIG_KINETIS_SDHC
 void sdhc_wrprotect(struct sdio_dev_s *dev, bool wrprotect);
 #endif
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

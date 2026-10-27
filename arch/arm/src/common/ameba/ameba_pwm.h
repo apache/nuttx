@@ -55,11 +55,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -87,7 +84,6 @@ extern "C"
 int ameba_pwm_register(const char *path, const uint8_t *pins,
                        unsigned int npins);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

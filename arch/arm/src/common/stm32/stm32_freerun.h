@@ -51,13 +51,9 @@ struct stm32_freerun_s
 #endif
 };
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int stm32_freerun_initialize(struct stm32_freerun_s *freerun, int chan,
@@ -71,7 +67,6 @@ int stm32_freerun_counter(struct stm32_freerun_s *freerun,
 #endif
 int stm32_freerun_uninitialize(struct stm32_freerun_s *freerun);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

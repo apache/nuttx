@@ -44,13 +44,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -102,7 +98,6 @@ void nuc_setbaud(uintptr_t base, uint32_t baud);
 void nuc_lowputc(uint32_t ch);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

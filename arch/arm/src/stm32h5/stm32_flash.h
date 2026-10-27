@@ -55,13 +55,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 void stm32_flash_getopt(uint32_t *opt1, uint32_t *opt2);
@@ -119,7 +115,6 @@ ssize_t stm32_flash_edata_read(uintptr_t addr, void *buf, size_t count);
 ssize_t stm32_flash_edata_write(uintptr_t addr, const void *buf,
                                 size_t count);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

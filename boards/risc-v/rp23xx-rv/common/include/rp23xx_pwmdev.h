@@ -37,13 +37,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -69,7 +65,6 @@ int rp23xx_pwmdev_initialize(int      slice,
                              uint32_t flags);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

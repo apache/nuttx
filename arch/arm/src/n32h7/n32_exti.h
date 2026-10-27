@@ -40,13 +40,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -123,7 +119,6 @@ int n32_exti_wakeup(bool risingedge, bool fallingedge, bool event,
                       xcpt_t func, void *arg);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

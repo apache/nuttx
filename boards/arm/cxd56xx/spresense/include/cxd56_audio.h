@@ -41,13 +41,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -159,7 +155,6 @@ void board_audio_finalize(void);
 
 int board_audio_initialize_driver(int minor);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -255,13 +255,9 @@ typedef struct st_transfer_data
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -508,7 +504,6 @@ void rx65n_dtc_start(DTC_HANDLE handle);
 
 void rx65n_dtc_stop(DTC_HANDLE handle);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

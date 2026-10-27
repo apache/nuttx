@@ -41,11 +41,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -72,7 +69,6 @@ extern "C"
 
 int board_ina219_initialize(int busno);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

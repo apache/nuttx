@@ -24,11 +24,8 @@
 #define __ARCH_ARM_INCLUDE_CXD56XX_GNSS_H
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -924,7 +921,6 @@ struct cxd56_gnss_get_var_ephemeris_s
   uint32_t  size; /* ephemeris data buffer size */
 };
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

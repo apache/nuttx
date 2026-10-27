@@ -37,13 +37,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -85,7 +81,6 @@ void gd32_usart_clock_enable(uint32_t usartbase);
 
 void gd32_usart_clock_disable(uint32_t usartbase);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

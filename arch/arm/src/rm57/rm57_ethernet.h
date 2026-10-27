@@ -36,11 +36,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_RM57_EMAC
@@ -70,7 +67,6 @@ int rm57_ethinitialize(int intf, FAR const uint8_t *macaddr);
 
 #endif /* CONFIG_RM57_EMAC */
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

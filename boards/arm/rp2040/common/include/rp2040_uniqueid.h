@@ -35,8 +35,6 @@
 #ifdef __cplusplus
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -63,7 +61,6 @@ extern "C"
 
 void rp2040_uniqueid_initialize(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -492,11 +492,8 @@ typedef void (* cxd56_audio_dma_cb_t)(cxd56_audio_dma_t handle,
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************

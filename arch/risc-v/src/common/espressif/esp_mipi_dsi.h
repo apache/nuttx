@@ -75,11 +75,8 @@ struct esp_mipi_dsi_dpi_config_s
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -221,7 +218,6 @@ int esp_mipi_dsi_video_start(void);
 
 int esp_mipi_dsi_video_stop(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

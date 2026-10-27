@@ -554,13 +554,9 @@ struct flexspi_dev_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -584,7 +580,6 @@ extern "C"
 struct flexspi_dev_s;
 struct flexspi_dev_s *imxrt_flexspi_initialize(int intf);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

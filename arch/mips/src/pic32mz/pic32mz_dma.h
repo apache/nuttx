@@ -194,13 +194,9 @@ struct pic32mz_dmaregs_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -318,7 +314,6 @@ void pic32mz_dma_dump(DMA_HANDLE handle,
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_DMA_H */

@@ -34,13 +34,9 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -97,7 +93,6 @@ int imx9_sar_adc_read_channel(uint8_t channel, uint32_t *value);
 
 bool imx9_sar_adc_is_initialized(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

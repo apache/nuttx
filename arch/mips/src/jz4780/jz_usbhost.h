@@ -197,13 +197,9 @@ enum usbhost_trace1codes_e
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -270,7 +266,6 @@ struct usbhost_connection_s;
 struct usbhost_connection_s *jz_ehci_initialize(int controller);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

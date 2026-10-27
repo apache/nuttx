@@ -64,13 +64,9 @@
 extern const struct clock_configuration_s g_initial_clkconfig;
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -116,7 +112,6 @@ void imx9_boardinitialize(void);
 void imx9_init_isram_functions(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

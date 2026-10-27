@@ -31,13 +31,9 @@
 
 #include <stdbool.h>
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -65,7 +61,6 @@ void board_clock_initialize(void);
 
 void board_clock_enable(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

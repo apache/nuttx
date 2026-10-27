@@ -40,13 +40,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -69,7 +65,6 @@ void stm32_fsmc_enable(void);
 
 void stm32_fsmc_disable(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

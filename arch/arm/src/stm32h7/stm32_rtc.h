@@ -72,13 +72,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -171,7 +167,6 @@ struct rtc_lowerhalf_s;
 struct rtc_lowerhalf_s *stm32_rtc_lowerhalf(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
