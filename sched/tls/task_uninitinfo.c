@@ -172,6 +172,16 @@ void task_uninit_info(FAR struct task_group_s *group)
   task_uninit_stream(group);
 #endif /* CONFIG_FILE_STREAM */
 
+#ifdef CONFIG_NETDB_DNSCLIENT
+  /* libc allocated the resolver state in the heap of the process */
+
+  if (info->ta_res != NULL)
+    {
+      group_free(group, info->ta_res);
+      info->ta_res = NULL;
+    }
+#endif
+
   /* Release all environment variables */
 
   env_release(info);
