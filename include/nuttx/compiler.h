@@ -226,7 +226,8 @@
                                  extern __inline__ no_builtin(#fn) \
                                  __attribute__((__always_inline__, \
                                                 __gnu_inline__, __artificial__))
-#  elif defined(__OPTIMIZE__) && __OPTIMIZE__ > 0 && defined(__has_builtin)
+#  elif defined(__OPTIMIZE__) && __OPTIMIZE__ > 0 && \
+         defined(__has_builtin) && !defined(NUTTX_NO_EXTENSIONS)
 #    define builtin_original(fn)  __typeof__(fn)  __orig_##fn __asm__(#fn)
 #    define builtin_function(fn)  builtin_original(fn); \
                                   extern __inline__ no_builtin(#fn) \
@@ -1623,11 +1624,12 @@
  * and lutimens() (sys/stat.h), the file system types *_MAGIC
  * (sys/statfs.h), PANIC(), PANIC_WITH_REGS(), ASSERT(), VERIFY(),
  * COMPILE_TIME_ASSERT() and BUILD_BUG_ON_ZERO() (assert.h), crypt_r()
- * (unistd.h), the types unchar and s_char (sys/types.h) and the helper
- * macros of this file below, such as memory_barrier() and UNUSED().  The
- * headers that a program includes do not use these names.  A definition
- * that the program made before is restored (saved at the start of this
- * file).
+ * (unistd.h), the types unchar and s_char (sys/types.h),
+ * builtin_function() and builtin_original() (above: string.h then declares
+ * the plain functions) and the helper macros of this file below, such as
+ * memory_barrier() and UNUSED().  The headers that a program includes do
+ * not use these names.  A definition that the program made before is
+ * restored (saved at the start of this file).
  */
 
 #ifdef NUTTX_NO_EXTENSIONS
