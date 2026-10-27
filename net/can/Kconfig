@@ -172,5 +172,47 @@ config NET_CAN_NPOLLWAITERS
 		Maximum number of threads than can be waiting for POLL events.
 		Default: 4
 
+config NET_CAN_ISOTP
+	bool "Enable ISO-TP CAN transport protocol (ISO 15765-2)"
+	default n
+	depends on SCHED_HPWORK && NETDEV_IFINDEX
+	---help---
+		Enable ISO-TP CAN transport protocol (ISO 15765-2).
+		The high-priority work queue is used for STmin TX pacing.
+
+config NET_CAN_ISOTP_PREALLOC_CONNS
+	int "Preallocated ISO-TP socket connections"
+	default NET_CAN_PREALLOC_CONNS
+	depends on NET_CAN_ISOTP
+	---help---
+		Number of ISO-TP connections pre-allocated during system boot.
+
+config NET_CAN_ISOTP_ALLOC_CONNS
+	int "Dynamic ISO-TP connections allocation"
+	default NET_CAN_ALLOC_CONNS
+	depends on NET_CAN_ISOTP
+	---help---
+		Dynamic memory allocations for ISO-TP.
+
+		When set to 0 all dynamic allocations are disabled.
+
+		When set to 1 a new connection will be allocated every time,
+		and it will be free'd when no longer needed.
+
+		Setting this to 2 or more will allocate the connections in
+		batches (with batch size equal to this config). When a
+		connection is no longer needed, it will be returned to the
+		free connections pool, and it will never be deallocated!
+
+config NET_CAN_ISOTP_MAX_CONNS
+	int "Maximum number of ISO-TP connections"
+	depends on NET_CAN_ISOTP
+	default NET_CAN_MAX_CONNS if NET_CAN_ALLOC_CONNS > 0
+	default 0
+	---help---
+		If dynamic connections allocation is selected
+		(NET_CAN_ISOTP_ALLOC_CONNS > 0), this will limit the number of
+		connections that can be allocated.
+
 endif # NET_CAN
 endmenu # CAN Socket Support

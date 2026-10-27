@@ -40,9 +40,10 @@
  * Name: can_sockif
  *
  * Description:
- *   Return the socket interface of the requested CAN protocol.  CAN_RAW
- *   is the only CAN protocol for now; can_raw_setup() validates the socket
- *   type and protocol.
+ *   Return the socket interface for the requested CAN protocol: the
+ *   ISO-TP interface for CAN_ISOTP, the CAN_RAW interface otherwise.  The
+ *   setup routine of the selected interface validates the socket type and
+ *   protocol.
  *
  * Input Parameters:
  *   family   - Socket address family (always PF_CAN)
@@ -50,13 +51,20 @@
  *   protocol - CAN protocol
  *
  * Returned Value:
- *   The socket interface of the CAN protocol.
+ *   The socket interface for the CAN protocol.
  *
  ****************************************************************************/
 
 FAR const struct sock_intf_s *
 can_sockif(sa_family_t family, int type, int protocol)
 {
+#ifdef CONFIG_NET_CAN_ISOTP
+  if (protocol == CAN_ISOTP)
+    {
+      return &g_can_isotp_sockif;
+    }
+#endif
+
   return &g_can_raw_sockif;
 }
 

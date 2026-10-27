@@ -31,5 +31,9 @@ if(CONFIG_NET_CAN)
 
   list(APPEND SRCS can.c)
 
+  if(CONFIG_NET_CAN_ISOTP)
+    list(APPEND SRCS can_isotp.c)
+  endif()
+
   target_sources(net PRIVATE ${SRCS})
 endif()

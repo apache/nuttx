@@ -39,6 +39,10 @@ NET_CSRCS += can.c
 
 # Include can build support
 
+ifeq ($(CONFIG_NET_CAN_ISOTP),y)
+NET_CSRCS += can_isotp.c
+endif
+
 DEPPATH += --dep-path can
 VPATH += :can
 endif # CONFIG_NET_CAN
