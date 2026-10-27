@@ -215,59 +215,59 @@ net_sockif(sa_family_t family, int type, int protocol)
     {
 #if defined(HAVE_PFINET_SOCKETS) || defined(HAVE_PFINET6_SOCKETS)
 #  ifdef HAVE_PFINET_SOCKETS
-    case PF_INET:
+      case PF_INET:
 #  endif
 #  ifdef HAVE_PFINET6_SOCKETS
-    case PF_INET6:
+      case PF_INET6:
 #  endif
-      sockif = inet_sockif(family, type, protocol);
-      break;
+        sockif = inet_sockif(family, type, protocol);
+        break;
 #endif
 
 #ifdef CONFIG_NET_LOCAL
-    case PF_LOCAL:
-      sockif = &g_local_sockif;
-      break;
+      case PF_LOCAL:
+        sockif = &g_local_sockif;
+        break;
 #endif
 
 #ifdef CONFIG_NET_CAN
-    case PF_CAN:
-      sockif = &g_can_sockif;
-      break;
+      case PF_CAN:
+        sockif = &g_can_sockif;
+        break;
 #endif
 
 #ifdef CONFIG_NET_NETLINK
-    case PF_NETLINK:
-      sockif = &g_netlink_sockif;
-      break;
+      case PF_NETLINK:
+        sockif = &g_netlink_sockif;
+        break;
 #endif
 
 #ifdef CONFIG_NET_PKT
-    case PF_PACKET:
-      sockif = &g_pkt_sockif;
-      break;
+      case PF_PACKET:
+        sockif = &g_pkt_sockif;
+        break;
 #endif
 
 #ifdef CONFIG_NET_BLUETOOTH
-    case PF_BLUETOOTH:
-      sockif = &g_bluetooth_sockif;
-      break;
+      case PF_BLUETOOTH:
+        sockif = &g_bluetooth_sockif;
+        break;
 #endif
 
 #ifdef CONFIG_NET_IEEE802154
-    case PF_IEEE802154:
-      sockif = &g_ieee802154_sockif;
-      break;
+      case PF_IEEE802154:
+        sockif = &g_ieee802154_sockif;
+        break;
 #endif
 
 #ifdef CONFIG_NET_RPMSG
-    case PF_RPMSG:
-      sockif = &g_rpmsg_sockif;
-      break;
+      case PF_RPMSG:
+        sockif = &g_rpmsg_sockif;
+        break;
 #endif
 
-    default:
-      nerr("ERROR: Address family unsupported: %d\n", family);
+      default:
+        nerr("ERROR: Address family unsupported: %d\n", family);
     }
 
   return sockif;
