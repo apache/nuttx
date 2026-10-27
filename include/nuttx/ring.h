@@ -1130,8 +1130,11 @@ ring_sc_start(FAR struct ring_s *r, uint32_t count, bool bulk,
   uint32_t available;
   uint32_t n = 0;
 
-  UP_RMB();
   prod_index = RTS_IDX(blob->prod_tail);
+
+  /* Read prod_tail before the data it publishes */
+
+  UP_RMB();
   available = ring_dist(r, prod_index, cons_index);
 
   /* available > capacity is physically impossible for a consistent ring;
@@ -1296,7 +1299,9 @@ ring_sc_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
     {
       uint32_t cons_index = ring_advance(r, buf->idx, buf->cnt);
 
-      UP_WMB();
+      /* Finish reading the data before handing the slots back */
+
+      UP_DMB();
       blob->cons_tail = RTS_PACK(0, cons_index);
     }
 }
@@ -1330,8 +1335,11 @@ ring_sc_peek(FAR struct ring_s *r, FAR void *items, uint32_t count,
       cons_index = ring_clamp_cons(r, *index, cons_index);
     }
 
-  UP_RMB();
   prod_index = RTS_IDX(blob->prod_tail);
+
+  /* Read prod_tail before the data it publishes */
+
+  UP_RMB();
   available = ring_dist(r, prod_index, cons_index);
   n = count < available ? count : available;
 
