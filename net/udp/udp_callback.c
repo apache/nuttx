@@ -75,8 +75,10 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
 #endif
 
   uint8_t src_addr_size;
+  uint8_t meta[UDP_READAHEAD_META_SIZE];
   FAR void *src_addr;
   int offset;
+  int pos;
 
   conn_lock(&conn->sconn);
 #if CONFIG_NET_RECV_BUFSIZE > 0
@@ -158,6 +160,14 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
    * Layout: |datalen|ifindex|src_addr_size|src_addr|[timestamp]|data|
    */
 
+  pos = 0;
+  memcpy(&meta[pos], &buflen, sizeof(buflen));
+  pos += sizeof(buflen);
+#ifdef CONFIG_NETDEV_IFINDEX
+  meta[pos++] = dev->d_ifindex;
+#endif
+  meta[pos++] = src_addr_size;
+
   offset = (dev->d_appdata - iob->io_data) - iob->io_offset;
   offset -= src_addr_size;
   ret = iob_trycopyin(iob, src_addr, src_addr_size, offset, true);
@@ -166,27 +176,9 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
       goto errout;
     }
 
-  offset -= sizeof(src_addr_size);
-  ret = iob_trycopyin(iob, &src_addr_size, sizeof(src_addr_size),
-                      offset, true);
-  if (ret < 0)
-    {
-      goto errout;
-    }
-
-#ifdef CONFIG_NETDEV_IFINDEX
-  offset -= sizeof(dev->d_ifindex);
-  ret = iob_trycopyin(iob, &dev->d_ifindex, sizeof(dev->d_ifindex),
-                      offset, true);
-  if (ret < 0)
-    {
-      goto errout;
-    }
-#endif
-
-  offset -= sizeof(buflen);
-  ret = iob_trycopyin(iob, (FAR const uint8_t *)&buflen, sizeof(buflen),
-                      offset, true);
+  DEBUGASSERT(pos == UDP_READAHEAD_META_SIZE);
+  offset -= sizeof(meta);
+  ret = iob_trycopyin(iob, meta, sizeof(meta), offset, true);
   if (ret < 0)
     {
       goto errout;
