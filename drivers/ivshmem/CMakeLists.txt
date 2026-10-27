@@ -30,5 +30,9 @@ if(CONFIG_IVSHMEM)
     list(APPEND SRCS ivshmem_uio.c)
   endif()
 
+  if(CONFIG_IVSHMEM_FLAT)
+    list(APPEND SRCS ivshmem_flat.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 endif()
