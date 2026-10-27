@@ -596,6 +596,11 @@ FAR void *mempool_multiple_realloc(FAR struct mempool_multiple_s *mpool,
       return NULL;
     }
 
+  if (size > 0 && mempool_multiple_find(mpool, size) == dict->pool)
+    {
+      return oldblk;
+    }
+
   blk = mempool_multiple_alloc(mpool, size);
   if (blk != NULL && oldblk != NULL)
     {
