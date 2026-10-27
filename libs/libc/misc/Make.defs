@@ -28,6 +28,7 @@ CSRCS += lib_tea_decrypt.c lib_impure.c lib_memfd.c lib_posix_madvise.c
 CSRCS += lib_mutex.c lib_fchmodat.c lib_fstatat.c lib_getfullpath.c
 CSRCS += lib_openat.c lib_mkdirat.c lib_utimensat.c lib_mallopt.c
 CSRCS += lib_idr.c lib_getnprocs.c lib_getstacksize.c lib_mntent.c
+CSRCS += lib_can_isotp.c
 
 ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
 CSRCS += lib_cxx_initialize.c

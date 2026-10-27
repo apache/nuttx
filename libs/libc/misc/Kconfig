@@ -172,3 +172,16 @@ config LIBC_MUTEX_BACKTRACE_SKIP
 	---help---
 		Configure how many initial addresses to skip when dumping mutex backtraces.
 		When generating a backtrace, the first skip addresses will be skipped.
+
+config LIBC_CAN_ISOTP_LONG_PDU
+	bool "ISO-TP long messages (>4095 bytes)"
+	default n
+	---help---
+		Support ISO-TP messages longer than 4095 bytes using the 32-bit
+		FF_DL escape sequence (ISO 15765-2).  Messages up to 4095 bytes use
+		the classic 12-bit FF_DL field; longer ones use a 6-byte First Frame
+		header carrying a 32-bit length.
+
+		Leave it disabled on classic-CAN-only configurations that never
+		transfer long PDUs so no transfer long PDUs so no extra code or
+		memory is spent on long-message support.
