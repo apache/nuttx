@@ -6,7 +6,7 @@ Process capabilities
 
 A process holds three capabilities. Without one, the calls it guards fail
 with ``EPERM``. Every build, the kernel and init start with all three.
-``CONFIG_SCHED_CAPABILITIES``, off with ``DEFAULT_SMALL``, builds the checks.
+``CONFIG_SCHED_CAPABILITIES``, off by default, builds the checks.
 
 =================  ==================================================
 ``PR_CAP_RAWIO``   ``open()`` of block, MTD and BCH nodes,

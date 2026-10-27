@@ -854,7 +854,7 @@ endif # SCHED_USER_IDENTITY
 
 config SCHED_CAPABILITIES
 	bool "Process capabilities"
-	default !DEFAULT_SMALL
+	default n
 	---help---
 		Task groups hold PR_CAP_RAWIO, PR_CAP_SPAWN and PR_CAP_ADMIN,
 		inherit them from their creator and can drop them with
