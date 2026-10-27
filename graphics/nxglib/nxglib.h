@@ -38,13 +38,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -513,7 +509,6 @@ void nxglib_cursor_backup_32bpp(FAR struct nxbe_state_s *be,
                                 int planeno);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

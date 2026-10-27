@@ -91,11 +91,8 @@ begin_packed_struct struct virtio_input_event
 } end_packed_struct;
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -104,7 +101,6 @@ extern "C"
 
 int virtio_register_input_driver(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

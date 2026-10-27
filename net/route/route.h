@@ -78,11 +78,8 @@ typedef int (*route_handler_ipv6_t)(FAR struct net_route_ipv6_s *route,
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -317,7 +314,6 @@ void net_ipv6_dumproute(FAR const char *msg,
 #  define net_ipv6_dumproute(m,r)
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

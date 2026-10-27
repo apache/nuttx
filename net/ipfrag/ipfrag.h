@@ -142,11 +142,8 @@ struct ip_fragsnode_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /* Only one thread can access g_assemblyhead_ipid and g_assemblyhead_time

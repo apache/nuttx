@@ -519,11 +519,8 @@ begin_packed_struct struct virtio_gpu_resource_unmap_blob
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -534,7 +531,6 @@ int virtio_register_gpu_driver(void);
 
 int virtio_gpu_fb_register(int display);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

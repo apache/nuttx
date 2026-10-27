@@ -72,13 +72,9 @@ struct nxmu_state_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -276,7 +272,6 @@ int nxmu_mousein(FAR struct nxmu_state_s *nxmu,
 void nxmu_kbdin(FAR struct nxmu_state_s *nxmu, uint8_t nch, FAR uint8_t *ch);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

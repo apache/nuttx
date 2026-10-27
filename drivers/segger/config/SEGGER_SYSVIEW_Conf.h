@@ -75,13 +75,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -98,7 +94,6 @@ extern "C"
 
 unsigned int note_sysview_get_interrupt_id(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

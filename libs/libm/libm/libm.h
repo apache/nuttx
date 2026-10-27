@@ -42,13 +42,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -64,7 +60,6 @@ double lib_expi(size_t n);
 
 float lib_sqrtapprox(float x);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

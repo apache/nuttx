@@ -35,11 +35,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -79,7 +76,6 @@ void ptmx_minor_free(uint8_t minor);
 
 int pty_register2(int minor, bool susv1);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

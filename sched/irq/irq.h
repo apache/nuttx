@@ -101,11 +101,8 @@ extern volatile uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -165,7 +162,6 @@ bool is_irqchain(int ndx, xcpt_t isr);
 int irqchain_attach(int ndx, xcpt_t isr, FAR void *arg);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

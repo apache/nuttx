@@ -346,16 +346,12 @@ struct virtio_snd_chmap_info
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int virtio_register_snd_driver(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

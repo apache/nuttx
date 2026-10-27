@@ -149,11 +149,8 @@ struct rpmsg_port_s
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -377,7 +374,6 @@ int rpmsg_port_register(FAR struct rpmsg_port_s *port,
 
 void rpmsg_port_unregister(FAR struct rpmsg_port_s *port);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

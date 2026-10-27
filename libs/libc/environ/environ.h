@@ -46,11 +46,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -180,7 +177,6 @@ int env_reserve(FAR struct task_info_s *info, size_t more);
 
 void env_removevar(FAR struct task_info_s *info, size_t index);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

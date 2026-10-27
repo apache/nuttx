@@ -51,11 +51,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* The g_wdactivelist data structure is a singly linked list ordered by
@@ -221,7 +218,6 @@ static inline_function clock_t wd_get_next_expire(clock_t curr)
   return next - curr <= 0 ? 0 : next;
 }
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif
