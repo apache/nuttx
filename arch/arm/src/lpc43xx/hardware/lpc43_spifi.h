@@ -192,9 +192,9 @@ struct spifi_driver_s
 
   /* Mid level functions */
 
-  int32_t  (*checkAd)(struct spifi_dev_s *dev,
+  int32_t  (*check_ad)(struct spifi_dev_s *dev,
                struct spifi_operands_s *opers);
-  int32_t  (*setProt)(struct spifi_dev_s *dev,
+  int32_t  (*set_prot)(struct spifi_dev_s *dev,
                struct spifi_operands_s *opers,
                uint8_t *change, uint8_t *saveprot);
   int32_t  (*check_block) (struct spifi_dev_s *dev, uint8_t *source,
@@ -214,7 +214,7 @@ struct spifi_driver_s
   void     (*setsize) (struct spifi_dev_s *dev, int32_t value);
   int32_t  (*setdev)(struct spifi_dev_s *dev, uint32_t opts,
                uint32_t mem_cmd, uint32_t prog_cmd);
-  uint32_t (*cmd)(uint8_t op, uint8_t addrlen, uint8_t intLen, uint16_t len);
+  uint32_t (*cmd)(uint8_t op, uint8_t addrlen, uint8_t intlen, uint16_t len);
   uint32_t (*readad)(struct spifi_dev_s *dev, uint32_t cmd, uint32_t addr);
   void     (*send04)(struct spifi_dev_s *dev, uint8_t op, uint8_t len,
                uint32_t value);
