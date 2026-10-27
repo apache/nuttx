@@ -28,6 +28,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 #include <fcntl.h>
 #include <poll.h>
 #include <errno.h>
@@ -338,14 +339,18 @@ static ssize_t telnet_receive(FAR struct telnet_dev_s *priv,
                               FAR const char *src, size_t srclen,
                               FAR char *dest, size_t destlen)
 {
+  FAR const char *iac;
+  size_t ncopy;
   int nread;
   uint8_t ch;
 
   ninfo("srclen: %zd destlen: %zd\n", srclen, destlen);
 
-  for (nread = 0; srclen > 0 && nread < destlen; srclen--)
+  nread = 0;
+  while (srclen > 0 && nread < destlen)
     {
       ch = *src++;
+      srclen--;
       ninfo("ch=%02x state=%d\n", ch, priv->td_state);
 
       switch (priv->td_state)
@@ -460,6 +465,26 @@ static ssize_t telnet_receive(FAR struct telnet_dev_s *priv,
             else
               {
                 telnet_getchar(priv, ch, dest, &nread);
+
+                ncopy = destlen - nread;
+                if (ncopy > srclen)
+                  {
+                    ncopy = srclen;
+                  }
+
+                iac = memchr(src, TELNET_IAC, ncopy);
+                if (iac != NULL)
+                  {
+                    ncopy = iac - src;
+                  }
+
+                if (ncopy > 0)
+                  {
+                    memcpy(&dest[nread], src, ncopy);
+                    nread += ncopy;
+                    src += ncopy;
+                    srclen -= ncopy;
+                  }
               }
             break;
 
