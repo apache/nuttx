@@ -1622,11 +1622,11 @@
  * (errno.h), zalloc() (stdlib.h), O_TEXT and O_BINARY (fcntl.h), utimens()
  * and lutimens() (sys/stat.h), the file system types *_MAGIC
  * (sys/statfs.h), PANIC(), PANIC_WITH_REGS(), ASSERT(), VERIFY(),
- * COMPILE_TIME_ASSERT() and BUILD_BUG_ON_ZERO() (assert.h) and the helper
- * macros of this file below, such as memory_barrier() and UNUSED().  The
- * headers that a program includes do not use these names.  A definition
- * that the program made before is restored (saved at the start of this
- * file).
+ * COMPILE_TIME_ASSERT() and BUILD_BUG_ON_ZERO() (assert.h), crypt_r()
+ * (unistd.h) and the helper macros of this file below, such as
+ * memory_barrier() and UNUSED().  The headers that a program includes do
+ * not use these names.  A definition that the program made before is
+ * restored (saved at the start of this file).
  */
 
 #ifdef NUTTX_NO_EXTENSIONS

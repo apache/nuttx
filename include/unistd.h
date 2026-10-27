@@ -548,8 +548,17 @@ int     profil(FAR unsigned short *buf, size_t bufsiz,
 FAR char *getpass(FAR const char *prompt);
 #ifdef CONFIG_CRYPTO
 FAR char *crypt(FAR const char *key, FAR const char *salt);
+
+/* NuttX's crypt_r() writes to a buffer of the caller.  glibc and
+ * libxcrypt have crypt_r(key, salt, FAR struct crypt_data *) in
+ * <crypt.h>: with NUTTX_NO_EXTENSIONS this declaration is left out, so
+ * that theirs can be used.
+ */
+
+#ifndef NUTTX_NO_EXTENSIONS /* See nuttx/compiler.h */
 FAR char *crypt_r(FAR const char *key, FAR const char *salt,
                   FAR char *output);
+#endif
 #endif
 
 #if CONFIG_FORTIFY_SOURCE > 0
