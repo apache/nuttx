@@ -153,6 +153,8 @@
 #define IN_CLASSA_HOST        (0xffffffff & ~IN_CLASSA_NET)
 #define IN_CLASSA_MAX         128
 
+#define IN_LOOPBACKNET        127  /* The loopback network, 127/8 */
+
 #define IN_CLASSB(a)          ((((in_addr_t)(a)) & 0xc0000000) == 0x80000000)
 #define IN_CLASSB_NET         0xffff0000
 #define IN_CLASSB_NSHIFT      16
@@ -168,6 +170,11 @@
 
 #define IN_CLASSD(i)          (((in_addr_t)(i) & 0xf0000000) == 0xe0000000)
 #define IN_MULTICAST(i)       IN_CLASSD(i)
+
+/* Experimental (224/3) and reserved (240/4) addresses, as in glibc */
+
+#define IN_EXPERIMENTAL(a)    (((in_addr_t)(a) & 0xe0000000) == 0xe0000000)
+#define IN_BADCLASS(a)        (((in_addr_t)(a) & 0xf0000000) == 0xf0000000)
 
 /* Special values of in_addr_t */
 
