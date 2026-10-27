@@ -243,11 +243,8 @@ struct mtd_dev_s
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -950,7 +947,6 @@ int register_cfi_driver(volatile uintptr_t addr_base,
                         int id);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

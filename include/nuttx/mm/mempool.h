@@ -145,13 +145,9 @@ struct mempoolinfo_s
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -523,7 +519,6 @@ struct mallinfo_task
 mempool_multiple_info_task(FAR struct mempool_multiple_s *mpool,
                            FAR const struct malltask *task);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

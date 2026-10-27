@@ -220,11 +220,8 @@ struct watchdog_lowerhalf_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_WATCHDOG_TIMEOUT_NOTIFIER
@@ -332,7 +329,6 @@ FAR void *watchdog_register(FAR const char *path,
 
 void watchdog_unregister(FAR void *handle);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

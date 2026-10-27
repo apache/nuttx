@@ -445,11 +445,8 @@ typedef CODE void (*sig_t)(int);
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int  kill(pid_t pid, int signo);
@@ -493,7 +490,6 @@ int pthread_kill(pthread_t thread, int sig);
 int pthread_sigmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
 int pthread_sigqueue(pthread_t thread, int sig, const union sigval value);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

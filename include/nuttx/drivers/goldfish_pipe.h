@@ -34,11 +34,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -56,7 +53,6 @@ extern "C"
 int goldfish_pipe_register(FAR void *base, int irq);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

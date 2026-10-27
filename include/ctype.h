@@ -57,11 +57,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -416,7 +413,6 @@ int tolower(int c);
 int tolower_l(int c, locale_t locale);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

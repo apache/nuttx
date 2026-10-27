@@ -40,13 +40,9 @@ typedef FAR void *iconv_t;
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 iconv_t iconv_open(FAR const char *to, FAR const char *from);
@@ -54,7 +50,6 @@ size_t iconv(iconv_t cd, FAR char **in, FAR size_t *inb,
              FAR char **out, FAR size_t *outb);
 int iconv_close(iconv_t cd);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

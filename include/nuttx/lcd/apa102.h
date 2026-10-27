@@ -56,11 +56,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -82,7 +79,6 @@ extern "C"
 FAR struct lcd_dev_s *apa102_initialize(FAR struct spi_dev_s *spi,
                                         unsigned int devno);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

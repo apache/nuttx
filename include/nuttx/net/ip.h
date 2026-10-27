@@ -258,11 +258,8 @@ struct arp_acd_s
  * Public Data
  ****************************************************************************/
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -767,7 +764,6 @@ static inline_function bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
 
 #define net_is_addr_sitelocal(a) ((a)[0] == HTONS(0xfec0))
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

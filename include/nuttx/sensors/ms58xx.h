@@ -80,11 +80,8 @@ struct i2c_master_s;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -108,7 +105,6 @@ extern "C"
 int ms58xx_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                     uint8_t addr, uint16_t osr, enum ms58xx_model_e model);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

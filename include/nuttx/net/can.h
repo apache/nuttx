@@ -89,11 +89,8 @@ extern const uint8_t g_len_to_can_dlc[65];
 #endif
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -169,7 +166,6 @@ int can_iob_navail(void);
 #define can_iob_navail() iob_navail(false)
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

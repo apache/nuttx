@@ -134,11 +134,8 @@ struct ads7843e_config_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -164,7 +161,6 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
                       FAR struct ads7843e_config_s *config,
                       int minor);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

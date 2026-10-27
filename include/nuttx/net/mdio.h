@@ -87,11 +87,8 @@ struct mdio_lowerhalf_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -184,7 +181,6 @@ int mdio_write(FAR struct mdio_bus_s *dev, uint8_t phyaddr, uint8_t regaddr,
 
 int mdio_reset(FAR struct mdio_bus_s *dev, uint8_t phyaddr);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

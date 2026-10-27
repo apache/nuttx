@@ -117,13 +117,9 @@ struct epoll_event
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -140,7 +136,6 @@ int epoll_pwait(int epfd, FAR struct epoll_event *evs,
 
 void epoll_close(int epfd);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -233,13 +233,9 @@ typedef CODE bool (*hid_rptfilter_t)(FAR struct hid_rptitem_s *item);
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -339,7 +335,6 @@ void hid_putitem(FAR uint8_t *report, FAR struct hid_rptitem_s *item);
 size_t hid_reportsize(FAR struct hid_rptinfo_s *rptinfo, uint8_t id,
                       uint8_t rpttype);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

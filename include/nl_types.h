@@ -49,18 +49,14 @@ typedef FAR void *nl_catd;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 nl_catd catopen(FAR const char *name, int oflag);
 FAR char *catgets(nl_catd catd, int set_id, int msg_id, FAR const char *s);
 int catclose(nl_catd catd);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

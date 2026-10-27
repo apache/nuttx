@@ -68,13 +68,9 @@ struct iovec
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -163,7 +159,6 @@ ssize_t preadv(int fildes, FAR const struct iovec *iov, int iovcnt,
 ssize_t pwritev(int fildes, FAR const struct iovec *iov, int iovcnt,
                 off_t offset);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

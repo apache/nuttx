@@ -77,13 +77,9 @@ struct utsname
  * Pre-processor Definitions
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -92,7 +88,6 @@ extern "C"
 
 int uname(FAR struct utsname *name);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

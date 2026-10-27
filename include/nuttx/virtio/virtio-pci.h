@@ -44,11 +44,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -57,7 +54,6 @@ extern "C"
 
 int register_virtio_pci_driver(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -75,13 +75,9 @@
 #define FS_IOC_GETFLAGS     FIOC_GETFLAGS
 #define FS_IOC_SETFLAGS     FIOC_SETFLAGS
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -122,7 +118,6 @@ extern "C"
 
 int ioctl(int fd, int req, ...);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

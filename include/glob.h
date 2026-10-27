@@ -84,11 +84,8 @@ typedef struct
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -113,7 +110,6 @@ int glob(FAR const char *pat, int flags,
 
 void globfree(FAR glob_t *g);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

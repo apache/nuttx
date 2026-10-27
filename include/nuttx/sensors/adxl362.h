@@ -34,11 +34,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -59,7 +56,6 @@ extern "C"
 
 int adxl362_register(int devno, FAR struct spi_dev_s *spi);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

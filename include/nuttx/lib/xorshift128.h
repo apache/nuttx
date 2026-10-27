@@ -60,11 +60,8 @@ struct xorshift128_state_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -89,7 +86,6 @@ extern "C"
 
 uint32_t xorshift128(FAR struct xorshift128_state_s *state);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

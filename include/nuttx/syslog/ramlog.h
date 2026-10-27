@@ -82,11 +82,8 @@
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -150,7 +147,6 @@ ssize_t ramlog_write(FAR syslog_channel_t *channel,
                      FAR const char *buffer, size_t buflen);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

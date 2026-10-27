@@ -971,13 +971,9 @@ struct usbhost_driver_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -1369,7 +1365,6 @@ int usbhost_waiter_initialize(FAR struct usbhost_connection_s *conn);
 void usbhost_drivers_initialize(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

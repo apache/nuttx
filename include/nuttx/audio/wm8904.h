@@ -167,11 +167,8 @@ struct wm8904_lower_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -253,7 +250,6 @@ void wm8904_clock_analysis(FAR struct audio_lowerhalf_s *dev,
 #  define wm8904_clock_analysis(d,m)
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

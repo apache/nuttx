@@ -86,11 +86,8 @@ struct streamlist
 #endif /* CONFIG_FILE_STREAM */
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* type tls_dtor_t **********************************************************/
@@ -498,7 +495,6 @@ void tls_cleanup_popall(FAR struct tls_info_s *tls);
 #  define tls_cleanup_popall(tls) ((void)(tls))
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

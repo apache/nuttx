@@ -103,11 +103,8 @@ struct mlx90393_config_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -130,7 +127,6 @@ extern "C"
 int mlx90393_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
                       FAR struct mlx90393_config_s *config);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

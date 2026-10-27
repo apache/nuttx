@@ -53,11 +53,8 @@ struct wm8776_lower_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -73,7 +70,6 @@ FAR struct audio_lowerhalf_s *
                     FAR struct i2s_dev_s *i2s,
                     FAR const struct wm8776_lower_s *lower);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

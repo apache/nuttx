@@ -248,13 +248,9 @@ struct nx_callback_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -1066,7 +1062,6 @@ void nx_redrawreq(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect);
 int nx_constructwindow(NXHANDLE handle, NXWINDOW hwnd, uint8_t flags,
                        FAR const struct nx_callback_s *cb, FAR void *arg);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

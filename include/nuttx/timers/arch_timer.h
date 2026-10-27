@@ -35,11 +35,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_TIMER_ARCH
@@ -52,7 +49,6 @@ void up_timer_set_lowerhalf(struct timer_lowerhalf_s *lower);
 
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

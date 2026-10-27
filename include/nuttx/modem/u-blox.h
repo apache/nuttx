@@ -94,13 +94,9 @@ struct ubxmdm_lower
  * Public Functions Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -112,7 +108,6 @@ FAR void *ubxmdm_register(FAR const char *path,
 
 void ubxmdm_unregister(FAR void *handle);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

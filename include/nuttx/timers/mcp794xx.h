@@ -36,11 +36,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -95,7 +92,6 @@ int mcp794xx_rtc_set_trim(uint8_t trim_val, bool rtc_slow, bool coarse_mode);
 struct i2c_master_s; /* Forward reference */
 int mcp794xx_rtc_initialize(FAR struct i2c_master_s *i2c, uint8_t addr);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

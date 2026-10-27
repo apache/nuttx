@@ -60,11 +60,8 @@ struct spirit_lower_s
 };
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -92,7 +89,6 @@ struct spi_dev_s; /* Forward reference */
 int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
                              FAR const struct spirit_lower_s *lower);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

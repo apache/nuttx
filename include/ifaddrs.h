@@ -70,17 +70,13 @@ struct ifaddrs
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 extern int getifaddrs(FAR struct ifaddrs **addrs);
 extern void freeifaddrs(FAR struct ifaddrs *addrs);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

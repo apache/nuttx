@@ -73,16 +73,12 @@ struct signalfd_siginfo
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int signalfd(int fd, FAR const sigset_t *mask, int flags);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

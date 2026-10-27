@@ -298,11 +298,8 @@ struct lsm330_config_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -331,7 +328,6 @@ int lsm330_register(FAR const char *devpath_acl,
                     FAR struct lsm330_config_s *config_acl,
                     FAR struct lsm330_config_s *config_gyro);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

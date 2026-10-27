@@ -109,11 +109,8 @@ struct regmap_s;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -312,7 +309,6 @@ int regmap_read(FAR struct regmap_s *map, unsigned int reg,
 int regmap_bulk_read(FAR struct regmap_s *map, unsigned int reg,
                      FAR void *val, unsigned int val_count);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

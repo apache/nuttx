@@ -36,11 +36,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -74,7 +71,6 @@ int rpmsg_router_hub_init(FAR const char *edge0,
 
 int rpmsg_router_edge_init(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -31,18 +31,13 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 void __stack_chk_fail(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

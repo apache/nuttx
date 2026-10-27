@@ -30,11 +30,8 @@
 #include <fixedmath.h>
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -47,7 +44,6 @@ struct attenuator_control
   int channel;
 };
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

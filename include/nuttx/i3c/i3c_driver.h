@@ -139,11 +139,8 @@ struct i3c_transfer_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -172,7 +169,6 @@ extern "C"
 int i3c_register(FAR struct i3c_master_controller *master, int bus);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

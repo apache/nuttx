@@ -163,16 +163,11 @@ int spi_transfer(FAR struct spi_dev_s *spi, FAR struct spi_sequence_s *seq);
 int spi_register(FAR struct spi_dev_s *spi, int bus);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

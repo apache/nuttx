@@ -33,13 +33,9 @@
  * Public Functions Definitions
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -76,7 +72,6 @@ FAR const struct symtab_s *allsyms_findbyname(FAR const char *name,
 FAR const struct symtab_s *allsyms_findbyvalue(FAR void *value,
                                                FAR size_t *size);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

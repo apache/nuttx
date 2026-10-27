@@ -138,11 +138,8 @@ struct as726x_sensor_data_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -164,7 +161,6 @@ extern "C"
 
 int as726x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

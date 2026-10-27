@@ -194,13 +194,9 @@ struct posix_typed_mem_info
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -233,7 +229,6 @@ int shm_unlink(FAR const char *name);
 #endif
 int memfd_create(FAR const char *name, unsigned int flags);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -114,11 +114,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -139,7 +136,6 @@ extern "C"
 FAR struct qe_lowerhalf_s *as5048a_initialize(FAR struct spi_dev_s *spi,
                                               int spi_devid);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

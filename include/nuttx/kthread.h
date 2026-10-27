@@ -39,11 +39,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -128,7 +125,6 @@ int kthread_create(FAR const char *name, int priority, int stack_size,
 
 #define kthread_delete(p) nxtask_delete(p)
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

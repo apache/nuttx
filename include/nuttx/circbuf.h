@@ -62,13 +62,9 @@ struct circbuf_s
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -411,7 +407,6 @@ void circbuf_writecommit(FAR struct circbuf_s *circ, size_t writtensize);
 
 void circbuf_readcommit(FAR struct circbuf_s *circ, size_t readsize);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

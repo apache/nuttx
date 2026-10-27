@@ -46,11 +46,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -104,7 +101,6 @@ extern "C"
 
 int fnmatch(FAR const char *pattern, const char *string, int flags);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -60,13 +60,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* The ipc_perm structure is used by three mechanisms for XSI interprocess
@@ -114,7 +110,6 @@ struct ipc_perm
 
 key_t ftok(FAR const char *pathname, int proj_id);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

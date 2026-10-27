@@ -238,11 +238,8 @@ struct cap_lowerhalf_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -297,7 +294,6 @@ int cap_register_multiple(FAR const char *devpath,
 int fake_capture_initialize(int channels);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

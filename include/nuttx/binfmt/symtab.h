@@ -31,13 +31,9 @@
  * Public Functions Definitions
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -77,7 +73,6 @@ void exec_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols);
 
 void exec_setsymtab(FAR const struct symtab_s *symtab, int nsymbols);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

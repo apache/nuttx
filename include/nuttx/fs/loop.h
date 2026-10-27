@@ -79,11 +79,8 @@ struct losetup_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -128,7 +125,6 @@ int losetup(FAR const char *devname, FAR const char *filename,
 int loteardown(FAR const char *devname);
 #endif /* __KERNEL __ */
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

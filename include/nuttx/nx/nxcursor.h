@@ -37,13 +37,9 @@
 
 #if defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -185,7 +181,6 @@ int nxcursor_setposition(NXHANDLE hnd, FAR const struct nxgl_point_s *pos);
 
 int nxcursor_get_position(NXHANDLE hnd, FAR struct nxgl_point_s *pos);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

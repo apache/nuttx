@@ -334,13 +334,9 @@ struct va_format
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 extern struct lib_outstream_s g_lowoutstream;
@@ -889,7 +885,6 @@ int lib_vscanf(FAR struct lib_instream_s *stream, FAR int *lastc,
 int lib_bscanf(FAR struct lib_instream_s *stream, FAR int *lastc,
                FAR const IPTR char *fmt, FAR void *data);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

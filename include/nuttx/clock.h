@@ -331,11 +331,8 @@ struct cpuload_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -871,7 +868,6 @@ int nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp);
 int nxclock_adjtime(clockid_t clock_id, FAR struct timex *buf);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

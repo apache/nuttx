@@ -105,11 +105,8 @@ struct pginfo_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -228,7 +225,6 @@ void mm_pgfree(uintptr_t paddr, unsigned int npages);
 
 void mm_pginfo(FAR struct pginfo_s *info);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

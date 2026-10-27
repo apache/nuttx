@@ -102,11 +102,8 @@ typedef int (*nftw_cb_t)(FAR const char *path, FAR const struct stat *buf,
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -221,7 +218,6 @@ int ftw(FAR const char *path, ftw_cb_t fn, int fdlimit);
 
 int nftw(FAR const char *path, nftw_cb_t fn, int fdlimit, int flags);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

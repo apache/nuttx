@@ -34,11 +34,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_FDCHECK
@@ -94,7 +91,6 @@ int fdcheck_restore(int val);
 
 int fdcheck_protect(int fd);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

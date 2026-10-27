@@ -43,11 +43,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -117,7 +114,6 @@ struct lpm013m091a_lcd_s
 FAR struct lcd_dev_s *
   lpm013m091a_initialize(FAR struct lpm013m091a_lcd_s *lcd, int devno);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

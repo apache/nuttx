@@ -71,19 +71,14 @@ struct statvfs
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int statvfs(FAR const char *path, FAR struct statvfs *buf);
 int fstatvfs(int fd, FAR struct statvfs *buf);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

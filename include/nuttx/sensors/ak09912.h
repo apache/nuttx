@@ -53,11 +53,8 @@ struct i2c_master_s;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* IOCTL Commands ***********************************************************/
@@ -103,7 +100,6 @@ struct ak09912_sensadj_s
 
 int ak09912_register(FAR const char *devpath, FAR struct i2c_master_s *i2c);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

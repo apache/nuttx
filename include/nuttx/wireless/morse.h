@@ -115,11 +115,8 @@ struct morse_lower_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -144,7 +141,6 @@ extern "C"
 int morse_register(FAR struct spi_dev_s *spi,
                    FAR const struct morse_lower_s *lower);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

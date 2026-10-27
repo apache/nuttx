@@ -324,11 +324,8 @@ struct battery_monitor_dev_s
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -410,7 +407,6 @@ bq769x0_initialize(FAR struct i2c_master_s *i2c,
                    uint8_t cellcount, uint8_t chip, uint32_t sense_r);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

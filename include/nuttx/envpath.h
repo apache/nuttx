@@ -50,11 +50,8 @@ typedef FAR void *ENVPATH_HANDLE;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -137,7 +134,6 @@ FAR char *envpath_next(ENVPATH_HANDLE handle, FAR const char *relpath);
 
 void envpath_release(ENVPATH_HANDLE handle);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

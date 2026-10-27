@@ -162,11 +162,8 @@ struct btn_lowerhalf_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -209,7 +206,6 @@ int btn_register(FAR const char *devname,
 int btn_lower_initialize(FAR const char *devname);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

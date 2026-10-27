@@ -274,13 +274,9 @@ struct i2c_transfer_s
  * Public Functions Definitions
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -383,7 +379,6 @@ int i2c_read(FAR struct i2c_master_s *dev,
              FAR const struct i2c_config_s *config,
              FAR uint8_t *buffer, int buflen);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

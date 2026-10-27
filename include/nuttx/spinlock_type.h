@@ -33,13 +33,9 @@
  * Public Type Definitions
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #if defined(CONFIG_RW_SPINLOCK)
@@ -96,7 +92,6 @@ typedef struct seqcount_s
   uint32_t sequence;
 } seqcount_t;
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

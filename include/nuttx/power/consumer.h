@@ -48,11 +48,8 @@
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -72,7 +69,6 @@ int regulator_get_voltage(FAR struct regulator_s *regulator);
 int regulator_set_mode(FAR struct regulator_s *regulator,
                        enum regulator_mode_e mode);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

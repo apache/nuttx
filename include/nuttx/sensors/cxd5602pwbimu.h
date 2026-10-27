@@ -132,11 +132,8 @@ struct i2c_master_s;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -163,7 +160,6 @@ int cxd5602pwbimu_register(FAR const char *devpath,
                            FAR struct i2c_master_s *dev_i2c,
                            FAR cxd5602pwbimu_config_t *config);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

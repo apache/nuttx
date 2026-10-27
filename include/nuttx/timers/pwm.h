@@ -255,11 +255,8 @@ struct pwm_lowerhalf_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -297,7 +294,6 @@ int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev);
  * Platform-Independent "Lower-Half" PWM Driver Interfaces
  ****************************************************************************/
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

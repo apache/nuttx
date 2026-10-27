@@ -130,11 +130,8 @@ struct lis3mdl_config_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -158,7 +155,6 @@ extern "C"
 int lis3mdl_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
                      FAR struct lis3mdl_config_s const *config);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

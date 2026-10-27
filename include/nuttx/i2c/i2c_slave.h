@@ -255,13 +255,9 @@ struct i2c_slave_s
  * Public Functions Definitions
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_I2C_SLAVE_DRIVER
@@ -291,7 +287,6 @@ int i2c_slave_register(FAR struct i2c_slave_s *dev, int bus, int addr,
 
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

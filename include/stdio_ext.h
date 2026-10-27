@@ -49,11 +49,8 @@
  */
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 size_t __fbufsize(FAR FILE *stream);
@@ -71,7 +68,6 @@ void   __fseterr(FAR FILE *stream);
 int    __fsetlocking(FAR FILE *stream, int type);
 void   _flushlbf(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

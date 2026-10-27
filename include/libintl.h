@@ -35,11 +35,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 FAR char *gettext(FAR const char *msgid) format_like(1);
@@ -68,7 +65,6 @@ FAR char *bindtextdomain(FAR const char *domainname,
 FAR char *bind_textdomain_codeset(FAR const char *domainname,
                                   FAR const char *codeset);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

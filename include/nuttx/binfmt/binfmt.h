@@ -384,7 +384,6 @@ int exec_spawn(FAR const char *filename, FAR char * const *argv,
 int binfmt_exit(FAR struct binary_s *bin);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

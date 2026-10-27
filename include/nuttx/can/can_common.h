@@ -35,13 +35,9 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -84,7 +80,6 @@ uint8_t can_bytes2dlc(uint8_t nbytes);
 
 uint8_t can_dlc2bytes(uint8_t dlc);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

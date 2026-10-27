@@ -51,11 +51,8 @@ struct nand_wrapper_dev_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -78,7 +75,6 @@ int nand_wrapper_isbad(FAR struct mtd_dev_s *dev, off_t block);
 int nand_wrapper_markbad(FAR struct mtd_dev_s *dev, off_t block);
 void nand_wrapper_initialize(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

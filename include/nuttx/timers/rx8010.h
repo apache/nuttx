@@ -36,11 +36,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -70,7 +67,6 @@ extern "C"
 struct i2c_master_s; /* Forward reference */
 int rx8010_rtc_initialize(FAR struct i2c_master_s *i2c);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

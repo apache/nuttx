@@ -463,13 +463,9 @@ struct avg_filter_data_s
  * Public Functions Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Math functions */
@@ -768,7 +764,6 @@ void matrix_copy(const float *A, float *B, uint8_t m, uint8_t n);
 
 uint8_t matrix_inv_3x3(const float A[3][3], float inv[3][3]);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

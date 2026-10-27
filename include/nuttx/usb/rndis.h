@@ -116,13 +116,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -192,7 +188,6 @@ int usbdev_rndis_set_host_mac_addr(FAR struct net_driver_s *netdev,
 void usbdev_rndis_get_composite_devdesc(struct composite_devdesc_s *dev);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

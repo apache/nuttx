@@ -1124,16 +1124,11 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
                         bool inc_addr, FAR uint8_t *buf,
                         unsigned int blocklen, unsigned int nblocks);
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

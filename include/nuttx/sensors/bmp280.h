@@ -54,11 +54,8 @@ struct i2c_master_s;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* IOCTL Commands ***********************************************************/
@@ -155,7 +152,6 @@ struct bmp280_meas_s
 
 int bmp280_register(int devno, FAR struct i2c_master_s *i2c);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

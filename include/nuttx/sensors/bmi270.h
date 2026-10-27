@@ -67,11 +67,8 @@ struct spi_dev_s;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -103,7 +100,6 @@ int bmi270_register_uorb(int devno, FAR struct spi_dev_s *dev);
 int bmi270_register(FAR const char *devpath, FAR struct spi_dev_s *dev);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

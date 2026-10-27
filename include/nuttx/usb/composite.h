@@ -53,13 +53,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -151,7 +147,6 @@ int composite_ep0submit(FAR struct usbdevclass_driver_s *driver,
 FAR const struct usbdev_devdescs_s *composite_getdevdescs(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

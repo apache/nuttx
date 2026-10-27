@@ -160,13 +160,9 @@ struct timezone
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -412,7 +408,6 @@ int futimes(int fd, const struct timeval tv[2]);
 
 hrtime_t gethrtime(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

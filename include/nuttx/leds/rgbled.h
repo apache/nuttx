@@ -42,11 +42,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -80,7 +77,6 @@ int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledr,
                                           int chanr, int chang, int chanb
                                           );
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -215,13 +215,9 @@ typedef uint64_t ub32_t;
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Trigonometric Functions */
@@ -235,7 +231,6 @@ b16_t  b16atan2(b16_t y, b16_t x);
 ub16_t ub32sqrtub16(ub32_t a);
 ub8_t ub16sqrtub8(ub16_t a);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

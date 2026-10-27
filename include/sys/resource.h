@@ -133,13 +133,9 @@ struct rusage
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int  getpriority(int which, id_t who);
@@ -148,7 +144,6 @@ int  getrusage(int who, FAR struct rusage *r_usage);
 int  setpriority(int which, id_t who, int value);
 int  setrlimit(int resource, FAR const struct rlimit *rlp);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

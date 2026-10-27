@@ -80,11 +80,8 @@ struct keyboard_lowerhalf_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -114,7 +111,6 @@ int keyboard_unregister(FAR struct keyboard_lowerhalf_s *lower,
 
 uint32_t keyboard_translate_virtio_code(uint16_t keycode, bool *special);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

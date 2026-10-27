@@ -56,11 +56,8 @@ struct hwspinlock_dev_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 static inline bool hwspin_trylock(FAR struct hwspinlock_dev_s *dev)

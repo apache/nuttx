@@ -30,11 +30,8 @@
 #include <nuttx/mmcsd.h>
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -64,7 +61,6 @@ extern "C"
 
 int bcmf_netdev_register(int intf);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

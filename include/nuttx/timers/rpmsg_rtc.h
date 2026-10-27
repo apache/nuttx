@@ -35,11 +35,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_RTC_RPMSG
@@ -51,7 +48,6 @@ FAR struct rtc_lowerhalf_s *rpmsg_rtc_server_initialize(
 #endif /* CONFIG_RTC_RPMSG_SERVER */
 #endif /* CONFIG_RTC_RPMSG */
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

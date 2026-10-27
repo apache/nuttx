@@ -73,11 +73,8 @@ struct graninfo_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -258,7 +255,6 @@ void gran_free(GRAN_HANDLE handle, FAR void *memory, size_t size);
 
 void gran_info(GRAN_HANDLE handle, FAR struct graninfo_s *info);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

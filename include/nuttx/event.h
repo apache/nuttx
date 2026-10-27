@@ -84,11 +84,8 @@ struct nevent_inode_s
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -373,7 +370,6 @@ int nxevent_open(FAR nxevent_t **event, FAR const char *name,
 
 int nxevent_close(FAR nxevent_t *event);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

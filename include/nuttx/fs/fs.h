@@ -540,13 +540,9 @@ struct fdlist
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -1937,7 +1933,6 @@ int map_anonymous(FAR struct mm_map_entry_s *entry, bool kernel);
 #  define map_anonymous(entry, kernel) (-ENOSYS)
 #endif /* CONFIG_FS_ANONMAP */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

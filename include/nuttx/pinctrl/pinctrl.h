@@ -351,11 +351,8 @@ pinctrl_funcname(FAR const struct pinctrl_padname_s *table, size_t npads,
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************

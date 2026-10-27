@@ -54,13 +54,9 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 FAR char  *strdup(FAR const char *s) malloc_like;
@@ -459,7 +455,6 @@ builtin_function(strrchr) FAR char *strrchr(FAR const char *s,
 #  endif
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

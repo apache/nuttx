@@ -171,11 +171,8 @@ typedef struct sem_s sem_t;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -260,7 +257,6 @@ int sem_setprotocol(FAR sem_t *sem, int protocol);
 
 int sem_getprotocol(FAR sem_t *sem, FAR int *protocol);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

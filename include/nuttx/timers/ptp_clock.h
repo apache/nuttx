@@ -333,13 +333,9 @@ struct ptp_lowerhalf_s
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -392,7 +388,6 @@ int ptp_clock_register(FAR struct ptp_lowerhalf_s *lower, int32_t max_adj,
 
 void ptp_clock_unregister(FAR struct ptp_lowerhalf_s *dev, int devno);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

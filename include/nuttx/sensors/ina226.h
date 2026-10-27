@@ -117,11 +117,8 @@ struct ina226_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -170,7 +167,6 @@ int ina226_register_uorb(int devno, FAR struct i2c_master_s *i2c,
                          uint8_t addr, int32_t shuntval, uint16_t config);
 #endif /* CONFIG_SENSORS_INA226_UORB */
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

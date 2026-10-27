@@ -52,13 +52,9 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 FAR char **backtrace_symbols(FAR void *const *buffer, int size);
@@ -78,7 +74,6 @@ void backtrace_dump(void);
 #    define backtrace_dump()
 #  endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

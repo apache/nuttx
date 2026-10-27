@@ -53,13 +53,9 @@ typedef struct ucontext_s
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int  getcontext(FAR ucontext_t *ucp);
@@ -68,7 +64,6 @@ void makecontext(FAR ucontext_t *ucp, CODE void (*func)(void), int argc,
                  ...);
 int  swapcontext(FAR ucontext_t *oucp, FAR const ucontext_t *ucp);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

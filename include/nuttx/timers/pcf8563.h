@@ -44,13 +44,9 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -76,7 +72,6 @@ extern "C"
 
 int pcf8563_rtc_initialize(FAR struct i2c_master_s *i2c);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

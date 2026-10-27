@@ -45,13 +45,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -99,7 +95,6 @@ int cdcecm_initialize(int minor, FAR void **handle);
 void cdcecm_get_composite_devdesc(struct composite_devdesc_s *dev);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

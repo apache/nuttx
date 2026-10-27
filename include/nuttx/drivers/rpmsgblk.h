@@ -34,11 +34,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -84,7 +81,6 @@ int rpmsgblk_register(FAR const char *remotecpu, FAR const char *remotepath,
                       FAR const char *localpath);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -55,11 +55,8 @@ typedef uint32_t eventfd_t;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int eventfd(unsigned int count, int flags);
@@ -67,7 +64,6 @@ int eventfd(unsigned int count, int flags);
 int eventfd_read(int fd, FAR eventfd_t *value);
 int eventfd_write(int fd, eventfd_t value);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

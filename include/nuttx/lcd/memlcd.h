@@ -30,11 +30,8 @@
 #include <stdbool.h>
 
 #ifdef __cplusplus
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -100,7 +97,6 @@ FAR struct lcd_dev_s *memlcd_initialize(FAR struct spi_dev_s *spi,
                                         FAR struct memlcd_priv_s *priv,
                                         unsigned int devno);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

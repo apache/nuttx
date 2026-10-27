@@ -393,11 +393,8 @@ struct pm_wakelock_s
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -941,7 +938,6 @@ bool pm_idle_lock(int cpu);
 #  define pm_idle_lock(cpu) (0)
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

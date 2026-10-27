@@ -144,11 +144,8 @@ struct aiocb
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -166,7 +163,6 @@ int aio_write(FAR struct aiocb *);
 int lio_listio(int, FAR struct aiocb *restrict const[restrict], int,
                FAR struct sigevent *restrict);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

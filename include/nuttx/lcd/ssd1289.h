@@ -94,11 +94,8 @@ struct ssd1289_lcd_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -131,7 +128,6 @@ FAR struct lcd_dev_s *ssd1289_lcdinitialize(FAR struct ssd1289_lcd_s *lcd);
 
 void ssd1289_clear(FAR struct lcd_dev_s *dev, uint16_t color);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

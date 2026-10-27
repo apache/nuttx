@@ -77,11 +77,8 @@ struct lan9250_lower_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -139,7 +136,6 @@ int lan9250_initialize(
 
 int lan9250_uninitialize(FAR const struct lan9250_lower_s *lower);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

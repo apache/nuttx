@@ -145,11 +145,8 @@ struct spi_dev_s;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -194,7 +191,6 @@ XEN1210_HANDLE xen1210_instantiate(FAR struct spi_dev_s *dev,
 
 int xen1210_register(XEN1210_HANDLE handle, int minor);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

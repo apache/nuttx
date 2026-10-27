@@ -51,11 +51,8 @@ typedef CODE int (*vnc_kbdout_t)(FAR void *arg, uint8_t nch,
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -152,7 +149,6 @@ int vnc_fb_register(int display);
 
 void vnc_fb_unregister(int display);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

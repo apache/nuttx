@@ -373,20 +373,15 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Return a pointer to the thread specific errno. */
 
 FAR int *__errno(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

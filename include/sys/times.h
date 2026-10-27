@@ -43,13 +43,9 @@ struct tms
   clock_t tms_cstime; /* System CPU time of dead children.  */
 };
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -75,7 +71,6 @@ extern "C"
 
 clock_t times(FAR struct tms *buffer);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

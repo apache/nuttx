@@ -44,11 +44,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -73,7 +70,6 @@ int virtio_register_mmio_device(FAR void *regs, int irq);
 int virtio_register_mmio_device_secure(FAR void *regs, int irq);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -54,11 +54,8 @@ struct i2c_master_s;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* IOCTL Commands ***********************************************************
@@ -131,7 +128,6 @@ int lt1pa01als_register(FAR const char *devpath, int minor,
 int lt1pa01prox_register(FAR const char *devpath, int minor,
                          FAR struct i2c_master_s *i2c, int port);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

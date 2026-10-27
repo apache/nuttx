@@ -150,11 +150,8 @@ struct battery_gauge_dev_s
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -292,7 +289,6 @@ int goldfish_battery_register(FAR void *regs, int irq);
 int battery_fake_gauge_register(void);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

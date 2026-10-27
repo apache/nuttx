@@ -36,11 +36,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -56,7 +53,6 @@ extern "C"
 
 int pci_register_rpmsg_virtio_ivshmem_driver(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

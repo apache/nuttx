@@ -35,11 +35,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Append _func suffix to avoid the penitential symbol collision */
@@ -78,7 +75,6 @@ void errx(int status, FAR const char *fmt, ...) printf_like(2, 3);
 void verrx(int status, FAR const char *fmt, va_list ap) printf_like(2, 0);
 
 #ifdef __cplusplus
-#undef EXTERN
 }
 #endif
 

@@ -106,11 +106,8 @@ struct tda19988_lower_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -189,7 +186,6 @@ int tda19988_videomode(TDA19988_HANDLE handle,
 ssize_t tda19988_read_edid(TDA19988_HANDLE handle, off_t offset,
                            FAR uint8_t *buffer, size_t buflen);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

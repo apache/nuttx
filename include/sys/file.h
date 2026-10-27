@@ -35,16 +35,12 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int flock(int fd, int cmd);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

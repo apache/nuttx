@@ -391,13 +391,9 @@ struct usbdevclass_driver_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -522,7 +518,6 @@ void usbdev_dma_free(FAR void *memory);
 void usbdev_sof_irq(FAR struct usbdev_s *dev, uint16_t frameno);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

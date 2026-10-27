@@ -286,13 +286,9 @@
  * Public Types
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /* Reported serial events.  Data is associated with CDCACM_EVENT_LINECODING
@@ -464,7 +460,6 @@ ssize_t cdcacm_write(FAR const char *buffer, size_t buflen);
 void cdcacm_disable_syslog(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

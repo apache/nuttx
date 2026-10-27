@@ -67,11 +67,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -100,7 +97,6 @@ extern "C"
 
 int slip_initialize(int intf, FAR const char *devname);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

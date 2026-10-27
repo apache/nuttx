@@ -34,11 +34,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_MOTOR_FOC_DUMMY
@@ -46,7 +43,6 @@ FAR struct foc_dev_s *foc_dummy_initialize(int inst);
 void foc_dummy_update(void);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

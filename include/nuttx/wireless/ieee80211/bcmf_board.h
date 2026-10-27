@@ -32,11 +32,8 @@
 #include <net/ethernet.h>
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -130,7 +127,6 @@ void bcmf_board_setup_oob_irq(int minor, CODE int (*func)(FAR void *),
 
 bool bcmf_board_etheraddr(FAR struct ether_addr *ethaddr);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

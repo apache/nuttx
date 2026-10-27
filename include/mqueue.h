@@ -61,11 +61,8 @@ typedef int mqd_t;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -89,7 +86,6 @@ int     mq_setattr(mqd_t mqdes, FAR const struct mq_attr *mq_stat,
                    FAR struct mq_attr *oldstat);
 int     mq_getattr(mqd_t mqdes, FAR struct mq_attr *mq_stat);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

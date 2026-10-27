@@ -64,11 +64,8 @@ struct st7123_config_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -97,7 +94,6 @@ extern "C"
 int st7123_register(FAR struct i2c_master_s *i2c, uint8_t minor,
                     FAR const struct st7123_config_s *config);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

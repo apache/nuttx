@@ -154,11 +154,8 @@ struct procfs_meminfo_entry_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -296,7 +293,6 @@ void procfs_register_meminfo(FAR struct procfs_meminfo_entry_s *entry);
 
 void procfs_unregister_meminfo(FAR struct procfs_meminfo_entry_s *entry);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

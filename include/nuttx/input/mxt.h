@@ -150,11 +150,8 @@ struct mxt_lower_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -183,7 +180,6 @@ extern "C"
 int mxt_register(FAR struct i2c_master_s *i2c,
                  FAR const struct mxt_lower_s *lower, int minor);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

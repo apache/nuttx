@@ -234,11 +234,8 @@ struct ili9341_lcd_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -292,7 +289,6 @@ FAR struct lcd_dev_s *ili9341_initialize(FAR struct ili9341_lcd_s *lcd,
  ****************************************************************************/
 
 int ili9341_clear(FAR struct lcd_dev_s *dev, uint16_t color);
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

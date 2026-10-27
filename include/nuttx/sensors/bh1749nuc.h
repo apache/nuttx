@@ -59,11 +59,8 @@ struct bh1749nuc_config_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -91,7 +88,6 @@ int bh1749nuc_register_uorb(int devno,
                             FAR struct bh1749nuc_config_s *config);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

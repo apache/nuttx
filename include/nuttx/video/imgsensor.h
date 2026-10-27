@@ -405,11 +405,8 @@ struct imgsensor_s
 };
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -420,7 +417,6 @@ extern "C"
 
 int imgsensor_register(FAR struct imgsensor_s *sensor);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

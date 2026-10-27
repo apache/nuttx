@@ -35,13 +35,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -58,7 +54,6 @@ extern "C"
 
 int uart_bth5_register(FAR const char *path, FAR struct bt_driver_s *drv);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

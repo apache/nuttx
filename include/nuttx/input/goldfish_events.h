@@ -38,11 +38,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -62,7 +59,6 @@ extern "C"
 
 int goldfish_events_register(FAR void *base, int irq);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

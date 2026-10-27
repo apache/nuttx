@@ -57,13 +57,9 @@ struct usbhost_devaddr_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -129,7 +125,6 @@ int usbhost_devaddr_create(FAR struct usbhost_hubport_s *hport);
 void usbhost_devaddr_destroy(FAR struct usbhost_hubport_s *hport,
                              uint8_t devaddr);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

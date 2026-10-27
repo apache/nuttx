@@ -351,11 +351,8 @@ typedef struct dq_queue_s dq_queue_t;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Add nodes to queues */
@@ -596,7 +593,6 @@ STATIC_INLINE size_t dq_count(FAR dq_queue_t *queue)
 }
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -24,11 +24,8 @@
 #define __INCLUDE_ISO646_H
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -65,7 +62,6 @@ extern "C"
 #define xor         ^
 #define xor_eq      ^=
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

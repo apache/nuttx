@@ -35,11 +35,8 @@
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -103,7 +100,6 @@ int parse_mtd_partition(FAR struct mtd_dev_s *mtd,
                         partition_handler_t handler,
                         FAR void *arg);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

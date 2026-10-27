@@ -34,17 +34,13 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 FAR char *basename(FAR char *path);
 FAR char *dirname(FAR char *path);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

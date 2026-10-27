@@ -63,13 +63,9 @@
  * Inline Functions
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -128,7 +124,6 @@ FAR char *rindex(FAR const char *s, int c);
 int strcasecmp(FAR const char *, FAR const char *);
 int strncasecmp(FAR const char *, FAR const char *, size_t);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

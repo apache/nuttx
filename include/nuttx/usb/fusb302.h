@@ -33,13 +33,9 @@
  * Pre-Processor Declarations
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -133,7 +129,6 @@ struct fusb302_config_s
 int fusb302_register(FAR const char *devpath,
                      FAR struct fusb302_config_s *config);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

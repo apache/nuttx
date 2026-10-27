@@ -35,13 +35,9 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -138,7 +134,6 @@ FAR const void *modsym(FAR void *handle, FAR const char *name);
 
 FAR void *modhandle(FAR const char *name);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

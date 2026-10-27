@@ -57,11 +57,8 @@ typedef uint8_t fat_attrib_t;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -103,7 +100,6 @@ FAR void *fat_dma_alloc(size_t size);
 void fat_dma_free(FAR void *memory, size_t size);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

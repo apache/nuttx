@@ -100,13 +100,9 @@ struct spi_bitbang_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -145,7 +141,6 @@ FAR struct spi_dev_s *spi_create_bitbang(
 
 void spi_destroy_bitbang(FAR struct spi_dev_s *dev);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

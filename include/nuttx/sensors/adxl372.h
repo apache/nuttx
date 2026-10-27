@@ -236,11 +236,8 @@ struct adxl372_config_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -269,7 +266,6 @@ int adxl372_register(FAR const char *devpath,
 int adxl372_register_uorb(int devno, FAR struct spi_dev_s *spi);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

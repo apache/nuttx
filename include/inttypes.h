@@ -363,11 +363,8 @@ typedef struct imaxdiv_s imaxdiv_t;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* "The following shall be declared as functions and may also be defined as
@@ -382,7 +379,6 @@ uintmax_t strtoumax(FAR const char *nptr, FAR char **endptr, int base);
 intmax_t  wcstoimax(FAR const wchar_t *nptr, FAR wchar_t **endptr, int base);
 uintmax_t wcstoumax(FAR const wchar_t *nptr, FAR wchar_t **endptr, int base);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

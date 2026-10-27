@@ -104,11 +104,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -151,7 +148,6 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd);
 struct mtd_dev_s;
 int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

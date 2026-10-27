@@ -117,11 +117,8 @@ typedef struct invdiv_param64_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -732,7 +729,6 @@ void umul64(FAR const struct uint64_s *factor1,
             FAR const struct uint64_s *factor2,
             FAR struct uint64_s *product);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

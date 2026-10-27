@@ -83,11 +83,8 @@ struct vlan_ioctl_args
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -129,7 +126,6 @@ int vlan_register(FAR struct netdev_lowerhalf_s *real, uint16_t vid,
 
 void vlan_unregister(FAR struct netdev_lowerhalf_s *dev);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

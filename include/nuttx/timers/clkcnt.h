@@ -53,11 +53,8 @@ typedef uint64_t clkcnt_t;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -458,7 +455,6 @@ uint64_t clkcnt_cnt2sec(clkcnt_t cnt, uint32_t freq)
   return clkcnt_delta_cnt2time(cnt, freq, 1);
 }
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

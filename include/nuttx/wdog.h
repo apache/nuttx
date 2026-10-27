@@ -98,11 +98,8 @@ struct wdog_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -376,7 +373,6 @@ int wd_cancel(FAR struct wdog_s *wdog);
 
 clock_t wd_gettime(FAR struct wdog_s *wdog);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

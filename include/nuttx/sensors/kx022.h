@@ -54,11 +54,8 @@ struct i2c_master_s;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -101,7 +98,6 @@ int kx022_init(FAR struct i2c_master_s *i2c, int port);
 int kx022_register(FAR const char *devpath, int minor,
                    FAR struct i2c_master_s *i2c, int port);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

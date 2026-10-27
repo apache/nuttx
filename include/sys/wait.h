@@ -83,13 +83,9 @@ typedef enum idtype_e idtype_t;
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 pid_t wait(FAR int *stat_loc);
@@ -107,7 +103,6 @@ pid_t wait3(FAR int *stat_loc, int options, FAR struct rusage *rusage);
 pid_t wait4(pid_t pid, FAR int *stat_loc, int options,
             FAR struct rusage *rusage);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

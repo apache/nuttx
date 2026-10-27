@@ -61,13 +61,9 @@ struct passwd
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 void setpwent(void);
@@ -83,7 +79,6 @@ int getpwnam_r(FAR const char *name, FAR struct passwd *pwd, FAR char *buf,
 int getpwuid_r(uid_t uid, FAR struct passwd *pwd, FAR char *buf,
                size_t buflen, FAR struct passwd **result);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

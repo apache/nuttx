@@ -60,20 +60,15 @@ struct sysinfo
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int sysinfo(FAR struct sysinfo *info);
 int get_nprocs_conf(void);
 int get_nprocs(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

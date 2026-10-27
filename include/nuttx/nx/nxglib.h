@@ -98,13 +98,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -507,7 +503,6 @@ void nxgl_circletraps(FAR const struct nxgl_point_s *center,
 uint32_t nxglib_rgb24_blend(uint32_t color1, uint32_t color2, ub16_t frac1);
 uint16_t nxglib_rgb565_blend(uint16_t color1, uint16_t color2, ub16_t frac1);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

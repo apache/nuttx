@@ -63,11 +63,8 @@ struct mrf24j40_lower_s
 };
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -100,7 +97,6 @@ FAR struct ieee802154_radio_s *
   mrf24j40_init(FAR struct spi_dev_s *spi,
                 FAR const struct mrf24j40_lower_s *lower);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -160,13 +160,9 @@ struct lirc_lowerhalf_s
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -261,7 +257,6 @@ void lirc_raw_event(FAR struct lirc_lowerhalf_s *lower,
 void lirc_scancode_event(FAR struct lirc_lowerhalf_s *lower,
                          FAR struct lirc_scancode *lsc);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

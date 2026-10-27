@@ -44,13 +44,9 @@
  * Public Type Definitions
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 struct option
@@ -98,7 +94,6 @@ int getopt_long_only(int argc, FAR char * const argv[],
                      FAR const struct option *longopts,
                      FAR int *longindex);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -36,11 +36,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_WATCHDOG_WDOG
@@ -67,7 +64,6 @@ extern "C"
 int watchdog_wdog_initialize(FAR const char *path);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

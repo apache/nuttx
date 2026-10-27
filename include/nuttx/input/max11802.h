@@ -122,11 +122,8 @@ struct max11802_config_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -151,7 +148,6 @@ extern "C"
 int max11802_register(FAR struct spi_dev_s *spi,
                        FAR struct max11802_config_s *config, int minor);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

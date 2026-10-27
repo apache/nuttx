@@ -88,11 +88,8 @@ struct mtd_losetup_s
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -103,7 +100,6 @@ extern "C"
 int mtd_loop_register(void);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

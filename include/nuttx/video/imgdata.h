@@ -135,11 +135,8 @@ struct imgdata_s
 };
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -150,7 +147,6 @@ extern "C"
 
 void imgdata_register(FAR struct imgdata_s *data);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -124,11 +124,8 @@ struct es8311_lower_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -182,7 +179,6 @@ void es8311_dump_registers(FAR struct audio_lowerhalf_s *dev,
 #  define es8311_dump_registers(d,m)
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

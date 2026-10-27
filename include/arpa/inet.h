@@ -38,11 +38,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Functions to manipulate address representations */
@@ -62,7 +59,6 @@ int         inet_pton(int af, FAR const char *src, FAR void *dst);
 const char *inet_ntop(int af, FAR const void *src, FAR char *dst,
                       socklen_t size);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

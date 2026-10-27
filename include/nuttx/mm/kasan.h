@@ -58,11 +58,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -237,7 +234,6 @@ int kasan_debugpoint(int type, FAR void *addr, size_t size);
 
 bool kasan_bypass(bool state);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -125,13 +125,9 @@ struct devfreq_notifier_s
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -366,7 +362,6 @@ FAR struct devfreq_governor_s *devfreq_performance(void);
 FAR struct devfreq_governor_s *devfreq_powersave(void);
 FAR struct devfreq_governor_s *devfreq_ondemand(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

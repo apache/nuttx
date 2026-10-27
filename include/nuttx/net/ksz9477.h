@@ -59,11 +59,8 @@ typedef enum
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -173,7 +170,6 @@ int ksz9477_configure_port_mirroring(ksz9477_port_t port, uint8_t config);
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_NET_KSZ9477 */

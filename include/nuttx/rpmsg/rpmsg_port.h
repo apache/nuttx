@@ -93,11 +93,8 @@ struct rpmsg_port_spi_config_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_RPMSG_PORT_SPI

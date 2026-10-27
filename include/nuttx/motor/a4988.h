@@ -71,11 +71,8 @@ struct a4988_ops_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -94,7 +91,6 @@ extern "C"
 
 int a4988_register(FAR const char *devpath, FAR struct a4988_ops_s *ops);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

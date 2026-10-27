@@ -73,11 +73,8 @@ struct hyt271_bus_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -103,7 +100,6 @@ extern "C"
 
 int hyt271_register(int devno, FAR struct i2c_master_s *i2c, uint8_t addr,
                     FAR struct hyt271_bus_s *bus);
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

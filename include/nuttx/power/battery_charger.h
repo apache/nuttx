@@ -168,11 +168,8 @@ struct battery_charger_dev_s
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -292,7 +289,6 @@ FAR struct battery_charger_dev_s *bq2429x_initialize(
                                      int current);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

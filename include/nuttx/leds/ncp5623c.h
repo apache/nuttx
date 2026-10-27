@@ -106,11 +106,8 @@ struct i2c_master_s;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -134,7 +131,6 @@ extern "C"
 int ncp5623c_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                       uint8_t const ncp5623c_i2c_addr);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

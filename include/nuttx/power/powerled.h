@@ -225,11 +225,8 @@ struct powerled_dev_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -239,7 +236,6 @@ extern "C"
 int powerled_register(FAR const char *path, FAR struct powerled_dev_s *dev,
                   FAR void *lower);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

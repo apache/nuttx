@@ -116,11 +116,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -895,7 +892,6 @@ int board_usbhost_select_configuration(FAR struct usbhost_hubport_s *hport,
                                  FAR const struct usbhost_id_s *id);
 #endif /* CONFIG_USBHOST_CONFIGURATION_SELECTION */
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

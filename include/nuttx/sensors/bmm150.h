@@ -50,11 +50,8 @@ struct bmm150_config_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -74,7 +71,6 @@ extern "C"
 
 int bmm150_register_uorb(int devno, FAR struct bmm150_config_s *config);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

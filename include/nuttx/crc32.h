@@ -43,11 +43,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -140,7 +137,6 @@ uint32_t crc32_ieeepart(FAR const uint8_t *src,
 
 uint32_t crc32_ieee(FAR const uint8_t *src, size_t len);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

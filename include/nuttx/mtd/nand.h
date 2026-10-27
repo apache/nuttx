@@ -77,11 +77,8 @@ struct nand_dev_s
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -122,7 +119,6 @@ FAR struct mtd_dev_s *nand_raw_initialize(FAR struct nand_raw_s *raw);
 
 FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif
