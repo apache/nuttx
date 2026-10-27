@@ -32,6 +32,10 @@ ifeq ($(CONFIG_UIO_IVSHMEM),y)
 CSRCS += ivshmem_uio.c
 endif
 
+ifeq ($(CONFIG_IVSHMEM_FLAT),y)
+CSRCS += ivshmem_flat.c
+endif
+
 DEPPATH += --dep-path ivshmem
 VPATH += :ivshmem
 
