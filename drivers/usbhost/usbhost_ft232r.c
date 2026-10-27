@@ -1143,7 +1143,6 @@ static void usbhost_rxdata_work(FAR void *arg)
   FAR struct uart_buffer_s *rxbuf;
   ssize_t nread;
   int nxfrd;
-  int nexthead;
   int rxndx;
   int ret;
 
@@ -1163,17 +1162,6 @@ static void usbhost_rxdata_work(FAR void *arg)
   rxndx    = priv->rxndx;
   nxfrd    = 0;
 
-  /* Get the index to the value of the UART RX buffer head AFTER the
-   * first character has been stored.  We need to know this in order
-   * to test if the UART RX buffer is full.
-   */
-
-  nexthead = rxbuf->head + 1;
-  if (nexthead >= rxbuf->size)
-    {
-      nexthead = 0;
-    }
-
   /* Loop until either:
    *
    * 1. The UART RX buffer is full
@@ -1187,17 +1175,6 @@ static void usbhost_rxdata_work(FAR void *arg)
   while (priv->rxena && !priv->disconnected)
 #endif
     {
-      /* Stop now if there is no room for another
-       * character in the RX buffer.
-       */
-
-      if (nexthead == rxbuf->tail)
-        {
-          /* Break out of the loop, rescheduling the work */
-
-          break;
-        }
-
       /* Do we have any buffer RX data to transfer? */
 
       if (priv->nrxbytes < 1)
@@ -1250,34 +1227,47 @@ static void usbhost_rxdata_work(FAR void *arg)
             }
         }
 
-      /* Transfer one byte from the RX packet buffer into UART RX buffer.
-       * +2 to account for the two status byes
+      /* Transfer one contiguous block from the RX packet buffer into the
+       * UART RX circular buffer, leaving one byte free to distinguish full
+       * from empty.  Add two to the packet index to skip the FTDI status
+       * bytes.
        */
 
-      rxbuf->buffer[rxbuf->head] = priv->inbuf[rxndx + 2];
-      nxfrd++;
-
-      /* Save the updated indices */
-
-      rxbuf->head = nexthead;
-      priv->rxndx = rxndx;
-
-      /* Update the head point for for the next pass through the loop
-       * handling. If nexthead incremented to rxbuf->tail, then the
-       * RX buffer will and we will exit the loop at the top.
-       */
-
-      if (++nexthead >= rxbuf->size)
+      if (rxbuf->head >= rxbuf->tail)
         {
-          nexthead = 0;
+          ret = rxbuf->size - rxbuf->head;
+          if (rxbuf->tail == 0)
+            {
+              ret--;
+            }
+        }
+      else
+        {
+          ret = rxbuf->tail - rxbuf->head - 1;
         }
 
-      /* Increment the index in the USB IN packet buffer.  If the
-       * index becomes equal to the number of bytes in the buffer, then
-       * we have consumed all of the RX data.
-       */
+      if (ret <= 0)
+        {
+          break;
+        }
 
-      if (++rxndx >= priv->nrxbytes)
+      if (ret > priv->nrxbytes - rxndx)
+        {
+          ret = priv->nrxbytes - rxndx;
+        }
+
+      memcpy(&rxbuf->buffer[rxbuf->head], &priv->inbuf[rxndx + 2], ret);
+      rxbuf->head += ret;
+      if (rxbuf->head >= rxbuf->size)
+        {
+          rxbuf->head = 0;
+        }
+
+      rxndx      += ret;
+      nxfrd      += ret;
+      priv->rxndx = rxndx;
+
+      if (rxndx >= priv->nrxbytes)
         {
           /* In that case set the number of bytes in the buffer to zero.
            * This will force re-reading on the next time through the loop.
