@@ -512,6 +512,29 @@ int fdt_cfi_register(FAR const void *fdt);
 #endif
 
 /****************************************************************************
+ * Name: fdt_ivshmem_flat_devices_register
+ *
+ * Description:
+ *   This function scans the device tree for nodes with compatible
+ *   "qemu,ivshmem-flat" and registers each via ivshmem_flat_register().
+ *   reg[0] is the register block, reg[1] the shared memory. A node
+ *   without "interrupts" has no doorbell; "ivshmem-id", if present, is
+ *   used as the ivshmem bus id.
+ *
+ * Input Parameters:
+ *   fdt      - Device tree handle
+ *   irqbase  - Interrupt base number
+ *
+ * Returned Value:
+ *   Return 0 if success, negative if failed
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IVSHMEM_FLAT
+int fdt_ivshmem_flat_devices_register(FAR const void *fdt, int irqbase);
+#endif
+
+/****************************************************************************
  * Name: fdt_sp804_devices_register
  *
  * Description:

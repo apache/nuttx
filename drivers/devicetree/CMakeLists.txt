@@ -34,6 +34,10 @@ if(CONFIG_DEVICE_TREE)
     list(APPEND SRCS fdt_cfi.c)
   endif()
 
+  if(CONFIG_IVSHMEM_FLAT)
+    list(APPEND SRCS fdt_ivshmem_flat.c)
+  endif()
+
   if(CONFIG_TIMER_SP804 AND CONFIG_TIMER)
     list(APPEND SRCS fdt_sp804.c)
   endif()
