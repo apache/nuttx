@@ -22,6 +22,7 @@
 
 # Add the string C files to the build
 
+CSRCS += lib_bcmp.c lib_bcopy.c lib_bzero.c
 CSRCS += lib_ffs.c lib_ffsl.c lib_ffsll.c lib_fls.c lib_flsl.c
 CSRCS += lib_flsll.c lib_isbasedigit.c lib_memmem.c
 CSRCS += lib_popcount.c lib_popcountl.c lib_popcountll.c
