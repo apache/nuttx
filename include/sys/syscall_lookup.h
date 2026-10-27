@@ -375,6 +375,15 @@ SYSCALL_LOOKUP(munlockall,                 0)
   SYSCALL_LOOKUP(mq_unlink,                1)
 #endif
 
+/* The following are defined only if System V message queues are enabled */
+
+#ifndef CONFIG_DISABLE_MQUEUE_SYSV
+  SYSCALL_LOOKUP(msgctl,                   3)
+  SYSCALL_LOOKUP(msgget,                   2)
+  SYSCALL_LOOKUP(msgrcv,                   5)
+  SYSCALL_LOOKUP(msgsnd,                   4)
+#endif
+
 /* The following are defined only if networking AND sockets are supported */
 
 #ifdef CONFIG_NET
