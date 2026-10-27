@@ -388,18 +388,6 @@ int shmget(key_t key, size_t size, int shmflg)
   int shmid = -1;
   int ret;
 
-  /* Check for the special case where the caller doesn't really want shared
-   * memory (they why do they bother to call us?)
-   */
-
-  if (key == IPC_PRIVATE)
-    {
-      /* Not yet implemented */
-
-      ret = -ENOSYS;
-      goto errout;
-    }
-
   /* Get exclusive access to the global list of shared memory regions */
 
   ret = nxmutex_lock(&g_shminfo.si_lock);
@@ -408,16 +396,19 @@ int shmget(key_t key, size_t size, int shmflg)
       goto errout;
     }
 
-  /* Find the requested memory region */
+  /* Find the requested memory region.  IPC_PRIVATE (0) always asks for a
+   * new region, and no call can find it by its key: a free region also
+   * has the key 0, so it is not searched.
+   */
 
-  ret = shm_find(key);
+  ret = key == IPC_PRIVATE ? -ENOENT : shm_find(key);
   if (ret < 0)
     {
       /* The memory region does not exist.. create it if IPC_CREAT is
-       * included in the shmflags.
+       * included in the shmflags (or the key is IPC_PRIVATE).
        */
 
-      if ((shmflg & IPC_CREAT) != 0)
+      if ((shmflg & IPC_CREAT) != 0 || key == IPC_PRIVATE)
         {
           /* Create the memory region */
 
