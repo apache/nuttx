@@ -104,10 +104,6 @@ extern struct FAR hrtimer_s *g_hrtimer_head;
 extern struct list_node g_hrtimer_list;
 #endif
 
-#ifdef CONFIG_SCHED_TICKLESS
-extern uint64_t g_hrtimer_expected;
-#endif
-
 #ifdef CONFIG_SMP
 /* Array of pointers to currently running high-resolution timers
  * for each CPU in SMP configurations. Index corresponds to CPU ID.
@@ -223,46 +219,42 @@ static inline_function void hrtimer_reprogram(uint64_t next_expired)
   uint64_t        delay;
   uint64_t        expired = hrtimer_last_expired();
 
-  if (g_hrtimer_expected != next_expired)
-    {
-      g_hrtimer_expected = next_expired;
 #  if CONFIG_HRTIMER_PRECISION_SHIFT > 0
-      /* Ceiling-align the target expiration time to the precision boundary.
-       * This coarsens the timer resolution to (1 << SHIFT) nanoseconds,
-       * reducing the frequency of hardware timer reprogramming.
-       */
+  /* Ceiling-align the target expiration time to the precision boundary.
+   * This coarsens the timer resolution to (1 << SHIFT) nanoseconds,
+   * reducing the frequency of hardware timer reprogramming.
+   */
 
-      next_expired = (next_expired + HRTIMER_PRECISION_MASK) &
-                     ~HRTIMER_PRECISION_MASK;
+  next_expired = (next_expired + HRTIMER_PRECISION_MASK) &
+                 ~HRTIMER_PRECISION_MASK;
 #  endif
 
-      delay = HRTIMER_TIME_BEFORE_EQ(expired, next_expired) ?
-              next_expired - expired : 0u;
+  delay = HRTIMER_TIME_BEFORE_EQ(expired, next_expired) ?
+          next_expired - expired : 0u;
 
 #  ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
-      delay = delay < TICK2NSEC((uint64_t)g_oneshot_maxticks) ?
-              delay : TICK2NSEC((uint64_t)g_oneshot_maxticks);
+  delay = delay < TICK2NSEC((uint64_t)g_oneshot_maxticks) ?
+          delay : TICK2NSEC((uint64_t)g_oneshot_maxticks);
 #  endif
 
-      /* Even if overflow occurs here, the functional correctness
-       * should still be fine.
-       */
+  /* Even if overflow occurs here, the functional correctness
+   * should still be fine.
+   */
 
-      delay -= CONFIG_TIMER_ADJUST_NSEC;
+  delay -= CONFIG_TIMER_ADJUST_NSEC;
 
-      clock_nsec2time(&ts, expired + delay);
+  clock_nsec2time(&ts, expired + delay);
 
 #  ifdef CONFIG_SCHED_TICKLESS_ALARM
-      ret = up_alarm_start(&ts);
+  ret = up_alarm_start(&ts);
 #  else
-      struct timespec current;
-      up_timer_gettime(&current);
-      clock_timespec_subtract(&ts, &current, &ts);
-      ret = up_timer_start(&ts);
+  struct timespec current;
+  up_timer_gettime(&current);
+  clock_timespec_subtract(&ts, &current, &ts);
+  ret = up_timer_start(&ts);
 #  endif
 
-      DEBUGASSERT(ret == 0);
-    }
+  DEBUGASSERT(ret == 0);
 #endif
 }
 
@@ -319,37 +311,28 @@ RB_PROTOTYPE(hrtimer_tree_s, hrtimer_s, node, hrtimer_compare);
  * Description:
  *   Remove a timer from the queue and mark it as dequeued.
  *
- * Returned Value:
- *   true if the timer is the head of the queue, otherwise false.
- *
  * Assumption:
  *   The caller must hold the queue lock.
  *   The caller must ensure that the timer is in the queue.
  *
  ****************************************************************************/
 
-static inline_function bool hrtimer_remove(FAR hrtimer_t *hrtimer)
+static inline_function void hrtimer_remove(FAR hrtimer_t *hrtimer)
 {
-  bool is_head;
 #ifdef CONFIG_HRTIMER_TREE
-  is_head = g_hrtimer_head == hrtimer;
-
   RB_REMOVE(hrtimer_tree_s, &g_hrtimer_tree, hrtimer);
 
-  if (is_head)
+  if (g_hrtimer_head == hrtimer)
     {
       g_hrtimer_head = RB_MIN(hrtimer_tree_s, &g_hrtimer_tree);
     }
 #else
-  is_head = list_is_head(&g_hrtimer_list, &hrtimer->node);
   list_delete_fast(&hrtimer->node);
 #endif
 
   /* Explicitly mark the timer as dequeued. */
 
   hrtimer->func = NULL;
-
-  return is_head;
 }
 
 /****************************************************************************
@@ -358,28 +341,21 @@ static inline_function bool hrtimer_remove(FAR hrtimer_t *hrtimer)
  * Description:
  *   Insert a timer into the hrtimer queue according to its expiration time.
  *
- * Returned Value:
- *   true if the timer is added to the head of the queue, otherwise false.
- *
  * Assumption:
  *   The caller must hold the queue lock.
  *   The caller must ensure that the timer is in the queue.
  *
  ****************************************************************************/
 
-static inline_function bool hrtimer_insert(FAR hrtimer_t *hrtimer)
+static inline_function void hrtimer_insert(FAR hrtimer_t *hrtimer)
 {
 #ifdef CONFIG_HRTIMER_TREE
-  bool is_head = false;
   RB_INSERT(hrtimer_tree_s, &g_hrtimer_tree, hrtimer);
 
   if (HRTIMER_TIME_BEFORE(hrtimer->expired, g_hrtimer_head->expired))
     {
       g_hrtimer_head = hrtimer;
-      is_head        = true;
     }
-
-  return is_head;
 #else
   FAR hrtimer_t *curr;
   uint64_t expired = hrtimer->expired;
@@ -395,7 +371,6 @@ static inline_function bool hrtimer_insert(FAR hrtimer_t *hrtimer)
     }
 
   list_add_before(&curr->node, &hrtimer->node);
-  return list_is_head(&g_hrtimer_list, &hrtimer->node);
 #endif
 }
 
@@ -417,6 +392,22 @@ static inline_function FAR hrtimer_t *hrtimer_get_first(void)
 #else
   return list_first_entry(&g_hrtimer_list, FAR hrtimer_t, node);
 #endif
+}
+
+/****************************************************************************
+ * Name: hrtimer_next_expired
+ *
+ * Description:
+ *   Return the expiration time of the earliest expiring pending timer.
+ *
+ * Returned Value:
+ *   The expiration time in nanoseconds.
+ *
+ ****************************************************************************/
+
+static inline_function uint64_t hrtimer_next_expired(void)
+{
+  return hrtimer_get_first()->expired;
 }
 
 /****************************************************************************
@@ -672,12 +663,6 @@ static inline_function void hrtimer_process(uint64_t now)
   FAR hrtimer_t  *hrtimer = hrtimer_get_first();
   uint64_t        expired = hrtimer->expired;
   hrtimer_entry_t    func = hrtimer->func;
-
-#ifdef CONFIG_SCHED_TICKLESS
-  /* Invalidate the g_hrtimer_expected */
-
-  g_hrtimer_expected = now;
-#endif
 
   /* Acquire the lock and seize the ownership of the hrtimer queue.
    * Then check if the timer has expired.
