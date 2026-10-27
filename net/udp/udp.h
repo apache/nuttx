@@ -31,6 +31,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <stdint.h>
 
 #include <nuttx/queue.h>
 #include <nuttx/semaphore.h>
@@ -77,6 +78,18 @@
 
 #define UDPIPv4BUF ((FAR struct udp_hdr_s *)IPBUF(IPv4_HDRLEN))
 #define UDPIPv6BUF ((FAR struct udp_hdr_s *)IPBUF(IPv6_HDRLEN))
+
+/* UDP read-ahead metadata layout:
+ * |datalen|ifindex|src_addr_size|src_addr|[timestamp]|data|
+ */
+
+#ifdef CONFIG_NETDEV_IFINDEX
+#  define UDP_READAHEAD_META_SIZE \
+     (sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint8_t))
+#else
+#  define UDP_READAHEAD_META_SIZE \
+     (sizeof(uint16_t) + sizeof(uint8_t))
+#endif
 
 /****************************************************************************
  * Public Type Definitions
