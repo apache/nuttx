@@ -39,13 +39,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* This is a list of registered handlers for different binary formats.
@@ -54,7 +50,7 @@ extern "C"
  * list.
  */
 
-EXTERN FAR struct binfmt_s *g_binfmts;
+extern FAR struct binfmt_s *g_binfmts;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -341,7 +337,6 @@ int nxflat_initialize(void);
 void nxflat_uninitialize(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

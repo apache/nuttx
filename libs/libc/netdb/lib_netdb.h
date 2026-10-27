@@ -100,16 +100,13 @@ struct services_db_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-EXTERN struct hostent g_hostent;
-EXTERN char g_hostbuffer[CONFIG_NETDB_BUFSIZE];
-EXTERN const struct services_db_s g_services_db[];
+extern struct hostent g_hostent;
+extern char g_hostbuffer[CONFIG_NETDB_BUFSIZE];
+extern const struct services_db_s g_services_db[];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -125,7 +122,6 @@ int gethostentbyname_r(FAR const char *name,
                        FAR struct hostent_s *host, FAR char *buf,
                        size_t buflen, FAR int *h_errnop, int flags);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

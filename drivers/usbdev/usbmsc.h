@@ -444,13 +444,9 @@ struct usbmsc_dev_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /* String *******************************************************************/
@@ -458,10 +454,10 @@ extern "C"
 /* Mass storage class vendor/product/serial number strings */
 
 #ifndef CONFIG_USBMSC_COMPOSITE
-EXTERN const char g_mscvendorstr[];
-EXTERN const char g_mscproductstr[];
+extern const char g_mscvendorstr[];
+extern const char g_mscproductstr[];
 #ifndef CONFIG_BOARD_USBDEV_SERIALSTR
-EXTERN const char g_mscserialstr[];
+extern const char g_mscserialstr[];
 #endif
 
 /* If we are using a composite device, then vendor/product/serial number
@@ -469,10 +465,10 @@ EXTERN const char g_mscserialstr[];
  */
 
 #else
-EXTERN const char g_compvendorstr[];
-EXTERN const char g_compproductstr[];
+extern const char g_compvendorstr[];
+extern const char g_compproductstr[];
 #ifndef CONFIG_BOARD_USBDEV_SERIALSTR
-EXTERN const char g_compserialstr[];
+extern const char g_compserialstr[];
 #endif
 
 #define g_mscvendorstr  g_compvendorstr
@@ -486,7 +482,7 @@ EXTERN const char g_compserialstr[];
  * started
  */
 
-EXTERN FAR struct usbmsc_dev_s *g_usbmsc_handoff;
+extern FAR struct usbmsc_dev_s *g_usbmsc_handoff;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -653,7 +649,6 @@ void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep,
 
 void usbmsc_deferredresponse(FAR struct usbmsc_dev_s *priv, bool failed);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

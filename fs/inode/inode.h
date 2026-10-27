@@ -131,16 +131,12 @@ typedef int (*foreach_inode_t)(FAR struct inode *inode,
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-EXTERN FAR struct inode *g_root_inode;
+extern FAR struct inode *g_root_inode;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -577,7 +573,6 @@ int pseudofile_create(FAR struct inode **node, FAR const char *path,
 bool inode_is_pseudofile(FAR struct inode *inode);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

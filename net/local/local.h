@@ -185,16 +185,13 @@ struct local_conn_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /* The local socket interface */
 
-EXTERN const struct sock_intf_s g_local_sockif;
+extern const struct sock_intf_s g_local_sockif;
 
 /* Global protection lock for local socket */
 
@@ -781,7 +778,6 @@ int local_set_pollthreshold(FAR struct local_conn_s *conn,
 
 int local_set_nonblocking(FAR struct local_conn_s *conn);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

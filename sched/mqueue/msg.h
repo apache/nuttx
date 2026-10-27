@@ -72,14 +72,11 @@ struct msgbuf_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-EXTERN struct list_node g_msgfreelist;
+extern struct list_node g_msgfreelist;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -115,7 +112,6 @@ void nxmsg_free(FAR struct msgq_s *msgq);
 
 FAR struct msgq_s *nxmsg_lookup(key_t key);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

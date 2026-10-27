@@ -293,16 +293,12 @@ struct xipfs_dir_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-EXTERN const struct mountpt_operations g_xipfs_operations;
+extern const struct mountpt_operations g_xipfs_operations;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -384,7 +380,6 @@ static inline void xipfs_unlock(FAR struct xipfs_mount_s *fs)
   nxrmutex_unlock(&fs->lock);
 }
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

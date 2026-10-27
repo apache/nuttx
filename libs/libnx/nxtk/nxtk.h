@@ -69,24 +69,20 @@ struct nxtk_framedwindow_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /* That is the callback for the framed window */
 
-EXTERN FAR const struct nx_callback_s g_nxtkcb;
+extern FAR const struct nx_callback_s g_nxtkcb;
 
 /* Frame border colors */
 
-EXTERN nxgl_mxpixel_t g_bordercolor1[CONFIG_NX_NPLANES];
-EXTERN nxgl_mxpixel_t g_bordercolor2[CONFIG_NX_NPLANES];
-EXTERN nxgl_mxpixel_t g_bordercolor3[CONFIG_NX_NPLANES];
+extern nxgl_mxpixel_t g_bordercolor1[CONFIG_NX_NPLANES];
+extern nxgl_mxpixel_t g_bordercolor2[CONFIG_NX_NPLANES];
+extern nxgl_mxpixel_t g_bordercolor3[CONFIG_NX_NPLANES];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -206,7 +202,6 @@ void nxtk_subwindowmove(FAR struct nxtk_framedwindow_s *fwnd,
 int nxtk_drawframe(FAR struct nxtk_framedwindow_s *fwnd,
                    FAR const struct nxgl_rect_s *bounds);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

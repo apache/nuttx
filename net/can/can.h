@@ -140,14 +140,11 @@ struct can_conn_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
-EXTERN const struct sock_intf_s g_can_sockif;
+extern const struct sock_intf_s g_can_sockif;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -464,7 +461,6 @@ int can_getsockopt(FAR struct socket *psock, int level, int option,
                    FAR void *value, FAR socklen_t *value_len);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -74,20 +74,16 @@ struct aio_container_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* This is a list of pending asynchronous I/O.  The user must hold the
  * lock on this list in order to access the list.
  */
 
-EXTERN dq_queue_t g_aio_pending;
+extern dq_queue_t g_aio_pending;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -242,7 +238,6 @@ int aio_signal(pid_t pid, FAR struct aiocb *aiocbp);
 int aio_read_internal(FAR struct aiocb *aiocbp);
 int aio_write_internal(FAR struct aiocb *aiocbp);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

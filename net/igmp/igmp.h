@@ -127,15 +127,12 @@ struct igmp_group_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
-EXTERN const in_addr_t g_ipv4_allsystems;
-EXTERN const in_addr_t g_ipv4_allrouters;
+extern const in_addr_t g_ipv4_allsystems;
+extern const in_addr_t g_ipv4_allrouters;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -375,7 +372,6 @@ void igmp_addmcastmac(FAR struct net_driver_s *dev, FAR const in_addr_t *ip);
 void igmp_removemcastmac(FAR struct net_driver_s *dev,
                          FAR const in_addr_t *ip);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

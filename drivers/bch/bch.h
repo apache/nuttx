@@ -68,25 +68,20 @@ struct bchlib_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-EXTERN const struct file_operations g_bch_fops;
+extern const struct file_operations g_bch_fops;
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-EXTERN int  bchlib_flushsector(FAR struct bchlib_s *bch, bool discard);
-EXTERN int  bchlib_readsector(FAR struct bchlib_s *bch, size_t sector);
+extern int  bchlib_flushsector(FAR struct bchlib_s *bch, bool discard);
+extern int  bchlib_readsector(FAR struct bchlib_s *bch, size_t sector);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

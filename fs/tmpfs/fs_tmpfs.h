@@ -179,22 +179,17 @@ typedef int (*tmpfs_foreach_t)(FAR struct tmpfs_directory_s *tdo,
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-EXTERN const struct mountpt_operations g_tmpfs_operations;
+extern const struct mountpt_operations g_tmpfs_operations;
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

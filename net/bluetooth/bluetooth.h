@@ -109,16 +109,13 @@ struct bluetooth_conn_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /* The Bluetooth socket interface */
 
-EXTERN const struct sock_intf_s g_bluetooth_sockif;
+extern const struct sock_intf_s g_bluetooth_sockif;
 
 /* The Bluetooth connections rmutex */
 
@@ -459,7 +456,6 @@ FAR struct bluetooth_container_s *bluetooth_container_allocate(void);
 
 void bluetooth_container_free(FAR struct bluetooth_container_s *container);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -94,20 +94,16 @@ union dns_addr_u
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifndef CONFIG_NETDB_RESOLVCONF
 /* The DNS server addresses */
 
-EXTERN union dns_addr_u g_dns_servers[];
-EXTERN uint8_t g_dns_nservers;
+extern union dns_addr_u g_dns_servers[];
+extern uint8_t g_dns_nservers;
 #endif
 
 /****************************************************************************
@@ -286,7 +282,6 @@ int dns_find_answer(FAR const char *hostname, FAR union dns_addr_u *addr,
 void dns_notify_nameserver(FAR const struct sockaddr *addr,
                            socklen_t addrlen);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

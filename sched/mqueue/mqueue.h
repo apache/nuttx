@@ -85,26 +85,23 @@ struct mqueue_msg_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* The g_msgfree is a list of messages that are available for general use.
  * The number of messages in this list is a system configuration item.
  */
 
-EXTERN struct list_node g_msgfree;
+extern struct list_node g_msgfree;
 
 /* The g_msgfreeirq is a list of messages that are reserved for use by
  * interrupt handlers.
  */
 
-EXTERN struct list_node g_msgfreeirq;
+extern struct list_node g_msgfreeirq;
 
-EXTERN spinlock_t g_msgfreelock;
+extern spinlock_t g_msgfreelock;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -144,7 +141,6 @@ void nxmq_notify_send(FAR struct mqueue_inode_s *msgq);
 
 void nxmq_recover(FAR struct tcb_s *tcb);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif
