@@ -39,29 +39,26 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_LIBC_NETDB
 /* Local loopback hostname */
 
-EXTERN const char           g_lo_hostname[];
+extern const char           g_lo_hostname[];
 #endif
 
 /* Local loopback addresses */
 
 #ifdef CONFIG_NET_IPv4
-EXTERN const in_addr_t      g_lo_ipv4addr;
-EXTERN const in_addr_t      g_lo_ipv4mask;
+extern const in_addr_t      g_lo_ipv4addr;
+extern const in_addr_t      g_lo_ipv4mask;
 #endif
 
 #ifdef CONFIG_NET_IPv6
-EXTERN const net_ipv6addr_t g_lo_ipv6addr;
-EXTERN const net_ipv6addr_t g_lo_ipv6mask;
+extern const net_ipv6addr_t g_lo_ipv6addr;
+extern const net_ipv6addr_t g_lo_ipv6mask;
 #endif
 
 /****************************************************************************
@@ -84,7 +81,6 @@ EXTERN const net_ipv6addr_t g_lo_ipv6mask;
 
 int localhost_initialize(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

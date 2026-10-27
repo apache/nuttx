@@ -258,11 +258,8 @@ struct addrinfo
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* When the <netdb.h> header is included, h_errno shall be available as a
@@ -275,7 +272,7 @@ extern "C"
 
 /* REVISIT:  This should at least be per-task? */
 
-EXTERN int h_errno;
+extern int h_errno;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -368,7 +365,6 @@ int getprotobynumber_r(int proto,
 
 #endif /* CONFIG_LIBC_NETDB */
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

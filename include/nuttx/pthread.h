@@ -105,11 +105,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -120,7 +117,7 @@ extern "C"
  * kernel- or within the user- address space.
  */
 
-EXTERN const pthread_attr_t g_default_pthread_attr;
+extern const pthread_attr_t g_default_pthread_attr;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -168,7 +165,6 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 
 void nx_pthread_exit(FAR void *exit_value) noreturn_function;
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

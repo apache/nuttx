@@ -183,13 +183,9 @@ typedef CODE void (*debug_callback_t)(int type, FAR void *addr, size_t size,
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
@@ -207,7 +203,7 @@ extern "C"
  * value (in ticks).
  */
 
-EXTERN uint32_t g_oneshot_maxticks;
+extern uint32_t g_oneshot_maxticks;
 #endif
 
 #ifdef CONFIG_RTC
@@ -218,7 +214,7 @@ EXTERN uint32_t g_oneshot_maxticks;
  * some reason fails.
  */
 
-EXTERN volatile bool g_rtc_enabled;
+extern volatile bool g_rtc_enabled;
 #endif
 
 #ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
@@ -227,7 +223,7 @@ EXTERN volatile bool g_rtc_enabled;
  * in the configuration.  See declaration in include/nuttx/irq.h
  */
 
-/* EXTERN const irq_mapped_t g_irqmap[NR_IRQS]; */
+/* extern const irq_mapped_t g_irqmap[NR_IRQS]; */
 
 #endif
 
@@ -3127,7 +3123,6 @@ void up_memtag_tag_mem(const void *addr, size_t size);
 
 #endif /* CONFIG_ARCH_HAVE_MEMTAG */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

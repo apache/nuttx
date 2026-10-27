@@ -378,19 +378,15 @@ struct in6_ifreq
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Global IPv6 in6addr_any and in6addr_loopback */
 
-EXTERN const struct in6_addr in6addr_any;
-EXTERN const struct in6_addr in6addr_loopback;
+extern const struct in6_addr in6addr_any;
+extern const struct in6_addr in6addr_loopback;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -414,7 +410,6 @@ uint32_t    htonl(uint32_t hl);
 uint16_t    htons(uint16_t hs);
 uint64_t    htonq(uint64_t hq);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

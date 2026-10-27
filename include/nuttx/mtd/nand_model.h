@@ -88,16 +88,13 @@ struct nand_model_s
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* List of NandFlash models which can be recognized by the software */
 
-EXTERN const struct nand_model_s g_nandmodels[NAND_NMODELS];
+extern const struct nand_model_s g_nandmodels[NAND_NMODELS];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -370,7 +367,6 @@ unsigned int nandmodel_getsparesize(FAR const struct nand_model_s *model);
 
 #define nandmodel_havecopyback(m) (((m)->options & NANDMODEL_COPYBACK) != 0)
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

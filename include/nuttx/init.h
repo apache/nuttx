@@ -82,11 +82,8 @@ enum nx_initstate_e
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* This is the current initialization state.  The level of initialization
@@ -94,7 +91,7 @@ extern "C"
  * hardware resources may not yet be available to the OS-internal logic.
  */
 
-EXTERN volatile enum nx_initstate_e g_nx_initstate;  /* See enum nx_initstate_e */
+extern volatile enum nx_initstate_e g_nx_initstate;  /* See enum nx_initstate_e */
 
 /****************************************************************************
  * Public Function Prototypes
@@ -106,7 +103,6 @@ EXTERN volatile enum nx_initstate_e g_nx_initstate;  /* See enum nx_initstate_e 
 
 void nx_start(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

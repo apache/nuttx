@@ -68,16 +68,13 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-EXTERN FAR struct mtd_dev_s    *g_nand_ram_mtd_wrapper;
-EXTERN FAR struct mtd_dev_s    *g_nand_ram_mtd_under;
-EXTERN FAR struct nand_raw_s   *g_nand_mtd_raw;
+extern FAR struct mtd_dev_s    *g_nand_ram_mtd_wrapper;
+extern FAR struct mtd_dev_s    *g_nand_ram_mtd_under;
+extern FAR struct nand_raw_s   *g_nand_mtd_raw;
 
 /****************************************************************************
  * Inline Functions
@@ -95,7 +92,6 @@ int nand_ram_rawwrite(FAR struct nand_raw_s *raw, off_t block,
                       FAR const void *spare);
 FAR struct mtd_dev_s *nand_ram_initialize(struct nand_raw_s *raw);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

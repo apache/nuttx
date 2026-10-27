@@ -40,11 +40,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* If the TZ database is built as a ROMFS file system, then these variables
@@ -54,14 +51,13 @@ extern "C"
  * mount the ROMF file system.
  */
 
-EXTERN unsigned char romfs_zoneinfo_img[];
-EXTERN unsigned int  romfs_zoneinfo_img_len;
+extern unsigned char romfs_zoneinfo_img[];
+extern unsigned int  romfs_zoneinfo_img_len;
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

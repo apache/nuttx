@@ -428,13 +428,9 @@ typedef CODE int (*trprintf_t)(FAR const char *fmt, ...) printf_like(1, 2);
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /* If CONFIG_USBDEV_TRACE_STRINGS is defined, then the USB class driver and
@@ -443,11 +439,11 @@ extern "C"
  */
 
 #ifdef CONFIG_USBDEV_TRACE_STRINGS
-EXTERN const struct trace_msg_t g_usb_trace_strings_clsapi[];
-EXTERN const struct trace_msg_t g_usb_trace_strings_clsstate[];
-EXTERN const struct trace_msg_t g_usb_trace_strings_clserror[];
-EXTERN const struct trace_msg_t g_usb_trace_strings_deverror[];
-EXTERN const struct trace_msg_t g_usb_trace_strings_intdecode[];
+extern const struct trace_msg_t g_usb_trace_strings_clsapi[];
+extern const struct trace_msg_t g_usb_trace_strings_clsstate[];
+extern const struct trace_msg_t g_usb_trace_strings_clserror[];
+extern const struct trace_msg_t g_usb_trace_strings_deverror[];
+extern const struct trace_msg_t g_usb_trace_strings_intdecode[];
 #endif
 
 /****************************************************************************
@@ -523,7 +519,6 @@ int usbtrace_enumerate(trace_callback_t callback, void *arg);
 
 void usbtrace_trprintf(trprintf_t trprintf, uint16_t event, uint16_t value);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

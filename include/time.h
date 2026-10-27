@@ -158,30 +158,26 @@ struct sigevent;
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_LIBC_LOCALTIME
 
 /* daylight - Daylight savings time flag */
 
-/* EXTERN int daylight; not supported */
+/* extern int daylight; not supported */
 
 /* timezone - Difference from UTC and local standard time */
 
-/* EXTERN long int timezone; not supported */
+/* extern long int timezone; not supported */
 
 /* tzname[] - Timezone strings
  * Setup by tzset()
  */
 
-EXTERN FAR char *tzname[2];
+extern FAR char *tzname[2];
 #endif
 
 /****************************************************************************
@@ -239,7 +235,6 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp);
 
 void tzset(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
