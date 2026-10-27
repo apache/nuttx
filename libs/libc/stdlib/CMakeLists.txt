@@ -69,7 +69,14 @@ if(NOT CONFIG_LIBM_NONE)
 endif()
 
 if(CONFIG_PSEUDOTERM)
-  list(APPEND SRCS lib_ptsname.c lib_ptsnamer.c lib_unlockpt.c lib_openpty.c)
+  list(
+    APPEND
+    SRCS
+    lib_ptsname.c
+    lib_ptsnamer.c
+    lib_unlockpt.c
+    lib_openpty.c
+    lib_grantpt.c)
 endif()
 
 target_sources(c PRIVATE ${SRCS})
