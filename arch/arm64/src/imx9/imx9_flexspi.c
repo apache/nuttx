@@ -646,6 +646,7 @@ void imx9_flexspi_set_device_config_private(struct flexspi_type_s *base,
 {
   uint32_t config_value = 0;
   uint32_t status_value = 0;
+  uint32_t dll_value    = 0;
   uint8_t index        = (uint8_t)port >> 1u; /* PortA with index 0, PortB with index 1 */
 
   /* Wait for bus idle before change flash configuration */
@@ -701,10 +702,17 @@ void imx9_flexspi_set_device_config_private(struct flexspi_type_s *base,
 
   base->FLSHCR2[port] = config_value;
 
+  /* Set RX sample clock, the DLL configuration depends on it */
+
+  config_value = base->MCR0;
+  config_value &= ~FLEXSPI_MCR0_RXCLKSRC_MASK;
+  config_value |= FLEXSPI_MCR0_RXCLKSRC(config->rx_sample_clock);
+  base->MCR0 = config_value;
+
   /* Configure DLL */
 
-  config_value        = imx9_flexspi_configure_dll(base, config);
-  base->DLLCR[index] = config_value;
+  dll_value          = imx9_flexspi_configure_dll(base, config);
+  base->DLLCR[index] = dll_value;
 
   /* Configure write mask */
 
@@ -728,17 +736,9 @@ void imx9_flexspi_set_device_config_private(struct flexspi_type_s *base,
       base->FLSHCR4 |= FLEXSPI_FLSHCR4_WMENB(config->enable_write_mask);
     }
 
-  /* Set RX Sample Clock */
-
-  config_value = base->MCR0;
-  config_value &= ~FLEXSPI_MCR0_RXCLKSRC_MASK;
-  config_value |= FLEXSPI_MCR0_RXCLKSRC(config->rx_sample_clock);
-
   /* Exit stop mode */
 
-  config_value &= ~FLEXSPI_MCR0_MDIS_MASK;
-
-  base->MCR0 = config_value;
+  base->MCR0 &= ~FLEXSPI_MCR0_MDIS_MASK;
 
   /* According to ERR011377, need to delay at least 100 NOPs to ensure the
    * DLL is locked.
@@ -751,7 +751,7 @@ void imx9_flexspi_set_device_config_private(struct flexspi_type_s *base,
           ((uint32_t)FLEXSPI_FLASH_B_SAMPLE_CLOCK_SLAVE_DELAY_LOCKED |
            (uint32_t)FLEXSPI_FLASH_B_SAMPLE_CLOCK_REF_DELAY_LOCKED);
 
-  if (0u != (config_value & FLEXSPI_DLLCR_DLLEN_MASK))
+  if (0u != (dll_value & FLEXSPI_DLLCR_DLLEN_MASK))
     {
       /* Wait slave delay line locked and slave reference delay line locked */
 
