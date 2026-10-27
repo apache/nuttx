@@ -533,6 +533,15 @@
 
 #define SNIOC_GNSS_SET_PRIORITY       _SNIOC(0x00AA)
 
+/* Command:      SNIOC_DISCARD
+ * Description:  Discard unread data of the caller, as if it had been read
+ *               but without copying it out. Other users are not affected.
+ * Argument:     Maximum number of bytes to discard.
+ * Return:       Number of bytes discarded, or a negated errno value.
+ */
+
+#define SNIOC_DISCARD                 _SNIOC(0x00AB)
+
 /****************************************************************************
  * Public types
  ****************************************************************************/
