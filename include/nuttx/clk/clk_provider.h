@@ -81,13 +81,9 @@
  * Public Types
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 struct clk_s
@@ -257,7 +253,6 @@ FAR struct clk_s *clk_register_rpmsg(FAR const char *name, uint8_t flags);
 int clk_rpmsg_server_initialize(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

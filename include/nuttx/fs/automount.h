@@ -146,11 +146,8 @@ struct automount_lower_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -192,7 +189,6 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower);
 
 void automount_uninitialize(FAR void *handle);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

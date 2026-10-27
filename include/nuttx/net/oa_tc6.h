@@ -31,11 +31,8 @@
 #include <stdbool.h>
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -136,7 +133,6 @@ int ncv7410_initialize(FAR struct spi_dev_s *spi,
 int lan865x_initialize(FAR struct spi_dev_s *spi,
                        FAR const struct oa_tc6_config_s *config);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

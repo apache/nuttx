@@ -93,11 +93,8 @@ struct ina219_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -123,7 +120,6 @@ extern "C"
 int ina219_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                     uint8_t addr, int32_t shuntval, uint16_t config);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

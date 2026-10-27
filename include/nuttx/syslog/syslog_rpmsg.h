@@ -35,11 +35,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_SYSLOG_RPMSG
@@ -56,7 +53,6 @@ ssize_t syslog_rpmsg_write(FAR syslog_channel_t *channel,
 int syslog_rpmsg_server_init(void);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

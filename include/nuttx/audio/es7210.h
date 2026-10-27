@@ -53,11 +53,8 @@ struct es7210_lower_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -87,7 +84,6 @@ es7210_initialize(FAR struct i2c_master_s *i2c,
                   FAR struct i2s_dev_s *i2s,
                   FAR const struct es7210_lower_s *lower);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

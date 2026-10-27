@@ -38,13 +38,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -194,7 +190,6 @@ int lis331dl_getsamplerate(FAR struct lis331dl_dev_s *dev);
 FAR const struct lis331dl_vector_s *
   lis331dl_getreadings(FAR struct lis331dl_dev_s *dev);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

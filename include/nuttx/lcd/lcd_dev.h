@@ -71,11 +71,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 struct lcddev_run_s
@@ -117,7 +114,6 @@ struct lcddev_area_s
 
 int lcddev_register(int devno);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

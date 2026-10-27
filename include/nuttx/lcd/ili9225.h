@@ -463,11 +463,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -490,7 +487,6 @@ extern "C"
 
 FAR struct lcd_dev_s *ili9225_lcdinitialize(FAR struct spi_dev_s *spi);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

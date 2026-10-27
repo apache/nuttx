@@ -87,11 +87,8 @@ typedef int wctrans_t;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* "The <wchar.h> header declares the following as functions and may also
@@ -120,7 +117,6 @@ wint_t            towupper(wint_t);
 wctrans_t         wctrans(FAR const char *);
 wctype_t          wctype(FAR const char *);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

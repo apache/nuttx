@@ -32,18 +32,14 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_USBHOST_XHCI_PCI
 int pci_xhci_init(void);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

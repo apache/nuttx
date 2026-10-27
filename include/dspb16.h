@@ -445,13 +445,9 @@ struct pmsm_model_b16_s
  * Public Functions Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Math functions */
@@ -600,7 +596,6 @@ int pmsm_model_elec_b16(FAR struct pmsm_model_b16_s *model,
                         FAR ab_frame_b16_t *vab);
 int pmsm_model_mech_b16(FAR struct pmsm_model_b16_s *model, b16_t load);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -32,13 +32,9 @@
 
 #ifdef CONFIG_SPI_FLASH
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -63,7 +59,6 @@ extern "C"
 FAR struct spi_dev_s *spi_flash_initialize(FAR const char *name);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

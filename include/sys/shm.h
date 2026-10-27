@@ -80,13 +80,9 @@ struct shmid_ds
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -98,7 +94,6 @@ int shmctl(int shmid, int cmd, FAR struct shmid_ds *buf);
 int shmdt(FAR const void *shmaddr);
 int shmget(key_t key, size_t size, int shmflg);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

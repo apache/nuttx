@@ -43,11 +43,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -251,7 +248,6 @@ uint16_t crc16h8005_part(FAR const uint8_t *src,
 
 uint16_t crc16h8005(FAR const uint8_t *src, size_t len);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -45,13 +45,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -105,7 +101,6 @@ void cdcmbim_get_composite_devdesc(FAR struct composite_devdesc_s *dev);
 #  endif
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

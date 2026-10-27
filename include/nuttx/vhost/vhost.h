@@ -92,11 +92,8 @@ struct vhost_buf_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int vhost_register_device(FAR struct vhost_device *hdev);
@@ -154,7 +151,6 @@ FAR void *up_vhost_iomap(uint64_t pa, FAR size_t *avail);
 
 void vhost_register_drivers(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

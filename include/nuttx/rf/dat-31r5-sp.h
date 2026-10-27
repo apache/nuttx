@@ -37,11 +37,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -76,7 +73,6 @@ int dat31r5sp_register(FAR const char *devpath,
                        FAR struct spi_dev_s *spi,
                        int spidev);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -71,11 +71,8 @@ struct lcddrv_lcd_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -118,7 +115,6 @@ extern int spiif_backlight(FAR struct lcddrv_lcd_s *lcd, int level);
 
 FAR struct lcddrv_lcd_s *lcddrv_spiif_initialize(FAR struct spi_dev_s *spi);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

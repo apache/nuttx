@@ -66,11 +66,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -116,7 +113,6 @@ uint64_t crc64emac_part(FAR const uint8_t *src,
 
 uint64_t crc64emac(FAR const uint8_t *src, size_t len);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

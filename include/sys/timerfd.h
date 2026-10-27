@@ -59,11 +59,8 @@ typedef uint32_t timerfd_t;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int timerfd_create(int clockid, int flags);
@@ -74,7 +71,6 @@ int timerfd_settime(int fd, int flags,
 
 int timerfd_gettime(int fd, FAR struct itimerspec *curr_value);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

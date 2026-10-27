@@ -137,11 +137,8 @@ struct userspace_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -154,7 +151,6 @@ extern "C"
 int CONFIG_INIT_ENTRYPOINT(int argc, FAR char *argv[]);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

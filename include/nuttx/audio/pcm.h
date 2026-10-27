@@ -114,11 +114,8 @@ struct wav_header_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -147,7 +144,6 @@ extern "C"
 FAR struct audio_lowerhalf_s *
   pcm_decode_initialize(FAR struct audio_lowerhalf_s *dev);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

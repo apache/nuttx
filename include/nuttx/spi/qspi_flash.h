@@ -32,13 +32,9 @@
 
 #ifdef CONFIG_QSPI_FLASH
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -60,7 +56,6 @@ extern "C"
 FAR struct qspi_dev_s *qspi_flash_initialize(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

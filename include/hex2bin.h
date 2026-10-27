@@ -58,11 +58,8 @@ enum hex2bin_swap_e
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -159,7 +156,6 @@ int hex2mem(int fd, unsigned long baseaddr, unsigned long endpaddr,
 int fhex2mem(FAR FILE *instream, unsigned long baseaddr,
              unsigned long endpaddr, enum hex2bin_swap_e swap);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

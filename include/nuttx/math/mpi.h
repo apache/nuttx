@@ -137,13 +137,9 @@ struct mpi_lowerhalf_s
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -157,7 +153,6 @@ extern "C"
 int mpi_register(FAR const char *path,
                  FAR struct mpi_lowerhalf_s *lower);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

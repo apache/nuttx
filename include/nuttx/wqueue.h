@@ -302,11 +302,8 @@ typedef CODE void (*work_foreach_t)(int tid, FAR void *arg);
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -697,7 +694,6 @@ void work_notifier_signal(enum work_evtype_e evtype,
                            FAR void *qualifier);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

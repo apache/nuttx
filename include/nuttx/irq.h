@@ -208,11 +208,8 @@ typedef CODE int (*xcpt_t)(int irq, FAR void *context, FAR void *arg);
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* This is the interrupt vector mapping table.  This must be provided by
@@ -419,7 +416,6 @@ void leave_critical_section_notrace(irqstate_t flags) noinstrument_function;
 #  define restore_critical_section(tcb, cpu)
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

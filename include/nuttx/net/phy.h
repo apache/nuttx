@@ -49,11 +49,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -112,7 +109,6 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid,
 int phy_notify_unsubscribe(FAR const char *intf, pid_t pid);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

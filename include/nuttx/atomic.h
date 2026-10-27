@@ -166,13 +166,9 @@ typedef __Atomic(int64_t) atomic64_t;
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifndef CONFIG_LIBC_ATOMIC_TOOLCHAIN
@@ -214,7 +210,6 @@ int64_t atomic_fetch_xor_8(FAR volatile void *ptr, int64_t value,
                            int memorder);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

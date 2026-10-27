@@ -77,11 +77,8 @@ struct spq10kbd_config_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -118,7 +115,6 @@ int spq10kbd_register(FAR struct i2c_master_s *i2c,
                       char kbdminor);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

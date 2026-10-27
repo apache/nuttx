@@ -56,11 +56,8 @@ typedef CODE void (*net_rpmsg_drv_cb_t)(FAR struct netdev_lowerhalf_s *dev,
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -127,7 +124,6 @@ void net_rpmsg_drv_set_callback(FAR struct netdev_lowerhalf_s *dev,
 int net_rpmsg_drv_server_init(void);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

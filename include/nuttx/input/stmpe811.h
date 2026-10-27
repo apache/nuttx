@@ -519,11 +519,8 @@ typedef FAR void *STMPE811_HANDLE;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -784,7 +781,6 @@ uint16_t stmpe811_tempread(STMPE811_HANDLE handle);
 
 /* Not implemented */
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -106,11 +106,8 @@ struct i2c_master_s;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -143,7 +140,6 @@ int bmi160_register(FAR const char *devpath, FAR struct spi_dev_s *dev);
 #  endif /* CONFIG_SENSORS_BMI160_UORB */
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

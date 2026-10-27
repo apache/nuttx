@@ -211,11 +211,8 @@ struct mipi_dsi_device
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -860,7 +857,6 @@ int mipi_dsi_dcs_set_display_brightness(FAR struct mipi_dsi_device *device,
 int mipi_dsi_dcs_get_display_brightness(FAR struct mipi_dsi_device *device,
                                         FAR uint16_t *brightness);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

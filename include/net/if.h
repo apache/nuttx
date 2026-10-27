@@ -387,11 +387,8 @@ struct ifconf
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -476,7 +473,6 @@ FAR struct if_nameindex *if_nameindex(void);
 
 void if_freenameindex(FAR struct if_nameindex *ifn);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

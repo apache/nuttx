@@ -110,11 +110,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -167,7 +164,6 @@ unsigned long bitmap_find_free_region(FAR unsigned long *bitmap,
 
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

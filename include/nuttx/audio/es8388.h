@@ -126,11 +126,8 @@ struct es8388_lower_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -184,7 +181,6 @@ void es8388_dump_registers(FAR struct audio_lowerhalf_s *dev,
 #  define es8388_dump_registers(d,m)
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

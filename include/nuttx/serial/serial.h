@@ -400,13 +400,9 @@ typedef struct uart_dev_s uart_dev_t;
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -602,7 +598,6 @@ int uart_check_special(FAR uart_dev_t *dev, FAR const char *buf,
 int uart_gdbstub_register(FAR uart_dev_t *dev, FAR const char *path);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

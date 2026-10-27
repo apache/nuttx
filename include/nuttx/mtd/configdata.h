@@ -94,11 +94,8 @@ struct config_data_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -175,7 +172,6 @@ int mtdconfig_register_by_path(FAR struct mtd_dev_s *mtd,
 
 int mtdconfig_unregister_by_path(FAR const char *path);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

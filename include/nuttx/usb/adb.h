@@ -47,13 +47,9 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -96,7 +92,6 @@ void usbdev_adb_uninitialize(FAR void *handle);
 
 void usbdev_adb_get_composite_devdesc(struct composite_devdesc_s *dev);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

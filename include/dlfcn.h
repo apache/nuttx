@@ -108,11 +108,8 @@ typedef struct
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -355,7 +352,6 @@ FAR char *dlerror(void);
 
 int dladdr(const FAR void *addr, FAR Dl_info *info);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

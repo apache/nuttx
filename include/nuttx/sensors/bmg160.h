@@ -390,11 +390,8 @@ struct bmg160_config_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -417,7 +414,6 @@ extern "C"
 int bmg160_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
                     FAR struct bmg160_config_s *config);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

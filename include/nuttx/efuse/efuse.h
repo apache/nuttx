@@ -160,11 +160,8 @@ struct efuse_lowerhalf_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -176,7 +173,6 @@ FAR void *efuse_register(FAR const char *path,
 
 void efuse_unregister(FAR void *handle);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

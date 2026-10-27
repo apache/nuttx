@@ -34,18 +34,14 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_TIMER_WDOG
 int timer_wdog_initialize(int timer_id);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

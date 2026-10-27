@@ -468,13 +468,9 @@ struct i2s_dev_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -506,7 +502,6 @@ extern "C"
 
 int i2schar_register(FAR struct i2s_dev_s *i2s, int minor);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -30,11 +30,8 @@
 #include <nuttx/mmcsd.h>
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -65,7 +62,6 @@ extern "C"
 
 int bcmf_sdio_initialize(int minor, FAR struct sdio_dev_s *dev);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

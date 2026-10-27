@@ -76,11 +76,8 @@
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -131,7 +128,6 @@ int hamming_verify256x(FAR uint8_t *data,
                        size_t size,
                        FAR const uint8_t *code);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

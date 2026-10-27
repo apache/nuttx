@@ -61,13 +61,9 @@ struct symtab_s
  * Public Functions Definitions
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -121,7 +117,6 @@ symtab_findbyvalue(FAR const struct symtab_s *symtab,
 
 void symtab_sortbyname(FAR struct symtab_s *symtab, int nsyms);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -56,11 +56,8 @@ struct i2c_master_s;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -86,7 +83,6 @@ int bmp180_register(FAR const char *devpath, FAR struct i2c_master_s *i2c);
 int bmp180_register_uorb(int devno, FAR struct i2c_master_s *i2c);
 #endif /* CONFIG_SENSORS_BMP180_UORB */
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

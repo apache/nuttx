@@ -163,11 +163,8 @@ struct cs2100_config_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -228,7 +225,6 @@ int cs2100_disable(FAR const struct cs2100_config_s *config);
 int cs2100_dump(FAR const struct cs2100_config_s *config);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -60,11 +60,8 @@
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -121,7 +118,6 @@ int nandecc_writepage(FAR struct nand_dev_s *nand, off_t block,
                       unsigned int page,  FAR const void *data,
                       FAR void *spare);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

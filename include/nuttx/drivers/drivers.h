@@ -36,13 +36,9 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -284,7 +280,6 @@ void rpmsg_serialinit(void);
 
 void rpmsg_serialrawinit(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

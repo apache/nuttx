@@ -87,11 +87,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 enum android_fdsan_owner_type
@@ -185,7 +182,6 @@ void android_fdsan_exchange_owner_tag(int fd, uint64_t expected_tag,
 
 int android_fdsan_close_with_tag(int fd, uint64_t tag);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

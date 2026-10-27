@@ -953,13 +953,9 @@ struct canioc_stdfilter_s
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -1124,7 +1120,6 @@ int can_txdone(FAR struct can_dev_s *dev);
 int can_txready(FAR struct can_dev_s *dev);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

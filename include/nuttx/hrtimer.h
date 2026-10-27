@@ -102,11 +102,8 @@ typedef struct hrtimer_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -246,7 +243,6 @@ int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
 
 uint64_t hrtimer_gettime(FAR hrtimer_t *timer);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

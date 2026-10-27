@@ -78,11 +78,8 @@ begin_packed_struct struct usrsock_message_frag_ack_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -98,7 +95,6 @@ extern "C"
 int usrsock_rpmsg_server_initialize(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

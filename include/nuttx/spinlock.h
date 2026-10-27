@@ -41,13 +41,9 @@
 
 #include <nuttx/spinlock_type.h>
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -1267,7 +1263,6 @@ void write_unlock_irqrestore(FAR rwlock_t *lock, irqstate_t flags);
 
 #endif /* CONFIG_RW_SPINLOCK */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

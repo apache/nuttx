@@ -229,11 +229,8 @@ struct djoy_lowerhalf_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -264,7 +261,6 @@ extern "C"
 int djoy_register(FAR const char *devname,
                   FAR const struct djoy_lowerhalf_s *lower);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

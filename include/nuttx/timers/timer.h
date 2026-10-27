@@ -254,11 +254,8 @@ struct timer_lowerhalf_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 static inline
@@ -454,7 +451,6 @@ int timer_setcallback(FAR void *handle, tccb_t callback, FAR void *arg);
  * Architecture-specific Application Interfaces
  ****************************************************************************/
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

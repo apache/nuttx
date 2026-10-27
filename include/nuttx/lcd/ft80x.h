@@ -1713,11 +1713,8 @@ struct ft80x_fade_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -1748,7 +1745,6 @@ int ft80x_register(FAR struct i2c_master_s *i2c,
                    FAR const struct ft80x_config_s *lower);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

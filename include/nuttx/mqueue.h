@@ -139,11 +139,8 @@ struct mqueue_inode_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 struct tcb_s;         /* Forward reference */
@@ -793,7 +790,6 @@ int file_mq_setattr(FAR struct file *mq, FAR const struct mq_attr *mq_stat,
 
 int file_mq_getattr(FAR struct file *mq, FAR struct mq_attr *mq_stat);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

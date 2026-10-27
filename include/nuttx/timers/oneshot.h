@@ -282,13 +282,9 @@ struct oneshot_start_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -772,7 +768,6 @@ int oneshot_register(FAR const char *devname,
                      FAR struct oneshot_lowerhalf_s *lower);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

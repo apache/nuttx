@@ -32,13 +32,9 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Start/stop profiling */
@@ -56,7 +52,6 @@ void _mcleanup(void);
 noinstrument_function
 void mcount_internal(uintptr_t frompc, uintptr_t selfpc);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

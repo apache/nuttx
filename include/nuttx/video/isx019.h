@@ -30,11 +30,8 @@
 #include <nuttx/config.h>
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -49,7 +46,6 @@ int isx019_read_register(uint8_t cat,
                          FAR uint8_t *buf,
                          uint8_t size);
 #endif
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

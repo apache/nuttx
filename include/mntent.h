@@ -67,13 +67,9 @@ struct mntent
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 FAR FILE *setmntent(FAR const char *filename, FAR const char *type);
@@ -84,7 +80,6 @@ int addmntent(FAR FILE *stream, FAR const struct mntent *mnt);
 int endmntent(FAR FILE *stream);
 FAR char *hasmntopt(FAR const struct mntent *mnt, FAR const char *opt);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

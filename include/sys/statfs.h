@@ -129,13 +129,9 @@ struct statfs
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Inspired by Linux statfs() which was, in turn, inspired by
@@ -146,7 +142,6 @@ extern "C"
 int statfs(FAR const char *path, FAR struct statfs *buf);
 int fstatfs(int fd, FAR struct statfs *buf);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

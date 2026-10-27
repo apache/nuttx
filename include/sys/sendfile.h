@@ -53,13 +53,9 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -108,7 +104,6 @@ extern "C"
 
 ssize_t sendfile(int outfd, int infd, FAR off_t *offset, size_t count);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

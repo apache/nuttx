@@ -187,11 +187,8 @@ static const uint16_t asciito14seg[96] =
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -214,7 +211,6 @@ struct i2c_master_s;  /* Forward reference */
 
 int ht16k33_register(int devno, FAR struct i2c_master_s *i2c);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

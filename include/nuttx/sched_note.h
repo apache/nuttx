@@ -563,13 +563,9 @@ struct note_filter_named_tag_s
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -769,7 +765,6 @@ void sched_note_filter_tag(FAR struct note_filter_named_tag_s *oldf,
 
 #endif /* defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT) */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -74,11 +74,8 @@ struct sx1301_lower_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -100,7 +97,6 @@ extern "C"
 int sx1301_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
                     FAR const struct sx1301_lower_s *lower);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

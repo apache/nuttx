@@ -61,11 +61,8 @@
 #define WS2812_RW_PIXEL_SIZE  4
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -205,7 +202,6 @@ uint32_t ws2812_hsv_to_rgb(uint8_t hue,
 
 uint32_t ws2812_gamma_correct(uint32_t pixel);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

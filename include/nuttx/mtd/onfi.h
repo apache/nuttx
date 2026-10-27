@@ -75,11 +75,8 @@ struct onfi_pgparam_s
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -175,7 +172,6 @@ bool onfi_embeddedecc(FAR const struct onfi_pgparam_s *onfi,
 bool onfi_ebidetect(uintptr_t cmdaddr, uintptr_t addraddr, uintptr_t
                     dataaddr);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

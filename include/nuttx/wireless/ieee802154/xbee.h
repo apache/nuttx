@@ -59,11 +59,8 @@ struct xbee_lower_s
 typedef FAR void *XBEEHANDLE;
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -114,7 +111,6 @@ XBEEHANDLE xbee_init(FAR struct spi_dev_s *spi,
 
 int xbee_netdev_register(XBEEHANDLE xbee);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

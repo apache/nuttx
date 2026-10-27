@@ -34,18 +34,14 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_16550_PCI_UART
 int pci_u16550_init(void);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

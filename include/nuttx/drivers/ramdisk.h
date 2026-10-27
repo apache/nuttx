@@ -54,11 +54,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -108,7 +105,6 @@ int ramdisk_register(int minor, FAR uint8_t *buffer, uint32_t nsectors,
 int mkrd(int minor, uint32_t nsectors, uint16_t sectsize, uint8_t rdflags);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

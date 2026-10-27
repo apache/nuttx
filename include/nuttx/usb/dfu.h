@@ -34,13 +34,9 @@
  * Public Functions Definitions
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -72,7 +68,6 @@ void usbdev_dfu_get_composite_devdesc(struct composite_devdesc_s *dev);
 
 void usbdev_dfu_activate_bootloader();
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

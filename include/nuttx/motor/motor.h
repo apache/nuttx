@@ -300,11 +300,8 @@ struct motor_lowerhalf_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -332,7 +329,6 @@ extern "C"
 int motor_register(FAR const char *path,
                    FAR struct motor_lowerhalf_s *lower);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

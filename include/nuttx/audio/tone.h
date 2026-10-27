@@ -43,11 +43,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -80,7 +77,6 @@ int tone_register(FAR const char *path, FAR struct pwm_lowerhalf_s *tone,
                   int channel,
                   FAR struct oneshot_lowerhalf_s *oneshot);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

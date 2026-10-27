@@ -213,11 +213,8 @@ virtio_zalloc_buf(FAR struct virtio_device *vdev, size_t size, size_t align)
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Driver and device register/unregister function */
@@ -232,7 +229,6 @@ int virtio_unregister_device(FAR struct virtio_device *device);
 
 void virtio_register_drivers(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

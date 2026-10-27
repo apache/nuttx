@@ -451,13 +451,9 @@ struct boardioc_macaddr_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -495,7 +491,6 @@ extern "C"
 
 int boardctl(unsigned int cmd, uintptr_t arg);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -236,11 +236,8 @@ struct l3gd20_config_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -264,7 +261,6 @@ extern "C"
 int l3gd20_register(int devno, FAR struct spi_dev_s *spi,
                     FAR struct l3gd20_config_s *config);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -94,13 +94,9 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int mount(FAR const char *source, FAR const char *target,
@@ -108,7 +104,6 @@ int mount(FAR const char *source, FAR const char *target,
           FAR const void *data);
 int umount2(FAR const char *target, unsigned int flags);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

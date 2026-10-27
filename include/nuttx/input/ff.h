@@ -476,11 +476,8 @@ struct ff_lowerhalf_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -543,7 +540,6 @@ int ff_register(FAR struct ff_lowerhalf_s *lower, FAR const char *path,
 
 void ff_unregister(FAR struct ff_lowerhalf_s *lower, FAR const char *path);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

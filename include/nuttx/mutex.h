@@ -70,11 +70,8 @@ typedef struct rmutex_s rmutex_t;
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -866,7 +863,6 @@ static inline_function void nxrmutex_reset(FAR rmutex_t *rmutex)
   nxmutex_reset(&rmutex->mutex);
 }
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

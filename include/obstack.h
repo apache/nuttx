@@ -208,13 +208,9 @@ struct obstack
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -544,7 +540,6 @@ int obstack_vprintf(FAR struct obstack *h, FAR const char *fmt, va_list ap)
 
 extern void (*obstack_alloc_failed_handler) (void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

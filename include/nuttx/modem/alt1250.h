@@ -373,11 +373,8 @@ typedef CODE int32_t (*parse_handler_t)(FAR struct alt1250_dev_s *dev,
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -401,7 +398,6 @@ FAR void *alt1250_register(FAR const char *devpath,
                            FAR struct spi_dev_s *dev,
                            FAR const struct alt1250_lower_s *lower);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

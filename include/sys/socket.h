@@ -452,13 +452,9 @@ static inline FAR struct cmsghdr *cmsg_nxthdr(FAR const struct msghdr *__msg,
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int socket(int domain, int type, int protocol);
@@ -528,7 +524,6 @@ fortify_function(recvfrom) ssize_t recvfrom(int sockfd, FAR void *buf,
 }
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -172,11 +172,8 @@ struct cs43l22_lower_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -258,7 +255,6 @@ void cs43l22_clock_analysis(FAR struct audio_lowerhalf_s *dev,
 #  define cs43l22_clock_analysis(d,m)
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

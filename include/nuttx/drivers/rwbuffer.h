@@ -150,13 +150,9 @@ struct rwbuffer_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -202,7 +198,6 @@ int rwb_flush(FAR struct rwbuffer_s *rwb);
 int rwb_discard(FAR struct rwbuffer_s *rwb);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

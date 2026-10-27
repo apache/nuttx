@@ -104,11 +104,8 @@ struct bme680_config_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -130,7 +127,6 @@ extern "C"
 int bme680_register(int devno, FAR struct i2c_master_s *i2c,
                     FAR struct bme680_config_s *config);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

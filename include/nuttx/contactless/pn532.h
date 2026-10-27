@@ -104,11 +104,8 @@ struct pn_mifare_tag_data_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -131,7 +128,6 @@ extern "C"
 int pn532_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
                    FAR struct pn532_config_s *config);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -71,11 +71,8 @@ struct netlink_response_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -119,7 +116,6 @@ void netlink_add_response(NETLINK_HANDLE handle,
 
 void netlink_add_broadcast(int group, FAR struct netlink_response_s *data);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

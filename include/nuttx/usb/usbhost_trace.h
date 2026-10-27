@@ -82,13 +82,9 @@ typedef CODE int (*usbhost_trcallback_t)(FAR uint32_t trace, FAR void *arg);
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -182,7 +178,6 @@ FAR const char *usbhost_trformat1(uint16_t id);
 FAR const char *usbhost_trformat2(uint16_t id);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

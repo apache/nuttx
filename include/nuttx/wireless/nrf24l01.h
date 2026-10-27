@@ -110,13 +110,9 @@
  * Public Data Types
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /* Data rates available for transmission */
@@ -529,7 +525,6 @@ void nrf24l01_dumpregs(FAR struct nrf24l01_dev_s *dev);
 void nrf24l01_dumprxfifo(FAR struct nrf24l01_dev_s *dev);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

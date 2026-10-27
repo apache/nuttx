@@ -68,11 +68,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -93,7 +90,6 @@ extern "C"
 FAR struct qe_lowerhalf_s *mt6816_initialize(FAR struct spi_dev_s *spi,
                                              uint16_t devid);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

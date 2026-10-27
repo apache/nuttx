@@ -107,11 +107,8 @@ struct ra8875_lcd_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -217,7 +214,6 @@ void ra8875_drawcircle(FAR struct lcd_dev_s *dev, uint16_t x, uint16_t y,
                        uint8_t radius, uint16_t color, bool fill);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -104,13 +104,9 @@ struct pollfd
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -140,7 +136,6 @@ fortify_function(ppoll) int ppoll(FAR struct pollfd *fds, nfds_t nfds,
 }
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

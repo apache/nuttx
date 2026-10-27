@@ -110,16 +110,12 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 FAR char *nl_langinfo(nl_item item);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

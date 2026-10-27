@@ -199,13 +199,9 @@ typedef CODE int (*dns_callback_t)(FAR void *arg,
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -289,7 +285,6 @@ int dns_unregister_notify(dns_callback_t callback, FAR void *arg);
 
 int dns_set_queryfamily(sa_family_t family);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

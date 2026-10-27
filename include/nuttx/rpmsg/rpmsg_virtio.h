@@ -40,11 +40,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -56,7 +53,6 @@ int rpmsg_virtio_probe_cpuname(FAR struct virtio_device *vdev,
 int rpmsg_virtio_probe(FAR struct virtio_device *vdev);
 void rpmsg_virtio_remove(FAR struct virtio_device *vdev);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

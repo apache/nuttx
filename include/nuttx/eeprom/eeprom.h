@@ -231,11 +231,8 @@ enum eeprom_25xx_e
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -334,7 +331,6 @@ void ee25xx_teardown(FAR struct eeprom_dev_s *dev);
 #endif /* CONFIG_MTD_AT25EE */
 #endif /* CONFIG_SPI_EE_25XX */
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

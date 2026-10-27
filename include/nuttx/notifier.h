@@ -95,13 +95,9 @@ struct blocking_notifier_head
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #define notifier_chain_register(nhead, node, unique_priority) \
@@ -276,7 +272,6 @@ extern "C"
     } \
   while(0)
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

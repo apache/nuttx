@@ -41,11 +41,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -98,7 +95,6 @@ int rpmsgdev_register(FAR const char *remotecpu, FAR const char *remotepath,
                       FAR const char *localpath, uint32_t flags);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

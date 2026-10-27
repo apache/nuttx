@@ -30,11 +30,8 @@
 #include <nuttx/config.h>
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -51,7 +48,6 @@ extern "C"
 
 int pci_kvaser_init(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -67,11 +67,8 @@ struct vs1053_lower_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -106,7 +103,6 @@ FAR struct audio_lowerhalf_s *vs1053_initialize(FAR struct spi_dev_s *spi,
                           FAR const struct vs1053_lower_s *lower,
                           unsigned int devno);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

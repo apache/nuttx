@@ -105,13 +105,9 @@ struct nxflat_loadinfo_s
  * Public Functions Definitions
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -212,7 +208,6 @@ int nxflat_bind(FAR struct nxflat_loadinfo_s *loadinfo,
 
 int nxflat_unload(struct nxflat_loadinfo_s *loadinfo);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -38,13 +38,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -246,7 +242,6 @@ ssize_t up_progmem_read(size_t addr, FAR void *buf, size_t count);
 
 uint8_t up_progmem_erasestate(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

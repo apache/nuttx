@@ -100,11 +100,8 @@ struct mio283qt9a_lcd_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -137,7 +134,6 @@ FAR struct lcd_dev_s *mio283qt9a_lcdinitialize(
 
 void mio283qt9a_clear(FAR struct lcd_dev_s *dev, uint16_t color);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -33,13 +33,9 @@
  * Pre-Processor Declarations
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #define ST_LIS2DH_WHOAMI_VALUE          0x33    /* Valid WHOAMI register value */
@@ -430,7 +426,6 @@ typedef struct lis2dh_raw_data_s lis2dh_raw_data_t;
 int lis2dh_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                     uint8_t addr, FAR struct lis2dh_config_s *config);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

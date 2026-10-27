@@ -98,11 +98,8 @@
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -142,7 +139,6 @@ void lib_put_tempbuffer(FAR char *buffer);
 FAR char *lib_realpath(FAR const char *path, FAR char *resolved,
                        bool notfollow);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

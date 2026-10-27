@@ -147,11 +147,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -181,7 +178,6 @@ void _assert(FAR const char *filename, int linenum,
 void __assert(FAR const char *filename, int linenum,
               FAR const char *msg) noreturn_function;
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

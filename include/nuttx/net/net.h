@@ -267,11 +267,8 @@ struct socket
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -1539,7 +1536,6 @@ FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname);
 
 FAR struct net_driver_s *netdev_findbyindex(int ifindex);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

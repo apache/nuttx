@@ -174,11 +174,8 @@ struct esp_himem_par
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -187,7 +184,6 @@ extern "C"
 
 int esp_himem_init(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

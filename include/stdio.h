@@ -231,13 +231,9 @@ typedef struct file_struct FILE;
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -461,7 +457,6 @@ fortify_function(sprintf) int sprintf(FAR char *buf,
 #endif
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

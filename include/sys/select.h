@@ -99,13 +99,9 @@ typedef struct fd_set_s fd_set;
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 struct timeval;
@@ -116,7 +112,6 @@ int pselect(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
             FAR fd_set *exceptfds, FAR const struct timespec *timeout,
             FAR const sigset_t *sigmask);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

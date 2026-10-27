@@ -75,11 +75,8 @@ struct drv8825_ops_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -98,7 +95,6 @@ extern "C"
 
 int drv8825_register(FAR const char *devpath, FAR struct drv8825_ops_s *ops);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

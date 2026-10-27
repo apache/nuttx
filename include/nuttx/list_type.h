@@ -51,13 +51,9 @@
  * Public Type Definitions
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 struct list_node
@@ -66,7 +62,6 @@ struct list_node
   FAR struct list_node *prev;
 };
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

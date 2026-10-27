@@ -114,11 +114,8 @@ struct ina3221_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -145,7 +142,6 @@ extern "C"
 int ina3221_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                      FAR const struct ina3221_config_s *config);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

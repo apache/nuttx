@@ -45,11 +45,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -77,7 +74,6 @@ extern "C"
 FAR struct audio_lowerhalf_s *audio_comp_initialize(FAR const char *name,
                                                     ...);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

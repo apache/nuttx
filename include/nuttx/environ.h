@@ -52,11 +52,8 @@ typedef CODE int (*env_foreach_t)(FAR void *arg, FAR const char *pair);
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 struct task_info_s;  /* Forward reference */
@@ -149,7 +146,6 @@ void env_release(FAR struct task_info_s *info);
 void env_sanitize_secure(FAR struct task_info_s *info);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

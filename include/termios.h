@@ -256,11 +256,8 @@ struct termios
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* The cfgetspeed() function is a non-POSIX function will extract the baud
@@ -321,7 +318,6 @@ int tcsendbreak(int fd, int duration);
 
 int tcsetattr(int fd, int options, FAR const struct termios *termiosp);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

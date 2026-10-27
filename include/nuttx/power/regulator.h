@@ -176,11 +176,8 @@ struct regulator_dev_s
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -285,7 +282,6 @@ int regulator_rpmsg_server_init(void);
 
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

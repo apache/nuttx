@@ -164,11 +164,8 @@ struct pga11x_settings_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -365,7 +362,6 @@ int pga11x_enable(PGA11X_HANDLE handle);
 int pga11x_uenable(PGA11X_HANDLE handle, int pos);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

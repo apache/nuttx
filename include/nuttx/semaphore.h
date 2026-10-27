@@ -140,11 +140,8 @@ struct nsem_inode_s
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -797,7 +794,6 @@ int nxsem_getprioceiling(FAR const sem_t *sem, FAR int *prioceiling);
 int nxsem_setprioceiling(FAR sem_t *sem, int prioceiling,
                          FAR int *old_ceiling);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

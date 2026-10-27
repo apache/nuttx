@@ -60,11 +60,8 @@ struct pca9540bdp_dev_s;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -107,7 +104,6 @@ FAR struct i2c_master_s *
 FAR struct pca9540bdp_dev_s *
   pca9540bdp_initialize(FAR struct i2c_master_s *i2c, uint8_t addr);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

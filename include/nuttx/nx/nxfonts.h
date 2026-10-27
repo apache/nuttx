@@ -468,13 +468,9 @@ struct nxfonts_glyph_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -663,7 +659,6 @@ NXHANDLE nxf_cache_getfonthandle(FCACHE fhandle);
 FAR const struct nxfonts_glyph_s *nxf_cache_getglyph(FCACHE fhandle,
                                                      uint8_t ch);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

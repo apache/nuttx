@@ -82,11 +82,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -113,7 +110,6 @@ struct audio_lowerhalf_s; /* Forward reference. Defined in nuttx/audio/audio.h *
 
 FAR struct audio_lowerhalf_s *audio_null_initialize(bool playback);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

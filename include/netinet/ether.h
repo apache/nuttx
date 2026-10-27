@@ -44,11 +44,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 FAR char *ether_ntoa(FAR const struct ether_addr *addr);
@@ -61,7 +58,6 @@ int ether_line(FAR const char *line, FAR struct ether_addr *addr,
 FAR struct ether_addr *ether_aton_r(FAR const char *asc,
                                     FAR struct ether_addr *addr);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

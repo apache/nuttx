@@ -44,11 +44,8 @@ struct bridge_port_s; /* Opaque, defined by the bridge driver */
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -117,7 +114,6 @@ void bridge_txdone(FAR struct bridge_port_s *port);
 
 void bridge_port_detach(FAR struct netdev_lowerhalf_s *dev);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

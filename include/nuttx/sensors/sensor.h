@@ -645,13 +645,9 @@ struct sensor_lowerhalf_s
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -865,7 +861,6 @@ int sensor_monitor_initialize(void);
 int sensor_monitor_level(FAR const char *name);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

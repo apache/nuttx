@@ -138,13 +138,9 @@ struct mmc_ioc_multi_cmd
  * Public Functions Definitions
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -186,7 +182,6 @@ struct spi_dev_s; /* See nuttx/spi/spi.h */
 int mmcsd_spislotinitialize(int minor, int slotno,
                             FAR struct spi_dev_s *spi);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -227,11 +227,8 @@ struct lis3dsh_config_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -276,7 +273,6 @@ int lis3dsh_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 int lis3dsh_register_uorb(int devno, FAR struct spi_dev_s *spi);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

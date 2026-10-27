@@ -210,13 +210,9 @@ struct sched_param
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -285,7 +281,6 @@ void   sched_dumpstack(pid_t tid);
 #  define sched_dumpstack(tid)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

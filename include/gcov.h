@@ -43,11 +43,8 @@ struct gcov_info;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -102,7 +99,6 @@ void __gcov_unload(FAR const void *addr, size_t size);
 #  define __gcov_unload(addr, size)
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

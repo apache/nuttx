@@ -216,13 +216,9 @@ struct flock
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -238,7 +234,6 @@ int fcntl(int fd, int cmd, ...);
 
 int posix_fallocate(int fd, off_t offset, off_t len);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

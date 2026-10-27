@@ -143,13 +143,9 @@ typedef struct lldiv_s lldiv_t;
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Random number generation */
@@ -334,7 +330,6 @@ fortify_function(realpath) FAR char *realpath(FAR const char *path,
 }
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

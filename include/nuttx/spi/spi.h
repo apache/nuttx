@@ -595,16 +595,11 @@ struct spi_dev_s
   FAR const struct spi_ops_s *ops;
 };
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

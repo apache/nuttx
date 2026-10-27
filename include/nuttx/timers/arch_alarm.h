@@ -35,11 +35,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_ALARM_ARCH
@@ -52,7 +49,6 @@ void up_alarm_set_lowerhalf(FAR struct oneshot_lowerhalf_s *lower);
 
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

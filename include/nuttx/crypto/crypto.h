@@ -59,13 +59,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -84,7 +80,6 @@ int aes_cypher(FAR void *out, FAR const void *in, size_t size,
 int crypto_test(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

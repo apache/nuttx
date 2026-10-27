@@ -42,11 +42,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -57,7 +54,6 @@ extern "C"
 int goldfish_fb_register(int display, FAR void *regs, int irq);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

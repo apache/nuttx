@@ -83,11 +83,8 @@ struct mymsg
 };
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -207,7 +204,6 @@ int msgsnd(int msqid, FAR const void *msgp, size_t msgsz, int msgflg);
 ssize_t msgrcv(int msqid, FAR void *msgp,
                size_t msgsz, long msgtyp, int msgflg);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -526,13 +526,9 @@ struct nxsvrmsg_redrawreq_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -604,7 +600,6 @@ int nxmu_sendserver(FAR struct nxmu_conn_s *conn,
 int nxmu_sendwindow(FAR struct nxbe_window_s *wnd, FAR const void *msg,
                     size_t msglen);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

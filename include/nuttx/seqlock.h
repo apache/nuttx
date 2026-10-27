@@ -37,13 +37,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -206,7 +202,6 @@ void write_sequnlock_irqrestore(FAR seqcount_t *s, irqstate_t flags)
   up_irq_restore(flags);
 }
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

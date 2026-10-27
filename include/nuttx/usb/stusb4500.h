@@ -35,13 +35,9 @@
  * Pre-Processor Declarations
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -136,7 +132,6 @@ STUSB_GEN1S_RDO_REG_STATUS_REGTYPEDEF end_packed_struct;
 int stusb4500_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                        uint8_t addr);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

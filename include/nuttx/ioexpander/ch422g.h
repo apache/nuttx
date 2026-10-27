@@ -81,11 +81,8 @@ struct ch422g_config_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -108,7 +105,6 @@ FAR struct ioexpander_dev_s *
 ch422g_initialize(FAR struct i2c_master_s *i2c,
                   FAR struct ch422g_config_s *config);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

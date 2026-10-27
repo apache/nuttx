@@ -81,11 +81,8 @@ CODE typedef void (*rpmsg_bind_cb_t)(FAR struct rpmsg_device *rdev,
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int rpmsg_wait(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem);

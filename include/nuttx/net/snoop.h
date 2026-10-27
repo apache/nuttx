@@ -106,11 +106,8 @@ struct snoop_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -194,7 +191,6 @@ int snoop_sync(FAR struct snoop_s *snoop);
 
 int snoop_close(FAR struct snoop_s *snoop);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

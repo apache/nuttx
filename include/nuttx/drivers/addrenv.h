@@ -52,11 +52,8 @@ struct simple_addrenv_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 void simple_addrenv_initialize(FAR const struct simple_addrenv_s *addrenv);

@@ -41,13 +41,9 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 #define GS2200M_IOC_CONNECT  _WLCIOC(GS2200M_FIRST + 0)
@@ -150,7 +146,6 @@ FAR void *gs2200m_register(FAR const char *devpath,
                            FAR struct spi_dev_s *dev,
                            FAR const struct gs2200m_lower_s *lower);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -558,11 +558,8 @@ struct userfs_chstat_response_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -629,7 +626,6 @@ int userfs_run(FAR const char *mountpt,
                FAR const struct userfs_operations_s *userops,
                FAR void *volinfo, size_t mxwrite);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

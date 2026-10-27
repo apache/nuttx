@@ -42,11 +42,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -58,7 +55,6 @@ int isx012_uninitialize(void);
 #ifdef CONFIG_VIDEO_ISX012_REGDEBUG
 int isx012_read_register(uint16_t addr, FAR uint8_t *buf, uint8_t size);
 #endif
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -38,11 +38,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -60,7 +57,6 @@ extern "C"
 int optee_register(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

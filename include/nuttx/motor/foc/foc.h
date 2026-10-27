@@ -190,16 +190,12 @@ struct foc_dev_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int foc_register(FAR const char *path, FAR struct foc_dev_s *dev);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

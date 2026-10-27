@@ -161,13 +161,9 @@ struct stat
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int mkdir(FAR const char *pathname, mode_t mode);
@@ -194,7 +190,6 @@ int futimens(int fd, const struct timespec times[2]);
 mode_t umask(mode_t mask);
 mode_t getumask(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

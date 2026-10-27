@@ -164,11 +164,8 @@ struct pulsecount_lowerhalf_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int pulsecount_register(FAR const char *path,
@@ -181,7 +178,6 @@ int pulsecount_register(FAR const char *path,
 
 void pulsecount_expired(FAR void *handle);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

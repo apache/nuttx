@@ -207,11 +207,8 @@ struct userled_lowerhalf_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -254,7 +251,6 @@ int userled_register(FAR const char *devname,
 int userled_lower_initialize(FAR const char *devname);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

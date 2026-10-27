@@ -73,11 +73,8 @@ struct sbutton_config_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -105,7 +102,6 @@ extern "C"
 int sbutton_register(FAR const struct sbutton_config_s *config,
                      char kbdminor);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

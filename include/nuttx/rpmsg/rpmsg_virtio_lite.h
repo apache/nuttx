@@ -208,11 +208,8 @@ struct rpmsg_virtio_lite_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int rpmsg_virtio_lite_initialize(FAR struct rpmsg_virtio_lite_s *dev);

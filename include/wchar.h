@@ -124,11 +124,8 @@ struct tm; /* Forward reference (see <time.h>) */
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -356,7 +353,6 @@ fortify_function(wmemset) FAR wchar_t *wmemset(FAR wchar_t *s,
 
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

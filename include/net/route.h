@@ -79,11 +79,8 @@ struct in6_rtmsg
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -133,7 +130,6 @@ int addroute(int sockfd, FAR void *target, FAR void *netmask,
 
 int delroute(int sockfd, FAR void *target, FAR void *netmask, socklen_t len);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

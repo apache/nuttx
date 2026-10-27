@@ -102,11 +102,8 @@ typedef FAR void *locale_t;
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 FAR char *setlocale(int category, FAR const char *locale);
@@ -119,7 +116,6 @@ void freelocale(locale_t locobj);
 locale_t uselocale(locale_t newloc);
 FAR const char *getlocalename_l(int category, locale_t locobj);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

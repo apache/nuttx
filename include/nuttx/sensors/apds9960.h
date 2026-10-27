@@ -357,11 +357,8 @@ struct gesture_data_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -384,7 +381,6 @@ struct i2c_master_s;
 int apds9960_register(FAR const char *devpath,
                       FAR struct apds9960_config_s *config);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -422,13 +422,9 @@ struct rtc_lowerhalf_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -449,7 +445,6 @@ extern "C"
 int rtc_initialize(int minor, FAR struct rtc_lowerhalf_s *lower);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

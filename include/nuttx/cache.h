@@ -39,11 +39,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -539,7 +536,6 @@ void up_coherent_dcache(uintptr_t addr, size_t len);
 #  define up_coherent_dcache(addr, len)
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif
