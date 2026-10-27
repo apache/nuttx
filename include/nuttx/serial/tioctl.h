@@ -139,10 +139,8 @@
 #define TIOCGSOFTCAR    _TIOC(0x0024)  /* Get software carrier flag: FAR int* */
 #define TIOCSSOFTCAR    _TIOC(0x0025)  /* Set software carrier flag: FAR const int */
 
-/* Get/set serial line info */
+/* Get the line status register */
 
-#define TIOCGSERIAL     _TIOC(0x0026)  /* Get serial line info: FAR struct serial_struct */
-#define TIOCSSERIAL     _TIOC(0x0027)  /* Set serial line info: FAR const struct serial_struct */
 #define TIOCSERGETLSR   _TIOC(0x0028)  /* Get line status register: FAR int */
 
 /* Serial events  */
