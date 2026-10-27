@@ -37,13 +37,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -157,7 +153,6 @@ int mtd_proxy(FAR const char *mtddev, int mountflags,
               FAR struct inode **ppinode);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

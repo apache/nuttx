@@ -128,13 +128,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -183,7 +179,6 @@ net_sockif(sa_family_t family, int type, int protocol);
 int net_timeo(clock_t start_time, socktimeo_t timeo);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

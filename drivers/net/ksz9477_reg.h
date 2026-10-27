@@ -174,11 +174,8 @@ begin_packed_struct struct ksz9477_transfer_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -194,7 +191,6 @@ int ksz9477_write(struct ksz9477_transfer_s *write_msg);
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __DRIVERS_NET_KSZ9477_REG_H */

@@ -37,13 +37,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -102,7 +98,6 @@ int getopt_common(int argc, FAR char * const argv[],
                   FAR int *longindex,
                   enum getopt_mode_e mode);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

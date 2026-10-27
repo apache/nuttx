@@ -263,13 +263,9 @@ struct nxbe_state_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -820,7 +816,6 @@ void nxbe_clipnull(FAR struct nxbe_clipops_s *cops,
                    FAR struct nxbe_plane_s *plane,
                    FAR const struct nxgl_rect_s *rect);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

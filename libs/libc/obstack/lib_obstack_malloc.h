@@ -30,13 +30,9 @@
 #include <nuttx/compiler.h>
 #include <stddef.h>
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -47,7 +43,6 @@ FAR void *lib_obstack_malloc(size_t size);
 
 FAR void *lib_obstack_realloc(FAR void *ptr, size_t size);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

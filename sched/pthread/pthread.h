@@ -47,11 +47,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -78,7 +75,6 @@ void pthread_mutex_inconsistent(FAR struct tls_info_s *tls);
 int pthread_mutexattr_verifytype(int type);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -362,11 +362,8 @@ struct oa_tc6_driver_s
 };
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -505,7 +502,6 @@ int oa_tc6_common_init(FAR struct oa_tc6_driver_s *priv,
 
 int oa_tc6_register(FAR struct oa_tc6_driver_s *oa_tc6_dev);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

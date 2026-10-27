@@ -144,11 +144,8 @@ struct pipe_dev_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 struct file;  /* Forward reference */
@@ -167,7 +164,6 @@ int     pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
 int     pipecommon_unlink(FAR struct inode *priv);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

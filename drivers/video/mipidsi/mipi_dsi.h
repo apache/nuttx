@@ -38,11 +38,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -85,7 +82,6 @@ int mipi_dsi_host_driver_register(FAR struct mipi_dsi_host *host);
 
 int mipi_dsi_device_driver_register(FAR struct mipi_dsi_device *device);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

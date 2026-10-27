@@ -146,11 +146,8 @@ struct net_bufpool_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -690,7 +687,6 @@ void cmsg_store_timestamp(FAR struct msghdr *msg,
                           FAR const struct timespec *tstamp, sockopt_t opt);
 #endif /* CONFIG_NET_TIMESTAMP */
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

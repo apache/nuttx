@@ -91,13 +91,9 @@ struct optee_shm
  * Public Functions Definitions
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -127,7 +123,6 @@ int optee_to_msg_param(FAR struct optee_priv_data *priv,
 
 int optee_convert_to_errno(uint32_t oterr);
 uint32_t optee_convert_from_errno(int err);
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

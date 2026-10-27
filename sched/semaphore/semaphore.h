@@ -44,11 +44,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Common semaphore logic */
@@ -104,7 +101,6 @@ int nxsem_protect_wait(FAR sem_t *sem);
 void nxsem_protect_post(FAR sem_t *sem);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

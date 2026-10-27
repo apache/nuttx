@@ -86,11 +86,8 @@ typedef int (*linegen_t)(FAR struct netprocfs_file_s *netfile);
  ****************************************************************************/
 
 #ifdef __cplusplus
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -257,7 +254,6 @@ ssize_t netprocfs_read_routes(FAR struct netprocfs_file_s *priv,
 ssize_t netprocfs_read_devstats(FAR struct netprocfs_file_s *priv,
                                 FAR char *buffer, size_t buflen);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

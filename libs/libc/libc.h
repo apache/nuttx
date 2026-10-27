@@ -240,13 +240,9 @@ typedef unsigned long long libc_data_t;
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -342,7 +338,6 @@ static inline void lib_cxx_initialize(void)
 }
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

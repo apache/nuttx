@@ -303,13 +303,9 @@ struct devif_callback_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -617,7 +613,6 @@ int netdev_input(FAR struct net_driver_s *dev,
 
 uint16_t devif_get_mtu(FAR struct net_driver_s *dev);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

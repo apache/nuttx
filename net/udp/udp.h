@@ -188,11 +188,8 @@ struct udp_callback_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -978,7 +975,6 @@ void udp_sendbuffer_notify(FAR struct udp_conn_s *conn);
 
 uint16_t udpip_hdrsize(FAR struct udp_conn_s *conn);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

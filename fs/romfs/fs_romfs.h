@@ -177,13 +177,9 @@ struct romfs_nodeinfo_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -214,7 +210,6 @@ int  romfs_datastart(FAR struct romfs_mountpt_s *rm,
 void romfs_freenode(FAR struct romfs_nodeinfo_s *node);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

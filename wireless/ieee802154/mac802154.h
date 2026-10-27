@@ -39,11 +39,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Callback operations to notify the next highest layer of various
@@ -355,7 +352,6 @@ int mac802154_resp_associate(MACHANDLE mac,
 int mac802154_resp_orphan(MACHANDLE mac,
                           FAR struct ieee802154_orphan_resp_s *resp);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

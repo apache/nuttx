@@ -35,13 +35,9 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 void optee_supplicant_init(FAR struct idr_s **shm_idr);
@@ -62,7 +58,6 @@ int optee_supplicant_send(uint32_t ret, uint32_t num_params,
 int optee_supplicant_recv(FAR uint32_t *func, FAR uint32_t *num_params,
                           FAR struct tee_ioctl_param *params);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
