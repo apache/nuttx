@@ -34,6 +34,12 @@
 #include <stdint.h>
 #include <limits.h>
 
+/* alloca() is also visible with <stdlib.h>, as in glibc and the BSDs:
+ * programs use it with only <stdlib.h>.
+ */
+
+#include <alloca.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
