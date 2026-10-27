@@ -36,26 +36,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Compatibility definitions
- *
- * Marked LEGACY in Open Group Base Specifications Issue 6/
- * IEEE Std 1003.1-2004
- * Removed from Open Group Base Specifications Issue 7/
- * IEEE Std 1003.1-2008
- */
-
-#ifndef bcmp
-#define bcmp(b1,b2,len)  memcmp(b1,b2,(size_t)len)
-#endif
-
-#ifndef bcopy
-#define bcopy(b1,b2,len) memmove(b2,b1,len)
-#endif
-
-#ifndef bzero
-#define bzero(s,n)       memset(s,0,n)
-#endif
-
 #define strcasecmp_l(s1, s2, l)     strcasecmp(s1, s2)
 #define strncasecmp_l(s1, s2, n, l) strncasecmp(s1, s2, n)
 
@@ -71,6 +51,33 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/* Compatibility functions
+ *
+ * Marked LEGACY in Open Group Base Specifications Issue 6/
+ * IEEE Std 1003.1-2004
+ * Removed from Open Group Base Specifications Issue 7/
+ * IEEE Std 1003.1-2008
+ */
+
+int bcmp(FAR const void *b1, FAR const void *b2, size_t len);
+void bcopy(FAR const void *b1, FAR void *b2, size_t len);
+void bzero(FAR void *s, size_t n);
+
+#if CONFIG_FORTIFY_SOURCE > 0
+fortify_function(bcopy) void bcopy(FAR const void *b1, FAR void *b2,
+                                   size_t len)
+{
+  fortify_assert(len <= fortify_size(b1, 0) && len <= fortify_size(b2, 0));
+  __real_bcopy(b1, b2, len);
+}
+
+fortify_function(bzero) void bzero(FAR void *s, size_t n)
+{
+  fortify_assert(n <= fortify_size(s, 0));
+  __real_bzero(s, n);
+}
+#endif
 
 int ffs(int j);
 

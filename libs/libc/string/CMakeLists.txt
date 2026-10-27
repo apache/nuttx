@@ -23,6 +23,9 @@
 # Add the string C files to the build
 
 set(SRCS
+    lib_bcmp.c
+    lib_bcopy.c
+    lib_bzero.c
     lib_ffs.c
     lib_ffsl.c
     lib_ffsll.c
