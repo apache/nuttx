@@ -7,6 +7,7 @@
 "__gcov_init","gcov.h","defined(CONFIG_COVERAGE_MINI) && defined(CONFIG_ARCH_TOOLCHAIN_GCC)","void","FAR struct gcov_info *"
 "__gcov_merge_add","gcov.h","defined(CONFIG_COVERAGE_MINI) && defined(CONFIG_ARCH_TOOLCHAIN_GCC)","void","FAR uint64_t *","unsigned int"
 "__gcov_reset","gcov.h","defined(CONFIG_COVERAGE_MINI) && defined(CONFIG_ARCH_TOOLCHAIN_GCC)","void"
+"__res_state","resolv.h","defined(CONFIG_NETDB_DNSCLIENT)","FAR struct __res_state *"
 "__stack_chk_fail","ssp/ssp.h","defined(CONFIG_STACK_CANARIES)","void","void"
 "_alert","debug.h","!defined(CONFIG_CPP_HAVE_VARARGS) && defined(CONFIG_DEBUG_ERROR)","void","FAR const char *","..."
 "_err","debug.h","!defined(CONFIG_CPP_HAVE_VARARGS) && defined(CONFIG_DEBUG_ERROR)","void","FAR const char *","..."
