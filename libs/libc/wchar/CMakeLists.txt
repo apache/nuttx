@@ -66,4 +66,10 @@ target_sources(
           lib_wcstok.c
           lib_wcswcs.c
           lib_wcwidth.c
-          lib_wcswidth.c)
+          lib_wcswidth.c
+          lib_wcsnlen.c
+          lib_wcsdup.c
+          lib_wcpcpy.c
+          lib_wcpncpy.c
+          lib_wcscasecmp.c
+          lib_wcsncasecmp.c)
