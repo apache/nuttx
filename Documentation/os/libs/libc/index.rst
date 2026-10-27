@@ -88,9 +88,26 @@ one of these macros before its first ``#include``:
 ``NUTTX_NO_EXTENSIONS``
   The headers do not define ``ERROR`` and ``OK`` (``sys/types.h``),
   ``set_errno()`` and ``get_errno()`` (``errno.h``), ``zalloc()``
-  (``stdlib.h``), ``O_TEXT`` (``fcntl.h``), ``weak_alias``,
-  ``visibility_hidden``, ``visibility_default`` and ``unused_data``
-  (``nuttx/compiler.h``).
+  (``stdlib.h``), ``O_TEXT`` and ``O_BINARY`` (``fcntl.h``), ``utimens()``
+  and ``lutimens()`` (``sys/stat.h``), the file system types ``*_MAGIC``
+  (``sys/statfs.h``), ``PANIC()``, ``PANIC_WITH_REGS()``,
+  ``ASSERT()``, ``VERIFY()``, ``COMPILE_TIME_ASSERT()`` and
+  ``BUILD_BUG_ON_ZERO()`` (``assert.h``), the NuttX ``crypt_r()``
+  (``unistd.h``; its third argument is the output buffer, not the
+  ``struct crypt_data`` of glibc and libxcrypt), the types ``unchar`` and
+  ``s_char`` (``sys/types.h``), ``builtin_function()`` and
+  ``builtin_original()`` (then ``string.h`` declares ``memcpy()`` and the
+  other functions without their inline versions; the compiler can still
+  use its own built-in functions), and the helper macros of
+  ``nuttx/compiler.h`` that the other headers do not use, for example
+  ``memory_barrier()``, ``UNUSED()``, ``weak_alias``, ``weak_function``,
+  ``predict_true()`` and ``always_inline_function``.  The list is in
+  ``nuttx/compiler.h``.  A definition of one of these names that the program
+  made before its first ``#include`` stays.  ``NUTTX_NO_EXTENSIONS`` needs
+  clang, or GCC 4.4 or later: with another compiler ``nuttx/compiler.h``
+  stops with ``#error``.  ``stdio.h`` and ``pthread.h`` do not bring in the
+  clock helpers of ``nuttx/clock.h`` (``TM_YEAR_BASE``, ``NSEC_PER_SEC`` and
+  others).
 
 Library Database
 ================
