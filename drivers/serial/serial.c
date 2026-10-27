@@ -1015,12 +1015,13 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
   unsigned int nbuffered;
   unsigned int watermark;
-  sbuf_size_t head;
 #endif
   irqstate_t flags;
   ssize_t recvd = 0;
   ssize_t buflen;
   bool echoed = false;
+  bool rawmode;
+  sbuf_size_t head;
   sbuf_size_t tail;
   char ch;
   int ret;
@@ -1044,6 +1045,9 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
    */
 
   buflen = uio->uio_resid;
+  rawmode = (dev->tc_iflag & (INLCR | IGNCR | ICRNL)) == 0 &&
+            (dev->tc_lflag & (ICANON | ECHO)) == 0;
+
   while (recvd < buflen)
     {
 #ifdef CONFIG_SERIAL_REMOVABLE
@@ -1078,8 +1082,40 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
        */
 
       tail = rxbuf->tail;
-      if (rxbuf->head != tail)
+      head = rxbuf->head;
+      if (head != tail)
         {
+          if (rawmode)
+            {
+              ssize_t ncopy;
+
+              if (head > tail)
+                {
+                  ncopy = head - tail;
+                }
+              else
+                {
+                  ncopy = rxbuf->size - tail;
+                }
+
+              if (ncopy > buflen - recvd)
+                {
+                  ncopy = buflen - recvd;
+                }
+
+              uio_copyfrom(uio, recvd, &rxbuf->buffer[tail], ncopy);
+              recvd += ncopy;
+
+              tail += ncopy;
+              if (tail >= rxbuf->size)
+                {
+                  tail = 0;
+                }
+
+              rxbuf->tail = tail;
+              continue;
+            }
+
           /* Take the next character from the tail of the buffer */
 
           ch = rxbuf->buffer[tail];
