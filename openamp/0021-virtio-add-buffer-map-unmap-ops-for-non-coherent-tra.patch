@@ -1,0 +1,166 @@
+From af5101e5c730abfdfe9a2ae44edf075e03e5eab5 Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Mon, 22 Jun 2026 22:54:12 +0800
+Subject: [PATCH 21/21] virtio: add buffer map/unmap ops for non-coherent transports
+
+Transports like remoteproc only let the peer access shared memory, so a
+driver cannot place arbitrary stack/heap/user addresses into a
+descriptor. Add a virtio_dma_map direction enum and map/unmap/
+free_largest callbacks to virtio_memory_ops, plus virtio_map_buf(),
+virtio_unmap_buf() and virtio_free_largest() helpers that bounce
+buffers when the transport requires it and are a no-op (zero copy)
+otherwise.
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/include/openamp/virtio.h | 121 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 121 insertions(+)
+
+diff --git a/lib/include/openamp/virtio.h open-amp/lib/include/openamp/virtio.h
+index 475aa69..e4d79ec 100644
+--- a/lib/include/openamp/virtio.h
++++ open-amp/lib/include/openamp/virtio.h
+@@ -282,12 +282,43 @@ struct virtio_dispatch {
+ 	void (*notify)(struct virtqueue *vq);
+ };
+ 
++/**
++ * @brief Buffer mapping direction for \ref virtio_map_buf and
++ * \ref virtio_unmap_buf.
++ *
++ * Mirrors Linux enum dma_data_direction. A transport that bounces buffers
++ * through shared memory uses the direction to decide whether to copy, which
++ * way to copy, and which cache maintenance to perform. The same direction
++ * must be passed to map and unmap for a given buffer.
++ */
++enum virtio_dma_map {
++	VIRTIO_DMA_TO_DEVICE,		/**< Data written to the device. */
++	VIRTIO_DMA_FROM_DEVICE,		/**< Data read from the device. */
++	VIRTIO_DMA_BIDIRECTIONAL,	/**< Data transferred both ways. */
++};
++
+ struct virtio_memory_ops {
+ 	/** Allocate memory from the virtio device. */
+ 	void *(*alloc)(struct virtio_device *dev, size_t size, size_t align);
+ 
+ 	/** Free memory allocated from the virtio device. */
+ 	void (*free)(struct virtio_device *dev, void *buf);
++
++	/* Largest buffer a single map call is guaranteed to satisfy. */
++	size_t (*free_largest)(struct virtio_device *dev);
++
++	/*
++	 * Map an existing buffer (stack/heap/user address) to an address the
++	 * device side can access, bouncing it through shared memory when the
++	 * transport requires it. NULL means the peer can access arbitrary
++	 * memory and the buffer is used as is (zero copy). Returns NULL when
++	 * the bounce buffer cannot be allocated; the caller may query
++	 * free_largest and retry with a smaller length.
++	 */
++	void *(*map)(struct virtio_device *dev, void *buf, size_t len,
++		     enum virtio_dma_map dir);
++	void (*unmap)(struct virtio_device *dev, void *buf, size_t len,
++		      enum virtio_dma_map dir, void *mapped);
+ };
+ 
+ /**
+@@ -558,6 +589,96 @@ static inline int virtio_free_buf(struct virtio_device *vdev, void *buf)
+ 	return 0;
+ }
+ 
++/**
++ * @brief Largest buffer a single \ref virtio_map_buf call can satisfy.
++ *
++ * Drivers query this before mapping and split large buffers accordingly.
++ * Transports that do not bounce return SIZE_MAX (no limit).
++ *
++ * @param vdev	Pointer to virtio device structure.
++ *
++ * @return Maximum mappable length in bytes.
++ */
++static inline size_t virtio_free_largest(struct virtio_device *vdev)
++{
++	if (!vdev || !vdev->mmops || !vdev->mmops->free_largest)
++		return SIZE_MAX;
++
++	return vdev->mmops->free_largest(vdev);
++}
++
++/**
++ * @brief Map a buffer so the device side can access it.
++ *
++ * If the transport does not need to bounce buffers (the peer can access
++ * arbitrary memory, e.g. MMIO/PCI), the original address is returned in
++ * mapped and no copy happens. Otherwise the buffer is bounced through
++ * shared memory.
++ *
++ * The caller should keep len within \ref virtio_free_largest. A transport
++ * that bounces buffers returns -ENOMEM when the bounce allocation fails; the
++ * caller may query free_largest and retry with a smaller length.
++ *
++ * @param vdev		Pointer to virtio device structure.
++ * @param buf		Buffer to map.
++ * @param len		Buffer length in bytes.
++ * @param dir		Transfer direction, see \ref virtio_dma_map.
++ * @param mapped	Pointer to the mapped address (output).
++ *
++ * @return 0 on success, otherwise error code.
++ */
++static inline int virtio_map_buf(struct virtio_device *vdev, void *buf,
++				 size_t len, enum virtio_dma_map dir,
++				 void **mapped)
++{
++	int ret = -EINVAL;
++
++	if (vdev && mapped) {
++		if (vdev->mmops && vdev->mmops->map) {
++			*mapped = vdev->mmops->map(vdev, buf, len, dir);
++			if (!*mapped)
++				ret = -ENOMEM;
++			else
++				ret = 0;
++		} else {
++			*mapped = buf;
++			ret = 0;
++		}
++	}
++
++	return ret;
++}
++
++/**
++ * @brief Unmap a buffer previously mapped by \ref virtio_map_buf.
++ *
++ * Pass the same direction that was passed to map. When the buffer was
++ * bounced and the direction includes reading from the device, the data is
++ * copied back to the original buffer.
++ *
++ * @param vdev		Pointer to virtio device structure.
++ * @param buf		Original buffer passed to \ref virtio_map_buf.
++ * @param len		Buffer length in bytes.
++ * @param dir		Transfer direction, see \ref virtio_dma_map.
++ * @param mapped	Address returned by \ref virtio_map_buf.
++ *
++ * @return 0 on success, otherwise error code.
++ */
++static inline int virtio_unmap_buf(struct virtio_device *vdev, void *buf,
++				   size_t len, enum virtio_dma_map dir,
++				   void *mapped)
++{
++	int ret = -EINVAL;
++
++	if (vdev) {
++		if (vdev->mmops && vdev->mmops->unmap)
++			vdev->mmops->unmap(vdev, buf, len, dir, mapped);
++		ret = 0;
++	}
++
++	return ret;
++}
++
+ /**
+  * @brief Check if the virtio device support a specific feature.
+  *
+-- 
+2.34.1
+
