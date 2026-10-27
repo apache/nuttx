@@ -247,13 +247,9 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 typedef CODE int (*wait_cc1101_ready)(FAR struct cc1101_dev_s *dev,
@@ -428,7 +424,7 @@ struct c1101_rfsettings_s
  *   ISM-Band and Short Range Device Regulatory Compliance Overview
  */
 
-EXTERN const struct c1101_rfsettings_s
+extern const struct c1101_rfsettings_s
     cc1101_rfsettings_ISM1_868MHzGFSK100kbps;
 
 /* 905 MHz, GFSK, 250 kbps, ISM Region 2 (America only)
@@ -441,10 +437,10 @@ EXTERN const struct c1101_rfsettings_s
  * Military radar        1000 kW
  */
 
-EXTERN const struct c1101_rfsettings_s
+extern const struct c1101_rfsettings_s
     cc1101_rfsettings_ISM2_905MHzGFSK250kbps;
 
-EXTERN const struct c1101_rfsettings_s
+extern const struct c1101_rfsettings_s
     cc1101_rfsettings_ISM2_433MHzMSK500kbps;
 
 /****************************************************************************
@@ -646,7 +642,6 @@ int cc1101_register(FAR const char *path, FAR struct cc1101_dev_s *dev);
 void cc1101_isr_process(FAR void *arg);
 int cc1101_isr(int irq, FAR void *context, FAR void *arg);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

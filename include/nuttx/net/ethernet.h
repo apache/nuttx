@@ -122,23 +122,19 @@ struct eth_8021qhdr_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #if defined(CONFIG_NET_ICMPv6_AUTOCONF) || defined(CONFIG_NET_ICMPv6_ROUTER)
-EXTERN const struct ether_addr g_ipv6_ethallnodes;    /* All link local nodes */
-EXTERN const struct ether_addr g_ipv6_ethallrouters;  /* All link local routers */
+extern const struct ether_addr g_ipv6_ethallnodes;    /* All link local nodes */
+extern const struct ether_addr g_ipv6_ethallrouters;  /* All link local routers */
 #endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

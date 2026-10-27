@@ -849,37 +849,33 @@ struct smp_call_data_s
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Maximum time with pre-emption disabled or within critical section. */
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
-EXTERN clock_t g_preemp_max[CONFIG_SMP_NCPUS];
+extern clock_t g_preemp_max[CONFIG_SMP_NCPUS];
 #endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION  >= 0 */
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
-EXTERN clock_t g_crit_max[CONFIG_SMP_NCPUS];
+extern clock_t g_crit_max[CONFIG_SMP_NCPUS];
 #endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 */
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0
-EXTERN clock_t g_busywait_max[CONFIG_SMP_NCPUS];
-EXTERN clock_t g_busywait_total[CONFIG_SMP_NCPUS];
+extern clock_t g_busywait_max[CONFIG_SMP_NCPUS];
+extern clock_t g_busywait_total[CONFIG_SMP_NCPUS];
 #endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0 */
 
 /* g_running_tasks[] holds a references to the running task for each CPU.
  * It is valid only when up_interrupt_context() returns true.
  */
 
-EXTERN FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
+extern FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
 
-EXTERN const struct tcbinfo_s g_tcbinfo;
+extern const struct tcbinfo_s g_tcbinfo;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -1910,7 +1906,6 @@ void nxsched_sleep(unsigned int sec);
 int nxsched_nanosleep(FAR const struct timespec *rqtp,
                       FAR struct timespec *rmtp);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

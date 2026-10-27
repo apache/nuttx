@@ -58,11 +58,8 @@ struct builtin_s
  ****************************************************************************/
 
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)
@@ -77,8 +74,8 @@ extern "C"
  * address space.  These globals must be provided the application layer.
  */
 
-EXTERN const struct builtin_s g_builtins[];
-EXTERN const int g_builtin_count;
+extern const struct builtin_s g_builtins[];
+extern const int g_builtin_count;
 #endif
 
 /****************************************************************************
@@ -203,7 +200,6 @@ int builtin_getmode(int index);
 
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -71,11 +71,8 @@ enum
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_LIB_SYSCALL
@@ -86,7 +83,7 @@ extern "C"
  * This table is only available during the kernel phase of a kernel build.
  */
 
-EXTERN const uintptr_t g_stublookup[SYS_nsyscalls];
+extern const uintptr_t g_stublookup[SYS_nsyscalls];
 
 #endif
 
@@ -94,13 +91,12 @@ EXTERN const uintptr_t g_stublookup[SYS_nsyscalls];
  * provides the name of the function.
  */
 
-EXTERN const char *g_funcnames[SYS_nsyscalls];
+extern const char *g_funcnames[SYS_nsyscalls];
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

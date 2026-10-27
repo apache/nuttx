@@ -75,17 +75,14 @@ struct nand_scheme_s
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-EXTERN const struct nand_scheme_s g_nand_sparescheme256;
-EXTERN const struct nand_scheme_s g_nand_sparescheme512;
-EXTERN const struct nand_scheme_s g_nand_sparescheme2048;
-EXTERN const struct nand_scheme_s g_nand_sparescheme4096;
+extern const struct nand_scheme_s g_nand_sparescheme256;
+extern const struct nand_scheme_s g_nand_sparescheme512;
+extern const struct nand_scheme_s g_nand_sparescheme2048;
+extern const struct nand_scheme_s g_nand_sparescheme4096;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -305,7 +302,6 @@ void nandscheme_writeextra(FAR const struct nand_scheme_s *scheme,
 int nandscheme_build4096(FAR struct nand_scheme_s *scheme,
                          unsigned int sparesize, unsigned int eccoffset);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

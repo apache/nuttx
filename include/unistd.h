@@ -338,13 +338,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -500,10 +496,10 @@ FAR int   *getoptindp(void);  /* Index into argv */
 FAR int   *getoptoptp(void);  /* Unrecognized option character */
 
 #ifdef NUTTX_NO_GETOPT_MACROS
-EXTERN FAR char *optarg;      /* Optional argument following option */
-EXTERN int       opterr;      /* Print error message */
-EXTERN int       optind;      /* Index into argv */
-EXTERN int       optopt;      /* Unrecognized option character */
+extern FAR char *optarg;      /* Optional argument following option */
+extern int       opterr;      /* Print error message */
+extern int       optind;      /* Index into argv */
+extern int       optopt;      /* Unrecognized option character */
 #endif
 
 int     gethostname(FAR char *name, size_t namelen);
@@ -624,7 +620,6 @@ fortify_function(write) ssize_t write(int fd, FAR const void *buf,
 }
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -212,13 +212,9 @@ struct mempool_init_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_MM_BACKTRACE_SEQNO
@@ -251,13 +247,13 @@ extern unsigned long g_mm_seqno;
 #if defined(CONFIG_BUILD_FLAT) || !defined(__KERNEL__)
 /* Otherwise, the user heap data structures are in common .bss */
 
-EXTERN FAR struct mm_heap_s *g_mmheap;
+extern FAR struct mm_heap_s *g_mmheap;
 #endif
 
 #ifdef CONFIG_MM_KERNEL_HEAP
 /* This is the kernel heap */
 
-EXTERN FAR struct mm_heap_s *g_kmmheap;
+extern FAR struct mm_heap_s *g_kmmheap;
 #endif
 
 /****************************************************************************
@@ -497,7 +493,6 @@ void mm_notify_pressure(size_t remaining, size_t largest);
 #  define mm_notify_pressure(remaining, largest)
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -1716,18 +1716,15 @@ struct ieee802154_netmac_s
 typedef FAR void *MACHANDLE;
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /*****************************************************************************
  * Public Data
  *****************************************************************************/
 
-EXTERN FAR const char *g_ieee802154_status_string[];
+extern FAR const char *g_ieee802154_status_string[];
 
 /*****************************************************************************
  * Public Function Prototypes
@@ -1867,7 +1864,6 @@ FAR struct ieee802154_primitive_s *ieee802154_primitive_allocate(void);
 
 void ieee802154_primitive_free(FAR struct ieee802154_primitive_s *prim);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif
