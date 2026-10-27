@@ -2244,7 +2244,7 @@ static int lpc54_eth_ioctl(struct net_driver_s *dev, int cmd,
             (struct mii_ioctl_data_s *)((uintptr_t)arg);
 
           req->val_out = lpc54_phy_read(priv, req->reg_num);
-          ret = OK
+          ret = OK;
         }
         break;
 
@@ -2254,17 +2254,18 @@ static int lpc54_eth_ioctl(struct net_driver_s *dev, int cmd,
             (struct mii_ioctl_data_s *)((uintptr_t)arg);
 
           lpc54_phy_write(priv, req->reg_num, req->val_in);
-          ret = OK
+          ret = OK;
         }
         break;
 #endif /* ifdef CONFIG_NETDEV_PHY_IOCTL */
 
       default:
-        nerr("ERROR: Unrecognized IOCTL command: %d\n", command);
-        return -ENOTTY;  /* Special return value for this case */
+        nerr("ERROR: Unrecognized IOCTL command: %d\n", cmd);
+        ret = -ENOTTY;  /* Special return value for this case */
+        break;
     }
 
-  return OK;
+  return ret;
 }
 #endif
 
