@@ -6,7 +6,6 @@
  * SPDX-FileCopyrightText: 2016 Freescale Semiconductor Inc.
  * SPDX-FileCopyrightText: 2016 - 2017, NXP
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
- * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
