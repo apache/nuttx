@@ -84,7 +84,7 @@ static int work_qqueue(FAR struct kwork_wqueue_s *wqueue,
 
   /* Preserve regular queue timing across lock contention. */
 
-  if (!period)
+  if (!period && delay > 0)
     {
       expected = clock_delay2abstick(delay);
     }
@@ -112,6 +112,11 @@ static int work_qqueue(FAR struct kwork_wqueue_s *wqueue,
 
   if (period)
     {
+      if (work->qtime == 0)
+        {
+          work->qtime = clock_systime_ticks();
+        }
+
       work->qtime += delay;
     }
   else
