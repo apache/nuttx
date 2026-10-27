@@ -33,7 +33,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define NBBY           CHAR_BIT      /* Number of bits in a byte */
 #define MAXHOSTNAMELEN HOST_NAME_MAX
+#define MAXNAMLEN      NAME_MAX
 #define MAXPATHLEN     PATH_MAX
 
 /* Macros for min/max. */
