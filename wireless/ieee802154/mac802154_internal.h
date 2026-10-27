@@ -681,8 +681,11 @@ mac802154_rxdisable(FAR struct ieee802154_privmac_s *priv)
 static inline void
 mac802154_oprxenable(FAR struct ieee802154_privmac_s *priv)
 {
-  priv->oprx = true;
-  mac802154_rxenable(priv);
+  if (!priv->oprx)
+    {
+      priv->oprx = true;
+      mac802154_rxenable(priv);
+    }
 }
 
 static inline void
