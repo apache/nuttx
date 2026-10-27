@@ -127,7 +127,7 @@ mempool_multiple_find(FAR struct mempool_multiple_s *mpool, size_t size)
   while (left < right)
     {
       mid = (left + right) >> 1;
-      if (mpool->pools[mid].blocksize > size)
+      if (mpool->pools[mid].blocksize >= size)
         {
           right = mid;
         }
@@ -718,6 +718,7 @@ FAR void *mempool_multiple_memalign(FAR struct mempool_multiple_s *mpool,
   do
     {
       FAR char *blk = mempool_allocate(pool);
+
       if (blk != NULL)
         {
           return (FAR void *)ALIGN_UP((uintptr_t)blk, alignment);
@@ -737,6 +738,7 @@ void mempool_multiple_foreach(FAR struct mempool_multiple_s *mpool,
                               FAR void *arg)
 {
   size_t i;
+
   for (i = 0; i < mpool->npools; i++)
     {
       handle(mpool->pools + i, arg);
