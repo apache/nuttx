@@ -354,6 +354,12 @@ struct uart_dev_s
   tcflag_t             tc_iflag;     /* Input modes */
   tcflag_t             tc_oflag;     /* Output modes */
   tcflag_t             tc_lflag;     /* Local modes */
+#ifdef CONFIG_TTY_SIGINT
+  cc_t                 tc_vintr;     /* c_cc[VINTR] */
+#endif
+#ifdef CONFIG_TTY_SIGTSTP
+  cc_t                 tc_vsusp;     /* c_cc[VSUSP] */
+#endif
 
   /* Semaphores & mutex */
 

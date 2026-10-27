@@ -451,6 +451,8 @@ config TTY_SIGINT_CHAR
 	---help---
 		Use ASCII 0x03 (Ctrl-c) or 0x04 (ctrl-d) inputs to determine whether
 		to send a SIGINT event.  Other characters may also be selected.
+		This is the INTR character (c_cc[VINTR]) of a terminal when it
+		starts; tcsetattr() can change or disable it.
 
 		REVISIT:  Traditionally Ctrl-C would generate SIGINT.  Ctrl-D is the
 		End-of-File character that should close the stream.
@@ -489,7 +491,9 @@ config TTY_SIGTSTP_CHAR
 	depends on TTY_SIGTSTP
 	---help---
 		Use ASCII 0x1a (Ctrl-z) input to determine whether to send a SIGTSTP
-		event.  Other characters may also be selected.
+		event.  Other characters may also be selected.  This is the SUSP
+		character (c_cc[VSUSP]) of a terminal when it starts; tcsetattr()
+		can change or disable it.
 
 #
 # Serial console selection

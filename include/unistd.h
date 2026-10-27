@@ -97,7 +97,12 @@
 
 #undef  _POSIX_CHOWN_RESTRICTED
 #undef  _POSIX_NO_TRUNC
-#undef  _POSIX_VDISABLE
+
+/* The value of a c_cc entry of struct termios that disables the special
+ * character.
+ */
+
+#define _POSIX_VDISABLE '\0'
 
 #define _POSIX_SYNC_IO 1
 #undef  _POSIX_ASYNC_IO

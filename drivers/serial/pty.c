@@ -114,6 +114,12 @@ struct pty_devpair_s
   struct pty_dev_s pp_master;   /* Maseter device */
   struct pty_dev_s pp_slave;    /* Slave device */
 
+#ifdef CONFIG_TTY_SIGINT
+  cc_t pp_vintr;                /* c_cc[VINTR] */
+#endif
+#ifdef CONFIG_TTY_SIGTSTP
+  cc_t pp_vsusp;                /* c_cc[VSUSP] */
+#endif
   bool pp_susv1;                /* SUSv1 or BSD style */
   bool pp_locked;               /* Slave is locked */
   bool pp_unlinked;             /* File has been unlinked */
@@ -667,7 +673,8 @@ static ssize_t pty_write(FAR struct file *filep,
             }
 
 #ifdef CONFIG_TTY_SIGINT
-          if (pid > 0 && ch == CONFIG_TTY_SIGINT_CHAR)
+          if (pid > 0 && dev->pd_devpair->pp_vintr != _POSIX_VDISABLE &&
+              (cc_t)ch == dev->pd_devpair->pp_vintr)
             {
               nxsig_kill(pid, SIGINT);
               return 1;
@@ -675,7 +682,8 @@ static ssize_t pty_write(FAR struct file *filep,
 #endif
 
 #ifdef CONFIG_TTY_SIGTSTP
-          if (pid > 0 && ch == CONFIG_TTY_SIGTSTP_CHAR)
+          if (pid > 0 && dev->pd_devpair->pp_vsusp != _POSIX_VDISABLE &&
+              (cc_t)ch == dev->pd_devpair->pp_vsusp)
             {
               nxsig_kill(pid, SIGTSTP);
               return 1;
@@ -836,6 +844,19 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           termiosp->c_iflag = dev->pd_iflag;
           termiosp->c_oflag = dev->pd_oflag;
           termiosp->c_lflag = dev->pd_lflag;
+
+          /* The special characters that the pair acts on (one set for
+           * both ends).  The others are disabled.
+           */
+
+          memset(termiosp->c_cc, _POSIX_VDISABLE, sizeof(termiosp->c_cc));
+#ifdef CONFIG_TTY_SIGINT
+          termiosp->c_cc[VINTR] = dev->pd_devpair->pp_vintr;
+#endif
+#ifdef CONFIG_TTY_SIGTSTP
+          termiosp->c_cc[VSUSP] = dev->pd_devpair->pp_vsusp;
+#endif
+          termiosp->c_cc[VMIN] = 1;
           ret = OK;
         }
         break;
@@ -855,6 +876,12 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           dev->pd_iflag = termiosp->c_iflag;
           dev->pd_oflag = termiosp->c_oflag;
           dev->pd_lflag = termiosp->c_lflag;
+#ifdef CONFIG_TTY_SIGINT
+          dev->pd_devpair->pp_vintr = termiosp->c_cc[VINTR];
+#endif
+#ifdef CONFIG_TTY_SIGTSTP
+          dev->pd_devpair->pp_vsusp = termiosp->c_cc[VSUSP];
+#endif
           ret = OK;
         }
         break;
@@ -1182,6 +1209,12 @@ int pty_register2(int minor, bool susv1)
 
   devpair->pp_master.pd_pid = INVALID_PROCESS_ID;
   devpair->pp_slave.pd_pid = INVALID_PROCESS_ID;
+#endif
+#ifdef CONFIG_TTY_SIGINT
+  devpair->pp_vintr = CONFIG_TTY_SIGINT_CHAR;
+#endif
+#ifdef CONFIG_TTY_SIGTSTP
+  devpair->pp_vsusp = CONFIG_TTY_SIGTSTP_CHAR;
 #endif
 
   /* Register the master device
