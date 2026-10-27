@@ -78,6 +78,8 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/open-amp)
       ${CMAKE_CURRENT_LIST_DIR}/0019-rpmsg-Add-VIRTIO_RPMSG_F_BUFADDR-to-support-specify-.patch
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
       ${CMAKE_CURRENT_LIST_DIR}/0020-rpmsg_virtio-do-not-trust-lengths-written-by-the-remote.patch
+      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+      ${CMAKE_CURRENT_LIST_DIR}/0021-virtio-add-buffer-map-unmap-ops-for-non-coherent-tra.patch
     DOWNLOAD_NO_PROGRESS true
     TIMEOUT 30)
 
