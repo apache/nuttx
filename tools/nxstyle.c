@@ -2480,6 +2480,7 @@ int main(int argc, char **argv, char **envp)
                    strncmp(&line[indent], "struct ", 7) == 0 ||
                    strncmp(&line[indent], "struct\n", 7) == 0 || /* May be unnamed */
                    strncmp(&line[indent], "enum ", 5) == 0 ||
+                   strncmp(&line[indent], "enum\n", 5) == 0 ||   /* May be unnamed */
                    strncmp(&line[indent], "extern ", 7) == 0 ||
                    strncmp(&line[indent], "EXTERN ", 7) == 0 ||
                    strncmp(&line[indent], "FAR ", 4) == 0 ||
