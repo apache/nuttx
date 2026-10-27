@@ -83,7 +83,10 @@ int ivshmem_register_device(FAR struct ivshmem_device_s *dev,
 
   dev->kick_peer = kick_peer;
 
-  dev->id = g_ivshmem_next_id++;
+  if (dev->id < 0)
+    {
+      dev->id = g_ivshmem_next_id++;
+    }
 
   /* Add the device to the ivshmem_bus device queue */
 
