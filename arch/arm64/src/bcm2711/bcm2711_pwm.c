@@ -334,34 +334,34 @@ static int bcm2711_pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
       switch (info->channels[i].channel)
         {
-        case 1:
-          bcm2711_setpulse(BCM_PWM_RNG1(priv->base),
-                           BCM_PWM_DAT1(priv->base),
-                           info->channels[i].duty, info->frequency);
-          bcm2711_channel_pol(priv, BCM_PWM_CTL_POLA1,
-                              info->channels[i].cpol);
+          case 1:
+            bcm2711_setpulse(BCM_PWM_RNG1(priv->base),
+                             BCM_PWM_DAT1(priv->base),
+                             info->channels[i].duty, info->frequency);
+            bcm2711_channel_pol(priv, BCM_PWM_CTL_POLA1,
+                                info->channels[i].cpol);
 
-          /* Enable channel output */
+            /* Enable channel output */
 
-          modreg32(BCM_PWM_CTL_PWEN1, BCM_PWM_CTL_PWEN1,
-                   BCM_PWM_CTL(priv->base));
-          break;
-        case 2:
-          bcm2711_setpulse(BCM_PWM_RNG2(priv->base),
-                           BCM_PWM_DAT2(priv->base),
-                           info->channels[i].duty, info->frequency);
-          bcm2711_channel_pol(priv, BCM_PWM_CTL_POLA2,
-                              info->channels[i].cpol);
+            modreg32(BCM_PWM_CTL_PWEN1, BCM_PWM_CTL_PWEN1,
+                     BCM_PWM_CTL(priv->base));
+            break;
+          case 2:
+            bcm2711_setpulse(BCM_PWM_RNG2(priv->base),
+                             BCM_PWM_DAT2(priv->base),
+                             info->channels[i].duty, info->frequency);
+            bcm2711_channel_pol(priv, BCM_PWM_CTL_POLA2,
+                                info->channels[i].cpol);
 
-          /* Enable channel output */
+            /* Enable channel output */
 
-          modreg32(BCM_PWM_CTL_PWEN2, BCM_PWM_CTL_PWEN2,
-                   BCM_PWM_CTL(priv->base));
-          break;
-        default:
-          pwmerr("Invalid channel %d\n", info->channels[i].channel);
-          nxmutex_unlock(&priv->lock); /* Unlock before return */
-          return -EINVAL;
+            modreg32(BCM_PWM_CTL_PWEN2, BCM_PWM_CTL_PWEN2,
+                     BCM_PWM_CTL(priv->base));
+            break;
+          default:
+            pwmerr("Invalid channel %d\n", info->channels[i].channel);
+            nxmutex_unlock(&priv->lock); /* Unlock before return */
+            return -EINVAL;
         }
 
       nxmutex_unlock(&priv->lock); /* Unlock for next iteration */
@@ -452,30 +452,30 @@ struct pwm_lowerhalf_s *bcm2711_pwminitialize(int timer)
   switch (timer)
     {
 #ifdef CONFIG_BCM2711_PWM0
-    case 0:
-      priv = &g_pwm0;
-      bcm2711_gpio_set_func(CONFIG_BCM2711_PWM0_CHAN1_PIN,
-                            BCM2711_PWM0_CHAN1_PIN_ALT);
-      bcm2711_gpio_set_pulls(CONFIG_BCM2711_PWM0_CHAN1_PIN, false, false);
-      bcm2711_gpio_set_func(CONFIG_BCM2711_PWM0_CHAN2_PIN,
-                            BCM2711_PWM0_CHAN2_PIN_ALT);
-      bcm2711_gpio_set_pulls(CONFIG_BCM2711_PWM0_CHAN2_PIN, false, false);
-      break;
+      case 0:
+        priv = &g_pwm0;
+        bcm2711_gpio_set_func(CONFIG_BCM2711_PWM0_CHAN1_PIN,
+                              BCM2711_PWM0_CHAN1_PIN_ALT);
+        bcm2711_gpio_set_pulls(CONFIG_BCM2711_PWM0_CHAN1_PIN, false, false);
+        bcm2711_gpio_set_func(CONFIG_BCM2711_PWM0_CHAN2_PIN,
+                              BCM2711_PWM0_CHAN2_PIN_ALT);
+        bcm2711_gpio_set_pulls(CONFIG_BCM2711_PWM0_CHAN2_PIN, false, false);
+        break;
 #endif
 #ifdef CONFIG_BCM2711_PWM1
-    case 1:
-      priv = &g_pwm1;
-      bcm2711_gpio_set_func(BCM2711_PWM1_CHAN1_PIN,
-                            BCM2711_PWM1_CHAN1_PIN_ALT);
-      bcm2711_gpio_set_pulls(BCM2711_PWM1_CHAN1_PIN, false, false);
-      bcm2711_gpio_set_func(BCM2711_PWM1_CHAN2_PIN,
-                            BCM2711_PWM1_CHAN2_PIN_ALT);
-      bcm2711_gpio_set_pulls(BCM2711_PWM1_CHAN2_PIN, false, false);
-      break;
+      case 1:
+        priv = &g_pwm1;
+        bcm2711_gpio_set_func(BCM2711_PWM1_CHAN1_PIN,
+                              BCM2711_PWM1_CHAN1_PIN_ALT);
+        bcm2711_gpio_set_pulls(BCM2711_PWM1_CHAN1_PIN, false, false);
+        bcm2711_gpio_set_func(BCM2711_PWM1_CHAN2_PIN,
+                              BCM2711_PWM1_CHAN2_PIN_ALT);
+        bcm2711_gpio_set_pulls(BCM2711_PWM1_CHAN2_PIN, false, false);
+        break;
 #endif
-    default:
-      pwmerr("No PWM%d interface.", timer);
-      return NULL;
+      default:
+        pwmerr("No PWM%d interface.", timer);
+        return NULL;
     }
 
   /* Don't re-initialize */
@@ -514,7 +514,8 @@ struct pwm_lowerhalf_s *bcm2711_pwminitialize(int timer)
   /* Wait for clock to no longer be busy */
 
   while (getreg32(PWM_GPCLKCTL) & BCM_GPCLK_CM_CTL_BUSY)
-    ;
+    {
+    }
 
   putreg32(BCM_GPCLK_PASSWD | BCM_PWMCLK_DIV_VAL, PWM_GPCLKDIV);
   putreg32(BCM_GPCLK_PASSWD | BCM_GPCLK_CLKSRC_OSC, PWM_GPCLKCTL);

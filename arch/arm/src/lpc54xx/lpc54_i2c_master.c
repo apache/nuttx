@@ -847,9 +847,9 @@ static int lpc54_i2c_transfer(struct i2c_master_s *dev,
   do
     {
 #ifndef CONFIG_I2C_POLLED
-       nxsem_wait(&priv->waitsem);
+      nxsem_wait(&priv->waitsem);
 #else
-       lpc54_i2c_statemachine(priv);
+      lpc54_i2c_statemachine(priv);
 #endif
     }
   while (priv->state != I2CSTATE_IDLE);

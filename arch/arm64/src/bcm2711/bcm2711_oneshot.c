@@ -140,6 +140,7 @@ static struct bcm2711_chan_s g_chans[BCM_SYST_NUMCHANS] =
 static clkcnt_t get_current_count(void)
 {
   clkcnt_t count;
+
   count = (clkcnt_t)getreg32(BCM_SYST_CHI) << 32;
   count |= getreg32(BCM_SYST_CLO);
   return count;
