@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "libc.h"
@@ -39,21 +40,23 @@
 no_builtin("memmove")
 FAR void *memmove(FAR void *dest, FAR const void *src, size_t count)
 {
+  uintptr_t d = (uintptr_t)dest;
+  uintptr_t s = (uintptr_t)src;
   FAR char *tmp;
-  FAR char *s;
+  FAR char *sp;
 
-  if (dest <= src)
+  if (d <= s || d - s >= count)
     {
       memcpy(dest, src, count);
     }
   else
     {
       tmp = (FAR char *) dest + count;
-      s   = (FAR char *) src + count;
+      sp  = (FAR char *) src + count;
 
       while (count--)
         {
-          *--tmp = *--s;
+          *--tmp = *--sp;
         }
     }
 
