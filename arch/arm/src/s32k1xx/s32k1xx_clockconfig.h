@@ -457,20 +457,16 @@ enum scg_system_clock_mode_e
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-EXTERN const unsigned int num_of_peripheral_clocks_0;
+extern const unsigned int num_of_peripheral_clocks_0;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -600,7 +596,6 @@ uint32_t s32k1xx_get_sysclk(enum scg_system_clock_type_e type);
 uint32_t s32k1xx_get_asnchfreq(enum clock_names_e clksrc,
                                enum scg_async_clock_type_e type);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -44,24 +44,20 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-EXTERN uint32_t fe310_get_hfclk(void);
-EXTERN void fe310_clockconfig(void);
+extern uint32_t fe310_get_hfclk(void);
+extern void fe310_clockconfig(void);
 
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_FE310_FE310_CLOCKCONFIG_H */

@@ -130,25 +130,21 @@ typedef enum
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-EXTERN uint32_t hpm_get_osc_freq(void);
-EXTERN void hpm_clockconfig(void);
+extern uint32_t hpm_get_osc_freq(void);
+extern void hpm_clockconfig(void);
 void hpm_uart_clockconfig(void);
 
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_HPM6000_HPM_CLOCKCONFIG_H */

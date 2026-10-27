@@ -267,23 +267,19 @@ struct lc823450_irq_ops
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
  * Public Functions Prototypes
  ****************************************************************************/
 
-EXTERN int lc823450_irq_srctype(int irq, enum lc823450_srctype_e srctype);
+extern int lc823450_irq_srctype(int irq, enum lc823450_srctype_e srctype);
 #ifdef CONFIG_LC823450_VIRQ
-EXTERN int lc823450_irq_register(int irq, struct lc823450_irq_ops *ops);
+extern int lc823450_irq_register(int irq, struct lc823450_irq_ops *ops);
 #endif /* CONFIG_LC823450_VIRQ */
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

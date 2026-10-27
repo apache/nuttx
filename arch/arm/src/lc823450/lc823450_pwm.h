@@ -79,20 +79,16 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-EXTERN struct pwm_lowerhalf_s *lc823450_pwminitialize(int timer);
+extern struct pwm_lowerhalf_s *lc823450_pwminitialize(int timer);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

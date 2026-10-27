@@ -76,24 +76,20 @@ enum clk_e
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-EXTERN void rv32m1_clockconfig(void);
-EXTERN unsigned rv32m1_clockfreq(enum clk_e clk);
+extern void rv32m1_clockconfig(void);
+extern unsigned rv32m1_clockfreq(enum clk_e clk);
 
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_RV32M1_RV32M1_CLOCKCONFIG_H */

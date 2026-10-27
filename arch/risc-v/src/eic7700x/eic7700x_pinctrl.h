@@ -113,20 +113,17 @@ struct eic7700x_pad_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-EXTERN const struct eic7700x_pad_s
+extern const struct eic7700x_pad_s
              g_eic7700x_pads[EIC7700X_PAD_NPADS];
-EXTERN const uint32_t
+extern const uint32_t
              g_eic7700x_pad_defaults[EIC7700X_PAD_NDEFAULTS];
-EXTERN const uint8_t
+extern const uint8_t
              g_eic7700x_pad_bygpio[EIC7700X_PAD_NGPIOS];
-EXTERN const struct pinctrl_ops_s g_eic7700x_pinctrl_ops;
+extern const struct pinctrl_ops_s g_eic7700x_pinctrl_ops;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -242,7 +239,6 @@ FAR const struct eic7700x_pad_s *eic7700x_pad_lookup(unsigned int pad);
 
 int eic7700x_pad_config(unsigned int pad, uint32_t cfg);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

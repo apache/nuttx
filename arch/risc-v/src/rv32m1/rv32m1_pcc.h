@@ -43,28 +43,23 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
  * Name: rv32m1_pcc_clock_enable
  ****************************************************************************/
 
-EXTERN void rv32m1_pcc_clock_enable(uint32_t regaddr);
+extern void rv32m1_pcc_clock_enable(uint32_t regaddr);
 
 /****************************************************************************
  * Name: rv32m1_pcc_clock_disable
  ****************************************************************************/
 
-EXTERN void rv32m1_pcc_clock_disable(uint32_t regaddr);
+extern void rv32m1_pcc_clock_disable(uint32_t regaddr);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

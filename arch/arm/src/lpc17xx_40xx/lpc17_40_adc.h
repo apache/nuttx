@@ -58,13 +58,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* The errata that states: "A/D Global Data register should not be used with
@@ -82,7 +78,7 @@ extern "C"
  */
 
 #ifdef CONFIG_LPC17_40_ADC_CHANLIST
-EXTERN uint8_t g_adc_chanlist[CONFIG_LPC17_40_ADC_NCHANNELS];
+extern uint8_t g_adc_chanlist[CONFIG_LPC17_40_ADC_NCHANNELS];
 #endif
 
 /****************************************************************************
@@ -104,7 +100,6 @@ EXTERN uint8_t g_adc_chanlist[CONFIG_LPC17_40_ADC_NCHANNELS];
 struct adc_dev_s *lpc17_40_adcinitialize(void);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

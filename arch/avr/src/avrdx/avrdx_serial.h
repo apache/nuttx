@@ -76,21 +76,17 @@ struct avrdx_uart_priv_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_MCU_SERIAL
 
-EXTERN const IOBJ uint8_t avrdx_usart_ports[];
-EXTERN const IOBJ uint8_t avrdx_usart_tx_pins[];
-EXTERN const IOBJ uint8_t avrdx_usart_portmux_bits[];
-EXTERN const IOBJ uint8_t avrdx_usart_portmux_masks[];
+extern const IOBJ uint8_t avrdx_usart_ports[];
+extern const IOBJ uint8_t avrdx_usart_tx_pins[];
+extern const IOBJ uint8_t avrdx_usart_portmux_bits[];
+extern const IOBJ uint8_t avrdx_usart_portmux_masks[];
 
 #endif
 
@@ -131,6 +127,10 @@ void avrdx_usart_reset(struct avrdx_uart_priv_s *priv);
 
 #ifdef CONFIG_MCU_SERIAL
 void avrdx_usart_configure(struct avrdx_uart_priv_s *priv);
+#endif
+
+#if defined(__cplusplus)
+}
 #endif
 
 #endif /* __ASSEMBLY__ */

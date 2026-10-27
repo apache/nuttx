@@ -114,11 +114,8 @@ typedef void (*up_vector_t)(void);
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* This is the beginning of heap as provided from up_head.S.
@@ -127,24 +124,24 @@ extern "C"
  * CONFIG_RAM_END
  */
 
-EXTERN const uint32_t g_idle_topstack;
+extern const uint32_t g_idle_topstack;
 
 /* Address of the saved user stack pointer */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-EXTERN uint8_t g_intstackalloc[]; /* Allocated stack base */
-EXTERN uint8_t g_intstacktop[];   /* Initial top of interrupt stack */
+extern uint8_t g_intstackalloc[]; /* Allocated stack base */
+extern uint8_t g_intstacktop[];   /* Initial top of interrupt stack */
 #endif
 
 /* These symbols are setup by the linker script. */
 
-EXTERN uint8_t _stext[];           /* Start of .text */
-EXTERN uint8_t _etext[];           /* End_1 of .text + .rodata */
-EXTERN const uint8_t _eronly[];    /* End+1 of read only section (.text + .rodata) */
-EXTERN uint8_t _sdata[];           /* Start of .data */
-EXTERN uint8_t _edata[];           /* End+1 of .data */
-EXTERN uint8_t _sbss[];            /* Start of .bss */
-EXTERN uint8_t _ebss[];            /* End+1 of .bss */
+extern uint8_t _stext[];           /* Start of .text */
+extern uint8_t _etext[];           /* End_1 of .text + .rodata */
+extern const uint8_t _eronly[];    /* End+1 of read only section (.text + .rodata) */
+extern uint8_t _sdata[];           /* Start of .data */
+extern uint8_t _edata[];           /* End+1 of .data */
+extern uint8_t _sbss[];            /* Start of .bss */
+extern uint8_t _ebss[];            /* End+1 of .bss */
 
 /* Sometimes, functions must be executed from RAM.  In this case, the
  * following macro may be used (with GCC!) to specify a function that will
@@ -168,9 +165,9 @@ EXTERN uint8_t _ebss[];            /* End+1 of .bss */
  * functions from flash to RAM.
  */
 
-EXTERN const uint32_t _framfuncs; /* Copy source address in FLASH */
-EXTERN uint32_t _sramfuncs;       /* Copy destination start address in RAM */
-EXTERN uint32_t _eramfuncs;       /* Copy destination end address in RAM */
+extern const uint32_t _framfuncs; /* Copy source address in FLASH */
+extern uint32_t _sramfuncs;       /* Copy destination start address in RAM */
+extern uint32_t _eramfuncs;       /* Copy destination end address in RAM */
 
 #else /* CONFIG_ARCH_RAMFUNCS */
 
@@ -320,7 +317,6 @@ void or1k_color_intstack(void);
 #  define or1k_color_intstack()
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

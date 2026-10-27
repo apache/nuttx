@@ -58,24 +58,19 @@
 #  define LOCATE_UITCM
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_RV32M1_ITCM
-  EXTERN uint8_t _slitcm[];        /* Start of ITCM LMA */
-  EXTERN uint8_t _svitcm[];        /* Start of ITCM VMA */
-  EXTERN uint8_t _evitcm[];        /* End+1 of ITCM VMA */
-  EXTERN uint8_t _suvitcm[];       /* Start of User ITCM VMA */
-  EXTERN uint8_t _euvitcm[];       /* End+1 of User ITCM VMA */
+  extern uint8_t _slitcm[];        /* Start of ITCM LMA */
+  extern uint8_t _svitcm[];        /* Start of ITCM VMA */
+  extern uint8_t _evitcm[];        /* End+1 of ITCM VMA */
+  extern uint8_t _suvitcm[];       /* Start of User ITCM VMA */
+  extern uint8_t _euvitcm[];       /* End+1 of User ITCM VMA */
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

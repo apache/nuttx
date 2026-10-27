@@ -63,13 +63,9 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* These tables have global scope only because they are shared between
@@ -77,12 +73,12 @@ extern "C"
  */
 
 #ifdef CONFIG_LPC17_40_GPIOIRQ
-EXTERN uint64_t g_intedge0;
-EXTERN uint64_t g_intedge2;
+extern uint64_t g_intedge0;
+extern uint64_t g_intedge2;
 #endif
 
-EXTERN const uint32_t g_fiobase[GPIO_NPORTS];
-EXTERN const uint32_t g_intbase[GPIO_NPORTS];
+extern const uint32_t g_fiobase[GPIO_NPORTS];
+extern const uint32_t g_intbase[GPIO_NPORTS];
 
 /****************************************************************************
  * Public Functions Prototypes

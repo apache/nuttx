@@ -172,13 +172,9 @@ typedef uint32_t pinset_t;
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* This table can be used to map a port number to a IOPORT base address.  For
@@ -186,7 +182,7 @@ extern "C"
  * etc.
  */
 
-EXTERN const uintptr_t g_gpiobase[CHIP_NPORTS];
+extern const uintptr_t g_gpiobase[CHIP_NPORTS];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -314,7 +310,6 @@ void pic32mz_dumpgpio(pinset_t pinset, const char *msg);
 #  define pic32mz_dumpgpio(p,m)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

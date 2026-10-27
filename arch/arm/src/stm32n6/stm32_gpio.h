@@ -232,18 +232,14 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Base addresses for each GPIO block */
 
-EXTERN const uint32_t g_gpiobase[STM32_NPORTS];
+extern const uint32_t g_gpiobase[STM32_NPORTS];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -308,7 +304,6 @@ void stm32_gpiowrite(uint32_t pinset, bool value);
 
 bool stm32_gpioread(uint32_t pinset);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

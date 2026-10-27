@@ -128,11 +128,8 @@ typedef void (*up_vector_t)(void);
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #define INIT_STACK_DEFINE(sym, size) \
@@ -144,10 +141,10 @@ extern "C"
      aligned_data(STACK_ALIGNMENT) sym[n][size]
 
 #define INIT_STACK_DEFINE_EXTERN(sym, size) \
-    EXTERN char sym[size]
+    extern char sym[size]
 
 #define INIT_STACK_ARRAY_DEFINE_EXTERN(sym, n, size) \
-    EXTERN char sym[n][size]
+    extern char sym[n][size]
 
 #define STACK_PTR_TO_FRAME(type, ptr) \
     (type *)STACKFRAME_ALIGN_DOWN((uintptr_t)(ptr) - sizeof(type))
@@ -186,8 +183,8 @@ INIT_STACK_DEFINE_EXTERN(g_interrupt_fiq_stack, INTSTACK_SIZE);
 /* Address of the saved user stack pointer */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-EXTERN uint8_t g_intstackalloc[]; /* Allocated stack base */
-EXTERN uint8_t g_intstacktop[];   /* Initial top of interrupt stack */
+extern uint8_t g_intstackalloc[]; /* Allocated stack base */
+extern uint8_t g_intstacktop[];   /* Initial top of interrupt stack */
 #else
 #  error CONFIG_ARCH_INTERRUPTSTACK must be defined (4096 at least) at arm64
 #endif
@@ -223,20 +220,20 @@ EXTERN uint8_t g_intstacktop[];   /* Initial top of interrupt stack */
  * please check dramboot.ld at specified platform for more detail
  */
 
-EXTERN uint8_t _stext[];            /* Start of .text */
-EXTERN uint8_t _etext[];            /* End of .text */
-EXTERN uint8_t _sztext[];           /* Size of .text */
-EXTERN uint8_t _srodata[];          /* Start of .rodata */
-EXTERN uint8_t _erodata[];          /* End+1 of .rodata */
-EXTERN uint8_t _szrodata[];         /* Size of .rodata */
-EXTERN const uint8_t _eronly[];     /* End+1 of read only section (.text + .rodata) */
-EXTERN uint8_t _sdata[];            /* Start of .data */
-EXTERN uint8_t _edata[];            /* End+1 of .data */
-EXTERN uint8_t _sbss[];             /* Start of .bss */
-EXTERN uint8_t _ebss[];             /* End+1 of .bss */
-EXTERN uint8_t _szdata[];           /* Size of data(.data + .bss) */
-EXTERN uint8_t _e_initstack[];      /* End+1 of .initstack */
-EXTERN uint8_t g_idle_topstack[];   /* End+1 of heap */
+extern uint8_t _stext[];            /* Start of .text */
+extern uint8_t _etext[];            /* End of .text */
+extern uint8_t _sztext[];           /* Size of .text */
+extern uint8_t _srodata[];          /* Start of .rodata */
+extern uint8_t _erodata[];          /* End+1 of .rodata */
+extern uint8_t _szrodata[];         /* Size of .rodata */
+extern const uint8_t _eronly[];     /* End+1 of read only section (.text + .rodata) */
+extern uint8_t _sdata[];            /* Start of .data */
+extern uint8_t _edata[];            /* End+1 of .data */
+extern uint8_t _sbss[];             /* Start of .bss */
+extern uint8_t _ebss[];             /* End+1 of .bss */
+extern uint8_t _szdata[];           /* Size of data(.data + .bss) */
+extern uint8_t _e_initstack[];      /* End+1 of .initstack */
+extern uint8_t g_idle_topstack[];   /* End+1 of heap */
 
 #  define _START_TEXT  _stext
 #  define _END_TEXT    _etext
@@ -392,7 +389,6 @@ void arm64_stack_color(void *stackbase, size_t nbytes);
 void arm64_enable_dbgmonitor(void);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

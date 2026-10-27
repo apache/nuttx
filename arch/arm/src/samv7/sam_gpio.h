@@ -181,16 +181,12 @@ typedef uint32_t gpio_pinset_t;
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-EXTERN const uintptr_t g_portbase[SAMV7_NPIO];
+extern const uintptr_t g_portbase[SAMV7_NPIO];
 
 /****************************************************************************
  * Inline Functions
@@ -369,7 +365,6 @@ int sam_dumpgpio(uint32_t pinset, const char *msg);
 #  define sam_dumpgpio(p,m)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

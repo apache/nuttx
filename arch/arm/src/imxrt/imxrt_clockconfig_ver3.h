@@ -194,16 +194,12 @@ struct clock_configuration_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-EXTERN const struct clock_configuration_s g_initial_clkconfig;
+extern const struct clock_configuration_s g_initial_clkconfig;
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -327,7 +323,6 @@ int imxrt_get_clock(int clkname, uint32_t *frequency);
 
 int imxrt_get_rootclock(uint32_t clkroot, uint32_t *frequency);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

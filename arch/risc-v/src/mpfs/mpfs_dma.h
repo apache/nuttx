@@ -60,36 +60,32 @@ struct mpfs_dma_channel_config
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-EXTERN int mpfs_dma_setup_transfer(unsigned int channel,
+extern int mpfs_dma_setup_transfer(unsigned int channel,
                                    struct mpfs_dma_channel_config *config);
-EXTERN int mpfs_dma_set_transaction_size(unsigned int channel,
+extern int mpfs_dma_set_transaction_size(unsigned int channel,
                                          uint8_t write_size,
                                          uint8_t read_size);
-EXTERN int mpfs_dma_start(unsigned int channel);
-EXTERN uint32_t mpfs_dma_get_transfer_type(unsigned int channel);
-EXTERN uint64_t mpfs_dma_get_bytes_remaining(unsigned int channel);
-EXTERN uint64_t mpfs_dma_get_current_destination(unsigned int channel);
-EXTERN uint64_t mpfs_dma_get_current_source(unsigned int channel);
-EXTERN int mpfs_dma_get_complete_status(unsigned int channel);
-EXTERN int mpfs_dma_get_error_status(unsigned int channel);
-EXTERN int mpfs_dma_clear_complete_status(unsigned int channel);
-EXTERN int mpfs_dma_clear_error_status(unsigned int channel);
+extern int mpfs_dma_start(unsigned int channel);
+extern uint32_t mpfs_dma_get_transfer_type(unsigned int channel);
+extern uint64_t mpfs_dma_get_bytes_remaining(unsigned int channel);
+extern uint64_t mpfs_dma_get_current_destination(unsigned int channel);
+extern uint64_t mpfs_dma_get_current_source(unsigned int channel);
+extern int mpfs_dma_get_complete_status(unsigned int channel);
+extern int mpfs_dma_get_error_status(unsigned int channel);
+extern int mpfs_dma_clear_complete_status(unsigned int channel);
+extern int mpfs_dma_clear_error_status(unsigned int channel);
 
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_MPFS_MPFS_DMA_H */

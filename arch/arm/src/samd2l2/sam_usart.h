@@ -143,46 +143,41 @@ bool usart_syncbusy(const struct sam_usart_config_s * const config)
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef SAMD2L2_HAVE_USART0
-EXTERN const struct sam_usart_config_s g_usart0config;
+extern const struct sam_usart_config_s g_usart0config;
 #endif
 
 #ifdef SAMD2L2_HAVE_USART1
-EXTERN const struct sam_usart_config_s g_usart1config;
+extern const struct sam_usart_config_s g_usart1config;
 #endif
 
 #ifdef SAMD2L2_HAVE_USART2
-EXTERN const struct sam_usart_config_s g_usart2config;
+extern const struct sam_usart_config_s g_usart2config;
 #endif
 
 #ifdef SAMD2L2_HAVE_USART3
-EXTERN const struct sam_usart_config_s g_usart3config;
+extern const struct sam_usart_config_s g_usart3config;
 #endif
 
 #ifdef SAMD2L2_HAVE_USART4
-EXTERN const struct sam_usart_config_s g_usart4config;
+extern const struct sam_usart_config_s g_usart4config;
 #endif
 
 #ifdef SAMD2L2_HAVE_USART5
-EXTERN const struct sam_usart_config_s g_usart5config;
+extern const struct sam_usart_config_s g_usart5config;
 #endif
 
-EXTERN const struct sam_usart_config_s *g_usartconfig[SAMD2L2_NSERCOM];
+extern const struct sam_usart_config_s *g_usartconfig[SAMD2L2_NSERCOM];
 
 /****************************************************************************
  * Public Functions Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

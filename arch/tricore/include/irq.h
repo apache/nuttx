@@ -159,11 +159,8 @@
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -194,7 +191,7 @@ struct xcptcontext
 
 /* g_interrupt_context store irq status */
 
-EXTERN volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
+extern volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -350,7 +347,6 @@ static inline_function uintptr_t up_getusrsp(void *regs)
 #define up_getusrpc(regs) \
     (((uint32_t *)((regs) ? (regs) : running_regs()))[REG_UPC])
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

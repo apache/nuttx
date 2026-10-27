@@ -55,17 +55,13 @@
  * Public Types
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifndef __ASSEMBLY__
-EXTERN uintptr_t g_idle_topstack;
+extern uintptr_t g_idle_topstack;
 
 /* Address of per-cpu idle stack base */
 
@@ -75,27 +71,26 @@ EXTERN uintptr_t g_idle_topstack;
 /* Address of the saved user stack pointer */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
-EXTERN uint8_t g_intstackalloc[]; /* Allocated stack base */
-EXTERN uint8_t g_intstacktop[];   /* Initial top of interrupt stack */
+extern uint8_t g_intstackalloc[]; /* Allocated stack base */
+extern uint8_t g_intstacktop[];   /* Initial top of interrupt stack */
 #endif
 
 /* These symbols are setup by the linker script. */
 
-EXTERN uint8_t _stext[];           /* Start of .text */
-EXTERN uint8_t _etext[];           /* End_1 of .text + .rodata */
-EXTERN const uint8_t _eronly[];    /* End+1 of read only section (.text + .rodata) */
-EXTERN uint8_t _sdata[];           /* Start of .data */
-EXTERN uint8_t _edata[];           /* End+1 of .data */
-EXTERN uint8_t _sbss[];            /* Start of .bss */
-EXTERN uint8_t _ebss[];            /* End+1 of .bss */
-EXTERN uint8_t _stdata[];          /* Start of .tdata */
-EXTERN uint8_t _etdata[];          /* End+1 of .tdata */
-EXTERN uint8_t _stbss[];           /* Start of .tbss */
-EXTERN uint8_t _etbss[];           /* End+1 of .tbss */
+extern uint8_t _stext[];           /* Start of .text */
+extern uint8_t _etext[];           /* End_1 of .text + .rodata */
+extern const uint8_t _eronly[];    /* End+1 of read only section (.text + .rodata) */
+extern uint8_t _sdata[];           /* Start of .data */
+extern uint8_t _edata[];           /* End+1 of .data */
+extern uint8_t _sbss[];            /* Start of .bss */
+extern uint8_t _ebss[];            /* End+1 of .bss */
+extern uint8_t _stdata[];          /* Start of .tdata */
+extern uint8_t _etdata[];          /* End+1 of .tdata */
+extern uint8_t _stbss[];           /* Start of .tbss */
+extern uint8_t _etbss[];           /* End+1 of .tbss */
 
 #endif /* __ASSEMBLY__ */
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

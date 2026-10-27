@@ -154,24 +154,20 @@ typedef uint16_t lpc17_40_pinset_t;
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* These tables have global scope only because they are shared between
  * lpc17_40_gpio.c, lpc17_40_gpioint.c, and lpc17_40_gpiodbg.c
  */
 
-EXTERN const uint32_t g_lopinsel[GPIO_NPORTS];
-EXTERN const uint32_t g_hipinsel[GPIO_NPORTS];
-EXTERN const uint32_t g_lopinmode[GPIO_NPORTS];
-EXTERN const uint32_t g_hipinmode[GPIO_NPORTS];
-EXTERN const uint32_t g_odmode[GPIO_NPORTS];
+extern const uint32_t g_lopinsel[GPIO_NPORTS];
+extern const uint32_t g_hipinsel[GPIO_NPORTS];
+extern const uint32_t g_lopinmode[GPIO_NPORTS];
+extern const uint32_t g_hipinmode[GPIO_NPORTS];
+extern const uint32_t g_odmode[GPIO_NPORTS];
 
 /****************************************************************************
  * Public Functions Prototypes

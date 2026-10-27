@@ -33,40 +33,35 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
  * Name: rv32m1_timersvc_up
  ****************************************************************************/
 
-EXTERN bool rv32m1_timersvc_up(void);
+extern bool rv32m1_timersvc_up(void);
 
 /****************************************************************************
  * Name: rv32m1_timersvc_freq
  ****************************************************************************/
 
-EXTERN uint32_t rv32m1_timersvc_freq(void);
+extern uint32_t rv32m1_timersvc_freq(void);
 
 /****************************************************************************
  * Name: rv32m1_timersvc_period
  ****************************************************************************/
 
-EXTERN uint32_t rv32m1_timersvc_period(void);
+extern uint32_t rv32m1_timersvc_period(void);
 
 /****************************************************************************
  * Name: rv32m1_timersvc_value
  ****************************************************************************/
 
-EXTERN uint32_t rv32m1_timersvc_value(void);
+extern uint32_t rv32m1_timersvc_value(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

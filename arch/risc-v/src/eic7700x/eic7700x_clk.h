@@ -93,16 +93,13 @@ struct eic7700x_clk_mux_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-EXTERN const struct clk_ops_s g_eic7700x_clk_pll_ops;
-EXTERN const struct clk_ops_s g_eic7700x_clk_div_ops;
-EXTERN const struct clk_ops_s g_eic7700x_clk_mux_ops;
+extern const struct clk_ops_s g_eic7700x_clk_pll_ops;
+extern const struct clk_ops_s g_eic7700x_clk_div_ops;
+extern const struct clk_ops_s g_eic7700x_clk_mux_ops;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -141,7 +138,6 @@ int eic7700x_clk_initialize(void);
 
 unsigned int eic7700x_clk_count(FAR unsigned int *failed);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

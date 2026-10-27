@@ -55,11 +55,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -71,7 +68,7 @@ extern "C"
  * interrupt processing.
  */
 
-EXTERN volatile uint32_t *g_current_regs;
+extern volatile uint32_t *g_current_regs;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -102,7 +99,6 @@ static inline_function void up_set_current_regs(uint32_t *regs)
 
 #define up_interrupt_context() (up_current_regs() != NULL)
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

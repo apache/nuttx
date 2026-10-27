@@ -187,22 +187,17 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-EXTERN irqstate_t up_irq_enable(void);
+extern irqstate_t up_irq_enable(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
