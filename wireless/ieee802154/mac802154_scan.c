@@ -160,8 +160,8 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
           mac802154_setchpage(priv, req->chpage);
           mac802154_setchannel(priv, req->channels[priv->scanindex]);
 
-          /* The radio calls the MAC with its lock held, so the energy
-           * detect starts after the MAC is released
+          /* energydetect() can take the radio lock, which the radio holds
+           * while it calls the MAC, so it starts after the MAC is released
            */
 
           nxmutex_unlock(&priv->lock);

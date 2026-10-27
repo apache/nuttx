@@ -1748,8 +1748,8 @@ mac802154_edresult(FAR const struct ieee802154_radiocb_s *radiocb,
 
   nxmutex_unlock(&priv->lock);
 
-  /* The radio calls the MAC with its lock held, the energy detect of the
-   * next channel starts after the MAC is released
+  /* energydetect() can take the radio lock, which the radio holds while it
+   * calls the MAC, so the next channel starts after the MAC is released
    */
 
   if (next)
