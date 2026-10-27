@@ -266,20 +266,16 @@ typedef uint32_t gpio_pinset_t;
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Look-up table that maps GPIO1..GPIOn indexes into GPIO register base
  * addresses
  */
 
-EXTERN const uintptr_t g_gpio_base[IMXRT_GPIO_NPORTS];
+extern const uintptr_t g_gpio_base[IMXRT_GPIO_NPORTS];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -387,7 +383,6 @@ int imxrt_dump_gpio(uint32_t pinset, const char *msg);
 #  define imxrt_dumpgpio(p,m)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -212,20 +212,16 @@ typedef uint16_t gpio_pinset_t;
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Look-up table that maps GPIO1..GPIOn indexes into GPIO register base
  * addresses
  */
 
-EXTERN const uintptr_t g_gpio_base[];
+extern const uintptr_t g_gpio_base[];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -332,7 +328,6 @@ int imx9_gpioirq_disable(gpio_pinset_t pinset);
 #  define imx9_gpioirq_disable(pinset) 0
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

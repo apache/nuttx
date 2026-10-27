@@ -69,11 +69,8 @@
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -110,7 +107,7 @@ static inline_function uint32_t up_getsp(void)
  * such value for each processor that can receive an interrupt.
  */
 
-EXTERN volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
+extern volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -192,7 +189,6 @@ static inline_function bool up_interrupt_context(void)
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

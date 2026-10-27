@@ -61,15 +61,12 @@ struct eic7700x_reset_reg_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-EXTERN const struct reset_control_ops g_eic7700x_reset_ops;
-EXTERN const struct eic7700x_reset_reg_s
+extern const struct reset_control_ops g_eic7700x_reset_ops;
+extern const struct eic7700x_reset_reg_s
              g_eic7700x_reset_regs[EIC7700X_RESET_NREGS];
 
 /****************************************************************************
@@ -133,7 +130,6 @@ int eic7700x_reset_getline(FAR struct reset_controller_dev *rcdev,
                            FAR struct reset_lineinfo_s *info);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -184,13 +184,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Gallois Field tables for 512 bytes sectors. First raw is "index_of" and
@@ -209,8 +205,8 @@ extern "C"
 #  define pmecc_gf1024 ((const int16_t *)CONFIG_SAMA5_PMECC_GALOIS_TABLE1024_ROMADDR)
 
 #else
-  EXTERN const uint16_t pmecc_gf512[2][PMECC_GF_SIZEOF_512];
-  EXTERN const uint16_t pmecc_gf1024[2][PMECC_GF_SIZEOF_1024];
+  extern const uint16_t pmecc_gf512[2][PMECC_GF_SIZEOF_512];
+  extern const uint16_t pmecc_gf1024[2][PMECC_GF_SIZEOF_1024];
 #endif
 
 /****************************************************************************
@@ -375,7 +371,6 @@ uint32_t pmecc_get_pagesize(void);
 void pmecc_buildgf(uint32_t mm, int16_t *indexof, int16_t *alphato);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

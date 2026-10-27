@@ -66,14 +66,11 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-EXTERN const IOBJ uint8_t avrdx_gpio_irq_vectors[];
+extern const IOBJ uint8_t avrdx_gpio_irq_vectors[];
 
 /****************************************************************************
  * Inline Functions
@@ -146,7 +143,6 @@ int avrdx_irq_detach_gpio_mux(uint8_t port_idx, uint8_t pins,
                               bool keep_handler);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

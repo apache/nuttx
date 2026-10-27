@@ -107,11 +107,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* This is the beginning of heap as provided from up_head.S.
@@ -120,71 +117,71 @@ extern "C"
  * CONFIG_RAM_END
  */
 
-EXTERN void *g_idle_basestack;
-EXTERN void *g_idle_topstack;
+extern void *g_idle_basestack;
+extern void *g_idle_topstack;
 
 /* Address of the interrupt stack pointer */
 
-EXTERN uint8_t g_intstackalloc[]; /* Allocated stack base */
-EXTERN uint8_t g_intstackbase[];  /* Initial top of interrupt stack */
+extern uint8_t g_intstackalloc[]; /* Allocated stack base */
+extern uint8_t g_intstackbase[];  /* Initial top of interrupt stack */
 
 /* These symbols are setup by the linker script. */
 
 /* Start of .text */
 
-EXTERN const uint8_t _stext[];
-EXTERN const uint8_t _stext2[];
-EXTERN const uint8_t _stext3[];
-EXTERN const uint8_t _stext4[];
+extern const uint8_t _stext[];
+extern const uint8_t _stext2[];
+extern const uint8_t _stext3[];
+extern const uint8_t _stext4[];
 
 /* End+1 of .text */
 
-EXTERN const uint8_t _etext[];
-EXTERN const uint8_t _etext2[];
-EXTERN const uint8_t _etext3[];
-EXTERN const uint8_t _etext4[];
+extern const uint8_t _etext[];
+extern const uint8_t _etext2[];
+extern const uint8_t _etext3[];
+extern const uint8_t _etext4[];
 
 /* End+1 of read only section (.text + .rodata) */
 
-EXTERN const uint8_t _eronly[];
-EXTERN const uint8_t _eronly2[];
-EXTERN const uint8_t _eronly3[];
-EXTERN const uint8_t _eronly4[];
+extern const uint8_t _eronly[];
+extern const uint8_t _eronly2[];
+extern const uint8_t _eronly3[];
+extern const uint8_t _eronly4[];
 
 /* Start of .data */
 
-EXTERN uint8_t _sdata[];
-EXTERN uint8_t _sdata2[];
-EXTERN uint8_t _sdata3[];
-EXTERN uint8_t _sdata4[];
+extern uint8_t _sdata[];
+extern uint8_t _sdata2[];
+extern uint8_t _sdata3[];
+extern uint8_t _sdata4[];
 
 /* End+1 of .data */
 
-EXTERN uint8_t _edata[];
-EXTERN uint8_t _edata2[];
-EXTERN uint8_t _edata3[];
-EXTERN uint8_t _edata4[];
+extern uint8_t _edata[];
+extern uint8_t _edata2[];
+extern uint8_t _edata3[];
+extern uint8_t _edata4[];
 
 /* Start of .bss */
 
-EXTERN uint8_t _sbss[];
-EXTERN uint8_t _sbss2[];
-EXTERN uint8_t _sbss3[];
-EXTERN uint8_t _sbss4[];
+extern uint8_t _sbss[];
+extern uint8_t _sbss2[];
+extern uint8_t _sbss3[];
+extern uint8_t _sbss4[];
 
 /* End+1 of .bss */
 
-EXTERN uint8_t _ebss[];
-EXTERN uint8_t _ebss2[];
-EXTERN uint8_t _ebss3[];
-EXTERN uint8_t _ebss4[];
+extern uint8_t _ebss[];
+extern uint8_t _ebss2[];
+extern uint8_t _ebss3[];
+extern uint8_t _ebss4[];
 
 /* End+1 of the memory */
 
-EXTERN uint8_t _eheap[];
-EXTERN uint8_t _eheap2[];
-EXTERN uint8_t _eheap3[];
-EXTERN uint8_t _eheap4[];
+extern uint8_t _eheap[];
+extern uint8_t _eheap2[];
+extern uint8_t _eheap3[];
+extern uint8_t _eheap4[];
 
 #endif /* __ASSEMBLY__ */
 
@@ -308,7 +305,6 @@ void ceva_color_intstack(void);
 #  define ceva_color_intstack()
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

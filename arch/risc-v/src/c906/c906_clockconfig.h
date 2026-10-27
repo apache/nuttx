@@ -44,25 +44,21 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-EXTERN uint64_t c906_get_cpuclk(void);
-EXTERN uint64_t c906_get_pll0clk(void);
-EXTERN void c906_clockconfig(void);
+extern uint64_t c906_get_cpuclk(void);
+extern uint64_t c906_get_pll0clk(void);
+extern void c906_clockconfig(void);
 
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_C906_C906_CLOCKCONFIG_H */

@@ -59,13 +59,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -219,7 +215,7 @@ int lpc31_spicmddata(struct spi_dev_s *dev,
  *   If USB is supported and the board supports a pullup via GPIO (for USB
  *   software connect and disconnect), then the board software must provide
  *   lpc31_pullup. See include/nuttx/usb/usbdev.h for additional description
- *   of this method. Alternatively, if no pull-up GPIO the following EXTERN
+ *   of this method. Alternatively, if no pull-up GPIO the following extern
  *   can be redefined to be NULL.
  *
  ****************************************************************************/
@@ -354,7 +350,6 @@ void sdio_mediachange(struct sdio_dev_s *dev, bool cardinslot);
 
 void sdio_wrprotect(struct sdio_dev_s *dev, bool wrprotect);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

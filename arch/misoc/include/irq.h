@@ -52,11 +52,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -82,7 +79,7 @@ static inline_function uint32_t up_getsp(void)
  * structure.  It is non-NULL only during interrupt processing.
  */
 
-EXTERN volatile uint32_t *g_current_regs;
+extern volatile uint32_t *g_current_regs;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -121,7 +118,6 @@ irqstate_t up_irq_save(void);
 irqstate_t up_irq_enable(void);
 void up_irq_restore(irqstate_t flags);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

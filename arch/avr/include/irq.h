@@ -69,11 +69,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -86,9 +83,9 @@ extern "C"
  */
 
 #ifdef CONFIG_ARCH_FAMILY_AVR32
-EXTERN volatile uint32_t *g_current_regs;
+extern volatile uint32_t *g_current_regs;
 #else
-EXTERN volatile uint8_t *g_current_regs;
+extern volatile uint8_t *g_current_regs;
 #endif
 
 /****************************************************************************
@@ -139,7 +136,6 @@ static inline_function void up_set_current_regs(FAR uint8_t *regs)
 #define up_getusrsp(regs) \
   ((uintptr_t)((uint8_t *)(regs))[REG_R13])
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

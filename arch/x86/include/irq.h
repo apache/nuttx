@@ -72,11 +72,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -88,7 +85,7 @@ extern "C"
  * structure.  It is non-NULL only during interrupt processing.
  */
 
-EXTERN volatile uint32_t *g_current_regs;
+extern volatile uint32_t *g_current_regs;
 #endif
 
 /****************************************************************************
@@ -134,7 +131,6 @@ static inline_function void up_set_current_regs(uint32_t *regs)
 #define up_getusrsp(regs) \
     ((uintptr_t)((uint32_t *)(regs))[REG_ESP])
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

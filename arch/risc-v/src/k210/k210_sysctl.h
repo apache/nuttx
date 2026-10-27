@@ -135,11 +135,8 @@ typedef enum
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /**
@@ -149,7 +146,7 @@ extern "C"
  * PLL configuration and clock tree setup.
  */
 
-EXTERN void k210_sysctl_init(void);
+extern void k210_sysctl_init(void);
 
 /**
  * @brief Enable a peripheral clock
@@ -158,7 +155,7 @@ EXTERN void k210_sysctl_init(void);
  * @return 0 on success, negative error code on failure
  */
 
-EXTERN int k210_sysctl_clock_enable(k210_clockid_t clkid);
+extern int k210_sysctl_clock_enable(k210_clockid_t clkid);
 
 /**
  * @brief Disable a peripheral clock
@@ -167,7 +164,7 @@ EXTERN int k210_sysctl_clock_enable(k210_clockid_t clkid);
  * @return 0 on success, negative error code on failure
  */
 
-EXTERN int k210_sysctl_clock_disable(k210_clockid_t clkid);
+extern int k210_sysctl_clock_disable(k210_clockid_t clkid);
 
 /**
  * @brief Get the frequency of a peripheral clock
@@ -176,7 +173,7 @@ EXTERN int k210_sysctl_clock_disable(k210_clockid_t clkid);
  * @return Clock frequency in Hz, 0 on error
  */
 
-EXTERN uint32_t k210_sysctl_clock_get_freq(k210_clockid_t clkid);
+extern uint32_t k210_sysctl_clock_get_freq(k210_clockid_t clkid);
 
 /**
  * @brief Get current CPU clock frequency
@@ -184,7 +181,7 @@ EXTERN uint32_t k210_sysctl_clock_get_freq(k210_clockid_t clkid);
  * @return CPU clock frequency in Hz
  */
 
-EXTERN uint32_t k210_sysctl_cpu_get_freq(void);
+extern uint32_t k210_sysctl_cpu_get_freq(void);
 
 /**
  * @brief Set CPU clock frequency (SDK-like)
@@ -196,7 +193,7 @@ EXTERN uint32_t k210_sysctl_cpu_get_freq(void);
  * @return Actual CPU clock frequency in Hz, 0 on failure
  */
 
-EXTERN uint32_t k210_sysctl_cpu_set_freq(uint32_t freq);
+extern uint32_t k210_sysctl_cpu_set_freq(uint32_t freq);
 
 /**
  * @brief Reset a peripheral
@@ -205,7 +202,7 @@ EXTERN uint32_t k210_sysctl_cpu_set_freq(uint32_t freq);
  * @return 0 on success, negative error code on failure
  */
 
-EXTERN int k210_sysctl_reset(k210_rstidx_t rstidx);
+extern int k210_sysctl_reset(k210_rstidx_t rstidx);
 
 /**
  * @brief Initialize a peripheral (enable clock and deassert reset)
@@ -218,7 +215,7 @@ EXTERN int k210_sysctl_reset(k210_rstidx_t rstidx);
  * @return 0 on success, negative error code on failure
  */
 
-EXTERN int k210_sysctl_init_peripheral(k210_clockid_t clkid,
+extern int k210_sysctl_init_peripheral(k210_clockid_t clkid,
                                         k210_rstidx_t rstidx);
 
 /**
@@ -228,12 +225,11 @@ EXTERN int k210_sysctl_init_peripheral(k210_clockid_t clkid,
  * @return true if PLL is locked, false otherwise
  */
 
-EXTERN bool k210_sysctl_pll_is_locked(uint32_t pll_offset);
+extern bool k210_sysctl_pll_is_locked(uint32_t pll_offset);
 
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_K210_K210_SYSCTL_H */

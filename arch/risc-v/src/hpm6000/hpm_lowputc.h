@@ -36,13 +36,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef HAVE_UART_DEVICE
@@ -65,7 +61,7 @@ struct uart_config_s
  * Name: hpm_lowsetup
  ****************************************************************************/
 
-EXTERN void hpm_lowsetup(void);
+extern void hpm_lowsetup(void);
 
 #ifdef HAVE_UART_DEVICE
 int hpm_uart_configure(uint32_t base, const struct uart_config_s *config);
@@ -77,7 +73,6 @@ void hpm_lowputc(int ch);
 #  define hpm_lowputc(ch)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -717,18 +717,14 @@ static inline_function uintptr_t up_getsp(void)
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* g_interrupt_context store irq status */
 
-EXTERN volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
+extern volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -946,7 +942,6 @@ noinstrument_function static inline_function bool up_interrupt_context(void)
 #define up_getusrsp(regs) \
     (((uintptr_t*)(regs))[REG_SP])
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

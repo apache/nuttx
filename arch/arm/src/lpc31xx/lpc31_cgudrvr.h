@@ -175,11 +175,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Clock domains */
@@ -525,7 +522,7 @@ struct lpc31_pllconfig_s
  * programmed frequency of every input source
  */
 
-EXTERN uint32_t g_boardfreqin[CGU_NFREQIN];
+extern uint32_t g_boardfreqin[CGU_NFREQIN];
 
 /* This instance of the lpc31_clkinit_s structure provides the initial,
  * default clock configuration for the board.  Every board must provide an
@@ -533,7 +530,7 @@ EXTERN uint32_t g_boardfreqin[CGU_NFREQIN];
  * the boot-up logic to configure initial lpc31xx clocking.
  */
 
-EXTERN const struct lpc31_clkinit_s g_boardclks;
+extern const struct lpc31_clkinit_s g_boardclks;
 
 /****************************************************************************
  * Inline Functions
@@ -797,7 +794,6 @@ void lpc31_enableexten(enum lpc31_clockid_e clkid);
 
 void lpc31_disableexten(enum lpc31_clockid_e clkid);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

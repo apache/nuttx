@@ -361,18 +361,14 @@ struct sam_nand_s
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* NAND global state */
 
-EXTERN struct sam_nand_s g_nand;
+extern struct sam_nand_s g_nand;
 
 /****************************************************************************
  * Public Functions Prototypes
@@ -627,7 +623,6 @@ uint16_t nand_get_trimpage(struct sam_nandcs_s *priv)
 #  define nand_get_trimpage(p) (0)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -167,20 +167,16 @@ typedef uint32_t gpio_pinset_t;
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
 
-EXTERN const uintptr_t g_gpiobase[AM335X_GPIO_NPORTS];
+extern const uintptr_t g_gpiobase[AM335X_GPIO_NPORTS];
 #define am335x_gpion_vbase(n) (g_gpiobase[(n)])
 
 /****************************************************************************
@@ -299,7 +295,6 @@ int am335x_dump_gpio(uint32_t pinset, const char *msg);
 
 gpio_pinset_t am335x_periph_gpio(gpio_pinset_t pinset);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

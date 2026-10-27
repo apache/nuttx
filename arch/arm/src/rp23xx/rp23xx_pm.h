@@ -36,13 +36,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -125,7 +121,7 @@ void rp23xx_pm_pads_quiesce(void);
 #ifdef CONFIG_RP23XX_PM_SUSPEND
 #  define RP23XX_PM_RESUME_STACK_WORDS (CONFIG_IDLETHREAD_STACKSIZE / 4)
 
-EXTERN uint32_t g_pm_resume_stack[RP23XX_PM_RESUME_STACK_WORDS];
+extern uint32_t g_pm_resume_stack[RP23XX_PM_RESUME_STACK_WORDS];
 #endif
 
 /****************************************************************************
@@ -164,7 +160,6 @@ bool rp23xx_pm_resume_pending(void);
 void rp23xx_pm_resume(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -34,19 +34,14 @@
 /****************************************************************************
  * Public Functions Definitions
  ****************************************************************************/
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-EXTERN void z80_lowputc(char ch) __naked;
-EXTERN char z80_lowgetc(void) __naked;
+extern void z80_lowputc(char ch) __naked;
+extern char z80_lowgetc(void) __naked;
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -231,18 +231,14 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Base addresses for each GPIO block */
 
-EXTERN const uint32_t g_gpiobase[N32H7_NGPIO];
+extern const uint32_t g_gpiobase[N32H7_NGPIO];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -357,7 +353,6 @@ int n32_dumpgpio(uint32_t pinset, const char *msg);
 
 void n32_gpioinit(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

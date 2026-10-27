@@ -75,13 +75,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #if defined(HAVE_SERIAL_CONSOLE)
@@ -89,16 +85,15 @@ extern "C"
  * Name: rv32m1_console_uart_setup
  ****************************************************************************/
 
-EXTERN void rv32m1_console_uart_setup(void);
+extern void rv32m1_console_uart_setup(void);
 
 /****************************************************************************
  * Name: rv32m1_console_uart_putc
  ****************************************************************************/
 
-EXTERN void rv32m1_console_uart_putc(char);
+extern void rv32m1_console_uart_putc(char);
 #endif /* HAVE_SERIAL_CONSOLE */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

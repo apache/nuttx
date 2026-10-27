@@ -55,13 +55,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -72,7 +68,7 @@ extern "C"
  * must be provided by MCU-specific logic.
  */
 
-EXTERN const struct clock_setup_s g_initial_clock_setup;
+extern const struct clock_setup_s g_initial_clock_setup;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -121,7 +117,6 @@ uint32_t max326_cpu_frequency(void);
 
 uint32_t max326_pclk_frequency(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

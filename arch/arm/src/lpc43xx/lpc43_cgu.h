@@ -45,13 +45,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -66,7 +62,7 @@ extern "C"
  *
  ****************************************************************************/
 
-EXTERN void lpc43_pll0usbdisable(void);
+extern void lpc43_pll0usbdisable(void);
 
 /****************************************************************************
  * Name: lpc43_pll0usbenable
@@ -77,7 +73,7 @@ EXTERN void lpc43_pll0usbdisable(void);
  *
  ****************************************************************************/
 
-EXTERN void lpc43_pll0usbenable(void);
+extern void lpc43_pll0usbenable(void);
 
 /****************************************************************************
  * Name: lpc43_pll0usbconfig
@@ -87,7 +83,7 @@ EXTERN void lpc43_pll0usbenable(void);
  *
  ****************************************************************************/
 
-EXTERN void lpc43_pll0usbconfig(void);
+extern void lpc43_pll0usbconfig(void);
 
 /****************************************************************************
  * Name: lpc43_clockconfig
@@ -101,7 +97,6 @@ EXTERN void lpc43_pll0usbconfig(void);
 
 void lpc43_clockconfig(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

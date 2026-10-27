@@ -92,16 +92,12 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-EXTERN struct mm_heap_s *const g_mm_heap[];
+extern struct mm_heap_s *const g_mm_heap[];
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

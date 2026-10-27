@@ -48,20 +48,15 @@ struct uart_config_s
   uint8_t  parity;    /* Parity selection:  0=none, 1=odd, 2=even */
 };
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-EXTERN void bl602_lowsetup(void);
+extern void bl602_lowsetup(void);
 
-EXTERN void bl602_uart_configure(const struct uart_config_s *config);
+extern void bl602_uart_configure(const struct uart_config_s *config);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

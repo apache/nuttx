@@ -44,25 +44,21 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-EXTERN uint64_t mpfs_get_cpuclk(void);
-EXTERN uint64_t mpfs_get_pll0clk(void);
-EXTERN void mpfs_clockconfig(void);
+extern uint64_t mpfs_get_cpuclk(void);
+extern uint64_t mpfs_get_pll0clk(void);
+extern void mpfs_clockconfig(void);
 
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_MPFS_MPFS_CLOCKCONFIG_H */

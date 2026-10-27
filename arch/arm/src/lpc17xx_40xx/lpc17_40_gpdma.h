@@ -105,13 +105,9 @@ struct lpc17_40_dmaregs_s
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* If the following value is zero, then there is no DMA in progress. This
@@ -123,7 +119,7 @@ extern "C"
  * disabled in order to save power."
  */
 
-EXTERN volatile uint8_t g_dma_inprogress;
+extern volatile uint8_t g_dma_inprogress;
 
 /****************************************************************************
  * Public Functions Prototypes
@@ -237,7 +233,6 @@ void lpc17_40_dmadump(DMA_HANDLE handle,
 #  define lpc17_40_dmadump(handle,regs,msg)
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

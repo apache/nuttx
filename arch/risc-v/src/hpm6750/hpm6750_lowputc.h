@@ -36,22 +36,17 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
  * Name: hpm6750_lowsetup
  ****************************************************************************/
 
-EXTERN void hpm6750_lowsetup(void);
+extern void hpm6750_lowsetup(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

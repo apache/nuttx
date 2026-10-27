@@ -79,11 +79,8 @@ static inline_function uint32_t up_getsp(void)
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* g_current_regs[] holds a references to the current interrupt level
@@ -96,7 +93,7 @@ extern "C"
  * such value for each processor that can receive an interrupt.
  */
 
-EXTERN volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
+extern volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -174,7 +171,6 @@ static inline_function bool up_interrupt_context(void)
 #define up_getusrsp(regs) \
     ((uintptr_t)((uint32_t *)(regs))[REG_R13])
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

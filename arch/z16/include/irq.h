@@ -59,11 +59,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Return the current value of the stack pointer */
@@ -75,7 +72,7 @@ chipreg_t up_getsp(void);
  * interrupt processing.
  */
 
-EXTERN volatile FAR chipreg_t *g_current_regs;
+extern volatile FAR chipreg_t *g_current_regs;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -125,7 +122,6 @@ static inline_function void up_set_current_regs(FAR chipreg_t *regs)
 #define up_getusrsp(regs) \
     ((uintptr_t)((FAR uint32_t*)(regs))[REG_SP])
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

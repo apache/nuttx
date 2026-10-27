@@ -149,40 +149,35 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
  * Name: fe310_gpio_config
  ****************************************************************************/
 
-EXTERN int fe310_gpio_config(uint16_t gpiocfg);
+extern int fe310_gpio_config(uint16_t gpiocfg);
 
 /****************************************************************************
  * Name: fe310_gpio_write
  ****************************************************************************/
 
-EXTERN void fe310_gpio_write(uint16_t gpiocfg, bool value);
+extern void fe310_gpio_write(uint16_t gpiocfg, bool value);
 
 /****************************************************************************
  * Name: fe310_gpio_read
  ****************************************************************************/
 
-EXTERN bool fe310_gpio_read(uint16_t gpiocfg);
+extern bool fe310_gpio_read(uint16_t gpiocfg);
 
 /****************************************************************************
  * Name: fe310_gpio_clearpending
  ****************************************************************************/
 
-EXTERN void fe310_gpio_clearpending(uint32_t pin);
+extern void fe310_gpio_clearpending(uint32_t pin);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

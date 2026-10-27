@@ -70,11 +70,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -102,7 +99,7 @@ static inline_function uint16_t up_getsp(void)
  * structure.  It is non-NULL only during interrupt processing.
  */
 
-EXTERN volatile uint8_t *g_current_regs;
+extern volatile uint8_t *g_current_regs;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -147,7 +144,6 @@ static inline_function uintptr_t up_getusrsp(void *regs)
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

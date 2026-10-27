@@ -50,11 +50,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -67,7 +64,7 @@ extern "C"
  ****************************************************************************/
 
 #if defined(CONFIG_AVR_SPI1) || defined(CONFIG_AVR_SPI2)
-EXTERN void weak_function at90usb_spidev_initialize(void);
+extern void weak_function at90usb_spidev_initialize(void);
 #endif
 
 /****************************************************************************
@@ -79,10 +76,9 @@ EXTERN void weak_function at90usb_spidev_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-EXTERN void at90usb_led_initialize(void);
+extern void at90usb_led_initialize(void);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

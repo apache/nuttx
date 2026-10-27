@@ -44,24 +44,20 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-EXTERN uint32_t litex_get_hfclk(void);
-EXTERN void litex_clockconfig(void);
+extern uint32_t litex_get_hfclk(void);
+extern void litex_clockconfig(void);
 
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_LITEX_LITEX_CLOCKCONFIG_H */

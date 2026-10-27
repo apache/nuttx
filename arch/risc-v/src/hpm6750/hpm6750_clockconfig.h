@@ -142,24 +142,20 @@ typedef enum
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-EXTERN uint32_t hpm6750_get_osc_freq(void);
-EXTERN void hpm6750_clockconfig(void);
+extern uint32_t hpm6750_get_osc_freq(void);
+extern void hpm6750_clockconfig(void);
 
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_HPM6750_HPM6750_CLOCKCONFIG_H */

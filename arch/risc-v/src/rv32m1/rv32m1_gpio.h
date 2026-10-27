@@ -234,70 +234,65 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
  * Name: rv32m1_gpio_config
  ****************************************************************************/
 
-EXTERN int rv32m1_gpio_config(uint32_t cfgset);
+extern int rv32m1_gpio_config(uint32_t cfgset);
 
 /****************************************************************************
  * Name: rv32m1_gpio_write
  ****************************************************************************/
 
-EXTERN void rv32m1_gpio_write(uint32_t cfgset, bool value);
+extern void rv32m1_gpio_write(uint32_t cfgset, bool value);
 
 /****************************************************************************
  * Name: rv32m1_gpio_toggle
  ****************************************************************************/
 
-EXTERN void rv32m1_gpio_toggle(uint32_t cfgset);
+extern void rv32m1_gpio_toggle(uint32_t cfgset);
 
 /****************************************************************************
  * Name: rv32m1_gpio_read
  ****************************************************************************/
 
-EXTERN bool rv32m1_gpio_read(uint32_t cfgset);
+extern bool rv32m1_gpio_read(uint32_t cfgset);
 
 /****************************************************************************
  * Name: rv32m1_gpio_irqenable
  ****************************************************************************/
 
-EXTERN void rv32m1_gpio_irqenable(uint32_t cfgset);
+extern void rv32m1_gpio_irqenable(uint32_t cfgset);
 
 /****************************************************************************
  * Name: rv32m1_gpio_irqdisable
  ****************************************************************************/
 
-EXTERN void rv32m1_gpio_irqdisable(uint32_t cfgset);
+extern void rv32m1_gpio_irqdisable(uint32_t cfgset);
 
 /****************************************************************************
  * Name: rv32m1_gpio_irqattach
  ****************************************************************************/
 
-EXTERN int rv32m1_gpio_irqattach(uint32_t cfgset, xcpt_t isr, void *arg);
+extern int rv32m1_gpio_irqattach(uint32_t cfgset, xcpt_t isr, void *arg);
 
 /****************************************************************************
  * Name: rv32m1_gpio_irqdetach
  ****************************************************************************/
 
-EXTERN int rv32m1_gpio_irqdetach(uint32_t cfgset, xcpt_t isr, void *arg);
+extern int rv32m1_gpio_irqdetach(uint32_t cfgset, xcpt_t isr, void *arg);
 
 /****************************************************************************
  * Name: rv32m1_gpio_clearpending
  ****************************************************************************/
 
-EXTERN void rv32m1_gpio_clearpending(uint32_t cfgset);
+extern void rv32m1_gpio_clearpending(uint32_t cfgset);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

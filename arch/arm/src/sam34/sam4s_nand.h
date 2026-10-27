@@ -109,18 +109,14 @@ struct sam_nandcs_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* NAND global state */
 
-EXTERN struct sam_nand_s g_nand;
+extern struct sam_nand_s g_nand;
 
 /****************************************************************************
  * Name: sam_nand_initialize
@@ -172,7 +168,6 @@ struct mtd_dev_s *sam_nand_initialize(int cs);
 
 int board_nandflash_config(int cs);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
