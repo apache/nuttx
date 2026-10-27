@@ -103,8 +103,9 @@
 #define CAN_J1939    7           /* SAE J1939 */
 #define CAN_NPROTO   8
 
-#define SOL_CAN_BASE 100
-#define SOL_CAN_RAW  (SOL_CAN_BASE + CAN_RAW)
+#define SOL_CAN_BASE  100
+#define SOL_CAN_RAW   (SOL_CAN_BASE + CAN_RAW)
+#define SOL_CAN_ISOTP (SOL_CAN_BASE + CAN_ISOTP)
 
 /* CAN_RAW socket options */
 

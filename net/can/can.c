@@ -47,11 +47,28 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
 #include <nuttx/queue.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 
 #include "can/can.h"
 #include "devif/devif.h"
+#include "netdev/netdev.h"
+#include "socket/socket.h"
 #include "utils/utils.h"
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* State of a can_recviob() call waiting for a frame */
+
+struct can_recviob_s
+{
+  FAR struct devif_callback_s *cb;
+  FAR struct iob_s *iob;
+  sem_t sem;
+  int result;
+};
 
 /****************************************************************************
  * Private Data
@@ -393,6 +410,43 @@ static int can_in(FAR struct net_driver_s *dev)
   can_conn_list_unlock();
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: can_recviob_event
+ *
+ * Description:
+ *   Take ownership of a newly received frame, or report that the network
+ *   device went down, and wake up the waiting can_recviob().
+ *
+ ****************************************************************************/
+
+static uint32_t can_recviob_event(FAR struct net_driver_s *dev,
+                                  FAR void *arg, uint32_t flags)
+{
+  FAR struct can_recviob_s *state = arg;
+
+  if ((flags & CAN_NEWDATA) != 0)
+    {
+      state->iob = dev->d_iob;
+      netdev_iob_clear(dev);
+      dev->d_len = 0;
+      flags &= ~CAN_NEWDATA;
+    }
+  else if ((flags & NETDEV_DOWN) != 0)
+    {
+      state->result = -ENETDOWN;
+    }
+  else
+    {
+      return flags;
+    }
+
+  state->cb->flags = 0;
+  state->cb->priv = NULL;
+  state->cb->event = NULL;
+  nxsem_post(&state->sem);
+  return flags;
 }
 
 /****************************************************************************
@@ -867,6 +921,93 @@ int can_conn_bind(FAR struct can_conn_s *conn,
 #endif
 
   return conn->dev == NULL && canaddr->can_ifindex != 0 ? -ENODEV : OK;
+}
+
+/****************************************************************************
+ * Name: can_recviob
+ *
+ * Description:
+ *   Receive one complete CAN frame without copying its IOB. On success the
+ *   caller owns the chain and must free it. timeout is in milliseconds;
+ *   UINT_MAX waits indefinitely. The function returns the frame length or
+ *   a negative errno. It does not translate a timeout to EAGAIN.
+ *
+ ****************************************************************************/
+
+ssize_t can_recviob(FAR struct can_conn_s *conn, FAR struct iob_s **iob,
+                    int flags, unsigned int timeout)
+{
+  FAR struct net_driver_s *dev = NULL;
+  struct can_recviob_s state;
+  int ret;
+
+  memset(&state, 0, sizeof(state));
+  *iob = NULL;
+  nxsem_init(&state.sem, 0, 0);
+  conn_lock(&conn->sconn);
+
+  state.iob = iob_remove_queue(&conn->readahead);
+  if (state.iob != NULL)
+    {
+      goto out;
+    }
+
+  if (_SS_ISNONBLOCK(conn->sconn.s_flags) || (flags & MSG_DONTWAIT) != 0)
+    {
+      state.result = -EAGAIN;
+      goto out;
+    }
+
+  dev = conn->dev;
+  if (dev == NULL && _SS_ISBOUND(conn->sconn.s_flags))
+    {
+      dev = netdev_default();
+    }
+
+  if (dev == NULL)
+    {
+      state.result = -ENODEV;
+      goto out;
+    }
+
+  conn_unlock(&conn->sconn);
+  conn_dev_lock(&conn->sconn, dev);
+
+  /* Input can enqueue a frame while the locks are being switched. */
+
+  state.iob = iob_remove_queue(&conn->readahead);
+  if (state.iob != NULL)
+    {
+      goto out;
+    }
+
+  state.cb = can_callback_alloc(dev, conn);
+  if (state.cb == NULL)
+    {
+      state.result = -EBUSY;
+      goto out;
+    }
+
+  state.cb->flags = CAN_NEWDATA | NETDEV_DOWN;
+  state.cb->priv = &state;
+  state.cb->event = can_recviob_event;
+  ret = conn_dev_sem_timedwait(&state.sem, true, timeout, &conn->sconn, dev);
+  can_callback_free(dev, conn, state.cb);
+  if (state.result == 0)
+    {
+      state.result = ret;
+    }
+
+out:
+  if (state.iob != NULL)
+    {
+      *iob = state.iob;
+      state.result = state.iob->io_pktlen;
+    }
+
+  conn_dev_unlock(&conn->sconn, dev);
+  nxsem_destroy(&state.sem);
+  return state.result;
 }
 
 #endif /* CONFIG_NET_CAN */

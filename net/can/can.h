@@ -149,6 +149,9 @@ extern "C"
 #endif
 
 extern const struct sock_intf_s g_can_raw_sockif;
+#ifdef CONFIG_NET_CAN_ISOTP
+extern const struct sock_intf_s g_can_isotp_sockif;
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -158,7 +161,10 @@ extern const struct sock_intf_s g_can_raw_sockif;
  * Name: can_sockif
  *
  * Description:
- *   Return the socket interface of the requested CAN protocol.
+ *   Return the socket interface for the requested CAN protocol: the
+ *   ISO-TP interface for CAN_ISOTP, the CAN_RAW interface otherwise.  The
+ *   setup routine of the selected interface validates the socket type and
+ *   protocol.
  *
  ****************************************************************************/
 
@@ -257,6 +263,20 @@ void can_conn_list_unlock(void);
 
 uint32_t can_callback(FAR struct net_driver_s *dev,
                       FAR struct can_conn_s *conn, uint32_t flags);
+
+/****************************************************************************
+ * Name: can_recviob
+ *
+ * Description:
+ *   Receive one complete CAN frame without copying it.  On success the
+ *   caller owns the returned IOB chain and must free it.  timeout is in
+ *   milliseconds, UINT_MAX waits indefinitely.  Returns the frame length,
+ *   or a negated errno value (a timeout returns -ETIMEDOUT).
+ *
+ ****************************************************************************/
+
+ssize_t can_recviob(FAR struct can_conn_s *conn, FAR struct iob_s **iob,
+                    int flags, unsigned int timeout);
 
 /****************************************************************************
  * Name: can_datahandler
