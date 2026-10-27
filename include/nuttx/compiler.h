@@ -1623,10 +1623,11 @@
  * and lutimens() (sys/stat.h), the file system types *_MAGIC
  * (sys/statfs.h), PANIC(), PANIC_WITH_REGS(), ASSERT(), VERIFY(),
  * COMPILE_TIME_ASSERT() and BUILD_BUG_ON_ZERO() (assert.h), crypt_r()
- * (unistd.h) and the helper macros of this file below, such as
- * memory_barrier() and UNUSED().  The headers that a program includes do
- * not use these names.  A definition that the program made before is
- * restored (saved at the start of this file).
+ * (unistd.h), the types unchar and s_char (sys/types.h) and the helper
+ * macros of this file below, such as memory_barrier() and UNUSED().  The
+ * headers that a program includes do not use these names.  A definition
+ * that the program made before is restored (saved at the start of this
+ * file).
  */
 
 #ifdef NUTTX_NO_EXTENSIONS

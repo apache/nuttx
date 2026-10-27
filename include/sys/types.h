@@ -275,13 +275,18 @@ typedef unsigned short u_short;
 typedef unsigned int   u_int;
 typedef unsigned long  u_long;
 
-/* SYSV types provided only to support porting to NuttX.  */
+/* SYSV types provided only to support porting to NuttX.  unchar and
+ * s_char are not in other C libraries: not with NUTTX_NO_EXTENSIONS (see
+ * nuttx/compiler.h), so that a program can use the names.
+ */
 
+#ifndef NUTTX_NO_EXTENSIONS
 typedef unsigned char  unchar;
+typedef signed char    s_char;
+#endif
 typedef unsigned short ushort;
 typedef unsigned int   uint;
 typedef unsigned long  ulong;
-typedef signed char    s_char;
 typedef FAR char      *caddr_t;
 
 /* These were defined by ISO C without the first `_'.  */
