@@ -167,6 +167,8 @@ content of a file may require that the lines exceed this limit.
 This often occurs in header files with naturally long definitions.
 If the line width must extend 78 lines, then some wider line width
 may be used in the file provided that it is used consistently.
+A line with an SPDX tag (for example ``SPDX-FileCopyrightText``) may
+be longer: its copyright notice is kept as it is.
 
 **Line Wrapping**.
 
