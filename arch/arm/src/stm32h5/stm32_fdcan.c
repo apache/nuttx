@@ -431,6 +431,10 @@ struct stm32_fdcan_s
   uint32_t txbusy;          /* TX buffers requested and not yet reaped */
   uint32_t rxints;          /* Configured RX interrupts */
   uint32_t txints;          /* Configured TX interrupts */
+  uint32_t bus_errors;      /* Accumulated CAN error logging count */
+  uint32_t arb_errors;      /* Protocol error interrupts, arbitration phase */
+  uint32_t data_errors;     /* Protocol error interrupts, data phase */
+  uint32_t rx_overruns;     /* RX FIFO message lost events seen */
 
 #ifdef CONFIG_CAN_EXTID
   uint32_t extfilters[2];   /* Extended filter bit allocator.  2*32=64 */
@@ -1719,6 +1723,11 @@ static int fdcan_setup(struct can_dev_s *dev)
 
   /* FDCAN hardware initialization */
 
+  priv->bus_errors  = 0;
+  priv->arb_errors  = 0;
+  priv->data_errors = 0;
+  priv->rx_overruns = 0;
+
   ret = fdcan_hw_initialize(priv);
   if (ret < 0)
     {
@@ -2226,6 +2235,76 @@ static int fdcan_ioctl(struct can_dev_s *dev, int cmd, unsigned long arg)
           /* Entering initialization mode cancels any pending transmission */
 
           fdcan_reaptx(dev);
+          ret = OK;
+        }
+        break;
+
+      /* CANIOC_GET_ERRORS:
+       *   Description : Get the error state and counters
+       *   Argument : A pointer to a write-able struct canioc_errors_s
+       *   Returned Value : Zero (OK) is returned on success.  Otherwise -1
+       *                    (ERROR) is returned with the errno variable set
+       *                    to indicate the nature of the error.
+       *   Dependencies : None
+       *
+       * errors accumulates the hardware CAN error logging counter (ECR.CEL),
+       * which is cleared by each read of ECR and saturates at 255, so poll
+       * often enough that fewer than 256 errors occur between calls.
+       * arb_errors, data_errors and rx_overruns count interrupts.  Protocol
+       * error interrupts are masked after the first until a frame is
+       * transmitted again, and RX overruns until a frame is received, so
+       * these are lower bounds.
+       */
+
+      case CANIOC_GET_ERRORS:
+        {
+          struct canioc_errors_s *errors =
+            (struct canioc_errors_s *)arg;
+          irqstate_t flags;
+          uint32_t   ecr;
+          uint32_t   psr;
+
+          if (errors == NULL)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          flags = enter_critical_section();
+
+          ecr = fdcan_getreg(priv, STM32_FDCAN_ECR_OFFSET);
+          psr = fdcan_getreg(priv, STM32_FDCAN_PSR_OFFSET);
+
+          priv->bus_errors += (ecr & FDCAN_ECR_CEL_MASK) >>
+                              FDCAN_ECR_CEL_SHIFT;
+
+          errors->errors      = priv->bus_errors;
+          errors->arb_errors  = priv->arb_errors;
+          errors->data_errors = priv->data_errors;
+          errors->rx_overruns = priv->rx_overruns;
+
+          leave_critical_section(flags);
+
+          errors->txerr = (ecr & FDCAN_ECR_TEC_MASK) >> FDCAN_ECR_TEC_SHIFT;
+          errors->rxerr = (ecr & FDCAN_ECR_REC_MASK) >> FDCAN_ECR_REC_SHIFT;
+
+          if ((psr & FDCAN_PSR_BO) != 0)
+            {
+              errors->state = CANIOC_ERRSTATE_BUSOFF;
+            }
+          else if ((psr & FDCAN_PSR_EP) != 0)
+            {
+              errors->state = CANIOC_ERRSTATE_PASSIVE;
+            }
+          else if ((psr & FDCAN_PSR_EW) != 0)
+            {
+              errors->state = CANIOC_ERRSTATE_WARNING;
+            }
+          else
+            {
+              errors->state = CANIOC_ERRSTATE_ACTIVE;
+            }
+
           ret = OK;
         }
         break;
@@ -2946,6 +3025,16 @@ static int fdcan_interrupt(int irq, void *context, void *arg)
            * successful transfer/receive on the hardware
            */
 
+          if ((pending & FDCAN_INT_PEA) != 0)
+            {
+              priv->arb_errors++;
+            }
+
+          if ((pending & FDCAN_INT_PED) != 0)
+            {
+              priv->data_errors++;
+            }
+
           psr = fdcan_getreg(priv, STM32_FDCAN_PSR_OFFSET);
 
           if ((psr & FDCAN_PSR_LEC_MASK) != 0)
@@ -3002,6 +3091,8 @@ static int fdcan_interrupt(int irq, void *context, void *arg)
 
           ie &= ~(pending & FDCAN_RXERR_INTS);
           fdcan_putreg(priv, STM32_FDCAN_IE_OFFSET, ie);
+
+          priv->rx_overruns++;
 
           /* Clear the error indications */
 
