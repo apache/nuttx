@@ -137,6 +137,17 @@
 #define IPV6_RECVHOPLIMIT     (__SO_PROTOCOL + 11) /* Access the hop limit field */
 #define IPV6_HOPLIMIT         (__SO_PROTOCOL + 12) /* Hop limit */
 
+/* Protocol-independent multicast options (RFC 3678) for the level
+ * IPPROTO_IP or IPPROTO_IPV6, with the values of Linux.
+ */
+
+#define MCAST_JOIN_GROUP         (__SO_PROTOCOL + 31) /* group_req */
+#define MCAST_BLOCK_SOURCE       (__SO_PROTOCOL + 32) /* group_source_req */
+#define MCAST_UNBLOCK_SOURCE     (__SO_PROTOCOL + 33) /* group_source_req */
+#define MCAST_LEAVE_GROUP        (__SO_PROTOCOL + 34) /* group_req */
+#define MCAST_JOIN_SOURCE_GROUP  (__SO_PROTOCOL + 35) /* group_source_req */
+#define MCAST_LEAVE_SOURCE_GROUP (__SO_PROTOCOL + 36) /* group_source_req */
+
 /* Values used with SIOCSIFMCFILTER and SIOCGIFMCFILTER ioctl's */
 
 #define MCAST_EXCLUDE         0
@@ -366,6 +377,21 @@ struct ipv6_mreq
 {
   struct in6_addr ipv6mr_multiaddr; /* IPv6 multicast address of group */
   unsigned int    ipv6mr_interface; /* Local interface index */
+};
+
+/* Used with the MCAST_* socket options (RFC 3678) */
+
+struct group_req
+{
+  uint32_t                gr_interface;  /* Interface index */
+  struct sockaddr_storage gr_group;      /* Multicast group address */
+};
+
+struct group_source_req
+{
+  uint32_t                gsr_interface; /* Interface index */
+  struct sockaddr_storage gsr_group;     /* Multicast group address */
+  struct sockaddr_storage gsr_source;    /* Source address */
 };
 
 struct in6_pktinfo
