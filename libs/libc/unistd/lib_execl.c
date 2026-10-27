@@ -54,6 +54,73 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static int lib_execl(FAR const char *path, FAR const char *arg0,
+                     va_list ap)
+{
+  FAR char **argv = NULL;
+  FAR char *arg = (FAR char *)arg0;
+  size_t nargs;
+  va_list ap2;
+  int argc;
+  int ret;
+
+  /* Count the number of arguments */
+
+  va_copy(ap2, ap);
+  nargs = 0;
+
+  while (arg != NULL)
+    {
+      /* Yes.. increment the number of arguments.  Here is a sanity
+       * check to prevent running away with an unterminated argv[] list.
+       * MAX_EXECL_ARGS should be sufficiently large that this never
+       * happens in normal usage.
+       */
+
+      if (++nargs > MAX_EXECL_ARGS)
+        {
+          set_errno(E2BIG);
+          va_end(ap2);
+          return ERROR;
+        }
+
+      arg = va_arg(ap2, FAR char *);
+    }
+
+  va_end(ap2);
+
+  /* Allocate a temporary argv[] array */
+
+  argv = (FAR char **)lib_malloc((nargs + 1) * sizeof(FAR char *));
+  if (argv == NULL)
+    {
+      set_errno(ENOMEM);
+      return ERROR;
+    }
+
+  argv[0] = (FAR char *)arg0;
+
+  /* Collect the arguments into the argv[] array */
+
+  for (argc = 1; argc <= nargs; argc++)
+    {
+      argv[argc] = va_arg(ap, FAR char *);
+    }
+
+  /* Then let execv() do the real work */
+
+  ret = execv(path, argv);
+
+  /* Free the allocated argv[] list */
+
+  lib_free(argv);
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -117,66 +184,32 @@
 
 int execl(FAR const char *path, FAR const char *arg0, ...)
 {
-  FAR char **argv = NULL;
-  FAR char *arg = (FAR char *)arg0;
-  size_t nargs;
   va_list ap;
-  int argc;
   int ret;
 
-  /* Count the number of arguments */
+  va_start(ap, arg0);
+  ret = lib_execl(path, arg0, ap);
+  va_end(ap);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: execlp
+ *
+ * Description:
+ *   The same as execl().  NuttX has only one behavior: with
+ *   CONFIG_LIBC_ENVPATH, execl() also searches the PATH for file.
+ *
+ ****************************************************************************/
+
+int execlp(FAR const char *file, FAR const char *arg0, ...)
+{
+  va_list ap;
+  int ret;
 
   va_start(ap, arg0);
-  nargs = 0;
-
-  while (arg != NULL)
-    {
-      /* Yes.. increment the number of arguments.  Here is a sanity
-       * check to prevent running away with an unterminated argv[] list.
-       * MAX_EXECL_ARGS should be sufficiently large that this never
-       * happens in normal usage.
-       */
-
-      if (++nargs > MAX_EXECL_ARGS)
-        {
-          set_errno(E2BIG);
-          va_end(ap);
-          return ERROR;
-        }
-
-      arg = va_arg(ap, FAR char *);
-    }
-
+  ret = lib_execl(file, arg0, ap);
   va_end(ap);
-
-  /* Allocate a temporary argv[] array */
-
-  argv = (FAR char **)lib_malloc((nargs + 1) * sizeof(FAR char *));
-  if (argv == NULL)
-    {
-      set_errno(ENOMEM);
-      return ERROR;
-    }
-
-  argv[0] = (FAR char *)arg0;
-
-  /* Collect the arguments into the argv[] array */
-
-  va_start(ap, arg0);
-  for (argc = 1; argc <= nargs; argc++)
-    {
-      argv[argc] = va_arg(ap, FAR char *);
-    }
-
-  va_end(ap);
-
-  /* Then let execv() do the real work */
-
-  ret = execv(path, argv);
-
-  /* Free the allocated argv[] list */
-
-  lib_free(argv);
   return ret;
 }
 

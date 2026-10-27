@@ -311,17 +311,6 @@
 #  define lockf64                        lockf
 #endif
 
-/* NOTE: NuttX provides only one implementation:  If
- * CONFIG_LIBC_ENVPATH is defined, then only execvp/execlp/execvpe behavior
- * is supported; otherwise, only execv/execl/execve behavior is supported.
- */
-
-#ifdef CONFIG_LIBC_EXECFUNCS
-#  define execvp                         execv
-#  define execlp                         execl
-#  define execvpe                        execve
-#endif
-
 /* Commands for lockf()
  * F_ULOCK - Unlock
  * F_LOCK  - Blocking Exclusive Lock
@@ -473,12 +462,21 @@ int     fchownat(int dirfd, FAR const char *path, uid_t owner,
 
 /* Execution of programs from files */
 
+/* NOTE: NuttX provides only one behavior:  If CONFIG_LIBC_ENVPATH is
+ * defined, then execv(), execl() and execve() also search the PATH as
+ * execvp(), execlp() and execvpe() do; otherwise none of them searches it.
+ */
+
 #ifdef CONFIG_LIBC_EXECFUNCS
 int     execl(FAR const char *path, FAR const char *arg0, ...);
 int     execle(FAR const char *path, FAR const char *arg0, ...);
+int     execlp(FAR const char *file, FAR const char *arg0, ...);
 int     execv(FAR const char *path, FAR char * const argv[]);
 int     execve(FAR const char *path, FAR char *const argv[],
                FAR char *const envp[]);
+int     execvp(FAR const char *file, FAR char * const argv[]);
+int     execvpe(FAR const char *file, FAR char * const argv[],
+                FAR char * const envp[]);
 #endif
 
 /* Byte operations */
