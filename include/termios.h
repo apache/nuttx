@@ -114,6 +114,7 @@
 #define NOFLSH    (1 << 7)  /* Bit 7:  Disable flush after interrupt or quit */
 #define TOSTOP    (1 << 8)  /* Bit 8:  Send SIGTTOU for background output */
 #define ECHOCTL   (1 << 9)  /* Bit 9:  Echo control characters as ^X */
+#define ECHOPRT   (1 << 10) /* Bit 10: Echo erased characters (hardcopy) */
 #define ECHOKE    (1 << 11) /* Bit 11: Visual erase for KILL */
 #define FLUSHO    (1 << 12) /* Bit 12: Flush output to terminal */
 #define IEXTEN    (1 << 15) /* Bit 15: Enable extended input character processing */
@@ -139,6 +140,10 @@
  *
  *   VMIN:   Minimum number of characters for non-canonical read
  *   VTIME:  Timeout in deciseconds for non-canonical read
+ *
+ * Extensions (not POSIX):  VREPRINT, VDISCARD, VWERASE, VLNEXT, VEOL2.  The
+ * indexes are the same as on Linux.  NCCS is one more than the largest
+ * index, so that every index is in the array.
  */
 
 #define VINTR     0         /* Bit 0:  INTR character */
@@ -152,9 +157,12 @@
 #define VSTOP     9         /* Bit 9:  STOP character */
 #define VSUSP     10        /* Bit 10: SUSP character */
 #define VEOL      11        /* Bit 11: EOL character (canonical mode) */
-#define NCCS      12        /* Bit 12: Size of the array c_cc for control characters */
+#define VREPRINT  12        /* Bit 12: REPRINT character (canonical mode) */
+#define VDISCARD  13        /* Bit 13: DISCARD character */
+#define VWERASE   14        /* Bit 14: WERASE character (canonical mode) */
 #define VLNEXT    15        /* Bit 15: Literal-next character */
 #define VEOL2     16        /* Bit 16: Second EOL character */
+#define NCCS      17        /* Bit 17: Size of the array c_cc for control characters */
 
 /* Baud Rate Selection.  These are instances of type speed_t.  Values of
  * 38400 and below are specified by POSIX; values above 38400 are sometimes
