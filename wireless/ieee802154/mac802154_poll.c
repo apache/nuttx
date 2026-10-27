@@ -204,6 +204,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
 
       /* We are now done the operation, and can release the command */
 
+      mac802154_oprxdisable(priv);
       priv->curr_op = MAC802154_OP_NONE;
       nxsem_post(&priv->opsem);
 
