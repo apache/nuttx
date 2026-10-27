@@ -53,6 +53,10 @@
 
 #define __SELECT_NUINT32 ((FD_SETSIZE + 31) / 32)
 
+/* The number of bits in one fd_mask, the element type of fd_set */
+
+#define NFDBITS (8 * (int)sizeof(fd_mask))
+
 /* These macros map a file descriptor to an index and bit number */
 
 #define _FD_NDX(fd) ((fd) >> 5)
@@ -82,9 +86,11 @@
  * Type Definitions
  ****************************************************************************/
 
+typedef uint32_t fd_mask;
+
 struct fd_set_s
 {
-  uint32_t arr[__SELECT_NUINT32];
+  fd_mask arr[__SELECT_NUINT32];
 };
 
 typedef struct fd_set_s fd_set;
