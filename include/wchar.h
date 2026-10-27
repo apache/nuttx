@@ -176,21 +176,28 @@ int               vswprintf(FAR wchar_t *, size_t, FAR const wchar_t *,
                       va_list);
 int               vswscanf(FAR const wchar_t *, FAR const wchar_t *,
                       va_list);
+FAR wchar_t      *wcpcpy(FAR wchar_t *, FAR const wchar_t *);
+FAR wchar_t      *wcpncpy(FAR wchar_t *, FAR const wchar_t *, size_t);
 size_t            wcrtomb(FAR char *, wchar_t, FAR mbstate_t *);
+int               wcscasecmp(FAR const wchar_t *, FAR const wchar_t *);
 FAR wchar_t      *wcscat(FAR wchar_t *, FAR const wchar_t *);
 FAR wchar_t      *wcschr(FAR const wchar_t *, wchar_t);
 int               wcscmp(FAR const wchar_t *, FAR const wchar_t *);
 int               wcscoll(FAR const wchar_t *, FAR const wchar_t *);
 FAR wchar_t      *wcscpy(FAR wchar_t *, FAR const wchar_t *);
 size_t            wcscspn(FAR const wchar_t *, FAR const wchar_t *);
+FAR wchar_t      *wcsdup(FAR const wchar_t *);
 size_t            wcsftime(FAR wchar_t *, size_t, FAR const wchar_t *,
                       FAR const struct tm *);
 size_t            wcslen(FAR const wchar_t *);
 size_t            wcslcpy(FAR wchar_t *, FAR const wchar_t *, size_t);
 size_t            wcslcat(FAR wchar_t *, FAR const wchar_t *, size_t);
+int               wcsncasecmp(FAR const wchar_t *, FAR const wchar_t *,
+                      size_t);
 FAR wchar_t      *wcsncat(FAR wchar_t *, FAR const wchar_t *, size_t);
 int               wcsncmp(FAR const wchar_t *, FAR const wchar_t *, size_t);
 FAR wchar_t      *wcsncpy(FAR wchar_t *, FAR const wchar_t *, size_t);
+size_t            wcsnlen(FAR const wchar_t *, size_t);
 size_t            wcsnrtombs(FAR char *, FAR const wchar_t **, size_t,
                       size_t, FAR mbstate_t *);
 FAR wchar_t      *wcspbrk(FAR const wchar_t *, FAR const wchar_t *);
