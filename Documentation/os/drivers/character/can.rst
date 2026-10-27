@@ -68,6 +68,7 @@ The upper half driver supports the following ``ioctl`` commands:
   will always provide only a single message.
 - **CANIOC_GET_MSGALIGN**: Get messages alignment. See CANIOC_SET_MSGALIGN for
   explanation.
+- **CANIOC_GET_ERRORS**: Get the CAN controller error state and counters.
 
 The upper half driver supports the **strict TX priority ordering**:
 
