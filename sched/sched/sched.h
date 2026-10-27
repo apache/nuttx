@@ -256,7 +256,7 @@ extern volatile int g_npidhash;
  * ordered list or not.
  */
 
-extern struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
+extern const struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
 
 #ifndef CONFIG_SCHED_CPULOAD_NONE
 /* This is the total number of clock tick counts.  Essentially the
