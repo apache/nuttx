@@ -148,6 +148,7 @@ static int _lc823450_sdc_support_trim(struct sddrcfg_s *cf)
   int ret = ((sddr_refmediatype(cf) == SDDR_MEDIA_TYPE_MMC) ?
              (((cf)->ex.mmc.extcsd_sec_feature_support & (1UL << 4)) ?
               1 : 0) : 0);
+
   return ret;
 }
 
@@ -453,6 +454,7 @@ int lc823450_sdc_readsector(uint32_t ch,
       if (0 == addr)
         {
           uint8_t *p = (pbuf + 0x1c2); /* partition id */
+
           if (0x7 == *p)
             {
               mcinfo("exFAT (NTFS) detected\n");
