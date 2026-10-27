@@ -119,13 +119,9 @@ struct mmcsd_state_s
  * Public Functions Definitions
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_MMCSD_PROCFS
@@ -139,12 +135,11 @@ void mmcsd_initialize_procfs(void);
 #endif
 
 #if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
-EXTERN void mmcsd_dmpcsd(FAR const uint8_t *csd, uint8_t cardtype);
+extern void mmcsd_dmpcsd(FAR const uint8_t *csd, uint8_t cardtype);
 #else
 #  define mmcsd_dmpcsd(csd,cadtype)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

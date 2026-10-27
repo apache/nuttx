@@ -122,16 +122,13 @@ struct pkt_conn_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /* The packet socket interface */
 
-EXTERN const struct sock_intf_s g_pkt_sockif;
+extern const struct sock_intf_s g_pkt_sockif;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -467,7 +464,6 @@ int pkt_setsockopt(FAR struct socket *psock, int level, int option,
 
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

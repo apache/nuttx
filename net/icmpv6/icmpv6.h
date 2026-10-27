@@ -150,17 +150,14 @@ struct icmpv6_pmtu_entry
  ****************************************************************************/
 
 #ifdef __cplusplus
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 #ifdef CONFIG_NET_ICMPv6_SOCKET
 /* PF_INET6 socket address family, IPPROTO_ICMP6 protocol interface */
 
-EXTERN const struct sock_intf_s g_icmpv6_sockif;
+extern const struct sock_intf_s g_icmpv6_sockif;
 #endif
 
 /****************************************************************************
@@ -838,7 +835,6 @@ icmpv6_find_pmtu_entry(net_ipv6addr_t destipaddr);
 
 void icmpv6_add_pmtu_entry(net_ipv6addr_t destipaddr, int mtu);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

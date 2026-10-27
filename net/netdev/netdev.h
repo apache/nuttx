@@ -43,13 +43,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* List of registered Ethernet device drivers.  You must have the network
@@ -58,7 +54,7 @@ extern "C"
  * NOTE that this duplicates a declaration in net/tcp/tcp.h
  */
 
-EXTERN struct net_driver_s *g_netdevices;
+extern struct net_driver_s *g_netdevices;
 
 #ifdef CONFIG_NETDEV_IFINDEX
 /* The set of network devices that have been registered.  This is used to
@@ -68,7 +64,7 @@ EXTERN struct net_driver_s *g_netdevices;
  * devices to 32 (MAX_IFINDEX).
  */
 
-EXTERN uint32_t g_devset;
+extern uint32_t g_devset;
 
 /* The set of network devices that have been freed.  The purpose of this
  * set is to postpone reuse of a interface index for as long as possible,
@@ -76,7 +72,7 @@ EXTERN uint32_t g_devset;
  * have been used.
  */
 
-EXTERN uint32_t g_devfreed;
+extern uint32_t g_devfreed;
 #endif
 
 /****************************************************************************
@@ -617,7 +613,6 @@ void netdev_list_lock(void);
 
 void netdev_list_unlock(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

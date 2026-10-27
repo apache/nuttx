@@ -123,16 +123,13 @@ struct ieee802154_conn_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /* The IEEE 802.15.4 socket interface */
 
-EXTERN const struct sock_intf_s g_ieee802154_sockif;
+extern const struct sock_intf_s g_ieee802154_sockif;
 
 /* The IEEE 802.15.4 connections rmutex */
 
@@ -473,7 +470,6 @@ FAR struct ieee802154_container_s *ieee802154_container_allocate(void);
 
 void ieee802154_container_free(FAR struct ieee802154_container_s *container);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

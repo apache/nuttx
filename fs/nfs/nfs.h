@@ -101,33 +101,28 @@ struct nfsstats
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-EXTERN int nfs_request(FAR struct nfsmount *nmp, int procnum,
+extern int nfs_request(FAR struct nfsmount *nmp, int procnum,
                 FAR void *request, size_t reqlen,
                 FAR void *response, size_t resplen);
-EXTERN int  nfs_lookup(FAR struct nfsmount *nmp, FAR const char *filename,
+extern int  nfs_lookup(FAR struct nfsmount *nmp, FAR const char *filename,
               FAR struct file_handle *fhandle,
               FAR struct nfs_fattr *obj_attributes,
               FAR struct nfs_fattr *dir_attributes);
-EXTERN int  nfs_findnode(FAR struct nfsmount *nmp, FAR const char *relpath,
+extern int  nfs_findnode(FAR struct nfsmount *nmp, FAR const char *relpath,
               FAR struct file_handle *fhandle,
               FAR struct nfs_fattr *obj_attributes,
               FAR struct nfs_fattr *dir_attributes);
-EXTERN int nfs_finddir(FAR struct nfsmount *nmp, FAR const char *relpath,
+extern int nfs_finddir(FAR struct nfsmount *nmp, FAR const char *relpath,
               FAR struct file_handle *fhandle,
               FAR struct nfs_fattr *attributes, FAR char *filename);
-EXTERN void nfs_attrupdate(FAR struct nfsnode *np,
+extern void nfs_attrupdate(FAR struct nfsnode *np,
               FAR struct nfs_fattr *attributes);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

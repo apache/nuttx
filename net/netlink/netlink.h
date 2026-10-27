@@ -291,14 +291,11 @@ struct nla_policy
  ****************************************************************************/
 
 #ifdef __cplusplus
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
-EXTERN const struct sock_intf_s g_netlink_sockif;
+extern const struct sock_intf_s g_netlink_sockif;
 
 /****************************************************************************
  * Name: netlink_alloc()
@@ -651,7 +648,6 @@ void netlink_lock(void);
 
 void netlink_unlock(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

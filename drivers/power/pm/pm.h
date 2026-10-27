@@ -99,18 +99,14 @@ struct pm_domain_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /* All PM global data: */
 
-EXTERN struct pm_domain_s g_pmdomains[CONFIG_PM_NDOMAINS];
+extern struct pm_domain_s g_pmdomains[CONFIG_PM_NDOMAINS];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -164,7 +160,6 @@ void pm_domain_unlock(int domain, irqstate_t flags);
 
 void pm_wakelock_global_init(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

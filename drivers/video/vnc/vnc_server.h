@@ -282,22 +282,19 @@ typedef CODE uint32_t (*vnc_convert32_t)(lfb_color_t rgb);
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Given a display number as an index, the following array can be used to
  * look-up the session structure for that display.
  */
 
-EXTERN FAR struct vnc_session_s *g_vnc_sessions[RFB_MAX_DISPLAYS];
+extern FAR struct vnc_session_s *g_vnc_sessions[RFB_MAX_DISPLAYS];
 
 /* Used to synchronize the server thread with the framebuffer driver. */
 
-EXTERN struct fb_startup_s g_fbstartup[RFB_MAX_DISPLAYS];
+extern struct fb_startup_s g_fbstartup[RFB_MAX_DISPLAYS];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -641,7 +638,6 @@ int vnc_colors(FAR struct vnc_session_s *session,
                FAR struct fb_area_s *rect,
                unsigned int maxcolors, FAR lfb_color_t *colors);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

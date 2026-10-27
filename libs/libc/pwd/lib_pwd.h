@@ -54,19 +54,16 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Data for non-reentrant group functions */
 
-EXTERN int g_passwd_index;
-EXTERN struct passwd g_passwd;
-EXTERN struct spwd g_spwd;
-EXTERN char g_passwd_buffer[CONFIG_LIBC_PASSWD_LINESIZE];
+extern int g_passwd_index;
+extern struct passwd g_passwd;
+extern struct spwd g_spwd;
+extern char g_passwd_buffer[CONFIG_LIBC_PASSWD_LINESIZE];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -90,7 +87,6 @@ int pwd_findby_index(int index, FAR struct passwd *entry,
                      FAR char *buffer, size_t buflen);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

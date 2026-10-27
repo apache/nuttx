@@ -134,14 +134,11 @@ struct usrsock_data_reqstate_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
-EXTERN const struct sock_intf_s g_usrsock_sockif;
+extern const struct sock_intf_s g_usrsock_sockif;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -670,7 +667,6 @@ int usrsock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg);
 
 int usrsock_shutdown(FAR struct socket *psock, int how);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

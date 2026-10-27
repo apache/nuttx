@@ -125,17 +125,14 @@ struct icmp_pmtu_entry
  ****************************************************************************/
 
 #ifdef __cplusplus
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 #ifdef CONFIG_NET_ICMP_SOCKET
 /* PF_INET socket address family, IPPROTO_ICMP protocol interface */
 
-EXTERN const struct sock_intf_s g_icmp_sockif;
+extern const struct sock_intf_s g_icmp_sockif;
 #endif
 
 /****************************************************************************
@@ -464,7 +461,6 @@ FAR struct icmp_pmtu_entry *icmpv4_find_pmtu_entry(in_addr_t destipaddr);
 
 void icmpv4_add_pmtu_entry(in_addr_t destipaddr, int mtu);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

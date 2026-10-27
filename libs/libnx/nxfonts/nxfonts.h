@@ -45,26 +45,21 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
-EXTERN struct nx_fontset_s g_7bitfonts;
+extern struct nx_fontset_s g_7bitfonts;
 #if CONFIG_NXFONTS_CHARBITS >= 8
-EXTERN struct nx_fontset_s g_8bitfonts;
+extern struct nx_fontset_s g_8bitfonts;
 #endif
-EXTERN struct nx_font_s g_fonts;
+extern struct nx_font_s g_fonts;
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

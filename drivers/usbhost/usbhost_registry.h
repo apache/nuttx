@@ -46,13 +46,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /* g_classregistry is a singly-linked list of class ID information added by
@@ -61,14 +57,13 @@ extern "C"
  * protected by disabling interrupts.
  */
 
-EXTERN struct usbhost_registry_s *g_classregistry;
-EXTERN spinlock_t g_classregistry_lock;
+extern struct usbhost_registry_s *g_classregistry;
+extern spinlock_t g_classregistry_lock;
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

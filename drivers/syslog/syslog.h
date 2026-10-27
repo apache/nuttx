@@ -38,11 +38,8 @@
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* This is the current syslog channel in use.  It initially points to
@@ -50,7 +47,7 @@ extern "C"
  */
 
 #ifdef CONFIG_SYSLOG
-EXTERN FAR syslog_channel_t *
+extern FAR syslog_channel_t *
 #ifndef CONFIG_SYSLOG_REGISTER
 const
 #endif
@@ -252,7 +249,6 @@ ssize_t syslog_write_foreach(FAR const char *buffer,
                              size_t buflen, bool force);
 #endif /* CONFIG_SYSLOG */
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif
