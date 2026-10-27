@@ -49,7 +49,8 @@ list(
   lib_mallopt.c
   lib_getnprocs.c
   lib_getstacksize.c
-  lib_mntent.c)
+  lib_mntent.c
+  lib_can_isotp.c)
 
 if(CONFIG_HAVE_CXXINITIALIZE)
   list(APPEND SRCS lib_cxx_initialize.c)
