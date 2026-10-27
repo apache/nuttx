@@ -32,22 +32,26 @@
 #ifdef CONFIG_RAM_UART
 
 #include <stdbool.h>
-#include <nuttx/atomic.h>
+#include <nuttx/ring.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Rounded up so that in an array of two the second blob stays aligned */
+
+#define UART_RAMBUF_BLOBSIZE \
+  ALIGN_UP(sizeof(struct ring_blob_s) + CONFIG_RAM_UART_BUFSIZE, \
+           RING_BLOB_ALIGN)
+
 /****************************************************************************
  * Type Declarations
  ****************************************************************************/
 
-struct uart_rambuf_s
-{
-    char buffer[CONFIG_RAM_UART_BUFSIZE];
-    atomic_t wroff;
-    atomic_t rdoff;
-};
+/* One direction of the link: a ring_spsc blob written by exactly one side */
+
+typedef uint8_t uart_rambuf_t[UART_RAMBUF_BLOBSIZE]
+        aligned_data(RING_BLOB_ALIGN);
 
 /****************************************************************************
  * Public Data
@@ -67,7 +71,7 @@ extern "C"
  ****************************************************************************/
 
 int uart_ram_register(FAR const char *devname,
-                      FAR struct uart_rambuf_s buffer[2], bool slave);
+                      FAR uart_rambuf_t buffer[2], bool slave);
 
 /****************************************************************************
  * Name: ram_serialinit
