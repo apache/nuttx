@@ -293,6 +293,7 @@ static void uart_nputs(int fd, const char *buf, size_t size)
   while (size > 0)
     {
       int ret = host_uart_puts(fd, buf, size);
+
       if (ret < 0)
         {
           continue;
@@ -705,13 +706,12 @@ static bool tty_txempty(struct uart_dev_s *dev)
 static int sim_uartram_register(const char *devname, bool slave)
 {
   char name[NAME_MAX];
-  struct uart_rambuf_s *shmem;
+  uart_rambuf_t *shmem;
 
   strlcpy(name, strrchr(devname, '/') + 1, NAME_MAX);
-  shmem = host_allocshmem(name, sizeof(struct uart_rambuf_s) * 2);
+  shmem = host_allocshmem(name, sizeof(uart_rambuf_t) * 2);
   DEBUGASSERT(shmem);
 
-  memset(shmem, 0, sizeof(struct uart_rambuf_s) * 2);
   return uart_ram_register(devname, shmem, slave);
 }
 #endif
@@ -800,6 +800,7 @@ void up_putc(int ch)
 {
 #ifdef USE_DEVCONSOLE
   char c = ch;
+
   up_nputs(&c, 1);
 #endif
 }

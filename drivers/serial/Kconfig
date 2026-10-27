@@ -893,25 +893,34 @@ source "drivers/serial/Kconfig-sci"
 
 config RAM_UART
 	bool "RAM uart driver"
-	select SERIAL_RXDMA
-	select SERIAL_TXDMA
 	default n
 	---help---
 		It uses the memory block in the kernel as a communication medium,
-		which can communicate between different processes or different CPUs
+		which can communicate between different processes or different CPUs.
+		It is a character device on two shared rings, without the serial
+		upper half.
 
 if RAM_UART
 config RAM_UART_POLLING_INTERVAL
 	int "RAM uart buffer check interval"
 	default USEC_PER_TICK
 	---help---
-		Interval in milliseconds to check for new data on uart ram buffer
+		Interval in microseconds between polls of the RAM uart buffer
 
 config RAM_UART_BUFSIZE
 	int "RAM_UART buffer size"
 	default 1024
+	range 2 16777152
 	---help---
-		The size of the RAM_UART buffer in bytes
+		The capacity in bytes of the shared ring in each direction.  The
+		upper bound keeps the rounded-up ring within the 24-bit ring index.
+
+config RAM_UART_NPOLLWAITERS
+	int "RAM uart poll waiters"
+	default 2
+	---help---
+		Maximum number of threads that can be waiting for POLL events on a
+		single RAM uart device.
 
 config RAM_UART0
 	bool "RAM uart driver 0"
