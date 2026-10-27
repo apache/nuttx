@@ -1169,6 +1169,33 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      case SNIOC_DISCARD:
+        {
+          if (arg == 0)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          /* Fetch-based drivers keep no circular buffer to skip over */
+
+          if (lower->ops->fetch)
+            {
+              ret = -ENOTSUP;
+              break;
+            }
+
+          nxrmutex_lock(&upper->lock);
+          if (!circbuf_is_empty(&upper->buffer) &&
+              sensor_is_updated(upper, user))
+            {
+              ret = sensor_do_samples(upper, user, NULL, arg);
+            }
+
+          nxrmutex_unlock(&upper->lock);
+        }
+        break;
+
       case SNIOC_GET_INFO:
         {
           if (lower->ops->get_info == NULL)

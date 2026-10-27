@@ -1503,7 +1503,7 @@ static int sensor_rpmsg_publish_handler(FAR struct rpmsg_endpoint *ept,
       list_for_every_entry_safe(&dev->stublist, stub, stmp,
                                 struct sensor_rpmsg_stub_s, node)
         {
-          file_read(&stub->file, NULL, cell->len);
+          file_ioctl(&stub->file, SNIOC_DISCARD, cell->len);
         }
 
       sensor_rpmsg_unlock(dev);
