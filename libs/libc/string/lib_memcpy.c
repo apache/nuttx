@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "libc.h"
@@ -43,8 +44,41 @@
 no_builtin("memcpy")
 FAR void *memcpy(FAR void *dest, FAR const void *src, size_t n)
 {
-  FAR unsigned char *pout = (FAR unsigned char *)dest;
-  FAR unsigned char *pin  = (FAR unsigned char *)src;
+  FAR uint8_t *pout = (FAR uint8_t *)dest;
+  FAR const uint8_t *pin  = (FAR const uint8_t *)src;
+
+  if (!TOO_SMALL4(n) && !(((uintptr_t)pout ^ (uintptr_t)pin) & 3))
+    {
+      FAR uint32_t *paligned_out;
+      FAR const uint32_t *paligned_in;
+
+      while (UNALIGNED4_X(pout))
+        {
+          *pout++ = *pin++;
+          n--;
+        }
+
+      paligned_out = (FAR uint32_t *)pout;
+      paligned_in = (FAR const uint32_t *)pin;
+
+      while (n >= BIGBLOCKSIZE4)
+        {
+          *paligned_out++ = *paligned_in++;
+          *paligned_out++ = *paligned_in++;
+          *paligned_out++ = *paligned_in++;
+          *paligned_out++ = *paligned_in++;
+          n -= BIGBLOCKSIZE4;
+        }
+
+      while (n >= LITTLEBLOCKSIZE4)
+        {
+          *paligned_out++ = *paligned_in++;
+          n -= LITTLEBLOCKSIZE4;
+        }
+
+      pout = (FAR uint8_t *)paligned_out;
+      pin = (FAR const uint8_t *)paligned_in;
+    }
 
   while (n-- > 0)
     {
