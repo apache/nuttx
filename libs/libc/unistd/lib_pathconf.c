@@ -139,6 +139,9 @@ long fpathconf(int fildes, int name)
       case _PC_PRIO_IO:
         return _POSIX_PRIO_IO;
 
+      case _PC_VDISABLE:
+        return _POSIX_VDISABLE;
+
       default:
 
         /* Assume valid but not implemented for the time being */

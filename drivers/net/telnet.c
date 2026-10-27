@@ -32,9 +32,10 @@
 #include <fcntl.h>
 #include <poll.h>
 #include <errno.h>
-#include <nuttx/debug.h>
 #include <termios.h>
+#include <unistd.h>
 
+#include <nuttx/debug.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/lib/lib.h>
@@ -132,6 +133,12 @@ struct telnet_dev_s
 #endif
 #ifdef HAVE_SIGNALS
   pid_t             td_pid;
+#endif
+#ifdef CONFIG_TTY_SIGINT
+  cc_t              td_vintr;     /* c_cc[VINTR] */
+#endif
+#ifdef CONFIG_TTY_SIGTSTP
+  cc_t              td_vsusp;     /* c_cc[VSUSP] */
 #endif
   tcflag_t          td_lflag;     /* Local modes */
   FAR struct socket td_psock;     /* A clone of the internal socket structure */
@@ -268,7 +275,8 @@ static void telnet_check_ctrlchar(FAR struct telnet_dev_s *priv,
        * signal?
        */
 
-      if (*buffer == CONFIG_TTY_SIGINT_CHAR)
+      if (priv->td_vintr != _POSIX_VDISABLE &&
+          (cc_t)*buffer == priv->td_vintr)
         {
           /* Yes.. note that the kill is needed and do not put the character
            * into the Rx buffer.  It should not be read as normal data.
@@ -284,7 +292,8 @@ static void telnet_check_ctrlchar(FAR struct telnet_dev_s *priv,
        * signal?
        */
 
-      if (*buffer == CONFIG_TTY_SIGTSTP_CHAR)
+      if (priv->td_vsusp != _POSIX_VDISABLE &&
+          (cc_t)*buffer == priv->td_vsusp)
         {
           /* Note that the kill is needed and do not put the character
            * into the Rx buffer.  It should not be read as normal data.
@@ -1108,6 +1117,12 @@ static int telnet_session(FAR struct telnet_session_s *session)
   /* Setting terminal attributes */
 
   priv->td_lflag = ECHO;
+#ifdef CONFIG_TTY_SIGINT
+  priv->td_vintr = CONFIG_TTY_SIGINT_CHAR;
+#endif
+#ifdef CONFIG_TTY_SIGTSTP
+  priv->td_vsusp = CONFIG_TTY_SIGTSTP_CHAR;
+#endif
 
   /* Register the driver */
 
@@ -1221,6 +1236,19 @@ static int telnet_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           cfmakeraw(termiosp);
 
           termiosp->c_lflag = priv->td_lflag;
+
+          /* The special characters that the session acts on.  The others
+           * are disabled.
+           */
+
+          memset(termiosp->c_cc, _POSIX_VDISABLE, sizeof(termiosp->c_cc));
+#ifdef CONFIG_TTY_SIGINT
+          termiosp->c_cc[VINTR] = priv->td_vintr;
+#endif
+#ifdef CONFIG_TTY_SIGTSTP
+          termiosp->c_cc[VSUSP] = priv->td_vsusp;
+#endif
+          termiosp->c_cc[VMIN] = 1;
         }
         break;
 
@@ -1232,6 +1260,12 @@ static int telnet_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           /* Save the termios settings */
 
           priv->td_lflag = termiosp->c_lflag;
+#ifdef CONFIG_TTY_SIGINT
+          priv->td_vintr = termiosp->c_cc[VINTR];
+#endif
+#ifdef CONFIG_TTY_SIGTSTP
+          priv->td_vsusp = termiosp->c_cc[VSUSP];
+#endif
 
           if ((priv->td_lflag & ECHO) != 0)
             {

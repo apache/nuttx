@@ -2061,9 +2061,26 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               termiosp->c_iflag = dev->tc_iflag;
               termiosp->c_oflag = dev->tc_oflag;
               termiosp->c_lflag = dev->tc_lflag;
+
+              /* The special characters that this layer acts on.  The
+               * others are disabled.  ERASE cannot be changed: ICANON
+               * erases with DEL and with BS.
+               */
+
+              memset(termiosp->c_cc, _POSIX_VDISABLE,
+                     sizeof(termiosp->c_cc));
+              termiosp->c_cc[VERASE] = ASCII_DEL;
+#ifdef CONFIG_TTY_SIGINT
+              termiosp->c_cc[VINTR] = dev->tc_vintr;
+#endif
+#ifdef CONFIG_TTY_SIGTSTP
+              termiosp->c_cc[VSUSP] = dev->tc_vsusp;
+#endif
 #ifdef CONFIG_SERIAL_TERMIOS
               termiosp->c_cc[VTIME] = dev->timeout;
               termiosp->c_cc[VMIN] = dev->minread;
+#else
+              termiosp->c_cc[VMIN] = 1;
 #endif
 
               ret = 0;
@@ -2083,6 +2100,12 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               dev->tc_iflag = termiosp->c_iflag;
               dev->tc_oflag = termiosp->c_oflag;
               dev->tc_lflag = termiosp->c_lflag;
+#ifdef CONFIG_TTY_SIGINT
+              dev->tc_vintr = termiosp->c_cc[VINTR];
+#endif
+#ifdef CONFIG_TTY_SIGTSTP
+              dev->tc_vsusp = termiosp->c_cc[VSUSP];
+#endif
 #ifdef CONFIG_SERIAL_TERMIOS
               dev->timeout = termiosp->c_cc[VTIME];
               dev->minread = termiosp->c_cc[VMIN];
@@ -2366,6 +2389,14 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
   dev->pid = INVALID_PROCESS_ID;
 #endif
 
+#ifdef CONFIG_TTY_SIGINT
+  dev->tc_vintr = CONFIG_TTY_SIGINT_CHAR;
+#endif
+
+#ifdef CONFIG_TTY_SIGTSTP
+  dev->tc_vsusp = CONFIG_TTY_SIGTSTP_CHAR;
+#endif
+
 #ifdef CONFIG_TTY_FORCE_PANIC
   dev->panic_count = 0;
 #endif
@@ -2606,14 +2637,16 @@ int uart_check_special(FAR uart_dev_t *dev, FAR const char *buf, size_t size)
 #endif
 
 #ifdef CONFIG_TTY_SIGINT
-      if (dev->pid > 0 && buf[i] == CONFIG_TTY_SIGINT_CHAR)
+      if (dev->pid > 0 && dev->tc_vintr != _POSIX_VDISABLE &&
+          (cc_t)buf[i] == dev->tc_vintr)
         {
           return SIGINT;
         }
 #endif
 
 #ifdef CONFIG_TTY_SIGTSTP
-      if (dev->pid > 0 && buf[i] == CONFIG_TTY_SIGTSTP_CHAR)
+      if (dev->pid > 0 && dev->tc_vsusp != _POSIX_VDISABLE &&
+          (cc_t)buf[i] == dev->tc_vsusp)
         {
           return SIGTSTP;
         }
