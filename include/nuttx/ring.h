@@ -45,10 +45,13 @@
  *     ring_mpmc_init(&g_ring, g_blob, sizeof(g_blob), 0);  // SMP/BMP, CAS
  *     ring_mpsc_init(&g_ring, g_blob, sizeof(g_blob), 0);  // alias of mpmc
  *     ring_spmc_init(&g_ring, g_blob, sizeof(g_blob), 0);  // alias of mpmc
- *     ring_spsc_init(&g_ring, g_blob, sizeof(g_blob), 0);  // AMP, no atomic
+ *     ring_spsc_init(&g_ring, g_blob, sizeof(g_blob), 0, false);
  *
  *   Under SPSC each side inits its own handle on the shared blob; the one
  *   that did not reset it polls ring_is_ready(&g_ring) before using it.
+ *   When both sides may start at the same time, only the master inits the
+ *   blob and the slave passes slave, retrying until it returns OK:
+ *     ring_spsc_init(&g_ring, g_blob, sizeof(g_blob), 0, true);
  *
  *   Dynamic - one allocation holds handle and blob, already initialized:
  *     struct ring_s *r = ring_alloc(256);
@@ -175,6 +178,7 @@
 #include <nuttx/nuttx.h>
 
 #include <assert.h>
+#include <errno.h>
 #include <string.h>
 #include <stdint.h>
 
@@ -667,29 +671,36 @@ static inline_function uint32_t ring_reset(FAR struct ring_s *r)
  *   polls ring_is_ready() before touching the ring: the reset is guarded by
  *   the blob magic, so a later call only binds and stamps the same geometry.
  *
+ *   When both sides may start at the same time, two callers that both find
+ *   the blob uninitialized both reset it, and the later reset can wipe
+ *   indices the earlier one has already started to move.  Pass slave on
+ *   one side: it only binds once the other side has initialized the blob
+ *   and never resets it, which removes the race without atomic RMW.
+ *
  *   Use ring_spsc_init for AMP/SHM scenarios where atomic instructions are
  *   unavailable on shared memory.  Use ring_mpmc_init for SMP/BMP scenarios
  *   where multiple cores may race to initialize the same ring.
  *
  *   buf    - the blob to operate on
  *   buflen - total blob size in bytes (header + data)
- *   rewind - bytes to replay on a warm restart, 0 for none
+ *   rewind - bytes to replay on a warm restart, 0 for none; ignored
+ *            for a slave
+ *   slave  - bind to a blob the other side initializes, never reset it
  *
  * Returned Value:
- *   true if this caller ran the init body (the first one this boot), false
- *   if the blob was already initialized by another caller.  The ring is
- *   usable either way.
+ *   OK once bound.  For a slave, -EAGAIN if the blob is not initialized
+ *   yet and -EINVAL if it was initialized with a different geometry; the
+ *   handle stays unbound in both cases and the caller may retry.
  *
  ****************************************************************************/
 
-static inline_function bool
+static inline_function int
 ring_spsc_init(FAR struct ring_s *r, FAR void *buf, uint32_t buflen,
-               uint32_t rewind)
+               uint32_t rewind, bool slave)
 {
   FAR struct ring_blob_s *blob = buf;
   uint32_t cap = buflen - sizeof(*blob);
   irqstate_t flags;
-  bool first;
 
   DEBUGASSERT(buf != NULL && cap <= RING_SIZE_MAX &&
               buflen > sizeof(*blob) &&
@@ -697,15 +708,35 @@ ring_spsc_init(FAR struct ring_s *r, FAR void *buf, uint32_t buflen,
 
   if (ring_is_ready(r))
     {
-      return false;
+      return OK;
+    }
+
+  if (slave)
+    {
+      if (*(FAR volatile int32_t *)&blob->magic != RING_BLOB_MAGIC_READY)
+        {
+          return -EAGAIN;
+        }
+
+      /* Pairs with the UP_WMB() before the blob magic below */
+
+      UP_RMB();
+      if (blob->capacity != cap)
+        {
+          return -EINVAL;
+        }
+
+      r->blob = blob;
+      UP_WMB();
+      r->magic = RING_MAGIC_READY;
+      return OK;
     }
 
   flags = irq_save();
 
   r->blob = blob;
 
-  first = blob->magic != RING_BLOB_MAGIC_READY || blob->capacity != cap;
-  if (first)
+  if (blob->magic != RING_BLOB_MAGIC_READY || blob->capacity != cap)
     {
       blob->magic = RING_BLOB_MAGIC_INIT;
       blob->capacity = cap;
@@ -739,7 +770,7 @@ ring_spsc_init(FAR struct ring_s *r, FAR void *buf, uint32_t buflen,
   UP_WMB();
   r->magic = RING_MAGIC_READY;
   irq_restore(flags);
-  return first;
+  return OK;
 }
 
 /****************************************************************************
@@ -912,7 +943,7 @@ static inline_function FAR struct ring_s *ring_alloc(size_t buflen)
 
   blob->magic = ~RING_BLOB_MAGIC_INIT;
   r->magic = RING_MAGIC_UNINIT;
-  ring_spsc_init(r, blob, buflen, 0);
+  ring_spsc_init(r, blob, buflen, 0, false);
   return r;
 }
 
