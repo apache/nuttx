@@ -2641,15 +2641,14 @@ C Header File Structure
   ****************************************************************************/
 
   #ifdef __cplusplus
-  #define EXTERN extern "C"
   extern "C"
   {
-  #else
-  #define EXTERN extern
   #endif
 
 *All data declarations with global scope appear here, preceded by the
-definition* ``EXTERN``.
+keyword* ``extern``.  *They are inside the* ``extern "C"`` *block, so they
+have C linkage also in C++.  Do not define a macro such as* ``EXTERN``
+*for them: a header must not change a name that a program can use.*
 
 .. code-block:: c
 
@@ -2705,12 +2704,10 @@ preceded by a function header similar to the above.*
   ****************************************************************************/
 
 *All global functions in the file are prototyped here. The keyword*
-``extern`` *or the definition* ``EXTERN`` *are never used with function
-prototypes.*
+``extern`` *is never used with function prototypes.*
 
 .. code-block:: c
 
-   #undef EXTERN
    #ifdef __cplusplus
    }
    #endif
