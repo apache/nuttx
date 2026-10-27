@@ -4,9 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2017-2019 Gregory Nutt. All rights reserved.
  * SPDX-FileCopyrightText: 2016 Freescale Semiconductor Inc.
- * SPDX-FileCopyrightText: 2016 - 2017, NXP
+ * SPDX-FileCopyrightText: 2016 - 2017, NXP. All rights reserved.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
- * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
