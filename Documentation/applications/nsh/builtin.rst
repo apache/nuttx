@@ -146,7 +146,7 @@ that in ``apps/examples/hello/Makefile`` is abstracted below:
         define REGISTER
             @echo "Register: $1"
             @echo "{ \"$1\", $2, $3, $4 }," >> "$(APPDIR)/builtin/builtin_list.h"
-            @echo "EXTERN int $4(int argc, char *argv[]);" >> "$(APPDIR)/builtin/builtin_proto.h"
+            @echo "int $4(int argc, char *argv[]);" >> "$(APPDIR)/builtin/builtin_proto.h"
         endef
 
      When this macro runs, you will see the output in the build
