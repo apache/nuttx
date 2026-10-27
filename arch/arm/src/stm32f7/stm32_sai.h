@@ -63,11 +63,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 typedef uint32_t (*stm32_sai_sampleratecb_t)(struct i2s_dev_s *dev,
@@ -90,7 +87,6 @@ typedef uint32_t (*stm32_sai_sampleratecb_t)(struct i2s_dev_s *dev,
 struct i2s_dev_s *stm32_sai_initialize(int intf,
                   stm32_sai_sampleratecb_t sampleratecb);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

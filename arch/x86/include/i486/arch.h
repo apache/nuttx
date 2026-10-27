@@ -366,17 +366,13 @@ begin_packed_struct struct idt_ptr_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 void gdt_flush(uint32_t gdt_addr);
 void idt_flush(uint32_t idt_addr);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

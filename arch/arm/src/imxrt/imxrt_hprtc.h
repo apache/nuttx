@@ -77,13 +77,9 @@ bool g_hprtc_timset;  /* True:  time has been set since power up */
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -233,7 +229,6 @@ int imxrt_hprtc_setalarm(struct timespec *ts,
 void imxrt_hprtc_alarmdisable(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

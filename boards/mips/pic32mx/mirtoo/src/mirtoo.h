@@ -50,11 +50,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -95,7 +92,6 @@ void pic32mx_led_initialize(void);
 
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

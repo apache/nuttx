@@ -46,13 +46,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -80,7 +76,6 @@ void pic32mz_lowinit(void);
 
 void pic32mz_boardinitialize(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

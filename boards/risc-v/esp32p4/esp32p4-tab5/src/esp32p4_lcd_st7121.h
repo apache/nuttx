@@ -38,11 +38,8 @@
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -66,7 +63,6 @@ FAR struct mipi_dsi_device *tab5_st7121_initialize(
       FAR struct mipi_dsi_host *host);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

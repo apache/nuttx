@@ -45,13 +45,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Called from am62x_boot.c / USE_EARLYSERIALINIT path */
@@ -62,7 +58,6 @@ void arm64_earlyserialinit(void);
 
 void arm64_serialinit(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

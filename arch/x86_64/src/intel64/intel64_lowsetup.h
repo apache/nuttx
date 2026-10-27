@@ -31,13 +31,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -67,7 +63,6 @@ void intel64_lowsetup(void);
 
 void intel64_timer_secondary_init(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -75,13 +75,9 @@ struct alm_setalarm_s
  * Public Functions Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -157,7 +153,6 @@ int kinetis_rtc_cancelalarm(void);
 
 struct rtc_lowerhalf_s *kinetis_rtc_lowerhalf(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

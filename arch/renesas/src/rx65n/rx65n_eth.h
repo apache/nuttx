@@ -45,13 +45,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -92,7 +88,6 @@ int rx65n_ethinitialize(int intf);
 void rx65n_txtimeout_expiry(wdparm_t arg);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

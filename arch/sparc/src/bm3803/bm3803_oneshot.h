@@ -78,13 +78,9 @@ struct bm3803_oneshot_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -175,7 +171,6 @@ int bm3803_oneshot_start(struct bm3803_oneshot_s *oneshot,
 int bm3803_oneshot_cancel(struct bm3803_oneshot_s *oneshot,
                            struct timespec *ts);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

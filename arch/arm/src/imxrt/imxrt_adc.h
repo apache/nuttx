@@ -43,13 +43,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -74,7 +70,6 @@ struct adc_dev_s *imxrt_adcinitialize(int intf,
                                       int nchannels);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

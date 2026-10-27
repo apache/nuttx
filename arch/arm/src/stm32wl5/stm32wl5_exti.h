@@ -40,13 +40,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -146,7 +142,6 @@ int stm32_exti_comp(int cmp, bool risingedge, bool fallingedge,
                       bool event, xcpt_t func, void *arg);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

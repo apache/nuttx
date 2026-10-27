@@ -44,11 +44,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -82,7 +79,6 @@ extern "C"
 
 void avrdx_delay_loop(uint32_t count);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

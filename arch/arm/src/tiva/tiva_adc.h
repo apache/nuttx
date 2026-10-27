@@ -159,11 +159,8 @@ struct tiva_adc_cfg_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -686,7 +683,6 @@ void tiva_adc_sse_step_cfg(uint8_t adc, uint8_t sse, uint8_t chn,
 void tiva_adc_dump_reg_cfg(uint8_t adc, uint8_t sse);
 #endif
 
-#  undef EXTERN
 #  ifdef __cplusplus
 }
 #  endif

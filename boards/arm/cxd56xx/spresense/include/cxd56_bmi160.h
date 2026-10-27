@@ -39,13 +39,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -139,7 +135,6 @@ int bmi160accel_register(const char *devpath, int minor,
 
 #endif /* CONFIG_SENSORS_BMI160_SCU */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

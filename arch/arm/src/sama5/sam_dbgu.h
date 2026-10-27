@@ -51,13 +51,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -86,7 +82,6 @@ void sam_dbgu_initialize(void);
 
 void sam_dbgu_register(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

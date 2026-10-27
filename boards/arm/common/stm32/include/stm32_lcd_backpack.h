@@ -46,11 +46,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -77,7 +74,6 @@ extern "C"
 
 int board_lcd_backpack_init(int devno, int busno, int rows, int cols);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

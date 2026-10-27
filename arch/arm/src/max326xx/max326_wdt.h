@@ -35,13 +35,9 @@
  * Public Types
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -70,7 +66,6 @@ extern "C"
 int max326_wdt_initialize(const char *devpath);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

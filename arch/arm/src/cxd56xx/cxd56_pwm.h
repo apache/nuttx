@@ -53,11 +53,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -81,7 +78,6 @@ extern "C"
 
 struct pwm_lowerhalf_s *cxd56_pwminitialize(uint32_t channel);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

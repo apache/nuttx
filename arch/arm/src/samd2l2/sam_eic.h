@@ -47,13 +47,9 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -105,7 +101,6 @@ int sam_eic_irq_enable(int irq);
 
 int sam_eic_config(uint8_t eirq, port_pinset_t pinset);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -35,13 +35,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -66,7 +62,6 @@ int board_wlan_init(void);
 
 #endif /* CONFIG_ESPRESSIF_WIFI */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

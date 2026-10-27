@@ -128,18 +128,14 @@ void riscv_mtimer_set(uintreg_t mtime_addr,
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 struct oneshot_lowerhalf_s *
 riscv_mtimer_initialize(uintreg_t mtime, uintreg_t mtimecmp,
                         int irq, uint64_t freq);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

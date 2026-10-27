@@ -50,11 +50,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -69,7 +66,6 @@ extern "C"
 void avrdx_led_initialize(void);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -35,11 +35,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -179,7 +176,6 @@ bool up_gnssram_heapmember(void *mem);
 
 struct mallinfo up_gnssram_mallinfo(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -278,13 +278,9 @@ begin_packed_struct struct acpi_mcfg_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -367,7 +363,6 @@ ssize_t acpi_table_get(const char *name, void **data);
 
 int acpi_procfs_register(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

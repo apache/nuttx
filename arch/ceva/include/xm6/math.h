@@ -34,11 +34,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 float       roundf(float x);
@@ -52,7 +49,6 @@ float       log2f (float x);
 double      log2  (double x);
 long double log2l (long double x);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

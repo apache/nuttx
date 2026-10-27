@@ -34,11 +34,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -64,7 +61,6 @@ extern "C"
 
 int ameba_timer_initialize(const char *devpath, int instance);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

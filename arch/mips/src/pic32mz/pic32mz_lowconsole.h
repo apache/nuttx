@@ -47,13 +47,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -102,7 +98,6 @@ void pic32mz_uartconfigure(uintptr_t uart_base, uint32_t baudrate,
                            bool stop2);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

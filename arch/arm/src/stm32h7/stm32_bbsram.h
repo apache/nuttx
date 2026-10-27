@@ -82,13 +82,9 @@ struct bbsramd_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -141,7 +137,6 @@ int stm32_bbsraminitialize(char *devpath, int *sizes);
 int stm32_bbsram_savepanic(int fileno, uint8_t *context, int length);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

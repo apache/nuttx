@@ -112,11 +112,8 @@ struct intel64_cpu_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -196,7 +193,6 @@ static inline_function void up_set_interrupt_context(bool flag)
 #define up_getusrsp(regs) \
     ((uintptr_t)((uint64_t *)(regs))[REG_RSP])
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

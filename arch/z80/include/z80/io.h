@@ -53,17 +53,13 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 void outp(char p, char c);
 char inp(char p);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

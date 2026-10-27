@@ -32,13 +32,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_ESPRESSIF_I2S
@@ -78,7 +74,6 @@ struct i2s_dev_s *esp_i2sbus_initialize(int port);
 
 #endif /* CONFIG_ESPRESSIF_I2S */
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

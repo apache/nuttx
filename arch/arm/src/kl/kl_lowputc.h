@@ -44,13 +44,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -107,7 +103,6 @@ void kl_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
                       unsigned int parity, unsigned int nbits);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

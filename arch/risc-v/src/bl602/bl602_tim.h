@@ -108,13 +108,9 @@ struct timer_cfg_s
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -506,7 +502,6 @@ void bl602_wdt_disable(void);
 
 void bl602_wdt_intmask(uint8_t int_type, uint8_t int_mask);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

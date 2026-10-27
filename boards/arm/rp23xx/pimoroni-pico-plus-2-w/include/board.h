@@ -115,13 +115,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -146,7 +142,6 @@ void rp23xx_boardearlyinitialize(void);
 
 void rp23xx_boardinitialize(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

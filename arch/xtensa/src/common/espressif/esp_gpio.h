@@ -120,13 +120,9 @@ typedef uint8_t gpio_intrtype_t;
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -345,7 +341,6 @@ int esp_gpio_irq(int id, xcpt_t irqhandler, void *arg);
 #ifdef __cplusplus
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_GPIO_H */

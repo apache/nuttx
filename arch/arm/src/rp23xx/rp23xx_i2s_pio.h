@@ -41,13 +41,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -98,7 +94,6 @@ uintptr_t rp23xx_i2s_pio_getdmaaddr(void);
 
 uint8_t rp23xx_i2s_pio_getdreq(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

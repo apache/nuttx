@@ -54,13 +54,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 extern gspi_dev_t *g_cyw43439;
@@ -125,7 +121,6 @@ static inline void rp2040_extra_gpio_setdir(uint32_t gpio, int out)
   DEBUGPANIC(); /* Function not yet implemented. */
 }
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

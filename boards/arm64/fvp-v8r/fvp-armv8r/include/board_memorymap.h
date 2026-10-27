@@ -39,13 +39,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -88,7 +84,6 @@ extern "C"
 #define USRAM_START   UTEXT_END
 #define USRAM_END     (USRAM_START + USRAM_SIZE)
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

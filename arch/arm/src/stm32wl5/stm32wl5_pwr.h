@@ -40,13 +40,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -81,7 +77,6 @@ bool stm32_pwr_enablebkp(bool writable);
 
 void stm32_pwr_boot_c2(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

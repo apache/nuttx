@@ -51,11 +51,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -64,7 +61,6 @@ extern "C"
 
 int jz_usbhost_initialize(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

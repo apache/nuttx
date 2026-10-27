@@ -39,13 +39,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -74,7 +70,6 @@ int esp32_oneshot_init(int timer, uint16_t resolution);
 
 #endif /* CONFIG_ONESHOT */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

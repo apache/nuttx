@@ -41,11 +41,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -252,7 +249,6 @@ void l2cc_flush_all(void);
 
 void l2cc_flush(uint32_t startaddr, uint32_t endaddr);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -242,13 +242,9 @@ struct imx9_dmaregs_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -468,7 +464,6 @@ void imx9_dmadump(const struct imx9_dmaregs_s *regs, const char *msg);
 #  define imx9_dmadump(handle,regs,msg)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

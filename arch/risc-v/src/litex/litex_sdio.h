@@ -29,13 +29,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -113,7 +109,6 @@ struct sdio_dev_s *sdio_initialize(int slotno);
 
 void sdio_mediachange(struct sdio_dev_s *dev, bool cardinslot);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -49,13 +49,9 @@ typedef enum
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -79,7 +75,6 @@ extern "C"
 
 bool imx9_vbus_detect(imx9_usb_id_t id);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

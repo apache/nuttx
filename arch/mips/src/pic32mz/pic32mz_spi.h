@@ -44,13 +44,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -216,7 +212,6 @@ int pic32mz_spi6register(struct spi_dev_s *dev,
 #endif
 #endif /* CONFIG_SPI_CALLBACK */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

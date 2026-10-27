@@ -37,13 +37,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -119,7 +115,6 @@ int kl_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_KL_SPI0 || CONFIG_KL_SPI1 */

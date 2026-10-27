@@ -94,13 +94,9 @@ struct at32_dmaregs_s
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -308,7 +304,6 @@ uint32_t at32_dma_intget(unsigned int chndx);
 
 #endif /* CONFIG_ARCH_HIPRI_INTERRUPT */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

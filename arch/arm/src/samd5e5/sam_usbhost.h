@@ -218,13 +218,9 @@ enum usbhost_trace1codes_e
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -281,7 +277,6 @@ struct usbhost_connection_s *sam_usbhost_initialize(int controller);
 
 void sam_usbhost_vbusdrive(int rhport, bool enable);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

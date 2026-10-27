@@ -35,19 +35,14 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 void rk3588_memory_initialize(void);
 void rk3588_board_initialize(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

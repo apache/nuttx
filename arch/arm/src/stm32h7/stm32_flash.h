@@ -38,13 +38,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -108,7 +104,6 @@ int stm32_flash_unlock(void);
 
 int stm32_flash_writeprotect(size_t page, bool enabled);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

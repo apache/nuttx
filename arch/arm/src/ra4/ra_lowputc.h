@@ -53,13 +53,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -79,7 +75,6 @@ extern "C"
 
 void ra_lowsetup(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

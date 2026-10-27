@@ -55,13 +55,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -121,7 +117,6 @@ void s32k3xx_qspi_enter_memorymapped(struct qspi_dev_s *dev,
 
 void s32k3xx_qspi_exit_memorymapped(struct qspi_dev_s *dev);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

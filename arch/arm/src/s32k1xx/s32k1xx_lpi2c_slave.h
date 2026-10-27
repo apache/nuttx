@@ -36,11 +36,8 @@
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -83,7 +80,6 @@ struct i2c_slave_s *s32k1xx_i2cbus_slave_initialize(int port);
 
 int s32k1xx_i2cbus_slave_uninitialize(struct i2c_slave_s *dev);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

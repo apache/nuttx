@@ -55,13 +55,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -101,7 +97,6 @@ struct spi_dev_s *sam_serial_spi_initialize(int port);
 
 uint8_t sam_serial_status(struct spi_dev_s *dev, uint32_t devid);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -32,11 +32,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -60,7 +57,6 @@ extern void (*_einit[])(void)
 #  endif
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

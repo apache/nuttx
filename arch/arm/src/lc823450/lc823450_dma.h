@@ -111,13 +111,9 @@ typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -141,7 +137,6 @@ int lc823450_dmastart(DMA_HANDLE handle, dma_callback_t callback,
 void lc823450_dmastop(DMA_HANDLE handle);
 int lc823450_dmaremain(DMA_HANDLE handle);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

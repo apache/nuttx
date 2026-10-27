@@ -24,11 +24,8 @@
 #define __BOARDS_ARM_RP2040_COMMON_INCLUDE_RP2040_COMMON_BRINGUP_H
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -41,7 +38,6 @@ extern "C"
 
 int rp2040_common_bringup(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

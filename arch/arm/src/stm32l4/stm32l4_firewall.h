@@ -70,13 +70,9 @@ struct stm32_firewall_t
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -97,7 +93,6 @@ extern "C"
 
 int stm32_firewallsetup(struct stm32_firewall_t *setup);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

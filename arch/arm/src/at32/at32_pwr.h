@@ -39,13 +39,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -188,7 +184,6 @@ void at32_pwr_enablepvd(void);
 
 void at32_pwr_disablepvd(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

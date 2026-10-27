@@ -37,13 +37,9 @@
 
 #include <stdint.h>
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #define MAC_LEN                 (6)
@@ -231,7 +227,6 @@ int esp_wifi_lock(bool lock);
 #ifdef __cplusplus
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_WIFI_UTILS_H */

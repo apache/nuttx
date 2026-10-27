@@ -45,13 +45,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -746,7 +742,6 @@ int cxd56_gnssram_clock_enable(void);
 
 int cxd56_gnssram_clock_disable(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

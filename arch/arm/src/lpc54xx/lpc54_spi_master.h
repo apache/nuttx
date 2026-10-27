@@ -66,13 +66,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -279,7 +275,6 @@ int lpc54_spi9_register(struct spi_dev_s *dev,
 #endif
 #endif /* CONFIG_SPI_CALLBACK */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

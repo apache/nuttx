@@ -48,11 +48,8 @@ struct cxd56_lower_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -64,7 +61,6 @@ struct audio_lowerhalf_s;
 struct audio_lowerhalf_s *
 cxd56_initialize(const struct cxd56_lower_s *lower);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

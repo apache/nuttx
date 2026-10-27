@@ -40,13 +40,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -132,7 +128,6 @@ void n32_pwr_configurewkup(uint32_t pin, bool en,
 
 void n32_pwr_setcorepwrsrc(pwr_vcoresrc_e src);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

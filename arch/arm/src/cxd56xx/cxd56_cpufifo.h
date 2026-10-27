@@ -25,11 +25,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 typedef int (*cpufifo_handler_t)(int cpuid, uint32_t data[2]);
@@ -40,7 +37,6 @@ int  cxd56_cfpull(uint32_t data[2]);
 int  cxd56_cfregrxhandler(cpufifo_handler_t handler);
 void cxd56_cfunregrxhandler(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

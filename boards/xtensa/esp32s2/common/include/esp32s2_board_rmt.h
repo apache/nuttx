@@ -39,13 +39,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -88,7 +84,6 @@ int board_rmt_txinitialize(int pin);
 
 #endif /* CONFIG_ESP_RMT */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

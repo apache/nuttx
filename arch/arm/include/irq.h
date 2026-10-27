@@ -101,11 +101,8 @@
 #define STACKFRAME_ALIGN 8
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -117,7 +114,6 @@ extern "C"
 
 #endif /* __ASSEMBLY__ */
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

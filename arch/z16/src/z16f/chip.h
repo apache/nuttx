@@ -627,11 +627,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* The following two routines are called from the low-level reset logic.
@@ -681,7 +678,6 @@ int z16f_espi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

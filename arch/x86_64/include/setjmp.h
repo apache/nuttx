@@ -89,17 +89,13 @@ typedef xcpt_reg_t jmp_buf[XCPTCONTEXT_REGS];
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int setjmp(jmp_buf env);
 void longjmp(jmp_buf env, int val) noreturn_function;
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

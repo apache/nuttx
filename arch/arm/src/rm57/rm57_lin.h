@@ -89,13 +89,9 @@ struct rm57_lin_config_s
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -170,7 +166,6 @@ int rm57_lin_send(int intf, uint8_t id, const uint8_t *data, size_t len);
 
 int rm57_lin_recv(int intf, uint8_t *id, uint8_t *data, size_t len);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

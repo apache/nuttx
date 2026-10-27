@@ -60,13 +60,9 @@ struct bm3803_freerun_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -136,7 +132,6 @@ int bm3803_freerun_counter(struct bm3803_freerun_s *freerun,
 
 int bm3803_freerun_uninitialize(struct bm3803_freerun_s *freerun);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -40,13 +40,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -128,7 +124,6 @@ int bmp280temp_register(const char *devpath, int minor,
 
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -93,11 +93,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Clocking:
@@ -111,7 +108,6 @@ extern "C"
  *     or greater than two.
  */
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

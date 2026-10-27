@@ -52,13 +52,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -68,7 +64,6 @@ extern "C"
 int sama5_sfc_initialize(const char *devpath);
 void sama5_sfc_unregister(void *handle);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

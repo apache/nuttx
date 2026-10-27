@@ -145,13 +145,9 @@ struct smbus_sbd_data_s
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -179,7 +175,6 @@ extern "C"
 
 int smbus_sbd_initialize(int minor, struct i2c_slave_s *i2c_slave_dev);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

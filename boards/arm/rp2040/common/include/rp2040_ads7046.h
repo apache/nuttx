@@ -47,11 +47,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -79,7 +76,6 @@ extern "C"
 
 int board_ads7046_initialize(FAR struct spi_dev_s *spi, int devno);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

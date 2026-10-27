@@ -42,13 +42,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 struct spi_dev_s; /* Forward reference */
@@ -206,7 +202,6 @@ int imxrt_lpspi6register(struct spi_dev_s *dev,
 #endif
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

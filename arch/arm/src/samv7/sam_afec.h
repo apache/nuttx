@@ -54,13 +54,9 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -83,7 +79,6 @@ struct adc_dev_s *sam_afec_initialize(int intf,
                                       const uint8_t *chanlist,
                                       int nchannels);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

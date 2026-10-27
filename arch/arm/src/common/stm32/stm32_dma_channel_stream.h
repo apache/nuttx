@@ -117,13 +117,9 @@ struct stm32_dmaregs_s
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -343,7 +339,6 @@ uint8_t  stm32_dma_intget(unsigned int controller, uint8_t stream);
 
 #endif /* CONFIG_ARCH_HIPRI_INTERRUPT */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

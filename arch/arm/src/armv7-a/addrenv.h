@@ -58,11 +58,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -118,7 +115,6 @@ void arm_addrenv_destroy_region(uintptr_t *l1table, unsigned int listlen,
 
 uintptr_t arm_addrenv_va_to_pa(uintptr_t *l1table, uintptr_t va);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

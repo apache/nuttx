@@ -55,13 +55,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -79,7 +75,6 @@ extern "C"
 struct i2c_master_s;  /* Forward reference */
 struct i2c_master_s *sam_i2c_master_initialize(int bus);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -43,13 +43,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -76,7 +72,6 @@ void bl602_cpu_reset(void);
 
 void bl602_por_reset(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

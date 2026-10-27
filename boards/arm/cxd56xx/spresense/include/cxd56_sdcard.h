@@ -40,13 +40,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -147,7 +143,6 @@ bool board_sdcard_inserted(int slotno);
 #  define board_sdcard_inserted(slotno) true
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

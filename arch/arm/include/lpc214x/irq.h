@@ -96,17 +96,13 @@ typedef void (*vic_vector_t)(uint32_t *regs);
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 void up_attach_vector(int irq, int vector, vic_vector_t handler);
 void up_detach_vector(int vector);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

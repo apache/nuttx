@@ -25,13 +25,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -148,7 +144,6 @@ void k230_ipi_notify(uint8_t devn, uint8_t line);
 
 void k230_ipi_finish(uint8_t devn, uint16_t mask);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

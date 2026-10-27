@@ -55,13 +55,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -85,7 +81,6 @@ extern "C"
 struct qspi_dev_s;
 struct qspi_dev_s *sam_qspi_initialize(int intf);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

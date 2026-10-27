@@ -159,11 +159,8 @@ union aplic_mode_arg_u
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* IMSIC */
@@ -284,7 +281,6 @@ void riscv_aplic_init_msi(uintptr_t base, uint64_t imsic_addr,
                           uint32_t lhxs, uint32_t lhxw,
                           uint32_t hhxs, uint32_t hhxw);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

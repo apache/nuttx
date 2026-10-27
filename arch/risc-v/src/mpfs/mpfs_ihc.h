@@ -36,13 +36,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -85,7 +81,6 @@ int mpfs_ihc_init(void);
 int mpfs_ihc_sbi_ecall_handler(unsigned long funcid, uint32_t remote_channel,
                                uint32_t *message_ptr);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -89,13 +89,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -142,7 +138,6 @@ int sam_tsd_register(struct sam_adc_s *adc, int minor);
 
 void sam_tsd_interrupt(uint32_t pending);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

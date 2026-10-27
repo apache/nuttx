@@ -38,13 +38,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -53,7 +49,6 @@ extern "C"
 
 struct i2s_dev_s *lc823450_i2sdev_initialize(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -39,13 +39,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -64,7 +60,6 @@ extern "C"
 int board_bm1383glv_initialize(const char *devpath, int bus);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

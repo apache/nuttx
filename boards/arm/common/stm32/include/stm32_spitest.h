@@ -42,11 +42,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -68,7 +65,6 @@ extern "C"
 
 int stm32_spidev_bus_test(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

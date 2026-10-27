@@ -42,13 +42,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 typedef enum
@@ -102,7 +98,6 @@ struct stm32_lptim_dev_s *stm32_lptim_init(int lptimer);
 
 int stm32_lptim_deinit(struct stm32_lptim_dev_s *dev);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

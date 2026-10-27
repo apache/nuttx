@@ -55,13 +55,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Timer's Operations */
@@ -141,7 +137,6 @@ int pic32mz_timer_deinit(struct pic32mz_timer_dev_s *dev);
 int pic32mz_timer_initialize(const char *devpath, int timer);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -130,13 +130,9 @@ struct zynq_gmac_s
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -225,7 +221,6 @@ int zynq_phyread(struct zynq_gmac_s *priv, uint8_t phyaddr,
 int zynq_phywrite(struct zynq_gmac_s *priv, uint8_t phyaddr,
                   uint8_t regaddr, uint16_t phyval);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -24,11 +24,8 @@
 #define __BOARDS_ARM_RP2040_COMMON_INCLUDE_RP2040_COMMON_INITIALIZE_H
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -54,7 +51,6 @@ int rp2040_common_earlyinitialize(void);
 
 void rp2040_common_initialize(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

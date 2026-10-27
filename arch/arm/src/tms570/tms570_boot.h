@@ -39,13 +39,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -96,7 +92,6 @@ void tms570_lowsetup(void);
 
 void tms570_board_initialize(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

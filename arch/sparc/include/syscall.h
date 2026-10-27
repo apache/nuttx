@@ -119,11 +119,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -189,7 +186,6 @@ uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
 uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
                     uintptr_t parm3, uintptr_t parm4, uintptr_t parm5);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

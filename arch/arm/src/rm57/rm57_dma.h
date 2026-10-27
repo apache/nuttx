@@ -91,13 +91,9 @@ typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t status,
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -205,7 +201,6 @@ size_t rm57_dmaresidual(DMA_HANDLE handle);
 
 void rm57_serial_dma_poll(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

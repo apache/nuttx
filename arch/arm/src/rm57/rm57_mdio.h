@@ -50,11 +50,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -158,7 +155,6 @@ bool rm57_mdio_linkstatus(uint8_t phyaddr);
 
 void rm57_mdio_linkint(uint8_t phyaddr, bool enable);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

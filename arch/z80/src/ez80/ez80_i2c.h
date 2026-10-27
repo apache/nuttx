@@ -152,11 +152,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif /* __cplusplus */
 
 /****************************************************************************
@@ -199,7 +196,6 @@ FAR struct i2c_master_s *ez80_i2cbus_initialize(int port);
 
 int ez80_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

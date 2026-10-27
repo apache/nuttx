@@ -43,13 +43,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -176,7 +172,6 @@ void gd32_rcu_irc16m_enable(void);
 
 void gd32_rcu_irc16m_disable(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -174,13 +174,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -212,7 +208,6 @@ void lpc17_40_boardinitialize(void);
 void lpc17_40_led(int lednum, int state);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

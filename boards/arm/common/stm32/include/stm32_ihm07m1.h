@@ -36,11 +36,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -53,7 +50,6 @@ extern "C"
 
 int board_ihm07m1_initialize(struct stm32_foc_adc_s *adc_cfg);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

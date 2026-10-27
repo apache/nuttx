@@ -45,13 +45,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -104,7 +100,6 @@ struct motor_lowerhalf_s *esp_motor_bdc_initialize(int channel,
 struct cap_lowerhalf_s *esp_mcpwm_capture_initialize(int channel, int pin);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

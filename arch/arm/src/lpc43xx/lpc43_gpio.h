@@ -239,11 +239,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -306,7 +303,6 @@ int lpc43_gpio_dump(uint16_t gpiocfg, const char *msg);
 #  define lpc43_gpio_dump(p,m)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

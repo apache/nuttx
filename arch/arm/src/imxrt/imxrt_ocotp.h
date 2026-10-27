@@ -39,13 +39,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -99,7 +95,6 @@ int imxrt_ocotp_write(uint32_t otp_index, uint32_t data);
 
 int imxrt_ocotp_reload(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

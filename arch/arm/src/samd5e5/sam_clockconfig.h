@@ -203,13 +203,9 @@ struct sam_clockconfig_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -241,7 +237,6 @@ void sam_clock_configure(const struct sam_clockconfig_s *config);
 
 void sam_clock_initialize(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -89,13 +89,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -315,7 +311,6 @@ void rp2040_gpio_clear_interrupt(uint32_t gpio,
 
 void rp2040_gpio_initialize(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

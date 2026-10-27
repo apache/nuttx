@@ -56,13 +56,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -294,7 +290,6 @@ void rp23xx_dmastop(DMA_HANDLE handle);
 
 uintptr_t rp23xx_dma_register(DMA_HANDLE handle, uint16_t offset);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

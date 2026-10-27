@@ -114,13 +114,9 @@ static const uint32_t sens_touch_status_reg[] =
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -2532,7 +2528,6 @@ static inline enum touch_pad_e touch_lh_get_wakeup_status(void)
 #ifdef __cplusplus
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_TOUCH_LOWERHALF_H */

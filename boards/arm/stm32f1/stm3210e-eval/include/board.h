@@ -205,13 +205,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -272,7 +268,6 @@ int stm32_lm75initialize(const char *devpath);
 int stm32_lm75attach(xcpt_t irqhandler, void *arg);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

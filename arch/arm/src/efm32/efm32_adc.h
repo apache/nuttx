@@ -547,11 +547,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -574,7 +571,6 @@ struct adc_dev_s;
 struct adc_dev_s *efm32_adcinitialize(int intf, const uint8_t *chanlist,
                                      int nchannels);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

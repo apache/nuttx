@@ -142,13 +142,9 @@ typedef uint16_t gio_pinset_t;
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -324,7 +320,6 @@ int tms570_dumpgio(uint32_t pinset, const char *msg);
 #  define tms570_dumpgio(p,m)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

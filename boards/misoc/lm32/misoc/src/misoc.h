@@ -48,11 +48,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -79,7 +76,6 @@ void weak_function lm32_spidev_initialize(void);
 void lm32_led_initialize(void);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

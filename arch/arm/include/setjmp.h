@@ -82,17 +82,13 @@ typedef struct setjmp_buf_s jmp_buf[1];
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 int setjmp(jmp_buf env);
 void longjmp(jmp_buf env, int val) noreturn_function;
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

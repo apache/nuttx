@@ -38,11 +38,8 @@
 
 #ifndef __ASSEMBLY__
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* This structure represents the state of one PWM timer */
@@ -120,7 +117,6 @@ int ra_pwm_uninitialize(struct pwm_lowerhalf_s *dev);
 
 struct pwm_lowerhalf_s *ra_pwminitialize(int channel);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

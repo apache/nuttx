@@ -358,13 +358,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -385,7 +381,6 @@ extern "C"
 
 void sam_lcdclear(uint16_t color);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -32,13 +32,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -494,7 +490,6 @@ void cxd56_sdhci_wrprotect(struct sdio_dev_s *dev, bool wrprotect);
 
 void cxd56_sdio_resetstatus(struct sdio_dev_s *dev);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

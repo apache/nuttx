@@ -231,11 +231,8 @@ enum stm32_comp_blanking_e
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -258,7 +255,6 @@ extern "C"
 
 struct comp_dev_s *stm32_compinitialize(int intf);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

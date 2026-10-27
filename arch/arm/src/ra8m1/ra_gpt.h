@@ -48,11 +48,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_RA_GPT_TIMER
@@ -78,7 +75,6 @@ int ra_gpt_timer_initialize(const char *devpath, int channel);
 
 #endif /* CONFIG_RA_GPT_TIMER */
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -321,13 +321,9 @@ static inline void n32_usbhs_phy_initialize(void)
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -414,7 +410,6 @@ void n32_usbulpireset(struct usbdev_s *dev);
 extern void n32_usbhs_vbusdrive(int iface, bool enable);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

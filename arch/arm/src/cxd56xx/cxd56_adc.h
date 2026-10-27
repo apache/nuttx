@@ -33,11 +33,8 @@
 
 #ifndef __ASSEMBLY__
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -58,7 +55,6 @@ void cxd56_adc_getinterval(int adctype, uint32_t *interval,
 #define cxd56_adc_getinterval(adctype, interval, adjust)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -51,11 +51,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -82,7 +79,6 @@ extern int mips_scache_size;
 extern int mips_scache_linesize;
 extern int mips_scache_ways;
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

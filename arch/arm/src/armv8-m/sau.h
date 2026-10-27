@@ -101,13 +101,9 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -184,7 +180,6 @@ void sau_configure_region(uintptr_t base, size_t size, uint32_t flags);
       sau_configure_region(base, size, SAU_RLAR_NSC); \
     } while (0)
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

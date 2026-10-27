@@ -148,13 +148,9 @@ struct sam_dmaregs_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -295,7 +291,6 @@ void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
 #  define sam_dmadump(handle,regs,msg)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

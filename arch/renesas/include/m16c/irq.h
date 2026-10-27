@@ -275,11 +275,8 @@ static inline_function uint16_t up_getsp(void)
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -362,7 +359,6 @@ static inline_function uintptr_t up_getusrsp(void *regs)
   return (uintptr_t)(ptr[REG_SP] << 8 | ptr[REG_SP + 1]);
 }
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

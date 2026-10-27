@@ -53,13 +53,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Capture Device Structure */
@@ -185,7 +181,6 @@ struct stm32_cap_dev_s *stm32_cap_init(int timer);
 
 int stm32_cap_deinit(struct stm32_cap_dev_s *dev);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

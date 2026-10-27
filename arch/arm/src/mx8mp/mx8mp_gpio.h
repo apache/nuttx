@@ -153,13 +153,9 @@ typedef uint32_t gpio_pinset_t;
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -237,7 +233,6 @@ void mx8mp_gpio_irq_enable(gpio_pinset_t pinset);
 
 void mx8mp_gpio_irq_disable(gpio_pinset_t pinset);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

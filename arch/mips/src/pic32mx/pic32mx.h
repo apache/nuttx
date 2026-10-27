@@ -155,13 +155,9 @@ struct pic32mx_dmaregs_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -631,7 +627,6 @@ void pic32mx_usbattach(void);
 void pic32mx_usbdetach(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

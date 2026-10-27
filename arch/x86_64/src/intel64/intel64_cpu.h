@@ -40,13 +40,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -147,7 +143,6 @@ uint8_t x86_64_cpu_count_get(void);
 
 void x86_64_cpu_priv_set(uint8_t cpu);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

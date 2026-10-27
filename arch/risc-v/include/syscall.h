@@ -116,11 +116,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 long smh_call(unsigned int nbr, void *parm);
@@ -365,7 +362,6 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
 }
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

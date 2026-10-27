@@ -65,13 +65,9 @@ typedef enum
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -97,7 +93,6 @@ extern "C"
 
 struct dshot_lowerhalf_s *imx9_flexio_dshot_init(flexio_dshot_id_t id);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -182,11 +182,8 @@ enum stm32_opamp4_vmsel_e
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -209,7 +206,6 @@ extern "C"
 
 struct opamp_dev_s *stm32_opampinitialize(int intf);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

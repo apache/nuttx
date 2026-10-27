@@ -160,13 +160,9 @@ extern uint8_t _progend[];
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -218,7 +214,6 @@ void ez80_spidev_initialize(void);
 int ez80_w25_initialize(int minor);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

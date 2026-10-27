@@ -586,14 +586,10 @@ extern void __enable_pcid(void);
 extern void x86_64_syscall_entry(void);
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

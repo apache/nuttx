@@ -80,13 +80,9 @@ struct max326_dmaregs_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -216,7 +212,6 @@ void max326_dmadump(DMA_HANDLE handle, const struct max326_dmaregs_s *regs,
 #  define max326_dmadump(handle,regs,msg)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

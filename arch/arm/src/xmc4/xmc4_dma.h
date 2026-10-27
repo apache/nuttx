@@ -78,13 +78,9 @@ struct xmc4_dmaregs_s
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -197,7 +193,6 @@ void xmc4_dmadump(DMA_HANDLE handle, const struct xmc4_dmaregs_s *regs,
 #  define xmc4_dmadump(handle,regs,msg)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

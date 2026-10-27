@@ -35,13 +35,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -64,7 +60,6 @@ extern "C"
 
 int cxd56_geofenceinitialize(const char *devpath);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

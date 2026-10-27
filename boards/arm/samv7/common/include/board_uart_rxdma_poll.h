@@ -37,13 +37,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -101,7 +97,6 @@ void board_uart_rxdma_poll_stop(void);
 
 int board_uart_rxdma_poll_init(int channel, uint32_t frequency);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

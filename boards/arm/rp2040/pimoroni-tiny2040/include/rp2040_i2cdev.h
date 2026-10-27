@@ -43,13 +43,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -68,7 +64,6 @@ extern "C"
 int board_i2cdev_initialize(int bus);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

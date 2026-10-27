@@ -40,13 +40,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -129,7 +125,6 @@ void stm32_fmc_sdram_set_control(int bank, uint32_t ctrl);
 
 void stm32_fmc_sdram_command(uint32_t cmd);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

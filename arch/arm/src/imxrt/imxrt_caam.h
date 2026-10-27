@@ -36,13 +36,9 @@
  * Public Function Prototypes
  *****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /*****************************************************************************
@@ -77,7 +73,6 @@ int imxrt_caam_initialize(void);
 
 int imxrt_caam_get_random(uint8_t *buffer, size_t buflen);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

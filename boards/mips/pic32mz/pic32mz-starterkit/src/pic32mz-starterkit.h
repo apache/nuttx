@@ -161,11 +161,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -202,7 +199,6 @@ void pic32mz_led_initialize(void);
 
 int pic32mz_bringup(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

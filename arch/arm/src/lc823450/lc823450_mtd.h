@@ -77,11 +77,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -93,6 +90,5 @@ int lc823450_mtd_initialize(uint32_t devno);
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ARCH_ARM_SRC_LC823450_LC823450_MTD_H */

@@ -174,13 +174,9 @@ typedef uint16_t gpio_cfgset_t;
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -239,7 +235,6 @@ void nuc_dumpgpio(gpio_cfgset_t pinset, const char *msg);
 #  define nuc_dumpgpio(p,m)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -37,11 +37,8 @@ typedef enum
 #ifndef __ASSEMBLY__
 
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -49,8 +46,6 @@ extern "C"
  ****************************************************************************/
 
 int k210_wdt_initialize(const char *devpath, k210_wdt_id_t id);
-
-#undef EXTERN
 
 #if defined(__cplusplus)
 }

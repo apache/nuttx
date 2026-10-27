@@ -68,13 +68,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -1982,7 +1978,6 @@ static inline void rp2040_pio_set_input_sync_bypass(uint32_t pio,
                 RP2040_PIO_INPUT_SYNC_BYPASS(pio));
 }
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

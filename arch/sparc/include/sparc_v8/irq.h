@@ -625,11 +625,8 @@ static inline_function void sparc_enable_interrupts(uint32_t psr)
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -709,7 +706,6 @@ void up_irq_enable(void);
 
 uint32_t up_irq_disable(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

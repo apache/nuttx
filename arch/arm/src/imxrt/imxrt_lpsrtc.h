@@ -59,13 +59,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -105,7 +101,6 @@ int imxrt_lpsrtc_initialize(void);
 
 bool imxrt_lpsrtc_havesettime(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

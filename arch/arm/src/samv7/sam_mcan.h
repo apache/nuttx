@@ -56,13 +56,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -87,7 +83,6 @@ extern "C"
 struct can_dev_s;
 struct can_dev_s *sam_mcan_initialize(int port);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

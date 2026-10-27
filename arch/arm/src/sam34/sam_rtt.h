@@ -40,13 +40,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -75,7 +71,6 @@ void sam_rttinitialize(const char *devpath);
 
 #endif // CONFIG_SAM34_RTT
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -36,13 +36,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -66,7 +62,6 @@ extern "C"
 
 int bl602_efuse_read_mac_address(uint8_t mac[6]);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

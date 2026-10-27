@@ -43,13 +43,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -67,7 +63,6 @@ extern "C"
 void rp2040_pll_init(uint32_t base, uint32_t refdiv, uint32_t vco_freq,
                      uint32_t post_div1, uint8_t post_div2);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

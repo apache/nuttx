@@ -35,13 +35,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -68,7 +64,6 @@ int tms570_esm_initialize(void);
 
 int tms570_esm_interrupt(int irq, void *context, void *arg);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

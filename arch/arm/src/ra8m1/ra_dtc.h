@@ -72,11 +72,8 @@ struct dtc_transfer_info_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -174,7 +171,6 @@ void ra_dtc_enable(uint8_t vector);
 
 void ra_dtc_disable(uint8_t vector);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -43,13 +43,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -146,7 +142,6 @@ int tms570_efc_selftest_complete(void);
 
 #define tms570_cpuecc_selftest()
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

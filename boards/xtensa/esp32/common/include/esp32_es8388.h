@@ -46,11 +46,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -84,7 +81,6 @@ extern "C"
 int esp32_es8388_initialize(int i2c_port, uint8_t i2c_addr, int i2c_freq,
                             int i2s_port);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

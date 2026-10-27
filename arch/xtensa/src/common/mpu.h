@@ -182,13 +182,9 @@ struct mpu_region_s
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -430,7 +426,6 @@ void mpu_dump_region(void);
                        MPU_AR_RWrw,  \
                        MPU_MEM_DEVICE)
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

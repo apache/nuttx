@@ -196,13 +196,9 @@ void mpu_early_reset(void);
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -603,7 +599,6 @@ void mpu_initialize(const struct mpu_region_s *table, size_t count,
                        MPU_RASR_AP_RWRW  | /* P:RW     U:RW         */ \
                        MPU_RASR_XN         /* No Instruction access */)
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

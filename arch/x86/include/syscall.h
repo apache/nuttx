@@ -54,11 +54,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* SWI with SYS_ call number and six parameters */
@@ -115,7 +112,6 @@ static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
   return sys_call6(nbr, parm1, parm2, parm3, parm4, parm5, 0);
 }
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

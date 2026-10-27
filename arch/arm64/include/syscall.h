@@ -395,14 +395,10 @@ void arm64_smccc_smc(unsigned long a0, unsigned long a1,
                      struct arm64_smccc_res *res);
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

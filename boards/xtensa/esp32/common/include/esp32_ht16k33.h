@@ -46,11 +46,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -78,7 +75,6 @@ extern "C"
 
 int board_ht16k33_initialize(int devno, int busno);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

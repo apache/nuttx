@@ -63,13 +63,9 @@ struct sam_freerun_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -139,7 +135,6 @@ int sam_freerun_counter(struct sam_freerun_s *freerun, struct timespec *ts);
 
 int sam_freerun_uninitialize(struct sam_freerun_s *freerun);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

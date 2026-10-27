@@ -50,13 +50,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -79,7 +75,6 @@ extern "C"
 
 struct i2s_dev_s *sam_ssc_initialize(int port);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -35,13 +35,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #include <nuttx/spi/spi.h>
@@ -99,7 +95,6 @@ void weak_function mpfs_corespi_select(struct spi_dev_s *dev,
 #ifdef __cplusplus
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_MPFS_MPFS_CORESPI_H */

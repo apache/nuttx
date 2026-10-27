@@ -33,13 +33,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -109,7 +105,6 @@ int s698pm_setup_irq(int cpu, int irq, int priority);
 
 void s698pm_teardown_irq(int irq);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

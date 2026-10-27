@@ -80,13 +80,9 @@ struct sbramd_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -139,7 +135,6 @@ int rx65n_sbraminitialize(char *devpath, int *sizes);
 int rx65n_sbram_savepanic(int fileno, uint8_t *context, int length);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

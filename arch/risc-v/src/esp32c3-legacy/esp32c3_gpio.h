@@ -106,13 +106,9 @@ typedef uint8_t gpio_intrtype_t;
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -221,7 +217,6 @@ void esp32c3_gpioirqdisable(int irq);
 #ifdef __cplusplus
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_ESP32C3_LEGACY_ESP32C3_GPIO_H */

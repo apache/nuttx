@@ -39,13 +39,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -72,7 +68,6 @@ int board_spidev_initialize(int port);
 
 #endif /* CONFIG_SPI_DRIVER */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

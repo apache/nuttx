@@ -65,13 +65,9 @@ struct sci_config_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -102,7 +98,6 @@ void tms570_lowsetup(void);
 int tms570_sci_configure(uint32_t base,
                          const struct sci_config_s *config);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

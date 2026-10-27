@@ -40,11 +40,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -101,7 +98,6 @@ void stm32_pmstandby(void);
 
 void stm32_pmsleep(bool sleeponexit);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

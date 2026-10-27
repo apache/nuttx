@@ -32,11 +32,8 @@
 
 #ifndef __ASSEMBLY__
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_WATCHDOG
@@ -88,7 +85,6 @@ extern "C"
 
 #endif /* CONFIG_WATCHDOG */
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

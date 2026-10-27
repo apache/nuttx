@@ -35,11 +35,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -60,6 +57,5 @@ int  dvfs_procfs_register(void);
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_LC823450_LC823450_DVFS2_H */

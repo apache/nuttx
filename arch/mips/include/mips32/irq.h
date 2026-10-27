@@ -498,11 +498,8 @@ static inline_function void cp0_putcause(uint32_t cause)
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -568,7 +565,6 @@ void up_irq_restore(irqstate_t irqtate);
 
 void up_irq_enable(void);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

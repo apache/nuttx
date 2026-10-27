@@ -133,13 +133,9 @@ typedef void (*bl602_dma_callback_t) \
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -255,7 +251,6 @@ void bl602_dmadump(const struct bl602_dmaregs_s *regs, const char *msg);
 #  define bl602_dmadump(regs,msg)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

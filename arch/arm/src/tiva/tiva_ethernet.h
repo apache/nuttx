@@ -49,13 +49,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -100,7 +96,6 @@ struct ether_addr;
 void tiva_ethernetmac(struct ether_addr *ethaddr);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

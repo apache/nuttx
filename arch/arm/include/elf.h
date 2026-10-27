@@ -357,17 +357,13 @@ typedef unsigned long elf_gregset_t[18];
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 extern __EIT_entry __exidx_start[];
 extern __EIT_entry __exidx_end[];
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

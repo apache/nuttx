@@ -48,13 +48,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -114,7 +110,6 @@ void __ramfunc__ sam_clockconfig(void);
 void board_norflash_config(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

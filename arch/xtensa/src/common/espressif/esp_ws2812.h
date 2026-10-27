@@ -35,11 +35,8 @@
 
 #ifndef __ASSEMBLY__
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_WS2812
@@ -96,7 +93,6 @@ int esp_ws2812_release(void * driver);
 
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

@@ -159,11 +159,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -199,7 +196,6 @@ uintptr_t jz_physramaddr(uintptr_t vramaddr);
 
 uintptr_t jz_virtramaddr(uintptr_t physramaddr);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -44,13 +44,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -109,7 +105,6 @@ void sam_usart_reset(const struct sam_usart_config_s * const config);
 void sam_lowputc(uint32_t ch);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

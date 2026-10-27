@@ -29,13 +29,9 @@
 
 #include <nuttx/config.h>
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -146,7 +142,6 @@ static inline void up_vintc_trigger_irq(int irq)
 
 void up_vintc_handler(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

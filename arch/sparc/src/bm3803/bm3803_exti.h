@@ -39,13 +39,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -75,7 +71,6 @@ extern "C"
 int bm3803_gpioset_irq(uint32_t pinset, bool enable, bool trig, bool edge,
                        xcpt_t func, void *arg);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

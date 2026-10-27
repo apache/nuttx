@@ -71,13 +71,9 @@ struct sam_gclkconfig_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -138,7 +134,6 @@ void sam_gclk_chan_enable(uint8_t channel, uint8_t srcgen);
 void sam_gclk_chan_disable(uint8_t channel);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

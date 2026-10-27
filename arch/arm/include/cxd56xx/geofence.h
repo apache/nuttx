@@ -24,11 +24,8 @@
 #define __ARCH_ARM_INCLUDE_CXD56XX_GEOFENCE_H
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Start geofence monitoring.
@@ -212,7 +209,6 @@ struct cxd56_geofence_status_s
   struct cxd56_geofence_trans_s status[CXD56_GEOFENCE_REGION_CAPACITY];
 };
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

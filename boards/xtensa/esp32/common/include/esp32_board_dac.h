@@ -46,11 +46,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -78,7 +75,6 @@ extern "C"
 
 int board_dac_initialize(const char *path);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

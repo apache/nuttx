@@ -42,13 +42,9 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -103,7 +99,6 @@ int sam_eic_irq_ack(int irq);
 
 void sam_eic_dumpregs(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

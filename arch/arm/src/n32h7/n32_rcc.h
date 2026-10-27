@@ -38,13 +38,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -166,7 +162,6 @@ void n32_rcc_enablelsi(void);
 
 void n32_rcc_disablelsi(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

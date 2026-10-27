@@ -40,13 +40,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef CONFIG_RTC_ALARM
@@ -174,7 +170,6 @@ void rp23xx_rtc_restorealarm(FAR const struct rp23xx_alarm_state_s *state);
 FAR struct rtc_lowerhalf_s *rp23xx_rtc_lowerhalf(void);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

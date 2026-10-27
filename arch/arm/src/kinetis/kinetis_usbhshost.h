@@ -44,13 +44,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -127,7 +123,6 @@ struct usbhost_connection_s;
 struct usbhost_connection_s *kinetis_ehci_initialize(int controller);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

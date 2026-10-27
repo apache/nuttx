@@ -106,13 +106,9 @@ static const int touch_channel_to_rtcio[] =
   TOUCH_PAD_NUM14_CHANNEL_NUM
 };
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -311,7 +307,6 @@ void esp32s2_touchregisterreleasecb(int (*func)(int, void *, void *));
 #ifdef __cplusplus
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_XTENSA_SRC_ESP32S2_ESP32S2_TOUCH_H */

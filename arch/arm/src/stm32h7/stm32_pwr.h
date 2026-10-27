@@ -40,13 +40,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -161,7 +157,6 @@ void stm32_pwr_configurewkup(uint32_t pin, bool en,
 
 void stm32_pwr_setvbatcharge(bool enable, bool resistor);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

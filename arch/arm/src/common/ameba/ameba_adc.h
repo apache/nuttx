@@ -58,11 +58,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -92,7 +89,6 @@ extern "C"
 int ameba_adc_register(const char *path, const uint8_t *channels,
                        const uint8_t *pins, unsigned int nchan);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

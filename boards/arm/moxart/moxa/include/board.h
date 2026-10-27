@@ -197,13 +197,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -213,7 +209,6 @@ extern "C"
 inline void ftintc010_set_trig_mode(int irq, int mode);
 inline void ftintc010_set_trig_level(int irq, int level);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

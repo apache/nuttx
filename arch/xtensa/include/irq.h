@@ -446,11 +446,8 @@ static inline_function void xtensa_intclear(uint32_t intnum)
 }
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -571,7 +568,6 @@ noinstrument_function static inline_function bool up_interrupt_context(void)
 #define up_getusrsp(regs) \
     (((uintptr_t*)(regs))[REG_A1])
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

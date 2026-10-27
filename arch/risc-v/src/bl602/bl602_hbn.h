@@ -41,13 +41,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -193,7 +189,6 @@ void bl602_hbn_out0_int_enable(void);
 
 void bl602_hbn_out0_int_disable(void);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

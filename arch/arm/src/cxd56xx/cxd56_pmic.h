@@ -184,11 +184,8 @@ struct pmic_mon_log_s
 
 #ifndef __ASSEMBLY__
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -804,7 +801,6 @@ int cxd56_pmic_monitor_get(struct pmic_mon_log_s *ptr);
 #define cxd56_pmic_monitor_get(ptr)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

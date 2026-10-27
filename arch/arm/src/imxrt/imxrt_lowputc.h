@@ -42,13 +42,9 @@
  * Public Types
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 #ifdef HAVE_LPUART_DEVICE
@@ -113,7 +109,6 @@ void imxrt_lowputc(int ch);
 #  define imxrt_lowputc(ch)
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -87,13 +87,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -167,7 +163,6 @@ void sam_adc_putreg(struct sam_adc_s *priv, uintptr_t address,
 #  define sam_adc_putreg(handle,addr,val) putreg32(val,addr)
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -31,13 +31,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -153,7 +149,6 @@ uint32_t esp_efuse_hal_chip_revision(void);
 int esp_efuse_initialize(const char *devpath);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

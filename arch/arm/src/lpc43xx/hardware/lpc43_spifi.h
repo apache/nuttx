@@ -230,13 +230,9 @@ struct spifi_driver_s
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -250,7 +246,6 @@ int32_t spifi_program(struct spifi_dev_s *dev, const uint8_t *source,
 int32_t spifi_erase(struct spifi_dev_s *dev,
                     struct spifi_operands_s *opers);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

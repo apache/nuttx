@@ -1488,11 +1488,8 @@ static inline uintptr_t mmu_l2_getentry(uintptr_t l2vaddr, uintptr_t vaddr)
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -1690,7 +1687,6 @@ void mmu_l2_map_pages(const struct page_mapping_s *mappings,
 void mmu_invalidate_region(uintptr_t vstart, size_t size);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

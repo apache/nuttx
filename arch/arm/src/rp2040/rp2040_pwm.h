@@ -33,11 +33,8 @@
 
 #ifndef __ASSEMBLY__
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* This structure represents the state of one PWM timer */
@@ -113,7 +110,6 @@ struct rp2040_pwm_lowerhalf_s *rp2040_pwm_initialize(int      port,
 
 int rp2040_pwm_uninitialize(struct pwm_lowerhalf_s *dev);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

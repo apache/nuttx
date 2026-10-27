@@ -68,13 +68,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* TIM Device Structure */
@@ -147,7 +143,6 @@ int bm3803_tim_deinit(struct bm3803_tim_dev_s *dev);
 int bm3803_timer_initialize(const char *devpath, int timer);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

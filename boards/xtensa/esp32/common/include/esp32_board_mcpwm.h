@@ -34,11 +34,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -83,7 +80,6 @@ int board_motor_initialize(void);
 int board_capture_initialize(void);
 
 #endif /* CONFIG_ESP_MCPWM_CAPTURE */
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

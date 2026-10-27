@@ -50,13 +50,9 @@ typedef void (*alarmcb_t)(void);
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -83,7 +79,6 @@ struct timespec;
 int sam_rtc_setalarm(const struct timespec *tp, alarmcb_t callback);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

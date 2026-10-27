@@ -73,13 +73,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -139,7 +135,6 @@ struct usbdev_s;
 void stm32_usbulpireset(struct usbdev_s *dev);
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

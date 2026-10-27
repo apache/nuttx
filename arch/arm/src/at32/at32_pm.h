@@ -48,11 +48,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -118,7 +115,6 @@ int at32_pmstandby(void);
 
 void at32_pmsleep(bool sleeponexit);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

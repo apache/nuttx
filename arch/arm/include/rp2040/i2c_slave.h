@@ -32,11 +32,8 @@
 
 #ifndef __ASSEMBLY__
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* There is no driver for I2C slave operations.  To create an I2C slave,
@@ -107,7 +104,6 @@ struct i2c_slave_s *rp2040_i2c1_slave_initialize
 
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

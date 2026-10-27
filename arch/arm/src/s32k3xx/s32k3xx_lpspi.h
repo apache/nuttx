@@ -42,13 +42,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 struct spi_dev_s; /* Forward reference */
@@ -179,7 +175,6 @@ int s32k3xx_lpspi2register(struct spi_dev_s *dev, spi_mediachange_t callback,
 #endif
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

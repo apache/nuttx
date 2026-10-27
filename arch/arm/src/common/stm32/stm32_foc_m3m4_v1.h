@@ -172,13 +172,9 @@ struct stm32_foc_board_s
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -194,7 +190,6 @@ stm32_foc_initialize(int inst, struct stm32_foc_board_s *board);
 
 struct adc_dev_s *stm32_foc_adcget(struct foc_dev_s *dev);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

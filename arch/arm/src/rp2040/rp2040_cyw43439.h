@@ -42,13 +42,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -108,7 +104,6 @@ gspi_dev_t *rp2040_cyw_setup(uint8_t gpio_on,
 
 void rp2040_cyw_remove(gspi_dev_t *dev);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

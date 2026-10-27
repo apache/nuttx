@@ -89,13 +89,9 @@ struct stm32_xspi_config_s
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -153,7 +149,6 @@ int stm32_xspi_enter_memorymapped(
 
 void stm32_xspi_exit_memorymapped(struct qspi_dev_s *dev);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

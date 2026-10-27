@@ -44,13 +44,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /* Must be big enough to hold the 32-bit encoding */
@@ -92,7 +88,6 @@ void ra_gpiowrite(gpio_pinset_t pinset, bool value);
 
 bool ra_gpioread(gpio_pinset_t pinset);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

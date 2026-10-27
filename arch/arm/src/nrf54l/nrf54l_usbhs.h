@@ -38,13 +38,9 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -69,7 +65,6 @@ int nrf54l_usbhs_enable(void);
 void nrf54l_usbhs_disable(void);
 int nrf54l_usbhs_pullup(bool enable);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

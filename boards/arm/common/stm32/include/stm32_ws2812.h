@@ -46,11 +46,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -79,7 +76,6 @@ extern "C"
 
 int board_ws2812_initialize(int devno, int spino, uint16_t nleds);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

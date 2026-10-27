@@ -320,13 +320,9 @@ typedef uint32_t port_pinset_t;
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -381,7 +377,6 @@ int sam_dumpport(port_pinset_t pinset, const char *msg);
 #  define sam_dumpport(p,m)
 #endif
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

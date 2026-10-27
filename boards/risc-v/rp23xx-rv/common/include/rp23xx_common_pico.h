@@ -41,11 +41,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -64,7 +61,6 @@ extern "C"
 int rp23xx_dev_gpio_init(void);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -36,13 +36,9 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -85,7 +81,6 @@ struct i2c_master_s *bl602_i2cbus_initialize(int port);
 
 int bl602_i2cbus_uninitialize(struct i2c_master_s *dev);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
