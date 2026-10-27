@@ -2228,10 +2228,11 @@ static int lpc54_eth_ioctl(struct net_driver_s *dev, int cmd,
   switch (cmd)
     {
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-     case SIOCGMIIPHY: /* Get MII PHY address */
+      case SIOCGMIIPHY: /* Get MII PHY address */
         {
           struct mii_ioctl_data_s *req =
-        (struct mii_ioctl_data_s *)((uintptr_t)arg);
+            (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
           req->phy_id = CONFIG_LPC54_ETH_PHYADDR;
           ret = OK;
         }
@@ -2240,7 +2241,8 @@ static int lpc54_eth_ioctl(struct net_driver_s *dev, int cmd,
       case SIOCGMIIREG: /* Get register from MII PHY */
         {
           struct mii_ioctl_data_s *req =
-        (struct mii_ioctl_data_s *)((uintptr_t)arg);
+            (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
           req->val_out = lpc54_phy_read(priv, req->reg_num);
           ret = OK
         }
@@ -2249,7 +2251,8 @@ static int lpc54_eth_ioctl(struct net_driver_s *dev, int cmd,
       case SIOCSMIIREG: /* Set register in MII PHY */
         {
           struct mii_ioctl_data_s *req =
-        (struct mii_ioctl_data_s *)((uintptr_t)arg);
+            (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
           lpc54_phy_write(priv, req->reg_num, req->val_in);
           ret = OK
         }
