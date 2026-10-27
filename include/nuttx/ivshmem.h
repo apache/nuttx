@@ -70,8 +70,8 @@ struct ivshmem_driver_s
   dq_entry_t       node;
 };
 
-/* Filled in by a backend and embedded in its own device structure. The
- * id is assigned by ivshmem_register_device().
+/* Filled in by a backend and embedded in its own device structure. A
+ * negative id asks ivshmem_register_device() to assign the next one.
  */
 
 struct ivshmem_device_s
@@ -198,8 +198,9 @@ int ivshmem_unregister_driver(FAR struct ivshmem_driver_s *drv);
  *
  * Description:
  *   Called by a backend to add a device to the ivshmem bus. Assigns the
- *   device id and probes the matching driver, if one is registered.
- *   kick_peer notifies the peer, or is NULL when the device has none.
+ *   device id if it is negative and probes the matching driver, if one
+ *   is registered. kick_peer notifies the peer, or is NULL when the
+ *   device has none.
  *
  ****************************************************************************/
 
