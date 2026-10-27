@@ -109,7 +109,7 @@ if(NOT CONFIG_DISABLE_ENVIRON)
 endif()
 
 if(CONFIG_LIBC_EXECFUNCS)
-  list(APPEND SRCS lib_execl.c lib_execle.c lib_execv.c)
+  list(APPEND SRCS lib_execl.c lib_execle.c lib_execv.c lib_execvp.c)
 endif()
 
 if(NOT CONFIG_DISABLE_MOUNTPOINTS)
