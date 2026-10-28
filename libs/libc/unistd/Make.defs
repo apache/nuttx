@@ -42,6 +42,10 @@ ifeq ($(CONFIG_SCHED_WAITPID),y)
 CSRCS += lib_wait.c
 endif
 
+ifeq ($(CONFIG_FILE_STREAM),y)
+CSRCS += lib_getusershell.c
+endif
+
 ifneq ($(CONFIG_SCHED_USER_IDENTITY),y)
 CSRCS += lib_setuid.c lib_setgid.c lib_getuid.c lib_getgid.c
 CSRCS += lib_seteuid.c lib_setegid.c lib_geteuid.c lib_getegid.c

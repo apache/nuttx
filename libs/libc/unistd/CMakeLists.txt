@@ -80,6 +80,10 @@ if(CONFIG_SCHED_WAITPID)
   list(APPEND SRCS lib_wait.c)
 endif()
 
+if(CONFIG_FILE_STREAM)
+  list(APPEND SRCS lib_getusershell.c)
+endif()
+
 if(NOT CONFIG_SCHED_USER_IDENTITY)
   list(
     APPEND
