@@ -240,12 +240,13 @@ static int ftl_open(FAR struct inode *inode)
 static int ftl_close(FAR struct inode *inode)
 {
   FAR struct ftl_struct_s *dev;
+  int ret = OK;
 
   DEBUGASSERT(inode->i_private);
   dev = inode->i_private;
 
 #ifdef CONFIG_FTL_WRITEBUFFER
-  rwb_flush(&dev->rwb);
+  ret = rwb_flush(&dev->rwb);
 #endif
 
   if (--dev->refs == 0 && dev->unlinked)
@@ -261,7 +262,7 @@ static int ftl_close(FAR struct inode *inode)
       kmm_free(dev);
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -869,7 +870,7 @@ static int ftl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
   if (cmd == BIOC_FLUSH)
     {
 #ifdef CONFIG_FTL_WRITEBUFFER
-      rwb_flush(&dev->rwb);
+      return rwb_flush(&dev->rwb);
 #endif
     }
 
