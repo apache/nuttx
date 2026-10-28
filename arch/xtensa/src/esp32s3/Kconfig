@@ -959,7 +959,7 @@ config ESP32S3_PAGEFAULT
 config ESP32S3_USERFAULT_ABORT
 	bool "Abort a faulting user task instead of panicking"
 	default y
-	depends on !BUILD_FLAT
+	depends on !BUILD_FLAT && ENABLE_ALL_SIGNALS
 	select SIG_DEFAULT
 	select SIG_SIGKILL_ACTION
 	---help---
