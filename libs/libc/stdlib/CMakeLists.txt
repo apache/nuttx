@@ -77,6 +77,9 @@ if(CONFIG_PSEUDOTERM)
     lib_unlockpt.c
     lib_openpty.c
     lib_grantpt.c)
+  if(CONFIG_ARCH_HAVE_FORK)
+    list(APPEND SRCS lib_forkpty.c)
+  endif()
 endif()
 
 target_sources(c PRIVATE ${SRCS})
