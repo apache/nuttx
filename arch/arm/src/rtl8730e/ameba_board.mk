@@ -105,6 +105,11 @@ AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_adc.c
 AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_otp.c
 endif
 
+# The AP ROM has no RTC either; the fwlib RTC layer is RAM-side.
+ifeq ($(CONFIG_AMEBA_RTC),y)
+AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_rtc.c
+endif
+
 # Include paths scoped to the fwlib compile only (never leaked to NuttX core).
 # -DCONFIG_ARM_CORE_CA32 activates the CA32 code paths in ameba_flash_ram.c.
 # No -mcmse (that is Cortex-M33 TrustZone; CA32 is ARMv7-A non-secure EL1).

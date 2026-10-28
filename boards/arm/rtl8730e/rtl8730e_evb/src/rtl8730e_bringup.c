@@ -326,6 +326,17 @@ int rtl8730e_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_AMEBA_RTC
+  /* Register the on-chip RTC at /dev/rtc0. */
+
+  ret = rtl8730e_rtc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize RTC: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

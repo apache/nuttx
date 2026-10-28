@@ -144,6 +144,21 @@ if(CONFIG_AMEBA_ADC)
   endif()
 endif()
 
+if(CONFIG_AMEBA_RTC)
+  list(APPEND SRCS ${AMEBA_COMMON}/ameba_rtc.c)
+  if(NOT CONFIG_RTL8730E_FLASH_FS
+     AND NOT CONFIG_AMEBA_GPIO
+     AND NOT CONFIG_AMEBA_UART
+     AND NOT CONFIG_AMEBA_I2C
+     AND NOT CONFIG_AMEBA_SPI
+     AND NOT CONFIG_AMEBA_PWM
+     AND NOT CONFIG_AMEBA_TIMER
+     AND NOT CONFIG_AMEBA_WDG
+     AND NOT CONFIG_AMEBA_ADC)
+    list(APPEND SRCS rtl8730e_flash_stubs.c)
+  endif()
+endif()
+
 target_include_directories(arch PRIVATE ${AMEBA_COMMON})
 target_sources(arch PRIVATE ${SRCS})
 
@@ -230,7 +245,8 @@ if(CONFIG_RTL8730E_FLASH_FS
    OR CONFIG_AMEBA_SPI
    OR CONFIG_AMEBA_PWM
    OR CONFIG_AMEBA_TIMER
-   OR CONFIG_AMEBA_ADC)
+   OR CONFIG_AMEBA_ADC
+   OR CONFIG_AMEBA_RTC)
   set(AMEBA_FWLIB_SRCS
       ${AMEBA_SOC}/fwlib/ram_common/ameba_arch.c ${AMEBA_SOC}/swlib/log.c
       ${AMEBA_SOC}/swlib/sscanf_minimal.c)
@@ -276,6 +292,11 @@ if(CONFIG_RTL8730E_FLASH_FS
          ${AMEBA_SOC}/fwlib/ram_common/ameba_otp.c)
   endif()
 
+  # The AP ROM has no RTC either; the fwlib RTC layer is RAM-side.
+  if(CONFIG_AMEBA_RTC)
+    list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_rtc.c)
+  endif()
+
   # Silence SDK warnings, activate CA32 code paths.  No -mcmse (ARMv7-A).
   set(AMEBA_FWLIB_INC
       -Wno-int-conversion
@@ -319,6 +340,7 @@ if(CONFIG_AMEBA_GPIO
    OR CONFIG_AMEBA_TIMER
    OR CONFIG_AMEBA_WDG
    OR CONFIG_AMEBA_ADC
+   OR CONFIG_AMEBA_RTC
    OR CONFIG_RTL8730E_FLASH_FS)
   list(APPEND AMEBA_EXTRA_LIBS
        ${AMEBA_SOC}/project/${AMEBA_KM_PROJ}/lib/soc/lib_rom.a)
@@ -331,7 +353,8 @@ if(CONFIG_RTL8730E_FLASH_FS
    OR CONFIG_AMEBA_SPI
    OR CONFIG_AMEBA_PWM
    OR CONFIG_AMEBA_TIMER
-   OR CONFIG_AMEBA_ADC)
+   OR CONFIG_AMEBA_ADC
+   OR CONFIG_AMEBA_RTC)
   list(APPEND AMEBA_EXTRA_LIBS ${AMEBA_FWLIB_A})
 endif()
 
