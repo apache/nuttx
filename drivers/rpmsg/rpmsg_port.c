@@ -245,7 +245,8 @@ static void rpmsg_port_destroy_queues(FAR struct rpmsg_port_s *port)
 
 static FAR void *
 rpmsg_port_get_tx_payload_buffer(FAR struct rpmsg_device *rdev,
-                                 FAR uint32_t *len, int wait)
+                                 FAR uint32_t *len, int wait,
+                                 uint8_t priority)
 {
   FAR struct rpmsg_port_s *port =
     metal_container_of(rdev, struct rpmsg_port_s, rdev);
@@ -302,13 +303,13 @@ static int rpmsg_port_send_offchannel_nocopy(FAR struct rpmsg_device *rdev,
 
 static int rpmsg_port_send_offchannel_raw(FAR struct rpmsg_device *rdev,
                                           uint32_t src, uint32_t dst,
-                                          FAR const void *data,
-                                          int len, int wait)
+                                          FAR const void *data, int len,
+                                          int wait, uint8_t priority)
 {
   uint32_t buflen;
   FAR void *buf;
 
-  buf = rpmsg_port_get_tx_payload_buffer(rdev, &buflen, wait);
+  buf = rpmsg_port_get_tx_payload_buffer(rdev, &buflen, wait, priority);
   if (buf == NULL)
     {
       return RPMSG_ERR_NO_BUFF;

@@ -110,7 +110,8 @@ static const struct rpmsg_ops_s g_rpmsg_router_edge_ops =
 
 static FAR void *
 rpmsg_router_edge_get_tx_payload_buffer(FAR struct rpmsg_device *rdev,
-                                        FAR uint32_t *len, int wait)
+                                        FAR uint32_t *len, int wait,
+                                        uint8_t priority)
 {
   FAR struct rpmsg_router_edge_s *edge = rpmsg_router_edge_from_rdev(rdev);
   FAR struct rpmsg_device *hubdev = edge->hubdev;
@@ -121,7 +122,7 @@ rpmsg_router_edge_get_tx_payload_buffer(FAR struct rpmsg_device *rdev,
       return NULL;
     }
 
-  buf = hubdev->ops.get_tx_payload_buffer(hubdev, len, wait);
+  buf = hubdev->ops.get_tx_payload_buffer(hubdev, len, wait, priority);
   *len = edge->tx_len;
   return buf;
 }
@@ -345,6 +346,7 @@ static void rpmsg_router_edge_release(FAR struct rpmsg_endpoint *ept)
  *   data - data to send
  *   len - data length
  *   wait - boolean, wait or not for buffer to become available
+ *   priority - message priority
  *
  * Returned Values:
  *   size of data sent or negative value for failure.
@@ -355,7 +357,7 @@ static int
 rpmsg_router_edge_send_offchannel_raw(FAR struct rpmsg_device *rdev,
                                       uint32_t src, uint32_t dst,
                                       FAR const void *data,
-                                      int len, int wait)
+                                      int len, int wait, uint8_t priority)
 {
   FAR struct rpmsg_router_edge_s *edge = rpmsg_router_edge_from_rdev(rdev);
   FAR struct rpmsg_ns_msg *ns_msg = (FAR struct rpmsg_ns_msg *)data;
@@ -375,7 +377,7 @@ rpmsg_router_edge_send_offchannel_raw(FAR struct rpmsg_device *rdev,
         }
 
       return hubdev->ops.send_offchannel_raw(hubdev, src,
-                                             dst, data, len, wait);
+                                             dst, data, len, wait, priority);
     }
 
   /* Try to get user ept firstly */
