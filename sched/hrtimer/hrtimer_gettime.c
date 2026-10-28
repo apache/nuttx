@@ -49,7 +49,7 @@
  *
  ****************************************************************************/
 
-uint64_t hrtimer_gettime(FAR hrtimer_t *timer)
+uint64_t hrtimer_gettime(FAR const hrtimer_t *timer)
 {
   int64_t remain = hrtimer_read_64(&timer->expired) - clock_systime_nsec();
 

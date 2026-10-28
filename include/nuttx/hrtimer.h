@@ -240,7 +240,7 @@ int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
  *
  ****************************************************************************/
 
-uint64_t hrtimer_gettime(FAR hrtimer_t *timer);
+uint64_t hrtimer_gettime(FAR const hrtimer_t *timer);
 
 #ifdef __cplusplus
 }
