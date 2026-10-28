@@ -99,6 +99,40 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
         ret = mld_leavegroup(value);
         break;
 
+      case MCAST_JOIN_GROUP:      /* Join a multicast group (RFC 3678) */
+      case MCAST_LEAVE_GROUP:     /* Leave a multicast group (RFC 3678) */
+        {
+          FAR const struct group_req *greq =
+            (FAR const struct group_req *)value;
+          struct ipv6_mreq mrec;
+
+          if (value_len < sizeof(struct group_req))
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          if (greq->gr_group.ss_family != AF_INET6)
+            {
+              ret = -EADDRNOTAVAIL;
+              break;
+            }
+
+          mrec.ipv6mr_multiaddr = ((FAR const struct sockaddr_in6 *)
+                                   &greq->gr_group)->sin6_addr;
+          mrec.ipv6mr_interface = greq->gr_interface;
+
+          if (option == MCAST_JOIN_GROUP)
+            {
+              ret = mld_joingroup(&mrec);
+            }
+          else
+            {
+              ret = mld_leavegroup(&mrec);
+            }
+        }
+        break;
+
       case IPV6_MULTICAST_HOPS:   /* Multicast hop limit */
         {
           FAR struct socket_conn_s *conn = psock->s_conn;
@@ -142,10 +176,14 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
           break;
         }
 #endif /* NET_UDP_HAVE_STACK */
-#endif /* CONFIG_NET_MLD */
 
       /* The following IPv6 socket options are defined, but not implemented */
 
+      case MCAST_BLOCK_SOURCE:
+      case MCAST_UNBLOCK_SOURCE:
+      case MCAST_JOIN_SOURCE_GROUP:
+      case MCAST_LEAVE_SOURCE_GROUP:
+#endif /* CONFIG_NET_MLD */
       case IPV6_V6ONLY:           /* Restrict AF_INET6 socket to IPv6
                                    * communications only */
         nwarn("WARNING: Unimplemented IPv6 option: %d\n", option);

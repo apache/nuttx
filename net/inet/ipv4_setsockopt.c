@@ -132,21 +132,55 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
 #ifdef NET_UDP_HAVE_STACK
       case IP_ADD_MEMBERSHIP:         /* Join a multicast group */
       case IP_DROP_MEMBERSHIP:        /* Leave a multicast group */
+      case MCAST_JOIN_GROUP:          /* Join a multicast group (RFC 3678) */
+      case MCAST_LEAVE_GROUP:         /* Leave a multicast group (RFC 3678) */
         {
-          FAR const struct ip_mreq *mrec;
+          FAR struct udp_conn_s *conn = psock->s_conn;
           FAR struct net_driver_s *dev;
+          struct in_addr grpaddr;
 
           /* REVISIT:  This is not a proper implementation of IP_MSGFILTER */
 
-          mrec = (FAR const struct ip_mreq *)value;
-          if (mrec == NULL || value_len < sizeof(struct ip_mreq))
+          if (option == MCAST_JOIN_GROUP || option == MCAST_LEAVE_GROUP)
             {
-              nerr("ERROR: Bad value or value_len\n");
-              ret = -EINVAL;
+              FAR const struct group_req *greq =
+                (FAR const struct group_req *)value;
+
+              if (greq == NULL || value_len < sizeof(struct group_req) ||
+                  greq->gr_group.ss_family != AF_INET)
+                {
+                  nerr("ERROR: Bad value or value_len\n");
+                  ret = -EINVAL;
+                  break;
+                }
+
+              grpaddr = ((FAR const struct sockaddr_in *)
+                         &greq->gr_group)->sin_addr;
+
+              /* Use the default network device if gr_interface is 0 */
+
+              if (greq->gr_interface == 0)
+                {
+                  dev = netdev_default();
+                }
+              else
+                {
+                  dev = netdev_findbyindex(greq->gr_interface);
+                }
             }
           else
             {
-              FAR struct udp_conn_s *conn = psock->s_conn;
+              FAR const struct ip_mreq *mrec =
+                (FAR const struct ip_mreq *)value;
+
+              if (mrec == NULL || value_len < sizeof(struct ip_mreq))
+                {
+                  nerr("ERROR: Bad value or value_len\n");
+                  ret = -EINVAL;
+                  break;
+                }
+
+              grpaddr = mrec->imr_multiaddr;
 
               /* Use the default network device is imr_interface is
                * INADDRY_ANY.
@@ -164,36 +198,36 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
 
                   dev = netdev_findby_lipv4addr(mrec->imr_interface.s_addr);
                 }
+            }
 
-              if (dev == NULL)
+          if (dev == NULL)
+            {
+              nwarn("WARNING: Could not find device\n");
+              ret = -ENODEV;
+            }
+          else if (option == IP_ADD_MEMBERSHIP || option == MCAST_JOIN_GROUP)
+            {
+              if (conn->mreq.imr_multiaddr.s_addr != 0)
                 {
-                  nwarn("WARNING: Could not find device\n");
-                  ret = -ENODEV;
-                }
-              else if (option == IP_ADD_MEMBERSHIP)
-                {
-                  if (conn->mreq.imr_multiaddr.s_addr != 0)
-                    {
-                      ret = -EADDRINUSE;
-                    }
-                  else
-                    {
-                      ret = igmp_joingroup(dev, &mrec->imr_multiaddr);
-                      if (ret == OK)
-                        {
-                          conn->mreq.imr_multiaddr = mrec->imr_multiaddr;
-                          conn->mreq.imr_ifindex   = dev->d_ifindex;
-                        }
-                    }
+                  ret = -EADDRINUSE;
                 }
               else
                 {
-                  ret = igmp_leavegroup(dev, &mrec->imr_multiaddr);
+                  ret = igmp_joingroup(dev, &grpaddr);
                   if (ret == OK)
                     {
-                      conn->mreq.imr_multiaddr.s_addr = 0;
-                      conn->mreq.imr_ifindex          = 0;
+                      conn->mreq.imr_multiaddr = grpaddr;
+                      conn->mreq.imr_ifindex   = dev->d_ifindex;
                     }
+                }
+            }
+          else
+            {
+              ret = igmp_leavegroup(dev, &grpaddr);
+              if (ret == OK)
+                {
+                  conn->mreq.imr_multiaddr.s_addr = 0;
+                  conn->mreq.imr_ifindex          = 0;
                 }
             }
         }
@@ -320,6 +354,10 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
       case IP_MULTICAST_ALL:          /* Modify the delivery policy of
                                        * multicast messages bound to
                                        * INADDR_ANY */
+      case MCAST_BLOCK_SOURCE:        /* Same as IP_BLOCK_SOURCE */
+      case MCAST_UNBLOCK_SOURCE:      /* Same as IP_UNBLOCK_SOURCE */
+      case MCAST_JOIN_SOURCE_GROUP:   /* Same as IP_ADD_SOURCE_MEMBERSHIP */
+      case MCAST_LEAVE_SOURCE_GROUP:  /* Same as IP_DROP_SOURCE_MEMBERSHIP */
 
         /* #warning Missing logic */
 
