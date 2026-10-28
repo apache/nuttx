@@ -128,7 +128,10 @@ static bool timer_notifier(FAR uint32_t *next_interval_us, FAR void *arg)
 
   /* Signal the waiter.. if there is one */
 
-  poll_notify(&upper->fds, 1, POLLIN);
+  if (upper->fds != NULL)
+    {
+      poll_notify(&upper->fds, 1, POLLIN);
+    }
 
   nxsig_notification(notify->pid, &notify->event, SI_QUEUE, &upper->work);
 
