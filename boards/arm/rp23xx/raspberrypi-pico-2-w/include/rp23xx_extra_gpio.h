@@ -67,16 +67,12 @@
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
-EXTERN gspi_dev_t *g_cyw43439;
+extern gspi_dev_t *g_cyw43439;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -130,7 +126,6 @@ static inline int rp23xx_extra_gpio_get(uint32_t gpio, bool *value)
   return bcmf_get_gpio(g_cyw43439->priv, gpio, value);
 }
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif

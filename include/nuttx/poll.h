@@ -75,20 +75,15 @@ struct pollfd_s
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 void poll_default_cb(FAR struct pollfd_s *fds);
 void poll_notify(FAR struct pollfd_s **afds, int nfds,
                  pollevent_t eventset);
 
-#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
