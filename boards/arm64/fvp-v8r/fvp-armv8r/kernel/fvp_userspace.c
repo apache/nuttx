@@ -71,6 +71,8 @@ extern uint8_t _sdata[];           /* Start of .data */
 extern uint8_t _edata[];           /* End+1 of .data */
 extern uint8_t _sbss[];            /* Start of .bss */
 extern uint8_t _ebss[];            /* End+1 of .bss */
+
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
 static void sig_trampoline(void) naked_function;
 static void sig_trampoline(void)
 {
@@ -93,6 +95,7 @@ static void sig_trampoline(void)
     :
   );
 }
+#endif
 
 const struct userspace_s userspace locate_data(".userspace") =
 {
@@ -117,7 +120,9 @@ const struct userspace_s userspace locate_data(".userspace") =
 
   /* Signal handler trampoline */
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   .signal_handler   = (void *)sig_trampoline,
+#endif
 
   /* User-space work queue support (declared in include/nuttx/wqueue.h) */
 
