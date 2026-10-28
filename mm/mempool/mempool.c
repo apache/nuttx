@@ -114,6 +114,7 @@ static inline void mempool_add_backtrace(FAR struct mempool_s *pool,
       int result = sched_backtrace(buf->pid, buf->backtrace,
                                    CONFIG_MM_BACKTRACE,
                                    CONFIG_MM_HEAP_MEMPOOL_BACKTRACE_SKIP);
+
       if (result < CONFIG_MM_BACKTRACE)
         {
           buf->backtrace[result] = NULL;
@@ -142,7 +143,7 @@ static void mempool_foreach(FAR struct mempool_s *pool,
       while (nblks--)
         {
           buf = (FAR struct mempool_backtrace_s *)
-                  pool->ibase + nblks * blocksize + pool->blocksize;
+                  (pool->ibase + nblks * blocksize + pool->blocksize);
 
           callback(pool, buf, input, output);
         }
