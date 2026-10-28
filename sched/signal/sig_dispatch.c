@@ -405,9 +405,30 @@ static int nxsig_alloc_dyn_pending(FAR irqstate_t *flags)
       FAR sigq_t *sigq = NULL;
 #endif
 
-      /* We can't do memory allocations in idle task or interrupt */
+      /* We can't do memory allocations in idle task or interrupt.  An
+       * interrupt handler takes the structures reserved for it
+       * (nxsig_alloc_pendingsignal(), nxsig_alloc_pendingsigaction()), if
+       * any are left.
+       */
 
-      if (up_interrupt_context() || sched_idletask())
+      if (up_interrupt_context())
+        {
+          if (alloc_signal && sq_empty(&g_sigpendingirqsignal))
+            {
+              return -EAGAIN;
+            }
+
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
+          if (alloc_sigact && sq_empty(&g_sigpendingirqaction))
+            {
+              return -EAGAIN;
+            }
+#endif
+
+          return OK;
+        }
+
+      if (sched_idletask())
         {
           return -EAGAIN;
         }
