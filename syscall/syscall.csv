@@ -127,7 +127,7 @@
 "pthread_setaffinity_np","pthread.h","!defined(CONFIG_DISABLE_PTHREAD) && defined(CONFIG_SMP)","int","pthread_t","size_t","FAR const cpu_set_t *"
 "pthread_setschedparam","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","pthread_t","int","FAR const struct sched_param *"
 "pthread_setschedprio","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","pthread_t","int"
-"pthread_sigmask","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","int","FAR const sigset_t *","FAR sigset_t *"
+"pthread_sigmask","pthread.h","!defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_DISABLE_ALL_SIGNALS)","int","int","FAR const sigset_t *","FAR sigset_t *"
 "pthread_sigqueue","signal.h","!defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_DISABLE_ALL_SIGNALS)","int","pthread_t","int","union sigval|FAR void *|sival_ptr"
 "pwrite","unistd.h","","ssize_t","int","FAR const void *","size_t","off_t"
 "read","unistd.h","","ssize_t","int","FAR void *","size_t"
