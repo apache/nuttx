@@ -51,6 +51,7 @@ static bool nxsig_dispatch_unmasked(FAR struct tcb_s *rtcb)
 {
   sigset_t unmaskedset;
   FAR sigpendq_t *pendingsig;
+  FAR const void *source;
   siginfo_t info;
   bool group;
   int signo;
@@ -103,8 +104,9 @@ static bool nxsig_dispatch_unmasked(FAR struct tcb_s *rtcb)
                * nxsig_tcbdispatch() does not return.
                */
 
-              info  = pendingsig->info;
-              group = pendingsig->tcb == NULL;
+              info   = pendingsig->info;
+              group  = pendingsig->tcb == NULL;
+              source = pendingsig->source;
               nxsig_release_pendingsignal(pendingsig);
 
               /* Process it like a normal signal.  Since the signal was
@@ -113,7 +115,7 @@ static bool nxsig_dispatch_unmasked(FAR struct tcb_s *rtcb)
                * other recipient for the signal other than this thread.
                */
 
-              nxsig_tcbdispatch(rtcb, &info, group);
+              nxsig_tcbdispatch_source(rtcb, &info, group, source);
             }
         }
     }

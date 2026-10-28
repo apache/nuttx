@@ -89,6 +89,7 @@ struct sigpendq
 {
   FAR struct sigpendq *flink;    /* Forward link */
   FAR struct tcb_s *tcb;         /* TCB of thread to deliver to */
+  FAR const void *source;        /* The POSIX timer of the signal, or NULL */
   siginfo_t info;                /* Signal information */
   uint8_t   type;                /* (Used to manage allocations) */
 };
@@ -107,6 +108,7 @@ struct sigq_s
   } action;                      /* Signal action */
   sigset_t  mask;                /* Additional signals to mask while the
                                   * the signal-catching function executes */
+  FAR const void *source;        /* The POSIX timer of the signal, or NULL */
   siginfo_t info;                /* Signal information */
   uint8_t   type;                /* (Used to manage allocations) */
 };
@@ -163,6 +165,7 @@ extern sq_queue_t  g_sigpendingirqsignal;
 /* Forward references */
 
 struct task_group_s;
+struct sigwork_s;
 
 /* sig_initializee.c */
 
@@ -186,11 +189,28 @@ int                nxsig_default_initialize(FAR struct tcb_s *tcb);
 
 /* sig_dispatch.c */
 
+int                nxsig_tcbdispatch_source(FAR struct tcb_s *stcb,
+                                            FAR siginfo_t *info,
+                                            bool group_dispatch,
+                                            FAR const void *source);
+int                nxsig_dispatch_source(pid_t pid, FAR siginfo_t *info,
+                                         bool thread,
+                                         FAR const void *source);
+bool               nxsig_source_queued(pid_t pid, FAR const void *source,
+                                       int signo);
 int                nxsig_tcbdispatch(FAR struct tcb_s *stcb,
                                      FAR siginfo_t *info,
                                      bool group_dispatch);
 int                nxsig_dispatch(pid_t pid, FAR siginfo_t *info,
                                   bool thread);
+
+/* sig_notification.c */
+
+int                nxsig_notification_source(pid_t pid,
+                                             FAR struct sigevent *event,
+                                             int code,
+                                             FAR struct sigwork_s *work,
+                                             FAR const void *source);
 
 /* sig_cleanup.c */
 

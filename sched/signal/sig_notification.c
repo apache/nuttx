@@ -138,7 +138,7 @@ int nxsig_event_valid(FAR const struct sigevent *event)
 }
 
 /****************************************************************************
- * Name: nxsig_notification
+ * Name: nxsig_notification_source
  *
  * Description:
  *   Notify a client an event via either a signal or function call
@@ -152,6 +152,7 @@ int nxsig_event_valid(FAR const struct sigevent *event)
  *   work  - The work structure to queue.  Must be non-NULL if
  *           event->sigev_notify == SIGEV_THREAD.  Ignored if
  *           CONFIG_SIG_EVTHREAD is not defined.
+ *   source - The POSIX timer that sends the notification, or NULL
  *
  * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
@@ -160,8 +161,9 @@ int nxsig_event_valid(FAR const struct sigevent *event)
  *
  ****************************************************************************/
 
-int nxsig_notification(pid_t pid, FAR struct sigevent *event,
-                       int code, FAR struct sigwork_s *work)
+int nxsig_notification_source(pid_t pid, FAR struct sigevent *event,
+                              int code, FAR struct sigwork_s *work,
+                              FAR const void *source)
 {
   sinfo("pid=%" PRIu16 " signo=%d code=%d sival_ptr=%p\n",
         pid, event->sigev_signo, code, event->sigev_value.sival_ptr);
@@ -203,7 +205,7 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
 
       /* Send the signal */
 
-      return nxsig_dispatch(pid, &info, thread);
+      return nxsig_dispatch_source(pid, &info, thread, source);
     }
 
 #ifdef CONFIG_SIG_EVTHREAD
@@ -250,3 +252,18 @@ void nxsig_cancel_notification(FAR struct sigwork_s *work)
   work_cancel_sync(SIG_EVTHREAD_WORK, &work->work);
 }
 #endif
+
+/****************************************************************************
+ * Name: nxsig_notification
+ *
+ * Description:
+ *   nxsig_notification_source() for a notification that no POSIX timer
+ *   sends.
+ *
+ ****************************************************************************/
+
+int nxsig_notification(pid_t pid, FAR struct sigevent *event,
+                       int code, FAR struct sigwork_s *work)
+{
+  return nxsig_notification_source(pid, event, code, work, NULL);
+}

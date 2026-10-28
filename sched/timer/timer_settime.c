@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <limits.h>
 #include <stdint.h>
 #include <time.h>
 #include <string.h>
@@ -35,6 +36,7 @@
 #include <nuttx/irq.h>
 
 #include "clock/clock.h"
+#include "signal/signal.h"
 #include "timer/timer.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
@@ -53,11 +55,37 @@ static void timer_timeout(wdparm_t itimer);
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: timer_overrun
+ *
+ * Description:
+ *   Count n more overruns of the timer, up to DELAYTIMER_MAX.
+ *
+ ****************************************************************************/
+
+static inline void timer_overrun(FAR struct posix_timer_s *timer, clock_t n)
+{
+  if (n >= (clock_t)(DELAYTIMER_MAX - timer->pt_overrun))
+    {
+      timer->pt_overrun = DELAYTIMER_MAX;
+    }
+  else
+    {
+      timer->pt_overrun += (int)n;
+    }
+}
+
+/****************************************************************************
  * Name: timer_signotify
  *
  * Description:
  *   This function basically re-implements nxsig_queue() so that the si_code
- *   can be correctly set to SI_TIMER
+ *   can be correctly set to SI_TIMER.
+ *
+ *   POSIX queues one signal of a timer at a time: while the last one is
+ *   still pending or queued for a signal handler, an expiration is only an
+ *   overrun.  An expiration whose signal cannot be queued (no free pending
+ *   signal in an interrupt handler) is an overrun too.  The overrun count
+ *   starts again with each signal that is queued (timer_getoverrun()).
  *
  * Input Parameters:
  *   timer - A reference to the POSIX timer that just timed out
@@ -72,13 +100,32 @@ static void timer_timeout(wdparm_t itimer);
 
 static inline void timer_signotify(FAR struct posix_timer_s *timer)
 {
+  pid_t pid = timer->pt_owner;
+  int ret;
+
+  if ((timer->pt_event.sigev_notify & SIGEV_THREAD_ID) != 0)
+    {
+      pid = timer->pt_event.sigev_notify_thread_id;
+    }
+
+  if (nxsig_source_queued(pid, timer, timer->pt_event.sigev_signo))
+    {
+      timer_overrun(timer, 1);
+      return;
+    }
+
+  timer->pt_overrun = 0;
 #ifdef CONFIG_SIG_EVTHREAD
-  DEBUGVERIFY(nxsig_notification(timer->pt_owner, &timer->pt_event,
-                                 SI_TIMER, &timer->pt_work));
+  ret = nxsig_notification_source(timer->pt_owner, &timer->pt_event,
+                                  SI_TIMER, &timer->pt_work, timer);
 #else
-  DEBUGVERIFY(nxsig_notification(timer->pt_owner, &timer->pt_event,
-                                 SI_TIMER, NULL));
+  ret = nxsig_notification_source(timer->pt_owner, &timer->pt_event,
+                                  SI_TIMER, NULL, timer);
 #endif
+  if (ret < 0)
+    {
+      timer_overrun(timer, 1);
+    }
 }
 
 /****************************************************************************
@@ -121,14 +168,14 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
        *  |   pt_delay   |   pt_delay   |   pt_delay   | ... |
        *  ^ pt_expected                    ^ ticks     ^ next pt_expected
        * In this case, frame equals 3.
-       * Then, pt_overrun <- frame - 1 and
+       * Then, pt_overrun <- pt_overrun + frame - 1 and
        * the next pt_expected <- pt_expected + frame * pt_delay.
        * Assumption of correctness:
        * (delay + timer->pt_delay) should not overflow.
        */
 
       frame = (delay + timer->pt_delay) / timer->pt_delay;
-      timer->pt_overrun   = (int)(frame - 1u);
+      timer_overrun(timer, frame - 1u);
       timer->pt_expected += frame * timer->pt_delay;
 
       wd_start_abstick(&timer->pt_wdog, timer->pt_expected,
