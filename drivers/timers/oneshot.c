@@ -109,8 +109,11 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
 
   /* Signal the waiter.. if there is one */
 
-  nxsig_notification(priv->od_pid, &priv->od_event, SI_QUEUE,
-                     &priv->od_work);
+  if (priv->od_event.sigev_notify != SIGEV_NONE)
+    {
+      nxsig_notification(priv->od_pid, &priv->od_event, SI_QUEUE,
+                         &priv->od_work);
+    }
 }
 #endif
 
@@ -189,6 +192,7 @@ static int oneshot_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case OSIOC_MAXDELAY:
         {
           FAR struct timespec *ts = (FAR struct timespec *)((uintptr_t)arg);
+
           DEBUGASSERT(ts != NULL);
 
           ret = ONESHOT_MAX_DELAY(priv->od_lower, ts);

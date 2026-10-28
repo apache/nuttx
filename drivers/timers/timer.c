@@ -133,7 +133,11 @@ static bool timer_notifier(FAR uint32_t *next_interval_us, FAR void *arg)
       poll_notify(&upper->fds, 1, POLLIN);
     }
 
-  nxsig_notification(notify->pid, &notify->event, SI_QUEUE, &upper->work);
+  if (notify->event.sigev_notify != SIGEV_NONE)
+    {
+      nxsig_notification(notify->pid, &notify->event, SI_QUEUE,
+                         &upper->work);
+    }
 
   return notify->periodic;
 }
