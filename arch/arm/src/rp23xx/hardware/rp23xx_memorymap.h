@@ -46,7 +46,7 @@
  ****************************************************************************/
 
 #define RP23XX_FLASH_BASE                0x10000000 /* -0x001fffff: FLASH memory space (2048KB) */
-#define RP23XX_SRAM_BASE                 0x20000000 /* -0x20041fff: SRAM memory space (520KB) */
+#define RP23XX_SRAM_BASE                 0x20000000 /* -0x20081fff: SRAM memory space (520KB) */
 
 #define RP23XX_SYSINFO_BASE              0x40000000
 #define RP23XX_SYSCFG_BASE               0x40008000  /* Register block for various chip control signals */

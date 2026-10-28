@@ -63,6 +63,13 @@
  *   is banked per core, so each core must call this before it relies on an
  *   atomic operation.
  *
+ *   The memory attributes follow the layout of mpu_control() in
+ *   armv8-m/arm_mpu.c, and the SRAM takes MPU region 0, so that region
+ *   must stay reserved should arm_mpu.c ever allocate regions here.
+ *
+ *   A resume from suspend to RAM does not run this; the suspend support
+ *   does not handle SMP yet, but must call it once it does.
+ *
  ****************************************************************************/
 
 static inline void rp23xx_mpu_share_sram(void)
@@ -73,14 +80,19 @@ static inline void rp23xx_mpu_share_sram(void)
   putreg32(0, MPU_CTRL);
   UP_MB();
 
-  /* Attribute index 0: Normal memory, Non-cacheable */
+  /* The same attribute layout as mpu_control() */
 
-  modifyreg32(MPU_MAIR0, 0xff, MPU_MAIR_NONCACHEABLE);
+  putreg32((MPU_MAIR_STRONGLY_ORDER <<  0) |
+           (MPU_MAIR_DEVICE         <<  8) |
+           (MPU_MAIR_NONCACHEABLE   << 16) |
+           (MPU_MAIR_WRITE_THROUGH  << 24),
+           MPU_MAIR0);
+  putreg32((MPU_MAIR_WRITE_BACK     <<  0), MPU_MAIR1);
 
   putreg32(0, MPU_RNR);
   putreg32((base & MPU_RBAR_BASE_MASK) | MPU_RBAR_SH_OUTER |
            MPU_RBAR_AP_RWRW, MPU_RBAR);
-  putreg32((limit & MPU_RLAR_LIMIT_MASK) | (0 << MPU_RLAR_INDX_SHIFT) |
+  putreg32((limit & MPU_RLAR_LIMIT_MASK) | MPU_RLAR_NONCACHEABLE |
            MPU_RLAR_ENABLE, MPU_RLAR);
 
   putreg32(MPU_CTRL_ENABLE | MPU_CTRL_PRIVDEFENA, MPU_CTRL);
