@@ -1117,6 +1117,9 @@ static int ctucanfd_sock_transmit(FAR struct netdev_lowerhalf_s *dev,
   uint32_t                    offset;
   int                         txidx;
   int                         i;
+#ifdef CONFIG_NET_CAN_CANFD
+  int                         wirelen;
+#endif
 
   /* Get TX empty buffer */
 
@@ -1234,11 +1237,15 @@ static int ctucanfd_sock_transmit(FAR struct netdev_lowerhalf_s *dev,
       ctucanfd_putreg(priv, offset + CTUCANFD_TXBUF_TSL, 0);
       ctucanfd_putreg(priv, offset + CTUCANFD_TXBUF_TSU, 0);
 
-      /* Pack bytes into aligned register writes and pad the final word. */
+      /* Pack bytes into aligned register writes.  The controller sends
+       * can_dlc2bytes(dlc) bytes, which can be more than frame->len, so
+       * pad up to that length with zeros.
+       */
 
-      for (i = 0; i < frame->len; i += 4)
+      wirelen = can_dlc2bytes(fmt.s.dlc);
+      for (i = 0; i < wirelen; i += 4)
         {
-          regval  = (uint32_t)frame->data[i];
+          regval  = (uint32_t)(i < frame->len ? frame->data[i] : 0);
           regval |= (uint32_t)(i + 1 < frame->len ? frame->data[i + 1] : 0)
                     << 8;
           regval |= (uint32_t)(i + 2 < frame->len ? frame->data[i + 2] : 0)
