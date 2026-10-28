@@ -105,6 +105,11 @@
 
 #define SCMI_MSG_LMM_NOTIFY 0x9u /* Configure LM notifications */
 
+/* SCMI BBM protocol message IDs */
+
+#define SCMI_MSG_BBM_GPR_SET 0x3u /* Write a GPR value */
+#define SCMI_MSG_BBM_GPR_GET 0x4u /* Read a GPR value */
+
 /* SCMI message type of a P2A notification */
 
 #define SCMI_MSG_TYPE_NOTIFY 3u
@@ -1299,6 +1304,138 @@ int32_t imx9_scmi_lmmevent(uint32_t *lmid, uint32_t *eventlm,
           *flags = msgrx->flags;
         }
     }
+
+  return status;
+}
+
+int32_t imx9_scmi_bbmgprset(uint32_t channel, uint32_t index,
+                            uint32_t value)
+{
+  int32_t status;
+  uint32_t header;
+  void *msg;
+
+  /* Acquire lock */
+
+  SCMI_A2P_LOCK(channel);
+
+  /* Init buffer */
+
+  status = imx9_scmi_bufinit(channel, &msg);
+
+  /* Send request */
+
+  if (status == OK)
+    {
+      /* Request message structure */
+
+      typedef struct
+      {
+        uint32_t header;
+        uint32_t index;
+        uint32_t value;
+      } msg_tbbmd3_t;
+
+      msg_tbbmd3_t *msgtx = (msg_tbbmd3_t *)msg;
+
+      /* Fill in parameters */
+
+      msgtx->index = index;
+      msgtx->value = value;
+
+      /* Send message */
+
+      status = imx9_scmi_a2ptx(channel, SCMI_PROTOCOL_BBM,
+                               SCMI_MSG_BBM_GPR_SET, sizeof(msg_tbbmd3_t),
+                               &header);
+    }
+
+  /* Receive response */
+
+  if (status == OK)
+    {
+      status = imx9_scmi_a2prx(channel, sizeof(msg_status_t), header);
+    }
+
+  /* Release lock */
+
+  SCMI_A2P_UNLOCK(channel);
+
+  /* Return status */
+
+  return status;
+}
+
+int32_t imx9_scmi_bbmgprget(uint32_t channel, uint32_t index,
+                            uint32_t *value)
+{
+  int32_t status;
+  uint32_t header;
+  void *msg;
+
+  /* Response message structure */
+
+  typedef struct
+  {
+    uint32_t header;
+    int32_t status;
+    uint32_t value;
+  } msg_rbbmd4_t;
+
+  /* Acquire lock */
+
+  SCMI_A2P_LOCK(channel);
+
+  /* Init buffer */
+
+  status = imx9_scmi_bufinit(channel, &msg);
+
+  /* Send request */
+
+  if (status == OK)
+    {
+      /* Request message structure */
+
+      typedef struct
+      {
+        uint32_t header;
+        uint32_t index;
+      } msg_tbbmd4_t;
+
+      msg_tbbmd4_t *msgtx = (msg_tbbmd4_t *)msg;
+
+      /* Fill in parameters */
+
+      msgtx->index = index;
+
+      /* Send message */
+
+      status = imx9_scmi_a2ptx(channel, SCMI_PROTOCOL_BBM,
+                               SCMI_MSG_BBM_GPR_GET, sizeof(msg_tbbmd4_t),
+                               &header);
+    }
+
+  /* Receive response */
+
+  if (status == OK)
+    {
+      status = imx9_scmi_a2prx(channel, sizeof(msg_rbbmd4_t), header);
+    }
+
+  /* Copy out if no error */
+
+  if (status == OK && value != NULL)
+    {
+      const msg_rbbmd4_t *msgrx = (const msg_rbbmd4_t *)msg;
+
+      *value = msgrx->value;
+    }
+
+  /* Release lock */
+
+  SCMI_A2P_UNLOCK(channel);
+
+  /* Return status */
 
   return status;
 }
