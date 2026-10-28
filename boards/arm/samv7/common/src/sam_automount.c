@@ -94,8 +94,8 @@ static const struct sam_automount_config_s g_hsmci0config =
     .fstype     = CONFIG_SAMV7_HSMCI0_AUTOMOUNT_FSTYPE,
     .blockdev   = CONFIG_SAMV7_HSMCI0_AUTOMOUNT_BLKDEV,
     .mountpoint = CONFIG_SAMV7_HSMCI0_AUTOMOUNT_MOUNTPOINT,
-    .ddelay     = MSEC2TICK(CONFIG_SAMV7_HSMCI0_AUTOMOUNT_DDELAY),
-    .udelay     = MSEC2TICK(CONFIG_SAMV7_HSMCI0_AUTOMOUNT_UDELAY),
+    .ddelay     = MSEC2TICK32(CONFIG_SAMV7_HSMCI0_AUTOMOUNT_DDELAY),
+    .udelay     = MSEC2TICK32(CONFIG_SAMV7_HSMCI0_AUTOMOUNT_UDELAY),
     .attach     = sam_attach,
     .enable     = sam_enable,
     .inserted   = sam_inserted
@@ -192,6 +192,7 @@ static void sam_enable(const struct automount_lower_s *lower,
       if (state->handler)
         {
           bool inserted = sam_cardinserted(config->hsmci);
+
           state->handler(&config->lower, state->arg, inserted);
         }
 

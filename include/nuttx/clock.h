@@ -180,10 +180,15 @@
 #define NSEC2TICK(nsec)       div_const_roundup(nsec, NSEC_PER_TICK)
 #define USEC2TICK(usec)       div_const_roundup(usec, USEC_PER_TICK)
 
+#define div_roundup32(n, b)   (((n) + (b) - 1) / (b))
+
 #if (MSEC_PER_TICK * USEC_PER_MSEC) == USEC_PER_TICK
 #  define MSEC2TICK(msec)     div_const_roundup(msec, MSEC_PER_TICK)
+#  define MSEC2TICK32(msec)   div_roundup32(msec, MSEC_PER_TICK)
 #else
 #  define MSEC2TICK(msec)     USEC2TICK((msec) * USEC_PER_MSEC)
+#  define MSEC2TICK32(msec)   div_roundup32((msec) * USEC_PER_MSEC, \
+                                            USEC_PER_TICK)
 #endif
 
 #define DSEC2TICK(dsec)       MSEC2TICK((dsec) * MSEC_PER_DSEC)
