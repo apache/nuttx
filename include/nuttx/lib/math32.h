@@ -338,12 +338,12 @@ extern "C"
         __n; \
       })
 
-#  define div_const(n, base) \
+#  define div_const(n, base) (typeof(n)) \
     ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const(n, base) : ((n) / (base)))
-#  define div_const_roundup(n, base) \
+#  define div_const_roundup(n, base) (typeof(n)) \
     ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const((n) + (base) - 1, base) : \
      (((n) + (base) - 1) / (base)))
-#  define div_const_roundnearest(n, base) \
+#  define div_const_roundnearest(n, base) (typeof(n)) \
     ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const((n) + ((base) / 2), base) : \
      (((n) + ((base) / 2)) / (base)))
 #else
