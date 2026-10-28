@@ -176,7 +176,15 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
       ret = nxsig_clockwait(CLOCK_REALTIME, 0, timeout, NULL);
       if (ret < 0)
         {
+          /* Stop waiting for the signals of set: else the next wait of
+           * this thread (a sleep) would take a blocked signal of set as
+           * its own, and the signal would be lost.
+           */
+
+          flags = enter_critical_section();
+          sigemptyset(&rtcb->sigwaitmask);
           rtcb->sigunbinfo = NULL;
+          leave_critical_section(flags);
           return ret;
         }
 
