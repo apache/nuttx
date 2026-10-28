@@ -166,17 +166,24 @@
 always_inline_function
 static uint32_t tricore_atomic_swap(volatile void *addr, uint32_t value)
 {
+#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
+  return __swap((unsigned int *)addr, value);
+#else
   uint32_t res;
 
   __asm__ volatile ("swap.w [%1]0, %2"
                     : "=d"(res) : "a"(addr), "0"(value));
   return res;
+#endif
 }
 
 always_inline_function
 static uint32_t tricore_atomic_cmpswap(volatile void *addr, uint32_t value,
                                        uint32_t condition)
 {
+#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
+  return __cmpswapw((unsigned int *)addr, value, condition);
+#else
   uint64_t reg64 = value | ((uint64_t)condition << 32);
 
   __asm__ __volatile__ ("cmpswap.w [%1]0, %A0"
@@ -184,6 +191,7 @@ static uint32_t tricore_atomic_cmpswap(volatile void *addr, uint32_t value,
                         : "a" (addr)
                         : "memory");
   return (uint32_t)reg64;
+#endif
 }
 
 /****************************************************************************

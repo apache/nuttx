@@ -2817,19 +2817,19 @@ config ARCH_BOARD_SABRE_6QUAD
 		This options selects support for NuttX on the NXP/Freescale Sabre
 		board featuring the iMX 6Quad CPU.
 
-config ARCH_BOARD_A2G_TC397_5V_TFT
-	bool "Infineon's AURIX TC397 board: KIT_A2G_TC397_5V_TFT"
-	depends on ARCH_CHIP_TC397
+config ARCH_BOARD_A2G_TC375_LITE
+	bool "Infineon AURIX Lite Kit (TC375)"
+	depends on TC3X_CHIP_TC375
 	---help---
-		This options selects support for NuttX on the Infineon's AURIX board
-		board featuring the TC397 6Quad CPU.
+		Infineon AURIX Lite Kit evaluation board (KIT_A2G_TC375_LITE)
+		with the TC375 SoC.
 
-config ARCH_BOARD_TRIBOARD_TC4X9_COM
-	bool "Infineon's AURIX TC4DA board: TRIBOARD_TC4X9_COM"
-	depends on ARCH_CHIP_TC4DA
+config ARCH_BOARD_A2G_TC397XA_3V3_TFT
+	bool "Infineon AURIX Application Kit (TC397XA 3V3 TFT)"
+	depends on TC3X_CHIP_TC397
 	---help---
-		This options selects support for NuttX on the Infineon's AURIX board
-		board featuring the TC4DA 6Quad CPU.
+		Infineon AURIX TC397 Application Kit (KIT_A2G_TC397XA_3V3_TFT)
+		with the TC397XA SoC.
 
 config ARCH_BOARD_QEMU_ARMV7A
 	bool "Qemu ARMv7a CPUs board"
@@ -4390,8 +4390,8 @@ config ARCH_BOARD
 	default "starpro64"                    if ARCH_BOARD_EIC7700X_STARPRO64
 	default "eic7700-evb"                  if ARCH_BOARD_EIC7700X_EVB
 	default "sabre-6quad"                  if ARCH_BOARD_SABRE_6QUAD
-	default "a2g-tc397-5v-tft"             if ARCH_BOARD_A2G_TC397_5V_TFT
-	default "triboard_tc4x9_com"           if ARCH_BOARD_TRIBOARD_TC4X9_COM
+	default "a2g-tc375-lite"               if ARCH_BOARD_A2G_TC375_LITE
+	default "a2g-tc397xa-3v3-tft"          if ARCH_BOARD_A2G_TC397XA_3V3_TFT
 	default "qemu-armv7a"                  if ARCH_BOARD_QEMU_ARMV7A
 	default "rtl8730e_evb"                     if ARCH_BOARD_RTL8730E_EVB
 	default "qemu-armv7r"                  if ARCH_BOARD_QEMU_ARMV7R
@@ -4632,8 +4632,11 @@ endif
 if ARCH_BOARD_SABRE_6QUAD
 source "boards/arm/imx6/sabre-6quad/Kconfig"
 endif
-if ARCH_BOARD_A2G_TC397_5V_TFT
-source "boards/tricore/tc397/a2g-tc397-5v-tft/Kconfig"
+if ARCH_BOARD_A2G_TC375_LITE
+source "boards/tricore/tc3x/a2g-tc375-lite/Kconfig"
+endif
+if ARCH_BOARD_A2G_TC397XA_3V3_TFT
+source "boards/tricore/tc3x/a2g-tc397xa-3v3-tft/Kconfig"
 endif
 if ARCH_BOARD_MPS2_AN500
 source "boards/arm/mps/mps2-an500/Kconfig"
