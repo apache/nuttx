@@ -176,6 +176,7 @@ static ssize_t virtio_rng_read(FAR struct file *filep, FAR char *buffer,
   if (ret < 0)
     {
       spin_unlock_irqrestore(&priv->lock, flags);
+      virtio_free_buf(priv->vdev, vb.buf);
       return ret;
     }
 
