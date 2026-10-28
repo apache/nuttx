@@ -62,6 +62,15 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
   size_t allocsize;
   size_t newsize;
 
+  /* Treat zero as a request for the natural malloc alignment.  Some
+   * internal callers pass zero when no extra alignment is required.
+   */
+
+  if (alignment == 0)
+    {
+      alignment = MM_ALIGN;
+    }
+
   /* Make sure that alignment is less than half max size_t */
 
   if (alignment >= (SIZE_MAX / 2))
@@ -94,6 +103,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
   if (alignment <= MM_ALIGN)
     {
       FAR void *ptr = mm_malloc(heap, size);
+
       DEBUGASSERT(ptr == NULL || ((uintptr_t)ptr) % alignment == 0);
       return ptr;
     }
