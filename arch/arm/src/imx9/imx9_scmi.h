@@ -55,6 +55,21 @@
 #define SCMI_PROTOCOL_FUSA    0x83u /* FuSa protocol */
 #define SCMI_PROTOCOL_MISC    0x84u /* Misc protocol */
 
+/* SCMI status codes returned by the System Manager. The request functions
+ * pass these through unchanged; they overlap with negated errno values.
+ */
+
+#define SCMI_ERR_NOT_SUPPORTED      (-1)
+#define SCMI_ERR_INVALID_PARAMETERS (-2)
+#define SCMI_ERR_DENIED             (-3)
+#define SCMI_ERR_NOT_FOUND          (-4)
+#define SCMI_ERR_OUT_OF_RANGE       (-5)
+#define SCMI_ERR_BUSY               (-6)
+#define SCMI_ERR_COMMS_ERROR        (-7)
+#define SCMI_ERR_GENERIC_ERROR      (-8)
+#define SCMI_ERR_HARDWARE_ERROR     (-9)
+#define SCMI_ERR_PROTOCOL_ERROR     (-10)
+
 /* SCMI LMM notification message ID and event flags */
 
 #define SCMI_MSG_LMM_EVENT      0x0u
@@ -284,5 +299,57 @@ int32_t imx9_scmi_lmmnotify(uint32_t channel, uint32_t lmid, uint32_t flags);
 
 int32_t imx9_scmi_lmmevent(uint32_t *lmid, uint32_t *eventlm,
                            uint32_t *flags);
+
+/****************************************************************************
+ * Name: imx9_scmi_bbmgprset
+ *
+ * Description:
+ *   Write a battery-backed general purpose register (BBNSM GPR) via the
+ *   SCMI BBM protocol. The agent needs EXCLUSIVE or higher access to the
+ *   GPR in the System Manager configuration. Blocks until the System
+ *   Manager responds, must not be called from interrupt context.
+ *
+ * Input Parameters:
+ *   channel - SCMI channel to use for the request
+ *   index   - Index of the GPR to write
+ *   value   - 32-bit value to write
+ *
+ * Returned Value:
+ *   OK on success, SCMI_ERR_NOT_FOUND if the index is not valid,
+ *   SCMI_ERR_DENIED if the agent may not write the GPR, another SCMI
+ *   status or a negated errno value on other failures. A CRC error on the
+ *   response returns -EIO, which has the same value as
+ *   SCMI_ERR_OUT_OF_RANGE.
+ *
+ ****************************************************************************/
+
+int32_t imx9_scmi_bbmgprset(uint32_t channel, uint32_t index,
+                            uint32_t value);
+
+/****************************************************************************
+ * Name: imx9_scmi_bbmgprget
+ *
+ * Description:
+ *   Read a battery-backed general purpose register (BBNSM GPR) via the
+ *   SCMI BBM protocol. The agent needs GET or higher access to the GPR in
+ *   the System Manager configuration. Blocks until the System Manager
+ *   responds, must not be called from interrupt context.
+ *
+ * Input Parameters:
+ *   channel - SCMI channel to use for the request
+ *   index   - Index of the GPR to read
+ *   value   - Returned 32-bit GPR value, may be NULL
+ *
+ * Returned Value:
+ *   OK on success, SCMI_ERR_NOT_FOUND if the index is not valid,
+ *   SCMI_ERR_DENIED if the agent may not read the GPR, another SCMI
+ *   status or a negated errno value on other failures. A CRC error on the
+ *   response returns -EIO, which has the same value as
+ *   SCMI_ERR_OUT_OF_RANGE.
+ *
+ ****************************************************************************/
+
+int32_t imx9_scmi_bbmgprget(uint32_t channel, uint32_t index,
+                            uint32_t *value);
 
 #endif /* __ARCH_ARM_SRC_IMX9_IMX9_SCMI_H */
