@@ -220,9 +220,13 @@ int nxsem_wait(FAR sem_t *sem)
 
 int nxsem_wait_uninterruptible(FAR sem_t *sem)
 {
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  FAR struct tcb_s *rtcb;
+  uint32_t flags;
+#endif
   int ret;
 
-  nxsem_set_uninterruptible(sem);
+  NXSEM_SET_UNINTERRUPTIBLE(rtcb, flags);
 
   do
     {
@@ -231,6 +235,8 @@ int nxsem_wait_uninterruptible(FAR sem_t *sem)
       ret = nxsem_wait(sem);
     }
   while (ret == -EINTR);
+
+  NXSEM_RESTORE_UNINTERRUPTIBLE(rtcb, flags);
 
   return ret;
 }
@@ -262,9 +268,13 @@ int nxsem_wait_uninterruptible(FAR sem_t *sem)
 int nxsem_clockwait_uninterruptible(FAR sem_t *sem, clockid_t clockid,
                                     FAR const struct timespec *abstime)
 {
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  FAR struct tcb_s *rtcb;
+  uint32_t flags;
+#endif
   int ret;
 
-  nxsem_set_uninterruptible(sem);
+  NXSEM_SET_UNINTERRUPTIBLE(rtcb, flags);
 
   do
     {
@@ -273,6 +283,8 @@ int nxsem_clockwait_uninterruptible(FAR sem_t *sem, clockid_t clockid,
       ret = nxsem_clockwait(sem, clockid, abstime);
     }
   while (ret == -EINTR);
+
+  NXSEM_RESTORE_UNINTERRUPTIBLE(rtcb, flags);
 
   return ret;
 }
