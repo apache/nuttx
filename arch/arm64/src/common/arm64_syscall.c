@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
@@ -43,6 +44,22 @@
 #include "arm64_fatal.h"
 #include "sched/sched.h"
 #include "signal/signal.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* From user mode, the only reserved system call that is allowed is the
+ * return from a signal handler that the kernel dispatched.  Without full
+ * signal support the kernel dispatches no handler, so none is allowed.
+ */
+
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
+#  define USER_SIGRETURN(tcb, cmd) \
+     ((cmd) == SYS_signal_handler_return && (tcb)->xcp.sigreturn != 0)
+#else
+#  define USER_SIGRETURN(tcb, cmd) false
+#endif
 
 /****************************************************************************
  * Private Types
@@ -183,7 +200,7 @@ uint64_t *arm64_syscall(uint64_t *regs)
 
 #ifdef CONFIG_BUILD_KERNEL
   if ((regs[REG_SPSR] & SPSR_MODE_MASK) == SPSR_MODE_EL0T &&
-      (cmd != SYS_signal_handler_return || tcb->xcp.sigreturn == 0))
+      !USER_SIGRETURN(tcb, cmd))
     {
       regs[REG_X0] = -ENOSYS;
       return regs;
