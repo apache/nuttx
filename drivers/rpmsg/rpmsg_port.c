@@ -478,7 +478,8 @@ static int rpmsg_port_ns_callback(FAR struct rpmsg_endpoint *ept,
                                   FAR void *data, size_t len, uint32_t src,
                                   FAR void *priv)
 {
-  FAR struct rpmsg_device *rdev = ept->rdev;
+  FAR struct rpmsg_port_s *port = priv;
+  FAR struct rpmsg_device *rdev = &port->rdev;
   FAR struct rpmsg_ns_msg *msg = data;
   FAR const char *name = msg->name;
   uint32_t dest = msg->addr;
