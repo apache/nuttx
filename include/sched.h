@@ -99,7 +99,7 @@
 
 /* int CPU_COUNT(FAR const cpu_set_t *set); */
 
-#define CPU_COUNT(s) popcountl(*s)
+#define CPU_COUNT(s) popcountl(*(s))
 
 /* void CPU_AND(FAR cpu_set_t *destset, FAR const cpu_set_t *srcset1,
  *              FAR const cpu_set_t *srcset2);
@@ -127,11 +127,11 @@
 
 /* FAR cpu_set_t *CPU_ALLOC(int num_cpus); */
 
-#define CPU_ALLOC(n) (FAR cpu_set_t *)malloc(sizeof(cpu_set_t));
+#define CPU_ALLOC(n) ((FAR cpu_set_t *)malloc(sizeof(cpu_set_t)))
 
 /* void CPU_FREE(cpu_set_t *set); */
 
-#define CPU_FREE(s) free(s)
+#define CPU_FREE(s) free((FAR void *)(s))
 
 /* size_t CPU_ALLOC_SIZE(int num_cpus); */
 
@@ -139,7 +139,7 @@
 
 /* void CPU_ZERO_S(size_t setsize, FAR cpu_set_t *set); */
 
-#define CPU_ZERO_S(n,s) CPU_ZERO_S(s)
+#define CPU_ZERO_S(n,s) CPU_ZERO(s)
 
 /* void CPU_SET_S(int cpu, size_t setsize, FAR cpu_set_t *set); */
 
