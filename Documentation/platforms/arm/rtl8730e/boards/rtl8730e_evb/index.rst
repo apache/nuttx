@@ -49,6 +49,8 @@ Supported in this NuttX port:
 * On-chip watchdog exposed as a ``/dev/watchdog0`` character device
 * 12-bit ADC exposed as a ``/dev/adc0`` character device, sampled in polling
   mode through the SDK fwlib register layer
+* On-chip RTC exposed as a ``/dev/rtc0`` character device, with a one-shot
+  alarm
 * littlefs persistent storage mounted at ``/data`` (a dedicated SPI NOR flash
   partition), backing the Wi-Fi key-value store
 * Wi-Fi station and SoftAP through the ``wapi`` tool
@@ -211,6 +213,28 @@ clashing channel from the table. The input range is 0 to 3.3 V with 12-bit
 samples, reported as raw codes. Exercise it with the example::
 
     nsh> adc -n 1     # sample CH2-CH5 once on /dev/adc0
+
+rtc
+---
+
+Minimal NSH with the RTC driver and the ``alarm`` example
+(``examples/alarm``) enabled (no Wi-Fi). The board registers the on-chip RTC
+at ``/dev/rtc0`` (see ``boards/arm/rtl8730e/rtl8730e_evb/src/rtl8730e_rtc.c``)
+and the system time is seeded from it at boot. The RTC has no board wiring
+(it is an internal clock in the always-on domain). The hardware keeps only a
+year and a day-of-year, so the driver converts to and from calendar
+month/day in software. After a cold power-up the counter starts in 1900; the
+driver then seeds it with ``CONFIG_START_YEAR/MONTH/DAY``, while a warm
+RTC that already holds a later date is left alone. The RTC is reset by
+CHIP_EN, power-on and system reset (which the board reset button
+triggers), but not by BOR, thermal, deep-sleep or watchdog resets. After a
+reset button press the registers therefore read back as zero (year 1900)
+when the driver starts and the clock is seeded again, whereas after a
+watchdog reset the time carries on. Exercise it with ``date`` and the alarm example::
+
+    nsh> date -s "Oct 28 12:00:00 2026"
+    nsh> date
+    nsh> alarm 5      # one-shot alarm on /dev/rtc0 firing in 5 seconds
 
 Wi-Fi
 =====
