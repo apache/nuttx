@@ -185,10 +185,12 @@ tricore_systimer_start_absolute(struct oneshot_lowerhalf_s *lower,
 {
   struct tricore_systimer_lowerhalf_s *priv =
     (struct tricore_systimer_lowerhalf_s *)lower;
+  irqstate_t flags;
+  uint64_t   min_expected;
 
-  irqstate_t flags = up_irq_save();
-  uint64_t min_expected = tricore_systimer_get_time(priv) +
-                          TRICORE_SYSTIMER_MIN_DELAY;
+  flags = up_irq_save();
+  min_expected = tricore_systimer_get_time(priv) +
+                 TRICORE_SYSTIMER_MIN_DELAY;
   expected = expected < min_expected ? min_expected : expected;
   tricore_systimer_set_timecmp(priv, expected);
 

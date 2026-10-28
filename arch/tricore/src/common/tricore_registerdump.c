@@ -109,7 +109,7 @@ void tricore_dump_csachain(uintptr_t pcxi)
           tricore_dump_lowcsa((uint32_t *)tricore_csa2addr(pcxi));
         }
 
-        pcxi = tricore_csa2addr(pcxi)[0];
+      pcxi = tricore_csa2addr(pcxi)[0];
     }
 }
 
