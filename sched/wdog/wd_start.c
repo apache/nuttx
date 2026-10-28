@@ -192,9 +192,40 @@ bool wd_insert(FAR struct wdog_s *wdog, clock_t expired,
   FAR struct wdog_s *curr;
   FAR struct wdog_s *head;
 
+  wdog->func = wdentry;
+  up_getpicbase(&wdog->picbase);
+  wdog->arg = arg;
+  wdog->expired = expired;
+
+  /* Empty list: insert directly as the first active watchdog. */
+
+  if (list_is_empty(&g_wdactivelist))
+    {
+      list_add_head(&g_wdactivelist, &wdog->node);
+      return true;
+    }
+
   /* Traverse the watchdog list */
 
   head = list_first_entry(&g_wdactivelist, struct wdog_s, node);
+
+  /* New earliest expiration: insert at the head and reassess timer. */
+
+  if (!clock_compare(head->expired, expired))
+    {
+      list_add_head(&g_wdactivelist, &wdog->node);
+      return true;
+    }
+
+  curr = list_last_entry(&g_wdactivelist, struct wdog_s, node);
+
+  /* New latest expiration: append at the tail without scanning. */
+
+  if (clock_compare(curr->expired, expired))
+    {
+      list_add_tail(&g_wdactivelist, &wdog->node);
+      return false;
+    }
 
   list_for_every_entry(&g_wdactivelist, curr, struct wdog_s, node)
     {
@@ -214,11 +245,6 @@ bool wd_insert(FAR struct wdog_s *wdog, clock_t expired,
    */
 
   list_add_before(&curr->node, &wdog->node);
-
-  wdog->func = wdentry;
-  up_getpicbase(&wdog->picbase);
-  wdog->arg = arg;
-  wdog->expired = expired;
 
   /* Return whether the head of the watchdog list has changed. */
 
@@ -369,6 +395,7 @@ uint64_t wd_timer(const hrtimer_t *timer, uint64_t expired)
   clock_t  tick = div_const(expired, NSEC_PER_TICK);
   clock_t delay = wd_expiration(tick) - tick;
   uint64_t nsec = TICK2NSEC(delay);
+
   return nsec <= HRTIMER_MAX_DELAY ? nsec : HRTIMER_MAX_DELAY;
 }
 #endif
