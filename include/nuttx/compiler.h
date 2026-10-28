@@ -740,6 +740,12 @@
 #    define tz_nonsecure_call  __attribute__((cmse_nonsecure_call))
 #  endif
 
+#if defined(CONFIG_DEBUG_FULLOPT) && !defined(CONFIG_ARCH_64BIT) && \
+     !defined(CONFIG_ARCH_RENESAS) && !defined(CONFIG_ARCH_XTENSA) && \
+     !defined(CONFIG_ARCH_SPARC)
+#  define CONFIG_HAVE_EXPRESSION_STATEMENT 1
+#endif
+
 /* Warning about usage of deprecated features. */
 
 #  define deprecated_function  __attribute__((deprecated))
