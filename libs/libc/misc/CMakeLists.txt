@@ -38,6 +38,7 @@ list(
   lib_idr.c
   lib_impure.c
   lib_memfd.c
+  lib_posix_madvise.c
   lib_mutex.c
   lib_fchmodat.c
   lib_fstatat.c

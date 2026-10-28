@@ -123,10 +123,3 @@ errout:
   set_errno(-ret);
   return ERROR;
 }
-
-/* Ignore the advice since there is no alternative strategy to select. */
-
-int posix_madvise(FAR void *addr, size_t len, int advice)
-{
-  return 0;
-}
