@@ -1253,9 +1253,11 @@ static FAR netpkt_t *kvaser_sock_recv(FAR struct netdev_lowerhalf_s *dev)
 
   regval = kvaser_getreg_sja(priv, SJA1000_DATA_0_REG);
 
-  /* Get the DLC */
+  /* Get the DLC.  A classic frame carries at most 8 data bytes, also with
+   * DLC 9..15.
+   */
 
-  frame->can_dlc = (regval & SJA1000_FI_DLC_MASK);
+  frame->can_dlc = MIN(regval & SJA1000_FI_DLC_MASK, CAN_MAX_DLEN);
 
   /* Get the CAN identifier. */
 
@@ -1303,7 +1305,7 @@ static FAR netpkt_t *kvaser_sock_recv(FAR struct netdev_lowerhalf_s *dev)
 
   /* Get data */
 
-  for (i = 0; i < can_dlc2bytes(frame->can_dlc); i++)
+  for (i = 0; i < frame->can_dlc; i++)
     {
       frame->data[i] = kvaser_getreg_sja(priv, dreg + i);
     }
