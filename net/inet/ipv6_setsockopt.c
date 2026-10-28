@@ -112,35 +112,35 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
       case IPV6_MULTICAST_IF:     /* Interface to use for outgoing multicast
                                    * packets */
 #ifdef NET_UDP_HAVE_STACK
-      {
-        FAR struct net_driver_s *dev;
-        FAR struct udp_conn_s *conn = psock->s_conn;
-        int ifindex = *(FAR int *)value;
+        {
+          FAR struct net_driver_s *dev;
+          FAR struct udp_conn_s *conn = psock->s_conn;
+          int ifindex = *(FAR int *)value;
 
-        if (ifindex > 0)
-          {
-            dev = netdev_findbyindex(ifindex);
-            if (dev == NULL)
-              {
-                ret = -ENODEV;
-                break;
-              }
+          if (ifindex > 0)
+            {
+              dev = netdev_findbyindex(ifindex);
+              if (dev == NULL)
+                {
+                  ret = -ENODEV;
+                  break;
+                }
 
 #ifdef CONFIG_NET_BINDTODEVICE
-            if (conn->sconn.s_boundto &&
-                ifindex != conn->sconn.s_boundto)
-              {
-                ret = -EINVAL;
-                break;
-              }
+              if (conn->sconn.s_boundto &&
+                  ifindex != conn->sconn.s_boundto)
+                {
+                  ret = -EINVAL;
+                  break;
+                }
 #endif
-          }
+            }
 
-        conn->mreq.imr_ifindex = ifindex;
+          conn->mreq.imr_ifindex = ifindex;
 
-        ret = OK;
-        break;
-      }
+          ret = OK;
+          break;
+        }
 #endif /* NET_UDP_HAVE_STACK */
 #endif /* CONFIG_NET_MLD */
 
