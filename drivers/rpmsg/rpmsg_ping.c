@@ -121,7 +121,7 @@ static int rpmsg_ping_ept_cb(FAR struct rpmsg_endpoint *ept,
 }
 
 static int rpmsg_ping_once(FAR struct rpmsg_endpoint *ept, int len,
-                           int cmd, uint32_t *buf_len, char i)
+                           int cmd, uint32_t *buf_len, unsigned char i)
 {
   FAR struct rpmsg_ping_msg_s *msg;
   int ret;
