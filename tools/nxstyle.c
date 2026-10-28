@@ -195,6 +195,7 @@ static const char *g_white_prefix[] =
   "Elf",     /* Ref:  include/elf.h, include/elf32.h, include/elf64.h */
   "GL",      /* Ref:  apps/graphics/tinygl/tinygl/include/GL/gl.h */
   "Ifx",     /* Ref:  arch/tricore/src */
+  "PDC_",    /* Ref:  apps/include/graphics/curses.h */
   "PRId",    /* Ref:  inttypes.h */
   "PRIi",    /* Ref:  inttypes.h */
   "PRIo",    /* Ref:  inttypes.h */
