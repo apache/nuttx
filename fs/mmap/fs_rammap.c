@@ -103,6 +103,8 @@ static int msync_rammap(FAR struct mm_map_entry_s *entry, FAR void *start,
                    entry->offset, nwrite);
               break;
             }
+
+          continue;
         }
 
       /* Increment number of bytes written */
@@ -322,6 +324,8 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
               ret = nread;
               goto errout_with_region;
             }
+
+          continue;
         }
 
       /* Check for end of file. */
