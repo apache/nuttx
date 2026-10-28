@@ -176,6 +176,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
       ret = nxsig_clockwait(CLOCK_REALTIME, 0, timeout, NULL);
       if (ret < 0)
         {
+          sigemptyset(&rtcb->sigwaitmask);
           rtcb->sigunbinfo = NULL;
           return ret;
         }
