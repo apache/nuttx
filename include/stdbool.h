@@ -70,14 +70,24 @@
  */
 
 #  ifndef __cplusplus
-#    ifdef CONFIG_C99_BOOL
-#      define bool _Bool
-#    else
-#      define bool uint8_t
-#    endif
 
-#    define true  1
-#    define false 0
+/* bool, true and false are keywords in C23, and in the C2X mode of GCC 13
+ * and Clang 15 or later.  Then define only __bool_true_false_are_defined.
+ */
+
+#    if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 202311L && \
+        (__STDC_VERSION__ <= 201710L || \
+         (!defined(__clang__) && (!defined(__GNUC__) || __GNUC__ < 13)) || \
+         (defined(__clang__) && __clang_major__ < 15)))
+#      ifdef CONFIG_C99_BOOL
+#        define bool _Bool
+#      else
+#        define bool uint8_t
+#      endif
+
+#      define true  1
+#      define false 0
+#    endif
 
 #    define __bool_true_false_are_defined 1
 #  else
