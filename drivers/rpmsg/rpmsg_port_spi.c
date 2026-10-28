@@ -344,6 +344,14 @@ static void rpmsg_port_spi_complete_handler(FAR void *arg)
       rpspi->shutdown = false;
     }
 
+  if (rpspi->rxhdr->len < sizeof(struct rpmsg_port_header_s) ||
+      rpspi->rxhdr->len > rpspi->port.rxq.len)
+    {
+      rpmsgerr("drop malformed rx: len=%u crc=%u cmd=%u\n",
+               rpspi->rxhdr->len, rpspi->rxhdr->crc, rpspi->rxhdr->cmd);
+      goto out;
+    }
+
   if (rpspi->rxhdr->crc != 0)
     {
       uint16_t crc = rpmsg_port_spi_crc16(rpspi->rxhdr);
