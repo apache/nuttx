@@ -94,6 +94,8 @@ if(CONFIG_OPENAMP_CACHE)
   set(WITH_DCACHE ON)
 endif()
 
+set(WITH_VQ_RX_EMPTY_NOTIFY ON)
+
 if(CONFIG_OPENAMP_DEBUG)
   add_compile_definitions(RPMSG_DEBUG)
   add_compile_definitions(VQUEUE_DEBUG)
