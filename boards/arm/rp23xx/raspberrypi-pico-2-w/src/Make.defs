@@ -30,16 +30,12 @@ endif
 # CONFIG_ARCH_LEDS, whose board_autoled_on() is called from interrupt handlers
 # and from assertion handling, so there is no rp23xx_autoleds.c.  It also
 # means there is no LED at all without the wireless chip.
-# See src/rp23xx_userleds.c.
+# See common/src/rp23xx_cyw43439_userleds.c.
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 $(error CONFIG_ARCH_LEDS is not supported on this board: the LED hangs off \
         the CYW43439 and cannot be driven from interrupt context. \
         Use CONFIG_USERLED instead)
-endif
-
-ifeq ($(CONFIG_RP23XX_INFINEON_CYW43439),y)
-CSRCS += rp23xx_userleds.c
 endif
 
 DEPPATH += --dep-path board

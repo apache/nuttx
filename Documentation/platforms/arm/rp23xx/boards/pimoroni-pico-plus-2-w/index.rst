@@ -107,7 +107,8 @@ has two consequences:
 
 With ``CONFIG_USERLED`` the LED appears as ``/dev/userleds`` and can be driven
 with the ``leds`` example.  Board code can also reach it, and the CYW43439's
-other two GPIOs, through ``include/rp23xx_extra_gpio.h``:
+other two GPIOs, through
+``boards/arm/rp23xx/common/include/rp23xx_extra_gpio.h``:
 
 ===== ========= ==============================================================
 GPIO  Direction Function

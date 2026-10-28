@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp23xx/raspberrypi-pico-2-w/include/rp23xx_extra_gpio.h
+ * boards/arm/rp23xx/common/include/rp23xx_extra_gpio.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,13 +20,13 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_RP23XX_RASPBERRYPI_PICO_2_W_INCLUDE_RP23XX_EXTRA_GPIO_H
-#define __BOARDS_ARM_RP23XX_RASPBERRYPI_PICO_2_W_INCLUDE_RP23XX_EXTRA_GPIO_H
+#ifndef __BOARDS_ARM_RP23XX_COMMON_INCLUDE_RP23XX_EXTRA_GPIO_H
+#define __BOARDS_ARM_RP23XX_COMMON_INCLUDE_RP23XX_EXTRA_GPIO_H
 
 /****************************************************************************
  *  These functions control the GPIO pins on the CYW43439 wireless chip, not
- *  the GPIO pins of the RP2350.  The pin assignments for the Pimoroni Pico
- *  Plus 2 W are:
+ *  the GPIO pins of the RP2350.  The pin assignments on the Raspberry Pi
+ *  Pico 2 W and the Pimoroni Pico Plus 2 W are:
  *
  *  GPIO 0 - output - controls the onboard LED
  *  GPIO 1 - output - controls the onboard voltage regulator mode.
@@ -131,4 +131,4 @@ static inline int rp23xx_extra_gpio_get(uint32_t gpio, bool *value)
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_RP23XX_RASPBERRYPI_PICO_2_W_INCLUDE_RP23XX_EXTRA_GPIO_H */
+#endif /* __BOARDS_ARM_RP23XX_COMMON_INCLUDE_RP23XX_EXTRA_GPIO_H */
