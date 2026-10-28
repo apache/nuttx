@@ -1238,6 +1238,13 @@ static FAR netpkt_t *kvaser_sock_recv(FAR struct netdev_lowerhalf_s *dev)
   if (!pkt)
     {
       canerr("alloc pkt_new failed\n");
+
+      /* Drop the frame and re-enable the RX interrupt, so that the next
+       * frame in the RX FIFO is received when a packet is available again.
+       */
+
+      kvaser_putreg_sja(priv, SJA1000_CMD_REG, SJA1000_RELEASE_BUF);
+      kvaser_rxint(priv, true);
       return NULL;
     }
 
@@ -1275,9 +1282,12 @@ static FAR netpkt_t *kvaser_sock_recv(FAR struct netdev_lowerhalf_s *dev)
       canerr("ERROR: Received message with extended"
              " identifier.  Dropped\n");
 
-      /* Release RX buffer */
+      /* Release RX buffer and re-enable the RX interrupt for the next
+       * frame in the RX FIFO
+       */
 
       kvaser_putreg_sja(priv, SJA1000_CMD_REG, SJA1000_RELEASE_BUF);
+      kvaser_rxint(priv, true);
 
       netpkt_free(dev, pkt, NETPKT_RX);
       return NULL;
