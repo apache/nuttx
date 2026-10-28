@@ -20,10 +20,20 @@
 #
 # ##############################################################################
 
+# TASKING assembles copies of the GNU .S files written for astc
+
+if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
+  set(ASMEXT .asm)
+else()
+  set(ASMEXT .S)
+endif()
+
 set(SRCS
     tricore_allocateheap.c
+    tricore_backtrace.c
     tricore_cache.c
     tricore_checkstack.c
+    tricore_compiler.c
     tricore_createstack.c
     tricore_csa.c
     tricore_exit.c
@@ -32,26 +42,22 @@ set(SRCS
     tricore_initialize.c
     tricore_initialstate.c
     tricore_irq.c
-    tricore_main.c
     tricore_nputs.c
     tricore_perf.c
     tricore_registerdump.c
     tricore_releasestack.c
     tricore_saveusercontext.c
+    tricore_schedulesigaction.c
+    tricore_sigdeliver.c
     tricore_stackframe.c
+    tricore_stm.c
     tricore_svcall.c
     tricore_tcbinfo.c
     tricore_trapcall.c
-    tricore_systimer.c
-    tricore_usestack.c)
-
-if(CONFIG_SCHED_BACKTRACE)
-  list(APPEND SRCS tricore_backtrace.c)
-endif()
-
-if(CONFIG_ENABLE_ALL_SIGNALS)
-  list(APPEND SRCS tricore_schedulesigaction.c tricore_sigdeliver.c)
-endif()
+    tricore_usestack.c
+    tricore_interrupt${ASMEXT}
+    tricore_trap${ASMEXT}
+    tricore_lib${ASMEXT})
 
 if(CONFIG_ARCH_USE_MPU)
   list(APPEND SRCS tricore_mpu.c)
@@ -65,12 +71,8 @@ if(CONFIG_ARCH_HAVE_DEBUG)
   list(APPEND SRCS tricore_hwdebug.c)
 endif()
 
-set(IFXFLAGS -DIFX_CFG_EXTEND_TRAP_HOOKS -DIFX_USE_SW_MANAGED_INT)
-
 target_sources(arch PRIVATE ${SRCS})
-target_sources(nuttx PRIVATE tricore_doirq.c)
-target_compile_options(arch PRIVATE ${IFXFLAGS})
-target_compile_options(nuttx PRIVATE ${IFXFLAGS})
+target_sources(nuttx PRIVATE tricore_doirq.c tricore_head${ASMEXT})
 target_include_directories(
   nuttx SYSTEM PRIVATE ${NUTTX_DIR}/include ${NUTTX_BINARY_DIR}/include
                        ${NUTTX_BINARY_DIR}/include_arch)

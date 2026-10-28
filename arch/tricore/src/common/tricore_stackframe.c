@@ -29,7 +29,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <sched.h>
-#include <nuttx/debug.h>
+#include <debug.h>
 
 #include <nuttx/arch.h>
 
@@ -76,7 +76,7 @@ void *up_stack_frame(struct tcb_s *tcb, size_t frame_size)
 
   /* Align the frame_size */
 
-  frame_size = STACKFRAME_ALIGN_UP(frame_size);
+  frame_size = STACK_ALIGN_UP(frame_size);
 
   /* Is there already a stack allocated? Is it big enough? */
 

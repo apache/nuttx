@@ -31,6 +31,7 @@
 #include <string.h>
 
 #include <nuttx/arch.h>
+#include <arch/arch.h>
 #include <nuttx/tls.h>
 #include <arch/irq.h>
 
@@ -49,32 +50,27 @@ uintptr_t *tricore_alloc_csa(uintptr_t pc, uintptr_t sp,
 {
   uintptr_t *plcsa;
   uintptr_t *pucsa;
+  uint32_t val;
+  irqstate_t flags;
 
-  plcsa = (uintptr_t *)tricore_csa2addr(__mfcr(CPU_FCX));
+  TRICORE_IRQ_DISABLE_AND_SAVE(flags);
+  TRICORE_MFCR(TRICORE_CPU_FCX, val);
 
-  /* DSYNC instruction should be executed immediately prior to the MTCR */
-
-  __dsync();
-
+  plcsa = (uintptr_t *)tricore_csa2addr(val);
   pucsa = (uintptr_t *)tricore_csa2addr(plcsa[REG_UPCXI]);
 
-  __mtcr(CPU_FCX, pucsa[REG_UPCXI]);
+  TRICORE_MTCR(TRICORE_CPU_FCX, pucsa[REG_UPCXI]);
 
-  /* ISYNC instruction executed immediately following MTCR */
+  TRICORE_IRQ_RESTORE(flags);
 
-  __isync();
-
-  memset(pucsa, 0, TC_CONTEXT_SIZE);
-  memset(plcsa, 0, TC_CONTEXT_SIZE);
+  memset(pucsa, 0, XCPTCONTEXT_SIZE);
+  memset(plcsa, 0, XCPTCONTEXT_SIZE);
 
   pucsa[REG_SP]  = sp;
   pucsa[REG_PSW] = psw;
-
-  /* Save the task entry point */
-
   pucsa[REG_UPC] = pc;
-  plcsa[REG_LPC] = pc;
 
+  plcsa[REG_LPC]   = pc;
   plcsa[REG_LPCXI] = (PCXI_UL | tricore_addr2csa(pucsa));
 
   if (!irqsave)
@@ -82,7 +78,7 @@ uintptr_t *tricore_alloc_csa(uintptr_t pc, uintptr_t sp,
       plcsa[REG_LPCXI] |= PCXI_PIE;
     }
 
-  return plcsa;
+  return (uintptr_t *)tricore_addr2csa(plcsa);
 }
 
 /****************************************************************************
@@ -140,7 +136,7 @@ void tricore_reclaim_csa(uintptr_t pcxi)
 
   /* Look up the current free CSA head. */
 
-  free = __mfcr(CPU_FCX);
+  TRICORE_MFCR(TRICORE_CPU_FCX, free);
 
   /* Join the current Free onto the Tail of what is being reclaimed. */
 
@@ -148,5 +144,5 @@ void tricore_reclaim_csa(uintptr_t pcxi)
 
   /* Move the head of the reclaimed into the Free. */
 
-  __mtcr(CPU_FCX, head);
+  TRICORE_MTCR(TRICORE_CPU_FCX, head);
 }

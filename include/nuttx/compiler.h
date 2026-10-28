@@ -1376,6 +1376,8 @@
 #  define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
 #  define return_address(x) 0
 
+#  define __builtin_unreachable()
+
 #  define PRAGMA(x)
 #  define unroll_loop(n)
 

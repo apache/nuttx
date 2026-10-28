@@ -34,8 +34,6 @@
 #include <nuttx/addrenv.h>
 #include <nuttx/board.h>
 
-#include <arch/board/board.h>
-
 #include <sched/sched.h>
 
 #include "tricore_internal.h"
@@ -44,45 +42,56 @@
  * Public Functions
  ****************************************************************************/
 
-IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
+#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
+void tricore_isr_handler(int irq)
+#else
+void __attribute__((interrupt_handler)) tricore_isr_handler(int irq)
+#endif
 {
-  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
-  struct tcb_s *tcb = this_task();
+  struct tcb_s *running_task = g_running_tasks[this_cpu()];
+  struct tcb_s *tcb;
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
 #else
-  Ifx_CPU_ICR icr;
   uintptr_t *regs;
 
-  icr.U = __mfcr(CPU_ICR);
-  regs = tricore_csa2addr(__mfcr(CPU_PCXI));
+  TRICORE_MFCR(TRICORE_CPU_PCXI, regs);
 
-  if (*running_task != NULL)
+  if (running_task != NULL)
     {
-      (*running_task)->xcp.regs = regs;
+      running_task->xcp.regs = regs;
     }
 
   board_autoled_on(LED_INIRQ);
 
   /* Nested interrupts are not supported */
 
-  DEBUGASSERT(!up_interrupt_context());
+  DEBUGASSERT(up_current_regs() == NULL);
 
-  /* Set irq flag */
+  /* Current regs non-zero indicates that we are processing an interrupt;
+   * current_regs is also used to manage interrupt level context switches.
+   */
 
-  up_set_interrupt_context(true);
+  up_set_current_regs(regs);
 
   /* Deliver the IRQ */
 
-  tricore_ack_irq(NDX_TO_IRQ(icr.B.CCPN));
+  irq_dispatch(irq, regs);
+  tcb = this_task();
 
-  irq_dispatch(NDX_TO_IRQ(icr.B.CCPN), regs);
+  /* Check for a context switch.  If one occurred, establish the correct
+   * address environment and update the scheduler for the new task.
+   */
 
-  /* Check for a context switch. */
-
-  if (*running_task != tcb)
+  if (running_task != tcb)
     {
+      /* Keep the context of the interrupted task, a signal may have
+       * redirected it to the signal handler.
+       */
+
+      running_task->xcp.regs = up_current_regs();
+
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
        * running task is closed down gracefully (data caches dump,
@@ -91,33 +100,48 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
        */
 
       addrenv_switch(tcb);
-      tcb = this_task();
 #endif
 
       /* Update scheduler parameters */
 
-      nxsched_switch_context(*running_task, tcb);
+      nxsched_switch_context(running_task, tcb);
 
       /* Record the new "running" task when context switch occurred.
        * g_running_tasks[] is only used by assertion logic for reporting
        * crashes.
        */
 
-      *running_task = tcb;
-
-      __mtcr(CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
-      __isync();
+      running_task = tcb;
+      g_running_tasks[this_cpu()] = running_task;
+      up_set_current_regs(tcb->xcp.regs);
     }
 
-  /* Set irq flag */
+  /* Return to the new task, or to the signal handler set up for the same
+   * task, through the context now in current_regs.
+   */
 
-  up_set_interrupt_context(false);
+  if (regs != up_current_regs())
+    {
+      TRICORE_MTCR(TRICORE_CPU_PCXI, (uintptr_t)up_current_regs());
+    }
+
+  /* Set current_regs to NULL to indicate that we are no longer in an
+   * interrupt handler.
+   */
+
+  up_set_current_regs(NULL);
 
   /* running_task->xcp.regs is about to become invalid
    * and will be marked as NULL to avoid misusage.
    */
 
-  (*running_task)->xcp.regs = NULL;
+  running_task->xcp.regs = NULL;
   board_autoled_off(LED_INIRQ);
+#endif
+
+#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
+  /* ctc has no interrupt_handler attribute, return the way it would */
+
+  __asm__ __volatile__ ("rslcx\n\trfe" ::: "memory");
 #endif
 }
