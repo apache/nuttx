@@ -566,7 +566,10 @@ parse the answer. ``res_mkquery()`` is always available with
 ``res_search()`` need ``CONFIG_NETDB_DNSCLIENT``; the last three use the same
 name servers, timeouts and retries as the DNS client. ``dn_comp()``,
 ``dn_expand()`` and ``dn_skipname()`` are always available with
-``CONFIG_LIBC_NETDB``.
+``CONFIG_LIBC_NETDB``. ``<resolv.h>`` also has the resolver state of BIND:
+``struct __res_state``, ``res_state``, ``_res`` and the ``RES_*`` options.
+``_res`` needs ``CONFIG_NETDB_DNSCLIENT``. Each task group has its own state.
+The DNS client does not use the resolver state.
 
   - :c:func:`res_init`
   - :c:func:`res_mkquery`
@@ -577,13 +580,14 @@ name servers, timeouts and retries as the DNS client. ``dn_comp()``,
 
 .. c:function:: int res_init(void);
 
-  Initialize the resolver. The DNS client gets the name servers at each
-  query: from ``CONFIG_NETDB_RESOLVCONF_PATH`` with
-  ``CONFIG_NETDB_RESOLVCONF``, otherwise from the list that
-  ``dns_add_nameserver()`` changes. Thus a change of the name servers is
-  used at the next query, and ``res_init()`` has nothing to do.
+  Initialize the resolver. It sets ``RES_INIT`` and the defaults of BIND in
+  ``_res``. The DNS client gets the name servers at each query: from
+  ``CONFIG_NETDB_RESOLVCONF_PATH`` with ``CONFIG_NETDB_RESOLVCONF``,
+  otherwise from the list that ``dns_add_nameserver()`` changes. Thus a
+  change of the name servers is used at the next query.
 
-  :return: Always 0.
+  :return: 0, or -1 with ``errno`` ``ENOMEM`` if the resolver state cannot
+    be allocated.
 
 .. c:function:: int res_mkquery(int op, const char *dname, int rclass, int type, const unsigned char *data, int datalen, const unsigned char *newrr, unsigned char *buf, int buflen);
 
