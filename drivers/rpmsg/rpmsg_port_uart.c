@@ -715,8 +715,9 @@ static void rpmsg_port_uart_rx_worker(FAR struct rpmsg_port_uart_s *rpuart,
               }
             else if (buf[i] == RPMSG_PORT_UART_END)
               {
-                if (hdr->len != next || (hdr->crc != 0 &&
-                    hdr->crc != rpmsg_port_uart_crc16(hdr)))
+                if (hdr->len < sizeof(*hdr) || hdr->len != next ||
+                    (hdr->crc != 0 &&
+                     hdr->crc != rpmsg_port_uart_crc16(hdr)))
                   {
                     rpmsgerr("Recv error crc=%u len=%u next=%u i=%zd "
                              "dbg_i=%d\n", hdr->crc, hdr->len, next, i,
