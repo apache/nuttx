@@ -31,6 +31,7 @@
 
 #ifdef CONFIG_NET_USRSOCK
 
+#include <stdbool.h>
 #include <sys/types.h>
 #include <sys/uio.h>
 

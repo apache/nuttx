@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 #include <nuttx/list_type.h>

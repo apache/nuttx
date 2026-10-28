@@ -37,6 +37,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdbool.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/i2c/i2c_master.h>

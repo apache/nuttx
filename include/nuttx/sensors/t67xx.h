@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdbool.h>
 #include <nuttx/sensors/ioctl.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_T67XX)

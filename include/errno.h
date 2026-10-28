@@ -29,7 +29,10 @@
 
 #include <nuttx/compiler.h>
 
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+/* set_errno() needs up_interrupt_context() */
+
+#if !defined(NUTTX_NO_EXTENSIONS) && \
+    (defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__))
 #  include <nuttx/irq.h>
 #endif
 

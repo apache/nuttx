@@ -44,6 +44,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <nuttx/mutex.h>
 #include <nuttx/fs/ioctl.h>

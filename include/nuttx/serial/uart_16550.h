@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdbool.h>
 
 #include <nuttx/serial/serial.h>
 #include <nuttx/spinlock.h>

@@ -26,6 +26,8 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+
 #include <nuttx/debug.h>
 
 #include <arch/board/board.h>

@@ -32,6 +32,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdbool.h>
 #include <nuttx/fs/ioctl.h>
 
 #ifdef CONFIG_DRIVERS_WIRELESS

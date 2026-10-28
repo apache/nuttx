@@ -31,6 +31,7 @@
 
 #include <pthread.h>
 #include <sched.h>
+#include <stdbool.h>
 
 /****************************************************************************
  * Pre-processor Definitions

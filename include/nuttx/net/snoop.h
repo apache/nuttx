@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/mutex.h>

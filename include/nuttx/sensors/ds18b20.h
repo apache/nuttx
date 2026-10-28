@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdbool.h>
 
 #if defined(CONFIG_1WIRE) && defined(CONFIG_SENSORS_DS18B20)
 

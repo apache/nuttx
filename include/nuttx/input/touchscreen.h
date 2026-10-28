@@ -37,6 +37,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdbool.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/circbuf.h>
 #include <nuttx/semaphore.h>

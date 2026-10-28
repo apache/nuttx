@@ -29,6 +29,7 @@
 #include <nuttx/list.h>
 #include <nuttx/notifier.h>
 #include <sys/types.h>
+#include <stdbool.h>
 
 /****************************************************************************
  * Pre-processor Definitions

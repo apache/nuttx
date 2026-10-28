@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <pthread.h>
 #include <errno.h>

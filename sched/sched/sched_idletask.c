@@ -56,7 +56,7 @@
  *
  ****************************************************************************/
 
-bool sched_idletask(void)
+uint8_t sched_idletask(void)
 {
   FAR struct tcb_s *rtcb = this_task();
 

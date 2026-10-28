@@ -30,7 +30,6 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
-#include <stdbool.h>
 #include <stdint.h>
 #include <signal.h>
 #include <semaphore.h>

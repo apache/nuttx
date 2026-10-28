@@ -31,7 +31,6 @@
 
 #include <sys/timex.h>
 #include <sys/types.h>
-#include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
 
@@ -586,7 +585,7 @@ int clock_isleapyear(int year);
  *
  ****************************************************************************/
 
-int clock_daysbeforemonth(int month, bool leap_year);
+int clock_daysbeforemonth(int month, uint8_t leap_year);
 
 /****************************************************************************
  * Name:  clock_dayoftheweek

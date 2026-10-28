@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <nuttx/bits.h>
 #include <nuttx/i3c/device.h>

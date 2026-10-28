@@ -29,6 +29,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <stdbool.h>
 
 #include <nuttx/net/net.h>
 

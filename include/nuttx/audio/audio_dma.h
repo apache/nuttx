@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdbool.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/dma/dma.h>
 

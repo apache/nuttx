@@ -32,6 +32,7 @@
 #include <nuttx/mutex.h>
 
 #include <dirent.h>
+#include <stdbool.h>
 #include <sys/stat.h>
 #include <sys/statfs.h>
 #include <sys/uio.h>

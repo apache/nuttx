@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <nuttx/atomic.h>
 #include <nuttx/wqueue.h>

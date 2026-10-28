@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdbool.h>
 
 #ifdef CONFIG_RTC_MCP794XX
 

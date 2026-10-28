@@ -29,6 +29,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <nuttx/i2c/i2c_master.h>
 

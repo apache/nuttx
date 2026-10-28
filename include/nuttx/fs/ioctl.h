@@ -29,7 +29,7 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
+#include <stdint.h>
 #include <sys/types.h>
 
 /****************************************************************************
@@ -886,9 +886,9 @@
 
 struct geometry
 {
-  bool      geo_available;    /* true: The device is available */
-  bool      geo_mediachanged; /* true: The media has changed since last query */
-  bool      geo_writeenabled; /* true: It is okay to write to this device */
+  uint8_t   geo_available;    /* true: The device is available */
+  uint8_t   geo_mediachanged; /* true: The media has changed since last query */
+  uint8_t   geo_writeenabled; /* true: It is okay to write to this device */
   blkcnt_t  geo_nsectors;     /* Number of sectors on the device */
   blksize_t geo_sectorsize;   /* Size of one sector */
 

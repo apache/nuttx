@@ -107,7 +107,7 @@ int nxmutex_init(FAR mutex_t *mutex)
  *
  ****************************************************************************/
 
-bool nxmutex_is_hold(FAR mutex_t *mutex)
+uint8_t nxmutex_is_hold(FAR mutex_t *mutex)
 {
   return nxmutex_get_holder(mutex) == _SCHED_GETTID();
 }

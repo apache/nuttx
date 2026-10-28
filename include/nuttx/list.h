@@ -46,7 +46,6 @@
  ****************************************************************************/
 
 #include <stddef.h>
-#include <stdbool.h>
 
 #include <nuttx/list_type.h>
 

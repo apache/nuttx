@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <nuttx/list.h>
 #include <nuttx/pci/pci_ids.h>

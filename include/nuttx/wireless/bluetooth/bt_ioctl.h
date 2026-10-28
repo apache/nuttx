@@ -40,6 +40,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <stdbool.h>
 #include <net/if.h>
 
 #include <nuttx/fs/ioctl.h>

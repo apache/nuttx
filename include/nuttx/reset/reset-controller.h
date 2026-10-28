@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdbool.h>
 
 #include <nuttx/list.h>
 #include <nuttx/compiler.h>

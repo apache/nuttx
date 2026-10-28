@@ -61,7 +61,7 @@ static const uint16_t g_daysbeforemonth[13] =
  *
  ****************************************************************************/
 
-int clock_daysbeforemonth(int month, bool leap_year)
+int clock_daysbeforemonth(int month, uint8_t leap_year)
 {
   int retval = g_daysbeforemonth[month];
 

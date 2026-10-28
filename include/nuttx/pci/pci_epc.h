@@ -27,6 +27,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <stdbool.h>
 #include <nuttx/list.h>
 #include <nuttx/mutex.h>
 #include <nuttx/pci/pci_epf.h>

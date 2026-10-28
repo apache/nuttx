@@ -33,7 +33,6 @@
 
 #include <sys/types.h>       /* Needed for general types */
 #include <stdint.h>          /* C99 fixed width integer types */
-#include <stdbool.h>         /* C99 boolean types */
 #include <unistd.h>          /* For getpid */
 #include <signal.h>          /* Needed for sigset_t, includes this file */
 #include <sched.h>           /* POSIX: pthread.h makes sched.h visible */
@@ -120,7 +119,7 @@
 
 /* Used to initialize a pthread_once_t */
 
-#define PTHREAD_ONCE_INIT             {false, PTHREAD_MUTEX_INITIALIZER}
+#define PTHREAD_ONCE_INIT             {0, PTHREAD_MUTEX_INITIALIZER}
 
 /* This is returned by pthread_barrier_wait.  It must not match any errno
  * in errno.h
@@ -383,7 +382,7 @@ typedef struct pthread_barrier_s pthread_barrier_t;
 
 struct pthread_once_s
 {
-  volatile bool done;
+  volatile uint8_t done;
   pthread_mutex_t mutex;
 };
 
@@ -408,7 +407,7 @@ struct pthread_rwlock_s
   pthread_cond_t  cv;
   unsigned int num_readers;
   unsigned int num_writers;
-  bool write_in_progress;
+  uint8_t write_in_progress;
 };
 
 #ifndef __PTHREAD_RWLOCK_T_DEFINED
@@ -418,7 +417,7 @@ typedef struct pthread_rwlock_s pthread_rwlock_t;
 
 #define PTHREAD_RWLOCK_INITIALIZER  {PTHREAD_MUTEX_INITIALIZER, \
                                      PTHREAD_COND_INITIALIZER, \
-                                     0, 0, false}
+                                     0, 0, 0}
 
 #ifdef CONFIG_PTHREAD_SPINLOCKS
 /* This (non-standard) structure represents a pthread spinlock */
@@ -780,7 +779,6 @@ int pthread_atfork(CODE void (*prepare)(void),
  ****************************************************************************/
 
 #include <sys/types.h>
-#include <stdbool.h>
 
 /****************************************************************************
  * Public Type Definitions

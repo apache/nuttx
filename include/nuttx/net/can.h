@@ -46,6 +46,7 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/netconfig.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 /****************************************************************************
  * Pre-processor Definitions
