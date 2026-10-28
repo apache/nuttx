@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp23xx/raspberrypi-pico-2-w/src/rp23xx_userleds.c
+ * boards/arm/rp23xx/common/src/rp23xx_cyw43439_userleds.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,14 +21,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * The single LED on this board is wired to GPIO 0 of the CYW43439 wireless
- * chip rather than to a pin of the RP2350, so setting it means sending an
- * iovar request over the gSPI bus.  Two consequences:
+ * On boards that select RP23XX_HAVE_CYW43439, the single LED is wired to
+ * GPIO 0 of the CYW43439 wireless chip rather than to a pin of the RP2350,
+ * so setting it means sending an iovar request over the gSPI bus.  Two
+ * consequences:
  *
  *   - The LED only responds once the wireless chip is running, which happens
  *     when wlan0 is brought up.  Before that every write fails with -EIO.
  *   - Writing the LED blocks, so it must not be done from interrupt context.
- *     That is why this board implements the user LED interface only and not
+ *     That is why these boards implement the user LED interface only and not
  *     the CONFIG_ARCH_LEDS auto-LED interface.
  ****************************************************************************/
 
@@ -44,7 +45,7 @@
 
 #include <nuttx/board.h>
 #include <arch/board/board.h>
-#include <arch/board/rp23xx_extra_gpio.h>
+#include "rp23xx_extra_gpio.h"
 
 #if defined(CONFIG_RP23XX_INFINEON_CYW43439) && !defined(CONFIG_ARCH_LEDS)
 

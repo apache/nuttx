@@ -114,6 +114,10 @@ if(CONFIG_ARCH_BOARD_COMMON)
     list(APPEND SRCS rp23xx_max6675.c)
   endif()
 
+  if(CONFIG_RP23XX_INFINEON_CYW43439)
+    list(APPEND SRCS rp23xx_cyw43439_userleds.c)
+  endif()
+
   # Firmware blob for the Infineon CYW43439 WiFi chip.  rp23xx_firmware.c
   # .incbin's it, so it has to be staged somewhere on the include path.
   if(CONFIG_IEEE80211_INFINEON_CYW43439)

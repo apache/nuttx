@@ -30,7 +30,8 @@ endif()
 # and reaching it means a gSPI bus transaction.  That rules out
 # CONFIG_ARCH_LEDS, whose board_autoled_on() is called from interrupt handlers
 # and from assertion handling, so there is no rp23xx_autoleds.c.  It also means
-# there is no LED at all without the wireless chip.  See rp23xx_userleds.c.
+# there is no LED at all without the wireless chip.  See
+# common/src/rp23xx_cyw43439_userleds.c.
 
 if(CONFIG_ARCH_LEDS)
   message(
@@ -38,10 +39,6 @@ if(CONFIG_ARCH_LEDS)
       "CONFIG_ARCH_LEDS is not supported on this board: the LED hangs off the "
       "CYW43439 and cannot be driven from interrupt context.  "
       "Use CONFIG_USERLED instead.")
-endif()
-
-if(CONFIG_RP23XX_INFINEON_CYW43439)
-  list(APPEND SRCS rp23xx_userleds.c)
 endif()
 
 if(CONFIG_ARCH_BUTTONS)

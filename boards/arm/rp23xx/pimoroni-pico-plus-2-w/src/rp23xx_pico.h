@@ -41,7 +41,7 @@
 /* LEDs
  *
  * The board's only LED hangs off GPIO 0 of the CYW43439, see
- * include/rp23xx_extra_gpio.h.  There is no LED on an RP2350 pin.
+ * common/include/rp23xx_extra_gpio.h.  There is no LED on an RP2350 pin.
  */
 
 /* Buttons */

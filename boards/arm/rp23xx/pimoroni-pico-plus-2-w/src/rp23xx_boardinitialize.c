@@ -70,7 +70,7 @@ void rp23xx_boardearlyinitialize(void)
 
   /* Nothing to do for the LED: it hangs off the CYW43439 wireless chip
    * rather than an RP2350 pin, and cannot be touched this early.  See
-   * src/rp23xx_userleds.c.
+   * common/src/rp23xx_cyw43439_userleds.c.
    */
 }
 

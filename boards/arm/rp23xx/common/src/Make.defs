@@ -114,6 +114,10 @@ ifeq ($(CONFIG_SENSORS_MAX6675),y)
  CSRCS += rp23xx_max6675.c
 endif
 
+ifeq ($(CONFIG_RP23XX_INFINEON_CYW43439),y)
+CSRCS += rp23xx_cyw43439_userleds.c
+endif
+
 # Firmware blob for the Infineon CYW43439 WiFi chip.  rp23xx_firmware.c
 # .incbin's it, so stage it out of pico_sdk next to rp23xx_firmware.c, which
 # is both on the include path and reachable via VPATH.  This mirrors what
