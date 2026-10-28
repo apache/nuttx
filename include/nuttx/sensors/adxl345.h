@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdbool.h>
 #include <nuttx/irq.h>
 
 #if defined(CONFIG_SENSORS_ADXL345)

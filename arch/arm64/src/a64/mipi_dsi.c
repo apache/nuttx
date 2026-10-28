@@ -35,6 +35,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/crc16.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>

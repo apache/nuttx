@@ -29,6 +29,8 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+
 #include <nuttx/compiler.h>
 #include <nuttx/clock.h>
 

@@ -31,6 +31,7 @@
 
 #include <spawn.h>
 #include <sys/types.h>
+#include <stdbool.h>
 
 #include <nuttx/sched.h>
 #include <nuttx/lib/elf.h>

@@ -52,6 +52,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <sys/ioctl.h>
 #include <netinet/in.h>
 #include <net/if.h>

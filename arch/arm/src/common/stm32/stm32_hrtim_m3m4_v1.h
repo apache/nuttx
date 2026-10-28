@@ -29,6 +29,8 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+
 #include <arch/board/board.h>
 
 #include "chip.h"

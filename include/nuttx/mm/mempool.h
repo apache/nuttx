@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <sys/types.h>
+#include <stdbool.h>
 
 #include <nuttx/list.h>
 #include <nuttx/queue.h>

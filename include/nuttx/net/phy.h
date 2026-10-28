@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 
 #include <signal.h>
+#include <stdbool.h>
 #include <sys/types.h>
 
 #include <nuttx/mutex.h>

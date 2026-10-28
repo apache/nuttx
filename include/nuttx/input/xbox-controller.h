@@ -37,6 +37,12 @@
 #ifndef __INCLUDE_NUTTX_INPUT_XBOX_CONTROLLER_H
 #define __INCLUDE_NUTTX_INPUT_XBOX_CONTROLLER_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C"
 {

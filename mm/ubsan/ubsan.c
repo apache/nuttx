@@ -27,6 +27,7 @@
 #include <nuttx/compiler.h>
 
 #include <nuttx/debug.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 #include <nuttx/nuttx.h>

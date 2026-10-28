@@ -42,6 +42,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdbool.h>
 #include <nuttx/compiler.h>
 
 #include <nuttx/motor/motor_ioctl.h>

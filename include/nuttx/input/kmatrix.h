@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 #include <nuttx/input/keyboard.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -31,6 +31,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <errno.h>
 #include <nuttx/debug.h>
 #ifdef CONFIG_VIDEO_FB_SPLASHSCREEN

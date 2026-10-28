@@ -28,6 +28,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdbool.h>
+
 #include <nuttx/queue.h>
 #include <nuttx/mutex.h>
 #include <nuttx/mm/gran.h>

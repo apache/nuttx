@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <nuttx/i2c/i2c_master.h>
 
 #ifdef CONFIG_TIMERS_CS2100CP

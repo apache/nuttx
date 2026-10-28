@@ -31,7 +31,6 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <stdbool.h>
 #include <strings.h>
 #include <time.h>
 
@@ -269,7 +268,7 @@ int    sched_lockcount(void);
 
 /* Queries */
 
-bool   sched_idletask(void);
+uint8_t sched_idletask(void);
 
 /* Task Backtrace */
 

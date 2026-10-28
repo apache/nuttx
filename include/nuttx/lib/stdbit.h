@@ -35,6 +35,7 @@
 
 #  include <nuttx/compiler.h>
 #  include <stdint.h>
+#  include <stdbool.h>
 
 /****************************************************************************
  * Generic C23 stdbit implementation (CONFIG_LIBC_STDBIT_GENERIC).

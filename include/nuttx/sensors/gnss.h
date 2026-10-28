@@ -27,6 +27,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <stdbool.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/sensors/sensor.h>
 

@@ -28,7 +28,7 @@
  ****************************************************************************/
 
 #include <assert.h>
-#include <stdbool.h>
+#include <stdint.h>
 
 #include <nuttx/semaphore.h>
 
@@ -127,7 +127,7 @@ int nxmutex_init(FAR mutex_t *mutex);
  *
  ****************************************************************************/
 
-bool nxmutex_is_hold(FAR mutex_t *mutex);
+uint8_t nxmutex_is_hold(FAR mutex_t *mutex);
 
 /****************************************************************************
  * Name: nxmutex_ticklock
@@ -448,7 +448,7 @@ static inline_function pid_t nxmutex_get_holder(FAR mutex_t *mutex)
  *
  ****************************************************************************/
 
-static inline_function bool nxmutex_is_locked(FAR mutex_t *mutex)
+static inline_function uint8_t nxmutex_is_locked(FAR mutex_t *mutex)
 {
   return NXSEM_MACQUIRED(mutex->sem.val.mholder);
 }
@@ -607,11 +607,11 @@ static inline_function int nxmutex_breaklock(FAR mutex_t *mutex,
 {
   int ret;
 
-  *locked = false;
+  *locked = 0;
   ret = nxmutex_unlock(mutex);
   if (ret >= 0)
     {
-      *locked = true;
+      *locked = 1;
     }
 
   return ret;
@@ -777,7 +777,7 @@ static inline_function int nxrmutex_destroy(FAR rmutex_t *rmutex)
  *
  ****************************************************************************/
 
-static inline_function bool nxrmutex_is_hold(FAR rmutex_t *rmutex)
+static inline_function uint8_t nxrmutex_is_hold(FAR rmutex_t *rmutex)
 {
   return nxmutex_is_hold(&rmutex->mutex);
 }
@@ -800,7 +800,7 @@ static inline_function bool nxrmutex_is_hold(FAR rmutex_t *rmutex)
  *
  ****************************************************************************/
 
-static inline_function bool nxrmutex_is_recursive(FAR rmutex_t *rmutex)
+static inline_function uint8_t nxrmutex_is_recursive(FAR rmutex_t *rmutex)
 {
   return rmutex->count > 1;
 }
@@ -841,7 +841,7 @@ static inline_function int nxrmutex_get_holder(FAR rmutex_t *rmutex)
  *
  ****************************************************************************/
 
-static inline_function bool nxrmutex_is_locked(FAR rmutex_t *rmutex)
+static inline_function uint8_t nxrmutex_is_locked(FAR rmutex_t *rmutex)
 {
   return nxmutex_is_locked(&rmutex->mutex);
 }

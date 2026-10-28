@@ -26,6 +26,7 @@
 #define __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_AES_H
 
 #include <nuttx/config.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifndef __ASSEMBLY__

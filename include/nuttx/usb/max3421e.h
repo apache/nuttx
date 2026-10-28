@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdbool.h>
 #include <nuttx/irq.h>
 
 #ifdef CONFIG_USBHOST_MAX3421E

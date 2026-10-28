@@ -31,6 +31,7 @@
 
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 #include <nuttx/addrenv.h>

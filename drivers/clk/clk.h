@@ -29,6 +29,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <strings.h>
 #include <sys/param.h>

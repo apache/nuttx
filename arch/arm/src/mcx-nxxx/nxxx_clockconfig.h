@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "hardware/nxxx_clock.h"

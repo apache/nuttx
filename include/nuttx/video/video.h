@@ -31,6 +31,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <stdbool.h>
 #include <sys/videoio.h>
 #include <nuttx/fs/fs.h>
 

@@ -47,6 +47,7 @@
 
 #include <sys/ioctl.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <nuttx/queue.h>
 
