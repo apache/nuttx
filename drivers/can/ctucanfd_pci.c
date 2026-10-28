@@ -1420,9 +1420,11 @@ static FAR netpkt_t *ctucanfd_sock_recv(FAR struct netdev_lowerhalf_s *dev)
       netpkt_setdatalen(dev, pkt, sizeof(struct can_frame));
       frame = (FAR struct can_frame *)netpkt_getdata(dev, pkt);
 
-      /* Get the DLC */
+      /* Get the DLC.  A classic frame carries at most 8 data bytes, also
+       * with DLC 9..15.
+       */
 
-      frame->can_dlc = rxframe->fmt.dlc;
+      frame->can_dlc = MIN(rxframe->fmt.dlc, CAN_MAX_DLEN);
 
 #ifdef CONFIG_NET_CAN_EXTID
       /* Get the CAN identifier. */
@@ -1458,7 +1460,7 @@ static FAR netpkt_t *ctucanfd_sock_recv(FAR struct netdev_lowerhalf_s *dev)
 
       /* Get data */
 
-      for (i = 0; i < rxframe->fmt.dlc; i++)
+      for (i = 0; i < frame->can_dlc; i++)
         {
           frame->data[i] = rxframe->data[i];
         }
