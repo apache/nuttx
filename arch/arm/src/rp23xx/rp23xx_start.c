@@ -39,6 +39,7 @@
 #include "rp23xx_config.h"
 #include "rp23xx_clock.h"
 #include "rp23xx_uart.h"
+#include "rp23xx_mpu.h"
 #include "hardware/rp23xx_sio.h"
 
 #ifdef CONFIG_RP23XX_PM_SUSPEND
@@ -286,6 +287,12 @@ void __start(void)
 #endif
 
   rp23xx_hwinit(false);
+
+#ifdef CONFIG_SMP
+  /* Let the atomic operations exclude the other core */
+
+  rp23xx_mpu_share_sram();
+#endif
 
   /* Then start NuttX */
 

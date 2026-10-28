@@ -40,6 +40,7 @@
 #include "sched/sched.h"
 #include "init/init.h"
 #include "arm_internal.h"
+#include "rp23xx_mpu.h"
 #include "hardware/rp23xx_memorymap.h"
 #include "hardware/rp23xx_sio.h"
 #include "hardware/rp23xx_psm.h"
@@ -145,6 +146,10 @@ static void core1_boot(void)
 #endif
 
   arm_fpuconfig();
+
+  /* Let the atomic operations exclude the other core */
+
+  rp23xx_mpu_share_sram();
 
   fifo_drain();
 
