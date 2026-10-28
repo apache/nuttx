@@ -316,6 +316,14 @@ Tickless Configuration Options
    This value should never be less than the underlying resolution
    of the timer. Errors may ensue.
 
+-  ``CONFIG_TIMER_ADJUST_NSEC``: Adjusts the scheduled wake-up time by
+   this many nanoseconds so timers fire that much earlier,
+   compensating for interrupt latency.  It replaces
+   ``CONFIG_TIMER_ADJUST_USEC``; the unit changed from microseconds to
+   nanoseconds.  It is used by the tickless watchdog path
+   (``wd_adjust_next_tick()``) even when ``CONFIG_HRTIMER`` is not
+   enabled.
+
 Tickless Imported Interfaces
 ----------------------------
 
@@ -624,6 +632,13 @@ or ``kill()`` to communicate with NuttX tasks.
 
 High-resolution Timer Interfaces
 ================================
+
+**CONFIG_HRTIMER_PRECISION_SHIFT**.  Reduces the resolution of the
+high-resolution timer to decrease the frequency of timer interrupts.
+The value N defines the left-shift bits of the precision unit:
+precision = 1 << N nanoseconds and the mask is precision - 1 (default
+0 = full precision).  This option is only available with
+``CONFIG_HRTIMER``.
 
 Hard real-time applications, such as motor control, often
 require nanosecond-level task timing, which tick-based timers
