@@ -697,6 +697,7 @@ config TASK_MAX_ARGS
 config SCHED_HAVE_PARENT
 	bool "Support parent/child task relationships"
 	default n
+	depends on !DISABLE_ALL_SIGNALS
 	---help---
 		Remember the ID of the parent task when a new child task is
 		created.  This support enables some additional features (such as
