@@ -112,7 +112,7 @@ int nxsig_tgkill(pid_t pid, pid_t tid, int signo)
   info.si_status          = OK;
 #endif
 
-  ret = nxsig_dispatch(tid, &info, pid == (pid_t)-1);
+  ret = nxsig_dispatch(tid, &info, pid == (pid_t)-1, NULL);
 
 errout:
   return ret;

@@ -108,7 +108,7 @@ int nxsig_queue(int pid, int signo, union sigval value)
 
   /* Send the signal */
 
-  return nxsig_dispatch(pid, &info, false);
+  return nxsig_dispatch(pid, &info, false, NULL);
 }
 
 /****************************************************************************
