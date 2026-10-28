@@ -366,12 +366,12 @@ RB_PROTOTYPE(hrtimer_tree_s, hrtimer_s, node, hrtimer_compare);
 static inline_function void hrtimer_remove(FAR hrtimer_t *hrtimer)
 {
 #ifdef CONFIG_HRTIMER_TREE
-  RB_REMOVE(hrtimer_tree_s, &g_hrtimer_tree, hrtimer);
-
   if (g_hrtimer_head == hrtimer)
     {
-      g_hrtimer_head = RB_MIN(hrtimer_tree_s, &g_hrtimer_tree);
+      g_hrtimer_head = RB_NEXT(hrtimer_tree_s, &g_hrtimer_tree, hrtimer);
     }
+
+  RB_REMOVE(hrtimer_tree_s, &g_hrtimer_tree, hrtimer);
 #else
   list_delete_fast(&hrtimer->node);
 #endif
