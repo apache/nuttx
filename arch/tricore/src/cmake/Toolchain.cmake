@@ -22,9 +22,24 @@
 
 # Toolchain
 
-if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
+# The compiler checks read this file again in a separate project, pass the
+# options that pick the toolchain and its flags on to them.
+
+list(
+  APPEND
+  CMAKE_TRY_COMPILE_PLATFORM_VARIABLES
+  CONFIG_TRICORE_TOOLCHAIN_LLVM
+  CONFIG_TRICORE_TOOLCHAIN_TASKING
+  CONFIG_ARCH_CHIP_FAMILY_TC3X
+  CONFIG_ARCH_CHIP_FAMILY_TC4X
+  CONFIG_TC3X_CHIP_TC375
+  CONFIG_TC4X_CHIP_TC4D7)
+
+if(CONFIG_TRICORE_TOOLCHAIN_LLVM)
+  include(${CMAKE_CURRENT_LIST_DIR}/clang.cmake)
+elseif(CONFIG_TRICORE_TOOLCHAIN_TASKING)
   include(${CMAKE_CURRENT_LIST_DIR}/tasking.cmake)
-elseif(CONFIG_TRICORE_TOOLCHAIN_GNU)
+else()
   include(${CMAKE_CURRENT_LIST_DIR}/gcc.cmake)
 endif()
 

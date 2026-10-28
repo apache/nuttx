@@ -26,14 +26,14 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
+
+#include <arch/arch.h>
+
 #include "tricore_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -51,29 +51,26 @@
 int up_saveusercontext(void *saveregs)
 {
   uintptr_t *regs;
-  uintptr_t pcxi;
+  uintptr_t  pcxi;
+  uintptr_t  lpcxi;
   int csa_size = TC_CONTEXT_REGS * sizeof(uintptr_t);
 
-  pcxi = __mfcr(CPU_PCXI);
+  TRICORE_MFCR(TRICORE_CPU_PCXI, pcxi);
   regs = tricore_csa2addr(pcxi);
   memcpy((char *)saveregs + csa_size, regs, csa_size);
 
-  /* to unify the trap processing, extra save lowcsa */
+  __asm__ __volatile__("svlcx" ::: "memory");
 
-  __asm("svlcx");
-
-  regs = tricore_csa2addr(__mfcr(CPU_PCXI));
+  TRICORE_MFCR(TRICORE_CPU_PCXI, lpcxi);
+  regs = tricore_csa2addr(lpcxi);
   memcpy(saveregs, regs, csa_size);
 
-  /* lowcsa[REG_LPCXI] saves the upcsa's pcxi, but if lowcsa and upcsa is
-   * stored at continuous addresses, pcxi has no meaning. Use PCXI_UL
-   * without marking whether it is lowcsa or upcsa, but to mark whether
-   * lowcsa and upcsa is stored at continuous addresses.
+  /* Lower CSA link normally points to the upper CSA; here both halves sit
+   * contiguously in the buffer, so repurpose it to carry the upper PCXI.
    */
 
   ((uintptr_t *)saveregs)[REG_LPCXI] = pcxi & (~PCXI_UL);
 
-  __asm("rslcx");
-
+  __asm__ __volatile__("rslcx" ::: "memory");
   return 0;
 }

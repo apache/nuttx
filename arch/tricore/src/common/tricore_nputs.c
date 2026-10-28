@@ -26,10 +26,21 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
+#include <nuttx/compiler.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+void weak_function up_putc(int ch)
+{
+  (void)ch;
+}
+
+void weak_function up_lowputc(int ch)
+{
+  (void)ch;
+}
 
 /****************************************************************************
  * Name: up_nputs

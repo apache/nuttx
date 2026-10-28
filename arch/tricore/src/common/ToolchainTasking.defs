@@ -20,136 +20,105 @@
 #
 ############################################################################
 
-#
-# Supported toolchains
-#
-# Each toolchain definition should set:
-#
-#  CROSSDEV         The GNU toolchain triple (command prefix)
-#  ARCHCPUFLAGS     CPU-specific flags selecting the instruction set
-#                   FPU options, etc.
-#  ARCHOPTIMIZATION The optimization level that results in
-#                   reliable code generation.
-#
-
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   ARCHOPTIMIZATION += $(CONFIG_DEBUG_OPTLEVEL)
 else ifeq ($(CONFIG_DEBUG_FULLOPT),y)
-  ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
-    ARCHOPTIMIZATION += -Oz
-  else
-    ARCHOPTIMIZATION += -Os
-  endif
+  ARCHOPTIMIZATION += -O2
 endif
 
-# Tasking toolchain
-
-TASKING_COMPILER_PATH := $(shell which ctc)
-C_COMPILER_DIR := $(dir $(TASKING_COMPILER_PATH))
-
-CC                = cctc
-CXX               = cctc
-CPP               = ctc -E -I$(C_COMPILER_DIR)/../include.lsl
-LD                = cctc
-STRIP             = strip --strip-unneeded
-AR                = artc -r
-UNAR              = artc -x
-NM                = nm
-OBJCOPY           = echo
-OBJDUMP           = elfdump
-
-ARCHOPTIMIZATION += --lsl-core=vtc
-LDFLAGS          += --lsl-core=vtc
-ARCHOPTIMIZATION += --iso=99
-ARCHOPTIMIZATION += --language=+gcc,+volatile,-strings,-kanji
-
-# pragma align <4> (default: 0)
-
-ARCHOPTIMIZATION += --align=4
-
-# Always use 32-bit integers for enumeration
-
-ARCHOPTIMIZATION += --integer-enumeration
-
-# tradeoff between speed (-t0) and size (-t4) (default: 4)
-
-ARCHOPTIMIZATION += --tradeoff=2
-
-# enable symbolic debug information
-
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION += --debug-info=default
-  ARCHOPTIMIZATION += --keep-temporary-files
   ARCHOPTIMIZATION += $(CONFIG_DEBUG_SYMBOLS_LEVEL)
 endif
 
-# merge source code with assembly output
+# cctc takes -I<dir>; the generic "-I <dir>" form would make the -I%
+# filters of the .asm rules below drop the directories.
 
-ARCHOPTIMIZATION += --source
+INCDIR_PREFIX := -I
 
-# generate alignment depending on assume_if hints
+TASKING_LSLDIR := $(dir $(shell which ctc))..$(DELIM)include.lsl
 
-ARCHOPTIMIZATION += --branch-target-align
+CC      = cctc
+CXX     = cctc
+CPP     = ctc -Ep -I$(TASKING_LSLDIR)
+LD      = cctc
+STRIP   = elfstrip
+AR      = artc -r -c
+UNAR    = artc -x
+NM      = nm
+OBJCOPY = objcopy
+OBJDUMP = hldumptc
 
+# Config.mk probes the prefix before CC is set, cctc has no -isystem
 
-# Since nuttx uses too many of GNU extensions in the implementation of
-# FPU-related library functions, which is not supported in tasking,
-# so currently we cannot use FPU-related configurations to manage it.
-#
-# Just set fp-model to Double Precision:
-# --fp-model[=<flag>,...]         floating-point model (default: cFlnrSTz)
-#   0                               alias for --fp-model=CFLNRStZ (strict)
-#   1                               alias for --fp-model=cFLNRSTZ (precise)
-#   2                               alias for --fp-model=cFlnrSTz (fast-dp)
-#   3                               alias for --fp-model=cflnrSTz (fast-sp)
+INCSYSDIR_PREFIX = -I
 
-ARCHOPTIMIZATION += --fp-model=2
-LDFLAGS          += --no-default-libraries
-LDFLAGS          += --fp-model=2
-LDFLAGS          += -lfp_fpu
+ARCHOPTIMIZATION += --language=+gcc,+volatile
+ARCHOPTIMIZATION += --integer-enumeration --signed-bitfields
+ARCHOPTIMIZATION += --default-near-size=0
+ARCHOPTIMIZATION += --fp-model=1
 
-LDFLAGS          += -Wl-OtxYcL -Wl-mcrfiklsmnoduq
-LDFLAGS          += -lrt
+# ctc W500: expression without effect
+# ctc W507: variable is possibly uninitialized
+# ctc W508: empty source file
+# ctc W525: discarded 'const' qualifier at assignment
+# ctc W526: enumeration constant shall be representable as 'int'
+# ctc W527: constant of type "double" saturated
+# ctc W529: overflow in constant expression
+# ctc W544: unreachable code
+# ctc W549: condition is always true
+# ctc W553: no 'break' or comment before case label
+# ctc W557: possible infinite loop
+# ctc W558: struct/union/enum definition in parameter declaration
+# ctc W560: possible truncation at implicit conversion
+# ctc W562: unary minus applied to unsigned value
+# ctc W587: underflow on constant of type "double"
+# ctc W588: dead assignment eliminated
+# ctc W589: pointer assumed to be nonzero - test removed
 
-ifeq ($(CONFIG_INTELHEX_BINARY),y)
-  LDFLAGS        += -Wl-o${TOPDIR}/nuttx.hex:IHEX:4 --hex-format=s
-endif
-
-ifeq ($(CONFIG_MOTOROLA_SREC),y)
-  LDFLAGS        += -Wl-o${TOPDIR}/nuttx.srec:SREC:4
-endif
-
-# ctc W500: ["stdio/lib_libvsprintf.c" 884/29] expression without effect
-# ctc W507: ["mm_heap/mm_malloc.c" 238/64] variable "nodesize" is possibly uninitialized
-# ctc W508: ["misc/lib_impure.c" 1/1] empty source file
-# ctc W525: ["getopt.c" 678/3] discarded 'const' qualifier at assignment: conversion from char const * to char *
-# ctc W527: ["stdlib/lib_strtold.c" 565/23] constant of type "double" saturated
-# ctc W526: ["include/sys/epoll.h" 87/5] enumeration constant shall be representable as 'int'
-# ctc W529: ["wchar/lib_mbrtowc.c" 88/35] overflow in constant expression of type "unsigned long int"
-# ctc W544: ["wqueue/kwork_thread.c" 210/32] unreachable code
-# ctc W549: ["unistd/lib_getopt_common.c" 544/15] condition is always true
-# ctc W553: ["vfs/fs_fcntl.c" 231/7] no 'break' or comment before case label
-# ctc W557: ["common/tricore_main.c" 58/11] possible infinite loop
-# ctc W560: ["tmpfs/fs_tmpfs.c" 232/25] possible truncation at implicit conversion to type "unsigned short int"
-# ctc W562: ["mm_heap/mm_memalign.c" 70/20] unary minus applied to unsigned value
-# ctc W558: ["include/nuttx/power/regulator.h" 224/36] struct/union/enum definition in parameter declaration
-# ctc W587: ["stdlib/lib_strtold.c" 571/23] underflow on constant of type "double"
-# ctc W588: ["misc/lib_glob.c" 150/13] dead assignment to "i" eliminated
-# ctc W589: ["inode/fs_inodesearch.c" 72/8] pointer assumed to be nonzero - test removed
-
-TASKING_WARNINGS  = 500,507,508,525,526,527,529,544,549,553,560,562,557,558,587,588,589
+TASKING_WARNINGS = 500,507,508,525,526,527,529,544,549,553,557,558,560,562,587,588,589
 
 ARCHOPTIMIZATION += --pass-c=--no-warnings=$(TASKING_WARNINGS)
 
-# Loadable module definitions
+# NuttX brings its own startup code and C library, only the compiler
+# helpers of the toolset are linked.  Duplicate code and constants are
+# kept apart so that distinct objects keep distinct addresses.
 
-CMODULEFLAGS = $(CFLAGS) -fvisibility=hidden
-LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
+LDFLAGS += --no-default-libraries -lfp_fpu -lrt
+LDFLAGS += -Wl--user-provided-initialization-code
+LDFLAGS += -Wl-OcLTXY
 
-# ELF module definitions
+# Every function and object keeps its own section, fill the alignment
+# holes between them so the hex file is a few contiguous blocks.
 
-CELFFLAGS = $(CFLAGS) -fvisibility=hidden
-CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
+OBJCOPYARGS += --gap-fill=0
 
-LDELFFLAGS = -r -e _start
-LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)elf$(DELIM)gnu-elf.ld)
+ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
+  LDFLAGS += -Wl--map-file=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
+endif
+
+# The .asm files are TASKING copies of the GNU .S files, astc has no C
+# preprocessor so they go through ctc first for the headers and options.
+
+ASMEXT = .asm
+
+TASKING_AFLAGS = -Wa--no-warnings=201
+
+# rfh and the VCON0 write of the TC1.8 path need the hypervisor mode
+
+ifeq ($(CONFIG_TRICORE_TC18),y)
+  TASKING_AFLAGS += -Wa--user-mode=hypervisor
+endif
+
+define ASSEMBLE
+	$(ECHO_BEGIN)"AS: $1 "
+	$(Q) $(CPP) $(filter -D% -U% -I%,$(AFLAGS) $($(strip $1)_AFLAGS)) $1 -o $(basename $2).src
+	$(Q) $(CC) -c $(ARCHCPUFLAGS) $(TASKING_AFLAGS) $(basename $2).src -o $2
+	$(ECHO_END)
+endef
+
+# Cancel the generic rule, it would pick the .S file
+
+%.dds: %.S
+
+%.dds: %.asm
+	$(Q) $(CPP) -Em --make-target=$(OBJPATH)$(DELIM)$*$(OBJEXT) $(filter -D% -U% -I%,$(CFLAGS)) $< -o $@
