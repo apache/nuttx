@@ -128,13 +128,7 @@
 
 typedef clock_t hrtime_t;
 
-/* struct timeval represents time as seconds plus microseconds */
-
-struct timeval
-{
-  time_t tv_sec;         /* Seconds */
-  long tv_usec;          /* Microseconds */
-};
+/* struct timeval (seconds plus microseconds) is defined in <sys/types.h> */
 
 /* Type of the second argument to `getitimer' and
  * the second and third arguments `setitimer'.

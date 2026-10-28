@@ -260,6 +260,17 @@ typedef FAR void    *timer_t;        /* Represents one POSIX timer */
 typedef uint32_t     useconds_t;
 typedef int32_t      suseconds_t;
 
+/* struct timeval represents time as seconds plus microseconds.  POSIX
+ * defines it in <sys/time.h> and <sys/select.h>; programs also expect it
+ * after <sys/types.h>.
+ */
+
+struct timeval
+{
+  time_t tv_sec;         /* Seconds */
+  long tv_usec;          /* Microseconds */
+};
+
 /* This is the smallest integer type that will hold a bitset of all CPUs */
 
 #if (CONFIG_SMP_NCPUS <= 32)
