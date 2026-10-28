@@ -181,6 +181,60 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
   for (; ; )
     {
+#ifndef CONFIG_ARCH_ROMGETC
+      FAR const char *start = fmt;
+
+      for (; ; )
+        {
+          c = fmt_char(fmt);
+          if (c == '\0')
+            {
+#ifdef CONFIG_LIBC_NUMBERED_ARGS
+              if (stream != NULL)
+#endif
+                {
+                  size_t len = (fmt - start) - 1;
+
+                  if (len > 0)
+                    {
+                      stream_puts(start, len, stream);
+                    }
+                }
+
+              goto ret;
+            }
+
+          if (c == '%')
+            {
+              size_t len = (fmt - start) - 1;
+
+              c = fmt_char(fmt);
+              if (c != '%')
+                {
+#ifdef CONFIG_LIBC_NUMBERED_ARGS
+                  if (stream != NULL)
+#endif
+                    {
+                      if (len > 0)
+                        {
+                          stream_puts(start, len, stream);
+                        }
+                    }
+
+                  break;
+                }
+
+#ifdef CONFIG_LIBC_NUMBERED_ARGS
+              if (stream != NULL)
+#endif
+                {
+                  stream_puts(start, len + 1, stream);
+                }
+
+              start = fmt;
+            }
+        }
+#else
       for (; ; )
         {
           c = fmt_char(fmt);
@@ -207,6 +261,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
           stream_putc(c, stream);
 #endif
         }
+#endif
 
       flags = 0;
       width = 0;
