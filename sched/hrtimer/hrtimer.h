@@ -686,17 +686,27 @@ static inline_function void hrtimer_process(uint64_t now)
    * the queue.
    */
 
-  while ((hrtimer = hrtimer_get_first()) != NULL &&
-         HRTIMER_TIME_BEFORE_EQ(hrtimer->expired, now))
+  while ((hrtimer = hrtimer_get_first()) != NULL)
     {
       expired = hrtimer->expired;
-      func    = hrtimer->func;
+
+      /* The earliest timer has not expired: arm the hardware for it.
+       * An empty queue exits the loop without touching the hardware.
+       */
+
+      if (!HRTIMER_TIME_BEFORE_EQ(expired, now))
+        {
+          hrtimer_reprogram(expired);
+          break;
+        }
+
+      hrtimer_mark_running(hrtimer, cpu);
+
+      func = hrtimer->func;
 
       /* Remove the expired timer from the timer queue */
 
       hrtimer_remove(hrtimer);
-
-      hrtimer_mark_running(hrtimer, cpu);
 
       /* Leave critical section before invoking the callback */
 
@@ -726,17 +736,8 @@ static inline_function void hrtimer_process(uint64_t now)
           hrtimer->func    = func;
           hrtimer_insert(hrtimer);
         }
-    }
 
-  hrtimer_unmark_running(cpu);
-
-  /* Arm the hardware for the earliest remaining timer.  When the queue
-   * is empty nothing needs to fire and the hardware is left alone.
-   */
-
-  if (hrtimer)
-    {
-      hrtimer_reprogram(hrtimer->expired);
+      hrtimer_unmark_running(cpu);
     }
 
   /* Release the lock and give up the ownership of the hrtimer queue. */
