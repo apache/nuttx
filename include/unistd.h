@@ -31,6 +31,10 @@
 #include <nuttx/compiler.h>
 #include <limits.h>
 
+/* Programs use fd_set and select() after <unistd.h> alone */
+
+#include <sys/select.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
