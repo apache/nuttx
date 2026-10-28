@@ -843,7 +843,7 @@ executed.
 
   **POSIX Compatibility:** This is a NON-POSIX interface.
 
-.. c:function:: uint64_t hrtimer_gettime(FAR hrtimer_t *timer)
+.. c:function:: uint64_t hrtimer_gettime(FAR const hrtimer_t *timer)
 
   Get the remaining time until timer expiration.
 
