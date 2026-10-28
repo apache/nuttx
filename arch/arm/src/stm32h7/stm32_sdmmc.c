@@ -238,14 +238,21 @@
  * This condition breaks interrupts delivering mechanism over DAT[1]/IRQ
  * SDIO line to the host.
  */
-#  define STM32_SDMMC_CLCKR_SDWIDEXFR (STM32_SDMMC_SDXFR_CLKDIV     |     \
-                                       STM32_SDMMC_CLKCR_EDGE       |     \
+#  define STM32_SDMMC_CLCKR_SDWIDEXFR (STM32_SDMMC_SDXFR_CLKDIV       | \
+                                       STM32_SDMMC_CLKCR_EDGE         | \
                                        STM32_SDMMC_CLKCR_WIDBUS_D4)
+#  define STM32_SDMMC_CLCKR_SDWIDEXFR_HS (STM32_SDMMC_SDXFR_HS_CLKDIV | \
+                                          STM32_SDMMC_CLKCR_EDGE      | \
+                                          STM32_SDMMC_CLKCR_WIDBUS_D4)
 #else
-#  define STM32_SDMMC_CLCKR_SDWIDEXFR (STM32_SDMMC_SDXFR_CLKDIV     |     \
-                                       STM32_SDMMC_CLKCR_EDGE       |     \
-                                       STM32_SDMMC_CLKCR_PWRSAV     |     \
+#  define STM32_SDMMC_CLCKR_SDWIDEXFR (STM32_SDMMC_SDXFR_CLKDIV       | \
+                                       STM32_SDMMC_CLKCR_EDGE         | \
+                                       STM32_SDMMC_CLKCR_PWRSAV       | \
                                        STM32_SDMMC_CLKCR_WIDBUS_D4)
+#  define STM32_SDMMC_CLCKR_SDWIDEXFR_HS (STM32_SDMMC_SDXFR_HS_CLKDIV | \
+                                          STM32_SDMMC_CLKCR_EDGE      | \
+                                          STM32_SDMMC_CLKCR_PWRSAV    | \
+                                          STM32_SDMMC_CLKCR_WIDBUS_D4)
 #endif
 
 /* Timing */
@@ -394,6 +401,7 @@ struct stm32_dev_s
 
   bool               widebus;         /* Required for DMA support */
   bool               onebit;          /* true: Only 1-bit transfers are supported */
+  bool               highspeed;       /* true: Support high-speed mode(CMD6) */
 
 #if defined(HAVE_SDMMC_SDIO_MODE)
   /* Interrupt at SDIO_D1 pin, only for SDIO cards */
@@ -2168,6 +2176,11 @@ static sdio_capset_t stm32_capabilities(struct sdio_dev_s *dev)
       caps |= SDIO_CAPS_4BIT;
     }
 
+  if (priv->highspeed)
+    {
+      caps |= SDIO_CAPS_SD_HS_MODE;
+    }
+
   caps |= SDIO_CAPS_DMABEFOREWRITE;
 
 #if defined(CONFIG_STM32_SDMMC_IDMA)
@@ -2316,6 +2329,16 @@ static void stm32_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
       case CLOCK_SD_TRANSFER_1BIT:
         clckr = STM32_SDMMC_CLCKR_SDXFR;
+        break;
+
+      /* SD high speed */
+
+      case CLOCK_SD_TRANSFER_4BIT_HS:
+#if defined(CONFIG_SDMMC1_SD_HS_MODE) || defined(CONFIG_SDMMC2_SD_HS_MODE)
+        clckr = STM32_SDMMC_CLCKR_SDWIDEXFR_HS;
+#else
+        clckr = STM32_SDMMC_CLCKR_SDXFR;
+#endif
         break;
     }
 
@@ -3814,11 +3837,17 @@ struct sdio_dev_s *sdio_initialize(int slotno)
 
       priv = &g_sdmmcdev1;
 
-#if defined(CONFIG_SDMMC1_WIDTH_D1_ONLY)
+#  if defined(CONFIG_SDMMC1_WIDTH_D1_ONLY)
       priv->onebit = true;
-#else
+#  else
       priv->onebit = false;
-#endif
+#  endif
+
+#  if defined(CONFIG_SDMMC1_SD_HS_MODE)
+      priv->highspeed = true;
+#  else
+      priv->highspeed = false;
+#  endif
 
       /* Configure GPIOs for 4-bit, wide-bus operation (the chip is capable
        * of 8-bit wide bus operation but D4-D7 are not configured).
@@ -3827,16 +3856,16 @@ struct sdio_dev_s *sdio_initialize(int slotno)
        * utility in the scope of the board support package.
        */
 
-#ifndef CONFIG_SDIO_MUXBUS
+#  ifndef CONFIG_SDIO_MUXBUS
       stm32_configgpio(SDMMC1_SDIO_PULL(GPIO_SDMMC1_D0));
-#  ifndef CONFIG_SDMMC1_WIDTH_D1_ONLY
+#    ifndef CONFIG_SDMMC1_WIDTH_D1_ONLY
       stm32_configgpio(SDMMC1_SDIO_PULL(GPIO_SDMMC1_D1));
       stm32_configgpio(SDMMC1_SDIO_PULL(GPIO_SDMMC1_D2));
       stm32_configgpio(SDMMC1_SDIO_PULL(GPIO_SDMMC1_D3));
-#  endif
+#    endif
       stm32_configgpio(GPIO_SDMMC1_CK);
       stm32_configgpio(SDMMC1_SDIO_PULL(GPIO_SDMMC1_CMD));
-#endif
+#  endif
     }
   else
 #endif
@@ -3851,6 +3880,12 @@ struct sdio_dev_s *sdio_initialize(int slotno)
       priv->onebit = true;
 #  else
       priv->onebit = false;
+#  endif
+
+#  if defined(CONFIG_SDMMC2_SD_HS_MODE)
+      priv->highspeed = true;
+#  else
+      priv->highspeed = false;
 #  endif
 
       /* Configure GPIOs for 4-bit, wide-bus operation (the chip is capable

@@ -120,6 +120,18 @@ config SDMMC1_WIDTH_D1_ONLY
 	---help---
 		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
 
+config SDMMC1_SD_HS_MODE
+	bool "Support SD card high speed mode on SDMMC1"
+	depends on STM32_SDMMC1
+	default n
+	---help---
+		Report SDIO_CAPS_SD_HS_MODE for SDMMC1 so that the
+		generic MMC/SD driver switches an inserted SD card
+		into high speed mode (CMD6) and raises the bus clock
+		accordingly, once the card confirms the switch. The
+		board must provide STM32_SDMMC_SDXFR_HS_CLKDIV in
+		board.h for the higher clock.
+
 config SDMMC1_SDIO_MODE
 	bool "SDIO Card Support"
 	depends on STM32_COMMON_F7_H7_H5 && STM32_SDMMC && STM32_SDMMC1
@@ -141,6 +153,18 @@ config SDMMC2_WIDTH_D1_ONLY
 	depends on STM32_COMMON_F7_H7_H5 && STM32_SDMMC && STM32_SDMMC2
 	---help---
 		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
+
+config SDMMC2_SD_HS_MODE
+	bool "Support SD card high speed mode on SDMMC2"
+	depends on STM32_SDMMC2
+	default n
+	---help---
+		Report SDIO_CAPS_SD_HS_MODE for SDMMC2 so that the
+		generic MMC/SD driver switches an inserted SD card
+		into high speed mode (CMD6) and raises the bus clock
+		accordingly, once the card confirms the switch. The
+		board must provide STM32_SDMMC_SDXFR_HS_CLKDIV in
+		board.h for the higher clock.
 
 config SDMMC2_SDIO_MODE
 	bool "SDIO Card Support"
