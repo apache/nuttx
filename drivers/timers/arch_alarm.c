@@ -372,7 +372,10 @@ int weak_function up_alarm_tick_cancel(FAR clock_t *ticks)
   if (g_oneshot_lower != NULL)
     {
       ret = ONESHOT_TICK_CANCEL(g_oneshot_lower, ticks);
+
+#ifndef CONFIG_ONESHOT_COUNT
       ONESHOT_TICK_CURRENT(g_oneshot_lower, ticks);
+#endif
     }
 
   return ret;
