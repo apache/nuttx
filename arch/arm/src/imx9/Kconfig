@@ -75,6 +75,22 @@ config IMX9_WFI_AWAKES_AT_SYSTICK
 	Configure the GPC to wake up from systick interrupts at WFI
 	instruction
 
+config IMX9_RPTUN_ALWAYS_COPY_RSC_TABLE
+	bool "Always copy resource table on rptun start"
+	default n
+	depends on RPTUN
+	---help---
+		Copy the built-in resource table to RESOURCE_TABLE_BASE on every
+		rptun start, resetting the vdev status. This allows rptun to be
+		restarted while the core keeps running, e.g. after Linux reboots.
+
+		Do not enable this when Linux remoteproc loads the firmware ELF.
+		Linux then writes the resource table before starting the core and
+		sets DRIVER_OK afterwards, so copying it would erase that state.
+
+		If disabled, the table is only copied when RESOURCE_TABLE_BASE
+		does not already hold a table.
+
 menu "i.MX9 Peripheral Selection"
 
 config IMX9_EDMA
