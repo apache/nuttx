@@ -89,5 +89,9 @@ int rtl8730e_wdg_initialize(void);
 int rtl8730e_adc_initialize(void);
 #endif
 
+#ifdef CONFIG_AMEBA_RTC
+int rtl8730e_rtc_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_RTL8730E_RTL8730E_EVB_SRC_RTL8730E_EVB_H */
