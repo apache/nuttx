@@ -901,7 +901,8 @@ In a PROTECTED or a KERNEL build, a user task that makes a forbidden access,
 or takes any other fault that cannot be serviced, receives ``SIGSEGV``.  Its
 default action terminates only that task, and the rest of the system keeps
 running.  This is ``CONFIG_ESP32S3_USERFAULT_ABORT``, which is enabled by
-default.  A fault in kernel mode still halts the system: a kernel thread, a
+default with full signal support (``CONFIG_ENABLE_ALL_SIGNALS``); without it,
+a fault in user code halts the system.  A fault in kernel mode still halts the system: a kernel thread, a
 system call and an interrupt handler have no task that can safely be killed.
 
 The console names the cause of the fault::
