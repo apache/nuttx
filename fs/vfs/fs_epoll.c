@@ -748,7 +748,9 @@ int epoll_pwait(int epfd, FAR struct epoll_event *evs,
 {
   FAR struct file *filep;
   FAR epoll_head_t *eph;
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   sigset_t oldsigmask;
+#endif
   int ret;
 
   eph = epoll_head_from_fd(epfd, &filep);
@@ -764,9 +766,11 @@ retry:
       goto err;
     }
 
-  /* Wait the poll ready */
+  /* Wait the poll ready.  Without signals, there is no mask to set. */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   nxsig_procmask(SIG_SETMASK, sigmask, &oldsigmask);
+#endif
 
   /* Push a cancellation point onto the stack.  This will be called if
    * the thread is canceled.
@@ -791,7 +795,9 @@ retry:
 
   tls_cleanup_pop(tls_get_info(), 0);
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   nxsig_procmask(SIG_SETMASK, &oldsigmask, NULL);
+#endif
   if (ret < 0 && ret != -ETIMEDOUT)
     {
       goto err;
