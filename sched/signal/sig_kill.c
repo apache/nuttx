@@ -121,7 +121,7 @@ int nxsig_kill(pid_t pid, int signo)
 
   /* Send the signal */
 
-  return nxsig_dispatch(pid, &info, false);
+  return nxsig_dispatch(pid, &info, false, NULL);
 #endif
 }
 

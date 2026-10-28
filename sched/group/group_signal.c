@@ -46,6 +46,7 @@
 struct group_signal_s
 {
   FAR siginfo_t *siginfo; /* Signal to be dispatched */
+  FAR const void *source; /* The POSIX timer of the signal, or NULL */
   FAR struct tcb_s *dtcb; /* Default, valid TCB */
   FAR struct tcb_s *utcb; /* TCB with this signal unblocked */
   FAR struct tcb_s *atcb; /* This TCB was awakened */
@@ -111,7 +112,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
        * receive the signal.
        */
 
-      ret = nxsig_tcbdispatch(tcb, info->siginfo, true);
+      ret = nxsig_tcbdispatch(tcb, info->siginfo, true, info->source);
       if (ret < 0)
         {
           return ret;
@@ -153,7 +154,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
            * blocking the signal will receive the signal.
            */
 
-          ret = nxsig_tcbdispatch(tcb, info->siginfo, true);
+          ret = nxsig_tcbdispatch(tcb, info->siginfo, true, info->source);
           if (ret < 0)
             {
               return ret;
@@ -198,7 +199,8 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
  *
  ****************************************************************************/
 
-int group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo)
+int group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo,
+                 FAR const void *source)
 {
 #ifdef HAVE_GROUP_MEMBERS
   struct group_signal_s info;
@@ -208,6 +210,7 @@ int group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo)
   DEBUGASSERT(group && siginfo);
 
   info.siginfo = siginfo;
+  info.source  = source;
   info.dtcb    = NULL;     /* Default, valid TCB */
   info.utcb    = NULL;     /* TCB with this signal unblocked */
   info.atcb    = NULL;     /* This TCB was awakened */
@@ -261,7 +264,7 @@ int group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo)
 
       /* Now deliver the signal to the selected group member */
 
-      ret = nxsig_tcbdispatch(tcb, siginfo, true);
+      ret = nxsig_tcbdispatch(tcb, siginfo, true, source);
     }
 
 errout:
@@ -276,6 +279,7 @@ errout:
 
   UNUSED(group);
   UNUSED(siginfo);
+  UNUSED(source);
   return -ENOSYS;
 
 #endif
