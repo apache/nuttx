@@ -115,6 +115,18 @@ struct getopt_s
   bool      go_binitialized; /* true:  getopt() has been initialized */
 };
 
+#ifdef CONFIG_FILE_STREAM
+/* The state of getusershell(), allocated by libc at the first call */
+
+struct usershell_s
+{
+  FAR FILE *us_file;         /* _PATH_SHELLS, or NULL: the default list */
+  FAR char *us_line;         /* The line buffer of getline() */
+  size_t    us_size;         /* The size of us_line */
+  size_t    us_next;         /* The next shell of the default list */
+};
+#endif
+
 #ifdef CONFIG_PTHREAD_ATFORK
 /* This structure defines the pthread_atfork_s, which is used to manage
  * the funcs that operates on pthread_atfork() method
@@ -157,6 +169,10 @@ struct task_info_s
 #endif
 #ifdef CONFIG_FILE_STREAM
   struct streamlist ta_streamlist; /* Holds C buffered I/O info */
+
+  /* The state of getusershell(), allocated by libc */
+
+  FAR struct usershell_s *ta_usershell;
 #endif
 
 #ifdef CONFIG_PTHREAD_ATFORK

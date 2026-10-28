@@ -546,6 +546,11 @@ int     profil(FAR unsigned short *buf, size_t bufsiz,
                size_t offset, unsigned int scale);
 
 FAR char *getpass(FAR const char *prompt);
+#ifdef CONFIG_FILE_STREAM
+FAR char *getusershell(void);
+void    setusershell(void);
+void    endusershell(void);
+#endif
 #ifdef CONFIG_CRYPTO
 FAR char *crypt(FAR const char *key, FAR const char *salt);
 

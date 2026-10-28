@@ -170,6 +170,17 @@ void task_uninit_info(FAR struct task_group_s *group)
   /* Free resource held by the stream list */
 
   task_uninit_stream(group);
+
+  /* libc allocated the getusershell() state in the heap of the process.
+   * Its stream was closed with the stream list.
+   */
+
+  if (info->ta_usershell != NULL)
+    {
+      group_free(group, info->ta_usershell->us_line);
+      group_free(group, info->ta_usershell);
+      info->ta_usershell = NULL;
+    }
 #endif /* CONFIG_FILE_STREAM */
 
 #ifdef CONFIG_NETDB_DNSCLIENT
