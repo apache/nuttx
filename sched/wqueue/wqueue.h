@@ -180,9 +180,35 @@ bool work_insert_pending(FAR struct kwork_wqueue_s *wqueue,
 
   DEBUGASSERT(wqueue != NULL && work != NULL);
 
+  /* Empty list: insert directly as the first pending work. */
+
+  if (list_is_empty(&wqueue->pending))
+    {
+      list_add_head(&wqueue->pending, &work->node);
+      return true;
+    }
+
   /* Insert the work into the wait queue sorted by the expired time. */
 
   head = list_first_entry(&wqueue->pending, struct work_s, node);
+
+  /* New earliest expiration: insert at the head and restart the timer. */
+
+  if (!clock_compare(head->qtime, work->qtime))
+    {
+      list_add_head(&wqueue->pending, &work->node);
+      return true;
+    }
+
+  curr = list_last_entry(&wqueue->pending, struct work_s, node);
+
+  /* New latest expiration: append at the tail without scanning. */
+
+  if (clock_compare(curr->qtime, work->qtime))
+    {
+      list_add_tail(&wqueue->pending, &work->node);
+      return false;
+    }
 
   list_for_every_entry(&wqueue->pending, curr, struct work_s, node)
     {
