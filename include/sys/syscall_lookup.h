@@ -355,6 +355,9 @@ SYSCALL_LOOKUP(munlockall,                 0)
   SYSCALL_LOOKUP(pthread_getaffinity_np,   3)
 #endif
   SYSCALL_LOOKUP(pthread_sigmask,          3)
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
+  SYSCALL_LOOKUP(pthread_sigqueue,         3)
+#endif
 #endif
 
 /* The following are defined only if message queues are enabled */
