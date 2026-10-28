@@ -2486,6 +2486,7 @@ config ARCH_BOARD_RASPBERRYPI_PICO_2_W
 	bool "Raspberry Pi Pico 2 W board"
 	depends on ARCH_CHIP_RP23XX
 	select ARCH_HAVE_LEDS
+	select RP23XX_HAVE_CYW43439
 	---help---
 		This is a port to the Raspberry Pi Pico 2 W board, with support for
 		the onboard Infineon CYW43439 Wi-Fi chip.
@@ -2521,6 +2522,7 @@ config ARCH_BOARD_PIMORONI_PICO_PLUS_2_W
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	select RP23XX_RP2350B
+	select RP23XX_HAVE_CYW43439
 	---help---
 		This is a port to the Pimoroni Pico Plus 2 W board, which adds an
 		Infineon CYW43439 WiFi/Bluetooth chip to the Pico Plus 2.
