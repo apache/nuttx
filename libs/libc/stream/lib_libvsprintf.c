@@ -62,6 +62,10 @@
 #define stream_putc(c,stream)  (total_len++, lib_stream_putc(stream, c))
 #define stream_puts(buf, len, stream) \
         (total_len += len, lib_stream_puts(stream, buf, len))
+#define stream_repeat(c, len, stream) \
+        (total_len += vsprintf_repeat(stream, c, len))
+
+#define REPEAT_BUFLEN      16
 
 /* Order is relevant here and matches order in format string */
 
@@ -133,6 +137,8 @@ struct arg_s
  ****************************************************************************/
 
 static const char g_nullstring[] = "(null)";
+static const char g_spaces[REPEAT_BUFLEN] = "                ";
+static const char g_zeroes[REPEAT_BUFLEN] = "0000000000000000";
 
 /****************************************************************************
  * Private Function Prototypes
@@ -146,6 +152,23 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static int vsprintf_repeat(FAR struct lib_outstream_s *stream, int ch,
+                           int len)
+{
+  FAR const char *buf = ch == '0' ? g_zeroes : g_spaces;
+  int total_len = len;
+
+  while (len > 0)
+    {
+      int n = MIN(len, REPEAT_BUFLEN);
+
+      lib_stream_puts(stream, buf, n);
+      len -= n;
+    }
+
+  return total_len;
+}
 
 static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                              FAR struct arg_s *arglist, int numargs,
@@ -676,11 +699,8 @@ flt_oper:
                   width -= ndigs;
                   if ((flags & FL_LPAD) == 0)
                     {
-                      do
-                        {
-                          stream_putc(' ', stream);
-                        }
-                      while (--width);
+                      stream_repeat(' ', width, stream);
+                      width = 0;
                     }
                 }
               else
@@ -781,11 +801,8 @@ flt_oper:
 
           if ((flags & (FL_LPAD | FL_ZFILL)) == 0)
             {
-              while (width)
-                {
-                  stream_putc(' ', stream);
-                  width--;
-                }
+              stream_repeat(' ', width, stream);
+              width = 0;
             }
 
           if (sign != 0)
@@ -795,11 +812,8 @@ flt_oper:
 
           if ((flags & FL_LPAD) == 0)
             {
-              while (width)
-                {
-                  stream_putc('0', stream);
-                  width--;
-                }
+              stream_repeat('0', width, stream);
+              width = 0;
             }
 
           if ((flags & FL_FLTFIX) != 0)
@@ -1018,10 +1032,12 @@ flt_oper:
 
                 if ((flags & FL_LPAD) == 0)
                   {
-                    while (size < width)
+                    if (width > 0 && size < width)
                       {
-                        stream_putc(' ', stream);
-                        width--;
+                        int pad = width - size;
+
+                        stream_repeat(' ', pad, stream);
+                        width -= pad;
                       }
                   }
 
@@ -1045,10 +1061,12 @@ flt_oper:
 str_lpad:
             if ((flags & FL_LPAD) == 0)
               {
-                while (size < width)
+                if (width > 0 && size < width)
                   {
-                    stream_putc(' ', stream);
-                    width--;
+                    int pad = width - size;
+
+                    stream_repeat(' ', pad, stream);
+                    width -= pad;
                   }
               }
 
@@ -1356,10 +1374,10 @@ str_lpad:
                 }
             }
 
-          while (len < width)
+          if (len < width)
             {
-              stream_putc(' ', stream);
-              len++;
+              stream_repeat(' ', width - len, stream);
+              len = width;
             }
         }
 
@@ -1390,10 +1408,10 @@ str_lpad:
           stream_putc(z, stream);
         }
 
-      while (prec > c)
+      if (prec > c)
         {
-          stream_putc('0', stream);
-          prec--;
+          stream_repeat('0', prec - c, stream);
+          prec = c;
         }
 
       while (c)
@@ -1405,10 +1423,9 @@ tail:
 
       /* Tail is possible.  */
 
-      while (width)
+      if (width > 0)
         {
-          stream_putc(' ', stream);
-          width--;
+          stream_repeat(' ', width, stream);
         }
     }
 
