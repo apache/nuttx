@@ -91,7 +91,11 @@ RB_HEAD(hrtimer_tree_s, hrtimer_s);
 
 extern seqcount_t g_hrtimer_lock;
 
-extern struct hrtimer_s g_hrtimer_guard;
+/* The time of the last hrtimer_process() run, used as the reference
+ * point for hrtimer_last_expired().
+ */
+
+extern uint64_t g_hrtimer_last_expired;
 
 #ifdef CONFIG_HRTIMER_TREE
 /* Red-Black tree containing all active high-resolution timers */
@@ -167,6 +171,27 @@ void hrtimer_unlock(irqstate_t flags)
 }
 
 /****************************************************************************
+ * Name: hrtimer_get_first
+ *
+ * Description:
+ *   Return the earliest expiring pending timer.
+ *
+ * Returned Value:
+ *   Pointer to the earliest timer, or NULL if none are pending.
+ *
+ ****************************************************************************/
+
+static inline_function FAR hrtimer_t *hrtimer_get_first(void)
+{
+#ifdef CONFIG_HRTIMER_TREE
+  return g_hrtimer_head;
+#else
+  return list_is_empty(&g_hrtimer_list) ?
+         NULL : list_first_entry(&g_hrtimer_list, FAR hrtimer_t, node);
+#endif
+}
+
+/****************************************************************************
  * Name: hrtimer_last_expired
  *
  * Description:
@@ -182,7 +207,28 @@ void hrtimer_unlock(irqstate_t flags)
 
 static inline_function uint64_t hrtimer_last_expired(void)
 {
-  return g_hrtimer_guard.expired - HRTIMER_GUARD_DELAY;
+  return g_hrtimer_last_expired;
+}
+
+/****************************************************************************
+ * Name: hrtimer_next_expired
+ *
+ * Description:
+ *   Return the expiration time of the earliest expiring pending timer.
+ *
+ * Returned Value:
+ *   The expiration time in nanoseconds.  When the queue is empty,
+ *   hrtimer_last_expired() + INT64_MAX is returned: a far-future deadline
+ *   that never fires in practice and cannot collide with a real
+ *   expiration requested by the user.
+ *
+ ****************************************************************************/
+
+static inline_function uint64_t hrtimer_next_expired(void)
+{
+  FAR hrtimer_t *first = hrtimer_get_first();
+
+  return first != NULL ? first->expired : hrtimer_last_expired() + INT64_MAX;
 }
 
 /****************************************************************************
@@ -352,7 +398,8 @@ static inline_function void hrtimer_insert(FAR hrtimer_t *hrtimer)
 #ifdef CONFIG_HRTIMER_TREE
   RB_INSERT(hrtimer_tree_s, &g_hrtimer_tree, hrtimer);
 
-  if (HRTIMER_TIME_BEFORE(hrtimer->expired, g_hrtimer_head->expired))
+  if (g_hrtimer_head == NULL ||
+      HRTIMER_TIME_BEFORE(hrtimer->expired, g_hrtimer_head->expired))
     {
       g_hrtimer_head = hrtimer;
     }
@@ -372,42 +419,6 @@ static inline_function void hrtimer_insert(FAR hrtimer_t *hrtimer)
 
   list_add_before(&curr->node, &hrtimer->node);
 #endif
-}
-
-/****************************************************************************
- * Name: hrtimer_get_first
- *
- * Description:
- *   Return the earliest expiring pending timer.
- *
- * Returned Value:
- *   Pointer to the earliest timer, or NULL if none are pending.
- *
- ****************************************************************************/
-
-static inline_function FAR hrtimer_t *hrtimer_get_first(void)
-{
-#ifdef CONFIG_HRTIMER_TREE
-  return g_hrtimer_head;
-#else
-  return list_first_entry(&g_hrtimer_list, FAR hrtimer_t, node);
-#endif
-}
-
-/****************************************************************************
- * Name: hrtimer_next_expired
- *
- * Description:
- *   Return the expiration time of the earliest expiring pending timer.
- *
- * Returned Value:
- *   The expiration time in nanoseconds.
- *
- ****************************************************************************/
-
-static inline_function uint64_t hrtimer_next_expired(void)
-{
-  return hrtimer_get_first()->expired;
 }
 
 /****************************************************************************
@@ -657,19 +668,30 @@ static inline_function void hrtimer_wait(FAR hrtimer_t *timer)
 
 static inline_function void hrtimer_process(uint64_t now)
 {
+  uint64_t        expired;
   uint64_t          delay;
+  hrtimer_entry_t    func;
+  FAR hrtimer_t  *hrtimer;
   int                 cpu = this_cpu();
   irqstate_t        flags = hrtimer_lock();
-  FAR hrtimer_t  *hrtimer = hrtimer_get_first();
-  uint64_t        expired = hrtimer->expired;
-  hrtimer_entry_t    func = hrtimer->func;
 
-  /* Acquire the lock and seize the ownership of the hrtimer queue.
-   * Then check if the timer has expired.
+  /* Record the current time as the reference point for
+   * hrtimer_last_expired().
    */
 
-  while (HRTIMER_TIME_BEFORE_EQ(expired, now))
+  g_hrtimer_last_expired = now;
+
+  /* Process every expired timer.  The earliest pending timer is
+   * re-fetched on each iteration since the callback may have modified
+   * the queue.
+   */
+
+  while ((hrtimer = hrtimer_get_first()) != NULL &&
+         HRTIMER_TIME_BEFORE_EQ(hrtimer->expired, now))
     {
+      expired = hrtimer->expired;
+      func    = hrtimer->func;
+
       /* Remove the expired timer from the timer queue */
 
       hrtimer_remove(hrtimer);
@@ -704,23 +726,18 @@ static inline_function void hrtimer_process(uint64_t now)
           hrtimer->func    = func;
           hrtimer_insert(hrtimer);
         }
-
-      /* Fetch the earliest active timer */
-
-      hrtimer = hrtimer_get_first();
-      expired = hrtimer->expired;
-      func    = hrtimer->func;
     }
 
   hrtimer_unmark_running(cpu);
 
-  /* Note that the g_hrtimer_guard.expired is not monotonic. */
+  /* Arm the hardware for the earliest remaining timer.  When the queue
+   * is empty nothing needs to fire and the hardware is left alone.
+   */
 
-  g_hrtimer_guard.expired = now + HRTIMER_GUARD_DELAY;
-
-  /* Schedule the next timer expiration */
-
-  hrtimer_reprogram(expired);
+  if (hrtimer)
+    {
+      hrtimer_reprogram(hrtimer->expired);
+    }
 
   /* Release the lock and give up the ownership of the hrtimer queue. */
 
