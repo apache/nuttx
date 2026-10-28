@@ -1282,9 +1282,12 @@ static FAR netpkt_t *ctucanfd_sock_recv(FAR struct netdev_lowerhalf_s *dev)
   regval = ctucanfd_getreg(priv, CTUCANFD_RXSETSTAT);
   if ((regval & CTUCANFD_RXSTAT_RXE) != 0)
     {
-      /* Clear RX interrupt before re-enabling interrupts */
+      /* Clear the RX buffer not empty interrupt before re-enabling RX
+       * interrupts.  Leave the error interrupts pending, they are handled
+       * by ctucanfd_sock_error().
+       */
 
-      ctucanfd_putreg(priv, CTUCANFD_INTSTAT, CTUCANFD_SOCK_RXINT);
+      ctucanfd_putreg(priv, CTUCANFD_INTSTAT, CTUCANFD_INT_RBNEI);
 
       /* Re-enable RX interrupts if no more messages to read */
 
