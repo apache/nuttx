@@ -28,56 +28,24 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
-#include <arch/board/board.h>
 
 #include "tricore_internal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#if defined(__TASKING__)
-#  define tricore_idle_loop() __asm__ volatile ("1: loopu 1p")
-#else
-#  define tricore_idle_loop() __asm__ volatile ("1: loopu 1b")
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_idle
- *
- * Description:
- *   up_idle() is the logic that will be executed when there is no other
- *   ready-to-run task.  This is processor idle time and will continue until
- *   some interrupt occurs to cause a context switch from the idle task.
- *
- *   Processing in this state may be processor-specific. e.g., this is where
- *   power management operations might be performed.
- *
- ****************************************************************************/
-
 void up_idle(void)
 {
 #if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
-  /* If the system is idle and there are no timer interrupts, then process
-   * "fake" timer interrupts. Hopefully, something will wake up.
-   */
 
   nxsched_process_timer();
 #else
-
-  /* Does the board support an IDLE LED to indicate that the board is in the
-   * IDLE state?
-   */
 
 #ifdef CONFIG_ARCH_LEDS_CPU_ACTIVITY
   board_autoled_off(LED_CPU);
 #endif
 
-  tricore_idle_loop();
-
+  __asm__ __volatile__ ("enable\n\twait" ::: "memory");
 #endif
 }
