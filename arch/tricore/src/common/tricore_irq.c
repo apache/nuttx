@@ -236,6 +236,7 @@ void up_affinity_irq(int irq, cpu_set_t cpuset)
 void tricore_ack_irq(int irq)
 {
   volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
+
   IfxSrc_clearRequest(src);
 }
 
@@ -251,6 +252,7 @@ void tricore_ack_irq(int irq)
 void up_trigger_irq(int irq, cpu_set_t cpuset)
 {
   volatile Ifx_INT_SRB *srb = &INT_SRB0 + up_cpu_index();
+
   srb->U = cpuset;
 }
 #endif

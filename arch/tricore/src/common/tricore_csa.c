@@ -92,7 +92,9 @@ uintptr_t *tricore_alloc_csa(uintptr_t pc, uintptr_t sp,
 
 void tricore_reclaim_csa(uintptr_t pcxi)
 {
-  uintptr_t head, tail, free;
+  uintptr_t head;
+  uintptr_t tail;
+  uintptr_t free;
   uintptr_t *next;
 
   /* A pointer to the first CSA in the list of CSAs consumed by the task is
