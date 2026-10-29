@@ -53,6 +53,33 @@
 #define IMXRT_ANADIG_PLL_AUDIO_CTRL      (IMXRT_ANADIG_PLL_BASE + 0x4200)
 #define IMXRT_ANADIG_PLL_VIDEO_CTRL      (IMXRT_ANADIG_PLL_BASE + 0x4300)
 
+/* SYS_PLL1 fractional PLL registers (NXP's ETHERNET_PLL block), separate
+ * from the clock-control/status register SYS1_CTRL at 0x4448_4100.
+ */
+
+#define IMXRT_SYS_PLL1_CTRL0             (IMXRT_ANADIG_PLL_BASE + 0x4180)
+#define IMXRT_SYS_PLL1_CTRL0_SET         (IMXRT_SYS_PLL1_CTRL0 + 0x4)
+#define IMXRT_SYS_PLL1_CTRL0_CLR         (IMXRT_SYS_PLL1_CTRL0 + 0x8)
+#define IMXRT_SYS_PLL1_NUMERATOR         (IMXRT_ANADIG_PLL_BASE + 0x41a0)
+#define IMXRT_SYS_PLL1_DENOMINATOR       (IMXRT_ANADIG_PLL_BASE + 0x41b0)
+
+#define SYS_PLL1_CTRL0_DIV_SELECT_MASK   (0x7fu)
+#define SYS_PLL1_CTRL0_DIV_SELECT(x)     ((x) & SYS_PLL1_CTRL0_DIV_SELECT_MASK)
+#define SYS_PLL1_CTRL0_HOLD_RING_OFF     (1u << 13)
+#define SYS_PLL1_CTRL0_POWERUP           (1u << 14)
+#define SYS_PLL1_CTRL0_ENABLE            (1u << 15)
+#define SYS_PLL1_CTRL0_BYPASS            (1u << 16)
+#define SYS_PLL1_CTRL0_PLL_REG_EN        (1u << 22)
+
+#define ANADIG_PLL_SYS1_ENABLE_CLK         (1u << 13)
+#define ANADIG_PLL_SYS1_GATE               (1u << 14)
+#define ANADIG_PLL_SYS1_DIV2               (1u << 25)
+#define ANADIG_PLL_SYS1_DIV5               (1u << 26)
+#define ANADIG_PLL_SYS1_DIV5_CONTROL_MODE  (1u << 27)
+#define ANADIG_PLL_SYS1_DIV2_CONTROL_MODE  (1u << 28)
+#define ANADIG_PLL_SYS1_STABLE             (1u << 29)
+#define ANADIG_PLL_SYS1_CONTROL_MODE       (1u << 31)
+
 /* ARM_PLL_CTRL bit fields (IMXRT1180RM Rev. 10 sec. 24.5.1.1, reset
  * value 4000_00A6h).
  *
