@@ -4,6 +4,25 @@
 # SPDX-License-Identifier: Apache-2.0
 # ##############################################################################
 
+# The CMake build makes simple boot images only; MCUboot and the legacy app
+# format (the bootloader build of the chips' Bootloader.mk) need Make for now.
+
+if(NOT CONFIG_ESPRESSIF_SIMPLE_BOOT)
+  message(
+    FATAL_ERROR
+      "CMake builds of ${CONFIG_ARCH_CHIP} support ESPRESSIF_SIMPLE_BOOT only, use Make for MCUboot or the legacy app format"
+  )
+endif()
+
+# The ULP RISC-V program is built by the boards' Make files only.
+
+if(CONFIG_ESPRESSIF_USE_ULP_RISCV_CORE)
+  message(
+    FATAL_ERROR
+      "CMake builds of ${CONFIG_ARCH_CHIP} do not build the ULP RISC-V program, use Make for ESPRESSIF_USE_ULP_RISCV_CORE"
+  )
+endif()
+
 set(SRCS)
 
 if(CONFIG_ESP_RMT)
@@ -132,6 +151,198 @@ if(CONFIG_ESPRESSIF_EFUSE)
   target_link_options(nuttx PRIVATE "SHELL:-u esp_efuse_startup_include_func")
 endif()
 
-target_include_directories(arch
-                           PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/platform_include)
+# ##############################################################################
+# ESP HAL 3rd Party Repository
+# ##############################################################################
+
+set(ESP_HAL_3RDPARTY_REPO_NAME esp-hal-3rdparty)
+
+if(DEFINED ENV{ESP_HAL_3RDPARTY_VERSION})
+  set(ESP_HAL_3RDPARTY_VERSION
+      $ENV{ESP_HAL_3RDPARTY_VERSION}
+      CACHE STRING "ESP HAL 3rdparty version")
+else()
+  set(ESP_HAL_3RDPARTY_VERSION
+      cf95a27f2aa263d77c7a8d7f56007abfc899fc47
+      CACHE STRING "ESP HAL 3rdparty version")
+endif()
+
+if(DEFINED ENV{ESP_HAL_3RDPARTY_URL})
+  set(ESP_HAL_3RDPARTY_URL
+      $ENV{ESP_HAL_3RDPARTY_URL}
+      CACHE STRING "ESP HAL 3rdparty URL")
+else()
+  set(ESP_HAL_3RDPARTY_URL
+      https://github.com/espressif/esp-hal-3rdparty.git
+      CACHE STRING "ESP HAL 3rdparty URL")
+endif()
+
+option(
+  NXTMPDIR
+  "Enable and use a persistent ESP third-party HAL cache directory under nuttx/../nxtmpdir"
+  OFF)
+
+get_filename_component(
+  ESP_HAL_3RDPARTY_CHIP_DIR
+  "${NUTTX_BINARY_DIR}/arch/xtensa/src/common/espressif/${ESP_HAL_3RDPARTY_REPO_NAME}"
+  REALPATH)
+
+set(EXECUTE_CLONE_ESP_HAL_3RDPARTY_REPO TRUE)
+set(ESP_HAL_3RDPARTY_REPO "${ESP_HAL_3RDPARTY_CHIP_DIR}")
+string(REPLACE "\"" "" CHIP_SERIES "${CONFIG_ESPRESSIF_CHIP_SERIES}")
+
+# The Wi-Fi and Bluetooth libraries of each chip (submodules of the HAL)
+if(CONFIG_ARCH_CHIP_ESP32)
+  set(ESP_HAL_WIRELESS_SUBMODULES
+      components/esp_phy/lib components/esp_wifi/lib
+      components/bt/controller/lib_esp32 components/esp_coex/lib)
+elseif(CONFIG_ARCH_CHIP_ESP32S2)
+  set(ESP_HAL_WIRELESS_SUBMODULES components/esp_phy/lib
+                                  components/esp_wifi/lib)
+else()
+  set(ESP_HAL_WIRELESS_SUBMODULES
+      components/esp_phy/lib components/esp_wifi/lib
+      components/bt/controller/lib_esp32c3_family components/esp_coex/lib)
+endif()
+
+# Clone the esp-hal-3rdparty repository and set up its submodules, once, when
+# CMake is configured.
+if(NOT IS_DIRECTORY "${ESP_HAL_3RDPARTY_REPO}")
+  # NXTMPDIR holds a cached copy of the repository in nuttx/../nxtmpdir
+  if(NXTMPDIR)
+    set(ESP_HAL_NXTMPDIR_CACHE "${NXTMPDIR_PATH}/${ESP_HAL_3RDPARTY_REPO_NAME}")
+    get_filename_component(ESP_HAL_NXTMPDIR_CACHE "${ESP_HAL_NXTMPDIR_CACHE}"
+                           REALPATH)
+    nuttx_check_git_hash(
+      "${ESP_HAL_NXTMPDIR_CACHE}" "${ESP_HAL_3RDPARTY_VERSION}"
+      ESP_HAL_3RDPARTY_REVISION_OK)
+    if(NOT ESP_HAL_3RDPARTY_REVISION_OK)
+      if(EXISTS "${ESP_HAL_NXTMPDIR_CACHE}")
+        message(
+          STATUS
+            "Removing esp-hal-3rdparty at ${ESP_HAL_NXTMPDIR_CACHE} (revision mismatch)"
+        )
+        file(REMOVE_RECURSE "${ESP_HAL_NXTMPDIR_CACHE}")
+      endif()
+    else()
+      set(EXECUTE_CLONE_ESP_HAL_3RDPARTY_REPO FALSE)
+    endif()
+    set(ESP_HAL_3RDPARTY_FETCH_SOURCE_DIR "${ESP_HAL_NXTMPDIR_CACHE}")
+  else()
+    set(ESP_HAL_3RDPARTY_FETCH_SOURCE_DIR "${ESP_HAL_3RDPARTY_CHIP_DIR}")
+  endif()
+
+  if(EXECUTE_CLONE_ESP_HAL_3RDPARTY_REPO
+     AND NOT EXISTS "${ESP_HAL_3RDPARTY_FETCH_SOURCE_DIR}")
+    message(STATUS "Cloning Espressif HAL for 3rd Party Platforms")
+    FetchContent_Declare(
+      esp_hal_3rdparty
+      GIT_REPOSITORY ${ESP_HAL_3RDPARTY_URL}
+      GIT_TAG ${ESP_HAL_3RDPARTY_VERSION}
+      SOURCE_DIR ${ESP_HAL_3RDPARTY_FETCH_SOURCE_DIR}
+      GIT_SUBMODULES "")
+    FetchContent_MakeAvailable(esp_hal_3rdparty)
+  endif()
+
+  # cmake-format: off
+
+  # Patch mbedtls
+  execute_process(COMMAND git submodule --quiet update --init components/mbedtls/mbedtls
+                  WORKING_DIRECTORY ${ESP_HAL_3RDPARTY_FETCH_SOURCE_DIR})
+  execute_process(COMMAND git -C components/mbedtls/mbedtls reset --quiet --hard
+                  WORKING_DIRECTORY ${ESP_HAL_3RDPARTY_FETCH_SOURCE_DIR})
+  file(GLOB ESP_HAL_MBEDTLS_PATCHES
+       ${ESP_HAL_3RDPARTY_FETCH_SOURCE_DIR}/nuttx/patches/components/mbedtls/mbedtls/*.patch)
+  execute_process(COMMAND git apply ${ESP_HAL_MBEDTLS_PATCHES}
+                  WORKING_DIRECTORY ${ESP_HAL_3RDPARTY_FETCH_SOURCE_DIR}/components/mbedtls/mbedtls)
+
+  if(CONFIG_ESPRESSIF_WIRELESS)
+    message(
+      STATUS "Espressif HAL for 3rd Party Platforms: initializing submodules...")
+    execute_process(
+      COMMAND git submodule --quiet update --init --depth=1 ${ESP_HAL_WIRELESS_SUBMODULES}
+      WORKING_DIRECTORY ${ESP_HAL_3RDPARTY_FETCH_SOURCE_DIR}
+      RESULT_VARIABLE GIT_SUBMODULE_RESULT)
+    if(NOT GIT_SUBMODULE_RESULT EQUAL 0)
+      message(FATAL_ERROR "Failed to initialize the Wi-Fi submodules of ${ESP_HAL_3RDPARTY_FETCH_SOURCE_DIR}")
+    endif()
+  endif()
+
+  # cmake-format: on
+
+  if(NXTMPDIR AND NOT EXISTS "${ESP_HAL_3RDPARTY_CHIP_DIR}")
+    message(
+      STATUS
+        "Copying from ${ESP_HAL_NXTMPDIR_CACHE} to ${ESP_HAL_3RDPARTY_CHIP_DIR}"
+    )
+    file(COPY "${ESP_HAL_NXTMPDIR_CACHE}"
+         DESTINATION "${ESP_HAL_3RDPARTY_CHIP_DIR}/..")
+  endif()
+endif()
+
+# A repository cloned for a configuration without wireless lacks the wireless
+# submodules: initialize them when wireless was enabled afterwards.
+if(CONFIG_ESPRESSIF_WIRELESS
+   AND NOT EXISTS
+       "${ESP_HAL_3RDPARTY_REPO}/components/esp_phy/lib/${CHIP_SERIES}/libphy.a"
+)
+  message(
+    STATUS "Espressif HAL for 3rd Party Platforms: initializing submodules...")
+  execute_process(
+    COMMAND git submodule --quiet update --init --depth=1
+            ${ESP_HAL_WIRELESS_SUBMODULES}
+    WORKING_DIRECTORY ${ESP_HAL_3RDPARTY_REPO}
+    RESULT_VARIABLE GIT_SUBMODULE_RESULT)
+  if(NOT GIT_SUBMODULE_RESULT EQUAL 0)
+    message(
+      FATAL_ERROR
+        "Failed to initialize the wireless submodules of ${ESP_HAL_3RDPARTY_REPO}"
+    )
+  endif()
+endif()
+
+# ##############################################################################
+# HAL sources and include paths (before the Espressif include paths)
+# ##############################################################################
+
+include(${NUTTX_CHIP_ABS_DIR}/hal_${CHIP_SERIES}.cmake)
+
+if(CONFIG_ESPRESSIF_WIRELESS)
+  include(${CMAKE_CURRENT_SOURCE_DIR}/Wireless.cmake)
+endif()
+
+target_include_directories(
+  arch PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+               ${CMAKE_CURRENT_SOURCE_DIR}/platform_include)
 target_sources(arch PRIVATE ${SRCS})
+
+# ##############################################################################
+# ESP binary image and flashing
+# ##############################################################################
+
+if(NOT TARGET nuttx_post_build)
+  add_custom_target(nuttx_post_build)
+endif()
+
+add_custom_command(
+  TARGET nuttx_post_build
+  POST_BUILD
+  COMMAND
+    ${CMAKE_COMMAND} -DBINARY_DIR=${NUTTX_BINARY_DIR} -DSOURCE_DIR=${NUTTX_DIR}
+    -P ${NUTTX_DIR}/tools/espressif/espressif_mkimage.cmake
+  WORKING_DIRECTORY ${NUTTX_BINARY_DIR}
+  COMMENT "Generating ESP-compatible binary"
+  VERBATIM)
+
+# Usage: ESPTOOL_PORT=/dev/ttyUSBx cmake --build <build_dir> --target flash
+
+add_custom_target(
+  flash
+  DEPENDS nuttx_post_build
+  COMMAND
+    ${CMAKE_COMMAND} -DBINARY_DIR=${NUTTX_BINARY_DIR} -DSOURCE_DIR=${NUTTX_DIR}
+    -DNUTTX_DIR=${NUTTX_DIR} -P
+    ${NUTTX_DIR}/tools/espressif/espressif_flash.cmake
+  WORKING_DIRECTORY ${NUTTX_BINARY_DIR}
+  COMMENT "Flashing firmware via esptool to $ENV{ESPTOOL_PORT}"
+  VERBATIM)
