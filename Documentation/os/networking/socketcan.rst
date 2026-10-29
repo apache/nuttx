@@ -95,6 +95,7 @@ Files supporting SocketCAN can be found in the following locations:
    - ``can.c`` - Connection management, input, callbacks and polling
    - ``can_raw.c`` - Socket interface, message transmission (with and without
      buffering) and reception
+   - ``can_sockif.c`` - Selection of the socket interface of a CAN protocol
 
 Configuration Options
 ---------------------

@@ -23,7 +23,7 @@ if(CONFIG_NET_CAN)
   set(SRCS)
 
   # Socket layer
-  list(APPEND SRCS can_raw.c)
+  list(APPEND SRCS can_sockif.c can_raw.c)
 
   if(CONFIG_NET_CAN_NBUFFERS GREATER 0)
     list(APPEND SRCS can_bufpool.c)

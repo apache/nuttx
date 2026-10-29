@@ -232,7 +232,7 @@ net_sockif(sa_family_t family, int type, int protocol)
 
 #ifdef CONFIG_NET_CAN
       case PF_CAN:
-        sockif = &g_can_raw_sockif;
+        sockif = can_sockif(family, type, protocol);
         break;
 #endif
 
