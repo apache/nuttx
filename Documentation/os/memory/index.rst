@@ -151,6 +151,11 @@ can occur from alignment;  Of course, heap alignment should no be
 used unless (a) you are using the granule allocator to manage DMA memory
 and (b) your hardware has specific memory alignment requirements.
 
+An allocation gets the free range of granules with the lowest address
+(first fit).  The allocator keeps the position of the lowest free
+granule and starts each search there.  The search reads the allocation
+table one 32-bit word (32 granules) at a time.
+
 The current implementation also restricts the maximum allocation size
 to 32 granules.  That restriction could be eliminated with some
 additional coding effort, but currently requires larger granule
