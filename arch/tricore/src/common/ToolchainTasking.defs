@@ -64,6 +64,12 @@ OBJCOPY           = echo
 OBJDUMP           = elfdump
 ASMEXT            = .asm
 
+# The .asm sources are not run through the C preprocessor and include no
+# headers, so they only depend on themselves.
+
+%.dds: %.asm
+	$(Q) echo "$(OBJPATH)$(DELIM)$*$(OBJEXT): $<" > $@
+
 ARCHOPTIMIZATION += --lsl-core=vtc
 LDFLAGS          += --lsl-core=vtc
 ARCHOPTIMIZATION += --iso=99
