@@ -6,9 +6,9 @@
 config TRICORE_STRING_FUNCTION
 	bool "Enable optimized TriCore specific string/memory functions"
 	default n
-	select TRICORE_MEMCPY
-	select TRICORE_MEMSET
-	select TRICORE_MEMMOVE
+	select TRICORE_MEMCPY if ARCH_TC1V8
+	select TRICORE_MEMSET if ARCH_TC1V8
+	select TRICORE_MEMMOVE if ARCH_TC1V8
 	select TRICORE_MEMCMP
 	select TRICORE_MEMCHR
 	select TRICORE_STRCMP
@@ -37,6 +37,7 @@ config TRICORE_STRING_FUNCTION
 
 config TRICORE_MEMCPY
 	bool "Enable optimized memcpy() for TriCore"
+	depends on ARCH_TC1V8
 	default n
 	select LIBC_ARCH_MEMCPY
 	---help---
@@ -45,6 +46,7 @@ config TRICORE_MEMCPY
 
 config TRICORE_MEMSET
 	bool "Enable optimized memset() for TriCore"
+	depends on ARCH_TC1V8
 	default n
 	select LIBC_ARCH_MEMSET
 	---help---
@@ -52,6 +54,7 @@ config TRICORE_MEMSET
 
 config TRICORE_MEMMOVE
 	bool "Enable optimized memmove() for TriCore"
+	depends on ARCH_TC1V8
 	default n
 	select LIBC_ARCH_MEMMOVE
 	---help---
