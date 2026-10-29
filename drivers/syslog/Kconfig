@@ -72,6 +72,15 @@ config SYSLOG_MAX_CHANNELS
 	---help---
 		Maximum number of supported SYSLOG channels.
 
+config SYSLOG_DROPMASK
+	bool "Channels can drop messages by priority"
+	default n
+	---help---
+		Each SYSLOG channel gets a mask of the message priorities that it
+		does not write (sc_dropmask).  For example, the console can write
+		only the urgent messages while the RAMLOG keeps all of them.  See
+		SYSLOG_CONSOLE_LEVEL.
+
 config RAMLOG
 	bool "RAM log device support"
 	default n
@@ -351,6 +360,23 @@ config SYSLOG_DEFAULT
 	---help---
 		syslog() interfaces will be present, but all output will go to the
 		up_putc(ARCH_LOWPUTC == y) or bit-bucket(ARCH_LOWPUTC == n).
+
+config SYSLOG_CONSOLE_LEVEL
+	int "Lowest message priority on the console"
+	default 7
+	range 0 7
+	depends on SYSLOG_DROPMASK
+	depends on SYSLOG_DEFAULT || SYSLOG_CONSOLE
+	---help---
+		The console channels (SYSLOG_DEFAULT and SYSLOG_CONSOLE) write
+		only the messages of this priority and of the more urgent
+		priorities: 0 is LOG_EMERG, 3 is LOG_ERR, 7 is LOG_DEBUG.  The
+		other channels (for example the RAMLOG) get all messages.  With
+		7 (the default), the console gets all messages.
+
+		A message that comes without a priority (for example a write to
+		/dev/log or output that the interrupt buffer saved) goes to all
+		channels.
 
 endif
 

@@ -30,12 +30,24 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <syslog.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/tls.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* The message priorities that the console channels do not write */
+
+#ifdef CONFIG_SYSLOG_CONSOLE_LEVEL
+#  define SYSLOG_CONSOLE_DROPMASK \
+     ((uint8_t)~LOG_UPTO(CONFIG_SYSLOG_CONSOLE_LEVEL))
+#endif
 
 /****************************************************************************
  * Public Data
@@ -295,9 +307,12 @@ void syslog_flush_intbuffer(bool force);
  *   one character at a time.
  *
  * Input Parameters:
- *   buffer - The buffer containing the data to be output
- *   buflen - The number of bytes in the buffer
- *   force  - Use the force() method of the channel vs. the putc() method.
+ *   priority - The priority of the message, or SYSLOG_PRIORITY_NONE.
+ *              A channel does not write the data if its sc_dropmask has
+ *              the bit of the priority.
+ *   buffer   - The buffer containing the data to be output
+ *   buflen   - The number of bytes in the buffer
+ *   force    - Use the force() method of the channel vs. the putc() method.
  *
  * Returned Value:
  *   On success, the number of characters written is returned.  A negated
@@ -305,7 +320,7 @@ void syslog_flush_intbuffer(bool force);
  *
  ****************************************************************************/
 
-ssize_t syslog_write_foreach(FAR const char *buffer,
+ssize_t syslog_write_foreach(int priority, FAR const char *buffer,
                              size_t buflen, bool force);
 #endif /* CONFIG_SYSLOG */
 

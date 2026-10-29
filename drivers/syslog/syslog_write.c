@@ -28,6 +28,7 @@
 
 #include <sys/types.h>
 #include <assert.h>
+#include <syslog.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
@@ -80,6 +81,34 @@ static bool syslog_safe_to_block(void)
 }
 
 /****************************************************************************
+ * Name: syslog_write_internal
+ ****************************************************************************/
+
+static ssize_t syslog_write_internal(int priority, FAR const char *buffer,
+                                     size_t buflen)
+{
+  bool force = !syslog_safe_to_block();
+
+#ifdef CONFIG_SYSLOG_INTBUFFER
+  if (force)
+    {
+      syslog_add_intbuffer(buffer, buflen);
+      return buflen;
+    }
+  else
+    {
+      /* Flush any characters that may have been added to the interrupt
+       * buffer.
+       */
+
+      syslog_flush_intbuffer(false);
+    }
+#endif
+
+  return syslog_write_foreach(priority, buffer, buflen, force);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -92,8 +121,10 @@ static bool syslog_safe_to_block(void)
  *   one character at a time.
  *
  * Input Parameters:
- *   buffer - The buffer containing the data to be output
- *   buflen - The number of bytes in the buffer
+ *   priority - The priority of the message, or SYSLOG_PRIORITY_NONE
+ *   buffer   - The buffer containing the data to be output
+ *   buflen   - The number of bytes in the buffer
+ *   force    - Use the force() method of the channel vs. the putc() method
  *
  * Returned Value:
  *   On success, the number of characters written is returned.  A negated
@@ -101,7 +132,7 @@ static bool syslog_safe_to_block(void)
  *
  ****************************************************************************/
 
-ssize_t syslog_write_foreach(FAR const char *buffer,
+ssize_t syslog_write_foreach(int priority, FAR const char *buffer,
                              size_t buflen, bool force)
 {
   syslog_write_t write;
@@ -123,6 +154,17 @@ ssize_t syslog_write_foreach(FAR const char *buffer,
 #ifdef CONFIG_SYSLOG_IOCTL
       if (channel->sc_state & SYSLOG_CHANNEL_DISABLE)
         {
+          continue;
+        }
+#endif
+
+#ifdef CONFIG_SYSLOG_DROPMASK
+      /* A channel that drops this priority takes the whole message */
+
+      if (priority != SYSLOG_PRIORITY_NONE &&
+          (channel->sc_dropmask & LOG_MASK(LOG_PRI(priority))) != 0)
+        {
+          nwritten_max = buflen;
           continue;
         }
 #endif
@@ -242,23 +284,32 @@ ssize_t syslog_write_foreach(FAR const char *buffer,
 
 ssize_t syslog_write(FAR const char *buffer, size_t buflen)
 {
-  bool force = !syslog_safe_to_block();
-
-#ifdef CONFIG_SYSLOG_INTBUFFER
-  if (force)
-    {
-      syslog_add_intbuffer(buffer, buflen);
-      return buflen;
-    }
-  else
-    {
-      /* Flush any characters that may have been added to the interrupt
-       * buffer.
-       */
-
-      syslog_flush_intbuffer(false);
-    }
-#endif
-
-  return syslog_write_foreach(buffer, buflen, force);
+  return syslog_write_internal(SYSLOG_PRIORITY_NONE, buffer, buflen);
 }
+
+#ifdef CONFIG_SYSLOG_DROPMASK
+/****************************************************************************
+ * Name: syslog_write_priority
+ *
+ * Description:
+ *   This is syslog_write() for the text of a message with a priority.  A
+ *   channel does not write the text if its sc_dropmask has the bit of the
+ *   priority.
+ *
+ * Input Parameters:
+ *   priority - The priority of the message, or SYSLOG_PRIORITY_NONE
+ *   buffer   - The buffer containing the data to be output
+ *   buflen   - The number of bytes in the buffer
+ *
+ * Returned Value:
+ *   On success, the number of characters written is returned.  A negated
+ *   errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+ssize_t syslog_write_priority(int priority, FAR const char *buffer,
+                              size_t buflen)
+{
+  return syslog_write_internal(priority, buffer, buflen);
+}
+#endif
