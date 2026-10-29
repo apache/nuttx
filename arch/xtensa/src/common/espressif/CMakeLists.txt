@@ -4,13 +4,13 @@
 # SPDX-License-Identifier: Apache-2.0
 # ##############################################################################
 
-# The CMake build makes simple boot images only; MCUboot and the legacy app
-# format (the bootloader build of the chips' Bootloader.mk) need Make for now.
+# The CMake build makes simple boot images, and MCUboot images on the ESP32-S3;
+# the other bootloader builds of the chips' Bootloader.mk need Make for now.
 
-if(NOT CONFIG_ESPRESSIF_SIMPLE_BOOT)
+if(NOT CONFIG_ESPRESSIF_SIMPLE_BOOT AND NOT CONFIG_ESP32S3_APP_FORMAT_MCUBOOT)
   message(
     FATAL_ERROR
-      "CMake builds of ${CONFIG_ARCH_CHIP} support ESPRESSIF_SIMPLE_BOOT only, use Make for MCUboot or the legacy app format"
+      "CMake builds of ${CONFIG_ARCH_CHIP} support ESPRESSIF_SIMPLE_BOOT (and MCUboot on the ESP32-S3) only, use Make for this app format"
   )
 endif()
 
@@ -333,6 +333,13 @@ add_custom_command(
   WORKING_DIRECTORY ${NUTTX_BINARY_DIR}
   COMMENT "Generating ESP-compatible binary"
   VERBATIM)
+
+if(CONFIG_ESP32S3_APP_FORMAT_MCUBOOT)
+  include(${NUTTX_CHIP_ABS_DIR}/Bootloader.cmake)
+else()
+  add_custom_target(bootloader COMMAND ${CMAKE_COMMAND} -E echo
+                                       "Using direct bootloader to boot NuttX.")
+endif()
 
 # Usage: ESPTOOL_PORT=/dev/ttyUSBx cmake --build <build_dir> --target flash
 

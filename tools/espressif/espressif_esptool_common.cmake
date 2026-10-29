@@ -73,6 +73,20 @@ endif()
 set(EFUSE_OFFSET ${EFUSE_FLASH_OFFSET})
 
 # MCUboot application slot (Config.mk APP_OFFSET); default when not MCUboot boot
+# The Xtensa chips name their MCUboot options per chip (tools/<chip>/Config.mk)
+
+if(CONFIG_ARCH_XTENSA AND CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT)
+  string(TOUPPER "${CHIP_SERIES}" _chip)
+  foreach(
+    _opt
+    ESPTOOL_TARGET_PRIMARY ESPTOOL_TARGET_SECONDARY APP_MCUBOOT_HEADER_SIZE
+    OTA_PRIMARY_SLOT_OFFSET OTA_SECONDARY_SLOT_OFFSET OTA_SLOT_SIZE)
+    if(DEFINED CONFIG_${_chip}_${_opt})
+      set(CONFIG_ESPRESSIF_${_opt} "${CONFIG_${_chip}_${_opt}}")
+    endif()
+  endforeach()
+endif()
+
 if(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT)
   if(CONFIG_ESPRESSIF_ESPTOOL_TARGET_PRIMARY)
     set(MCUBOOT_APP_OFFSET ${CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET})

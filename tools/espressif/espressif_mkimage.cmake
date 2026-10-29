@@ -304,14 +304,19 @@ set(ESPTOOL_BINS "")
 if(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT)
   # MCUboot configuration
 
+  # Only a merged image needs the bootloader, as in Config.mk; it is built by
+  # the bootloader target.
   if(EXISTS "${SOURCE_DIR}/mcuboot-${CHIP_SERIES}.bin")
     message(
       STATUS
         "Merge bin: ${BL_OFFSET} -> ${SOURCE_DIR}/mcuboot-${CHIP_SERIES}.bin")
     list(APPEND ESPTOOL_BINS ${BL_OFFSET}
          "${SOURCE_DIR}/mcuboot-${CHIP_SERIES}.bin")
-  else()
-    message(FATAL_ERROR "mcuboot-${CHIP_SERIES}.bin not found in ${SOURCE_DIR}")
+  elseif(CONFIG_ESPRESSIF_MERGE_BINS OR UF2_ENABLED)
+    message(
+      FATAL_ERROR
+        "mcuboot-${CHIP_SERIES}.bin not found in ${SOURCE_DIR}, build it with the bootloader target first"
+    )
   endif()
 
   # Create empty vefuse.bin if it doesn't exist
