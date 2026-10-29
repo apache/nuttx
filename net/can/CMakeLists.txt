@@ -31,10 +31,6 @@ if(CONFIG_NET_CAN)
     list(APPEND SRCS can_sendmsg.c)
   endif()
 
-  if(CONFIG_NET_CAN_NOTIFIER)
-    list(APPEND SRCS can_notifier.c)
-  endif()
-
   if(CONFIG_NET_CANPROTO_OPTIONS)
     list(APPEND SRCS can_setsockopt.c can_getsockopt.c)
   endif()
