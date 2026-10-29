@@ -694,8 +694,14 @@ static int rptun_create_devices(FAR struct rptun_priv_s *priv)
 static void rptun_send_command(FAR struct rptun_priv_s *priv,
                                uint32_t cmd, bool wait)
 {
-  FAR struct rptun_cmd_s *rptun_cmd = RPTUN_RSC2CMD(priv->rproc.rsc_table);
+  FAR struct rptun_cmd_s *rptun_cmd;
 
+  if (priv->rproc.rsc_table == NULL)
+    {
+      return;
+    }
+
+  rptun_cmd = RPTUN_RSC2CMD(priv->rproc.rsc_table);
   if (RPTUN_IS_MASTER(priv->dev))
     {
       rptun_cmd->cmd_master = cmd;
