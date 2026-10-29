@@ -92,13 +92,12 @@ Files supporting SocketCAN can be found in the following locations:
 -  **Header File**: ``include/nuttx/net/can.h``
 -  **Main Modules**:
 
-   - ``can.c`` - Connection management
+   - ``can.c`` - Connection management and callbacks
    - ``can_sockif.c`` - Socket interface implementation
    - ``can_sendmsg.c`` - Message transmission
    - ``can_sendmsg_buffered.c`` - Message transmission with buffering
    - ``can_recvmsg.c`` - Message reception
    - ``can_poll.c`` - Polling support
-   - ``can_callback.c`` - Callback handling
 
 Configuration Options
 ---------------------

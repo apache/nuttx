@@ -15902,7 +15902,6 @@ net/bluetooth/bluetooth_sockif.c bashton@brennanashton.com bijunda1@xiaomi.com x
 net/can/Kconfig peter.vanderperk@nxp.com f.panag@amco.gr anchao@xiaomi.com raiden00@railab.me jacob@flyvoly.com
 net/can/can.c peter.vanderperk@nxp.com wengzhe@xiaomi.com f.panag@amco.gr anchao@xiaomi.com anjiahao@xiaomi.com
 net/can/can.h peter.vanderperk@nxp.com bijunda1@xiaomi.com abdelatif.guettouche@gmail.com anchao@xiaomi.com jari.vanewijk@nxp.com
-net/can/can_callback.c peter.vanderperk@nxp.com anchao@xiaomi.com javiercasas@geotab.com gaohedong@xiaomi.com xiaoxiang@xiaomi.com
 net/can/can_getsockopt.c peter.vanderperk@nxp.com xiaoxiang@xiaomi.com yamamoto@midokura.com dongjiuzhu1@xiaomi.com gaohedong@xiaomi.com
 net/can/can_input.c peter.vanderperk@nxp.com xiaoxiang@xiaomi.com zhanghongyu@xiaomi.com jari.vanewijk@nxp.com anchao@xiaomi.com
 net/can/can_notifier.c peter.vanderperk@nxp.com alin.jerpelea@sony.com

@@ -26,24 +26,30 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <string.h>
+#ifdef CONFIG_NET_CAN
+
 #include <assert.h>
 #include <errno.h>
-#include <nuttx/debug.h>
+#include <stdint.h>
+#include <string.h>
+#include <sys/time.h>
 
 #include <arch/irq.h>
 
+#include <nuttx/debug.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/queue.h>
+#include <nuttx/mm/iob.h>
 #include <nuttx/mutex.h>
-#include <nuttx/net/netconfig.h>
+#include <nuttx/net/can.h>
 #include <nuttx/net/net.h>
+#include <nuttx/net/netconfig.h>
+#include <nuttx/net/netdev.h>
+#include <nuttx/net/netstats.h>
+#include <nuttx/queue.h>
 
-#include "utils/utils.h"
 #include "can/can.h"
-
-#ifdef CONFIG_NET_CAN
+#include "devif/devif.h"
+#include "utils/utils.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -69,8 +75,184 @@ NET_BUFPOOL_DECLARE(g_can_connections, sizeof(struct can_conn_s),
 static dq_queue_t g_active_can_connections;
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: can_data_event
+ *
+ * Description:
+ *   Handle data that is not accepted by the application because there is no
+ *   listener in place ready to receive the data.
+ *
+ * Assumptions:
+ * - The caller has checked that CAN_NEWDATA is set in flags and that is no
+ *   other handler available to process the incoming data.
+ * - This function must be called with the network locked.
+ *
+ ****************************************************************************/
+
+static inline uint32_t
+can_data_event(FAR struct net_driver_s *dev, FAR struct can_conn_s *conn,
+               uint32_t flags)
+{
+  int buflen = dev->d_len;
+  int recvlen;
+  uint32_t ret;
+
+  ret = (flags & ~CAN_NEWDATA);
+
+  /* Save as the packet data as in the read-ahead buffer.  NOTE that
+   * partial packets will not be buffered.
+   */
+
+  recvlen = can_datahandler(dev, conn);
+  if (recvlen < buflen)
+    {
+      /* There is no handler to receive new data and there are no free
+       * read-ahead buffers to retain the data -- drop the packet.
+       */
+
+      ninfo("Dropped %d bytes\n", dev->d_len);
+
+#ifdef CONFIG_NET_STATISTICS
+      g_netstats.can.drop++;
+#endif
+      NETDEV_RXDROPPED(dev);
+    }
+
+  /* In any event, the new data has now been handled */
+
+  dev->d_len = 0;
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: can_callback
+ *
+ * Description:
+ *   Inform the application holding the packet socket of a change in state.
+ *
+ * Returned Value:
+ *   OK if packet has been processed, otherwise ERROR.
+ *
+ * Assumptions:
+ *   This function can be called from an interrupt.
+ *
+ ****************************************************************************/
+
+uint32_t can_callback(FAR struct net_driver_s *dev,
+                      FAR struct can_conn_s *conn, uint32_t flags)
+{
+  /* Some sanity checking */
+
+  if (conn)
+    {
+      conn_lock(&conn->sconn);
+      flags = devif_conn_event(dev, flags, conn->sconn.list);
+
+      /* Either we did not get the lock or there is no application listening
+       * If we did not get a lock we store the frame in the read-ahead buffer
+       */
+
+      if ((flags & CAN_NEWDATA) != 0)
+        {
+          /* Data was not handled.. dispose of it appropriately */
+
+          flags = can_data_event(dev, conn, flags);
+        }
+
+      conn_unlock(&conn->sconn);
+    }
+
+  return flags;
+}
+
+/****************************************************************************
+ * Name: can_datahandler
+ *
+ * Description:
+ *   Handle data that is not accepted by the application.  This may be called
+ *   either (1) from the data receive logic if it cannot buffer the data, or
+ *   (2) from the CAN event logic is there is no listener in place ready to
+ *   receive the data.
+ *
+ * Input Parameters:
+ *   dev  - The device which as active when the event was detected.
+ *   conn - A pointer to the CAN connection structure
+ *
+ * Returned Value:
+ *   The number of bytes actually buffered is returned.  This will be either
+ *   zero or equal to buflen; partial packets are not buffered.
+ *
+ * Assumptions:
+ * - The caller has checked that CAN_NEWDATA is set in flags and that is no
+ *   other handler available to process the incoming data.
+ * - This function must be called with the network locked.
+ *
+ ****************************************************************************/
+
+int can_datahandler(FAR struct net_driver_s *dev,
+                    FAR struct can_conn_s *conn)
+{
+  FAR struct iob_s *iob = dev->d_iob;
+  int ret = 0;
+
+  conn_lock(&conn->sconn);
+#if CONFIG_NET_RECV_BUFSIZE > 0
+#  if CONFIG_NET_CAN_NBUFFERS > 0
+  int bufnum = div_const_roundup(conn->rcvbufs, NET_CAN_PKTSIZE);
+#  else
+  int bufnum = div_const_roundup(conn->rcvbufs, CONFIG_IOB_BUFSIZE);
+#  endif
+  /* Check the frame count pending on conn->readahead */
+
+  if (iob_get_queue_entry_count(&conn->readahead) >= bufnum)
+    {
+      nwarn("WARNING: There are no free receive buffer to retain the data. "
+            "Receive buffer number:%d, received frames:%u \n",
+            bufnum, iob_get_queue_entry_count(&conn->readahead));
+      goto errout;
+    }
+#endif
+
+  /* Concat the iob to readahead */
+
+  ret = iob_tryadd_queue(iob, &conn->readahead);
+  if (ret >= 0)
+    {
+#ifdef CONFIG_NET_CAN_NOTIFIER
+      /* Provide notification(s) that additional CAN read-ahead data is
+       * available.
+       */
+
+      can_readahead_signal(conn);
+#endif
+      ret = iob->io_pktlen;
+
+      /* Device buffer has been enqueued, clear the handle */
+
+      netdev_iob_clear(dev);
+    }
+  else
+    {
+      nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
+      ret = 0;
+      goto errout;
+    }
+
+  conn_unlock(&conn->sconn);
+  return ret;
+
+errout:
+  netdev_iob_release(dev);
+  conn_unlock(&conn->sconn);
+  return ret;
+}
 
 /****************************************************************************
  * Name: can_alloc()
