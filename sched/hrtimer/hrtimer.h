@@ -186,7 +186,7 @@ static inline_function FAR hrtimer_t *hrtimer_get_first(void)
 #ifdef CONFIG_HRTIMER_TREE
   return g_hrtimer_head;
 #else
-  return list_is_empty(&g_hrtimer_list) ?
+  return predict_false(list_is_empty(&g_hrtimer_list)) ?
          NULL : list_first_entry(&g_hrtimer_list, FAR hrtimer_t, node);
 #endif
 }
@@ -228,7 +228,8 @@ static inline_function uint64_t hrtimer_next_expired(void)
 {
   FAR hrtimer_t *first = hrtimer_get_first();
 
-  return first != NULL ? first->expired : hrtimer_last_expired() + INT64_MAX;
+  return predict_true(first != NULL) ? first->expired :
+         hrtimer_last_expired() + INT64_MAX;
 }
 
 /****************************************************************************
@@ -398,7 +399,7 @@ static inline_function void hrtimer_insert(FAR hrtimer_t *hrtimer)
 #ifdef CONFIG_HRTIMER_TREE
   RB_INSERT(hrtimer_tree_s, &g_hrtimer_tree, hrtimer);
 
-  if (g_hrtimer_head == NULL ||
+  if (predict_false(g_hrtimer_head == NULL) ||
       HRTIMER_TIME_BEFORE(hrtimer->expired, g_hrtimer_head->expired))
     {
       g_hrtimer_head = hrtimer;
@@ -686,7 +687,7 @@ static inline_function void hrtimer_process(uint64_t now)
    * the queue.
    */
 
-  while ((hrtimer = hrtimer_get_first()) != NULL)
+  while (predict_true((hrtimer = hrtimer_get_first()) != NULL))
     {
       expired = hrtimer->expired;
 
