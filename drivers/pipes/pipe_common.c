@@ -345,9 +345,16 @@ int pipecommon_close(FAR struct file *filep)
 
           if (--dev->d_nwriters <= 0)
             {
-              /* Inform poll readers that other end closed. */
+              /* Inform poll readers that other end closed.  Policy 1 keeps
+               * the buffer for the next writer: no POLLHUP, as in
+               * pipecommon_poll().
+               */
 
-              poll_notify(dev->d_fds, CONFIG_DEV_PIPE_NPOLLWAITERS, POLLHUP);
+              if (PIPE_IS_POLICY_0(dev->d_flags))
+                {
+                  poll_notify(dev->d_fds, CONFIG_DEV_PIPE_NPOLLWAITERS,
+                              POLLHUP);
+                }
 
               pipecommon_wakeup(&dev->d_rdsem);
             }
