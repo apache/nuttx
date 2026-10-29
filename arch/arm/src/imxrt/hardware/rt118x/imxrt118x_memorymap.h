@@ -271,20 +271,25 @@
 
 /* NETCMIX Domain (0x6000_0000 - 0x60FF_FFFF) *******************************/
 
+#define IMXRT_NETC_ECAM_BASE            (0x60000000ul)  /* Enhanced Configuration Access Mechanism */
+#define IMXRT_NETC_IERB_BASE            (0x60800000ul)  /* Integrated Endpoint Register Block */
+#define IMXRT_NETC_PRB_BASE             (0x60900000ul)  /* Privileged Register Block */
+#define IMXRT_SW0_BASE                  (0x60a00000ul)  /* Switch base registers */
+#define IMXRT_SW0_GLOBAL_BASE           (0x60a80000ul)  /* Switch Global registers */
 #define IMXRT_ENETC0_SI0_BASE           (0x60b00000ul)  /* ENETC0 station interface 0 */
-#define IMXRT_ENETC0_BASE               (0x60b10000ul)  /* ENETC0 common regs */
-#define IMXRT_ENETC0_PORT_BASE          (0x60b14000ul)  /* ENETC0 port regs */
-#define IMXRT_ENETC0_ETH_MAC_BASE       (0x60b15000ul)  /* ENETC0 MAC regs */
-#define IMXRT_ENETC0_GLOBAL_BASE        (0x60b20000ul)
-#define IMXRT_ENETC1_SI0_BASE           (0x60b40000ul)
-#define IMXRT_ENETC1_BASE               (0x60b50000ul)
-#define IMXRT_ENETC1_PORT_BASE          (0x60b54000ul)
-#define IMXRT_ENETC1_PSEUDO_MAC_BASE    (0x60b55000ul)
-#define IMXRT_ENETC1_GLOBAL_BASE        (0x60b60000ul)
-#define IMXRT_ENETC1_SI1_BASE           (0x60c10000ul)
-#define IMXRT_EMDIO_BASE                (0x60ba0000ul)  /* External MDIO */
+#define IMXRT_ENETC0_BASE               (0x60b10000ul)  /* ENETC0 base registers */
+#define IMXRT_ENETC0_PORT_BASE          (0x60b14000ul)  /* ENETC0 port registers */
+#define IMXRT_ENETC0_ETH_MAC_BASE       (0x60b15000ul)  /* ENETC0 MAC registers */
+#define IMXRT_ENETC0_GLOBAL_BASE        (0x60b20000ul)  /* ENETC0 Global registers */
+#define IMXRT_ENETC1_SI0_BASE           (0x60b40000ul)  /* ENETC1 station interface 0 */
+#define IMXRT_ENETC1_BASE               (0x60b50000ul)  /* ENETC1 base registers */
+#define IMXRT_ENETC1_PORT_BASE          (0x60b54000ul)  /* ENETC1 port registers */
+#define IMXRT_ENETC1_ETH_MAC_BASE       (0x60b55000ul)  /* ENETC1 MAC registers */
+#define IMXRT_ENETC1_GLOBAL_BASE        (0x60b60000ul)  /* ENETC1 Global registers */
 #define IMXRT_TMR0_BASE                 (0x60b80000ul)  /* NETC 1588 Timer */
-#define IMXRT_SW0_GLOBAL_BASE           (0x60a80000ul)  /* Switch 0 global */
+#define IMXRT_EMDIO_BASE                (0x60ba0000ul)  /* External MDIO */
+#define IMXRT_NETC_ENETC0_MSIX_BASE     (0x60bf0000ul)
+#define IMXRT_NETC_ENETC1_MSIX_BASE     (0x60c00000ul)
 
 /* CM7 Private Peripheral Bus (0xE000_0000 - 0xE00F_FFFF) *******************/
 

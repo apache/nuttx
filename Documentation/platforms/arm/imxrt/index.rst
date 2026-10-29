@@ -52,6 +52,165 @@ ELE firmware, and the TRDC driver configures access to RT118x memory and
 peripheral resources. The Cortex-M7 release helper is used by Cortex-M33
 firmware to set the Cortex-M7 boot vector and start the M7 core.
 
+NETC architecture driver
+------------------------
+
+``CONFIG_IMXRT_NETC`` provides a NETDEV lower-half Ethernet driver for
+RT118x. ENETC0 (PF3, SI0) connects directly to a PHY on physical link 4;
+ENETC1 (PF4, SI0) connects through switch CPU port 4 to selected external
+ports 0--3. These are independent interfaces and may operate separately
+or together; ENETC0 is not bridged to the switch.
+
+Required configuration
+~~~~~~~~~~~~~~~~~~~~~~
+
+On an RT118x target, enable ``CONFIG_NET``, ``CONFIG_NET_ETHERNET``,
+``CONFIG_NETDEVICES`` and ``CONFIG_MM_IOB``. In the **NETC Ethernet ports**
+menu, select at least one of the following:
+
+* ``CONFIG_IMXRT_NETC_ENETC0`` enables the independent direct-PHY interface
+  on physical link 4.
+* ``CONFIG_IMXRT_NETC_ENETC1_PORT0``, ``CONFIG_IMXRT_NETC_ENETC1_PORT1``,
+  ``CONFIG_IMXRT_NETC_ENETC1_PORT2`` and
+  ``CONFIG_IMXRT_NETC_ENETC1_PORT3`` select external switch ports 0--3.
+  Select each required port; selected ports share one ENETC1 interface.
+
+These selections enable the hidden ``CONFIG_IMXRT_NETC`` symbol, which
+automatically selects ``CONFIG_NETDEV_LATEINIT`` and ``CONFIG_SCHED_LPWORK``.
+Do not try to enable ``CONFIG_IMXRT_NETC`` directly.
+
+Also ensure that the PHY drivers used by the board are enabled through
+``CONFIG_ETH0_PHY_*`` and/or ``CONFIG_ETH1_PHY_*`` under
+**Network Device/PHY Support**. These selections enable compilation of
+the corresponding PHY drivers. A board may instead select the driver
+symbols directly in its Kconfig, as the i.MXRT1180-EVK does for its enabled
+NETC ports. The per-port PHY descriptors described below are required in
+addition to enabling the PHY drivers.
+
+The driver requires ``CONFIG_IOB_BUFSIZE >= 128``,
+``CONFIG_IOB_NBUFFERS >= 96`` and ``CONFIG_IOB_THROTTLE <= 16``.
+The TX descriptor choices require at least 96, 160, 320 or 640 IOBs for
+8, 16, 32 or 64 descriptors respectively; the default is 16 descriptors.
+Also keep ``CONFIG_NET_ETH_PKTSIZE <= 1518`` and
+``CONFIG_NET_LL_GUARDSIZE <= 32``, and disable ``CONFIG_NET_PROMISCUOUS``.
+
+For example, for a board using an RTL8201F PHY, the following configuration
+fragment selects its PHY driver and switch port 0 with 16 TX and RX
+descriptors::
+
+  CONFIG_NET=y
+  CONFIG_NET_ETHERNET=y
+  CONFIG_NETDEVICES=y
+  CONFIG_MM_IOB=y
+  CONFIG_IMXRT_NETC_ENETC1_PORT0=y
+  CONFIG_ETH0_PHY_RTL8201F=y
+  CONFIG_IMXRT_NETC_TX16=y
+  CONFIG_IMXRT_NETC_RX16=y
+  CONFIG_IOB_BUFSIZE=128
+  CONFIG_IOB_NBUFFERS=160
+  CONFIG_IOB_THROTTLE=0
+  # CONFIG_NET_PROMISCUOUS is not set
+
+For the direct interface alone, replace
+``CONFIG_IMXRT_NETC_ENETC1_PORT0=y`` with ``CONFIG_IMXRT_NETC_ENETC0=y``.
+Enable both to use both interfaces. This fragment covers driver selection
+and buffer sizing, not a complete board or network configuration. Kconfig
+selection alone does not initialize NETC or configure its PHYs. Replace
+the example PHY selection with the model selections needed by the board.
+
+Board integration
+~~~~~~~~~~~~~~~~~
+
+Call ``imxrt_netc_initialize(&config)`` from board late initialization with
+a ``static const`` configuration using the public types in
+``imxrt_netc.h``. The driver copies the configuration. Supply all interfaces
+together; shared IERB setup runs once.
+
+* Match the board configuration to the Kconfig selections. For
+  ``CONFIG_IMXRT_NETC_ENETC0``, set both ``enetc[0].enabled`` and
+  ``enetc[0].ports[0].enabled`` to ``true``; its other port slots must be
+  disabled. For each selected ``CONFIG_IMXRT_NETC_ENETC1_PORTn``, set
+  ``enetc[1].enabled`` and ``enetc[1].ports[n].enabled`` to ``true``.
+  These slots describe external switch ports, not the CPU port.
+  Each enabled controller needs at least one enabled port. Disabled entries
+  are ignored; Kconfig does not populate these board configuration fields.
+* Give each controller a distinct valid unicast MAC and an exclusive
+  ``msgintr`` instance (1--6), including its NVIC interrupt and all three
+  message registers. MAC changes take effect at the next interface up.
+
+PHY configuration
+"""""""""""""""""
+
+Each enabled port must supply a ``phy_desc_s`` in its ``phy`` field.
+The ``CONFIG_ETH0_PHY_*`` and ``CONFIG_ETH1_PHY_*`` model selections, or
+equivalent board Kconfig selections, enable PHY driver compilation; they
+do not populate these descriptors. Both the compiled PHY drivers and the
+per-port configuration are needed.
+Configure each descriptor to match the board wiring and PHY:
+
+* Set ``iftype`` to ``PHY_TYPE_MII``, ``PHY_TYPE_RMII`` or
+  ``PHY_TYPE_RGMII``, and ``clause`` to 22. For RMII, set
+  ``rmii_phy_clk_out`` to ``true`` if the PHY drives the reference clock,
+  or ``false`` if the MAC drives it.
+* Supply the expected ``id1`` and ``id2`` register values; discovery ignores
+  the PHY revision nibble. Set ``address_lo`` to the strapped PHY address
+  and ``address_high`` to the same address or ``0xffff`` for a fixed address.
+  MDIO endpoints are hardware-selected, not board-selectable. Only shared
+  EMDIO supports address-range probing; port MDIO requires a fixed address.
+* Set ``status = 0xffff`` to decode negotiation using standard registers.
+  Otherwise supply the vendor status register and its ``speed_mask``,
+  ``mbps10``, ``mbps100``, ``mbps1000`` and ``duplex`` decoding values.
+
+Enable ``CONFIG_IMXRT_NETC_PHYINIT`` only if the board needs the optional
+``board_netc_phyinit(unsigned int if_idx,
+const struct imxrt_netc_port_s *config)`` hook, and provide that function
+in board code. It runs for each enabled port during port preparation,
+after interface mode and clock-direction setup but before MDIO probing.
+``if_idx`` identifies physical link 0--4. Use this hook for board-specific
+GPIO/reset setup and complete any required reset delays before returning.
+
+The separate optional ``phy.ops->phyinit`` callback runs after PHY
+identification and before advertisement. It receives a PHY descriptor
+with the resolved address, MDIO operations and the hardware-selected
+MDIO endpoint. Use these supplied parameters for PHY-specific register
+setup, and restore the default PHY page before returning.
+
+The board owns pinmux, clock direction, PHY reset/timing, NETCMIX reset
+release and TRDC permissions. Stabilize the NETC root clock before
+initialization and keep it unchanged; its frequency must be supported and
+in whole MHz. RMII MAC clock output requires SION on the reference-clock
+pad. Apply RGMII delays at only one end and advertise only board/PHY-supported
+modes.
+
+DMA uses aligned heap allocations with cache maintenance and address
+translation through ``imxrt_dma_address()``. Retain the supported TCM
+partition (256 KB M7 DTCM or 128 KB M33 system TCM) and ensure system-bus
+accessibility, TRDC permissions and external-memory setup. Size the common
+IOB pool for aggregate traffic when both interfaces operate.
+
+Operation and validation
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Interface names depend on successful registrations and other network
+devices; identify interfaces by MAC rather than hardware index.
+Initialization stops at the first error, leaving earlier registrations
+active. Do not blindly retry after partial success.
+
+ENETC0 enables its MAC after full-duplex negotiation and removes carrier
+on link loss or PHY errors. ENETC1 carrier requires an operational CPU path
+and at least one selected external link. Interface down and TX-stall
+recovery reset only the affected ENETC function; external switching and
+link monitoring continue for ENETC1. Failed recovery leaves the interface
+failed, and DMA references are retained if quiesce/reset fails.
+
+PHY ioctls use Clause 22 registers 0--31. ENETC0 uses the resolved PHY
+address directly; ENETC1 encodes the switch port in ``phy_id[9:8]`` and
+address in ``phy_id[4:0]``. ``SIOCGMIIPHY`` preserves the requested port.
+Register access returns ``ENETDOWN`` after interface down disables PF
+memory access; address queries do not access MDIO. MDIO helpers require
+task context and an initialized endpoint; runtime multi-register PHY
+paging requires the network lock.
+
 Data and Instruction Cache
 ==========================
 
