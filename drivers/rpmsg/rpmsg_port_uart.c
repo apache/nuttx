@@ -97,6 +97,8 @@
 #define rpmsgerrdump(m,b,s)                lib_dumpbuffer(m, (FAR const uint8_t *)b, s)
 #define rpmsgvbs                           rpmsgerr
 
+#define rpmsg_port_uart_staywake(r)        rpmsg_port_uart_staywake_times(r, ~0)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -225,14 +227,16 @@ rpmsg_port_uart_send_one(FAR struct rpmsg_port_uart_s *rpuart, uint8_t ch)
 }
 
 /****************************************************************************
- * Name: rpmsg_port_uart_staywake
+ * Name: rpmsg_port_uart_staywake_times
  *
  * Description:
  *   Send wakeup data to peer if peer is suspended.
  *
  ****************************************************************************/
 
-static void rpmsg_port_uart_staywake(FAR struct rpmsg_port_uart_s *rpuart)
+static int
+rpmsg_port_uart_staywake_times(FAR struct rpmsg_port_uart_s *rpuart,
+                               unsigned int times)
 {
   pm_wakelock_stay(&rpuart->tx_wakelock);
 
@@ -240,12 +244,21 @@ static void rpmsg_port_uart_staywake(FAR struct rpmsg_port_uart_s *rpuart)
     {
       rpmsgdbg("Peer is running, no need to wakeup 0x%x 0x%x\n",
                rpuart->tx_staywake, rpuart->event.events);
-      return;
+      return 0;
     }
 
   rpmsg_port_uart_set(rpuart, RPMSG_PORT_UART_EVT_WAKING);
   for (; ; )
     {
+      if (times-- == 0)
+        {
+          rpmsg_port_uart_clear(rpuart, RPMSG_PORT_UART_EVT_WAKING);
+          pm_wakelock_relax(&rpuart->tx_wakelock);
+          rpmsgerr("Wakeup failed 0x%x 0x%lx\n",
+                   rpuart->tx_staywake, rpuart->event.events);
+          return -EAGAIN;
+        }
+
       rpmsgdbg("Try to wakeup peer 0x%x 0x%x\n",
                rpuart->tx_staywake, rpuart->event.events);
       rpmsg_port_uart_send_one(rpuart, rpuart->tx_staywake);
@@ -259,6 +272,7 @@ static void rpmsg_port_uart_staywake(FAR struct rpmsg_port_uart_s *rpuart)
   rpmsg_port_uart_clear(rpuart, RPMSG_PORT_UART_EVT_WAKING);
   rpmsgdbg("Wakeup peer success 0x%x 0x%x\n",
            rpuart->tx_staywake, rpuart->event.events);
+  return 0;
 }
 
 /****************************************************************************
@@ -855,7 +869,11 @@ static int rpmsg_port_uart_reboot_notifier(FAR struct notifier_block *nb,
   if ((action == SYS_POWER_OFF || action == SYS_RESTART) &&
       rpmsg_port_uart_check(rpuart, RPMSG_PORT_UART_EVT_CONNED))
     {
-      rpmsg_port_uart_staywake(rpuart);
+      if (rpmsg_port_uart_staywake_times(rpuart, 50) < 0)
+        {
+          rpmsgerr("Reboot wakeup timeout!\n");
+        }
+
       rpmsg_port_uart_send_one(rpuart, RPMSG_PORT_UART_POWEROFF);
     }
 
