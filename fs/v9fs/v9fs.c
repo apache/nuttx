@@ -30,6 +30,7 @@
 #include <inttypes.h>
 #include <libgen.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
@@ -1126,6 +1127,7 @@ static ssize_t v9fs_vfs_readlink(FAR struct inode *mountpt,
                                  FAR char *buffer, size_t buflen)
 {
   FAR struct v9fs_client_s *client;
+  struct stat st;
   uint32_t fid;
   ssize_t ret;
 
@@ -1148,9 +1150,25 @@ static ssize_t v9fs_vfs_readlink(FAR struct inode *mountpt,
 
   fid = ret;
 
+  /* readlink() of a file that is not a symbolic link fails with EINVAL.
+   * Do not ask the server: in the "mapped" security models of QEMU a
+   * symbolic link is a regular file that holds the target, and Treadlink
+   * returns the contents of any regular file.
+   */
+
+  ret = v9fs_client_stat(client, fid, &st);
+  if (ret >= 0 && !S_ISLNK(st.st_mode))
+    {
+      ret = -EINVAL;
+    }
+
   /* Read the symbolic link target */
 
-  ret = v9fs_client_readlink(client, fid, buffer, buflen);
+  if (ret >= 0)
+    {
+      ret = v9fs_client_readlink(client, fid, buffer, buflen);
+    }
+
   v9fs_fid_put(client, fid);
   return ret;
 }
