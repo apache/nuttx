@@ -41,7 +41,8 @@ Serial Device Drivers
    NuttX does not implement POSIX sessions or process groups, so the
    foreground process group is collapsed onto a single PID stored in
    the driver (``pgrp == pid``, one member per group); the signal is
-   delivered with ``nxsig_kill(pid, signo)``.
+   delivered with ``nxsig_kill(pid, signo)``.  The driver discards the
+   character that sends the signal, so the task does not read it.
 
    The following terminal ``ioctl`` commands manage this PID:
 
