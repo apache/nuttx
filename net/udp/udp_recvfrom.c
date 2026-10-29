@@ -172,9 +172,11 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
     {
       int recvlen;
       int offset = 0;
+      int pos;
       uint16_t datalen;
       uint8_t src_addr_size;
       uint8_t ifindex;
+      uint8_t meta[UDP_READAHEAD_META_SIZE];
 #ifdef CONFIG_NET_IPv6
       uint8_t srcaddr[sizeof(struct sockaddr_in6)];
 #else
@@ -185,22 +187,20 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
        * Layout: |datalen|ifindex|src_addr_size|src_addr|[timestamp]|data|
        */
 
-      recvlen = iob_copyout((FAR uint8_t *)&datalen, iob,
-                            sizeof(datalen), offset);
-      offset += sizeof(datalen);
-      DEBUGASSERT(recvlen == sizeof(datalen));
+      recvlen = iob_copyout(meta, iob, sizeof(meta), offset);
+      offset += sizeof(meta);
+      DEBUGASSERT(recvlen == sizeof(meta));
 
+      pos = 0;
+      memcpy(&datalen, &meta[pos], sizeof(datalen));
+      pos += sizeof(datalen);
 #ifdef CONFIG_NETDEV_IFINDEX
-      recvlen = iob_copyout(&ifindex, iob, sizeof(ifindex), offset);
-      offset += sizeof(ifindex);
-      DEBUGASSERT(recvlen == sizeof(ifindex));
+      ifindex = meta[pos++];
 #else
       ifindex = 1;
 #endif
-      recvlen = iob_copyout(&src_addr_size, iob,
-                            sizeof(src_addr_size), offset);
-      offset += sizeof(src_addr_size);
-      DEBUGASSERT(recvlen == sizeof(src_addr_size));
+      src_addr_size = meta[pos++];
+      DEBUGASSERT(pos == UDP_READAHEAD_META_SIZE);
 
       recvlen = iob_copyout(srcaddr, iob, src_addr_size, offset);
       offset += src_addr_size;
