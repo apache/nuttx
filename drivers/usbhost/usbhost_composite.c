@@ -862,7 +862,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 
   for (i = 0; i < nclasses; i++)
     {
-       member = &priv->members[i];
+      member = &priv->members[i];
 
       /* Is there is a class implementation registered to support this
        * device.
