@@ -296,7 +296,7 @@ failure:
 
 int gran_search(const gran_t *gran, size_t size)
 {
-  size_t posi = 0;
+  size_t posi;
   size_t used;
 
   if (gran == NULL || gran->ngranules < size)
@@ -304,6 +304,9 @@ int gran_search(const gran_t *gran, size_t size)
       return -EINVAL;
     }
 
+  /* No granule below lowfree is free: start there */
+
+  posi = gran->lowfree;
   for (; ; )
     {
       /* The first free granule, then the first used one after it */
@@ -334,6 +337,13 @@ int gran_set(gran_t *gran, size_t posi, size_t size)
   if (ret == OK)
     {
       gran_set_(gran, &rang, true);
+
+      /* The range took the lowest free granule: the next one is above it */
+
+      if (gran->lowfree >= posi && gran->lowfree < posi + size)
+        {
+          gran->lowfree = posi + size;
+        }
     }
 
   return ret;
@@ -349,6 +359,11 @@ int gran_clear(gran_t *gran, size_t posi, size_t size)
   if (ret == OK)
     {
       gran_set_(gran, &rang, false);
+
+      if (posi < gran->lowfree)
+        {
+          gran->lowfree = posi;
+        }
     }
 
   return ret;
