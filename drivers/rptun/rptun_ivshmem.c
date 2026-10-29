@@ -153,6 +153,7 @@ static const FAR char *rptun_ivshmem_get_cpuname(FAR struct rptun_dev_s *dev)
 {
   FAR struct rptun_ivshmem_dev_s *priv =
     (FAR struct rptun_ivshmem_dev_s *)dev;
+
   return priv->cpuname;
 }
 
@@ -161,6 +162,7 @@ rptun_ivshmem_get_addrenv(FAR struct rptun_dev_s *dev)
 {
   FAR struct rptun_ivshmem_dev_s *priv =
     (FAR struct rptun_ivshmem_dev_s *)dev;
+
   return &priv->raddrenv[0];
 }
 
@@ -186,6 +188,7 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
   else
     {
       FAR struct rptun_ivshmem_rsc_s *rsc = &priv->shmem->rsc;
+
       memset(priv->shmem, 0, priv->shmem_size);
 
       rsc->hdr.ver                    = 1;
@@ -324,6 +327,7 @@ static bool rptun_ivshmem_is_master(FAR struct rptun_dev_s *dev)
 {
   FAR struct rptun_ivshmem_dev_s *priv =
     (FAR struct rptun_ivshmem_dev_s *)dev;
+
   return priv->master;
 }
 
