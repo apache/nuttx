@@ -121,6 +121,47 @@ static void local_inout_poll_cb(FAR struct pollfd_s *fds)
 #endif
 
 /****************************************************************************
+ * Name: local_dgram_poll
+ *
+ * Description:
+ *   Poll of a SOCK_DGRAM socket that is not one of a socket pair: POLLIN
+ *   from the FIFO that bind() opened, POLLOUT always (no send buffer).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_LOCAL_DGRAM
+static int local_dgram_poll(FAR struct local_conn_s *conn,
+                            FAR struct pollfd_s *fds, bool setup)
+{
+  int ret = OK;
+
+  if (setup)
+    {
+      fds->priv = NULL;
+
+      /* An unbound socket cannot receive: no POLLIN */
+
+      if ((fds->events & POLLIN) != 0 && conn->lc_infile.f_inode != NULL)
+        {
+          ret = file_poll(&conn->lc_infile, fds, true);
+          if (ret < 0)
+            {
+              return ret;
+            }
+        }
+
+      poll_notify(&fds, 1, POLLOUT);
+    }
+  else if (fds->priv != NULL)
+    {
+      ret = file_poll(&conn->lc_infile, fds, false);
+    }
+
+  return ret;
+}
+#endif /* CONFIG_NET_LOCAL_DGRAM */
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -161,6 +202,13 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
 
   if (conn->lc_proto == SOCK_DGRAM)
     {
+#ifdef CONFIG_NET_LOCAL_DGRAM
+      if (conn->lc_state != LOCAL_STATE_CONNECTED)
+        {
+          return local_dgram_poll(conn, fds, true);
+        }
+#endif
+
       return -ENOSYS;
     }
 
@@ -310,6 +358,13 @@ int local_pollteardown(FAR struct socket *psock, FAR struct pollfd_s *fds)
 
   if (conn->lc_proto == SOCK_DGRAM)
     {
+#ifdef CONFIG_NET_LOCAL_DGRAM
+      if (conn->lc_state != LOCAL_STATE_CONNECTED)
+        {
+          return local_dgram_poll(conn, fds, false);
+        }
+#endif
+
       return -ENOSYS;
     }
 

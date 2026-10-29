@@ -29,7 +29,9 @@
 #include <sys/socket.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 
+#include <nuttx/debug.h>
 #include <nuttx/net/net.h>
 
 #include "local/local.h"
@@ -61,6 +63,16 @@ int psock_local_bind(FAR struct socket *psock,
     {
       return -EINVAL;
     }
+
+#ifdef CONFIG_NET_LOCAL_DGRAM
+  /* A bound datagram socket has its FIFO open: do not bind it again */
+
+  if (conn->lc_proto == SOCK_DGRAM &&
+      conn->lc_state != LOCAL_STATE_UNBOUND)
+    {
+      return -EINVAL;
+    }
+#endif
 
   conn = psock->s_conn;
 
@@ -99,6 +111,33 @@ int psock_local_bind(FAR struct socket *psock,
     }
 
   strlcpy(conn->lc_path, &unaddr->sun_path[index], sizeof(conn->lc_path));
+
+#ifdef CONFIG_NET_LOCAL_DGRAM
+  /* A datagram socket keeps the receiving side of its FIFO open until it
+   * is closed, so that poll() can watch the FIFO.
+   */
+
+  if (conn->lc_proto == SOCK_DGRAM)
+    {
+      int ret;
+
+      ret = local_create_halfduplex(conn, conn->lc_path, conn->lc_rcvsize);
+      if (ret >= 0)
+        {
+          ret = local_open_receiver(conn,
+                                    _SS_ISNONBLOCK(conn->lc_conn.s_flags));
+        }
+
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to open FIFO for %s: %d\n",
+               conn->lc_path, ret);
+          conn->lc_type    = LOCAL_TYPE_UNNAMED;
+          conn->lc_path[0] = '\0';
+          return ret;
+        }
+    }
+#endif
 
   conn->lc_state = LOCAL_STATE_BOUND;
   return OK;

@@ -490,7 +490,29 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       return -EISCONN;
     }
 
-  if (conn->lc_infile.f_inode == NULL)
+  if (conn->lc_infile.f_inode != NULL)
+    {
+      /* The FIFO is open in the mode of the socket.  MSG_DONTWAIT: do
+       * not wait for a datagram.
+       */
+
+      if ((flags & MSG_DONTWAIT) != 0)
+        {
+          int nread = 0;
+
+          ret = file_ioctl(&conn->lc_infile, FIONREAD, &nread);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          if (nread == 0)
+            {
+              return -EAGAIN;
+            }
+        }
+    }
+  else
     {
       bclose = true;
 
