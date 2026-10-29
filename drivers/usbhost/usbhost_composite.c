@@ -285,6 +285,12 @@ static int usbhost_copyinterface(uint8_t ifno, FAR const uint8_t *configdesc,
   int neps;
   int len;
 
+  if (configdesc == NULL || buffer == NULL ||
+      desclen < sizeof(struct usb_desc_s))
+    {
+      return -EINVAL;
+    }
+
   /* Make sure that the buffer will hold at least the interface descriptor */
 
   if (buflen < USB_SIZEOF_IFDESC)
@@ -301,10 +307,20 @@ static int usbhost_copyinterface(uint8_t ifno, FAR const uint8_t *configdesc,
       desc = (FAR struct usb_desc_s *)&configdesc[offset];
       len  = desc->len;
 
+      if (len < sizeof(struct usb_desc_s) || len > desclen - offset)
+        {
+          return -EINVAL;
+        }
+
       /* Is this an interface descriptor? */
 
       if (desc->type == USB_DESC_TYPE_INTERFACE)
         {
+          if (len < USB_SIZEOF_IFDESC)
+            {
+              return -EINVAL;
+            }
+
           ifdesc = (FAR struct usb_ifdesc_s *)&configdesc[offset];
 
           /* Is it the one we are looking for? */
@@ -312,6 +328,11 @@ static int usbhost_copyinterface(uint8_t ifno, FAR const uint8_t *configdesc,
           if (ifdesc->ifno == ifno && ifdesc->neps != 0)
             {
               /* Yes.. return the interface descriptor */
+
+              if (buflen < len)
+                {
+                  return -ENOSPC;
+                }
 
               memcpy(buffer, desc, len);
               buffer  += len;
@@ -338,6 +359,12 @@ static int usbhost_copyinterface(uint8_t ifno, FAR const uint8_t *configdesc,
                 {
                   desc = (FAR struct usb_desc_s *)&configdesc[offset];
                   len  = desc->len;
+
+                  if (len < sizeof(struct usb_desc_s) ||
+                      len > desclen - offset)
+                    {
+                      return -EINVAL;
+                    }
 
                   /* Is this a class-specific interface descriptor?  */
 
