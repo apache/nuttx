@@ -93,6 +93,11 @@
 #  error "Unknown i.MX RT chip type"
 #endif
 
+#if defined(CONFIG_ARCH_FAMILY_IMXRT118x)
+#  define IMXRT_NETC_NENETC            2            /* Two eth controllers in NETC */
+#  define IMXRT_NETC_SW0_NPORTS        4            /* Four ports in NETC switch 0 */
+#endif
+
 /* NVIC priority levels *****************************************************/
 
 /* Each priority field holds an 8-bit priority value, 0-15. The lower the

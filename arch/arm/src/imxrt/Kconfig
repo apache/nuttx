@@ -257,6 +257,7 @@ config ARCH_FAMILY_IMXRT118x
 	select IMXRT_HAVE_LPUART10
 	select IMXRT_HAVE_LPUART11
 	select IMXRT_HAVE_LPUART12
+	select IMXRT_HAVE_NETC
 	select IMXRT_CLOCKCONFIG_VER3
 	select IMXRT_ADC_VER3
 	select IMXRT_IOMUX_VER3
@@ -587,8 +588,146 @@ config IMXRT_USBDEV
 config IMXRT_ENET
 	bool "Ethernet"
 	default n
+	depends on !ARCH_FAMILY_IMXRT118x
 	select ARCH_HAVE_PHY
 	select ARCH_HAVE_NETDEV_STATISTICS
+
+config IMXRT_HAVE_NETC
+	bool
+
+menu "NETC Ethernet ports"
+	depends on IMXRT_HAVE_NETC && NET && NET_ETHERNET
+	# Include the remaining existing NETC prerequisites here.
+
+config IMXRT_NETC_ENETC0
+	bool "NETC Eth0 port"
+	default n
+	select IMXRT_NETC
+	---help---
+		Enable the independent ENETC0 direct-PHY interface on
+		physical link 4.
+
+config IMXRT_NETC_ENETC1_PORT0
+	bool "NETC Eth1 switch port0"
+	default n
+	select IMXRT_NETC
+
+config IMXRT_NETC_ENETC1_PORT1
+	bool "NETC Eth1 switch port1"
+	default n
+	select IMXRT_NETC
+
+config IMXRT_NETC_ENETC1_PORT2
+	bool "NETC Eth1 switch port2"
+	default n
+	select IMXRT_NETC
+
+config IMXRT_NETC_ENETC1_PORT3
+	bool "NETC Eth1 switch port3"
+	default n
+	select IMXRT_NETC
+
+endmenu
+
+if IMXRT_NETC_ENETC0 || IMXRT_NETC_ENETC1_PORT0 || \
+   IMXRT_NETC_ENETC1_PORT1 || IMXRT_NETC_ENETC1_PORT2 || \
+   IMXRT_NETC_ENETC1_PORT3
+
+config IMXRT_NETC
+	bool
+	default y
+	select ARCH_HAVE_PHY
+	select ARCH_HAVE_NETDEV_STATISTICS
+	select MDIO_BUS
+	select NET_PHYLIB
+	select NETDEV_LATEINIT
+	---help---
+		NETDEV lower-half Ethernet interfaces for direct-PHY ENETC0 and
+		switch-attached ENETC1. Selected switch ports share one ENETC1
+		interface.
+
+menu "NETC settings"
+	depends on IMXRT_NETC
+
+choice
+	prompt "NETC transmit descriptors"
+	default IMXRT_NETC_TX16
+	---help---
+		Two 16-byte hardware descriptors form one cache-isolated packet
+		slot. One slot remains unused to distinguish full from empty.
+		Pool constraints reserve room for chained 1518-byte packets,
+		stack work and an IOB throttle reserve of up to 16 buffers.
+
+config IMXRT_NETC_TX8
+	bool "8 descriptors (3 packets)"
+	depends on IOB_NBUFFERS >= 96
+
+config IMXRT_NETC_TX16
+	bool "16 descriptors (7 packets)"
+	depends on IOB_NBUFFERS >= 160
+
+config IMXRT_NETC_TX32
+	bool "32 descriptors (15 packets)"
+	depends on IOB_NBUFFERS >= 320
+
+config IMXRT_NETC_TX64
+	bool "64 descriptors (31 packets)"
+	depends on IOB_NBUFFERS >= 640
+
+endchoice
+
+config IMXRT_NETC_NTXDESC
+	int
+	default 8 if IMXRT_NETC_TX8
+	default 16 if IMXRT_NETC_TX16
+	default 32 if IMXRT_NETC_TX32
+	default 64 if IMXRT_NETC_TX64
+
+choice
+	prompt "NETC receive descriptors"
+	default IMXRT_NETC_RX16
+
+config IMXRT_NETC_RX8
+	bool "8 descriptors"
+
+config IMXRT_NETC_RX16
+	bool "16 descriptors"
+
+config IMXRT_NETC_RX32
+	bool "32 descriptors"
+
+config IMXRT_NETC_RX64
+	bool "64 descriptors"
+
+endchoice
+
+config IMXRT_NETC_NRXDESC
+	int
+	default 8 if IMXRT_NETC_RX8
+	default 16 if IMXRT_NETC_RX16
+	default 32 if IMXRT_NETC_RX32
+	default 64 if IMXRT_NETC_RX64
+
+config IMXRT_NETC_LINK_POLL_MS
+	int "NETC MAC update and watchdog interval (milliseconds)"
+	default 1000
+	range 100 1000
+	---help---
+		Interval for updating MAC modes and carrier from PHYLIB link
+		state and checking for stalled TX. TX recovery resets the
+		affected CPU function.
+
+config IMXRT_NETC_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Provide board_netc_phyinit() for per-port setup after interface
+		mode and clock-direction setup, before MDIO probing. It receives
+		the physical link index (0..4) and port configuration. Complete
+		any reset delays before returning.
+
+endmenu # "NETC settings"
+endif
 
 config IMXRT_LCD
 	bool "LCD controller"
