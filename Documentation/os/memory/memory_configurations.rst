@@ -332,6 +332,14 @@ is available in the process local heap.(FULLY implemented):
 * See https://www.OpenGroup.org for further information about these system
   calls.
 
+The heap of a process starts small.  When ``malloc()``,
+``memalign()`` or ``realloc()`` find no free chunk that is large enough,
+they call ``sbrk()`` and try again.  Thus a failed search of the heap of a
+process is a normal step, and the heap does not report it: the warning
+"Allocation failed" (``CONFIG_DEBUG_MM_WARN``) and the panic of
+``CONFIG_MM_PANIC_ON_FAILURE`` come only when ``sbrk()`` fails.
+``CONFIG_MM_DUMP_ON_FAILURE`` applies only to the kernel heap.
+
 Shared Memory
 ^^^^^^^^^^^^^
 
