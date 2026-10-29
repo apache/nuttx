@@ -29,7 +29,7 @@ ifeq ($(CONFIG_NET_CAN),y)
 SOCK_CSRCS += can_raw.c
 
 ifeq ($(CONFIG_NET_CANPROTO_OPTIONS),y)
-SOCK_CSRCS += can_setsockopt.c can_getsockopt.c
+SOCK_CSRCS += can_setsockopt.c
 endif
 
 ifdef CONFIG_NET_CAN_NBUFFERS
