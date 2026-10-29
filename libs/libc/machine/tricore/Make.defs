@@ -33,67 +33,67 @@ endif
 AFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)machine$(DELIM)tricore
 
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
-ASRCS += arch_setjmp.$(ASMEXT)
+ASRCS += arch_setjmp$(ASMEXT)
 endif
 
 ifeq ($(CONFIG_LIBC_ARCH_MEMCPY),y)
-ASRCS += arch_memcpy.$(ASMEXT)
+ASRCS += arch_memcpy$(ASMEXT)
 endif
 
 ifeq ($(CONFIG_LIBC_ARCH_MEMSET),y)
-ASRCS += arch_memset.$(ASMEXT)
+ASRCS += arch_memset$(ASMEXT)
 endif
 
 ifeq ($(CONFIG_LIBC_ARCH_MEMMOVE),y)
-ASRCS += arch_memmove.$(ASMEXT)
+ASRCS += arch_memmove$(ASMEXT)
 endif
 
 ifeq ($(CONFIG_LIBC_ARCH_MEMCMP),y)
-ASRCS += arch_memcmp.$(ASMEXT)
+ASRCS += arch_memcmp$(ASMEXT)
 endif
 
 ifeq ($(CONFIG_LIBC_ARCH_MEMCHR),y)
-ASRCS += arch_memchr.$(ASMEXT)
+ASRCS += arch_memchr$(ASMEXT)
 endif
 
 ifeq ($(CONFIG_LIBC_ARCH_STRCPY),y)
-ASRCS += arch_strcpy.$(ASMEXT)
+ASRCS += arch_strcpy$(ASMEXT)
 endif
 
 ifeq ($(CONFIG_LIBC_ARCH_STRCMP),y)
-ASRCS += arch_strcmp.$(ASMEXT)
+ASRCS += arch_strcmp$(ASMEXT)
 endif
 
 ifeq ($(CONFIG_LIBC_ARCH_STRLEN),y)
-ASRCS += arch_strlen.$(ASMEXT)
+ASRCS += arch_strlen$(ASMEXT)
 endif
 
 ifeq ($(CONFIG_LIBC_ARCH_STRCHR),y)
-ASRCS += arch_strchr.$(ASMEXT)
+ASRCS += arch_strchr$(ASMEXT)
 endif
 
 ifeq ($(CONFIG_LIBC_ARCH_STRCHRNUL),y)
-ASRCS += arch_strchrnul.$(ASMEXT)
+ASRCS += arch_strchrnul$(ASMEXT)
 endif
 
 ifeq ($(CONFIG_LIBC_ARCH_STRNCMP),y)
-ASRCS += arch_strncmp.$(ASMEXT)
+ASRCS += arch_strncmp$(ASMEXT)
 endif
 
 ifeq ($(CONFIG_LIBC_ARCH_STRNLEN),y)
-ASRCS += arch_strnlen.$(ASMEXT)
+ASRCS += arch_strnlen$(ASMEXT)
 endif
 
 ifeq ($(CONFIG_LIBC_ARCH_STRRCHR),y)
-ASRCS += arch_strrchr.$(ASMEXT)
+ASRCS += arch_strrchr$(ASMEXT)
 endif
 
 ifeq ($(CONFIG_LIBC_ARCH_STRNCPY),y)
-ASRCS += arch_strncpy.$(ASMEXT)
+ASRCS += arch_strncpy$(ASMEXT)
 endif
 
 ifeq ($(CONFIG_LIBC_ARCH_STPCPY),y)
-ASRCS += arch_stpcpy.$(ASMEXT)
+ASRCS += arch_stpcpy$(ASMEXT)
 endif
 
 DEPPATH += --dep-path machine/tricore/$(TRICORE_SUBDIR)
