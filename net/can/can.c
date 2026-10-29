@@ -538,6 +538,52 @@ int can_input(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
+ * Name: can_poll
+ *
+ * Description:
+ *   Poll a packet "connection" structure for availability of TX data
+ *
+ * Input Parameters:
+ *   dev - The device driver structure to use in the send operation
+ *   conn - The packet "connection" to poll for TX data
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The network is locked.
+ *   dev is not NULL.
+ *   conn is not NULL.
+ *   The connection (conn) is bound to the polling device (dev).
+ *
+ ****************************************************************************/
+
+void can_poll(FAR struct net_driver_s *dev, FAR struct can_conn_s *conn)
+{
+  DEBUGASSERT(dev != NULL && conn != NULL && dev == conn->dev);
+
+  /* Setup for the application callback */
+
+  dev->d_len    = 0;
+  dev->d_sndlen = 0;
+
+  /* Perform the application callback */
+
+  can_callback(dev, conn, CAN_POLL);
+
+  /* Check if the application has data to send */
+
+  if (dev->d_sndlen > 0)
+    {
+      return;
+    }
+
+  /* Make sure that d_len is zero meaning that there is nothing to be sent */
+
+  dev->d_len = 0;
+}
+
+/****************************************************************************
  * Name: can_alloc()
  *
  * Description:
