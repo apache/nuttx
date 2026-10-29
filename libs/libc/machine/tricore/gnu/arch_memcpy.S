@@ -48,8 +48,7 @@
  *     same minimum the vendor Tasking memcpy relies on), so no data alignment
  *     trap can occur.
  *
- * Requires the assembler to target TC1.8 for ld.dd/st.dd (see AFLAGS
- * -Wa,-mtc18 in Make.defs / CMakeLists.txt).
+ * Requires the assembler to target TC1.8 for ld.dd/st.dd.
  *
  * Q0 is a lower-context register pair group; together with the other scratch
  * registers (%d15, %a2/%a3/%a15) it needs no CSA context save.
