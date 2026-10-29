@@ -726,9 +726,12 @@ static void rpmsg_port_uart_rx_worker(FAR struct rpmsg_port_uart_s *rpuart,
                                  sizeof(rpuart->rx_dbg_buf));
                     rpmsgerrdump("Recv error:", buf, ret);
                     rpmsgerrdump("Recv hdr:", hdr, hdr->len);
+                    rpmsg_port_queue_return_buffer(rxq, hdr);
                   }
-
-                rpmsg_port_queue_add_buffer(rxq, hdr);
+                else
+                  {
+                    rpmsg_port_queue_add_buffer(rxq, hdr);
+                  }
 
                 state = RPMSG_PORT_UART_RX_WAIT_START;
                 hdr = NULL;
