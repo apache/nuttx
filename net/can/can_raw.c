@@ -45,6 +45,7 @@
 #include <netpacket/packet.h>
 #include <nuttx/debug.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/net/ip.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
@@ -61,6 +62,24 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+#ifndef CONFIG_NET_CAN_WRITE_BUFFERS
+/* This structure holds the state of the send operation until it can be
+ * operated upon by the event handler.
+ */
+
+struct send_s
+{
+  FAR struct devif_callback_s *snd_cb; /* Reference to callback instance */
+  FAR struct can_conn_s  *snd_conn;    /* Reference to the CAN connection */
+  sem_t                   snd_sem;     /* Used to wake up the waiting thread */
+  FAR const uint8_t      *snd_buffer;  /* Points to the buffer of data to send */
+  size_t                  snd_buflen;  /* Number of bytes in the buffer to send */
+  size_t                  pr_msglen;   /* Length of msg buffer */
+  FAR uint8_t            *pr_msgbuf;   /* Pointer to msg buffer */
+  ssize_t                 snd_sent;    /* The number of bytes sent */
+};
+#endif
 
 struct can_recvfrom_s
 {
@@ -578,6 +597,286 @@ errout_with_state:
   nxsem_destroy(&state.pr_sem);
   return ret;
 }
+
+#ifndef CONFIG_NET_CAN_WRITE_BUFFERS
+/****************************************************************************
+ * Name: psock_send_eventhandler
+ ****************************************************************************/
+
+static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
+                                        FAR void *pvpriv, uint32_t flags)
+{
+  FAR struct send_s *pstate = pvpriv;
+
+  if (pstate)
+    {
+      /* Check if the outgoing packet is available. It may have been claimed
+       * by a send event handler serving a different thread -OR- if the
+       * output buffer currently contains unprocessed incoming data. In
+       * these cases we will just have to wait for the next polling cycle.
+       */
+
+      if (dev->d_sndlen > 0 || (flags & CAN_NEWDATA) != 0)
+        {
+          /* Another thread has beat us sending data or the buffer is busy,
+           * Check for a timeout. If not timed out, wait for the next
+           * polling cycle and check again.
+           */
+
+          /* No timeout. Just wait for the next polling cycle */
+
+          return flags;
+        }
+
+      /* It looks like we are good to send the data */
+
+      else
+        {
+          /* Copy the packet data into the device packet buffer and send it */
+
+          int ret = devif_send(dev, pstate->snd_buffer,
+                               pstate->snd_buflen + pstate->pr_msglen, 0);
+
+          dev->d_len = dev->d_sndlen - pstate->pr_msglen;
+          if (ret <= 0)
+            {
+              pstate->snd_sent = ret;
+              goto end_wait;
+            }
+
+          dev->d_iob->io_conn = &pstate->snd_conn->sconn;
+
+          pstate->snd_sent = pstate->snd_buflen;
+          if (pstate->pr_msglen > 0) /* concat cmsg data after packet */
+            {
+              memcpy(dev->d_buf + pstate->snd_buflen, pstate->pr_msgbuf,
+                     pstate->pr_msglen);
+            }
+        }
+
+end_wait:
+
+      /* Don't allow any further call backs. */
+
+      pstate->snd_cb->flags = 0;
+      pstate->snd_cb->priv  = NULL;
+      pstate->snd_cb->event = NULL;
+
+      /* Wake up the waiting thread */
+
+      nxsem_post(&pstate->snd_sem);
+    }
+
+  return flags;
+}
+
+/****************************************************************************
+ * Name: can_sendmsg
+ *
+ * Description:
+ *   The can_sendmsg() call may be used only when the packet socket is
+ *   in a connected state (so that the intended recipient is known).
+ *
+ * Input Parameters:
+ *   psock    An instance of the internal socket structure.
+ *   msg      CAN frame and optional CMSG
+ *   flags    Send flags (ignored)
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error,
+ *   a negated errno value is retruend.  See sendmsg() for the complete list
+ *   of return values.
+ *
+ ****************************************************************************/
+
+ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
+                    int flags)
+{
+  FAR struct net_driver_s *dev;
+  FAR struct can_conn_s *conn;
+  struct send_s state;
+  int ret = OK;
+
+  /* Verify that the sockfd corresponds to valid, allocated socket */
+
+  if (psock == NULL || psock->s_conn == NULL)
+    {
+      return -EBADF;
+    }
+
+  /* Only SOCK_RAW is supported */
+
+  if (psock->s_type != SOCK_RAW)
+    {
+      /* EDESTADDRREQ.  Signifies that the socket is not connection-mode and
+       * no peer address is set.
+       */
+
+      return -EDESTADDRREQ;
+    }
+
+  conn = psock->s_conn;
+
+  /* Get the device driver that will service this transfer */
+
+  dev = conn->dev;
+  if (dev == NULL)
+    {
+      return -ENODEV;
+    }
+
+#if defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)
+  if (_SO_GETOPT(conn->sconn.s_options, CAN_RAW_FD_FRAMES))
+    {
+      if (msg->msg_iov->iov_len != CANFD_MTU &&
+          msg->msg_iov->iov_len != CAN_MTU)
+        {
+          return -EINVAL;
+        }
+    }
+  else
+#endif
+    {
+      if (msg->msg_iov->iov_len != CAN_MTU)
+        {
+          return -EINVAL;
+        }
+    }
+
+  /* Perform the send operation */
+
+  /* Initialize the state structure. This is done with the network locked
+   * because we don't want anything to happen until we are ready.
+   */
+
+  conn_dev_lock(&conn->sconn, dev);
+  memset(&state, 0, sizeof(struct send_s));
+  nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
+
+  state.snd_buflen = msg->msg_iov->iov_len;  /* bytes to send */
+  state.snd_buffer = msg->msg_iov->iov_base; /* Buffer to send from */
+  state.snd_conn   = conn;
+
+#ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
+  if (msg->msg_controllen > sizeof(struct cmsghdr))
+    {
+      FAR struct cmsghdr *cmsg = CMSG_FIRSTHDR(msg);
+
+      if (_SO_GETOPT(conn->sconn.s_options, CAN_RAW_TX_DEADLINE) &&
+          cmsg->cmsg_level == SOL_CAN_RAW &&
+          cmsg->cmsg_type == CAN_RAW_TX_DEADLINE &&
+          cmsg->cmsg_len == sizeof(struct timeval))
+        {
+          state.pr_msgbuf = CMSG_DATA(cmsg); /* Buffer to cmsg data */
+          state.pr_msglen = cmsg->cmsg_len;  /* len of cmsg data */
+        }
+    }
+#endif
+
+  /* Allocate resource to receive a callback */
+
+  state.snd_cb = can_callback_alloc(dev, conn);
+  if (state.snd_cb)
+    {
+      /* Set up the callback in the connection */
+
+      state.snd_cb->flags = CAN_POLL;
+      state.snd_cb->priv  = (FAR void *)&state;
+      state.snd_cb->event = psock_send_eventhandler;
+
+      /* Notify the device driver that new TX data is available. */
+
+      netdev_txnotify_dev(dev, CAN_POLL);
+
+      /* Wait for the send to complete or an error to occur.
+       * conn_dev_sem_timedwait will also terminate if a signal is received.
+       */
+
+      if (_SS_ISNONBLOCK(conn->sconn.s_flags) || (flags & MSG_DONTWAIT) != 0)
+        {
+          ret = conn_dev_sem_timedwait(&state.snd_sem, true, 0,
+                                       &conn->sconn, dev);
+        }
+      else
+        {
+          ret = conn_dev_sem_timedwait(&state.snd_sem, true, UINT_MAX,
+                                       &conn->sconn, dev);
+        }
+
+      /* Make sure that no further events are processed */
+
+      can_callback_free(dev, conn, state.snd_cb);
+    }
+
+  nxsem_destroy(&state.snd_sem);
+  conn_dev_unlock(&conn->sconn, dev);
+
+  /* Check for a errors, Errors are signalled by negative errno values
+   * for the send length
+   */
+
+  if (state.snd_sent < 0)
+    {
+      return state.snd_sent;
+    }
+
+  /* If conn_dev_sem_timedwait failed, then we were probably reawakened by
+   * a signal. In this case, conn_dev_sem_timedwait will have returned
+   * negated errno appropriately.
+   */
+
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+#ifdef CONFIG_NET_STATISTICS
+  g_netstats.can.sent++;
+#endif
+
+  /* Return the number of bytes actually sent */
+
+  return state.snd_sent;
+}
+
+/****************************************************************************
+ * Name: psock_can_cansend
+ *
+ * Description:
+ *   psock_can_cansend() returns a value indicating if a write to the socket
+ *   would block.  No space in the buffer is actually reserved, so it is
+ *   possible that the write may still block if the buffer is filled by
+ *   another means.
+ *
+ * Input Parameters:
+ *   psock    An instance of the internal socket structure.
+ *
+ * Returned Value:
+ *   OK
+ *     At least one byte of data could be successfully written.
+ *   -EWOULDBLOCK
+ *     There is no room in the output buffer.
+ *   -EBADF
+ *     An invalid descriptor was specified.
+ *
+ ****************************************************************************/
+
+int psock_can_cansend(FAR struct socket *psock)
+{
+  /* Verify that we received a valid socket */
+
+  if (psock == NULL || psock->s_conn == NULL)
+    {
+      nerr("ERROR: Invalid socket\n");
+      return -EBADF;
+    }
+
+  /* TODO Query CAN driver mailboxes to see if there's mailbox available */
+
+  return OK;
+}
+
+#endif
 
 /****************************************************************************
  * Name: can_poll_eventhandler
