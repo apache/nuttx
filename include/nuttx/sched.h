@@ -766,15 +766,9 @@ struct tcb_s
 #endif
 };
 
-/* struct pthread_tcb_s *****************************************************/
-
-/* This is the particular form of the task control block (TCB) structure used
- * by pthreads. There are two TCB forms:  one for pthreads and one for tasks.
- * Both share the common TCB fields (which must appear at the top of the
- * structure) plus additional fields unique to tasks and threads.
- * Having separate structures for tasks and pthreads adds some complexity,
- * but saves memory in that it prevents pthreads from being burdened with
- * the overhead required for tasks (and vice versa).
+/* pthread startup parameters.  This structure is appended to the TCB and
+ * fetched with (FAR struct pthread_entry_s *)(tcb + 1).  Pthreads thus
+ * share the common struct tcb_s and need no TCB type of their own.
  */
 
 #ifndef CONFIG_DISABLE_PTHREAD
