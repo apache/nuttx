@@ -104,6 +104,62 @@
    ((tvp)->tv_usec cmp (uvp)->tv_usec) : \
    ((tvp)->tv_sec cmp (uvp)->tv_sec))
 
+/* void timespecadd(FAR struct timespec *a, FAR struct timespec *b,
+ *                  FAR struct timespec *res);
+ */
+
+#define timespecadd(tsp, usp, vsp) \
+  do \
+    { \
+      (vsp)->tv_sec = (tsp)->tv_sec + (usp)->tv_sec; \
+      (vsp)->tv_nsec = (tsp)->tv_nsec + (usp)->tv_nsec; \
+      if ((vsp)->tv_nsec >= 1000000000) \
+        { \
+          (vsp)->tv_sec++; \
+          (vsp)->tv_nsec -= 1000000000; \
+        } \
+    } \
+  while (0)
+
+/* void timespecsub(FAR struct timespec *a, FAR struct timespec *b,
+ *                  FAR struct timespec *res);
+ */
+
+#define timespecsub(tsp, usp, vsp) \
+  do \
+    { \
+      (vsp)->tv_sec = (tsp)->tv_sec - (usp)->tv_sec; \
+      (vsp)->tv_nsec = (tsp)->tv_nsec - (usp)->tv_nsec; \
+      if ((vsp)->tv_nsec < 0) \
+        { \
+          (vsp)->tv_sec--; \
+          (vsp)->tv_nsec += 1000000000; \
+        } \
+    } \
+  while (0)
+
+/* void timespecclear(FAR struct timespec *tsp); */
+
+#define timespecclear(tsp) \
+  do \
+    { \
+      (tsp)->tv_sec = 0; \
+      (tsp)->tv_nsec = 0; \
+    } \
+  while (0)
+
+/* int timespecisset(FAR struct timespec *tsp); */
+
+#define timespecisset(tsp) \
+  ((tsp)->tv_sec != 0 || (tsp)->tv_nsec != 0)
+
+/* int timespeccmp(FAR struct timespec *a, FAR struct timespec *b, CMP); */
+
+#define timespeccmp(tsp, usp, cmp) \
+  (((tsp)->tv_sec == (usp)->tv_sec) ? \
+   ((tsp)->tv_nsec cmp (usp)->tv_nsec) : \
+   ((tsp)->tv_sec cmp (usp)->tv_sec))
+
 /* Macros for converting between `struct timeval' and `struct timespec'.  */
 
 #define TIMEVAL_TO_TIMESPEC(tv, ts) \
