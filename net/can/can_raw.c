@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/can/can_sockif.c
+ * net/can/can_raw.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *

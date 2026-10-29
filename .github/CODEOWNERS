@@ -15903,10 +15903,10 @@ net/can/Kconfig peter.vanderperk@nxp.com f.panag@amco.gr anchao@xiaomi.com raide
 net/can/can.c peter.vanderperk@nxp.com wengzhe@xiaomi.com f.panag@amco.gr anchao@xiaomi.com anjiahao@xiaomi.com
 net/can/can.h peter.vanderperk@nxp.com bijunda1@xiaomi.com abdelatif.guettouche@gmail.com anchao@xiaomi.com jari.vanewijk@nxp.com
 net/can/can_getsockopt.c peter.vanderperk@nxp.com xiaoxiang@xiaomi.com yamamoto@midokura.com dongjiuzhu1@xiaomi.com gaohedong@xiaomi.com
+net/can/can_raw.c peter.vanderperk@nxp.com xiaoxiang@xiaomi.com bijunda1@xiaomi.com wangbowen6@xiaomi.com anchao@xiaomi.com
 net/can/can_recvmsg.c bijunda1@xiaomi.com anchao@xiaomi.com xiaoxiang@xiaomi.com xucheng5@xiaomi.com hai.to@unikie.com
 net/can/can_sendmsg.c bijunda1@xiaomi.com jari.vanewijk@nxp.com xiaoxiang@xiaomi.com petro.karashchenko@gmail.com anchao@xiaomi.com
 net/can/can_setsockopt.c peter.vanderperk@nxp.com xiaoxiang@xiaomi.com dongjiuzhu1@xiaomi.com gaohedong@xiaomi.com raiden00@railab.me
-net/can/can_sockif.c peter.vanderperk@nxp.com xiaoxiang@xiaomi.com bijunda1@xiaomi.com wangbowen6@xiaomi.com anchao@xiaomi.com
 net/devif/devif.h anchao@xiaomi.com peter.vanderperk@nxp.com f.j.panag@gmail.com xiaoxiang@xiaomi.com
 net/devif/devif_callback.c alexanderlunev@mail.ru wangchen41@xiaomi.com wengzhe@xiaomi.com anchao@xiaomi.com
 net/devif/devif_filesend.c anchao@xiaomi.com devel@sumpfralle.de wengzhe@xiaomi.com alin.jerpelea@sony.com
