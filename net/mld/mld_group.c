@@ -213,7 +213,8 @@ FAR struct mld_group_s *mld_grpallocfind(FAR struct net_driver_s *dev,
  *   Release a previously allocated group.
  *
  * Assumptions:
- *   The network is locked.
+ *   The caller does not hold the device lock or the device list lock.
+ *   The poll work takes them, and this function waits for the work.
  *
  ****************************************************************************/
 
@@ -221,9 +222,18 @@ void mld_grpfree(FAR struct net_driver_s *dev, FAR struct mld_group_s *group)
 {
   mldinfo("Free: %p flags: %02x\n", group, group->flags);
 
-  /* Cancel the timers */
+  /* Stop the start-up reports and the poll timer.  The poll work reads the
+   * flag with the device locked, so it does not start the timer again.
+   */
 
+  netdev_lock(dev);
+  CLR_MLD_STARTUP(group->flags);
   wd_cancel(&group->polldog);
+  netdev_unlock(dev);
+
+  /* Cancel the poll work, or wait until it is done */
+
+  work_cancel_sync(LPWORK, &group->work);
 
   /* Remove the group structure from the group list in the device structure */
 
@@ -292,7 +302,7 @@ void mld_new_pollcycle(FAR struct net_driver_s *dev)
  *   Release all previously allocated groups for a device.
  *
  * Assumptions:
- *   The network is locked.
+ *   The caller does not hold the device lock or the device list lock.
  *
  ****************************************************************************/
 
