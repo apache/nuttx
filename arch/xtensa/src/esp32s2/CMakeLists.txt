@@ -4,31 +4,84 @@
 # SPDX-License-Identifier: Apache-2.0
 # ##############################################################################
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../common/espressif espressif)
-
-set(SRCS
-    esp32s2_start.c
-    esp32s2_wdt.c
-    esp32s2_allocateheap.c
-    esp32s2_rtc_gpio.c
-    esp32s2_region.c
-    esp32s2_user.c
-    esp32s2_lowputc.c
-    esp32s2_systemreset.c
-    esp32s2_dma.c
-    esp32s2_libc_stubs.c)
-
-if(NOT CONFIG_ARCH_IDLE_CUSTOM)
-  list(APPEND SRCS esp32s2_idle.c)
-endif()
-
+set(SRCS esp32s2_start.c esp32s2_wdt.c)
+list(APPEND SRCS esp32s2_allocateheap.c)
+list(APPEND SRCS esp32s2_rtc_gpio.c esp32s2_region.c esp32s2_user.c)
+list(APPEND SRCS esp32s2_lowputc.c esp32s2_systemreset.c)
+list(APPEND SRCS esp32s2_dma.c esp32s2_libc_stubs.c)
 if(NOT CONFIG_SCHED_TICKLESS)
   list(APPEND SRCS esp32s2_timerisr.c)
 endif()
-
+if(NOT CONFIG_ARCH_IDLE_CUSTOM)
+  list(APPEND SRCS esp32s2_idle.c)
+endif()
+if(CONFIG_ESP32S2_UART)
+  list(APPEND SRCS esp32s2_serial.c)
+endif()
+if(CONFIG_ESP32S2_RNG)
+  list(APPEND SRCS esp32s2_rng.c)
+endif()
+if(CONFIG_ESP32S2_I2C)
+  if(CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE)
+    list(APPEND SRCS esp32s2_i2c.c)
+  endif()
+endif()
+if(CONFIG_ESP32S2_TWAI)
+  list(APPEND SRCS esp32s2_twai.c)
+endif()
+if(CONFIG_ESP32S2_SPI)
+  list(APPEND SRCS esp32s2_spi.c)
+  if(CONFIG_SPI_SLAVE)
+    list(APPEND SRCS esp32s2_spi_slave.c)
+  endif()
+endif()
+if(CONFIG_ESP32S2_PARTITION_TABLE)
+  list(APPEND SRCS esp32_partition.c)
+endif()
+if(CONFIG_ESP32S2_TIMER)
+  list(APPEND SRCS esp32s2_tim.c)
+  if(CONFIG_TIMER)
+    list(APPEND SRCS esp32s2_tim_lowerhalf.c)
+  endif()
+endif()
+if(CONFIG_WATCHDOG)
+  list(APPEND SRCS esp32s2_wdt_lowerhalf.c)
+endif()
+if(CONFIG_ARCH_HAVE_EXTRA_HEAPS)
+  list(APPEND SRCS esp32s2_extraheaps.c)
+endif()
+if(CONFIG_ESP32S2_RTC_HEAP)
+  list(APPEND SRCS esp32s2_rtcheap.c)
+endif()
+if(CONFIG_ARCH_USE_TEXT_HEAP)
+  list(APPEND SRCS esp32s2_textheap.c)
+endif()
+if(CONFIG_ESP32S2_FREERUN)
+  list(APPEND SRCS esp32s2_freerun.c)
+endif()
+if(CONFIG_ESP32S2_TOUCH)
+  list(APPEND SRCS esp32s2_touch.c)
+endif()
+if(CONFIG_ESP32S2_ONESHOT)
+  list(APPEND SRCS esp32s2_oneshot.c)
+  if(CONFIG_ONESHOT)
+    list(APPEND SRCS esp32s2_oneshot_lowerhalf.c)
+  endif()
+endif()
+if(CONFIG_ESP32S2_SPIRAM)
+  list(APPEND SRCS esp32s2_spiram.c)
+  list(APPEND SRCS esp32s2_psram.c)
+endif()
 if(CONFIG_ESPRESSIF_WIFI)
   list(APPEND SRCS esp32s2_wifi_adapter.c)
 endif()
 
-target_compile_definitions(arch PRIVATE ESP_PLATFORM=1)
+target_compile_options(
+  arch
+  PRIVATE -Wno-undef -Wno-unused-variable -fno-jump-tables
+          -fno-tree-switch-conversion -Wno-deprecated-declarations
+          -fstrict-volatile-bitfields)
+
 target_sources(arch PRIVATE ${SRCS})
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../common/espressif espressif)
