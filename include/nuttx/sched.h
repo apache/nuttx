@@ -123,7 +123,7 @@
 #define GROUP_FLAG_FD_BACKTRACE    (1 << 4)                      /* Bit 4: Enable FD backtrace for the group */
 #define GROUP_FLAG_SECURE_EXEC     (1 << 5)                      /* Bit 5: Secure (setuid/setgid) executable */
 #define GROUP_FLAG_DUMPABLE        (1 << 6)                      /* Bit 6: Process may be traced / coredumped */
-                                                                 /* Bit 7: Available */
+#define GROUP_FLAG_VFORK           (1 << 7)                      /* Bit 7: In the address environment of the vfork() parent */
 
 /* Values for struct child_status_s ch_flags */
 
