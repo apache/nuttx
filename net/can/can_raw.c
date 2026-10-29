@@ -75,6 +75,23 @@
  * Private Types
  ****************************************************************************/
 
+/* CAN_RAW connection: the state shared by all CAN protocols followed by
+ * the CAN_RAW receive filters.
+ */
+
+struct can_raw_conn_s
+{
+  struct can_conn_s conn;            /* Common CAN state, must be first */
+
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+  struct can_filter filters[CONFIG_NET_CAN_RAW_FILTER_MAX];
+  int32_t filter_count;
+#  ifdef CONFIG_NET_CAN_ERRORS
+  can_err_mask_t err_mask;
+#  endif
+#endif
+};
+
 #ifndef CONFIG_NET_CAN_WRITE_BUFFERS
 /* This structure holds the state of the send operation until it can be
  * operated upon by the event handler.
@@ -137,7 +154,7 @@ static int can_raw_setsockopt(FAR struct socket *psock, int level,
 
 /* The array containing all CAN_RAW connections. */
 
-NET_BUFPOOL_DECLARE(g_can_raw_connections, sizeof(struct can_conn_s),
+NET_BUFPOOL_DECLARE(g_can_raw_connections, sizeof(struct can_raw_conn_s),
                     CONFIG_NET_CAN_PREALLOC_CONNS,
                     CONFIG_NET_CAN_ALLOC_CONNS,
                     CONFIG_NET_CAN_MAX_CONNS);
@@ -175,6 +192,127 @@ const struct sock_intf_s g_can_raw_sockif =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: can_recv_filter
+ *
+ * Description:
+ *   filter incoming packet
+ *
+ * Input Parameters:
+ *   raw  - A pointer to the CAN_RAW connection structure
+ *   id   - The CAN identifier
+ *
+ * Returned Value: 0 - Filter not passed, 1 - Filter passed
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+static int can_recv_filter(FAR struct can_raw_conn_s *raw, canid_t id)
+{
+  uint32_t i;
+
+#ifdef CONFIG_NET_CAN_ERRORS
+  /* error message frame */
+
+  if ((id & CAN_ERR_FLAG) != 0)
+    {
+      return id & raw->err_mask ? 1 : 0;
+    }
+#endif
+
+  for (i = 0; i < raw->filter_count; i++)
+    {
+      if (raw->filters[i].can_id & CAN_INV_FILTER)
+        {
+          if ((id & raw->filters[i].can_mask) !=
+                ((raw->filters[i].can_id & ~CAN_INV_FILTER) &
+                 raw->filters[i].can_mask))
+            {
+              return 1;
+            }
+        }
+      else
+        {
+          if ((id & raw->filters[i].can_mask) ==
+                (raw->filters[i].can_id & raw->filters[i].can_mask))
+            {
+              return 1;
+            }
+        }
+    }
+
+  return 0;
+}
+#endif
+
+/****************************************************************************
+ * Name: can_raw_match
+ *
+ * Description:
+ *   conn->match() hook of CAN_RAW connections: apply the receive filters
+ *   and do not pass CAN FD frames to a classic CAN socket.
+ *
+ * Input Parameters:
+ *   conn - The CAN_RAW connection
+ *   dev  - The device holding the received frame
+ *
+ * Returned Value:
+ *   true if the frame is delivered to conn.
+ *
+ ****************************************************************************/
+
+static bool can_raw_match(FAR struct can_conn_s *conn,
+                          FAR struct net_driver_s *dev)
+{
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+  FAR struct can_raw_conn_s *raw = (FAR struct can_raw_conn_s *)conn;
+  canid_t can_id;
+
+  memcpy(&can_id, NETLLBUF, sizeof(canid_t));
+
+  if (can_recv_filter(raw, can_id) == 0)
+    {
+      return false;
+    }
+#endif
+
+  /* Do not pass CAN FD frames to a classic CAN socket */
+
+#if defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)
+  if (!_SO_GETOPT(conn->sconn.s_options, CAN_RAW_FD_FRAMES))
+#endif
+    {
+      if (dev->d_len > sizeof(struct can_frame))
+        {
+          return false;
+        }
+    }
+
+  return true;
+}
+
+/****************************************************************************
+ * Name: can_raw_input
+ *
+ * Description:
+ *   conn->input() hook of CAN_RAW connections: deliver the frame to the
+ *   socket callbacks.
+ *
+ * Input Parameters:
+ *   conn - The CAN_RAW connection
+ *   dev  - The device holding the received frame
+ *
+ * Returned Value:
+ *   The flags returned by can_callback().
+ *
+ ****************************************************************************/
+
+static uint32_t can_raw_input(FAR struct can_conn_s *conn,
+                              FAR struct net_driver_s *dev)
+{
+  return can_callback(dev, conn, CAN_NEWDATA);
+}
+
+/****************************************************************************
  * Name: can_raw_alloc()
  *
  * Description:
@@ -185,14 +323,14 @@ const struct sock_intf_s g_can_raw_sockif =
 
 static FAR struct can_conn_s *can_raw_alloc(void)
 {
-  FAR struct can_conn_s *conn;
+  FAR struct can_raw_conn_s *raw;
 
   /* The free list is protected by a a mutex. */
 
   NET_BUFPOOL_LOCK(g_can_raw_connections);
 
-  conn = NET_BUFPOOL_TRYALLOC(g_can_raw_connections);
-  if (conn != NULL)
+  raw = NET_BUFPOOL_TRYALLOC(g_can_raw_connections);
+  if (raw != NULL)
     {
       /* FIXME SocketCAN default behavior enables loopback */
 
@@ -203,24 +341,26 @@ static FAR struct can_conn_s *can_raw_alloc(void)
        * struct can_filter_t catchall_filter;
        * filter.can_id = 0;
        * filter.can_mask = 0;
-       * conn->filters[0] = catchall_filter;
+       * raw->filters[0] = catchall_filter;
        *
        * However memset already sets the filter to 0
        * therefore we only have to set the filter count to 1
        */
 
-      conn->filter_count = 1;
+      raw->filter_count = 1;
 #endif
 
       /* Initialize the shared state and enqueue the connection into the
        * active list
        */
 
-      can_conn_init(conn);
+      raw->conn.match = can_raw_match;
+      raw->conn.input = can_raw_input;
+      can_conn_init(&raw->conn);
     }
 
   NET_BUFPOOL_UNLOCK(g_can_raw_connections);
-  return conn;
+  return raw != NULL ? &raw->conn : NULL;
 }
 
 /****************************************************************************
@@ -1423,11 +1563,13 @@ static int can_raw_getsockopt(FAR struct socket *psock, int level,
                               int option, FAR void *value,
                               FAR socklen_t *value_len)
 {
+  FAR struct can_raw_conn_s *raw;
   FAR struct can_conn_s *conn;
   int ret = OK;
 
   DEBUGASSERT(value != NULL && value_len != NULL);
   conn = psock->s_conn;
+  raw  = (FAR struct can_raw_conn_s *)conn;
 
   /* SO_RCVBUF and SO_SNDBUF are socket-level options that are kept in
    * the CAN connection; psock_socketlevel_option() handles the others.
@@ -1465,7 +1607,7 @@ static int can_raw_getsockopt(FAR struct socket *psock, int level,
           }
         else
           {
-            int count = conn->filter_count;
+            int count = raw->filter_count;
             int i;
 
             if (*value_len < count * sizeof(struct can_filter))
@@ -1479,7 +1621,7 @@ static int can_raw_getsockopt(FAR struct socket *psock, int level,
 
             for (i = 0; i < count; i++)
               {
-                ((FAR struct can_filter *)value)[i] = conn->filters[i];
+                ((FAR struct can_filter *)value)[i] = raw->filters[i];
               }
           }
         break;
@@ -1494,7 +1636,7 @@ static int can_raw_getsockopt(FAR struct socket *psock, int level,
           {
             FAR can_err_mask_t *mask = (FAR can_err_mask_t *)value;
 
-            *mask = conn->err_mask;
+            *mask = raw->err_mask;
             *value_len = sizeof(can_err_mask_t);
           }
         break;
@@ -1596,6 +1738,7 @@ static int can_raw_setsockopt(FAR struct socket *psock, int level,
                               int option, FAR const void *value,
                               socklen_t value_len)
 {
+  FAR struct can_raw_conn_s *raw;
   FAR struct can_conn_s *conn;
   int ret = OK;
   int count = 0;
@@ -1603,6 +1746,7 @@ static int can_raw_setsockopt(FAR struct socket *psock, int level,
   DEBUGASSERT(value_len == 0 || value != NULL);
 
   conn = psock->s_conn;
+  raw  = (FAR struct can_raw_conn_s *)conn;
 
   /* SO_RCVBUF and SO_SNDBUF are socket-level options that are kept in
    * the CAN connection; psock_socketlevel_option() handles the others.
@@ -1631,7 +1775,7 @@ static int can_raw_setsockopt(FAR struct socket *psock, int level,
       case CAN_RAW_FILTER:
         if (value_len == 0)
           {
-            conn->filter_count = 0;
+            raw->filter_count = 0;
             ret = OK;
           }
         else if (value_len % sizeof(struct can_filter) != 0)
@@ -1651,10 +1795,10 @@ static int can_raw_setsockopt(FAR struct socket *psock, int level,
 
             for (i = 0; i < count; i++)
               {
-                conn->filters[i] = ((struct can_filter *)value)[i];
+                raw->filters[i] = ((struct can_filter *)value)[i];
               }
 
-            conn->filter_count = count;
+            raw->filter_count = count;
 
             ret = OK;
           }
@@ -1667,7 +1811,7 @@ static int can_raw_setsockopt(FAR struct socket *psock, int level,
             return -EINVAL;
           }
 
-        conn->err_mask = *(FAR can_err_mask_t *)value;
+        raw->err_mask = *(FAR can_err_mask_t *)value;
         break;
 #endif
 

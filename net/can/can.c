@@ -213,6 +213,55 @@ can_data_event(FAR struct net_driver_s *dev, FAR struct can_conn_s *conn,
 }
 
 /****************************************************************************
+ * Name: can_conn_active
+ *
+ * Description:
+ *   Traverse the list of NetLink connections that match dev
+ *
+ * Input Parameters:
+ *   dev  - The device to search for.
+ *   conn - The current connection; may be NULL to start the search at the
+ *          beginning
+ *
+ * Assumptions:
+ *   This function is called from NetLink device logic.
+ *
+ ****************************************************************************/
+
+static FAR struct can_conn_s *
+can_conn_active(FAR struct net_driver_s *dev, FAR struct can_conn_s *conn)
+{
+  can_conn_list_lock();
+  while ((conn = can_conn_next(conn)) != NULL)
+    {
+      if ((conn->dev == NULL && _SS_ISBOUND(conn->sconn.s_flags)) ||
+          conn->dev == dev)
+        {
+          if (dev->d_iob->io_conn == &conn->sconn
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+              && !_SO_GETOPT(conn->sconn.s_options, CAN_RAW_RECV_OWN_MSGS)
+#endif
+             )
+            {
+              continue; /* Skip own messages */
+            }
+
+          /* Let the protocol decide if it accepts the frame */
+
+          if (!conn->match(conn, dev))
+            {
+              continue;
+            }
+
+          break;
+        }
+    }
+
+  can_conn_list_unlock();
+  return conn;
+}
+
+/****************************************************************************
  * Name: can_input_conn
  *
  * Description:
@@ -248,7 +297,7 @@ static int can_input_conn(FAR struct net_driver_s *dev,
 
   /* Perform the application callback */
 
-  flags = can_callback(dev, conn, CAN_NEWDATA);
+  flags = conn->input(conn, dev);
 
   /* If the operation was successful, the CAN_NEWDATA flag is removed
    * and thus the packet can be deleted (OK will be returned).
@@ -291,7 +340,7 @@ static int can_input_conn(FAR struct net_driver_s *dev,
 
 static int can_in(FAR struct net_driver_s *dev)
 {
-  FAR struct can_conn_s *conn = can_active(dev, NULL);
+  FAR struct can_conn_s *conn = can_conn_active(dev, NULL);
   FAR struct can_conn_s *nextconn;
   int ret;
 
@@ -317,7 +366,7 @@ static int can_in(FAR struct net_driver_s *dev)
 
   /* Do we have second connection that can hold this packet? */
 
-  while ((nextconn = can_active(dev, conn)) != NULL)
+  while ((nextconn = can_conn_active(dev, conn)) != NULL)
     {
       /* Yes... There are multiple listeners on the same dev.
        * We need to clone the packet and deliver it to each listener.
@@ -611,7 +660,8 @@ void can_readahead_signal(FAR struct can_conn_s *conn)
  *
  * Description:
  *   Initialize the state shared by all CAN protocols in a newly allocated
- *   connection and add it to the list of active connections.
+ *   connection and add it to the list of active connections.  The caller
+ *   sets the match() and input() hooks first.
  *
  * Input Parameters:
  *   conn - The connection to initialize
@@ -698,59 +748,6 @@ void can_conn_uninit(FAR struct can_conn_s *conn)
 }
 
 /****************************************************************************
- * Name: can_recv_filter
- *
- * Description:
- *   filter incoming packet
- *
- * Input Parameters:
- *   conn - A pointer to the CAN connection structure
- *   id   - The CAN identifier
- *
- * Returned Value: 0 - Filter not passed, 1 - Filter passed
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_CANPROTO_OPTIONS
-static int can_recv_filter(FAR struct can_conn_s *conn, canid_t id)
-{
-  uint32_t i;
-
-#ifdef CONFIG_NET_CAN_ERRORS
-  /* error message frame */
-
-  if ((id & CAN_ERR_FLAG) != 0)
-    {
-      return id & conn->err_mask ? 1 : 0;
-    }
-#endif
-
-  for (i = 0; i < conn->filter_count; i++)
-    {
-      if (conn->filters[i].can_id & CAN_INV_FILTER)
-        {
-          if ((id & conn->filters[i].can_mask) !=
-                ((conn->filters[i].can_id & ~CAN_INV_FILTER) &
-                 conn->filters[i].can_mask))
-            {
-              return 1;
-            }
-        }
-      else
-        {
-          if ((id & conn->filters[i].can_mask) ==
-                (conn->filters[i].can_id & conn->filters[i].can_mask))
-            {
-              return 1;
-            }
-        }
-    }
-
-  return 0;
-}
-#endif
-
-/****************************************************************************
  * Name: can_conn_next
  *
  * Description:
@@ -794,73 +791,6 @@ void can_conn_list_lock(void)
 void can_conn_list_unlock(void)
 {
   nxrmutex_unlock(&g_can_conn_lock);
-}
-
-/****************************************************************************
- * Name: can_active()
- *
- * Description:
- *   Traverse the list of NetLink connections that match dev
- *
- * Input Parameters:
- *   dev  - The device to search for.
- *   conn - The current connection; may be NULL to start the search at the
- *          beginning
- *
- * Assumptions:
- *   This function is called from NetLink device logic.
- *
- ****************************************************************************/
-
-FAR struct can_conn_s *can_active(FAR struct net_driver_s *dev,
-                                  FAR struct can_conn_s *conn)
-{
-#ifdef CONFIG_NET_CANPROTO_OPTIONS
-  canid_t can_id;
-
-  memcpy(&can_id, NETLLBUF, sizeof(canid_t));
-#endif
-
-  can_conn_list_lock();
-  while ((conn = can_conn_next(conn)) != NULL)
-    {
-      if ((conn->dev == NULL && _SS_ISBOUND(conn->sconn.s_flags)) ||
-          conn->dev == dev)
-        {
-          if (dev->d_iob->io_conn == &conn->sconn
-#ifdef CONFIG_NET_CANPROTO_OPTIONS
-              && !_SO_GETOPT(conn->sconn.s_options, CAN_RAW_RECV_OWN_MSGS)
-#endif
-             )
-            {
-              continue; /* Skip own messages */
-            }
-
-#ifdef CONFIG_NET_CANPROTO_OPTIONS
-          if (can_recv_filter(conn, can_id) == 0)
-            {
-              continue;
-            }
-#endif
-
-          /* Do not pass CAN FD frames to a classic CAN socket */
-
-#if defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)
-          if (!_SO_GETOPT(conn->sconn.s_options, CAN_RAW_FD_FRAMES))
-#endif
-            {
-              if (dev->d_len > sizeof(struct can_frame))
-                {
-                  continue;
-                }
-            }
-
-          break;
-        }
-    }
-
-  can_conn_list_unlock();
-  return conn;
 }
 
 /****************************************************************************
