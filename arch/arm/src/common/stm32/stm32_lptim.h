@@ -168,6 +168,12 @@ struct stm32_lptim_dev_s *stm32_lptim_init(int lptimer);
 
 int stm32_lptim_deinit(struct stm32_lptim_dev_s *dev);
 
+#ifdef CONFIG_TIMER
+/* Register LPTIMn as a timer device, e.g. "/dev/timer1" */
+
+int stm32_lptim_timer_initialize(const char *devpath, int lptim);
+#endif
+
 #if defined(__cplusplus)
 }
 #endif

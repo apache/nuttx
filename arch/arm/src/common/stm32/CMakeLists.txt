@@ -99,6 +99,9 @@ endif()
 
 if(CONFIG_STM32_LPTIM)
   list(APPEND SRCS stm32_lptim.c)
+  if(CONFIG_TIMER)
+    list(APPEND SRCS stm32_lptim_lowerhalf.c)
+  endif()
 endif()
 
 if(CONFIG_STM32_FREERUN)
