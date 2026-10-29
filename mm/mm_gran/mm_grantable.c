@@ -124,6 +124,40 @@ static void gran_set_(gran_t *gran, gatr_t *rang, bool val)
   return;
 }
 
+/* Return the first granule at or above posi and below limit that is in the
+ * given state, or limit if there is none.  Look at one GAT cell at a time.
+ */
+
+static size_t gran_next(const gran_t *gran, size_t posi, size_t limit,
+                        bool used)
+{
+  size_t width = GATC_BITS(gran);
+  size_t c = posi / width;
+  uint32_t v;
+
+  if (posi >= limit)
+    {
+      return limit;
+    }
+
+  v = used ? gran->gat[c] : ~gran->gat[c];
+  v &= ~(BIT(posi % width) - 1);
+
+  while (v == 0)
+    {
+      c++;
+      if (c * width >= limit)
+        {
+          return limit;
+        }
+
+      v = used ? gran->gat[c] : ~gran->gat[c];
+    }
+
+  posi = c * width + ffsl(v) - 1;
+  return posi < limit ? posi : limit;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -262,25 +296,32 @@ failure:
 
 int gran_search(const gran_t *gran, size_t size)
 {
-  int ret = -EINVAL;
-  size_t i;
+  size_t posi = 0;
+  size_t used;
 
   if (gran == NULL || gran->ngranules < size)
     {
-      return ret;
+      return -EINVAL;
     }
 
-  ret = -ENOMEM;
-  for (i = 0; i <= gran->ngranules - size; i++)
+  for (; ; )
     {
-      if (gran_match(gran, i, size, 0, &i))
-        {
-          ret = i;
-          break;
-        }
-    }
+      /* The first free granule, then the first used one after it */
 
-  return ret;
+      posi = gran_next(gran, posi, gran->ngranules, false);
+      if (gran->ngranules - posi < size)
+        {
+          return -ENOMEM;
+        }
+
+      used = gran_next(gran, posi, posi + size, true);
+      if (used - posi >= size)
+        {
+          return posi;
+        }
+
+      posi = used;
+    }
 }
 
 /* set a range of granules */
