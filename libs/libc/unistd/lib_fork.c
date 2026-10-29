@@ -53,9 +53,8 @@ static void atfork_prepare(void)
   FAR struct list_node *list = &info->ta_atfork;
   FAR struct pthread_atfork_s *entry;
 
-  /* According to posix standard, the prepare handlers are called in reverse
-   * order of registration
-   * so we iterate over the func list in reverse order
+  /* POSIX: the prepare handlers are called in the reverse order of
+   * registration.  pthread_atfork() adds each entry at the tail.
    */
 
   nxrmutex_lock(&info->ta_lock);
@@ -85,7 +84,7 @@ static void atfork_child(void)
   FAR struct list_node *list = &info->ta_atfork;
   FAR struct pthread_atfork_s *entry;
 
-  /* The parent handlers are called in the order of registration */
+  /* The child handlers are called in the order of registration */
 
   nxrmutex_lock(&info->ta_lock);
   list_for_every_entry(list, entry,
@@ -114,7 +113,7 @@ static void atfork_parent(void)
   FAR struct list_node *list = &info->ta_atfork;
   FAR struct pthread_atfork_s *entry;
 
-  /* The child handlers are called in the order of registration */
+  /* The parent handlers are called in the order of registration */
 
   nxrmutex_lock(&info->ta_lock);
   list_for_every_entry(list, entry,

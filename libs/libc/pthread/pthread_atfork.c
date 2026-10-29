@@ -80,7 +80,7 @@ int pthread_atfork(CODE void (*prepare)(void),
   entry->child = child;
 
   nxrmutex_lock(&info->ta_lock);
-  list_add_head(list, &entry->node);
+  list_add_tail(list, &entry->node);
   nxrmutex_unlock(&info->ta_lock);
 #endif
 
