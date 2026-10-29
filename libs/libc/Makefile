@@ -138,7 +138,7 @@ endif
 
 BINDIR ?= bin
 
-AOBJS = $(patsubst %.S, $(BINDIR)$(DELIMS)%$(OBJEXT), $(ASRCS))
+AOBJS = $(patsubst %$(ASMEXT), $(BINDIR)$(DELIMS)%$(OBJEXT), $(ASRCS))
 COBJS = $(patsubst %.c, $(BINDIR)$(DELIMS)%$(OBJEXT), $(CSRCS))
 
 SRCS = $(ASRCS) $(CSRCS)
@@ -150,7 +150,7 @@ BIN ?= libc$(LIBEXT)
 all: $(BIN)
 .PHONY: clean distclean
 
-$(AOBJS): $(BINDIR)$(DELIMS)%$(OBJEXT): %.S
+$(AOBJS): $(BINDIR)$(DELIMS)%$(OBJEXT): %$(ASMEXT)
 	$(call ASSEMBLE, $<, $@)
 
 # REVISIT: Backslash causes problems in $(COBJS) target
@@ -193,11 +193,11 @@ endif
 
 # Dependencies
 
-makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
+makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:$(ASMEXT)=.dds)
 	$(call CATFILE, bin/Make.dep, $^)
 	$(call DELFILE, $^)
 
-makekdepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
+makekdepfile: $(CSRCS:.c=.ddc) $(ASRCS:$(ASMEXT)=.dds)
 	$(call CATFILE, kbin/Make.dep, $^)
 	$(call DELFILE, $^)
 
@@ -228,7 +228,7 @@ distclean:: clean
 	$(Q) $(MAKE) -C zoneinfo distclean BIN=$(BIN)
 	$(Q) $(MAKE) -C elf distclean
 	$(call DELFILE, exec_symtab.c)
-	$(call DELFILE, $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds))
+	$(call DELFILE, $(CSRCS:.c=.ddc) $(ASRCS:$(ASMEXT)=.dds))
 	$(call DELFILE, .depend)
 	$(call DELDIR, bin)
 	$(call DELDIR, kbin)
