@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <string.h>
 #include <errno.h>
 #include <assert.h>
 #include <nuttx/debug.h>
@@ -38,6 +39,16 @@
 
 #include "socket/socket.h"
 #include "local/local.h"
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_LOCAL_DGRAM
+static ssize_t local_dgram_send(FAR struct socket *psock,
+                                FAR const struct iovec *buf, size_t len,
+                                int flags, FAR const char *path);
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -159,6 +170,31 @@ static ssize_t local_send(FAR struct socket *psock,
 {
   ssize_t ret;
 
+#ifdef CONFIG_NET_LOCAL_DGRAM
+  /* A datagram socket that is not one of a socket pair sends to the
+   * address that connect() set.
+   */
+
+  if (psock->s_type == SOCK_DGRAM)
+    {
+      FAR struct local_conn_s *conn = psock->s_conn;
+
+      if (conn->lc_state != LOCAL_STATE_CONNECTED)
+        {
+          if (conn->lc_rpath[0] == '\0')
+            {
+              return -EDESTADDRREQ;
+            }
+
+          ret = local_dgram_send(psock, buf, len, flags, conn->lc_rpath);
+
+          /* -ENOENT: the receiver was closed */
+
+          return ret == -ENOENT ? -ECONNREFUSED : ret;
+        }
+    }
+#endif
+
   switch (psock->s_type)
     {
 #ifdef CONFIG_NET_LOCAL_STREAM
@@ -220,6 +256,146 @@ static ssize_t local_send(FAR struct socket *psock,
 }
 
 /****************************************************************************
+ * Name: local_dgram_send
+ *
+ * Description:
+ *   Send one datagram to the SOCK_DGRAM socket that has a name.
+ *
+ * Input Parameters:
+ *   psock    A pointer to a NuttX-specific, internal socket structure
+ *   buf      Data to send
+ *   len      Length of data to send
+ *   flags    Send flags
+ *   path     The name of the receiver (for an abstract name, without the
+ *            NUL character at the start)
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On error, a
+ *   negated errno value is returned: -ENOENT if no socket has the name,
+ *   -EPERM if the receiver is connected to a different socket.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_LOCAL_DGRAM
+static ssize_t local_dgram_send(FAR struct socket *psock,
+                                FAR const struct iovec *buf, size_t len,
+                                int flags, FAR const char *path)
+{
+  FAR struct local_conn_s *conn = psock->s_conn;
+  FAR struct local_conn_s *server = NULL;
+  lc_size_t rcvsize;
+  ssize_t ret;
+
+  /* Find the receiver */
+
+  local_lock();
+  while ((server = local_nextconn(server)) != NULL)
+    {
+      if (server->lc_proto == SOCK_DGRAM &&
+          strncmp(server->lc_path, path, UNIX_PATH_MAX - 1) == 0)
+        {
+          break;
+        }
+    }
+
+  if (server == NULL)
+    {
+      local_unlock();
+      ninfo("No socket has the name %s\n", path);
+      return -ENOENT;
+    }
+
+  /* A connected receiver accepts datagrams only from its peer */
+
+  if (server->lc_rpath[0] != '\0' &&
+      strncmp(server->lc_rpath, conn->lc_path, UNIX_PATH_MAX - 1) != 0)
+    {
+      local_unlock();
+      return -EPERM;
+    }
+
+  rcvsize = server->lc_rcvsize;
+  local_unlock();
+
+  /* Make sure that dgram is sent safely */
+
+  ret = nxmutex_lock(&conn->lc_sendlock);
+  if (ret < 0)
+    {
+      /* May fail because the task was canceled. */
+
+      nerr("ERROR: Failed to get localsocket sendlock: %zd\n", ret);
+      return ret;
+    }
+
+  /* The outgoing FIFO should not be open */
+
+  DEBUGASSERT(conn->lc_outfile.f_inode == NULL);
+
+  /* Make sure that half duplex FIFO has been created.
+   * REVISIT:  Or should be just make sure that it already exists?
+   */
+
+  ret = local_create_halfduplex(conn, path, rcvsize);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to create FIFO for %s: %zd\n", path, ret);
+      goto errout_with_lock;
+    }
+
+  /* Open the sending side of the transfer */
+
+  ret = local_open_sender(conn, path,
+                          _SS_ISNONBLOCK(conn->lc_conn.s_flags) ||
+                          (flags & MSG_DONTWAIT) != 0);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to open FIFO for %s: %zd\n", path, ret);
+
+      goto errout_with_halfduplex;
+    }
+
+  /* Send the preamble */
+
+  ret = local_send_preamble(conn, &conn->lc_outfile, buf, len, rcvsize);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to send the preamble: %zd\n", ret);
+      goto errout_with_sender;
+    }
+
+  /* Send the packet */
+
+  ret = local_send_packet(&conn->lc_outfile, buf, len);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to send the packet: %zd\n", ret);
+      goto errout_with_sender;
+    }
+
+errout_with_sender:
+
+  /* Now we can close the write-only socket descriptor */
+
+  file_close(&conn->lc_outfile);
+  conn->lc_outfile.f_inode = NULL;
+
+errout_with_halfduplex:
+
+  /* Release our reference to the half duplex FIFO */
+
+  local_release_halfduplex(conn);
+
+errout_with_lock:
+
+  /* Release localsocket sendlock */
+
+  nxmutex_unlock(&conn->lc_sendlock);
+  return ret;
+}
+#endif /* CONFIG_NET_LOCAL_DGRAM */
+
+/****************************************************************************
  * Name: local_sendto
  *
  * Description:
@@ -252,9 +428,7 @@ static ssize_t local_sendto(FAR struct socket *psock,
 {
 #ifdef CONFIG_NET_LOCAL_DGRAM
   FAR struct local_conn_s *conn = psock->s_conn;
-  FAR struct local_conn_s *server;
   FAR const struct sockaddr_un *unaddr = (FAR const struct sockaddr_un *)to;
-  ssize_t ret;
 
   /* Verify that a valid address has been provided */
 
@@ -298,96 +472,11 @@ static ssize_t local_sendto(FAR struct socket *psock,
       return -EISCONN;
     }
 
-  local_lock();
+  /* An abstract name starts with a NUL character */
 
-  server = local_findconn(conn, unaddr);
-  if (server == NULL)
-    {
-      local_unlock();
-      nerr("ERROR: No such file or directory\n");
-      return -ENOENT;
-    }
-
-  local_unlock();
-
-  /* Make sure that dgram is sent safely */
-
-  ret = nxmutex_lock(&conn->lc_sendlock);
-  if (ret < 0)
-    {
-      /* May fail because the task was canceled. */
-
-      nerr("ERROR: Failed to get localsocket sendlock: %zd\n", ret);
-      return ret;
-    }
-
-  /* The outgoing FIFO should not be open */
-
-  DEBUGASSERT(conn->lc_outfile.f_inode == NULL);
-
-  /* Make sure that half duplex FIFO has been created.
-   * REVISIT:  Or should be just make sure that it already exists?
-   */
-
-  ret = local_create_halfduplex(conn, unaddr->sun_path, server->lc_rcvsize);
-  if (ret < 0)
-    {
-      nerr("ERROR: Failed to create FIFO for %s: %zd\n",
-           unaddr->sun_path, ret);
-      goto errout_with_lock;
-    }
-
-  /* Open the sending side of the transfer */
-
-  ret = local_open_sender(conn, unaddr->sun_path,
-                          _SS_ISNONBLOCK(conn->lc_conn.s_flags) ||
-                          (flags & MSG_DONTWAIT) != 0);
-  if (ret < 0)
-    {
-      nerr("ERROR: Failed to open FIFO for %s: %zd\n",
-           unaddr->sun_path, ret);
-
-      goto errout_with_halfduplex;
-    }
-
-  /* Send the preamble */
-
-  ret = local_send_preamble(conn, &conn->lc_outfile, buf, len,
-                            server->lc_rcvsize);
-  if (ret < 0)
-    {
-      nerr("ERROR: Failed to send the preamble: %zd\n", ret);
-      goto errout_with_sender;
-    }
-
-  /* Send the packet */
-
-  ret = local_send_packet(&conn->lc_outfile, buf, len);
-  if (ret < 0)
-    {
-      nerr("ERROR: Failed to send the packet: %zd\n", ret);
-      goto errout_with_sender;
-    }
-
-errout_with_sender:
-
-  /* Now we can close the write-only socket descriptor */
-
-  file_close(&conn->lc_outfile);
-  conn->lc_outfile.f_inode = NULL;
-
-errout_with_halfduplex:
-
-  /* Release our reference to the half duplex FIFO */
-
-  local_release_halfduplex(conn);
-
-errout_with_lock:
-
-  /* Release localsocket sendlock */
-
-  nxmutex_unlock(&conn->lc_sendlock);
-  return ret;
+  return local_dgram_send(psock, buf, len, flags,
+                          unaddr->sun_path[0] == '\0' ?
+                          &unaddr->sun_path[1] : unaddr->sun_path);
 #else
   return -EISCONN;
 #endif /* CONFIG_NET_LOCAL_DGRAM */

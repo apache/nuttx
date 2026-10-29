@@ -28,6 +28,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -449,6 +450,37 @@ static int local_getpeername(FAR struct socket *psock,
       return OK;
     }
 
+#ifdef CONFIG_NET_LOCAL_DGRAM
+  /* A datagram socket gives the address that connect() set */
+
+  if (psock->s_type == SOCK_DGRAM &&
+      conn->lc_state != LOCAL_STATE_CONNECTED)
+    {
+      size_t abstract = conn->lc_rtype == LOCAL_TYPE_ABSTRACT;
+      size_t namelen;
+
+      if (conn->lc_rpath[0] == '\0')
+        {
+          return -ENOTCONN;
+        }
+
+      /* As below: the name, clipped to the buffer of the caller */
+
+      unaddr->sun_family = AF_LOCAL;
+      namelen = MIN(strlen(conn->lc_rpath) + 1 + abstract,
+                    *addrlen - sizeof(sa_family_t));
+      if (namelen > abstract)
+        {
+          unaddr->sun_path[0] = '\0';
+          strlcpy(&unaddr->sun_path[abstract], conn->lc_rpath,
+                  namelen - abstract);
+        }
+
+      *addrlen = sizeof(sa_family_t) + namelen;
+      return OK;
+    }
+#endif
+
   /* Verify that the socket has been connected */
 
   if (conn->lc_state != LOCAL_STATE_CONNECTED)
@@ -755,6 +787,113 @@ static int local_setsockopt(FAR struct socket *psock, int level, int option,
 #endif
 
 /****************************************************************************
+ * Name: local_dgram_connect
+ *
+ * Description:
+ *   Set the default destination of a SOCK_DGRAM socket to the bound socket
+ *   with the name in 'addr'.  AF_UNSPEC removes the destination.
+ *
+ * Input Parameters:
+ *   psock     Pointer to a socket structure initialized by psock_socket()
+ *   addr      The address of the receiver
+ *   addrlen   Length of actual 'addr'
+ *
+ * Returned Value:
+ *   0 on success; a negated errno value on failure: ENOENT if no file and
+ *   no socket has the path, ECONNREFUSED if no socket has the name.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_LOCAL_DGRAM
+static int local_dgram_connect(FAR struct socket *psock,
+                               FAR const struct sockaddr *addr,
+                               socklen_t addrlen)
+{
+  FAR const struct sockaddr_un *unaddr =
+    (FAR const struct sockaddr_un *)addr;
+  FAR struct local_conn_s *conn = psock->s_conn;
+  FAR struct local_conn_s *peer;
+  FAR const char *path;
+  struct stat buf;
+  int ret;
+
+  if (addrlen < sizeof(sa_family_t))
+    {
+      return -EINVAL;
+    }
+
+  /* A socket of a socket pair keeps its peer */
+
+  if (conn->lc_state == LOCAL_STATE_CONNECTED)
+    {
+      return -EISCONN;
+    }
+
+  /* AF_UNSPEC removes the default destination */
+
+  if (addr->sa_family == AF_UNSPEC)
+    {
+      local_lock();
+      conn->lc_rpath[0] = '\0';
+      conn->lc_conn.s_flags &= ~_SF_CONNECTED;
+      local_unlock();
+      return OK;
+    }
+
+  if (addr->sa_family != AF_LOCAL)
+    {
+      return -EAFNOSUPPORT;
+    }
+
+  if (addrlen < sizeof(sa_family_t) + 2)
+    {
+      return -EINVAL;
+    }
+
+  /* The receiver must have the name now.  An abstract name starts with a
+   * NUL character.
+   */
+
+  path = unaddr->sun_path[0] == '\0' ? &unaddr->sun_path[1] :
+                                        unaddr->sun_path;
+
+  /* An empty name would match every socket that is not bound */
+
+  if (path[0] == '\0')
+    {
+      return -EINVAL;
+    }
+
+  local_lock();
+  peer = local_findconn(conn, unaddr);
+  if (peer != NULL)
+    {
+      strlcpy(conn->lc_rpath, peer->lc_path, sizeof(conn->lc_rpath));
+      conn->lc_rtype = peer->lc_type;
+      local_unlock();
+      return OK;
+    }
+
+  local_unlock();
+
+  /* As for a stream socket: ENOENT if nothing has the path, ECONNREFUSED
+   * if a file that is not a socket has it.
+   */
+
+  if (path == unaddr->sun_path)
+    {
+      ret = nx_stat(path, &buf, 1);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+
+  return -ECONNREFUSED;
+}
+#endif /* CONFIG_NET_LOCAL_DGRAM */
+
+/****************************************************************************
  * Name: local_connect
  *
  * Description:
@@ -789,6 +928,15 @@ static int local_setsockopt(FAR struct socket *psock, int level, int option,
 static int local_connect(FAR struct socket *psock,
                          FAR const struct sockaddr *addr, socklen_t addrlen)
 {
+#ifdef CONFIG_NET_LOCAL_DGRAM
+  /* A datagram socket also takes AF_UNSPEC */
+
+  if (psock->s_type == SOCK_DGRAM)
+    {
+      return local_dgram_connect(psock, addr, addrlen);
+    }
+#endif
+
   /* Verify that a valid address has been provided */
 
   if (addr->sa_family != AF_LOCAL || addrlen < sizeof(sa_family_t))
@@ -818,16 +966,6 @@ static int local_connect(FAR struct socket *psock,
         }
         break;
 #endif /* CONFIG_NET_LOCAL_STREAM */
-
-#ifdef CONFIG_NET_LOCAL_DGRAM
-      case SOCK_DGRAM:
-        {
-          /* Perform the datagram connection logic */
-
-          return -ENOSYS;
-        }
-        break;
-#endif /* CONFIG_NET_LOCAL_DGRAM */
 
       default:
         return -EBADF;
