@@ -106,6 +106,24 @@
 #  define powerof2(a)	(!(((a) - 1) & (a)))
 #endif /* powerof2 */
 
+/* Macros for bit-strings. */
+
+#ifndef setbit
+#  define setbit(a, i)       ((a)[(i) / NBBY] |= (1 << ((i) % NBBY)))
+#endif /* setbit */
+
+#ifndef clrbit
+#  define clrbit(a, i)       ((a)[(i) / NBBY] &= ~(1 << ((i) % NBBY)))
+#endif /* clrbit */
+
+#ifndef isset
+#  define isset(a, i)        ((a)[(i) / NBBY] & (1 << ((i) % NBBY)))
+#endif /* isset */
+
+#ifndef isclr
+#  define isclr(a, i)        (((a)[(i) / NBBY] & (1 << ((i) % NBBY))) == 0)
+#endif /* isclr */
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
