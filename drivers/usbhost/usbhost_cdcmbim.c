@@ -1399,6 +1399,12 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcmbim_s *priv,
                       boutdesc.interval     = epdesc->interval;
                       boutdesc.mxpacketsize =
                                   usbhost_getle16(epdesc->mxpacketsize);
+                      if (boutdesc.mxpacketsize == 0)
+                        {
+                          uerr("ERROR: Invalid zero Bulk OUT packet size\n");
+                          return -EINVAL;
+                        }
+
                       uinfo("Bulk OUT EP addr:%d mxpacketsize:%d\n",
                             boutdesc.addr, boutdesc.mxpacketsize);
 
