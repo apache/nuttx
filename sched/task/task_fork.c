@@ -125,6 +125,38 @@ static void fork_inherit_tls(FAR struct tcb_s *child)
 }
 
 /****************************************************************************
+ * Name: fork_inherit_info
+ *
+ * Description:
+ *   Give the fork() child the task information of its parent.
+ *
+ *   group_allocate() made new task information for the group of the child.
+ *   It is in the user heap of the parent, because the child has no address
+ *   environment yet.  It has no fork handlers, exit functions, streams,
+ *   keys or auxiliary vector.  The copy of the address environment has the
+ *   task information of the parent at the same address, with all of these.
+ *   The child uses that copy, as it uses the copy of each other object of
+ *   the parent.
+ *
+ *   Call this before the copy, with the address environment of the parent
+ *   current: then the new block is in neither heap.
+ *
+ * Input Parameters:
+ *   parent - The parent task's TCB
+ *   child  - The child task's TCB
+ *
+ ****************************************************************************/
+
+static void fork_inherit_info(FAR struct tcb_s *parent,
+                              FAR struct tcb_s *child)
+{
+#ifdef CONFIG_MM_KERNEL_HEAP
+  group_free(child->group, child->group->tg_info);
+  child->group->tg_info = parent->group->tg_info;
+#endif
+}
+
+/****************************************************************************
  * Name: fork_restore_parent_env
  *
  * Description:
@@ -259,9 +291,11 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr, bool vfork)
            * the parent's contents -- including its stack -- at the parent's
            * virtual addresses, which is what lets the child go on to inherit
            * the stack address rather than be given a relocated copy.  See
-           * fork_inherit_stack().
+           * fork_inherit_stack().  The same applies to the task
+           * information:  see fork_inherit_info().
            */
 
+          fork_inherit_info(parent, child);
           ret = addrenv_fork(parent, child);
           if (ret >= 0)
             {
@@ -316,12 +350,17 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr, bool vfork)
   DEBUGASSERT(vfork);
 #endif
 
-  /* Duplicate the parent tasks environment */
+  /* Duplicate the parent tasks environment.  A child that has the copy of
+   * the task information of its parent has the environment in it.
+   */
 
-  ret = env_dup(child->group->tg_info, environ);
-  if (ret < 0)
+  if (child->group->tg_info != parent->group->tg_info)
     {
-      goto errout_with_tcb;
+      ret = env_dup(child->group->tg_info, environ);
+      if (ret < 0)
+        {
+          goto errout_with_tcb;
+        }
     }
 
   /* Associate file descriptors with the new task */
@@ -512,14 +551,6 @@ pid_t nxtask_start_fork(FAR struct tcb_s *child, bool vfork)
       (child->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
       fork_restore_parent_env();
-
-#ifdef CONFIG_MM_KERNEL_HEAP
-      /* group_allocate() put the child's task_info in the parent's heap
-       * before the copy.  The child uses its own copy: free this one.
-       */
-
-      group_free(child->group, child->group->tg_info);
-#endif
     }
 #endif
 
