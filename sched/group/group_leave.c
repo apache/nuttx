@@ -245,6 +245,19 @@ void group_leave(FAR struct tcb_s *tcb)
         {
           group->tg_flags &= ~GROUP_FLAG_VFORK;
         }
+
+      /* The heap of an ending user group goes away with its address
+       * environment, and a stack overflow can break it: do not free the
+       * stack into it.  The heap of a vfork() child stays.
+       */
+
+      if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL &&
+          (group->tg_flags &
+           (GROUP_FLAG_PRIVILEGED | GROUP_FLAG_VFORK)) == 0 &&
+          (release || (group->tg_flags & GROUP_FLAG_EXITING) != 0))
+        {
+          tcb->flags &= ~TCB_FLAG_FREE_STACK;
+        }
 #endif
 
       if (release)
