@@ -220,7 +220,11 @@ int parse_block_partition(FAR const char *path,
       state.blk->u.i_bops->ioctl(state.blk, MTDIOC_GEOMETRY,
                                  (unsigned long)(uintptr_t)&mgeo) >= 0)
     {
-      DEBUGASSERT(mgeo.blocksize);
+      if (mgeo.blocksize == 0)
+        {
+          close_blockdriver(state.blk);
+          return -EINVAL;
+        }
 
       state.blocksize = mgeo.blocksize;
       state.erasesize = mgeo.erasesize;
@@ -234,7 +238,11 @@ int parse_block_partition(FAR const char *path,
       ret = state.blk->u.i_bops->geometry(state.blk, &geo);
       if (ret >= 0)
         {
-          DEBUGASSERT(geo.geo_sectorsize);
+          if (geo.geo_sectorsize == 0)
+            {
+              close_blockdriver(state.blk);
+              return -EINVAL;
+            }
 
           state.blocksize = geo.geo_sectorsize;
           state.erasesize = geo.geo_sectorsize;
@@ -278,7 +286,10 @@ int parse_mtd_partition(FAR struct mtd_dev_s *mtd,
       return ret;
     }
 
-  DEBUGASSERT(mgeo.blocksize);
+  if (mgeo.blocksize == 0)
+    {
+      return -EINVAL;
+    }
 
   state.blk       = NULL;
   state.mtd       = mtd;
