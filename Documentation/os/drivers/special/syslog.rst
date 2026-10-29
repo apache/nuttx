@@ -275,6 +275,42 @@ In nsh, you can view/set the syslog channel status through the setlogmask comman
 -  ``setlogmask <enable/disable> <channel>``. Enable or disable the
    specified channel.
 
+SYSLOG Channel Priorities
+-------------------------
+
+With ``CONFIG_SYSLOG_DROPMASK``, each channel can drop the messages of
+some priorities. The field ``sc_dropmask`` of ``struct syslog_channel_s``
+is an OR of ``LOG_MASK()`` values: the channel does not write the
+messages of these priorities. Zero (the value of a channel that does not
+set the field) means that the channel writes the messages of all
+priorities.
+
+``setlogmask()`` selects the messages for all channels. ``sc_dropmask``
+selects them for one channel. For example, the console can show only
+the urgent messages while the RAMLOG keeps all of them.
+
+``CONFIG_SYSLOG_CONSOLE_LEVEL`` sets ``sc_dropmask`` of the console
+channels (``CONFIG_SYSLOG_DEFAULT`` and ``CONFIG_SYSLOG_CONSOLE``).
+These channels write only the messages of this priority and of the more
+urgent priorities: 0 is ``LOG_EMERG``, 3 is ``LOG_ERR``, 7 is
+``LOG_DEBUG``. With 7 (the default), the console writes all messages.
+The assertion and crash reports use ``LOG_ALERT`` and ``LOG_EMERG``, so
+a value of 1 or more keeps them on the console.
+
+Output that does not come from ``syslog()`` has no priority, and all
+channels write it. This output is:
+
+-  ``syslog_write()`` (for example a write to ``/dev/log`` with
+   ``CONFIG_SYSLOG_CHARDEV``, or the console output with
+   ``CONFIG_CONSOLE_SYSLOG``).
+
+-  The output that the interrupt buffer (``CONFIG_SYSLOG_INTBUFFER``)
+   saved. With the interrupt buffer, the messages from interrupt
+   handlers lose their priority.
+
+Kernel code that writes the text of a message with ``syslog_write()``
+can call ``syslog_write_priority()`` instead, to give its priority.
+
 Interrupt Level SYSLOG Output
 -----------------------------
 
@@ -680,6 +716,8 @@ Core Channel Settings
 - ``CONFIG_SYSLOG_MAX_CHANNELS``: Set the maximum number of syslog channels (default: 1 in the architecture, configurable per platform).
 - ``CONFIG_SYSLOG_DEFAULT``: Enable the **default channel** (maps to UART output).
 - ``CONFIG_SYSLOG_CRLF``: (Shared) Applies line ending conversion to all channel output.
+- ``CONFIG_SYSLOG_DROPMASK``: Each channel can drop messages by priority (default: n). See `SYSLOG Channel Priorities`_.
+- ``CONFIG_SYSLOG_CONSOLE_LEVEL``: The lowest message priority that the console channels write (default: 7, all messages). See `SYSLOG Channel Priorities`_.
 
 Individual Channel & Destination Options
 ----------------------------------------
