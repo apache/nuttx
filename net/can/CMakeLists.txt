@@ -23,7 +23,7 @@ if(CONFIG_NET_CAN)
   set(SRCS)
 
   # Socket layer
-  list(APPEND SRCS can_raw.c can_recvmsg.c)
+  list(APPEND SRCS can_raw.c)
 
   if(CONFIG_NET_CAN_WRITE_BUFFERS)
     list(APPEND SRCS can_sendmsg_buffered.c)
