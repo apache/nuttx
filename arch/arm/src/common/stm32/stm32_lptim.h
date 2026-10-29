@@ -174,6 +174,13 @@ int stm32_lptim_deinit(struct stm32_lptim_dev_s *dev);
 int stm32_lptim_timer_initialize(const char *devpath, int lptim);
 #endif
 
+#ifdef CONFIG_ONESHOT
+/* Get a oneshot timer lower-half on LPTIMn */
+
+struct oneshot_lowerhalf_s;
+struct oneshot_lowerhalf_s *stm32_lptim_oneshot_initialize(int lptim);
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
