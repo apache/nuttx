@@ -778,7 +778,7 @@ static void stm32_serial_setformat(struct uart_dev_s *dev)
   if ((regval & (USART_CR1_UE | USART_CR1_TE)) ==
       (USART_CR1_UE | USART_CR1_TE))
     {
-      timeout = 50000;
+      timeout = 5000;
       while ((stm32_serial_getreg(priv, STM32_USART_ISR_OFFSET) &
               USART_ISR_TC) == 0 && --timeout > 0)
         {

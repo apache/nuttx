@@ -1567,7 +1567,7 @@ static void up_set_format(struct uart_dev_s *dev)
   if ((regval & (USART_CR1_UE | USART_CR1_TE)) ==
       (USART_CR1_UE | USART_CR1_TE))
     {
-      timeout = 50000;
+      timeout = 5000;
       while ((up_serialin(priv, STM32_USART_SR_OFFSET) &
               USART_SR_TC) == 0 && --timeout > 0)
         {
