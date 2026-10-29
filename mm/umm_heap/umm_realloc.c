@@ -26,9 +26,11 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+#include <nuttx/debug.h>
 #include <nuttx/mm/mm.h>
 
 #include "umm_heap/umm_heap.h"
@@ -82,6 +84,12 @@ FAR void *realloc(FAR void *oldmem, size_t size)
           brkaddr = sbrk(size < 1 ? 1 : size);
           if (brkaddr == (FAR void *)-1)
             {
+              /* mm_malloc() does not report a failure in this heap */
+
+              mwarn("WARNING: Allocation failed, size %zu\n", size);
+#ifdef CONFIG_MM_PANIC_ON_FAILURE
+              PANIC();
+#endif
               return NULL;
             }
         }
