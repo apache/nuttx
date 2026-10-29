@@ -45,12 +45,15 @@
 #include <netpacket/packet.h>
 #include <nuttx/debug.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
 #include <nuttx/net/can.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/net.h>
+#include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
 #include <nuttx/poll.h>
+#include <nuttx/queue.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 
@@ -59,6 +62,14 @@
 #include "netdev/netdev.h"
 #include "socket/socket.h"
 #include "utils/utils.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_NET_CAN_MAX_CONNS
+#  define CONFIG_NET_CAN_MAX_CONNS 0
+#endif
 
 /****************************************************************************
  * Private Types
@@ -121,6 +132,17 @@ static int can_raw_setsockopt(FAR struct socket *psock, int level,
 #endif
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* The array containing all CAN_RAW connections. */
+
+NET_BUFPOOL_DECLARE(g_can_raw_connections, sizeof(struct can_conn_s),
+                    CONFIG_NET_CAN_PREALLOC_CONNS,
+                    CONFIG_NET_CAN_ALLOC_CONNS,
+                    CONFIG_NET_CAN_MAX_CONNS);
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -151,6 +173,81 @@ const struct sock_intf_s g_can_raw_sockif =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: can_raw_alloc()
+ *
+ * Description:
+ *   Allocate a new, uninitialized NetLink connection structure.  This is
+ *   normally something done by the implementation of the socket() API
+ *
+ ****************************************************************************/
+
+static FAR struct can_conn_s *can_raw_alloc(void)
+{
+  FAR struct can_conn_s *conn;
+
+  /* The free list is protected by a a mutex. */
+
+  NET_BUFPOOL_LOCK(g_can_raw_connections);
+
+  conn = NET_BUFPOOL_TRYALLOC(g_can_raw_connections);
+  if (conn != NULL)
+    {
+      /* FIXME SocketCAN default behavior enables loopback */
+
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+      /* By default the filter is configured to catch all,
+       * this is done in commented filter code below:
+       *
+       * struct can_filter_t catchall_filter;
+       * filter.can_id = 0;
+       * filter.can_mask = 0;
+       * conn->filters[0] = catchall_filter;
+       *
+       * However memset already sets the filter to 0
+       * therefore we only have to set the filter count to 1
+       */
+
+      conn->filter_count = 1;
+#endif
+
+      /* Initialize the shared state and enqueue the connection into the
+       * active list
+       */
+
+      can_conn_init(conn);
+    }
+
+  NET_BUFPOOL_UNLOCK(g_can_raw_connections);
+  return conn;
+}
+
+/****************************************************************************
+ * Name: can_raw_free()
+ *
+ * Description:
+ *   Free a NetLink connection structure that is no longer in use. This
+ *   should be done by the implementation of close().
+ *
+ ****************************************************************************/
+
+static void can_raw_free(FAR struct can_conn_s *conn)
+{
+  /* The free list is protected by a mutex. */
+
+  DEBUGASSERT(conn->crefs == 0);
+
+  NET_BUFPOOL_LOCK(g_can_raw_connections);
+
+  can_conn_uninit(conn);
+
+  /* Free the connection. */
+
+  NET_BUFPOOL_FREE(g_can_raw_connections, conn);
+
+  NET_BUFPOOL_UNLOCK(g_can_raw_connections);
+}
 
 /****************************************************************************
  * Name: can_recvfrom_initialize
@@ -1792,7 +1889,7 @@ static int can_raw_setup(FAR struct socket *psock)
        * new socket instance.
        */
 
-      FAR struct can_conn_s *conn = can_alloc();
+      FAR struct can_conn_s *conn = can_raw_alloc();
 
       if (conn == NULL)
         {
@@ -1800,28 +1897,6 @@ static int can_raw_setup(FAR struct socket *psock)
 
           return -ENOMEM;
         }
-
-      /* Set the reference count on the connection structure.  This
-       * reference count will be incremented only if the socket is
-       * dup'ed
-       */
-
-      conn->crefs = 1;
-
-      /* If Can Socket Stack receive can frame and pending on the readahead,
-       * but the application layer did not read the frame. This will cause
-       * a memory leak, and it is necessary to limit the readahead.
-       */
-
-#if CONFIG_NET_RECV_BUFSIZE > 0
-      conn->rcvbufs = CONFIG_NET_RECV_BUFSIZE;
-#endif
-
-#if CONFIG_NET_SEND_BUFSIZE > 0
-      conn->sndbufs = CONFIG_NET_SEND_BUFSIZE;
-      nxsem_init(&conn->sndsem, 0, 0);
-#endif
-      nxrmutex_init(&conn->sconn.s_lock);
 
 #ifdef CONFIG_NET_CANPROTO_OPTIONS
 
@@ -2166,7 +2241,7 @@ static int can_raw_close(FAR struct socket *psock)
       /* Free the connection structure */
 
       conn->crefs = 0;
-      can_free(psock->s_conn);
+      can_raw_free(psock->s_conn);
 
       if (ret < 0)
         {
