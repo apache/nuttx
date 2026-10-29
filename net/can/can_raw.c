@@ -96,43 +96,55 @@ struct can_recvfrom_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  can_setup(FAR struct socket *psock);
-static sockcaps_t can_sockcaps(FAR struct socket *psock);
-static void can_addref(FAR struct socket *psock);
-static int  can_bind(FAR struct socket *psock,
-                     FAR const struct sockaddr *addr, socklen_t addrlen);
-static int  can_getsockname(FAR struct socket *psock,
-                            FAR struct sockaddr *addr,
-                            FAR socklen_t *addrlen);
-static int can_poll_local(FAR struct socket *psock, FAR struct pollfd_s *fds,
-                          bool setup);
-static int can_close(FAR struct socket *psock);
+static int can_raw_setup(FAR struct socket *psock);
+static sockcaps_t can_raw_sockcaps(FAR struct socket *psock);
+static void can_raw_addref(FAR struct socket *psock);
+static int can_raw_bind(FAR struct socket *psock,
+                        FAR const struct sockaddr *addr, socklen_t addrlen);
+static int can_raw_getsockname(FAR struct socket *psock,
+                               FAR struct sockaddr *addr,
+                               FAR socklen_t *addrlen);
+static int can_raw_poll(FAR struct socket *psock,
+                        FAR struct pollfd_s *fds, bool setup);
+static ssize_t can_raw_sendmsg(FAR struct socket *psock,
+                               FAR const struct msghdr *msg, int flags);
+static ssize_t can_raw_recvmsg(FAR struct socket *psock,
+                               FAR struct msghdr *msg, int flags);
+static int can_raw_close(FAR struct socket *psock);
+#if defined(CONFIG_NET_SOCKOPTS) && defined(CONFIG_NET_CANPROTO_OPTIONS)
+static int can_raw_getsockopt(FAR struct socket *psock, int level,
+                              int option, FAR void *value,
+                              FAR socklen_t *value_len);
+static int can_raw_setsockopt(FAR struct socket *psock, int level,
+                              int option, FAR const void *value,
+                              socklen_t value_len);
+#endif
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-const struct sock_intf_s g_can_sockif =
+const struct sock_intf_s g_can_raw_sockif =
 {
-  can_setup,        /* si_setup */
-  can_sockcaps,     /* si_sockcaps */
-  can_addref,       /* si_addref */
-  can_bind,         /* si_bind */
-  can_getsockname,  /* si_getsockname */
-  NULL,             /* si_getpeername */
-  NULL,             /* si_listen */
-  NULL,             /* si_connect */
-  NULL,             /* si_accept */
-  can_poll_local,   /* si_poll */
-  can_sendmsg,      /* si_sendmsg */
-  can_recvmsg,      /* si_recvmsg */
-  can_close,        /* si_close */
-  NULL,             /* si_ioctl */
-  NULL,             /* si_socketpair */
-  NULL              /* si_shutdown */
+  can_raw_setup,        /* si_setup */
+  can_raw_sockcaps,     /* si_sockcaps */
+  can_raw_addref,       /* si_addref */
+  can_raw_bind,         /* si_bind */
+  can_raw_getsockname,  /* si_getsockname */
+  NULL,                 /* si_getpeername */
+  NULL,                 /* si_listen */
+  NULL,                 /* si_connect */
+  NULL,                 /* si_accept */
+  can_raw_poll,         /* si_poll */
+  can_raw_sendmsg,      /* si_sendmsg */
+  can_raw_recvmsg,      /* si_recvmsg */
+  can_raw_close,        /* si_close */
+  NULL,                 /* si_ioctl */
+  NULL,                 /* si_socketpair */
+  NULL                  /* si_shutdown */
 #if defined(CONFIG_NET_SOCKOPTS) && defined(CONFIG_NET_CANPROTO_OPTIONS)
-  , can_getsockopt  /* si_getsockopt */
-  , can_setsockopt  /* si_setsockopt */
+  , can_raw_getsockopt  /* si_getsockopt */
+  , can_raw_setsockopt  /* si_setsockopt */
 #endif
 };
 
@@ -467,7 +479,7 @@ static ssize_t can_recvfrom_result(int result,
 }
 
 /****************************************************************************
- * Name: can_recvmsg
+ * Name: can_raw_recvmsg
  *
  * Description:
  *   recvmsg() receives messages from a socket, and may be used to receive
@@ -485,8 +497,8 @@ static ssize_t can_recvfrom_result(int result,
  *
  ****************************************************************************/
 
-ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
-                    int flags)
+static ssize_t can_raw_recvmsg(FAR struct socket *psock,
+                               FAR struct msghdr *msg, int flags)
 {
   FAR struct can_conn_s *conn;
   FAR struct net_driver_s *dev = NULL;
@@ -672,10 +684,10 @@ end_wait:
 }
 
 /****************************************************************************
- * Name: can_sendmsg
+ * Name: can_raw_sendmsg
  *
  * Description:
- *   The can_sendmsg() call may be used only when the packet socket is
+ *   The can_raw_sendmsg() call may be used only when the packet socket is
  *   in a connected state (so that the intended recipient is known).
  *
  * Input Parameters:
@@ -690,8 +702,8 @@ end_wait:
  *
  ****************************************************************************/
 
-ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
-                    int flags)
+static ssize_t can_raw_sendmsg(FAR struct socket *psock,
+                               FAR const struct msghdr *msg, int flags)
 {
   FAR struct net_driver_s *dev;
   FAR struct can_conn_s *conn;
@@ -841,10 +853,10 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
 }
 
 /****************************************************************************
- * Name: psock_can_cansend
+ * Name: can_raw_cansend
  *
  * Description:
- *   psock_can_cansend() returns a value indicating if a write to the socket
+ *   can_raw_cansend() returns a value indicating if a write to the socket
  *   would block.  No space in the buffer is actually reserved, so it is
  *   possible that the write may still block if the buffer is filled by
  *   another means.
@@ -862,7 +874,7 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
  *
  ****************************************************************************/
 
-int psock_can_cansend(FAR struct socket *psock)
+static int can_raw_cansend(FAR struct socket *psock)
 {
   /* Verify that we received a valid socket */
 
@@ -982,10 +994,10 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
- * Name: can_sendmsg
+ * Name: can_raw_sendmsg
  *
  * Description:
- *   The can_sendmsg() call may be used only when the packet socket is
+ *   The can_raw_sendmsg() call may be used only when the packet socket is
  *   in a connected state (so that the intended recipient is known).
  *
  * Input Parameters:
@@ -1000,8 +1012,8 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
-                    int flags)
+static ssize_t can_raw_sendmsg(FAR struct socket *psock,
+                               FAR const struct msghdr *msg, int flags)
 {
   FAR struct net_driver_s *dev;
   FAR struct can_conn_s *conn;
@@ -1223,10 +1235,10 @@ errout_with_lock:
 }
 
 /****************************************************************************
- * Name: psock_can_cansend
+ * Name: can_raw_cansend
  *
  * Description:
- *   psock_can_cansend() returns a value indicating if a write to the socket
+ *   can_raw_cansend() returns a value indicating if a write to the socket
  *   would block.  No space in the buffer is actually reserved, so it is
  *   possible that the write may still block if the buffer is filled by
  *   another means.
@@ -1244,7 +1256,7 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-int psock_can_cansend(FAR struct socket *psock)
+static int can_raw_cansend(FAR struct socket *psock)
 {
 #if CONFIG_NET_SEND_BUFSIZE > 0
   FAR struct can_conn_s *conn;
@@ -1280,12 +1292,12 @@ int psock_can_cansend(FAR struct socket *psock)
 
 #endif
 
-#ifdef CONFIG_NET_CANPROTO_OPTIONS
+#if defined(CONFIG_NET_SOCKOPTS) && defined(CONFIG_NET_CANPROTO_OPTIONS)
 /****************************************************************************
- * Name: can_getsockopt
+ * Name: can_raw_getsockopt
  *
  * Description:
- *   can_getsockopt() retrieves the value for the option specified by the
+ *   can_raw_getsockopt() retrieves the value for the option specified by the
  *   'option' argument for the socket specified by the 'psock' argument.  If
  *   the size of the option value is greater than 'value_len', the value
  *   stored in the object pointed to by the 'value' argument will be silently
@@ -1310,8 +1322,9 @@ int psock_can_cansend(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-int can_getsockopt(FAR struct socket *psock, int level, int option,
-                   FAR void *value, FAR socklen_t *value_len)
+static int can_raw_getsockopt(FAR struct socket *psock, int level,
+                              int option, FAR void *value,
+                              FAR socklen_t *value_len)
 {
   FAR struct can_conn_s *conn;
   int ret = OK;
@@ -1458,10 +1471,10 @@ int can_getsockopt(FAR struct socket *psock, int level, int option,
 }
 
 /****************************************************************************
- * Name: can_setsockopt
+ * Name: can_raw_setsockopt
  *
  * Description:
- *   can_setsockopt() sets the CAN-protocol option specified by the
+ *   can_raw_setsockopt() sets the CAN-protocol option specified by the
  *   'option' argument to the value pointed to by the 'value' argument for
  *   the socket specified by the 'psock' argument.
  *
@@ -1482,8 +1495,9 @@ int can_getsockopt(FAR struct socket *psock, int level, int option,
  *
  ****************************************************************************/
 
-int can_setsockopt(FAR struct socket *psock, int level, int option,
-                   FAR const void *value, socklen_t value_len)
+static int can_raw_setsockopt(FAR struct socket *psock, int level,
+                              int option, FAR const void *value,
+                              socklen_t value_len)
 {
   FAR struct can_conn_s *conn;
   int ret = OK;
@@ -1669,7 +1683,7 @@ int can_setsockopt(FAR struct socket *psock, int level, int option,
 #endif
 
 /****************************************************************************
- * Name: can_poll_eventhandler
+ * Name: can_raw_poll_eventhandler
  *
  * Description:
  *   This function is called to perform the actual CAN receive operation
@@ -1688,8 +1702,8 @@ int can_setsockopt(FAR struct socket *psock, int level, int option,
  *
  ****************************************************************************/
 
-static uint32_t can_poll_eventhandler(FAR struct net_driver_s *dev,
-                                      FAR void *pvpriv, uint32_t flags)
+static uint32_t can_raw_poll_eventhandler(FAR struct net_driver_s *dev,
+                                          FAR void *pvpriv, uint32_t flags)
 {
   FAR struct can_poll_s *info = pvpriv;
 
@@ -1718,7 +1732,7 @@ static uint32_t can_poll_eventhandler(FAR struct net_driver_s *dev,
       /* A poll is a sign that we are free to send data. */
 
       else if ((flags & CAN_POLL) != 0 &&
-                 psock_can_cansend(info->psock) >= 0)
+                 can_raw_cansend(info->psock) >= 0)
         {
           eventset |= POLLOUT;
         }
@@ -1732,7 +1746,7 @@ static uint32_t can_poll_eventhandler(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
- * Name: can_setup
+ * Name: can_raw_setup
  *
  * Description:
  *   Called for socket() to verify that the provided socket type and
@@ -1749,7 +1763,7 @@ static uint32_t can_poll_eventhandler(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static int can_setup(FAR struct socket *psock)
+static int can_raw_setup(FAR struct socket *psock)
 {
   int domain = psock->s_domain;
   int type = psock->s_type;
@@ -1826,7 +1840,7 @@ static int can_setup(FAR struct socket *psock)
 }
 
 /****************************************************************************
- * Name: can_sockcaps
+ * Name: can_raw_sockcaps
  *
  * Description:
  *   Return the bit encoded capabilities of this socket.
@@ -1840,7 +1854,7 @@ static int can_setup(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-static sockcaps_t can_sockcaps(FAR struct socket *psock)
+static sockcaps_t can_raw_sockcaps(FAR struct socket *psock)
 {
   /* Permit vfcntl to set socket to non-blocking */
 
@@ -1848,7 +1862,7 @@ static sockcaps_t can_sockcaps(FAR struct socket *psock)
 }
 
 /****************************************************************************
- * Name: can_addref
+ * Name: can_raw_addref
  *
  * Description:
  *   Increment the reference count on the underlying connection structure.
@@ -1862,7 +1876,7 @@ static sockcaps_t can_sockcaps(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-static void can_addref(FAR struct socket *psock)
+static void can_raw_addref(FAR struct socket *psock)
 {
   FAR struct can_conn_s *conn;
 
@@ -1872,10 +1886,10 @@ static void can_addref(FAR struct socket *psock)
 }
 
 /****************************************************************************
- * Name: can_bind
+ * Name: can_raw_bind
  *
  * Description:
- *   can_bind() gives the socket 'conn' the local address 'addr'. 'addr'
+ *   can_raw_bind() gives the socket 'conn' the local address 'addr'. 'addr'
  *   is 'addrlen' bytes long. Traditionally, this is called "assigning a name
  *   to a socket." When a socket is created with socket, it exists in a name
  *   space (address family) but has no name assigned.
@@ -1901,8 +1915,8 @@ static void can_addref(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-static int can_bind(FAR struct socket *psock,
-                    FAR const struct sockaddr *addr, socklen_t addrlen)
+static int can_raw_bind(FAR struct socket *psock,
+                        FAR const struct sockaddr *addr, socklen_t addrlen)
 {
   FAR struct sockaddr_can *canaddr;
   FAR struct can_conn_s *conn;
@@ -1930,11 +1944,11 @@ static int can_bind(FAR struct socket *psock,
 }
 
 /****************************************************************************
- * Name: can_getsockname
+ * Name: can_raw_getsockname
  *
  * Description:
- *   The can_getsockname() function retrieves the locally-bound name of the
- *   specified CAN socket, stores this address in the sockaddr structure
+ *   The can_raw_getsockname() function retrieves the locally-bound name of
+ *   the specified CAN socket, stores this address in the sockaddr structure
  *   pointed to by the 'addr' argument, and stores the length of this
  *   address in the object pointed to by the 'addrlen' argument.
  *
@@ -1949,9 +1963,9 @@ static int can_bind(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-static int can_getsockname(FAR struct socket *psock,
-                           FAR struct sockaddr *addr,
-                           FAR socklen_t *addrlen)
+static int can_raw_getsockname(FAR struct socket *psock,
+                               FAR struct sockaddr *addr,
+                               FAR socklen_t *addrlen)
 {
   FAR struct sockaddr_can *canaddr;
   FAR struct can_conn_s *conn;
@@ -1999,7 +2013,7 @@ static int can_getsockname(FAR struct socket *psock,
 }
 
 /****************************************************************************
- * Name: can_poll_local
+ * Name: can_raw_poll
  *
  * Description:
  *   The standard poll() operation redirects operations on socket descriptors
@@ -2021,8 +2035,8 @@ static int can_getsockname(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-static int can_poll_local(FAR struct socket *psock, FAR struct pollfd_s *fds,
-                          bool setup)
+static int can_raw_poll(FAR struct socket *psock,
+                        FAR struct pollfd_s *fds, bool setup)
 {
   FAR struct can_conn_s *conn;
   FAR struct can_poll_s *info = NULL;
@@ -2079,7 +2093,7 @@ static int can_poll_local(FAR struct socket *psock, FAR struct pollfd_s *fds,
 
       cb->flags = NETDEV_DOWN;
       cb->priv  = info;
-      cb->event = can_poll_eventhandler;
+      cb->event = can_raw_poll_eventhandler;
 
       if ((fds->events & POLLOUT) != 0)
         {
@@ -2106,7 +2120,7 @@ static int can_poll_local(FAR struct socket *psock, FAR struct pollfd_s *fds,
           eventset |= POLLRDNORM;
         }
 
-      if (psock_can_cansend(psock) >= 0)
+      if (can_raw_cansend(psock) >= 0)
         {
           /* A CAN frame may be sent without blocking. */
 
@@ -2147,7 +2161,7 @@ errout_with_lock:
 }
 
 /****************************************************************************
- * Name: can_close
+ * Name: can_raw_close
  *
  * Description:
  *   Performs the close operation on a CAN socket instance
@@ -2162,7 +2176,7 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-static int can_close(FAR struct socket *psock)
+static int can_raw_close(FAR struct socket *psock)
 {
   FAR struct can_conn_s *conn = psock->s_conn;
   int ret = OK;
@@ -2196,7 +2210,7 @@ static int can_close(FAR struct socket *psock)
         {
           /* Return with error code, but free resources. */
 
-          nerr("ERROR: can_close failed: %d\n", ret);
+          nerr("ERROR: can_raw_close failed: %d\n", ret);
           return ret;
         }
     }
@@ -2214,7 +2228,7 @@ static int can_close(FAR struct socket *psock)
  * Public Functions
  ****************************************************************************/
 
-#ifdef CONFIG_NET_CAN_WRITE_BUFFERS
+#if defined(CONFIG_NET_CAN_WRITE_BUFFERS) && CONFIG_NET_SEND_BUFSIZE > 0
 /****************************************************************************
  * Name: can_sendbuffer_notify
  *
@@ -2229,7 +2243,6 @@ static int can_close(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-#if CONFIG_NET_SEND_BUFSIZE > 0
 void can_sendbuffer_notify(FAR struct can_conn_s *conn)
 {
   int val = 0;
@@ -2240,8 +2253,6 @@ void can_sendbuffer_notify(FAR struct can_conn_s *conn)
       nxsem_post(&conn->sndsem);
     }
 }
-
-#endif /* CONFIG_NET_SEND_BUFSIZE */
 
 #endif
 
