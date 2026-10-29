@@ -53,9 +53,12 @@ if(NOT DEFINED CHIP_SERIES)
   string(REPLACE "\"" "" CHIP_SERIES "${CONFIG_ESPRESSIF_CHIP_SERIES}")
 endif()
 
-# Bootloader base (MCUboot placement; simple boot app start on ESP32-P4)
+# Bootloader base (MCUboot placement; simple boot app start): where the ROM
+# loads the second stage from (tools/<chip>/Config.mk APP_OFFSET)
 if(CONFIG_ARCH_CHIP_ESP32P4)
   set(BL_OFFSET 0x2000)
+elseif(CONFIG_ARCH_CHIP_ESP32 OR CONFIG_ARCH_CHIP_ESP32S2)
+  set(BL_OFFSET 0x1000)
 else()
   set(BL_OFFSET 0x0000)
 endif()

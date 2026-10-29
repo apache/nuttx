@@ -30,7 +30,7 @@
 #
 # ##############################################################################
 
-find_program(ESPEFUSE espefuse espefuse.py)
+find_program(ESPEFUSE NAMES espefuse espefuse.py)
 if(NOT ESPEFUSE)
   message(FATAL_ERROR "espefuse.py not found (required for burn_enc_key)")
 endif()
