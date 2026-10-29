@@ -75,6 +75,10 @@ list(
   xtensa_usestack.c
   xtensa_tcbinfo.c)
 
+if(CONFIG_ARCH_HAVE_FORK OR CONFIG_ARCH_HAVE_VFORK)
+  list(APPEND SRCS xtensa_fork.c)
+endif()
+
 if(CONFIG_ENABLE_ALL_SIGNALS)
   list(APPEND SRCS xtensa_schedsigaction.c xtensa_sigdeliver.c)
 endif()
@@ -89,8 +93,16 @@ if(CONFIG_ARCH_FPU)
   list(APPEND SRCS xtensa_fpucmp.c)
 endif()
 
+if(CONFIG_ARCH_HAVE_DEBUG)
+  list(APPEND SRCS xtensa_debug.c)
+endif()
+
 if(CONFIG_SCHED_BACKTRACE)
   list(APPEND SRCS xtensa_backtrace.c)
+endif()
+
+if(CONFIG_SCHED_THREAD_LOCAL)
+  list(APPEND SRCS xtensa_tls.c)
 endif()
 
 if(CONFIG_SMP)
@@ -105,7 +117,11 @@ if(CONFIG_XTENSA_SEMIHOSTING_HOSTFS)
   list(APPEND SRCS xtensa_simcall.S xtensa_hostfs.c)
 endif()
 
-if(CONFIG_BUILD_PROTECTED)
+if(CONFIG_ARCH_KERNEL_STACK)
+  list(APPEND SRCS xtensa_addrenv_kstack.c)
+endif()
+
+if(NOT CONFIG_BUILD_FLAT)
   target_sources(arch_interface PRIVATE xtensa_signal_handler.S)
   list(APPEND SRCS xtensa_dispatch_syscall.S)
   list(APPEND SRCS xtensa_task_start.c xtensa_pthread_start.c)

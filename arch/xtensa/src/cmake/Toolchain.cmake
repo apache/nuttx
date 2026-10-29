@@ -31,7 +31,7 @@ if(CONFIG_XTENSA_TOOLCHAIN_XCC OR CONFIG_XTENSA_TOOLCHAIN_XCLANG)
 endif()
 
 if(CONFIG_XTENSA_TOOLCHAIN_ESP)
-  set(TOOLCHAIN_PREFIX xtensa-${CONFIG_ARCH_CHIP}-elf-)
+  set(TOOLCHAIN_PREFIX xtensa-${CONFIG_ARCH_CHIP}-elf)
 endif()
 
 # Default toolchain
@@ -84,6 +84,10 @@ set(NO_LTO "-fno-lto")
 add_compile_options(-mlongcalls)
 
 add_compile_options(-mtext-section-literals)
+
+if(CONFIG_ESP32_SPIRAM)
+  add_compile_options(-mfix-esp32-psram-cache-issue)
+endif()
 
 if(CONFIG_MM_KASAN_INSTRUMENT_ALL)
   add_compile_options(-fsanitize=kernel-address)
