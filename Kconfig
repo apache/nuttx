@@ -1233,7 +1233,6 @@ endif # DEBUG_WIRELESS
 config DEBUG_SCHED
 	bool "Scheduler Debug Features"
 	default n
-	depends on !SYSLOG_TIMESTAMP
 	---help---
 		Enable OS scheduler debug features.
 
@@ -1256,9 +1255,13 @@ config DEBUG_SCHED_WARN
 config DEBUG_SCHED_INFO
 	bool "Scheduler Informational Output"
 	default n
-	depends on DEBUG_INFO
+	depends on DEBUG_INFO && !SYSLOG_TIMESTAMP
 	---help---
 		Enable OS scheduler informational output to SYSLOG.
+
+		Not with SYSLOG_TIMESTAMP: the time stamp of a message comes
+		from the clock code of the scheduler, and its informational
+		output must not call syslog() again.
 
 endif # DEBUG_SCHED
 
