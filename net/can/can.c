@@ -75,6 +75,98 @@ NET_BUFPOOL_DECLARE(g_can_connections, sizeof(struct can_conn_s),
 static dq_queue_t g_active_can_connections;
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+const uint8_t g_can_dlc_to_len[16] =
+{
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  12,
+  16,
+  20,
+  24,
+  32,
+  48,
+  64,
+};
+const uint8_t g_len_to_can_dlc[65] =
+{
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  9,
+  9,
+  9,
+  10,
+  10,
+  10,
+  10,
+  11,
+  11,
+  11,
+  11,
+  12,
+  12,
+  12,
+  12,
+  13,
+  13,
+  13,
+  13,
+  13,
+  13,
+  13,
+  13,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+};
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -124,6 +216,140 @@ can_data_event(FAR struct net_driver_s *dev, FAR struct can_conn_s *conn,
   /* In any event, the new data has now been handled */
 
   dev->d_len = 0;
+  return ret;
+}
+
+/****************************************************************************
+ * Name: can_input_conn
+ *
+ * Description:
+ *   Handle incoming packet input
+ *
+ * Input Parameters:
+ *   dev  - The device driver structure containing the received packet
+ *   conn - A pointer to the CAN connection structure
+ *
+ * Returned Value:
+ *   OK     The packet has been processed  and can be deleted
+ *  -EAGAIN There is a matching connection, but could not dispatch the packet
+ *          yet.  Useful when a packet arrives before a recv call is in
+ *          place.
+ *
+ * Assumptions:
+ *   This function can be called from an interrupt.
+ *
+ ****************************************************************************/
+
+static int can_input_conn(FAR struct net_driver_s *dev,
+                          FAR struct can_conn_s *conn)
+{
+  uint32_t flags;
+  uint16_t buflen = dev->d_len;
+  int ret = OK;
+
+  /* Setup for the application callback */
+
+  dev->d_appdata = dev->d_buf;
+  dev->d_sndlen  = 0;
+  dev->d_len     = buflen;
+
+  /* Perform the application callback */
+
+  flags = can_callback(dev, conn, CAN_NEWDATA);
+
+  /* If the operation was successful, the CAN_NEWDATA flag is removed
+   * and thus the packet can be deleted (OK will be returned).
+   */
+
+  if ((flags & CAN_NEWDATA) != 0)
+    {
+      /* No.. the packet was not processed now.  Return -EAGAIN so
+       * that the driver may retry again later.  We still need to
+       * set d_len to zero so that the driver is aware that there
+       * is nothing to be sent.
+       */
+
+      nwarn("WARNING: Packet not processed\n");
+      ret = -EAGAIN;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: can_in
+ *
+ * Description:
+ *   Handle incoming packet input
+ *
+ * Input Parameters:
+ *   dev - The device driver structure containing the received packet
+ *
+ * Returned Value:
+ *   OK     The packet has been processed  and can be deleted
+ *  -EAGAIN There is a matching connection, but could not dispatch the packet
+ *          yet.  Useful when a packet arrives before a recv call is in
+ *          place.
+ *
+ * Assumptions:
+ *   This function can be called from an interrupt.
+ *
+ ****************************************************************************/
+
+static int can_in(FAR struct net_driver_s *dev)
+{
+  FAR struct can_conn_s *conn = can_active(dev, NULL);
+  FAR struct can_conn_s *nextconn;
+  int ret;
+
+  if (conn == NULL)
+    {
+      /* There is no listener on the dev.  Just drop the packet. */
+
+      return OK;
+    }
+
+  /* Storing reception timestamp provided by realtime
+   * if timestamp no provided by hardware.
+   */
+
+#ifdef CONFIG_NET_TIMESTAMP
+  if ((dev->d_features & NETDEV_RX_STAMP) == 0)
+    {
+      clock_gettime(CLOCK_REALTIME, &dev->d_iob->io_time);
+    }
+#endif /* CONFIG_NET_TIMESTAMP */
+
+  can_conn_list_lock();
+
+  /* Do we have second connection that can hold this packet? */
+
+  while ((nextconn = can_active(dev, conn)) != NULL)
+    {
+      /* Yes... There are multiple listeners on the same dev.
+       * We need to clone the packet and deliver it to each listener.
+       */
+
+      FAR struct iob_s *iob = can_iob_clone(dev);
+
+      if (iob == NULL)
+        {
+          nerr("ERROR: IOB clone failed.\n");
+          break; /* We can still process one time without clone. */
+        }
+
+      can_input_conn(dev, conn);
+
+      netdev_iob_replace(dev, iob);
+      conn = nextconn;
+    }
+
+  /* We can deliver the packet directly to the last listener. */
+
+  ret = can_input_conn(dev, conn);
+
+  can_conn_list_unlock();
+
   return ret;
 }
 
@@ -251,6 +477,63 @@ int can_datahandler(FAR struct net_driver_s *dev,
 errout:
   netdev_iob_release(dev);
   conn_unlock(&conn->sconn);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: can_input
+ *
+ * Description:
+ *   Handle incoming packet input
+ *
+ * Input Parameters:
+ *   dev - The device driver structure containing the received packet
+ *
+ * Returned Value:
+ *   OK     The packet has been processed  and can be deleted
+ *  -EAGAIN There is a matching connection, but could not dispatch the packet
+ *          yet.  Useful when a packet arrives before a recv call is in
+ *          place.
+ *
+ * Assumptions:
+ *   This function can be called from an interrupt.
+ *
+ ****************************************************************************/
+
+int can_input(FAR struct net_driver_s *dev)
+{
+  FAR uint8_t *buf;
+  int ret;
+
+#ifdef CONFIG_NET_STATISTICS
+  g_netstats.can.recv++;
+#endif
+  netdev_lock(dev);
+
+  if (dev->d_iob != NULL)
+    {
+      buf = dev->d_buf;
+
+      /* Set the device buffer to l2 */
+
+      dev->d_buf = NETLLBUF;
+      ret = can_in(dev);
+
+      dev->d_buf = buf;
+
+      netdev_unlock(dev);
+      return ret;
+    }
+
+  ret = netdev_input(dev, can_in, false);
+  if (ret < 0)
+    {
+#ifdef CONFIG_NET_STATISTICS
+      g_netstats.can.drop++;
+#endif
+    }
+
+  netdev_unlock(dev);
   return ret;
 }
 

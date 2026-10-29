@@ -43,7 +43,7 @@ if(CONFIG_NET_CAN)
     list(APPEND SRCS can_bufpool.c)
   endif()
 
-  list(APPEND SRCS can.c can_input.c can_poll.c)
+  list(APPEND SRCS can.c can_poll.c)
 
   target_sources(net PRIVATE ${SRCS})
 endif()
