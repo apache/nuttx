@@ -805,13 +805,22 @@ static inline int usbhost_readcapacity(FAR struct usbhost_state_s *priv)
           priv->nblocks   = usbhost_getbe32(resp->lba) + 1;
           priv->blocksize = usbhost_getbe32(resp->blklen);
 
+          if (priv->blocksize == 0)
+            {
+              uerr("ERROR: Invalid zero block size\n");
+              nbytes = -EINVAL;
+            }
+
           /* Receive the CSW */
 
-          nbytes = DRVR_TRANSFER(hport->drvr, priv->bulkin,
-                                 priv->tbuffer, USBMSC_CSW_SIZEOF);
           if (nbytes >= 0)
             {
-              usbhost_dumpcsw((FAR struct usbmsc_csw_s *)priv->tbuffer);
+              nbytes = DRVR_TRANSFER(hport->drvr, priv->bulkin,
+                                     priv->tbuffer, USBMSC_CSW_SIZEOF);
+              if (nbytes >= 0)
+                {
+                  usbhost_dumpcsw((FAR struct usbmsc_csw_s *)priv->tbuffer);
+                }
             }
         }
     }
