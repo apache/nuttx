@@ -65,8 +65,6 @@
 #define LOG_NOWAIT      0x10    /* don't wait for console forks: DEPRECATED */
 #define LOG_PERROR      0x20    /* log to stderr as well */
 
-/* Note: openlog() is not currently supported */
-
 /* The facility argument is used to specify what type of program is logging
  * the message. This lets the configuration file specify that messages from
  * different facilities will be handled differently.
@@ -177,10 +175,13 @@ extern "C"
  *
  *   It is not necessary to call openlog() prior to calling syslog().
  *
+ *   NuttX puts the ident (up to 31 characters) and, with LOG_PID, the
+ *   process ID before each message, and writes the messages to stderr too
+ *   with LOG_PERROR.  It does not use the other options or the facility.
+ *
  ****************************************************************************/
 
-/* Not supported */
-#define openlog(i, o, f) {(void)(i); (void)(o); (void)(f);}
+void openlog(FAR const char *ident, int option, int facility);
 
 /****************************************************************************
  * Name: closelog
@@ -190,10 +191,11 @@ extern "C"
  *   The closelog() function will close any open file descriptors allocated
  *   by previous calls to openlog() or syslog().
  *
+ *   NuttX has no such descriptor.  The settings of openlog() stay.
+ *
  ****************************************************************************/
 
-/* Not supported */
-#define closelog()
+void closelog(void);
 
 /****************************************************************************
  * Name: syslog and vsyslog
