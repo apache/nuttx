@@ -33,6 +33,17 @@
 #include <nuttx/syslog/syslog.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_SYSLOG_DROPMASK
+#  define syslograwstream_write(s, b, n) \
+     syslog_write_priority((s)->priority, b, n)
+#else
+#  define syslograwstream_write(s, b, n) syslog_write(b, n)
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -71,7 +82,8 @@ static int syslograwstream_flush(FAR struct lib_outstream_s *self)
 
       do
         {
-          ret = syslog_write(stream->buffer + written, nbytes - written);
+          ret = syslograwstream_write(stream, stream->buffer + written,
+                                      nbytes - written);
           if (ret < 0)
             {
               if (ret != -EINTR)
@@ -215,7 +227,7 @@ static void syslograwstream_putc(FAR struct lib_outstream_s *self, int ch)
            * failure, syslog_write returns a negated errno value.
            */
 
-          ret = syslog_write(&c, 1);
+          ret = syslograwstream_write(stream, &c, 1);
           if (ret >= 0)
             {
               self->nput++;
@@ -263,7 +275,7 @@ static ssize_t syslograwstream_puts(FAR struct lib_outstream_s *self,
        * failure, syslog_write returns a negated errno value.
        */
 
-      ret = syslog_write(buff, len);
+      ret = syslograwstream_write(stream, buff, len);
       if (ret >= 0)
         {
           self->nput += ret;
@@ -312,6 +324,9 @@ void lib_syslograwstream_open(FAR struct lib_syslograwstream_s *stream)
   stream->common.puts  = syslograwstream_puts;
   stream->common.nput  = 0;
   stream->last_ch      = '\0';
+#ifdef CONFIG_SYSLOG_DROPMASK
+  stream->priority     = SYSLOG_PRIORITY_NONE;
+#endif
 
 #ifdef CONFIG_SYSLOG_BUFFER
   stream->common.flush = syslograwstream_flush;

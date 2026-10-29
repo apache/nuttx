@@ -280,6 +280,9 @@ struct lib_syslograwstream_s
   off_t offset;
 #endif
   int last_ch;
+#ifdef CONFIG_SYSLOG_DROPMASK
+  int priority;  /* Of the message, or SYSLOG_PRIORITY_NONE */
+#endif
 };
 
 /* LZF compressed stream pipeline */

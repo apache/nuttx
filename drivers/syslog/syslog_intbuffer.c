@@ -109,7 +109,7 @@ static void syslog_flush_internal(bool force, size_t buflen)
       if (size > 0)
         {
           size = (size >= buflen) ? buflen : size;
-          syslog_write_foreach(buffer, size, force);
+          syslog_write_foreach(SYSLOG_PRIORITY_NONE, buffer, size, force);
           circbuf_readcommit(&g_syslog_intbuffer.circ, size);
           buflen -= size;
         }
@@ -167,7 +167,7 @@ void syslog_add_intbuffer(FAR const char *buffer, size_t buflen)
     {
       syslog_flush_internal(true, sizeof(g_syslog_intbuffer.buffer));
       space = buflen - sizeof(g_syslog_intbuffer.buffer);
-      syslog_write_foreach(buffer, space, true);
+      syslog_write_foreach(SYSLOG_PRIORITY_NONE, buffer, space, true);
       circbuf_write(&g_syslog_intbuffer.circ,
                     buffer + space, buflen - space);
     }

@@ -179,6 +179,12 @@ static syslog_channel_t g_default_channel =
 #  ifdef CONFIG_SYSLOG_IOCTL
   , "default"
 #  endif
+#  ifdef CONFIG_SYSLOG_CONSOLE_LEVEL
+#    if defined(CONFIG_SYSLOG_IOCTL) || defined(CONFIG_SYSLOG_CRLF)
+  , 0
+#    endif
+  , SYSLOG_CONSOLE_DROPMASK
+#  endif
 };
 #endif
 

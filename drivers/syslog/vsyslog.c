@@ -104,6 +104,12 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 
   lib_syslograwstream_open(&stream);
 
+#ifdef CONFIG_SYSLOG_DROPMASK
+  /* The channels select the messages by their priority */
+
+  stream.priority = LOG_PRI(priority);
+#endif
+
 #ifdef CONFIG_SYSLOG_TIMESTAMP
   ts.tv_sec = 0;
   ts.tv_nsec = 0;

@@ -87,6 +87,12 @@ FAR syslog_channel_t *syslog_console_channel(void)
       return NULL;
     }
 
+#ifdef CONFIG_SYSLOG_CONSOLE_LEVEL
+  /* The console writes only the urgent messages */
+
+  console_channel->sc_dropmask = SYSLOG_CONSOLE_DROPMASK;
+#endif
+
   /* Use the character driver as the SYSLOG channel */
 
   if (syslog_channel_register(console_channel) != OK)

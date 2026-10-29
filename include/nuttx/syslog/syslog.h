@@ -98,6 +98,12 @@
 #define SYSLOG_CHANNEL_DISABLE        0x01
 #define SYSLOG_CHANNEL_DISABLE_CRLF   0x02
 
+/* The priority of output that does not come from syslog() (a raw write):
+ * every channel takes it.
+ */
+
+#define SYSLOG_PRIORITY_NONE          (-1)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -166,6 +172,15 @@ struct syslog_channel_s
 
 #if defined(CONFIG_SYSLOG_IOCTL) || defined(CONFIG_SYSLOG_CRLF)
   uint8_t sc_state;
+#endif
+
+#ifdef CONFIG_SYSLOG_DROPMASK
+  /* The message priorities that the channel does not write: an OR of
+   * LOG_MASK() values.  Zero (the value of a channel that does not set it)
+   * means that the channel writes the messages of all priorities.
+   */
+
+  uint8_t sc_dropmask;
 #endif
 };
 
@@ -335,6 +350,31 @@ syslog_stream_channel(FAR struct lib_outstream_s *stream);
  ****************************************************************************/
 
 ssize_t syslog_write(FAR const char *buffer, size_t buflen);
+
+#ifdef CONFIG_SYSLOG_DROPMASK
+/****************************************************************************
+ * Name: syslog_write_priority
+ *
+ * Description:
+ *   This is syslog_write() for the text of a message with a priority.  A
+ *   channel does not write the text if its sc_dropmask has the bit of the
+ *   priority.
+ *
+ * Input Parameters:
+ *   priority - The priority of the message (LOG_EMERG to LOG_DEBUG), or
+ *              SYSLOG_PRIORITY_NONE: all channels write the text.
+ *   buffer   - The buffer containing the data to be output
+ *   buflen   - The number of bytes in the buffer
+ *
+ * Returned Value:
+ *   On success, the number of characters written is returned.  A negated
+ *   errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+ssize_t syslog_write_priority(int priority, FAR const char *buffer,
+                              size_t buflen);
+#endif
 
 /****************************************************************************
  * Name: syslog_flush
