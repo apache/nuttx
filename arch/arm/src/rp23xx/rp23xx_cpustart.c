@@ -112,13 +112,14 @@ static int fifo_comm(uint32_t msg)
 {
   uint32_t rcv;
 
-  while (!(getreg32(RP23XX_SIO_FIFO_ST) & RP23XX_SIO_FIFO_ST_RDY))
-    ;
+  while (!(getreg32(RP23XX_SIO_FIFO_ST) & RP23XX_SIO_FIFO_ST_RDY));
   putreg32(msg, RP23XX_SIO_FIFO_WR);
   __asm__ volatile ("sev");
 
   while (!(getreg32(RP23XX_SIO_FIFO_ST) & RP23XX_SIO_FIFO_ST_VLD))
-    __asm__ volatile ("wfe");
+    {
+      __asm__ volatile ("wfe");
+    }
 
   rcv = getreg32(RP23XX_SIO_FIFO_RD);
 
@@ -223,8 +224,7 @@ int up_cpu_start(int cpu)
   /* Reset Core 1 */
 
   setbits_reg32(RP23XX_PSM_PROC1, RP23XX_PSM_FRCE_OFF);
-  while (!(getreg32(RP23XX_PSM_FRCE_OFF) & RP23XX_PSM_PROC1))
-    ;
+  while (!(getreg32(RP23XX_PSM_FRCE_OFF) & RP23XX_PSM_PROC1));
   clrbits_reg32(RP23XX_PSM_PROC1, RP23XX_PSM_FRCE_OFF);
 
   /* Send initial VTOR, MSP, PC for Core 1 boot */
