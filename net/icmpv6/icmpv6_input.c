@@ -405,7 +405,7 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
 
         /* Get the length of the option data */
 
-        pktlen = (uint16_t)ipv6->len[0] << 8 | ipv6->len[1];
+        pktlen = ICMPv6SIZE;
         if (pktlen <= ICMPv6_RADV_MINLEN)
           {
             /* Too small to contain any options */
