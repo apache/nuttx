@@ -343,7 +343,7 @@ devif_poll_can_connections(FAR struct net_driver_s *dev,
    */
 
   can_conn_list_lock();
-  while (!bstop && (can_conn = can_nextconn(can_conn)))
+  while (!bstop && (can_conn = can_conn_next(can_conn)))
     {
       /* Skip connections that are bound to other polling devices */
 

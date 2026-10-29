@@ -173,7 +173,7 @@ FAR struct can_conn_s *can_alloc(void);
 void can_free(FAR struct can_conn_s *conn);
 
 /****************************************************************************
- * Name: can_nextconn()
+ * Name: can_conn_next
  *
  * Description:
  *   Traverse the list of allocated NetLink connections
@@ -183,7 +183,7 @@ void can_free(FAR struct can_conn_s *conn);
  *
  ****************************************************************************/
 
-FAR struct can_conn_s *can_nextconn(FAR struct can_conn_s *conn);
+FAR struct can_conn_s *can_conn_next(FAR struct can_conn_s *conn);
 
 /****************************************************************************
  * Name: can_conn_list_lock
