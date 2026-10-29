@@ -144,7 +144,8 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
 
   if (desc.nofollow && INODE_IS_SOFTLINK(inode))
     {
-      return -ELOOP;
+      ret = -ELOOP;
+      goto errout_with_inode;
     }
 #endif
 
