@@ -32,6 +32,11 @@
 #                   reliable code generation.
 #
 
+# cctc has no -isystem, which tools/incdir gives every compiler other
+# than the ZDS ones, so pass the system include directories with -I.
+
+INCSYSDIR_PREFIX = -I
+
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   ARCHOPTIMIZATION += $(CONFIG_DEBUG_OPTLEVEL)
 else ifeq ($(CONFIG_DEBUG_FULLOPT),y)
