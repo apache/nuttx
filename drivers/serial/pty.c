@@ -839,11 +839,13 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               break;
             }
 
-          /* And update with flags from this layer */
+          /* The settings of the terminal are the ones of the slave, also
+           * through the master, as on other systems.
+           */
 
-          termiosp->c_iflag = dev->pd_iflag;
-          termiosp->c_oflag = dev->pd_oflag;
-          termiosp->c_lflag = dev->pd_lflag;
+          termiosp->c_iflag = devpair->pp_slave.pd_iflag;
+          termiosp->c_oflag = devpair->pp_slave.pd_oflag;
+          termiosp->c_lflag = devpair->pp_slave.pd_lflag;
 
           /* The special characters that the pair acts on (one set for
            * both ends).  The others are disabled.
@@ -851,10 +853,10 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           memset(termiosp->c_cc, _POSIX_VDISABLE, sizeof(termiosp->c_cc));
 #ifdef CONFIG_TTY_SIGINT
-          termiosp->c_cc[VINTR] = dev->pd_devpair->pp_vintr;
+          termiosp->c_cc[VINTR] = devpair->pp_vintr;
 #endif
 #ifdef CONFIG_TTY_SIGTSTP
-          termiosp->c_cc[VSUSP] = dev->pd_devpair->pp_vsusp;
+          termiosp->c_cc[VSUSP] = devpair->pp_vsusp;
 #endif
           termiosp->c_cc[VMIN] = 1;
           ret = OK;
@@ -871,16 +873,18 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               break;
             }
 
-          /* Update the flags we keep at this layer */
+          /* Set the terminal, the slave, also through the master.  The
+           * master keeps its own flags: it never echoes what it reads.
+           */
 
-          dev->pd_iflag = termiosp->c_iflag;
-          dev->pd_oflag = termiosp->c_oflag;
-          dev->pd_lflag = termiosp->c_lflag;
+          devpair->pp_slave.pd_iflag = termiosp->c_iflag;
+          devpair->pp_slave.pd_oflag = termiosp->c_oflag;
+          devpair->pp_slave.pd_lflag = termiosp->c_lflag;
 #ifdef CONFIG_TTY_SIGINT
-          dev->pd_devpair->pp_vintr = termiosp->c_cc[VINTR];
+          devpair->pp_vintr = termiosp->c_cc[VINTR];
 #endif
 #ifdef CONFIG_TTY_SIGTSTP
-          dev->pd_devpair->pp_vsusp = termiosp->c_cc[VSUSP];
+          devpair->pp_vsusp = termiosp->c_cc[VSUSP];
 #endif
           ret = OK;
         }
