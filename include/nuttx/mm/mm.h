@@ -133,12 +133,27 @@
 #  define USR_HEAP g_mmheap
 #endif
 
+/* MM_INTERNAL_HEAP() selects the heaps whose failed allocations mm_malloc()
+ * reports.  The heap of a process in the kernel build is not one of them:
+ * it starts small, and a failed allocation makes it grow with sbrk() (see
+ * umm_memalign.c).  The user allocator reports a failure of sbrk() (the
+ * warning and CONFIG_MM_PANIC_ON_FAILURE).
+ */
+
 #ifdef CONFIG_MM_KERNEL_HEAP
 #  define KRN_HEAP               g_kmmheap
-#  define MM_INTERNAL_HEAP(heap) ((heap) == USR_HEAP || (heap) == g_kmmheap)
+#  if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+#    define MM_INTERNAL_HEAP(heap) ((heap) == g_kmmheap)
+#  else
+#    define MM_INTERNAL_HEAP(heap) ((heap) == USR_HEAP || (heap) == g_kmmheap)
+#  endif
 #else
 #  define KRN_HEAP               USR_HEAP
-#  define MM_INTERNAL_HEAP(heap) ((heap) == USR_HEAP)
+#  if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+#    define MM_INTERNAL_HEAP(heap) 0
+#  else
+#    define MM_INTERNAL_HEAP(heap) ((heap) == USR_HEAP)
+#  endif
 #endif
 
 #if CONFIG_MM_BACKTRACE >= 0
