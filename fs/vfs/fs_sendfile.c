@@ -264,7 +264,12 @@ ssize_t file_sendfile(FAR struct file *outfile, FAR struct file *infile,
   FAR struct socket *psock;
 
   psock = file_socket(outfile);
-  if (psock != NULL)
+
+  /* psock_sendfile() seeks the input to send its data again: an input that
+   * cannot seek (a pipe, a FIFO or a socket) uses the slow path.
+   */
+
+  if (psock != NULL && !INODE_IS_NOSEEK(infile->f_inode))
     {
       /* Then let psock_sendfile do the work. */
 

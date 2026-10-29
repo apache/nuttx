@@ -64,6 +64,17 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence)
   DEBUGASSERT(filep);
   inode =  filep->f_inode;
 
+  /* A pipe, a FIFO or a socket has no file position (POSIX: ESPIPE).
+   * Without this, the common file position below took any offset, and a
+   * program that skips data with lseek() and reads only when it fails
+   * lost the data.
+   */
+
+  if (inode != NULL && INODE_IS_NOSEEK(inode))
+    {
+      return -ESPIPE;
+    }
+
   /* Invoke the file seek method if available */
 
   if (inode && inode->u.i_ops && inode->u.i_ops->seek)
