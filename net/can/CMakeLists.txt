@@ -25,10 +25,6 @@ if(CONFIG_NET_CAN)
   # Socket layer
   list(APPEND SRCS can_raw.c)
 
-  if(CONFIG_NET_CANPROTO_OPTIONS)
-    list(APPEND SRCS can_setsockopt.c)
-  endif()
-
   if(CONFIG_NET_CAN_NBUFFERS GREATER 0)
     list(APPEND SRCS can_bufpool.c)
   endif()
