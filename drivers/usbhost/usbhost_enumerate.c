@@ -147,17 +147,23 @@ static inline int usbhost_configdesc(const uint8_t *configdesc, int cfglen,
                                      struct usbhost_id_s *id)
 {
   FAR struct usb_cfgdesc_s *cfgdesc;
+  FAR struct usb_desc_s *desc;
   FAR struct usb_ifdesc_s *ifdesc;
   int remaining;
+  int desclen;
 
-  DEBUGASSERT(configdesc != NULL && cfglen >= USB_SIZEOF_CFGDESC);
+  if (configdesc == NULL || cfglen < USB_SIZEOF_CFGDESC)
+    {
+      return -EINVAL;
+    }
 
   /* Verify that we were passed a configuration descriptor */
 
   cfgdesc = (struct usb_cfgdesc_s *)configdesc;
   uinfo("cfg len:%d total len:%d\n", cfgdesc->len, cfglen);
 
-  if (cfgdesc->type != USB_DESC_TYPE_CONFIG)
+  if (cfgdesc->type != USB_DESC_TYPE_CONFIG ||
+      cfgdesc->len < USB_SIZEOF_CFGDESC || cfgdesc->len > cfglen)
     {
       return -EINVAL;
     }
@@ -174,17 +180,33 @@ static inline int usbhost_configdesc(const uint8_t *configdesc, int cfglen,
     {
       /* What is the next descriptor? Is it an interface descriptor? */
 
-      ifdesc = (struct usb_ifdesc_s *)configdesc;
-      if (ifdesc->type == USB_DESC_TYPE_INTERFACE &&
-          ifdesc->ifno >= start_ifnum)
+      desc = (FAR struct usb_desc_s *)configdesc;
+      desclen = desc->len;
+
+      if (desclen < sizeof(struct usb_desc_s) || desclen > remaining)
         {
+          return -EINVAL;
+        }
+
+      if (desc->type == USB_DESC_TYPE_INTERFACE)
+        {
+          if (desclen < USB_SIZEOF_IFDESC)
+            {
+              return -EINVAL;
+            }
+
+          ifdesc = (FAR struct usb_ifdesc_s *)configdesc;
+          if (ifdesc->ifno < start_ifnum)
+            {
+              goto next_desc;
+            }
+
           /* Yes, extract the class information from the interface
            * descriptor.
            * Typically these values are zero meaning that the "real" ID
            * information resides in the device descriptor.
            */
 
-          DEBUGASSERT(remaining >= sizeof(struct usb_ifdesc_s));
           id->base     = ifdesc->classid;
           id->subclass = ifdesc->subclass;
           id->proto    = ifdesc->protocol;
@@ -196,8 +218,9 @@ static inline int usbhost_configdesc(const uint8_t *configdesc, int cfglen,
 
       /* Increment the address of the next descriptor */
 
-      configdesc += ifdesc->len;
-      remaining  -= ifdesc->len;
+next_desc:
+      configdesc += desclen;
+      remaining  -= desclen;
     }
 
   return -ENOENT;
