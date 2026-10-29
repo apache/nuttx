@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/can/can_conn.c
+ * net/can/can.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
