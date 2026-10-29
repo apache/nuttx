@@ -82,7 +82,7 @@ endif()
 # Find required tools for the post build process
 # ##############################################################################
 
-find_program(ESPTOOL esptool esptool.py)
+find_program(ESPTOOL NAMES esptool esptool.py)
 find_program(IMGTOOL imgtool)
 find_program(PYTHON3 python3)
 
@@ -181,6 +181,10 @@ else()
     message(FATAL_ERROR "nuttx ELF not found in ${BINARY_DIR}")
   endif()
 
+  if(NOT ESPTOOL)
+    message(FATAL_ERROR "esptool / esptool.py not found in PATH")
+  endif()
+
   # Build elf2image options
   set(ELF2IMAGE_OPTS -fs ${FLASH_SIZE} -fm ${FLASH_MODE} -ff ${FLASH_FREQ})
 
@@ -213,7 +217,7 @@ file(APPEND "${BINARY_DIR}/nuttx.manifest" "nuttx.bin\n")
 
 if(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_ENABLED)
   message(STATUS "Flash Encryption is enabled!")
-  find_program(ESPSECURE espsecure espsecure.py)
+  find_program(ESPSECURE NAMES espsecure espsecure.py)
 
   if(CONFIG_ESPRESSIF_EFUSE_VIRTUAL)
     message(WARNING "Virtual E-Fuses are enabled! E-Fuses will not be burned.")
@@ -330,7 +334,8 @@ if(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT)
   endif()
 
 elseif(CONFIG_ESPRESSIF_SIMPLE_BOOT)
-  # Simple boot: same base offset as BL_OFFSET (0x2000 on ESP32-P4, else 0x0)
+  # Simple boot: at BL_OFFSET (0x1000 on ESP32/ESP32-S2, 0x2000 on ESP32-P4,
+  # else 0x0)
   list(APPEND ESPTOOL_BINS ${BL_OFFSET} "${BINARY_DIR}/nuttx.bin")
 
 else()
@@ -353,13 +358,14 @@ if(CONFIG_ESPRESSIF_MERGE_BINS)
 
   # Execute merge_bin
   execute_process(
-    COMMAND ${ESPTOOL} -c ${CHIP_SERIES} merge-bin --pad-to-size ${FLASH_SIZE}
-            --output ${BINARY_DIR}/nuttx.merged.bin ${ESPTOOL_BINS}
+    COMMAND
+      ${ESPTOOL} -c ${CHIP_SERIES} merge_bin --fill-flash-size ${FLASH_SIZE}
+      --output ${BINARY_DIR}/nuttx.merged.bin ${ESPTOOL_BINS}
     RESULT_VARIABLE MERGEBIN_RESULT
     WORKING_DIRECTORY ${BINARY_DIR})
 
   if(NOT MERGEBIN_RESULT EQUAL 0)
-    message(FATAL_ERROR "esptool merge-bin failed")
+    message(FATAL_ERROR "esptool merge_bin failed")
   endif()
 
   message(STATUS "Generated: nuttx.merged.bin")
@@ -375,14 +381,14 @@ if(UF2_ENABLED)
 
   execute_process(
     COMMAND
-      ${ESPTOOL} -c ${CHIP_SERIES} merge-bin --format uf2 -o
+      ${ESPTOOL} -c ${CHIP_SERIES} merge_bin --format uf2 -o
       ${BINARY_DIR}/nuttx.merged.uf2 -fs ${FLASH_SIZE} -fm ${FLASH_MODE}
       ${ESPTOOL_BINS}
     RESULT_VARIABLE MAKEUF2_RESULT
     WORKING_DIRECTORY ${BINARY_DIR})
 
   if(NOT MAKEUF2_RESULT EQUAL 0)
-    message(FATAL_ERROR "esptool merge-bin --format uf2 failed")
+    message(FATAL_ERROR "esptool merge_bin --format uf2 failed")
   endif()
 
   message(STATUS "Generated: nuttx.merged.uf2")

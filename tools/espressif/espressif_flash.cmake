@@ -80,7 +80,7 @@ if((NOT DEFINED ESPTOOL_PORT) OR ("${ESPTOOL_PORT}" STREQUAL ""))
   set(ESPTOOL_PORT "$ENV{ESPTOOL_PORT}")
 endif()
 
-find_program(ESPTOOL esptool esptool.py)
+find_program(ESPTOOL NAMES esptool esptool.py)
 find_program(PYTHON3 python3)
 
 if(NOT ESPTOOL)
@@ -188,12 +188,12 @@ else()
 endif()
 
 execute_process(
-  COMMAND ${ESPTOOL} ${ESPTOOL_OPTS} write-flash ${WRITEFLASH_ARGS}
+  COMMAND ${ESPTOOL} ${ESPTOOL_OPTS} write_flash ${WRITEFLASH_ARGS}
   WORKING_DIRECTORY ${BINARY_DIR}
   RESULT_VARIABLE FLASH_RESULT)
 
 if(NOT FLASH_RESULT EQUAL 0)
-  message(FATAL_ERROR "esptool write-flash failed (exit ${FLASH_RESULT})")
+  message(FATAL_ERROR "esptool write_flash failed (exit ${FLASH_RESULT})")
 endif()
 
 message(STATUS "Flash completed successfully.")
