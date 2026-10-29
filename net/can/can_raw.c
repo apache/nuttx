@@ -1918,29 +1918,7 @@ static void can_raw_addref(FAR struct socket *psock)
 static int can_raw_bind(FAR struct socket *psock,
                         FAR const struct sockaddr *addr, socklen_t addrlen)
 {
-  FAR struct sockaddr_can *canaddr;
-  FAR struct can_conn_s *conn;
-
-  DEBUGASSERT(addr != NULL &&
-              addrlen >= sizeof(struct sockaddr_can));
-
-  /* Save the address information in the connection structure */
-
-  canaddr = (FAR struct sockaddr_can *)addr;
-  conn    = psock->s_conn;
-
-  /* Bind CAN device to socket */
-
-#ifdef CONFIG_NETDEV_IFINDEX
-  conn->dev = netdev_findbyindex(canaddr->can_ifindex);
-#else
-  char netdev_name[5] = "can0";
-
-  netdev_name[3] += canaddr->can_ifindex;
-  conn->dev = netdev_findbyname((const char *)&netdev_name);
-#endif
-
-  return conn->dev == NULL && canaddr->can_ifindex != 0 ? -ENODEV : OK;
+  return can_conn_bind(psock->s_conn, addr, addrlen);
 }
 
 /****************************************************************************
@@ -1990,23 +1968,7 @@ static int can_raw_getsockname(FAR struct socket *psock,
   memset(canaddr, 0, sizeof(struct sockaddr_can));
 
   canaddr->can_family = AF_CAN;
-
-  if (conn->dev != NULL)
-    {
-#ifdef CONFIG_NETDEV_IFINDEX
-      canaddr->can_ifindex = conn->dev->d_ifindex;
-#else
-      /* Reverse mapping: extract ifindex from device name "can<N>".
-       * This mirrors the bind logic which maps ifindex -> "can<N>".
-       */
-
-      canaddr->can_ifindex = conn->dev->d_ifname[3] - '0';
-#endif
-    }
-  else
-    {
-      canaddr->can_ifindex = 0;
-    }
+  canaddr->can_ifindex = can_get_ifindex(conn);
 
   *addrlen = sizeof(struct sockaddr_can);
   return OK;

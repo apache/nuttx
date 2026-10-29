@@ -184,6 +184,29 @@ FAR struct can_conn_s *can_alloc(void);
 void can_free(FAR struct can_conn_s *conn);
 
 /****************************************************************************
+ * Name: can_conn_bind
+ *
+ * Description:
+ *   Bind a CAN connection to the network device selected by the
+ *   can_ifindex field of a struct sockaddr_can.
+ *
+ ****************************************************************************/
+
+int can_conn_bind(FAR struct can_conn_s *conn,
+                  FAR const struct sockaddr *addr, socklen_t addrlen);
+
+/****************************************************************************
+ * Name: can_get_ifindex
+ *
+ * Description:
+ *   Return the interface index of the device a CAN connection is bound to,
+ *   or 0 if it is not bound to a device.
+ *
+ ****************************************************************************/
+
+int can_get_ifindex(FAR struct can_conn_s *conn);
+
+/****************************************************************************
  * Name: can_conn_next
  *
  * Description:
