@@ -292,6 +292,7 @@ static int syslog_default_putc(FAR syslog_channel_t *channel, int ch)
        */
 
       irqstate_t flags = enter_critical_section();
+
       up_putc(ch);
       leave_critical_section(flags);
     }
@@ -316,6 +317,7 @@ static ssize_t syslog_default_write(FAR syslog_channel_t *channel,
        */
 
       irqstate_t flags = enter_critical_section();
+
       up_nputs(buffer, buflen);
       leave_critical_section(flags);
     }
