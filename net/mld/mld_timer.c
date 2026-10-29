@@ -326,31 +326,33 @@ static void mld_polldog_work(FAR void *arg)
   group = (FAR struct mld_group_s *)arg;
   DEBUGASSERT(group != NULL);
 
+  /* Get a reference to the device serving the sub-net */
+
+  dev = netdev_findbyindex(group->ifindex);
+  if (dev == NULL)
+    {
+      /* This could be a normal consequence if the device is
+       * unregistered while the timer is pending.
+       */
+
+      fwarn("WARNING: No device associated with ifindex=%d\n",
+            group->ifindex);
+      return;
+    }
+
+  /* mld_grpfree() clears the start-up flag with the device locked */
+
+  netdev_lock(dev);
+
   /* Check if this a new join to the multicast group. */
 
   if (IS_MLD_STARTUP(group->flags))
     {
       MLD_STATINCR(g_netstats.mld.report_sched);
 
-      /* Get a reference to the device serving the sub-net */
-
-      dev = netdev_findbyindex(group->ifindex);
-      if (dev == NULL)
-        {
-          /* This could be a normal consequence if the device is
-           * unregistered while the timer is pending.
-           */
-
-          fwarn("WARNING: No device associated with ifindex=%d\n",
-                group->ifindex);
-          return;
-        }
-
       /* Schedule (and forget) the Report. */
 
-      netdev_lock(dev);
       ret = mld_schedmsg(group, mld_report_msgtype(dev));
-      netdev_unlock(dev);
       if (ret < 0)
         {
           mlderr("ERROR: Failed to schedule message: %d\n", ret);
@@ -374,6 +376,8 @@ static void mld_polldog_work(FAR void *arg)
           CLR_MLD_STARTUP(group->flags);
         }
     }
+
+  netdev_unlock(dev);
 }
 
 /****************************************************************************
