@@ -718,24 +718,18 @@ static int stm32_tim_setmode(struct stm32_tim_dev_s *dev,
                              stm32_tim_mode_t mode)
 {
   uint16_t val = GTIM_CR1_CEN | GTIM_CR1_ARPE;
+  bool basic = false;
 
   DEBUGASSERT(dev != NULL);
 
-  /* This function is not supported on basic timers. To enable or
-   * disable it, simply set its clock to valid frequency or zero.
-   */
+  /* Basic timers count up only */
 
 #if STM32_NBTIM > 0
-  if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM6_BASE
+  basic = ((struct stm32_tim_priv_s *)dev)->base == STM32_TIM6_BASE;
 #endif
 #if STM32_NBTIM > 1
-      ||  ((struct stm32_tim_priv_s *)dev)->base == STM32_TIM7_BASE
-#endif
-#if STM32_NBTIM > 0
-  )
-    {
-      return -EINVAL;
-    }
+  basic = basic ||
+          ((struct stm32_tim_priv_s *)dev)->base == STM32_TIM7_BASE;
 #endif
 
   /* Decode operational modes */
@@ -747,12 +741,22 @@ static int stm32_tim_setmode(struct stm32_tim_dev_s *dev,
         break;
 
       case STM32_TIM_MODE_DOWN:
+        if (basic)
+          {
+            return -EINVAL;
+          }
+
         val |= GTIM_CR1_DIR;
 
       case STM32_TIM_MODE_UP:
         break;
 
       case STM32_TIM_MODE_UPDOWN:
+        if (basic)
+          {
+            return -EINVAL;
+          }
+
         /* Our default:
          * Interrupts are generated on compare, when counting down
          */
