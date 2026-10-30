@@ -96,6 +96,11 @@ Functions
   to the environment. If name does exist, then the value of name in the
   environment is changed to value.
 
+  The string itself becomes part of the environment, as POSIX requires.
+  NuttX does not copy it, so a later change to the string changes the
+  environment.  Do not free the string or use its memory for other data
+  while it is in the environment.
+
   :param string: ``name=value`` string describing the environment setting to
      add/modify.
 
