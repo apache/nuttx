@@ -134,3 +134,4 @@ Available lower halves:
 
 * nRF52: :doc:`/platforms/arm/nrf52/ble_ll`
 * nRF53: :doc:`/platforms/arm/nrf53/ble_ll`
+* nRF54L: :doc:`/platforms/arm/nrf54l/ble_ll`
