@@ -69,6 +69,7 @@
 #define STM32_RCC_MEMLPENR_OFFSET     0x028c  /* SRAM clocks enable in Sleep mode */
 #define STM32_RCC_APB1LLPENR_OFFSET   0x02a4  /* APB1 LP clock enable register 1 */
 #define STM32_RCC_APB2LPENR_OFFSET    0x02ac  /* APB2 LP clock enable register */
+#define STM32_RCC_APB4LLPENR_OFFSET   0x02b4  /* APB4 LP clock enable register 1 */
 
 #define STM32_RCC_DIVENR_OFFSET       0x0240  /* IC divider enable register */
 #define STM32_RCC_DIVENSR_OFFSET      0x0a40  /* IC divider enable set register */
@@ -82,6 +83,7 @@
 #define STM32_RCC_MEMLPENSR_OFFSET    0x0a8c  /* SRAM LP clock enable set register */
 #define STM32_RCC_APB1LLPENSR_OFFSET  0x0aa4  /* APB1 LP clock enable set register 1 */
 #define STM32_RCC_APB2LPENSR_OFFSET   0x0aac  /* APB2 LP clock enable set register */
+#define STM32_RCC_APB4LLPENSR_OFFSET  0x0ab4  /* APB4 LP clock enable set register 1 */
 
 #define STM32_RCC_CCR_OFFSET          0x1000  /* Clock control clear register */
 #define STM32_RCC_APB2ENCR_OFFSET     0x126c  /* APB2 clock enable clear register */
@@ -119,6 +121,7 @@
 #define STM32_RCC_MEMLPENR            (STM32_RCC_BASE + STM32_RCC_MEMLPENR_OFFSET)
 #define STM32_RCC_APB1LLPENR          (STM32_RCC_BASE + STM32_RCC_APB1LLPENR_OFFSET)
 #define STM32_RCC_APB2LPENR           (STM32_RCC_BASE + STM32_RCC_APB2LPENR_OFFSET)
+#define STM32_RCC_APB4LLPENR          (STM32_RCC_BASE + STM32_RCC_APB4LLPENR_OFFSET)
 
 #define STM32_RCC_MEMENSR             (STM32_RCC_BASE + STM32_RCC_MEMENSR_OFFSET)
 #define STM32_RCC_AHB4ENSR            (STM32_RCC_BASE + STM32_RCC_AHB4ENSR_OFFSET)
@@ -129,6 +132,7 @@
 #define STM32_RCC_MEMLPENSR           (STM32_RCC_BASE + STM32_RCC_MEMLPENSR_OFFSET)
 #define STM32_RCC_APB1LLPENSR         (STM32_RCC_BASE + STM32_RCC_APB1LLPENSR_OFFSET)
 #define STM32_RCC_APB2LPENSR          (STM32_RCC_BASE + STM32_RCC_APB2LPENSR_OFFSET)
+#define STM32_RCC_APB4LLPENSR         (STM32_RCC_BASE + STM32_RCC_APB4LLPENSR_OFFSET)
 
 #define STM32_RCC_CCR                 (STM32_RCC_BASE + STM32_RCC_CCR_OFFSET)
 #define STM32_RCC_APB2ENCR            (STM32_RCC_BASE + STM32_RCC_APB2ENCR_OFFSET)
@@ -344,6 +348,7 @@
 
 #define RCC_APB1LLPENR_TIM11LPEN      (1 << 13)  /* Bit 13: TIM11 enable in CSLEEP */
 #define RCC_APB1LLPENR_TIM10LPEN      (1 << 12)  /* Bit 12: TIM10 enable in CSLEEP */
+#define RCC_APB1LLPENR_LPTIM1LPEN     (1 << 9)   /* Bit 9:  LPTIM1 enable in CSLEEP */
 #define RCC_APB1LLPENR_TIM14LPEN      (1 << 8)   /* Bit 8:  TIM14 enable in CSLEEP */
 #define RCC_APB1LLPENR_TIM13LPEN      (1 << 7)   /* Bit 7:  TIM13 enable in CSLEEP */
 #define RCC_APB1LLPENR_TIM12LPEN      (1 << 6)   /* Bit 6:  TIM12 enable in CSLEEP */
@@ -376,6 +381,16 @@
                                        RCC_APB2LPENR_TIM9LPEN | RCC_APB2LPENR_TIM15LPEN | \
                                        RCC_APB2LPENR_TIM16LPEN | RCC_APB2LPENR_TIM17LPEN | \
                                        RCC_APB2LPENR_TIM18LPEN)
+
+/* APB4 peripheral clock enable in Sleep mode (register 1) */
+
+#define RCC_APB4LLPENR_LPTIM5LPEN     (1 << 12)  /* Bit 12: LPTIM5 enable in CSLEEP */
+#define RCC_APB4LLPENR_LPTIM4LPEN     (1 << 11)  /* Bit 11: LPTIM4 enable in CSLEEP */
+#define RCC_APB4LLPENR_LPTIM3LPEN     (1 << 10)  /* Bit 10: LPTIM3 enable in CSLEEP */
+#define RCC_APB4LLPENR_LPTIM2LPEN     (1 << 9)   /* Bit 9:  LPTIM2 enable in CSLEEP */
+
+#define RCC_APB4LLPENR_ALLLPTIM       (RCC_APB4LLPENR_LPTIM2LPEN | RCC_APB4LLPENR_LPTIM3LPEN | \
+                                       RCC_APB4LLPENR_LPTIM4LPEN | RCC_APB4LLPENR_LPTIM5LPEN)
 
 /* Peripheral kernel clock select register 13 */
 
