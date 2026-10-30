@@ -131,6 +131,7 @@ set(SDK_CSRCS
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/_Impl/IfxAsclin_cfg.c"
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/_Impl/IfxCpu_cfg.c"
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/_Impl/IfxStm_cfg.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/_Impl/TC39xB/IfxPort_cfg_TC39xB.c"
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/_PinMap/TC39xB/IfxAsclin_PinMap_TC39xB_LFBGA292.c"
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/Pms/Std/IfxPmsEvr.c"
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/Pms/Std/IfxPmsPm.c"
