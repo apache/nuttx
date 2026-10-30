@@ -1348,6 +1348,13 @@ void mm_memdump(FAR struct mm_heap_s *heap,
 
 size_t mm_malloc_size(FAR struct mm_heap_s *heap, FAR void *mem)
 {
+  /* Protect against attempts to query a NULL reference */
+
+  if (mem == NULL)
+    {
+      return 0;
+    }
+
 #ifdef CONFIG_MM_HEAP_MEMPOOL
   if (heap->mm_mpool)
     {
