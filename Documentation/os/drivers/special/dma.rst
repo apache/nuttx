@@ -22,6 +22,11 @@ The framework is enabled with ``CONFIG_DMA`` (``drivers/dma/Kconfig``),
 which selects ``ARCH_DMA``. Scatter/gather-style link transfers
 additionally require ``CONFIG_DMA_LINK``.
 
+This page also documents the separate **DMA-BUF** buffer-sharing
+subsystem (``drivers/dma-buf/``). DMA-BUF is not a DMA controller:
+it exports memory buffers as file descriptors so multiple drivers and
+userspace can share them without copying. See `DMA-BUF`_ below.
+
 Architecture
 ============
 
@@ -277,3 +282,53 @@ Configuration
   ``CONFIG_16550_UARTn_DMA_RXTIMEOUT``: 16550 UART DMA binding.
 - ``CONFIG_AUDIO_BUFFER_NUMBYTES`` / ``CONFIG_AUDIO_NUM_BUFFERS``:
   default buffer geometry used by ``audio_dma_initialize()``.
+
+DMA-BUF
+=======
+
+DMA-BUF (``drivers/dma-buf/``) is a Linux-style buffer-sharing
+framework. An exporter creates a buffer and hands a file descriptor
+to importers (other drivers or userspace). Importers attach, map into
+device address space, and access the buffer through
+``struct dma_buf_ops``.
+
+This is unrelated to the DMA controller interface above
+(``include/nuttx/dma/dma.h``). DMA-BUF moves or shares *memory*;
+the controller framework starts hardware DMA *transfers*.
+
+Userspace model
+---------------
+
+- ``CONFIG_DMA_SHARED_BUFFER``: enable the DMA-BUF core
+  (``drivers/dma-buf/dma-buf.c``, ``include/nuttx/dma-buf.h``).
+- ``CONFIG_DMABUF_HEAPS``: enable userspace heaps under
+  ``/dev/dma_heap/`` (``dma-heap.c``, ``system_heap.c``,
+  ``include/nuttx/dma-heap.h``). Selects ``DMA_SHARED_BUFFER``.
+- System heap node: ``/dev/dma_heap/system``. Userspace allocates with
+  ``DMA_BUF_HEAP_IOCTL_ALLOC`` and receives a DMA-BUF file
+  descriptor (Linux dma-heap model).
+- CPU access is bracketed with ``DMA_BUF_IOCTL_SYNC``. Optional naming
+  via ``DMA_BUF_SET_NAME`` is for debugging.
+
+Kernel API
+----------
+
+- Exporter: fill ``struct dma_buf_export_info`` and call
+  ``dma_buf_export()``, then ``dma_buf_fd()`` to get a file
+  descriptor. Callers must ``dma_buf_put()`` after ``dma_buf_fd()``
+  because the descriptor holds its own reference.
+- Importer: ``dma_buf_get(fd)``, ``dma_buf_attach()``,
+  ``dma_buf_map_attachment()``; release with the matching unmap,
+  detach, and put.
+- ``mmap()`` on a DMA-BUF descriptor holds a reference for the
+  lifetime of the mapping.
+
+System heap notes
+-----------------
+
+- Payloads are allocated with 32-byte alignment so importers that
+  need DMA-aligned addresses work correctly.
+- When a buffer is mapped into a device, ``DMA_BUF_IOCTL_SYNC``
+  brackets dcache invalidate/flush.
+- On flat / non-addrenv builds the CPU virtual address is used as
+  the DMA address.

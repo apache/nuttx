@@ -37,6 +37,7 @@ include crypto/Make.defs
 include devfreq/Make.defs
 include devicetree/Make.defs
 include dma/Make.defs
+include dma-buf/Make.defs
 include math/Make.defs
 include motor/Make.defs
 include i2c/Make.defs
