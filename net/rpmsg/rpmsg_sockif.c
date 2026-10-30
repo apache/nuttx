@@ -632,15 +632,54 @@ static bool rpmsg_socket_pend_remove(FAR struct rpmsg_socket_conn_s *server,
 static void rpmsg_socket_ns_bound(struct rpmsg_endpoint *ept)
 {
   FAR struct rpmsg_socket_conn_s *conn = ept->priv;
-  struct rpmsg_socket_sync_s msg;
+  FAR struct rpmsg_socket_sync_s *msg;
+  uint32_t len = sizeof(*msg);
 
-  msg.cmd  = RPMSG_SOCKET_CMD_SYNC;
-  msg.size = circbuf_size(&conn->recvbuf);
-  msg.pid  = nxsched_getpid();
-  msg.uid  = getuid();
-  msg.gid  = getgid();
+  if (!ept->rdev)
+    {
+      return;
+    }
 
-  rpmsg_send(&conn->ept, &msg, sizeof(msg));
+  /* Reserve the tx buffer without holding recvlock, since it may block
+   * waiting for a free vring buffer.
+   */
+
+  msg = rpmsg_get_tx_payload_buffer(ept, &len, true);
+  if (msg == NULL)
+    {
+      return;
+    }
+
+  DEBUGASSERT(len >= sizeof(*msg));
+
+  msg->cmd = RPMSG_SOCKET_CMD_SYNC;
+  msg->pid = nxsched_getpid();
+  msg->uid = getuid();
+  msg->gid = getgid();
+
+  nxmutex_lock(&conn->recvlock);
+
+  /* This runs in the rx callback context, where a blocking rpmsg_send()
+   * on an endpoint unregistered meanwhile would wait the whole
+   * RPMSG_TICK_COUNT and stall every inbound message.
+   *
+   * conn->unbind is not checked:  a stale flag left by an earlier
+   * NS_DESTROY is cleared only when a SYNC is received, so bailing out on
+   * it would leave a reconnecting peer without our recvbuf size.
+   */
+
+  if (!is_rpmsg_ept_ready(ept))
+    {
+      nxmutex_unlock(&conn->recvlock);
+      rpmsg_release_tx_buffer(ept, msg);
+      return;
+    }
+
+  msg->size = circbuf_size(&conn->recvbuf);
+  rpmsg_send_offchannel_nocopy(ept, ept->addr, ept->dest_addr,
+                               msg, sizeof(*msg));
+
+  nxmutex_unlock(&conn->recvlock);
 }
 
 static void rpmsg_socket_ns_unbind(FAR struct rpmsg_endpoint *ept)
