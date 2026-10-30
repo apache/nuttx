@@ -135,9 +135,15 @@ int clock_basetime(FAR struct timespec *tp)
   jdn = clock_calendar2utc(CONFIG_START_YEAR, CONFIG_START_MONTH - 1,
                            CONFIG_START_DAY);
 
-  /* Set the base time as seconds into this julian day. */
+  /* Set the base time as seconds into this julian day.
+   *
+   * jdn is a day count since 1970 and CONFIG_START_YEAR is at least 1970, so
+   * jdn is non-negative and fits in 32 bits.  Widen it explicitly so that
+   * the compiler can use a 32x32->64 multiply instead of a full 64x64 one
+   * (__muldi3 / __aeabi_lmul on targets without native 64-bit multiply).
+   */
 
-  tp->tv_sec  = jdn * SEC_PER_DAY;
+  tp->tv_sec  = (uint64_t)(uint32_t)jdn * SEC_PER_DAY;
   tp->tv_nsec = 0;
   return OK;
 }
