@@ -100,6 +100,13 @@ FAR void *sbrk(intptr_t incr)
       /* Convert the increment to multiples of the page size */
 
       pgincr = MM_NPAGES(incr);
+      if (pgincr != MM_NPAGES(incr))
+        {
+          /* The page count does not fit in pgalloc() */
+
+          errcode = ENOMEM;
+          goto errout;
+        }
 
       /* Allocate the requested number of pages and map them to the
        * break address.
