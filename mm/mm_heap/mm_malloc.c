@@ -152,7 +152,7 @@ void mm_free_delaylist(FAR struct mm_heap_s *heap)
 {
   if (heap)
     {
-       free_delaylist(heap, true);
+      free_delaylist(heap, true);
     }
 }
 

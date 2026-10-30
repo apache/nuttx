@@ -104,6 +104,7 @@ static int memdump_record_comare(FAR const void *a, FAR const void *b)
   FAR struct mm_allocnode_s *node_b = *(FAR struct mm_allocnode_s **)b;
   size_t size_a = MM_SIZEOF_NODE(node_a);
   size_t size_b = MM_SIZEOF_NODE(node_b);
+
   return size_a > size_b ? 1 : -1;
 }
 
@@ -135,6 +136,7 @@ static void memdump_record_biggest(FAR struct mm_memdump_priv_s *priv,
 static void memdump_dump_biggestnodes(FAR struct mm_memdump_priv_s *priv)
 {
   size_t i;
+
   for (i = 0; i < priv->filled; i++)
     {
       priv->info.uordblks += MM_SIZEOF_NODE(priv->node[i]);
@@ -188,6 +190,7 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
         {
           FAR struct mm_allocnode_s *next = (FAR struct mm_allocnode_s *)
                                             ((FAR char *)node + nodesize);
+
           if (MM_PREVNODE_IS_FREE(node) || MM_NODE_IS_FREE(next))
             {
               priv->info.aordblks++;
