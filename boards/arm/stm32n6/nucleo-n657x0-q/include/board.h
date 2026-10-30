@@ -89,6 +89,16 @@
 #define STM32_TIM13_CLKIN        STM32_APB1_TIM_FREQUENCY
 #define STM32_TIM14_CLKIN        STM32_APB1_TIM_FREQUENCY
 
+/* LPTIM kernel clocks (RCC_CCIPR12 LPTIMxSEL reset values): LPTIM1 on
+ * PCLK1, LPTIM2-5 on PCLK4 (= HCLK, PPRE4 /1)
+ */
+
+#define STM32_LPTIM1_CLKIN       STM32_PCLK1_FREQUENCY
+#define STM32_LPTIM2_CLKIN       STM32_HCLK_FREQUENCY
+#define STM32_LPTIM3_CLKIN       STM32_HCLK_FREQUENCY
+#define STM32_LPTIM4_CLKIN       STM32_HCLK_FREQUENCY
+#define STM32_LPTIM5_CLKIN       STM32_HCLK_FREQUENCY
+
 /* I/O voltage domains ******************************************************/
 
 /* GPIO port E (USART1 TX/RX on PE5/PE6) is on the VddIO2 and VddIO3
