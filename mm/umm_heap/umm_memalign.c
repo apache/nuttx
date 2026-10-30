@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
@@ -79,7 +80,14 @@ FAR void *memalign(size_t alignment, size_t size)
       mem = mm_memalign(USR_HEAP, alignment, size);
       if (!mem)
         {
-          brkaddr = sbrk(size < 1 ? 1 : size);
+          /* sbrk() takes a signed increment */
+
+          brkaddr = (FAR void *)-1;
+          if (size <= INTPTR_MAX)
+            {
+              brkaddr = sbrk(size < 1 ? 1 : size);
+            }
+
           if (brkaddr == (FAR void *)-1)
             {
               /* mm_malloc() does not report a failure in this heap */
@@ -88,6 +96,8 @@ FAR void *memalign(size_t alignment, size_t size)
 #ifdef CONFIG_MM_PANIC_ON_FAILURE
               PANIC();
 #endif
+
+              umm_set_errno(ENOMEM);
               return NULL;
             }
         }

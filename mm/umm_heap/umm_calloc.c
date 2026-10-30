@@ -68,6 +68,10 @@ FAR void *calloc(size_t n, size_t elem_size)
 
       mem = zalloc(n * elem_size);
     }
+  else
+    {
+      umm_set_errno(ENOMEM);
+    }
 
   return mem;
 #else
