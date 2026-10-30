@@ -89,6 +89,13 @@
 #define NRF53_FICR_TRIMCNF_ADDR(n)          (NRF53_FICR_BASE + NRF53_FICR_TRIMCNF_ADDR_OFFSET(n))
 #define NRF53_FICR_TRIMCNF_DATA(n)          (NRF53_FICR_BASE + NRF53_FICR_TRIMCNF_DATA_OFFSET(n))
 
+/* FICR Register Bitfield Definitions **************************************/
+
+/* DEVICEADDRTYPE Register */
+
+#define FICR_DEVICEADDRTYPE_PUBLIC          (0)    /* Public address */
+#define FICR_DEVICEADDRTYPE_RANDOM          (1)    /* Random address */
+
 /* TODO */
 
 #endif /* __ARCH_ARM_SRC_NRF53_HARDWARE_NRF53_FICR_NET_H */
