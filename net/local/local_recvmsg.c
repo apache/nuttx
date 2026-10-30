@@ -211,6 +211,7 @@ out:
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   buf      Buffer to receive data
  *   len      Length of buffer
+ *   offset   Offset within the FIFO (for MSG_PEEK)
  *   flags    Receive flags
  *   from     Address of source (may be NULL)
  *   fromlen  The length of the address structure
@@ -226,7 +227,7 @@ out:
 #ifdef CONFIG_NET_LOCAL_STREAM
 static inline ssize_t
 psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                      int flags, FAR struct sockaddr *from,
+                      size_t offset, int flags, FAR struct sockaddr *from,
                       FAR socklen_t *fromlen)
 {
   FAR struct local_conn_s *conn = psock->s_conn;
@@ -255,13 +256,14 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   if (flags & MSG_DONTWAIT)
     {
       int data_len = 0;
+
       ret = file_ioctl(&conn->lc_infile, FIONREAD, &data_len);
       if (ret < 0)
         {
           return ret;
         }
 
-      if (data_len == 0)
+      if ((flags & MSG_PEEK) ? data_len <= (int)offset : data_len == 0)
         {
           return -EAGAIN;
         }
@@ -269,7 +271,7 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Read the packet */
 
-  ret = psock_fifo_read(psock, buf, 0, &readlen, flags, true);
+  ret = psock_fifo_read(psock, buf, offset, &readlen, flags, true);
   if (ret < 0)
     {
       return ret;
@@ -540,22 +542,97 @@ ssize_t local_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 {
   FAR socklen_t *fromlen = &msg->msg_namelen;
   FAR struct sockaddr *from = msg->msg_name;
-  FAR void *buf = msg->msg_iov->iov_base;
-  size_t len = msg->msg_iov->iov_len;
+  FAR void *buf;
+  ssize_t len;
 
-  if (msg->msg_iovlen != 1)
+  if (msg->msg_iovlen == 0)
     {
-      return -ENOTSUP;
+      return -EMSGSIZE;
     }
 
-  DEBUGASSERT(buf);
+  buf = msg->msg_iov->iov_base;
+  len = msg->msg_iov->iov_len;
 
   /* Check for a stream socket */
 
 #ifdef CONFIG_NET_LOCAL_STREAM
   if (psock->s_type == SOCK_STREAM)
     {
-      len = psock_stream_recvfrom(psock, buf, len, flags, from, fromlen);
+      FAR uint8_t *target;
+      size_t peek_offset = 0;
+      ssize_t total_recv = 0;
+      size_t iov_recv;
+      ssize_t ret = 0;
+      int cur_flags;
+      int i;
+
+      for (i = 0; i < msg->msg_iovlen; i++)
+        {
+          if (msg->msg_iov[i].iov_len == 0 ||
+              msg->msg_iov[i].iov_base == NULL)
+            {
+              continue;
+            }
+
+          iov_recv = 0;
+          while (iov_recv < msg->msg_iov[i].iov_len)
+            {
+              cur_flags = flags;
+
+              /* If data has already been received and MSG_WAITALL is not
+               * set, do not block waiting for more data.
+               */
+
+              if (total_recv > 0 && !(flags & MSG_WAITALL))
+                {
+                  cur_flags |= MSG_DONTWAIT;
+                }
+
+              target = (FAR uint8_t *)msg->msg_iov[i].iov_base + iov_recv;
+              ret    = psock_stream_recvfrom(psock, target,
+                                             msg->msg_iov[i].iov_len -
+                                             iov_recv,
+                                             peek_offset, cur_flags, from,
+                                             fromlen);
+              if (ret <= 0)
+                {
+                  if (total_recv == 0)
+                    {
+                      total_recv = ret;
+                    }
+
+                  break;
+                }
+
+              iov_recv   += ret;
+              total_recv += ret;
+              if (flags & MSG_PEEK)
+                {
+                  peek_offset += ret;
+                }
+
+              /* If MSG_WAITALL is not set and we read less than requested,
+               * return what we have so far without blocking further.
+               */
+
+              if (!(flags & MSG_WAITALL))
+                {
+                  break;
+                }
+            }
+
+          /* If an error occurred or EOF was reached, or if partial data was
+           * received without MSG_WAITALL, stop processing subsequent iovecs.
+           */
+
+          if (ret <= 0 || (!(flags & MSG_WAITALL) &&
+                           iov_recv < msg->msg_iov[i].iov_len))
+            {
+              break;
+            }
+        }
+
+      len = total_recv;
     }
   else
 #endif
@@ -563,6 +640,12 @@ ssize_t local_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 #ifdef CONFIG_NET_LOCAL_DGRAM
   if (psock->s_type == SOCK_DGRAM)
     {
+      if (msg->msg_iovlen != 1)
+        {
+          return -ENOTSUP;
+        }
+
+      DEBUGASSERT(buf);
       len = psock_dgram_recvfrom(psock, buf, len, flags, from, fromlen);
     }
   else

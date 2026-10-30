@@ -189,6 +189,8 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
   FAR struct net_driver_s *dev;
   FAR struct can_conn_s *conn;
   FAR struct iob_s *wb_iob;
+  size_t total_len = 0;
+  size_t i;
   bool empty;
   bool nonblock;
   int ret = OK;
@@ -214,11 +216,25 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
       return -ENODEV;
     }
 
+  if (msg->msg_iovlen == 0)
+    {
+      return -EMSGSIZE;
+    }
+
+  for (i = 0; i < msg->msg_iovlen; i++)
+    {
+      if (msg->msg_iov[i].iov_len > CANFD_MTU - total_len)
+        {
+          return -EINVAL;
+        }
+
+      total_len += msg->msg_iov[i].iov_len;
+    }
+
 #if defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)
   if (_SO_GETOPT(conn->sconn.s_options, CAN_RAW_FD_FRAMES))
     {
-      if (msg->msg_iov->iov_len != CANFD_MTU &&
-          msg->msg_iov->iov_len != CAN_MTU)
+      if (total_len != CANFD_MTU && total_len != CAN_MTU)
         {
           return -EINVAL;
         }
@@ -226,7 +242,7 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
   else
 #endif
     {
-      if (msg->msg_iov->iov_len != CAN_MTU)
+      if (total_len != CAN_MTU)
         {
           return -EINVAL;
         }
@@ -250,7 +266,7 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
    */
 
   while (!IOB_QEMPTY(&conn->write_q) &&
-         (iob_get_queue_size(&conn->write_q) + msg->msg_iov->iov_len) >
+         (iob_get_queue_size(&conn->write_q) + total_len) >
          conn->sndbufs)
     {
       /* send buffer size exceeds the send limit */
@@ -310,8 +326,8 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
 
   if (nonblock)
     {
-      ret = iob_trycopyin(wb_iob, (FAR uint8_t *)msg->msg_iov->iov_base,
-                          msg->msg_iov->iov_len, 0, false);
+      ret = iob_trycopyin_iov(wb_iob, msg->msg_iov, msg->msg_iovlen, 0,
+                              false);
     }
   else
     {
@@ -321,14 +337,18 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
        */
 
       conn_dev_unlock(&conn->sconn, dev);
-      ret = iob_copyin(wb_iob, (FAR uint8_t *)msg->msg_iov->iov_base,
-                       msg->msg_iov->iov_len, 0, false);
+      ret = iob_copyin_iov(wb_iob, msg->msg_iov, msg->msg_iovlen, 0, false);
       conn_dev_lock(&conn->sconn, dev);
     }
 
-  if (ret < 0)
+  if (ret < 0 || ret != total_len)
     {
       nerr("ERROR: Failed to copy data into write buffer\n");
+      if (ret >= 0)
+        {
+          ret = -ENOMEM;
+        }
+
       goto errout_with_wrb;
     }
 
@@ -392,7 +412,7 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
 
   conn_dev_unlock(&conn->sconn, dev);
 
-  return msg->msg_iov->iov_len;
+  return total_len;
 
 errout_with_wrb:
   iob_free_chain(wb_iob);
