@@ -104,6 +104,12 @@
 #define STM32_TIM15_CLKIN  STM32_PCLK1_FREQUENCY
 #define STM32_TIM16_CLKIN  STM32_PCLK1_FREQUENCY
 
+/* LPTIM kernel clocks (RCC_CCIPR LPTIMxSEL reset values): PCLK */
+
+#define STM32_LPTIM1_CLKIN STM32_PCLK1_FREQUENCY
+#define STM32_LPTIM2_CLKIN STM32_PCLK1_FREQUENCY
+#define STM32_LPTIM3_CLKIN STM32_PCLK1_FREQUENCY
+
 /* LED definitions **********************************************************/
 
 /* The Nucleo U083RC board has three LEDs.  Two of these are controlled by
