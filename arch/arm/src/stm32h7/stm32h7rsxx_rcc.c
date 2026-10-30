@@ -264,6 +264,9 @@ static inline void rcc_enableapb1(void)
 #ifdef CONFIG_STM32_LPTIM1
   regval |= RCC_APB1ENR1_LPTIM1EN;
 #endif
+#ifdef CONFIG_STM32_WWDG
+  regval |= RCC_APB1ENR1_WWDGEN;
+#endif
 #ifdef CONFIG_STM32_SPI2
   regval |= RCC_APB1ENR1_SPI2EN;
 #endif
