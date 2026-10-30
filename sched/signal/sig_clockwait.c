@@ -197,6 +197,8 @@ int nxsig_clockwait(int clockid, int flags,
   clock_t stop   = 0u;
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
   siginfo_t unbinfo;
+  sigset_t intersection;
+  FAR sigpendq_t *sigpend;
   bool own_unbinfo = false;
 #endif
 
@@ -252,6 +254,32 @@ int nxsig_clockwait(int clockid, int flags,
     {
       rtcb->sigunbinfo = &unbinfo;
       own_unbinfo = true;
+    }
+
+  /* nxsig_timedwait() publishes sigwaitmask before calling this function.
+   * A matching signal can be queued after that publication but before this
+   * task transitions to TSTATE_WAIT_SIG. Re-check the pending set here while
+   * interrupts are disabled so we do not sleep with a waited-for signal
+   * already pending.
+   */
+
+  if (!own_unbinfo)
+    {
+      intersection = nxsig_pendingset(rtcb);
+      sigandset(&intersection, &intersection, &rtcb->sigwaitmask);
+      if (!sigisemptyset(&intersection))
+        {
+          sigpend = nxsig_remove_pendingsignal(rtcb,
+                                               nxsig_lowest(&intersection));
+          DEBUGASSERT(sigpend != NULL);
+
+          memcpy(rtcb->sigunbinfo, &sigpend->info, sizeof(siginfo_t));
+          sigemptyset(&rtcb->sigwaitmask);
+          nxsig_release_pendingsignal(sigpend);
+
+          leave_critical_section(iflags);
+          return 0;
+        }
     }
 #endif
 
