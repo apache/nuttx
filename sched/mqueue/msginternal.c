@@ -26,6 +26,7 @@
 
 #include <nuttx/kmalloc.h>
 #include "mqueue/msg.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -98,6 +99,41 @@ static FAR struct msgq_s *nxmsg_alloc_internal(void)
 }
 
 /****************************************************************************
+ * Name: nxmsg_wakeup
+ *
+ * Description:
+ *   Wake up all tasks that wait on a removed queue.  Their msgrcv() or
+ *   msgsnd() fails with EIDRM.
+ *
+ ****************************************************************************/
+
+static void nxmsg_wakeup(FAR struct msgq_s *msgq)
+{
+  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *wtcb;
+  bool need_switch = false;
+
+  while ((wtcb = (FAR struct tcb_s *)
+                 dq_remfirst(MQ_WNELIST(msgq->cmn))) != NULL ||
+         (wtcb = (FAR struct tcb_s *)
+                 dq_remfirst(MQ_WNFLIST(msgq->cmn))) != NULL)
+    {
+      wtcb->waitobj = NULL;
+      wtcb->errcode = EIDRM;
+
+      if (nxsched_add_readytorun(wtcb))
+        {
+          need_switch = true;
+        }
+    }
+
+  if (need_switch)
+    {
+      up_switch_context(this_task(), rtcb);
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -143,6 +179,13 @@ void nxmsg_free(FAR struct msgq_s *msgq)
 
   index = msgq->key - 1;
 
+  /* Remove the queue from the table first, so that no task finds it after
+   * the wake-up or while kmm_free() waits for the heap lock.
+   */
+
+  g_msgqs[index] = NULL;
+  nxmsg_wakeup(msgq);
+
   list_for_every_entry_safe(&msgq->msglist, entry,
                             tmp, struct msgbuf_s, node)
     {
@@ -150,8 +193,7 @@ void nxmsg_free(FAR struct msgq_s *msgq)
       list_add_tail(&g_msgfreelist, &entry->node);
     }
 
-  kmm_free(g_msgqs[index]);
-  g_msgqs[index] = NULL;
+  kmm_free(msgq);
 }
 
 /****************************************************************************

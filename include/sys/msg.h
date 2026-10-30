@@ -170,6 +170,7 @@ int msgget(key_t key, int msgflg);
  *            less than 1, or msgsz is greater than the maximum message
  *            size of the queue.
  *   EINTR    The call was interrupted by a signal handler.
+ *   EIDRM    The queue was removed while the caller waited.
  *
  ****************************************************************************/
 
@@ -203,6 +204,7 @@ int msgsnd(int msqid, FAR const void *msgp, size_t msgsz, int msgflg);
  *   ENOMSG  IPC_NOWAIT is set and the queue has no message of the
  *           requested type.
  *   EINTR   The call was interrupted by a signal handler.
+ *   EIDRM   The queue was removed while the caller waited.
  *
  ****************************************************************************/
 

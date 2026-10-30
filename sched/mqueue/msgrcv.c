@@ -45,6 +45,7 @@ static int msgrcv_wait(FAR struct msgq_s *msgq, FAR struct msgbuf_s **rcvmsg,
   FAR struct msgbuf_s *newmsg = NULL;
   FAR struct msgbuf_s *tmp;
   FAR struct tcb_s *rtcb;
+  key_t key = msgq->key;
 
 #ifdef CONFIG_CANCELLATION_POINTS
   /* msgrcv_wait() is not a cancellation point, but it may be called
@@ -160,6 +161,13 @@ static int msgrcv_wait(FAR struct msgq_s *msgq, FAR struct msgbuf_s **rcvmsg,
         {
           return -rtcb->errcode;
         }
+
+      /* msgctl(IPC_RMID) may have freed the queue before this task ran */
+
+      if (nxmsg_lookup(key) != msgq)
+        {
+          return -EIDRM;
+        }
     }
 
 found:
@@ -200,6 +208,7 @@ found:
  *   ENOMSG  IPC_NOWAIT is set and the queue has no message of the
  *           requested type.
  *   EINTR   The call was interrupted by a signal handler.
+ *   EIDRM   The queue was removed while the caller waited.
  *
  ****************************************************************************/
 

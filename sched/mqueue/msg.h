@@ -96,7 +96,7 @@ int nxmsg_alloc(FAR struct msgq_s **pmsgq);
  * Name: nxmsg_free
  *
  * Description:
- *   Free the message queue instance
+ *   Remove the message queue, wake up its waiters with EIDRM and free it
  *
  ****************************************************************************/
 
