@@ -74,10 +74,16 @@ PROVIDE(__start3 = 0x80900000);
 PROVIDE(__start4 = 0x80c00000);
 PROVIDE(__start5 = 0x80f00000);
 
+#ifdef CONFIG_ARCH_IRQPRIO
+#  define INTTAB_OFFSET 0x20
+#else
+#  define INTTAB_OFFSET 0x1fe0
+#endif
+
 SECTIONS
 {
-  /* Reset entry at +0, full BIV table at +0x20, trap table at +0x2000,
-   * and text at +0x2100.
+  /* Reset entry at +0, full BIV table at +0x20, single-entry BIV at
+   * +0x1fe0, trap table at +0x2000, and text at +0x2100.
    */
 
   .start ORIGIN(pfls) :
@@ -91,9 +97,13 @@ SECTIONS
     KEEP(*(.traptab))
   } > pfls
 
-  .intvec ORIGIN(pfls) + 0x20 :
+  .intvec ORIGIN(pfls) + INTTAB_OFFSET :
   {
+#ifdef CONFIG_ARCH_IRQPRIO
     __INTTAB_CPU0 = ORIGIN(pfls);
+#else
+    __INTTAB_CPU0 = ORIGIN(pfls) + INTTAB_OFFSET;
+#endif
     KEEP(*(.inttab))
   } > pfls
 
