@@ -93,6 +93,10 @@
 #define STM32_TIM6_CLKIN        (2 * STM32_PCLK1_FREQUENCY)
 #define STM32_TIM7_CLKIN        (2 * STM32_PCLK1_FREQUENCY)
 
+/* LPTIM kernel clock (RCC_CCIPR LPTIM1SEL reset value): APB (PCLK1) */
+
+#define STM32_LPTIM1_CLKIN      STM32_PCLK1_FREQUENCY
+
 /* 48MHz clock configuration */
 
 #if defined(CONFIG_STM32_USB) || defined(CONFIG_STM32_RNG)
