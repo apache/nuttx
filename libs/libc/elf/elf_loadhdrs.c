@@ -61,6 +61,7 @@ int libelf_loadhdrs(FAR struct mod_loadinfo_s *loadinfo)
   size_t shdrsize;
   size_t phdrsize;
   int ret;
+  int i;
 
   DEBUGASSERT(loadinfo->shdr == NULL);
   DEBUGASSERT(loadinfo->phdr == NULL);
@@ -117,6 +118,21 @@ int libelf_loadhdrs(FAR struct mod_loadinfo_s *loadinfo)
   if (ret < 0)
     {
       berr("ERROR: Failed to read section header table: %d\n", ret);
+    }
+  else
+    {
+      /* sh_addralign 0 and 1 both mean no alignment (ELF specification).
+       * Use 1 for 0, so that ALIGN_UP() can take the value when the
+       * sections are sized and loaded.
+       */
+
+      for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
+        {
+          if (loadinfo->shdr[i].sh_addralign == 0)
+            {
+              loadinfo->shdr[i].sh_addralign = 1;
+            }
+        }
     }
 
   if (loadinfo->ehdr.e_phnum > 0)
