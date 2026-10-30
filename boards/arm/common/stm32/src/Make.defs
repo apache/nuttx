@@ -118,6 +118,10 @@ ifeq ($(CONFIG_PWM),y)
   endif
 endif
 
+ifneq ($(CONFIG_TIMER)$(CONFIG_ONESHOT),)
+  CSRCS += board_timer.c
+endif
+
 ifeq ($(CONFIG_SENSORS_HALL3PHASE),y)
   CSRCS += board_hall3ph.c
 endif

@@ -104,6 +104,10 @@ if(CONFIG_PWM AND NOT EXISTS ${NUTTX_BOARD_DIR}/src/stm32_pwm.c)
   list(APPEND SRCS board_pwm.c)
 endif()
 
+if(CONFIG_TIMER OR CONFIG_ONESHOT)
+  list(APPEND SRCS board_timer.c)
+endif()
+
 if(CONFIG_SENSORS_INA219)
   list(APPEND SRCS stm32_ina219.c)
 endif()
