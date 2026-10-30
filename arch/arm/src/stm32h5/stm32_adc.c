@@ -2106,19 +2106,19 @@ static int adc12_interrupt(int irq, void *context, void *arg)
 
 #ifdef CONFIG_STM32_ADC1
   regval  = getreg32(STM32_ADC1_ISR);
-  pending = regval & ADC_INT_MASK;
+  pending = regval & getreg32(STM32_ADC1_IER) & ADC_INT_MASK;
   if (pending != 0)
     {
-      adc_interrupt(&g_adcdev1, regval);
+      adc_interrupt(&g_adcdev1, pending);
     }
 #endif
 
 #ifdef CONFIG_STM32_ADC2
   regval  = getreg32(STM32_ADC2_ISR);
-  pending = regval & ADC_INT_MASK;
+  pending = regval & getreg32(STM32_ADC2_IER) & ADC_INT_MASK;
   if (pending != 0)
     {
-      adc_interrupt(&g_adcdev2, regval);
+      adc_interrupt(&g_adcdev2, pending);
     }
 #endif
 
