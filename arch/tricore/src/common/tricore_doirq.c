@@ -47,6 +47,8 @@
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_IRQPRIO
+
 /****************************************************************************
  * Name: tricore_irq_direct
  *
@@ -63,9 +65,7 @@ static void tricore_irq_direct(uintptr_t *regs, int ccpn)
   struct tcb_s **running_task = &g_running_tasks[this_cpu()];
   int irq;
 
-#ifdef CONFIG_ARCH_IRQPRIO
   up_irq_enable();
-#endif
 
   irq = tricore_srpn_to_irq(ccpn);
   tricore_ack_irq(irq);
@@ -81,24 +81,31 @@ static void tricore_irq_direct(uintptr_t *regs, int ccpn)
     }
 }
 
+#endif /* CONFIG_ARCH_IRQPRIO */
+
 /****************************************************************************
  * Name: tricore_irq_sched
  *
  * Description:
- *   Scheduling GPSR path for context switch (analogous to arm_doirq).
- *   This is triggered by tricore_irq_direct when it detects that a
- *   context switch is needed.
+ *   Context-switch interrupt path. Two dispatch schemes share this path
+ *   with different roles, selected by CONFIG_ARCH_IRQPRIO.
  *
- *   Because the GPSR SRPN is the lowest priority, this only executes
- *   after all normal interrupts have completed, guaranteeing safe
- *   context switch without race conditions.
+ *   CONFIG_ARCH_IRQPRIO=y:
+ *     SRPN 1 -> tricore_irq_sched (lowest priority, task switch only),
+ *     SRPN 2~MAX -> tricore_irq_direct (fast dispatch, nestable).
+ *   CONFIG_ARCH_IRQPRIO=n:
+ *     tricore_irq_sched does dispatch and task switch for all IRQs.
+ *     No nesting support and no scheduling GPSR.
  *
  ****************************************************************************/
 
-static void tricore_irq_sched(uintptr_t *regs)
+static void tricore_irq_sched(uintptr_t *regs, int ccpn)
 {
   struct tcb_s **running_task = &g_running_tasks[this_cpu()];
   struct tcb_s *tcb;
+#ifndef CONFIG_ARCH_IRQPRIO
+  int irq;
+#endif
 
 #ifdef CONFIG_ARCH_IRQPRIO
   up_irq_enable();
@@ -110,6 +117,14 @@ static void tricore_irq_sched(uintptr_t *regs)
     }
 
   board_autoled_on(LED_INIRQ);
+
+#ifndef CONFIG_ARCH_IRQPRIO
+  irq = tricore_srpn_to_irq(ccpn);
+  tricore_ack_irq(irq);
+  irq_dispatch(irq, regs);
+#else
+  UNUSED(ccpn);
+#endif
 
   tcb = this_task();
 
@@ -163,12 +178,13 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
   icr.U = tricore_mfcr(CPU_ICR);
   regs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
 
-  if (icr.B.CCPN == TRICORE_IRQ_MIN_PRIORITY)
-    {
-      tricore_irq_sched(regs);
-    }
-  else
+#ifdef CONFIG_ARCH_IRQPRIO
+  if (icr.B.CCPN != TRICORE_IRQ_MIN_PRIORITY)
     {
       tricore_irq_direct(regs, icr.B.CCPN);
+      return;
     }
+#endif
+
+  tricore_irq_sched(regs, icr.B.CCPN);
 }

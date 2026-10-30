@@ -164,12 +164,14 @@ int tricore_irq_to_srpn(int irq)
 
   /* Scheduling GPSR always gets the lowest priority */
 
+#ifdef CONFIG_ARCH_IRQPRIO
   if (irq == TRICORE_SCHEDIRQ)
     {
       g_srpn_to_irq[TRICORE_IRQ_MIN_PRIORITY] = irq;
 
       return TRICORE_IRQ_MIN_PRIORITY;
     }
+#endif
 
   /* Lookup: search the full SRPN range [MIN + 1, MAX] */
 
@@ -270,7 +272,11 @@ void up_irqinitialize(void)
 #endif
 
   tricore_color_intstack();
+
+#ifdef CONFIG_ARCH_IRQPRIO
   up_enable_irq(TRICORE_SCHEDIRQ);
+#endif
+
   up_irq_enable();
 }
 
