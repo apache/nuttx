@@ -320,16 +320,10 @@ static void memdump_dump_biggestnodes(FAR struct mm_memdump_priv_s *priv)
 static void memdump_backtrace(FAR struct mm_heap_s *heap,
                               FAR struct memdump_backtrace_s *buf)
 {
-#  if CONFIG_MM_BACKTRACE > 0
-  FAR struct tcb_s *tcb;
-#  endif
-
   buf->pid = _SCHED_GETTID();
   MM_INCSEQNO(buf);
 #  if CONFIG_MM_BACKTRACE > 0
-  tcb = nxsched_get_tcb(buf->pid);
-  if (heap->mm_procfs.backtrace ||
-      (tcb && tcb->flags & TCB_FLAG_HEAP_DUMP))
+  if (heap->mm_procfs.backtrace)
     {
       int ret = sched_backtrace(buf->pid, buf->backtrace,
                                 CONFIG_MM_BACKTRACE,
@@ -1285,7 +1279,9 @@ void mm_memdump(FAR struct mm_heap_s *heap,
       else
         {
           name = "Unknown";
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
           tcb  = nxsched_get_tcb(pid);
+#endif
         }
 
       if (tcb == NULL)

@@ -61,11 +61,9 @@
 #  define MM_ADD_BACKTRACE(heap, ptr) \
      do { \
          FAR struct mm_allocnode_s *tmp = (FAR struct mm_allocnode_s *)(ptr); \
-         FAR struct tcb_s *tcb; \
          pid_t tid = _SCHED_GETTID(); \
          tmp->pid = tid; \
-         tcb = nxsched_get_tcb(tid); \
-         if ((heap)->procfs.backtrace || (tcb && tcb->flags & TCB_FLAG_HEAP_DUMP)) { \
+         if ((heap)->procfs.backtrace) { \
              int n = sched_backtrace(tid, tmp->backtrace, CONFIG_MM_BACKTRACE, \
                                      CONFIG_MM_BACKTRACE_SKIP); \
              if (n < CONFIG_MM_BACKTRACE) { \
@@ -74,7 +72,6 @@
          } else { \
              tmp->backtrace[0] = NULL; \
          } \
-         if (tcb) nxsched_put_tcb(tcb); \
          MM_INCSEQNO(tmp); \
      } while (0)
 

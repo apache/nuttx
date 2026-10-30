@@ -33,6 +33,7 @@
 #include <sys/types.h>
 #include <stdbool.h>
 #include <malloc.h>
+#include <signal.h>
 #include <string.h>
 
 /****************************************************************************
@@ -170,7 +171,7 @@
     ((node) != NULL && (dump)->pid == (node)->pid)
 #  define MM_DUMP_LEAK(dump, node) \
     ((node) != NULL && (dump)->pid == PID_MM_LEAK && (node)->pid >= 0 && \
-     nxsched_get_tcb((node)->pid) == NULL)
+     kill((node)->pid, 0) != 0)
 #else
 #  define MM_DUMP_ALLOC(dump,node)  ((dump)->pid == PID_MM_ALLOC)
 #  define MM_DUMP_SEQNO(dump,node)  (true)
