@@ -130,6 +130,11 @@
 #define STM32_TIM16_CLKIN  (2 * STM32_PCLK1_FREQUENCY)
 #define STM32_TIM17_CLKIN  (2 * STM32_PCLK1_FREQUENCY)
 
+/* LPTIM kernel clocks (RCC_CCIPR LPTIMxSEL reset values): PCLK */
+
+#define STM32_LPTIM1_CLKIN STM32_PCLK1_FREQUENCY
+#define STM32_LPTIM2_CLKIN STM32_PCLK1_FREQUENCY
+
 /* LED definitions **********************************************************/
 
 /* The Nucleo LO73RZ board has three LEDs.  Two of these are controlled by
