@@ -44,6 +44,8 @@
 #define TRICORE_SRC_BASE         0xf4432000  /* SRC_CPU0SB, IRQ 0 */
 #define TRICORE_SRC_GPSR_BASE    0xf4433460  /* SRC_GPSR0SR0 */
 #define TRICORE_INT_SRB_BASE     0xf4430b00  /* INT_SRB0 */
+#define TRICORE_INT_LASR_BASE    0xf4430c20  /* INT_LASR0 */
+#define TRICORE_INT_LASR_SPACING 0x34        /* INT_LASRn spacing */
 
 #define TRICORE_SRC_SRPN_MASK    0xff        /* Service request priority */
 #define TRICORE_SRC_VM_MASK      (0x7 << 8)  /* Virtual machine */
