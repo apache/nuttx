@@ -1373,6 +1373,15 @@
 
 #elif defined(__TASKING__)
 
+/* Map the GCC keyword spellings: the TASKING VX-toolset accepts
+ * __asm, asm and the __asm volatile sequence, but neither __asm__
+ * nor __volatile__ nor the asm volatile sequence, so redirect the
+ * double underscore spellings to __asm and plain volatile.
+ */
+
+#  define __asm__       __asm
+#  define __volatile__  volatile
+
 /* Define these here and allow specific architectures to override as needed */
 
 #  define CONFIG_HAVE_FLOAT             1
