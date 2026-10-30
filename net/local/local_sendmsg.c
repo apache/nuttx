@@ -30,6 +30,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <assert.h>
 #include <nuttx/debug.h>
 
@@ -137,6 +138,101 @@ fail:
   return ret;
 }
 #endif /* CONFIG_NET_LOCAL_SCM */
+
+/****************************************************************************
+ * Name: local_pair_send
+ *
+ * Description:
+ *   Send one datagram, whole or not at all, to the peer of a SOCK_DGRAM
+ *   socket pair: the header that psock_dgram_recvfrom() reads (address
+ *   length 0, datagram length), then the data.
+ *
+ * Input Parameters:
+ *   conn     The connection of the sender
+ *   buf      Data to send
+ *   len      Number of entries in buf
+ *   flags    Send flags
+ *
+ * Returned Value:
+ *   The length of the datagram, or a negated errno value: EMSGSIZE when
+ *   the datagram does not fit into the FIFO, ECONNREFUSED when the peer
+ *   was closed.
+ *
+ * Assumptions:
+ *   The caller holds lc_sendlock.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_LOCAL_DGRAM
+static ssize_t local_pair_send(FAR struct local_conn_s *conn,
+                               FAR const struct iovec *buf, size_t len,
+                               int flags)
+{
+  FAR const struct iovec *end = buf + len;
+  FAR const struct iovec *iov;
+  lc_size_t header[2];
+  struct iovec hdriov;
+  size_t pktlen = 0;
+  int space;
+  int ret;
+
+  for (iov = buf; iov != end; iov++)
+    {
+      pktlen += iov->iov_len;
+    }
+
+  ret = file_ioctl(&conn->lc_outfile, PIPEIOC_GETSIZE, 0);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (pktlen + sizeof(header) > ret)
+    {
+      return -EMSGSIZE;
+    }
+
+  if ((flags & MSG_DONTWAIT) != 0 ||
+      (conn->lc_outfile.f_oflags & O_NONBLOCK) != 0)
+    {
+      ret = file_ioctl(&conn->lc_outfile, FIONSPACE, &space);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      if (space < pktlen + sizeof(header))
+        {
+          return -EAGAIN;
+        }
+    }
+
+  header[0]       = 0;
+  header[1]       = pktlen;
+  hdriov.iov_base = header;
+  hdriov.iov_len  = sizeof(header);
+
+  ret = local_send_packet(&conn->lc_outfile, &hdriov, 1);
+  if (ret == sizeof(header) && pktlen > 0)
+    {
+      ret = local_send_packet(&conn->lc_outfile, buf, len);
+    }
+  else if (ret == sizeof(header))
+    {
+      ret = 0;
+    }
+  else if (ret >= 0)
+    {
+      ret = -EPIPE;
+    }
+
+  /* -EPIPE: the peer was closed.  A datagram socket reports that as
+   * Linux does, and without SIGPIPE.
+   */
+
+  return ret == -EPIPE ? -ECONNREFUSED : ret;
+}
+#endif /* CONFIG_NET_LOCAL_DGRAM */
 
 /****************************************************************************
  * Name: local_sendto
@@ -392,6 +488,26 @@ static ssize_t local_send(FAR struct socket *psock,
       case SOCK_DGRAM:
         {
           FAR struct local_conn_s *conn = psock->s_conn;
+
+          /* One of a socket pair: the FIFO to the peer is open */
+
+          if (conn->lc_state == LOCAL_STATE_CONNECTED)
+            {
+              if (conn->lc_outfile.f_inode == NULL)
+                {
+                  return -EPIPE;
+                }
+
+              ret = nxmutex_lock(&conn->lc_sendlock);
+              if (ret < 0)
+                {
+                  return ret;
+                }
+
+              ret = local_pair_send(conn, buf, len, flags);
+              nxmutex_unlock(&conn->lc_sendlock);
+              break;
+            }
 
           if (!conn->lc_dconnected)
             {
