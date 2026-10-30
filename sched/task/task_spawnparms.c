@@ -227,7 +227,16 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
       param.sched_ss_init_budget.tv_sec  = attr->budget.tv_sec;
       param.sched_ss_init_budget.tv_nsec = attr->budget.tv_nsec;
 #endif
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
       ret = nxsched_set_scheduler(pid, attr->policy, &param);
+#else
+      /* SCHED_FIFO is the only policy and SCHED_OTHER maps to it, so only
+       * the priority can change.
+       */
+
+      ret = attr->policy == SCHED_FIFO || attr->policy == SCHED_OTHER ?
+            nxsched_set_param(pid, &param) : -EINVAL;
+#endif
     }
 
   return ret;
