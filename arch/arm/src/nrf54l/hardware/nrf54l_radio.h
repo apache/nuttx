@@ -55,6 +55,9 @@
 #define NRF54L_RADIO_TASKS_CCASTART_OFFSET   0x0028                 /* Start the clear channel assessment used in IEEE 802.15.4 mode */
 #define NRF54L_RADIO_TASKS_CCASTOP_OFFSET    0x002c                 /* Stop the clear channel assessment */
 #define NRF54L_RADIO_TASKS_SOFTRESET_OFFSET  0x00a4                 /* Reset all public registers */
+#define NRF54L_RADIO_SUBSCRIBE_TXEN_OFFSET   0x0100                 /* Subscribe configuration for task TXEN */
+#define NRF54L_RADIO_SUBSCRIBE_RXEN_OFFSET   0x0104                 /* Subscribe configuration for task RXEN */
+#define NRF54L_RADIO_SUBSCRIBE_DISABLE_OFFSET 0x0110                /* Subscribe configuration for task DISABLE */
 #define NRF54L_RADIO_EVENTS_READY_OFFSET     0x0200                 /* RADIO has ramped up and is ready to be started */
 #define NRF54L_RADIO_EVENTS_TXREADY_OFFSET   0x0204                 /* RADIO has ramped up and is ready to be started TX path */
 #define NRF54L_RADIO_EVENTS_RXREADY_OFFSET   0x0208                 /* RADIO has ramped up and is ready to be started RX path */
@@ -77,6 +80,13 @@
 #define NRF54L_RADIO_EVENTS_RATEBOOST_OFFSET 0x0250                 /* Ble_LR CI field received */
 #define NRF54L_RADIO_EVENTS_MHRMATCH_OFFSET  0x0254                 /* MAC header match found */
 #define NRF54L_RADIO_EVENTS_SYNC_OFFSET      0x0258                 /* Possible preamble received */
+#define NRF54L_RADIO_PUBLISH_READY_OFFSET    0x0300                 /* Publish configuration for event READY */
+#define NRF54L_RADIO_PUBLISH_ADDRESS_OFFSET  0x030c                 /* Publish configuration for event ADDRESS */
+#define NRF54L_RADIO_PUBLISH_PAYLOAD_OFFSET  0x0314                 /* Publish configuration for event PAYLOAD */
+#define NRF54L_RADIO_PUBLISH_END_OFFSET      0x0318                 /* Publish configuration for event END */
+#define NRF54L_RADIO_PUBLISH_PHYEND_OFFSET   0x031c                 /* Publish configuration for event PHYEND */
+#define NRF54L_RADIO_PUBLISH_DISABLED_OFFSET 0x0320                 /* Publish configuration for event DISABLED */
+#define NRF54L_RADIO_PUBLISH_BCMATCH_OFFSET  0x0338                 /* Publish configuration for event BCMATCH */
 #define NRF54L_RADIO_SHORTS_OFFSET           0x0400                 /* Shortcuts between local events and tasks */
 #define NRF54L_RADIO_INTENSET00_OFFSET       0x0488                 /* Enable interrupt */
 #define NRF54L_RADIO_INTENCLR00_OFFSET       0x0490                 /* Disable interrupt */
@@ -131,6 +141,9 @@
 #define NRF54L_RADIO_TASKS_CCASTART      (NRF54L_RADIO_BASE + NRF54L_RADIO_TASKS_CCASTART_OFFSET)
 #define NRF54L_RADIO_TASKS_CCASTOP       (NRF54L_RADIO_BASE + NRF54L_RADIO_TASKS_CCASTOP_OFFSET)
 #define NRF54L_RADIO_TASKS_SOFTRESET     (NRF54L_RADIO_BASE + NRF54L_RADIO_TASKS_SOFTRESET_OFFSET)
+#define NRF54L_RADIO_SUBSCRIBE_TXEN      (NRF54L_RADIO_BASE + NRF54L_RADIO_SUBSCRIBE_TXEN_OFFSET)
+#define NRF54L_RADIO_SUBSCRIBE_RXEN      (NRF54L_RADIO_BASE + NRF54L_RADIO_SUBSCRIBE_RXEN_OFFSET)
+#define NRF54L_RADIO_SUBSCRIBE_DISABLE   (NRF54L_RADIO_BASE + NRF54L_RADIO_SUBSCRIBE_DISABLE_OFFSET)
 #define NRF54L_RADIO_EVENTS_READY        (NRF54L_RADIO_BASE + NRF54L_RADIO_EVENTS_READY_OFFSET)
 #define NRF54L_RADIO_EVENTS_TXREADY      (NRF54L_RADIO_BASE + NRF54L_RADIO_EVENTS_TXREADY_OFFSET)
 #define NRF54L_RADIO_EVENTS_RXREADY      (NRF54L_RADIO_BASE + NRF54L_RADIO_EVENTS_RXREADY_OFFSET)
@@ -153,6 +166,13 @@
 #define NRF54L_RADIO_EVENTS_RATEBOOST    (NRF54L_RADIO_BASE + NRF54L_RADIO_EVENTS_RATEBOOST_OFFSET)
 #define NRF54L_RADIO_EVENTS_MHRMATCH     (NRF54L_RADIO_BASE + NRF54L_RADIO_EVENTS_MHRMATCH_OFFSET)
 #define NRF54L_RADIO_EVENTS_SYNC         (NRF54L_RADIO_BASE + NRF54L_RADIO_EVENTS_SYNC_OFFSET)
+#define NRF54L_RADIO_PUBLISH_READY       (NRF54L_RADIO_BASE + NRF54L_RADIO_PUBLISH_READY_OFFSET)
+#define NRF54L_RADIO_PUBLISH_ADDRESS     (NRF54L_RADIO_BASE + NRF54L_RADIO_PUBLISH_ADDRESS_OFFSET)
+#define NRF54L_RADIO_PUBLISH_PAYLOAD     (NRF54L_RADIO_BASE + NRF54L_RADIO_PUBLISH_PAYLOAD_OFFSET)
+#define NRF54L_RADIO_PUBLISH_END         (NRF54L_RADIO_BASE + NRF54L_RADIO_PUBLISH_END_OFFSET)
+#define NRF54L_RADIO_PUBLISH_PHYEND      (NRF54L_RADIO_BASE + NRF54L_RADIO_PUBLISH_PHYEND_OFFSET)
+#define NRF54L_RADIO_PUBLISH_DISABLED    (NRF54L_RADIO_BASE + NRF54L_RADIO_PUBLISH_DISABLED_OFFSET)
+#define NRF54L_RADIO_PUBLISH_BCMATCH     (NRF54L_RADIO_BASE + NRF54L_RADIO_PUBLISH_BCMATCH_OFFSET)
 #define NRF54L_RADIO_SHORTS              (NRF54L_RADIO_BASE + NRF54L_RADIO_SHORTS_OFFSET)
 #define NRF54L_RADIO_INTENSET00          (NRF54L_RADIO_BASE + NRF54L_RADIO_INTENSET00_OFFSET)
 #define NRF54L_RADIO_INTENCLR00          (NRF54L_RADIO_BASE + NRF54L_RADIO_INTENCLR00_OFFSET)
@@ -193,6 +213,15 @@
 #define NRF54L_RADIO_PACKETPTR           (NRF54L_RADIO_BASE + NRF54L_RADIO_PACKETPTR_OFFSET)
 
 /* Register Bitfield Definitions ********************************************/
+
+/* SUBSCRIBE and PUBLISH Registers */
+
+#define RADIO_SUBSCRIBE_CHIDX_SHIFT     (0)         /* Bits 0-7: DPPI channel */
+#define RADIO_SUBSCRIBE_CHIDX_MASK      (0xff << RADIO_SUBSCRIBE_CHIDX_SHIFT)
+#define RADIO_SUBSCRIBE_EN              (1 << 31)   /* Bit 31: Enable subscription */
+#define RADIO_PUBLISH_CHIDX_SHIFT       (0)         /* Bits 0-7: DPPI channel */
+#define RADIO_PUBLISH_CHIDX_MASK        (0xff << RADIO_PUBLISH_CHIDX_SHIFT)
+#define RADIO_PUBLISH_EN                (1 << 31)   /* Bit 31: Enable publishing */
 
 /* SHORTS Register */
 
@@ -280,7 +309,33 @@
 
 #define RADIO_TXPOWER_SHIFT               (0)      /* Bits 0-10: RADIO output power */
 #define RADIO_TXPOWER_MASK                (0x7ff << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_NEG46DBM          (0x110 << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_NEG40DBM          (0x130 << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_NEG28DBM          (0x001 << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_NEG20DBM          (0x002 << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_NEG18DBM          (0x003 << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_NEG16DBM          (0x004 << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_NEG14DBM          (0x005 << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_NEG12DBM          (0x006 << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_NEG10DBM          (0x007 << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_NEG9DBM           (0x008 << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_NEG8DBM           (0x009 << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_NEG7DBM           (0x00a << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_NEG6DBM           (0x00b << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_NEG5DBM           (0x00d << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_NEG4DBM           (0x00f << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_NEG3DBM           (0x011 << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_NEG2DBM           (0x013 << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_NEG1DBM           (0x015 << RADIO_TXPOWER_SHIFT)
 #  define RADIO_TXPOWER_0DBM              (0x018 << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_POS1DBM           (0x01b << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_POS2DBM           (0x01f << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_POS3DBM           (0x023 << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_POS4DBM           (0x028 << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_POS5DBM           (0x02d << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_POS6DBM           (0x033 << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_POS7DBM           (0x039 << RADIO_TXPOWER_SHIFT)
+#  define RADIO_TXPOWER_POS8DBM           (0x03f << RADIO_TXPOWER_SHIFT)
 #  define RADIO_TXPOWER_MAXDBM            (0x03f << RADIO_TXPOWER_SHIFT)
 
 /* MODE Register */
@@ -430,6 +485,7 @@
 #define RADIO_DATAWHITE_IV_MAX            (0x1ff)
 #define RADIO_DATAWHITE_POLY_SHIFT        (16)    /* Bits 16-25: Data whitening polynomial */
 #define RADIO_DATAWHITE_POLY_MASK         (0x3ff << RADIO_DATAWHITE_POLY_SHIFT)
+#define RADIO_DATAWHITE_POLY_BLE          (0x089 << RADIO_DATAWHITE_POLY_SHIFT) /* Reset value */
 
 /* DAP Register */
 
