@@ -106,7 +106,6 @@
 #define TCB_FLAG_EXIT_PROCESSING   (1 << 8)                      /* Bit 8: Exiting */
 #define TCB_FLAG_FREE_STACK        (1 << 9)                      /* Bit 9: Free stack after exit */
 #define TCB_FLAG_HEAP_CHECK        (1 << 10)                     /* Bit 10: Heap check */
-#define TCB_FLAG_HEAP_DUMP         (1 << 11)                     /* Bit 11: Heap dump */
 #define TCB_FLAG_DETACHED          (1 << 12)                     /* Bit 12: Pthread detached */
 #define TCB_FLAG_FORCED_CANCEL     (1 << 13)                     /* Bit 13: Pthread cancel is forced */
 #define TCB_FLAG_JOIN_COMPLETED    (1 << 14)                     /* Bit 14: Pthread join completed */

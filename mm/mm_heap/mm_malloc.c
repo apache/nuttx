@@ -375,7 +375,9 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
             minfo.arena, minfo.uordblks, minfo.fordblks,
             minfo.mxordblk, minfo.aordblks, minfo.ordblks);
 #  if CONFIG_MM_BACKTRACE >= 0
+#    if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
       nxsched_foreach(mm_dump_handler, heap);
+#    endif
       mm_dump_handler(NULL, heap);
 #  endif
 #  ifdef CONFIG_MM_HEAP_MEMPOOL

@@ -499,9 +499,6 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
 #if CONFIG_MM_BACKTRACE >= 0
   FAR char *p;
 #endif
-#if CONFIG_MM_BACKTRACE > 0
-  FAR struct tcb_s *tcb;
-#endif
 
   DEBUGASSERT(buffer != NULL && buflen > 0);
 
@@ -527,32 +524,6 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
           entry->backtrace = false;
         }
 
-      return buflen;
-    }
-  else if ((p = strstr(buffer, "on")) != NULL)
-    {
-      *p = '\0';
-      dump.pid = atoi(buffer);
-      tcb = nxsched_get_tcb(dump.pid);
-      if (tcb == NULL)
-        {
-          return -EINVAL;
-        }
-
-      tcb->flags |= TCB_FLAG_HEAP_DUMP;
-      return buflen;
-    }
-  else if ((p = strstr(buffer, "off")) != NULL)
-    {
-      *p = '\0';
-      dump.pid = atoi(buffer);
-      tcb = nxsched_get_tcb(dump.pid);
-      if (tcb == NULL)
-        {
-          return -EINVAL;
-        }
-
-      tcb->flags &= ~TCB_FLAG_HEAP_DUMP;
       return buflen;
     }
 #endif

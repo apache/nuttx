@@ -86,10 +86,8 @@
      do \
        { \
          FAR struct mm_allocnode_s *tmp = (FAR struct mm_allocnode_s *)(ptr); \
-         FAR struct tcb_s *tcb; \
          tmp->pid = _SCHED_GETTID(); \
-         tcb = nxsched_get_tcb(tmp->pid); \
-         if ((heap)->mm_procfs.backtrace || (tcb && tcb->flags & TCB_FLAG_HEAP_DUMP)) \
+         if ((heap)->mm_procfs.backtrace) \
            { \
              int n = sched_backtrace(tmp->pid, tmp->backtrace, CONFIG_MM_BACKTRACE, \
                                      CONFIG_MM_BACKTRACE_SKIP); \
