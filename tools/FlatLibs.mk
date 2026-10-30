@@ -143,6 +143,10 @@ ifeq ($(CONFIG_LIBDSP),y)
 NUTTXLIBS += staging$(DELIM)libdsp$(LIBEXT)
 endif
 
+ifeq ($(CONFIG_BT),y)
+NUTTXLIBS += staging$(DELIM)libzblue$(LIBEXT)
+endif
+
 ifeq ($(CONFIG_OPENAMP),y)
 NUTTXLIBS += staging$(DELIM)libopenamp$(LIBEXT)
 endif

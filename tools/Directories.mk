@@ -175,6 +175,12 @@ else
 CLEANDIRS += libs$(DELIM)libdsp
 endif
 
+ifeq ($(CONFIG_BT),y)
+KERNDEPDIRS += libs$(DELIM)zblue
+else
+CLEANDIRS += libs$(DELIM)zblue
+endif
+
 # Add networking directories to KERNDEPDIRS and CLEANDIRS
 
 ifeq ($(CONFIG_NET),y)

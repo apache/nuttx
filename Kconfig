@@ -3050,6 +3050,7 @@ endmenu
 
 menu "Wireless Support"
 source "wireless/Kconfig"
+source "libs/zblue/Kconfig"
 endmenu
 
 menu "Binary Loader"

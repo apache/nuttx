@@ -1,0 +1,197 @@
+############################################################################
+# libs/zblue/mesh/Make.defs
+#
+# Author: chao an <magicdcps@hotmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+ifeq ($(CONFIG_BT_MESH),y)
+
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/main.c $(TOPDIR)/libs/zblue/mesh/cfg.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/adv.c $(TOPDIR)/libs/zblue/mesh/beacon.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/net.c $(TOPDIR)/libs/zblue/mesh/subnet.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/app_keys.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/heartbeat.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/crypto.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/crypto_psa.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/access.c $(TOPDIR)/libs/zblue/mesh/msg.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/cfg_srv.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/health_srv.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/va.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/transport.c
+
+ifeq ($(CONFIG_BT_MESH_ADV_LEGACY),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/adv_legacy.c
+endif
+ifeq ($(CONFIG_BT_MESH_ADV_EXT),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/adv_ext.c
+endif
+ifeq ($(CONFIG_BT_SETTINGS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/settings.c
+endif
+ifeq ($(CONFIG_BT_MESH_RPL_STORAGE_MODE_SETTINGS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/rpl.c
+endif
+ifeq ($(CONFIG_BT_MESH_LOW_POWER),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/lpn.c
+endif
+ifeq ($(CONFIG_BT_MESH_FRIEND),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/friend.c
+endif
+ifeq ($(CONFIG_BT_MESH_PROV),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/prov.c
+endif
+ifeq ($(CONFIG_BT_MESH_PROVISIONEE),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/provisionee.c
+endif
+ifeq ($(CONFIG_BT_MESH_PROVISIONER),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/provisioner.c
+endif
+ifeq ($(CONFIG_BT_MESH_PB_ADV),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/pb_adv.c
+endif
+ifeq ($(CONFIG_BT_MESH_PB_GATT_COMMON),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/pb_gatt.c
+endif
+ifeq ($(CONFIG_BT_MESH_PB_GATT),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/pb_gatt_srv.c
+endif
+ifeq ($(CONFIG_BT_MESH_PB_GATT_CLIENT),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/pb_gatt_cli.c
+endif
+ifeq ($(CONFIG_BT_MESH_GATT_CLIENT),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/gatt_cli.c
+endif
+ifeq ($(CONFIG_BT_MESH_PROXY_CLIENT),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/proxy_cli.c
+endif
+ifeq ($(CONFIG_BT_MESH_GATT_PROXY),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/proxy_srv.c
+endif
+ifeq ($(CONFIG_BT_MESH_GATT),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/proxy_msg.c
+endif
+ifeq ($(CONFIG_BT_MESH_CFG_CLI),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/cfg_cli.c
+endif
+ifeq ($(CONFIG_BT_MESH_HEALTH_CLI),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/health_cli.c
+endif
+ifeq ($(CONFIG_BT_MESH_SAR_CFG_CLI),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/sar_cfg_cli.c
+endif
+ifeq ($(CONFIG_BT_MESH_SAR_CFG_SRV),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/sar_cfg_srv.c
+endif
+ifeq ($(CONFIG_BT_MESH_SAR_CFG),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/sar_cfg.c
+endif
+ifeq ($(CONFIG_BT_MESH_OP_AGG_SRV),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/op_agg_srv.c
+endif
+ifeq ($(CONFIG_BT_MESH_OP_AGG_CLI),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/op_agg_cli.c
+endif
+ifeq ($(CONFIG_BT_MESH_OP_AGG),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/op_agg.c
+endif
+ifeq ($(CONFIG_BT_MESH_LARGE_COMP_DATA_SRV),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/large_comp_data_srv.c
+endif
+ifeq ($(CONFIG_BT_MESH_LARGE_COMP_DATA_CLI),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/large_comp_data_cli.c
+endif
+ifeq ($(CONFIG_BT_MESH_PRIV_BEACON_SRV),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/priv_beacon_srv.c
+endif
+ifeq ($(CONFIG_BT_MESH_PRIV_BEACON_CLI),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/priv_beacon_cli.c
+endif
+ifeq ($(CONFIG_BT_MESH_SELF_TEST),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/test.c
+endif
+ifeq ($(CONFIG_BT_MESH_CDB),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/cdb.c
+endif
+ifeq ($(CONFIG_BT_MESH_BLOB_SRV),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/blob_srv.c
+endif
+ifeq ($(CONFIG_BT_MESH_BLOB_CLI),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/blob_cli.c
+endif
+ifeq ($(CONFIG_BT_MESH_BLOB_IO_FLASH),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/blob_io_flash.c
+endif
+ifeq ($(CONFIG_BT_MESH_DFU_CLI),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/dfu_cli.c
+endif
+ifeq ($(CONFIG_BT_MESH_DFU_SRV),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/dfu_srv.c
+endif
+ifeq ($(CONFIG_BT_MESH_DFD_SRV),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/dfd_srv.c
+endif
+ifeq ($(CONFIG_BT_MESH_DFU_SLOTS),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/dfu_slot.c
+endif
+ifeq ($(CONFIG_BT_MESH_DFU_METADATA),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/dfu_metadata.c
+endif
+ifeq ($(CONFIG_BT_MESH_RPR_CLI),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/rpr_cli.c
+endif
+ifeq ($(CONFIG_BT_MESH_RPR_SRV),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/rpr_srv.c
+endif
+ifeq ($(CONFIG_BT_MESH_OD_PRIV_PROXY_CLI),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/od_priv_proxy_cli.c
+endif
+ifeq ($(CONFIG_BT_MESH_OD_PRIV_PROXY_SRV),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/od_priv_proxy_srv.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/sol_pdu_rpl_srv.c
+endif
+ifeq ($(CONFIG_BT_MESH_SOL_PDU_RPL_CLI),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/sol_pdu_rpl_cli.c
+endif
+ifeq ($(CONFIG_BT_MESH_BRG_CFG_CLI),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/brg_cfg_cli.c
+endif
+ifeq ($(CONFIG_BT_MESH_BRG_CFG_SRV),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/brg_cfg_srv.c
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/brg_cfg.c
+endif
+ifeq ($(CONFIG_BT_MESH_SOLICITATION),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/solicitation.c
+endif
+ifeq ($(CONFIG_BT_MESH_STATISTIC),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/statistic.c
+endif
+ifeq ($(CONFIG_BT_MESH_ACCESS_DELAYABLE_MSG),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/delayable_msg.c
+endif
+ifeq ($(CONFIG_BT_TESTING),y)
+BT_CSRCS += $(TOPDIR)/libs/zblue/mesh/testing.c
+endif
+
+VPATH += $(TOPDIR)/libs/zblue/mesh
+DEPPATH += --dep-path $(TOPDIR)/libs/zblue/mesh
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)/libs/zblue/mesh
+
+endif
