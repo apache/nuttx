@@ -101,6 +101,15 @@ config ARCH_IRQ_DISABLE_PRIORITY
 		Interrupts with SRPN > this value are treated as
 		high-priority and will not be masked.
 
+config ARCH_IRQ_MAX_PRIORITY
+	int "Number of interrupt vector table entries"
+	default 255
+	range 1 255
+	---help---
+		Number of entries generated in the interrupt vector table.
+		Hardware supports up to 255. Reduce to save flash on
+		resource-constrained cores.
+
 config ARCH_DCACHE_ADDR
 	hex "AURIX Dcache base address"
 	default 0x7003C000

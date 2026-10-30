@@ -72,6 +72,10 @@ static inline_function int tricore_irq_from_lasr(void)
   return (getreg32(addr) >> 16) & 0x7ff;
 }
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 #ifdef CONFIG_ARCH_IRQPRIO
 
 /****************************************************************************
@@ -85,8 +89,9 @@ static inline_function int tricore_irq_from_lasr(void)
  *
  ****************************************************************************/
 
-static void tricore_irq_direct(uintptr_t *regs)
+void tricore_irq_direct(void)
 {
+  uintptr_t *regs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
   struct tcb_s **running_task = &g_running_tasks[this_cpu()];
   int irq = tricore_irq_from_lasr();
 
@@ -103,6 +108,8 @@ static void tricore_irq_direct(uintptr_t *regs)
       CPU_SET(up_cpu_index(), &cpuset);
       up_trigger_irq(TRICORE_SCHEDIRQ, cpuset);
     }
+
+  __jumpBackToLink();
 }
 
 #endif /* CONFIG_ARCH_IRQPRIO */
@@ -123,8 +130,9 @@ static void tricore_irq_direct(uintptr_t *regs)
  *
  ****************************************************************************/
 
-static void tricore_irq_sched(uintptr_t *regs)
+void tricore_irq_sched(void)
 {
+  uintptr_t *regs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
   struct tcb_s **running_task = &g_running_tasks[this_cpu()];
   struct tcb_s *tcb;
 #ifndef CONFIG_ARCH_IRQPRIO
@@ -185,26 +193,6 @@ static void tricore_irq_sched(uintptr_t *regs)
 
   (*running_task)->xcp.regs = NULL;
   board_autoled_off(LED_INIRQ);
-}
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
-{
-  uintptr_t *regs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
-
-#ifdef CONFIG_ARCH_IRQPRIO
-  Ifx_CPU_ICR icr;
-
-  icr.U = tricore_mfcr(CPU_ICR);
-  if (icr.B.CCPN != TRICORE_IRQ_MIN_PRIORITY)
-    {
-      tricore_irq_direct(regs);
-      return;
-    }
-#endif
-
-  tricore_irq_sched(regs);
+  __jumpBackToLink();
 }

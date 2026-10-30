@@ -151,7 +151,7 @@
 #endif
 
 #define TRICORE_IRQ_MIN_PRIORITY 1
-#define TRICORE_IRQ_MAX_PRIORITY 255
+#define TRICORE_IRQ_MAX_PRIORITY CONFIG_ARCH_IRQ_MAX_PRIORITY
 
 /* For use with EABI and floating point, the stack must be aligned to 8-byte
  * addresses.

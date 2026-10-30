@@ -67,7 +67,9 @@ ifeq ($(CONFIG_ARCH_HAVE_DEBUG),y)
   CMN_CSRCS += tricore_hwdebug.c
 endif
 
-CFLAGS += -DIFX_USE_SW_MANAGED_INT
+ifneq ($(CONFIG_ARCH_IRQPRIO),y)
+  CFLAGS += -DIFX_USE_SW_MANAGED_INT
+endif
 
 # TASKING toolchain: build a fake libc_fpu.a to override the toolchain's
 # default C library and provide stubs for the symbols the linker still

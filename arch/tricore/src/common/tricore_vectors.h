@@ -158,5 +158,12 @@ void tricore_trapinit(void);
 void tricore_bustrap_register_hook(tricore_bustrap_hook_t hook);
 void tricore_fcu_register_pool(void *base, size_t num);
 
+/* Interrupt Handler */
+
+void tricore_irq_sched(void);
+#ifdef CONFIG_ARCH_IRQPRIO
+void tricore_irq_direct(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_TRICORE_SRC_COMMON_TRICORE_VECTORS_H */

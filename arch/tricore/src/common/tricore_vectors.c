@@ -30,6 +30,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/compiler.h>
+#include <nuttx/macro.h>
 
 #include <arch/barriers.h>
 #include <arch/irq.h>
@@ -72,6 +73,28 @@
   __asm__("rslcx\n\trfe");                                  \
 }
 
+#define TRICORE_INT_CALL_SCHEDISR(handler)                  \
+{                                                           \
+  __asm__(".align 32\n\t");                                 \
+  __asm__("svlcx\n\t");                                     \
+  __asm__("jli %0\n\t" :: "a"(handler));                    \
+  __asm__("rslcx\n\trfe");                                  \
+}
+
+#define TRICORE_INT_CALL_DIRECTISR(handler)                 \
+  __asm__                                                   \
+  (                                                         \
+    ".DUP " STRINGIFY(TRICORE_IRQ_MAX_PRIORITY - 1) "\n\t"  \
+    ".align 32\n\t"                                         \
+    "svlcx\n\t"                                             \
+    "movh.a a15, #@his(" #handler ")\n\t"                   \
+    "lea a15, [a15]@los(" #handler ")\n\t"                  \
+    "jli a15\n\t"                                           \
+    "rslcx\n\t"                                             \
+    "rfe\n\t"                                               \
+    ".ENDM\n"                                               \
+  );
+
 #else
 #define TRICORE_TRAP_CALLTSR(serviceroutine, tclass)        \
 {                                                           \
@@ -102,6 +125,28 @@
   __asm__("jli %0" :: "a"(handler));                        \
   __asm__("rslcx\n\trfe");                                  \
 }
+
+#define TRICORE_INT_CALL_SCHEDISR(handler)                  \
+{                                                           \
+  __asm__(".align 5\n\t");                                  \
+  __asm__("svlcx\n\t");                                     \
+  __asm__("jli %0\n\t" :: "a"(handler));                    \
+  __asm__("rslcx\n\trfe");                                  \
+}
+
+#define TRICORE_INT_CALL_DIRECTISR(handler)                 \
+  __asm__                                                   \
+  (                                                         \
+    ".rept " STRINGIFY(TRICORE_IRQ_MAX_PRIORITY - 1) "\n\t" \
+    ".align 5\n\t"                                          \
+    "svlcx\n\t"                                             \
+    "movh.a %a15, hi:" #handler "\n\t"                      \
+    "lea %a15, [%a15]lo:" #handler "\n\t"                   \
+    "jli %a15\n\t"                                          \
+    "rslcx\n\t"                                             \
+    "rfe\n\t"                                               \
+    ".endr\n"                                               \
+  );
 #endif
 
 #define TRICORE_FCU_CSA_MINNUM  20
@@ -278,4 +323,35 @@ void tricore_traptab(void)
   TRICORE_TRAP_CALLTSR(tricore_trap_trapcall, TRICORE_TRAP_CLASS_ASSERT)
   TRICORE_TRAP_CALLTSR(tricore_trap_svcall, TRICORE_TRAP_CLASS_SYSCALL)
   TRICORE_TRAP_CALLTSR(tricore_trap_trapcall, TRICORE_TRAP_CLASS_NMI)
+}
+
+/****************************************************************************
+ * Name: tricore_inttab
+ *
+ * Description:
+ *   TriCore interrupt vector table (BIV). Unlike ARM/RISC-V which store
+ *   function pointers, TriCore's table contains executable code directly.
+ *   Each entry is a 32-byte (0x20) aligned slot holding a small code
+ *   sequence that saves context and jumps to the handler.
+ *
+ *   CONFIG_ARCH_IRQPRIO=y (Hardware-managed, Full BIV table):
+ *     SRPN 1 -> tricore_irq_sched (lowest priority, task switch only),
+ *     SRPN 2~MAX -> tricore_irq_direct (fast dispatch, nestable).
+ *   CONFIG_ARCH_IRQPRIO=n (Software-managed, One-entry BIV table):
+ *     Only the SRPN 255 entry exists, all IRQs vector to
+ *     tricore_irq_sched. No nesting support. Saves BIV flash (~8KB).
+ *
+ ****************************************************************************/
+
+#if defined(__TASKING__)
+noinstrument_function locate_code(".text.inttable")
+#else
+noinstrument_function locate_code(".inttable")
+#endif
+void tricore_inttab(void)
+{
+  TRICORE_INT_CALL_SCHEDISR(tricore_irq_sched)
+#ifdef CONFIG_ARCH_IRQPRIO
+  TRICORE_INT_CALL_DIRECTISR(tricore_irq_direct)
+#endif
 }

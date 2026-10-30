@@ -77,7 +77,7 @@
 #define LCF_HEAP_OFFSET    (LCF_USTACK_OFFSET - LCF_HEAP_SIZE)
 
 #define LCF_STARTPTR_CPU   LCF_PFLASH_KERNEL_START
-#define LCF_TRAPVEC_START  (LCF_STARTPTR_CPU + 0x20)
+#define LCF_TRAPVEC_START  (LCF_STARTPTR_CPU + 0x2000)
 #define LCF_INTVEC_START   LCF_PFLASH_KERNEL_START
 
 #define LCF_STARTPTR_NC_CPU0 NC_START(CORE0_PFLASH_KERNEL_START)
@@ -88,6 +88,11 @@
 #define LCF_STARTPTR_NC_CPU5 NC_START(CORE5_PFLASH_KERNEL_START)
 
 #define INTTAB     (LCF_INTVEC_START)
+#ifdef CONFIG_ARCH_IRQPRIO
+#define INTTAB_OFFSET 0x0020
+#else
+#define INTTAB_OFFSET 0x1FE0
+#endif
 
 #define RESET CORE0_PFLASH_KERNEL_START
 
@@ -340,7 +345,7 @@ derivative tc4D
         {
             group int_tab_tc (ordered)
             {
-                group (run_addr=(INTTAB)+0x1FE0) select ".text.inttab0.intvec.0ff";
+                group (run_addr=(INTTAB)+INTTAB_OFFSET) select ".text.inttable";
             }
             "_lc_u_int_tab" = (LCF_INTVEC_START);
             "__INTTAB_CPU0" = (LCF_INTVEC_START);
