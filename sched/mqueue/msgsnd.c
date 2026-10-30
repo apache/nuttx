@@ -42,6 +42,7 @@
 static int msgsnd_wait(FAR struct msgq_s *msgq, int msgflg)
 {
   FAR struct tcb_s *rtcb;
+  key_t key = msgq->key;
 
 #ifdef CONFIG_CANCELLATION_POINTS
   /* msgsnd_wait() is not a cancellation point, but may be called via
@@ -117,6 +118,13 @@ static int msgsnd_wait(FAR struct msgq_s *msgq, int msgflg)
         {
           return -rtcb->errcode;
         }
+
+      /* msgctl(IPC_RMID) may have freed the queue before this task ran */
+
+      if (nxmsg_lookup(key) != msgq)
+        {
+          return -EIDRM;
+        }
     }
 
   return OK;
@@ -152,6 +160,7 @@ static int msgsnd_wait(FAR struct msgq_s *msgq, int msgflg)
  *            less than 1, or msgsz is greater than the maximum message
  *            size of the queue.
  *   EINTR    The call was interrupted by a signal handler.
+ *   EIDRM    The queue was removed while the caller waited.
  *
  ****************************************************************************/
 
