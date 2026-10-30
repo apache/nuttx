@@ -250,7 +250,7 @@ static int virtio_rng_probe(FAR struct virtio_device *vdev)
 #endif
     }
 
-  ret = register_driver(priv->name, &g_virtio_rng_ops, 0400, priv);
+  ret = register_driver(priv->name, &g_virtio_rng_ops, 0444, priv);
   if (ret < 0)
     {
       vrterr("Register NuttX driver failed, ret=%d\n", ret);
@@ -258,7 +258,7 @@ static int virtio_rng_probe(FAR struct virtio_device *vdev)
     }
 
 #ifdef CONFIG_DEV_URANDOM_ARCH
-  ret = register_driver(priv->uname, &g_virtio_rng_ops, 0400, priv);
+  ret = register_driver(priv->uname, &g_virtio_rng_ops, 0444, priv);
   if (ret < 0)
     {
       vrterr("Register NuttX driver failed, ret=%d\n", ret);
