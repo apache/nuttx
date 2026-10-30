@@ -502,6 +502,43 @@ static void stm32_lptim_writesync(struct stm32_lptim_dev_s *dev,
         }
     }
 }
+
+/****************************************************************************
+ * Name: stm32_lptim_modifydier
+ *
+ * Description:
+ *   Modify DIER.  DIER can only be written while the timer is enabled, so
+ *   enable it for the write if needed and wait for DIEROK.
+ *
+ ****************************************************************************/
+
+static void stm32_lptim_modifydier(struct stm32_lptim_dev_s *dev,
+                                   uint32_t clearbits, uint32_t setbits)
+{
+  bool enabled = (stm32_getreg32(dev, STM32_LPTIM_CR_OFFSET) &
+                  LPTIM_CR_ENABLE) != 0;
+  uint32_t timeout;
+
+  if (!enabled)
+    {
+      stm32_modifyreg32(dev, STM32_LPTIM_CR_OFFSET, 0, LPTIM_CR_ENABLE);
+    }
+
+  stm32_putreg32(dev, STM32_LPTIM_ICR_OFFSET, LPTIM_ISR_DIEROK);
+  stm32_modifyreg32(dev, STM32_LPTIM_DIER_OFFSET, clearbits, setbits);
+
+  timeout = 10000;
+  while (!(stm32_getreg32(dev, STM32_LPTIM_ISR_OFFSET) &
+           LPTIM_ISR_DIEROK) && timeout > 0)
+    {
+      timeout--;
+    }
+
+  if (!enabled)
+    {
+      stm32_modifyreg32(dev, STM32_LPTIM_CR_OFFSET, LPTIM_CR_ENABLE, 0);
+    }
+}
 #endif
 
 /****************************************************************************
@@ -899,7 +936,11 @@ static void stm32_lptim_enableint(struct stm32_lptim_dev_s *dev,
 {
   DEBUGASSERT(dev != NULL);
 
+#ifdef CONFIG_STM32_HAVE_IP_LPTIM_V2
+  stm32_lptim_modifydier(dev, 0, source);
+#else
   stm32_modifyreg32(dev, STM32_LPTIM_IER_OFFSET, 0, source);
+#endif
 }
 
 static void stm32_lptim_disableint(struct stm32_lptim_dev_s *dev,
@@ -907,7 +948,11 @@ static void stm32_lptim_disableint(struct stm32_lptim_dev_s *dev,
 {
   DEBUGASSERT(dev != NULL);
 
+#ifdef CONFIG_STM32_HAVE_IP_LPTIM_V2
+  stm32_lptim_modifydier(dev, source, 0);
+#else
   stm32_modifyreg32(dev, STM32_LPTIM_IER_OFFSET, source, 0);
+#endif
 }
 
 static void stm32_lptim_ackint(struct stm32_lptim_dev_s *dev, int source)
