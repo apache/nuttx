@@ -126,7 +126,7 @@ static int msgrcv_wait(FAR struct msgq_s *msgq, FAR struct msgbuf_s **rcvmsg,
        * isn't going to end well.
        */
 
-      DEBUGASSERT(NULL != rtcb->flink);
+      DEBUGASSERT(!is_idle_task(rtcb));
 
       /* Remove the tcb task from the running list. */
 

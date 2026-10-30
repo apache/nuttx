@@ -92,7 +92,7 @@ static int msgsnd_wait(FAR struct msgq_s *msgq, int msgflg)
        * isn't going to end well.
        */
 
-      DEBUGASSERT(NULL != rtcb->flink);
+      DEBUGASSERT(!is_idle_task(rtcb));
 
       /* Remove the tcb task from the running list. */
 
