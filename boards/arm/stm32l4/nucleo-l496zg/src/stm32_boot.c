@@ -35,6 +35,7 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
+#include "stm32l4_pwr.h"
 #include "nucleo-144.h"
 
 /****************************************************************************
@@ -58,6 +59,10 @@
 
 void stm32_board_initialize(void)
 {
+  /* Enable Vddio2 - mandatory to use the PG2 - PG15 I/Os. */
+
+  stm32_pwr_vddio2_valid(true);
+
 #ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
 
