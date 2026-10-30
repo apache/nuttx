@@ -31,7 +31,9 @@ lower half::
                                  address resolution, RNG
 
 The upper half is registered with ``ble_ll_register()``, called by the
-lower half initialization code.
+lower half initialization code.  ``ble_ll_initialize()`` initializes the
+Link Layer without registering it and returns its ``struct bt_driver_s``,
+for transports that take the driver directly (RPMSG HCI server).
 
 The NimBLE OS abstraction is replaced with NuttX facilities:
 
@@ -131,3 +133,4 @@ transmission (interrupt processing and radio ramp-up).
 Available lower halves:
 
 * nRF52: :doc:`/platforms/arm/nrf52/ble_ll`
+* nRF53: :doc:`/platforms/arm/nrf53/ble_ll`
