@@ -58,6 +58,12 @@
 #define USTACK0         ISTACK0_END
 #define USTACK0_END     (USTACK0 - USTACK_SIZE)
 
+#ifdef CONFIG_ARCH_IRQPRIO
+#  define INTTAB_OFFSET 0x20
+#else
+#  define INTTAB_OFFSET 0x1fe0
+#endif
+
 derivative nuttx_tc3xx
 {
   core tc0
@@ -100,8 +106,8 @@ section_setup mpe:tc0:linear
 
 section_layout mpe:tc0:linear
 {
-  /* Reset entry at +0, full BIV table at +0x20, trap table at +0x2000,
-   * and text at +0x2100.
+  /* Reset entry at +0, full BIV table at +0x20, single-entry BIV at
+   * +0x1fe0, trap table at +0x2000, and text at +0x2100.
    */
 
   group start (ordered, run_addr = PFLS_BASE)
@@ -114,7 +120,7 @@ section_layout mpe:tc0:linear
     select ".text.traptab";
   }
 
-  group intvec (ordered, run_addr = PFLS_BASE + 0x20)
+  group intvec (ordered, run_addr = PFLS_BASE + INTTAB_OFFSET)
   {
     select ".text.inttab";
   }
@@ -171,7 +177,11 @@ section_layout mpe:tc0:linear
   }
 
   "__TRAPTAB_CPU0" := PFLS_BASE + 0x2000;
+#ifdef CONFIG_ARCH_IRQPRIO
   "__INTTAB_CPU0" := PFLS_BASE;
+#else
+  "__INTTAB_CPU0" := PFLS_BASE + INTTAB_OFFSET;
+#endif
 
   "__a0_mem" := sizeof(group:a0) > 0 ? addressof(group:a0) + 0x8000 : 0;
   "__a1_mem" := sizeof(group:a1) > 0 ? addressof(group:a1) + 0x8000 : 0;

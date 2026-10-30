@@ -45,6 +45,8 @@
  * Public Functions
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_IRQPRIO
+
 /****************************************************************************
  * Name: tricore_irq_direct
  *
@@ -79,17 +81,21 @@ void tricore_irq_direct(void)
   tricore_jump_backto_link();
 }
 
+#endif /* CONFIG_ARCH_IRQPRIO */
+
 /****************************************************************************
  * Name: tricore_irq_sched
  *
  * Description:
- *   Scheduling GPSR path for context switch (analogous to arm_doirq).
- *   This is triggered by tricore_irq_direct when it detects that a
- *   context switch is needed.
+ *   Context-switch interrupt path. Two dispatch schemes share this path
+ *   with different roles, selected by CONFIG_ARCH_IRQPRIO.
  *
- *   Because the GPSR SRPN is the lowest priority, this only executes
- *   after all normal interrupts have completed, guaranteeing safe
- *   context switch without race conditions.
+ *   CONFIG_ARCH_IRQPRIO=y:
+ *     SRPN 1 -> tricore_irq_sched (lowest priority, task switch only),
+ *     SRPN 2~MAX -> tricore_irq_direct (fast dispatch, nestable).
+ *   CONFIG_ARCH_IRQPRIO=n:
+ *     tricore_irq_sched does dispatch and task switch for all IRQs.
+ *     No nesting support and no scheduling GPSR.
  *
  ****************************************************************************/
 
@@ -98,6 +104,9 @@ void tricore_irq_sched(void)
   struct tcb_s **running_task = &g_running_tasks[this_cpu()];
   uintptr_t *regs = tricore_csa2addr(tricore_mfcr(TRICORE_CPU_PCXI));
   struct tcb_s *tcb;
+#ifndef CONFIG_ARCH_IRQPRIO
+  int irq = tricore_irq_from_lasr();
+#endif
 
   if (*running_task != NULL)
     {
@@ -118,6 +127,11 @@ void tricore_irq_sched(void)
 #endif
 
   board_autoled_on(LED_INIRQ);
+
+#ifndef CONFIG_ARCH_IRQPRIO
+  tricore_ack_irq(irq);
+  irq_dispatch(irq, regs);
+#endif
 
   tcb = this_task();
 

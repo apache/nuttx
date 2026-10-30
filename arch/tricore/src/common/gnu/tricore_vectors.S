@@ -135,8 +135,12 @@ tricore_traptab:
 /****************************************************************************
  * Interrupt vector table
  *
- *   SRPN 1 -> tricore_irq_sched (lowest priority, task switch only),
- *   SRPN 2~MAX -> tricore_irq_direct (fast dispatch, nestable).
+ *   CONFIG_ARCH_IRQPRIO=y (Hardware-managed, Full BIV table):
+ *     SRPN 1 -> tricore_irq_sched (lowest priority, task switch only),
+ *     SRPN 2~MAX -> tricore_irq_direct (fast dispatch, nestable).
+ *   CONFIG_ARCH_IRQPRIO=n (Software-managed, One-entry BIV table):
+ *     Only the SRPN 255 entry exists, all IRQs vector to
+ *     tricore_irq_sched. No nesting support. Saves BIV flash (~8KB).
  ****************************************************************************/
 
 	.section .inttab, "ax", @progbits
@@ -145,7 +149,9 @@ tricore_traptab:
 	.type	tricore_inttab, @function
 tricore_inttab:
 	INTSLOT	tricore_irq_sched
+#ifdef CONFIG_ARCH_IRQPRIO
 	.rept	TRICORE_IRQ_MAX_PRIORITY - 1
 	INTSLOT	tricore_irq_direct
 	.endr
+#endif
 	.size	tricore_inttab, . - tricore_inttab
