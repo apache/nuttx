@@ -189,6 +189,8 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
   FAR struct tcb_s *ptcb;
   struct sched_param param;
   FAR struct tcb_s *parent;
+  irqstate_t flags;
+  bool scheduler_setup = false;
   int policy;
   int ret;
 
@@ -401,6 +403,8 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
       goto errout_with_tcb;
     }
 
+  scheduler_setup = true;
+
   /* Initialize thread local storage */
 
   ret = tls_init_info(ptcb);
@@ -472,6 +476,31 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
   return OK;
 
 errout_with_tcb:
+
+  flags = enter_critical_section();
+
+#ifdef CONFIG_SCHED_SPORADIC
+  /* Stop sporadic scheduling before releasing its replenishment timers or
+   * the TCB referenced by those timers.
+   */
+
+  if (ptcb->sporadic != NULL)
+    {
+      DEBUGVERIFY(nxsched_stop_sporadic(ptcb));
+    }
+#endif
+
+  /* pthread_setup_scheduler() adds the TCB to the inactive task list.
+   * Remove it before releasing the TCB if a later initialization step
+   * failed.
+   */
+
+  if (scheduler_setup)
+    {
+      dq_rem((FAR dq_entry_t *)ptcb, list_inactivetasks());
+    }
+
+  leave_critical_section(flags);
 
   /* Since we do not join the group, assign group to NULL to clear binding */
 
