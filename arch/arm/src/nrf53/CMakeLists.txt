@@ -133,6 +133,10 @@ if(CONFIG_SENSORS_QENCODER)
   list(APPEND SRCS nrf53_qdec.c)
 endif()
 
+if(CONFIG_NRF53_BLE_CONTROLLER)
+  list(APPEND SRCS nrf53_ble.c nrf53_ble_hw.c nrf53_ble_phy.c)
+endif()
+
 if(CONFIG_NRF53_SOFTDEVICE_CONTROLLER)
 
   set(NRFXLIB_VER "2.3.0")

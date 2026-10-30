@@ -120,6 +120,10 @@ ifeq ($(CONFIG_NRF53_QDEC),y)
 CHIP_CSRCS += nrf53_qdec.c
 endif
 
+ifeq ($(CONFIG_NRF53_BLE_CONTROLLER),y)
+CHIP_CSRCS += nrf53_ble.c nrf53_ble_hw.c nrf53_ble_phy.c
+endif
+
 ifeq ($(CONFIG_NRF53_SOFTDEVICE_CONTROLLER),y)
 
 NRFXLIB_UNPACK  := sdk-nrfxlib

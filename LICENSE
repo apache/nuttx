@@ -8612,6 +8612,10 @@ arch/arm/src/nrf52/nrf52_ble.c
 arch/arm/src/nrf52/nrf52_ble_hw.c
 arch/arm/src/nrf52/nrf52_ble_phy.c
 arch/arm/src/nrf52/nrf52_ble_priv.h
+arch/arm/src/nrf53/nrf53_ble.c
+arch/arm/src/nrf53/nrf53_ble_hw.c
+arch/arm/src/nrf53/nrf53_ble_phy.c
+arch/arm/src/nrf53/nrf53_ble_priv.h
 =========================================
 
  Heavily based on Apache Mynewt NimBLE
