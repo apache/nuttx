@@ -26,6 +26,10 @@ ifeq ($(CONFIG_DMA_SHARED_BUFFER),y)
 
 CSRCS += dma-buf.c
 
+ifeq ($(CONFIG_DMABUF_HEAPS),y)
+CSRCS += dma-heap.c system_heap.c
+endif
+
 # Include dma buf driver build support
 
 DEPPATH += --dep-path dma-buf

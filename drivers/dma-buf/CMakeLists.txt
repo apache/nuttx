@@ -22,5 +22,9 @@
 if(CONFIG_DMA_SHARED_BUFFER)
   set(SRCS dma-buf.c)
 
+  if(CONFIG_DMABUF_HEAPS)
+    list(APPEND SRCS dma-heap.c system_heap.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 endif()
