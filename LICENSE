@@ -8626,3 +8626,23 @@ arch/arm/src/nrf53/nrf53_ble_priv.h
  Portions of this software were developed at Runtime Inc, copyright 2015.
 
  SPDX-License-Identifier: Apache-2.0
+
+arch/arm/src/nrf54l/nrf54l_ble.c
+arch/arm/src/nrf54l/nrf54l_ble_hw.c
+arch/arm/src/nrf54l/nrf54l_ble_phy.c
+arch/arm/src/nrf54l/nrf54l_ble_priv.h
+=========================================
+
+ Based on Apache Mynewt NimBLE through arch/arm/src/nrf52/nrf52_ble*
+ (https://github.com/apache/mynewt-nimble,
+ commit b6831813cfe6da9b25c8be7136b40ce060bf9710) and on the Zephyr
+ Bluetooth controller nRF5 radio HAL
+ (https://github.com/zephyrproject-rtos/zephyr,
+ subsys/bluetooth/controller/ll_sw/nordic/hal/nrf5/radio,
+ commit dccb09599635bdff17633fa7e9dab014b91dce90).
+
+ Copyright 2015-2024 The Apache Software Foundation
+ Portions of this software were developed at Runtime Inc, copyright 2015.
+ Copyright (c) 2016-2024 Nordic Semiconductor ASA
+
+ SPDX-License-Identifier: Apache-2.0
