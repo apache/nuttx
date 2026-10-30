@@ -216,11 +216,11 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
               if (stream != NULL)
 #endif
                 {
-                  size_t len = (fmt - start) - 1;
+                  size_t litlen = (fmt - start) - 1;
 
-                  if (len > 0)
+                  if (litlen > 0)
                     {
-                      stream_puts(start, len, stream);
+                      stream_puts(start, litlen, stream);
                     }
                 }
 
@@ -229,7 +229,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
           if (c == '%')
             {
-              size_t len = (fmt - start) - 1;
+              size_t litlen = (fmt - start) - 1;
 
               c = fmt_char(fmt);
               if (c != '%')
@@ -238,9 +238,9 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                   if (stream != NULL)
 #endif
                     {
-                      if (len > 0)
+                      if (litlen > 0)
                         {
-                          stream_puts(start, len, stream);
+                          stream_puts(start, litlen, stream);
                         }
                     }
 
@@ -251,7 +251,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
               if (stream != NULL)
 #endif
                 {
-                  stream_puts(start, len + 1, stream);
+                  stream_puts(start, litlen + 1, stream);
                 }
 
               start = fmt;
