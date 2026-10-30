@@ -103,7 +103,7 @@ int nxsem_wait_slow(FAR sem_t *sem)
    * so the check would make every retry fail at once.
    */
 
-  if (!mutex && (sem->flags & SEM_TYPE_UNINTERRUPTIBLE) == 0)
+  if (!mutex && (rtcb->flags & TCB_FLAG_SEM_UNINTERRUPTIBLE) == 0)
     {
       pendingset = nxsig_pendingset(rtcb);
       nxsig_nandset(&pendingset, &pendingset, &rtcb->sigprocmask);

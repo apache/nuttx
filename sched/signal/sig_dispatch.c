@@ -716,15 +716,13 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
 
       if (stcb->task_state == TSTATE_WAIT_SEM && !ignored)
         {
-          FAR sem_t *sem = stcb->waitobj;
-
           /* Not for an uninterruptible semaphore in a system call: the
            * handler runs only when the call returns, and the wait would
            * block again.
            */
 
           if ((stcb->flags & TCB_FLAG_SYSCALL) == 0 ||
-              (sem->flags & SEM_TYPE_UNINTERRUPTIBLE) == 0)
+              (stcb->flags & TCB_FLAG_SEM_UNINTERRUPTIBLE) == 0)
             {
               nxsem_wait_irq(stcb, EINTR);
             }

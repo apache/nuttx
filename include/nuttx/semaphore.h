@@ -73,17 +73,34 @@
 #define NXSEM_COUNT(s)        ((FAR atomic_t *)&((s)->val.semcount))
 #define NXSEM_IS_MUTEX(s)     (((s)->flags & SEM_TYPE_MUTEX) != 0)
 
-/* The uninterruptible waits set SEM_TYPE_UNINTERRUPTIBLE: then a pending
- * signal does not make nxsem_wait_slow() fail at once.  Not in user space:
- * there, the flag would also stop a signal from ending sem_wait(), and the
- * retry gets the signal when the system call returns.
+/* The uninterruptible waits set TCB_FLAG_SEM_UNINTERRUPTIBLE on the waiting
+ * task: then a pending signal does not make nxsem_wait_slow() fail at once.
+ * Not in user space: there, the flag would also stop a signal from ending
+ * sem_wait(), and the retry gets the signal when the system call returns.
  */
 
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-#  define nxsem_set_uninterruptible(s) \
-     ((s)->flags |= SEM_TYPE_UNINTERRUPTIBLE)
+#  define NXSEM_SET_UNINTERRUPTIBLE(tcb, flags) \
+  do \
+    { \
+      (tcb) = nxsched_self(); \
+      (flags) = (tcb)->flags & TCB_FLAG_SEM_UNINTERRUPTIBLE; \
+      (tcb)->flags |= TCB_FLAG_SEM_UNINTERRUPTIBLE; \
+    } \
+  while (0)
+
+#  define NXSEM_RESTORE_UNINTERRUPTIBLE(tcb, flags) \
+  do \
+    { \
+      if ((flags) == 0) \
+        { \
+          (tcb)->flags &= ~TCB_FLAG_SEM_UNINTERRUPTIBLE; \
+        } \
+    } \
+  while (0)
 #else
-#  define nxsem_set_uninterruptible(s)
+#  define NXSEM_SET_UNINTERRUPTIBLE(tcb, flags) do { } while (0)
+#  define NXSEM_RESTORE_UNINTERRUPTIBLE(tcb, flags) do { } while (0)
 #endif
 
 /* Mutex related helper macros */
