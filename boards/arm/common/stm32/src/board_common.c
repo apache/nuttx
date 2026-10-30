@@ -78,6 +78,10 @@
 #  include "stm32_cansock_setup.h"
 #endif
 
+#if defined(CONFIG_TIMER) || defined(CONFIG_ONESHOT)
+#  include "board_timer.h"
+#endif
+
 #include "board_common.h"
 
 /****************************************************************************
@@ -224,6 +228,12 @@ int stm32_common_initialize(void)
     {
       syslog(LOG_ERR, "ERROR: stm32_cansock_setup() failed: %d\n", ret);
     }
+#endif
+
+#if defined(CONFIG_TIMER) || defined(CONFIG_ONESHOT)
+  /* Register the timer and oneshot devices selected in the board config */
+
+  stm32_timer_setup();
 #endif
 
   UNUSED(ret);
