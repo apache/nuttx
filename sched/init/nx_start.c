@@ -151,8 +151,10 @@ dq_queue_t g_waitingforfill;
 dq_queue_t g_stoppedtasks;
 #endif
 
-/* This list of all tasks that have been initialized, but not yet
- * activated. NOTE:  This is the only list that is not prioritized.
+/* Task list for TSTATE_TASK_INACTIVE.  Initialized but not yet activated
+ * tasks are never linked into it, so it stays empty and removing such a
+ * TCB (whose links are NULL) through the generic task list helpers is a
+ * no-op.
  */
 
 dq_queue_t g_inactivetasks;
