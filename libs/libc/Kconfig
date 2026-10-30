@@ -5,6 +5,16 @@
 
 comment "Standard C Library Options"
 
+config LIBC_DISABLE_DIV64_OPTIMIZATION
+	bool "Disable optimized 64-bit constant division"
+	default n
+	---help---
+		Disable the optimized 64-bit constant division implementation.
+
+		When enabled, the generic division implementation is used
+		instead. This may reduce code size on some targets but can
+		significantly reduce division performance.
+
 source "libs/libc/ctype/Kconfig"
 source "libs/libc/stdio/Kconfig"
 source "libs/libc/audio/Kconfig"

@@ -170,6 +170,16 @@
 #  define __Atomic(t) _Atomic(t)
 #endif
 
+/* Compile-time selection of an expression without evaluating the unused
+ * operand.  This is a GCC/Clang extension; Green Hills does not support it.
+ */
+
+#undef HAVE_BUILTIN_CHOOSE_EXPR
+
+#if !defined(__ghs__) && (defined(__GNUC__) || defined(__clang__))
+#  define HAVE_BUILTIN_CHOOSE_EXPR 1
+#endif
+
 /* Green Hills Software definitions *****************************************/
 
 #if defined(__ghs__)

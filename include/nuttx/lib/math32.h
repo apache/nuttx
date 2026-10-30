@@ -315,34 +315,45 @@ extern "C"
       } \
     while (0)
 
-#if defined(CONFIG_HAVE_EXPRESSION_STATEMENT)
-#  define div64_const(n, base) \
-    ({ \
-      uint64_t __n = (n); \
-      uint32_t __base = (base); \
-      if (IS_POWER_OF_2(__base)) \
-        { \
-          (__n) >>= LOG2_FLOOR(__base); \
-        } \
-      else if (UINTPTR_MAX == UINT32_MAX) \
-        { \
-          div64_const32(__n, __base); \
-        } \
-      else \
-        { \
-          __n /= __base; \
-        } \
-        __n; \
-      })
+#if !defined(CONFIG_LIBC_DISABLE_DIV64_OPTIMIZATION) && \
+    defined(HAVE_BUILTIN_CHOOSE_EXPR)
+
+/* This helper must be a function rather than a statement expression.
+ * div_const() is also used in constant initializers at file scope, where
+ * statement expressions are not allowed.  __builtin_choose_expr() selects
+ * the active path without evaluating the other one and, unlike the
+ * conditional operator, does not promote the 32-bit result to uint64_t.
+ */
+
+static inline_function uint64_t div64_const(uint64_t n, uint32_t base)
+{
+  if (IS_POWER_OF_2(base))
+    {
+      n >>= LOG2_FLOOR(base);
+    }
+  else if (UINTPTR_MAX == UINT32_MAX)
+    {
+      div64_const32(n, base);
+    }
+  else
+    {
+      n /= base;
+    }
+
+  return n;
+}
 
 #  define div_const(n, base) \
-    ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const(n, base) : ((n) / (base)))
+    __builtin_choose_expr(sizeof(n) == sizeof(uint64_t), \
+                          div64_const((n), (base)), ((n) / (base)))
 #  define div_const_roundup(n, base) \
-    ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const((n) + (base) - 1, base) : \
-     (((n) + (base) - 1) / (base)))
+    __builtin_choose_expr(sizeof(n) == sizeof(uint64_t), \
+                          div64_const((n) + (base) - 1, (base)), \
+                          (((n) + (base) - 1) / (base)))
 #  define div_const_roundnearest(n, base) \
-    ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const((n) + ((base) / 2), base) : \
-     (((n) + ((base) / 2)) / (base)))
+    __builtin_choose_expr(sizeof(n) == sizeof(uint64_t), \
+                          div64_const((n) + ((base) / 2), (base)), \
+                          (((n) + ((base) / 2)) / (base)))
 #else
 #  define div_const(n, base) ((n) / (base))
 #  define div_const_roundup(n, base) (((n) + (base) - 1) / (base))
