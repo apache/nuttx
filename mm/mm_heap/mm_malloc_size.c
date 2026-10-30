@@ -44,6 +44,13 @@ size_t mm_malloc_size(FAR struct mm_heap_s *heap, FAR void *mem)
   ssize_t size;
   bool flag;
 
+  /* Protect against attempts to query a NULL reference */
+
+  if (mem == NULL)
+    {
+      return 0;
+    }
+
   flag = kasan_bypass(true);
 #ifdef CONFIG_MM_HEAP_MEMPOOL
   if (heap->mm_mpool)
@@ -56,13 +63,6 @@ size_t mm_malloc_size(FAR struct mm_heap_s *heap, FAR void *mem)
         }
     }
 #endif
-
-  /* Protect against attempts to query a NULL reference */
-
-  if (!mem)
-    {
-      return 0;
-    }
 
   /* Map the memory chunk into a free node */
 
