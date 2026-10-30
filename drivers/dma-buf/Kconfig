@@ -11,3 +11,13 @@ config DMA_SHARED_BUFFER
 		multiple drivers. A buffer is associated with a file using driver
 		APIs extension; the file's descriptor can then be passed on to other
 		driver.
+
+config DMABUF_HEAPS
+	bool "DMA-BUF Userland Memory Heaps"
+	default n
+	select DMA_SHARED_BUFFER
+	---help---
+		Choose this option to enable the DMA-BUF userland memory heaps.
+		This options creates per heap chardevs in /dev/dma_heap/ which
+		allows userspace to allocate dma-bufs that can be shared
+		between drivers.
