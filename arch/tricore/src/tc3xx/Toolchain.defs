@@ -23,6 +23,7 @@
 ifeq ($(CONFIG_ARCH_CHIP_TC39X),y)
   ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
     ARCHCPUFLAGS += --cpu=tc39xb
+    ARCHCPUFLAGS += --default-near-size=0
     LDFLAGS      += -Ctc39xb
   else
     ARCHCPUFLAGS += -mcpu=tc39xx
