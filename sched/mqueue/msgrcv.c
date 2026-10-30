@@ -40,7 +40,7 @@
  ****************************************************************************/
 
 static int msgrcv_wait(FAR struct msgq_s *msgq, FAR struct msgbuf_s **rcvmsg,
-                       long msgtyp, int msgflg)
+                       size_t msgsz, long msgtyp, int msgflg)
 {
   FAR struct msgbuf_s *newmsg = NULL;
   FAR struct msgbuf_s *tmp;
@@ -99,13 +99,22 @@ static int msgrcv_wait(FAR struct msgq_s *msgq, FAR struct msgbuf_s **rcvmsg,
 
       if (newmsg)
         {
+          /* A message longer than msgsz stays in the queue.  With
+           * MSG_NOERROR, msgrcv() truncates the message.
+           */
+
+          if (newmsg->msize > msgsz && (msgflg & MSG_NOERROR) == 0)
+            {
+              return -E2BIG;
+            }
+
           list_delete(&newmsg->node);
           goto found;
         }
 
       if ((msgflg & IPC_NOWAIT) != 0)
         {
-          return -EAGAIN;
+          return -ENOMSG;
         }
 
       /* The queue is empty!  Should we block until there the above condition
@@ -182,8 +191,15 @@ found:
  * Returned Value:
  *   On success, msgrcv() returns the number of bytes actually copied
  *   into the mtext array.
- *   On failure, both functions return -1, and set errno to indicate
- *   the error.
+ *   On failure, msgrcv() returns -1 and sets errno to indicate the
+ *   error:
+ *
+ *   E2BIG   The message is longer than msgsz and MSG_NOERROR is not set.
+ *           The message stays in the queue.
+ *   EINVAL  msqid is not a valid message queue identifier.
+ *   ENOMSG  IPC_NOWAIT is set and the queue has no message of the
+ *           requested type.
+ *   EINTR   The call was interrupted by a signal handler.
  *
  ****************************************************************************/
 
@@ -212,14 +228,7 @@ ssize_t msgrcv(int msqid, FAR void *msgp, size_t msgsz, long msgtyp,
       goto errout_with_critical;
     }
 
-  if (msgsz < msgq->maxmsgsize &&
-      ((msgflg & MSG_NOERROR) == 0))
-    {
-      ret = -EMSGSIZE;
-      goto errout_with_critical;
-    }
-
-  ret = msgrcv_wait(msgq, &msg, msgtyp, msgflg);
+  ret = msgrcv_wait(msgq, &msg, msgsz, msgtyp, msgflg);
   if (ret < 0)
     {
       goto errout_with_critical;
