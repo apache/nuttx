@@ -141,14 +141,56 @@ static int libelf_section_alloc(FAR struct mod_loadinfo_s *loadinfo,
 #endif
 
 /****************************************************************************
+ * Name: libelf_addsize
+ *
+ * Description:
+ *   Add a section of the given size and alignment to a running size.
+ *   The ELF specification allows only powers of two as alignment (0 is 1
+ *   here).  Fail for any other alignment, and when a size is more than half
+ *   of the address space: no image can be that large, and the later
+ *   round-ups (to the alignment, to pages) then cannot wrap.
+ *
+ * Returned Value:
+ *   true on success, false when the size or the alignment is invalid.
+ *
+ ****************************************************************************/
+
+static bool libelf_addsize(FAR size_t *total, uintmax_t size,
+                           uintmax_t align)
+{
+  size_t start;
+  size_t end;
+
+  if (align == 0 || (align & (align - 1)) != 0 || align > SIZE_MAX / 2 ||
+      size > SIZE_MAX / 2)
+    {
+      return false;
+    }
+
+  start = ALIGN_UP(*total, align);
+  end   = start + ELF_ALIGNUP(size);
+  if (start < *total || end < start || end > SIZE_MAX / 2)
+    {
+      return false;
+    }
+
+  *total = end;
+  return true;
+}
+
+/****************************************************************************
  * Name: libelf_elfsize
  *
  * Description:
  *   Calculate total memory allocation for the ELF file.
  *
+ * Returned Value:
+ *   true on success; false when a section has an invalid alignment or the
+ *   sizes are more than half of the address space.
+ *
  ****************************************************************************/
 
-static void libelf_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
+static bool libelf_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
 {
   size_t textsize = 0;
   size_t datasize = 0;
@@ -168,6 +210,12 @@ static void libelf_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
 
           if (phdr->p_type == PT_LOAD)
             {
+              if (phdr->p_memsz > SIZE_MAX / 2 - textsize - datasize)
+                {
+                  berr("ERROR: Segment %d is too large\n", i);
+                  return false;
+                }
+
               if (phdr->p_flags & PF_X)
                 {
                   textsize += phdr->p_memsz;
@@ -212,8 +260,14 @@ static void libelf_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
                     }
 #endif
 
-                  datasize = ALIGN_UP(datasize, shdr->sh_addralign);
-                  datasize += ELF_ALIGNUP(shdr->sh_size);
+                  if (!libelf_addsize(&datasize, shdr->sh_size,
+                                      shdr->sh_addralign))
+                    {
+                      berr("ERROR: Bad size or alignment of section %d\n",
+                           i);
+                      return false;
+                    }
+
                   if (loadinfo->dataalign < shdr->sh_addralign)
                     {
                       loadinfo->dataalign = shdr->sh_addralign;
@@ -228,8 +282,14 @@ static void libelf_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
                     }
 #endif
 
-                  textsize = ALIGN_UP(textsize, shdr->sh_addralign);
-                  textsize += ELF_ALIGNUP(shdr->sh_size);
+                  if (!libelf_addsize(&textsize, shdr->sh_size,
+                                      shdr->sh_addralign))
+                    {
+                      berr("ERROR: Bad size or alignment of section %d\n",
+                           i);
+                      return false;
+                    }
+
                   if (loadinfo->textalign < shdr->sh_addralign)
                     {
                       loadinfo->textalign = shdr->sh_addralign;
@@ -256,8 +316,21 @@ static void libelf_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
           if ((shdr->sh_type == SHT_REL || shdr->sh_type == SHT_DYNSYM) &&
               shdr->sh_entsize != 0)
             {
-              nrels += shdr->sh_size / shdr->sh_entsize;
+              size_t n = shdr->sh_size / shdr->sh_entsize;
+
+              if (n > SIZE_MAX - nrels)
+                {
+                  return false;
+                }
+
+              nrels += n;
             }
+        }
+
+      if (nrels > (SIZE_MAX / 2 - datasize) / sizeof(struct fdpic_desc_s))
+        {
+          berr("ERROR: Too many descriptors: %zu\n", nrels);
+          return false;
         }
 
       loadinfo->ndesc = nrels;
@@ -284,6 +357,7 @@ static void libelf_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
 
   loadinfo->textsize = textsize;
   loadinfo->datasize = datasize;
+  return true;
 }
 
 #ifdef CONFIG_LIBC_ELF_LOADTO_LMA
@@ -748,7 +822,12 @@ int libelf_load(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Determine total size to allocate */
 
-  libelf_elfsize(loadinfo, true);
+  if (!libelf_elfsize(loadinfo, true))
+    {
+      ret = -ENOEXEC;
+      berr("ERROR: Invalid section size or alignment\n");
+      goto errout_with_buffers;
+    }
 
   /* Allocate (and zero) memory for the ELF file. */
 
@@ -1001,7 +1080,12 @@ int libelf_load_with_addrenv(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Determine total size to allocate */
 
-  libelf_elfsize(loadinfo, false);
+  if (!libelf_elfsize(loadinfo, false))
+    {
+      ret = -ENOEXEC;
+      berr("ERROR: Invalid section size or alignment\n");
+      goto errout_with_buffers;
+    }
 
   ret = libelf_addrenv_alloc(loadinfo, loadinfo->textsize,
                              loadinfo->datasize);
