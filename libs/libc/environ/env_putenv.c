@@ -24,9 +24,11 @@
  * Included Files
  ****************************************************************************/
 
+#include <assert.h>
 #include <string.h>
 #include <errno.h>
 
+#include <nuttx/mutex.h>
 #include <nuttx/tls.h>
 
 #include "environ.h"
@@ -46,6 +48,10 @@
  *   name does exist, then the value of name in the environment is changed to
  *   value.
  *
+ *   As POSIX requires, the string itself becomes part of the environment:
+ *   a later change to the string changes the environment.  libc does not
+ *   copy or free it.
+ *
  * Input Parameters:
  *   name=value string describing the environment setting to add/modify
  *
@@ -57,9 +63,11 @@
  *
  ****************************************************************************/
 
-int putenv(FAR const char *string)
+int putenv(FAR char *string)
 {
-  FAR const char *pequal;
+  FAR struct task_info_s *info = task_get_info();
+  FAR char *pequal;
+  ssize_t idx;
   int ret;
 
   /* Verify that a string was passed */
@@ -78,9 +86,33 @@ int putenv(FAR const char *string)
       return OK;
     }
 
-  /* Then let env_setvar do all of the work */
+  DEBUGASSERT(info != NULL);
 
-  ret = env_setvar(string, pequal - string, pequal + 1, TRUE);
+  nxrmutex_lock(&info->ta_lock);
+
+  /* environ must be an array of libc with room for one more entry */
+
+  ret = env_reserve(info, 1);
+  if (ret >= 0)
+    {
+      /* Put the string itself in the place of the old name=value pair, or
+       * at the end.
+       */
+
+      idx = env_findvar(info, string, pequal - string);
+      if (idx >= 0)
+        {
+          info->ta_envp[idx] = string;
+        }
+      else
+        {
+          info->ta_envp[info->ta_envc++] = string;
+          info->ta_envp[info->ta_envc]   = NULL;
+        }
+    }
+
+  nxrmutex_unlock(&info->ta_lock);
+
   if (ret < 0)
     {
       set_errno(-ret);

@@ -39,82 +39,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: env_setvar
- ****************************************************************************/
-
-int env_setvar(FAR const char *name, size_t namelen,
-               FAR const char *value, int overwrite)
-{
-  FAR struct task_info_s *info = task_get_info();
-  FAR char *pvar;
-  ssize_t idx;
-  size_t varlen;
-  int ret;
-
-  DEBUGASSERT(info != NULL);
-
-  nxrmutex_lock(&info->ta_lock);
-
-  /* environ must be an array of libc with room for one more entry */
-
-  ret = env_reserve(info, 1);
-  if (ret < 0)
-    {
-      goto out;
-    }
-
-  /* Check if the variable already exists */
-
-  idx = env_findvar(info, name, namelen);
-  if (idx >= 0)
-    {
-      /* It does! Do we have permission to overwrite the existing value? */
-
-      if (!overwrite)
-        {
-          goto out;
-        }
-
-      /* Yes.. just remove the name=value pair from the environment.  It will
-       * be added again below.
-       */
-
-      env_removevar(info, idx);
-    }
-
-  /* An empty value removes the variable */
-
-  if (*value == '\0')
-    {
-      goto out;
-    }
-
-  /* Get the size of the new name=value string.
-   * The +2 is for the '=' and for null terminator
-   */
-
-  varlen = namelen + strlen(value) + 2;
-
-  pvar = env_alloc(info, varlen);
-  if (pvar == NULL)
-    {
-      ret = -ENOMEM;
-      goto out;
-    }
-
-  /* Now, put the new name=value string into the environment */
-
-  snprintf(pvar, varlen, "%.*s=%s", (int)namelen, name, value);
-
-  info->ta_envp[info->ta_envc++] = pvar;
-  info->ta_envp[info->ta_envc]   = NULL;
-
-out:
-  nxrmutex_unlock(&info->ta_lock);
-  return ret;
-}
-
-/****************************************************************************
  * Name: setenv
  *
  * Description:
@@ -139,6 +63,11 @@ out:
 
 int setenv(FAR const char *name, FAR const char *value, int overwrite)
 {
+  FAR struct task_info_s *info = task_get_info();
+  FAR char *pvar;
+  ssize_t idx;
+  size_t namelen;
+  size_t varlen;
   int ret;
 
   /* Verify input parameter */
@@ -171,7 +100,61 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
         }
     }
 
-  ret = env_setvar(name, strlen(name), value, overwrite);
+  DEBUGASSERT(info != NULL);
+
+  namelen = strlen(name);
+  nxrmutex_lock(&info->ta_lock);
+
+  /* environ must be an array of libc with room for one more entry */
+
+  ret = env_reserve(info, 1);
+  if (ret < 0)
+    {
+      goto out;
+    }
+
+  /* Check if the variable already exists */
+
+  idx = env_findvar(info, name, namelen);
+  if (idx >= 0)
+    {
+      /* It does! Do we have permission to overwrite the existing value? */
+
+      if (!overwrite)
+        {
+          goto out;
+        }
+
+      /* Yes.. just remove the name=value pair from the environment.  It will
+       * be added again below.
+       */
+
+      env_removevar(info, idx);
+    }
+
+  /* Get the size of the new name=value string.
+   * The +2 is for the '=' and for null terminator
+   */
+
+  varlen = namelen + strlen(value) + 2;
+
+  pvar = env_alloc(info, varlen);
+  if (pvar == NULL)
+    {
+      ret = -ENOMEM;
+      goto out;
+    }
+
+  /* Now, put the new name=value string into the environment */
+
+  snprintf(pvar, varlen, "%s=%s", name, value);
+
+  info->ta_envp[info->ta_envc++] = pvar;
+  info->ta_envp[info->ta_envc]   = NULL;
+
+out:
+  nxrmutex_unlock(&info->ta_lock);
+
   if (ret < 0)
     {
       set_errno(-ret);

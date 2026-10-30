@@ -266,7 +266,7 @@
 "pthread_setname_np","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","pthread_t","const char *"
 "pthread_setspecific","pthread.h","!defined(CONFIG_DISABLE_PTHREAD) && CONFIG_TLS_NELEM > 0","int","pthread_key_t","FAR const void *"
 "pthread_yield","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","void"
-"putenv","stdlib.h","!defined(CONFIG_DISABLE_ENVIRON)","int","FAR const char *"
+"putenv","stdlib.h","!defined(CONFIG_DISABLE_ENVIRON)","int","FAR char *"
 "puts","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR const IPTR char *"
 "putwc","wchar.h","defined(CONFIG_FILE_STREAM)","wint_t","wchar_t","FAR FILE *"
 "putwc_unlocked","wchar.h","defined(CONFIG_FILE_STREAM)","wint_t","wchar_t","FAR FILE *"
