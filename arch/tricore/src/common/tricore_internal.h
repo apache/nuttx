@@ -163,13 +163,28 @@ extern uintptr_t        _eheap[]; /* End+1 of .heap */
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: tricore_irq_from_lasr
+ *
+ * Description:
+ *   Get irq number from ICU's last acknowledged SRN register
+ *
+ ****************************************************************************/
+
+static inline_function int tricore_irq_from_lasr(void)
+{
+  uintptr_t addr = TRICORE_INT_LASR_BASE +
+                   up_cpu_index() * TRICORE_INT_LASR_SPACING;
+
+  return (getreg32(addr) >> 16) & 0x7ff;
+}
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /* Interrupt ****************************************************************/
 
 void tricore_ack_irq(int irq);
-void tricore_doirq(void);
 int tricore_srpn_to_irq(int srpn);
 int tricore_irq_to_srpn(int irq);
 
