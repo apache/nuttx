@@ -1483,6 +1483,15 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
   size_t nodesize;
   FAR void *ret;
 
+  /* Treat zero as a request for the natural malloc alignment.  Some
+   * internal callers pass zero when no extra alignment is required.
+   */
+
+  if (alignment == 0)
+    {
+      alignment = MM_ALIGN;
+    }
+
 #ifdef CONFIG_MM_HEAP_MEMPOOL
   if (heap->mm_mpool)
     {
