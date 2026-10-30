@@ -44,6 +44,7 @@
 #include <nuttx/lib/elf.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/nuttx.h>
 
 #include "libc.h"
 #include "elf/elf.h"
@@ -52,13 +53,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ELF_ALIGN_MASK   ((1 << CONFIG_LIBC_ELF_ALIGN_LOG2) - 1)
-#define ELF_ALIGNUP(a)   (((unsigned long)(a) + ELF_ALIGN_MASK) & ~ELF_ALIGN_MASK)
-#define ELF_ALIGNDOWN(a) ((unsigned long)(a) & ~ELF_ALIGN_MASK)
-
-/* _ALIGN_UP: 'a' is assumed to be a power of two */
-
-#define _ALIGN_UP(v, a)  (((v) + ((a) - 1)) & ~((a) - 1))
+#define ELF_ALIGN        (1 << CONFIG_LIBC_ELF_ALIGN_LOG2)
+#define ELF_ALIGNUP(a)   ALIGN_UP((unsigned long)(a), ELF_ALIGN)
+#define ELF_ALIGNDOWN(a) ALIGN_DOWN((unsigned long)(a), ELF_ALIGN)
 
 #ifdef CONFIG_ARCH_USE_TEXT_HEAP
 #  define buffer_data_address(p) \
@@ -215,7 +212,7 @@ static void libelf_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
                     }
 #endif
 
-                  datasize = _ALIGN_UP(datasize, shdr->sh_addralign);
+                  datasize = ALIGN_UP(datasize, shdr->sh_addralign);
                   datasize += ELF_ALIGNUP(shdr->sh_size);
                   if (loadinfo->dataalign < shdr->sh_addralign)
                     {
@@ -231,7 +228,7 @@ static void libelf_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
                     }
 #endif
 
-                  textsize = _ALIGN_UP(textsize, shdr->sh_addralign);
+                  textsize = ALIGN_UP(textsize, shdr->sh_addralign);
                   textsize += ELF_ALIGNUP(shdr->sh_size);
                   if (loadinfo->textalign < shdr->sh_addralign)
                     {
@@ -270,15 +267,15 @@ static void libelf_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
     }
 
   /* An ET_DYN object is sized from its program headers, which give no
-   * section alignment.  A word is enough.
+   * section alignment, and sections can ask for none.  A word is enough.
    */
 
-  if (loadinfo->textalign == 0)
+  if (loadinfo->textalign <= 1)
     {
       loadinfo->textalign = sizeof(uintptr_t);
     }
 
-  if (loadinfo->dataalign == 0)
+  if (loadinfo->dataalign <= 1)
     {
       loadinfo->dataalign = sizeof(uintptr_t);
     }
@@ -480,8 +477,8 @@ static inline int libelf_loadfile(FAR struct mod_loadinfo_s *loadinfo,
                    * xipbase is set, the address can't be aligned
                    */
 
-                  *pptr = (FAR uint8_t *)_ALIGN_UP((uintptr_t)*pptr,
-                                                   shdr->sh_addralign);
+                  *pptr = (FAR uint8_t *)ALIGN_UP((uintptr_t)*pptr,
+                                                  shdr->sh_addralign);
                 }
             }
 
