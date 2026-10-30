@@ -315,7 +315,8 @@ extern "C"
       } \
     while (0)
 
-#if defined(CONFIG_HAVE_EXPRESSION_STATEMENT)
+#if !defined(CONFIG_LIBC_DISABLE_DIV64_OPTIMIZATION) && \
+    defined(HAVE_EXPRESSION_STATEMENT)
 #  define div64_const(n, base) \
     ({ \
       uint64_t __n = (n); \
@@ -336,12 +337,12 @@ extern "C"
       })
 
 #  define div_const(n, base) \
-    ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const(n, base) : ((n) / (base)))
+    ((sizeof(n) == sizeof(uint64_t)) ? div64_const(n, base) : ((n) / (base)))
 #  define div_const_roundup(n, base) \
-    ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const((n) + (base) - 1, base) : \
+    ((sizeof(n) == sizeof(uint64_t)) ? div64_const((n) + (base) - 1, base) : \
      (((n) + (base) - 1) / (base)))
 #  define div_const_roundnearest(n, base) \
-    ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const((n) + ((base) / 2), base) : \
+    ((sizeof(n) == sizeof(uint64_t)) ? div64_const((n) + ((base) / 2), base) : \
      (((n) + ((base) / 2)) / (base)))
 #else
 #  define div_const(n, base) ((n) / (base))

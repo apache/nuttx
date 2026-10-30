@@ -170,6 +170,14 @@
 #  define __Atomic(t) _Atomic(t)
 #endif
 
+/* Expression statements (GNU statement expressions) */
+
+#undef HAVE_EXPRESSION_STATEMENT
+
+#if !defined(__ghs__) && (defined(__GNUC__) || defined(__clang__))
+#  define HAVE_EXPRESSION_STATEMENT 1
+#endif
+
 /* Green Hills Software definitions *****************************************/
 
 #if defined(__ghs__)
