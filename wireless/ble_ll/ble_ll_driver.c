@@ -462,6 +462,46 @@ int ble_ll_hci_acl_send(FAR struct iob_s *iob)
 }
 
 /****************************************************************************
+ * Name: ble_ll_initialize
+ *
+ * Description:
+ *   Initialize the BLE Link Layer on top of a radio lower half without
+ *   registering its HCI driver.
+ *
+ * Input Parameters:
+ *   lower - Radio lower half
+ *
+ * Returned Value:
+ *   The Link Layer HCI driver on success; NULL on failure.
+ *
+ ****************************************************************************/
+
+FAR struct bt_driver_s *ble_ll_initialize(FAR struct ble_ll_lower_s *lower)
+{
+  DEBUGASSERT(lower != NULL && lower->ops != NULL);
+  DEBUGASSERT(g_ble_ll_lower == NULL);
+
+  g_ble_ll_wq = work_queue_create("ble_ll", CONFIG_BLE_LL_PRIORITY, NULL,
+                                  CONFIG_BLE_LL_STACKSIZE, 1);
+  if (g_ble_ll_wq == NULL)
+    {
+      wlerr("ERROR: failed to create work queue\n");
+      return NULL;
+    }
+
+  ble_ll_pool_init(&g_ble_ll_cmd_pool);
+  ble_ll_pool_init(&g_ble_ll_evt_pool);
+  ble_ll_pool_init(&g_ble_ll_evt_lo_pool);
+
+  g_ble_ll_lower = lower;
+  lower->ops->bind(lower, &g_ble_ll_lowercb_priv.cb);
+
+  ble_ll_init();
+
+  return &g_ble_ll_btdev;
+}
+
+/****************************************************************************
  * Name: ble_ll_register
  *
  * Description:
@@ -480,32 +520,19 @@ int ble_ll_hci_acl_send(FAR struct iob_s *iob)
 
 int ble_ll_register(FAR struct ble_ll_lower_s *lower, int devid)
 {
+  FAR struct bt_driver_s *btdev;
   int ret;
 
-  DEBUGASSERT(lower != NULL && lower->ops != NULL);
-  DEBUGASSERT(g_ble_ll_lower == NULL);
-
-  g_ble_ll_wq = work_queue_create("ble_ll", CONFIG_BLE_LL_PRIORITY, NULL,
-                                  CONFIG_BLE_LL_STACKSIZE, 1);
-  if (g_ble_ll_wq == NULL)
+  btdev = ble_ll_initialize(lower);
+  if (btdev == NULL)
     {
-      wlerr("ERROR: failed to create work queue\n");
       return -ENOMEM;
     }
 
-  ble_ll_pool_init(&g_ble_ll_cmd_pool);
-  ble_ll_pool_init(&g_ble_ll_evt_pool);
-  ble_ll_pool_init(&g_ble_ll_evt_lo_pool);
-
-  g_ble_ll_lower = lower;
-  lower->ops->bind(lower, &g_ble_ll_lowercb_priv.cb);
-
-  ble_ll_init();
-
 #ifdef CONFIG_DRIVERS_BLUETOOTH
-  ret = bt_driver_register_with_id(&g_ble_ll_btdev, devid);
+  ret = bt_driver_register_with_id(btdev, devid);
 #else
-  ret = bt_netdev_register(&g_ble_ll_btdev);
+  ret = bt_netdev_register(btdev);
 #endif
   if (ret < 0)
     {

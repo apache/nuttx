@@ -367,10 +367,30 @@ struct ble_ll_lower_s
  * Public Function Prototypes
  ****************************************************************************/
 
+struct bt_driver_s;
+
 #if defined(__cplusplus)
 extern "C"
 {
 #endif
+
+/****************************************************************************
+ * Name: ble_ll_initialize
+ *
+ * Description:
+ *   Initialize the BLE Link Layer on top of a radio lower half without
+ *   registering its HCI driver.  Used when the HCI driver is handed to
+ *   another transport.
+ *
+ * Input Parameters:
+ *   lower - Radio lower half
+ *
+ * Returned Value:
+ *   The Link Layer HCI driver on success; NULL on failure.
+ *
+ ****************************************************************************/
+
+FAR struct bt_driver_s *ble_ll_initialize(FAR struct ble_ll_lower_s *lower);
 
 /****************************************************************************
  * Name: ble_ll_register
