@@ -36,6 +36,7 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/signal.h>
 
 #include "aio/aio.h"
 
@@ -253,7 +254,8 @@ int aio_write_internal(FAR struct aiocb *aiocbp)
 
   DEBUGASSERT(aiocbp);
 
-  if (aiocbp->aio_offset < 0 || aiocbp->aio_reqprio < 0)
+  if (aiocbp->aio_offset < 0 || aiocbp->aio_reqprio < 0 ||
+      nxsig_event_valid(&aiocbp->aio_sigevent) < 0)
     {
       aiocbp->aio_result = -EINVAL;
       set_errno(EINVAL);

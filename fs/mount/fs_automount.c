@@ -354,7 +354,8 @@ static int automount_ioctl(FAR struct file *filep, int cmd,
           FAR struct automount_notify_s *notify =
             (FAR struct automount_notify_s *)((uintptr_t)arg);
 
-          if (notify != NULL)
+          if (notify != NULL &&
+              nxsig_event_valid(&notify->an_event) == OK)
             {
               /* Save the notification events */
 

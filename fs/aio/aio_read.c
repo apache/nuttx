@@ -34,6 +34,7 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/signal.h>
 
 #include "aio/aio.h"
 
@@ -224,7 +225,8 @@ int aio_read_internal(FAR struct aiocb *aiocbp)
 
   /* for aio_read, the aio_offset should be large or equal than 0 */
 
-  if (aiocbp->aio_offset < 0 || aiocbp->aio_reqprio < 0)
+  if (aiocbp->aio_offset < 0 || aiocbp->aio_reqprio < 0 ||
+      nxsig_event_valid(&aiocbp->aio_sigevent) < 0)
     {
       /* the EINVAL should be collected by aio_error(), we need to return
        * ERROR here

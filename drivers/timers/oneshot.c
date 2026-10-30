@@ -189,6 +189,7 @@ static int oneshot_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case OSIOC_MAXDELAY:
         {
           FAR struct timespec *ts = (FAR struct timespec *)((uintptr_t)arg);
+
           DEBUGASSERT(ts != NULL);
 
           ret = ONESHOT_MAX_DELAY(priv->od_lower, ts);
@@ -207,6 +208,12 @@ static int oneshot_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           start = (FAR struct oneshot_start_s *)((uintptr_t)arg);
           DEBUGASSERT(start != NULL);
+
+          ret = nxsig_event_valid(&start->event);
+          if (ret < 0)
+            {
+              break;
+            }
 
           /* Save signaling information */
 

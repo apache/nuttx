@@ -259,9 +259,9 @@ static void ft80x_notify(FAR struct ft80x_dev_s *priv,
                          enum ft80x_notify_e id, int value)
 {
 #ifdef CONFIG_DISABLE_ALL_SIGNALS
-    UNUSED(priv);
-    UNUSED(id);
-    UNUSED(value);
+  UNUSED(priv);
+  UNUSED(id);
+  UNUSED(value);
 #else
   FAR struct ft80x_eventinfo_s *info = &priv->notify[id];
 
@@ -1025,7 +1025,8 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                 {
                   /* Make sure that arguments are valid for the enable */
 
-                  if (notify->pid == 0)
+                  if (notify->pid == 0 ||
+                      nxsig_event_valid(&notify->event) < 0)
                     {
                       ret = -EINVAL;
                     }
@@ -1067,14 +1068,14 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 #endif
-       /* FT80X_IOC_FADE:
-        *   Description:  Change the backlight intensity with a controllable
-        *                 fade.
-        *   Argument:     A reference to an instance of struct ft80x_fade_s.
-        *   Returns:      None.
-        */
+      /* FT80X_IOC_FADE:
+       *   Description:  Change the backlight intensity with a controllable
+       *                 fade.
+       *   Argument:     A reference to an instance of struct ft80x_fade_s.
+       *   Returns:      None.
+       */
 
-       case FT80X_IOC_FADE:
+      case FT80X_IOC_FADE:
         {
           FAR const struct ft80x_fade_s *fade =
             (FAR const struct ft80x_fade_s *)((uintptr_t)arg);
@@ -1091,13 +1092,13 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-       /* FT80X_IOC_AUDIO:
-        *   Description:  Enable/disable an external audio amplifier.
-        *   Argument:     0=disable; 1=enable.
-        *   Returns:      None.
-        */
+      /* FT80X_IOC_AUDIO:
+       *   Description:  Enable/disable an external audio amplifier.
+       *   Argument:     0=disable; 1=enable.
+       *   Returns:      None.
+       */
 
-       case FT80X_IOC_AUDIO:
+      case FT80X_IOC_AUDIO:
         {
 #if defined(CONFIG_LCD_FT80X_AUDIO_MCUSHUTDOWN)
           /* Amplifier is controlled by an MCU GPIO pin */
