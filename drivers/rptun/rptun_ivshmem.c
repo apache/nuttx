@@ -432,8 +432,8 @@ static void rptun_ivshmem_wdog(wdparm_t arg)
       priv->callback(priv->arg, RPTUN_NOTIFY_ALL);
     }
 
-  wd_start(&priv->wdog, RPTUN_IVSHMEM_WDOG_DELAY, rptun_ivshmem_wdog,
-           (wdparm_t)priv);
+  wd_start_next(&priv->wdog, RPTUN_IVSHMEM_WDOG_DELAY, rptun_ivshmem_wdog,
+                (wdparm_t)priv);
 }
 
 /****************************************************************************
