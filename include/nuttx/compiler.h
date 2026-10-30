@@ -1387,6 +1387,7 @@
 #  define CONFIG_HAVE_FLOAT             1
 #  define CONFIG_HAVE_DOUBLE            1
 #  define CONFIG_HAVE_LONG_DOUBLE       1
+#  define LDBL_MANT_DIG                 53
 
 /* Pre-processor */
 
