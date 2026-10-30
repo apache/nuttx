@@ -120,10 +120,9 @@ static void    uart_poll_notify(FAR uart_dev_t *dev, unsigned int min,
 
 /* Write support */
 
-#ifdef CONFIG_SERIAL_TXBULK
-static size_t  uart_putxmitbuf(FAR uart_dev_t *dev, FAR const char *buf,
-                               size_t len);
-#endif
+static ssize_t uart_putxmitbuffer(FAR uart_dev_t *dev,
+                                  FAR const char *buffer, size_t buflen,
+                                  bool oktoblock);
 static int     uart_putxmitchar(FAR uart_dev_t *dev, int ch,
                                 bool oktoblock);
 static inline ssize_t uart_irqwrite(FAR uart_dev_t *dev,
@@ -253,209 +252,221 @@ static void uart_poll_notify(FAR uart_dev_t *dev, unsigned int min,
   leave_critical_section(flags);
 }
 
-#ifdef CONFIG_SERIAL_TXBULK
 /****************************************************************************
- * Name: uart_putxmitbuf
+ * Name: uart_putxmitbuffer
  *
  * Description:
- *   Copy as many bytes as currently fit into the TX buffer, without
- *   blocking.  Returns the number of bytes copied, which may be zero if
- *   the TX buffer is full.  The caller handles a full buffer with
- *   uart_putxmitchar().
+ *   Copy up to 'buflen' bytes from 'buffer' into the TX ring buffer,
+ *   blocking (when 'oktoblock' is true) to wait for free space.  Data is
+ *   moved in bulk with memcpy over the contiguous free region, removing the
+ *   per-byte call/branch overhead of adding one character at a time.  This
+ *   dominates large raw-mode writes (e.g. block transfers to USB CDC/ACM).
+ *
+ *   Concurrency: dev->xmit.head is owned by the writer under xmit.lock,
+ *   which the caller must hold.  dev->xmit.tail only advances on the drain
+ *   side, so reading a stale tail only underestimates the free space (safe,
+ *   never overwrites unread data).
+ *
+ * Returned Value:
+ *   The number of bytes copied into the TX buffer.  If no byte at all could
+ *   be copied, a negated errno value is returned instead (-EINTR if a signal
+ *   was received, -ENOTCONN if a removable device was disconnected, or
+ *   -EAGAIN if non-blocking and the buffer is full).
  *
  ****************************************************************************/
 
-static size_t uart_putxmitbuf(FAR uart_dev_t *dev, FAR const char *buf,
-                              size_t len)
+static ssize_t uart_putxmitbuffer(FAR uart_dev_t *dev,
+                                  FAR const char *buffer, size_t buflen,
+                                  bool oktoblock)
 {
-  size_t total = 0;
-  size_t nfree;
-  size_t ncopy;
-  int head = dev->xmit.head;
-  int tail = dev->xmit.tail;  /* Snapshot: the drain side only frees space */
+  size_t nwritten = 0;
+  irqstate_t flags;
+  int nexthead;
+  int ret;
 
-  while (total < len)
+  /* Loop until all data has been added to the TX buffer (or we stop early
+   * because of an error or a full buffer in non-blocking mode).
+   */
+
+  while (nwritten < buflen)
     {
-      /* Contiguous free space at the head, keeping one byte unused to
-       * distinguish a full buffer from an empty one.
+      int head = dev->xmit.head;
+      int tail = dev->xmit.tail;
+      size_t space;
+      size_t chunk;
+
+      /* Determine the contiguous free space at the head of the ring
+       * buffer.
        */
 
-      if (head < tail)
+      if (dev->xmit.buffer == NULL)
         {
-          nfree = tail - head - 1;
+          space = 0;
         }
-      else if (tail > 0)
+      else if (head >= tail)
         {
-          nfree = dev->xmit.size - head;
+          /* Contiguous space up to the physical end of the buffer.  If tail
+           * is at 0, leave the final slot free so that head == tail keeps
+           * meaning "empty".
+           */
+
+          space = dev->xmit.size - head;
+          if (tail == 0)
+            {
+              space -= 1;
+            }
         }
       else
         {
-          nfree = dev->xmit.size - head - 1;
+          space = tail - head - 1;
         }
 
-      if (nfree == 0)
+      if (space > 0)
         {
-          break;
+          /* Copy as much as fits into the contiguous region, then advance
+           * (and wrap) the head pointer.
+           */
+
+          chunk = MIN(space, buflen - nwritten);
+          memcpy(&dev->xmit.buffer[head], &buffer[nwritten], chunk);
+
+          head += chunk;
+          if (head >= dev->xmit.size)
+            {
+              head = 0;
+            }
+
+          dev->xmit.head = head;
+          nwritten      += chunk;
+          continue;
         }
 
-      ncopy = MIN(len - total, nfree);
-      memcpy(&dev->xmit.buffer[head], buf + total, ncopy);
-      total += ncopy;
+      /* The TX buffer is full (or not yet available).  Should we block,
+       * waiting for the hardware to remove some data from the TX buffer?
+       */
 
-      /* Publish the new head only after the data is in place */
-
-      head += ncopy;
-      if (head >= dev->xmit.size)
+      if (!oktoblock)
         {
-          head = 0;
+          /* The caller has requested that we not block for data.  Return the
+           * count copied so far, or -EAGAIN if nothing was copied.
+           */
+
+          return nwritten > 0 ? nwritten : -EAGAIN;
         }
 
-      dev->xmit.head = head;
+      /* The following steps must be atomic with respect to serial interrupt
+       * handling.
+       *
+       * This critical section is also used for the serialization with the
+       * up_putc-based syslog channels.
+       * See https://github.com/apache/nuttx/issues/14662
+       */
+
+      flags = enter_critical_section();
+
+      /* Check again...  In certain race conditions an interrupt may have
+       * occurred between the test at the top of the loop and entering the
+       * critical section and the TX buffer may no longer be full.
+       *
+       * NOTE: On certain devices, such as USB CDC/ACM, the entire TX buffer
+       * may have been emptied in this race condition.  In that case, the
+       * logic would hang below waiting for space in the TX buffer without
+       * this test.
+       */
+
+      if (dev->xmit.buffer == NULL)
+        {
+          nexthead = dev->xmit.tail;
+        }
+      else
+        {
+          nexthead = dev->xmit.head + 1;
+          if (nexthead >= dev->xmit.size)
+            {
+              nexthead = 0;
+            }
+        }
+
+      if (nexthead != dev->xmit.tail)
+        {
+          /* Space is available again; retry the copy. */
+
+          leave_critical_section(flags);
+          continue;
+        }
+
+#ifdef CONFIG_SERIAL_REMOVABLE
+      /* Check if the removable device is no longer connected while we have
+       * interrupts off.  We do not want the transition to occur as a race
+       * condition before we begin the wait.
+       */
+
+      if (dev->disconnected)
+        {
+          leave_critical_section(flags);
+          return nwritten > 0 ? nwritten : -ENOTCONN;
+        }
+#endif
+
+      /* Wait for some characters to be sent from the buffer with the TX
+       * interrupt enabled.  When the TX interrupt is enabled,
+       * uart_xmitchars() should execute and remove some of the data from
+       * the TX buffer.
+       *
+       * NOTE that interrupts will be re-enabled while we wait for the
+       * semaphore.
+       */
+
+#ifdef CONFIG_SERIAL_TXDMA
+      uart_dmatxavail(dev);
+#endif
+      uart_enabletxint(dev);
+      leave_critical_section(flags);
+      ret = nxsem_wait(&dev->xmitsem);
+      flags = enter_critical_section();
+      uart_disabletxint(dev);
+      leave_critical_section(flags);
+
+#ifdef CONFIG_SERIAL_REMOVABLE
+      /* Check if the removable device was disconnected while we were
+       * waiting.
+       */
+
+      if (dev->disconnected)
+        {
+          return nwritten > 0 ? nwritten : -ENOTCONN;
+        }
+#endif
+
+      /* Check if we were awakened by signal. */
+
+      if (ret < 0)
+        {
+          /* A signal received while waiting for the xmit buffer to become
+           * non-full will abort the transfer.
+           */
+
+          return nwritten > 0 ? nwritten : ret;
+        }
     }
 
-  return total;
+  return nwritten;
 }
-
-#endif /* CONFIG_SERIAL_TXBULK */
 
 /****************************************************************************
  * Name: uart_putxmitchar
  ****************************************************************************/
 
-static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
+static inline
+int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
 {
-  irqstate_t flags;
-  int nexthead;
-  int ret;
+  ssize_t nsent;
+  char c = ch;
 
-  /* Loop until we are able to add the character to the TX buffer. */
+  /* Forward the single character to the batch helper. */
 
-  for (; ; )
-    {
-      /* Increment to see what the next head pointer will be.
-       * We need to use the "next" head pointer to determine when the
-       * circular buffer would overrun
-       */
-
-      nexthead = dev->xmit.head + 1;
-      if (nexthead >= dev->xmit.size)
-        {
-          nexthead = 0;
-        }
-
-      /* Check if the TX buffer is full */
-
-      if (nexthead != dev->xmit.tail)
-        {
-          /* No.. not full.  Add the character to the TX buffer and return. */
-
-          dev->xmit.buffer[dev->xmit.head] = ch;
-          dev->xmit.head = nexthead;
-          break;
-        }
-
-      /* The TX buffer is full.  Should be block, waiting for the hardware
-       * to remove some data from the TX buffer?
-       */
-
-      else if (oktoblock)
-        {
-          /* The following steps must be atomic with respect to serial
-           * interrupt handling.
-           *
-           * This critical section is also used for the serialization
-           * with the up_putc-based syslog channels.
-           * See https://github.com/apache/nuttx/issues/14662
-           */
-
-          flags = enter_critical_section();
-
-          /* Check again...  In certain race conditions an interrupt may
-           * have occurred between the test at the top of the loop and
-           * entering the critical section and the TX buffer may no longer
-           * be full.
-           *
-           * NOTE: On certain devices, such as USB CDC/ACM, the entire TX
-           * buffer may have been emptied in this race condition.  In that
-           * case, the logic would hang below waiting for space in the TX
-           * buffer without this test.
-           */
-
-          if (nexthead != dev->xmit.tail)
-            {
-              ret = OK;
-            }
-
-#ifdef CONFIG_SERIAL_REMOVABLE
-          /* Check if the removable device is no longer connected while we
-           * have interrupts off.  We do not want the transition to occur
-           * as a race condition before we begin the wait.
-           */
-
-          else if (dev->disconnected)
-            {
-              ret = -ENOTCONN;
-            }
-#endif
-          else
-            {
-              /* Wait for some characters to be sent from the buffer with
-               * the TX interrupt enabled.  When the TX interrupt is enabled,
-               * uart_xmitchars() should execute and remove some of the data
-               * from the TX buffer.
-               *
-               * NOTE that interrupts will be re-enabled while we wait for
-               * the semaphore.
-               */
-
-#ifdef CONFIG_SERIAL_TXDMA
-              uart_dmatxavail(dev);
-#endif
-              uart_enabletxint(dev);
-              ret = nxsem_wait(&dev->xmitsem);
-              uart_disabletxint(dev);
-            }
-
-          leave_critical_section(flags);
-
-#ifdef CONFIG_SERIAL_REMOVABLE
-          /* Check if the removable device was disconnected while we were
-           * waiting.
-           */
-
-          if (dev->disconnected)
-            {
-              return -ENOTCONN;
-            }
-#endif
-
-          /* Check if we were awakened by signal. */
-
-          if (ret < 0)
-            {
-              /* A signal received while waiting for the xmit buffer to
-               * become non-full will abort the transfer.
-               */
-
-              return -EINTR;
-            }
-        }
-
-      /* The caller has request that we not block for data.  So return the
-       * EAGAIN error to signal this situation.
-       */
-
-      else
-        {
-          return -EAGAIN;
-        }
-    }
-
-  /* We won't get here.  Some compilers may complain that this code is
-   * unreachable.
-   */
-
-  return OK;
+  nsent = uart_putxmitbuffer(dev, &c, 1, oktoblock);
+  return nsent < 0 ? nsent : OK;
 }
 
 /****************************************************************************
@@ -499,40 +510,63 @@ static inline ssize_t uart_irqwrite(FAR uart_dev_t *dev,
                                     FAR const char *buffer,
                                     size_t buflen)
 {
-  size_t tail = 0;
-  size_t head = buflen;
+  size_t offset = 0;
 
-  /* Do output post-processing */
+  /* Do output post-processing: locate the next character that requires
+   * translation (CR under OCRNL, NL under ONLCR/ONLRET), emit the run of
+   * ordinary bytes before it in one go, then emit the translation.  When no
+   * translation is enabled the whole buffer is written in a single call.
+   */
 
-  if ((dev->tc_oflag & OPOST) != 0)
+  while (offset < buflen)
     {
-      for (head = 0; head < buflen; head++)
+      FAR const char *special = NULL;
+      size_t nsent = buflen - offset;
+
+      if ((dev->tc_oflag & OCRNL) != 0)
         {
-          int ch = buffer[head];
+          special = memchr(&buffer[offset], '\r', nsent);
+        }
 
-          /* Mapping CR to NL? */
+      if ((dev->tc_oflag & (ONLCR | ONLRET)) != 0)
+        {
+          FAR const char *nl = memchr(&buffer[offset], '\n', nsent);
 
-          if ((ch == '\r') && (dev->tc_oflag & OCRNL) != 0)
+          if (nl != NULL && (special == NULL || nl < special))
             {
-              uart_putchars(dev, &buffer[tail], head - tail);
-              uart_putchars(dev, "\n", 1);
-              tail = head + 1;
-            }
-
-          /* Are we interested in newline processing? */
-
-          if ((ch == '\n') && (dev->tc_oflag & (ONLCR | ONLRET)) != 0)
-            {
-              uart_putchars(dev, &buffer[tail], head - tail);
-              uart_putchars(dev, "\r", 1);
-              tail = head;
+              special = nl;
             }
         }
+
+      if (special != NULL)
+        {
+          nsent = special - &buffer[offset];
+        }
+
+      uart_putchars(dev, &buffer[offset], nsent);
+      offset += nsent;
+
+      if (special == NULL)
+        {
+          break;
+        }
+
+      if (buffer[offset] == '\r')
+        {
+          /* OCRNL: map CR to NL (the CR itself is dropped). */
+
+          uart_putchars(dev, "\n", 1);
+        }
+      else
+        {
+          /* ONLCR/ONLRET: prepend CR before the NL. */
+
+          uart_putchars(dev, "\r\n", 2);
+        }
+
+      offset += 1;
     }
 
-  /* Output the character, using the low-level direct UART interfaces */
-
-  uart_putchars(dev, &buffer[tail], head - tail);
   return buflen;
 }
 
@@ -1592,9 +1626,6 @@ static ssize_t uart_writev(FAR struct file *filep, FAR struct uio *uio)
   FAR const char   *segbuf   = NULL;
   size_t            seglen   = 0;
   size_t            nseg     = 0;
-#ifdef CONFIG_SERIAL_TXBULK
-  size_t            ncopy;
-#endif
   ssize_t           nwritten;
   ssize_t           buflen;
   bool              oktoblock;
@@ -1669,8 +1700,21 @@ static ssize_t uart_writev(FAR struct file *filep, FAR struct uio *uio)
    */
 
   uart_disabletxint(dev);
+
+  /* Copy the payload into the TX buffer.  Output post-processing only needs
+   * to translate CR (when OCRNL is set) and NL (when ONLCR/ONLRET is set);
+   * every other byte is copied verbatim.  So within each iovec segment,
+   * locate the next byte that needs translation, bulk-copy everything before
+   * it with uart_putxmitbuffer(), then handle that one byte.  When no
+   * translation is enabled (the common raw-mode case, e.g. block transfers
+   * to USB CDC/ACM) each segment is copied in a single bulk operation.
+   */
+
   while (buflen > 0)
     {
+      FAR const char *special = NULL;
+      size_t          nsent;
+
       if (nseg >= seglen)
         {
           /* Consume the current segment and take a pointer to the next.
@@ -1684,105 +1728,133 @@ static ssize_t uart_writev(FAR struct file *filep, FAR struct uio *uio)
           nseg   = 0;
         }
 
-      /* With no output processing, copy whole runs into the TX buffer at
-       * once.  The bulk copy caches the head index, so it is only used
-       * when this thread is provably the sole producer: ECHO makes
-       * uart_readv() echo into the same buffer, and on a console
-       * uart_irqwrite() produces into it from interrupt context.  A full
-       * TX buffer falls through to uart_putxmitchar() below, which keeps
-       * the canonical blocking, disconnect and O_NONBLOCK handling.
+      /* Number of contiguous bytes remaining in the current segment. */
+
+      nsent = seglen - nseg;
+
+      /* Locate the next character in this segment that requires output
+       * post-processing.
        */
 
-#ifdef CONFIG_SERIAL_TXBULK
-      if ((dev->tc_oflag & OPOST) == 0 && (dev->tc_lflag & ECHO) == 0 &&
-          !dev->isconsole)
+      if ((dev->tc_oflag & OCRNL) != 0)
         {
-          ncopy = uart_putxmitbuf(dev, segbuf + nseg, seglen - nseg);
-          if (ncopy > 0)
+          special = memchr(&segbuf[nseg], '\r', nsent);
+        }
+
+      if ((dev->tc_oflag & (ONLCR | ONLRET)) != 0)
+        {
+          FAR const char *nl = memchr(&segbuf[nseg], '\n', nsent);
+
+          if (nl != NULL && (special == NULL || nl < special))
             {
-              nseg   += ncopy;
-              buflen -= ncopy;
+              special = nl;
+            }
+        }
+
+      if (special != NULL)
+        {
+          nsent = special - &segbuf[nseg];
+        }
+
+      /* Bulk-copy the run of ordinary bytes that precede the special
+       * character (or the rest of the segment when there is none).
+       */
+
+      if (nsent > 0)
+        {
+          ret = uart_putxmitbuffer(dev, &segbuf[nseg], nsent, oktoblock);
+          if (ret < 0)
+            {
+              break;
+            }
+
+          nseg   += ret;
+          buflen -= ret;
+          if (ret < nsent)
+            {
               continue;
             }
         }
-#endif
 
-      ch  = segbuf[nseg];
-      ret = OK;
+      /* Copy entire segment, no special characters, goto next segment */
 
-      /* Do output post-processing */
-
-      if ((dev->tc_oflag & OPOST) != 0)
+      if (special == NULL)
         {
-          /* Mapping CR to NL? */
-
-          if ((ch == '\r') && (dev->tc_oflag & OCRNL) != 0)
-            {
-              ch = '\n';
-            }
-
-          /* Are we interested in newline processing? */
-
-          if ((ch == '\n') && (dev->tc_oflag & (ONLCR | ONLRET)) != 0)
-            {
-              ret = uart_putxmitchar(dev, '\r', oktoblock);
-            }
-
-          /* Specifically not handled:
-           *
-           * OXTABS - primarily a full-screen terminal optimization
-           * ONOEOT - Unix interoperability hack
-           * OLCUC  - Not specified by POSIX
-           * ONOCR  - low-speed interactive optimization
-           */
+          continue;
         }
 
-      /* Put the character into the transmit buffer */
+      /* 'special' points at the current byte.  Translate and
+       * emit that single character.
+       *
+       * Specifically not handled:
+       *   OXTABS - primarily a full-screen terminal optimization
+       *   ONOEOT - Unix interoperability hack
+       *   OLCUC  - Not specified by POSIX
+       *   ONOCR  - low-speed interactive optimization
+       */
+
+      ch = segbuf[nseg];
+
+      /* Mapping CR to NL? */
+
+      if ((ch == '\r') && (dev->tc_oflag & OCRNL) != 0)
+        {
+          ch = '\n';
+        }
+
+      /* Are we interested in newline processing? */
+
+      if ((ch == '\n') && (dev->tc_oflag & (ONLCR | ONLRET)) != 0)
+        {
+          ret = uart_putxmitchar(dev, '\r', oktoblock);
+        }
+
+      /* Put the (translated) character into the transmit buffer. */
 
       if (ret >= 0)
         {
           ret = uart_putxmitchar(dev, ch, oktoblock);
         }
 
-      /* uart_putxmitchar() might return an error under one of two
+      /* uart_putxmitchar() might return an error under one of three
        * conditions:  (1) The wait for buffer space might have been
        * interrupted by a signal (ret should be -EINTR), (2) if
        * CONFIG_SERIAL_REMOVABLE is defined, then uart_putxmitchar()
        * might also return if the serial device was disconnected
        * (with -ENOTCONN), or (3) if O_NONBLOCK is specified, then
-       * then uart_putxmitchar() might return -EAGAIN if the output
+       * uart_putxmitchar() might return -EAGAIN if the output
        * TX buffer is full.
        */
 
       if (ret < 0)
         {
-          /* POSIX requires that we return -1 and errno set if no data was
-           * transferred.  Otherwise, we return the number of bytes in the
-           * interrupted transfer.
-           */
-
-          if (buflen < (size_t)nwritten)
-            {
-              /* Some data was transferred.  Return the number of bytes that
-               * were successfully transferred.
-               */
-
-              nwritten -= buflen;
-            }
-          else
-            {
-              /* No data was transferred. Return the negated errno value.
-               * The VFS layer will set the errno value appropriately).
-               */
-
-              nwritten = ret;
-            }
-
           break;
         }
 
-      buflen--;
       nseg++;
+      buflen--;
+    }
+
+  /* POSIX requires that we return -1 and errno set if no data was
+   * transferred.  Otherwise, we return the number of bytes in the
+   * interrupted transfer.
+   */
+
+  if (nwritten > buflen)
+    {
+      /* Some data was transferred. Return the number of bytes that
+       * were successfully transferred.
+       */
+
+      nwritten -= buflen;
+    }
+  else
+    {
+      /* No data was transferred.  Return the negated errno value.  The VFS
+       * layer will set the errno value appropriately.
+       */
+
+      nwritten = ret;
     }
 
   /* Consume the bytes that were successfully queued */
