@@ -42,10 +42,35 @@
 #include "tricore_internal.h"
 
 #include "IfxCpu.h"
+#include "IfxInt_reg.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define TRICORE_INT_LASR0_ADDR    ((uintptr_t)&INT_LASR0)
+#define TRICORE_INT_LASR_SPACING  ((uintptr_t)&INT_LASR1 - \
+                                   (uintptr_t)&INT_LASR0)
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: tricore_irq_from_lasr
+ *
+ * Description:
+ *   Get irq number from ICU's last acknowledged SRN register
+ *
+ ****************************************************************************/
+
+static inline_function int tricore_irq_from_lasr(void)
+{
+  uintptr_t addr = TRICORE_INT_LASR0_ADDR +
+                   up_cpu_index() * TRICORE_INT_LASR_SPACING;
+
+  return (getreg32(addr) >> 16) & 0x7ff;
+}
 
 #ifdef CONFIG_ARCH_IRQPRIO
 
@@ -60,14 +85,13 @@
  *
  ****************************************************************************/
 
-static void tricore_irq_direct(uintptr_t *regs, int ccpn)
+static void tricore_irq_direct(uintptr_t *regs)
 {
   struct tcb_s **running_task = &g_running_tasks[this_cpu()];
-  int irq;
+  int irq = tricore_irq_from_lasr();
 
   up_irq_enable();
 
-  irq = tricore_srpn_to_irq(ccpn);
   tricore_ack_irq(irq);
   irq_dispatch(irq, regs);
 
@@ -99,12 +123,12 @@ static void tricore_irq_direct(uintptr_t *regs, int ccpn)
  *
  ****************************************************************************/
 
-static void tricore_irq_sched(uintptr_t *regs, int ccpn)
+static void tricore_irq_sched(uintptr_t *regs)
 {
   struct tcb_s **running_task = &g_running_tasks[this_cpu()];
   struct tcb_s *tcb;
 #ifndef CONFIG_ARCH_IRQPRIO
-  int irq;
+  int irq = tricore_irq_from_lasr();
 #endif
 
 #ifdef CONFIG_ARCH_IRQPRIO
@@ -119,11 +143,8 @@ static void tricore_irq_sched(uintptr_t *regs, int ccpn)
   board_autoled_on(LED_INIRQ);
 
 #ifndef CONFIG_ARCH_IRQPRIO
-  irq = tricore_srpn_to_irq(ccpn);
   tricore_ack_irq(irq);
   irq_dispatch(irq, regs);
-#else
-  UNUSED(ccpn);
 #endif
 
   tcb = this_task();
@@ -172,19 +193,18 @@ static void tricore_irq_sched(uintptr_t *regs, int ccpn)
 
 IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
 {
-  Ifx_CPU_ICR icr;
-  uintptr_t *regs;
-
-  icr.U = tricore_mfcr(CPU_ICR);
-  regs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
+  uintptr_t *regs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
 
 #ifdef CONFIG_ARCH_IRQPRIO
+  Ifx_CPU_ICR icr;
+
+  icr.U = tricore_mfcr(CPU_ICR);
   if (icr.B.CCPN != TRICORE_IRQ_MIN_PRIORITY)
     {
-      tricore_irq_direct(regs, icr.B.CCPN);
+      tricore_irq_direct(regs);
       return;
     }
 #endif
 
-  tricore_irq_sched(regs, icr.B.CCPN);
+  tricore_irq_sched(regs);
 }
