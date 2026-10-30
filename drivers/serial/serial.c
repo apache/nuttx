@@ -2572,52 +2572,113 @@ void uart_reset_sem(FAR uart_dev_t *dev)
     defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
 int uart_check_special(FAR uart_dev_t *dev, FAR const char *buf, size_t size)
 {
-  size_t i;
-
   if ((dev->tc_lflag & ISIG) == 0)
     {
       return 0;
     }
 
-  for (i = 0; i < size; i++)
-    {
-#ifdef CONFIG_TTY_FORCE_PANIC
-      if (buf[i] == CONFIG_TTY_FORCE_PANIC_CHAR)
-        {
-          if (++dev->panic_count >= CONFIG_TTY_FORCE_PANIC_REPEAT_COUNT)
-            {
-              PANIC_WITH_REGS("Force panic by user.", NULL);
-            }
+  /* Walk the buffer, jumping to the next control character with memchr
+   * instead of scanning byte by byte.  SIGINT/SIGTSTP stop the scan and
+   * return their signal; FORCE_PANIC and LAUNCH are handled in passing so
+   * that a later signal in the same buffer is still delivered.
+   */
 
-          return 0;
-        }
-      else
+  while (size > 0)
+    {
+      FAR const char *special = NULL;
+      FAR const char *tmp;
+
+#ifdef CONFIG_TTY_FORCE_PANIC
+      tmp = memchr(buf, CONFIG_TTY_FORCE_PANIC_CHAR, size);
+      if (tmp != NULL && (special == NULL || tmp < special))
         {
-          dev->panic_count = 0;
+          special = tmp;
         }
 #endif
 
 #ifdef CONFIG_TTY_LAUNCH
-      if (buf[i] == CONFIG_TTY_LAUNCH_CHAR)
+      tmp = memchr(buf, CONFIG_TTY_LAUNCH_CHAR, size);
+      if (tmp != NULL && (special == NULL || tmp < special))
+        {
+          special = tmp;
+        }
+#endif
+
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
+      if (dev->pid > 0)
+        {
+#ifdef CONFIG_TTY_SIGINT
+          tmp = memchr(buf, CONFIG_TTY_SIGINT_CHAR, size);
+          if (tmp != NULL && (special == NULL || tmp < special))
+            {
+              special = tmp;
+            }
+#endif
+
+#ifdef CONFIG_TTY_SIGTSTP
+          tmp = memchr(buf, CONFIG_TTY_SIGTSTP_CHAR, size);
+          if (tmp != NULL && (special == NULL || tmp < special))
+            {
+              special = tmp;
+            }
+#endif
+        }
+#endif
+
+      if (special == NULL)
+        {
+#ifdef CONFIG_TTY_FORCE_PANIC
+          /* Only ordinary bytes remain; they break the panic run. */
+
+          dev->panic_count = 0;
+#endif
+          break;
+        }
+
+#ifdef CONFIG_TTY_FORCE_PANIC
+      /* An ordinary byte before this char, or a non-panic control char,
+       * breaks the panic run.
+       */
+
+      if (*special != CONFIG_TTY_FORCE_PANIC_CHAR || special != buf)
+        {
+          dev->panic_count = 0;
+        }
+
+      if (*special == CONFIG_TTY_FORCE_PANIC_CHAR)
+        {
+          /* Consecutive panic characters accumulate */
+
+          if (++dev->panic_count >= CONFIG_TTY_FORCE_PANIC_REPEAT_COUNT)
+            {
+              PANIC_WITH_REGS("Force panic by user.", NULL);
+            }
+        }
+#endif
+
+#ifdef CONFIG_TTY_LAUNCH
+      if (*special == CONFIG_TTY_LAUNCH_CHAR)
         {
           uart_launch();
-          return 0;
         }
 #endif
 
 #ifdef CONFIG_TTY_SIGINT
-      if (dev->pid > 0 && buf[i] == CONFIG_TTY_SIGINT_CHAR)
+      if (*special == CONFIG_TTY_SIGINT_CHAR)
         {
           return SIGINT;
         }
 #endif
 
 #ifdef CONFIG_TTY_SIGTSTP
-      if (dev->pid > 0 && buf[i] == CONFIG_TTY_SIGTSTP_CHAR)
+      if (*special == CONFIG_TTY_SIGTSTP_CHAR)
         {
           return SIGTSTP;
         }
 #endif
+
+      size -= special - buf + 1;
+      buf = special + 1;
     }
 
   return 0;
