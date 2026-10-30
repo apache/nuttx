@@ -1,0 +1,13 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config DMA_SHARED_BUFFER
+	bool
+	default n
+	---help---
+		This option enables the framework for buffer-sharing between
+		multiple drivers. A buffer is associated with a file using driver
+		APIs extension; the file's descriptor can then be passed on to other
+		driver.

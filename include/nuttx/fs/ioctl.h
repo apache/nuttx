@@ -116,6 +116,7 @@
 #define _DSHOTIOCBASE   (0x4800) /* Dshot device ioctl commands */
 #define _PULSECOUNTBASE (0x4900) /* Pulse count driver ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
+#define _DMABUFBASE     (0x8d00) /* DMA-Buf modules ioctl commands */
 
 /* boardctl() commands share the same number space */
 
@@ -851,6 +852,13 @@
 
 #define _PULSECOUNTIOCVALID(c) (_IOC_TYPE(c)==_PULSECOUNTBASE)
 #define _PULSECOUNTIOC(nr)     _IOC(_PULSECOUNTBASE,nr)
+
+/* DMA-Buf driver ioctl definitions *****************************************/
+
+/* see nuttx/include/nuttx/dma-buf.h */
+
+#define _DMABUFIOCVALID(c)    (_IOC_TYPE(c)==_DMABUFBASE)
+#define _DMABUFIOC(nr)        _IOC(_DMABUFBASE,nr)
 
 /****************************************************************************
  * Public Type Definitions

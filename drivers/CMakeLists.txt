@@ -21,6 +21,10 @@
 # ##############################################################################
 
 nuttx_add_kernel_library(drivers)
+
+# Subdirectories that provide their own CMakeLists.txt (for example dma-buf) are
+# included automatically.
 nuttx_add_subdirectory()
+
 target_sources(drivers PRIVATE drivers_initialize.c)
 target_include_directories(drivers PRIVATE ${CMAKE_CURRENT_LIST_DIR})
