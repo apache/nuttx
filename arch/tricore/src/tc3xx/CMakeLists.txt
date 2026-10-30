@@ -148,7 +148,4 @@ if(NOT CONFIG_TRICORE_TOOLCHAIN_TASKING)
   target_compile_options(nuttx PRIVATE -Wno-unused-parameter
                                        -Wno-unused-but-set-parameter)
   target_compile_options(nuttx PRIVATE -Wno-implicit-fallthrough)
-else()
-  nuttx_add_extra_library(
-    "${CMAKE_CURRENT_LIST_DIR}/illd/prebuilts/tc162/cinit.o")
 endif()
