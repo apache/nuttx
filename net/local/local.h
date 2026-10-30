@@ -153,6 +153,12 @@ struct local_conn_s
                                   */
 #endif
 
+  /* The poll structures for the two FIFOs of a connected stream socket or
+   * of a socket pair, for poll() of POLLIN and POLLOUT together.
+   */
+
+  struct pollfd_s lc_inout_fds[2*LOCAL_NPOLLWAITERS];
+
 #ifdef CONFIG_NET_LOCAL_STREAM
   /* SOCK_STREAM fields common to both client and server */
 
@@ -163,7 +169,6 @@ struct local_conn_s
    */
 
   FAR struct pollfd_s *lc_event_fds[LOCAL_NPOLLWAITERS];
-  struct pollfd_s lc_inout_fds[2*LOCAL_NPOLLWAITERS];
 
   /* Union of fields unique to SOCK_STREAM client, server, and connected
    * peers.
@@ -799,13 +804,13 @@ int32_t local_generate_instance_id(void);
  * Name: local_set_pollthreshold
  *
  * Description:
- *   Set the local pollin and pollout threshold:
+ *   Set the poll thresholds of the FIFO that a socket of a SOCK_DGRAM
+ *   socket pair reads.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_LOCAL_DGRAM
-int local_set_pollthreshold(FAR struct local_conn_s *conn,
-                            unsigned long threshold);
+int local_set_pollthreshold(FAR struct local_conn_s *conn);
 #endif
 
 /****************************************************************************

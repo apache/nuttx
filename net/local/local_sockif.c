@@ -784,6 +784,15 @@ static int local_setsockopt(FAR struct socket *psock, int level, int option,
                 {
                   ret = file_ioctl(&conn->lc_infile, PIPEIOC_SETSIZE,
                                    rcvsize);
+#ifdef CONFIG_NET_LOCAL_DGRAM
+                  /* A socket pair: thresholds for the new size */
+
+                  if (ret >= 0 && psock->s_type == SOCK_DGRAM &&
+                      conn->lc_state == LOCAL_STATE_CONNECTED)
+                    {
+                      ret = local_set_pollthreshold(conn);
+                    }
+#endif
                 }
 #ifdef CONFIG_NET_LOCAL_DGRAM
               else if (psock->s_type == SOCK_DGRAM &&
@@ -1250,7 +1259,7 @@ static int local_socketpair(FAR struct socket *psocks[2])
     {
       for (i = 0; i < 2; i++)
         {
-          ret = local_set_pollthreshold(conns[i], sizeof(lc_size_t));
+          ret = local_set_pollthreshold(conns[i]);
           if (ret < 0)
             {
               goto errout;
