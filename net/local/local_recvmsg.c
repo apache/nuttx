@@ -544,6 +544,16 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       return ret;
     }
 
+  /* No data: the peer of a socket pair was closed.  Return 0, as for the
+   * orderly shutdown of a peer.
+   */
+
+  if (readlen < sizeof(addrlen))
+    {
+      readlen = 0;
+      goto errout_with_infd;
+    }
+
   /* Sync to the start of the next packet in the stream and get the size of
    * the next packet.
    */
