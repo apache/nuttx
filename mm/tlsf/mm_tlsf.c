@@ -185,6 +185,8 @@ static void mm_delayfree(struct mm_heap_s *heap, void *mem, bool delay);
  * Private Functions
  ****************************************************************************/
 
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+
 /****************************************************************************
  * Name: mm_lock_irq
  *
@@ -212,6 +214,8 @@ static void mm_unlock_irq(FAR struct mm_heap_s *heap, irqstate_t state)
   UNUSED(heap);
   up_irq_restore(state);
 }
+
+#endif
 
 static void memdump_allocnode(FAR void *ptr, size_t size)
 {
