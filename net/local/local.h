@@ -602,17 +602,21 @@ ssize_t local_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
  *   len   - Length of data to receive [in]
  *           Length of data actually received [out]
  *   once  - Flag to indicate the buf may only be read once
+ *   intr  - A signal can end the wait for the first byte.  Use false for
+ *           the parts of a datagram after its start: a datagram must be
+ *           read whole.
  *
  * Returned Value:
  *   Zero is returned on success; a negated errno value is returned on any
  *   failure.  If -ECONNRESET is received, then the sending side has closed
  *   the FIFO. In this case, the returned data may still be valid (if the
- *   returned len > 0).
+ *   returned len > 0).  -EINTR: a signal came before the first byte (only
+ *   if intr is true).
  *
  ****************************************************************************/
 
 int local_fifo_read(FAR struct file *filep, FAR uint8_t *buf,
-                    size_t *len, bool once);
+                    size_t *len, bool once, bool intr);
 
 /****************************************************************************
  * Name: local_getaddr

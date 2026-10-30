@@ -53,13 +53,14 @@
  *
  * Description:
  *   A thin layer around local_fifo_read that handles socket-related loss-of-
- *   connection events.
+ *   connection events.  intr: a signal can end the wait for the first
+ *   byte (the start of a message, not the rest of a datagram).
  *
  ****************************************************************************/
 
 static int psock_fifo_read(FAR struct socket *psock, FAR void *buf,
                            size_t offset, FAR size_t *readlen,
-                           int flags, bool once)
+                           int flags, bool once, bool intr)
 {
   FAR struct local_conn_s *conn = psock->s_conn;
   int ret;
@@ -78,7 +79,7 @@ static int psock_fifo_read(FAR struct socket *psock, FAR void *buf,
     }
   else
     {
-      ret = local_fifo_read(&conn->lc_infile, buf, readlen, once);
+      ret = local_fifo_read(&conn->lc_infile, buf, readlen, once, intr);
     }
 
   if (ret < 0)
@@ -112,7 +113,7 @@ static int psock_fifo_read(FAR struct socket *psock, FAR void *buf,
         }
       else
         {
-          if (ret != -EAGAIN)
+          if (ret != -EAGAIN && ret != -EINTR)
             {
               nerr("ERROR: Failed to read packet: %d\n", ret);
             }
@@ -327,7 +328,7 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
           ret = psock_fifo_read(psock,
                                 (FAR uint8_t *)msg->msg_iov[i].iov_base +
                                 iov_recv,
-                                peek_offset, &readlen, flags, true);
+                                peek_offset, &readlen, flags, true, true);
           if (ret < 0)
             {
               break;
@@ -428,7 +429,8 @@ static int psock_fifo_discard(FAR struct socket *psock, size_t len,
       /* Read 256 bytes into the bit bucket */
 
       tmplen = MIN(len, sizeof(bitbucket));
-      ret = psock_fifo_read(psock, bitbucket, 0, &tmplen, flags, false);
+      ret = psock_fifo_read(psock, bitbucket, 0, &tmplen, flags, false,
+                            false);
       if (ret < 0)
         {
           nerr("ERROR: Failed to get bitbucket : ret %d\n", ret);
@@ -536,12 +538,21 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
         }
     }
 
+  /* A signal ends the wait for a datagram (-EINTR).  When the first byte
+   * is in, the datagram is read whole.
+   */
+
   readlen = sizeof(addrlen);
-  ret = psock_fifo_read(psock, &addrlen, offset, &readlen, flags, false);
+  ret = psock_fifo_read(psock, &addrlen, offset, &readlen, flags, false,
+                        true);
   if (ret < 0)
     {
-      nerr("ERROR: Failed to get path length: ret %d\n", ret);
-      return ret;
+      if (ret != -EAGAIN && ret != -EINTR)
+        {
+          nerr("ERROR: Failed to get path length: ret %d\n", ret);
+        }
+
+      goto errout_with_infd;
     }
 
   /* No data: the peer of a socket pair was closed.  Return 0, as for the
@@ -560,7 +571,8 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   readlen = sizeof(pktlen);
   offset += sizeof(addrlen);
-  ret = psock_fifo_read(psock, &pktlen, offset, &readlen, flags, false);
+  ret = psock_fifo_read(psock, &pktlen, offset, &readlen, flags, false,
+                        false);
   if (ret < 0)
     {
       nerr("ERROR: Failed to get packet length: ret %d\n", ret);
@@ -578,7 +590,7 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
     {
       pathlen = MIN(*fromlen - sizeof(sa_family_t) - 1, readlen);
       ret = psock_fifo_read(psock, from->sa_data, offset,
-                            &pathlen, flags, false);
+                            &pathlen, flags, false, false);
       if (ret < 0)
         {
           nerr("ERROR: Failed to get path : ret %d\n", ret);
@@ -610,7 +622,8 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   readlen = MIN(pktlen, len);
   offset += addrlen;
-  ret     = psock_fifo_read(psock, buf, offset, &readlen, flags, false);
+  ret     = psock_fifo_read(psock, buf, offset, &readlen, flags, false,
+                            false);
   if (ret < 0)
     {
       nerr("ERROR: Failed to get packet : ret %d\n", ret);
