@@ -62,7 +62,7 @@
 
 extern void __start(void);
 
-static void start(void)
+static void noinstrument_function start(void)
 {
   /* Zero lr to mark the end of backtrace */
 
