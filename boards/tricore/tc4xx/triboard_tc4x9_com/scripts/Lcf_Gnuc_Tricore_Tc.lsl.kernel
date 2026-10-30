@@ -32,6 +32,12 @@
 #define COREID_LST(x)    JOIN2(x, CONFIG_CPU_COREID)
 #define COREID_MID(x,y)  JOIN3(x, CONFIG_CPU_COREID, y)
 
+#ifdef CONFIG_ARCH_IRQPRIO
+#define INTTAB_OFFSET 0x0020
+#else
+#define INTTAB_OFFSET 0x1FE0
+#endif
+
 /* Default linker script, for normal executables */
 OUTPUT_FORMAT("elf32-tricore")
 OUTPUT_ARCH("tricore")
@@ -67,7 +73,7 @@ LCF_USTACK_OFFSET = (LCF_ISTACK_OFFSET - 256 - LCF_USTACK_SIZE);
 
 LCF_STARTPTR      = LCF_PFLASH_KERNEL_START;
 LCF_STARTPTR_NC   = NC_START(LCF_STARTPTR);
-LCF_TRAPVEC_START = LCF_STARTPTR + 0x100;
+LCF_TRAPVEC_START = LCF_STARTPTR + 0x2000;
 
 COREID_LST(__INTTAB_CPU) = LCF_PFLASH_KERNEL_START;
 
@@ -161,17 +167,6 @@ SECTIONS
     PROVIDE(__ENABLE_INDIVIDUAL_C_INIT_CPU5 = 1);
 }
 
-/*Fixed memory Allocations for Trap Vector Table*/
-CORE_ID = GLOBAL;
-SECTIONS
-{
-    .traptab_tc (LCF_TRAPVEC_START) :
-    {
-        PROVIDE(COREID_LST(__TRAPTAB_CPU) = .);
-        KEEP (*(.traptab));
-    } > pfls
-}
-
 /*Fixed memory Allocations for _START1 to 5 */
 CORE_ID = GLOBAL ;
 SECTIONS
@@ -187,11 +182,22 @@ SECTIONS
 SECTIONS
 {
     /*Interrupt Vector Table*/
-    .COREID_MID(inttab_tc, _0FF) (COREID_LST(__INTTAB_CPU) + 0x1FE0) :
+    .COREID_MID(inttab_tc, _0FF) (COREID_LST(__INTTAB_CPU) + INTTAB_OFFSET) :
     {
         . = ALIGN(8);
-        KEEP (*(.COREID_MID(intvec_tc, _255)));
+        KEEP (*(.inttable));
         . = ALIGN(0x2000);
+    } > pfls
+}
+
+/*Fixed memory Allocations for Trap Vector Table*/
+CORE_ID = GLOBAL;
+SECTIONS
+{
+    .traptab_tc (LCF_TRAPVEC_START) :
+    {
+        PROVIDE(COREID_LST(__TRAPTAB_CPU) = .);
+        KEEP (*(.traptab));
     } > pfls
 }
 

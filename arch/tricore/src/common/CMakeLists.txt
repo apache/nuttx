@@ -65,7 +65,9 @@ if(CONFIG_ARCH_HAVE_DEBUG)
   list(APPEND SRCS tricore_hwdebug.c)
 endif()
 
-set(IFXFLAGS -DIFX_USE_SW_MANAGED_INT)
+if(NOT CONFIG_ARCH_IRQPRIO)
+  set(IFXFLAGS -DIFX_USE_SW_MANAGED_INT)
+endif()
 
 target_sources(arch PRIVATE ${SRCS})
 target_sources(nuttx PRIVATE tricore_doirq.c tricore_vectors.c)
