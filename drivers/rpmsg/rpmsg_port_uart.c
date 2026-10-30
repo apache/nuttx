@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <execinfo.h>
 #include <fcntl.h>
+#include <lzf.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -47,6 +48,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define RPMSG_PORT_UART_CMD_NORMAL         0x00
+#define RPMSG_PORT_UART_CMD_LZF            0x01
 
 #define RPMSG_PORT_UART_START              0x7f
 #define RPMSG_PORT_UART_CONNREQ            0x7e
@@ -120,6 +124,11 @@ struct rpmsg_port_uart_s
 #ifdef CONFIG_PM
   struct pm_wakelock_s            tx_wakelock;
   struct pm_wakelock_s            rx_wakelock;
+#endif
+#ifdef CONFIG_RPMSG_PORT_UART_COMPRESSION
+  FAR struct rpmsg_port_header_s *tx_lzfhdr;  /* Buffer for LZF compression output */
+  FAR struct rpmsg_port_header_s *rx_lzfhdr;  /* Pre-reserved rxq buffer for decompression */
+  lzf_state_t                     tx_lzfhtab; /* LZF compression hash table */
 #endif
 };
 
@@ -374,12 +383,52 @@ static void rpmsg_port_uart_send_frame(FAR struct rpmsg_port_uart_s *rpuart,
 static void rpmsg_port_uart_send_data(FAR struct rpmsg_port_uart_s *rpuart,
                                       FAR struct rpmsg_port_header_s *hdr)
 {
-  rpmsgdbg("Send data len: %" PRIu16 "\n", hdr->len);
+  uint16_t len = hdr->len - sizeof(*hdr);
+#ifdef CONFIG_RPMSG_PORT_UART_COMPRESSION
+  FAR struct rpmsg_port_header_s *lzfhdr = rpuart->tx_lzfhdr;
+  FAR struct lzf_header_s *reshdr;
+  size_t lzflen;
 
-  hdr->cmd = 0;
+  /* Try LZF compression: compress hdr->buf payload into lzfhdr->buf.
+   * out_len is set to len so compression only succeeds (TYPE1) when
+   * the result is strictly smaller than the original data.
+   *
+   * Side effects of lzf_compress:
+   *  - TYPE1 (compressed): writes a 7-byte LZF file header at
+   *    lzfhdr->buf - 7, clobbering lzfhdr's port header fields.
+   *    We rebuild them below before sending.
+   *  - TYPE0 (incompressible fallback): writes a 5-byte header at
+   *    hdr->buf - 5, clobbering hdr->cmd, hdr->avail, and hdr->len.
+   *    The else branch restores all three fields.
+   */
+
+  lzflen = lzf_compress(hdr->buf, len, lzfhdr->buf, len,
+                        rpuart->tx_lzfhtab, &reshdr);
+  if (reshdr->lzf_type == LZF_TYPE1_HDR)
+    {
+      /* Compression successful (TYPE1).  The compressed payload sits
+       * at lzfhdr->buf with length = lzflen - LZF_TYPE1_HDR_SIZE.
+       * Copy the original port header to lzfhdr (restoring fields
+       * clobbered by the LZF file header), then override cmd and len
+       * for the compressed frame.  Finally redirect hdr to lzfhdr
+       * so the common CRC + send path below uses the compressed frame.
+       */
+
+      memcpy(lzfhdr, hdr, sizeof(*lzfhdr));
+      lzfhdr->cmd = RPMSG_PORT_UART_CMD_LZF;
+      lzfhdr->len = sizeof(*lzfhdr) + lzflen - LZF_TYPE1_HDR_SIZE;
+      hdr = lzfhdr;
+    }
+  else
+#endif
+    {
+      hdr->cmd = RPMSG_PORT_UART_CMD_NORMAL;
+      hdr->len = sizeof(*hdr) + len;
+    }
+
+  rpmsgdbg("Send data len: %" PRIu16 "\n", hdr->len);
   hdr->avail = 0;
   hdr->crc = rpmsg_port_uart_crc16(hdr);
-
   rpmsg_port_uart_send_frame(rpuart, hdr, hdr->len);
 }
 
@@ -625,6 +674,37 @@ rpmsg_port_uart_process_rx_data(FAR struct rpmsg_port_uart_s *rpuart)
   while ((hdr = rpmsg_port_queue_get_buffer(rxq, false)) != NULL)
     {
       rpmsgdbg("Received data hdr=%p len=%u\n", hdr, hdr->len);
+
+#ifdef CONFIG_RPMSG_PORT_UART_COMPRESSION
+      if (hdr->cmd == RPMSG_PORT_UART_CMD_LZF)
+        {
+          FAR struct rpmsg_port_header_s *rxhdr = rpuart->rx_lzfhdr;
+          uint16_t rxlen = hdr->len - sizeof(*hdr);
+
+          /* Decompress hdr->buf (compressed payload) into the
+           * pre-reserved rxhdr buffer.  On success, copy the port
+           * header from hdr to rxhdr, fix up rxhdr->len with the
+           * decompressed size, then swap: rxhdr goes to rx_cb and
+           * the consumed hdr becomes the new rx_lzfhdr.
+           */
+
+          rxlen = lzf_decompress(hdr->buf, rxlen, rxhdr->buf,
+                                 rxq->len - sizeof(*rxhdr));
+          if (rxlen > 0)
+            {
+              memcpy(rxhdr, hdr, sizeof(*rxhdr));
+              rxhdr->len = sizeof(*rxhdr) + rxlen;
+              rpuart->rx_lzfhdr = hdr;
+              hdr = rxhdr;
+            }
+          else
+            {
+              rpmsgerr("LZF decompress failed\n");
+              PANIC();
+            }
+        }
+#endif
+
       rpuart->rx_cb(&rpuart->port, hdr);
     }
 }
@@ -886,13 +966,21 @@ int rpmsg_port_uart_initialize(FAR const struct rpmsg_port_config_s *cfg,
   int ret;
   int rx;
 
-  rpuart = kmm_zalloc(sizeof(*rpuart));
+  rpuart = kmm_malloc(sizeof(*rpuart)
+#ifdef CONFIG_RPMSG_PORT_UART_COMPRESSION
+                      + cfg->txlen
+#endif
+                    );
   if (rpuart == NULL)
     {
       rpmsgerr("Malloc rptun uart failed\n");
       return -ENOMEM;
     }
 
+  memset(rpuart, 0, sizeof(*rpuart));
+#ifdef CONFIG_RPMSG_PORT_UART_COMPRESSION
+  rpuart->tx_lzfhdr = (FAR struct rpmsg_port_header_s *)(rpuart + 1);
+#endif
   rpuart->rx_state = RPMSG_PORT_UART_RX_WAIT_START;
   rpuart->tx_staywake = RPMSG_PORT_UART_STAYWAKE1;
   nxevent_init(&rpuart->event, 0);
@@ -917,6 +1005,17 @@ int rpmsg_port_uart_initialize(FAR const struct rpmsg_port_config_s *cfg,
       rpmsgerr("Port initialize failed, ret=%d\n", ret);
       goto err_rpmsg_port;
     }
+
+#ifdef CONFIG_RPMSG_PORT_UART_COMPRESSION
+  rpuart->rx_lzfhdr = rpmsg_port_queue_get_available_buffer(
+                        &rpuart->port.rxq, false);
+  if (rpuart->rx_lzfhdr == NULL)
+    {
+      rpmsgerr("Get LZF rx queue buffer failed\n");
+      ret = -ENOMEM;
+      goto err_lzf;
+    }
+#endif
 
 #ifdef CONFIG_PM
   snprintf(arg1, sizeof(arg1), "rpmsg-uart-rx-%s", cfg->remotecpu);
@@ -964,6 +1063,11 @@ err_rx_thread:
 #ifdef CONFIG_PM
   pm_wakelock_uninit(&rpuart->tx_wakelock);
   pm_wakelock_uninit(&rpuart->rx_wakelock);
+#endif
+#ifdef CONFIG_RPMSG_PORT_UART_COMPRESSION
+  rpmsg_port_queue_return_buffer(&rpuart->port.rxq,
+                                 rpuart->rx_lzfhdr);
+err_lzf:
 #endif
   rpmsg_port_uninitialize(&rpuart->port);
 err_rpmsg_port:
