@@ -413,22 +413,25 @@ static int local_set_polloutthreshold(FAR struct file *filep,
  * Name: local_set_pollthreshold
  *
  * Description:
- *   Set the local pollin and pollout threshold:
+ *   Set the poll thresholds of the FIFO that a socket of a SOCK_DGRAM
+ *   socket pair reads: POLLIN after the first field of a header, POLLOUT
+ *   (for the writer) when more than half of the FIFO is free.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_LOCAL_DGRAM
-int local_set_pollthreshold(FAR struct local_conn_s *conn,
-                            unsigned long threshold)
+int local_set_pollthreshold(FAR struct local_conn_s *conn)
 {
   int ret;
 
-  /* Set the buffer poll threshold */
-
-  ret = local_set_pollinthreshold(&conn->lc_infile, threshold);
-  if (ret > 0)
+  ret = local_set_pollinthreshold(&conn->lc_infile, sizeof(lc_size_t));
+  if (ret >= 0)
     {
-      ret = local_set_polloutthreshold(&conn->lc_outfile, threshold);
+      ret = file_ioctl(&conn->lc_infile, PIPEIOC_GETSIZE, 0);
+      if (ret > 0)
+        {
+          ret = local_set_polloutthreshold(&conn->lc_infile, ret / 2);
+        }
     }
 
   return ret;

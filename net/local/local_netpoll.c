@@ -107,6 +107,7 @@ static int local_event_pollsetup(FAR struct local_conn_s *conn,
 
   return OK;
 }
+#endif /* CONFIG_NET_LOCAL_STREAM */
 
 /****************************************************************************
  * Name: local_inout_poll_cb
@@ -118,7 +119,6 @@ static void local_inout_poll_cb(FAR struct pollfd_s *fds)
 
   poll_notify(&originfds, 1, fds->revents);
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -159,7 +159,9 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
   FAR struct local_conn_s *conn = psock->s_conn;
   int ret = OK;
 
-  if (conn->lc_proto == SOCK_DGRAM)
+#ifdef CONFIG_NET_LOCAL_DGRAM
+  if (conn->lc_proto == SOCK_DGRAM &&
+      conn->lc_state != LOCAL_STATE_CONNECTED)
     {
       /* A datagram send opens its FIFO on demand and has no send buffer to
        * wait for, so it is always possible to send.  Report POLLOUT
@@ -182,12 +184,19 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
 
       return OK;
     }
+#endif
 
 #ifdef CONFIG_NET_LOCAL_STREAM
   if (conn->lc_state == LOCAL_STATE_LISTENING)
     {
       return local_event_pollsetup(conn, fds, true);
     }
+#endif
+
+  /* A connected stream socket or a socket of a socket pair (stream or
+   * datagram): POLLIN from the FIFO that it reads, POLLOUT from the FIFO
+   * that it writes.
+   */
 
   if (conn->lc_state == LOCAL_STATE_DISCONNECTED)
     {
@@ -295,15 +304,12 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
       default:
         break;
     }
-#endif
 
   return ret;
 
-#ifdef CONFIG_NET_LOCAL_STREAM
 pollerr:
   poll_notify(&fds, 1, POLLERR);
   return OK;
-#endif
 }
 
 /****************************************************************************
@@ -327,7 +333,9 @@ int local_pollteardown(FAR struct socket *psock, FAR struct pollfd_s *fds)
   FAR struct local_conn_s *conn = psock->s_conn;
   int ret = OK;
 
-  if (conn->lc_proto == SOCK_DGRAM)
+#ifdef CONFIG_NET_LOCAL_DGRAM
+  if (conn->lc_proto == SOCK_DGRAM &&
+      conn->lc_state != LOCAL_STATE_CONNECTED)
     {
       /* Only a registered poll (fds->priv set by setup) needs teardown. */
 
@@ -338,12 +346,14 @@ int local_pollteardown(FAR struct socket *psock, FAR struct pollfd_s *fds)
 
       return OK;
     }
+#endif
 
 #ifdef CONFIG_NET_LOCAL_STREAM
   if (conn->lc_state == LOCAL_STATE_LISTENING)
     {
       return local_event_pollsetup(conn, fds, false);
     }
+#endif
 
   if (conn->lc_state == LOCAL_STATE_DISCONNECTED)
     {
@@ -402,7 +412,6 @@ int local_pollteardown(FAR struct socket *psock, FAR struct pollfd_s *fds)
       default:
         break;
     }
-#endif
 
   return ret;
 }
