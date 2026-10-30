@@ -112,6 +112,15 @@ config RPMSG_PORT_UART_CRC
 	bool "Rpmsg UART Port CRC Enable"
 	default n
 
+config RPMSG_PORT_UART_COMPRESSION
+	bool "Rpmsg UART Port LZF Compression"
+	default n
+	depends on LIBC_LZF
+	---help---
+		Enable LZF compression for rpmsg port uart data frames.
+		Compresses payload before byte-escaping to reduce UART
+		bandwidth usage. Both TX and RX sides must enable this.
+
 config RPMSG_PORT_UART_DEBUG
 	bool "Rpmsg UART DEBUG Enable"
 	default n
