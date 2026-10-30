@@ -56,15 +56,16 @@
  *           Zero means *len[in] is zero,
  *           or the sending side has closed the FIFO
  *   once  - Flag to indicate the buf may only be read once
+ *   intr  - A signal can end the wait for the first byte
  *
  * Returned Value:
  *   Zero is returned on success; a negated errno value is returned on any
- *   failure.
+ *   failure.  -EINTR: a signal came before the first byte.
  *
  ****************************************************************************/
 
 int local_fifo_read(FAR struct file *filep, FAR uint8_t *buf,
-                    size_t *len, bool once)
+                    size_t *len, bool once, bool intr)
 {
   ssize_t remaining;
   ssize_t nread;
@@ -80,12 +81,15 @@ int local_fifo_read(FAR struct file *filep, FAR uint8_t *buf,
         {
           ret = (int)nread;
 
-          if (ret == -EINTR)
+          /* A signal ends the wait only before the first byte, and only if
+           * the caller lets it: the rest of a datagram is on its way.
+           */
+
+          if (ret == -EINTR && (!intr || remaining < *len))
             {
-              ninfo("Ignoring signal\n");
               continue;
             }
-          else if (ret == -EAGAIN)
+          else if (ret == -EAGAIN || ret == -EINTR)
             {
               goto errout;
             }
@@ -101,7 +105,7 @@ int local_fifo_read(FAR struct file *filep, FAR uint8_t *buf,
            * has closed the FIFO.
            */
 
-            break;
+          break;
         }
       else
         {
