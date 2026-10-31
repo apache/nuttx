@@ -40,6 +40,12 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
+/* Only float data type supported now */
+
+#ifdef CONFIG_SENSORS_USE_B16
+#  error fixed-point data type not supported yet
+#endif
+
 /* Time to wait after a nWAKE falling edge before the CCS811 is ready for an
  * I2C transaction (datasheet t_WAKE is 50us).
  */
