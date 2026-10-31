@@ -100,11 +100,25 @@ void up_initial_state(struct tcb_s *tcb)
 
   memset(xcp, 0, sizeof(struct xcptcontext));
 
-  /* Allocate area for XCPTCONTEXT */
+  /* Allocate area for XCPTCONTEXT.  A thread with a kernel stack has it at
+   * the top of the kernel stack: user code must not reach it.
+   */
 
-  xcp->regs = (uint64_t *)XCP_ALIGN_DOWN((uintptr_t)tcb->stack_base_ptr +
-                                         tcb->adj_stack_size -
-                                         XCPTCONTEXT_SIZE);
+  topstack = (uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size;
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  if (kstack)
+    {
+      xcp->regs = (uint64_t *)XCP_ALIGN_DOWN((uintptr_t)kstack +
+                                             ARCH_KERNEL_STACKSIZE -
+                                             XCPTCONTEXT_SIZE);
+      topstack &= ~(uint64_t)15;
+    }
+  else
+#endif
+    {
+      xcp->regs = (uint64_t *)XCP_ALIGN_DOWN(topstack - XCPTCONTEXT_SIZE);
+      topstack  = (uint64_t)xcp->regs;
+    }
 
   /* Reset the xcp registers */
 
@@ -127,7 +141,7 @@ void up_initial_state(struct tcb_s *tcb)
                    : "memory");
 #endif
 
-  topstack = (uint64_t)xcp->regs - 8;
+  topstack -= 8;
 
   /* Save the initial stack pointer... the value of the stackpointer before
    * the "interrupt occurs."
@@ -145,7 +159,7 @@ void up_initial_state(struct tcb_s *tcb)
     {
       xcp->kstack  = kstack;
       xcp->ustkptr = (uintptr_t *)topstack;
-      topstack     = (uintptr_t)kstack + ARCH_KERNEL_STACKSIZE;
+      topstack     = (uintptr_t)xcp->regs;
       xcp->ktopstk = (uintptr_t *)topstack;
       xcp->kstkptr = xcp->ktopstk;
 
