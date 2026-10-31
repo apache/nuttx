@@ -1277,6 +1277,7 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   else if (cmd == TUNGETIFF)
     {
       FAR struct ifreq *ifr = (FAR struct ifreq *)arg;
+
       if (priv == NULL || ifr == NULL)
         {
           return -EINVAL;

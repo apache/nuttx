@@ -386,6 +386,7 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
   FAR struct usbhost_freestate_s *entry =
     (FAR struct usbhost_freestate_s *)usbclass;
   irqstate_t flags;
+
   DEBUGASSERT(entry != NULL);
 
   uinfo("Freeing: %p\n", entry);
@@ -429,6 +430,7 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
   for (devno = 0; devno < 26; devno++)
     {
       uint32_t bitno = 1 << devno;
+
       if ((g_devinuse & bitno) == 0)
         {
           g_devinuse |= bitno;
@@ -448,7 +450,9 @@ static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
 
   if (devno >= 0 && devno < 26)
     {
-      irqstate_t flags = spin_lock_irqsave(&g_lock);
+      irqstate_t flags;
+
+      flags = spin_lock_irqsave(&g_lock);
       g_devinuse &= ~(1 << devno);
       spin_unlock_irqrestore(&g_lock, flags);
     }
@@ -651,8 +655,9 @@ static inline int usbhost_maxlunreq(FAR struct usbhost_state_s *priv)
 {
   FAR struct usb_ctrlreq_s *req = (FAR struct usb_ctrlreq_s *)priv->tbuffer;
   FAR struct usbhost_hubport_s *hport;
-  DEBUGASSERT(priv && priv->tbuffer);
   int ret;
+
+  DEBUGASSERT(priv && priv->tbuffer);
 
   /* Request maximum logical unit number.  NOTE: On an IN transaction, The
    * req and buffer pointers passed to DRVR_CTRLIN may refer to the same
@@ -805,13 +810,22 @@ static inline int usbhost_readcapacity(FAR struct usbhost_state_s *priv)
           priv->nblocks   = usbhost_getbe32(resp->lba) + 1;
           priv->blocksize = usbhost_getbe32(resp->blklen);
 
+          if (priv->blocksize == 0)
+            {
+              uerr("ERROR: Invalid zero block size\n");
+              nbytes = -EINVAL;
+            }
+
           /* Receive the CSW */
 
-          nbytes = DRVR_TRANSFER(hport->drvr, priv->bulkin,
-                                 priv->tbuffer, USBMSC_CSW_SIZEOF);
           if (nbytes >= 0)
             {
-              usbhost_dumpcsw((FAR struct usbmsc_csw_s *)priv->tbuffer);
+              nbytes = DRVR_TRANSFER(hport->drvr, priv->bulkin,
+                                     priv->tbuffer, USBMSC_CSW_SIZEOF);
+              if (nbytes >= 0)
+                {
+                  usbhost_dumpcsw((FAR struct usbmsc_csw_s *)priv->tbuffer);
+                }
             }
         }
     }
@@ -1040,7 +1054,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
   configdesc += cfgdesc->len;
   remaining  -= cfgdesc->len;
 
-  /* Loop where there are more descriptors to examine */
+  /* Loop while there are more descriptors to examine */
 
   while (remaining >= sizeof(struct usb_desc_s))
     {
@@ -1049,116 +1063,119 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
       desc = (FAR struct usb_desc_s *)configdesc;
       switch (desc->type)
         {
-        /* Interface descriptor. We really should get the number of endpoints
-         * from this descriptor too.
-         */
+          /* Interface descriptor. We really should get the number of
+           * endpoints from this descriptor too.
+           */
 
-        case USB_DESC_TYPE_INTERFACE:
-          {
-            FAR struct usb_ifdesc_s *ifdesc =
-              (FAR struct usb_ifdesc_s *)configdesc;
+          case USB_DESC_TYPE_INTERFACE:
+            {
+              FAR struct usb_ifdesc_s *ifdesc =
+                (FAR struct usb_ifdesc_s *)configdesc;
 
-            uinfo("Interface descriptor\n");
-            DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
+              uinfo("Interface descriptor\n");
+              DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
 
-            /* Save the interface number and mark ONLY the interface found */
+              /* Save the interface number and mark ONLY the interface
+               * found.
+               */
 
-            priv->ifno = ifdesc->ifno;
-            found      = USBHOST_IFFOUND;
-          }
-          break;
+              priv->ifno = ifdesc->ifno;
+              found      = USBHOST_IFFOUND;
+            }
+            break;
 
-        /* Endpoint descriptor.  We expect two bulk endpoints, an IN and an
-         * OUT.
-         */
+          /* Endpoint descriptor.  We expect two bulk endpoints, an IN and an
+           * OUT.
+           */
 
-        case USB_DESC_TYPE_ENDPOINT:
-          {
-            FAR struct usb_epdesc_s *epdesc =
-              (FAR struct usb_epdesc_s *)configdesc;
+          case USB_DESC_TYPE_ENDPOINT:
+            {
+              FAR struct usb_epdesc_s *epdesc =
+                (FAR struct usb_epdesc_s *)configdesc;
 
-            uinfo("Endpoint descriptor\n");
-            DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
+              uinfo("Endpoint descriptor\n");
+              DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
 
-            /* Check for a bulk endpoint.  We only support the bulk-only
-             * protocol so I suppose anything else should really be an error.
-             */
+              /* Check for a bulk endpoint.  We only support the bulk-only
+               * protocol so I suppose anything else should really be an
+               * error.
+               */
 
-            if ((epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) ==
-                USB_EP_ATTR_XFER_BULK)
-              {
-                /* Yes.. it is a bulk endpoint.  IN or OUT? */
+              if ((epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) ==
+                  USB_EP_ATTR_XFER_BULK)
+                {
+                  /* Yes.. it is a bulk endpoint.  IN or OUT? */
 
-                if (USB_ISEPOUT(epdesc->addr))
-                  {
-                    /* It is an OUT bulk endpoint.  There should be only one
-                     * bulk OUT endpoint.
-                     */
+                  if (USB_ISEPOUT(epdesc->addr))
+                    {
+                      /* It is an OUT bulk endpoint.  There should be only
+                       * one bulk OUT endpoint.
+                       */
 
-                    if ((found & USBHOST_BOUTFOUND) != 0)
-                      {
-                        /* Oops.. more than one endpoint.  We don't know
-                         * what to do with this.
-                         */
+                      if ((found & USBHOST_BOUTFOUND) != 0)
+                        {
+                          /* Oops.. more than one endpoint.  We don't know
+                           * what to do with this.
+                           */
 
-                        return -EINVAL;
-                      }
+                          return -EINVAL;
+                        }
 
-                    found |= USBHOST_BOUTFOUND;
+                      found |= USBHOST_BOUTFOUND;
 
-                    /* Save the bulk OUT endpoint information */
+                      /* Save the bulk OUT endpoint information */
 
-                    boutdesc.hport        = hport;
-                    boutdesc.addr         = epdesc->addr &
-                                            USB_EP_ADDR_NUMBER_MASK;
-                    boutdesc.in           = false;
-                    boutdesc.xfrtype      = USB_EP_ATTR_XFER_BULK;
-                    boutdesc.interval     = epdesc->interval;
-                    boutdesc.mxpacketsize =
-                      usbhost_getle16(epdesc->mxpacketsize);
+                      boutdesc.hport        = hport;
+                      boutdesc.addr         = epdesc->addr &
+                                              USB_EP_ADDR_NUMBER_MASK;
+                      boutdesc.in           = false;
+                      boutdesc.xfrtype      = USB_EP_ATTR_XFER_BULK;
+                      boutdesc.interval     = epdesc->interval;
+                      boutdesc.mxpacketsize =
+                        usbhost_getle16(epdesc->mxpacketsize);
 
-                    uinfo("Bulk OUT EP addr:%d mxpacketsize:%d\n",
-                          boutdesc.addr, boutdesc.mxpacketsize);
-                  }
-                else
-                  {
-                    /* It is an IN bulk endpoint.  There should be only one
-                     * bulk IN endpoint.
-                     */
+                      uinfo("Bulk OUT EP addr:%d mxpacketsize:%d\n",
+                            boutdesc.addr, boutdesc.mxpacketsize);
+                    }
+                  else
+                    {
+                      /* It is an IN bulk endpoint.  There should be only one
+                       * bulk IN endpoint.
+                       */
 
-                    if ((found & USBHOST_BINFOUND) != 0)
-                      {
-                        /* Oops.. more than one endpoint.  We don't know
-                         * what to do with this.
-                         */
+                      if ((found & USBHOST_BINFOUND) != 0)
+                        {
+                          /* Oops.. more than one endpoint.  We don't know
+                           * what to do with this.
+                           */
 
-                        return -EINVAL;
-                      }
+                          return -EINVAL;
+                        }
 
-                    found |= USBHOST_BINFOUND;
+                      found |= USBHOST_BINFOUND;
 
-                    /* Save the bulk IN endpoint information */
+                      /* Save the bulk IN endpoint information */
 
-                    bindesc.hport        = hport;
-                    bindesc.addr         = epdesc->addr &
-                                           USB_EP_ADDR_NUMBER_MASK;
-                    bindesc.in           = 1;
-                    bindesc.xfrtype      = USB_EP_ATTR_XFER_BULK;
-                    bindesc.interval     = epdesc->interval;
-                    bindesc.mxpacketsize =
-                      usbhost_getle16(epdesc->mxpacketsize);
+                      bindesc.hport        = hport;
+                      bindesc.addr         = epdesc->addr &
+                                             USB_EP_ADDR_NUMBER_MASK;
+                      bindesc.in           = 1;
+                      bindesc.xfrtype      = USB_EP_ATTR_XFER_BULK;
+                      bindesc.interval     = epdesc->interval;
+                      bindesc.mxpacketsize =
+                        usbhost_getle16(epdesc->mxpacketsize);
 
-                    uinfo("Bulk IN EP addr:%d mxpacketsize:%d\n",
-                          bindesc.addr, bindesc.mxpacketsize);
-                  }
-              }
-          }
-          break;
+                      uinfo("Bulk IN EP addr:%d mxpacketsize:%d\n",
+                            bindesc.addr, bindesc.mxpacketsize);
+                    }
+                }
+            }
+            break;
 
-        /* Other descriptors are just ignored for now */
+          /* Other descriptors are just ignored for now */
 
-        default:
-          break;
+          default:
+            break;
         }
 
       /* If we found everything we need with this interface, then break out

@@ -1296,6 +1296,7 @@ static int alt1250_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR struct alt_evtbuffer_s *buff =
             (FAR struct alt_evtbuffer_s *)arg;
+
           add_evtbuff(dev, buff);
         }
         break;

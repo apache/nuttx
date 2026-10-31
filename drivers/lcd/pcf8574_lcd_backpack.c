@@ -497,6 +497,7 @@ static inline uint8_t lcd_getdata(FAR struct pcf8574_lcd_dev_s *priv)
 static inline uint8_t lcd_getcmd(FAR struct pcf8574_lcd_dev_s *priv)
 {
   uint8_t data;
+
   data = (load_nybble(priv, false) << 4) | load_nybble(priv, false);
   return data;
 }
@@ -736,238 +737,241 @@ static void lcd_codec_action(FAR struct pcf8574_lcd_dev_s *priv,
     {
       /* Erasure */
 
-    case SLCDCODE_BACKDEL:  /* Backspace (backward delete) N characters */
-      {
-        if (count <= 0)  /* silly case */
-          {
-            break;
-          }
-        else
+      case SLCDCODE_BACKDEL:  /* Backspace (backward delete) N characters */
+        {
+          if (count <= 0)  /* silly case */
+            {
+              break;
+            }
+          else
+            {
+              uint8_t row;
+              uint8_t col;
+
+              lcd_get_curpos(priv, &row, &col);
+              if (count > col)  /* saturate to preceding columns available */
+                {
+                  count = col;
+                }
+
+              lcd_set_curpos(priv, row, col - count);
+            }
+
+          /* ... and conscientiously fall through to next case ... */
+        }
+
+      case SLCDCODE_FWDDEL:  /* Delete (forward delete) N characters, moving
+                              * text */
+        {
+          if (count <= 0)  /* silly case */
+            {
+              break;
+            }
+          else
+            {
+              uint8_t row;
+              uint8_t col;
+              uint8_t start;
+              uint8_t end;
+              uint8_t nidx;
+              uint8_t data;
+
+              lcd_get_curpos(priv, &row, &col);
+              start = col + count;
+
+              if (start >= priv->cfg.cols)  /* silly case of nothing left */
+                {
+                  break;
+                }
+
+              end = start + count;
+              if (end > priv->cfg.cols)   /* saturate */
+                {
+                  end = priv->cfg.cols;
+                }
+
+              for (nidx = col; nidx < end; ++start, ++nidx)  /* much like
+                                                              * memmove */
+                {
+                  lcd_set_curpos(priv, row, start);
+                  data = lcd_getdata(priv);
+                  lcd_set_curpos(priv, row, nidx);
+                  lcd_putdata(priv, data);
+                }
+
+              for (; nidx < priv->cfg.cols; ++nidx)  /* much like memset */
+                {
+                  lcd_putdata(priv, ' ');
+                }
+
+              lcd_set_curpos(priv, row, col);
+            }
+        }
+        break;
+
+      case SLCDCODE_ERASE:  /* Erase N characters from the cursor position */
+        if (count > 0)
           {
             uint8_t row;
             uint8_t col;
-
-            lcd_get_curpos(priv, &row, &col);
-            if (count > col)    /* saturate to preceding columns available */
-              {
-                count = col;
-              }
-
-            lcd_set_curpos(priv, row, col - count);
-          }
-
-        /* ... and conscientiously fall through to next case ... */
-      }
-
-    case SLCDCODE_FWDDEL:  /* Delete (forward delete) N characters, moving text */
-      {
-        if (count <= 0)  /* silly case */
-          {
-            break;
-          }
-        else
-          {
-            uint8_t row;
-            uint8_t col;
-            uint8_t start;
             uint8_t end;
             uint8_t nidx;
-            uint8_t data;
 
             lcd_get_curpos(priv, &row, &col);
-            start = col + count;
-
-            if (start >= priv->cfg.cols)  /* silly case of nothing left */
-              {
-                break;
-              }
-
-            end = start + count;
-            if (end > priv->cfg.cols)   /* saturate */
+            end = col + count;
+            if (end > priv->cfg.cols)
               {
                 end = priv->cfg.cols;
               }
 
-            for (nidx = col; nidx < end; ++start, ++nidx)  /* much like memmove */
-              {
-                lcd_set_curpos(priv, row, start);
-                data = lcd_getdata(priv);
-                lcd_set_curpos(priv, row, nidx);
-                lcd_putdata(priv, data);
-              }
-
-            for (; nidx < priv->cfg.cols; ++nidx)  /* much like memset */
+            for (nidx = col; nidx < end; ++nidx)
               {
                 lcd_putdata(priv, ' ');
               }
 
             lcd_set_curpos(priv, row, col);
           }
-      }
-      break;
+        break;
 
-    case SLCDCODE_ERASE:  /* Erase N characters from the cursor position */
-      if (count > 0)
+      case SLCDCODE_CLEAR:  /* Home the cursor and erase the entire display */
+        {
+          lcd_putcmd(priv, CMD_CLEAR);
+          up_udelay(DELAY_US_HOMECLEAR);  /* clear needs extra time */
+        }
+        break;
+
+      case SLCDCODE_ERASEEOL:  /* Erase from the cursor position to the end
+                                * of line */
         {
           uint8_t row;
           uint8_t col;
-          uint8_t end;
           uint8_t nidx;
 
           lcd_get_curpos(priv, &row, &col);
-          end = col + count;
-          if (end > priv->cfg.cols)
-            {
-              end = priv->cfg.cols;
-            }
 
-          for (nidx = col; nidx < end; ++nidx)
+          for (nidx = col; nidx < priv->cfg.cols; ++nidx)
             {
               lcd_putdata(priv, ' ');
             }
 
           lcd_set_curpos(priv, row, col);
         }
-      break;
-
-    case SLCDCODE_CLEAR:  /* Home the cursor and erase the entire display */
-      {
-        lcd_putcmd(priv, CMD_CLEAR);
-        up_udelay(DELAY_US_HOMECLEAR);  /* clear needs extra time */
-      }
-      break;
-
-    case SLCDCODE_ERASEEOL:  /* Erase from the cursor position to the end of
-                              * line */
-      {
-        uint8_t row;
-        uint8_t col;
-        uint8_t nidx;
-
-        lcd_get_curpos(priv, &row, &col);
-
-        for (nidx = col; nidx < priv->cfg.cols; ++nidx)
-          {
-            lcd_putdata(priv, ' ');
-          }
-
-        lcd_set_curpos(priv, row, col);
-      }
-      break;
+        break;
 
       /* Cursor movement */
 
-    case SLCDCODE_LEFT:  /* Cursor left by N characters */
-      {
-        uint8_t row;
-        uint8_t col;
+      case SLCDCODE_LEFT:  /* Cursor left by N characters */
+        {
+          uint8_t row;
+          uint8_t col;
 
-        lcd_get_curpos(priv, &row, &col);
-        if (count > col)
-          {
-            col = 0;
-          }
-        else
-          {
-            col -= count;
-          }
+          lcd_get_curpos(priv, &row, &col);
+          if (count > col)
+            {
+              col = 0;
+            }
+          else
+            {
+              col -= count;
+            }
 
-        lcd_set_curpos(priv, row, col);
-      }
-      break;
+          lcd_set_curpos(priv, row, col);
+        }
+        break;
 
-    case SLCDCODE_RIGHT:  /* Cursor right by N characters */
-      {
-        uint8_t row;
-        uint8_t col;
+      case SLCDCODE_RIGHT:  /* Cursor right by N characters */
+        {
+          uint8_t row;
+          uint8_t col;
 
-        lcd_get_curpos(priv, &row, &col);
-        col += count;
-        if (col >= priv->cfg.cols)
-          {
-            col = priv->cfg.cols - 1;
-          }
+          lcd_get_curpos(priv, &row, &col);
+          col += count;
+          if (col >= priv->cfg.cols)
+            {
+              col = priv->cfg.cols - 1;
+            }
 
-        lcd_set_curpos(priv, row, col);
-      }
-      break;
+          lcd_set_curpos(priv, row, col);
+        }
+        break;
 
-    case SLCDCODE_UP:  /* Cursor up by N lines */
-      {
-        uint8_t row;
-        uint8_t col;
+      case SLCDCODE_UP:  /* Cursor up by N lines */
+        {
+          uint8_t row;
+          uint8_t col;
 
-        lcd_get_curpos(priv, &row, &col);
-        if (count > row)
-          {
-            row = 0;
-          }
-        else
-          {
-            row -= count;
-          }
+          lcd_get_curpos(priv, &row, &col);
+          if (count > row)
+            {
+              row = 0;
+            }
+          else
+            {
+              row -= count;
+            }
 
-        lcd_set_curpos(priv, row, col);
-      }
-      break;
+          lcd_set_curpos(priv, row, col);
+        }
+        break;
 
-    case SLCDCODE_DOWN:  /* Cursor down by N lines */
-      {
-        uint8_t row;
-        uint8_t col;
+      case SLCDCODE_DOWN:  /* Cursor down by N lines */
+        {
+          uint8_t row;
+          uint8_t col;
 
-        lcd_get_curpos(priv, &row, &col);
-        row += count;
-        if (row >= priv->cfg.rows)
-          {
-            row = priv->cfg.rows - 1;
-          }
+          lcd_get_curpos(priv, &row, &col);
+          row += count;
+          if (row >= priv->cfg.rows)
+            {
+              row = priv->cfg.rows - 1;
+            }
 
-        lcd_set_curpos(priv, row, col);
-      }
-      break;
+          lcd_set_curpos(priv, row, col);
+        }
+        break;
 
-    case SLCDCODE_HOME:  /* Cursor home */
-      {
-        uint8_t row;
-        uint8_t col;
+      case SLCDCODE_HOME:  /* Cursor home */
+        {
+          uint8_t row;
+          uint8_t col;
 
-        lcd_get_curpos(priv, &row, &col);
-        lcd_set_curpos(priv, row, 0);
-      }
-      break;
+          lcd_get_curpos(priv, &row, &col);
+          lcd_set_curpos(priv, row, 0);
+        }
+        break;
 
-    case SLCDCODE_END:  /* Cursor end */
-      {
-        uint8_t row;
-        uint8_t col;
+      case SLCDCODE_END:  /* Cursor end */
+        {
+          uint8_t row;
+          uint8_t col;
 
-        lcd_get_curpos(priv, &row, &col);
-        lcd_set_curpos(priv, row, priv->cfg.cols - 1);
-      }
-      break;
+          lcd_get_curpos(priv, &row, &col);
+          lcd_set_curpos(priv, row, priv->cfg.cols - 1);
+        }
+        break;
 
-    case SLCDCODE_PAGEUP:    /* Cursor up by N pages */
-    case SLCDCODE_PAGEDOWN:  /* Cursor down by N pages */
-      break;                 /* Not supportable on this SLCD */
+      case SLCDCODE_PAGEUP:    /* Cursor up by N pages */
+      case SLCDCODE_PAGEDOWN:  /* Cursor down by N pages */
+        break;                 /* Not supportable on this SLCD */
 
       /* Blinking */
 
-    case SLCDCODE_BLINKSTART:  /* Start blinking with current cursor position */
-      lcd_putcmd(priv, CMD_CURSOR_ON_BLINK);
-      break;
+      case SLCDCODE_BLINKSTART:  /* Start blinking with current cursor
+                                  * position */
+        lcd_putcmd(priv, CMD_CURSOR_ON_BLINK);
+        break;
 
-    case SLCDCODE_BLINKEND:  /* End blinking after the current cursor
-                              * position */
-    case SLCDCODE_BLINKOFF:  /* Turn blinking off */
-      lcd_putcmd(priv, CMD_CURSOR_OFF);
-      break;                 /* Not implemented */
+      case SLCDCODE_BLINKEND:  /* End blinking after the current cursor
+                                * position */
+      case SLCDCODE_BLINKOFF:  /* Turn blinking off */
+        lcd_putcmd(priv, CMD_CURSOR_OFF);
+        break;                 /* Not implemented */
 
       /* These are actually unreportable errors */
 
-    default:
-    case SLCDCODE_NORMAL:  /* Not a special keycode */
-      break;
+      default:
+      case SLCDCODE_NORMAL:  /* Not a special keycode */
+        break;
     }
 }
 
@@ -1358,54 +1362,54 @@ static off_t pcf8574_lcd_seek(FAR struct file *filep, off_t offset,
 
   switch (whence)
     {
-    case SEEK_CUR:
-      pos += offset;
-      if (pos > maxpos)
-        {
-          pos = maxpos;
-        }
-      else if (pos < 0)
-        {
-          pos = 0;
-        }
+      case SEEK_CUR:
+        pos += offset;
+        if (pos > maxpos)
+          {
+            pos = maxpos;
+          }
+        else if (pos < 0)
+          {
+            pos = 0;
+          }
 
-      filep->f_pos = pos;
-      break;
+        filep->f_pos = pos;
+        break;
 
-    case SEEK_SET:
-      pos = offset;
-      if (pos > maxpos)
-        {
-          pos = maxpos;
-        }
-      else if (pos < 0)
-        {
-          pos = 0;
-        }
+      case SEEK_SET:
+        pos = offset;
+        if (pos > maxpos)
+          {
+            pos = maxpos;
+          }
+        else if (pos < 0)
+          {
+            pos = 0;
+          }
 
-      filep->f_pos = pos;
-      break;
+        filep->f_pos = pos;
+        break;
 
-    case SEEK_END:
-      pos = maxpos + offset;
-      if (pos > maxpos)
-        {
-          pos = maxpos;
-        }
-      else if (pos < 0)
-        {
-          pos = 0;
-        }
+      case SEEK_END:
+        pos = maxpos + offset;
+        if (pos > maxpos)
+          {
+            pos = maxpos;
+          }
+        else if (pos < 0)
+          {
+            pos = 0;
+          }
 
-      filep->f_pos = pos;
-      break;
+        filep->f_pos = pos;
+        break;
 
-    default:
+      default:
 
-      /* Return EINVAL if the whence argument is invalid */
+        /* Return EINVAL if the whence argument is invalid */
 
-      pos = (off_t) - EINVAL;
-      break;
+        pos = (off_t) - EINVAL;
+        break;
     }
 
   nxmutex_unlock(&priv->lock);
@@ -1425,96 +1429,97 @@ static int pcf8574_lcd_ioctl(FAR struct file *filep, int cmd,
 {
   switch (cmd)
     {
-    case SLCDIOC_GETATTRIBUTES:  /* SLCDIOC_GETATTRIBUTES: Get the
-                                  * attributes of the SLCD */
-      {
-        FAR struct inode *inode = filep->f_inode;
-        FAR struct pcf8574_lcd_dev_s *priv =
-          inode->i_private;
-        FAR struct slcd_attributes_s *attr =
-          (FAR struct slcd_attributes_s *)((uintptr_t) arg);
+      case SLCDIOC_GETATTRIBUTES:  /* SLCDIOC_GETATTRIBUTES: Get the
+                                    * attributes of the SLCD */
+        {
+          FAR struct inode *inode = filep->f_inode;
+          FAR struct pcf8574_lcd_dev_s *priv =
+            inode->i_private;
+          FAR struct slcd_attributes_s *attr =
+            (FAR struct slcd_attributes_s *)((uintptr_t) arg);
 
-        lcdinfo("SLCDIOC_GETATTRIBUTES:\n");
+          lcdinfo("SLCDIOC_GETATTRIBUTES:\n");
 
-        if (!attr)
-          {
-            return -EINVAL;
-          }
+          if (!attr)
+            {
+              return -EINVAL;
+            }
 
-        attr->nrows = priv->cfg.rows;
-        attr->ncolumns = priv->cfg.cols;
-        attr->nbars = 0;
-        attr->maxcontrast = 0;
-        attr->maxbrightness = 1;  /* 'brightness' for us is the backlight */
-      }
-      break;
+          attr->nrows = priv->cfg.rows;
+          attr->ncolumns = priv->cfg.cols;
+          attr->nbars = 0;
+          attr->maxcontrast = 0;
+          attr->maxbrightness = 1;  /* 'brightness' for us is the backlight */
+        }
+        break;
 
-    case SLCDIOC_CURPOS:  /* SLCDIOC_CURPOS: Get the SLCD cursor position */
-      {
-        FAR struct inode *inode = filep->f_inode;
-        FAR struct pcf8574_lcd_dev_s *priv =
-          inode->i_private;
-        FAR struct slcd_curpos_s *attr =
-          (FAR struct slcd_curpos_s *)((uintptr_t) arg);
-        uint8_t row;
-        uint8_t col;
+      case SLCDIOC_CURPOS:  /* SLCDIOC_CURPOS: Get the SLCD cursor position */
+        {
+          FAR struct inode *inode = filep->f_inode;
+          FAR struct pcf8574_lcd_dev_s *priv =
+            inode->i_private;
+          FAR struct slcd_curpos_s *attr =
+            (FAR struct slcd_curpos_s *)((uintptr_t) arg);
+          uint8_t row;
+          uint8_t col;
 
-        nxmutex_lock(&priv->lock);
+          nxmutex_lock(&priv->lock);
 
-        lcd_get_curpos(priv, &row, &col);
-        attr->row = row;
-        attr->column = col;
+          lcd_get_curpos(priv, &row, &col);
+          attr->row = row;
+          attr->column = col;
 
-        nxmutex_unlock(&priv->lock);
-      }
-      break;
+          nxmutex_unlock(&priv->lock);
+        }
+        break;
 
-    case SLCDIOC_GETBRIGHTNESS:  /* Get the current brightness setting */
-      {
-        FAR struct inode *inode = filep->f_inode;
-        FAR struct pcf8574_lcd_dev_s *priv =
-          inode->i_private;
-        bool bon;
+      case SLCDIOC_GETBRIGHTNESS:  /* Get the current brightness setting */
+        {
+          FAR struct inode *inode = filep->f_inode;
+          FAR struct pcf8574_lcd_dev_s *priv =
+            inode->i_private;
+          bool bon;
 
-        bon = (priv->bl_bit && priv->cfg.bl_active_high) ||
-              (!priv->bl_bit && !priv->cfg.bl_active_high);
-        *(FAR int *)((uintptr_t) arg) = bon ? 1 : 0;
-      }
-      break;
+          bon = (priv->bl_bit && priv->cfg.bl_active_high) ||
+                (!priv->bl_bit && !priv->cfg.bl_active_high);
+          *(FAR int *)((uintptr_t) arg) = bon ? 1 : 0;
+        }
+        break;
 
-    case SLCDIOC_SETBRIGHTNESS:  /* Set the brightness to a new value */
-      {
-        FAR struct inode *inode = filep->f_inode;
-        FAR struct pcf8574_lcd_dev_s *priv =
-          inode->i_private;
+      case SLCDIOC_SETBRIGHTNESS:  /* Set the brightness to a new value */
+        {
+          FAR struct inode *inode = filep->f_inode;
+          FAR struct pcf8574_lcd_dev_s *priv =
+            inode->i_private;
 
-        nxmutex_lock(&priv->lock);
-        lcd_backlight(priv, arg ? true : false);
-        nxmutex_unlock(&priv->lock);
-      }
-      break;
+          nxmutex_lock(&priv->lock);
+          lcd_backlight(priv, arg ? true : false);
+          nxmutex_unlock(&priv->lock);
+        }
+        break;
 
-    case SLCDIOC_CREATECHAR:  /* Create a custom character pattern */
-      {
-        FAR struct inode *inode = filep->f_inode;
-        FAR struct pcf8574_lcd_dev_s *priv =
-          inode->i_private;
-        FAR struct slcd_createchar_s *attr =
-          (FAR struct slcd_createchar_s *)((uintptr_t) arg);
+      case SLCDIOC_CREATECHAR:  /* Create a custom character pattern */
+        {
+          FAR struct inode *inode = filep->f_inode;
+          FAR struct pcf8574_lcd_dev_s *priv =
+            inode->i_private;
+          FAR struct slcd_createchar_s *attr =
+            (FAR struct slcd_createchar_s *)((uintptr_t) arg);
 
-        nxmutex_lock(&priv->lock);
-        lcd_create_char(priv, attr->idx, attr->bmp);
-        nxmutex_unlock(&priv->lock);
-      }
-      break;
+          nxmutex_lock(&priv->lock);
+          lcd_create_char(priv, attr->idx, attr->bmp);
+          nxmutex_unlock(&priv->lock);
+        }
+        break;
 
-    case SLCDIOC_SETBAR:       /* SLCDIOC_SETBAR: Set bars on a bar display */
-    case SLCDIOC_GETCONTRAST:  /* SLCDIOC_GETCONTRAST: Get the current
-                                * contrast setting */
-    case SLCDIOC_SETCONTRAST:  /* SLCDIOC_SETCONTRAST: Set the contrast to a
-                                * new value */
-    default:
-      return -ENOTTY;
+      case SLCDIOC_SETBAR:       /* SLCDIOC_SETBAR: Set bars on a bar
+                                  * display */
+      case SLCDIOC_GETCONTRAST:  /* SLCDIOC_GETCONTRAST: Get the current
+                                  * contrast setting */
+      case SLCDIOC_SETCONTRAST:  /* SLCDIOC_SETCONTRAST: Set the contrast to
+                                  * a new value */
+      default:
+        return -ENOTTY;
     }
 
   return OK;

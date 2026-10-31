@@ -644,17 +644,17 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
            * Decrement the cursor position and fall through.
            */
 
-           tmp = (int)g_slcdstate.curpos - count;
-           if (tmp < 0)
-             {
-               tmp   = 0;
-               count = g_slcdstate.curpos;
-             }
+          tmp = (int)g_slcdstate.curpos - count;
+          if (tmp < 0)
+            {
+              tmp   = 0;
+              count = g_slcdstate.curpos;
+            }
 
-           /* Save the updated cursor positions */
+          /* Save the updated cursor positions */
 
-           g_slcdstate.curpos = tmp;
-         }
+          g_slcdstate.curpos = tmp;
+        }
 
       case SLCDCODE_FWDDEL:   /* DELete (forward delete) N characters moving text */
         if (count > 0)
@@ -904,7 +904,7 @@ static ssize_t slcd_write(struct file *filep,
 
               /* Ignore dots before control characters (all of them?) */
 
-               options = 0;
+              options = 0;
             }
 
           /* Handle characters decoreated with a preceding period */
@@ -944,7 +944,7 @@ static ssize_t slcd_write(struct file *filep,
                   g_slcdstate.curpos++;
                 }
 
-               slcd_dumpstate("AFTER APPEND");
+              slcd_dumpstate("AFTER APPEND");
             }
         }
       else /* (result == SLCDRET_SPEC) */  /* A special SLCD action was returned */
@@ -1075,6 +1075,7 @@ static int slcd_ioctl(struct file *filep, int cmd, unsigned long arg)
       case SLCDIOC_GETCONTRAST:
         {
           int *contrast = (int *)((uintptr_t)arg);
+
           if (!contrast)
             {
               return -EINVAL;

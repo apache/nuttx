@@ -217,7 +217,7 @@ static int stmpe811_sample(FAR struct stmpe811_dev_s *priv,
            * movement events.
            */
 
-         priv->sample.contact = CONTACT_MOVE;
+          priv->sample.contact = CONTACT_MOVE;
         }
 
       priv->penchange = false;
@@ -557,6 +557,7 @@ static int stmpe811_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case TSIOC_SETFREQUENCY:  /* arg: Pointer to uint32_t frequency value */
         {
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
+
           DEBUGASSERT(priv->config != NULL && ptr != NULL);
           priv->config->frequency = *ptr;
         }
@@ -565,6 +566,7 @@ static int stmpe811_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case TSIOC_GETFREQUENCY:  /* arg: Pointer to uint32_t frequency value */
         {
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
+
           DEBUGASSERT(priv->config != NULL && ptr != NULL);
           *ptr = priv->config->frequency;
         }
@@ -573,6 +575,7 @@ static int stmpe811_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case TSIOC_GETOFFSETX:  /* arg: Pointer to int offsetx config value */
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           *ptr = CONFIG_STMPE811_OFFSETX;
         }
@@ -581,6 +584,7 @@ static int stmpe811_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case TSIOC_GETOFFSETY:  /* arg: Pointer to int offsety config value */
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           *ptr = CONFIG_STMPE811_OFFSETY;
         }
@@ -589,6 +593,7 @@ static int stmpe811_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case TSIOC_GETTHRESHX:  /* arg: Pointer to int threshx config value */
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           *ptr = CONFIG_STMPE811_THRESHX;
         }
@@ -597,6 +602,7 @@ static int stmpe811_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case TSIOC_GETTHRESHY:  /* arg: Pointer to int threshy config value */
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
+
           DEBUGASSERT(ptr != NULL);
           *ptr = CONFIG_STMPE811_THRESHY;
         }
@@ -695,6 +701,7 @@ static int stmpe811_poll(FAR struct file *filep, FAR struct pollfd *fds,
       /* This is a request to tear down the poll. */
 
       FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+
       DEBUGASSERT(slot != NULL);
 
       /* Remove all memory of the poll setup */
@@ -982,7 +989,7 @@ void stmpe811_tscworker(FAR struct stmpe811_dev_s *priv, uint8_t intsta)
        * CONTACT_NONE after the loss of contact is sampled.
        */
 
-       priv->sample.contact = CONTACT_UP;
+      priv->sample.contact = CONTACT_UP;
     }
 
   /* The pen is down... check for data in the FIFO */

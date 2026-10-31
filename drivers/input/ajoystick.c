@@ -488,99 +488,100 @@ static int ajoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   ret = -EINVAL;
   switch (cmd)
     {
-    /* Command:     AJOYIOC_SUPPORTED
-     * Description: Report the set of button events supported by the
-     *              hardware;
-     * Argument:    A pointer to writeable integer value in which to return
-     *              the set of supported buttons.
-     * Return:      Zero (OK) on success.  Minus one will be returned on
-     *              failure with the errno value set appropriately.
-     */
+      /* Command:     AJOYIOC_SUPPORTED
+       * Description: Report the set of button events supported by the
+       *              hardware;
+       * Argument:    A pointer to writeable integer value in which to return
+       *              the set of supported buttons.
+       * Return:      Zero (OK) on success.  Minus one will be returned on
+       *              failure with the errno value set appropriately.
+       */
 
-    case AJOYIOC_SUPPORTED:
-      {
-        FAR int *supported = (FAR int *)((uintptr_t)arg);
+      case AJOYIOC_SUPPORTED:
+        {
+          FAR int *supported = (FAR int *)((uintptr_t)arg);
 
-        if (supported)
-          {
-            lower = priv->au_lower;
-            DEBUGASSERT(lower && lower->al_supported);
+          if (supported)
+            {
+              lower = priv->au_lower;
+              DEBUGASSERT(lower && lower->al_supported);
 
-            *supported = (int)lower->al_supported(lower);
-            ret = OK;
-          }
-      }
-      break;
+              *supported = (int)lower->al_supported(lower);
+              ret = OK;
+            }
+        }
+        break;
 
-    /* Command:     AJOYIOC_POLLEVENTS
-     * Description: Specify the set of button events that can cause a poll()
-     *              to awaken.  The default is all button depressions and
-     *              all button releases (all supported buttons);
-     * Argument:    A read-only pointer to an instance of struct
-     *              ajoy_pollevents_s
-     * Return:      Zero (OK) on success.  Minus one will be returned on
-     *              failure with the errno value set appropriately.
-     */
+      /* Command:     AJOYIOC_POLLEVENTS
+       * Description: Specify the set of button events that can cause a
+       *              poll() to awaken.  The default is all button
+       *              depressions and all button releases (all supported
+       *              buttons);
+       * Argument:    A read-only pointer to an instance of struct
+       *              ajoy_pollevents_s
+       * Return:      Zero (OK) on success.  Minus one will be returned on
+       *              failure with the errno value set appropriately.
+       */
 
-    case AJOYIOC_POLLEVENTS:
-      {
-        FAR struct ajoy_pollevents_s *pollevents =
-          (FAR struct ajoy_pollevents_s *)((uintptr_t)arg);
+      case AJOYIOC_POLLEVENTS:
+        {
+          FAR struct ajoy_pollevents_s *pollevents =
+            (FAR struct ajoy_pollevents_s *)((uintptr_t)arg);
 
-        if (pollevents)
-          {
-            /* Save the poll events */
+          if (pollevents)
+            {
+              /* Save the poll events */
 
-            opriv->ao_pollevents.ap_press   = pollevents->ap_press;
-            opriv->ao_pollevents.ap_release = pollevents->ap_release;
+              opriv->ao_pollevents.ap_press   = pollevents->ap_press;
+              opriv->ao_pollevents.ap_release = pollevents->ap_release;
 
-            /* Enable/disable interrupt handling */
+              /* Enable/disable interrupt handling */
 
-            ajoy_enable(priv);
-            ret = OK;
-          }
-      }
-      break;
+              ajoy_enable(priv);
+              ret = OK;
+            }
+        }
+        break;
 
-    /* Command:     AJOYIOC_REGISTER
-     * Description: Register to receive a signal whenever there is a change
-     *              in any of the joystick discrete inputs.  This feature,
-     *              of course, depends upon interrupt GPIO support from the
-     *              platform.
-     * Argument:    A read-only pointer to an instance of struct
-     *              ajoy_notify_s
-     * Return:      Zero (OK) on success.  Minus one will be returned on
-     *              failure with the errno value set appropriately.
-     */
+      /* Command:     AJOYIOC_REGISTER
+       * Description: Register to receive a signal whenever there is a change
+       *              in any of the joystick discrete inputs.  This feature,
+       *              of course, depends upon interrupt GPIO support from the
+       *              platform.
+       * Argument:    A read-only pointer to an instance of struct
+       *              ajoy_notify_s
+       * Return:      Zero (OK) on success.  Minus one will be returned on
+       *              failure with the errno value set appropriately.
+       */
 
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
-    case AJOYIOC_REGISTER:
-      {
-        FAR struct ajoy_notify_s *notify =
-          (FAR struct ajoy_notify_s *)((uintptr_t)arg);
+      case AJOYIOC_REGISTER:
+        {
+          FAR struct ajoy_notify_s *notify =
+            (FAR struct ajoy_notify_s *)((uintptr_t)arg);
 
-        if (notify)
-          {
-            /* Save the notification events */
+          if (notify)
+            {
+              /* Save the notification events */
 
-            opriv->ao_notify.an_press   = notify->an_press;
-            opriv->ao_notify.an_release = notify->an_release;
-            opriv->ao_notify.an_event   = notify->an_event;
-            opriv->ao_pid               = nxsched_getpid();
+              opriv->ao_notify.an_press   = notify->an_press;
+              opriv->ao_notify.an_release = notify->an_release;
+              opriv->ao_notify.an_event   = notify->an_event;
+              opriv->ao_pid               = nxsched_getpid();
 
-            /* Enable/disable interrupt handling */
+              /* Enable/disable interrupt handling */
 
-            ajoy_enable(priv);
-            ret = OK;
-          }
-      }
-      break;
+              ajoy_enable(priv);
+              ret = OK;
+            }
+        }
+        break;
 #endif
 
-    default:
-      ierr("ERROR: Unrecognized command: %ld\n", cmd);
-      ret = -ENOTTY;
-      break;
+      default:
+        ierr("ERROR: Unrecognized command: %ld\n", cmd);
+        ret = -ENOTTY;
+        break;
     }
 
   leave_critical_section(flags);

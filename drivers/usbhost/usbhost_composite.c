@@ -285,6 +285,12 @@ static int usbhost_copyinterface(uint8_t ifno, FAR const uint8_t *configdesc,
   int neps;
   int len;
 
+  if (configdesc == NULL || buffer == NULL ||
+      desclen < sizeof(struct usb_desc_s))
+    {
+      return -EINVAL;
+    }
+
   /* Make sure that the buffer will hold at least the interface descriptor */
 
   if (buflen < USB_SIZEOF_IFDESC)
@@ -301,10 +307,20 @@ static int usbhost_copyinterface(uint8_t ifno, FAR const uint8_t *configdesc,
       desc = (FAR struct usb_desc_s *)&configdesc[offset];
       len  = desc->len;
 
+      if (len < sizeof(struct usb_desc_s) || len > desclen - offset)
+        {
+          return -EINVAL;
+        }
+
       /* Is this an interface descriptor? */
 
       if (desc->type == USB_DESC_TYPE_INTERFACE)
         {
+          if (len < USB_SIZEOF_IFDESC)
+            {
+              return -EINVAL;
+            }
+
           ifdesc = (FAR struct usb_ifdesc_s *)&configdesc[offset];
 
           /* Is it the one we are looking for? */
@@ -312,6 +328,11 @@ static int usbhost_copyinterface(uint8_t ifno, FAR const uint8_t *configdesc,
           if (ifdesc->ifno == ifno && ifdesc->neps != 0)
             {
               /* Yes.. return the interface descriptor */
+
+              if (buflen < len)
+                {
+                  return -ENOSPC;
+                }
 
               memcpy(buffer, desc, len);
               buffer  += len;
@@ -338,6 +359,12 @@ static int usbhost_copyinterface(uint8_t ifno, FAR const uint8_t *configdesc,
                 {
                   desc = (FAR struct usb_desc_s *)&configdesc[offset];
                   len  = desc->len;
+
+                  if (len < sizeof(struct usb_desc_s) ||
+                      len > desclen - offset)
+                    {
+                      return -EINVAL;
+                    }
 
                   /* Is this a class-specific interface descriptor?  */
 
@@ -584,6 +611,11 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
       desc = (FAR struct usb_desc_s *)&configdesc[offset];
       int len = desc->len;
 
+      if (len < sizeof(struct usb_desc_s) || len > desclen - offset)
+        {
+          return -EINVAL;
+        }
+
       if (offset + len <= desclen)
         {
           /* Is this an interface descriptor? */
@@ -593,7 +625,10 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
               FAR struct usb_ifdesc_s *ifdesc =
                 (FAR struct usb_ifdesc_s *)desc;
 
-              DEBUGASSERT(ifdesc->ifno < 32);
+              if (len < USB_SIZEOF_IFDESC || ifdesc->ifno >= 32)
+                {
+                  return -EINVAL;
+                }
 
               /* Increment the count of interfaces */
 
@@ -614,13 +649,18 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
                 (FAR struct usb_iaddesc_s *)desc;
               uint32_t mask;
 
+              if (len < USB_SIZEOF_IADDESC || iad->nifs == 0 ||
+                  iad->firstif >= 32 || iad->nifs > 32 - iad->firstif)
+                {
+                  return -EINVAL;
+                }
+
               /* Keep count of the number of interfaces that will be merged */
 
               nmerged += (iad->nifs - 1);
 
               /* Keep track of which interfaces will be merged */
 
-              DEBUGASSERT(iad->firstif + iad->nifs < 32);
               mask      = (1 << iad->nifs) - 1;
               mergeset |= mask << iad->firstif;
             }
@@ -700,6 +740,12 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
       desc = (FAR struct usb_desc_s *)&configdesc[offset];
       int len = desc->len;
 
+      if (len < sizeof(struct usb_desc_s) || len > desclen - offset)
+        {
+          ret = -EINVAL;
+          goto errout_with_members;
+        }
+
       if (offset + len <= desclen)
         {
           /* Is this an interface descriptor? */
@@ -711,9 +757,20 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 
               /* Was the interface merged via an IAD descriptor? */
 
-              DEBUGASSERT(ifdesc->ifno < 32);
+              if (len < USB_SIZEOF_IFDESC || ifdesc->ifno >= 32)
+                {
+                  ret = -EINVAL;
+                  goto errout_with_members;
+                }
+
               if ((mergeset & (1 << ifdesc->ifno)) == 0)
                 {
+                  if (i >= nclasses)
+                    {
+                      ret = -EINVAL;
+                      goto errout_with_members;
+                    }
+
                   /* No, this interface was not merged.  Save the registry
                    * lookup information from the interface descriptor.
                    */
@@ -745,6 +802,14 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
               FAR struct usb_iaddesc_s *iad =
                 (FAR struct usb_iaddesc_s *)desc;
 
+              if (len < USB_SIZEOF_IADDESC || iad->nifs == 0 ||
+                  iad->firstif >= 32 || iad->nifs > 32 - iad->firstif ||
+                  i >= nclasses)
+                {
+                  ret = -EINVAL;
+                  goto errout_with_members;
+                }
+
               /* Yes.. Save the registry lookup information from the IAD. */
 
               member              = (FAR struct usbhost_member_s *)
@@ -773,6 +838,12 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 
   DEBUGASSERT(i == nclasses);
 
+  if (i != nclasses)
+    {
+      ret = -EINVAL;
+      goto errout_with_members;
+    }
+
   /* Allocate a temporary buffer in which we can construct a custom
    * configuration descriptor for each member class.
    */
@@ -791,7 +862,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 
   for (i = 0; i < nclasses; i++)
     {
-       member = &priv->members[i];
+      member = &priv->members[i];
 
       /* Is there is a class implementation registered to support this
        * device.
