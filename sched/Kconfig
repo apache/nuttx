@@ -1649,7 +1649,7 @@ config ENABLE_PARTIAL_SIGNALS
 config DISABLE_ALL_SIGNALS
 	bool "Disable all signal support"
 	select DISABLE_POSIX_TIMERS
-	select DISABLE_MQUEUE_NOTIFICATION
+	select DISABLE_MQUEUE_NOTIFICATION if !DISABLE_MQUEUE || !DISABLE_MQUEUE_SYSV
 	---help---
 		Disable all signal-related functionality, including signal
 		handling, thread cancellation, timers, and process-related

@@ -91,8 +91,8 @@ static const struct cxd56_automount_config_s g_sdcard0config =
     .fstype     = CONFIG_CXD56_SDCARD_AUTOMOUNT_FSTYPE,
     .blockdev   = CONFIG_CXD56_SDCARD_AUTOMOUNT_BLKDEV,
     .mountpoint = CONFIG_CXD56_SDCARD_AUTOMOUNT_MOUNTPOINT,
-    .ddelay     = MSEC2TICK(CONFIG_CXD56_SDCARD_AUTOMOUNT_DDELAY),
-    .udelay     = MSEC2TICK(CONFIG_CXD56_SDCARD_AUTOMOUNT_UDELAY),
+    .ddelay     = MSEC2TICK32(CONFIG_CXD56_SDCARD_AUTOMOUNT_DDELAY),
+    .udelay     = MSEC2TICK32(CONFIG_CXD56_SDCARD_AUTOMOUNT_UDELAY),
     .attach     = sdcard_attach,
     .enable     = sdcard_enable,
     .inserted   = sdcard_inserted
@@ -188,6 +188,7 @@ static void sdcard_enable(const struct automount_lower_s *lower,
       if (state->handler)
         {
           bool inserted = board_sdcard_inserted(0);
+
           state->handler(&config->lower, state->arg, inserted);
         }
 

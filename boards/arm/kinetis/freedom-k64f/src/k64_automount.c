@@ -89,8 +89,8 @@ static const struct k64_automount_config_s g_sdhc_config =
     .fstype     = CONFIG_FRDMK64F_SDHC_AUTOMOUNT_FSTYPE,
     .blockdev   = CONFIG_FRDMK64F_SDHC_AUTOMOUNT_BLKDEV,
     .mountpoint = CONFIG_FRDMK64F_SDHC_AUTOMOUNT_MOUNTPOINT,
-    .ddelay     = MSEC2TICK(CONFIG_FRDMK64F_SDHC_AUTOMOUNT_DDELAY),
-    .udelay     = MSEC2TICK(CONFIG_FRDMK64F_SDHC_AUTOMOUNT_UDELAY),
+    .ddelay     = MSEC2TICK32(CONFIG_FRDMK64F_SDHC_AUTOMOUNT_DDELAY),
+    .udelay     = MSEC2TICK32(CONFIG_FRDMK64F_SDHC_AUTOMOUNT_UDELAY),
     .attach     = k64_attach,
     .enable     = k64_enable,
     .inserted   = k64_inserted
@@ -185,6 +185,7 @@ static void k64_enable(const struct automount_lower_s *lower,
       if (state->handler)
         {
           bool inserted = k64_cardinserted();
+
           state->handler(&config->lower, state->arg, inserted);
         }
 

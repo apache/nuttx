@@ -95,9 +95,9 @@ static const struct litex_automount_config_s g_mb1_mmcsdconfig =
     .fstype     = CONFIG_LITEX_SDIO_MOUNT_FSTYPE,
     .blockdev   = CONFIG_LITEX_SDIO_MOUNT_BLKDEV,
     .mountpoint = CONFIG_LITEX_SDIO_MOUNT_MOUNTPOINT,
-    .ddelay     = MSEC2TICK(
+    .ddelay     = MSEC2TICK32(
                   100),
-    .udelay     = MSEC2TICK(
+    .udelay     = MSEC2TICK32(
                   100),
     .attach     = litex_attach,
     .enable     = litex_enable,
@@ -195,6 +195,7 @@ static void litex_enable(const struct automount_lower_s *lower,
       if (state->handler)
         {
           bool inserted = litex_cardinserted(config->mmcsd);
+
           state->handler(&config->lower, state->arg, inserted);
         }
 

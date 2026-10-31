@@ -89,8 +89,8 @@ static const struct k66_automount_config_s g_sdhc_config =
     .fstype     = CONFIG_FRDMK66F_SDHC_AUTOMOUNT_FSTYPE,
     .blockdev   = CONFIG_FRDMK66F_SDHC_AUTOMOUNT_BLKDEV,
     .mountpoint = CONFIG_FRDMK66F_SDHC_AUTOMOUNT_MOUNTPOINT,
-    .ddelay     = MSEC2TICK(CONFIG_FRDMK66F_SDHC_AUTOMOUNT_DDELAY),
-    .udelay     = MSEC2TICK(CONFIG_FRDMK66F_SDHC_AUTOMOUNT_UDELAY),
+    .ddelay     = MSEC2TICK32(CONFIG_FRDMK66F_SDHC_AUTOMOUNT_DDELAY),
+    .udelay     = MSEC2TICK32(CONFIG_FRDMK66F_SDHC_AUTOMOUNT_UDELAY),
     .attach     = k66_attach,
     .enable     = k66_enable,
     .inserted   = k66_inserted
@@ -185,6 +185,7 @@ static void k66_enable(const struct automount_lower_s *lower,
       if (state->handler)
         {
           bool inserted = k66_cardinserted();
+
           state->handler(&config->lower, state->arg, inserted);
         }
 
