@@ -177,7 +177,7 @@ uint8_t nrf91_spi1status(struct spi_dev_s *dev, uint32_t devid)
 }
 #endif
 
-#ifdef CONFIG_nrf91_SPI2_MASTER
+#ifdef CONFIG_NRF91_SPI2_MASTER
 void nrf91_spi2select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
