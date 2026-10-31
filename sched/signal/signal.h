@@ -195,6 +195,7 @@ int                nxsig_dispatch(pid_t pid, FAR siginfo_t *info,
 /* sig_cleanup.c */
 
 void               nxsig_cleanup(FAR struct tcb_s *stcb);
+void               nxsig_discard_threadsignals(FAR struct tcb_s *stcb);
 void               nxsig_release(FAR struct task_group_s *group);
 
 /* sig_timedwait.c */

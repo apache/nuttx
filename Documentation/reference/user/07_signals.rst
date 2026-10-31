@@ -12,6 +12,13 @@ priority. The signal handler is a user-supplied function that is bound
 to a specific signal and performs whatever actions are necessary
 whenever the signal is received.
 
+**Pending signals**.  A signal that the receiver blocks stays pending
+until the receiver unblocks it.  A signal sent to the whole task group
+(``kill()``) and a signal sent to one thread (``pthread_kill()``,
+``tgkill()``) are pending apart: each target has at most one pending
+instance of a signal that is not a real-time signal.  The signals that
+are pending for a thread are discarded when the thread exits.
+
 By default, there are no predefined actions for any signal. The default
 action for all signals (i.e., when no signal handler has been supplied
 by the user) is to ignore the signal. In this sense, all NuttX are *real

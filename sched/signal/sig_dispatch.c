@@ -262,7 +262,10 @@ static FAR sigpendq_t *nxsig_alloc_pendingsignal(void)
  * Name: nxsig_find_pendingsignal
  *
  * Description:
- *   Find a specified element in the pending signal list
+ *   Find the pending signal of one target in the pending signal list: the
+ *   signal sent to the thread 'tcb', or to the whole group if 'tcb' is
+ *   NULL.  POSIX keeps the pending signals of each thread and of the
+ *   process apart.
  *
  * Assumptions:
  *   Called with group->tg_sigpendingq locked
@@ -270,7 +273,8 @@ static FAR sigpendq_t *nxsig_alloc_pendingsignal(void)
  ****************************************************************************/
 
 static FAR sigpendq_t *
-nxsig_find_pendingsignal(FAR struct task_group_s *group, int signo)
+nxsig_find_pendingsignal(FAR struct task_group_s *group, int signo,
+                         FAR struct tcb_s *tcb)
 {
   FAR sigpendq_t *sigpend = NULL;
   irqstate_t flags;
@@ -291,7 +295,8 @@ nxsig_find_pendingsignal(FAR struct task_group_s *group, int signo)
   /* Search the list for a action pending on this signal */
 
   for (sigpend = (FAR sigpendq_t *)group->tg_sigpendingq.head;
-       (sigpend && sigpend->info.si_signo != signo);
+       (sigpend && (sigpend->info.si_signo != signo ||
+                    sigpend->tcb != tcb));
        sigpend = sigpend->flink);
 
   spin_unlock_irqrestore(&group->tg_lock, flags);
@@ -323,9 +328,10 @@ static FAR sigpendq_t *nxsig_add_pendingsignal(FAR struct tcb_s *stcb,
   DEBUGASSERT(stcb != NULL && stcb->group != NULL);
   group = stcb->group;
 
-  /* Check if the signal is already pending for the group */
+  /* Check if the signal is already pending for the same target */
 
-  sigpend = nxsig_find_pendingsignal(group, info->si_signo);
+  sigpend = nxsig_find_pendingsignal(group, info->si_signo,
+                                     group_dispatch ? NULL : stcb);
   if (sigpend != NULL)
     {
       /* The signal is already pending... retain only one copy */
@@ -540,6 +546,17 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
     {
       leave_critical_section(flags);
       return ret;
+    }
+
+  /* Check the exit again, in the critical section that queues the signal:
+   * the exit sets the flag in a critical section and then discards the
+   * signals pending for the thread.
+   */
+
+  if ((stcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      leave_critical_section(flags);
+      return -ESRCH;
     }
 
   masked = nxsig_ismember(&stcb->sigprocmask, info->si_signo);

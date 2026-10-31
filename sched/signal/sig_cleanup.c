@@ -71,6 +71,64 @@ void nxsig_cleanup(FAR struct tcb_s *stcb)
 }
 
 /****************************************************************************
+ * Name: nxsig_discard_threadsignals
+ *
+ * Description:
+ *   Release the signals pending for one thread (sent with pthread_kill()
+ *   or tgkill() and not delivered yet).  Called when the thread exits,
+ *   before it leaves its group.
+ *
+ ****************************************************************************/
+
+void nxsig_discard_threadsignals(FAR struct tcb_s *stcb)
+{
+  FAR struct task_group_s *group = stcb->group;
+  FAR sigpendq_t *sigpend;
+  FAR sigpendq_t *prev;
+  FAR sigpendq_t *next;
+  sq_queue_t discard;
+  irqstate_t flags;
+
+  if (group == NULL)
+    {
+      return;
+    }
+
+  sq_init(&discard);
+  flags = spin_lock_irqsave(&group->tg_lock);
+
+  for (prev = NULL, sigpend = (FAR sigpendq_t *)group->tg_sigpendingq.head;
+       sigpend != NULL; sigpend = next)
+    {
+      next = sigpend->flink;
+      if (sigpend->tcb == stcb)
+        {
+          if (prev != NULL)
+            {
+              sq_remafter((FAR sq_entry_t *)prev, &group->tg_sigpendingq);
+            }
+          else
+            {
+              sq_remfirst(&group->tg_sigpendingq);
+            }
+
+          sq_addlast((FAR sq_entry_t *)sigpend, &discard);
+        }
+      else
+        {
+          prev = sigpend;
+        }
+    }
+
+  spin_unlock_irqrestore(&group->tg_lock, flags);
+
+  while ((sigpend = (FAR sigpendq_t *)sq_remfirst(&discard)) != NULL)
+    {
+      nxsig_release_pendingsignal(sigpend);
+    }
+}
+
+/****************************************************************************
  * Name: nxsig_release
  *
  * Description:
