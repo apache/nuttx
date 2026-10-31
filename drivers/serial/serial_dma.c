@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <sys/types.h>
 #include <stdint.h>
+#include <string.h>
 
 #include <nuttx/debug.h>
 #include <nuttx/signal.h>
@@ -45,11 +46,10 @@
  * Name: uart_recvchars_check_special
  *
  * Description:
- *   Check if the SIGINT character is anywhere in the newly received DMA
- *   buffer.
- *
- *   REVISIT:  We must also remove the SIGINT/SIGTSTP character from the Rx
- *   buffer.  It should not be read as normal data by the caller.
+ *   Act on the special characters in the newly received DMA buffer, remove
+ *   them and update xfer->nbytes.  The data can be in two regions: the
+ *   characters that are left in the second region move to follow the ones
+ *   that are left in the first.
  *
  ****************************************************************************/
 
@@ -59,27 +59,49 @@
 static int uart_recvchars_check_special(FAR uart_dev_t *dev)
 {
   FAR struct uart_dmaxfer_s *xfer = &dev->dmarx;
+  size_t nfirst;
+  size_t nsecond;
+  size_t n;
   int signo;
+  int sig;
 
   /* Check if the valid DMAed data is in one or two contiguous regions */
 
   if (xfer->nbytes <= xfer->length)
     {
-      return uart_check_special(dev, xfer->buffer, xfer->nbytes);
+      nfirst = xfer->nbytes;
+      signo  = uart_check_special(dev, xfer->buffer, &nfirst);
+      xfer->nbytes = nfirst;
+      return signo;
     }
-  else
+
+  nfirst  = xfer->length;
+  nsecond = xfer->nbytes - xfer->length;
+  signo   = uart_check_special(dev, xfer->buffer, &nfirst);
+  sig     = uart_check_special(dev, xfer->nbuffer, &nsecond);
+  if (signo == 0)
     {
-      /* REVISIT:  Additional signals could be in the second region. */
-
-      signo = uart_check_special(dev, xfer->buffer, xfer->length);
-      if (signo != 0)
-        {
-          return signo;
-        }
-
-      return uart_check_special(dev, xfer->nbuffer,
-                                xfer->nbytes - xfer->length);
+      signo = sig;
     }
+
+  /* Close the gap at the end of the first region with the start of the
+   * second region, then move the rest of the second region to its start.
+   */
+
+  n = xfer->length - nfirst;
+  if (n > nsecond)
+    {
+      n = nsecond;
+    }
+
+  if (n > 0)
+    {
+      memcpy(&xfer->buffer[nfirst], xfer->nbuffer, n);
+      memmove(xfer->nbuffer, &xfer->nbuffer[n], nsecond - n);
+    }
+
+  xfer->nbytes = nfirst + nsecond;
+  return signo;
 }
 #endif
 
@@ -317,13 +339,13 @@ void uart_recvchars_done(FAR uart_dev_t *dev)
 {
   FAR struct uart_dmaxfer_s *xfer = &dev->dmarx;
   FAR struct uart_buffer_s *rxbuf = &dev->recv;
-  size_t nbytes = xfer->nbytes;
+  size_t nbytes;
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
     defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
   int signo = 0;
 
-  /* Check if the SIGINT character is anywhere in the newly received DMA
-   * buffer.
+  /* Act on the special characters in the newly received DMA buffer and
+   * remove them.
    */
 
   signo = uart_recvchars_check_special(dev);
@@ -331,6 +353,7 @@ void uart_recvchars_done(FAR uart_dev_t *dev)
 
   /* Move head for nbytes. */
 
+  nbytes       = xfer->nbytes;
   rxbuf->head  = (rxbuf->head + nbytes) % rxbuf->size;
   xfer->nbytes = 0;
   xfer->length = xfer->nlength = 0;

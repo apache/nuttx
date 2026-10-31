@@ -2585,24 +2585,23 @@ void uart_reset_sem(FAR uart_dev_t *dev)
  * Name: uart_check_special
  *
  * Description:
- *   Check if the SIGINT or SIGTSTP character is in the contiguous Rx DMA
- *   buffer region.  The first signal associated with the first such
- *   character is returned.
- *
- *   If there multiple such characters in the buffer, only the signal
- *   associated with the first is returned (this a bug!)
+ *   Act on the special characters in the *size characters at buf and
+ *   remove them: the INTR and SUSP characters that send a signal (POSIX:
+ *   the terminal discards them), the launch character and the panic
+ *   character.  *size returns the number of characters that are left.
  *
  * Returned Value:
- *   0 if a signal-related character does not appear in the.  Otherwise,
- *   SIGKILL or SIGTSTP may be returned to indicate the appropriate signal
- *   action.
+ *   SIGINT or SIGTSTP for the first INTR or SUSP character, else 0.
  *
  ****************************************************************************/
 
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
     defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
-int uart_check_special(FAR uart_dev_t *dev, FAR const char *buf, size_t size)
+int uart_check_special(FAR uart_dev_t *dev, FAR char *buf,
+                       FAR size_t *size)
 {
+  size_t kept = 0;
+  int signo = 0;
   size_t i;
 
   if ((dev->tc_lflag & ISIG) == 0)
@@ -2610,49 +2609,62 @@ int uart_check_special(FAR uart_dev_t *dev, FAR const char *buf, size_t size)
       return 0;
     }
 
-  for (i = 0; i < size; i++)
+  for (i = 0; i < *size; i++)
     {
+      char ch = buf[i];
+
 #ifdef CONFIG_TTY_FORCE_PANIC
-      if (buf[i] == CONFIG_TTY_FORCE_PANIC_CHAR)
+      if (ch == CONFIG_TTY_FORCE_PANIC_CHAR)
         {
           if (++dev->panic_count >= CONFIG_TTY_FORCE_PANIC_REPEAT_COUNT)
             {
               PANIC_WITH_REGS("Force panic by user.", NULL);
             }
 
-          return 0;
+          continue;
         }
-      else
-        {
-          dev->panic_count = 0;
-        }
+
+      dev->panic_count = 0;
 #endif
 
 #ifdef CONFIG_TTY_LAUNCH
-      if (buf[i] == CONFIG_TTY_LAUNCH_CHAR)
+      if (ch == CONFIG_TTY_LAUNCH_CHAR)
         {
           uart_launch();
-          return 0;
+          continue;
         }
 #endif
 
 #ifdef CONFIG_TTY_SIGINT
       if (dev->pid > 0 && dev->tc_vintr != _POSIX_VDISABLE &&
-          (cc_t)buf[i] == dev->tc_vintr)
+          (cc_t)ch == dev->tc_vintr)
         {
-          return SIGINT;
+          if (signo == 0)
+            {
+              signo = SIGINT;
+            }
+
+          continue;
         }
 #endif
 
 #ifdef CONFIG_TTY_SIGTSTP
       if (dev->pid > 0 && dev->tc_vsusp != _POSIX_VDISABLE &&
-          (cc_t)buf[i] == dev->tc_vsusp)
+          (cc_t)ch == dev->tc_vsusp)
         {
-          return SIGTSTP;
+          if (signo == 0)
+            {
+              signo = SIGTSTP;
+            }
+
+          continue;
         }
 #endif
+
+      buf[kept++] = ch;
     }
 
-  return 0;
+  *size = kept;
+  return signo;
 }
 #endif

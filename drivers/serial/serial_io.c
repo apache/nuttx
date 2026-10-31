@@ -164,7 +164,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
     defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
   int signo = 0;
 #endif
-  uint16_t nbytes = 0;
+  size_t nbytes = 0;
 
   /* Loop putting characters into the receive buffer until there are no
    * further characters to available.
@@ -183,6 +183,10 @@ void uart_recvchars(FAR uart_dev_t *dev)
       sbuf_size_t tail = rxbuf->tail;
       bool is_full = (nexthead == tail);
       FAR char *pbuf = NULL;
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
+    defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
+      int sig = 0;
+#endif
       char ch;
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
@@ -260,6 +264,10 @@ void uart_recvchars(FAR uart_dev_t *dev)
                 }
 
               nbytes = ret;
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
+    defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
+              sig = uart_check_special(dev, pbuf, &nbytes);
+#endif
               rxbuf->head += nbytes;
               if (rxbuf->head >= rxbuf->size)
                 {
@@ -276,6 +284,11 @@ void uart_recvchars(FAR uart_dev_t *dev)
                 {
                   continue;
                 }
+
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
+    defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
+              sig = uart_check_special(dev, pbuf, &nbytes);
+#endif
             }
         }
       else if(dev->ops->receive)
@@ -286,6 +299,11 @@ void uart_recvchars(FAR uart_dev_t *dev)
           pbuf = &ch;
           nbytes = 1;
 
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
+    defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
+          sig = uart_check_special(dev, pbuf, &nbytes);
+#endif
+
           /* If the RX buffer becomes full, then the serial data is
            * discarded. This is necessary because on most serial hardware,
            * you must read the data in order to clear the RX interrupt.
@@ -295,7 +313,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
            * (unless it has some large internal buffering).
            */
 
-          if (!is_full)
+          if (!is_full && nbytes > 0)
             {
               /* Add the character to the buffer */
 
@@ -309,7 +327,12 @@ void uart_recvchars(FAR uart_dev_t *dev)
 
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
     defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
-      signo = uart_check_special(dev, pbuf, nbytes);
+      /* Keep the first signal: a later character must not clear it */
+
+      if (signo == 0)
+        {
+          signo = sig;
+        }
 #endif
     }
 
