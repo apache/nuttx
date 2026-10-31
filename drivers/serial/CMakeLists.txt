@@ -22,7 +22,9 @@
 
 # Include serial drivers
 
-set(SRCS serial.c serial_io.c)
+if(CONFIG_SERIAL)
+  set(SRCS serial.c serial_io.c)
+endif()
 
 if(CONFIG_SERIAL_GDBSTUB)
   list(APPEND SRCS serial_gdbstub.c)
