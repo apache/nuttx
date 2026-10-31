@@ -566,7 +566,7 @@ static int ipv6_in(FAR struct net_driver_s *dev)
 
             goto drop;
           }
-#endif /* CONFIG_NET_6LOWPAN && CONFIG_NET_ICMPV6 */
+#endif /* CONFIG_NET_6LOWPAN && CONFIG_NET_ICMPv6 */
 
         break;
 #endif
