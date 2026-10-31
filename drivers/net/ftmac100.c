@@ -379,10 +379,11 @@ static void ftmac100_reset(FAR struct ftmac100_driver_s *priv)
 
   ninfo("%s(): iobase=%p\n", __func__, iobase);
 
-  putreg32 (FTMAC100_MACCR_SW_RST, &iobase->maccr);
+  putreg32(FTMAC100_MACCR_SW_RST, &iobase->maccr);
 
-  while (getreg32 (&iobase->maccr) & FTMAC100_MACCR_SW_RST)
-    ;
+  while ((getreg32(&iobase->maccr) & FTMAC100_MACCR_SW_RST) != 0)
+    {
+    }
 }
 
 /****************************************************************************
@@ -624,11 +625,27 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
       len = FTMAC100_RXDES0_RFL(rxdes->rxdes0);
       data = (FAR uint8_t *)rxdes->rxdes2;
 
-      ninfo ("RX buffer %d (%08x), %x received (%d)\n",
-             priv->rx_pointer, data, len,
-             (rxdes->rxdes0 & FTMAC100_RXDES0_LRS));
+      ninfo("RX buffer %d (%08x), %x received (%d)\n",
+            priv->rx_pointer, data, len,
+            (rxdes->rxdes0 & FTMAC100_RXDES0_LRS));
 
-      /* Copy the data data from the hardware to priv->ft_dev.d_buf.  Set
+      /* Check for a usable packet length */
+
+      if (len < ETH_HDRLEN || len > CONFIG_NET_ETH_PKTSIZE)
+        {
+          nerr("ERROR: Bad packet size dropped (%u)\n", (unsigned int)len);
+          NETDEV_RXERRORS(&priv->ft_dev);
+
+          priv->rx_pointer = (priv->rx_pointer + 1) &
+                             (CONFIG_FTMAC100_RX_DESC - 1);
+
+          rxdes->rxdes1 &= FTMAC100_RXDES1_EDORR;
+          rxdes->rxdes1 |= FTMAC100_RXDES1_RXBUF_SIZE(RX_BUF_SIZE);
+          rxdes->rxdes0 |= FTMAC100_RXDES0_RXDMA_OWN;
+          continue;
+        }
+
+      /* Copy the data from the hardware to priv->ft_dev.d_buf.  Set
        * amount of data in priv->ft_dev.d_len
        */
 
