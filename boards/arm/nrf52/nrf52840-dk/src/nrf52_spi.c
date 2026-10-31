@@ -162,7 +162,7 @@ uint8_t nrf52_spi1status(struct spi_dev_s *dev, uint32_t devid)
 }
 #endif
 
-#ifdef CONFIG_nrf52_SPI2_MASTER
+#ifdef CONFIG_NRF52_SPI2_MASTER
 void nrf52_spi2select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
