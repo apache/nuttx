@@ -31,6 +31,123 @@
 #include "tricore_internal.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Data Protection Range registers */
+
+#define CPU_DPR0_L   0xC000
+#define CPU_DPR0_U   0xC004
+#define CPU_DPR1_L   0xC008
+#define CPU_DPR1_U   0xC00C
+#define CPU_DPR2_L   0xC010
+#define CPU_DPR2_U   0xC014
+#define CPU_DPR3_L   0xC018
+#define CPU_DPR3_U   0xC01C
+#define CPU_DPR4_L   0xC020
+#define CPU_DPR4_U   0xC024
+#define CPU_DPR5_L   0xC028
+#define CPU_DPR5_U   0xC02C
+#define CPU_DPR6_L   0xC030
+#define CPU_DPR6_U   0xC034
+#define CPU_DPR7_L   0xC038
+#define CPU_DPR7_U   0xC03C
+#define CPU_DPR8_L   0xC040
+#define CPU_DPR8_U   0xC044
+#define CPU_DPR9_L   0xC048
+#define CPU_DPR9_U   0xC04C
+#define CPU_DPR10_L  0xC050
+#define CPU_DPR10_U  0xC054
+#define CPU_DPR11_L  0xC058
+#define CPU_DPR11_U  0xC05C
+#define CPU_DPR12_L  0xC060
+#define CPU_DPR12_U  0xC064
+#define CPU_DPR13_L  0xC068
+#define CPU_DPR13_U  0xC06C
+#define CPU_DPR14_L  0xC070
+#define CPU_DPR14_U  0xC074
+#define CPU_DPR15_L  0xC078
+#define CPU_DPR15_U  0xC07C
+#define CPU_DPR16_L  0xC080
+#define CPU_DPR16_U  0xC084
+#define CPU_DPR17_L  0xC088
+#define CPU_DPR17_U  0xC08C
+#define CPU_DPR18_L  0xC090
+#define CPU_DPR18_U  0xC094
+#define CPU_DPR19_L  0xC098
+#define CPU_DPR19_U  0xC09C
+#define CPU_DPR20_L  0xC0A0
+#define CPU_DPR20_U  0xC0A4
+#define CPU_DPR21_L  0xC0A8
+#define CPU_DPR21_U  0xC0AC
+#define CPU_DPR22_L  0xC0B0
+#define CPU_DPR22_U  0xC0B4
+#define CPU_DPR23_L  0xC0B8
+#define CPU_DPR23_U  0xC0BC
+
+/* Code Protection Range registers */
+
+#define CPU_CPR0_L   0xD000
+#define CPU_CPR0_U   0xD004
+#define CPU_CPR1_L   0xD008
+#define CPU_CPR1_U   0xD00C
+#define CPU_CPR2_L   0xD010
+#define CPU_CPR2_U   0xD014
+#define CPU_CPR3_L   0xD018
+#define CPU_CPR3_U   0xD01C
+#define CPU_CPR4_L   0xD020
+#define CPU_CPR4_U   0xD024
+#define CPU_CPR5_L   0xD028
+#define CPU_CPR5_U   0xD02C
+#define CPU_CPR6_L   0xD030
+#define CPU_CPR6_U   0xD034
+#define CPU_CPR7_L   0xD038
+#define CPU_CPR7_U   0xD03C
+#define CPU_CPR8_L   0xD040
+#define CPU_CPR8_U   0xD044
+#define CPU_CPR9_L   0xD048
+#define CPU_CPR9_U   0xD04C
+#define CPU_CPR10_L  0xD050
+#define CPU_CPR10_U  0xD054
+#define CPU_CPR11_L  0xD058
+#define CPU_CPR11_U  0xD05C
+#define CPU_CPR12_L  0xD060
+#define CPU_CPR12_U  0xD064
+#define CPU_CPR13_L  0xD068
+#define CPU_CPR13_U  0xD06C
+#define CPU_CPR14_L  0xD070
+#define CPU_CPR14_U  0xD074
+#define CPU_CPR15_L  0xD078
+#define CPU_CPR15_U  0xD07C
+
+/* Data read / write and code execute registers */
+
+#define CPU_CPXE_0   0xE000
+#define CPU_CPXE_1   0xE004
+#define CPU_CPXE_2   0xE008
+#define CPU_CPXE_3   0xE00C
+#define CPU_CPXE_4   0xE040
+#define CPU_CPXE_5   0xE044
+#define CPU_CPXE_6   0xE048
+#define CPU_CPXE_7   0xE04C
+#define CPU_DPRE_0   0xE010
+#define CPU_DPRE_1   0xE014
+#define CPU_DPRE_2   0xE018
+#define CPU_DPRE_3   0xE01C
+#define CPU_DPRE_4   0xE050
+#define CPU_DPRE_5   0xE054
+#define CPU_DPRE_6   0xE058
+#define CPU_DPRE_7   0xE05C
+#define CPU_DPWE_0   0xE020
+#define CPU_DPWE_1   0xE024
+#define CPU_DPWE_2   0xE028
+#define CPU_DPWE_3   0xE02C
+#define CPU_DPWE_4   0xE060
+#define CPU_DPWE_5   0xE064
+#define CPU_DPWE_6   0xE068
+#define CPU_DPWE_7   0xE06C
+
+/****************************************************************************
  * Private Variables
  ****************************************************************************/
 
@@ -1138,12 +1255,12 @@ void mpu_free_set(unsigned int set)
 
 void mpu_control(bool enable)
 {
-  uint32_t corecon_value = tricore_mfcr(CPU_CORECON);
+  uint32_t corecon_value = tricore_mfcr(CPU_SYSCON);
 
   corecon_value = enable ?
                   corecon_value | (1 << 1) :
                   corecon_value & ~(1 << 1);
-  tricore_mtcr(CPU_CORECON, corecon_value);
+  tricore_mtcr(CPU_SYSCON, corecon_value);
 
   UP_ISB();
 }

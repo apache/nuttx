@@ -3,7 +3,20 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+choice
+	prompt "TC3XX Chip Selection"
+	default ARCH_CHIP_TC39X
+
+config ARCH_CHIP_TC39X
+	bool "TC3XX TC39X"
+
+endchoice
+
 comment "TC3XX Configuration Options"
+
+config CPU_CLOCK_FREQUENCY
+	int "CPU clock frequency (Hz)"
+	default 300000000
 
 menu "TC3XX Peripheral Support"
 

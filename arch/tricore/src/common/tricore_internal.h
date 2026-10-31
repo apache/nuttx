@@ -35,11 +35,6 @@
 #  include <sys/types.h>
 #  include <stdint.h>
 #  include <syscall.h>
-
-#  include <IfxCpu_reg.h>
-#  include <Ifx_Ssw_Compilers.h>
-#  include <Compilers/Compilers.h>
-#  include <IfxCpu_Intrinsics.h>
 #endif
 
 /****************************************************************************
@@ -176,16 +171,14 @@ extern uintptr_t        _eheap[]; /* End+1 of .heap */
 /* Interrupt ****************************************************************/
 
 void tricore_ack_irq(int irq);
+void tricore_src_init(int irq, uint8_t tos, uint8_t srpn);
+int tricore_srpn_to_irq(int srpn);
+int tricore_irq_to_srpn(int irq);
+void tricore_register_irq_srpn(int irq);
 
 /* Signal handling **********************************************************/
 
 void tricore_sigdeliver(void);
-
-/* Exception Handler ********************************************************/
-
-void tricore_svcall(volatile void *trap);
-void tricore_trapcall(volatile void *trap);
-void tricore_trapinit(void);
 
 /* Context Save Areas *******************************************************/
 

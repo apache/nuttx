@@ -24,14 +24,6 @@ set(SRCS tc4xx_timerisr.c tc4xx_serial.c)
 
 target_sources(arch PRIVATE ${SRCS})
 
-if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
-  nuttx_add_kernel_library(c_fpu)
-  target_sources(c_fpu PRIVATE tc4xx_libc.c)
-  target_link_options(
-    nuttx PRIVATE
-    --library-directory=${NUTTX_BINARY_DIR}/arch/tricore/src/exclude_chip)
-endif()
-
 set(ILLD_UNPACK "${CMAKE_CURRENT_SOURCE_DIR}/../illd/tc4xx")
 set(ILLD_TARBALL "${ILLD_UNPACK}/illd.tar.gz")
 set(ILLD_UNPACK_NAME "illd_release_tc4x-main")
@@ -164,7 +156,6 @@ set(SDK_CSRCS
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/_Impl/IfxCpu_cfg.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/_Impl/IfxStm_cfg.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Cpu/Std/IfxCpu.c"
-    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Cpu/Trap/IfxCpu_Trap.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Scu/Std/IfxScuEru.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Stm/Std/IfxStm.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Smm/Std/IfxSmm.c"
@@ -187,6 +178,5 @@ if(NOT CONFIG_TRICORE_TOOLCHAIN_TASKING)
   target_compile_options(nuttx PRIVATE -Wno-implicit-fallthrough)
 endif()
 
-target_compile_definitions(
-  arch PRIVATE -DSRC_GPSR00=SRC_GPSR0SR0 -DSRC_CPU_CPU0_SB=SRC_CPU0SB
-               -DMODULE_STM0=MODULE_CPU0 -DSRC_STM0SR0=SRC_STMCPU0_SR2)
+target_compile_definitions(arch PRIVATE -DMODULE_STM0=MODULE_CPU0
+                                        -DSRC_STM0SR0=SRC_STMCPU0_SR2)
