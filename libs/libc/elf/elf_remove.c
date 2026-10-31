@@ -33,6 +33,7 @@
 #include <nuttx/lib/lib.h>
 #include <nuttx/lib/elf.h>
 
+#include "libc.h"
 #include "elf/elf.h"
 
 /****************************************************************************
@@ -110,6 +111,15 @@ int libelf_uninit(FAR struct module_s *modp)
    */
 
   libelf_pinrelease(&modp->pinfile);
+#endif
+
+#if defined(CONFIG_TLS_EMUTLS) && !defined(__KERNEL__)
+  /* Free the copies of the __thread variables of the module */
+
+  if (g_tls_emutls_release != NULL)
+    {
+      g_tls_emutls_release(modp->dataalloc, modp->datasize);
+    }
 #endif
 
   /* Release resources held by the module */

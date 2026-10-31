@@ -77,6 +77,12 @@ int tls_dup_info(FAR struct tcb_s *dst, FAR struct tcb_s *src)
 
   info->tl_argv = NULL;
 
+#ifdef CONFIG_TLS_EMUTLS
+  /* The parent's copies of the __thread variables stay with the parent */
+
+  info->tl_emutls = NULL;
+#endif
+
   /* Thread ID */
 
   info->tl_tid = dst->pid;

@@ -9,6 +9,8 @@
 "__gcov_reset","gcov.h","defined(CONFIG_COVERAGE_MINI) && defined(CONFIG_ARCH_TOOLCHAIN_GCC)","void"
 "__res_state","resolv.h","defined(CONFIG_NETDB_DNSCLIENT)","FAR struct __res_state *"
 "__stack_chk_fail","ssp/ssp.h","defined(CONFIG_STACK_CANARIES)","void","void"
+"__wrap___emutls_get_address","nuttx/tls.h","defined(CONFIG_TLS_EMUTLS)","FAR void *","FAR void *"
+"__wrap___emutls_register_common","nuttx/tls.h","defined(CONFIG_TLS_EMUTLS)","void","FAR void *","emutls_word_t","emutls_word_t","FAR void *"
 "_alert","debug.h","!defined(CONFIG_CPP_HAVE_VARARGS) && defined(CONFIG_DEBUG_ERROR)","void","FAR const char *","..."
 "_err","debug.h","!defined(CONFIG_CPP_HAVE_VARARGS) && defined(CONFIG_DEBUG_ERROR)","void","FAR const char *","..."
 "_exit","unistd.h","","void","int"

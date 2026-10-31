@@ -240,7 +240,7 @@ LDELFFLAGS=$(echo "$LDELFFLAGS" | sed -e 's:-T.*ld::')
 
 # Set LDMODULEFLAGS so that kernel modules can build in kernel mode
 
-LDMODULEFLAGS="-r"
+LDMODULEFLAGS="-r ${EMUTLS_LDFLAGS}"
 
 # Save the compilation options
 

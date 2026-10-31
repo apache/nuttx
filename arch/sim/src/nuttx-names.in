@@ -33,6 +33,10 @@
 #endif
 
 NXSYMBOLS(__cxa_atexit)
+#ifdef CONFIG_TLS_EMUTLS
+NXSYMBOLS(__emutls_get_address)
+NXSYMBOLS(__emutls_register_common)
+#endif
 NXSYMBOLS(abort)
 NXSYMBOLS(accept)
 NXSYMBOLS(access)

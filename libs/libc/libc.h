@@ -328,6 +328,18 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
 int lib_restoredir(void);
 #endif
 
+/* Defined in tls/tls_emutls.c.  exit(), pthread_exit() and the loader call
+ * them through these pointers (tls/tls_getinfo.c).
+ */
+
+#ifdef CONFIG_TLS_EMUTLS
+extern CODE void (*g_tls_emutls_destruct)(void);
+extern CODE void (*g_tls_emutls_release)(FAR const void *start,
+                                         size_t size);
+void tls_emutls_destruct(void);
+void lib_emutls_release(FAR const void *start, size_t size);
+#endif
+
 /* Defined in lib_cxx_initialize.c */
 
 #ifdef CONFIG_HAVE_CXXINITIALIZE

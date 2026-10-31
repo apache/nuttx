@@ -304,6 +304,11 @@ endif
 LDELFFLAGS = -r -e main --gc-sections
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 
+# The --wrap options of CONFIG_TLS_EMUTLS (tools/Config.mk)
+
+LDMODULEFLAGS += $(EMUTLS_LDFLAGS)
+LDELFFLAGS += $(EMUTLS_LDFLAGS)
+
 ifeq ($(CONFIG_HOST_MACOS),y)
   LDFLAGS += -Wl,-dead_strip
 else

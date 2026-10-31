@@ -37,6 +37,8 @@
 #include <nuttx/pthread.h>
 #include <nuttx/lib/elf.h>
 
+#include "libc.h"
+
 #if defined(CONFIG_BUILD_FLAT) || !defined(__KERNEL__)
 
 /****************************************************************************
@@ -111,6 +113,15 @@ void exit(int status)
   tls_destruct();
 #endif
 
+#ifdef CONFIG_TLS_EMUTLS
+  /* Then free the copies of its __thread variables */
+
+  if (g_tls_emutls_destruct != NULL)
+    {
+      g_tls_emutls_destruct();
+    }
+#endif
+
 #if defined(CONFIG_LIBC_DLFCN) && defined(CONFIG_BUILD_PROTECTED)
   /* Close what dlopen() left open.  The kernel cannot reach this registry.
    * A flat build does it in the kernel, after the last thread.  A kernel
@@ -172,6 +183,15 @@ void quick_exit(int status)
 
 #if defined(CONFIG_TLS_NELEM) && CONFIG_TLS_NELEM > 0
   tls_destruct();
+#endif
+
+#ifdef CONFIG_TLS_EMUTLS
+  /* Then free the copies of its __thread variables */
+
+  if (g_tls_emutls_destruct != NULL)
+    {
+      g_tls_emutls_destruct();
+    }
 #endif
 
   /* Then perform the exit */

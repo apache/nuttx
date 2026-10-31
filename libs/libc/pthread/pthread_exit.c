@@ -33,6 +33,8 @@
 #include <nuttx/pthread.h>
 #include <nuttx/tls.h>
 
+#include "libc.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -66,6 +68,15 @@ void pthread_exit(FAR void *exit_value)
 
 #if defined(CONFIG_TLS_NELEM) && CONFIG_TLS_NELEM > 0
   tls_destruct();
+#endif
+
+#ifdef CONFIG_TLS_EMUTLS
+  /* Then free the copies of its __thread variables */
+
+  if (g_tls_emutls_destruct != NULL)
+    {
+      g_tls_emutls_destruct();
+    }
 #endif
 
   nx_pthread_exit(exit_value);

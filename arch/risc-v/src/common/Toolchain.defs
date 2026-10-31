@@ -503,6 +503,11 @@ endif
 
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 
+# The --wrap options of CONFIG_TLS_EMUTLS (tools/Config.mk)
+
+LDMODULEFLAGS += $(EMUTLS_LDFLAGS)
+LDELFFLAGS += $(EMUTLS_LDFLAGS)
+
 # Zig toolchain
 
 include $(TOPDIR)/tools/Zig.defs

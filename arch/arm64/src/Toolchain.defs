@@ -317,3 +317,8 @@ ifneq ($(CONFIG_BUILD_KERNEL),y)
 endif
 
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)elf$(DELIM)gnu-elf.ld)
+
+# The --wrap options of CONFIG_TLS_EMUTLS (tools/Config.mk)
+
+LDMODULEFLAGS += $(EMUTLS_LDFLAGS)
+LDELFFLAGS += $(EMUTLS_LDFLAGS)

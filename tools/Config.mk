@@ -909,3 +909,30 @@ LOWER_CASE = $(call ULMAP,$(LOWERMAP),$(1))
 ifeq ($(CONFIG_ITERABLE_SECTIONS_LINKER_INSERT),y)
   ARCHSCRIPT += $(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)linker$(DELIM)common-insert.ld
 endif
+
+# Send the calls to __emutls_get_address() to the per-thread version of
+# libc, never to the single copy of libgcc.  LDFLAGS is for the image link;
+# the sim links NuttX with "$(LD) -r $(LDLINKFLAGS)" first.  The arch
+# Toolchain.defs adds EMUTLS_LDFLAGS to LDELFFLAGS and LDMODULEFLAGS.
+
+ifeq ($(CONFIG_TLS_EMUTLS),y)
+  EMUTLS_WRAP = --wrap=__emutls_get_address --wrap=__emutls_register_common
+  EMUTLS_IMAGE = $(EMUTLS_WRAP)
+
+  # With LTO the compiler makes the calls only after the linker has chosen
+  # the archive members, so take the libc functions in from the start.
+
+  ifneq ($(CONFIG_LTO_FULL)$(CONFIG_LTO_THIN),)
+    EMUTLS_IMAGE += -u __wrap___emutls_get_address
+    EMUTLS_IMAGE += -u __wrap___emutls_register_common
+  endif
+
+  ifeq ($(CONFIG_ARCH_SIM),y)
+    LDLINKFLAGS += $(EMUTLS_IMAGE)
+  else
+    LDFLAGS += $(EMUTLS_IMAGE)
+  endif
+
+  EMUTLS_XLINKER = $(if $(filter $(CC),$(LD)),-Xlinker)
+  EMUTLS_LDFLAGS = $(foreach f,$(EMUTLS_WRAP),$(EMUTLS_XLINKER) $(f))
+endif
