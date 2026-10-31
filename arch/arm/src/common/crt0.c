@@ -33,7 +33,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fdpic.h>
 
-#include <arch/syscall.h>
+#include <syscall.h>
 
 /****************************************************************************
  * Public Data
@@ -79,7 +79,7 @@ int main(int argc, char *argv[], char *envp[]);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_KERNEL
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_ENABLE_ALL_SIGNALS)
 static void sig_trampoline(void) naked_function;
 static void sig_trampoline(void)
 {
@@ -173,7 +173,7 @@ void _start(int argc, char *argv[])
    * that is visible to the RTOS.
    */
 
-#ifdef CONFIG_BUILD_KERNEL
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_ENABLE_ALL_SIGNALS)
   ARCH_DATA_RESERVE->ar_sigtramp = (addrenv_sigtramp_t)sig_trampoline;
 #endif
 

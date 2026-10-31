@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
@@ -41,6 +42,10 @@
 #include "arm_internal.h"
 #include "sched/sched.h"
 #include "signal/signal.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -182,6 +187,16 @@ uint32_t *arm_syscall(uint32_t *regs)
   /* The SYSCALL command is in R0 on entry.  Parameters follow in R1..R7 */
 
   cmd = regs[REG_R0];
+
+#ifdef CONFIG_BUILD_PROTECTED
+  if ((regs[REG_CPSR] & PSR_MODE_MASK) == PSR_MODE_USR &&
+      cmd < CONFIG_SYS_RESERVED)
+    {
+      regs[REG_R0] = -ENOSYS;
+      up_set_interrupt_context(false);
+      return regs;
+    }
+#endif
 
   /* if cmd == SYS_restore_context (*running_task)->xcp.regs is valid
    * should not be overwritten
@@ -452,7 +467,11 @@ uint32_t *arm_syscall(uint32_t *regs)
 
           /* Set up to return to the kernel-mode signal dispatching logic. */
 
-          DEBUGASSERT(rtcb->xcp.sigreturn != 0);
+          if (rtcb->xcp.sigreturn == 0)
+            {
+              regs[REG_R0] = -EINVAL;
+              break;
+            }
 
           regs[REG_PC]         = rtcb->xcp.sigreturn;
           cpsr                 = regs[REG_CPSR] & ~PSR_MODE_MASK;
