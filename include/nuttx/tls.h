@@ -115,6 +115,17 @@ struct getopt_s
   bool      go_binitialized; /* true:  getopt() has been initialized */
 };
 
+/* This structure holds the settings of openlog() */
+
+#define OPENLOG_IDENT_SIZE 32
+
+struct openlog_s
+{
+  char ol_ident[OPENLOG_IDENT_SIZE]; /* Prefix of the messages */
+  int  ol_option;                    /* LOG_PID, LOG_PERROR ... */
+  int  ol_facility;                  /* Default facility */
+};
+
 #ifdef CONFIG_PTHREAD_ATFORK
 /* This structure defines the pthread_atfork_s, which is used to manage
  * the funcs that operates on pthread_atfork() method
@@ -152,6 +163,7 @@ struct task_info_s
                                    * libc at the first use
                                    */
 #endif
+  struct openlog_s ta_openlog; /* Settings of openlog() */
 #if CONFIG_LIBC_MAX_EXITFUNS > 0
   struct atexit_list_s ta_exit; /* Exit functions */
 #endif

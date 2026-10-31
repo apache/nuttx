@@ -27,11 +27,76 @@
 #include <nuttx/config.h>
 
 #include <stdarg.h>
+#include <stdio.h>
 #include <syslog.h>
+#include <unistd.h>
 
 #include <nuttx/syslog/syslog.h>
+#include <nuttx/tls.h>
 
 #include "syslog/syslog.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#if !defined(__KERNEL__) && defined(va_copy)
+/****************************************************************************
+ * Name: vsyslog_perror
+ *
+ * Description:
+ *   With LOG_PERROR of openlog(), write the message to stderr too, with the
+ *   ident and the process ID before it and a newline after it.
+ *
+ ****************************************************************************/
+
+static void vsyslog_perror(FAR const IPTR char *fmt, va_list ap)
+{
+  FAR struct task_info_s *info = task_get_info();
+  FAR const IPTR char *end;
+  va_list copy;
+  int option;
+
+  if (info == NULL
+#ifdef CONFIG_BUILD_FLAT
+      || up_interrupt_context()
+#endif
+     )
+    {
+      return;
+    }
+
+  option = info->ta_openlog.ol_option;
+  if ((option & LOG_PERROR) == 0)
+    {
+      return;
+    }
+
+  if ((option & LOG_PID) != 0)
+    {
+      dprintf(STDERR_FILENO, "%.*s[%d]: ", OPENLOG_IDENT_SIZE - 1,
+              info->ta_openlog.ol_ident, (int)getpid());
+    }
+  else if (info->ta_openlog.ol_ident[0] != '\0')
+    {
+      dprintf(STDERR_FILENO, "%.*s: ", OPENLOG_IDENT_SIZE - 1,
+              info->ta_openlog.ol_ident);
+    }
+
+  va_copy(copy, ap);
+  vdprintf(STDERR_FILENO, fmt, copy);
+  va_end(copy);
+
+  for (end = fmt; *end != '\0'; end++)
+    {
+    }
+
+  if (end == fmt || *(end - 1) != '\n')
+    {
+      write(STDERR_FILENO, "\n", 1);
+    }
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -69,6 +134,10 @@ void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
       va_copy(copy, ap);
       nx_vsyslog(priority, fmt, &copy);
       va_end(copy);
+
+#  ifndef __KERNEL__
+      vsyslog_perror(fmt, ap);
+#  endif
 #else
       nx_vsyslog(priority, fmt, &ap);
 #endif

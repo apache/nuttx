@@ -9,8 +9,12 @@ configured in various ways to select how these messages are displayed
 Applications can emit logging messages using the standard :c:func:`syslog`
 interface.
 
-.. note:: The standard :c:func:`openlog` and :c:func:`closelog`
-  are not currently supported.
+.. note:: :c:func:`openlog` sets the ident (up to 31 characters) and the
+  options of the process: :c:func:`syslog` puts ``ident: `` before each
+  message, ``ident[pid]: `` with ``LOG_PID``, and writes the message to
+  stderr too with ``LOG_PERROR``. The messages that the OS prints while the
+  process runs get the same prefix. NuttX does not use the other options or
+  the facility. :c:func:`closelog` has no descriptor to close.
 
 .. c:function:: void syslog(int priority, const char *fmt, ...)
 

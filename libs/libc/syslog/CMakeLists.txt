@@ -20,6 +20,8 @@
 #
 # ##############################################################################
 
+target_sources(c PRIVATE lib_openlog.c)
+
 if(CONFIG_SYSLOG)
   target_sources(c PRIVATE lib_setlogmask.c lib_syslog.c)
 endif()

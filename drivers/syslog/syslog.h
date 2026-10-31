@@ -30,6 +30,12 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
+#include <stdio.h>
+#include <syslog.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/sched.h>
+#include <nuttx/tls.h>
 
 /****************************************************************************
  * Public Data
@@ -52,6 +58,60 @@ extern FAR syslog_channel_t *
 const
 #endif
 g_syslog_channel[CONFIG_SYSLOG_MAX_CHANNELS];
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: syslog_openlog
+ *
+ * Description:
+ *   Get the ident that the task group of the caller set with openlog(), and
+ *   write the text after it to 'tail': "[pid]: " with LOG_PID, ": " for a
+ *   non-empty ident, else nothing.  The messages of the OS that run in the
+ *   task get the ident too.  The task information can be in user memory:
+ *   print the ident with a precision of OPENLOG_IDENT_SIZE - 1.  No ident
+ *   in an interrupt handler.
+ *
+ * Returned Value:
+ *   The ident, or "" when there is nothing to print.
+ *
+ ****************************************************************************/
+
+static inline FAR const char *syslog_openlog(FAR char *tail, size_t size)
+{
+  FAR struct task_info_s *info;
+  FAR struct tcb_s *tcb;
+
+  tail[0] = '\0';
+  if (up_interrupt_context())
+    {
+      return "";
+    }
+
+  tcb = nxsched_self();
+  if (tcb == NULL || tcb->group == NULL || tcb->group->tg_info == NULL)
+    {
+      return "";
+    }
+
+  info = tcb->group->tg_info;
+  if ((info->ta_openlog.ol_option & LOG_PID) != 0)
+    {
+      snprintf(tail, size, "[%d]: ", (int)tcb->group->tg_pid);
+    }
+  else if (info->ta_openlog.ol_ident[0] != '\0')
+    {
+      snprintf(tail, size, ": ");
+    }
+  else
+    {
+      return "";
+    }
+
+  return info->ta_openlog.ol_ident;
+}
 
 /****************************************************************************
  * Public Function Prototypes

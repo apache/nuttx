@@ -22,6 +22,8 @@
 
 # Add the internal C files to the build
 
+CSRCS += lib_openlog.c
+
 ifeq ($(CONFIG_SYSLOG),y)
 CSRCS += lib_syslog.c lib_setlogmask.c
 endif
